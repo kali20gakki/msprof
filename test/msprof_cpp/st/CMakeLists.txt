@@ -1,0 +1,8 @@
+add_subdirectory(device)
+add_subdirectory(msprof)
+add_subdirectory(job_wrapper)
+add_subdirectory(msprofbin)
+add_subdirectory(streamio)
+add_subdirectory(stub_stest)
+add_subdirectory(common)
+add_subdirectory(driver)

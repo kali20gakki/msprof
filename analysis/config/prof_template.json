@@ -1,0 +1,12 @@
+{
+    "prof_rules": [
+        {
+            "rule_id": "Define rule id.",
+            "rule_description": "Describe for the rule.",
+            "rule_condition": "Three types supported: 1)normal 2)formula 3)count.",
+            "rule_type": "Five types supported: 1)Model/Operator Computation 2)Model/Operator Memory 3)Operator Schedule 4)Operator Processing 5}Operator Metrics.",
+            "rule_subtype": "Show second level title for the rule tips.",
+            "rule_suggestion": "Show rule tips for what you define here."
+        }
+    ]
+}
