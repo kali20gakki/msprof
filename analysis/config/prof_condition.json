@@ -1,0 +1,464 @@
+{
+  "conditions": [
+    {
+      "id": "condition_common_1",
+      "type": "formula",
+      "left": [
+        "channel"
+      ],
+      "right": 0,
+      "formula": "{0}%16",
+      "cmp": "!="
+    },
+    {
+      "id": "condition_common_2",
+      "type": "formula",
+      "left": [
+        "channel"
+      ],
+      "right": 0,
+      "formula": "{0}%32",
+      "cmp": "!="
+    },
+    {
+      "id": "condition_common_3",
+      "type": "formula",
+      "left": [
+        "height",
+        "width"
+      ],
+      "right": 0,
+      "formula": "({0}*{1})%16",
+      "cmp": "!="
+    },
+    {
+      "id": "condition_common_4",
+      "type": "normal",
+      "left": "input_data_type",
+      "right": "FLOAT16",
+      "cmp": "=="
+    },
+    {
+      "id": "condition_common_5",
+      "type": "normal",
+      "left": "input_data_type",
+      "right": "INT8",
+      "cmp": "=="
+    },
+    {
+      "id": "condition_common_6",
+      "type": "formula",
+      "left": [
+        "batch"
+      ],
+      "right": 0,
+      "formula": "{0}%16",
+      "cmp": "!="
+    },
+    {
+      "id": "condition_block_dim_1",
+      "type": "formula",
+      "left": [
+        "block_dim",
+        "core_num"
+      ],
+      "right": 1,
+      "formula": "{0}/{1}",
+      "cmp": "<"
+    },
+    {
+      "id": "condition_block_dim_2",
+      "type": "formula",
+      "left": [
+        "block_dim"
+      ],
+      "right": 0,
+      "formula": "{0}&({0}-1)",
+      "cmp": "!="
+    },
+    {
+      "id": "condition_block_dim_3",
+      "type": "formula",
+      "left": [
+        "block_dim",
+        "core_num"
+      ],
+      "right": 0,
+      "formula": "{0}%{1}",
+      "cmp": "!="
+    },
+    {
+      "id": "condition_transData_1",
+      "type": "normal",
+      "left": "op_type",
+      "right": "TransData",
+      "cmp": "=="
+    },
+    {
+      "id": "condition_transData_2",
+      "dependency": "condition_transData_1",
+      "type": "count",
+      "threshold": 2,
+      "cmp": ">"
+    },
+    {
+      "id": "condition_memory_workspace_1",
+      "type": "normal",
+      "left": "memory_workspace",
+      "right": 0,
+      "cmp": ">"
+    },
+    {
+      "id": "condition_wait_time_1",
+      "type": "normal",
+      "left": "task_wait_time",
+      "right": 10,
+      "cmp": ">"
+    },
+    {
+      "id": "condition_aicpu_1",
+      "type": "normal",
+      "left": "task_type",
+      "right": "AI CPU",
+      "cmp": "=="
+    },
+    {
+      "id": "condition_memory_bound_1",
+      "type": "normal",
+      "left": "memory_bound",
+      "right": 1,
+      "cmp": ">"
+    },
+    {
+      "id": "condition_vector_bound_1",
+      "type": "normal",
+      "left": "vector_bound",
+      "right": 1,
+      "cmp": ">"
+    },
+    {
+      "id": "condition_vector_ratio_1",
+      "type": "normal",
+      "left": "vec_ratio",
+      "right": 0.8,
+      "cmp": "<"
+    },
+    {
+      "id": "condition_cube_ratio_1",
+      "type": "normal",
+      "left": "mac_ratio",
+      "right": 0.8,
+      "cmp": "<"
+    },
+    {
+      "id": "condition_vec_bankgroup_cflt_ratio_1",
+      "type": "normal",
+      "left": "vec_bankgroup_cflt_ratio",
+      "right": 0.04,
+      "cmp": ">"
+    },
+    {
+      "id": "condition_vec_bank_cflt_ratio_1",
+      "type": "normal",
+      "left": "vec_bank_cflt_ratio",
+      "right": 0.04,
+      "cmp": ">"
+    },
+    {
+      "id": "condition_conv2d_1",
+      "type": "normal",
+      "left": "op_type",
+      "right": "Conv2d",
+      "cmp": "=="
+    },
+    {
+      "id": "condition_conv3d_1",
+      "type": "normal",
+      "left": "op_type",
+      "right": "Conv3d",
+      "cmp": "=="
+    },
+    {
+      "id": "condition_depthwiseconv2d_1",
+      "type": "normal",
+      "left": "op_type",
+      "right": "DepthwiseConv2d",
+      "cmp": "=="
+    },
+    {
+      "id": "condition_dilationconv2d_1",
+      "type": "normal",
+      "left": "op_type",
+      "right": "DilationConv2d",
+      "cmp": "=="
+    },
+    {
+      "id": "condition_deformable_1",
+      "type": "normal",
+      "left": "op_type",
+      "right": "Deformable",
+      "cmp": "=="
+    },
+    {
+      "id": "condition_deconv_1",
+      "type": "normal",
+      "left": "op_type",
+      "right": "Deconv",
+      "cmp": "=="
+    },
+    {
+      "id": "condition_BatchNorm_1",
+      "type": "normal",
+      "left": "op_type",
+      "right": "BatchNorm",
+      "cmp": "=="
+    },
+    {
+      "id": "condition_LRN_1",
+      "type": "normal",
+      "left": "op_type",
+      "right": "LRN",
+      "cmp": "=="
+    },
+    {
+      "id": "condition_LCN_1",
+      "type": "normal",
+      "left": "op_type",
+      "right": "LCN",
+      "cmp": "=="
+    },
+    {
+      "id": "condition_InstanceNorm_1",
+      "type": "normal",
+      "left": "op_type",
+      "right": "InstanceNorm",
+      "cmp": "=="
+    },
+    {
+      "id": "condition_L2Norm_1",
+      "type": "normal",
+      "left": "op_type",
+      "right": "L2Norm",
+      "cmp": "=="
+    },
+    {
+      "id": "condition_Normalize_1",
+      "type": "normal",
+      "left": "op_type",
+      "right": "Normalize",
+      "cmp": "=="
+    },
+    {
+      "id": "condition_ReLU_1",
+      "type": "normal",
+      "left": "op_type",
+      "right": "ReLU",
+      "cmp": "=="
+    },
+    {
+      "id": "condition_Sigmoid_1",
+      "type": "normal",
+      "left": "op_type",
+      "right": "Sigmoid",
+      "cmp": "=="
+    },
+    {
+      "id": "condition_Tanh_1",
+      "type": "normal",
+      "left": "op_type",
+      "right": "Tanh",
+      "cmp": "=="
+    },
+    {
+      "id": "condition_Clipped_ReLU_1",
+      "type": "normal",
+      "left": "op_type",
+      "right": "Clipped ReLU",
+      "cmp": "=="
+    },
+    {
+      "id": "condition_leaky_ReLU_1",
+      "type": "normal",
+      "left": "op_type",
+      "right": "leaky ReLU",
+      "cmp": "=="
+    },
+    {
+      "id": "condition_PReLU_1",
+      "type": "normal",
+      "left": "op_type",
+      "right": "PReLU",
+      "cmp": "=="
+    },
+    {
+      "id": "condition_ELU_1",
+      "type": "normal",
+      "left": "op_type",
+      "right": "ELU",
+      "cmp": "=="
+    },
+    {
+      "id": "condition_rReLU_1",
+      "type": "normal",
+      "left": "op_type",
+      "right": "rReLU",
+      "cmp": "=="
+    },
+    {
+      "id": "condition_softReLU_1",
+      "type": "normal",
+      "left": "op_type",
+      "right": "softReLU",
+      "cmp": "=="
+    },
+    {
+      "id": "condition_Softplus_1",
+      "type": "normal",
+      "left": "op_type",
+      "right": "Softplus",
+      "cmp": "=="
+    },
+    {
+      "id": "condition_Softsign_1",
+      "type": "normal",
+      "left": "op_type",
+      "right": "Softsign",
+      "cmp": "=="
+    },
+    {
+      "id": "condition_SeLU_1",
+      "type": "normal",
+      "left": "op_type",
+      "right": "SeLU",
+      "cmp": "=="
+    },
+    {
+      "id": "condition_MaxPooling_1",
+      "type": "normal",
+      "left": "op_type",
+      "right": "MaxPooling",
+      "cmp": "=="
+    },
+    {
+      "id": "condition_AvgPooling_1",
+      "type": "normal",
+      "left": "op_type",
+      "right": "AvgPooling",
+      "cmp": "=="
+    },
+    {
+      "id": "condition_L2Pool_1",
+      "type": "normal",
+      "left": "op_type",
+      "right": "L2Pool",
+      "cmp": "=="
+    },
+    {
+      "id": "condition_Softmax_1",
+      "type": "normal",
+      "left": "op_type",
+      "right": "Softmax",
+      "cmp": "=="
+    },
+    {
+      "id": "condition_LogSoftmax_1",
+      "type": "normal",
+      "left": "op_type",
+      "right": "LogSoftmax",
+      "cmp": "=="
+    },
+    {
+      "id": "condition_Concat_1",
+      "type": "normal",
+      "left": "op_type",
+      "right": "Concat",
+      "cmp": "=="
+    },
+    {
+      "id": "condition_Split_1",
+      "type": "normal",
+      "left": "op_type",
+      "right": "Split",
+      "cmp": "=="
+    },
+    {
+      "id": "condition_Reshape_1",
+      "type": "normal",
+      "left": "op_type",
+      "right": "Reshape",
+      "cmp": "=="
+    },
+    {
+      "id": "condition_Transpose_1",
+      "type": "normal",
+      "left": "op_type",
+      "right": "Transpose",
+      "cmp": "=="
+    },
+    {
+      "id": "condition_Slice_1",
+      "type": "normal",
+      "left": "op_type",
+      "right": "Slice",
+      "cmp": "=="
+    },
+    {
+      "id": "condition_Eltwise_1",
+      "type": "normal",
+      "left": "op_type",
+      "right": "Eltwise",
+      "cmp": "=="
+    },
+    {
+      "id": "condition_RPN_1",
+      "type": "normal",
+      "left": "op_type",
+      "right": "RPN",
+      "cmp": "=="
+    },
+    {
+      "id": "condition_ROIPooling_1",
+      "type": "normal",
+      "left": "op_type",
+      "right": "RPN",
+      "cmp": "=="
+    },
+    {
+      "id": "condition_PsROIPooling_1",
+      "type": "normal",
+      "left": "op_type",
+      "right": "RPN",
+      "cmp": "=="
+    },
+    {
+      "id": "condition_ROI_Align_1",
+      "type": "normal",
+      "left": "op_type",
+      "right": "ROI Align",
+      "cmp": "=="
+    },
+    {
+      "id": "condition_RNN_1",
+      "type": "normal",
+      "left": "op_type",
+      "right": "RNN",
+      "cmp": "=="
+    },
+    {
+      "id": "condition_LSTM_1",
+      "type": "normal",
+      "left": "op_type",
+      "right": "LSTM",
+      "cmp": "=="
+    },
+    {
+      "id": "condition_GRU_1",
+      "type": "normal",
+      "left": "op_type",
+      "right": "GRU",
+      "cmp": "=="
+    }
+  ]
+}
+
+
