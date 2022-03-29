@@ -1,9 +1,9 @@
-
-include(CMakePackageConfigHelpers)
+cmake_minimum_required(version 3.8) # To check
 
 set(MSPROF_HOME ${CMAKE_CURRENT_SOURCE_DIR})
 
 add_subdirectory(collector)
+add_subdirectory(test)
 
 set(INSTALL_LIBRARY_DIR lib)
 set(INSTALL_CONFIG_DIR  ${CMAKE_CURRENT_BINARY_DIR}/lib/cmake)
