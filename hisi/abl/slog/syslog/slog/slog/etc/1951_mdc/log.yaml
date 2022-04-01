@@ -1,0 +1,5 @@
+startup_path_list:
+  - "/var/slogd.yaml"
+  - "/var/log-daemon.yaml"
+
+sub_startup:

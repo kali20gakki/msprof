@@ -1,0 +1,13 @@
+[Unit]
+Description=IDE Daemon process
+Requires=start_roscore.service
+After=start_roscore.service
+
+[Service]
+ExecStart=/bin/bash /usr/lib/mdc/driver/tools/mdc_ide_daemon_start.sh
+ExecStartPost=/bin/bash /usr/bin/mdc/base/set_limit.sh DFX mdc_ide_daemon_start.sh
+KillMode=process
+Restart=no
+RemainAfterExit=yes
+Type=simple
+

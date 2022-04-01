@@ -1,7 +1,7 @@
 #/bin/bash
 
-set -e # 不是true直接退出
-CUR_DIR=$(dirname $(readlink -f $0)) # 获取脚本绝对路径
+set -e
+CUR_DIR=$(dirname $(readlink -f $0))
 TOP_DIR=${CUR_DIR}/..
 
 OPENSOURCE_DIR=${TOP_DIR}/opensource
@@ -38,8 +38,15 @@ git clone ssh://git@codehub-dg-y.huawei.com:2222/hwsecurec_group/huawei_secure_c
 
 ###################################### Hisi组件下载（待加权限） #####################################
 cd ${HISI_DIR}
-
-
+###################
+#  graphengine/inc
+#  inc/driver
+#  inc/external/acl
+#  ace/npuruntime/inc/runtime
+#  metadef
+#  abl/mmpa
+#  abl/adump
+#  abl/slog
 ###################################### gtest下载 #####################################
 # 下载 gtest
 cd ${GTEST_DIR}
