@@ -1,0 +1,14 @@
+{
+    "blockDim":-2,
+    "kernelName":"Test",
+    "batchBindOnly":"0",
+    "magic":"FFTS_BINARY_MAGIC_ELF_MIX_AIC",
+    "KBHit" : 1,
+    "core_type":"AIC",
+    "modeInArgsFirstField":"1",
+    "workspace":{
+      "num":4,
+      "size":"423300, 423300, 423300, 423300",
+      "type":[1,1,1,1]
+  }
+}

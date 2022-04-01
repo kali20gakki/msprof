@@ -1,0 +1,13 @@
+slogdmgr:
+  bin_path: "/var/slogd"
+  depends: [ ]
+  env: [ ]
+  uid: 1000
+  arguments: [-n]
+  priority: 0
+  restart: "yes"
+  is_so: false
+  process_bind_path: ""
+  term_time_out: 10000
+  is_force_term: true
+  res_group_name: "OTHER"

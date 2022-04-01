@@ -177,10 +177,3 @@ target_link_libraries(msprofbinNpuf10_pub INTERFACE
     $<$<STREQUAL:${TARGET_SYSTEM_NAME},Linux>:-lpthread>
 )
 
-target_link_directories(msprofbinNpuf10_pub INTERFACE
-    $<$<STREQUAL:${TARGET_SYSTEM_NAME},Android>:${TOP_DIR}/vendor/sdk/hi3796/drv_android>
-    $<$<STREQUAL:${TARGET_SYSTEM_NAME},Android>:${TOP_DIR}/build/prebuilts/clang/linux-x86/aarch64/android-ndk-r21/sysroot/usr/lib/aarch64-linux-android/29>
-    $<$<AND:$<STREQUAL:${TARGET_SYSTEM_NAME},Linux>,$<STREQUAL:${TARGET_LINUX_DISTRIBUTOR_RELEASE},100>>:${TOP_DIR}/vendor/sdk/hi3796/drv>
-    $<$<AND:$<STREQUAL:${TARGET_SYSTEM_NAME},Linux>,$<STREQUAL:${TARGET_LINUX_DISTRIBUTOR_RELEASE},200>>:${TOP_DIR}/vendor/sdk/hi3559dv100/drv>
-)
-
