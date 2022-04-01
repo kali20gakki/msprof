@@ -1,0 +1,5 @@
+project(graphengine_st)
+add_compile_options(-g --coverage -fprofile-arcs -fPIC -O0 -ftest-coverage)
+add_subdirectory(stubs)
+add_subdirectory(testcase)
+add_subdirectory(hybrid_model_exec)

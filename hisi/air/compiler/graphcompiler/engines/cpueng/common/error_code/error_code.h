@@ -1,0 +1,127 @@
+/**
+ * Copyright 2020 Huawei Technologies Co., Ltd
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#ifndef AICPU_ERROR_CODE_H_
+#define AICPU_ERROR_CODE_H_
+#include <string>
+
+#include "external/ge/ge_api_error_codes.h"
+
+namespace aicpu {
+enum ErrorCode {
+  LOAD_INIT_CONFIGURE_FILE_FAILED = 20000001,
+  INPUT_PARAM_VALID,
+  LOAD_PRIORITY_ITEM_FAILED,
+  INPUT_PARAM_NULL,
+  DATA_TYPE_UNDEFILED,
+  GE_SHAPE_SIZE_INVAILD,
+  GE_MEM_NOT_ENOUGH,
+  DATA_OVERFLOW,
+  SERIALIZE_KERNEL_RUN_PARAM_FAILED,
+  RT_MEMCPY_ERROR = 20000010,
+  RT_SET_CALLBACK_ERROR,
+  RT_KERNEL_LAUNCH_EX_ERROR,
+  CALL_RT_API_FAILED,
+  KERNELINFOSTORE_INITIALIZE_FAILED,
+  KERNELINFOSTORE_INSTANCE_FAILED,
+  NONE_KERNELINFOSTORE,
+  LOAD_CONFIG_JSON_FILE_FAILED,
+  INSERT_OPINFO_FAILED,
+  STR_IS_EMPTY,
+  OBJECT_IS_NULL = 20000020,
+  PARAM_INVALID,
+  PARSE_NODE_DEF_FAILED,
+  SESSIONID_IS_EXIST,
+  CALL_CCE_FAILED,
+  OP_INIT_INPUT_FAILED,
+  OP_INIT_OUTPUT_FAILED,
+  OP_RUN_FAILED,
+  IR2TF_CONFIG_PARSE_FAILED,
+  IR2TF_CONFIG_INVALID,
+  IR2TF_FILE_PARSE_FAILED = 20000030,
+  IR2TF_SRC_ATTR_MISSING,
+  UPDATE_FMKOP_FAILED,
+  GET_ORIGINAL_TYPE_FAILED,
+  INVOKE_GRAPH_ITF_FAILED,
+  OP_NOT_EXIST_IN_IR2TF_CONFIG_FILE,
+  OP_NOT_EXIST_IN_KERNEL_LIBS,
+  CREATE_OPDEF_FAILED,
+  CREATE_NODEDEF_FAILED,
+  GET_NODEDEF_FAILED,
+  FUSE_NODES_FAILED = 20000040,
+  ADD_EDGE_FAILED,
+  RMV_EDGE_FAILED,
+  BUILD_FUNCDEF_FAILED,
+  REBUILD_TENSORDESC_FAILED,
+  MEMORY_ALLOC_FAILED,
+  GET_ATTR_FAILED,
+  ADD_ATTR_FAILED,
+  GRAPH_TRANS_TO_FUNC_FAILED,
+  OPERATE_ANCHOR_FAILED,
+  ADD_TF_DATADESC_FAILED = 20000050,
+  ADD_TF_DATATYPE_FAILED,
+  CREATE_NODE_FAILED,
+  REMAP_FUNCTIONDEF_FAILED,
+  GRAPH_TOPOLOGICAL_SORTING_FAILED,
+  NODE_DEF_NOT_EXIST,
+  PARSE_FUNC_DEF_FAILED,
+  FUNC_DEF_NOT_EXIST,
+  GET_IR2TF_PARSER_FAILED,
+  INVALID_KERNEL_SO_NAME,
+  READ_BINARY_FILE_FAILED = 20000060,
+  INVALID_OP_INFO_IN_KERNEL_LIB,
+  UNKNOWN_ATTR_TYPE,
+  CALC_OP_PARAM_UNKNOW_SHAPE,
+  LOAD_OPTIMIZER_CONFIG_FAILED,
+  GRAPH_OPTIMIZER_INSTANCE_FAILED,
+  GRAPH_EMPTY,
+  LOAD_CONFIGURE_FILE_FAILED,
+  LOAD_KERNEL_BUILDER_FAILED,
+  NONE_KERNEL_BUILDER,
+  KERNEL_BUILDER_INSTANCE_FAILED,
+  GET_BIN_FILE_NAME_FAILED,
+  MULTI_CPU_KERNELS_SO_EXIST,
+  NO_CPU_KERNELS_SO_EXIST,
+  GET_SUB_GRAPH_ID_FAILED,
+  SRC_DST_SIZE_ERROR,
+  PACKAGE_BIN_FILE,
+  KERNEL_TYPE_INVALID
+};
+
+// error code for report purpose.
+// 30000~34999 for aicpu engine error
+// and 35000~39999 for infershape error
+enum ViewErrorCode {
+  LOAD_INIT_CONFIG_FILE_FAILED = 30000,
+  LOAD_AICPU_KERNEL_INFO_ERR = 30001,
+  LOAD_IR_CONFIG_ERR = 30002,
+};
+
+struct State {
+  ge::Status state;
+  std::string msg;
+  State(ge::Status state, const std::string &msg) : state(state), msg(msg) {}
+
+  State(ge::Status state) : state(state) {}
+
+  State() : state(ge::SUCCESS) {}
+};
+
+std::string GetViewErrorCodeStr(ViewErrorCode err_code);
+
+}  // namespace aicpu
+
+#endif
