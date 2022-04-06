@@ -1,1 +1,0 @@
-../../../ace/npuruntime/acl/inc/external/acl/acl_mdl.h
