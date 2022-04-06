@@ -1,7 +1,0 @@
-{
-    "files.associations": {
-        "driver_api.h": "c",
-        "typeinfo": "c",
-        "library_load.h": "c"
-    }
-}
