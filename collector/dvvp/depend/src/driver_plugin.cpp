@@ -4,12 +4,27 @@ namespace Analysis {
 namespace Dvvp {
 namespace Plugin {
 
+Status DriverPlugin::TryLoadSo()
+{
+    if (!pluginManager_.HasLoad()) {
+        Status ret = pluginManager_.OpenPlugin(soName_);
+        if (ret != PLUGIN_LOAD_SUCCESS) {
+            return ret;
+        }
+    }
+    return PLUGIN_LOAD_SUCCESS;
+}
+
 // halHdcRecv
 hdcError_t DriverPlugin::MsprofHalHdcRecv(HDC_SESSION session, struct drvHdcMsg *pMsg, int bufLen,
     UINT64 flag, int *recvBufCount, UINT32 timeout)
 {
+    Status ret = TryLoadSo();
+    if (ret != PLUGIN_LOAD_SUCCESS) {
+        return -1;
+    }
     MSPROF_HALHDCRECV_T func;
-    Status ret = pluginManager_.GetFunction<HDC_SESSION, struct drvHdcMsg *, int, UINT64
+    ret = pluginManager_.GetFunction<HDC_SESSION, struct drvHdcMsg *, int, UINT64
                                             int *, UINT32>("halHdcRecv", func);
     if (ret != PLUGIN_LOAD_SUCCESS) {
         return -1;
@@ -18,10 +33,14 @@ hdcError_t DriverPlugin::MsprofHalHdcRecv(HDC_SESSION session, struct drvHdcMsg 
 }
 
 // halHdcSend
-hdcError_t MsprofHalHdcSend(HDC_SESSION session, struct drvHdcMsg *pMsg, UINT64 flag, UINT32 timeout)
+hdcError_t DriverPlugin::MsprofHalHdcSend(HDC_SESSION session, struct drvHdcMsg *pMsg, UINT64 flag, UINT32 timeout)
 {
+    Status ret = TryLoadSo();
+    if (ret != PLUGIN_LOAD_SUCCESS) {
+        return -1;
+    }
     MSPROF_HALHDCSEND_T func;
-    Status ret = pluginManager_.GetFunction<HDC_SESSION, struct drvHdcMsg *, UINT64, UINT32>("halHdcSend", func);
+    ret = pluginManager_.GetFunction<HDC_SESSION, struct drvHdcMsg *, UINT64, UINT32>("halHdcSend", func);
     if (ret != PLUGIN_LOAD_SUCCESS) {
         return -1;
     }
@@ -29,11 +48,15 @@ hdcError_t MsprofHalHdcSend(HDC_SESSION session, struct drvHdcMsg *pMsg, UINT64 
 }
 
 // halHdcSessionConnectEx
-hdcError_t MsprofHalHdcSessionConnectEx(int peer_node, int peer_devid, int peer_pid, HDC_CLIENT client,
+hdcError_t DriverPlugin::MsprofHalHdcSessionConnectEx(int peer_node, int peer_devid, int peer_pid, HDC_CLIENT client,
     HDC_SESSION *pSession)
 {
+    Status ret = TryLoadSo();
+    if (ret != PLUGIN_LOAD_SUCCESS) {
+        return -1;
+    }
     MSPROF_HALHDCSESSIONCONNECTEX_T func;
-    Status ret = pluginManager_.GetFunction<int, int, int, HDC_CLIENT, HDC_SESSION *>("halHdcSessionConnectEx", func);
+    ret = pluginManager_.GetFunction<int, int, int, HDC_CLIENT, HDC_SESSION *>("halHdcSessionConnectEx", func);
     if (ret != PLUGIN_LOAD_SUCCESS) {
         return -1;
     }
@@ -41,10 +64,14 @@ hdcError_t MsprofHalHdcSessionConnectEx(int peer_node, int peer_devid, int peer_
 }
 
 // drvHdcSetSessionReference
-drvError_t MsprofDrvHdcSetSessionReference(HDC_SESSION session)
+drvError_t DriverPlugin::MsprofDrvHdcSetSessionReference(HDC_SESSION session)
 {
+    Status ret = TryLoadSo();
+    if (ret != PLUGIN_LOAD_SUCCESS) {
+        return -1;
+    }
     MSPROF_DRVHDCSETSESSIONREFERENCE_T func;
-    Status ret = pluginManager_.GetFunction<HDC_SESSION>("drvHdcSetSessionReference", func);
+    ret = pluginManager_.GetFunction<HDC_SESSION>("drvHdcSetSessionReference", func);
     if (ret != PLUGIN_LOAD_SUCCESS) {
         return -1;
     }
@@ -52,10 +79,14 @@ drvError_t MsprofDrvHdcSetSessionReference(HDC_SESSION session)
 }
 
 // halHdcGetSessionAttr
-drvError_t MsprofHalHdcGetSessionAttr(HDC_SESSION session, int attr, int *value)
+drvError_t DriverPlugin::MsprofHalHdcGetSessionAttr(HDC_SESSION session, int attr, int *value)
 {
+    Status ret = TryLoadSo();
+    if (ret != PLUGIN_LOAD_SUCCESS) {
+        return -1;
+    }
     MSPROF_HALHDCGETSESSIONATTR_T func;
-    Status ret = pluginManager_.GetFunction<HDC_SESSION, int, int *>("halHdcGetSessionAttr", func);
+    ret = pluginManager_.GetFunction<HDC_SESSION, int, int *>("halHdcGetSessionAttr", func);
     if (ret != PLUGIN_LOAD_SUCCESS) {
         return -1;
     }
@@ -63,10 +94,14 @@ drvError_t MsprofHalHdcGetSessionAttr(HDC_SESSION session, int attr, int *value)
 }
 
 // halGetChipInfo
-drvError_t MsprofHalGetChipInfo(unsigned int devId, halChipInfo *chipInfo)
+drvError_t DriverPlugin::MsprofHalGetChipInfo(unsigned int devId, halChipInfo *chipInfo)
 {
+    Status ret = TryLoadSo();
+    if (ret != PLUGIN_LOAD_SUCCESS) {
+        return -1;
+    }
     MSPROF_HALGETCHIPINFO_T func;
-    Status ret = pluginManager_.GetFunction<unsigned int, halChipInfo *>("halGetChipInfo", func);
+    ret = pluginManager_.GetFunction<unsigned int, halChipInfo *>("halGetChipInfo", func);
     if (ret != PLUGIN_LOAD_SUCCESS) {
         return -1;
     }
@@ -74,10 +109,14 @@ drvError_t MsprofHalGetChipInfo(unsigned int devId, halChipInfo *chipInfo)
 }
 
 // halGetDeviceInfo
-drvError_t MsprofHalGetDeviceInfo(uint32_t devId, int32_t moduleType, int32_t infoType, int64_t *value)
+drvError_t DriverPlugin::MsprofHalGetDeviceInfo(uint32_t devId, int32_t moduleType, int32_t infoType, int64_t *value)
 {
+    Status ret = TryLoadSo();
+    if (ret != PLUGIN_LOAD_SUCCESS) {
+        return -1;
+    }
     MSPROF_HALGETDEVICEINFO_T func;
-    Status ret = pluginManager_.GetFunction<uint32_t, int32_t, int32_t, int64_t *>("halGetDeviceInfo", func);
+    ret = pluginManager_.GetFunction<uint32_t, int32_t, int32_t, int64_t *>("halGetDeviceInfo", func);
     if (ret != PLUGIN_LOAD_SUCCESS) {
         return -1;
     }
@@ -85,10 +124,14 @@ drvError_t MsprofHalGetDeviceInfo(uint32_t devId, int32_t moduleType, int32_t in
 }
 
 // halProfDataFlush
-int MsprofHalProfDataFlush(unsigned int device_id, unsigned int channel_id, unsigned int *data_len)
+int DriverPlugin::MsprofHalProfDataFlush(unsigned int device_id, unsigned int channel_id, unsigned int *data_len)
 {
+    Status ret = TryLoadSo();
+    if (ret != PLUGIN_LOAD_SUCCESS) {
+        return -1;
+    }
     MSPROF_HALPROFDATAFLUSH_T func;
-    Status ret = pluginManager_.GetFunction<unsigned int, unsigned int, unsigned int *>("halProfDataFlush", func);
+    ret = pluginManager_.GetFunction<unsigned int, unsigned int, unsigned int *>("halProfDataFlush", func);
     if (ret != PLUGIN_LOAD_SUCCESS) {
         return -1;
     }
@@ -96,10 +139,14 @@ int MsprofHalProfDataFlush(unsigned int device_id, unsigned int channel_id, unsi
 }
 
 // prof_drv_get_channels
-int MsprofDrvGetChannels(unsigned int device_id, channel_list_t *channels)
+int DriverPlugin::MsprofDrvGetChannels(unsigned int device_id, channel_list_t *channels)
 {
+    Status ret = TryLoadSo();
+    if (ret != PLUGIN_LOAD_SUCCESS) {
+        return -1;
+    }
     MSPROF_PROFDRVGETCHANNELS_T func;
-    Status ret = pluginManager_.GetFunction<unsigned int, channel_list_t *>("prof_drv_get_channels", func);
+    ret = pluginManager_.GetFunction<unsigned int, channel_list_t *>("prof_drv_get_channels", func);
     if (ret != PLUGIN_LOAD_SUCCESS) {
         return -1;
     }
@@ -107,10 +154,14 @@ int MsprofDrvGetChannels(unsigned int device_id, channel_list_t *channels)
 }
 
 // prof_drv_start
-int MsprofDrvStart(unsigned int device_id, unsigned int channel_id, struct prof_start_para *start_para)
+int DriverPlugin::MsprofDrvStart(unsigned int device_id, unsigned int channel_id, struct prof_start_para *start_para)
 {
+    Status ret = TryLoadSo();
+    if (ret != PLUGIN_LOAD_SUCCESS) {
+        return -1;
+    }
     MSPROF_PROFDRVSRART_T func;
-    Status ret = pluginManager_.GetFunction<unsigned int, unsigned int, struct prof_start_para *>("prof_drv_start", func);
+    ret = pluginManager_.GetFunction<unsigned int, unsigned int, struct prof_start_para *>("prof_drv_start", func);
     if (ret != PLUGIN_LOAD_SUCCESS) {
         return -1;
     }
@@ -118,10 +169,14 @@ int MsprofDrvStart(unsigned int device_id, unsigned int channel_id, struct prof_
 }
 
 // prof_stop
-int MsprofDrvStop(unsigned int device_id, unsigned int channel_id)
+int DriverPlugin::MsprofDrvStop(unsigned int device_id, unsigned int channel_id)
 {
+    Status ret = TryLoadSo();
+    if (ret != PLUGIN_LOAD_SUCCESS) {
+        return -1;
+    }
     MSPROF_PROFSTOP_T func;
-    Status ret = pluginManager_.GetFunction<unsigned int, unsigned int>("prof_stop", func);
+    ret = pluginManager_.GetFunction<unsigned int, unsigned int>("prof_stop", func);
     if (ret != PLUGIN_LOAD_SUCCESS) {
         return -1;
     }
@@ -129,10 +184,14 @@ int MsprofDrvStop(unsigned int device_id, unsigned int channel_id)
 }
 
 // prof_channel_read
-int MsprofChannelRead(unsigned int device_id, unsigned int channel_id, char *out_buf, unsigned int buf_size)
+int DriverPlugin::MsprofChannelRead(unsigned int device_id, unsigned int channel_id, char *out_buf, unsigned int buf_size)
 {
+    Status ret = TryLoadSo();
+    if (ret != PLUGIN_LOAD_SUCCESS) {
+        return -1;
+    }
     MSPROF_CHANNELREAD_T func;
-    Status ret = pluginManager_.GetFunction<unsigned int, unsigned int, char *, unsigned int>("prof_channel_read", func);
+    ret = pluginManager_.GetFunction<unsigned int, unsigned int, char *, unsigned int>("prof_channel_read", func);
     if (ret != PLUGIN_LOAD_SUCCESS) {
         return -1;
     }
@@ -140,10 +199,14 @@ int MsprofChannelRead(unsigned int device_id, unsigned int channel_id, char *out
 }
 
 // prof_channel_poll
-int MsprofChannelPoll(struct prof_poll_info *out_buf, int num, int timeout)
+int DriverPlugin::MsprofChannelPoll(struct prof_poll_info *out_buf, int num, int timeout)
 {
+    Status ret = TryLoadSo();
+    if (ret != PLUGIN_LOAD_SUCCESS) {
+        return -1;
+    }
     MSPROF_CHANNELPOLL_T func;
-    Status ret = pluginManager_.GetFunction<struct prof_poll_info *, int, int>("prof_channel_poll", func);
+    ret = pluginManager_.GetFunction<struct prof_poll_info *, int, int>("prof_channel_poll", func);
     if (ret != PLUGIN_LOAD_SUCCESS) {
         return -1;
     }

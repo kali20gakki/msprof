@@ -2,9 +2,14 @@
 #define DRIVER_PLUGIN_H
 
 #include "singleton/singleton.h"
-#include "driver/ascend_hal.h"
+#include "ascend_hal.h"
 #include "plugin_manager.h"
 
+/* Msprof调用 ascend_hal.so 使用的函数原型  
+*  halHdcRecv、halHdcSend、halHdcSessionConnectEx、drvHdcSetSessionReference、halHdcGetSessionAttr
+*  halGetChipInfo、halGetDeviceInfo、halProfDataFlush、
+*  prof_drv_get_channels、prof_drv_start、prof_stop、prof_channel_read、prof_channel_poll、
+*/
 namespace Analysis {
 namespace Dvvp {
 namespace Plugin {
@@ -73,11 +78,13 @@ public:
     int MsprofChannelPoll(struct prof_poll_info *out_buf, int num, int timeout);
 
 private:
+    bool load_;
     std::string soName_;
     PluginManager pluginManager_;
-    drvError_t TryLoadSo();
 };
 
 } // Plugin
 } // Dvvp
 } // Analysis
+
+#endif
