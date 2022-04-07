@@ -1,5 +1,4 @@
 #include "plugin_manager.h"
-#include "utils.h"
 #include "config.h"
 
 namespace Analysis {
@@ -13,19 +12,27 @@ const string PluginManager::GetSoName() const
     return so_name_;
 }
 
+std::string RealPath(const std::string &path) const
+{
+    char resoved_path[MAX_PATH_LENGTH] = {0x00};
+    std::string res = "";
+    if (realpath(path.c_str(), resoved_path)) {
+        res = resoved_path;
+    }
+    return res;
+}
+
 Status PluginManager::OpenPlugin(const std::string& path)
 {
     if (path.empty() || path.size() >= MAX_PATH_LENGTH) {
         return PLUGIN_LOAD_FAILED;
     }
-    std::string absoluteDir = Utils::RelativePathToAbsolutePath(path);
+    std::string absoluteDir = RealPath(path);
     if (absoluteDir.empty()) {
         return PLUGIN_LOAD_FAILED;
     }
 
-    handle_ = mmDlopen(absoluteDir.c_str(),
-        static_cast<int32_t>(static_cast<uint32_t>(MMPA_RTLD_NOW) |
-        static_cast<uint32_t>(MMPA_RTLD_GLOBAL)));
+    handle_ = dlopen(absoluteDir.c_str(), RTLD_NOW | RTLD_GLOBAL);
     if (!handle) {
         return PLUGIN_LOAD_FAILED;
     }
@@ -37,9 +44,9 @@ Status PluginManager::CloseHandle()
 {
     if (!handle_) {
         // [To add message]
-        return PLUGIN_LOAD_FAILED;
+        return;
     }
-    if (!mmDlclose(handle)) {
+    if (!dlclose(handle)) {
         // [To add message]
         return PLUGIN_LOAD_FAILED;
     }

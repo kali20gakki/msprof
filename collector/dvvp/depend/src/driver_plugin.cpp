@@ -15,6 +15,15 @@ Status DriverPlugin::TryLoadSo()
     return PLUGIN_LOAD_SUCCESS;
 }
 
+void DriverPlugin::TryUnloadSo() noexcept
+{
+    if (pluginManager_.HasLoad()) {
+        Status ret = pluginManager_.CloseHandle();
+        if (ret != PLUGIN_LOAD_SUCCESS) {
+        }
+    }
+}
+
 // halHdcRecv
 hdcError_t DriverPlugin::MsprofHalHdcRecv(HDC_SESSION session, struct drvHdcMsg *pMsg, int bufLen,
     UINT64 flag, int *recvBufCount, UINT32 timeout)
@@ -212,8 +221,6 @@ int DriverPlugin::MsprofChannelPoll(struct prof_poll_info *out_buf, int num, int
     }
     return func(out_buf, num, timeout);
 }
-
-
 
 } // Plugin
 } // Dvvp

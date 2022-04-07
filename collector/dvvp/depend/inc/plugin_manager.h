@@ -3,7 +3,7 @@
 
 #include <string>
 #include <functional>
-#include "mmpa/mmpa_api.h"
+#include <dlfcn.h>
 
 namespace Analysis {
 namespace Dvvp {
@@ -26,9 +26,10 @@ public:
     Status OpenPlugin(const std::string& path);
     Status CloseHandle();
     template <typename R, typename... Types>
-    Status GetFunction(const std::string& func_name, std::function<R(Types... args)>& func) const {
-        func = (R(*)(Types...))mmDlsym(handle_, func_name.c_str());
-        if (func == nullptr) {
+    Status GetFunction(const std::string& func_name, std::function<R(Types... args)>& func) const
+    {
+        func = (R(*)(Types...))dlsym(handle, func_name.c_str());
+        if (!func) {
             return PLUGIN_LOAD_FAILED;
         }
         return PLUGIN_LOAD_SUCCESS;
@@ -39,6 +40,7 @@ private:
     std::string so_name_;
     HandleType handle_;
     bool load_;
+    std::string RealPath(const std::string &path) const;
 };
 } // namespace Plugin
 } // namespace Dvvp
