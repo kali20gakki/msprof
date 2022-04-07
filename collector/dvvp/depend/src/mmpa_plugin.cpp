@@ -1,69 +1,200 @@
-#include "mmpa/mmpa_api.h"
+#include "mmpa_plugin.h"
 
-static const char *str = "stub";
-
-INT32 mmOpen2(const CHAR *pathName, INT32 flags, MODE mode)
+INT32 MmpaPlugin::MsprofMmOpen2(const CHAR *pathName, INT32 flags, MODE mode)
 {
-    return 0;
+    if (!pluginManager_.HasLoad()) {
+        Status ret = pluginManager_.OpenPlugin(soName_);
+        if (ret != PLUGIN_LOAD_SUCCESS) {
+            return -1;
+        }
+    }
+    MSPROF_HALHDCRECV_T func;
+    ret = pluginManager_.GetFunction<const CHAR *, INT32, MODE>("mmOpen2", func);
+    if (ret != PLUGIN_LOAD_SUCCESS) {
+        return -1;
+    }
+    return func(pathName, flags, mode);
 }
 
-mmSsize_t mmRead(INT32 fd, VOID *buf, UINT32 bufLen)
+mmSsize_t MmpaPlugin::MsprofMmRead(INT32 fd, VOID *buf, UINT32 bufLen)
 {
-    return 0;
+    if (!pluginManager_.HasLoad()) {
+        Status ret = pluginManager_.OpenPlugin(soName_);
+        if (ret != PLUGIN_LOAD_SUCCESS) {
+            return -1;
+        }
+    }
+    MSPROF_HALHDCRECV_T func;
+    ret = pluginManager_.GetFunction<INT32, VOID *, UINT32>("mmRead", func);
+    if (ret != PLUGIN_LOAD_SUCCESS) {
+        return -1;
+    }
+    return func(fd, buf, bufLen);
 }
 
-INT32 mmClose(INT32 fd)
+INT32 MmpaPlugin::MsprofMmClose(INT32 fd)
 {
-    return 0;
+    if (!pluginManager_.HasLoad()) {
+        Status ret = pluginManager_.OpenPlugin(soName_);
+        if (ret != PLUGIN_LOAD_SUCCESS) {
+            return -1;
+        }
+    }
+    MSPROF_HALHDCRECV_T func;
+    ret = pluginManager_.GetFunction<INT32>("mmClose", func);
+    if (ret != PLUGIN_LOAD_SUCCESS) {
+        return -1;
+    }
+    return func(fd);
 }
 
-CHAR *mmGetErrorFormatMessage(mmErrorMsg errnum, CHAR *buf, mmSize size)
+CHAR *MmpaPlugin::MsprofMmGetErrorFormatMessage(mmErrorMsg errnum, CHAR *buf, mmSize size)
 {
-    return str;
+    if (!pluginManager_.HasLoad()) {
+        Status ret = pluginManager_.OpenPlugin(soName_);
+        if (ret != PLUGIN_LOAD_SUCCESS) {
+            return -1;
+        }
+    }
+    MSPROF_HALHDCRECV_T func;
+    ret = pluginManager_.GetFunction<mmErrorMsg, CHAR *, mmSize>("mmGetErrorFormatMessage", func);
+    if (ret != PLUGIN_LOAD_SUCCESS) {
+        return -1;
+    }
+    return func(errnum, buf, size);
 }
 
-INT32 mmGetErrorCode()
+INT32 MmpaPlugin::MsprofMmGetErrorCode()
 {
-    return 0;
+    if (!pluginManager_.HasLoad()) {
+        Status ret = pluginManager_.OpenPlugin(soName_);
+        if (ret != PLUGIN_LOAD_SUCCESS) {
+            return -1;
+        }
+    }
+    MSPROF_HALHDCRECV_T func;
+    ret = pluginManager_.GetFunction<>("mmGetErrorCode", func);
+    if (ret != PLUGIN_LOAD_SUCCESS) {
+        return -1;
+    }
+    return func();
 }
 
-INT32 mmAccess2(const CHAR *pathName, INT32 mode)
+INT32 MmpaPlugin::MsprofMmAccess2(const CHAR *pathName, INT32 mode)
 {
-    return 0;
+    if (!pluginManager_.HasLoad()) {
+        Status ret = pluginManager_.OpenPlugin(soName_);
+        if (ret != PLUGIN_LOAD_SUCCESS) {
+            return -1;
+        }
+    }
+    MSPROF_HALHDCRECV_T func;
+    ret = pluginManager_.GetFunction<const CHAR *, INT32>("mmAccess2", func);
+    if (ret != PLUGIN_LOAD_SUCCESS) {
+        return -1;
+    }
+    return func(pathName, mode);
 }
 
-
-INT32 mmGetOptLong(INT32 argc,
+INT32 MmpaPlugin::MsprofMmGetOptLong(INT32 argc,
                    CHAR *const *argv,
                    const CHAR *opts,
                    const mmStructOption *longOpts,
                    INT32 *longIndex)
 {
-    return 0;
+    if (!pluginManager_.HasLoad()) {
+        Status ret = pluginManager_.OpenPlugin(soName_);
+        if (ret != PLUGIN_LOAD_SUCCESS) {
+            return -1;
+        }
+    }
+    MSPROF_HALHDCRECV_T func;
+    ret = pluginManager_.GetFunction<INT32, CHAR *const *, const CHAR *,
+                                    const mmStructOption *, INT32 *>("mmGetOptLong", func);
+    if (ret != PLUGIN_LOAD_SUCCESS) {
+        return -1;
+    }
+    return func(argc, argv, opts, longOpts, longIndex);
+}                   
+
+INT32 MmpaPlugin::MsprofMmGetOptInd()
+{
+    if (!pluginManager_.HasLoad()) {
+        Status ret = pluginManager_.OpenPlugin(soName_);
+        if (ret != PLUGIN_LOAD_SUCCESS) {
+            return -1;
+        }
+    }
+    MSPROF_HALHDCRECV_T func;
+    ret = pluginManager_.GetFunction<>("mmGetOptInd", func);
+    if (ret != PLUGIN_LOAD_SUCCESS) {
+        return -1;
+    }
+    return func();
 }
 
-INT32 mmGetOptInd()
+CHAR *MmpaPlugin::MsprofMmGetOptArg()
 {
-    return 0;
+    if (!pluginManager_.HasLoad()) {
+        Status ret = pluginManager_.OpenPlugin(soName_);
+        if (ret != PLUGIN_LOAD_SUCCESS) {
+            return -1;
+        }
+    }
+    MSPROF_HALHDCRECV_T func;
+    ret = pluginManager_.GetFunction<>("mmGetOptArg", func);
+    if (ret != PLUGIN_LOAD_SUCCESS) {
+        return -1;
+    }
+    return func();
 }
 
-CHAR *mmGetOptArg()
+INT32 MmpaPlugin::MsprofMmSleep(UINT32 milliSecond)
 {
-    return str;
+    if (!pluginManager_.HasLoad()) {
+        Status ret = pluginManager_.OpenPlugin(soName_);
+        if (ret != PLUGIN_LOAD_SUCCESS) {
+            return -1;
+        }
+    }
+    MSPROF_HALHDCRECV_T func;
+    ret = pluginManager_.GetFunction<UINT32>("mmSleep", func);
+    if (ret != PLUGIN_LOAD_SUCCESS) {
+        return -1;
+    }
+    return func(milliSecond);
 }
 
-INT32 mmSleep(UINT32 milliSecond)
+INT32 MmpaPlugin::MsprofMmUnlink(const CHAR *filename)
 {
-    return 0;
+    if (!pluginManager_.HasLoad()) {
+        Status ret = pluginManager_.OpenPlugin(soName_);
+        if (ret != PLUGIN_LOAD_SUCCESS) {
+            return -1;
+        }
+    }
+    MSPROF_HALHDCRECV_T func;
+    ret = pluginManager_.GetFunction<const CHAR *>("mmUnlink", func);
+    if (ret != PLUGIN_LOAD_SUCCESS) {
+        return -1;
+    }
+    return func(filename);
 }
 
-INT32 mmUnlink(const CHAR *filename)
+    using MSPROF_MMGETTID_T = INT32 (*)();
+INT32 MmpaPlugin::MsprofMmGetTid()
 {
-    return 0;
-}
-
-INT32 mmGetTid()
-{
-    return 0;
+    if (!pluginManager_.HasLoad()) {
+        Status ret = pluginManager_.OpenPlugin(soName_);
+        if (ret != PLUGIN_LOAD_SUCCESS) {
+            return -1;
+        }
+    }
+    MSPROF_HALHDCRECV_T func;
+    ret = pluginManager_.GetFunction<>("mmGetTid", func);
+    if (ret != PLUGIN_LOAD_SUCCESS) {
+        return -1;
+    }
+    return func();
 }
 

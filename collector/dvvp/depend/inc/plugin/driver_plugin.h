@@ -16,7 +16,7 @@ public:
      :soName_("libascend_hal.so"),
       pluginManager_(PluginManager(soName_))
     {}
-    ~DriverPlugin() = default;
+    ~DriverPlugin(pluginManager_.CloseHandle()); // 成员变量销毁时机
 
     // halHdcRecv
     using MSPROF_HALHDCRECV_T = hdcError_t (*)(HDC_SESSION, struct drvHdcMsg *, int, UINT64, int *, UINT32);
@@ -75,7 +75,6 @@ public:
 private:
     std::string soName_;
     PluginManager pluginManager_;
-    drvError_t TryLoadSo();
 };
 
 } // Plugin

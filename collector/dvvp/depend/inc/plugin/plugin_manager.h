@@ -4,6 +4,7 @@
 #include <string>
 #include <functional>
 #include <dlfcn.h>
+#include "msprof_dlog.h"
 
 namespace Analysis {
 namespace Dvvp {
@@ -24,12 +25,13 @@ public:
     ~PluginManager() {}
     const std::string GetSoName() const;
     Status OpenPlugin(const std::string& path);
-    Status CloseHandle();
+    void CloseHandle();
     template <typename R, typename... Types>
     Status GetFunction(const std::string& func_name, std::function<R(Types... args)>& func) const
     {
         func = (R(*)(Types...))dlsym(handle, func_name.c_str());
         if (!func) {
+            MSPROF_LOGE("[GetFunction]Get function from so failed.");
             return PLUGIN_LOAD_FAILED;
         }
         return PLUGIN_LOAD_SUCCESS;
@@ -37,10 +39,11 @@ public:
     bool HasLoad();
 
 private:
+    std::string RealPath(const std::string &path) const;
+    void TryUnloadSo() noexcept;
     std::string so_name_;
     HandleType handle_;
     bool load_;
-    std::string RealPath(const std::string &path) const;
 };
 } // namespace Plugin
 } // namespace Dvvp

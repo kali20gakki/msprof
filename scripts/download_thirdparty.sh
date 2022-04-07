@@ -6,20 +6,11 @@ TOP_DIR=${CUR_DIR}/..
 
 OPENSOURCE_DIR=${TOP_DIR}/opensource
 HISI_DIR=${TOP_DIR}/hisi
-GTEST_DIR=${TOP_DIR}/testcode/opensource
+GTEST_DIR=${TOP_DIR}/llt/opensource
 
 THIRDPARTY_LIST="${OPENSOURCE_DIR}/protobuf    \\
                  ${OPENSOURCE_DIR}/json        \\
                  ${OPENSOURCE_DIR}/securec       \\
-                 ${HISI_DIR}/graphengine           \\
-                 ${HISI_DIR}/driver        \\
-                 ${HISI_DIR}/inc           \\
-                 ${HISI_DIR}/runtime       \\
-                 ${HISI_DIR}/acl           \\
-                 ${HISI_DIR}/metadef       \\
-                 ${HISI_DIR}/mmpa          \\
-                 ${HISI_DIR}/adump         \\
-                 ${HISI_DIR}/slog          \\
                  ${GTEST_DIR}/googletest"
 
 if [ -n "$1" ]; then
@@ -36,17 +27,6 @@ git clone ssh://git@codehub-dg-y.huawei.com:2222/OpenSourceCenter/protobuf.git p
 git clone ssh://git@codehub-dg-y.huawei.com:2222/OpenSourceCenter/nlohmann/json.git json -b v3.7.3
 git clone ssh://git@codehub-dg-y.huawei.com:2222/hwsecurec_group/huawei_secure_c.git securec -b tag_Huawei_Secure_C_V100R001C01SPC011B003_00001
 
-###################################### Hisi组件下载（待加权限） #####################################
-cd ${HISI_DIR}
-###################
-#  graphengine/inc
-#  inc/driver
-#  inc/external/acl
-#  ace/npuruntime/inc/runtime
-#  metadef
-#  abl/mmpa
-#  abl/adump
-#  abl/slog
 ###################################### gtest下载 #####################################
 # 下载 gtest
 cd ${GTEST_DIR}
