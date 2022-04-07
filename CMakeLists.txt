@@ -3,8 +3,6 @@ cmake_minimum_required(VERSION 3.14.1)
 project(msprof)
 
 set(TOP_DIR ${CMAKE_CURRENT_SOURCE_DIR})
-include(cmake/install_opensource.cmake)
-include(cmake/install_hisi.cmake)
 
 # ################################### msprof #####################################
 # set(MSPROF_HOME )

@@ -18,7 +18,8 @@ class PluginManager {
 public:
     explicit PluginManager(const std::string &name)
     : so_name_(name),
-      handle_(nullptr)
+      handle_(nullptr),
+      load_(false)
     {}
     ~PluginManager() {}
     const std::string GetSoName() const;
@@ -32,10 +33,12 @@ public:
         }
         return PLUGIN_LOAD_SUCCESS;
     }
+    bool HasLoad();
 
 private:
     std::string so_name_;
     HandleType handle_;
+    bool load_;
 };
 } // namespace Plugin
 } // namespace Dvvp

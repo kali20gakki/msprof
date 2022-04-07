@@ -1,3 +1,4 @@
+add_subdirectory(depend)
 add_subdirectory(msprofbin)
 
 protobuf_generate(profiler_proto

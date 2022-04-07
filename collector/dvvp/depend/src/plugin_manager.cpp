@@ -2,7 +2,6 @@
 #include "utils.h"
 #include "config.h"
 
-
 namespace Analysis {
 namespace Dvvp {
 namespace Plugin {
@@ -30,6 +29,7 @@ Status PluginManager::OpenPlugin(const std::string& path)
     if (!handle) {
         return PLUGIN_LOAD_FAILED;
     }
+    load_ = true;
     return PLUGIN_LOAD_SUCCESS;
 }
 
@@ -44,6 +44,11 @@ Status PluginManager::CloseHandle()
         return PLUGIN_LOAD_FAILED;
     }
     return PLUGIN_LOAD_SUCCESS;
+}
+
+bool PluginManager::HasLoad()
+{
+    return load_;
 }
 
 
