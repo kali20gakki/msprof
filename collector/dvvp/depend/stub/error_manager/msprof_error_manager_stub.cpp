@@ -5,17 +5,12 @@ namespace Dvvp {
 namespace MsprofErrMgr {
 error_message::Context MsprofErrorManager::errorContext_ = {0UL, "", "", ""};
 
-MsprofErrorManager &MsprofErrorManager::GetInstance()
-{
-    static MsprofErrorManager instance;
-    return instance;
-}
-error_message::Context &MsprofErrorManager::GetErrorManagerContext()
+error_message::Context &MsprofErrorManager::GetErrorManagerContext() const
 {
     return errorContext_;
 }
 
-void MsprofErrorManager::SetErrorContext(const error_message::Context errorContext)
+void MsprofErrorManager::SetErrorContext(const error_message::Context errorContext) const
 {
     (void)(errorContext);
 }

@@ -1,4 +1,4 @@
-add_subdirectory(msprofbin)
+# add_subdirectory(msprofbin)
 
 protobuf_generate(profiler_proto
     CppPath
@@ -56,7 +56,7 @@ target_include_directories(stub_msprofiler PRIVATE
     ${MSPROF_STUB_INC}
     ${TOP_DIR}/collector/dvvp/depend/inc/acl
     ${TOP_DIR}/inc/external
-    ${TOP_DIR}/collector/dvvp/depend/inc
+    ${TOP_DIR}/collector/dvvp/depend/inc/graphengine/external
     ${TOP_DIR}/collector/dvvp/depend/inc/metadef
 )
 
@@ -76,6 +76,46 @@ install(TARGETS stub_msprofiler OPTIONAL
     LIBRARY DESTINATION ${INSTALL_LIBRARY_DIR}/stub
 )
 ###################### stub/libmsprofiler.so #######################
+
+##################################### depend #########################################
+# alog
+# error_manager
+add_library(alog SHARED
+    ${TOP_DIR}/collector/dvvp/depend/stub/dlog_stub.cpp
+)
+
+set_target_properties(alog
+    PROPERTIES
+    OUTPUT_NAME alog
+    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/
+)
+
+add_library(error_manager SHARED
+    ${TOP_DIR}/collector/dvvp/depend/stub/error_manager/error_manager_stub.cpp
+)
+
+target_include_directories(error_manager PRIVATE
+    ${TOP_DIR}/collector/dvvp/depend/inc/metadef    
+)
+
+target_compile_options(error_manager PRIVATE
+    -std=c++11
+    -fPIC
+    -fstack-protector-all
+    -fno-strict-aliasing
+    -fno-common
+    -fvisibility=hidden
+    -fvisibility-inlines-hidden
+    -Wfloat-equal
+    -Wextra
+)
+
+set_target_properties(error_manager
+    PROPERTIES
+    OUTPUT_NAME error_manager
+    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/
+)
+######################################################################################
 
 ####################### libmsprofiler.so ###########################
 
@@ -140,16 +180,20 @@ set(msprofilerCpp
 )
 
 set(msprofilerInc
-    ${TOP_DIR}/graphengine/inc/external
-    ${TOP_DIR}/graphengine/inc/framework/common
     ${TOP_DIR}/inc
-    ${TOP_DIR}/inc/driver
+    ${TOP_DIR}/collector/dvvp/depend/inc/graphengine/external
+    ${TOP_DIR}/collector/dvvp/depend/inc/graphengine
+    ${TOP_DIR}/collector/dvvp/depend/inc/graphengine/framework/common
+    ${TOP_DIR}/collector/dvvp/depend/inc/driver
+    ${TOP_DIR}/collector/dvvp/depend/inc/adump
+    ${TOP_DIR}/inc/toolchain
     ${TOP_DIR}/inc/external
-    ${TOP_DIR}/inc/external/acl
-    ${TOP_DIR}/abl/libc_sec/include
-    ${TOP_DIR}/open_source/json/include
-    ${TOP_DIR}/ace/npuruntime/inc
-    ${TOP_DIR}/metadef/inc
+    ${TOP_DIR}/collector/dvvp/depend/inc/metadef
+    ${TOP_DIR}/collector/dvvp/depend/inc/acl
+    ${TOP_DIR}/collector/dvvp/depend/inc/mmpa
+    ${TOP_DIR}/collector/dvvp/depend/inc/slog
+    ${TOP_DIR}/opensource/securec/include
+    ${TOP_DIR}/opensource/json/include
     msprof/engine/include
     msprof/common/include
     msprof/drvprof/include
@@ -179,7 +223,6 @@ set(msprofilerInc
     ${CMAKE_BINARY_DIR}/proto/profiler_proto/
 )
 
-
 set(msprofilerFwcSrc
     ${msprofilerCpp}
     msprof/engine/src/prof_ge_core.cpp
@@ -194,24 +237,19 @@ add_library(msprofiler_fwk_share SHARED
 
 target_include_directories(msprofiler_fwk_share PRIVATE
     ${msprofilerInc}
-    ${TOP_DIR}/graphengine/inc
-    ${TOP_DIR}/graphengine/inc/framework
-    ${TOP_DIR}/metadef/inc
-    ${TOP_DIR}/metadef/inc/external
-    depend/include/wrapper
+    ${TOP_DIR}/collector/dvvp/depend/inc/metadef/error_manager/error_manager_wrapper
+    ${TOP_DIR}/collector/dvvp/depend/inc
 )
 
 set_target_properties(msprofiler_fwk_share
     PROPERTIES
-    OUTPUT_NAME $<IF:$<STREQUAL:${TARGET_SYSTEM_NAME},Windows>,libmsprofiler,msprofiler>
+    OUTPUT_NAME msprofiler
     LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/
 )
 
 target_compile_definitions(msprofiler_fwk_share PRIVATE
     google=ascend_private
     $<$<STREQUAL:${CMAKE_BUILD_TYPE},Debug>:MSPROF_DEBUG>
-    $<$<STREQUAL:${TARGET_SYSTEM_NAME},Windows>:NOMINMAX>
-    $<$<STREQUAL:${TARGET_SYSTEM_NAME},Windows>:WIN32>
 )
 
 target_compile_options(msprofiler_fwk_share PRIVATE
@@ -235,14 +273,9 @@ target_link_options(msprofiler_fwk_share PRIVATE
 )
 
 target_link_libraries(msprofiler_fwk_share PRIVATE
-    ascend_hal
-)
-
-target_link_libraries(msprofiler_fwk_share PRIVATE
     -Wl,--no-as-needed
     c_sec
     alog
-    mmpa
     protobuf
     error_manager
     -Wl,--as-needed
