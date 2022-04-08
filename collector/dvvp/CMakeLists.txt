@@ -1,4 +1,3 @@
-add_subdirectory(depend)
 add_subdirectory(msprofbin)
 
 protobuf_generate(profiler_proto
@@ -20,7 +19,8 @@ set(hdcStubCpp
 )
 
 ############################## stub ################################
-set(MSPROF_STUB_INC ${MSPROF_HOME}/inc/external)
+set(MSPROF_STUB_INC ${TOP_DIR}/inc/external)
+set(HI_PYTHON python3)
 add_custom_target(
     stub_msprof_src ALL
     DEPENDS  ${CMAKE_CURRENT_BINARY_DIR}/acl_prof_stub.cpp
@@ -30,12 +30,12 @@ add_custom_command(
     OUTPUT  ${CMAKE_CURRENT_BINARY_DIR}/acl_prof_stub.cpp
             ${CMAKE_CURRENT_BINARY_DIR}/ge_prof_stub.cpp
     COMMAND echo "Generating stub files:acl_prof_stub.cpp, ge_prof_stub.cpp."
-            && ${HI_PYTHON} ${MSPROF_HOME}/build/stub/gen_stubapi.py ${MSPROF_STUB_INC}
+            && ${HI_PYTHON} ${TOP_DIR}/build/stub/gen_stubapi.py ${MSPROF_STUB_INC}
             ${CMAKE_CURRENT_BINARY_DIR}/acl_prof_stub.cpp
             ${CMAKE_CURRENT_BINARY_DIR}/ge_prof_stub.cpp
             && echo "Generating stub files end."
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-    DEPENDS ${MSPROF_HOME}/build/stub/gen_stubapi.py ${MSPROF_STUB_INC}
+    DEPENDS ${TOP_DIR}/build/stub/gen_stubapi.py ${MSPROF_STUB_INC}
 )
 ############################## stub ################################
 
@@ -54,11 +54,10 @@ set_target_properties(stub_msprofiler
 
 target_include_directories(stub_msprofiler PRIVATE
     ${MSPROF_STUB_INC}
-    ${TOP_DIR}/inc/external/acl
+    ${TOP_DIR}/collector/dvvp/depend/inc/acl
     ${TOP_DIR}/inc/external
-    
-    ${TOP_DIR}/graphengine/inc/external
-    ${TOP_DIR}/metadef/inc/external
+    ${TOP_DIR}/collector/dvvp/depend/inc
+    ${TOP_DIR}/collector/dvvp/depend/inc/metadef
 )
 
 target_compile_options(stub_msprofiler PRIVATE
@@ -71,15 +70,6 @@ target_compile_options(stub_msprofiler PRIVATE
     -fvisibility-inlines-hidden
     -Wfloat-equal
     -Wextra
-)
-
-target_link_libraries(stub_msprofiler PRIVATE
-    $<BUILD_INTERFACE:intf_pub>
-    $<BUILD_INTERFACE:mmpa_headers>
-    $<BUILD_INTERFACE:msprof_headers>
-    $<BUILD_INTERFACE:adump_headers>
-    $<BUILD_INTERFACE:slog_headers>
-    $<BUILD_INTERFACE:runtime_headers>
 )
 
 install(TARGETS stub_msprofiler OPTIONAL
@@ -197,9 +187,9 @@ set(msprofilerFwcSrc
 
 add_library(msprofiler_fwk_share SHARED
     ${msprofilerFwcSrc}
-    depend/wrapper/error_manager/msprof_error_manager.cpp
+    depend/stub/error_manager/msprof_error_manager.cpp
     msprof/engine/src/prof_acl_core.cpp
-    $<IF:$<STREQUAL:${PRODUCT},npuf10>,${hdcStubCpp},${hdcCpp}>
+    ${hdcCpp}
 )
 
 target_include_directories(msprofiler_fwk_share PRIVATE
@@ -244,41 +234,16 @@ target_link_options(msprofiler_fwk_share PRIVATE
     -Wl,--exclude-libs=ALL
 )
 
-if (PRODUCT)
-    if (${PRODUCT} STREQUAL "npuf10")
-        target_link_directories(msprofiler_fwk_share PRIVATE
-            $<$<STREQUAL:${TARGET_SYSTEM_NAME},Android>:${TOP_DIR}/build/prebuilts/clang/linux-x86/aarch64/android-ndk-r21/sysroot/usr/lib/aarch64-linux-android/29>
-            $<$<STREQUAL:${TARGET_SYSTEM_NAME},Android>:${TOP_DIR}/vendor/sdk/hi3796/drv_android>
-            $<$<AND:$<STREQUAL:${TARGET_SYSTEM_NAME},Linux>,$<STREQUAL:${TARGET_LINUX_DISTRIBUTOR_RELEASE},100>>:${TOP_DIR}/vendor/sdk/hi3796/drv>
-            $<$<AND:$<STREQUAL:${TARGET_SYSTEM_NAME},Linux>,$<STREQUAL:${TARGET_LINUX_DISTRIBUTOR_RELEASE},200>>:${TOP_DIR}/vendor/sdk/hi3559dv100/drv>
-        )
-    else()
-        if (${TARGET_SYSTEM_NAME} STREQUAL "Windows")
-            target_link_libraries(msprofiler_fwk_share PRIVATE
-                ascend_hal
-            )
-        else()
-            target_link_libraries(msprofiler_fwk_share PRIVATE
-                ascend_hal_stub
-            )
-        endif()
-    endif()
-endif()
+target_link_libraries(msprofiler_fwk_share PRIVATE
+    ascend_hal
+)
 
 target_link_libraries(msprofiler_fwk_share PRIVATE
-    $<BUILD_INTERFACE:intf_pub>
-    $<BUILD_INTERFACE:mmpa_headers>
-    $<BUILD_INTERFACE:msprof_headers>
-    $<BUILD_INTERFACE:adump_headers>
-    $<BUILD_INTERFACE:slog_headers>
-    $<BUILD_INTERFACE:runtime_headers>
     -Wl,--no-as-needed
     c_sec
     alog
     mmpa
-    ascend_protobuf
-    ge_executor_shared
-    runtime
+    protobuf
     error_manager
     -Wl,--as-needed
 )
