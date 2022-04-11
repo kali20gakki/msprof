@@ -29,7 +29,7 @@ public:
     template <typename R, typename... Types>
     Status GetFunction(const std::string& func_name, std::function<R(Types... args)>& func) const
     {
-        func = (R(*)(Types...))dlsym(handle, func_name.c_str());
+        func = (R(*)(Types...))dlsym(handle_, func_name.c_str());
         if (!func) {
             MSPROF_LOGE("[GetFunction]Get function from so failed.");
             return PLUGIN_LOAD_FAILED;

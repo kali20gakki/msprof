@@ -1,6 +1,5 @@
 #include "plugin_manager.h"
 #include "config.h"
-#include <limit.h>
 #include <cstdlib>
 
 namespace Analysis {
@@ -9,12 +8,12 @@ namespace Plugin {
 
 using namespace analysis::dvvp::common::config;
 
-const string PluginManager::GetSoName() const
+const std::string PluginManager::GetSoName() const
 {
     return so_name_;
 }
 
-std::string RealPath(const std::string &path) const
+std::string PluginManager::RealPath(const std::string &path) const
 {
     char resoved_path[MAX_PATH_LENGTH] = {0x00};
     std::string res = "";
@@ -39,7 +38,7 @@ Status PluginManager::OpenPlugin(const std::string& path)
     }
 
     handle_ = dlopen(absoluteDir.c_str(), RTLD_NOW | RTLD_GLOBAL);
-    if (!handle) {
+    if (!handle_) {
         MSPROF_LOGE("[OpenPlugin]dlopen failed.");
         return PLUGIN_LOAD_FAILED;
     }
@@ -53,8 +52,8 @@ void PluginManager::CloseHandle()
         MSPROF_LOGI("[CloseHandle]Do not need to close so.");
         return;
     }
-    if (!dlclose(handle)) {
-        const char_t *error = dlerror();
+    if (!dlclose(handle_)) {
+        const char *error = dlerror();
         if (!error) {
             MSPROF_LOGE("[CloseHandle]failed to get error msg.");
             return;

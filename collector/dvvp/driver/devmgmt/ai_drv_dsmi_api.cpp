@@ -13,18 +13,20 @@
 #include "errno/error_code.h"
 #include "msprof_dlog.h"
 #include "config/config_manager.h"
+#include "driver_plugin.h"
 namespace Analysis {
 namespace Dvvp {
 namespace Driver {
 using namespace analysis::dvvp::common::error;
 using namespace Analysis::Dvvp::Common::Config;
+using namespace Analysis::Dvvp::Plugin;
 
 int DrvGetAicoreInfo(int deviceId, int64_t &freq)
 {
     if (deviceId < 0) {
         return PROFILING_FAILED;
     }
-    return halGetDeviceInfo(deviceId, MODULE_TYPE_AICORE, INFO_TYPE_FREQUE, &freq);
+    return DriverPlugin::instance()->MsprofHalGetDeviceInfo(deviceId, MODULE_TYPE_AICORE, INFO_TYPE_FREQUE, &freq);
 }
 
 std::string DrvGeAicFrq(int deviceId)

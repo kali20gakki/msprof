@@ -7,4 +7,4 @@ TOP_DIR=${CUR_DIR}/..
 mkdir -p ${TOP_DIR}/build_test
 cd ${TOP_DIR}/build_test
 cmake ${TOP_DIR} -Dprotobuf_BUILD_TESTS=OFF
-make -j1
+make -j8

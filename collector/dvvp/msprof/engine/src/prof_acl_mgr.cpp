@@ -36,6 +36,7 @@
 #include "prof_ge_core.h"
 #include "msprof_tx_manager.h"
 #include "utils/utils.h"
+#include "mmpa_plugin.h"
 
 
 using namespace analysis::dvvp::common::config;
@@ -51,6 +52,7 @@ using namespace Analysis::Dvvp::Common::Platform;
 using namespace Analysis::Dvvp::JobWrapper;
 using namespace Analysis::Dvvp::MsprofErrMgr;
 using namespace Msprof::MsprofTx;
+using namespace Analysis::Dvvp::Plugin;
 
 namespace Msprofiler {
 namespace Api {
@@ -1749,7 +1751,7 @@ void ProfAclMgr::CloseSubscribeFd(const uint32_t devId)
     for (int *fd : closedFds) {
         if (usedFds.find(*fd) == usedFds.end()) {
             MSPROF_EVENT("Close subscribe fd %d", *fd);
-            if (mmClose(*fd) != EOK) {
+            if (MmpaPlugin::instance()->MsprofMmClose(*fd) != EOK) {
                 MSPROF_LOGE("Failed to close subscribe fd %d", *fd);
                 MSPROF_INNER_ERROR("EK9999", "Failed to close subscribe fd %d", *fd);
                 Utils::PrintSysErrorMsg();
@@ -1779,7 +1781,7 @@ void ProfAclMgr::CloseSubscribeFd(const uint32_t devId, const uint32_t modelId)
         }
     }
     MSPROF_EVENT("Close subscribe fd %d", *fd);
-    if (mmClose(*fd) != EOK) {
+    if (MmpaPlugin::instance()->MsprofMmClose(*fd) != EOK) {
         MSPROF_LOGE("Failed to close subscribe fd: %d, modelId: %u, devId: %u", *fd, modelId, devId);
         MSPROF_INNER_ERROR("EK9999", "Failed to close subscribe fd: %d, modelId: %u, devId: %u", *fd, modelId, devId);
         Utils::PrintSysErrorMsg();

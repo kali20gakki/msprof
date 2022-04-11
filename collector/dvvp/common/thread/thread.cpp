@@ -17,6 +17,7 @@ namespace thread {
 using namespace analysis::dvvp::common::config;
 using namespace analysis::dvvp::common::error;
 using namespace Analysis::Dvvp::MsprofErrMgr;
+using namespace Analysis::Dvvp::Plugin;
 
 Thread::Thread()
     :tid_(0),
@@ -53,7 +54,7 @@ int Thread::Start()
 
     quit_ = false;
     errorContext_ = MsprofErrorManager::instance()->GetErrorManagerContext();
-    int ret = mmCreateTaskWithThreadAttr(&tid_, &funcBlock, &threadAttr);
+    int ret = MmpaPlugin::instance()->MsprofMmCreateTaskWithThreadAttr(&tid_, &funcBlock, &threadAttr);
     if (ret != EN_OK) {
         tid_ = 0;
         return PROFILING_FAILED;
@@ -77,7 +78,7 @@ int Thread::Stop()
 int Thread::Join()
 {
     if (tid_ != 0) {
-        int ret = mmJoinTask(&tid_);
+        int ret = MmpaPlugin::instance()->MsprofMmJoinTask(&tid_);
         if (ret != EN_OK) {
             return PROFILING_FAILED;
         }
@@ -109,7 +110,7 @@ void *Thread::ThrProcess(VOID_PTR arg)
         return nullptr;
     }
     auto runnable = reinterpret_cast<Thread *>(arg);
-    (void)mmSetCurrentThreadName(runnable->threadName_.c_str());
+    (void)MmpaPlugin::instance()->MsprofMmSetCurrentThreadName(runnable->threadName_.c_str());
 
     MSPROF_LOGI("New thread %s begins to run", runnable->threadName_.c_str());
 
