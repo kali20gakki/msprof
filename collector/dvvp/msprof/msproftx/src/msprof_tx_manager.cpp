@@ -299,8 +299,8 @@ int MsprofTxManager::ReportStampData(MsprofStampInfo &stamp) const
     }
     static const std::string MSPROF_TX_REPORTER_TAG = "msproftx";
 
-    stamp.processId = static_cast<uint32_t>(mmGetPid());
-    stamp.threadId = static_cast<uint32_t>(mmGetTid());
+    stamp.processId = static_cast<uint32_t>(MmpaPlugin::instance()->MsprofMmGetPid()());
+    stamp.threadId = static_cast<uint32_t>(MmpaPlugin::instance()->MsprofMmGetTid());
     stamp.dataTag = MSPROF_MSPROFTX_DATA_TAG;
     stamp.magicNumber = static_cast<uint16_t>(MSPROF_DATA_HEAD_MAGIC_NUM);
 

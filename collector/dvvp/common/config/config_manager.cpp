@@ -15,7 +15,7 @@
 #include "errno/error_code.h"
 #include "config/config.h"
 #include "config/config_manager.h"
-#include "ascend_hal.h"
+#include "driver_plugin.h"
 #include "ai_drv_dev_api.h"
 namespace Analysis {
 namespace Dvvp {
@@ -30,6 +30,7 @@ using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::message;
 using namespace analysis::dvvp::common::config;
 using namespace analysis::dvvp::common::utils;
+using namespace Analysis::Dvvp::Plugin;
 
 ConfigManager::ConfigManager()
     : isInit_(false)
@@ -49,7 +50,7 @@ int ConfigManager::Init()
     }
     int64_t versionInfo = 0;
     uint32_t chipId = 0;
-    int ret = halGetDeviceInfo(0, MODULE_TYPE_SYSTEM, INFO_TYPE_VERSION, &versionInfo);
+    int ret = DriverPlugin::instance()->MsprofHalGetDeviceInfo(0, MODULE_TYPE_SYSTEM, INFO_TYPE_VERSION, &versionInfo);
     if (ret != DRV_ERROR_NONE) {
         if (ret == MSPROF_HELPER_HOST) {
             chipId = static_cast<uint64_t>(PlatformType::HELPER_DEVICE_TYPE);

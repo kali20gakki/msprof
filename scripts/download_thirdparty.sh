@@ -29,5 +29,5 @@ git clone ssh://git@codehub-dg-y.huawei.com:2222/hwsecurec_group/huawei_secure_c
 
 ###################################### gtest下载 #####################################
 # 下载 gtest
-cd ${GTEST_DIR}
-git clone ssh://git@codehub-dg-y.huawei.com:2222/OpenSourceCenter/googletest.git googletest -b release-1.8.1
+# cd ${GTEST_DIR}
+# git clone ssh://git@codehub-dg-y.huawei.com:2222/OpenSourceCenter/googletest.git googletest -b release-1.8.1

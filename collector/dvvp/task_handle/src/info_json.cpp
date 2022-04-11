@@ -22,6 +22,7 @@
 #include "utils/utils.h"
 #include "platform/platform.h"
 #include "task_relationship_mgr.h"
+#include "mmpa_plugin.h"
 
 namespace analysis {
 namespace dvvp {
@@ -32,6 +33,7 @@ using namespace analysis::dvvp::common::utils;
 using namespace analysis::dvvp::common::config;
 using namespace Analysis::Dvvp::Common::Platform;
 using namespace Analysis::Dvvp::Common::Config;
+using namespace Analysis::Dvvp::Plugin;
 
 const char * const PROF_NET_CARD = "/sys/class/net";
 const char * const PROF_PROC_MEM = "/proc/meminfo";
@@ -109,13 +111,13 @@ void InfoJson::AddSysConf(SHARED_PTR_ALIA<InfoMain> infoMain)
 #if (defined(linux) || defined(__linux__))
     long tck = sysconf(_SC_CLK_TCK);
     if (tck == -1) {
-        MSPROF_LOGW("Get system clock failed, err=%d.", mmGetErrorCode());
+        MSPROF_LOGW("Get system clock failed, err=%d.", MmpaPlugin::instance()->MsprofMmGetErrorCode());
         return;
     }
     infoMain->set_sysclockfreq(tck);
     long cpu = sysconf(_SC_NPROCESSORS_CONF);
     if (cpu == -1) {
-        MSPROF_LOGW("Get system cpu num failed, err=%d.", mmGetErrorCode());
+        MSPROF_LOGW("Get system cpu num failed, err=%d.", MmpaPlugin::instance()->MsprofMmGetErrorCode());
         return;
     }
     infoMain->set_cpunums(cpu);
@@ -240,7 +242,7 @@ int InfoJson::AddHostInfo(SHARED_PTR_ALIA<InfoMain> infoMain)
     // fetch and set OS
     MSPROF_LOGI("Begin to AddHostInfo in info.json, devices: %s.", devices_.c_str());
     char str[MMPA_MAX_PATH] = {0};
-    int ret = mmGetOsVersion(str, MMPA_MAX_PATH);
+    int ret = MmpaPlugin::instance()->MsprofMmGetOsVersion(str, MMPA_MAX_PATH);
     if (ret != EN_OK) {
         MSPROF_LOGW("mmGetOsVersion failed");
     }
@@ -249,7 +251,7 @@ int InfoJson::AddHostInfo(SHARED_PTR_ALIA<InfoMain> infoMain)
 
     // fetch and set hostname
     (void)memset_s(str, MMPA_MAX_PATH, 0, MMPA_MAX_PATH);
-    ret = mmGetOsName(str, MMPA_MAX_PATH);
+    ret = MmpaPlugin::instance()->MsprofMmGetOsName(str, MMPA_MAX_PATH);
     if (ret != EN_OK) {
         MSPROF_LOGW("mmGetOsName failed");
     }
@@ -265,7 +267,7 @@ int InfoJson::AddHostInfo(SHARED_PTR_ALIA<InfoMain> infoMain)
     // fetch and set cpu infos
     mmCpuDesc *cpuInfo = nullptr;
     INT32 cpuNum = 0;
-    ret = mmGetCpuInfo(&cpuInfo, &cpuNum);
+    ret = MmpaPlugin::instance()->MsprofMmGetCpuInfo(&cpuInfo, &cpuNum);
     if (ret != EN_OK || cpuNum <= 0) {
         MSPROF_LOGE("mmGetCpuInfo failed");
         return PROFILING_FAILED;
@@ -280,7 +282,7 @@ int InfoJson::AddHostInfo(SHARED_PTR_ALIA<InfoMain> infoMain)
         infoCpu->set_frequency(cpuInfo[i].maxFrequency);
         infoCpu->set_logical_cpu_count(cpuInfo[i].nthreads == 0 ? cpuInfo[i].ncounts : cpuInfo[i].nthreads);
     }
-    mmCpuInfoFree(cpuInfo, cpuNum);
+    MmpaPlugin::instance()->MsprofMmCpuInfoFree(cpuInfo, cpuNum);
     MSPROF_LOGI("End to AddHostInfo in info.json, devices: %s.", devices_.c_str());
     return PROFILING_SUCCESS;
 }

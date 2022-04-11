@@ -22,7 +22,7 @@
 #include "platform/platform.h"
 #include "config/config.h"
 #include "msprof_dlog.h"
-#include "mmpa_api.h"
+#include "mmpa_plugin.h"
 
 namespace Analysis {
 namespace Dvvp {
@@ -35,6 +35,7 @@ using namespace Analysis::Dvvp::Common::Config;
 using namespace Analysis::Dvvp::Common::Platform;
 using namespace analysis::dvvp::common::config;
 using namespace Collector::Dvvp::Msprofbin;
+using namespace Analysis::Dvvp::Plugin;
 
 const int MSPROF_DAEMON_ERROR       = -1;
 const int MSPROF_DAEMON_OK          = 0;
@@ -84,7 +85,7 @@ SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> InputParser::MsprofGetOp
     int optionIndex = 0;
     MsprofString optString  = "";
     struct MsprofCmdInfo cmdInfo = { {nullptr} };
-    while ((opt = mmGetOptLong(argc, const_cast<MsprofStrBufAddrT>(argv),
+    while ((opt = MmpaPlugin::instance()->MsprofMmGetOptLong(argc, const_cast<MsprofStrBufAddrT>(argv),
         optString, longOptions, &optionIndex)) != MSPROF_DAEMON_ERROR) {
         if (PreCheckPlatform(opt, argv) == PROFILING_FAILED) {
             return nullptr;
@@ -134,7 +135,7 @@ int InputParser::PreCheckPlatform(int opt, CONST_CHAR_PTR argv[])
     }
     std::vector<MsprofArgsType> platSwithList = platformArgsType[platformType];
     if (std::find(platSwithList.begin(), platSwithList.end(), opt) != platSwithList.end()) {
-        std::cout << Utils::GetSelfPath() << ": unrecognized option '" << argv[mmGetOptInd() - 1] << "'" << std::endl;
+        std::cout << Utils::GetSelfPath() << ": unrecognized option '" << argv[MmpaPlugin::instance()->MsprofMmGetOptInd() - 1] << "'" << std::endl;
         std::cout << "PlatformType:" << static_cast<uint8_t>(platformType) << std::endl;
         MsprofCmdUsage("");
         return PROFILING_FAILED;
@@ -152,7 +153,7 @@ int InputParser::ProcessOptions(int opt, struct MsprofCmdInfo &cmdInfo)
         return ret;
     }
 
-    cmdInfo.args[opt] = mmGetOptArg();
+    cmdInfo.args[opt] = MmpaPlugin::instance()->MsprofMmGetOptArg();
     params_->usedParams.insert(opt);
 
     if (opt >= ARGS_OUTPUT && opt <= ARGS_SUMMARY_FORMAT) {
@@ -297,7 +298,7 @@ int InputParser::CheckHostSysCmdOutIsExist(const std::string tmpDir, const std::
     MSPROF_LOGI("Start to check whether the file exists.");
     for (int i = 0; i < FILE_FIND_REPLAY; i++) {
         if (!(Utils::IsFileExist(tmpDir))) {
-            mmSleep(20); // If the file is not found, the delay is 20 ms.
+            MmpaPlugin::instance()->MsprofMmSleep(20); // If the file is not found, the delay is 20 ms.
             continue;
         } else {
             break;
@@ -306,7 +307,7 @@ int InputParser::CheckHostSysCmdOutIsExist(const std::string tmpDir, const std::
     for (int i = 0; i < FILE_FIND_REPLAY; i++) {
         long long len = analysis::dvvp::common::utils::Utils::GetFileSize(tmpDir);
         if (len < static_cast<int>(toolName.length())) {
-            mmSleep(5); // If the file has no content, the delay is 5 ms.
+            MmpaPlugin::instance()->MsprofMmSleep(5); // If the file has no content, the delay is 5 ms.
             continue;
         } else {
             break;
@@ -316,7 +317,7 @@ int InputParser::CheckHostSysCmdOutIsExist(const std::string tmpDir, const std::
     std::ostringstream tmp;
     tmp << in.rdbuf();
     std::string tmpStr = tmp.str();
-    mmUnlink(tmpDir.c_str());
+    MmpaPlugin::instance()->MsprofMmUnlink(tmpDir.c_str());
     int ret = CheckHostOutString(tmpStr, toolName);
     if (ret != MSPROF_DAEMON_OK) {
         ret = UninitCheckHostSysCmd(tmpProcess); // stop check process.
@@ -372,7 +373,7 @@ int InputParser::UninitCheckHostSysCmd(const mmProcess checkProcess)
     for (int i = 0; i < FILE_FIND_REPLAY; i++) {
         if (ParamValidation::instance()->CheckHostSysPidIsValid(reinterpret_cast<int>(checkProcess))) {
             ret = analysis::dvvp::common::utils::Utils::ExecCmd(execCmdParams, argsV, envV, exitCode, tmpProcess);
-            mmSleep(20); // If failed stop check process, the delay is 20 ms.
+            MmpaPlugin::instance()->MsprofMmSleep(20); // If failed stop check process, the delay is 20 ms.
             continue;
         } else {
             break;
@@ -438,14 +439,14 @@ int InputParser::CheckOutputValid(const struct MsprofCmdInfo &cmdInfo)
         if (Utils::CreateDir(path) != PROFILING_SUCCESS) {
             char errBuf[MAX_ERR_STRING_LEN + 1] = {0};
             CmdLog::instance()->CmdErrorLog("Create output dir failed.ErrorCode: %d, ErrorInfo: %s.",
-                mmGetErrorCode(), mmGetErrorFormatMessage(mmGetErrorCode(), errBuf, MAX_ERR_STRING_LEN));
+                MmpaPlugin::instance()->MsprofMmGetErrorCode(), MmpaPlugin::instance()->MsprofMmGetErrorFormatMessage(MmpaPlugin::instance()->MsprofMmGetErrorCode(), errBuf, MAX_ERR_STRING_LEN));
             return MSPROF_DAEMON_ERROR;
         }
         if (!Utils::IsDir(path)) {
             CmdLog::instance()->CmdErrorLog("Argument --output %s is not a dir.", params_->result_dir.c_str());
             return MSPROF_DAEMON_ERROR;
         }
-        if (mmAccess2(path.c_str(), M_W_OK) != EN_OK) {
+        if (MmpaPlugin::instance()->MsprofMmAccess2(path.c_str(), M_W_OK) != EN_OK) {
             CmdLog::instance()->CmdErrorLog("Argument --output %s permission denied.", params_->result_dir.c_str());
             return MSPROF_DAEMON_ERROR;
         }
@@ -536,7 +537,7 @@ int InputParser::PreCheckApp(const std::string &appDir, const std::string &appNa
         return MSPROF_DAEMON_ERROR;
     }
     // check app permisiion
-    if (mmAccess2(appPath.c_str(), M_X_OK) != EN_OK) {
+    if (MmpaPlugin::instance()->MsprofMmAccess2(appPath.c_str(), M_X_OK) != EN_OK) {
         CmdLog::instance()->CmdErrorLog("This app(%s) has no executable permission!", appPath.c_str());
         return MSPROF_DAEMON_ERROR;
     }
@@ -618,7 +619,7 @@ int InputParser::CheckPythonPathValid(const struct MsprofCmdInfo &cmdInfo) const
         return MSPROF_DAEMON_ERROR;
     }
 
-    if (mmAccess2(absolutePythonPath.c_str(), M_X_OK) != EN_OK) {
+    if (MmpaPlugin::instance()->MsprofMmAccess2(absolutePythonPath.c_str(), M_X_OK) != EN_OK) {
         CmdLog::instance()->CmdErrorLog("Argument --python-path %s permission denied.", params_->pythonPath.c_str());
         return MSPROF_DAEMON_ERROR;
     }

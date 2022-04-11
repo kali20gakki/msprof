@@ -10,6 +10,7 @@
 #include "logger/msprof_dlog.h"
 #include "proto/profiler.pb.h"
 #include "utils/utils.h"
+#include "mmpa_plugin.h"
 
 using namespace Analysis::Dvvp::Common::Statistics;
 
@@ -19,6 +20,7 @@ namespace transport {
 using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::common::config;
 using namespace analysis::dvvp::common::utils;
+using namespace Analysis::Dvvp::Plugin;
 
 FileSlice::FileSlice(int sliceFileMaxKByte, const std::string &storageDir, const std::string &storageLimit)
     : sliceFileMaxKByte_(sliceFileMaxKByte), storageDir_(storageDir),
@@ -140,10 +142,10 @@ int FileSlice::WriteToLocalFiles(const std::string &key, CONST_CHAR_PTR data, in
         std::ofstream out;
         out.open(absolutePath, std::ofstream::app | std::ios::binary);
         if (!out.is_open()) {
-            int errorNo = mmGetErrorCode();
+            int errorNo = MmpaPlugin::instance()->MsprofMmGetErrorCode();
             char errBuf[MAX_ERR_STRING_LEN + 1] = {0};
             MSPROF_LOGE("Failed to open %s, ErrorCode:%d, errinfo:%s", Utils::BaseName(absolutePath).c_str(),
-                errorNo, mmGetErrorFormatMessage(errorNo, errBuf, MAX_ERR_STRING_LEN));
+                errorNo, MmpaPlugin::instance()->MsprofMmGetErrorFormatMessage(errorNo, errBuf, MAX_ERR_STRING_LEN));
             return PROFILING_FAILED;
         }
         if (offset != -1) {
@@ -302,10 +304,10 @@ bool FileSlice::CreateDoneFile(const std::string &absolutePath, const std::strin
     std::ofstream file;
     file.open(tempPath);
     if (!file.is_open()) {
-        int errorNo = mmGetErrorCode();
+        int errorNo = MmpaPlugin::instance()->MsprofMmGetErrorCode();
         char errBuf[MAX_ERR_STRING_LEN + 1] = {0};
         MSPROF_LOGE("Failed to open %s, ErrorCode:%d, errinfo:%s", Utils::BaseName(tempPath).c_str(), errorNo,
-                    mmGetErrorFormatMessage(errorNo, errBuf, MAX_ERR_STRING_LEN));
+                    MmpaPlugin::instance()->MsprofMmGetErrorFormatMessage(errorNo, errBuf, MAX_ERR_STRING_LEN));
         return false;
     }
     file << "filesize:" << fileSize << std::endl;

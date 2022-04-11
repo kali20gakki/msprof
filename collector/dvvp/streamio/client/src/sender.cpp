@@ -10,7 +10,7 @@
 #include "message/codec.h"
 #include "message/prof_params.h"
 #include "securec.h"
-
+#include "mmpa_plugin"
 #include "proto/profiler.pb.h"
 
 using namespace analysis::dvvp::proto;
@@ -22,6 +22,7 @@ namespace client {
 using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::common::utils;
 using namespace analysis::dvvp::common::config;
+using namespace Analysis::Dvvp::Plugin;
 
 Sender::Sender(SHARED_PTR_ALIA<ITransport> transport, const std::string &engineName,
                SHARED_PTR_ALIA<analysis::dvvp::common::memory::ChunkPool> chunkPool)
@@ -303,7 +304,7 @@ void Sender::CloseFileFds()
     int ret = EN_OK;
 
     for (auto iter = fileFdMap_.begin(); iter != fileFdMap_.end(); iter++) {
-        ret = mmClose(iter->second);
+        ret = MmpaPlugin::instance()->MsprofMmClose(iter->second);
         if (ret != EN_OK) {
             MSPROF_LOGE("Failed to mmClose ret:%d fd:%d", ret, iter->second);
         }
@@ -324,7 +325,7 @@ INT32 Sender::OpenWriteFile(const std::string &fileName)
         return -1;
     }
 
-    INT32 fd = mmOpen2(fileName.c_str(), O_WRONLY | O_CREAT, M_IRUSR | M_IWUSR);
+    INT32 fd = MmpaPlugin::instance()->MsprofMmOpen2(fileName.c_str(), O_WRONLY | O_CREAT, M_IRUSR | M_IWUSR);
     if (fd < 0) {
         MSPROF_LOGE("open file %s failed.", fileName.c_str());
         return fd;

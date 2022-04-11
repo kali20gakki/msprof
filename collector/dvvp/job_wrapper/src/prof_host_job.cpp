@@ -13,7 +13,7 @@
 #endif
 #include "config/config.h"
 #include "logger/msprof_dlog.h"
-#include "mmpa_api.h"
+#include "mmpa_plugin.h"
 #include "platform/platform.h"
 #include "uploader_mgr.h"
 #include "utils/utils.h"
@@ -26,6 +26,7 @@ using namespace analysis::dvvp::common::error;
 using namespace Analysis::Dvvp::Common::Platform;
 using namespace analysis::dvvp::common::utils;
 using namespace Analysis::Dvvp::MsprofErrMgr;
+using namespace Analysis::Dvvp::Plugin;
 
 const int FILE_FIND_REPLAY          = 10;
 
@@ -792,7 +793,7 @@ int ProfHostService::CollectToolIsRun()
     }
     for (int i = 0; i < FILE_FIND_REPLAY; ++i) {
         if (!(Utils::IsFileExist(redirectionPath))) {
-            mmSleep(1); // If the file is not found, the delay is 1 ms.
+            MmpaPlugin::instance()->MsprofMmSleep(1); // If the file is not found, the delay is 1 ms.
             continue;
         } else {
             break;
@@ -805,7 +806,7 @@ int ProfHostService::CollectToolIsRun()
     }
     PrintFileContent(redirectionPath);
     long long len = Utils::GetFileSize(redirectionPath);
-    mmUnlink(redirectionPath.c_str());
+    MmpaPlugin::instance()->MsprofMmUnlink(redirectionPath.c_str());
     if (len > 0) {
         return PROFILING_SUCCESS;
     }

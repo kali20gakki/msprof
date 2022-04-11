@@ -5,16 +5,33 @@ protobuf_generate(profiler
     ${CMAKE_CURRENT_SOURCE_DIR}/../proto/profiler_ext.proto
 )
 
+############################## depend ############################
+add_library(alog SHARED
+    ${TOP_DIR}/collector/dvvp/depend/stub/dlog_stub.cpp
+)
+
+set_target_properties(alog
+    PROPERTIES
+    OUTPUT_NAME alog
+    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/
+)
+###################################################################
+
 set(msprofBinHeader
     include
     ../
     ../app
-    ${TOP_DIR}/abl/libc_sec/include
-    ${TOP_DIR}/inc/driver
-    ${TOP_DIR}/open_source/json/include
-    ${TOP_DIR}/ace/npuruntime/inc/
-    ${TOP_DIR}/abl/msprof/inc/toolchain
-    ${TOP_DIR}/metadef/inc
+    ${TOP_DIR}/collector/dvvp/depend/inc/mmpa
+    ${TOP_DIR}/opensource/securec/include
+    ${TOP_DIR}/collector/dvvp/depend/inc/slog
+    ${TOP_DIR}/opensource/json/include
+    ${TOP_DIR}/collector/dvvp/depend/inc/metadef/error_manager/error_manager_stub
+    ${TOP_DIR}/collector/dvvp/depend/inc
+    ${TOP_DIR}/collector/dvvp/depend/inc/driver
+    ${TOP_DIR}/collector/dvvp/depend/inc/adump
+    ${TOP_DIR}/collector/dvvp/depend/inc/plugin
+    ${TOP_DIR}/inc/toolchain
+    ${TOP_DIR}/collector/dvvp/common/config
     ../common/utils
     ../msprof/engine/include
     ../host/include/
@@ -40,10 +57,6 @@ set(hdcCpp
     ../adx/stub/adx_prof_api.cpp
     ../adx/wrapper/hdc_api.cpp
     ../adx/wrapper/memory_utils.cpp
-)
-
-set(hdcStubCpp
-    ../adx/stub_lhisi/adx_prof_api.cpp
 )
 
 add_executable(msprofbin
@@ -92,7 +105,10 @@ add_executable(msprofbin
     ../transport/hdc/hdc_transport.cpp
     ../transport/hdc/device_transport.cpp
     ../transport/hdc/platform/rpc/dev_mgr_api.cpp
-    $<IF:$<STREQUAL:${PRODUCT},npuf10>,${hdcStubCpp},${hdcCpp}>
+    ../depend/src/mmpa_plugin.cpp
+    ../depend/src/plugin_manager.cpp
+    ../depend/src/driver_plugin.cpp
+    ${hdcCpp}
     ${CppPath}
 )
 
@@ -104,21 +120,14 @@ target_include_directories(msprofbin PRIVATE
 target_compile_options(msprofbin PRIVATE
     -std=c++11
     -fPIE
+    -DLOG_CPP
+    -D_GLIBCXX_USE_CXX11_ABI=0
     -fno-strict-aliasing
     -fno-common
-    $<$<NOT:$<STREQUAL:${TARGET_SYSTEM_NAME},Windows>>:-Wfloat-equal>
-    $<$<NOT:$<STREQUAL:${TARGET_SYSTEM_NAME},Windows>>:-Wextra>
-    $<$<NOT:$<STREQUAL:${TARGET_SYSTEM_NAME},Windows>>:-Wno-unused-parameter>
-    $<$<NOT:$<STREQUAL:${TARGET_SYSTEM_NAME},Windows>>:-Wno-missing-field-initializers>
-    $<$<NOT:$<STREQUAL:${TARGET_SYSTEM_NAME},Windows>>:-Werror>
-    $<$<AND:$<STREQUAL:${TARGET_SYSTEM_NAME},Windows>,$<STREQUAL:${CMAKE_CONFIGURATION_TYPES},Debug>>:/MTd>
-    $<$<AND:$<STREQUAL:${TARGET_SYSTEM_NAME},Windows>,$<STREQUAL:${CMAKE_CONFIGURATION_TYPES},Release>>:/MT>
 )
 
 target_compile_definitions(msprofbin PRIVATE
     SECUREC_USING_STD_SECURE_LIB=0
-    google=ascend_private
-    $<$<STREQUAL:${TARGET_SYSTEM_NAME},Windows>:NOMINMAX>
 )
 
 target_link_options(msprofbin PRIVATE
@@ -128,10 +137,11 @@ target_link_options(msprofbin PRIVATE
 )
 
 target_link_libraries(msprofbin PRIVATE
-    $<BUILD_INTERFACE:mmpa_headers>
-    $<BUILD_INTERFACE:adump_headers>
-    $<BUILD_INTERFACE:slog_headers>
-    $<IF:$<STREQUAL:${PRODUCT},npuf10>,$<BUILD_INTERFACE:msprofbinNpuf10_pub>,$<BUILD_INTERFACE:msprofbinOnetrack_pub>>
+    alog
+    securec_share
+    protobuf
+    -lpthread
+    dl
 )
 
 set_target_properties(msprofbin
@@ -142,38 +152,5 @@ set_target_properties(msprofbin
 
 install(TARGETS msprofbin OPTIONAL
     LIBRARY DESTINATION ${INSTALL_LIBRARY_DIR}
-)
-
-### onetrack target interface
-
-add_library(msprofbinOnetrack_pub INTERFACE)
-
-target_link_libraries(msprofbinOnetrack_pub INTERFACE
-    $<BUILD_INTERFACE:intf_pub>
-    c_sec
-    $<IF:$<STREQUAL:${TARGET_SYSTEM_NAME},Windows>,alog,static_alog>
-    mmpa
-    $<IF:$<STREQUAL:${TARGET_SYSTEM_NAME},Windows>,ascend_hal,ascend_hal_stub>
-    ascend_protobuf_static
-    -lpthread
-)
-### lhisi target interface
-
-add_library(msprofbinNpuf10_pub INTERFACE)
-
-target_link_libraries(msprofbinNpuf10_pub INTERFACE
-    $<BUILD_INTERFACE:intf_pub>
-    ascend_protobuf_static
-    -Wl,--no-as-needed
-    c_sec
-    static_alog
-    slog
-    mmpa
-    -Wl,--as-needed
-    -ldrvdevdrv
-    -ldrv_dfx
-    -ldl
-    $<$<STREQUAL:${TARGET_SYSTEM_NAME},Android>:-llog>
-    $<$<STREQUAL:${TARGET_SYSTEM_NAME},Linux>:-lpthread>
 )
 
