@@ -10,7 +10,7 @@
 #include <cstdint>
 #include <memory>
 
-#include "mmpa/mmpa_api.h"
+#include "mmpa_plugin.h"
 
 #include "utils.h"
 #include "errno/error_code.h"
@@ -20,6 +20,7 @@
 using namespace analysis::dvvp::common::config;
 using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::common::utils;
+using namespace Analysis::Dvvp::Plugin;
 
 namespace Msprof {
 namespace MsprofTx {
@@ -299,7 +300,7 @@ int MsprofTxManager::ReportStampData(MsprofStampInfo &stamp) const
     }
     static const std::string MSPROF_TX_REPORTER_TAG = "msproftx";
 
-    stamp.processId = static_cast<uint32_t>(MmpaPlugin::instance()->MsprofMmGetPid()());
+    stamp.processId = static_cast<uint32_t>(MmpaPlugin::instance()->MsprofMmGetPid());
     stamp.threadId = static_cast<uint32_t>(MmpaPlugin::instance()->MsprofMmGetTid());
     stamp.dataTag = MSPROF_MSPROFTX_DATA_TAG;
     stamp.magicNumber = static_cast<uint16_t>(MSPROF_DATA_HEAD_MAGIC_NUM);
