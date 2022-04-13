@@ -43,7 +43,7 @@ function(protobuf_generate comp c_var h_var)
                 WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
                 COMMAND ${CMAKE_COMMAND} -E make_directory "${proto_output_path}"
                 COMMAND ${CMAKE_COMMAND} -E echo "generate proto cpp_out ${comp} by ${abs_file}"
-                COMMAND ${TOP_DIR}/out/bin/protoc -I${file_dir} ${extra_option} --cpp_out=${proto_output_path} ${abs_file}
+                COMMAND ${PROTOC_PROGRAM} -I${file_dir} ${extra_option} --cpp_out=${proto_output_path} ${abs_file}
                 DEPENDS ${abs_file}
                 COMMENT "Running C++ protocol buffer compiler on ${file}" VERBATIM )
     endforeach()
@@ -65,19 +65,13 @@ add_library(alog SHARED
     ${TOP_DIR}/collector/dvvp/depend/stub/dlog_stub.cpp
 )
 
-set_target_properties(alog
-    PROPERTIES
-    OUTPUT_NAME alog
-    LIBRARY_OUTPUT_DIRECTORY ${TOP_DIR}/out
-)
-
 # error_manager
 add_library(error_manager SHARED
     ${TOP_DIR}/collector/dvvp/depend/stub/error_manager/error_manager_stub.cpp
 )
 
 target_include_directories(error_manager PRIVATE
-    ${TOP_DIR}/collector/dvvp/depend/inc/metadef    
+    ${TOP_DIR}/collector/dvvp/depend/inc/metadef
 )
 
 target_compile_options(error_manager PRIVATE
@@ -90,12 +84,6 @@ target_compile_options(error_manager PRIVATE
     -fvisibility-inlines-hidden
     -Wfloat-equal
     -Wextra
-)
-
-set_target_properties(error_manager
-    PROPERTIES
-    OUTPUT_NAME error_manager
-    LIBRARY_OUTPUT_DIRECTORY ${TOP_DIR}/out
 )
 
 # profapi
@@ -119,11 +107,6 @@ target_compile_options(profapi PRIVATE
     -Wextra
 )
 
-set_target_properties(profapi
-    PROPERTIES
-    OUTPUT_NAME profapi
-    LIBRARY_OUTPUT_DIRECTORY ${TOP_DIR}/out
-)
 ######################################################################################
 
 add_subdirectory(dvvp)
