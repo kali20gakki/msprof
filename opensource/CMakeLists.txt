@@ -59,7 +59,7 @@ target_compile_options(securec_share PRIVATE
  
 set_target_properties(securec_share
     PROPERTIES
-    OUTPUT_NAME securec
+    OUTPUT_NAME c_sec
     LIBRARY_OUTPUT_DIRECTORY ${TOP_DIR}/out
 )
  
@@ -67,4 +67,3 @@ target_link_options(securec_share PRIVATE
     -Wl,-z,relro,-z,now,-z,noexecstack
     -s
 )
-########################## securec ###################################

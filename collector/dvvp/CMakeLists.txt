@@ -73,7 +73,7 @@ target_compile_options(stub_msprofiler PRIVATE
 )
 
 install(TARGETS stub_msprofiler OPTIONAL
-    LIBRARY DESTINATION ${TOP_DIR}/out/stub
+    LIBRARY DESTINATION stub
 )
 ###################### stub/libmsprofiler.so #######################
 
@@ -206,7 +206,6 @@ target_include_directories(msprofiler_fwk_share PRIVATE
 set_target_properties(msprofiler_fwk_share
     PROPERTIES
     OUTPUT_NAME msprofiler
-    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/
 )
 
 target_compile_definitions(msprofiler_fwk_share PRIVATE
@@ -234,19 +233,18 @@ target_link_options(msprofiler_fwk_share PRIVATE
     -Wl,--exclude-libs=ALL
 )
 
-set(ascend_protobuf_shared_lib ${TOP_DIR}/out/lib/libascend_protobuf.so)
 target_link_libraries(msprofiler_fwk_share PRIVATE
     -Wl,--no-as-needed
     c_sec
     alog
-    ${ascend_protobuf_shared_lib}
+    ascend_protobuf
     profapi
     error_manager
     -Wl,--as-needed
 )
 
 install(TARGETS msprofiler_fwk_share OPTIONAL
-    LIBRARY DESTINATION ${TOP_DIR}/out
+    LIBRARY DESTINATION lib
 )
 
 ####################### libmsprofiler.so ###########################
