@@ -11,6 +11,7 @@ set(CMAKE_MODULE_PATH
 
 find_package(protoc)
 find_package(ascend_protobuf_shared)
+find_package(ascend_protobuf_static)
 
 ########################## securec ###################################
 set(SECUREC_DIR ${TOP_DIR}/opensource/securec)

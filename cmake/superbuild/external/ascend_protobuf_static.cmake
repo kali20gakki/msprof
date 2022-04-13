@@ -4,7 +4,7 @@ set(SECURITY_COMPILE_OPT "-fPIC -fstack-protector-all -Wl,-z,relro,-z,now,-z,noe
 set(PROTOBUF_CXXFLAGS "${SECURITY_COMPILE_OPT} -Wno-maybe-uninitialized -Wno-unused-parameter -D_GLIBCXX_USE_CXX11_ABI=0 -Dgoogle=ascend_private -Wl,-Bsymbolic")
 set(PROTOBUF_CXXFLAGS "${PROTOBUF_CXXFLAGS} ${PROTOBUF_SYM_RENAME}")
 
-ExternalProject_Add(ascend_protobuf_shared_build
+ExternalProject_Add(ascend_protobuf_static_build
     SOURCE_DIR ${TOP_DIR}/opensource/protobuf
     CONFIGURE_COMMAND ${CMAKE_COMMAND}
         -G ${CMAKE_GENERATOR}
@@ -13,10 +13,10 @@ ExternalProject_Add(ascend_protobuf_shared_build
         -DLIB_PREFIX=ascend_
         -Dprotobuf_BUILD_TESTS=OFF
         -DCMAKE_INSTALL_LIBDIR=lib
-        -DBUILD_SHARED_LIBS=ON
+        -DBUILD_SHARED_LIBS=OFF
         -DCMAKE_CXX_FLAGS=${PROTOBUF_CXXFLAGS}
         -Dprotobuf_BUILD_PROTOC_BINARIES=OFF
-        -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}/ascend_protobuf
+        -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}/ascend_protobuf_static
         <SOURCE_DIR>/cmake
     BUILD_COMMAND $(MAKE)
     EXCLUDE_FROM_ALL TRUE
