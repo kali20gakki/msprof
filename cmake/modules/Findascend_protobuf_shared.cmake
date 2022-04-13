@@ -1,4 +1,4 @@
-set(ASCEND_PROTOBUF_SHARED_DIR ${CMAKE_INSTALL_PREFIX}/ascend_protobuf)
+set(ASCEND_PROTOBUF_SHARED_DIR ${CMAKE_INSTALL_PREFIX}/ascend_protobuf_shared)
 
 find_path(ASCEND_PROTOBUF_SHARED_INCLUDE
              PATHS ${ASCEND_PROTOBUF_SHARED_DIR}/include
@@ -23,9 +23,9 @@ if(ascend_protobuf_shared_FOUND)
     set(ASCEND_PROTOBUF_SHARED_INCLUDE_DIR ${ASCEND_PROTOBUF_SHARED_INCLUDE})
     set(ASCEND_PROTOBUF_SHARED_LIBRARY_DIR ${ASCEND_PROTOBUF_SHARED_DIR}/lib)
 
-    if(NOT TARGET ascend_protobuf)
-        add_library(ascend_protobuf SHARED IMPORTED)
-        set_target_properties(ascend_protobuf PROPERTIES
+    if(NOT TARGET ascend_protobuf_shared)
+        add_library(ascend_protobuf_shared SHARED IMPORTED)
+        set_target_properties(ascend_protobuf_shared PROPERTIES
             INTERFACE_INCLUDE_DIRECTORIES "${ASCEND_PROTOBUF_SHARED_INCLUDE}"
             IMPORTED_LOCATION             "${ASCEND_PROTOBUF_SHARED_LIBRARY}"
             )

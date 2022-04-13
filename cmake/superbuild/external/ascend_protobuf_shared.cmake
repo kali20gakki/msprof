@@ -16,7 +16,7 @@ ExternalProject_Add(ascend_protobuf_shared_build
         -DBUILD_SHARED_LIBS=ON
         -DCMAKE_CXX_FLAGS=${PROTOBUF_CXXFLAGS}
         -Dprotobuf_BUILD_PROTOC_BINARIES=OFF
-        -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}/ascend_protobuf
+        -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}/ascend_protobuf_shared
         <SOURCE_DIR>/cmake
     BUILD_COMMAND $(MAKE)
     EXCLUDE_FROM_ALL TRUE

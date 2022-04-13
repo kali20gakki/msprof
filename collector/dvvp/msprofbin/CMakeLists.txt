@@ -125,11 +125,10 @@ target_link_options(msprofbin PRIVATE
     -ldl
 )
 
-set(ascend_protobuf_static_lib ${TOP_DIR}/out/lib/libascend_protobuf.a)
 target_link_libraries(msprofbin PRIVATE
     alog
-    securec_share
-    ${ascend_protobuf_static_lib}
+    c_sec
+    ascend_protobuf_static
     -lpthread
     dl
 )
@@ -137,10 +136,8 @@ target_link_libraries(msprofbin PRIVATE
 set_target_properties(msprofbin
     PROPERTIES
     OUTPUT_NAME msprof
-    LIBRARY_OUTPUT_DIRECTORY ${TOP_DIR}/out
 )
 
 install(TARGETS msprofbin OPTIONAL
-    LIBRARY DESTINATION ${TOP_DIR}/out
+    RUNTIME DESTINATION bin
 )
-
