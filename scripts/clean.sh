@@ -10,3 +10,4 @@ rm -rf ${TOP_DIR}/opensource/protobuf
 rm -rf ${TOP_DIR}/opensource/json
 rm -rf ${TOP_DIR}/opensource/securec
 rm -rf ${TOP_DIR}/llt/opensource/googletest
+rm -rf ${TOP_DIR}/out

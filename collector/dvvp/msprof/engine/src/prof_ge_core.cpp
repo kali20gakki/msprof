@@ -23,6 +23,7 @@
 #include "param_validation.h"
 #include "runtime/base.h"
 #include "platform/platform.h"
+#include "prof_api.h"
 
 using namespace analysis::dvvp::common::error;
 using namespace Analysis::Dvvp::Analyze;
@@ -54,7 +55,7 @@ Status aclgrphProfGraphSubscribe(const uint32_t graphId, const aclprofSubscribeC
     }
 
     uint32_t deviceId = 0;
-    ret = rtGetDeviceIdByGeModelIdx(graphId, &deviceId);
+    ret = profGetDeviceIdByGeModelIdx(graphId, &deviceId);
     if (ret != ACL_SUCCESS) {
         MSPROF_LOGE("Graph id %u is not loaded", graphId);
         MSPROF_INPUT_ERROR("EK0010", std::vector<std::string>({"param", "value"}),
