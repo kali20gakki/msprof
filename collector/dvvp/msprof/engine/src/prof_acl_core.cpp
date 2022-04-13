@@ -26,6 +26,7 @@
 #include "transport/hash_data.h"
 #include "runtime/base.h"
 #include "platform/platform.h"
+#include "prof_api.h"
 
 using namespace Analysis::Dvvp::Analyze;
 using namespace analysis::dvvp::common::error;
@@ -393,7 +394,7 @@ aclError aclprofModelSubscribe(const uint32_t modelId, const aclprofSubscribeCon
     }
 
     uint32_t deviceId = 0;
-    aclError aclRet = rtGetDeviceIdByGeModelIdx(modelId, &deviceId);
+    aclError aclRet = profGetDeviceIdByGeModelIdx(modelId, &deviceId);
     if (aclRet != ACL_SUCCESS) {
         MSPROF_LOGE("Model id %u is not loaded", modelId);
         MSPROF_INPUT_ERROR("EK0010", std::vector<std::string>({"param", "value"}),

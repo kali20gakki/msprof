@@ -73,49 +73,9 @@ target_compile_options(stub_msprofiler PRIVATE
 )
 
 install(TARGETS stub_msprofiler OPTIONAL
-    LIBRARY DESTINATION ${INSTALL_LIBRARY_DIR}/stub
+    LIBRARY DESTINATION ${TOP_DIR}/out/stub
 )
 ###################### stub/libmsprofiler.so #######################
-
-##################################### depend #########################################
-# alog
-# error_manager
-add_library(alog SHARED
-    ${TOP_DIR}/collector/dvvp/depend/stub/dlog_stub.cpp
-)
-
-set_target_properties(alog
-    PROPERTIES
-    OUTPUT_NAME alog
-    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/
-)
-
-add_library(error_manager SHARED
-    ${TOP_DIR}/collector/dvvp/depend/stub/error_manager/error_manager_stub.cpp
-)
-
-target_include_directories(error_manager PRIVATE
-    ${TOP_DIR}/collector/dvvp/depend/inc/metadef    
-)
-
-target_compile_options(error_manager PRIVATE
-    -std=c++11
-    -fPIC
-    -fstack-protector-all
-    -fno-strict-aliasing
-    -fno-common
-    -fvisibility=hidden
-    -fvisibility-inlines-hidden
-    -Wfloat-equal
-    -Wextra
-)
-
-set_target_properties(error_manager
-    PROPERTIES
-    OUTPUT_NAME error_manager
-    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/
-)
-######################################################################################
 
 ####################### libmsprofiler.so ###########################
 
@@ -192,6 +152,7 @@ set(msprofilerInc
     ${TOP_DIR}/collector/dvvp/depend/inc/acl
     ${TOP_DIR}/collector/dvvp/depend/inc/mmpa
     ${TOP_DIR}/collector/dvvp/depend/inc/slog
+    ${TOP_DIR}/collector/dvvp/depend/inc/profapi
     ${TOP_DIR}/opensource/securec/include
     ${TOP_DIR}/opensource/json/include
     ${TOP_DIR}/collector/dvvp/depend/inc/plugin
@@ -273,17 +234,20 @@ target_link_options(msprofiler_fwk_share PRIVATE
     -Wl,--exclude-libs=ALL
 )
 
+set(ascend_protobuf_shared_lib ${TOP_DIR}/out/lib/libascend_protobuf.so)
 target_link_libraries(msprofiler_fwk_share PRIVATE
     -Wl,--no-as-needed
     c_sec
     alog
-    protobuf
+    ${ascend_protobuf_shared_lib}
+    profapi
     error_manager
     -Wl,--as-needed
 )
 
 install(TARGETS msprofiler_fwk_share OPTIONAL
-    LIBRARY DESTINATION ${INSTALL_LIBRARY_DIR}
+    LIBRARY DESTINATION ${TOP_DIR}/out
 )
+
 ####################### libmsprofiler.so ###########################
 add_dependencies(msprofiler_fwk_share profiler_proto)

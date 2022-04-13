@@ -15,6 +15,7 @@
 #include "msprof_tx_manager.h"
 #include "command_handle.h"
 #include "platform/platform.h"
+#include "prof_api.h"
 
 namespace Analysis {
 namespace Dvvp {
@@ -101,7 +102,7 @@ int32_t MsprofCtrlCallbackImpl(uint32_t type, VOID_PTR data, uint32_t len)
     }
 
     // register device state callback
-    ret = rtRegDeviceStateCallback("profiling", MsprofSetDeviceCallbackImpl);
+    ret = profRegDeviceStateCallback(MsprofSetDeviceCallbackImpl);
     if (ret != 0) {
         MSPROF_LOGE("Failed to register device state callback");
         MSPROF_CALL_ERROR("EK9999", "ProfStart CommandHandle set failed");
@@ -111,29 +112,30 @@ int32_t MsprofCtrlCallbackImpl(uint32_t type, VOID_PTR data, uint32_t len)
 }
 
 // set device callback
-void MsprofSetDeviceCallbackImpl(uint32_t devId, bool isOpenDevice)
+int32_t MsprofSetDeviceCallbackImpl(VOID_PTR data, uint32_t len)
 {
-    MSPROF_EVENT("MsprofSetDeviceCallback called, is open: %d", isOpenDevice);
-    if (isOpenDevice) {
+    ProfSetDevPara *setCfg = (struct ProfSetDevPara *)data;
+    MSPROF_EVENT("MsprofSetDeviceCallback called, is open: %d", setCfg->isOpen);
+    if (setCfg->isOpen) {
         if (!Msprofiler::Api::ProfAclMgr::instance()->IsCmdMode()) {
             MSPROF_LOGI("MsprofSetDeviceCallbackImpl, not on cmd mode");
-            return;
+            return MSPROF_ERROR;
         }
         std::string info;
-        if (!(analysis::dvvp::host::ProfManager::instance()->CheckIfDevicesOnline(std::to_string(devId), info))) {
-            MSPROF_LOGE("MsprofSetDeviceCallbackImpl, devId:%u is invalid, error info:%s", devId, info.c_str());
+        if (!(analysis::dvvp::host::ProfManager::instance()->CheckIfDevicesOnline(std::to_string(setCfg->deviceId), info))) {
+            MSPROF_LOGE("MsprofSetDeviceCallbackImpl, devId:%u is invalid, error info:%s", setCfg->deviceId, info.c_str());
             MSPROF_INNER_ERROR("EK9999", "MsprofSetDeviceCallbackImpl, devId:%u is invalid, error info:%s",
-                devId, info.c_str());
-            return;
+                setCfg->deviceId, info.c_str());
+            return MSPROF_ERROR;
         }
         int ret = RegisterReporterCallback();
         if (ret != PROFILING_SUCCESS) {
             MSPROF_LOGE("MsprofSetDeviceCallbackImpl, RegisterReporterCallback failed");
             MSPROF_INNER_ERROR("EK9999", "MsprofSetDeviceCallbackImpl, RegisterReporterCallback failed");
-            return;
+            return MSPROF_ERROR;
         }
 
-        ge::GeOpenDeviceHandle(devId);
+        ge::GeOpenDeviceHandle(setCfg->deviceId);
     }
 }
 
@@ -167,8 +169,8 @@ int32_t RegisterReporterCallback()
         MSPROF_LOGI("MsprofCallbackHandler InitReporters");
         Msprof::Engine::MsprofCallbackHandler::InitReporters();
     }
-    MSPROF_LOGI("Call rtSetMsprofReporterCallback");
-    aclError ret = rtSetMsprofReporterCallback(MsprofReporterCallbackImpl);
+    MSPROF_LOGI("Call profRegReporterCallback");
+    aclError ret = profRegReporterCallback(MsprofReporterCallbackImpl);
     if (ret != ACL_SUCCESS) {
         MSPROF_LOGE("Failed to register reporter callback");
         MSPROF_CALL_ERROR("EK9999", "Failed to register reporter callback");
@@ -186,6 +188,22 @@ void RegisterMsprofTxReporterCallback()
     MSPROF_LOGI("Call MsprofTxManager SetReporterCallback");
     Msprof::MsprofTx::MsprofTxManager::instance()->SetReporterCallback(MsprofReporterCallbackImpl);
 }
+
+int32_t MsprofilerInit()
+{
+    MSPROF_EVENT("Started to register profiling ctrl callback.");
+    // register ctrl callback
+    aclError ret = profRegCtrlCallback(MsprofCtrlCallbackImpl);
+    if (ret != ACL_SUCCESS) {
+        MSPROF_LOGE("Failed to register ctrl callback");
+        return PROFILING_FAILED;
+    }
+    return PROFILING_SUCCESS;
+}
+
+static int32_t g_initResult = MsprofilerInit();
+
+int32_t GetRegisterResult() { return g_initResult; }
 }  // namespace ProfilerCommon
 }  // namespace Dvvp
 }  // namespace Analysis

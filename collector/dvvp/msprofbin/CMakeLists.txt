@@ -5,18 +5,6 @@ protobuf_generate(profiler
     ${CMAKE_CURRENT_SOURCE_DIR}/../proto/profiler_ext.proto
 )
 
-############################## depend ############################
-add_library(alog SHARED
-    ${TOP_DIR}/collector/dvvp/depend/stub/dlog_stub.cpp
-)
-
-set_target_properties(alog
-    PROPERTIES
-    OUTPUT_NAME alog
-    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/
-)
-###################################################################
-
 set(msprofBinHeader
     include
     ../
@@ -128,6 +116,7 @@ target_compile_options(msprofbin PRIVATE
 
 target_compile_definitions(msprofbin PRIVATE
     SECUREC_USING_STD_SECURE_LIB=0
+    google=ascend_private
 )
 
 target_link_options(msprofbin PRIVATE
@@ -136,10 +125,11 @@ target_link_options(msprofbin PRIVATE
     -ldl
 )
 
+set(ascend_protobuf_static_lib ${TOP_DIR}/out/lib/libascend_protobuf.a)
 target_link_libraries(msprofbin PRIVATE
     alog
     securec_share
-    protobuf
+    ${ascend_protobuf_static_lib}
     -lpthread
     dl
 )
@@ -147,10 +137,10 @@ target_link_libraries(msprofbin PRIVATE
 set_target_properties(msprofbin
     PROPERTIES
     OUTPUT_NAME msprof
-    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/
+    LIBRARY_OUTPUT_DIRECTORY ${TOP_DIR}/out
 )
 
 install(TARGETS msprofbin OPTIONAL
-    LIBRARY DESTINATION ${INSTALL_LIBRARY_DIR}
+    LIBRARY DESTINATION ${TOP_DIR}/out
 )
 

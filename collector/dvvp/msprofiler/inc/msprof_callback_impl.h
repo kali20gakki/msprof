@@ -24,7 +24,7 @@ using namespace analysis::dvvp::common::utils;
 int32_t MsprofCtrlCallbackImpl(uint32_t type, VOID_PTR data, uint32_t len);
 
 // defination of MsprofSetDeviceCallback, see prof_callback.h
-void MsprofSetDeviceCallbackImpl(uint32_t devId, bool isOpenDevice);
+int32_t MsprofSetDeviceCallbackImpl(VOID_PTR data, uint32_t len);
 
 // defination of MsprofReporterCallback, see prof_callback.h
 int32_t MsprofReporterCallbackImpl(uint32_t moduleId, uint32_t type, VOID_PTR data, uint32_t len);
