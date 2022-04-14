@@ -130,6 +130,9 @@ set(msprofilerCpp
     transport/file_transport.cpp
     transport/hdc/hdc_transport.cpp
     transport/hdc/platform/soc/dev_mgr_api.cpp
+    depend/src/driver_plugin.cpp
+    depend/src/mmpa_plugin.cpp
+    depend/src/plugin_manager.cpp
     transport/parser_transport.cpp
     transport/prof_channel.cpp
     transport/transport.cpp
@@ -146,6 +149,7 @@ set(msprofilerInc
     ${TOP_DIR}/collector/dvvp/depend/inc/graphengine/framework/common
     ${TOP_DIR}/collector/dvvp/depend/inc/driver
     ${TOP_DIR}/collector/dvvp/depend/inc/adump
+    ${TOP_DIR}/collector/dvvp/depend/inc/slog
     ${TOP_DIR}/inc/toolchain
     ${TOP_DIR}/inc/external
     ${TOP_DIR}/collector/dvvp/depend/inc/metadef
@@ -210,7 +214,6 @@ set_target_properties(msprofiler_fwk_share
 
 target_compile_definitions(msprofiler_fwk_share PRIVATE
     google=ascend_private
-    $<$<STREQUAL:${CMAKE_BUILD_TYPE},Debug>:MSPROF_DEBUG>
 )
 
 target_compile_options(msprofiler_fwk_share PRIVATE
@@ -223,8 +226,6 @@ target_compile_options(msprofiler_fwk_share PRIVATE
     -fvisibility-inlines-hidden
     -Wfloat-equal
     -Wextra
-    $<$<AND:$<STREQUAL:${TARGET_SYSTEM_NAME},Windows>,$<STREQUAL:${CMAKE_CONFIGURATION_TYPES},Debug>>:/MTd>
-    $<$<AND:$<STREQUAL:${TARGET_SYSTEM_NAME},Windows>,$<STREQUAL:${CMAKE_CONFIGURATION_TYPES},Release>>:/MT>
 )
 
 target_link_options(msprofiler_fwk_share PRIVATE

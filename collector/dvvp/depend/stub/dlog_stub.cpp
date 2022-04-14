@@ -1,3 +1,5 @@
+#include "slog.h"
+
 int CheckLogLevel(int moduleId, int logLevel) { return 0;}
 void DlogErrorInner(int moduleId, const char *fmt, ...) {}
 void DlogWarnInner(int moduleId, const char *fmt, ...) {}
