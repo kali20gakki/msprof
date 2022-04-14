@@ -8,7 +8,7 @@ INT32 MmpaPlugin::MsprofMmOpen2(const CHAR *pathName, INT32 flags, MODE mode)
 {
     Status ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginManager_.HasLoad()) {
-        ret = pluginManager_.OpenPlugin(soName_);
+        ret = pluginManager_.OpenPlugin("LD_LIBRARY_PATH");;
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
@@ -25,7 +25,7 @@ mmSsize_t MmpaPlugin::MsprofMmRead(INT32 fd, VOID *buf, UINT32 bufLen)
 {
     Status ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginManager_.HasLoad()) {
-        ret = pluginManager_.OpenPlugin(soName_);
+        ret = pluginManager_.OpenPlugin("LD_LIBRARY_PATH");
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
@@ -42,7 +42,7 @@ INT32 MmpaPlugin::MsprofMmClose(INT32 fd)
 {
     Status ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginManager_.HasLoad()) {
-        ret = pluginManager_.OpenPlugin(soName_);
+        ret = pluginManager_.OpenPlugin("LD_LIBRARY_PATH");
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
@@ -59,7 +59,7 @@ CHAR *MmpaPlugin::MsprofMmGetErrorFormatMessage(mmErrorMsg errnum, CHAR *buf, mm
 {
     Status ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginManager_.HasLoad()) {
-        ret = pluginManager_.OpenPlugin(soName_);
+        ret = pluginManager_.OpenPlugin("LD_LIBRARY_PATH");
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return nullptr;
         }
@@ -76,7 +76,7 @@ INT32 MmpaPlugin::MsprofMmGetErrorCode()
 {
     Status ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginManager_.HasLoad()) {
-        ret = pluginManager_.OpenPlugin(soName_);
+        ret = pluginManager_.OpenPlugin("LD_LIBRARY_PATH");
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
@@ -93,7 +93,7 @@ INT32 MmpaPlugin::MsprofMmAccess2(const CHAR *pathName, INT32 mode)
 {
     Status ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginManager_.HasLoad()) {
-        ret = pluginManager_.OpenPlugin(soName_);
+        ret = pluginManager_.OpenPlugin("LD_LIBRARY_PATH");
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
@@ -114,7 +114,7 @@ INT32 MmpaPlugin::MsprofMmGetOptLong(INT32 argc,
 {
     Status ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginManager_.HasLoad()) {
-        ret = pluginManager_.OpenPlugin(soName_);
+        ret = pluginManager_.OpenPlugin("LD_LIBRARY_PATH");
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
@@ -132,7 +132,7 @@ INT32 MmpaPlugin::MsprofMmGetOptInd()
 {
     Status ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginManager_.HasLoad()) {
-        ret = pluginManager_.OpenPlugin(soName_);
+        ret = pluginManager_.OpenPlugin("LD_LIBRARY_PATH");
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
@@ -149,7 +149,7 @@ CHAR *MmpaPlugin::MsprofMmGetOptArg()
 {
     Status ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginManager_.HasLoad()) {
-        ret = pluginManager_.OpenPlugin(soName_);
+        ret = pluginManager_.OpenPlugin("LD_LIBRARY_PATH");
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return nullptr;
         }
@@ -166,7 +166,7 @@ INT32 MmpaPlugin::MsprofMmSleep(UINT32 milliSecond)
 {
     Status ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginManager_.HasLoad()) {
-        ret = pluginManager_.OpenPlugin(soName_);
+        ret = pluginManager_.OpenPlugin("LD_LIBRARY_PATH");
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
@@ -183,7 +183,7 @@ INT32 MmpaPlugin::MsprofMmUnlink(const CHAR *filename)
 {
     Status ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginManager_.HasLoad()) {
-        ret = pluginManager_.OpenPlugin(soName_);
+        ret = pluginManager_.OpenPlugin("LD_LIBRARY_PATH");
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
@@ -200,7 +200,7 @@ INT32 MmpaPlugin::MsprofMmGetTid()
 {
     Status ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginManager_.HasLoad()) {
-        ret = pluginManager_.OpenPlugin(soName_);
+        ret = pluginManager_.OpenPlugin("LD_LIBRARY_PATH");
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
@@ -218,7 +218,7 @@ INT32 MmpaPlugin::MsprofMmGetTimeOfDay(mmTimeval *timeVal, mmTimezone *timeZone)
 {
     Status ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginManager_.HasLoad()) {
-        ret = pluginManager_.OpenPlugin(soName_);
+        ret = pluginManager_.OpenPlugin("LD_LIBRARY_PATH");
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
@@ -236,7 +236,7 @@ mmTimespec MmpaPlugin::MsprofMmGetTickCount()
     mmTimespec rts = {0};
     Status ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginManager_.HasLoad()) {
-        ret = pluginManager_.OpenPlugin(soName_);
+        ret = pluginManager_.OpenPlugin("LD_LIBRARY_PATH");
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return rts;
         }
@@ -253,7 +253,7 @@ INT32 MmpaPlugin::MsprofMmGetFileSize(const CHAR *fileName, ULONGLONG *length)
 {
     Status ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginManager_.HasLoad()) {
-        ret = pluginManager_.OpenPlugin(soName_);
+        ret = pluginManager_.OpenPlugin("LD_LIBRARY_PATH");
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
@@ -270,7 +270,7 @@ INT32 MmpaPlugin::MsprofMmGetDiskFreeSpace(const CHAR *path, mmDiskSize *diskSiz
 {
     Status ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginManager_.HasLoad()) {
-        ret = pluginManager_.OpenPlugin(soName_);
+        ret = pluginManager_.OpenPlugin("LD_LIBRARY_PATH");
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
@@ -287,7 +287,7 @@ INT32 MmpaPlugin::MsprofMmIsDir(const CHAR *fileName)
 {
     Status ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginManager_.HasLoad()) {
-        ret = pluginManager_.OpenPlugin(soName_);
+        ret = pluginManager_.OpenPlugin("LD_LIBRARY_PATH");
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
@@ -304,7 +304,7 @@ INT32 MmpaPlugin::MsprofMmAccess(const CHAR *pathName)
 {
     Status ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginManager_.HasLoad()) {
-        ret = pluginManager_.OpenPlugin(soName_);
+        ret = pluginManager_.OpenPlugin("LD_LIBRARY_PATH");
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
@@ -321,7 +321,7 @@ CHAR *MmpaPlugin::MsprofMmDirName(CHAR *path)
 {
     Status ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginManager_.HasLoad()) {
-        ret = pluginManager_.OpenPlugin(soName_);
+        ret = pluginManager_.OpenPlugin("LD_LIBRARY_PATH");
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return nullptr;
         }
@@ -338,7 +338,7 @@ CHAR *MmpaPlugin::MsprofMmBaseName(CHAR *path)
 {
     Status ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginManager_.HasLoad()) {
-        ret = pluginManager_.OpenPlugin(soName_);
+        ret = pluginManager_.OpenPlugin("LD_LIBRARY_PATH");
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return nullptr;
         }
@@ -355,7 +355,7 @@ INT32 MmpaPlugin::MsprofMmMkdir(const CHAR *pathName, mmMode_t mode)
 {
     Status ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginManager_.HasLoad()) {
-        ret = pluginManager_.OpenPlugin(soName_);
+        ret = pluginManager_.OpenPlugin("LD_LIBRARY_PATH");
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
@@ -372,7 +372,7 @@ INT32 MmpaPlugin::MsprofMmChmod(const CHAR *filename, INT32 mode)
 {
     Status ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginManager_.HasLoad()) {
-        ret = pluginManager_.OpenPlugin(soName_);
+        ret = pluginManager_.OpenPlugin("LD_LIBRARY_PATH");
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
@@ -389,7 +389,7 @@ INT32 MmpaPlugin::MsprofMmScandir(const CHAR *path, mmDirent ***entryList, mmFil
 {
     Status ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginManager_.HasLoad()) {
-        ret = pluginManager_.OpenPlugin(soName_);
+        ret = pluginManager_.OpenPlugin("LD_LIBRARY_PATH");
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
@@ -406,7 +406,7 @@ INT32 MmpaPlugin::MsprofMmRmdir(const CHAR *pathName)
 {
     Status ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginManager_.HasLoad()) {
-        ret = pluginManager_.OpenPlugin(soName_);
+        ret = pluginManager_.OpenPlugin("LD_LIBRARY_PATH");
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
@@ -423,7 +423,7 @@ INT32 MmpaPlugin::MsprofMmRealPath(const CHAR *path, CHAR *realPath, INT32 realP
 {
     Status ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginManager_.HasLoad()) {
-        ret = pluginManager_.OpenPlugin(soName_);
+        ret = pluginManager_.OpenPlugin("LD_LIBRARY_PATH");
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
@@ -440,7 +440,7 @@ INT32 MmpaPlugin::MsprofMmCreateProcess(const CHAR *fileName, const mmArgvEnv *e
 {
     Status ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginManager_.HasLoad()) {
-        ret = pluginManager_.OpenPlugin(soName_);
+        ret = pluginManager_.OpenPlugin("LD_LIBRARY_PATH");
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
@@ -457,7 +457,7 @@ VOID MmpaPlugin::MsprofMmScandirFree(mmDirent **entryList, INT32 count)
 {
     Status ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginManager_.HasLoad()) {
-        ret = pluginManager_.OpenPlugin(soName_);
+        ret = pluginManager_.OpenPlugin("LD_LIBRARY_PATH");
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return;
         }
@@ -474,7 +474,7 @@ INT32 MmpaPlugin::MsprofMmChdir(const CHAR *path)
 {
     Status ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginManager_.HasLoad()) {
-        ret = pluginManager_.OpenPlugin(soName_);
+        ret = pluginManager_.OpenPlugin("LD_LIBRARY_PATH");
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
@@ -491,7 +491,7 @@ INT32 MmpaPlugin::MsprofMmWaitPid(mmProcess pid, INT32 *status, INT32 options)
 {
     Status ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginManager_.HasLoad()) {
-        ret = pluginManager_.OpenPlugin(soName_);
+        ret = pluginManager_.OpenPlugin("LD_LIBRARY_PATH");
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
@@ -508,7 +508,7 @@ INT32 MmpaPlugin::MsprofMmGetMac(mmMacInfo **list, INT32 *count)
 {
     Status ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginManager_.HasLoad()) {
-        ret = pluginManager_.OpenPlugin(soName_);
+        ret = pluginManager_.OpenPlugin("LD_LIBRARY_PATH");
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
@@ -525,7 +525,7 @@ INT32 MmpaPlugin::MsprofMmGetMacFree(mmMacInfo *list, INT32 count)
 {
     Status ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginManager_.HasLoad()) {
-        ret = pluginManager_.OpenPlugin(soName_);
+        ret = pluginManager_.OpenPlugin("LD_LIBRARY_PATH");
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
@@ -542,7 +542,7 @@ INT32 MmpaPlugin::MsprofMmGetLocalTime(mmSystemTime_t *sysTimePtr)
 {
     Status ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginManager_.HasLoad()) {
-        ret = pluginManager_.OpenPlugin(soName_);
+        ret = pluginManager_.OpenPlugin("LD_LIBRARY_PATH");
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
@@ -559,7 +559,7 @@ INT32 MmpaPlugin::MsprofMmGetPid()
 {
     Status ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginManager_.HasLoad()) {
-        ret = pluginManager_.OpenPlugin(soName_);
+        ret = pluginManager_.OpenPlugin("LD_LIBRARY_PATH");
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
@@ -576,7 +576,7 @@ INT32 MmpaPlugin::MsprofMmGetCwd(CHAR *buffer, INT32 maxLen)
 {
     Status ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginManager_.HasLoad()) {
-        ret = pluginManager_.OpenPlugin(soName_);
+        ret = pluginManager_.OpenPlugin("LD_LIBRARY_PATH");
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
@@ -593,7 +593,7 @@ INT32 MmpaPlugin::MsprofMmGetEnv(const CHAR *name, CHAR *value, UINT32 len)
 {
     Status ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginManager_.HasLoad()) {
-        ret = pluginManager_.OpenPlugin(soName_);
+        ret = pluginManager_.OpenPlugin("LD_LIBRARY_PATH");
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
@@ -612,7 +612,7 @@ INT32 MmpaPlugin::MsprofMmCreateTaskWithThreadAttr(mmThread *threadHandle, const
 {
     Status ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginManager_.HasLoad()) {
-        ret = pluginManager_.OpenPlugin(soName_);
+        ret = pluginManager_.OpenPlugin("LD_LIBRARY_PATH");
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
@@ -629,7 +629,7 @@ INT32 MmpaPlugin::MsprofMmJoinTask(mmThread *threadHandle)
 {
     Status ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginManager_.HasLoad()) {
-        ret = pluginManager_.OpenPlugin(soName_);
+        ret = pluginManager_.OpenPlugin("LD_LIBRARY_PATH");
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
@@ -646,7 +646,7 @@ INT32 MmpaPlugin::MsprofMmSetCurrentThreadName(const CHAR* name)
 {
     Status ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginManager_.HasLoad()) {
-        ret = pluginManager_.OpenPlugin(soName_);
+        ret = pluginManager_.OpenPlugin("LD_LIBRARY_PATH");
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
@@ -663,7 +663,7 @@ INT32 MmpaPlugin::MsprofMmStatGet(const CHAR *path, mmStat_t *buffer)
 {
     Status ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginManager_.HasLoad()) {
-        ret = pluginManager_.OpenPlugin(soName_);
+        ret = pluginManager_.OpenPlugin("LD_LIBRARY_PATH");
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
@@ -680,7 +680,7 @@ INT32 MmpaPlugin::MsprofMmGetOsVersion(CHAR* versionInfo, INT32 versionLength)
 {
     Status ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginManager_.HasLoad()) {
-        ret = pluginManager_.OpenPlugin(soName_);
+        ret = pluginManager_.OpenPlugin("LD_LIBRARY_PATH");
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
@@ -697,7 +697,7 @@ INT32 MmpaPlugin::MsprofMmGetOsName(CHAR* name, INT32 nameSize)
 {
     Status ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginManager_.HasLoad()) {
-        ret = pluginManager_.OpenPlugin(soName_);
+        ret = pluginManager_.OpenPlugin("LD_LIBRARY_PATH");
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
@@ -714,7 +714,7 @@ INT32 MmpaPlugin::MsprofMmGetCpuInfo(mmCpuDesc **cpuInfo, INT32 *count)
 {
     Status ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginManager_.HasLoad()) {
-        ret = pluginManager_.OpenPlugin(soName_);
+        ret = pluginManager_.OpenPlugin("LD_LIBRARY_PATH");
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
@@ -731,7 +731,7 @@ INT32 MmpaPlugin::MsprofMmCpuInfoFree(mmCpuDesc *cpuInfo, INT32 count)
 {
     Status ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginManager_.HasLoad()) {
-        ret = pluginManager_.OpenPlugin(soName_);
+        ret = pluginManager_.OpenPlugin("LD_LIBRARY_PATH");
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }

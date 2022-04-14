@@ -2,6 +2,7 @@
 #define PLUGIN_MANAGER_H
 
 #include <string>
+#include <vector>
 #include <functional>
 #include <dlfcn.h>
 #include "msprof_dlog.h"
@@ -24,7 +25,7 @@ public:
     {}
     ~PluginManager() {}
     const std::string GetSoName() const;
-    Status OpenPlugin(const std::string& path);
+    Status OpenPlugin(const std::string envValue);
     void CloseHandle();
     template <typename R, typename... Types>
     Status GetFunction(const std::string& func_name, std::function<R(Types... args)>& func) const
@@ -40,7 +41,9 @@ public:
 
 private:
     std::string RealPath(const std::string &path) const;
-    void TryUnloadSo() noexcept;
+    bool IsValidSo(const std::string soPath) const;
+    std::string GetSoPath(const std::string &envValue) const;
+    void SplitPath(const std::string &mutil_path, std::vector<std::string> &path_vec) const;
     std::string so_name_;
     HandleType handle_;
     bool load_;
