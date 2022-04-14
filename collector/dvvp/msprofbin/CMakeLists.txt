@@ -117,6 +117,7 @@ target_compile_options(msprofbin PRIVATE
 target_compile_definitions(msprofbin PRIVATE
     SECUREC_USING_STD_SECURE_LIB=0
     google=ascend_private
+    LOG_CPP
 )
 
 target_link_options(msprofbin PRIVATE

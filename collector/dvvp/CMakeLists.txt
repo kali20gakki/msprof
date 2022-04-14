@@ -214,6 +214,7 @@ set_target_properties(msprofiler_fwk_share
 
 target_compile_definitions(msprofiler_fwk_share PRIVATE
     google=ascend_private
+    LOG_CPP
 )
 
 target_compile_options(msprofiler_fwk_share PRIVATE
