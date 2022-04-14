@@ -122,7 +122,6 @@ target_compile_definitions(msprofbin PRIVATE
 target_link_options(msprofbin PRIVATE
     -Wl,-Bsymbolic
     -Wl,--exclude-libs=ALL
-    -ldl
 )
 
 target_link_libraries(msprofbin PRIVATE
