@@ -1,3 +1,9 @@
+## download
+```bash
+bash scripts/download_thirdparty.sh
+
+```
+
 ## build-all
 ```bash
 mkdir build_test && cd build_test
