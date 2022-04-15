@@ -97,14 +97,11 @@ target_include_directories(error_manager PRIVATE
 
 target_compile_options(error_manager PRIVATE
     -std=c++11
-    -fPIC
-    -fstack-protector-all
-    -fno-strict-aliasing
+    -Werror
     -fno-common
-    -fvisibility=hidden
-    -fvisibility-inlines-hidden
-    -Wfloat-equal
     -Wextra
+    -Wfloat-equal
+    -D_GLIBCXX_USE_CXX11_ABI=0
 )
 
 # profapi

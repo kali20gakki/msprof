@@ -227,6 +227,7 @@ target_compile_options(msprofiler_fwk_share PRIVATE
     -fvisibility-inlines-hidden
     -Wfloat-equal
     -Wextra
+    -D_GLIBCXX_USE_CXX11_ABI=0
 )
 
 target_link_options(msprofiler_fwk_share PRIVATE
