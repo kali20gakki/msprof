@@ -19,7 +19,7 @@ const Status PLUGIN_LOAD_FAILED = 0xFFFFFFFF;
 class PluginManager {
 public:
     explicit PluginManager(const std::string &name)
-    : so_name_(name),
+    : soName_(name),
       handle_(nullptr),
       load_(false)
     {}
@@ -43,8 +43,9 @@ private:
     std::string RealPath(const std::string &path) const;
     bool IsValidSo(const std::string soPath) const;
     std::string GetSoPath(const std::string &envValue) const;
-    void SplitPath(const std::string &mutil_path, std::vector<std::string> &path_vec) const;
-    std::string so_name_;
+    void SplitPath(const std::string &mutilPath, std::vector<std::string> &patVec) const;
+    void ReadDriverConf(std::vector<std::string> &pathVec) const; // "/etc/ld.so.conf.d/ascend_driver_so.conf"
+    std::string soName_;
     HandleType handle_;
     bool load_;
 };
