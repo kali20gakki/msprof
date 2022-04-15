@@ -1,6 +1,7 @@
 #include "plugin_manager.h"
 #include "config.h"
 #include <cstdlib>
+#include <fstream>
 
 namespace Analysis {
 namespace Dvvp {
@@ -10,7 +11,7 @@ using namespace analysis::dvvp::common::config;
 
 const std::string PluginManager::GetSoName() const
 {
-    return so_name_;
+    return soName_;
 }
 
 std::string PluginManager::RealPath(const std::string &path) const
@@ -57,14 +58,8 @@ void PluginManager::CloseHandle()
         MSPROF_LOGI("[CloseHandle]Do not need to close so.");
         return;
     }
-    if (!dlclose(handle_)) {
-        const char *error = dlerror();
-        if (!error) {
-            MSPROF_LOGE("[CloseHandle]failed to get error msg.");
-            return;
-        }
-        MSPROF_LOGE("[CloseHandle]failed to close [%s]so.msg:[]", so_name_.c_str(), error);
-        return;
+    if (dlclose(handle_) != 0) {
+        MSPROF_LOGE("[CloseHandle]failed to close [%s]so.msg:[]", soName_.c_str(), dlerror());
     }
 }
 
@@ -73,30 +68,53 @@ bool PluginManager::HasLoad()
     return load_;
 }
 
-void PluginManager::SplitPath(const std::string &mutil_path, std::vector<std::string> &path_vec) const
+void PluginManager::SplitPath(const std::string &mutilPath, std::vector<std::string> &pathVec) const
 {
-    const std::string tmp_string = mutil_path + ":";
-    std::string::size_type start_pos = 0U;
-    std::string::size_type cur_pos = tmp_string.find(':', 0U);
-    while (cur_pos != std::string::npos) {
-        const std::string path = tmp_string.substr(start_pos, cur_pos - start_pos);
+    const std::string tmpString = mutilPath + ":";
+    std::string::size_type startPos = 0U;
+    std::string::size_type curPos = tmpString.find(':', 0U);
+    while (curPos != std::string::npos) {
+        const std::string path = tmpString.substr(startPos, curPos - startPos);
         if (!path.empty()) {
-        path_vec.push_back(path);
+        pathVec.push_back(path);
         }
-        start_pos = cur_pos + 1U;
-        cur_pos = tmp_string.find(':', start_pos);
+        startPos = curPos + 1U;
+        curPos = tmpString.find(':', startPos);
     }
+}
+
+void PluginManager::ReadDriverConf(std::vector<std::string> &pathVec) const
+{
+    const char *drvConfPth = "/etc/ld.so.conf.d/ascend_driver_so.conf";
+    if (access(drvConfPth, F_OK) == -1) {
+        MSPROF_LOGI("[ReadDriverConf]ascend_driver_so.conf not exist.");
+        return;
+    }
+    std::fstream drvConfReader(drvConfPth, std::fstream::in);
+    if (!drvConfReader.is_open()) {
+        MSPROF_LOGE("[ReadDriverConf]Fail to read drvConf file.");
+        return;
+    }
+    char path[MAX_PATH_LENGTH] = {0};
+    while (drvConfReader.getline(path, MAX_PATH_LENGTH)) {
+        pathVec.push_back(path);
+    }
+    drvConfReader.close();
 }
 
 std::string PluginManager::GetSoPath(const std::string &envValue) const
 {
-    char path_env[MAX_PATH_LENGTH]{};
+    MSPROF_LOGI("[GetSoPath]envValue:%s", envValue.c_str());
+    char pathEnv[MAX_PATH_LENGTH] = {0};
     const char *env = getenv(envValue.c_str());
-    strncpy(path_env, env, MAX_PATH_LENGTH);
-    std::vector<std::string> path_vec;
-    SplitPath(std::string(path_env), path_vec);
-    for (auto path : path_vec) {
-        std::string ret = path + "/" + so_name_;
+    strncpy(pathEnv, env, MAX_PATH_LENGTH);
+    MSPROF_LOGI("[GetSoPath]pathEnv:%s", pathEnv);
+    std::vector<std::string> pathVec;
+    SplitPath(std::string(pathEnv), pathVec);
+    ReadDriverConf(pathVec);
+    for (auto path : pathVec) {
+        std::string ret = path + "/" + soName_;
+        MSPROF_LOGI("[GetSoPath]so path:%s", ret.c_str());
         if (access(ret.c_str(), F_OK) != -1) {
             return ret;
         }
