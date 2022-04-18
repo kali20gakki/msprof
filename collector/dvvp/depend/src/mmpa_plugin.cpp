@@ -233,7 +233,8 @@ INT32 MmpaPlugin::MsprofMmGetTimeOfDay(mmTimeval *timeVal, mmTimezone *timeZone)
 
 mmTimespec MmpaPlugin::MsprofMmGetTickCount()
 {
-    mmTimespec rts = {0};
+    mmTimespec rts;;
+    memset(&rts, 0, sizeof(mmTimespec));
     Status ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginManager_.HasLoad()) {
         ret = pluginManager_.OpenPlugin("LD_LIBRARY_PATH");
