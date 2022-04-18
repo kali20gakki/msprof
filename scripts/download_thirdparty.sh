@@ -6,12 +6,13 @@ TOP_DIR=${CUR_DIR}/..
 
 OPENSOURCE_DIR=${TOP_DIR}/opensource
 HISI_DIR=${TOP_DIR}/hisi
-GTEST_DIR=${TOP_DIR}/llt/opensource
+LLT_DIR=${TOP_DIR}/llt/opensource
 
 THIRDPARTY_LIST="${OPENSOURCE_DIR}/protobuf    \\
                  ${OPENSOURCE_DIR}/json        \\
-                 ${OPENSOURCE_DIR}/securec       \\
-                 ${GTEST_DIR}/googletest"
+                 ${OPENSOURCE_DIR}/securec     \\
+                 ${LLT_DIR}/googletest         \\
+                 ${LLT_DIR}/mockcpp"
 
 if [ -n "$1" ]; then
     if [ "$1" == "force" ]; then
@@ -28,6 +29,7 @@ git clone ssh://git@codehub-dg-y.huawei.com:2222/OpenSourceCenter/nlohmann/json.
 git clone ssh://git@codehub-dg-y.huawei.com:2222/hwsecurec_group/huawei_secure_c.git securec -b tag_Huawei_Secure_C_V100R001C01SPC011B003_00001
 
 ###################################### gtest下载 #####################################
-# 下载 gtest
-cd ${GTEST_DIR}
+# 下载 gtest和mockcpp
+cd ${LLT_DIR}
 git clone ssh://git@codehub-dg-y.huawei.com:2222/OpenSourceCenter/googletest.git googletest -b release-1.8.1
+git clone ssh://git@codehub-dg-y.huawei.com:2222/OpenSourceCenter/sinojelly/mockcpp.git -b master

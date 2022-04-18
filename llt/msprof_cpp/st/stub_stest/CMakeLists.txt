@@ -2,7 +2,7 @@
 add_executable(stub_file_stest
     ${MSPROF_SOURCE_DIR}/dvvp/adx/wrapper/hdc_api.cpp  
     ${MSPROF_SOURCE_DIR}/dvvp/adx/wrapper/memory_utils.cpp
-    ${MSPROF_SOURCE_DIR}/dvvp/depend/wrapper/error_manager/msprof_error_manager.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/stub/error_manager/msprof_error_manager.cpp
     test/main.cpp
     test/hdc_api_stest.cpp
     test/msprof_err_mgr_stest.cpp
