@@ -16,18 +16,18 @@ mark_as_advanced(ASCEND_PROTOBUF_STATIC_LIBRARY)
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(ascend_protobuf_static
-    REQUIRED_VARS ASCEND_PROTOBUF_STATIC_INCLUDE ASCEND_PROTOBUF_STATIC_LIBRARY
-)
+        REQUIRED_VARS ASCEND_PROTOBUF_STATIC_INCLUDE ASCEND_PROTOBUF_STATIC_LIBRARY
+    )
 
-if(ascend_protobuf_static_FOUND)
-    set(ASCEND_PROTOBUF_STATIC_INCLUDE_DIR ${ASCEND_PROTOBUF_STATIC_INCLUDE})
-    set(ASCEND_PROTOBUF_STATIC_LIBRARY_DIR ${ASCEND_PROTOBUF_STATIC_DIR}/lib)
-
-    if(NOT TARGET ascend_protobuf_static)
-        add_library(ascend_protobuf_static STATIC IMPORTED)
-        set_target_properties(ascend_protobuf_static PROPERTIES
-            INTERFACE_INCLUDE_DIRECTORIES "${ASCEND_PROTOBUF_STATIC_INCLUDE}"
-            IMPORTED_LOCATION             "${ASCEND_PROTOBUF_STATIC_LIBRARY}"
-            )
+    if(ascend_protobuf_static_FOUND)
+        set(ASCEND_PROTOBUF_STATIC_INCLUDE_DIR ${ASCEND_PROTOBUF_STATIC_INCLUDE})
+        set(ASCEND_PROTOBUF_STATIC_LIBRARY_DIR ${ASCEND_PROTOBUF_STATIC_DIR}/lib)
+    
+        if(NOT TARGET ascend_protobuf_static)
+            add_library(ascend_protobuf_static STATIC IMPORTED)
+            set_target_properties(ascend_protobuf_static PROPERTIES
+                INTERFACE_INCLUDE_DIRECTORIES "${ASCEND_PROTOBUF_STATIC_INCLUDE}"
+                IMPORTED_LOCATION             "${ASCEND_PROTOBUF_STATIC_LIBRARY}"
+                )
+        endif()
     endif()
-endif()
