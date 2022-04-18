@@ -34,9 +34,6 @@ add_executable(
 )
 
 target_include_directories(application_utest PRIVATE
-    # ${TOP_DIR}/opensource/securec/include
-    # 
-    # ${MSPROF_SOURCE_DIR}/dvvp/depend/adump
     ${GTEST_INCLUDE_DIR}
     ${MOCKCPP_INCLUDE_DIR}
     ${TOP_DIR}/opensource/securec/include
