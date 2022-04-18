@@ -104,7 +104,6 @@ function(run_llt_test)
     if((NOT DEFINED ${PACKAGE}_ENV_FILE) OR (${PACKAGE}_ENV_FILE STREQUAL ""))
         set(${PACKAGE}_ENV_FILE \"\")
     endif()
-
         add_custom_command(
             OUTPUT ${CMAKE_INSTALL_PREFIX}/${${PACKAGE}_TARGET}.timestamp
             COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_INSTALL_PREFIX}/${PACKAGE}_report
