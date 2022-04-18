@@ -9,7 +9,37 @@ set -e
 CUR_DIR=$(dirname $(readlink -f "$0"))
 TOP_DIR=$(readlink -f "$CUR_DIR/../../..")
 
-source ${TOP_DIR}/vendor/hisi/build/scripts/common_log/comm_log.sh
+log()
+{
+    info=$1
+
+	timestr=`date '+%Y-%m-%d %H:%M:%S.%N '|cut -b 1-23`
+        echo "[${timestr}]""${info}"
+   
+    return 0
+}
+
+log_error()
+{
+	info="$1"
+	log "[ERROR] ${info}"
+	return 0
+}
+
+
+log_warning()
+{
+        info="$1"
+        log "[WARNING] ${info}"
+        return 0
+}
+
+log_info()
+{
+        info="$1"
+        log "[INFO] ${info}"
+        return 0
+}
 
 LLT_REPORT_OUT="$1"
 LLT_NAME="$2"

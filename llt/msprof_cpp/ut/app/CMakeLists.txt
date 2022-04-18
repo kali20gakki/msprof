@@ -87,7 +87,7 @@ target_compile_definitions(application_utest PRIVATE
 )
 
 target_link_libraries(application_utest PRIVATE
-    ascend_protobuf_shared
+    ascend_protobuf_static
     c_sec
     pthread
     ${GTEST_STATIC_LIBRARY}

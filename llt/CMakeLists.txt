@@ -20,6 +20,7 @@ ExternalProject_Add(msprof_llt
     SOURCE_DIR ${TOP_DIR}/llt/msprof_cpp
     CONFIGURE_COMMAND ${CMAKE_COMMAND}
                 -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+                -DPACKAGE=${PACKAGE}
                 <SOURCE_DIR>
     BUILD_COMMAND $(MAKE)
     DEPENDS protoc_build ascend_protobuf_shared_build ascend_protobuf_static_build gtest_build mockcpp_build
