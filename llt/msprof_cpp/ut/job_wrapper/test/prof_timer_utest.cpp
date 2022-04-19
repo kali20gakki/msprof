@@ -35,13 +35,17 @@ public:
 
     HDC_SESSION session = (HDC_SESSION)0x12345678;
     std::shared_ptr<analysis::dvvp::transport::Uploader> upLoader;
+    MockObject<analysis::dvvp::common::memory::Chunk>mockerChunk;
+    MockObject<Analysis::Dvvp::JobWrapper::ProcStatFileHandler>mockerProcStatFileHandler;
+    MockObject<Analysis::Dvvp::JobWrapper::ProcTimerHandler>mockerProcTimerHandler;
+    MockObject<analysis::dvvp::transport::Uploader>mockerUploader;
 };
 
 /////////////////////////////////////////////////////////////
 TEST_F(PROF_STAT_FILE_HANDLER_TEST, Init) {
     GlobalMockObject::verify();
 
-    MOCKER_CPP(&analysis::dvvp::common::memory::Chunk::Init)
+    MOCK_METHOD(mockerChunk, Init)
         .stubs()
         .will(returnValue(false))
         .then(returnValue(true));
@@ -93,13 +97,13 @@ TEST_F(PROF_STAT_FILE_HANDLER_TEST, Execute) {
     EXPECT_EQ(PROFILING_SUCCESS, statHandler.Execute());
     //srcFileName is empty
     statHandler.srcFileName_ = "";
-    MOCKER_CPP_VIRTUAL(&statHandler, &Analysis::Dvvp::JobWrapper::ProcStatFileHandler::ParseProcFile)
+    MOCK_METHOD(mockerProcStatFileHandler, ParseProcFile)
         .stubs();
-    MOCKER_CPP(&Analysis::Dvvp::JobWrapper::ProcTimerHandler::StoreData)
+    MOCK_METHOD(mockerProcTimerHandler, StoreData)
         .stubs();
     EXPECT_EQ(PROFILING_SUCCESS, statHandler.Execute());
     //succ
-    MOCKER_CPP(&Analysis::Dvvp::JobWrapper::ProcTimerHandler::PacketData)
+    MOCK_METHOD(mockerProcTimerHandler, PacketData)
         .stubs();
     statHandler.srcFileName_ = "./test";
     EXPECT_EQ(PROFILING_SUCCESS, statHandler.Execute());
@@ -108,7 +112,7 @@ TEST_F(PROF_STAT_FILE_HANDLER_TEST, Execute) {
 TEST_F(PROF_STAT_FILE_HANDLER_TEST, PacketData) {
     GlobalMockObject::verify();
 
-    MOCKER_CPP(&analysis::dvvp::common::memory::Chunk::Init)
+    MOCK_METHOD(mockerChunk, Init)
         .stubs()
         .will(returnValue(false))
         .then(returnValue(true));
@@ -131,7 +135,7 @@ TEST_F(PROF_STAT_FILE_HANDLER_TEST, PacketData) {
 TEST_F(PROF_STAT_FILE_HANDLER_TEST, SendData) {
     GlobalMockObject::verify();
 
-    MOCKER_CPP(&analysis::dvvp::common::memory::Chunk::Init)
+    MOCK_METHOD(mockerChunk, Init)
         .stubs()
         .will(returnValue(false))
         .then(returnValue(true));
@@ -141,7 +145,7 @@ TEST_F(PROF_STAT_FILE_HANDLER_TEST, SendData) {
     EXPECT_EQ(PROFILING_FAILED, statHandler.Init());
     EXPECT_EQ(PROFILING_SUCCESS, statHandler.Init());
 
-    MOCKER_CPP(&analysis::dvvp::transport::Uploader::UploadData)
+    MOCK_METHOD(mockerUploader, UploadData)
         .stubs()
         .will(returnValue(0));
 
@@ -154,7 +158,7 @@ TEST_F(PROF_STAT_FILE_HANDLER_TEST, SendData) {
 TEST_F(PROF_STAT_FILE_HANDLER_TEST, FlushBuf) {
     GlobalMockObject::verify();
 
-    MOCKER_CPP(&analysis::dvvp::common::memory::Chunk::Init)
+    MOCK_METHOD(mockerChunk, Init)
         .stubs()
         .will(returnValue(false))
         .then(returnValue(true));
@@ -164,7 +168,7 @@ TEST_F(PROF_STAT_FILE_HANDLER_TEST, FlushBuf) {
     EXPECT_EQ(PROFILING_FAILED, statHandler.Init());
     EXPECT_EQ(PROFILING_SUCCESS, statHandler.Init());
 
-    MOCKER_CPP(&Analysis::Dvvp::JobWrapper::ProcTimerHandler::SendData)
+    MOCK_METHOD(mockerProcTimerHandler, SendData)
         .stubs();
     statHandler.buf_.usedSize_ = 1;
     statHandler.isInited_ = true;
@@ -179,9 +183,9 @@ TEST_F(PROF_STAT_FILE_HANDLER_TEST, StoreData) {
     ProcStatFileHandler statHandler(PROF_SYS_STAT, devId, bufSize,
             sampleIntervalMs, srcFileName, retFileName, param, jobCtx, upLoader);
 
-    MOCKER_CPP(&Analysis::Dvvp::JobWrapper::ProcTimerHandler::SendData)
+    MOCK_METHOD(mockerProcTimerHandler, SendData)
         .stubs();
-    MOCKER_CPP(&Analysis::Dvvp::JobWrapper::ProcTimerHandler::FlushBuf)
+    MOCK_METHOD(mockerProcTimerHandler, FlushBuf)
         .stubs();
     MOCKER(memcpy_s)
         .stubs()
@@ -211,7 +215,7 @@ TEST_F(PROF_STAT_FILE_HANDLER_TEST, StoreData) {
 TEST_F(PROF_STAT_FILE_HANDLER_TEST, ParseProcFile) {
     GlobalMockObject::verify();
 
-    MOCKER_CPP(&analysis::dvvp::common::memory::Chunk::Init)
+    MOCK_METHOD(mockerChunk, Init)
         .stubs()
         .will(returnValue(false))
         .then(returnValue(true));
@@ -258,12 +262,13 @@ public:
     HDC_SESSION session = (HDC_SESSION)0x12345678;
     std::shared_ptr<analysis::dvvp::transport::Uploader> upLoader;
     unsigned int pid = 1;
+    MockObject<analysis::dvvp::common::memory::Chunk>mockerChunk;
 };
 
 TEST_F(PROF_PID_STAT_FILE_HANDLER_TEST, ParseProcFile) {
     GlobalMockObject::verify();
 
-    MOCKER_CPP(&analysis::dvvp::common::memory::Chunk::Init)
+    MOCK_METHOD(mockerChunk, Init)
         .stubs()
         .will(returnValue(false))
         .then(returnValue(true));
@@ -310,12 +315,14 @@ public:
 
     HDC_SESSION session = (HDC_SESSION)0x12345678;
     std::shared_ptr<analysis::dvvp::transport::Uploader> upLoader;
+    MockObject<analysis::dvvp::common::memory::Chunk>mockerChunk;
+    MockObject<Analysis::Dvvp::JobWrapper::ProcTimerHandler>mockerProcTimerHandler;
 };
 
 TEST_F(PROF_HOST_CPU_HANDLER_TEST, ParseProcFile) {
     GlobalMockObject::verify();
 
-    MOCKER_CPP(&analysis::dvvp::common::memory::Chunk::Init)
+    MOCK_METHOD(mockerChunk, Init)
         .stubs()
         .will(returnValue(false))
         .then(returnValue(true));
@@ -343,7 +350,7 @@ TEST_F(PROF_HOST_CPU_HANDLER_TEST, ParseSysTime) {
 TEST_F(PROF_HOST_CPU_HANDLER_TEST, ParseProcTidStat) {
     GlobalMockObject::verify();
 
-    MOCKER_CPP(&Analysis::Dvvp::JobWrapper::ProcTimerHandler::CheckFileSize)
+    MOCK_METHOD(mockerProcTimerHandler, CheckFileSize)
         .stubs()
         .will(returnValue(false))
         .then(returnValue(true));
@@ -381,12 +388,13 @@ public:
 
     HDC_SESSION session = (HDC_SESSION)0x12345678;
     std::shared_ptr<analysis::dvvp::transport::Uploader> upLoader;
+    MockObject<analysis::dvvp::common::memory::Chunk>mockerChunk;
 };
 
 TEST_F(PROF_HOST_MEM_HANDLER_TEST, ParseProcFile) {
     GlobalMockObject::verify();
 
-    MOCKER_CPP(&analysis::dvvp::common::memory::Chunk::Init)
+    MOCK_METHOD(mockerChunk, Init)
         .stubs()
         .will(returnValue(false))
         .then(returnValue(true));
@@ -425,12 +433,13 @@ public:
 
     HDC_SESSION session = (HDC_SESSION)0x12345678;
     std::shared_ptr<analysis::dvvp::transport::Uploader> upLoader;
+    MockObject<analysis::dvvp::common::memory::Chunk>mockerChunk;
 };
 
 TEST_F(PROF_HOST_NETWORK_HANDLER_TEST, ParseProcFile) {
     GlobalMockObject::verify();
 
-    MOCKER_CPP(&analysis::dvvp::common::memory::Chunk::Init)
+    MOCK_METHOD(mockerChunk, Init)
         .stubs()
         .will(returnValue(false))
         .then(returnValue(true));
@@ -469,12 +478,13 @@ public:
 
     HDC_SESSION session = (HDC_SESSION)0x12345678;
     std::shared_ptr<analysis::dvvp::transport::Uploader> upLoader;
+    MockObject<analysis::dvvp::common::memory::Chunk>mockerChunk;
 };
 
 TEST_F(PROF_MEM_FILE_HANDLER_TEST, ParseProcFile) {
     GlobalMockObject::verify();
 
-    MOCKER_CPP(&analysis::dvvp::common::memory::Chunk::Init)
+    MOCK_METHOD(mockerChunk, Init)
         .stubs()
         .will(returnValue(false))
         .then(returnValue(true));
@@ -522,12 +532,13 @@ public:
     HDC_SESSION session = (HDC_SESSION)0x12345678;
     std::shared_ptr<analysis::dvvp::transport::Uploader> upLoader;
     unsigned int pid = 1;
+    MockObject<analysis::dvvp::common::memory::Chunk>mockerChunk;
 };
 
 TEST_F(PROF_PID_MEM_FILE_HANDLER_TEST, ParseProcFile) {
     GlobalMockObject::verify();
 
-    MOCKER_CPP(&analysis::dvvp::common::memory::Chunk::Init)
+    MOCK_METHOD(mockerChunk, Init)
         .stubs()
         .will(returnValue(false))
         .then(returnValue(true));
@@ -571,6 +582,7 @@ public:
 
     HDC_SESSION session = (HDC_SESSION)0x12345678;
     std::shared_ptr<analysis::dvvp::transport::Uploader> upLoader;
+    MockObject<Analysis::Dvvp::JobWrapper::ProcAllPidsFileHandler>mockerProcAllPidsFileHandler;
 };
 
 void fake_get_child_dirs(const std::string &dir, bool is_recur, std::vector<std::string>& pidDirs)
@@ -589,11 +601,11 @@ TEST_F(PROF_ALL_PID_FILE_HANDLER_TEST, Init) {
     MOCKER(analysis::dvvp::common::utils::Utils::GetChildDirs)
         .stubs()
         .will(invoke(fake_get_child_dirs));
-    MOCKER_CPP(&Analysis::Dvvp::JobWrapper::ProcAllPidsFileHandler::GetNewExitPids)
+    MOCK_METHOD(mockerProcAllPidsFileHandler, GetNewExitPids)
         .stubs();
-    MOCKER_CPP(&Analysis::Dvvp::JobWrapper::ProcAllPidsFileHandler::HandleExitPids)
+    MOCK_METHOD(mockerProcAllPidsFileHandler, HandleExitPids)
         .stubs();
-    MOCKER_CPP(&Analysis::Dvvp::JobWrapper::ProcAllPidsFileHandler::HandleNewPids)
+    MOCK_METHOD(mockerProcAllPidsFileHandler, HandleNewPids)
         .stubs();
     //Init
     EXPECT_EQ(PROFILING_SUCCESS, allPidsHandler.Init());
@@ -684,13 +696,13 @@ TEST_F(PROF_TIMER_TEST, Handler) {
 TEST_F(PROF_TIMER_TEST, Start) {
     GlobalMockObject::verify();
 
-    //MOCKER_CPP(&analysis::dvvp::common::thread::Thread::Start)
+    //MOCK_METHOD(&analysis::dvvp::common::thread::Thread::Start)
     //    .stubs()
     //    .will(returnValue(PROFILING_SUCCESS));
     MOCKER(mmCreateTaskWithThreadAttr)
         .stubs()
         .will(returnValue(EN_OK));
-    //MOCKER_CPP(&analysis::dvvp::common::thread::Thread::Stop)
+    //MOCK_METHOD(&analysis::dvvp::common::thread::Thread::Stop)
     //    .stubs()
     //    .will(returnValue(PROFILING_SUCCESS));
     MOCKER(mmJoinTask)

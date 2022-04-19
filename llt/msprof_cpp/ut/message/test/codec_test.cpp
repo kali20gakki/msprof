@@ -11,6 +11,9 @@ protected:
     }
     virtual void TearDown() {
     }
+private:
+    MockObject<google::protobuf::MessageFactory>mockerMessageFactory;
+    MockObject<google::protobuf::Message>mockerMessage;
 };
 
 TEST_F(MESSAGE_CODEC_TEST, CreateMessage) {
@@ -53,7 +56,7 @@ TEST_F(MESSAGE_CODEC_TEST, create_message_GetPrototype_fail) {
     std::shared_ptr<analysis::dvvp::proto::JobStartReq> message(
         new analysis::dvvp::proto::JobStartReq);
 
-    MOCKER_CPP_VIRTUAL(google::protobuf::MessageFactory::generated_factory(), &google::protobuf::MessageFactory::GetPrototype)
+    MOCK_METHOD(mockerMessageFactory, GetPrototype)
         .stubs()
         .will(returnValue((google::protobuf::Message const*)NULL));
 
@@ -166,7 +169,7 @@ TEST_F(MESSAGE_CODEC_TEST, decode_message_ParseFromArray_fail) {
 
     std::string buffer = analysis::dvvp::message::EncodeMessage(enc);
 
-    MOCKER_CPP(&google::protobuf::Message::ParseFromArray)
+    MOCK_METHOD(mockerMessage, ParseFromArray)
         .stubs()
         .will(returnValue(false));
 
