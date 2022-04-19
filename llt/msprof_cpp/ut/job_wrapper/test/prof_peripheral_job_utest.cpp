@@ -49,12 +49,13 @@ protected:
     }
 public:
     std::shared_ptr<Analysis::Dvvp::JobWrapper::CollectionJobCfg> collectionJobCfg_;
+    MockObject<Analysis::Dvvp::Common::Config::ConfigManager>mockerConfigManager;
 };
 
 TEST_F(JOB_WRAPPER_PROF_PERIPHERAL_JOB_TEST, Init) {
     GlobalMockObject::verify();
 
-    MOCKER_CPP(&Analysis::Dvvp::Common::Config::ConfigManager::GetPlatformType)
+    MOCK_METHOD(mockerConfigManager, GetPlatformType)
         .stubs()
         .will(returnValue(Analysis::Dvvp::Common::Config::PlatformType::DC_TYPE));
     auto profPeripheralJob = std::make_shared<Analysis::Dvvp::JobWrapper::ProfPeripheralJob>();
@@ -110,6 +111,7 @@ protected:
     }
 public:
     std::shared_ptr<Analysis::Dvvp::JobWrapper::CollectionJobCfg> collectionJobCfg_;
+    MockObject<ProfChannelManager>mockerProfChannelManager;
 };
 
 TEST_F(JOB_WRAPPER_PROF_DDR_JOB_TEST, Init) {
@@ -137,7 +139,7 @@ TEST_F(JOB_WRAPPER_PROF_DDR_JOB_TEST, Process) {
     auto proDdrJob = std::make_shared<Analysis::Dvvp::JobWrapper::ProfDdrJob>();
     proDdrJob->Init(collectionJobCfg_);
     auto poller = std::make_shared<analysis::dvvp::transport::ChannelPoll>();
-    MOCKER_CPP(&ProfChannelManager::GetChannelPoller)
+    MOCK_METHOD(mockerProfChannelManager, GetChannelPoller)
         .stubs()
         .will(returnValue(poller));
     EXPECT_EQ(PROFILING_SUCCESS, proDdrJob->Process());
@@ -176,7 +178,7 @@ TEST_F(JOB_WRAPPER_PROF_DDR_JOB_TEST, AddReader) {
     analysis::dvvp::driver::AI_DRV_CHANNEL channel_id = analysis::dvvp::driver::PROF_CHANNEL_AI_CORE;
     std::string file_path = "test";
     proDdrJob->Init(collectionJobCfg_);
-    MOCKER_CPP(&ProfChannelManager::GetChannelPoller)
+    MOCK_METHOD(mockerProfChannelManager, GetChannelPoller)
         .stubs()
         .will(returnValue(poller));
     proDdrJob->AddReader("jobId", dev_id, channel_id, file_path);
@@ -187,7 +189,7 @@ TEST_F(JOB_WRAPPER_PROF_DDR_JOB_TEST, Uninit) {
 
     auto proDdrJob = std::make_shared<Analysis::Dvvp::JobWrapper::ProfDdrJob>();
     auto poller = std::make_shared<analysis::dvvp::transport::ChannelPoll>();
-    MOCKER_CPP(&ProfChannelManager::GetChannelPoller)
+    MOCK_METHOD(mockerProfChannelManager, GetChannelPoller)
         .stubs()
         .will(returnValue(poller));
     proDdrJob->Init(collectionJobCfg_);
@@ -275,11 +277,15 @@ protected:
     }
 public:
     std::shared_ptr<Analysis::Dvvp::JobWrapper::CollectionJobCfg> collectionJobCfg_;
+    MockObject<Analysis::Dvvp::Common::Platform::Platform>mockerPlatform;
+    MockObject<Analysis::Dvvp::Common::Config::ConfigManager>mockerConfigManager;
+    MockObject<analysis::dvvp::transport::Uploader>mockerUploader;
+    
 };
 
 TEST_F(JOB_WRAPPER_PROF_LLC_JOB_TEST, Init) {
     GlobalMockObject::verify();
-    MOCKER_CPP(&Analysis::Dvvp::Common::Platform::Platform::RunSocSide)
+    MOCK_METHOD(mockerPlatform, RunSocSide)
         .stubs()
         .will(returnValue(true));
 
@@ -299,7 +305,7 @@ TEST_F(JOB_WRAPPER_PROF_LLC_JOB_TEST, Init) {
 
 TEST_F(JOB_WRAPPER_PROF_LLC_JOB_TEST, IsGlobalJobLevel) {
     GlobalMockObject::verify();
-    MOCKER_CPP(&Analysis::Dvvp::Common::Config::ConfigManager::GetPlatformType)
+    MOCK_METHOD(mockerConfigManager, GetPlatformType)
         .stubs()
         .will(returnValue(Analysis::Dvvp::Common::Config::PlatformType::DC_TYPE))
         .then(returnValue(Analysis::Dvvp::Common::Config::PlatformType::MINI_TYPE));
@@ -320,7 +326,7 @@ TEST_F(JOB_WRAPPER_PROF_LLC_JOB_TEST, SendData) {
     collectionJobCfg_->comParams->params->llc_profiling = "on";
     profLlcJob->collectionJobCfg_ = collectionJobCfg_;
     profLlcJob->collectionJobCfg_->jobParams.dataPath = "./llc.data";
-    MOCKER_CPP(&analysis::dvvp::transport::Uploader::UploadData)
+    MOCK_METHOD(mockerUploader, UploadData)
         .stubs()
         .will(returnValue(PROFILING_SUCCESS));
     profLlcJob->SendData();
@@ -336,7 +342,7 @@ TEST_F(JOB_WRAPPER_PROF_LLC_JOB_TEST, SendData) {
 
 TEST_F(JOB_WRAPPER_PROF_LLC_JOB_TEST, Process) {
     GlobalMockObject::verify();
-    MOCKER_CPP(&Analysis::Dvvp::Common::Config::ConfigManager::GetPlatformType)
+    MOCK_METHOD(mockerConfigManager, GetPlatformType)
         .stubs()
         .will(returnValue(Analysis::Dvvp::Common::Config::PlatformType::DC_TYPE))
         .then(returnValue(Analysis::Dvvp::Common::Config::PlatformType::MINI_TYPE));
@@ -374,7 +380,7 @@ TEST_F(JOB_WRAPPER_PROF_LLC_JOB_TEST, SetPeripheralConfig) {
 }
 TEST_F(JOB_WRAPPER_PROF_LLC_JOB_TEST, Uninit) {
     GlobalMockObject::verify();
-    MOCKER_CPP(&Analysis::Dvvp::Common::Config::ConfigManager::GetPlatformType)
+    MOCK_METHOD(mockerConfigManager, GetPlatformType)
         .stubs()
         .will(returnValue(Analysis::Dvvp::Common::Config::PlatformType::DC_TYPE))
         .then(returnValue(Analysis::Dvvp::Common::Config::PlatformType::MINI_TYPE));
@@ -598,16 +604,18 @@ protected:
     }
 public:
     std::shared_ptr<Analysis::Dvvp::JobWrapper::CollectionJobCfg> collectionJobCfg_;
+    MockObject<Analysis::Dvvp::Common::Config::ConfigManager>mockerConfigManager;
+    MockObject<analysis::dvvp::driver::DrvChannelsMgr>mockerDrvChannelsMgr;
 };
 
 TEST_F(JOB_WRAPPER_PROF_DVPP_JOB_TEST, Init) {
     GlobalMockObject::verify();
 
-    MOCKER_CPP(&Analysis::Dvvp::Common::Config::ConfigManager::GetPlatformType)
+    MOCK_METHOD(mockerConfigManager, GetPlatformType)
         .stubs()
         .will(returnValue(Analysis::Dvvp::Common::Config::PlatformType::DC_TYPE));
 
-    MOCKER_CPP(&analysis::dvvp::driver::DrvChannelsMgr::ChannelIsValid)
+    MOCK_METHOD(mockerDrvChannelsMgr, ChannelIsValid)
         .stubs()
         .will(returnValue(true));
 
@@ -630,15 +638,15 @@ TEST_F(JOB_WRAPPER_PROF_DVPP_JOB_TEST, Init) {
 TEST_F(JOB_WRAPPER_PROF_DVPP_JOB_TEST, Process) {
     GlobalMockObject::verify();
 
-     MOCKER_CPP(&Analysis::Dvvp::Common::Config::ConfigManager::GetPlatformType)
+     MOCK_METHOD(mockerConfigManager, GetPlatformType)
         .stubs()
         .will(returnValue(Analysis::Dvvp::Common::Config::PlatformType::DC_TYPE));
 
-    MOCKER_CPP(&analysis::dvvp::driver::DrvChannelsMgr::ChannelIsValid)
+    MOCK_METHOD(mockerDrvChannelsMgr, ChannelIsValid)
         .stubs()
         .will(returnValue(true));
 
-    //MOCKER_CPP(&Analysis::Dvvp::JobWrapper::ProfPeripheralJob::SetPeripheralConfig)
+    //MOCK_METHOD(&Analysis::Dvvp::JobWrapper::ProfPeripheralJob::SetPeripheralConfig)
     //    .stubs()
     //    .will(returnValue(PROFILING_FAILED))
     //    .then(returnValue(PROFILING_SUCCESS));
@@ -657,11 +665,11 @@ TEST_F(JOB_WRAPPER_PROF_DVPP_JOB_TEST, Process) {
 TEST_F(JOB_WRAPPER_PROF_DVPP_JOB_TEST, Uninit) {
     GlobalMockObject::verify();
 
-    MOCKER_CPP(&Analysis::Dvvp::Common::Config::ConfigManager::GetPlatformType)
+    MOCK_METHOD(mockerConfigManager, GetPlatformType)
         .stubs()
         .will(returnValue(Analysis::Dvvp::Common::Config::PlatformType::DC_TYPE));
 
-    MOCKER_CPP(&analysis::dvvp::driver::DrvChannelsMgr::ChannelIsValid)
+    MOCK_METHOD(mockerDrvChannelsMgr, ChannelIsValid)
         .stubs()
         .will(returnValue(true));
     auto proJob = std::make_shared<Analysis::Dvvp::JobWrapper::ProfDvppJob>();

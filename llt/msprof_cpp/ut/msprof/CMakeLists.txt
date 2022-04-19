@@ -95,14 +95,21 @@ add_executable(
 )
 
 target_include_directories(msprofiler_utest PRIVATE
+	${GTEST_INCLUDE_DIR}
+	${MOCKCPP_INCLUDE_DIR}
+	${TOP_DIR}/opensource/securec/include
+	${TOP_DIR}/opensource/json/include
+	${MSPROF_SOURCE_DIR}/dvvp/depend/inc/slog
+	${MSPROF_SOURCE_DIR}/dvvp/depend/inc/metadef/error_manager/error_manager_stub
+	${MSPROF_SOURCE_DIR}/dvvp/depend/inc/driver
+	${MSPROF_SOURCE_DIR}/dvvp/depend/inc/adump
+	${MSPROF_SOURCE_DIR}/dvvp/depend/inc/mmpa
+	${MSPROF_SOURCE_DIR}/dvvp/depend/inc/plugin
+	${MSPROF_SOURCE_DIR}/dvvp/depend/inc
+	${MSPROF_SOURCE_DIR}/../inc
     ${MSPROF_SOURCE_DIR}/dvvp/msprof/engine/include
     ${MSPROF_SOURCE_DIR}/dvvp/common/utils 
-    ${TOP_DIR}/abl/msprof/inc/toolchain
 	../stub/
-	${TOP_DIR}/llt/abl/msprof/msprof_cpp/st/stub 
-	${TOP_DIR}/abl/libc_sec/include
-	${TOP_DIR}/open_source/json/include
-    ${TOP_DIR}/metadef/inc
 	${MSPROF_SOURCE_DIR}/dvvp/analyze/inc
 	${MSPROF_SOURCE_DIR}/dvvp/msprof/engine/include
 	${MSPROF_SOURCE_DIR}/dvvp/msprof/common/include
@@ -129,14 +136,6 @@ target_include_directories(msprofiler_utest PRIVATE
 	${MSPROF_SOURCE_DIR}/dvvp/driver/inc
 	${MSPROF_SOURCE_DIR}/dvvp/job_wrapper/include
 	${MSPROF_SOURCE_DIR}/dvvp/adx/inc	
-	${TOP_DIR}/graphengine/inc/external
-	#${TOP_DIR}/graphengine/inc/framework/common
-	${TOP_DIR}/inc
-	${TOP_DIR}/inc/driver
-	${TOP_DIR}/inc/external
-	${TOP_DIR}/inc/external/acl
-	${TOP_DIR}/ace/npuruntime/inc
-	${TOP_DIR}/abl/msprof/inc
 	${MSPROF_SOURCE_DIR}/dvvp/msprofiler/inc
     ${CMAKE_BINARY_DIR}/proto/profiler/
 	${MSPROF_SOURCE_DIR}/dvvp/depend/include/stub
@@ -151,6 +150,7 @@ target_compile_options(msprofiler_utest PRIVATE
     -fno-access-control
     -Wfloat-equal
     -Wextra
+	-D_GLIBCXX_USE_CXX11_ABI=0
 )
 
 target_compile_definitions(msprofiler_utest PRIVATE
@@ -160,13 +160,12 @@ target_compile_definitions(msprofiler_utest PRIVATE
 )
 
 target_link_libraries(msprofiler_utest PRIVATE
-    $<BUILD_INTERFACE:intf_llt_pub>
-    $<BUILD_INTERFACE:mmpa_headers>
-    $<BUILD_INTERFACE:slog_headers>
-    $<BUILD_INTERFACE:adump_headers>
-    $<BUILD_INTERFACE:msprof_headers>
-    ascend_protobuf
-    c_sec
+	ascend_protobuf_static
+	c_sec
+	pthread
+	${GTEST_STATIC_LIBRARY}
+	${MOCKCPP_STATIC_LIBRARY}
+	dl
 )
 
 set_target_properties(msprofiler_utest
