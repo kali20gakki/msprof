@@ -1,6 +1,6 @@
 # add_subdirectory(app)
-add_subdirectory(common)
-# add_subdirectory(device)
+# add_subdirectory(common)
+add_subdirectory(device)
 # add_subdirectory(driver)
 # add_subdirectory(job_wrapper)
 # add_subdirectory(message)

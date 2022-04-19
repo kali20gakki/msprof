@@ -21,6 +21,9 @@ protected:
     }
 public:
     std::shared_ptr<analysis::dvvp::transport::HDCTransport> _transport;
+    MockObject<analysis::dvvp::device::TaskManager>mockerTaskManager;
+    MockObject<analysis::dvvp::device::ProfJobHandler>mockerProfJobHandler;
+    
 };
 
 TEST_F(TASK_MGR_TEST, Init) {
@@ -36,7 +39,7 @@ TEST_F(TASK_MGR_TEST, init1) {
 
 TEST_F(TASK_MGR_TEST, Uninit) {
 
-    MOCKER_CPP(&analysis::dvvp::device::TaskManager::ClearTask)
+    MOCK_METHOD(mockerTaskManager, ClearTask)
         .stubs();
 
     auto taskMgr = analysis::dvvp::device::TaskManager::instance();
@@ -50,7 +53,7 @@ TEST_F(TASK_MGR_TEST, ClearTask) {
     
     EXPECT_EQ(PROFILING_SUCCESS, taskMgr->Init());
     auto task = taskMgr->CreateTask(0, "0x123456789", _transport);
-    MOCKER_CPP_VIRTUAL(task.get(), &analysis::dvvp::device::ProfJobHandler::OnConnectionReset)
+    MOCK_METHOD(mockerProfJobHandler, OnConnectionReset)
         .stubs()
         .will(returnValue(PROFILING_SUCCESS));
     
@@ -63,7 +66,7 @@ TEST_F(TASK_MGR_TEST, ConnectionReset) {
     
     EXPECT_EQ(PROFILING_SUCCESS, taskMgr->Init());
     auto task = taskMgr->CreateTask(0, "0x123456789", _transport);
-    MOCKER_CPP_VIRTUAL(task.get(), &analysis::dvvp::device::ProfJobHandler::OnConnectionReset)
+    MOCK_METHOD(mockerProfJobHandler, OnConnectionReset)
         .stubs()
         .will(returnValue(PROFILING_SUCCESS));
     
@@ -81,7 +84,7 @@ TEST_F(TASK_MGR_TEST, CreateTask) {
     EXPECT_TRUE(task == nullptr);
 
     //task init failed
-    MOCKER_CPP(&analysis::dvvp::device::ProfJobHandler::Init)
+    MOCK_METHOD(mockerProfJobHandler, Init)
         .stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
@@ -113,7 +116,7 @@ TEST_F(TASK_MGR_TEST, GetTask) {
     EXPECT_TRUE(task == nullptr);
 
     //task init failed
-    MOCKER_CPP(&analysis::dvvp::device::ProfJobHandler::Init)
+    MOCK_METHOD(mockerProfJobHandler, Init)
         .stubs()
         .will(returnValue(PROFILING_SUCCESS));
     
@@ -135,7 +138,7 @@ TEST_F(TASK_MGR_TEST, DeleteTask) {
 
 
     //task init failed
-    MOCKER_CPP(&analysis::dvvp::device::ProfJobHandler::Init)
+    MOCK_METHOD(mockerProfJobHandler, Init)
         .stubs()
         .will(returnValue(PROFILING_SUCCESS));
     

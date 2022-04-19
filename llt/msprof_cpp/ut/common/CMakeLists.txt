@@ -18,6 +18,7 @@ set(profilerSrcFiles
     ${MSPROF_SOURCE_DIR}/dvvp/depend/stub/error_manager/msprof_error_manager_stub.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/depend/src/mmpa_plugin.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/depend/src/plugin_manager.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/src/driver_plugin.cpp
     ${CppPath}
 )
 

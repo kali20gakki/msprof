@@ -18,12 +18,16 @@ protected:
     }
     virtual void TearDown() {
     }
+public:
+    MockObject<analysis::dvvp::device::CollectionEntry>mockerCollectionEntry;
+    MockObject<analysis::dvvp::device::TaskManager>mockerTaskManager;
+    MockObject<analysis::dvvp::transport::HDCTransportFactory>mockerHDCTransportFactory;
 };
 
 TEST_F(DEVICE_PROF_DEVICE_CORE_TEST, IdeDeviceProfileInit) {
     GlobalMockObject::verify();
 
-    MOCKER_CPP(&analysis::dvvp::device::CollectionEntry::Init)
+    MOCK_METHOD(mockerCollectionEntry, Init)
         .stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
@@ -35,12 +39,12 @@ TEST_F(DEVICE_PROF_DEVICE_CORE_TEST, IdeDeviceProfileInit) {
 TEST_F(DEVICE_PROF_DEVICE_CORE_TEST, IdeDeviceProfileCleanup) {
     GlobalMockObject::verify();
 
-    MOCKER_CPP(&analysis::dvvp::device::CollectionEntry::Uinit)
+    MOCK_METHOD(mockerCollectionEntry, Uinit)
         .stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
 
-    MOCKER_CPP(&analysis::dvvp::device::TaskManager::Uninit)
+    MOCK_METHOD(mockerTaskManager, Uninit)
         .stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
@@ -54,8 +58,7 @@ TEST_F(DEVICE_PROF_DEVICE_CORE_TEST, IdeDeviceProfileProcess_hdc_failed) {
 
     std::shared_ptr<analysis::dvvp::transport::AdxTransport> trans;
     trans.reset();
-    MOCKER_CPP(&analysis::dvvp::transport::HDCTransportFactory::CreateHdcTransport,
-            std::shared_ptr<analysis::dvvp::transport::AdxTransport>(analysis::dvvp::transport::HDCTransportFactory::*)(HDC_SESSION session))
+    MOCK_OVERLOAD_METHOD(mockerHDCTransportFactory, std::shared_ptr<analysis::dvvp::transport::AdxTransport>(analysis::dvvp::transport::HDCTransportFactory::*)(HDC_SESSION ), CreateHdcTransport)
         .stubs()
         .will(returnValue(trans));
 
@@ -96,7 +99,7 @@ TEST_F(DEVICE_PROF_DEVICE_CORE_TEST, IdeDeviceProfileProcess) {
         .then(returnValue(true))
         .then(returnValue(true));
 
-    MOCKER_CPP(&analysis::dvvp::device::CollectionEntry::Handle)
+    MOCK_METHOD(mockerCollectionEntry, Handle)
         .stubs()
         .will(returnValue(PROFILING_SUCCESS));
 
@@ -106,8 +109,7 @@ TEST_F(DEVICE_PROF_DEVICE_CORE_TEST, IdeDeviceProfileProcess) {
     std::shared_ptr<analysis::dvvp::transport::AdxTransport> trans;
     trans.reset();
 
-    MOCKER_CPP(&analysis::dvvp::transport::HDCTransportFactory::CreateHdcTransport,
-            std::shared_ptr<analysis::dvvp::transport::AdxTransport>(analysis::dvvp::transport::HDCTransportFactory::*)(HDC_SESSION session))
+    MOCK_OVERLOAD_METHOD(mockerHDCTransportFactory, std::shared_ptr<analysis::dvvp::transport::AdxTransport>(analysis::dvvp::transport::HDCTransportFactory::*)(HDC_SESSION ), CreateHdcTransport)
         .stubs()
         .will(returnValue(trans))
         .then(returnValue(data_tran));
