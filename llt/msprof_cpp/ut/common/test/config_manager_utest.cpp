@@ -7,6 +7,7 @@
 #include <memory>
 #include <fstream>
 #include "gtest/gtest.h"
+#include "gmock/gmock.h"
 #include "mockcpp/mockcpp.hpp"
 #include "config/config_manager.h"
 #include "config/config.h"
@@ -52,7 +53,8 @@ TEST_F(COMMON_CONFIG_MANAGER_TEST, GetPlatformType)
 TEST_F(COMMON_CONFIG_MANAGER_TEST, IsDriverSupportLlc)
 {
     GlobalMockObject::verify();
-    MOCKER_CPP(&Analysis::Dvvp::Common::Config::ConfigManager::GetPlatformType)
+    MockObject<ConfigManager>mocker;
+    MOCK_METHOD(mocker, GetPlatformType)
             .stubs()
             .will(returnValue(PlatformType::CLOUD_TYPE))
             .then(returnValue(PlatformType::MINI_TYPE));
@@ -64,7 +66,8 @@ TEST_F(COMMON_CONFIG_MANAGER_TEST, IsDriverSupportLlc)
 TEST_F(COMMON_CONFIG_MANAGER_TEST, GetL2cacheEvents)
 {
     GlobalMockObject::verify();
-    MOCKER_CPP(&Analysis::Dvvp::Common::Config::ConfigManager::GetPlatformType)
+    MockObject<ConfigManager>mocker;
+    MOCK_METHOD(mocker, GetPlatformType)
             .stubs()
             .will(returnValue(PlatformType::MINI_TYPE))
             .then(returnValue(PlatformType::CLOUD_TYPE));
@@ -84,7 +87,8 @@ TEST_F(COMMON_CONFIG_MANAGER_TEST, MsprofL2CacheAdapter)
     configManger->MsprofL2CacheAdapter(params);
     EXPECT_STREQ("off", params->l2CacheTaskProfiling.c_str());
     GlobalMockObject::verify();
-    MOCKER_CPP(&Analysis::Dvvp::Common::Config::ConfigManager::GetL2cacheEvents)
+    MockObject<ConfigManager>mocker;
+    MOCK_METHOD(mocker, GetL2cacheEvents)
             .stubs()
             .will(returnValue(0))
             .then(returnValue(-1));

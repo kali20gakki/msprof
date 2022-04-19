@@ -19,6 +19,8 @@ class PROF_MSG_HANDLER_TEST: public testing::Test {
 protected:
     virtual void SetUp() {}
     virtual void TearDown() {}
+public:
+    MockObject<analysis::dvvp::device::TaskManager>mockerTaskManager;
 };
 
 TEST_F(PROF_MSG_HANDLER_TEST, CreateResponse_success) {
@@ -87,7 +89,7 @@ TEST_F(PROF_MSG_HANDLER_TEST, JobStartHandler) {
     handler->OnNewMessage(req);
 
     std::shared_ptr<analysis::dvvp::device::ProfJobHandler> job(new analysis::dvvp::device::ProfJobHandler);
-    MOCKER_CPP(&analysis::dvvp::device::TaskManager::CreateTask)
+    MOCK_METHOD(mockerTaskManager, CreateTask)
         .stubs()
         .will(returnValue(job));
     handler->OnNewMessage(req);
@@ -115,7 +117,7 @@ TEST_F(PROF_MSG_HANDLER_TEST, JobStopHandler) {
 
     std::shared_ptr<analysis::dvvp::device::ProfJobHandler> job(new analysis::dvvp::device::ProfJobHandler);
     job->Init(0, "jobId", nullptr);
-    MOCKER_CPP(&analysis::dvvp::device::TaskManager::GetTask)
+    MOCK_METHOD(mockerTaskManager, GetTask)
         .stubs()
         .will(returnValue(job));
     handler->OnNewMessage(req);
@@ -137,7 +139,7 @@ TEST_F(PROF_MSG_HANDLER_TEST, ReplayStartHandler) {
 
     std::shared_ptr<analysis::dvvp::device::ProfJobHandler> job(new analysis::dvvp::device::ProfJobHandler);
     job->Init(0, "jobId", nullptr);
-    MOCKER_CPP(&analysis::dvvp::device::TaskManager::GetTask)
+    MOCK_METHOD(mockerTaskManager, GetTask)
         .stubs()
         .will(returnValue(job));
     handler->OnNewMessage(req);
@@ -160,7 +162,7 @@ TEST_F(PROF_MSG_HANDLER_TEST, ReplayStopHandler) {
 
     std::shared_ptr<analysis::dvvp::device::ProfJobHandler> job(new analysis::dvvp::device::ProfJobHandler);
     job->Init(0, "jobId", nullptr);
-    MOCKER_CPP(&analysis::dvvp::device::TaskManager::GetTask)
+    MOCK_METHOD(mockerTaskManager, GetTask)
         .stubs()
         .will(returnValue(job));
     handler->OnNewMessage(req);

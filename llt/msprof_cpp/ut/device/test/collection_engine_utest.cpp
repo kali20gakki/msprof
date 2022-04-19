@@ -43,6 +43,10 @@ protected:
     }
 public:
     std::shared_ptr<analysis::dvvp::transport::HDCTransport> _transport;
+    MockObject<analysis::dvvp::device::CollectEngine>mockerCollectEngine;
+    MockObject<analysis::dvvp::device::CollectionEntry>mockerCollectionEntry;
+    MockObject<analysis::dvvp::common::validation::ParamValidation>mockerParamValidation;
+    MockObject<analysis::dvvp::transport::Uploader>mockerUploadData;
 };
 
 TEST_F(DEVICE_COLLECTION_ENGINE_TEST, CollectEngine_destructor) {
@@ -87,7 +91,7 @@ TEST_F(DEVICE_COLLECTION_ENGINE_TEST, Uinit) {
     std::shared_ptr<analysis::dvvp::device::CollectEngine> engine(
             new analysis::dvvp::device::CollectEngine());
 
-    MOCKER_CPP(&analysis::dvvp::device::CollectEngine::CollectStop)
+    MOCK_METHOD(mockerCollectEngine, CollectStop)
         .stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
@@ -125,7 +129,7 @@ TEST_F(DEVICE_COLLECTION_ENGINE_TEST, CollectStart) {
     engine->collectionjobComnCfg_->params = std::shared_ptr<analysis::dvvp::message::ProfileParams>(
         new analysis::dvvp::message::ProfileParams());
 
-    MOCKER_CPP(&analysis::dvvp::device::CollectEngine::InitBeforeCollectStart)
+    MOCK_METHOD(mockerCollectEngine, InitBeforeCollectStart)
         .stubs()
         .will(returnValue(PROFILING_SUCCESS));
 
@@ -146,7 +150,7 @@ TEST_F(DEVICE_COLLECTION_ENGINE_TEST, CollectStop) {
     engine->collectionjobComnCfg_->params = std::shared_ptr<analysis::dvvp::message::ProfileParams>(
         new analysis::dvvp::message::ProfileParams());
 
-    MOCKER_CPP(&analysis::dvvp::device::CollectEngine::CollectStopReplay)
+    MOCK_METHOD(mockerCollectEngine, CollectStopReplay)
         .stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
@@ -155,7 +159,7 @@ TEST_F(DEVICE_COLLECTION_ENGINE_TEST, CollectStop) {
         .stubs()
         .will(returnValue(PROFILING_SUCCESS));
 
-    MOCKER_CPP(&analysis::dvvp::device::CollectionEntry::FinishCollection)
+    MOCK_METHOD(mockerCollectionEntry, FinishCollection)
         .stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
@@ -213,7 +217,7 @@ TEST_F(DEVICE_COLLECTION_ENGINE_TEST, CollectStartReplay) {
         .stubs()
         .will(returnValue(PROFILING_SUCCESS));
 
-    /*MOCKER_CPP(&Analysis::Dvvp::JobWrapper::CollectionRegisterMgr::CollectionJobRegisterAndRun)
+    /*MOCK_METHOD(&Analysis::Dvvp::JobWrapper::CollectionRegisterMgr::CollectionJobRegisterAndRun)
         .stubs()
         .will(returnValue(PROFILING_SUCCESS));*/
 
@@ -273,12 +277,12 @@ TEST_F(DEVICE_COLLECTION_ENGINE_TEST, CollectStartReplay) {
             aiv_event,
             aiv_event_cores));
 
-    MOCKER_CPP(&analysis::dvvp::device::CollectEngine::CheckPmuEventIsValid)
+    MOCK_METHOD(mockerCollectEngine, CheckPmuEventIsValid)
         .stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
 
-    MOCKER_CPP(&analysis::dvvp::common::validation::ParamValidation::CheckHbmEventsIsValid)
+    MOCK_METHOD(mockerParamValidation, CheckHbmEventsIsValid)
         .stubs()
         .will(returnValue(false));
     EXPECT_EQ(PROFILING_FAILED, engine->CollectStartReplay(
@@ -341,7 +345,7 @@ TEST_F(DEVICE_COLLECTION_ENGINE_TEST, CollectStopReplay) {
     engine->isAicoreTaskBased_ = true;
     engine->tmpResultDir_ = "./tmp_result_dir";
 
-    //MOCKER_CPP(&analysis::dvvp::common::thread::Thread::Stop)
+    //MOCK_METHOD(&analysis::dvvp::common::thread::Thread::Stop)
     //    .stubs()
     //    .will(returnValue(PROFILING_SUCCESS));
     MOCKER(mmJoinTask)
@@ -474,7 +478,7 @@ TEST_F(DEVICE_COLLECTION_ENGINE_TEST, StoreData) {
     EXPECT_NE(nullptr, engine);
     engine->Init(0);
     engine->collectionjobComnCfg_->params = std::make_shared<analysis::dvvp::message::ProfileParams>();
-    MOCKER_CPP(&analysis::dvvp::transport::Uploader::UploadData)
+    MOCK_METHOD(mockerUploadData, UploadData)
         .stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
@@ -551,35 +555,35 @@ TEST_F(DEVICE_COLLECTION_ENGINE_TEST, CheckPmuEventIsValid) {
     ddr_event->push_back("write");
     ddr_event->push_back("master_id");
 
-    MOCKER_CPP(&analysis::dvvp::common::validation::ParamValidation::CheckCtrlCpuEventIsValid)
+    MOCK_METHOD(mockerParamValidation, CheckCtrlCpuEventIsValid)
         .stubs()
         .will(returnValue(false))
         .then(returnValue(true));
-    MOCKER_CPP(&analysis::dvvp::common::validation::ParamValidation::CheckTsCpuEventIsValid)
+    MOCK_METHOD(mockerParamValidation, CheckTsCpuEventIsValid)
         .stubs()
         .will(returnValue(false))
         .then(returnValue(true));
-    MOCKER_CPP(&analysis::dvvp::common::validation::ParamValidation::CheckAiCoreEventsIsValid)
+    MOCK_METHOD(mockerParamValidation, CheckAiCoreEventsIsValid)
         .stubs()
         .will(returnValue(false))
         .then(returnValue(true));
-    MOCKER_CPP(&analysis::dvvp::common::validation::ParamValidation::CheckAiCoreEventCoresIsValid)
+    MOCK_METHOD(mockerParamValidation, CheckAiCoreEventCoresIsValid)
         .stubs()
         .will(returnValue(false))
         .then(returnValue(true));
-    MOCKER_CPP(&analysis::dvvp::common::validation::ParamValidation::CheckLlcEventsIsValid)
+    MOCK_METHOD(mockerParamValidation, CheckLlcEventsIsValid)
         .stubs()
         .will(returnValue(false))
         .then(returnValue(true));
-    MOCKER_CPP(&analysis::dvvp::common::validation::ParamValidation::CheckDdrEventsIsValid)
+    MOCK_METHOD(mockerParamValidation, CheckDdrEventsIsValid)
         .stubs()
         .will(returnValue(false))
         .then(returnValue(true));
-    MOCKER_CPP(&analysis::dvvp::common::validation::ParamValidation::CheckAivEventsIsValid)
+    MOCK_METHOD(mockerParamValidation, CheckAivEventsIsValid)
         .stubs()
         .will(returnValue(false))
         .then(returnValue(true));
-    MOCKER_CPP(&analysis::dvvp::common::validation::ParamValidation::CheckAivEventCoresIsValid)
+    MOCK_METHOD(mockerParamValidation, CheckAivEventCoresIsValid)
         .stubs()
         .will(returnValue(false))
         .then(returnValue(true));

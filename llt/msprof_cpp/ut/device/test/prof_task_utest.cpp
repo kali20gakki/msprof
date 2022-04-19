@@ -27,6 +27,12 @@ protected:
     }
 public:
     std::shared_ptr<analysis::dvvp::transport::HDCTransport> _transport;
+    MockObject<analysis::dvvp::device::CollectEngine>mockerCollectEngine;
+    MockObject<analysis::dvvp::device::CollectionEntry>mockerCollectionEntry;
+    MockObject<analysis::dvvp::device::ProfJobHandler>mockerProfJobHandler;
+    MockObject<analysis::dvvp::common::validation::ParamValidation>mockerParamValidation;
+    MockObject<analysis::dvvp::transport::ITransport>mockerITransport;
+    
 };
 
 /////////////////////////////////////////////////////////////
@@ -77,12 +83,12 @@ TEST_F(PROF_TASK_TEST, OnJobStart) {
     std::shared_ptr<analysis::dvvp::device::ProfJobHandler> job(
         new analysis::dvvp::device::ProfJobHandler());
 
-    MOCKER_CPP(&analysis::dvvp::device::CollectEngine::Init)
+    MOCK_METHOD(mockerCollectEngine, Init)
         .stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
 
-    MOCKER_CPP(&analysis::dvvp::device::CollectEngine::CollectStart)
+    MOCK_METHOD(mockerCollectEngine, CollectStart)
         .stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
@@ -93,7 +99,7 @@ TEST_F(PROF_TASK_TEST, OnJobStart) {
     std::shared_ptr<analysis::dvvp::device::Receiver> receive_invalid_transport(new analysis::dvvp::device::Receiver(transport_invalid));
     std::shared_ptr<analysis::dvvp::device::Receiver> receive(new analysis::dvvp::device::Receiver(transport));
 
-    MOCKER_CPP(&analysis::dvvp::device::CollectionEntry::GetReceiver)
+    MOCK_METHOD(mockerCollectionEntry, GetReceiver)
         .stubs()
         .will(returnValue(receive_invalid))
         .then(returnValue(receive_invalid_transport))
@@ -138,14 +144,14 @@ TEST_F(PROF_TASK_TEST, OnJobEnd) {
     std::shared_ptr<analysis::dvvp::device::ProfJobHandler> job(
         new analysis::dvvp::device::ProfJobHandler());
 
-    MOCKER_CPP(&analysis::dvvp::device::CollectEngine::CollectStop)
+    MOCK_METHOD(mockerCollectEngine, CollectStop)
         .stubs()
         .will(returnValue(PROFILING_SUCCESS));
-    MOCKER_CPP(&analysis::dvvp::device::CollectEngine::Init)
+    MOCK_METHOD(mockerCollectEngine, Init)
         .stubs()
         .will(returnValue(PROFILING_SUCCESS));
 
-    MOCKER_CPP(&analysis::dvvp::device::CollectEngine::SetDevIdOnHost)
+    MOCK_METHOD(mockerCollectEngine, SetDevIdOnHost)
         .stubs()
         .will(returnValue(PROFILING_SUCCESS));
 
@@ -168,7 +174,7 @@ TEST_F(PROF_TASK_TEST, OnReplayStart) {
     std::shared_ptr<analysis::dvvp::device::ProfJobHandler> job(
         new analysis::dvvp::device::ProfJobHandler());
 
-    MOCKER_CPP(&analysis::dvvp::device::CollectEngine::CollectStartReplay)
+    MOCK_METHOD(mockerCollectEngine, CollectStartReplay)
         .stubs()
         .will(returnValue(PROFILING_SUCCESS))
         .then(returnValue(PROFILING_FAILED));
@@ -194,7 +200,7 @@ TEST_F(PROF_TASK_TEST, OnReplayStart) {
     EXPECT_EQ(PROFILING_FAILED, job->OnReplayStart(req, status_info));
     EXPECT_EQ(PROFILING_FAILED, job->OnReplayStart(req, status_info));
 
-    MOCKER_CPP(&analysis::dvvp::device::ProfJobHandler::CheckEventValid)
+    MOCK_METHOD(mockerProfJobHandler, CheckEventValid)
         .stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
@@ -209,7 +215,7 @@ TEST_F(PROF_TASK_TEST, OnReplayEnd) {
     std::shared_ptr<analysis::dvvp::device::ProfJobHandler> job(
         new analysis::dvvp::device::ProfJobHandler());
 
-    MOCKER_CPP(&analysis::dvvp::device::CollectEngine::CollectStopReplay)
+    MOCK_METHOD(mockerCollectEngine, CollectStopReplay)
         .stubs()
         .will(returnValue(PROFILING_SUCCESS))
         .then(returnValue(PROFILING_FAILED));
@@ -237,7 +243,7 @@ TEST_F(PROF_TASK_TEST, OnConnectionReset) {
     std::shared_ptr<analysis::dvvp::device::ProfJobHandler> job(
         new analysis::dvvp::device::ProfJobHandler());
 
-    MOCKER_CPP(&analysis::dvvp::device::CollectEngine::CollectStop)
+    MOCK_METHOD(mockerCollectEngine, CollectStop)
         .stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
@@ -273,7 +279,7 @@ TEST_F(PROF_TASK_TEST, CheckEventValid_faile1) {
     std::shared_ptr<analysis::dvvp::proto::ReplayStartReq> req(
         new analysis::dvvp::proto::ReplayStartReq);
 
-    MOCKER_CPP(&analysis::dvvp::common::validation::ParamValidation::CheckPmuEventSizeIsValid)
+    MOCK_METHOD(mockerParamValidation, CheckPmuEventSizeIsValid)
         .stubs()
         .will(returnValue(false));
     job->CheckEventValid(req);
@@ -289,7 +295,7 @@ TEST_F(PROF_TASK_TEST, CheckEventValid_faile2) {
     std::shared_ptr<analysis::dvvp::proto::ReplayStartReq> req(
         new analysis::dvvp::proto::ReplayStartReq);
 
-    MOCKER_CPP(&analysis::dvvp::common::validation::ParamValidation::CheckPmuEventSizeIsValid)
+    MOCK_METHOD(mockerParamValidation, CheckPmuEventSizeIsValid)
         .stubs()
         .will(returnValue(true))
         .then(returnValue(false));
@@ -306,7 +312,7 @@ TEST_F(PROF_TASK_TEST, CheckEventValid_faile8) {
     std::shared_ptr<analysis::dvvp::proto::ReplayStartReq> req(
         new analysis::dvvp::proto::ReplayStartReq);
 
-    MOCKER_CPP(&analysis::dvvp::common::validation::ParamValidation::CheckPmuEventSizeIsValid)
+    MOCK_METHOD(mockerParamValidation, CheckPmuEventSizeIsValid)
         .stubs()
         .will(returnValue(true))
         .then(returnValue(true))
@@ -324,7 +330,7 @@ TEST_F(PROF_TASK_TEST, CheckEventValid_faile3) {
     std::shared_ptr<analysis::dvvp::proto::ReplayStartReq> req(
         new analysis::dvvp::proto::ReplayStartReq);
 
-    MOCKER_CPP(&analysis::dvvp::common::validation::ParamValidation::CheckPmuEventSizeIsValid)
+    MOCK_METHOD(mockerParamValidation, CheckPmuEventSizeIsValid)
         .stubs()
         .will(returnValue(true))
         .then(returnValue(true))
@@ -343,13 +349,13 @@ TEST_F(PROF_TASK_TEST, CheckEventValid_faile4) {
     std::shared_ptr<analysis::dvvp::proto::ReplayStartReq> req(
         new analysis::dvvp::proto::ReplayStartReq);
 
-    MOCKER_CPP(&analysis::dvvp::common::validation::ParamValidation::CheckPmuEventSizeIsValid)
+    MOCK_METHOD(mockerParamValidation, CheckPmuEventSizeIsValid)
         .stubs()
         .will(returnValue(true))
         .then(returnValue(true))
         .then(returnValue(true))
         .then(returnValue(true));
-    MOCKER_CPP(&analysis::dvvp::common::validation::ParamValidation::CheckCoreIdSizeIsValid)
+    MOCK_METHOD(mockerParamValidation, CheckCoreIdSizeIsValid)
         .stubs()
         .will(returnValue(false));
     job->CheckEventValid(req);
@@ -365,14 +371,14 @@ TEST_F(PROF_TASK_TEST, CheckEventValid_faile5) {
     std::shared_ptr<analysis::dvvp::proto::ReplayStartReq> req(
         new analysis::dvvp::proto::ReplayStartReq);
 
-    MOCKER_CPP(&analysis::dvvp::common::validation::ParamValidation::CheckPmuEventSizeIsValid)
+    MOCK_METHOD(mockerParamValidation, CheckPmuEventSizeIsValid)
         .stubs()
         .will(returnValue(true))
         .then(returnValue(true))
         .then(returnValue(true))
         .then(returnValue(true))
         .then(returnValue(false));
-    MOCKER_CPP(&analysis::dvvp::common::validation::ParamValidation::CheckCoreIdSizeIsValid)
+    MOCK_METHOD(mockerParamValidation, CheckCoreIdSizeIsValid)
         .stubs()
         .will(returnValue(true));
     job->CheckEventValid(req);
@@ -388,14 +394,14 @@ TEST_F(PROF_TASK_TEST, CheckEventValid_faile6) {
     std::shared_ptr<analysis::dvvp::proto::ReplayStartReq> req(
         new analysis::dvvp::proto::ReplayStartReq);
 
-    MOCKER_CPP(&analysis::dvvp::common::validation::ParamValidation::CheckPmuEventSizeIsValid)
+    MOCK_METHOD(mockerParamValidation, CheckPmuEventSizeIsValid)
         .stubs()
         .will(returnValue(true))
         .then(returnValue(true))
         .then(returnValue(true))
         .then(returnValue(true))
         .then(returnValue(true));
-    MOCKER_CPP(&analysis::dvvp::common::validation::ParamValidation::CheckCoreIdSizeIsValid)
+    MOCK_METHOD(mockerParamValidation, CheckCoreIdSizeIsValid)
         .stubs()
         .will(returnValue(true))
         .then(returnValue(false));
@@ -412,7 +418,7 @@ TEST_F(PROF_TASK_TEST, CheckEventValid_faile9) {
     std::shared_ptr<analysis::dvvp::proto::ReplayStartReq> req(
         new analysis::dvvp::proto::ReplayStartReq);
 
-    MOCKER_CPP(&analysis::dvvp::common::validation::ParamValidation::CheckPmuEventSizeIsValid)
+    MOCK_METHOD(mockerParamValidation, CheckPmuEventSizeIsValid)
         .stubs()
         .will(returnValue(true))
         .then(returnValue(true))
@@ -420,7 +426,7 @@ TEST_F(PROF_TASK_TEST, CheckEventValid_faile9) {
         .then(returnValue(true))
         .then(returnValue(true))
         .then(returnValue(false));
-    MOCKER_CPP(&analysis::dvvp::common::validation::ParamValidation::CheckCoreIdSizeIsValid)
+    MOCK_METHOD(mockerParamValidation, CheckCoreIdSizeIsValid)
         .stubs()
         .will(returnValue(true))
         .then(returnValue(true));
@@ -437,7 +443,7 @@ TEST_F(PROF_TASK_TEST, CheckEventValid_faile7) {
     std::shared_ptr<analysis::dvvp::proto::ReplayStartReq> req(
         new analysis::dvvp::proto::ReplayStartReq);
 
-    MOCKER_CPP(&analysis::dvvp::common::validation::ParamValidation::CheckPmuEventSizeIsValid)
+    MOCK_METHOD(mockerParamValidation, CheckPmuEventSizeIsValid)
         .stubs()
         .will(returnValue(true))
         .then(returnValue(true))
@@ -446,7 +452,7 @@ TEST_F(PROF_TASK_TEST, CheckEventValid_faile7) {
         .then(returnValue(true))
         .then(returnValue(true))
         .then(returnValue(false));
-    MOCKER_CPP(&analysis::dvvp::common::validation::ParamValidation::CheckCoreIdSizeIsValid)
+    MOCK_METHOD(mockerParamValidation, CheckCoreIdSizeIsValid)
         .stubs()
         .will(returnValue(true))
         .then(returnValue(true));
@@ -465,8 +471,7 @@ TEST_F(PROF_TASK_TEST, Receiver_SendMessage) {
     transport->perfCount_ = perfCount;
     std::shared_ptr<analysis::dvvp::device::Receiver> receive(new analysis::dvvp::device::Receiver(transport));
     EXPECT_NE(nullptr, receive);
-    MOCKER_CPP_VIRTUAL(((analysis::dvvp::transport::ITransport *)transport.get()), 
-            &analysis::dvvp::transport::ITransport::SendBuffer)
+    MOCK_METHOD(mockerITransport, SendBuffer)
         .stubs()
         .will(returnValue(PROFILING_SUCCESS));
     receive->SendMessage(response);
