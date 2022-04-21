@@ -18,6 +18,9 @@ set(profilerSrcFiles
     ${MSPROF_SOURCE_DIR}/dvvp/adx/stub/adx_prof_api.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/statistics/perf_count.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/adx/wrapper/memory_utils.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/src/mmpa_plugin.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/src/driver_plugin.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/src/plugin_manager.cpp
     ${CppPath}
 )
 
@@ -35,15 +38,22 @@ add_executable(client_utest
 )
 
 target_include_directories(client_utest PRIVATE
-    ${TOP_DIR}/abl/libc_sec/include
-    ${TOP_DIR}/inc/driver
-    ${TOP_DIR}/open_source/json/include
-    ${TOP_DIR}/abl/adump
-    ${TOP_DIR}/ace/npuruntime/inc
-    ${TOP_DIR}/metadef/inc
+    ${GTEST_INCLUDE_DIR}
+    ${MOCKCPP_INCLUDE_DIR}
+    ${TOP_DIR}/opensource/securec/include
+    ${TOP_DIR}/opensource/json/include
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/slog
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/metadef/error_manager/error_manager_stub
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/driver
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/adump
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/mmpa
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/plugin
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/inc
+    ${MSPROF_SOURCE_DIR}/../inc
     ${MSPROF_SOURCE_DIR}/dvvp
     ${MSPROF_SOURCE_DIR}/dvvp/common
     ${MSPROF_SOURCE_DIR}/dvvp/common/logger
+    ${MSPROF_SOURCE_DIR}/dvvp/common/config
     ${MSPROF_SOURCE_DIR}/dvvp/common/validation
     ${MSPROF_SOURCE_DIR}/dvvp/streamio/client/include
     ${MSPROF_SOURCE_DIR}/dvvp/streamio/common/include
@@ -60,7 +70,7 @@ target_compile_options(client_utest PRIVATE
     -fno-access-control
     -Wfloat-equal
     -Wextra
-
+    -D_GLIBCXX_USE_CXX11_ABI=0
 )
 
 target_compile_definitions(client_utest PRIVATE
@@ -70,13 +80,12 @@ target_compile_definitions(client_utest PRIVATE
 )
 
 target_link_libraries(client_utest PRIVATE
-    $<BUILD_INTERFACE:intf_llt_pub>
-    $<BUILD_INTERFACE:mmpa_headers>
-    $<BUILD_INTERFACE:msprof_headers>
-    $<BUILD_INTERFACE:slog_headers>
-    $<BUILD_INTERFACE:adump_headers>
-    ascend_protobuf
+    ascend_protobuf_static
     c_sec
+    pthread
+    ${GTEST_STATIC_LIBRARY}
+    ${MOCKCPP_STATIC_LIBRARY}
+    dl
 )
 
 set_target_properties(client_utest

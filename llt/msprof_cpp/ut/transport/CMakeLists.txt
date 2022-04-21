@@ -26,6 +26,9 @@ set(profilerSrcFiles
     ${MSPROF_SOURCE_DIR}/dvvp/transport/hdc/hdc_transport.cpp 
     ${MSPROF_SOURCE_DIR}/dvvp/common/validation/param_validation.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/depend/stub/error_manager/msprof_error_manager_stub.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/src/plugin_manager.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/src/driver_plugin.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/src/mmpa_plugin.cpp
     ${CppPath}
 )
 
@@ -48,17 +51,21 @@ add_executable(transport
 )
 
 target_include_directories(transport PRIVATE
-    ${TOP_DIR}/abl/libc_sec/include 
-    ${TOP_DIR}/inc/driver 
+    ${GTEST_INCLUDE_DIR}
+    ${MOCKCPP_INCLUDE_DIR}
+    ${TOP_DIR}/opensource/securec/include
+    ${TOP_DIR}/opensource/json/include
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/slog
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/metadef/error_manager/error_manager_stub
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/driver
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/adump
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/mmpa
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/plugin
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/inc
+    ${MSPROF_SOURCE_DIR}/../inc
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/graphengine/external
+    ${MSPROF_SOURCE_DIR}/../inc/toolchain
     ../stub/
-    ${TOP_DIR}/llt/abl/msprof/msprof_cpp/st/stub 
-    ${TOP_DIR}/abl/adump 
-    ${TOP_DIR}/abl/adump/external 
-    ${TOP_DIR}/open_source/json/include 
-    ${TOP_DIR}/ace/npuruntime/inc
-    ${TOP_DIR}/abl/msprof/inc
-    ${TOP_DIR}/abl/msprof/inc/toolchain
-    ${TOP_DIR}/metadef/inc
     ${MSPROF_SOURCE_DIR}/dvvp 
     ${MSPROF_SOURCE_DIR}/dvvp/adx/inc    
     ${MSPROF_SOURCE_DIR}/dvvp/common 
@@ -67,6 +74,7 @@ target_include_directories(transport PRIVATE
     ${MSPROF_SOURCE_DIR}/dvvp/common/logger 
     ${MSPROF_SOURCE_DIR}/dvvp/common/validation
     ${MSPROF_SOURCE_DIR}/dvvp/common/queue
+    ${MSPROF_SOURCE_DIR}/dvvp/common/config
     ${MSPROF_SOURCE_DIR}/dvvp/msprof/common/include/
     ${MSPROF_SOURCE_DIR}/dvvp/message
     ${MSPROF_SOURCE_DIR}/dvvp/transport
@@ -89,7 +97,7 @@ target_compile_options(transport PRIVATE
     -fno-access-control
     -Wfloat-equal
     -Wextra
-
+    -D_GLIBCXX_USE_CXX11_ABI=0
 )
 
 target_compile_definitions(transport PRIVATE
@@ -99,12 +107,12 @@ target_compile_definitions(transport PRIVATE
 )
 
 target_link_libraries(transport PRIVATE
-    $<BUILD_INTERFACE:intf_llt_pub>
-    $<BUILD_INTERFACE:mmpa_headers>
-    $<BUILD_INTERFACE:adump_headers>
-    $<BUILD_INTERFACE:slog_headers>
-    ascend_protobuf
+    ascend_protobuf_static
     c_sec
+    pthread
+    ${GTEST_STATIC_LIBRARY}
+    ${MOCKCPP_STATIC_LIBRARY}
+    dl
 )
 
 set_target_properties(transport

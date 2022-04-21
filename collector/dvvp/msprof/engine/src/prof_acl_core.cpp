@@ -488,14 +488,14 @@ size_t aclprofGetModelId(CONST_VOID_PTR opInfo, size_t opInfoLen, uint32_t index
 }
 
 // internal interface
-uint64_t ProfGetOpExecutionTime(CONST_VOID_PTR data, uint32_t len, uint32_t index)
-{
-    if (Platform::instance()->PlatformIsHelperHostSide()) {
-        MSPROF_LOGE("acl api not support in helper");
-        return 0;
-    }
-    return Msprofiler::Api::ProfGetOpExecutionTime(data, len, index);
-}
+// uint64_t ProfGetOpExecutionTime(CONST_VOID_PTR data, uint32_t len, uint32_t index)
+// {
+//     if (Platform::instance()->PlatformIsHelperHostSide()) {
+//         MSPROF_LOGE("acl api not support in helper");
+//         return 0;
+//     }
+//     return Msprofiler::Api::ProfGetOpExecutionTime(data, len, index);
+// }
 
 struct aclprofStepInfo {
     bool startFlag;

@@ -2,27 +2,35 @@
 add_executable(stub_file_utest
     ${MSPROF_SOURCE_DIR}/dvvp/adx/wrapper/hdc_api.cpp  
     ${MSPROF_SOURCE_DIR}/dvvp/adx/wrapper/memory_utils.cpp
-    ${MSPROF_SOURCE_DIR}/dvvp/depend/wrapper/error_manager/msprof_error_manager.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/src/mmpa_plugin.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/src/driver_plugin.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/src/plugin_manager.cpp
     test/main.cpp
     test/hdc_api_utest.cpp
-    test/msprof_err_mgr_utest.cpp
     ..//stub/mmpa_stub.cpp
     ../stub/profile_drv_user_stub.cpp
     ../stub/hdc-log-stub.cpp
     ../stub/devdrv_runtime_api_stub.cpp
     ../stub/ide_hdc_stub.cc
-    ../stub/error_manager_stub.cpp
 
 )
 
 target_include_directories(stub_file_utest PRIVATE
-    ${TOP_DIR}/abl/libc_sec/include
-    ${TOP_DIR}/inc/driver
-    ${TOP_DIR}/ace/npuruntime/inc
-    ${TOP_DIR}/abl/msprof/inc
-    ${TOP_DIR}/metadef/inc
+    ${GTEST_INCLUDE_DIR}
+    ${MOCKCPP_INCLUDE_DIR}
+    ${TOP_DIR}/opensource/securec/include
+    ${TOP_DIR}/opensource/json/include
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/slog
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/metadef/error_manager/error_manager_stub
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/driver
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/adump
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/mmpa
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/plugin
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/inc
+    ${MSPROF_SOURCE_DIR}/../inc
     ${MSPROF_SOURCE_DIR}/dvvp/common/logger
     ${MSPROF_SOURCE_DIR}/dvvp/common/
+    ${MSPROF_SOURCE_DIR}/dvvp/common/config
     ${MSPROF_SOURCE_DIR}/dvvp/adx/inc
     ${MSPROF_SOURCE_DIR}/dvvp/depend/include/wrapper
     ${MSPROF_SOURCE_DIR}/dvvp
@@ -37,7 +45,7 @@ target_compile_options(stub_file_utest PRIVATE
     -fno-access-control
     -Wfloat-equal
     -Wextra
-
+    -D_GLIBCXX_USE_CXX11_ABI=0
 )
 
 target_compile_definitions(stub_file_utest PRIVATE
@@ -47,12 +55,12 @@ target_compile_definitions(stub_file_utest PRIVATE
 )
 
 target_link_libraries(stub_file_utest PRIVATE
-    $<BUILD_INTERFACE:intf_llt_pub>
-    $<BUILD_INTERFACE:mmpa_headers>
-    $<BUILD_INTERFACE:slog_headers>
-    $<BUILD_INTERFACE:adump_headers>
-    ascend_protobuf
+    ascend_protobuf_static
     c_sec
+    pthread
+    ${GTEST_STATIC_LIBRARY}
+    ${MOCKCPP_STATIC_LIBRARY}
+    dl
 )
 
 set_target_properties(stub_file_utest

@@ -4,6 +4,7 @@
 #include <fstream>
 #include "errno/error_code.h"
 #include "hdc_api.h"
+#include "securec.h"
 #include "memory_utils.h"
 
 
