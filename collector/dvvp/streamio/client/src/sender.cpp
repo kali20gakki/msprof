@@ -10,7 +10,7 @@
 #include "message/codec.h"
 #include "message/prof_params.h"
 #include "securec.h"
-#include "mmpa_plugin"
+#include "mmpa_plugin.h"
 #include "proto/profiler.pb.h"
 
 using namespace analysis::dvvp::proto;
