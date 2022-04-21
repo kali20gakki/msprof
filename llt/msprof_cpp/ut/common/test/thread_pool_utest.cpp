@@ -35,7 +35,7 @@ TEST_F(COMMON_THREAD_POOL_TEST, start) {
     pool->threadNum_ = 0;
     EXPECT_EQ(PROFILING_FAILED, pool->Start());
 
-    //MOCKER(&analysis::dvvp::common::thread::Thread::Start)
+    //MOCKER_CPP(&analysis::dvvp::common::thread::Thread::Start)
     //    .stubs()
     //    .will(returnValue(PROFILING_FAILED))
     //    .then(returnValue(PROFILING_SUCCESS));
@@ -65,11 +65,11 @@ TEST_F(COMMON_THREAD_POOL_TEST, stop) {
 
 TEST_F(COMMON_THREAD_POOL_TEST, InnnerThread_run) {
     GlobalMockObject::verify();
-    MockObject<Thread> mocker;
+
     std::shared_ptr<ThreadPool::InnnerThread> thread(new ThreadPool::InnnerThread(64));
     EXPECT_NE(nullptr, thread);
 
-    MOCK_METHOD(mocker, Thread::IsQuit)
+    MOCKER_CPP(&Thread::IsQuit)
         .stubs()
         .will(returnValue(false))
         .then(returnValue(true));

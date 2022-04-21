@@ -16,9 +16,6 @@ set(profilerSrcFiles
     ${MSPROF_SOURCE_DIR}//dvvp/driver/channel/ai_drv_prof_api.cpp
     ${MSPROF_SOURCE_DIR}//dvvp/message/codec.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/depend/stub/error_manager/msprof_error_manager_stub.cpp
-    ${MSPROF_SOURCE_DIR}/dvvp/depend/src/mmpa_plugin.cpp
-    ${MSPROF_SOURCE_DIR}/dvvp/depend/src/plugin_manager.cpp
-    ${MSPROF_SOURCE_DIR}/dvvp/depend/src/driver_plugin.cpp
     ${CppPath}
 )
 
@@ -45,25 +42,20 @@ add_executable(common_utest
 )
 
 target_include_directories(common_utest PRIVATE
-    ${GTEST_INCLUDE_DIR}
-    ${MOCKCPP_INCLUDE_DIR}
-    ${TOP_DIR}/opensource/securec/include
-    ${TOP_DIR}/opensource/json/include
-    ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/slog
-    ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/metadef/error_manager/error_manager_stub
-    ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/driver
-    ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/adump
-    ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/mmpa
-    ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/plugin
-    ${MSPROF_SOURCE_DIR}/dvvp/depend/inc
-    ${MSPROF_SOURCE_DIR}/../inc
     ../
     ../stub
+    ${TOP_DIR}/llt/abl/msprof/msprof_cpp/ut/stub
+    ${TOP_DIR}/abl/libc_sec/include
+    ${TOP_DIR}/inc/driver
+    ${TOP_DIR}/abl/adump
+    ${TOP_DIR}/open_source/json/include
+    ${TOP_DIR}/ace/npuruntime/inc
+    ${TOP_DIR}/abl/msprof/inc
+    ${TOP_DIR}/metadef/inc
     ${MSPROF_SOURCE_DIR}/dvvp
     ${MSPROF_SOURCE_DIR}/dvvp/common
     ${MSPROF_SOURCE_DIR}/dvvp/common/statistics
     ${MSPROF_SOURCE_DIR}/dvvp/common/logger
-    ${MSPROF_SOURCE_DIR}/dvvp/common/config
     ${MSPROF_SOURCE_DIR}/dvvp/driver/inc
     ${MSPROF_SOURCE_DIR}/dvvp/common/errno
     ${MSPROF_SOURCE_DIR}/dvvp/common/validation
@@ -79,7 +71,6 @@ target_compile_options(common_utest PRIVATE
     -fno-access-control
     -Wfloat-equal
     -Wextra
-    -D_GLIBCXX_USE_CXX11_ABI=0
 )
 
 target_compile_definitions(common_utest PRIVATE
@@ -89,12 +80,11 @@ target_compile_definitions(common_utest PRIVATE
 )
 
 target_link_libraries(common_utest PRIVATE
-    ascend_protobuf_static
+    $<BUILD_INTERFACE:intf_llt_pub>
+    $<BUILD_INTERFACE:mmpa_headers>
+    $<BUILD_INTERFACE:slog_headers>
+    ascend_protobuf
     c_sec
-    pthread
-    ${GTEST_STATIC_LIBRARY}
-    ${MOCKCPP_STATIC_LIBRARY}
-    dl
 )
 
 set_target_properties(common_utest

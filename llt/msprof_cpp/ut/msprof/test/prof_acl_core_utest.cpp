@@ -36,6 +36,7 @@
 #include "command_handle.h"
 #include "acl_prof.h"
 #include "data_struct.h"
+#include "ai_drv_dev_api.h"
 
 using namespace analysis::dvvp::common::error;
 using namespace Analysis::Dvvp::Analyze;
@@ -154,7 +155,7 @@ TEST_F(MSPROF_ACL_CORE_UTEST, acl_api) {
     largeConfig.dataTypeConfig = 0x7d7f001f;
     ge::aclgrphProfConfig *largeAclConfig = ge::aclgrphProfCreateConfig(
         largeConfig.devIdList, largeConfig.devNums, (ge::ProfilingAicoreMetrics)largeConfig.aicoreMetrics, nullptr, largeConfig.dataTypeConfig);
-    
+
     EXPECT_EQ(nullptr, largeAclConfig);
 
     Msprof::Engine::MsprofCallbackHandler::reporters_.clear();
@@ -195,6 +196,23 @@ TEST_F(MSPROF_ACL_CORE_UTEST, acl_api) {
     EXPECT_EQ(ge::SUCCESS, ge::aclgrphProfDestroyConfig(zeroConfig));
     EXPECT_EQ(ge::SUCCESS, ge::aclgrphProfDestroyConfig(invalidConfig));
     EXPECT_EQ(ge::SUCCESS, ge::aclgrphProfDestroyConfig(aclConfig));
+
+    config.devNums = 8;
+    config.devIdList[0] = 0;
+    config.aicoreMetrics = PROF_AICORE_ARITHMETIC_UTILIZATION;
+    config.dataTypeConfig = 0x7d7f001f;
+    MOCKER_CPP(&analysis::dvvp::driver::DrvGetDevNum)
+        .stubs()
+        .will(returnValue(5));
+    invalidConfig = ge::aclgrphProfCreateConfig(
+        config.devIdList, config.devNums, (ge::ProfilingAicoreMetrics)config.aicoreMetrics, nullptr, config.dataTypeConfig);
+    EXPECT_EQ(nullptr, invalidConfig);
+
+    config.devNums = 3;
+    config.devIdList[0] = 6;
+    invalidConfig = ge::aclgrphProfCreateConfig(
+        config.devIdList, config.devNums, (ge::ProfilingAicoreMetrics)config.aicoreMetrics, nullptr, config.dataTypeConfig);
+    EXPECT_EQ(nullptr, invalidConfig);
 
     analysis::dvvp::common::utils::Utils::RemoveDir(result);
 }
@@ -359,6 +377,23 @@ TEST_F(MSPROF_ACL_CORE_UTEST, acl_prof_api) {
     EXPECT_EQ(ge::SUCCESS, aclprofDestroyConfig(invalidConfig));
     EXPECT_EQ(ge::SUCCESS, aclprofDestroyConfig(aclConfig));
     EXPECT_EQ(ACL_ERROR_INVALID_PARAM, aclprofDestroyConfig(nullptr));
+
+    config.devNums = 8;
+    config.devIdList[0] = 0;
+    config.aicoreMetrics = PROF_AICORE_ARITHMETIC_UTILIZATION;
+    config.dataTypeConfig = 0x7d7f001f;
+    MOCKER_CPP(&analysis::dvvp::driver::DrvGetDevNum)
+        .stubs()
+        .will(returnValue(5));
+    invalidConfig = aclprofCreateConfig(
+        config.devIdList, config.devNums, (aclprofAicoreMetrics)config.aicoreMetrics, nullptr, config.dataTypeConfig);
+    EXPECT_EQ(nullptr, invalidConfig);
+
+    config.devNums = 3;
+    config.devIdList[0] = 6;
+    invalidConfig = aclprofCreateConfig(
+        config.devIdList, config.devNums, (aclprofAicoreMetrics)config.aicoreMetrics, nullptr, config.dataTypeConfig);
+    EXPECT_EQ(nullptr, invalidConfig);
     using namespace Msprofiler::Api;
     ProfAclMgr::instance()->mode_ = WORK_MODE_OFF;
     analysis::dvvp::common::utils::Utils::RemoveDir(result);

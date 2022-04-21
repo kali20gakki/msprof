@@ -26,8 +26,6 @@ protected:
     }
 public:
     std::shared_ptr<analysis::dvvp::transport::HDCTransport> _transport;
-    MockObject<analysis::dvvp::transport::HDCTransport>mockerHDCTransport;
-    MockObject<analysis::dvvp::message::MsgDispatcher>mockerMsgDispatcher;
 };
 
 TEST_F(RECEIVER_TEST, Receiver_destructor) {
@@ -89,16 +87,16 @@ TEST_F(RECEIVER_TEST, run) {
     req->len = (int)buffer.size();
     memcpy_s(req->value, req->len, buffer.c_str(), buffer.size());
 
-    MOCK_METHOD(mockerHDCTransport, RecvPacket)
+    MOCKER_CPP_VIRTUAL(_transport.get(), &analysis::dvvp::transport::HDCTransport::RecvPacket)
         .stubs()
         .with(outBoundP(&req))
         .will(returnValue(-1))
         .then(returnValue(length));
 
-    MOCK_METHOD(mockerHDCTransport, DestroyPacket)
+    MOCKER_CPP_VIRTUAL(_transport.get(), &analysis::dvvp::transport::HDCTransport::DestroyPacket)
         .stubs();
 
-    MOCK_METHOD(mockerMsgDispatcher, OnNewMessage)
+    MOCKER_CPP(&analysis::dvvp::message::MsgDispatcher::OnNewMessage)
         .stubs();
     recv->Run(errorContext);
     EXPECT_EQ(PROFILING_SUCCESS, recv->Stop());

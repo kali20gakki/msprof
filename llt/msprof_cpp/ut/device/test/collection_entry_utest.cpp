@@ -34,19 +34,11 @@ class DEVICE_COLLECTION_ENTRY_TEST: public testing::Test {
 protected:
     virtual void SetUp() {}
     virtual void TearDown() {}
-public:
-    MockObject<ProfChannelManager>mockerProfChannelManager;
-    MockObject<analysis::dvvp::device::CollectionEntry>mockerCollectionEntry;
-    MockObject<analysis::dvvp::transport::HDCTransport>mockerHDCTransport;
-    MockObject<analysis::dvvp::device::Receiver>mockerReceiver;
-    MockObject<analysis::dvvp::common::thread::Thread>mockerThread;
-    MockObject<analysis::dvvp::transport::Uploader>mockerUploader;
-    
 };
 TEST_F(DEVICE_COLLECTION_ENTRY_TEST, Init) {
     GlobalMockObject::verify();
     
-    MOCK_METHOD(mockerProfChannelManager, Init)
+    MOCKER_CPP(&ProfChannelManager::Init)
         .stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
@@ -109,17 +101,17 @@ TEST_F(DEVICE_COLLECTION_ENTRY_TEST, Handle) {
 
     std::string non_message("123456");
 
-    MOCK_METHOD(mockerCollectionEntry, HandleCtrlSession)
+    MOCKER_CPP(&analysis::dvvp::device::CollectionEntry::HandleCtrlSession)
         .stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
 
-    MOCK_METHOD(mockerCollectionEntry, HandleDataSession)
+    MOCKER_CPP(&analysis::dvvp::device::CollectionEntry::HandleDataSession)
         .stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
 
-    MOCK_METHOD(mockerHDCTransport, SendBuffer)
+    MOCKER_CPP_VIRTUAL(transport.get(), &analysis::dvvp::transport::HDCTransport::SendBuffer)
         .stubs()
         .will(returnValue(PROFILING_FAILED));
 
@@ -149,12 +141,12 @@ TEST_F(DEVICE_COLLECTION_ENTRY_TEST, HandleCtrlSession) {
     std::shared_ptr<analysis::dvvp::proto::CtrlChannelHandshake> ctrl(
         new analysis::dvvp::proto::CtrlChannelHandshake);
 
-    MOCK_METHOD(mockerReceiver, Init)
+    MOCKER_CPP(&analysis::dvvp::device::Receiver::Init)
         .stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
 
-    //MOCK_METHOD(&analysis::dvvp::common::thread::Thread::Start)
+    //MOCKER_CPP(&analysis::dvvp::common::thread::Thread::Start)
     //    .stubs()
     //    .will(returnValue(PROFILING_SUCCESS));
     MOCKER(mmCreateTaskWithThreadAttr)
@@ -162,11 +154,11 @@ TEST_F(DEVICE_COLLECTION_ENTRY_TEST, HandleCtrlSession) {
         .will(returnValue(EN_OK));
 	
 
-    MOCK_METHOD(mockerThread, Join)
+    MOCKER_CPP(&analysis::dvvp::common::thread::Thread::Join)
         .stubs()
         .will(returnValue(PROFILING_SUCCESS));
 
-    MOCK_METHOD(mockerHDCTransport, SendBuffer)
+    MOCKER_CPP_VIRTUAL(transport.get(), &analysis::dvvp::transport::HDCTransport::SendBuffer)
         .stubs()
         .will(returnValue(PROFILING_FAILED));
 
@@ -196,19 +188,19 @@ TEST_F(DEVICE_COLLECTION_ENTRY_TEST, HandleDataSession) {
     std::shared_ptr<analysis::dvvp::proto::DataChannelHandshake> data(
         new analysis::dvvp::proto::DataChannelHandshake);
 
-    MOCK_METHOD(mockerUploader, Init)
+    MOCKER_CPP(&analysis::dvvp::transport::Uploader::Init)
         .stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
 
-    //MOCK_METHOD(&analysis::dvvp::common::thread::Thread::Start)
+    //MOCKER_CPP(&analysis::dvvp::common::thread::Thread::Start)
     //    .stubs()
     //    .will(returnValue(PROFILING_SUCCESS));
     MOCKER(mmCreateTaskWithThreadAttr)
         .stubs()
         .will(returnValue(EN_OK));
 
-    MOCK_METHOD(mockerHDCTransport, SendBuffer)
+    MOCKER_CPP_VIRTUAL(transport.get(), &analysis::dvvp::transport::HDCTransport::SendBuffer)
         .stubs()
         .will(returnValue(PROFILING_FAILED));
 
@@ -220,7 +212,7 @@ TEST_F(DEVICE_COLLECTION_ENTRY_TEST, HandleDataSession) {
 
 TEST_F(DEVICE_COLLECTION_ENTRY_TEST, FinishCollection) {
     GlobalMockObject::verify();
-    MOCK_METHOD(mockerUploader, Flush)
+    MOCKER_CPP(&analysis::dvvp::transport::Uploader::Flush)
         .stubs()
         .will(returnValue(PROFILING_SUCCESS));
     auto entry = analysis::dvvp::device::CollectionEntry::instance();

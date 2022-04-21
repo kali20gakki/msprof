@@ -32,4 +32,3 @@ git clone ssh://git@codehub-dg-y.huawei.com:2222/hwsecurec_group/huawei_secure_c
 # 下载 gtest和mockcpp
 cd ${LLT_DIR}
 git clone ssh://git@codehub-dg-y.huawei.com:2222/OpenSourceCenter/googletest.git googletest -b release-1.8.1
-git clone ssh://git@codehub-dg-y.huawei.com:2222/OpenSourceCenter/sinojelly/mockcpp.git -b master
