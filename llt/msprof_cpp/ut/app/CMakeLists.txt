@@ -6,11 +6,13 @@ protobuf_generate(profiler
 )
 
 set(profilerSrcList
-    ${MSPROF_SOURCE_DIR}//dvvp/common/validation/param_validation.cpp 
+    ${MSPROF_SOURCE_DIR}/dvvp/common/validation/param_validation.cpp 
     ${MSPROF_SOURCE_DIR}/dvvp/app/application.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/app/env_manager.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/utils/utils.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/depend/stub/error_manager/msprof_error_manager_stub.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/src/mmpa_plugin.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/src/plugin_manager.cpp
     ${CppPath}
 )
 
@@ -32,15 +34,18 @@ add_executable(
 )
 
 target_include_directories(application_utest PRIVATE
-    ${TOP_DIR}/abl/libc_sec/include
-    ${TOP_DIR}/inc/driver
-    ${TOP_DIR}/inc/tsch
-    ${TOP_DIR}/abl/adump
-    ${TOP_DIR}/abl/adump/external
-    ${TOP_DIR}/open_source/json/include
-    ${TOP_DIR}/ace/npuruntime/inc
-    ${TOP_DIR}/abl/msprof/inc
-    ${TOP_DIR}/metadef/inc
+    ${GTEST_INCLUDE_DIR}
+    ${MOCKCPP_INCLUDE_DIR}
+    ${TOP_DIR}/opensource/securec/include
+    ${TOP_DIR}/opensource/json/include
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/slog
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/metadef/error_manager/error_manager_stub
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/driver
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/adump
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/mmpa
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/plugin
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/inc
+    ${MSPROF_SOURCE_DIR}/../inc
     ../stub/
     ../stub/common
     ${MSPROF_SOURCE_DIR}/dvvp
@@ -51,6 +56,7 @@ target_include_directories(application_utest PRIVATE
     ${MSPROF_SOURCE_DIR}/dvvp/common/logger
     ${MSPROF_SOURCE_DIR}/dvvp/common/validation
     ${MSPROF_SOURCE_DIR}/dvvp/common/statistics
+    ${MSPROF_SOURCE_DIR}/dvvp/common/config
     ${MSPROF_SOURCE_DIR}/dvvp/host/include
     ${MSPROF_SOURCE_DIR}/dvvp/streamio/server/include
     ${MSPROF_SOURCE_DIR}/dvvp/job_wrapper/include
@@ -71,6 +77,7 @@ target_compile_options(application_utest PRIVATE
     -fno-access-control
     -Wfloat-equal
     -Wextra
+    -D_GLIBCXX_USE_CXX11_ABI=0
 )
 
 target_compile_definitions(application_utest PRIVATE
@@ -80,12 +87,12 @@ target_compile_definitions(application_utest PRIVATE
 )
 
 target_link_libraries(application_utest PRIVATE
-    $<BUILD_INTERFACE:intf_llt_pub>
-    $<BUILD_INTERFACE:mmpa_headers>
-    $<BUILD_INTERFACE:slog_headers>
-    $<BUILD_INTERFACE:adump_headers>
-    ascend_protobuf
+    ascend_protobuf_static
     c_sec
+    pthread
+    ${GTEST_STATIC_LIBRARY}
+    ${MOCKCPP_STATIC_LIBRARY}
+    dl
 )
 
 set_target_properties(application_utest
