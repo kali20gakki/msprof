@@ -163,23 +163,23 @@ target_compile_options(error_manager PRIVATE
     -D_GLIBCXX_USE_CXX11_ABI=0
 )
 
-########################## profapi ##########################
-add_library(profapi SHARED
-    ${COLLECT_DIR}/dvvp/depend/stub/prof_api_stub.cpp
-)
+# ########################## profapi ##########################
+# add_library(profapi SHARED
+#     ${COLLECT_DIR}/dvvp/depend/stub/prof_api_stub.cpp
+# )
 
-target_include_directories(profapi PRIVATE
-    ${COLLECT_DIR}/dvvp/depend/inc/profapi
-)
+# target_include_directories(profapi PRIVATE
+#     ${COLLECT_DIR}/dvvp/depend/inc/profapi
+# )
 
-target_compile_options(profapi PRIVATE
-    -std=c++11
-    -fPIC
-    -fstack-protector-all
-    -fno-strict-aliasing
-    -fno-common
-    -fvisibility=hidden
-    -fvisibility-inlines-hidden
-    -Wfloat-equal
-    -Wextra
-)
+# target_compile_options(profapi PRIVATE
+#     -std=c++11
+#     -fPIC
+#     -fstack-protector-all
+#     -fno-strict-aliasing
+#     -fno-common
+#     -fvisibility=hidden
+#     -fvisibility-inlines-hidden
+#     -Wfloat-equal
+#     -Wextra
+# )

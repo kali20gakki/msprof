@@ -15,6 +15,9 @@ set(profilerSrcFiles
     ${MSPROF_SOURCE_DIR}/dvvp/common/thread/thread.cpp 
     ${MSPROF_SOURCE_DIR}/dvvp/common/config/config_manager.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/depend/stub/error_manager/msprof_error_manager_stub.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/src/mmpa_plugin.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/src/driver_plugin.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/src/plugin_manager.cpp
     ${CppPath}
 )
 
@@ -34,13 +37,18 @@ add_executable(streamio_common_utest
 )
 
 target_include_directories(streamio_common_utest PRIVATE
-	${TOP_DIR}/abl/adump/inc/adump
-	${TOP_DIR}/abl/libc_sec/include    
-	${TOP_DIR}/inc/driver 
-	${TOP_DIR}/open_source/json/include 
-	${TOP_DIR}/ace/npuruntime/inc
-    ${TOP_DIR}/abl/msprof/inc
-    ${TOP_DIR}/metadef/inc
+    ${GTEST_INCLUDE_DIR}
+    ${MOCKCPP_INCLUDE_DIR}
+    ${TOP_DIR}/opensource/securec/include
+    ${TOP_DIR}/opensource/json/include
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/slog
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/metadef/error_manager/error_manager_stub
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/driver
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/adump
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/mmpa
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/plugin
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/inc
+    ${MSPROF_SOURCE_DIR}/../inc
 	${MSPROF_SOURCE_DIR}/dvvp/streamio/common/include 
 	${MSPROF_SOURCE_DIR}/dvvp/ 
 	${MSPROF_SOURCE_DIR}/dvvp/common 
@@ -66,6 +74,7 @@ target_compile_options(streamio_common_utest PRIVATE
     -fno-access-control
     -Wfloat-equal
     -Wextra
+    -D_GLIBCXX_USE_CXX11_ABI=0
 )
 
 target_compile_definitions(streamio_common_utest PRIVATE
@@ -75,11 +84,12 @@ target_compile_definitions(streamio_common_utest PRIVATE
 )
 
 target_link_libraries(streamio_common_utest PRIVATE
-    $<BUILD_INTERFACE:intf_llt_pub>
-    $<BUILD_INTERFACE:mmpa_headers>
-    $<BUILD_INTERFACE:slog_headers>
-    ascend_protobuf
+    ascend_protobuf_static
     c_sec
+    pthread
+    ${GTEST_STATIC_LIBRARY}
+    ${MOCKCPP_STATIC_LIBRARY}
+    dl
 )
 
 set_target_properties(streamio_common_utest
