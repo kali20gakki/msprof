@@ -24,12 +24,7 @@ protected:
 
     }
 public:
-    MockObject<Analysis::Dvvp::JobWrapper::JobDeviceSoc>mockerJobDeviceSoc;
-    MockObject<analysis::dvvp::common::validation::ParamValidation>mockerParamValidation;
-    MockObject<Analysis::Dvvp::JobWrapper::ProfChannelManager>mockerProfChannelManager;
-    MockObject<analysis::dvvp::transport::UploaderMgr>mockerUploaderMgr;
-    MockObject<analysis::dvvp::driver::DrvChannelsMgr>mockerDrvChannelsMgr;
-    
+
 };
 
 TEST_F(PROF_DEVICE_SOC_UTEST, StartProf)
@@ -39,10 +34,10 @@ TEST_F(PROF_DEVICE_SOC_UTEST, StartProf)
     params->FromString("{\"result_dir\":\"/tmp/\", \"devices\":\"1\", \"job_id\":\"1\"}");
     auto jobDeviceSoc = std::make_shared<Analysis::Dvvp::JobWrapper::JobDeviceSoc>(0);
     std::string fileName = "/tmp/test";
-    MOCK_METHOD(mockerJobDeviceSoc, GenerateFileName)
+    MOCKER_CPP(&Analysis::Dvvp::JobWrapper::JobDeviceSoc::GenerateFileName)
         .stubs()
         .will(returnValue(fileName));
-    MOCK_METHOD(mockerJobDeviceSoc, SendData)
+    MOCKER_CPP(&Analysis::Dvvp::JobWrapper::JobDeviceSoc::SendData)
         .stubs()
         .will(returnValue(0));
     MOCKER(analysis::dvvp::driver::DrvGetDevNum)
@@ -54,17 +49,17 @@ TEST_F(PROF_DEVICE_SOC_UTEST, StartProf)
         .will(returnValue(PROFILING_SUCCESS))
         .then(returnValue(PROFILING_FAILED));
 
-    MOCK_METHOD(mockerParamValidation, CheckProfilingParams)
+    MOCKER_CPP(&analysis::dvvp::common::validation::ParamValidation::CheckProfilingParams)
         .stubs()
         .will(returnValue(true))
         .then(returnValue(false));
 
-    MOCK_METHOD(mockerProfChannelManager, Init)
+    MOCKER_CPP(&Analysis::Dvvp::JobWrapper::ProfChannelManager::Init)
         .stubs()
         .will(returnValue(PROFILING_SUCCESS))
         .then(returnValue(PROFILING_SUCCESS));
 
-    MOCK_METHOD(mockerJobDeviceSoc, GetAndStoreStartTime)
+    MOCKER_CPP(&Analysis::Dvvp::JobWrapper::JobDeviceSoc::GetAndStoreStartTime)
         .stubs()
         .will(ignoreReturnValue());
 
@@ -88,7 +83,7 @@ TEST_F(PROF_DEVICE_SOC_UTEST, StartProf1)
     params->low_power = "on";
     params->acc_pmu_mode = "sample-based";
 
-    MOCK_METHOD(mockerProfChannelManager, UnInit)
+    MOCKER_CPP(&Analysis::Dvvp::JobWrapper::ProfChannelManager::UnInit)
         .stubs()
         .will(ignoreReturnValue());
     auto jobDeviceSoc = std::make_shared<Analysis::Dvvp::JobWrapper::JobDeviceSoc>(0);
@@ -96,7 +91,7 @@ TEST_F(PROF_DEVICE_SOC_UTEST, StartProf1)
     EXPECT_EQ(PROFILING_FAILED, jobDeviceSoc->StartProf(params));
 
 
-    MOCK_METHOD(mockerJobDeviceSoc, GetAndStoreStartTime)
+    MOCKER_CPP(&Analysis::Dvvp::JobWrapper::JobDeviceSoc::GetAndStoreStartTime)
         .stubs()
         .will(ignoreReturnValue());
 
@@ -118,10 +113,10 @@ TEST_F(PROF_DEVICE_SOC_UTEST, StartProf1)
 
     jobDeviceSoc->collectionjobComnCfg_->devIdOnHost = 0;
 
-    MOCK_METHOD(mockerJobDeviceSoc, RegisterCollectionJobs)
+    MOCKER_CPP(&Analysis::Dvvp::JobWrapper::JobDeviceSoc::RegisterCollectionJobs)
         .stubs()
         .will(returnValue(0));
-    MOCK_METHOD(mockerJobDeviceSoc, ParsePmuConfig)
+    MOCKER_CPP(&Analysis::Dvvp::JobWrapper::JobDeviceSoc::ParsePmuConfig)
         .stubs()
         .will(returnValue(-1))
         .then(returnValue(0));
@@ -137,7 +132,7 @@ TEST_F(PROF_DEVICE_SOC_UTEST, StartProf1)
 TEST_F(PROF_DEVICE_SOC_UTEST, StopProf)
 {
     GlobalMockObject::verify();
-    MOCK_METHOD(mockerProfChannelManager, UnInit)
+    MOCKER_CPP(&Analysis::Dvvp::JobWrapper::ProfChannelManager::UnInit)
         .stubs()
         .will(ignoreReturnValue());
     auto jobDeviceSoc = std::make_shared<Analysis::Dvvp::JobWrapper::JobDeviceSoc>(0);
@@ -168,7 +163,7 @@ TEST_F(PROF_DEVICE_SOC_UTEST, StopProf)
 TEST_F(PROF_DEVICE_SOC_UTEST, SendData) {
     GlobalMockObject::verify();
 
-    MOCK_METHOD(mockerUploaderMgr, UploadFileData)
+    MOCKER_CPP(&analysis::dvvp::transport::UploaderMgr::UploadFileData)
         .stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
@@ -201,12 +196,12 @@ TEST_F(PROF_DEVICE_SOC_UTEST, GenerateFileName) {
 TEST_F(PROF_DEVICE_SOC_UTEST, ParseAiCoreConfig) {
     GlobalMockObject::verify();
 
-    MOCK_METHOD(mockerParamValidation, CheckAiCoreEventsIsValid)
+    MOCKER_CPP(&analysis::dvvp::common::validation::ParamValidation::CheckAiCoreEventsIsValid)
         .stubs()
         .will(returnValue(false))
         .then(returnValue(true));
 
-    MOCK_METHOD(mockerParamValidation, CheckAiCoreEventCoresIsValid)
+    MOCKER_CPP(&analysis::dvvp::common::validation::ParamValidation::CheckAiCoreEventCoresIsValid)
         .stubs()
         .will(returnValue(false))
         .then(returnValue(true));
@@ -234,37 +229,37 @@ TEST_F(PROF_DEVICE_SOC_UTEST, ParseAiCoreConfig) {
 TEST_F(PROF_DEVICE_SOC_UTEST, ParsePmuConfig) {
     GlobalMockObject::verify();
 
-    MOCK_METHOD(mockerJobDeviceSoc, ParseTsCpuConfig)
+    MOCKER_CPP(&Analysis::Dvvp::JobWrapper::JobDeviceSoc::ParseTsCpuConfig)
         .stubs()
         .will(returnValue(-1))
         .then(returnValue(0));
 
-    MOCK_METHOD(mockerJobDeviceSoc, ParseAiCoreConfig)
+    MOCKER_CPP(&Analysis::Dvvp::JobWrapper::JobDeviceSoc::ParseAiCoreConfig)
         .stubs()
         .will(returnValue(-1))
         .then(returnValue(0));
 
-    MOCK_METHOD(mockerJobDeviceSoc, ParseControlCpuConfig)
+    MOCKER_CPP(&Analysis::Dvvp::JobWrapper::JobDeviceSoc::ParseControlCpuConfig)
         .stubs()
         .will(returnValue(-1))
         .then(returnValue(0));
 
-    MOCK_METHOD(mockerJobDeviceSoc, ParseLlcConfig)
+    MOCKER_CPP(&Analysis::Dvvp::JobWrapper::JobDeviceSoc::ParseLlcConfig)
         .stubs()
         .will(returnValue(-1))
         .then(returnValue(0));
 
-    MOCK_METHOD(mockerJobDeviceSoc, ParseDdrCpuConfig)
+    MOCKER_CPP(&Analysis::Dvvp::JobWrapper::JobDeviceSoc::ParseDdrCpuConfig)
         .stubs()
         .will(returnValue(-1))
         .then(returnValue(0));
 
-    MOCK_METHOD(mockerJobDeviceSoc, ParseAivConfig)
+    MOCKER_CPP(&Analysis::Dvvp::JobWrapper::JobDeviceSoc::ParseAivConfig)
         .stubs()
         .will(returnValue(-1))
         .then(returnValue(0));
 
-    MOCK_METHOD(mockerJobDeviceSoc, ParseHbmConfig)
+    MOCKER_CPP(&Analysis::Dvvp::JobWrapper::JobDeviceSoc::ParseHbmConfig)
         .stubs()
         .will(returnValue(-1))
         .then(returnValue(0));
@@ -287,7 +282,7 @@ TEST_F(PROF_DEVICE_SOC_UTEST, GetAndStoreStartTime) {
     MSVP_MAKE_SHARED0_VOID(jobDeviceSoc->collectionjobComnCfg_, CollectionJobCommonParams);
     jobDeviceSoc->GetAndStoreStartTime(true);
 
-    MOCK_METHOD(mockerJobDeviceSoc, StoreTime)
+    MOCKER_CPP(&Analysis::Dvvp::JobWrapper::JobDeviceSoc::StoreTime)
         .stubs()
         .will(returnValue(PROFILING_SUCCESS))
         .then(returnValue(PROFILING_FAILED));
@@ -302,7 +297,7 @@ TEST_F(PROF_DEVICE_SOC_UTEST, StoreTime) {
     auto jobDeviceSoc = std::make_shared<Analysis::Dvvp::JobWrapper::JobDeviceSoc>(0);
     MSVP_MAKE_SHARED0_VOID(jobDeviceSoc->collectionjobComnCfg_, CollectionJobCommonParams);
 
-    MOCK_METHOD(mockerUploaderMgr, UploadFileData)
+    MOCKER_CPP(&analysis::dvvp::transport::UploaderMgr::UploadFileData)
         .stubs()
         .will(returnValue(PROFILING_FAILED));
     std::shared_ptr<analysis::dvvp::message::ProfileParams> params(
@@ -325,25 +320,25 @@ TEST_F(PROF_DEVICE_SOC_UTEST, StartProfFailed)
 
     jobDeviceSoc->params_ = params;
     jobDeviceSoc->isStarted_ = false;
-    MOCK_METHOD(mockerParamValidation, CheckProfilingParams)
+    MOCKER_CPP(&analysis::dvvp::common::validation::ParamValidation::CheckProfilingParams)
         .stubs()
         .will(returnValue(true));
-    MOCK_METHOD(mockerJobDeviceSoc, StartProfHandle)
+    MOCKER_CPP(&Analysis::Dvvp::JobWrapper::JobDeviceSoc::StartProfHandle)
         .stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
 
-    MOCK_METHOD(mockerProfChannelManager, Init)
+    MOCKER_CPP(&Analysis::Dvvp::JobWrapper::ProfChannelManager::Init)
         .stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
 
-    MOCK_METHOD(mockerDrvChannelsMgr, GetAllChannels)
+    MOCKER_CPP(&analysis::dvvp::driver::DrvChannelsMgr::GetAllChannels)
         .stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
 
-    MOCK_METHOD(mockerJobDeviceSoc, RegisterCollectionJobs)
+    MOCKER_CPP(&Analysis::Dvvp::JobWrapper::JobDeviceSoc::RegisterCollectionJobs)
         .stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
@@ -359,7 +354,7 @@ TEST_F(PROF_DEVICE_SOC_UTEST, ParseTsCpuConfig)
 {
     GlobalMockObject::verify();
 
-    MOCK_METHOD(mockerParamValidation, CheckTsCpuEventIsValid)
+    MOCKER_CPP(&analysis::dvvp::common::validation::ParamValidation::CheckTsCpuEventIsValid)
         .stubs()
         .will(returnValue(false));
     auto jobDeviceSoc = std::make_shared<Analysis::Dvvp::JobWrapper::JobDeviceSoc>(0);
@@ -374,7 +369,7 @@ TEST_F(PROF_DEVICE_SOC_UTEST, ParseHbmConfig)
 {
     GlobalMockObject::verify();
 
-    MOCK_METHOD(mockerParamValidation, CheckHbmEventsIsValid)
+    MOCKER_CPP(&analysis::dvvp::common::validation::ParamValidation::CheckHbmEventsIsValid)
         .stubs()
         .will(returnValue(false));
     auto jobDeviceSoc = std::make_shared<Analysis::Dvvp::JobWrapper::JobDeviceSoc>(0);
@@ -389,11 +384,11 @@ TEST_F(PROF_DEVICE_SOC_UTEST, ParseAivConfig)
 {
     GlobalMockObject::verify();
 
-    MOCK_METHOD(mockerParamValidation, CheckAivEventsIsValid)
+    MOCKER_CPP(&analysis::dvvp::common::validation::ParamValidation::CheckAivEventsIsValid)
         .stubs()
         .will(returnValue(false))
         .then(returnValue(true));
-    MOCK_METHOD(mockerParamValidation, CheckAivEventCoresIsValid)
+    MOCKER_CPP(&analysis::dvvp::common::validation::ParamValidation::CheckAivEventCoresIsValid)
         .stubs()
         .will(returnValue(false));
     auto jobDeviceSoc = std::make_shared<Analysis::Dvvp::JobWrapper::JobDeviceSoc>(0);
@@ -411,7 +406,7 @@ TEST_F(PROF_DEVICE_SOC_UTEST, ParseControlCpuConfig)
 {
     GlobalMockObject::verify();
 
-    MOCK_METHOD(mockerParamValidation, CheckCtrlCpuEventIsValid)
+    MOCKER_CPP(&analysis::dvvp::common::validation::ParamValidation::CheckCtrlCpuEventIsValid)
         .stubs()
         .will(returnValue(false));
     auto jobDeviceSoc = std::make_shared<Analysis::Dvvp::JobWrapper::JobDeviceSoc>(0);
@@ -426,7 +421,7 @@ TEST_F(PROF_DEVICE_SOC_UTEST, ParseDdrCpuConfig)
 {
     GlobalMockObject::verify();
 
-    MOCK_METHOD(mockerParamValidation, CheckDdrEventsIsValid)
+    MOCKER_CPP(&analysis::dvvp::common::validation::ParamValidation::CheckDdrEventsIsValid)
         .stubs()
         .will(returnValue(false));
     auto jobDeviceSoc = std::make_shared<Analysis::Dvvp::JobWrapper::JobDeviceSoc>(0);
@@ -441,7 +436,7 @@ TEST_F(PROF_DEVICE_SOC_UTEST, ParseLlcConfig)
 {
     GlobalMockObject::verify();
 
-    MOCK_METHOD(mockerParamValidation, CheckLlcEventsIsValid)
+    MOCKER_CPP(&analysis::dvvp::common::validation::ParamValidation::CheckLlcEventsIsValid)
         .stubs()
         .will(returnValue(false));
     auto jobDeviceSoc = std::make_shared<Analysis::Dvvp::JobWrapper::JobDeviceSoc>(0);

@@ -1139,19 +1139,19 @@ TEST_F(COMMON_UTILS_UTILS_TEST, WriteFile1) {
     FILE *file = (FILE *)0x12345;
     std::string profName = "PROF_000001_20220222182700493_BABQCAKDOMCOLMJB\n";
 
-    MOCKER(fopen)
+    MOCKER_CPP(fopen)
         .stubs()
         .will(returnValue(file));
 
-    MOCKER(fileno)
+    MOCKER_CPP(fileno)
         .stubs()
         .will(returnValue(2));
 
-    MOCKER(flock)
+    MOCKER_CPP(flock)
         .stubs()
         .will(returnValue(1)); //failed
 
-    MOCKER(fclose)
+    MOCKER_CPP(fclose)
         .stubs()
         .will(returnValue(1));
 
@@ -1163,27 +1163,27 @@ TEST_F(COMMON_UTILS_UTILS_TEST, WriteFile2) {
     FILE *file = (FILE *)0x12345;
     std::string profName = "PROF_000001_20220222182700493_BABQCAKDOMCOLMJB\n";
 
-    MOCKER(fopen)
+    MOCKER_CPP(fopen)
         .stubs()
         .will(returnValue(file));
 
-    MOCKER(fileno)
+    MOCKER_CPP(fileno)
         .stubs()
         .will(returnValue(2));
 
-    MOCKER(flock)
+    MOCKER_CPP(flock)
         .stubs()
         .will(returnValue(0)); //success
 
-    MOCKER(fwrite)
+    MOCKER_CPP(fwrite)
         .stubs()
         .will(returnValue(profName.length() - 1)); //failed. 2 is not equal to the lenth of PROF_000001_20220222182700493_BABQCAKDOMCOLMJB\n
 
-    MOCKER(UnFileLock)
+    MOCKER_CPP(UnFileLock)
         .stubs()
         .will(returnValue(0)); //success
 
-    MOCKER(fclose)
+    MOCKER_CPP(fclose)
         .stubs()
         .will(returnValue(2));
 
@@ -1195,27 +1195,27 @@ TEST_F(COMMON_UTILS_UTILS_TEST, WriteFile3) {
     FILE *file = (FILE *)0x12345;
     std::string profName = "PROF_000001_20220222182700493_BABQCAKDOMCOLMJB\n";
 
-    MOCKER(fopen)
+    MOCKER_CPP(fopen)
         .stubs()
         .will(returnValue(file));
 
-    MOCKER(fileno)
+    MOCKER_CPP(fileno)
         .stubs()
         .will(returnValue(2));
 
-    MOCKER(flock)
+    MOCKER_CPP(flock)
         .stubs()
         .will(returnValue(0)); //success
 
-    MOCKER(fwrite)
+    MOCKER_CPP(fwrite)
         .stubs()
         .will(returnValue(profName.length())); //sucess. 47 is not equal to the lenth of PROF_000001_20220222182700493_BABQCAKDOMCOLMJB\n
 
-    MOCKER(UnFileLock)
+    MOCKER_CPP(UnFileLock)
         .stubs()
         .will(returnValue(1)); //failed
 
-    MOCKER(fclose)
+    MOCKER_CPP(fclose)
         .stubs()
         .will(returnValue(2));
 
@@ -1227,27 +1227,27 @@ TEST_F(COMMON_UTILS_UTILS_TEST, WriteFile4) {
     FILE *file = (FILE *)0x12345;
     std::string profName = "PROF_000001_20220222182700493_BABQCAKDOMCOLMJB\n";
 
-    MOCKER(fopen)
+    MOCKER_CPP(fopen)
         .stubs()
         .will(returnValue(file));
 
-    MOCKER(fileno)
+    MOCKER_CPP(fileno)
         .stubs()
         .will(returnValue(2));
 
-    MOCKER(flock)
+    MOCKER_CPP(flock)
         .stubs()
         .will(returnValue(0)); //success
 
-    MOCKER(fwrite)
+    MOCKER_CPP(fwrite)
         .stubs()
         .will(returnValue(profName.length())); //sucess. 47 is not equal to the lenth of PROF_000001_20220222182700493_BABQCAKDOMCOLMJB\n
 
-    MOCKER(UnFileLock)
+    MOCKER_CPP(UnFileLock)
         .stubs()
         .will(returnValue(0)); //sucess
 
-    MOCKER(fclose)
+    MOCKER_CPP(fclose)
         .stubs()
         .will(returnValue(2));
 
@@ -1258,11 +1258,11 @@ TEST_F(COMMON_UTILS_UTILS_TEST, UnFileLock0) {
     GlobalMockObject::verify();
     FILE *file = (FILE *)0x12345;
 
-    MOCKER(fileno)
+    MOCKER_CPP(fileno)
         .stubs()
         .will(returnValue(2));
 
-    MOCKER(flock)
+    MOCKER_CPP(flock)
         .stubs()
         .will(returnValue(0)); //success
 
@@ -1273,11 +1273,11 @@ TEST_F(COMMON_UTILS_UTILS_TEST, UnFileLock1) {
     GlobalMockObject::verify();
     FILE *file = (FILE *)0x12345;
 
-    MOCKER(fileno)
+    MOCKER_CPP(fileno)
         .stubs()
         .will(returnValue(2));
 
-    MOCKER(flock)
+    MOCKER_CPP(flock)
         .stubs()
         .will(returnValue(1)); //failed
 

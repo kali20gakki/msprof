@@ -116,7 +116,6 @@ protected:
     }
 public:
     std::shared_ptr<Analysis::Dvvp::JobWrapper::CollectionJobCfg> collectionJobCfg_;
-    MockObject<analysis::dvvp::driver::DrvChannelsMgr>mockerDrvChannelsMgr;
 };
 
 TEST_F(JOB_WRAPPER_PROF_TsTrack_JOB_TEST, Init) {
@@ -140,7 +139,7 @@ TEST_F(JOB_WRAPPER_PROF_TsTrack_JOB_TEST, Init) {
 TEST_F(JOB_WRAPPER_PROF_TsTrack_JOB_TEST, Process) {
     GlobalMockObject::verify();
 
-    MOCK_METHOD(mockerDrvChannelsMgr, ChannelIsValid)
+    MOCKER_CPP(&analysis::dvvp::driver::DrvChannelsMgr::ChannelIsValid)
         .stubs()
         .will(returnValue(true));
 
@@ -194,7 +193,6 @@ protected:
     }
 public:
     std::shared_ptr<Analysis::Dvvp::JobWrapper::CollectionJobCfg> collectionJobCfg_;
-    MockObject<analysis::dvvp::driver::DrvChannelsMgr>mockerDrvChannelsMgr;
 };
 
 TEST_F(JOB_WRAPPER_PROF_AICORE_JOB_TEST, Init) {
@@ -228,7 +226,7 @@ TEST_F(JOB_WRAPPER_PROF_AICORE_JOB_TEST, Init) {
 TEST_F(JOB_WRAPPER_PROF_AICORE_JOB_TEST, Process) {
     GlobalMockObject::verify();
 
-    MOCK_METHOD(mockerDrvChannelsMgr, ChannelIsValid)
+    MOCKER_CPP(&analysis::dvvp::driver::DrvChannelsMgr::ChannelIsValid)
         .stubs()
         .will(returnValue(false))
         .then(returnValue(true));
@@ -254,7 +252,7 @@ TEST_F(JOB_WRAPPER_PROF_AICORE_JOB_TEST, Process) {
 TEST_F(JOB_WRAPPER_PROF_AICORE_JOB_TEST, Uninit) {
     GlobalMockObject::verify();
 
-    MOCK_METHOD(mockerDrvChannelsMgr, ChannelIsValid)
+    MOCKER_CPP(&analysis::dvvp::driver::DrvChannelsMgr::ChannelIsValid)
         .stubs()
         .will(returnValue(false))
         .then(returnValue(true));
@@ -288,7 +286,6 @@ protected:
     }
 public:
     std::shared_ptr<Analysis::Dvvp::JobWrapper::CollectionJobCfg> collectionJobCfg_;
-    MockObject<analysis::dvvp::driver::DrvChannelsMgr>mockerDrvChannelsMgr;
 };
 
 TEST_F(JOB_WRAPPER_PROF_AICORETASK_JOB_TEST, Init) {
@@ -357,7 +354,7 @@ TEST_F(JOB_WRAPPER_PROF_AICORETASK_JOB_TEST, Uninit) {
     profAicoreTaskBasedJob->Init(collectionJobCfg_);
     EXPECT_EQ(PROFILING_SUCCESS, profAicoreTaskBasedJob->Uninit());
 
-    MOCK_METHOD(mockerDrvChannelsMgr, ChannelIsValid)
+    MOCKER_CPP(&analysis::dvvp::driver::DrvChannelsMgr::ChannelIsValid)
         .stubs()
         .will(returnValue(false));
     EXPECT_EQ(PROFILING_SUCCESS, profAicoreTaskBasedJob->Uninit());
@@ -385,7 +382,6 @@ protected:
     }
 public:
     std::shared_ptr<Analysis::Dvvp::JobWrapper::CollectionJobCfg> collectionJobCfg_;
-    MockObject<analysis::dvvp::driver::DrvChannelsMgr>mockerDrvChannelsMgr;
 };
 
 TEST_F(JOB_WRAPPER_PROF_FFTS_JOB_TEST, Init) {
@@ -424,7 +420,7 @@ TEST_F(JOB_WRAPPER_PROF_FFTS_JOB_TEST, Process) {
     collectionJobCfg_->comParams->params->aicore_sampling_interval = 20;
     profFftsJob->Init(collectionJobCfg_);
 
-    MOCK_METHOD(mockerDrvChannelsMgr, ChannelIsValid)
+    MOCKER_CPP(&analysis::dvvp::driver::DrvChannelsMgr::ChannelIsValid)
         .stubs()
         .will(returnValue(true));
     EXPECT_EQ(PROFILING_SUCCESS, profFftsJob->Process());
@@ -450,7 +446,7 @@ TEST_F(JOB_WRAPPER_PROF_FFTS_JOB_TEST, Uninit) {
     EXPECT_EQ(PROFILING_SUCCESS, profFftsJob->Uninit());
 
     profFftsJob->Init(collectionJobCfg_);
-    MOCK_METHOD(mockerDrvChannelsMgr, ChannelIsValid)
+    MOCKER_CPP(&analysis::dvvp::driver::DrvChannelsMgr::ChannelIsValid)
         .stubs()
         .will(returnValue(true));
     EXPECT_EQ(PROFILING_SUCCESS, profFftsJob->Uninit());
@@ -476,13 +472,6 @@ protected:
     }
 public:
     std::shared_ptr<Analysis::Dvvp::JobWrapper::CollectionJobCfg> collectionJobCfg_;
-    MockObject<Analysis::Dvvp::Common::Platform::Platform>mockerPlatform;
-    MockObject<Analysis::Dvvp::JobWrapper::ProfCtrlcpuJob>mockerProfCtrlcpuJob;
-    MockObject<analysis::dvvp::common::thread::Thread>mockerThread;
-    MockObject<Analysis::Dvvp::JobWrapper::PerfExtraTask>mockerPerfExtraTask;
-    MockObject<analysis::dvvp::common::memory::Chunk>mockerChunk;
-    MockObject<analysis::dvvp::transport::Uploader>mockerUploader;
-    
 };
 
 void fake_get_files_perf(const std::string &dir, bool is_recur, std::vector<std::string>& files)
@@ -504,7 +493,7 @@ TEST_F(JOB_WRAPPER_PROF_CTRLCPU_JOB_TEST, InitFailed) {
 TEST_F(JOB_WRAPPER_PROF_CTRLCPU_JOB_TEST, Init) {
     GlobalMockObject::verify();
 
-    MOCK_METHOD(mockerPlatform, RunSocSide)
+    MOCKER_CPP(&Analysis::Dvvp::Common::Platform::Platform::RunSocSide)
         .stubs()
         .will(returnValue(true));
 
@@ -522,7 +511,7 @@ TEST_F(JOB_WRAPPER_PROF_CTRLCPU_JOB_TEST, Init) {
 
 TEST_F(JOB_WRAPPER_PROF_CTRLCPU_JOB_TEST, Process) {
     GlobalMockObject::verify();
-    MOCK_METHOD(mockerPlatform, RunSocSide)
+    MOCKER_CPP(&Analysis::Dvvp::Common::Platform::Platform::RunSocSide)
         .stubs()
         .will(returnValue(true));
 
@@ -537,7 +526,7 @@ TEST_F(JOB_WRAPPER_PROF_CTRLCPU_JOB_TEST, Process) {
     collectionJobCfg_->comParams->jobCtx = std::make_shared<analysis::dvvp::message::JobContext>();
 
     std::string filePath = "./ctrlCpu.data";
-    MOCK_METHOD(mockerProfCtrlcpuJob, PrepareDataDir)
+    MOCKER_CPP(&Analysis::Dvvp::JobWrapper::ProfCtrlcpuJob::PrepareDataDir)
         .stubs()
         .with(outBound(filePath))
         .will(returnValue(PROFILING_SUCCESS));
@@ -562,7 +551,7 @@ TEST_F(JOB_WRAPPER_PROF_CTRLCPU_JOB_TEST, Process) {
 
 TEST_F(JOB_WRAPPER_PROF_CTRLCPU_JOB_TEST, Uninit) {
     GlobalMockObject::verify();
-    MOCK_METHOD(mockerPlatform, RunSocSide)
+    MOCKER_CPP(&Analysis::Dvvp::Common::Platform::Platform::RunSocSide)
         .stubs()
         .will(returnValue(true));
 
@@ -589,7 +578,7 @@ TEST_F(JOB_WRAPPER_PROF_CTRLCPU_JOB_TEST, Uninit) {
 
 TEST_F(JOB_WRAPPER_PROF_CTRLCPU_JOB_TEST, GetCollectCtrlCpuEventCmd) {
     GlobalMockObject::verify();
-    MOCK_METHOD(mockerPlatform, RunSocSide)
+    MOCKER_CPP(&Analysis::Dvvp::Common::Platform::Platform::RunSocSide)
         .stubs()
         .will(returnValue(true));
 
@@ -603,7 +592,7 @@ TEST_F(JOB_WRAPPER_PROF_CTRLCPU_JOB_TEST, GetCollectCtrlCpuEventCmd) {
     collectionJobCfg_->comParams->params = params;
     collectionJobCfg_->comParams->params->cpu_sampling_interval = 10;
     std::string filePath = "./GetCollectCtrlCpuEventCmd";
-    MOCK_METHOD(mockerProfCtrlcpuJob, PrepareDataDir)
+    MOCKER_CPP(&Analysis::Dvvp::JobWrapper::ProfCtrlcpuJob::PrepareDataDir)
         .stubs()
         .with(outBound(filePath))
         .will(returnValue(PROFILING_SUCCESS));
@@ -631,7 +620,7 @@ TEST_F(JOB_WRAPPER_PROF_CTRLCPU_JOB_TEST, GetCollectCtrlCpuEventCmd) {
 
 TEST_F(JOB_WRAPPER_PROF_CTRLCPU_JOB_TEST, PrepareDataDir) {
     GlobalMockObject::verify();
-    MOCK_METHOD(mockerPlatform, RunSocSide)
+    MOCKER_CPP(&Analysis::Dvvp::Common::Platform::Platform::RunSocSide)
         .stubs()
         .will(returnValue(true));
 
@@ -658,7 +647,7 @@ TEST_F(JOB_WRAPPER_PROF_CTRLCPU_JOB_TEST, PerfScriptTask) {
         .stubs()
         .will(returnValue(0));
 
-    MOCK_METHOD(mockerThread, IsQuit)
+    MOCKER_CPP(&analysis::dvvp::common::thread::Thread::IsQuit)
         .stubs()
         .will(returnValue(true));
 
@@ -666,7 +655,7 @@ TEST_F(JOB_WRAPPER_PROF_CTRLCPU_JOB_TEST, PerfScriptTask) {
         .stubs()
         .will(returnValue(PROFILING_SUCCESS));
 
-    MOCK_METHOD(mockerPerfExtraTask, StoreData)
+    MOCKER_CPP(&Analysis::Dvvp::JobWrapper::PerfExtraTask::StoreData)
         .stubs();
     Analysis::Dvvp::JobWrapper::PerfExtraTask perfTask(10, "./ret", collectionJobCfg_->comParams->jobCtx, collectionJobCfg_->comParams->params);
     EXPECT_EQ(PROFILING_SUCCESS, perfTask.Init());
@@ -676,15 +665,15 @@ TEST_F(JOB_WRAPPER_PROF_CTRLCPU_JOB_TEST, PerfScriptTask) {
 TEST_F(JOB_WRAPPER_PROF_CTRLCPU_JOB_TEST, run) {
     GlobalMockObject::verify();
 
-    MOCK_METHOD(mockerPerfExtraTask, PerfScriptTask)
+    MOCKER_CPP(&Analysis::Dvvp::JobWrapper::PerfExtraTask::PerfScriptTask)
         .stubs();
 
-    MOCK_METHOD(mockerThread, IsQuit)
+    MOCKER_CPP(&analysis::dvvp::common::thread::Thread::IsQuit)
         .stubs()
         .will(returnValue(false))
         .then(returnValue(true));
 
-    MOCK_METHOD(mockerChunk, Init)
+    MOCKER_CPP(&analysis::dvvp::common::memory::Chunk::Init)
         .stubs()
         .will(returnValue(false))
         .then(returnValue(true));
@@ -704,7 +693,7 @@ TEST_F(JOB_WRAPPER_PROF_CTRLCPU_JOB_TEST, run) {
 TEST_F(JOB_WRAPPER_PROF_CTRLCPU_JOB_TEST, StoreData) {
     GlobalMockObject::verify();
 
-    MOCK_METHOD(mockerUploader, UploadData)
+    MOCKER_CPP(&analysis::dvvp::transport::Uploader::UploadData)
         .stubs()
         .will(returnValue(PROFILING_SUCCESS));
     auto jobCtx = std::make_shared<analysis::dvvp::message::JobContext>();
@@ -745,14 +734,11 @@ protected:
     }
 public:
     std::shared_ptr<Analysis::Dvvp::JobWrapper::CollectionJobCfg> collectionJobCfg_;
-    MockObject<Analysis::Dvvp::Common::Platform::Platform>mockerPlatform;
-    MockObject<analysis::dvvp::transport::UploaderMgr>mockerUploaderMgr;
-    MockObject<Analysis::Dvvp::JobWrapper::ProcStatFileHandler>mockerProcStatFileHandler;
 };
 
 TEST_F(JOB_WRAPPER_PROF_SYSSTAT_JOB_TEST, Init) {
     GlobalMockObject::verify();
-    MOCK_METHOD(mockerPlatform, RunSocSide)
+    MOCKER_CPP(&Analysis::Dvvp::Common::Platform::Platform::RunSocSide)
         .stubs()
         .will(returnValue(true));
     auto profSysStatJob = std::make_shared<Analysis::Dvvp::JobWrapper::ProfSysStatJob>();
@@ -765,7 +751,7 @@ TEST_F(JOB_WRAPPER_PROF_SYSSTAT_JOB_TEST, Init) {
     auto transport = std::shared_ptr<analysis::dvvp::transport::HDCTransport>(
             new analysis::dvvp::transport::HDCTransport(session));
     auto uploader = std::make_shared<analysis::dvvp::transport::Uploader>(transport);
-    MOCK_METHOD(mockerUploaderMgr, GetUploader)
+    MOCKER_CPP(&analysis::dvvp::transport::UploaderMgr::GetUploader)
         .stubs()
         .will(returnValue(uploader));
     analysis::dvvp::transport::UploaderMgr::instance()->AddUploader("0", uploader);
@@ -778,7 +764,7 @@ TEST_F(JOB_WRAPPER_PROF_SYSSTAT_JOB_TEST, Init) {
 
 TEST_F(JOB_WRAPPER_PROF_SYSSTAT_JOB_TEST, Process) {
     GlobalMockObject::verify();
-    MOCK_METHOD(mockerPlatform, RunSocSide)
+    MOCKER_CPP(&Analysis::Dvvp::Common::Platform::Platform::RunSocSide)
         .stubs()
         .will(returnValue(true));
     collectionJobCfg_->comParams->params->cpu_sampling_interval = 200;
@@ -808,7 +794,8 @@ TEST_F(JOB_WRAPPER_PROF_SYSSTAT_JOB_TEST, Process) {
             Analysis::Dvvp::JobWrapper::PROF_SYS_MEM, devId, bufSize,
             sampleIntervalMs, srcFileName, retFileName, params, jobCtx, uploader);
 
-    MOCK_METHOD(mockerProcStatFileHandler, Init)
+    MOCKER_CPP_VIRTUAL(
+            (Analysis::Dvvp::JobWrapper::ProcTimerHandler*)&memHandler, &Analysis::Dvvp::JobWrapper::ProcStatFileHandler::Init)
         .stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
@@ -817,7 +804,7 @@ TEST_F(JOB_WRAPPER_PROF_SYSSTAT_JOB_TEST, Process) {
 
 TEST_F(JOB_WRAPPER_PROF_SYSSTAT_JOB_TEST, Uninit) {
     GlobalMockObject::verify();
-    MOCK_METHOD(mockerPlatform, RunSocSide)
+    MOCKER_CPP(&Analysis::Dvvp::Common::Platform::Platform::RunSocSide)
         .stubs()
         .will(returnValue(true));
 
@@ -846,14 +833,11 @@ protected:
     }
 public:
     std::shared_ptr<Analysis::Dvvp::JobWrapper::CollectionJobCfg> collectionJobCfg_;
-    MockObject<Analysis::Dvvp::Common::Platform::Platform>mockerPlatform;
-    MockObject<Analysis::Dvvp::JobWrapper::ProcAllPidsFileHandler>mockerProcAllPidsFileHandler;
-    MockObject<analysis::dvvp::transport::UploaderMgr>mockerUploaderMgr;
 };
 
 TEST_F(JOB_WRAPPER_PROF_ALLPIDS_JOB_TEST, Init) {
     GlobalMockObject::verify();
-    MOCK_METHOD(mockerPlatform, RunSocSide)
+    MOCKER_CPP(&Analysis::Dvvp::Common::Platform::Platform::RunSocSide)
         .stubs()
         .will(returnValue(true));
     auto profAllPidsJob = std::make_shared<Analysis::Dvvp::JobWrapper::ProfAllPidsJob>();
@@ -869,7 +853,7 @@ TEST_F(JOB_WRAPPER_PROF_ALLPIDS_JOB_TEST, Init) {
 
 TEST_F(JOB_WRAPPER_PROF_ALLPIDS_JOB_TEST, Process) {
     GlobalMockObject::verify();
-    MOCK_METHOD(mockerPlatform, RunSocSide)
+    MOCKER_CPP(&Analysis::Dvvp::Common::Platform::Platform::RunSocSide)
         .stubs()
         .will(returnValue(true));
     auto profAllPidsJob = std::make_shared<Analysis::Dvvp::JobWrapper::ProfAllPidsJob>();
@@ -890,7 +874,7 @@ TEST_F(JOB_WRAPPER_PROF_ALLPIDS_JOB_TEST, Process) {
     Analysis::Dvvp::JobWrapper::ProcAllPidsFileHandler allPidsHandler(PROF_ALL_PID, devId,
             sampleIntervalMs, params, jobCtx, uploader);
 
-    MOCK_METHOD(mockerProcAllPidsFileHandler, Init)
+    MOCKER_CPP_VIRTUAL(&allPidsHandler, &Analysis::Dvvp::JobWrapper::ProcAllPidsFileHandler::Init)
         .stubs()
         .will(returnValue(PROFILING_FAILED));
     EXPECT_EQ(PROFILING_FAILED, profAllPidsJob->Process());
@@ -898,7 +882,7 @@ TEST_F(JOB_WRAPPER_PROF_ALLPIDS_JOB_TEST, Process) {
 
 TEST_F(JOB_WRAPPER_PROF_ALLPIDS_JOB_TEST, ProfTimerJobCommonInit) {
     GlobalMockObject::verify();
-    MOCK_METHOD(mockerPlatform, RunSocSide)
+    MOCKER_CPP(&Analysis::Dvvp::Common::Platform::Platform::RunSocSide)
         .stubs()
         .will(returnValue(true));
     collectionJobCfg_->comParams->params->pid_profiling = "on";
@@ -919,7 +903,7 @@ TEST_F(JOB_WRAPPER_PROF_ALLPIDS_JOB_TEST, ProfTimerJobCommonInit) {
     Analysis::Dvvp::JobWrapper::ProcAllPidsFileHandler allPidsHandler(PROF_ALL_PID, devId,
             sampleIntervalMs, params, jobCtx, uploader);
 
-    MOCK_METHOD(mockerUploaderMgr, GetUploader)
+    MOCKER_CPP(&analysis::dvvp::transport::UploaderMgr::GetUploader)
         .stubs()
         .will(returnValue(uploader));
     EXPECT_EQ(PROFILING_SUCCESS, profAllPidsJob->Process());
@@ -927,7 +911,7 @@ TEST_F(JOB_WRAPPER_PROF_ALLPIDS_JOB_TEST, ProfTimerJobCommonInit) {
 
 TEST_F(JOB_WRAPPER_PROF_ALLPIDS_JOB_TEST, Uninit) {
     GlobalMockObject::verify();
-    MOCK_METHOD(mockerPlatform, RunSocSide)
+    MOCKER_CPP(&Analysis::Dvvp::Common::Platform::Platform::RunSocSide)
         .stubs()
         .will(returnValue(true));
 
@@ -956,13 +940,11 @@ protected:
     }
 public:
     std::shared_ptr<Analysis::Dvvp::JobWrapper::CollectionJobCfg> collectionJobCfg_;
-    MockObject<Analysis::Dvvp::Common::Platform::Platform>mockerPlatform;
-    MockObject<Analysis::Dvvp::JobWrapper::ProcMemFileHandler>mockerProcMemFileHandler;
 };
 
 TEST_F(JOB_WRAPPER_PROF_SYSMEM_JOB_TEST, Init) {
     GlobalMockObject::verify();
-    MOCK_METHOD(mockerPlatform, RunSocSide)
+    MOCKER_CPP(&Analysis::Dvvp::Common::Platform::Platform::RunSocSide)
         .stubs()
         .will(returnValue(true));
     auto profSysMemJob = std::make_shared<Analysis::Dvvp::JobWrapper::ProfSysMemJob>();
@@ -977,7 +959,7 @@ TEST_F(JOB_WRAPPER_PROF_SYSMEM_JOB_TEST, Init) {
 
 TEST_F(JOB_WRAPPER_PROF_SYSMEM_JOB_TEST, Process) {
     GlobalMockObject::verify();
-    MOCK_METHOD(mockerPlatform, RunSocSide)
+    MOCKER_CPP(&Analysis::Dvvp::Common::Platform::Platform::RunSocSide)
         .stubs()
         .will(returnValue(true));
     auto profSysMemJob = std::make_shared<Analysis::Dvvp::JobWrapper::ProfSysMemJob>();
@@ -1006,7 +988,8 @@ TEST_F(JOB_WRAPPER_PROF_SYSMEM_JOB_TEST, Process) {
             Analysis::Dvvp::JobWrapper::PROF_SYS_MEM, devId, bufSize,
             sampleIntervalMs, srcFileName, retFileName, params, jobCtx, uploader);
 
-    MOCK_METHOD(mockerProcMemFileHandler, Init)
+    MOCKER_CPP_VIRTUAL(
+            (Analysis::Dvvp::JobWrapper::ProcTimerHandler*)&memHandler, &Analysis::Dvvp::JobWrapper::ProcMemFileHandler::Init)
         .stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
@@ -1015,7 +998,7 @@ TEST_F(JOB_WRAPPER_PROF_SYSMEM_JOB_TEST, Process) {
 
 TEST_F(JOB_WRAPPER_PROF_SYSMEM_JOB_TEST, Uninit) {
     GlobalMockObject::verify();
-    MOCK_METHOD(mockerPlatform, RunSocSide)
+    MOCKER_CPP(&Analysis::Dvvp::Common::Platform::Platform::RunSocSide)
         .stubs()
         .will(returnValue(true));
 
@@ -1155,7 +1138,6 @@ protected:
     }
 public:
     std::shared_ptr<Analysis::Dvvp::JobWrapper::CollectionJobCfg> collectionJobCfg_;
-    MockObject<analysis::dvvp::transport::Uploader>mockerUploader;
 };
 
 TEST_F(JOB_WRAPPER_PROF_L2_CACHE_JOB_TEST, Init) {
@@ -1202,7 +1184,7 @@ TEST_F(JOB_WRAPPER_PROF_L2_CACHE_JOB_TEST, TaskInit) {
      _devices.push_back("0");
     std::shared_ptr<analysis::dvvp::host::ProfTask> task(new analysis::dvvp::host::ProfTask(_devices, param_));
 
-    MOCK_METHOD(mockerUploader, Flush)
+    MOCKER_CPP(&analysis::dvvp::transport::Uploader::Flush)
         .stubs();
 
     MOCKER(mmCreateTaskWithThreadAttr)
@@ -1237,7 +1219,6 @@ protected:
     }
 public:
     std::shared_ptr<Analysis::Dvvp::JobWrapper::CollectionJobCfg> collectionJobCfg_;
-    MockObject<Analysis::Dvvp::JobWrapper::PerfExtraTask>mockerPerfExtraTask;
 };
 
 void fake_get_files_perf_extra(const std::string &dir, bool is_recur, std::vector<std::string>& files)
@@ -1255,11 +1236,11 @@ TEST_F(JOB_WRAPPER_PROF_PERF_EXTRA_JOB_TEST, PerfScriptTask) {
         .stubs()
         .will(invoke(fake_get_files_perf_extra));
 
-    MOCK_METHOD(mockerPerfExtraTask, IsQuit)
+    MOCKER_CPP(&Analysis::Dvvp::JobWrapper::PerfExtraTask::IsQuit)
         .stubs()
         .will(returnValue(true));
 
-    MOCK_METHOD(mockerPerfExtraTask, ResolvePerfRecordData)
+    MOCKER_CPP(&Analysis::Dvvp::JobWrapper::PerfExtraTask::ResolvePerfRecordData)
         .stubs();
     Analysis::Dvvp::JobWrapper::PerfExtraTask perfExtraTask(10, "./ret", collectionJobCfg_->comParams->jobCtx, collectionJobCfg_->comParams->params);
     perfExtraTask.PerfScriptTask();

@@ -33,14 +33,11 @@ protected:
     }
 public:
     std::shared_ptr<Analysis::Dvvp::JobWrapper::CollectionJobCfg> collectionJobCfg_;
-    MockObject<Analysis::Dvvp::Common::Platform::Platform>mockerPlatform;
-    MockObject<analysis::dvvp::transport::UploaderMgr>mockerUploaderMgr;
-    MockObject<Analysis::Dvvp::JobWrapper::ProcHostCpuHandler>mockerProcHostCpuHandler;
 };
 
 TEST_F(JOB_WRAPPER_PROF_HOST_CPU_JOB_TEST, Init) {
     GlobalMockObject::verify();
-    MOCK_METHOD(mockerPlatform, RunSocSide)
+    MOCKER_CPP(&Analysis::Dvvp::Common::Platform::Platform::RunSocSide)
         .stubs()
         .will(returnValue(true))
         .then(returnValue(false));
@@ -56,7 +53,7 @@ TEST_F(JOB_WRAPPER_PROF_HOST_CPU_JOB_TEST, Init) {
     EXPECT_EQ(PROFILING_FAILED, profHostCpuJob->Init(collectionJobCfg_));
 
     auto uploader = std::make_shared<analysis::dvvp::transport::Uploader>(nullptr);
-    MOCK_METHOD(mockerUploaderMgr, GetUploader)
+    MOCKER_CPP(&analysis::dvvp::transport::UploaderMgr::GetUploader)
         .stubs()
         .with(any(), outBound(uploader));
     analysis::dvvp::transport::UploaderMgr::instance()->AddUploader("0", uploader);
@@ -70,7 +67,7 @@ TEST_F(JOB_WRAPPER_PROF_HOST_CPU_JOB_TEST, Init) {
 
 TEST_F(JOB_WRAPPER_PROF_HOST_CPU_JOB_TEST, Process) {
     GlobalMockObject::verify();
-    MOCK_METHOD(mockerPlatform, RunSocSide)
+    MOCKER_CPP(&Analysis::Dvvp::Common::Platform::Platform::RunSocSide)
         .stubs()
         .will(returnValue(false));
     collectionJobCfg_->comParams->params->host_profiling = true;
@@ -91,7 +88,8 @@ TEST_F(JOB_WRAPPER_PROF_HOST_CPU_JOB_TEST, Process) {
             Analysis::Dvvp::JobWrapper::PROF_HOST_PROC_CPU, bufSize,
             sampleIntervalMs, retFileName, params, jobCtx, uploader);
 
-    MOCK_METHOD(mockerProcHostCpuHandler, Init)
+    MOCKER_CPP_VIRTUAL(
+            (Analysis::Dvvp::JobWrapper::ProcTimerHandler*)&hostCpuHandler, &Analysis::Dvvp::JobWrapper::ProcHostCpuHandler::Init)
         .stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
@@ -101,7 +99,7 @@ TEST_F(JOB_WRAPPER_PROF_HOST_CPU_JOB_TEST, Process) {
 
 TEST_F(JOB_WRAPPER_PROF_HOST_CPU_JOB_TEST, Uninit) {
     GlobalMockObject::verify();
-    MOCK_METHOD(mockerPlatform, RunSocSide)
+    MOCKER_CPP(&Analysis::Dvvp::Common::Platform::Platform::RunSocSide)
         .stubs()
         .will(returnValue(false));
 
@@ -128,14 +126,11 @@ protected:
     }
 public:
     std::shared_ptr<Analysis::Dvvp::JobWrapper::CollectionJobCfg> collectionJobCfg_;
-    MockObject<Analysis::Dvvp::Common::Platform::Platform>mockerPlatform;
-    MockObject<analysis::dvvp::transport::UploaderMgr>mockerUploaderMgr;
-    MockObject<Analysis::Dvvp::JobWrapper::ProcHostMemHandler>mockerProcHostMemHandler;
 };
 
 TEST_F(JOB_WRAPPER_PROF_HOST_MEM_JOB_TEST, Init) {
     GlobalMockObject::verify();
-    MOCK_METHOD(mockerPlatform, RunSocSide)
+    MOCKER_CPP(&Analysis::Dvvp::Common::Platform::Platform::RunSocSide)
         .stubs()
         .will(returnValue(true))
         .then(returnValue(false));
@@ -151,7 +146,7 @@ TEST_F(JOB_WRAPPER_PROF_HOST_MEM_JOB_TEST, Init) {
     EXPECT_EQ(PROFILING_FAILED, profHostMemJob->Init(collectionJobCfg_));
 
     auto uploader = std::make_shared<analysis::dvvp::transport::Uploader>(nullptr);
-    MOCK_METHOD(mockerUploaderMgr, GetUploader)
+    MOCKER_CPP(&analysis::dvvp::transport::UploaderMgr::GetUploader)
         .stubs()
         .with(any(), outBound(uploader));
     analysis::dvvp::transport::UploaderMgr::instance()->AddUploader("0", uploader);
@@ -163,7 +158,7 @@ TEST_F(JOB_WRAPPER_PROF_HOST_MEM_JOB_TEST, Init) {
 
 TEST_F(JOB_WRAPPER_PROF_HOST_MEM_JOB_TEST, Process) {
     GlobalMockObject::verify();
-    MOCK_METHOD(mockerPlatform, RunSocSide)
+    MOCKER_CPP(&Analysis::Dvvp::Common::Platform::Platform::RunSocSide)
         .stubs()
         .will(returnValue(false));
     collectionJobCfg_->comParams->params->host_profiling = true;
@@ -184,7 +179,8 @@ TEST_F(JOB_WRAPPER_PROF_HOST_MEM_JOB_TEST, Process) {
             Analysis::Dvvp::JobWrapper::PROF_HOST_PROC_MEM, bufSize,
             sampleIntervalMs, retFileName, params, jobCtx, uploader);
 
-    MOCK_METHOD(mockerProcHostMemHandler, Init)
+    MOCKER_CPP_VIRTUAL(
+            (Analysis::Dvvp::JobWrapper::ProcTimerHandler*)&hostMemHandler, &Analysis::Dvvp::JobWrapper::ProcHostMemHandler::Init)
         .stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
@@ -194,7 +190,7 @@ TEST_F(JOB_WRAPPER_PROF_HOST_MEM_JOB_TEST, Process) {
 
 TEST_F(JOB_WRAPPER_PROF_HOST_MEM_JOB_TEST, Uninit) {
     GlobalMockObject::verify();
-    MOCK_METHOD(mockerPlatform, RunSocSide)
+    MOCKER_CPP(&Analysis::Dvvp::Common::Platform::Platform::RunSocSide)
         .stubs()
         .will(returnValue(false));
 
@@ -222,14 +218,11 @@ protected:
     }
 public:
     std::shared_ptr<Analysis::Dvvp::JobWrapper::CollectionJobCfg> collectionJobCfg_;
-    MockObject<Analysis::Dvvp::Common::Platform::Platform>mockerPlatform;
-    MockObject<analysis::dvvp::transport::UploaderMgr>mockerUploaderMgr;
-    MockObject<Analysis::Dvvp::JobWrapper::ProcHostNetworkHandler>mockerProcHostNetworkHandler;
 };
 
 TEST_F(JOB_WRAPPER_PROF_HOST_NETWORK_JOB_TEST, Init) {
     GlobalMockObject::verify();
-    MOCK_METHOD(mockerPlatform, RunSocSide)
+    MOCKER_CPP(&Analysis::Dvvp::Common::Platform::Platform::RunSocSide)
         .stubs()
         .will(returnValue(true))
         .then(returnValue(false));
@@ -245,7 +238,7 @@ TEST_F(JOB_WRAPPER_PROF_HOST_NETWORK_JOB_TEST, Init) {
     EXPECT_EQ(PROFILING_FAILED, profHostNetworkJob->Init(collectionJobCfg_));
 
     auto uploader = std::make_shared<analysis::dvvp::transport::Uploader>(nullptr);
-    MOCK_METHOD(mockerUploaderMgr, GetUploader)
+    MOCKER_CPP(&analysis::dvvp::transport::UploaderMgr::GetUploader)
         .stubs()
         .with(any(), outBound(uploader));
     analysis::dvvp::transport::UploaderMgr::instance()->AddUploader("0", uploader);
@@ -259,7 +252,7 @@ TEST_F(JOB_WRAPPER_PROF_HOST_NETWORK_JOB_TEST, Init) {
 
 TEST_F(JOB_WRAPPER_PROF_HOST_NETWORK_JOB_TEST, Process) {
     GlobalMockObject::verify();
-    MOCK_METHOD(mockerPlatform, RunSocSide)
+    MOCKER_CPP(&Analysis::Dvvp::Common::Platform::Platform::RunSocSide)
         .stubs()
         .will(returnValue(false));
     collectionJobCfg_->comParams->params->host_profiling = true;
@@ -280,7 +273,8 @@ TEST_F(JOB_WRAPPER_PROF_HOST_NETWORK_JOB_TEST, Process) {
             Analysis::Dvvp::JobWrapper::PROF_HOST_SYS_NETWORK, bufSize,
             sampleIntervalMs, retFileName, params, jobCtx, uploader);
 
-    MOCK_METHOD(mockerProcHostNetworkHandler, Init)
+    MOCKER_CPP_VIRTUAL(
+            (Analysis::Dvvp::JobWrapper::ProcTimerHandler*)&hostNetworkHandler, &Analysis::Dvvp::JobWrapper::ProcHostNetworkHandler::Init)
         .stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
@@ -290,7 +284,7 @@ TEST_F(JOB_WRAPPER_PROF_HOST_NETWORK_JOB_TEST, Process) {
 
 TEST_F(JOB_WRAPPER_PROF_HOST_NETWORK_JOB_TEST, Uninit) {
     GlobalMockObject::verify();
-    MOCK_METHOD(mockerPlatform, RunSocSide)
+    MOCKER_CPP(&Analysis::Dvvp::Common::Platform::Platform::RunSocSide)
         .stubs()
         .will(returnValue(false));
 
@@ -317,13 +311,11 @@ protected:
     }
 public:
     std::shared_ptr<Analysis::Dvvp::JobWrapper::CollectionJobCfg> collectionJobCfg_;
-    MockObject<Analysis::Dvvp::Common::Platform::Platform>mockerPlatform;
-    MockObject<Analysis::Dvvp::JobWrapper::ProfHostService>mockerProfHostService;
 };
 
 TEST_F(JOB_WRAPPER_PROF_HOST_SYSCALLS_JOB_TEST, Init) {
     GlobalMockObject::verify();
-    MOCK_METHOD(mockerPlatform, RunSocSide)
+    MOCKER_CPP(&Analysis::Dvvp::Common::Platform::Platform::RunSocSide)
         .stubs()
         .will(returnValue(true))
         .then(returnValue(false));
@@ -344,17 +336,18 @@ TEST_F(JOB_WRAPPER_PROF_HOST_SYSCALLS_JOB_TEST, Init) {
 
 TEST_F(JOB_WRAPPER_PROF_HOST_SYSCALLS_JOB_TEST, Process) {
     GlobalMockObject::verify();
-    MOCK_METHOD(mockerPlatform, RunSocSide)
+    MOCKER_CPP(&Analysis::Dvvp::Common::Platform::Platform::RunSocSide)
         .stubs()
         .will(returnValue(false));
-    MOCK_METHOD(mockerProfHostService, Init)
+    MOCKER_CPP(&Analysis::Dvvp::JobWrapper::ProfHostService::Init)
         .stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
 
     Analysis::Dvvp::JobWrapper::ProfHostService hostServiceThread;
 
-    MOCK_METHOD(mockerProfHostService, Start)
+    MOCKER_CPP_VIRTUAL(
+            (Analysis::Dvvp::JobWrapper::ProfHostService*)&hostServiceThread, &Analysis::Dvvp::JobWrapper::ProfHostService::Start)
         .stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
@@ -374,22 +367,24 @@ TEST_F(JOB_WRAPPER_PROF_HOST_SYSCALLS_JOB_TEST, Uninit) {
     GlobalMockObject::verify();
     Analysis::Dvvp::JobWrapper::ProfHostService hostServiceThread;
 
-    MOCK_METHOD(mockerProfHostService, Stop)
+    MOCKER_CPP_VIRTUAL(
+            (Analysis::Dvvp::JobWrapper::ProfHostService*)&hostServiceThread, &Analysis::Dvvp::JobWrapper::ProfHostService::Stop)
         .stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
 
-    MOCK_METHOD(mockerProfHostService, Init)
+    MOCKER_CPP(&Analysis::Dvvp::JobWrapper::ProfHostService::Init)
         .stubs()
         .will(returnValue(PROFILING_SUCCESS))
         .then(returnValue(PROFILING_SUCCESS));
 
-    MOCK_METHOD(mockerProfHostService, Start)
+    MOCKER_CPP_VIRTUAL(
+            (Analysis::Dvvp::JobWrapper::ProfHostService*)&hostServiceThread, &Analysis::Dvvp::JobWrapper::ProfHostService::Start)
         .stubs()
         .will(returnValue(PROFILING_SUCCESS))
         .then(returnValue(PROFILING_SUCCESS));
 
-    MOCK_METHOD(mockerPlatform, RunSocSide)
+    MOCKER_CPP(&Analysis::Dvvp::Common::Platform::Platform::RunSocSide)
         .stubs()
         .will(returnValue(false));
 
@@ -406,7 +401,8 @@ TEST_F(JOB_WRAPPER_PROF_HOST_SYSCALLS_JOB_TEST, UninitFailed) {
     GlobalMockObject::verify();
     Analysis::Dvvp::JobWrapper::ProfHostService hostServiceThread;
 
-    MOCK_METHOD(mockerProfHostService, Stop)
+    MOCKER_CPP_VIRTUAL(
+            (Analysis::Dvvp::JobWrapper::ProfHostService*)&hostServiceThread, &Analysis::Dvvp::JobWrapper::ProfHostService::Stop)
         .stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
@@ -434,13 +430,11 @@ protected:
     }
 public:
     std::shared_ptr<Analysis::Dvvp::JobWrapper::CollectionJobCfg> collectionJobCfg_;
-    MockObject<Analysis::Dvvp::Common::Platform::Platform>mockerPlatform;
-    MockObject<Analysis::Dvvp::JobWrapper::ProfHostService>mockerProfHostService;
 };
 
 TEST_F(JOB_WRAPPER_PROF_HOST_PTHREAD_JOB_TEST, Init) {
     GlobalMockObject::verify();
-    MOCK_METHOD(mockerPlatform, RunSocSide)
+    MOCKER_CPP(&Analysis::Dvvp::Common::Platform::Platform::RunSocSide)
         .stubs()
         .will(returnValue(true))
         .then(returnValue(false));
@@ -461,17 +455,18 @@ TEST_F(JOB_WRAPPER_PROF_HOST_PTHREAD_JOB_TEST, Init) {
 
 TEST_F(JOB_WRAPPER_PROF_HOST_PTHREAD_JOB_TEST, Process) {
     GlobalMockObject::verify();
-    MOCK_METHOD(mockerPlatform, RunSocSide)
+    MOCKER_CPP(&Analysis::Dvvp::Common::Platform::Platform::RunSocSide)
         .stubs()
         .will(returnValue(false));
-    MOCK_METHOD(mockerProfHostService, Init)
+    MOCKER_CPP(&Analysis::Dvvp::JobWrapper::ProfHostService::Init)
         .stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
 
     Analysis::Dvvp::JobWrapper::ProfHostService hostServiceThread;
 
-    MOCK_METHOD(mockerProfHostService, Start)
+    MOCKER_CPP_VIRTUAL(
+            (Analysis::Dvvp::JobWrapper::ProfHostService*)&hostServiceThread, &Analysis::Dvvp::JobWrapper::ProfHostService::Start)
         .stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
@@ -491,22 +486,24 @@ TEST_F(JOB_WRAPPER_PROF_HOST_PTHREAD_JOB_TEST, Uninit) {
     GlobalMockObject::verify();
     Analysis::Dvvp::JobWrapper::ProfHostService hostServiceThread;
 
-    MOCK_METHOD(mockerProfHostService, Stop)
+    MOCKER_CPP_VIRTUAL(
+            (Analysis::Dvvp::JobWrapper::ProfHostService*)&hostServiceThread, &Analysis::Dvvp::JobWrapper::ProfHostService::Stop)
         .stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
 
-    MOCK_METHOD(mockerProfHostService, Init)
+    MOCKER_CPP(&Analysis::Dvvp::JobWrapper::ProfHostService::Init)
         .stubs()
         .will(returnValue(PROFILING_SUCCESS))
         .then(returnValue(PROFILING_SUCCESS));
 
-    MOCK_METHOD(mockerProfHostService, Start)
+    MOCKER_CPP_VIRTUAL(
+            (Analysis::Dvvp::JobWrapper::ProfHostService*)&hostServiceThread, &Analysis::Dvvp::JobWrapper::ProfHostService::Start)
         .stubs()
         .will(returnValue(PROFILING_SUCCESS))
         .then(returnValue(PROFILING_SUCCESS));
 
-    MOCK_METHOD(mockerPlatform, RunSocSide)
+    MOCKER_CPP(&Analysis::Dvvp::Common::Platform::Platform::RunSocSide)
         .stubs()
         .will(returnValue(false));
 
@@ -523,7 +520,8 @@ TEST_F(JOB_WRAPPER_PROF_HOST_PTHREAD_JOB_TEST, UninitFailed) {
     GlobalMockObject::verify();
     Analysis::Dvvp::JobWrapper::ProfHostService hostServiceThread;
 
-    MOCK_METHOD(mockerProfHostService, Stop)
+    MOCKER_CPP_VIRTUAL(
+            (Analysis::Dvvp::JobWrapper::ProfHostService*)&hostServiceThread, &Analysis::Dvvp::JobWrapper::ProfHostService::Stop)
         .stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
@@ -551,13 +549,11 @@ protected:
     }
 public:
     std::shared_ptr<Analysis::Dvvp::JobWrapper::CollectionJobCfg> collectionJobCfg_;
-    MockObject<Analysis::Dvvp::Common::Platform::Platform>mockerPlatform;
-    MockObject<Analysis::Dvvp::JobWrapper::ProfHostService>mockerProfHostService;
 };
 
 TEST_F(JOB_WRAPPER_PROF_HOST_DISK_JOB_TEST, Init) {
     GlobalMockObject::verify();
-    MOCK_METHOD(mockerPlatform, RunSocSide)
+    MOCKER_CPP(&Analysis::Dvvp::Common::Platform::Platform::RunSocSide)
         .stubs()
         .will(returnValue(true))
         .then(returnValue(false));
@@ -578,17 +574,18 @@ TEST_F(JOB_WRAPPER_PROF_HOST_DISK_JOB_TEST, Init) {
 
 TEST_F(JOB_WRAPPER_PROF_HOST_DISK_JOB_TEST, Process) {
     GlobalMockObject::verify();
-    MOCK_METHOD(mockerPlatform, RunSocSide)
+    MOCKER_CPP(&Analysis::Dvvp::Common::Platform::Platform::RunSocSide)
         .stubs()
         .will(returnValue(false));
-    MOCK_METHOD(mockerProfHostService, Init)
+    MOCKER_CPP(&Analysis::Dvvp::JobWrapper::ProfHostService::Init)
         .stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
 
     Analysis::Dvvp::JobWrapper::ProfHostService hostServiceThread;
 
-    MOCK_METHOD(mockerProfHostService, Start)
+    MOCKER_CPP_VIRTUAL(
+            (Analysis::Dvvp::JobWrapper::ProfHostService*)&hostServiceThread, &Analysis::Dvvp::JobWrapper::ProfHostService::Start)
         .stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
@@ -608,22 +605,24 @@ TEST_F(JOB_WRAPPER_PROF_HOST_DISK_JOB_TEST, Uninit) {
     GlobalMockObject::verify();
     Analysis::Dvvp::JobWrapper::ProfHostService hostServiceThread;
 
-    MOCK_METHOD(mockerProfHostService, Stop)
+    MOCKER_CPP_VIRTUAL(
+            (Analysis::Dvvp::JobWrapper::ProfHostService*)&hostServiceThread, &Analysis::Dvvp::JobWrapper::ProfHostService::Stop)
         .stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
 
-    MOCK_METHOD(mockerProfHostService, Init)
+    MOCKER_CPP(&Analysis::Dvvp::JobWrapper::ProfHostService::Init)
         .stubs()
         .will(returnValue(PROFILING_SUCCESS))
         .then(returnValue(PROFILING_SUCCESS));
 
-    MOCK_METHOD(mockerProfHostService, Start)
+    MOCKER_CPP_VIRTUAL(
+            (Analysis::Dvvp::JobWrapper::ProfHostService*)&hostServiceThread, &Analysis::Dvvp::JobWrapper::ProfHostService::Start)
         .stubs()
         .will(returnValue(PROFILING_SUCCESS))
         .then(returnValue(PROFILING_SUCCESS));
 
-    MOCK_METHOD(mockerPlatform, RunSocSide)
+    MOCKER_CPP(&Analysis::Dvvp::Common::Platform::Platform::RunSocSide)
         .stubs()
         .will(returnValue(false));
 
@@ -640,7 +639,8 @@ TEST_F(JOB_WRAPPER_PROF_HOST_DISK_JOB_TEST, UninitFailed) {
     GlobalMockObject::verify();
     Analysis::Dvvp::JobWrapper::ProfHostService hostServiceThread;
 
-    MOCK_METHOD(mockerProfHostService, Stop)
+    MOCKER_CPP_VIRTUAL(
+            (Analysis::Dvvp::JobWrapper::ProfHostService*)&hostServiceThread, &Analysis::Dvvp::JobWrapper::ProfHostService::Stop)
         .stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
@@ -668,13 +668,11 @@ protected:
     }
 public:
     std::shared_ptr<Analysis::Dvvp::JobWrapper::CollectionJobCfg> collectionJobCfg_;
-    MockObject<Analysis::Dvvp::Common::Platform::Platform>mockerPlatform;
-    MockObject<Analysis::Dvvp::JobWrapper::ProfHostService>mockerProfHostService;
 };
 
 TEST_F(JOB_WRAPPER_PROF_HOST_SERVER_TEST, Init) {
     GlobalMockObject::verify();
-    MOCK_METHOD(mockerPlatform, RunSocSide)
+    MOCKER_CPP(&Analysis::Dvvp::Common::Platform::Platform::RunSocSide)
         .stubs()
         .will(returnValue(true))
         .then(returnValue(false));
@@ -688,7 +686,7 @@ TEST_F(JOB_WRAPPER_PROF_HOST_SERVER_TEST, Init) {
 
 TEST_F(JOB_WRAPPER_PROF_HOST_SERVER_TEST, GetCollectIOTopCmd) {
     GlobalMockObject::verify();
-    MOCK_METHOD(mockerPlatform, RunSocSide)
+    MOCKER_CPP(&Analysis::Dvvp::Common::Platform::Platform::RunSocSide)
         .stubs()
         .will(returnValue(true))
         .then(returnValue(false));
@@ -701,7 +699,7 @@ TEST_F(JOB_WRAPPER_PROF_HOST_SERVER_TEST, GetCollectIOTopCmd) {
 
 TEST_F(JOB_WRAPPER_PROF_HOST_SERVER_TEST, GetCollectPthreadsCmd) {
     GlobalMockObject::verify();
-    MOCK_METHOD(mockerPlatform, RunSocSide)
+    MOCKER_CPP(&Analysis::Dvvp::Common::Platform::Platform::RunSocSide)
         .stubs()
         .will(returnValue(true))
         .then(returnValue(false));
@@ -714,7 +712,7 @@ TEST_F(JOB_WRAPPER_PROF_HOST_SERVER_TEST, GetCollectPthreadsCmd) {
 
 TEST_F(JOB_WRAPPER_PROF_HOST_SERVER_TEST, GetCollectSysCallsCmd) {
     GlobalMockObject::verify();
-    MOCK_METHOD(mockerPlatform, RunSocSide)
+    MOCKER_CPP(&Analysis::Dvvp::Common::Platform::Platform::RunSocSide)
         .stubs()
         .will(returnValue(true))
         .then(returnValue(false));
@@ -745,11 +743,11 @@ TEST_F(JOB_WRAPPER_PROF_HOST_SERVER_TEST, WriteDone) {
 
 TEST_F(JOB_WRAPPER_PROF_HOST_SERVER_TEST, Handler) {
     GlobalMockObject::verify();
-    MOCK_METHOD(mockerProfHostService, Uninit)
+    MOCKER_CPP(&Analysis::Dvvp::JobWrapper::ProfHostService::Uninit)
         .stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
-    MOCK_METHOD(mockerProfHostService, Process)
+    MOCKER_CPP(&Analysis::Dvvp::JobWrapper::ProfHostService::Process)
         .stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
@@ -761,11 +759,11 @@ TEST_F(JOB_WRAPPER_PROF_HOST_SERVER_TEST, Handler) {
 
 TEST_F(JOB_WRAPPER_PROF_HOST_SERVER_TEST, Run) {
     GlobalMockObject::verify();
-    MOCK_METHOD(mockerProfHostService, Uninit)
+    MOCKER_CPP(&Analysis::Dvvp::JobWrapper::ProfHostService::Uninit)
         .stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
-    MOCK_METHOD(mockerProfHostService, Process)
+    MOCKER_CPP(&Analysis::Dvvp::JobWrapper::ProfHostService::Process)
         .stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
@@ -794,11 +792,11 @@ TEST_F(JOB_WRAPPER_PROF_HOST_SERVER_TEST, Stop) {
 TEST_F(JOB_WRAPPER_PROF_HOST_SERVER_TEST, Start) {
     GlobalMockObject::verify();
 
-    MOCK_METHOD(mockerProfHostService, Uninit)
+    MOCKER_CPP(&Analysis::Dvvp::JobWrapper::ProfHostService::Uninit)
         .stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
-    MOCK_METHOD(mockerProfHostService, Process)
+    MOCKER_CPP(&Analysis::Dvvp::JobWrapper::ProfHostService::Process)
         .stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
@@ -843,7 +841,7 @@ TEST_F(JOB_WRAPPER_PROF_HOST_SERVER_TEST, Process) {
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
 
-    MOCK_METHOD(mockerProfHostService, WaitCollectToolStart)
+    MOCKER_CPP(&Analysis::Dvvp::JobWrapper::ProfHostService::WaitCollectToolStart)
         .stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
@@ -868,12 +866,12 @@ TEST_F(JOB_WRAPPER_PROF_HOST_SERVER_TEST, Uninit) {
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
 
-    MOCK_METHOD(mockerProfHostService, WriteDone)
+    MOCKER_CPP(&Analysis::Dvvp::JobWrapper::ProfHostService::WriteDone)
         .stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
 
-    MOCK_METHOD(mockerProfHostService, WaitCollectToolEnd)
+    MOCKER_CPP(&Analysis::Dvvp::JobWrapper::ProfHostService::WaitCollectToolEnd)
         .stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
@@ -944,7 +942,7 @@ TEST_F(JOB_WRAPPER_PROF_HOST_SERVER_TEST, CollectToolIsRunFail) {
 TEST_F(JOB_WRAPPER_PROF_HOST_SERVER_TEST, WaitCollectToolEnd) {
     GlobalMockObject::verify();
 
-    MOCK_METHOD(mockerProfHostService, CollectToolIsRun)
+    MOCKER_CPP(&Analysis::Dvvp::JobWrapper::ProfHostService::CollectToolIsRun)
         .stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
@@ -959,7 +957,7 @@ TEST_F(JOB_WRAPPER_PROF_HOST_SERVER_TEST, WaitCollectToolEnd) {
 TEST_F(JOB_WRAPPER_PROF_HOST_SERVER_TEST, WaitCollectToolStart) {
     GlobalMockObject::verify();
 
-    MOCK_METHOD(mockerProfHostService, CollectToolIsRun)
+    MOCKER_CPP(&Analysis::Dvvp::JobWrapper::ProfHostService::CollectToolIsRun)
         .stubs()
         .will(returnValue(PROFILING_SUCCESS))
         .then(returnValue(PROFILING_FAILED));
