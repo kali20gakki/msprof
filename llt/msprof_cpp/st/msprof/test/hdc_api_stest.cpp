@@ -5,6 +5,7 @@
 #include "errno/error_code.h"
 #include "hdc_api.h"
 #include "memory_utils.h"
+#include "securec.h"
 
 
 using namespace analysis::dvvp::common::error;

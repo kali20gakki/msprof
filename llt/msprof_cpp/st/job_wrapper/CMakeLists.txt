@@ -65,6 +65,10 @@ set(profilerSrcFiles
     ${MSPROF_SOURCE_DIR}/dvvp/transport/transport.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/transport/uploader.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/transport/uploader_mgr.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/src/mmpa_plugin.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/src/driver_plugin.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/src/plugin_manager.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/stub/prof_api_stub.cpp
     ${CppPath}
 )
 
@@ -76,7 +80,6 @@ set(localSrcFiles
     ../stub/common-utils-stub.cpp
     ../stub/devdrv_runtime_api_stub.cpp
     ../stub/profile_drv_user_stub.cpp
-    ../../stub/error_manager_stub.cpp
     test/prof_job_stest.cpp
     test/prof_peripheral_job_stest.cpp
     test/prof_timer_stest.cpp
@@ -99,14 +102,23 @@ target_compile_definitions(job_wrapper_stest PRIVATE
 
 
 target_include_directories(job_wrapper_stest PRIVATE
+    ${GTEST_INCLUDE_DIR}
+    ${MOCKCPP_INCLUDE_DIR}
+    ${TOP_DIR}/opensource/securec/include
+    ${TOP_DIR}/opensource/json/include
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/slog
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/acl
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/metadef/error_manager/error_manager_stub
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/driver
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/adump
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/mmpa
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/plugin
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/profapi
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/inc
+    ${MSPROF_SOURCE_DIR}/../inc
+    ${MSPROF_SOURCE_DIR}/../inc/toolchain
     ${MSPROF_SOURCE_DIR}/dvvp/msprof/engine/include
     ${MSPROF_SOURCE_DIR}/dvvp/common/utils 
-    ${TOP_DIR}/abl/msprof/inc/toolchain
-    ${TOP_DIR}/abl/libc_sec/include
-    ${TOP_DIR}/open_source/json/include
-    ${TOP_DIR}/ace/npuruntime/inc
-    ${TOP_DIR}/metadef/inc
-    ${TOP_DIR}/metadef/inc/external
     ${MSPROF_SOURCE_DIR}/dvvp/analyze/inc
     ${MSPROF_SOURCE_DIR}/dvvp/msprof/engine/include
     ${MSPROF_SOURCE_DIR}/dvvp/msprof/common/include
@@ -120,6 +132,7 @@ target_include_directories(job_wrapper_stest PRIVATE
     ${MSPROF_SOURCE_DIR}/dvvp/common/validation
     ${MSPROF_SOURCE_DIR}/dvvp/common/queue
     ${MSPROF_SOURCE_DIR}/dvvp/common/singleton
+    ${MSPROF_SOURCE_DIR}/dvvp/common/config
     ${MSPROF_SOURCE_DIR}/dvvp/common/utils
     ${MSPROF_SOURCE_DIR}/dvvp/message
     ${MSPROF_SOURCE_DIR}/dvvp/transport
@@ -153,6 +166,7 @@ target_compile_options(job_wrapper_stest PRIVATE
     -fno-access-control
     -Wfloat-equal
     -Wextra
+    -D_GLIBCXX_USE_CXX11_ABI=0
 )
 
 target_compile_definitions(job_wrapper_stest PRIVATE
@@ -162,13 +176,12 @@ target_compile_definitions(job_wrapper_stest PRIVATE
 )
 
 target_link_libraries(job_wrapper_stest PRIVATE
-    $<BUILD_INTERFACE:intf_llt_pub>
-    $<BUILD_INTERFACE:mmpa_headers>
-    $<BUILD_INTERFACE:slog_headers>
-    $<BUILD_INTERFACE:adump_headers>
-    $<BUILD_INTERFACE:msprof_headers>
-    ascend_protobuf
+    ascend_protobuf_static
     c_sec
+    pthread
+    ${GTEST_STATIC_LIBRARY}
+    ${MOCKCPP_STATIC_LIBRARY}
+    dl
 )
 
 set_target_properties(job_wrapper_stest
