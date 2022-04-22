@@ -6,6 +6,7 @@
 #include "hdc_api.h"
 #include "memory_utils.h"
 #include "msprof_error_manager.h"
+#include "securec.h"
 
 using namespace analysis::dvvp::common::error;
 using namespace Analysis::Dvvp::Adx;
