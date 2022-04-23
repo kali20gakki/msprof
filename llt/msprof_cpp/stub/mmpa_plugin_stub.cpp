@@ -460,7 +460,7 @@ INT32 MmpaPlugin::MsprofMmGetMac(mmMacInfo **list, INT32 *count)
     ifc.ifc_buf = buf;
     ret = ioctl(sock, SIOCGIFCONF, &ifc);
     if (ret == EN_ERROR) {
-        (void)mmClose(sock);
+        (void)MsprofMmClose(sock);
         return EN_ERROR;
     }
 
@@ -473,7 +473,7 @@ INT32 MmpaPlugin::MsprofMmGetMac(mmMacInfo **list, INT32 *count)
     macInfo = (mmMacInfo*)malloc(needSize);
     if (macInfo == NULL) {
         *count = MMPA_ZERO;
-        (void)mmClose(sock);
+        (void)MsprofMmClose(sock);
         return EN_ERROR;
     }
 
@@ -484,7 +484,7 @@ INT32 MmpaPlugin::MsprofMmGetMac(mmMacInfo **list, INT32 *count)
         ret = strcpy_s(ifr.ifr_name, sizeof(ifr.ifr_name), it->ifr_name);
         if(ret != EOK) {
             *count = MMPA_ZERO;
-            (void)mmClose(sock);
+            (void)MsprofMmClose(sock);
             (void)free(macInfo);
             return EN_ERROR;
         }
@@ -497,7 +497,7 @@ INT32 MmpaPlugin::MsprofMmGetMac(mmMacInfo **list, INT32 *count)
                     "%02X-%02X-%02X-%02X-%02X-%02X", *ptr, *(ptr+1), *(ptr+2), *(ptr+3), *(ptr+4), *(ptr+5));
                 if (ret == EN_ERROR) {
                     *count = MMPA_ZERO;
-                    (void)mmClose(sock);
+                    (void)MsprofMmClose(sock);
                     (void)free(macInfo);
                     return EN_ERROR;
                 }
@@ -505,7 +505,7 @@ INT32 MmpaPlugin::MsprofMmGetMac(mmMacInfo **list, INT32 *count)
             }
         }
     }
-    (void)mmClose(sock);
+    (void)MsprofMmClose(sock);
 
     *list = macInfo;
     return EN_OK;

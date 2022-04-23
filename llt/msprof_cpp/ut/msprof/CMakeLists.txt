@@ -69,9 +69,6 @@ set(profilerSrcList
 	${MSPROF_SOURCE_DIR}/dvvp/transport/uploader.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/transport/uploader_mgr.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/transport/hash_data.cpp
-	${MSPROF_SOURCE_DIR}/dvvp/depend/src/plugin_manager.cpp
-    ${MSPROF_SOURCE_DIR}/dvvp/depend/src/driver_plugin.cpp
-    ${MSPROF_SOURCE_DIR}/dvvp/depend/src/mmpa_plugin.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/depend/stub/prof_api_stub.cpp
 	${CppPath}
 )
