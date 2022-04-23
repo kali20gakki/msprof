@@ -90,7 +90,6 @@ INT32 MmpaPlugin::MsprofMmAccess2(const CHAR *pathName, INT32 mode)
     if (pathName == NULL) {
         return EN_INVALID_PARAM;
     }
-
     INT32 ret = access(pathName, mode);
     if (ret != EN_OK) {
         return EN_ERROR;
@@ -104,20 +103,17 @@ INT32 MmpaPlugin::MsprofMmGetOptLong(INT32 argc,
                    const mmStructOption *longOpts,
                    INT32 *longIndex)
 {
-    // return getopt_long(argc, argv, opts, longOpts, longIndex);
-    return 0;
+    return getopt_long(argc, argv, opts, longOpts, longIndex);
 }
 
 INT32 MmpaPlugin::MsprofMmGetOptInd()
 {
-    // return optind;
-    return 0;
+    return optind;
 }
 
 CHAR *MmpaPlugin::MsprofMmGetOptArg()
 {
-    // return optarg;
-    return 0;
+    return optarg;
 }
 
 INT32 MmpaPlugin::MsprofMmSleep(UINT32 milliSecond)
@@ -180,23 +176,22 @@ mmTimespec MmpaPlugin::MsprofMmGetTickCount()
 
 INT32 MmpaPlugin::MsprofMmGetDiskFreeSpace(const CHAR *path, mmDiskSize *diskSize)
 {
-    // if ((path == NULL) || (diskSize == NULL)) {
-    //     return EN_INVALID_PARAM;
-    // }
+    if ((path == NULL) || (diskSize == NULL)) {
+        return EN_INVALID_PARAM;
+    }
 
-    // // 把文件系统信息读入 struct statvfs buf 中
-    // struct statvfs buf;
-    // (VOID)memset_s(&buf, sizeof(buf), 0, sizeof(buf)); /* unsafe_function_ignore: memset */
+    // 把文件系统信息读入 struct statvfs buf 中
+    struct statvfs buf;
+    (VOID)memset_s(&buf, sizeof(buf), 0, sizeof(buf)); /* unsafe_function_ignore: memset */
 
-    // INT32 ret = statvfs(path, &buf);
-    // if (ret == MMPA_ZERO) {
-    //     diskSize->totalSize = (ULONGLONG)(buf.f_blocks) * (ULONGLONG)(buf.f_bsize);
-    //     diskSize->availSize = (ULONGLONG)(buf.f_bavail) * (ULONGLONG)(buf.f_bsize);
-    //     diskSize->freeSize = (ULONGLONG)(buf.f_bfree) * (ULONGLONG)(buf.f_bsize);
-    //     return EN_OK;
-    // }
-    // return EN_ERROR;
-    return 0;
+    INT32 ret = statvfs(path, &buf);
+    if (ret == MMPA_ZERO) {
+        diskSize->totalSize = (ULONGLONG)(buf.f_blocks) * (ULONGLONG)(buf.f_bsize);
+        diskSize->availSize = (ULONGLONG)(buf.f_bavail) * (ULONGLONG)(buf.f_bsize);
+        diskSize->freeSize = (ULONGLONG)(buf.f_bfree) * (ULONGLONG)(buf.f_bsize);
+        return EN_OK;
+    }
+    return EN_ERROR;
 }
 
 INT32 MmpaPlugin::MsprofMmIsDir(const CHAR *fileName)
@@ -401,184 +396,161 @@ INT32 MmpaPlugin::MsprofMmDup2(INT32 oldFd, INT32 newFd)
 
 VOID MmpaPlugin::MsprofMmScandirFree(mmDirent **entryList, INT32 count)
 {
-    // if (entryList == NULL) {
-    //     return;
-    // }
-    // INT32 j;
-    // for (j = 0; j < count; j++) {
-    //     if (entryList[j] != NULL) {
-    //         free(entryList[j]);
-    //         entryList[j] = NULL;
-    //     }
-    // }
-    // free(entryList);
+    if (entryList == NULL) {
+        return;
+    }
+    INT32 j;
+    for (j = 0; j < count; j++) {
+        if (entryList[j] != NULL) {
+            free(entryList[j]);
+            entryList[j] = NULL;
+        }
+    }
+    free(entryList);
 }
 
 INT32 MmpaPlugin::MsprofMmChdir(const CHAR *path)
 {
-    // if (path == NULL) {
-    //     return EN_INVALID_PARAM;
-    // }
-    // return chdir(path);
-    return 0;
+    if (path == NULL) {
+        return EN_INVALID_PARAM;
+    }
+    return chdir(path);
 }
 
 INT32 MmpaPlugin::MsprofMmWaitPid(mmProcess pid, INT32 *status, INT32 options)
 {
-    // if ((options != MMPA_ZERO) && (options != M_WAIT_NOHANG) && (options != M_WAIT_UNTRACED)) {
-    //     return EN_INVALID_PARAM;
-    // }
+    if ((options != MMPA_ZERO) && (options != M_WAIT_NOHANG) && (options != M_WAIT_UNTRACED)) {
+        return EN_INVALID_PARAM;
+    }
 
-    // INT32 ret = waitpid(pid, status, options);
-    // if (ret == EN_ERROR) {
-    //     return EN_ERROR;                 // 调用异常
-    // }
-    // if ((ret > MMPA_ZERO) && (ret == pid)) { // 返回了子进程ID
-    //     if (status != NULL) {
-    //         if (WIFEXITED(*status)) {
-    //             *status = WEXITSTATUS(*status); // 正常退出码
-    //         }
-    //         if (WIFSIGNALED(*status)) {
-    //             *status = WTERMSIG(*status); // 信号中止退出码
-    //         }
-    //     }
-    //     return EN_ERR;                  // 进程结束
-    // }
-    // return EN_OK; // 进程未结束
-    return 0;
+    INT32 ret = waitpid(pid, status, options);
+    if (ret == EN_ERROR) {
+        return EN_ERROR;                 // 调用异常
+    }
+    if ((ret > MMPA_ZERO) && (ret == pid)) { // 返回了子进程ID
+        if (status != NULL) {
+            if (WIFEXITED(*status)) {
+                *status = WEXITSTATUS(*status); // 正常退出码
+            }
+            if (WIFSIGNALED(*status)) {
+                *status = WTERMSIG(*status); // 信号中止退出码
+            }
+        }
+        return EN_ERR;                  // 进程结束
+    }
+    return EN_OK; // 进程未结束
 }
 
 INT32 MmpaPlugin::MsprofMmGetMac(mmMacInfo **list, INT32 *count)
 {
-    // if ((list == NULL) || (count == NULL)) {
-    //     return EN_INVALID_PARAM;
-    // }
-    // struct ifreq ifr;
-    // CHAR buf[MMPA_MAX_IF_SIZE] = {0};
-    // struct ifconf ifc;
-    // mmMacInfo *macInfo = NULL;
-    // INT32 sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_IP);
-    // if (sock == EN_ERROR) {
-    //     return EN_ERROR;
-    // }
-    // ifc.ifc_buf = buf;
-    // ifc.ifc_len = (INT)sizeof(buf);
-    // INT32 ret = ioctl(sock, SIOCGIFCONF, &ifc);
-    // if (ret == EN_ERROR) {
-    //     (VOID)close(sock);
-    //     return EN_ERROR;
-    // }
+    if(list == NULL || count == NULL) {
+        return EN_INVALID_PARAM;
+    }
+    mmMacInfo *macInfo = NULL;
+    struct ifreq ifr;
+    struct ifconf ifc;
+    CHAR buf[2048] = {0};
+    INT32 ret = 0;
+    INT32 sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_IP);
+    if (sock == EN_ERROR) {
+        return EN_ERROR;
+    }
 
-    // INT32 len = (INT32)sizeof(struct ifreq);
-    // const struct ifreq* it = ifc.ifc_req;
-    // *count = (ifc.ifc_len / len);
-    // UINT32 cnt = (UINT32)(*count);
-    // size_t needSize = (size_t)(cnt) * sizeof(mmMacInfo);
+    ifc.ifc_len = sizeof(buf);
+    ifc.ifc_buf = buf;
+    ret = ioctl(sock, SIOCGIFCONF, &ifc);
+    if (ret == EN_ERROR) {
+        (void)mmClose(sock);
+        return EN_ERROR;
+    }
 
-    // macInfo = (mmMacInfo*)malloc(needSize);
-    // if (macInfo == NULL) {
-    //     *count = MMPA_ZERO;
-    //     (VOID)close(sock);
-    //     return EN_ERROR;
-    // }
+    struct ifreq* it = ifc.ifc_req;
+    INT32 len = (INT32)sizeof(struct ifreq);
+    *count = (ifc.ifc_len / len);
+    UINT32 needSize = (UINT32)(*count * sizeof(mmMacInfo)); //lint !e737
 
-    // (VOID)memset_s(macInfo, needSize, 0, needSize); /* unsafe_function_ignore: memset */
-    // const struct ifreq* const end = it + *count;
-    // INT32 i = 0;
-    // for (; it != end; ++it) {
-    //     ret = strcpy_s(ifr.ifr_name, sizeof(ifr.ifr_name), it->ifr_name);
-    //     if (ret != EOK) {
-    //         *count = MMPA_ZERO;
-    //         (VOID)close(sock);
-    //         (VOID)free(macInfo);
-    //         return EN_ERROR;
-    //     }
-    //     if (ioctl(sock, SIOCGIFFLAGS, &ifr) != MMPA_ZERO) {
-    //         continue;
-    //     }
-    //     UINT16 ifrFlag = (UINT16)ifr.ifr_flags;
-    //     if ((ifrFlag & IFF_LOOPBACK) == MMPA_ZERO) { // ignore loopback
-    //         ret = ioctl(sock, SIOCGIFHWADDR, &ifr);
-    //         if (ret != MMPA_ZERO) {
-    //             continue;
-    //         }
-    //         const UCHAR *ptr = (UCHAR *)&ifr.ifr_ifru.ifru_hwaddr.sa_data[0];
-    //         ret = snprintf_s(macInfo[i].addr,
-    //             sizeof(macInfo[i].addr), sizeof(macInfo[i].addr) - 1U,
-    //             "%02X-%02X-%02X-%02X-%02X-%02X",
-    //             *(ptr + MMPA_MAC_ADDR_FIRST_BYTE),
-    //             *(ptr + MMPA_MAC_ADDR_SECOND_BYTE),
-    //             *(ptr + MMPA_MAC_ADDR_THIRD_BYTE),
-    //             *(ptr + MMPA_MAC_ADDR_FOURTH_BYTE),
-    //             *(ptr + MMPA_MAC_ADDR_FIFTH_BYTE),
-    //             *(ptr + MMPA_MAC_ADDR_SIXTH_BYTE));
-    //         if (ret == EN_ERROR) {
-    //             *count = MMPA_ZERO;
-    //             (VOID)close(sock);
-    //             (VOID)free(macInfo);
-    //             return EN_ERROR;
-    //         }
-    //         i++;
-    //     } else {
-    //         *count = *count - 1;
-    //     }
-    // }
-    // (VOID)close(sock);
-    // if (*count <= 0) {
-    //     (VOID)free(macInfo);
-    //     return EN_ERROR;
-    // } else {
-    //     *list = macInfo;
-    //     return EN_OK;
-    // }
-    return 0;
+
+    macInfo = (mmMacInfo*)malloc(needSize);
+    if (macInfo == NULL) {
+        *count = MMPA_ZERO;
+        (void)mmClose(sock);
+        return EN_ERROR;
+    }
+
+    (void)memset(macInfo, 0, needSize); /* unsafe_function_ignore: memset */
+    const struct ifreq* const end = it + *count;;
+    INT32 i = 0;
+    for (; it != end; ++it) {
+        ret = strcpy_s(ifr.ifr_name, sizeof(ifr.ifr_name), it->ifr_name);
+        if(ret != EOK) {
+            *count = MMPA_ZERO;
+            (void)mmClose(sock);
+            (void)free(macInfo);
+            return EN_ERROR;
+        }
+        ret = ioctl(sock, SIOCGIFFLAGS, &ifr);
+        if (ret == MMPA_ZERO) {
+            ret = ioctl(sock, SIOCGIFHWADDR, &ifr);
+            if (ret == MMPA_ZERO) {
+                UCHAR * ptr = (UCHAR *)&ifr.ifr_ifru.ifru_hwaddr.sa_data[0];
+                ret = snprintf_s(macInfo[i].addr, sizeof(macInfo[i].addr), sizeof(macInfo[i].addr) - 1, \
+                    "%02X-%02X-%02X-%02X-%02X-%02X", *ptr, *(ptr+1), *(ptr+2), *(ptr+3), *(ptr+4), *(ptr+5));
+                if (ret == EN_ERROR) {
+                    *count = MMPA_ZERO;
+                    (void)mmClose(sock);
+                    (void)free(macInfo);
+                    return EN_ERROR;
+                }
+                i++;
+            }
+        }
+    }
+    (void)mmClose(sock);
+
+    *list = macInfo;
+    return EN_OK;
 }
 
 INT32 MmpaPlugin::MsprofMmGetMacFree(mmMacInfo *list, INT32 count)
 {
-    // if ((list == NULL) || (count < MMPA_ZERO)) {
-    //     return EN_INVALID_PARAM;
-    // }
-    // (VOID)free(list);
-    // return EN_OK;
-    return 0;
+    if ((list == NULL) || (count < MMPA_ZERO)) {
+        return EN_INVALID_PARAM;
+    }
+    (VOID)free(list);
+    return EN_OK;
 }
 
-INT32 MmpaPlugin::MsprofMmGetLocalTime(mmSystemTime_t *sysTimePtr)
+INT32 MmpaPlugin::MsprofMmGetLocalTime(mmSystemTime_t *sysTime)
 {
-    // if (sysTimePtr == NULL) {
-    //     return EN_INVALID_PARAM;
-    // }
+    if (sysTime == NULL) {
+        return EN_INVALID_PARAM;
+    }
 
-    // struct timeval timeVal;
-    // (VOID)memset_s(&timeVal, sizeof(timeVal), 0, sizeof(timeVal)); /* unsafe_function_ignore: memset */
+    struct timeval timeVal;
+    (void)memset(&timeVal,0,sizeof(timeVal)); /* unsafe_function_ignore: memset */
 
-    // INT32 ret = gettimeofday(&timeVal, NULL);
-    // if (ret != EN_OK) {
-    //     return EN_ERROR;
-    // }
+    INT32 ret = gettimeofday(&timeVal,NULL);
+    if (ret != EN_OK) {
+        return EN_ERROR;
+    }
 
-    // struct tm nowTime;
-    // (VOID)memset_s(&nowTime, sizeof(nowTime), 0, sizeof(nowTime)); /* unsafe_function_ignore: memset */
+    struct tm nowTime = {0};
+    if(localtime_r(&timeVal.tv_sec,&nowTime) == NULL) {
+        return EN_ERROR;
+    }
 
-    // const struct tm *tmp = localtime_r(&timeVal.tv_sec, &nowTime);
-    // if (tmp == NULL) {
-    //     return EN_ERROR;
-    // }
+    sysTime->wSecond = nowTime.tm_sec;
+    sysTime->wMinute = nowTime.tm_min;
+    sysTime->wHour = nowTime.tm_hour;
+    sysTime->wDay = nowTime.tm_mday;
+    sysTime->wMonth = nowTime.tm_mon + 1; // in localtime month is [0,11],but in fact month is [1,12]
+    sysTime->wYear = nowTime.tm_year + MMPA_COMPUTER_BEGIN_YEAR;
+    sysTime->wDayOfWeek = nowTime.tm_wday;
+    sysTime->tm_yday = nowTime.tm_yday;
+    sysTime->tm_isdst = nowTime.tm_isdst;
+    sysTime->wMilliseconds = timeVal.tv_usec / MMPA_ONE_THOUSAND;
 
-    // sysTimePtr->wSecond = nowTime.tm_sec;
-    // sysTimePtr->wMinute = nowTime.tm_min;
-    // sysTimePtr->wHour = nowTime.tm_hour;
-    // sysTimePtr->wDay = nowTime.tm_mday;
-    // sysTimePtr->wMonth = nowTime.tm_mon + 1; // in localtime month is [0, 11], but in fact month is [1, 12]
-    // sysTimePtr->wYear = nowTime.tm_year + MMPA_COMPUTER_BEGIN_YEAR;
-    // sysTimePtr->wDayOfWeek = nowTime.tm_wday;
-    // sysTimePtr->tm_yday = nowTime.tm_yday;
-    // sysTimePtr->tm_isdst = nowTime.tm_isdst;
-    // sysTimePtr->wMilliseconds = timeVal.tv_usec / MMPA_MSEC_TO_USEC;
-
-    // return EN_OK;
-    return 0;
+    return EN_OK;
 }
 
 INT32 MmpaPlugin::MsprofMmGetPid()
@@ -589,16 +561,15 @@ INT32 MmpaPlugin::MsprofMmGetPid()
 
 INT32 MmpaPlugin::MsprofMmGetCwd(CHAR *buffer, INT32 maxLen)
 {
-    // if ((buffer == NULL) || (maxLen < MMPA_ZERO)) {
-    //     return EN_INVALID_PARAM;
-    // }
-    // const CHAR *ptr = getcwd(buffer, (UINT32)maxLen);
-    // if (ptr != NULL) {
-    //     return EN_OK;
-    // } else {
-    //     return EN_ERROR;
-    // }
-    return 0;
+    if ((buffer == NULL) || (maxLen < MMPA_ZERO)) {
+        return EN_INVALID_PARAM;
+    }
+    const CHAR *ptr = getcwd(buffer, (UINT32)maxLen);
+    if (ptr != NULL) {
+        return EN_OK;
+    } else {
+        return EN_ERROR;
+    }
 }
 
 INT32 MmpaPlugin::MsprofMmGetEnv(const CHAR *name, CHAR *value, UINT32 len)
@@ -753,101 +724,189 @@ INT32 MmpaPlugin::MsprofMmStatGet(const CHAR *path, mmStat_t *buffer)
 
 INT32 MmpaPlugin::MsprofMmGetOsVersion(CHAR* versionInfo, INT32 versionLength)
 {
-    // if ((versionInfo == NULL) || (versionLength < MMPA_MIN_OS_VERSION_SIZE)) {
-    //     return EN_INVALID_PARAM;
-    // }
-    // INT32 ret = 0;
-    // struct utsname sysInfo;
-    // (VOID)memset_s(&sysInfo, sizeof(sysInfo), 0, sizeof(sysInfo)); /* unsafe_function_ignore: memset */
-    // UINT32 length = (UINT32)versionLength;
-    // size_t len = (size_t)length;
-    // INT32 fb = uname(&sysInfo);
-    // if (fb < MMPA_ZERO) {
-    //     return EN_ERROR;
-    // } else {
-    //     ret = snprintf_s(versionInfo, len, (len - 1U), "%s-%s-%s",
-    //         sysInfo.sysname, sysInfo.release, sysInfo.version);
-    //     if (ret == EN_ERROR) {
-    //         return EN_ERROR;
-    //     }
-    //     return EN_OK;
-    // }
-    return 0;
+    if ((versionInfo == NULL) || (versionLength < MMPA_MIN_OS_VERSION_SIZE)) {
+        return EN_INVALID_PARAM;
+    }
+    INT32 ret = 0;
+    struct utsname sysInfo;
+    (VOID)memset_s(&sysInfo, sizeof(sysInfo), 0, sizeof(sysInfo)); /* unsafe_function_ignore: memset */
+    UINT32 length = (UINT32)versionLength;
+    size_t len = (size_t)length;
+    INT32 fb = uname(&sysInfo);
+    if (fb < MMPA_ZERO) {
+        return EN_ERROR;
+    } else {
+        ret = snprintf_s(versionInfo, len, (len - 1U), "%s-%s-%s",
+            sysInfo.sysname, sysInfo.release, sysInfo.version);
+        if (ret == EN_ERROR) {
+            return EN_ERROR;
+        }
+        return EN_OK;
+    }
 }
 
 INT32 MmpaPlugin::MsprofMmGetOsName(CHAR* name, INT32 nameSize)
 {
-    // if ((name == NULL) || (nameSize < MMPA_MIN_OS_NAME_SIZE)) {
-    //     return EN_INVALID_PARAM;
-    // }
-    // UINT32 length = (UINT32)nameSize;
-    // INT32 ret = gethostname(name, length);
-    // if (ret < MMPA_ZERO) {
-    //     return EN_ERROR;
-    // }
-    // return EN_OK;
-    return 0;
+    if ((name == NULL) || (nameSize < MMPA_MIN_OS_NAME_SIZE)) {
+        return EN_INVALID_PARAM;
+    }
+    UINT32 length = (UINT32)nameSize;
+    INT32 ret = gethostname(name, length);
+    if (ret < MMPA_ZERO) {
+        return EN_ERROR;
+    }
+    return EN_OK;
+}
+
+static INT32 LocalLookup(CHAR *buf, UINT32 bufLen, const CHAR *pattern, CHAR *value, UINT32 valueLen)
+{
+    CHAR *pValue = NULL;
+    CHAR *pBuf = NULL;
+    UINT32 len = strlen(pattern); //lint !e712
+
+    // 空白字符过滤
+    for (pBuf = buf; isspace(*pBuf); pBuf++) {}
+
+    // 关键字匹配
+    INT32 ret = strncmp(pBuf, pattern, len);
+    if (ret != MMPA_ZERO) {
+        return EN_ERROR;
+    }
+    // :之前空白字符过滤
+    for (pBuf = pBuf + len; isspace(*pBuf); pBuf++) {}
+
+    // :之后空白字符过滤
+    for (++pBuf; isspace(*pBuf); pBuf++) {}
+
+    pValue = pBuf;
+    // 截取所需信息
+    for (pBuf = buf + bufLen; isspace(*(pBuf-1)); pBuf--) {}
+
+    *pBuf = '\0';
+
+    ret = memcpy_s(value, valueLen, pValue, strlen(pValue) + 1);
+    if (ret != EN_OK) {
+        return EN_ERROR;
+    }
+    return EN_OK;
+}
+
+static VOID LocalGetCpuProc(mmCpuDesc *cpuInfo, INT32 *physicalCount)
+{
+    CHAR buf[256] = {0};
+    CHAR physicalID[64] = {0};
+    CHAR cpuMhz[64] = {0};
+    CHAR cpuCores[64] = {0};
+    CHAR cpuCounts[64] = {0};
+
+    FILE *fp = fopen("/proc/cpuinfo", "r");
+    if(fp == NULL) {
+        return;
+    }
+    while(fgets(buf, sizeof(buf), fp) != NULL) { //lint !e713
+        UINT32 length = (UINT32)strlen(buf);
+
+        if (LocalLookup(buf, length, "manufacturer", cpuInfo->manufacturer, sizeof(cpuInfo->manufacturer)) == EN_OK) {
+            ;
+        } else if (LocalLookup(buf, length, "vendor_id",
+            cpuInfo->manufacturer, sizeof(cpuInfo->manufacturer)) == EN_OK) {
+            ;
+        } else if (LocalLookup(buf, length, "CPU implementer",
+            cpuInfo->manufacturer, sizeof(cpuInfo->manufacturer)) == EN_OK) {
+            ; /* ARM and aarch64 */
+        } else if (LocalLookup(buf, length, "model name", cpuInfo->version, sizeof(cpuInfo->version)) == EN_OK) {
+            ;
+        } else if (LocalLookup(buf, length, "cpu MHz", cpuMhz, sizeof(cpuMhz)) == EN_OK) {
+            ;
+        } else if (LocalLookup(buf, length, "cpu cores", cpuCores, sizeof(cpuCores)) == EN_OK) {
+            ;
+        } else if (LocalLookup(buf, length, "processor", cpuCounts, sizeof(cpuCounts)) == EN_OK) {
+            ; // processor index + 1
+        } else if (LocalLookup(buf, length, "physical id", physicalID, sizeof(physicalID)) == EN_OK) {
+            ;
+        }
+    }
+    cpuInfo->frequency = atoi(cpuMhz);
+    cpuInfo->ncores = atoi(cpuCores);
+    cpuInfo->ncounts = atoi(cpuCounts) + 1;
+    *physicalCount += atoi(physicalID);
+
+    (void)fclose(fp);
+    return;
+}
+
+static VOID LocalGetDmiDecode(mmCpuDesc *cpuInfo)
+{
+    CHAR buf[256] = {0};
+    CHAR cpuThreads[64] = {0};
+    CHAR maxSpeed[64] = {0};
+    FILE *stream = popen("dmidecode -t processor", "r");
+    if(stream == NULL) {
+        return;
+    }
+    while(fgets(buf, sizeof(buf), stream) != NULL) { //lint !e713
+        UINT32 length = (UINT32)strlen(buf);
+        if (LocalLookup(buf, length, "Thread Count", cpuThreads, sizeof(cpuThreads)) == EN_OK) {
+            ;
+        } else if (LocalLookup(buf, length, "Max Speed", maxSpeed, sizeof(maxSpeed)) == EN_OK) {
+            ;
+        }
+    }
+    cpuInfo->nthreads = atoi(cpuThreads);
+    cpuInfo->maxFrequency = atoi(maxSpeed);
+    (void)pclose(stream);
+    return;
 }
 
 INT32 MmpaPlugin::MsprofMmGetCpuInfo(mmCpuDesc **cpuInfo, INT32 *count)
 {
-    // if (count == NULL) {
-    //     return EN_INVALID_PARAM;
-    // }
-    // if (cpuInfo == NULL) {
-    //     return EN_INVALID_PARAM;
-    // }
-    // INT32 i = 0;
-    // INT32 ret = 0;
-    // mmCpuDesc cpuDest = {};
-    // // 默认一个CPU
-    // INT32 physicalCount = 1;
-    // mmCpuDesc *pCpuDesc = NULL;
-    // struct utsname sysInfo = {};
+    INT32 i = 0;
+    INT32 ret = 0;
+    mmCpuDesc cpuDest = {};
+    // 默认一个CPU
+    INT32 physicalCount = 1;
+    mmCpuDesc *pCpuDesc = NULL;
+    struct utsname sysInfo = {};
 
-    // LocalGetCpuProc(&cpuDest, &physicalCount);
+    LocalGetCpuProc(&cpuDest, &physicalCount);
+    LocalGetDmiDecode(&cpuDest);
 
-    // if ((physicalCount < MMPA_MIN_PHYSICALCPU_COUNT) || (physicalCount > MMPA_MAX_PHYSICALCPU_COUNT)) {
-    //     return EN_ERROR;
-    // }
-    // UINT32 needSize = (UINT32)(physicalCount) * (UINT32)(sizeof(mmCpuDesc));
+    UINT32 needSize = (UINT32)(physicalCount * sizeof(mmCpuDesc)); //lint !e737
 
-    // pCpuDesc = (mmCpuDesc*)malloc(needSize);
-    // if (pCpuDesc == NULL) {
-    //     return EN_ERROR;
-    // }
+    pCpuDesc = (mmCpuDesc*)malloc(needSize); /* [false alarm]:ignore fortity */
+    if(pCpuDesc == NULL) {
+        return EN_ERROR;
+    }
 
-    // (VOID)memset_s(pCpuDesc, needSize, 0, needSize); /* unsafe_function_ignore: memset */
+    (void)memset(pCpuDesc, 0, needSize); /* unsafe_function_ignore: memset */
 
-    // if (uname(&sysInfo) == EN_OK) {
-    //     ret = memcpy_s(cpuDest.arch, sizeof(cpuDest.arch), sysInfo.machine, strlen(sysInfo.machine) + 1U);
-    //     if (ret != EN_OK) {
-    //         free(pCpuDesc);
-    //         return EN_ERROR;
-    //     }
-    // }
+    if (uname(&sysInfo) == EN_OK) {
+        ret = memcpy_s(cpuDest.arch, sizeof(cpuDest.arch), sysInfo.machine, strlen(sysInfo.machine) + 1);
+        if(ret != EN_OK) {
+            free(pCpuDesc);
+            return EN_ERROR;
+        }
+    }
 
-    // INT32 cpuCnt = physicalCount;
-    // for (i = 0; i < cpuCnt; i++) {
-    //     pCpuDesc[i] = cpuDest;
-    //     // 平均逻辑CPU个数
-    //     pCpuDesc[i].ncounts = pCpuDesc[i].ncounts / cpuCnt;
-    // }
+    INT32 cpuCount = physicalCount;
+    for(i = 0; i < cpuCount; i++) {
+        pCpuDesc[i] = cpuDest;
+        //平均逻辑CPU个数
+        pCpuDesc[i].ncounts = pCpuDesc[i].ncounts / cpuCount;
+    }
 
-    // *cpuInfo = pCpuDesc;
-    // *count = cpuCnt;
-    // return EN_OK;
-    return 0;
+    *cpuInfo = pCpuDesc;
+    *count = cpuCount;
+    return EN_OK;
 }
 
 INT32 MmpaPlugin::MsprofMmCpuInfoFree(mmCpuDesc *cpuInfo, INT32 count)
 {
-    // if ((cpuInfo == NULL) || (count == MMPA_ZERO)) {
-    //     return EN_INVALID_PARAM;
-    // }
-    // (VOID)free(cpuInfo);
-    // return EN_OK;
-    return 0;
+    if ((cpuInfo == NULL) || (count == MMPA_ZERO)) {
+        return EN_INVALID_PARAM;
+    }
+    (VOID)free(cpuInfo);
+    return EN_OK;
 }
 
 INT32 MmpaPlugin::MsprofMmGetFileSize(const CHAR *fileName, ULONGLONG *length)

@@ -131,9 +131,11 @@ TEST_F(MSPROF_MANAGER_STEST, MsProcessCmd) {
     Utils::CreateDir(dirName2 + "/profiler_tool");
     Utils::CreateDir(dirName2 + "/profiler_tool/analysis");
     Utils::CreateDir(dirName2 + "/profiler_tool/analysis/msprof");
-    std::ofstream test_file2((dirName2 + "/profiler_tool/analysis/msprof/msprof.py").c_str());
+    std::string test_file2_name = dirName2 + "/profiler_tool/analysis/msprof/msprof.py";
+    std::ofstream test_file2(test_file2_name.c_str());
     test_file2 << "import os" << std::endl;
     test_file2.close();
+    chmod(test_file2_name.c_str(), 0700);
     std::string tmp = "/tmp/profiler_tool/analysis";
     MOCKER(&Utils::GetSelfPath).stubs().will(returnValue(tmp));
     MOCKER(&Utils::GetPid).stubs().will(returnValue(1));

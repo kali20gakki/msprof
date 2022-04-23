@@ -152,7 +152,6 @@ int InputParser::ProcessOptions(int opt, struct MsprofCmdInfo &cmdInfo)
         MsprofCmdUsage("");
         return ret;
     }
-
     cmdInfo.args[opt] = MmpaPlugin::instance()->MsprofMmGetOptArg();
     params_->usedParams.insert(opt);
 

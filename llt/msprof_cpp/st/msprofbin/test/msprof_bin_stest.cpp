@@ -35,6 +35,7 @@ TEST_F(MSPROF_BIN_UTEST, LltMain) {
     std::ofstream test_file("st-prof_bin_test");
     test_file << "echo test" << std::endl;
     test_file.close();
+    chmod("./st-prof_bin_test", 0700);
     argv[2] = "--app=./st-prof_bin_test";
     argv[3] = "--task-time=on";
     EXPECT_EQ(PROFILING_SUCCESS, LltMain(4, (const char**)argv, (const char**)envp));

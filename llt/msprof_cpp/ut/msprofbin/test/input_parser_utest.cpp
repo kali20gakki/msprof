@@ -4,10 +4,11 @@
 #include "errno/error_code.h"
 #include "input_parser.h"
 #include "config/config_manager.h"
-
+#include "mmpa_plugin.h"
 
 using namespace analysis::dvvp::common::error;
 using namespace Analysis::Dvvp::Msprof;
+using namespace Analysis::Dvvp::Plugin;
 
 class INPUT_PARSER_UTEST : public testing::Test {
 protected:
@@ -150,17 +151,19 @@ TEST_F(INPUT_PARSER_UTEST, CheckAppValid) {
     GlobalMockObject::verify();
     InputParser parser = InputParser();
     struct MsprofCmdInfo cmdInfo = { {nullptr} };
-    std::remove("./CheckAppValid");
+    std::remove("./INPUT_PARSER_UTEST-CheckAppValid");
     EXPECT_EQ(PROFILING_FAILED, parser.CheckAppValid(cmdInfo));
     cmdInfo.args[ARGS_APPLICATION] = "";
     EXPECT_EQ(PROFILING_FAILED, parser.CheckAppValid(cmdInfo));
-    cmdInfo.args[ARGS_APPLICATION] = "./CheckAppValid a";
+    cmdInfo.args[ARGS_APPLICATION] = "./INPUT_PARSER_UTEST-CheckAppValid a";
     EXPECT_EQ(PROFILING_FAILED, parser.CheckAppValid(cmdInfo));
-    std::ofstream file("CheckAppValid");
+    std::ofstream file("INPUT_PARSER_UTEST-CheckAppValid");
     file << "command not found" << std::endl;
     file.close();
+    EXPECT_EQ(PROFILING_FAILED, parser.CheckAppValid(cmdInfo));
+    chmod("./INPUT_PARSER_UTEST-CheckAppValid", 0700) ;
     EXPECT_EQ(PROFILING_SUCCESS, parser.CheckAppValid(cmdInfo));
-    std::remove("./CheckAppValid");
+    remove(".INPUT_PARSER_UTEST-CheckAppValid");
 }
 
 TEST_F(INPUT_PARSER_UTEST, CheckEnvironmentValid) {
@@ -199,7 +202,7 @@ TEST_F(INPUT_PARSER_UTEST, CheckPythonPathValid) {
     EXPECT_EQ(PROFILING_FAILED, parser.CheckPythonPathValid(cmdInfo));
     
     Utils::CreateDir("TestPython");
-    MOCKER(mmAccess2).stubs().will(returnValue(-1)).then(returnValue(0));
+    MOCKER(&MmpaPlugin::MsprofMmAccess2).stubs().will(returnValue(-1)).then(returnValue(0));
     cmdInfo.args[ARGS_PYTHON_PATH] = "TestPython";
     EXPECT_EQ(PROFILING_FAILED, parser.CheckPythonPathValid(cmdInfo));
     EXPECT_EQ(PROFILING_FAILED, parser.CheckPythonPathValid(cmdInfo));
