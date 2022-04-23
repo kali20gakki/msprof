@@ -23,11 +23,13 @@
 #include "uploader_mgr.h"
 #include "prof_channel_manager.h"
 #include "config/config_manager.h"
+#include "mmpa_plugin.h"
 
 using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::common::config;
 using namespace Analysis::Dvvp::JobWrapper;
 using namespace Analysis::Dvvp::Common::Statistics;
+using namespace Analysis::Dvvp::Plugin;
 
 using namespace analysis::dvvp::device;
 class DEVICE_COLLECTION_ENTRY_TEST: public testing::Test {
@@ -149,7 +151,7 @@ TEST_F(DEVICE_COLLECTION_ENTRY_TEST, HandleCtrlSession) {
     //MOCKER_CPP(&analysis::dvvp::common::thread::Thread::Start)
     //    .stubs()
     //    .will(returnValue(PROFILING_SUCCESS));
-    MOCKER(mmCreateTaskWithThreadAttr)
+    MOCKER(&MmpaPlugin::MsprofMmCreateTaskWithThreadAttr)
         .stubs()
         .will(returnValue(EN_OK));
 	

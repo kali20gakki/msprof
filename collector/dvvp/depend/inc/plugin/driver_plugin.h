@@ -15,7 +15,9 @@ public:
      :soName_("libascend_hal.so"),
       pluginManager_(PluginManager(soName_))
     {}
-    ~DriverPlugin(){pluginManager_.CloseHandle();} // 成员变量销毁时机
+    ~DriverPlugin();
+
+    bool IsFuncExist(const std::string &funcName) const;
 
     // halHdcRecv
     using MSPROF_HALHDCRECV_T = std::function<hdcError_t(HDC_SESSION, struct drvHdcMsg *, int, UINT64, int *, UINT32)>;

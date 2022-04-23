@@ -9,8 +9,6 @@ set(profilerSrcFiles
     ${MSPROF_SOURCE_DIR}//dvvp/message/dispatcher.cpp 
     ${MSPROF_SOURCE_DIR}//dvvp/common/utils/utils.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/depend/stub/error_manager/msprof_error_manager_stub.cpp
-    ${MSPROF_SOURCE_DIR}/dvvp/depend/src/mmpa_plugin.cpp
-    ${MSPROF_SOURCE_DIR}/dvvp/depend/src/plugin_manager.cpp
     ${CppPath}
 )
 
@@ -20,7 +18,9 @@ set(localSrcFiles
     test/dispatcher_test.cpp 
     test/message_test.cpp 
     ../stub/hdc-log-stub.cpp 
-    ../stub/common-utils-stub.cpp 
+    ../stub/common-utils-stub.cpp
+    ../../stub/driver_plugin_stub.cpp
+    ../../stub/mmpa_plugin_stub.cpp
 )
 
 add_executable(message_utest 

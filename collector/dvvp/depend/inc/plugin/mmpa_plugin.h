@@ -14,13 +14,18 @@ public:
     : soName_("libmmpa.so"),
       pluginManager_(PluginManager(soName_))
     {}
-    ~MmpaPlugin(){pluginManager_.CloseHandle();}
+    ~MmpaPlugin();
+
+    bool IsFuncExist(const std::string &funcName) const;
 
     using MSPROF_MMOPEN2_T = std::function<INT32(const CHAR *, INT32, MODE)>;
     INT32 MsprofMmOpen2(const CHAR *pathName, INT32 flags, MODE mode);
 
     using MSPROF_MMREAD_T = std::function<mmSsize_t(INT32, VOID *, UINT32)>;
     mmSsize_t MsprofMmRead(INT32 fd, VOID *buf, UINT32 bufLen);
+
+    using MSPROF_MMWRITE_T = std::function<mmSsize_t(INT32, VOID *, UINT32)>;
+    mmSsize_t MsprofMmWrite(INT32 fd, VOID *buf, UINT32 bufLen);
 
     using MSPROF_MMCLOSE_T = std::function<INT32(INT32)>;
     INT32 MsprofMmClose(INT32 fd);
@@ -56,7 +61,6 @@ public:
     using MSPROF_MMGETTID_T = std::function<INT32()>;
     INT32 MsprofMmGetTid();
 
-    // 分割线
     using MSPROF_MMGETTIMEOFDAY_T = std::function<INT32(mmTimeval *, mmTimezone *)>;
     INT32 MsprofMmGetTimeOfDay(mmTimeval *timeVal, mmTimezone *timeZone);
 
@@ -125,8 +129,7 @@ public:
     
     using MSPROF_MMGETENV_T = std::function<INT32(const CHAR *, CHAR *, UINT32)>;
     INT32 MsprofMmGetEnv(const CHAR *name, CHAR *value, UINT32 len);
-    
-    // 分割线2
+
     using MSPROF_MMCREATETASKWITHTHREADATTR_T = std::function<INT32(mmThread *, const mmUserBlock_t *, const mmThreadAttr *)>;
     INT32 MsprofMmCreateTaskWithThreadAttr(mmThread *threadHandle, const mmUserBlock_t *funcBlock,
         const mmThreadAttr *threadAttr);
@@ -151,6 +154,9 @@ public:
     
     using MSPROF_MMCPUINFOFORFREE_T = std::function<INT32(mmCpuDesc *, INT32)>;
     INT32 MsprofMmCpuInfoFree(mmCpuDesc *cpuInfo, INT32 count);
+
+    using MSPROF_MMDUP2_T = std::function<INT32(INT32, INT32)>;
+    INT32 MsprofMmDup2(INT32 oldFd, INT32 newFd);
     
 private:
     std::string soName_;

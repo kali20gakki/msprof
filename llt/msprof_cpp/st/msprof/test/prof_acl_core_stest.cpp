@@ -24,11 +24,14 @@
 #include "platform/platform.h"
 #include "command_handle.h"
 #include "data_struct.h"
+#include "mmpa_plugin.h"
+
 using namespace analysis::dvvp::common::error;
 using namespace Analysis::Dvvp::ProfilerCommon;
 using namespace Analysis::Dvvp::Common::Platform;
 using namespace Analysis::Dvvp::Analyze;
 using namespace analysis::dvvp::transport;
+using namespace Analysis::Dvvp::Plugin;
 
 const int RECEIVE_CHUNK_SIZE = 320; // chunk size:320
 
@@ -415,10 +418,10 @@ TEST_F(MSPROF_ACL_CORE_STEST, acl_api_subscribe) {
 
     Analysis::Dvvp::Common::Config::ConfigManager::instance()->Init();
 
-    MOCKER(mmWrite)
+    MOCKER(&MmpaPlugin::MsprofMmWrite)
         .stubs()
         .will(invoke(mmWriteStub));
-    MOCKER(mmClose)
+    MOCKER(&MmpaPlugin::MsprofMmClose)
         .stubs()
         .will(returnValue(EN_OK));
 
@@ -577,10 +580,10 @@ TEST_F(MSPROF_ACL_CORE_STEST, acl_api_subscribe_step_parse) {
 
     Analysis::Dvvp::Common::Config::ConfigManager::instance()->Init();
 
-    MOCKER(mmWrite)
+    MOCKER(&MmpaPlugin::MsprofMmWrite)
         .stubs()
         .will(invoke(mmWriteStub));
-    MOCKER(mmClose)
+    MOCKER(&MmpaPlugin::MsprofMmClose)
         .stubs()
         .will(returnValue(EN_OK));
 
@@ -730,10 +733,10 @@ TEST_F(MSPROF_ACL_CORE_STEST, ge_api_subscribe) {
 
     Analysis::Dvvp::Common::Config::ConfigManager::instance()->Init();
 
-    MOCKER(mmWrite)
+    MOCKER(&MmpaPlugin::MsprofMmWrite)
         .stubs()
         .will(invoke(mmWriteStub));
-    MOCKER(mmClose)
+    MOCKER(&MmpaPlugin::MsprofMmClose)
         .stubs()
         .will(returnValue(EN_OK));
 
@@ -782,7 +785,7 @@ TEST_F(MSPROF_ACL_CORE_STEST, acl_json) {
 
     EXPECT_EQ(MSPROF_ERROR_NONE, Analysis::Dvvp::ProfilerCommon::MsprofCtrlCallbackImpl(MSPROF_CTRL_INIT_ACL_JSON, data, aclJson.size()));
 
-    Analysis::Dvvp::ProfilerCommon::MsprofSetDeviceCallbackImpl(0, true);
+    // Analysis::Dvvp::ProfilerCommon::MsprofSetDeviceCallbackImpl(0, true);
 
     EXPECT_EQ(MSPROF_ERROR_NONE, Analysis::Dvvp::ProfilerCommon::MsprofCtrlCallbackImpl(MSPROF_CTRL_FINALIZE, nullptr, 0));
 }
@@ -817,7 +820,7 @@ TEST_F(MSPROF_ACL_CORE_STEST, ge_option) {
 
     EXPECT_EQ(MSPROF_ERROR_NONE, Analysis::Dvvp::ProfilerCommon::MsprofCtrlCallbackImpl(MSPROF_CTRL_INIT_GE_OPTIONS, data, sizeof(options)));
 
-    Analysis::Dvvp::ProfilerCommon::MsprofSetDeviceCallbackImpl(0, true);
+    // Analysis::Dvvp::ProfilerCommon::MsprofSetDeviceCallbackImpl(0, true);
 
     EXPECT_EQ(MSPROF_ERROR_NONE, Analysis::Dvvp::ProfilerCommon::MsprofCtrlCallbackImpl(MSPROF_CTRL_FINALIZE, nullptr, 0));
     analysis::dvvp::common::utils::Utils::RemoveDir(result);
@@ -868,7 +871,7 @@ TEST_F(MSPROF_ACL_CORE_STEST, init_env) {
 
     EXPECT_EQ(MSPROF_ERROR_NONE, Analysis::Dvvp::ProfilerCommon::MsprofCtrlCallbackImpl(MSPROF_CTRL_INIT_ACL_ENV, nullptr, 0));
 
-    Analysis::Dvvp::ProfilerCommon::MsprofSetDeviceCallbackImpl(0, true);
+    // Analysis::Dvvp::ProfilerCommon::MsprofSetDeviceCallbackImpl(0, true);
 
     EXPECT_EQ(MSPROF_ERROR_NONE, Analysis::Dvvp::ProfilerCommon::MsprofCtrlCallbackImpl(MSPROF_CTRL_FINALIZE, nullptr, 0));
     analysis::dvvp::common::utils::Utils::RemoveDir(result);

@@ -17,6 +17,7 @@
 #include "mmpa_stub.h"
 #include "uploader_mgr.h"
 #include "config/config_manager.h"
+#include "driver_plugin.h"
 
 #define SET_PROTOMSG_JOBCTX(msg, devId, jobId) do {                               \
     analysis::dvvp::message::JobContext __jobCtx;                   \
@@ -30,6 +31,7 @@ using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::message;
 using namespace analysis::dvvp::host;
 using namespace Analysis::Dvvp::Adx;
+using namespace Analysis::Dvvp::Plugin;
 
 class DEVICE_PROF_DEVICE_CORE_TEST: public testing::Test {
 protected:
@@ -515,7 +517,7 @@ TEST_F(DEVICE_PROF_DEVICE_CORE_TEST, IdeDeviceProfileProcess_ctrl_started) {
         .will(invoke(fake_ctrl_HdcRead_started));
 
     uint32_t num_dev = 2;
-    MOCKER(drvGetDevNum)
+    MOCKER(&DriverPlugin::MsprofDrvGetDevNum)
         .stubs()
         .with(outBoundP(&num_dev))
         .will(returnValue(DRV_ERROR_NO_DEVICE))
@@ -525,7 +527,7 @@ TEST_F(DEVICE_PROF_DEVICE_CORE_TEST, IdeDeviceProfileProcess_ctrl_started) {
     devices[0] = 0;
     devices[1] = 2;
 
-    MOCKER(drvGetDevIDs)
+    MOCKER(&DriverPlugin::MsprofDrvGetDevIDs)
         .stubs()
         .with(outBoundP(devices, num_dev * sizeof(uint32_t)))
         .will(returnValue(PROFILING_SUCCESS));

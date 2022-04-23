@@ -7,6 +7,8 @@ protobuf_generate(profiler
 
 set(profilerSrcList
 	${MSPROF_SOURCE_DIR}/dvvp/adx/wrapper/adx_prof_api.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/adx/wrapper/hdc_api.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/adx/wrapper/memory_utils.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/common/config/config_manager.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/common/memory/chunk_pool.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform.cpp
@@ -40,9 +42,6 @@ set(profilerSrcList
 	${MSPROF_SOURCE_DIR}/dvvp/transport/transport.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/transport/uploader.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/transport/uploader_mgr.cpp
-	${MSPROF_SOURCE_DIR}/dvvp/depend/src/mmpa_plugin.cpp
-    ${MSPROF_SOURCE_DIR}/dvvp/depend/src/driver_plugin.cpp
-    ${MSPROF_SOURCE_DIR}/dvvp/depend/src/plugin_manager.cpp
     ${CppPath}
 )
 
@@ -50,11 +49,12 @@ set(profilerSrcFile
     testcase/main.cpp
 	testcase/prof_device_core_stest.cpp
 	testcase/prof_timer_stest.cpp
-	../stub/hdc-api-stub.cpp
 	../stub/hdc-log-stub.cpp
 	../stub/devdrv_runtime_api_stub.cpp
 	../stub/profile_drv_user_stub.cpp
 	../stub/mmpa_stub.cpp
+	../../stub/driver_plugin_stub.cpp
+    ../../stub/mmpa_plugin_stub.cpp
     ${profilerSrcList}
 )
 

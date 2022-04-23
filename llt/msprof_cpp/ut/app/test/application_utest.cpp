@@ -11,8 +11,11 @@
 #include "message/codec.h"
 #include "uploader_mgr.h"
 #include "transport.h"
+#include "mmpa_plugin.h"
+
 using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::message;
+using namespace Analysis::Dvvp::Plugin;
 
 class PROF_APPLICATION_TEST: public testing::Test {
 protected:
@@ -41,13 +44,6 @@ TEST_F(PROF_APPLICATION_TEST, PrepareLaunchAppCmd) {
 	params->app = "test";
 	params->app_parameters = "app_parameters";
 
-	EXPECT_EQ(PROFILING_SUCCESS, analysis::dvvp::app::Application::PrepareLaunchAppCmd(ss_perf_cmd_app, params));
-
-	EXPECT_EQ(PROFILING_SUCCESS, analysis::dvvp::app::Application::PrepareLaunchAppCmd(ss_perf_cmd_app, params));
-
-	EXPECT_EQ(PROFILING_SUCCESS, analysis::dvvp::app::Application::PrepareLaunchAppCmd(ss_perf_cmd_app, params));
-
-	params->app_parameters = "app_parameters";
 	EXPECT_EQ(PROFILING_SUCCESS, analysis::dvvp::app::Application::PrepareLaunchAppCmd(ss_perf_cmd_app, params));
 }
 

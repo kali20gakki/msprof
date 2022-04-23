@@ -4,9 +4,11 @@
 #include "thread/thread.h"
 #include "stub/common-utils-stub.h"
 #include "utils/utils.h"
+#include "mmpa_plugin.h"
 
 using namespace analysis::dvvp::common::thread;
 using namespace analysis::dvvp::common::error;
+using namespace Analysis::Dvvp::Plugin;
 
 class COMMON_THREAD_TEST: public testing::Test {
 protected:
@@ -26,12 +28,12 @@ TEST_F(COMMON_THREAD_TEST, start_stop) {
     GlobalMockObject::verify();
 
     ThreadClass my_thread;
-    MOCKER(mmCreateTaskWithThreadAttr)
+    MOCKER(&MmpaPlugin::MsprofMmCreateTaskWithThreadAttr)
         .stubs()
         .will(returnValue(EN_ERROR))
         .then(returnValue(EN_OK));
 
-    MOCKER(mmJoinTask)
+    MOCKER(&MmpaPlugin::MsprofMmJoinTask)
         .stubs()
         .will(returnValue(EN_OK));
 
@@ -46,11 +48,11 @@ TEST_F(COMMON_THREAD_TEST, join) {
 
     ThreadClass my_thread;
 
-    MOCKER(mmCreateTaskWithThreadAttr)
+    MOCKER(&MmpaPlugin::MsprofMmCreateTaskWithThreadAttr)
         .stubs()
         .will(returnValue(EN_OK));
 
-    MOCKER(mmJoinTask)
+    MOCKER(&MmpaPlugin::MsprofMmJoinTask)
         .stubs()
         .will(returnValue(EN_ERROR))
         .then(returnValue(EN_OK));
@@ -67,11 +69,11 @@ TEST_F(COMMON_THREAD_TEST, IsQuit) {
 
     ThreadClass my_thread;
 
-    MOCKER(mmCreateTaskWithThreadAttr)
+    MOCKER(&MmpaPlugin::MsprofMmCreateTaskWithThreadAttr)
         .stubs()
         .will(returnValue(EN_OK));
 
-    MOCKER(mmJoinTask)
+    MOCKER(&MmpaPlugin::MsprofMmJoinTask)
         .stubs()
         .will(returnValue(EN_OK));
 

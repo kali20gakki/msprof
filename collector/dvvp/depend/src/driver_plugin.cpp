@@ -4,6 +4,16 @@ namespace Analysis {
 namespace Dvvp {
 namespace Plugin {
 
+DriverPlugin::~DriverPlugin()
+{
+    pluginManager_.CloseHandle();
+}
+
+bool DriverPlugin::IsFuncExist(const std::string &funcName) const
+{
+    return pluginManager_.IsFuncExist(std::string funcName);
+}
+
 // halHdcRecv
 hdcError_t DriverPlugin::MsprofHalHdcRecv(HDC_SESSION session, struct drvHdcMsg *pMsg, int bufLen,
     UINT64 flag, int *recvBufCount, UINT32 timeout)
@@ -275,8 +285,6 @@ drvError_t DriverPlugin::MsprofDrvGetDevIDByLocalDevID(uint32_t localDevId, uint
     }
     return func(localDevId, devId);
 }
-
-// 分割线
 
 // drvGetDevIDs
 drvError_t DriverPlugin::MsprofDrvGetDevIDs(uint32_t *devices, uint32_t len)
