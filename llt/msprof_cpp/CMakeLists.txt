@@ -24,5 +24,5 @@ protobuf_generate(profiler
     ${MSPROF_SOURCE_DIR}/dvvp/proto/profiler_ext.proto
 )
 
-# add_subdirectory(ut)
-add_subdirectory(st)
+add_subdirectory(ut)
+# add_subdirectory(st)

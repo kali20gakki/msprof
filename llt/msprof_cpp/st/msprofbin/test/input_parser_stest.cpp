@@ -3,10 +3,12 @@
 #include <iostream>
 #include "errno/error_code.h"
 #include "input_parser.h"
+#include "mmpa_plugin.h"
 
 
 using namespace analysis::dvvp::common::error;
 using namespace Analysis::Dvvp::Msprof;
+using namespace Analysis::Dvvp::Plugin;
 
 class INPUT_PARSER_STEST : public testing::Test {
 protected:
@@ -134,6 +136,8 @@ TEST_F(INPUT_PARSER_STEST, CheckAppValid) {
     std::ofstream file("INPUT_PARSER_STEST-CheckAppValid");
     file << "command not found" << std::endl;
     file.close();
+    EXPECT_EQ(PROFILING_FAILED, parser.CheckAppValid(cmdInfo));
+    chmod("./INPUT_PARSER_STEST-CheckAppValid", 0700) ;
     EXPECT_EQ(PROFILING_SUCCESS, parser.CheckAppValid(cmdInfo));
     remove(".INPUT_PARSER_STEST-CheckAppValid");
 }
@@ -173,7 +177,7 @@ TEST_F(INPUT_PARSER_STEST, CheckPythonPathValid) {
     cmdInfo.args[ARGS_PYTHON_PATH] = "testpython";
     EXPECT_EQ(PROFILING_FAILED, parser.CheckPythonPathValid(cmdInfo));
     
-    MOCKER(mmAccess2).stubs().will(returnValue(-1)).then(returnValue(0));
+    MOCKER(&MmpaPlugin::MsprofMmAccess2).stubs().will(returnValue(-1)).then(returnValue(0));
     cmdInfo.args[ARGS_PYTHON_PATH] = "TestPython";
     EXPECT_EQ(PROFILING_FAILED, parser.CheckPythonPathValid(cmdInfo));
     Utils::CreateDir("TestPython");

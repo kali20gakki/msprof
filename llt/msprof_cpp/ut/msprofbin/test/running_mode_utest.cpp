@@ -14,6 +14,7 @@
 #include "platform/platform.h"
 #include <fstream>
 #include <memory>
+#include "mmpa_plugin.h"
 
 using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::common::utils;
@@ -22,6 +23,7 @@ using namespace analysis::dvvp::transport;
 using namespace Analysis::Dvvp::Common::Config;
 using namespace Analysis::Dvvp::Msprof;
 using namespace Collector::Dvvp::Msprofbin;
+using namespace Analysis::Dvvp::Plugin;
 
 class RUNNING_MODE_UTEST : public testing::Test {
 protected:
@@ -436,7 +438,7 @@ TEST_F(RUNNING_MODE_UTEST, CheckAnalysisEnv){
         .will(returnValue(false))
         .then(returnValue(true));
     EXPECT_EQ(PROFILING_FAILED, rMode.CheckAnalysisEnv());
-    MOCKER(mmAccess2).stubs()
+    MOCKER(&MmpaPlugin::MsprofMmAccess2).stubs()
         .will(returnValue(EN_ERR))
         .then(returnValue(EN_OK));
     EXPECT_EQ(PROFILING_FAILED, rMode.CheckAnalysisEnv());
