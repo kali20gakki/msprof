@@ -11,7 +11,7 @@ MmpaPlugin::~MmpaPlugin()
 
 bool MmpaPlugin::IsFuncExist(const std::string &funcName) const
 {
-    return pluginManager_.IsFuncExist(std::string funcName);
+    return pluginManager_.IsFuncExist(funcName);
 }
 
 INT32 MmpaPlugin::MsprofMmOpen2(const CHAR *pathName, INT32 flags, MODE mode)

@@ -122,7 +122,7 @@ std::string PluginManager::GetSoPath(const std::string &envValue) const
     return "";
 }
 
-bool IsFuncExist(const std::string funcName) const
+bool PluginManager::IsFuncExist(const std::string funcName) const
 {
     if (funcName.empty()) {
         return false;
