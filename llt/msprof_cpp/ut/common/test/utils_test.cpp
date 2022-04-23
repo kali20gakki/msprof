@@ -26,9 +26,11 @@
 #include "stub/common-utils-stub.h"
 #include "config/config.h"
 #include <sys/file.h>
+#include "mmpa_plugin.h"
 
 using namespace analysis::dvvp::common::utils;
 using namespace analysis::dvvp::common::error;
+using namespace Analysis::Dvvp::Plugin;
 
 class COMMON_UTILS_UTILS_TEST: public testing::Test {
 protected:
@@ -103,7 +105,7 @@ TEST_F(COMMON_UTILS_UTILS_TEST, IsDir) {
 
     path = "/path/to/fake_dir";
 
-    MOCKER(mmIsDir)
+    MOCKER(&MmpaPlugin::MsprofMmIsDir)
         .stubs()
         .will(returnValue(-1))
         .then(returnValue(0));
@@ -236,7 +238,7 @@ TEST_F(COMMON_UTILS_UTILS_TEST, get_files_recur) {
     name_list[3] = &entry4;
     mmDirent **p_name_list = name_list;
 
-    MOCKER(mmScandir)
+    MOCKER(&MmpaPlugin::MsprofMmScandir)
         .stubs()
         .with(any(), outBoundP(&p_name_list), any(), any())
         .will(returnValue(4));
@@ -249,7 +251,7 @@ TEST_F(COMMON_UTILS_UTILS_TEST, get_files_recur) {
         .then(returnValue(true))
         .then(returnValue(false));
 
-    MOCKER(mmScandirFree)
+    MOCKER(&MmpaPlugin::MsprofMmScandirFree)
         .stubs()
         .with(any(), any())
         .will(returnValue(0));
@@ -288,7 +290,7 @@ TEST_F(COMMON_UTILS_UTILS_TEST, get_files_non_recur) {
     name_list[3] = &entry4;
     mmDirent **p_name_list = name_list;
 
-    MOCKER(mmScandir)
+    MOCKER(&MmpaPlugin::MsprofMmScandir)
         .stubs()
         .with(any(), outBoundP(&p_name_list), any(), any())
         .will(returnValue(4));
@@ -301,7 +303,7 @@ TEST_F(COMMON_UTILS_UTILS_TEST, get_files_non_recur) {
         .then(returnValue(true))
         .then(returnValue(false));
 
-    MOCKER(mmScandirFree)
+    MOCKER(&MmpaPlugin::MsprofMmScandirFree)
         .stubs()
         .with(any(), any())
         .will(returnValue(0));
@@ -374,7 +376,7 @@ TEST_F(COMMON_UTILS_UTILS_TEST, CreateDir_mkdir_fail) {
 
     path = "./path_CreateDir";
 
-    MOCKER(mmMkdir)
+    MOCKER(&MmpaPlugin::MsprofMmMkdir)
         .stubs()
         .with(any(), any())
         .will(returnValue(-1));
@@ -498,7 +500,7 @@ TEST_F(COMMON_UTILS_UTILS_TEST, CanonicalizePath) {
     memset_s(real_path_buffer, 4096, 0, 4096);
     strcpy_s(real_path_buffer, 4095, real_path.c_str());
 
-    MOCKER(mmRealPath)
+    MOCKER(&MmpaPlugin::MsprofMmRealPath)
         .stubs()
         .with(any(), outBoundP(real_path_buffer, 4096), outBound(4096))
         .will(returnValue(0))
@@ -554,7 +556,7 @@ TEST_F(COMMON_UTILS_UTILS_TEST, exec_cmd_cpp) {
     std::vector<std::string> envp;
     envp.push_back("PATH=/usr/bin:/usr/sbin");
 
-    MOCKER(mmCreateProcess)
+    MOCKER(&MmpaPlugin::MsprofMmCreateProcess)
         .stubs()
         .will(returnValue(-1));
 
@@ -594,12 +596,12 @@ TEST_F(COMMON_UTILS_UTILS_TEST, exec_cmd_c) {
 
     std::string stdout_redirect_file = "./exec_cmd_c_child_redirect_file";
 
-    MOCKER(mmCreateProcess)
+    MOCKER(&MmpaPlugin::MsprofMmCreateProcess)
         .stubs()
         .will(returnValue(-1))
         .then(returnValue(0));
 
-    MOCKER(mmWaitPid)
+    MOCKER(&MmpaPlugin::MsprofMmWaitPid)
         .stubs()
         .will(returnValue(-1))
         .then(returnValue(0));
@@ -639,7 +641,7 @@ TEST_F(COMMON_UTILS_UTILS_TEST, exec_cmd_async_c) {
 
     std::string stdout_redirect_file = "./exec_cmd_c_child_redirect_file";
 
-    MOCKER(mmCreateProcess)
+    MOCKER(&MmpaPlugin::MsprofMmCreateProcess)
         .stubs()
         .will(returnValue(0))
         .then(returnValue(-1));
@@ -660,7 +662,7 @@ TEST_F(COMMON_UTILS_UTILS_TEST, wait_process_no_hang) {
     int exit_code = 0;
     bool hang = false;
 
-    MOCKER(mmWaitPid)
+    MOCKER(&MmpaPlugin::MsprofMmWaitPid)
         .stubs()
         .will(returnValue(0))
         .then(returnValue(-1));
@@ -670,7 +672,7 @@ TEST_F(COMMON_UTILS_UTILS_TEST, wait_process_no_hang) {
 
     GlobalMockObject::verify();
 
-    MOCKER(mmWaitPid)
+    MOCKER(&MmpaPlugin::MsprofMmWaitPid)
         .stubs()
         .will(returnValue(EN_ERR));
 
@@ -700,7 +702,7 @@ TEST_F(COMMON_UTILS_UTILS_TEST, ProcessIsRuning) {
 
     pid_t process = 1234;
 
-    MOCKER(mmWaitPid)
+    MOCKER(&MmpaPlugin::MsprofMmWaitPid)
         .stubs()
         .will(returnValue(-1))
         .then(returnValue(0));
@@ -872,7 +874,7 @@ TEST_F(COMMON_UTILS_UTILS_TEST, get_child_dirs_recur) {
     name_list[3] = &entry4;
     mmDirent **p_name_list = name_list;
 
-    MOCKER(mmScandir)
+    MOCKER(&MmpaPlugin::MsprofMmScandir)
         .stubs()
         .with(any(), outBoundP(&p_name_list), any(), any())
         .will(returnValue(4));
@@ -885,7 +887,7 @@ TEST_F(COMMON_UTILS_UTILS_TEST, get_child_dirs_recur) {
         .then(returnValue(true))
         .then(returnValue(false));
 
-    MOCKER(mmScandirFree)
+    MOCKER(&MmpaPlugin::MsprofMmScandirFree)
         .stubs()
         .with(any(), any())
         .will(returnValue(0));
@@ -925,7 +927,7 @@ TEST_F(COMMON_UTILS_UTILS_TEST, get_child_dirs_no_recur) {
     name_list[3] = &entry4;
     mmDirent **p_name_list = name_list;
 
-    MOCKER(mmScandir)
+    MOCKER(&MmpaPlugin::MsprofMmScandir)
         .stubs()
         .with(any(), outBoundP(&p_name_list), any(), any())
         .will(returnValue(4));
@@ -938,7 +940,7 @@ TEST_F(COMMON_UTILS_UTILS_TEST, get_child_dirs_no_recur) {
         .then(returnValue(true))
         .then(returnValue(false));
 
-    MOCKER(mmScandirFree)
+    MOCKER(&MmpaPlugin::MsprofMmScandirFree)
         .stubs()
         .with(any(), any())
         .will(returnValue(0));
@@ -994,12 +996,12 @@ TEST_F(COMMON_UTILS_UTILS_TEST, get_child_filenames_scan_dir_success) {
     name_list[3] = &entry4;
     mmDirent **p_name_list = name_list;
 
-    MOCKER(mmScandir)
+    MOCKER(&MmpaPlugin::MsprofMmScandir)
         .stubs()
         .with(any(), outBoundP(&p_name_list), any(), any())
         .will(returnValue(4));
 
-    MOCKER(mmScandirFree)
+    MOCKER(&MmpaPlugin::MsprofMmScandirFree)
         .stubs()
         .with(any(), any())
         .will(returnValue(0));
@@ -1045,7 +1047,7 @@ TEST_F(COMMON_UTILS_UTILS_TEST, GetMac) {
 
     std::string mac_address;
     int mac_count = 0;
-    MOCKER(mmGetMac)
+    MOCKER(&MmpaPlugin::MsprofMmGetMac)
         .stubs()
         .with(any(), outBoundP(&mac_count))
         .will(returnValue(0))
@@ -1060,12 +1062,12 @@ TEST_F(COMMON_UTILS_UTILS_TEST, GetMac) {
     std::string str_mac = "00-11-22-33-44-55\n";
     snprintf(mac[0].addr, sizeof(18), str_mac.c_str(), sizeof(18));
     mmMacInfo *mac_info = mac;
-    MOCKER(mmGetMac)
+    MOCKER(&MmpaPlugin::MsprofMmGetMac)
         .stubs()
         .with(outBoundP(&mac_info), outBoundP(&mac_count))
         .will(returnValue(0));
 
-    MOCKER(mmGetMacFree)
+    MOCKER(&MmpaPlugin::MsprofMmGetMacFree)
         .stubs()
         .with(any(), any())
         .will(returnValue(0));

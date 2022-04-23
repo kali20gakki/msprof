@@ -1,11 +1,11 @@
-# add_subdirectory(app) # ok
-# add_subdirectory(common) # core dump
-# add_subdirectory(device) # OK
-# add_subdirectory(driver) # ok
-# add_subdirectory(job_wrapper) # ok
-# add_subdirectory(message)  # No rule to make target 'install'
+# add_subdirectory(app) # done
+# add_subdirectory(common) # done
+# add_subdirectory(device) # done
+# add_subdirectory(driver) # done
+# add_subdirectory(job_wrapper) # done
+# add_subdirectory(message)  # done
 # add_subdirectory(msprof) # ok
-# add_subdirectory(transport) # SendFiles死循环
-# add_subdirectory(streamio) # dumped core client（OK）
-# add_subdirectory(msprofbin)
-add_subdirectory(stub_utest)
+# add_subdirectory(transport) # done
+# add_subdirectory(streamio) # done
+add_subdirectory(msprofbin) # 遗留
+# add_subdirectory(stub_utest) # done

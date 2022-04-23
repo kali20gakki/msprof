@@ -8,8 +8,10 @@
 #include "errno/error_code.h"
 #include "ai_drv_dev_api.h"
 #include "ai_drv_prof_api.h"
+#include "driver_plugin.h"
 
 using namespace analysis::dvvp::common::error;
+using namespace Analysis::Dvvp::Plugin;
 #define CHANNEL_STR(s) #s
 
 ///////////////////////////////////////////////////////////////////
@@ -26,7 +28,7 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvGetDevNum) {
 
     uint32_t num_dev = 0;
 
-    MOCKER(drvGetDevNum)
+    MOCKER(&DriverPlugin::MsprofDrvGetDevNum)
         .stubs()
         .with(outBoundP(&num_dev))
         .will(returnValue(DRV_ERROR_NO_DEVICE))
@@ -43,7 +45,7 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvGetDevIds) {
 
     uint32_t num_dev = 0;
 
-    MOCKER(drvGetDevIDs)
+    MOCKER(&DriverPlugin::MsprofDrvGetDevIDs)
         .stubs()
         .with(outBoundP(&num_dev))
         .will(returnValue(DRV_ERROR_NO_DEVICE))
@@ -62,7 +64,7 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvPeripheralStart) {
     int prof_sample_period = 10;
     std::string prof_data_file_path = "/path/to/data";
 
-    MOCKER(prof_drv_start)
+    MOCKER(&DriverPlugin::MsprofDrvStart)
         .stubs()
         .will(returnValue(PROF_ERROR))
         .then(returnValue(PROF_OK));
@@ -98,7 +100,7 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvTscpuStart) {
 
     GlobalMockObject::verify();
 
-    MOCKER(prof_drv_start)
+    MOCKER(&DriverPlugin::MsprofDrvStart)
         .stubs()
         .will(returnValue(PROF_ERROR))
         .then(returnValue(PROF_OK));
@@ -130,7 +132,7 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvAicoreStart) {
 
     GlobalMockObject::verify();
 
-    MOCKER(prof_drv_start)
+    MOCKER(&DriverPlugin::MsprofDrvStart)
         .stubs()
         .will(returnValue(PROF_ERROR))
         .then(returnValue(PROF_OK));
@@ -160,7 +162,7 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvAicoreTaskBasedStart) {
 
     GlobalMockObject::verify();
 
-    MOCKER(prof_drv_start)
+    MOCKER(&DriverPlugin::MsprofDrvStart)
         .stubs()
         .will(returnValue(PROF_ERROR))
         .then(returnValue(PROF_OK));
@@ -195,7 +197,7 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvFftsProfileStart) {
     drvPeripheralProfileCfg.aicMode = 1;
     drvPeripheralProfileCfg.aivMode = 1;
 
-    MOCKER(prof_drv_start)
+    MOCKER(&DriverPlugin::MsprofDrvStart)
         .stubs()
         .will(returnValue(PROF_ERROR))
         .then(returnValue(PROF_OK));
@@ -225,7 +227,7 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvTsFwStart) {
     profileParams->ts_cpu_usage = "on";
     profileParams->ai_core_status = "on";
     profileParams->ai_vector_status = "on";
-    MOCKER(prof_drv_start)
+    MOCKER(&DriverPlugin::MsprofDrvStart)
         .stubs()
         .will(returnValue(PROF_ERROR))
         .then(returnValue(PROF_OK));
@@ -251,7 +253,7 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvStarsSocLogStart) {
     profileParams->stars_acsq_task = "on";
     profileParams->ffts_block = "on";
     profileParams->low_power  = "on";
-    MOCKER(prof_drv_start)
+    MOCKER(&DriverPlugin::MsprofDrvStart)
         .stubs()
         .will(returnValue(PROF_ERROR))
         .then(returnValue(PROF_OK));
@@ -267,7 +269,7 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvStop) {
     int prof_device_id = 0;
     analysis::dvvp::driver::AI_DRV_CHANNEL prof_channel = analysis::dvvp::driver::PROF_CHANNEL_HBM;
 
-    MOCKER(prof_stop)
+    MOCKER(&DriverPlugin::MsprofDrvStop)
         .stubs()
         .will(returnValue(PROF_ERROR))
         .then(returnValue(PROF_OK));
@@ -284,7 +286,7 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvChannelRead) {
     unsigned char out_buf[4096];
     uint32_t buf_size = 4096;
 
-    MOCKER(prof_channel_read)
+    MOCKER(&DriverPlugin::MsprofChannelRead)
         .stubs()
         .will(returnValue(PROF_ERROR))
         .then(returnValue(64))
@@ -308,7 +310,7 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvChannelPoll) {
 
     struct prof_poll_info out_buf[2];
 
-    MOCKER(prof_channel_poll)
+    MOCKER(&DriverPlugin::MsprofChannelPoll)
         .stubs()
         .will(returnValue(PROF_ERROR))
         .then(returnValue(PROF_OK));
@@ -331,7 +333,7 @@ int halProfDataFlush(unsigned int deviceId, unsigned int channelId, unsigned int
 TEST_F(DRIVER_AI_DRV_API_TEST, DrvProfFlush) {
     GlobalMockObject::verify();
 
-    MOCKER(halProfDataFlush)
+    MOCKER(&DriverPlugin::MsprofHalProfDataFlush)
         .stubs()
         .will(returnValue(PROF_ERROR))
         .then(returnValue(PROF_STOPPED_ALREADY))
@@ -358,7 +360,7 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvHwtsLogStart) {
 
     GlobalMockObject::verify();
 
-    MOCKER(prof_drv_start)
+    MOCKER(&DriverPlugin::MsprofDrvStart)
         .stubs()
         .will(returnValue(PROF_ERROR))
         .then(returnValue(PROF_OK));
@@ -382,7 +384,7 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvFmkDataStart) {
 
     GlobalMockObject::verify();
 
-    MOCKER(prof_drv_start)
+    MOCKER(&DriverPlugin::MsprofDrvStart)
         .stubs()
         .will(returnValue(PROF_ERROR))
         .then(returnValue(PROF_OK));
@@ -411,7 +413,7 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvL2CacheTaskStart) {
 
     GlobalMockObject::verify();
 
-    MOCKER(prof_drv_start)
+    MOCKER(&DriverPlugin::MsprofDrvStart)
         .stubs()
         .will(returnValue(PROF_ERROR))
         .then(returnValue(PROF_OK));
@@ -426,7 +428,7 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvL2CacheTaskStart) {
 TEST_F(DRIVER_AI_DRV_API_TEST, DrvGetHostPhyIdByDeviceIndex) {
     GlobalMockObject::verify();
 
-    MOCKER(drvGetDevIDByLocalDevID)
+    MOCKER(&DriverPlugin::MsprofDrvGetDevIDByLocalDevID)
         .stubs()
         .will(returnValue(DRV_ERROR_NO_DEVICE))
         .then(returnValue(DRV_ERROR_NONE));
@@ -441,14 +443,14 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvGetDevIdsStr) {
     uint32_t num_dev = 0;
     std::vector<int> devIds;
     devIds.push_back(1);
-    MOCKER(drvGetDevNum)
+    MOCKER(&DriverPlugin::MsprofDrvGetDevNum)
         .stubs()
         .with(outBoundP(&num_dev))
         .will(returnValue(DRV_ERROR_NO_DEVICE))
         .then(returnValue(DRV_ERROR_NONE));
 
     num_dev = 1;
-    MOCKER(drvGetDevIDs)
+    MOCKER(&DriverPlugin::MsprofDrvGetDevIDs)
         .stubs()
         .with(outBoundP(&num_dev))
         .will(returnValue(DRV_ERROR_NO_DEVICE))
@@ -463,7 +465,7 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvGetDevIdsStr) {
 TEST_F(DRIVER_AI_DRV_API_TEST, DrvGetPlatformInfo) {
     GlobalMockObject::verify();
     uint32_t platformInfo = 0;
-    MOCKER(drvGetPlatformInfo)
+    MOCKER(&DriverPlugin::MsprofDrvGetPlatformInfo)
         .stubs()
         .will(returnValue(DRV_ERROR_NONE))
         .then(returnValue(MSPROF_HELPER_HOST))
@@ -476,7 +478,7 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvGetPlatformInfo) {
 
 TEST_F(DRIVER_AI_DRV_API_TEST, DrvCheckIfHelperHost) {
     GlobalMockObject::verify();
-    MOCKER(drvGetDevNum)
+    MOCKER(&DriverPlugin::MsprofDrvGetDevNum)
         .stubs()
         .will(returnValue(DRV_ERROR_NONE))
         .then(returnValue(MSPROF_HELPER_HOST));

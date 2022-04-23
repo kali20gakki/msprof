@@ -122,6 +122,18 @@ std::string PluginManager::GetSoPath(const std::string &envValue) const
     return "";
 }
 
+bool IsFuncExist(const std::string funcName) const
+{
+    if (funcName.empty()) {
+        return false;
+    }
+    void *func = dlsym(handle_, funcName.c_str());
+    if (!func) {
+        return false;
+    }
+    return true;
+}
+
 } // namespace Plugin
 } // namespace Dvvp
 } // namespace Analysis

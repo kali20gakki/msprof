@@ -11,11 +11,13 @@
 #include "message/prof_params.h"
 #include "securec.h"
 #include "sender.h"
+#include "mmpa_plugin.h"
 
 using namespace std;
 using namespace analysis::dvvp::streamio::client;
 using namespace analysis::dvvp::streamio::common;
 using namespace analysis::dvvp::common::error;
+using namespace Analysis::Dvvp::Plugin;
 
 class PROFILER_SENDER_TEST: public testing::Test {
 
@@ -398,7 +400,7 @@ TEST_F(PROFILER_SENDER_TEST, OpenWriteFile)
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
 
-    MOCKER(mmOpen2)
+    MOCKER(&MmpaPlugin::MsprofMmOpen2)
         .stubs()
         .will(returnValue(-1))
         .then(returnValue(7));

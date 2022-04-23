@@ -2,16 +2,14 @@
 add_executable(stub_file_stest
     ${MSPROF_SOURCE_DIR}/dvvp/adx/wrapper/hdc_api.cpp  
     ${MSPROF_SOURCE_DIR}/dvvp/adx/wrapper/memory_utils.cpp
-    ${MSPROF_SOURCE_DIR}/dvvp/depend/src/mmpa_plugin.cpp
-    ${MSPROF_SOURCE_DIR}/dvvp/depend/src/driver_plugin.cpp
-    ${MSPROF_SOURCE_DIR}/dvvp/depend/src/plugin_manager.cpp
     test/main.cpp
     test/hdc_api_stest.cpp
-    ../stub/mmpa_stub.cpp
     ../stub/profile_drv_user_stub.cpp
     ../stub/hdc-log-stub.cpp
     ../stub/devdrv_runtime_api_stub.cpp
     ../stub/ide_hdc_stub.cc
+    ../../stub/driver_plugin_stub.cpp
+    ../../stub/mmpa_plugin_stub.cpp
 )
 
 target_include_directories(stub_file_stest PRIVATE
@@ -25,6 +23,7 @@ target_include_directories(stub_file_stest PRIVATE
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/adump
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/slog
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/plugin
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/metadef/error_manager/error_manager_stub
     ${MSPROF_SOURCE_DIR}/../inc
     ${MSPROF_SOURCE_DIR}/dvvp
     ${MSPROF_SOURCE_DIR}/dvvp/common/logger

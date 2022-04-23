@@ -4,9 +4,11 @@
 #include "errno/error_code.h"
 #include "msprof_dlog.h"
 #include "ascend_hal.h"
+#include "driver_plugin.h"
 
 using namespace analysis::dvvp::driver;
 using namespace analysis::dvvp::common::error;
+using namespace Analysis::Dvvp::Plugin;
 
 class DRV_DEV_API_STEST: public testing::Test {
 protected:
@@ -19,7 +21,7 @@ protected:
 TEST_F(DRV_DEV_API_STEST, DrvGetPlatformInfo)
 {
     GlobalMockObject::verify();
-    MOCKER(drvGetPlatformInfo)
+    MOCKER(&DriverPlugin::MsprofDrvGetPlatformInfo)
         .stubs()
         .will(returnValue(DRV_ERROR_NONE))
         .then(returnValue(MSPROF_HELPER_HOST))
@@ -32,7 +34,7 @@ TEST_F(DRV_DEV_API_STEST, DrvGetPlatformInfo)
 
 TEST_F(DRV_DEV_API_STEST, DrvCheckIfHelperHost) {
     GlobalMockObject::verify();
-    MOCKER(drvGetDevNum)
+    MOCKER(&DriverPlugin::MsprofDrvGetDevNum)
         .stubs()
         .will(returnValue(DRV_ERROR_NONE))
         .then(returnValue(MSPROF_HELPER_HOST));

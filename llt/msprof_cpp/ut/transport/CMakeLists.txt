@@ -26,9 +26,6 @@ set(profilerSrcFiles
     ${MSPROF_SOURCE_DIR}/dvvp/transport/hdc/hdc_transport.cpp 
     ${MSPROF_SOURCE_DIR}/dvvp/common/validation/param_validation.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/depend/stub/error_manager/msprof_error_manager_stub.cpp
-    ${MSPROF_SOURCE_DIR}/dvvp/depend/src/plugin_manager.cpp
-    ${MSPROF_SOURCE_DIR}/dvvp/depend/src/driver_plugin.cpp
-    ${MSPROF_SOURCE_DIR}/dvvp/depend/src/mmpa_plugin.cpp
     ${CppPath}
 )
 
@@ -42,7 +39,9 @@ set(localSrcFiles
     ../stub/hdc-log-stub.cpp 
     ../stub/devdrv_runtime_api_stub.cpp 
     ../stub/profile_drv_user_stub.cpp 
-    ../stub/common-utils-stub.cpp 
+    ../stub/common-utils-stub.cpp
+    ../../stub/driver_plugin_stub.cpp
+    ../../stub/mmpa_plugin_stub.cpp
 )
 
 add_executable(transport

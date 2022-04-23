@@ -18,9 +18,6 @@ set(msprofSrcList
     ${MSPROF_SOURCE_DIR}/dvvp/driver/channel/ai_drv_prof_api.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/message/codec.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform.cpp
-    ${MSPROF_SOURCE_DIR}/dvvp/depend/src/mmpa_plugin.cpp
-    ${MSPROF_SOURCE_DIR}/dvvp/depend/src/driver_plugin.cpp
-    ${MSPROF_SOURCE_DIR}/dvvp/depend/src/plugin_manager.cpp
     ${CppPath}
 )
 
@@ -29,6 +26,8 @@ set(testCfgSrcFile
     ../stub/devdrv_runtime_api_stub.cpp
     ../stub/profile_drv_user_stub.cpp
     ../stub/hdc-log-stub.cpp
+    ../../stub/driver_plugin_stub.cpp
+    ../../stub/mmpa_plugin_stub.cpp
     testcase/main.cpp
 	testcase/config_manager_stest.cpp
     ${msprofSrcList}

@@ -21,9 +21,6 @@ set(profilerSrcFiles
     ${MSPROF_SOURCE_DIR}/dvvp/adx/stub/adx_prof_api.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/statistics/perf_count.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/adx/wrapper/memory_utils.cpp
-    ${MSPROF_SOURCE_DIR}/dvvp/depend/src/mmpa_plugin.cpp
-    ${MSPROF_SOURCE_DIR}/dvvp/depend/src/driver_plugin.cpp
-    ${MSPROF_SOURCE_DIR}/dvvp/depend/src/plugin_manager.cpp
     ${CppPath}
 )
 
@@ -36,6 +33,8 @@ set(localSrcFiles
     ../stub/hdc-log-stub.cpp
     ../stub/hdc-api-stub.cpp
     ../stub/devdrv_runtime_api_stub.cpp
+    ../../stub/driver_plugin_stub.cpp
+    ../../stub/mmpa_plugin_stub.cpp
 )
 
 add_executable(client_stest 

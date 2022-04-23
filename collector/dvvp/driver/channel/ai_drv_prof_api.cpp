@@ -633,13 +633,13 @@ int DrvChannelPoll(PROF_POLL_INFO_PTR outBuf,
 int DrvProfFlush(unsigned int deviceId, unsigned int channelId, unsigned int &bufSize)
 {
 #if (defined(linux) || defined(__linux__))
-    if (!halProfDataFlush) {
+    if (!DriverPlugin::instance()->IsFuncExist("halProfDataFlush")) {
         MSPROF_LOGW("Function halProfDataFlush not supported, deviceId=%u, channelId=%u", deviceId, channelId);
         return PROFILING_FAILED;
     }
 
     MSPROF_LOGI("Begin to flush drv buff. deviceId=%u, channelId=%u", deviceId, channelId);
-    int ret = halProfDataFlush(deviceId, channelId, &bufSize);
+    int ret = DriverPlugin::instance()->MsprofHalProfDataFlush(deviceId, channelId, &bufSize);
     if (ret == PROF_OK) {
         MSPROF_LOGI("End to flush drv buff. deviceId=%u, channelId=%u, bufSize=%u", deviceId, channelId, bufSize);
         return PROFILING_SUCCESS;

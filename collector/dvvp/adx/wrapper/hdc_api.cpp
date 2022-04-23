@@ -561,14 +561,12 @@ int32_t HalHdcSessionConnect(int32_t peerNode, int32_t peerDevid,
 int32_t HdcSessionClose(HDC_SESSION session)
 {
     IDE_CTRL_VALUE_FAILED(session != nullptr, return IDE_DAEMON_ERROR, "session is nullptr");
-
     // close hdc session, use for hdc_accept session
     hdcError_t error = DriverPlugin::instance()->MsprofDrvHdcSessionClose(session);
     if (error != DRV_ERROR_NONE) {
         MSPROF_LOGE("Hdc Session Close Failed, error: %d", error);
         return IDE_DAEMON_ERROR;
     }
-
     return IDE_DAEMON_OK;
 }
 

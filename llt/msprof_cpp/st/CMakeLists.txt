@@ -1,8 +1,8 @@
-# add_subdirectory(common) # ok
-# add_subdirectory(device) # dumped core
-# add_subdirectory(driver) # ok
-# add_subdirectory(job_wrapper) # ok
-# add_subdirectory(msprof) # dumped core
-# add_subdirectory(msprofbin) # ok
-# add_subdirectory(streamio) # command dumped core
+# add_subdirectory(common) # done
+# add_subdirectory(device) # done
+# add_subdirectory(driver) # done
+# add_subdirectory(job_wrapper) # done
+# add_subdirectory(msprof) # done
+# add_subdirectory(msprofbin) # 遗留（同ut）
+# add_subdirectory(streamio) # done
 add_subdirectory(stub_stest)

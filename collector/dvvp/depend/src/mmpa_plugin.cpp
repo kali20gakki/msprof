@@ -4,6 +4,16 @@ namespace Analysis {
 namespace Dvvp {
 namespace Plugin {
 
+MmpaPlugin::~MmpaPlugin()
+{
+    pluginManager_.CloseHandle();
+}
+
+bool MmpaPlugin::IsFuncExist(const std::string &funcName) const
+{
+    return pluginManager_.IsFuncExist(std::string funcName);
+}
+
 INT32 MmpaPlugin::MsprofMmOpen2(const CHAR *pathName, INT32 flags, MODE mode)
 {
     Status ret = PLUGIN_LOAD_SUCCESS;
@@ -32,6 +42,23 @@ mmSsize_t MmpaPlugin::MsprofMmRead(INT32 fd, VOID *buf, UINT32 bufLen)
     }
     MSPROF_MMREAD_T func;
     ret = pluginManager_.GetFunction<mmSsize_t, INT32, VOID *, UINT32>("mmRead", func);
+    if (ret != PLUGIN_LOAD_SUCCESS) {
+        return -1;
+    }
+    return func(fd, buf, bufLen);
+}
+
+mmSsize_t MmpaPlugin::MsprofMmWrite(INT32 fd, VOID *buf, UINT32 bufLen)
+{
+    Status ret = PLUGIN_LOAD_SUCCESS;
+    if (!pluginManager_.HasLoad()) {
+        ret = pluginManager_.OpenPlugin("LD_LIBRARY_PATH");
+        if (ret != PLUGIN_LOAD_SUCCESS) {
+            return -1;
+        }
+    }
+    MSPROF_MMWRITE_T func;
+    ret = pluginManager_.GetFunction<mmSsize_t, INT32, VOID *, UINT32>("mmWrite", func);
     if (ret != PLUGIN_LOAD_SUCCESS) {
         return -1;
     }
@@ -213,7 +240,6 @@ INT32 MmpaPlugin::MsprofMmGetTid()
     return func();
 }
 
-// 分割线
 INT32 MmpaPlugin::MsprofMmGetTimeOfDay(mmTimeval *timeVal, mmTimezone *timeZone)
 {
     Status ret = PLUGIN_LOAD_SUCCESS;
@@ -233,7 +259,7 @@ INT32 MmpaPlugin::MsprofMmGetTimeOfDay(mmTimeval *timeVal, mmTimezone *timeZone)
 
 mmTimespec MmpaPlugin::MsprofMmGetTickCount()
 {
-    mmTimespec rts;;
+    mmTimespec rts;
     memset(&rts, 0, sizeof(mmTimespec));
     Status ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginManager_.HasLoad()) {
@@ -607,7 +633,6 @@ INT32 MmpaPlugin::MsprofMmGetEnv(const CHAR *name, CHAR *value, UINT32 len)
     return func(name, value, len);
 }
 
-// 分割线2
 INT32 MmpaPlugin::MsprofMmCreateTaskWithThreadAttr(mmThread *threadHandle, const mmUserBlock_t *funcBlock,
         const mmThreadAttr *threadAttr)
 {
@@ -743,6 +768,23 @@ INT32 MmpaPlugin::MsprofMmCpuInfoFree(mmCpuDesc *cpuInfo, INT32 count)
         return -1;
     }
     return func(cpuInfo, count);
+}
+
+INT32 MmpaPlugin::MsprofMmDup2(INT32 oldFd, INT32 newFd)
+{
+    Status ret = PLUGIN_LOAD_SUCCESS;
+    if (!pluginManager_.HasLoad()) {
+        ret = pluginManager_.OpenPlugin("LD_LIBRARY_PATH");
+        if (ret != PLUGIN_LOAD_SUCCESS) {
+            return -1;
+        }
+    }
+    MSPROF_MMDUP2_T func;
+    ret = pluginManager_.GetFunction<INT32, INT32, INT32>("mmDup2", func);
+    if (ret != PLUGIN_LOAD_SUCCESS) {
+        return -1;
+    }
+    return func(oldFd, newFd);
 }
 
 } // namespace Plugin

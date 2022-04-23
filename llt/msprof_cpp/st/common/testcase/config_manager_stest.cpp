@@ -7,8 +7,10 @@
 #include "config/config.h"
 #include "utils/utils.h"
 #include "ai_drv_dev_api.h"
+#include "driver_plugin.h"
 using namespace Analysis::Dvvp::Common::Config;
 using namespace analysis::dvvp::common::error;
+using namespace Analysis::Dvvp::Plugin;
 static const std::string TYPE_CONFIG = "type";
 
 class COMMON_CONFIG_MANAGER_STEST: public testing::Test {
@@ -30,7 +32,7 @@ TEST_F(COMMON_CONFIG_MANAGER_STEST, GetPlatformType)
     EXPECT_EQ(PlatformType::MINI_TYPE, configManger->GetPlatformType());
     configManger->Uninit();
     configManger->configMap_[TYPE_CONFIG] = "0";
-    MOCKER(halGetDeviceInfo)
+    MOCKER(&DriverPlugin::MsprofHalGetDeviceInfo)
             .stubs()
             .will(returnValue(MSPROF_HELPER_HOST))
             .then(returnValue(DRV_ERROR_INVALID_VALUE));

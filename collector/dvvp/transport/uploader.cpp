@@ -30,7 +30,6 @@ Uploader::~Uploader()
 int Uploader::Init(size_t size)
 {
     int ret = PROFILING_FAILED;
-
     do {
         MSVP_MAKE_SHARED1_BREAK(queue_, UploaderQueue, size);
         queue_->SetQueueName(UPLOADER_QUEUE_NAME);
@@ -38,7 +37,6 @@ int Uploader::Init(size_t size)
 
         ret = PROFILING_SUCCESS;
     } while (0);
-
     return ret;
 }
 

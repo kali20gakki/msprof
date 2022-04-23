@@ -87,7 +87,8 @@ set(profilerSrcFile
 	../stub/devdrv_runtime_api_stub.cpp
 	../stub/profile_drv_user_stub.cpp
 	../stub/hdc-api-stub.cpp
-    ../../stub/error_manager_stub.cpp
+    ../../stub/driver_plugin_stub.cpp
+    ../../stub/mmpa_plugin_stub.cpp
     ${profilerSrcList}
 )
 
@@ -205,6 +206,8 @@ add_executable(msprof_utest
 	../stub/devdrv_runtime_api_stub.cpp
 	../stub/profile_drv_user_stub.cpp
 	../stub/hdc-api-stub.cpp
+	../../stub/driver_plugin_stub.cpp
+    ../../stub/mmpa_plugin_stub.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/adx/stub_lhisi/adx_prof_api.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/common/config/config_manager.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/memory/chunk_pool.cpp
@@ -230,9 +233,6 @@ add_executable(msprof_utest
     ${MSPROF_SOURCE_DIR}/dvvp/transport/transport.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/transport/uploader.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/transport/uploader_mgr.cpp
-	${MSPROF_SOURCE_DIR}/dvvp/depend/src/plugin_manager.cpp
-    ${MSPROF_SOURCE_DIR}/dvvp/depend/src/driver_plugin.cpp
-    ${MSPROF_SOURCE_DIR}/dvvp/depend/src/mmpa_plugin.cpp
 	${CppPath}
 )
 

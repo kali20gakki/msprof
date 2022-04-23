@@ -15,9 +15,6 @@ set(profilerSrcFiles
     ${MSPROF_SOURCE_DIR}/dvvp/common/thread/thread.cpp 
     ${MSPROF_SOURCE_DIR}/dvvp/common/config/config_manager.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/depend/stub/error_manager/msprof_error_manager_stub.cpp
-    ${MSPROF_SOURCE_DIR}/dvvp/depend/src/mmpa_plugin.cpp
-    ${MSPROF_SOURCE_DIR}/dvvp/depend/src/driver_plugin.cpp
-    ${MSPROF_SOURCE_DIR}/dvvp/depend/src/plugin_manager.cpp
     ${CppPath}
 )
 
@@ -29,6 +26,8 @@ set(localSrcFiles
 	../../stub/common-utils-stub.cpp 
 	../../stub/hdc-log-stub.cpp
     ../../stub/devdrv_runtime_api_stub.cpp
+    ../../../stub/driver_plugin_stub.cpp
+    ../../../stub/mmpa_plugin_stub.cpp
 )
 
 add_executable(streamio_common_utest
