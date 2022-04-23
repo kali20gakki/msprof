@@ -11,7 +11,7 @@ DriverPlugin::~DriverPlugin()
 
 bool DriverPlugin::IsFuncExist(const std::string &funcName) const
 {
-    return pluginManager_.IsFuncExist(std::string funcName);
+    return pluginManager_.IsFuncExist(funcName);
 }
 
 // halHdcRecv

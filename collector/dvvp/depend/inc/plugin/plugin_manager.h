@@ -38,10 +38,10 @@ public:
         return PLUGIN_LOAD_SUCCESS;
     }
     bool HasLoad();
+    bool IsFuncExist(const std::string funcName) const;
 
 private:
     std::string RealPath(const std::string &path) const;
-    bool IsFuncExist(const std::string funcName) const;
     std::string GetSoPath(const std::string &envValue) const;
     void SplitPath(const std::string &mutilPath, std::vector<std::string> &patVec) const;
     void ReadDriverConf(std::vector<std::string> &pathVec) const; // "/etc/ld.so.conf.d/ascend_driver_so.conf"
