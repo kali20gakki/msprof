@@ -20,6 +20,7 @@
 #include "utils/utils.h"
 #include "info_json.h"
 #include "config/config_manager.h"
+#include "mmpa_plugin.h"
 
 namespace analysis {
 namespace dvvp {
@@ -32,6 +33,7 @@ using namespace analysis::dvvp::common::config;
 using namespace analysis::dvvp::message;
 using namespace analysis::dvvp::transport;
 using namespace Analysis::Dvvp::MsprofErrMgr;
+using namespace Analysis::Dvvp::Plugin;
 
 ProfTask::ProfTask(const std::vector<std::string> &devices,
                    SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> param)
@@ -188,7 +190,7 @@ std::string ProfTask::GetHostTime()
     mmTimeval tv;
 
     (void)memset_s(&tv, sizeof(tv), 0, sizeof(tv));
-    int ret = mmGetTimeOfDay(&tv, nullptr);
+    int ret = MmpaPlugin::instance()->MsprofMmGetTimeOfDay(&tv, nullptr);
     if (ret != EN_OK) {
         MSPROF_LOGE("[GetHostTime]gettimeofday failed");
         MSPROF_INNER_ERROR("EK9999", "gettimeofday failed");

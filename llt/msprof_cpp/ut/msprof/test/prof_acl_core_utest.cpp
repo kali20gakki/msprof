@@ -37,12 +37,14 @@
 #include "acl_prof.h"
 #include "data_struct.h"
 #include "ai_drv_dev_api.h"
+#include "mmpa_plugin.h"
 
 using namespace analysis::dvvp::common::error;
 using namespace Analysis::Dvvp::Analyze;
 using namespace analysis::dvvp::transport;
 using namespace Analysis::Dvvp::ProfilerCommon;
 using namespace Analysis::Dvvp::Common::Platform;
+using namespace Analysis::Dvvp::Plugin;
 const int RECEIVE_CHUNK_SIZE = 320; // chunk size:320
 
 class MSPROF_ACL_CORE_UTEST: public testing::Test {
@@ -487,10 +489,10 @@ TEST_F(MSPROF_ACL_CORE_UTEST, acl_api_subscribe) {
 
     Analysis::Dvvp::Common::Config::ConfigManager::instance()->Init();
 
-    MOCKER(mmWrite)
+    MOCKER(&MmpaPlugin::MsprofMmWrite)
         .stubs()
         .will(invoke(mmWriteStub));
-    MOCKER(mmClose)
+    MOCKER(&MmpaPlugin::MsprofMmClose)
         .stubs()
         .will(returnValue(EN_OK));
     MOCKER_CPP(&analysis::dvvp::host::ProfManager::IdeCloudProfileProcess)
@@ -705,10 +707,10 @@ TEST_F(MSPROF_ACL_CORE_UTEST, ge_api_subscribe) {
 
     Analysis::Dvvp::Common::Config::ConfigManager::instance()->Init();
 
-    MOCKER(mmWrite)
+    MOCKER(&MmpaPlugin::MsprofMmWrite)
         .stubs()
         .will(invoke(mmWriteStub));
-    MOCKER(mmClose)
+    MOCKER(&MmpaPlugin::MsprofMmClose)
         .stubs()
         .will(returnValue(EN_OK));
 
@@ -1673,10 +1675,10 @@ TEST_F(MSPROF_ACL_CORE_UTEST, acl_api_subscribe_fail) {
 
     Analysis::Dvvp::Common::Config::ConfigManager::instance()->Init();
 
-    MOCKER(mmWrite)
+    MOCKER(&MmpaPlugin::MsprofMmWrite)
         .stubs()
         .will(invoke(mmWriteStub));
-    MOCKER(mmClose)
+    MOCKER(&MmpaPlugin::MsprofMmClose)
         .stubs()
         .will(returnValue(EN_OK));
 

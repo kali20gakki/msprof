@@ -24,7 +24,7 @@ TEST_F(INPUT_PARSER_UTEST, ProcessOptions) {
     EXPECT_EQ(PROFILING_FAILED, parser.ProcessOptions(-1, cmdInfo));
 
     char* resArgs = "on";
-    MOCKER(mmGetOptArg)
+    MOCKER(&MmpaPlugin::MsprofMmGetOptArg)
         .stubs()
         .will(returnValue(resArgs));
     MOCKER_CPP(&InputParser::MsprofHostCheckValid)
@@ -413,7 +413,7 @@ TEST_F(INPUT_PARSER_UTEST, PreCheckPlatform) {
         .will(returnValue(Analysis::Dvvp::Common::Config::PlatformType::END_TYPE))
         .then(returnValue(Analysis::Dvvp::Common::Config::PlatformType::DC_TYPE));
     EXPECT_EQ(PROFILING_FAILED, parser.PreCheckPlatform(ARGS_AIV, argv));
-    MOCKER(mmGetOptInd)
+    MOCKER(&MmpaPlugin::MsprofMmGetOptInd)
         .stubs()
         .will(returnValue(1));
     parser.PreCheckPlatform(ARGS_AIV, argv);
@@ -429,7 +429,7 @@ TEST_F(INPUT_PARSER_UTEST, MsprofCmdCheckValid) {
     cmdInfo.args[ARGS_LOW_POWER] = "bb";
     cmdInfo.args[ARGS_SUMMARY_FORMAT] = "csv";
     cmdInfo.args[ARGS_PYTHON_PATH] = "123";
-    MOCKER(mmGetOptInd)
+    MOCKER(&MmpaPlugin::MsprofMmGetOptInd)
         .stubs()
         .will(returnValue(1));
     parser.MsprofCmdCheckValid(cmdInfo, ARGS_AIV_MODE);

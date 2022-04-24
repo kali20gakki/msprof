@@ -3,10 +3,12 @@
 #include <iostream>
 #include "errno/error_code.h"
 #include "thread/thread_pool.h"
+#include "mmpa_plugin.h"
 
 using namespace analysis::dvvp::common::thread;
 using namespace analysis::dvvp::common::error;
 using namespace Analysis::Dvvp::MsprofErrMgr;
+using namespace Analysis::Dvvp::Plugin;
 
 class COMMON_THREAD_POOL_TEST: public testing::Test {
 protected:
@@ -39,7 +41,7 @@ TEST_F(COMMON_THREAD_POOL_TEST, start) {
     //    .stubs()
     //    .will(returnValue(PROFILING_FAILED))
     //    .then(returnValue(PROFILING_SUCCESS));
-    MOCKER(mmCreateTaskWithThreadAttr)
+    MOCKER(&MmpaPlugin::MsprofMmCreateTaskWithThreadAttr)
         .stubs()
         .will(returnValue(EN_ERROR))
 	    .then(returnValue(EN_OK));

@@ -77,6 +77,7 @@ set(localSrcFiles
     ../stub/common-utils-stub.cpp
     ../stub/devdrv_runtime_api_stub.cpp
     ../stub/profile_drv_user_stub.cpp
+    ../../stub/driver_plugin_stub.cpp
     test/prof_job_utest.cpp
     test/prof_peripheral_job_utest.cpp
     test/prof_timer_utest.cpp

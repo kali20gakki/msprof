@@ -62,10 +62,10 @@ TEST_F(DEVICE_COLLECTION_ENTRY_TEST, Uinit) {
     auto entry = analysis::dvvp::device::CollectionEntry::instance();
     entry->isInited_ = true;
 
-    MOCKER(mmCreateTaskWithThreadAttr)
+    MOCKER(&MmpaPlugin::MsprofMmCreateTaskWithThreadAttr)
         .stubs()
         .will(returnValue(EN_OK));
-	MOCKER(mmJoinTask)
+	MOCKER(&MmpaPlugin::MsprofMmJoinTask)
         .stubs()
         .will(returnValue(EN_OK));
     entry->Init();
@@ -198,7 +198,7 @@ TEST_F(DEVICE_COLLECTION_ENTRY_TEST, HandleDataSession) {
     //MOCKER_CPP(&analysis::dvvp::common::thread::Thread::Start)
     //    .stubs()
     //    .will(returnValue(PROFILING_SUCCESS));
-    MOCKER(mmCreateTaskWithThreadAttr)
+    MOCKER(&MmpaPlugin::MsprofMmCreateTaskWithThreadAttr)
         .stubs()
         .will(returnValue(EN_OK));
 

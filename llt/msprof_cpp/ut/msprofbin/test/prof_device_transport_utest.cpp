@@ -118,7 +118,7 @@ TEST_F(HOST_PROF_DEVICE_TRANSPORT_UTEST, DoInit) {
         .then(returnValue(-1))
         .then(returnValue(0));
 
-    MOCKER(mmCreateTaskWithThreadAttr)
+    MOCKER(&MmpaPlugin::MsprofMmCreateTaskWithThreadAttr)
         .stubs()
         .will(returnValue(EN_OK));
 

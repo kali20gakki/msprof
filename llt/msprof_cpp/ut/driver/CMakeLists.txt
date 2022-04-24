@@ -11,6 +11,7 @@ set(localSrcFiles
     ../stub/devdrv_runtime_api_stub.cpp 
     ../stub/profile_drv_user_stub.cpp 
     ../stub/common-utils-stub.cpp
+    ../../stub/driver_plugin_stub.cpp
     test/ai_drv_api_utest.cpp 
 )
 
