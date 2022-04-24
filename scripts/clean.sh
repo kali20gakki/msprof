@@ -16,4 +16,4 @@ rm -rf ${TOP_DIR}/llt/output
 rm -rf ${TOP_DIR}/output
 
 shopt -s extglob
-rm -rf !(analysis|build|cmake|CMakeLists.txt|collector|inc|llt|opensource|README.md|scripts|\.git)
+rm -rf !(analysis|build|cmake|CMakeLists.txt|collector|inc|llt|opensource|README.md|scripts|.git|.|..)
