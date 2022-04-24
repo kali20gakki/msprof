@@ -1,40 +1,11 @@
-//#include <sys/time.h>
-#include <libgen.h>
-#include "common-utils-stub.h"
-#include "errno/error_code.h"
+#include "mmpa_plugin.h"
+namespace Analysis {
+namespace Dvvp {
+namespace Plugin {
 
-#include "securec.h"
+MmpaPlugin::~MmpaPlugin() {}
 
-int g_sprintf_s_flag = 0;
-int g_sprintf_s_flag1 = 1;
-
-extern "C" {
-int sprintf_s(char* strDest, size_t count, const char* format, ...)
-{
-    snprintf(strDest, count, "s");
-    if(g_sprintf_s_flag == 0) {
-        g_sprintf_s_flag --;
-        return 1;
-    }
-    else {
-        g_sprintf_s_flag = 0;
-        return -1;
-    }
-  
-}
-
-int vsnprintf_s(char* strDest, size_t destMax, size_t count, const char* format, va_list arglist) 
-{
-    vsnprintf(strDest, count, format, arglist);
-    if(g_sprintf_s_flag1 > 0) {
-        return 0;
-    }
-    else {
-        return -1;
-    }
-}
-
-mmTimespec mmGetTickCount()
+mmTimespec MmpaPlugin::MsprofMmGetTickCount()
 {
     mmTimespec rts;
     struct timespec ts = {0};
@@ -45,7 +16,7 @@ mmTimespec mmGetTickCount()
 }
 
 
-INT32 mmGetTimeOfDay(mmTimeval *timeVal, mmTimezone *timeZone)
+INT32 MmpaPlugin::MsprofMmGetTimeOfDay(mmTimeval *timeVal, mmTimezone *timeZone)
 {
     if (timeVal == NULL) {
         return EN_INVALID_PARAM;
@@ -57,7 +28,7 @@ INT32 mmGetTimeOfDay(mmTimeval *timeVal, mmTimezone *timeZone)
     return ret;
 }
 
-INT32 mmGetEnv(const CHAR *name, CHAR *value, UINT32 len)
+INT32 MmpaPlugin::MsprofMmGetEnv(const CHAR *name, CHAR *value, UINT32 len)
 {
     INT32 result;
     UINT32 envLen = 0;
@@ -86,7 +57,7 @@ INT32 mmGetEnv(const CHAR *name, CHAR *value, UINT32 len)
     return EN_OK;
 }
 
-CHAR *mmDirName(CHAR *path)
+CHAR *MmpaPlugin::MsprofMmDirName(CHAR *path)
 {
     if (path == NULL) {
         return NULL;
@@ -95,7 +66,7 @@ CHAR *mmDirName(CHAR *path)
     return dir;
 }
 
-CHAR *mmBaseName(CHAR *path)
+CHAR *MmpaPlugin::MsprofMmBaseName(CHAR *path)
 {
     if (path == NULL) {
         return NULL;
@@ -104,7 +75,7 @@ CHAR *mmBaseName(CHAR *path)
     return dir;
 }
 
-INT32 mmGetFileSize(const CHAR *fileName, ULONGLONG *length)
+INT32 MmpaPlugin::MsprofMmGetFileSize(const CHAR *fileName, ULONGLONG *length)
 {
     if(fileName == NULL || length == NULL){
         return EN_INVALID_PARAM;
@@ -119,7 +90,7 @@ INT32 mmGetFileSize(const CHAR *fileName, ULONGLONG *length)
     return EN_OK;
 }
 
-INT32 mmIsDir(const CHAR *fileName)
+INT32 MmpaPlugin::MsprofMmIsDir(const CHAR *fileName)
 {
     if (fileName == NULL) {
         return EN_INVALID_PARAM;
@@ -137,7 +108,7 @@ INT32 mmIsDir(const CHAR *fileName)
     return EN_OK;
 }
 
-INT32 mmAccess(const CHAR *lpPathName)
+INT32 MmpaPlugin::MsprofMmAccess(const CHAR *lpPathName)
 {
     if (lpPathName == NULL) {
         return EN_INVALID_PARAM;
@@ -150,7 +121,7 @@ INT32 mmAccess(const CHAR *lpPathName)
     return EN_OK;
 }
 
-INT32 mmRmdir(const CHAR *lpPathName)
+INT32 MmpaPlugin::MsprofMmRmdir(const CHAR *lpPathName)
 {
     INT32 ret;
     DIR *pDir = NULL;
@@ -177,7 +148,7 @@ INT32 mmRmdir(const CHAR *lpPathName)
         pChildDir = opendir(buf);
         if (pChildDir != NULL) {
             closedir(pChildDir);
-            ret = mmRmdir(buf);
+            ret = MsprofMmRmdir(buf);
             continue;
         } else {
             ret = unlink(buf);
@@ -195,7 +166,7 @@ INT32 mmRmdir(const CHAR *lpPathName)
     return EN_OK;
 }
 
-INT32 mmMkdir(const CHAR *lpPathName, mmMode_t mode)
+INT32 MmpaPlugin::MsprofMmMkdir(const CHAR *lpPathName, mmMode_t mode)
 {
     if (lpPathName == NULL) {
         return EN_INVALID_PARAM;
@@ -208,11 +179,13 @@ INT32 mmMkdir(const CHAR *lpPathName, mmMode_t mode)
     }
     return EN_OK;
 }
-INT32  mmAccess2(const CHAR *path, INT32 mode) {
+
+INT32 MmpaPlugin::MsprofMmAccess2(const CHAR *pathName, INT32 mode)
+{
     return EN_OK;
 }
 
-INT32 mmGetDiskFreeSpace(const char* path, mmDiskSize *diskSize)
+INT32 MmpaPlugin::MsprofMmGetDiskFreeSpace(const CHAR *path, mmDiskSize *diskSize)
 {
     if (path == NULL || diskSize == NULL) {
         return EN_INVALID_PARAM;
@@ -230,7 +203,7 @@ INT32 mmGetDiskFreeSpace(const char* path, mmDiskSize *diskSize)
     return EN_ERROR;
 }
 
-INT32 mmRealPath(const CHAR *path, CHAR *realPath,INT32 realPathLen)
+INT32 MmpaPlugin::MsprofMmRealPath(const CHAR *path, CHAR *realPath, INT32 realPathLen)
 {
     INT32 ret = EN_OK;
     if (realPath == NULL || path == NULL || realPathLen < MMPA_MAX_PATH) {
@@ -243,7 +216,7 @@ INT32 mmRealPath(const CHAR *path, CHAR *realPath,INT32 realPathLen)
     return ret;
 }
 
-INT32 mmGetLocalTime(mmSystemTime_t *sysTime)
+INT32 MmpaPlugin::MsprofMmGetLocalTime(mmSystemTime_t *sysTime)
 {
     if (sysTime == NULL) {
         return EN_INVALID_PARAM;
@@ -276,7 +249,7 @@ INT32 mmGetLocalTime(mmSystemTime_t *sysTime)
     return EN_OK;
 }
 
-INT32 mmSleep(UINT32 milliSecond)
+INT32 MmpaPlugin::MsprofMmSleep(UINT32 milliSecond)
 {
     if (milliSecond == MMPA_ZERO) {
         return(EN_INVALID_PARAM);
@@ -294,27 +267,27 @@ INT32 mmSleep(UINT32 milliSecond)
     return EN_OK;
 }
 
-INT32 mmCreateProcess(const CHAR* fileName, const mmArgvEnv *env, const char* stdoutRedirectFile, mmProcess *id)
+INT32 MmpaPlugin::MsprofMmCreateProcess(const CHAR *fileName, const mmArgvEnv *env, const CHAR* stdoutRedirectFile, mmProcess *id)
 {
     return EN_OK;
 }
 
-INT32 mmWaitPid(mmProcess pid, int *status, int options)
+INT32 MmpaPlugin::MsprofMmWaitPid(mmProcess pid, INT32 *status, INT32 options)
 {
     return EN_OK;
 }
 
-INT32 mmGetMac(mmMacInfo **list, INT32 *count)
+INT32 MmpaPlugin::MsprofMmGetMac(mmMacInfo **list, INT32 *count)
 {
     return EN_OK;
 }
 
-INT32 mmGetMacFree(mmMacInfo *list, INT32 count)
+INT32 MmpaPlugin::MsprofMmGetMacFree(mmMacInfo *list, INT32 count)
 {
     return EN_OK;
 }
 
-INT32 mmScandir(const CHAR *path, mmDirent ***entryList, mmFilter filterFunc, mmSort sort)
+INT32 MmpaPlugin::MsprofMmScandir(const CHAR *path, mmDirent ***entryList, mmFilter filterFunc, mmSort sort)
 {
     if (path == NULL) {
         return EN_INVALID_PARAM;
@@ -326,7 +299,7 @@ INT32 mmScandir(const CHAR *path, mmDirent ***entryList, mmFilter filterFunc, mm
     return count;
 }
 
-void mmScandirFree(mmDirent **entryList, INT32 count)
+VOID MmpaPlugin::MsprofMmScandirFree(mmDirent **entryList, INT32 count)
 {
     if (entryList == NULL) {
         return;
@@ -341,27 +314,27 @@ void mmScandirFree(mmDirent **entryList, INT32 count)
     free(entryList);
 }
 
-INT32 mmGetOsName(CHAR* name, INT32 nameSize)
+INT32 MmpaPlugin::MsprofMmGetOsName(CHAR* name, INT32 nameSize)
 {
     return EN_OK;
 }
 
-INT32 mmGetOsVersion(CHAR* versionInfo, INT32 versionLength)
+INT32 MmpaPlugin::MsprofMmGetOsVersion(CHAR* versionInfo, INT32 versionLength)
 {
     return EN_OK;
 }
 
-INT32 mmGetCpuInfo(mmCpuDesc **cpuInfo, INT32 *count)
+INT32 MmpaPlugin::MsprofMmGetCpuInfo(mmCpuDesc **cpuInfo, INT32 *count)
 {
     return EN_OK;
 }
 
-INT32 mmCpuInfoFree(mmCpuDesc *cpuInfo, INT32 count)
+INT32 MmpaPlugin::MsprofMmCpuInfoFree(mmCpuDesc *cpuInfo, INT32 count)
 {
     return EN_OK;
 }
 
-INT32 mmGetPidHandle(mmProcess *pstProcessHandle)
+INT32 MmpaPlugin::MsprofMmGetPidHandle(mmProcess *pstProcessHandle)
 {
     if (pstProcessHandle == NULL) {
         return EN_INVALID_PARAM;
@@ -370,7 +343,7 @@ INT32 mmGetPidHandle(mmProcess *pstProcessHandle)
     return EN_OK;
 }
 
-INT32 mmUnlink(const CHAR *filename)
+INT32 MmpaPlugin::MsprofMmUnlink(const CHAR *filename)
 {
     if (filename == NULL) {
         return EN_INVALID_PARAM;
@@ -382,7 +355,7 @@ INT32 mmUnlink(const CHAR *filename)
     return ret;
 }
 
-INT32 mmChdir(const CHAR *path)
+INT32 MmpaPlugin::MsprofMmChdir(const CHAR *path)
 {
     if (path == NULL) {
         return EN_INVALID_PARAM;
@@ -394,7 +367,7 @@ INT32 mmChdir(const CHAR *path)
     return ret;
 }
 
-INT32 mmSetCurrentThreadName(const CHAR* name)
+INT32 MmpaPlugin::MsprofMmSetCurrentThreadName(const CHAR* name)
 {
     if (name == NULL) {
         return EN_INVALID_PARAM;
@@ -406,7 +379,7 @@ INT32 mmSetCurrentThreadName(const CHAR* name)
     return EN_OK;
 }
 
-INT32 mmOpen2(const CHAR *pathName, INT32 flags, MODE mode)
+INT32 MmpaPlugin::MsprofMmOpen2(const CHAR *pathName, INT32 flags, MODE mode)
 {
     UINT32 flag = (UINT32)flags;
 
@@ -428,7 +401,7 @@ INT32 mmOpen2(const CHAR *pathName, INT32 flags, MODE mode)
     return fd;
 }
 
-mmSsize_t mmRead(INT32 fd, VOID *buf, UINT32 bufLen)
+mmSsize_t MmpaPlugin::MsprofMmRead(INT32 fd, VOID *buf, UINT32 bufLen)
 {
     if ((fd < MMPA_ZERO) || (buf == NULL)) {
         return EN_INVALID_PARAM;
@@ -441,7 +414,7 @@ mmSsize_t mmRead(INT32 fd, VOID *buf, UINT32 bufLen)
     return ret;
 }
 
-mmSsize_t mmWrite(INT32 fd, VOID *buf, UINT32 bufLen)
+mmSsize_t MmpaPlugin::MsprofMmWrite(INT32 fd, VOID *buf, UINT32 bufLen)
 {
     if ((fd < MMPA_ZERO) || (buf == NULL)) {
         return EN_INVALID_PARAM;
@@ -454,7 +427,7 @@ mmSsize_t mmWrite(INT32 fd, VOID *buf, UINT32 bufLen)
     return ret;
 }
 
-INT32 mmClose(INT32 fd)
+INT32 MmpaPlugin::MsprofMmClose(INT32 fd)
 {
     if (fd < MMPA_ZERO) {
         return EN_INVALID_PARAM;
@@ -467,7 +440,7 @@ INT32 mmClose(INT32 fd)
     return EN_OK;
 }
 
-INT32 mmCloseSocket(mmSockHandle sockFd)
+INT32 MmpaPlugin::MsprofMmCloseSocket(mmSockHandle sockFd)
 {
     if (sockFd < MMPA_ZERO) {
         return EN_INVALID_PARAM;
@@ -480,7 +453,7 @@ INT32 mmCloseSocket(mmSockHandle sockFd)
     return EN_OK;
 }
 
-mmSsize_t mmSocketSend(mmSockHandle sockFd,VOID *pstSendBuf,INT32 sendLen,INT32 sendFlag)
+mmSsize_t MmpaPlugin::MsprofMmSocketSend(mmSockHandle sockFd,VOID *pstSendBuf,INT32 sendLen,INT32 sendFlag)
 {
     if ((sockFd < MMPA_ZERO) || (pstSendBuf == NULL) || (sendLen <= MMPA_ZERO) || (sendFlag < MMPA_ZERO)) {
         return EN_INVALID_PARAM;
@@ -494,7 +467,7 @@ mmSsize_t mmSocketSend(mmSockHandle sockFd,VOID *pstSendBuf,INT32 sendLen,INT32 
     return ret;
 }
 
-mmSsize_t mmSocketRecv(mmSockHandle sockFd, VOID *pstRecvBuf,INT32 recvLen,INT32 recvFlag)
+mmSsize_t MmpaPlugin::MsprofMmSocketRecv(mmSockHandle sockFd, VOID *pstRecvBuf,INT32 recvLen,INT32 recvFlag)
 {
     if ((sockFd < MMPA_ZERO) || (pstRecvBuf == NULL) || (recvLen <= MMPA_ZERO) || (recvFlag < MMPA_ZERO)) {
         return EN_INVALID_PARAM;
@@ -508,7 +481,7 @@ mmSsize_t mmSocketRecv(mmSockHandle sockFd, VOID *pstRecvBuf,INT32 recvLen,INT32
     return ret;
 }
 
-mmSockHandle mmSocket(INT32 sockFamily, INT32 type, INT32 protocol)
+mmSockHandle MmpaPlugin::MspofMmSocket(INT32 sockFamily, INT32 type, INT32 protocol)
 {
     INT32 socketHandle = socket(sockFamily, type, protocol);
     if (socketHandle < MMPA_ZERO) {
@@ -517,7 +490,7 @@ mmSockHandle mmSocket(INT32 sockFamily, INT32 type, INT32 protocol)
     return socketHandle;
 }
 
-INT32 mmBind(mmSockHandle sockFd, mmSockAddr* addr, mmSocklen_t addrLen)
+INT32 MmpaPlugin::MsprofMmBind(mmSockHandle sockFd, mmSockAddr* addr, mmSocklen_t addrLen)
 {
     if ((sockFd < MMPA_ZERO) || (addr == NULL) || (addrLen == MMPA_ZERO)) {
         return EN_INVALID_PARAM;
@@ -530,7 +503,7 @@ INT32 mmBind(mmSockHandle sockFd, mmSockAddr* addr, mmSocklen_t addrLen)
     return EN_OK;
 }
 
-INT32 mmListen(mmSockHandle sockFd, INT32 backLog)
+INT32 MmpaPlugin::MsprofMmListen(mmSockHandle sockFd, INT32 backLog)
 {
     if ((sockFd < MMPA_ZERO) || (backLog <= MMPA_ZERO)) {
         return EN_INVALID_PARAM;
@@ -543,7 +516,7 @@ INT32 mmListen(mmSockHandle sockFd, INT32 backLog)
     return EN_OK;
 }
 
-mmSockHandle mmAccept(mmSockHandle sockFd, mmSockAddr *addr, mmSocklen_t *addrLen)
+mmSockHandle MmpaPlugin::MsprofMmAccept(mmSockHandle sockFd, mmSockAddr *addr, mmSocklen_t *addrLen)
 {
     if (sockFd < MMPA_ZERO) {
         return EN_INVALID_PARAM;
@@ -557,7 +530,7 @@ mmSockHandle mmAccept(mmSockHandle sockFd, mmSockAddr *addr, mmSocklen_t *addrLe
     return ret;
 }
 
-INT32 mmConnect(mmSockHandle sockFd, mmSockAddr* addr, mmSocklen_t addrLen)
+INT32 MmpaPlugin::MsprofMmConnect(mmSockHandle sockFd, mmSockAddr* addr, mmSocklen_t addrLen)
 {
     if ((sockFd < MMPA_ZERO) || (addr == NULL) || (addrLen == MMPA_ZERO)) {
         return EN_INVALID_PARAM;
@@ -570,22 +543,22 @@ INT32 mmConnect(mmSockHandle sockFd, mmSockAddr* addr, mmSocklen_t addrLen)
     return EN_OK;
 }
 
-INT32 mmSAStartup()
+INT32 MmpaPlugin::MsprofMmSAStartup()
 {
     return EN_OK;
 }
 
-INT32 mmSACleanup()
+INT32 MmpaPlugin::MsprofMmSACleanup()
 {
     return EN_OK;
 }
 
-INT32 mmGetPid()
+INT32 MmpaPlugin::MsprofMmGetPid()
 {
     return (INT32)getpid();
 }
 
-INT32 mmCreateTask(mmThread *threadHandle, mmUserBlock_t *funcBlock)
+INT32 MmpaPlugin::MsprofMmCreateTask(mmThread *threadHandle, mmUserBlock_t *funcBlock)
 {
     if ((threadHandle == NULL) || (funcBlock == NULL) || (funcBlock->procFunc == NULL)) {
         return EN_INVALID_PARAM;
@@ -653,8 +626,8 @@ INT32 LocalSetThreadAttr(pthread_attr_t *attr,const mmThreadAttr *threadAttr)
 }
 
 
-INT32 mmCreateTaskWithThreadAttr(mmThread *threadHandle, const mmUserBlock_t *funcBlock,
-                                         const mmThreadAttr *threadAttr)
+INT32 MmpaPlugin::MsprofMmCreateTaskWithThreadAttr(mmThread *threadHandle, const mmUserBlock_t *funcBlock,
+        const mmThreadAttr *threadAttr)
 {
     if (threadHandle == NULL || funcBlock == NULL ||
         funcBlock->procFunc == NULL || threadAttr == NULL) {
@@ -684,7 +657,7 @@ INT32 mmCreateTaskWithThreadAttr(mmThread *threadHandle, const mmUserBlock_t *fu
     return ret;
 }
 
-INT32 mmJoinTask(mmThread *threadHandle)
+INT32 MmpaPlugin::MsprofMmJoinTask(mmThread *threadHandle)
 {
     if (threadHandle == NULL) {
         return EN_INVALID_PARAM;
@@ -697,65 +670,64 @@ INT32 mmJoinTask(mmThread *threadHandle)
     return ret;
 }
 
-INT32 mmGetErrorCode()
+INT32 MmpaPlugin::MsprofMmGetErrorCode()
 {
     return 0;
 }
 
-INT32 mmChmod(const CHAR *fileName,INT32 mode)
+INT32 MmpaPlugin::MsprofMmChmod(const CHAR *filename, INT32 mode)
 {
     return 0;
 }
 
 
-}
 
 std::string GetAdxWorkPath()
 {
     return "~/";
 }
 
-INT32 mmMutexInit(mmMutex_t *mutex)
- {
-     if (mutex == NULL) {
-         return EN_INVALID_PARAM;
-     }
- 
-     INT32 ret = pthread_mutex_init(mutex, NULL);
-     if (ret != EN_OK) {
-         ret = EN_ERROR;
-     }
- 
-     return ret;
- }
+INT32 MmpaPlugin::MsprofMmMutexInit(mmMutex_t *mutex)
+{
+    if (mutex == NULL) {
+        return EN_INVALID_PARAM;
+    }
 
-INT32 mmMutexLock(mmMutex_t *mutex)
- {
-     if (mutex == NULL) {
-         return EN_INVALID_PARAM;
-     }
- 
-     INT32 ret = pthread_mutex_lock(mutex);
-     if (ret != EN_OK) {
-         ret = EN_ERROR;
-     }
-     return ret;
- }
+    INT32 ret = pthread_mutex_init(mutex, NULL);
+    if (ret != EN_OK) {
+        ret = EN_ERROR;
+    }
 
- INT32 mmMutexUnLock(mmMutex_t *mutex)
- {
-     if (mutex == NULL) {
-         return EN_INVALID_PARAM;
-     }
- 
-     INT32 ret = pthread_mutex_unlock(mutex);
-     if (ret != EN_OK) {
-         ret = EN_ERROR;
-     }
-     return ret;
- }
+    return ret;
+}
 
-INT32 mmGetTid()
+INT32 MmpaPlugin::MsprofMmMutexLock(mmMutex_t *mutex)
+{
+    if (mutex == NULL) {
+        return EN_INVALID_PARAM;
+    }
+
+    INT32 ret = pthread_mutex_lock(mutex);
+    if (ret != EN_OK) {
+        ret = EN_ERROR;
+    }
+    return ret;
+}
+
+INT32 MmpaPlugin::MsprofMmMutexUnLock(mmMutex_t *mutex)
+{
+    if (mutex == NULL) {
+        return EN_INVALID_PARAM;
+    }
+
+    INT32 ret = pthread_mutex_unlock(mutex);
+    if (ret != EN_OK) {
+        ret = EN_ERROR;
+    }
+    return ret;
+}
+
+INT32 MmpaPlugin::MsprofMmGetTid()
 {
     INT32 ret = (INT32)syscall(SYS_gettid);
     if (ret < MMPA_ZERO) {
@@ -765,7 +737,7 @@ INT32 mmGetTid()
     return ret;
 }
 
-INT32 mmStatGet(const CHAR *path, mmStat_t *buffer)
+INT32 MmpaPlugin::MsprofMmStatGet(const CHAR *path, mmStat_t *buffer)
 {
     if ((path == NULL) || (buffer == NULL)) {
         return EN_INVALID_PARAM;
@@ -778,7 +750,7 @@ INT32 mmStatGet(const CHAR *path, mmStat_t *buffer)
     return EN_OK;
 }
 
-CHAR *mmGetErrorFormatMessage(int errnum, CHAR *buf, size_t  size)
+CHAR *MmpaPlugin::MsprofMmGetErrorFormatMessage(mmErrorMsg errnum, CHAR *buf, mmSize size)
 {
     if (buf == NULL || size <= 0) {
         return NULL;
@@ -786,7 +758,7 @@ CHAR *mmGetErrorFormatMessage(int errnum, CHAR *buf, size_t  size)
     return strerror_r(errnum, buf, size);
 }
 
-INT32 mmGetCwd(CHAR *buffer, INT32 maxLen)
+INT32 MmpaPlugin::MsprofMmGetCwd(CHAR *buffer, INT32 maxLen)
 {
     if ((buffer == NULL) || (maxLen < MMPA_ZERO)) {
         return EN_INVALID_PARAM;
@@ -798,3 +770,7 @@ INT32 mmGetCwd(CHAR *buffer, INT32 maxLen)
         return EN_ERROR;
     }
 }
+
+} // Plugin
+} // Dvvp
+} // Analysis

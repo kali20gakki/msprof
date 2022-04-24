@@ -27,8 +27,6 @@ set(localSrcFiles
     ../../stub/common-utils-stub.cpp
     ../../stub/hdc-log-stub.cpp
     ../../stub/hdc-api-stub.cpp
-    ../../../stub/driver_plugin_stub.cpp
-    ../../../stub/mmpa_plugin_stub.cpp
 )
 
 add_executable(client_utest 

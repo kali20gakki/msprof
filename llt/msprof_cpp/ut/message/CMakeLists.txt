@@ -19,8 +19,6 @@ set(localSrcFiles
     test/message_test.cpp 
     ../stub/hdc-log-stub.cpp 
     ../stub/common-utils-stub.cpp
-    ../../stub/driver_plugin_stub.cpp
-    ../../stub/mmpa_plugin_stub.cpp
 )
 
 add_executable(message_utest 

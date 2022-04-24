@@ -75,8 +75,6 @@ add_executable(msprof_bin_utest
     ../stub/hdc-api-stub.cpp
     ../stub/hdc-log-stub.cpp
     ../stub/devdrv_runtime_api_stub.cpp
-    ../../stub/driver_plugin_stub.cpp
-    ../../stub/mmpa_plugin_stub.cpp
     ${CppPath}
 )
 

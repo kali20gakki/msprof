@@ -24,8 +24,7 @@ set(localSrcFiles
     ../stub/devdrv_runtime_api_stub.cpp
     ../stub/profile_drv_user_stub.cpp
     ../stub/hdc-log-stub.cpp
-    ../../stub/driver_plugin_stub.cpp
-    ../../stub/mmpa_plugin_stub.cpp
+    ../../driver_plugin_stub.cpp
     test/main.cpp
     test/config_manager_utest.cpp
     test/chunk_pool_test.cpp

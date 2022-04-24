@@ -9,8 +9,6 @@ add_executable(stub_file_utest
     ../stub/hdc-log-stub.cpp
     ../stub/devdrv_runtime_api_stub.cpp
     ../stub/ide_hdc_stub.cc
-    ../../stub/driver_plugin_stub.cpp
-    ../../stub/mmpa_plugin_stub.cpp
 
 )
 

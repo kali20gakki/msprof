@@ -158,6 +158,80 @@ public:
     using MSPROF_MMDUP2_T = std::function<INT32(INT32, INT32)>;
     INT32 MsprofMmDup2(INT32 oldFd, INT32 newFd);
     
+    // mmGetPidHandle
+    using MSPROF_MMGETPIDHANDLE_T = std::function<INT32(mmProcess *)>;
+    INT32 MsprofMmGetPidHandle(mmProcess *pstProcessHandle);
+    
+    // mmCloseSocket
+    using MSPROF_MMCLOSESOCKET_T = std::function<INT32(mmSockHandle)>;
+    INT32 MsprofMmCloseSocket(mmSockHandle sockFd);
+    
+    // mmSocketSend
+    using MSPROF_MMSOCKETSEND_T = std::function<mmSsize_t(mmSockHandle, VOID *, INT32, INT32)>;
+    mmSsize_t MsprofMmSocketSend(mmSockHandle sockFd,VOID *pstSendBuf,INT32 sendLen,INT32 sendFlag);
+    
+    // mmSocketRecv
+    using MSPROF_MMSOCKETRECV_T = std::function<mmSsize_t(mmSockHandle, VOID *, INT32, INT32)>;
+    mmSsize_t MsprofMmSocketRecv(mmSockHandle sockFd, VOID *pstRecvBuf,INT32 recvLen,INT32 recvFlag);
+    
+    // mmSocket
+    using MSPROF_MMSOCKET_T = std::function<mmSockHandle(INT32, INT32, INT32)>;
+    mmSockHandle MspofMmSocket(INT32 sockFamily, INT32 type, INT32 protocol);
+    
+    // mmBind
+    using MSPROF_MMBIND_T = std::function<INT32(mmSockHandle, mmSockAddr*, mmSocklen_t)>;
+    INT32 MsprofMmBind(mmSockHandle sockFd, mmSockAddr* addr, mmSocklen_t addrLen);
+    
+    // mmListen
+    using MSPROF_MMLISTEN_T = std::function<INT32(mmSockHandle, INT32)>;
+    INT32 MsprofMmListen(mmSockHandle sockFd, INT32 backLog);
+    
+    // mmAccept
+    using MSPROF_MMSOCKETHANDLE_T = std::function<mmSockHandle(mmSockHandle, mmSockAddr *, mmSocklen_t *)>;
+    mmSockHandle MsprofMmAccept(mmSockHandle sockFd, mmSockAddr *addr, mmSocklen_t *addrLen);
+    
+    // mmConnect
+    using MSPROF_MMCONNECT_T = std::function<INT32(mmSockHandle, mmSockAddr*, mmSocklen_t)>;
+    INT32 MsprofMmConnect(mmSockHandle sockFd, mmSockAddr* addr, mmSocklen_t addrLen);
+    
+    // mmSAStartup
+    using MSPROF_MMSASTARTUP_T = std::function<INT32()>;
+    INT32 MsprofMmSAStartup();
+    
+    // mmSACleanup
+    using MSPROF_MMSACLEANUP_T = std::function<INT32()>;
+    INT32 MsprofMmSACleanup();
+    
+    // mmCreateTask
+    using MSPROF_MMCREATETASK_T = std::function<INT32(mmThread *, mmUserBlock_t *)>;
+    INT32 MsprofMmCreateTask(mmThread *threadHandle, mmUserBlock_t *funcBlock);
+    
+    // mmCreateTaskWithThreadAttrStub
+    using MSPROF_MMCREATETASKWITHTHREADATTRSTUB_T = std::function<INT32(mmThread *, const mmUserBlock_t *, const mmThreadAttr *)>;
+    INT32 MsprofMmCreateTaskWithThreadAttrStub(mmThread *threadHandle, const mmUserBlock_t *funcBlock,
+                                         const mmThreadAttr *threadAttr);
+                                         
+    // mmCreateTaskWithThreadAttrNormalStub
+    using MSPROF_MMCREATETASKWITHTHREADATTRNORMALSTUB_T = std::function<INT32(mmThread *, const mmUserBlock_t *, const mmThreadAttr *)>;
+    INT32 MsprofMmCreateTaskWithThreadAttrNormalStub(mmThread *threadHandle, const mmUserBlock_t *funcBlock,
+                                         const mmThreadAttr *threadAttr);
+    
+    // mmMutexInit
+    using MSPROF_MMMUTEXINIT_T = std::function<INT32(mmMutex_t *)>;
+    INT32 MsprofMmMutexInit(mmMutex_t *mutex);
+    
+    // mmMutexLock
+    using MSPROF_MMMUTEXLOCK_T = std::function<INT32(mmMutex_t *)>;
+    INT32 MsprofMmMutexLock(mmMutex_t *mutex);
+    
+    // mmMutexUnLock
+    using MSPROF_MMMUTEXUNLOCK_T = std::function<INT32(mmMutex_t *)>;
+    INT32 MsprofMmMutexUnLock(mmMutex_t *mutex);
+    
+    // mmGetOpt
+    using MSPROF_MMGETOPT_T = std::function<INT32(INT32, CHAR * const *, const CHAR *)>;
+    INT32 MsprofMmGetOpt(INT32 argc, CHAR * const * argv, const CHAR *opts);
+    
 private:
     std::string soName_;
     PluginManager pluginManager_;
