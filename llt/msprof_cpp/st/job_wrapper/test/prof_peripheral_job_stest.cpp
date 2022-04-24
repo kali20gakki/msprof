@@ -281,6 +281,9 @@ TEST_F(JOB_WRAPPER_PROF_LLC_JOB_TEST, Init) {
     collectionJobCfg_->comParams->params->llc_profiling = "on";
     collectionJobCfg_->comParams->params->msprof_llc_profiling = "on";
     EXPECT_EQ(PROFILING_SUCCESS, profLlcJob->Init(collectionJobCfg_));
+    collectionJobCfg_->comParams->params->host_profiling = true;
+    EXPECT_EQ(PROFILING_FAILED, profLlcJob->Init(collectionJobCfg_));
+    collectionJobCfg_->comParams->params->host_profiling = false;
     collectionJobCfg_->jobParams.events = nullptr;
     EXPECT_EQ(PROFILING_FAILED, profLlcJob->Init(collectionJobCfg_));
     EXPECT_EQ(PROFILING_FAILED, profLlcJob->Uninit());
