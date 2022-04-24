@@ -107,7 +107,7 @@ INT32 MmpaPlugin::MsprofMmIsDir(const CHAR *fileName)
     return EN_OK;
 }
 
-INT32 MmpaPlugin::MsprofMmAccess(const CHAR *pathName)
+INT32 MmpaPlugin::MsprofMmAccess(const CHAR *lpPathName)
 {
     if (lpPathName == NULL) {
         return EN_INVALID_PARAM;
@@ -120,7 +120,7 @@ INT32 MmpaPlugin::MsprofMmAccess(const CHAR *pathName)
     return EN_OK;
 }
 
-INT32 MmpaPlugin::MsprofMmRmdir(const CHAR *pathName)
+INT32 MmpaPlugin::MsprofMmRmdir(const CHAR *lpPathName)
 {
     INT32 ret;
     DIR *pDir = NULL;
@@ -165,7 +165,7 @@ INT32 MmpaPlugin::MsprofMmRmdir(const CHAR *pathName)
     return EN_OK;
 }
 
-INT32 MmpaPlugin::MsprofMmMkdir(const CHAR *pathName, mmMode_t mode)
+INT32 MmpaPlugin::MsprofMmMkdir(const CHAR *lpPathName, mmMode_t mode)
 {
     if (lpPathName == NULL) {
         return EN_INVALID_PARAM;
@@ -180,6 +180,7 @@ INT32 MmpaPlugin::MsprofMmMkdir(const CHAR *pathName, mmMode_t mode)
 }
 
 INT32 MmpaPlugin::MsprofMmAccess2(const CHAR *pathName, INT32 mode)
+{
     return EN_OK;
 }
 
@@ -606,7 +607,7 @@ INT32 MmpaPlugin::MsprofMmCpuInfoFree(mmCpuDesc *cpuInfo, INT32 count)
     return EN_OK;
 }
 
-INT32 MmpaPlugin::MsprofMmGetPidHandle(mmProcess *pstProcessHandle);
+INT32 MmpaPlugin::MsprofMmGetPidHandle(mmProcess *pstProcessHandle)
 {
     if (pstProcessHandle == NULL) {
         return EN_INVALID_PARAM;
@@ -1060,8 +1061,8 @@ INT32 MmpaPlugin::MsprofMmStatGet(const CHAR *path, mmStat_t *buffer)
 INT32 MmpaPlugin::MsprofMmGetOptLong(INT32 argc,
                    CHAR *const *argv,
                    const CHAR *opts,
-                   const mmStructOption *longOpts,
-                   INT32 *longIndex)
+                   const mmStructOption *longopts,
+                   INT32 *longindex)
 {
     return getopt_long(argc, argv, opts, longopts, longindex);
 }

@@ -6,7 +6,7 @@ include(ExternalProject)
 get_filename_component(TOP_DIR "${CMAKE_CURRENT_LIST_DIR}/../.." ABSOLUTE)
 
 if (CMAKE_INSTALL_PREFIX STREQUAL /usr/local)
-    set(CMAKE_INSTALL_PREFIX ${TOP_DIR}/output CACHE STRING "path for install()" FORCE)
+    set(CMAKE_INSTALL_PREFIX ${TOP_DIR}/tmp CACHE STRING "path for install()" FORCE)
     message(STATUS "No install prefix selected, default to ${CMAKE_INSTALL_PREFIX}.")
 endif()
 

@@ -25,11 +25,13 @@
 #include "param_validation.h"
 #include "config/config_manager.h"
 #include "prof_channel_manager.h"
+#include "mmpa_plugin.h"
 
 using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::driver;
 using namespace analysis::dvvp::message;
 using namespace Analysis::Dvvp::JobWrapper;
+using namespace Analysis::Dvvp::Plugin;
 
 class DEVICE_COLLECTION_ENGINE_TEST: public testing::Test {
 protected:
@@ -218,7 +220,7 @@ TEST_F(DEVICE_COLLECTION_ENGINE_TEST, CollectStartReplay) {
         .will(returnValue(PROFILING_SUCCESS));*/
 
 
-    MOCKER(mmCreateTaskWithThreadAttr)
+    MOCKER(&MmpaPlugin::MsprofMmCreateTaskWithThreadAttr)
         .stubs()
         .will(returnValue(EN_OK));
 
@@ -344,7 +346,7 @@ TEST_F(DEVICE_COLLECTION_ENGINE_TEST, CollectStopReplay) {
     //MOCKER_CPP(&analysis::dvvp::common::thread::Thread::Stop)
     //    .stubs()
     //    .will(returnValue(PROFILING_SUCCESS));
-    MOCKER(mmJoinTask)
+    MOCKER(&MmpaPlugin::MsprofMmJoinTask)
         .stubs()
         .will(returnValue(EN_OK));
 

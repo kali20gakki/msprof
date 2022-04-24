@@ -377,7 +377,7 @@ TEST_F(PROFILER_SENDER_TEST, CloseFileFds)
     EXPECT_EQ(PROFILING_SUCCESS, sender.Init());
     sender.fileFdMap_["file_name"] = 5;
 
-    MOCKER(mmClose)
+    MOCKER(&MmpaPlugin::MsprofMmClose)
         .stubs()
         .will(returnValue(EN_OK));
 
@@ -456,7 +456,7 @@ TEST_F(PROFILER_SENDER_TEST, SendData)
 
     char buf[24] = {0};
 
-    MOCKER(mmSocketSend)
+    MOCKER(&MmpaPlugin::MsprofMmSocketSend)
         .stubs()
         .will(returnValue(-1))
         .then(returnValue(7));
@@ -567,7 +567,7 @@ TEST_F(PROFILER_SENDER_TEST, ExecuteFileMode)
         .will(returnValue(-1))
         .then(returnValue(7));
 
-    MOCKER(mmWrite)
+    MOCKER(&MmpaPlugin::MsprofMmWrite)
         .stubs()
         .will(returnValue(-1));
 
