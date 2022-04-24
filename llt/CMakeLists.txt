@@ -21,6 +21,8 @@ ExternalProject_Add(msprof_llt
     CONFIGURE_COMMAND ${CMAKE_COMMAND}
                 -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
                 -DPACKAGE=${PACKAGE}
+                -DFULL_COVERAGE=true
+                -DCOVERAGE_RC_CONFIG=true
                 <SOURCE_DIR>
     BUILD_COMMAND $(MAKE)
     DEPENDS protoc_build ascend_protobuf_shared_build ascend_protobuf_static_build gtest_build mockcpp_build
