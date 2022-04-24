@@ -787,6 +787,332 @@ INT32 MmpaPlugin::MsprofMmDup2(INT32 oldFd, INT32 newFd)
     return func(oldFd, newFd);
 }
 
+// mmGetPidHandle
+INT32 MmpaPlugin::MsprofMmGetPidHandle(mmProcess *pstProcessHandle)
+{
+    Status ret = PLUGIN_LOAD_SUCCESS;
+    if (!pluginManager_.HasLoad()) {
+        ret = pluginManager_.OpenPlugin("LD_LIBRARY_PATH");
+        if (ret != PLUGIN_LOAD_SUCCESS) {
+            return -1;
+        }
+    }
+    MSPROF_MMGETPIDHANDLE_T func;
+    ret = pluginManager_.GetFunction<INT32, mmProcess *>("mmGetPidHandle", func);
+    if (ret != PLUGIN_LOAD_SUCCESS) {
+        return -1;
+    }
+    return func(pstProcessHandle);
+}
+    
+// mmCloseSocket
+INT32 MmpaPlugin::MsprofMmCloseSocket(mmSockHandle sockFd)
+{
+    Status ret = PLUGIN_LOAD_SUCCESS;
+    if (!pluginManager_.HasLoad()) {
+        ret = pluginManager_.OpenPlugin("LD_LIBRARY_PATH");
+        if (ret != PLUGIN_LOAD_SUCCESS) {
+            return -1;
+        }
+    }
+    MSPROF_MMCLOSESOCKET_T func;
+    ret = pluginManager_.GetFunction<INT32, mmSockHandle>("mmCloseSocket", func);
+    if (ret != PLUGIN_LOAD_SUCCESS) {
+        return -1;
+    }
+    return func(sockFd);
+}
+    
+// mmSocketSend
+mmSsize_t MmpaPlugin::MsprofMmSocketSend(mmSockHandle sockFd,VOID *pstSendBuf,INT32 sendLen,INT32 sendFlag)
+{
+    Status ret = PLUGIN_LOAD_SUCCESS;
+    if (!pluginManager_.HasLoad()) {
+        ret = pluginManager_.OpenPlugin("LD_LIBRARY_PATH");
+        if (ret != PLUGIN_LOAD_SUCCESS) {
+            return -1;
+        }
+    }
+    MSPROF_MMSOCKETSEND_T func;
+    ret = pluginManager_.GetFunction<mmSsize_t, mmSockHandle, VOID *, INT32, INT32>("mmSocketSend", func);
+    if (ret != PLUGIN_LOAD_SUCCESS) {
+        return -1;
+    }
+    return func(sockFd, pstSendBuf, sendLen, sendFlag);
+}
+    
+// mmSocketRecv
+mmSsize_t MmpaPlugin::MsprofMmSocketRecv(mmSockHandle sockFd, VOID *pstRecvBuf,INT32 recvLen,INT32 recvFlag)
+{
+    Status ret = PLUGIN_LOAD_SUCCESS;
+    if (!pluginManager_.HasLoad()) {
+        ret = pluginManager_.OpenPlugin("LD_LIBRARY_PATH");
+        if (ret != PLUGIN_LOAD_SUCCESS) {
+            return -1;
+        }
+    }
+    MSPROF_MMSOCKETRECV_T func;
+    ret = pluginManager_.GetFunction<mmSsize_t, mmSockHandle, VOID *, INT32, INT32>("mmSocketRecv", func);
+    if (ret != PLUGIN_LOAD_SUCCESS) {
+        return -1;
+    }
+    return func(sockFd, pstRecvBuf, recvLen, recvFlag);
+}
+    
+// mmSocket
+mmSockHandle MmpaPlugin::MspofMmSocket(INT32 sockFamily, INT32 type, INT32 protocol)
+{
+    Status ret = PLUGIN_LOAD_SUCCESS;
+    if (!pluginManager_.HasLoad()) {
+        ret = pluginManager_.OpenPlugin("LD_LIBRARY_PATH");
+        if (ret != PLUGIN_LOAD_SUCCESS) {
+            return -1;
+        }
+    }
+    MSPROF_MMSOCKET_T func;
+    ret = pluginManager_.GetFunction<mmSockHandle, INT32, INT32, INT32>("mmSocket", func);
+    if (ret != PLUGIN_LOAD_SUCCESS) {
+        return -1;
+    }
+    return func(sockFamily, type, protocol);
+}
+    
+// mmBind
+INT32 MmpaPlugin::MsprofMmBind(mmSockHandle sockFd, mmSockAddr* addr, mmSocklen_t addrLen)
+{
+    Status ret = PLUGIN_LOAD_SUCCESS;
+    if (!pluginManager_.HasLoad()) {
+        ret = pluginManager_.OpenPlugin("LD_LIBRARY_PATH");
+        if (ret != PLUGIN_LOAD_SUCCESS) {
+            return -1;
+        }
+    }
+    MSPROF_MMBIND_T func;
+    ret = pluginManager_.GetFunction<INT32, mmSockHandle, mmSockAddr*, mmSocklen_t>("mmBind", func);
+    if (ret != PLUGIN_LOAD_SUCCESS) {
+        return -1;
+    }
+    return func(sockFd, addr, addrLen);
+}
+    
+// mmListen
+INT32 MmpaPlugin::MsprofMmListen(mmSockHandle sockFd, INT32 backLog)
+{
+    Status ret = PLUGIN_LOAD_SUCCESS;
+    if (!pluginManager_.HasLoad()) {
+        ret = pluginManager_.OpenPlugin("LD_LIBRARY_PATH");
+        if (ret != PLUGIN_LOAD_SUCCESS) {
+            return -1;
+        }
+    }
+    MSPROF_MMLISTEN_T func;
+    ret = pluginManager_.GetFunction<INT32, mmSockHandle, INT32>("mmListen", func);
+    if (ret != PLUGIN_LOAD_SUCCESS) {
+        return -1;
+    }
+    return func(sockFd, backLog);
+}
+    
+// mmAccept
+mmSockHandle MmpaPlugin::MsprofMmAccept(mmSockHandle sockFd, mmSockAddr *addr, mmSocklen_t *addrLen)
+{
+    Status ret = PLUGIN_LOAD_SUCCESS;
+    if (!pluginManager_.HasLoad()) {
+        ret = pluginManager_.OpenPlugin("LD_LIBRARY_PATH");
+        if (ret != PLUGIN_LOAD_SUCCESS) {
+            return -1;
+        }
+    }
+    MSPROF_MMSOCKETHANDLE_T func;
+    ret = pluginManager_.GetFunction<mmSockHandle, mmSockHandle, mmSockAddr *, mmSocklen_t *>("mmAccept", func);
+    if (ret != PLUGIN_LOAD_SUCCESS) {
+        return -1;
+    }
+    return func(sockFd, addr, addrLen);
+}
+    
+// mmConnect
+INT32 MmpaPlugin::MsprofMmConnect(mmSockHandle sockFd, mmSockAddr* addr, mmSocklen_t addrLen)
+{
+    Status ret = PLUGIN_LOAD_SUCCESS;
+    if (!pluginManager_.HasLoad()) {
+        ret = pluginManager_.OpenPlugin("LD_LIBRARY_PATH");
+        if (ret != PLUGIN_LOAD_SUCCESS) {
+            return -1;
+        }
+    }
+    MSPROF_MMCONNECT_T func;
+    ret = pluginManager_.GetFunction<INT32, mmSockHandle, mmSockAddr*, mmSocklen_t>("mmConnect", func);
+    if (ret != PLUGIN_LOAD_SUCCESS) {
+        return -1;
+    }
+    return func(sockFd, addr, addrLen);
+}
+
+// mmSAStartup
+INT32 MmpaPlugin::MsprofMmSAStartup()
+{
+    Status ret = PLUGIN_LOAD_SUCCESS;
+    if (!pluginManager_.HasLoad()) {
+        ret = pluginManager_.OpenPlugin("LD_LIBRARY_PATH");
+        if (ret != PLUGIN_LOAD_SUCCESS) {
+            return -1;
+        }
+    }
+    MSPROF_MMSASTARTUP_T func;
+    ret = pluginManager_.GetFunction<INT32>("mmSAStartup", func);
+    if (ret != PLUGIN_LOAD_SUCCESS) {
+        return -1;
+    }
+    return func();
+}
+
+// mmSACleanup
+INT32 MmpaPlugin::MsprofMmSACleanup()
+{
+    Status ret = PLUGIN_LOAD_SUCCESS;
+    if (!pluginManager_.HasLoad()) {
+        ret = pluginManager_.OpenPlugin("LD_LIBRARY_PATH");
+        if (ret != PLUGIN_LOAD_SUCCESS) {
+            return -1;
+        }
+    }
+    MSPROF_MMSACLEANUP_T func;
+    ret = pluginManager_.GetFunction<INT32>("mmSACleanup", func);
+    if (ret != PLUGIN_LOAD_SUCCESS) {
+        return -1;
+    }
+    return func();
+}
+
+// mmCreateTask
+INT32 MmpaPlugin::MsprofMmCreateTask(mmThread *threadHandle, mmUserBlock_t *funcBlock)
+{
+    Status ret = PLUGIN_LOAD_SUCCESS;
+    if (!pluginManager_.HasLoad()) {
+        ret = pluginManager_.OpenPlugin("LD_LIBRARY_PATH");
+        if (ret != PLUGIN_LOAD_SUCCESS) {
+            return -1;
+        }
+    }
+    MSPROF_MMCREATETASK_T func;
+    ret = pluginManager_.GetFunction<INT32, mmThread *, mmUserBlock_t *>("mmCreateTask", func);
+    if (ret != PLUGIN_LOAD_SUCCESS) {
+        return -1;
+    }
+    return func(threadHandle, funcBlock);
+}
+
+// mmCreateTaskWithThreadAttrStub
+INT32 MmpaPlugin::MsprofMmCreateTaskWithThreadAttrStub(mmThread *threadHandle, const mmUserBlock_t *funcBlock,
+                                     const mmThreadAttr *threadAttr)
+{
+    Status ret = PLUGIN_LOAD_SUCCESS;
+    if (!pluginManager_.HasLoad()) {
+        ret = pluginManager_.OpenPlugin("LD_LIBRARY_PATH");
+        if (ret != PLUGIN_LOAD_SUCCESS) {
+            return -1;
+        }
+    }
+    MSPROF_MMCREATETASKWITHTHREADATTRSTUB_T func;
+    ret = pluginManager_.GetFunction<INT32, mmThread *, const mmUserBlock_t *, const mmThreadAttr *>("mmCreateTaskWithThreadAttrStub", func);
+    if (ret != PLUGIN_LOAD_SUCCESS) {
+        return -1;
+    }
+    return func(threadHandle, funcBlock, threadAttr);
+}
+                                     
+// mmCreateTaskWithThreadAttrNormalStub
+INT32 MmpaPlugin::MsprofMmCreateTaskWithThreadAttrNormalStub(mmThread *threadHandle, const mmUserBlock_t *funcBlock,
+                                     const mmThreadAttr *threadAttr)
+{
+    Status ret = PLUGIN_LOAD_SUCCESS;
+    if (!pluginManager_.HasLoad()) {
+        ret = pluginManager_.OpenPlugin("LD_LIBRARY_PATH");
+        if (ret != PLUGIN_LOAD_SUCCESS) {
+            return -1;
+        }
+    }
+    MSPROF_MMCREATETASKWITHTHREADATTRNORMALSTUB_T func;
+    ret = pluginManager_.GetFunction<INT32, mmThread *, const mmUserBlock_t *, const mmThreadAttr *>("mmCreateTaskWithThreadAttrNormalStub", func);
+    if (ret != PLUGIN_LOAD_SUCCESS) {
+        return -1;
+    }
+    return func(threadHandle, funcBlock, threadAttr);
+}
+
+// mmMutexInit
+INT32 MmpaPlugin::MsprofMmMutexInit(mmMutex_t *mutex)
+{
+    Status ret = PLUGIN_LOAD_SUCCESS;
+    if (!pluginManager_.HasLoad()) {
+        ret = pluginManager_.OpenPlugin("LD_LIBRARY_PATH");
+        if (ret != PLUGIN_LOAD_SUCCESS) {
+            return -1;
+        }
+    }
+    MSPROF_MMMUTEXINIT_T func;
+    ret = pluginManager_.GetFunction<INT32, mmMutex_t *>("mmMutexInit", func);
+    if (ret != PLUGIN_LOAD_SUCCESS) {
+        return -1;
+    }
+    return func(mutex);
+}
+
+// mmMutexLock
+INT32 MmpaPlugin::MsprofMmMutexLock(mmMutex_t *mutex)
+{
+    Status ret = PLUGIN_LOAD_SUCCESS;
+    if (!pluginManager_.HasLoad()) {
+        ret = pluginManager_.OpenPlugin("LD_LIBRARY_PATH");
+        if (ret != PLUGIN_LOAD_SUCCESS) {
+            return -1;
+        }
+    }
+    MSPROF_MMMUTEXLOCK_T func;
+    ret = pluginManager_.GetFunction<INT32, mmMutex_t *>("mmMutexLock", func);
+    if (ret != PLUGIN_LOAD_SUCCESS) {
+        return -1;
+    }
+    return func(mutex);
+}
+    
+// mmMutexUnLock
+INT32 MmpaPlugin::MsprofMmMutexUnLock(mmMutex_t *mutex)
+{
+    Status ret = PLUGIN_LOAD_SUCCESS;
+    if (!pluginManager_.HasLoad()) {
+        ret = pluginManager_.OpenPlugin("LD_LIBRARY_PATH");
+        if (ret != PLUGIN_LOAD_SUCCESS) {
+            return -1;
+        }
+    }
+    MSPROF_MMMUTEXUNLOCK_T func;
+    ret = pluginManager_.GetFunction<INT32, mmMutex_t *>("mmMutexUnLock", func);
+    if (ret != PLUGIN_LOAD_SUCCESS) {
+        return -1;
+    }
+    return func(mutex);
+}
+
+// mmGetOpt
+INT32 MmpaPlugin::MsprofMmGetOpt(INT32 argc, CHAR * const * argv, const CHAR *opts)
+{
+    Status ret = PLUGIN_LOAD_SUCCESS;
+    if (!pluginManager_.HasLoad()) {
+        ret = pluginManager_.OpenPlugin("LD_LIBRARY_PATH");
+        if (ret != PLUGIN_LOAD_SUCCESS) {
+            return -1;
+        }
+    }
+    MSPROF_MMGETOPT_T func;
+    ret = pluginManager_.GetFunction<INT32, INT32, CHAR * const *, const CHAR *>("mmGetOpt", func);
+    if (ret != PLUGIN_LOAD_SUCCESS) {
+        return -1;
+    }
+    return func(argc, argv, opts);
+}
+
 } // namespace Plugin
 } // namespace Dvvp
 } // namespace Analysis

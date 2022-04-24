@@ -199,7 +199,7 @@ TEST_F(COMMON_UTILS_UTILS_TEST, get_files_scan_dir_fail) {
 
     std::string path = "/path/to/dir";
     std::vector<std::string> files;
-    MOCKER(mmScandir)
+    MOCKER(&MmpaPlugin::MsprofMmScandir)
         .stubs()
         .with(any(), any(), any(), any())
         .will(returnValue(0));
@@ -355,11 +355,11 @@ TEST_F(COMMON_UTILS_UTILS_TEST, CreateDir_not_exist_fail) {
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
 
-    MOCKER(mmMkdir)
+    MOCKER(&MmpaPlugin::MsprofMmMkdir)
         .stubs()
         .with(any(), any())
         .will(returnValue(-1));
-    MOCKER(mmChmod)
+    MOCKER(&MmpaPlugin::MsprofMmChmod)
         .stubs()
         .will(returnValue(-1));
 
@@ -397,7 +397,7 @@ TEST_F(COMMON_UTILS_UTILS_TEST, CreateDir_not_exist_success) {
         .will(returnValue(-1))
         .then(returnValue(0));
 
-    MOCKER(mmMkdir)
+    MOCKER(&MmpaPlugin::MsprofMmMkdir)
         .stubs()
         .with(any(), any())
         .will(returnValue(0));
@@ -415,7 +415,7 @@ TEST_F(COMMON_UTILS_UTILS_TEST, RemoveDir) {
     Utils::RemoveDir(path);
 
     path = "/path/to/dir";
-    MOCKER(mmRmdir)
+    MOCKER(&MmpaPlugin::MsprofMmMkdir)
         .stubs()
         .with(any())
         .will(returnValue(-1))
@@ -453,7 +453,7 @@ TEST_F(COMMON_UTILS_UTILS_TEST, RemoveDir_not_rm_top_dir) {
     name_list[3] = &entry4;
     mmDirent **p_name_list = name_list;
 
-    MOCKER(mmScandir)
+    MOCKER(&MmpaPlugin::MsprofMmScandir)
         .stubs()
         .with(any(), outBoundP(&p_name_list), any(), any())
         .will(returnValue(-1))
@@ -465,16 +465,16 @@ TEST_F(COMMON_UTILS_UTILS_TEST, RemoveDir_not_rm_top_dir) {
         .will(returnValue(true))
         .then(returnValue(false));
 
-    MOCKER(mmScandirFree)
+    MOCKER(&MmpaPlugin::MsprofMmScandirFree)
         .stubs()
         .with(any(), any())
         .will(returnValue(0));
 
-    MOCKER(mmRmdir)
+    MOCKER(&MmpaPlugin::MsprofMmRmdir)
         .stubs()
         .will(returnValue(0));
 
-    MOCKER(mmUnlink)
+    MOCKER(&MmpaPlugin::MsprofMmUnlink)
         .stubs()
         .will(returnValue(0));
 
@@ -689,7 +689,7 @@ TEST_F(COMMON_UTILS_UTILS_TEST, wait_process_hang) {
 
     //WIFEXITED
     int wait_status = 0;
-    MOCKER(mmWaitPid)
+    MOCKER(&MmpaPlugin::MsprofMmWaitPid)
         .stubs()
         .with(any(), outBoundP(&wait_status), any())
         .will(returnValue(1234));
@@ -833,7 +833,7 @@ TEST_F(COMMON_UTILS_UTILS_TEST, get_child_dirs_scan_dir_fail) {
     bool is_recur = false;
     std::vector<std::string> child_dir;
 
-    MOCKER(mmScandir)
+    MOCKER(&MmpaPlugin::MsprofMmScandir)
         .stubs()
         .with(any(), any(), any(), any())
         .will(returnValue(0));
@@ -956,7 +956,7 @@ TEST_F(COMMON_UTILS_UTILS_TEST, get_child_filenames_scan_dir_fail) {
     std::string dir("/tmp/get_child_filenames_scan_dir_fail");
     std::vector<std::string> child_filename;
 
-    MOCKER(mmScandir)
+    MOCKER(&MmpaPlugin::MsprofMmScandir)
         .stubs()
         .with(any(), any(), any(), any())
         .will(returnValue(0));

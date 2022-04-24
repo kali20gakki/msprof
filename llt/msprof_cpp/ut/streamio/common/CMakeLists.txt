@@ -26,8 +26,6 @@ set(localSrcFiles
 	../../stub/common-utils-stub.cpp 
 	../../stub/hdc-log-stub.cpp
     ../../stub/devdrv_runtime_api_stub.cpp
-    ../../../stub/driver_plugin_stub.cpp
-    ../../../stub/mmpa_plugin_stub.cpp
 )
 
 add_executable(streamio_common_utest
