@@ -24,5 +24,8 @@ protobuf_generate(profiler
     ${MSPROF_SOURCE_DIR}/dvvp/proto/profiler_ext.proto
 )
 
-# add_subdirectory(ut)
-add_subdirectory(st)
+if ((NOT DEFINED PACKAGE) OR (PACKAGE STREQUAL "ut"))
+    add_subdirectory(ut)
+else()
+    add_subdirectory(st)
+endif()
