@@ -151,19 +151,17 @@ TEST_F(INPUT_PARSER_UTEST, CheckAppValid) {
     GlobalMockObject::verify();
     InputParser parser = InputParser();
     struct MsprofCmdInfo cmdInfo = { {nullptr} };
-    std::remove("./INPUT_PARSER_UTEST-CheckAppValid");
+    std::remove("./CheckAppValid");
     EXPECT_EQ(PROFILING_FAILED, parser.CheckAppValid(cmdInfo));
     cmdInfo.args[ARGS_APPLICATION] = "";
     EXPECT_EQ(PROFILING_FAILED, parser.CheckAppValid(cmdInfo));
-    cmdInfo.args[ARGS_APPLICATION] = "./INPUT_PARSER_UTEST-CheckAppValid a";
+    cmdInfo.args[ARGS_APPLICATION] = "./CheckAppValid a";
     EXPECT_EQ(PROFILING_FAILED, parser.CheckAppValid(cmdInfo));
-    std::ofstream file("INPUT_PARSER_UTEST-CheckAppValid");
+    std::ofstream file("CheckAppValid");
     file << "command not found" << std::endl;
     file.close();
-    EXPECT_EQ(PROFILING_FAILED, parser.CheckAppValid(cmdInfo));
-    chmod("./INPUT_PARSER_UTEST-CheckAppValid", 0700) ;
     EXPECT_EQ(PROFILING_SUCCESS, parser.CheckAppValid(cmdInfo));
-    remove(".INPUT_PARSER_UTEST-CheckAppValid");
+    std::remove("./CheckAppValid");
 }
 
 TEST_F(INPUT_PARSER_UTEST, CheckEnvironmentValid) {

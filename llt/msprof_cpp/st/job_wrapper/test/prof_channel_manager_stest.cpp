@@ -5,10 +5,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include "prof_channel_manager.h"
+#include "mmpa_plugin.h"
 
 using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::message;
 using namespace Analysis::Dvvp::JobWrapper;
+using namespace Analysis::Dvvp::Plugin;
 
 class PROF_CHANNEL_MANAGER_UTEST: public testing::Test {
 protected:
@@ -24,7 +26,7 @@ TEST_F(PROF_CHANNEL_MANAGER_UTEST, ProfChannelManager_Init) {
     // MOCKER_CPP(&analysis::dvvp::transport::ChannelPoll::Start)
     //     .stubs()
     //     .will(returnValue(PROFILING_SUCCESS));
-    MOCKER(mmCreateTaskWithThreadAttr)
+    MOCKER(&MmpaPlugin::MsprofMmCreateTaskWithThreadAttr)
         .stubs()
         .will(returnValue(EN_OK));
     EXPECT_EQ(entry->Init(), PROFILING_SUCCESS);
@@ -36,7 +38,7 @@ TEST_F(PROF_CHANNEL_MANAGER_UTEST, ProfChannelManager_UnInit) {
     // MOCKER_CPP(&analysis::dvvp::transport::ChannelPoll::Stop)
     //     .stubs()
     //     .will(returnValue(PROFILING_SUCCESS));
-    MOCKER(mmJoinTask)
+    MOCKER(&MmpaPlugin::MsprofMmJoinTask)
         .stubs()
         .will(returnValue(EN_OK));
     EXPECT_NE(nullptr, entry);

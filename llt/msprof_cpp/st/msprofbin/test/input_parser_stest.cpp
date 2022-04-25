@@ -136,8 +136,6 @@ TEST_F(INPUT_PARSER_STEST, CheckAppValid) {
     std::ofstream file("INPUT_PARSER_STEST-CheckAppValid");
     file << "command not found" << std::endl;
     file.close();
-    EXPECT_EQ(PROFILING_FAILED, parser.CheckAppValid(cmdInfo));
-    chmod("./INPUT_PARSER_STEST-CheckAppValid", 0700) ;
     EXPECT_EQ(PROFILING_SUCCESS, parser.CheckAppValid(cmdInfo));
     remove(".INPUT_PARSER_STEST-CheckAppValid");
 }

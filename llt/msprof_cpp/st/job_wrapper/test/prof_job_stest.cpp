@@ -23,11 +23,13 @@
 #include "uploader_mgr.h"
 #include "platform/platform.h"
 #include "transport/hdc/hdc_transport.h"
+#include "mmpa_plugin.h"
 
 using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::message;
 using namespace Analysis::Dvvp::JobWrapper;
 using namespace Analysis::Dvvp::MsprofErrMgr;
+using namespace Analysis::Dvvp::Plugin;
 
 class JOB_WRAPPER_PROF_TsCPu_JOB_TEST: public testing::Test {
 protected:
@@ -380,7 +382,7 @@ TEST_F(JOB_WRAPPER_PROF_CTRLCPU_JOB_TEST, Process) {
         .stubs()
         .will(invoke(fake_get_files_perf));
 
-    MOCKER(mmCreateTaskWithThreadAttr)
+    MOCKER(&MmpaPlugin::MsprofMmCreateTaskWithThreadAttr)
         .stubs()
         .will(returnValue(EN_OK));
 

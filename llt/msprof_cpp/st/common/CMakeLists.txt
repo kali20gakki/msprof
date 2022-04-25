@@ -27,7 +27,6 @@ set(testCfgSrcFile
     ../stub/profile_drv_user_stub.cpp
     ../stub/hdc-log-stub.cpp
     ../../stub/driver_plugin_stub.cpp
-    ../../stub/mmpa_plugin_stub.cpp
     testcase/main.cpp
 	testcase/config_manager_stest.cpp
     ${msprofSrcList}
