@@ -6,11 +6,13 @@
 #include "prof_manager.h"
 #include "hdc/device_transport.h"
 #include "data_handle.h"
+#include "mmpa_plugin.h"
 
 using namespace analysis::dvvp::host;
 using namespace analysis::dvvp::transport;
 using namespace analysis::dvvp::common::error;
 using namespace Analysis::Dvvp::MsprofErrMgr;
+using namespace Analysis::Dvvp::Plugin;
 
 class HOST_PROF_DEVICE_TRANSPORT_UTEST: public testing::Test {
 protected:

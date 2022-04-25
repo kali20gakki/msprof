@@ -86,7 +86,6 @@ set(profilerSrcFile
 	../stub/hdc-api-stub.cpp
 	../stub/ide-cmd-stub.cpp
 	../../stub/driver_plugin_stub.cpp
-    ../../stub/mmpa_plugin_stub.cpp
     ${profilerSrcList}
 )
 
@@ -200,7 +199,6 @@ add_executable(msprof_stest
 	../stub/ge_stub.cpp
 	../stub/devdrv_runtime_api_stub.cpp
 	../../stub/driver_plugin_stub.cpp
-    ../../stub/mmpa_plugin_stub.cpp
 	${CppPath}
 	${MSPROF_SOURCE_DIR}/dvvp/adx/stub/adx_prof_api.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/adx/wrapper/hdc_api.cpp

@@ -38,6 +38,7 @@
 #include "data_struct.h"
 #include "ai_drv_dev_api.h"
 #include "mmpa_plugin.h"
+#include "prof_api.h"
 
 using namespace analysis::dvvp::common::error;
 using namespace Analysis::Dvvp::Analyze;
@@ -772,7 +773,7 @@ TEST_F(MSPROF_ACL_CORE_UTEST, acl_json) {
 
     EXPECT_EQ(MSPROF_ERROR_NONE, Analysis::Dvvp::ProfilerCommon::MsprofCtrlCallbackImpl(MSPROF_CTRL_INIT_ACL_JSON, data, aclJson.size()));
 
-    Analysis::Dvvp::ProfilerCommon::MsprofSetDeviceCallbackImpl(0, true);
+    //Analysis::Dvvp::ProfilerCommon::MsprofSetDeviceCallbackImpl(0, true);
 
     EXPECT_EQ(MSPROF_ERROR_NONE, Analysis::Dvvp::ProfilerCommon::MsprofCtrlCallbackImpl(MSPROF_CTRL_FINALIZE, nullptr, 0));
 }
@@ -811,13 +812,13 @@ TEST_F(MSPROF_ACL_CORE_UTEST, ge_option) {
 
     EXPECT_EQ(MSPROF_ERROR_NONE, Analysis::Dvvp::ProfilerCommon::MsprofCtrlCallbackImpl(MSPROF_CTRL_INIT_GE_OPTIONS, data, sizeof(options)));
 
-    Analysis::Dvvp::ProfilerCommon::MsprofSetDeviceCallbackImpl(0, true);
+    //Analysis::Dvvp::ProfilerCommon::MsprofSetDeviceCallbackImpl(0, true);
 
     EXPECT_EQ(MSPROF_ERROR_NONE, Analysis::Dvvp::ProfilerCommon::MsprofCtrlCallbackImpl(MSPROF_CTRL_FINALIZE, nullptr, 0));
 
     EXPECT_EQ(MSPROF_ERROR_NONE, MsprofInit(MSPROF_CTRL_INIT_GE_OPTIONS, data, sizeof(options)));
 
-    Analysis::Dvvp::ProfilerCommon::MsprofSetDeviceCallbackImpl(0, true);
+    //Analysis::Dvvp::ProfilerCommon::MsprofSetDeviceCallbackImpl(0, true);
 
     EXPECT_EQ(MSPROF_ERROR_NONE, MsprofFinalize());
 
@@ -863,13 +864,13 @@ TEST_F(MSPROF_ACL_CORE_UTEST, init_env) {
                        \"ts_timeline\":\"on\",\"ts_track1\":\"\"}";
     setenv("PROFILER_SAMPLECONFIG", env.c_str(), 1);
 
-    MOCKER(rtRegDeviceStateCallback)
+    MOCKER(profRegDeviceStateCallback)
         .stubs()
         .will(returnValue(1));
     // register failed, but still ok
     EXPECT_NE(MSPROF_ERROR_NONE, Analysis::Dvvp::ProfilerCommon::MsprofCtrlCallbackImpl(MSPROF_CTRL_INIT_ACL_ENV, nullptr, 0));
 
-    Analysis::Dvvp::ProfilerCommon::MsprofSetDeviceCallbackImpl(0, true);
+    //Analysis::Dvvp::ProfilerCommon::MsprofSetDeviceCallbackImpl(0, true);
 
     EXPECT_EQ(MSPROF_ERROR_NONE, Analysis::Dvvp::ProfilerCommon::MsprofCtrlCallbackImpl(MSPROF_CTRL_FINALIZE, nullptr, 0));
     analysis::dvvp::common::utils::Utils::RemoveDir(result);

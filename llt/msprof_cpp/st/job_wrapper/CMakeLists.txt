@@ -78,7 +78,6 @@ set(localSrcFiles
     ../stub/devdrv_runtime_api_stub.cpp
     ../stub/profile_drv_user_stub.cpp
     ../../stub/driver_plugin_stub.cpp
-    ../../stub/mmpa_plugin_stub.cpp
     test/prof_job_stest.cpp
     test/prof_peripheral_job_stest.cpp
     test/prof_timer_stest.cpp

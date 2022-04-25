@@ -8,6 +8,7 @@
 #include "msprof_error_manager.h"
 #include "securec.h"
 #include "driver_plugin.h"
+#include "mmpa_plugin.h"
 
 using namespace analysis::dvvp::common::error;
 using namespace Analysis::Dvvp::Adx;

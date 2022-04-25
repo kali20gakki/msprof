@@ -13,7 +13,7 @@ rm -rf ${TOP_DIR}/llt/opensource/googletest
 rm -rf ${TOP_DIR}/llt/opensource/mockcpp/install
 rm -rf ${TOP_DIR}/llt/build_llt
 rm -rf ${TOP_DIR}/llt/output
-rm -rf ${TOP_DIR}/output
+rm -rf ${TOP_DIR}/tmp
 
 shopt -s extglob
 rm -rf !(analysis|build|cmake|CMakeLists.txt|collector|inc|llt|opensource|README.md|scripts|.git|.|..)

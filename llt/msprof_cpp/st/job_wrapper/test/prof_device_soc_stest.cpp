@@ -10,11 +10,13 @@
 #include "hdc/device_transport.h"
 #include "param_validation.h"
 #include "prof_channel_manager.h"
+#include "mmpa_plugin.h"
 
 using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::message;
 using namespace Analysis::Dvvp::JobWrapper;
 using namespace analysis::dvvp::common::validation;
+using namespace Analysis::Dvvp::Plugin;
 
 class PROF_DEVICE_SOC_UTEST: public testing::Test {
 protected:
@@ -156,7 +158,7 @@ TEST_F(PROF_DEVICE_SOC_UTEST, StopProf)
     //MOCKER_CPP(&analysis::dvvp::common::thread::Thread::Stop)
     //    .stubs()
     //    .will(returnValue(PROFILING_SUCCESS));
-    MOCKER(mmJoinTask)
+    MOCKER(&MmpaPlugin::MsprofMmJoinTask)
         .stubs()
         .will(returnValue(EN_OK));
 
