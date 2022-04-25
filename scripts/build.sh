@@ -8,3 +8,5 @@ mkdir -p ${TOP_DIR}/build_test
 cd ${TOP_DIR}/build_test
 cmake ../cmake/superbuild/
 make -j64
+
+bash create_run_package.sh
