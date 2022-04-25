@@ -40,7 +40,4 @@ target_link_options(c_sec PRIVATE
 )
 
 ########################## securec ###################################
-
 add_subdirectory(collector)
-
-

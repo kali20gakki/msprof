@@ -90,17 +90,17 @@ set(localSrcFiles
 )
 
 
-add_executable(job_wrapper
+add_executable(job_wrapper_utest
     ${profilerSrcFiles}
     ${localSrcFiles}
 )
 
-target_compile_definitions(job_wrapper PRIVATE
+target_compile_definitions(job_wrapper_utest PRIVATE
     C_SEC
 )
 
 
-target_include_directories(job_wrapper PRIVATE
+target_include_directories(job_wrapper_utest PRIVATE
     ${GTEST_INCLUDE_DIR}
     ${MOCKCPP_INCLUDE_DIR}
     ${TOP_DIR}/opensource/securec/include
@@ -166,7 +166,7 @@ target_include_directories(job_wrapper PRIVATE
     ${MSPROF_SOURCE_DIR}/dvvp/depend/include/stub
 )
 
-target_compile_options(job_wrapper PRIVATE
+target_compile_options(job_wrapper_utest PRIVATE
     -g
     -pipe
     -Wall
@@ -175,15 +175,22 @@ target_compile_options(job_wrapper PRIVATE
     -Wfloat-equal
     -Wextra
     -D_GLIBCXX_USE_CXX11_ABI=0
+    -fprofile-arcs
+    -ftest-coverage
 )
 
-target_compile_definitions(job_wrapper PRIVATE
+target_link_options(job_wrapper_utest PRIVATE
+	-lgcov
+	--coverage
+)
+
+target_compile_definitions(job_wrapper_utest PRIVATE
     C_SEC
     MSPROF_DEBUG
     google=ascend_private
 )
 
-target_link_libraries(job_wrapper PRIVATE
+target_link_libraries(job_wrapper_utest PRIVATE
     ascend_protobuf_static
     c_sec
     pthread
@@ -192,14 +199,14 @@ target_link_libraries(job_wrapper PRIVATE
     dl
 )
 
-set_target_properties(job_wrapper
+set_target_properties(job_wrapper_utest
     PROPERTIES
-    OUTPUT_NAME job_wrapper
+    OUTPUT_NAME job_wrapper_utest
     LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 )
 
 run_llt_test(
-    TARGET job_wrapper
+    TARGET job_wrapper_utest
     TASK_NUM 1
 )
 

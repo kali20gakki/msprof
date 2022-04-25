@@ -43,12 +43,19 @@ target_compile_options(stub_file_utest PRIVATE
     -Wfloat-equal
     -Wextra
     -D_GLIBCXX_USE_CXX11_ABI=0
+    -fprofile-arcs
+    -ftest-coverage
 )
 
 target_compile_definitions(stub_file_utest PRIVATE
     C_SEC
     __PROF_UT
     google=ascend_private
+)
+
+target_link_options(stub_file_utest PRIVATE
+	-lgcov
+	--coverage
 )
 
 target_link_libraries(stub_file_utest PRIVATE

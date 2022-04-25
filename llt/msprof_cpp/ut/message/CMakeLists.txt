@@ -56,12 +56,19 @@ target_compile_options(message_utest PRIVATE
     -Wfloat-equal
     -Wextra
     -D_GLIBCXX_USE_CXX11_ABI=0
+    -fprofile-arcs
+    -ftest-coverage
 )
 
 target_compile_definitions(message_utest PRIVATE
     C_SEC
     MSPROF_DEBUG
     google=ascend_private
+)
+
+target_link_options(message_utest PRIVATE
+	-lgcov
+	--coverage
 )
 
 target_link_libraries(message_utest PRIVATE

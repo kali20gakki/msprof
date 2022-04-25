@@ -76,12 +76,19 @@ target_compile_options(application_utest PRIVATE
     -Wfloat-equal
     -Wextra
     -D_GLIBCXX_USE_CXX11_ABI=0
+    -fprofile-arcs
+    -ftest-coverage
 )
 
 target_compile_definitions(application_utest PRIVATE
     C_SEC
     MSPROF_DEBUG
     google=ascend_private
+)
+
+target_link_options(application_utest PRIVATE
+	-lgcov
+	--coverage
 )
 
 target_link_libraries(application_utest PRIVATE

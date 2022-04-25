@@ -125,6 +125,8 @@ target_compile_options(msprof_bin_utest PRIVATE
     -Wfloat-equal
     -Wextra
     -D_GLIBCXX_USE_CXX11_ABI=0
+    -fprofile-arcs
+    -ftest-coverage
 )
 
 target_compile_definitions(msprof_bin_utest PRIVATE
@@ -140,6 +142,11 @@ target_link_libraries(msprof_bin_utest PRIVATE
     ${GTEST_STATIC_LIBRARY}
     ${MOCKCPP_STATIC_LIBRARY}
     dl
+)
+
+target_link_options(msprof_bin_utest PRIVATE
+	-lgcov
+	--coverage
 )
 
 set_target_properties(msprof_bin_utest

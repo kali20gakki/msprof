@@ -51,6 +51,8 @@ target_compile_options(driver_utest PRIVATE
     -Wfloat-equal
     -Wextra
     -D_GLIBCXX_USE_CXX11_ABI=0
+    -fprofile-arcs
+    -ftest-coverage
 )
 
 target_compile_definitions(driver_utest PRIVATE
@@ -66,6 +68,11 @@ target_link_libraries(driver_utest PRIVATE
     ${GTEST_STATIC_LIBRARY}
     ${MOCKCPP_STATIC_LIBRARY}
     dl
+)
+
+target_link_options(driver_utest PRIVATE
+	-lgcov
+	--coverage
 )
 
 set_target_properties(driver_utest

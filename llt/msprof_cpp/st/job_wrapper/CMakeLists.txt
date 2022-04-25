@@ -165,12 +165,19 @@ target_compile_options(job_wrapper_stest PRIVATE
     -Wfloat-equal
     -Wextra
     -D_GLIBCXX_USE_CXX11_ABI=0
+    -fprofile-arcs
+    -ftest-coverage
 )
 
 target_compile_definitions(job_wrapper_stest PRIVATE
     C_SEC
     MSPROF_DEBUG
     google=ascend_private
+)
+
+target_link_options(job_wrapper_stest PRIVATE
+	-lgcov
+	--coverage
 )
 
 target_link_libraries(job_wrapper_stest PRIVATE

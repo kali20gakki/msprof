@@ -25,5 +25,7 @@ ExternalProject_Add(msprof_llt
                 -DCOVERAGE_RC_CONFIG=true
                 <SOURCE_DIR>
     BUILD_COMMAND $(MAKE)
+    INSTALL_COMMAND "" # llt install
+    BUILD_ALWAYS TRUE
     DEPENDS protoc_build ascend_protobuf_shared_build ascend_protobuf_static_build gtest_build mockcpp_build
 )
