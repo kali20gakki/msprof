@@ -73,6 +73,8 @@ target_compile_options(common_stest PRIVATE
     -Wfloat-equal
     -Wextra
     -D_GLIBCXX_USE_CXX11_ABI=0
+    -fprofile-arcs
+    -ftest-coverage
 )
 
 target_compile_definitions(common_stest PRIVATE
@@ -82,8 +84,8 @@ target_compile_definitions(common_stest PRIVATE
 )
 
 target_link_options(common_stest PRIVATE
-   -ldl
-   -lpthread
+	-lgcov
+	--coverage
 )
 
 target_link_libraries(common_stest PRIVATE

@@ -43,12 +43,12 @@ set(localSrcFiles
     ../../stub/driver_plugin_stub.cpp
 )
 
-add_executable(transport
+add_executable(transport_utest
     ${profilerSrcFiles}
     ${localSrcFiles}
 )
 
-target_include_directories(transport PRIVATE
+target_include_directories(transport_utest PRIVATE
     ${GTEST_INCLUDE_DIR}
     ${MOCKCPP_INCLUDE_DIR}
     ${TOP_DIR}/opensource/securec/include
@@ -87,7 +87,7 @@ target_include_directories(transport PRIVATE
     ${MSPROF_SOURCE_DIR}/dvvp/depend/include/stub
 )
 
-target_compile_options(transport PRIVATE
+target_compile_options(transport_utest PRIVATE
     -g
     -pipe
     -Wall
@@ -96,15 +96,22 @@ target_compile_options(transport PRIVATE
     -Wfloat-equal
     -Wextra
     -D_GLIBCXX_USE_CXX11_ABI=0
+    -fprofile-arcs
+    -ftest-coverage
 )
 
-target_compile_definitions(transport PRIVATE
+target_compile_definitions(transport_utest PRIVATE
     C_SEC
     MSPROF_DEBUG
     google=ascend_private
 )
 
-target_link_libraries(transport PRIVATE
+target_link_options(transport_utest PRIVATE
+	-lgcov
+	--coverage
+)
+
+target_link_libraries(transport_utest PRIVATE
     ascend_protobuf_static
     c_sec
     pthread
@@ -113,14 +120,14 @@ target_link_libraries(transport PRIVATE
     dl
 )
 
-set_target_properties(transport
+set_target_properties(transport_utest
     PROPERTIES
-    OUTPUT_NAME transport
+    OUTPUT_NAME transport_utest
     LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 )
 
 run_llt_test(
-    TARGET transport
+    TARGET transport_utest
     TASK_NUM 1
 )
 

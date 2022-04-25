@@ -106,6 +106,8 @@ target_compile_options(device_stest PRIVATE
     -Wfloat-equal
     -Wextra
 	-D_GLIBCXX_USE_CXX11_ABI=0
+	-fprofile-arcs
+    -ftest-coverage
 )
 
 target_compile_definitions(device_stest PRIVATE
@@ -115,8 +117,8 @@ target_compile_definitions(device_stest PRIVATE
 )
 
 target_link_options(device_stest PRIVATE
-   -ldl
-   -lpthread
+	-lgcov
+	--coverage
 )
 
 target_link_libraries(device_stest PRIVATE

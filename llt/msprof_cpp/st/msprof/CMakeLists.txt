@@ -159,12 +159,19 @@ target_compile_options(msprofiler_stest PRIVATE
     -Wfloat-equal
     -Wextra
 	-D_GLIBCXX_USE_CXX11_ABI=0
+	-fprofile-arcs
+    -ftest-coverage
 )
 
 target_compile_definitions(msprofiler_stest PRIVATE
     C_SEC
     MSPROF_DEBUG
     google=ascend_private
+)
+
+target_link_options(msprofiler_stest PRIVATE
+	-lgcov
+	--coverage
 )
 
 target_link_libraries(msprofiler_stest PRIVATE
@@ -335,6 +342,8 @@ target_compile_options(msprof_stest PRIVATE
     -Wfloat-equal
     -Wextra
 	-D_GLIBCXX_USE_CXX11_ABI=0
+	-fprofile-arcs
+    -ftest-coverage
 )
 
 target_compile_definitions(msprof_stest PRIVATE
@@ -342,6 +351,11 @@ target_compile_definitions(msprof_stest PRIVATE
     MSPROF
     ADX_LIB
     google=ascend_private
+)
+
+target_link_options(msprof_stest PRIVATE
+	-lgcov
+	--coverage
 )
 
 target_link_libraries(msprof_stest PRIVATE
