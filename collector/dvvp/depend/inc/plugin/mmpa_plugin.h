@@ -21,11 +21,11 @@ public:
     using MSPROF_MMOPEN2_T = std::function<INT32(const CHAR *, INT32, MODE)>;
     INT32 MsprofMmOpen2(const CHAR *pathName, INT32 flags, MODE mode);
 
-    using MSPROF_MMREAD_T = std::function<mmSsize_t(INT32, VOID *, UINT32)>;
-    mmSsize_t MsprofMmRead(INT32 fd, VOID *buf, UINT32 bufLen);
+    using MSPROF_MMREAD_T = std::function<mmSsize_t(INT32, void *, UINT32)>;
+    mmSsize_t MsprofMmRead(INT32 fd, void *buf, UINT32 bufLen);
 
-    using MSPROF_MMWRITE_T = std::function<mmSsize_t(INT32, VOID *, UINT32)>;
-    mmSsize_t MsprofMmWrite(INT32 fd, VOID *buf, UINT32 bufLen);
+    using MSPROF_MMWRITE_T = std::function<mmSsize_t(INT32, void *, UINT32)>;
+    mmSsize_t MsprofMmWrite(INT32 fd, void *buf, UINT32 bufLen);
 
     using MSPROF_MMCLOSE_T = std::function<INT32(INT32)>;
     INT32 MsprofMmClose(INT32 fd);
@@ -65,7 +65,7 @@ public:
     INT32 MsprofMmGetTimeOfDay(mmTimeval *timeVal, mmTimezone *timeZone);
 
     using MSPROF_MMGETTICKCOUNT_T = std::function<mmTimespec()>;
-    mmTimespec MsprofMmGetTickCount(VOID);
+    mmTimespec MsprofMmGetTickCount(void);
 
     using MSPROF_MMGETFILESIZE_T = std::function<INT32(const CHAR *, ULONGLONG *)>;
     INT32 MsprofMmGetFileSize(const CHAR *fileName, ULONGLONG *length);
@@ -103,8 +103,8 @@ public:
     using MSPROF_MMCREATEPROCESS_T = std::function<INT32(const CHAR *, const mmArgvEnv *, const CHAR*, mmProcess *)>;
     INT32 MsprofMmCreateProcess(const CHAR *fileName, const mmArgvEnv *env, const CHAR* stdoutRedirectFile, mmProcess *id);
     
-    using MSPROF_MMSCANDIRFREE_T = std::function<VOID(mmDirent **, INT32)>;
-    VOID MsprofMmScandirFree(mmDirent **entryList, INT32 count);
+    using MSPROF_MMSCANDIRFREE_T = std::function<void(mmDirent **, INT32)>;
+    void MsprofMmScandirFree(mmDirent **entryList, INT32 count);
     
     using MSPROF_MMCHDIR_T = std::function<INT32(const CHAR *)>;
     INT32 MsprofMmChdir(const CHAR *path);
@@ -122,7 +122,7 @@ public:
     INT32 MsprofMmGetLocalTime(mmSystemTime_t *sysTimePtr);
     
     using MSPROF_MMGETPID_T = std::function<INT32()>;
-    INT32 MsprofMmGetPid(VOID);
+    INT32 MsprofMmGetPid(void);
     
     using MSPROF_MMGETCWD_T = std::function<INT32(CHAR *, INT32)>;
     INT32 MsprofMmGetCwd(CHAR *buffer, INT32 maxLen);
@@ -167,12 +167,12 @@ public:
     INT32 MsprofMmCloseSocket(mmSockHandle sockFd);
     
     // mmSocketSend
-    using MSPROF_MMSOCKETSEND_T = std::function<mmSsize_t(mmSockHandle, VOID *, INT32, INT32)>;
-    mmSsize_t MsprofMmSocketSend(mmSockHandle sockFd,VOID *pstSendBuf,INT32 sendLen,INT32 sendFlag);
+    using MSPROF_MMSOCKETSEND_T = std::function<mmSsize_t(mmSockHandle, void *, INT32, INT32)>;
+    mmSsize_t MsprofMmSocketSend(mmSockHandle sockFd,void *pstSendBuf,INT32 sendLen,INT32 sendFlag);
     
     // mmSocketRecv
-    using MSPROF_MMSOCKETRECV_T = std::function<mmSsize_t(mmSockHandle, VOID *, INT32, INT32)>;
-    mmSsize_t MsprofMmSocketRecv(mmSockHandle sockFd, VOID *pstRecvBuf,INT32 recvLen,INT32 recvFlag);
+    using MSPROF_MMSOCKETRECV_T = std::function<mmSsize_t(mmSockHandle, void *, INT32, INT32)>;
+    mmSsize_t MsprofMmSocketRecv(mmSockHandle sockFd, void *pstRecvBuf,INT32 recvLen,INT32 recvFlag);
     
     // mmSocket
     using MSPROF_MMSOCKET_T = std::function<mmSockHandle(INT32, INT32, INT32)>;
