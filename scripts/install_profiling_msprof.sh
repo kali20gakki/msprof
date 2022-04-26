@@ -28,28 +28,13 @@ function getInstallParam() {
     echo "${_param}"
 }
 
-function copy_script_to_usr_bin(){
-    if [ ! -f "${CURRENT_DIR}/../tools/profiler/scripts/msprof_data_collection.sh" ]; then
-        profiling_warning "The script file msprof_data_collection.sh dose not exist"
-        return
-    fi
-    cp -rf "${CURRENT_DIR}"/../tools/profiler/scripts/msprof_data_collection.sh /usr/bin/ >/dev/null 2>&1
-    chmod u+x /usr/bin/msprof_data_collection.sh >/dev/null 2>&1
-}
-
-function rm_script_from_usr_bin(){
-    rm -f /usr/bin/msprof_data_collection.sh >/dev/null 2>&1
-}
-
 function install()
 {
-    copy_script_to_usr_bin
     profiling_info "Install profiling successfully."
 }
 
 function uninstall()
 {
-    rm_script_from_usr_bin
     profiling_info "Uninstall profiling successfully."
 }
 

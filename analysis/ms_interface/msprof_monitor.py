@@ -71,6 +71,8 @@ class JobDispatcher:
         add symlink for jobxxx
         :return: None
         """
+        check_path_valid(self.dispatch_path, True)
+        self._clean_invalid_dispatch_symlink()
         for job_tag in os.listdir(self.collection_path):
             self._add_symlink_by_job_tag(job_tag)
 
@@ -105,8 +107,6 @@ class JobDispatcher:
         try:
             while True:
                 try:
-                    check_path_valid(self.dispatch_path, True)
-                    self._clean_invalid_dispatch_symlink()
                     self.add_symlink()
                 except (OSError, SystemError, ValueError, TypeError,
                         RuntimeError, ProfException) as err:
@@ -208,13 +208,17 @@ def monitor(collection_path: str) -> None:
     """
     check_path_valid(collection_path, False)
     try:
-        processes = Utils.generator_to_list(multiprocessing.Process(target=_monitor_job, args=(i, collection_path,))
-                                            for i in range(CommonConstant.CLIENT_NUM))
-        processes.append(multiprocessing.Process(target=_dispatch_job,
-                                                 args=(collection_path,)))
-        for process in processes:
-            process.start()
-        for process in processes:
-            process.join()
+        _monitor_process(collection_path)
     except KeyboardInterrupt:
         print_info(JobDispatcher.SCRIPT_NAME, "Parent stopped ...")
+
+
+def _monitor_process(collection_path: str) -> None:
+    processes = Utils.generator_to_list(multiprocessing.Process(target=_monitor_job, args=(i, collection_path,))
+                                        for i in range(CommonConstant.CLIENT_NUM))
+    processes.append(multiprocessing.Process(target=_dispatch_job,
+                                             args=(collection_path,)))
+    for process in processes:
+        process.start()
+    for process in processes:
+        process.join()

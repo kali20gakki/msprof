@@ -15,6 +15,7 @@ from common_func.msvp_common import path_check
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.path_manager import PathManager
 from common_func.empty_class import EmptyClass
+from profiling_bean.db_dto.database_to_object import DataBaseToObject
 
 
 class ClassRowType:
@@ -44,6 +45,19 @@ class ClassRowType:
             return bean_obj
 
         return row_factory
+
+    @staticmethod
+    def create_object(cursor: any, row: any) -> any:
+        """
+        trans the sqlite type for bean data
+        :param cursor: sqlite cursor
+        :param row: pear data
+        :return: bean object
+        """
+        bean_obj = DataBaseToObject()
+        for col_idx, col in enumerate(cursor.description):
+            setattr(bean_obj, col[0], row[col_idx])
+        return bean_obj
 
 
 class DBManager:

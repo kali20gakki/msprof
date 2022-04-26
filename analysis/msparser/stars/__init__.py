@@ -9,10 +9,11 @@ from msparser.stars.ffts_log_parser import FftsLogParser
 from msparser.stars.inter_soc_parser import InterSocParser
 from msparser.stars.acc_pmu_parser import AccPmuParser
 from msparser.stars.stars_chip_trans_parser import StarsChipTransParser
+from msparser.stars.low_power_parser import LowPowerParser
 
 __all__ = [
     "AcsqTaskParser", "FftsLogParser",
     "InterSocParser", "AccPmuParser",
-    "StarsChipTransParser"
+    "StarsChipTransParser", "LowPowerParser"
 ]
 

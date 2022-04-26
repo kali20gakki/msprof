@@ -61,7 +61,7 @@ class GeOpExecuteViewer:
         tid_set = set()
         for data in timeline_data:
             _name = data[2] if not data[1] else "{}_{}".format(data[1], str(data[2]))
-            result.append([data[2], pid, data[0], data[3], data[4]])
+            result.append([_name, pid, data[0], data[3], data[4]])
             tid_set.add(data[0])
         _trace = TraceViewManager.time_graph_trace(TraceViewHeaderConstant.TASK_TIME_GRAPH_HEAD, result)
         for _tid in tid_set:

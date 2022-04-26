@@ -25,6 +25,7 @@ from msparser.interface.data_parser import DataParser
 from msparser.step_trace.helper.model_with_q_parser import ModelWithQParser
 from msparser.step_trace.ts_binary_data_reader.step_trace_reader import StepTraceReader
 from msparser.step_trace.ts_binary_data_reader.ts_memcpy_reader import TsMemcpyReader
+from msparser.step_trace.ts_binary_data_reader.task_type_reader import TaskTypeReader
 from profiling_bean.prof_enum.data_tag import DataTag
 
 
@@ -41,12 +42,15 @@ class TstrackParser(DataParser, MsMultiProcess):
         self._file_list = file_list
         self._model = TsTrackModel(self.project_path,
                                    DBNameConstant.DB_STEP_TRACE,
-                                   [DBNameConstant.TABLE_STEP_TRACE, DBNameConstant.TABLE_TS_MEMCPY,
-                                    DBNameConstant.TABLE_MODEL_WITH_Q])
+                                   [DBNameConstant.TABLE_STEP_TRACE,
+                                    DBNameConstant.TABLE_TS_MEMCPY,
+                                    DBNameConstant.TABLE_MODEL_WITH_Q,
+                                    DBNameConstant.TABLE_TASK_TYPE])
         self.tag_reader = {
             CommonConstant.STEP_TRACE_TAG: StepTraceReader(),
             CommonConstant.TS_MEMCPY_TAG: TsMemcpyReader(),
-            CommonConstant.MODEL_WITH_Q_TAG: ModelWithQParser()
+            CommonConstant.MODEL_WITH_Q_TAG: ModelWithQParser(),
+            CommonConstant.TS_TASK_TYPE_TAG: TaskTypeReader()
         }
 
     def parse_binary_data(self: any, file_list: list, format_size: int, tag_fmt: str) -> None:

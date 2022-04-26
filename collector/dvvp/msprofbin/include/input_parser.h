@@ -67,6 +67,7 @@ enum MsprofArgsType {
     ARGS_FFTS_BLOCK,
     ARGS_LOW_POWER,
     ARGS_HCCL,
+    ARGS_BIU,
     ARGS_L2_PROFILING,
     ARGS_PARSE,
     ARGS_QUERY,
@@ -74,6 +75,7 @@ enum MsprofArgsType {
     // number
     ARGS_AIC_FREQ, // 10 10-1000
     ARGS_AIV_FREQ, // 10 10-1000
+    ARGS_BIU_FREQ, // 1000 300-30000
     ARGS_SYS_PERIOD, // >0
     ARGS_SYS_SAMPLING_FREQ, // 10 1-10
     ARGS_PID_SAMPLING_FREQ, // 10 1-10
@@ -133,6 +135,7 @@ const mmStructOption longOptions[] = {
     {"ffts_block", mm_optional_argument, nullptr, ARGS_FFTS_BLOCK},
     {"low_power", mm_optional_argument, nullptr, ARGS_LOW_POWER},
     {"hccl", mm_optional_argument, nullptr, ARGS_HCCL},  // the default value is off
+    {"biu", mm_optional_argument, nullptr, ARGS_BIU},
     {"l2", mm_optional_argument, nullptr, ARGS_L2_PROFILING},
     {"parse", mm_optional_argument, nullptr, ARGS_PARSE},
     {"query", mm_optional_argument, nullptr, ARGS_QUERY},
@@ -140,6 +143,7 @@ const mmStructOption longOptions[] = {
     // number
     {"aic-freq", mm_optional_argument, nullptr, ARGS_AIC_FREQ},
     {"aiv-freq", mm_optional_argument, nullptr, ARGS_AIV_FREQ},
+    {"biu-freq", mm_optional_argument, nullptr, ARGS_BIU_FREQ},
     {"sys-period", mm_optional_argument, nullptr, ARGS_SYS_PERIOD},
     {"sys-sampling-freq", mm_optional_argument, nullptr, ARGS_SYS_SAMPLING_FREQ},
     {"sys-pid-sampling-freq", mm_optional_argument, nullptr, ARGS_PID_SAMPLING_FREQ},
@@ -188,6 +192,7 @@ private:
     int MsprofSwitchCheckValid(const struct MsprofCmdInfo &cmdInfo, int opt);
     void ParamsSwitchValid(const struct MsprofCmdInfo &cmdInfo, int opt);
     void ParamsSwitchValid2(const struct MsprofCmdInfo &cmdInfo, int opt);
+    void ParamsSwitchValid3(const struct MsprofCmdInfo &cmdInfo, int opt);
     void ParamsFreqValid(const struct MsprofCmdInfo &cmdInfo, const int freq, int opt);
     int CheckLlcProfilingIsValid(const std::string &llcProfiling);
     int PreCheckApp(const std::string &appDir, const std::string &appName);

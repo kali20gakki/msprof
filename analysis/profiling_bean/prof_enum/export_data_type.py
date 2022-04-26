@@ -65,4 +65,6 @@ class ExportDataType(Enum):
     STARS_SOC = 48
     STARS_CHIP_TRANS = 49
     THREAD_GROUP = 50
+    LOW_POWER = 51
+    BIU_PERF = 52
     MSPROF = 100

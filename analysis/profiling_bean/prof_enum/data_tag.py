@@ -58,6 +58,7 @@ class DataTag(Enum):
     GE_HOST = 41
     SOC_PROFILER = 42
     HELPER_MODEL_WITH_Q = 43
+    BIU_PERF = 44
 
 
 @unique

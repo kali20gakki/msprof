@@ -48,7 +48,11 @@ class StructDecoder:
         "GeHostBean": StructFmt.GE_HOST_FMT,
         "ModelWithQBean": StructFmt.HELPER_MODEL_WITH_Q_FMT,
         "StepTraceReader": StructFmt.STEP_TRACE_FMT,
-        "StarsChipTransBean": StructFmt.CHIP_TRANS_FMT
+        "StarsChipTransBean": StructFmt.CHIP_TRANS_FMT,
+        "LowPowerBean": StructFmt.LOWPOWER_FMT,
+        "Monitor0Bean": StructFmt.MONITOR0_FMT,
+        "Monitor1Bean": StructFmt.MONITOR1_FMT,
+        "TaskTypeBean": StructFmt.TS_TASK_TYPE_FMT
     }
 
     @classmethod

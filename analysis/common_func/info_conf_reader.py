@@ -282,3 +282,19 @@ class InfoConfReader:
         calculate time difference between host and device
         """
         return self._host_mon - self._start_log_time / NumberConstant.NANO_SECOND
+
+    def get_biu_sample_cycle(self: any) -> int:
+        """
+        calculate biu sample cycle
+        """
+        try:
+            biu_sample_cycle = int(self._sample_json.get("biu_freq"))
+        except TypeError as err:
+            logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
+            raise ProfException(ProfException.PROF_INVALID_DATA_ERROR) from err
+
+        if biu_sample_cycle <= 0:
+            logging.error("Biu freq is invalid.")
+            raise ProfException(ProfException.PROF_INVALID_DATA_ERROR)
+
+        return biu_sample_cycle

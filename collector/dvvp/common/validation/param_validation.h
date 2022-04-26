@@ -58,6 +58,8 @@ public:
     bool ProfStarsAcsqParamIsValid(const std::string &param);
     bool IsValidSwitch(const std::string &switchStr);
     bool CheckStorageLimit(const std::string &storageLimit);
+    bool CheckBiuFreqValid(const uint32_t biuFreq);
+
 private:
     bool CheckTsSwitchProfiling(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params);
     bool CheckPmuSwitchProfiling(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params);

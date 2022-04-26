@@ -38,12 +38,56 @@ class CoreCpuReduceViewer:
     }
 
     @staticmethod
+    def get_op_names_and_task_type(sql_path: str) -> tuple:
+        """
+        get op_name and task_type value
+        """
+        op_names = {}
+        task_types = {}
+        sql = "SELECT op_name, stream_id, task_id, " \
+              "task_type, batch_id FROM {} ".format(DBNameConstant.TABLE_GE_TASK)
+        conn_ge, cur_ge = DBManager.check_connect_db_path(
+            os.path.join(sql_path, DBNameConstant.DB_GE_INFO))
+        if conn_ge and cur_ge:
+            if not DBManager.judge_table_exist(cur_ge, DBNameConstant.TABLE_GE_TASK):
+                return op_names, task_types
+            ge_datas = DBManager.fetch_all_data(cur_ge, sql)
+            for ge_data in ge_datas:
+                ge_data_key = "_".join(list(map(str, [ge_data[1], ge_data[2], ge_data[3], ge_data[-1]])))
+                op_names[ge_data_key] = ge_data[0]
+                task_types[ge_data_key] = ge_data[3]
+        DBManager.destroy_db_connect(conn_ge, cur_ge)
+        return op_names, task_types
+
+    @staticmethod
+    def get_total_cycle(sql_path: str) -> tuple:
+        """
+        get total_cycle value
+        """
+        total_cycle_data = {}
+        total_time_data = {}
+        conn_ge, cur_ge = DBManager.check_connect_db_path(
+            os.path.join(sql_path, DBNameConstant.DB_RUNTIME))
+        if conn_ge and cur_ge:
+            if not DBManager.judge_table_exist(cur_ge, DBNameConstant.TABLE_METRICS_SUMMARY):
+                return total_cycle_data, total_time_data
+            total_cycles = DBManager.fetch_all_data(cur_ge, CoreCpuReduceViewer._get_aicore_sql(sql_path))
+            total_cycles = OpCommonFunc.deal_batch_id(stream_index=1, task_index=2, merge_data=total_cycles)
+            for total_cycle in total_cycles:
+                total_data_key = "_".join(
+                    [str(total_cycle[1]), str(total_cycle[2]), Constant.TASK_TYPE_AI_CORE, str(total_cycle[-1])])
+                total_cycle_data[total_data_key] = total_cycle[0]
+                total_time_data[total_data_key] = total_cycle[3]
+        DBManager.destroy_db_connect(conn_ge, cur_ge)
+        return total_cycle_data, total_time_data
+
+    @staticmethod
     def _get_aicore_sql(sql_path: str) -> str:
         sql = "SELECT total_cycles, stream_id, task_id, total_time FROM {} ".format(
-                        DBNameConstant.TABLE_METRICS_SUMMARY)
+            DBNameConstant.TABLE_METRICS_SUMMARY)
         if not os.path.exists(os.path.join(sql_path, DBNameConstant.DB_GE_INFO)):
             sql = "SELECT total_cycles, stream_id, task_id FROM {} ".format(
-                        DBNameConstant.TABLE_METRICS_SUMMARY)
+                DBNameConstant.TABLE_METRICS_SUMMARY)
         return sql
 
     @staticmethod
@@ -84,49 +128,48 @@ class CoreCpuReduceViewer:
             result = DBManager.fetch_all_data(trace_curs, sql, (device_id, iteration_end))
         return result
 
-    @staticmethod
-    def _get_op_names_and_task_type(sql_path: str) -> tuple:
+    @classmethod
+    def get_meta_trace_data(cls: any, name: str, tid: any = None) -> list:
         """
-        get op_name and task_type value
+        get meta trace data
         """
-        op_names = {}
-        task_types = {}
-        sql = "SELECT op_name, stream_id, task_id, " \
-              "task_type, batch_id FROM {} ".format(DBNameConstant.TABLE_GE_TASK)
-        conn_ge, cur_ge = DBManager.check_connect_db_path(
-            os.path.join(sql_path, DBNameConstant.DB_GE_INFO))
-        if conn_ge and cur_ge:
-            if not DBManager.judge_table_exist(cur_ge, DBNameConstant.TABLE_GE_TASK):
-                return op_names, task_types
-            ge_datas = DBManager.fetch_all_data(cur_ge, sql)
-            for ge_data in ge_datas:
-                ge_data_key = "_".join(list(map(str, [ge_data[1], ge_data[2], ge_data[3], ge_data[-1]])))
-                op_names[ge_data_key] = ge_data[0]
-                task_types[ge_data_key] = ge_data[3]
-        DBManager.destroy_db_connect(conn_ge, cur_ge)
-        return op_names, task_types
+        pid = cls.TRACE_PID_MAP.get(name)
+        meta_data = [["process_name", pid, InfoConfReader().get_json_tid_data(), name]]
+        if name == TraceViewHeaderConstant.PROCESS_TASK:
+            meta_data.extend(["thread_name", pid, tid_value,
+                              "Stream {}".format(tid_value)] for tid_value in tid)
+        result = TraceViewManager.metadata_event(meta_data)
+        return result
 
-    @staticmethod
-    def _get_total_cycle(sql_path: str) -> tuple:
+    @classmethod
+    def get_task_time_data(cls: any, params: dict) -> str:
         """
-        get total_cycle value
+        get ai core, ai cpu and all reduce data.
+        :return: result
         """
-        total_cycle_data = {}
-        total_time_data = {}
-        conn_ge, cur_ge = DBManager.check_connect_db_path(
-            os.path.join(sql_path, DBNameConstant.DB_RUNTIME))
-        if conn_ge and cur_ge:
-            if not DBManager.judge_table_exist(cur_ge, DBNameConstant.TABLE_METRICS_SUMMARY):
-                return total_cycle_data, total_time_data
-            total_cycles = DBManager.fetch_all_data(cur_ge, CoreCpuReduceViewer._get_aicore_sql(sql_path))
-            total_cycles = OpCommonFunc.deal_batch_id(stream_index=1, task_index=2, merge_data=total_cycles)
-            for total_cycle in total_cycles:
-                total_data_key = "_".join(
-                    [str(total_cycle[1]), str(total_cycle[2]), Constant.TASK_TYPE_AI_CORE, str(total_cycle[-1])])
-                total_cycle_data[total_data_key] = total_cycle[0]
-                total_time_data[total_data_key] = total_cycle[3]
-        DBManager.destroy_db_connect(conn_ge, cur_ge)
-        return total_cycle_data, total_time_data
+
+        trace_data = []
+        device_id = params.get('device_id')
+        iter_id = params.get('iter_id')
+        result_dir = params.get('result_dir')
+        model_id = params.get('model_id')
+
+        # add memory copy data
+        memory_copy_viewer = MemoryCopyViewer(result_dir)
+        trace_data_memcpy = memory_copy_viewer.get_memory_copy_timeline()
+
+        trace_data_sql = \
+            cls._get_task_scheduler_data(sql_path=PathManager.get_sql_dir(result_dir))
+        trace_data_job = \
+            cls._get_ai_cpu_data(iter_id, model_id, job_path=result_dir)
+
+        trace_data_result = \
+            cls._get_all_reduce_data(device_id, iter_id, model_id, result_dir=result_dir)
+        trace_data.extend(trace_data_memcpy)
+        trace_data.extend(trace_data_sql)
+        trace_data.extend(trace_data_job)
+        trace_data.extend(trace_data_result)
+        return json.dumps(trace_data)
 
     @classmethod
     def _get_task_scheduler_data(cls: any, sql_path: str) -> list:
@@ -156,8 +199,8 @@ class CoreCpuReduceViewer:
     @classmethod
     def _format_task_trace_data(cls: any, sql_datas: list, sql_path: str) -> list:
         trace_data = []
-        op_names, task_types = cls._get_op_names_and_task_type(sql_path)
-        total_cycle, total_time = cls._get_total_cycle(sql_path)
+        op_names, task_types = cls.get_op_names_and_task_type(sql_path)
+        total_cycle, total_time = cls.get_total_cycle(sql_path)
         for sql_data in sql_datas:
             # key: stream_id task_id task_type batch_id
             _key_for_ops = "_".join([str(sql_data[0]), str(sql_data[1]), str(sql_data[-3]), str(sql_data[-1])])
@@ -255,46 +298,3 @@ class CoreCpuReduceViewer:
                          OrderedDict([("Reduce Duration(us)",
                                        all_reduce[1] / hwts_freq * NumberConstant.MICRO_SECOND)])))
         return all_reduce_datas
-
-    @classmethod
-    def get_meta_trace_data(cls: any, name: str, tid: any = None) -> list:
-        """
-        get meta trace data
-        """
-        pid = cls.TRACE_PID_MAP.get(name)
-        meta_data = [["process_name", pid, InfoConfReader().get_json_tid_data(), name]]
-        if name == TraceViewHeaderConstant.PROCESS_TASK:
-            meta_data.extend(["thread_name", pid, tid_value,
-                              "Stream {}".format(tid_value)] for tid_value in tid)
-        result = TraceViewManager.metadata_event(meta_data)
-        return result
-
-    @classmethod
-    def get_task_time_data(cls: any, params: dict) -> str:
-        """
-        get ai core, ai cpu and all reduce data.
-        :return: result
-        """
-
-        trace_data = []
-        device_id = params.get('device_id')
-        iter_id = params.get('iter_id')
-        result_dir = params.get('result_dir')
-        model_id = params.get('model_id')
-
-        # add memory copy data
-        memory_copy_viewer = MemoryCopyViewer(result_dir)
-        trace_data_memcpy = memory_copy_viewer.get_memory_copy_timeline()
-
-        trace_data_sql = \
-            cls._get_task_scheduler_data(sql_path=PathManager.get_sql_dir(result_dir))
-        trace_data_job = \
-            cls._get_ai_cpu_data(iter_id, model_id, job_path=result_dir)
-
-        trace_data_result = \
-            cls._get_all_reduce_data(device_id, iter_id, model_id, result_dir=result_dir)
-        trace_data.extend(trace_data_memcpy)
-        trace_data.extend(trace_data_sql)
-        trace_data.extend(trace_data_job)
-        trace_data.extend(trace_data_result)
-        return json.dumps(trace_data)

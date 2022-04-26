@@ -75,6 +75,7 @@ from viewer.runtime_report import get_runtime_api_data
 from viewer.runtime_report import get_task_scheduler_data
 from viewer.stars.acsq_task_viewer import AcsqTaskViewer
 from viewer.stars.ffts_log_viewer import FftsLogViewer
+from viewer.stars.low_power_viewer import LowPowerViewer
 from viewer.stars.stars_chip_trans_view import StarsChipTransView
 from viewer.stars.stars_soc_view import StarsSocView
 from viewer.thread_group_viewer import ThreadGroupViewer
@@ -83,6 +84,7 @@ from viewer.training.core_cpu_reduce_viewer import CoreCpuReduceViewer
 from viewer.training.step_trace_viewer import StepTraceViewer
 from viewer.training.task_op_viewer import TaskOpViewer
 from viewer.ts_cpu_report import TsCpuReport
+from viewer.biu_perf_viewer import BiuPerfViewer
 
 
 class MsProfExportDataUtils:
@@ -781,3 +783,12 @@ class MsProfExportDataUtils:
     @staticmethod
     def _get_thread_group_data(configs: dict, params: dict) -> any:
         return ThreadGroupViewer(configs, params).get_timeline_data()
+
+    @staticmethod
+    def _get_low_power_data(configs: dict, params: dict) -> any:
+        return LowPowerViewer(configs, params).get_timeline_data()
+
+    @staticmethod
+    def _get_biu_perf_timeline(configs: dict, params: dict) -> any:
+        _ = configs
+        return BiuPerfViewer(params.get(StrConstant.PARAM_RESULT_DIR)).get_timeline()

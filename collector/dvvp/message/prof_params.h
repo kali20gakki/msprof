@@ -69,7 +69,7 @@ struct ProfileParams : BaseInfo {
     std::string ts_keypoint;
     std::string ts_memcpy;
     std::string ai_vector_status;
-    std::string ts_fw_training;
+    std::string ts_fw_training;  // unused
     std::string hwts_log;
     std::string hwts_log1;
     std::string stars_acsq_task;
@@ -131,6 +131,9 @@ struct ProfileParams : BaseInfo {
     std::string aiv_profiling_metrics;
     std::string ts_cpu_hot_function;
 
+    std::string biu;
+    int biu_freq;
+
     // for msprof
     std::string acl;
     std::string modelExecution;
@@ -188,7 +191,8 @@ struct ProfileParams : BaseInfo {
           hccsProfiling("off"), hccsInterval(DEFAULT_PROFILING_INTERVAL_20MS),
           pcieInterval(DEFAULT_PROFILING_INTERVAL_20MS),
           dvpp_profiling("off"), dvpp_sampling_interval(DEFAULT_PROFILING_INTERVAL_20MS),
-          modelExecution("off"), runtimeApi("off"), msprof("off"), msproftx("off"),
+          biu_freq(DEFAULT_PROFILING_BIU_FREQ), modelExecution("off"),
+          runtimeApi("off"), msprof("off"), msproftx("off"),
           host_sys(""), host_sys_pid(HOST_PID_DEFAULT),
           host_disk_profiling("off"), host_osrt_profiling("off"),
           host_profiling(FALSE), host_cpu_profiling("off"),
@@ -333,6 +337,9 @@ struct ProfileParams : BaseInfo {
         SET_VALUE(object, msprof_llc_profiling); // for msprof self use, on or off
         SET_VALUE(object, llc_profiling_events);
         SET_VALUE(object, llc_interval);
+        // biu
+        SET_VALUE(object, biu);
+        SET_VALUE(object, biu_freq);
         // ddr
         SET_VALUE(object, ddr_profiling);
         SET_VALUE(object, ddr_profiling_events);
@@ -418,6 +425,7 @@ struct ProfileParams : BaseInfo {
         FROM_STRING_VALUE(object, roceProfiling);
         FROM_INT_VALUE(object, dvpp_sampling_interval, DEFAULT_PROFILING_INTERVAL_10MS);
         FROM_INT_VALUE(object, aicore_sampling_interval, DEFAULT_PROFILING_INTERVAL_10MS);
+        FROM_INT_VALUE(object, biu_freq, DEFAULT_PROFILING_BIU_FREQ);
         FROM_STRING_VALUE(object, ai_core_profiling_metrics);
         FROM_STRING_VALUE(object, aiv_profiling_metrics);
         // host system

@@ -36,7 +36,7 @@ class StepTraceConstant:
 
     ITER_TIME = "iter_time"
     FORWARD_TO_BACK = "fp_bp"
-    GRAD_REFRESH = "grad_refresh"
+    ITERATION_REFRESH = "iteration_refresh"
     DATA_AUGMENTATION = "data_aug"
 
     @staticmethod
