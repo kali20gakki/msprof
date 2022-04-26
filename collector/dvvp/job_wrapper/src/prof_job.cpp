@@ -4,7 +4,6 @@
  * Create: 2019.05.16
  */
 #include "prof_job.h"
-#include "config/config.h"
 #include "config/config_manager.h"
 #include "param_validation.h"
 #include "prof_channel_manager.h"
@@ -455,6 +454,89 @@ int ProfFftsProfileJob::Uninit()
     collectionJobCfg_->jobParams.events.reset();
 
     return PROFILING_SUCCESS;
+}
+
+ProfBiuPerfJob::ProfBiuPerfJob()
+{
+}
+
+ProfBiuPerfJob::~ProfBiuPerfJob()
+{
+}
+
+int ProfBiuPerfJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
+{
+    CHECK_JOB_CONTEXT_PARAM_RET(cfg, PROFILING_FAILED);
+    collectionJobCfg_ = cfg;
+    sampleCycle_ = cfg->comParams->params->biu_freq;
+    if (cfg->comParams->params->host_profiling) {
+        return PROFILING_FAILED;
+    }
+    if (cfg->comParams->params->biu.compare(MSVP_PROF_ON) != 0) {
+        return PROFILING_FAILED;
+    }
+    // currently get all biu group id, group id can be configured in the future.
+    for (uint32_t groupId = 0; groupId < BIU_GROUP_MAX_NUM; ++groupId) {
+        groupIds_.push_back(groupId);
+    }
+    MSPROF_LOGI("biu profile init success, biu groupId: %s.", cfg->comParams->params->biu.c_str());
+    return PROFILING_SUCCESS;
+}
+
+int ProfBiuPerfJob::Process()
+{
+    CHECK_JOB_CONTEXT_PARAM_RET(collectionJobCfg_, PROFILING_FAILED);
+    int32_t ret = PROFILING_SUCCESS;
+    uint32_t devId = collectionJobCfg_->comParams->devId;
+    std::vector<std::string> coreName = {"aic", "aiv0", "aiv1"};
+
+    for (auto groupId : groupIds_) {
+        for (size_t i = 0; i < BIU_GROUP_CHANNEL_NUM; ++i) {
+            auto channelId = groupChannelIdMap_[groupId][i];
+            if (!DrvChannelsMgr::instance()->ChannelIsValid(devId, channelId)) {
+                MSPROF_LOGW("Channel is invalid, devId:%d, channelId:%d", devId, channelId);
+                continue;
+            }
+            MSPROF_LOGI("Begin to start bui profile buffer, devId:%d, channelId:%d", devId, channelId);
+            std::string filePath = collectionJobCfg_->jobParams.dataPath +
+                                ".group_" + std::to_string(groupId) + "_" + coreName[i];
+            AddReader(collectionJobCfg_->comParams->params->job_id, devId, channelId, filePath);
+            ret = DrvBiuProfileStart(devId, channelId, sampleCycle_);
+            MSPROF_LOGI("start biu profile buffer, ret=%d, devId:%d, channelId:%d", ret, devId, channelId);
+            if (ret != PROFILING_SUCCESS) {
+                RemoveReader(collectionJobCfg_->comParams->params->job_id, devId, channelId);
+                MSPROF_LOGE("[ProfBiuPerfJob]Process, DrvBiuProfileStart failed. devId:%d, channelId:%d",
+                            devId, channelId);
+            }
+        }
+    }
+    // return last channel start result
+    return ret;
+}
+
+int ProfBiuPerfJob::Uninit()
+{
+    CHECK_JOB_CONTEXT_PARAM_RET(collectionJobCfg_, PROFILING_FAILED);
+    int32_t ret = PROFILING_SUCCESS;
+    int32_t devId = collectionJobCfg_->comParams->devId;
+
+    for (auto groupId : groupIds_) {
+        for (size_t i = 0; i < BIU_GROUP_CHANNEL_NUM; ++i) {
+            auto channelId = groupChannelIdMap_[groupId][i];
+            if (!DrvChannelsMgr::instance()->ChannelIsValid(devId, channelId)) {
+                MSPROF_LOGW("Channel is invalid, devId:%d, channelId:%d", devId, channelId);
+                continue;
+            }
+            ret = DrvStop(devId, channelId);
+            if (ret != PROFILING_SUCCESS) {
+                MSPROF_LOGE("[ProfBiuPerfJob]DrvStop failed, ret:%d, devId:%d, channelId:%d", ret, devId, channelId);
+            }
+            RemoveReader(collectionJobCfg_->comParams->params->job_id, devId, channelId);
+            collectionJobCfg_->jobParams.events.reset();
+        }
+    }
+    // return last channel stop result
+    return ret;
 }
 
 ProfAivTsTrackJob::ProfAivTsTrackJob() {}

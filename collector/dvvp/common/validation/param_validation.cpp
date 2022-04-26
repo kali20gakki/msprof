@@ -736,6 +736,15 @@ bool ParamValidation::CheckStorageLimit(const std::string &storageLimit)
     }
     return true;
 }
+
+bool ParamValidation::CheckBiuFreqValid(const uint32_t biuFreq)
+{
+    if ((biuFreq < BIU_SAMPLE_FREQ_MIN) || (biuFreq > BIU_SAMPLE_FREQ_MAX)) {
+        MSPROF_LOGE("biu_freq %u is invalid (%u~%u).", biuFreq, BIU_SAMPLE_FREQ_MIN, BIU_SAMPLE_FREQ_MAX);
+        return false;
+    }
+    return true;
+}
 }
 }
 }

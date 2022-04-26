@@ -111,6 +111,10 @@ class ExportCommand:
              'handler': AiStackDataCheckManager.contain_stars_chip_trans_data},
             {'export_type': ExportDataType.THREAD_GROUP,
              'handler': AiStackDataCheckManager.contain_thread_group_data},
+            {'export_type': ExportDataType.LOW_POWER,
+             'handler': AiStackDataCheckManager.contain_stars_low_power_data},
+            {'export_type': ExportDataType.BIU_PERF,
+             'handler': AiStackDataCheckManager.contain_biu_perf_data},
             {'export_type': ExportDataType.MSPROF,
              'handler': lambda result_dir, device_id=None: True}
         ],

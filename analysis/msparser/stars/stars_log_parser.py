@@ -7,11 +7,12 @@ Copyright Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
 import os
 
 from analyzer.scene_base.profiling_scene import ProfilingScene
+from common_func.file_manager import FileOpen
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.path_manager import PathManager
 from common_func.utils import Utils
-from framework.offset_calculator import FileCalculator
+from framework.offset_calculator import FileCalculator, OffsetCalculator
 from model.iter_rec.iter_rec_model import HwtsIterModel
 from mscalculate.interface.icalculator import ICalculator
 from msparser.stars.parser_dispatcher import ParserDispatcher
@@ -32,7 +33,6 @@ class StarsLogCalCulator(ICalculator, MsMultiProcess):
 
     def __init__(self: any, file_list: dict, sample_config: dict) -> None:
         MsMultiProcess.__init__(self, sample_config)
-        self._file_list = file_list
         self._sample_config = sample_config
         self._project_path = sample_config.get(StrConstant.SAMPLE_CONFIG_PROJECT_PATH)
         self._parser_dispatcher = None
@@ -76,10 +76,12 @@ class StarsLogCalCulator(ICalculator, MsMultiProcess):
         self._parser_dispatcher.init()
 
     def _parse_all_file(self):
+        offset_calculator = OffsetCalculator(self._file_list, self.DEFAULT_FMT_SIZE, self._project_path)
         for _file in self._file_list:
             file_name = PathManager.get_data_file_path(self._project_path, _file)
-            with open(file_name, 'rb') as file_reader:
-                self._parse_data(file_reader.read(os.path.getsize(file_name)))
+            with FileOpen(file_name, 'rb') as file_reader:
+                file_data = offset_calculator.pre_process(file_reader, os.path.getsize(file_name))
+                self._parse_data(file_data)
 
     def _parse_by_iter(self):
         with HwtsIterModel(self._project_path) as iter_model:

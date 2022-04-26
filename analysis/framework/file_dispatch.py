@@ -53,6 +53,7 @@ from common_func.file_name_manager import get_ts_track_aiv_compiles
 from common_func.file_name_manager import get_soc_profiler_compiles
 from common_func.file_name_manager import get_ts_track_compiles
 from common_func.file_name_manager import get_helper_model_with_q_compiles
+from common_func.file_name_manager import get_biu_compiles
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.path_manager import PathManager
 from framework.prof_factory_maker import ProfFactoryMaker
@@ -106,6 +107,7 @@ class FileDispatch:
         DataTag.TS_TRACK_AIV: get_ts_track_aiv_compiles(),
         DataTag.HWTS_AIV: get_hwts_vector_compiles(),
         DataTag.HCCL: get_hccl_hcom_compiles(),
+        DataTag.BIU_PERF: get_biu_compiles(),
         DataTag.MSPROFTX: get_msproftx_compiles(),
         DataTag.HELPER_MODEL_WITH_Q: get_helper_model_with_q_compiles(),
         DataTag.SOC_PROFILER: get_soc_profiler_compiles()

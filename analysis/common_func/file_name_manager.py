@@ -191,6 +191,9 @@ class FileNameManagerConstant:
     # helper
     MODEL_WITH_Q_FILE_PATTERN = r"^DATA_PREPROCESS\.AICPU_MODEL\.(\d+)\.slice_\d+"
 
+    # biu perf
+    BIU_PERF_FILE_PATTERN = r"^biu\.group_\d+_(aic|aiv0|aiv1).\d+.slice_\d+"
+
     def get_file_name_manager_class_name(self: any) -> any:
         """
         get file name manager class name
@@ -295,7 +298,8 @@ def get_ai_core_compiles() -> tuple:
     """
     return re.compile(FileNameManagerConstant.AI_CORE_FILE_PATTERN), re.compile(
         FileNameManagerConstant.AI_CORE_INFER_FILE_PATTERN), re.compile(
-        FileNameManagerConstant.AI_CORE_TRAINING_FILE_PATTERN)
+        FileNameManagerConstant.AI_CORE_TRAINING_FILE_PATTERN), re.compile(
+        FileNameManagerConstant.FFTS_PMU_FILE_PATTERN)
 
 
 def get_aiv_compiles() -> tuple:
@@ -704,3 +708,12 @@ def get_helper_model_with_q_compiles() -> tuple:
     :return: helper model_with_q files regex
     """
     return (re.compile(FileNameManagerConstant.MODEL_WITH_Q_FILE_PATTERN),)
+
+
+def get_biu_compiles() -> tuple:
+    """
+    get biu perf files regex compiles
+    :return: helper biu perf files regex
+    """
+    return (re.compile(FileNameManagerConstant.BIU_PERF_FILE_PATTERN),)
+

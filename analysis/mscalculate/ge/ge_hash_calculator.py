@@ -27,7 +27,7 @@ class GeHashCalculator(ICalculator, MsMultiProcess):
         self._file_list = file_list
         self._project_path = sample_config.get(StrConstant.SAMPLE_CONFIG_PROJECT_PATH)
         self._ge_model = GeModel(self._project_path, [DBNameConstant.TABLE_GE_TASK])
-        self._ge_data = MsvpConstant.MSVP_EMPTY_DATA
+        self._ge_data = MsvpConstant.EMPTY_LIST
 
     def get_ge_task_data(self: any) -> None:
         """

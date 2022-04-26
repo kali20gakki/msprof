@@ -72,7 +72,7 @@ class TimeLineJsonMaker:
         trace_parm[StepTraceConstant.STEP_END] = data[3]
         trace_parm[StepTraceConstant.ITER_TIME] = data[4]
         trace_parm[StepTraceConstant.FORWARD_TO_BACK] = data[5]
-        trace_parm[StepTraceConstant.GRAD_REFRESH] = data[6]
+        trace_parm[StepTraceConstant.ITERATION_REFRESH] = data[6]
         trace_parm[StepTraceConstant.DATA_AUGMENTATION] = data[7] if is_number(data[7]) else 0
 
     @staticmethod
@@ -127,17 +127,17 @@ class TimeLineJsonMaker:
         :param index: index
         :return: list
         """
-        return ["Grad_refresh Bound {}".format(trace_parm[StepTraceConstant.ITER_ID]),
+        return ["Iteration Refresh {}".format(trace_parm[StepTraceConstant.ITER_ID]),
                 pid, 1 + 3 * int(index),
                 trace_parm[StepTraceConstant.BACK_PROPAGATION],
                 (trace_parm[StepTraceConstant.STEP_END] - trace_parm[StepTraceConstant.BACK_PROPAGATION]),
                 OrderedDict([("Iteration ID", trace_parm[StepTraceConstant.ITER_ID]),
                              ("BP End", trace_parm[StepTraceConstant.BACK_PROPAGATION]),
                              ("Iteration End", trace_parm[StepTraceConstant.STEP_END]),
-                             ("Grad_refresh Bound(ns)",
-                              round(trace_parm.get(StepTraceConstant.GRAD_REFRESH) * NumberConstant.NS_TO_US,
+                             ("Iteration Refresh(ns)",
+                              round(trace_parm.get(StepTraceConstant.ITERATION_REFRESH) * NumberConstant.NS_TO_US,
                                     NumberConstant.ROUND_TWO_DECIMAL))]),
-                "Grad_refresh Bound"]
+                "Iteration Refresh"]
 
     @staticmethod
     def make_data_aug_dict0(trace_parm: dict, pid: int) -> dict:

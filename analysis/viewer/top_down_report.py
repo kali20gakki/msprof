@@ -18,10 +18,12 @@ from common_func.get_export_data_config import GetExportDataConfigs
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
+from common_func.path_manager import PathManager
 from common_func.platform.chip_manager import ChipManager
 from common_func.trace_view_header_constant import TraceViewHeaderConstant
 from common_func.trace_view_manager import TraceViewManager
 from common_func.utils import Utils
+from viewer.training.core_cpu_reduce_viewer import CoreCpuReduceViewer
 
 
 class TopDownData:
@@ -56,6 +58,89 @@ class TopDownData:
     GE_TID = 1
     RUNTIME_TID = 2
     TASK_TID = 3
+
+    @staticmethod
+    def _dispatch_top_down_datas(top_down_datas: list) -> dict:
+        dispatch_result = OrderedDict(
+            [(TopDownData.MODULE_ACL, []), (TopDownData.MODULE_GE, []), (TopDownData.MODULE_RUNTIME, []),
+             (TopDownData.MODULE_TASK_SCHEDULER, [])])
+        for top_down_data in top_down_datas:
+            dispatch_result[top_down_data[1]].append(top_down_data)
+        return dispatch_result
+
+    @staticmethod
+    def _check_sql_file(conn: any, curs: any, table_name: str) -> bool:
+        if not conn or not curs:
+            return False
+        if not DBManager.judge_table_exist(curs, table_name):
+            return False
+        return True
+
+    @classmethod
+    def get_max_iter_id(cls: any, project_path: str) -> int:
+        """
+        get iteration count
+        """
+        if not Utils.is_step_scene(project_path):
+            return NumberConstant.INVALID_ITER_ID
+        if ChipManager().is_chip_v1():
+            db_name, table_name = (DBNameConstant.DB_RUNTIME, DBNameConstant.TABLE_RUNTIME_TASK_TIME)
+        else:
+            db_name, table_name = (DBNameConstant.DB_HWTS, DBNameConstant.TABLE_HWTS_TASK_TIME)
+        conn, cur = DBManager.check_connect_db(project_path, db_name)
+        if not cls._check_sql_file(conn, cur, table_name):
+            return NumberConstant.INVALID_ITER_ID
+        try:
+            max_iter_id = cur.execute(
+                "select max({0}) from {1} "
+                    .format(cls.COLUMN_RUNTIME_ITER_ID, table_name), ).fetchone()
+        except sqlite3.Error as err:
+            logging.error(err, exc_info=Constant.TRACE_BACK_SWITCH)
+            return NumberConstant.INVALID_ITER_ID
+        else:
+            if max_iter_id and max_iter_id[0]:
+                return int(max_iter_id[0])
+            return NumberConstant.INVALID_ITER_ID
+        finally:
+            DBManager.destroy_db_connect(conn, cur)
+
+    @classmethod
+    def get_top_down_data(cls: any, project_path: str, device_id: str, iter_id: int) -> tuple:
+        """
+        query and get top down data
+        """
+        logging.info("start to get top down data.")
+        headers = GetExportDataConfigs.get_data_headers(StrConstant.TOP_DOWN)
+        top_down_data = cls._get_top_down_data_one_iter(project_path, device_id, iter_id)
+        logging.info("get top down data finish.")
+        return headers, top_down_data, len(top_down_data)
+
+    @classmethod
+    def get_top_down_timeline_data(cls: any, project_path: str, device_id: str, iter_id: int) -> str:
+        """
+        export top down tracing data
+        """
+        result_data = []
+        logging.info("Start to get top down tracing data.")
+        meta_data = [["process_name", InfoConfReader().get_json_pid_data(),
+                      InfoConfReader().get_json_tid_data(), TraceViewHeaderConstant.PROCESS_AI_STACK_TIME],
+                     ["thread_name", InfoConfReader().get_json_pid_data(),
+                      cls.ACL_TID, TraceViewHeaderConstant.PROCESS_ACL],
+                     ["thread_name", InfoConfReader().get_json_pid_data(),
+                      cls.GE_TID, TraceViewHeaderConstant.PROCESS_GE],
+                     ["thread_name", InfoConfReader().get_json_pid_data(),
+                      cls.RUNTIME_TID, TraceViewHeaderConstant.PROCESS_RUNTIME],
+                     ["thread_name", InfoConfReader().get_json_pid_data(),
+                      cls.TASK_TID, TraceViewHeaderConstant.PROCESS_TASK]]
+        result_data.extend(TraceViewManager.metadata_event(meta_data))
+        try:
+            cls._export_top_down_data_by_iter(project_path, device_id, result_data, iter_id)
+        except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
+            logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
+            return ""
+        if result_data:
+            return json.dumps(result_data)
+        return ""
 
     @classmethod
     def _get_acl_data(cls: any, project_path: str, device_id: str, iter_id: int, db_name: str) -> list:
@@ -166,42 +251,6 @@ class TopDownData:
         return []
 
     @classmethod
-    def get_max_iter_id(cls: any, project_path: str) -> int:
-        """
-        get iteration count
-        """
-        if not Utils.is_step_scene(project_path):
-            return NumberConstant.INVALID_ITER_ID
-        if ChipManager().is_chip_v1():
-            db_name, table_name = (DBNameConstant.DB_RUNTIME, DBNameConstant.TABLE_RUNTIME_TASK_TIME)
-        else:
-            db_name, table_name = (DBNameConstant.DB_HWTS, DBNameConstant.TABLE_HWTS_TASK_TIME)
-        conn, cur = DBManager.check_connect_db(project_path, db_name)
-        if not cls._check_sql_file(conn, cur, table_name):
-            return NumberConstant.INVALID_ITER_ID
-        try:
-            max_iter_id = cur.execute(
-                "select max({0}) from {1} "
-                    .format(cls.COLUMN_RUNTIME_ITER_ID, table_name), ).fetchone()
-        except sqlite3.Error as err:
-            logging.error(err, exc_info=Constant.TRACE_BACK_SWITCH)
-            return NumberConstant.INVALID_ITER_ID
-        else:
-            if max_iter_id and max_iter_id[0]:
-                return int(max_iter_id[0])
-            return NumberConstant.INVALID_ITER_ID
-        finally:
-            DBManager.destroy_db_connect(conn, cur)
-
-    @staticmethod
-    def _check_sql_file(conn: any, curs: any, table_name: str) -> bool:
-        if not conn or not curs:
-            return False
-        if not DBManager.judge_table_exist(curs, table_name):
-            return False
-        return True
-
-    @classmethod
     def _get_top_down_data_one_iter(cls: any, project_path: str, device_id: str, iter_id: int = 1) -> list:
         acl_data = cls._get_acl_data(project_path, device_id, iter_id, DBNameConstant.DB_ACL_MODULE)
         ge_data = cls._get_ge_data(project_path, iter_id, DBNameConstant.DB_GE_MODEL_TIME)
@@ -213,6 +262,8 @@ class TopDownData:
 
     @classmethod
     def _format_data(cls: any, top_down_datas: list) -> list:
+        # top_down_datas: iter_id, type, op_name, start_time, duration_time, (total_time), pid, tid
+        # total_time exist when type is Task Scheduler
         trace_data = []
         for top_down_data in top_down_datas:
             trace_data_args = OrderedDict([("Iter ID", top_down_data[0]),
@@ -241,15 +292,6 @@ class TopDownData:
         cls._fill_runtime_trace_data(project_path, device_id, result_data,
                                      dispatch_result.get(cls.MODULE_RUNTIME))
         cls._fill_ts_trace_data(project_path, result_data, dispatch_result.get(cls.MODULE_TASK_SCHEDULER))
-
-    @staticmethod
-    def _dispatch_top_down_datas(top_down_datas: list) -> dict:
-        dispatch_result = OrderedDict(
-            [(TopDownData.MODULE_ACL, []), (TopDownData.MODULE_GE, []), (TopDownData.MODULE_RUNTIME, []),
-             (TopDownData.MODULE_TASK_SCHEDULER, [])])
-        for top_down_data in top_down_datas:
-            dispatch_result[top_down_data[1]].append(top_down_data)
-        return dispatch_result
 
     @classmethod
     def _reformat_acl_trace_data(cls: any, acl_data: list, acl_iter_data: any) -> list:
@@ -338,11 +380,13 @@ class TopDownData:
     @classmethod
     def _reformat_ts_trace_data(cls: any, top_down_datas: list, op_names: dict, total_time: dict,
                                 ts_trace: any) -> list:
-        stream_task_key = "_".join(map(str, ts_trace[-3:]))
+        # top_down_datas: iter_id, type
+        # ts_trace: start_time, duration_time, stream_id, task_id, task_type, batch_id
+        stream_task_key = "_".join(map(str, ts_trace[-4:]))
         res = []
         res.extend(top_down_datas[0][:2])
         res.append(op_names.get(stream_task_key, Constant.NA))
-        res.extend(ts_trace[:-3])
+        res.extend(ts_trace[:2])  # start_time, duration_time,
         res.append(total_time.get(stream_task_key, ""))
         res.extend((InfoConfReader().get_json_pid_data(), cls.TASK_TID))
         return res
@@ -354,13 +398,12 @@ class TopDownData:
             if not DBManager.judge_table_exist(cur, cls.OP_SUMMARY_METRICS):
                 return
 
-            acl_query_sql = "select start_time,duration_time,stream_id,task_id from {0} " \
+            acl_query_sql = "select start_time,duration_time,stream_id,task_id,task_type,batch_id from {0} " \
                             "order by start_time".format(cls.OP_SUMMARY_TASK_TIME_TABLE)
             ts_traces = DBManager.fetch_all_data(cur, acl_query_sql)
-            ts_traces = OpCommonFunc.deal_batch_id(stream_index=-2, task_index=-1, merge_data=ts_traces)
             if ts_traces:
-                op_names = cls._get_op_name(project_path)
-                total_time = cls._get_total_time(project_path)
+                op_names, _ = CoreCpuReduceViewer.get_op_names_and_task_type(PathManager.get_sql_dir(project_path))
+                _, total_time = CoreCpuReduceViewer.get_total_cycle(PathManager.get_sql_dir(project_path))
                 ts_trace_data = Utils.generator_to_list(
                     cls._reformat_ts_trace_data(top_down_datas, op_names, total_time, ts_trace)
                     for ts_trace in ts_traces)
@@ -370,53 +413,6 @@ class TopDownData:
         DBManager.destroy_db_connect(conn, cur)
 
     @classmethod
-    def _get_op_name(cls: any, project_path: str) -> dict:
-        op_names_dict = {}
-
-        conn, cur = DBManager.check_connect_db(project_path, DBNameConstant.DB_GE_INFO)
-        if not (conn and cur) or not DBManager.judge_table_exist(cur, DBNameConstant.TABLE_GE_TASK):
-            return op_names_dict
-        sql_to_get_opname = "select stream_id,task_id,op_name from {} " \
-                            "order by timestamp".format(DBNameConstant.TABLE_GE_TASK)
-        op_names = DBManager.fetch_all_data(cur, sql_to_get_opname)
-        op_names = OpCommonFunc.deal_batch_id(stream_index=0, task_index=1, merge_data=op_names)
-        for op_name in op_names:
-            op_names_dict.setdefault("_".join([str(op_name[0]), str(op_name[1]), str(op_name[-1])]), op_name[2])
-        DBManager.destroy_db_connect(conn, cur)
-        return op_names_dict
-
-    @staticmethod
-    def _get_total_time(project_path: str) -> dict:
-        """
-        get total_cycle value
-        """
-        total_time_data = {}
-        conn_ge, cur_ge = DBManager.check_connect_db(project_path, DBNameConstant.DB_RUNTIME)
-        if not DBManager.judge_table_exist(cur_ge, DBNameConstant.TABLE_METRICS_SUMMARY):
-            return total_time_data
-        if not os.path.exists(os.path.join(project_path, DBNameConstant.DB_GE_INFO)):
-            return total_time_data
-        sql = "SELECT stream_id, task_id, total_time FROM {} ".format(DBNameConstant.TABLE_METRICS_SUMMARY)
-        total_time = DBManager.fetch_all_data(cur_ge, sql)
-        total_time = OpCommonFunc.deal_batch_id(stream_index=0, task_index=1, merge_data=total_time)
-        for each_time in total_time:
-            total_data_key = "_".join([str(each_time[0]), str(each_time[1]), str(each_time[-1])])
-            total_time_data[total_data_key] = each_time[2]
-        DBManager.destroy_db_connect(conn_ge, cur_ge)
-        return total_time_data
-
-    @classmethod
-    def get_top_down_data(cls: any, project_path: str, device_id: str, iter_id: int) -> tuple:
-        """
-        query and get top down data
-        """
-        logging.info("start to get top down data.")
-        headers = GetExportDataConfigs.get_data_headers(StrConstant.TOP_DOWN)
-        top_down_data = cls._get_top_down_data_one_iter(project_path, device_id, iter_id)
-        logging.info("get top down data finish.")
-        return headers, top_down_data, len(top_down_data)
-
-    @classmethod
     def _export_top_down_data_by_iter(cls: any, project_path: str, device_id: str,
                                       result_data: list, iter_id: int) -> None:
         top_down_datas = cls._get_top_down_data_one_iter(
@@ -424,30 +420,3 @@ class TopDownData:
         if top_down_datas:
             cls._fill_top_down_trace_data(
                 project_path, device_id, result_data, top_down_datas)
-
-    @classmethod
-    def get_top_down_timeline_data(cls: any, project_path: str, device_id: str, iter_id: int) -> str:
-        """
-        export top down tracing data
-        """
-        result_data = []
-        logging.info("Start to get top down tracing data.")
-        meta_data = [["process_name", InfoConfReader().get_json_pid_data(),
-                      InfoConfReader().get_json_tid_data(), TraceViewHeaderConstant.PROCESS_AI_STACK_TIME],
-                     ["thread_name", InfoConfReader().get_json_pid_data(),
-                      cls.ACL_TID, TraceViewHeaderConstant.PROCESS_ACL],
-                     ["thread_name", InfoConfReader().get_json_pid_data(),
-                      cls.GE_TID, TraceViewHeaderConstant.PROCESS_GE],
-                     ["thread_name", InfoConfReader().get_json_pid_data(),
-                      cls.RUNTIME_TID, TraceViewHeaderConstant.PROCESS_RUNTIME],
-                     ["thread_name", InfoConfReader().get_json_pid_data(),
-                      cls.TASK_TID, TraceViewHeaderConstant.PROCESS_TASK]]
-        result_data.extend(TraceViewManager.metadata_event(meta_data))
-        try:
-            cls._export_top_down_data_by_iter(project_path, device_id, result_data, iter_id)
-        except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
-            logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
-            return ""
-        if result_data:
-            return json.dumps(result_data)
-        return ""

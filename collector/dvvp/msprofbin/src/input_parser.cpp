@@ -101,23 +101,25 @@ int InputParser::PreCheckPlatform(int opt, CONST_CHAR_PTR argv[])
 {
     std::vector<MsprofArgsType> miniBlackSwith = {ARGS_INTERCONNECTION_PROFILING, ARGS_INTERCONNECTION_FREQ,
         ARGS_L2_PROFILING, ARGS_AIV, ARGS_AIV_FREQ, ARGS_AIV_MODE, ARGS_AIV_METRICS, ARGS_LOW_POWER,
-        ARGS_STARS_ACSQ_TASK, ARGS_STARS_SUB_TASK, ARGS_FFTS_THREAD_TASK, ARGS_FFTS_BLOCK, ARGS_ACC_PMU_MODE};
+        ARGS_STARS_ACSQ_TASK, ARGS_STARS_SUB_TASK, ARGS_FFTS_THREAD_TASK, ARGS_FFTS_BLOCK, ARGS_ACC_PMU_MODE,
+        ARGS_BIU, ARGS_BIU_FREQ};
     std::vector<MsprofArgsType> cloudBlackSwith = {ARGS_AIV, ARGS_AIV_FREQ, ARGS_AIV_MODE, ARGS_AIV_METRICS,
         ARGS_STARS_ACSQ_TASK, ARGS_STARS_SUB_TASK, ARGS_FFTS_THREAD_TASK, ARGS_FFTS_BLOCK, ARGS_ACC_PMU_MODE,
-        ARGS_LOW_POWER};
+        ARGS_LOW_POWER, ARGS_BIU, ARGS_BIU_FREQ};
     std::vector<MsprofArgsType> mdcBlackSwith = {ARGS_IO_PROFILING, ARGS_IO_SAMPLING_FREQ, ARGS_INTERCONNECTION_FREQ,
         ARGS_INTERCONNECTION_PROFILING, ARGS_AICPU, ARGS_STARS_ACSQ_TASK, ARGS_STARS_SUB_TASK, ARGS_FFTS_THREAD_TASK,
         ARGS_FFTS_BLOCK, ARGS_ACC_PMU_MODE, ARGS_LOW_POWER, ARGS_PYTHON_PATH, ARGS_SUMMARY_FORMAT, ARGS_PARSE,
-        ARGS_QUERY, ARGS_EXPORT, ARGS_EXPORT_ITERATION_ID, ARGS_EXPORT_MODEL_ID};
+        ARGS_QUERY, ARGS_EXPORT, ARGS_EXPORT_ITERATION_ID, ARGS_EXPORT_MODEL_ID, ARGS_BIU, ARGS_BIU_FREQ};
     std::vector<MsprofArgsType> dcBlackSwith = {ARGS_AIV, ARGS_AIV_FREQ, ARGS_AIV_MODE, ARGS_AIV_METRICS,
         ARGS_IO_PROFILING, ARGS_IO_SAMPLING_FREQ, ARGS_STARS_ACSQ_TASK, ARGS_STARS_SUB_TASK, ARGS_FFTS_THREAD_TASK,
-        ARGS_FFTS_BLOCK, ARGS_ACC_PMU_MODE, ARGS_LOW_POWER};
+        ARGS_FFTS_BLOCK, ARGS_ACC_PMU_MODE, ARGS_LOW_POWER, ARGS_BIU, ARGS_BIU_FREQ};
     std::vector<MsprofArgsType> lhisiBlackSwith = {ARGS_AIV, ARGS_AIV_FREQ, ARGS_AIV_MODE, ARGS_AIV_METRICS,
         ARGS_IO_PROFILING, ARGS_IO_SAMPLING_FREQ, ARGS_INTERCONNECTION_FREQ, ARGS_INTERCONNECTION_PROFILING, ARGS_AICPU,
         ARGS_HARDWARE_MEM, ARGS_HARDWARE_MEM_SAMPLING_FREQ, ARGS_L2_PROFILING, ARGS_DVPP_PROFILING, ARGS_DVPP_FREQ,
         ARGS_CPU_SAMPLING_FREQ, ARGS_CPU_PROFILING, ARGS_LLC_PROFILING, ARGS_STARS_ACSQ_TASK, ARGS_STARS_SUB_TASK,
         ARGS_FFTS_THREAD_TASK, ARGS_FFTS_BLOCK, ARGS_ACC_PMU_MODE, ARGS_LOW_POWER, ARGS_PYTHON_PATH,
-        ARGS_SUMMARY_FORMAT, ARGS_PARSE, ARGS_QUERY, ARGS_EXPORT, ARGS_EXPORT_ITERATION_ID, ARGS_EXPORT_MODEL_ID};
+        ARGS_SUMMARY_FORMAT, ARGS_PARSE, ARGS_QUERY, ARGS_EXPORT, ARGS_EXPORT_ITERATION_ID, ARGS_EXPORT_MODEL_ID,
+        ARGS_BIU, ARGS_BIU_FREQ};
     std::vector<MsprofArgsType> cloudBlackSwithV2 = {};
 
     std::map<Analysis::Dvvp::Common::Config::PlatformType, std::vector<MsprofArgsType>> platformArgsType = {
@@ -845,6 +847,7 @@ void InputParser::ParamsSwitchValid(const struct MsprofCmdInfo &cmdInfo, int opt
     if (opt >= NR_ARGS) {
         return;
     }
+
     switch (opt) {
         case ARGS_ASCENDCL:
             params_->acl = cmdInfo.args[opt];
@@ -942,6 +945,18 @@ void InputParser::ParamsSwitchValid2(const struct MsprofCmdInfo &cmdInfo, int op
             params_->msproftx = cmdInfo.args[opt];
             break;
         default:
+            ParamsSwitchValid3(cmdInfo, opt);
+            break;
+    }
+}
+
+void InputParser::ParamsSwitchValid3(const struct MsprofCmdInfo &cmdInfo, int opt)
+{
+    switch (opt) {
+        case ARGS_BIU:
+            params_->biu = cmdInfo.args[opt];
+            break;
+        default:
             break;
     }
 }
@@ -1018,6 +1033,10 @@ int InputParser::MsprofFreqCheckValid(const struct MsprofCmdInfo &cmdInfo, int o
             // 10 - 1000
             ret = CheckArgRange(cmdInfo, opt, 1, 100); // 10 : min length, 100 : max length
             break;
+        case ARGS_BIU_FREQ:
+            // 300 - 30000
+            ret = CheckArgRange(cmdInfo, opt, BIU_SAMPLE_FREQ_MIN, BIU_SAMPLE_FREQ_MAX);
+            break;
         case ARGS_EXPORT_ITERATION_ID:
         case ARGS_EXPORT_MODEL_ID:
             ret = CheckArgsIsNumber(cmdInfo, opt);
@@ -1039,6 +1058,9 @@ void InputParser::MsprofFreqUpdateParams(const struct MsprofCmdInfo &cmdInfo, in
             break;
         case ARGS_AIV_FREQ:
             params_->aiv_sampling_interval = (THOUSAND / std::stoi(cmdInfo.args[opt]));
+            break;
+        case ARGS_BIU_FREQ:
+            params_->biu_freq = std::stoi(cmdInfo.args[opt]);
             break;
         case ARGS_SYS_PERIOD:
             params_->profiling_period = std::stoi(cmdInfo.args[opt]);
@@ -1191,6 +1213,9 @@ ArgsManager::ArgsManager()
     {"sys-devices", "Specify the profiling scope by device ID when collect sys profiling."
                      "The value is all or ID list (split with ',')."},
     {"hccl", "Show hccl profiling data, the default value is off.", OFF},
+    {"biu", "Show biu profiling data, the default value is off.", OFF},
+    {"biu-freq", "The biu sampling period in clock-cycle, "
+                "the default value is 1000 cycle, the range is 300 to 30000 cycle.", "1000"},
     {"msproftx", "Show msproftx data, the default value is off.", OFF}
     };
     AddAnalysisArgs();

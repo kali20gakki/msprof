@@ -256,8 +256,7 @@ class AiStackDataCheckManager(DataCheckManager):
         :param device_id: device id
         :return: if contained training trace data or step trace data, true or false
         """
-        return cls.contain_ge_step_info_data(result_dir) or \
-               cls.contain_training_trace_data(result_dir, device_id=device_id)
+        return cls.contain_training_trace_data(result_dir, device_id=device_id)
 
     @classmethod
     def contain_msproftx_data(cls: any, result_dir: str, device_id: int = None) -> bool:
@@ -306,3 +305,26 @@ class AiStackDataCheckManager(DataCheckManager):
                cls.contain_ge_model_time_data(result_dir, device_id=device_id) or \
                cls.contain_ge_op_execute_data(result_dir, device_id=device_id) or \
                cls.contain_runtime_api_data(result_dir, device_id=device_id)
+
+    @classmethod
+    def contain_stars_low_power_data(cls: any, result_dir: str, device_id: int = None) -> bool:
+        """
+        The data path contain lowpower sample data
+        :param result_dir: data dir path
+        :param device_id: device id
+        :return: if contained lowpower sample data, true or false
+        """
+        return cls.check_data_exist(result_dir, file_name_manager.get_soc_profiler_compiles(),
+                                    device_id=device_id) \
+               and path_check(PathManager.get_db_path(result_dir, DBNameConstant.DB_LOW_POWER))
+
+    @classmethod
+    def contain_biu_perf_data(cls: any, result_dir: str, device_id: int = None) -> bool:
+        """
+        The data path contain biu perf data
+        :param result_dir: data dir path
+        :param device_id: device id
+        :return: if contained biu data, true or false
+        """
+        return cls.check_data_exist(result_dir, file_name_manager.get_biu_compiles(),
+                                    device_id=device_id)

@@ -85,6 +85,7 @@ class StrConstant:
     AI_CORE_PMU_EVENTS = "ai_core_pmu_events"
     AI_VECTOR_CORE_PMU_EVENTS = "ai_vector_core_pmu_events"
     AI_CORE_PROFILING_METRICS = "ai_core_metrics"
+    AI_VECTOR_CORE_PROFILING_METRICS = "aiv_metrics"
     AIV_PROFILING_METRICS = "aiv_metrics"
     LLC_PROFILING_READ_EVENT = "read"
     LLC_PROFILING_WRITE_EVENT = "write"

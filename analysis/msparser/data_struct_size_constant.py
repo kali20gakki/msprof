@@ -45,6 +45,7 @@ class StructFmt:
     API_CALL_FMT = "QQLLLLLL"
     TIME_LINE_FMT = "BBHLHHHHQLL"
     TS_MEMCPY_FMT = "BBHLQHHBBHQQ"
+    TS_TASK_TYPE_FMT = "BBHLQHHHBBQQ"
     EVENT_COUNT_FMT = "BBHLHHHHQ8QQQH3H"
     HWTS_LOG_FMT = 'BBHHHQ12I'
     AIC_PMU_FMT = 'BBHHHII10Q8I'
@@ -62,6 +63,7 @@ class StructFmt:
     LPE_FMT = "HHLQQLL8L"
     STARS_FMT = "HHLQ12L"
     CHIP_TRANS_FMT = "2HLQ2H3L2Q4L"
+    LOWPOWER_FMT = "HHLQ12L"
 
     # other fmt
     STARS_HEADER_FMT = "=HH"
@@ -100,6 +102,9 @@ class StructFmt:
     HELPER_MODEL_WITH_Q_FMT = "HHIQQIHHQ24B"
     HELPER_MODEL_WITH_Q_FMT_SIZE = struct.calcsize(BYTE_ORDER_CHAR + HELPER_MODEL_WITH_Q_FMT)
 
+    # biu perf
+    MONITOR0_FMT = "HHTTTTTTQH"
+    MONITOR1_FMT = "ttttttttttH"
 
     @staticmethod
     def class_name() -> str:

@@ -54,6 +54,8 @@ class DBNameConstant(metaclass=ABCMeta):
     DB_SOC_LOG = "soc_log.db"
     DB_STARS_SOC = "soc_profiler.db"
     DB_STARS_CHIP_TRANS = "chip_trans.db"
+    DB_LOW_POWER = "lowpower.db"
+    DB_BIU_PERF = "biu_perf.db"
 
     # DB tables
     TABLE_ACL_DATA = "acl_data"
@@ -99,6 +101,7 @@ class DBNameConstant(metaclass=ABCMeta):
     TABLE_STEP_TRACE = "StepTrace"
     TABLE_TS_MEMCPY = "TsMemcpy"
     TABLE_MODEL_WITH_Q = "ModelWithQ"
+    TABLE_TASK_TYPE = "TaskType"
     TABLE_STEP_TRACE_DATA = "step_trace_data"
     # cpu usage
     TABLE_HOST_CPU_INFO = "CpuInfo"
@@ -179,6 +182,7 @@ class DBNameConstant(metaclass=ABCMeta):
     TABLE_FFTS_LOG = "FftsLog"
     TABLE_STARS_PA_LINK = "PaLinkInfo"
     TABLE_STARS_PCIE = "PcieInfo"
+    TABLE_LOWPOWER = "LowPower"
 
     # ge
     TABLE_GE_TASK = "TaskInfo"
@@ -193,6 +197,12 @@ class DBNameConstant(metaclass=ABCMeta):
 
     # ge model time
     TABLE_GE_MODEL_TIME = "GeModelTime"
+
+    # biu perf
+    TABLE_MONITOR0 = "Monitor0"
+    TABLE_MONITOR1 = "Monitor1"
+    TABLE_BIU_FLOW = "BiuFlow"
+    TABLE_BIU_CYCLES = "BiuCycles"
 
     @abstractmethod
     def get_db_name(self: any) -> str:

@@ -127,12 +127,11 @@ class TaskOpViewer:
             task_start = "".join(["\"", str(task_datum[2]), "\""])
             task_end = "".join(["\"", str(task_datum[3]), "\""])
             name_type = ge_data_dict.get("{}-{}-{}".format(task_datum[0], task_datum[1],
-                                                           task_datum[4]))
-            if not name_type:
+                                                           task_datum[4]), (Constant.NA, Constant.NA))
+            if name_type == (Constant.NA, Constant.NA):
                 logging.warning(
                     "Can not find name and type for stream %d, "
                     "task %d", task_datum[0], task_datum[1])
-                continue
             task_info.append((name_type[0],  # op name
                               name_type[1],  # task type
                               task_datum[0],  # stream id

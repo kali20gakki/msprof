@@ -67,6 +67,57 @@ class MergeOPCounter:
                 total_time[model] += ops.get("duration", 0)
         return total_time
 
+    def create_db(self: any, map_path: str) -> tuple:
+        """
+        analysis and create db for op statics
+        :param map_path: table config file path
+        :return: connection of op statics
+        """
+        merge_conn, merge_curs = DBManager.create_connect_db(
+            os.path.join(self.sql_path, DBNameConstant.DB_OP_COUNTER))
+        if not merge_conn or not merge_curs:
+            logging.error("unable to create op counter db connection")
+            raise ProfException(ProfException.PROF_SYSTEM_EXIT)
+        ge_create_sql = DBManager.sql_create_general_table("GeMergeMap", DBNameConstant.TABLE_OP_COUNTER_GE_MERGE,
+                                                           map_path)
+        DBManager.execute_sql(merge_conn, ge_create_sql)
+
+        rts_task_create_sql = DBManager.sql_create_general_table("RtsTaskMap",
+                                                                 DBNameConstant.TABLE_OP_COUNTER_RTS_TASK,
+                                                                 map_path)
+        DBManager.execute_sql(merge_conn, rts_task_create_sql)
+
+        op_report_create_sql = DBManager.sql_create_general_table("OpReportMap",
+                                                                  DBNameConstant.TABLE_OP_COUNTER_OP_REPORT,
+                                                                  map_path)
+        DBManager.execute_sql(merge_conn, op_report_create_sql)
+        return merge_conn, merge_curs
+
+    def create_and_insert_db(self: any) -> None:
+        if not self._is_db_need_to_create():
+            logging.warning("No need to create db for op counter, "
+                            "maybe the data of framework or task is not collected.")
+            return
+        map_path = \
+            self.TABLE_PATH if ProfilingScene().is_step_trace() else self.TRAIN_TABLE_PATH
+        merge_conn, merge_curs = self.create_db(map_path)
+        self._create_ge_merge(merge_conn)
+        self._create_task(merge_conn)
+        self._create_report(merge_conn)
+        DBManager.destroy_db_connect(merge_conn, merge_curs)
+
+    def run(self: any) -> None:
+        """
+        merge process
+        :return: None
+        """
+        try:
+            self._init_params()
+        except (OSError, SystemError, ValueError, TypeError, RuntimeError, ProfException) as err:
+            logging.error(err, exc_info=Constant.TRACE_BACK_SWITCH)
+            return
+        self.create_and_insert_db()
+
     def _is_db_need_to_create(self: any) -> bool:
         ge_db_path = PathManager.get_db_path(self.project_path, DBNameConstant.DB_GE_INFO)
         if DBManager.check_tables_in_db(ge_db_path, DBNameConstant.TABLE_GE_TASK):
@@ -190,54 +241,3 @@ class MergeOPCounter:
             sql = 'insert into {} values({})'.format(CommonConstant.OP_REPORT_TABLE,
                                                      '?,' * (len(sorted_total_data[0]) - 1) + '?')
             DBManager.executemany_sql(merge_conn, sql, sorted_total_data)
-
-    def create_db(self: any, map_path: str) -> tuple:
-        """
-        analysis and create db for op statics
-        :param map_path: table config file path
-        :return: connection of op statics
-        """
-        merge_conn, merge_curs = DBManager.create_connect_db(
-            os.path.join(self.sql_path, DBNameConstant.DB_OP_COUNTER))
-        if not merge_conn or not merge_curs:
-            logging.error("unable to create op counter db connection")
-            raise ProfException(ProfException.PROF_SYSTEM_EXIT)
-        ge_create_sql = DBManager.sql_create_general_table("GeMergeMap", DBNameConstant.TABLE_OP_COUNTER_GE_MERGE,
-                                                           map_path)
-        DBManager.execute_sql(merge_conn, ge_create_sql)
-
-        rts_task_create_sql = DBManager.sql_create_general_table("RtsTaskMap",
-                                                                 DBNameConstant.TABLE_OP_COUNTER_RTS_TASK,
-                                                                 map_path)
-        DBManager.execute_sql(merge_conn, rts_task_create_sql)
-
-        op_report_create_sql = DBManager.sql_create_general_table("OpReportMap",
-                                                                  DBNameConstant.TABLE_OP_COUNTER_OP_REPORT,
-                                                                  map_path)
-        DBManager.execute_sql(merge_conn, op_report_create_sql)
-        return merge_conn, merge_curs
-
-    def create_and_insert_db(self: any) -> None:
-        if not self._is_db_need_to_create():
-            logging.warning("No need to create db for op counter, "
-                            "maybe the data of framework or task is not collected.")
-            return
-        map_path = \
-            self.TABLE_PATH if ProfilingScene().is_step_trace() else self.TRAIN_TABLE_PATH
-        merge_conn, merge_curs = self.create_db(map_path)
-        self._create_ge_merge(merge_conn)
-        self._create_task(merge_conn)
-        self._create_report(merge_conn)
-        DBManager.destroy_db_connect(merge_conn, merge_curs)
-
-    def run(self: any) -> None:
-        """
-        merge process
-        :return: None
-        """
-        try:
-            self._init_params()
-        except (OSError, SystemError, ValueError, TypeError, RuntimeError, ProfException) as err:
-            logging.error(err, exc_info=Constant.TRACE_BACK_SWITCH)
-            return
-        self.create_and_insert_db()

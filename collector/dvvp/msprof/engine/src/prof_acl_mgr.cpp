@@ -544,7 +544,8 @@ int ProfAclMgr::ProfAclModelSubscribe(const uint32_t modelId, const uint32_t dev
         MSPROF_INNER_ERROR("EK9999", "SubscribeConfig is invalid");
         return ACL_ERROR_INVALID_PARAM;
     }
-    MSPROF_EVENT("Received ProfAclModelSubscribe request from acl, device: %u, model: %u", devId, modelId);
+    MSPROF_EVENT("Received ProfAclModelSubscribe request from acl, device: %u, model: %u fd: %u",
+        devId, modelId, profSubscribeConfig->fd);
     std::lock_guard<std::mutex> lk(mtx_);
     if (!isReady_) {
         MSPROF_LOGE("Profiling is not ready");
@@ -568,22 +569,22 @@ int ProfAclMgr::ProfAclModelSubscribe(const uint32_t modelId, const uint32_t dev
         // device already started, check cfg and add fd to subscribe list
         return UpdateSubscribeInfo(modelId, devId, profSubscribeConfig);
     }
-    int ret = Analysis::Dvvp::ProfilerCommon::RegisterReporterCallback();
-    if (ret != ACL_SUCCESS) {
-        MSPROF_LOGE("RegisterReporterCallback failed, Model:%u", modelId);
-        MSPROF_INNER_ERROR("EK9999", "RegisterReporterCallback failed, Model:%u", modelId);
-        return ACL_ERROR_PROFILING_FAILURE;
-    }
     // start device
-    ret = StartDeviceSubscribeTask(modelId, devId, profSubscribeConfig);
+    int ret = StartDeviceSubscribeTask(modelId, devId, profSubscribeConfig);
     if (ret != ACL_SUCCESS) {
         MSPROF_LOGE("StartDeviceSubscribeTask failed, Model:%u", modelId);
         MSPROF_INNER_ERROR("EK9999", "StartDeviceSubscribeTask failed, Model:%u", modelId);
         return ACL_ERROR_PROFILING_FAILURE;
     }
+    ret = Analysis::Dvvp::ProfilerCommon::RegisterReporterCallback();
+    if (ret != ACL_SUCCESS) {
+        MSPROF_LOGE("RegisterReporterCallback failed, Model:%u", modelId);
+        MSPROF_INNER_ERROR("EK9999", "RegisterReporterCallback failed, Model:%u", modelId);
+        return ACL_ERROR_PROFILING_FAILURE;
+    }
     uint32_t devIdList[1] = {devId};
     uint64_t dataTypeConfig = ProfAclGetDataTypeConfig(profSubscribeConfig);
-    MSPROF_LOGI("Allocate subscription config to Runtime, dataTypeConfig %x", dataTypeConfig);
+    MSPROF_LOGI("Allocate subscription config to Runtime, dataTypeConfig %llx", dataTypeConfig);
     return Analysis::Dvvp::ProfilerCommon::CommandHandleProfStart(devIdList, 1, dataTypeConfig);
 }
 
@@ -1242,6 +1243,7 @@ void ProfAclMgr::ProfDataTypeConfigHandle(SHARED_PTR_ALIA<analysis::dvvp::messag
     UpdateDataTypeConfigBySwitch(params->runtimeApi, PROF_RUNTIME_API);
     UpdateDataTypeConfigBySwitch(params->runtimeTrace, PROF_RUNTIME_TRACE);
     UpdateDataTypeConfigBySwitch(params->ts_fw_training, PROF_TRAINING_TRACE);
+    UpdateDataTypeConfigBySwitch(params->ts_keypoint, PROF_TRAINING_TRACE);
     UpdateDataTypeConfigBySwitch(params->hcclTrace, PROF_HCCL_TRACE);
     UpdateDataTypeConfigBySwitch(params->l2CacheTaskProfiling, PROF_L2CACHE);
 
@@ -1310,6 +1312,12 @@ int32_t ProfAclMgr::MsprofAclJsonParamConstruct(SHARED_PTR_ALIA<analysis::dvvp::
     if (!ParamValidation::instance()->CheckStorageLimit(storageLimit_)) {
         MSPROF_LOGE("storage_limit para is invalid");
         MSPROF_INNER_ERROR("EK9999", "storage_limit para is invalid");
+        return MSPROF_ERROR_CONFIG_INVALID;
+    }
+    params_->biu = inputCfgPb->biu();
+    params_->biu_freq = inputCfgPb->biu_freq();
+    if ((params_->biu.compare(MSVP_PROF_ON) == 0) &&
+        (!ParamValidation::instance()->CheckBiuFreqValid(params_->biu_freq))) {
         return MSPROF_ERROR_CONFIG_INVALID;
     }
 
@@ -1489,6 +1497,12 @@ int32_t ProfAclMgr::MsprofGeOptionsParamConstruct(const std::string &jobInfo,
     if (!ParamValidation::instance()->CheckStorageLimit(storageLimit_)) {
         MSPROF_LOGE("storage_limit para is invalid");
         MSPROF_INNER_ERROR("EK9999", "storage_limit para is invalid");
+        return MSPROF_ERROR_CONFIG_INVALID;
+    }
+    params_->biu = inputCfgPb->biu();
+    params_->biu_freq = inputCfgPb->biu_freq();
+    if ((params_->biu.compare(MSVP_PROF_ON) == 0) &&
+        (!ParamValidation::instance()->CheckBiuFreqValid(params_->biu_freq))) {
         return MSPROF_ERROR_CONFIG_INVALID;
     }
     return MSPROF_ERROR_NONE;

@@ -66,12 +66,13 @@ class TraceViewManager:
         result_data = [0] * len(meta_data)
         try:
             for index, item_data in enumerate(meta_data):
+                item_data_list = list(item_data)
                 # name, pid, tid, args is required
-                if item_data[0] in ["process_sort_index", "thread_sort_index"]:
-                    item_data[3] = OrderedDict([("sort_index", item_data[3])])
+                if item_data_list[0] in ["process_sort_index", "thread_sort_index"]:
+                    item_data_list[3] = OrderedDict([("sort_index", item_data_list[3])])
                 else:
-                    item_data[3] = OrderedDict([("name", str(item_data[3]))])
-                result_data_part = OrderedDict(list(zip(TraceViewHeaderConstant.METADATA_HEAD, item_data)))
+                    item_data_list[3] = OrderedDict([("name", str(item_data_list[3]))])
+                result_data_part = OrderedDict(list(zip(TraceViewHeaderConstant.METADATA_HEAD, item_data_list)))
                 result_data_part['ph'] = 'M'
                 result_data[index] = result_data_part
             return result_data

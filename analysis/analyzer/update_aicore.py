@@ -174,7 +174,7 @@ class UpdateAICoreData:
         ge_conn, ge_curs = DBManager.check_connect_db_path(
             os.path.join(self.sql_dir, DBNameConstant.DB_GE_INFO))
         if ge_conn and ge_curs:
-            block_dim_sql, iter_id = self.__get_block_dim_sql(ge_curs)
+            block_dim_sql, iter_id = self.__get_block_dim_sql()
             ge_data = DBManager.fetch_all_data(ge_curs, block_dim_sql, iter_id)
             if not ge_data:
                 DBManager.destroy_db_connect(ge_conn, ge_curs)
@@ -183,10 +183,10 @@ class UpdateAICoreData:
         DBManager.destroy_db_connect(ge_conn, ge_curs)
         return res_data
 
-    def __get_block_dim_sql(self: any, curs: any) -> tuple:
-        headers = DBManager.get_table_headers(curs, DBNameConstant.TABLE_GE_TASK)
-        sql = "select task_id, stream_id, block_dim from {0} order by timestamp".format(DBNameConstant.TABLE_GE_TASK)
-        if not ProfilingScene().is_operator() and StrConstant.ITER_ID in headers:
+    def __get_block_dim_sql(self: any) -> tuple:
+        sql = "select task_id, stream_id, block_dim from {0} where task_type='{1}' " \
+              "order by timestamp".format(DBNameConstant.TABLE_GE_TASK, Constant.TASK_TYPE_AI_CORE)
+        if not ProfilingScene().is_operator():
             iter_id = self.sample_config.get("iter_id", NumberConstant.DEFAULT_ITER_ID)
             sql = "select task_id, stream_id, block_dim from {0} " \
                   "where (index_id=0 or index_id=?) " \

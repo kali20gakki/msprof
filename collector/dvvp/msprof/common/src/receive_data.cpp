@@ -162,8 +162,12 @@ int ReceiveData::DoReport(CONST_REPORT_DATA_PTR rData)
 
     uint64_t startRawTime = analysis::dvvp::common::utils::Utils::GetClockMonotonicRaw();
     do {
-        if (!started_ || rData == nullptr || rData->data == nullptr || rData->dataLen <= 0) {
-            MSPROF_LOGE("report failed! reporter not started or input data error");
+        if (!started_ || rData == nullptr) {
+            MSPROF_LOGE("report failed! started %llu", started_);
+            break;
+        }
+        if (rData->data == nullptr || rData->dataLen <= 0) {
+            MSPROF_LOGE("report failed! dataLen %llu", rData->dataLen);
             break;
         }
         if (rData->dataLen > RECEIVE_CHUNK_SIZE) {

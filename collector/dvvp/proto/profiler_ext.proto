@@ -12,6 +12,8 @@ message ProfAclConfig {
     string storage_limit = 7;
     string hccl = 8;
     string msproftx = 9;
+    string biu = 10;
+    uint32 biu_freq = 11;
 }
 
 message ProfGeOptionsConfig {
@@ -32,6 +34,8 @@ message ProfGeOptionsConfig {
     string acc_pmu_mode = 15;
     string hccl = 16;
     string msproftx = 17;
+    string biu = 18;
+    uint32 biu_freq = 19;
 }
 
 message ProfAclInitConfig {

@@ -135,7 +135,7 @@ class AiCoreSampleModel(BaseModel):
             self.cur.execute("alter table r11 rename to cycles")
         self.conn.commit()
 
-    def create_ai_vector_core_db(self: any, events: list, ai_core_data: list) -> None:
+    def create_core_table(self: any, events: list, ai_core_data: list) -> None:
         """
         create ai event tables
         :param events: ai core events

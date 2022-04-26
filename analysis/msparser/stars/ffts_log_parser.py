@@ -23,12 +23,6 @@ class FftsLogParser(IStarsParser):
         self._model = FftsLogModel(result_dir, db, table_list)
         self._decoder = self._get_log_decoder()
 
-    @classmethod
-    def _get_log_decoder(cls: any) -> any:
-        if ChipManager().is_ffts_plus_type():
-            return FftsPlusLogDecoder
-        return FftsLogDecoder
-
     @property
     def decoder(self: any) -> any:
         """
@@ -36,6 +30,12 @@ class FftsLogParser(IStarsParser):
         :return: class decoder
         """
         return self._decoder
+
+    @classmethod
+    def _get_log_decoder(cls: any) -> any:
+        if ChipManager().is_ffts_plus_type():
+            return FftsPlusLogDecoder
+        return FftsLogDecoder
 
     @abstractmethod
     def preprocess_data(self: any) -> None:
