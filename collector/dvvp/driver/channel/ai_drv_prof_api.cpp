@@ -534,7 +534,7 @@ int DrvBiuProfileStart(const uint32_t devId, const AI_DRV_CHANNEL channelId, con
     profStartPara.real_time = PROFILE_REAL_TIME;
     profStartPara.user_data = &config;
     profStartPara.user_data_size = sizeof(config);
-    int32_t ret = prof_drv_start(devId, channelId, &profStartPara);
+    int32_t ret = DriverPlugin::instance()->MsprofDrvStart(devId, channelId, &profStartPara);
     if (ret != PROF_OK) {
         MSPROF_LOGE("Failed to start profiling DrvBiuProfileStart, ret=%d, profDeviceId=%u, profChannel=%u, "
             "period=%u, pid=%u", ret, devId, static_cast<uint32_t>(channelId), config.period, config.pid);
