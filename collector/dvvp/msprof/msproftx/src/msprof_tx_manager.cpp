@@ -128,7 +128,8 @@ int MsprofTxManager::SetCategoryName(uint32_t category, std::string categoryName
 
     std::string hashData = std::to_string(category) + HASH_DIC_DELIMITER + categoryName + "\n";
 
-    ReporterData reporterData = {0};
+    ReporterData reporterData;
+    memset_s(&reporterData, sizeof(ReporterData), 0, sizeof(ReporterData));
     reporterData.deviceId = DEFAULT_HOST_ID;
     auto err = memcpy_s(reporterData.tag, static_cast<size_t>(MSPROF_ENGINE_MAX_TAG_LEN),
         MSPROF_TX_CATEGORY_DICT.c_str(), MSPROF_TX_CATEGORY_DICT.size());
@@ -305,7 +306,8 @@ int MsprofTxManager::ReportStampData(MsprofStampInfo &stamp) const
     stamp.dataTag = MSPROF_MSPROFTX_DATA_TAG;
     stamp.magicNumber = static_cast<uint16_t>(MSPROF_DATA_HEAD_MAGIC_NUM);
 
-    ReporterData reporterData = {0};
+    ReporterData reporterData;
+    memset_s(&reporterData, sizeof(ReporterData), 0, sizeof(ReporterData));
     reporterData.deviceId = DEFAULT_HOST_ID;
     auto err = memcpy_s(reporterData.tag, static_cast<size_t>(MSPROF_ENGINE_MAX_TAG_LEN),
         MSPROF_TX_REPORTER_TAG.c_str(), MSPROF_TX_REPORTER_TAG.size());
