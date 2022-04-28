@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
+ * Description: stub for profapi
+ * Author: Huawei Technologies Co., Ltd.
+ * Create: 2022-04-15
+ */
 #include "prof_api.h"
 
 int32_t profRegReporterCallback(ProfReportHandle reporter)
@@ -112,7 +118,7 @@ int32_t profAclGetId(uint32_t type, const void *opInfo, size_t opInfoLen, uint32
 }
 
 int32_t profAclGetOpVal(uint32_t type, const void *opInfo, size_t opInfoLen,
-                                      uint32_t index, void *data, size_t len)
+                        uint32_t index, void *data, size_t len)
 {
     return 0;
 }
@@ -123,7 +129,7 @@ uint64_t ProfGetOpExecutionTime(const void *data, uint32_t len, uint32_t index)
 }
 
 const char *profAclGetOpAttriVal(uint32_t type, const void *opInfo, size_t opInfoLen,
-                                               uint32_t index, uint32_t attri)
+                                 uint32_t index, uint32_t attri)
 {
     return nullptr;
 }

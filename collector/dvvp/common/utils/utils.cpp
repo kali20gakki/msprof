@@ -381,7 +381,8 @@ int Utils::CreateDir(const std::string &path)
         char errBuf[MAX_ERR_STRING_LEN + 1] = {0};
         MSPROF_LOGE("Failed to mkdir, FilePath : %s, FileMode : %o, ErrorCode : %d, ERRORInfo : %s",
             BaseName(path).c_str(), static_cast<int>(defaultFileMode), MmpaPlugin::instance()->MsprofMmGetErrorCode(),
-            MmpaPlugin::instance()->MsprofMmGetErrorFormatMessage(MmpaPlugin::instance()->MsprofMmGetErrorCode(), errBuf, MAX_ERR_STRING_LEN));
+            MmpaPlugin::instance()->MsprofMmGetErrorFormatMessage(MmpaPlugin::instance()->MsprofMmGetErrorCode(),
+                errBuf, MAX_ERR_STRING_LEN));
         return PROFILING_FAILED;
     }
     return PROFILING_SUCCESS;
@@ -400,7 +401,8 @@ void Utils::RemoveDir(const std::string &dir, bool rmTopDir)
         mmDirent **nameList = nullptr;
         int count = MmpaPlugin::instance()->MsprofMmScandir(dir.c_str(), &nameList, nullptr, nullptr);
         if (count == EN_ERROR || count == EN_INVALID_PARAM) {
-            MSPROF_LOGW("mmScandir failed %s. ErrorCode : %d", BaseName(dir).c_str(), MmpaPlugin::instance()->MsprofMmGetErrorCode());
+            MSPROF_LOGW("mmScandir failed %s. ErrorCode : %d", BaseName(dir).c_str(),
+                MmpaPlugin::instance()->MsprofMmGetErrorCode());
             return;
         }
 
@@ -422,7 +424,8 @@ void Utils::RemoveDir(const std::string &dir, bool rmTopDir)
         MmpaPlugin::instance()->MsprofMmScandirFree(nameList, count);
     } else {
         if (MmpaPlugin::instance()->MsprofMmRmdir(dir.c_str()) != EN_OK) {
-            MSPROF_LOGW("mmRmdir failed %s. ErrorCode : %d", BaseName(dir).c_str(), MmpaPlugin::instance()->MsprofMmGetErrorCode());
+            MSPROF_LOGW("mmRmdir failed %s. ErrorCode : %d", BaseName(dir).c_str(),
+                MmpaPlugin::instance()->MsprofMmGetErrorCode());
         }
     }
 }
@@ -570,7 +573,8 @@ int Utils::DoCreateCmdProcess(const std::string &stdoutRedirectFile,
     if (stdoutRedirectFile.empty()) {
         ret = MmpaPlugin::instance()->MsprofMmCreateProcess(fileName.c_str(), &argvEnv, nullptr, &tid);
     } else {
-        ret = MmpaPlugin::instance()->MsprofMmCreateProcess(fileName.c_str(), &argvEnv, stdoutRedirectFile.c_str(), &tid);
+        ret = MmpaPlugin::instance()->MsprofMmCreateProcess(fileName.c_str(), &argvEnv,
+            stdoutRedirectFile.c_str(), &tid);
     }
     if (ret != EN_OK) {
         return PROFILING_FAILED;
@@ -1068,7 +1072,8 @@ void Utils::PrintSysErrorMsg()
 {
     char errBuf[MAX_ERR_STRING_LEN + 1] = {0};
     INT32 errorNo = MmpaPlugin::instance()->MsprofMmGetErrorCode();
-    MSPROF_LOGE("ErrorCode:%d, errinfo:%s", errorNo, MmpaPlugin::instance()->MsprofMmGetErrorFormatMessage(errorNo, errBuf, MAX_ERR_STRING_LEN));
+    MSPROF_LOGE("ErrorCode:%d, errinfo:%s", errorNo, MmpaPlugin::instance()->MsprofMmGetErrorFormatMessage(errorNo,
+        errBuf, MAX_ERR_STRING_LEN));
 }
 
 std::string Utils::GetSelfPath()

@@ -449,7 +449,8 @@ void Sender::ExecuteFileMode(SHARED_PTR_ALIA<File> file)
     }
 
     size_t size = chunk->GetUsedSize();
-    INT32 ret = MmpaPlugin::instance()->MsprofMmWrite(fd, static_cast<void *>(const_cast<UNSIGNED_CHAR_PTR>(chunk->GetBuffer())), size);
+    INT32 ret = MmpaPlugin::instance()->MsprofMmWrite(fd, 
+        static_cast<void *>(const_cast<UNSIGNED_CHAR_PTR>(chunk->GetBuffer())), size);
     if (static_cast<size_t>(ret) != size) {
         MSPROF_LOGE("write[%d] fileName = %s data size = %u, written size = %d",
                     static_cast<int>(fd), fileName.c_str(),

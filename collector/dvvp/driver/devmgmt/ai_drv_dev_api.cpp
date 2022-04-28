@@ -82,7 +82,8 @@ int DrvGetPlatformInfo(uint32_t &platformInfo)
 
 int DrvGetEnvType(uint32_t deviceId, int64_t &envType)
 {
-    drvError_t ret = DriverPlugin::instance()->MsprofHalGetDeviceInfo(deviceId, MODULE_TYPE_SYSTEM, INFO_TYPE_ENV, &envType);
+    drvError_t ret = DriverPlugin::instance()->MsprofHalGetDeviceInfo(deviceId,
+        MODULE_TYPE_SYSTEM, INFO_TYPE_ENV, &envType);
     if (ret != DRV_ERROR_NONE) {
         MSPROF_LOGE("Failed to DrvGetEnvType, deviceId=%d, ret=%d", deviceId, static_cast<int>(ret));
         MSPROF_CALL_ERROR("EK9999", "Failed to DrvGetEnvType, deviceId=%d, ret=%d", deviceId, static_cast<int>(ret));
@@ -95,7 +96,8 @@ int DrvGetEnvType(uint32_t deviceId, int64_t &envType)
 
 int DrvGetCtrlCpuId(uint32_t deviceId, int64_t &ctrlCpuId)
 {
-    drvError_t ret = DriverPlugin::instance()->MsprofHalGetDeviceInfo(deviceId, MODULE_TYPE_CCPU, INFO_TYPE_ID, &ctrlCpuId);
+    drvError_t ret = DriverPlugin::instance()->MsprofHalGetDeviceInfo(deviceId,
+        MODULE_TYPE_CCPU, INFO_TYPE_ID, &ctrlCpuId);
     if (ret != DRV_ERROR_NONE) {
         MSPROF_LOGE("Failed to DrvGetCtrlCpuId, deviceId=%d, ret=%d", deviceId, static_cast<int>(ret));
         MSPROF_CALL_ERROR("EK9999", "Failed to DrvGetCtrlCpuId, deviceId=%d, ret=%d", deviceId, static_cast<int>(ret));
@@ -108,7 +110,8 @@ int DrvGetCtrlCpuId(uint32_t deviceId, int64_t &ctrlCpuId)
 
 int DrvGetCtrlCpuCoreNum(uint32_t deviceId, int64_t &ctrlCpuCoreNum)
 {
-    drvError_t ret = DriverPlugin::instance()->MsprofHalGetDeviceInfo(deviceId, MODULE_TYPE_CCPU, INFO_TYPE_CORE_NUM, &ctrlCpuCoreNum);
+    drvError_t ret = DriverPlugin::instance()->MsprofHalGetDeviceInfo(deviceId,
+        MODULE_TYPE_CCPU, INFO_TYPE_CORE_NUM, &ctrlCpuCoreNum);
     if (ret != DRV_ERROR_NONE) {
         MSPROF_LOGE("Failed to DrvGetCtrlCpuCoreNum, deviceId=%d, ret=%d", deviceId, static_cast<int>(ret));
         MSPROF_CALL_ERROR("EK9999", "Failed to DrvGetCtrlCpuCoreNum, deviceId=%d, ret=%d",
@@ -122,7 +125,8 @@ int DrvGetCtrlCpuCoreNum(uint32_t deviceId, int64_t &ctrlCpuCoreNum)
 
 int DrvGetCtrlCpuEndianLittle(uint32_t deviceId, int64_t &ctrlCpuEndianLittle)
 {
-    drvError_t ret = DriverPlugin::instance()->MsprofHalGetDeviceInfo(deviceId, MODULE_TYPE_CCPU, INFO_TYPE_ENDIAN, &ctrlCpuEndianLittle);
+    drvError_t ret = DriverPlugin::instance()->MsprofHalGetDeviceInfo(deviceId,
+        MODULE_TYPE_CCPU, INFO_TYPE_ENDIAN, &ctrlCpuEndianLittle);
     if (ret != DRV_ERROR_NONE) {
         MSPROF_LOGE("Failed to DrvGetCtrlCpuEndianLittle, deviceId=%d, ret=%d", deviceId, static_cast<int>(ret));
         MSPROF_CALL_ERROR("EK9999", "Failed to DrvGetCtrlCpuEndianLittle, deviceId=%d, ret=%d",
@@ -136,7 +140,8 @@ int DrvGetCtrlCpuEndianLittle(uint32_t deviceId, int64_t &ctrlCpuEndianLittle)
 
 int DrvGetAiCpuCoreNum(uint32_t deviceId, int64_t &aiCpuCoreNum)
 {
-    drvError_t ret = DriverPlugin::instance()->MsprofHalGetDeviceInfo(deviceId, MODULE_TYPE_AICPU, INFO_TYPE_CORE_NUM, &aiCpuCoreNum);
+    drvError_t ret = DriverPlugin::instance()->MsprofHalGetDeviceInfo(deviceId,
+        MODULE_TYPE_AICPU, INFO_TYPE_CORE_NUM, &aiCpuCoreNum);
     if (ret != DRV_ERROR_NONE) {
         MSPROF_LOGE("Failed to DrvGetAiCpuCoreNum, deviceId=%d, ret=%d", deviceId, static_cast<int>(ret));
         MSPROF_CALL_ERROR("EK9999", "Failed to DrvGetAiCpuCoreNum, deviceId=%d, ret=%d",
@@ -150,7 +155,8 @@ int DrvGetAiCpuCoreNum(uint32_t deviceId, int64_t &aiCpuCoreNum)
 
 int DrvGetAiCpuCoreId(uint32_t deviceId, int64_t &aiCpuCoreId)
 {
-    drvError_t ret = DriverPlugin::instance()->MsprofHalGetDeviceInfo(deviceId, MODULE_TYPE_AICPU, INFO_TYPE_ID, &aiCpuCoreId);
+    drvError_t ret = DriverPlugin::instance()->MsprofHalGetDeviceInfo(deviceId,
+        MODULE_TYPE_AICPU, INFO_TYPE_ID, &aiCpuCoreId);
     if (ret != DRV_ERROR_NONE) {
         MSPROF_LOGE("Failed to DrvGetAiCpuCoreId, deviceId=%d, ret=%d", deviceId, static_cast<int>(ret));
         MSPROF_CALL_ERROR("EK9999", "Failed to DrvGetAiCpuCoreId, deviceId=%d, ret=%d",
@@ -164,7 +170,8 @@ int DrvGetAiCpuCoreId(uint32_t deviceId, int64_t &aiCpuCoreId)
 
 int DrvGetAiCpuOccupyBitmap(uint32_t deviceId, int64_t &aiCpuOccupyBitmap)
 {
-    drvError_t ret = DriverPlugin::instance()->MsprofHalGetDeviceInfo(deviceId, MODULE_TYPE_AICPU, INFO_TYPE_OCCUPY, &aiCpuOccupyBitmap);
+    drvError_t ret = DriverPlugin::instance()->MsprofHalGetDeviceInfo(deviceId,
+        MODULE_TYPE_AICPU, INFO_TYPE_OCCUPY, &aiCpuOccupyBitmap);
     if (ret != DRV_ERROR_NONE) {
         MSPROF_LOGE("Failed to DrvGetAiCpuOccupyBitmap, deviceId=%d, ret=%d", deviceId, static_cast<int>(ret));
         MSPROF_CALL_ERROR("EK9999", "Failed to DrvGetAiCpuOccupyBitmap, deviceId=%d, ret=%d",
@@ -178,7 +185,8 @@ int DrvGetAiCpuOccupyBitmap(uint32_t deviceId, int64_t &aiCpuOccupyBitmap)
 
 int DrvGetTsCpuCoreNum(uint32_t deviceId, int64_t &tsCpuCoreNum)
 {
-    drvError_t ret = DriverPlugin::instance()->MsprofHalGetDeviceInfo(deviceId, MODULE_TYPE_TSCPU, INFO_TYPE_CORE_NUM, &tsCpuCoreNum);
+    drvError_t ret = DriverPlugin::instance()->MsprofHalGetDeviceInfo(deviceId,
+        MODULE_TYPE_TSCPU, INFO_TYPE_CORE_NUM, &tsCpuCoreNum);
     if (ret != DRV_ERROR_NONE) {
         MSPROF_LOGE("Failed to DrvGetTsCpuCoreNum, deviceId=%d, ret=%d", deviceId, static_cast<int>(ret));
         MSPROF_CALL_ERROR("EK9999", "Failed to DrvGetTsCpuCoreNum, deviceId=%d, ret=%d",
@@ -192,7 +200,8 @@ int DrvGetTsCpuCoreNum(uint32_t deviceId, int64_t &tsCpuCoreNum)
 
 int DrvGetAiCoreId(uint32_t deviceId, int64_t &aiCoreId)
 {
-    drvError_t ret = DriverPlugin::instance()->MsprofHalGetDeviceInfo(deviceId, MODULE_TYPE_AICORE, INFO_TYPE_ID, &aiCoreId);
+    drvError_t ret = DriverPlugin::instance()->MsprofHalGetDeviceInfo(deviceId,
+        MODULE_TYPE_AICORE, INFO_TYPE_ID, &aiCoreId);
     if (ret != DRV_ERROR_NONE) {
         MSPROF_LOGE("Failed to DrvGetAiCoreId, deviceId=%d, ret=%d", deviceId, static_cast<int>(ret));
         MSPROF_CALL_ERROR("EK9999", "Failed to DrvGetAiCoreId, deviceId=%d, ret=%d", deviceId, static_cast<int>(ret));
@@ -205,7 +214,8 @@ int DrvGetAiCoreId(uint32_t deviceId, int64_t &aiCoreId)
 
 int DrvGetAiCoreNum(uint32_t deviceId, int64_t &aiCoreNum)
 {
-    drvError_t ret = DriverPlugin::instance()->MsprofHalGetDeviceInfo(deviceId, MODULE_TYPE_AICORE, INFO_TYPE_CORE_NUM, &aiCoreNum);
+    drvError_t ret = DriverPlugin::instance()->MsprofHalGetDeviceInfo(deviceId,
+        MODULE_TYPE_AICORE, INFO_TYPE_CORE_NUM, &aiCoreNum);
     if (ret != DRV_ERROR_NONE) {
         MSPROF_LOGE("Failed to DrvGetAiCoreNum, deviceId=%d, ret=%d", deviceId, static_cast<int>(ret));
         MSPROF_CALL_ERROR("EK9999", "Failed to DrvGetAiCoreNum, deviceId=%d, ret=%d", deviceId, static_cast<int>(ret));
@@ -226,7 +236,8 @@ int DrvGetAivNum(uint32_t deviceId, int64_t &aivNum)
 int DrvGetDeviceTime(uint32_t deviceId, unsigned long long &startMono, unsigned long long &cntvct)
 {
     int64_t time = 0;
-    drvError_t ret = DriverPlugin::instance()->MsprofHalGetDeviceInfo(deviceId, MODULE_TYPE_SYSTEM, INFO_TYPE_MONOTONIC_RAW, &time);
+    drvError_t ret = DriverPlugin::instance()->MsprofHalGetDeviceInfo(deviceId,
+        MODULE_TYPE_SYSTEM, INFO_TYPE_MONOTONIC_RAW, &time);
     if (ret != DRV_ERROR_NONE) {
         MSPROF_LOGE("Failed to DrvGetDeviceTime startMono, deviceId=%d, ret=%d", deviceId, static_cast<int>(ret));
         MSPROF_CALL_ERROR("EK9999", "Failed to DrvGetDeviceTime startMono, deviceId=%d, ret=%d",
@@ -244,7 +255,8 @@ int DrvGetDeviceTime(uint32_t deviceId, unsigned long long &startMono, unsigned 
     }
     cntvct = static_cast<unsigned long long>(time);
 
-    MSPROF_LOGI("Succeeded to DrvGetDeviceTime, devId=%d, startMono=%llu ns, cntvct=%llu", deviceId, startMono, cntvct);
+    MSPROF_LOGI("Succeeded to DrvGetDeviceTime, devId=%d, startMono=%llu ns, cntvct=%llu",
+        deviceId, startMono, cntvct);
     return PROFILING_SUCCESS;
 }
 

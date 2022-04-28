@@ -4,8 +4,9 @@
  * Author: Huawei Technologies Co., Ltd.
  * Create: 2020-10-24
  */
-#include "acl_prof.h"
 #include "analyzer_ts.h"
+
+#include "acl_prof.h"
 #include "errno/error_code.h"
 #include "message/codec.h"
 #include "proto/profiler.pb.h"
