@@ -1,6 +1,11 @@
+/*
+ * Copyright (c) Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
+ * Description: Dynamic library handle
+ * Author: Huawei Technologies Co., Ltd.
+ * Create: 2022-04-15
+ */
 #include "plugin_manager.h"
 #include "config.h"
-#include <cstdlib>
 #include <fstream>
 
 namespace Analysis {

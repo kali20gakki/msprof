@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
+ * Description: mmpa interface
+ * Author: Huawei Technologies Co., Ltd.
+ * Create: 2022-04-15
+ */
 #include "mmpa_plugin.h"
 
 namespace Analysis {
@@ -134,10 +140,10 @@ INT32 MmpaPlugin::MsprofMmAccess2(const CHAR *pathName, INT32 mode)
 }
 
 INT32 MmpaPlugin::MsprofMmGetOptLong(INT32 argc,
-                   CHAR *const *argv,
-                   const CHAR *opts,
-                   const mmStructOption *longOpts,
-                   INT32 *longIndex)
+                                     CHAR *const *argv,
+                                     const CHAR *opts,
+                                     const mmStructOption *longOpts,
+                                     INT32 *longIndex)
 {
     Status ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginManager_.HasLoad()) {
@@ -463,7 +469,8 @@ INT32 MmpaPlugin::MsprofMmRealPath(const CHAR *path, CHAR *realPath, INT32 realP
     return func(path, realPath, realPathLen);
 }
 
-INT32 MmpaPlugin::MsprofMmCreateProcess(const CHAR *fileName, const mmArgvEnv *env, const CHAR* stdoutRedirectFile, mmProcess *id)
+INT32 MmpaPlugin::MsprofMmCreateProcess(const CHAR *fileName, const mmArgvEnv *env,
+                                        const CHAR* stdoutRedirectFile, mmProcess *id)
 {
     Status ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginManager_.HasLoad()) {
@@ -473,7 +480,8 @@ INT32 MmpaPlugin::MsprofMmCreateProcess(const CHAR *fileName, const mmArgvEnv *e
         }
     }
     MSPROF_MMCREATEPROCESS_T func;
-    ret = pluginManager_.GetFunction<INT32, const CHAR *, const mmArgvEnv *, const CHAR*, mmProcess *>("mmCreateProcess", func);
+    ret = pluginManager_.GetFunction<INT32, const CHAR *, const mmArgvEnv *,
+        const CHAR*, mmProcess *>("mmCreateProcess", func);
     if (ret != PLUGIN_LOAD_SUCCESS) {
         return -1;
     }
@@ -644,7 +652,8 @@ INT32 MmpaPlugin::MsprofMmCreateTaskWithThreadAttr(mmThread *threadHandle, const
         }
     }
     MSPROF_MMCREATETASKWITHTHREADATTR_T func;
-    ret = pluginManager_.GetFunction<INT32, mmThread *, const mmUserBlock_t *, const mmThreadAttr *>("mmCreateTaskWithThreadAttr", func);
+    ret = pluginManager_.GetFunction<INT32, mmThread *, const mmUserBlock_t *,
+        const mmThreadAttr *>("mmCreateTaskWithThreadAttr", func);
     if (ret != PLUGIN_LOAD_SUCCESS) {
         return -1;
     }
@@ -824,7 +833,7 @@ INT32 MmpaPlugin::MsprofMmCloseSocket(mmSockHandle sockFd)
 }
     
 // mmSocketSend
-mmSsize_t MmpaPlugin::MsprofMmSocketSend(mmSockHandle sockFd,VOID *pstSendBuf,INT32 sendLen,INT32 sendFlag)
+mmSsize_t MmpaPlugin::MsprofMmSocketSend(mmSockHandle sockFd,VOID *pstSendBuf, INT32 sendLen, INT32 sendFlag)
 {
     Status ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginManager_.HasLoad()) {
@@ -842,7 +851,7 @@ mmSsize_t MmpaPlugin::MsprofMmSocketSend(mmSockHandle sockFd,VOID *pstSendBuf,IN
 }
     
 // mmSocketRecv
-mmSsize_t MmpaPlugin::MsprofMmSocketRecv(mmSockHandle sockFd, VOID *pstRecvBuf,INT32 recvLen,INT32 recvFlag)
+mmSsize_t MmpaPlugin::MsprofMmSocketRecv(mmSockHandle sockFd, VOID *pstRecvBuf, INT32 recvLen, INT32 recvFlag)
 {
     Status ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginManager_.HasLoad()) {
@@ -1005,7 +1014,7 @@ INT32 MmpaPlugin::MsprofMmCreateTask(mmThread *threadHandle, mmUserBlock_t *func
 
 // mmCreateTaskWithThreadAttrStub
 INT32 MmpaPlugin::MsprofMmCreateTaskWithThreadAttrStub(mmThread *threadHandle, const mmUserBlock_t *funcBlock,
-                                     const mmThreadAttr *threadAttr)
+                                                       const mmThreadAttr *threadAttr)
 {
     Status ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginManager_.HasLoad()) {
@@ -1015,7 +1024,8 @@ INT32 MmpaPlugin::MsprofMmCreateTaskWithThreadAttrStub(mmThread *threadHandle, c
         }
     }
     MSPROF_MMCREATETASKWITHTHREADATTRSTUB_T func;
-    ret = pluginManager_.GetFunction<INT32, mmThread *, const mmUserBlock_t *, const mmThreadAttr *>("mmCreateTaskWithThreadAttrStub", func);
+    ret = pluginManager_.GetFunction<INT32, mmThread *, const mmUserBlock_t *,
+        const mmThreadAttr *>("mmCreateTaskWithThreadAttrStub", func);
     if (ret != PLUGIN_LOAD_SUCCESS) {
         return -1;
     }
@@ -1024,7 +1034,7 @@ INT32 MmpaPlugin::MsprofMmCreateTaskWithThreadAttrStub(mmThread *threadHandle, c
                                      
 // mmCreateTaskWithThreadAttrNormalStub
 INT32 MmpaPlugin::MsprofMmCreateTaskWithThreadAttrNormalStub(mmThread *threadHandle, const mmUserBlock_t *funcBlock,
-                                     const mmThreadAttr *threadAttr)
+                                                             const mmThreadAttr *threadAttr)
 {
     Status ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginManager_.HasLoad()) {
@@ -1034,7 +1044,8 @@ INT32 MmpaPlugin::MsprofMmCreateTaskWithThreadAttrNormalStub(mmThread *threadHan
         }
     }
     MSPROF_MMCREATETASKWITHTHREADATTRNORMALSTUB_T func;
-    ret = pluginManager_.GetFunction<INT32, mmThread *, const mmUserBlock_t *, const mmThreadAttr *>("mmCreateTaskWithThreadAttrNormalStub", func);
+    ret = pluginManager_.GetFunction<INT32, mmThread *, const mmUserBlock_t *,
+        const mmThreadAttr *>("mmCreateTaskWithThreadAttrNormalStub", func);
     if (ret != PLUGIN_LOAD_SUCCESS) {
         return -1;
     }

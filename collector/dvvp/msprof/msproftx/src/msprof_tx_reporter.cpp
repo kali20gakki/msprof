@@ -6,7 +6,6 @@
  */
 
 #include "msprof_tx_reporter.h"
-#include <cstdint>
 
 #include "runtime/base.h"
 

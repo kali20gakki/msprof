@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
+ * Description: driver interface
+ * Author: Huawei Technologies Co., Ltd.
+ * Create: 2022-04-15
+ */
 #include "driver_plugin.h"
 
 namespace Analysis {
@@ -26,7 +32,8 @@ hdcError_t DriverPlugin::MsprofHalHdcRecv(HDC_SESSION session, struct drvHdcMsg 
         }
     }
     MSPROF_HALHDCRECV_T func;
-    ret = pluginManager_.GetFunction<hdcError_t, HDC_SESSION, struct drvHdcMsg *, int, UINT64, int *, UINT32>("halHdcRecv", func);
+    ret = pluginManager_.GetFunction<hdcError_t, HDC_SESSION, struct drvHdcMsg *, int, UINT64,
+                                     int *, UINT32>("halHdcRecv", func);
     if (ret != PLUGIN_LOAD_SUCCESS) {
         return DRV_ERROR_INVALID_HANDLE;
     }
@@ -63,7 +70,8 @@ hdcError_t DriverPlugin::MsprofHalHdcSessionConnectEx(int peer_node, int peer_de
         }
     }
     MSPROF_HALHDCSESSIONCONNECTEX_T func;
-    ret = pluginManager_.GetFunction<hdcError_t, int, int, int, HDC_CLIENT, HDC_SESSION *>("halHdcSessionConnectEx", func);
+    ret = pluginManager_.GetFunction<hdcError_t, int, int, int, HDC_CLIENT,
+                                     HDC_SESSION *>("halHdcSessionConnectEx", func);
     if (ret != PLUGIN_LOAD_SUCCESS) {
         return DRV_ERROR_INVALID_HANDLE;
     }
@@ -189,7 +197,8 @@ int DriverPlugin::MsprofDrvStart(unsigned int device_id, unsigned int channel_id
         }
     }
     MSPROF_PROFDRVSRART_T func;
-    ret = pluginManager_.GetFunction<int, unsigned int, unsigned int, struct prof_start_para *>("prof_drv_start", func);
+    ret = pluginManager_.GetFunction<int, unsigned int, unsigned int,
+                                     struct prof_start_para *>("prof_drv_start", func);
     if (ret != PLUGIN_LOAD_SUCCESS) {
         return -1;
     }
@@ -215,7 +224,8 @@ int DriverPlugin::MsprofDrvStop(unsigned int device_id, unsigned int channel_id)
 }
 
 // prof_channel_read
-int DriverPlugin::MsprofChannelRead(unsigned int device_id, unsigned int channel_id, char *out_buf, unsigned int buf_size)
+int DriverPlugin::MsprofChannelRead(unsigned int device_id, unsigned int channel_id,
+                                    char *out_buf, unsigned int buf_size)
 {
     Status ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginManager_.HasLoad()) {
@@ -503,7 +513,8 @@ drvError_t DriverPlugin::MsprofDrvHdcAddMsgBuffer(struct drvHdcMsg *msg, char *p
 }
 
 // drvHdcSessionConnect
-drvError_t DriverPlugin::MsprofDrvHdcSessionConnect(int peer_node, int peer_devid, HDC_CLIENT client, HDC_SESSION *session)
+drvError_t DriverPlugin::MsprofDrvHdcSessionConnect(int peer_node, int peer_devid,
+                                                    HDC_CLIENT client, HDC_SESSION *session)
 {
     Status ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginManager_.HasLoad()) {
