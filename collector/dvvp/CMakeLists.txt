@@ -19,7 +19,7 @@ set(hdcStubCpp
 )
 
 ############################## stub ################################
-set(MSPROF_STUB_INC ${TOP_DIR}/inc/external)
+set(MSPROF_STUB_INC ${TOP_DIR}/collector/inc/external)
 set(HI_PYTHON python3)
 add_custom_target(
     stub_msprof_src ALL
@@ -30,12 +30,12 @@ add_custom_command(
     OUTPUT  ${CMAKE_CURRENT_BINARY_DIR}/acl_prof_stub.cpp
             ${CMAKE_CURRENT_BINARY_DIR}/ge_prof_stub.cpp
     COMMAND echo "Generating stub files:acl_prof_stub.cpp, ge_prof_stub.cpp."
-            && ${HI_PYTHON} ${TOP_DIR}/build/stub/gen_stubapi.py ${MSPROF_STUB_INC}
+            && ${HI_PYTHON} ${TOP_DIR}/cmake/stub/gen_stubapi.py ${MSPROF_STUB_INC}
             ${CMAKE_CURRENT_BINARY_DIR}/acl_prof_stub.cpp
             ${CMAKE_CURRENT_BINARY_DIR}/ge_prof_stub.cpp
             && echo "Generating stub files end."
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-    DEPENDS ${TOP_DIR}/build/stub/gen_stubapi.py ${MSPROF_STUB_INC}
+    DEPENDS ${TOP_DIR}/cmake/stub/gen_stubapi.py ${MSPROF_STUB_INC}
 )
 ############################## stub ################################
 
@@ -55,7 +55,7 @@ set_target_properties(stub_msprofiler
 target_include_directories(stub_msprofiler PRIVATE
     ${MSPROF_STUB_INC}
     ${TOP_DIR}/collector/dvvp/depend/inc/acl
-    ${TOP_DIR}/inc/external
+    ${TOP_DIR}/collector/inc/external
     ${TOP_DIR}/collector/dvvp/depend/inc/graphengine/external
     ${TOP_DIR}/collector/dvvp/depend/inc/metadef
 )
@@ -143,15 +143,15 @@ set(msprofilerCpp
 )
 
 set(msprofilerInc
-    ${TOP_DIR}/inc
+    ${TOP_DIR}/collector/inc
     ${TOP_DIR}/collector/dvvp/depend/inc/graphengine/external
     ${TOP_DIR}/collector/dvvp/depend/inc/graphengine
     ${TOP_DIR}/collector/dvvp/depend/inc/graphengine/framework/common
     ${TOP_DIR}/collector/dvvp/depend/inc/driver
     ${TOP_DIR}/collector/dvvp/depend/inc/adump
     ${TOP_DIR}/collector/dvvp/depend/inc/slog
-    ${TOP_DIR}/inc/toolchain
-    ${TOP_DIR}/inc/external
+    ${TOP_DIR}/collector/inc/toolchain
+    ${TOP_DIR}/collector/inc/external
     ${TOP_DIR}/collector/dvvp/depend/inc/metadef
     ${TOP_DIR}/collector/dvvp/depend/inc/acl
     ${TOP_DIR}/collector/dvvp/depend/inc/mmpa

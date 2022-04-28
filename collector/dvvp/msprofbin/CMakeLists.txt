@@ -18,7 +18,7 @@ set(msprofBinHeader
     ${TOP_DIR}/collector/dvvp/depend/inc/driver
     ${TOP_DIR}/collector/dvvp/depend/inc/adump
     ${TOP_DIR}/collector/dvvp/depend/inc/plugin
-    ${TOP_DIR}/inc/toolchain
+    ${TOP_DIR}/collector/inc/toolchain
     ${TOP_DIR}/collector/dvvp/common/config
     ../common/utils
     ../msprof/engine/include
