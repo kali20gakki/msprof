@@ -5,13 +5,13 @@
  * Create: 2022-04-15
  */
 #include "plugin_manager.h"
-#include "config.h"
+
 #include <fstream>
+#include "config.h"
 
 namespace Analysis {
 namespace Dvvp {
 namespace Plugin {
-
 using namespace analysis::dvvp::common::config;
 
 const std::string PluginManager::GetSoName() const
@@ -138,7 +138,6 @@ bool PluginManager::IsFuncExist(const std::string funcName) const
     }
     return true;
 }
-
 } // namespace Plugin
 } // namespace Dvvp
 } // namespace Analysis

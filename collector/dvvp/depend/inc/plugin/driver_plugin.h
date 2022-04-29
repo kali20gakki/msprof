@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
+ * Description: driver interface
+ * Author: Huawei Technologies Co., Ltd.
+ * Create: 2022-04-15
+ */
 #ifndef DRIVER_PLUGIN_H
 #define DRIVER_PLUGIN_H
 

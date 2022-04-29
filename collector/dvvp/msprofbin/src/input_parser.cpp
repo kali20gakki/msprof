@@ -137,7 +137,8 @@ int InputParser::PreCheckPlatform(int opt, CONST_CHAR_PTR argv[])
     }
     std::vector<MsprofArgsType> platSwithList = platformArgsType[platformType];
     if (std::find(platSwithList.begin(), platSwithList.end(), opt) != platSwithList.end()) {
-        std::cout << Utils::GetSelfPath() << ": unrecognized option '" << argv[MmpaPlugin::instance()->MsprofMmGetOptInd() - 1] << "'" << std::endl;
+        std::cout << Utils::GetSelfPath() << ": unrecognized option '" 
+                  << argv[MmpaPlugin::instance()->MsprofMmGetOptInd() - 1] << "'" << std::endl;
         std::cout << "PlatformType:" << static_cast<uint8_t>(platformType) << std::endl;
         MsprofCmdUsage("");
         return PROFILING_FAILED;
@@ -440,7 +441,9 @@ int InputParser::CheckOutputValid(const struct MsprofCmdInfo &cmdInfo)
         if (Utils::CreateDir(path) != PROFILING_SUCCESS) {
             char errBuf[MAX_ERR_STRING_LEN + 1] = {0};
             CmdLog::instance()->CmdErrorLog("Create output dir failed.ErrorCode: %d, ErrorInfo: %s.",
-                MmpaPlugin::instance()->MsprofMmGetErrorCode(), MmpaPlugin::instance()->MsprofMmGetErrorFormatMessage(MmpaPlugin::instance()->MsprofMmGetErrorCode(), errBuf, MAX_ERR_STRING_LEN));
+                MmpaPlugin::instance()->MsprofMmGetErrorCode(),
+                MmpaPlugin::instance()->MsprofMmGetErrorFormatMessage(MmpaPlugin::instance()->MsprofMmGetErrorCode(),
+                    errBuf, MAX_ERR_STRING_LEN));
             return MSPROF_DAEMON_ERROR;
         }
         if (!Utils::IsDir(path)) {

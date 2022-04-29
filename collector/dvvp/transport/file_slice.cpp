@@ -307,7 +307,7 @@ bool FileSlice::CreateDoneFile(const std::string &absolutePath, const std::strin
         int errorNo = MmpaPlugin::instance()->MsprofMmGetErrorCode();
         char errBuf[MAX_ERR_STRING_LEN + 1] = {0};
         MSPROF_LOGE("Failed to open %s, ErrorCode:%d, errinfo:%s", Utils::BaseName(tempPath).c_str(), errorNo,
-                    MmpaPlugin::instance()->MsprofMmGetErrorFormatMessage(errorNo, errBuf, MAX_ERR_STRING_LEN));
+            MmpaPlugin::instance()->MsprofMmGetErrorFormatMessage(errorNo, errBuf, MAX_ERR_STRING_LEN));
         return false;
     }
     file << "filesize:" << fileSize << std::endl;

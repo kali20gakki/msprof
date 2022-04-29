@@ -9,7 +9,6 @@
 namespace Analysis {
 namespace Dvvp {
 namespace Plugin {
-
 DriverPlugin::~DriverPlugin()
 {
     pluginManager_.CloseHandle();
@@ -566,7 +565,6 @@ drvError_t DriverPlugin::MsprofDrvHdcGetCapacity(struct drvHdcCapacity *capacity
     }
     return func(capacity);
 }
-
 } // Plugin
 } // Dvvp
 } // Analysis
