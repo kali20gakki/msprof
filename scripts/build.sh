@@ -11,4 +11,4 @@ cd ${TOP_DIR}/build
 cmake ../cmake/superbuild/
 make -j64
 
-# bash create_run_package.sh
+#bash ${TOP_DIR}/scripts/create_run_package.sh ${1}
