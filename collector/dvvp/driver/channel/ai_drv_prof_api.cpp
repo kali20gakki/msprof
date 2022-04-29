@@ -125,8 +125,8 @@ int DrvPeripheralStart(const DrvPeripheralProfileCfg &peripheralCfg)
     profStartPara.real_time = PROFILE_REAL_TIME;
     profStartPara.user_data = peripheralCfg.configP;
     profStartPara.user_data_size = peripheralCfg.configSize;
-    int ret = DriverPlugin::instance()->MsprofDrvStart((unsigned int)peripheralCfg.profDeviceId, (unsigned int)peripheralCfg.profChannel,
-        &profStartPara);
+    int ret = DriverPlugin::instance()->MsprofDrvStart((unsigned int)peripheralCfg.profDeviceId,
+        (unsigned int)peripheralCfg.profChannel, &profStartPara);
     if (ret != PROF_OK) {
         MSPROF_LOGE("Failed to start profiling DrvPeripheralStart, profDeviceId=%d,"
             " profChannel=%d, profSamplePeriod=%d, ret=%d",
@@ -624,7 +624,8 @@ int DrvChannelRead(int profDeviceId,
         MSPROF_LOGE("outBuf is nullptr");
         return PROFILING_FAILED;
     }
-    int ret = DriverPlugin::instance()->MsprofChannelRead((uint32_t)profDeviceId, profChannel, reinterpret_cast<CHAR_PTR>(outBuf), bufSize);
+    int ret = DriverPlugin::instance()->MsprofChannelRead((uint32_t)profDeviceId, profChannel,
+        reinterpret_cast<CHAR_PTR>(outBuf), bufSize);
     if (ret < 0) {
         if (ret == PROF_STOPPED_ALREADY) {
             MSPROF_LOGW("profChannel has stopped already, profDeviceId=%d, profChannel=%d, bufSize=%d",

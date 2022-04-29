@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
+ * Description: driver interface
+ * Author: Huawei Technologies Co., Ltd.
+ * Create: 2022-04-15
+ */
 #ifndef DRIVER_PLUGIN_H
 #define DRIVER_PLUGIN_H
 
@@ -80,7 +86,6 @@ public:
     using MSPROF_DRVGETDEVIDBYLOCALID_T = std::function<drvError_t(uint32_t, uint32_t *)>;
     drvError_t MsprofDrvGetDevIDByLocalDevID(uint32_t localDevId, uint32_t *devId);
     
-    // 分割线
     // drvGetDevIDs
     using MSPROF_DRVGETDEVIDS_T = std::function<drvError_t(uint32_t *, uint32_t)>;
     drvError_t MsprofDrvGetDevIDs(uint32_t *devices, uint32_t len);

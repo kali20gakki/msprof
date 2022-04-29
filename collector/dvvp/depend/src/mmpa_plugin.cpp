@@ -9,7 +9,6 @@
 namespace Analysis {
 namespace Dvvp {
 namespace Plugin {
-
 MmpaPlugin::~MmpaPlugin()
 {
     pluginManager_.CloseHandle();
@@ -159,7 +158,7 @@ INT32 MmpaPlugin::MsprofMmGetOptLong(INT32 argc,
         return -1;
     }
     return func(argc, argv, opts, longOpts, longIndex);
-}                   
+}
 
 INT32 MmpaPlugin::MsprofMmGetOptInd()
 {
@@ -642,7 +641,7 @@ INT32 MmpaPlugin::MsprofMmGetEnv(const CHAR *name, CHAR *value, UINT32 len)
 }
 
 INT32 MmpaPlugin::MsprofMmCreateTaskWithThreadAttr(mmThread *threadHandle, const mmUserBlock_t *funcBlock,
-        const mmThreadAttr *threadAttr)
+                                                   const mmThreadAttr *threadAttr)
 {
     Status ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginManager_.HasLoad()) {
@@ -1123,7 +1122,6 @@ INT32 MmpaPlugin::MsprofMmGetOpt(INT32 argc, CHAR * const * argv, const CHAR *op
     }
     return func(argc, argv, opts);
 }
-
 } // namespace Plugin
 } // namespace Dvvp
 } // namespace Analysis

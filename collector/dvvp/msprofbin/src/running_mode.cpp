@@ -154,7 +154,8 @@ int RunningMode::GetOutputDirInfoFromRecord()
     } else {
         char errBuf[MAX_ERR_STRING_LEN + 1] = {0};
         MSPROF_LOGE("Open file failed, fileName:%s, error: %s", Utils::BaseName(recordFile).c_str(),
-            MmpaPlugin::instance()->MsprofMmGetErrorFormatMessage(MmpaPlugin::instance()->MsprofMmGetErrorCode(), errBuf, MAX_ERR_STRING_LEN));
+            MmpaPlugin::instance()->MsprofMmGetErrorFormatMessage(MmpaPlugin::instance()->MsprofMmGetErrorCode(),
+                errBuf, MAX_ERR_STRING_LEN));
         return PROFILING_FAILED;
     }
 }
@@ -770,7 +771,9 @@ int SystemMode::CreateJobDir(std::string device, std::string &resultDir) const
         char errBuf[MAX_ERR_STRING_LEN + 1] = {0};
         CmdLog::instance()->CmdErrorLog("Create dir (%s) failed.ErrorCode: %d, ErrorInfo: %s.",
             Utils::BaseName(resultDir).c_str(),
-            MmpaPlugin::instance()->MsprofMmGetErrorCode(), MmpaPlugin::instance()->MsprofMmGetErrorFormatMessage(MmpaPlugin::instance()->MsprofMmGetErrorCode(), errBuf, MAX_ERR_STRING_LEN));
+            MmpaPlugin::instance()->MsprofMmGetErrorCode(),
+            MmpaPlugin::instance()->MsprofMmGetErrorFormatMessage(MmpaPlugin::instance()->MsprofMmGetErrorCode(),
+                errBuf, MAX_ERR_STRING_LEN));
         return PROFILING_FAILED;
     }
     analysis::dvvp::common::utils::Utils::EnsureEndsInSlash(resultDir);

@@ -508,8 +508,8 @@ int32_t HdcSessionConnect(int32_t peerNode, int32_t peerDevid, HDC_CLIENT client
         return IDE_DAEMON_ERROR;
     }
 
-    IDE_CTRL_VALUE_FAILED(DriverPlugin::instance()->MsprofDrvHdcSetSessionReference(*session) == DRV_ERROR_NONE, return IDE_DAEMON_ERROR,
-        "session reference set failed");
+    IDE_CTRL_VALUE_FAILED(DriverPlugin::instance()->MsprofDrvHdcSetSessionReference(*session) == DRV_ERROR_NONE,
+        return IDE_DAEMON_ERROR, "session reference set failed");
 
     MSPROF_LOGI("connect succ, peer_node: %d, peer_devid: %d", peerNode, peerDevid);
     return IDE_DAEMON_OK;
@@ -537,14 +537,15 @@ int32_t HalHdcSessionConnect(int32_t peerNode, int32_t peerDevid,
     IDE_CTRL_VALUE_FAILED(session != nullptr, return IDE_DAEMON_ERROR, "session is nullptr");
 
     // hdc connect
-    hdcError_t error = DriverPlugin::instance()->MsprofHalHdcSessionConnectEx(peerNode, peerDevid, hostPid, client, session);
+    hdcError_t error = DriverPlugin::instance()->MsprofHalHdcSessionConnectEx(peerNode, peerDevid,
+        hostPid, client, session);
     if (error != DRV_ERROR_NONE || *session == nullptr) {
         MSPROF_LOGI("Hdc Session Connect, ret: %d", error);
         return IDE_DAEMON_ERROR;
     }
 
-    IDE_CTRL_VALUE_FAILED(DriverPlugin::instance()->MsprofDrvHdcSetSessionReference(*session) == DRV_ERROR_NONE, return IDE_DAEMON_ERROR,
-        "session reference set failed");
+    IDE_CTRL_VALUE_FAILED(DriverPlugin::instance()->MsprofDrvHdcSetSessionReference(*session) == DRV_ERROR_NONE,
+        return IDE_DAEMON_ERROR, "session reference set failed");
 
     MSPROF_LOGI("connect succ, peer_node: %d, peer_devid: %d, host_pid: %d", peerNode, peerDevid, hostPid);
     return IDE_DAEMON_OK;
