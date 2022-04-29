@@ -27,7 +27,7 @@ cd ${OPENSOURCE_DIR}
 git clone ssh://git@codehub-dg-y.huawei.com:2222/OpenSourceCenter/protobuf.git protobuf -b v3.13.0
 git clone ssh://git@codehub-dg-y.huawei.com:2222/OpenSourceCenter/nlohmann/json.git json -b v3.7.3
 git clone ssh://git@codehub-dg-y.huawei.com:2222/hwsecurec_group/huawei_secure_c.git securec -b tag_Huawei_Secure_C_V100R001C01SPC011B003_00001
-
+git clone  --branch 2.4.5-h0.computing.cann.r3 ssh://git@codehub-dg-y.huawei.com:2222/OpenSourceCenter/makeself.git
 
 ###################################### gtest下载 #####################################
 # 下载 gtest和mockcpp

@@ -1,7 +1,6 @@
   --run                             Install run mode
   --full                            Install full mode
   --devel                           Install devel mode
-  --nox11                           Install nox11 mode
   --upgrade                         Upgrade
   --uninstall                       Uninstall 
   --install-path=<path>             Install  to specific path
