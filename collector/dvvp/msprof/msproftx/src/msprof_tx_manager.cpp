@@ -16,7 +16,6 @@
 #include "errno/error_code.h"
 #include "msprof_dlog.h"
 #include "config/config.h"
-#include "securec.h"
 
 using namespace analysis::dvvp::common::config;
 using namespace analysis::dvvp::common::error;
