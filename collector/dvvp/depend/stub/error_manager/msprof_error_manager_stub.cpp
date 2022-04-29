@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
+ * Description: wrapper for error manager
+ * Author: Huawei Technologies Co., Ltd.
+ * Create: 2022-04-15
+ */
 #include "msprof_error_manager.h"
 
 namespace Analysis {
