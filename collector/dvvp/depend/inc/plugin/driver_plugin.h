@@ -80,7 +80,6 @@ public:
     using MSPROF_DRVGETDEVIDBYLOCALID_T = std::function<drvError_t(uint32_t, uint32_t *)>;
     drvError_t MsprofDrvGetDevIDByLocalDevID(uint32_t localDevId, uint32_t *devId);
     
-    // 分割线
     // drvGetDevIDs
     using MSPROF_DRVGETDEVIDS_T = std::function<drvError_t(uint32_t *, uint32_t)>;
     drvError_t MsprofDrvGetDevIDs(uint32_t *devices, uint32_t len);
