@@ -23,6 +23,7 @@ namespace ProfilerCommon {
 using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::common::config;
 using namespace Analysis::Dvvp::Common::Platform;
+using namespace analysis::dvvp::host;
 
 bool CheckMsprofBin(std::string &envValue)
 {
@@ -122,8 +123,9 @@ int32_t MsprofSetDeviceCallbackImpl(VOID_PTR data, uint32_t len)
             return MSPROF_ERROR;
         }
         std::string info;
-        if (!(analysis::dvvp::host::ProfManager::instance()->CheckIfDevicesOnline(std::to_string(setCfg->deviceId), info))) {
-            MSPROF_LOGE("MsprofSetDeviceCallbackImpl, devId:%u is invalid, error info:%s", setCfg->deviceId, info.c_str());
+        if (!(ProfManager::instance()->CheckIfDevicesOnline(std::to_string(setCfg->deviceId), info))) {
+            MSPROF_LOGE("MsprofSetDeviceCallbackImpl, devId:%u is invalid, error info:%s",
+                setCfg->deviceId, info.c_str());
             MSPROF_INNER_ERROR("EK9999", "MsprofSetDeviceCallbackImpl, devId:%u is invalid, error info:%s",
                 setCfg->deviceId, info.c_str());
             return MSPROF_ERROR;

@@ -142,13 +142,3 @@ const char *aclprofGetOpAttriValue(CONST_VOID_PTR opInfo, size_t opInfoLen, uint
     const char *result = OpDescParser::GetOpAttriValue(opInfo, opInfoLen, index, attri);
     return result;
 }
-
-// int32_t MsprofInit(uint32_t dataType, VOID_PTR data, uint32_t dataLen)
-// {
-//     return Analysis::Dvvp::ProfilerCommon::MsprofCtrlCallbackImpl(dataType, data, dataLen);
-// }
-
-// int32_t MsprofFinalize()
-// {
-//     return Analysis::Dvvp::ProfilerCommon::MsprofCtrlCallbackImpl(MSPROF_CTRL_FINALIZE, nullptr, 0);
-// }
