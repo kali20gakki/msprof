@@ -19,6 +19,7 @@ CREATE_RUN_SCRIPT=${MAKESELF_DIR}/makeself.sh
 CONTROL_PARAM_SCRIPT=${MAKESELF_DIR}/makeself-header.sh
 #输出run存放的位置
 OUTPUT_DIR=${TOP_DIR}/output
+mkdir ${OUTPUT_DIR}
 
 
 #执行run包相关脚本存放的路径
@@ -100,5 +101,4 @@ sed -i "1i VERSION=$version" ${RUN_SCRIPT_DIR}${MAIN_SCRIPT}
 create_temp_dir ${MSPROF_TEMP_DIR}
 create_run_package ${MSPROF_RUN_NAME} ${MSPROF_TEMP_DIR}
 
-rm -r ${MSPROF_TEMP_DIR}
 sed -i '1d' ${RUN_SCRIPT_DIR}${MAIN_SCRIPT}
