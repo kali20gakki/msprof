@@ -1,0 +1,116 @@
+# coding=utf-8
+"""
+This script is amid to define db names.
+Copyright Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
+"""
+from decimal import Decimal
+
+
+class NumberConstant:
+    """
+    Constant for number
+    """
+    NULL_NUMBER = 0
+    EXCEPTION = -1
+    SUCCESS = 0
+    ERROR = 1
+    WARN = 2
+    KILOBYTE = 1024.0
+    FLOAT_ZERO_BOUND = 1e-17
+
+    MS_TIME_RATE = 1000000
+    NS_TIME_RATE = 1000000000.0
+    DEFAULT_LENGTH = 50
+    DEFAULT_NUMBER = 9223372036854775807  # max value for 16 bytes Integer
+    DEFAULT_START_TIME = 0
+    DEFAULT_END_TIME = 9223372036854775807  # max value for 16 bytes Integer
+    FILE_AUTHORITY = 0o640
+    DIR_AUTHORITY = 0o750
+    U_MASK = 0o027
+    NANO_SECOND = 1000000000.0
+    MICRO_SECOND = 1000000.0
+    MILLI_SECOND = 1000.0
+    HEX_NUMBER = 16
+    DATA_NUM = 8196
+    DEFAULT_TABLE_FIELD_NUM = 0
+    RATIO_NAME_LEN = 5
+    PERCENTAGE = 100
+    DECIMAL_ACCURACY = 6
+    ROUND_TWO_DECIMAL = 2
+    LLC_CAPACITY = 64.0
+    CPU_FREQ = 680000
+
+    # AICORE metrics index in metric summary tables
+    METRICS_DEVICE_INDEX = -4
+    METRICS_TASK_INDEX = -3
+    METRICS_STREAM_INDEX = -2
+    METRICS_ITER_INDEX = -1
+
+    DEFAULT_ITER_ID = 1
+    DEFAULT_MODEL_ID = -1
+    STATIC_SHAPE_ITER_ID = 0
+
+    # time units transfer
+    NS_TO_US = 1000.0
+    TEN_NS_TO_US = 100.0
+    MS_TO_US = 1000.0
+    MS_TO_NS = 1000000.0
+    LLC_BYTE = 64.0
+    FLT_EPSILON = 1.0e-9
+    USTONS = 1000
+    DEFAULT_STREAM_ID = 65535
+    DEFAULT_TASK_ID = 65535
+    PROF_PATH_MAX_LEN = 300
+
+    # time conversion ns to us
+    CONVERSION_TIME = 1000.0
+
+    # string max length, no more than 8 MB
+    MAX_STR_LENGTH = 8 * 1024 * 1024
+
+    # llc capacity num tracelate to MB
+    LLC_CAPACITY_CONVERT_MB = 64.0 / (1024 * 1024)
+    USAGE_PLACES = Decimal(10) ** -6
+    SEC_TO_US = 10 ** 6
+
+    INVALID_ITER_ID = -1
+
+    # training trace index
+    FORWARD_PROPAGATION = 3
+    STEP_END = 5
+    DATA_AUG_BOUND = 9
+
+    COLUMN_COUNT = 9
+
+    #pytorch msproftx event_type
+    MARKER = 0
+    PUSH_AND_POP = 1
+    START_AND_END = 2
+
+    # task time
+    TASK_TIME_PID = 0
+
+    # the default batch id of chip v1
+    DEFAULT_BATCH_ID = 0
+
+    # invalid id
+    INVALID_STREAM_ID = -1
+    INVALID_TASK_ID = -1
+
+
+
+    @property
+    def conversion_time(self: any) -> float:
+        """
+        time conversion ns to us
+        :return: time conversion
+        """
+        return self.CONVERSION_TIME
+
+    @property
+    def max_str_length(self: any) -> int:
+        """
+        string max length, no more than 8 MB
+        :return: string max length
+        """
+        return self.MAX_STR_LENGTH

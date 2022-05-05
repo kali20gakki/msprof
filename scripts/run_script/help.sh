@@ -1,0 +1,7 @@
+  --run                             Install run mode
+  --full                            Install full mode
+  --devel                           Install devel mode
+  --upgrade                         Upgrade
+  --uninstall                       Uninstall 
+  --install-path=<path>             Install  to specific path
+  --install-for-all                 Install for all user

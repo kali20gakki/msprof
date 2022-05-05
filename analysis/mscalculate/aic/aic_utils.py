@@ -1,0 +1,78 @@
+# coding=utf-8
+"""
+function: script used to help parse aic pmu
+Copyright Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
+"""
+
+from common_func.msvp_common import read_cpu_cfg
+from common_func.utils import Utils
+
+
+class AicPmuUtils:
+    """
+    class used to help parse aic pmu
+    """
+    HEX = 16
+
+    @staticmethod
+    def get_pmu_event_name(pmu_event: str) -> str:
+        """
+        return pmu event name by pmu_event
+        :param pmu_event:
+        :return: pmu name
+        """
+        aicore_events_map = read_cpu_cfg("ai_core", "event2metric")
+        pmu_name = aicore_events_map.get(int(pmu_event, AicPmuUtils.HEX), "")
+        if not pmu_name:
+            pmu_name = str(pmu_event)
+        return pmu_name
+
+    @staticmethod
+    def get_pmu_events(aic_pmu_events: str) -> list:
+        """
+        get pmu events
+        :param aic_pmu_events:
+        :return:
+        """
+        if not aic_pmu_events:
+            return []
+        return Utils.generator_to_list(AicPmuUtils.get_pmu_event_name(pmu_event)
+                                       for pmu_event in aic_pmu_events.split(","))
+
+    @classmethod
+    def remove_unused_column(cls: any, ai_core_profiling_events: list) -> list:
+        """
+        :param ai_core_profiling_events:
+        :return:
+        """
+        remove_list = cls._remove_list(ai_core_profiling_events)
+        result_list = list(filter(lambda events: events not in remove_list, ai_core_profiling_events))
+        return result_list
+
+    @classmethod
+    def remove_redundant(cls: any, ai_core_profiling_events: dict) -> None:
+        """
+        :param ai_core_profiling_events:
+        :return:
+        """
+        key_list = list(ai_core_profiling_events.keys())
+        remove_list = cls._remove_list(key_list)
+        for _key in key_list:
+            if _key in remove_list:
+                del ai_core_profiling_events[_key]
+
+    @classmethod
+    def _remove_list(cls: any, key_list: list) -> list:
+        """
+        :param key_list:
+        :return:
+        """
+        remove_list = ["total_time(ms)", "icache_req_ratio", "vec_fp16_128lane_ratio", "vec_fp16_64lane_ratio"]
+        unused_list = [["ub_read_bw_mte(GB/s)", "ub_write_bw_mte(GB/s)", "l2_write_bw(GB/s)",
+                        "main_mem_write_bw(GB/s)"],
+                       ["ub_read_bw_mte(GB/s)", "ub_write_bw_mte(GB/s)"],
+                       ["l2_read_bw(GB/s)", "l2_write_bw(GB/s)"]]
+        for _unused_list in unused_list:
+            if set(key_list) >= set(_unused_list):
+                remove_list.extend(_unused_list)
+        return remove_list
