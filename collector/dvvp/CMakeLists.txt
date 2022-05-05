@@ -55,9 +55,9 @@ set_target_properties(stub_msprofiler
 target_include_directories(stub_msprofiler PRIVATE
     ${MSPROF_STUB_INC}
     ${TOP_DIR}/collector/dvvp/depend/inc/acl
-    ${TOP_DIR}/collector/inc/external
     ${TOP_DIR}/collector/dvvp/depend/inc/graphengine/external
     ${TOP_DIR}/collector/dvvp/depend/inc/metadef
+    ${TOP_DIR}/collector/inc/external
 )
 
 target_compile_options(stub_msprofiler PRIVATE
@@ -77,8 +77,7 @@ install(TARGETS stub_msprofiler OPTIONAL
 )
 ###################### stub/libmsprofiler.so #######################
 
-####################### libmsprofiler.so ###########################
-
+# ####################### libmsprofiler.so ###########################
 set(msprofilerCpp
     analyze/src/analyzer.cpp
     analyze/src/analyzer_base.cpp
@@ -144,19 +143,22 @@ set(msprofilerCpp
 
 set(msprofilerInc
     ${TOP_DIR}/collector/inc
+    ################################## Check #####################################
     ${TOP_DIR}/collector/dvvp/depend/inc/graphengine/external
     ${TOP_DIR}/collector/dvvp/depend/inc/graphengine
     ${TOP_DIR}/collector/dvvp/depend/inc/graphengine/framework/common
     ${TOP_DIR}/collector/dvvp/depend/inc/driver
     ${TOP_DIR}/collector/dvvp/depend/inc/adump
     ${TOP_DIR}/collector/dvvp/depend/inc/slog
-    ${TOP_DIR}/collector/inc/toolchain
-    ${TOP_DIR}/collector/inc/external
     ${TOP_DIR}/collector/dvvp/depend/inc/metadef
     ${TOP_DIR}/collector/dvvp/depend/inc/acl
     ${TOP_DIR}/collector/dvvp/depend/inc/mmpa
     ${TOP_DIR}/collector/dvvp/depend/inc/slog
     ${TOP_DIR}/collector/dvvp/depend/inc/profapi
+    ################################# Check #######################################
+    ${TOP_DIR}/collector/inc/toolchain
+    ${TOP_DIR}/collector/inc/external
+    ${TOP_DIR}/collector/inc/external/acl
     ${TOP_DIR}/opensource/securec/include
     ${TOP_DIR}/opensource/json/include
     ${TOP_DIR}/collector/dvvp/depend/inc/plugin

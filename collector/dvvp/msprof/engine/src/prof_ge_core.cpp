@@ -8,7 +8,6 @@
 #include <google/protobuf/util/json_util.h>
 #include "acl/acl_base.h"
 #include "ge/ge_prof.h"
-#include "profiling/ge_profiling.h"
 
 #include "ai_drv_dev_api.h"
 #include "command_handle.h"

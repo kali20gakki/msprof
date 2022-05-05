@@ -5,7 +5,6 @@
  * Create: 2020-09-26
  */
 #include "msprof_callback_impl.h"
-#include "profiling/ge_profiling.h"
 #include "errno/error_code.h"
 #include "msprof_callback_handler.h"
 #include "prof_acl_mgr.h"

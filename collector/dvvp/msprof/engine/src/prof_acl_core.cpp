@@ -21,7 +21,6 @@
 #include "prof_acl_mgr.h"
 #include "msprof_tx_manager.h"
 #include "utils/utils.h"
-#include "profiling/ge_profiling.h"
 #include "prof_api_common.h"
 #include "transport/hash_data.h"
 #include "runtime/base.h"
@@ -520,8 +519,8 @@ aclError aclprofGetStepTimestamp(ACLPROF_STEPINFO_PTR stepInfo, aclprofStepTag t
     } else {
         stepInfo->endFlag = true;
     }
-    auto geRet = ProfSetStepInfo(stepInfo->indexId, tag, stream);
-    if (geRet != ge::SUCCESS) {
+    auto geRet = profSetStepInfo(stepInfo->indexId, tag, stream);
+    if (geRet != PROFAPI_SUCCESS) {
         MSPROF_LOGE("[aclprofGetStepTimestamp]Call ProfSetStepInfo function failed, ge result = %d", geRet);
         return ACL_ERROR_GE_FAILURE;
     }
