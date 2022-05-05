@@ -86,50 +86,6 @@
 
 
 #if(OS_TYPE == WIN) //lint !e553
-
-#ifdef FUNC_VISIBILITY
-#define MMPA_FUNC_VISIBILITY _declspec(dllexport)
-#else
-#define MMPA_FUNC_VISIBILITY
-#endif
-
-#include <winsock2.h>
-#include <winsock.h>
-#include "Windows.h"
-#include <errno.h>
-#include <string.h>
-#include <fcntl.h>
-#include <io.h>
-#include <stdio.h>
-#include <ws2tcpip.h>
-#include <winioctl.h>
-#include <WinBase.h>
-#include <mswsock.h>
-#include <strsafe.h>
-#include <signal.h>
-#include <time.h>
-#include <stdarg.h>
-#include "shlwapi.h"
-#include <direct.h>
-#include <VersionHelpers.h>
-#include <processthreadsapi.h>
-#include <Wbemidl.h>
-#include <iphlpapi.h>
-#include <synchapi.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-
-#include "securec.h"
-
-#include "sub_inc/mmpa_typedef_win.h"
-#include "sub_inc/mmpa_win.h"
-
-#pragma comment(lib, "ws2_32.lib")
-#pragma comment(lib, "mswsock.lib")
-#pragma comment(lib, "Kernel32.lib")
-#pragma comment(lib, "shlwapi.lib")
-#pragma comment(lib, "wbemuuid.lib")
-#pragma comment(lib, "Iphlpapi.lib")
 #endif
 
 #endif // MMPA_API_H_

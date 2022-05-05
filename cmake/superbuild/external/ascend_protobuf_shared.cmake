@@ -21,10 +21,3 @@ ExternalProject_Add(ascend_protobuf_shared_build
     BUILD_COMMAND $(MAKE)
     EXCLUDE_FROM_ALL TRUE
 )
-
-
-
-
-
-
-

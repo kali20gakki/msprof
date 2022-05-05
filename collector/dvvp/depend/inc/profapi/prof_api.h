@@ -39,6 +39,9 @@ struct ProfSetDevPara {
     bool isOpen;
 };
 
+#define PROFAPI_SUCCESS 0
+#define PROFAPI_FAILED 0xFFFU
+
 using ProfSetDevPara_t = struct ProfSetDevPara;
 
 using PROFAPI_CONFIG_CONST_PTR = const void *; // const aclprofConfig *;
