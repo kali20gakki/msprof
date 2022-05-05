@@ -2,12 +2,13 @@
 CUR_DIR=$(dirname $(readlink -f $0))
 TOP_DIR=${CUR_DIR}/..
 #存放编译出的msprof.bin和msprof.py
+TEMP_OUTPUT=${TOP_DIR}/build/output
 MSPROF_TEMP_DIR=${TOP_DIR}/msprof_tmp
 mkdir ${MSPROF_TEMP_DIR}
 
-cp -r ${TOP_DIR}/tmp/lib/libmsprofiler.so ${MSPROF_TEMP_DIR}
-cp -r ${TOP_DIR}/tmp/stub ${MSPROF_TEMP_DIR}
-cp -r ${TOP_DIR}/tmp/bin/msprof ${MSPROF_TEMP_DIR}
+cp -r ${TEMP_OUTPUT}/lib/libmsprofiler.so ${MSPROF_TEMP_DIR}
+cp -r ${TEMP_OUTPUT}/stub ${MSPROF_TEMP_DIR}
+cp -r ${TEMP_OUTPUT}/bin/msprof ${MSPROF_TEMP_DIR}
 cp -r ${TOP_DIR}/analysis ${MSPROF_TEMP_DIR}
 
 #makeself是一款编run包的工具
