@@ -8,9 +8,6 @@
 #define ANALYSIS_DVVP_PROFILER_MSPROF_CALLBACK_HANDLER_H
 
 #include <cstdint>
-
-#include "acl/acl_base.h"
-
 #include "data_dumper.h"
 #include "prof_callback.h"
 #include "utils/utils.h"

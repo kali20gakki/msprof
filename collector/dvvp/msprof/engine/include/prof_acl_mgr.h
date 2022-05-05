@@ -21,7 +21,7 @@
 #include "utils/utils.h"
 #include "prof_api_common.h"
 #include "proto/profiler_ext.pb.h"
-#include "runtime/base.h"
+#include "prof_api.h"
 
 namespace analysis {
 namespace dvvp {

@@ -8,6 +8,5 @@
 #define MSPROF_ENGINE_ACL_CORE_H
 
 #include "prof_api_common.h"
-#include "acl/acl_base.h"
 
 #endif  // MSPROF_ENGINE_ACL_CORE_H

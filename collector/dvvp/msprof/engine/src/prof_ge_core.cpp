@@ -6,7 +6,6 @@
  */
 #include "prof_ge_core.h"
 #include <google/protobuf/util/json_util.h>
-#include "acl/acl_base.h"
 #include "ge/ge_prof.h"
 
 #include "ai_drv_dev_api.h"
@@ -20,7 +19,7 @@
 #include "prof_api_common.h"
 #include "utils/utils.h"
 #include "param_validation.h"
-#include "runtime/base.h"
+#include "prof_api.h"
 #include "platform/platform.h"
 #include "prof_api.h"
 

@@ -6,7 +6,7 @@
  */
 #include "command_handle.h"
 #include "prof_api_common.h"
-#include "runtime/base.h"
+#include "prof_api.h"
 #include "prof_common.h"
 #include "msprof_dlog.h"
 #include "prof_acl_mgr.h"
