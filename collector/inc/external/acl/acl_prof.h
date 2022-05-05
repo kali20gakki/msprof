@@ -17,7 +17,7 @@
 #define MSVP_PROF_API __attribute__((visibility("default")))
 #endif
 
-#include "acl_base.h"
+#include "prof_api.h"
 
 #ifdef __cplusplus
 extern "C" {

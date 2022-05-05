@@ -58,6 +58,7 @@ target_include_directories(stub_msprofiler PRIVATE
     ${TOP_DIR}/collector/dvvp/depend/inc/graphengine/external
     ${TOP_DIR}/collector/dvvp/depend/inc/metadef
     ${TOP_DIR}/collector/inc/external
+    ${TOP_DIR}/collector/dvvp/depend/inc/profapi
 )
 
 target_compile_options(stub_msprofiler PRIVATE
