@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project>
+    <artifact>
+        <versionType>Component</versionType>
+        <repoType>Generic</repoType>
+        <id>
+            <offering>MindStudio</offering>
+            <componentName>msprof</componentName>
+            <componentVersion>20.10.0.B010</componentVersion>
+        </id>
+        <isClear>N</isClear>
+        <copies>
+            <copy>
+                <source>output/</source>
+                <dest />
+            </copy>
+        </copies>
+    </artifact>
+</project>
