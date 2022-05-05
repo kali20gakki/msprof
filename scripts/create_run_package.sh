@@ -63,7 +63,7 @@ function create_temp_dir() {
 
 # 以下函数不需要
 function version() {
-    local _path="${TOP_DIR}/../../MindStudio_CI/Manifest/dependency/config.ini"
+    local _path="${TOP_DIR}/../MindStudio_CI/Manifest/dependency/config.ini"
     local _version=$(grep "^version=" "${_path}" | cut -d"=" -f2)
     echo "${_version}"
 }
