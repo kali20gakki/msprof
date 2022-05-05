@@ -8,7 +8,6 @@
 
 #include <google/protobuf/util/json_util.h>
 
-#include "acl/acl_base.h"
 #include "acl/acl_prof.h"
 
 #include "ai_drv_dev_api.h"
@@ -23,7 +22,7 @@
 #include "utils/utils.h"
 #include "prof_api_common.h"
 #include "transport/hash_data.h"
-#include "runtime/base.h"
+#include "prof_api.h"
 #include "platform/platform.h"
 #include "prof_api.h"
 
