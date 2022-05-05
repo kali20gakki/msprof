@@ -11,9 +11,47 @@
 #ifndef IDE_HDC_API_H
 #define IDE_HDC_API_H
 #include "ascend_hal.h"
-#include "ide_tlv.h"
 #include "extra_config.h"
 #include "adx_log.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+enum cmd_class {
+    IDE_EXEC_COMMAND_REQ = 0, /**< 执行device命令请求\n */
+    IDE_SEND_FILE_REQ,        /**< 发送文件到device命令请求\n */
+    IDE_DEBUG_REQ,            /**< Debug命令请求\n */
+    IDE_BBOX_REQ,             /**< Bbox命令请求\n */
+    IDE_LOG_REQ,              /**< Log命令请求\n */
+    IDE_PROFILING_REQ,        /**< Profiling命令请求\n */
+    IDE_OME_DUMP_REQ,         /**< Ome dump命令请求\n */
+    IDE_FILE_SYNC_REQ,        /**< 发送文件到AiHost 命令请求\n */
+    IDE_EXEC_API_REQ,         /**< 执行AiHost Api命令请求\n */
+    IDE_EXEC_HOSTCMD_REQ,     /**< 执行AiHost 命令命令请求\n */
+    IDE_DETECT_REQ,           /**< 执行AiHost 通路命令请求\n */
+    IDE_FILE_GET_REQ,         /**< 获取AiHost侧文件命令请求\n */
+    IDE_NV_REQ,               /**< 执行AiHost Nv命令请求\n */
+    IDE_DUMP_REQ,             /**< Dump命令请求\n */
+    IDE_FILE_GETD_REQ,        /**< 获取Device侧文件命令请求\n */
+    IDE_INVALID_REQ,          /**< 无效命令请求\n */
+    NR_IDE_CMD_CLASS,         /**< 标识命令请求最大值\n */
+};
+typedef enum cmd_class CmdClassT;
+
+struct tlv_req {
+    enum cmd_class type; /**< command type */
+    int dev_id;          /**< device id */
+    int len;             /**< data len */
+    char value[0];       /**< data */
+};
+
+typedef struct tlv_req TlvReqT;
+typedef TlvReqT* IdeTlvReq;
+typedef const TlvReqT* IdeTlvConReq;
+typedef IdeTlvReq* IdeTlvReqAddr;
+#ifdef __cplusplus
+}
+#endif
 
 namespace Analysis {
 namespace Dvvp {

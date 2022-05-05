@@ -6,6 +6,8 @@
  */
 #include "mmpa_plugin.h"
 
+#include "securec.h"
+
 namespace Analysis {
 namespace Dvvp {
 namespace Plugin {
@@ -265,7 +267,7 @@ INT32 MmpaPlugin::MsprofMmGetTimeOfDay(mmTimeval *timeVal, mmTimezone *timeZone)
 mmTimespec MmpaPlugin::MsprofMmGetTickCount()
 {
     mmTimespec rts;
-    memset(&rts, 0, sizeof(mmTimespec));
+    memset_s(&rts, sizeof(mmTimespec), 0, sizeof(mmTimespec));
     Status ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginManager_.HasLoad()) {
         ret = pluginManager_.OpenPlugin("LD_LIBRARY_PATH");

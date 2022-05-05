@@ -10,7 +10,6 @@
 #include "errno/error_code.h"
 #include "securec.h"
 #include "ai_drv_dev_api.h"
-#include "ascend_inpackage_hal.h"
 #include "driver_plugin.h"
 namespace analysis {
 namespace dvvp {

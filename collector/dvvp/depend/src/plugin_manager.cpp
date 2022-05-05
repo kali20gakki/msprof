@@ -6,8 +6,8 @@
  */
 #include "plugin_manager.h"
 
-#include <fstream>
 #include "config.h"
+#include "securec.h"
 
 namespace Analysis {
 namespace Dvvp {
@@ -88,35 +88,15 @@ void PluginManager::SplitPath(const std::string &mutilPath, std::vector<std::str
     }
 }
 
-void PluginManager::ReadDriverConf(std::vector<std::string> &pathVec) const
-{
-    const char *drvConfPth = "/etc/ld.so.conf.d/ascend_driver_so.conf";
-    if (access(drvConfPth, F_OK) == -1) {
-        MSPROF_LOGI("[ReadDriverConf]ascend_driver_so.conf not exist.");
-        return;
-    }
-    std::fstream drvConfReader(drvConfPth, std::fstream::in);
-    if (!drvConfReader.is_open()) {
-        MSPROF_LOGE("[ReadDriverConf]Fail to read drvConf file.");
-        return;
-    }
-    char path[MAX_PATH_LENGTH] = {0};
-    while (drvConfReader.getline(path, MAX_PATH_LENGTH)) {
-        pathVec.push_back(path);
-    }
-    drvConfReader.close();
-}
-
 std::string PluginManager::GetSoPath(const std::string &envValue) const
 {
     MSPROF_LOGI("[GetSoPath]envValue:%s", envValue.c_str());
     char pathEnv[MAX_PATH_LENGTH] = {0};
     const char *env = getenv(envValue.c_str());
-    strncpy(pathEnv, env, MAX_PATH_LENGTH);
+    strncpy_s(pathEnv, MAX_PATH_LENGTH, env, MAX_PATH_LENGTH);
     MSPROF_LOGI("[GetSoPath]pathEnv:%s", pathEnv);
     std::vector<std::string> pathVec;
     SplitPath(std::string(pathEnv), pathVec);
-    ReadDriverConf(pathVec);
     for (auto path : pathVec) {
         std::string ret = path + "/" + soName_;
         MSPROF_LOGI("[GetSoPath]so path:%s", ret.c_str());

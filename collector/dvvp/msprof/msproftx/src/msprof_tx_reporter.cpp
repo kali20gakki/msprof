@@ -7,7 +7,7 @@
 
 #include "msprof_tx_reporter.h"
 
-#include "runtime/base.h"
+#include "prof_api.h"
 
 #include "errno/error_code.h"
 #include "msprof_dlog.h"

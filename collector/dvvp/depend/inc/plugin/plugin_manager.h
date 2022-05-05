@@ -44,7 +44,6 @@ private:
     std::string RealPath(const std::string &path) const;
     std::string GetSoPath(const std::string &envValue) const;
     void SplitPath(const std::string &mutilPath, std::vector<std::string> &patVec) const;
-    void ReadDriverConf(std::vector<std::string> &pathVec) const; // "/etc/ld.so.conf.d/ascend_driver_so.conf"
     std::string soName_;
     HandleType handle_;
     bool load_;
