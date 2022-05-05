@@ -8,7 +8,6 @@
 #include "msprof_tx_manager.h"
 
 #include <cstdint>
-#include <memory>
 
 #include "mmpa_plugin.h"
 

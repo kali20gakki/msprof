@@ -31,8 +31,6 @@
 extern "C" {
 #endif
 
-//#include "ascend_hal_define.h"
-
 /*lint -e116 -e17*/
 #ifndef int8_t
 typedef signed char int8_t;
