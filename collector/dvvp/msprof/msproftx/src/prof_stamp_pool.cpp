@@ -6,8 +6,6 @@
  */
 #include "prof_stamp_pool.h"
 
-#include <iostream>
-
 #include "errno/error_code.h"
 #include "msprof_dlog.h"
 #include "utils.h"
