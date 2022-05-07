@@ -43,7 +43,6 @@ public:
     void SetSchedulingStatus(bool isScheduling);
     void FlushDrvBuff();
     void CheckIfSendFlush(const size_t curLen);
-    void WaitFlushFinished(const size_t bufSize);
     void SendFlushFinished();
 
 private:
@@ -70,7 +69,6 @@ private:
     unsigned int flushBufSize_;
     unsigned int flushCurSize_;
     std::mutex flushMutex_;
-    std::mutex cvMutex_;
     std::condition_variable flushFlag_;
 };
 
