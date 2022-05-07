@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package analysis.dvvp.proto;
+
+message ProfAclConfig {
+    string switch = 1;
+    string output = 2;
+    string device_id = 3; // This Filed is invalidated now.
+    string aic_metrics = 4;
+    string aicpu = 5;
+    string l2 = 6;
+    string storage_limit = 7;
+    string hccl = 8;
+    string msproftx = 9;
+    string biu = 10;
+    uint32 biu_freq = 11;
+}
+
+message ProfGeOptionsConfig {
+    string output = 1;
+    string training_trace = 2;
+    string task_trace = 3;
+    string aicpu = 4;
+    string fp_point =5;
+    string bp_point = 6;
+    string aic_metrics = 7;
+    string stars_acsq_task = 8;
+    string stars_sub_task = 9;
+    string ffts_thread_task = 10;
+    string l2 = 11;
+    string storage_limit = 12;
+    string ffts_block = 13;
+    string low_power = 14;
+    string acc_pmu_mode = 15;
+    string hccl = 16;
+    string msproftx = 17;
+    string biu = 18;
+    uint32 biu_freq = 19;
+}
+
+message ProfAclInitConfig {
+    string path = 1;
+}

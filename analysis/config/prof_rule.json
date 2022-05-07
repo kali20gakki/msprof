@@ -1,0 +1,220 @@
+{
+  "prof_rules": [
+    {
+      "rule_id": "rule_block_dim_1",
+      "rule_description": "check whether using multi-core",
+      "rule_condition": "condition_block_dim_1",
+      "rule_type": "Operator Processing",
+      "rule_subtype": "",
+      "rule_suggestion": "please using multi-core"
+    },
+    {
+      "rule_id": "rule_block_dim_2",
+      "rule_description": "check tiling strategy.",
+      "rule_condition": "condition_block_dim_2 && condition_block_dim_3",
+      "rule_type": "Operator Processing",
+      "rule_subtype": "",
+      "rule_suggestion": "please check tiling strategy"
+    },
+    {
+      "rule_id": "rule_transData_1",
+      "rule_description": "check and count the number of transData.",
+      "rule_condition": "condition_transData_2",
+      "rule_type": "Operator Processing",
+      "rule_subtype": "",
+      "rule_suggestion": "please check and reduce the transData"
+    },
+    {
+      "rule_id": "rule_memory_workspace_1",
+      "rule_description": "check and count the number of memory workspace.",
+      "rule_condition": "condition_memory_workspace_1",
+      "rule_type": "Operator Metrics",
+      "rule_subtype": "Memory",
+      "rule_suggestion": "please check and reduce the memory workspace"
+    },
+    {
+      "rule_id": "rule_wait_time_1",
+      "rule_description": "check the wait time for tasks.",
+      "rule_condition": "condition_wait_time_1",
+      "rule_type": "Operator Schedule",
+      "rule_subtype": "",
+      "rule_suggestion": "Task wait time has reached the upper limit"
+    },
+    {
+      "rule_id": "rule_aicpu_1",
+      "rule_description": "check the aicpu operator for net",
+      "rule_condition": "condition_aicpu_1",
+      "rule_type": "Operator Processing",
+      "rule_subtype": "",
+      "rule_suggestion": "please check and reduce aicpu operator"
+    },
+    {
+      "rule_id": "rule_memory_bound_1",
+      "rule_description": "check the memory bound",
+      "rule_condition": "condition_memory_bound_1",
+      "rule_type": "Model/Operator Memory",
+      "rule_subtype": "",
+      "rule_suggestion": "Low data memory handling efficiency"
+    },
+    {
+      "rule_id": "rule_vector_bound_1",
+      "rule_description": "check the vector bound",
+      "rule_condition": "condition_vector_bound_1",
+      "rule_type": "Model/Operator Memory",
+      "rule_subtype": "",
+      "rule_suggestion": "please check repeat counts and vector mask"
+    },
+    {
+      "rule_id": "rule_vector_ratio_1",
+      "rule_description": "check the vector compute utilization",
+      "rule_condition": "condition_vector_ratio_1",
+      "rule_type": "Model/Operator Computation",
+      "rule_subtype": "Vector",
+      "rule_suggestion": "low vector compute utilization"
+    },
+    {
+      "rule_id": "rule_cube_ratio_1",
+      "rule_description": "check the cube compute utilization",
+      "rule_condition": "condition_cube_ratio_1",
+      "rule_type": "Model/Operator Computation",
+      "rule_subtype": "Cube",
+      "rule_suggestion": "low cube compute utilization"
+    },
+    {
+      "rule_id": "rule_vec_bankgroup_cflt_ratio_1",
+      "rule_description": "check the vec_bankgroup_cflt_ratio",
+      "rule_condition": "condition_vec_bankgroup_cflt_ratio_1",
+      "rule_type": "Model/Operator Computation",
+      "rule_subtype": "Vector",
+      "rule_suggestion": "vector bank group conflict has reached the upper limit"
+    },
+    {
+      "rule_id": "rule_vec_bank_cflt_ratio_1",
+      "rule_description": "check the vec_bank_cflt_ratio",
+      "rule_condition": "condition_vec_bank_cflt_ratio_1",
+      "rule_type": "Model/Operator Computation",
+      "rule_subtype": "Vector",
+      "rule_suggestion": "vector bank conflict has reached the upper limit"
+    },
+    {
+      "rule_id": "rule_conv2d_1",
+      "rule_description": "check the rule for conv2d.",
+      "rule_condition": "condition_conv2d_1 && condition_common_4 && condition_common_1",
+      "rule_type": "",
+      "rule_subtype": "",
+      "rule_suggestion": ""
+    },
+    {
+      "rule_id": "rule_conv2d_2",
+      "rule_description": "check the rule for conv2d.",
+      "rule_condition": "condition_conv2d_1 && condition_common_5 && condition_common_2",
+      "rule_type": "",
+      "rule_subtype": "",
+      "rule_suggestion": ""
+    },
+    {
+      "rule_id": "rule_conv2d_3",
+      "rule_description": "check the rule for conv2d.",
+      "rule_condition": "condition_conv2d_1 && condition_common_3",
+      "rule_type": "",
+      "rule_subtype": "",
+      "rule_suggestion": ""
+    },
+    {
+      "rule_id": "rule_MaxPooling_1",
+      "rule_description": "check the rule for MaxPooling.",
+      "rule_condition": "condition_MaxPooling_1 && condition_common_1",
+      "rule_type": "",
+      "rule_subtype": "",
+      "rule_suggestion": ""
+    },
+    {
+      "rule_id": "rule_AvgPooling_1",
+      "rule_description": "check the rule for AvgPooling.",
+      "rule_condition": "condition_AvgPooling_1 && condition_common_1",
+      "rule_type": "",
+      "rule_subtype": "",
+      "rule_suggestion": ""
+    },
+    {
+      "rule_id": "rule_Concat_1",
+      "rule_description": "check the rule for Concat.",
+      "rule_condition": "condition_Concat_1 && condition_common_1",
+      "rule_type": "",
+      "rule_subtype": "",
+      "rule_suggestion": ""
+    },
+    {
+      "rule_id": "rule_RNN_1",
+      "rule_description": "check the rule for RNN.",
+      "rule_condition": "condition_RNN_1 && condition_common_4 && condition_common_1",
+      "rule_type": "",
+      "rule_subtype": "",
+      "rule_suggestion": ""
+    },
+    {
+      "rule_id": "rule_RNN_2",
+      "rule_description": "check the rule for RNN.",
+      "rule_condition": "condition_RNN_1 && condition_common_5 && condition_common_2",
+      "rule_type": "",
+      "rule_subtype": "",
+      "rule_suggestion": ""
+    },
+    {
+      "rule_id": "rule_RNN_3",
+      "rule_description": "check the rule for RNN.",
+      "rule_condition": "condition_RNN_1 && condition_common_6",
+      "rule_type": "",
+      "rule_subtype": "",
+      "rule_suggestion": ""
+    },
+    {
+      "rule_id": "rule_LSTM_1",
+      "rule_description": "check the rule for LSTM.",
+      "rule_condition": "condition_LSTM_1 && condition_common_4 && condition_common_1",
+      "rule_type": "",
+      "rule_subtype": "",
+      "rule_suggestion": ""
+    },
+    {
+      "rule_id": "rule_LSTM_2",
+      "rule_description": "check the rule for LSTM.",
+      "rule_condition": "condition_LSTM_1 && condition_common_5 && condition_common_2",
+      "rule_type": "",
+      "rule_subtype": "",
+      "rule_suggestion": ""
+    },
+    {
+      "rule_id": "rule_LSTM_3",
+      "rule_description": "check the rule for LSTM.",
+      "rule_condition": "condition_LSTM_1 && condition_common_6",
+      "rule_type": "",
+      "rule_subtype": "",
+      "rule_suggestion": ""
+    },
+    {
+      "rule_id": "rule_GRU_1",
+      "rule_description": "check the rule for GRU.",
+      "rule_condition": "condition_GRU_1 && condition_common_4 && condition_common_1",
+      "rule_type": "",
+      "rule_subtype": "",
+      "rule_suggestion": ""
+    },
+    {
+      "rule_id": "rule_GRU_2",
+      "rule_description": "check the rule for GRU.",
+      "rule_condition": "condition_GRU_1 && condition_common_5 && condition_common_2",
+      "rule_type": "",
+      "rule_subtype": "",
+      "rule_suggestion": ""
+    },
+    {
+      "rule_id": "rule_GRU_3",
+      "rule_description": "check the rule for GRU.",
+      "rule_condition": "condition_GRU_1 && condition_common_6",
+      "rule_type": "",
+      "rule_subtype": "",
+      "rule_suggestion": ""
+    }
+  ]
+}
