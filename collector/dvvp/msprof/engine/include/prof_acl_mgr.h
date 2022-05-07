@@ -85,6 +85,7 @@ public:
     void SetModeToCmd();
     void SetModeToOff();
     bool IsCmdMode();
+    bool IsModeOff();
 
     // api ctrl
     int ProfAclInit(const std::string& profResultPath);
