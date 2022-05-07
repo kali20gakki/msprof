@@ -78,7 +78,9 @@ int32_t MsprofCtrlCallbackImpl(uint32_t type, VOID_PTR data, uint32_t len)
     if (type == MSPROF_CTRL_FINALIZE) {
         return Msprofiler::Api::ProfAclMgr::instance()->MsprofFinalizeHandle();
     }
-    if (type == MSPROF_CTRL_INIT_DYNA && Utils::GetEnvString(PROFILER_SAMPLE_CONFIG_ENV).empty()) {
+    if ((type == MSPROF_CTRL_INIT_DYNA) &&
+        (Utils::GetEnvString(PROFILER_SAMPLE_CONFIG_ENV).empty() ||
+        !Msprofiler::Api::ProfAclMgr::instance()->IsModeOff())) {
         return Msprofiler::Api::ProfAclMgr::instance()->MsprofInitForDynamic(data, len);
     }
     int32_t ret = MsprofCtrlCallbackImplHandle(type, data, len);
