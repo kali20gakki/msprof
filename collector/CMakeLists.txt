@@ -86,6 +86,32 @@ target_compile_options(alog PRIVATE
     -fno-strict-aliasing
 )
 
+# alog_static
+add_library(alog_static STATIC
+    ${TOP_DIR}/collector/dvvp/depend/stub/dlog_stub.cpp
+)
+
+target_include_directories(alog_static PRIVATE
+    ${TOP_DIR}/collector/dvvp/depend/inc/slog
+)
+
+target_compile_definitions(alog_static PRIVATE
+    OS_TYPE_DEF=0
+    LOG_CPP
+    WRITE_TO_SYSLOG
+)
+
+target_compile_options(alog_static PRIVATE
+    -Werror
+    -Wfloat-equal -Wextra
+    -O2
+    -fPIC
+    -fstack-protector-strong
+    -fno-common
+    -fsigned-char
+    -fno-strict-aliasing
+)
+
 # error_manager
 add_library(error_manager SHARED
     ${TOP_DIR}/collector/dvvp/depend/stub/error_manager/error_manager_stub.cpp

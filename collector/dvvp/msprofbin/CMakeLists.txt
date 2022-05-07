@@ -126,7 +126,7 @@ target_link_options(msprofbin PRIVATE
 )
 
 target_link_libraries(msprofbin PRIVATE
-    alog
+    alog_static
     c_sec
     ascend_protobuf_static
     -lpthread
