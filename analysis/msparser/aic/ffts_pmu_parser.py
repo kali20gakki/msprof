@@ -68,7 +68,7 @@ class FftsPmuParser(IParser, MsMultiProcess):
         offset_calculator = OffsetCalculator(self._file_list, self.AIC_PMU_SIZE, self._project_path)
         with FileOpen(file_path, 'rb') as _pmu_file:
             _file_size = os.path.getsize(file_path)
-            file_data = offset_calculator.pre_process(_pmu_file, _file_size)
+            file_data = offset_calculator.pre_process(_pmu_file.file_reader, _file_size)
             for chunk in Utils.chunks(file_data, self.AIC_PMU_SIZE):
                 self._data_list.append(self._decoder.decode(chunk))
 

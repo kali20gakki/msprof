@@ -80,7 +80,7 @@ class StarsLogCalCulator(ICalculator, MsMultiProcess):
         for _file in self._file_list:
             file_name = PathManager.get_data_file_path(self._project_path, _file)
             with FileOpen(file_name, 'rb') as file_reader:
-                file_data = offset_calculator.pre_process(file_reader, os.path.getsize(file_name))
+                file_data = offset_calculator.pre_process(file_reader.file_reader, os.path.getsize(file_name))
                 self._parse_data(file_data)
 
     def _parse_by_iter(self):
