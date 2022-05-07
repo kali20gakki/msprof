@@ -61,9 +61,9 @@ function create_temp_dir() {
 	cp ${RUN_SCRIPT_DIR}${MAIN_SCRIPT} ${temp_dir}
 }
 
-# 以下函数不需要
+#获取安装包的版本号
 function version() {
-    local _path="${TOP_DIR}/../mindstudio_ci/dependency/config.ini"
+    local _path="${TOP_DIR}/../manifest/dependency/config.ini"
     local _version=$(grep "^version=" "${_path}" | cut -d"=" -f2)
     echo "${_version}"
 }
