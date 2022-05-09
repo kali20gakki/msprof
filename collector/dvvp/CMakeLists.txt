@@ -132,7 +132,7 @@ set(msprofilerCpp
     transport/hdc/platform/soc/dev_mgr_api.cpp
     depend/src/driver_plugin.cpp
     depend/src/mmpa_plugin.cpp
-    depend/src/plugin_manager.cpp
+    depend/src/plugin_handle.cpp
     transport/parser_transport.cpp
     transport/prof_channel.cpp
     transport/transport.cpp

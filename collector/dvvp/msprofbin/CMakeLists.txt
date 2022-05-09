@@ -94,7 +94,7 @@ add_executable(msprofbin
     ../transport/hdc/device_transport.cpp
     ../transport/hdc/platform/rpc/dev_mgr_api.cpp
     ../depend/src/mmpa_plugin.cpp
-    ../depend/src/plugin_manager.cpp
+    ../depend/src/plugin_handle.cpp
     ../depend/src/driver_plugin.cpp
     ${hdcCpp}
     ${CppPath}
