@@ -6,6 +6,8 @@
  */
 #include "plugin_manager.h"
 
+#include <sys/stat.h>
+#include <sys/types.h>
 #include "config.h"
 #include "securec.h"
 
@@ -17,6 +19,28 @@ using namespace analysis::dvvp::common::config;
 const std::string PluginManager::GetSoName() const
 {
     return soName_;
+}
+
+bool PluginManager::IsSoftLink(const std::string &path) const
+{
+    struct stat buf1;
+    int ret = stat(path.c_str(), &buf1);
+    if (ret != 0) {
+        MSPROF_LOGE("stat %s fail, ret=%d errno=%u", path.c_str(), ret, errno);
+        return true;
+    }
+
+    struct stat buf2;
+    ret = lstat(path.c_str(), &buf2);
+    if (ret != 0) {
+        MSPROF_LOGE("lstat %s fail, ret=%d errno=%u", path.c_str(), ret, errno);
+        return true;
+    }
+
+    if (buf1.st_ino != buf2.st_ino) {
+        return true;     // soft-link
+    }
+    return false;   // not soft-link
 }
 
 std::string PluginManager::RealPath(const std::string &path) const
@@ -43,8 +67,8 @@ Status PluginManager::OpenPlugin(const std::string envValue)
         return PLUGIN_LOAD_FAILED;
     }
     std::string absoluteDir = RealPath(soPath);
-    if (absoluteDir.empty()) {
-        MSPROF_LOGE("[OpenPlugin]Get realpath failed.");
+    if (absoluteDir.empty() || IsSoftLink(absoluteDir)) {
+        MSPROF_LOGE("[OpenPlugin]Get realpath failed or realpath is softlink.");
         return PLUGIN_LOAD_FAILED;
     }
 

@@ -42,6 +42,7 @@ public:
 
 private:
     std::string RealPath(const std::string &path) const;
+    bool IsSoftLink(const std::string &path) const;
     std::string GetSoPath(const std::string &envValue) const;
     void SplitPath(const std::string &mutilPath, std::vector<std::string> &patVec) const;
     std::string soName_;
