@@ -23,7 +23,7 @@ bool DriverPlugin::IsFuncExist(const std::string &funcName) const
 hdcError_t DriverPlugin::MsprofHalHdcRecv(HDC_SESSION session, struct drvHdcMsg *pMsg, int bufLen,
     UINT64 flag, int *recvBufCount, UINT32 timeout)
 {
-    Status ret = PLUGIN_LOAD_SUCCESS;
+    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginHandle_.HasLoad()) {
         ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
         if (ret != PLUGIN_LOAD_SUCCESS) {
@@ -42,7 +42,7 @@ hdcError_t DriverPlugin::MsprofHalHdcRecv(HDC_SESSION session, struct drvHdcMsg 
 // halHdcSend
 hdcError_t DriverPlugin::MsprofHalHdcSend(HDC_SESSION session, struct drvHdcMsg *pMsg, UINT64 flag, UINT32 timeout)
 {
-    Status ret = PLUGIN_LOAD_SUCCESS;
+    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginHandle_.HasLoad()) {
         ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
         if (ret != PLUGIN_LOAD_SUCCESS) {
@@ -61,7 +61,7 @@ hdcError_t DriverPlugin::MsprofHalHdcSend(HDC_SESSION session, struct drvHdcMsg 
 hdcError_t DriverPlugin::MsprofHalHdcSessionConnectEx(int peer_node, int peer_devid, int peer_pid, HDC_CLIENT client,
     HDC_SESSION *pSession)
 {
-    Status ret = PLUGIN_LOAD_SUCCESS;
+    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginHandle_.HasLoad()) {
         ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
         if (ret != PLUGIN_LOAD_SUCCESS) {
@@ -80,7 +80,7 @@ hdcError_t DriverPlugin::MsprofHalHdcSessionConnectEx(int peer_node, int peer_de
 // drvHdcSetSessionReference
 drvError_t DriverPlugin::MsprofDrvHdcSetSessionReference(HDC_SESSION session)
 {
-    Status ret = PLUGIN_LOAD_SUCCESS;
+    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginHandle_.HasLoad()) {
         ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
         if (ret != PLUGIN_LOAD_SUCCESS) {
@@ -98,7 +98,7 @@ drvError_t DriverPlugin::MsprofDrvHdcSetSessionReference(HDC_SESSION session)
 // halHdcGetSessionAttr
 drvError_t DriverPlugin::MsprofHalHdcGetSessionAttr(HDC_SESSION session, int attr, int *value)
 {
-    Status ret = PLUGIN_LOAD_SUCCESS;
+    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginHandle_.HasLoad()) {
         ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
         if (ret != PLUGIN_LOAD_SUCCESS) {
@@ -116,7 +116,7 @@ drvError_t DriverPlugin::MsprofHalHdcGetSessionAttr(HDC_SESSION session, int att
 // halGetChipInfo
 drvError_t DriverPlugin::MsprofHalGetChipInfo(unsigned int devId, halChipInfo *chipInfo)
 {
-    Status ret = PLUGIN_LOAD_SUCCESS;
+    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginHandle_.HasLoad()) {
         ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
         if (ret != PLUGIN_LOAD_SUCCESS) {
@@ -134,7 +134,7 @@ drvError_t DriverPlugin::MsprofHalGetChipInfo(unsigned int devId, halChipInfo *c
 // halGetDeviceInfo
 drvError_t DriverPlugin::MsprofHalGetDeviceInfo(uint32_t devId, int32_t moduleType, int32_t infoType, int64_t *value)
 {
-    Status ret = PLUGIN_LOAD_SUCCESS;
+    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginHandle_.HasLoad()) {
         ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
         if (ret != PLUGIN_LOAD_SUCCESS) {
@@ -152,7 +152,7 @@ drvError_t DriverPlugin::MsprofHalGetDeviceInfo(uint32_t devId, int32_t moduleTy
 // halProfDataFlush
 int DriverPlugin::MsprofHalProfDataFlush(unsigned int device_id, unsigned int channel_id, unsigned int *data_len)
 {
-    Status ret = PLUGIN_LOAD_SUCCESS;
+    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginHandle_.HasLoad()) {
         ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
         if (ret != PLUGIN_LOAD_SUCCESS) {
@@ -170,7 +170,7 @@ int DriverPlugin::MsprofHalProfDataFlush(unsigned int device_id, unsigned int ch
 // prof_drv_get_channels
 int DriverPlugin::MsprofDrvGetChannels(unsigned int device_id, channel_list_t *channels)
 {
-    Status ret = PLUGIN_LOAD_SUCCESS;
+    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginHandle_.HasLoad()) {
         ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
         if (ret != PLUGIN_LOAD_SUCCESS) {
@@ -188,7 +188,7 @@ int DriverPlugin::MsprofDrvGetChannels(unsigned int device_id, channel_list_t *c
 // prof_drv_start
 int DriverPlugin::MsprofDrvStart(unsigned int device_id, unsigned int channel_id, struct prof_start_para *start_para)
 {
-    Status ret = PLUGIN_LOAD_SUCCESS;
+    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginHandle_.HasLoad()) {
         ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
         if (ret != PLUGIN_LOAD_SUCCESS) {
@@ -207,7 +207,7 @@ int DriverPlugin::MsprofDrvStart(unsigned int device_id, unsigned int channel_id
 // prof_stop
 int DriverPlugin::MsprofDrvStop(unsigned int device_id, unsigned int channel_id)
 {
-    Status ret = PLUGIN_LOAD_SUCCESS;
+    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginHandle_.HasLoad()) {
         ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
         if (ret != PLUGIN_LOAD_SUCCESS) {
@@ -226,7 +226,7 @@ int DriverPlugin::MsprofDrvStop(unsigned int device_id, unsigned int channel_id)
 int DriverPlugin::MsprofChannelRead(unsigned int device_id, unsigned int channel_id,
                                     char *out_buf, unsigned int buf_size)
 {
-    Status ret = PLUGIN_LOAD_SUCCESS;
+    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginHandle_.HasLoad()) {
         ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
         if (ret != PLUGIN_LOAD_SUCCESS) {
@@ -244,7 +244,7 @@ int DriverPlugin::MsprofChannelRead(unsigned int device_id, unsigned int channel
 // prof_channel_poll
 int DriverPlugin::MsprofChannelPoll(struct prof_poll_info *out_buf, int num, int timeout)
 {
-    Status ret = PLUGIN_LOAD_SUCCESS;
+    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginHandle_.HasLoad()) {
         ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
         if (ret != PLUGIN_LOAD_SUCCESS) {
@@ -262,7 +262,7 @@ int DriverPlugin::MsprofChannelPoll(struct prof_poll_info *out_buf, int num, int
 // drvGetDevNum
 drvError_t DriverPlugin::MsprofDrvGetDevNum(uint32_t *num_dev)
 {
-    Status ret = PLUGIN_LOAD_SUCCESS;
+    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginHandle_.HasLoad()) {
         ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
         if (ret != PLUGIN_LOAD_SUCCESS) {
@@ -280,7 +280,7 @@ drvError_t DriverPlugin::MsprofDrvGetDevNum(uint32_t *num_dev)
 // drvGetDevIDByLocalDevID
 drvError_t DriverPlugin::MsprofDrvGetDevIDByLocalDevID(uint32_t localDevId, uint32_t *devId)
 {
-    Status ret = PLUGIN_LOAD_SUCCESS;
+    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginHandle_.HasLoad()) {
         ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
         if (ret != PLUGIN_LOAD_SUCCESS) {
@@ -298,7 +298,7 @@ drvError_t DriverPlugin::MsprofDrvGetDevIDByLocalDevID(uint32_t localDevId, uint
 // drvGetDevIDs
 drvError_t DriverPlugin::MsprofDrvGetDevIDs(uint32_t *devices, uint32_t len)
 {
-    Status ret = PLUGIN_LOAD_SUCCESS;
+    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginHandle_.HasLoad()) {
         ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
         if (ret != PLUGIN_LOAD_SUCCESS) {
@@ -316,7 +316,7 @@ drvError_t DriverPlugin::MsprofDrvGetDevIDs(uint32_t *devices, uint32_t len)
 // drvGetPlatformInfo
 drvError_t DriverPlugin::MsprofDrvGetPlatformInfo(uint32_t *info)
 {
-    Status ret = PLUGIN_LOAD_SUCCESS;
+    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginHandle_.HasLoad()) {
         ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
         if (ret != PLUGIN_LOAD_SUCCESS) {
@@ -334,7 +334,7 @@ drvError_t DriverPlugin::MsprofDrvGetPlatformInfo(uint32_t *info)
 // drvHdcClientCreate
 drvError_t DriverPlugin::MsprofDrvHdcClientCreate(HDC_CLIENT *client, int maxSessionNum, int serviceType, int flag)
 {
-    Status ret = PLUGIN_LOAD_SUCCESS;
+    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginHandle_.HasLoad()) {
         ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
         if (ret != PLUGIN_LOAD_SUCCESS) {
@@ -352,7 +352,7 @@ drvError_t DriverPlugin::MsprofDrvHdcClientCreate(HDC_CLIENT *client, int maxSes
 // drvHdcClientDestroy
 drvError_t DriverPlugin::MsprofDrvHdcClientDestroy(HDC_CLIENT client)
 {
-    Status ret = PLUGIN_LOAD_SUCCESS;
+    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginHandle_.HasLoad()) {
         ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
         if (ret != PLUGIN_LOAD_SUCCESS) {
@@ -370,7 +370,7 @@ drvError_t DriverPlugin::MsprofDrvHdcClientDestroy(HDC_CLIENT client)
 // drvHdcServerCreate
 drvError_t DriverPlugin::MsprofDrvHdcServerCreate(int devid, int serviceType, HDC_SERVER *pServer)
 {
-    Status ret = PLUGIN_LOAD_SUCCESS;
+    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginHandle_.HasLoad()) {
         ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
         if (ret != PLUGIN_LOAD_SUCCESS) {
@@ -388,7 +388,7 @@ drvError_t DriverPlugin::MsprofDrvHdcServerCreate(int devid, int serviceType, HD
 // drvHdcServerDestroy
 drvError_t DriverPlugin::MsprofDrvHdcServerDestroy(HDC_SERVER server)
 {
-    Status ret = PLUGIN_LOAD_SUCCESS;
+    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginHandle_.HasLoad()) {
         ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
         if (ret != PLUGIN_LOAD_SUCCESS) {
@@ -406,7 +406,7 @@ drvError_t DriverPlugin::MsprofDrvHdcServerDestroy(HDC_SERVER server)
 // drvHdcSessionAccept
 drvError_t DriverPlugin::MsprofDrvHdcSessionAccept(HDC_SERVER server, HDC_SESSION *session)
 {
-    Status ret = PLUGIN_LOAD_SUCCESS;
+    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginHandle_.HasLoad()) {
         ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
         if (ret != PLUGIN_LOAD_SUCCESS) {
@@ -424,7 +424,7 @@ drvError_t DriverPlugin::MsprofDrvHdcSessionAccept(HDC_SERVER server, HDC_SESSIO
 // drvHdcGetMsgBuffer
 drvError_t DriverPlugin::MsprofDrvHdcGetMsgBuffer(struct drvHdcMsg *msg, int index, char **pBuf, int *pLen)
 {
-    Status ret = PLUGIN_LOAD_SUCCESS;
+    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginHandle_.HasLoad()) {
         ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
         if (ret != PLUGIN_LOAD_SUCCESS) {
@@ -442,7 +442,7 @@ drvError_t DriverPlugin::MsprofDrvHdcGetMsgBuffer(struct drvHdcMsg *msg, int ind
 // drvHdcAllocMsg
 drvError_t DriverPlugin::MsprofDrvHdcAllocMsg(HDC_SESSION session, struct drvHdcMsg **ppMsg, int count)
 {
-    Status ret = PLUGIN_LOAD_SUCCESS;
+    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginHandle_.HasLoad()) {
         ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
         if (ret != PLUGIN_LOAD_SUCCESS) {
@@ -460,7 +460,7 @@ drvError_t DriverPlugin::MsprofDrvHdcAllocMsg(HDC_SESSION session, struct drvHdc
 // drvHdcFreeMsg
 drvError_t DriverPlugin::MsprofDrvHdcFreeMsg(struct drvHdcMsg *msg)
 {
-    Status ret = PLUGIN_LOAD_SUCCESS;
+    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginHandle_.HasLoad()) {
         ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
         if (ret != PLUGIN_LOAD_SUCCESS) {
@@ -478,7 +478,7 @@ drvError_t DriverPlugin::MsprofDrvHdcFreeMsg(struct drvHdcMsg *msg)
 // drvHdcReuseMsg
 drvError_t DriverPlugin::MsprofDrvHdcReuseMsg(struct drvHdcMsg *msg)
 {
-    Status ret = PLUGIN_LOAD_SUCCESS;
+    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginHandle_.HasLoad()) {
         ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
         if (ret != PLUGIN_LOAD_SUCCESS) {
@@ -496,7 +496,7 @@ drvError_t DriverPlugin::MsprofDrvHdcReuseMsg(struct drvHdcMsg *msg)
 // drvHdcAddMsgBuffer
 drvError_t DriverPlugin::MsprofDrvHdcAddMsgBuffer(struct drvHdcMsg *msg, char *pBuf, int len)
 {
-    Status ret = PLUGIN_LOAD_SUCCESS;
+    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginHandle_.HasLoad()) {
         ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
         if (ret != PLUGIN_LOAD_SUCCESS) {
@@ -515,7 +515,7 @@ drvError_t DriverPlugin::MsprofDrvHdcAddMsgBuffer(struct drvHdcMsg *msg, char *p
 drvError_t DriverPlugin::MsprofDrvHdcSessionConnect(int peer_node, int peer_devid,
                                                     HDC_CLIENT client, HDC_SESSION *session)
 {
-    Status ret = PLUGIN_LOAD_SUCCESS;
+    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginHandle_.HasLoad()) {
         ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
         if (ret != PLUGIN_LOAD_SUCCESS) {
@@ -533,7 +533,7 @@ drvError_t DriverPlugin::MsprofDrvHdcSessionConnect(int peer_node, int peer_devi
 // drvHdcSessionClose
 drvError_t DriverPlugin::MsprofDrvHdcSessionClose(HDC_SESSION session)
 {
-    Status ret = PLUGIN_LOAD_SUCCESS;
+    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginHandle_.HasLoad()) {
         ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
         if (ret != PLUGIN_LOAD_SUCCESS) {
@@ -551,7 +551,7 @@ drvError_t DriverPlugin::MsprofDrvHdcSessionClose(HDC_SESSION session)
 // drvHdcGetCapacity
 drvError_t DriverPlugin::MsprofDrvHdcGetCapacity(struct drvHdcCapacity *capacity)
 {
-    Status ret = PLUGIN_LOAD_SUCCESS;
+    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginHandle_.HasLoad()) {
         ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
         if (ret != PLUGIN_LOAD_SUCCESS) {

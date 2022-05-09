@@ -11,10 +11,10 @@
 #include "prof_manager.h"
 #include "prof_acl_core.h"
 #include "prof_ge_core.h"
+#include "profapi_plugin.h"
 #include "msprof_tx_manager.h"
 #include "command_handle.h"
 #include "platform/platform.h"
-#include "prof_api.h"
 
 namespace Analysis {
 namespace Dvvp {
@@ -23,6 +23,7 @@ using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::common::config;
 using namespace Analysis::Dvvp::Common::Platform;
 using namespace analysis::dvvp::host;
+using namespace Analysis::Dvvp::Plugin;
 
 bool CheckMsprofBin(std::string &envValue)
 {
@@ -104,7 +105,7 @@ int32_t MsprofCtrlCallbackImpl(uint32_t type, VOID_PTR data, uint32_t len)
     }
 
     // register device state callback
-    ret = profRegDeviceStateCallback(MsprofSetDeviceCallbackImpl);
+    ret = ProfApiPlugin::instance()->MsprofProfRegDeviceStateCallback(MsprofSetDeviceCallbackImpl);
     if (ret != 0) {
         MSPROF_LOGE("Failed to register device state callback");
         MSPROF_CALL_ERROR("EK9999", "ProfStart CommandHandle set failed");
@@ -173,7 +174,7 @@ int32_t RegisterReporterCallback()
         Msprof::Engine::MsprofCallbackHandler::InitReporters();
     }
     MSPROF_LOGI("Call profRegReporterCallback");
-    aclError ret = profRegReporterCallback(MsprofReporterCallbackImpl);
+    aclError ret = ProfApiPlugin::instance()->MsprofProfRegReporterCallback(MsprofReporterCallbackImpl);
     if (ret != ACL_SUCCESS) {
         MSPROF_LOGE("Failed to register reporter callback");
         MSPROF_CALL_ERROR("EK9999", "Failed to register reporter callback");
@@ -196,7 +197,7 @@ int32_t MsprofilerInit()
 {
     MSPROF_EVENT("Started to register profiling ctrl callback.");
     // register ctrl callback
-    aclError ret = profRegCtrlCallback(MsprofCtrlCallbackImpl);
+    aclError ret = ProfApiPlugin::instance()->MsprofProfRegCtrlCallback(MsprofCtrlCallbackImpl);
     if (ret != ACL_SUCCESS) {
         MSPROF_LOGE("Failed to register ctrl callback");
         return PROFILING_FAILED;

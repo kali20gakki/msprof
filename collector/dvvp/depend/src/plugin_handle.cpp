@@ -52,7 +52,7 @@ std::string PluginHandle::RealPath(const std::string &path) const
     return res;
 }
 
-Status PluginHandle::OpenPlugin(const std::string envValue)
+PluginStatus PluginHandle::OpenPlugin(const std::string envValue)
 {
     if (envValue.empty() || envValue.size() >= MAX_PATH_LENGTH) {
         return PLUGIN_LOAD_FAILED;
