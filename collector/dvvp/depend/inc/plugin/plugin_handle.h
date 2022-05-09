@@ -11,7 +11,6 @@
 #include <vector>
 #include <functional>
 #include <dlfcn.h>
-#include "msprof_dlog.h"
 
 namespace Analysis {
 namespace Dvvp {
@@ -38,7 +37,6 @@ public:
     {
         func = (R(*)(Types...))dlsym(handle_, funcName.c_str());
         if (!func) {
-            MSPROF_LOGE("[GetFunction]Get function from so failed.");
             return PLUGIN_LOAD_FAILED;
         }
         return PLUGIN_LOAD_SUCCESS;

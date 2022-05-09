@@ -9,7 +9,7 @@
 
 #include <cstdio>
 #include <cstring>
-#include "slog.h"
+#include "slog_plugin.h"
 #include <unistd.h>
 #include <sys/syscall.h>
 
@@ -17,34 +17,114 @@
 #include <syslog.h>
 #endif
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+enum {
+    SLOG,          /**< Slog */
+    IDEDD,         /**< IDE daemon device */
+    IDEDH,         /**< IDE daemon host */
+    HCCL,          /**< HCCL */
+    FMK,           /**< Adapter */
+    HIAIENGINE,    /**< Matrix */
+    DVPP,          /**< DVPP */
+    RUNTIME,       /**< Runtime */
+    CCE,           /**< CCE */
+#if (OS_TYPE == LINUX)
+    HDC,         /**< HDC */
+#else
+    HDCL,
+#endif // OS_TYPE
+    DRV,           /**< Driver */
+    MDCFUSION,     /**< Mdc fusion */
+    MDCLOCATION,   /**< Mdc location */
+    MDCPERCEPTION, /**< Mdc perception */
+    MDCFSM,
+    MDCCOMMON,
+    MDCMONITOR,
+    MDCBSWP,    /**< MDC base software platform */
+    MDCDEFAULT, /**< MDC undefine */
+    MDCSC,      /**< MDC spatial cognition */
+    MDCPNC,
+    MLL,      /**< abandon */
+    DEVMM,    /**< Dlog memory managent */
+    KERNEL,   /**< Kernel */
+    LIBMEDIA, /**< Libmedia */
+    CCECPU,   /**< aicpu shedule */
+    ASCENDDK, /**< AscendDK */
+    ROS,      /**< ROS */
+    HCCP,
+    ROCE,
+    TEFUSION,
+    PROFILING, /**< Profiling */
+    DP,        /**< Data Preprocess */
+    APP,       /**< User Application */
+    TS,        /**< TS module */
+    TSDUMP,    /**< TSDUMP module */
+    AICPU,     /**< AICPU module */
+    LP,        /**< LP module */
+    TDT,       /**< tsdaemon or aicpu shedule */
+    FE,
+    MD,
+    MB,
+    ME,
+    IMU,
+    IMP,
+    GE, /**< Fmk */
+    MDCFUSA,
+    CAMERA,
+    ASCENDCL,
+    TEEOS,
+    ISP,
+    SIS,
+    HSM,
+    DSS,
+    PROCMGR,     // Process Manager, Base Platform
+    BBOX,
+    AIVECTOR,
+    TBE,
+    FV,
+    MDCMAP,
+    TUNE,
+    HSS, /**< helper */
+    FFTS,
+    INVLID_MOUDLE_ID
+};
 
 #define MSPROF_MODULE_NAME PROFILING
 
+using SlogPlugin = Analysis::Dvvp::Plugin::SlogPlugin;
+
 #define MSPROF_LOGD(format, ...) do {                                                                      \
-    dlog_debug(MSPROF_MODULE_NAME, " >>> (tid:%ld) " format "\n", syscall(SYS_gettid), ##__VA_ARGS__);    \
+    if (SlogPlugin::instance()->MsprofCheckLogLevelForC(MSPROF_MODULE_NAME, Analysis::Dvvp::Plugin::DLOG_DEBUG) == 1) {                 \
+        SlogPlugin::instance()->MsprofDlogInnerForC(MSPROF_MODULE_NAME, Analysis::Dvvp::Plugin::DLOG_DEBUG, "[%s:%d]" " >>> (tid:%ld) " \
+            format "\n", __FILE__, __LINE__, syscall(SYS_gettid), ##__VA_ARGS__);                          \
+    }                                                                                                      \
 } while (0)
 
 #define MSPROF_LOGI(format, ...) do {                                                                      \
-    dlog_info(MSPROF_MODULE_NAME, " >>> (tid:%ld) " format "\n", syscall(SYS_gettid), ##__VA_ARGS__);     \
+    if (SlogPlugin::instance()->MsprofCheckLogLevelForC(MSPROF_MODULE_NAME, Analysis::Dvvp::Plugin::DLOG_INFO) == 1) {                 \
+        SlogPlugin::instance()->MsprofDlogInnerForC(MSPROF_MODULE_NAME, Analysis::Dvvp::Plugin::DLOG_INFO, "[%s:%d]" " >>> (tid:%ld) " \
+            format "\n", __FILE__, __LINE__, syscall(SYS_gettid), ##__VA_ARGS__);                         \
+    }                                                                                                     \
 } while (0)
 
-#define MSPROF_LOGW(format, ...) do {                                                                      \
-    dlog_warn(MSPROF_MODULE_NAME, " >>> (tid:%ld) " format "\n", syscall(SYS_gettid), ##__VA_ARGS__);     \
+#define MSPROF_LOGW(format, ...) do {                                                                        \
+    if (SlogPlugin::instance()->MsprofCheckLogLevelForC(MSPROF_MODULE_NAME, Analysis::Dvvp::Plugin::DLOG_WARN) == 1) {                 \
+        SlogPlugin::instance()->MsprofDlogInnerForC(MSPROF_MODULE_NAME, Analysis::Dvvp::Plugin::DLOG_WARN, "[%s:%d]" " >>> (tid:%ld) " \
+            format "\n", __FILE__, __LINE__, syscall(SYS_gettid), ##__VA_ARGS__);                            \
+    }                                                                                                        \
 } while (0)
 
 #define MSPROF_LOGE(format, ...) do {                                                                      \
-    dlog_error(MSPROF_MODULE_NAME, " >>> (tid:%ld) " format "\n", syscall(SYS_gettid), ##__VA_ARGS__);    \
+    if (SlogPlugin::instance()->MsprofCheckLogLevelForC(MSPROF_MODULE_NAME, Analysis::Dvvp::Plugin::DLOG_ERROR) == 1) {                 \
+        SlogPlugin::instance()->MsprofDlogInnerForC(MSPROF_MODULE_NAME, Analysis::Dvvp::Plugin::DLOG_ERROR, "[%s:%d]" " >>> (tid:%ld) " \
+            format "\n", __FILE__, __LINE__, syscall(SYS_gettid), ##__VA_ARGS__);                          \
+    }                                                                                                      \
 } while (0)
 
 #define MSPROF_EVENT(format, ...) do {                                                                     \
-    dlog_event(MSPROF_MODULE_NAME, " >>> (tid:%ld) " format "\n", syscall(SYS_gettid), ##__VA_ARGS__);    \
+    if (SlogPlugin::instance()->MsprofCheckLogLevelForC(MSPROF_MODULE_NAME, Analysis::Dvvp::Plugin::DLOG_EVENT) == 1) {                 \
+        SlogPlugin::instance()->MsprofDlogInnerForC(MSPROF_MODULE_NAME, Analysis::Dvvp::Plugin::DLOG_EVENT, "[%s:%d]" " >>> (tid:%ld) " \
+            format "\n", __FILE__, __LINE__, syscall(SYS_gettid), ##__VA_ARGS__);                          \
+    }                                                                                                      \
 } while (0)
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif  // MSPROF_LOG_H

@@ -242,7 +242,6 @@ private:
     std::string soName_;
     PluginHandle pluginHandle_;
 };
-
 } // Plugin
 } // Dvvp
 } // Analysis
