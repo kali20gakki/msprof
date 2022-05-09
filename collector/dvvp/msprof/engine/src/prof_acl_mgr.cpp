@@ -238,6 +238,14 @@ bool ProfAclMgr::IsCmdMode()
     return false;
 }
 
+bool ProfAclMgr::IsModeOff()
+{
+    if (mode_ == WORK_MODE_OFF) {
+        return true;
+    }
+    return false;
+}
+
 /**
  * Init resources for acl api call
  */
