@@ -1,5 +1,11 @@
-#ifndef PLUGIN_MANAGER_H
-#define PLUGIN_MANAGER_H
+/*
+ * Copyright (c) Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
+ * Description: dlopen interface
+ * Author: Huawei Technologies Co., Ltd.
+ * Create: 2022-04-15
+ */
+#ifndef PLUGIN_HANDLE_H
+#define PLUGIN_HANDLE_H
 
 #include <string>
 #include <vector>
@@ -16,14 +22,14 @@ using HandleType = void*;
 const Status PLUGIN_LOAD_SUCCESS = 0x0;
 const Status PLUGIN_LOAD_FAILED = 0xFFFFFFFF;
 
-class PluginManager {
+class PluginHandle {
 public:
-    explicit PluginManager(const std::string &name)
+    explicit PluginHandle(const std::string &name)
     : soName_(name),
       handle_(nullptr),
       load_(false)
     {}
-    ~PluginManager() {}
+    ~PluginHandle() {}
     const std::string GetSoName() const;
     Status OpenPlugin(const std::string envValue);
     void CloseHandle();

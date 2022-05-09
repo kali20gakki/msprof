@@ -4,7 +4,7 @@
  * Author: Huawei Technologies Co., Ltd.
  * Create: 2022-04-15
  */
-#include "plugin_manager.h"
+#include "plugin_handle.h"
 
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -16,12 +16,12 @@ namespace Dvvp {
 namespace Plugin {
 using namespace analysis::dvvp::common::config;
 
-const std::string PluginManager::GetSoName() const
+const std::string PluginHandle::GetSoName() const
 {
     return soName_;
 }
 
-bool PluginManager::IsSoftLink(const std::string &path) const
+bool PluginHandle::IsSoftLink(const std::string &path) const
 {
     struct stat buf1;
     int ret = stat(path.c_str(), &buf1);
@@ -43,7 +43,7 @@ bool PluginManager::IsSoftLink(const std::string &path) const
     return false;   // not soft-link
 }
 
-std::string PluginManager::RealPath(const std::string &path) const
+std::string PluginHandle::RealPath(const std::string &path) const
 {
     char resoved_path[MAX_PATH_LENGTH] = {0x00};
     std::string res = "";
@@ -55,7 +55,7 @@ std::string PluginManager::RealPath(const std::string &path) const
     return res;
 }
 
-Status PluginManager::OpenPlugin(const std::string envValue)
+Status PluginHandle::OpenPlugin(const std::string envValue)
 {
     if (envValue.empty() || envValue.size() >= MAX_PATH_LENGTH) {
         MSPROF_LOGE("[OpenPlugin]envValue wrong");
@@ -81,7 +81,7 @@ Status PluginManager::OpenPlugin(const std::string envValue)
     return PLUGIN_LOAD_SUCCESS;
 }
 
-void PluginManager::CloseHandle()
+void PluginHandle::CloseHandle()
 {
     if (!handle_ || !load_) { // nullptr
         MSPROF_LOGI("[CloseHandle]Do not need to close so.");
@@ -92,12 +92,12 @@ void PluginManager::CloseHandle()
     }
 }
 
-bool PluginManager::HasLoad()
+bool PluginHandle::HasLoad()
 {
     return load_;
 }
 
-void PluginManager::SplitPath(const std::string &mutilPath, std::vector<std::string> &pathVec) const
+void PluginHandle::SplitPath(const std::string &mutilPath, std::vector<std::string> &pathVec) const
 {
     const std::string tmpString = mutilPath + ":";
     std::string::size_type startPos = 0U;
@@ -112,7 +112,7 @@ void PluginManager::SplitPath(const std::string &mutilPath, std::vector<std::str
     }
 }
 
-std::string PluginManager::GetSoPath(const std::string &envValue) const
+std::string PluginHandle::GetSoPath(const std::string &envValue) const
 {
     MSPROF_LOGI("[GetSoPath]envValue:%s", envValue.c_str());
     char pathEnv[MAX_PATH_LENGTH] = {0};
@@ -131,7 +131,7 @@ std::string PluginManager::GetSoPath(const std::string &envValue) const
     return "";
 }
 
-bool PluginManager::IsFuncExist(const std::string funcName) const
+bool PluginHandle::IsFuncExist(const std::string funcName) const
 {
     if (funcName.empty()) {
         return false;
