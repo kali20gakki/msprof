@@ -244,7 +244,6 @@ target_link_libraries(msprofiler_fwk_share PRIVATE
     -Wl,--no-as-needed
     c_sec
     ascend_protobuf_shared
-    profapi
     error_manager
     -Wl,--as-needed
 )

@@ -42,7 +42,7 @@ public:
     template<typename... T>
     void MsprofDlogInnerForC(int moduleId, int level, const char *fmt, T... args)
     {
-        Status ret = PLUGIN_LOAD_SUCCESS;
+        PluginStatus ret = PLUGIN_LOAD_SUCCESS;
         if (!pluginHandle_.HasLoad()) {
             ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
             if (ret != PLUGIN_LOAD_SUCCESS) {

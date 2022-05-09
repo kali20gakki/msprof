@@ -22,7 +22,7 @@ bool SlogPlugin::IsFuncExist(const std::string &funcName) const
 // CheckLogLevelForC
 int SlogPlugin::MsprofCheckLogLevelForC(int moduleId, int logLevel)
 {
-    Status ret = PLUGIN_LOAD_SUCCESS;
+    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginHandle_.HasLoad()) {
         ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");;
         if (ret != PLUGIN_LOAD_SUCCESS) {

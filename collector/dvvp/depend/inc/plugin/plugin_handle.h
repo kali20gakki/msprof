@@ -16,10 +16,10 @@ namespace Analysis {
 namespace Dvvp {
 namespace Plugin {
 
-using Status = uint32_t;
+using PluginStatus = uint32_t;
 using HandleType = void*;
-const Status PLUGIN_LOAD_SUCCESS = 0x0;
-const Status PLUGIN_LOAD_FAILED = 0xFFFFFFFF;
+const PluginStatus PLUGIN_LOAD_SUCCESS = 0x0;
+const PluginStatus PLUGIN_LOAD_FAILED = 0xFFFFFFFF;
 
 class PluginHandle {
 public:
@@ -30,10 +30,10 @@ public:
     {}
     ~PluginHandle() {}
     const std::string GetSoName() const;
-    Status OpenPlugin(const std::string envValue);
+    PluginStatus OpenPlugin(const std::string envValue);
     void CloseHandle();
     template <typename R, typename... Types>
-    Status GetFunction(const std::string& funcName, std::function<R(Types... args)>& func) const
+    PluginStatus GetFunction(const std::string& funcName, std::function<R(Types... args)>& func) const
     {
         func = (R(*)(Types...))dlsym(handle_, funcName.c_str());
         if (!func) {
