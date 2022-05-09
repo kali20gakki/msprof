@@ -206,7 +206,10 @@ int32_t MsprofilerInit()
 
 static int32_t g_initResult = MsprofilerInit();
 
-int32_t GetRegisterResult() { return g_initResult; }
+int32_t GetRegisterResult()
+{
+    return g_initResult;
+}
 }  // namespace ProfilerCommon
 }  // namespace Dvvp
 }  // namespace Analysis
