@@ -61,9 +61,9 @@ function create_temp_dir() {
 	cp ${RUN_SCRIPT_DIR}${MAIN_SCRIPT} ${temp_dir}
 }
 
-# 以下函数不需要
+#获取安装包的版本号
 function version() {
-    local _path="${TOP_DIR}/../mindstudio_ci/dependency/config.ini"
+    local _path="${TOP_DIR}/../manifest/dependency/config.ini"
     local _version=$(grep "^version=" "${_path}" | cut -d"=" -f2)
     echo "${_version}"
 }
@@ -72,7 +72,7 @@ function get_package_name() {
     local _product="Ascend"
     local _name="mindstudio-msprof"
 
-    local _version=$(version)
+    local _version=$(echo $(version) | cut -d '.' -f 1,2,3)
     local _os_arch=$(arch)
     echo "${_product}-${_name}_${_version}_linux-${_os_arch}.run"
 }
