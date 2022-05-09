@@ -164,33 +164,34 @@ void InfoJson::AddMemTotal(SHARED_PTR_ALIA<InfoMain> infoMain)
         return;
     }
     while (std::getline(fin, line)) {
-        if (line.find(PROC_MEM_TOTAL) != std::string::npos) {
-            unsigned start = 0;
-            unsigned end = 0;
-            for (unsigned i = 0; i < line.size(); i++) {
-                char c = line.at(i);
-                if (c >= '0' && c <= '9') {
-                    start = i;
-                    break;
-                }
-            }
-            for (unsigned i = line.size() - 1; i > start; i--) {
-                char c = line.at(i);
-                if (c >= '0' && c <= '9') {
-                    end = i;
-                    break;
-                }
-            }
-            if (start == 0 || end == 0) {
-                MSPROF_LOGW("Parse MemTotal %s failed.", line.c_str());
+        if (line.find(PROC_MEM_TOTAL) == std::string::npos) {
+            continue;
+        }
+        unsigned start = 0;
+        unsigned end = 0;
+        for (unsigned i = 0; i < line.size(); i++) {
+            char c = line.at(i);
+            if (c >= '0' && c <= '9') {
+                start = i;
                 break;
             }
-            std::string result = line.substr(start, end - start + 1);
-            if (Utils::CheckStringIsNonNegativeIntNum(result)) {
-                infoMain->set_memorytotal(std::stoi(result));
+        }
+        for (unsigned i = line.size() - 1; i > start; i--) {
+            char c = line.at(i);
+            if (c >= '0' && c <= '9') {
+                end = i;
+                break;
             }
+        }
+        if (start == 0 || end == 0) {
+            MSPROF_LOGW("Parse MemTotal %s failed.", line.c_str());
             break;
         }
+        std::string result = line.substr(start, end - start + 1);
+        if (Utils::CheckStringIsNonNegativeIntNum(result)) {
+            infoMain->set_memorytotal(std::stoi(result));
+        }
+        break;
     }
     fin.close();
 #endif
