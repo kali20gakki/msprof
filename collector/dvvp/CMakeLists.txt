@@ -133,6 +133,7 @@ set(msprofilerCpp
     depend/src/driver_plugin.cpp
     depend/src/mmpa_plugin.cpp
     depend/src/plugin_handle.cpp
+    depend/src/slog_plugin.cpp
     transport/parser_transport.cpp
     transport/prof_channel.cpp
     transport/transport.cpp
@@ -242,7 +243,6 @@ target_link_options(msprofiler_fwk_share PRIVATE
 target_link_libraries(msprofiler_fwk_share PRIVATE
     -Wl,--no-as-needed
     c_sec
-    alog
     ascend_protobuf_shared
     profapi
     error_manager
