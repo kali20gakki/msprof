@@ -125,28 +125,11 @@ function copy_file() {
 }
 
 function print() {
-    if [ "$quiet_flag" = y -a "$1" = "INFO" ]; then
-        log "$1" "$2"
-        return
-    fi
     # 将关键信息打印到屏幕上
     if [ ! -f "$log_file" ]; then
         echo "[Mindstudio-msprof] [$(date +"%Y-%m-%d %H:%M:%S")]: [$1] $2"
     else
         echo "[Mindstudio-msprof] [$(date +"%Y-%m-%d %H:%M:%S")]: [$1] $2" | tee -a $log_file
-    fi
-}
-
-# 将日志打印
-function log() {
-    local cur_date_=$(date +"%Y-%m-%d %H:%M:%S")
-    local log_type_=$1
-    local msg_=$2
-    local log_format_="[pyACL] [$cur_date_] [$log_type_]: ${msg_}"
-    if [ ! -f "$log_file" -a "$quiet_flag" = n ]; then
-        echo $log_format_
-    elif [ -f "$log_file" ]; then
-        echo $log_format_ >>$log_file
     fi
 }
 
