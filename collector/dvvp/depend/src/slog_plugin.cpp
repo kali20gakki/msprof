@@ -24,7 +24,7 @@ int SlogPlugin::MsprofCheckLogLevelForC(int moduleId, int logLevel)
 {
     PluginStatus ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");;
+        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
