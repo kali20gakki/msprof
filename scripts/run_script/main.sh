@@ -131,9 +131,9 @@ function print() {
     fi
     # 将关键信息打印到屏幕上
     if [ ! -f "$log_file" ]; then
-        echo "[Mindstudio-msprof] [$(date +"%Y-%m-%d %H:%M:%S")] [$1] $2"
+        echo "[Mindstudio-msprof] [$(date +"%Y-%m-%d %H:%M:%S")]: [$1] $2"
     else
-        echo "[Mindstudio-msprof] [$(date +"%Y-%m-%d %H:%M:%S")] [$1] $2" | tee -a $log_file
+        echo "[Mindstudio-msprof] [$(date +"%Y-%m-%d %H:%M:%S")]: [$1] $2" | tee -a $log_file
     fi
 }
 
@@ -188,9 +188,9 @@ function get_default_install_path() {
 function get_log_file() {
 	local log_dir
 	if [ "$UID" = "0" ]; then
-		log_dir="${HOME}/var/log/ascend_seclog"
-	else
 		log_dir="/var/log/ascend_seclog"
+	else
+		log_dir="${HOME}/var/log/ascend_seclog"
 	fi
 	echo "${log_dir}/ascend_install.log"
 }
