@@ -67,7 +67,7 @@ function check_args() {
 	fi
 
 	if [ ${install_path_num} -gt 1 ]; then
-		print "ERROR" "Input option is invalid. Please try --help."
+		print "ERROR" "Do not input --install-path many times. Please try --help."
 		exit 2
 	fi
 }
