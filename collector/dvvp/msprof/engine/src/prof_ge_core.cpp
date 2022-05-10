@@ -19,9 +19,8 @@
 #include "prof_api_common.h"
 #include "utils/utils.h"
 #include "param_validation.h"
-#include "prof_api.h"
+#include "profapi_plugin.h"
 #include "platform/platform.h"
-#include "prof_api.h"
 
 using namespace analysis::dvvp::common::error;
 using namespace Analysis::Dvvp::Analyze;
@@ -29,6 +28,7 @@ using namespace Msprofiler::Api;
 using namespace analysis::dvvp::common::utils;
 using namespace analysis::dvvp::common::validation;
 using namespace Analysis::Dvvp::Common::Platform;
+using namespace Analysis::Dvvp::Plugin;
 
 std::mutex g_aclgraphProfMutex;
 
@@ -53,7 +53,7 @@ Status aclgrphProfGraphSubscribe(const uint32_t graphId, const aclprofSubscribeC
     }
 
     uint32_t deviceId = 0;
-    ret = profGetDeviceIdByGeModelIdx(graphId, &deviceId);
+    ret = ProfApiPlugin::instance()->MsprofProfGetDeviceIdByGeModelIdx(graphId, &deviceId);
     if (ret != ACL_SUCCESS) {
         MSPROF_LOGE("Graph id %u is not loaded", graphId);
         MSPROF_INPUT_ERROR("EK0010", std::vector<std::string>({"param", "value"}),
