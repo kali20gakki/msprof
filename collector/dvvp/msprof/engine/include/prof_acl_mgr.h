@@ -21,7 +21,7 @@
 #include "utils/utils.h"
 #include "prof_api_common.h"
 #include "proto/profiler_ext.pb.h"
-#include "prof_api.h"
+#include "profapi_plugin.h"
 
 namespace analysis {
 namespace dvvp {
@@ -85,6 +85,7 @@ public:
     void SetModeToCmd();
     void SetModeToOff();
     bool IsCmdMode();
+    bool IsModeOff();
 
     // api ctrl
     int ProfAclInit(const std::string& profResultPath);
