@@ -127,9 +127,9 @@ function copy_file() {
 function print() {
     # 将关键信息打印到屏幕上
     if [ ! -f "$log_file" ]; then
-        echo "[Mindstudio-msprof] [$(date +"%Y-%m-%d %H:%M:%S")]: [$1] $2"
+        echo "[Mindstudio-msprof] [$(date +"%Y-%m-%d %H:%M:%S")] [$1]: $2"
     else
-        echo "[Mindstudio-msprof] [$(date +"%Y-%m-%d %H:%M:%S")]: [$1] $2" | tee -a $log_file
+        echo "[Mindstudio-msprof] [$(date +"%Y-%m-%d %H:%M:%S")] [$1]: $2" | tee -a $log_file
     fi
 }
 
