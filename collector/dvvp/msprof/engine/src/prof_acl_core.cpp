@@ -22,9 +22,8 @@
 #include "utils/utils.h"
 #include "prof_api_common.h"
 #include "transport/hash_data.h"
-#include "prof_api.h"
+#include "profapi_plugin.h"
 #include "platform/platform.h"
-#include "prof_api.h"
 
 using namespace Analysis::Dvvp::Analyze;
 using namespace analysis::dvvp::common::error;
@@ -33,6 +32,7 @@ using namespace Msprofiler::Api;
 using namespace Msprof::MsprofTx;
 using namespace analysis::dvvp::transport;
 using namespace Analysis::Dvvp::Common::Platform;
+using namespace Analysis::Dvvp::Plugin;
 
 std::mutex g_aclprofMutex;
 static uint64_t g_indexId = 1;
@@ -392,7 +392,7 @@ aclError aclprofModelSubscribe(const uint32_t modelId, const aclprofSubscribeCon
     }
 
     uint32_t deviceId = 0;
-    aclError aclRet = profGetDeviceIdByGeModelIdx(modelId, &deviceId);
+    aclError aclRet = ProfApiPlugin::instance()->MsprofProfGetDeviceIdByGeModelIdx(modelId, &deviceId);
     if (aclRet != ACL_SUCCESS) {
         MSPROF_LOGE("Model id %u is not loaded", modelId);
         MSPROF_INPUT_ERROR("EK0010", std::vector<std::string>({"param", "value"}),
@@ -518,7 +518,7 @@ aclError aclprofGetStepTimestamp(ACLPROF_STEPINFO_PTR stepInfo, aclprofStepTag t
     } else {
         stepInfo->endFlag = true;
     }
-    auto geRet = profSetStepInfo(stepInfo->indexId, tag, stream);
+    auto geRet = ProfApiPlugin::instance()->MsprofProfSetStepInfo(stepInfo->indexId, tag, stream);
     if (geRet != PROFAPI_SUCCESS) {
         MSPROF_LOGE("[aclprofGetStepTimestamp]Call ProfSetStepInfo function failed, ge result = %d", geRet);
         return ACL_ERROR_GE_FAILURE;

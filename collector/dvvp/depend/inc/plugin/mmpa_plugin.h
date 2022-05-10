@@ -1,9 +1,15 @@
+/*
+ * Copyright (c) Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
+ * Description: mmpa interface
+ * Author: Huawei Technologies Co., Ltd.
+ * Create: 2022-04-15
+ */
 #ifndef MMPA_PLUGIN_H
 #define MMPA_PLUGIN_H
 
 #include "singleton/singleton.h"
 #include "mmpa/mmpa_api.h"
-#include "plugin_manager.h"
+#include "plugin_handle.h"
 
 namespace Analysis {
 namespace Dvvp {
@@ -12,7 +18,7 @@ class MmpaPlugin : public analysis::dvvp::common::singleton::Singleton<MmpaPlugi
 public:
     MmpaPlugin()
     : soName_("libmmpa.so"),
-      pluginManager_(PluginManager(soName_))
+      pluginHandle_(PluginHandle(soName_))
     {}
     ~MmpaPlugin();
 
@@ -234,9 +240,8 @@ public:
     
 private:
     std::string soName_;
-    PluginManager pluginManager_;
+    PluginHandle pluginHandle_;
 };
-
 } // Plugin
 } // Dvvp
 } // Analysis
