@@ -1,3 +1,4 @@
+#!/bin/bash
 # 非法选项校验已由makeself的help.sh脚本完成
 # 参数重复，参数非法组合的情况已由check_args完成
 # 安装路径有效校验已在copy file中完成

@@ -1,3 +1,4 @@
+#!/bin/bash
 #readlink -f $0获取该文件的绝对路径；dirname获取父目录
 CUR_DIR=$(dirname $(readlink -f $0))
 TOP_DIR=${CUR_DIR}/..
