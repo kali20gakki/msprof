@@ -9,7 +9,7 @@
 
 #include "singleton/singleton.h"
 #include "driver/ascend_hal.h"
-#include "plugin_manager.h"
+#include "plugin_handle.h"
 
 namespace Analysis {
 namespace Dvvp {
@@ -19,7 +19,7 @@ class DriverPlugin : public analysis::dvvp::common::singleton::Singleton<DriverP
 public:
     DriverPlugin()
      :soName_("libascend_hal.so"),
-      pluginManager_(PluginManager(soName_))
+      pluginHandle_(PluginHandle(soName_))
     {}
     ~DriverPlugin();
 
@@ -148,7 +148,7 @@ public:
 
 private:
     std::string soName_;
-    PluginManager pluginManager_;
+    PluginHandle pluginHandle_;
 };
 
 } // Plugin

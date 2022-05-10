@@ -4,10 +4,11 @@
  * Author: Huawei Technologies Co., Ltd.
  * Create: 2022-04-15
  */
-#include "plugin_manager.h"
+#include "plugin_handle.h"
 
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <unistd.h>
 #include "config.h"
 #include "securec.h"
 
@@ -16,24 +17,22 @@ namespace Dvvp {
 namespace Plugin {
 using namespace analysis::dvvp::common::config;
 
-const std::string PluginManager::GetSoName() const
+const std::string PluginHandle::GetSoName() const
 {
     return soName_;
 }
 
-bool PluginManager::IsSoftLink(const std::string &path) const
+bool PluginHandle::IsSoftLink(const std::string &path) const
 {
     struct stat buf1;
     int ret = stat(path.c_str(), &buf1);
     if (ret != 0) {
-        MSPROF_LOGE("stat %s fail, ret=%d errno=%u", path.c_str(), ret, errno);
         return true;
     }
 
     struct stat buf2;
     ret = lstat(path.c_str(), &buf2);
     if (ret != 0) {
-        MSPROF_LOGE("lstat %s fail, ret=%d errno=%u", path.c_str(), ret, errno);
         return true;
     }
 
@@ -43,61 +42,51 @@ bool PluginManager::IsSoftLink(const std::string &path) const
     return false;   // not soft-link
 }
 
-std::string PluginManager::RealPath(const std::string &path) const
+std::string PluginHandle::RealPath(const std::string &path) const
 {
     char resoved_path[MAX_PATH_LENGTH] = {0x00};
     std::string res = "";
     if (realpath(path.c_str(), resoved_path)) {
         res = resoved_path;
-    } else {
-        MSPROF_LOGE("[RealPath]Get realpath failed.");
     }
     return res;
 }
 
-Status PluginManager::OpenPlugin(const std::string envValue)
+PluginStatus PluginHandle::OpenPlugin(const std::string envValue)
 {
     if (envValue.empty() || envValue.size() >= MAX_PATH_LENGTH) {
-        MSPROF_LOGE("[OpenPlugin]envValue wrong");
         return PLUGIN_LOAD_FAILED;
     }
     std::string soPath = GetSoPath(envValue);
     if (soPath.empty()) {
-        MSPROF_LOGE("[OpenPlugin]Get so path failed");
         return PLUGIN_LOAD_FAILED;
     }
     std::string absoluteDir = RealPath(soPath);
     if (absoluteDir.empty() || IsSoftLink(absoluteDir)) {
-        MSPROF_LOGE("[OpenPlugin]Get realpath failed or realpath is softlink.");
         return PLUGIN_LOAD_FAILED;
     }
-
     handle_ = dlopen(absoluteDir.c_str(), RTLD_NOW | RTLD_GLOBAL);
     if (!handle_) {
-        MSPROF_LOGE("[OpenPlugin]dlopen failed.");
         return PLUGIN_LOAD_FAILED;
     }
     load_ = true;
     return PLUGIN_LOAD_SUCCESS;
 }
 
-void PluginManager::CloseHandle()
+void PluginHandle::CloseHandle()
 {
     if (!handle_ || !load_) { // nullptr
-        MSPROF_LOGI("[CloseHandle]Do not need to close so.");
         return;
     }
-    if (dlclose(handle_) != 0) {
-        MSPROF_LOGE("[CloseHandle]failed to close [%s]so.msg:[]", soName_.c_str(), dlerror());
-    }
+    dlclose(handle_);
 }
 
-bool PluginManager::HasLoad()
+bool PluginHandle::HasLoad()
 {
     return load_;
 }
 
-void PluginManager::SplitPath(const std::string &mutilPath, std::vector<std::string> &pathVec) const
+void PluginHandle::SplitPath(const std::string &mutilPath, std::vector<std::string> &pathVec) const
 {
     const std::string tmpString = mutilPath + ":";
     std::string::size_type startPos = 0U;
@@ -112,18 +101,17 @@ void PluginManager::SplitPath(const std::string &mutilPath, std::vector<std::str
     }
 }
 
-std::string PluginManager::GetSoPath(const std::string &envValue) const
+std::string PluginHandle::GetSoPath(const std::string &envValue) const
 {
-    MSPROF_LOGI("[GetSoPath]envValue:%s", envValue.c_str());
-    char pathEnv[MAX_PATH_LENGTH] = {0};
-    const char *env = getenv(envValue.c_str());
-    strncpy_s(pathEnv, MAX_PATH_LENGTH, env, MAX_PATH_LENGTH);
-    MSPROF_LOGI("[GetSoPath]pathEnv:%s", pathEnv);
+    const char *env = std::getenv(envValue.c_str());
+    if (env == nullptr) {
+        return "";
+    }
+    std::string pathEnv = env;
     std::vector<std::string> pathVec;
     SplitPath(std::string(pathEnv), pathVec);
     for (auto path : pathVec) {
         std::string ret = path + "/" + soName_;
-        MSPROF_LOGI("[GetSoPath]so path:%s", ret.c_str());
         if (access(ret.c_str(), F_OK) != -1) {
             return ret;
         }
@@ -131,7 +119,7 @@ std::string PluginManager::GetSoPath(const std::string &envValue) const
     return "";
 }
 
-bool PluginManager::IsFuncExist(const std::string funcName) const
+bool PluginHandle::IsFuncExist(const std::string funcName) const
 {
     if (funcName.empty()) {
         return false;
