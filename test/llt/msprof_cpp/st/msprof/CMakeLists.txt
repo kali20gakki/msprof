@@ -1,0 +1,379 @@
+protobuf_generate(profiler
+	CppPath
+	HeaderPath
+	${MSPROF_SOURCE_DIR}/dvvp/proto/profiler.proto
+	${MSPROF_SOURCE_DIR}/dvvp/proto/profiler_ext.proto
+)
+
+################ msprofiler_stest
+
+set(profilerSrcList
+	${MSPROF_SOURCE_DIR}/dvvp/adx/stub/adx_prof_api.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/adx/wrapper/memory_utils.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/analyze/src/analyzer.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/analyze/src/analyzer_base.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/analyze/src/analyzer_ge.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/analyze/src/analyzer_ffts.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/analyze/src/analyzer_hwts.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/analyze/src/analyzer_ts.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/analyze/src/op_desc_parser.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/common/config/config_manager.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/common/memory/chunk_pool.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/common/statistics/perf_count.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/common/thread/thread.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/common/thread/thread_pool.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/common/utils/utils.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/common/validation/param_validation.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/depend/stub/error_manager/msprof_error_manager_stub.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/driver/channel/ai_drv_prof_api.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/driver/devmgmt/ai_drv_dev_api.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/driver/devmgmt/mini/ai_drv_dsmi_api.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/job_wrapper/src/collection_register.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/job_wrapper/src/job_device_soc.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/job_wrapper/src/job_factory.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/job_wrapper/src/prof_channel_manager.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/job_wrapper/src/prof_job.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/job_wrapper/src/prof_peripheral_job.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/job_wrapper/src/prof_timer.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/job_wrapper/src/prof_host_job.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/message/codec.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/msprof/common/src/msprof_callback_handler.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/msprof/common/src/receive_data.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/msprof/engine/src/aicpu_plugin.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/msprof/engine/src/prof_acl_mgr.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/msprof/engine/src/prof_ge_core.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/msprof/engine/src/prof_acl_core.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/msprof/engine/src/prof_api_common.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/msprof/engine/src/uploader_dumper.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/msprof/platform/mini/data_dumper.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/msprof/msproftx/src/msprof_tx_manager.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/msprof/msproftx/src/msprof_tx_reporter.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/msprof/msproftx/src/prof_stamp_pool.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/msprofiler/src/command_handle.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/msprofiler/src/msprof_callback_impl.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/task_handle/src/device.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/task_handle/src/info_json.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/task_handle/src/prof_manager.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/task_handle/src/prof_params_adapter.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/task_handle/src/prof_task.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/task_handle/src/task_relationship_mgr.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/transport/file_slice.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/transport/file_ageing.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/transport/hash_data.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/transport/file_transport.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/transport/hdc/hdc_transport.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/transport/hdc/platform/soc/dev_mgr_api.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/transport/parser_transport.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/transport/prof_channel.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/transport/transport.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/transport/uploader.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/transport/uploader_mgr.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/depend/stub/prof_api_stub.cpp
+	${CppPath}
+)
+
+set(profilerSrcFile
+	test/main.cpp
+	test/prof_acl_core_stest.cpp
+	test/param_validation_stest.cpp
+	test/hash_data_test.cpp
+	../stub/mmpa_stub.cpp
+    ../stub/ge_stub.cpp
+	../stub/hdc-log-stub.cpp
+	../stub/devdrv_runtime_api_stub.cpp
+	../stub/profile_drv_user_stub.cpp
+	../stub/hdc-api-stub.cpp
+	../stub/ide-cmd-stub.cpp
+	../../stub/driver_plugin_stub.cpp
+    ${profilerSrcList}
+)
+
+
+add_executable(
+    msprofiler_stest
+    ${profilerSrcFile}
+)
+
+target_include_directories(msprofiler_stest PRIVATE
+	${GTEST_INCLUDE_DIR}
+	${MOCKCPP_INCLUDE_DIR}
+	${TOP_DIR}/opensource/securec/include
+	${TOP_DIR}/opensource/json/include
+	${MSPROF_SOURCE_DIR}/dvvp/depend/inc/slog
+	${MSPROF_SOURCE_DIR}/dvvp/depend/inc/acl
+	${MSPROF_SOURCE_DIR}/dvvp/depend/inc/metadef/error_manager/error_manager_stub
+	${MSPROF_SOURCE_DIR}/dvvp/depend/inc/driver
+	${MSPROF_SOURCE_DIR}/dvvp/depend/inc/adump
+	${MSPROF_SOURCE_DIR}/dvvp/depend/inc/mmpa
+	${MSPROF_SOURCE_DIR}/dvvp/depend/inc/plugin
+	${MSPROF_SOURCE_DIR}/dvvp/depend/inc/profapi
+	${MSPROF_SOURCE_DIR}/dvvp/depend/inc
+	${MSPROF_SOURCE_DIR}/../inc
+	${MSPROF_SOURCE_DIR}/../inc/toolchain
+    ${MSPROF_SOURCE_DIR}/dvvp/msprof/engine/include
+    ${MSPROF_SOURCE_DIR}/dvvp/common/utils 
+	${MSPROF_SOURCE_DIR}/dvvp/analyze/inc
+	${MSPROF_SOURCE_DIR}/dvvp/msprof/engine/include
+	${MSPROF_SOURCE_DIR}/dvvp/msprof/common/include
+	${MSPROF_SOURCE_DIR}/dvvp/msprof/drvprof/include
+	${MSPROF_SOURCE_DIR}/dvvp/msprof/platform/include
+	${MSPROF_SOURCE_DIR}/dvvp/msprof/msproftx/include
+	${MSPROF_SOURCE_DIR}/dvvp/msprof/include
+	${MSPROF_SOURCE_DIR}/dvvp/common
+	${MSPROF_SOURCE_DIR}/dvvp/common/errno
+	${MSPROF_SOURCE_DIR}/dvvp/common/config
+	${MSPROF_SOURCE_DIR}/dvvp/common/logger
+	${MSPROF_SOURCE_DIR}/dvvp/common/validation
+	${MSPROF_SOURCE_DIR}/dvvp/common/queue
+	${MSPROF_SOURCE_DIR}/dvvp/common/singleton
+	${MSPROF_SOURCE_DIR}/dvvp/common/utils
+	${MSPROF_SOURCE_DIR}/dvvp/message
+	${MSPROF_SOURCE_DIR}/dvvp/transport
+	${MSPROF_SOURCE_DIR}/dvvp/common/memory/
+	${MSPROF_SOURCE_DIR}/dvvp/streamio/client/include
+	${MSPROF_SOURCE_DIR}/dvvp/streamio/common/include
+	${MSPROF_SOURCE_DIR}/dvvp/streamio/server/include
+	${MSPROF_SOURCE_DIR}/dvvp
+	${MSPROF_SOURCE_DIR}/dvvp/task_handle/include
+	${MSPROF_SOURCE_DIR}/dvvp/driver/inc
+	${MSPROF_SOURCE_DIR}/dvvp/job_wrapper/include
+	${MSPROF_SOURCE_DIR}/dvvp/adx/inc
+	${TOP_DIR}/inc
+	${TOP_DIR}/inc/driver
+	${TOP_DIR}/inc/external
+	${TOP_DIR}/inc/external/acl
+	${TOP_DIR}/ace/npuruntime/inc
+	${MSPROF_SOURCE_DIR}/dvvp/msprofiler/inc
+    ${CMAKE_BINARY_DIR}/proto/profiler/
+	../stub/
+	${MSPROF_SOURCE_DIR}/dvvp/depend/include/stub
+)
+
+target_compile_options(msprofiler_stest PRIVATE
+    -g
+    -pipe
+    -Wall
+    -std=c++11
+    -fno-access-control
+    -Wfloat-equal
+    -Wextra
+	-D_GLIBCXX_USE_CXX11_ABI=0
+	-fprofile-arcs
+    -ftest-coverage
+)
+
+target_compile_definitions(msprofiler_stest PRIVATE
+    C_SEC
+    MSPROF_DEBUG
+    google=ascend_private
+)
+
+target_link_options(msprofiler_stest PRIVATE
+	-lgcov
+	--coverage
+)
+
+target_link_libraries(msprofiler_stest PRIVATE
+	ascend_protobuf_static
+	c_sec
+	pthread
+	${GTEST_STATIC_LIBRARY}
+	${MOCKCPP_STATIC_LIBRARY}
+	dl
+)
+
+set_target_properties(msprofiler_stest
+    PROPERTIES
+    OUTPUT_NAME msprofiler_stest
+    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+)
+
+run_llt_test(
+    TARGET msprofiler_stest
+    TASK_NUM 1
+)
+
+
+add_executable(msprof_stest
+	test/msprof_stest.cpp
+	test/main.cpp
+	test/hdc_api_stest.cpp
+	../stub/profile_drv_user_stub.cpp
+	../stub/mmpa_stub.cpp
+	../stub/ide_hdc_stub.cc
+	../stub/hdc-log-stub.cpp
+	../stub/ge_stub.cpp
+	../stub/devdrv_runtime_api_stub.cpp
+	../../stub/driver_plugin_stub.cpp
+	${CppPath}
+	${MSPROF_SOURCE_DIR}/dvvp/adx/stub/adx_prof_api.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/adx/wrapper/hdc_api.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/adx/wrapper/memory_utils.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/analyze/src/analyzer.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/analyze/src/analyzer_base.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/analyze/src/analyzer_ge.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/analyze/src/analyzer_ffts.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/analyze/src/analyzer_hwts.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/analyze/src/analyzer_ts.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/analyze/src/op_desc_parser.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/common/config/config_manager.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/common/memory/chunk_pool.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/common/statistics/perf_count.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/common/thread/thread.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/common/thread/thread_pool.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/common/utils/utils.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/common/validation/param_validation.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/depend/stub/error_manager/msprof_error_manager_stub.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/driver/channel/ai_drv_prof_api.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/driver/devmgmt/ai_drv_dev_api.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/driver/devmgmt/mini/ai_drv_dsmi_api.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/job_wrapper/src/collection_register.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/job_wrapper/src/job_device_soc.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/job_wrapper/src/job_factory.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/job_wrapper/src/prof_channel_manager.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/job_wrapper/src/prof_host_job.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/job_wrapper/src/prof_job.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/job_wrapper/src/prof_peripheral_job.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/job_wrapper/src/prof_timer.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/message/codec.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/msprof/common/src/msprof_callback_handler.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/msprof/common/src/receive_data.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/msprof/drvprof/src/engine_mgr.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/msprof/drvprof/src/module_job.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/msprof/drvprof/src/rpc_data_handle.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/msprof/drvprof/src/rpc_dumper.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/msprof/engine/src/aicpu_plugin.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/msprof/engine/src/prof_acl_core.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/msprof/engine/src/prof_acl_mgr.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/msprof/engine/src/prof_api_common.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/msprof/engine/src/prof_ge_core.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/msprof/engine/src/uploader_dumper.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/msprof/platform/mini/data_dumper.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/msprof/msproftx/src/msprof_tx_manager.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/msprof/msproftx/src/msprof_tx_reporter.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/msprof/msproftx/src/prof_stamp_pool.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/msprofiler/src/command_handle.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/msprofiler/src/msprof_callback_impl.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/streamio/client/src/sender.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/task_handle/src/device.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/task_handle/src/info_json.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/task_handle/src/prof_manager.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/task_handle/src/prof_params_adapter.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/task_handle/src/prof_task.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/task_handle/src/task_relationship_mgr.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/transport/file_ageing.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/transport/hash_data.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/transport/file_slice.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/transport/file_transport.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/transport/hdc/hdc_sender.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/transport/hdc/hdc_transport.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/transport/hdc/platform/soc/dev_mgr_api.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/transport/parser_transport.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/transport/prof_channel.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/transport/transport.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/transport/uploader.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/transport/uploader_mgr.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/depend/stub/prof_api_stub.cpp
+)
+
+target_include_directories(msprof_stest PRIVATE
+	${GTEST_INCLUDE_DIR}
+	${MOCKCPP_INCLUDE_DIR}
+	${TOP_DIR}/opensource/securec/include
+	${TOP_DIR}/opensource/json/include
+	${MSPROF_SOURCE_DIR}/dvvp/depend/inc/slog
+	${MSPROF_SOURCE_DIR}/dvvp/depend/inc/acl
+	${MSPROF_SOURCE_DIR}/dvvp/depend/inc/metadef/error_manager/error_manager_stub
+	${MSPROF_SOURCE_DIR}/dvvp/depend/inc/driver
+	${MSPROF_SOURCE_DIR}/dvvp/depend/inc/adump
+	${MSPROF_SOURCE_DIR}/dvvp/depend/inc/mmpa
+	${MSPROF_SOURCE_DIR}/dvvp/depend/inc/plugin
+	${MSPROF_SOURCE_DIR}/dvvp/depend/inc/profapi
+	${MSPROF_SOURCE_DIR}/dvvp/depend/inc
+	${MSPROF_SOURCE_DIR}/../inc
+	${MSPROF_SOURCE_DIR}/../inc/toolchain
+	${MSPROF_SOURCE_DIR}/../inc/external
+    ${MSPROF_SOURCE_DIR}/dvvp/msprof/engine/include
+    ${MSPROF_SOURCE_DIR}/dvvp/common/utils 
+    ${TOP_DIR}/abl/msprof/inc/toolchain
+	../stub
+	${CMAKE_BINARY_DIR}/proto/profiler
+	${MSPROF_SOURCE_DIR}/dvvp
+	${MSPROF_SOURCE_DIR}/dvvp/./
+	${MSPROF_SOURCE_DIR}/dvvp/adx/inc
+	${MSPROF_SOURCE_DIR}/dvvp/analyze/inc
+	${MSPROF_SOURCE_DIR}/dvvp/common
+	${MSPROF_SOURCE_DIR}/dvvp/common/errno
+	${MSPROF_SOURCE_DIR}/dvvp/common/logger
+	${MSPROF_SOURCE_DIR}/dvvp/common/memory/
+	${MSPROF_SOURCE_DIR}/dvvp/common/config
+	${MSPROF_SOURCE_DIR}/dvvp/common/queue
+	${MSPROF_SOURCE_DIR}/dvvp/common/singleton
+	${MSPROF_SOURCE_DIR}/dvvp/common/utils
+	${MSPROF_SOURCE_DIR}/dvvp/common/validation
+	${MSPROF_SOURCE_DIR}/dvvp/driver/inc
+	${MSPROF_SOURCE_DIR}/dvvp/job_wrapper/include
+	${MSPROF_SOURCE_DIR}/dvvp/message
+	${MSPROF_SOURCE_DIR}/dvvp/msprof/
+	${MSPROF_SOURCE_DIR}/dvvp/msprof/common/include
+	${MSPROF_SOURCE_DIR}/dvvp/msprof/drvprof
+	${MSPROF_SOURCE_DIR}/dvvp/msprof/drvprof/include
+	${MSPROF_SOURCE_DIR}/dvvp/msprof/engine/include
+	${MSPROF_SOURCE_DIR}/dvvp/msprof/include
+	${MSPROF_SOURCE_DIR}/dvvp/msprof/platform/include
+	${MSPROF_SOURCE_DIR}/dvvp/msprof/msproftx/include
+	${MSPROF_SOURCE_DIR}/dvvp/msprofiler/inc
+	${MSPROF_SOURCE_DIR}/dvvp/streamio/client/include
+	${MSPROF_SOURCE_DIR}/dvvp/streamio/common/include
+	${MSPROF_SOURCE_DIR}/dvvp/streamio/server/include
+	${MSPROF_SOURCE_DIR}/dvvp/task_handle/include
+	${MSPROF_SOURCE_DIR}/dvvp/transport
+	${MSPROF_SOURCE_DIR}/dvvp/depend/include/stub
+)
+
+target_compile_options(msprof_stest PRIVATE
+    -g
+    -pipe
+    -Wall
+    -std=c++11
+    -fno-access-control
+    -Wfloat-equal
+    -Wextra
+	-D_GLIBCXX_USE_CXX11_ABI=0
+	-fprofile-arcs
+    -ftest-coverage
+)
+
+target_compile_definitions(msprof_stest PRIVATE
+    C_SEC
+    MSPROF
+    ADX_LIB
+    google=ascend_private
+)
+
+target_link_options(msprof_stest PRIVATE
+	-lgcov
+	--coverage
+)
+
+target_link_libraries(msprof_stest PRIVATE
+	ascend_protobuf_static
+	c_sec
+	pthread
+	${GTEST_STATIC_LIBRARY}
+	${MOCKCPP_STATIC_LIBRARY}
+	dl
+)
+
+set_target_properties(msprof_stest
+    PROPERTIES
+    OUTPUT_NAME msprof_stest
+    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+)
+
+run_llt_test(
+    TARGET msprof_stest
+    TASK_NUM 1
+)

@@ -4,8 +4,9 @@ set -e
 
 CUR_DIR=$(dirname $(readlink -f $0))
 TOP_DIR=${CUR_DIR}/..
-mkdir -p ${TOP_DIR}/llt/build_llt
-cd ${TOP_DIR}/llt/build_llt
+echo "XXX0" ${TOP_DIR}
+mkdir -p ${TOP_DIR}/test/llt/build_llt
+cd ${TOP_DIR}/test/llt/build_llt
 cmake ../ -DPACKAGE=ut
-make -j64
+make -j64 
 
