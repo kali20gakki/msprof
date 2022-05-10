@@ -47,12 +47,12 @@ function parse_script_args() {
 			continue
             ;;
         --install-for-all)
-			#直接拷贝原有权限，不用特别设置
+			install_for_all_flag=1
             shift
 			continue
             ;;
         *)
-			echo "[ERROR]" "Input option is invalid. Please try --help."
+			print "ERROR" "Input option is invalid. Please try --help."
 			exit 2
             ;;
         esac
@@ -62,63 +62,53 @@ function parse_script_args() {
 
 function check_args() {
 	if [ ${install_args_num} -ne 0 ] && [ ${uninstall_flag} = 1 ]; then
-		echo "[ERROR]" "Input option is invalid. Please try --help."
-		echo uuuuuuuuuuu
-		echo ${install_args_num}
-		echo ${uninstall_flag}
+		print "ERROR" "Input option is invalid. Please try --help."
 		exit 2
 	fi
 
 	if [ ${install_path_num} -gt 1 ]; then
-		echo "[ERROR]" "Do not input --install-path many times. Please try --help."
-		echo yyyyyyyyyyyyyyyyyy
-		echo ${install_path_num}
+		print "ERROR" "Input option is invalid. Please try --help."
 		exit 2
 	fi
 }
 
 function execute_run() {
 	if [ ${uninstall_flag} = 1 ]; then
+		print "INFO" "Mindstudio msprof package uninstall success."
 		exit 0
 	fi
 	get_cann_package_name
 	implement_install
 }
 
+function get_cann_package_name() {
+	local name_list=(${install_path//// })
+	cann_package_name=${name_list[-2]}
+	if [ "$cann_package_name" = "ascend-toolkit" ] || [ "$cann_package_name" = "nnrt" ] || [ "$cann_package_name" = "nnae" ]; then
+		return
+	fi
+	print "ERROR" "There is no ascend-toolkit, nnrt or nnae."
+	exit 2
+}
+
 function implement_install() {
-	echo "$cann_package_name"
 	if [ "$cann_package_name" = "ascend-toolkit" ]; then
 		copy_file ${ANALYSIS} ${install_path}${ANALYSIS_PATH}${ANALYSIS}
 		copy_file ${MSPROF} ${install_path}${MSPROF_PATH}${MSPROF}
 	fi
-
-	#if [ "$array"=="ascend-tookit" ] || [ "$array"=="nnae" ]; then
-	#	copy_file ${GE_PROF} ${install_path}${GE_PROF_PATH}${GE_PROF}
-	#fi
-
-	#copy_file ${ACL_PROF} ${install_path}${ACL_PROF_PATH}${ACL_PROF}
-	copy_file ${LIBMSPROFILER} ${install_path}${LIBMSPROFILER_PATH}${LIBMSPROFILER}
-	copy_file ${LIBMSPROFILER_STUB} ${install_path}${LIBMSPROFILER_PATH}${LIBMSPROFILER_STUB}
-}
-
-function get_cann_package_name() {
-	local name_list=(${install_path//// })
-	cann_package_name=${name_list[-2]}
-	echo "$cann_package_name"
-	if [ "$cann_package_name" = "ascend-toolkit" ] || [ "$cann_package_name" = "nnrt" ] || [ "$cann_package_name" = "nnae" ]; then
-		return
+	
+	if [ "$cann_package_name" != "nnae" ]; then
+		copy_file ${LIBMSPROFILER_STUB} ${install_path}${LIBMSPROFILER_PATH}${LIBMSPROFILER_STUB}
 	fi
-	echo "[ERROR]" "There is no ascend-toolkit, nnrt or nnae."
-	exit 2
+
+	copy_file ${LIBMSPROFILER} ${install_path}${LIBMSPROFILER_PATH}${LIBMSPROFILER}
 }
 
 function copy_file() {
 	local filename=${1}
 	local target_file=$(readlink -f ${2})
 	
-	echo ${target_file}
 	if [ -f "$target_file" ] || [ -d "$target_file" ]; then
-		right=$(stat -c '%a' ${target_file})
 		# target file的权限受父目录影响
 		chmod u+w $(dirname ${target_file})
 		travFolder ${target_file} u+w
@@ -127,9 +117,37 @@ function copy_file() {
 		cp -r ${filename} ${target_file}
 		travFolder ${target_file} $right
 		chmod u-w $(dirname ${target_file})
+		
+		print "INFO" "$filename is replaced."
 		return
 	fi
-	echo "[WARNING]" "$2 is non-existent."
+	print "WARNING" "$target_file is non-existent."
+}
+
+function print() {
+    if [ "$quiet_flag" = y -a "$1" = "INFO" ]; then
+        log "$1" "$2"
+        return
+    fi
+    # 将关键信息打印到屏幕上
+    if [ ! -f "$log_file" ]; then
+        echo "[Mindstudio-msprof] [$(date +"%Y-%m-%d %H:%M:%S")] [$1] $2"
+    else
+        echo "[Mindstudio-msprof] [$(date +"%Y-%m-%d %H:%M:%S")] [$1] $2" | tee -a $log_file
+    fi
+}
+
+# 将日志打印
+function log() {
+    local cur_date_=$(date +"%Y-%m-%d %H:%M:%S")
+    local log_type_=$1
+    local msg_=$2
+    local log_format_="[pyACL] [$cur_date_] [$log_type_]: ${msg_}"
+    if [ ! -f "$log_file" -a "$quiet_flag" = n ]; then
+        echo $log_format_
+    elif [ -f "$log_file" ]; then
+        echo $log_format_ >>$log_file
+    fi
 }
 
 function travFolder(){
@@ -151,28 +169,53 @@ function travFolder(){
 	fi
 }
 
+function get_right() {
+	if [ "$install_for_all_flag" = 1 ] || [ "$UID" = "0" ]; then
+		echo 555
+	else
+		echo 550
+	fi
+}
 
-if [ "$UID" = "0" ]; then
-	# root用户安装的默认路径
-	DEFAULT_INSTALL_PATH="/usr/local/Ascend/ascend-toolkit/latest"
-else
-	DEFAULT_INSTALL_PATH="${HOME}/Ascend/ascend-toolkit/latest"
-fi
-	
+function get_default_install_path() {
+	if [ "$UID" = "0" ]; then
+		echo "/usr/local/Ascend/ascend-toolkit/latest"
+	else
+		echo "${HOME}/Ascend/ascend-toolkit/latest"
+	fi
+}
+
+function get_log_file() {
+	local log_dir
+	if [ "$UID" = "0" ]; then
+		log_dir="${HOME}/var/log/ascend_seclog"
+	else
+		log_dir="/var/log/ascend_seclog"
+	fi
+	echo "${log_dir}/ascend_install.log"
+}
+
+function chmod_ini_file() {
+	local ini_config_dir=${install_path}${ANALYSIS_PATH}${ANALYSIS}"/config"
+	if [ "$install_for_all_flag" = 1 ] || [ "$UID" = "0" ]; then
+		find "${ini_config_dir}" -type f -exec chmod 444 {} \;
+	else
+		find "${ini_config_dir}" -type f -exec chmod 400 {} \;
+	fi
+}
+
+log_file=$(get_log_file)
+install_path=$(get_default_install_path)
+
 LIBMSPROFILER="libmsprofiler.so"
 LIBMSPROFILER_STUB="stub/libmsprofiler.so"
 ANALYSIS="analysis"
 MSPROF="msprof"
-#GE_PROF="ge_prof.h"
-#ACL_PROF="acl_prof.h"
 
 LIBMSPROFILER_PATH="/runtime/lib64/"
 ANALYSIS_PATH="/tools/profiler/profiler_tool/"
 MSPROF_PATH="/tools/profiler/bin/"
-#GE_PROF_PATH="/compiler/include/ge/"
-#ACL_PROF_PATH="/runtime/include/acl/"
 
-install_path=${DEFAULT_INSTALL_PATH}
 
 #以下参数用于校验
 install_args_num=0
@@ -181,7 +224,13 @@ install_path_num=0
 #以下参数决定是否卸载
 uninstall_flag=0
 
+#以下参数决定是否给其它用户权限
+install_for_all_flag=0
+
 #$*包括至少三个参数:0, 该脚本路径;1, 执行run包的路径;2, run包父目录;3, run包参数
 parse_script_args $*
+right=$(get_right)
 check_args
 execute_run
+chmod_ini_file
+print "INFO" "Mindstudio msprof package install success."
