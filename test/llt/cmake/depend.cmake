@@ -109,7 +109,7 @@ function(run_llt_test)
             OUTPUT ${CMAKE_INSTALL_PREFIX}/${${PACKAGE}_TARGET}.timestamp
             COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_INSTALL_PREFIX}/${PACKAGE}_report
             COMMAND echo "execute ${${PACKAGE}_TARGET} begin:"
-            COMMAND bash ${TOP_DIR}/llt/cmake/tools/llt_run_and_check.sh ${CMAKE_INSTALL_PREFIX}/${PACKAGE}_report $<TARGET_FILE:${${PACKAGE}_TARGET}> 
+            COMMAND bash ${TOP_DIR}/test/llt/cmake/tools/llt_run_and_check.sh ${CMAKE_INSTALL_PREFIX}/${PACKAGE}_report $<TARGET_FILE:${${PACKAGE}_TARGET}> 
             ${${PACKAGE}_TASK_NUM} 1200 "${LLT_RUN_MOD}" ${${PACKAGE}_ENV_FILE}
             COMMAND echo "execute ${${PACKAGE}_TARGET} successfully"
             COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_INSTALL_PREFIX}

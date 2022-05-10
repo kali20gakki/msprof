@@ -106,6 +106,11 @@ target_include_directories(job_wrapper_utest PRIVATE
     ${TOP_DIR}/opensource/securec/include
     ${TOP_DIR}/opensource/json/include
     ${TOP_DIR}/inc/toolchain
+    ${TOP_DIR}/collector/inc/
+    ${TOP_DIR}/collector/inc/toolchain
+    ${TOP_DIR}/collector/inc/external
+    ${TOP_DIR}/collector/inc/external/acl
+    ${TOP_DIR}/collector/inc/external/ge
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/slog
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/metadef/error_manager/error_manager_stub
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/driver

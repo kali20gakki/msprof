@@ -95,6 +95,10 @@ drvError_t drvGetDevIDByLocalDevID(uint32_t index, uint32_t *phyId) {
 extern "C" {
 #endif
 
+typedef int32_t (*MsprofReporterCallback)(uint32_t moduleId, uint32_t type, void *data, uint32_t len);
+typedef void (*rtDeviceStateCallback)(uint32_t devId, bool isOpenDevice);
+
+
 int rtGetDeviceIdByGeModelIdx(uint32_t geModelIdx, uint32_t *deviceId)
 {
     return 0;
