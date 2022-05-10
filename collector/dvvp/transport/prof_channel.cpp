@@ -115,6 +115,7 @@ int ChannelReader::Execute()
     static const int maxThresholdSize = MAX_BUFFER_SIZE * 0.8;
     SetSchedulingStatus(false);
     std::lock_guard<std::mutex> lk(mtx_);
+    std::unique_lock<std::mutex> guard(flushMutex_, std::defer_lock);
     do {
         drvChannelReadCont_++;
         if (!isInited_ || isChannelStopped_) {
@@ -126,8 +127,10 @@ int ChannelReader::Execute()
 
         spaceSize_ = bufSize_ - dataSize_;
         uint64_t startRawTime = analysis::dvvp::common::utils::Utils::GetClockMonotonicRaw();
+        guard.lock();
         currLen = DrvChannelRead(deviceId_, channelId_, buffer_.get() + dataSize_, spaceSize_);
         CheckIfSendFlush(currLen);
+        guard.unlock();
         MSPROF_LOGD("deviceId:%d, channelId:%d fileName:%s, bufSize:%u, currLen:%d, spaceSize:%u",
             deviceId_, channelId_, relativeFileName_.c_str(), bufSize_, currLen, spaceSize_);
 
@@ -201,16 +204,28 @@ void ChannelReader::FlushDrvBuff()
     if ((channelId_ != PROF_CHANNEL_HWTS_LOG) && (channelId_ != PROF_CHANNEL_TS_FW)) {
         return;
     }
+    // 1. query flush size
+    std::unique_lock<std::mutex> guard(flushMutex_);
     unsigned int flushSize = 0;
     int ret = DrvProfFlush(deviceId_, channelId_, flushSize);
     if (ret != PROFILING_SUCCESS) {
         MSPROF_LOGE("DrvProfFlush failed, deviceId:%d, channelId:%d, ret:%d", deviceId_, channelId_, ret);
         MSPROF_INNER_ERROR("EK9999", "DrvProfFlush failed, deviceId:%d, channelId:%d,ret:%d",
             deviceId_, channelId_, ret);
+        guard.unlock();
         return;
     }
     MSPROF_LOGI("Flush deviceId:%d, channelId:%d, flushSize:%d", deviceId_, channelId_, flushSize);
-    WaitFlushFinished(flushSize);
+    // 2. wait flush finished
+    if (flushSize == 0) {
+        MSPROF_LOGI("No drv data need flush.");
+        guard.unlock();
+        return;
+    }
+    needWait_ = true;
+    flushBufSize_ = flushSize;
+    flushFlag_.wait(guard, [=] { return !needWait_; });
+    // 3. upload flush data
     FlushBuffToUpload();
 }
 
@@ -219,7 +234,6 @@ void ChannelReader::CheckIfSendFlush(const size_t curLen)
     if ((channelId_ != PROF_CHANNEL_HWTS_LOG) && (channelId_ != PROF_CHANNEL_TS_FW)) {
         return;
     }
-    std::lock_guard<std::mutex> lk(flushMutex_);
     if (needWait_) {
         if (flushCurSize_ > UINT_MAX - curLen) { // Check for overflow, if curLen is very large,Sure to send finish
             SendFlushFinished();
@@ -234,23 +248,10 @@ void ChannelReader::CheckIfSendFlush(const size_t curLen)
 
 void ChannelReader::SendFlushFinished()
 {
-    std::unique_lock<std::mutex> lk(cvMutex_);
     needWait_ = false;
     flushCurSize_ = 0;
     flushBufSize_ = 0;
     flushFlag_.notify_all();
-}
-
-void ChannelReader::WaitFlushFinished(const size_t bufSize)
-{
-    if (bufSize == 0) {
-        MSPROF_LOGI("No drv data need flush.");
-        return;
-    }
-    std::unique_lock<std::mutex> lk(cvMutex_);
-    needWait_ = true;
-    flushBufSize_ = bufSize;
-    flushFlag_.wait(lk, [=] { return !needWait_; });
 }
 
 ChannelPoll::ChannelPoll(): threadPool_(nullptr), isStarted_(false)
