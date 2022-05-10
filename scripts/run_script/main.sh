@@ -180,7 +180,7 @@ function get_log_file() {
 
 function chmod_ini_file() {
 	local ini_config_dir=${install_path}${ANALYSIS_PATH}${ANALYSIS}"/config"
-	if [ "$install_for_all_flag" = 1 ] || [ "$UID" = "0" ]; then
+	if [ "$install_for_all_flag" = "1" ] || [ "$UID" = "0" ]; then
 		find "${ini_config_dir}" -type f -exec chmod 444 {} \;
 	else
 		find "${ini_config_dir}" -type f -exec chmod 400 {} \;
@@ -212,8 +212,8 @@ install_for_all_flag=0
 
 #$*包括至少三个参数:0, 该脚本路径;1, 执行run包的路径;2, run包父目录;3, run包参数
 parse_script_args $*
-right=$(get_right)
 check_args
+right=$(get_right)
 execute_run
 chmod_ini_file
 print "INFO" "Mindstudio msprof package install success."
