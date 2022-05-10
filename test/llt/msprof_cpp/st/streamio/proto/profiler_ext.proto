@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package analysis.dvvp.proto;
+
+message ProfAclConfig {
+    string switch = 1;
+    string output = 2;
+    string device_id = 3;
+    string aic_metrics = 4;
+    string aicpu = 5;
+}
+
+message ProfGeOptionsConfig {
+    string output = 1;
+    string training_trace = 2;
+    string task_trace = 3;
+    string aicpu = 4;
+    string fp_point =5;
+    string bp_point = 6;
+    string aic_metrics = 7;
+}
+
+message ProfAclInitConfig {
+    string path = 1;
+}
