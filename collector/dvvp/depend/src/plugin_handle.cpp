@@ -65,7 +65,6 @@ PluginStatus PluginHandle::OpenPlugin(const std::string envValue)
     if (absoluteDir.empty() || IsSoftLink(absoluteDir)) {
         return PLUGIN_LOAD_FAILED;
     }
-
     handle_ = dlopen(absoluteDir.c_str(), RTLD_NOW | RTLD_GLOBAL);
     if (!handle_) {
         return PLUGIN_LOAD_FAILED;
@@ -104,9 +103,11 @@ void PluginHandle::SplitPath(const std::string &mutilPath, std::vector<std::stri
 
 std::string PluginHandle::GetSoPath(const std::string &envValue) const
 {
-    char pathEnv[MAX_PATH_LENGTH] = {0};
-    const char *env = getenv(envValue.c_str());
-    strncpy_s(pathEnv, MAX_PATH_LENGTH, env, MAX_PATH_LENGTH);
+    const char *env = std::getenv(envValue.c_str());
+    if (env == nullptr) {
+        return "";
+    }
+    std::string pathEnv = env;
     std::vector<std::string> pathVec;
     SplitPath(std::string(pathEnv), pathVec);
     for (auto path : pathVec) {

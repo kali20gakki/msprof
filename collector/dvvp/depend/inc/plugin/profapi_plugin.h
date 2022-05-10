@@ -37,7 +37,7 @@ public:
     int32_t MsprofProfRegDeviceStateCallback(ProfSetDeviceHandle handle);
 
     // profGetDeviceIdByGeModelIdx
-    using MSPROF_PROFGETDEVICEIDBYGEMODELIDX_T = std::function<int32_t(const uint32_t, uint32_t *)>;
+    using MSPROF_PROFGETDEVICEIDBYGEMODELIDX_T = std::function<int32_t(uint32_t, uint32_t *)>;
     int32_t MsprofProfGetDeviceIdByGeModelIdx(const uint32_t modelIdx, uint32_t *deviceId);
 
     // profSetProfCommand
@@ -45,7 +45,7 @@ public:
     int32_t MsprofProfSetProfCommand(PROFAPI_PROF_COMMAND_PTR command, uint32_t len);
 
     // profSetStepInfo
-    using MSPROF_PROFSETSTEPINFO_T = std::function<int32_t(const uint64_t, const uint16_t, void* const)>;
+    using MSPROF_PROFSETSTEPINFO_T = std::function<int32_t(uint64_t, uint16_t, void*)>;
     int32_t MsprofProfSetStepInfo(const uint64_t indexId, const uint16_t tagId, void* const stream);
 
 private:

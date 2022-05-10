@@ -84,7 +84,7 @@ int32_t ProfApiPlugin::MsprofProfGetDeviceIdByGeModelIdx(const uint32_t modelIdx
         }
     }
     MSPROF_PROFGETDEVICEIDBYGEMODELIDX_T func;
-    ret = pluginHandle_.GetFunction<int32_t, const uint32_t, uint32_t *>("profGetDeviceIdByGeModelIdx", func);
+    ret = pluginHandle_.GetFunction<int32_t, uint32_t, uint32_t *>("profGetDeviceIdByGeModelIdx", func);
     if (ret != PLUGIN_LOAD_SUCCESS) {
         return -1;
     }
@@ -120,7 +120,7 @@ int32_t ProfApiPlugin::MsprofProfSetStepInfo(const uint64_t indexId, const uint1
         }
     }
     MSPROF_PROFSETSTEPINFO_T func;
-    ret = pluginHandle_.GetFunction<int32_t, const uint64_t, const uint16_t, void* const>("profSetStepInfo", func);
+    ret = pluginHandle_.GetFunction<int32_t, uint64_t, uint16_t, void*>("profSetStepInfo", func);
     if (ret != PLUGIN_LOAD_SUCCESS) {
         return -1;
     }
