@@ -32,7 +32,6 @@ version="unknwon"
 
 function parse_script_args() {
     while true; do
-		echo "$1"
 		if [ "$1" = "" ]; then
 			break
 		fi
@@ -100,8 +99,7 @@ function create_run_package(){
 }
 
 parse_script_args $*
-sed -i "1i VERSION=$version" ${RUN_SCRIPT_DIR}${MAIN_SCRIPT}
+sed -i "2i VERSION=$version" ${RUN_SCRIPT_DIR}${MAIN_SCRIPT}
 create_temp_dir ${MSPROF_TEMP_DIR}
 create_run_package ${MSPROF_RUN_NAME} ${MSPROF_TEMP_DIR}
-
-sed -i '1d' ${RUN_SCRIPT_DIR}${MAIN_SCRIPT}
+sed -i '2d' ${RUN_SCRIPT_DIR}${MAIN_SCRIPT}

@@ -180,11 +180,13 @@ function get_log_file() {
 }
 
 function chmod_ini_file() {
-	local ini_config_dir=${install_path}${ANALYSIS_PATH}${ANALYSIS}"/config"
-	if [ "$install_for_all_flag" = "1" ] || [ "$UID" = "0" ]; then
-		find "${ini_config_dir}" -type f -exec chmod 444 {} \;
-	else
-		find "${ini_config_dir}" -type f -exec chmod 400 {} \;
+	if [ "$cann_package_name" = "ascend-toolkit" ]; then
+		local ini_config_dir=${install_path}${ANALYSIS_PATH}${ANALYSIS}"/config"
+		if [ "$install_for_all_flag" = "1" ] || [ "$UID" = "0" ]; then
+			find "${ini_config_dir}" -type f -exec chmod 444 {} \;
+		else
+			find "${ini_config_dir}" -type f -exec chmod 400 {} \;
+		fi
 	fi
 }
 
