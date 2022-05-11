@@ -120,31 +120,6 @@ function(run_llt_test)
 
 endfunction(run_llt_test)
 
-######################################## alog ##################################
-add_library(alog SHARED
-    ${COLLECT_DIR}/dvvp/depend/stub/dlog_stub.cpp
-)
-
-target_include_directories(alog PRIVATE
-    ${COLLECT_DIR}/dvvp/depend/inc/slog
-)
-
-target_compile_definitions(alog PRIVATE
-    OS_TYPE_DEF=0
-    LOG_CPP
-    WRITE_TO_SYSLOG
-)
-
-target_compile_options(alog PRIVATE
-    -Werror
-    -Wfloat-equal -Wextra
-    -O2
-    -fPIC
-    -fstack-protector-strong
-    -fno-common
-    -fsigned-char
-    -fno-strict-aliasing
-)
 
 ############################### error_manager #############################
 add_library(error_manager SHARED

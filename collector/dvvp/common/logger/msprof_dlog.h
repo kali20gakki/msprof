@@ -92,6 +92,14 @@ enum {
 
 using SlogPlugin = Analysis::Dvvp::Plugin::SlogPlugin;
 
+#define MSPROF_LOGD(format, ...)                                                                   
+#define MSPROF_LOGI(format, ...)                                                                   
+#define MSPROF_LOGW(format, ...)                                                                       
+#define MSPROF_LOGE(format, ...)                                                                     
+#define MSPROF_EVENT(format, ...)                                                                 
+
+#if 0
+XXX
 #define MSPROF_LOGD(format, ...) do {                                                                      \
     if (SlogPlugin::instance()->MsprofCheckLogLevelForC(MSPROF_MODULE_NAME, Analysis::Dvvp::Plugin::DLOG_DEBUG) == 1) {                 \
         SlogPlugin::instance()->MsprofDlogInnerForC(MSPROF_MODULE_NAME, Analysis::Dvvp::Plugin::DLOG_DEBUG, "[%s:%d]" " >>> (tid:%ld) " \
@@ -126,5 +134,5 @@ using SlogPlugin = Analysis::Dvvp::Plugin::SlogPlugin;
             format "\n", __FILE__, __LINE__, syscall(SYS_gettid), ##__VA_ARGS__);                          \
     }                                                                                                      \
 } while (0)
-
+#endif
 #endif  // MSPROF_LOG_H

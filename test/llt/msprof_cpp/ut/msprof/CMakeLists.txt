@@ -12,7 +12,7 @@ set(profilerSrcList
 	${MSPROF_SOURCE_DIR}/dvvp/analyze/src/analyzer.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/analyze/src/analyzer_base.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/analyze/src/analyzer_ge.cpp
-    ${MSPROF_SOURCE_DIR}/dvvp/analyze/src/analyzer_ffts.cpp
+        ${MSPROF_SOURCE_DIR}/dvvp/analyze/src/analyzer_ffts.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/analyze/src/analyzer_hwts.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/analyze/src/analyzer_ts.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/analyze/src/op_desc_parser.cpp
@@ -25,6 +25,8 @@ set(profilerSrcList
 	${MSPROF_SOURCE_DIR}/dvvp/common/utils/utils.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/common/validation/param_validation.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/depend/stub/error_manager/msprof_error_manager_stub.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/depend/src/slog_plugin.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/depend/src/plugin_handle.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/driver/channel/ai_drv_prof_api.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/driver/devmgmt/ai_drv_dev_api.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/driver/devmgmt/mini/ai_drv_dsmi_api.cpp
@@ -69,23 +71,22 @@ set(profilerSrcList
 	${MSPROF_SOURCE_DIR}/dvvp/transport/uploader.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/transport/uploader_mgr.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/transport/hash_data.cpp
-	${MSPROF_SOURCE_DIR}/dvvp/depend/stub/prof_api_stub.cpp
 	${CppPath}
 )
 
 set(profilerSrcFile
 	test/main.cpp
-    test/msprof_callback_handler_utest.cpp
+        test/msprof_callback_handler_utest.cpp
 	test/prof_acl_core_utest.cpp
 	test/aicpu_plugin_utest.cpp
 	../stub/mmpa_stub.cpp
-    ../stub/ge_stub.cpp
+        ../stub/ge_stub.cpp
 	../stub/hdc-log-stub.cpp
 	../stub/devdrv_runtime_api_stub.cpp
 	../stub/profile_drv_user_stub.cpp
 	../stub/hdc-api-stub.cpp
 	../../stub/driver_plugin_stub.cpp
-    ${profilerSrcList}
+        ${profilerSrcList}
 )
 
 
@@ -103,6 +104,11 @@ target_include_directories(msprofiler_utest PRIVATE
     ${MOCKCPP_INCLUDE_DIR}
     ${TOP_DIR}/opensource/securec/include
     ${TOP_DIR}/opensource/json/include
+    ${TOP_DIR}/collector/inc/
+    ${TOP_DIR}/collector/inc/toolchain/
+    ${TOP_DIR}/collector/inc/external/
+    ${TOP_DIR}/collector/inc/external/acl
+    ${TOP_DIR}/collector/inc/external/ge
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/slog
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/metadef/error_manager/error_manager_stub
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/driver
@@ -224,10 +230,6 @@ add_executable(msprof_utest
     ${MSPROF_SOURCE_DIR}/dvvp/msprof/msproftx/src/msprof_tx_manager.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/msprof/msproftx/src/msprof_tx_reporter.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/msprof/msproftx/src/prof_stamp_pool.cpp
-    ${MSPROF_SOURCE_DIR}/dvvp/msprof/drvprof/src/engine_mgr.cpp
-    ${MSPROF_SOURCE_DIR}/dvvp/msprof/drvprof/src/module_job.cpp
-    ${MSPROF_SOURCE_DIR}/dvvp/msprof/drvprof/src/rpc_data_handle.cpp
-    ${MSPROF_SOURCE_DIR}/dvvp/msprof/drvprof/src/rpc_dumper.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/msprof/platform/mini/data_dumper.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/streamio/client/src/sender.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/transport/hdc/hdc_transport.cpp
@@ -243,6 +245,11 @@ target_include_directories(msprof_utest PRIVATE
 	${MOCKCPP_INCLUDE_DIR}
 	${TOP_DIR}/opensource/securec/include
 	${TOP_DIR}/opensource/json/include
+        ${TOP_DIR}/collector/inc/
+        ${TOP_DIR}/collector/inc/toolchain/
+        ${TOP_DIR}/collector/inc/external/
+        ${TOP_DIR}/collector/inc/external/acl
+        ${TOP_DIR}/collector/inc/external/ge
 	${MSPROF_SOURCE_DIR}/dvvp/depend/inc/slog
 	${MSPROF_SOURCE_DIR}/dvvp/depend/inc/metadef/error_manager/error_manager_stub
 	${MSPROF_SOURCE_DIR}/dvvp/depend/inc/driver

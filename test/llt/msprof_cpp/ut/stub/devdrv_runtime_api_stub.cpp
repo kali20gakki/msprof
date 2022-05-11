@@ -1,4 +1,6 @@
 #include "devdrv_runtime_api_stub.h"
+#include "profapi_plugin.h"
+#include "slog_plugin.h"
 
 /*
 函数原型	drvGetPlatformInfo(u32 *info)
@@ -127,3 +129,58 @@ int dsmi_get_device_info(unsigned int device_id, unsigned int main_cmd, unsigned
 #ifdef __cplusplus
 }
 #endif
+
+
+namespace Analysis {
+namespace Dvvp {
+namespace Plugin {
+ProfApiPlugin::~ProfApiPlugin() {}
+
+bool ProfApiPlugin::IsFuncExist(const std::string &funcName) const
+{
+    return true;
+}
+
+int32_t ProfApiPlugin::MsprofProfRegReporterCallback(ProfReportHandle reporter)
+{
+    return 0;
+}
+
+int32_t ProfApiPlugin::MsprofProfRegCtrlCallback(ProfCtrlHandle handle)
+{
+    return 0;
+}
+
+int32_t ProfApiPlugin::MsprofProfRegDeviceStateCallback(ProfSetDeviceHandle handle)
+{
+    return 0;
+}
+
+int32_t ProfApiPlugin::MsprofProfGetDeviceIdByGeModelIdx(const uint32_t modelIdx, uint32_t *deviceId)
+{
+    return 0;
+}
+
+int32_t ProfApiPlugin::MsprofProfSetProfCommand(PROFAPI_PROF_COMMAND_PTR command, uint32_t len)
+{
+    return 0;
+}
+
+int32_t ProfApiPlugin::MsprofProfSetStepInfo(const uint64_t indexId, const uint16_t tagId, void* const stream)
+{
+    return 0;
+}
+
+// SlogPlugin::~SlogPlugin() {}
+
+// bool SlogPlugin::IsFuncExist(const std::string &funcName) const
+// {
+//     return true;
+// }
+
+// int SlogPlugin::MsprofCheckLogLevelForC(int moduleId, int logLevel)
+// {
+//     return 0;
+// }
+
+}}}
