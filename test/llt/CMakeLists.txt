@@ -3,8 +3,6 @@ project(msprof_llt_superbuild)
 
 include(ExternalProject)
 set(TOP_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../..)
-message("XXX1:" ${TOP_DIR})
-message("XXX11:" ${CMAKE_INSTALL_PREFIX})
 
 if (CMAKE_INSTALL_PREFIX STREQUAL /usr/local)
     set(CMAKE_INSTALL_PREFIX ${TOP_DIR}/llt/output CACHE STRING "path for install()" FORCE)
