@@ -136,31 +136,31 @@ class TestUpdateAICoreData(unittest.TestCase):
                     self.assertEqual(result, {'3-5': [2]})
         db_manager.destroy(res)
 
-    def test_get_block_dim_sql(self):
-        curs = 1
-        create_sql = "create table IF NOT EXISTS ge_task_data (device_id INTEGER,model_name TEXT,model_id INTEGER," \
-                     "op_name TEXT,stream_id INTEGER,task_id INTEGER,block_dim INTEGER,op_state TEXT,task_type TEXT," \
-                     "op_type TEXT,iter_id INTEGER,input_count INTEGER,input_formats TEXT,input_data_types TEXT," \
-                     "input_shapes TEXT,output_count INTEGER,output_formats TEXT,output_data_types TEXT," \
-                     "output_shapes TEXT)"
-        db_manager = DBManager()
-        res = db_manager.create_table("ge_info.db")
-        res[1].execute(create_sql)
-        res[1].execute("insert into ge_task_data values (0, 'resnet50', 1, 'trans_TransData_0', "
-                       "5, 3, 2, 'static', '{2}', 'TransData', 0, 1, 'NCHW','DT_FLOAT16', "
-                       "'1,3,224,224', 1, 'NC1HWC0', 'DT_FLOAT16', '1,1,224,224,16')")
-        select_sql = "select task_id, stream_id, block_dim from ge_task_data " \
-                     "where (iter_id=0 or iter_id=1) " \
-                     "and task_type='{2}'"
-        ProfilingScene().init('test')
-        with mock.patch(NAMESPACE + '.DBManager.get_table_headers', return_value=select_sql), \
-                mock.patch('common_func.utils.Utils.get_scene', return_value='step_info'):
-            key = UpdateAICoreData(CONFIG)
-            result = key._UpdateAICoreData__get_block_dim_sql(curs)
-        self.assertEqual(result[1], (1,))
-        res[1].execute("drop table ge_task_data")
-        res[0].commit()
-        db_manager.destroy(res)
+    # def test_get_block_dim_sql(self): XXX
+    #     curs = 1
+    #     create_sql = "create table IF NOT EXISTS ge_task_data (device_id INTEGER,model_name TEXT,model_id INTEGER," \
+    #                  "op_name TEXT,stream_id INTEGER,task_id INTEGER,block_dim INTEGER,op_state TEXT,task_type TEXT," \
+    #                  "op_type TEXT,iter_id INTEGER,input_count INTEGER,input_formats TEXT,input_data_types TEXT," \
+    #                  "input_shapes TEXT,output_count INTEGER,output_formats TEXT,output_data_types TEXT," \
+    #                  "output_shapes TEXT)"
+    #     db_manager = DBManager()
+    #     res = db_manager.create_table("ge_info.db")
+    #     res[1].execute(create_sql)
+    #     res[1].execute("insert into ge_task_data values (0, 'resnet50', 1, 'trans_TransData_0', "
+    #                    "5, 3, 2, 'static', '{2}', 'TransData', 0, 1, 'NCHW','DT_FLOAT16', "
+    #                    "'1,3,224,224', 1, 'NC1HWC0', 'DT_FLOAT16', '1,1,224,224,16')")
+    #     select_sql = "select task_id, stream_id, block_dim from ge_task_data " \
+    #                  "where (iter_id=0 or iter_id=1) " \
+    #                  "and task_type='{2}'"
+    #     ProfilingScene().init('test')
+    #     with mock.patch(NAMESPACE + '.DBManager.get_table_headers', return_value=select_sql), \
+    #             mock.patch('common_func.utils.Utils.get_scene', return_value='step_info'):
+    #         key = UpdateAICoreData(CONFIG)
+    #         result = key._UpdateAICoreData__get_block_dim_sql(curs)
+    #     self.assertEqual(result[1], (1,))
+    #     res[1].execute("drop table ge_task_data")
+    #     res[0].commit()
+    #     db_manager.destroy(res)
 
     def test_get_config_params(self):
         with mock.patch(NAMESPACE + '.FileManager.is_info_json_file', return_value='111'):
