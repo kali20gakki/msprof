@@ -10,7 +10,6 @@ BUILD_DIR=${TOP_DIR}/test/llt/build_llt
 if [ ! -d ${COV_DIR} ] ; then
     mkdir ${COV_DIR}
 fi
-echo "XXX1"
 #----------------------------------------------------------
 # coverage function
 generate_coverage(){
@@ -24,10 +23,8 @@ generate_coverage(){
     lcov -r ${COV_DIR}/lcov_$2.info '*opensource*' -o ${COV_DIR}/lcov_$2.info --rc lcov_branch_coverage=1
     echo "********************** Generate $2 Coverage Stop.*************************"
 }
-echo "XXX2"
 #----------------------------------------------------------
 test_obj=(
-    #device_utest XXX
     job_wrapper_utest
     common_utest
     msprof_bin_utest
@@ -40,17 +37,14 @@ test_obj=(
     transport_utest
 )
 
-echo "XXX3"
 str_test=""
 for test in ${test_obj[@]} ; do
     str_test=${str_test}"-a ${COV_DIR}/lcov_${test}.info "
     test_dir=`find ${BUILD_DIR} -name "${test}.dir"`
     target_dir=`ls -F ${test_dir} | grep "/$" | grep -v "test" | grep -v "__"`
-    echo "XXXX33 ${target_dir} ${test_dir} ${str_test=} ${test}"
     generate_coverage ${test_dir}/${target_dir} ${test}
 done
 
-echo "XXX4"
 echo "${str_test}"
 lcov ${str_test} -o ${COV_DIR}/ut_report.info
 genhtml ${COV_DIR}/ut_report.info -o ${COV_DIR}/result --branch-coverage

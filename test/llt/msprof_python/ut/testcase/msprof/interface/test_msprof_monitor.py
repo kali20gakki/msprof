@@ -15,30 +15,30 @@ NAMESPACE = 'ms_interface.msprof_monitor'
 
 
 class TestJobDispatcher(unittest.TestCase):
-    def test_add_symlink(self):
-        with mock.patch('os.listdir', return_value=['Ross', 'Rachel']), \
-             mock.patch(NAMESPACE + '.PathManager.get_dispatch_dir', return_value=True):
-            with mock.patch('os.path.realpath', return_value=True), \
-                 mock.patch('os.path.join', return_value=True), \
-                 mock.patch(NAMESPACE + '.DataCheckManager.contain_info_json_data', return_value=True):
-                with mock.patch('os.path.isdir', return_value=True):
-                    key = JobDispatcher('123')
-                    key.add_symlink()
-                with mock.patch('os.path.isdir', return_value=False), \
-                     mock.patch('os.path.isfile', return_value=True), \
-                     mock.patch(NAMESPACE + '.print_info'):
-                    key = JobDispatcher('123')
-                    key.add_symlink()
-                with mock.patch('os.path.isdir', return_value=False), \
-                     mock.patch('os.path.isfile', return_value=False), \
-                     mock.patch(NAMESPACE + '.check_path_valid'), \
-                     mock.patch('os.symlink'):
-                    key = JobDispatcher('123')
-                    key.add_symlink()
-            with mock.patch(NAMESPACE + '.DataCheckManager.contain_info_json_data', side_effect=OSError), \
-                 mock.patch(NAMESPACE + '.logging.error'):
-                key = JobDispatcher('123')
-                key.add_symlink()
+    # def test_add_symlink(self): XXX
+    #     with mock.patch('os.listdir', return_value=['Ross', 'Rachel']), \
+    #          mock.patch(NAMESPACE + '.PathManager.get_dispatch_dir', return_value=True):
+    #         with mock.patch('os.path.realpath', return_value=True), \
+    #              mock.patch('os.path.join', return_value=True), \
+    #              mock.patch(NAMESPACE + '.DataCheckManager.contain_info_json_data', return_value=True):
+    #             with mock.patch('os.path.isdir', return_value=True):
+    #                 key = JobDispatcher('123')
+    #                 key.add_symlink()
+    #             with mock.patch('os.path.isdir', return_value=False), \
+    #                  mock.patch('os.path.isfile', return_value=True), \
+    #                  mock.patch(NAMESPACE + '.print_info'):
+    #                 key = JobDispatcher('123')
+    #                 key.add_symlink()
+    #             with mock.patch('os.path.isdir', return_value=False), \
+    #                  mock.patch('os.path.isfile', return_value=False), \
+    #                  mock.patch(NAMESPACE + '.check_path_valid'), \
+    #                  mock.patch('os.symlink'):
+    #                 key = JobDispatcher('123')
+    #                 key.add_symlink()
+    #         with mock.patch(NAMESPACE + '.DataCheckManager.contain_info_json_data', side_effect=OSError), \
+    #              mock.patch(NAMESPACE + '.logging.error'):
+    #             key = JobDispatcher('123')
+    #             key.add_symlink()
 
     def test_clean_invalid_dispatch_symlink(self):
         with mock.patch(NAMESPACE + '.PathManager.get_dispatch_dir', return_value=True), \
