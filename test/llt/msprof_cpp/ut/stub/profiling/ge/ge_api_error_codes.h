@@ -19,6 +19,7 @@
 
 #include <map>
 #include <string>
+#include "prof_api.h"
 
 namespace ge {
 class StatusFactory {
@@ -58,19 +59,19 @@ class ErrorNoRegisterar {
   ~ErrorNoRegisterar() {}
 };
 
-// Code compose(4 byte), runtime: 2 bit,  type: 2 bit,   level: 3 bit,  sysid: 8 bit, modid: 5 bit, value: 12 bit
-#define GE_ERRORNO(runtime, type, level, sysid, modid, name, value, desc)                              \
-  constexpr ge::Status name =                                                                          \
-    ((0xFF & (static_cast<uint8_t>(runtime))) << 30) | ((0xFF & (static_cast<uint8_t>(type))) << 28) | \
-    ((0xFF & (static_cast<uint8_t>(level))) << 25) | ((0xFF & (static_cast<uint8_t>(sysid))) << 17) |  \
-    ((0xFF & (static_cast<uint8_t>(modid))) << 12) | (0x0FFF & (static_cast<uint16_t>(value)));        \
-  const ErrorNoRegisterar g_##name##_errorno(name, desc);
+// // Code compose(4 byte), runtime: 2 bit,  type: 2 bit,   level: 3 bit,  sysid: 8 bit, modid: 5 bit, value: 12 bit
+// #define GE_ERRORNO(runtime, type, level, sysid, modid, name, value, desc)                              \
+//   constexpr ge::Status name =                                                                          \
+//     ((0xFF & (static_cast<uint8_t>(runtime))) << 30) | ((0xFF & (static_cast<uint8_t>(type))) << 28) | \
+//     ((0xFF & (static_cast<uint8_t>(level))) << 25) | ((0xFF & (static_cast<uint8_t>(sysid))) << 17) |  \
+//     ((0xFF & (static_cast<uint8_t>(modid))) << 12) | (0x0FFF & (static_cast<uint16_t>(value)));        \
+//   const ErrorNoRegisterar g_##name##_errorno(name, desc);
 
-using Status = uint32_t;
+// using Status = uint32_t;
 
-// General error code
-GE_ERRORNO(0, 0, 0, 0, 0, SUCCESS, 0, "success");
-GE_ERRORNO(0b11, 0b11, 0b111, 0xFF, 0b11111, FAILED, 0xFFF, "failed"); /*lint !e401*/
+// // General error code
+// GE_ERRORNO(0, 0, 0, 0, 0, SUCCESS, 0, "success");
+// GE_ERRORNO(0b11, 0b11, 0b111, 0xFF, 0b11111, FAILED, 0xFFF, "failed"); /*lint !e401*/
 }  // namespace ge
 
 #endif  // INC_EXTERNAL_GE_GE_API_ERROR_CODES_H_

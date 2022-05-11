@@ -8,5 +8,5 @@ echo "XXX0" ${TOP_DIR}
 mkdir -p ${TOP_DIR}/test/llt/build_llt
 cd ${TOP_DIR}/test/llt/build_llt
 cmake ../ -DPACKAGE=ut
-make -j64 
+make -j64
 
