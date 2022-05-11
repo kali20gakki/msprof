@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.14.1)
 project(msprof_llt)
-
+add_definitions(-DMSPORF_LLT)
 set(CMAKE_SKIP_RPATH TRUE)
 set(TOP_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../..)
 set(MSPROF_SOURCE_DIR ${TOP_DIR}/collector)
