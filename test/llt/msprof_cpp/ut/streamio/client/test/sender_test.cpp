@@ -7,7 +7,6 @@
 #include"mockcpp/mockcpp.hpp"
 #include"errno/error_code.h"
 #include"select_operation.h"
-//#include"hdc-common/log/hdc_log.h" XXX
 #include "message/prof_params.h"
 #include "securec.h"
 #include "sender.h"

@@ -1,4 +1,3 @@
-message("XXX:"${TOP_DIR})
 set(OPENSOURCE_DIR ${TOP_DIR}/opensource)
 set(COLLECT_DIR ${TOP_DIR}/collector)
 ########################### securec ############################

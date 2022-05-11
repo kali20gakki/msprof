@@ -5,7 +5,6 @@
 #include "gtest/gtest.h"
 #include "mockcpp/mockcpp.hpp"
 #include "prof_channel.h"
-//#include "collection_entry.h" XXX
 #include "uploader_mgr.h"
 
 using namespace analysis::dvvp::common::error;

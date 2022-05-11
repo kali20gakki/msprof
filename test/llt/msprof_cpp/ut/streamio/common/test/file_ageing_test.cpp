@@ -84,7 +84,6 @@ TEST_F(COMMON_FILE_AGEING_TEST, Init2) {
     FileAgeing ageingObj2(storageDir, storageLimit);
     EXPECT_EQ(PROFILING_SUCCESS, ageingObj2.Init());
     //
-    MSPROF_LOGD("XXXXXXXXXXXX 11111");
     ageingObj2.AppendAgeingFile("111_hash_dic_222", "111_hash_dic_222", 1000, 1000);    
 }
 

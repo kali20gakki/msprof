@@ -8,7 +8,7 @@ COV_DIR=${TOP_DIR}/test/llt/output/coverage
 BUILD_DIR=${TOP_DIR}/test/llt/build_llt
 
 if [ ! -d ${COV_DIR} ] ; then
-    mkdir ${COV_DIR}
+    mkdir -p ${COV_DIR}
 fi
 #----------------------------------------------------------
 # coverage function
