@@ -1,34 +1,31 @@
 #!/bin/bash
-#readlink -f $0获取该文件的绝对路径；dirname获取父目录
+# get real path of parents' dir of this file
 CUR_DIR=$(dirname $(readlink -f $0))
 TOP_DIR=${CUR_DIR}/..
-#存放编译出的msprof.bin和msprof.py
+
+# store product
 TEMP_OUTPUT=${TOP_DIR}/build/output
 MSPROF_TEMP_DIR=${TOP_DIR}/build/msprof_tmp
 mkdir ${MSPROF_TEMP_DIR}
 
-#makeself是一款编run包的工具
+# makeself is tool for compiling run package
 MAKESELF_DIR=${TOP_DIR}/opensource/makeself
-#创建run包的脚本
+
+# footnote for creating run package
 CREATE_RUN_SCRIPT=${MAKESELF_DIR}/makeself.sh
-#makeself的参数控制脚本，用于将--参数传给内置脚本
+
+# footnote for controling params
 CONTROL_PARAM_SCRIPT=${MAKESELF_DIR}/makeself-header.sh
-#输出run存放的位置
+
+# store run package
 OUTPUT_DIR=${TOP_DIR}/output
 mkdir ${OUTPUT_DIR}
 
-
-#执行run包相关脚本存放的路径
 RUN_SCRIPT_DIR=${TOP_DIR}/scripts/run_script
-#入参白名单
 FILTER_PARAM_SCRIPT=${RUN_SCRIPT_DIR}/help.sh
-#run包运行时自动执行的脚本
 MAIN_SCRIPT=/main.sh
-#run包的名字
 MSPROF_RUN_NAME="msprof"
-#获取版本
 version="unknwon"
-
 
 function parse_script_args() {
     while true; do
@@ -43,14 +40,13 @@ function parse_script_args() {
             ;;
         *)
 			echo "[ERROR]" "Input option is invalid"
-			exit 2
+			exit 1
             ;;
         esac
     done
 }
 
-
-#创建发布件的临时目录
+# create temp dir for product
 function create_temp_dir() {
 	local temp_dir=${1}
 	
@@ -63,7 +59,6 @@ function create_temp_dir() {
 	chmod 500 ${temp_dir}${MAIN_SCRIPT}
 }
 
-#获取安装包的版本号
 function version() {
     local _path="${TOP_DIR}/../manifest/dependency/config.ini"
     local _version=$(grep "^version=" "${_path}" | cut -d"=" -f2)
@@ -78,7 +73,6 @@ function get_package_name() {
     local _os_arch=$(arch)
     echo "${_product}-${_name}_${_version}_linux-${_os_arch}.run"
 }
-
 
 function create_run_package(){
 	local _run_name=${1}
