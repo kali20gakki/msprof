@@ -3,13 +3,8 @@ CUR_DIR=$(dirname $(readlink -f $0))
 TOP_DIR=${CUR_DIR}/..
 #存放编译出的msprof.bin和msprof.py
 TEMP_OUTPUT=${TOP_DIR}/build/output
-MSPROF_TEMP_DIR=${TOP_DIR}/msprof_tmp
+MSPROF_TEMP_DIR=${TOP_DIR}/build/msprof_tmp
 mkdir ${MSPROF_TEMP_DIR}
-
-cp -r ${TEMP_OUTPUT}/lib/libmsprofiler.so ${MSPROF_TEMP_DIR}
-cp -r ${TEMP_OUTPUT}/stub ${MSPROF_TEMP_DIR}
-cp -r ${TEMP_OUTPUT}/bin/msprof ${MSPROF_TEMP_DIR}
-cp -r ${TOP_DIR}/analysis ${MSPROF_TEMP_DIR}
 
 #makeself是一款编run包的工具
 MAKESELF_DIR=${TOP_DIR}/opensource/makeself
@@ -58,7 +53,14 @@ function parse_script_args() {
 #创建发布件的临时目录
 function create_temp_dir() {
 	local temp_dir=${1}
+	
+	cp ${TEMP_OUTPUT}/lib/libmsprofiler.so ${temp_dir}
+	cp -r ${TEMP_OUTPUT}/stub ${temp_dir}
+	cp ${TEMP_OUTPUT}/bin/msprof ${temp_dir}
+	cp -r ${TOP_DIR}/analysis ${temp_dir}
+	
 	cp ${RUN_SCRIPT_DIR}${MAIN_SCRIPT} ${temp_dir}
+	chmod 500 ${temp_dir}${MAIN_SCRIPT}
 }
 
 #获取安装包的版本号
