@@ -102,3 +102,4 @@ create_temp_dir ${MSPROF_TEMP_DIR}
 create_run_package ${MSPROF_RUN_NAME} ${MSPROF_TEMP_DIR}
 
 sed -i '1d' ${RUN_SCRIPT_DIR}${MAIN_SCRIPT}
+
