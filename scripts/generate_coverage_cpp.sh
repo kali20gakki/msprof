@@ -4,8 +4,8 @@
 set -e
 CUR_DIR=$(dirname $(readlink -f $0))
 TOP_DIR=${CUR_DIR}/..
-COV_DIR=${TOP_DIR}/test/llt/output/coverage
-BUILD_DIR=${TOP_DIR}/test/llt/build_llt
+COV_DIR=${TOP_DIR}/test/build_llt/output/cpp_coverage
+BUILD_DIR=${TOP_DIR}/test/build_llt
 
 if [ ! -d ${COV_DIR} ] ; then
     mkdir -p ${COV_DIR}
@@ -36,15 +36,19 @@ test_obj=(
     msprof_utest
     transport_utest
 )
+echo "XXX1"
 
 str_test=""
 for test in ${test_obj[@]} ; do
     str_test=${str_test}"-a ${COV_DIR}/lcov_${test}.info "
     test_dir=`find ${BUILD_DIR} -name "${test}.dir"`
     target_dir=`ls -F ${test_dir} | grep "/$" | grep -v "test" | grep -v "__"`
+    echo "${target_dir} ${test_dir} ${str_test}"
+    echo "XXX2"
     generate_coverage ${test_dir}/${target_dir} ${test}
 done
 
 echo "${str_test}"
 lcov ${str_test} -o ${COV_DIR}/ut_report.info
 genhtml ${COV_DIR}/ut_report.info -o ${COV_DIR}/result --branch-coverage
+echo "report: ${COV_DIR}"

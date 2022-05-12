@@ -6,7 +6,7 @@ TOP_DIR=${CUR_DIR}/..
 
 OPENSOURCE_DIR=${TOP_DIR}/opensource
 HISI_DIR=${TOP_DIR}/hisi
-LLT_DIR=${TOP_DIR}/test/llt/opensource
+LLT_DIR=${TOP_DIR}/test/opensource
 
 THIRDPARTY_LIST="${OPENSOURCE_DIR}/protobuf    \\
                  ${OPENSOURCE_DIR}/json        \\
@@ -31,6 +31,8 @@ git clone  --branch 2.4.5-h0.computing.cann.r3 ssh://git@codehub-dg-y.huawei.com
 
 ###################################### gtest下载 #####################################
 # 下载 gtest和mockcpp
+mkdir -p ${LLT_DIR}
 cd ${LLT_DIR}
 git clone ssh://git@codehub-dg-y.huawei.com:2222/OpenSourceCenter/googletest.git googletest -b release-1.8.1
 git clone ssh://git@szv-y.codehub.huawei.com:2222/d00437232/mock_cpp.git mockcpp -b msprof
+
