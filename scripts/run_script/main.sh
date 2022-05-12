@@ -1,7 +1,4 @@
 #!/bin/bash
-# 非法选项校验已由makeself的help.sh脚本完成
-# 参数重复，参数非法组合的情况已由check_args完成
-# 安装路径有效校验已在copy file中完成
 function parse_script_args() {
     while true; do
 		if [ "$3" = "" ]; then
@@ -10,8 +7,6 @@ function parse_script_args() {
         case "$3" in
         --install-path=*)
 			let "install_path_num+=1"
-			
-			#路径校验在copy file函数中完成
 			install_path=${3#--install-path=}/${VERSION}
 			shift
 			continue
@@ -54,22 +49,21 @@ function parse_script_args() {
             ;;
         *)
 			print "ERROR" "Input option is invalid. Please try --help."
-			exit 2
+			exit 1
             ;;
         esac
     done
 }
 
-
 function check_args() {
 	if [ ${install_args_num} -ne 0 ] && [ ${uninstall_flag} = 1 ]; then
 		print "ERROR" "Input option is invalid. Please try --help."
-		exit 2
+		exit 1
 	fi
 
 	if [ ${install_path_num} -gt 1 ]; then
 		print "ERROR" "Do not input --install-path many times. Please try --help."
-		exit 2
+		exit 1
 	fi
 }
 
@@ -89,7 +83,7 @@ function get_cann_package_name() {
 		return
 	fi
 	print "ERROR" "There is no ascend-toolkit, nnrt or nnae."
-	exit 2
+	exit 1
 }
 
 function implement_install() {
@@ -110,7 +104,6 @@ function copy_file() {
 	local target_file=$(readlink -f ${2})
 	
 	if [ -f "$target_file" ] || [ -d "$target_file" ]; then
-		# target file的权限受父目录影响
 		chmod u+w $(dirname ${target_file})
 		travFolder ${target_file} u+w
 		rm -r ${target_file}
@@ -126,7 +119,6 @@ function copy_file() {
 }
 
 function print() {
-    # 将关键信息打印到屏幕上
     if [ ! -f "$log_file" ]; then
         echo "[Mindstudio-msprof] [$(date +"%Y-%m-%d %H:%M:%S")] [$1]: $2"
     else
@@ -180,8 +172,8 @@ function get_log_file() {
 }
 
 function chmod_ini_file() {
-	if [ "$cann_package_name" = "ascend-toolkit" ]; then
-		local ini_config_dir=${install_path}${ANALYSIS_PATH}${ANALYSIS}"/config"
+	local ini_config_dir=${install_path}${ANALYSIS_PATH}${ANALYSIS}"/config"
+	if [ -d "$ini_config_dir" ]; then
 		if [ "$install_for_all_flag" = "1" ] || [ "$UID" = "0" ]; then
 			find "${ini_config_dir}" -type f -exec chmod 444 {} \;
 		else
@@ -202,18 +194,14 @@ LIBMSPROFILER_PATH="/runtime/lib64/"
 ANALYSIS_PATH="/tools/profiler/profiler_tool/"
 MSPROF_PATH="/tools/profiler/bin/"
 
-
-#以下参数用于校验
+# the params for checking
 install_args_num=0
 install_path_num=0
 
-#以下参数决定是否卸载
 uninstall_flag=0
-
-#以下参数决定是否给其它用户权限
 install_for_all_flag=0
 
-#$*包括至少三个参数:0, 该脚本路径;1, 执行run包的路径;2, run包父目录;3, run包参数
+#0, this footnote path;1, path for executing run;2, parents' dir for run package;3, run params
 parse_script_args $*
 check_args
 right=$(get_right)
