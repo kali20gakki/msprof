@@ -63,7 +63,7 @@ def implement_function(func):
     if m:
         ret_type = m.group(1).strip()
         if RETURN_STATEMENTS.__contains__(ret_type):
-            function_def += RETURN_STATEMENTS[ret_type]
+            function_def += RETURN_STATEMENTS.get(ret_type)
         else:
             if ret_type.endswith('*'):
                 function_def += '    return nullptr;'

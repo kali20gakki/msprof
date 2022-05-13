@@ -94,8 +94,9 @@ add_executable(msprofbin
     ../transport/hdc/device_transport.cpp
     ../transport/hdc/platform/rpc/dev_mgr_api.cpp
     ../depend/src/mmpa_plugin.cpp
-    ../depend/src/plugin_manager.cpp
+    ../depend/src/plugin_handle.cpp
     ../depend/src/driver_plugin.cpp
+    ../depend/src/slog_plugin.cpp
     ${hdcCpp}
     ${CppPath}
 )
@@ -126,7 +127,6 @@ target_link_options(msprofbin PRIVATE
 )
 
 target_link_libraries(msprofbin PRIVATE
-    alog
     c_sec
     ascend_protobuf_static
     -lpthread
