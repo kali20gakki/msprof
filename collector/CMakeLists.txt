@@ -60,32 +60,6 @@ function(protobuf_generate comp c_var h_var)
 endfunction()
 
 ##################################### depend #########################################
-# alog
-add_library(alog SHARED
-    ${TOP_DIR}/collector/dvvp/depend/stub/dlog_stub.cpp
-)
-
-target_include_directories(alog PRIVATE
-    ${TOP_DIR}/collector/dvvp/depend/inc/slog
-)
-
-target_compile_definitions(alog PRIVATE
-    OS_TYPE_DEF=0
-    LOG_CPP
-    WRITE_TO_SYSLOG
-)
-
-target_compile_options(alog PRIVATE
-    -Werror
-    -Wfloat-equal -Wextra
-    -O2
-    -fPIC
-    -fstack-protector-strong
-    -fno-common
-    -fsigned-char
-    -fno-strict-aliasing
-)
-
 # error_manager
 add_library(error_manager SHARED
     ${TOP_DIR}/collector/dvvp/depend/stub/error_manager/error_manager_stub.cpp
@@ -102,27 +76,6 @@ target_compile_options(error_manager PRIVATE
     -Wextra
     -Wfloat-equal
     -D_GLIBCXX_USE_CXX11_ABI=0
-)
-
-# profapi
-add_library(profapi SHARED
-    ${TOP_DIR}/collector/dvvp/depend/stub/prof_api_stub.cpp
-)
-
-target_include_directories(profapi PRIVATE
-    ${TOP_DIR}/collector/dvvp/depend/inc/profapi
-)
-
-target_compile_options(profapi PRIVATE
-    -std=c++11
-    -fPIC
-    -fstack-protector-all
-    -fno-strict-aliasing
-    -fno-common
-    -fvisibility=hidden
-    -fvisibility-inlines-hidden
-    -Wfloat-equal
-    -Wextra
 )
 
 ######################################################################################
