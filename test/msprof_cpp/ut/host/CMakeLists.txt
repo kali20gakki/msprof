@@ -94,6 +94,7 @@ target_include_directories(host_utest PRIVATE
     ${TOP_DIR}/test/msprof_cpp/ut/stub/common/log/ 
     ${MSPROF_SOURCE_DIR}/dvvp/common/validation 
     ${MSPROF_SOURCE_DIR}/dvvp/common/statistics 
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/profapi
     ${MSPROF_SOURCE_DIR}/dvvp/host/include 
     ${MSPROF_SOURCE_DIR}/dvvp/streamio/server/include 
     ${MSPROF_SOURCE_DIR}/dvvp/job_wrapper/include 

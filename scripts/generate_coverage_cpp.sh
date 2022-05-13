@@ -36,7 +36,6 @@ test_obj=(
     msprof_utest
     transport_utest
 )
-echo "XXX1"
 
 str_test=""
 for test in ${test_obj[@]} ; do
@@ -44,7 +43,6 @@ for test in ${test_obj[@]} ; do
     test_dir=`find ${BUILD_DIR} -name "${test}.dir"`
     target_dir=`ls -F ${test_dir} | grep "/$" | grep -v "test" | grep -v "__"`
     echo "${target_dir} ${test_dir} ${str_test}"
-    echo "XXX2"
     generate_coverage ${test_dir}/${target_dir} ${test}
 done
 

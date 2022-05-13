@@ -21,6 +21,7 @@ target_include_directories(stub_file_utest PRIVATE
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/metadef/error_manager/error_manager_stub
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/driver
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/adump
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/profapi
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/mmpa
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/plugin
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc
@@ -31,6 +32,7 @@ target_include_directories(stub_file_utest PRIVATE
     ${MSPROF_SOURCE_DIR}/dvvp/common/config
     ${MSPROF_SOURCE_DIR}/dvvp/adx/inc
     ${MSPROF_SOURCE_DIR}/dvvp/depend/include/wrapper
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/include/profapi
     ${MSPROF_SOURCE_DIR}/dvvp
 )
 
