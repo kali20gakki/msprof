@@ -7,7 +7,7 @@
 #include "file_slice.h"
 #include "file_ageing.h"
 #include "config/config.h"
-#include "logger/msprof_dlog.h"
+#include "msprof_dlog.h"
 #include "proto/profiler.pb.h"
 #include "utils/utils.h"
 #include "mmpa_plugin.h"

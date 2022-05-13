@@ -25,7 +25,8 @@ target_include_directories(stub_file_utest PRIVATE
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/plugin
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc
     ${MSPROF_SOURCE_DIR}/../inc
-    ${MSPROF_SOURCE_DIR}/dvvp/common/logger
+    #${MSPROF_SOURCE_DIR}/dvvp/common/logger
+    ${TOP_DIR}/test/msprof_cpp/ut/stub/common/log/
     ${MSPROF_SOURCE_DIR}/dvvp/common/
     ${MSPROF_SOURCE_DIR}/dvvp/common/config
     ${MSPROF_SOURCE_DIR}/dvvp/adx/inc

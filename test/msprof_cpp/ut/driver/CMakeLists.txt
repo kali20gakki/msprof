@@ -37,7 +37,8 @@ target_include_directories(driver_utest PRIVATE
     ${MSPROF_SOURCE_DIR}/dvvp/task_handle/include 
     ${MSPROF_SOURCE_DIR}/dvvp/common 
     ${MSPROF_SOURCE_DIR}/dvvp/driver/inc 
-    ${MSPROF_SOURCE_DIR}/dvvp/common/logger
+    # ${MSPROF_SOURCE_DIR}/dvvp/common/logger
+    ${TOP_DIR}/test/msprof_cpp/ut/stub/common/log/
     ${MSPROF_SOURCE_DIR}/dvvp/common/config
     ${MSPROF_SOURCE_DIR}/dvvp/depend/include/stub
 )
