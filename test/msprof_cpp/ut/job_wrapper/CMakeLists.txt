@@ -117,6 +117,7 @@ target_include_directories(job_wrapper_utest PRIVATE
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/driver
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/adump
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/mmpa
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/profapi
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/plugin
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/acl
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc

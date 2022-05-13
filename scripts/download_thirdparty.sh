@@ -1,6 +1,6 @@
 #/bin/bash
 
-#set -e
+set -e
 CUR_DIR=$(dirname $(readlink -f $0))
 TOP_DIR=${CUR_DIR}/..
 

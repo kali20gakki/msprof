@@ -17,8 +17,3 @@ rm -rf ${TOP_DIR}/hwts.*
 rm -rf ${TOP_DIR}/llc.*
 rm -rf ${TOP_DIR}/TRANSPORT_TRANSPORT_ITRANSPORT_TEST-SendFile-file_existing
 rm -rf ${TOP_DIR}/test/msprof_python/ut/testcase/sqlite/ai_cpu.db
-
-#shopt -s extglob
-#rm -rf !(analysis|build|cmake|CMakeLists.txt|collector|inc|llt|opensource|README.md|scripts|.git|.|..)
-
-

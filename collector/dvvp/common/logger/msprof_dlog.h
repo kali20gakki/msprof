@@ -126,4 +126,5 @@ using SlogPlugin = Analysis::Dvvp::Plugin::SlogPlugin;
             format "\n", __FILE__, __LINE__, syscall(SYS_gettid), ##__VA_ARGS__);                          \
     }                                                                                                      \
 } while (0)
+
 #endif  // MSPROF_LOG_H

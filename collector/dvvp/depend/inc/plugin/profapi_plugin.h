@@ -8,7 +8,7 @@
 #define PROFAPI_PLUGIN_H
 
 #include "singleton/singleton.h"
-#include "../profapi/prof_api.h"
+#include "prof_api.h"
 #include "plugin_handle.h"
 
 namespace Analysis {

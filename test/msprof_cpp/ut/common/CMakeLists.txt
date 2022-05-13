@@ -55,6 +55,7 @@ target_include_directories(common_utest PRIVATE
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/adump
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/mmpa
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/plugin
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/profapi
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc
     ${MSPROF_SOURCE_DIR}/../inc
     ${MSPROF_SOURCE_DIR}/dvvp

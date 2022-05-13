@@ -69,4 +69,3 @@ set(PROTOBUF_SYM_RENAME " \
 -Ddescriptor_table_google_2fprotobuf_2fwrappers_2eproto=descriptor_table_google_2fprotobuf_2fwrappers_2eproto_3_13_0_0 \
 -Dscc_info_FieldDescriptorProto_google_2fprotobuf_2fdescriptor_2eproto=scc_info_FieldDescriptorProto_google_2fprotobuf_2fdescriptor_2eproto_3_13_0_0 "
 )
-
