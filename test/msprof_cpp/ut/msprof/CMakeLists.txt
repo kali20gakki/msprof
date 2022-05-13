@@ -131,7 +131,8 @@ target_include_directories(msprofiler_utest PRIVATE
 	${MSPROF_SOURCE_DIR}/dvvp/msprof/include
 	${MSPROF_SOURCE_DIR}/dvvp/common
 	${MSPROF_SOURCE_DIR}/dvvp/common/errno
-	${MSPROF_SOURCE_DIR}/dvvp/common/logger
+	#${MSPROF_SOURCE_DIR}/dvvp/common/logger
+    ${TOP_DIR}/test/msprof_cpp/ut/stub/common/log/
 	${MSPROF_SOURCE_DIR}/dvvp/common/validation
 	${MSPROF_SOURCE_DIR}/dvvp/common/queue
 	${MSPROF_SOURCE_DIR}/dvvp/common/singleton
@@ -269,7 +270,8 @@ target_include_directories(msprof_utest PRIVATE
 	${MSPROF_SOURCE_DIR}/dvvp/common
 	${MSPROF_SOURCE_DIR}/dvvp/common/validation
 	${MSPROF_SOURCE_DIR}/dvvp/common/errno
-	${MSPROF_SOURCE_DIR}/dvvp/common/logger
+	#${MSPROF_SOURCE_DIR}/dvvp/common/logger
+    ${TOP_DIR}/test/msprof_cpp/ut/stub/common/log/
 	${MSPROF_SOURCE_DIR}/dvvp/common/queue
 	${MSPROF_SOURCE_DIR}/dvvp/common/singleton
 	${MSPROF_SOURCE_DIR}/dvvp/common/utils

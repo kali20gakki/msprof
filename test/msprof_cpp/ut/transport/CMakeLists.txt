@@ -74,7 +74,8 @@ target_include_directories(transport_utest PRIVATE
     ${MSPROF_SOURCE_DIR}/dvvp/common 
     ${MSPROF_SOURCE_DIR}/dvvp/common/statistics 
     ${MSPROF_SOURCE_DIR}/dvvp/common/utils 
-    ${MSPROF_SOURCE_DIR}/dvvp/common/logger 
+    ${TOP_DIR}/test/msprof_cpp/ut/stub/common/log/
+    # ${MSPROF_SOURCE_DIR}/dvvp/common/logger 
     ${MSPROF_SOURCE_DIR}/dvvp/common/validation
     ${MSPROF_SOURCE_DIR}/dvvp/common/queue
     ${MSPROF_SOURCE_DIR}/dvvp/common/config

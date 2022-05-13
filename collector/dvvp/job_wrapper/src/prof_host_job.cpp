@@ -12,7 +12,7 @@
 #include <unistd.h>
 #endif
 #include "config/config.h"
-#include "logger/msprof_dlog.h"
+#include "msprof_dlog.h"
 #include "mmpa_plugin.h"
 #include "platform/platform.h"
 #include "uploader_mgr.h"

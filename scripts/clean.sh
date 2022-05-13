@@ -8,6 +8,7 @@ TOP_DIR=${CUR_DIR}/..
 rm -rf ${TOP_DIR}/msprof_bin_utest
 rm -rf ${TOP_DIR}/opensource/protobuf
 rm -rf ${TOP_DIR}/opensource/json
+rm -rf ${TOP_DIR}/opensource/makeself
 rm -rf ${TOP_DIR}/opensource/securec
 rm -rf ${TOP_DIR}/test/opensource
 rm -rf ${TOP_DIR}/test/build_llt

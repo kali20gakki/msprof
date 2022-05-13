@@ -41,7 +41,8 @@ target_include_directories(message_utest PRIVATE
     ${MSPROF_SOURCE_DIR}/../inc
     ${MSPROF_SOURCE_DIR}/dvvp
     ${MSPROF_SOURCE_DIR}/dvvp/common
-    ${MSPROF_SOURCE_DIR}/dvvp/common/logger
+    # ${MSPROF_SOURCE_DIR}/dvvp/common/logger
+    ${TOP_DIR}/test/msprof_cpp/ut/stub/common/log/
     ${MSPROF_SOURCE_DIR}/dvvp/common/config
     ${CMAKE_BINARY_DIR}/proto/profiler
     ${MSPROF_SOURCE_DIR}/dvvp/depend/include/stub

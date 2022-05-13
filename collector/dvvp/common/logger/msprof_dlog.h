@@ -92,32 +92,6 @@ enum {
 
 using SlogPlugin = Analysis::Dvvp::Plugin::SlogPlugin;
 
-#ifdef MSPORF_LLT
-#define MSPROF_LOGD(format, ...) do {                                           \
-            printf("[PROFILING] [DEBUG] [%s:%u] >>> (tid:%d) " format "\n",   \
-            __FILE__, __LINE__, syscall(SYS_gettid), ##__VA_ARGS__);            \
-    } while (0)
-
-#define MSPROF_LOGI(format, ...) do {                                           \
-            printf("[PROFILING] [INFO] [%s:%u] >>> (tid:%d) " format "\n",    \
-            __FILE__, __LINE__, syscall(SYS_gettid), ##__VA_ARGS__);            \
-    } while (0)
-
-#define MSPROF_LOGW(format, ...) do {                                           \
-            printf("[PROFILING] [WARNING] [%s:%u] >>> (tid:%d) " format "\n", \
-            __FILE__, __LINE__, syscall(SYS_gettid), ##__VA_ARGS__);            \
-    } while (0)
-
-#define MSPROF_LOGE(format, ...) do {                                           \
-            printf("[PROFILING] [ERROR] [%s:%u] >>> (tid:%d) " format "\n",   \
-            __FILE__, __LINE__, syscall(SYS_gettid), ##__VA_ARGS__);            \
-    } while (0)
-
-#define MSPROF_EVENT(format, ...) do {                                          \
-            printf("[PROFILING] [EVENT] [%s:%u] >>> (tid:%d) " format "\n",   \
-            __FILE__, __LINE__, syscall(SYS_gettid), ##__VA_ARGS__);            \
-    } while (0)
-#else
 #define MSPROF_LOGD(format, ...) do {                                                                      \
     if (SlogPlugin::instance()->MsprofCheckLogLevelForC(MSPROF_MODULE_NAME, Analysis::Dvvp::Plugin::DLOG_DEBUG) == 1) {                 \
         SlogPlugin::instance()->MsprofDlogInnerForC(MSPROF_MODULE_NAME, Analysis::Dvvp::Plugin::DLOG_DEBUG, "[%s:%d]" " >>> (tid:%ld) " \
@@ -152,5 +126,4 @@ using SlogPlugin = Analysis::Dvvp::Plugin::SlogPlugin;
             format "\n", __FILE__, __LINE__, syscall(SYS_gettid), ##__VA_ARGS__);                          \
     }                                                                                                      \
 } while (0)
-#endif
 #endif  // MSPROF_LOG_H
