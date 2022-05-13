@@ -13,7 +13,7 @@
 #include "config/config.h"
 #include "config/config_manager.h"
 #include "errno/error_code.h"
-#include "logger/msprof_dlog.h"
+#include "msprof_dlog.h"
 #include "message/codec.h"
 #include "message/prof_params.h"
 #include "msprof_callback_handler.h"

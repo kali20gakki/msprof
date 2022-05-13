@@ -11,7 +11,7 @@
 #include "ai_drv_dev_api.h"
 #include "command_handle.h"
 #include "errno/error_code.h"
-#include "logger/msprof_dlog.h"
+#include "msprof_dlog.h"
 #include "msprof_callback_handler.h"
 #include "msprof_callback_impl.h"
 #include "op_desc_parser.h"
