@@ -5,7 +5,7 @@
  * Create: 2019-12-22
  */
 #include "transport/hdc/dev_mgr_api.h"
-#include "logger/msprof_dlog.h"
+#include "msprof_dlog.h"
 #include "utils/utils.h"
 
 namespace analysis {
