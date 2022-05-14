@@ -11,6 +11,7 @@
 #include "msprof_dlog.h"
 #include "config/config.h"
 #include "nlohmann/json.hpp"
+#include "slog_plugin.h"
 #include "utils/utils.h"
 #include "message.h"
 
@@ -20,6 +21,7 @@ namespace message {
 using BOOL = int;
 using namespace analysis::dvvp::common::config;
 using namespace analysis::dvvp::common::utils;
+using namespace Analysis::Dvvp::Plugin;
 const char * const PROFILING_MODE_SAMPLE_BASED = "sample-based";
 const char * const PROFILING_MODE_TASK_BASED = "task-based";
 const char * const PROFILING_ANALYSIS_TARGET = "launch application";
@@ -212,7 +214,7 @@ struct ProfileParams : BaseInfo {
 
     void PrintAllFields()
     {
-        if (CheckLogLevel(MSPROF_MODULE_NAME, DLOG_INFO)) {
+        if (SlogPlugin::instance()->MsprofCheckLogLevelForC(MSPROF_MODULE_NAME, DLOG_INFO)) {
             nlohmann::json object;
             ToObject(object);
             std::stringstream ss;

@@ -11,7 +11,7 @@
 #include <mutex>
 #include <queue>
 #include <vector>
-#include "logger/msprof_dlog.h"
+#include "msprof_dlog.h"
 #include "utils/utils.h"
 
 namespace analysis {

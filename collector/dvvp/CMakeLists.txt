@@ -95,6 +95,11 @@ set(msprofilerCpp
     common/thread/thread_pool.cpp
     common/utils/utils.cpp
     common/validation/param_validation.cpp
+    depend/src/driver_plugin.cpp
+    depend/src/mmpa_plugin.cpp
+    depend/src/plugin_handle.cpp
+    depend/src/slog_plugin.cpp
+    depend/src/profapi_plugin.cpp
     driver/channel/ai_drv_prof_api.cpp
     driver/devmgmt/ai_drv_dev_api.cpp
     driver/devmgmt/ai_drv_dsmi_api.cpp
@@ -130,9 +135,6 @@ set(msprofilerCpp
     transport/file_transport.cpp
     transport/hdc/hdc_transport.cpp
     transport/hdc/platform/soc/dev_mgr_api.cpp
-    depend/src/driver_plugin.cpp
-    depend/src/mmpa_plugin.cpp
-    depend/src/plugin_manager.cpp
     transport/parser_transport.cpp
     transport/prof_channel.cpp
     transport/transport.cpp
@@ -242,9 +244,7 @@ target_link_options(msprofiler_fwk_share PRIVATE
 target_link_libraries(msprofiler_fwk_share PRIVATE
     -Wl,--no-as-needed
     c_sec
-    alog
     ascend_protobuf_shared
-    profapi
     error_manager
     -Wl,--as-needed
 )

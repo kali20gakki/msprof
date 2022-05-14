@@ -1,0 +1,59 @@
+/*
+ * Copyright (c) Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
+ * Description: dlopen interface
+ * Author: Huawei Technologies Co., Ltd.
+ * Create: 2022-04-15
+ */
+#ifndef PLUGIN_HANDLE_H
+#define PLUGIN_HANDLE_H
+
+#include <string>
+#include <vector>
+#include <functional>
+#include <dlfcn.h>
+
+namespace Analysis {
+namespace Dvvp {
+namespace Plugin {
+
+using PluginStatus = uint32_t;
+using HandleType = void*;
+const PluginStatus PLUGIN_LOAD_SUCCESS = 0x0;
+const PluginStatus PLUGIN_LOAD_FAILED = 0xFFFFFFFF;
+
+class PluginHandle {
+public:
+    explicit PluginHandle(const std::string &name)
+    : soName_(name),
+      handle_(nullptr),
+      load_(false)
+    {}
+    ~PluginHandle() {}
+    const std::string GetSoName() const;
+    PluginStatus OpenPlugin(const std::string envValue);
+    void CloseHandle();
+    template <typename R, typename... Types>
+    PluginStatus GetFunction(const std::string& funcName, std::function<R(Types... args)>& func) const
+    {
+        func = (R(*)(Types...))dlsym(handle_, funcName.c_str());
+        if (!func) {
+            return PLUGIN_LOAD_FAILED;
+        }
+        return PLUGIN_LOAD_SUCCESS;
+    }
+    bool HasLoad();
+    bool IsFuncExist(const std::string funcName) const;
+
+private:
+    std::string RealPath(const std::string &path) const;
+    bool IsSoftLink(const std::string &path) const;
+    std::string GetSoPath(const std::string &envValue) const;
+    void SplitPath(const std::string &mutilPath, std::vector<std::string> &patVec) const;
+    std::string soName_;
+    HandleType handle_;
+    bool load_;
+};
+} // namespace Plugin
+} // namespace Dvvp
+} // namespace Analysis
+#endif
