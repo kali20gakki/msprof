@@ -89,7 +89,22 @@ class TestMsprofDataStorage(unittest.TestCase):
                 mock.patch('os.fdopen', mock.mock_open(read_data='123')):
             key = MsprofDataStorage()
             res = key.export_timeline_data_to_json(result, params)
+        params = {"data_type": 'str', "device_id": 1, "model_id": 1, "iter_id": 1,
+                  "export_type": "summary", "export_format": "json", "project": 123}
+        with mock.patch(NAMESPACE + '.check_file_writable'), \
+                mock.patch('os.path.exists', return_value=True), \
+                mock.patch('os.remove', return_value=True), \
+                mock.patch('os.open', return_value=True), \
+                mock.patch(NAMESPACE + '.MsprofDataStorage.clear_timeline_dir'), \
+                mock.patch(NAMESPACE + '.MsprofDataStorage.slice_data_list', return_value=(1, [1])), \
+                mock.patch('os.fdopen', mock.mock_open(read_data='123')):
+            with mock.patch(NAMESPACE + '.PathManager.get_summary_dir', return_value="train"), \
+                    mock.patch('os.path.join', return_value=True),\
+                    mock.patch('common_func.utils.Utils.is_step_scene', return_value=True):
+                key = MsprofDataStorage()
+                result = key.export_timeline_data_to_json(result, params)
         self.assertEqual(res, '{"status": 0, "data": [1]}')
+        self.assertEqual(result, '{"status": 0, "data": [true]}')
 
     def test_export_timeline_data_to_json_3(self):
         result = '123'
@@ -109,46 +124,30 @@ class TestMsprofDataStorage(unittest.TestCase):
         self.assertEqual(res, '{"status": 2, "info": "Unable to get 3 data. Maybe the data is not collected, '
                               'or the data may fail to be analyzed."}')
 
-    def test_make_export_file_name(self):
-        params = {"data_type": 'str', "device_id": 1, "model_id": 1, "iter_id": 1,
-                  "export_type": "summary", "export_format": "json", "project": 123}
-        with mock.patch(NAMESPACE + '.PathManager.get_summary_dir', return_value="train"), \
-                mock.patch('os.path.join', return_value=True):
-            ProfilingScene().init('')
-            ProfilingScene()._scene = Constant.STEP_INFO
-            key = MsprofDataStorage()
-            result = key._make_export_file_name(params)
-        self.assertEqual(result, True)
-
     def test_read_slice_config(self):
         with mock.patch(NAMESPACE + '.check_file_writable'), \
                 mock.patch('os.path.exists', return_value=True), \
                 mock.patch('os.remove', return_value=True), \
                 mock.patch('os.open', return_value=True), \
-                mock.patch('os.fdopen', mock.mock_open(read_data='{"slice_switch": "on","slice_file_size": 0,"slice_method": 0}')):
+                mock.patch('os.fdopen', mock.mock_open(
+                    read_data='{"slice_switch": "on","slice_file_size": 0,"slice_method": 0}')):
             key = MsprofDataStorage()
             res = key.read_slice_config()
             self.assertEqual(res, ('on', 0, 0))
 
-    def test_get_time_level(self):
-        key = MsprofDataStorage()
-        result = key._get_time_level(20)
-        self.assertEqual(result, 10)
-        result = key._get_time_level(40)
-        self.assertEqual(result, 30)
-
-    def test_update_timeline_head(self):
-        key = MsprofDataStorage()
-        key.data_list = [{'ph': 'M'}, {'ph': 1}]
-        key._update_timeline_head()
-        self.assertEqual(key.timeline_head, [{'ph': 'M'}])
-
     def test_timeline_dir(self):
         with mock.patch(NAMESPACE + '.PathManager.get_timeline_dir', return_value='test'),\
-            mock.patch('os.listdir', return_value=['acl_0_0_1.json']),\
-            mock.patch(NAMESPACE + '.check_file_writable'),\
-            mock.patch('os.remove'):\
+                mock.patch('os.listdir', return_value=['acl_0_0_1.json']),\
+                mock.patch(NAMESPACE + '.check_file_writable'),\
+                mock.patch('os.remove'):
             MsprofDataStorage.clear_timeline_dir({'data_type': 'acl'})
+
+    def test_get_slice_times(self):
+        with mock.patch(NAMESPACE + '.logging.warning'):
+            key = MsprofDataStorage()
+            key.data_list = [{'test': 'test'} for _ in range(10000000)]
+            key.tid_set = {i for i in range(100)}
+            key.get_slice_times('a', 1)
 
 
 if __name__ == '__main__':
