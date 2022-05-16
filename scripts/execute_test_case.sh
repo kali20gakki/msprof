@@ -5,6 +5,6 @@ TOP_DIR=${CUR_DIR}/..
 mkdir -p ${TOP_DIR}/test/build_llt
 cd ${TOP_DIR}/test/build_llt
 cmake ../ -DPACKAGE=ut
-make
+make -j64
 
 
