@@ -9,6 +9,7 @@ import os
 from common_func.ai_stack_data_check_manager import AiStackDataCheckManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.msvp_common import path_check
+from common_func.path_manager import PathManager
 from common_func.trace_view_manager import TraceViewManager
 from model.interface.view_model import ViewModel
 
@@ -76,7 +77,7 @@ class AclToHwts:
         get ge data
         :return: ge data
         """
-        if not path_check(os.path.join(self._result_dir, DBNameConstant.DB_GE_INFO)):
+        if not path_check(PathManager.get_db_path(self._result_dir, DBNameConstant.DB_GE_INFO)):
             return []
         ge_model = ViewModel(self._result_dir, DBNameConstant.DB_GE_INFO, [DBNameConstant.TABLE_GE_TASK])
         ge_model.init()
