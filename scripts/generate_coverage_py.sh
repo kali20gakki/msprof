@@ -9,6 +9,9 @@ export PYTHONPATH=${src_code}:${test_code}:${PYTHONPATH}
 mkdir -p ${output_dir}
 cd ${output_dir}
 rm -f .coverage
-coverage run --source=${src_code} -m pytest -s "${test_code}"
+coverage run --branch --source=${src_code} -m pytest -s "${test_code}" --junit-xml=./report.xml
+coverage xml
 coverage report > python_coverage_report.log
 echo "report: ${output_dir}"
+find ${script_dir}/.. -name "__pycache__" | xargs rm -r
+

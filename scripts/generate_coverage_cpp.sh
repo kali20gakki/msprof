@@ -47,6 +47,6 @@ for test in ${test_obj[@]} ; do
 done
 
 echo "${str_test}"
-lcov ${str_test} -o ${COV_DIR}/ut_report.info
+lcov ${str_test} -o ${COV_DIR}/ut_report.info --rc lcov_branch_coverage=1
 genhtml ${COV_DIR}/ut_report.info -o ${COV_DIR}/result --branch-coverage
 echo "report: ${COV_DIR}"
