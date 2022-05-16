@@ -11,7 +11,7 @@
 #include "op_desc_parser.h"
 #include "msprof_callback_impl.h"
 #include "errno/error_code.h"
-#include "prof_api.h"
+#include "profapi_plugin.h"
 
 using namespace Analysis::Dvvp::Analyze;
 using namespace analysis::dvvp::common::error;
