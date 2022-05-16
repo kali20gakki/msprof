@@ -240,11 +240,15 @@ class MsprofDataStorage:
         slice_method = LoadingTimeLevel.BAD_LEVEL.value
         if method == TimeLineSliceStrategy.LOADING_TIME_PRIORITY.value:
             slice_method = LoadingTimeLevel.FINE_LEVEL.value
-        while time_level >= slice_method:
-            slice_length = math.ceil(list_length / slice_time)
-            formula = MsprofDataStorage._calculate_loading_time(row_line_level, slice_length)
-            time_level = self._get_time_level(formula)
-            slice_time += 1
+        try:
+            while time_level >= slice_method:
+                slice_length = math.ceil(list_length / slice_time)
+                formula = MsprofDataStorage._calculate_loading_time(row_line_level, slice_length)
+                time_level = self._get_time_level(formula)
+                slice_time += 1
+        except ZeroDivisionError as err:
+            logging.error(err, exc_info=Constant.TRACE_BACK_SWITCH)
+            return 0
         return slice_time - 1 if slice_time > 2 else 0
 
     def _update_timeline_head(self: any) -> None:
