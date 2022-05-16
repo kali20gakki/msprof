@@ -777,24 +777,6 @@ class TestMsProfExportDataUtils(unittest.TestCase):
             res = MsProfExportDataUtils._get_stars_chip_trans_data({}, {})
         self.assertEqual(res, {})
 
-    def test_get_thread_group_data(self):
-        InfoConfReader()._info_json = {"pid": 123}
-        with mock.patch(NAMESPACE + '.ThreadGroupViewer.get_timeline_data', return_value={}):
-            res = MsProfExportDataUtils._get_thread_group_data({}, {})
-        self.assertEqual(res, {})
-
-    def test_get_low_power_data(self):
-        InfoConfReader()._info_json = {"pid": 123}
-        with mock.patch(NAMESPACE + '.LowPowerViewer.get_timeline_data', return_value={}):
-            res = MsProfExportDataUtils._get_low_power_data({}, {})
-        self.assertEqual(res, {})
-
-    def test_get_biu_perf_timeline(self):
-        InfoConfReader()._info_json = {"pid": 123}
-        with mock.patch(NAMESPACE + '.BiuPerfViewer.get_timeline', return_value={}):
-            res = MsProfExportDataUtils._get_biu_perf_timeline({}, {})
-        self.assertEqual(res, {})
-
 
 if __name__ == '__main__':
     unittest.main()
