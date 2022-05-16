@@ -10,7 +10,6 @@ import json
 import os
 import threading
 
-from analyzer.scene_base.profiling_scene import ProfilingScene
 from common_func.config_mgr import ConfigMgr
 from common_func.constant import Constant
 from common_func.data_manager import DataManager
@@ -21,16 +20,13 @@ from common_func.ms_constant.str_constant import StrConstant
 from common_func.msprof_common import MsProfCommonConstant
 from common_func.msprof_iteration import MsprofIteration
 from common_func.msvp_common import MsvpCommonConst
-from common_func.msvp_common import create_csv
-from common_func.msvp_common import create_json
 from common_func.msvp_constant import MsvpConstant
-from common_func.os_manager import check_file_writable
 from common_func.path_manager import PathManager
 from common_func.platform.chip_manager import ChipManager
-from common_func.utils import Utils
 from host_prof.host_prof_presenter_manager import HostExportType
 from host_prof.host_prof_presenter_manager import get_host_prof_timeline
 from host_prof.host_syscall.presenter.host_syscall_presenter import HostSyscallPresenter
+from ms_interface.msprof_data_storage import MsprofDataStorage
 from ms_interface.msprof_timeline import MsprofTimeline
 from msparser.aicpu.parse_dp_data import ParseDpData
 from viewer.acl_report import get_acl_data
@@ -39,6 +35,7 @@ from viewer.ai_core_op_report import AiCoreOpReport
 from viewer.ai_core_op_report import ReportOPCounter
 from viewer.ai_core_report import get_core_sample_data
 from viewer.aicpu_viewer import ParseAiCpuData
+from viewer.biu_perf_viewer import BiuPerfViewer
 from viewer.cpu_data_report import get_aictrl_pmu_events
 from viewer.cpu_data_report import get_cpu_hot_function
 from viewer.cpu_data_report import get_ts_pmu_events
@@ -84,7 +81,6 @@ from viewer.training.core_cpu_reduce_viewer import CoreCpuReduceViewer
 from viewer.training.step_trace_viewer import StepTraceViewer
 from viewer.training.task_op_viewer import TaskOpViewer
 from viewer.ts_cpu_report import TsCpuReport
-from viewer.biu_perf_viewer import BiuPerfViewer
 
 
 class MsProfExportDataUtils:
@@ -116,13 +112,13 @@ class MsProfExportDataUtils:
             handler = getattr(cls, configs.get(StrConstant.CONFIG_HANDLER))
             if params.get(StrConstant.PARAM_EXPORT_TYPE) == MsProfCommonConstant.SUMMARY:
                 headers, data, _ = handler(configs, params)
-                return MsProfExportDataUtils.export_summary_data(headers, data, params)
+                return MsprofDataStorage().export_summary_data(headers, data, params)
             data = handler(configs, params)
             if isinstance(data, EmptyClass):
                 return json.dumps(
                     {"status": NumberConstant.ERROR, "info": "Unable to get prof data."})
             cls.add_timeline_data(params, data)
-            return MsProfExportDataUtils.export_timeline_data_to_json(data, params)
+            return MsprofDataStorage().export_timeline_data_to_json(data, params)
         return json.dumps(
             {"status": NumberConstant.ERROR,
              "info": "Unable to handler data type %s." % params.get(
@@ -636,85 +632,6 @@ class MsProfExportDataUtils:
             return MsvpConstant.MSVP_EMPTY_DATA
         return get_host_prof_timeline(params.get(StrConstant.PARAM_RESULT_DIR),
                                       HostExportType.HOST_RUNTIME_API)
-
-    @staticmethod
-    def _make_export_file_name(params: dict) -> str:
-        file_name = params.get(StrConstant.PARAM_DATA_TYPE)
-        if params.get(StrConstant.PARAM_DEVICE_ID) is not None:
-            file_name += "_" + str(params.get(StrConstant.PARAM_DEVICE_ID))
-            if ProfilingScene().is_step_trace():
-                file_name += "_" + str(params.get(StrConstant.PARAM_MODEL_ID))
-            if params.get(StrConstant.PARAM_ITER_ID) is not None:
-                file_name += "_" + str(params.get(StrConstant.PARAM_ITER_ID))
-
-        if params.get(StrConstant.PARAM_EXPORT_TYPE) == MsProfCommonConstant.SUMMARY:
-            file_suffix = StrConstant.FILE_SUFFIX_CSV
-            if params.get(StrConstant.PARAM_EXPORT_FORMAT) == StrConstant.EXPORT_JSON:
-                file_suffix = StrConstant.FILE_SUFFIX_JSON
-            return os.path.join(
-                PathManager.get_summary_dir(params.get(StrConstant.PARAM_RESULT_DIR)),
-                file_name + file_suffix)
-        return os.path.join(
-            PathManager.get_timeline_dir(params.get(StrConstant.PARAM_RESULT_DIR)),
-            file_name + StrConstant.FILE_SUFFIX_JSON)
-
-    @staticmethod
-    def export_summary_data(headers: list, data: list, params: dict) -> any:
-        """
-        export data to csv file
-        :param headers: header
-        :param data: data
-        :param params: params
-        :return:
-        """
-        if headers and data:
-            summary_file_path = MsProfExportDataUtils._make_export_file_name(params)
-            check_file_writable(summary_file_path)
-            if params.get(StrConstant.PARAM_EXPORT_FORMAT) == StrConstant.EXPORT_CSV:
-                return create_csv(summary_file_path, headers, data, save_old_file=False)
-            if params.get(StrConstant.PARAM_EXPORT_FORMAT) == StrConstant.EXPORT_JSON:
-                return create_json(summary_file_path, headers, data, save_old_file=False)
-        if data:
-            return data
-        return json.dumps({"status": NumberConstant.WARN,
-                           "info": "Unable to get %s data. Maybe the data is not "
-                                   "collected, or the data may fail to be analyzed."
-                                   % params.get(StrConstant.PARAM_DATA_TYPE)})
-
-    @staticmethod
-    def export_timeline_data_to_json(result: any, params: dict) -> any:
-        """
-        export data to json file
-        :param result: export result
-        :param params: params
-        :return: result
-        """
-        if not result:
-            return json.dumps({"status": NumberConstant.WARN,
-                               "info": "Unable to get %s data. Maybe the data is not "
-                                       "collected, or the data may fail to be analyzed."
-                                       % params.get(StrConstant.PARAM_DATA_TYPE)})
-        if isinstance(result, dict):
-            if 'status' in result:
-                return result
-            result = json.dumps(result)
-        elif isinstance(result, str):
-            if 'status' in json.loads(result):
-                return result
-        timeline_file_path = MsProfExportDataUtils._make_export_file_name(params)
-        check_file_writable(timeline_file_path)
-        if os.path.exists(timeline_file_path):
-            os.remove(timeline_file_path)
-        try:
-            with os.fdopen(os.open(timeline_file_path, Constant.WRITE_FLAGS,
-                                   Constant.WRITE_MODES), 'w') as trace_file:
-                trace_file.write(result)
-                return json.dumps({'status': NumberConstant.SUCCESS,
-                                   'data': timeline_file_path})
-        except (OSError, SystemError, ValueError, TypeError,
-                RuntimeError) as err:
-            return json.dumps({"status": NumberConstant.ERROR,
-                               "info": "message error: %s" % err})
 
     @staticmethod
     def _get_ge_data(configs: dict, params: dict) -> any:

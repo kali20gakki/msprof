@@ -43,17 +43,18 @@ class MsprofJobSummary:
         :param sub_dir:
         :return:
         """
+        msprof_json_data = []
         timeline_path = os.path.realpath(
             os.path.join(self._output, sub_dir, self.MSPROF_TIMELINE_DIR))
         if not os.path.exists(timeline_path):
-            return []
+            return msprof_json_data
         file_list = os.listdir(timeline_path)
         for file_name in file_list:
             json_result = get_file_name_pattern_match(file_name, *(get_msprof_json_compiles()))
             if json_result:
                 self._file_name = file_name
-                return Utils.get_json_data(os.path.join(timeline_path, file_name))
-        return []
+                msprof_json_data.extend(Utils.get_json_data(os.path.join(timeline_path, file_name)))
+        return msprof_json_data
 
     def _export_msprof_timeline(self: any) -> None:
         self._host_data = self._get_host_timeline_data()
