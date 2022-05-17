@@ -12,6 +12,7 @@ import sys
 class MsprofInfoConstruct:
     """
     get basic info
+    get basic info
     """
     BASIC_MODEL_PATH = "profiling_bean.basic_info.msprof_basic_info"
     BASIC_INFO_CLASS_NAME = "MsProfBasicInfo"
