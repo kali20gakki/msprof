@@ -4,15 +4,15 @@ set(COLLECT_DIR ${TOP_DIR}/collector)
 set(SECUREC_DIR ${OPENSOURCE_DIR}/securec)
 file(GLOB_RECURSE SECUREC_SRC ${SECUREC_DIR}/src/*.c)
 
-add_library(c_sec STATIC
+add_library(c_sec_static STATIC
     ${SECUREC_SRC}
 )
 
-target_include_directories(c_sec PRIVATE
+target_include_directories(c_sec_static PRIVATE
     ${SECUREC_DIR}/include
 )
 
-target_compile_options(c_sec PRIVATE
+target_compile_options(c_sec_static PRIVATE
     -fPIC
     -fstack-protector-all
     -fno-common
@@ -21,7 +21,7 @@ target_compile_options(c_sec PRIVATE
     -Wextra
 )
 
-target_link_options(c_sec PRIVATE
+target_link_options(c_sec_static PRIVATE
     -Wl,-z,relro,-z,now,-z,noexecstack
     -s
 )
