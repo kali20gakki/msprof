@@ -20,7 +20,7 @@ from common_func.constant import Constant
 from common_func.data_check_manager import DataCheckManager
 from common_func.file_manager import FileManager
 from common_func.ms_constant.number_constant import NumberConstant
-from common_func.msprof_common import MsProfCommonConstant
+from common_func.msprof_common import MsProfCommonConstant, update_sample_json
 from common_func.msprof_common import add_all_file_complete
 from common_func.msprof_common import check_path_valid
 from common_func.msprof_exception import ProfException
@@ -183,6 +183,7 @@ class JobMonitor:
         target_collection = AI(
             {**sample_config, **job_sample_config})
         target_collection.import_control_flow()
+        update_sample_json(sample_config, result_dir)
         file_dispatch = FileDispatch({**sample_config, **job_sample_config})
         file_dispatch.dispatch_parser()
         add_all_file_complete(result_dir)
