@@ -4,7 +4,7 @@ set(COLLECT_DIR ${TOP_DIR}/collector)
 set(SECUREC_DIR ${OPENSOURCE_DIR}/securec)
 file(GLOB_RECURSE SECUREC_SRC ${SECUREC_DIR}/src/*.c)
 
-add_library(c_sec SHARED
+add_library(c_sec STATIC
     ${SECUREC_SRC}
 )
 

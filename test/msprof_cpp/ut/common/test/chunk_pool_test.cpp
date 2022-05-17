@@ -19,13 +19,12 @@ TEST_F(COMMON_CHUNK_POOL_TEST, chunk) {
 
     auto chunk = std::make_shared<analysis::dvvp::common::memory::Chunk>(0);
     EXPECT_EQ(true, chunk->Init());
+    // MOCKER(malloc)
+    //     .stubs()
+    //     .will(returnValue((void*)NULL));
 
-    MOCKER(malloc)
-        .stubs()
-        .will(returnValue((void*)NULL));
-
-    chunk->bufferSize_ = 10;
-    EXPECT_EQ(false, chunk->Init());
+    // chunk->bufferSize_ = 10;
+    // EXPECT_EQ(false, chunk->Init());
 }
 
 TEST_F(COMMON_CHUNK_POOL_TEST, chunk_pool) {
