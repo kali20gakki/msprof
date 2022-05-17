@@ -228,7 +228,7 @@ class MsprofDataStorage:
         str_length = len(json.dumps(self.data_list))
         # If an exception occurs, continue the calculation logic.
         try:
-            if limit_size % 1 == 0 and limit_size >= 200:
+            if isinstance(limit_size, int) and limit_size >= 200:
                 str_size_of_mb = str_length // self.DATA_TO_FILE
                 return 1 + str_size_of_mb // limit_size if str_size_of_mb > limit_size else 0
         except (TypeError, ValueError) as err:
