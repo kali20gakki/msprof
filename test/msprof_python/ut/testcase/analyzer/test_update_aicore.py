@@ -162,18 +162,6 @@ class TestUpdateAICoreData(unittest.TestCase):
     #     res[0].commit()
     #     db_manager.destroy(res)
 
-    def test_get_config_params(self):
-        with mock.patch(NAMESPACE + '.FileManager.is_info_json_file', return_value='111'):
-            key = UpdateAICoreData(CONFIG)
-            InfoConfReader()._info_json = {'deviceinfo': None}
-            result = key._UpdateAICoreData__get_config_params()
-        self.assertEqual(result, (0, 0))
-        with mock.patch(NAMESPACE + '.FileManager.is_info_json_file', return_value='111'):
-            key = UpdateAICoreData(CONFIG)
-            InfoConfReader()._info_json = INFO_JSON
-            result = key._UpdateAICoreData__get_config_params()
-        self.assertEqual(result, (0, 0)) # (8, 1150000000.0) XXX
-
     def test_update_aicore_db(self):
         block_dims = '123'
         core_num = 1

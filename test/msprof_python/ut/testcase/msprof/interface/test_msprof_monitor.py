@@ -122,20 +122,6 @@ class TestJobDispatcher(unittest.TestCase):
                 key = JobMonitor('123')
                 key._analysis_job_profiling(job_path, job_tag)
 
-    def test_launch_parsing_job_data(self):
-        result_dir = 'test'
-        sample_config = {"model_id": '1', "DeviceInfo": 'ada'}
-        tag_id = 1
-        with mock.patch(NAMESPACE + '.PathManager.get_sql_dir', return_value='456'), \
-             mock.patch('framework.collection_engine.AI.data_analysis', side_effect=multiprocessing.ProcessError), \
-             mock.patch('framework.collection_engine.logging.error'), \
-             mock.patch('os.listdir', return_value=["1"]), \
-             mock.patch(NAMESPACE + '.FileDispatch.dispatch_parser'):
-            InfoConfReader()._info_json = INFO_JSON
-            key = JobMonitor('123')
-            key._launch_parsing_job_data(result_dir, sample_config, tag_id)
-
-
 def test_monitor_job():
     num = 123
     collection_path = 'home\\collection'
