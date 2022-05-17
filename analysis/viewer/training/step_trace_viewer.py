@@ -84,7 +84,7 @@ class TimeLineJsonMaker:
         :param index: index
         :return: list
         """
-        return ["Iteration Time {}".format(trace_parm[StepTraceConstant.ITER_ID]),
+        return ["Iteration {}".format(trace_parm[StepTraceConstant.ITER_ID]),
                 pid, 0 + 3 * int(index),
                 trace_parm.get(StepTraceConstant.STEP_END) - trace_parm.get(StepTraceConstant.ITER_TIME),
                 trace_parm.get(StepTraceConstant.ITER_TIME),
