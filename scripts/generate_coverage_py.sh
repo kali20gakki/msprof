@@ -1,20 +1,17 @@
 #!/bin/bash
-#Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
-# ================================================================================
 set -e
-script=$(readlink -f "$0")
-route=$(dirname "$script")
+real_path=$(readlink -f "$0")
+script_dir=$(dirname "$real_path")
+output_dir="${script_dir}/../test/build_llt/output/python_coverage"
+src_code="${script_dir}/../analysis"
+test_code="${script_dir}/../test/msprof_python/ut/testcase"
+export PYTHONPATH=${src_code}:${test_code}:${PYTHONPATH}
+mkdir -p ${output_dir}
+cd ${output_dir}
+rm -f .coverage
+coverage run --branch --source=${src_code} -m pytest -s "${test_code}" --junit-xml=./report.xml
+coverage xml
+coverage report > python_coverage_report.log
+echo "report: ${output_dir}"
+find ${script_dir}/.. -name "__pycache__" | xargs rm -r
 
-export PYTHONPATH="${route}/../llt/msprof_python":$PYTHONPATH
-echo "PYTHONPATH is ${PYTHONPATH}"
-
-rm -rf ${route}/.coverage ${route}/report
-mkdir -p ${route}/report
-
-ret=0
-code_dir=${route}/../src
-coverage3 run --source=${code_dir} -m pytest cases --junitxml="${route}/report/final.xml" || ret=1
-coverage3 combine
-coverage3 xml -o ${route}/report/coverage.xml
-
-exit ${ret}

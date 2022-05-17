@@ -4,13 +4,12 @@
 set -e
 CUR_DIR=$(dirname $(readlink -f $0))
 TOP_DIR=${CUR_DIR}/..
-COV_DIR=${TOP_DIR}/llt/output/coverage
-BUILD_DIR=${TOP_DIR}/llt/build_llt
+COV_DIR=${TOP_DIR}/test/build_llt/output/cpp_coverage
+BUILD_DIR=${TOP_DIR}/test/build_llt
 
 if [ ! -d ${COV_DIR} ] ; then
-    mkdir ${COV_DIR}
+    mkdir -p ${COV_DIR}
 fi
-
 #----------------------------------------------------------
 # coverage function
 generate_coverage(){
@@ -26,7 +25,6 @@ generate_coverage(){
 }
 #----------------------------------------------------------
 test_obj=(
-    device_utest
     job_wrapper_utest
     common_utest
     msprof_bin_utest
@@ -44,9 +42,11 @@ for test in ${test_obj[@]} ; do
     str_test=${str_test}"-a ${COV_DIR}/lcov_${test}.info "
     test_dir=`find ${BUILD_DIR} -name "${test}.dir"`
     target_dir=`ls -F ${test_dir} | grep "/$" | grep -v "test" | grep -v "__"`
+    echo "${target_dir} ${test_dir} ${str_test}"
     generate_coverage ${test_dir}/${target_dir} ${test}
 done
 
 echo "${str_test}"
-lcov ${str_test} -o ${COV_DIR}/ut_report.info
+lcov ${str_test} -o ${COV_DIR}/ut_report.info --rc lcov_branch_coverage=1
 genhtml ${COV_DIR}/ut_report.info -o ${COV_DIR}/result --branch-coverage
+echo "report: ${COV_DIR}"

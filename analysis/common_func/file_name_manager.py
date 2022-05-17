@@ -185,7 +185,7 @@ class FileNameManagerConstant:
     ALL_FILE_TAG = "all_file.complete"
 
     MSPROFTX_FILE_PATTERN = r"^Msprof\.msproftx\.slice_\d+"
-    MSPROF_JSON_FILE_PATTERN = r"^msprof_?\d?_?\d?_?\d?.json"
+    MSPROF_JSON_FILE_PATTERN = r"^msprof_?\d?_?\d?_?\d?_?(slice)?_?\d?.json"
     MSPROFTX_JSON_FILE_PATTERN = r"^msprof_tx_?\d?_?\d?.json"
 
     # helper
