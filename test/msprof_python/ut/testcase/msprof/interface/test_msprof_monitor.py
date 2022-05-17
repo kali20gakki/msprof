@@ -122,6 +122,7 @@ class TestJobDispatcher(unittest.TestCase):
                 key = JobMonitor('123')
                 key._analysis_job_profiling(job_path, job_tag)
 
+
 def test_monitor_job():
     num = 123
     collection_path = 'home\\collection'
