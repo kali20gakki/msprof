@@ -68,9 +68,10 @@ class AicCalculator(ICalculator, MsMultiProcess):
         :return: None
         """
         if self._iter_model.check_db() and self._iter_model.check_table():
+            # iter_id means [iter_id-1, iter_id]
             _iter_id = MsprofIteration(self._project_path). \
-                get_iteration_id_by_index_id(self._sample_config.get("iter_id"), self._sample_config.get("model_id"))
-            offset_count, total_count = self._get_offset_and_total(_iter_id)
+                get_iter_id_by_index_id(self._sample_config.get("iter_id"), self._sample_config.get("model_id"))
+            offset_count, total_count = self._get_offset_and_total(_iter_id[0] + 1)
             if total_count <= 0:
                 logging.warning("The ai core data that is not satisfied by the specified iteration!")
                 return

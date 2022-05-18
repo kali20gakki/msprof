@@ -238,6 +238,8 @@ class Constant:
     GE_TIMELINE_MODEL_ID_INDEX_NAME_INDEX = 6
     GE_TIMELINE_TID_INDEX = 8
 
+    GE_OP_MODEL_ID = 4294967295
+
     def get_constant_class_name(self: any) -> any:
         """
         get constant class name
