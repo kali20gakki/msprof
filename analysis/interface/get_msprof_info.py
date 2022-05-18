@@ -3,6 +3,7 @@
 Function: The entry for constructing the basic info.
 Copyright Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 """
+
 import argparse
 import importlib
 import os
@@ -11,7 +12,6 @@ import sys
 
 class MsprofInfoConstruct:
     """
-    get basic info
     get basic info
     """
     BASIC_MODEL_PATH = "profiling_bean.basic_info.msprof_basic_info"
