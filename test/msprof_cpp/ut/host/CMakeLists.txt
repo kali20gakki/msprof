@@ -126,7 +126,7 @@ target_link_libraries(host_utest PRIVATE
     $<BUILD_INTERFACE:intf_llt_pub>
     $<BUILD_INTERFACE:mmpa_headers>
     ascend_protobuf
-    c_sec
+    c_sec_static
 )
 
 set_target_properties(host_utest

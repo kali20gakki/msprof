@@ -74,7 +74,7 @@ target_link_options(message_utest PRIVATE
 
 target_link_libraries(message_utest PRIVATE
     ascend_protobuf_static
-    c_sec
+    c_sec_static
     pthread
     ${GTEST_STATIC_LIBRARY}
     ${MOCKCPP_STATIC_LIBRARY}
