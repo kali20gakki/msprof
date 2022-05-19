@@ -190,7 +190,7 @@ target_link_options(msprofiler_utest PRIVATE
 
 target_link_libraries(msprofiler_utest PRIVATE
 	ascend_protobuf_static
-	c_sec
+    c_sec_static
 	pthread
 	${GTEST_STATIC_LIBRARY}
 	${MOCKCPP_STATIC_LIBRARY}
@@ -317,7 +317,7 @@ target_compile_definitions(msprof_utest PRIVATE
 
 target_link_libraries(msprof_utest PRIVATE
 	ascend_protobuf_static
-	c_sec
+    c_sec_static
 	pthread
 	${GTEST_STATIC_LIBRARY}
 	${MOCKCPP_STATIC_LIBRARY}

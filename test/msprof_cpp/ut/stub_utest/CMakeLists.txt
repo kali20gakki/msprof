@@ -63,7 +63,7 @@ target_link_options(stub_file_utest PRIVATE
 
 target_link_libraries(stub_file_utest PRIVATE
     ascend_protobuf_static
-    c_sec
+    c_sec_static
     pthread
     ${GTEST_STATIC_LIBRARY}
     ${MOCKCPP_STATIC_LIBRARY}
