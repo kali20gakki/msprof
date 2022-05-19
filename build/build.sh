@@ -3,6 +3,9 @@
 # msprofbin libmsprofiler.so stub/libmsprofiler.so
 set -e
 CUR_DIR=$(dirname $(readlink -f $0))
+
+bash ${CUR_DIR}/bep/check_bep_env.sh
+
 TOP_DIR=${CUR_DIR}/..
 if [ ! -d ${TOP_DIR}/build ]; then
     mkdir -p  ${TOP_DIR}/build
