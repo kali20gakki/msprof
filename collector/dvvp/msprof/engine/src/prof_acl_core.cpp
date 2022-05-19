@@ -45,7 +45,7 @@ aclError aclprofInit(CONST_CHAR_PTR profilerResultPath, size_t length)
     }
     MSPROF_LOGI("Start to execute aclprofInit");
     std::lock_guard<std::mutex> lock(g_aclprofMutex);
-
+    g_indexId = 1;
     if (profilerResultPath == nullptr || strlen(profilerResultPath) != length) {
         MSPROF_LOGE("profilerResultPath is nullptr or its length does not equals given length");
         MSPROF_INPUT_ERROR("EK0002", std::vector<std::string>({"path"}),
