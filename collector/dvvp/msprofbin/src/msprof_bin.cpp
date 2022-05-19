@@ -87,7 +87,7 @@ int main(int argc, const char **argv, const char **envp)
         return PROFILING_FAILED;
     } else {
         CmdLog::instance()->CmdInfoLog("Profiling finished.");
-        PrintOutPutDir(params->result_dir);
+        PrintOutPutDir();
     }
     return PROFILING_SUCCESS;
 }
