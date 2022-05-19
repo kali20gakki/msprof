@@ -32,7 +32,7 @@ class TestCalculateRts(unittest.TestCase):
 
     def test_calculate_task_schedule_data_2(self):
         create_sql = "CREATE TABLE IF NOT EXISTS TaskTime(replayid, device_id, api, apirowid, tasktype, " \
-                     "task_id, stream_id, waittime, pendingtime, runtime, completetime, index_id, model_id, batch_id)"
+                     "task_id, stream_id, waittime, pendingtime, running, complete, index_id, model_id, batch_id)"
         data = ((0, 0, 4, 430, 4, 2, 5, 0, 0, 118562436328.0, 118562438671.0, 1, 1, 0),)
         insert_sql = "insert into {0} values ({value})".format(
             "TaskTime", value="?," * (len(data[0]) - 1) + "?")
@@ -115,22 +115,22 @@ class TestCalculateRts(unittest.TestCase):
         curs.description = [['device_id'], ['core_num'], ['other']]
         insert_event_value(curs, conn, 0)
 
-    def test_insert_metric_value(self):
-        metrics = ["a", "b"]
-        metrics_1 = []
-        db_manager = DBManager()
-        test_sql = db_manager.create_table(DBNameConstant.DB_RUNTIME)
-        res = insert_metric_value(test_sql[0], metrics, "ts")
-        self.assertEqual(res, True)
-
-        res = insert_metric_value(test_sql[0], metrics, "ts")
-        self.assertEqual(res, True)
-
-        res = insert_metric_value(test_sql[0], metrics_1, "ts")
-        self.assertEqual(res, False)
-
-        (test_sql[1]).execute("drop Table ts")
-        db_manager.destroy(test_sql)
+    # def test_insert_metric_value(self):
+    #     metrics = ["a", "b"]
+    #     metrics_1 = []
+    #     db_manager = DBManager()
+    #     test_sql = db_manager.create_table(DBNameConstant.DB_RUNTIME)
+    #     res = insert_metric_value(test_sql[0], metrics, "ts")
+    #     self.assertEqual(res, True)
+    #
+    #     res = insert_metric_value(test_sql[0], metrics, "ts")
+    #     self.assertEqual(res, True)
+    #
+    #     res = insert_metric_value(test_sql[0], metrics_1, "ts")
+    #     self.assertEqual(res, False)
+    #
+    #     (test_sql[1]).execute("drop Table ts")
+    #     db_manager.destroy(test_sql)
 
     def test_get_limit_and_offset_1(self):
         with mock.patch(NAMESPACE + "._query_limit_and_offset", side_effect=sqlite3.OperationalError), \

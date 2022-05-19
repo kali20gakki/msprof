@@ -65,6 +65,7 @@ class Utils:
             return False
         sql = "select model_id from {}".format(DBNameConstant.TABLE_STEP_TRACE_DATA)
         model_ids = DBManager.fetch_all_data(_model.cur, sql)
+        _model.finalize()
         model_id_set = set([model_id[0] for model_id in model_ids])
         if len(model_id_set) == 1:
             return False
