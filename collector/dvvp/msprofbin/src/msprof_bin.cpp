@@ -25,7 +25,7 @@ using namespace analysis::dvvp::common::error;
 using namespace Analysis::Dvvp::Common::Platform;
 using namespace Collector::Dvvp::Msprofbin;
 
-void PrintOutPutDir(const std::string &resultDir)
+void PrintOutPutDir()
 {
     if (MsprofManager::instance()->rMode_ == nullptr || MsprofManager::instance()->rMode_->jobResultDir_.empty()) {
         return;

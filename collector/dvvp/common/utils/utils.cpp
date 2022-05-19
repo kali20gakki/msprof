@@ -194,7 +194,8 @@ std::vector<std::string> Utils::Split(const std::string &input_str,
     }
     std::string str = input_str + pattern;
     std::string::size_type size = str.size();
-    for (std::string::size_type i = 0; i < size; i++) {
+    std::string::size_type i = 0;
+    while (i < size) {
         pos = str.find(pattern, i);
         if (pos < size) {
             bool isOk = true;
@@ -210,6 +211,7 @@ std::vector<std::string> Utils::Split(const std::string &input_str,
 
             i = pos + pattern.size() - 1;
         }
+        i++;
     }
 
     return res;
@@ -1232,7 +1234,8 @@ uint32_t Utils::GenerateSignature(CONST_UINT8_PTR data, uint64_t len)
     };
 
     static const int offset = 8;
-    while (len--) {
+    while (len != 0 ) {
+        len -= 1;
         signature = signatureTable[(signature ^ *data++) & 0xff] ^ (signature >> offset);
     }
     return signature;
