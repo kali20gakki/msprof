@@ -42,7 +42,7 @@ class MsprofDataStorage:
         self.data_list = None
 
     @staticmethod
-    def export_timeline_data_to_json(result: any, params: dict) -> any:
+    def export_timeline_data_to_json(result: str or dict, params: dict) -> any:
         """
         export data to json file
         :param result: export result
@@ -61,7 +61,11 @@ class MsprofDataStorage:
         elif isinstance(result, str):
             if 'status' in json.loads(result):
                 return result
-        result = MsprofDataStorage().slice_data_list(json.loads(result))
+        try:
+            result = MsprofDataStorage().slice_data_list(json.loads(result))
+        except (json.JSONDecodeError, TypeError, ValueError, IOError) as err:
+            return json.dumps({"status": NumberConstant.ERROR,
+                               "info": "message error: %s" % err})
         MsprofDataStorage.clear_timeline_dir(params)
         data_path = []
         for slice_time in range(len(result[1])):
@@ -118,6 +122,21 @@ class MsprofDataStorage:
             if re.match(r'{0}{1}.*'.format(params.get(StrConstant.PARAM_DATA_TYPE), file_suffix), file):
                 check_file_writable(os.path.join(timeline_dir, file))
                 os.remove(os.path.join(timeline_dir, file))
+
+    @staticmethod
+    def write_json_files(json_data: list, file_path: str) -> None:
+        """
+        write json data  to file
+        :param json_data:
+        :param file_path:
+        :return:
+        """
+        try:
+            with os.fdopen(os.open(file_path, Constant.WRITE_FLAGS,
+                                   Constant.WRITE_MODES), 'w') as trace_file:
+                trace_file.write(json.dumps(json_data))
+        except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
+            logging.error(os.path.basename(__file__), err)
 
     @staticmethod
     def _calculate_loading_time(row_line_level: int, count_line_level: int) -> float:
@@ -211,8 +230,8 @@ class MsprofDataStorage:
         try:
             with FileOpen(self.SLICE_CONFIG_PATH, "r") as rule_reader:
                 config_json = json.load(rule_reader.file_reader)
-        except FileNotFoundError:
-            logging.error("Read slice config failed: %s", os.path.basename(self.SLICE_CONFIG_PATH))
+        except (FileNotFoundError, TypeError, json.JSONDecodeError):
+            logging.warning("Read slice config failed: %s", os.path.basename(self.SLICE_CONFIG_PATH))
             return self.DEFAULT_SETTING
         slice_switch = config_json.get('slice_switch', 'on')
         limit_size = config_json.get('slice_file_size(MB)', 0)
