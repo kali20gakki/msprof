@@ -139,28 +139,6 @@ int ProfAclMgr::CallbackFinalizePrecheck()
     return PROFILING_FAILED;
 }
 
-int PreCheckProfConfig()
-{
-    preCheckGraphProfConfig
-}
-bool ProfAclMgr::PreCheckGraphProfConfig(ACL_GRPH_PROF_CONFIG_PTR profilerConfig)
-{
-    if (profilerConfig == nullptr) {
-        MSPROF_LOGE("Param profilerConfig is nullptr");
-        MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config"}),
-            std::vector<std::string>({"profilerConfig"}));
-        return false;
-    }
-    if (profilerConfig->config.devNums == 0 || profilerConfig->config.devNums > MSVP_MAX_DEV_NUM) {
-        MSPROF_LOGE("Param prolilerConfig is invalid");
-        std::string devNumsStr = std::to_string(profilerConfig->config.devNums);
-        MSPROF_INPUT_ERROR("EK0006", std::vector<std::string>({"config", "value", "min", "max"}),
-            std::vector<std::string>({"devNum", devNumsStr, "1", std::to_string(MSVP_MAX_DEV_NUM)}));
-        return false;
-    }
-    return true;
-}
-
 int ProfAclMgr::ProfInitPrecheck()
 {
     if (mode_ == WORK_MODE_OFF) {
