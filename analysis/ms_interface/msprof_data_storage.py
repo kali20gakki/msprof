@@ -61,11 +61,7 @@ class MsprofDataStorage:
         elif isinstance(result, str):
             if 'status' in json.loads(result):
                 return result
-        try:
-            result = MsprofDataStorage().slice_data_list(json.loads(result))
-        except (json.JSONDecodeError, TypeError, ValueError, IOError) as err:
-            return json.dumps({"status": NumberConstant.ERROR,
-                               "info": "message error: %s" % err})
+        result = MsprofDataStorage().slice_data_list(json.loads(result))
         MsprofDataStorage.clear_timeline_dir(params)
         data_path = []
         for slice_time in range(len(result[1])):
@@ -230,8 +226,8 @@ class MsprofDataStorage:
         try:
             with FileOpen(self.SLICE_CONFIG_PATH, "r") as rule_reader:
                 config_json = json.load(rule_reader.file_reader)
-        except (FileNotFoundError, TypeError, json.JSONDecodeError):
-            logging.warning("Read slice config failed: %s", os.path.basename(self.SLICE_CONFIG_PATH))
+        except FileNotFoundError:
+            logging.error("Read slice config failed: %s", os.path.basename(self.SLICE_CONFIG_PATH))
             return self.DEFAULT_SETTING
         slice_switch = config_json.get('slice_switch', 'on')
         limit_size = config_json.get('slice_file_size(MB)', 0)
