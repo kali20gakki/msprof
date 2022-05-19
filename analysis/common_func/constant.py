@@ -195,6 +195,7 @@ class Constant:
     CHIP_V3_3_0 = "4"
     CHIP_V4_1_0 = "5"
 
+    MIX_OP_AND_GRAPH = "mix_operator_and_graph"
     STEP_INFO = "step_info"
     TRAIN = "train"
     SINGLE_OP = "single_op"

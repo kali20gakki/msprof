@@ -58,7 +58,6 @@ class MsprofIteration:
         """
         get step iteration time
         """
-        db_path = PathManager.get_db_path(self._result_dir, DBNameConstant.DB_STEP_TRACE)
         trace_conn, trace_curs = DBManager.check_connect_db(self._result_dir, DBNameConstant.DB_STEP_TRACE)
         if not trace_conn or not trace_curs \
                 or not DBManager.judge_table_exist(trace_curs, DBNameConstant.TABLE_STEP_TRACE_DATA):
@@ -117,19 +116,18 @@ class MsprofIteration:
             return iter_id_list
         sql = "select iter_id from {0} " \
               "where index_id=? and model_id=?".format(DBNameConstant.TABLE_STEP_TRACE_DATA)
-        iter_dada = DBManager.fetch_all_data(trace_curs, sql, (index_id, model_id))
-        iter_id_list = [iter_dada[0][0] - 1, iter_dada[0][0]] if iter_dada else iter_id_list
+        iter_data = DBManager.fetch_all_data(trace_curs, sql, (index_id, model_id))
+        iter_id_list = [iter_data[0][0] - 1, iter_data[0][0]] if iter_data else iter_id_list
         if Utils.need_all_model_in_one_iter(self._result_dir, model_id):
             sql = "select iter_id from {0} " \
                   "where index_id>=? and index_id<=? and model_id=?".format(DBNameConstant.TABLE_STEP_TRACE_DATA)
-            iter_dada = DBManager.fetch_all_data(trace_curs, sql, (index_id, index_id + 1, model_id))
-        if iter_dada and iter_dada[0]:
-            iter_id_list = \
-                [iter_dada[0][0] - 1, iter_dada[0][0]] \
-                if len(iter_dada) == 1 \
-                else [iter_dada[0][0] - 1, iter_dada[1][0] - 1]
-
+            iter_data = DBManager.fetch_all_data(trace_curs, sql, (index_id, index_id + 1, model_id))
         DBManager.destroy_db_connect(trace_conn, trace_curs)
+        if iter_data and iter_data[0]:
+            iter_id_list = [iter_data[0][0] - 1, iter_data[0][0]]
+            if len(iter_data) != 1:
+                iter_id_list = [iter_data[0][0] - 1, iter_data[1][0] - 1]
+
         return iter_id_list
 
     def get_iter_id_by_index_id(self: any, index_id: int, model_id: int) -> tuple:
@@ -145,7 +143,7 @@ class MsprofIteration:
                 iter_id = step_trace.get_mix_op_iter_id(index_id, model_id)
         if iter_id:
             return iter_id
-        return index_id-1, index_id
+        return index_id - 1, index_id
 
     def get_iter_dict_with_index_and_model(self: any, index_id: int, model_id: int) -> dict:
         """

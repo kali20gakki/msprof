@@ -4,11 +4,12 @@
 Function:
 This file mainly involves iteration.
 Copyright Information:
-Huawei Technologies Co., Ltd. All Rights Reserved © 2021
+Huawei Technologies Co., Ltd. All Rights Reserved © 2022
 """
 from common_func.constant import Constant
 from common_func.db_manager import DBManager, ClassRowType
 from common_func.db_name_constant import DBNameConstant
+from common_func.empty_class import EmptyClass
 from common_func.utils import Utils
 from model.interface.base_model import BaseModel
 from profiling_bean.db_dto.step_trace_dto import StepTraceDto
@@ -61,7 +62,7 @@ class MsprofStep:
                 step_end_min = data.step_end
             if data.iter_id == iter_id_list[1]:
                 step_end_max = data.step_end
-        if not step_end_min or step_end_max:
+        if not step_end_min or not step_end_max:
             return []
         return [step_end_min, step_end_max]
 
@@ -127,4 +128,4 @@ class MsprofStep:
         for data in self.data:
             if data.iter_id == iter_id:
                 return data.model_id, data.index_id
-        return None, None
+        return EmptyClass(), EmptyClass()

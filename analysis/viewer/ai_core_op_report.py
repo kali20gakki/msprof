@@ -129,7 +129,7 @@ class AiCoreOpReport:
     def get_op_summary_data(cls: any, project_path: str, db_path: str, iter_id: int, configs: dict) -> tuple:
         """
         get op summary data
-        :param db_path: sqlite file path
+        :param project_path: sqlite file path
         :param iter_id: iteration id
         :param configs: info config
         :return: headers and data
@@ -319,10 +319,9 @@ class AiCoreOpReport:
         """
         batch_limit = "and {0}.batch_id={1}.batch_id" \
             .format(DBNameConstant.TABLE_SUMMARY_TASK_TIME, DBNameConstant.TABLE_SUMMARY_GE)
-        index_info = \
-            "{0}.index_id, ".format(DBNameConstant.TABLE_SUMMARY_TASK_TIME) \
-            if not ProfilingScene().is_operator() \
-                else ''
+        index_info = "{0}.index_id, ".format(DBNameConstant.TABLE_SUMMARY_TASK_TIME)
+        if ProfilingScene().is_operator():
+            index_info = ''
         return "select {1}.model_id, {0}.task_id, {0}.stream_id, {index_info} " \
                "op_name, {1}.op_type, {1}.task_type, start_time, duration_time/{NS_TO_US}, " \
                "wait_time/{NS_TO_US}, block_dim from {0} " \
@@ -342,10 +341,9 @@ class AiCoreOpReport:
         """
         batch_limit = "and {0}.batch_id={1}.batch_id".format(
             DBNameConstant.TABLE_SUMMARY_TASK_TIME, DBNameConstant.TABLE_SUMMARY_GE)
-        index_info = \
-            "{0}.index_id, ".format(DBNameConstant.TABLE_SUMMARY_TASK_TIME) \
-            if not ProfilingScene().is_operator() \
-            else ''
+        index_info = "{0}.index_id, ".format(DBNameConstant.TABLE_SUMMARY_TASK_TIME)
+        if ProfilingScene().is_operator():
+            index_info = ''
         union_sql = "select {1}.model_id, {0}.task_id, {1}.stream_id, {index_info} " \
                     "op_name, {1}.op_type, {1}.task_type, " \
                     "{0}.start_time, {0}.duration_time/{NS_TO_US}, " \
@@ -384,10 +382,9 @@ class AiCoreOpReport:
         batch_limit = "and {0}.batch_id={1}.batch_id" \
             .format(DBNameConstant.TABLE_SUMMARY_TASK_TIME,
                     DBNameConstant.TABLE_SUMMARY_GE)
-        index_info = \
-            "{0}.index_id, ".format(DBNameConstant.TABLE_SUMMARY_TASK_TIME) \
-            if not ProfilingScene().is_operator() \
-            else ''
+        index_info = "{0}.index_id, ".format(DBNameConstant.TABLE_SUMMARY_TASK_TIME)
+        if ProfilingScene().is_operator():
+            index_info = ''
         sql = "select {1}.model_id, {0}.task_id, {0}.stream_id, {index_info}" \
               "{1}.op_name, {1}.op_type, {1}.task_type, " \
               "{0}.start_time, {0}.duration_time/{NS_TO_US}, {0}.wait_time/{NS_TO_US}, {1}.block_dim, " \
@@ -412,10 +409,9 @@ class AiCoreOpReport:
     @classmethod
     def _get_table_sql_and_headers_without_ge(cls: any, headers: list) -> tuple:
         cls.clear_no_ge_data_headers(headers)
-        index_info = \
-            "{0}.index_id, ".format(DBNameConstant.TABLE_SUMMARY_TASK_TIME) \
-            if not ProfilingScene().is_operator() \
-            else ''
+        index_info = "{0}.index_id, ".format(DBNameConstant.TABLE_SUMMARY_TASK_TIME)
+        if ProfilingScene().is_operator():
+            index_info = ''
         sql = "select model_id, task_id, stream_id, {index_info} task_type, start_time, " \
               "duration_time/{NS_TO_US}, wait_time/{NS_TO_US} from {0} where " \
               "task_type!=? order by start_time" \
