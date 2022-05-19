@@ -2,11 +2,13 @@
 #Copyright (c) Huawei Technologies Co., Ltd. 2022. All rights reserved.
 # ================================================================================
 
+CUR_DIR=$(dirname $(readlink -f $0))
+
 function bep_env_init() {
     # 使SECBEPKIT_HOME生效
     source /etc/profile
     # bep消除二进制
-    local bep_env_config=./bep_env.conf
+    local bep_env_config=${CUR_DIR}/bep_env.conf
     # 检查BepKit预置环境
     local bep_sh=$(which bep_env.sh)
     echo "has bep sh :${bep_sh}"
