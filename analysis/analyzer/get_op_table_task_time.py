@@ -107,10 +107,10 @@ class GetOpTableTsTime:
         get ai core task time sql without model id
         :return:
         """
-        mini_limit = 'where tasktype=0' if ChipManager().is_chip_v1() else ''
+        limit = 'where tasktype=0' if ChipManager().is_chip_v1() else ''
         sql = "select {1}.task_id, {1}.stream_id, {1}.running, {1}.complete - {1}.running, '{0}', " \
               "{1}.index_id, {1}.batch_id from {1} {limit} group by running order by running" \
-            .format(Constant.TASK_TYPE_AI_CORE, self._task_time_table, limit=mini_limit)
+            .format(Constant.TASK_TYPE_AI_CORE, self._task_time_table, limit=limit)
         return sql
 
     def _get_no_op_ai_core_task_time_sql(self: any) -> str:
@@ -118,19 +118,19 @@ class GetOpTableTsTime:
         get ai core task time sql with model id
         :return:
         """
-        mini_limit = 'and tasktype=0' if ChipManager().is_chip_v1() else ''
+        limit = 'and tasktype=0' if ChipManager().is_chip_v1() else ''
         sql = "select {1}.task_id, {1}.stream_id, {1}.running, {1}.complete - {1}.running, '{0}'," \
               " {1}.index_id, {1}.model_id, {1}.batch_id from {1} where " \
               "{1}.index_id={2} and {1}.model_id={3} {limit} order by running " \
             .format(Constant.TASK_TYPE_AI_CORE, self._task_time_table,
-                    self.iter_id, self.model_id, limit=mini_limit)
+                    self.iter_id, self.model_id, limit=limit)
         if Utils.need_all_model_in_one_iter(self.project_path, self.model_id):
             # export all index data when pytorch graph no model_id set
-            mini_limit = 'where tasktype=0' if ChipManager().is_chip_v1() else ''
+            limit = 'where tasktype=0' if ChipManager().is_chip_v1() else ''
             sql = "select {1}.task_id, {1}.stream_id, {1}.running, {1}.complete - {1}.running, '{0}'," \
                   " {1}.index_id, {1}.model_id, {1}.batch_id from {1} " \
                   "{limit} order by running " \
-                .format(Constant.TASK_TYPE_AI_CORE, self._task_time_table, limit=mini_limit)
+                .format(Constant.TASK_TYPE_AI_CORE, self._task_time_table, limit=limit)
         return sql
 
     def _get_ai_cpu_task_sql(self: any) -> str:

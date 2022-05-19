@@ -24,7 +24,6 @@ class IterRecorder:
         self._project_path = project_path
         self._iter_end_dict = MsprofIteration(self._project_path).get_iteration_end_dict()
         self._current_iter_id = self.DEFAULT_ITER_ID
-        self._current_iter_id = self.DEFAULT_ITER_ID
         self._current_op_iter = 0
         self._current_graph_iter = 0
         self._op_iter_dict = MsprofIteration(self._project_path).get_op_iteration_dict()

@@ -79,6 +79,8 @@ class Utils:
         :param result_dir:  project path
         :return: scene
         """
+        if Utils.is_single_op_graph_mix(result_dir):
+            return Constant.MIX_OP_AND_GRAPH
         if Utils.is_step_scene(result_dir):
             return Constant.STEP_INFO
         if Utils.is_training_trace_scene(result_dir):

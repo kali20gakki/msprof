@@ -10,6 +10,7 @@ import os
 from analyzer.scene_base.profiling_scene import ProfilingScene
 from analyzer.op_common_function import OpCommonFunc
 from common_func.db_name_constant import DBNameConstant
+from common_func.empty_class import EmptyClass
 from common_func.info_conf_reader import InfoConfReader
 from common_func.iter_recorder import IterRecorder
 from common_func.ms_constant.str_constant import StrConstant
@@ -140,8 +141,8 @@ class HwtsCalculator(ICalculator, MsMultiProcess):
                     prep_data_res[index] = list(prep_data_res[index][:2]) + [
                         InfoConfReader().time_from_syscnt(prep_data_res[index][2]),
                         InfoConfReader().time_from_syscnt(prep_data_res[index][3]),
-                        index_id if index_id else self._sample_config.get('iter_id'),
-                        model_id if model_id else self._sample_config.get('model_id'),
+                        index_id if not isinstance(index_id, EmptyClass) else self._sample_config.get('iter_id'),
+                        model_id if not isinstance(model_id, EmptyClass) else self._sample_config.get('model_id'),
                         batch[0]]
         return prep_data_res
 

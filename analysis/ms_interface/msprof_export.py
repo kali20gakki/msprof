@@ -354,10 +354,9 @@ class ExportCommand:
             logging.warning("ge step info data miss model id.")
 
         if not self.list_map.get(self.INPUT_MODEL_ID):
-            self.list_map[self.MODEL_ID] = \
-                min(model_match_set) \
-                if not Utils.is_single_op_graph_mix(result_dir) \
-                else Constant.GE_OP_MODEL_ID
+            self.list_map[self.MODEL_ID] = min(model_match_set)
+            if Utils.is_single_op_graph_mix(result_dir):
+                self.list_map[self.MODEL_ID] = Constant.GE_OP_MODEL_ID
             return
 
         model_id = self.list_map.get(self.MODEL_ID)
