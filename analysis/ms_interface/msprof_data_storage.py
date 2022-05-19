@@ -211,7 +211,7 @@ class MsprofDataStorage:
         try:
             with FileOpen(self.SLICE_CONFIG_PATH, "r") as rule_reader:
                 config_json = json.load(rule_reader.file_reader)
-        except (FileNotFoundError, json.JSONDecodeError):
+        except (OSError, ValueError):
             logging.warning("Read slice config failed: %s", os.path.basename(self.SLICE_CONFIG_PATH))
             return self.DEFAULT_SETTING
         slice_switch = config_json.get('slice_switch', 'on')
