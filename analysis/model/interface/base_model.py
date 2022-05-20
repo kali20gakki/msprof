@@ -6,10 +6,8 @@ Copyright Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
 
 import logging
 import os
-import sqlite3
 from abc import ABCMeta
 
-from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.msvp_constant import MsvpConstant
 from common_func.path_manager import PathManager
@@ -103,7 +101,6 @@ class BaseModel(metaclass=ABCMeta):
     def get_all_data(self: any, table_name: str) -> list:
         """
         get all data from db
-        :param cur:
         :param table_name:
         :return:
         """
