@@ -30,6 +30,7 @@ class MsprofJobSummary:
         self._output = output
         self._host_data = []
         self._file_name = "msprof.json"
+        self.param = {'project': self._output, 'data_type': 'msprof'}
 
     def export(self: any) -> None:
         """
@@ -86,6 +87,7 @@ class MsprofJobSummary:
             file_name = os.path.join(timeline_dir, self._file_name)
             print_info(MsProfCommonConstant.COMMON_FILE_NAME,
                        "Start to export msprof timeline data ...")
-            MsprofDataStorage.write_json_files(json_data, file_name)
+            slice_result = MsprofDataStorage().slice_data_list(json_data)
+            MsprofDataStorage.write_json_files(slice_result, self.param)
             print_info(MsProfCommonConstant.COMMON_FILE_NAME,
                        'Export timeline json file success, "%s" ...' % file_name)
