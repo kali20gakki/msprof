@@ -9,7 +9,7 @@ VERSION=""
 BUILD_TYPE=""
 
 # input param check
-if [ $# > 1 ];
+if [[ $# > 1 ]];
     then
         echo "[ERROR]Please input valid param, for example:"
         echo "       ./build.sh           # Default"
