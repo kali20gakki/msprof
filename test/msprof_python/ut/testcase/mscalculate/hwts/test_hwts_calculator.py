@@ -82,7 +82,7 @@ class TestHwtsCalculator(unittest.TestCase):
              mock.patch('common_func.msprof_iteration' + '.MsprofIteration.get_iteration_end_dict', return_value=[]), \
              mock.patch('common_func.msprof_iteration' + '.MsprofIteration.get_op_iteration_dict', return_value=[]), \
              mock.patch('common_func.msprof_iteration' + '.MsprofIteration.get_iteration_dict', return_value=[]), \
-             mock.patch('model.iter_rec.iter_rec_model' + '.HwtsIterModel.get_batch_list', return_value=prep_data_res), \
+             mock.patch('model.iter_rec.iter_rec_model' + '.HwtsIterModel.get_batch_list', return_value=prep_data_res),\
              mock.patch('model.interface.base_model' + '.BaseModel.check_table', return_value=True), \
              mock.patch('model.interface.base_model' + '.BaseModel.finalize'), \
              mock.patch('common_func.msprof_step' + '.MsprofStep.get_step_data'), \

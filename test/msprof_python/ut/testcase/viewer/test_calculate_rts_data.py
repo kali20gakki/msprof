@@ -44,18 +44,18 @@ class TestCalculateRts(unittest.TestCase):
         (test_sql[1]).execute("drop Table TaskTime")
         db_manager.destroy(test_sql)
 
-    # def test_multi_calculate_task_cost_time(self):
-    #     data = [(1, 0, '', '', 1, 2, 3, 5, 4)]
-    #     res = multi_calculate_task_cost_time(data)
-    #     self.assertEqual(res, [])
+    def test_multi_calculate_task_cost_time(self):
+        data = [(1, 0, '', '', 1, 2, 3, 5, 4)]
+        res = multi_calculate_task_cost_time(data)
+        self.assertEqual(res, [])
 
-    # def test_calculate_timeline_task_time_1(self):
-    #     task_time = {}
-    #     data = [(1, 0, '', '', 1, 2, 3, 5, 4)]
-    #     calculate_timeline_task_time(data, task_time, 0, "")
-    #     with mock.patch(NAMESPACE + '.handle_task_time', side_effect=RuntimeError), \
-    #             mock.patch(NAMESPACE + '.logging.error'):
-    #         calculate_timeline_task_time(data, task_time, 0)
+    def test_calculate_timeline_task_time_1(self):
+        task_time = {}
+        data = [(1, 0, '', '', 1, 2, 3, 5, 4)]
+        calculate_timeline_task_time(data, task_time, 0, "")
+        with mock.patch(NAMESPACE + '.handle_task_time', side_effect=RuntimeError), \
+                mock.patch(NAMESPACE + '.logging.error'):
+            calculate_timeline_task_time(data, task_time, 0)
 
     def test_handle_task_time_1(self):
         data = [(1, 0, '', '', 1, 2, 3, 5, 3)]

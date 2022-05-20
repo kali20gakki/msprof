@@ -8,7 +8,6 @@ from common_func.msvp_common import MsvpCommonConst
 from common_func.info_conf_reader import InfoConfReader
 from mscalculate.memory_copy.memcpy_calculator import MemcpyCalculator
 from analyzer.scene_base.profiling_scene import ProfilingScene
-from sqlite.db_manager import DBManager as sql_db
 
 NAMESAPCE = "common_func.msprof_iteration"
 
@@ -54,47 +53,47 @@ def prepar_ts_memcpy_data(conn, curs):
         DBManager.executemany_sql(conn, sql, ts_memcpy_data)
 
 
-# class TestMemcpyModel(unittest.TestCase):
-#     def setup_class(self):
-#         self.current_path = "./memcpy_test/"
-#         self.file_folder = "sqlite/"
-#
-#         if not os.path.exists(self.current_path):
-#             os.mkdir(self.current_path)
-#         if not os.path.exists(self.current_path + self.file_folder):
-#             os.mkdir(self.current_path + self.file_folder)
-#         prepar_step_trace_db(self.current_path, self.file_folder)
-#
-#     def teardown_class(self):
-#         if os.path.exists(self.current_path):
-#             shutil.rmtree(self.current_path)
-#
-#     def setUp(self):
-#         file_list = {}
-#         sample_config = {"result_dir": self.current_path, "iter_id": 1, "model_id": 2}
-#         self.memcpy_calculator = MemcpyCalculator(file_list, sample_config)
-#
-#     def test_calculate_1(self):
-#         # stream_id, task_id, receive_time, start_time, end_time, duration, name, type
-#         expect_res = [(1, 2, 2.5, 2.6, 2.7, 0.10000000000000009, 'MemcopyAsync', 'other')]
-#
-#         self.memcpy_calculator._has_table = True
-#         ProfilingScene().init("")
-#         ProfilingScene()._scene = Constant.STEP_INFO
-#         InfoConfReader()._info_json = {'pid': 1, "DeviceInfo": [{'hwts_frequency': 1000}]}
-#         self.memcpy_calculator.calculator_connect_db()
-#         self.memcpy_calculator.calculate()
-#         self.assertEqual(expect_res, self.memcpy_calculator._memcpy_data)
-#
-#     def test_calculate_2(self):
-#         # stream_id, task_id, receive_time, start_time, end_time, duration, name, type
-#         expect_res = [(1, 1, 0.5, 0.6, 0.7, 0.09999999999999998, 'MemcopyAsync', 'other'),
-#                       (1, 2, 2.5, 2.6, 2.7, 0.10000000000000009, 'MemcopyAsync', 'other')]
-#
-#         self.memcpy_calculator._has_table = True
-#         ProfilingScene().init("")
-#         ProfilingScene()._scene = Constant.SINGLE_OP
-#         InfoConfReader()._info_json = {'pid': 1, "DeviceInfo": [{'hwts_frequency': 1000}]}
-#         self.memcpy_calculator.calculator_connect_db()
-#         self.memcpy_calculator.calculate()
-#         self.assertEqual(expect_res, self.memcpy_calculator._memcpy_data)
+class TestMemcpyModel(unittest.TestCase):
+    def setup_class(self):
+        self.current_path = "./memcpy_test/"
+        self.file_folder = "sqlite/"
+
+        if not os.path.exists(self.current_path):
+            os.mkdir(self.current_path)
+        if not os.path.exists(self.current_path + self.file_folder):
+            os.mkdir(self.current_path + self.file_folder)
+        prepar_step_trace_db(self.current_path, self.file_folder)
+
+    def teardown_class(self):
+        if os.path.exists(self.current_path):
+            shutil.rmtree(self.current_path)
+
+    def setUp(self):
+        file_list = {}
+        sample_config = {"result_dir": self.current_path, "iter_id": 1, "model_id": 2}
+        self.memcpy_calculator = MemcpyCalculator(file_list, sample_config)
+
+    def test_calculate_1(self):
+        # stream_id, task_id, receive_time, start_time, end_time, duration, name, type
+        expect_res = [(1, 2, 2.5, 2.6, 2.7, 0.10000000000000009, 'MemcopyAsync', 'other')]
+
+        self.memcpy_calculator._has_table = True
+        ProfilingScene().init("")
+        ProfilingScene()._scene = Constant.STEP_INFO
+        InfoConfReader()._info_json = {'pid': 1, "DeviceInfo": [{'hwts_frequency': 1000}]}
+        self.memcpy_calculator.calculator_connect_db()
+        self.memcpy_calculator.calculate()
+        self.assertEqual(expect_res, self.memcpy_calculator._memcpy_data)
+
+    def test_calculate_2(self):
+        # stream_id, task_id, receive_time, start_time, end_time, duration, name, type
+        expect_res = [(1, 1, 0.5, 0.6, 0.7, 0.09999999999999998, 'MemcopyAsync', 'other'),
+                      (1, 2, 2.5, 2.6, 2.7, 0.10000000000000009, 'MemcopyAsync', 'other')]
+
+        self.memcpy_calculator._has_table = True
+        ProfilingScene().init("")
+        ProfilingScene()._scene = Constant.SINGLE_OP
+        InfoConfReader()._info_json = {'pid': 1, "DeviceInfo": [{'hwts_frequency': 1000}]}
+        self.memcpy_calculator.calculator_connect_db()
+        self.memcpy_calculator.calculate()
+        self.assertEqual(expect_res, self.memcpy_calculator._memcpy_data)
