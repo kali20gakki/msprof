@@ -44,19 +44,6 @@ class TestCalculateRts(unittest.TestCase):
         (test_sql[1]).execute("drop Table TaskTime")
         db_manager.destroy(test_sql)
 
-    def test_multi_calculate_task_cost_time(self):
-        data = [(1, 0, '', '', 1, 2, 3, 5, 4)]
-        res = multi_calculate_task_cost_time(data)
-        self.assertEqual(res, [])
-
-    def test_calculate_timeline_task_time_1(self):
-        task_time = {}
-        data = [(1, 0, '', '', 1, 2, 3, 5, 4)]
-        calculate_timeline_task_time(data, task_time, 0, "")
-        with mock.patch(NAMESPACE + '.handle_task_time', side_effect=RuntimeError), \
-                mock.patch(NAMESPACE + '.logging.error'):
-            calculate_timeline_task_time(data, task_time, 0)
-
     def test_handle_task_time_1(self):
         data = [(1, 0, '', '', 1, 2, 3, 5, 3)]
         list_data = [-1, -1, -1]
@@ -115,22 +102,22 @@ class TestCalculateRts(unittest.TestCase):
         curs.description = [['device_id'], ['core_num'], ['other']]
         insert_event_value(curs, conn, 0)
 
-    # def test_insert_metric_value(self):
-    #     metrics = ["a", "b"]
-    #     metrics_1 = []
-    #     db_manager = DBManager()
-    #     test_sql = db_manager.create_table(DBNameConstant.DB_RUNTIME)
-    #     res = insert_metric_value(test_sql[0], metrics, "ts")
-    #     self.assertEqual(res, True)
-    #
-    #     res = insert_metric_value(test_sql[0], metrics, "ts")
-    #     self.assertEqual(res, True)
-    #
-    #     res = insert_metric_value(test_sql[0], metrics_1, "ts")
-    #     self.assertEqual(res, False)
-    #
-    #     (test_sql[1]).execute("drop Table ts")
-    #     db_manager.destroy(test_sql)
+    def test_insert_metric_value(self):
+        metrics = ["a", "b"]
+        metrics_1 = []
+        db_manager = DBManager()
+        test_sql = db_manager.create_table(DBNameConstant.DB_RUNTIME)
+        res = insert_metric_value(test_sql[0], metrics, "ts")
+        self.assertEqual(res, True)
+
+        res = insert_metric_value(test_sql[0], metrics, "ts")
+        self.assertEqual(res, True)
+
+        res = insert_metric_value(test_sql[0], metrics_1, "ts")
+        self.assertEqual(res, False)
+
+        (test_sql[1]).execute("drop Table ts")
+        db_manager.destroy(test_sql)
 
     def test_get_limit_and_offset_1(self):
         with mock.patch(NAMESPACE + "._query_limit_and_offset", side_effect=sqlite3.OperationalError), \
