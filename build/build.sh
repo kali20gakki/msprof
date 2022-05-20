@@ -30,7 +30,7 @@ function bep_env_init() {
 bep_env_init
 
 TOP_DIR=${CUR_DIR}/..
-BUILD_TYPE="Release"
+BUILD_TYPE=""
 if [ $# = 1 ] && [ "$1" = "Debug" ];
 then
     BUILD_TYPE="Debug"
