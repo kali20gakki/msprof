@@ -141,23 +141,6 @@ class Utils:
         return copy_dict
 
     @staticmethod
-    def write_json_files(json_data: list, file_path: str) -> None:
-        """
-        write json data  to file
-        :param json_data:
-        :param file_path:
-        :return:
-        """
-        try:
-            with os.fdopen(os.open(file_path, Constant.WRITE_FLAGS,
-                                   Constant.WRITE_MODES), 'w') as trace_file:
-                trace_file.write(json.dumps(json_data))
-        except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
-            logging.error(os.path.basename(__file__), err)
-        finally:
-            pass
-
-    @staticmethod
     def get_json_data(info_json_path: str) -> list:
         """
         read json data from file
