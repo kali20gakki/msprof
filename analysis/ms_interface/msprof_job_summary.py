@@ -29,7 +29,6 @@ class MsprofJobSummary:
     def __init__(self: any, output: str) -> None:
         self._output = output
         self._host_data = []
-        self._file_name = "msprof.json"
         self.param = {'project': self._output, 'data_type': 'msprof'}
 
     def export(self: any) -> None:

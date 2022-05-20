@@ -92,8 +92,8 @@ class MsprofDataStorage:
             except (OSError, SystemError, ValueError, TypeError,
                     RuntimeError) as err:
                 logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
-                return 1, err
-        return 0, data_path
+                return NumberConstant.ERROR, err
+        return NumberConstant.SUCCESS, data_path
 
     @staticmethod
     def export_summary_data(headers: list, data: list, params: dict) -> any:
