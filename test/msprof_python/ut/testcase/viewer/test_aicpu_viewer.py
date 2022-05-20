@@ -36,7 +36,7 @@ def test_get_ai_cpu_sql():
              mock.patch(NAMESPACE + '.MsprofIteration.get_iteration_time', return_value=[[0, 1]]):
             ProfilingScene().init(" ")
             ProfilingScene()._scene = Constant.SINGLE_OP
-            result = ParseAiCpuData.get_ai_cpu_data("", 1, 0, db_open._conn)
+            result = ParseAiCpuData.get_ai_cpu_data("", 1, 0, db_open.db_conn)
             unittest.TestCase().assertEqual(result, [])
 
         with mock.patch(NAMESPACE + '.DBManager.attach_to_db', return_value=True), \
@@ -45,7 +45,7 @@ def test_get_ai_cpu_sql():
              mock.patch(NAMESPACE + '.MsprofIteration.get_iteration_time', return_value=[[0, 1]]):
             ProfilingScene().init(" ")
             ProfilingScene()._scene = Constant.STEP_INFO
-            result = ParseAiCpuData.get_ai_cpu_data("", 1, 0, db_open._conn)
+            result = ParseAiCpuData.get_ai_cpu_data("", 1, 0, db_open.db_conn)
             unittest.TestCase().assertEqual(result, [])
 
         with mock.patch(NAMESPACE + '.DBManager.attach_to_db', return_value=False), \
@@ -53,7 +53,7 @@ def test_get_ai_cpu_sql():
              mock.patch(NAMESPACE + '.MsprofIteration.get_iteration_time', return_value=[[0, 1]]):
             ProfilingScene().init(" ")
             ProfilingScene()._scene = Constant.STEP_INFO
-            result = ParseAiCpuData.get_ai_cpu_data("", 1, 0, db_open._conn)
+            result = ParseAiCpuData.get_ai_cpu_data("", 1, 0, db_open.db_conn)
             unittest.TestCase().assertEqual(result, [])
 
 
