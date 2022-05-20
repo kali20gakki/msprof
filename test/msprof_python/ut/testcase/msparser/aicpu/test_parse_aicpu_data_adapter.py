@@ -31,14 +31,6 @@ class TestParseAiCpuData(unittest.TestCase):
                            return_value='test\\data\\DATA_PREPROCESS.AICPU.7.slice_0'), \
                 mock.patch('os.path.getsize', return_value=132), \
                 mock.patch('common_func.msprof_iteration.MsprofIteration.get_iteration_end_dict', return_value={1: 10}):
-            # with mock.patch('builtins.open', mock.mock_open(read_data=data_bin)), \
-            #         mock.patch('msparser.aicpu.parse_aicpu_bin_data.ParseAiCpuBinData.ms_run'):
-            #     check = ParseAiCpuDataAdapter(self.file_list, CONFIG)
-            #     check.ms_run()
-            # with mock.patch('builtins.open', mock.mock_open(read_data=data)), \
-            #         mock.patch('msparser.aicpu.parse_aicpu_data.ParseAiCpuData.ms_run'):
-            #     check = ParseAiCpuDataAdapter(self.file_list, CONFIG)
-            #     check.ms_run()
             with mock.patch('builtins.open', side_effect=SystemError), \
                     mock.patch(NAMESPACE + '.logging.error'), \
                     mock.patch('common_func.msprof_iteration.MsprofIteration.get_iteration_end_dict',
