@@ -129,10 +129,10 @@ class MsprofDataStorage:
                     file_suffix += "_" + str(params.get(StrConstant.PARAM_MODEL_ID))
                 if params.get(StrConstant.PARAM_ITER_ID) is not None:
                     file_suffix += "_" + str(params.get(StrConstant.PARAM_ITER_ID))
-            if re.match(r'^{0}{1}(_slice_\d+)?.json'.format(params.get(StrConstant.PARAM_DATA_TYPE), file_suffix), file):
+            if re.match(
+                    r'^{0}{1}(_slice_\d+)?.json'.format(params.get(StrConstant.PARAM_DATA_TYPE), file_suffix), file):
                 check_file_writable(os.path.join(timeline_dir, file))
                 os.remove(os.path.join(timeline_dir, file))
-
 
     @staticmethod
     def _calculate_loading_time(row_line_level: int, count_line_level: int) -> float:
@@ -155,8 +155,8 @@ class MsprofDataStorage:
                 file_name += "_" + str(params.get(StrConstant.PARAM_MODEL_ID))
             if params.get(StrConstant.PARAM_ITER_ID) is not None:
                 file_name += "_" + str(params.get(StrConstant.PARAM_ITER_ID))
-            if slice_switch:
-                file_name += "_slice_{}".format(str(slice_times))
+        if slice_switch:
+            file_name += "_slice_{}".format(str(slice_times))
 
         if params.get(StrConstant.PARAM_EXPORT_TYPE) == MsProfCommonConstant.SUMMARY:
             file_suffix = StrConstant.FILE_SUFFIX_CSV
