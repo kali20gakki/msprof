@@ -30,13 +30,18 @@ function bep_env_init() {
 bep_env_init
 
 TOP_DIR=${CUR_DIR}/..
+VERSION=""
 BUILD_TYPE=""
 if [ $# = 1 ] && [ "$1" = "Debug" ];
-then
-    BUILD_TYPE="Debug"
+    then
+        BUILD_TYPE="Debug"
+elif [ $# = 1 ] && [ "$1" != "Debug" ];
+    then
+        VERSION=$1
 fi
+
 cd ${TOP_DIR}/build
 cmake ../cmake/superbuild/ -DMSPROF_BUILD_TYPE=${BUILD_TYPE}
 make -j64
 
-bash ${TOP_DIR}/scripts/create_run_package.sh ${1}
+bash ${TOP_DIR}/scripts/create_run_package.sh ${VERSION}
