@@ -1,19 +1,37 @@
-#/bin/bash
+#!/bin/bash
 # This script is used to build msprofbin&&libmsprofiler.so&&stub/libmsprofiler.so
 # Copyright Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
 
 set -e
 CUR_DIR=$(dirname $(readlink -f $0))
+TOP_DIR=${CUR_DIR}/..
+VERSION=""
+BUILD_TYPE=""
 
+# input param check
+if [[ $# > 1 ]];
+    then
+        echo "[ERROR]Please input valid param, for example:"
+        echo "       ./build.sh           # Default"
+        echo "       ./build.sh Debug     # Debug"
+        echo "       ./build.sh [version] # With Version"    
+        exit
+fi
+
+if [ $# = 1 ] && [ "$1" = "Debug" ];
+    then
+        BUILD_TYPE="Debug"
+elif [ $# = 1 ] && [ "$1" != "Debug" ];
+    then
+        VERSION=$1
+fi
+
+# binary check
 function bep_env_init() {
-    # 使SECBEPKIT_HOME生效
     source /etc/profile
-    # bep消除二进制
     local bep_env_config=${CUR_DIR}/bep/bep_env.conf
-    # 检查BepKit预置环境
     local bep_sh=$(which bep_env.sh)
     echo "has bep sh :${bep_sh}"
-    # 执行bep脚本
     if [ ! -d "${SECBEPKIT_HOME}" ] && [ ! -f "$bep_sh" ]; then
         echo "BepKit is not installed, Please install the tool and configure the env var \$SECBEPKIT_HOME"
     else
@@ -29,14 +47,8 @@ function bep_env_init() {
 
 bep_env_init
 
-TOP_DIR=${CUR_DIR}/..
-BUILD_TYPE="Release"
-if [ $# = 1 ] && [ "$1" = "Debug" ];
-then
-    BUILD_TYPE="Debug"
-fi
 cd ${TOP_DIR}/build
 cmake ../cmake/superbuild/ -DMSPROF_BUILD_TYPE=${BUILD_TYPE}
 make -j64
 
-bash ${TOP_DIR}/scripts/create_run_package.sh ${1}
+bash ${TOP_DIR}/scripts/create_run_package.sh ${VERSION}
