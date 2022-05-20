@@ -11,10 +11,10 @@ BUILD_TYPE=""
 # input param check
 if [ $# != 0 ] && [ $# != 1 ];
     then
-        echo "[ERROR]Please check input params. For example:"
-        echo "./build.sh           # offline (Release)"
-        echo "./build.sh Debug     # offline (Debug)"
-        echo "./build.sh [version] # online (Release)"    
+        echo "[ERROR]Please input valid param, for example:"
+        echo "       ./build.sh           # offline (Release)"
+        echo "       ./build.sh Debug     # offline (Debug)"
+        echo "       ./build.sh [version] # online (Release)"    
         exit
 fi
 
