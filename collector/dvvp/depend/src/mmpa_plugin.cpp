@@ -25,7 +25,7 @@ INT32 MmpaPlugin::MsprofMmOpen2(const CHAR *pathName, INT32 flags, MODE mode)
 {
     PluginStatus ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");;
+        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
@@ -834,7 +834,7 @@ INT32 MmpaPlugin::MsprofMmCloseSocket(mmSockHandle sockFd)
 }
     
 // mmSocketSend
-mmSsize_t MmpaPlugin::MsprofMmSocketSend(mmSockHandle sockFd,VOID *pstSendBuf, INT32 sendLen, INT32 sendFlag)
+mmSsize_t MmpaPlugin::MsprofMmSocketSend(mmSockHandle sockFd, VOID *pstSendBuf, INT32 sendLen, INT32 sendFlag)
 {
     PluginStatus ret = PLUGIN_LOAD_SUCCESS;
     if (!pluginHandle_.HasLoad()) {
