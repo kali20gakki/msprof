@@ -6,6 +6,8 @@ Copyright Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
 """
 import os
 
+from common_func.msvp_common import error
+from common_func.constant import Constant
 from common_func.db_name_constant import DBNameConstant
 from common_func.path_manager import PathManager
 from model.interface.parser_model import ParserModel
@@ -34,5 +36,8 @@ class HwtsLogModel(ParserModel):
         clear db file
         :return:
         """
-        if os.path.exists(PathManager.get_db_path(self.result_dir, DBNameConstant.DB_HWTS)):
-            os.remove(PathManager.get_db_path(self.result_dir, DBNameConstant.DB_HWTS))
+        try:
+            if os.path.exists(PathManager.get_db_path(self.result_dir, DBNameConstant.DB_HWTS)):
+                os.remove(PathManager.get_db_path(self.result_dir, DBNameConstant.DB_HWTS))
+        except (OSError, SystemError) as err:
+            error(os.path.basename(__file__), str(err))

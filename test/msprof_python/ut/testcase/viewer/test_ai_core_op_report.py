@@ -133,7 +133,7 @@ class TestAiCoreOpReport(unittest.TestCase):
                  99655949576850, 3.4, 0.0, 1, '', 'INT64;INT64', 'FORMAT_ND;FORMAT_ND', '',
                  'INT64', 'FORMAT_ND', 0.002988, 2988, 0, 0, 0, 0, 0, 0, 0, 0]]
         with mock.patch(NAMESPACE + '.get_ge_model_name_dict', return_value={}):
-            res = AiCoreOpReport._update_model_name_and_infer_id('', data, 1)
+            res = AiCoreOpReport._update_model_name_and_infer_id('', data)
         self.assertEqual(len(res), 1)
 
     def test_update_op_name_from_hash(self):
@@ -161,13 +161,13 @@ class TestAiCoreOpReport(unittest.TestCase):
         self.assertEqual(res[0], {})
 
     def test_get_two_table_union_sql(self):
-        res_sql_1 = "select ge_summary.model_id, task_time.task_id, task_time.stream_id, op_name, " \
-                    "ge_summary.op_type, ge_summary.task_type, start_time, " \
-                    "duration_time/1000.0, wait_time/1000.0, block_dim" \
-                    " from task_time inner join ge_summary on " \
-                    "task_time.task_id=ge_summary.task_id and task_time.stream_id = ge_summary.stream_id " \
+        res_sql_1 = "select ge_summary.model_id, task_time.task_id, task_time.stream_id,  " \
+                    "op_name, ge_summary.op_type, ge_summary.task_type, start_time, " \
+                    "duration_time/1000.0, wait_time/1000.0, block_dim " \
+                    "from task_time inner join ge_summary " \
+                    "on task_time.task_id=ge_summary.task_id and task_time.stream_id = ge_summary.stream_id " \
                     "and task_time.task_type = ge_summary.task_type " \
-                    "and task_time.index_id=? and ge_summary.task_type!=? " \
+                    "and ge_summary.task_type!=? " \
                     "and task_time.batch_id=ge_summary.batch_id order by start_time"
         with mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=False):
             ProfilingScene().init('')
@@ -176,11 +176,15 @@ class TestAiCoreOpReport(unittest.TestCase):
             self.assertEqual(res, res_sql_1)
 
     def test_get_ai_cpu_sql(self):
-        res_sql = "select ge_summary.model_id, task_time.task_id, ge_summary.stream_id, op_name, ge_summary.op_type, " \
-                  "ge_summary.task_type, task_time.start_time, task_time.duration_time/1000.0," \
-                  " task_time.wait_time/1000.0, block_dim from task_time inner join ge_summary on " \
-                  "task_time.task_id=ge_summary.task_id and task_time.task_type = ge_summary.task_type " \
-                  "and task_time.stream_id=ge_summary.stream_id and task_time.index_id=? and ge_summary.task_type=? "
+        res_sql = "select ge_summary.model_id, task_time.task_id, ge_summary.stream_id, task_time.index_id,  " \
+                  "op_name, ge_summary.op_type, ge_summary.task_type, task_time.start_time, " \
+                  "task_time.duration_time/1000.0, task_time.wait_time/1000.0, block_dim " \
+                  "from task_time inner join ge_summary " \
+                  "on task_time.task_id=ge_summary.task_id " \
+                  "and task_time.task_type = ge_summary.task_type " \
+                  "and task_time.stream_id=ge_summary.stream_id " \
+                  "and ge_summary.task_type=? " \
+                  "and task_time.batch_id=ge_summary.batch_id"
         ProfilingScene().init('')
         ProfilingScene()._scene = Constant.STEP_INFO
         res = AiCoreOpReport._get_ai_cpu_sql("")
