@@ -19,6 +19,7 @@ from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msprof_exception import ProfException
+from common_func.msprof_iteration import MsprofIteration
 from common_func.msvp_constant import MsvpConstant
 from common_func.path_manager import PathManager
 from common_func.platform.chip_manager import ChipManager
@@ -142,15 +143,16 @@ class MergeOPCounter:
         if os.path.exists(os.path.join(self.sql_path, DBNameConstant.DB_OP_COUNTER)):
             os.remove(os.path.join(self.sql_path, DBNameConstant.DB_OP_COUNTER))
 
-    def _get_ge_sql(self: any) -> tuple:
+    def _get_ge_data(self: any, ge_curs: any) -> list:
+        ge_data = []
+        iter_dict = MsprofIteration(self.project_path).get_iter_dict_with_index_and_model(self.iter_id, self.model_id)
         ge_sql = 'select model_id, op_name, op_type, task_type, task_id, stream_id, batch_id ' \
-                 'from {0} where (index_id=? or index_id=0) '.format(DBNameConstant.TABLE_GE_TASK)
-        if ProfilingScene().is_step_trace():
-            ge_sql = 'select model_id, op_name, op_type, task_type, task_id, stream_id, batch_id ' \
-                     'from {0} where (index_id=? or index_id=0) ' \
-                     'and model_id=?'.format(DBNameConstant.TABLE_GE_TASK)
-            return ge_sql, (self.iter_id, self.model_id)
-        return ge_sql, (self.iter_id,)
+                 'from {0} where (index_id=? or index_id=0) ' \
+                 'and model_id=?'.format(DBNameConstant.TABLE_GE_TASK)
+        for index_and_model in iter_dict.values():
+            ge_data.extend(DBManager.fetch_all_data(ge_curs, ge_sql, index_and_model))
+
+        return ge_data
 
     def _create_ge_merge(self: any, merge_conn: any) -> None:
         """
@@ -161,11 +163,11 @@ class MergeOPCounter:
         ge_conn, ge_curs = DBManager.check_connect_db_path(
             os.path.join(self.sql_path, DBNameConstant.DB_GE_INFO))
         if ge_conn and ge_curs and DBManager.judge_table_exist(ge_curs, DBNameConstant.TABLE_GE_TASK):
-            ge_sql, sql_param = self._get_ge_sql()
-            ge_data = DBManager.fetch_all_data(ge_curs, ge_sql, sql_param)
-            insert_sql = "insert into {} values({value})".format(CommonConstant.GE_TASK_MEGED_TABLE,
-                                                                 value='?,' * (len(ge_data[0]) - 1) + '?')
-            DBManager.executemany_sql(merge_conn, insert_sql, ge_data)
+            ge_data = self._get_ge_data(ge_curs)
+            if ge_data:
+                insert_sql = "insert into {} values({value})".format(CommonConstant.GE_TASK_MEGED_TABLE,
+                                                                     value='?,' * (len(ge_data[0]) - 1) + '?')
+                DBManager.executemany_sql(merge_conn, insert_sql, ge_data)
         DBManager.destroy_db_connect(ge_conn, ge_curs)
 
     def _create_task(self: any, merge_conn: any) -> None:

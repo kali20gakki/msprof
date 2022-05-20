@@ -38,7 +38,6 @@ class TestParseAiCoreOpSummary(unittest.TestCase):
              mock.patch(NAMESPACE + '.logging.error'), \
              mock.patch(NAMESPACE + '.DBManager.destroy_db_connect'), \
              mock.patch(NAMESPACE + '.ParseAiCoreOpSummary.get_db_path', return_value=True):
-
             with mock.patch(NAMESPACE + '.DBManager.check_tables_in_db', return_value=False):
                 check = ParseAiCoreOpSummary(CONFIG)
                 result = check.create_summary_table()
@@ -65,25 +64,13 @@ class TestParseAiCoreOpSummary(unittest.TestCase):
             check.create_conn()
         db_manager.destroy(res)
 
-    def test_get_ge_sql(self):
-        ge_sql = "SELECT model_id, batch_id, task_id, stream_id, op_name, op_type, block_dim, task_type, timestamp from TaskInfo where " \
-                 "(index_id=? or index_id=0)"
-        ge_step_sql = "SELECT model_id, batch_id, task_id, stream_id, op_name, op_type, block_dim, task_type, timestamp from TaskInfo" \
-                      " where (index_id=? or index_id=0) and model_id=?"
-        with mock.patch('analyzer.scene_base.profiling_scene.Utils.get_scene',
-                        return_value="step_info"):
+    def test_get_ge_data(self):
+        with mock.patch(NAMESPACE + '.MsprofIteration.get_iter_dict_with_index_and_model',
+                        return_value={}), \
+             mock.patch(NAMESPACE + '.DBManager.fetch_all_data', return_value=[1]):
             check = ParseAiCoreOpSummary(CONFIG)
-            ProfilingScene().init('')
-            result = check._get_ge_sql()
-        self.assertEqual(result[0], ge_step_sql)
-        self.assertEqual(result[1], (1, -1))
-        with mock.patch('analyzer.scene_base.profiling_scene.Utils.get_scene',
-                        return_value="train"):
-            check = ParseAiCoreOpSummary(CONFIG)
-            ProfilingScene().init('')
-            result = check._get_ge_sql()
-        self.assertEqual(result[0], ge_sql)
-        self.assertEqual(result[1], (1,))
+            result = check._get_ge_data('')
+        self.assertEqual(result, [])
 
     def test_create_ge_summary_table(self):
         with mock.patch(NAMESPACE + '.ParseAiCoreOpSummary.get_db_path', return_value='test\\test'), \
@@ -99,13 +86,14 @@ class TestParseAiCoreOpSummary(unittest.TestCase):
             check.create_ge_summary_table("")
         with mock.patch(NAMESPACE + '.ParseAiCoreOpSummary.get_db_path', return_value='test\\test'), \
              mock.patch(NAMESPACE + '.logging.warning'), \
-             mock.patch(NAMESPACE + '.DBManager.execute_sql'), \
-             mock.patch(NAMESPACE + '.ParseAiCoreOpSummary._get_ge_sql', return_value=("", ())), \
              mock.patch(NAMESPACE + '.DBManager.check_tables_in_db', return_value=True), \
-             mock.patch(NAMESPACE + '.DBManager.attach_to_db', return_value=True):
+             mock.patch(NAMESPACE + '.DBManager.attach_to_db', return_value=True), \
+             mock.patch(NAMESPACE + '.DBManager.sql_create_general_table', return_value=""), \
+             mock.patch(NAMESPACE + '.ParseAiCoreOpSummary._get_ge_data', return_value=[]), \
+             mock.patch(NAMESPACE + '.DBManager.execute_sql'), \
+             mock.patch(NAMESPACE + '.DBManager.insert_data_into_table'):
             check = ParseAiCoreOpSummary(CONFIG)
             check.create_ge_summary_table("")
-
 
     # def test_create_ai_core_metrics_table(self): XXX
     #     db_manager = DBManager()
@@ -139,7 +127,7 @@ class TestParseAiCoreOpSummary(unittest.TestCase):
     def test_create_task_time_table(self):
         with mock.patch('analyzer.scene_base.profiling_scene.Utils.get_scene',
                         return_value="train"), \
-             mock.patch(NAMESPACE + '.logging.warning'),\
+             mock.patch(NAMESPACE + '.logging.warning'), \
              mock.patch(NAMESPACE + '.logging.error'):
             with mock.patch(NAMESPACE + '.DBManager.sql_create_general_table', return_value=False):
                 check = ParseAiCoreOpSummary(CONFIG)
@@ -161,7 +149,6 @@ class TestParseAiCoreOpSummary(unittest.TestCase):
                 ProfilingScene().init('')
                 ProfilingScene()._scene = "single_op"
                 check.create_task_time_table("")
-
 
     def test_get_task_time_data(self):
         InfoConfReader()._info_json = {'devices': '0'}
