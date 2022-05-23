@@ -28,7 +28,7 @@ public:
     virtual void StopNoWait() { quit_ = true; };
     int Join();
     bool IsQuit() const;
-    void SetThreadName(const std::string &name);
+    void SetThreadName(const std::string &threadName);
     const std::string &GetThreadName();
 
 protected:

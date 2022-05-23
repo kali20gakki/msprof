@@ -245,7 +245,7 @@ aclError aclprofDestroyConfig(ACL_PROF_CONFIG_CONST_PTR profilerConfig)
     return ACL_SUCCESS;
 }
 
-static aclError preCheckProfConfig(ACL_PROF_CONFIG_CONST_PTR profilerConfig)
+static aclError PreCheckProfConfig(ACL_PROF_CONFIG_CONST_PTR profilerConfig)
 {
     if (profilerConfig == nullptr) {
         MSPROF_LOGE("Param profilerConfig is nullptr");
@@ -286,7 +286,7 @@ aclError aclprofStart(ACL_PROF_CONFIG_CONST_PTR profilerConfig)
     }
     MSPROF_LOGI("Start to execute aclprofStartProfiling");
     std::lock_guard<std::mutex> lock(g_aclprofMutex);
-    aclError aclRet = preCheckProfConfig(profilerConfig);
+    aclError aclRet = PreCheckProfConfig(profilerConfig);
     if (aclRet != ACL_SUCCESS) {
         MSPROF_LOGE("PreCheck ProfConfig Failed.");
         MSPROF_INNER_ERROR("EK9999", "PreCheck ProfConfig Failed.");
@@ -324,7 +324,7 @@ aclError aclprofStop(ACL_PROF_CONFIG_CONST_PTR profilerConfig)
     }
     MSPROF_LOGI("Start to execute aclprofStopProfiling");
     std::lock_guard<std::mutex> lock(g_aclprofMutex);
-    aclError aclRet = preCheckProfConfig(profilerConfig);
+    aclError aclRet = PreCheckProfConfig(profilerConfig);
     if (aclRet != ACL_SUCCESS) {
         MSPROF_LOGE("PreCheck ProfConfig Failed.");
         MSPROF_INNER_ERROR("EK9999", "PreCheck ProfConfig Failed.");
