@@ -41,6 +41,16 @@ class AicCalculator(ICalculator, MsMultiProcess):
         self._aic_data_list = []
         self._file_list.sort(key=lambda x: int(x.split("_")[-1]))
 
+    def calculate(self: any) -> None:
+        """
+        calculate the ai core
+        :return: None
+        """
+        if ProfilingScene().is_operator():
+            self._parse_all_file()
+        else:
+            self._parse_by_iter()
+
     def _get_total_aic_count(self: any) -> int:
         sum_file_size = 0
         for file in self._file_list:
@@ -86,16 +96,6 @@ class AicCalculator(ICalculator, MsMultiProcess):
             logging.info("start parsing ai core data file: %s", os.path.basename(_file))
             with open(_file, 'rb') as _aic_reader:
                 self._parse(_offset_calculator.pre_process(_aic_reader, os.path.getsize(_file)))
-
-    def calculate(self: any) -> None:
-        """
-        calculate the ai core
-        :return: None
-        """
-        if ProfilingScene().is_operator():
-            self._parse_all_file()
-        else:
-            self._parse_by_iter()
 
     def _parse(self: any, all_log_bytes: bytes) -> None:
         aic_pmu_events = AicPmuUtils.get_pmu_events(
