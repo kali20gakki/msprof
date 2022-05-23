@@ -33,19 +33,12 @@ class GeModelTimeParser(DataParser, MsMultiProcess):
         self._table_list = [DBNameConstant.TABLE_GE_MODEL_TIME]
         self._model = None
 
-    def parse(self: any) -> None:
+    @staticmethod
+    def read_binary_data(bean_class: any, bean_data: any) -> any:
         """
-        parse ge model time data
+        read binary data
         """
-        self._parse_model_time_data()
-
-    def _parse_model_time_data(self: any) -> None:
-        fusion_time_file = self._file_list.get(DataTag.GE_MODEL_TIME, [])
-        if fusion_time_file:
-            self._ge_model_time_data = self.parse_bean_data(fusion_time_file,
-                                                            StructFmt.GE_MODEL_TIME_SIZE,
-                                                            GeModelTimeBean,
-                                                            self._get_model_time_data)
+        return bean_class().fusion_decode(bean_data)
 
     @staticmethod
     def _get_model_time_data(bean_data: any) -> list:
@@ -59,12 +52,11 @@ class GeModelTimeParser(DataParser, MsMultiProcess):
                 bean_data.infer_start_time, bean_data.infer_end_time, bean_data.output_data_start_time,
                 bean_data.output_data_end_time]
 
-    @staticmethod
-    def read_binary_data(bean_class: any, bean_data: any) -> any:
+    def parse(self: any) -> None:
         """
-        read binary data
+        parse ge model time data
         """
-        return bean_class().fusion_decode(bean_data)
+        self._parse_model_time_data()
 
     def save(self: any) -> None:
         """
@@ -92,3 +84,11 @@ class GeModelTimeParser(DataParser, MsMultiProcess):
             self.save()
         except sqlite3.Error as err:
             logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
+
+    def _parse_model_time_data(self: any) -> None:
+        fusion_time_file = self._file_list.get(DataTag.GE_MODEL_TIME, [])
+        if fusion_time_file:
+            self._ge_model_time_data = self.parse_bean_data(fusion_time_file,
+                                                            StructFmt.GE_MODEL_TIME_SIZE,
+                                                            GeModelTimeBean,
+                                                            self._get_model_time_data)
