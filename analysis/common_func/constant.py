@@ -25,7 +25,7 @@ class PmuMetricCalculate:
         :return: metric value
         """
         pmu, task_cyc, freq = base_info
-        if task_cyc - 0 < NumberConstant.FLOAT_ZERO_BOUND or freq - 0 < NumberConstant.FLOAT_ZERO_BOUND:
+        if NumberConstant.is_zero(task_cyc) or NumberConstant.is_zero(freq):
             return 0
         return float_bit * pmu * pip_size * scalar / (task_cyc / freq) / 8589934592.0
 
@@ -38,7 +38,7 @@ class PmuMetricCalculate:
         :return: metric value
         """
         pmu, task_cyc = base_info
-        if task_cyc - 0 < NumberConstant.FLOAT_ZERO_BOUND:
+        if NumberConstant.is_zero(task_cyc):
             return 0
         return float_bit * pmu / task_cyc
 

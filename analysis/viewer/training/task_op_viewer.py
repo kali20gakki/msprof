@@ -46,6 +46,63 @@ class TaskOpViewer:
         return headers, data, len(data)
 
     @staticmethod
+    def get_task_data_summary(hwts_curs: any, task_curs: any, ge_curs: any) -> tuple:
+        """
+        get task info csv
+        """
+        if not DBManager.judge_table_exist(ge_curs, DBNameConstant.TABLE_GE_TASK):
+            logging.warning(
+                "No ge data collected, maybe the TaskInfo table is not created, try to export data with no ge data")
+        if not DBManager.judge_table_exist(task_curs, DBNameConstant.TABLE_RUNTIME_TRACK):
+            logging.warning("No need to export task time data, maybe the RuntimeTrack table is not created.")
+            return [], 0
+        if not DBManager.judge_table_exist(hwts_curs, DBNameConstant.TABLE_HWTS_TASK_TIME):
+            logging.warning("No need to export task time data, maybe the hwts is not collected.")
+            return [], 0
+
+        sql = "SELECT stream_id, task_id, running," \
+              "complete, batch_id from {0}".format(DBNameConstant.TABLE_HWTS_TASK_TIME)
+        hwts_data = DBManager.fetch_all_data(hwts_curs, sql)
+
+        try:
+            task_info = TaskOpViewer._reformat_task_info(hwts_data, task_curs, ge_curs)
+        except sqlite3.Error as error:
+            logging.error(str(error), exc_info=Constant.TRACE_BACK_SWITCH)
+            return [], 0
+        return task_info, len(task_info)
+
+    @staticmethod
+    def get_op_task_data_summary(hwts_curs: any, ge_curs: any) -> tuple:
+        """
+        get task time data for operator scene
+        :param hwts_curs: cursor of hwts
+        :param ge_curs: cursor of ge
+        :return: task data and count of the task data
+        """
+
+        if not DBManager.judge_table_exist(ge_curs, DBNameConstant.TABLE_GE_TASK):
+            logging.warning(
+                "No ge data collected, maybe the TaskInfo table is not created, try to export data with no ge data")
+        if not DBManager.judge_table_exist(hwts_curs, DBNameConstant.TABLE_HWTS_TASK_TIME):
+            logging.warning("No need to export task time data, maybe the hwts is not collected.")
+            return [], 0
+
+        sql = "SELECT stream_id, task_id, running, " \
+              "complete, batch_id from {0}".format(DBNameConstant.TABLE_HWTS_TASK_TIME)
+        hwts_data = DBManager.fetch_all_data(hwts_curs, sql)
+
+        sql = "SELECT stream_id, task_id, op_name, " \
+              "task_type, batch_id from {0}".format(DBNameConstant.TABLE_GE_TASK)
+        ge_data = DBManager.fetch_all_data(ge_curs, sql)
+
+        try:
+            task_info = TaskOpViewer._reformat_op_task_info(hwts_data, ge_data)
+        except (OSError, SystemError, ValueError, TypeError, RuntimeError) as error:
+            logging.error(str(error), exc_info=Constant.TRACE_BACK_SWITCH)
+            return [], 0
+        return task_info, len(task_info)
+
+    @staticmethod
     def _add_memcpy_data(result_dir: str, data: list) -> list:
         memcpy_viewer = MemoryCopyViewer(result_dir)
         memcpy_data = memcpy_viewer.get_memory_copy_non_chip0_summary()
@@ -89,32 +146,6 @@ class TaskOpViewer:
         return task_info
 
     @staticmethod
-    def get_task_data_summary(hwts_curs: any, task_curs: any, ge_curs: any) -> tuple:
-        """
-        get task info csv
-        """
-        if not DBManager.judge_table_exist(ge_curs, DBNameConstant.TABLE_GE_TASK):
-            logging.warning(
-                "No ge data collected, maybe the TaskInfo table is not created, try to export data with no ge data")
-        if not DBManager.judge_table_exist(task_curs, DBNameConstant.TABLE_RUNTIME_TRACK):
-            logging.warning("No need to export task time data, maybe the RuntimeTrack table is not created.")
-            return [], 0
-        if not DBManager.judge_table_exist(hwts_curs, DBNameConstant.TABLE_HWTS_TASK_TIME):
-            logging.warning("No need to export task time data, maybe the hwts is not collected.")
-            return [], 0
-
-        sql = "SELECT stream_id, task_id, running," \
-              "complete, batch_id from {0}".format(DBNameConstant.TABLE_HWTS_TASK_TIME)
-        hwts_data = DBManager.fetch_all_data(hwts_curs, sql)
-
-        try:
-            task_info = TaskOpViewer._reformat_task_info(hwts_data, task_curs, ge_curs)
-        except sqlite3.Error as error:
-            logging.error(str(error), exc_info=Constant.TRACE_BACK_SWITCH)
-            return [], 0
-        return task_info, len(task_info)
-
-    @staticmethod
     def _reformat_op_task_info(task_data: list, ge_data: list) -> list:
         task_info = []
         ge_data_dict = {}
@@ -141,34 +172,3 @@ class TaskOpViewer:
                               task_end,  # task end
                               ))
         return task_info
-
-    @staticmethod
-    def get_op_task_data_summary(hwts_curs: any, ge_curs: any) -> tuple:
-        """
-        get task time data for operator scene
-        :param hwts_curs: cursor of hwts
-        :param ge_curs: cursor of ge
-        :return: task data and count of the task data
-        """
-
-        if not DBManager.judge_table_exist(ge_curs, DBNameConstant.TABLE_GE_TASK):
-            logging.warning(
-                "No ge data collected, maybe the TaskInfo table is not created, try to export data with no ge data")
-        if not DBManager.judge_table_exist(hwts_curs, DBNameConstant.TABLE_HWTS_TASK_TIME):
-            logging.warning("No need to export task time data, maybe the hwts is not collected.")
-            return [], 0
-
-        sql = "SELECT stream_id, task_id, running, " \
-              "complete, batch_id from {0}".format(DBNameConstant.TABLE_HWTS_TASK_TIME)
-        hwts_data = DBManager.fetch_all_data(hwts_curs, sql)
-
-        sql = "SELECT stream_id, task_id, op_name, " \
-              "task_type, batch_id from {0}".format(DBNameConstant.TABLE_GE_TASK)
-        ge_data = DBManager.fetch_all_data(ge_curs, sql)
-
-        try:
-            task_info = TaskOpViewer._reformat_op_task_info(hwts_data, ge_data)
-        except (OSError, SystemError, ValueError, TypeError, RuntimeError) as error:
-            logging.error(str(error), exc_info=Constant.TRACE_BACK_SWITCH)
-            return [], 0
-        return task_info, len(task_info)

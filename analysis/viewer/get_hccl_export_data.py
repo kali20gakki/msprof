@@ -44,6 +44,23 @@ class HCCLExport:
             self._format_hccl_data(hccl_data)
         return json.dumps(self.result)
 
+    def get_hccl_sql(self: any) -> str:
+        """
+        get hccl query sql
+        :return: control statement
+        """
+        sql = "select name,plane_id,timestamp,duration,bandwidth,stream_id," \
+              "task_id, task_type,transport_type,size,stage,step from {0}".format(DBNameConstant.TABLE_HCCL_ALL_REDUCE)
+
+        if not ProfilingScene().is_operator():
+            iter_time = MsprofIteration(self.project_path).get_iteration_time(self.iter_id, self.model_id)
+            if iter_time:
+                sql = "select name,plane_id,timestamp,duration,bandwidth,stream_id," \
+                      "task_id, task_type,transport_type,size,stage,step from {0} where timestamp>={1} " \
+                      "and timestamp<{2}".format(DBNameConstant.TABLE_HCCL_ALL_REDUCE,
+                                                 iter_time[0][0], iter_time[0][1])
+        return sql
+
     def _get_meta_data(self: any, hccl_data: list) -> None:
         self.result = TraceViewManager.metadata_event(
             [["process_name", self.pid_value, InfoConfReader().get_json_tid_data(), "HCCL"]])
@@ -73,23 +90,6 @@ class HCCLExport:
             _hccl_format_data[index + len(hccl_data)] = _hccl_stage_pice
         self.result.extend(TraceViewManager.time_graph_trace(
             TraceViewHeaderConstant.GRPC_TIME_GRAPH_HEAD, _hccl_format_data))
-
-    def get_hccl_sql(self: any) -> str:
-        """
-        get hccl query sql
-        :return: control statement
-        """
-        sql = "select name,plane_id,timestamp,duration,bandwidth,stream_id," \
-              "task_id, task_type,transport_type,size,stage,step from {0}".format(DBNameConstant.TABLE_HCCL_ALL_REDUCE)
-
-        if not ProfilingScene().is_operator():
-            iter_time = MsprofIteration(self.project_path).get_iteration_time(self.iter_id, self.model_id)
-            if iter_time:
-                sql = "select name,plane_id,timestamp,duration,bandwidth,stream_id," \
-                      "task_id, task_type,transport_type,size,stage,step from {0} where timestamp>={1} " \
-                      "and timestamp<{2}".format(DBNameConstant.TABLE_HCCL_ALL_REDUCE,
-                                                 iter_time[0][0], iter_time[0][1])
-        return sql
 
     def _get_hccl_sql_data(self: any, sql: str) -> list:
         conn, cur = DBManager.check_connect_db(self.project_path, DBNameConstant.DB_HCCL)

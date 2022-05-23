@@ -34,16 +34,6 @@ class InterConnectionView:
         min_default_val = int('0xFFFFF', Constant.HEX_NUMBER)
         return result_data[index] if result_data[index] != min_default_val else 0
 
-    @staticmethod
-    def _get_hccs_sql_str() -> str:
-        sql = "SELECT round(MAX(txThroughput),{accuracy}), " \
-              "round(MIN(txThroughput), {accuracy}), round(AVG(txThroughput), {accuracy}), " \
-              "round(MAX(rxThroughput),{accuracy}), round(MIN(rxThroughput), {accuracy}), " \
-              "round(AVG(rxThroughput), {accuracy}) FROM {0} " \
-              "WHERE device_id IS ?".format(DBNameConstant.TABLE_HCCS_EVENTS,
-                                            accuracy=NumberConstant.DECIMAL_ACCURACY)
-        return sql
-
     def get_hccs_data(self: any, dev_id: str) -> tuple:
         """
         get hccs data
@@ -66,30 +56,6 @@ class InterConnectionView:
                    ["Rx (MB/s)"] + list(hccs_throughput[3:])]
         headers = ["Mode", "Max", "Min", "Average"]
         return headers, _result, len(_result)
-
-    @staticmethod
-    def _get_pcie_sql_str() -> str:
-        sql = "select timestamp, device_id, round(AVG(tx_p_bandwidth_min), {accuracy})," \
-              "round(AVG(tx_p_bandwidth_max), {accuracy}),round(AVG(tx_p_bandwidth_avg)," \
-              " {accuracy}),round(AVG(tx_np_bandwidth_min), {accuracy}),round(AVG(" \
-              "tx_np_bandwidth_max" \
-              "), {accuracy}),round(AVG(tx_np_bandwidth_avg), {accuracy})" \
-              ",round(AVG(tx_cpl_bandwidth_min), {accuracy}),round(AVG(" \
-              "tx_cpl_bandwidth_max), {accuracy}),round(AVG(tx_cpl_bandwidth_avg)" \
-              ", {accuracy}),round(AVG(tx_np_lantency_min), {accuracy})" \
-              ",round(AVG(tx_np_lantency_max), {accuracy})" \
-              ",round(AVG(tx_np_lantency_avg), {accuracy})" \
-              ",round(AVG(rx_p_bandwidth_min), {accuracy}),round(AVG(rx_p_bandwidth_max)" \
-              ", {accuracy}),round(AVG(rx_p_bandwidth_avg), {accuracy})," \
-              "round(AVG(rx_np_bandwidth_min), {accuracy})" \
-              ",round(AVG(rx_np_bandwidth_max), {accuracy})," \
-              "round(AVG(rx_np_bandwidth_avg), {accuracy})" \
-              ",round(AVG(rx_cpl_bandwidth_min), {accuracy})," \
-              "round(AVG(rx_cpl_bandwidth_max), {accuracy})" \
-              ",round(AVG(rx_cpl_bandwidth_avg), {accuracy}) from PcieOriginalData where " \
-              "tx_p_bandwidth_max >= tx_p_bandwidth_min". \
-            format(accuracy=NumberConstant.DECIMAL_ACCURACY)
-        return sql
 
     def get_pcie_summary_data(self: any) -> tuple:
         """
@@ -143,3 +109,37 @@ class InterConnectionView:
             return MsvpConstant.MSVP_EMPTY_DATA
         finally:
             DBManager.destroy_db_connect(conn, curs)
+
+    @staticmethod
+    def _get_hccs_sql_str() -> str:
+        sql = "SELECT round(MAX(txThroughput),{accuracy}), " \
+              "round(MIN(txThroughput), {accuracy}), round(AVG(txThroughput), {accuracy}), " \
+              "round(MAX(rxThroughput),{accuracy}), round(MIN(rxThroughput), {accuracy}), " \
+              "round(AVG(rxThroughput), {accuracy}) FROM {0} " \
+              "WHERE device_id IS ?".format(DBNameConstant.TABLE_HCCS_EVENTS,
+                                            accuracy=NumberConstant.DECIMAL_ACCURACY)
+        return sql
+
+    @staticmethod
+    def _get_pcie_sql_str() -> str:
+        sql = "select timestamp, device_id, round(AVG(tx_p_bandwidth_min), {accuracy})," \
+              "round(AVG(tx_p_bandwidth_max), {accuracy}),round(AVG(tx_p_bandwidth_avg)," \
+              " {accuracy}),round(AVG(tx_np_bandwidth_min), {accuracy}),round(AVG(" \
+              "tx_np_bandwidth_max" \
+              "), {accuracy}),round(AVG(tx_np_bandwidth_avg), {accuracy})" \
+              ",round(AVG(tx_cpl_bandwidth_min), {accuracy}),round(AVG(" \
+              "tx_cpl_bandwidth_max), {accuracy}),round(AVG(tx_cpl_bandwidth_avg)" \
+              ", {accuracy}),round(AVG(tx_np_lantency_min), {accuracy})" \
+              ",round(AVG(tx_np_lantency_max), {accuracy})" \
+              ",round(AVG(tx_np_lantency_avg), {accuracy})" \
+              ",round(AVG(rx_p_bandwidth_min), {accuracy}),round(AVG(rx_p_bandwidth_max)" \
+              ", {accuracy}),round(AVG(rx_p_bandwidth_avg), {accuracy})," \
+              "round(AVG(rx_np_bandwidth_min), {accuracy})" \
+              ",round(AVG(rx_np_bandwidth_max), {accuracy})," \
+              "round(AVG(rx_np_bandwidth_avg), {accuracy})" \
+              ",round(AVG(rx_cpl_bandwidth_min), {accuracy})," \
+              "round(AVG(rx_cpl_bandwidth_max), {accuracy})" \
+              ",round(AVG(rx_cpl_bandwidth_avg), {accuracy}) from PcieOriginalData where " \
+              "tx_p_bandwidth_max >= tx_p_bandwidth_min". \
+            format(accuracy=NumberConstant.DECIMAL_ACCURACY)
+        return sql
