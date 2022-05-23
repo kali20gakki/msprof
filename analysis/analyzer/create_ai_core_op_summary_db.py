@@ -6,7 +6,6 @@ Copyright Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
 import logging
 import os
 import sqlite3
-import sys
 
 from analyzer.get_op_table_task_time import GetOpTableTsTime
 from analyzer.op_common_function import OpCommonFunc
@@ -21,7 +20,6 @@ from common_func.msprof_exception import ProfException
 from common_func.msprof_iteration import MsprofIteration
 from common_func.msvp_constant import MsvpConstant
 from common_func.path_manager import PathManager
-from common_func.utils import Utils
 
 
 class ParseAiCoreOpSummary:
@@ -88,17 +86,6 @@ class ParseAiCoreOpSummary:
         curs = conn.cursor()
         os.chmod(conn_path, NumberConstant.FILE_AUTHORITY)
         return conn, curs
-
-    def _get_ge_data(self: any, conn: any) -> list:
-        ge_data = []
-        iter_dict = MsprofIteration(self.project_path).get_iter_dict_with_index_and_model(self.iter_id, self.model_id)
-        ge_sql = "SELECT model_id, batch_id, task_id, stream_id, " \
-                 "op_name, op_type, block_dim, task_type, timestamp, index_id from {0} where " \
-                 "(index_id=? or index_id=0) and model_id=?" \
-            .format(DBNameConstant.TABLE_GE_TASK)
-        for index_and_model in iter_dict.values():
-            ge_data.extend(DBManager.fetch_all_data(conn.cursor(), ge_sql, index_and_model))
-        return ge_data
 
     def create_ge_summary_table(self: any, conn: any) -> None:
         """
@@ -223,3 +210,14 @@ class ParseAiCoreOpSummary:
             self.create_summary_table()
         except sqlite3.Error as err:
             logging.error(err, exc_info=Constant.TRACE_BACK_SWITCH)
+
+    def _get_ge_data(self: any, conn: any) -> list:
+        ge_data = []
+        iter_dict = MsprofIteration(self.project_path).get_iter_dict_with_index_and_model(self.iter_id, self.model_id)
+        ge_sql = "SELECT model_id, batch_id, task_id, stream_id, " \
+                 "op_name, op_type, block_dim, task_type, timestamp, index_id from {0} where " \
+                 "(index_id=? or index_id=0) and model_id=?" \
+            .format(DBNameConstant.TABLE_GE_TASK)
+        for index_and_model in iter_dict.values():
+            ge_data.extend(DBManager.fetch_all_data(conn.cursor(), ge_sql, index_and_model))
+        return ge_data
