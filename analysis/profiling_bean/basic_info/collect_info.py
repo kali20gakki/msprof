@@ -8,8 +8,8 @@ import os
 
 from common_func.constant import Constant
 from common_func.info_conf_reader import InfoConfReader
-from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_constant.number_constant import NumberConstant
+from common_func.ms_constant.str_constant import StrConstant
 from profiling_bean.basic_info.base_info import BaseInfo
 
 

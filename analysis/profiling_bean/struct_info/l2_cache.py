@@ -7,8 +7,8 @@ Copyright Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
 import logging
 import struct
 
-from msparser.interface.idata_bean import IDataBean
 from msparser.data_struct_size_constant import StructFmt
+from msparser.interface.idata_bean import IDataBean
 
 
 class L2CacheDataBean(IDataBean):
@@ -26,31 +26,6 @@ class L2CacheDataBean(IDataBean):
         self._stream_id = None
         self._task_id = None
         self._events_list = []
-
-    def decode(self: any, bin_data: bytes) -> None:
-        """
-        decode the l2 cache bin data
-        :param bin_data: l2 cache bin data
-        :return: instance of l2 cache
-        """
-        if not self.construct_bean(struct.unpack(StructFmt.L2_CACHE_STRUCT_FMT, bin_data)):
-            logging.error("l2 cache data struct is incomplete, please check the l2 cache file.")
-
-    def construct_bean(self: any, *args: any) -> bool:
-        """
-        refresh the l2 cache data
-        :param args: l2 cache data
-        :return: True or False
-        """
-        l2_cache_data = args[0]
-        if len(l2_cache_data) != self.L2_CACHE_DATA_NUM:
-            return False
-        self._task_type = l2_cache_data[self.TASK_TYPE_INDEX]
-        self._stream_id = l2_cache_data[self.STREAM_ID_INDEX]
-        self._task_id = l2_cache_data[self.TASK_ID_INDEX]
-        for _event_index in range(self.L2_CACHE_EVENT_START_INDEX, self.L2_CACHE_DATA_NUM):
-            self._events_list.append(str(l2_cache_data[_event_index]))
-        return True
 
     @property
     def task_type(self: any) -> int:
@@ -79,3 +54,28 @@ class L2CacheDataBean(IDataBean):
         l2 cache stream id
         """
         return self._stream_id
+
+    def decode(self: any, bin_data: bytes) -> None:
+        """
+        decode the l2 cache bin data
+        :param bin_data: l2 cache bin data
+        :return: instance of l2 cache
+        """
+        if not self.construct_bean(struct.unpack(StructFmt.L2_CACHE_STRUCT_FMT, bin_data)):
+            logging.error("l2 cache data struct is incomplete, please check the l2 cache file.")
+
+    def construct_bean(self: any, *args: any) -> bool:
+        """
+        refresh the l2 cache data
+        :param args: l2 cache data
+        :return: True or False
+        """
+        l2_cache_data = args[0]
+        if len(l2_cache_data) != self.L2_CACHE_DATA_NUM:
+            return False
+        self._task_type = l2_cache_data[self.TASK_TYPE_INDEX]
+        self._stream_id = l2_cache_data[self.STREAM_ID_INDEX]
+        self._task_id = l2_cache_data[self.TASK_ID_INDEX]
+        for _event_index in range(self.L2_CACHE_EVENT_START_INDEX, self.L2_CACHE_DATA_NUM):
+            self._events_list.append(str(l2_cache_data[_event_index]))
+        return True

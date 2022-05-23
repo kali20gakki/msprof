@@ -5,8 +5,8 @@ Copyright Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 import logging
 import struct
 
-from common_func.ms_constant.number_constant import NumberConstant
 from common_func.info_conf_reader import InfoConfReader
+from common_func.ms_constant.number_constant import NumberConstant
 from msparser.data_struct_size_constant import StructFmt
 from profiling_bean.struct_info.struct_decoder import StructDecoder
 
@@ -116,6 +116,30 @@ class AiCpuData(StructDecoder):
         self._task_id = None
         self._ai_cpu_time_consuming = None
 
+    @property
+    def stream_id(self: any) -> any:
+        """
+        stream id for ai cpu
+        :return: stream id for ai cpu
+        """
+        return self._stream_id
+
+    @property
+    def task_id(self: any) -> any:
+        """
+        task id for ai cpu
+        :return: task id for ai cpu
+        """
+        return self._task_id
+
+    @property
+    def ai_cpu_time_consuming(self: any) -> AiCpuTimeConsuming:
+        """
+        bean time for ai cpu
+        :return: bean time for ai cpu
+        """
+        return self._ai_cpu_time_consuming
+
     def ai_cpu_decode(self: any, bin_data: any) -> any:
         """
         decode the aicpu bin data
@@ -141,27 +165,3 @@ class AiCpuData(StructDecoder):
             return True
         logging.error("AICPU data struct is incomplete: %s, please check the AICPU file.", hex(_magic_num))
         return False
-
-    @property
-    def stream_id(self: any) -> any:
-        """
-        stream id for ai cpu
-        :return: stream id for ai cpu
-        """
-        return self._stream_id
-
-    @property
-    def task_id(self: any) -> any:
-        """
-        task id for ai cpu
-        :return: task id for ai cpu
-        """
-        return self._task_id
-
-    @property
-    def ai_cpu_time_consuming(self: any) -> AiCpuTimeConsuming:
-        """
-        bean time for ai cpu
-        :return: bean time for ai cpu
-        """
-        return self._ai_cpu_time_consuming
