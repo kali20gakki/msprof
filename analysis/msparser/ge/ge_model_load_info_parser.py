@@ -24,16 +24,12 @@ class GeModelLoadParser(DataParser, MsMultiProcess):
         self._file_list = file_list
         self.data = []
 
-    def parse(self: any) -> None:
+    @staticmethod
+    def read_binary_data(bean_class: any, bean_data: any) -> any:
         """
-        parse model load data
+        read binary data
         """
-        model_load_file = self._file_list.get(DataTag.GE_MODEL_LOAD, [])
-        if model_load_file:
-            self.data = self.parse_bean_data(model_load_file,
-                                             StructFmt.GE_MODEL_LOAD_SIZE,
-                                             GeModelLoadBean,
-                                             self._get_model_load_data)
+        return bean_class().fusion_decode(bean_data)
 
     @staticmethod
     def _get_model_load_data(bean_data: any) -> list:
@@ -47,12 +43,16 @@ class GeModelLoadParser(DataParser, MsMultiProcess):
         return [bean_data.model_id, model_name, bean_data.start_time,
                 bean_data.end_time]
 
-    @staticmethod
-    def read_binary_data(bean_class: any, bean_data: any) -> any:
+    def parse(self: any) -> None:
         """
-        read binary data
+        parse model load data
         """
-        return bean_class().fusion_decode(bean_data)
+        model_load_file = self._file_list.get(DataTag.GE_MODEL_LOAD, [])
+        if model_load_file:
+            self.data = self.parse_bean_data(model_load_file,
+                                             StructFmt.GE_MODEL_LOAD_SIZE,
+                                             GeModelLoadBean,
+                                             self._get_model_load_data)
 
     def save(self: any) -> str:
         """

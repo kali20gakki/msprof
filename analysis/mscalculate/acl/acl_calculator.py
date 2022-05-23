@@ -27,6 +27,42 @@ class AclCalculator(ICalculator, MsMultiProcess):
         self._project_path = sample_config.get(StrConstant.SAMPLE_CONFIG_PROJECT_PATH)
         self._acl_data = []
 
+    @staticmethod
+    def _update_api_type(acl_api_value: str) -> str:
+        """
+        transfer the acl api value to enum
+        :param acl_api_value: 0,1,2,3
+        :return: acl api tag
+        """
+        return AclApiTag(int(acl_api_value)).name if acl_api_value.isdigit() else acl_api_value
+
+    def calculate(self: any) -> None:
+        """
+        calculate the acl data
+        :return: None
+        """
+        logging.info("start to calculate the data of acl")
+        self._acl_data = self._get_acl_data()
+        self._refresh_acl_api_name()
+        self._refresh_acl_api_type()
+        self.save()
+
+    def save(self: any) -> None:
+        """
+        save the data of acl
+        :return: None
+        """
+        logging.info("calculating acl data finished, and starting to update the acl data.")
+        AclSqlCalculator.delete_acl_data(self._get_acl_db_path(), DBNameConstant.TABLE_ACL_DATA)
+        AclSqlCalculator.insert_data_to_db(self._get_acl_db_path(), DBNameConstant.TABLE_ACL_DATA, self._acl_data)
+
+    def ms_run(self: any) -> None:
+        """
+        entrance for acl calculator
+        :return: None
+        """
+        self.calculate()
+
     def _get_acl_data(self: any) -> list:
         acl_data = AclSqlCalculator.select_acl_data(self._get_acl_db_path(), DBNameConstant.TABLE_ACL_DATA)
         return acl_data if acl_data else []
@@ -63,39 +99,3 @@ class AclCalculator(ICalculator, MsMultiProcess):
         logging.info("start to refresh the acl api type.")
         self._acl_data = Utils.generator_to_list((_data[0], self._update_api_type(_data[1])) + _data[2:]
                                                  for _data in self._acl_data)
-
-    @staticmethod
-    def _update_api_type(acl_api_value: str) -> str:
-        """
-        transfer the acl api value to enum
-        :param acl_api_value: 0,1,2,3
-        :return: acl api tag
-        """
-        return AclApiTag(int(acl_api_value)).name if acl_api_value.isdigit() else acl_api_value
-
-    def calculate(self: any) -> None:
-        """
-        calculate the acl data
-        :return: None
-        """
-        logging.info("start to calculate the data of acl")
-        self._acl_data = self._get_acl_data()
-        self._refresh_acl_api_name()
-        self._refresh_acl_api_type()
-        self.save()
-
-    def save(self: any) -> None:
-        """
-        save the data of acl
-        :return: None
-        """
-        logging.info("calculating acl data finished, and starting to update the acl data.")
-        AclSqlCalculator.delete_acl_data(self._get_acl_db_path(), DBNameConstant.TABLE_ACL_DATA)
-        AclSqlCalculator.insert_data_to_db(self._get_acl_db_path(), DBNameConstant.TABLE_ACL_DATA, self._acl_data)
-
-    def ms_run(self: any) -> None:
-        """
-        entrance for acl calculator
-        :return: None
-        """
-        self.calculate()
