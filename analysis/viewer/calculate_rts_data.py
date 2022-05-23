@@ -68,22 +68,22 @@ class CalculateRtsDataConst:
 
 def _get_task_schedule_sql() -> str:
     sql = "select ifnull(taskType, '')||'|'||ifnull(api, '')||'|'||task_id||'|'||stream_id||'|'||batch_id, " \
-          "sum(case when waittime=0 or completetime=0.0 then 0 " \
-          "when runtime<waittime then completetime-waittime " \
-          "else runtime-waittime end) as waitting," \
-          " sum(case when runtime=0 or completetime=0.0 then 0 " \
-          "else completetime-runtime end) as running, " \
-          "sum(case when pendingtime=0 or completetime=0.0 then 0 " \
-          "else completetime-pendingtime end) as pending," \
-          "min(case when completetime=0.0 then 0 " \
-          "when runtime=0 then completetime-pendingtime " \
-          "else completetime-runtime end) as min_time," \
-          "max(case when completetime=0.0 then 0 " \
-          "when runtime=0 then completetime-pendingtime " \
-          "else completetime-runtime end) as max_time, " \
-          "sum(case when completetime=0.0 then 0 " \
-          "when runtime=0 then completetime-pendingtime " \
-          "else completetime-runtime end)/count(rowid) as avg, " \
+          "sum(case when waittime=0 or complete=0.0 then 0 " \
+          "when running<waittime then complete-waittime " \
+          "else running-waittime end) as waitting," \
+          " sum(case when running=0 or complete=0.0 then 0 " \
+          "else complete-running end) as running, " \
+          "sum(case when pendingtime=0 or complete=0.0 then 0 " \
+          "else complete-pendingtime end) as pending," \
+          "min(case when complete=0.0 then 0 " \
+          "when running=0 then complete-pendingtime " \
+          "else complete-running end) as min_time," \
+          "max(case when complete=0.0 then 0 " \
+          "when running=0 then complete-pendingtime " \
+          "else complete-running end) as max_time, " \
+          "sum(case when complete=0.0 then 0 " \
+          "when running=0 then complete-pendingtime " \
+          "else complete-running end)/count(rowid) as avg, " \
           "count(rowid) from TaskTime where device_id = ?" \
           "group by taskType, api, task_id, stream_id, batch_id;"
     return sql
