@@ -5,7 +5,8 @@ ErrorManager &ErrorManager::GetInstance() {
   return instance;
 }
 
-error_message::Context &ErrorManager::GetErrorManagerContext() {
+error_message::Context &ErrorManager::GetErrorManagerContext()
+{
     error_message::Context error_context = {0UL, "", "", ""};
     return error_context;
 }

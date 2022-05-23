@@ -7,8 +7,6 @@
 
 #include "msprof_tx_manager.h"
 
-#include <cstdint>
-
 #include "mmpa_plugin.h"
 
 #include "utils.h"

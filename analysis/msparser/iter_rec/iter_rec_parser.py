@@ -100,11 +100,18 @@ class IterParser(IParser, MsMultiProcess):
         :return: None
         """
 
+    def ms_run(self):
+        """
+
+        :return:
+        """
+        pass
+
     def _calculate_task_count(self: any, task_log: HwtsLogBean) -> None:
-        iter_info = self._iter_info_dict.setdefault(self._iter_recorder.current_iter_id,
-                                                    IterInfo(self._iter_recorder.current_iter_id,
+        iter_info = self._iter_info_dict.setdefault(self._iter_recorder.current_op_iter,
+                                                    IterInfo(self._iter_recorder.current_op_iter,
                                                              self._iter_recorder.iter_end_dict.get(
-                                                                 self._iter_recorder.current_iter_id)))
+                                                                 self._iter_recorder.current_op_iter)))
         iter_info.task_count += 1
         if task_log.task_type == self.HWTS_TASK_END \
                 and self._is_ai_core_task(task_log.task_id, task_log.stream_id, task_log.batch_id):
