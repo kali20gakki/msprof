@@ -19,8 +19,12 @@ class TestHwtsAivCalculator(unittest.TestCase):
     file_list = {DataTag.AIV: ['aiVectorCore.data.0.slice_0']}
 
     def test_ms_run(self):
-        ProfilingScene()._scene = "single_op"
+
         with mock.patch(NAMESPACE + '.HwtsAivCalculator._parse_all_file'), \
-                mock.patch(NAMESPACE + '.HwtsAivCalculator.save'):
+             mock.patch('common_func.msprof_iteration' + '.MsprofIteration.get_iteration_end_dict', return_value=[]), \
+             mock.patch('common_func.msprof_iteration' + '.MsprofIteration.get_op_iteration_dict', return_value=[]), \
+             mock.patch('common_func.msprof_iteration' + '.MsprofIteration.get_iteration_dict', return_value=[]), \
+             mock.patch(NAMESPACE + '.HwtsAivCalculator.save'):
+            ProfilingScene()._scene = "single_op"
             check = HwtsAivCalculator(self.file_list, CONFIG)
             check.ms_run()

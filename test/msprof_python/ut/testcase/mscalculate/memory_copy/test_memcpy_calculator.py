@@ -11,11 +11,12 @@ from analyzer.scene_base.profiling_scene import ProfilingScene
 
 NAMESAPCE = "common_func.msprof_iteration"
 
+
 def prepar_step_trace_db(current_dir, sqlite_folder):
     conn, curs = DBManager.create_connect_db(current_dir + sqlite_folder + DBNameConstant.DB_STEP_TRACE)
     columns = ["index_id", "model_id", "step_start", "step_end", "iter_id", "ai_core_num"]
     sql = "create table if not exists {0} ({1})".format(DBNameConstant.TABLE_STEP_TRACE_DATA,
-                                            ",".join(columns))
+                                                        ",".join(columns))
     conn.execute(sql)
 
     prepar_step_trace_data(conn, curs)
@@ -27,7 +28,7 @@ def prepar_step_trace_db(current_dir, sqlite_folder):
 def prepar_step_trace_data(conn, curs):
     columns = ["index_id", "model_id", "step_start", "step_end", "iter_id", "ai_core_num"]
     sql = "create table if not exists {0} ({1})".format(DBNameConstant.TABLE_STEP_TRACE_DATA,
-                                            ",".join(columns))
+                                                        ",".join(columns))
     conn.execute(sql)
 
     step_trace_data = [(1, 1, 1000, 2000, 1, 30),
@@ -38,12 +39,13 @@ def prepar_step_trace_data(conn, curs):
             DBNameConstant.TABLE_STEP_TRACE_DATA, "?," * (len(step_trace_data[0]) - 1) + "?")
         DBManager.executemany_sql(conn, sql, step_trace_data)
 
+
 def prepar_ts_memcpy_data(conn, curs):
     sql = DBManager.sql_create_general_table(DBNameConstant.TABLE_TS_MEMCPY + "Map", DBNameConstant.TABLE_TS_MEMCPY,
-                                       os.path.join(MsvpCommonConst.CONFIG_PATH, 'Tables.ini'))
+                                             os.path.join(MsvpCommonConst.CONFIG_PATH, 'Tables.ini'))
     curs.execute(sql)
     ts_memcpy_data = [(500, 1, 1, 0), (600, 1, 1, 1), (700, 1, 1, 2), (800, 1, 1, 3), (800, 1, 1, 1),
-                       (2500, 1, 2, 0), (2600, 1, 2, 1), (2700, 1, 2, 2), (2800, 2, 1, 0)]
+                      (2500, 1, 2, 0), (2600, 1, 2, 1), (2700, 1, 2, 2), (2800, 2, 1, 0)]
 
     if conn and ts_memcpy_data:
         sql = 'insert into {0} values ({1})'.format(
