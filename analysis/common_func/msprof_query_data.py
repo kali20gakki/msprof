@@ -5,7 +5,6 @@ Copyright Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 """
 
 import os
-import sqlite3
 
 from common_func.common import error
 from common_func.constant import Constant
@@ -31,6 +30,57 @@ class MsprofQueryData:
     def __init__(self: any, project_path: str) -> None:
         self.project_path = project_path
         self.data = []
+
+    @classmethod
+    def _get_iteration_infos(cls: any, curs: any) -> list:
+        sql = "select model_id, max(index_id) from {} group by model_id".format(
+            DBNameConstant.TABLE_STEP_TRACE_DATA)
+        iteration_infos = DBManager.fetch_all_data(curs, sql)
+        if not iteration_infos or not iteration_infos[0]:
+            return []
+        return iteration_infos
+
+    @classmethod
+    def _get_model_id_set(cls: any, curs_ge: any) -> set:
+        sql = "select distinct model_id from {}".format(DBNameConstant.TABLE_GE_TASK)
+        model_ids = DBManager.fetch_all_data(curs_ge, sql)
+        model_ids_set = {model_id[0] for model_id in model_ids}
+        return model_ids_set
+
+    @classmethod
+    def _update_top_iteration_info(cls: any, iteration_infos: list, model_ids_set: set, curs: any) -> list:
+        if not iteration_infos or not model_ids_set:
+            return []
+
+        # get top {QUERY_TOP_ITERATION_NUM} time iterations of every model
+        top_sql = \
+            "select t.* from (" \
+            "select index_id, model_id," \
+            "(select count(*) + 1 from {0} as t2 where t2.model_id = t1.model_id and " \
+            "(t2.step_end - t2.step_start) > (t1.step_end - t1.step_start)) as top " \
+            "from {0} as t1) as t where top <= {1} order by model_id, top" \
+                .format(DBNameConstant.TABLE_STEP_TRACE_DATA, cls.QUERY_TOP_ITERATION_NUM)
+        top_index_ids = DBManager.fetch_all_data(curs, top_sql)
+        if not top_index_ids or not top_index_ids[0]:
+            return []
+        top_index_ids_filtered = list(
+            filter(lambda model_iter_info: model_iter_info[1] in model_ids_set, top_index_ids))
+
+        # every iteration_info in format (model_id, max(index_id))
+        # top_index_ids_filtered is in format [(index_id, model_id, top),...]
+        iteration_info_list = []
+        iteration_infos_result = []
+        for iteration_info in iteration_infos:
+            iteration_info_list = list(iteration_info)
+            top_index_id = list(
+                filter(lambda model_iter_info: model_iter_info[1] == iteration_info_list[0], top_index_ids_filtered))
+            if not top_index_id:
+                iteration_info_list.append(Constant.NA)
+            else:
+                top_index_ids_info = ",".join((str(id[0]) for id in top_index_id))
+                iteration_info_list.append(top_index_ids_info)
+            iteration_infos_result.append(iteration_info_list)
+        return iteration_infos_result
 
     def get_job_basic_info(self: any) -> list:
         """
@@ -86,57 +136,6 @@ class MsprofQueryData:
         DBManager.destroy_db_connect(conn_ge, curs_ge)
         DBManager.destroy_db_connect(conn, curs)
 
-        return iteration_infos_result
-
-    @classmethod
-    def _get_iteration_infos(cls: any, curs: any) -> list:
-        sql = "select model_id, max(index_id) from {} group by model_id".format(
-            DBNameConstant.TABLE_STEP_TRACE_DATA)
-        iteration_infos = DBManager.fetch_all_data(curs, sql)
-        if not iteration_infos or not iteration_infos[0]:
-            return []
-        return iteration_infos
-
-    @classmethod
-    def _get_model_id_set(cls: any, curs_ge: any) -> set:
-        sql = "select distinct model_id from {}".format(DBNameConstant.TABLE_GE_TASK)
-        model_ids = DBManager.fetch_all_data(curs_ge, sql)
-        model_ids_set = {model_id[0] for model_id in model_ids}
-        return model_ids_set
-
-    @classmethod
-    def _update_top_iteration_info(cls: any, iteration_infos: list, model_ids_set: set, curs: any) -> list:
-        if not iteration_infos or not model_ids_set:
-            return []
-
-        # get top {QUERY_TOP_ITERATION_NUM} time iterations of every model
-        top_sql = \
-            "select t.* from (" \
-            "select index_id, model_id," \
-            "(select count(*) + 1 from {0} as t2 where t2.model_id = t1.model_id and " \
-            "(t2.step_end - t2.step_start) > (t1.step_end - t1.step_start)) as top " \
-            "from {0} as t1) as t where top <= {1} order by model_id, top"\
-                .format(DBNameConstant.TABLE_STEP_TRACE_DATA, cls.QUERY_TOP_ITERATION_NUM)
-        top_index_ids = DBManager.fetch_all_data(curs, top_sql)
-        if not top_index_ids or not top_index_ids[0]:
-            return []
-        top_index_ids_filtered = list(
-            filter(lambda model_iter_info: model_iter_info[1] in model_ids_set, top_index_ids))
-
-        # every iteration_info in format (model_id, max(index_id))
-        # top_index_ids_filtered is in format [(index_id, model_id, top),...]
-        iteration_info_list = []
-        iteration_infos_result = []
-        for iteration_info in iteration_infos:
-            iteration_info_list = list(iteration_info)
-            top_index_id = list(
-                filter(lambda model_iter_info: model_iter_info[1] == iteration_info_list[0], top_index_ids_filtered))
-            if not top_index_id:
-                iteration_info_list.append(Constant.NA)
-            else:
-                top_index_ids_info = ",".join((str(id[0]) for id in top_index_id))
-                iteration_info_list.append(top_index_ids_info)
-            iteration_infos_result.append(iteration_info_list)
         return iteration_infos_result
 
     def assembly_job_info(self: any, basic_data: list, iteration_data: list) -> list:

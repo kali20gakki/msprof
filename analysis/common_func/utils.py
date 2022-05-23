@@ -24,6 +24,40 @@ class Utils:
     def __init__(self: any) -> any:
         pass
 
+    @classmethod
+    def need_all_model_in_one_iter(cls: any, result_dir: str, model_id: int) -> bool:
+        """
+        check the scene of need export all model in one iter or not
+        :param result_dir:
+        :param model_id:
+        :return:
+        """
+        if cls.is_single_op_scene(result_dir):
+            return True
+        if cls.is_single_op_graph_mix(result_dir) and model_id == Constant.GE_OP_MODEL_ID:
+            return True
+        return False
+
+    @classmethod
+    def get_func_type(cls: any, header: int) -> str:
+        """
+        func type is the lower 6 bits of the first byte, used to distinguish different data types.
+        keep 6 lower bits which represent func type
+        :param header:
+        :return: func_type.For example: 000011
+        """
+        return bin(header & 63)[2:].zfill(6)
+
+    @classmethod
+    def get_cnt(cls: any, header: int) -> str:
+        """
+        cnt is the 7 - 10 bits of the first byte.
+        keep 7 - 10 bits which represent cnt
+        :param header:
+        :return: func_type.For example: 1111
+        """
+        return bin(header & 960)[2:].zfill(6)
+
     @staticmethod
     def is_training_trace_scene(result_dir: str) -> bool:
         """
@@ -157,37 +191,3 @@ class Utils:
             json_data = json_reader.read()
             json_data = json.loads(json_data)
             return json_data
-
-    @classmethod
-    def need_all_model_in_one_iter(cls: any, result_dir: str, model_id: int) -> bool:
-        """
-        check the scene of need export all model in one iter or not
-        :param result_dir:
-        :param model_id:
-        :return:
-        """
-        if cls.is_single_op_scene(result_dir):
-            return True
-        if cls.is_single_op_graph_mix(result_dir) and model_id == Constant.GE_OP_MODEL_ID:
-            return True
-        return False
-
-    @classmethod
-    def get_func_type(cls: any, header: int) -> str:
-        """
-        func type is the lower 6 bits of the first byte, used to distinguish different data types.
-        63 is 0b00111111 keep 6 lower bits which represent func type
-        :param header:
-        :return: func_type.For example: 000011
-        """
-        return bin(header & 63)[2:].zfill(6)
-
-    @classmethod
-    def get_cnt(cls: any, header: int) -> str:
-        """
-        cnt is the 7 - 10 bits of the first byte.
-        960 is 0b001111000000 keep 7 - 10 bits which represent cnt
-        :param header:
-        :return: func_type.For example: 1111
-        """
-        return bin(header & 960)[2:].zfill(6)
