@@ -73,7 +73,6 @@ class GeInfoModel(BaseModel):
 
         return ge_op_iter_dict
 
-
     def get_batch_dict(self: any, datatype: str) -> dict:
         """
         get batch data
@@ -147,4 +146,3 @@ class GeInfoModel(BaseModel):
                 iter_id = model_to_iter_dict.get((per_data[0], per_data[1]))
                 ge_op_iter_dict.setdefault(str(iter_id), set()).add(
                     self.STREAM_TASK_BATCH_KEY_FMT.format(*per_data[2:]))
-

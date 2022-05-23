@@ -373,7 +373,6 @@ class DBManager:
             return []
         data = []
         try:
-
             if param:
                 curs.execute(sql, param)
             else:

@@ -16,6 +16,7 @@ from common_func.file_name_manager import get_msprof_json_compiles
 from common_func.msprof_common import MsProfCommonConstant
 from common_func.msprof_common import get_path_dir
 from common_func.utils import Utils
+from ms_interface.msprof_data_storage import MsprofDataStorage
 
 
 class MsprofJobSummary:
@@ -28,7 +29,7 @@ class MsprofJobSummary:
     def __init__(self: any, output: str) -> None:
         self._output = output
         self._host_data = []
-        self._file_name = ""
+        self.param = {'project': self._output, 'data_type': 'msprof'}
 
     def export(self: any) -> None:
         """
@@ -52,7 +53,6 @@ class MsprofJobSummary:
         for file_name in file_list:
             json_result = get_file_name_pattern_match(file_name, *(get_msprof_json_compiles()))
             if json_result:
-                self._file_name = file_name
                 msprof_json_data.extend(Utils.get_json_data(os.path.join(timeline_path, file_name)))
         return msprof_json_data
 
@@ -83,9 +83,12 @@ class MsprofJobSummary:
             timeline_dir = os.path.join(self._output, self.MSPROF_TIMELINE_DIR)
             if not os.path.exists(timeline_dir):
                 os.makedirs(timeline_dir, Constant.FOLDER_MASK)
-            file_name = os.path.join(timeline_dir, self._file_name)
             print_info(MsProfCommonConstant.COMMON_FILE_NAME,
                        "Start to export msprof timeline data ...")
-            Utils.write_json_files(json_data, file_name)
-            print_info(MsProfCommonConstant.COMMON_FILE_NAME,
-                       'Export timeline json file success, "%s" ...' % file_name)
+            slice_result = MsprofDataStorage().slice_data_list(json_data)
+            error_code, result_message = MsprofDataStorage.write_json_files(slice_result, self.param)
+            if error_code:
+                print_info(MsProfCommonConstant.COMMON_FILE_NAME, "message error: %s" % result_message)
+            else:
+                print_info(MsProfCommonConstant.COMMON_FILE_NAME,
+                           'Export timeline json file success, "%s" ...' % result_message)

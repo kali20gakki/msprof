@@ -373,7 +373,7 @@ static hdcError_t HdcWritePackage(HDC_SESSION session, DataSendMsg dataSendMsg,
     DRV_HDC_MSG_T_PTR pmsg, IDE_HDC_PACKET_T_PTR packet, int flag)
 {
     hdcError_t hdcError = DRV_ERROR_NONE;
-    unsigned int totalLen = dataSendMsg.bufLen;
+    unsigned int totalLen = static_cast<uint32_t>(dataSendMsg.bufLen);
     unsigned int reservedLen = totalLen;
     int sendLen = 0;
     unsigned int timeout = 0;
@@ -389,7 +389,7 @@ static hdcError_t HdcWritePackage(HDC_SESSION session, DataSendMsg dataSendMsg,
             sendLen = dataSendMsg.maxSendLen;
             packet->isLast = static_cast<int8_t>(IdeLastPacket::IDE_NOT_LAST_PACK);
         } else {
-            sendLen = reservedLen;
+            sendLen = static_cast<int32_t>(reservedLen);
             packet->isLast = static_cast<int8_t>(IdeLastPacket::IDE_LAST_PACK);
         }
         packet->len = sendLen;

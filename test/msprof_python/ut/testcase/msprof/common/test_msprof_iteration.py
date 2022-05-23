@@ -53,7 +53,7 @@ class TestMsprofIteration(unittest.TestCase):
         db_manager = DBManager()
         res = db_manager.create_table("step_trace.db", create_sql, insert_sql, data)
         with mock.patch(NAMESPACE + '.PathManager.get_db_path', return_value="step_trace.db"), \
-             mock.patch(NAMESPACE + '.DBManager.create_connect_db', return_value=res), \
+             mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=res), \
              mock.patch(NAMESPACE + '.DBManager.check_tables_in_db', return_value=True):
             key = MsprofIteration('123')
             InfoConfReader()._info_json = INFO_JSON
@@ -86,7 +86,7 @@ class TestMsprofIteration(unittest.TestCase):
         res = db_manager.create_table("step_trace.db", create_sql, insert_sql, data)
         InfoConfReader()._info_json = {'pid': 1, "DeviceInfo": [{'hwts_frequency': 1000}]}
         with mock.patch(NAMESPACE + '.PathManager.get_db_path', return_value="step_trace.db"), \
-             mock.patch(NAMESPACE + '.DBManager.create_connect_db', return_value=res), \
+             mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=res), \
              mock.patch(NAMESPACE + '.DBManager.check_tables_in_db', return_value=True):
             key = MsprofIteration('123')
             result = key._generate_trace_result(key.get_step_iteration_time(index_id, model_id))
@@ -162,7 +162,7 @@ class TestMsprofIteration(unittest.TestCase):
              mock.patch(NAMESPACE + '.DBManager.destroy_db_connect'):
             key = MsprofIteration('123')
             result = key.get_iteration_id_by_index_id(index_id, model_id)
-        self.assertEqual(result, 1)
+        self.assertEqual(result, [0, 1])
         with mock.patch(NAMESPACE + '.Utils.is_step_scene', return_value=True), \
              mock.patch(NAMESPACE + '.PathManager.get_db_path', return_value="step_trace.db"):
             with mock.patch(NAMESPACE + '.DBManager.check_connect_db_path', return_value=(None, None)), \
@@ -170,14 +170,14 @@ class TestMsprofIteration(unittest.TestCase):
                  mock.patch(NAMESPACE + '.DBManager.destroy_db_connect'):
                 key = MsprofIteration('123')
                 result = key.get_iteration_id_by_index_id(index_id, model_id)
-            self.assertEqual(result, 1)
+            self.assertEqual(result, [0, 1])
 
             with mock.patch(NAMESPACE + '.DBManager.check_connect_db_path', return_value=res), \
                  mock.patch(NAMESPACE + '.DBManager.check_tables_in_db', return_value=True), \
                  mock.patch(NAMESPACE + '.DBManager.destroy_db_connect'):
                 key = MsprofIteration('123')
                 result = key.get_iteration_id_by_index_id(index_id, model_id)
-            self.assertEqual(result, 1)
+            self.assertEqual(result, [0, 1])
         db_manager.destroy(res)
 
     def test_get_iteration_id_by_index_id_2(self):
@@ -198,14 +198,14 @@ class TestMsprofIteration(unittest.TestCase):
                  mock.patch(NAMESPACE + '.DBManager.destroy_db_connect'):
                 key = MsprofIteration('123')
                 result = key.get_iteration_id_by_index_id(index_id, model_id)
-            self.assertEqual(result, 1)
+            self.assertEqual(result, [0, 1])
         res[1].execute("drop table step_trace_data")
         res[0].commit()
         db_manager.destroy(res)
 
     def test_get_trace_iteration_end(self):
         with mock.patch(NAMESPACE + '.PathManager.get_db_path', return_value=True), \
-             mock.patch(NAMESPACE + '.DBManager.create_connect_db', return_value=(True, True)), \
+             mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=(True, True)), \
              mock.patch(NAMESPACE + '.DBManager.check_tables_in_db', return_value=True), \
              mock.patch(NAMESPACE + '.MsprofIteration._generate_trace_iter_end_result', return_value=1), \
              mock.patch(NAMESPACE + '.DBManager.fetch_all_data', return_value=1), \
@@ -216,7 +216,7 @@ class TestMsprofIteration(unittest.TestCase):
         self.assertEqual(result, 1)
 
         with mock.patch(NAMESPACE + '.PathManager.get_db_path', return_value=True), \
-             mock.patch(NAMESPACE + '.DBManager.create_connect_db', return_value=(True, True)), \
+             mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=(True, True)), \
              mock.patch(NAMESPACE + '.DBManager.check_tables_in_db', return_value=False), \
              mock.patch(NAMESPACE + '.MsprofIteration._generate_trace_iter_end_result', return_value=1), \
              mock.patch(NAMESPACE + '.DBManager.fetch_all_data', return_value=1), \
@@ -227,7 +227,7 @@ class TestMsprofIteration(unittest.TestCase):
         self.assertEqual(result, OrderedDict())
 
         with mock.patch(NAMESPACE + '.PathManager.get_db_path', return_value=True), \
-             mock.patch(NAMESPACE + '.DBManager.create_connect_db', return_value=(True, True)), \
+             mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=(True, True)), \
              mock.patch(NAMESPACE + '.DBManager.check_tables_in_db', return_value=True), \
              mock.patch(NAMESPACE + '.MsprofIteration._generate_trace_iter_end_result', return_value=1), \
              mock.patch(NAMESPACE + '.DBManager.fetch_all_data', return_value=[]), \
@@ -239,7 +239,7 @@ class TestMsprofIteration(unittest.TestCase):
 
     def test_get_iter_by_training_trace(self):
         with mock.patch(NAMESPACE + '.PathManager.get_db_path', return_value=True), \
-             mock.patch(NAMESPACE + '.DBManager.create_connect_db', return_value=(True, True)), \
+             mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=(True, True)), \
              mock.patch(NAMESPACE + '.DBManager.check_tables_in_db', return_value=True), \
              mock.patch(NAMESPACE + '.MsprofIteration._generate_trace_iter_end_result', return_value=1), \
              mock.patch(NAMESPACE + '.DBManager.fetch_all_data', return_value=1), \
@@ -250,7 +250,7 @@ class TestMsprofIteration(unittest.TestCase):
         self.assertEqual(result, 1)
 
         with mock.patch(NAMESPACE + '.PathManager.get_db_path', return_value=True), \
-             mock.patch(NAMESPACE + '.DBManager.create_connect_db', return_value=(True, True)), \
+             mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=(True, True)), \
              mock.patch(NAMESPACE + '.DBManager.check_tables_in_db', return_value=False), \
              mock.patch(NAMESPACE + '.MsprofIteration._generate_trace_iter_end_result', return_value=1), \
              mock.patch(NAMESPACE + '.DBManager.fetch_all_data', return_value=1), \
@@ -261,7 +261,7 @@ class TestMsprofIteration(unittest.TestCase):
         self.assertEqual(result, OrderedDict())
 
         with mock.patch(NAMESPACE + '.PathManager.get_db_path', return_value=True), \
-             mock.patch(NAMESPACE + '.DBManager.create_connect_db', return_value=(True, True)), \
+             mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=(True, True)), \
              mock.patch(NAMESPACE + '.DBManager.check_tables_in_db', return_value=True), \
              mock.patch(NAMESPACE + '.MsprofIteration._generate_trace_iter_end_result', return_value=1), \
              mock.patch(NAMESPACE + '.DBManager.fetch_all_data', return_value=[]), \
