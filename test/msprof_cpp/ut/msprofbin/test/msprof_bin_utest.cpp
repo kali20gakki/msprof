@@ -20,7 +20,7 @@ protected:
 
 extern int LltMain(int argc, const char **argv, const char **envp);
 extern void SetEnvList(const char **envp, std::vector<std::string> &envpList);
-extern void PrintOutPutDir(const std::string &resultDir);
+extern void PrintOutPutDir();
 
 TEST_F(MSPROF_BIN_UTEST, LltMain) { 
     GlobalMockObject::verify();

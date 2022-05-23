@@ -137,7 +137,7 @@ int InputParser::PreCheckPlatform(int opt, CONST_CHAR_PTR argv[])
     }
     std::vector<MsprofArgsType> platSwithList = platformArgsType[platformType];
     if (std::find(platSwithList.begin(), platSwithList.end(), opt) != platSwithList.end()) {
-        std::cout << Utils::GetSelfPath() << ": unrecognized option '" 
+        std::cout << Utils::GetSelfPath() << ": unrecognized option '"
                   << argv[MmpaPlugin::instance()->MsprofMmGetOptInd() - 1] << "'" << std::endl;
         std::cout << "PlatformType:" << static_cast<uint8_t>(platformType) << std::endl;
         MsprofCmdUsage("");
