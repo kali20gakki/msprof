@@ -25,16 +25,16 @@ class ParsingAICPUData(ParsingCPUData):
         self._file_list = file_list.get(DataTag.AICPU, [])
         self._file_list.sort(key=lambda x: int(x.split("_")[-1]))
 
-    @staticmethod
-    def class_name() -> str:
-        """
-        class name
-        """
-        return ParsingAICPUData.__name__
-
     @property
     def cpu_type(self: any) -> str:
         """
         cpu type
         """
         return self.type
+
+    @staticmethod
+    def class_name() -> str:
+        """
+        class name
+        """
+        return ParsingAICPUData.__name__

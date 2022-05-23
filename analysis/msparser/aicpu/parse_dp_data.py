@@ -35,6 +35,39 @@ class ParseDpData:
 
     FILE_NAME = os.path.basename(__file__)
 
+    @staticmethod
+    def get_dp_judge_data(dp_file: list) -> tuple:
+        """
+        calculate Data aging
+        """
+        dp_file.sort(key=lambda x: int(x.split("_")[-1]), reverse=True)
+        total_size = 0
+        size_list = []
+        for file in dp_file:
+            size_list.append(os.path.getsize(file))
+            total_size += os.path.getsize(file)
+        if total_size < ParseDpData.DP_DATA_FMT_SIZE:
+            return EmptyClass(str('Insufficient file size')), 0
+        judge_file = dp_file[0]
+        offset = 0
+        if size_list[0] < ParseDpData.DP_DATA_FMT_SIZE:
+            offset = size_list[0]
+            judge_file = dp_file[1]
+        return judge_file, offset
+
+    @staticmethod
+    def get_dp_tuple(index: int, dp_data: tuple) -> tuple:
+        """
+        split dp data into dp_tuple
+        """
+        dp_data_length = index * ParseDpData.DP_TUPLE_LENGTH
+        timestamp = dp_data[dp_data_length + 3]
+        action = dp_data[dp_data_length + 4].partition(b'\x00')[0].decode('utf-8', 'ignore')
+        source = dp_data[dp_data_length + 5].partition(b'\x00')[0].decode('utf-8', 'ignore')
+        size = dp_data[dp_data_length + 7]
+        dp_data_msaasge = (timestamp, action, source, size)
+        return dp_data_msaasge
+
     @classmethod
     def get_files(cls: any, path: str, tag: any, device_id: any) -> list:
         """
@@ -117,26 +150,6 @@ class ParseDpData:
             logging.error(err, exc_info=Constant.TRACE_BACK_SWITCH)
             return cls.DP_FILE_STR_TYPE
 
-    @staticmethod
-    def get_dp_judge_data(dp_file: list) -> tuple:
-        """
-        calculate Data aging
-        """
-        dp_file.sort(key=lambda x: int(x.split("_")[-1]), reverse=True)
-        total_size = 0
-        size_list = []
-        for file in dp_file:
-            size_list.append(os.path.getsize(file))
-            total_size += os.path.getsize(file)
-        if total_size < ParseDpData.DP_DATA_FMT_SIZE:
-            return EmptyClass(str('Insufficient file size')), 0
-        judge_file = dp_file[0]
-        offset = 0
-        if size_list[0] < ParseDpData.DP_DATA_FMT_SIZE:
-            offset = size_list[0]
-            judge_file = dp_file[1]
-        return judge_file, offset
-
     @classmethod
     def analyse_bin_dp(cls: any, dp_files: list) -> any:
         """
@@ -172,16 +185,3 @@ class ParseDpData:
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
             logging.error(err, exc_info=Constant.TRACE_BACK_SWITCH)
             return []
-
-    @staticmethod
-    def get_dp_tuple(index: int, dp_data: tuple) -> tuple:
-        """
-        split dp data into dp_tuple
-        """
-        dp_data_length = index * ParseDpData.DP_TUPLE_LENGTH
-        timestamp = dp_data[dp_data_length + 3]
-        action = dp_data[dp_data_length + 4].partition(b'\x00')[0].decode('utf-8', 'ignore')
-        source = dp_data[dp_data_length + 5].partition(b'\x00')[0].decode('utf-8', 'ignore')
-        size = dp_data[dp_data_length + 7]
-        dp_data_msaasge = (timestamp, action, source, size)
-        return dp_data_msaasge
