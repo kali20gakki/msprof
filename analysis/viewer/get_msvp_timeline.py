@@ -91,12 +91,15 @@ def get_dvpp_total_data(param: dict, conn: any, delta_dev: float) -> dict:
                             param['start_time'] - delta_dev, param['end_time'] - delta_dev,
                             param['device_id'])).fetchall()
     else:
+        group_number = 0
+        if not NumberConstant.is_zero(param['number']):
+            group_number = count[0] / param['number']
         res = curs.execute("select timestamp, proctime/1, lasttime/1, "
                            "procframe/1, lastframe/1, procutilization, "
                            "allutilization from DvppOriginalData "
                            "where rowid-(rowid/?)*?=0 and enginetype=? and engineid=? "
                            "and timestamp between ? and ? and device_id=?",
-                           (count[0] / param['number'], count[0] / param['number'],
+                           (group_number, group_number,
                             dvpp_typw_name.index(param['enginetype']), param['engineid'],
                             param['start_time'] - delta_dev, param['end_time'] - delta_dev,
                             param['device_id'])).fetchall()
@@ -174,11 +177,14 @@ def get_nic_total_data(param: dict, conn: any) -> dict:
                            "where timestamp between ? and ? and device_id=?", (param['start_time'], param['end_time'],
                                                                                param['device_id'])).fetchall()
     else:
+        group_number = 0
+        if not NumberConstant.is_zero(param['number']):
+            group_number = count[0] / param['number']
         res = curs.execute("select timestamp, rx_bandwidth_efficiency, rx_packets, "
                            "rx_error_rate, rx_dropped_rate, tx_bandwidth_efficiency, "
                            "tx_packets, tx_error_rate, tx_dropped_rate from NicReceiveSend "
                            "where rowid-(rowid/?)*?=0 and timestamp between ? and ? "
-                           "and device_id=?", (count[0] / param['number'], count[0] / param['number'],
+                           "and device_id=?", (group_number, group_number,
                                                param['start_time'], param['end_time'],
                                                param['device_id'])).fetchall()
     return get_result_data_for_nic(res, count[0])

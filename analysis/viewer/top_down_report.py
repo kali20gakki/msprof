@@ -68,14 +68,6 @@ class TopDownData:
             dispatch_result[top_down_data[1]].append(top_down_data)
         return dispatch_result
 
-    @staticmethod
-    def _check_sql_file(conn: any, curs: any, table_name: str) -> bool:
-        if not conn or not curs:
-            return False
-        if not DBManager.judge_table_exist(curs, table_name):
-            return False
-        return True
-
     @classmethod
     def get_max_iter_id(cls: any, project_path: str) -> int:
         """
@@ -420,3 +412,11 @@ class TopDownData:
         if top_down_datas:
             cls._fill_top_down_trace_data(
                 project_path, device_id, result_data, top_down_datas)
+
+    @staticmethod
+    def _check_sql_file(conn: any, curs: any, table_name: str) -> bool:
+        if not conn or not curs:
+            return False
+        if not DBManager.judge_table_exist(curs, table_name):
+            return False
+        return True

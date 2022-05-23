@@ -220,27 +220,29 @@ def get_bandwidth_value(bandwidth_data: list, interval_time: float) -> list:
     sum_wr_allocate = bandwidth_data[4] + bandwidth_data[5]
 
     read_bandwidth_value = 0.0
-    read_hit_rate_value = 0.0
-    if sum_re_allocate:
+    read_hit_bandwidth_value = 0.0
+    write_hit_bandwidth_value = 0.0
+    write_bandwidth_value = 0.0
+    if not NumberConstant.is_zero(interval_time):
         read_bandwidth_value = round(sum_re_allocate / interval_time * NumberConstant.LLC_CAPACITY_CONVERT_MB,
                                      CommonConstant.ROUND_SIX)
+        read_hit_bandwidth_value = round(bandwidth_data[3] * NumberConstant.LLC_CAPACITY_CONVERT_MB /
+                                         interval_time, CommonConstant.ROUND_SIX)
+        write_bandwidth_value = round(sum_wr_allocate / interval_time
+                                      * NumberConstant.LLC_CAPACITY_CONVERT_MB, CommonConstant.ROUND_SIX)
+        write_hit_bandwidth_value = round(bandwidth_data[6] * NumberConstant.LLC_CAPACITY_CONVERT_MB /
+                                          interval_time, CommonConstant.ROUND_SIX)
+
+    read_hit_rate_value = 0.0
+    if not NumberConstant.is_zero(sum_re_allocate):
         read_hit_rate_value = round(bandwidth_data[3] / sum_re_allocate * NumberConstant.PERCENTAGE,
                                     CommonConstant.ROUND_SIX)
 
-
-    read_hit_bandwidth_value = round(bandwidth_data[3] * NumberConstant.LLC_CAPACITY_CONVERT_MB /
-                                     interval_time, CommonConstant.ROUND_SIX)
-
-    write_bandwidth_value = 0.0
     write_hit_rate_value = 0.0
-    if sum_wr_allocate:
-        write_bandwidth_value = round(sum_wr_allocate / interval_time
-                                      * NumberConstant.LLC_CAPACITY_CONVERT_MB, CommonConstant.ROUND_SIX)
+    if not NumberConstant.is_zero(sum_wr_allocate):
         write_hit_rate_value = round(bandwidth_data[6] / sum_wr_allocate * NumberConstant.PERCENTAGE,
                                      CommonConstant.ROUND_SIX)
 
-    write_hit_bandwidth_value = round(bandwidth_data[6] * NumberConstant.LLC_CAPACITY_CONVERT_MB /
-                                      interval_time, CommonConstant.ROUND_SIX)
     bandwidth_value = [read_bandwidth_value, read_hit_rate_value, read_hit_bandwidth_value,
                        write_bandwidth_value, write_hit_rate_value, write_hit_bandwidth_value]
     return bandwidth_value if bandwidth_value else []
