@@ -4,7 +4,7 @@
 get and report cpu usage data
 Copyright Huawei Technologies Co., Ltd. 2019-2020. All rights reserved.
 """
-
+import logging
 import sqlite3
 
 from common_func.db_manager import DBManager
@@ -12,6 +12,8 @@ from common_func.msvp_common import is_number
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.msvp_constant import MsvpConstant
 from common_func.ms_constant.number_constant import NumberConstant
+
+from common_func.constant import Constant
 
 
 def get_sys_cpu_usage_data(db_path: str, table_name: str, configs: dict) -> tuple:
@@ -33,26 +35,37 @@ def get_sys_cpu_usage_data(db_path: str, table_name: str, configs: dict) -> tupl
         DBManager.destroy_db_connect(conn, curs)
 
 
+def _do_divide(val: int, total_size) -> float:
+    """
+    do divide
+    """
+    ratio = 0.0
+    try:
+        ratio = StrConstant.ACCURACY % (val / total_size * NumberConstant.PERCENTAGE)
+    except ZeroDivisionError as err:
+        logging.error(err, exc_info=Constant.TRACE_BACK_SWITCH)
+    return ratio
+
+
 def _sys_usage_data(curs: any, table_name: str) -> list:
     """
     get sys cpu data
     """
-    sql = "select cputype,sum(user), sum(sys), sum(iowait), sum(irq), sum(soft), sum(idle), " \
+    sql = "select cputype, sum(user), sum(sys), sum(iowait), sum(irq), sum(soft), sum(idle), " \
           "sum(user+nice+sys+idle+iowait+irq+soft+steal+guest+gnice) " \
           "from {} where cputype != '' group by cputype".format(table_name)
     result_data = DBManager.fetch_all_data(curs, sql)
     data_list = []
-    each = [None, None, None, None, None, None, None]
     for data in result_data:
-        each[0] = data[0]
-        each[1] = StrConstant.ACCURACY % (data[1] / data[7] * NumberConstant.PERCENTAGE)
-        each[2] = StrConstant.ACCURACY % (data[2] / data[7] * NumberConstant.PERCENTAGE)
-        each[3] = StrConstant.ACCURACY % (data[3] / data[7] * NumberConstant.PERCENTAGE)
-        each[4] = StrConstant.ACCURACY % (data[4] / data[7] * NumberConstant.PERCENTAGE)
-        each[5] = StrConstant.ACCURACY % (data[5] / data[7] * NumberConstant.PERCENTAGE)
-        each[6] = StrConstant.ACCURACY % (data[6] / data[7] * NumberConstant.PERCENTAGE)
-        data_list.append(each)
-        each = [None, None, None, None, None, None, None]
+        total_size = data[7]
+        cpu_type = data[0]
+        user_ratio = _do_divide(data[1], total_size)
+        sys_ratio = _do_divide(data[2], total_size)
+        io_wait_ratio = _do_divide(data[3], total_size)
+        irq_ratio = _do_divide(data[4], total_size)
+        soft_ratio = _do_divide(data[5], total_size)
+        idle_ratio = _do_divide(data[6], total_size)
+        data_list.append([cpu_type, user_ratio, sys_ratio, io_wait_ratio, irq_ratio, soft_ratio, idle_ratio])
     return data_list
 
 

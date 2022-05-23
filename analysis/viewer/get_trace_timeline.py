@@ -63,10 +63,6 @@ class TraceViewer:
         return _result
 
     @staticmethod
-    def _cal_sys_time_us(delta_dev: any, item: list) -> int:
-        return int(float(item[0]) + delta_dev * NumberConstant.NANO_SECOND) / NumberConstant.USTONS
-
-    @staticmethod
     def format_trace_data(data_item: list, trace_name: str, timestamp: any, pid: int, tid: int) -> tuple:
         """
         PCIe data format
@@ -102,6 +98,10 @@ class TraceViewer:
         :return: result
         """
         return json.dumps(trace_evnets)
+
+    @staticmethod
+    def _cal_sys_time_us(delta_dev: any, item: list) -> int:
+        return int(float(item[0]) + delta_dev * NumberConstant.NANO_SECOND) / NumberConstant.USTONS
 
 
 def _get_hccs_result(hccs_data: list, trace_parser: any) -> list:
