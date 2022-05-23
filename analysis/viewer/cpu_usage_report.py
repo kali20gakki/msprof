@@ -37,22 +37,23 @@ def _sys_usage_data(curs: any, table_name: str) -> list:
     """
     get sys cpu data
     """
-    sql = "select cputype,sum(user), sum(sys), sum(iowait), sum(irq), sum(soft), sum(idle), " \
+    sql = "select cputype, sum(user), sum(sys), sum(iowait), sum(irq), sum(soft), sum(idle), " \
           "sum(user+nice+sys+idle+iowait+irq+soft+steal+guest+gnice) " \
           "from {} where cputype != '' group by cputype".format(table_name)
     result_data = DBManager.fetch_all_data(curs, sql)
     data_list = []
-    each = [None, None, None, None, None, None, None]
     for data in result_data:
-        each[0] = data[0]
-        each[1] = StrConstant.ACCURACY % (data[1] / data[7] * NumberConstant.PERCENTAGE)
-        each[2] = StrConstant.ACCURACY % (data[2] / data[7] * NumberConstant.PERCENTAGE)
-        each[3] = StrConstant.ACCURACY % (data[3] / data[7] * NumberConstant.PERCENTAGE)
-        each[4] = StrConstant.ACCURACY % (data[4] / data[7] * NumberConstant.PERCENTAGE)
-        each[5] = StrConstant.ACCURACY % (data[5] / data[7] * NumberConstant.PERCENTAGE)
-        each[6] = StrConstant.ACCURACY % (data[6] / data[7] * NumberConstant.PERCENTAGE)
-        data_list.append(each)
-        each = [None, None, None, None, None, None, None]
+        total_size = data[7]
+        if total_size == 0:
+            continue
+        cpu_type = data[0]
+        user_ratio = StrConstant.ACCURACY % (data[1] / total_size * NumberConstant.PERCENTAGE)
+        sys_ratio = StrConstant.ACCURACY % (data[2] / total_size * NumberConstant.PERCENTAGE)
+        io_wait_ratio = StrConstant.ACCURACY % (data[3] / total_size * NumberConstant.PERCENTAGE)
+        irq_ratio = StrConstant.ACCURACY % (data[4] / total_size * NumberConstant.PERCENTAGE)
+        soft_ratio = StrConstant.ACCURACY % (data[5] / total_size * NumberConstant.PERCENTAGE)
+        idle_ratio = StrConstant.ACCURACY % (data[6] / total_size * NumberConstant.PERCENTAGE)
+        data_list.append([cpu_type, user_ratio, sys_ratio, io_wait_ratio, irq_ratio, soft_ratio, idle_ratio])
     return data_list
 
 
