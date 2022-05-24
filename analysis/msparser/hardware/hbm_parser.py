@@ -71,15 +71,6 @@ class ParsingHBMData(MsMultiProcess):
             logging.error("%s: %s", file_name, err, exc_info=Constant.TRACE_BACK_SWITCH)
             return status
 
-    def _original_data_handler(self: any, file_name: str) -> None:
-        device_id = self.sample_config.get("device_id", "0")
-        logging.info("start parsing HBM data file: %s", file_name)
-        status = self.read_binary_data(file_name, device_id, '0')  # replay is is 0
-        FileManager.add_complete_file(self.project_path, file_name)
-        if status:
-            logging.error('Insert HBM bandwidth data error.')
-        logging.info("Create HBM DB finished!")
-
     def start_parsing_data_file(self: any) -> None:
         """
         parsing data file
@@ -114,3 +105,12 @@ class ParsingHBMData(MsMultiProcess):
                 self.save()
         except (OSError, SystemError, ValueError, TypeError, RuntimeError, ProfException) as hbm_err:
             logging.error(str(hbm_err), exc_info=Constant.TRACE_BACK_SWITCH)
+
+    def _original_data_handler(self: any, file_name: str) -> None:
+        device_id = self.sample_config.get("device_id", "0")
+        logging.info("start parsing HBM data file: %s", file_name)
+        status = self.read_binary_data(file_name, device_id, '0')  # replay is is 0
+        FileManager.add_complete_file(self.project_path, file_name)
+        if status:
+            logging.error('Insert HBM bandwidth data error.')
+        logging.info("Create HBM DB finished!")

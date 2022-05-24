@@ -24,6 +24,20 @@ class GeSessionParser(DataParser, MsMultiProcess):
         self._file_list = file_list
         self.data = []
 
+    @staticmethod
+    def read_binary_data(bean_class: any, bean_data: any) -> any:
+        """
+        read binary data
+        """
+        return bean_class().fusion_decode(bean_data)
+
+    @staticmethod
+    def _get_session_info_data(bean_data: any) -> list:
+        if not bean_data:
+            return []
+        return [bean_data.model_id, bean_data.graph_id, bean_data.session_id,
+                bean_data.mod, bean_data.timestamp]
+
     def parse(self: any) -> None:
         """
         parse ge session data
@@ -34,20 +48,6 @@ class GeSessionParser(DataParser, MsMultiProcess):
                                              StructFmt.GE_SESSION_SIZE,
                                              GeSessionInfoBean,
                                              self._get_session_info_data)
-
-    @staticmethod
-    def _get_session_info_data(bean_data: any) -> list:
-        if not bean_data:
-            return []
-        return [bean_data.model_id, bean_data.graph_id, bean_data.session_id,
-                bean_data.mod, bean_data.timestamp]
-
-    @staticmethod
-    def read_binary_data(bean_class: any, bean_data: any) -> any:
-        """
-        read binary data
-        """
-        return bean_class().fusion_decode(bean_data)
 
     def save(self: any) -> str:
         """
