@@ -48,8 +48,7 @@ class AccPmuCalculator(ICalculator, MsMultiProcess):
         task_time = self._get_task_time_form_acsq()
         self._model.cur.row_factory = ClassRowType.class_row(AccPmuOriDto)
         ori_data = self._model.get_all_data(DBNameConstant.TABLE_ACC_PMU_ORIGIN_DATA)
-        # data[0] means task_id
-        self._data = [data + task_time.get(data[0], (Constant.DEFAULT_VALUE, Constant.DEFAULT_VALUE))
+        self._data = [data + task_time.get(data.task_id, (Constant.DEFAULT_VALUE, Constant.DEFAULT_VALUE))
                       for data in ori_data]
         self._model.cur.row_factory = None
 
