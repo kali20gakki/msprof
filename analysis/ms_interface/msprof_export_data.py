@@ -73,6 +73,7 @@ from viewer.runtime_report import get_task_scheduler_data
 from viewer.stars.acsq_task_viewer import AcsqTaskViewer
 from viewer.stars.ffts_log_viewer import FftsLogViewer
 from viewer.stars.low_power_viewer import LowPowerViewer
+from viewer.stars.acc_pmu_viewer import AccPmuViewer
 from viewer.stars.stars_chip_trans_view import StarsChipTransView
 from viewer.stars.stars_soc_view import StarsSocView
 from viewer.thread_group_viewer import ThreadGroupViewer
@@ -706,3 +707,7 @@ class MsProfExportDataUtils:
     def _get_biu_perf_timeline(configs: dict, params: dict) -> any:
         _ = configs
         return BiuPerfViewer(params.get(StrConstant.PARAM_RESULT_DIR)).get_timeline()
+
+    @staticmethod
+    def _get_acc_pmu(configs: dict, params: dict) -> any:
+        return AccPmuViewer(configs, params).get_timeline_data()

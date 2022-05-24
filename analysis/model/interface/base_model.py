@@ -8,6 +8,7 @@ import logging
 import os
 from abc import ABCMeta
 
+from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.msvp_constant import MsvpConstant
 from common_func.path_manager import PathManager
@@ -92,7 +93,9 @@ class BaseModel(metaclass=ABCMeta):
         """
         if self.conn and data_list:
             sql = 'insert into {0} values ({1})'.format(table_name, "?," * (len(data_list[0]) - 1) + "?")
-            DBManager.executemany_sql(self.conn, sql, data_list)
+            if not DBManager.executemany_sql(self.conn, sql, data_list):
+                logging.warning('insert data to table {} failed, please check.'.format(table_name),
+                                exc_info=Constant.TRACE_BACK_SWITCH)
 
     def drop_table(self: any, table_name: str) -> None:
         if DBManager.judge_table_exist(self.cur, table_name):
