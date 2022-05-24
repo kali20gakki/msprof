@@ -37,7 +37,7 @@ class AccPmuCalculator(ICalculator, MsMultiProcess):
         if not self.file_list.get(DataTag.STARS_LOG) and not self.file_list.get(DataTag.SOC_PROFILER):
             return
         with AccPmuModel(self.result_dir, DBNameConstant.DB_SOC_LOG,
-                                  [DBNameConstant.TABLE_ACC_PMU_ORIGIN_DATA]) as self._model:
+                         [DBNameConstant.TABLE_ACC_PMU_ORIGIN_DATA]) as self._model:
 
             if not self._model.check_table():
                 return
@@ -47,8 +47,12 @@ class AccPmuCalculator(ICalculator, MsMultiProcess):
     def calculate(self: any) -> None:
         task_time = self._get_task_time_form_acsq()
         self._model.cur.row_factory = ClassRowType.class_row(AccPmuOriDto)
-        ori_data = self._model.get_all_data(DBNameConstant.TABLE_ACC_PMU_ORIGIN_DATA)
-        self._data = [data + task_time.get(data.task_id, (Constant.DEFAULT_VALUE, Constant.DEFAULT_VALUE))
+        all_data_sql = "select * from {}".format(DBNameConstant.TABLE_ACC_PMU_ORIGIN_DATA)
+        ori_data = DBManager.fetch_all_data(self._model.cur, all_data_sql)
+        self._data = [(data.task_id, data.stream_id, data.acc_id, data.block_id,
+                       data.read_bandwidth, data.write_bandwidth,
+                       data.read_ost, data.write_ost, data.timestamp)
+                      + task_time.get(data.task_id, (Constant.DEFAULT_VALUE, Constant.DEFAULT_VALUE))
                       for data in ori_data]
         self._model.cur.row_factory = None
 
