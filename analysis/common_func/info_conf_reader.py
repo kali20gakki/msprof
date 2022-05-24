@@ -46,6 +46,25 @@ class InfoConfReader:
         self._host_mon = 0
         self._dev_cnt = 0
 
+    @classmethod
+    def get_json_tid_data(cls: any) -> int:
+        """
+        get timeline json tid data
+        """
+        return TraceViewHeaderConstant.DEFAULT_TID_VALUE
+
+    @classmethod
+    def get_conf_file_path(cls: any, project_path: str, conf_patterns: tuple) -> str:
+        """
+        get the config file path with pattern
+        """
+        for _file in os.listdir(project_path):
+            for conf_pattern in conf_patterns:
+                if conf_pattern.match(_file) \
+                        and is_valid_original_data(_file, project_path, is_conf=True):
+                    return os.path.join(project_path, _file)
+        return ""
+
     @staticmethod
     def __get_json_data(info_json_path: str) -> dict:
         """
@@ -66,8 +85,6 @@ class InfoConfReader:
             logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
             logging.error("json data decode fail")
             return {}
-        finally:
-            pass
 
     def load_info(self: any, result_path: str) -> None:
         """
@@ -77,55 +94,6 @@ class InfoConfReader:
         if not self.is_host_profiling():
             self._load_dev_start_time(result_path)
             self._load_dev_cnt(result_path)
-
-    def _load_json(self: any, result_path: str) -> None:
-        """
-        load info.json once
-        """
-        self._info_json = self.__get_json_data(
-            self.get_conf_file_path(result_path, get_info_json_compiles()))
-        self._start_info = self.__get_json_data(
-            self.get_conf_file_path(result_path, get_start_info_compiles()))
-        self._end_info = self.__get_json_data(
-            self.get_conf_file_path(result_path, get_end_info_compiles()))
-        self._sample_json = self.__get_json_data(
-            self.get_conf_file_path(result_path, get_sample_json_compiles()))
-
-    def _load_dev_start_path_line_by_line(self: any, log_file: any) -> None:
-        while True:
-            line = log_file.readline(Constant.MAX_READ_LINE_BYTES)
-            if line:
-                line = line.strip()
-                if line.startswith(StrConstant.MONOTONIC_TIME):
-                    _, value = line.split(":")
-                    self._start_log_time = int(value.strip())
-                    break
-
-    def _load_dev_start_time(self: any, result_path: str) -> None:
-        """
-        load start log
-        """
-        dev_start_path = self.get_conf_file_path(result_path, get_dev_start_compiles())
-        try:
-            with open(dev_start_path, "r") as log_file:
-                self._load_dev_start_path_line_by_line(log_file)
-        except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
-            logging.error(err, exc_info=Constant.TRACE_BACK_SWITCH)
-        finally:
-            pass
-
-    def _load_dev_cnt(self: any, project_path: str) -> None:
-        """
-        load dev cnt
-        :return: None
-        """
-        dev_start_file = self.get_conf_file_path(project_path, get_dev_start_compiles())
-        host_start_file = self.get_conf_file_path(project_path, get_host_start_compiles())
-        _, self._host_mon, _, _, self._dev_cnt = \
-            get_host_device_time(host_start_file, dev_start_file, self.get_device_list()[0])
-        if self._host_mon <= 0 or self._dev_cnt <= 0:
-            logging.error("The monotonic time %s or cntvct %s is unusual, "
-                          "maybe get data from driver failed", self._host_mon, self._dev_cnt)
 
     def get_start_timestamp(self: any) -> int:
         """
@@ -212,13 +180,6 @@ class InfoConfReader:
         process_id = self._info_json.get("pid")
         return int(process_id) if is_number(process_id) else TraceViewHeaderConstant.DEFAULT_PID_VALUE
 
-    @classmethod
-    def get_json_tid_data(cls: any) -> int:
-        """
-        get timeline json tid data
-        """
-        return TraceViewHeaderConstant.DEFAULT_TID_VALUE
-
     def get_cpu_info(self: any) -> list:
         """
         get cpu info
@@ -265,18 +226,6 @@ class InfoConfReader:
             return device_items[0].get(data_type, "")
         return ""
 
-    @classmethod
-    def get_conf_file_path(cls: any, project_path: str, conf_patterns: tuple) -> str:
-        """
-        get the config file path with pattern
-        """
-        for _file in os.listdir(project_path):
-            for conf_pattern in conf_patterns:
-                if conf_pattern.match(_file) \
-                        and is_valid_original_data(_file, project_path, is_conf=True):
-                    return os.path.join(project_path, _file)
-        return ""
-
     def get_delta_time(self: any) -> float:
         """
         calculate time difference between host and device
@@ -298,3 +247,52 @@ class InfoConfReader:
             raise ProfException(ProfException.PROF_INVALID_DATA_ERROR)
 
         return biu_sample_cycle
+
+    def _load_json(self: any, result_path: str) -> None:
+        """
+        load info.json once
+        """
+        self._info_json = self.__get_json_data(
+            self.get_conf_file_path(result_path, get_info_json_compiles()))
+        self._start_info = self.__get_json_data(
+            self.get_conf_file_path(result_path, get_start_info_compiles()))
+        self._end_info = self.__get_json_data(
+            self.get_conf_file_path(result_path, get_end_info_compiles()))
+        self._sample_json = self.__get_json_data(
+            self.get_conf_file_path(result_path, get_sample_json_compiles()))
+
+    def _load_dev_start_path_line_by_line(self: any, log_file: any) -> None:
+        while True:
+            line = log_file.readline(Constant.MAX_READ_LINE_BYTES)
+            if line:
+                line = line.strip()
+                if line.startswith(StrConstant.MONOTONIC_TIME):
+                    _, value = line.split(":")
+                    self._start_log_time = int(value.strip())
+                    break
+
+    def _load_dev_start_time(self: any, result_path: str) -> None:
+        """
+        load start log
+        """
+        dev_start_path = self.get_conf_file_path(result_path, get_dev_start_compiles())
+        try:
+            with open(dev_start_path, "r") as log_file:
+                self._load_dev_start_path_line_by_line(log_file)
+        except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
+            logging.error(err, exc_info=Constant.TRACE_BACK_SWITCH)
+        finally:
+            pass
+
+    def _load_dev_cnt(self: any, project_path: str) -> None:
+        """
+        load dev cnt
+        :return: None
+        """
+        dev_start_file = self.get_conf_file_path(project_path, get_dev_start_compiles())
+        host_start_file = self.get_conf_file_path(project_path, get_host_start_compiles())
+        _, self._host_mon, _, _, self._dev_cnt = \
+            get_host_device_time(host_start_file, dev_start_file, self.get_device_list()[0])
+        if self._host_mon <= 0 or self._dev_cnt <= 0:
+            logging.error("The monotonic time %s or cntvct %s is unusual, "
+                          "maybe get data from driver failed", self._host_mon, self._dev_cnt)
