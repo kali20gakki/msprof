@@ -12,9 +12,9 @@ from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.msvp_common import is_valid_original_data
+from common_func.os_manager import check_file_readable
 from common_func.path_manager import PathManager
 from common_func.utils import Utils
-from common_func.os_manager import check_file_readable
 from model.hardware.mini_llc_model import MiniLlcModel
 from profiling_bean.prof_enum.data_tag import DataTag
 
@@ -39,6 +39,27 @@ class MiniLLCParser(MsMultiProcess):
         self.dsid_tmp = OrderedDict()
         self.llc_data = {'metric': [], 'dsid': [], 'original_data': []}
         self._file_list.sort(key=lambda x: int(x.split("_")[-1]))
+
+    @staticmethod
+    def handle_llc_data(tmp: any, llc_data: list, container: list, device_id: str, replay_id: str) -> None:
+        """
+        handle llc tmp data
+        """
+        if llc_data[0] == tmp["timestamp"] and tmp["timestamp"] != 0:
+            tmp[llc_data[-1]] = llc_data[1]
+        elif tmp["timestamp"] == 0:
+            tmp["timestamp"] = llc_data[0]
+            tmp["device_id"] = device_id
+            tmp["replayid"] = replay_id
+            tmp[llc_data[-1]] = llc_data[1]
+        elif llc_data[0] != tmp["timestamp"]:
+            container.append(list(tmp.values()))
+            for k in list(tmp.keys()):
+                tmp[k] = 0
+            tmp["timestamp"] = llc_data[0]
+            tmp["device_id"] = device_id
+            tmp["replayid"] = replay_id
+            tmp[llc_data[-1]] = llc_data[1]
 
     def init_tmp_data(self: any) -> None:
         """
@@ -66,55 +87,6 @@ class MiniLLCParser(MsMultiProcess):
         self.dsid_tmp["dsid5"] = 0
         self.dsid_tmp["dsid6"] = 0
         self.dsid_tmp["dsid7"] = 0
-
-    @staticmethod
-    def handle_llc_data(tmp: any, llc_data: list, container: list, device_id: str, replay_id: str) -> None:
-        """
-        handle llc tmp data
-        """
-        if llc_data[0] == tmp["timestamp"] and tmp["timestamp"] != 0:
-            tmp[llc_data[-1]] = llc_data[1]
-        elif tmp["timestamp"] == 0:
-            tmp["timestamp"] = llc_data[0]
-            tmp["device_id"] = device_id
-            tmp["replayid"] = replay_id
-            tmp[llc_data[-1]] = llc_data[1]
-        elif llc_data[0] != tmp["timestamp"]:
-            container.append(list(tmp.values()))
-            for k in list(tmp.keys()):
-                tmp[k] = 0
-            tmp["timestamp"] = llc_data[0]
-            tmp["device_id"] = device_id
-            tmp["replayid"] = replay_id
-            tmp[llc_data[-1]] = llc_data[1]
-
-    def _update_line(self: any, line: list, start_time: int, headers: list) -> None:
-        line[0] = start_time + float(line[0])
-        self.llc_data.get('original_data', []).append(headers + line)
-        if line[-1].startswith("dsid"):
-            self.handle_llc_data(self.dsid_tmp, line, self.llc_data.get('dsid', []), headers[0],
-                                 headers[1])
-        else:
-            self.handle_llc_data(self.metric_tmp, line, self.llc_data.get('metric', []), headers[0],
-                                 headers[1])
-
-    def _read_binary_helper(self: any, llc_file: any, start_time: int, headers: list) -> None:
-        while 1:
-            line = llc_file.readline(Constant.MAX_READ_FILE_BYTES)
-            if line:
-                if line.startswith("#") or not line.strip():
-                    continue
-                line = line.strip().replace("<not counted>", "0").split(" ")
-                line = Utils.generator_to_list(i for i in line if i != '' and not i.startswith("("))
-                line = line[:-1] + line[-1].split(self.SPLIT_FMT)[:-1]
-                # time, counts, events_sp0, events_sp1
-                if len(line) != 4:
-                    continue
-                if not check_number_valid(line[0]):  # must be float number
-                    continue
-                self._update_line(line, start_time, headers)
-            else:
-                break
 
     def read_binary_data(self: any, file_name: str, device_id: str, replay_id: str) -> None:
         """
@@ -172,3 +144,31 @@ class MiniLLCParser(MsMultiProcess):
                 self.save()
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as mini_llc_err:
             logging.error(str(mini_llc_err), exc_info=Constant.TRACE_BACK_SWITCH)
+
+    def _update_line(self: any, line: list, start_time: int, headers: list) -> None:
+        line[0] = start_time + float(line[0])
+        self.llc_data.get('original_data', []).append(headers + line)
+        if line[-1].startswith("dsid"):
+            self.handle_llc_data(self.dsid_tmp, line, self.llc_data.get('dsid', []), headers[0],
+                                 headers[1])
+        else:
+            self.handle_llc_data(self.metric_tmp, line, self.llc_data.get('metric', []), headers[0],
+                                 headers[1])
+
+    def _read_binary_helper(self: any, llc_file: any, start_time: int, headers: list) -> None:
+        while 1:
+            line = llc_file.readline(Constant.MAX_READ_FILE_BYTES)
+            if line:
+                if line.startswith("#") or not line.strip():
+                    continue
+                line = line.strip().replace("<not counted>", "0").split(" ")
+                line = Utils.generator_to_list(i for i in line if i != '' and not i.startswith("("))
+                line = line[:-1] + line[-1].split(self.SPLIT_FMT)[:-1]
+                # time, counts, events_sp0, events_sp1
+                if len(line) != 4:
+                    continue
+                if not check_number_valid(line[0]):  # must be float number
+                    continue
+                self._update_line(line, start_time, headers)
+            else:
+                break

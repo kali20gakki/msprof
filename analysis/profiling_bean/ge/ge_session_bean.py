@@ -24,31 +24,6 @@ class GeSessionInfoBean(StructDecoder):
         self._timestamp = Constant.DEFAULT_VALUE
         self._mod = Constant.DEFAULT_VALUE
 
-    def fusion_decode(self: any, binary_data: bytes) -> any:
-        """
-        decode fusion info binary data
-        :param binary_data:
-        :return:
-        """
-
-        fmt = StructFmt.BYTE_ORDER_CHAR + self.get_fmt()
-        self.construct_bean(struct.unpack_from(fmt, binary_data))
-        return self
-
-    def construct_bean(self: any, *args: any) -> None:
-        """
-        refresh the acl data
-        :param args: acl bin data
-        :return: True or False
-        """
-        self._fusion_data = args[0]
-        self._data_tag = self._fusion_data[1]
-        self._graph_id = self._fusion_data[2]
-        self._mod = self._fusion_data[6]
-        self._model_id = self._fusion_data[3]
-        self._session_id = self._fusion_data[4]
-        self._timestamp = self._fusion_data[5]
-
     @property
     def model_id(self: any) -> int:
         """
@@ -83,3 +58,28 @@ class GeSessionInfoBean(StructDecoder):
         for timestamp
         """
         return self._timestamp
+
+    def fusion_decode(self: any, binary_data: bytes) -> any:
+        """
+        decode fusion info binary data
+        :param binary_data:
+        :return:
+        """
+
+        fmt = StructFmt.BYTE_ORDER_CHAR + self.get_fmt()
+        self.construct_bean(struct.unpack_from(fmt, binary_data))
+        return self
+
+    def construct_bean(self: any, *args: any) -> None:
+        """
+        refresh the acl data
+        :param args: acl bin data
+        :return: True or False
+        """
+        self._fusion_data = args[0]
+        self._data_tag = self._fusion_data[1]
+        self._graph_id = self._fusion_data[2]
+        self._mod = self._fusion_data[6]
+        self._model_id = self._fusion_data[3]
+        self._session_id = self._fusion_data[4]
+        self._timestamp = self._fusion_data[5]
