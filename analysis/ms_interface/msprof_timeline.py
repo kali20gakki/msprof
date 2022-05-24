@@ -38,6 +38,16 @@ class MsprofTimeline:
         self._export_data_list = []
         self._iteration_time = []
 
+    @classmethod
+    def get_timeline_header(cls: any, pid: str, pid_sort_index: int) -> list:
+        """
+        get timeline header
+        """
+        header = [["process_sort_index", pid,
+                   InfoConfReader().get_json_tid_data(), pid_sort_index]]
+        process_index = TraceViewManager.metadata_event(header)
+        return process_index
+
     def add_export_data(self: any, data: str, data_type: str) -> None:
         """
         index events in bulk json
@@ -106,16 +116,6 @@ class MsprofTimeline:
                 data_list.extend(self._export_data_list)
                 return json.dumps(data_list)
         return json.dumps(self._export_data_list)
-
-    @classmethod
-    def get_timeline_header(cls: any, pid: str, pid_sort_index: int) -> list:
-        """
-        get timeline header
-        """
-        header = [["process_sort_index", pid,
-                   InfoConfReader().get_json_tid_data(), pid_sort_index]]
-        process_index = TraceViewManager.metadata_event(header)
-        return process_index
 
     def is_in_iteration(self: any, time_stamp: int) -> bool:
         """

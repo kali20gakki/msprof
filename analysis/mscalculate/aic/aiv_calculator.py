@@ -32,13 +32,6 @@ class AivCalculator(AicCalculator, MsMultiProcess):
         """
         self._parse_all_file()
 
-    def _parse(self: any, all_log_bytes: bytes) -> None:
-        aic_pmu_events = AicPmuUtils.get_pmu_events(
-            ConfigMgr.read_sample_config(self._project_path).get('aiv_profiling_events'))
-        for log_data in Utils.chunks(all_log_bytes, self.AICORE_LOG_SIZE):
-            _aic_pmu_log = AivPmuBean.decode(log_data)
-            self.calculate_pmu_list(_aic_pmu_log, aic_pmu_events, self._aiv_data_list)
-
     def save(self: any) -> None:
         """
         :return:
@@ -57,3 +50,10 @@ class AivCalculator(AicCalculator, MsMultiProcess):
         if self._file_list:
             self.aiv_calculate()
             self.save()
+
+    def _parse(self: any, all_log_bytes: bytes) -> None:
+        aic_pmu_events = AicPmuUtils.get_pmu_events(
+            ConfigMgr.read_sample_config(self._project_path).get('aiv_profiling_events'))
+        for log_data in Utils.chunks(all_log_bytes, self.AICORE_LOG_SIZE):
+            _aic_pmu_log = AivPmuBean.decode(log_data)
+            self.calculate_pmu_list(_aic_pmu_log, aic_pmu_events, self._aiv_data_list)

@@ -49,17 +49,6 @@ class MiniAicCalculator(ICalculator, MsMultiProcess):
         """
         self.events_name_list = []
 
-    def _parse_ai_core_pmu_event(self: any) -> None:
-        """
-        get ai_core_profiling_events from sample.json
-        :return:None
-        """
-        config = generate_config(PathManager.get_sample_json_path(self._project_path))
-        ai_core_profiling_events = config.get('ai_core_profiling_events', '')
-        if ai_core_profiling_events:
-            self.events_name_list = Utils.generator_to_list(AicPmuUtils.get_pmu_event_name(pmu_event)
-                                                            for pmu_event in ai_core_profiling_events.split(","))
-
     def insert_metric_summary(self: any) -> None:
         """
         insert ai core metric summary table
@@ -92,3 +81,14 @@ class MiniAicCalculator(ICalculator, MsMultiProcess):
         if config.get('ai_core_profiling_mode') == 'sample-based':
             return
         self.calculate()
+
+    def _parse_ai_core_pmu_event(self: any) -> None:
+        """
+        get ai_core_profiling_events from sample.json
+        :return:None
+        """
+        config = generate_config(PathManager.get_sample_json_path(self._project_path))
+        ai_core_profiling_events = config.get('ai_core_profiling_events', '')
+        if ai_core_profiling_events:
+            self.events_name_list = Utils.generator_to_list(AicPmuUtils.get_pmu_event_name(pmu_event)
+                                                            for pmu_event in ai_core_profiling_events.split(","))
