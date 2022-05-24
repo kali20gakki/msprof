@@ -52,6 +52,37 @@ class HwtsCalculator(ICalculator, MsMultiProcess):
         self._file_list.sort(key=lambda x: int(x.split("_")[-1]))
         self._iter_rec = IterRecorder(self._project_path)
 
+    def calculate(self: any) -> None:
+        """
+        calculate hwts data
+        :return: None
+        """
+        if ProfilingScene().is_operator():
+            self._parse_all_file()
+        else:
+            self._parse_by_iter()
+
+    def save(self: any) -> None:
+        """
+        save hwts data
+        :return: None
+        """
+        self._hwts_log_model.clear()
+        if self._log_data:
+            self._hwts_log_model.init()
+            self._hwts_log_model.flush(Utils.obj_list_to_list(self._log_data), DBNameConstant.TABLE_HWTS_TASK)
+            self._hwts_log_model.flush(self._add_batch_id(self._prep_data()), DBNameConstant.TABLE_HWTS_TASK_TIME)
+            self._hwts_log_model.finalize()
+
+    def ms_run(self: any) -> None:
+        """
+        entrance for calculating hwts
+        :return: None
+        """
+        if self._file_list:
+            self.calculate()
+            self.save()
+
     def _prep_data(self: any) -> list:
         """
         prepare data for tasktime table
@@ -146,39 +177,8 @@ class HwtsCalculator(ICalculator, MsMultiProcess):
                         batch[0]]
         return prep_data_res
 
-    def calculate(self: any) -> None:
-        """
-        calculate hwts data
-        :return: None
-        """
-        if ProfilingScene().is_operator():
-            self._parse_all_file()
-        else:
-            self._parse_by_iter()
-
     def _parse(self: any, all_log_bytes: bytes) -> None:
         for log_data in Utils.chunks(all_log_bytes, self.HWTS_LOG_SIZE):
             _task_log = HwtsLogBean.decode(log_data)
             if _task_log.is_log_type():
                 self._log_data.append(_task_log)
-
-    def save(self: any) -> None:
-        """
-        save hwts data
-        :return: None
-        """
-        self._hwts_log_model.clear()
-        if self._log_data:
-            self._hwts_log_model.init()
-            self._hwts_log_model.flush(Utils.obj_list_to_list(self._log_data), DBNameConstant.TABLE_HWTS_TASK)
-            self._hwts_log_model.flush(self._add_batch_id(self._prep_data()), DBNameConstant.TABLE_HWTS_TASK_TIME)
-            self._hwts_log_model.finalize()
-
-    def ms_run(self: any) -> None:
-        """
-        entrance for calculating hwts
-        :return: None
-        """
-        if self._file_list:
-            self.calculate()
-            self.save()
