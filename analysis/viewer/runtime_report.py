@@ -76,8 +76,10 @@ def _update_time_ratio(data: list) -> list:
     update_data = []
     sum_time = sum(datum[1] for datum in data)
     for datum in data:
-        update_datum = []
-        update_datum.append(datum[1] / sum_time * 100)
+        avg = 0
+        if not NumberConstant.is_zero(sum_time):
+            avg = datum[1] / sum_time * 100
+        update_datum = [avg]
         update_datum.extend(datum[1:])
         update_data.append(tuple(update_datum))
 
@@ -278,7 +280,7 @@ def get_opname(task: list, result_dir: str, curs_ge: any) -> str:
         op_name = _get_opname(task, result_dir, curs_ge)
         return op_name
     except sqlite3.Error as err:
-        print(err)
+        logging.error("get op name error.")
         return op_name
 
 
@@ -307,7 +309,7 @@ def add_mem_bound(value: list, vec_index: int, mac_index: int, mte2_index: int) 
     :param mte2_index: mte2 ratio index
     :return: appended value
     """
-    if max(value[vec_index], value[mac_index]):
+    if not NumberConstant.is_zero(max(value[vec_index], value[mac_index])):
         value.append(StrConstant.ACCURACY % float(value[mte2_index] /
                                                   max(value[vec_index], value[mac_index])))
     else:
