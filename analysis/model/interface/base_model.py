@@ -94,7 +94,7 @@ class BaseModel(metaclass=ABCMeta):
         if self.conn and data_list:
             sql = 'insert into {0} values ({1})'.format(table_name, "?," * (len(data_list[0]) - 1) + "?")
             if not DBManager.executemany_sql(self.conn, sql, data_list):
-                logging.warning('insert data to table {} failed, please check.'.format(table_name),
+                logging.warning('insert data to table %s failed, please check.', table_name,
                                 exc_info=Constant.TRACE_BACK_SWITCH)
 
     def drop_table(self: any, table_name: str) -> None:
