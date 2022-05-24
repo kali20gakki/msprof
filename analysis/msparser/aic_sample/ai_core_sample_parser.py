@@ -74,7 +74,7 @@ class ParsingCoreSampleData(MsMultiProcess):
             for file_name in self.file_list:
                 if is_valid_original_data(file_name, self.result_dir):
                     logging.info(
-                        "start parsing data file: {0}".format(file_name))
+                        "start parsing data file: %s", file_name)
                     self.read_binary_data(file_name)
                     FileManager.add_complete_file(self.result_dir, file_name)
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
