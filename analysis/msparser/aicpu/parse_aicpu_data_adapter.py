@@ -59,22 +59,6 @@ class ParseAiCpuDataAdapter(MsMultiProcess):
             logging.error(err, exc_info=Constant.TRACE_BACK_SWITCH)
             return EmptyClass(str(err))
 
-    def __get_aicpu_judge_data(self: any, ai_cpu_file: list) -> tuple:
-        total_size = 0
-        size_list = []
-        for file in ai_cpu_file:
-            _ai_cpu_file = PathManager.get_data_file_path(self.project_path, file)
-            size_list.append(os.path.getsize(_ai_cpu_file))
-            total_size += os.path.getsize(_ai_cpu_file)
-        if total_size < StructFmt.AI_CPU_FMT_SIZE:
-            return EmptyClass(str('Insufficient file size')), 0
-        judge_file = ai_cpu_file[0]
-        offset = 0
-        if size_list[0] < StructFmt.AI_CPU_FMT_SIZE:
-            offset = size_list[0]
-            judge_file = ai_cpu_file[1]
-        return judge_file, offset
-
     def ms_run(self: any) -> None:
         """
         main entry for parsing ai cpu data adapter
@@ -90,3 +74,19 @@ class ParseAiCpuDataAdapter(MsMultiProcess):
                 parser_obj.ms_run()
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as task_rec_err:
             logging.error(str(task_rec_err), exc_info=Constant.TRACE_BACK_SWITCH)
+
+    def __get_aicpu_judge_data(self: any, ai_cpu_file: list) -> tuple:
+        total_size = 0
+        size_list = []
+        for file in ai_cpu_file:
+            _ai_cpu_file = PathManager.get_data_file_path(self.project_path, file)
+            size_list.append(os.path.getsize(_ai_cpu_file))
+            total_size += os.path.getsize(_ai_cpu_file)
+        if total_size < StructFmt.AI_CPU_FMT_SIZE:
+            return EmptyClass(str('Insufficient file size')), 0
+        judge_file = ai_cpu_file[0]
+        offset = 0
+        if size_list[0] < StructFmt.AI_CPU_FMT_SIZE:
+            offset = size_list[0]
+            judge_file = ai_cpu_file[1]
+        return judge_file, offset

@@ -82,7 +82,7 @@ class NumberConstant:
 
     COLUMN_COUNT = 9
 
-    #pytorch msproftx event_type
+    # pytorch msproftx event_type
     MARKER = 0
     PUSH_AND_POP = 1
     START_AND_END = 2
@@ -96,8 +96,6 @@ class NumberConstant:
     # invalid id
     INVALID_STREAM_ID = -1
     INVALID_TASK_ID = -1
-
-
 
     @property
     def conversion_time(self: any) -> float:
@@ -114,3 +112,15 @@ class NumberConstant:
         :return: string max length
         """
         return self.MAX_STR_LENGTH
+
+    @staticmethod
+    def is_zero(number: any) -> bool:
+        """
+        :param number
+        """
+        if isinstance(number, int):
+            return number == 0
+        elif isinstance(number, float):
+            return number < NumberConstant.FLOAT_ZERO_BOUND
+        else:
+            return False
