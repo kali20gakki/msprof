@@ -152,7 +152,6 @@ class CalculateTaskScheduler:
         select_api_sql = 'select api,rowid,stream_id,task_id,batch_id from ApiCall ' \
                          'where tasknum != 0 order by entry_time;'
         api_thread = DBManager.fetch_all_data(runtime_curs, select_api_sql)
-        api_down_data = []
         try:
             api_down_data = self.update(api_thread)
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
