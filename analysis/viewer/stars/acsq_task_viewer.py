@@ -29,6 +29,16 @@ class AcsqTaskViewer(BaseViewer, ABC):
             'acsq_task_time': AcsqTaskModel,
         }
 
+    @staticmethod
+    def get_timeline_header() -> list:
+        pid = InfoConfReader().get_json_pid_data()
+        result = [["process_name", pid, InfoConfReader().get_json_tid_data(), "AcsqTask"]]
+
+        for sqe in SqeType:
+            thread_header = ["thread_name", pid, sqe.value, sqe.name]
+            result.append(thread_header)
+        return result
+
     def get_summary_data(self: any) -> tuple:
         """
         get acsq task op_summary data,
@@ -53,16 +63,7 @@ class AcsqTaskViewer(BaseViewer, ABC):
             task_name = "{} {}".format(str(data[1]), str(data[0]))
             result.append([task_name, pid, SqeType[data[3]].value, start_time, task_dur])
         _trace = TraceViewManager.time_graph_trace(TraceViewHeaderConstant.TASK_TIME_GRAPH_HEAD, result)
-        result = TraceViewManager.metadata_event(self._get_timeline_header())
+        result = TraceViewManager.metadata_event(AcsqTaskViewer.get_timeline_header())
         result.extend(_trace)
         return result
 
-    @staticmethod
-    def _get_timeline_header() -> list:
-        pid = InfoConfReader().get_json_pid_data()
-        result = [["process_name", pid, InfoConfReader().get_json_tid_data(), "AcsqTask"]]
-
-        for sqe in SqeType:
-            thread_header = ["thread_name", pid, sqe.value, sqe.name]
-            result.append(thread_header)
-        return result
