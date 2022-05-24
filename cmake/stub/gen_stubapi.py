@@ -38,7 +38,7 @@ def collect_header_files(path):
     """
     acl_headers = []
     ge_headers = []
-    for root, dirs, files in os.walk(path):
+    for root, _, files in os.walk(path):
         files.sort()
         for file in files:
             if file.find("acl") >= 0:

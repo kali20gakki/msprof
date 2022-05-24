@@ -22,9 +22,6 @@ class MetaRule:
         self.condition = rule_bean.rule_condition
         self.callback = callback
 
-    def __compare(self: any) -> any:
-        return self.get_metric()
-
     @abstractmethod
     def get_metric(self: any) -> any:
         """
@@ -41,6 +38,9 @@ class MetaRule:
         param = self.__compare()
         if param and self.callback:
             self.callback(**param)
+
+    def __compare(self: any) -> any:
+        return self.get_metric()
 
 
 class OperatorRule(MetaRule):

@@ -24,9 +24,33 @@ class MemoryCopyViewer:
     def __init__(self: any, project_path: str) -> None:
         self._project_path = project_path
         self._model = MemcpyModel(self._project_path,
-                                   DBNameConstant.DB_MEMORY_COPY,
-                                   DBNameConstant.TABLE_TS_MEMCPY_CALCULATION
-                                   )
+                                  DBNameConstant.DB_MEMORY_COPY,
+                                  DBNameConstant.TABLE_TS_MEMCPY_CALCULATION
+                                  )
+
+    @staticmethod
+    def add_runtime_memcpy_args(sql_data: list, args: dict) -> dict:
+        """
+        if runtime belongs to memcpy, add direction, data size, stream id, task id to args
+        sql index: 0 api name, 1 start time, 2 duration, 3 pid, 4 data size, 5 direction,
+        6 stream id, 7 task id
+        params: sql_data: runtime data
+        params: args: timeline args
+        return: updated timeline args
+        """
+        direction = MemoryCopyConstant.get_direction(sql_data[5])
+        # if data size is not zero and direction is not 'other', the runtime belongs to memcpy
+        if sql_data[4] and direction != MemoryCopyConstant.DEFAULTE_NAME:
+            args.setdefault("data size", "{} byte".format(sql_data[4]))
+            args.setdefault("memcpy direction", "{}".format(direction))
+
+            task_id = sql_data[7]
+            # if task id is not '', it is async
+            if task_id:
+                args.setdefault("stream id", sql_data[6])
+                args.setdefault("task id", sql_data[7])
+
+        return args
 
     def get_memory_copy_chip0_summary(self: any) -> None:
         """
@@ -53,8 +77,8 @@ class MemoryCopyViewer:
                 op_name = MemoryCopyConstant.DEFAULT_VIEWER_VALUE
 
                 summart_data.append((default_time_ratio, sum_val, task_count, avg_val,
-                min_val, max_val, waiting, running,
-                pending, datum[1], StrConstant.API_TYPE_MAPPING.get(
+                                     min_val, max_val, waiting, running,
+                                     pending, datum[1], StrConstant.API_TYPE_MAPPING.get(
                     StrConstant.AYNC_MEMCPY_NUM), datum[2], op_name, datum[3]))
         return summart_data
 
@@ -93,7 +117,7 @@ class MemoryCopyViewer:
         timeline_data = []
         if self._model.check_db():
             export_data = self._model.return_task_scheduler_timeline(
-                                             DBNameConstant.TABLE_TS_MEMCPY_CALCULATION)
+                DBNameConstant.TABLE_TS_MEMCPY_CALCULATION)
             for datum in export_data:
                 args = OrderedDict([("Task Type", datum[1]),
                                     ("Stream Id", datum[6]),
@@ -107,28 +131,4 @@ class MemoryCopyViewer:
                 timeline_data.append(timeline_datum)
 
         return TraceViewManager.time_graph_trace(
-                TraceViewHeaderConstant.TOP_DOWN_TIME_GRAPH_HEAD, timeline_data)
-
-    @staticmethod
-    def add_runtime_memcpy_args(sql_data: list, args: dict) -> dict:
-        """
-        if runtime belongs to memcpy, add direction, data size, stream id, task id to args
-        sql index: 0 api name, 1 start time, 2 duration, 3 pid, 4 data size, 5 direction,
-        6 stream id, 7 task id
-        params: sql_data: runtime data
-        params: args: timeline args
-        return: updated timeline args
-        """
-        direction = MemoryCopyConstant.get_direction(sql_data[5])
-        # if data size is not zero and direction is not 'other', the runtime belongs to memcpy
-        if sql_data[4] and direction != MemoryCopyConstant.DEFAULTE_NAME:
-            args.setdefault("data size", "{} byte".format(sql_data[4]))
-            args.setdefault("memcpy direction", "{}".format(direction))
-
-            task_id = sql_data[7]
-            # if task id is not '', it is async
-            if task_id:
-                args.setdefault("stream id", sql_data[6])
-                args.setdefault("task id", sql_data[7])
-
-        return args
+            TraceViewHeaderConstant.TOP_DOWN_TIME_GRAPH_HEAD, timeline_data)
