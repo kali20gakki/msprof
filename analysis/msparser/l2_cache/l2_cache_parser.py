@@ -9,11 +9,10 @@ import logging
 import os
 
 from common_func.constant import Constant
+from common_func.file_manager import FileManager
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
-from common_func.file_manager import FileManager
 from common_func.path_manager import PathManager
-from common_func.utils import Utils
 from model.l2_cache.l2_cache_parser_model import L2CacheParserModel
 from msparser.data_struct_size_constant import StructFmt
 from msparser.interface.iparser import IParser
@@ -36,17 +35,6 @@ class L2CacheParser(IParser, MsMultiProcess):
             self._l2_cache_events.append(event.strip().lower())
         self._l2_cache_data = []
         self._device_id = self.sample_config.get("device_id")
-
-    def _check_l2_cache_event_valid(self: any) -> bool:
-        if not self._l2_cache_events:
-            return False
-        if len(self._l2_cache_events) > Constant.L2_CACHE_ITEM:
-            logging.error("Option --L2_cache_events number should less than %s.", Constant.L2_CACHE_ITEM)
-            return False
-        if not set(self._l2_cache_events).issubset(Constant.L2_CACHE_EVENTS):
-            logging.error("Option --L2_cache_events value should be in %s", Constant.L2_CACHE_EVENTS)
-            return False
-        return True
 
     @staticmethod
     def _check_file_complete(file_path: str) -> int:
@@ -107,3 +95,14 @@ class L2CacheParser(IParser, MsMultiProcess):
                          ",".join(self._l2_cache_events))
             self.parse()
             self.save()
+
+    def _check_l2_cache_event_valid(self: any) -> bool:
+        if not self._l2_cache_events:
+            return False
+        if len(self._l2_cache_events) > Constant.L2_CACHE_ITEM:
+            logging.error("Option --L2_cache_events number should less than %s.", Constant.L2_CACHE_ITEM)
+            return False
+        if not set(self._l2_cache_events).issubset(Constant.L2_CACHE_EVENTS):
+            logging.error("Option --L2_cache_events value should be in %s", Constant.L2_CACHE_EVENTS)
+            return False
+        return True

@@ -26,14 +26,6 @@ class MetricFactory:
     def __init__(self: any) -> None:
         pass
 
-    @abstractmethod
-    def generate_metric(self: any, metric_name: str) -> any:
-        """
-        generate metrics
-        :param metric_name:metric name
-        :return: metric object
-        """
-
     @staticmethod
     def get_support_rules(option: str) -> list:
         """
@@ -50,6 +42,14 @@ class MetricFactory:
         except configparser.Error as err:
             logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
             return []
+
+    @abstractmethod
+    def generate_metric(self: any, metric_name: str) -> any:
+        """
+        generate metrics
+        :param metric_name:metric name
+        :return: metric object
+        """
 
 
 class OpMetricFactory(MetricFactory):
