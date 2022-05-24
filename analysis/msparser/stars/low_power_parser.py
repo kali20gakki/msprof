@@ -5,7 +5,6 @@ function: parser for ge task
 Copyright Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 """
 import logging
-from collections import defaultdict
 
 from common_func.constant import Constant
 from model.stars.lowpower_model import LowPowerModel
@@ -47,7 +46,7 @@ class LowPowerParser(IStarsParser):
                 tmp_list.extend([data.sys_time] + list(data.lp_info))
                 continue
             elif data.sys_time != tmp_list[0]:
-                logging.warning('Can not match the data which time is {}'.format(str(tmp_list[0])))
+                logging.warning('Can not match the data which time is %s', str(tmp_list[0]))
                 tmp_list.clear()
                 tmp_list.extend([data.sys_time] + list(data.lp_info))
             else:

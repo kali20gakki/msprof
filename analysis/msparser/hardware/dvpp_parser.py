@@ -36,37 +36,6 @@ class ParsingPeripheralData(MsMultiProcess):
                       [DBNameConstant.TABLE_DVPP_ORIGIN, DBNameConstant.TABLE_DVPP_REPORT])
         self._file_list.sort(key=lambda x: int(x.split("_")[-1]))
 
-    def _generate_dvpp_data(self: any, dvpp_data: list) -> None:
-        _dvpp_data = []
-        if not self.has_dvpp_id:
-            for x in dvpp_data:
-                _dvpp_data.append([self.device_id, self.replayid, float(
-                    x[0].replace(":", '.')), 0] + x[1:])
-        else:
-            for x in dvpp_data:
-                _dvpp_data.append([self.device_id, self.replayid, float(
-                    x[0].replace(":", '.'))] + x[1:])
-        self.dvpp_data = _dvpp_data
-
-    def _read_binary_helper(self: any, lines: list) -> None:
-        dvpp_data = Utils.generator_to_list(x.split() for x in lines)
-
-        if len(dvpp_data) > 0:
-            for item in dvpp_data[0]:
-                if item == "dvpp_id":
-                    self.has_dvpp_id = True
-                    break
-        else:
-            logging.warning("No Dvpp Data Found!")
-            return
-        dvpp_list = [x for x in dvpp_data if (x[1].isdigit() and len(x) == int(self.has_dvpp_id) + self.DATA_LENGTH)]
-        dvpp_data = \
-            Utils.generator_to_list(dvpp_list)
-        if not dvpp_data:
-            logging.warning("No Dvpp Data Found!")
-            return
-        self._generate_dvpp_data(dvpp_data)
-
     def dvpp_data_parsing(self: any, binary_data_path: str) -> None:
         """
         parsing dvpp data file
@@ -120,3 +89,34 @@ class ParsingPeripheralData(MsMultiProcess):
                 self.save()
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as dvpp_err:
             logging.error(str(dvpp_err))
+
+    def _generate_dvpp_data(self: any, dvpp_data: list) -> None:
+        _dvpp_data = []
+        if not self.has_dvpp_id:
+            for x in dvpp_data:
+                _dvpp_data.append([self.device_id, self.replayid, float(
+                    x[0].replace(":", '.')), 0] + x[1:])
+        else:
+            for x in dvpp_data:
+                _dvpp_data.append([self.device_id, self.replayid, float(
+                    x[0].replace(":", '.'))] + x[1:])
+        self.dvpp_data = _dvpp_data
+
+    def _read_binary_helper(self: any, lines: list) -> None:
+        dvpp_data = Utils.generator_to_list(x.split() for x in lines)
+
+        if len(dvpp_data) > 0:
+            for item in dvpp_data[0]:
+                if item == "dvpp_id":
+                    self.has_dvpp_id = True
+                    break
+        else:
+            logging.warning("No Dvpp Data Found!")
+            return
+        dvpp_list = [x for x in dvpp_data if (x[1].isdigit() and len(x) == int(self.has_dvpp_id) + self.DATA_LENGTH)]
+        dvpp_data = \
+            Utils.generator_to_list(dvpp_list)
+        if not dvpp_data:
+            logging.warning("No Dvpp Data Found!")
+            return
+        self._generate_dvpp_data(dvpp_data)
