@@ -43,6 +43,18 @@ class ConfigDataParsers:
         return parsers_dict
 
     @classmethod
+    def load_conf_file(cls: any, config_file_path: str) -> any:
+        """
+        load conf file
+        :param config_file_path: config file path
+        :return: ConfigParser
+        """
+        check_file_readable(config_file_path)
+        conf_parser_read = configparser.ConfigParser()
+        conf_parser_read.read(config_file_path)
+        return conf_parser_read
+
+    @classmethod
     def _load_parser_level(cls: any, conf_parser_read: any, section: str) -> str:
         """
         get parser level
@@ -54,18 +66,6 @@ class ConfigDataParsers:
         if conf_parser_read.has_option(section, cls.KEY_LEVEL):
             parser_level = conf_parser_read.get(section, cls.KEY_LEVEL)
         return parser_level
-
-    @classmethod
-    def load_conf_file(cls: any, config_file_path: str) -> any:
-        """
-        load conf file
-        :param config_file_path: config file path
-        :return: ConfigParser
-        """
-        check_file_readable(config_file_path)
-        conf_parser_read = configparser.ConfigParser()
-        conf_parser_read.read(config_file_path)
-        return conf_parser_read
 
     @classmethod
     def _load_parser_chip_model(cls: any, conf_parser_read: any, section: str) -> list:

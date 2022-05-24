@@ -29,6 +29,22 @@ class MsprofIteration:
     def __init__(self: any, result_dir: str) -> None:
         self._result_dir = result_dir
 
+    @staticmethod
+    def _generate_trace_result(trace_datas: list) -> list:
+        if not trace_datas:
+            return []
+        result = [(trace_datas[0][0], trace_datas[1][0])] if len(trace_datas) == 2 else [(0, trace_datas[0][0])]
+        result = [(InfoConfReader().time_from_syscnt(result[0][0], NumberConstant.MICRO_SECOND),
+                   InfoConfReader().time_from_syscnt(result[0][1], NumberConstant.MICRO_SECOND))]
+        return result
+
+    @staticmethod
+    def _generate_trace_iter_end_result(trace_datas: list) -> dict:
+        iter_end_dict = OrderedDict()
+        for trace_data in trace_datas:
+            iter_end_dict.setdefault(trace_data[0], trace_data[1])
+        return iter_end_dict
+
     def get_iteration_time(self: any, index_id: int, model_id: int) -> list:
         """
         get iteration start and end timestamp
@@ -41,18 +57,6 @@ class MsprofIteration:
         if Utils.is_training_trace_scene(self._result_dir):
             return self._generate_trace_result(self.get_train_iteration_time(index_id))
         return []
-
-    def _get_iteration_time(self: any, trace_curs: any, index_id: int, model_id: int) -> list:
-        iter_id = self.get_iteration_id_by_index_id(index_id, model_id)
-        if not iter_id:
-            return []
-        sql = "select step_end from {0} " \
-              "where iter_id>=? and iter_id<=? order by " \
-              "step_end".format(DBNameConstant.TABLE_STEP_TRACE_DATA)
-        trace_data = DBManager.fetch_all_data(trace_curs, sql, iter_id)
-        if not trace_data:
-            return []
-        return trace_data
 
     def get_step_iteration_time(self: any, index_id: int, model_id: int) -> list:
         """
@@ -71,15 +75,6 @@ class MsprofIteration:
             return []
         finally:
             DBManager.destroy_db_connect(trace_conn, trace_curs)
-
-    @staticmethod
-    def _generate_trace_result(trace_datas: list) -> list:
-        if not trace_datas:
-            return []
-        result = [(trace_datas[0][0], trace_datas[1][0])] if len(trace_datas) == 2 else [(0, trace_datas[0][0])]
-        result = [(InfoConfReader().time_from_syscnt(result[0][0], NumberConstant.MICRO_SECOND),
-                   InfoConfReader().time_from_syscnt(result[0][1], NumberConstant.MICRO_SECOND))]
-        return result
 
     def get_train_iteration_time(self: any, iteration_id: int) -> list:
         """
@@ -175,13 +170,6 @@ class MsprofIteration:
                 iter_dict.update({data[0]: [data[1], data[2]]})
         return iter_dict
 
-    @staticmethod
-    def _generate_trace_iter_end_result(trace_datas: list) -> dict:
-        iter_end_dict = OrderedDict()
-        for trace_data in trace_datas:
-            iter_end_dict.setdefault(trace_data[0], trace_data[1])
-        return iter_end_dict
-
     def get_op_iteration_dict(self: any) -> dict:
         """
         get iteration end dict where model id is 4294967295 in mix op and graph scene
@@ -202,6 +190,38 @@ class MsprofIteration:
         for trace_data in trace_datas:
             iter_dict.setdefault(trace_data[0], [trace_data[1], trace_data[2]])
         return iter_dict
+
+    def get_iteration_end_dict(self: any) -> dict:
+        """
+        get iteration end timestamp
+        """
+        if Utils.is_step_scene(self._result_dir):
+            return self.__get_trace_iteration_end()
+        if Utils.is_training_trace_scene(self._result_dir):
+            return self.__get_iter_by_training_trace()
+        return {}
+
+    def get_iteration_dict(self: any) -> dict:
+        """
+        get iteration start and end timestamp
+        """
+        if ProfilingScene().is_mix_operator_and_graph():
+            return self.__get_graph_iteration_dict()
+        if Utils.is_step_scene(self._result_dir):
+            return self.__get_iteration_dict()
+        return {}
+
+    def _get_iteration_time(self: any, trace_curs: any, index_id: int, model_id: int) -> list:
+        iter_id = self.get_iteration_id_by_index_id(index_id, model_id)
+        if not iter_id:
+            return []
+        sql = "select step_end from {0} " \
+              "where iter_id>=? and iter_id<=? order by " \
+              "step_end".format(DBNameConstant.TABLE_STEP_TRACE_DATA)
+        trace_data = DBManager.fetch_all_data(trace_curs, sql, iter_id)
+        if not trace_data:
+            return []
+        return trace_data
 
     def __get_graph_iteration_dict(self: any) -> dict:
         iter_dict = OrderedDict()
@@ -266,23 +286,3 @@ class MsprofIteration:
         if not trace_datas:
             return iter_end_dict
         return MsprofIteration._generate_trace_iter_end_result(trace_datas)
-
-    def get_iteration_end_dict(self: any) -> dict:
-        """
-        get iteration end timestamp
-        """
-        if Utils.is_step_scene(self._result_dir):
-            return self.__get_trace_iteration_end()
-        if Utils.is_training_trace_scene(self._result_dir):
-            return self.__get_iter_by_training_trace()
-        return {}
-
-    def get_iteration_dict(self: any) -> dict:
-        """
-        get iteration start and end timestamp
-        """
-        if ProfilingScene().is_mix_operator_and_graph():
-            return self.__get_graph_iteration_dict()
-        if Utils.is_step_scene(self._result_dir):
-            return self.__get_iteration_dict()
-        return {}
