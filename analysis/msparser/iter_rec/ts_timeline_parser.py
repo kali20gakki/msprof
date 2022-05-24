@@ -31,12 +31,6 @@ class TsTimelineRecParser(IParser, MsMultiProcess):
         self._file_list = file_list
         self.ts_timeline_update_data = []
 
-    def _check_step_trace_db(self: any) -> bool:
-        if not (self.trace_conn and self.trace_curs) \
-                or not DBManager.judge_table_exist(self.trace_curs, DBNameConstant.TABLE_STEP_TRACE_DATA):
-            return False
-        return True
-
     @staticmethod
     def _check_runtime_db(runtime_conn: any, runtime_curs: any) -> bool:
         if not (runtime_conn and runtime_curs) \
@@ -89,7 +83,6 @@ class TsTimelineRecParser(IParser, MsMultiProcess):
         DBManager.destroy_db_connect(self.trace_conn, self.trace_curs)
         DBManager.destroy_db_connect(runtime_conn, runtime_curs)
 
-
     def save(self: any) -> None:
         """
         save data
@@ -106,3 +99,9 @@ class TsTimelineRecParser(IParser, MsMultiProcess):
         run function
         """
         self.parse()
+
+    def _check_step_trace_db(self: any) -> bool:
+        if not (self.trace_conn and self.trace_curs) \
+                or not DBManager.judge_table_exist(self.trace_curs, DBNameConstant.TABLE_STEP_TRACE_DATA):
+            return False
+        return True

@@ -27,35 +27,6 @@ class AclDataBean(StructDecoder):
         self._process_id = None
         self._thread_id = None
 
-    def acl_decode(self: any, bin_data: any) -> any:
-        """
-        decode the acl bin data
-        :param bin_data: acl bin data
-        :return: instance of acl
-        """
-        if self.construct_bean(struct.unpack(self.ACL_FMT, bin_data)):
-            return self
-        return {}
-
-    def construct_bean(self: any, *args: dict) -> bool:
-        """
-        refresh the acl data
-        :param args: acl bin data
-        :return: True or False
-        """
-        _acl_data = args[0]
-        _magic_num, _data_tag = _acl_data[:2]
-        if _magic_num == self.ACL_MAGIC_NUM and _data_tag == self.ACL_DATA_TAG:
-            self._api_type = _acl_data[2]
-            self._api = bytes.decode(_acl_data[7]).replace('\x00', '')
-            self._api_start = _acl_data[3]
-            self._api_end = _acl_data[4]
-            self._process_id = _acl_data[5]
-            self._thread_id = _acl_data[6]
-            return True
-        logging.error("ACL data struct is incomplete: %s, please check the acl file.", hex(_magic_num))
-        return False
-
     @property
     def api_type(self: any) -> str:
         """
@@ -103,3 +74,32 @@ class AclDataBean(StructDecoder):
         :return: api thread id
         """
         return self._thread_id
+
+    def acl_decode(self: any, bin_data: any) -> any:
+        """
+        decode the acl bin data
+        :param bin_data: acl bin data
+        :return: instance of acl
+        """
+        if self.construct_bean(struct.unpack(self.ACL_FMT, bin_data)):
+            return self
+        return {}
+
+    def construct_bean(self: any, *args: dict) -> bool:
+        """
+        refresh the acl data
+        :param args: acl bin data
+        :return: True or False
+        """
+        _acl_data = args[0]
+        _magic_num, _data_tag = _acl_data[:2]
+        if _magic_num == self.ACL_MAGIC_NUM and _data_tag == self.ACL_DATA_TAG:
+            self._api_type = _acl_data[2]
+            self._api = bytes.decode(_acl_data[7]).replace('\x00', '')
+            self._api_start = _acl_data[3]
+            self._api_end = _acl_data[4]
+            self._process_id = _acl_data[5]
+            self._thread_id = _acl_data[6]
+            return True
+        logging.error("ACL data struct is incomplete: %s, please check the acl file.", hex(_magic_num))
+        return False

@@ -5,7 +5,6 @@ Copyright Huawei Technologies Co., Ltd. 2018-2019. All rights reserved.
 """
 import logging
 import os
-import sqlite3
 import struct
 
 from common_func.constant import Constant
@@ -52,6 +51,95 @@ class ParsingTSData(MsMultiProcess):
         self.tools = {'devices': []}
         self._file_list.sort(key=lambda x: int(x.split("_")[-1]))
 
+    @staticmethod
+    def _generate_ts_info(decoder: any) -> dict:
+        ts_info = {"perf_backtrace": decoder.perf_backtrace, "pc": decoder.pc, "timestamp": decoder.timestamp,
+                   "pmu_data": decoder.pmu_data}
+        ts_info["perf_backtrace"] = Utils.generator_to_list(i for i in ts_info.get("perf_backtrace", []) if i != 0)
+        lp_ = Utils.generator_to_list(hex(i) for i in ts_info.get("perf_backtrace", [])[1::2])
+        lp_ = Utils.generator_to_list(str(i) for i in lp_)
+        fr_ = Utils.generator_to_list(str(hex(i)) for i in ts_info.get("perf_backtrace", [])[0::2])
+        ts_info["callstack"] = ' <- '.join(Utils.generator_to_list(','.join(x) for x in zip(lp_, fr_)))
+        ts_info['pmu_event_type'] = ts_info.get("pmu_data", [])[0::2]
+        ts_info["pc"] = str(hex(ts_info.get("pc", "")))
+        ts_info["func_name"] = str(ts_info.get("pc", ""))
+        return ts_info
+
+    @staticmethod
+    def _generate_ts_info_in_mdc(decoder: any) -> dict:
+        ts_info = {"perf_backtrace": decoder.perf_backtrace, "pc": decoder.pc,
+                   "timestamp": decoder.timestamp, "pmu_data": decoder.pmu_data}
+        ts_info["perf_backtrace"] = Utils.generator_to_list(i for i in ts_info.get("perf_backtrace", []) if i != 0)
+        ts_info["perf_backtrace"] = Utils.generator_to_list(i for i in ts_info.get("perf_backtrace", []) if i != 0)
+        perf_backtrace = Utils.generator_to_list(hex(i) for i in ts_info.get("perf_backtrace", [])[1::2])
+        lp_ = Utils.generator_to_list(str(i) for i in perf_backtrace)
+        fr_ = Utils.generator_to_list(str(hex(i)) for i in ts_info.get("perf_backtrace", [])[0::2])
+        ts_info["callstack"] = ' <- '.join(Utils.generator_to_list(','.join(x) for x in zip(lp_, fr_)))
+        ts_info['pmu_event_type'] = ts_info.get("pmu_data", [])[0::2]
+
+        ts_info["pc"] = str(hex(ts_info.get("pc", '')))
+        ts_info["func_name"] = str(ts_info.get("pc", ''))
+        return ts_info
+
+    def read_binary_data(self: any, binary_data_path: str) -> None:
+        """
+        read binary data file
+        """
+        file_path = PathManager.get_data_file_path(self.project_path, binary_data_path)
+        if not os.path.exists(file_path):
+            return
+        _file_size = os.path.getsize(file_path)
+        try:
+            with FileOpen(file_path, "rb") as file_:
+                self._do_read_binary_data(file_.file_reader, _file_size)
+        except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
+            logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
+
+    def read_mdc_binary_data(self: any, binary_data_path: str) -> None:
+        """
+        read mdc binary data file
+        """
+        file_path = PathManager.get_data_file_path(self.project_path, binary_data_path)
+        if not os.path.exists(file_path):
+            return
+        _file_size = os.path.getsize(file_path)
+        try:
+            with FileOpen(file_path, "rb") as file_:
+                self._do_read_mdc_binary_data(file_.file_reader, _file_size)
+
+        except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
+            logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
+
+    def start_parsing_data_file(self: any) -> None:
+        """
+        start parsing data file
+        """
+        try:
+            for file_name in self._file_list:
+                self._do_parse_tscpu(file_name)
+        except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
+            logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
+
+    def save(self: any) -> None:
+        """
+        save
+        """
+        if self.ts_data and self._model:
+            self._model.init()
+            self._model.flush(self.ts_data)
+            self._model.finalize()
+
+    def ms_run(self: any) -> None:
+        """
+        run function
+        """
+        try:
+            if self._file_list:
+                self.start_parsing_data_file()
+                self.save()
+        except (OSError, SystemError, ValueError, TypeError, RuntimeError) as tscpu_err:
+            logging.error(str(tscpu_err), exc_info=Constant.TRACE_BACK_SWITCH)
+
     def _open_mdc_binary_data(self: any, binary_data_path: str) -> any:
         binary_data_file = PathManager.get_data_file_path(self.project_path, binary_data_path)
         try:
@@ -75,19 +163,44 @@ class ParsingTSData(MsMultiProcess):
             binary_file.read(self.MDC_DATA_LENGTH)
         return True
 
-    @staticmethod
-    def _generate_ts_info(decoder: any) -> dict:
-        ts_info = {"perf_backtrace": decoder.perf_backtrace, "pc": decoder.pc, "timestamp": decoder.timestamp,
-                   "pmu_data": decoder.pmu_data}
-        ts_info["perf_backtrace"] = Utils.generator_to_list(i for i in ts_info.get("perf_backtrace", []) if i != 0)
-        lp_ = Utils.generator_to_list(hex(i) for i in ts_info.get("perf_backtrace", [])[1::2])
-        lp_ = Utils.generator_to_list(str(i) for i in lp_)
-        fr_ = Utils.generator_to_list(str(hex(i)) for i in ts_info.get("perf_backtrace", [])[0::2])
-        ts_info["callstack"] = ' <- '.join(Utils.generator_to_list(','.join(x) for x in zip(lp_, fr_)))
-        ts_info['pmu_event_type'] = ts_info.get("pmu_data", [])[0::2]
-        ts_info["pc"] = str(hex(ts_info.get("pc", "")))
-        ts_info["func_name"] = str(ts_info.get("pc", ""))
-        return ts_info
+    def _insert_ts_data_in_mdc(self: any, decoder: any) -> None:
+        if decoder.header == self.HEADER_NUMBER:
+            ts_info = self._generate_ts_info_in_mdc(decoder)
+            pmu_event_count = ts_info.get("pmu_data", [])[1::2]
+            flag = NumberConstant.SUCCESS
+            for index in pmu_event_count:
+                if index > self.INT_MAX:
+                    logging.error('Invalid pmu event count: %s', index)
+                    flag = NumberConstant.ERROR
+            for pmu_vent in ts_info.get('pmu_event_type', []):
+                if not self.PMU_START <= pmu_vent <= self.PMU_END:
+                    logging.error('Invalid pmu event: %s', pmu_vent)
+                    flag = NumberConstant.ERROR
+            if flag == NumberConstant.ERROR:
+                return
+            ts_info['pmu_event_type'] = Utils.generator_to_list(hex(i) for i in ts_info.get('pmu_event_type', []))
+            for i in range(self.MDC_PERF_PMU_DATA_SIZE):
+                self.ts_data.append((self.replayid, ts_info.get("timestamp", 0),
+                                     ts_info.get("pc", "").replace('L', ''),
+                                     ts_info.get("callstack", ""),
+                                     ts_info.get('pmu_event_type', [])[i],
+                                     pmu_event_count[i],
+                                     ts_info.get("func_name", "")))
+
+    def _do_parse_tscpu(self: any, file_name: str) -> None:
+        if is_valid_original_data(file_name, self.project_path):
+            logging.info(
+                "start parsing tscpu data file: %s", file_name)
+            self.replayid = '0'  # replay id is 0
+            self.tools.get('devices', []).append(self.device_id)
+            if self._open_mdc_binary_data(file_name):
+                self.calculate = OffsetCalculator(self._file_list, StructFmt.MDC_TSCPU_FMT_SIZE,
+                                                  self.project_path)
+                self.read_mdc_binary_data(file_name)
+            else:
+                self.read_binary_data(file_name)
+            FileManager.add_complete_file(self.project_path, file_name)
+            logging.info("Create TsCPU DB finished!")
 
     def _insert_ts_data(self: any, decoder: any) -> None:
         if decoder.header == self.HEADER_NUMBER:
@@ -124,60 +237,6 @@ class ParsingTSData(MsMultiProcess):
             else:
                 break
 
-    def read_binary_data(self: any, binary_data_path: str) -> None:
-        """
-        read binary data file
-        """
-        file_path = PathManager.get_data_file_path(self.project_path, binary_data_path)
-        if not os.path.exists(file_path):
-            return
-        _file_size = os.path.getsize(file_path)
-        try:
-            with FileOpen(file_path, "rb") as file_:
-                self._do_read_binary_data(file_.file_reader, _file_size)
-        except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
-            logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
-
-    @staticmethod
-    def _generate_ts_info_in_mdc(decoder: any) -> dict:
-        ts_info = {"perf_backtrace": decoder.perf_backtrace, "pc": decoder.pc,
-                   "timestamp": decoder.timestamp, "pmu_data": decoder.pmu_data}
-        ts_info["perf_backtrace"] = Utils.generator_to_list(i for i in ts_info.get("perf_backtrace", []) if i != 0)
-        ts_info["perf_backtrace"] = Utils.generator_to_list(i for i in ts_info.get("perf_backtrace", []) if i != 0)
-        perf_backtrace = Utils.generator_to_list(hex(i) for i in ts_info.get("perf_backtrace", [])[1::2])
-        lp_ = Utils.generator_to_list(str(i) for i in perf_backtrace)
-        fr_ = Utils.generator_to_list(str(hex(i)) for i in ts_info.get("perf_backtrace", [])[0::2])
-        ts_info["callstack"] = ' <- '.join(Utils.generator_to_list(','.join(x) for x in zip(lp_, fr_)))
-        ts_info['pmu_event_type'] = ts_info.get("pmu_data", [])[0::2]
-
-        ts_info["pc"] = str(hex(ts_info.get("pc", '')))
-        ts_info["func_name"] = str(ts_info.get("pc", ''))
-        return ts_info
-
-    def _insert_ts_data_in_mdc(self: any, decoder: any) -> None:
-        if decoder.header == self.HEADER_NUMBER:
-            ts_info = self._generate_ts_info_in_mdc(decoder)
-            pmu_event_count = ts_info.get("pmu_data", [])[1::2]
-            flag = NumberConstant.SUCCESS
-            for index in pmu_event_count:
-                if index > self.INT_MAX:
-                    logging.error('Invalid pmu event count: %s', index)
-                    flag = NumberConstant.ERROR
-            for pmu_vent in ts_info.get('pmu_event_type', []):
-                if not self.PMU_START <= pmu_vent <= self.PMU_END:
-                    logging.error('Invalid pmu event: %s', pmu_vent)
-                    flag = NumberConstant.ERROR
-            if flag == NumberConstant.ERROR:
-                return
-            ts_info['pmu_event_type'] = Utils.generator_to_list(hex(i) for i in ts_info.get('pmu_event_type', []))
-            for i in range(self.MDC_PERF_PMU_DATA_SIZE):
-                self.ts_data.append((self.replayid, ts_info.get("timestamp", 0),
-                                     ts_info.get("pc", "").replace('L', ''),
-                                     ts_info.get("callstack", ""),
-                                     ts_info.get('pmu_event_type', [])[i],
-                                     pmu_event_count[i],
-                                     ts_info.get("func_name", "")))
-
     def _do_read_mdc_binary_data(self: any, file: any, file_size: int) -> None:
         tscpu_data = self.calculate.pre_process(file, file_size)
         for _index in range(file_size // StructFmt.MDC_TSCPU_FMT_SIZE):
@@ -188,63 +247,3 @@ class ParsingTSData(MsMultiProcess):
                 self._insert_ts_data_in_mdc(decoder)
             else:
                 break
-
-    def read_mdc_binary_data(self: any, binary_data_path: str) -> None:
-        """
-        read mdc binary data file
-        """
-        file_path = PathManager.get_data_file_path(self.project_path, binary_data_path)
-        if not os.path.exists(file_path):
-            return
-        _file_size = os.path.getsize(file_path)
-        try:
-            with FileOpen(file_path, "rb") as file_:
-                self._do_read_mdc_binary_data(file_.file_reader, _file_size)
-
-        except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
-            logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
-
-    def _do_parse_tscpu(self: any, file_name: str) -> None:
-        if is_valid_original_data(file_name, self.project_path):
-            logging.info(
-                "start parsing tscpu data file: %s", file_name)
-            self.replayid = '0'  # replay id is 0
-            self.tools.get('devices', []).append(self.device_id)
-            if self._open_mdc_binary_data(file_name):
-                self.calculate = OffsetCalculator(self._file_list, StructFmt.MDC_TSCPU_FMT_SIZE,
-                                                  self.project_path)
-                self.read_mdc_binary_data(file_name)
-            else:
-                self.read_binary_data(file_name)
-            FileManager.add_complete_file(self.project_path, file_name)
-            logging.info("Create TsCPU DB finished!")
-
-    def start_parsing_data_file(self: any) -> None:
-        """
-        start parsing data file
-        """
-        try:
-            for file_name in self._file_list:
-                self._do_parse_tscpu(file_name)
-        except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
-            logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
-
-    def save(self: any) -> None:
-        """
-        save
-        """
-        if self.ts_data and self._model:
-            self._model.init()
-            self._model.flush(self.ts_data)
-            self._model.finalize()
-
-    def ms_run(self: any) -> None:
-        """
-        run function
-        """
-        try:
-            if self._file_list:
-                self.start_parsing_data_file()
-                self.save()
-        except (OSError, SystemError, ValueError, TypeError, RuntimeError) as tscpu_err:
-            logging.error(str(tscpu_err), exc_info=Constant.TRACE_BACK_SWITCH)
