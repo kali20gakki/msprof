@@ -40,8 +40,7 @@ class TsTimelineRecParser(IParser, MsMultiProcess):
 
     @staticmethod
     def _get_ts_timeline_update_data(db_path: str, time_ranges: list, runtime_curs: any) -> list:
-        DBManager.add_new_column(db_path, DBNameConstant.TABLE_STEP_TRACE_DATA, "ai_core_num", "INT",
-                                 default_value=0)
+        DBManager.add_new_column(db_path, DBNameConstant.TABLE_STEP_TRACE_DATA, "ai_core_num", "INT", '0')
         sql = "select count(*) from {0} " \
               "where tasktype=0 and taskState=3 and timestamp>? " \
               "and timestamp<?".format(DBNameConstant.TABLE_RUNTIME_TIMELINE)
