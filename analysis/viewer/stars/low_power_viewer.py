@@ -73,7 +73,7 @@ class LowPowerViewer(BaseViewer, ABC):
             result.append(["AIC TEMP (℃)", data[self.TIME_STAMP], self.pid, self.TEM_OF_AI_CORE,
                            {'value': data[self.TEM_OF_AI_CORE]}])
             result.append(
-                ["HBM Controller TEMP  (℃)", data[self.TIME_STAMP], self.pid, self.TEM_OF_HBM,
+                ["HBM Controller TEMP (℃)", data[self.TIME_STAMP], self.pid, self.TEM_OF_HBM,
                  {'value': data[self.TEM_OF_HBM]}])
             result.append(["HBM TEMP (℃)", data[self.TIME_STAMP], self.pid, self.TEM_OF_HBM,
                            {'value': data[self.TEM_OF_HBM_GRANULARITY]}])
@@ -82,7 +82,7 @@ class LowPowerViewer(BaseViewer, ABC):
                  {'value': data[self.TEM_OF_CPU]}])
             result.append(["Peripherals TEMP (℃)", data[self.TIME_STAMP], self.pid, self.TEM_OF_PERIPHERALS,
                            {'value': data[self.TEM_OF_PERIPHERALS]}])
-            result.append(["L2Buff TEMP (℃)", data[self.TIME_STAMP], self.pid, self.TEM_OF_L2_BUFF,
+            result.append(["L2 Buffer TEMP (℃)", data[self.TIME_STAMP], self.pid, self.TEM_OF_L2_BUFF,
                            {'value': data[self.TEM_OF_L2_BUFF]}])
             result.append(["DPM AIC Current (A)", data[self.TIME_STAMP], self.pid, self.AIC_CURRENT_DPM,
                            {'value': data[self.AIC_CURRENT_DPM]}])
