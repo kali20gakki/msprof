@@ -49,8 +49,8 @@ class InterSocViewer(BaseViewer, ABC):
             return []
         result = []
         for data in datas:
-            result.append(["buffer_bw_level", data[self.TIME_STAMP], {'value': data[self.BUFFER_BW_LEVEL]}])
-            result.append(["mata_bw_level", data[self.TIME_STAMP], {'value': data[self.MATA_BW_LEVEL]}])
+            result.append(["Buffer BW Level", data[self.TIME_STAMP], {'Value': data[self.BUFFER_BW_LEVEL]}])
+            result.append(["Mata BW Level", data[self.TIME_STAMP], {'Value': data[self.MATA_BW_LEVEL]}])
         for data in result:
             data[2:2] = [self.pid, InfoConfReader().get_json_tid_data()]
         _trace = TraceViewManager.column_graph_trace(TraceViewHeaderConstant.COLUMN_GRAPH_HEAD_LEAST, result)
