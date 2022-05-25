@@ -10,7 +10,7 @@ SAMPLE_CONFIG = {"result_dir": "test",
                  "model_id": 1}
 
 
-class TestAccPmuModel(unittest.TestCase):
+class TestOpSummaryModel(unittest.TestCase):
 
     def test_create_table(self):
         with mock.patch(NAMESPACE + '.OpSummaryModel.create_ge_summary_table', return_value=""), \
