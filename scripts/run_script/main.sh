@@ -108,19 +108,25 @@ function implement_install() {
 function copy_file() {
 	local filename=${1}
 	local target_file=$(readlink -f ${2})
-	
+	echo ${2}
+	echo ${target_file}
+	if [ ! -f "$filename" ] && [ ! -d "$filename" ]; then
+		return
+	fi
+
 	if [ -f "$target_file" ] || [ -d "$target_file" ]; then
 		chmod u+w $(dirname ${target_file})
 		travFolder ${target_file} u+w
-		rm -r ${target_file}
+		rm -r -f ${target_file}
 		
-		cp -r ${filename} ${target_file}
+		cp -r -p ${filename} ${target_file}
 		travFolder ${target_file} $right
 		chmod u-w $(dirname ${target_file})
 		
 		print "INFO" "$filename is replaced."
 		return
 	fi
+	echo ${target_file}
 	print "WARNING" "$target_file is non-existent."
 }
 
