@@ -35,6 +35,7 @@ class TestParsingAICoreSampleData(unittest.TestCase):
             check.read_binary_data(binary_data_path)
         with mock.patch('os.path.getsize', return_value=len(data)), \
                 mock.patch(NAMESPACE + '.PathManager.get_data_file_path'), \
+                mock.patch(NAMESPACE + '.OffsetCalculator.pre_process', return_value='test\\test'), \
                 mock.patch('common_func.file_manager.check_path_valid'), \
                 mock.patch('os.path.join', return_value='test\\test'), \
                 mock.patch('builtins.open', mock.mock_open(

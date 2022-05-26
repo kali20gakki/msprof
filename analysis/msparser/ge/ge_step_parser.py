@@ -24,6 +24,21 @@ class GeStepParser(DataParser, MsMultiProcess):
         self._file_list = file_list
         self.data = []
 
+    @staticmethod
+    def read_binary_data(bean_class: any, bean_data: any) -> any:
+        """
+        read binary data
+        """
+        return bean_class().fusion_decode(bean_data)
+
+    @staticmethod
+    def _get_step_data(bean_data: any) -> list:
+        if not bean_data:
+            return []
+        return [bean_data.model_id, bean_data.stream_id,
+                bean_data.task_id, bean_data.thread_id, bean_data.timestamp,
+                bean_data.index_num, bean_data.tag, bean_data.batch_id]
+
     def parse(self: any) -> None:
         """
         parse ge step data
@@ -34,21 +49,6 @@ class GeStepParser(DataParser, MsMultiProcess):
                                              StructFmt.GE_STEP_SIZE,
                                              GeStepBean,
                                              self._get_step_data)
-
-    @staticmethod
-    def _get_step_data(bean_data: any) -> list:
-        if not bean_data:
-            return []
-        return [bean_data.model_id, bean_data.stream_id,
-                bean_data.task_id, bean_data.thread_id, bean_data.timestamp,
-                bean_data.index_num, bean_data.tag, bean_data.batch_id]
-
-    @staticmethod
-    def read_binary_data(bean_class: any, bean_data: any) -> any:
-        """
-        read binary data
-        """
-        return bean_class().fusion_decode(bean_data)
 
     def save(self: any) -> str:
         """

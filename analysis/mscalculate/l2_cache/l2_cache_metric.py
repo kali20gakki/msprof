@@ -18,8 +18,12 @@ class HitRateMetric(IMetrics):
         self.hit_value = hit_value
         self.request_value = request_value
 
-    def _calculate_hit_rate(self: any) -> float:
-        return round(self.get_division(self.hit_value, self.request_value), NumberConstant.DECIMAL_ACCURACY)
+    @staticmethod
+    def class_name() -> str:
+        """
+        class name
+        """
+        return HitRateMetric.__name__
 
     def run_rules(self: any) -> float:
         """
@@ -27,12 +31,8 @@ class HitRateMetric(IMetrics):
         """
         return self._calculate_hit_rate()
 
-    @staticmethod
-    def class_name() -> str:
-        """
-        class name
-        """
-        return HitRateMetric.__name__
+    def _calculate_hit_rate(self: any) -> float:
+        return round(self.get_division(self.hit_value, self.request_value), NumberConstant.DECIMAL_ACCURACY)
 
 
 class VictimRateMetric(IMetrics):
@@ -44,8 +44,12 @@ class VictimRateMetric(IMetrics):
         self.victim_value = victim_value
         self.request_value = request_value
 
-    def _calculate_victim_rate(self: any) -> float:
-        return round(self.get_division(self.victim_value, self.request_value), NumberConstant.DECIMAL_ACCURACY)
+    @staticmethod
+    def class_name() -> str:
+        """
+        class name
+        """
+        return VictimRateMetric.__name__
 
     def run_rules(self: any) -> float:
         """
@@ -53,9 +57,5 @@ class VictimRateMetric(IMetrics):
         """
         return self._calculate_victim_rate()
 
-    @staticmethod
-    def class_name() -> str:
-        """
-        class name
-        """
-        return VictimRateMetric.__name__
+    def _calculate_victim_rate(self: any) -> float:
+        return round(self.get_division(self.victim_value, self.request_value), NumberConstant.DECIMAL_ACCURACY)

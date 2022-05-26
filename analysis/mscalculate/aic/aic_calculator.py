@@ -41,6 +41,16 @@ class AicCalculator(ICalculator, MsMultiProcess):
         self._aic_data_list = []
         self._file_list.sort(key=lambda x: int(x.split("_")[-1]))
 
+    def calculate(self: any) -> None:
+        """
+        calculate the ai core
+        :return: None
+        """
+        if ProfilingScene().is_operator():
+            self._parse_all_file()
+        else:
+            self._parse_by_iter()
+
     def _get_total_aic_count(self: any) -> int:
         sum_file_size = 0
         for file in self._file_list:
@@ -68,9 +78,10 @@ class AicCalculator(ICalculator, MsMultiProcess):
         :return: None
         """
         if self._iter_model.check_db() and self._iter_model.check_table():
+            # iter_id means [iter_id-1, iter_id]
             _iter_id = MsprofIteration(self._project_path). \
-                get_iteration_id_by_index_id(self._sample_config.get("iter_id"), self._sample_config.get("model_id"))
-            offset_count, total_count = self._get_offset_and_total(_iter_id)
+                get_iter_id_by_index_id(self._sample_config.get("iter_id"), self._sample_config.get("model_id"))
+            offset_count, total_count = self._get_offset_and_total(_iter_id[0] + 1)
             if total_count <= 0:
                 logging.warning("The ai core data that is not satisfied by the specified iteration!")
                 return
@@ -86,16 +97,6 @@ class AicCalculator(ICalculator, MsMultiProcess):
             logging.info("start parsing ai core data file: %s", os.path.basename(_file))
             with open(_file, 'rb') as _aic_reader:
                 self._parse(_offset_calculator.pre_process(_aic_reader, os.path.getsize(_file)))
-
-    def calculate(self: any) -> None:
-        """
-        calculate the ai core
-        :return: None
-        """
-        if ProfilingScene().is_operator():
-            self._parse_all_file()
-        else:
-            self._parse_by_iter()
 
     def _parse(self: any, all_log_bytes: bytes) -> None:
         aic_pmu_events = AicPmuUtils.get_pmu_events(

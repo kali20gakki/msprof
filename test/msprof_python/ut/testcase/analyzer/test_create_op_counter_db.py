@@ -93,15 +93,13 @@ class TestMergeOPCounter(unittest.TestCase):
         res[1].execute("drop table op_report")
         db_manager.destroy(res)
 
-    def test_get_ge_sql(self):
-        with mock.patch('analyzer.scene_base.profiling_scene.Utils.get_scene',
-                        return_value="step_info"):
+    def test_get_ge_data(self):
+        with mock.patch(NAMESPACE + '.MsprofIteration.get_iter_dict_with_index_and_model',
+                        return_value={}), \
+             mock.patch(NAMESPACE + '.DBManager.fetch_all_data', return_value=[1]):
             check = MergeOPCounter(CONFIG)
-            ProfilingScene().init('')
-            result = check._get_ge_sql()
-        self.assertEqual(result[0],
-                         "select model_id, op_name, op_type, task_type, task_id, stream_id, batch_id from TaskInfo where (index_id=? or index_id=0) and model_id=?")
-        self.assertEqual(result[1], (1, -1))
+            result = check._get_ge_data('')
+        self.assertEqual(result, [])
 
     def test_get_op_report_sql(self):
         with mock.patch('analyzer.scene_base.profiling_scene.Utils.get_scene',
@@ -117,39 +115,16 @@ class TestMergeOPCounter(unittest.TestCase):
                          "and ge_task_merge.task_type=rts_task.task_type and ge_task_merge.batch_id=rts_task.batch_id group by op_type,ge_task_merge.task_type")
 
     def test_create_ge_merge(self):
-        create_sql = "CREATE TABLE if not exists ge_task_data(device_id INTEGER,model_name TEXT," \
-                     "model_id INTEGER,op_name TEXT,stream_id INTEGER,task_id INTEGER," \
-                     "block_dim INTEGER,op_state TEXT,task_type TEXT,op_type TEXT," \
-                     "iter_id INTEGER,input_count INTEGER,input_formats TEXT," \
-                     "input_data_types TEXT,input_shapes TEXT,output_count INTEGER," \
-                     "output_formats TEXT,output_data_types TEXT,output_shapes TEXT)"
-        insert_sql = "insert into ge_task_data values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
-        data = ((0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 1, 8, 9, 5, 4, 6, 5, 4, 4),)
-        db_manager_ge = DBManager()
-        db_manager_op = DBManager()
-        res_ge = db_manager_ge.create_table('ge_info.db', create_sql, insert_sql, data)
-        res_op_counter = db_manager_op.create_table('op_counter.db')
-        res_op_counter[1].execute("CREATE TABLE IF NOT EXISTS ge_task_merge(model_name text,"
-                                  "model_id INTEGER,op_name text,op_type text,task_id INTEGER,"
-                                  "stream_id INTEGER,device_id INTEGER)")
-        ge_sql = "select model_name, model_id, op_name, op_type, task_id, stream_id, " \
-                 "device_id from ge_task_data where (iter_id=? or iter_id=0) and model_id=?"
 
         with mock.patch('os.path.join', return_value='test\\db'), \
                 mock.patch(NAMESPACE + '.DBManager.check_connect_db_path',
-                           return_value=res_ge), \
-                mock.patch(NAMESPACE + '.DBManager.judge_table_exist',
-                           return_value=True), \
-                mock.patch(NAMESPACE + '.MergeOPCounter._get_ge_sql',
-                           return_value=(ge_sql, (1, 1))):
+                           return_value=(True, True)), \
+                mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True), \
+                mock.patch(NAMESPACE + '.MergeOPCounter._get_ge_data', return_value=[[1]]), \
+                mock.patch(NAMESPACE + '.DBManager.executemany_sql'), \
+                mock.patch(NAMESPACE + '.DBManager.destroy_db_connect'):
             check = MergeOPCounter(CONFIG)
-            check._create_ge_merge(res_op_counter[1])
-        res_ge = db_manager_ge.create_table('ge_info.db')
-        res_ge[1].execute("drop table ge_task_data")
-        db_manager_ge.destroy(res_ge)
-        res_op_counter[1].execute("drop table ge_task_merge")
-        res_op_counter[0].commit()
-        db_manager_op.destroy(res_op_counter)
+            check._create_ge_merge('')
 
     def test_create_task(self):
         InfoConfReader()._info_json = {'devices': '0'}

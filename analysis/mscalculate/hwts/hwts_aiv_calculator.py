@@ -8,6 +8,7 @@ Copyright Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
 from analyzer.scene_base.profiling_scene import ProfilingScene
 from analyzer.op_common_function import OpCommonFunc
 from common_func.db_name_constant import DBNameConstant
+from common_func.info_conf_reader import InfoConfReader
 from common_func.utils import Utils
 from common_func.constant import Constant
 from common_func.batch_counter import BatchCounter
@@ -63,5 +64,10 @@ class HwtsAivCalculator(HwtsCalculator):
         for index, datum in enumerate(prep_data_res):
             # index 0 stream id, index 1 task id
             batch_id = batch_counter.calculate_batch(datum[0], datum[1])
-            prep_data_res[index] = list(datum) + [batch_id]
+            prep_data_res[index] = list(datum[:2]) + [
+                InfoConfReader().time_from_syscnt(datum[2]),
+                InfoConfReader().time_from_syscnt(datum[3]),
+                self._sample_config.get('iter_id'),
+                self._sample_config.get('model_id'),
+                batch_id]
         return prep_data_res

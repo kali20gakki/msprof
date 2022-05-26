@@ -330,11 +330,11 @@ namespace utils {
 
 #define MSVP_TRY_BLOCK_BREAK(block) \
     do {                            \
-        try                         \
-            block catch (...)       \
-            {                       \
+        try {                       \
+            block                   \
+        } catch (...) {             \
                 break;              \
-            }                       \
+        }                           \
     } while (0)
 
 #define FUNRET_CHECK_RET_VALUE(inPut, checkValue, checkOkRetValue, checkFailRetValue) do {   \

@@ -10,7 +10,7 @@ set(msprofBinHeader
     ../
     ../app
     ${TOP_DIR}/collector/dvvp/depend/inc/mmpa
-    ${TOP_DIR}/opensource/securec/include
+    ${TOP_DIR}/platform/securec/include
     ${TOP_DIR}/collector/dvvp/depend/inc/slog
     ${TOP_DIR}/opensource/json/include
     ${TOP_DIR}/collector/dvvp/depend/inc/metadef/error_manager/error_manager_stub
