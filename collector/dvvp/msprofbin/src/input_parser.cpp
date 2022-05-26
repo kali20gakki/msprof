@@ -837,7 +837,7 @@ int InputParser::CheckArgsIsNumber(const struct MsprofCmdInfo &cmdInfo, int opt)
         CmdLog::instance()->CmdErrorLog("Argument --%s is empty, please enter a valid value.", longOptions[opt].name);
         return MSPROF_DAEMON_ERROR;
     }
-    if (!Utils::CheckStringIsNonNegativeIntNum(cmdInfo.args[opt])) {
+    if (!Utils::CheckStringIsValidNatureNum(cmdInfo.args[opt])) {
         CmdLog::instance()->CmdErrorLog("Argument --%s: invalid value: %s."
             "Please input an integer value.", longOptions[opt].name, cmdInfo.args[opt]);
         return MSPROF_DAEMON_ERROR;
@@ -1082,10 +1082,10 @@ void InputParser::MsprofFreqUpdateParams(const struct MsprofCmdInfo &cmdInfo, in
             params_->interconnection_sampling_interval = (THOUSAND / std::stoi(cmdInfo.args[opt]));
             break;
         case ARGS_EXPORT_ITERATION_ID:
-            params_->exportIterationId = std::stoi(cmdInfo.args[opt]);
+            params_->exportIterationId = cmdInfo.args[opt];
             break;
         case ARGS_EXPORT_MODEL_ID:
-            params_->exportModelId = std::stoi(cmdInfo.args[opt]);
+            params_->exportModelId = cmdInfo.args[opt];
             break;
         default:
             break;
