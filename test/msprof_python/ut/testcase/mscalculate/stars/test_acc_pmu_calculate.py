@@ -31,7 +31,7 @@ class TestAccPmuCalculator(unittest.TestCase):
     def test_calculate(self):
         file_list = {DataTag.STARS_LOG: ['stars_soc.data.0.slice_0', 'stars_soc.data.0.slice_1']}
         with DBOpen(DBNameConstant.DB_SOC_LOG) as db_open:
-            with mock.patch(NAMESPACE + '.AccPmuCalculator._get_task_time_form_acsq', return_value=[]), \
+            with mock.patch(NAMESPACE + '.AccPmuCalculator.get_task_time_form_acsq', return_value=[]), \
                  mock.patch(NAMESPACE + '.ClassRowType.class_row', return_value=True), \
                  mock.patch(NAMESPACE + '.DBManager.fetch_all_data', return_value=[]):
                 check = AccPmuCalculator(file_list, self.sample_config)
