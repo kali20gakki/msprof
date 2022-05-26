@@ -20,7 +20,8 @@ ErrorManager &ErrorManager::GetInstance() {
     return instance;
 }
 
-error_message::Context &ErrorManager::GetErrorManagerContext() {
+error_message::Context &ErrorManager::GetErrorManagerContext()
+{
     return error_context_;
 }
 

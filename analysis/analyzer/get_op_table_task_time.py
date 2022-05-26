@@ -5,6 +5,7 @@ Copyright Huawei Technologies Co., Ltd. 2021-2022. All rights reserved.
 import logging
 import sqlite3
 
+from common_func.utils import Utils
 from model.interface.view_model import ViewModel
 from analyzer.scene_base.profiling_scene import ProfilingScene
 from common_func.constant import Constant
@@ -80,8 +81,7 @@ class GetOpTableTsTime:
     def _get_ai_core_task_time(self: any) -> list:
         model_view = ViewModel(self.project_path, self._get_db_name(), [self._task_time_table])
         if model_view.check_table():
-            return model_view.get_sql_data(
-                self._get_ai_core_sql(bool(model_view.attach_to_db(DBNameConstant.DB_GE_INFO))))
+            return model_view.get_sql_data(self._get_ai_core_sql())
         return []
 
     def _get_aiv_task_time(self: any) -> list:
@@ -97,63 +97,40 @@ class GetOpTableTsTime:
             ai_cpu_time.extend(model_view.get_sql_data(self._get_ai_cpu_task_sql()))
         return ai_cpu_time
 
-    def _get_ai_core_sql(self: any, has_ge_data: bool) -> str:
+    def _get_ai_core_sql(self: any) -> str:
         if ProfilingScene().is_training_trace() or ProfilingScene().is_operator():
-            return self._get_op_ai_core_task_time_sql(has_ge_data)
-        return self._get_no_op_ai_core_task_time_sql(has_ge_data)
+            return self._get_op_ai_core_task_time_sql()
+        return self._get_no_op_ai_core_task_time_sql()
 
-    def _get_op_ai_core_task_time_sql(self: any, has_ge_data: bool) -> str:
+    def _get_op_ai_core_task_time_sql(self: any) -> str:
         """
         get ai core task time sql without model id
         :return:
         """
+        limit = 'where tasktype=0' if ChipManager().is_chip_v1() else ''
         sql = "select {1}.task_id, {1}.stream_id, {1}.running, {1}.complete - {1}.running, '{0}', " \
-              "{1}.index_id, {1}.batch_id from {1} inner join {2} where {1}.task_id={2}.task_id " \
-              "and {1}.stream_id={2}.stream_id and {1}.batch_id={2}.batch_id and {2}.task_type='{0}' " \
-              "group by running order by running" \
-            .format(Constant.TASK_TYPE_AI_CORE, self._task_time_table, DBNameConstant.TABLE_GE_TASK)
-        if not has_ge_data:
-            sql = "select {1}.task_id, {1}.stream_id, {1}.running, {1}.complete - {1}.running, '{0}', " \
-                  "{1}.index_id, {1}.batch_id from {1} group by running order by running" \
-                .format(Constant.TASK_TYPE_AI_CORE, self._task_time_table)
-        if ChipManager().is_chip_v1():
-            sql = "select {1}.task_id, {1}.stream_id, {1}.runtime, {1}.completetime - {1}.runtime, '{0}', " \
-                  "{1}.index_id, 0 as batch_id from {1} where tasktype=0 order by runtime" \
-                .format(Constant.TASK_TYPE_AI_CORE, self._task_time_table)
-        elif ChipManager().is_chip_v2():
-            sql = "select {1}.task_id, {1}.stream_id, {1}.running, {1}.complete - {1}.running, '{0}', " \
-                  "{1}.index_id, {1}.batch_id from {1} order by running" \
-                .format(Constant.TASK_TYPE_AI_CORE, self._task_time_table)
+              "{1}.index_id, {1}.batch_id from {1} {limit} group by running order by running" \
+            .format(Constant.TASK_TYPE_AI_CORE, self._task_time_table, limit=limit)
         return sql
 
-    def _get_no_op_ai_core_task_time_sql(self: any, has_ge_data: bool) -> str:
+    def _get_no_op_ai_core_task_time_sql(self: any) -> str:
         """
         get ai core task time sql with model id
         :return:
         """
+        limit = 'and tasktype=0' if ChipManager().is_chip_v1() else ''
         sql = "select {1}.task_id, {1}.stream_id, {1}.running, {1}.complete - {1}.running, '{0}'," \
-              " {1}.index_id, {1}.model_id, {1}.batch_id from {1} inner join {2} where {1}.task_id={2}.task_id and " \
-              "{1}.stream_id={2}.stream_id and {1}.batch_id={2}.batch_id " \
-              "and {1}.index_id= {3} and {1}.model_id={4} and {2}.task_type='{0}' order by running " \
-            .format(Constant.TASK_TYPE_AI_CORE, self._task_time_table, DBNameConstant.TABLE_GE_TASK,
-                    self.iter_id, self.model_id)
-        if not has_ge_data:
+              " {1}.index_id, {1}.model_id, {1}.batch_id from {1} where " \
+              "{1}.index_id={2} and {1}.model_id={3} {limit} order by running " \
+            .format(Constant.TASK_TYPE_AI_CORE, self._task_time_table,
+                    self.iter_id, self.model_id, limit=limit)
+        if Utils.need_all_model_in_one_iter(self.project_path, self.model_id):
+            # export all index data when pytorch graph no model_id set
+            limit = 'where tasktype=0' if ChipManager().is_chip_v1() else ''
             sql = "select {1}.task_id, {1}.stream_id, {1}.running, {1}.complete - {1}.running, '{0}'," \
-                  " {1}.index_id, {1}.model_id, {1}.batch_id from {1} where " \
-                  "{1}.index_id= {2} and {1}.model_id={3}  order by running " \
-                .format(Constant.TASK_TYPE_AI_CORE, self._task_time_table,
-                        self.iter_id, self.model_id)
-        if ChipManager().is_chip_v1():
-            sql = "select {1}.task_id, {1}.stream_id, {1}.runtime, {1}.completetime - {1}.runtime, '{0}', " \
-                  "{1}.index_id, {1}.model_id, 0 as batch_id " \
-                  "from {1} where tasktype=0 and {1}.model_id={2} order by rowid" \
-                .format(Constant.TASK_TYPE_AI_CORE, self._task_time_table, self.model_id)
-        elif ChipManager().is_chip_v2():
-            sql = "select {1}.task_id, {1}.stream_id, {1}.running, {1}.complete - {1}.running, '{0}'," \
-                  " {1}.index_id, {1}.model_id, {1}.batch_id from {1} where " \
-                  "{1}.index_id= {2} and {1}.model_id={3} order by running " \
-                .format(Constant.TASK_TYPE_AI_CORE, self._task_time_table, self.iter_id,
-                        self.model_id)
+                  " {1}.index_id, {1}.model_id, {1}.batch_id from {1} " \
+                  "{limit} order by running " \
+                .format(Constant.TASK_TYPE_AI_CORE, self._task_time_table, limit=limit)
         return sql
 
     def _get_ai_cpu_task_sql(self: any) -> str:
@@ -164,16 +141,17 @@ class GetOpTableTsTime:
         if ProfilingScene().is_operator():
             return self.get_op_ai_cpu_task_sql()
         iter_time = MsprofIteration(self.project_path).get_iteration_time(self.iter_id, self.model_id)
-        ai_cpu_sql = "select task_id, stream_id, sys_start*{MS_TO_NS}, (sys_end - sys_start)*{MS_TO_NS}, " \
-                     "'{1}', {4}, batch_id from {0} where sys_start >= {2} and sys_end <= {3}" \
-            .format(DBNameConstant.TABLE_AI_CPU, Constant.TASK_TYPE_AI_CPU, iter_time[0][0] / NumberConstant.MS_TO_US,
-                    iter_time[0][1] / NumberConstant.MS_TO_US, self.iter_id,
-                    MS_TO_NS=NumberConstant.MS_TO_NS)
-        if ChipManager().is_chip_v1() or ProfilingScene().is_step_trace():
+
+        ai_cpu_sql = ''
+        try:
             ai_cpu_sql = "select task_id, stream_id, sys_start*{MS_TO_NS}, (sys_end - sys_start)*{MS_TO_NS}, " \
                          "'{1}', {4}, {5}, batch_id from {0} where sys_start >= {2} and sys_end <= {3}" \
                 .format(DBNameConstant.TABLE_AI_CPU, Constant.TASK_TYPE_AI_CPU,
                         iter_time[0][0] / NumberConstant.NS_TO_US,
                         iter_time[0][1] / NumberConstant.NS_TO_US,
-                        self.iter_id, self.model_id, MS_TO_NS=NumberConstant.MS_TO_NS)
+                        self.iter_id, self.model_id,
+                        MS_TO_NS=NumberConstant.MS_TO_NS)
+        except ZeroDivisionError as err:
+            logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
+            return ai_cpu_sql
         return ai_cpu_sql

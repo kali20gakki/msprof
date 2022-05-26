@@ -25,15 +25,6 @@ class PathManager:
     PROFILER = ".profiler"
     HCCL = "hccl"
 
-    @staticmethod
-    def get_path_under_result_dir(result_dir: str, *paths: str) -> str:
-        """
-        get directory path
-        """
-        if result_dir is not None:
-            return os.path.join(result_dir, *paths)
-        return ""
-
     @classmethod
     def get_data_dir(cls: any, result_dir: str) -> str:
         """
@@ -113,6 +104,15 @@ class PathManager:
         get hccl trace path in result directory
         """
         return cls.get_path_under_result_dir(result_dir, cls.HCCL)
+
+    @staticmethod
+    def get_path_under_result_dir(result_dir: str, *paths: str) -> str:
+        """
+        get directory path
+        """
+        if result_dir is not None:
+            return os.path.join(result_dir, *paths)
+        return ""
 
     @staticmethod
     def check_map_file_path(map_file_path: str, cfg_parser: any) -> bool:

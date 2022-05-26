@@ -31,13 +31,6 @@ class QueryCommand:
     def __init__(self: any, collection_path: str) -> None:
         self.collection_path = os.path.realpath(collection_path)
 
-    def check_argument_valid(self: any) -> None:
-        """
-        Check the argument valid
-        :return: None
-        """
-        check_path_valid(self.collection_path, False)
-
     @staticmethod
     def _calculate_str_length(headers: list, data: list) -> list:
         max_header_list = Utils.generator_to_list(len(header) for header in headers)
@@ -84,6 +77,23 @@ class QueryCommand:
                                 _result.top_time_iteration])
         return result_data
 
+    def check_argument_valid(self: any) -> None:
+        """
+        Check the argument valid
+        :return: None
+        """
+        check_path_valid(self.collection_path, False)
+
+    def process(self: any) -> None:
+        """
+        handle query command
+        :return: None
+        """
+        self.check_argument_valid()
+        table_data = self._get_query_data()
+        sorted_table_data = sorted(table_data, key=itemgetter(0, 3))
+        self._format_print(sorted_table_data)
+
     def _get_query_data(self: any) -> list:
         result_data = []
         if DataCheckManager.contain_info_json_data(self.collection_path):  # find profiling data dir
@@ -103,13 +113,3 @@ class QueryCommand:
                         warn(self.FILE_NAME, 'Invalid parsing dir("%s"), -dir must be profiling data dir '
                                              'such as PROF_XXX_XXX_XXX' % self.collection_path)
         return result_data
-
-    def process(self: any) -> None:
-        """
-        handle query command
-        :return: None
-        """
-        self.check_argument_valid()
-        table_data = self._get_query_data()
-        sorted_table_data = sorted(table_data, key=itemgetter(0, 3))
-        self._format_print(sorted_table_data)

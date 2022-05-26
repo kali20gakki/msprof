@@ -67,15 +67,6 @@ class MsprofTxParser(IParser, MsMultiProcess):
             logging.error("%s: %s", file_name, err, exc_info=Constant.TRACE_BACK_SWITCH)
             return NumberConstant.ERROR
 
-    def _original_data_handler(self: any, file_name: str) -> None:
-        logging.info(
-            "start parsing msproftx data file: %s", file_name)
-        status_ = self.read_binary_data(file_name)
-        FileManager.add_complete_file(self._project_path, file_name)
-        if status_:
-            logging.error('Insert MsprofTx data error.')
-        logging.info("Create MSPROFTX DB finished!")
-
     def parse(self: any) -> None:
         """
         parsing data file
@@ -108,3 +99,12 @@ class MsprofTxParser(IParser, MsMultiProcess):
                 self.save()
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
             logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
+
+    def _original_data_handler(self: any, file_name: str) -> None:
+        logging.info(
+            "start parsing msproftx data file: %s", file_name)
+        status_ = self.read_binary_data(file_name)
+        FileManager.add_complete_file(self._project_path, file_name)
+        if status_:
+            logging.error('Insert MsprofTx data error.')
+        logging.info("Create MSPROFTX DB finished!")

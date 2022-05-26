@@ -5,7 +5,6 @@ Copyright Huawei Technologies Co., Ltd. 2018-2019. All rights reserved.
 """
 
 import logging
-import os
 import re
 
 from common_func.constant import Constant
@@ -70,19 +69,6 @@ class ParsingMemoryData(MsMultiProcess):
 
         return tmp_list, match_flag
 
-    def _match_sys_data(self: any, file: any) -> None:
-        match_flag = False
-        tmp_list = [None, None, None, None, None, None, None, None, None, None, None]
-        while True:
-            line = file.readline(Constant.MAX_READ_LINE_BYTES)
-            if not line:
-                break
-            if re.match(r'TimeStamp:\d+', line):
-                match_flag = True
-                tmp_list[0] = line.split(':')[1].strip()
-            if match_flag:
-                tmp_list, match_flag = self.match_sys_data(line, tmp_list)
-
     def get_sys_data(self: any, file_name: str) -> None:
         """
         get system memory data
@@ -93,28 +79,6 @@ class ParsingMemoryData(MsMultiProcess):
                 self._match_sys_data(file_.file_reader)
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
             logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
-
-    def _match_pid_data(self: any, file: any, pid: str) -> None:
-        match_flag = False
-        tmp_list = [None, None, None, None, None]
-        while True:
-            line = file.readline(Constant.MAX_READ_LINE_BYTES)
-            if re.match(r'TimeStamp:\d+', line):
-                match_flag = True
-                tmp_list[0] = line.split(':')[1].strip()
-            if match_flag:
-                if 'ProcessName' in line:
-                    tmp_list[1] = ''.join(line.split(':')[1:]).strip()
-                result = re.match(self.PID_DATA_PATTERN, line)
-                if result:
-                    tmp_list[2], tmp_list[3], tmp_list[4], _, _, _, _ = result.groups()
-            if line == '\n':
-                tmp_list.append(pid)
-                self.data_dict.get('pid_data_list', []).append(tmp_list)
-                tmp_list = [None, None, None, None, None]
-                match_flag = False
-            if not line:
-                break
 
     def get_pid_data(self: any, file_name: str) -> None:
         """
@@ -170,3 +134,38 @@ class ParsingMemoryData(MsMultiProcess):
                 self.save()
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
             logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
+
+    def _match_sys_data(self: any, file: any) -> None:
+        match_flag = False
+        tmp_list = [None, None, None, None, None, None, None, None, None, None, None]
+        while True:
+            line = file.readline(Constant.MAX_READ_LINE_BYTES)
+            if not line:
+                break
+            if re.match(r'TimeStamp:\d+', line):
+                match_flag = True
+                tmp_list[0] = line.split(':')[1].strip()
+            if match_flag:
+                tmp_list, match_flag = self.match_sys_data(line, tmp_list)
+
+    def _match_pid_data(self: any, file: any, pid: str) -> None:
+        match_flag = False
+        tmp_list = [None, None, None, None, None]
+        while True:
+            line = file.readline(Constant.MAX_READ_LINE_BYTES)
+            if re.match(r'TimeStamp:\d+', line):
+                match_flag = True
+                tmp_list[0] = line.split(':')[1].strip()
+            if match_flag:
+                if 'ProcessName' in line:
+                    tmp_list[1] = ''.join(line.split(':')[1:]).strip()
+                result = re.match(self.PID_DATA_PATTERN, line)
+                if result:
+                    tmp_list[2], tmp_list[3], tmp_list[4], _, _, _, _ = result.groups()
+            if line == '\n':
+                tmp_list.append(pid)
+                self.data_dict.get('pid_data_list', []).append(tmp_list)
+                tmp_list = [None, None, None, None, None]
+                match_flag = False
+            if not line:
+                break

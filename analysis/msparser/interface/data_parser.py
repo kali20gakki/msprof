@@ -7,8 +7,8 @@ import os
 from abc import abstractmethod
 
 from common_func.constant import Constant
-from common_func.file_manager import FileOpen
 from common_func.file_manager import FileManager
+from common_func.file_manager import FileOpen
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.msvp_common import is_valid_original_data
 from common_func.os_manager import check_file_readable
@@ -26,6 +26,30 @@ class DataParser(IParser):
     def __init__(self: any, sample_config: dict) -> None:
         self._sample_config = sample_config
         self._project_path = sample_config.get(StrConstant.SAMPLE_CONFIG_PROJECT_PATH)
+
+    @staticmethod
+    def read_binary_data(bean_class: any, bean_data: any) -> any:
+        """
+        read binary data
+        :param bean_class:
+        :param bean_data:
+        :return:
+        """
+        return bean_class.decode(bean_data)
+
+    @abstractmethod
+    def parse(self: any) -> None:
+        """
+        parse the data under the file path
+        :return: NA
+        """
+
+    @abstractmethod
+    def save(self: any) -> None:
+        """
+        save the result of data parsing
+        :return: NA
+        """
 
     def parse_plaintext_data(self: any, file_list: list, format_func: any) -> list:
         """
@@ -70,27 +94,3 @@ class DataParser(IParser):
         file_path = PathManager.get_data_file_path(self._project_path, file_name)
         check_file_readable(file_path)
         return file_path
-
-    @staticmethod
-    def read_binary_data(bean_class: any, bean_data: any) -> any:
-        """
-        read binary data
-        :param bean_class:
-        :param bean_data:
-        :return:
-        """
-        return bean_class.decode(bean_data)
-
-    @abstractmethod
-    def parse(self: any) -> None:
-        """
-        parse the data under the file path
-        :return: NA
-        """
-
-    @abstractmethod
-    def save(self: any) -> None:
-        """
-        save the result of data parsing
-        :return: NA
-        """
