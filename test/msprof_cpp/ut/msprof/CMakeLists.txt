@@ -102,7 +102,7 @@ target_include_directories(msprofiler_utest PRIVATE
 	../stub/
 	${GTEST_INCLUDE_DIR}
     ${MOCKCPP_INCLUDE_DIR}
-    ${TOP_DIR}/opensource/securec/include
+    ${TOP_DIR}/platform/securec/include
     ${TOP_DIR}/opensource/json/include
     ${TOP_DIR}/collector/inc/
     ${TOP_DIR}/collector/inc/toolchain/
@@ -245,7 +245,7 @@ add_executable(msprof_utest
 target_include_directories(msprof_utest PRIVATE
 	${GTEST_INCLUDE_DIR}
 	${MOCKCPP_INCLUDE_DIR}
-	${TOP_DIR}/opensource/securec/include
+	${TOP_DIR}/platform/securec/include
 	${TOP_DIR}/opensource/json/include
         ${TOP_DIR}/collector/inc/
         ${TOP_DIR}/collector/inc/toolchain/

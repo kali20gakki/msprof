@@ -24,17 +24,6 @@ class GeFusionOpParser(DataParser, MsMultiProcess):
         self.data = []
         self.table_list = []
 
-    def parse(self: any) -> None:
-        """
-        parse fusion op data
-        """
-        fusion_op_file = self._file_list.get(DataTag.GE_FUSION_OP_INFO, [])
-        if fusion_op_file:
-            self.data = self.parse_bean_data(fusion_op_file,
-                                             StructFmt.GE_FUSION_OP_SIZE,
-                                             GeFusionOpInfoBean,
-                                             self._get_fusion_op_info_data)
-
     @staticmethod
     def read_binary_data(bean_class: any, bean_data: any) -> any:
         """
@@ -53,6 +42,17 @@ class GeFusionOpParser(DataParser, MsMultiProcess):
         return [bean_data.model_id, fusion_name, bean_data.fusion_op_num,
                 bean_data.fusion_op, bean_data.input_mem_size, bean_data.output_mem_size,
                 bean_data.weight_mem_size, bean_data.workspace_mem_size, bean_data.total_mem_size]
+
+    def parse(self: any) -> None:
+        """
+        parse fusion op data
+        """
+        fusion_op_file = self._file_list.get(DataTag.GE_FUSION_OP_INFO, [])
+        if fusion_op_file:
+            self.data = self.parse_bean_data(fusion_op_file,
+                                             StructFmt.GE_FUSION_OP_SIZE,
+                                             GeFusionOpInfoBean,
+                                             self._get_fusion_op_info_data)
 
     def save(self: any) -> str:
         """

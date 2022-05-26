@@ -217,7 +217,6 @@ class MsProfExportDataUtils:
                                            params)
         message = {"job_id": params.get(StrConstant.PARAM_JOB_ID), "host_id": MsProfCommonConstant.DEFAULT_IP,
                    "device_id": params.get(StrConstant.PARAM_DEVICE_ID),
-                   "iter_id": params.get(StrConstant.PARAM_ITER_ID),
                    'result_dir': params.get(StrConstant.PARAM_RESULT_DIR)}
         return TaskOpViewer.get_task_op_summary(message)
 
@@ -342,14 +341,12 @@ class MsProfExportDataUtils:
         device_id = params.get(StrConstant.PARAM_DEVICE_ID)
         index_id = params.get(StrConstant.PARAM_ITER_ID)
         result_dir = params.get(StrConstant.PARAM_RESULT_DIR)
-        model_id = params.get(StrConstant.PARAM_MODEL_ID)
-        iter_id = MsprofIteration(result_dir).get_iteration_id_by_index_id(index_id, model_id)
 
         if params.get(StrConstant.PARAM_EXPORT_TYPE) == MsProfCommonConstant.TIMELINE:
             return TopDownData.get_top_down_timeline_data(
-                result_dir, device_id, iter_id)
+                result_dir, device_id, index_id)
 
-        return TopDownData.get_top_down_data(result_dir, device_id, iter_id)
+        return TopDownData.get_top_down_data(result_dir, device_id, index_id)
 
     @staticmethod
     def _get_l2_cache_data(configs: dict, params: dict) -> tuple:

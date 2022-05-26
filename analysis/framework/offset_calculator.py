@@ -6,8 +6,8 @@ Copyright Huawei Technologies Co., Ltd. 2021. All rights reserved.
 import logging
 import os
 
-from common_func.path_manager import PathManager
 from common_func.constant import Constant
+from common_func.path_manager import PathManager
 
 
 class OffsetCalculator:
@@ -69,21 +69,6 @@ class FileCalculator(OffsetCalculator):
         self._file_cache = bytes()
         self._is_first_file = False
 
-    def _get_sum_size(self: any) -> int:
-        """
-        :return: file offset
-        """
-        return self.struct_size * self._offset_count + self.calculate_total_offset()
-
-    def _get_total_need_size(self: any) -> int:
-        return self._total_count * self.struct_size
-
-    def _get_file_offset(self: any, total_sum_size: int) -> int:
-        if not self._is_first_file:
-            self._is_first_file = True
-            return total_sum_size
-        return 0
-
     def prepare_process(self: any) -> bytes:
         """
         prepare to process data
@@ -110,6 +95,21 @@ class FileCalculator(OffsetCalculator):
                 self._read_binary_file(_file, _file_offset, _file_offset + _total_need_size)
                 return self._file_cache
         return self._file_cache
+
+    def _get_sum_size(self: any) -> int:
+        """
+        :return: file offset
+        """
+        return self.struct_size * self._offset_count + self.calculate_total_offset()
+
+    def _get_total_need_size(self: any) -> int:
+        return self._total_count * self.struct_size
+
+    def _get_file_offset(self: any, total_sum_size: int) -> int:
+        if not self._is_first_file:
+            self._is_first_file = True
+            return total_sum_size
+        return 0
 
     def _read_binary_file(self: any, _file: str, left_offset: int, right_offset: int) -> any:
         with open(_file, 'rb') as _file_reader:

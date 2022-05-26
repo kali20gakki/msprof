@@ -330,7 +330,7 @@ Status aclgrphProfDestroyConfig(ACL_GRPH_PROF_CONFIG_PTR profilerConfig)
     return SUCCESS;
 }
 
-static bool preCheckGraphProfConfig(ACL_GRPH_PROF_CONFIG_PTR profilerConfig)
+static bool PreCheckGraphProfConfig(ACL_GRPH_PROF_CONFIG_PTR profilerConfig)
 {
     if (profilerConfig == nullptr) {
         MSPROF_LOGE("Param profilerConfig is nullptr");
@@ -356,7 +356,7 @@ Status aclgrphProfStart(ACL_GRPH_PROF_CONFIG_PTR profilerConfig)
     }
     MSPROF_LOGI("Start to execute aclgrphProfStart");
     std::lock_guard<std::mutex> lock(g_aclgraphProfMutex);
-    if (!preCheckGraphProfConfig(profilerConfig)) {
+    if (!PreCheckGraphProfConfig(profilerConfig)) {
         MSPROF_LOGE("PreCheck GraphProfConfig Failed.");
         MSPROF_INNER_ERROR("EK9999", "PreCheck GraphProfConfig Failed.");
         return FAILED;
@@ -403,7 +403,7 @@ Status aclgrphProfStop(ACL_GRPH_PROF_CONFIG_PTR profilerConfig)
     }
     MSPROF_LOGI("Start to execute aclgrphProfStop");
     std::lock_guard<std::mutex> lock(g_aclgraphProfMutex);
-    if (!preCheckGraphProfConfig(profilerConfig)) {
+    if (!PreCheckGraphProfConfig(profilerConfig)) {
         MSPROF_LOGE("PreCheck GraphProfConfig Failed.");
         MSPROF_INNER_ERROR("EK9999", "PreCheck GraphProfConfig Failed.");
         return FAILED;

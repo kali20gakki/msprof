@@ -70,40 +70,40 @@ class LowPowerViewer(BaseViewer, ABC):
         for data in datas:
             result.append(["Sampling Times", data[self.TIME_STAMP], self.pid, self.SAMPLEING_TIMES,
                            {'value': data[self.SAMPLEING_TIMES]}])
-            result.append(["AIC Temperature (℃)", data[self.TIME_STAMP], self.pid, self.TEM_OF_AI_CORE,
+            result.append(["AIC TEMP (℃)", data[self.TIME_STAMP], self.pid, self.TEM_OF_AI_CORE,
                            {'value': data[self.TEM_OF_AI_CORE]}])
             result.append(
-                ["HBM Controller Temperature  (℃)", data[self.TIME_STAMP], self.pid, self.TEM_OF_HBM,
+                ["HBM Controller TEMP (℃)", data[self.TIME_STAMP], self.pid, self.TEM_OF_HBM,
                  {'value': data[self.TEM_OF_HBM]}])
-            result.append(["HBM Temperature (℃)", data[self.TIME_STAMP], self.pid, self.TEM_OF_HBM,
+            result.append(["HBM TEMP (℃)", data[self.TIME_STAMP], self.pid, self.TEM_OF_HBM,
                            {'value': data[self.TEM_OF_HBM_GRANULARITY]}])
             result.append(
-                ["CPU Temperature (℃)", data[self.TIME_STAMP], self.pid, self.TEM_OF_CPU,
+                ["CPU TEMP (℃)", data[self.TIME_STAMP], self.pid, self.TEM_OF_CPU,
                  {'value': data[self.TEM_OF_CPU]}])
-            result.append(["Peripherals Temperature (℃)", data[self.TIME_STAMP], self.pid, self.TEM_OF_PERIPHERALS,
+            result.append(["Peripherals TEMP (℃)", data[self.TIME_STAMP], self.pid, self.TEM_OF_PERIPHERALS,
                            {'value': data[self.TEM_OF_PERIPHERALS]}])
-            result.append(["L2buff Temperature (℃)", data[self.TIME_STAMP], self.pid, self.TEM_OF_L2_BUFF,
+            result.append(["L2 Buffer TEMP (℃)", data[self.TIME_STAMP], self.pid, self.TEM_OF_L2_BUFF,
                            {'value': data[self.TEM_OF_L2_BUFF]}])
             result.append(["DPM AIC Current (A)", data[self.TIME_STAMP], self.pid, self.AIC_CURRENT_DPM,
                            {'value': data[self.AIC_CURRENT_DPM]}])
-            result.append(["DPM Power Consumption (W)", data[self.TIME_STAMP], self.pid, self.POWER_COS_DPM,
+            result.append(["DPM Power (W)", data[self.TIME_STAMP], self.pid, self.POWER_COS_DPM,
                            {'value': data[self.POWER_COS_DPM]}])
-            result.append(["SD5003 AIC Current (A)", data[self.TIME_STAMP], self.pid, self.AIC_CURRENT_SD5003,
+            result.append(["AIC Current (A)", data[self.TIME_STAMP], self.pid, self.AIC_CURRENT_SD5003,
                            {'value': data[self.AIC_CURRENT_SD5003]}])
-            result.append(["SD5003 Power Consumption (W)", data[self.TIME_STAMP], self.pid, self.POWER_COS_SD5003,
+            result.append(["AIC Power (W)", data[self.TIME_STAMP], self.pid, self.POWER_COS_SD5003,
                            {'value': data[self.POWER_COS_SD5003]}])
             result.append(
-                ["SD5003 Voltage (V)", data[self.TIME_STAMP], self.pid, self.VOLTAGE, {'value': data[self.VOLTAGE]}])
-            result.append(["AIC Frequency (Mhz)", data[self.TIME_STAMP], self.pid, self.AIC_FREQUENCY,
+                ["AIC Voltage (V)", data[self.TIME_STAMP], self.pid, self.VOLTAGE, {'value': data[self.VOLTAGE]}])
+            result.append(["AIC Frequency (MHz)", data[self.TIME_STAMP], self.pid, self.AIC_FREQUENCY,
                            {'value': data[self.AIC_FREQUENCY]}])
             result.append(["Imon", data[self.TIME_STAMP], self.pid, self.IMON, {'value': data[self.IMON]}])
-            result.append(["Temperature Warning 0", data[self.TIME_STAMP], self.pid, self.WARN_CNT0,
+            result.append(["TEMP Warning 0", data[self.TIME_STAMP], self.pid, self.WARN_CNT0,
                            {'value': data[self.WARN_CNT0]}])
-            result.append(["Temperature Warning 1", data[self.TIME_STAMP], self.pid, self.WARN_CNT1,
+            result.append(["TEMP Warning 1", data[self.TIME_STAMP], self.pid, self.WARN_CNT1,
                            {'value': data[self.WARN_CNT1]}])
-            result.append(["Temperature Warning 2", data[self.TIME_STAMP], self.pid, self.WARN_CNT2,
+            result.append(["TEMP Warning 2", data[self.TIME_STAMP], self.pid, self.WARN_CNT2,
                            {'value': data[self.WARN_CNT2]}])
-            result.append(["Temperature Warning 3", data[self.TIME_STAMP], self.pid, self.WARN_CNT3,
+            result.append(["TEMP Warning 3", data[self.TIME_STAMP], self.pid, self.WARN_CNT3,
                            {'value': data[self.WARN_CNT3]}])
         _trace = TraceViewManager.column_graph_trace(TraceViewHeaderConstant.COLUMN_GRAPH_HEAD_LEAST, result)
         result = TraceViewManager.metadata_event(self.get_timeline_header())

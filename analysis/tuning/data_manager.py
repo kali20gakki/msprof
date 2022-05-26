@@ -24,6 +24,7 @@ class DataManager:
     """
     get operator data by infer id
     """
+
     @staticmethod
     def get_memory_workspace(memory_workspaces: list, operator_dict: dict) -> None:
         """
@@ -84,6 +85,43 @@ class DataManager:
         return op_data
 
     @classmethod
+    def get_vector_bound(cls: any, extend_data_dict: dict, operator_dict: dict) -> None:
+        """
+        get data for vector bound
+        """
+        if operator_dict.get("vec_ratio") and operator_dict.get("mte2_ratio") \
+                and operator_dict.get("mac_ratio"):
+            extend_data_dict["vector_bound"] = 0
+            if max(operator_dict.get("mte2_ratio"), operator_dict.get("mac_ratio")):
+                extend_data_dict["vector_bound"] = \
+                    StrConstant.ACCURACY % float(operator_dict.get("vec_ratio") /
+                                                 max(operator_dict.get("mte2_ratio"), operator_dict.get("mac_ratio")))
+
+    @classmethod
+    def get_core_number(cls: any, extend_data_dict: dict) -> None:
+        """
+        get core number
+        """
+        extend_data_dict["core_num"] = InfoConfReader().get_data_under_device("ai_core_num")
+
+    @classmethod
+    def select_memory_workspace(cls: any, project: str, device_id: any) -> list:
+        """
+        query memory workspace from db
+        """
+        memory_workspaces = []
+        if not cls.is_network(project, device_id):
+            return memory_workspaces
+        conn, cur = DBManager.check_connect_db(project, DBNameConstant.DB_GE_MODEL_INFO)
+        if conn and cur and DBManager.judge_table_exist(cur, DBNameConstant.TABLE_GE_LOAD_TABLE):
+            sql = "select stream_id, task_ids, memory_workspace " \
+                  "from GELoad where memory_workspace>0 " \
+                  "and device_id=?"
+            memory_workspaces = DBManager.fetch_all_data(cur, sql, (device_id,))
+        DBManager.destroy_db_connect(conn, cur)
+        return memory_workspaces
+
+    @classmethod
     def _get_base_data(cls: any, device_id: any, infer_id: any, project_path: str) -> tuple:
         if cls.is_network(project_path, device_id):
             configs = {
@@ -122,40 +160,3 @@ class DataManager:
         cls.get_vector_bound(extend_data_dict, operator_dict)
         operator_dict.update(extend_data_dict)
         return extend_data_dict
-
-    @classmethod
-    def get_vector_bound(cls: any, extend_data_dict: dict, operator_dict: dict) -> None:
-        """
-        get data for vector bound
-        """
-        if operator_dict.get("vec_ratio") and operator_dict.get("mte2_ratio") \
-                and operator_dict.get("mac_ratio"):
-            extend_data_dict["vector_bound"] = 0
-            if max(operator_dict.get("mte2_ratio"), operator_dict.get("mac_ratio")):
-                extend_data_dict["vector_bound"] = \
-                    StrConstant.ACCURACY % float(operator_dict.get("vec_ratio") /
-                    max(operator_dict.get("mte2_ratio"), operator_dict.get("mac_ratio")))
-
-    @classmethod
-    def get_core_number(cls: any, extend_data_dict: dict) -> None:
-        """
-        get core number
-        """
-        extend_data_dict["core_num"] = InfoConfReader().get_data_under_device("ai_core_num")
-
-    @classmethod
-    def select_memory_workspace(cls: any, project: str, device_id: any) -> list:
-        """
-        query memory workspace from db
-        """
-        memory_workspaces = []
-        if not cls.is_network(project, device_id):
-            return memory_workspaces
-        conn, cur = DBManager.check_connect_db(project, DBNameConstant.DB_GE_MODEL_INFO)
-        if conn and cur and DBManager.judge_table_exist(cur, DBNameConstant.TABLE_GE_LOAD_TABLE):
-            sql = "select stream_id, task_ids, memory_workspace " \
-                  "from GELoad where memory_workspace>0 " \
-                  "and device_id=?"
-            memory_workspaces = DBManager.fetch_all_data(cur, sql, (device_id,))
-        DBManager.destroy_db_connect(conn, cur)
-        return memory_workspaces

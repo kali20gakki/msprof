@@ -24,31 +24,12 @@ class GeTensorParser(DataParser, MsMultiProcess):
         self._file_list = file_list
         self.data = []
 
-    def parse(self: any) -> None:
+    @staticmethod
+    def read_binary_data(bean_class: any, bean_data: any) -> any:
         """
-        parse ge tensor data
+        read binary data
         """
-        fusion_tensor_file = self._file_list.get(DataTag.GE_TENSOR, [])
-        if fusion_tensor_file:
-            self.data = self.parse_bean_data(fusion_tensor_file,
-                                             StructFmt.GE_TENSOR_SIZE,
-                                             GeTensorBean,
-                                             self._get_tensor_data)
-            self._update_tensor_data()
-
-    def _update_tensor_data(self: any) -> None:
-        hash_dict = {}
-        for data in self.data:
-            if len(data) < 13:
-                continue
-            # 0 model; 1 stream; 2 task; 10 index; 11 timestamp; 12 batch
-            key = "{}_{}_{}_{}_{}_{}".format(
-                str(data[0]), str(data[1]), str(data[2]), str(data[10]), str(data[11]), str(data[12]))
-            if key not in hash_dict.keys():
-                self._generate_new_hash_dict_data(hash_dict, key, data)
-            else:
-                self._update_hash_dict_data(hash_dict, key, data)
-        self._assemble_tensor_data(hash_dict)
+        return bean_class().fusion_decode(bean_data)
 
     @classmethod
     def _generate_new_hash_dict_data(cls: any, hash_dict: dict, key: any, data: list) -> None:
@@ -74,22 +55,6 @@ class GeTensorParser(DataParser, MsMultiProcess):
         value['output_shape'] += (";" + str(data[9])) if data[9] else ''
         hash_dict[key] = value
 
-    def _assemble_tensor_data(self: any, hash_dict: dict) -> None:
-        self.data = []
-        for key, value in hash_dict.items():
-            model_id = int(key.split("_")[0])
-            stream_id = int(key.split("_")[1])
-            task_id = int(key.split("_")[2])
-            index_id = int(key.split("_")[3])
-            timestamp = str(key.split("_")[4])
-            batch_id = str(key.split("_")[5])
-            self.data.append(
-                [model_id, stream_id, task_id, value['tensor_num'], value['input_format'].strip(';'),
-                 value['input_data_type'].strip(';'), "\"" + value['input_shape'].strip(';') + "\"",
-                 value['output_format'].strip(';'), value['output_data_type'].strip(';'),
-                 "\"" + value['output_shape'].strip(';') + "\"", index_id, timestamp, batch_id]
-            )
-
     @staticmethod
     def _get_tensor_data(bean_data: any) -> list:
         if not bean_data:
@@ -99,12 +64,17 @@ class GeTensorParser(DataParser, MsMultiProcess):
                 bean_data.input_shape, bean_data.output_format, bean_data.output_data_type,
                 bean_data.output_shape, bean_data.index_num, bean_data.timestamp, bean_data.batch_id]
 
-    @staticmethod
-    def read_binary_data(bean_class: any, bean_data: any) -> any:
+    def parse(self: any) -> None:
         """
-        read binary data
+        parse ge tensor data
         """
-        return bean_class().fusion_decode(bean_data)
+        fusion_tensor_file = self._file_list.get(DataTag.GE_TENSOR, [])
+        if fusion_tensor_file:
+            self.data = self.parse_bean_data(fusion_tensor_file,
+                                             StructFmt.GE_TENSOR_SIZE,
+                                             GeTensorBean,
+                                             self._get_tensor_data)
+            self._update_tensor_data()
 
     def save(self: any) -> str:
         """
@@ -122,3 +92,33 @@ class GeTensorParser(DataParser, MsMultiProcess):
             return {}
         self.parse()
         return {DBNameConstant.TABLE_GE_TENSOR: self.data}
+
+    def _update_tensor_data(self: any) -> None:
+        hash_dict = {}
+        for data in self.data:
+            if len(data) < 13:
+                continue
+            # 0 model; 1 stream; 2 task; 10 index; 11 timestamp; 12 batch
+            key = "{}_{}_{}_{}_{}_{}".format(
+                str(data[0]), str(data[1]), str(data[2]), str(data[10]), str(data[11]), str(data[12]))
+            if key not in hash_dict.keys():
+                self._generate_new_hash_dict_data(hash_dict, key, data)
+            else:
+                self._update_hash_dict_data(hash_dict, key, data)
+        self._assemble_tensor_data(hash_dict)
+
+    def _assemble_tensor_data(self: any, hash_dict: dict) -> None:
+        self.data = []
+        for key, value in hash_dict.items():
+            model_id = int(key.split("_")[0])
+            stream_id = int(key.split("_")[1])
+            task_id = int(key.split("_")[2])
+            index_id = int(key.split("_")[3])
+            timestamp = str(key.split("_")[4])
+            batch_id = str(key.split("_")[5])
+            self.data.append(
+                [model_id, stream_id, task_id, value['tensor_num'], value['input_format'].strip(';'),
+                 value['input_data_type'].strip(';'), "\"" + value['input_shape'].strip(';') + "\"",
+                 value['output_format'].strip(';'), value['output_data_type'].strip(';'),
+                 "\"" + value['output_shape'].strip(';') + "\"", index_id, timestamp, batch_id]
+            )

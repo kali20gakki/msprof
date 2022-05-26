@@ -7,12 +7,10 @@ Copyright Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
 
 import logging
 import os
-import sys
 
 from common_func.file_name_manager import get_file_name_pattern_match
 from common_func.file_name_manager import get_host_disk_usage_compiles
 from common_func.ms_multi_process import MsMultiProcess
-from common_func.msprof_exception import ProfException
 from common_func.msvp_common import is_valid_original_data
 from common_func.path_manager import PathManager
 from host_prof.host_disk_usage.presenter.host_disk_usage_presenter import HostDiskUsagePresenter
@@ -27,6 +25,13 @@ class DiskUsageAnalysis(MsMultiProcess):
         MsMultiProcess.__init__(self, sample_config)
         self.sample_config = sample_config
         self.result_dir = self.sample_config.get("result_dir", "")
+
+    @staticmethod
+    def class_name() -> str:
+        """
+        class name
+        """
+        return DiskUsageAnalysis.__name__
 
     def ms_run(self: any) -> None:
         """
@@ -45,10 +50,3 @@ class DiskUsageAnalysis(MsMultiProcess):
                     "start parsing disk usage data file: %s", file_name)
                 host_disk_usage_presenter = HostDiskUsagePresenter(self.result_dir, file_name)
                 host_disk_usage_presenter.run()
-
-    @staticmethod
-    def class_name() -> str:
-        """
-        class name
-        """
-        return DiskUsageAnalysis.__name__
