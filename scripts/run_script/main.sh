@@ -69,11 +69,37 @@ function check_args() {
 
 function execute_run() {
 	if [ ${uninstall_flag} = 1 ]; then
+		implement_uninstall
 		print "INFO" "Mindstudio msprof package uninstall success."
 		exit 0
 	fi
 	get_cann_package_name
 	implement_install
+}
+
+function implement_uninstall() {
+    if [ "${package_arch}" != "$(arch)" ] && [ -d "${install_path}/${package_arch}-linux/hetero-arch-scripts" ]; then
+		delete_product  ${LIBMSPROFILER_STUB} ${install_path}/${package_arch}-linux/hetero-arch-scripts${LIBMSPROFILER_PATH}${LIBMSPROFILER_STUB}
+		delete_product  ${LIBMSPROFILER} ${install_path}/${package_arch}-linux/hetero-arch-scripts${LIBMSPROFILER_PATH}${LIBMSPROFILER}
+		return
+	fi
+		delete_product ${ANALYSIS} ${install_path}${ANALYSIS_PATH}${ANALYSIS}
+		delete_product ${MSPROF} ${install_path}${MSPROF_PATH}${MSPROF}
+		delete_product ${LIBMSPROFILER_STUB} ${install_path}${LIBMSPROFILER_PATH}${LIBMSPROFILER_STUB}
+		delete_product ${LIBMSPROFILER} ${install_path}${LIBMSPROFILER_PATH}${LIBMSPROFILER}
+}
+
+function delete_product() {
+	local _product=${1}
+	local _target=${2}
+
+	if [ ! -f "$_target" ] && [ ! -d "$_target" ]; then
+		return
+	fi
+
+	get_file_list=$(find ${_product})
+
+	
 }
 
 function get_cann_package_name() {
