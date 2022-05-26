@@ -34,7 +34,7 @@ function check_args() {
 }
 
 function execute_backup() {
-    bash backup.sh ${install_path}/${VERSION} ${MSPROF_RUN_NAME}
+    bash backup.sh ${install_path}/${VERSION}
 }
 
 function execute_install() {
@@ -44,9 +44,9 @@ function execute_install() {
 
 function print() {
     if [ ! -f "$log_file" ]; then
-        echo "[Mindstudio-msprof] [$(date +"%Y-%m-%d %H:%M:%S")] [$1]: $2"
+        echo "[${MSPROF_RUN_NAME}] [$(date +"%Y-%m-%d %H:%M:%S")] [$1]: $2"
     else
-        echo "[Mindstudio-msprof] [$(date +"%Y-%m-%d %H:%M:%S")] [$1]: $2" | tee -a $log_file
+        echo "[${MSPROF_RUN_NAME}] [$(date +"%Y-%m-%d %H:%M:%S")] [$1]: $2" | tee -a $log_file
     fi
 }
 
@@ -60,7 +60,22 @@ function get_log_file() {
 	echo "${log_dir}/ascend_install.log"
 }
 
+function log_init() {
+    if [ ! -f "$log_file" ]; then
+        touch $log_file
+        if [ $? -ne 0 ]; then
+            print "ERROR" "touch $log_file permission denied"
+            exit 1
+        fi
+    fi
+    chmod 640 $log_file
+}
+
+# init log file
 log_file=$(get_log_file)
+log_init
+
+MSPROF_RUN_NAME="mindstudio-msprof"
 
 # the params for checking
 install_args_num=0
@@ -70,4 +85,4 @@ parse_script_args $*
 check_args
 execute_backup
 execute_install
-print "INFO" "Mindstudio msprof package install success."
+print "INFO" "${MSPROF_RUN_NAME} package install success."

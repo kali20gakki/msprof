@@ -1,28 +1,4 @@
 #!/bin/bash
-
-# location of log
-if [ $(id -u) -ne 0 ]; then
-    log_dir="${HOME}/var/log/ascend_seclog"
-else
-    log_dir="/var/log/ascend_seclog"
-fi
-log_file="${log_dir}/ascend_install.log"
-
-function log_init() {
-    if [ ! -f "$log_file" ]; then
-        touch $log_file
-        if [ $? -ne 0 ]; then
-            print "ERROR" "touch $log_file permission denied"
-            exit 1
-        fi
-    fi
-    chmod 640 $log_file
-}
-
-function print() {
-    echo "[Mindstudio-msprof] [$(date +"%Y-%m-%d %H:%M:%S")] [$1]: $2" | tee -a $log_file
-}
-
 function dir_check() {
     if [ ! -d "$1" ]; then
         print "ERROR" "dir $2 is not installed, rollback failed"
@@ -50,20 +26,53 @@ function deal_precheck() {
     exit 0
 }
 
-# product
-LIBMSPROFILER_PATH="/runtime/lib64/"
-LIBMSPROFILER="libmsprofiler.so"
+function print() {
+    if [ ! -f "$log_file" ]; then
+        echo "[${MSPROF_RUN_NAME}] [$(date +"%Y-%m-%d %H:%M:%S")] [$1]: $2"
+    else
+        echo "[${MSPROF_RUN_NAME}] [$(date +"%Y-%m-%d %H:%M:%S")] [$1]: $2" | tee -a $log_file
+    fi
+}
+
+function get_log_file() {
+	local log_dir
+	if [ "$UID" = "0" ]; then
+		log_dir="/var/log/ascend_seclog"
+	else
+		log_dir="${HOME}/var/log/ascend_seclog"
+	fi
+	echo "${log_dir}/ascend_install.log"
+}
+
+function log_init() {
+    if [ ! -f "$log_file" ]; then
+        touch $log_file
+        if [ $? -ne 0 ]; then
+            print "ERROR" "touch $log_file permission denied"
+            exit 1
+        fi
+    fi
+    chmod 640 $log_file
+}
+
+# init log file
+log_file=$(get_log_file)
+log_init
 
 # spc dir
 SPC_DIR="spc"
 BACKUP_DIR="backup"
+SCRIPT_DIR="script"
 MSPROF_RUN_NAME="mindstudio-msprof"
 
-# get install path
+# script for spc
 install_path="$(
     cd "$(dirname "$0")/../../../"
     pwd
 )"
 
-log_init
+# product
+LIBMSPROFILER_PATH="/runtime/lib64/"
+LIBMSPROFILER="libmsprofiler.so"
+
 deal_precheck

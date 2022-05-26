@@ -1,24 +1,7 @@
 #!/bin/bash
-
-function print() {
-    # 将关键信息打印到屏幕上
-    echo "[Mindstudio-msprof] [$(date +"%Y-%m-%d %H:%M:%S")] [$1]: $2" | tee -a $log_file
-}
-
-function log_init() {
-    if [ ! -f "$log_file" ]; then
-        touch $log_file
-        if [ $? -ne 0 ]; then
-            print "ERROR" "touch $log_file permission denied"
-            exit 1
-        fi
-    fi
-    chmod 640 $log_file
-}
-
 function del_file() {
     file_path=$1
-    # 判断是否是文件
+
     if [ -f "${file_path}" ]; then
         rm -f "${file_path}"
         if [ $? = 0 ]; then
@@ -32,13 +15,10 @@ function del_file() {
     fi
 }
 
-#安全删除文件夹
 function del_dir() {
     local dir_path=$1
 
-    # 判断变量不为空且不是系统根盘
     if [ -n "${dir_path}" ] && [[ ! "${dir_path}" =~ ^/+$ ]]; then
-        # 判断是否是目录
         if [ -d "${dir_path}" ]; then
             chmod 750 -R ${dir_path}
             rm -rf "${dir_path}"
@@ -70,10 +50,6 @@ function remove_empty_dir() {
 }
 
 function deal_uninstall() {
-    #if [ -d "$spc_path/backup/pyACL" ]; then
-    #    chmod 750 -R $spc_path/backup/pyACL
-    #fi
-
     # delete product
     del_file ${install_path}/${SPC_DIR}/${BACKUP_DIR}/${MSPROF_RUN_NAME}/${LIBMSPROFILER_PATH}/${LIBMSPROFILER}
 
@@ -85,20 +61,41 @@ function deal_uninstall() {
     del_dir ${install_path}/${SPC_DIR}/${SCRIPT_DIR}/${MSPROF_RUN_NAME}
     remove_empty_dir ${install_path}/${SPC_DIR}/${SCRIPT_DIR}
 
-    print "INFO" "${PACKAGE_NAME}-${PACKAGE_VERSION} uninstalled successfully, the directory spc/backup/pyACL has been deleted"
+    print "INFO" "${MSPROF_RUN_NAME} uninstalled successfully, the directory spc/backup/${MSPROF_RUN_NAME} has been deleted"
 }
 
-# location of log
-if [ $(id -u) -ne 0 ]; then
-    log_dir="${HOME}/var/log/ascend_seclog"
-else
-    log_dir="/var/log/ascend_seclog"
-fi
-log_file="${log_dir}/ascend_install.log"
+function print() {
+    if [ ! -f "$log_file" ]; then
+        echo "[${MSPROF_RUN_NAME}] [$(date +"%Y-%m-%d %H:%M:%S")] [$1]: $2"
+    else
+        echo "[${MSPROF_RUN_NAME}] [$(date +"%Y-%m-%d %H:%M:%S")] [$1]: $2" | tee -a $log_file
+    fi
+}
 
-# product
-LIBMSPROFILER_PATH="/runtime/lib64/"
-LIBMSPROFILER="libmsprofiler.so"
+function get_log_file() {
+	local log_dir
+	if [ "$UID" = "0" ]; then
+		log_dir="/var/log/ascend_seclog"
+	else
+		log_dir="${HOME}/var/log/ascend_seclog"
+	fi
+	echo "${log_dir}/ascend_install.log"
+}
+
+function log_init() {
+    if [ ! -f "$log_file" ]; then
+        touch $log_file
+        if [ $? -ne 0 ]; then
+            print "ERROR" "touch $log_file permission denied"
+            exit 1
+        fi
+    fi
+    chmod 640 $log_file
+}
+
+# init log file
+log_file=$(get_log_file)
+log_init
 
 # spc dir
 SPC_DIR="spc"
@@ -106,8 +103,9 @@ BACKUP_DIR="backup"
 SCRIPT_DIR="script"
 MSPROF_RUN_NAME="mindstudio-msprof"
 
-# uninstall script
-UNINSTALL_SCRIPT="uninstall.sh"
+# product
+LIBMSPROFILER_PATH="/runtime/lib64/"
+LIBMSPROFILER="libmsprofiler.so"
 
 # get install path
 install_path="$(
@@ -115,6 +113,7 @@ install_path="$(
     pwd
 )"
 
+# script for spc
+UNINSTALL_SCRIPT="uninstall.sh"
 
-log_init
 deal_uninstall
