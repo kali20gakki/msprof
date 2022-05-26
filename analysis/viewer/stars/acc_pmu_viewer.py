@@ -26,7 +26,7 @@ class AccPmuViewer(BaseViewer, ABC):
         super().__init__(configs, params)
         self.pid = 0
         self.model_list = {
-            'acc_pmu_summary': AccPmuModel,
+            'acc_pmu': AccPmuModel,
         }
 
     def get_timeline_header(self: any) -> list:

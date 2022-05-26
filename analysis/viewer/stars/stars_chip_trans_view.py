@@ -26,8 +26,8 @@ class StarsChipTransView:
     PA_LINK_TX = "PA Link Tx"
     PCIE_WRITE = "PCIE Write Bandwidth"
     PCIE_READ = "PCIE Read Bandwidth"
-    PA_ID = "pa link id"
-    PCIE_ID = "pcie id"
+    PA_ID = "PA Link ID"
+    PCIE_ID = "PCIE ID"
 
     TIMELINE_MAP = {StarsConstant.TYPE_STARS_PA: [PA_LINK_RX, PA_LINK_TX, PA_ID],
                     StarsConstant.TYPE_STARS_PCIE: [PCIE_WRITE, PCIE_READ, PCIE_ID]}
