@@ -19,6 +19,13 @@ class MetaMetric:
     def __init__(self: any) -> None:
         pass
 
+    @staticmethod
+    def class_name() -> str:
+        """
+        class name
+        """
+        return MetaMetric.__name__
+
     @abstractmethod
     def get_metric(self: any, metric_name: str) -> any:
         """
@@ -26,13 +33,6 @@ class MetaMetric:
         :param metric_name: metric name
         :return:
         """
-
-    @staticmethod
-    def class_name() -> str:
-        """
-        class name
-        """
-        return MetaMetric.__name__
 
 
 class OperatorMetric(MetaMetric):

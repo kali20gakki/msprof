@@ -8,7 +8,6 @@ import logging
 import os
 import sqlite3
 import struct
-import sys
 from abc import abstractmethod
 from collections import OrderedDict
 
@@ -20,6 +19,8 @@ from common_func.file_name_manager import get_ai_core_compiles
 from common_func.file_name_manager import get_aiv_compiles
 from common_func.file_name_manager import get_file_name_pattern_match
 from common_func.info_conf_reader import InfoConfReader
+from common_func.ms_constant.number_constant import NumberConstant
+from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.msprof_exception import ProfException
 from common_func.msvp_common import MsvpCommonConst
@@ -27,8 +28,6 @@ from common_func.msvp_common import config_file_obj
 from common_func.msvp_common import error
 from common_func.msvp_common import is_valid_original_data
 from common_func.msvp_common import read_cpu_cfg
-from common_func.ms_constant.str_constant import StrConstant
-from common_func.ms_constant.number_constant import NumberConstant
 from common_func.path_manager import PathManager
 from common_func.utils import Utils
 from mscalculate.calculate_ai_core_data import CalculateAiCoreData
@@ -54,6 +53,20 @@ class ParsingCoreSampleData(MsMultiProcess):
         self.device_list = []
         self.device_id = 0
         self.replayid = 0
+
+    @staticmethod
+    def get_ai_core_event_chunk(event: list) -> list:
+        """
+        get ai core event chunk
+        """
+        check_aicore_events(event)
+        ai_core_events = Utils.generator_to_list(event[i:i + 8]
+                                                 for i in range(0, len(event), 8))
+        return ai_core_events
+
+    @staticmethod
+    def __generate_event_num(event_sum: dict) -> dict:
+        return {key: value + [key] for key, value in event_sum.items()}
 
     @abstractmethod
     def ms_run(self: any) -> None:
@@ -89,31 +102,6 @@ class ParsingCoreSampleData(MsMultiProcess):
                                                            for algo in algos)) + " FROM EventCount " \
                                                                                  "where coreid = ?"
         return sql
-
-    def __read_binary_data_helper(self: any, file_: any, delta_dev: float) -> None:
-        while True:
-            mode_data = file_.read(1)  # One Byte data for data mode
-            if mode_data:
-                mode = struct.unpack(self.BYTE_ORDER_CHAR + "B", mode_data)[0]
-                # Eight Byte alignment
-                _ = file_.read(7)
-                # Eight Byte for each pmu event. Eight events for each struct
-                event_count = struct.unpack(self.BYTE_ORDER_CHAR + '8Q', file_.read(64))
-                # Eight Byte for TASK_CYC_CNT
-                task_cyc = struct.unpack(self.BYTE_ORDER_CHAR + 'Q', file_.read(8))[0]
-                # Eight Byte for timestamp
-                timestamp = struct.unpack(self.BYTE_ORDER_CHAR + 'Q', file_.read(8))[0] \
-                            + delta_dev * NumberConstant.NANO_SECOND
-                # One Byte for count number
-                count_num = struct.unpack(self.BYTE_ORDER_CHAR + "B", file_.read(1))[0]
-                # One Byte for core id
-                core_id = struct.unpack(self.BYTE_ORDER_CHAR + "B", file_.read(1))[0]
-                file_.read(6)  # reserved space
-                tmp = [count_num, mode, self.replayid, timestamp, core_id, task_cyc]
-                tmp.extend(event_count[:count_num])
-                self.ai_core_data.append(tmp)
-            else:
-                break
 
     def read_binary_data(self: any, binary_data_path: str) -> None:
         """
@@ -157,33 +145,6 @@ class ParsingCoreSampleData(MsMultiProcess):
                 insert_data.append([key.replace("(gb/s)", "(GB/s)"), None, core[0]])
         DBManager.insert_data_into_table(self.conn, "MetricSummary", insert_data)
         return NumberConstant.SUCCESS
-
-    def __insert_metric_summary_table_one_by_one(self: any, core_id: list, sql: str, metrics: list) -> None:
-        for core in core_id:
-            result = DBManager.fetch_all_data(self.curs, sql)
-            for row in result:
-                index = 0
-                for key in metrics:
-                    value = row[index] if row[index] else 0
-                    DBManager.execute_sql(self.conn, "UPDATE MetricSummary SET value=? WHERE metric=? and coreid=?",
-                                          (value, key, core[0]))
-                    index += 1
-
-    def __check_has_metrics(self: any, metric_key: str) -> str:
-        if self.sample_config.get(metric_key) not in Constant.AICORE_METRICS_LIST:
-            return ""
-        sample_metrics = Constant.AICORE_METRICS_LIST.get(
-            self.sample_config.get("ai_core_metrics"))
-        if not sample_metrics:
-            return ""
-        return sample_metrics
-
-    def __check_is_valid_metrics(self: any, sample_metrics_lst: list) -> None:
-        for key in sample_metrics_lst:
-            if key.lower() not in \
-                    (item[0] for item in config_file_obj(file_name='AICore').items('formula')):
-                error(self.FILE_NAME, 'Invalid metric {} .'.format(key))
-                raise ProfException(ProfException.PROF_SYSTEM_EXIT)
 
     def insert_metric_summary_table(self: any, freq: float, metric_key: str) -> None:
         """
@@ -239,15 +200,42 @@ class ParsingCoreSampleData(MsMultiProcess):
             raise ProfException(ProfException.PROF_SYSTEM_EXIT)
         DBManager.execute_sql(self.conn, sql)
 
-    @staticmethod
-    def get_ai_core_event_chunk(event: list) -> list:
+    def create_ai_event_tables(self: any, events: list) -> int:
         """
-        get ai core event chunk
+        create ai event tables
         """
-        check_aicore_events(event)
-        ai_core_events = Utils.generator_to_list(event[i:i + 8]
-                                                 for i in range(0, len(event), 8))
-        return ai_core_events
+        try:
+            return self.__create_ai_event_tables_helper(events)
+        except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
+            logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
+            return NumberConstant.ERROR
+
+    def __insert_metric_summary_table_one_by_one(self: any, core_id: list, sql: str, metrics: list) -> None:
+        for core in core_id:
+            result = DBManager.fetch_all_data(self.curs, sql)
+            for row in result:
+                index = 0
+                for key in metrics:
+                    value = row[index] if row[index] else 0
+                    DBManager.execute_sql(self.conn, "UPDATE MetricSummary SET value=? WHERE metric=? and coreid=?",
+                                          (value, key, core[0]))
+                    index += 1
+
+    def __check_has_metrics(self: any, metric_key: str) -> str:
+        if self.sample_config.get(metric_key) not in Constant.AICORE_METRICS_LIST:
+            return ""
+        sample_metrics = Constant.AICORE_METRICS_LIST.get(
+            self.sample_config.get("ai_core_metrics"))
+        if not sample_metrics:
+            return ""
+        return sample_metrics
+
+    def __check_is_valid_metrics(self: any, sample_metrics_lst: list) -> None:
+        for key in sample_metrics_lst:
+            if key.lower() not in \
+                    (item[0] for item in config_file_obj(file_name='AICore').items('formula')):
+                error(self.FILE_NAME, 'Invalid metric {} .'.format(key))
+                raise ProfException(ProfException.PROF_SYSTEM_EXIT)
 
     def __create_event_count_table(self: any, event_: list) -> None:
         check_aicore_events(event_)
@@ -279,7 +267,7 @@ class ParsingCoreSampleData(MsMultiProcess):
 
     def __update_event_sum(self: any, event_: list, event_sum: dict) -> None:
         for i in event_:
-            sql = "select sum(pmucount),coreid from {tablename} group by coreid order by coreid"\
+            sql = "select sum(pmucount),coreid from {tablename} group by coreid order by coreid" \
                 .format(tablename=i.replace("0x", "r"))
             result = DBManager.fetch_all_data(self.curs, sql)
             for j in result:
@@ -304,9 +292,30 @@ class ParsingCoreSampleData(MsMultiProcess):
             DBManager.execute_sql(self.conn, "drop table if exists cycles")
             DBManager.execute_sql(self.conn, "alter table r11 rename to cycles")
 
-    @staticmethod
-    def __generate_event_num(event_sum: dict) -> dict:
-        return {key: value + [key] for key, value in event_sum.items()}
+    def __read_binary_data_helper(self: any, file_: any, delta_dev: float) -> None:
+        while True:
+            mode_data = file_.read(1)  # One Byte data for data mode
+            if mode_data:
+                mode = struct.unpack(self.BYTE_ORDER_CHAR + "B", mode_data)[0]
+                # Eight Byte alignment
+                _ = file_.read(7)
+                # Eight Byte for each pmu event. Eight events for each struct
+                event_count = struct.unpack(self.BYTE_ORDER_CHAR + '8Q', file_.read(64))
+                # Eight Byte for TASK_CYC_CNT
+                task_cyc = struct.unpack(self.BYTE_ORDER_CHAR + 'Q', file_.read(8))[0]
+                # Eight Byte for timestamp
+                timestamp = struct.unpack(self.BYTE_ORDER_CHAR + 'Q', file_.read(8))[0] \
+                            + delta_dev * NumberConstant.NANO_SECOND
+                # One Byte for count number
+                count_num = struct.unpack(self.BYTE_ORDER_CHAR + "B", file_.read(1))[0]
+                # One Byte for core id
+                core_id = struct.unpack(self.BYTE_ORDER_CHAR + "B", file_.read(1))[0]
+                file_.read(6)  # reserved space
+                tmp = [count_num, mode, self.replayid, timestamp, core_id, task_cyc]
+                tmp.extend(event_count[:count_num])
+                self.ai_core_data.append(tmp)
+            else:
+                break
 
     def __create_ai_event_tables_helper(self: any, events: list) -> int:
         logging.info(
@@ -329,18 +338,6 @@ class ParsingCoreSampleData(MsMultiProcess):
         logging.info(
             'create event tables finished')
         return NumberConstant.SUCCESS
-
-    def create_ai_event_tables(self: any, events: list) -> int:
-        """
-        create ai event tables
-        """
-        try:
-            return self.__create_ai_event_tables_helper(events)
-        except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
-            logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
-            return NumberConstant.ERROR
-        finally:
-            pass
 
 
 class ParsingAICoreSampleData(ParsingCoreSampleData):
@@ -375,22 +372,6 @@ class ParsingAICoreSampleData(ParsingCoreSampleData):
                 FileManager.add_complete_file(project_path, file_name)
         logging.info("Create AICore DB finished!")
 
-    def _process_device_list_ai_core(self: any, project_path: str) -> None:
-        for device in set(self.device_list):
-            self.conn = sqlite3.connect(os.path.join(
-                project_path,
-                "sqlite", "aicore_" + str(device) + ".db"))
-            self.curs = self.conn.cursor()
-            event_ = self.sample_config.get("ai_core_profiling_events", "").split(",")
-            status = self.create_ai_event_tables(event_)
-            if status == NumberConstant.ERROR:
-                return
-            status = self.insert_metric_value()
-            if status == NumberConstant.ERROR:
-                return
-            freq = InfoConfReader().get_freq(StrConstant.AIC)
-            self.insert_metric_summary_table(freq, StrConstant.AI_CORE_PROFILING_METRICS)
-
     def create_ai_core_db(self: any) -> None:
         """
         create aicore db
@@ -416,8 +397,22 @@ class ParsingAICoreSampleData(ParsingCoreSampleData):
             self.create_ai_core_db()
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
             logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
-        finally:
-            pass
+
+    def _process_device_list_ai_core(self: any, project_path: str) -> None:
+        for device in set(self.device_list):
+            self.conn = sqlite3.connect(os.path.join(
+                project_path,
+                "sqlite", "aicore_" + str(device) + ".db"))
+            self.curs = self.conn.cursor()
+            event_ = self.sample_config.get("ai_core_profiling_events", "").split(",")
+            status = self.create_ai_event_tables(event_)
+            if status == NumberConstant.ERROR:
+                return
+            status = self.insert_metric_value()
+            if status == NumberConstant.ERROR:
+                return
+            freq = InfoConfReader().get_freq(StrConstant.AIC)
+            self.insert_metric_summary_table(freq, StrConstant.AI_CORE_PROFILING_METRICS)
 
 
 class ParsingAIVectorCoreSampleData(ParsingCoreSampleData):
@@ -451,22 +446,6 @@ class ParsingAIVectorCoreSampleData(ParsingCoreSampleData):
                 self.read_binary_data(file_name)
         logging.info("Create AIVectorCore DB finished!")
 
-    def _process_device_list_ai_vector(self: any, project_path: str) -> None:
-        for device in set(self.device_list):
-            self.conn = sqlite3.connect(os.path.join(
-                project_path,
-                "sqlite", "ai_vector_core_" + str(device) + ".db"))
-            self.curs = self.conn.cursor()
-            event_ = self.sample_config.get("aiv_profiling_events", "").split(",")
-            status = self.create_ai_event_tables(event_)
-            if status == NumberConstant.ERROR:
-                return
-            status = self.insert_metric_value()
-            if status == NumberConstant.ERROR:
-                return
-            freq = InfoConfReader().get_freq(StrConstant.AIV)
-            self.insert_metric_summary_table(freq, StrConstant.AIV_PROFILING_METRICS)
-
     def create_ai_vector_core_db(self: any) -> None:
         """
         create ai core db
@@ -489,5 +468,19 @@ class ParsingAIVectorCoreSampleData(ParsingCoreSampleData):
             self.create_ai_vector_core_db()
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
             logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
-        finally:
-            pass
+
+    def _process_device_list_ai_vector(self: any, project_path: str) -> None:
+        for device in set(self.device_list):
+            self.conn = sqlite3.connect(os.path.join(
+                project_path,
+                "sqlite", "ai_vector_core_" + str(device) + ".db"))
+            self.curs = self.conn.cursor()
+            event_ = self.sample_config.get("aiv_profiling_events", "").split(",")
+            status = self.create_ai_event_tables(event_)
+            if status == NumberConstant.ERROR:
+                return
+            status = self.insert_metric_value()
+            if status == NumberConstant.ERROR:
+                return
+            freq = InfoConfReader().get_freq(StrConstant.AIV)
+            self.insert_metric_summary_table(freq, StrConstant.AIV_PROFILING_METRICS)

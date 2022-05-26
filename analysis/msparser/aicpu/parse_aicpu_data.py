@@ -52,48 +52,15 @@ class ParseAiCpuData(MsMultiProcess):
         self._batch_counter.init(Constant.TASK_TYPE_AI_CPU)
         self._iter_recorder = IterRecorder(self.project_path)
 
-    def __read_and_analysis_ai_cpu(self: any, file_path: str) -> None:
-        infos = {self.AICPU_MARKS: [], self.DISPATCH_MARKS: []}
-        # analysis run start/end time and dispatch time every loop.
-        lines = self.__read_lines(file_path)
-        while len(lines) >= 2:
-            node_line = lines.pop(0)
-            dispatch_line = lines.pop(0)
-            if node_line.find(self.AICPU_MARKS) != -1:
-                infos.get(self.AICPU_MARKS).append(node_line)
-                infos.get(self.DISPATCH_MARKS).append(dispatch_line)
-
-        for every_ai_cpu in zip(infos.get(self.AICPU_MARKS), infos.get(self.DISPATCH_MARKS)):
-            # analysis compute, memory copy, task time dispatch time and total time for each aicpu.
-            device_id = InfoConfReader().get_device_list()
-            if not device_id:
-                logging.error("No device list found in info.json when analysis ai cpu data.")
-                return
-            self.__analysis_ai_cpu(every_ai_cpu)
-
-    def __create_db(self: any) -> bool:
-        ai_cpu_conn, ai_cpu_curs = \
-            DBManager.create_connect_db(PathManager.get_db_path(self.project_path, DBNameConstant.DB_AI_CPU))
-
-        ai_cpu_create_sql = DBManager.sql_create_general_table(self.AI_CPU_DATA_MAP,
-                                                               DBNameConstant.TABLE_AI_CPU,
-                                                               self.TABLES_PATH)
-
-        DBManager.execute_sql(ai_cpu_conn, ai_cpu_create_sql)
-        DBManager.destroy_db_connect(ai_cpu_conn, ai_cpu_curs)
+    @staticmethod
+    def check_sign_exist(data: str, marks_sign: list) -> bool:
+        """
+        check for sign in data
+        """
+        for sign in marks_sign:
+            if sign not in data:
+                return False
         return True
-
-    def __insert_data(self: any) -> None:
-        if not self.ai_cpu_datas:
-            return
-        ai_cpu_conn, ai_cpu_curs = \
-            DBManager.create_connect_db(PathManager.get_db_path(self.project_path, DBNameConstant.DB_AI_CPU))
-        ai_cpu_inst_sql = "insert into {0} values ({1})".format(DBNameConstant.TABLE_AI_CPU,
-                                                                ','.join(('?' for _ in self.ai_cpu_datas[0])))
-
-        DBManager.executemany_sql(ai_cpu_conn, ai_cpu_inst_sql, self.ai_cpu_datas)
-        DBManager.destroy_db_connect(ai_cpu_conn, ai_cpu_curs)
-        self.ai_cpu_datas.clear()
 
     @staticmethod
     def __read_lines(file_path: str) -> list:
@@ -108,41 +75,6 @@ class ParseAiCpuData(MsMultiProcess):
             lines += list(filter(None, line.split(" ___ ")))
         return lines
 
-    def __analysis_ai_cpu(self: any, ai_cpu_datas: tuple) -> None:
-        """
-        analysis ai cpu marks
-        data format: timestamp, sys_start, sys_end, node_name, compute_time,
-        memcpy_time, task_time, dispatch_time, total_time
-        """
-        # info is in the following format:
-        # [13136354159] Node:IteratorV2201910091232111, Run start:13136354161 1313635416102,
-        # compute start:13136354167, memcpy start:13136354357, memcpy end:13136355132,
-        #  Run end:13136355160 1313635516002
-        #  streamId:int, taskId:int
-        ai_cpu_marks = ai_cpu_datas[0]
-        marks_sign = [",", ":", " "]
-        if not self.check_sign_exist(ai_cpu_marks, marks_sign):
-            logging.warning("Unable to get aicpu data, "
-                            "maybe aicpu data is not collected .")
-            return
-        info_split = ai_cpu_marks.split(",")
-        timers = []
-        stage_time_names = []
-        for iter_name in info_split[1:]:
-            stage_time_names.append(iter_name.split(":")[0])
-            node_time_value = iter_name.split(":")[-1].split(" ")[-1]
-            if node_time_value and node_time_value.isdigit():
-                timers.append(int(node_time_value))
-
-        # time sequence should to be correct and ai cpu name needed.
-        if not self.check_stage_time(timers, stage_time_names):
-            logging.warning("Unable to get aicpu data, "
-                            "maybe aicpu data is not collected .")
-            return
-
-        ai_cpu_data = self._calculate_ai_cpu_data(ai_cpu_datas, timers)
-        self.ai_cpu_datas.append(ai_cpu_data)
-
     def check_stage_time(self: any, timers: list, time_names: list) -> bool:
         """
         timers: Run start,compute start,memcpy start,memcpy end,Run end
@@ -155,15 +87,35 @@ class ParseAiCpuData(MsMultiProcess):
             return timers[-1] > timers[0]
         return False
 
-    @staticmethod
-    def check_sign_exist(data: str, marks_sign: list) -> bool:
+    def parse_ai_cpu(self: any) -> None:
         """
-        check for sign in data
+        parse ai cpu
         """
-        for sign in marks_sign:
-            if sign not in data:
-                return False
-        return True
+        if not AiStackDataCheckManager.contain_dp_aicpu_data(self.project_path):
+            return
+
+        self.__create_db()
+        data_dir = PathManager.get_data_dir(self.project_path)
+        for _file in get_data_dir_sorted_files(data_dir):
+            res = get_file_name_pattern_match(_file, *get_data_preprocess_compiles(self.TAG_AICPU))
+            if res and is_valid_original_data(_file, self.project_path):
+                self.__read_and_analysis_ai_cpu(os.path.join(data_dir, _file))
+                FileManager.add_complete_file(self.project_path, _file)
+
+        # flush all data to db
+        self.__insert_data()
+
+    def ms_run(self: any) -> None:
+        """
+        main entry for parsing ai cpu data
+        :return: None
+        """
+        try:
+            self.parse_ai_cpu()
+        except (OSError, SystemError, ValueError, TypeError, RuntimeError, ProfException) as task_rec_err:
+            logging.error(str(task_rec_err), exc_info=Constant.TRACE_BACK_SWITCH)
+        finally:
+            pass
 
     def _calculate_ai_cpu_data(self: any, ai_cpu_datas: tuple, timers: list) -> list:
         """
@@ -209,6 +161,84 @@ class ParseAiCpuData(MsMultiProcess):
 
         return ai_cpu_data
 
+    def __insert_data(self: any) -> None:
+        if not self.ai_cpu_datas:
+            return
+        ai_cpu_conn, ai_cpu_curs = \
+            DBManager.create_connect_db(PathManager.get_db_path(self.project_path, DBNameConstant.DB_AI_CPU))
+        ai_cpu_inst_sql = "insert into {0} values ({1})".format(DBNameConstant.TABLE_AI_CPU,
+                                                                ','.join(('?' for _ in self.ai_cpu_datas[0])))
+
+        DBManager.executemany_sql(ai_cpu_conn, ai_cpu_inst_sql, self.ai_cpu_datas)
+        DBManager.destroy_db_connect(ai_cpu_conn, ai_cpu_curs)
+        self.ai_cpu_datas.clear()
+
+    def __read_and_analysis_ai_cpu(self: any, file_path: str) -> None:
+        infos = {self.AICPU_MARKS: [], self.DISPATCH_MARKS: []}
+        # analysis run start/end time and dispatch time every loop.
+        lines = self.__read_lines(file_path)
+        while len(lines) >= 2:
+            node_line = lines.pop(0)
+            dispatch_line = lines.pop(0)
+            if node_line.find(self.AICPU_MARKS) != -1:
+                infos.get(self.AICPU_MARKS).append(node_line)
+                infos.get(self.DISPATCH_MARKS).append(dispatch_line)
+
+        for every_ai_cpu in zip(infos.get(self.AICPU_MARKS), infos.get(self.DISPATCH_MARKS)):
+            # analysis compute, memory copy, task time dispatch time and total time for each aicpu.
+            device_id = InfoConfReader().get_device_list()
+            if not device_id:
+                logging.error("No device list found in info.json when analysis ai cpu data.")
+                return
+            self.__analysis_ai_cpu(every_ai_cpu)
+
+    def __create_db(self: any) -> bool:
+        ai_cpu_conn, ai_cpu_curs = \
+            DBManager.create_connect_db(PathManager.get_db_path(self.project_path, DBNameConstant.DB_AI_CPU))
+
+        ai_cpu_create_sql = DBManager.sql_create_general_table(self.AI_CPU_DATA_MAP,
+                                                               DBNameConstant.TABLE_AI_CPU,
+                                                               self.TABLES_PATH)
+
+        DBManager.execute_sql(ai_cpu_conn, ai_cpu_create_sql)
+        DBManager.destroy_db_connect(ai_cpu_conn, ai_cpu_curs)
+        return True
+
+    def __analysis_ai_cpu(self: any, ai_cpu_datas: tuple) -> None:
+        """
+        analysis ai cpu marks
+        data format: timestamp, sys_start, sys_end, node_name, compute_time,
+        memcpy_time, task_time, dispatch_time, total_time
+        """
+        # info is in the following format:
+        # [13136354159] Node:IteratorV2201910091232111, Run start:13136354161 1313635416102,
+        # compute start:13136354167, memcpy start:13136354357, memcpy end:13136355132,
+        #  Run end:13136355160 1313635516002
+        #  streamId:int, taskId:int
+        ai_cpu_marks = ai_cpu_datas[0]
+        marks_sign = [",", ":", " "]
+        if not self.check_sign_exist(ai_cpu_marks, marks_sign):
+            logging.warning("Unable to get aicpu data, "
+                            "maybe aicpu data is not collected .")
+            return
+        info_split = ai_cpu_marks.split(",")
+        timers = []
+        stage_time_names = []
+        for iter_name in info_split[1:]:
+            stage_time_names.append(iter_name.split(":")[0])
+            node_time_value = iter_name.split(":")[-1].split(" ")[-1]
+            if node_time_value and node_time_value.isdigit():
+                timers.append(int(node_time_value))
+
+        # time sequence should to be correct and ai cpu name needed.
+        if not self.check_stage_time(timers, stage_time_names):
+            logging.warning("Unable to get aicpu data, "
+                            "maybe aicpu data is not collected .")
+            return
+
+        ai_cpu_data = self._calculate_ai_cpu_data(ai_cpu_datas, timers)
+        self.ai_cpu_datas.append(ai_cpu_data)
+
     def __calculate_batch_id(self: any, stream_id: int, task_id: int, syscnt: int) -> int:
         if not ProfilingScene().is_operator():
             self._iter_recorder.set_current_iter_id(syscnt)
@@ -216,33 +246,3 @@ class ParseAiCpuData(MsMultiProcess):
         else:
             batch_id = self._batch_counter.calculate_batch(stream_id, task_id)
         return batch_id
-
-    def parse_ai_cpu(self: any) -> None:
-        """
-        parse ai cpu
-        """
-        if not AiStackDataCheckManager.contain_dp_aicpu_data(self.project_path):
-            return
-
-        self.__create_db()
-        data_dir = PathManager.get_data_dir(self.project_path)
-        for _file in get_data_dir_sorted_files(data_dir):
-            res = get_file_name_pattern_match(_file, *get_data_preprocess_compiles(self.TAG_AICPU))
-            if res and is_valid_original_data(_file, self.project_path):
-                self.__read_and_analysis_ai_cpu(os.path.join(data_dir, _file))
-                FileManager.add_complete_file(self.project_path, _file)
-
-        # flush all data to db
-        self.__insert_data()
-
-    def ms_run(self: any) -> None:
-        """
-        main entry for parsing ai cpu data
-        :return: None
-        """
-        try:
-            self.parse_ai_cpu()
-        except (OSError, SystemError, ValueError, TypeError, RuntimeError, ProfException) as task_rec_err:
-            logging.error(str(task_rec_err), exc_info=Constant.TRACE_BACK_SWITCH)
-        finally:
-            pass

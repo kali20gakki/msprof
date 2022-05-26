@@ -25,7 +25,7 @@ class PmuMetricCalculate:
         :return: metric value
         """
         pmu, task_cyc, freq = base_info
-        if task_cyc - 0 < NumberConstant.FLOAT_ZERO_BOUND or freq - 0 < NumberConstant.FLOAT_ZERO_BOUND:
+        if NumberConstant.is_zero(task_cyc) or NumberConstant.is_zero(freq):
             return 0
         return float_bit * pmu * pip_size * scalar / (task_cyc / freq) / 8589934592.0
 
@@ -38,7 +38,7 @@ class PmuMetricCalculate:
         :return: metric value
         """
         pmu, task_cyc = base_info
-        if task_cyc - 0 < NumberConstant.FLOAT_ZERO_BOUND:
+        if NumberConstant.is_zero(task_cyc):
             return 0
         return float_bit * pmu / task_cyc
 
@@ -195,6 +195,7 @@ class Constant:
     CHIP_V3_3_0 = "4"
     CHIP_V4_1_0 = "5"
 
+    MIX_OP_AND_GRAPH = "mix_operator_and_graph"
     STEP_INFO = "step_info"
     TRAIN = "train"
     SINGLE_OP = "single_op"
@@ -237,6 +238,8 @@ class Constant:
     GE_TIMELINE_MODEL_ID_INDEX = 0
     GE_TIMELINE_MODEL_ID_INDEX_NAME_INDEX = 6
     GE_TIMELINE_TID_INDEX = 8
+
+    GE_OP_MODEL_ID = 4294967295
 
     def get_constant_class_name(self: any) -> any:
         """

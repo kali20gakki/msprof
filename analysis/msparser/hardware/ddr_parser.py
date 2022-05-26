@@ -39,6 +39,16 @@ class ParsingDDRData(MsMultiProcess):
         self.ddr_data = []
         self._file_list.sort(key=lambda x: int(x.split("_")[-1]))
 
+    @staticmethod
+    def _update_ddr_data(time_start: int, item: list, headers: list) -> list:
+        if len(item) >= 5:  # DDR item length
+            item[2], item[3] = 'hisi_ddrc{}_0'.format(item[3]), \
+                               'flux{}_{}'.format('id' if item[4] != 2 ** 32 - 1 else '',
+                                                  'read' if item[2] == 0 else 'write')
+            item[0] = time_start + item[0] * NumberConstant.USTONS
+            return headers + item[:4]
+        return headers
+
     def read_binary_data(self: any, file_name: str, device_id: str, replay_id: str = '0') -> int:
         """
         parsing ddr data and insert into ddr.db
@@ -61,26 +71,6 @@ class ParsingDDRData(MsMultiProcess):
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
             logging.error("%s: %s", file_name, err, exc_info=Constant.TRACE_BACK_SWITCH)
             return NumberConstant.ERROR
-
-    @staticmethod
-    def _update_ddr_data(time_start: int, item: list, headers: list) -> list:
-        if len(item) >= 5:  # DDR item length
-            item[2], item[3] = 'hisi_ddrc{}_0'.format(item[3]), \
-                               'flux{}_{}'.format('id' if item[4] != 2 ** 32 - 1 else '',
-                                                  'read' if item[2] == 0 else 'write')
-            item[0] = time_start + item[0] * NumberConstant.USTONS
-            return headers + item[:4]
-        return headers
-
-    def _original_data_handler(self: any, project_path: str, file_name: str) -> None:
-        device_id = self.sample_config.get("device_id", "0")
-        logging.info(
-            "start parsing ddr data file: %s", file_name)
-        status_ = self.read_binary_data(file_name, device_id, '0')  # replay id is 0
-        FileManager.add_complete_file(project_path, file_name)
-        if status_:
-            logging.error('Insert DDR metric data error.')
-        logging.info("Create DDR DB finished!")
 
     def start_parsing_data_file(self: any) -> None:
         """
@@ -117,3 +107,13 @@ class ParsingDDRData(MsMultiProcess):
                 self.save()
         except (OSError, SystemError, RuntimeError, TypeError, ValueError) as ddr_err:
             logging.error(str(ddr_err), exc_info=Constant.TRACE_BACK_SWITCH)
+
+    def _original_data_handler(self: any, project_path: str, file_name: str) -> None:
+        device_id = self.sample_config.get("device_id", "0")
+        logging.info(
+            "start parsing ddr data file: %s", file_name)
+        status_ = self.read_binary_data(file_name, device_id, '0')  # replay id is 0
+        FileManager.add_complete_file(project_path, file_name)
+        if status_:
+            logging.error('Insert DDR metric data error.')
+        logging.info("Create DDR DB finished!")

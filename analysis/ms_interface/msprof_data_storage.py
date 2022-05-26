@@ -42,7 +42,7 @@ class MsprofDataStorage:
         self.data_list = None
 
     @staticmethod
-    def export_timeline_data_to_json(result: any, params: dict) -> any:
+    def export_timeline_data_to_json(result: str or dict, params: dict) -> any:
         """
         export data to json file
         :param result: export result
@@ -62,24 +62,38 @@ class MsprofDataStorage:
             if 'status' in json.loads(result):
                 return result
         result = MsprofDataStorage().slice_data_list(json.loads(result))
+        error_code, data_path = MsprofDataStorage.write_json_files(result, params)
+        if error_code:
+            return json.dumps({"status": NumberConstant.ERROR,
+                               "info": "message error: %s" % data_path})
+        return json.dumps({'status': NumberConstant.SUCCESS,
+                           'data': data_path})
+
+    @staticmethod
+    def write_json_files(json_data: tuple, params: dict) -> tuple:
+        """
+        write json data  to file
+        :param json_data:
+        :param params:
+        :return:
+        """
         MsprofDataStorage.clear_timeline_dir(params)
         data_path = []
-        for slice_time in range(len(result[1])):
-            timeline_file_path = MsprofDataStorage._make_export_file_name(params, slice_time, result[0])
+        for slice_time in range(len(json_data[1])):
+            timeline_file_path = MsprofDataStorage._make_export_file_name(params, slice_time, json_data[0])
             check_file_writable(timeline_file_path)
             if os.path.exists(timeline_file_path):
                 os.remove(timeline_file_path)
             try:
                 with os.fdopen(os.open(timeline_file_path, Constant.WRITE_FLAGS,
                                        Constant.WRITE_MODES), 'w') as trace_file:
-                    trace_file.write(json.dumps(result[1][slice_time]))
+                    trace_file.write(json.dumps(json_data[1][slice_time]))
                     data_path.append(timeline_file_path)
             except (OSError, SystemError, ValueError, TypeError,
                     RuntimeError) as err:
-                return json.dumps({"status": NumberConstant.ERROR,
-                                   "info": "message error: %s" % err})
-        return json.dumps({'status': NumberConstant.SUCCESS,
-                           'data': data_path})
+                logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
+                return NumberConstant.ERROR, err
+        return NumberConstant.SUCCESS, data_path
 
     @staticmethod
     def export_summary_data(headers: list, data: list, params: dict) -> any:
@@ -115,7 +129,8 @@ class MsprofDataStorage:
                     file_suffix += "_" + str(params.get(StrConstant.PARAM_MODEL_ID))
                 if params.get(StrConstant.PARAM_ITER_ID) is not None:
                     file_suffix += "_" + str(params.get(StrConstant.PARAM_ITER_ID))
-            if re.match(r'{0}{1}.*'.format(params.get(StrConstant.PARAM_DATA_TYPE), file_suffix), file):
+            if re.match(
+                    r'^{0}{1}(_slice_\d+)?.json'.format(params.get(StrConstant.PARAM_DATA_TYPE), file_suffix), file):
                 check_file_writable(os.path.join(timeline_dir, file))
                 os.remove(os.path.join(timeline_dir, file))
 
@@ -140,8 +155,8 @@ class MsprofDataStorage:
                 file_name += "_" + str(params.get(StrConstant.PARAM_MODEL_ID))
             if params.get(StrConstant.PARAM_ITER_ID) is not None:
                 file_name += "_" + str(params.get(StrConstant.PARAM_ITER_ID))
-            if slice_switch:
-                file_name += "_slice_{}".format(str(slice_times))
+        if slice_switch:
+            file_name += "_slice_{}".format(str(slice_times))
 
         if params.get(StrConstant.PARAM_EXPORT_TYPE) == MsProfCommonConstant.SUMMARY:
             file_suffix = StrConstant.FILE_SUFFIX_CSV
@@ -163,7 +178,7 @@ class MsprofDataStorage:
         time_level_list = [i.value for i in LoadingTimeLevel]
         for index, level in enumerate(time_level_list):
             if line_level < level:
-                return time_level_list[index-1] if index > 0 else time_level_list[index]
+                return time_level_list[index - 1] if index > 0 else time_level_list[index]
         return LoadingTimeLevel.BAD_LEVEL.value
 
     def init_params(self: any, data_list: list) -> None:

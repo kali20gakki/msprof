@@ -32,7 +32,7 @@ class TestCalculateRts(unittest.TestCase):
 
     def test_calculate_task_schedule_data_2(self):
         create_sql = "CREATE TABLE IF NOT EXISTS TaskTime(replayid, device_id, api, apirowid, tasktype, " \
-                     "task_id, stream_id, waittime, pendingtime, runtime, completetime, index_id, model_id, batch_id)"
+                     "task_id, stream_id, waittime, pendingtime, running, complete, index_id, model_id, batch_id)"
         data = ((0, 0, 4, 430, 4, 2, 5, 0, 0, 118562436328.0, 118562438671.0, 1, 1, 0),)
         insert_sql = "insert into {0} values ({value})".format(
             "TaskTime", value="?," * (len(data[0]) - 1) + "?")
@@ -43,19 +43,6 @@ class TestCalculateRts(unittest.TestCase):
         self.assertEqual(len(res), 1)
         (test_sql[1]).execute("drop Table TaskTime")
         db_manager.destroy(test_sql)
-
-    # def test_multi_calculate_task_cost_time(self):
-    #     data = [(1, 0, '', '', 1, 2, 3, 5, 4)]
-    #     res = multi_calculate_task_cost_time(data)
-    #     self.assertEqual(res, [])
-
-    # def test_calculate_timeline_task_time_1(self):
-    #     task_time = {}
-    #     data = [(1, 0, '', '', 1, 2, 3, 5, 4)]
-    #     calculate_timeline_task_time(data, task_time, 0, "")
-    #     with mock.patch(NAMESPACE + '.handle_task_time', side_effect=RuntimeError), \
-    #             mock.patch(NAMESPACE + '.logging.error'):
-    #         calculate_timeline_task_time(data, task_time, 0)
 
     def test_handle_task_time_1(self):
         data = [(1, 0, '', '', 1, 2, 3, 5, 3)]

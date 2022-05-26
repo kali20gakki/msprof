@@ -27,33 +27,6 @@ class GeStepBean(StructDecoder):
         self._thread_id = Constant.DEFAULT_VALUE
         self._tag = Constant.DEFAULT_VALUE
 
-    def fusion_decode(self: any, binary_data: bytes) -> any:
-        """
-        decode fusion info binary data
-        :param binary_data:
-        :return:
-        """
-        fmt = StructFmt.BYTE_ORDER_CHAR + self.get_fmt()
-        self.construct_bean(struct.unpack_from(fmt, binary_data))
-        return self
-
-    def construct_bean(self: any, *args: any) -> None:
-        """
-        refresh the acl data
-        :param args: acl bin data
-        :return: True or False
-        """
-        self._fusion_data = args[0]
-        self._data_tag = self._fusion_data[1]
-        self._model_id = self._fusion_data[2]
-        self._stream_id = self._fusion_data[3]
-        self._task_id = self._fusion_data[4]
-        self._batch_id = self._fusion_data[5]
-        self._timestamp = self._fusion_data[6]
-        self._index_num = self._fusion_data[7]
-        self._thread_id = self._fusion_data[8]
-        self._tag = self._fusion_data[9]
-
     @property
     def model_id(self: any) -> int:
         """
@@ -109,3 +82,30 @@ class GeStepBean(StructDecoder):
         for tag
         """
         return self._tag
+
+    def fusion_decode(self: any, binary_data: bytes) -> any:
+        """
+        decode fusion info binary data
+        :param binary_data:
+        :return:
+        """
+        fmt = StructFmt.BYTE_ORDER_CHAR + self.get_fmt()
+        self.construct_bean(struct.unpack_from(fmt, binary_data))
+        return self
+
+    def construct_bean(self: any, *args: any) -> None:
+        """
+        refresh the acl data
+        :param args: acl bin data
+        :return: True or False
+        """
+        self._fusion_data = args[0]
+        self._data_tag = self._fusion_data[1]
+        self._model_id = self._fusion_data[2]
+        self._stream_id = self._fusion_data[3]
+        self._task_id = self._fusion_data[4]
+        self._batch_id = self._fusion_data[5]
+        self._timestamp = self._fusion_data[6]
+        self._index_num = self._fusion_data[7]
+        self._thread_id = self._fusion_data[8]
+        self._tag = self._fusion_data[9]
