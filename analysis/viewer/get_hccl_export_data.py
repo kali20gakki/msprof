@@ -102,7 +102,7 @@ class HCCLExport:
         else:
             sql_datas = DBManager.fetch_all_data(cur, sql)
             if not sql_datas:
-                self.result = {'status': NumberConstant.ERROR,
+                self.result = {'status': NumberConstant.WARN,
                                "info": "get hccl data failed,"
                                        " may be lack of hccl files containing iteration {}.".format(self.iter_id)}
             return sql_datas
