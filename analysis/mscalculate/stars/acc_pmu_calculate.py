@@ -44,7 +44,7 @@ class AccPmuCalculator(ICalculator, MsMultiProcess):
             self.save()
 
     def calculate(self: any) -> None:
-        task_time = self._get_task_time_form_acsq()
+        task_time = self.get_task_time_form_acsq()
         self.model.cur.row_factory = ClassRowType.class_row(AccPmuOriDto)
         all_data_sql = "select * from {}".format(DBNameConstant.TABLE_ACC_PMU_ORIGIN_DATA)
         ori_data = DBManager.fetch_all_data(self.model.cur, all_data_sql)
@@ -61,7 +61,7 @@ class AccPmuCalculator(ICalculator, MsMultiProcess):
         self.model.create_table()
         self.model.insert_data_to_db(DBNameConstant.TABLE_ACC_PMU_DATA, self._data)
 
-    def _get_task_time_form_acsq(self: any) -> dict:
+    def get_task_time_form_acsq(self: any) -> dict:
         """
         get task start_time and dur_time
         :return: dict
