@@ -1,21 +1,4 @@
 #!/bin/bash
-
-function print() {
-    # 将关键信息打印到屏幕上
-    echo "[Mindstudio-msprof] [$(date +"%Y-%m-%d %H:%M:%S")] [$1]: $2" | tee -a $log_file
-}
-
-function log_init() {
-    if [ ! -f "$log_file" ]; then
-        touch $log_file
-        if [ $? -ne 0 ]; then
-            print "ERROR" "touch $log_file permission denied"
-            exit 1
-        fi
-    fi
-    chmod 640 $log_file
-}
-
 function deal_rollback() {
     copy_file ${install_path}/${SPC_DIR}/${BACKUP_DIR}/${MSPROF_RUN_NAME}/${LIBMSPROFILER_PATH}/${LIBMSPROFILER} ${install_path}/${LIBMSPROFILER_PATH}/${LIBMSPROFILER}
     bash ${install_path}/${SPC_DIR}/${SCRIPT_DIR}/${MSPROF_RUN_NAME}/${UNINSTALL_SCRIPT}
@@ -38,21 +21,40 @@ function copy_file() {
 		print "INFO" "$filename is replaced."
 		return
 	fi
-	echo ${target_file}
-	print "WARNING" "$target_file is non-existent."
 }
 
-# location of log
-if [ $(id -u) -ne 0 ]; then
-    log_dir="${HOME}/var/log/ascend_seclog"
-else
-    log_dir="/var/log/ascend_seclog"
-fi
-log_file="${log_dir}/ascend_install.log"
+function print() {
+    if [ ! -f "$log_file" ]; then
+        echo "[${MSPROF_RUN_NAME}] [$(date +"%Y-%m-%d %H:%M:%S")] [$1]: $2"
+    else
+        echo "[${MSPROF_RUN_NAME}] [$(date +"%Y-%m-%d %H:%M:%S")] [$1]: $2" | tee -a $log_file
+    fi
+}
 
-# product
-LIBMSPROFILER_PATH="/runtime/lib64/"
-LIBMSPROFILER="libmsprofiler.so"
+function get_log_file() {
+	local log_dir
+	if [ "$UID" = "0" ]; then
+		log_dir="/var/log/ascend_seclog"
+	else
+		log_dir="${HOME}/var/log/ascend_seclog"
+	fi
+	echo "${log_dir}/ascend_install.log"
+}
+
+function log_init() {
+    if [ ! -f "$log_file" ]; then
+        touch $log_file
+        if [ $? -ne 0 ]; then
+            print "ERROR" "touch $log_file permission denied"
+            exit 1
+        fi
+    fi
+    chmod 640 $log_file
+}
+
+# init log file
+log_file=$(get_log_file)
+log_init
 
 # spc dir
 SPC_DIR="spc"
@@ -60,8 +62,9 @@ BACKUP_DIR="backup"
 SCRIPT_DIR="script"
 MSPROF_RUN_NAME="mindstudio-msprof"
 
-# uninstall script
-UNINSTALL_SCRIPT="uninstall.sh"
+# product
+LIBMSPROFILER_PATH="/runtime/lib64/"
+LIBMSPROFILER="libmsprofiler.so"
 
 # get install path
 install_path="$(
@@ -69,5 +72,7 @@ install_path="$(
     pwd
 )"
 
-log_init
+# script for spc
+UNINSTALL_SCRIPT="uninstall.sh"
+
 deal_rollback
