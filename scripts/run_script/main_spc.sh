@@ -16,6 +16,14 @@ function parse_script_args() {
             shift
 			continue
             ;;
+        --quiet)
+            shift
+			continue
+            ;;
+        --nox11)
+            shift
+			continue
+            ;;
         *)
 			print "ERROR" "Input option is invalid. Please try --help."
 			exit 1
