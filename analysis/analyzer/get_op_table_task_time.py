@@ -142,11 +142,16 @@ class GetOpTableTsTime:
             return self.get_op_ai_cpu_task_sql()
         iter_time = MsprofIteration(self.project_path).get_iteration_time(self.iter_id, self.model_id)
 
-        ai_cpu_sql = "select task_id, stream_id, sys_start*{MS_TO_NS}, (sys_end - sys_start)*{MS_TO_NS}, " \
-                     "'{1}', {4}, {5}, batch_id from {0} where sys_start >= {2} and sys_end <= {3}" \
-            .format(DBNameConstant.TABLE_AI_CPU, Constant.TASK_TYPE_AI_CPU,
-                    iter_time[0][0] / NumberConstant.NS_TO_US,
-                    iter_time[0][1] / NumberConstant.NS_TO_US,
-                    self.iter_id, self.model_id,
-                    MS_TO_NS=NumberConstant.MS_TO_NS)
+        ai_cpu_sql = ''
+        try:
+            ai_cpu_sql = "select task_id, stream_id, sys_start*{MS_TO_NS}, (sys_end - sys_start)*{MS_TO_NS}, " \
+                         "'{1}', {4}, {5}, batch_id from {0} where sys_start >= {2} and sys_end <= {3}" \
+                .format(DBNameConstant.TABLE_AI_CPU, Constant.TASK_TYPE_AI_CPU,
+                        iter_time[0][0] / NumberConstant.NS_TO_US,
+                        iter_time[0][1] / NumberConstant.NS_TO_US,
+                        self.iter_id, self.model_id,
+                        MS_TO_NS=NumberConstant.MS_TO_NS)
+        except ZeroDivisionError as err:
+            logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
+            return ai_cpu_sql
         return ai_cpu_sql

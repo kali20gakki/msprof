@@ -198,8 +198,10 @@ class MsprofDataStorage:
         """
         self.init_params(data_list)
         slice_switch, limit_size, method = self.read_slice_config()
+        if slice_switch == 'off':
+            return False, [self.timeline_head + data_list]
         slice_count = self.get_slice_times(limit_size, method)
-        if slice_switch == 'off' or not slice_count:
+        if not slice_count:
             return False, [self.timeline_head + data_list]
         slice_point = len(self.data_list) // slice_count
         slice_data = []
