@@ -507,20 +507,25 @@ class ExportCommand:
         tuning_view = TuningView(result_dir, sample_config)
         tuning_view.show_by_dev_id(self.list_map.get("devices_list")[0])
 
-    def _process_sub_dirs(self: any) -> None:
-        sub_dirs = get_path_dir(self.collection_path)
+    def _process_sub_dirs(self: any, subdir: str = '', is_cluster: bool = False) -> None:
+        collect_path = self.collection_path
+        if subdir:
+            collect_path = os.path.join(self.collection_path, subdir)
+        sub_dirs = get_path_dir(collect_path)
         for sub_dir in sub_dirs:  # result_dir
             if sub_dir != StrConstant.TIMELINE_PATH:
                 sub_path = os.path.realpath(
-                    os.path.join(self.collection_path, sub_dir))
+                    os.path.join(collect_path, sub_dir))
                 check_path_valid(sub_path, False)
                 if DataCheckManager.contain_info_json_data(sub_path):
                     InfoConfReader().load_info(sub_path)
                     self._handle_export(sub_path)
                     self._show_tuning_result(sub_path)
-                else:
+                elif subdir and is_cluster:
                     warn(self.FILE_NAME, 'Invalid parsing dir("%s"), -dir must be profiling data dir '
-                                         'such as PROF_XXX_XXX_XXX' % self.collection_path)
+                                         'such as PROF_XXX_XXX_XXX' % collect_path)
+                else:
+                    self._process_sub_dirs(sub_dir, is_cluster=True)
                 self.list_map['devices_list'] = ''
-        job_summary = MsprofJobSummary(self.collection_path)
+        job_summary = MsprofJobSummary(collect_path)
         job_summary.export()
