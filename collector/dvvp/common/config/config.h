@@ -197,8 +197,8 @@ const char * const AICORE_DATA = "aicore.data";
 const char * const STORAGE_LIMIT_UNIT = "MB";
 
 // analysis script param
-constexpr int DEFAULT_INTERATION_ID         = 1;
-constexpr int DEFAULT_MODEL_ID              = -1;
+const char * const DEFAULT_INTERATION_ID    = "1";
+const char * const DEFAULT_MODEL_ID         = "-1";
 const char * const PROFILING_SUMMARY_FORMAT = "csv";
 
 // used for init param
