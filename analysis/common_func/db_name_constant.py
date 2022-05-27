@@ -175,6 +175,7 @@ class DBNameConstant(metaclass=ABCMeta):
     # stars
     TABLE_PCIE_DATA = "PcieData"
     TABLE_ACC_PMU_DATA = "AccPmu"
+    TABLE_ACC_PMU_ORIGIN_DATA = "AccPmuOrigin"
     TABLE_LPE_DATA = 'Lpe'
     TABLE_LPS_DATA = "Lps"
     TABLE_SOC_DATA = "InterSoc"

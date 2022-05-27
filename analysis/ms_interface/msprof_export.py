@@ -115,6 +115,8 @@ class ExportCommand:
              'handler': AiStackDataCheckManager.contain_stars_low_power_data},
             {'export_type': ExportDataType.BIU_PERF,
              'handler': AiStackDataCheckManager.contain_biu_perf_data},
+            {'export_type': ExportDataType.ACC_PMU,
+             'handler': AiStackDataCheckManager.contain_stars_soc_data},
             {'export_type': ExportDataType.MSPROF,
              'handler': lambda result_dir, device_id=None: True}
         ],
