@@ -13,9 +13,9 @@ from common_func.file_name_manager import FileNameManagerConstant
 from common_func.file_name_manager import get_file_name_pattern_match
 from common_func.file_name_manager import get_training_trace_compiles
 from common_func.info_conf_reader import InfoConfReader
+from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.msvp_common import is_valid_original_data
-from common_func.ms_constant.str_constant import StrConstant
 from common_func.path_manager import PathManager
 from saver.training.training_trace_saver import TrainingTraceSaver
 
@@ -77,6 +77,16 @@ class TrainingTraceParser(MsMultiProcess):
             return message
         logging.error("No data file was generated.")
         return {}
+
+    def ms_run(self: any) -> None:
+        """
+        main entry for training trace parser
+        :return: None
+        """
+        try:
+            self.parse_training_trace()
+        except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
+            logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
 
     def __parse_trace_data_helper(self: any, message: dict, file_: any, iteration_id: any) -> None:
         while True:
@@ -171,15 +181,3 @@ class TrainingTraceParser(MsMultiProcess):
                 break
             else:
                 break
-
-    def ms_run(self: any) -> None:
-        """
-        main entry for training trace parser
-        :return: None
-        """
-        try:
-            self.parse_training_trace()
-        except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
-            logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
-        finally:
-            pass

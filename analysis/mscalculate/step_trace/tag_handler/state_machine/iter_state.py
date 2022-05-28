@@ -18,6 +18,13 @@ class BaseTagState:
             StepTraceConstant.ITER_END_TAG: self.process_iter_end_tag
         }
 
+    @staticmethod
+    def do_nothing() -> None:
+        """
+        do nothing
+        :return: void
+        """
+
     def process_record(self: any, record: any) -> None:
         """
         the way to process record
@@ -45,13 +52,6 @@ class BaseTagState:
         """
         self.handler.collect_data.get(self.handler.index_id)[StepTraceConstant.STEP_END] = time
         self.handler.index_id += 1
-
-    @staticmethod
-    def do_nothing() -> None:
-        """
-        do nothing
-        :return: void
-        """
 
     def process_model_start_tag(self: any, time: int, tag_id: int) -> tuple:
         """

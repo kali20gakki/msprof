@@ -67,4 +67,5 @@ class ExportDataType(Enum):
     THREAD_GROUP = 50
     LOW_POWER = 51
     BIU_PERF = 52
+    ACC_PMU = 53
     MSPROF = 100

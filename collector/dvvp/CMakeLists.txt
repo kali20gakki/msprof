@@ -162,7 +162,7 @@ set(msprofilerInc
     ${TOP_DIR}/collector/inc/toolchain
     ${TOP_DIR}/collector/inc/external
     ${TOP_DIR}/collector/inc/external/acl
-    ${TOP_DIR}/opensource/securec/include
+    ${TOP_DIR}/platform/securec/include
     ${TOP_DIR}/opensource/json/include
     ${TOP_DIR}/collector/dvvp/depend/inc/plugin
     msprof/engine/include

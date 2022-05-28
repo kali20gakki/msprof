@@ -6,12 +6,10 @@ Copyright Information:
 Huawei Technologies Co., Ltd. All Rights Reserved © 2021
 """
 import os
-import sys
 
 from common_func.common import error
 from common_func.constant import Constant
 from common_func.info_conf_reader import InfoConfReader
-from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msprof_exception import ProfException
 from common_func.singleton import singleton
 from profiling_bean.prof_enum.chip_model import ChipModel
@@ -36,6 +34,14 @@ class ChipManager:
     def __init__(self: any) -> None:
         self.chip_id = ChipModel.CHIP_V1_1_0
 
+    @classmethod
+    def get_chip_id(cls: any) -> any:
+        """
+        get chip id
+        :return: chip id
+        """
+        return cls.CHIP_RELATION_MAP.get(InfoConfReader().get_root_data(Constant.PLATFORM_VERSION))
+
     @staticmethod
     def is_ffts_type() -> bool:
         """
@@ -51,14 +57,6 @@ class ChipManager:
         :return:
         """
         return True
-
-    @classmethod
-    def get_chip_id(cls: any) -> any:
-        """
-        get chip id
-        :return: chip id
-        """
-        return cls.CHIP_RELATION_MAP.get(InfoConfReader().get_root_data(Constant.PLATFORM_VERSION))
 
     def load_chip_info(self: any) -> None:
         """

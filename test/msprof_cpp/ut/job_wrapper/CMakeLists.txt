@@ -104,7 +104,7 @@ target_compile_definitions(job_wrapper_utest PRIVATE
 target_include_directories(job_wrapper_utest PRIVATE
     ${GTEST_INCLUDE_DIR}
     ${MOCKCPP_INCLUDE_DIR}
-    ${TOP_DIR}/opensource/securec/include
+    ${TOP_DIR}/platform/securec/include
     ${TOP_DIR}/opensource/json/include
     ${TOP_DIR}/inc/toolchain
     ${TOP_DIR}/collector/inc/

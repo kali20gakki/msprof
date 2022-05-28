@@ -25,23 +25,12 @@ class GeTaskParser(DataParser, MsMultiProcess):
         self._file_list = file_list
         self.data = []
 
-    def parse(self: any) -> None:
+    @staticmethod
+    def read_binary_data(bean_class: any, bean_data: any) -> any:
         """
-        parse ge task data
+        read binary data
         """
-        fusion_task_file = self._file_list.get(DataTag.GE_TASK, [])
-        if fusion_task_file:
-            self.data = self.parse_bean_data(fusion_task_file, StructFmt.GE_TASK_SIZE, GeTaskBean, self._get_task_data)
-
-    def _get_task_data(self: any, bean_data: any) -> list:
-        if isinstance(bean_data, EmptyClass):
-            return []
-        op_name = self._get_op_name(bean_data)
-        op_type = self._get_op_type(bean_data)
-        return [bean_data.model_id, op_name, bean_data.stream_id,
-                bean_data.task_id, bean_data.block_dims, bean_data.shape_type, bean_data.task_type,
-                op_type, bean_data.index_num,
-                bean_data.thread_id, bean_data.timestamp, bean_data.batch_id]
+        return bean_class().fusion_decode(bean_data)
 
     @staticmethod
     def _get_op_name(bean_data: any) -> any:
@@ -59,12 +48,13 @@ class GeTaskParser(DataParser, MsMultiProcess):
             op_type = bean_data.op_type.partition(b'\x00')[0].decode('utf-8', 'ignore')
         return str(op_type)
 
-    @staticmethod
-    def read_binary_data(bean_class: any, bean_data: any) -> any:
+    def parse(self: any) -> None:
         """
-        read binary data
+        parse ge task data
         """
-        return bean_class().fusion_decode(bean_data)
+        fusion_task_file = self._file_list.get(DataTag.GE_TASK, [])
+        if fusion_task_file:
+            self.data = self.parse_bean_data(fusion_task_file, StructFmt.GE_TASK_SIZE, GeTaskBean, self._get_task_data)
 
     def save(self: any) -> str:
         """
@@ -82,3 +72,13 @@ class GeTaskParser(DataParser, MsMultiProcess):
             return {}
         self.parse()
         return {DBNameConstant.TABLE_GE_TASK: self.data}
+
+    def _get_task_data(self: any, bean_data: any) -> list:
+        if isinstance(bean_data, EmptyClass):
+            return []
+        op_name = self._get_op_name(bean_data)
+        op_type = self._get_op_type(bean_data)
+        return [bean_data.model_id, op_name, bean_data.stream_id,
+                bean_data.task_id, bean_data.block_dims, bean_data.shape_type, bean_data.task_type,
+                op_type, bean_data.index_num,
+                bean_data.thread_id, bean_data.timestamp, bean_data.batch_id]

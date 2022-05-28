@@ -29,9 +29,13 @@ def _get_ddr_data_from_db(curs: any, device_id: str) -> list:
     for ddr in ddr_data:
         read_sum += ddr[0]
         write_sum += ddr[1]
-
-    data = [['Average', round(read_sum * 1.0 / len(ddr_data), NumberConstant.DECIMAL_ACCURACY),
-             round(write_sum * 1.0 / len(ddr_data), NumberConstant.DECIMAL_ACCURACY)]]
+    read_avg = 0.0
+    write_avg = 0.0
+    if not NumberConstant.is_zero(len(ddr_data)):
+        read_avg = read_sum * 1.0 / len(ddr_data)
+        write_avg = write_sum * 1.0 / len(ddr_data)
+    data = [['Average', round(read_avg, NumberConstant.DECIMAL_ACCURACY),
+             round(write_avg, NumberConstant.DECIMAL_ACCURACY)]]
     return data
 
 
@@ -66,15 +70,15 @@ def cal_llc_band_res(llc_data: list, max_time: float) -> tuple:
     :return: ['Metric', 'l3c_rd', 'l3c_wr'], result_data, 3# 3 is the count of summary items
     """
     read_hit = 0.0
-    if llc_data[0] + llc_data[1]:
+    if not NumberConstant.is_zero(llc_data[0] + llc_data[1]):
         read_hit = round(llc_data[2] / (llc_data[0] + llc_data[1]), NumberConstant.DECIMAL_ACCURACY)
 
     write_hit = 0.0
-    if llc_data[3] + llc_data[4]:
+    if not NumberConstant.is_zero(llc_data[3] + llc_data[4]):
         write_hit = round(llc_data[5] / (llc_data[3] + llc_data[4]), NumberConstant.DECIMAL_ACCURACY)
 
     hit_rate = [["Hit_Rate(%)", read_hit * NumberConstant.PERCENTAGE, write_hit * NumberConstant.PERCENTAGE]]
-    if not max_time:
+    if NumberConstant.is_zero(max_time):
         bandwidth = [["BandWidth(MB/s)", 0.0, 0.0]]
         hit_bandwidth = [["Hit_BandWidth(MB/s)", 0.0, 0.0]]
     else:

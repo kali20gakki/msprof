@@ -173,6 +173,34 @@ class ParsingCPUData(MsMultiProcess):
         self.patterns = get_ctrl_cpu_compiles()
         self._file_list = []
 
+    @classmethod
+    def get_cpu_id(cls: any, sample_config: dict, device_id: str, cpu_type: str) -> str:
+        """
+        get cpu id from info.json
+        :param sample_config: sample config
+        :param device_id: device id
+        :param cpu_type: cpu type
+        :return: cpu id
+        """
+        project_path = sample_config.get("result_dir")
+        if not os.path.exists(project_path):
+            logging.info("No project path found in %s", CommonConstant.SAMPLE_JSON)
+            error(cls.FILE_NAME, "No project path found in {}".format(CommonConstant.SAMPLE_JSON))
+            return ''
+        info_path = os.path.realpath(os.path.join(project_path, StrConstant.INFO_JSON + '.' + device_id))
+        if not info_path:
+            return ''
+        cpu_id = InfoConfReader().get_data_under_device("{}_cpu".format(cpu_type))
+        if not cpu_id:
+            return ''
+        try:
+            return cpu_id if all(i.isdigit() for i in cpu_id.split(',')) else ''
+        except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
+            logging.error(err, exc_info=Constant.TRACE_BACK_SWITCH)
+            return ''
+        finally:
+            pass
+
     def init_cpu_db(self: any, device_id: str) -> None:
         """
         inti cpu db file
@@ -202,51 +230,6 @@ class ParsingCPUData(MsMultiProcess):
                 sys.exit(NumberConstant.ERROR)
             else:
                 self.conn.commit()
-
-    def _get_start_time(self: any) -> tuple:
-        # test the existence of OriginalData table
-        if self.curs.execute("select count(*) from sqlite_master where type='table' "
-                             "and name='OriginalData'").fetchone()[0]:
-            start_time = self.curs.execute(
-                "select timestamp from OriginalData order by timestamp limit 1")
-            start_time = start_time.fetchone()
-            if start_time:
-                start_time = start_time[0]
-            else:
-                start_time = Constant.DEFAULT_START
-        else:
-            status = create_originaldatatable(self.curs, "OriginalDataMap")
-            if status:
-                return status, 0
-            self.curs.execute(
-                "CREATE INDEX pmuevent_index ON OriginalData(pmuevent)")
-            self.curs.execute(
-                "CREATE INDEX timestamp_index ON OriginalData(timestamp)")
-            start_time = 0
-        return NumberConstant.SUCCESS, start_time
-
-    def _multiprocess(self: any, data_path: str, project_path: str, cpuid: str, device_id: str) -> None:
-        processes = []
-        lock = multiprocessing.Lock()
-        for i in range(self.FILE_SIZE):
-            kwargs = {
-                "replayid": 0,
-                "filename": data_path,
-                "id": cpuid,
-                "start_pos": i * os.path.getsize(data_path) / self.FILE_SIZE,
-                "end_pos": (i + 1) * os.path.getsize(data_path) / self.FILE_SIZE,
-                "dbname": os.path.join(project_path,
-                                       "sqlite", self.type + "cpu_" + device_id),
-                "pro_no": i,
-                "lock": lock
-            }
-            pro = multiprocessing.Process(
-                target=multi_process_cb.multiprocess_callback,
-                args=(kwargs,))
-            pro.start()
-            processes.append(pro)
-        for pro_ in processes:
-            pro_.join()
 
     def parsing_data_file(self: any, device_id: str, cpuid: str, data_path: str) -> int:
         """
@@ -316,26 +299,6 @@ class ParsingCPUData(MsMultiProcess):
                 "System failed to analysis data: %s", reason)
             error(self.FILE_NAME, "System failed to analysis {0} data: {1}".format(self.type, reason))
 
-    def _do_parse(self: any, device_id: str, project_path: str) -> bool:
-        for file in os.listdir(os.path.join(project_path, "data")):
-            if not (get_file_name_pattern_match(file, *self.patterns) and is_valid_original_data(file, project_path)):
-                continue
-            cpu_id = self.get_cpu_id(self.sample_config, device_id, self.type)
-            if cpu_id == '':
-                logging.error('failed to get %s cpu id', self.type)
-                return False
-            # create database
-            self.init_cpu_db(device_id)
-            data_path = os.path.join(project_path, "data", file)
-            if os.path.getsize(data_path) != 0:
-                # replay id is 0
-                status = self.parsing_data_file(device_id, cpu_id, data_path)
-                if status == NumberConstant.ERROR:
-                    return False
-            # create EventCount table and insert data
-            self.create_other_table()
-        return True
-
     def init_and_parsing(self: any) -> None:
         """
         init db file and parsing data into db
@@ -371,30 +334,67 @@ class ParsingCPUData(MsMultiProcess):
             if isinstance(self.conn, sqlite3.Connection):
                 self.conn.close()
 
-    @classmethod
-    def get_cpu_id(cls: any, sample_config: dict, device_id: str, cpu_type: str) -> str:
-        """
-        get cpu id from info.json
-        :param sample_config: sample config
-        :param device_id: device id
-        :param cpu_type: cpu type
-        :return: cpu id
-        """
-        project_path = sample_config.get("result_dir")
-        if not os.path.exists(project_path):
-            logging.info("No project path found in %s", CommonConstant.SAMPLE_JSON)
-            error(cls.FILE_NAME, "No project path found in {}".format(CommonConstant.SAMPLE_JSON))
-            return ''
-        info_path = os.path.realpath(os.path.join(project_path, StrConstant.INFO_JSON + '.' + device_id))
-        if not info_path:
-            return ''
-        cpu_id = InfoConfReader().get_data_under_device("{}_cpu".format(cpu_type))
-        if not cpu_id:
-            return ''
-        try:
-            return cpu_id if all(i.isdigit() for i in cpu_id.split(',')) else ''
-        except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
-            logging.error(err, exc_info=Constant.TRACE_BACK_SWITCH)
-            return ''
-        finally:
-            pass
+    def _multiprocess(self: any, data_path: str, project_path: str, cpuid: str, device_id: str) -> None:
+        processes = []
+        lock = multiprocessing.Lock()
+        for i in range(self.FILE_SIZE):
+            kwargs = {
+                "replayid": 0,
+                "filename": data_path,
+                "id": cpuid,
+                "start_pos": i * os.path.getsize(data_path) / self.FILE_SIZE,
+                "end_pos": (i + 1) * os.path.getsize(data_path) / self.FILE_SIZE,
+                "dbname": os.path.join(project_path,
+                                       "sqlite", self.type + "cpu_" + device_id),
+                "pro_no": i,
+                "lock": lock
+            }
+            pro = multiprocessing.Process(
+                target=multi_process_cb.multiprocess_callback,
+                args=(kwargs,))
+            pro.start()
+            processes.append(pro)
+        for pro_ in processes:
+            pro_.join()
+
+    def _do_parse(self: any, device_id: str, project_path: str) -> bool:
+        for file in os.listdir(os.path.join(project_path, "data")):
+            if not (get_file_name_pattern_match(file, *self.patterns) and is_valid_original_data(file, project_path)):
+                continue
+            cpu_id = self.get_cpu_id(self.sample_config, device_id, self.type)
+            if cpu_id == '':
+                logging.error('failed to get %s cpu id', self.type)
+                return False
+            # create database
+            self.init_cpu_db(device_id)
+            data_path = os.path.join(project_path, "data", file)
+            if os.path.getsize(data_path) != 0:
+                # replay id is 0
+                status = self.parsing_data_file(device_id, cpu_id, data_path)
+                if status == NumberConstant.ERROR:
+                    return False
+            # create EventCount table and insert data
+            self.create_other_table()
+        return True
+
+    def _get_start_time(self: any) -> tuple:
+        # test the existence of OriginalData table
+        if self.curs.execute("select count(*) from sqlite_master where type='table' "
+                             "and name='OriginalData'").fetchone()[0]:
+            start_time = self.curs.execute(
+                "select timestamp from OriginalData order by timestamp limit 1")
+            start_time = start_time.fetchone()
+            if start_time:
+                start_time = start_time[0]
+            else:
+                start_time = Constant.DEFAULT_START
+        else:
+            status = create_originaldatatable(self.curs, "OriginalDataMap")
+            if status:
+                return status, 0
+            self.curs.execute(
+                "CREATE INDEX pmuevent_index ON OriginalData(pmuevent)")
+            self.curs.execute(
+                "CREATE INDEX timestamp_index ON OriginalData(timestamp)")
+            start_time = 0
+        return NumberConstant.SUCCESS, start_time

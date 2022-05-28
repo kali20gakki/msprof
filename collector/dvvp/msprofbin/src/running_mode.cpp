@@ -322,11 +322,11 @@ int RunningMode::RunExportSummaryTask(const ExecCmdParams &execCmdParams,
         analysisPath_,
         "export", "summary",
         "-dir=" + jobResultDir_,
-        "--iteration-id=" + std::to_string(params_->exportIterationId),
+        "--iteration-id=" + params_->exportIterationId,
         "--format=" + params_->exportSummaryFormat
     };
     if (params_->exportModelId != DEFAULT_MODEL_ID) {
-        argsSummaryV.emplace_back("--model-id=" + std::to_string(params_->exportModelId));
+        argsSummaryV.emplace_back("--model-id=" + params_->exportModelId);
     }
     int ret = analysis::dvvp::common::utils::Utils::ExecCmd(execCmdParams, argsSummaryV, envsV, exitCode, taskPid_);
     if (ret == PROFILING_FAILED) {
@@ -349,10 +349,10 @@ int RunningMode::RunExportTimelineTask(const ExecCmdParams &execCmdParams,
         analysisPath_,
         "export", "timeline",
         "-dir=" + jobResultDir_,
-        "--iteration-id=" + std::to_string(params_->exportIterationId)
+        "--iteration-id=" + params_->exportIterationId
     };
     if (params_->exportModelId != DEFAULT_MODEL_ID) {
-        argsTimelineV.emplace_back("--model-id=" + std::to_string(params_->exportModelId));
+        argsTimelineV.emplace_back("--model-id=" + params_->exportModelId);
     }
     int ret = analysis::dvvp::common::utils::Utils::ExecCmd(execCmdParams, argsTimelineV, envsV, exitCode, taskPid_);
     if (ret == PROFILING_FAILED) {
