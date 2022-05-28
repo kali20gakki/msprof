@@ -29,47 +29,6 @@ class GeFusionOpInfoBean(StructDecoder):
         self._fusion_op = Constant.DEFAULT_VALUE
         self._hash_flag = Constant.NO_HASH_DICT_FLAG
 
-    def fusion_decode(self: any, binary_data: bytes) -> any:
-        """
-        decode fusion info binary data
-        :param binary_data:
-        :return:
-        """
-        pre_fusion_data = struct.unpack_from(StructFmt.BYTE_ORDER_CHAR + StructFmt.GE_FUSION_PRE_FMT,
-                                             binary_data[:StructFmt.GE_FUSION_PRE_SIZE])
-        self._hash_flag = pre_fusion_data[3]
-        fmt = "HHI8B120s14Q8B"
-        if self.is_hash_type():
-            fmt = "HHI8BQ112B14Q8B"
-        self.construct_bean(struct.unpack_from(fmt, binary_data))
-        return self
-
-    def construct_bean(self: any, *args: any) -> None:
-        """
-        refresh the acl data
-        :param args: acl bin data
-        :return: True or False
-        """
-        self._fusion_data = args[0]
-        self._model_id = self._fusion_data[2]
-        self._fusion_name = self._fusion_data[11]
-        self._input_mem_size = self._fusion_data[12]
-        self._output_mem_size = self._fusion_data[13]
-        self._weight_mem_size = self._fusion_data[14]
-        self._workspace_mem_size = self._fusion_data[15]
-        self._total_mem_size = self._fusion_data[16]
-        self._fusion_op_num = self._fusion_data[17]
-        self._fusion_op = self._fusion_data[18:26]
-        if self.is_hash_type():
-            self._fusion_name = self._fusion_data[11]
-            self._input_mem_size = self._fusion_data[124]
-            self._output_mem_size = self._fusion_data[125]
-            self._weight_mem_size = self._fusion_data[126]
-            self._workspace_mem_size = self._fusion_data[127]
-            self._total_mem_size = self._fusion_data[128]
-            self._fusion_op_num = self._fusion_data[129]
-            self._fusion_op = self._fusion_data[130:138]
-
     @property
     def hash_flag(self: any) -> int:
         """
@@ -146,3 +105,44 @@ class GeFusionOpInfoBean(StructDecoder):
         :return:
         """
         return self._hash_flag == Constant.HASH_DICT_FLAG
+
+    def fusion_decode(self: any, binary_data: bytes) -> any:
+        """
+        decode fusion info binary data
+        :param binary_data:
+        :return:
+        """
+        pre_fusion_data = struct.unpack_from(StructFmt.BYTE_ORDER_CHAR + StructFmt.GE_FUSION_PRE_FMT,
+                                             binary_data[:StructFmt.GE_FUSION_PRE_SIZE])
+        self._hash_flag = pre_fusion_data[3]
+        fmt = "HHI8B120s14Q8B"
+        if self.is_hash_type():
+            fmt = "HHI8BQ112B14Q8B"
+        self.construct_bean(struct.unpack_from(fmt, binary_data))
+        return self
+
+    def construct_bean(self: any, *args: any) -> None:
+        """
+        refresh the acl data
+        :param args: acl bin data
+        :return: True or False
+        """
+        self._fusion_data = args[0]
+        self._model_id = self._fusion_data[2]
+        self._fusion_name = self._fusion_data[11]
+        self._input_mem_size = self._fusion_data[12]
+        self._output_mem_size = self._fusion_data[13]
+        self._weight_mem_size = self._fusion_data[14]
+        self._workspace_mem_size = self._fusion_data[15]
+        self._total_mem_size = self._fusion_data[16]
+        self._fusion_op_num = self._fusion_data[17]
+        self._fusion_op = self._fusion_data[18:26]
+        if self.is_hash_type():
+            self._fusion_name = self._fusion_data[11]
+            self._input_mem_size = self._fusion_data[124]
+            self._output_mem_size = self._fusion_data[125]
+            self._weight_mem_size = self._fusion_data[126]
+            self._workspace_mem_size = self._fusion_data[127]
+            self._total_mem_size = self._fusion_data[128]
+            self._fusion_op_num = self._fusion_data[129]
+            self._fusion_op = self._fusion_data[130:138]

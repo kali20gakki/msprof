@@ -6,7 +6,6 @@ Copyright Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
 """
 
 import logging
-import sqlite3
 from collections import deque
 
 from analyzer.scene_base.profiling_scene import ProfilingScene
@@ -209,6 +208,29 @@ class AiCoreOpReport:
             i += 1
 
     @classmethod
+    def get_ai_core_op_summary_data(cls: any, project_path: str, db_path: str, iter_id: int, configs: dict) -> tuple:
+        """
+        get ai core op summary data
+        :param project_path:
+        :param db_path:
+        :param iter_id:
+        :param configs:
+        :return:
+        """
+        conn, curs = DBManager.check_connect_db_path(db_path)
+        if not cls._check_op_summary_table_no_op_scene(conn, curs):
+            return MsvpConstant.MSVP_EMPTY_DATA
+        headers = cls.get_op_header(configs)
+        try:
+            data, headers = cls._get_op_summary_data(project_path, curs, headers, iter_id)
+            return headers, data, len(data)
+        except (OSError, SystemError, ValueError, TypeError, RuntimeError) as op_err:
+            logging.error(str(op_err), exc_info=Constant.TRACE_BACK_SWITCH)
+            return MsvpConstant.MSVP_EMPTY_DATA
+        finally:
+            DBManager.destroy_db_connect(conn, curs)
+
+    @classmethod
     def _check_ai_cpu_data(cls: any, conn: any, curs: any) -> bool:
         """
         check ai cpu sqlite data
@@ -242,29 +264,6 @@ class AiCoreOpReport:
         cls._add_memory_bound(headers, data)
         headers = add_aicore_units(headers)
         return data, headers
-
-    @classmethod
-    def get_ai_core_op_summary_data(cls: any, project_path: str, db_path: str, iter_id: int, configs: dict) -> tuple:
-        """
-        get ai core op summary data
-        :param project_path:
-        :param db_path:
-        :param iter_id:
-        :param configs:
-        :return:
-        """
-        conn, curs = DBManager.check_connect_db_path(db_path)
-        if not cls._check_op_summary_table_no_op_scene(conn, curs):
-            return MsvpConstant.MSVP_EMPTY_DATA
-        headers = cls.get_op_header(configs)
-        try:
-            data, headers = cls._get_op_summary_data(project_path, curs, headers, iter_id)
-            return headers, data, len(data)
-        except (OSError, SystemError, ValueError, TypeError, RuntimeError) as op_err:
-            logging.error(str(op_err), exc_info=Constant.TRACE_BACK_SWITCH)
-            return MsvpConstant.MSVP_EMPTY_DATA
-        finally:
-            DBManager.destroy_db_connect(conn, curs)
 
     @classmethod
     def _update_model_name_and_infer_id(cls: any, project_path: str, ai_core_data: list) -> list:
@@ -459,12 +458,6 @@ class ReportOPCounter:
         return sql
 
     @classmethod
-    def _clear_unused_headers(cls: any, headers: list) -> None:
-        for head in cls.OPERATOR_UNUSED_HEADERS:
-            if head in headers:
-                headers.remove(head)
-
-    @classmethod
     def report_op(cls: any, db_path: str, headers: list) -> tuple:
         """
         report op counter
@@ -482,3 +475,9 @@ class ReportOPCounter:
         data = DBManager.fetch_all_data(curs, sql)
         DBManager.destroy_db_connect(conn, curs)
         return headers, data, len(data)
+
+    @classmethod
+    def _clear_unused_headers(cls: any, headers: list) -> None:
+        for head in cls.OPERATOR_UNUSED_HEADERS:
+            if head in headers:
+                headers.remove(head)

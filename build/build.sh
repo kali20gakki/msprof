@@ -4,9 +4,6 @@
 
 set -e
 CUR_DIR=$(dirname $(readlink -f $0))
-
-bash ${CUR_DIR}/bep/check_bep_env.sh
-
 TOP_DIR=${CUR_DIR}/..
 VERSION=""
 BUILD_TYPE=""

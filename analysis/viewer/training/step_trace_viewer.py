@@ -210,25 +210,6 @@ class StepTraceViewer:
         return data
 
     @staticmethod
-    def __select_reduce(conn: any, trace: list) -> list:
-        """
-        Select date from all_reduce table with specific ids.
-        :param conn: connect to database
-        :param trace: trace data
-        :return: result
-        """
-        curs = conn.cursor()
-        iteration_end = trace[3]
-        model_id = NumberConstant.DEFAULT_MODEL_ID if trace[-1] == "N/A" else trace[-1]
-
-        sql = "select start, end from {0} " \
-              "where iteration_end=? and model_id=?" \
-            .format(DBNameConstant.TABLE_ALL_REDUCE)
-        result = DBManager.fetch_all_data(curs, sql, (iteration_end, model_id))
-        curs.close()
-        return result
-
-    @staticmethod
     def query_top_total(message: any) -> dict:
         """
         Rewrite gRPC QueryTopTotal method.
@@ -252,47 +233,6 @@ class StepTraceViewer:
             return resp
         resp["total_count"] = values
         return resp
-
-    @staticmethod
-    def __count_trace(conn: any) -> any:
-        """Select date from traing_trace limited by count and sort"""
-        curs = conn.cursor()
-        sql = "SELECT COUNT(*) FROM {0} group by device_id".format(DBNameConstant.TABLE_TRAINING_TRACE)
-        curs.execute(sql)
-        result = curs.fetchone()
-        if result:
-            result = result[0]
-        else:
-            result = 0
-        curs.close()
-        return result
-
-    @staticmethod
-    def __get_mata_trace_data(result_data: list, index: int, iter_id: int, pid: int) -> list:
-        """
-        get training trace mata data
-        :param result_data: result data
-        :param index: index
-        :param iter_id: iter id
-        :param pid: pid
-        :return: result
-        """
-        # each training trace include three tid
-        tid_value = [int(0 + 3 * int(index)), int(1 + 3 * int(index)), int(2 + 3 * int(index))]
-        meta_data = [["thread_name", pid,
-                      tid_value[0], "Iteration {}".format(iter_id)],
-                     ["thread_name", pid,
-                      tid_value[1], " "],
-                     ["thread_name", pid,
-                      tid_value[2], " "],
-                     ["thread_sort_index", pid,
-                      tid_value[0], tid_value[0]],
-                     ["thread_sort_index", pid,
-                      tid_value[1], tid_value[1]],
-                     ["thread_sort_index", pid,
-                      tid_value[2], tid_value[2]]]
-        result_data.extend(TraceViewManager.metadata_event(meta_data))
-        return result_data
 
     @staticmethod
     def get_model_pid(data: list) -> int:
@@ -326,50 +266,22 @@ class StepTraceViewer:
                   InfoConfReader().get_json_tid_data(), "Model ID:{}".format(model_id)]]))
 
     @staticmethod
-    @catch_exception
-    def __format_trace_json(trace_data: list) -> any:
+    def add_reduce_headers(conn: any, headers: list, message: dict) -> None:
         """
-        Parse hwts protobuf message to json format
-        trace_parm//100: Convert 10ns-level timestamp to us-level timestamp
-        tid=0:Iteration Time
-        tid=1:FP_BP Time;Grad_refresh Bound
-        tid=2:Reduce time
+        add reduece headers
+        :param conn: sqlite connection
+        :param headers: headers
+        :param message: message
+        :return:
         """
-        result_data = []
-        trace_parm = {}
-        result_dict = {}
-        StepTraceViewer.make_model_meta(result_data, trace_data)
-        for index, data in enumerate(trace_data):
-            trace_view_data = []
-            TimeLineJsonMaker.create_trace_parm(trace_parm, data)
-
-            pid = StepTraceViewer.get_model_pid(data)
-            result_data = StepTraceViewer.__get_mata_trace_data(
-                result_data, index, trace_parm.get(StepTraceConstant.ITER_ID), pid)
-
-            iter_time_data = TimeLineJsonMaker.make_iter_time(trace_parm, pid, index)
-
-            if data[1] == "N/A" or data[2] == "N/A":
-                trace_view_data.append(iter_time_data)
-                result_data.extend(
-                    TraceViewManager.time_graph_trace(TraceViewHeaderConstant.GRPC_TIME_GRAPH_HEAD, trace_view_data))
-
-            else:
-                fp_bp_data = TimeLineJsonMaker.make_fp_bp_data(trace_parm, pid, index)
-                grad_refresh_data = TimeLineJsonMaker.make_grad_refresh_data(trace_parm, pid, index)
-                result_dict["data_aug_dict0"] = TimeLineJsonMaker.make_data_aug_dict0(trace_parm, pid)
-                result_dict["data_aug_dict1"] = TimeLineJsonMaker.make_data_aug_dict1(trace_parm, pid)
-
-                trace_view_data.append(iter_time_data)
-                trace_view_data.append(fp_bp_data)
-                trace_view_data.append(grad_refresh_data)
-                result_data.extend(
-                    TraceViewManager.time_graph_trace(TraceViewHeaderConstant.GRPC_TIME_GRAPH_HEAD, trace_view_data))
-                result_data.extend([result_dict.get("data_aug_dict0", {}), result_dict.get("data_aug_dict1", {})])
-
-            StepTraceViewer.format_reduce_json(data, trace_parm, pid, index, result_data)
-
-        return json.dumps(result_data)
+        if DBManager.judge_table_exist(conn.cursor(), DBNameConstant.TABLE_ALL_REDUCE):
+            reduce_data = conn.cursor().execute(
+                "select count(*) from  {0} where device_id=?"
+                " group by iteration_end, model_id;".format(DBNameConstant.TABLE_ALL_REDUCE),
+                (message["device_id"],)).fetchone()
+            if reduce_data:
+                headers += ["Reduce Start", "Reduce Duration(us)"] * \
+                           int(reduce_data[0])
 
     @staticmethod
     def format_reduce_json(data: list, trace_parm: dict, pid: int, index: int, result_data: list) -> None:
@@ -406,37 +318,6 @@ class StepTraceViewer:
                 result_data.extend(TraceViewManager.time_graph_trace(
                     TraceViewHeaderConstant.GRPC_TIME_GRAPH_HEAD, reduce_trace_data))
                 i = i + 1
-
-    @staticmethod
-    def _reformat_step_trace_data(data: list, conn: any) -> list:
-        merge_data = []
-        for line in data:
-            trace = list(line)
-            if len(trace) >= 4:  # trace[3] refers to iteration end
-                reduce_data = StepTraceViewer.__select_reduce(conn,
-                                                              trace)
-                for item in reduce_data:
-                    trace += [item[0], (item[1] - item[0]) * StepTraceConstant.syscnt_to_micro()]
-            merge_data.append(trace)
-        return merge_data
-
-    @staticmethod
-    def add_reduce_headers(conn: any, headers: list, message: dict) -> None:
-        """
-        add reduece headers
-        :param conn: sqlite connection
-        :param headers: headers
-        :param message: message
-        :return:
-        """
-        if DBManager.judge_table_exist(conn.cursor(), DBNameConstant.TABLE_ALL_REDUCE):
-            reduce_data = conn.cursor().execute(
-                "select count(*) from  {0} where device_id=?"
-                " group by iteration_end, model_id;".format(DBNameConstant.TABLE_ALL_REDUCE),
-                (message["device_id"],)).fetchone()
-            if reduce_data:
-                headers += ["Reduce Start", "Reduce Duration(us)"] * \
-                           int(reduce_data[0])
 
     @staticmethod
     def get_step_trace_summary(message: dict) -> tuple:
@@ -486,33 +367,6 @@ class StepTraceViewer:
         curs.close()
 
         return StepTraceViewer.get_trace_timeline_data(conn, data)
-
-    @staticmethod
-    def __select_trace_one_iter(curs: any, index_id: int, model_id: int) -> list:
-        """
-        Select date from traing_trace limited by count and sort
-        """
-
-        sql = "select iteration_id, " \
-              "(case when FP_start={2} then 'N/A' else FP_start end), " \
-              "(case when BP_end={2} then 'N/A' else BP_end end), " \
-              "iteration_end, " \
-              "(case when iteration_time={2} then 'N/A' else iteration_time*{0} end), " \
-              "(case when fp_bp_time={2} then 'N/A' else fp_bp_time*{0} end), " \
-              "(case when grad_refresh_bound={2} then 'N/A' else grad_refresh_bound*{0} end), " \
-              "(case when data_aug_bound={2} then 'N/A' else data_aug_bound*{0} end), " \
-              "(case when model_id={3} then 'N/A' else model_id end) " \
-              "from {1} where model_id={4} and iteration_id={5}".format(StepTraceConstant.syscnt_to_micro(),
-                                                                        DBNameConstant.TABLE_TRAINING_TRACE,
-                                                                        NumberConstant.NULL_NUMBER,
-                                                                        NumberConstant.DEFAULT_MODEL_ID,
-                                                                        model_id,
-                                                                        index_id)
-        curs.execute(sql)
-        result = curs.fetchall()
-        # index_id
-        curs.close()
-        return result
 
     @staticmethod
     def get_one_iter_timeline_data(result_dir: str, index_id: int, model_id: int) -> str:
@@ -579,3 +433,149 @@ class StepTraceViewer:
             if cnn:
                 DBManager.destroy_db_connect(cnn, cnn.cursor())
         return EmptyClass("no trace timeline data")
+
+    @staticmethod
+    def _reformat_step_trace_data(data: list, conn: any) -> list:
+        merge_data = []
+        for line in data:
+            trace = list(line)
+            if len(trace) >= 4:  # trace[3] refers to iteration end
+                reduce_data = StepTraceViewer.__select_reduce(conn,
+                                                              trace)
+                for item in reduce_data:
+                    trace += [item[0], (item[1] - item[0]) * StepTraceConstant.syscnt_to_micro()]
+            merge_data.append(trace)
+        return merge_data
+
+    @staticmethod
+    @catch_exception
+    def __format_trace_json(trace_data: list) -> any:
+        """
+        Parse hwts protobuf message to json format
+        trace_parm//100: Convert 10ns-level timestamp to us-level timestamp
+        tid=0:Iteration Time
+        tid=1:FP_BP Time;Grad_refresh Bound
+        tid=2:Reduce time
+        """
+        result_data = []
+        trace_parm = {}
+        result_dict = {}
+        StepTraceViewer.make_model_meta(result_data, trace_data)
+        for index, data in enumerate(trace_data):
+            trace_view_data = []
+            TimeLineJsonMaker.create_trace_parm(trace_parm, data)
+
+            pid = StepTraceViewer.get_model_pid(data)
+            result_data = StepTraceViewer.__get_mata_trace_data(
+                result_data, index, trace_parm.get(StepTraceConstant.ITER_ID), pid)
+
+            iter_time_data = TimeLineJsonMaker.make_iter_time(trace_parm, pid, index)
+
+            if data[1] == "N/A" or data[2] == "N/A":
+                trace_view_data.append(iter_time_data)
+                result_data.extend(
+                    TraceViewManager.time_graph_trace(TraceViewHeaderConstant.GRPC_TIME_GRAPH_HEAD, trace_view_data))
+
+            else:
+                fp_bp_data = TimeLineJsonMaker.make_fp_bp_data(trace_parm, pid, index)
+                grad_refresh_data = TimeLineJsonMaker.make_grad_refresh_data(trace_parm, pid, index)
+                result_dict["data_aug_dict0"] = TimeLineJsonMaker.make_data_aug_dict0(trace_parm, pid)
+                result_dict["data_aug_dict1"] = TimeLineJsonMaker.make_data_aug_dict1(trace_parm, pid)
+
+                trace_view_data.append(iter_time_data)
+                trace_view_data.append(fp_bp_data)
+                trace_view_data.append(grad_refresh_data)
+                result_data.extend(
+                    TraceViewManager.time_graph_trace(TraceViewHeaderConstant.GRPC_TIME_GRAPH_HEAD, trace_view_data))
+                result_data.extend([result_dict.get("data_aug_dict0", {}), result_dict.get("data_aug_dict1", {})])
+
+            StepTraceViewer.format_reduce_json(data, trace_parm, pid, index, result_data)
+
+        return json.dumps(result_data)
+
+    @staticmethod
+    def __count_trace(conn: any) -> any:
+        """Select date from traing_trace limited by count and sort"""
+        curs = conn.cursor()
+        sql = "SELECT COUNT(*) FROM {0} group by device_id".format(DBNameConstant.TABLE_TRAINING_TRACE)
+        curs.execute(sql)
+        result = curs.fetchone()
+        if result:
+            result = result[0]
+        else:
+            result = 0
+        curs.close()
+        return result
+
+    @staticmethod
+    def __get_mata_trace_data(result_data: list, index: int, iter_id: int, pid: int) -> list:
+        """
+        get training trace mata data
+        :param result_data: result data
+        :param index: index
+        :param iter_id: iter id
+        :param pid: pid
+        :return: result
+        """
+        # each training trace include three tid
+        tid_value = [int(0 + 3 * int(index)), int(1 + 3 * int(index)), int(2 + 3 * int(index))]
+        meta_data = [["thread_name", pid,
+                      tid_value[0], "Iteration {}".format(iter_id)],
+                     ["thread_name", pid,
+                      tid_value[1], " "],
+                     ["thread_name", pid,
+                      tid_value[2], " "],
+                     ["thread_sort_index", pid,
+                      tid_value[0], tid_value[0]],
+                     ["thread_sort_index", pid,
+                      tid_value[1], tid_value[1]],
+                     ["thread_sort_index", pid,
+                      tid_value[2], tid_value[2]]]
+        result_data.extend(TraceViewManager.metadata_event(meta_data))
+        return result_data
+
+    @staticmethod
+    def __select_reduce(conn: any, trace: list) -> list:
+        """
+        Select date from all_reduce table with specific ids.
+        :param conn: connect to database
+        :param trace: trace data
+        :return: result
+        """
+        curs = conn.cursor()
+        iteration_end = trace[3]
+        model_id = NumberConstant.DEFAULT_MODEL_ID if trace[-1] == "N/A" else trace[-1]
+
+        sql = "select start, end from {0} " \
+              "where iteration_end=? and model_id=?" \
+            .format(DBNameConstant.TABLE_ALL_REDUCE)
+        result = DBManager.fetch_all_data(curs, sql, (iteration_end, model_id))
+        curs.close()
+        return result
+
+    @staticmethod
+    def __select_trace_one_iter(curs: any, index_id: int, model_id: int) -> list:
+        """
+        Select date from traing_trace limited by count and sort
+        """
+
+        sql = "select iteration_id, " \
+              "(case when FP_start={2} then 'N/A' else FP_start end), " \
+              "(case when BP_end={2} then 'N/A' else BP_end end), " \
+              "iteration_end, " \
+              "(case when iteration_time={2} then 'N/A' else iteration_time*{0} end), " \
+              "(case when fp_bp_time={2} then 'N/A' else fp_bp_time*{0} end), " \
+              "(case when grad_refresh_bound={2} then 'N/A' else grad_refresh_bound*{0} end), " \
+              "(case when data_aug_bound={2} then 'N/A' else data_aug_bound*{0} end), " \
+              "(case when model_id={3} then 'N/A' else model_id end) " \
+              "from {1} where model_id={4} and iteration_id={5}".format(StepTraceConstant.syscnt_to_micro(),
+                                                                        DBNameConstant.TABLE_TRAINING_TRACE,
+                                                                        NumberConstant.NULL_NUMBER,
+                                                                        NumberConstant.DEFAULT_MODEL_ID,
+                                                                        model_id,
+                                                                        index_id)
+        curs.execute(sql)
+        result = curs.fetchall()
+        # index_id
+        curs.close()
+        return result

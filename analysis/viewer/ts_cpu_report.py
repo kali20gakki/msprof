@@ -21,24 +21,11 @@ class TsCpuReport:
     FILE_NAME = os.path.basename(__file__)
 
     @staticmethod
-    def _get_ts_cpu_data(cursor: any, result: list) -> list:
-        top_function = {}
-        total_data = []
-        for key, value in result:
-            if key in top_function:
-                top_function[key] += value
-            else:
-                top_function[key] = value
-        total_count = cursor.execute('select sum(count) from TsOriginalData '
-                                     'where event="0x11"').fetchone()[0]
-        if total_count:
-            tmp_res = []
-            for key, value in list(top_function.items()):
-                rate = round(float(value) * NumberConstant.PERCENTAGE / total_count,
-                             NumberConstant.DECIMAL_ACCURACY)
-                tmp_res.append((key, value, rate))
-            total_data = sorted(tmp_res, key=lambda x: x[1], reverse=True)
-        return total_data
+    def class_name() -> str:
+        """
+        class name
+        """
+        return TsCpuReport.__name__
 
     def get_output_top_function(self: any, db_name: str, result_dir: str) -> tuple:
         """
@@ -71,8 +58,21 @@ class TsCpuReport:
         return headers, total_data[:5], len(total_data[:5])
 
     @staticmethod
-    def class_name() -> str:
-        """
-        class name
-        """
-        return TsCpuReport.__name__
+    def _get_ts_cpu_data(cursor: any, result: list) -> list:
+        top_function = {}
+        total_data = []
+        for key, value in result:
+            if key in top_function:
+                top_function[key] += value
+            else:
+                top_function[key] = value
+        total_count = cursor.execute('select sum(count) from TsOriginalData '
+                                     'where event="0x11"').fetchone()[0]
+        if not NumberConstant.is_zero(total_count):
+            tmp_res = []
+            for key, value in list(top_function.items()):
+                rate = round(float(value) * NumberConstant.PERCENTAGE / total_count,
+                             NumberConstant.DECIMAL_ACCURACY)
+                tmp_res.append((key, value, rate))
+            total_data = sorted(tmp_res, key=lambda x: x[1], reverse=True)
+        return total_data
