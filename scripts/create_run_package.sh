@@ -6,7 +6,9 @@ TOP_DIR=${CUR_DIR}/..
 # store product
 TEMP_OUTPUT=${TOP_DIR}/build/output
 MSPROF_TEMP_DIR=${TOP_DIR}/build/msprof_tmp
+COMMON_DIR="common_script"
 mkdir ${MSPROF_TEMP_DIR}
+mkdir ${MSPROF_TEMP_DIR}/${COMMON_DIR}
 
 # makeself is tool for compiling run package
 MAKESELF_DIR=${TOP_DIR}/opensource/makeself
@@ -32,6 +34,8 @@ BACKUP=backup.sh
 ROLLBACK_PRECHECK=rollback_precheck.sh
 ROLLBACK=rollback.sh
 UNINSTALL=uninstall.sh
+COMMON_ROLLBACK=rollback.sh
+COMMON_UNINSTALL=uninstall.sh
 
 MSPROF_RUN_NAME="mindstudio-msprof"
 version="unknwon"
@@ -74,6 +78,9 @@ function create_temp_dir() {
 			copy_script ${ROLLBACK_PRECHECK} ${temp_dir}
 			copy_script ${ROLLBACK} ${temp_dir}
 			copy_script ${UNINSTALL} ${temp_dir}
+			copy_script ${COMMON_DIR}/${COMMON_ROLLBACK} ${temp_dir}
+			copy_script ${COMMON_DIR}/${COMMON_UNINSTALL} ${temp_dir}
+
 		else
 			cp ${TEMP_OUTPUT}/lib/libmsprofiler.so ${temp_dir}
 			cp -r ${TEMP_OUTPUT}/stub ${temp_dir}
@@ -89,7 +96,7 @@ function copy_script() {
 	local script_name=${1}
 	local temp_dir=${2}
 
-	cp ${RUN_SCRIPT_DIR}/${script_name} ${temp_dir}
+	cp ${RUN_SCRIPT_DIR}/${script_name} ${temp_dir}/${script_name}
 	chmod 500 ${temp_dir}/${script_name}
 }
 
