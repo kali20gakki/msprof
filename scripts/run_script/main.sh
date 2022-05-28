@@ -26,11 +26,6 @@ function parse_script_args() {
             shift
 			continue
             ;;
-        --quiet)
-            let "install_args_num+=1"
-            shift
-			continue
-            ;;
         --run)
             let "install_args_num+=1"
             shift
@@ -41,6 +36,14 @@ function parse_script_args() {
             shift
 			continue
             ;;
+        --quiet)
+            shift
+			continue
+            ;;
+        --nox11)
+            shift
+			continue
+            ;;	
         --install-for-all)
 			install_for_all_flag=1
             shift
@@ -68,11 +71,104 @@ function check_args() {
 
 function execute_run() {
 	if [ ${uninstall_flag} = 1 ]; then
+		implement_uninstall
 		print "INFO" "Mindstudio msprof package uninstall success."
 		exit 0
 	fi
 	get_cann_package_name
 	implement_install
+}
+
+function implement_uninstall() {
+    if [ "${package_arch}" != "$(arch)" ] && [ -d "${install_path}/${package_arch}-linux/hetero-arch-scripts" ]; then
+	    delete_product  ${LIBMSPROFILER_STUB} ${install_path}/${package_arch}-linux/hetero-arch-scripts/${LIBMSPROFILER_PATH}/${LIBMSPROFILER_STUB}
+		delete_product  ${LIBMSPROFILER} ${install_path}/${package_arch}-linux/hetero-arch-scripts/${LIBMSPROFILER_PATH}/${LIBMSPROFILER}
+		return
+	fi
+		delete_product ${ANALYSIS} ${install_path}/${ANALYSIS_PATH}/${ANALYSIS}
+		delete_product ${MSPROF} ${install_path}/${MSPROF_PATH}/${MSPROF}
+		delete_product ${LIBMSPROFILER_STUB} ${install_path}/${LIBMSPROFILER_PATH}/${LIBMSPROFILER_STUB}
+		delete_product ${LIBMSPROFILER} ${install_path}/${LIBMSPROFILER_PATH}/${LIBMSPROFILER}
+}
+
+function delete_product() {
+	local file_name=${1}
+	local target_path=$(readlink -f ${2})
+    local parent_dir=$(dirname ${target_path})
+    local right=$(stat -c '%a' ${parent_dir})
+
+	if [ ! -f "$target_path" ] && [ ! -d "$target_path" ]; then
+		return
+	fi
+
+	chmod u+w ${parent_dir}
+	rm_travel ${file_name} ${target_path}
+	chmod ${right} ${parent_dir}
+}
+
+function rm_travel(){
+	local file_name=${1}
+	local target_path=${2}
+	local right=400
+
+	if [ -f "${target_path}" ]; then
+        right=$(stat -c '%a' ${target_path})
+        chmod u+w ${target_path}
+		if [ -f "${file_name}" ]; then
+			rm_file_safe "${target_path}"
+		fi
+	fi
+	
+	if [ -d "${target_path}" ]; then
+        right=$(stat -c '%a' ${target_path})
+        chmod u+w ${target_path}
+		if [ -d "${file_name}" ]; then
+			file_list=`ls $file_name`
+			for f in $file_list
+			do
+				rm_travel ${file_name}/${f} ${target_path}/${f}
+			done
+			delete_empty_folder "${target_path}"
+		fi
+	fi
+
+	if [ -f "${target_path}" ] && [ -d "${target_path}" ]; then
+		chmod ${right} ${target_path}
+	fi
+}
+
+function rm_file_safe() {
+    local file_path=$1
+    if [ -n "${file_path}" ]; then
+        if [ -f "${file_path}" ] || [ -h "${file_path}" ]; then
+            rm -f "${file_path}"
+        else
+            print "WARNING" "the file ${file_path} is not exist"
+        fi
+    else
+        print "WARNING" "the file ${file_path} path is NULL"
+    fi
+}
+
+function delete_empty_folder() {
+    if [ -d "${1}" ]; then
+        if [ ! "$(ls -A ${1})" ]; then
+            rm_dir_safe ${1}
+        fi
+    fi
+}
+
+function rm_dir_safe() {
+    local dir_path=$1
+    if [ -n "${dir_path}" ] && [[ ! "${dir_path}" =~ ^/+$ ]]; then
+        if [ -d "${dir_path}" ]; then
+            rm -rf "${dir_path}"
+        else
+            print "WARNING" "the directory ${dir_path} is not exist"
+        fi
+    else
+        print "WARNING" "the directory ${dir_path} path is NULL"
+    fi
 }
 
 function get_cann_package_name() {
