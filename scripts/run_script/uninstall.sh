@@ -49,19 +49,36 @@ function remove_empty_dir() {
     fi
 }
 
+is_dir_empty() {
+    [ ! -d "$1" ] && return 1
+    [ "$(ls -A "$1" 2>&1)" != "" ] && return 2
+    return 0
+}
+
+remove_dir_if_empty() {
+    local dirpath="$1"
+    is_dir_empty "${dirpath}"
+    if [ $? -eq 0 ]; then
+        rm -rf "${dirpath}"
+    fi
+    return 0
+}
+
 function deal_uninstall() {
     # delete product
     del_file ${install_path}/${SPC_DIR}/${BACKUP_DIR}/${MSPROF_RUN_NAME}/${LIBMSPROFILER_PATH}/${LIBMSPROFILER}
 
-    # delete script
-    del_dir ${install_path}/${SPC_DIR}/${BACKUP_DIR}/${MSPROF_RUN_NAME}
-    remove_empty_dir ${install_path}/${SPC_DIR}/${BACKUP_DIR}
-
     # delete backup
-    del_dir ${install_path}/${SPC_DIR}/${SCRIPT_DIR}/${MSPROF_RUN_NAME}
-    remove_empty_dir ${install_path}/${SPC_DIR}/${SCRIPT_DIR}
+    del_dir ${install_path}/${SPC_DIR}/${BACKUP_DIR}/${MSPROF_RUN_NAME}
+    remove_empty_dir ${install_path}/${SPC_DIR}/${BACKUP_DIR}/${MSPROF_RUN_NAME}
+    remove_dir_if_empty ${install_path}/${SPC_DIR}/${BACKUP_DIR}
+    print "INFO" "${MSPROF_RUN_NAME} uninstalled successfully, the directory ${SPC_DIR}/${BACKUP_DIR}/${MSPROF_RUN_NAME} has been deleted"
 
-    print "INFO" "${MSPROF_RUN_NAME} uninstalled successfully, the directory spc/backup/${MSPROF_RUN_NAME} has been deleted"
+    # delete script
+    del_dir ${install_path}/${SPC_DIR}/${SCRIPT_DIR}/${MSPROF_RUN_NAME}
+    tree ${install_path}/${SPC_DIR}
+    remove_empty_dir ${install_path}/${SPC_DIR}/${SCRIPT_DIR}/${MSPROF_RUN_NAME}
+    print "INFO" "${MSPROF_RUN_NAME} uninstalled successfully, the directory ${SPC_DIR}/${SCRIPT_DIR}/${MSPROF_RUN_NAME} has been deleted"
 }
 
 function print() {

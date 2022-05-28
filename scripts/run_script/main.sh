@@ -1,4 +1,6 @@
 #!/bin/bash
+package_arch=x86_64
+VERSION=5.1.T200
 function parse_script_args() {
     while true; do
 		if [ "$3" = "" ]; then
@@ -115,9 +117,9 @@ function copy_file() {
 	if [ -f "$target_file" ] || [ -d "$target_file" ]; then
 		chmod u+w $(dirname ${target_file})
 		travFolder ${target_file} u+w
-		rm -r -f ${target_file}
+		rm -rf ${target_file}
 		
-		cp -r -p ${filename} ${target_file}
+		cp -r ${filename} ${target_file}
 		travFolder ${target_file} $right
 		chmod u-w $(dirname ${target_file})
 		

@@ -9,7 +9,7 @@ function create_backup_dir() {
 }
 
 function copy_product() {
-    cp -r -p ${LIBMSPROFILER} ${install_path}/${SPC_DIR}/${BACKUP_DIR}/${MSPROF_RUN_NAME}/${LIBMSPROFILER_PATH}/
+    cp -r -p -a ${LIBMSPROFILER} ${install_path}/${SPC_DIR}/${BACKUP_DIR}/${MSPROF_RUN_NAME}/${LIBMSPROFILER_PATH}/
 }
 
 function backup_script() {
@@ -22,9 +22,14 @@ function create_script_dir() {
 }
 
 function copy_script() {
-    cp -r -p ${ROLLBACK_PRECHECK} ${install_path}/${SPC_DIR}/${SCRIPT_DIR}/${MSPROF_RUN_NAME}/
-    cp -r -p ${ROLLBACK} ${install_path}/${SPC_DIR}/${SCRIPT_DIR}/${MSPROF_RUN_NAME}/
-    cp -r -p ${UNINSTALL} ${install_path}/${SPC_DIR}/${SCRIPT_DIR}/${MSPROF_RUN_NAME}/
+    cp -r -p -a ${ROLLBACK_PRECHECK} ${install_path}/${SPC_DIR}/${SCRIPT_DIR}/${MSPROF_RUN_NAME}/
+    cp -r -p -a ${ROLLBACK} ${install_path}/${SPC_DIR}/${SCRIPT_DIR}/${MSPROF_RUN_NAME}/
+    cp -r -p -a ${UNINSTALL} ${install_path}/${SPC_DIR}/${SCRIPT_DIR}/${MSPROF_RUN_NAME}/
+}
+
+function place_common_script() {
+    cp -r -p -a ${COMMON_DIR}/${COMMON_ROLLBACK} ${install_path}/${SPC_DIR}/${SCRIPT_DIR}
+    cp -r -p -a ${COMMON_DIR}/${COMMON_UNINSTALL} ${install_path}/${SPC_DIR}/${SCRIPT_DIR}
 }
 
 # spc dir
@@ -44,6 +49,13 @@ install_path=${1}
 ROLLBACK_PRECHECK=rollback_precheck.sh
 ROLLBACK=rollback.sh
 UNINSTALL=uninstall.sh
+COMMON_ROLLBACK=rollback.sh
+COMMON_UNINSTALL=uninstall.sh
+
+# common dir
+COMMON_DIR="common_script"
 
 backup_product
 backup_script
+place_common_script
+

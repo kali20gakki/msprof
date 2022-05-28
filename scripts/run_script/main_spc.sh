@@ -1,4 +1,6 @@
 #!/bin/bash
+package_arch=x86_64
+VERSION=5.1.T200
 function parse_script_args() {
     while true; do
 		if [ "$3" = "" ]; then

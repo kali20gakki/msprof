@@ -12,11 +12,17 @@ function copy_file() {
 	fi
 
 	if [ -f "$target_file" ] || [ -d "$target_file" ]; then
-		chmod u+w $(dirname ${target_file})
-		rm -r -f ${target_file}
+		local target_parent_dir=$(dirname ${target_file})
+		local parent_right=$(stat -c '%a' ${target_parent_dir})
+		local filename_right=$(stat -c '%a' ${filename})
 		
-		cp -r -p ${filename} ${target_file}
-		chmod u-w $(dirname ${target_file})
+		chmod u+w ${target_parent_dir}
+		rm -rf ${target_file}
+		
+		cp -r ${filename} ${target_file}
+		chmod ${filename_right} ${target_file}
+
+		chmod ${parent_right} ${target_parent_dir}
 		
 		print "INFO" "$filename is replaced."
 		return
