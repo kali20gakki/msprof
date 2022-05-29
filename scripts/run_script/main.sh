@@ -16,12 +16,12 @@ function parse_script_args() {
             shift
 			continue
             ;;
-        --devel)
-            let "install_args_num+=1"
+        --upgrade)
+            upgrade_flag=1
             shift
 			continue
             ;;
-        --upgrade)
+        --devel)
             let "install_args_num+=1"
             shift
 			continue
@@ -68,9 +68,16 @@ function check_args() {
 
 function execute_run() {
 	if [ ${uninstall_flag} = 1 ]; then
+		bash "${install_path}/mindstudio-msprof/script/uninstall.sh"
 		print "INFO" "Mindstudio msprof package uninstall success."
 		exit 0
 	fi
+
+	if [ ${upgrade_flag} = 1 ]; then
+		bash "${install_path}/../latest/mindstudio-msprof/script/uninstall.sh"
+		print "INFO" "Mindstudio msprof package uninstall success."
+	fi
+
 	get_cann_package_name
 	implement_install
 }
@@ -110,11 +117,11 @@ function copy_file() {
 	
 	if [ -f "$target_file" ] || [ -d "$target_file" ]; then
 		chmod u+w $(dirname ${target_file})
-		travFolder ${target_file} u+w
+		chmod -R u+w ${target_file}
 		rm -r ${target_file}
 		
 		cp -r ${filename} ${target_file}
-		travFolder ${target_file} $right
+		chmod -R ${right} ${target_file}
 		chmod u-w $(dirname ${target_file})
 		
 		print "INFO" "$filename is replaced."
@@ -129,25 +136,6 @@ function print() {
     else
         echo "[Mindstudio-msprof] [$(date +"%Y-%m-%d %H:%M:%S")] [$1]: $2" | tee -a $log_file
     fi
-}
-
-function travFolder(){
-	local file_name=${1}
-	local right=${2}
-	chmod $right ${file_name}
-	
-	if [ -f "$file_name" ]; then
-		return
-	fi
-	
-	if [ -d "$file_name" ]; then
-		file_list=`ls $file_name`
-		
-		for f in $file_list
-		do
-			travFolder ${file_name}/${f} ${right}
-		done
-	fi
 }
 
 function get_right() {
@@ -187,9 +175,74 @@ function chmod_ini_file() {
 	fi
 }
 
+function store_uninstall_script() {
+	local install_right=500
+
+	if [ -f "${install_path}/mindstudio-msprof/script/uninstall.sh" ]; then
+		return
+	fi
+
+	mkdir -p "${install_path}/mindstudio-msprof/"
+	mkdir -p "${install_path}/mindstudio-msprof/script/"
+	cp "uninstall.sh" "${install_path}/mindstudio-msprof/script/"
+
+	chmod ${install_right} "${install_path}/mindstudio-msprof/script/uninstall.sh"
+	chmod ${install_right} "${install_path}/mindstudio-msprof/script/"
+	chmod ${install_right} "${install_path}/mindstudio-msprof/"
+}
+
+function set_latest() {
+	local latest_path=${install_path}/../latest/
+	remove_latest_link ${latest_path}
+	add_latest_link ${latest_path}
+}
+
+function remove_latest_link() {
+	local latest_path=$1
+    if [ -L "${latest_path}/mindstudio-msprof" ]; then
+        rm_file_safe ${latest_path}/mindstudio-msprof
+    fi
+}
+
+function rm_file_safe() {
+    local file_path=$1
+    if [ -n "${file_path}" ]; then
+        if [ -f "${file_path}" ] || [ -h "${file_path}" ]; then
+            rm -f "${file_path}"
+            print "INFO" "delete file ${file_path} successfully"
+        else
+            print "WARNING" "the file is not exist"
+        fi
+    else
+        print "WARNING" "the file path is NULL"
+    fi
+}
+
+function add_latest_link() {
+	local latest_path=$1
+    ln -sf ../${VERSION}/mindstudio-msprof ${latest_path}/mindstudio-msprof
+}
+
+function regist_uninstall() {
+    if [ -f "${install_path}/cann_uninstall.sh" ]; then
+        write_cann_uninstall
+    else
+        cp -af script/cann_uninstall.sh ${install_path}
+        write_cann_uninstall
+    fi
+}
+
+function write_cann_uninstall() {
+    chmod 500 ${install_path}/cann_uninstall.sh
+    chmod u+w ${install_path}/cann_uninstall.sh
+    sed -i "/^exit /i uninstall_package \"mindstudio-msprof/script\"" "${install_path}/cann_uninstall.sh"
+    chmod u-w ${install_path}/cann_uninstall.sh
+}
+
 log_file=$(get_log_file)
 install_path=$(get_default_install_path)
 
+# product
 LIBMSPROFILER="libmsprofiler.so"
 LIBMSPROFILER_STUB="stub/libmsprofiler.so"
 ANALYSIS="analysis"
@@ -204,12 +257,16 @@ install_args_num=0
 install_path_num=0
 
 uninstall_flag=0
+upgrade_flag=0
 install_for_all_flag=0
 
 #0, this footnote path;1, path for executing run;2, parents' dir for run package;3, run params
 parse_script_args $*
 check_args
+store_uninstall_script
 right=$(get_right)
 execute_run
 chmod_ini_file
+set_latest
+regist_uninstall
 print "INFO" "Mindstudio msprof package install success."

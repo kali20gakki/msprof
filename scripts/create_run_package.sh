@@ -54,6 +54,8 @@ function create_temp_dir() {
 	cp -r ${TEMP_OUTPUT}/stub ${temp_dir}
 	cp ${TEMP_OUTPUT}/bin/msprof ${temp_dir}
 	cp -r ${TOP_DIR}/analysis ${temp_dir}
+	cp "${RUN_SCRIPT_DIR}/common_script/cann_uninstall.sh" ${temp_dir}
+	cp "${RUN_SCRIPT_DIR}/uninstall.sh" ${temp_dir}
 	
 	cp ${RUN_SCRIPT_DIR}${MAIN_SCRIPT} ${temp_dir}
 	chmod 500 ${temp_dir}${MAIN_SCRIPT}
