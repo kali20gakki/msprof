@@ -1,11 +1,4 @@
 #!/bin/bash
-function dir_check() {
-    if [ ! -d "$1" ]; then
-        print "ERROR" "dir $2 is not installed, rollback failed"
-        exit 1
-    fi
-}
-
 function file_check() {
     if [ ! -f "$1" ]; then
         print "ERROR" "the source file $2 does not exist, rollback failed"
@@ -14,12 +7,6 @@ function file_check() {
 }
 
 function deal_precheck() {
-    # check spc path
-    dir_check ${install_path}/${SPC_DIR} ${SPC_DIR}
-
-    # check real install path
-    dir_check $install_path/${LIBMSPROFILER_PATH} ${MSPROF_RUN_NAME}
-
     # check spc backup so
     file_check ${install_path}/${SPC_DIR}/${BACKUP_DIR}/${MSPROF_RUN_NAME}/${LIBMSPROFILER_PATH}/${LIBMSPROFILER} ${LIBMSPROFILER}
 
