@@ -24,7 +24,7 @@ function create_script_dir() {
 function copy_script() {
     cp -p ${ROLLBACK_PRECHECK} ${install_path}/${SPC_DIR}/${SCRIPT_DIR}/${MSPROF_RUN_NAME}/
     cp -p ${ROLLBACK} ${install_path}/${SPC_DIR}/${SCRIPT_DIR}/${MSPROF_RUN_NAME}/
-    cp -p ${UNINSTALL} ${install_path}/${SPC_DIR}/${SCRIPT_DIR}/${MSPROF_RUN_NAME}/
+    cp -p ${UNINSTALL_SPC} ${install_path}/${SPC_DIR}/${SCRIPT_DIR}/${MSPROF_RUN_NAME}/uninstall.sh
 }
 
 function place_common_script() {
@@ -48,7 +48,7 @@ install_path=${1}
 # script for spc
 ROLLBACK_PRECHECK=rollback_precheck.sh
 ROLLBACK=rollback.sh
-UNINSTALL=uninstall.sh
+UNINSTALL_SPC=uninstall_spc.sh
 COMMON_ROLLBACK=rollback.sh
 COMMON_UNINSTALL=uninstall.sh
 

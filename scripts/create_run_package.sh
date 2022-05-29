@@ -33,7 +33,7 @@ FILTER_PARAM_SCRIPT_SPC=${RUN_SCRIPT_DIR}/help_spc.sh
 BACKUP=backup.sh
 ROLLBACK_PRECHECK=rollback_precheck.sh
 ROLLBACK=rollback.sh
-UNINSTALL=uninstall.sh
+UNINSTALL_SPC=uninstall_spc.sh
 COMMON_ROLLBACK=rollback.sh
 COMMON_UNINSTALL=uninstall.sh
 
@@ -77,7 +77,7 @@ function create_temp_dir() {
 			copy_script ${BACKUP} ${temp_dir}
 			copy_script ${ROLLBACK_PRECHECK} ${temp_dir}
 			copy_script ${ROLLBACK} ${temp_dir}
-			copy_script ${UNINSTALL} ${temp_dir}
+			copy_script ${UNINSTALL_SPC} ${temp_dir}
 			copy_script ${COMMON_DIR}/${COMMON_ROLLBACK} ${temp_dir}
 			copy_script ${COMMON_DIR}/${COMMON_UNINSTALL} ${temp_dir}
 
