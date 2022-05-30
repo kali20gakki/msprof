@@ -23,6 +23,7 @@ function create_script_dir() {
 
 function copy_script() {
     cp -p ${ROLLBACK_PRECHECK} ${install_path}/${SPC_DIR}/${SCRIPT_DIR}/${MSPROF_RUN_NAME}/
+    cp -p ${UTILS_SCRIPT} ${install_path}/${SPC_DIR}/${SCRIPT_DIR}/${MSPROF_RUN_NAME}/
     cp -p ${ROLLBACK} ${install_path}/${SPC_DIR}/${SCRIPT_DIR}/${MSPROF_RUN_NAME}/rollback.sh
     cp -p ${UNINSTALL_SPC} ${install_path}/${SPC_DIR}/${SCRIPT_DIR}/${MSPROF_RUN_NAME}/uninstall.sh
 }
@@ -32,11 +33,13 @@ function place_common_script() {
     cp -np ${COMMON_DIR}/${COMMON_UNINSTALL} ${install_path}/${SPC_DIR}/${SCRIPT_DIR}
 }
 
+# use utils function and constant
+source utils.sh
+
 # spc dir
 SPC_DIR="spc"
 BACKUP_DIR="backup"
 SCRIPT_DIR="script"
-MSPROF_RUN_NAME="mindstudio-msprof"
 
 # product
 LIBMSPROFILER_PATH="/runtime/lib64/"
@@ -47,10 +50,11 @@ install_path=${1}
 
 # script for spc
 ROLLBACK_PRECHECK=rollback_precheck.sh
-ROLLBACK=rollback.sh
+ROLLBACK=rollback_spc.sh
 UNINSTALL_SPC=uninstall_spc.sh
 COMMON_ROLLBACK=rollback.sh
 COMMON_UNINSTALL=uninstall.sh
+UTILS_SCRIPT=utils.sh
 
 # common dir
 COMMON_DIR="common_script"
