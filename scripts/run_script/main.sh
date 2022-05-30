@@ -79,6 +79,7 @@ function execute_run() {
 	fi
 
 	bash install.sh ${install_path} ${package_arch} ${install_for_all_flag}
+}
 
 function get_default_install_path() {
 	if [ "$UID" = "0" ]; then
