@@ -85,6 +85,8 @@ function create_temp_dir() {
 
 		else
 			copy_script ${MAIN_SCRIPT} ${temp_dir}
+			copy_script "${RUN_SCRIPT_DIR}/common_script/cann_uninstall.sh" ${temp_dir}
+			copy_script "${RUN_SCRIPT_DIR}/uninstall.sh" ${temp_dir}
 			cp ${TEMP_OUTPUT}/lib/libmsprofiler.so ${temp_dir}
 			cp -r ${TEMP_OUTPUT}/stub ${temp_dir}
 			cp ${TEMP_OUTPUT}/bin/msprof ${temp_dir}
