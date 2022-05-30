@@ -26,6 +26,8 @@ mkdir ${OUTPUT_DIR}
 RUN_SCRIPT_DIR=${TOP_DIR}/scripts/run_script
 FILTER_PARAM_SCRIPT=${RUN_SCRIPT_DIR}/help.sh
 MAIN_SCRIPT=main.sh
+INSTALL_SCRIPT=install.sh
+UTILS_SCRIPT=utils.sh
 
 # script for spc
 MAIN_SPC=main_spc.sh
@@ -82,13 +84,14 @@ function create_temp_dir() {
 			copy_script ${COMMON_DIR}/${COMMON_UNINSTALL} ${temp_dir}
 
 		else
+			copy_script ${MAIN_SCRIPT} ${temp_dir}
 			cp ${TEMP_OUTPUT}/lib/libmsprofiler.so ${temp_dir}
 			cp -r ${TEMP_OUTPUT}/stub ${temp_dir}
 			cp ${TEMP_OUTPUT}/bin/msprof ${temp_dir}
 			cp -r ${TOP_DIR}/analysis ${temp_dir}
 	fi
-
-	copy_script ${MAIN_SCRIPT} ${temp_dir}
+	copy_script ${INSTALL_SCRIPT} ${temp_dir}
+	copy_script ${UTILS_SCRIPT} ${temp_dir}
 }
 
 # copy script
@@ -147,18 +150,21 @@ function delete_sed_param() {
 	sed -i "2d" "${RUN_SCRIPT_DIR}/${_main_script}"
 }
 
+function sed_main_param() {
+	local _main_script=${1}
+	local _filer=${2}
+	sed_param ${_main_script}
+	create_temp_dir ${MSPROF_TEMP_DIR}
+	create_run_package ${MSPROF_RUN_NAME} ${MSPROF_TEMP_DIR} ${_main_script} ${_filer}
+	delete_sed_param ${_main_script}
+}
+
 parse_script_args $*
 
-sed_param ${MAIN_SCRIPT}
-sed_param ${MAIN_SPC}
-
-create_temp_dir ${MSPROF_TEMP_DIR}
 if [ "${package_type}" = "Patch" ];
 	then
-		create_run_package ${MSPROF_RUN_NAME} ${MSPROF_TEMP_DIR} ${MAIN_SPC} ${FILTER_PARAM_SCRIPT_SPC}
+		sed_main_param ${MAIN_SPC} ${FILTER_PARAM_SCRIPT_SPC}
 	else
-		create_run_package ${MSPROF_RUN_NAME} ${MSPROF_TEMP_DIR} ${MAIN_SCRIPT} ${FILTER_PARAM_SCRIPT}
+		sed_main_param ${MAIN_SCRIPT} ${FILTER_PARAM_SCRIPT}
 fi
 
-delete_sed_param ${MAIN_SCRIPT}
-delete_sed_param ${MAIN_SPC}
