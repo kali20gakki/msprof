@@ -187,7 +187,7 @@ class MsprofDataStorage:
         :return: None
         """
         self.data_list = data_list
-        self.data_list.sort(key=lambda x: int(x.get('ts', 0)))
+        self.data_list.sort(key=lambda x: float(x.get('ts', 0)))
         self.set_tid()
         self._update_timeline_head()
 
