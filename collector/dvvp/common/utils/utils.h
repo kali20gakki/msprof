@@ -504,6 +504,7 @@ public:
     static VOID_PTR ProfMalloc(size_t size);
     static void ProfFree(VOID_PTR &ptr);
     static bool CheckStringIsNonNegativeIntNum(const std::string &numberStr);
+    static bool CheckStringIsValidNatureNum(const std::string &numberStr);
     static bool IsDeviceMapping();
     static std::string GetCoresStr(const std::vector<int> &cores, const std::string &separator = ",");
     static std::string GetEventsStr(const std::vector<std::string> &events, const std::string &separator = ",");
