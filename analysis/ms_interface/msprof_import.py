@@ -42,8 +42,20 @@ class ImportCommand:
             warn(MsProfCommonConstant.COMMON_FILE_NAME,
                  'Analysis data in "%s" failed. Maybe the data is incomplete.' % result_dir)
 
-    def cluster_tuning(self:any, collect_path: str) -> None:
+    def cluster_tuning(self: any, collect_path: str) -> None:
         pass
+
+    def process(self: any) -> None:
+        """
+        command import command entry
+        :return: None
+        """
+        check_path_valid(self.collection_path, False)
+        if DataCheckManager.contain_info_json_data(self.collection_path):  # find profiling data dir
+            LoadInfoManager.load_info(self.collection_path)
+            self.do_import(os.path.realpath(self.collection_path))
+        else:
+            self._process_sub_dirs()
 
     def _process_sub_dirs(self: any, subdir: str = '', is_cluster: bool = False) -> None:
         collect_path = self.collection_path
@@ -62,17 +74,3 @@ class ImportCommand:
                                      'such as PROF_XXX_XXX_XXX' % collect_path)
             else:
                 self._process_sub_dirs(sub_dir, is_cluster=True)
-
-    def process(self: any) -> None:
-        """
-        command import command entry
-        :return: None
-        """
-        check_path_valid(self.collection_path, False)
-        if DataCheckManager.contain_info_json_data(self.collection_path):  # find profiling data dir
-            LoadInfoManager.load_info(self.collection_path)
-            self.do_import(os.path.realpath(self.collection_path))
-        else:
-            self._process_sub_dirs()
-
-

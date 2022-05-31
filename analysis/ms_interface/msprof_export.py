@@ -15,6 +15,7 @@ import sqlite3
 from analyzer.data_analysis_factory import DataAnalysisFactory
 from analyzer.scene_base.profiling_scene import ProfilingScene
 from common_func.ai_stack_data_check_manager import AiStackDataCheckManager
+from common_func.cluster_tuning import ClusterTuning
 from common_func.common import error
 from common_func.common import print_info
 from common_func.common import warn
@@ -43,6 +44,7 @@ from framework.load_info_manager import LoadInfoManager
 from ms_interface.msprof_export_data import MsProfExportDataUtils
 from ms_interface.msprof_job_summary import MsprofJobSummary
 from ms_interface.msprof_timeline import MsprofTimeline
+from mscalculate.cluster_calculator import TrailingCalculator
 from profiling_bean.prof_enum.export_data_type import ExportDataType
 from tuning.profiling_tuning import ProfilingTuning
 from viewer.top_down_report import TopDownData
@@ -288,6 +290,9 @@ class ExportCommand:
             self._show_tuning_result(os.path.realpath(self.collection_path))
         else:
             self._process_sub_dirs()
+            if ClusterTuning().scene:
+                TrailingCalculator().ms_run()
+                self._show_cluster_tuning()
 
     def _add_export_type(self: any, result_dir: str) -> None:
         export_map = self.EXPORT_HANDLE_MAP.get(self.command_type, [])
@@ -507,10 +512,14 @@ class ExportCommand:
         tuning_view = TuningView(result_dir, sample_config)
         tuning_view.show_by_dev_id(self.list_map.get("devices_list")[0])
 
-    def _process_sub_dirs(self: any, subdir: str = '', is_cluster: bool = False) -> None:
+    def _show_cluster_tuning(self) -> None:
+        if self.command_type != MsProfCommonConstant.SUMMARY:
+            return
+
+    def _process_sub_dirs(self: any, sub_path: str = '', is_cluster: bool = False) -> None:
         collect_path = self.collection_path
-        if subdir:
-            collect_path = os.path.join(self.collection_path, subdir)
+        if sub_path:
+            collect_path = os.path.join(self.collection_path, sub_path)
         sub_dirs = get_path_dir(collect_path)
         for sub_dir in sub_dirs:  # result_dir
             if sub_dir != StrConstant.TIMELINE_PATH:
@@ -518,10 +527,12 @@ class ExportCommand:
                     os.path.join(collect_path, sub_dir))
                 check_path_valid(sub_path, False)
                 if DataCheckManager.contain_info_json_data(sub_path):
+                    if sub_path and is_cluster:
+                        ClusterTuning().init_cluster_scene(sub_path)
                     InfoConfReader().load_info(sub_path)
                     self._handle_export(sub_path)
                     self._show_tuning_result(sub_path)
-                elif subdir and is_cluster:
+                elif sub_path and is_cluster:
                     warn(self.FILE_NAME, 'Invalid parsing dir("%s"), -dir must be profiling data dir '
                                          'such as PROF_XXX_XXX_XXX' % collect_path)
                 else:

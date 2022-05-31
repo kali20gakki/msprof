@@ -8,7 +8,7 @@ from common_func.singleton import singleton
 
 
 @singleton
-class Cluster_tuning:
+class ClusterTuning:
     """
     class used to read data from info.json
     """
@@ -19,10 +19,20 @@ class Cluster_tuning:
     HOST_PROFILING_TYPE = "host_profiling"
 
     def __init__(self: any) -> None:
-        self._info_json = None
-        self._start_info = None
-        self._end_info = None
-        self._sample_json = None
-        self._start_log_time = 0
-        self._host_mon = 0
-        self._dev_cnt = 0
+        self._is_cluster_scene = None
+        self.cluster_list = []
+        self.avg_time_dict = {}
+
+    def init_cluster_scene(self: any, collect_path: str) -> None:
+        self.set_cluster_scene()
+        self.cluster_list.append(collect_path)
+
+    def set_cluster_scene(self):
+        self._is_cluster_scene = True
+
+    @property
+    def scene(self: any) -> bool:
+        return self._is_cluster_scene
+
+    def set_node_avg_time(self: any, data_path: str, avg_time: float):
+        self.avg_time_dict[data_path] = [avg_time]
