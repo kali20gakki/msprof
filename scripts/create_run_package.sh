@@ -24,14 +24,14 @@ OUTPUT_DIR=${TOP_DIR}/output
 mkdir ${OUTPUT_DIR}
 
 RUN_SCRIPT_DIR=${TOP_DIR}/scripts/run_script
-FILTER_PARAM_SCRIPT=${RUN_SCRIPT_DIR}/help.sh
+FILTER_PARAM_SCRIPT=${RUN_SCRIPT_DIR}/help.conf
 MAIN_SCRIPT=main.sh
 INSTALL_SCRIPT=install.sh
 UTILS_SCRIPT=utils.sh
 
 # script for spc
 MAIN_SPC=main_spc.sh
-FILTER_PARAM_SCRIPT_SPC=${RUN_SCRIPT_DIR}/help_spc.sh
+FILTER_PARAM_SCRIPT_SPC=${RUN_SCRIPT_DIR}/help_spc.conf
 BACKUP=backup.sh
 ROLLBACK_PRECHECK=rollback_precheck.sh
 ROLLBACK=rollback_spc.sh
@@ -74,6 +74,9 @@ function create_temp_dir() {
 	if [ "${package_type}" = "Patch" ];
 		then
 			cp ${TEMP_OUTPUT}/lib/libmsprofiler.so ${temp_dir}
+			cp -r ${TEMP_OUTPUT}/stub ${temp_dir}
+			cp ${TEMP_OUTPUT}/bin/msprof ${temp_dir}
+			cp -r ${TOP_DIR}/analysis ${temp_dir}
 
 			copy_script ${MAIN_SPC} ${temp_dir}
 			copy_script ${BACKUP} ${temp_dir}
@@ -104,59 +107,59 @@ function copy_script() {
 }
 
 function version() {
-    local _path="${TOP_DIR}/../manifest/dependency/config.ini"
-    local _version=$(grep "^version=" "${_path}" | cut -d"=" -f2)
-    echo "${_version}"
+    local path="${TOP_DIR}/../manifest/dependency/config.ini"
+    local version=$(grep "^version=" "${path}" | cut -d"=" -f2)
+    echo "${version}"
 }
 
 function get_package_name() {
-    local _product="Ascend"
-    local _name=${MSPROF_RUN_NAME}
+    local product="Ascend"
+    local name=${MSPROF_RUN_NAME}
 
-    local _version=$(echo $(version) | cut -d '.' -f 1,2,3)
-    local _os_arch=$(arch)
-    echo "${_product}-${_name}_${_version}_linux-${_os_arch}.run"
+    local version=$(echo $(version) | cut -d '.' -f 1,2,3)
+    local os_arch=$(arch)
+    echo "${product}-${name}_${version}_linux-${os_arch}.run"
 }
 
 function create_run_package() {
-	local _run_name=${1}
-	local _temp_dir=${2}
-	local _main_script=${3}
-	local _filer_param=${4}
-	local _package_name=$(get_package_name)
+	local run_name=${1}
+	local temp_dir=${2}
+	local main_script=${3}
+	local filer_param=${4}
+	local package_name=$(get_package_name)
 	
 	${CREATE_RUN_SCRIPT} \
 	--header ${CONTROL_PARAM_SCRIPT} \
-	--help-header ${_filer_param} --pigz \
+	--help-header ${filer_param} --pigz \
 	--complevel 4 \
 	--nomd5 \
 	--sha256 \
 	--chown \
-	${_temp_dir} \
-	${OUTPUT_DIR}/${_package_name} \
-	${_run_name} \
-	./${_main_script}
+	${temp_dir} \
+	${OUTPUT_DIR}/${package_name} \
+	${run_name} \
+	./${main_script}
 }
 
 function sed_param() {
-	local _main_script=${1}
-	sed -i "2i VERSION=$version" "${RUN_SCRIPT_DIR}/${_main_script}"
-	sed -i "2i package_arch=$(arch)" "${RUN_SCRIPT_DIR}/${_main_script}"
+	local main_script=${1}
+	sed -i "2i VERSION=$version" "${RUN_SCRIPT_DIR}/${main_script}"
+	sed -i "2i package_arch=$(arch)" "${RUN_SCRIPT_DIR}/${main_script}"
 }
 
 function delete_sed_param() {
-	local _main_script=${1}
-	sed -i "2d" "${RUN_SCRIPT_DIR}/${_main_script}"
-	sed -i "2d" "${RUN_SCRIPT_DIR}/${_main_script}"
+	local main_script=${1}
+	sed -i "2d" "${RUN_SCRIPT_DIR}/${main_script}"
+	sed -i "2d" "${RUN_SCRIPT_DIR}/${main_script}"
 }
 
 function sed_main_param() {
-	local _main_script=${1}
-	local _filer=${2}
-	sed_param ${_main_script}
+	local main_script=${1}
+	local filer=${2}
+	sed_param ${main_script}
 	create_temp_dir ${MSPROF_TEMP_DIR}
-	create_run_package ${MSPROF_RUN_NAME} ${MSPROF_TEMP_DIR} ${_main_script} ${_filer}
-	delete_sed_param ${_main_script}
+	create_run_package ${MSPROF_RUN_NAME} ${MSPROF_TEMP_DIR} ${main_script} ${filer}
+	delete_sed_param ${main_script}
 }
 
 parse_script_args $*
@@ -167,4 +170,3 @@ if [ "${package_type}" = "Patch" ];
 	else
 		sed_main_param ${MAIN_SCRIPT} ${FILTER_PARAM_SCRIPT}
 fi
-

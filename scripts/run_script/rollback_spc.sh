@@ -1,7 +1,19 @@
 #!/bin/bash
+# get install path
+install_path="$(
+    cd "$(dirname "$0")/../../../"
+    pwd
+)"
+
+# script for spc
+UNINSTALL_SCRIPT="uninstall.sh"
+
 function deal_rollback() {
-    copy_file ${install_path}/${SPC_DIR}/${BACKUP_DIR}/${MSPROF_RUN_NAME}/${LIBMSPROFILER_PATH}/${LIBMSPROFILER} ${install_path}/${LIBMSPROFILER_PATH}/${LIBMSPROFILER}
-    bash ${install_path}/${SPC_DIR}/${SCRIPT_DIR}/${MSPROF_RUN_NAME}/${UNINSTALL_SCRIPT}
+	local backup_dir=${install_path}/${SPC_DIR}/${BACKUP_DIR}/${MSPROF_RUN_NAME}
+    copy_file ${backup_dir}/${LIBMSPROFILER_PATH}/${LIBMSPROFILER} ${install_path}/${LIBMSPROFILER_PATH}/${LIBMSPROFILER}
+    copy_file ${backup_dir}/${ANALYSIS_PATH}/${ANALYSIS} ${install_path}/${ANALYSIS_PATH}/${ANALYSIS}
+	copy_file ${backup_dir}/${MSPROF_PATH}/${MSPROF} ${install_path}/${MSPROF_PATH}/${MSPROF}
+	copy_file ${backup_dir}/${LIBMSPROFILER_PATH}/${LIBMSPROFILER_STUB} ${install_path}/${LIBMSPROFILER_PATH}/${LIBMSPROFILER_STUB}
 }
 
 function copy_file() {
@@ -14,13 +26,12 @@ function copy_file() {
 	if [ -f "$target_file" ] || [ -d "$target_file" ]; then
 		local target_parent_dir=$(dirname ${target_file})
 		local parent_right=$(stat -c '%a' ${target_parent_dir})
-		local filename_right=$(stat -c '%a' ${filename})
 		
 		chmod u+w ${target_parent_dir}
+		chmod -R u+w ${target_file}
 		rm -rf ${target_file}
 		
-		cp -r ${filename} ${target_file}
-		chmod ${filename_right} ${target_file}
+		cp -rp ${filename} ${target_file}
 
 		chmod ${parent_right} ${target_parent_dir}
 		
@@ -29,25 +40,7 @@ function copy_file() {
 	fi
 }
 
-# spc dir
-SPC_DIR="spc"
-BACKUP_DIR="backup"
-SCRIPT_DIR="script"
-
-# product
-LIBMSPROFILER_PATH="/runtime/lib64/"
-LIBMSPROFILER="libmsprofiler.so"
-
-# get install path
-install_path="$(
-    cd "$(dirname "$0")/../../../"
-    pwd
-)"
-
 # use utils function and constant
 source $(dirname "$0")/utils.sh
-
-# script for spc
-UNINSTALL_SCRIPT="uninstall.sh"
 
 deal_rollback
