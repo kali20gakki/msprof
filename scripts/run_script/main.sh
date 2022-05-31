@@ -13,7 +13,6 @@ function parse_script_args() {
             ;;
         --uninstall)
             uninstall_flag=1
-			let "install_args_num+=1"
             shift
 			continue
             ;;
