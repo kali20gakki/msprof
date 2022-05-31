@@ -218,6 +218,7 @@ class Constant:
     DVPP_TYPE_NAME = ['VDEC', 'JPEGD', 'PNGD', 'JPEGE', 'VPC']
     FILTER_DIRS = [".profiler", "HCCL_PROF"]
     NA = 'N/A'
+    NULL = 'NULL'
     TASK_TYPE_OTHER = "Other"
     TASK_TYPE_AI_CORE = "AI_CORE"
     TASK_TYPE_AI_CPU = "AI_CPU"
@@ -240,6 +241,11 @@ class Constant:
     GE_TIMELINE_TID_INDEX = 8
 
     GE_OP_MODEL_ID = 4294967295
+
+    # hccl
+    TYPE_RDMA = "RDMA"
+    TYPE_SDMA = "SDMA"
+
 
     def get_constant_class_name(self: any) -> any:
         """

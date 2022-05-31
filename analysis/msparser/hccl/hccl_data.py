@@ -2,7 +2,7 @@
 # coding=utf-8
 """
 function: HCCL data
-Copyright Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
+Copyright Huawei Technologies Co., Ltd. 2022-2023. All rights reserved.
 """
 
 from common_func.constant import Constant
@@ -22,7 +22,7 @@ class HCCLData:
         self._plane_id = 0
         self._timestamp = 0
         self._duration = 0
-        self._bandwidth = Constant.NA
+        self._bandwidth = Constant.NULL
         self._stage = 0
         self._step = 0
         self._stream_id = 0

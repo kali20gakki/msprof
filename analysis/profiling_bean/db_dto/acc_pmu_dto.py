@@ -16,7 +16,6 @@ class AccPmuOriDto:
         self._stream_id = None
         self._acc_id = None
         self._block_id = None
-        self._stream_id = None
         self._read_bandwidth = None
         self._write_bandwidth = None
         self._read_ost = None
