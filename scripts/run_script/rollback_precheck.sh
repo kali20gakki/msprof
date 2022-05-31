@@ -1,4 +1,10 @@
 #!/bin/bash
+# script for spc
+install_path="$(
+    cd "$(dirname "$0")/../../../"
+    pwd
+)"
+
 function file_check() {
     if [ ! -f "$1" ]; then
         print "ERROR" "the source file $2 does not exist, rollback failed"
@@ -13,22 +19,7 @@ function deal_precheck() {
     exit 0
 }
 
-# spc dir
-SPC_DIR="spc"
-BACKUP_DIR="backup"
-SCRIPT_DIR="script"
-
-# script for spc
-install_path="$(
-    cd "$(dirname "$0")/../../../"
-    pwd
-)"
-
 # use utils function and constant
 source $(dirname "$0")/utils.sh
-
-# product
-LIBMSPROFILER_PATH="/runtime/lib64/"
-LIBMSPROFILER="libmsprofiler.so"
 
 deal_precheck

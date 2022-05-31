@@ -1,4 +1,13 @@
 #!/bin/bash
+# get install path
+install_path="$(
+    cd "$(dirname "$0")/../../../"
+    pwd
+)"
+
+# script for spc
+UNINSTALL_SCRIPT="uninstall.sh"
+
 function del_file() {
     file_path=$1
 
@@ -67,6 +76,10 @@ remove_dir_if_empty() {
 function deal_uninstall() {
     # delete product
     del_file ${install_path}/${SPC_DIR}/${BACKUP_DIR}/${MSPROF_RUN_NAME}/${LIBMSPROFILER_PATH}/${LIBMSPROFILER}
+    del_file ${install_path}/${SPC_DIR}/${BACKUP_DIR}/${MSPROF_RUN_NAME}/${MSPROF_PATH}/${MSPROF}
+    del_file ${install_path}/${SPC_DIR}/${BACKUP_DIR}/${MSPROF_RUN_NAME}/${LIBMSPROFILER_PATH}/${LIBMSPROFILER_STUB}
+    del_dir ${install_path}/${SPC_DIR}/${BACKUP_DIR}/${MSPROF_RUN_NAME}/${ANALYSIS_PATH}/${ANALYSIS}
+    remove_empty_dir ${install_path}/${SPC_DIR}/${BACKUP_DIR}/${MSPROF_RUN_NAME}/${ANALYSIS_PATH}/${ANALYSIS}
 
     # delete backup
     del_dir ${install_path}/${SPC_DIR}/${BACKUP_DIR}/${MSPROF_RUN_NAME}
@@ -76,30 +89,11 @@ function deal_uninstall() {
 
     # delete script
     del_dir ${install_path}/${SPC_DIR}/${SCRIPT_DIR}/${MSPROF_RUN_NAME}
-    tree ${install_path}/${SPC_DIR}
     remove_empty_dir ${install_path}/${SPC_DIR}/${SCRIPT_DIR}/${MSPROF_RUN_NAME}
     print "INFO" "${MSPROF_RUN_NAME} uninstalled successfully, the directory ${SPC_DIR}/${SCRIPT_DIR}/${MSPROF_RUN_NAME} has been deleted"
 }
 
-# spc dir
-SPC_DIR="spc"
-BACKUP_DIR="backup"
-SCRIPT_DIR="script"
-
-# product
-LIBMSPROFILER_PATH="/runtime/lib64/"
-LIBMSPROFILER="libmsprofiler.so"
-
-# get install path
-install_path="$(
-    cd "$(dirname "$0")/../../../"
-    pwd
-)"
-
 # use utils function and constant
 source $(dirname "$0")/utils.sh
-
-# script for spc
-UNINSTALL_SCRIPT="uninstall.sh"
 
 deal_uninstall

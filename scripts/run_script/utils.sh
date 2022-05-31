@@ -1,4 +1,27 @@
 #!/bin/bash
+# right constant
+MSPROF_RUN_NAME="mindstudio-msprof"
+root_right=555
+user_right=550
+
+root_ini_right=444
+user_ini_right=400
+
+# product constant
+LIBMSPROFILER="libmsprofiler.so"
+LIBMSPROFILER_STUB="stub/libmsprofiler.so"
+ANALYSIS="analysis"
+MSPROF="msprof"
+
+LIBMSPROFILER_PATH="/runtime/lib64/"
+ANALYSIS_PATH="/tools/profiler/profiler_tool/"
+MSPROF_PATH="/tools/profiler/bin/"
+
+# spc dir
+SPC_DIR="spc"
+BACKUP_DIR="backup"
+SCRIPT_DIR="script"
+
 function print() {
     if [ ! -f "$log_file" ]; then
         echo "[${MSPROF_RUN_NAME}] [$(date +"%Y-%m-%d %H:%M:%S")] [$1]: $2"
@@ -29,6 +52,5 @@ function log_init() {
 }
 
 # init log file
-MSPROF_RUN_NAME="mindstudio-msprof"
 log_file=$(get_log_file)
 log_init
