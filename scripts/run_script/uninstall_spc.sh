@@ -11,6 +11,7 @@ function deal_uninstall() {
     fi
 
     uninstall_script
+    print "INFO" "${MSPROF_RUN_NAME} uninstalled successfully !"
 }
 
 # use utils function and constant
