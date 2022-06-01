@@ -38,7 +38,7 @@ function deal_precheck() {
 	fi
 	
 	if [ "$cann_package_name" != "nnae" ]; then
-		file_check ${install_path}${LIBMSPROFILER_PATH}${LIBMSPROFILER_STUB} ${LIBMSPROFILER_STUB}
+		file_check ${backup_dir}${LIBMSPROFILER_PATH}${LIBMSPROFILER_STUB} ${LIBMSPROFILER_STUB}
 	fi
     
 	file_check ${backup_dir}/${LIBMSPROFILER_PATH}/${LIBMSPROFILER} ${LIBMSPROFILER}
