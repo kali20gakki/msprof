@@ -7,7 +7,6 @@ install_path="$(
 
 function deal_uninstall() {
     if [ -d ${install_path}/${SPC_DIR}/${BACKUP_DIR}/${MSPROF_RUN_NAME} ]; then
-        uninstall_product
         uninstall_backup
     fi
 
