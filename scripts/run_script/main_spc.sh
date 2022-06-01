@@ -51,7 +51,6 @@ function execute_backup() {
 }
 
 function execute_install() {
-    local install_for_all_flag=0
     bash install.sh ${install_path} ${package_arch} ${install_for_all_flag}
 }
 
@@ -65,7 +64,6 @@ function get_install_flag() {
 
 # use utils function and constant
 source utils.sh
-
 parse_script_args $*
 get_install_flag
 check_args
