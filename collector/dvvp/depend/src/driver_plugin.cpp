@@ -9,9 +9,15 @@
 namespace Analysis {
 namespace Dvvp {
 namespace Plugin {
-DriverPlugin::~DriverPlugin()
+void DriverPlugin::LoadDriverSo()
 {
-    pluginHandle_.CloseHandle();
+    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
+    if (!pluginHandle_.HasLoad()) {
+        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+        if (ret != PLUGIN_LOAD_SUCCESS) {
+            return;
+        }
+    }
 }
 
 bool DriverPlugin::IsFuncExist(const std::string &funcName) const
@@ -23,547 +29,420 @@ bool DriverPlugin::IsFuncExist(const std::string &funcName) const
 hdcError_t DriverPlugin::MsprofHalHdcRecv(HDC_SESSION session, struct drvHdcMsg *pMsg, int bufLen,
     UINT64 flag, int *recvBufCount, UINT32 timeout)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {DriverPlugin::instance()->LoadDriverSo();});
+    if (halHdcRecv_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<hdcError_t, HDC_SESSION, struct drvHdcMsg *, int, UINT64,
+                                                     int *, UINT32>("halHdcRecv", halHdcRecv_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return DRV_ERROR_INVALID_HANDLE;
         }
     }
-    MSPROF_HALHDCRECV_T func;
-    ret = pluginHandle_.GetFunction<hdcError_t, HDC_SESSION, struct drvHdcMsg *, int, UINT64,
-                                     int *, UINT32>("halHdcRecv", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return DRV_ERROR_INVALID_HANDLE;
-    }
-    return func(session, pMsg, bufLen, flag, recvBufCount, timeout);
+    return halHdcRecv_(session, pMsg, bufLen, flag, recvBufCount, timeout);
 }
 
 // halHdcSend
 hdcError_t DriverPlugin::MsprofHalHdcSend(HDC_SESSION session, struct drvHdcMsg *pMsg, UINT64 flag, UINT32 timeout)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {DriverPlugin::instance()->LoadDriverSo();});
+    if (halHdcSend_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<hdcError_t, HDC_SESSION, struct drvHdcMsg *,
+            UINT64, UINT32>("halHdcSend", halHdcSend_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return DRV_ERROR_INVALID_HANDLE;
         }
     }
-    MSPROF_HALHDCSEND_T func;
-    ret = pluginHandle_.GetFunction<hdcError_t, HDC_SESSION, struct drvHdcMsg *, UINT64, UINT32>("halHdcSend", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return DRV_ERROR_INVALID_HANDLE;
-    }
-    return func(session, pMsg, flag, timeout);
+    return halHdcSend_(session, pMsg, flag, timeout);
 }
 
 // halHdcSessionConnectEx
 hdcError_t DriverPlugin::MsprofHalHdcSessionConnectEx(int peer_node, int peer_devid, int peer_pid, HDC_CLIENT client,
     HDC_SESSION *pSession)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {DriverPlugin::instance()->LoadDriverSo();});
+    if (halHdcSessionConnectEx_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<hdcError_t, int, int, int, HDC_CLIENT,
+                              HDC_SESSION *>("halHdcSessionConnectEx", halHdcSessionConnectEx_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return DRV_ERROR_INVALID_HANDLE;
         }
     }
-    MSPROF_HALHDCSESSIONCONNECTEX_T func;
-    ret = pluginHandle_.GetFunction<hdcError_t, int, int, int, HDC_CLIENT,
-                                     HDC_SESSION *>("halHdcSessionConnectEx", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return DRV_ERROR_INVALID_HANDLE;
-    }
-    return func(peer_node, peer_devid, peer_pid, client, pSession);
+    return halHdcSessionConnectEx_(peer_node, peer_devid, peer_pid, client, pSession);
 }
 
 // drvHdcSetSessionReference
 drvError_t DriverPlugin::MsprofDrvHdcSetSessionReference(HDC_SESSION session)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {DriverPlugin::instance()->LoadDriverSo();});
+    if (drvHdcSetSessionReference_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<drvError_t, HDC_SESSION>("drvHdcSetSessionReference",
+            drvHdcSetSessionReference_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return DRV_ERROR_INVALID_HANDLE;
         }
     }
-    MSPROF_DRVHDCSETSESSIONREFERENCE_T func;
-    ret = pluginHandle_.GetFunction<drvError_t, HDC_SESSION>("drvHdcSetSessionReference", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return DRV_ERROR_INVALID_HANDLE;
-    }
-    return func(session);
+    return drvHdcSetSessionReference_(session);
 }
 
 // halHdcGetSessionAttr
 drvError_t DriverPlugin::MsprofHalHdcGetSessionAttr(HDC_SESSION session, int attr, int *value)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {DriverPlugin::instance()->LoadDriverSo();});
+    if (halHdcGetSessionAttr_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<drvError_t, HDC_SESSION, int, int *>("halHdcGetSessionAttr",
+            halHdcGetSessionAttr_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return DRV_ERROR_INVALID_HANDLE;
         }
     }
-    MSPROF_HALHDCGETSESSIONATTR_T func;
-    ret = pluginHandle_.GetFunction<drvError_t, HDC_SESSION, int, int *>("halHdcGetSessionAttr", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return DRV_ERROR_INVALID_HANDLE;
-    }
-    return func(session, attr, value);
+    return halHdcGetSessionAttr_(session, attr, value);
 }
 
 // halGetChipInfo
 drvError_t DriverPlugin::MsprofHalGetChipInfo(unsigned int devId, halChipInfo *chipInfo)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {DriverPlugin::instance()->LoadDriverSo();});
+    if (halGetChipInfo_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<drvError_t, unsigned int, halChipInfo *>("halGetChipInfo",
+            halGetChipInfo_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return DRV_ERROR_INVALID_HANDLE;
         }
     }
-    MSPROF_HALGETCHIPINFO_T func;
-    ret = pluginHandle_.GetFunction<drvError_t, unsigned int, halChipInfo *>("halGetChipInfo", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return DRV_ERROR_INVALID_HANDLE;
-    }
-    return func(devId, chipInfo);
+    return halGetChipInfo_(devId, chipInfo);
 }
 
 // halGetDeviceInfo
 drvError_t DriverPlugin::MsprofHalGetDeviceInfo(uint32_t devId, int32_t moduleType, int32_t infoType, int64_t *value)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {DriverPlugin::instance()->LoadDriverSo();});
+    if (halGetDeviceInfo_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<drvError_t, uint32_t, int32_t, int32_t,
+            int64_t *>("halGetDeviceInfo", halGetDeviceInfo_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return DRV_ERROR_INVALID_HANDLE;
         }
     }
-    MSPROF_HALGETDEVICEINFO_T func;
-    ret = pluginHandle_.GetFunction<drvError_t, uint32_t, int32_t, int32_t, int64_t *>("halGetDeviceInfo", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return DRV_ERROR_INVALID_HANDLE;
-    }
-    return func(devId, moduleType, infoType, value);
+    return halGetDeviceInfo_(devId, moduleType, infoType, value);
 }
 
 // halProfDataFlush
 int DriverPlugin::MsprofHalProfDataFlush(unsigned int device_id, unsigned int channel_id, unsigned int *data_len)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {DriverPlugin::instance()->LoadDriverSo();});
+    if (halProfDataFlush_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<int, unsigned int, unsigned int,
+            unsigned int *>("halProfDataFlush", halProfDataFlush_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
     }
-    MSPROF_HALPROFDATAFLUSH_T func;
-    ret = pluginHandle_.GetFunction<int, unsigned int, unsigned int, unsigned int *>("halProfDataFlush", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return -1;
-    }
-    return func(device_id, channel_id, data_len);
+    return halProfDataFlush_(device_id, channel_id, data_len);
 }
 
 // prof_drv_get_channels
 int DriverPlugin::MsprofDrvGetChannels(unsigned int device_id, channel_list_t *channels)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {DriverPlugin::instance()->LoadDriverSo();});
+    if (profDrvGetChannels_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<int, unsigned int, channel_list_t *>("prof_drv_get_channels",
+            profDrvGetChannels_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
     }
-    MSPROF_PROFDRVGETCHANNELS_T func;
-    ret = pluginHandle_.GetFunction<int, unsigned int, channel_list_t *>("prof_drv_get_channels", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return -1;
-    }
-    return func(device_id, channels);
+    return profDrvGetChannels_(device_id, channels);
 }
 
 // prof_drv_start
 int DriverPlugin::MsprofDrvStart(unsigned int device_id, unsigned int channel_id, struct prof_start_para *start_para)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {DriverPlugin::instance()->LoadDriverSo();});
+    if (profDrvStart_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<int, unsigned int, unsigned int,
+                              struct prof_start_para *>("prof_drv_start", profDrvStart_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
     }
-    MSPROF_PROFDRVSRART_T func;
-    ret = pluginHandle_.GetFunction<int, unsigned int, unsigned int,
-                                     struct prof_start_para *>("prof_drv_start", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return -1;
-    }
-    return func(device_id, channel_id, start_para);
+    return profDrvStart_(device_id, channel_id, start_para);
 }
 
 // prof_stop
 int DriverPlugin::MsprofDrvStop(unsigned int device_id, unsigned int channel_id)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {DriverPlugin::instance()->LoadDriverSo();});
+    if (profStop_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<int, unsigned int, unsigned int>("prof_stop", profStop_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
     }
-    MSPROF_PROFSTOP_T func;
-    ret = pluginHandle_.GetFunction<int, unsigned int, unsigned int>("prof_stop", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return -1;
-    }
-    return func(device_id, channel_id);
+    return profStop_(device_id, channel_id);
 }
 
 // prof_channel_read
 int DriverPlugin::MsprofChannelRead(unsigned int device_id, unsigned int channel_id,
                                     char *out_buf, unsigned int buf_size)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {DriverPlugin::instance()->LoadDriverSo();});
+    if (profChannelRead_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<int, unsigned int, unsigned int,
+            char *, unsigned int>("prof_channel_read", profChannelRead_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
     }
-    MSPROF_CHANNELREAD_T func;
-    ret = pluginHandle_.GetFunction<int, unsigned int, unsigned int, char *, unsigned int>("prof_channel_read", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return -1;
-    }
-    return func(device_id, channel_id, out_buf, buf_size);
+    return profChannelRead_(device_id, channel_id, out_buf, buf_size);
 }
 
 // prof_channel_poll
 int DriverPlugin::MsprofChannelPoll(struct prof_poll_info *out_buf, int num, int timeout)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {DriverPlugin::instance()->LoadDriverSo();});
+    if (profChannelPoll_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<int, struct prof_poll_info *, int, int>("prof_channel_poll",
+            profChannelPoll_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
     }
-    MSPROF_CHANNELPOLL_T func;
-    ret = pluginHandle_.GetFunction<int, struct prof_poll_info *, int, int>("prof_channel_poll", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return -1;
-    }
-    return func(out_buf, num, timeout);
+    return profChannelPoll_(out_buf, num, timeout);
 }
 
 // drvGetDevNum
 drvError_t DriverPlugin::MsprofDrvGetDevNum(uint32_t *num_dev)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {DriverPlugin::instance()->LoadDriverSo();});
+    if (drvGetDevNum_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<drvError_t, uint32_t *>("drvGetDevNum", drvGetDevNum_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return DRV_ERROR_INVALID_HANDLE;
         }
     }
-    MSPROF_DRVGETDEVNUM_T func;
-    ret = pluginHandle_.GetFunction<drvError_t, uint32_t *>("drvGetDevNum", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return DRV_ERROR_INVALID_HANDLE;
-    }
-    return func(num_dev);
+    return drvGetDevNum_(num_dev);
 }
 
 // drvGetDevIDByLocalDevID
 drvError_t DriverPlugin::MsprofDrvGetDevIDByLocalDevID(uint32_t localDevId, uint32_t *devId)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {DriverPlugin::instance()->LoadDriverSo();});
+    if (drvGetDevIDByLocalDevID_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<drvError_t, uint32_t, uint32_t*>("drvGetDevIDByLocalDevID",
+            drvGetDevIDByLocalDevID_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return DRV_ERROR_INVALID_HANDLE;
         }
     }
-    MSPROF_DRVGETDEVIDBYLOCALID_T func;
-    ret = pluginHandle_.GetFunction<drvError_t, uint32_t, uint32_t*>("drvGetDevIDByLocalDevID", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return DRV_ERROR_INVALID_HANDLE;
-    }
-    return func(localDevId, devId);
+    return drvGetDevIDByLocalDevID_(localDevId, devId);
 }
 
 // drvGetDevIDs
 drvError_t DriverPlugin::MsprofDrvGetDevIDs(uint32_t *devices, uint32_t len)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {DriverPlugin::instance()->LoadDriverSo();});
+    if (drvGetDevIDs_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<drvError_t, uint32_t *, uint32_t>("drvGetDevIDs", drvGetDevIDs_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return DRV_ERROR_INVALID_HANDLE;
         }
     }
-    MSPROF_DRVGETDEVIDS_T func;
-    ret = pluginHandle_.GetFunction<drvError_t, uint32_t *, uint32_t>("drvGetDevIDs", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return DRV_ERROR_INVALID_HANDLE;
-    }
-    return func(devices, len);
+    return drvGetDevIDs_(devices, len);
 }
 
 // drvGetPlatformInfo
 drvError_t DriverPlugin::MsprofDrvGetPlatformInfo(uint32_t *info)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {DriverPlugin::instance()->LoadDriverSo();});
+    if (drvGetPlatformInfo_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<drvError_t, uint32_t *>("drvGetPlatformInfo",
+            drvGetPlatformInfo_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return DRV_ERROR_INVALID_HANDLE;
         }
     }
-    MSPROF_DRVGETPLATFORMINFO_T func;
-    ret = pluginHandle_.GetFunction<drvError_t, uint32_t *>("drvGetPlatformInfo", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return DRV_ERROR_INVALID_HANDLE;
-    }
-    return func(info);
+    return drvGetPlatformInfo_(info);
 }
 
 // drvHdcClientCreate
 drvError_t DriverPlugin::MsprofDrvHdcClientCreate(HDC_CLIENT *client, int maxSessionNum, int serviceType, int flag)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {DriverPlugin::instance()->LoadDriverSo();});
+    if (drvHdcClientCreate_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<drvError_t, HDC_CLIENT *, int, int, int>("drvHdcClientCreate",
+            drvHdcClientCreate_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return DRV_ERROR_INVALID_HANDLE;
         }
     }
-    MSPROF_DRVHDCCLIENTCREATE_T func;
-    ret = pluginHandle_.GetFunction<drvError_t, HDC_CLIENT *, int, int, int>("drvHdcClientCreate", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return DRV_ERROR_INVALID_HANDLE;
-    }
-    return func(client, maxSessionNum, serviceType, flag);
+    return drvHdcClientCreate_(client, maxSessionNum, serviceType, flag);
 }
 
 // drvHdcClientDestroy
 drvError_t DriverPlugin::MsprofDrvHdcClientDestroy(HDC_CLIENT client)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {DriverPlugin::instance()->LoadDriverSo();});
+    if (drvHdcClientDestroy_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<drvError_t, HDC_CLIENT>("drvHdcClientDestroy",
+            drvHdcClientDestroy_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return DRV_ERROR_INVALID_HANDLE;
         }
     }
-    MSPROF_DRVHDCCLIENTDESTROY_T func;
-    ret = pluginHandle_.GetFunction<drvError_t, HDC_CLIENT>("drvHdcClientDestroy", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return DRV_ERROR_INVALID_HANDLE;
-    }
-    return func(client);
+    return drvHdcClientDestroy_(client);
 }
 
 // drvHdcServerCreate
 drvError_t DriverPlugin::MsprofDrvHdcServerCreate(int devid, int serviceType, HDC_SERVER *pServer)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {DriverPlugin::instance()->LoadDriverSo();});
+    if (drvHdcServerCreate_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<drvError_t, int, int, HDC_SERVER *>("drvHdcServerCreate",
+            drvHdcServerCreate_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return DRV_ERROR_INVALID_HANDLE;
         }
     }
-    MSPROF_DRVHDCSERVERCREATE_T func;
-    ret = pluginHandle_.GetFunction<drvError_t, int, int, HDC_SERVER *>("drvHdcServerCreate", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return DRV_ERROR_INVALID_HANDLE;
-    }
-    return func(devid, serviceType, pServer);
+    return drvHdcServerCreate_(devid, serviceType, pServer);
 }
 
 // drvHdcServerDestroy
 drvError_t DriverPlugin::MsprofDrvHdcServerDestroy(HDC_SERVER server)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {DriverPlugin::instance()->LoadDriverSo();});
+    if (drvHdcServerDestroy_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<drvError_t, HDC_SERVER>("drvHdcServerDestroy",
+            drvHdcServerDestroy_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return DRV_ERROR_INVALID_HANDLE;
         }
     }
-    MSPROF_DRVHDCSERVERDESTROY_T func;
-    ret = pluginHandle_.GetFunction<drvError_t, HDC_SERVER>("drvHdcServerDestroy", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return DRV_ERROR_INVALID_HANDLE;
-    }
-    return func(server);
+    return drvHdcServerDestroy_(server);
 }
 
 // drvHdcSessionAccept
 drvError_t DriverPlugin::MsprofDrvHdcSessionAccept(HDC_SERVER server, HDC_SESSION *session)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {DriverPlugin::instance()->LoadDriverSo();});
+    if (drvHdcSessionAccept_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<drvError_t, HDC_SERVER, HDC_SESSION *>("drvHdcSessionAccept",
+            drvHdcSessionAccept_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return DRV_ERROR_INVALID_HANDLE;
         }
     }
-    MSPROF_DRVHDCSESSIONACCEPT_T func;
-    ret = pluginHandle_.GetFunction<drvError_t, HDC_SERVER, HDC_SESSION *>("drvHdcSessionAccept", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return DRV_ERROR_INVALID_HANDLE;
-    }
-    return func(server, session);
+    return drvHdcSessionAccept_(server, session);
 }
 
 // drvHdcGetMsgBuffer
 drvError_t DriverPlugin::MsprofDrvHdcGetMsgBuffer(struct drvHdcMsg *msg, int index, char **pBuf, int *pLen)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {DriverPlugin::instance()->LoadDriverSo();});
+    if (drvHdcGetMsgBuffer_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<drvError_t, struct drvHdcMsg *,
+            int, char **, int *>("drvHdcGetMsgBuffer", drvHdcGetMsgBuffer_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return DRV_ERROR_INVALID_HANDLE;
         }
     }
-    MSPROF_DRVHDCGETMSGBUFFER_T func;
-    ret = pluginHandle_.GetFunction<drvError_t, struct drvHdcMsg *, int, char **, int *>("drvHdcGetMsgBuffer", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return DRV_ERROR_INVALID_HANDLE;
-    }
-    return func(msg, index, pBuf, pLen);
+    return drvHdcGetMsgBuffer_(msg, index, pBuf, pLen);
 }
 
 // drvHdcAllocMsg
 drvError_t DriverPlugin::MsprofDrvHdcAllocMsg(HDC_SESSION session, struct drvHdcMsg **ppMsg, int count)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {DriverPlugin::instance()->LoadDriverSo();});
+    if (drvHdcAllocMsg_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<drvError_t, HDC_SESSION,
+            struct drvHdcMsg **, int>("drvHdcAllocMsg", drvHdcAllocMsg_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return DRV_ERROR_INVALID_HANDLE;
         }
     }
-    MSPROF_DRVHDCALLOCMSG_T func;
-    ret = pluginHandle_.GetFunction<drvError_t, HDC_SESSION, struct drvHdcMsg **, int>("drvHdcAllocMsg", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return DRV_ERROR_INVALID_HANDLE;
-    }
-    return func(session, ppMsg, count);
+    return drvHdcAllocMsg_(session, ppMsg, count);
 }
 
 // drvHdcFreeMsg
 drvError_t DriverPlugin::MsprofDrvHdcFreeMsg(struct drvHdcMsg *msg)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {DriverPlugin::instance()->LoadDriverSo();});
+    if (drvHdcFreeMsg_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<drvError_t, struct drvHdcMsg *>("drvHdcFreeMsg", drvHdcFreeMsg_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return DRV_ERROR_INVALID_HANDLE;
         }
     }
-    MSPROF_DRVHDCFREEMSG_T func;
-    ret = pluginHandle_.GetFunction<drvError_t, struct drvHdcMsg *>("drvHdcFreeMsg", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return DRV_ERROR_INVALID_HANDLE;
-    }
-    return func(msg);
+    return drvHdcFreeMsg_(msg);
 }
 
 // drvHdcReuseMsg
 drvError_t DriverPlugin::MsprofDrvHdcReuseMsg(struct drvHdcMsg *msg)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {DriverPlugin::instance()->LoadDriverSo();});
+    if (drvHdcReuseMsg_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<drvError_t, struct drvHdcMsg *>("drvHdcReuseMsg",
+            drvHdcReuseMsg_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return DRV_ERROR_INVALID_HANDLE;
         }
     }
-    MSPROF_DRVHDCREUSEMSG_T func;
-    ret = pluginHandle_.GetFunction<drvError_t, struct drvHdcMsg *>("drvHdcReuseMsg", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return DRV_ERROR_INVALID_HANDLE;
-    }
-    return func(msg);
+    return drvHdcReuseMsg_(msg);
 }
 
 // drvHdcAddMsgBuffer
 drvError_t DriverPlugin::MsprofDrvHdcAddMsgBuffer(struct drvHdcMsg *msg, char *pBuf, int len)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {DriverPlugin::instance()->LoadDriverSo();});
+    if (drvHdcAddMsgBuffer_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<drvError_t, struct drvHdcMsg *, char *,
+            int>("drvHdcAddMsgBuffer", drvHdcAddMsgBuffer_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return DRV_ERROR_INVALID_HANDLE;
         }
     }
-    MSPROF_DRVHDCADDMSGBUFFER_T func;
-    ret = pluginHandle_.GetFunction<drvError_t, struct drvHdcMsg *, char *, int>("drvHdcAddMsgBuffer", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return DRV_ERROR_INVALID_HANDLE;
-    }
-    return func(msg, pBuf, len);
+    return drvHdcAddMsgBuffer_(msg, pBuf, len);
 }
 
 // drvHdcSessionConnect
 drvError_t DriverPlugin::MsprofDrvHdcSessionConnect(int peer_node, int peer_devid,
                                                     HDC_CLIENT client, HDC_SESSION *session)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {DriverPlugin::instance()->LoadDriverSo();});
+    if (drvHdcSessionConnect_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<drvError_t, int, int, HDC_CLIENT,
+            HDC_SESSION *>("drvHdcSessionConnect", drvHdcSessionConnect_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return DRV_ERROR_INVALID_HANDLE;
         }
     }
-    MSPROF_DRVHDCSESSIONCONNECT_T func;
-    ret = pluginHandle_.GetFunction<drvError_t, int, int, HDC_CLIENT, HDC_SESSION *>("drvHdcSessionConnect", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return DRV_ERROR_INVALID_HANDLE;
-    }
-    return func(peer_node, peer_devid, client, session);
+    return drvHdcSessionConnect_(peer_node, peer_devid, client, session);
 }
 
 // drvHdcSessionClose
 drvError_t DriverPlugin::MsprofDrvHdcSessionClose(HDC_SESSION session)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {DriverPlugin::instance()->LoadDriverSo();});
+    if (drvHdcSessionClose_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<drvError_t, HDC_SESSION>("drvHdcSessionClose",
+            drvHdcSessionClose_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return DRV_ERROR_INVALID_HANDLE;
         }
     }
-    MSPROF_DRVHDCSESSIONCLOSE_T func;
-    ret = pluginHandle_.GetFunction<drvError_t, HDC_SESSION>("drvHdcSessionClose", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return DRV_ERROR_INVALID_HANDLE;
-    }
-    return func(session);
+    return drvHdcSessionClose_(session);
 }
 
 // drvHdcGetCapacity
 drvError_t DriverPlugin::MsprofDrvHdcGetCapacity(struct drvHdcCapacity *capacity)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {DriverPlugin::instance()->LoadDriverSo();});
+    if (drvHdcGetCapacity_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<drvError_t, struct drvHdcCapacity *>("drvHdcGetCapacity",
+            drvHdcGetCapacity_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return DRV_ERROR_INVALID_HANDLE;
         }
     }
-    MSPROF_DRVHDCGETCAPACITY_T func;
-    ret = pluginHandle_.GetFunction<drvError_t, struct drvHdcCapacity *>("drvHdcGetCapacity", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return DRV_ERROR_INVALID_HANDLE;
-    }
-    return func(capacity);
+    return drvHdcGetCapacity_(capacity);
 }
 } // Plugin
 } // Dvvp
