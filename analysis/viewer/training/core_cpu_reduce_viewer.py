@@ -81,6 +81,53 @@ class CoreCpuReduceViewer:
         DBManager.destroy_db_connect(conn_ge, cur_ge)
         return total_cycle_data, total_time_data
 
+    @staticmethod
+    def _get_aicore_sql(sql_path: str) -> str:
+        sql = "SELECT total_cycles, stream_id, task_id, total_time FROM {} ".format(
+            DBNameConstant.TABLE_METRICS_SUMMARY)
+        if not os.path.exists(os.path.join(sql_path, DBNameConstant.DB_GE_INFO)):
+            sql = "SELECT total_cycles, stream_id, task_id FROM {} ".format(
+                DBNameConstant.TABLE_METRICS_SUMMARY)
+        return sql
+
+    @staticmethod
+    def _get_trace_one_device(trace_curs: any, device_id: int, iter_id: int, model_id: int) -> list:
+        """
+        Select date from traing trace limited by count and sort
+        :param trace_curs: curs related to trace_db
+        :param device_id: device id
+        :param iter_id: iter id
+        :param model_id: model id
+        :return: training trace data
+        """
+        result = []
+        if trace_curs:
+            if ProfilingScene().is_step_trace():
+                sql = "select iteration_id, FP_start, BP_end, iteration_end, iteration_time, " \
+                      "fp_bp_time, grad_refresh_bound, data_aug_bound from {0} " \
+                      "where device_id=? and iteration_id=? and model_id=?".format(DBNameConstant.TABLE_TRAINING_TRACE)
+                result = DBManager.fetch_all_data(trace_curs, sql, (device_id, iter_id, model_id))
+            elif ProfilingScene().is_training_trace():
+                sql = "select iteration_id, FP_start, BP_end, iteration_end, iteration_time, " \
+                      "fp_bp_time, grad_refresh_bound, data_aug_bound from {0} " \
+                      "where device_id=? and iteration_id=?".format(DBNameConstant.TABLE_TRAINING_TRACE)
+                result = DBManager.fetch_all_data(trace_curs, sql, (device_id, iter_id))
+
+        return result
+
+    @staticmethod
+    def _get_reduce(trace_curs: any, device_id: str, iteration_end: int) -> list:
+        """
+        Select date from all_reduce table with specific ids.
+        """
+        result = []
+        if trace_curs:
+            sql = "select start, end-start from {0} " \
+                  "where device_id=? and iteration_end=?" \
+                .format(DBNameConstant.TABLE_ALL_REDUCE)
+            result = DBManager.fetch_all_data(trace_curs, sql, (device_id, iteration_end))
+        return result
+
     @classmethod
     def get_meta_trace_data(cls: any, name: str, tid: any = None) -> list:
         """
@@ -254,50 +301,3 @@ class CoreCpuReduceViewer:
                      all_reduce_time,
                      OrderedDict([("Reduce Duration(us)", all_reduce_time)])))
         return all_reduce_datas
-
-    @staticmethod
-    def _get_aicore_sql(sql_path: str) -> str:
-        sql = "SELECT total_cycles, stream_id, task_id, total_time FROM {} ".format(
-            DBNameConstant.TABLE_METRICS_SUMMARY)
-        if not os.path.exists(os.path.join(sql_path, DBNameConstant.DB_GE_INFO)):
-            sql = "SELECT total_cycles, stream_id, task_id FROM {} ".format(
-                DBNameConstant.TABLE_METRICS_SUMMARY)
-        return sql
-
-    @staticmethod
-    def _get_trace_one_device(trace_curs: any, device_id: int, iter_id: int, model_id: int) -> list:
-        """
-        Select date from traing trace limited by count and sort
-        :param trace_curs: curs related to trace_db
-        :param device_id: device id
-        :param iter_id: iter id
-        :param model_id: model id
-        :return: training trace data
-        """
-        result = []
-        if trace_curs:
-            if ProfilingScene().is_step_trace():
-                sql = "select iteration_id, FP_start, BP_end, iteration_end, iteration_time, " \
-                      "fp_bp_time, grad_refresh_bound, data_aug_bound from {0} " \
-                      "where device_id=? and iteration_id=? and model_id=?".format(DBNameConstant.TABLE_TRAINING_TRACE)
-                result = DBManager.fetch_all_data(trace_curs, sql, (device_id, iter_id, model_id))
-            elif ProfilingScene().is_training_trace():
-                sql = "select iteration_id, FP_start, BP_end, iteration_end, iteration_time, " \
-                      "fp_bp_time, grad_refresh_bound, data_aug_bound from {0} " \
-                      "where device_id=? and iteration_id=?".format(DBNameConstant.TABLE_TRAINING_TRACE)
-                result = DBManager.fetch_all_data(trace_curs, sql, (device_id, iter_id))
-
-        return result
-
-    @staticmethod
-    def _get_reduce(trace_curs: any, device_id: str, iteration_end: int) -> list:
-        """
-        Select date from all_reduce table with specific ids.
-        """
-        result = []
-        if trace_curs:
-            sql = "select start, end-start from {0} " \
-                  "where device_id=? and iteration_end=?" \
-                .format(DBNameConstant.TABLE_ALL_REDUCE)
-            result = DBManager.fetch_all_data(trace_curs, sql, (device_id, iteration_end))
-        return result

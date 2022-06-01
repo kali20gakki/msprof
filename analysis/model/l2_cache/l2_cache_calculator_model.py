@@ -21,12 +21,6 @@ class L2CacheCalculatorModel(BaseModel):
         super(L2CacheCalculatorModel, self).__init__(result_dir, DBNameConstant.DB_L2CACHE,
                                                      [DBNameConstant.TABLE_L2CACHE_SUMMARY])
 
-    def flush(self: any, data_list: list) -> None:
-        """
-        insert data into database
-        """
-        self.insert_data_to_db(self.table_list[0], data_list)
-
     @staticmethod
     def split_events_data(l2_cache_ps_data: list) -> list:
         """
@@ -48,3 +42,9 @@ class L2CacheCalculatorModel(BaseModel):
             no_event.extend(event)
             res_l2_cache_ps_data.append(no_event)
         return res_l2_cache_ps_data
+
+    def flush(self: any, data_list: list) -> None:
+        """
+        insert data into database
+        """
+        self.insert_data_to_db(self.table_list[0], data_list)

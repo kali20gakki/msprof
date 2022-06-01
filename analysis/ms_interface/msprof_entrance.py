@@ -30,44 +30,6 @@ class MsprofEntrance:
             type=str, help='<Mandatory> Specify the directory that is used for '
                            'creating data collection results.', required=True)
 
-    def _query_parser(self: any, query_parser: any) -> None:
-        self._add_collect_path_argument(query_parser)
-
-    def _add_export_argument(self: any, parser: any) -> None:
-        self._add_collect_path_argument(parser)
-        parser.add_argument(
-            '--iteration-id', dest='iteration_id', default=None,
-            metavar='<iteration_id>',
-            type=int, help='<Optional> the iteration ID')
-        parser.add_argument(
-            '--model-id', dest='model_id', default=None,
-            metavar='<model_id>',
-            type=int, help='<Optional> the model ID')
-
-    def _export_parser(self: any, export_parser: any) -> None:
-        subparsers = export_parser.add_subparsers()
-        summary_parser = subparsers.add_parser('summary', help='Get summary data.')
-        timeline_parser = subparsers.add_parser(
-            'timeline', help='Get timeline data.')
-        self._add_export_argument(summary_parser)
-        summary_parser.add_argument(
-            '--format', dest='export_format', default='csv',
-            metavar='<export_format>', choices=['csv', 'json'],
-            type=str, help='<Optional> the format for export, supports csv and json.')
-        self._add_export_argument(timeline_parser)
-
-    def _import_parser(self: any, import_parser: any) -> None:
-        self._add_collect_path_argument(import_parser)
-
-    @staticmethod
-    def _handle_import_command(parser: any, args: any) -> None:
-        _ = parser
-        import_command = ImportCommand(args.collection_path)
-        import_command.process()
-
-    def _monitor_parser(self: any, monitor_parser: any) -> None:
-        self._add_collect_path_argument(monitor_parser)
-
     @staticmethod
     def _handle_export_command(parser: any, args: any) -> None:
         if len(sys.argv) < 3:
@@ -86,6 +48,12 @@ class MsprofEntrance:
     def _handle_monitor_command(parser: any, args: any) -> None:
         _ = parser
         monitor(os.path.realpath(args.collection_path))
+
+    @staticmethod
+    def _handle_import_command(parser: any, args: any) -> None:
+        _ = parser
+        import_command = ImportCommand(args.collection_path)
+        import_command.process()
 
     def main(self: any) -> None:
         """
@@ -147,3 +115,35 @@ class MsprofEntrance:
         self._import_parser(import_parser)
         parser_tuple = (parser, export_parser, import_parser, monitor_parser, query_parser)
         return parser_tuple
+
+    def _query_parser(self: any, query_parser: any) -> None:
+        self._add_collect_path_argument(query_parser)
+
+    def _add_export_argument(self: any, parser: any) -> None:
+        self._add_collect_path_argument(parser)
+        parser.add_argument(
+            '--iteration-id', dest='iteration_id', default=None,
+            metavar='<iteration_id>',
+            type=int, help='<Optional> the iteration ID')
+        parser.add_argument(
+            '--model-id', dest='model_id', default=None,
+            metavar='<model_id>',
+            type=int, help='<Optional> the model ID')
+
+    def _export_parser(self: any, export_parser: any) -> None:
+        subparsers = export_parser.add_subparsers()
+        summary_parser = subparsers.add_parser('summary', help='Get summary data.')
+        timeline_parser = subparsers.add_parser(
+            'timeline', help='Get timeline data.')
+        self._add_export_argument(summary_parser)
+        summary_parser.add_argument(
+            '--format', dest='export_format', default='csv',
+            metavar='<export_format>', choices=['csv', 'json'],
+            type=str, help='<Optional> the format for export, supports csv and json.')
+        self._add_export_argument(timeline_parser)
+
+    def _import_parser(self: any, import_parser: any) -> None:
+        self._add_collect_path_argument(import_parser)
+
+    def _monitor_parser(self: any, monitor_parser: any) -> None:
+        self._add_collect_path_argument(monitor_parser)

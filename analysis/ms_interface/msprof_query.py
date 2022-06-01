@@ -40,6 +40,18 @@ class QueryCommand:
             max_column_list = Utils.generator_to_list(max(_element) for _element in zip(max_data_list, max_column_list))
         return max_column_list
 
+    @staticmethod
+    def _do_get_query_data(result_dir: str) -> list:
+        result_data = []
+        LoadInfoManager().load_info(result_dir)
+        result = MsprofQueryData(result_dir).query_data()
+        for _result in result:
+            result_data.append([_result.job_info, _result.device_id,
+                                _result.job_name, _result.collection_time,
+                                _result.model_id, _result.iteration_id,
+                                _result.top_time_iteration])
+        return result_data
+
     @classmethod
     def _format_print(cls: any, data: list, headers: list = None) -> None:
         if not data:
@@ -64,18 +76,6 @@ class QueryCommand:
         for index, header in enumerate(headers):
             print(str(header).ljust(max_column_list[index], ' '), end="\t")
         print("\n")
-
-    @staticmethod
-    def _do_get_query_data(result_dir: str) -> list:
-        result_data = []
-        LoadInfoManager().load_info(result_dir)
-        result = MsprofQueryData(result_dir).query_data()
-        for _result in result:
-            result_data.append([_result.job_info, _result.device_id,
-                                _result.job_name, _result.collection_time,
-                                _result.model_id, _result.iteration_id,
-                                _result.top_time_iteration])
-        return result_data
 
     def check_argument_valid(self: any) -> None:
         """

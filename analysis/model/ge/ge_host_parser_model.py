@@ -13,6 +13,13 @@ class GeHostParserModel(ParserModel):
     Model for Ge Host Parser
     """
 
+    @staticmethod
+    def class_name() -> str:
+        """
+        class name for ge op execute
+        """
+        return GeHostParserModel.__name__
+
     def flush(self: any, data_list: list) -> None:
         """
         data flush to db
@@ -20,10 +27,3 @@ class GeHostParserModel(ParserModel):
         :return:
         """
         self.insert_data_to_db(DBNameConstant.TABLE_GE_HOST, data_list)
-
-    @staticmethod
-    def class_name() -> str:
-        """
-        class name for ge op execute
-        """
-        return GeHostParserModel.__name__
