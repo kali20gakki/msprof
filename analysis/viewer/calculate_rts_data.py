@@ -158,7 +158,7 @@ def _compute_multi_process(timeline_data: list, project_path: str, task_time: di
     cpu_count = multiprocessing.cpu_count() / 3 * 3
     processes = []
     step = len(timeline_data)
-    if len(timeline_data) > CalculateRtsDataConst.MAX_LENGTH:
+    if len(timeline_data) > CalculateRtsDataConst.MAX_LENGTH and not NumberConstant.is_zero(cpu_count):
         step = int(len(timeline_data) / cpu_count) - 1
     count = 0
     for i in range(0, len(timeline_data), step):
