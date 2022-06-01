@@ -70,7 +70,7 @@ function copy_product() {
 		then
 			mkdir -p ${backup_path}/${relative_location}
 		fi
-        cp -r ${target_file} ${backup_path}/${relative_location}
+        cp -rp ${target_file} ${backup_path}/${relative_location}
 		chmod -R a-w ${backup_path}
 	fi
 }
