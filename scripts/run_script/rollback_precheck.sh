@@ -7,14 +7,14 @@ install_path="$(
 
 function file_check() {
     if [ ! -f "$1" ]; then
-        print "ERROR" "the source file $2 does not exist, rollback failed"
+        print "ERROR" "the source file $2 does not exist, rollback precheck failed"
         exit 1
     fi
 }
 
 function dir_check() {
     if [ ! -d "$1" ]; then
-        print "ERROR" "dir $2 is not installed, rollback failed"
+        print "ERROR" "dir $2 is not installed, rollback precheck failed"
         exit 1
     fi
 }
