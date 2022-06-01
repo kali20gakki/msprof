@@ -85,40 +85,20 @@ function remove_empty_dir() {
     fi
 }
 
-is_dir_empty() {
-    [ ! -d "$1" ] && return 1
-    [ "$(ls -A "$1" 2>&1)" != "" ] && return 2
-    return 0
-}
-
-remove_dir_if_empty() {
-    local dirpath="$1"
-    is_dir_empty "${dirpath}"
-    if [ $? -eq 0 ]; then
-        rm -rf "${dirpath}"
-    fi
-    return 0
-}
-
-function uninstall_product() {
+function uninstall_backup() {
     if [ -d ${install_path}/${SPC_DIR}/${BACKUP_DIR}/${MSPROF_RUN_NAME} ]; then
         chmod -R u+w ${install_path}/${SPC_DIR}/${BACKUP_DIR}/${MSPROF_RUN_NAME}
-        rm -rf ${install_path}/${SPC_DIR}/${BACKUP_DIR}/${MSPROF_RUN_NAME}
+        del_dir ${install_path}/${SPC_DIR}/${BACKUP_DIR}/${MSPROF_RUN_NAME}
+        remove_empty_dir ${install_path}/${SPC_DIR}/${BACKUP_DIR}
     fi
-}
-
-function uninstall_backup() {
-    del_dir ${install_path}/${SPC_DIR}/${BACKUP_DIR}/${MSPROF_RUN_NAME}
-    remove_empty_dir ${install_path}/${SPC_DIR}/${BACKUP_DIR}/${MSPROF_RUN_NAME}
-    remove_dir_if_empty ${install_path}/${SPC_DIR}/${BACKUP_DIR}
-    print "INFO" "${MSPROF_RUN_NAME} uninstalled successfully, the directory ${SPC_DIR}/${BACKUP_DIR}/${MSPROF_RUN_NAME} has been deleted"
 }
 
 function uninstall_script() {
-    # delete script
-    del_dir ${install_path}/${SPC_DIR}/${SCRIPT_DIR}/${MSPROF_RUN_NAME}
-    remove_empty_dir ${install_path}/${SPC_DIR}/${SCRIPT_DIR}/${MSPROF_RUN_NAME}
-    print "INFO" "${MSPROF_RUN_NAME} uninstalled successfully, the directory ${SPC_DIR}/${SCRIPT_DIR}/${MSPROF_RUN_NAME} has been deleted"
+    if [ -d ${install_path}/${SPC_DIR}/${SCRIPT_DIR}/${MSPROF_RUN_NAME} ]; then
+        chmod -R u+w ${install_path}/${SPC_DIR}/${SCRIPT_DIR}/${MSPROF_RUN_NAME}
+        del_dir ${install_path}/${SPC_DIR}/${SCRIPT_DIR}/${MSPROF_RUN_NAME}
+        remove_empty_dir ${install_path}/${SPC_DIR}/${SCRIPT_DIR}
+    fi
 }
 
 # init log file

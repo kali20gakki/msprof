@@ -79,6 +79,7 @@ function backup_script() {
 	if [ ! -d ${install_path}/${SPC_DIR}/${SCRIPT_DIR}/${MSPROF_RUN_NAME} ]; then
 		create_script_dir
 		copy_script
+		chmod -R a-w ${install_path}/${SPC_DIR}/${SCRIPT_DIR}/${MSPROF_RUN_NAME}
 	fi
 }
 

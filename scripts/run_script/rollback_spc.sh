@@ -15,8 +15,7 @@ function deal_rollback() {
 	copy_file ${backup_dir}/${MSPROF_PATH}/${MSPROF} ${install_path}/${MSPROF_PATH}/${MSPROF}
 	copy_file ${backup_dir}/${LIBMSPROFILER_PATH}/${LIBMSPROFILER_STUB} ${install_path}/${LIBMSPROFILER_PATH}/${LIBMSPROFILER_STUB}
 	
-	# uninstall product and backup
-	uninstall_product
+	# uninstall backup
 	uninstall_backup
 }
 
