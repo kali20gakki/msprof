@@ -58,14 +58,28 @@ function copy_product() {
 	fi
 
 	if [ -f ${target_file} ] || [ -d ${target_file} ]; then
-        mkdir -p ${backup_path}/${relative_location}
+		if [ -d ${backup_path} ]; 
+		then
+			chmod -R a+w ${backup_path}
+		else
+			mkdir -p ${backup_path}
+			chmod -R a+w ${backup_path}
+		fi
+
+		if [ ! -f ${backup_path}/${relative_location}/${filename} ] && [ ! -d ${backup_path}/${relative_location}/${filename} ]; 
+		then
+			mkdir -p ${backup_path}/${relative_location}
+		fi
         cp -r ${target_file} ${backup_path}/${relative_location}
+		chmod -R a-w ${backup_path}
 	fi
 }
 
 function backup_script() {
-    create_script_dir
-    copy_script
+	if [ ! -d ${install_path}/${SPC_DIR}/${SCRIPT_DIR}/${MSPROF_RUN_NAME} ]; then
+		create_script_dir
+		copy_script
+	fi
 }
 
 function create_script_dir() {

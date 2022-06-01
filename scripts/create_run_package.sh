@@ -73,6 +73,7 @@ function create_temp_dir() {
 	
 	if [ "${package_type}" = "Patch" ];
 		then
+			# if we want to change product, we also need to change rollback_precheck
 			cp ${TEMP_OUTPUT}/lib/libmsprofiler.so ${temp_dir}
 			cp -r ${TEMP_OUTPUT}/stub ${temp_dir}
 			cp ${TEMP_OUTPUT}/bin/msprof ${temp_dir}
