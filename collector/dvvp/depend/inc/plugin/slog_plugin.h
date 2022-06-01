@@ -24,18 +24,18 @@ enum {
     DLOG_EVENT = 0x10
 };
 
+using CheckLogLevelForCFunc = std::function<int(int, int)>;
 class SlogPlugin : public analysis::dvvp::common::singleton::Singleton<SlogPlugin> {
 public:
     SlogPlugin()
     : soName_("libalog.so"),
-      pluginHandle_(PluginHandle(soName_))
+      pluginHandle_(PluginHandle(soName_)),
+      loadFlag_(0)
     {}
-    ~SlogPlugin();
 
     bool IsFuncExist(const std::string &funcName) const;
 
     // CheckLogLevelForC
-    using MSPROF_CHECKLOGLEVELFORC_T = std::function<int(int, int)>;
     int MsprofCheckLogLevelForC(int moduleId, int logLevel);
 
     // DlogInnerForC
@@ -49,8 +49,8 @@ public:
                 return;
             }
         }
-        using MSPROF_DLOGINNERFORC_T = std::function<void(int, int, const char *, T...)>;
-        MSPROF_DLOGINNERFORC_T func;
+        using DlogInnerForCFunc = std::function<void(int, int, const char *, T...)>;
+        DlogInnerForCFunc func;
         ret = pluginHandle_.GetFunction<void, int, int, const char *, T...>("DlogInnerForC", func);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return;
@@ -61,6 +61,11 @@ public:
 private:
     std::string soName_;
     PluginHandle pluginHandle_;
+    PTHREAD_ONCE_T loadFlag_;
+    CheckLogLevelForCFunc checkLogLevelForC_ = nullptr;
+
+private:
+    void LoadSlogSo();
 };
 } // Plugin
 } // Dvvp
