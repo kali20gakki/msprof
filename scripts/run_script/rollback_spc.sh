@@ -17,6 +17,7 @@ function deal_rollback() {
 	
 	# uninstall backup
 	uninstall_backup
+	print "INFO" "${MSPROF_RUN_NAME} rollback successfully !"
 }
 
 function copy_file() {
