@@ -16,23 +16,6 @@ class ClusterTuning:
         self.calculate_list = {TrailingCalculator: 'Slow node'}
         self.tuning_result = []
 
-    def run(self: any, cluster_params: list) -> None:
-        """
-        run and recommend
-        """
-        for calculator, value in self.calculate_list.items():
-            calculator_result = {'rule_type': value, 'result': calculator(cluster_params).ms_run()}
-            self.tuning_result.append(calculator_result)
-        self.show_tuning_result()
-
-    def show_tuning_result(self: any) -> None:
-        print("\nThe current data is identified as cluster data.")
-        print("Cluster Tuning Report:")
-        for index, every_data in enumerate(self.tuning_result):
-            self.print_first_level(index + 1, every_data)
-            self.print_second_level(every_data.get("result"))
-        print("\n")
-
     @staticmethod
     def print_first_level(index: any, data: dict) -> None:
         """
@@ -55,3 +38,20 @@ class ClusterTuning:
             return
         for result_index, result in enumerate(data):
             print("\t{0}){1}:".format(result_index + 1, result))
+
+    def run(self: any, cluster_params: list) -> None:
+        """
+        run and recommend
+        """
+        for calculator, value in self.calculate_list.items():
+            calculator_result = {'rule_type': value, 'result': calculator(cluster_params).ms_run()}
+            self.tuning_result.append(calculator_result)
+        self.show_tuning_result()
+
+    def show_tuning_result(self: any) -> None:
+        print("\nThe current data is identified as cluster data.")
+        print("Cluster Tuning Report:")
+        for index, every_data in enumerate(self.tuning_result):
+            self.print_first_level(index + 1, every_data)
+            self.print_second_level(every_data.get("result"))
+        print("\n")
