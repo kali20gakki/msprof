@@ -11,7 +11,7 @@ import os
 import sys
 
 if __name__ == '__main__':
-    sys.path.insert(0, os.path.realpath(os.path.join(os.path.dirname(__file__), '..')))
+    sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), '..')))
     MODEL_PATH = "ms_interface.msprof_entrance"
     MSPROF_ENTRANCE_CLASS = "MsprofEntrance"
     os.umask(0o027)

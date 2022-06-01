@@ -37,6 +37,7 @@ class MsprofInfoConstruct:
         :param args: collection path
         :return: None
         """
+        from common_func.common import print_msg
         if not hasattr(args, "collection_path"):
             return
 
@@ -44,7 +45,7 @@ class MsprofInfoConstruct:
         if hasattr(model_obj, self.BASIC_INFO_CLASS_NAME):
             msprof_basic_info = getattr(model_obj, self.BASIC_INFO_CLASS_NAME)(args.collection_path)
             msprof_basic_info.init()
-            print(msprof_basic_info.run())
+            print_msg(msprof_basic_info.run())
 
     def main(self: any) -> None:
         """
@@ -61,5 +62,5 @@ class MsprofInfoConstruct:
 
 
 if __name__ == '__main__':
-    sys.path.insert(0, os.path.realpath(os.path.join(os.path.dirname(__file__), '..')))
+    sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), '..')))
     MsprofInfoConstruct().main()
