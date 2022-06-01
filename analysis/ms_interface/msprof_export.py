@@ -514,7 +514,7 @@ class ExportCommand:
     def _show_cluster_tuning(self) -> None:
         if self.command_type != MsProfCommonConstant.SUMMARY:
             return
-        ClusterTuning.run(self._cluster_params.get('cluster_path'))
+        ClusterTuning().run(self._cluster_params.get('cluster_path'))
 
     def _update_cluster_params(self: any, sub_path: str) -> None:
         self._cluster_params['is_cluster_scene'] = True

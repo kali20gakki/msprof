@@ -2,7 +2,11 @@
 This script is used to calculate cluster scene data smearing time.
 Copyright Huawei Technologies Co., Ltd. 2022. All rights reserved.
 """
+import logging
+import os
+
 from analyzer.scene_base.profiling_scene import ProfilingScene
+from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
@@ -17,8 +21,7 @@ class TrailingCalculator:
     """
     create op op_summary db.
     """
-    SLOW_TAG = 1
-    QUICK_TAG = 0
+    SLOW_THRESHOLD = 0.2
 
     def __init__(self: any, path_list: list) -> None:
         self._cluster_list = path_list
@@ -33,7 +36,7 @@ class TrailingCalculator:
             avg_time = DBManager.fetch_all_data(curs, "select avg(data_aug_bound) from training_trace")
         return avg_time
 
-    def run(self: any) -> list:
+    def ms_run(self: any) -> list:
         """
         entrance for calculating op_summary
         :return: None
@@ -47,16 +50,29 @@ class TrailingCalculator:
 
     def calculate_slow_node(self: any) -> list:
         sum_time = 0
-        slow_node = []
+        slow_node_list = []
         if not self.trailing_dict:
-            return slow_node
+            return slow_node_list
         for value in self.trailing_dict.values():
             sum_time += value
-        avg_bound = sum_time / len(self.trailing_dict.values())
-        for key, value in self.trailing_dict.items():
-            if (value - avg_bound)/avg_bound > 0.2:
-                slow_node.append([key])
-        return slow_node
+        if not sum_time:
+            return slow_node_list
+        try:
+            avg_bound = sum_time / len(self.trailing_dict.values())
+        except (ZeroDivisionError, TypeError) as err:
+            logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
+            return slow_node_list
+        try:
+            for key, value in self.trailing_dict.items():
+                bias = (value - avg_bound) / avg_bound
+                if bias > self.SLOW_THRESHOLD:
+                    slow_node = {'slow_node': os.path.basename(os.path.dirname(key)), 'avg_node_cost': avg_bound,
+                                 'slow_node_cost': value, 'slow_ratio': bias}
+                    slow_node_list.append(slow_node)
+        except (ZeroDivisionError, TypeError) as err:
+            logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
+            return slow_node_list
+        return slow_node_list
 
     def calculate(self: any, data_path) -> None:
         """
