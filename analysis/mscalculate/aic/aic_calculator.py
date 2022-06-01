@@ -51,6 +51,48 @@ class AicCalculator(ICalculator, MsMultiProcess):
         else:
             self._parse_by_iter()
 
+    def calculate_pmu_list(self: any, data: any, profiling_events: list, data_list: list) -> None:
+        """
+        calculate pmu
+        :param data: pmu data
+        :param profiling_events: pmu events list
+        :param data_list: out args
+        :return:
+        """
+        pmu_list = {}
+        _, pmu_list = CalculateAiCoreData(self._project_path).compute_ai_core_data(
+            Utils.generator_to_list(profiling_events), pmu_list, data.total_cycle, data.pmu_list)
+
+        AicPmuUtils.remove_redundant(pmu_list)
+        data_list.append(
+            [data.total_cycle, *list(itertools.chain.from_iterable(pmu_list.values())), data.task_id, data.stream_id,
+             ])
+
+    def save(self: any) -> None:
+        """
+        save ai core data
+        :return: None
+        """
+        if self._aic_data_list:
+            aic_pmu_model = AicPmuModel(self._project_path)
+            aic_pmu_model.init()
+            aic_pmu_model.flush(self._aic_data_list)
+            aic_pmu_model.finalize()
+
+    def ms_run(self: any) -> None:
+        """
+        entrance or ai core calculator
+        :return: None
+        """
+        config = generate_config(PathManager.get_sample_json_path(self._project_path))
+        if config.get('ai_core_profiling_mode') == 'sample-based':
+            return
+
+        if not self._file_list:
+            return
+        self.calculate()
+        self.save()
+
     def _get_total_aic_count(self: any) -> int:
         sum_file_size = 0
         for file in self._file_list:
@@ -104,45 +146,3 @@ class AicCalculator(ICalculator, MsMultiProcess):
         for log_data in Utils.chunks(all_log_bytes, self.AICORE_LOG_SIZE):
             _aic_pmu_log = AicPmuBean.decode(log_data)
             self.calculate_pmu_list(_aic_pmu_log, aic_pmu_events, self._aic_data_list)
-
-    def calculate_pmu_list(self: any, data: any, profiling_events: list, data_list: list) -> None:
-        """
-        calculate pmu
-        :param data: pmu data
-        :param profiling_events: pmu events list
-        :param data_list: out args
-        :return:
-        """
-        pmu_list = {}
-        _, pmu_list = CalculateAiCoreData(self._project_path).compute_ai_core_data(
-            Utils.generator_to_list(profiling_events), pmu_list, data.total_cycle, data.pmu_list)
-
-        AicPmuUtils.remove_redundant(pmu_list)
-        data_list.append(
-            [data.total_cycle, *list(itertools.chain.from_iterable(pmu_list.values())), data.task_id, data.stream_id,
-             ])
-
-    def save(self: any) -> None:
-        """
-        save ai core data
-        :return: None
-        """
-        if self._aic_data_list:
-            aic_pmu_model = AicPmuModel(self._project_path)
-            aic_pmu_model.init()
-            aic_pmu_model.flush(self._aic_data_list)
-            aic_pmu_model.finalize()
-
-    def ms_run(self: any) -> None:
-        """
-        entrance or ai core calculator
-        :return: None
-        """
-        config = generate_config(PathManager.get_sample_json_path(self._project_path))
-        if config.get('ai_core_profiling_mode') == 'sample-based':
-            return
-
-        if not self._file_list:
-            return
-        self.calculate()
-        self.save()

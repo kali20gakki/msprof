@@ -33,6 +33,104 @@ class MiniLlcModel(BaseModel, ABC):
         self.aic_profiling_events = None  # ai core pmu event
         self.aiv_profiling_events = None
 
+    @staticmethod
+    def calculate_read_bandwidth(llc_metric: list, start_time: int) -> tuple:
+        """
+        calculate read bandwidth metric data
+        :param llc_metric: llc metric
+        :param start_time: start timestamp
+        :return:
+        """
+        read_hit_rate = []
+        read_total = []
+        read_hit = []
+        try:
+            if llc_metric:
+                llc_first = llc_metric[0]
+                llc_read_total_first = [(llc_first.read_allocate + llc_first.read_noallocate) *
+                                        MiniLlcModel.LLC_CAPACITY / (llc_first.timestamp - start_time) /
+                                        (NumberConstant.KILOBYTE * NumberConstant.KILOBYTE)]
+                llc_read_hit_first = [llc_first.read_hit * MiniLlcModel.LLC_CAPACITY /
+                                      (llc_first.timestamp - start_time) /
+                                      (NumberConstant.KILOBYTE * NumberConstant.KILOBYTE)]
+                for i in llc_metric:
+                    if i.read_allocate + i.read_noallocate != 0:
+                        read_hit_rate.append(i.read_hit /
+                                             (i.read_allocate + i.read_noallocate) * MiniLlcModel.PERCENTAGE)
+                    else:
+                        read_hit_rate.append(0)
+                llc_read_total_second, llc_read_hit_second = MiniLlcModel._read_bandwidth_helper(llc_metric)
+                read_total = llc_read_total_first + llc_read_total_second
+                read_hit = llc_read_hit_first + llc_read_hit_second
+        except (OSError, SystemError, ValueError, TypeError,
+                RuntimeError, ZeroDivisionError) as err:
+            logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
+        return read_hit_rate, read_total, read_hit
+
+    @staticmethod
+    def calculate_write_bandwidth(llc_metric: list, start_time: int) -> tuple:
+        """
+        calculate write bandwidth metric data
+        :param llc_metric: llc metric
+        :param start_time: start timestamp
+        :return:
+        """
+        write_hit_rate = []
+        write_total = []
+        write_hit = []
+        try:
+            if llc_metric:
+                llc_first = llc_metric[0]
+                llc_write_total_first = [(llc_first.write_allocate + llc_first.write_noallocate) *
+                                         MiniLlcModel.LLC_CAPACITY / (llc_first.timestamp - start_time) /
+                                         (NumberConstant.KILOBYTE * NumberConstant.KILOBYTE)]
+                llc_write_hit_first = [llc_first.write_hit * MiniLlcModel.LLC_CAPACITY /
+                                       (llc_first.timestamp - start_time)
+                                       / (NumberConstant.KILOBYTE * NumberConstant.KILOBYTE)]
+                for i in llc_metric:
+                    if i.write_allocate + i.write_noallocate != 0:
+                        write_hit_rate.append(i.write_hit /
+                                              (i.write_allocate + i.write_noallocate) * MiniLlcModel.PERCENTAGE)
+                    else:
+                        write_hit_rate.append(0)
+                llc_write_total_second, llc_write_hit_second = MiniLlcModel._write_bandwidth_helper(llc_metric)
+                write_total = llc_write_total_first + llc_write_total_second
+                write_hit = llc_write_hit_first + llc_write_hit_second
+        except (OSError, SystemError, ValueError, TypeError, RuntimeError,
+                ZeroDivisionError) as err:
+            logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
+        return write_hit_rate, write_total, write_hit
+
+    @staticmethod
+    def _read_bandwidth_helper(llc_metric: list) -> tuple:
+        llc_read_total_second = []
+        llc_read_hit_second = []
+        for k, v in enumerate(llc_metric[1:]):
+            llc_read_total_second_tmp = (v.read_allocate + v.read_noallocate) * MiniLlcModel.LLC_CAPACITY / \
+                                        (v.timestamp - llc_metric[k].timestamp) / \
+                                        (NumberConstant.KILOBYTE * NumberConstant.KILOBYTE)
+            llc_read_total_second.append(llc_read_total_second_tmp)
+            llc_read_hit_second_tmp = v.read_hit * MiniLlcModel.LLC_CAPACITY / \
+                                      (v.timestamp - llc_metric[k].timestamp) / \
+                                      (NumberConstant.KILOBYTE * NumberConstant.KILOBYTE)
+            llc_read_hit_second.append(llc_read_hit_second_tmp)
+        return llc_read_total_second, llc_read_hit_second
+
+    @staticmethod
+    def _write_bandwidth_helper(llc_metric: list) -> tuple:
+        llc_write_total_second = []
+        llc_write_hit_second = []
+        for k, v in enumerate(llc_metric[1:]):
+            llc_write_total_tmp = (v.write_allocate + v.write_noallocate) * MiniLlcModel.LLC_CAPACITY / \
+                                  (v.timestamp - llc_metric[k].timestamp) / \
+                                  (NumberConstant.KILOBYTE * NumberConstant.KILOBYTE)
+            llc_write_total_second.append(llc_write_total_tmp)
+            llc_write_hit_tmp = v.write_hit * MiniLlcModel.LLC_CAPACITY / \
+                                (v.timestamp - llc_metric[k].timestamp) / \
+                                (NumberConstant.KILOBYTE * NumberConstant.KILOBYTE)
+            llc_write_hit_second.append(llc_write_hit_tmp)
+        return llc_write_total_second, llc_write_hit_second
+
     def create_table(self: any) -> None:
         """
         create MiniLlc table
@@ -104,104 +202,6 @@ class MiniLlcModel(BaseModel, ABC):
                     insert_sql = 'insert into LLCBandwidth values(?,?,?,?,?,?,?,?)'
                     DBManager.executemany_sql(self.conn, insert_sql, insert_data)
 
-    @staticmethod
-    def _read_bandwidth_helper(llc_metric: list) -> tuple:
-        llc_read_total_second = []
-        llc_read_hit_second = []
-        for k, v in enumerate(llc_metric[1:]):
-            llc_read_total_second_tmp = (v.read_allocate + v.read_noallocate) * MiniLlcModel.LLC_CAPACITY / \
-                                        (v.timestamp - llc_metric[k].timestamp) / \
-                                        (NumberConstant.KILOBYTE * NumberConstant.KILOBYTE)
-            llc_read_total_second.append(llc_read_total_second_tmp)
-            llc_read_hit_second_tmp = v.read_hit * MiniLlcModel.LLC_CAPACITY / \
-                                      (v.timestamp - llc_metric[k].timestamp) / \
-                                      (NumberConstant.KILOBYTE * NumberConstant.KILOBYTE)
-            llc_read_hit_second.append(llc_read_hit_second_tmp)
-        return llc_read_total_second, llc_read_hit_second
-
-    @staticmethod
-    def calculate_read_bandwidth(llc_metric: list, start_time: int) -> tuple:
-        """
-        calculate read bandwidth metric data
-        :param llc_metric: llc metric
-        :param start_time: start timestamp
-        :return:
-        """
-        read_hit_rate = []
-        read_total = []
-        read_hit = []
-        try:
-            if llc_metric:
-                llc_first = llc_metric[0]
-                llc_read_total_first = [(llc_first.read_allocate + llc_first.read_noallocate) *
-                                        MiniLlcModel.LLC_CAPACITY / (llc_first.timestamp - start_time) /
-                                        (NumberConstant.KILOBYTE * NumberConstant.KILOBYTE)]
-                llc_read_hit_first = [llc_first.read_hit * MiniLlcModel.LLC_CAPACITY /
-                                      (llc_first.timestamp - start_time) /
-                                      (NumberConstant.KILOBYTE * NumberConstant.KILOBYTE)]
-                for i in llc_metric:
-                    if i.read_allocate + i.read_noallocate != 0:
-                        read_hit_rate.append(i.read_hit /
-                                             (i.read_allocate + i.read_noallocate) * MiniLlcModel.PERCENTAGE)
-                    else:
-                        read_hit_rate.append(0)
-                llc_read_total_second, llc_read_hit_second = MiniLlcModel._read_bandwidth_helper(llc_metric)
-                read_total = llc_read_total_first + llc_read_total_second
-                read_hit = llc_read_hit_first + llc_read_hit_second
-        except (OSError, SystemError, ValueError, TypeError,
-                RuntimeError, ZeroDivisionError) as err:
-            logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
-        return read_hit_rate, read_total, read_hit
-
-    @staticmethod
-    def _write_bandwidth_helper(llc_metric: list) -> tuple:
-        llc_write_total_second = []
-        llc_write_hit_second = []
-        for k, v in enumerate(llc_metric[1:]):
-            llc_write_total_tmp = (v.write_allocate + v.write_noallocate) * MiniLlcModel.LLC_CAPACITY / \
-                                  (v.timestamp - llc_metric[k].timestamp) / \
-                                  (NumberConstant.KILOBYTE * NumberConstant.KILOBYTE)
-            llc_write_total_second.append(llc_write_total_tmp)
-            llc_write_hit_tmp = v.write_hit * MiniLlcModel.LLC_CAPACITY / \
-                                (v.timestamp - llc_metric[k].timestamp) / \
-                                (NumberConstant.KILOBYTE * NumberConstant.KILOBYTE)
-            llc_write_hit_second.append(llc_write_hit_tmp)
-        return llc_write_total_second, llc_write_hit_second
-
-    @staticmethod
-    def calculate_write_bandwidth(llc_metric: list, start_time: int) -> tuple:
-        """
-        calculate write bandwidth metric data
-        :param llc_metric: llc metric
-        :param start_time: start timestamp
-        :return:
-        """
-        write_hit_rate = []
-        write_total = []
-        write_hit = []
-        try:
-            if llc_metric:
-                llc_first = llc_metric[0]
-                llc_write_total_first = [(llc_first.write_allocate + llc_first.write_noallocate) *
-                                         MiniLlcModel.LLC_CAPACITY / (llc_first.timestamp - start_time) /
-                                         (NumberConstant.KILOBYTE * NumberConstant.KILOBYTE)]
-                llc_write_hit_first = [llc_first.write_hit * MiniLlcModel.LLC_CAPACITY /
-                                       (llc_first.timestamp - start_time)
-                                       / (NumberConstant.KILOBYTE * NumberConstant.KILOBYTE)]
-                for i in llc_metric:
-                    if i.write_allocate + i.write_noallocate != 0:
-                        write_hit_rate.append(i.write_hit /
-                                              (i.write_allocate + i.write_noallocate) * MiniLlcModel.PERCENTAGE)
-                    else:
-                        write_hit_rate.append(0)
-                llc_write_total_second, llc_write_hit_second = MiniLlcModel._write_bandwidth_helper(llc_metric)
-                write_total = llc_write_total_first + llc_write_total_second
-                write_hit = llc_write_hit_first + llc_write_hit_second
-        except (OSError, SystemError, ValueError, TypeError, RuntimeError,
-                ZeroDivisionError) as err:
-            logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
-        return write_hit_rate, write_total, write_hit
-
     def get_bandwidth_insert_data(self: any, llc_metric: list, device_data: list) -> list:
         """
         zip read and write data
@@ -220,6 +220,21 @@ class MiniLlcModel(BaseModel, ABC):
                                write_hit_rate, write_total, write_hit))
         return insert_data
 
+    def calculate_capacity_data(self: any, llc_profiling: str) -> None:
+        """
+        calculate llc capacity data order by timestamp
+        :param llc_profiling: llc profiling mode
+        :return: None
+        """
+        try:
+            if llc_profiling == StrConstant.LLC_CAPACITY_ITEM:
+                device_sql = 'select distinct(device_id) from LLCDsidData where replayid=0;'
+                device_list = DBManager.fetch_all_data(self.cur, device_sql)
+                if device_list:
+                    self._capacity_data_helper(device_list)
+        except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
+            logging.error(err, exc_info=Constant.TRACE_BACK_SWITCH)
+
     def _capacity_data_helper(self: any, device_list: list) -> None:
         for device in device_list:
             core2cpu = cal_core2cpu(self.result_dir, device[0])
@@ -237,21 +252,6 @@ class MiniLlcModel(BaseModel, ABC):
             if dsid_data:
                 insert_sql = 'insert into LLCCapacity values(?,?,?,?)'
                 DBManager.executemany_sql(self.conn, insert_sql, dsid_data)
-
-    def calculate_capacity_data(self: any, llc_profiling: str) -> None:
-        """
-        calculate llc capacity data order by timestamp
-        :param llc_profiling: llc profiling mode
-        :return: None
-        """
-        try:
-            if llc_profiling == StrConstant.LLC_CAPACITY_ITEM:
-                device_sql = 'select distinct(device_id) from LLCDsidData where replayid=0;'
-                device_list = DBManager.fetch_all_data(self.cur, device_sql)
-                if device_list:
-                    self._capacity_data_helper(device_list)
-        except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
-            logging.error(err, exc_info=Constant.TRACE_BACK_SWITCH)
 
 
 def cal_core2cpu(project_path: str, device_id: int) -> dict:
