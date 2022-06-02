@@ -6,15 +6,17 @@ set -e
 CUR_DIR=$(dirname $(readlink -f $0))
 TOP_DIR=${CUR_DIR}/..
 VERSION=""
+PACKAGE_TYPE=""
 BUILD_TYPE=""
 
 # input param check
-if [[ $# > 1 ]];
+if [[ $# > 2 ]];
     then
         echo "[ERROR]Please input valid param, for example:"
-        echo "       ./build.sh           # Default"
-        echo "       ./build.sh Debug     # Debug"
-        echo "       ./build.sh [version] # With Version"    
+        echo "       ./build.sh                 # Default"
+        echo "       ./build.sh Debug           # Debug"
+        echo "       ./build.sh [version]       # With Version"    
+        echo "       ./build.sh [version] [Patch] # With Version and Patch" 
         exit
 fi
 
@@ -24,6 +26,10 @@ if [ $# = 1 ] && [ "$1" = "Debug" ];
 elif [ $# = 1 ] && [ "$1" != "Debug" ];
     then
         VERSION=$1
+elif [ $# = 2 ];
+    then
+        VERSION=$1
+        PACKAGE_TYPE=$2
 fi
 
 # binary check
@@ -50,5 +56,4 @@ bep_env_init
 cd ${TOP_DIR}/build
 cmake ../cmake/superbuild/ -DMSPROF_BUILD_TYPE=${BUILD_TYPE}
 make -j64
-
-bash ${TOP_DIR}/scripts/create_run_package.sh ${VERSION}
+bash ${TOP_DIR}/scripts/create_run_package.sh ${VERSION} ${PACKAGE_TYPE}
