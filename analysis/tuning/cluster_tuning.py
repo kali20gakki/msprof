@@ -20,6 +20,21 @@ class ClusterTuning(BaseTuningView):
         self.data = []
         self.turing_start = "Cluster Tuning Report"
 
+    @staticmethod
+    def print_second_level(data: any) -> None:
+        """
+        :param data: data
+        :return: None
+        """
+        if not data:
+            print("\tN/A")
+            return
+        for result_index, result in enumerate(data.items()):
+            print("\t{0}) {1}: \n\t {2}".format(result_index + 1,
+                                                result[0],
+                                                "\n".join(list(map(str, result[1])))
+                                                ))
+
     def run(self: any) -> None:
         """
         run and recommend
@@ -35,18 +50,3 @@ class ClusterTuning(BaseTuningView):
             calculator_result = {
                 CommonProfRule.RESULT_RULE_TYPE: value, 'result': calculator(self.cluster_params).run()}
             self.data.append(calculator_result)
-
-    @staticmethod
-    def print_second_level(data: any) -> None:
-        """
-        :param data: data
-        :return: None
-        """
-        if not data:
-            print("\tN/A")
-            return
-        for result_index, result in enumerate(data.items()):
-            print("\t{0}) {1}: \n\t [{2}]".format(result_index + 1,
-                                                  result[0],
-                                                  ",".join(list(map(str, result[1])))
-                                                  ))
