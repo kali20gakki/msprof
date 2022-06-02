@@ -17,20 +17,18 @@ class TuningView(BaseTuningView):
     view for tuning
     """
 
-    def __init__(self: any, result_dir: str, sample_config: dict) -> None:
+    def __init__(self: any, result_dir: str, sample_config: dict, dev_id: any) -> None:
         super().__init__()
         self.result_dir = result_dir
         self.sample_config = sample_config
-        self.dev_id = ""
+        self.dev_id = dev_id
         self.data = None
 
-    def show_by_dev_id(self: any, dev_id: any) -> None:
+    def show_by_dev_id(self: any) -> None:
         """
         show data by device id
-        :param dev_id: device id
         :return: None
         """
-        self.dev_id = dev_id
         self.tuning_report()
 
     def get_tuning_data(self: any) -> None:
