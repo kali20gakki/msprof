@@ -1,15 +1,19 @@
 #!/bin/bash
+# install constant
+install_path=${1}
+package_arch=${2}
+install_for_all_flag=${3}
+
 function get_right() {
 	if [ "$install_for_all_flag" = 1 ] || [ "$UID" = "0" ]; then
-		echo 555
+		right=${root_right}
 	else
-		echo 550
+		right=${user_right}
 	fi
 }
 
 function get_cann_package_name() {
 	local name_list=(${install_path//// })
-	echo ${cann_package_name}
 	cann_package_name=${name_list[-2]}
 	if [ "$cann_package_name" = "ascend-toolkit" ] || [ "$cann_package_name" = "nnrt" ] || [ "$cann_package_name" = "nnae" ]; then
 		return
@@ -46,11 +50,11 @@ function copy_file() {
 
 	if [ -f "$target_file" ] || [ -d "$target_file" ]; then
 		chmod u+w $(dirname ${target_file})
-		travFolder ${target_file} u+w
+		chmod -R u+w ${target_file}
 		rm -r ${target_file}
 		
 		cp -r ${filename} ${target_file}
-		travFolder ${target_file} $right
+		chmod -R ${right} ${target_file}
 		chmod u-w $(dirname ${target_file})
 		
 		print "INFO" "$filename is replaced."
@@ -59,52 +63,21 @@ function copy_file() {
 	print "WARNING" "$target_file is non-existent."
 }
 
-function travFolder(){
-	local file_name=${1}
-	local right=${2}
-	chmod $right ${file_name}
-	
-	if [ -f "$file_name" ]; then
-		return
-	fi
-	
-	if [ -d "$file_name" ]; then
-		file_list=`ls $file_name`
-		
-		for f in $file_list
-		do
-			travFolder ${file_name}/${f} ${right}
-		done
-	fi
-}
-
 function chmod_ini_file() {
 	local ini_config_dir=${install_path}${ANALYSIS_PATH}${ANALYSIS}"/config"
 	if [ -d "$ini_config_dir" ]; then
 		if [ "$install_for_all_flag" = "1" ] || [ "$UID" = "0" ]; then
-			find "${ini_config_dir}" -type f -exec chmod 444 {} \;
+			find "${ini_config_dir}" -type f -exec chmod ${root_ini_right} {} \;
 		else
-			find "${ini_config_dir}" -type f -exec chmod 400 {} \;
+			find "${ini_config_dir}" -type f -exec chmod ${user_ini_right} {} \;
 		fi
 	fi
 }
 
-LIBMSPROFILER="libmsprofiler.so"
-LIBMSPROFILER_STUB="stub/libmsprofiler.so"
-ANALYSIS="analysis"
-MSPROF="msprof"
-
-LIBMSPROFILER_PATH="/runtime/lib64/"
-ANALYSIS_PATH="/tools/profiler/profiler_tool/"
-MSPROF_PATH="/tools/profiler/bin/"
-
 source utils.sh
 
-install_path=${1}
-package_arch=${2}
-install_for_all_flag=${3}
-
-right=$(get_right)
+right=${user_right}
+get_right
 get_cann_package_name
 implement_install
 chmod_ini_file
