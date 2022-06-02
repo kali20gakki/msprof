@@ -27,14 +27,17 @@ class TestTuningView(unittest.TestCase):
         self.assertEqual(res, {'data': '', 'status': 1})
 
     def test_tuning_report(self):
-        data = {"data": [{"result": 1}], "rule_type": 1}
-        with mock.patch(NAMESPACE + '.TuningView._load_result_file', return_value=None):
-            TuningView("", {}).tuning_report(0)
+        data = {"data": [{"result": [{'rule_subtype': 'test'}]}], "rule_type": 1}
+        with mock.patch(NAMESPACE + '.PathManager.get_summary_dir', return_value='test'),\
+                mock.patch('os.path.exists', return_value=True),\
+                mock.patch('builtins.open', mock.mock_open(read_data=json.dumps(data))):
+
+            TuningView("", {}).tuning_report()
 
         with mock.patch(NAMESPACE + '.TuningView._load_result_file', return_value=data), \
                 mock.patch(NAMESPACE + '.TuningView.print_first_level'), \
                 mock.patch(NAMESPACE + '.TuningView.print_second_level'):
-            TuningView("", {}).tuning_report(0)
+            TuningView("", {}).tuning_report()
 
     def test_print_first_level(self):
         data = {"rule_type": 1}
