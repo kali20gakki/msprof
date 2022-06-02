@@ -63,6 +63,7 @@ class BaseTuningView:
         get turing data
         :return:
         """
+        self.data = {}
 
     def tuning_report(self: any) -> None:
         """
