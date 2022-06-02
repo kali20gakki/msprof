@@ -42,9 +42,6 @@ class ImportCommand:
             warn(MsProfCommonConstant.COMMON_FILE_NAME,
                  'Analysis data in "%s" failed. Maybe the data is incomplete.' % result_dir)
 
-    def cluster_tuning(self: any, collect_path: str) -> None:
-        pass
-
     def process(self: any) -> None:
         """
         command import command entry

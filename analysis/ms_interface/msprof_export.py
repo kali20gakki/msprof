@@ -514,11 +514,12 @@ class ExportCommand:
     def _show_cluster_tuning(self) -> None:
         if self.command_type != MsProfCommonConstant.SUMMARY:
             return
-        ClusterTuning().run(self._cluster_params.get('cluster_path'))
+        ClusterTuning(self._cluster_params.get('cluster_path')).run()
 
-    def _update_cluster_params(self: any, sub_path: str) -> None:
-        self._cluster_params['is_cluster_scene'] = True
-        self._cluster_params['cluster_path'].append(sub_path)
+    def _update_cluster_params(self: any, sub_path: str, is_cluster: bool) -> None:
+        if is_cluster:
+            self._cluster_params['is_cluster_scene'] = True
+            self._cluster_params.setdefault('cluster_path', []).append(sub_path)
 
     def _process_sub_dirs(self: any, sub_path: str = '', is_cluster: bool = False) -> None:
         collect_path = self.collection_path
@@ -531,8 +532,7 @@ class ExportCommand:
                     os.path.join(collect_path, sub_dir))
                 check_path_valid(sub_path, False)
                 if DataCheckManager.contain_info_json_data(sub_path):
-                    if sub_path and is_cluster:
-                        self._update_cluster_params(sub_path)
+                    self._update_cluster_params(sub_path, is_cluster)
                     InfoConfReader().load_info(sub_path)
                     self._handle_export(sub_path)
                     self._show_tuning_result(sub_path)
