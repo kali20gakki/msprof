@@ -20,12 +20,6 @@ class BaseTuningView:
         self.data = {}
         self.turing_start = "Performance Summary Report"
 
-    def get_tuning_data(self: any) -> None:
-        """
-        get turing data
-        :return:
-        """
-
     @staticmethod
     def print_first_level(index: any, data: dict) -> None:
         """
@@ -63,6 +57,12 @@ class BaseTuningView:
                         "\t\t{0}){2}: [{1}]".format(value_index + 1,
                                                     ",".join(value.get(CommonProfRule.RESULT_OP_LIST)),
                                                     value.get(CommonProfRule.RESULT_RULE_SUGGESTION)))
+
+    def get_tuning_data(self: any) -> None:
+        """
+        get turing data
+        :return:
+        """
 
     def tuning_report(self: any) -> None:
         """

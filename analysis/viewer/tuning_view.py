@@ -22,6 +22,7 @@ class TuningView(BaseTuningView):
         self.result_dir = result_dir
         self.sample_config = sample_config
         self.dev_id = ""
+        self.data = None
 
     def show_by_dev_id(self: any, dev_id: any) -> None:
         """

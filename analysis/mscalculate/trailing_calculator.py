@@ -32,7 +32,7 @@ class TrailingCalculator:
                 DBNameConstant.TABLE_TRAINING_TRACE))
         return avg_time
 
-    def run(self: any) -> list:
+    def run(self: any) -> dict:
         """
         entrance for calculating slow node
         :return: slow node list
@@ -44,34 +44,34 @@ class TrailingCalculator:
             self.calculate(data_path)
         return self.calculate_slow_node()
 
-    def calculate_slow_node(self: any) -> list:
-        slow_node_list = []
+    def calculate_slow_node(self: any) -> dict:
+        slow_node_dict = {'Slow Node': []}
         if not self.trailing_dict:
-            return slow_node_list
+            return slow_node_dict
         try:
             sum_time = sum(self.trailing_dict.values())
         except TypeError as err:
             logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
-            return slow_node_list
+            return slow_node_dict
         if not sum_time:
-            return slow_node_list
+            return slow_node_dict
         try:
             avg_bound = round(sum_time / len(self.trailing_dict.values()), 2)
         except (ZeroDivisionError, TypeError) as err:
             logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
-            return slow_node_list
+            return slow_node_dict
         try:
             for key, value in self.trailing_dict.items():
                 bias = round((value - avg_bound) / avg_bound, 2)
                 if bias > self.SLOW_THRESHOLD:
-                    slow_node = ['Slow Node: '+os.path.basename(os.path.dirname(key)),
-                                 'Enhanced tailing time of node tie data: '+str(value),
-                                 'Slow Node Percentage: {}%'.format(str(round(100*bias)))]
-                    slow_node_list.append(slow_node)
+                    slow_node = 'Node: {0}, Enhanced tailing time of node tie data: {1}, ' \
+                                'Slow Node Percentage: {2}%.\t'.format(os.path.basename(key),
+                                                                   str(value), str(round(100 * bias)))
+                    slow_node_dict.setdefault('Slow Node', []).append(slow_node)
         except (ZeroDivisionError, TypeError) as err:
             logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
-            return slow_node_list
-        return {'slow node': slow_node_list}
+            return slow_node_dict
+        return slow_node_dict
 
     def calculate(self: any, data_path) -> None:
         """
