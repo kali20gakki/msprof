@@ -65,15 +65,21 @@ class TestTrailingCalculator(unittest.TestCase):
                 mock.patch(NAMESPACE + '.TrailingCalculator.calculate'), \
                 mock.patch(NAMESPACE + '.TrailingCalculator.calculate_slow_node', return_value=[]):
             check = TrailingCalculator(['device_0', 'device_1'])
-            self.assertEqual(check.calculate_slow_node(), [])
+            self.assertEqual(check.run(), [])
 
     def test_calculate_slow_node(self):
         check = TrailingCalculator(['device_0', 'device_1'])
         check.trailing_dict = {'test_1': 10, 'test_2': 20}
-        self.assertEqual(check.calculate_slow_node(), [{'avg_node_cost': 15.0,
-                                                        'slow_node': '',
-                                                        'slow_node_cost': 20,
-                                                        'slow_ratio': 0.3333333333333333}])
+        self.assertEqual(check.calculate_slow_node(),
+                         {'Slow Node': ['Node: test_2, Enhanced tailing time of node tie data: 20, Slow '
+                                        'Node Percentage: 33%.\t']})
+        check.trailing_dict = {}
+        self.assertEqual(check.calculate_slow_node(), {'Slow Node': []})
+        with mock.patch(NAMESPACE + '.logging.error'):
+            check.trailing_dict = {'ts': 'a'}
+            self.assertEqual(check.calculate_slow_node(), {'Slow Node': []})
+        check.trailing_dict = {'ts': 0}
+        self.assertEqual(check.calculate_slow_node(), {'Slow Node': []})
 
     def test_calculate(self):
         with mock.patch(NAMESPACE + '.TrailingCalculator.get_step_data', return_value=[(10,)]):

@@ -323,50 +323,29 @@ class TestExportCommand(unittest.TestCase):
                 test = ExportCommand("summary", args)
                 test.list_map["devices_list"] = ["1"]
                 test.process()
+
+    def test_process_1(self):
+        args_dic = {"collection_path": "test", "iteration_id": 3, "model_id": 1}
+        args = Namespace(**args_dic)
+        json_data_result = (False, True)
+        path_dir = (['device_0'], ['host'], ['device_1'])
         with mock.patch(NAMESPACE + '.check_path_valid'),\
-                mock.patch(NAMESPACE + '.DataCheckManager.contain_info_json_data', return_value=False),\
-                mock.patch(NAMESPACE + '.ExportCommand._process_sub_dirs'),\
-                mock.patch(NAMESPACE + '.MsprofJobSummary.export'):
-            test = ExportCommand("summary", args)
-            test.list_map["devices_list"] = ["1"]
-            test._cluster_params["is_cluster_scene"] = True
-            test.process()
-
-    def test_process_sub_dirs(self):
-        json_data_result = [True]
-        args_dic = {"collection_path": "test", "iteration_id": 3, "model_id": 1}
-        args = Namespace(**args_dic)
-        with mock.patch(NAMESPACE + '.get_path_dir', return_value=['device_0']),\
-                mock.patch('os.path.join', return_value='JOB/device_0'),\
-                mock.patch('os.path.realpath', return_value='JOB/device_0'),\
-                mock.patch('os.listdir', return_value=[]),\
-                mock.patch(NAMESPACE + '.check_path_valid'),\
                 mock.patch(NAMESPACE + '.DataCheckManager.contain_info_json_data', side_effect=json_data_result),\
-                mock.patch(NAMESPACE + '.ExportCommand._handle_export'),\
-                mock.patch(NAMESPACE + '.ExportCommand._show_tuning_result'),\
-                mock.patch(NAMESPACE + '.warn'),\
                 mock.patch(NAMESPACE + '.MsprofJobSummary.export'):
-            test = ExportCommand("summary", args)
-            test.list_map["devices_list"] = ["1"]
-            test._process_sub_dirs()
+            with mock.patch(NAMESPACE + '.get_path_dir', side_effect=path_dir), \
+                    mock.patch('os.path.join', return_value='JOB/device_0'), \
+                    mock.patch('os.path.realpath', return_value='JOB/device_0'), \
+                    mock.patch('os.listdir', return_value=[]), \
+                    mock.patch(NAMESPACE + '.check_path_valid'), \
+                    mock.patch(NAMESPACE + '.DataCheckManager.contain_info_json_data', side_effect=json_data_result), \
+                    mock.patch(NAMESPACE + '.ExportCommand._handle_export'), \
+                    mock.patch(NAMESPACE + '.ExportCommand._show_tuning_result'), \
+                    mock.patch(NAMESPACE + '.warn'), \
+                    mock.patch(NAMESPACE + '.MsprofJobSummary.export'):
 
-    def test_process_sub_dirs_1(self):
-        json_data_result = [False, True]
-        args_dic = {"collection_path": "test", "iteration_id": 3, "model_id": 1}
-        args = Namespace(**args_dic)
-        with mock.patch(NAMESPACE + '.get_path_dir', return_value=['device_0']),\
-                mock.patch('os.path.join', return_value='JOB/device_0'),\
-                mock.patch('os.path.realpath', return_value='JOB/device_0'),\
-                mock.patch('os.listdir', return_value=[]),\
-                mock.patch(NAMESPACE + '.check_path_valid'),\
-                mock.patch(NAMESPACE + '.DataCheckManager.contain_info_json_data', side_effect=json_data_result),\
-                mock.patch(NAMESPACE + '.ExportCommand._handle_export'),\
-                mock.patch(NAMESPACE + '.ExportCommand._show_tuning_result'),\
-                mock.patch(NAMESPACE + '.warn'),\
-                mock.patch(NAMESPACE + '.MsprofJobSummary.export'):
-            test = ExportCommand("summary", args)
-            test.list_map["devices_list"] = ["1"]
-            test._process_sub_dirs()
+                test = ExportCommand("summary", args)
+                test.list_map["devices_list"] = ["1"]
+                test.process()
 
 
 if __name__ == '__main__':
