@@ -45,6 +45,7 @@ from ms_interface.msprof_job_summary import MsprofJobSummary
 from ms_interface.msprof_timeline import MsprofTimeline
 from profiling_bean.prof_enum.export_data_type import ExportDataType
 from tuning.profiling_tuning import ProfilingTuning
+from tuning.cluster_tuning import ClusterTuning
 from viewer.top_down_report import TopDownData
 from viewer.tuning_view import TuningView
 
@@ -214,6 +215,7 @@ class ExportCommand:
             'model_id': getattr(args, self.MODEL_ID),
             'input_model_id': args.model_id is not None
         }
+        self._cluster_params = {'is_cluster_scene': False, 'cluster_path': []}
 
     @staticmethod
     def get_model_id_set(result_dir: str, db_name: str, table_name: str) -> any:
@@ -288,6 +290,8 @@ class ExportCommand:
             self._show_tuning_result(os.path.realpath(self.collection_path))
         else:
             self._process_sub_dirs()
+            if self._cluster_params.get('is_cluster_scene', False):
+                self._show_cluster_tuning()
 
     def _add_export_type(self: any, result_dir: str) -> None:
         export_map = self.EXPORT_HANDLE_MAP.get(self.command_type, [])
@@ -507,20 +511,36 @@ class ExportCommand:
         tuning_view = TuningView(result_dir, sample_config)
         tuning_view.show_by_dev_id(self.list_map.get("devices_list")[0])
 
-    def _process_sub_dirs(self: any) -> None:
-        sub_dirs = get_path_dir(self.collection_path)
+    def _show_cluster_tuning(self) -> None:
+        if self.command_type != MsProfCommonConstant.SUMMARY:
+            return
+        ClusterTuning(self._cluster_params.get('cluster_path')).run()
+
+    def _update_cluster_params(self: any, sub_path: str) -> None:
+        self._cluster_params['is_cluster_scene'] = True
+        self._cluster_params['cluster_path'].append(sub_path)
+
+    def _process_sub_dirs(self: any, sub_path: str = '', is_cluster: bool = False) -> None:
+        collect_path = self.collection_path
+        if sub_path:
+            collect_path = os.path.join(self.collection_path, sub_path)
+        sub_dirs = get_path_dir(collect_path)
         for sub_dir in sub_dirs:  # result_dir
             if sub_dir != StrConstant.TIMELINE_PATH:
                 sub_path = os.path.realpath(
-                    os.path.join(self.collection_path, sub_dir))
+                    os.path.join(collect_path, sub_dir))
                 check_path_valid(sub_path, False)
                 if DataCheckManager.contain_info_json_data(sub_path):
+                    if sub_path and is_cluster:
+                        self._update_cluster_params(sub_path)
                     InfoConfReader().load_info(sub_path)
                     self._handle_export(sub_path)
                     self._show_tuning_result(sub_path)
-                else:
+                elif sub_path and is_cluster:
                     warn(self.FILE_NAME, 'Invalid parsing dir("%s"), -dir must be profiling data dir '
-                                         'such as PROF_XXX_XXX_XXX' % self.collection_path)
+                                         'such as PROF_XXX_XXX_XXX' % collect_path)
+                else:
+                    self._process_sub_dirs(sub_dir, is_cluster=True)
                 self.list_map['devices_list'] = ''
-        job_summary = MsprofJobSummary(self.collection_path)
+        job_summary = MsprofJobSummary(collect_path)
         job_summary.export()
