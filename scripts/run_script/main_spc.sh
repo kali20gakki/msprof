@@ -1,4 +1,9 @@
 #!/bin/bash
+# the params for checking
+install_args_num=0
+install_path_num=0
+install_for_all_flag=0
+
 function parse_script_args() {
     while true; do
 		if [ "$3" = "" ]; then
@@ -46,18 +51,21 @@ function execute_backup() {
 }
 
 function execute_install() {
-    local install_for_all_flag=0
     bash install.sh ${install_path} ${package_arch} ${install_for_all_flag}
+}
+
+function get_install_flag() {
+    local libmsprofiler_path=$(readlink -f ${install_path}/${LIBMSPROFILER_PATH}/${LIBMSPROFILER})
+    local libmsprofiler_right=$(stat -c '%a' ${libmsprofiler_path})
+    if [ ${libmsprofiler_right} = ${root_right} ]; then
+        install_for_all_flag=1
+    fi
 }
 
 # use utils function and constant
 source utils.sh
-
-# the params for checking
-install_args_num=0
-install_path_num=0
-
 parse_script_args $*
+get_install_flag
 check_args
 execute_backup
 execute_install
