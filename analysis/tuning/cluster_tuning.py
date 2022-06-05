@@ -16,8 +16,6 @@ class ClusterTuning(BaseTuningView):
 
     def __init__(self: any, cluster_params: list) -> None:
         super().__init__()
-        # self.calculate_list = {TrailingCalculator: 'Slow node',
-        #                        ClusterLinkCalculator: 'Slow Link'}
         self.cluster_params = cluster_params
         self.calculate_list = {ClusterLinkCalculator: 'slow link, threshold value 20%, please check the bandwidth'}
         self.data = []
@@ -49,7 +47,7 @@ class ClusterTuning(BaseTuningView):
             print("\tN/A")
             return
         for result_index, result in enumerate(data.items()):
-            print("\t{0}) {1}: \n\t [{2}]".format(result_index + 1,
-                                                  result[0],
-                                                  ",".join(list(map(str, result[1])))
-                                                  ))
+            print("\t{0}) {1}: \n\t {2}".format(result_index + 1,
+                                                result[0],
+                                                "\n\t ".join(list(map(str, result[1])))
+                                                ))
