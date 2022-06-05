@@ -3,6 +3,7 @@
 """
 Copyright Huawei Technologies Co., Ltd. 2020. All rights reserved.
 """
+from common_func.common import print_msg
 from common_func.common_prof_rule import CommonProfRule
 from mscalculate.trailing_calculator import TrailingCalculator
 from tuning.base_turing_view import BaseTuningView
@@ -27,10 +28,10 @@ class ClusterTuning(BaseTuningView):
         :return: None
         """
         if not data:
-            print("\tN/A")
+            print_msg("\tN/A")
             return
         for result_index, result in enumerate(data.items()):
-            print("\t{0}) {1}: \n\t {2}".format(result_index + 1,
+            print_msg("\t{0}) {1}: \n\t {2}".format(result_index + 1,
                                                 result[0],
                                                 "\n".join(list(map(str, result[1])))
                                                 ))
