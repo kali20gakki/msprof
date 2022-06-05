@@ -9,6 +9,7 @@ from common_func.constant import Constant
 from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_multi_process import MsMultiProcess
+from common_func.msvp_common import is_number
 from model.hccl.hccl_model import HCCLModel
 
 
@@ -101,7 +102,7 @@ class ClusterSingleLinkCalculator(MsMultiProcess):
         except ZeroDivisionError:
             return cluster_link_list
 
-    def get_type_slow_link(self: any, link_type: str) -> None:
+    def get_slow_link_by_type(self: any, link_type: str) -> None:
         """
         get type link data
         :return: None
@@ -124,7 +125,7 @@ class ClusterSingleLinkCalculator(MsMultiProcess):
         :return: None
         """
         for link_type in Constant.LINK_TYPE_LIST:
-            self.get_type_slow_link(link_type)
+            self.get_slow_link_by_type(link_type)
 
     def get_all_link_dict(self: any) -> None:
         """
@@ -132,7 +133,7 @@ class ClusterSingleLinkCalculator(MsMultiProcess):
         :return: None
         """
         for hccl_data in self.hccl_data:
-            if hccl_data.bandwidth == Constant.NULL:
+            if not is_number(hccl_data.bandwidth):
                 continue
             if hccl_data.src_rank == hccl_data.dst_rank or hccl_data.src_rank == Constant.ILLEGAL_RANK:
                 continue
