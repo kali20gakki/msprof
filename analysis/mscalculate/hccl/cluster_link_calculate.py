@@ -106,16 +106,17 @@ class ClusterSingleLinkCalculator(MsMultiProcess):
         get type link data
         :return: None
         """
-        try:
-            if self.link_dict.get(link_type, []):
+
+        if self.link_dict.get(link_type, []):
+            try:
                 type_average = sum(float(i[0]) for i in self.link_dict.get(link_type)) \
                                / len(self.link_dict.get(link_type))
-                self.average_data.setdefault(link_type, type_average)
-                type_list = self.calculate_cluster_link_list(link_type)
-                if type_list:
-                    self.result_dict.setdefault(link_type, type_list)
-        except ZeroDivisionError:
-            return
+            except ZeroDivisionError:
+                return
+            self.average_data.setdefault(link_type, type_average)
+            type_list = self.calculate_cluster_link_list(link_type)
+            if type_list:
+                self.result_dict.setdefault(link_type, type_list)
 
     def get_slow_link_data(self: any) -> None:
         """
