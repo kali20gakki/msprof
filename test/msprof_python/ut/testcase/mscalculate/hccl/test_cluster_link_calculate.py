@@ -61,14 +61,11 @@ class TestClusterSingleLinkCalculator(unittest.TestCase):
             self.assertEqual(res, {})
 
     def test_get_slow_link_data(self):
-        with mock.patch(SINGLE_NAMESPACE + '.ClusterSingleLinkCalculator.get_type_slow_link'):
+        with mock.patch(SINGLE_NAMESPACE + '.ClusterSingleLinkCalculator.get_slow_link_by_type'):
             check = ClusterSingleLinkCalculator("")
             check.get_slow_link_data()
 
-    def test_get_type_slow_link(self):
-        with mock.patch(SINGLE_NAMESPACE + '.HCCLModel.check_table', return_value=True), \
-             mock.patch(SINGLE_NAMESPACE + '.HCCLModel.check_table', return_value=True), \
-             mock.patch(SINGLE_NAMESPACE + '.ClusterSingleLinkCalculator.get_type_slow_link'):
-            check = ClusterSingleLinkCalculator("")
-            check.link_dict = {Constant.TYPE_SDMA: [[5, 1, 0, 39], [7, 1, 0, 39], [9, 1, 0, 39]]}
-            check.get_slow_link_data()
+    def test_get_slow_link_by_type(self):
+        check = ClusterSingleLinkCalculator("")
+        check.link_dict = {Constant.TYPE_SDMA: [[5, 1, 0, 39], [7, 1, 0, 39], [9, 1, 0, 39]]}
+        check.get_slow_link_by_type(Constant.TYPE_SDMA)
