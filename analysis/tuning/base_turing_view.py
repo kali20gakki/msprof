@@ -25,6 +25,7 @@ class BaseTuningView:
         get turing data
         :return:
         """
+        self.data = {}
 
     @staticmethod
     def print_first_level(index: any, data: dict) -> None:

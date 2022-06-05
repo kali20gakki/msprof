@@ -508,8 +508,8 @@ class ExportCommand:
             return
         ProfilingTuning.run(result_dir, self.iteration_id)
         sample_config = {}
-        tuning_view = TuningView(result_dir, sample_config)
-        tuning_view.show_by_dev_id(self.list_map.get("devices_list")[0])
+        tuning_view = TuningView(result_dir, sample_config, self.list_map.get("devices_list")[0])
+        tuning_view.show_by_dev_id()
 
     def _show_cluster_tuning(self) -> None:
         if self.command_type != MsProfCommonConstant.SUMMARY:
