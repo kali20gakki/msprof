@@ -1,21 +1,12 @@
-import sqlite3
 import unittest
-from argparse import Namespace
 from unittest import mock
 
-import pytest
-from analyzer.scene_base.profiling_scene import ProfilingScene
-from common_func.constant import Constant
 from common_func.db_name_constant import DBNameConstant
-from common_func.info_conf_reader import InfoConfReader
-from common_func.msprof_exception import ProfException
-from common_func.system_data_check_manager import SystemDataCheckManager
-from mscalculate.trailing_calculator import TrailingCalculator
-from profiling_bean.prof_enum.export_data_type import ExportDataType
+from mscalculate.cluster.trailing_calculator import TrailingCalculator
 
 from sqlite.db_manager import DBManager
 
-NAMESPACE = 'mscalculate.trailing_calculator'
+NAMESPACE = 'mscalculate.cluster.trailing_calculator'
 
 
 def create_trace_db():
@@ -71,8 +62,8 @@ class TestTrailingCalculator(unittest.TestCase):
         check = TrailingCalculator(['device_0', 'device_1'])
         check.trailing_dict = {'test_1': 10, 'test_2': 20}
         self.assertEqual(check.calculate_slow_node(),
-                         {'Slow Node': ['Node: test_2, Enhanced tailing time of node tie data: 20, Slow '
-                                        'Node Percentage: 33%.\t']})
+                         {'Slow Node': ['Node: test_2, enhanced tailing time of node tie data is 20 ns, '
+                                        'and the ratio of slow node is 33.33%.\t']})
         check.trailing_dict = {}
         self.assertEqual(check.calculate_slow_node(), {'Slow Node': []})
         with mock.patch(NAMESPACE + '.logging.error'):

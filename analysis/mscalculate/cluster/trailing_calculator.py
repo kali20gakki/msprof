@@ -9,6 +9,7 @@ from analyzer.scene_base.profiling_scene import ProfilingScene
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
+from common_func.ms_constant.number_constant import NumberConstant
 from common_func.path_manager import PathManager
 
 
@@ -16,7 +17,7 @@ class TrailingCalculator:
     """
     calculate slow node message.
     """
-    SLOW_THRESHOLD = 0.2
+    SLOW_THRESHOLD = 20
 
     def __init__(self: any, path_list: list) -> None:
         self._cluster_list = path_list
@@ -56,17 +57,19 @@ class TrailingCalculator:
         if not sum_time:
             return slow_node_dict
         try:
-            avg_bound = round(sum_time / len(self.trailing_dict.values()), 2)
+            avg_bound = round(sum_time / len(self.trailing_dict.values()), NumberConstant.ROUND_TWO_DECIMAL)
         except (ZeroDivisionError, TypeError) as err:
             logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
             return slow_node_dict
         try:
             for key, value in self.trailing_dict.items():
-                bias = round((value - avg_bound) / avg_bound, 2)
-                if bias > self.SLOW_THRESHOLD:
-                    slow_node = 'Node: {0}, Enhanced tailing time of node tie data: {1}, ' \
-                                'Slow Node Percentage: {2}%.\t'.format(os.path.basename(key),
-                                                                   str(value), str(round(100 * bias)))
+                ratio = round(NumberConstant.PERCENTAGE * (value - avg_bound) / avg_bound,
+                              NumberConstant.ROUND_TWO_DECIMAL)
+                if ratio > self.SLOW_THRESHOLD:
+                    slow_node = 'Node: {0}, enhanced tailing time of node tie data is {1} ns, ' \
+                                'and the ratio of slow node is {2}%.\t' \
+                        .format(os.path.basename(key), str(round(value, NumberConstant.ROUND_TWO_DECIMAL)),
+                                str(ratio))
                     slow_node_dict.setdefault('Slow Node', []).append(slow_node)
         except (ZeroDivisionError, TypeError) as err:
             logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
