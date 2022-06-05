@@ -14,7 +14,7 @@ from model.hccl.hccl_model import HCCLModel
 
 class ClusterLinkCalculator:
     """
-    class used to calculate ge hash info
+    class used to calculate slow link in cluster
     """
     THRESHOLD_VALUE = 0.2
 
@@ -67,8 +67,8 @@ class ClusterLinkCalculator:
 
 class ClusterSingleLinkCalculator(MsMultiProcess):
     """
-        class used to calculate ge hash info
-        """
+    class used to calculate slow link in PROF
+    """
     THRESHOLD_VALUE = 20
 
     def __init__(self: any, project_path: str) -> None:
@@ -101,29 +101,29 @@ class ClusterSingleLinkCalculator(MsMultiProcess):
         except ZeroDivisionError:
             return cluster_link_list
 
-    def get_type_slow_link(self: any, type: str) -> None:
+    def get_type_slow_link(self: any, link_type: str) -> None:
         """
         get type link data
         :return: None
         """
-        if self.link_dict.get(type, []):
-            type_average = sum(float(i[0]) for i in self.link_dict.get(type)) \
-                           / len(self.link_dict.get(type))
-            self.average_data.setdefault(type, type_average)
-            type_list = self.calculate_cluster_link_list(type)
-            if type_list:
-                self.result_dict.setdefault(type, type_list)
+        try:
+            if self.link_dict.get(link_type, []):
+                type_average = sum(float(i[0]) for i in self.link_dict.get(link_type)) \
+                               / len(self.link_dict.get(link_type))
+                self.average_data.setdefault(link_type, type_average)
+                type_list = self.calculate_cluster_link_list(link_type)
+                if type_list:
+                    self.result_dict.setdefault(link_type, type_list)
+        except ZeroDivisionError:
+            return
 
     def get_slow_link_data(self: any) -> None:
         """
         get cluster link data
         :return: None
         """
-        try:
-            for link_type in Constant.LINK_TYPE_LIST:
-                self.get_type_slow_link(link_type)
-        except ZeroDivisionError:
-            return
+        for link_type in Constant.LINK_TYPE_LIST:
+            self.get_type_slow_link(link_type)
 
     def get_all_link_dict(self: any) -> None:
         """
