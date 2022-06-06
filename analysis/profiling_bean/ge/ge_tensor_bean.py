@@ -152,9 +152,9 @@ class GeTensorBean(StructDecoder):
     def _process_tensor_data_type(data_type: list) -> list:
         enum_dict = GeDataType.member_map()
         for index, _format in enumerate(data_type):
-            if _format not in enum_dict:
-                continue
-            enum_format = enum_dict.get(_format).name
+            # if _format not in enum_dict:
+            #     continue
+            enum_format = enum_dict.get(_format, GeDataType.UNDEFINED).name
             data_type[index] = enum_format
         return data_type
 
