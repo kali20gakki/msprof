@@ -77,9 +77,9 @@ def error(file_name: str, msg: str) -> None:
     """
     if file_name is None or msg is None:
         return
-    print(time.strftime("%a %d %b %Y %H:%M:%S ", time.localtime())
-          + "[ERROR] [MSVP] [{0}] {1}: {2}".format(str(os.getpid()), file_name, str(msg)),
-          flush=True)
+    print_msg(time.strftime("%a %d %b %Y %H:%M:%S ", time.localtime())
+              + "[ERROR] [MSVP] [{0}] {1}: {2}".format(str(os.getpid()), file_name, str(msg)),
+              flush=True)
 
 
 def print_info(file_name: str, msg: str) -> None:
@@ -88,9 +88,9 @@ def print_info(file_name: str, msg: str) -> None:
     """
     if file_name is None or msg is None:
         return
-    print(time.strftime("%a %d %b %Y %H:%M:%S ", time.localtime())
-          + "[INFO] [MSVP] [{0}] {1}: {2}".format(str(os.getpid()), file_name, str(msg)),
-          flush=True)
+    print_msg(time.strftime("%a %d %b %Y %H:%M:%S ", time.localtime())
+              + "[INFO] [MSVP] [{0}] {1}: {2}".format(str(os.getpid()), file_name, str(msg)),
+              flush=True)
 
 
 def warn(file_name: str, msg: str) -> None:
@@ -99,9 +99,16 @@ def warn(file_name: str, msg: str) -> None:
     """
     if file_name is None or msg is None:
         return
-    print(time.strftime("%a %d %b %Y %H:%M:%S ", time.localtime())
-          + "[WARNING] [MSVP] [{0}] {1}: {2}".format(str(os.getpid()), file_name, str(msg)),
-          flush=True)
+    print_msg(time.strftime("%a %d %b %Y %H:%M:%S ", time.localtime())
+              + "[WARNING] [MSVP] [{0}] {1}: {2}".format(str(os.getpid()), file_name, str(msg)),
+              flush=True)
+
+
+def print_msg(*args: any, **kwargs: any) -> None:
+    """
+    execute print
+    """
+    print(*args, **kwargs)
 
 
 def generate_config(sample_path: str) -> dict:
