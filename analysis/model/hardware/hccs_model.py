@@ -45,6 +45,22 @@ class HccsModel(BaseModel, ABC):
         DBManager.execute_sql(self.conn, drop_original_table_sql)
         DBManager.execute_sql(self.conn, drop_bw_table_sql)
 
+    def insert_metrics(self: any, device_id: int) -> None:
+        """
+        Insert metrics value into mertics table
+        :return:None
+        """
+        self._calculate_metrics(device_id)
+        try:
+            if self.metric_data:
+                sql = "INSERT INTO {0} VALUES ({1})".format(
+                    DBNameConstant.TABLE_HCCS_EVENTS, '?,' * (len(self.metric_data[0]) - 1) + '?')
+                DBManager.executemany_sql(self.conn, sql, self.metric_data)
+        except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
+            logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
+        finally:
+            del self.metric_data[:]
+
     def _insert_metrics_data(self: any, device_id: str, original_data: list) -> None:
         for item in zip(original_data[1:] + original_data[:1], original_data):
             _timestamp = item[0][0]
@@ -84,19 +100,3 @@ class HccsModel(BaseModel, ABC):
             logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
         finally:
             pass
-
-    def insert_metrics(self: any, device_id: int) -> None:
-        """
-        Insert metrics value into mertics table
-        :return:None
-        """
-        self._calculate_metrics(device_id)
-        try:
-            if self.metric_data:
-                sql = "INSERT INTO {0} VALUES ({1})".format(
-                    DBNameConstant.TABLE_HCCS_EVENTS, '?,' * (len(self.metric_data[0]) - 1) + '?')
-                DBManager.executemany_sql(self.conn, sql, self.metric_data)
-        except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
-            logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
-        finally:
-            del self.metric_data[:]
