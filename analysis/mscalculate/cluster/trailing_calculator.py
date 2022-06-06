@@ -66,8 +66,8 @@ class TrailingCalculator:
                 ratio = round(NumberConstant.PERCENTAGE * (value - avg_bound) / avg_bound,
                               NumberConstant.ROUND_TWO_DECIMAL)
                 if ratio > self.SLOW_THRESHOLD:
-                    slow_node = 'Node: {0}, enhanced tailing time of node tie data is {1} ns, ' \
-                                'and the ratio of slow node is {2}%.\t' \
+                    slow_node = 'Node: {0}, with a data augmentation bound duration of {1} ns on average, ' \
+                                'which is {2}% higher than the average duration consumed by nodes.\t' \
                         .format(os.path.basename(key), str(round(value, NumberConstant.ROUND_TWO_DECIMAL)),
                                 str(ratio))
                     slow_node_dict.setdefault('Slow Node', []).append(slow_node)
