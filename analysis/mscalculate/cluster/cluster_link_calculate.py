@@ -17,7 +17,6 @@ class ClusterLinkCalculator:
     """
     class used to calculate slow link in cluster
     """
-    THRESHOLD_VALUE = 0.2
 
     def __init__(self: any, file_list: list) -> None:
         self._file_list = file_list
@@ -70,7 +69,7 @@ class ClusterSingleLinkCalculator(MsMultiProcess):
     """
     class used to calculate slow link in PROF
     """
-    THRESHOLD_VALUE = 20
+    LINK_THRESHOLD_RATIO = 20
 
     def __init__(self: any, project_path: str) -> None:
         super().__init__({'result_dir': project_path})
@@ -95,7 +94,7 @@ class ClusterSingleLinkCalculator(MsMultiProcess):
                     (self.average_data.get(link_type) - link_type_data[0]) / self.average_data.get(link_type)
                     * NumberConstant.PERCENTAGE,
                     NumberConstant.ROUND_TWO_DECIMAL)
-                if link_bw >= self.THRESHOLD_VALUE:
+                if link_bw >= self.LINK_THRESHOLD_RATIO:
                     link_type_data.extend([link_bw])
                     cluster_link_list.append(link_type_data)
             return cluster_link_list
@@ -137,7 +136,7 @@ class ClusterSingleLinkCalculator(MsMultiProcess):
                 continue
             if hccl_data.src_rank == hccl_data.dst_rank or hccl_data.src_rank == Constant.ILLEGAL_RANK:
                 continue
-            if hccl_data.transport_type == Constant.TYPE_RDMA or hccl_data.transport_type == Constant.TYPE_SDMA:
+            if hccl_data.transport_type in Constant.LINK_TYPE_LIST:
                 self.link_dict.setdefault(hccl_data.transport_type, []). \
                     append([float(hccl_data.bandwidth), hccl_data.src_rank, hccl_data.dst_rank])
 

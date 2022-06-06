@@ -17,7 +17,7 @@ class HcclDto:
         self._plane_id = 0
         self._timestamp = 0
         self._duration = 0
-        self._bandwidth = Constant.NULL
+        self._bandwidth = Constant.NA
         self._stage = 0
         self._step = 0
         self._stream_id = 0

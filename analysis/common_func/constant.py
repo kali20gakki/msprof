@@ -218,7 +218,6 @@ class Constant:
     DVPP_TYPE_NAME = ['VDEC', 'JPEGD', 'PNGD', 'JPEGE', 'VPC']
     FILTER_DIRS = [".profiler", "HCCL_PROF", "timeline"]
     NA = 'N/A'
-    NULL = 'NULL'
     TASK_TYPE_OTHER = "Other"
     TASK_TYPE_AI_CORE = "AI_CORE"
     TASK_TYPE_AI_CPU = "AI_CPU"
