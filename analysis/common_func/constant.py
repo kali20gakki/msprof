@@ -216,7 +216,7 @@ class Constant:
     L2_CACHE_ITEM = 8
     HEX_NUMBER = 16
     DVPP_TYPE_NAME = ['VDEC', 'JPEGD', 'PNGD', 'JPEGE', 'VPC']
-    FILTER_DIRS = [".profiler", "HCCL_PROF"]
+    FILTER_DIRS = [".profiler", "HCCL_PROF", "timeline"]
     NA = 'N/A'
     NULL = 'NULL'
     TASK_TYPE_OTHER = "Other"

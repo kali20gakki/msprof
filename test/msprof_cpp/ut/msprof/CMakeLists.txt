@@ -239,6 +239,7 @@ add_executable(msprof_utest
     ${MSPROF_SOURCE_DIR}/dvvp/transport/transport.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/transport/uploader.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/transport/uploader_mgr.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/depend/src/plugin_handle.cpp
 	${CppPath}
 )
 

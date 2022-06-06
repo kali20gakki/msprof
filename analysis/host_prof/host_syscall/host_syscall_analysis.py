@@ -28,6 +28,13 @@ class HostSyscallAnalysis(MsMultiProcess):
         self.sample_config = sample_config
         self.result_dir = self.sample_config.get("result_dir", "")
 
+    @staticmethod
+    def class_name() -> str:
+        """
+        class name
+        """
+        return HostSyscallAnalysis.__name__
+
     def ms_run(self: any) -> None:
         """
         run function
@@ -49,10 +56,3 @@ class HostSyscallAnalysis(MsMultiProcess):
                     "start parsing os runtime api data file: %s", file_name)
                 host_syscall_presenter = HostSyscallPresenter(self.result_dir, file_name)
                 host_syscall_presenter.run()
-
-    @staticmethod
-    def class_name() -> str:
-        """
-        class name
-        """
-        return HostSyscallAnalysis.__name__

@@ -16,6 +16,10 @@ namespace Analysis {
 namespace Dvvp {
 namespace Plugin {
 using namespace analysis::dvvp::common::config;
+PluginHandle::~PluginHandle()
+{
+    CloseHandle();
+}
 
 const std::string PluginHandle::GetSoName() const
 {
@@ -79,6 +83,7 @@ void PluginHandle::CloseHandle()
         return;
     }
     dlclose(handle_);
+    handle_ = nullptr;
 }
 
 bool PluginHandle::HasLoad()

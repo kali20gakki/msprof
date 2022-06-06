@@ -37,6 +37,54 @@ class DdrModel(BaseModel, ABC):
         self.aic_profiling_events = None  # ai core pmu event
         self.aiv_profiling_events = None
 
+    @classmethod
+    def calculate_data(cls: any, ddr_data: any, start_time: any) -> list:
+        """
+        calculate time series data of ddr metrics
+        :param ddr_data: ddr data
+        :param start_time: start time
+        :return:
+        """
+        metric_data = []
+        ddr_total_first = []
+        ddr_first = ddr_data[0]
+        if len(ddr_first) >= 4:  # 4 is the minimum length for ddr
+            ddr_total_first = cls._calculate_ddr_head_data(ddr_first, start_time)
+        if len(ddr_data) >= 1:  # add ddr data from second place
+            ddr_data_cal = []
+            for index, ddr in enumerate(ddr_data[1:]):
+                ddr_data_cal.append(cls._calculate_ddr_data(ddr, ddr_data[index]))
+            metric_data = ddr_total_first + ddr_data_cal
+        return metric_data
+
+    @classmethod
+    def _calculate_ddr_head_data(cls: any, ddr_first: any, start_time: int) -> list:
+        bandwidth_list = []
+        for ddr in ddr_first[3:]:
+            if ddr_first[2] - start_time:
+                bandwidth_list.append(cls._cal_ddr_bandwidth(ddr, ddr_first[2] - start_time))
+            else:
+                bandwidth_list.append(0)
+        return [list(ddr_first[:3]) + bandwidth_list]
+
+    @classmethod
+    def _calculate_ddr_data(cls: any, ddr: any, ddr_data: any) -> list:
+        if len(ddr) >= 4:
+            bandwidth_list = []
+            for metric in ddr[3:]:
+                if ddr[2] - ddr_data[2]:
+                    bandwidth_list.append(cls._cal_ddr_bandwidth(metric, ddr[2] - ddr_data[2]))
+                else:
+                    bandwidth_list.append(0)
+            return list(ddr[:3]) + bandwidth_list
+        return []
+
+    @classmethod
+    def _cal_ddr_bandwidth(cls: any, metric: any, ddr_detal_time: any) -> any:
+        return metric * ConfigMgr.get_ddr_bit_width() / \
+               (ddr_detal_time * NumberConstant.KILOBYTE * NumberConstant.KILOBYTE * cls.DDR_EVENT) * \
+               Constant.TIME_RATE
+
     def flush(self: any, data_list: list) -> None:
         """
         flush acsq task data to db
@@ -108,51 +156,3 @@ class DdrModel(BaseModel, ABC):
                     logging.error(err, exc_info=Constant.TRACE_BACK_SWITCH)
                     return
                 DBManager.executemany_sql(self.conn, insert_sql, metric_data)
-
-    @classmethod
-    def calculate_data(cls: any, ddr_data: any, start_time: any) -> list:
-        """
-        calculate time series data of ddr metrics
-        :param ddr_data: ddr data
-        :param start_time: start time
-        :return:
-        """
-        metric_data = []
-        ddr_total_first = []
-        ddr_first = ddr_data[0]
-        if len(ddr_first) >= 4:  # 4 is the minimum length for ddr
-            ddr_total_first = cls._calculate_ddr_head_data(ddr_first, start_time)
-        if len(ddr_data) >= 1:  # add ddr data from second place
-            ddr_data_cal = []
-            for index, ddr in enumerate(ddr_data[1:]):
-                ddr_data_cal.append(cls._calculate_ddr_data(ddr, ddr_data[index]))
-            metric_data = ddr_total_first + ddr_data_cal
-        return metric_data
-
-    @classmethod
-    def _calculate_ddr_head_data(cls: any, ddr_first: any, start_time: int) -> list:
-        bandwidth_list = []
-        for ddr in ddr_first[3:]:
-            if ddr_first[2] - start_time:
-                bandwidth_list.append(cls._cal_ddr_bandwidth(ddr, ddr_first[2] - start_time))
-            else:
-                bandwidth_list.append(0)
-        return [list(ddr_first[:3]) + bandwidth_list]
-
-    @classmethod
-    def _calculate_ddr_data(cls: any, ddr: any, ddr_data: any) -> list:
-        if len(ddr) >= 4:
-            bandwidth_list = []
-            for metric in ddr[3:]:
-                if ddr[2] - ddr_data[2]:
-                    bandwidth_list.append(cls._cal_ddr_bandwidth(metric, ddr[2] - ddr_data[2]))
-                else:
-                    bandwidth_list.append(0)
-            return list(ddr[:3]) + bandwidth_list
-        return []
-
-    @classmethod
-    def _cal_ddr_bandwidth(cls: any, metric: any, ddr_detal_time: any) -> any:
-        return metric * ConfigMgr.get_ddr_bit_width() / \
-               (ddr_detal_time * NumberConstant.KILOBYTE * NumberConstant.KILOBYTE * cls.DDR_EVENT) * \
-               Constant.TIME_RATE
