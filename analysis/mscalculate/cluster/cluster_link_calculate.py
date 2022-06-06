@@ -34,7 +34,7 @@ class ClusterLinkCalculator:
             for value in link_data.get(link_type, []):
                 key = "{0}-{1}".format(value[1], value[2])
                 max_value = max(max_value, value[3])
-                slow_link = "slow rank link {0}, bandwidth is {1}% lower than average.".format(key, max_value)
+                slow_link = "Slow rank link {0}, with {1}% lower bandwidth than average.".format(key, max_value)
                 link_dict.update({key: slow_link})
             self.result_dict.setdefault(link_type, []).extend(list(link_dict.values()))
 
