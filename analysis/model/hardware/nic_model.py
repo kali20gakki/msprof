@@ -118,66 +118,6 @@ class NicModel(BaseModel, ABC):
         func_list = DBManager.fetch_all_data(self.cur, _sql, (device,))
         return func_list
 
-    def _duration_nic_report_sql_exec(self: any, device: list, func_id: int) -> any:
-        _sql = "select max(timestamp) - min(timestamp) as duration from " \
-               "{} where device_id = ? " \
-               "AND funcId = ?;".format(DBNameConstant.TABLE_NIC_ORIGIN)
-        try:
-            duration = round(float(
-                self.cur.execute(_sql, (device[0], func_id)).fetchone()[0]), self.ROUND_NUMBER)
-        except sqlite3.Error:
-            return EmptyClass()
-        return duration
-
-    def _bandwidth_nic_report_sql_exec(self: any, device: list, func_id: int) -> any:
-        _sql = "select bandwidth from {} where device_id = ? " \
-               "AND funcId = ?;".format(DBNameConstant.TABLE_NIC_ORIGIN)
-        try:
-            bandwidth = self.cur.execute(_sql, (device[0], func_id)).fetchone()[0]
-        except sqlite3.Error:
-            return EmptyClass()
-        return bandwidth
-
-    def _packet_data_nic_report_sql_exec(self: any, device: list, func_id: int) -> any:
-        _sql = 'select rxpacket, txpacket from {} where replayId = 0 ' \
-               'AND device_id = ? ' \
-               'AND funcId = ?;'.format(DBNameConstant.TABLE_NIC_ORIGIN)
-        try:
-            packet_data = self.cur.execute(_sql, (device[0], func_id)).fetchone()
-        except sqlite3.Error:
-            return EmptyClass()
-        return packet_data
-
-    def _rx_data_nic_report_sql_exec(self: any, device: list, func_id: int) -> any:
-        _sql = 'select rxpackets,rxerrors,rxdropped from {} where replayId = 0 ' \
-               'AND device_id = ? ' \
-               'AND funcId = ?'.format(DBNameConstant.TABLE_NIC_ORIGIN)
-        try:
-            rx_data = self.cur.execute(_sql, (device[0], func_id)).fetchone()
-        except sqlite3.Error:
-            return EmptyClass()
-        return rx_data
-
-    def _tx_data_nic_report_sql_exec(self: any, device: list, func_id: int) -> any:
-        _sql = 'select txpackets,txerrors,txdropped from {} where replayId = 0 ' \
-               'AND device_id = ? ' \
-               'AND funcId = ?'.format(DBNameConstant.TABLE_NIC_ORIGIN)
-        try:
-            tx_data = self.cur.execute(_sql, (device[0], func_id)).fetchone()
-        except sqlite3.Error:
-            return EmptyClass()
-        return tx_data
-
-    def _tx_rate_adapter(self: any, tx_data: list, tx_rate_dic: dict) -> None:
-        if tx_data[0] != Constant.DEFAULT_COUNT:
-            tx_rate_dic['tx_errors_rate'] = round(tx_data[1] / tx_data[0], self.ROUND_NUMBER)
-            tx_rate_dic['tx_drop_rate'] = round(tx_data[2] / tx_data[0], self.ROUND_NUMBER)
-
-    def _rx_rate_adapter(self: any, rx_data: list, tx_rate_dic: dict) -> None:
-        if rx_data[0] != Constant.DEFAULT_COUNT:
-            tx_rate_dic['rx_errors_rate'] = round(rx_data[1] / rx_data[0], self.ROUND_NUMBER)
-            tx_rate_dic['rx_drop_rate'] = round(rx_data[2] / rx_data[0], self.ROUND_NUMBER)
-
     def get_nic_report_data(self: any, device: list, func_id: int) -> None:
         """
         get nic report data when data length is 1
@@ -209,34 +149,6 @@ class NicModel(BaseModel, ABC):
                             tx_rate_dic.get('tx_drop_rate'),
                             func_id])
         DBManager.insert_data_into_table(self.conn, DBNameConstant.TABLE_NIC_REPORT, target_data)
-
-    def _create_nic_timestamp_sql_exec(self: any, func_id: int) -> list:
-        _sql = "select timestamp from {0} where replayId = 0 " \
-               "AND device_id = ? " \
-               "AND funcId = ?;".format(DBNameConstant.TABLE_NIC_ORIGIN)
-        time_stamp = self.cur.execute(_sql, (self.device_id, func_id)).fetchall()
-        return time_stamp
-
-    def _create_nic_bandwidth_sql_exec(self: any, func_id: int) -> float:
-        _sql = "select bandwidth from {} where replayId = 0 " \
-               "AND device_id = ? " \
-               "AND funcId = ?;".format(DBNameConstant.TABLE_NIC_ORIGIN)
-        bandwidth = self.cur.execute(_sql, (self.device_id, func_id)).fetchone()[0]
-        return bandwidth
-
-    def _create_nic_rx_byte_sql_exec(self: any, func_id: int) -> list:
-        _sql = "select rxbyte from {} where replayId = 0 " \
-               "AND device_id = ? " \
-               "AND funcId = ?;".format(DBNameConstant.TABLE_NIC_ORIGIN)
-        rx_byte = self.cur.execute(_sql, (self.device_id, func_id)).fetchall()
-        return rx_byte
-
-    def _create_nic_tx_byte_sql_exec(self: any, func_id: int) -> list:
-        _sql = "select txbyte from {} where replayId = 0 " \
-               "AND device_id = ? " \
-               "AND funcId = ?;".format(DBNameConstant.TABLE_NIC_ORIGIN)
-        tx_byte = self.cur.execute(_sql, (self.device_id, func_id)).fetchall()
-        return tx_byte
 
     def create_nicreceivesend_table(self: any, func_id: int) -> None:
         """
@@ -311,6 +223,135 @@ class NicModel(BaseModel, ABC):
         DBManager.executemany_sql(conn, sql, target_data)
         del target_data[:]
         DBManager.destroy_db_connect(conn, curs)
+
+    def calculate_nic_report_data(self: any, device: list, func_id: int) -> None:
+        """
+        calculate nic report data when data length > 1
+        :param device: device id
+        :param func_id: func id
+        :return:
+        """
+        try:
+            if device:
+                target_data = []
+                nic_info = {}
+                tx_packet_dic = {'tx_packet_second': Constant.DEFAULT_COUNT, 'tx_packet': Constant.DEFAULT_COUNT}
+                self._cal_duration_sql_exec(nic_info, device, func_id)
+                self._cal_bandwidth_sql_exec(nic_info, device, func_id)
+                NicModel._cal_nic_info_adapter(nic_info)
+
+                if float(nic_info.get("duration")) != Constant.DEFAULT_COUNT:
+                    self._cal_rx_bytes_packet_info(nic_info, device, func_id)
+                    self._cal_tx_packet_sql_exec(tx_packet_dic, device, func_id)
+                    tx_packet_dic['tx_packet_second'] = \
+                        round(tx_packet_dic.get('tx_packet') / float(nic_info.get("duration")), self.ROUND_NUMBER)
+
+                rx_error_rate, rx_dropped_rate = self._cal_rx_rate_adapter(nic_info, device, func_id)
+                tx_error_rate, tx_dropped_rate = self._cal_tx_rate_adapter(tx_packet_dic, device, func_id)
+
+                target_data.append((device[0],
+                                    nic_info.get("duration"),
+                                    nic_info.get("bandwidth"),
+                                    nic_info.get("rx_bytes"),
+                                    nic_info.get("tx_bytes"),
+                                    nic_info.get("rx_packet_second"),
+                                    rx_error_rate,
+                                    rx_dropped_rate,
+                                    tx_packet_dic.get('tx_packet_second'),
+                                    tx_error_rate,
+                                    tx_dropped_rate,
+                                    func_id))
+                DBManager.insert_data_into_table(self.conn, DBNameConstant.TABLE_NIC_REPORT, target_data)
+        except sqlite3.Error as err:
+            logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
+
+    def _duration_nic_report_sql_exec(self: any, device: list, func_id: int) -> any:
+        _sql = "select max(timestamp) - min(timestamp) as duration from " \
+               "{} where device_id = ? " \
+               "AND funcId = ?;".format(DBNameConstant.TABLE_NIC_ORIGIN)
+        try:
+            duration = round(float(
+                self.cur.execute(_sql, (device[0], func_id)).fetchone()[0]), self.ROUND_NUMBER)
+        except sqlite3.Error:
+            return EmptyClass()
+        return duration
+
+    def _bandwidth_nic_report_sql_exec(self: any, device: list, func_id: int) -> any:
+        _sql = "select bandwidth from {} where device_id = ? " \
+               "AND funcId = ?;".format(DBNameConstant.TABLE_NIC_ORIGIN)
+        try:
+            bandwidth = self.cur.execute(_sql, (device[0], func_id)).fetchone()[0]
+        except sqlite3.Error:
+            return EmptyClass()
+        return bandwidth
+
+    def _packet_data_nic_report_sql_exec(self: any, device: list, func_id: int) -> any:
+        _sql = 'select rxpacket, txpacket from {} where replayId = 0 ' \
+               'AND device_id = ? ' \
+               'AND funcId = ?;'.format(DBNameConstant.TABLE_NIC_ORIGIN)
+        try:
+            packet_data = self.cur.execute(_sql, (device[0], func_id)).fetchone()
+        except sqlite3.Error:
+            return EmptyClass()
+        return packet_data
+
+    def _rx_data_nic_report_sql_exec(self: any, device: list, func_id: int) -> any:
+        _sql = 'select rxpackets,rxerrors,rxdropped from {} where replayId = 0 ' \
+               'AND device_id = ? ' \
+               'AND funcId = ?'.format(DBNameConstant.TABLE_NIC_ORIGIN)
+        try:
+            rx_data = self.cur.execute(_sql, (device[0], func_id)).fetchone()
+        except sqlite3.Error:
+            return EmptyClass()
+        return rx_data
+
+    def _tx_data_nic_report_sql_exec(self: any, device: list, func_id: int) -> any:
+        _sql = 'select txpackets,txerrors,txdropped from {} where replayId = 0 ' \
+               'AND device_id = ? ' \
+               'AND funcId = ?'.format(DBNameConstant.TABLE_NIC_ORIGIN)
+        try:
+            tx_data = self.cur.execute(_sql, (device[0], func_id)).fetchone()
+        except sqlite3.Error:
+            return EmptyClass()
+        return tx_data
+
+    def _tx_rate_adapter(self: any, tx_data: list, tx_rate_dic: dict) -> None:
+        if tx_data[0] != Constant.DEFAULT_COUNT:
+            tx_rate_dic['tx_errors_rate'] = round(tx_data[1] / tx_data[0], self.ROUND_NUMBER)
+            tx_rate_dic['tx_drop_rate'] = round(tx_data[2] / tx_data[0], self.ROUND_NUMBER)
+
+    def _rx_rate_adapter(self: any, rx_data: list, tx_rate_dic: dict) -> None:
+        if rx_data[0] != Constant.DEFAULT_COUNT:
+            tx_rate_dic['rx_errors_rate'] = round(rx_data[1] / rx_data[0], self.ROUND_NUMBER)
+            tx_rate_dic['rx_drop_rate'] = round(rx_data[2] / rx_data[0], self.ROUND_NUMBER)
+
+    def _create_nic_timestamp_sql_exec(self: any, func_id: int) -> list:
+        _sql = "select timestamp from {0} where replayId = 0 " \
+               "AND device_id = ? " \
+               "AND funcId = ?;".format(DBNameConstant.TABLE_NIC_ORIGIN)
+        time_stamp = self.cur.execute(_sql, (self.device_id, func_id)).fetchall()
+        return time_stamp
+
+    def _create_nic_bandwidth_sql_exec(self: any, func_id: int) -> float:
+        _sql = "select bandwidth from {} where replayId = 0 " \
+               "AND device_id = ? " \
+               "AND funcId = ?;".format(DBNameConstant.TABLE_NIC_ORIGIN)
+        bandwidth = self.cur.execute(_sql, (self.device_id, func_id)).fetchone()[0]
+        return bandwidth
+
+    def _create_nic_rx_byte_sql_exec(self: any, func_id: int) -> list:
+        _sql = "select rxbyte from {} where replayId = 0 " \
+               "AND device_id = ? " \
+               "AND funcId = ?;".format(DBNameConstant.TABLE_NIC_ORIGIN)
+        rx_byte = self.cur.execute(_sql, (self.device_id, func_id)).fetchall()
+        return rx_byte
+
+    def _create_nic_tx_byte_sql_exec(self: any, func_id: int) -> list:
+        _sql = "select txbyte from {} where replayId = 0 " \
+               "AND device_id = ? " \
+               "AND funcId = ?;".format(DBNameConstant.TABLE_NIC_ORIGIN)
+        tx_byte = self.cur.execute(_sql, (self.device_id, func_id)).fetchall()
+        return tx_byte
 
     def _cal_duration_sql_exec(self: any, nic_info: dict, device: list, func_id: int) -> None:
         _sql = "select max(timestamp) - min(timestamp) as duration from {} " \
@@ -425,47 +466,6 @@ class NicModel(BaseModel, ABC):
             tx_dropped_rate = self._cal_tx_drop_sql_exec(tx_packet_dic, device, func_id)
             return tx_error_rate, tx_dropped_rate
         return "0%", "0%"
-
-    def calculate_nic_report_data(self: any, device: list, func_id: int) -> None:
-        """
-        calculate nic report data when data length > 1
-        :param device: device id
-        :param func_id: func id
-        :return:
-        """
-        try:
-            if device:
-                target_data = []
-                nic_info = {}
-                tx_packet_dic = {'tx_packet_second': Constant.DEFAULT_COUNT, 'tx_packet': Constant.DEFAULT_COUNT}
-                self._cal_duration_sql_exec(nic_info, device, func_id)
-                self._cal_bandwidth_sql_exec(nic_info, device, func_id)
-                NicModel._cal_nic_info_adapter(nic_info)
-
-                if float(nic_info.get("duration")) != Constant.DEFAULT_COUNT:
-                    self._cal_rx_bytes_packet_info(nic_info, device, func_id)
-                    self._cal_tx_packet_sql_exec(tx_packet_dic, device, func_id)
-                    tx_packet_dic['tx_packet_second'] = \
-                        round(tx_packet_dic.get('tx_packet') / float(nic_info.get("duration")), self.ROUND_NUMBER)
-
-                rx_error_rate, rx_dropped_rate = self._cal_rx_rate_adapter(nic_info, device, func_id)
-                tx_error_rate, tx_dropped_rate = self._cal_tx_rate_adapter(tx_packet_dic, device, func_id)
-
-                target_data.append((device[0],
-                                    nic_info.get("duration"),
-                                    nic_info.get("bandwidth"),
-                                    nic_info.get("rx_bytes"),
-                                    nic_info.get("tx_bytes"),
-                                    nic_info.get("rx_packet_second"),
-                                    rx_error_rate,
-                                    rx_dropped_rate,
-                                    tx_packet_dic.get('tx_packet_second'),
-                                    tx_error_rate,
-                                    tx_dropped_rate,
-                                    func_id))
-                DBManager.insert_data_into_table(self.conn, DBNameConstant.TABLE_NIC_REPORT, target_data)
-        except sqlite3.Error as err:
-            logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
 
     def _report_data_per_device(self: any, device_id_list: list) -> None:
         for device in set(device_id_list):

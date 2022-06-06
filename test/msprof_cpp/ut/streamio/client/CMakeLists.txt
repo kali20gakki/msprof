@@ -18,6 +18,7 @@ set(profilerSrcFiles
     ${MSPROF_SOURCE_DIR}/dvvp/adx/stub/adx_prof_api.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/statistics/perf_count.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/adx/wrapper/memory_utils.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/src/plugin_handle.cpp
     ${CppPath}
 )
 

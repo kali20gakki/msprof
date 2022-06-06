@@ -42,8 +42,6 @@ Status aclgrphProfGraphSubscribe(const uint32_t graphId, const aclprofSubscribeC
     std::lock_guard<std::mutex> lock(g_aclgraphProfMutex);
     if (profSubscribeConfig == nullptr) {
         MSPROF_LOGE("Param profSubscribeConfig is nullptr");
-        MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config"}),
-            std::vector<std::string>({"profSubscribeConfig"}));
         return ACL_ERROR_INVALID_PARAM;
     }
 
@@ -56,8 +54,6 @@ Status aclgrphProfGraphSubscribe(const uint32_t graphId, const aclprofSubscribeC
     ret = ProfApiPlugin::instance()->MsprofProfGetDeviceIdByGeModelIdx(graphId, &deviceId);
     if (ret != ACL_SUCCESS) {
         MSPROF_LOGE("Graph id %u is not loaded", graphId);
-        MSPROF_INPUT_ERROR("EK0010", std::vector<std::string>({"param", "value"}),
-            std::vector<std::string>({"Graph id", std::to_string(graphId)}));
         return ACL_ERROR_INVALID_MODEL_ID;
     }
 
@@ -99,8 +95,6 @@ Status aclgrphProfGraphUnSubscribe(const uint32_t graphId)
 
     if (!ProfAclMgr::instance()->IsModelSubscribed(graphId)) {
         MSPROF_LOGE("Graph Id %u is not subscribed when unsubcribed", graphId);
-        MSPROF_INPUT_ERROR("EK0011", std::vector<std::string>({"param", "value"}),
-            std::vector<std::string>({"Graph Id", std::to_string(graphId)}));
         return ACL_ERROR_INVALID_MODEL_ID;
     }
 
@@ -151,8 +145,6 @@ Status aclgrphProfInit(CONST_CHAR_PTR profilerPath, uint32_t length)
     std::lock_guard<std::mutex> lock(g_aclgraphProfMutex);
     if (profilerPath == nullptr || strlen(profilerPath) != length) {
         MSPROF_LOGE("profilerPath is nullptr or its length does not equals given length");
-        MSPROF_INPUT_ERROR("EK0002", std::vector<std::string>({"path"}),
-            std::vector<std::string>({"profilerPath"}));
         return FAILED;
     }
     const static size_t aclGrphProfPathMaxLen = 4096;  // path max length: 4096
@@ -160,8 +152,6 @@ Status aclgrphProfInit(CONST_CHAR_PTR profilerPath, uint32_t length)
         MSPROF_LOGE("length of profilerResultPath is illegal, the value is %zu, it should be in (0, %zu)",
                     length, aclGrphProfPathMaxLen);
         std::string aclGrphProfPathMaxLenStr = std::to_string(aclGrphProfPathMaxLen);
-        MSPROF_INPUT_ERROR("EK0006", std::vector<std::string>({"config", "value", "min", "max"}),
-            std::vector<std::string>({"profilerResultPath", std::to_string(length), "0", aclGrphProfPathMaxLenStr}));
         return FAILED;
     }
 
@@ -231,16 +221,12 @@ bool IsProfConfigValid(CONST_UINT32_T_PTR deviceidList, uint32_t deviceNums)
 {
     if (deviceidList == nullptr) {
         MSPROF_LOGE("[IsProfConfigValid]deviceIdList is nullptr");
-        MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config"}),
-            std::vector<std::string>({"deviceIdList"}));
         return false;
     }
     if (deviceNums == 0 || deviceNums > MSVP_MAX_DEV_NUM) {
         MSPROF_LOGE("[IsProfConfigValid]The device nums is invalid.");
         std::string deviceNumsStr = std::to_string(deviceNums);
         std::string maxDevNums = std::to_string(MSVP_MAX_DEV_NUM);
-        MSPROF_INPUT_ERROR("EK0006", std::vector<std::string>({"config", "value", "min", "max"}),
-            std::vector<std::string>({"device nums", deviceNumsStr, "1", maxDevNums}));
         return false;
     }
     // real device num
@@ -251,8 +237,6 @@ bool IsProfConfigValid(CONST_UINT32_T_PTR deviceidList, uint32_t deviceNums)
     }
     if (deviceNums > static_cast<uint32_t>(devCount)) {
         MSPROF_LOGE("[IsProfConfigValid]Device num(%u) is not in range 1 ~ %d.", deviceNums, devCount);
-        MSPROF_INPUT_ERROR("EK0006", std::vector<std::string>({"config", "value", "min", "max"}),
-            std::vector<std::string>({"Device num", std::to_string(deviceNums), "1", std::to_string(devCount)}));
         return false;
     }
     std::unordered_set<uint32_t> record;
@@ -260,14 +244,10 @@ bool IsProfConfigValid(CONST_UINT32_T_PTR deviceidList, uint32_t deviceNums)
         uint32_t devId = deviceidList[i];
         if (devId >= static_cast<uint32_t>(devCount)) {
             MSPROF_LOGE("Device id %u is not in range 0 ~ %d(exclude %d)", devId, devCount, devCount);
-            MSPROF_INPUT_ERROR("EK0006", std::vector<std::string>({"config", "value", "min", "max"}),
-                std::vector<std::string>({"Device id", std::to_string(devId), "0", std::to_string(devCount)}));
             return false;
         }
         if (record.count(devId) > 0) {
             MSPROF_LOGE("Device id %u is duplicatedly set", devId);
-            MSPROF_INPUT_ERROR("EK0007", std::vector<std::string>({"config", "value"}),
-                std::vector<std::string>({"Device id", std::to_string(devId)}));
             return false;
         }
         record.insert(devId);
@@ -321,8 +301,6 @@ Status aclgrphProfDestroyConfig(ACL_GRPH_PROF_CONFIG_PTR profilerConfig)
     }
     if (profilerConfig == nullptr) {
         MSPROF_LOGE("Destroy profilerConfig failed, profilerConfig must not be nullptr");
-        MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config"}),
-            std::vector<std::string>({"profilerConfig"}));
         return FAILED;
     }
     delete profilerConfig;
@@ -334,15 +312,11 @@ static bool PreCheckGraphProfConfig(ACL_GRPH_PROF_CONFIG_PTR profilerConfig)
 {
     if (profilerConfig == nullptr) {
         MSPROF_LOGE("Param profilerConfig is nullptr");
-        MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config"}),
-            std::vector<std::string>({"profilerConfig"}));
         return false;
     }
     if (profilerConfig->config.devNums == 0 || profilerConfig->config.devNums > MSVP_MAX_DEV_NUM) {
         MSPROF_LOGE("Param prolilerConfig is invalid");
         std::string devNumsStr = std::to_string(profilerConfig->config.devNums);
-        MSPROF_INPUT_ERROR("EK0006", std::vector<std::string>({"config", "value", "min", "max"}),
-            std::vector<std::string>({"devNum", devNumsStr, "1", std::to_string(MSVP_MAX_DEV_NUM)}));
         return false;
     }
     return true;
@@ -371,8 +345,6 @@ Status aclgrphProfStart(ACL_GRPH_PROF_CONFIG_PTR profilerConfig)
         MSPROF_LOGE("dataTypeConfig:0x%x, supported switch is:0x%x",
                     profilerConfig->config.dataTypeConfig, PROF_SWITCH_SUPPORT);
         std::string dataTypeConfigStr = std::to_string(profilerConfig->config.dataTypeConfig);
-        MSPROF_INPUT_ERROR("EK0008", std::vector<std::string>({"switch_use", "switch_support"}),
-            std::vector<std::string>({dataTypeConfigStr, std::to_string(PROF_SWITCH_SUPPORT)}));
         return FAILED;
     }
 
@@ -426,8 +398,6 @@ Status aclgrphProfStop(ACL_GRPH_PROF_CONFIG_PTR profilerConfig)
             MSPROF_LOGE("DataTypeConfig stop: %x different from start: %x",
                         profilerConfig->config.dataTypeConfig, dataTypeConfig);
             std::string dataTypeConfigStr = std::to_string(profilerConfig->config.dataTypeConfig);
-            MSPROF_INPUT_ERROR("EK0009", std::vector<std::string>({"switch_start", "switch_end"}),
-                std::vector<std::string>({dataTypeConfigStr, std::to_string(dataTypeConfig)}));
             return ACL_ERROR_INVALID_PROFILING_CONFIG;
         }
     }

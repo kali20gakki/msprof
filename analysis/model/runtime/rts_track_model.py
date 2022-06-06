@@ -18,6 +18,13 @@ class RtsModel(BaseModel):
     """
     TABLES_PATH = os.path.join(MsvpCommonConst.CONFIG_PATH, 'Tables.ini')
 
+    @staticmethod
+    def class_name() -> str:
+        """
+        class name
+        """
+        return "RtsModel"
+
     def create_rts_db(self: any, data: list) -> None:
         """
         create rts_track.db
@@ -29,10 +36,3 @@ class RtsModel(BaseModel):
         self.create_table()
         self.insert_data_to_db(DBNameConstant.TABLE_RUNTIME_TRACK, data)
         self.finalize()
-
-    @staticmethod
-    def class_name() -> str:
-        """
-        class name
-        """
-        return "RtsModel"
