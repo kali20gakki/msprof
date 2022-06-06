@@ -29,6 +29,13 @@ class NetworkUsageAnalysis(MsMultiProcess):
         self.sample_config = sample_config
         self.result_dir = self.sample_config.get("result_dir", "")
 
+    @staticmethod
+    def class_name() -> str:
+        """
+        class name
+        """
+        return NetworkUsageAnalysis.__name__
+
     def ms_run(self: any) -> None:
         """
         run function
@@ -46,10 +53,3 @@ class NetworkUsageAnalysis(MsMultiProcess):
                     "start parsing network usage data file: %s", file_name)
                 host_network_usage_presenter = HostNetworkUsagePresenter(self.result_dir, file_name)
                 host_network_usage_presenter.run()
-
-    @staticmethod
-    def class_name() -> str:
-        """
-        class name
-        """
-        return NetworkUsageAnalysis.__name__

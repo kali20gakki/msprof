@@ -39,6 +39,17 @@ class AiCoreSampleModel(BaseModel):
         self.conn = None
         self.cur = None
 
+    @staticmethod
+    def get_ai_core_event_chunk(event: list) -> list:
+        """
+        get ai core event chunk
+        :param event: ai core event
+        :return:
+        """
+        check_aicore_events(event)
+        ai_core_events = Utils.generator_to_list(event[i:i + 8] for i in range(0, len(event), 8))
+        return ai_core_events
+
     def init(self: any) -> bool:
         """
         create db and tables
@@ -66,6 +77,111 @@ class AiCoreSampleModel(BaseModel):
             DBManager.destroy_db_connect(self.conn, self.cur)
             raise ProfException(ProfException.PROF_SYSTEM_EXIT)
         DBManager.execute_sql(self.conn, sql)
+
+    def create_core_table(self: any, events: list, ai_core_data: list) -> None:
+        """
+        create ai event tables
+        :param events: ai core events
+        :param ai_core_data: ai core data
+        :return:
+        """
+        if not DBManager.judge_table_exist(self.cur, 'AICoreOriginalData'):
+            self.create_aicore_originaldatatable('AICoreOriginalDataMap')
+        self.flush(ai_core_data)
+        logging.info("start create ai core events tables")
+        try:
+            if self._init_ai_core_events_table(events):
+                self._init_task_cyc_table()
+                self._insert_event_table(events)
+                logging.info('create event tables finished')
+        except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
+            logging.error(str(err))
+        finally:
+            pass
+
+    def insert_metric_summary_table(self: any, freq: int, key: str) -> None:
+        """
+        insert metric summary table
+        :param key: key of metric
+        :param freq: Frequency
+        :return:
+        """
+        try:
+            metrics = self._get_metrics(key)
+        except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
+            logging.error(str(err))
+            error(self.FILE_NAME, str(err))
+            return
+        if metrics:
+            self._do_insert_metric_summary_table(freq, metrics)
+
+    def insert_metric_value(self: any) -> int:
+        """
+        insert metric value
+        :return:
+        """
+        metrics_config = read_cpu_cfg(self.TYPE, "formula")
+        data = []
+        if metrics_config:
+            sql = "CREATE TABLE IF NOT EXISTS MetricSummary (metric text, " \
+                  "value numeric, coreid INT)"
+            DBManager.execute_sql(self.conn, sql)
+            core_id = DBManager.fetch_all_data(self.cur, "select distinct(coreid) from EventCount;")
+            for core in core_id:
+                data.extend([key.replace("(gb/s)", "(GB/s)"), None, core[0]] for key in list(metrics_config.keys()))
+            DBManager.insert_data_into_table(self.conn, "MetricSummary", data)
+            return NumberConstant.SUCCESS
+        return NumberConstant.ERROR
+
+    def sql_insert_metric_summary_table(self: any, metrics: list, freq: float, metric_key: str) -> str:
+        """
+        generate sql statement for inserting metric from EventCount
+        :param metrics: metrics to be calcualted
+        :param freq: running frequecy, which can be used to calculate aic metrics
+        :param metric_key: metric key
+        :return: merged sql sentence
+        """
+        algos = []
+        cal = CalculateAiCoreData(self.result_dir)
+        cal.add_fops_header(metric_key, metrics)
+        field_dict = read_cpu_cfg(self.TYPE, 'formula')
+        res = []
+        for metric in metrics:
+            replaced_metric = metric.replace("(GB/s)", "(gb/s)")
+            field_val = field_dict[replaced_metric].replace('/block_num*((block_num+core_num-1)/core_num)', '')
+            res.append((replaced_metric, field_val))
+        field_dict = OrderedDict(res)
+        for field in field_dict:
+            algo = field_dict[field]
+            algo = algo.replace("freq", str(freq))
+            algo = cal.update_fops_data(field, algo)
+            algos.append(algo)
+
+        sql = "SELECT " + ",".join("cast(" + algo + " as decimal(8,2))"
+                                   for algo in algos) + " FROM EventCount where coreid = ?"
+        return sql
+
+    def flush(self: any, data_list: list) -> None:
+        """
+        insert data into database
+        :param data_list: ffts pmu data list
+        :return: None
+        """
+        count_num = data_list[0][0]
+        column = 'mode,replayid,timestamp,coreid,task_cyc,'
+        column = column + ','.join('event{}'.format(i) for i in range(1, count_num + 1))
+        sql = 'insert into AICoreOriginalData ({column}) values ({value})'. \
+            format(column=column, value='?,' * (4 + count_num) + '?')
+        DBManager.executemany_sql(self.conn, sql, Utils.generator_to_list(x[1:] for x in data_list))
+
+    def clear(self: any) -> None:
+        """
+        clear ai core table
+        :return: None
+        """
+        db_path = PathManager.get_db_path(self.result_dir, DBNameConstant.DB_RUNTIME)
+        if DBManager.check_tables_in_db(db_path, DBNameConstant.TABLE_AI_CORE_METRIC_SUMMARY):
+            DBManager.drop_table(self.conn, DBNameConstant.TABLE_AI_CORE_METRIC_SUMMARY)
 
     def _create_event_count_table(self: any, events: list) -> None:
         sql = "CREATE TABLE IF NOT EXISTS EventCount (" + \
@@ -135,27 +251,6 @@ class AiCoreSampleModel(BaseModel):
             self.cur.execute("alter table r11 rename to cycles")
         self.conn.commit()
 
-    def create_core_table(self: any, events: list, ai_core_data: list) -> None:
-        """
-        create ai event tables
-        :param events: ai core events
-        :param ai_core_data: ai core data
-        :return:
-        """
-        if not DBManager.judge_table_exist(self.cur, 'AICoreOriginalData'):
-            self.create_aicore_originaldatatable('AICoreOriginalDataMap')
-        self.flush(ai_core_data)
-        logging.info("start create ai core events tables")
-        try:
-            if self._init_ai_core_events_table(events):
-                self._init_task_cyc_table()
-                self._insert_event_table(events)
-                logging.info('create event tables finished')
-        except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
-            logging.error(str(err))
-        finally:
-            pass
-
     def _do_insert_metric_summary_table(self: any, freq: int, metrics: list) -> None:
         logging.info('start insert into MetricSummary')
         core_id = DBManager.fetch_all_data(self.cur, "select distinct(coreid) from EventCount;")
@@ -185,98 +280,3 @@ class AiCoreSampleModel(BaseModel):
                 raise ProfException(ProfException.PROF_SYSTEM_EXIT)
         metrics.extend(sample_metrics_lst)
         return metrics
-
-    def insert_metric_summary_table(self: any, freq: int, key: str) -> None:
-        """
-        insert metric summary table
-        :param key: key of metric
-        :param freq: Frequency
-        :return:
-        """
-        try:
-            metrics = self._get_metrics(key)
-        except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
-            logging.error(str(err))
-            error(self.FILE_NAME, str(err))
-            return
-        if metrics:
-            self._do_insert_metric_summary_table(freq, metrics)
-
-    def insert_metric_value(self: any) -> int:
-        """
-        insert metric value
-        :return:
-        """
-        metrics_config = read_cpu_cfg(self.TYPE, "formula")
-        data = []
-        if metrics_config:
-            sql = "CREATE TABLE IF NOT EXISTS MetricSummary (metric text, " \
-                  "value numeric, coreid INT)"
-            DBManager.execute_sql(self.conn, sql)
-            core_id = DBManager.fetch_all_data(self.cur, "select distinct(coreid) from EventCount;")
-            for core in core_id:
-                data.extend([key.replace("(gb/s)", "(GB/s)"), None, core[0]] for key in list(metrics_config.keys()))
-            DBManager.insert_data_into_table(self.conn, "MetricSummary", data)
-            return NumberConstant.SUCCESS
-        return NumberConstant.ERROR
-
-    def sql_insert_metric_summary_table(self: any, metrics: list, freq: float, metric_key: str) -> str:
-        """
-        generate sql statement for inserting metric from EventCount
-        :param metrics: metrics to be calcualted
-        :param freq: running frequecy, which can be used to calculate aic metrics
-        :param metric_key: metric key
-        :return: merged sql sentence
-        """
-        algos = []
-        cal = CalculateAiCoreData(self.result_dir)
-        cal.add_fops_header(metric_key, metrics)
-        field_dict = read_cpu_cfg(self.TYPE, 'formula')
-        res = []
-        for metric in metrics:
-            replaced_metric = metric.replace("(GB/s)", "(gb/s)")
-            field_val = field_dict[replaced_metric].replace('/block_num*((block_num+core_num-1)/core_num)', '')
-            res.append((replaced_metric, field_val))
-        field_dict = OrderedDict(res)
-        for field in field_dict:
-            algo = field_dict[field]
-            algo = algo.replace("freq", str(freq))
-            algo = cal.update_fops_data(field, algo)
-            algos.append(algo)
-
-        sql = "SELECT " + ",".join("cast(" + algo + " as decimal(8,2))"
-                                   for algo in algos) + " FROM EventCount where coreid = ?"
-        return sql
-
-    @staticmethod
-    def get_ai_core_event_chunk(event: list) -> list:
-        """
-        get ai core event chunk
-        :param event: ai core event
-        :return:
-        """
-        check_aicore_events(event)
-        ai_core_events = Utils.generator_to_list(event[i:i + 8] for i in range(0, len(event), 8))
-        return ai_core_events
-
-    def flush(self: any, data_list: list) -> None:
-        """
-        insert data into database
-        :param data_list: ffts pmu data list
-        :return: None
-        """
-        count_num = data_list[0][0]
-        column = 'mode,replayid,timestamp,coreid,task_cyc,'
-        column = column + ','.join('event{}'.format(i) for i in range(1, count_num + 1))
-        sql = 'insert into AICoreOriginalData ({column}) values ({value})'. \
-            format(column=column, value='?,' * (4 + count_num) + '?')
-        DBManager.executemany_sql(self.conn, sql, Utils.generator_to_list(x[1:] for x in data_list))
-
-    def clear(self: any) -> None:
-        """
-        clear ai core table
-        :return: None
-        """
-        db_path = PathManager.get_db_path(self.result_dir, DBNameConstant.DB_RUNTIME)
-        if DBManager.check_tables_in_db(db_path, DBNameConstant.TABLE_AI_CORE_METRIC_SUMMARY):
-            DBManager.drop_table(self.conn, DBNameConstant.TABLE_AI_CORE_METRIC_SUMMARY)

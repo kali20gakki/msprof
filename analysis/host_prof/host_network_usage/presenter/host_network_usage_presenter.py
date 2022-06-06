@@ -65,6 +65,14 @@ class HostNetworkUsagePresenter(HostProfPresenterBase):
         self.network_usage_info = []
         self.speeds = {}
 
+    @classmethod
+    def get_timeline_header(cls: any) -> list:
+        """
+        get timeline header
+        """
+        return [["process_name", InfoConfReader().get_json_pid_data(),
+                 InfoConfReader().get_json_tid_data(), "Network Usage"]]
+
     def init(self: any) -> None:
         """
         init model
@@ -124,11 +132,6 @@ class HostNetworkUsagePresenter(HostProfPresenterBase):
         self.cur_model.insert_single_data(
             [last_timestamp, curr_timestamp, str(usage)])
 
-    def _update_cur_data(self: any, line: str, curr_data: dict) -> None:
-        stat = parse_net_stats(line)
-        if stat and stat.intf in self.speeds:
-            curr_data[stat.intf] = stat
-
     def write_usage_items(self: any, file: any) -> None:
         """
         write every usage
@@ -160,13 +163,6 @@ class HostNetworkUsagePresenter(HostProfPresenterBase):
             self.write_per_usage(curr_timestamp, curr_data,
                                  last_timestamp, last_data)
 
-    def _parse_network_usage(self: any, file: any) -> None:
-        # network intface info
-        self.load_interface_speed()
-
-        # loop all net stat sample
-        self.write_usage_items(file)
-
     def get_network_usage_data(self: any) -> dict:
         """
         get network usage data
@@ -193,10 +189,14 @@ class HostNetworkUsagePresenter(HostProfPresenterBase):
             result.append(temp_data)
         return result
 
-    @classmethod
-    def get_timeline_header(cls: any) -> list:
-        """
-        get timeline header
-        """
-        return [["process_name", InfoConfReader().get_json_pid_data(),
-                 InfoConfReader().get_json_tid_data(), "Network Usage"]]
+    def _parse_network_usage(self: any, file: any) -> None:
+        # network intface info
+        self.load_interface_speed()
+
+        # loop all net stat sample
+        self.write_usage_items(file)
+
+    def _update_cur_data(self: any, line: str, curr_data: dict) -> None:
+        stat = parse_net_stats(line)
+        if stat and stat.intf in self.speeds:
+            curr_data[stat.intf] = stat

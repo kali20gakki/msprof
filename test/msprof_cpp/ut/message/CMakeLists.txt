@@ -9,6 +9,7 @@ set(profilerSrcFiles
     ${MSPROF_SOURCE_DIR}//dvvp/message/dispatcher.cpp 
     ${MSPROF_SOURCE_DIR}//dvvp/common/utils/utils.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/depend/stub/error_manager/msprof_error_manager_stub.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/src/plugin_handle.cpp
     ${CppPath}
 )
 

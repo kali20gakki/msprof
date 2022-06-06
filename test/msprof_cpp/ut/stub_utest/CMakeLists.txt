@@ -2,6 +2,7 @@
 add_executable(stub_file_utest
     ${MSPROF_SOURCE_DIR}/dvvp/adx/wrapper/hdc_api.cpp  
     ${MSPROF_SOURCE_DIR}/dvvp/adx/wrapper/memory_utils.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/src/plugin_handle.cpp
     test/main.cpp
     test/hdc_api_utest.cpp
     ..//stub/mmpa_stub.cpp

@@ -45,6 +45,42 @@ class LlcModel(BaseModel, ABC):
         super().__init__(result_dir, db_name, table_list)
         self.metrics_data = []
 
+    @staticmethod
+    def calculate_hit_rate(item: list) -> int:
+        """
+        Calculate hit rate metric
+        :param item: hit item
+        :return:
+        """
+        try:
+            return float_calculate([float_calculate([item[5], item[6],
+                                                     item[8], item[10]]),
+                                    float_calculate([item[7], item[9]])], "/")
+        except (OSError, SystemError, ValueError, TypeError,
+                RuntimeError, ZeroDivisionError) as err:
+            logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
+            return Constant.DEFAULT_COUNT
+        finally:
+            pass
+
+    @staticmethod
+    def calculate_throughput(item: list, time_difference: str) -> str:
+        """
+        Calculate throughput
+        :param item: llc item
+        :param time_difference: detal time
+        :return:
+        """
+        try:
+            total_byte = float_calculate([item[3], item[4]], '+')
+            return float_calculate([total_byte, 1 / NumberConstant.LLC_BYTE, NumberConstant.KILOBYTE,
+                                    NumberConstant.KILOBYTE, time_difference], '/')
+        except ZeroDivisionError as err:
+            logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
+            return Constant.DEFAULT_COUNT
+        finally:
+            pass
+
     def flush(self: any, data_list: list) -> None:
         """
         flush acsq task data to db
@@ -102,42 +138,6 @@ class LlcModel(BaseModel, ABC):
         finally:
             del self.metrics_data[:]
 
-    @staticmethod
-    def calculate_hit_rate(item: list) -> int:
-        """
-        Calculate hit rate metric
-        :param item: hit item
-        :return:
-        """
-        try:
-            return float_calculate([float_calculate([item[5], item[6],
-                                                     item[8], item[10]]),
-                                    float_calculate([item[7], item[9]])], "/")
-        except (OSError, SystemError, ValueError, TypeError,
-                RuntimeError, ZeroDivisionError) as err:
-            logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
-            return Constant.DEFAULT_COUNT
-        finally:
-            pass
-
-    @staticmethod
-    def calculate_throughput(item: list, time_difference: str) -> str:
-        """
-        Calculate throughput
-        :param item: llc item
-        :param time_difference: detal time
-        :return:
-        """
-        try:
-            total_byte = float_calculate([item[3], item[4]], '+')
-            return float_calculate([total_byte, 1 / NumberConstant.LLC_BYTE, NumberConstant.KILOBYTE,
-                                    NumberConstant.KILOBYTE, time_difference], '/')
-        except ZeroDivisionError as err:
-            logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
-            return Constant.DEFAULT_COUNT
-        finally:
-            pass
-
     def calculate_time_diff(self: any, time_start: int, time_stop: int) -> str:
         """
         Calculate time interval and transfer it to seconds.
@@ -147,23 +147,6 @@ class LlcModel(BaseModel, ABC):
         """
         return float_calculate([float_calculate([time_start, time_stop], '-'),
                                 self.LLC_CACHE_SIZE, self.LLC_TO_SECOND], '/')
-
-    def _insert_llc_data(self: any, llc_event_data: list) -> None:
-        if llc_event_data:
-            start_time = InfoConfReader().get_start_timestamp()
-            for item_index, item in enumerate(llc_event_data):
-                tmp_hit_rate = self.calculate_hit_rate(item)
-                time_difference = self.calculate_time_diff(llc_event_data[item_index][2],
-                                                           llc_event_data[item_index - 1][2])
-                if item_index:
-                    tmp_throughput = self.calculate_throughput(item, time_difference)
-                else:
-                    tmp_throughput = Constant.DEFAULT_COUNT
-                self.metrics_data.append(
-                    (item[0], item[1], item[2] * NumberConstant.USTONS + start_time,
-                     tmp_hit_rate, tmp_throughput))
-        else:
-            logging.error("%s has no data.", DBNameConstant.TABLE_LLC_EVENTS)
 
     def calculate_metrics(self: any) -> None:
         """
@@ -180,26 +163,6 @@ class LlcModel(BaseModel, ABC):
             logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
         finally:
             pass
-
-    def _do_create_trigger(self: any, pmu_list: dict) -> None:
-        for event_key in pmu_list:
-            ignore_list = []
-            for event_key_temp in self.EVENT_LIST:
-                if event_key_temp == event_key:
-                    ignore_list.append("new.counts")
-                else:
-                    ignore_list.append(
-                        "(SELECT {0} FROM {1} WHERE device_id = new.device_id AND "
-                        "l3tId = new.l3tId AND timestamp = new.timestamp)".format(
-                            event_key_temp, DBNameConstant.TABLE_LLC_EVENTS))
-            trigger_create = "CREATE TRIGGER IF NOT EXISTS {1}_{0} AFTER INSERT ON {1} " \
-                             "WHEN new.event={4} BEGIN INSERT OR REPLACE INTO {2} values " \
-                             "(new.device_id, " \
-                             "new.l3tId, " \
-                             "new.timestamp, {3}); END". \
-                format(event_key, DBNameConstant.TABLE_LLC_ORIGIN, DBNameConstant.TABLE_LLC_EVENTS,
-                       ",".join(ignore_list), pmu_list.get(event_key))
-            DBManager.execute_sql(self.conn, trigger_create)
 
     def create_events_trigger(self: any, llc_profiling: str) -> int:
         """
@@ -220,3 +183,40 @@ class LlcModel(BaseModel, ABC):
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
             logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
             return NumberConstant.ERROR
+
+    def _insert_llc_data(self: any, llc_event_data: list) -> None:
+        if llc_event_data:
+            start_time = InfoConfReader().get_start_timestamp()
+            for item_index, item in enumerate(llc_event_data):
+                tmp_hit_rate = self.calculate_hit_rate(item)
+                time_difference = self.calculate_time_diff(llc_event_data[item_index][2],
+                                                           llc_event_data[item_index - 1][2])
+                if item_index:
+                    tmp_throughput = self.calculate_throughput(item, time_difference)
+                else:
+                    tmp_throughput = Constant.DEFAULT_COUNT
+                self.metrics_data.append(
+                    (item[0], item[1], item[2] * NumberConstant.USTONS + start_time,
+                     tmp_hit_rate, tmp_throughput))
+        else:
+            logging.error("%s has no data.", DBNameConstant.TABLE_LLC_EVENTS)
+
+    def _do_create_trigger(self: any, pmu_list: dict) -> None:
+        for event_key in pmu_list:
+            ignore_list = []
+            for event_key_temp in self.EVENT_LIST:
+                if event_key_temp == event_key:
+                    ignore_list.append("new.counts")
+                else:
+                    ignore_list.append(
+                        "(SELECT {0} FROM {1} WHERE device_id = new.device_id AND "
+                        "l3tId = new.l3tId AND timestamp = new.timestamp)".format(
+                            event_key_temp, DBNameConstant.TABLE_LLC_EVENTS))
+            trigger_create = "CREATE TRIGGER IF NOT EXISTS {1}_{0} AFTER INSERT ON {1} " \
+                             "WHEN new.event={4} BEGIN INSERT OR REPLACE INTO {2} values " \
+                             "(new.device_id, " \
+                             "new.l3tId, " \
+                             "new.timestamp, {3}); END". \
+                format(event_key, DBNameConstant.TABLE_LLC_ORIGIN, DBNameConstant.TABLE_LLC_EVENTS,
+                       ",".join(ignore_list), pmu_list.get(event_key))
+            DBManager.execute_sql(self.conn, trigger_create)

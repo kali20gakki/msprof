@@ -66,6 +66,17 @@ class TscpuModel(BaseModel, ABC):
             self._create_ts_hot_ins_table()
         self._insert_ts_hot_ins()
 
+    def get_pmu_event_name(self: any) -> any:
+        """
+        get pmu event name
+        :return: pmu events
+        """
+        event_sql = 'select distinct(event) from TsOriginalData order by rowid;'
+        pmu_events = DBManager.fetch_all_data(self.cur, event_sql)
+        if pmu_events:
+            pmu_events = reduce(add, pmu_events)
+        return pmu_events
+
     def _create_ts_event_count_table(self: any, table_name: str = DBNameConstant.TABLE_TS_CPU_EVENT) -> None:
         """
         create ts event count table
@@ -123,14 +134,3 @@ class TscpuModel(BaseModel, ABC):
                              .format(pmu_event, pmu_event.replace('0x', 'r')))
         sql = insert_statement + ",".join(case_list) + group_statement
         DBManager.execute_sql(self.conn, sql)
-
-    def get_pmu_event_name(self: any) -> any:
-        """
-        get pmu event name
-        :return: pmu events
-        """
-        event_sql = 'select distinct(event) from TsOriginalData order by rowid;'
-        pmu_events = DBManager.fetch_all_data(self.cur, event_sql)
-        if pmu_events:
-            pmu_events = reduce(add, pmu_events)
-        return pmu_events

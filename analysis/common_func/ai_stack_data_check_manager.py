@@ -172,7 +172,7 @@ class AiStackDataCheckManager(DataCheckManager):
     @classmethod
     def contain_ai_stack_time_data(cls: any, result_dir: str, device_id: any = None) -> bool:
         """
-        The data path contain step_trace data or not
+        The data path contain acl data or not
         """
         return cls.contain_acl_data(result_dir, device_id=device_id)
 

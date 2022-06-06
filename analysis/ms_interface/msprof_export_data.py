@@ -92,101 +92,6 @@ class MsProfExportDataUtils:
     init_cfg_finished = False
     LOCK = threading.Lock()
 
-    @classmethod
-    def export_data(cls: any, params: dict) -> str:
-        """
-        export data, support different data types and export types
-        :param params: param object
-        :return: result of export
-        """
-        if params.get(StrConstant.DATA_TYPE) is None:
-            return json.dumps(
-                {"status": NumberConstant.ERROR, "info": "Parameter data_type is none."})
-        if not cls.init_cfg_finished:
-            cls.LOCK.acquire()
-            if not cls.init_cfg_finished:
-                cls._load_export_data_config()
-            cls.LOCK.release()
-        configs = cls._get_configs_with_data_type(params.get(StrConstant.PARAM_DATA_TYPE))
-        if configs.get(StrConstant.CONFIG_HANDLER) is not None \
-                and hasattr(cls, configs.get(StrConstant.CONFIG_HANDLER)):
-            handler = getattr(cls, configs.get(StrConstant.CONFIG_HANDLER))
-            if params.get(StrConstant.PARAM_EXPORT_TYPE) == MsProfCommonConstant.SUMMARY:
-                headers, data, _ = handler(configs, params)
-                return MsprofDataStorage().export_summary_data(headers, data, params)
-            data = handler(configs, params)
-            if isinstance(data, EmptyClass):
-                return json.dumps(
-                    {"status": NumberConstant.ERROR, "info": "Unable to get prof data."})
-            cls.add_timeline_data(params, data)
-            return MsprofDataStorage().export_timeline_data_to_json(data, params)
-        return json.dumps(
-            {"status": NumberConstant.ERROR,
-             "info": "Unable to handler data type %s." % params.get(
-                 StrConstant.PARAM_DATA_TYPE)})
-
-    @classmethod
-    def add_timeline_data(cls: any, params: dict, data: any) -> None:
-        """
-        add timeline data to bulk
-        :param params:
-        :param data:
-        :return:
-        """
-        filter_list = ["msprof", "ai_stack_time", "step_trace", "thread_group"]
-        if params.get(StrConstant.PARAM_DATA_TYPE) not in filter_list:
-            MsprofTimeline().add_export_data(data, params.get(StrConstant.PARAM_DATA_TYPE))
-
-    @classmethod
-    def _load_export_data_config(cls: any) -> None:
-        """
-        load export configuration
-        :return: None
-        """
-        config_file_path = os.path.join(MsvpCommonConst.CONFIG_PATH, "msprof_export_data.ini")
-        if os.path.exists(config_file_path) and os.path.getsize(
-                config_file_path) <= Constant.MAX_READ_FILE_BYTES:
-            cls.cfg_parser = configparser.ConfigParser(interpolation=None)
-            cls.cfg_parser.read(config_file_path)
-            cls.init_cfg_finished = True
-
-    @classmethod
-    def _get_configs_with_data_type(cls: any, data_type: str) -> dict:
-        """
-        get configs according to data type
-        :param data_type: data type
-        :return: config parser
-        """
-        configs = {}
-        if cls.cfg_parser:
-            if cls.cfg_parser.has_option(data_type, StrConstant.CONFIG_HANDLER):
-                configs[StrConstant.CONFIG_HANDLER] = cls.cfg_parser.get(data_type,
-                                                                         StrConstant.CONFIG_HANDLER)
-
-            configs[StrConstant.CONFIG_HEADERS] = []
-            if cls.cfg_parser.has_option(data_type, StrConstant.CONFIG_HEADERS):
-                headers = cls.cfg_parser.get(data_type, StrConstant.CONFIG_HEADERS)
-                if headers:
-                    configs[StrConstant.CONFIG_HEADERS] = headers.split(",")
-
-            cls._get_configs_with_option(configs, data_type, StrConstant.CONFIG_DB)
-
-            cls._get_configs_with_option(configs, data_type, StrConstant.CONFIG_COLUMNS)
-
-            cls._get_configs_with_option(configs, data_type, StrConstant.CONFIG_TABLE)
-
-            configs[StrConstant.CONFIG_UNUSED_COLS] = []
-            if cls.cfg_parser.has_option(data_type, StrConstant.CONFIG_UNUSED_COLS):
-                unused_cols = cls.cfg_parser.get(data_type, StrConstant.CONFIG_UNUSED_COLS)
-                if unused_cols:
-                    configs[StrConstant.CONFIG_UNUSED_COLS] = unused_cols.split(",")
-        return configs
-
-    @classmethod
-    def _get_configs_with_option(cls: any, configs: dict, data_type: str, option: str) -> None:
-        if cls.cfg_parser.has_option(data_type, option):
-            configs[option] = cls.cfg_parser.get(data_type, option)
-
     @staticmethod
     def _get_runtime_api_data(configs: dict, params: dict) -> any:
         """
@@ -579,28 +484,6 @@ class MsProfExportDataUtils:
     def _get_fusion_op_data(configs: dict, params: dict) -> any:
         return get_ge_model_data(params, configs.get(StrConstant.CONFIG_TABLE), configs)
 
-    @classmethod
-    def _get_ai_core_sample_based_data(cls: any, configs: dict, params: dict) -> any:
-        if params.get(StrConstant.PARAM_EXPORT_TYPE) == MsProfCommonConstant.TIMELINE:
-            aicore_utilization_param = {
-                'project_path': params.get(StrConstant.PARAM_RESULT_DIR),
-                'device_id': params.get(StrConstant.PARAM_DEVICE_ID),
-                'start_time': NumberConstant.DEFAULT_START_TIME,
-                'end_time': NumberConstant.DEFAULT_END_TIME}
-            result = get_aicore_utilization_timeline(aicore_utilization_param)
-            return result
-        params[StrConstant.CORE_DATA_TYPE] = StrConstant.AI_CORE_PMU_EVENTS
-        return get_core_sample_data(params.get(StrConstant.PARAM_RESULT_DIR),
-                                    configs.get(StrConstant.CONFIG_DB),
-                                    params.get(StrConstant.PARAM_DEVICE_ID), params)
-
-    @classmethod
-    def _get_aiv_sample_based_data(cls: any, configs: dict, params: dict) -> any:
-        params[StrConstant.CORE_DATA_TYPE] = StrConstant.AI_VECTOR_CORE_PMU_EVENTS
-        return get_core_sample_data(params.get(StrConstant.PARAM_RESULT_DIR),
-                                    configs.get(StrConstant.CONFIG_DB),
-                                    params.get(StrConstant.PARAM_DEVICE_ID), params)
-
     @staticmethod
     def _get_host_cpu_usage_data(configs: dict, params: dict) -> any:
         _ = configs
@@ -711,3 +594,120 @@ class MsProfExportDataUtils:
     @staticmethod
     def _get_acc_pmu(configs: dict, params: dict) -> any:
         return AccPmuViewer(configs, params).get_timeline_data()
+
+    @classmethod
+    def export_data(cls: any, params: dict) -> str:
+        """
+        export data, support different data types and export types
+        :param params: param object
+        :return: result of export
+        """
+        if params.get(StrConstant.DATA_TYPE) is None:
+            return json.dumps(
+                {"status": NumberConstant.ERROR, "info": "Parameter data_type is none."})
+        if not cls.init_cfg_finished:
+            cls.LOCK.acquire()
+            if not cls.init_cfg_finished:
+                cls._load_export_data_config()
+            cls.LOCK.release()
+        configs = cls._get_configs_with_data_type(params.get(StrConstant.PARAM_DATA_TYPE))
+        if configs.get(StrConstant.CONFIG_HANDLER) is not None \
+                and hasattr(cls, configs.get(StrConstant.CONFIG_HANDLER)):
+            handler = getattr(cls, configs.get(StrConstant.CONFIG_HANDLER))
+            if params.get(StrConstant.PARAM_EXPORT_TYPE) == MsProfCommonConstant.SUMMARY:
+                headers, data, _ = handler(configs, params)
+                return MsprofDataStorage().export_summary_data(headers, data, params)
+            data = handler(configs, params)
+            if isinstance(data, EmptyClass):
+                return json.dumps(
+                    {"status": NumberConstant.ERROR, "info": "Unable to get prof data."})
+            cls.add_timeline_data(params, data)
+            return MsprofDataStorage().export_timeline_data_to_json(data, params)
+        return json.dumps(
+            {"status": NumberConstant.ERROR,
+             "info": "Unable to handler data type %s." % params.get(
+                 StrConstant.PARAM_DATA_TYPE)})
+
+    @classmethod
+    def add_timeline_data(cls: any, params: dict, data: any) -> None:
+        """
+        add timeline data to bulk
+        :param params:
+        :param data:
+        :return:
+        """
+        filter_list = ["msprof", "ai_stack_time", "step_trace", "thread_group"]
+        if params.get(StrConstant.PARAM_DATA_TYPE) not in filter_list:
+            MsprofTimeline().add_export_data(data, params.get(StrConstant.PARAM_DATA_TYPE))
+
+    @classmethod
+    def _load_export_data_config(cls: any) -> None:
+        """
+        load export configuration
+        :return: None
+        """
+        config_file_path = os.path.join(MsvpCommonConst.CONFIG_PATH, "msprof_export_data.ini")
+        if os.path.exists(config_file_path) and os.path.getsize(
+                config_file_path) <= Constant.MAX_READ_FILE_BYTES:
+            cls.cfg_parser = configparser.ConfigParser(interpolation=None)
+            cls.cfg_parser.read(config_file_path)
+            cls.init_cfg_finished = True
+
+    @classmethod
+    def _get_configs_with_data_type(cls: any, data_type: str) -> dict:
+        """
+        get configs according to data type
+        :param data_type: data type
+        :return: config parser
+        """
+        configs = {}
+        if cls.cfg_parser:
+            if cls.cfg_parser.has_option(data_type, StrConstant.CONFIG_HANDLER):
+                configs[StrConstant.CONFIG_HANDLER] = cls.cfg_parser.get(data_type,
+                                                                         StrConstant.CONFIG_HANDLER)
+
+            configs[StrConstant.CONFIG_HEADERS] = []
+            if cls.cfg_parser.has_option(data_type, StrConstant.CONFIG_HEADERS):
+                headers = cls.cfg_parser.get(data_type, StrConstant.CONFIG_HEADERS)
+                if headers:
+                    configs[StrConstant.CONFIG_HEADERS] = headers.split(",")
+
+            cls._get_configs_with_option(configs, data_type, StrConstant.CONFIG_DB)
+
+            cls._get_configs_with_option(configs, data_type, StrConstant.CONFIG_COLUMNS)
+
+            cls._get_configs_with_option(configs, data_type, StrConstant.CONFIG_TABLE)
+
+            configs[StrConstant.CONFIG_UNUSED_COLS] = []
+            if cls.cfg_parser.has_option(data_type, StrConstant.CONFIG_UNUSED_COLS):
+                unused_cols = cls.cfg_parser.get(data_type, StrConstant.CONFIG_UNUSED_COLS)
+                if unused_cols:
+                    configs[StrConstant.CONFIG_UNUSED_COLS] = unused_cols.split(",")
+        return configs
+
+    @classmethod
+    def _get_configs_with_option(cls: any, configs: dict, data_type: str, option: str) -> None:
+        if cls.cfg_parser.has_option(data_type, option):
+            configs[option] = cls.cfg_parser.get(data_type, option)
+
+    @classmethod
+    def _get_ai_core_sample_based_data(cls: any, configs: dict, params: dict) -> any:
+        if params.get(StrConstant.PARAM_EXPORT_TYPE) == MsProfCommonConstant.TIMELINE:
+            aicore_utilization_param = {
+                'project_path': params.get(StrConstant.PARAM_RESULT_DIR),
+                'device_id': params.get(StrConstant.PARAM_DEVICE_ID),
+                'start_time': NumberConstant.DEFAULT_START_TIME,
+                'end_time': NumberConstant.DEFAULT_END_TIME}
+            result = get_aicore_utilization_timeline(aicore_utilization_param)
+            return result
+        params[StrConstant.CORE_DATA_TYPE] = StrConstant.AI_CORE_PMU_EVENTS
+        return get_core_sample_data(params.get(StrConstant.PARAM_RESULT_DIR),
+                                    configs.get(StrConstant.CONFIG_DB),
+                                    params.get(StrConstant.PARAM_DEVICE_ID), params)
+
+    @classmethod
+    def _get_aiv_sample_based_data(cls: any, configs: dict, params: dict) -> any:
+        params[StrConstant.CORE_DATA_TYPE] = StrConstant.AI_VECTOR_CORE_PMU_EVENTS
+        return get_core_sample_data(params.get(StrConstant.PARAM_RESULT_DIR),
+                                    configs.get(StrConstant.CONFIG_DB),
+                                    params.get(StrConstant.PARAM_DEVICE_ID), params)
