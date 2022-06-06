@@ -241,6 +241,12 @@ class Constant:
 
     GE_OP_MODEL_ID = 4294967295
 
+    # hccl
+    TYPE_RDMA = "RDMA"
+    TYPE_SDMA = "SDMA"
+    ILLEGAL_RANK = 4294967295
+    LINK_TYPE_LIST = [TYPE_SDMA, TYPE_RDMA]
+
     def get_constant_class_name(self: any) -> any:
         """
         get constant class name
