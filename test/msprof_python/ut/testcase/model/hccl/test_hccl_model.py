@@ -18,6 +18,3 @@ class TestHCCLModel(unittest.TestCase):
         with mock.patch(NAMESPACE + '.HCCLModel.insert_data_to_db'):
             HCCLModel("", [" "]).flush([])
 
-    def test_get_hccl_timeline_data(self):
-        with mock.patch(NAMESPACE + '.DBManager.fetch_all_data'):
-            HCCLModel("", [" "]).get_hccl_timeline_data(" ")
