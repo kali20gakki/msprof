@@ -107,6 +107,7 @@ function store_uninstall_script() {
 	mkdir -p "${install_path}/${MSPROF_RUN_NAME}/"
 	mkdir -p "${install_path}/${MSPROF_RUN_NAME}/script/"
 	cp "uninstall.sh" "${install_path}/${MSPROF_RUN_NAME}/script/"
+	cp "utils.sh" "${install_path}/${MSPROF_RUN_NAME}/script/"
 
 	chmod ${install_right} "${install_path}/${MSPROF_RUN_NAME}/script/uninstall.sh"
 	chmod ${install_right} "${install_path}/${MSPROF_RUN_NAME}/script/"
