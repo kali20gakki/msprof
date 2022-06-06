@@ -1,6 +1,8 @@
+#!/usr/bin/python3
+# coding=utf-8
 """
-
-Copyright Huawei Technologies Co., Ltd. 2020. All rights reserved.
+function: this script used to calculate cluster link from hccl.
+Copyright Huawei Technologies Co., Ltd. 2022-2023. All rights reserved.
 """
 
 from common_func.common import print_msg
