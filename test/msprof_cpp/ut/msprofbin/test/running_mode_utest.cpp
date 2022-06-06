@@ -286,7 +286,7 @@ TEST_F(RUNNING_MODE_UTEST, StartExportTask){
     EXPECT_EQ(PROFILING_FAILED, rMode.StartExportTask());
     rMode.jobResultDir_ = "123";
     rMode.analysisPath_ = "path_test";
-    params->exportModelId = 1;
+    params->exportModelId = "1";
     MOCKER_CPP(&RunningMode::RunExportSummaryTask)
         .stubs()
         .will(returnValue(PROFILING_FAILED))

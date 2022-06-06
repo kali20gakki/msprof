@@ -937,7 +937,7 @@ bool Utils::CheckStringIsNonNegativeIntNum(const std::string &numberStr)
         return false;
     }
 
-    const std::string maxIntValStr = "2147483647";  // max int string
+    const std::string maxIntValStr = std::to_string(INT32_MAX);  // max int string
     if (numberStr.length() > maxIntValStr.length()) {  // over max int value
         MSPROF_LOGE("[Utils::CheckStringIsNonNegativeIntNum]numberStr(%s) is too long", numberStr.c_str());
         return false;
@@ -961,6 +961,23 @@ bool Utils::CheckStringIsNonNegativeIntNum(const std::string &numberStr)
             } else {
                 break;
             }
+        }
+    }
+    return true;
+}
+
+bool Utils::CheckStringIsValidNatureNum(const std::string &numberStr)
+{
+    // length of nature number [1, 10]
+    if (numberStr.empty() || numberStr.length() > std::to_string(UINT32_MAX).length()) {
+        MSPROF_LOGE("[Utils::CheckStringIsValidNatureNum]numberStr(%s) is too empty or too long", numberStr.c_str());
+        return false;
+    }
+
+    for (unsigned int i = 0; i < numberStr.length(); ++i) {
+        if (numberStr[i] < '0' || numberStr[i] > '9') {  // numberStr must be pure number
+            MSPROF_LOGE("[Utils::CheckStringIsValidNatureNum]numberStr(%s) is not a number", numberStr.c_str());
+            return false;
         }
     }
     return true;

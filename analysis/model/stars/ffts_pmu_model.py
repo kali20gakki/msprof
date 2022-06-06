@@ -47,23 +47,6 @@ class FftsPmuModel(ParserModel):
         if column_list:
             self._insert_metric_value(column_list, DBNameConstant.TABLE_AIV_METRIC_SUMMARY)
 
-    def _insert_metric_value(self: any, metrics: list, table_name: str) -> None:
-        """insert event value into metric op_summary"""
-        sql = 'CREATE TABLE IF NOT EXISTS {name}({column})'.format(
-            column=','.join(metric.replace('(ms)', '').replace('(GB/s)', '')
-                            + ' numeric' for metric in metrics) + ', task_id INT, '
-                                                                  'stream_id INT,'
-                                                                  'ctx_id INT,'
-                                                                  'task_type INT, '
-                                                                  'start_time INT,'
-                                                                  'end_time INT', name=table_name)
-        try:
-            DBManager.execute_sql(self.conn, sql)
-        except sqlite3.Error as err:
-            logging.error(err, exc_info=Constant.TRACE_BACK_SWITCH)
-        finally:
-            pass
-
     def insert_task_pmu_data(self: any, pmu_data_list: list) -> None:
         """
         insert sub task pmu data to db
@@ -110,3 +93,20 @@ class FftsPmuModel(ParserModel):
         :return: None
         """
         self.insert_task_pmu_data(data_list)
+
+    def _insert_metric_value(self: any, metrics: list, table_name: str) -> None:
+        """insert event value into metric op_summary"""
+        sql = 'CREATE TABLE IF NOT EXISTS {name}({column})'.format(
+            column=','.join(metric.replace('(ms)', '').replace('(GB/s)', '')
+                            + ' numeric' for metric in metrics) + ', task_id INT, '
+                                                                  'stream_id INT,'
+                                                                  'ctx_id INT,'
+                                                                  'task_type INT, '
+                                                                  'start_time INT,'
+                                                                  'end_time INT', name=table_name)
+        try:
+            DBManager.execute_sql(self.conn, sql)
+        except sqlite3.Error as err:
+            logging.error(err, exc_info=Constant.TRACE_BACK_SWITCH)
+        finally:
+            pass

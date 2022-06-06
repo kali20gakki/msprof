@@ -33,12 +33,6 @@ class HostProfPresenterBase:
         :return: None
         """
 
-    def _create_tables(self: any) -> None:
-        if not self.cur_model.init():
-            logging.error("Failed to connect to host usage database.")
-            sys.exit(NumberConstant.ERROR)
-        self.cur_model.create_table()
-
     @abstractmethod
     def parse_prof_data(self: any) -> None:
         """
@@ -92,3 +86,9 @@ class HostProfPresenterBase:
         get timeline header
         :return: timeline headers
         """
+
+    def _create_tables(self: any) -> None:
+        if not self.cur_model.init():
+            logging.error("Failed to connect to host usage database.")
+            sys.exit(NumberConstant.ERROR)
+        self.cur_model.create_table()

@@ -27,6 +27,13 @@ class MemUsageAnalysis(MsMultiProcess):
         self.sample_config = sample_config
         self.result_dir = self.sample_config.get("result_dir", "")
 
+    @staticmethod
+    def class_name() -> str:
+        """
+        class name
+        """
+        return MemUsageAnalysis.__name__
+
     def ms_run(self: any) -> None:
         """
         run function
@@ -44,10 +51,3 @@ class MemUsageAnalysis(MsMultiProcess):
                     "start parsing mem usage data file: %s", file_name)
                 host_mem_usage_presenter = HostMemUsagePresenter(self.result_dir, file_name)
                 host_mem_usage_presenter.run()
-
-    @staticmethod
-    def class_name() -> str:
-        """
-        class name
-        """
-        return MemUsageAnalysis.__name__

@@ -59,25 +59,6 @@ class HbmModel(BaseModel, ABC):
         DBManager.execute_sql(self.conn, 'DROP TABLE IF EXISTS HBMOriginalData')
         DBManager.execute_sql(self.conn, 'DROP TABLE IF EXISTS HBMbwData')
 
-    def _get_hbm_data(self: any, bw_data: list, check_len: int) -> list:
-        formula_result = float(float_calculate([self.HBMC, self.HBM_EVENT,
-                                                self.KILOBYTE, self.KILOBYTE], '/'))
-        data = []
-        for i, _ in enumerate(bw_data):
-            if bw_data[i][1] - bw_data[i - check_len][1]:
-                dur_time = bw_data[i][1] - bw_data[i - check_len][1]
-                tmp_counts = bw_data[i][2] * formula_result / dur_time * Constant.TIME_RATE
-                sys_counts = max((tmp_counts, 0))
-                item = (bw_data[i][0], bw_data[i][1], sys_counts, bw_data[i][3], bw_data[i][4])
-            else:
-                item = (bw_data[i][0],
-                        bw_data[i][1],
-                        bw_data[i][2],
-                        bw_data[i][3],
-                        bw_data[i][4])
-            data.append(item)
-        return data
-
     def insert_bw_data(self: any, event_type: list) -> None:
         """
         insert HBM bandwidth data
@@ -108,3 +89,22 @@ class HbmModel(BaseModel, ABC):
             logging.error('Failed to insert HBM bandwidth data.')
         finally:
             pass
+
+    def _get_hbm_data(self: any, bw_data: list, check_len: int) -> list:
+        formula_result = float(float_calculate([self.HBMC, self.HBM_EVENT,
+                                                self.KILOBYTE, self.KILOBYTE], '/'))
+        data = []
+        for i, _ in enumerate(bw_data):
+            if bw_data[i][1] - bw_data[i - check_len][1]:
+                dur_time = bw_data[i][1] - bw_data[i - check_len][1]
+                tmp_counts = bw_data[i][2] * formula_result / dur_time * Constant.TIME_RATE
+                sys_counts = max((tmp_counts, 0))
+                item = (bw_data[i][0], bw_data[i][1], sys_counts, bw_data[i][3], bw_data[i][4])
+            else:
+                item = (bw_data[i][0],
+                        bw_data[i][1],
+                        bw_data[i][2],
+                        bw_data[i][3],
+                        bw_data[i][4])
+            data.append(item)
+        return data
