@@ -18,18 +18,18 @@ class CollectInfo(BaseInfo):
     collect info
     """
 
+    def __init__(self: any) -> None:
+        super(CollectInfo, self).__init__()
+        self.collection_start_time = ""
+        self.collection_end_time = ""
+        self.result_size = ""
+
     def merge_data(self: any) -> any:
         """
         merge data
         :return:
         """
         self.get_collect_time()
-
-    def __init__(self: any) -> None:
-        super(CollectInfo, self).__init__()
-        self.collection_start_time = ""
-        self.collection_end_time = ""
-        self.result_size = ""
 
     def get_collect_time(self: any) -> None:
         """

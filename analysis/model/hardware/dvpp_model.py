@@ -36,6 +36,20 @@ class DvppModel(BaseModel, ABC):
         self.insert_data_to_db(DBNameConstant.TABLE_DVPP_ORIGIN, data_list)
         self._create_index()
 
+    def report_data(self: any, has_dvpp_id: bool) -> None:
+        """
+        summary data of dvpp
+        :param has_dvpp_id: dvpp id
+        :return:
+        """
+        try:
+            if DBManager.judge_table_exist(self.cur, 'DvppOriginalData'):
+                self._create_dvpp_report_data(has_dvpp_id)
+                if not has_dvpp_id:
+                    self._create_dvpp_tree_data()
+        except (OSError, SystemError, ValueError, TypeError, RuntimeError, ZeroDivisionError) as err:
+            logging.error(str(err))
+
     def _create_index(self: any) -> None:
         """
         create index
@@ -51,20 +65,6 @@ class DvppModel(BaseModel, ABC):
             if not DBManager.judge_index_exist(self.cur, "enginetype_dvpp"):
                 self.cur.execute("CREATE INDEX enginetype_dvpp ON "
                                  "DvppOriginalData(enginetype)")
-
-    def report_data(self: any, has_dvpp_id: bool) -> None:
-        """
-        summary data of dvpp
-        :param has_dvpp_id: dvpp id
-        :return:
-        """
-        try:
-            if DBManager.judge_table_exist(self.cur, 'DvppOriginalData'):
-                self._create_dvpp_report_data(has_dvpp_id)
-                if not has_dvpp_id:
-                    self._create_dvpp_tree_data()
-        except (OSError, SystemError, ValueError, TypeError, RuntimeError, ZeroDivisionError) as err:
-            logging.error(str(err))
 
     def _get_dvpp_tree_data(self: any, total_device_id: list, enginetype: list) -> list:
         result_data = []
