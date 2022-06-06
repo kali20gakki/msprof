@@ -2,6 +2,7 @@
 
 function uninstall_product() {
 	delete_product ${install_path}/${ANALYSIS_PATH}/${ANALYSIS}
+    delete_parent_dir ${install_path}/tools
     delete_run_dir
 }
 
@@ -18,6 +19,32 @@ function delete_product() {
     rm -rf ${target_path}
 
 	chmod ${right} ${parent_dir}
+}
+
+function delete_parent_dir(){
+	local dir_name=${1}
+    local right=400
+ 
+	if [ -f "${dir_name}" ]; then
+        return
+	fi
+	
+	if [ -d "${dir_name}" ]; then
+        right=$(stat -c '%a' ${dir_name})
+        chmod u+w ${dir_name}
+
+        file_list=`ls $dir_name`
+        for f in $file_list
+        do
+            delete_parent_dir ${dir_name}/${f}
+        done
+
+        remove_empty_dir ${dir_name}
+	fi
+
+	if [ -f "${dir_name}" ] && [ -d "${dir_name}" ]; then
+		chmod ${right} ${dir_name}
+	fi
 }
  
 function rm_file_safe() {
@@ -98,6 +125,8 @@ function print() {
         echo "[${MSPROF_RUN_NAME}] [$(date +"%Y-%m-%d %H:%M:%S")] [$1]: $2" | tee -a $log_file
     fi
 }
+
+source $(dirname "$0")/utils.sh
 
 # get path
 install_path="$(
