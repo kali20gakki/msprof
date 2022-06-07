@@ -78,11 +78,11 @@ int main(int argc, const char **argv, const char **envp)
         return PROFILING_FAILED;
     } else {
         CmdLog::instance()->CmdInfoLog("Profiling finished.");
-        if (MsprofManager::instance()->rMode_ != nullptr && 
+        if (MsprofManager::instance()->rMode_ != nullptr &&
             !MsprofManager::instance()->rMode_->jobResultDir_.empty()) {
             CmdLog::instance()->CmdInfoLog("Process profiling data complete. Data is saved in %s",
-                MsprofManager::instance()->rMode_->jobResultDir_.c_str());  
-        }      
+                MsprofManager::instance()->rMode_->jobResultDir_.c_str());
+        }
     }
     return PROFILING_SUCCESS;
 }
