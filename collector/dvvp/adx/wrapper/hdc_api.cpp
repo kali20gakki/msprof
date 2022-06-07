@@ -396,7 +396,8 @@ static hdcError_t HdcWritePackage(HDC_SESSION session, DataSendMsg dataSendMsg,
         packet->type = IDE_DAEMON_LITTLE_PACKAGE;
 
         errno_t ret = memcpy_s(packet->value, dataSendMsg.maxSendLen,
-                               static_cast<IdeU8Pt>(const_cast<IdeBuffT>(buf)) + (totalLen - reservedLen), sendLen);
+                               static_cast<IdeU8Pt>(const_cast<IdeBuffT>(buf)) + (totalLen - reservedLen),
+                               static_cast<int32_t>(sendLen));
         IDE_CTRL_VALUE_FAILED(ret == EOK, return DRV_ERROR_INVALID_VALUE, "memory copy failed");
 
         // add buffer to hdc message
