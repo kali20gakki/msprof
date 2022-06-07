@@ -664,7 +664,7 @@ int IdeCreatePacket(CmdClassT type, IdeString value,
     IDE_CTRL_VALUE_FAILED(sendBuf != nullptr, return IDE_DAEMON_ERROR, "malloc memory failed");
     IdeTlvReq req = (IdeTlvReq)sendBuf;
     req->dev_id = 0;
-    req->len = staic_cast<int32_t>(valueLen);
+    req->len = static_cast<int32_t>(valueLen);
     req->type = type;
     errno_t err = memcpy_s(req->value, mallocValueLen, value, valueLen);
     if (err != EOK) {
