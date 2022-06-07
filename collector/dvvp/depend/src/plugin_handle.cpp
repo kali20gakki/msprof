@@ -48,12 +48,11 @@ bool PluginHandle::IsSoftLink(const std::string &path) const
 
 std::string PluginHandle::RealPath(const std::string &path) const
 {
-    char *resoved_path = nullptr;
+    char resoved_path[MAX_PATH_LENGTH * 2] = {0};
     std::string res = "";
     if (realpath(path.c_str(), resoved_path)) {
         res = resoved_path;
     }
-    free(resoved_path);
     return res;
 }
 
