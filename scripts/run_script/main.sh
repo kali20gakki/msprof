@@ -81,8 +81,9 @@ function execute_run() {
 		exit 0
 	fi
 
-	if [ ${upgrade_flag} = 1 ]; then
-		bash "${install_path}/../latest/${MSPROF_RUN_NAME}/script/uninstall.sh"
+	if [ ${upgrade_flag} = 1 ] && [ -L "${install_path}/../latest/${MSPROF_RUN_NAME}" ]; then
+		local uninstall_absolute_path=$(readlink -f "${install_path}/../latest/${MSPROF_RUN_NAME}/script/uninstall.sh")
+		bash ${uninstall_absolute_path}
 		print "INFO" "Mindstudio msprof package uninstall success."
 	fi
 
