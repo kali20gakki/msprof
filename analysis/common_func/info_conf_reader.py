@@ -8,6 +8,7 @@ import json
 import logging
 import os
 
+from common_func.common import print_msg
 from common_func.constant import Constant
 from common_func.file_name_manager import get_dev_start_compiles
 from common_func.file_name_manager import get_sample_json_compiles
@@ -135,7 +136,7 @@ class InfoConfReader:
         freq = str(self.get_data_under_device("{}_frequency".format(search_type)))
         try:
             if not freq or (not freq.isdigit and freq != self.FREQ) or float(freq) <= 0:
-                print("unable to get %s frequency.", search_type)
+                print_msg("unable to get %s frequency.", search_type)
                 logging.error("unable to get %s frequency.", search_type)
                 raise ProfException(ProfException.PROF_SYSTEM_EXIT)
             return float(freq) * 1000000.0

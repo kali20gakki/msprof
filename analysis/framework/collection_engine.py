@@ -14,6 +14,7 @@ import traceback
 
 from analyzer.training.time_parser import TimeParser
 from analyzer.training.training_trace_parser import TrainingTraceParser
+from common_func.common import print_msg
 from common_func.constant import Constant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
@@ -95,7 +96,7 @@ class AI:
             self.data_analysis()
         except multiprocessing.ProcessError as err:
             logging.error(str(err))
-            print(json.dumps({'status': NumberConstant.ERROR, 'info': traceback.format_exc()}))
+            print_msg(json.dumps({'status': NumberConstant.ERROR, 'info': traceback.format_exc()}))
         logging.info('Database process finished.')
         logging.info('Analysis finished.')
 
