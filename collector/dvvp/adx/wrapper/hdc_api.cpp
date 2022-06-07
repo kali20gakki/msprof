@@ -375,7 +375,7 @@ static hdcError_t HdcWritePackage(HDC_SESSION session, DataSendMsg dataSendMsg,
     hdcError_t hdcError = DRV_ERROR_NONE;
     unsigned int totalLen = static_cast<uint32_t>(dataSendMsg.bufLen);
     unsigned int reservedLen = totalLen;
-    int sendLen = 0;
+    unsigned int sendLen = 0;
     unsigned int timeout = 0;
     IdeSendBuffT buf = dataSendMsg.buf;
 
@@ -389,7 +389,7 @@ static hdcError_t HdcWritePackage(HDC_SESSION session, DataSendMsg dataSendMsg,
             sendLen = dataSendMsg.maxSendLen;
             packet->isLast = static_cast<int8_t>(IdeLastPacket::IDE_NOT_LAST_PACK);
         } else {
-            sendLen = static_cast<int32_t>(reservedLen);
+            sendLen = reservedLen;
             packet->isLast = static_cast<int8_t>(IdeLastPacket::IDE_LAST_PACK);
         }
         packet->len = sendLen;
@@ -664,7 +664,7 @@ int IdeCreatePacket(CmdClassT type, IdeString value,
     IDE_CTRL_VALUE_FAILED(sendBuf != nullptr, return IDE_DAEMON_ERROR, "malloc memory failed");
     IdeTlvReq req = (IdeTlvReq)sendBuf;
     req->dev_id = 0;
-    req->len = valueLen;
+    req->len = staic_cast<int32_t>(valueLen);
     req->type = type;
     errno_t err = memcpy_s(req->value, mallocValueLen, value, valueLen);
     if (err != EOK) {

@@ -34,7 +34,7 @@ using namespace analysis::dvvp::transport;
 using namespace Analysis::Dvvp::Common::Platform;
 using namespace Analysis::Dvvp::Plugin;
 
-std::mutex g_aclprofMutex;
+static std::mutex g_aclprofMutex;
 static uint64_t g_indexId = 1;
 
 aclError aclprofInit(CONST_CHAR_PTR profilerResultPath, size_t length)
