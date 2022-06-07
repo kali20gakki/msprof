@@ -31,6 +31,71 @@ class HostCpuUsagePresenter(HostProfPresenterBase):
         self.process_usage_info = []
         self.sort_map = {}
 
+    @staticmethod
+    def _compute_jiffies(curr: float, last: float) -> float:
+        """
+        compute jiffies
+        """
+        return (curr.utime - last.utime) + (curr.stime - last.stime)
+
+    def init(self: any) -> None:
+        """
+        init class
+        """
+        self.set_model(HostCpuUsage(self.result_dir))
+
+    def parse_prof_data(self: any) -> None:
+        """
+        implement parent class for parse data
+        """
+        try:
+            with open(self.file_name) as file:
+                self._parse_cpu_info()
+                self._parse_cpu_usage(file)
+                logging.info(
+                    "Finish parsing host cpu usage data file: %s", os.path.basename(self.file_name))
+        except (FileNotFoundError, ValueError, IOError) as parse_file_except:
+            logging.error("Error in parsing host cpu usage data:%s", str(parse_file_except),
+                          exc_info=Constant.TRACE_BACK_SWITCH)
+        finally:
+            pass
+
+    def get_cpu_usage_data(self: any) -> dict:
+        """
+        return cpu usage data
+        """
+        if not self.cur_model.check_db() or not self.cur_model.has_cpu_usage_data():
+            self.cur_model.finalize()
+            return MsvpConstant.EMPTY_DICT
+        res = self.cur_model.get_cpu_usage_data()
+        self.cur_model.finalize()
+        return res
+
+    def get_timeline_header(self: any) -> list:
+        """
+        return cpu usage timeline header
+        """
+        pid = InfoConfReader().get_json_pid_data()
+        result = [["process_name", pid,
+                   InfoConfReader().get_json_tid_data(), "CPU Usage"]]
+        cpu_list = self._get_cpu_list()
+        for index, cpu_info in enumerate(cpu_list):
+            cpu_no = " ".join(["CPU", cpu_info[0]])
+            result.append(["thread_name", pid, index, cpu_no])
+            result.append(["thread_sort_index", pid, index, index])
+            self.sort_map[cpu_no] = index
+        return result
+
+    def get_timeline_data(self: any) -> list:
+        """
+        get timeline data
+        """
+        result = self.get_cpu_usage_data()
+        for data in result:
+            data.append(self.sort_map.get(data[0]))
+        return result
+
+
     def _parse_cpu_info(self: any) -> None:
         """
         parse cpu info
@@ -38,13 +103,6 @@ class HostCpuUsagePresenter(HostProfPresenterBase):
         # first line: cpu_num clk
         self.cpu_info = InfoConfReader().get_cpu_info()
         self.cur_model.insert_cpu_info_data(self.cpu_info)
-
-    @staticmethod
-    def _compute_jiffies(curr: float, last: float) -> float:
-        """
-        compute jiffies
-        """
-        return (curr.utime - last.utime) + (curr.stime - last.stime)
 
     def _process_per_usage(self: any, curr_info: list, last_info: list) -> None:
         """"
@@ -145,39 +203,6 @@ class HostCpuUsagePresenter(HostProfPresenterBase):
         self.cur_model.insert_cpu_usage_data(self.cpu_usage_info)
         self.cur_model.insert_process_usage_data(self.process_usage_info)
 
-    def init(self: any) -> None:
-        """
-        init class
-        """
-        self.set_model(HostCpuUsage(self.result_dir))
-
-    def parse_prof_data(self: any) -> None:
-        """
-        implement parent class for parse data
-        """
-        try:
-            with open(self.file_name) as file:
-                self._parse_cpu_info()
-                self._parse_cpu_usage(file)
-                logging.info(
-                    "Finish parsing host cpu usage data file: %s", os.path.basename(self.file_name))
-        except (FileNotFoundError, ValueError, IOError) as parse_file_except:
-            logging.error("Error in parsing host cpu usage data:%s", str(parse_file_except),
-                          exc_info=Constant.TRACE_BACK_SWITCH)
-        finally:
-            pass
-
-    def get_cpu_usage_data(self: any) -> dict:
-        """
-        return cpu usage data
-        """
-        if not self.cur_model.check_db() or not self.cur_model.has_cpu_usage_data():
-            self.cur_model.finalize()
-            return MsvpConstant.EMPTY_DICT
-        res = self.cur_model.get_cpu_usage_data()
-        self.cur_model.finalize()
-        return res
-
     def _get_cpu_list(self: any) -> dict:
         """
         get cpu list from db
@@ -188,27 +213,3 @@ class HostCpuUsagePresenter(HostProfPresenterBase):
         res = self.cur_model.get_cpu_list()
         self.cur_model.finalize()
         return res
-
-    def get_timeline_header(self: any) -> list:
-        """
-        return cpu usage timeline header
-        """
-        pid = InfoConfReader().get_json_pid_data()
-        result = [["process_name", pid,
-                   InfoConfReader().get_json_tid_data(), "CPU Usage"]]
-        cpu_list = self._get_cpu_list()
-        for index, cpu_info in enumerate(cpu_list):
-            cpu_no = " ".join(["CPU", cpu_info[0]])
-            result.append(["thread_name", pid, index, cpu_no])
-            result.append(["thread_sort_index", pid, index, index])
-            self.sort_map[cpu_no] = index
-        return result
-
-    def get_timeline_data(self: any) -> list:
-        """
-        get timeline data
-        """
-        result = self.get_cpu_usage_data()
-        for data in result:
-            data.append(self.sort_map.get(data[0]))
-        return result

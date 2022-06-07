@@ -21,28 +21,28 @@ class StarsConstant:
     FFTS_TYPE = {
         0: "AIC only",
         1: "AIV only",
-        2: "automatic threading mode",
-        3: "manual threading mode",
-        4: "ffts+"
+        2: "Automatic Threading Mode",
+        3: "Manual Threading Mode",
+        4: "FFTS+"
     }
     SUBTASK_TYPE = {
         0: "AIC",
         1: "AIV",
-        3: "notify_wait",
-        4: "notify_record",
-        5: "write_value",
-        6: "MIX_AIC",
-        7: "MIX_AIV",
+        3: "Notify Wait",
+        4: "Notify Record",
+        5: "Write Value",
+        6: "MIX AIC",
+        7: "MIX AIV",
         8: "SDMA",
-        9: "data context",
+        9: "Data Context",
         # Schedule the DMU descriptor to SDMA, and SDMA informs the L2 cache to
         #   invalidate the corresponding cache line directly
-        10: "invalidate data context",
+        10: "Invalidate Data Context",
         # FFTS schedules the DMU descriptor to SDMA,
         # and SDMA informs L2 cache to write back the corresponding cache line
-        11: "writeback data context",
+        11: "Writeback Data Context",
         12: "AICPU",
-        13: "Load context"
+        13: "Load Context"
     }
 
     def get_subtask_type(self: any) -> dict:

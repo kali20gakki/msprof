@@ -9,7 +9,6 @@ import logging
 import os
 import sqlite3
 import struct
-import sys
 from collections import OrderedDict
 
 from common_func.common import get_col_index
@@ -18,9 +17,9 @@ from common_func.data_manager import DataManager
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.file_manager import FileOpen
+from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msprof_exception import ProfException
 from common_func.msvp_common import read_cpu_cfg
-from common_func.ms_constant.number_constant import NumberConstant
 from common_func.utils import Utils
 from mscalculate.calculate_ai_core_data import CalculateAiCoreData
 from viewer.calculate_rts_data import insert_metric_value
@@ -49,6 +48,62 @@ class BaseParseDataByHwts:
         self.events_name_list = []
         self.ai_core_profiling_events = OrderedDict()  # ai core pmu event
         self.freq = freq
+
+    @classmethod
+    def get_pmu_event_name(cls: any, pmu_event: str) -> str:
+        """
+        return pmu event name by pmu_event
+        :param pmu_event: pmu event
+        :return: pmu name
+        """
+        aicore_events_map = read_cpu_cfg("ai_core", "event2metric")
+        pmu_name = aicore_events_map.get(int(pmu_event, cls.HEX), "")
+        if not pmu_name:
+            pmu_name = str(pmu_event)
+        return pmu_name
+
+    def read_binary_data(self: any) -> None:
+        """
+        Parsing ai core binary files.
+        """
+        logging.info("Start parsing aicore data ...")
+        if not os.path.exists(self.ai_core_file_name):
+            logging.error("ai core file is not found.")
+            return
+        sum_pmu = [0] * self.PMU_COUNT
+        cycle = 0
+        device_id = self.__get_device()
+        if not device_id:
+            logging.error("unable to get device_id from file name.")
+            raise ProfException(ProfException.PROF_SYSTEM_EXIT)
+        with FileOpen(self.ai_core_file_name, 'rb') as ai_core_log_file:
+            self.__read_binary_data_helper(ai_core_log_file.file_reader, device_id, cycle, sum_pmu)
+        self.aicore_data.get("ai_data").insert(0, ["", "", cycle, "", device_id, -1, ""])
+        self.events_name_list, self.ai_core_profiling_events = \
+            CalculateAiCoreData(self.sample_config.get("result_dir")).compute_ai_core_data(
+                self.events_name_list, self.ai_core_profiling_events, cycle, sum_pmu)
+        self.__move_total_forward()
+
+    def remove_redundant(self: any) -> None:
+        """
+        remove redundant events
+        :return: None
+        """
+        if self.ai_core_profiling_events.get("icache_req_ratio"):
+            del self.ai_core_profiling_events["icache_req_ratio"]
+        if self.ai_core_profiling_events.get("vec_fp16_128lane_ratio"):
+            del self.ai_core_profiling_events["vec_fp16_128lane_ratio"]
+        if self.ai_core_profiling_events.get("vec_fp16_64lane_ratio"):
+            del self.ai_core_profiling_events["vec_fp16_64lane_ratio"]
+
+    def save_db(self: any, table_name: str) -> None:
+        """
+        save ai core data to db
+        """
+        try:
+            self.__save_db_helper(table_name)
+        except sqlite3.Error as err:
+            logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
 
     def __move_total_forward(self: any) -> None:
         logging.info("move HWTS aicore total time data forward")
@@ -98,40 +153,6 @@ class BaseParseDataByHwts:
                     self.events_name_list, self.ai_core_profiling_events,
                     total_cyc, pmu_cnt)
 
-    def read_binary_data(self: any) -> None:
-        """
-        Parsing ai core binary files.
-        """
-        logging.info("Start parsing aicore data ...")
-        if not os.path.exists(self.ai_core_file_name):
-            logging.error("ai core file is not found.")
-            return
-        sum_pmu = [0] * self.PMU_COUNT
-        cycle = 0
-        device_id = self.__get_device()
-        if not device_id:
-            logging.error("unable to get device_id from file name.")
-            raise ProfException(ProfException.PROF_SYSTEM_EXIT)
-        with FileOpen(self.ai_core_file_name, 'rb') as ai_core_log_file:
-            self.__read_binary_data_helper(ai_core_log_file.file_reader, device_id, cycle, sum_pmu)
-        self.aicore_data.get("ai_data").insert(0, ["", "", cycle, "", device_id, -1, ""])
-        self.events_name_list, self.ai_core_profiling_events = \
-            CalculateAiCoreData(self.sample_config.get("result_dir")).compute_ai_core_data(
-                self.events_name_list, self.ai_core_profiling_events, cycle, sum_pmu)
-        self.__move_total_forward()
-
-    def remove_redundant(self: any) -> None:
-        """
-        remove redundant events
-        :return: None
-        """
-        if self.ai_core_profiling_events.get("icache_req_ratio"):
-            del self.ai_core_profiling_events["icache_req_ratio"]
-        if self.ai_core_profiling_events.get("vec_fp16_128lane_ratio"):
-            del self.ai_core_profiling_events["vec_fp16_128lane_ratio"]
-        if self.ai_core_profiling_events.get("vec_fp16_64lane_ratio"):
-            del self.ai_core_profiling_events["vec_fp16_64lane_ratio"]
-
     def __get_current_iter_id(self: any, table_name: str) -> int:
         cur_iter_id = None
         get_iter_id_sql = "select max(iter_id) from {}".format(table_name)
@@ -180,30 +201,6 @@ class BaseParseDataByHwts:
         self.conn.executemany("insert into {0} values (?{1}, ?, ?, ?, ?)".format(
             table_name, pmu_str), ai_core_lst)  # insert ai core data to db
         self.conn.commit()
-
-    def save_db(self: any, table_name: str) -> None:
-        """
-        save ai core data to db
-        """
-        try:
-            self.__save_db_helper(table_name)
-        except sqlite3.Error as err:
-            logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
-        finally:
-            pass
-
-    @classmethod
-    def get_pmu_event_name(cls: any, pmu_event: str) -> str:
-        """
-        return pmu event name by pmu_event
-        :param pmu_event: pmu event
-        :return: pmu name
-        """
-        aicore_events_map = read_cpu_cfg("ai_core", "event2metric")
-        pmu_name = aicore_events_map.get(int(pmu_event, cls.HEX), "")
-        if not pmu_name:
-            pmu_name = str(pmu_event)
-        return pmu_name
 
 
 class ParseAiVectorCoreByHwts(BaseParseDataByHwts):

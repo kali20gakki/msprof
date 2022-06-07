@@ -36,7 +36,7 @@ ExternalProject_Add(ascend_protobuf_shared
     BUILD_COMMAND  make -j64
 )
 ########################## securec ###################################
-set(SECUREC_DIR ${TOP_DIR}/opensource/securec)
+set(SECUREC_DIR ${TOP_DIR}/platform/securec)
 file(GLOB_RECURSE SECUREC_Src ${SECUREC_DIR}/src/*.c)
 set(SECUREC_Inc ${SECUREC_DIR}/include)
 

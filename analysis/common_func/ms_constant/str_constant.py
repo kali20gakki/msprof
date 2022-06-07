@@ -103,6 +103,7 @@ class StrConstant:
     AYNC_MEMCPY_NUM = "21"
 
     TRACE_HEADER_PID = "pid"
+    TRACE_HEADER_TID = "tid"
     TRACE_HEADER_NAME = "name"
 
     API_TYPE_MAPPING = {

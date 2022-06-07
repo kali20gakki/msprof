@@ -48,8 +48,6 @@ aclError aclprofInit(CONST_CHAR_PTR profilerResultPath, size_t length)
 
     if (profilerResultPath == nullptr || strlen(profilerResultPath) != length) {
         MSPROF_LOGE("profilerResultPath is nullptr or its length does not equals given length");
-        MSPROF_INPUT_ERROR("EK0002", std::vector<std::string>({"path"}),
-            std::vector<std::string>({"profilerResultPath"}));
         return ACL_ERROR_INVALID_PARAM;
     }
     const static size_t aclProfPathMaxLen = 4096;   // path max length: 4096
@@ -57,8 +55,6 @@ aclError aclprofInit(CONST_CHAR_PTR profilerResultPath, size_t length)
         MSPROF_LOGE("length of profilerResultPath is illegal, the value is %zu, it should be in (0, %zu)",
                     length, aclProfPathMaxLen);
         std::string aclProfPathMaxLenStr = std::to_string(aclProfPathMaxLen);
-        MSPROF_INPUT_ERROR("EK0006", std::vector<std::string>({"config", "value", "min", "max"}),
-            std::vector<std::string>({"profilerResultPath", std::to_string(length), "0", aclProfPathMaxLenStr}));
         return ACL_ERROR_INVALID_PARAM;
     }
 
@@ -129,15 +125,11 @@ bool IsValidProfConfig(CONST_UINT32_T_PTR deviceIdList, uint32_t deviceNums, ACL
 {
     if (deviceNums != 0 && deviceIdList == nullptr) {
         MSPROF_LOGE("deviceIdList is nullptr");
-        MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config"}),
-            std::vector<std::string>({"deviceIdList"}));
         return false;
     }
 
     if (aicoreEvents != nullptr) {
         MSPROF_LOGE("aicoreEvents must be nullptr");
-        MSPROF_INPUT_ERROR("EK0004", std::vector<std::string>({"config"}),
-            std::vector<std::string>({"aicoreEvents"}));
         return false;
     }
 
@@ -154,8 +146,6 @@ bool IsValidProfConfig(CONST_UINT32_T_PTR deviceIdList, uint32_t deviceNums, ACL
 
     if (deviceNums > static_cast<uint32_t>(devCount)) {
         MSPROF_LOGE("Device num(%u) is not in range 1 ~ %d.", deviceNums, devCount);
-        MSPROF_INPUT_ERROR("EK0006", std::vector<std::string>({"config", "value", "min", "max"}),
-            std::vector<std::string>({"Device num", std::to_string(deviceNums), "1", std::to_string(devCount)}));
         return false;
     }
 
@@ -165,14 +155,10 @@ bool IsValidProfConfig(CONST_UINT32_T_PTR deviceIdList, uint32_t deviceNums, ACL
         if (devId >= static_cast<uint32_t>(devCount)) {
             MSPROF_LOGE("[IsValidProfConfig]Device id %u is not in range 0 ~ %d(exclude %d)",
                 devId, devCount, devCount);
-            MSPROF_INPUT_ERROR("EK0006", std::vector<std::string>({"config", "value", "min", "max"}),
-                std::vector<std::string>({"Device id", std::to_string(devId), "0", std::to_string(devCount)}));
             return false;
         }
         if (record.count(devId) > 0) {
             MSPROF_LOGE("[IsValidProfConfig]Device id %u is duplicatedly set", devId);
-            MSPROF_INPUT_ERROR("EK0007", std::vector<std::string>({"config", "value"}),
-                std::vector<std::string>({"Device id", std::to_string(devId)}));
             return false;
         }
         record.insert(devId);
@@ -236,8 +222,6 @@ aclError aclprofDestroyConfig(ACL_PROF_CONFIG_CONST_PTR profilerConfig)
     }
     if (profilerConfig == nullptr) {
         MSPROF_LOGE("destroy profilerConfig failed, profilerConfig must not be nullptr");
-        MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config"}),
-            std::vector<std::string>({"profilerConfig"}));
         return ACL_ERROR_INVALID_PARAM;
     }
     delete profilerConfig;
@@ -249,14 +233,10 @@ static aclError PreCheckProfConfig(ACL_PROF_CONFIG_CONST_PTR profilerConfig)
 {
     if (profilerConfig == nullptr) {
         MSPROF_LOGE("Param profilerConfig is nullptr");
-        MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config"}),
-            std::vector<std::string>({"profilerConfig"}));
         return ACL_ERROR_INVALID_PARAM;
     }
     if (profilerConfig->config.dataTypeConfig == 0) {
         MSPROF_LOGE("Param profilerConfig dataTypeConfig is zero");
-        MSPROF_INPUT_ERROR("EK0005", std::vector<std::string>({"config"}),
-            std::vector<std::string>({"profilerConfig dataTypeConfig"}));
         return ACL_ERROR_INVALID_PARAM;
     }
     // check switch
@@ -264,15 +244,11 @@ static aclError PreCheckProfConfig(ACL_PROF_CONFIG_CONST_PTR profilerConfig)
         MSPROF_LOGE("dataTypeConfig:0x%x, supported switch is:0x%x",
                     profilerConfig->config.dataTypeConfig, PROF_SWITCH_SUPPORT);
         std::string dataTypeConfigStr = std::to_string(profilerConfig->config.dataTypeConfig);
-        MSPROF_INPUT_ERROR("EK0008", std::vector<std::string>({"switch_use", "switch_support"}),
-            std::vector<std::string>({dataTypeConfigStr, std::to_string(PROF_SWITCH_SUPPORT)}));
         return ACL_ERROR_PROF_MODULES_UNSUPPORTED;
     }
     if (profilerConfig->config.devNums > MSVP_MAX_DEV_NUM + 1) {
         MSPROF_LOGE("Param prolilerConfig is invalid");
         std::string devNumsStr = std::to_string(profilerConfig->config.devNums);
-        MSPROF_INPUT_ERROR("EK0006", std::vector<std::string>({"config", "value", "min", "max"}),
-            std::vector<std::string>({"profilerConfig devNums", devNumsStr, "1", std::to_string(MSVP_MAX_DEV_NUM)}));
         return ACL_ERROR_INVALID_PARAM;
     }
     return ACL_SUCCESS;
@@ -345,8 +321,6 @@ aclError aclprofStop(ACL_PROF_CONFIG_CONST_PTR profilerConfig)
             MSPROF_LOGE("DataTypeConfig stop: %x different from start: %x", profilerConfig->config.dataTypeConfig,
                 dataTypeConfig);
             std::string dataTypeConfigStr = std::to_string(profilerConfig->config.dataTypeConfig);
-            MSPROF_INPUT_ERROR("EK0009", std::vector<std::string>({"switch_start", "switch_end"}),
-                std::vector<std::string>({dataTypeConfigStr, std::to_string(dataTypeConfig)}));
             return ACL_ERROR_INVALID_PROFILING_CONFIG;
         }
     }
@@ -380,8 +354,6 @@ aclError aclprofModelSubscribe(const uint32_t modelId, const aclprofSubscribeCon
     std::lock_guard<std::mutex> lock(g_aclprofMutex);
 
     if (profSubscribeConfig == nullptr) {
-        MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config"}),
-            std::vector<std::string>({"profSubscribeConfig"}));
         MSPROF_LOGE("Param profSubscribeConfig is nullptr");
         return ACL_ERROR_INVALID_PARAM;
     }
@@ -395,8 +367,6 @@ aclError aclprofModelSubscribe(const uint32_t modelId, const aclprofSubscribeCon
     aclError aclRet = ProfApiPlugin::instance()->MsprofProfGetDeviceIdByGeModelIdx(modelId, &deviceId);
     if (aclRet != ACL_SUCCESS) {
         MSPROF_LOGE("Model id %u is not loaded", modelId);
-        MSPROF_INPUT_ERROR("EK0010", std::vector<std::string>({"param", "value"}),
-            std::vector<std::string>({"Model id", std::to_string(modelId)}));
         return ACL_ERROR_INVALID_MODEL_ID;
     }
 
@@ -444,8 +414,6 @@ aclError aclprofModelUnSubscribe(const uint32_t modelId)
 
     if (!ProfAclMgr::instance()->IsModelSubscribed(modelId)) {
         MSPROF_LOGE("Model Id %u is not subscribed when unsubcribed", modelId);
-        MSPROF_INPUT_ERROR("EK0011", std::vector<std::string>({"param", "value"}),
-            std::vector<std::string>({"Model Id", std::to_string(modelId)}));
         return ACL_ERROR_INVALID_MODEL_ID;
     }
 
@@ -501,8 +469,6 @@ aclError aclprofGetStepTimestamp(ACLPROF_STEPINFO_PTR stepInfo, aclprofStepTag t
     }
     if (stepInfo == nullptr) {
         MSPROF_LOGE("stepInfo is nullptr.");
-        MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config"}),
-            std::vector<std::string>({"stepInfo"}));
         return ACL_ERROR_INVALID_PARAM;
     }
     if (stepInfo->startFlag && tag == ACL_STEP_START) {
@@ -555,8 +521,6 @@ void aclprofDestroyStepInfo(ACLPROF_STEPINFO_PTR stepInfo)
     }
     if (stepInfo == nullptr) {
         MSPROF_LOGE("destroy stepInfo failed, stepInfo must not be nullptr");
-        MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config"}),
-            std::vector<std::string>({"stepInfo"}));
     } else {
         delete stepInfo;
         MSPROF_LOGI("Successfully destroy stepInfo");

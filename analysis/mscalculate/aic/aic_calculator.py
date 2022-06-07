@@ -41,52 +41,6 @@ class AicCalculator(ICalculator, MsMultiProcess):
         self._aic_data_list = []
         self._file_list.sort(key=lambda x: int(x.split("_")[-1]))
 
-    def _get_total_aic_count(self: any) -> int:
-        sum_file_size = 0
-        for file in self._file_list:
-            sum_file_size += os.path.getsize(PathManager.get_data_file_path(self._project_path, file))
-        return sum_file_size // self.AICORE_LOG_SIZE
-
-    def _get_offset_and_total(self: any, iter_id: int) -> (int, int):
-        """
-        :param iter_id:
-        :return: offset count and total aic count
-        """
-        offset_count, total_count = self._iter_model.get_task_offset_and_sum(iter_id, 'ai_core_num')
-        _total_aic_count = self._get_total_aic_count()
-        _sql_aic_count = self._iter_model.get_aic_sum_count()
-        # get offset by all aic count and sql record count
-        offset_count = _total_aic_count - _sql_aic_count + offset_count
-        if offset_count < 0:
-            total_count += offset_count
-            offset_count = 0
-        return offset_count, total_count
-
-    def _parse_by_iter(self: any) -> None:
-        """
-        Parse the specified iteration data
-        :return: None
-        """
-        if self._iter_model.check_db() and self._iter_model.check_table():
-            _iter_id = MsprofIteration(self._project_path). \
-                get_iteration_id_by_index_id(self._sample_config.get("iter_id"), self._sample_config.get("model_id"))
-            offset_count, total_count = self._get_offset_and_total(_iter_id)
-            if total_count <= 0:
-                logging.warning("The ai core data that is not satisfied by the specified iteration!")
-                return
-            _file_calculator = FileCalculator(self._file_list, self.AICORE_LOG_SIZE, self._project_path,
-                                              offset_count, total_count)
-            self._parse(_file_calculator.prepare_process())
-            self._iter_model.finalize()
-
-    def _parse_all_file(self: any) -> None:
-        _offset_calculator = OffsetCalculator(self._file_list, self.AICORE_LOG_SIZE, self._project_path)
-        for _file in self._file_list:
-            _file = PathManager.get_data_file_path(self._project_path, _file)
-            logging.info("start parsing ai core data file: %s", os.path.basename(_file))
-            with open(_file, 'rb') as _aic_reader:
-                self._parse(_offset_calculator.pre_process(_aic_reader, os.path.getsize(_file)))
-
     def calculate(self: any) -> None:
         """
         calculate the ai core
@@ -96,13 +50,6 @@ class AicCalculator(ICalculator, MsMultiProcess):
             self._parse_all_file()
         else:
             self._parse_by_iter()
-
-    def _parse(self: any, all_log_bytes: bytes) -> None:
-        aic_pmu_events = AicPmuUtils.get_pmu_events(
-            ConfigMgr.read_sample_config(self._project_path).get('ai_core_profiling_events'))
-        for log_data in Utils.chunks(all_log_bytes, self.AICORE_LOG_SIZE):
-            _aic_pmu_log = AicPmuBean.decode(log_data)
-            self.calculate_pmu_list(_aic_pmu_log, aic_pmu_events, self._aic_data_list)
 
     def calculate_pmu_list(self: any, data: any, profiling_events: list, data_list: list) -> None:
         """
@@ -145,3 +92,57 @@ class AicCalculator(ICalculator, MsMultiProcess):
             return
         self.calculate()
         self.save()
+
+    def _get_total_aic_count(self: any) -> int:
+        sum_file_size = 0
+        for file in self._file_list:
+            sum_file_size += os.path.getsize(PathManager.get_data_file_path(self._project_path, file))
+        return sum_file_size // self.AICORE_LOG_SIZE
+
+    def _get_offset_and_total(self: any, iter_id: int) -> (int, int):
+        """
+        :param iter_id:
+        :return: offset count and total aic count
+        """
+        offset_count, total_count = self._iter_model.get_task_offset_and_sum(iter_id, 'ai_core_num')
+        _total_aic_count = self._get_total_aic_count()
+        _sql_aic_count = self._iter_model.get_aic_sum_count()
+        # get offset by all aic count and sql record count
+        offset_count = _total_aic_count - _sql_aic_count + offset_count
+        if offset_count < 0:
+            total_count += offset_count
+            offset_count = 0
+        return offset_count, total_count
+
+    def _parse_by_iter(self: any) -> None:
+        """
+        Parse the specified iteration data
+        :return: None
+        """
+        if self._iter_model.check_db() and self._iter_model.check_table():
+            # iter_id means [iter_id-1, iter_id]
+            _iter_id = MsprofIteration(self._project_path). \
+                get_iter_id_by_index_id(self._sample_config.get("iter_id"), self._sample_config.get("model_id"))
+            offset_count, total_count = self._get_offset_and_total(_iter_id[0] + 1)
+            if total_count <= 0:
+                logging.warning("The ai core data that is not satisfied by the specified iteration!")
+                return
+            _file_calculator = FileCalculator(self._file_list, self.AICORE_LOG_SIZE, self._project_path,
+                                              offset_count, total_count)
+            self._parse(_file_calculator.prepare_process())
+            self._iter_model.finalize()
+
+    def _parse_all_file(self: any) -> None:
+        _offset_calculator = OffsetCalculator(self._file_list, self.AICORE_LOG_SIZE, self._project_path)
+        for _file in self._file_list:
+            _file = PathManager.get_data_file_path(self._project_path, _file)
+            logging.info("start parsing ai core data file: %s", os.path.basename(_file))
+            with open(_file, 'rb') as _aic_reader:
+                self._parse(_offset_calculator.pre_process(_aic_reader, os.path.getsize(_file)))
+
+    def _parse(self: any, all_log_bytes: bytes) -> None:
+        aic_pmu_events = AicPmuUtils.get_pmu_events(
+            ConfigMgr.read_sample_config(self._project_path).get('ai_core_profiling_events'))
+        for log_data in Utils.chunks(all_log_bytes, self.AICORE_LOG_SIZE):
+            _aic_pmu_log = AicPmuBean.decode(log_data)
+            self.calculate_pmu_list(_aic_pmu_log, aic_pmu_events, self._aic_data_list)

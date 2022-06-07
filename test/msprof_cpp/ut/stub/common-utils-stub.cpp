@@ -2,9 +2,6 @@
 namespace Analysis {
 namespace Dvvp {
 namespace Plugin {
-
-MmpaPlugin::~MmpaPlugin() {}
-
 mmTimespec MmpaPlugin::MsprofMmGetTickCount()
 {
     mmTimespec rts;

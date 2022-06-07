@@ -26,39 +26,19 @@ class HostMemUsagePresenter(HostProfPresenterBase):
         super().__init__(result_dir, file_name)
         self.mem_usage_info = []
 
+    @classmethod
+    def get_timeline_header(cls: any) -> list:
+        """
+        get mem timeline header
+        """
+        return [["process_name", InfoConfReader().get_json_pid_data(),
+                 InfoConfReader().get_json_tid_data(), "Memory Usage"]]
+
     def init(self: any) -> None:
         """
         init class
         """
         self.set_model(HostMemUsage(self.result_dir))
-
-    def _parse_mem_data(self: any, file: any, mem_total: str) -> None:
-        if not mem_total or not is_number(mem_total):
-            logging.error("mem_total is invalid, please check file info.json...")
-            return
-        last_timestamp = None
-
-        line = file.readline()
-        while line:
-            usage_detail = line.split()
-            # parse data from usage_detail
-            curr_timestamp = usage_detail[0]
-            # The used memory is four times the physical memory
-            usage_data = Decimal(usage_detail[2]) * 4 / mem_total * NumberConstant.PERCENTAGE
-            usage = str(usage_data.quantize(NumberConstant.USAGE_PLACES))
-
-            if last_timestamp is not None:
-                item = [last_timestamp, curr_timestamp, usage]
-                self.mem_usage_info.append(item)
-
-            last_timestamp = curr_timestamp
-            line = file.readline()
-
-        self.cur_model.insert_mem_usage_data(self.mem_usage_info)
-
-    def _parse_mem_usage(self: any, file: any) -> None:
-        mem_total = InfoConfReader().get_mem_total()
-        self._parse_mem_data(file, mem_total)
 
     def parse_prof_data(self: any) -> None:
         """
@@ -102,10 +82,30 @@ class HostMemUsagePresenter(HostProfPresenterBase):
                 result.append(temp_data)
         return result
 
-    @classmethod
-    def get_timeline_header(cls: any) -> list:
-        """
-        get mem timeline header
-        """
-        return [["process_name", InfoConfReader().get_json_pid_data(),
-                 InfoConfReader().get_json_tid_data(), "Memory Usage"]]
+    def _parse_mem_data(self: any, file: any, mem_total: str) -> None:
+        if not mem_total or not is_number(mem_total):
+            logging.error("mem_total is invalid, please check file info.json...")
+            return
+        last_timestamp = None
+
+        line = file.readline()
+        while line:
+            usage_detail = line.split()
+            # parse data from usage_detail
+            curr_timestamp = usage_detail[0]
+            # The used memory is four times the physical memory
+            usage_data = Decimal(usage_detail[2]) * 4 / mem_total * NumberConstant.PERCENTAGE
+            usage = str(usage_data.quantize(NumberConstant.USAGE_PLACES))
+
+            if last_timestamp is not None:
+                item = [last_timestamp, curr_timestamp, usage]
+                self.mem_usage_info.append(item)
+
+            last_timestamp = curr_timestamp
+            line = file.readline()
+
+        self.cur_model.insert_mem_usage_data(self.mem_usage_info)
+
+    def _parse_mem_usage(self: any, file: any) -> None:
+        mem_total = InfoConfReader().get_mem_total()
+        self._parse_mem_data(file, mem_total)

@@ -36,25 +36,27 @@ class TestMsprofJobSummary(unittest.TestCase):
 
     def test_generate_json_file(self):
         with mock.patch('os.path.join', return_value='test'), \
-                mock.patch(NAMESPACE + '.MsprofJobSummary.get_msprof_json_file', return_value=[1]), \
-                mock.patch(NAMESPACE + '.Utils.write_json_files'):
+                mock.patch(NAMESPACE + '.MsprofJobSummary.get_msprof_json_file', return_value=[{}]), \
+                mock.patch(NAMESPACE + '.MsprofDataStorage.write_json_files', return_value=(0, [])):
             check = MsprofJobSummary('test')
-            check._host_data = [2]
+            check._host_data = [{'ts': 1}]
             check._generate_json_file('test')
         with mock.patch('os.path.join', return_value='test'), \
-                mock.patch(NAMESPACE + '.MsprofJobSummary.get_msprof_json_file', return_value=[1]):
+                mock.patch(NAMESPACE + '.MsprofJobSummary.get_msprof_json_file', return_value=[{}]):
             with mock.patch('os.open'), \
-                    mock.patch('os.fdopen', mock.mock_open(read_data='')):
+                    mock.patch('os.fdopen', mock.mock_open(read_data='')), \
+                    mock.patch(NAMESPACE + '.MsprofDataStorage.write_json_files', return_value=(0, [])):
                 check = MsprofJobSummary('test')
-                check._host_data = [2]
+                check._host_data = [{'ts': 1}]
                 check._generate_json_file('test')
         with mock.patch('os.path.join', return_value='test'), \
-                mock.patch(NAMESPACE + '.MsprofJobSummary.get_msprof_json_file', return_value=[1]):
-            with mock.patch('os.open', side_effect=OSError), \
+                mock.patch(NAMESPACE + '.MsprofJobSummary.get_msprof_json_file', return_value=[{}]):
+            with mock.patch(NAMESPACE + '.MsprofJobSummary.get_msprof_json_file', return_value=[{}]), \
+                mock.patch(NAMESPACE + '.MsprofDataStorage.write_json_files', return_value=(1, 'test')),\
                     mock.patch('os.fdopen', mock.mock_open(read_data='')),\
                     mock.patch('common_func.utils.logging.error'):
                 check = MsprofJobSummary('test')
-                check._host_data = [2]
+                check._host_data = [{'ts': 1}]
                 check._generate_json_file('test')
 
     def test_get_msprof_json_file(self):

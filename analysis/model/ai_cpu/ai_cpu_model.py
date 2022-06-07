@@ -4,15 +4,10 @@
 function: this script used to operate AI_CPU
 Copyright Huawei Technologies Co., Ltd. 2021. All rights reserved.
 """
-import logging
-import sqlite3
 
-from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
-from common_func.path_manager import PathManager
 from model.interface.parser_model import ParserModel
-from viewer.ge_info_report import get_ge_hash_dict
 
 
 class AiCpuModel(ParserModel):

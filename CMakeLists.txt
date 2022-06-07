@@ -14,7 +14,7 @@ find_package(ascend_protobuf_shared)
 find_package(ascend_protobuf_static)
 
 ########################## securec ###################################
-set(SECUREC_DIR ${TOP_DIR}/opensource/securec)
+set(SECUREC_DIR ${TOP_DIR}/platform/securec)
 file(GLOB_RECURSE SECUREC_SRC ${SECUREC_DIR}/src/*.c)
 
 add_library(c_sec SHARED

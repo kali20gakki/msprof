@@ -47,7 +47,7 @@ class AcsqTaskParser(IStarsParser):
                 task_map[task_key] = {data.func_type: [data]}
 
         result_list = []
-        for task_key, data_dict in task_map.items():
+        for data_dict in task_map.values():
             start_que = data_dict.get(StarsConstant.ACSQ_START_FUNCTYPE, [])
             end_que = data_dict.get(StarsConstant.ACSQ_END_FUNCTYPE, [])
             if len(start_que) != len(end_que):

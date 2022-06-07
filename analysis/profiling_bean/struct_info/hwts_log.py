@@ -34,7 +34,7 @@ class HwtsLogBean(StructDecoder):
         return self._task_id
 
     @property
-    def stream_id(self: any) -> str:
+    def stream_id(self: any) -> int:
         """
         for stream id
         """

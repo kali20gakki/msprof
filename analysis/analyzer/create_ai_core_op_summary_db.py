@@ -6,7 +6,6 @@ Copyright Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
 import logging
 import os
 import sqlite3
-import sys
 
 from analyzer.get_op_table_task_time import GetOpTableTsTime
 from analyzer.op_common_function import OpCommonFunc
@@ -18,6 +17,7 @@ from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msprof_exception import ProfException
+from common_func.msprof_iteration import MsprofIteration
 from common_func.msvp_constant import MsvpConstant
 from common_func.path_manager import PathManager
 
@@ -30,6 +30,7 @@ class ParseAiCoreOpSummary:
     TRAIN_TASK_TIME_COL_NUM = 7
     TABLE_PATH = os.path.join(MsvpConstant.CONFIG_PATH, 'Tables.ini')
     TRAIN_TABLE_PATH = os.path.join(MsvpConstant.CONFIG_PATH, 'Tables_training.ini')
+    TABLES_PATH = os.path.join(MsvpConstant.CONFIG_PATH, 'Tables.ini')
 
     def __init__(self: any, sample_config: dict) -> None:
         self.sample_config = sample_config
@@ -86,23 +87,10 @@ class ParseAiCoreOpSummary:
         os.chmod(conn_path, NumberConstant.FILE_AUTHORITY)
         return conn, curs
 
-    def _get_ge_sql(self: any) -> tuple:
-        ge_sql = "SELECT model_id, batch_id, task_id, stream_id, " \
-                 "op_name, op_type, block_dim, task_type, timestamp from {0} where " \
-                 "(index_id=? or index_id=0)".format(DBNameConstant.TABLE_GE_TASK)
-        if ProfilingScene().is_step_trace():
-            ge_sql = "SELECT model_id, batch_id, task_id, stream_id, " \
-                     "op_name, op_type, block_dim, task_type, timestamp from {0} where " \
-                     "(index_id=? or index_id=0) " \
-                     "and model_id=?" \
-                .format(DBNameConstant.TABLE_GE_TASK)
-            return ge_sql, (self.iter_id, self.model_id)
-        return ge_sql, (self.iter_id,)
-
     def create_ge_summary_table(self: any, conn: any) -> None:
         """
         create ge summary table
-        :param curs: sqlite curs
+        :param conn: sqlite curs
         :return: None
         """
         if not DBManager.check_tables_in_db(self.get_db_path(DBNameConstant.DB_GE_INFO), DBNameConstant.TABLE_GE_TASK):
@@ -112,9 +100,11 @@ class ParseAiCoreOpSummary:
         if not DBManager.attach_to_db(conn, self.project_path, DBNameConstant.DB_GE_INFO, "ge_info"):
             logging.warning("unable to create ge summary table, because attach db of ge failed.")
             return
-        ge_merge_sql, sql_param = self._get_ge_sql()
-        create_ge_summary_sql = "create table if not exists ge_summary as {}".format(ge_merge_sql)
-        DBManager.execute_sql(conn, create_ge_summary_sql, sql_param)
+        ge_create_sql = DBManager.sql_create_general_table("GeSummaryMap",
+                                                           DBNameConstant.TABLE_SUMMARY_GE, self.TABLES_PATH)
+        DBManager.execute_sql(conn, ge_create_sql)
+        ge_data = self._get_ge_data(conn)
+        DBManager.insert_data_into_table(conn, DBNameConstant.TABLE_SUMMARY_GE, ge_data)
 
     def create_ge_tensor_table(self: any, conn: any) -> None:
         """
@@ -125,11 +115,18 @@ class ParseAiCoreOpSummary:
             logging.warning("unable to create ge tensor table, because table %s is not found.",
                             DBNameConstant.TABLE_GE_TENSOR)
             return
-        ge_tensor_sql = "select * from {0} where (index_id={1} or index_id=0)" \
-            .format(DBNameConstant.TABLE_GE_TENSOR, self.iter_id)
-        create_ge_tensor_sql = "create table if not exists {0} as {1}" \
-            .format(DBNameConstant.TABLE_SUMMARY_TENSOR, ge_tensor_sql)
-        DBManager.execute_sql(conn, create_ge_tensor_sql)
+        ge_tensor_create_sql = DBManager.sql_create_general_table("GeTensorMap",
+                                                                  DBNameConstant.TABLE_SUMMARY_TENSOR, self.TABLES_PATH)
+        DBManager.execute_sql(conn, ge_tensor_create_sql)
+        ge_data = []
+        iter_dict = MsprofIteration(self.project_path).get_iter_dict_with_index_and_model(self.iter_id, self.model_id)
+        ge_tensor_sql = "select * from {0} where " \
+                        "(index_id=? or index_id=0) and model_id=?" \
+            .format(DBNameConstant.TABLE_GE_TENSOR)
+        for index_and_model in iter_dict.values():
+            ge_data.extend(DBManager.fetch_all_data(conn.cursor(), ge_tensor_sql, index_and_model))
+
+        DBManager.insert_data_into_table(conn, DBNameConstant.TABLE_SUMMARY_TENSOR, ge_data)
 
     def create_ai_core_metrics_table(self: any, conn: any) -> None:
         """
@@ -213,3 +210,14 @@ class ParseAiCoreOpSummary:
             self.create_summary_table()
         except sqlite3.Error as err:
             logging.error(err, exc_info=Constant.TRACE_BACK_SWITCH)
+
+    def _get_ge_data(self: any, conn: any) -> list:
+        ge_data = []
+        iter_dict = MsprofIteration(self.project_path).get_iter_dict_with_index_and_model(self.iter_id, self.model_id)
+        ge_sql = "SELECT model_id, batch_id, task_id, stream_id, " \
+                 "op_name, op_type, block_dim, task_type, timestamp, index_id from {0} where " \
+                 "(index_id=? or index_id=0) and model_id=?" \
+            .format(DBNameConstant.TABLE_GE_TASK)
+        for index_and_model in iter_dict.values():
+            ge_data.extend(DBManager.fetch_all_data(conn.cursor(), ge_sql, index_and_model))
+        return ge_data

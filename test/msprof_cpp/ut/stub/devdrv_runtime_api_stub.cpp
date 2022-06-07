@@ -134,8 +134,6 @@ int dsmi_get_device_info(unsigned int device_id, unsigned int main_cmd, unsigned
 namespace Analysis {
 namespace Dvvp {
 namespace Plugin {
-ProfApiPlugin::~ProfApiPlugin() {}
-
 bool ProfApiPlugin::IsFuncExist(const std::string &funcName) const
 {
     return true;

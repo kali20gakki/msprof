@@ -153,6 +153,26 @@ class CreateTrainingTrace(CreateSubTable):
     db_name = DBNameConstant.DB_TRACE
     table_name = DBNameConstant.TABLE_TRAINING_TRACE
 
+    @staticmethod
+    def check_timestamp(model_id: int, index_id: int, step_start: int, step_end: int) -> None:
+        """
+        check timestamp
+        :param model_id: model id
+        :param index_id: index id
+        :param step_start: starting timestamp of a iter
+        :param step_end: ending timestamp of a iter
+        :return:
+        """
+        if step_start == NumberConstant.NULL_NUMBER or step_end == NumberConstant.NULL_NUMBER:
+            logging.error("step time is None, step start: %d, step end: %d, "
+                          "model id: %d, index id: %d", step_start, step_end, model_id, index_id)
+            raise ProfException(ProfException.PROF_INVALID_STEP_TRACE_ERROR)
+
+        if step_start == step_end:
+            logging.error("start time equals to end time, step start: %d, step end: %d, "
+                          "model id: %d, index id: %d", step_start, step_end, model_id, index_id)
+            raise ProfException(ProfException.PROF_INVALID_STEP_TRACE_ERROR)
+
     @classmethod
     def extract_data(cls: any, collect_data: any) -> None:
         for model_id, model_data in collect_data.items():
@@ -178,26 +198,6 @@ class CreateTrainingTrace(CreateSubTable):
         insert_sql = 'insert into {0} values ({1})'.format(
             DBNameConstant.TABLE_TRAINING_TRACE, ",".join("?" * len(cls.data[0])))
         DBManager.executemany_sql(conn, insert_sql, cls.data)
-
-    @staticmethod
-    def check_timestamp(model_id: int, index_id: int, step_start: int, step_end: int) -> None:
-        """
-        check timestamp
-        :param model_id: model id
-        :param index_id: index id
-        :param step_start: starting timestamp of a iter
-        :param step_end: ending timestamp of a iter
-        :return:
-        """
-        if step_start == NumberConstant.NULL_NUMBER or step_end == NumberConstant.NULL_NUMBER:
-            logging.error("step time is None, step start: %d, step end: %d, "
-                          "model id: %d, index id: %d", step_start, step_end, model_id, index_id)
-            raise ProfException(ProfException.PROF_INVALID_STEP_TRACE_ERROR)
-
-        if step_start == step_end:
-            logging.error("start time equals to end time, step start: %d, step end: %d, "
-                          "model id: %d, index id: %d", step_start, step_end, model_id, index_id)
-            raise ProfException(ProfException.PROF_INVALID_STEP_TRACE_ERROR)
 
     @classmethod
     def update_data(cls: any, model_id: int, index_id: int, index_data: dict) -> None:
@@ -282,17 +282,6 @@ class StepTableBuilder:
     step_conn = None
     step_curs = None
 
-    @classmethod
-    def _get_step_data(cls: any, table_name: str) -> list:
-        if not DBManager.judge_table_exist(cls.step_curs, table_name):
-            return []
-
-        # iteration range table
-        select_sql = "select DISTINCT index_id, model_id, " \
-                     "timestamp, tag_id from {}".format(table_name)
-
-        return DBManager.fetch_all_data(cls.step_curs, select_sql)
-
     @staticmethod
     def to_dict(record: list) -> dict:
         """
@@ -333,6 +322,31 @@ class StepTableBuilder:
             create_table.run(sample_config, cls.model_handler)
 
     @classmethod
+    def run(cls: any, sample_config: dict) -> None:
+        """
+        run class
+        :param sample_config: sample config
+        :return: void
+        """
+        cls._connect_step_db(sample_config)
+        step_trace_data = cls._get_step_trace_data()
+        if not step_trace_data:
+            return
+        cls.process_step_trace(step_trace_data)
+        cls.build_table(sample_config)
+
+    @classmethod
+    def _get_step_data(cls: any, table_name: str) -> list:
+        if not DBManager.judge_table_exist(cls.step_curs, table_name):
+            return []
+
+        # iteration range table
+        select_sql = "select DISTINCT index_id, model_id, " \
+                     "timestamp, tag_id from {}".format(table_name)
+
+        return DBManager.fetch_all_data(cls.step_curs, select_sql)
+
+    @classmethod
     def _connect_step_db(cls: any, sample_config: dict) -> None:
         db_path = PathManager.get_db_path(sample_config.get("result_dir"), DBNameConstant.DB_STEP_TRACE)
         cls.step_conn, cls.step_curs = DBManager.check_connect_db_path(db_path)
@@ -349,17 +363,3 @@ class StepTableBuilder:
         _step_trace = sorted(step_trace_data, key=lambda x: float(x[2]))
         DBManager.destroy_db_connect(cls.step_conn, cls.step_curs)
         return _step_trace
-
-    @classmethod
-    def run(cls: any, sample_config: dict) -> None:
-        """
-        run class
-        :param sample_config: sample config
-        :return: void
-        """
-        cls._connect_step_db(sample_config)
-        step_trace_data = cls._get_step_trace_data()
-        if not step_trace_data:
-            return
-        cls.process_step_trace(step_trace_data)
-        cls.build_table(sample_config)

@@ -31,13 +31,6 @@ class QueryCommand:
     def __init__(self: any, collection_path: str) -> None:
         self.collection_path = os.path.realpath(collection_path)
 
-    def check_argument_valid(self: any) -> None:
-        """
-        Check the argument valid
-        :return: None
-        """
-        check_path_valid(self.collection_path, False)
-
     @staticmethod
     def _calculate_str_length(headers: list, data: list) -> list:
         max_header_list = Utils.generator_to_list(len(header) for header in headers)
@@ -46,6 +39,18 @@ class QueryCommand:
             max_data_list = Utils.generator_to_list(len(str(_element)) for _element in _data)
             max_column_list = Utils.generator_to_list(max(_element) for _element in zip(max_data_list, max_column_list))
         return max_column_list
+
+    @staticmethod
+    def _do_get_query_data(result_dir: str) -> list:
+        result_data = []
+        LoadInfoManager().load_info(result_dir)
+        result = MsprofQueryData(result_dir).query_data()
+        for _result in result:
+            result_data.append([_result.job_info, _result.device_id,
+                                _result.job_name, _result.collection_time,
+                                _result.model_id, _result.iteration_id,
+                                _result.top_time_iteration])
+        return result_data
 
     @classmethod
     def _format_print(cls: any, data: list, headers: list = None) -> None:
@@ -72,17 +77,22 @@ class QueryCommand:
             print(str(header).ljust(max_column_list[index], ' '), end="\t")
         print("\n")
 
-    @staticmethod
-    def _do_get_query_data(result_dir: str) -> list:
-        result_data = []
-        LoadInfoManager().load_info(result_dir)
-        result = MsprofQueryData(result_dir).query_data()
-        for _result in result:
-            result_data.append([_result.job_info, _result.device_id,
-                                _result.job_name, _result.collection_time,
-                                _result.model_id, _result.iteration_id,
-                                _result.top_time_iteration])
-        return result_data
+    def check_argument_valid(self: any) -> None:
+        """
+        Check the argument valid
+        :return: None
+        """
+        check_path_valid(self.collection_path, False)
+
+    def process(self: any) -> None:
+        """
+        handle query command
+        :return: None
+        """
+        self.check_argument_valid()
+        table_data = self._get_query_data()
+        sorted_table_data = sorted(table_data, key=itemgetter(0, 3))
+        self._format_print(sorted_table_data)
 
     def _get_query_data(self: any) -> list:
         result_data = []
@@ -103,13 +113,3 @@ class QueryCommand:
                         warn(self.FILE_NAME, 'Invalid parsing dir("%s"), -dir must be profiling data dir '
                                              'such as PROF_XXX_XXX_XXX' % self.collection_path)
         return result_data
-
-    def process(self: any) -> None:
-        """
-        handle query command
-        :return: None
-        """
-        self.check_argument_valid()
-        table_data = self._get_query_data()
-        sorted_table_data = sorted(table_data, key=itemgetter(0, 3))
-        self._format_print(sorted_table_data)

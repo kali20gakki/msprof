@@ -6,10 +6,8 @@ Copyright Huawei Technologies Co., Ltd. 2018-2019. All rights reserved.
 """
 import logging
 import os
-import sqlite3
 
 from common_func.common import check_number_valid
-from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.utils import Utils
@@ -20,18 +18,13 @@ class TimeSaver:
     saver of time data
     """
 
-    @classmethod
-    def save_data_to_db(cls: any, message: dict) -> bool:
+    @staticmethod
+    def create_timedb_conn(sql_path: str) -> tuple:
         """
-        Rewrite gRPC TimeSync method.
-        Insert TimeMessage protobuf into time table and report status.
+        create time DB connection
         """
-        cls._check_time_format(message)
-        conn, curs = TimeSaver.create_timedb_conn(message["sql_path"])
-        TimeSaver._create_table(conn)
-        result = TimeSaver._insert_time_data(conn, message)
-        DBManager.destroy_db_connect(conn, curs)
-        return result
+        conn, curs = DBManager.create_connect_db(os.path.join(sql_path, DBNameConstant.DB_TIME))
+        return conn, curs
 
     @staticmethod
     def _check_time_format(message: dict) -> bool:
@@ -74,10 +67,15 @@ class TimeSaver:
         DBManager.executemany_sql(conn, insert_sql, data)
         return True
 
-    @staticmethod
-    def create_timedb_conn(sql_path: str) -> tuple:
+    @classmethod
+    def save_data_to_db(cls: any, message: dict) -> bool:
         """
-        create time DB connection
+        Rewrite gRPC TimeSync method.
+        Insert TimeMessage protobuf into time table and report status.
         """
-        conn, curs = DBManager.create_connect_db(os.path.join(sql_path, DBNameConstant.DB_TIME))
-        return conn, curs
+        cls._check_time_format(message)
+        conn, curs = TimeSaver.create_timedb_conn(message["sql_path"])
+        TimeSaver._create_table(conn)
+        result = TimeSaver._insert_time_data(conn, message)
+        DBManager.destroy_db_connect(conn, curs)
+        return result
