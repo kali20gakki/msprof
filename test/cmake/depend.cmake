@@ -1,7 +1,7 @@
-set(OPENSOURCE_DIR ${TOP_DIR}/opensource)
+set(PLATFORM_DIR ${TOP_DIR}/platform)
 set(COLLECT_DIR ${TOP_DIR}/collector)
 ########################### securec ############################
-set(SECUREC_DIR ${OPENSOURCE_DIR}/securec)
+set(SECUREC_DIR ${PLATFORM_DIR}/securec)
 file(GLOB_RECURSE SECUREC_SRC ${SECUREC_DIR}/src/*.c)
 
 add_library(c_sec_static STATIC

@@ -44,29 +44,6 @@ class InterConnectionView:
                                             accuracy=NumberConstant.DECIMAL_ACCURACY)
         return sql
 
-    def get_hccs_data(self: any, dev_id: str) -> tuple:
-        """
-        get hccs data
-        """
-        db_path = PathManager.get_db_path(self.result_dir, DBNameConstant.DB_HCCS)
-        conn, curs = DBManager.check_connect_db_path(db_path)
-        sql = InterConnectionView._get_hccs_sql_str()
-        try:
-            hccs_throughput = curs.execute(sql, (dev_id,)).fetchone()
-        except sqlite3.Error:
-            return MsvpConstant.MSVP_EMPTY_DATA
-        finally:
-            DBManager.destroy_db_connect(conn, curs)
-        if not hccs_throughput:
-            return MsvpConstant.MSVP_EMPTY_DATA
-        for item in hccs_throughput:
-            if item is None:
-                return MsvpConstant.MSVP_EMPTY_DATA
-        _result = [["Tx (MB/s)"] + list(hccs_throughput[0:3]),
-                   ["Rx (MB/s)"] + list(hccs_throughput[3:])]
-        headers = ["Mode", "Max", "Min", "Average"]
-        return headers, _result, len(_result)
-
     @staticmethod
     def _get_pcie_sql_str() -> str:
         sql = "select timestamp, device_id, round(AVG(tx_p_bandwidth_min), {accuracy})," \
@@ -90,6 +67,29 @@ class InterConnectionView:
               "tx_p_bandwidth_max >= tx_p_bandwidth_min". \
             format(accuracy=NumberConstant.DECIMAL_ACCURACY)
         return sql
+
+    def get_hccs_data(self: any, dev_id: str) -> tuple:
+        """
+        get hccs data
+        """
+        db_path = PathManager.get_db_path(self.result_dir, DBNameConstant.DB_HCCS)
+        conn, curs = DBManager.check_connect_db_path(db_path)
+        sql = InterConnectionView._get_hccs_sql_str()
+        try:
+            hccs_throughput = curs.execute(sql, (dev_id,)).fetchone()
+        except sqlite3.Error:
+            return MsvpConstant.MSVP_EMPTY_DATA
+        finally:
+            DBManager.destroy_db_connect(conn, curs)
+        if not hccs_throughput:
+            return MsvpConstant.MSVP_EMPTY_DATA
+        for item in hccs_throughput:
+            if item is None:
+                return MsvpConstant.MSVP_EMPTY_DATA
+        _result = [["Tx (MB/s)"] + list(hccs_throughput[0:3]),
+                   ["Rx (MB/s)"] + list(hccs_throughput[3:])]
+        headers = ["Mode", "Max", "Min", "Average"]
+        return headers, _result, len(_result)
 
     def get_pcie_summary_data(self: any) -> tuple:
         """

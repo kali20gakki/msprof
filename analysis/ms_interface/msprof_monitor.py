@@ -20,7 +20,7 @@ from common_func.constant import Constant
 from common_func.data_check_manager import DataCheckManager
 from common_func.file_manager import FileManager
 from common_func.ms_constant.number_constant import NumberConstant
-from common_func.msprof_common import MsProfCommonConstant
+from common_func.msprof_common import MsProfCommonConstant, update_sample_json
 from common_func.msprof_common import add_all_file_complete
 from common_func.msprof_common import check_path_valid
 from common_func.msprof_exception import ProfException
@@ -42,6 +42,37 @@ class JobDispatcher:
     def __init__(self: any, collection_path: str) -> None:
         self.collection_path = os.path.realpath(collection_path)
         self.dispatch_path = PathManager.get_dispatch_dir(self.collection_path)
+
+    def add_symlink(self: any) -> None:
+        """
+        add symlink for jobxxx
+        :return: None
+        """
+        check_path_valid(self.dispatch_path, True)
+        self._clean_invalid_dispatch_symlink()
+        for job_tag in os.listdir(self.collection_path):
+            self._add_symlink_by_job_tag(job_tag)
+
+    def process(self: any) -> None:
+        """
+        process dispatch
+        :return: None
+        """
+        print_info(self.SCRIPT_NAME, "Start running profiling dispatch client.")
+        try:
+            while True:
+                try:
+                    self.add_symlink()
+                except (OSError, SystemError, ValueError, TypeError,
+                        RuntimeError, ProfException) as err:
+                    logging.error(err, exc_info=Constant.TRACE_BACK_SWITCH)
+                # dispatch process cycle interval:3s
+                time.sleep(3)
+        except KeyboardInterrupt:
+            print_info(self.SCRIPT_NAME, "KeyboardInterrupt")
+            sys.exit(0)
+        finally:
+            pass
 
     def _add_symlink_by_job_tag(self: any, job_tag: str) -> None:
         job_realpath = os.path.realpath(os.path.join(self.collection_path, job_tag))
@@ -66,16 +97,6 @@ class JobDispatcher:
                 RuntimeError, ProfException) as err:
             logging.error(err, exc_info=Constant.TRACE_BACK_SWITCH)
 
-    def add_symlink(self: any) -> None:
-        """
-        add symlink for jobxxx
-        :return: None
-        """
-        check_path_valid(self.dispatch_path, True)
-        self._clean_invalid_dispatch_symlink()
-        for job_tag in os.listdir(self.collection_path):
-            self._add_symlink_by_job_tag(job_tag)
-
     def _clean_invalid_dispatch_symlink_by_client_num(self: any, client_num: str) -> None:
         client_num_path = os.path.join(self.dispatch_path, client_num)
         try:
@@ -98,27 +119,6 @@ class JobDispatcher:
         for client_num in os.listdir(self.dispatch_path):
             self._clean_invalid_dispatch_symlink_by_client_num(client_num)
 
-    def process(self: any) -> None:
-        """
-        process dispatch
-        :return: None
-        """
-        print_info(self.SCRIPT_NAME, "Start running profiling dispatch client.")
-        try:
-            while True:
-                try:
-                    self.add_symlink()
-                except (OSError, SystemError, ValueError, TypeError,
-                        RuntimeError, ProfException) as err:
-                    logging.error(err, exc_info=Constant.TRACE_BACK_SWITCH)
-                # dispatch process cycle interval:3s
-                time.sleep(3)
-        except KeyboardInterrupt:
-            print_info(self.SCRIPT_NAME, "KeyboardInterrupt")
-            sys.exit(0)
-        finally:
-            pass
-
 
 class JobMonitor:
     """
@@ -128,6 +128,19 @@ class JobMonitor:
 
     def __init__(self: any, monitor_path: str) -> None:
         self.monitor_path = monitor_path
+
+    @staticmethod
+    def _launch_parsing_job_data(result_dir: str, sample_config: dict, tag_id: str) -> None:
+        job_sample_config = {
+            "result_dir": result_dir, "tag_id": tag_id, "host_id": MsProfCommonConstant.DEFAULT_IP,
+            "sql_path": PathManager.get_sql_dir(result_dir)}
+        target_collection = AI(
+            {**sample_config, **job_sample_config})
+        target_collection.import_control_flow()
+        update_sample_json(sample_config, result_dir)
+        file_dispatch = FileDispatch({**sample_config, **job_sample_config})
+        file_dispatch.dispatch_parser()
+        add_all_file_complete(result_dir)
 
     def analyze_data(self: any) -> None:
         """
@@ -174,18 +187,6 @@ class JobMonitor:
             check_path_valid(PathManager.get_sql_dir(job_path), True)
             clear_project_dirs(job_path)
             self._launch_parsing_job_data(job_path, sample_config, job_tag)
-
-    @staticmethod
-    def _launch_parsing_job_data(result_dir: str, sample_config: dict, tag_id: str) -> None:
-        job_sample_config = {
-            "result_dir": result_dir, "tag_id": tag_id, "host_id": MsProfCommonConstant.DEFAULT_IP,
-            "sql_path": PathManager.get_sql_dir(result_dir)}
-        target_collection = AI(
-            {**sample_config, **job_sample_config})
-        target_collection.import_control_flow()
-        file_dispatch = FileDispatch({**sample_config, **job_sample_config})
-        file_dispatch.dispatch_parser()
-        add_all_file_complete(result_dir)
 
 
 def _monitor_job(num: int, collection_path: str) -> None:

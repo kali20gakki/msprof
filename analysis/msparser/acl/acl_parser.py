@@ -35,26 +35,20 @@ class AclParser(IParser, MsMultiProcess):
         self._acl_data = []
         self._device_id = self._sample_config.get("device_id", "0")
 
-    def _insert_acl_data(self: any, file_path: str, file_size: int, file_list: list) -> None:
-        offset_calculator = OffsetCalculator(file_list, StructFmt.ACL_FMT_SIZE,
-                                             self._project_path)
-        struct_size = StructFmt.ACL_FMT_SIZE
-        with open(file_path, 'rb') as _acl_file:
-            _all_acl_data = offset_calculator.pre_process(_acl_file, file_size)
-            for _index in range(file_size // struct_size):
-                acl_data_bean = AclDataBean().acl_decode(
-                    _all_acl_data[_index * struct_size:(_index + 1) * struct_size])
-
-                if acl_data_bean:
-                    self._acl_data.append([
-                        acl_data_bean.api_name,
-                        acl_data_bean.api_type,
-                        acl_data_bean.api_start,
-                        acl_data_bean.api_end,
-                        acl_data_bean.process_id,
-                        acl_data_bean.thread_id,
-                        self._device_id
-                    ])
+    @staticmethod
+    def group_file_list(file_list: list) -> dict:
+        """
+        Grouping Files
+        :return: dict
+        """
+        result_dict = {'acl_model': [],
+                       'acl_op': [],
+                       'acl_rts': [],
+                       'acl_others': []}
+        for file in file_list:
+            if file.split('.')[1] in result_dict.keys():
+                result_dict.get(file.split('.')[1], []).append(file)
+        return result_dict
 
     def parse(self: any) -> None:
         """
@@ -76,21 +70,6 @@ class AclParser(IParser, MsMultiProcess):
                     "start parsing acl data file: %s", _file)
                 self._insert_acl_data(_file_path, _file_size, file_list)
                 FileManager.add_complete_file(self._project_path, _file)
-
-    @staticmethod
-    def group_file_list(file_list: list) -> dict:
-        """
-        Grouping Files
-        :return: dict
-        """
-        result_dict = {'acl_model': [],
-                       'acl_op': [],
-                       'acl_rts': [],
-                       'acl_others': []}
-        for file in file_list:
-            if file.split('.')[1] in result_dict.keys():
-                result_dict.get(file.split('.')[1], []).append(file)
-        return result_dict
 
     def save(self: any) -> None:
         """
@@ -115,3 +94,24 @@ class AclParser(IParser, MsMultiProcess):
             logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
             return
         self.save()
+
+    def _insert_acl_data(self: any, file_path: str, file_size: int, file_list: list) -> None:
+        offset_calculator = OffsetCalculator(file_list, StructFmt.ACL_FMT_SIZE,
+                                             self._project_path)
+        struct_size = StructFmt.ACL_FMT_SIZE
+        with open(file_path, 'rb') as _acl_file:
+            _all_acl_data = offset_calculator.pre_process(_acl_file, file_size)
+            for _index in range(file_size // struct_size):
+                acl_data_bean = AclDataBean().acl_decode(
+                    _all_acl_data[_index * struct_size:(_index + 1) * struct_size])
+
+                if acl_data_bean:
+                    self._acl_data.append([
+                        acl_data_bean.api_name,
+                        acl_data_bean.api_type,
+                        acl_data_bean.api_start,
+                        acl_data_bean.api_end,
+                        acl_data_bean.process_id,
+                        acl_data_bean.thread_id,
+                        self._device_id
+                    ])

@@ -45,6 +45,7 @@ from ms_interface.msprof_job_summary import MsprofJobSummary
 from ms_interface.msprof_timeline import MsprofTimeline
 from profiling_bean.prof_enum.export_data_type import ExportDataType
 from tuning.profiling_tuning import ProfilingTuning
+from tuning.cluster_tuning import ClusterTuning
 from viewer.top_down_report import TopDownData
 from viewer.tuning_view import TuningView
 
@@ -115,6 +116,8 @@ class ExportCommand:
              'handler': AiStackDataCheckManager.contain_stars_low_power_data},
             {'export_type': ExportDataType.BIU_PERF,
              'handler': AiStackDataCheckManager.contain_biu_perf_data},
+            {'export_type': ExportDataType.ACC_PMU,
+             'handler': AiStackDataCheckManager.contain_stars_soc_data},
             {'export_type': ExportDataType.MSPROF,
              'handler': lambda result_dir, device_id=None: True}
         ],
@@ -212,24 +215,32 @@ class ExportCommand:
             'model_id': getattr(args, self.MODEL_ID),
             'input_model_id': args.model_id is not None
         }
+        self._cluster_params = {'is_cluster_scene': False, 'cluster_path': []}
 
-    def check_argument_valid(self: any) -> None:
+    @staticmethod
+    def get_model_id_set(result_dir: str, db_name: str, table_name: str) -> any:
         """
-        Check the argument valid
-        :return: None
+        get model id set
+        :param result_dir: result dir
+        :param db_name: db name
+        :param table_name: table name
+        :return: model_ids_set
         """
-        if self.input_iteration:  # has args iteration
-            if self.iteration_id <= 0:  # invalid
-                error(self.FILE_NAME, 'The iteration id (%d) is invalid. Must be'
-                                      ' greater than 0. Please enter a'
-                                      ' valid iteration id.' % self.iteration_id)
-                raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR)
+        db_path = PathManager.get_db_path(result_dir, db_name)
+        conn, curs = DBManager.check_connect_db_path(db_path)
+        if not conn or not curs or not DBManager.check_tables_in_db(db_path, table_name):
+            logging.warning(
+                "Can not get model id from framework data, maybe framework data is not collected,"
+                " try to export data with no framework data.")
+            DBManager.destroy_db_connect(conn, curs)
+            return set()
 
-    def _add_export_type(self: any, result_dir: str) -> None:
-        export_map = self.EXPORT_HANDLE_MAP.get(self.command_type, [])
-        for item in export_map:
-            if item['handler'](result_dir):
-                self.list_map.get('export_type_list').append(item)
+        sql = "select model_id from {0}".format(table_name)
+        model_ids = DBManager.fetch_all_data(curs, sql)
+        model_ids_set = {model_id[0] for model_id in model_ids}
+        DBManager.destroy_db_connect(conn, curs)
+
+        return model_ids_set
 
     @staticmethod
     def _init_index_id_env(profiling_scene: any, project_path: str) -> tuple:
@@ -254,6 +265,39 @@ class ExportCommand:
             init_success = False
         init_result = (init_success, sql, conn, curs)
         return init_result
+
+    def check_argument_valid(self: any) -> None:
+        """
+        Check the argument valid
+        :return: None
+        """
+        if self.input_iteration:  # has args iteration
+            if self.iteration_id <= 0:  # invalid
+                error(self.FILE_NAME, 'The iteration id (%d) is invalid. Must be'
+                                      ' greater than 0. Please enter a'
+                                      ' valid iteration id.' % self.iteration_id)
+                raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR)
+
+    def process(self: any) -> None:
+        """
+        handle export command
+        :return: None
+        """
+        check_path_valid(self.collection_path, False)
+        if DataCheckManager.contain_info_json_data(self.collection_path):  # find profiling data dir
+            InfoConfReader().load_info(self.collection_path)
+            self._handle_export(os.path.realpath(self.collection_path))
+            self._show_tuning_result(os.path.realpath(self.collection_path))
+        else:
+            self._process_sub_dirs()
+            if self._cluster_params.get('is_cluster_scene', False):
+                self._show_cluster_tuning()
+
+    def _add_export_type(self: any, result_dir: str) -> None:
+        export_map = self.EXPORT_HANDLE_MAP.get(self.command_type, [])
+        for item in export_map:
+            if item['handler'](result_dir):
+                self.list_map.get('export_type_list').append(item)
 
     def _check_index_id(self: any, project_path: str) -> None:
         """
@@ -299,31 +343,6 @@ class ExportCommand:
             print_info(self.FILE_NAME, 'The data in "%s" has been analyzed.'
                        % result_dir)
 
-    @staticmethod
-    def get_model_id_set(result_dir: str, db_name: str, table_name: str) -> any:
-        """
-        get model id set
-        :param result_dir: result dir
-        :param db_name: db name
-        :param table_name: table name
-        :return: model_ids_set
-        """
-        db_path = PathManager.get_db_path(result_dir, db_name)
-        conn, curs = DBManager.check_connect_db_path(db_path)
-        if not conn or not curs or not DBManager.check_tables_in_db(db_path, table_name):
-            logging.warning(
-                "Can not get model id from framework data, maybe framework data is not collected,"
-                " try to export data with no framework data.")
-            DBManager.destroy_db_connect(conn, curs)
-            return set()
-
-        sql = "select model_id from {0}".format(table_name)
-        model_ids = DBManager.fetch_all_data(curs, sql)
-        model_ids_set = {model_id[0] for model_id in model_ids}
-        DBManager.destroy_db_connect(conn, curs)
-
-        return model_ids_set
-
     def _check_model_id(self: any, result_dir: str) -> None:
         """
         check model id
@@ -334,7 +353,7 @@ class ExportCommand:
         profiling_scene.init(result_dir)
 
         if not profiling_scene.is_step_trace():
-            self.list_map[self.MODEL_ID] = NumberConstant.DEFAULT_MODEL_ID
+            self.list_map[self.MODEL_ID] = Constant.GE_OP_MODEL_ID
             return
 
         model_ids_ge = ExportCommand.get_model_id_set(
@@ -355,6 +374,8 @@ class ExportCommand:
 
         if not self.list_map.get(self.INPUT_MODEL_ID):
             self.list_map[self.MODEL_ID] = min(model_match_set)
+            if Utils.is_single_op_graph_mix(result_dir):
+                self.list_map[self.MODEL_ID] = Constant.GE_OP_MODEL_ID
             return
 
         model_id = self.list_map.get(self.MODEL_ID)
@@ -487,36 +508,39 @@ class ExportCommand:
             return
         ProfilingTuning.run(result_dir, self.iteration_id)
         sample_config = {}
-        tuning_view = TuningView(result_dir, sample_config)
-        tuning_view.show_by_dev_id(self.list_map.get("devices_list")[0])
+        tuning_view = TuningView(result_dir, sample_config, self.list_map.get("devices_list")[0])
+        tuning_view.show_by_dev_id()
 
-    def process(self: any) -> None:
-        """
-        handle export command
-        :return: None
-        """
-        check_path_valid(self.collection_path, False)
-        if DataCheckManager.contain_info_json_data(self.collection_path):  # find profiling data dir
-            InfoConfReader().load_info(self.collection_path)
-            self._handle_export(os.path.realpath(self.collection_path))
-            self._show_tuning_result(os.path.realpath(self.collection_path))
-        else:
-            self._process_sub_dirs()
+    def _show_cluster_tuning(self) -> None:
+        if self.command_type != MsProfCommonConstant.SUMMARY:
+            return
+        ClusterTuning(self._cluster_params.get('cluster_path')).run()
 
-    def _process_sub_dirs(self: any) -> None:
-        sub_dirs = get_path_dir(self.collection_path)
+    def _update_cluster_params(self: any, sub_path: str, is_cluster: bool) -> None:
+        if is_cluster:
+            self._cluster_params['is_cluster_scene'] = True
+            self._cluster_params.setdefault('cluster_path', []).append(sub_path)
+
+    def _process_sub_dirs(self: any, sub_path: str = '', is_cluster: bool = False) -> None:
+        collect_path = self.collection_path
+        if sub_path:
+            collect_path = os.path.join(self.collection_path, sub_path)
+        sub_dirs = get_path_dir(collect_path)
         for sub_dir in sub_dirs:  # result_dir
             if sub_dir != StrConstant.TIMELINE_PATH:
                 sub_path = os.path.realpath(
-                    os.path.join(self.collection_path, sub_dir))
+                    os.path.join(collect_path, sub_dir))
                 check_path_valid(sub_path, False)
                 if DataCheckManager.contain_info_json_data(sub_path):
+                    self._update_cluster_params(sub_path, is_cluster)
                     InfoConfReader().load_info(sub_path)
                     self._handle_export(sub_path)
                     self._show_tuning_result(sub_path)
-                else:
+                elif sub_path and is_cluster:
                     warn(self.FILE_NAME, 'Invalid parsing dir("%s"), -dir must be profiling data dir '
-                                         'such as PROF_XXX_XXX_XXX' % self.collection_path)
+                                         'such as PROF_XXX_XXX_XXX' % collect_path)
+                else:
+                    self._process_sub_dirs(sub_dir, is_cluster=True)
                 self.list_map['devices_list'] = ''
-        job_summary = MsprofJobSummary(self.collection_path)
+        job_summary = MsprofJobSummary(collect_path)
         job_summary.export()

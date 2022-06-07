@@ -12,13 +12,6 @@ class EmptyClass:
     def __init__(self: any, info: str = "") -> None:
         self._info = info
 
-    @staticmethod
-    def is_empty() -> bool:
-        """
-        return this is a empty class
-        """
-        return True
-
     @property
     def info(self: any) -> str:
         """
@@ -34,3 +27,10 @@ class EmptyClass:
     @classmethod
     def __str__(cls: any) -> str:
         return ""
+
+    @staticmethod
+    def is_empty() -> bool:
+        """
+        return this is a empty class
+        """
+        return True

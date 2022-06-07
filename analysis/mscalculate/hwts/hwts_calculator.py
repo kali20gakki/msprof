@@ -10,11 +10,14 @@ import os
 from analyzer.scene_base.profiling_scene import ProfilingScene
 from analyzer.op_common_function import OpCommonFunc
 from common_func.db_name_constant import DBNameConstant
+from common_func.empty_class import EmptyClass
 from common_func.info_conf_reader import InfoConfReader
+from common_func.iter_recorder import IterRecorder
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.constant import Constant
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.msprof_iteration import MsprofIteration
+from common_func.msprof_step import MsprofStep
 from common_func.path_manager import PathManager
 from common_func.utils import Utils
 from common_func.batch_counter import BatchCounter
@@ -47,6 +50,38 @@ class HwtsCalculator(ICalculator, MsMultiProcess):
         self._iter_model = HwtsIterModel(self._project_path)
         self._log_data = []
         self._file_list.sort(key=lambda x: int(x.split("_")[-1]))
+        self._iter_rec = IterRecorder(self._project_path)
+
+    def calculate(self: any) -> None:
+        """
+        calculate hwts data
+        :return: None
+        """
+        if ProfilingScene().is_operator():
+            self._parse_all_file()
+        else:
+            self._parse_by_iter()
+
+    def save(self: any) -> None:
+        """
+        save hwts data
+        :return: None
+        """
+        self._hwts_log_model.clear()
+        if self._log_data:
+            self._hwts_log_model.init()
+            self._hwts_log_model.flush(Utils.obj_list_to_list(self._log_data), DBNameConstant.TABLE_HWTS_TASK)
+            self._hwts_log_model.flush(self._add_batch_id(self._prep_data()), DBNameConstant.TABLE_HWTS_TASK_TIME)
+            self._hwts_log_model.finalize()
+
+    def ms_run(self: any) -> None:
+        """
+        entrance for calculating hwts
+        :return: None
+        """
+        if self._file_list:
+            self.calculate()
+            self.save()
 
     def _prep_data(self: any) -> list:
         """
@@ -74,13 +109,13 @@ class HwtsCalculator(ICalculator, MsMultiProcess):
             task_value.update({self.HWTS_TASK_START: task_satrt_list, self.HWTS_TASK_END: task_end_list})
             prep.update({index: task_value})
         train_data = []
+
         for index in prep:
             _index_value = prep.get(index)
             while _index_value.get(self.HWTS_TASK_START) and _index_value.get(self.HWTS_TASK_END):
                 train_data.append(tuple(list(index.split(",")) + [
-                    InfoConfReader().time_from_syscnt(_index_value[self.HWTS_TASK_START].pop(0)),
-                    InfoConfReader().time_from_syscnt(_index_value[self.HWTS_TASK_END].pop(0)),
-                    self._sample_config.get('iter_id'), self._sample_config.get('model_id')]))
+                    _index_value[self.HWTS_TASK_START].pop(0),
+                    _index_value[self.HWTS_TASK_END].pop(0)]))
         return sorted(train_data, key=lambda data: data[self.TASK_TIME_COMPLETE_INDEX])
 
     def _parse_by_iter(self: any) -> None:
@@ -90,9 +125,9 @@ class HwtsCalculator(ICalculator, MsMultiProcess):
         """
         if self._iter_model.check_db() and self._iter_model.check_table():
             _iter_id = MsprofIteration(self._project_path). \
-                get_iteration_id_by_index_id(self._sample_config.get("iter_id"), self._sample_config.get("model_id"))
+                get_iter_id_by_index_id(self._sample_config.get("iter_id"), self._sample_config.get("model_id"))
 
-            offset_count, total_count = self._iter_model.get_task_offset_and_sum(_iter_id, 'task_count')
+            offset_count, total_count = self._iter_model.get_task_offset_and_sum(_iter_id[0] + 1, 'task_count')
             if not total_count:
                 return
             _file_calculator = FileCalculator(self._file_list, self.HWTS_LOG_SIZE, self._project_path,
@@ -114,55 +149,36 @@ class HwtsCalculator(ICalculator, MsMultiProcess):
             for index, datum in enumerate(prep_data_res):
                 # index 0 stream id, index 1 task id
                 batch_id = batch_counter.calculate_batch(datum[0], datum[1])
-                prep_data_res[index] = list(datum) + [batch_id]
+                prep_data_res[index] = list(datum[:2]) + [
+                    InfoConfReader().time_from_syscnt(datum[2]),
+                    InfoConfReader().time_from_syscnt(datum[3]),
+                    self._sample_config.get('iter_id'),
+                    self._sample_config.get('model_id'),
+                    batch_id]
         else:
             self._iter_model.init()
             _iter_id = MsprofIteration(self._project_path). \
-                get_iteration_id_by_index_id(self._sample_config.get("iter_id"), self._sample_config.get("model_id"))
+                get_iter_id_by_index_id(self._sample_config.get("iter_id"), self._sample_config.get("model_id"))
             batch_list = self._iter_model.get_batch_list(_iter_id, DBNameConstant.TABLE_HWTS_BATCH)
 
             if len(batch_list) != len(prep_data_res):
                 logging.warning("hwts data can not match with batch id list.")
                 return []
-
-            for index, batch in enumerate(batch_list):
-                # type of batch is tuple
-                prep_data_res[index] = prep_data_res[index] + batch
+            with MsprofStep(self._project_path) as step_trace:
+                for index, batch in enumerate(batch_list):
+                    # type of batch is tuple
+                    self._iter_rec.set_current_iter_id(prep_data_res[index][2])
+                    model_id, index_id = step_trace.get_model_and_index_id_by_iter_id(self._iter_rec.current_iter_id)
+                    prep_data_res[index] = list(prep_data_res[index][:2]) + [
+                        InfoConfReader().time_from_syscnt(prep_data_res[index][2]),
+                        InfoConfReader().time_from_syscnt(prep_data_res[index][3]),
+                        index_id if not isinstance(index_id, EmptyClass) else self._sample_config.get('iter_id'),
+                        model_id if not isinstance(model_id, EmptyClass) else self._sample_config.get('model_id'),
+                        batch[0]]
         return prep_data_res
-
-    def calculate(self: any) -> None:
-        """
-        calculate hwts data
-        :return: None
-        """
-        if ProfilingScene().is_operator():
-            self._parse_all_file()
-        else:
-            self._parse_by_iter()
 
     def _parse(self: any, all_log_bytes: bytes) -> None:
         for log_data in Utils.chunks(all_log_bytes, self.HWTS_LOG_SIZE):
             _task_log = HwtsLogBean.decode(log_data)
             if _task_log.is_log_type():
                 self._log_data.append(_task_log)
-
-    def save(self: any) -> None:
-        """
-        save hwts data
-        :return: None
-        """
-        self._hwts_log_model.clear()
-        if self._log_data:
-            self._hwts_log_model.init()
-            self._hwts_log_model.flush(Utils.obj_list_to_list(self._log_data), DBNameConstant.TABLE_HWTS_TASK)
-            self._hwts_log_model.flush(self._add_batch_id(self._prep_data()), DBNameConstant.TABLE_HWTS_TASK_TIME)
-            self._hwts_log_model.finalize()
-
-    def ms_run(self: any) -> None:
-        """
-        entrance for calculating hwts
-        :return: None
-        """
-        if self._file_list:
-            self.calculate()
-            self.save()

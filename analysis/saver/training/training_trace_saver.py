@@ -7,11 +7,9 @@ Copyright Huawei Technologies Co., Ltd. 2018-2019. All rights reserved.
 
 import logging
 import os
-import sqlite3
 
 from common_func.common import CommonConstant
 from common_func.common import check_number_valid
-from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.number_constant import NumberConstant
@@ -21,34 +19,6 @@ class TrainingTraceSaver:
     """
     saver of training trace data
     """
-
-    @staticmethod
-    def _check_all_reduce(items: dict) -> bool:
-        for item in items["all_reduces"]:
-            check_int_item = [item["start"], item["start_stream"], item["start_task"],
-                              item["end"], item["end_stream"], item["end_task"]]
-            for check_item in check_int_item:
-                if not check_number_valid(check_item):
-                    logging.error("reduce_cp message check integer value failed")
-                    return False
-        return True
-
-    @staticmethod
-    def _check_training_trace(message: dict) -> bool:
-        for items in message["data"]:
-            check_int_item = [items["iteration_id"], items["job_stream"], items["job_task"],
-                              items["FP_start"], items["FP_stream"], items["FP_task"],
-                              items["BP_end"], items["BP_stream"], items["BP_task"],
-                              items["iteration_end"], items["iter_stream"], items["iter_task"]]
-            for item in check_int_item:
-                if not check_number_valid(item):
-                    logging.error("data message check integer value failed")
-                    return False
-            ret = TrainingTraceSaver._check_all_reduce(items)
-            if not ret:
-                return ret
-
-        return True
 
     @staticmethod
     def save_data_to_db(message: dict) -> bool:
@@ -121,6 +91,33 @@ class TrainingTraceSaver:
             DBNameConstant.TABLE_TRACE_FILES)
         DBManager.execute_sql(conn, file_sql)
         return conn, curs
+
+    @staticmethod
+    def _check_all_reduce(items: dict) -> bool:
+        for item in items["all_reduces"]:
+            check_int_item = [item["start"], item["start_stream"], item["start_task"],
+                              item["end"], item["end_stream"], item["end_task"]]
+            for check_item in check_int_item:
+                if not check_number_valid(check_item):
+                    logging.error("reduce_cp message check integer value failed")
+                    return False
+        return True
+
+    @staticmethod
+    def _check_training_trace(message: dict) -> bool:
+        for items in message["data"]:
+            check_int_item = [items["iteration_id"], items["job_stream"], items["job_task"],
+                              items["FP_start"], items["FP_stream"], items["FP_task"],
+                              items["BP_end"], items["BP_stream"], items["BP_task"],
+                              items["iteration_end"], items["iter_stream"], items["iter_task"]]
+            for item in check_int_item:
+                if not check_number_valid(item):
+                    logging.error("data message check integer value failed")
+                    return False
+            ret = TrainingTraceSaver._check_all_reduce(items)
+            if not ret:
+                return ret
+        return True
 
     @staticmethod
     def __insert_values(conn: any, host_id: int, device_id: int, data: list) -> None:

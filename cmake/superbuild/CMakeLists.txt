@@ -18,6 +18,7 @@ ExternalProject_Add(msprof
     SOURCE_DIR ${TOP_DIR}
     CONFIGURE_COMMAND ${CMAKE_COMMAND}
                 -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+                -DCMAKE_BUILD_TYPE=${MSPROF_BUILD_TYPE}
                 <SOURCE_DIR>
     BUILD_COMMAND $(MAKE)
     DEPENDS protoc_build ascend_protobuf_shared_build ascend_protobuf_static_build

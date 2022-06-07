@@ -6,7 +6,6 @@ Copyright Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
 
 import logging
 import os
-import sqlite3
 from abc import ABCMeta
 
 from common_func.constant import Constant
@@ -94,7 +93,9 @@ class BaseModel(metaclass=ABCMeta):
         """
         if self.conn and data_list:
             sql = 'insert into {0} values ({1})'.format(table_name, "?," * (len(data_list[0]) - 1) + "?")
-            DBManager.executemany_sql(self.conn, sql, data_list)
+            if not DBManager.executemany_sql(self.conn, sql, data_list):
+                logging.warning('insert data to table %s failed, please check.', table_name,
+                                exc_info=Constant.TRACE_BACK_SWITCH)
 
     def drop_table(self: any, table_name: str) -> None:
         if DBManager.judge_table_exist(self.cur, table_name):
@@ -103,7 +104,6 @@ class BaseModel(metaclass=ABCMeta):
     def get_all_data(self: any, table_name: str) -> list:
         """
         get all data from db
-        :param cur:
         :param table_name:
         :return:
         """

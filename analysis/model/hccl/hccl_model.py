@@ -5,8 +5,10 @@ function: this script used to operate HCCL
 Copyright Huawei Technologies Co., Ltd. 2021. All rights reserved.
 """
 from common_func.db_manager import DBManager
+from common_func.db_manager import ClassRowType
 from common_func.db_name_constant import DBNameConstant
 from model.interface.parser_model import ParserModel
+from profiling_bean.db_dto.hccl_dto import HcclDto
 
 
 class HCCLModel(ParserModel):
@@ -25,10 +27,13 @@ class HCCLModel(ParserModel):
         """
         self.insert_data_to_db(DBNameConstant.TABLE_HCCL_ALL_REDUCE, data_list)
 
-    def get_hccl_timeline_data(self: any, sql: str) -> list:
+    def get_hccl_data(self: any) -> list:
         """
         get hccl data
-        :param sql:
         :return:
         """
-        return DBManager.fetch_all_data(self.cur, sql)
+        sql = "select * from {}".format(DBNameConstant.TABLE_HCCL_ALL_REDUCE)
+        self.cur.row_factory = ClassRowType.class_row(HcclDto)
+        data = DBManager.fetch_all_data(self.cur, sql)
+        self.cur.row_factory = None
+        return data

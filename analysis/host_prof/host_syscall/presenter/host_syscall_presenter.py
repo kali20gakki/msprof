@@ -148,86 +148,6 @@ class HostSyscallPresenter(HostProfPresenterBase):
         super().__init__(result_dir, file_name)
         self.pid = InfoConfReader().get_json_pid_data()
 
-    def init(self: any) -> None:
-        """
-        init syscall presenter
-        :return: None
-        """
-        self.set_model(HostSyscall(self.result_dir))
-
-    def parse_prof_data(self: any) -> None:
-        """
-        parse syscall or pthread api data
-        :return: None
-        """
-        try:
-            with open(self.file_name, "r") as file:
-                host_syscall_file_patterns = get_host_syscall_compiles()
-                if get_file_name_pattern_match(os.path.basename(self.file_name),
-                                               *host_syscall_file_patterns):
-                    self._parse_syscall_api(file)
-                else:
-                    self._parse_pthread_api(file)
-                logging.info(
-                    "Finish parsing os runtime api data file: %s", os.path.basename(self.file_name))
-        except (FileNotFoundError, ValueError, IOError) as parse_file_except:
-            logging.error("Error in parsing os runtime api data:%s", str(parse_file_except),
-                          exc_info=Constant.TRACE_BACK_SWITCH)
-        finally:
-            pass
-
-    @classmethod
-    def _get_time_info(cls: any, line: str) -> any:
-        if len(line.strip()) == 0:
-            return EmptyClass()
-        raw_data_list = re.split(r':', line.strip())
-        if len(raw_data_list) < 2:
-            return EmptyClass()
-        time_info = re.split(r'\s\(', raw_data_list[0].strip())
-        if len(time_info) != 2:
-            return EmptyClass()
-        start_time_data = re.match(StrConstant.TIME_PATTERN, time_info[0].strip())
-        if start_time_data is None:
-            return EmptyClass()
-        start_time_ms = start_time_data.group()
-        duration_time_data = re.match(StrConstant.TIME_PATTERN, time_info[1].strip())
-        if duration_time_data is None:
-            return EmptyClass()
-        duration_ms = duration_time_data.group()
-        return TimeInfo(raw_data_list, start_time_ms, duration_ms)
-
-    def _parse_syscall_api(self: any, file: any) -> None:
-        start_handle_sec = time.time()
-        for line in file:
-            time_info = self._get_time_info(line.strip())
-            if isinstance(time_info, EmptyClass):
-                continue
-
-            if not PerfGapTime().is_init():
-                start_time_ns, _ = InfoConfReader().get_collect_raw_time()
-                if start_time_ns is not None:
-                    PerfGapTime().set_init_flag(True)
-                    # perfb - perfa + raw
-                    PerfGapTime().set_gap_time(
-                        float(time_info.start_time_ms) * NumberConstant.CONVERSION_TIME - float(
-                            start_time_ns) / NumberConstant.CONVERSION_TIME)
-            command_name, command_tid, api_name = HostSyscallPresenter.get_command_api_info(
-                time_info.raw_data, self.pid)
-            if not HostSyscallPresenter.check_api_name(api_name):
-                continue
-            real_start_us = float(
-                time_info.start_time_ms) * NumberConstant.CONVERSION_TIME - PerfGapTime().get_gap_time()
-            tran_duration_us = float(time_info.duration_ms) * NumberConstant.CONVERSION_TIME
-            real_end_us = real_start_us + tran_duration_us
-            end_time_ms = str(
-                float(time_info.start_time_ms) + float(time_info.duration_ms))
-            if float(end_time_ms) / NumberConstant.CONVERSION_TIME > start_handle_sec:
-                continue
-            call_api_info = [command_name, self.pid, command_tid, api_name,
-                             time_info.start_time_ms, tran_duration_us,
-                             end_time_ms, real_start_us, real_end_us]
-            self.cur_model.insert_single_data(call_api_info)
-
     @staticmethod
     def check_api_name(api_name: str) -> bool:
         """
@@ -281,44 +201,6 @@ class HostSyscallPresenter(HostProfPresenterBase):
         return duration_sec
 
     @staticmethod
-    def _update_thread_gap_time(start_time: float) -> None:
-        if not PthreadGapTime().is_init():
-            start_time_raw, _ = InfoConfReader().get_collect_raw_time()
-            if is_number(start_time_raw):
-                # perfb - perfa + raw
-                PthreadGapTime().set_init_flag(True)
-                PthreadGapTime().set_gap_time(
-                    start_time - float(start_time_raw) / NumberConstant.CONVERSION_TIME)
-
-    def _parse_pthread_api(self: any, file: any) -> None:
-        # get pthread data
-        for line in file:
-            if len(line.strip()) == 0:
-                continue
-            raw_data_list = line.split()
-            duration_sec = HostSyscallPresenter.get_duration(raw_data_list)
-            # raw_data_list format [pid xx] timestamp exe->api_name '=' 0 <dur>
-            if not duration_sec or len(raw_data_list) < 5:
-                continue
-            command_tid = raw_data_list[1].strip(']')
-            if not is_number(raw_data_list[2]):
-                continue
-            # to us
-            start_time = float(raw_data_list[2]) * NumberConstant.SEC_TO_US
-            HostSyscallPresenter._update_thread_gap_time(start_time)
-            start_time = start_time - PthreadGapTime().get_gap_time()
-            if raw_data_list[3].find("->") >= 0:
-                api_name = raw_data_list[3].split("->")[1].split("(")[0]
-            else:
-                api_name = raw_data_list[4]
-            if api_name == "pthread_once":
-                continue
-            end_time = start_time + float(duration_sec) * NumberConstant.SEC_TO_US
-            write_list = ["", self.pid, command_tid, api_name,
-                          "", float(duration_sec) * NumberConstant.SEC_TO_US, "", start_time, end_time]
-            self.cur_model.insert_single_data(write_list)
-
-    @staticmethod
     def get_summary_api_info(result_dir: str) -> list:
         """
         get summary host os runtime api data
@@ -334,6 +216,63 @@ class HostSyscallPresenter(HostProfPresenterBase):
         cur_model.finalize()
         return res
 
+    @staticmethod
+    def _update_thread_gap_time(start_time: float) -> None:
+        if not PthreadGapTime().is_init():
+            start_time_raw, _ = InfoConfReader().get_collect_raw_time()
+            if is_number(start_time_raw):
+                # perfb - perfa + raw
+                PthreadGapTime().set_init_flag(True)
+                PthreadGapTime().set_gap_time(
+                    start_time - float(start_time_raw) / NumberConstant.CONVERSION_TIME)
+
+    @classmethod
+    def _get_time_info(cls: any, line: str) -> any:
+        if len(line.strip()) == 0:
+            return EmptyClass()
+        raw_data_list = re.split(r':', line.strip())
+        if len(raw_data_list) < 2:
+            return EmptyClass()
+        time_info = re.split(r'\s\(', raw_data_list[0].strip())
+        if len(time_info) != 2:
+            return EmptyClass()
+        start_time_data = re.match(StrConstant.TIME_PATTERN, time_info[0].strip())
+        if start_time_data is None:
+            return EmptyClass()
+        start_time_ms = start_time_data.group()
+        duration_time_data = re.match(StrConstant.TIME_PATTERN, time_info[1].strip())
+        if duration_time_data is None:
+            return EmptyClass()
+        duration_ms = duration_time_data.group()
+        return TimeInfo(raw_data_list, start_time_ms, duration_ms)
+
+    def init(self: any) -> None:
+        """
+        init syscall presenter
+        :return: None
+        """
+        self.set_model(HostSyscall(self.result_dir))
+
+    def parse_prof_data(self: any) -> None:
+        """
+        parse syscall or pthread api data
+        :return: None
+        """
+        try:
+            with open(self.file_name, "r") as file:
+                host_syscall_file_patterns = get_host_syscall_compiles()
+                if get_file_name_pattern_match(os.path.basename(self.file_name),
+                                               *host_syscall_file_patterns):
+                    self._parse_syscall_api(file)
+                else:
+                    self._parse_pthread_api(file)
+                logging.info(
+                    "Finish parsing os runtime api data file: %s", os.path.basename(self.file_name))
+        except (FileNotFoundError, ValueError, IOError) as parse_file_except:
+            logging.error("Error in parsing os runtime api data:%s", str(parse_file_except),
+                          exc_info=Constant.TRACE_BACK_SWITCH)
+        finally:
+            pass
 
     def get_runtime_api_data(self: any) -> list:
         """
@@ -386,3 +325,63 @@ class HostSyscallPresenter(HostProfPresenterBase):
         res = self.cur_model.get_all_tid()
         self.cur_model.finalize()
         return res
+
+    def _parse_pthread_api(self: any, file: any) -> None:
+        # get pthread data
+        for line in file:
+            if len(line.strip()) == 0:
+                continue
+            raw_data_list = line.split()
+            duration_sec = HostSyscallPresenter.get_duration(raw_data_list)
+            # raw_data_list format [pid xx] timestamp exe->api_name '=' 0 <dur>
+            if not duration_sec or len(raw_data_list) < 5:
+                continue
+            command_tid = raw_data_list[1].strip(']')
+            if not is_number(raw_data_list[2]):
+                continue
+            # to us
+            start_time = float(raw_data_list[2]) * NumberConstant.SEC_TO_US
+            HostSyscallPresenter._update_thread_gap_time(start_time)
+            start_time = start_time - PthreadGapTime().get_gap_time()
+            if raw_data_list[3].find("->") >= 0:
+                api_name = raw_data_list[3].split("->")[1].split("(")[0]
+            else:
+                api_name = raw_data_list[4]
+            if api_name == "pthread_once":
+                continue
+            end_time = start_time + float(duration_sec) * NumberConstant.SEC_TO_US
+            write_list = ["", self.pid, command_tid, api_name,
+                          "", float(duration_sec) * NumberConstant.SEC_TO_US, "", start_time, end_time]
+            self.cur_model.insert_single_data(write_list)
+
+    def _parse_syscall_api(self: any, file: any) -> None:
+        start_handle_sec = time.time()
+        for line in file:
+            time_info = self._get_time_info(line.strip())
+            if isinstance(time_info, EmptyClass):
+                continue
+
+            if not PerfGapTime().is_init():
+                start_time_ns, _ = InfoConfReader().get_collect_raw_time()
+                if start_time_ns is not None:
+                    PerfGapTime().set_init_flag(True)
+                    # perfb - perfa + raw
+                    PerfGapTime().set_gap_time(
+                        float(time_info.start_time_ms) * NumberConstant.CONVERSION_TIME - float(
+                            start_time_ns) / NumberConstant.CONVERSION_TIME)
+            command_name, command_tid, api_name = HostSyscallPresenter.get_command_api_info(
+                time_info.raw_data, self.pid)
+            if not HostSyscallPresenter.check_api_name(api_name):
+                continue
+            real_start_us = float(
+                time_info.start_time_ms) * NumberConstant.CONVERSION_TIME - PerfGapTime().get_gap_time()
+            tran_duration_us = float(time_info.duration_ms) * NumberConstant.CONVERSION_TIME
+            real_end_us = real_start_us + tran_duration_us
+            end_time_ms = str(
+                float(time_info.start_time_ms) + float(time_info.duration_ms))
+            if float(end_time_ms) / NumberConstant.CONVERSION_TIME > start_handle_sec:
+                continue
+            call_api_info = [command_name, self.pid, command_tid, api_name,
+                             time_info.start_time_ms, tran_duration_us,
+                             end_time_ms, real_start_us, real_end_us]
+            self.cur_model.insert_single_data(call_api_info)
