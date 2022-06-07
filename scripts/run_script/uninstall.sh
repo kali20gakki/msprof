@@ -2,8 +2,8 @@
 
 function uninstall_product() {
 	delete_product ${install_path}/${ANALYSIS_PATH}/${ANALYSIS}
-    delete_parent_dir ${install_path}/tools
-    delete_run_dir
+    delete_mindstudio_msprof
+    delete_parent_dir
 }
 
 function delete_product() {
@@ -22,31 +22,34 @@ function delete_product() {
 }
 
 function delete_parent_dir(){
-	local dir_name=${1}
-    local right=400
- 
-	if [ -f "${dir_name}" ]; then
+    # must from in to out
+    remove_dir_by_order ${install_path}/tools/profiler/profiler_tool
+    remove_dir_by_order ${install_path}/tools/profiler
+    remove_dir_by_order ${install_path}/tools/
+    remove_dir_by_order ${install_path}
+}
+
+function remove_dir_by_order() {
+    local dir_name=${1}
+
+	if [ ! -d "${dir_name}" ]; then
         return
 	fi
-	
+
+    local parent_dir=$(dirname ${dir_name})
+    local dir_right=$(stat -c '%a' ${dir_name})
+    local parent_dir_right=$(stat -c '%a' ${parent_dir})
+
+    chmod u+w ${dir_name}
+    chmod u+w ${parent_dir}
+
+    remove_empty_dir ${dir_name}
 	if [ -d "${dir_name}" ]; then
-        right=$(stat -c '%a' ${dir_name})
-        chmod u+w ${dir_name}
-
-        file_list=`ls $dir_name`
-        for f in $file_list
-        do
-            delete_parent_dir ${dir_name}/${f}
-        done
-
-        remove_empty_dir ${dir_name}
+        chmod ${dir_right} ${dir_name}
 	fi
-
-	if [ -f "${dir_name}" ] && [ -d "${dir_name}" ]; then
-		chmod ${right} ${dir_name}
-	fi
+    chmod ${parent_dir_right} ${parent_dir}
 }
- 
+
 function rm_file_safe() {
     local file_path=$1
     if [ -n "${file_path}" ]; then
@@ -72,7 +75,9 @@ function uninstall_latest() {
     fi
 
     # multi version new
-    ln -sf ${latest_path}/${leader_package}/../${MSPROF_RUN_NAME} ${latest_path}/${MSPROF_RUN_NAME}
+    local mindstudio_msprof_abs_path=$(dirname $(readlink -f ${latest_path}/${leader_package}/../${MSPROF_RUN_NAME}))
+    local version_name=$(basename ${mindstudio_msprof_abs_path})
+    ln -sf ../${version_name}/${MSPROF_RUN_NAME} ${latest_path}/${MSPROF_RUN_NAME}
 }
 
 function unregist_uninstall() {
@@ -103,7 +108,7 @@ function __remove_uninstall_package() {
     fi
 }
 
-function delete_run_dir() {
+function delete_mindstudio_msprof() {
     chmod -R u+w ${install_path}/${MSPROF_RUN_NAME}
     rm -rf ${install_path}/${MSPROF_RUN_NAME}
 }
@@ -146,6 +151,6 @@ ANALYSIS="analysis"
 ANALYSIS_PATH="/tools/profiler/profiler_tool/"
 MSPROF_RUN_NAME="mindstudio-msprof"
 
+unregist_uninstall
 uninstall_product
 uninstall_latest
-unregist_uninstall

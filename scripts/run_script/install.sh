@@ -60,7 +60,7 @@ function copy_file() {
 		print "INFO" "$filename is replaced."
 		return
 	fi
-	print "WARNING" "$target_file is non-existent."
+	print "WARNING" "target $filename is non-existent."
 }
 
 function chmod_ini_file() {
