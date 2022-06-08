@@ -74,7 +74,10 @@ def calculate_utilization(tmp_data: list, result_data: dict) -> None:
         time_list.append(tmp_data[i + 1][1] - tmp_data[i][1])
     for tmp in tmp_data:  # [timestamp, utilization, coreid]
         interval = NumberConstant.CPU_FREQ * float(time_list[tmp_data.index(tmp)]) * 10 ** 3
-        if not NumberConstant.is_zero(interval) and len(tmp) >= 3:  # length tmp should be longer than 3
+        is_zero_value = NumberConstant.is_zero(interval) or \
+                        NumberConstant.is_zero(float(tmp[0])) or \
+                        NumberConstant.is_zero(float(tmp[1]))
+        if not is_zero_value and len(tmp) >= 3:  # length tmp should be longer than 3
             result_data['usage'].setdefault(str(tmp[2]), []).append(
                 [StrConstant.ACCURACY % float(tmp[1]),
                  StrConstant.ACCURACY % float(float(tmp[0]) * NumberConstant.PERCENTAGE / interval)])
@@ -134,7 +137,7 @@ def cal_ave(result_data: dict, pos_cores: dict) -> dict:
         for _, item in enumerate(data_keys):
             if len(result_data['usage'][item]) > i and len(result_data['usage'][item][i]) == 2:
                 sum_count += float(result_data['usage'][item][i][1])
-        if not NumberConstant.is_zero(key_len):
+        if not NumberConstant.is_zero(key_len) and not NumberConstant.is_zero(sum_count):
             result_data['usage']['average'].append([result_data['usage'][item][i][0],
                                                     StrConstant.ACCURACY % (sum_count / key_len)])
     return result_data
