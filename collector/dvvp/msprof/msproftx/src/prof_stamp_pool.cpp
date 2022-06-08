@@ -39,7 +39,7 @@ int MsprofStampPool::Init(int size)
     singleTStack_.reserve(size);
     g_stampPoolHandle = new (std::nothrow) MsprofStampCtrlHandle();
     FUNRET_CHECK_EQUAL_RET_VALUE(g_stampPoolHandle, nullptr, PROFILING_FAILED);
-    g_stampPoolHandle->freeCnt = size;
+    g_stampPoolHandle->freeCnt = static_cast<uint32_t>(size);
     g_stampPoolHandle->usedCnt = 0;
 
     g_stampPoolHandle->memPool =
@@ -48,7 +48,7 @@ int MsprofStampPool::Init(int size)
         MSPROF_LOGE("Init Stamp Pool Failed, Memory Not Enough.");
         return PROFILING_FAILED;
     }
-    g_stampPoolHandle->instanceSize = size;
+    g_stampPoolHandle->instanceSize = static_cast<uint32_t>(size);
     g_stampPoolHandle->freelist = g_stampPoolHandle->memPool;
 
     MsprofStampInstance* node = nullptr;

@@ -296,10 +296,11 @@ def get_ai_core_compiles() -> tuple:
     """
     get ai core regex compiles
     """
-    return re.compile(FileNameManagerConstant.AI_CORE_FILE_PATTERN), re.compile(
+    ai_core_compiles = (re.compile(FileNameManagerConstant.AI_CORE_FILE_PATTERN), re.compile(
         FileNameManagerConstant.AI_CORE_INFER_FILE_PATTERN), re.compile(
         FileNameManagerConstant.AI_CORE_TRAINING_FILE_PATTERN), re.compile(
-        FileNameManagerConstant.FFTS_PMU_FILE_PATTERN)
+        FileNameManagerConstant.FFTS_PMU_FILE_PATTERN))
+    return ai_core_compiles
 
 
 def get_aiv_compiles() -> tuple:

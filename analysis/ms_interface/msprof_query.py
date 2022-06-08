@@ -10,6 +10,7 @@ Huawei Technologies Co., Ltd. All Rights Reserved © 2020
 import os
 from operator import itemgetter
 
+from common_func.common import print_msg
 from common_func.common import warn
 from common_func.data_check_manager import DataCheckManager
 from common_func.ms_constant.str_constant import StrConstant
@@ -68,14 +69,14 @@ class QueryCommand:
     def _show_query_data(cls: any, data: list, max_column_list: list) -> None:
         for _data in data:
             for index, _element in enumerate(_data):
-                print(str(_element).ljust(max_column_list[index], ' '), end="\t")
-            print("\n")
+                print_msg(str(_element).ljust(max_column_list[index], ' '), end="\t")
+            print_msg("\n")
 
     @classmethod
     def _show_query_header(cls: any, headers: list, max_column_list: list) -> None:
         for index, header in enumerate(headers):
-            print(str(header).ljust(max_column_list[index], ' '), end="\t")
-        print("\n")
+            print_msg(str(header).ljust(max_column_list[index], ' '), end="\t")
+        print_msg("\n")
 
     def check_argument_valid(self: any) -> None:
         """

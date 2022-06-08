@@ -187,7 +187,7 @@ class MsprofDataStorage:
         :return: None
         """
         self.data_list = data_list
-        self.data_list.sort(key=lambda x: x.get('ts', 0))
+        self.data_list.sort(key=lambda x: float(x.get('ts', 0)))
         self.set_tid()
         self._update_timeline_head()
 
@@ -196,7 +196,11 @@ class MsprofDataStorage:
         split data to slices
         return: tuple (slice count, slice data)
         """
-        self.init_params(data_list)
+        try:
+            self.init_params(data_list)
+        except (TypeError, ValueError) as err:
+            logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
+            return False, [self.timeline_head + data_list]
         slice_switch, limit_size, method = self.read_slice_config()
         if slice_switch == 'off':
             return False, [self.timeline_head + data_list]
