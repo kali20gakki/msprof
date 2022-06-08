@@ -20,7 +20,19 @@ function get_version(){
 
 function pkill_prof_cmd(){
     if [ "${command_param}" = "perf" ] || [ "${command_param}" = "ltrace" ] || [ "${command_param}" = "iotop" ]; then
-        pkill -2 "${command_param}"
+        try_times=0
+        while [ ${try_times} -lt 10 ]
+        do
+            pkill -2 "${command_param}"
+            if [ $? -eq 0 ]; then
+                exit 0
+            fi
+            let try_times+=1
+            sleep 1
+        done
+        echo "'pkill -2 ${command_param}' executed ${try_times} times failed"
+        pkill -9 "${command_param}"
+        exit 1
     else
         printf "The value of the second parameter is incorrect, please enter the correct parameter, "
         printf "such as: perf, ltrace, iotop\n"
