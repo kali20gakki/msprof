@@ -32,7 +32,7 @@ function pkill_prof_cmd(){
         done
         echo "'pkill -2 ${command_param}' executed ${try_times} times failed"
         pkill -9 "${command_param}"
-        exit 2
+        exit 1
     else
         printf "The value of the second parameter is incorrect, please enter the correct parameter, "
         printf "such as: perf, ltrace, iotop\n"
