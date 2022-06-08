@@ -30,7 +30,7 @@ using namespace analysis::dvvp::common::validation;
 using namespace Analysis::Dvvp::Common::Platform;
 using namespace Analysis::Dvvp::Plugin;
 
-std::mutex g_aclgraphProfMutex;
+static std::mutex g_aclgraphProfMutex;
 
 Status aclgrphProfGraphSubscribe(const uint32_t graphId, const aclprofSubscribeConfig *profSubscribeConfig)
 {
