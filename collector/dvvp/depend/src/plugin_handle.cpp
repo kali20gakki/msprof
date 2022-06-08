@@ -18,7 +18,6 @@ namespace Plugin {
 using namespace analysis::dvvp::common::config;
 PluginHandle::~PluginHandle()
 {
-    CloseHandle();
 }
 
 const std::string PluginHandle::GetSoName() const
