@@ -5,6 +5,7 @@
  */
 #include "prof_job.h"
 #include "config/config_manager.h"
+#include "config/config.h"
 #include "param_validation.h"
 #include "prof_channel_manager.h"
 #include "proto/profiler.pb.h"
@@ -456,7 +457,7 @@ int ProfFftsProfileJob::Uninit()
     return PROFILING_SUCCESS;
 }
 
-ProfBiuPerfJob::ProfBiuPerfJob() : sampleCycle_(1000)
+ProfBiuPerfJob::ProfBiuPerfJob() : sampleCycle_(DEFAULT_PROFILING_BIU_FREQ)
 {
 }
 
