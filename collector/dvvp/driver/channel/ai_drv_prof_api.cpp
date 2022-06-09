@@ -421,7 +421,7 @@ int DrvStarsSocLogStart(const DrvPeripheralProfileCfg &peripheralCfg,
     AI_DRV_CHANNEL profChannel = peripheralCfg.profChannel;
     StarsSocLogConfigT configP;
     (void)memset_s(&configP, sizeof(StarsSocLogConfigT), 0, sizeof(StarsSocLogConfigT));
-    configP.pid = static_cast<int32_t>(MmpaPlugin::instance()->MsprofMmGetPid());
+    configP.pid = static_cast<uint32_t>(MmpaPlugin::instance()->MsprofMmGetPid());
 
     if (profileParams->stars_acsq_task.compare(analysis::dvvp::common::config::MSVP_PROF_ON) == 0) {
         configP.acsq_task = TS_PROFILE_COMMAND_TYPE_PROFILING_ENABLE;
@@ -494,7 +494,7 @@ int DrvFftsProfileStart(const DrvPeripheralProfileCfg &peripheralCfg, const std:
     }
     (void)memset_s(configP, configSize, 0, configSize);
     configP->cfgMode = peripheralCfg.cfgMode; // 0-none,1-aic,2-aiv,3-aic&aiv
-    configP->pid = static_cast<int32_t>(MmpaPlugin::instance()->MsprofMmGetPid());
+    configP->pid = static_cast<uint32_t>(MmpaPlugin::instance()->MsprofMmGetPid());
 
     DrvPackPmuParam(FFTS_PROF_MODE_AIC, *configP, peripheralCfg, aicCores, aicEvents);
     DrvPackPmuParam(FFTS_PROF_MODE_AIV, *configP, peripheralCfg, aivCores, aivEvents);

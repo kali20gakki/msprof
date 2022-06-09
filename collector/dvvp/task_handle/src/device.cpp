@@ -87,9 +87,9 @@ int Device::InitJobAdapter()
         auto jobFactory = JobSocFactory();
         jobAdapter_ = jobFactory.CreateJobAdapter(indexId_);
     } else {
-        int platform = Platform::instance()->GetPlatform();
-        MSPROF_LOGE("[Device::Init]GetPlatform failed, platformInfo is %d", platform);
-        MSPROF_INNER_ERROR("EK9999", "GetPlatform failed, platformInfo is %d", platform);
+        uint32_t platform = Platform::instance()->GetPlatform();
+        MSPROF_LOGE("[Device::Init]GetPlatform failed, platformInfo is %u", platform);
+        MSPROF_INNER_ERROR("EK9999", "GetPlatform failed, platformInfo is %u", platform);
         return PROFILING_FAILED;
     }
     if (jobAdapter_ == nullptr) {

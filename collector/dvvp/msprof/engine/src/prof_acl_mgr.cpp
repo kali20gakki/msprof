@@ -1323,7 +1323,7 @@ int32_t ProfAclMgr::MsprofAclJsonParamConstruct(SHARED_PTR_ALIA<analysis::dvvp::
         return MSPROF_ERROR_CONFIG_INVALID;
     }
     params_->biu = inputCfgPb->biu();
-    params_->biu_freq = inputCfgPb->biu_freq();
+    params_->biu_freq = static_cast<int32_t>(inputCfgPb->biu_freq());
     if ((params_->biu.compare(MSVP_PROF_ON) == 0) &&
         (!ParamValidation::instance()->CheckBiuFreqValid(params_->biu_freq))) {
         return MSPROF_ERROR_CONFIG_INVALID;
@@ -1508,7 +1508,7 @@ int32_t ProfAclMgr::MsprofGeOptionsParamConstruct(const std::string &jobInfo,
         return MSPROF_ERROR_CONFIG_INVALID;
     }
     params_->biu = inputCfgPb->biu();
-    params_->biu_freq = inputCfgPb->biu_freq();
+    params_->biu_freq = static_cast<int32_t>(inputCfgPb->biu_freq());
     if ((params_->biu.compare(MSVP_PROF_ON) == 0) &&
         (!ParamValidation::instance()->CheckBiuFreqValid(params_->biu_freq))) {
         return MSPROF_ERROR_CONFIG_INVALID;

@@ -842,7 +842,7 @@ std::string Utils::TimestampToTime(const std::string &timestamp, int unit /* = 1
     uint32_t microTime;
     try {
         secTime = std::stoll(timestamp) / unit;
-        microTime = std::stoll(timestamp) % unit;
+        microTime = static_cast<uint32_t>(std::stoll(timestamp) % unit);
     } catch (...) {
         return "0";
     }
@@ -1284,7 +1284,7 @@ int32_t WriteFile(const std::string &absolutePath, const std::string &recordFile
 #else
     FILE *file;
 
-    if ((file = fopen(absolutePath.c_str(), "a")) == nullptr) {
+    if ((file = fopen(CanonicalizePath(absolutePath).c_str(), "a")) == nullptr) {
         MSPROF_LOGE("Failed to open %s", recordFile.c_str());
         return analysis::dvvp::common::error::PROFILING_FAILED;
     }

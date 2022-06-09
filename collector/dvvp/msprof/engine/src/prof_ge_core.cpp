@@ -30,7 +30,7 @@ using namespace analysis::dvvp::common::validation;
 using namespace Analysis::Dvvp::Common::Platform;
 using namespace Analysis::Dvvp::Plugin;
 
-static std::mutex g_aclgraphProfMutex;
+std::mutex g_aclgraphProfMutex;
 
 Status aclgrphProfGraphSubscribe(const uint32_t graphId, const aclprofSubscribeConfig *profSubscribeConfig)
 {
@@ -173,12 +173,13 @@ Status aclgrphProfInit(CONST_CHAR_PTR profilerPath, uint32_t length)
         MSPROF_INNER_ERROR("EK9999", "AclProfiling init fail, profiling result = %d", ret);
         return FAILED;
     }
-
-    Status geRegisterRet = Analysis::Dvvp::ProfilerCommon::RegisterReporterCallback();
+    ret = Analysis::Dvvp::ProfilerCommon::RegisterReporterCallback();
+    Status geRegisterRet = static_cast<Status>(ret);
     RETURN_IF_NOT_SUCCESS(geRegisterRet);
 
     MSPROF_LOGI("Allocate config of profiling initialize to Ge");
-    Status geHandleInitRet = Analysis::Dvvp::ProfilerCommon::CommandHandleProfInit();
+    ret = Analysis::Dvvp::ProfilerCommon::CommandHandleProfInit();
+    Status geHandleInitRet = static_cast<Status>(ret);
     RETURN_IF_NOT_SUCCESS(geHandleInitRet);
 
     MSPROF_LOGI("Successfully execute aclgrphProfInit");
@@ -199,7 +200,8 @@ Status aclgrphProfFinalize()
     }
 
     MSPROF_LOGI("Allocate config of profiling finalize to Ge");
-    Status geRet = Analysis::Dvvp::ProfilerCommon::CommandHandleProfFinalize();
+    ret = Analysis::Dvvp::ProfilerCommon::CommandHandleProfFinalize();
+    Status geRet = static_cast<Status>(ret);
     RETURN_IF_NOT_SUCCESS(geRet);
 
     Msprof::Engine::FlushAllModule();
@@ -359,8 +361,9 @@ Status aclgrphProfStart(ACL_GRPH_PROF_CONFIG_PTR profilerConfig)
     MSPROF_LOGI("Allocate start profiling config to Ge");
     uint64_t dataTypeConfig = profilerConfig->config.dataTypeConfig;
     ProfAclMgr::instance()->AddModelLoadConf(dataTypeConfig);
-    Status geRet = Analysis::Dvvp::ProfilerCommon::CommandHandleProfStart(
+    ret = Analysis::Dvvp::ProfilerCommon::CommandHandleProfStart(
         profilerConfig->config.devIdList, profilerConfig->config.devNums, dataTypeConfig | PROF_OP_DETAIL);
+    Status geRet = static_cast<Status>(ret);
     RETURN_IF_NOT_SUCCESS(geRet);
 
     MSPROF_LOGI("successfully execute aclgrphProfStart");
@@ -404,8 +407,9 @@ Status aclgrphProfStop(ACL_GRPH_PROF_CONFIG_PTR profilerConfig)
 
     MSPROF_LOGI("Allocate stop config of profiling modules to Acl");
     ProfAclMgr::instance()->AddModelLoadConf(dataTypeConfig);
-    Status geRet = Analysis::Dvvp::ProfilerCommon::CommandHandleProfStop(
+    ret = Analysis::Dvvp::ProfilerCommon::CommandHandleProfStop(
         profilerConfig->config.devIdList, profilerConfig->config.devNums, dataTypeConfig | PROF_OP_DETAIL);
+    Status geRet = static_cast<Status>(ret);
     RETURN_IF_NOT_SUCCESS(geRet);
 
     for (uint32_t i = 0; i < profilerConfig->config.devNums; i++) {
@@ -451,26 +455,26 @@ void GeFinalizeHandle()
 {
     std::vector<uint32_t> devIds;
     Msprofiler::Api::ProfAclMgr::instance()->GetRunningDevices(devIds);
-    Status geRet;
+    int32_t ret;
     for (uint32_t devId : devIds) {
         if (devId == DEFAULT_HOST_ID) {
             continue;
         }
         uint64_t dataTypeConfig = 0;
-        int32_t ret = Msprofiler::Api::ProfAclMgr::instance()->ProfAclGetDataTypeConfig(devId, dataTypeConfig);
+        ret = Msprofiler::Api::ProfAclMgr::instance()->ProfAclGetDataTypeConfig(devId, dataTypeConfig);
         if (ret != ACL_SUCCESS) {
             continue;
         }
         uint32_t devIdList[1] = {devId};
         ProfAclMgr::instance()->AddModelLoadConf(dataTypeConfig);
-        geRet = Analysis::Dvvp::ProfilerCommon::CommandHandleProfStop(devIdList, 1, dataTypeConfig);
-        if (geRet != SUCCESS) {
+        ret = Analysis::Dvvp::ProfilerCommon::CommandHandleProfStop(devIdList, 1, dataTypeConfig);
+        if (ret != SUCCESS) {
             MSPROF_LOGE("Failed to CommandHandleProfStop on device:%u", devId);
             MSPROF_INNER_ERROR("EK9999", "Failed to CommandHandleProfStop on device:%u", devId);
         }
     }
-    geRet = Analysis::Dvvp::ProfilerCommon::CommandHandleProfFinalize();
-    if (geRet != SUCCESS) {
+    ret = Analysis::Dvvp::ProfilerCommon::CommandHandleProfFinalize();
+    if (ret != SUCCESS) {
         MSPROF_LOGE("Failed to CommandHandleProfFinalize");
         MSPROF_INNER_ERROR("EK9999", "Failed to CommandHandleProfFinalize");
     }
