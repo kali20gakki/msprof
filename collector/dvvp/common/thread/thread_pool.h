@@ -61,7 +61,7 @@ private:
             : started_(false), queue_(nullptr), queueSize_(queueSize)
         {
         }
-        ~InnnerThread()
+        virtual ~InnnerThread() override
         {
             (void)Stop();
         }

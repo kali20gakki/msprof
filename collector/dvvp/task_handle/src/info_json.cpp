@@ -384,7 +384,8 @@ int InfoJson::AddDeviceInfo(SHARED_PTR_ALIA<InfoMain> infoMain)
         CPU_ID_STR(ctrlCpu, 0, devInfo.ctrl_cpu_core_num); // ctrl cpu, begin with 0
         infoDevice->set_ctrl_cpu(ctrlCpu);
         std::string aiCpu;
-        CPU_ID_STR(aiCpu, devInfo.ai_cpu_core_id, (devInfo.ctrl_cpu_core_num + devInfo.ai_cpu_core_num)); // ai cpu
+        CPU_ID_STR(aiCpu, (static_cast<uint64_t>(devInfo.ai_cpu_core_id)), 
+                (static_cast<uint64_t>(devInfo.ctrl_cpu_core_num + devInfo.ai_cpu_core_num))); // ai cpu
         infoDevice->set_ai_cpu(aiCpu);
         SetHwtsFrequency(*infoDevice);
         infoDevice->set_aic_frequency(Analysis::Dvvp::Driver::DrvGeAicFrq(devIndexId));
