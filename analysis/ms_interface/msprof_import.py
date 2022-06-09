@@ -42,6 +42,11 @@ class ImportCommand:
             warn(MsProfCommonConstant.COMMON_FILE_NAME,
                  'Analysis data in "%s" failed. Maybe the data is incomplete.' % result_dir)
 
+    @staticmethod
+    def summary_check(path: str) -> bool:
+        check_path_valid(path, False)
+        return DataCheckManager.contain_info_json_data(path)
+
     def process(self: any) -> None:
         """
         command import command entry
@@ -52,9 +57,19 @@ class ImportCommand:
             LoadInfoManager.load_info(self.collection_path)
             self.do_import(os.path.realpath(self.collection_path))
         else:
-            self._process_sub_dirs()
+            self.process_sub_dirs()
 
-    def _process_sub_dirs(self: any, subdir: str = '', is_cluster: bool = False) -> None:
+    def process_sub_dirs(self: any) -> None:
+        sub_dirs = get_path_dir(self.collection_path)
+        for sub_dir in sub_dirs:
+            sub_path = os.path.realpath(
+                os.path.join(self.collection_path, sub_dir))
+            if self.summary_check(sub_path):
+                self._process_sub_dirs()
+            else:
+                self._process_sub_dirs(sub_dir)
+
+    def _process_sub_dirs(self: any, subdir: str = '') -> None:
         collect_path = self.collection_path
         if subdir:
             collect_path = os.path.join(self.collection_path, subdir)
@@ -62,12 +77,9 @@ class ImportCommand:
         for sub_dir in sub_dirs:  # result_dir
             sub_path = os.path.realpath(
                 os.path.join(collect_path, sub_dir))
-            check_path_valid(sub_path, False)
-            if DataCheckManager.contain_info_json_data(sub_path):
+            if self.summary_check(sub_path):
                 LoadInfoManager.load_info(sub_path)
                 self.do_import(sub_path)
-            elif collect_path and is_cluster:
+            else:
                 warn(self.FILE_NAME, 'Invalid parsing dir("%s"), -dir must be profiling data dir '
                                      'such as PROF_XXX_XXX_XXX' % collect_path)
-            else:
-                self._process_sub_dirs(sub_dir, is_cluster=True)

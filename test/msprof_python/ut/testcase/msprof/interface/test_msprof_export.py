@@ -327,7 +327,7 @@ class TestExportCommand(unittest.TestCase):
     def test_process_1(self):
         args_dic = {"collection_path": "test", "iteration_id": 3, "model_id": 1}
         args = Namespace(**args_dic)
-        json_data_result = (False, True)
+        json_data_result = (False, True, True)
         path_dir = (['device_0'], ['host'], ['device_1'])
         with mock.patch(NAMESPACE + '.check_path_valid'),\
                 mock.patch(NAMESPACE + '.DataCheckManager.contain_info_json_data', side_effect=json_data_result),\
