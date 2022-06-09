@@ -35,12 +35,15 @@ function uninstall_product() {
 }
 
 function delete_product() {
-	local target_path=$(readlink -f ${1})
-    local parent_dir=$(dirname ${target_path})
-    local right=$(stat -c '%a' ${parent_dir})
+	local target_path=${1}
+
 	if [ ! -f "$target_path" ] && [ ! -d "$target_path" ]; then
 		return
 	fi
+
+    local parent_dir=$(dirname ${target_path})
+    local right=$(stat -c '%a' ${parent_dir})
+
 	chmod u+w ${parent_dir}
 	
     chmod -R u+w ${target_path}
@@ -50,6 +53,10 @@ function delete_product() {
 }
 
 function delete_mindstudio_msprof() {
+	if [ ! -d "${install_path}/${MSPROF_RUN_NAME}" ]; then
+		return
+	fi
+
     chmod -R u+w ${install_path}/${MSPROF_RUN_NAME}
     rm -rf ${install_path}/${MSPROF_RUN_NAME}
 }
@@ -58,7 +65,7 @@ function delete_parent_dir(){
     # must from in to out
     remove_dir_by_order ${install_path}/tools/profiler/profiler_tool
     remove_dir_by_order ${install_path}/tools/profiler
-    remove_dir_by_order ${install_path}/tools/
+    remove_dir_by_order ${install_path}/tools
     remove_dir_by_order ${install_path}
 }
 
@@ -70,16 +77,10 @@ function remove_dir_by_order() {
 	fi
 
     local parent_dir=$(dirname ${dir_name})
-    local dir_right=$(stat -c '%a' ${dir_name})
     local parent_dir_right=$(stat -c '%a' ${parent_dir})
 
-    chmod u+w ${dir_name}
     chmod u+w ${parent_dir}
-
     remove_empty_dir ${dir_name}
-	if [ -d "${dir_name}" ]; then
-        chmod ${dir_right} ${dir_name}
-	fi
     chmod ${parent_dir_right} ${parent_dir}
 }
 
@@ -87,7 +88,9 @@ function uninstall_latest() {
     # runtime has been uninstall
     local leader_package="runtime"
 
-    rm_file_safe ${latest_path}/${MSPROF_RUN_NAME}
+    if [ -L "${latest_path}/${MSPROF_RUN_NAME}" ]; then
+        rm_file_safe ${latest_path}/${MSPROF_RUN_NAME}
+    fi
 
     # single version or multi version old
     if [ ! -L "${latest_path}/${leader_package}" ] || [ ! -d "${latest_path}/${leader_package}/../${MSPROF_RUN_NAME}" ]; then
@@ -100,36 +103,31 @@ function uninstall_latest() {
     ln -sf ../${version_name}/${MSPROF_RUN_NAME} ${latest_path}/${MSPROF_RUN_NAME}
 }
 
-function rm_file_safe() {
-    local file_path=$1
-    if [ -n "${file_path}" ]; then
-        if [ -f "${file_path}" ] || [ -h "${file_path}" ]; then
-            rm -f "${file_path}"
-        else
-            print "WARNING" "the file ${file_path} is not exist"
-        fi
-    else
-        print "WARNING" "the file ${file_path} path is NULL"
-    fi
-}
+# must use readlink, or can not bash by latest
+uninstall_location=$(readlink -f ${0})
 
-source $(dirname "$0")/utils.sh
+source $(dirname ${uninstall_location})/utils.sh
 
 # get path
+install_path=$(dirname ${uninstall_location})/../../
+if [ ! -d "${install_path}" ]; then
+    print "ERROR" "Can not find install path."
+    exit 1
+fi
 install_path="$(
-    cd "$(dirname "$0")/../../"
+    cd ${install_path}
     pwd
 )"
 
+latest_path=$(dirname ${uninstall_location})/../../../latest
+if [ ! -d "${latest_path}" ]; then
+    print "ERROR" "Can not find latest path."
+    exit 1
+fi
 latest_path="$(
-    cd "$(dirname "$0")/../../../latest"
+    cd ${latest_path}
     pwd
 )"
-
-# product
-ANALYSIS="analysis"
-ANALYSIS_PATH="/tools/profiler/profiler_tool/"
-MSPROF_RUN_NAME="mindstudio-msprof"
 
 unregist_uninstall
 uninstall_product

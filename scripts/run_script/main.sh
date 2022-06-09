@@ -105,14 +105,11 @@ function store_uninstall_script() {
 		return
 	fi
 
-	mkdir -p "${install_path}/${MSPROF_RUN_NAME}/"
 	mkdir -p "${install_path}/${MSPROF_RUN_NAME}/script/"
 	cp "uninstall.sh" "${install_path}/${MSPROF_RUN_NAME}/script/"
 	cp "utils.sh" "${install_path}/${MSPROF_RUN_NAME}/script/"
 
-	chmod ${install_right} "${install_path}/${MSPROF_RUN_NAME}/script/uninstall.sh"
-	chmod ${install_right} "${install_path}/${MSPROF_RUN_NAME}/script/"
-	chmod ${install_right} "${install_path}/${MSPROF_RUN_NAME}/"
+	chmod -R ${install_right} ${install_path}/${MSPROF_RUN_NAME}
 }
 
 function set_latest() {
@@ -125,20 +122,6 @@ function remove_latest_link() {
 	local latest_path=$1
     if [ -L "${latest_path}/${MSPROF_RUN_NAME}" ]; then
         rm_file_safe ${latest_path}/${MSPROF_RUN_NAME}
-    fi
-}
-
-function rm_file_safe() {
-    local file_path=$1
-    if [ -n "${file_path}" ]; then
-        if [ -f "${file_path}" ] || [ -h "${file_path}" ]; then
-            rm -f "${file_path}"
-            print "INFO" "delete file ${file_path} successfully"
-        else
-            print "WARNING" "the file is not exist"
-        fi
-    else
-        print "WARNING" "the file path is NULL"
     fi
 }
 
