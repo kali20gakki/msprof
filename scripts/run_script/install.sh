@@ -49,18 +49,21 @@ function copy_file() {
 	fi
 
 	if [ -f "$target_file" ] || [ -d "$target_file" ]; then
-		chmod u+w $(dirname ${target_file})
+		local parent_dir=$(dirname ${target_file})
+		local parent_right=$(stat -c '%a' ${parent_dir})
+
+		chmod u+w ${parent_dir}
 		chmod -R u+w ${target_file}
 		rm -r ${target_file}
 		
 		cp -r ${filename} ${target_file}
 		chmod -R ${right} ${target_file}
-		chmod u-w $(dirname ${target_file})
+		chmod ${parent_right} ${parent_dir}
 		
 		print "INFO" "$filename is replaced."
 		return
 	fi
-	print "WARNING" "$target_file is non-existent."
+	print "WARNING" "target $filename is non-existent."
 }
 
 function chmod_ini_file() {
