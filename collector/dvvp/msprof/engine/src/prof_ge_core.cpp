@@ -30,7 +30,7 @@ using namespace analysis::dvvp::common::validation;
 using namespace Analysis::Dvvp::Common::Platform;
 using namespace Analysis::Dvvp::Plugin;
 
-std::mutex g_aclgraphProfMutex;
+static std::mutex g_aclgraphProfMutex;
 
 Status aclgrphProfGraphSubscribe(const uint32_t graphId, const aclprofSubscribeConfig *profSubscribeConfig)
 {
@@ -173,13 +173,11 @@ Status aclgrphProfInit(CONST_CHAR_PTR profilerPath, uint32_t length)
         MSPROF_INNER_ERROR("EK9999", "AclProfiling init fail, profiling result = %d", ret);
         return FAILED;
     }
-    ret = Analysis::Dvvp::ProfilerCommon::RegisterReporterCallback();
-    Status geRegisterRet = static_cast<Status>(ret);
+    Status geRegisterRet = Analysis::Dvvp::ProfilerCommon::RegisterReporterCallback();
     RETURN_IF_NOT_SUCCESS(geRegisterRet);
 
     MSPROF_LOGI("Allocate config of profiling initialize to Ge");
-    ret = Analysis::Dvvp::ProfilerCommon::CommandHandleProfInit();
-    Status geHandleInitRet = static_cast<Status>(ret);
+    Status geHandleInitRet = Analysis::Dvvp::ProfilerCommon::CommandHandleProfInit();
     RETURN_IF_NOT_SUCCESS(geHandleInitRet);
 
     MSPROF_LOGI("Successfully execute aclgrphProfInit");
@@ -200,8 +198,7 @@ Status aclgrphProfFinalize()
     }
 
     MSPROF_LOGI("Allocate config of profiling finalize to Ge");
-    ret = Analysis::Dvvp::ProfilerCommon::CommandHandleProfFinalize();
-    Status geRet = static_cast<Status>(ret);
+    Status geRet = Analysis::Dvvp::ProfilerCommon::CommandHandleProfFinalize();
     RETURN_IF_NOT_SUCCESS(geRet);
 
     Msprof::Engine::FlushAllModule();
@@ -361,9 +358,8 @@ Status aclgrphProfStart(ACL_GRPH_PROF_CONFIG_PTR profilerConfig)
     MSPROF_LOGI("Allocate start profiling config to Ge");
     uint64_t dataTypeConfig = profilerConfig->config.dataTypeConfig;
     ProfAclMgr::instance()->AddModelLoadConf(dataTypeConfig);
-    ret = Analysis::Dvvp::ProfilerCommon::CommandHandleProfStart(
+    Status geRet = Analysis::Dvvp::ProfilerCommon::CommandHandleProfStart(
         profilerConfig->config.devIdList, profilerConfig->config.devNums, dataTypeConfig | PROF_OP_DETAIL);
-    Status geRet = static_cast<Status>(ret);
     RETURN_IF_NOT_SUCCESS(geRet);
 
     MSPROF_LOGI("successfully execute aclgrphProfStart");
@@ -407,9 +403,8 @@ Status aclgrphProfStop(ACL_GRPH_PROF_CONFIG_PTR profilerConfig)
 
     MSPROF_LOGI("Allocate stop config of profiling modules to Acl");
     ProfAclMgr::instance()->AddModelLoadConf(dataTypeConfig);
-    ret = Analysis::Dvvp::ProfilerCommon::CommandHandleProfStop(
+    Status geRet = Analysis::Dvvp::ProfilerCommon::CommandHandleProfStop(
         profilerConfig->config.devIdList, profilerConfig->config.devNums, dataTypeConfig | PROF_OP_DETAIL);
-    Status geRet = static_cast<Status>(ret);
     RETURN_IF_NOT_SUCCESS(geRet);
 
     for (uint32_t i = 0; i < profilerConfig->config.devNums; i++) {
