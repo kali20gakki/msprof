@@ -66,6 +66,7 @@ class ImportCommand:
                 os.path.join(self.collection_path, sub_dir))
             if self.summary_check(sub_path):
                 self._process_sub_dirs()
+                break
             else:
                 self._process_sub_dirs(sub_dir)
 
