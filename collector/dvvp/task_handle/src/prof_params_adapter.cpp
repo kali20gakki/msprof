@@ -155,40 +155,40 @@ void ProfParamsAdapter::UpdateSysConf(SHARED_PTR_ALIA<analysis::dvvp::proto::Pro
     }
     if (sysConf->cpusamplinginterval() > 0) {
         params->cpu_profiling = "on";
-        params->cpu_sampling_interval = sysConf->cpusamplinginterval();
+        params->cpu_sampling_interval = static_cast<int32_t>(sysConf->cpusamplinginterval());
     }
     if (sysConf->syssamplinginterval() > 0) {
         params->sys_profiling = "on";
-        params->sys_sampling_interval = sysConf->syssamplinginterval();
+        params->sys_sampling_interval = static_cast<int32_t>(sysConf->syssamplinginterval());
     }
     if (sysConf->appsamplinginterval() > 0) {
         params->pid_profiling = "on";
-        params->pid_sampling_interval = sysConf->appsamplinginterval();
+        params->pid_sampling_interval = static_cast<int32_t>(sysConf->appsamplinginterval());
     }
     if (sysConf->hardwarememsamplinginterval() > 0) {
         params->hardware_mem = "on";
-        params->hardware_mem_sampling_interval = sysConf->hardwarememsamplinginterval();
+        params->hardware_mem_sampling_interval = static_cast<int32_t>(sysConf->hardwarememsamplinginterval());
     }
     if (sysConf->iosamplinginterval() > 0) {
         params->io_profiling = "on";
-        params->io_sampling_interval = sysConf->iosamplinginterval();
+        params->io_sampling_interval = static_cast<int32_t>(sysConf->iosamplinginterval());
     }
     if (sysConf->interconnectionsamplinginterval() > 0) {
         params->interconnection_profiling = "on";
-        params->interconnection_sampling_interval = sysConf->interconnectionsamplinginterval();
+        params->interconnection_sampling_interval = static_cast<int32_t>(sysConf->interconnectionsamplinginterval());
     }
     if (sysConf->dvppsamplinginterval() > 0) {
         params->dvpp_profiling = "on";
-        params->dvpp_sampling_interval = sysConf->dvppsamplinginterval();
+        params->dvpp_sampling_interval = static_cast<int32_t>(sysConf->dvppsamplinginterval());
     }
     if (sysConf->aicoresamplinginterval() > 0 && !sysConf->aicoremetrics().empty()) {
         params->ai_core_profiling = "on";
-        params->aicore_sampling_interval = sysConf->aicoresamplinginterval();
+        params->aicore_sampling_interval = static_cast<int32_t>(sysConf->aicoresamplinginterval());
         params->ai_core_metrics = sysConf->aicoremetrics();
     }
     if (sysConf->aivsamplinginterval() > 0 && !sysConf->aivmetrics().empty()) {
         params->aiv_profiling = "on";
-        params->aiv_sampling_interval = sysConf->aivsamplinginterval();
+        params->aiv_sampling_interval = static_cast<int32_t>(sysConf->aivsamplinginterval());
         params->aiv_metrics = sysConf->aivmetrics();
     }
 }
