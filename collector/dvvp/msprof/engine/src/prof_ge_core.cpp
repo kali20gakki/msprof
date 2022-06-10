@@ -173,6 +173,7 @@ Status aclgrphProfInit(CONST_CHAR_PTR profilerPath, uint32_t length)
         MSPROF_INNER_ERROR("EK9999", "AclProfiling init fail, profiling result = %d", ret);
         return FAILED;
     }
+
     Status geRegisterRet = Analysis::Dvvp::ProfilerCommon::RegisterReporterCallback();
     RETURN_IF_NOT_SUCCESS(geRegisterRet);
 
@@ -450,26 +451,26 @@ void GeFinalizeHandle()
 {
     std::vector<uint32_t> devIds;
     Msprofiler::Api::ProfAclMgr::instance()->GetRunningDevices(devIds);
-    int32_t ret;
+    Status geRet;
     for (uint32_t devId : devIds) {
         if (devId == DEFAULT_HOST_ID) {
             continue;
         }
         uint64_t dataTypeConfig = 0;
-        ret = Msprofiler::Api::ProfAclMgr::instance()->ProfAclGetDataTypeConfig(devId, dataTypeConfig);
+        int32_t ret = Msprofiler::Api::ProfAclMgr::instance()->ProfAclGetDataTypeConfig(devId, dataTypeConfig);
         if (ret != ACL_SUCCESS) {
             continue;
         }
         uint32_t devIdList[1] = {devId};
         ProfAclMgr::instance()->AddModelLoadConf(dataTypeConfig);
-        ret = Analysis::Dvvp::ProfilerCommon::CommandHandleProfStop(devIdList, 1, dataTypeConfig);
-        if (ret != SUCCESS) {
+        geRet = Analysis::Dvvp::ProfilerCommon::CommandHandleProfStop(devIdList, 1, dataTypeConfig);
+        if (geRet != SUCCESS) {
             MSPROF_LOGE("Failed to CommandHandleProfStop on device:%u", devId);
             MSPROF_INNER_ERROR("EK9999", "Failed to CommandHandleProfStop on device:%u", devId);
         }
     }
-    ret = Analysis::Dvvp::ProfilerCommon::CommandHandleProfFinalize();
-    if (ret != SUCCESS) {
+    geRet = Analysis::Dvvp::ProfilerCommon::CommandHandleProfFinalize();
+    if (geRet != SUCCESS) {
         MSPROF_LOGE("Failed to CommandHandleProfFinalize");
         MSPROF_INNER_ERROR("EK9999", "Failed to CommandHandleProfFinalize");
     }
