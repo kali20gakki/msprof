@@ -97,13 +97,6 @@ MSVP_PROF_API Status aclgrphProfStart(aclgrphProfConfig *profiler_config);
 /// @return Status result of function
 ///
 MSVP_PROF_API Status aclgrphProfStop(aclgrphProfConfig *profiler_config);
-
-#define RETURN_IF_NOT_SUCCESS_2(ret)  \
-    do {                            \
-        if ((ret) != ACL_SUCCESS) { \
-            return ret;             \
-        }                           \
-    } while (0)
 }  // namespace ge
 
 #endif  // INC_EXTERNAL_GE_GE_PROF_H_
