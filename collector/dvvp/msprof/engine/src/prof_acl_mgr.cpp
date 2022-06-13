@@ -308,7 +308,8 @@ int32_t ProfAclMgr::ProfAclInit(const std::string &profResultPath)
     path = Utils::CanonicalizePath(path);
     if (path.empty()) {
         MSPROF_LOGE("Invalid path of profInit");
-        MSPROF_INNER_ERROR("EK9999", "Invalid path of profInit");
+        MSPROF_INPUT_ERROR("EK0005", std::vector<std::string>({"path"}),
+            std::vector<std::string>({profResultPath}));
         return ACL_ERROR_INVALID_FILE;
     }
 
@@ -355,7 +356,8 @@ int ProfAclMgr::ProfAclStart(PROF_CONF_CONST_PTR profStartCfg)
 
     if (mode_ != WORK_MODE_API_CTRL) {
         MSPROF_LOGE("Profiling has not been inited");
-        MSPROF_INNER_ERROR("EK9999", "Profiling has not been inited");
+        MSPROF_INPUT_ERROR("EK0002", std::vector<std::string>({"intf", "intf"}),
+            std::vector<std::string>({"aclgrphProfStart|aclprofStart", "aclgrphProfInit|aclprofInit"}));
         return ACL_ERROR_PROF_NOT_RUN;
     }
 
@@ -415,7 +417,8 @@ int ProfAclMgr::ProfAclStop(PROF_CONF_CONST_PTR profStopCfg)
 
     if (mode_ != WORK_MODE_API_CTRL) {
         MSPROF_LOGE("Profiling has not been inited");
-        MSPROF_INNER_ERROR("EK9999", "Profiling has not been inited");
+        MSPROF_INPUT_ERROR("EK0002", std::vector<std::string>({"intf", "intf"}),
+            std::vector<std::string>({"aclgrphProfStop|aclprofStop", "aclgrphProfInit|aclprofInit"}));
         return ACL_ERROR_PROF_NOT_RUN;
     }
     // check device is started and
@@ -432,7 +435,8 @@ int ProfAclMgr::ProfAclStop(PROF_CONF_CONST_PTR profStopCfg)
             }
         } else {
             MSPROF_LOGE("Device %u has not been started", devId);
-            MSPROF_INNER_ERROR("EK9999", "Device %u has not been started", devId);
+            MSPROF_INPUT_ERROR("EK0002", std::vector<std::string>({"intf", "intf"}),
+                std::vector<std::string>({"aclgrphProfStop|aclprofStop", "aclgrphProfStart|aclprofStart"}));
             return ACL_ERROR_PROF_NOT_RUN;
         }
     }
@@ -466,7 +470,8 @@ int ProfAclMgr::ProfAclFinalize()
     std::lock_guard<std::mutex> lk(mtx_);
     if (mode_ != WORK_MODE_API_CTRL) {
         MSPROF_LOGE("Profiling has not been inited");
-        MSPROF_INNER_ERROR("EK9999", "Profiling has not been inited");
+        MSPROF_INPUT_ERROR("EK0002", std::vector<std::string>({"intf", "intf"}),
+            std::vector<std::string>({"aclgrphProfFinalize|aclprofFinalize", "aclgrphProfInit|aclprofInit"}));
         return ACL_ERROR_PROF_NOT_RUN;
     }
     for (auto iter = devTasks_.begin(); iter != devTasks_.end(); iter++) {
@@ -602,13 +607,14 @@ int ProfAclMgr::ProfAclModelUnSubscribe(const uint32_t modelId)
     std::lock_guard<std::mutex> lk(mtx_);
     if (!isReady_) {
         MSPROF_LOGE("Model %u has not been subscribed", modelId);
-        MSPROF_INNER_ERROR("EK9999", "Model %u has not been subscribed", modelId);
         return ACL_ERROR_INVALID_MODEL_ID;
     }
     auto iter = subscribeInfos_.find(modelId);
     if (iter == subscribeInfos_.end() || !iter->second.subscribed) {
         MSPROF_LOGE("Model %u has not been subscribed", modelId);
-        MSPROF_INNER_ERROR("EK9999", "Model %u has not been subscribed", modelId);
+        std::string errorReason = "Model id has not been subscribed";
+        MSPROF_INPUT_ERROR("EK0001", std::vector<std::string>({"value", "param", "reason"}),
+            std::vector<std::string>({std::to_string(modelId), "modelId", errorReason}));
         return ACL_ERROR_INVALID_MODEL_ID;
     }
     int ret = ACL_SUCCESS;
@@ -626,7 +632,6 @@ int ProfAclMgr::ProfAclModelUnSubscribe(const uint32_t modelId)
             iterDev->second.params->is_cancel = true;
             if (ProfManager::instance()->IdeCloudProfileProcess(iterDev->second.params) != PROFILING_SUCCESS) {
                 MSPROF_LOGE("Failed to stop profiling on device %u", iterDev->first);
-                MSPROF_INNER_ERROR("EK9999", "Failed to stop profiling on device %u", iterDev->first);
                 ret = ACL_ERROR_PROFILING_FAILURE;
             }
             CloseSubscribeFd(iterDev->first);
@@ -1444,6 +1449,8 @@ int32_t ProfAclMgr::MsprofResultPathAdapter(const std::string &dir, std::string 
     result = analysis::dvvp::common::utils::Utils::CanonicalizePath(path);
     if (result.empty() || !analysis::dvvp::common::utils::Utils::IsDirAccessible(result)) {
         MSPROF_LOGE("Result path is not accessible or not exist, result path: %s", Utils::BaseName(dir).c_str());
+        MSPROF_INPUT_ERROR("EK0005", std::vector<std::string>({"path"}),
+            std::vector<std::string>({dir}));
         return PROFILING_FAILED;
     }
     resultPath = result;
