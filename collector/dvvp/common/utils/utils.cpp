@@ -474,7 +474,7 @@ std::string Utils::CanonicalizePath(const std::string &path)
         resolvedPath = realPath;
     }
     MSPROF_LOGI("Input path:%s, canonicalized path:%s",
-                BaseName(tmpPath).c_str(), BaseName(resolvedPath).c_str());
+                path.c_str(), resolvedPath.c_str());
 
     return resolvedPath;
 }
@@ -1283,8 +1283,9 @@ int32_t WriteFile(const std::string &absolutePath, const std::string &recordFile
     return analysis::dvvp::common::error::PROFILING_SUCCESS;
 #else
     FILE *file;
-
-    if ((file = fopen(Utils::CanonicalizePath(absolutePath).c_str(), "a")) == nullptr) {
+    
+    MSPROF_LOGI("XXX CanonicalizePath = %s", Utils::CanonicalizePath(absolutePath).c_str());
+    if ((file = fopen(absolutePath.c_str(), "a")) == nullptr) {
         MSPROF_LOGE("Failed to open %s", recordFile.c_str());
         return analysis::dvvp::common::error::PROFILING_FAILED;
     }

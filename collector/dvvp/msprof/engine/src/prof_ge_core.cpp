@@ -7,7 +7,6 @@
 #include "prof_ge_core.h"
 #include <google/protobuf/util/json_util.h>
 #include "ge/ge_prof.h"
-
 #include "ai_drv_dev_api.h"
 #include "command_handle.h"
 #include "errno/error_code.h"
