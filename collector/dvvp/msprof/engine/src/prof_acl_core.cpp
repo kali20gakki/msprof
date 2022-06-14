@@ -33,7 +33,6 @@ using namespace Msprof::MsprofTx;
 using namespace analysis::dvvp::transport;
 using namespace Analysis::Dvvp::Common::Platform;
 using namespace Analysis::Dvvp::Plugin;
-using namespace Analysis::Dvvp::ProfilerCommon;
 
 static std::mutex g_aclprofMutex;
 static uint64_t g_indexId = 1;
