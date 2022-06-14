@@ -719,19 +719,27 @@ bool ParamValidation::CheckStorageLimit(const std::string &storageLimit)
         return false;
     } else if (digitStr.size() > 10) { // digitStr range is 0 ~ 4294967296, max length is 10
         MSPROF_LOGE("storage_limit:%s, valid range is 200~4294967296", storageLimit.c_str());
-        MSPROF_INNER_ERROR("EK9999", "storage_limit:%s, valid range is 200~4294967296", storageLimit.c_str());
+        std::string minValueStr = std::to_string(STORAGE_LIMIT_DOWN_THD - 1);
+        std::string maxValueStr = std::to_string(UINT32_MAX);
+        MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"limit", "min", "max"}),
+            std::vector<std::string>({digitStr, minValueStr, maxValueStr}));
         return false;
     }
 
     uint64_t limit = stoull(digitStr);
     if (limit < STORAGE_LIMIT_DOWN_THD) {
         MSPROF_LOGE("storage_limit:%s, min value is %uMB", storageLimit.c_str(), STORAGE_LIMIT_DOWN_THD);
-        MSPROF_INNER_ERROR("EK9999", "storage_limit:%s, min value is %uMB", storageLimit.c_str(),
-            STORAGE_LIMIT_DOWN_THD);
+        std::string minValueStr = std::to_string(STORAGE_LIMIT_DOWN_THD - 1);
+        std::string maxValueStr = std::to_string(UINT32_MAX);
+        MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"limit", "min", "max"}),
+            std::vector<std::string>({digitStr, minValueStr, maxValueStr}));
         return false;
     } else if (limit > UINT32_MAX) {
         MSPROF_LOGE("storage_limit:%s, max value is %uMB", storageLimit.c_str(), UINT32_MAX);
-        MSPROF_INNER_ERROR("EK9999", "storage_limit:%s, max value is %uMB", storageLimit.c_str(), UINT32_MAX);
+        std::string minValueStr = std::to_string(STORAGE_LIMIT_DOWN_THD - 1);
+        std::string maxValueStr = std::to_string(UINT32_MAX);
+        MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"limit", "min", "max"}),
+            std::vector<std::string>({digitStr, minValueStr, maxValueStr}));
         return false;
     }
     return true;
