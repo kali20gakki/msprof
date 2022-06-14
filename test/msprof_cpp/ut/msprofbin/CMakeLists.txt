@@ -42,7 +42,7 @@ set(common_file
     ${MSPROF_SOURCE_DIR}/dvvp/transport/hdc/hdc_transport.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/transport/hdc/device_transport.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/transport/hdc/platform/rpc/dev_mgr_api.cpp
-    ${MSPROF_SOURCE_DIR}/dvvp/adx/stub_lhisi/adx_prof_api.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/adx/stub/adx_prof_api.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/depend/src/slog_plugin.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/depend/src/plugin_handle.cpp
 )
@@ -76,6 +76,7 @@ add_executable(msprof_bin_utest
     ../stub/profile_drv_user_stub.cpp
     ../stub/hdc-api-stub.cpp
     ../stub/hdc-log-stub.cpp
+    ../stub/ide-cmd-stub.cpp
     ../stub/devdrv_runtime_api_stub.cpp
     ../../stub/driver_plugin_stub.cpp
     ${CppPath}

@@ -1,9 +1,8 @@
-#include "ide-cmd-stub.h"
 #include <memory>
-int CommandRes(struct IdeSockHandle, int cmd_or_file) {
-    return 0;
-}
 
+namespace Analysis {
+namespace Dvvp {
+namespace Adx {
 void* IdeXmalloc(size_t size)
 {
     if (size == 0) {
@@ -31,4 +30,6 @@ void IdeXfree(void* ptr)
         ptr = nullptr;
     }
 }
-
+} // namespace Adx
+} // namespace Dvvp
+} // namespace Analysis
