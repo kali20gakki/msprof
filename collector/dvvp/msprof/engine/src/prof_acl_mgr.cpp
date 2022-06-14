@@ -1475,9 +1475,12 @@ int32_t ProfAclMgr::MsprofGeOptionsParamConstruct(const std::string &jobInfo,
     } else {
         MSVP_MAKE_SHARED0_RET(params_, analysis::dvvp::message::ProfileParams, MSPROF_ERROR_MEM_NOT_ENOUGH);
     }
-    int ret = MsprofResultPathAdapter(inputCfgPb->output(), params_->result_dir);
-    if (ret != PROFILING_SUCCESS) {
-        return MSPROF_ERROR_CONFIG_INVALID;
+    int ret = PROFILING_SUCCESS;
+    if (!Platform::instance()->PlatformIsHelperHostSide()) {
+        ret = MsprofResultPathAdapter(inputCfgPb->output(), params_->result_dir);
+        if (ret != PROFILING_SUCCESS) {
+            return MSPROF_ERROR_CONFIG_INVALID;
+        }
     }
     MsprofInitGeOptionsParamAdaper(params_, jobInfo, inputCfgPb);
     MSPROF_LOGI("MsprofInitGeOptions, stars_acsq_task Param:%s, stars_sub_task:%s, ffts_thread_task:%s, ffts_block:%s"
@@ -1490,7 +1493,6 @@ int32_t ProfAclMgr::MsprofGeOptionsParamConstruct(const std::string &jobInfo,
         ret = ConfigManager::instance()->GetAicoreEvents(aiCoreMetrics, params_->ai_core_profiling_events);
         if (ret != PROFILING_SUCCESS) {
             MSPROF_LOGE("The ai_core_metrics of input aclJsonConfig is invalid");
-            MSPROF_INNER_ERROR("EK9999", "The ai_core_metrics of input aclJsonConfig is invalid");
             return MSPROF_ERROR_CONFIG_INVALID;
         }
         params_->ai_core_profiling = MSVP_PROF_ON;
@@ -1502,7 +1504,6 @@ int32_t ProfAclMgr::MsprofGeOptionsParamConstruct(const std::string &jobInfo,
     bool isValidSwith = ParamValidation::instance()->IsValidSwitch(inputCfgPb->l2());
     if (!isValidSwith) {
         MSPROF_LOGE("MsprofInitGeOptions, The l2 cache switch of input optionConfig is invalid");
-        MSPROF_INNER_ERROR("EK9999", "MsprofInitGeOptions, The l2 cache switch of input optionConfig is invalid");
         return MSPROF_ERROR_CONFIG_INVALID;
     }
     params_->l2CacheTaskProfiling = inputCfgPb->l2();
@@ -1511,7 +1512,6 @@ int32_t ProfAclMgr::MsprofGeOptionsParamConstruct(const std::string &jobInfo,
     storageLimit_ = params_->storageLimit;
     if (!ParamValidation::instance()->CheckStorageLimit(storageLimit_)) {
         MSPROF_LOGE("storage_limit para is invalid");
-        MSPROF_INNER_ERROR("EK9999", "storage_limit para is invalid");
         return MSPROF_ERROR_CONFIG_INVALID;
     }
     params_->biu = inputCfgPb->biu();
@@ -1595,8 +1595,7 @@ int32_t ProfAclMgr::MsprofInitAclEnv(const std::string &envValue)
     return MSPROF_ERROR_NONE;
 }
 
-int32_t ProfAclMgr::MsprofHelperParamConstruct(const std::string &msprofPath,
-    uint32_t storageLimit, const std::string &paramsJson)
+int32_t ProfAclMgr::MsprofHelperParamConstruct(const std::string &msprofPath, const std::string &paramsJson)
 {
     if (params_ != nullptr) {
         MSPROF_LOGW("MsprofHelper params exist");
@@ -1610,7 +1609,6 @@ int32_t ProfAclMgr::MsprofHelperParamConstruct(const std::string &msprofPath,
     }
     resultPath_ = params_->result_dir;
     baseDir_ = Utils::CreateTaskId(0);
-    params_->storageLimit = std::to_string(storageLimit) + "MB";
     if (!ParamValidation::instance()->CheckStorageLimit(params_->storageLimit)) {
         MSPROF_LOGE("storage_limit para is invalid");
         MSPROF_INNER_ERROR("EK9999", "storage_limit para is invalid");
@@ -1638,10 +1636,8 @@ int32_t ProfAclMgr::MsprofInitHelper(VOID_PTR data, uint32_t len)
     MsprofCommandHandleParams *commandHandleParams = static_cast<struct MsprofCommandHandleParams *>(data);
     std::string msprofPath = MsprofCheckAndGetChar(commandHandleParams->path, PATH_LEN_MAX);
     std::string msprofParams = MsprofCheckAndGetChar(commandHandleParams->profData, PARAM_LEN_MAX);
-    uint32_t storageLimit = commandHandleParams->storageLimit;
-    MSPROF_LOGI("MsprofInitHelper, path:%s, storageLimit:%u, params:%s",
-        msprofPath.c_str(), storageLimit, msprofParams.c_str());
-    ret = MsprofHelperParamConstruct(msprofPath, storageLimit, msprofParams);
+    MSPROF_LOGI("MsprofInitHelper, path:%s, params:%s", msprofPath.c_str(), msprofParams.c_str());
+    ret = MsprofHelperParamConstruct(msprofPath, msprofParams);
     if (ret != MSPROF_ERROR_NONE) {
         return ret;
     }

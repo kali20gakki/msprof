@@ -14,9 +14,6 @@
 #include "extra_config.h"
 #include "adx_log.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 enum cmd_class {
     IDE_EXEC_COMMAND_REQ = 0, /**< 执行device命令请求\n */
     IDE_SEND_FILE_REQ,        /**< 发送文件到device命令请求\n */
@@ -49,9 +46,6 @@ typedef struct tlv_req TlvReqT;
 typedef TlvReqT* IdeTlvReq;
 typedef const TlvReqT* IdeTlvConReq;
 typedef IdeTlvReq* IdeTlvReqAddr;
-#ifdef __cplusplus
-}
-#endif
 
 namespace Analysis {
 namespace Dvvp {

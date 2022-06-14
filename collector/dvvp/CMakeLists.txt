@@ -14,11 +14,7 @@ set(hdcCpp
     adx/wrapper/memory_utils.cpp
 )
 
-set(hdcStubCpp
-    adx/stub_lhisi/adx_prof_api.cpp
-)
-
-############################## stub ################################
+############################ generate stub file(acl_prof_stub.cpp and ge_prof_stub.cpp) ##############################
 set(MSPROF_STUB_INC ${TOP_DIR}/collector/inc/external)
 set(HI_PYTHON python3)
 add_custom_target(
@@ -30,14 +26,14 @@ add_custom_command(
     OUTPUT  ${CMAKE_CURRENT_BINARY_DIR}/acl_prof_stub.cpp
             ${CMAKE_CURRENT_BINARY_DIR}/ge_prof_stub.cpp
     COMMAND echo "Generating stub files:acl_prof_stub.cpp, ge_prof_stub.cpp."
-            && ${HI_PYTHON} ${TOP_DIR}/cmake/stub/gen_stubapi.py ${MSPROF_STUB_INC}
+            && ${HI_PYTHON} ${TOP_DIR}/collector/stub/gen_stubapi.py ${MSPROF_STUB_INC}
             ${CMAKE_CURRENT_BINARY_DIR}/acl_prof_stub.cpp
             ${CMAKE_CURRENT_BINARY_DIR}/ge_prof_stub.cpp
             && echo "Generating stub files end."
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-    DEPENDS ${TOP_DIR}/cmake/stub/gen_stubapi.py ${MSPROF_STUB_INC}
+    DEPENDS ${TOP_DIR}/collector/stub/gen_stubapi.py ${MSPROF_STUB_INC}
 )
-############################## stub ################################
+############################ generate stub file(acl_prof_stub.cpp and ge_prof_stub.cpp) ##############################
 
 ###################### stub/libmsprofiler.so #######################
 
@@ -54,8 +50,6 @@ set_target_properties(stub_msprofiler
 
 target_include_directories(stub_msprofiler PRIVATE
     ${MSPROF_STUB_INC}
-    ${TOP_DIR}/collector/dvvp/depend/inc/acl
-    ${TOP_DIR}/collector/dvvp/depend/inc/graphengine/external
     ${TOP_DIR}/collector/dvvp/depend/inc/metadef
     ${TOP_DIR}/collector/inc/external
     ${TOP_DIR}/collector/dvvp/depend/inc/profapi
@@ -78,7 +72,7 @@ install(TARGETS stub_msprofiler OPTIONAL
 )
 ###################### stub/libmsprofiler.so #######################
 
-# ####################### libmsprofiler.so ###########################
+######################## libmsprofiler.so ###########################
 set(msprofilerCpp
     analyze/src/analyzer.cpp
     analyze/src/analyzer_base.cpp
@@ -146,19 +140,11 @@ set(msprofilerCpp
 
 set(msprofilerInc
     ${TOP_DIR}/collector/inc
-    ################################## Check #####################################
-    ${TOP_DIR}/collector/dvvp/depend/inc/graphengine/external
-    ${TOP_DIR}/collector/dvvp/depend/inc/graphengine
-    ${TOP_DIR}/collector/dvvp/depend/inc/graphengine/framework/common
     ${TOP_DIR}/collector/dvvp/depend/inc/driver
-    ${TOP_DIR}/collector/dvvp/depend/inc/adump
     ${TOP_DIR}/collector/dvvp/depend/inc/slog
     ${TOP_DIR}/collector/dvvp/depend/inc/metadef
-    ${TOP_DIR}/collector/dvvp/depend/inc/acl
     ${TOP_DIR}/collector/dvvp/depend/inc/mmpa
-    ${TOP_DIR}/collector/dvvp/depend/inc/slog
     ${TOP_DIR}/collector/dvvp/depend/inc/profapi
-    ################################# Check #######################################
     ${TOP_DIR}/collector/inc/toolchain
     ${TOP_DIR}/collector/inc/external
     ${TOP_DIR}/collector/inc/external/acl
@@ -199,30 +185,30 @@ set(msprofilerFwcSrc
     msprof/engine/src/prof_ge_core.cpp
 )
 
-add_library(msprofiler_fwk_share SHARED
+add_library(msprofiler_share SHARED
     ${msprofilerFwcSrc}
     depend/stub/error_manager/msprof_error_manager.cpp
     msprof/engine/src/prof_acl_core.cpp
     ${hdcCpp}
 )
 
-target_include_directories(msprofiler_fwk_share PRIVATE
+target_include_directories(msprofiler_share PRIVATE
     ${msprofilerInc}
     ${TOP_DIR}/collector/dvvp/depend/inc/metadef/error_manager/error_manager_wrapper
     ${TOP_DIR}/collector/dvvp/depend/inc
 )
 
-set_target_properties(msprofiler_fwk_share
+set_target_properties(msprofiler_share
     PROPERTIES
     OUTPUT_NAME msprofiler
 )
 
-target_compile_definitions(msprofiler_fwk_share PRIVATE
+target_compile_definitions(msprofiler_share PRIVATE
     google=ascend_private
     LOG_CPP
 )
 
-target_compile_options(msprofiler_fwk_share PRIVATE
+target_compile_options(msprofiler_share PRIVATE
     -std=c++11
     -fPIC
     -fstack-protector-all
@@ -235,13 +221,13 @@ target_compile_options(msprofiler_fwk_share PRIVATE
     -D_GLIBCXX_USE_CXX11_ABI=0
 )
 
-target_link_options(msprofiler_fwk_share PRIVATE
+target_link_options(msprofiler_share PRIVATE
     -Wl,-z,relro,-z,now,-z,noexecstack
     -Wl,-Bsymbolic
     -Wl,--exclude-libs=ALL
 )
 
-target_link_libraries(msprofiler_fwk_share PRIVATE
+target_link_libraries(msprofiler_share PRIVATE
     -Wl,--no-as-needed
     c_sec
     ascend_protobuf_shared
@@ -249,9 +235,9 @@ target_link_libraries(msprofiler_fwk_share PRIVATE
     -Wl,--as-needed
 )
 
-install(TARGETS msprofiler_fwk_share OPTIONAL
+install(TARGETS msprofiler_share OPTIONAL
     LIBRARY DESTINATION lib
 )
 
 ####################### libmsprofiler.so ###########################
-add_dependencies(msprofiler_fwk_share profiler_proto)
+add_dependencies(msprofiler_share profiler_proto)
