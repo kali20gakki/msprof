@@ -11,6 +11,7 @@ from framework.load_info_manager import LoadInfoManager
 from profiling_bean.basic_info.collect_info import CollectInfo
 from profiling_bean.basic_info.device_info import DeviceInfo
 from profiling_bean.basic_info.host_info import HostInfo
+from profiling_bean.basic_info.model_info import ModelInfo
 
 
 class BasicInfo:
@@ -18,10 +19,15 @@ class BasicInfo:
     basic info contain collect, device and host info
     """
 
-    def __init__(self: any, collection_info: CollectInfo, device_info: DeviceInfo, host_info: HostInfo) -> None:
+    def __init__(self: any,
+                 collection_info: CollectInfo,
+                 device_info: DeviceInfo,
+                 host_info: HostInfo,
+                 model_info: ModelInfo) -> None:
         self.collection_info = collection_info
         self.device_info = device_info
         self.host_info = host_info
+        self.model_info = model_info
 
     def fresh_data(self: any, project_path: str) -> None:
         """
@@ -32,6 +38,7 @@ class BasicInfo:
         self.collection_info.run(project_path)
         self.device_info.run(project_path)
         self.host_info.run(project_path)
+        self.model_info.run(project_path)
 
     def run(self: any, project_path: str) -> None:
         """
@@ -63,7 +70,10 @@ class MsProfBasicInfo:
                      "_frequency": "Frequency",
                      "_logical_cpu_count": "Logical_CPU_Count",
                      "_cpu_name": "Name",
-                     "_cpu_type": "Type"
+                     "_cpu_type": "Type",
+                     "_device_id": "Device Id",
+                     "_model_id": "Model Id",
+                     "_iteration_num": "Iteration Number"
                      }
 
     def __init__(self: any, project_path: str) -> None:
@@ -79,7 +89,8 @@ class MsProfBasicInfo:
         collection_info = CollectInfo()
         device_info = DeviceInfo()
         host_info = HostInfo()
-        self.basic_info = BasicInfo(collection_info, device_info, host_info)
+        model_info = ModelInfo()
+        self.basic_info = BasicInfo(collection_info, device_info, host_info, model_info)
 
     def run(self: any) -> str:
         """
