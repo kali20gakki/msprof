@@ -1,4 +1,8 @@
 #!/bin/bash
+
+# use utils function and constant
+source utils.sh
+
 # spc dir
 SPC_DIR="spc"
 BACKUP_DIR="backup"
@@ -10,6 +14,7 @@ LIBMSPROFILER="libmsprofiler.so"
 
 # get install path
 install_path=${1}
+backup_path=${install_path}/${SPC_DIR}/${BACKUP_DIR}/${MSPROF_RUN_NAME}
 
 # script for spc
 ROLLBACK_PRECHECK=rollback_precheck.sh
@@ -24,17 +29,18 @@ COMMON_DIR="common_script"
 
 function backup_product() {
     get_cann_package_name
-    
+	prepar_backup_path ${backup_path}
+
 	if [ "$cann_package_name" = "ascend-toolkit" ]; then
-		copy_product ${ANALYSIS} ${ANALYSIS_PATH}
-		copy_product ${MSPROF} ${MSPROF_PATH}
+		copy_product ${install_path}/${MSPROF_PATH}/${MSPROF} ${MSPROF}
+		copy_product ${install_path}/${ANALYSIS_PATH}/${ANALYSIS} ${ANALYSIS}
 	fi
 	
 	if [ "$cann_package_name" != "nnae" ]; then
-		copy_product ${LIBMSPROFILER} ${LIBMSPROFILER_PATH}/stub
+		copy_product ${install_path}/${LIBMSPROFILER_PATH}/${LIBMSPROFILER_STUB} ${LIBMSPROFILER_STUB}
 	fi
 
-	copy_product ${LIBMSPROFILER} ${LIBMSPROFILER_PATH}
+	copy_product ${install_path}/${LIBMSPROFILER_PATH}/${LIBMSPROFILER} ${LIBMSPROFILER}
 }
 
 function get_cann_package_name() {
@@ -47,44 +53,43 @@ function get_cann_package_name() {
 	exit 1
 }
 
-function copy_product() {
-	local filename=${1}
-    local relative_location=${2}
-    local backup_path=${install_path}/${SPC_DIR}/${BACKUP_DIR}/${MSPROF_RUN_NAME}
-    local target_file=$(readlink -f ${install_path}/${relative_location}/${filename})
-
-	if [ ! -f ${filename} ] && [ ! -d ${filename} ]; then
+function prepar_backup_path() {
+	if [ -d ${backup_path} ]; then
 		return
 	fi
 
-	if [ -f ${target_file} ] || [ -d ${target_file} ]; then
-		if [ -d ${backup_path} ]; 
-		then
-			chmod -R a+w ${backup_path}
-		else
-			mkdir -p ${backup_path}
-			chmod -R a+w ${backup_path}
-		fi
+	mkdir -p ${backup_path}/stub
+	chmod -R ${mindstudio_msprof_spc_right} ${backup_path}
+}
 
-		if [ ! -f ${backup_path}/${relative_location}/${filename} ] && [ ! -d ${backup_path}/${relative_location}/${filename} ]; 
-		then
-			mkdir -p ${backup_path}/${relative_location}
-		fi
-        cp -rp ${target_file} ${backup_path}/${relative_location}
-		chmod -R a-w ${backup_path}
+function copy_product() {
+	local installed_filename=$(readlink -f ${1})
+    local backup_filename=${backup_path}/${2}
+
+	if [ ! -f ${installed_filename} ] && [ ! -d ${installed_filename} ]; then
+		return
 	fi
+
+	chmod -R u+w ${backup_path}
+
+	if [ -f ${backup_filename} ] || [ -d ${backup_filename} ]; then
+		rm -rf ${backup_filename}
+	fi
+
+	cp -rp ${installed_filename} ${backup_filename}
+	chmod -R u-w ${backup_path}
 }
 
 function backup_script() {
-	if [ ! -d ${install_path}/${SPC_DIR}/${SCRIPT_DIR}/${MSPROF_RUN_NAME} ]; then
-		create_script_dir
-		copy_script
-		chmod -R a-w ${install_path}/${SPC_DIR}/${SCRIPT_DIR}/${MSPROF_RUN_NAME}
-	fi
+	create_script_dir
+	chmod -R u+w ${install_path}/${SPC_DIR}/${SCRIPT_DIR}/${MSPROF_RUN_NAME}
+	copy_script
+	chmod -R u-w ${install_path}/${SPC_DIR}/${SCRIPT_DIR}/${MSPROF_RUN_NAME}
 }
 
 function create_script_dir() {
     mkdir -p ${install_path}/${SPC_DIR}/${SCRIPT_DIR}/${MSPROF_RUN_NAME}
+	chmod -R ${mindstudio_msprof_spc_right} ${install_path}/${SPC_DIR}/${SCRIPT_DIR}/${MSPROF_RUN_NAME}
 }
 
 function copy_script() {
@@ -99,10 +104,20 @@ function place_common_script() {
     cp -np ${COMMON_DIR}/${COMMON_UNINSTALL} ${install_path}/${SPC_DIR}/${SCRIPT_DIR}
 }
 
-# use utils function and constant
-source utils.sh
+function set_common_dir_right() {
+	local common_spc_right
+	if [ "$UID" = "0" ]; then
+		common_spc_right=755
+	else
+		common_spc_right=750
+	fi
+	chmod ${common_spc_right} ${install_path}/${SPC_DIR}
+	chmod ${common_spc_right} ${install_path}/${SPC_DIR}/${BACKUP_DIR}
+	chmod ${common_spc_right} ${install_path}/${SPC_DIR}/${SCRIPT_DIR}
+}
 
 backup_product
 backup_script
 place_common_script
+set_common_dir_right
 
