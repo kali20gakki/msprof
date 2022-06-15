@@ -199,7 +199,7 @@ Status aclgrphProfInit(CONST_CHAR_PTR profilerPath, uint32_t length)
     RETURN_IF_NOT_SUCCESS(geRegisterRet);
 
     MSPROF_LOGI("Allocate config of profiling initialize to Ge");
-    Status geHandleInitRet = Analysis::Dvvp::ProfilerCommon::CommandHandleProfInit();
+    Status geHandleInitRet = static_cast<Status>(CommandHandleProfInit());
     RETURN_IF_NOT_SUCCESS(geHandleInitRet);
 
     MSPROF_LOGI("Successfully execute aclgrphProfInit");
@@ -410,8 +410,8 @@ Status aclgrphProfStart(ACL_GRPH_PROF_CONFIG_PTR profilerConfig)
     MSPROF_LOGI("Allocate start profiling config to Ge");
     uint64_t dataTypeConfig = profilerConfig->config.dataTypeConfig;
     ProfAclMgr::instance()->AddModelLoadConf(dataTypeConfig);
-    Status geRet = Analysis::Dvvp::ProfilerCommon::CommandHandleProfStart(
-        profilerConfig->config.devIdList, profilerConfig->config.devNums, dataTypeConfig | PROF_OP_DETAIL);
+    Status geRet = static_cast<Status>(CommandHandleProfStart(
+        profilerConfig->config.devIdList, profilerConfig->config.devNums, dataTypeConfig | PROF_OP_DETAIL));
     RETURN_IF_NOT_SUCCESS(geRet);
 
     MSPROF_LOGI("successfully execute aclgrphProfStart");
