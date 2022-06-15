@@ -1,4 +1,3 @@
-@@ -1,23 +1,23 @@
 #!/bin/bash
 # the params for checking
 install_args_num=0
