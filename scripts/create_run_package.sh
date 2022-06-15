@@ -72,6 +72,7 @@ function parse_script_args() {
 # create temp dir for product
 function create_temp_dir() {
 	local temp_dir=${1}
+	
 	if [ "${package_type}" = "Patch" ];
 		then
 			# if we want to change product, we also need to change rollback_precheck

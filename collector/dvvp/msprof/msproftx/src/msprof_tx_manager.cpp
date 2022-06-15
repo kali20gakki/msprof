@@ -103,6 +103,8 @@ void MsprofTxManager::DestroyStamp(ACL_PROF_STAMP_PTR stamp) const
 {
     if (stamp == nullptr) {
         MSPROF_LOGE("[DestroyStamp]aclprofStamp is nullptr");
+        MSPROF_INPUT_ERROR("EK0001", std::vector<std::string>({"value", "param", "reason"}),
+            std::vector<std::string>({"nullptr", "stamp", "stamp can not be nullptr when destroy"}));
         return;
     }
     if (!isInit_) {
@@ -152,6 +154,8 @@ int MsprofTxManager::SetStampCategory(ACL_PROF_STAMP_PTR stamp, uint32_t categor
 {
     if (stamp == nullptr) {
         MSPROF_LOGE("aclprofStamp is nullptr");
+        MSPROF_INPUT_ERROR("EK0001", std::vector<std::string>({"value", "param", "reason"}),
+            std::vector<std::string>({"nullptr", "stamp", "stamp can not be nullptr when set category"}));
         return PROFILING_FAILED;
     }
 
@@ -163,6 +167,8 @@ int MsprofTxManager::SetStampPayload(ACL_PROF_STAMP_PTR stamp, const int32_t typ
 {
     if (stamp == nullptr) {
         MSPROF_LOGE("aclprofStamp is nullptr");
+        MSPROF_INPUT_ERROR("EK0001", std::vector<std::string>({"value", "param", "reason"}),
+            std::vector<std::string>({"nullptr", "stamp", "stamp can not be nullptr when set payload"}));
         return PROFILING_FAILED;
     }
     if (value == nullptr) {
@@ -179,12 +185,17 @@ int MsprofTxManager::SetStampTraceMessage(ACL_PROF_STAMP_PTR stamp, CONST_CHAR_P
 {
     if (stamp == nullptr) {
         MSPROF_LOGE("[SetStampTraceMessage]aclprofStamp is nullptr");
+        MSPROF_INPUT_ERROR("EK0001", std::vector<std::string>({"value", "param", "reason"}),
+            std::vector<std::string>({"nullptr", "stamp", "stamp can not be nullptr when set traceMessage"}));
         return PROFILING_FAILED;
     }
 
     static const int MAX_MSG_LEN = 128;
     if (msgLen >= MAX_MSG_LEN) {
         MSPROF_LOGE("[SetStampTraceMessage]msg len(%u) is invalid, must less then 128", msgLen);
+        std::string errorReason = "msg len should be less than" + std::to_string(MAX_MSG_LEN);
+        MSPROF_INPUT_ERROR("EK0001", std::vector<std::string>({"value", "param", "reason"}),
+            std::vector<std::string>({std::to_string(msgLen), "stamp", errorReason}));
         return PROFILING_FAILED;
     }
     auto ret = memset_s(stamp->stampInfo.message, MAX_MSG_LEN, 0, MAX_MSG_LEN);
@@ -210,6 +221,8 @@ int MsprofTxManager::Mark(ACL_PROF_STAMP_PTR stamp) const
     }
     if (stamp == nullptr) {
         MSPROF_LOGE("[Mark]aclprofStamp is nullptr");
+        MSPROF_INPUT_ERROR("EK0001", std::vector<std::string>({"value", "param", "reason"}),
+            std::vector<std::string>({"nullptr", "stamp", "stamp can not be nullptr when mark"}));
         return PROFILING_FAILED;
     }
 
@@ -229,6 +242,8 @@ int MsprofTxManager::Push(ACL_PROF_STAMP_PTR stamp) const
     }
     if (stamp == nullptr) {
         MSPROF_LOGE("[Push]aclprofStamp is nullptr");
+        MSPROF_INPUT_ERROR("EK0001", std::vector<std::string>({"value", "param", "reason"}),
+            std::vector<std::string>({"nullptr", "stamp", "stamp can not be nullptr when push"}));
         return PROFILING_FAILED;
     }
 
@@ -264,6 +279,8 @@ int MsprofTxManager::RangeStart(ACL_PROF_STAMP_PTR stamp, uint32_t *rangeId) con
     }
     if (stamp == nullptr) {
         MSPROF_LOGE("[RangeStart] stamp pointer is nullptr!");
+        MSPROF_INPUT_ERROR("EK0001", std::vector<std::string>({"value", "param", "reason"}),
+            std::vector<std::string>({"nullptr", "stamp", "stamp can not be nullptr when RangeStart"}));
         return PROFILING_FAILED;
     }
     auto &stampInfo = stamp->stampInfo;
@@ -282,6 +299,9 @@ int MsprofTxManager::RangeStop(uint32_t rangeId) const
     auto stamp = stampPool_->GetStampById(rangeId);
     if (stamp == nullptr) {
         MSPROF_LOGE("[RangeStop] Get stamp by rangeId failed, rangeId is %u!", rangeId);
+        std::string errorReason = "Get stamp by rangeId failed, this rangeId was not set in profAclRangeStart";
+        MSPROF_INPUT_ERROR("EK0001", std::vector<std::string>({"value", "param", "reason"}),
+            std::vector<std::string>({std::to_string(rangeId), "rangeId", errorReason}));
         return PROFILING_FAILED;
     }
     auto stampInfo = stamp->stampInfo;

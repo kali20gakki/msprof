@@ -123,8 +123,8 @@ class TestTopDownData(unittest.TestCase):
         create_sql = "CREATE TABLE IF NOT EXISTS ApiCall" \
                      " (replayid, entry_time, exit_time, api, retcode, thread, device_id, " \
                      "stream_id, tasknum, task_id, detail, mode)"
-        data = ((0, 117960819118, 117962052296, 3, 0, 2246, 0, 65535, 2, "0,0", None, 0),
-                (0, 117962212631, 117962485483, 3, 0, 2246, 0, 4, 1, 0, None, 0))
+        data = ((0, 117960819118, 117962052296, "KernelLaunch", 0, 2246, 0, 65535, 2, "0,0", None, 0),
+                (0, 117962212631, 117962485483, "KernelLaunch", 0, 2246, 0, 4, 1, 0, None, 0))
         db_manager = DBManager()
         insert_sql = db_manager.insert_sql("ApiCall", data)
 
@@ -292,7 +292,7 @@ class TestTopDownData(unittest.TestCase):
         with mock.patch(NAMESPACE + '.logging.error'), \
              mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=(True, True)), \
              mock.patch(NAMESPACE + '.DBManager.destroy_db_connect'):
-            TopDownData._fill_runtime_trace_data('', 0, [], [])
+            TopDownData._fill_runtime_trace_data('', [], [])
 
     def test_fill_runtime_trace_data_2(self):
         top_down_datas = [(1, 'Runtime', 'N/A', 7702311524052, 13106532)]
@@ -307,7 +307,7 @@ class TestTopDownData(unittest.TestCase):
         with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=test_sql), \
              mock.patch(NAMESPACE + '.DBManager.destroy_db_connect'):
             InfoConfReader()._info_json = {"pid": 1}
-            TopDownData._fill_runtime_trace_data('', 0, [], top_down_datas)
+            TopDownData._fill_runtime_trace_data('', [], top_down_datas)
         (test_sql[1]).execute("drop Table ApiCall")
         db_manager.destroy(test_sql)
 
