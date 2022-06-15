@@ -71,6 +71,11 @@ function copy_product() {
 	fi
 
 	chmod -R u+w ${backup_path}
+
+	if [ -f ${backup_filename} ] || [ -d ${backup_filename} ]; then
+		rm -rf ${backup_filename}
+	fi
+
 	cp -rp ${installed_filename} ${backup_filename}
 	chmod -R u-w ${backup_path}
 }
