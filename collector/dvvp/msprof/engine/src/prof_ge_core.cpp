@@ -199,7 +199,7 @@ Status aclgrphProfInit(CONST_CHAR_PTR profilerPath, uint32_t length)
     RETURN_IF_NOT_SUCCESS(geRegisterRet);
 
     MSPROF_LOGI("Allocate config of profiling initialize to Ge");
-    Status geHandleInitRet = Analysis::Dvvp::ProfilerCommon::CommandHandleProfInit();
+    Status geHandleInitRet = static_cast<Status>(CommandHandleProfInit());
     RETURN_IF_NOT_SUCCESS(geHandleInitRet);
 
     MSPROF_LOGI("Successfully execute aclgrphProfInit");
