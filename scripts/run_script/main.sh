@@ -2,11 +2,11 @@
 # the params for checking
 install_args_num=0
 install_path_num=0
- 
+
 uninstall_flag=0
 upgrade_flag=0
 install_for_all_flag=0
- 
+
 function parse_script_args() {
     while true; do
 		if [ "$3" = "" ]; then
@@ -61,7 +61,7 @@ function parse_script_args() {
         esac
     done
 }
- 
+
 function check_args() {
 	if [ ${install_args_num} -ne 0 ] && [ ${uninstall_flag} = 1 ]; then
 		print "ERROR" "Input option is invalid. Please try --help."
@@ -73,7 +73,7 @@ function check_args() {
 		exit 1
 	fi
 }
- 
+
 function execute_run() {
 	if [ ${uninstall_flag} = 1 ]; then
 		if [ -f "${install_path}/${MSPROF_RUN_NAME}/script/uninstall.sh" ];
@@ -102,7 +102,7 @@ function execute_run() {
  
 	bash install.sh ${install_path} ${package_arch} ${install_for_all_flag}
 }
- 
+
 function get_default_install_path() {
 	if [ "$UID" = "0" ]; then
 		echo "/usr/local/Ascend/ascend-toolkit/latest"
@@ -110,7 +110,7 @@ function get_default_install_path() {
 		echo "${HOME}/Ascend/ascend-toolkit/latest"
 	fi
 }
- 
+
 function store_uninstall_script() {
 	local install_right=500
  
@@ -124,25 +124,25 @@ function store_uninstall_script() {
  
 	chmod -R ${install_right} ${install_path}/${MSPROF_RUN_NAME}
 }
- 
+
 function set_latest() {
 	local latest_path=${install_path}/../latest/
 	remove_latest_link ${latest_path}
 	add_latest_link ${latest_path}
 }
- 
+
 function remove_latest_link() {
 	local latest_path=$1
     if [ -L "${latest_path}/${MSPROF_RUN_NAME}" ]; then
         rm_file_safe ${latest_path}/${MSPROF_RUN_NAME}
     fi
 }
- 
+
 function add_latest_link() {
 	local latest_path=$1
     ln -sf ../${VERSION}/${MSPROF_RUN_NAME} ${latest_path}/${MSPROF_RUN_NAME}
 }
- 
+
 function regist_uninstall() {
     if [ -f "${install_path}/cann_uninstall.sh" ]; then
         write_cann_uninstall
@@ -151,24 +151,23 @@ function regist_uninstall() {
         write_cann_uninstall
     fi
 }
- 
+
 function write_cann_uninstall() {
     chmod 500 ${install_path}/cann_uninstall.sh
     chmod u+w ${install_path}/cann_uninstall.sh
     sed -i "/^exit /i uninstall_package \"${MSPROF_RUN_NAME}/script\"" "${install_path}/cann_uninstall.sh"
     chmod u-w ${install_path}/cann_uninstall.sh
 }
- 
+
 # use utils function and constant
 source utils.sh
 install_path=$(get_default_install_path)
- 
+
 #0, this footnote path;1, path for executing run;2, parents' dir for run package;3, run params
 parse_script_args $*
 check_args
 execute_run
 store_uninstall_script
- 
 set_latest
 regist_uninstall
 print "INFO" "${MSPROF_RUN_NAME} package install success."
