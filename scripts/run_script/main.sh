@@ -67,7 +67,7 @@ function check_args() {
 		print "ERROR" "Input option is invalid. Please try --help."
 		exit 1
 	fi
- 
+
 	if [ ${install_path_num} -gt 1 ]; then
 		print "ERROR" "Do not input --install-path many times. Please try --help."
 		exit 1
@@ -87,7 +87,7 @@ function execute_run() {
 		fi
 		
 	fi
- 
+
 	if [ ${upgrade_flag} = 1 ] && [ -L "${install_path}/../latest/${MSPROF_RUN_NAME}" ]; then
 		local uninstall_absolute_path=$(readlink -f "${install_path}/../latest/${MSPROF_RUN_NAME}/script/uninstall.sh")
 		if [ -f ${uninstall_absolute_path} ];
@@ -99,7 +99,7 @@ function execute_run() {
 			exit 1
 		fi
 	fi
- 
+
 	bash install.sh ${install_path} ${package_arch} ${install_for_all_flag}
 }
 
@@ -113,15 +113,15 @@ function get_default_install_path() {
 
 function store_uninstall_script() {
 	local install_right=500
- 
+
 	if [ -f "${install_path}/${MSPROF_RUN_NAME}/script/uninstall.sh" ] || [ -f "${install_path}/${MSPROF_RUN_NAME}/script/utils.sh" ]; then
 		return
 	fi
- 
+
 	mkdir -p "${install_path}/${MSPROF_RUN_NAME}/script/"
 	cp "uninstall.sh" "${install_path}/${MSPROF_RUN_NAME}/script/"
 	cp "utils.sh" "${install_path}/${MSPROF_RUN_NAME}/script/"
- 
+
 	chmod -R ${install_right} ${install_path}/${MSPROF_RUN_NAME}
 }
 
