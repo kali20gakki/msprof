@@ -76,12 +76,10 @@ function copy_product() {
 }
 
 function backup_script() {
-	if [ ! -d ${install_path}/${SPC_DIR}/${SCRIPT_DIR}/${MSPROF_RUN_NAME} ]; then
-		create_script_dir
-		chmod -R u+w ${install_path}/${SPC_DIR}/${SCRIPT_DIR}/${MSPROF_RUN_NAME}
-		copy_script
-		chmod -R u-w ${install_path}/${SPC_DIR}/${SCRIPT_DIR}/${MSPROF_RUN_NAME}
-	fi
+	create_script_dir
+	chmod -R u+w ${install_path}/${SPC_DIR}/${SCRIPT_DIR}/${MSPROF_RUN_NAME}
+	copy_script
+	chmod -R u-w ${install_path}/${SPC_DIR}/${SCRIPT_DIR}/${MSPROF_RUN_NAME}
 }
 
 function create_script_dir() {
