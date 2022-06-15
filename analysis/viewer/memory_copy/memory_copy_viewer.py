@@ -52,7 +52,7 @@ class MemoryCopyViewer:
 
         return args
 
-    def get_memory_copy_chip0_summary(self: any) -> None:
+    def get_memory_copy_chip0_summary(self: any) -> list:
         """
         get memory copy summary data when chip type is 0.
         datum index: 0 sum duration of start to end; 1 task type; 2 task id;
@@ -60,7 +60,7 @@ class MemoryCopyViewer:
         6 min duration of start to end; 7 max duration of start to end; 8 count
         return: None
         """
-        summart_data = []
+        summary_data = []
         if self._model.check_db():
             export_data = self._model.return_chip0_summary(DBNameConstant.TABLE_TS_MEMCPY_CALCULATION)
 
@@ -76,13 +76,12 @@ class MemoryCopyViewer:
                 pending = MemoryCopyConstant.DEFAULT_VIEWER_VALUE
                 op_name = MemoryCopyConstant.DEFAULT_VIEWER_VALUE
 
-                summart_data.append((default_time_ratio, sum_val, task_count, avg_val,
+                summary_data.append((default_time_ratio, sum_val, task_count, avg_val,
                                      min_val, max_val, waiting, running,
-                                     pending, datum[1], StrConstant.API_TYPE_MAPPING.get(
-                    StrConstant.AYNC_MEMCPY_NUM), datum[2], op_name, datum[3]))
-        return summart_data
+                                     pending, datum[1], StrConstant.AYNC_MEMCPY, datum[2], op_name, datum[3]))
+        return summary_data
 
-    def get_memory_copy_non_chip0_summary(self: any) -> None:
+    def get_memory_copy_non_chip0_summary(self: any) -> list:
         """
         get memory copy summary data when chip type is not 0.
         datum index: 0 name; 1 task type; 2 stream_id;

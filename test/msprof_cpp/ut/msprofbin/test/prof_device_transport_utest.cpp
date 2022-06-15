@@ -38,8 +38,6 @@ TEST_F(HOST_PROF_DEVICE_TRANSPORT_UTEST, CreateCoparamsnn){
 
     std::shared_ptr<analysis::dvvp::proto::DataChannelHandshake> data_message(
             new analysis::dvvp::proto::DataChannelHandshake());
-    EXPECT_EQ(nullptr, dev_tran->CreateConn());
-    // EXPECT_EQ(PROFILING_FAILED, dev_tran->HandleShake(nullptr, data_message));
 
     data_tran = std::make_shared<HDCTransport>(client);
     std::shared_ptr<AdxTransport> fake_trans;

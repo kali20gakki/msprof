@@ -842,7 +842,7 @@ std::string Utils::TimestampToTime(const std::string &timestamp, int unit /* = 1
     uint32_t microTime;
     try {
         secTime = std::stoll(timestamp) / unit;
-        microTime = std::stoll(timestamp) % unit;
+        microTime = static_cast<uint32_t>(std::stoll(timestamp) % unit);
     } catch (...) {
         return "0";
     }
