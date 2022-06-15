@@ -1284,7 +1284,7 @@ int32_t WriteFile(const std::string &absolutePath, const std::string &recordFile
 #else
     FILE *file;
 
-    if ((file = fopen(Utils::CanonicalizePath(absolutePath).c_str(), "a")) == nullptr) {
+    if ((file = fopen(absolutePath.c_str(), "a")) == nullptr) {
         MSPROF_LOGE("Failed to open %s", recordFile.c_str());
         return analysis::dvvp::common::error::PROFILING_FAILED;
     }

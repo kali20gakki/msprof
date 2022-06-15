@@ -174,7 +174,10 @@ class AiStackDataCheckManager(DataCheckManager):
         """
         The data path contain acl data or not
         """
-        return cls.contain_acl_data(result_dir, device_id=device_id)
+        return cls.contain_acl_data(result_dir, device_id=device_id) or \
+               cls.contain_ge_model_time_data(result_dir, device_id=device_id) or \
+               cls.contain_runtime_api_data(result_dir, device_id=device_id) or \
+               cls.contain_task_time_data(result_dir, device_id=device_id)
 
     @classmethod
     def contain_core_cpu_reduce_data(cls: any, result_dir: str, device_id: any = None) -> bool:

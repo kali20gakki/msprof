@@ -1,6 +1,7 @@
-#/bin/bash
+#!/bin/bash
+# This script is used to generate llt-cpp coverage.
+# Copyright Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
 
-# 82.0%
 set -e
 CUR_DIR=$(dirname $(readlink -f $0))
 TOP_DIR=${CUR_DIR}/..
