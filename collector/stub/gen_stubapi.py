@@ -32,6 +32,13 @@ RETURN_STATEMENTS = {
 }
 
 
+def log_info(info):
+    """
+    wrapper print
+    """
+    print(info)
+
+
 def collect_header_files(path):
     """
     collect header from path(ge, acl)
@@ -68,7 +75,7 @@ def implement_function(func):
             if ret_type.endswith('*'):
                 function_def += '    return nullptr;'
             else:
-                print("Unhandled return type: " + ret_type)
+                log_info("Unhandled return type: " + ret_type)
     else:
         function_def += '    return nullptr;'
     function_def += '\n'
@@ -103,7 +110,7 @@ def generate_function(header_files, inc_dir):
         includes.append(include_str)
 
     content = includes
-    print("include concent build success")
+    log_info("include concent build success")
     total = 0
     content.append('\n')
     # generate implement
@@ -116,15 +123,15 @@ def generate_function(header_files, inc_dir):
             content.append("namespace ge {\n")
         content.append("\n")
         functions = collect_functions(header)
-        print("inc file:{}, functions numbers:{}".format(header, len(functions)))
+        log_info("inc file:{}, functions numbers:{}".format(header, len(functions)))
         total += len(functions)
         for func in functions:
             content.append("{}\n".format(implement_function(func)))
             content.append("\n")
         if header_base_name == "ge_prof.h":
             content.append("} //ge\n")
-    print("implement concent build success")
-    print('total functions number is {}'.format(total))
+    log_info("implement concent build success")
+    log_info('total functions number is {}'.format(total))
     return content
 
 
@@ -133,11 +140,11 @@ def generate_stub_file(inc_dir):
     collect header files and generate function
     """
     acl_header_files, ge_header_files = collect_header_files(inc_dir)
-    print("header files has been generated")
+    log_info("header files has been generated")
     acl_content = generate_function(acl_header_files, inc_dir)
-    print("acl_content has been generated")
+    log_info("acl_content has been generated")
     ge_content = generate_function(ge_header_files, inc_dir)
-    print("ge_content has been generated")
+    log_info("ge_content has been generated")
     return acl_content, ge_content
 
 
@@ -148,7 +155,7 @@ def gen_code(inc_dir, acl_stub_path, ge_stub_path):
     if not inc_dir.endswith('/'):
         inc_dir += '/'
     acl_content, ge_content = generate_stub_file(inc_dir)
-    print("acl_content, ge_content have been generated")
+    log_info("acl_content, ge_content have been generated")
     with open(acl_stub_path, mode='w') as f:
         f.writelines(acl_content)
     with open(ge_stub_path, mode='w') as f:

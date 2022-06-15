@@ -196,7 +196,7 @@ private:
     void CloseSubscribeFd(const uint32_t devId, const uint32_t modelId);
     int32_t MsprofResultPathAdapter(const std::string &dir, std::string &resultPath);
     void PrintWorkMode(WorkMode mode);
-    int32_t MsprofHelperParamConstruct(const std::string &msprofPath, uint32_t storageLimit, const std::string &paramsJson);
+    int32_t MsprofHelperParamConstruct(const std::string &msprofPath, const std::string &paramsJson);
 
 private:
     bool isReady_;

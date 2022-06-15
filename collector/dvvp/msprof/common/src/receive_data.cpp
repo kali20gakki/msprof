@@ -284,7 +284,7 @@ int ReceiveData::DumpData(std::vector<ReporterDataChunk> &message, SHARED_PTR_AL
     std::string chunk = "";
     bool isFirstMessage = true;
     for (size_t i = 0; i < message.size(); i++) {
-        int messageLen = message[i].dataLen;
+        size_t messageLen = static_cast<size_t>(message[i].dataLen);
         CHAR_PTR dataPtr = reinterpret_cast<CHAR_PTR>(&message[i].data[0]);
         if (dataPtr == nullptr) {
             return PROFILING_FAILED;

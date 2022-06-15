@@ -193,16 +193,16 @@ class TopDownData:
             return []
         try:
             runtime_start = cur.execute(
-                "select min(entry_time) from ApiCall where api={}".format(
-                    CommonConstant.KERNEL_LAUNCH_INDEX)).fetchone()
+                "select min(entry_time) from ApiCall where api='{}'".format(
+                    CommonConstant.KERNEL_LAUNCH)).fetchone()
         except sqlite3.Error as err:
             DBManager.destroy_db_connect(conn, cur)
             logging.error(err, exc_info=Constant.TRACE_BACK_SWITCH)
             return []
         try:
             runtime_end = cur.execute(
-                "select max(exit_time) from ApiCall where api={}".format(
-                    CommonConstant.KERNEL_LAUNCH_INDEX)).fetchone()
+                "select max(exit_time) from ApiCall where api='{}'".format(
+                    CommonConstant.KERNEL_LAUNCH)).fetchone()
         except sqlite3.Error as err:
             logging.error(err, exc_info=Constant.TRACE_BACK_SWITCH)
             return []
@@ -281,7 +281,7 @@ class TopDownData:
         dispatch_result = cls._dispatch_top_down_datas(top_down_datas)
         cls._fill_acl_trace_data(project_path, device_id, result_data, dispatch_result)
         cls._fill_ge_trace_data(result_data, dispatch_result.get(cls.MODULE_GE))
-        cls._fill_runtime_trace_data(project_path, device_id, result_data,
+        cls._fill_runtime_trace_data(project_path, result_data,
                                      dispatch_result.get(cls.MODULE_RUNTIME))
         cls._fill_ts_trace_data(project_path, result_data, dispatch_result.get(cls.MODULE_TASK_SCHEDULER))
 
@@ -344,20 +344,17 @@ class TopDownData:
     def _reformat_runtime_trace_data(cls: any, top_down_datas: list, runtime_api: any) -> list:
         res = []
         res.extend(top_down_datas[0][:2])
-        res.extend((
-            StrConstant.API_TYPE_MAPPING.get(str(runtime_api[0])), runtime_api[1],
-            runtime_api[2], InfoConfReader().get_json_pid_data(),
-            cls.RUNTIME_TID))
+        res.extend((runtime_api[0], runtime_api[1], runtime_api[2],
+                   InfoConfReader().get_json_pid_data(), cls.RUNTIME_TID))
         return res
 
     @classmethod
-    def _fill_runtime_trace_data(cls: any, project_path: str, device_id: str,
-                                 result_data: list, top_down_datas: list) -> None:
+    def _fill_runtime_trace_data(cls: any, project_path: str, result_data: list, top_down_datas: list) -> None:
         conn, cur = DBManager.check_connect_db(project_path, DBNameConstant.DB_RUNTIME)
         if conn and cur and top_down_datas:
-            sql = "select api, entry_time, exit_time-entry_time from ApiCall where device_id= ? " \
-                  "and entry_time>=? and exit_time<=?"
-            runtime_apis = DBManager.fetch_all_data(cur, sql, (device_id, top_down_datas[0][3],
+            sql = "select api, entry_time, exit_time-entry_time from ApiCall where " \
+                  "entry_time>=? and exit_time<=?"
+            runtime_apis = DBManager.fetch_all_data(cur, sql, (top_down_datas[0][3],
                                                                top_down_datas[0][3] +
                                                                top_down_datas[0][4]))
             if runtime_apis:

@@ -80,7 +80,7 @@ std::string EncodeMessage(SHARED_PTR_ALIA<google::protobuf::Message> message)
     auto nameLen = static_cast<uint32_t>(type.size() + 1);
     uint32_t nameLenN = ::htonl(nameLen);
 
-    const int intSize = sizeof(nameLenN);
+    const uint32_t intSize = sizeof(nameLenN);
     union UnionData {
         char data[intSize];
         uint32_t nameLen;
@@ -186,9 +186,9 @@ SHARED_PTR_ALIA<google::protobuf::Message> DecodeMessage(const std::string &buf)
     }
 
     if (message != nullptr) {
-        int dataLen = bufLen - currLen;
+        uint32_t dataLen = bufLen - currLen;
         if (!message->ParseFromArray(buf.c_str() + currLen, dataLen)) {
-            MSPROF_LOGE("Failed to ParseFromArray, dataLen=%d", dataLen);
+            MSPROF_LOGE("Failed to ParseFromArray, dataLen=%u", dataLen);
             message.reset();
         }
     } else {
