@@ -1,14 +1,16 @@
 #!/bin/bash
 # right constant
-MSPROF_RUN_NAME="mindstudio-msprof"
 root_right=555
 user_right=550
 
 root_ini_right=444
 user_ini_right=400
 
+script_right=500
+
 mindstudio_msprof_spc_right=500
 
+MSPROF_RUN_NAME="mindstudio-msprof"
 # product constant
 LIBMSPROFILER="libmsprofiler.so"
 LIBMSPROFILER_STUB="stub/libmsprofiler.so"

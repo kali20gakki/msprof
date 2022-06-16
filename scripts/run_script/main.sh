@@ -111,20 +111,6 @@ function get_default_install_path() {
 	fi
 }
 
-function store_uninstall_script() {
-	local install_right=500
-
-	if [ -f "${install_path}/${MSPROF_RUN_NAME}/script/uninstall.sh" ] || [ -f "${install_path}/${MSPROF_RUN_NAME}/script/utils.sh" ]; then
-		return
-	fi
-
-	mkdir -p "${install_path}/${MSPROF_RUN_NAME}/script/"
-	cp "uninstall.sh" "${install_path}/${MSPROF_RUN_NAME}/script/"
-	cp "utils.sh" "${install_path}/${MSPROF_RUN_NAME}/script/"
-
-	chmod -R ${install_right} ${install_path}/${MSPROF_RUN_NAME}
-}
-
 function set_latest() {
 	local latest_path=${install_path}/../latest/
 	remove_latest_link ${latest_path}
@@ -141,6 +127,27 @@ function remove_latest_link() {
 function add_latest_link() {
 	local latest_path=$1
     ln -sf ../${VERSION}/${MSPROF_RUN_NAME} ${latest_path}/${MSPROF_RUN_NAME}
+}
+
+function prepar_uninstall() {
+    if [ "${package_arch}" != "$(arch)" ] && [ -d "${install_path}/${package_arch}-linux/hetero-arch-scripts" ]; then
+		return
+	fi
+
+	store_uninstall_script
+	regist_uninstall
+}
+
+function store_uninstall_script() {
+	if [ -f "${install_path}/${MSPROF_RUN_NAME}/script/uninstall.sh" ] || [ -f "${install_path}/${MSPROF_RUN_NAME}/script/utils.sh" ]; then
+		return
+	fi
+
+	mkdir -p "${install_path}/${MSPROF_RUN_NAME}/script/"
+	cp "uninstall.sh" "${install_path}/${MSPROF_RUN_NAME}/script/"
+	cp "utils.sh" "${install_path}/${MSPROF_RUN_NAME}/script/"
+
+	chmod -R ${script_right} ${install_path}/${MSPROF_RUN_NAME}
 }
 
 function regist_uninstall() {
@@ -167,7 +174,6 @@ install_path=$(get_default_install_path)
 parse_script_args $*
 check_args
 execute_run
-store_uninstall_script
 set_latest
-regist_uninstall
+prepar_uninstall
 print "INFO" "${MSPROF_RUN_NAME} package install success."
