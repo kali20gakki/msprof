@@ -243,11 +243,6 @@ class ExportCommand:
         return model_ids_set
 
     @staticmethod
-    def summary_check(path: str) -> bool:
-        check_path_valid(path, False)
-        return DataCheckManager.contain_info_json_data(path)
-
-    @staticmethod
     def _init_index_id_env(profiling_scene: any, project_path: str) -> tuple:
         sql = ""
         judge_table = None
@@ -278,7 +273,7 @@ class ExportCommand:
                 continue
             sub_path = os.path.realpath(
                 os.path.join(self.collection_path, sub_dir))
-            if self.summary_check(sub_path):
+            if DataCheckManager.process_check(sub_path):
                 self._process_sub_dirs()
                 break
             else:
@@ -549,7 +544,7 @@ class ExportCommand:
                 continue
             sub_path = os.path.realpath(
                 os.path.join(collect_path, sub_dir))
-            if self.summary_check(sub_path):
+            if DataCheckManager.process_check(sub_path):
                 self._update_cluster_params(sub_path, bool(subdir))
                 InfoConfReader().load_info(sub_path)
                 self._handle_export(sub_path)
