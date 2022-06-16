@@ -42,11 +42,6 @@ class ImportCommand:
             warn(MsProfCommonConstant.COMMON_FILE_NAME,
                  'Analysis data in "%s" failed. Maybe the data is incomplete.' % result_dir)
 
-    @staticmethod
-    def summary_check(path: str) -> bool:
-        check_path_valid(path, False)
-        return DataCheckManager.contain_info_json_data(path)
-
     def process(self: any) -> None:
         """
         command import command entry
@@ -64,7 +59,7 @@ class ImportCommand:
         for sub_dir in sub_dirs:
             sub_path = os.path.realpath(
                 os.path.join(self.collection_path, sub_dir))
-            if self.summary_check(sub_path):
+            if DataCheckManager.process_check(sub_path):
                 self._process_sub_dirs()
                 break
             else:
@@ -78,7 +73,7 @@ class ImportCommand:
         for sub_dir in sub_dirs:  # result_dir
             sub_path = os.path.realpath(
                 os.path.join(collect_path, sub_dir))
-            if self.summary_check(sub_path):
+            if DataCheckManager.process_check(sub_path):
                 LoadInfoManager.load_info(sub_path)
                 self.do_import(sub_path)
             else:

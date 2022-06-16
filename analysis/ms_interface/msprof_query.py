@@ -101,16 +101,37 @@ class QueryCommand:
             result = self._do_get_query_data(os.path.realpath(self.collection_path))
             result_data.extend(result)
         else:
-            sub_dirs = get_path_dir(self.collection_path)
-            for sub_dir in sub_dirs:  # result_dir
-                if sub_dir != StrConstant.TIMELINE_PATH:
-                    sub_path = os.path.realpath(
-                        os.path.join(self.collection_path, sub_dir))
-                    check_path_valid(sub_path, False)
-                    if DataCheckManager.contain_info_json_data(sub_path):  # find profiling data dir
-                        result = self._do_get_query_data(sub_path)
-                        result_data.extend(result)
-                    else:
-                        warn(self.FILE_NAME, 'Invalid parsing dir("%s"), -dir must be profiling data dir '
-                                             'such as PROF_XXX_XXX_XXX' % self.collection_path)
+            self.process_sub_dirs(result_data)
         return result_data
+
+    def process_sub_dirs(self: any, result_data: list):
+        sub_dirs = get_path_dir(self.collection_path)
+        for sub_dir in sub_dirs:  # result_dir
+            if sub_dir == StrConstant.TIMELINE_PATH:
+                continue
+            sub_path = os.path.realpath(
+                os.path.join(self.collection_path, sub_dir))
+            if DataCheckManager.process_check(sub_path):
+                self._process_sub_dirs(result_data)
+                break
+            else:
+                self._process_sub_dirs(result_data, sub_dir)
+
+    def _process_sub_dirs(self: any, result_data: list, subdir: str = '') -> None:
+        collect_path = self.collection_path
+        result = []
+        if subdir:
+            collect_path = os.path.join(self.collection_path, subdir)
+        sub_dirs = get_path_dir(collect_path)
+        for sub_dir in sub_dirs:  # result_dir
+            sub_path = os.path.realpath(
+                os.path.join(collect_path, sub_dir))
+            if DataCheckManager.process_check(sub_path):
+                result = self._do_get_query_data(sub_path)
+            else:
+                warn(self.FILE_NAME, 'Invalid parsing dir("%s"), -dir must be profiling data dir '
+                                     'such as PROF_XXX_XXX_XXX' % collect_path)
+        if subdir and result:
+            for data in result:
+                data[2] = '{}\\{}'.format(subdir, data[2])
+        result_data.extend(result)
