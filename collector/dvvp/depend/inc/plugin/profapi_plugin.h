@@ -11,7 +11,7 @@
 #include "prof_api.h"
 #include "plugin_handle.h"
 
-namespace Analysis {
+namespace Collector {
 namespace Dvvp {
 namespace Plugin {
 using ProfRegReporterCallbackFunc = std::function<int32_t(ProfReportHandle)>;              // profRegReporterCallback
@@ -64,5 +64,5 @@ private:
 };
 } // Plugin
 } // Dvvp
-} // Analysis
+} // Collector
 #endif

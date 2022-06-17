@@ -26,7 +26,7 @@ using namespace analysis::dvvp::common::utils;
 using namespace analysis::dvvp::host;
 using namespace analysis::dvvp::transport;
 using namespace Analysis::Dvvp::MsprofErrMgr;
-using namespace Analysis::Dvvp::Plugin;
+using namespace Collector::Dvvp::Plugin;
 
 ProfTask::ProfTask(const int devId, SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> param)
     : isInit_(false),
