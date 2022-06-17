@@ -358,7 +358,7 @@ aclError aclprofStop(ACL_PROF_CONFIG_CONST_PTR profilerConfig)
     }
 
     int32_t ret = ProfAclMgr::instance()->ProfStopPrecheck();
-    FUNRET_CHECK_FAIL_RET_VALUE(ret, ACL_SUCCESS, ret);
+    RETURN_IF_NOT_SUCCESS(ret);
 
     uint64_t dataTypeConfig = 0;
     for (uint32_t i = 0; i < profilerConfig->config.devNums; i++) {
@@ -370,7 +370,7 @@ aclError aclprofStop(ACL_PROF_CONFIG_CONST_PTR profilerConfig)
             MSPROF_LOGE("DataTypeConfig stop:0x%lx different from start:0x%lx",
                 profilerConfig->config.dataTypeConfig, dataTypeConfig);
             std::string dataTypeConfigStr = "0x" +
-            Utils::Int2HexStr<uint64_t>(profilerConfig->config.dataTypeConfig);
+                Utils::Int2HexStr<uint64_t>(profilerConfig->config.dataTypeConfig);
             std::string errorReason = "dataTypeConfig is different from start:0x" +
                 Utils::Int2HexStr<uint64_t>(dataTypeConfig);
             MSPROF_INPUT_ERROR("EK0001", std::vector<std::string>({"value", "param", "reason"}),
@@ -417,7 +417,7 @@ aclError aclprofModelSubscribe(const uint32_t modelId, const aclprofSubscribeCon
     }
 
     int32_t ret = ProfAclMgr::instance()->ProfSubscribePrecheck();
-    FUNRET_CHECK_FAIL_RET_VALUE(ret, ACL_SUCCESS, ret);
+    RETURN_IF_NOT_SUCCESS(ret);
 
     uint32_t deviceId = 0;
     aclError aclRet = ProfApiPlugin::instance()->MsprofProfGetDeviceIdByGeModelIdx(modelId, &deviceId);
