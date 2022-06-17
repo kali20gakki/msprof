@@ -28,7 +28,7 @@ using namespace Msprofiler::Api;
 using namespace analysis::dvvp::common::utils;
 using namespace analysis::dvvp::common::validation;
 using namespace Analysis::Dvvp::Common::Platform;
-using namespace Analysis::Dvvp::Plugin;
+using namespace Collector::Dvvp::Plugin;
 using namespace Analysis::Dvvp::ProfilerCommon;
 static std::mutex g_aclgraphProfMutex;
 
@@ -161,7 +161,7 @@ Status aclgrphProfInit(CONST_CHAR_PTR profilerPath, uint32_t length)
     std::lock_guard<std::mutex> lock(g_aclgraphProfMutex);
     if (profilerPath == nullptr || strlen(profilerPath) != length) {
         MSPROF_LOGE("profilerPath is nullptr or its length does not equals given length");
-        std::string valueStr = std::string(profilerPath);
+        std::string valueStr = (profilerPath == nullptr) ? "nullptr" : std::string(profilerPath);
         std::string errorReason = "Profiler path can not be nullptr, and its length should equal to the given length";
         MSPROF_INPUT_ERROR("EK0001", std::vector<std::string>({"value", "param", "reason"}),
             std::vector<std::string>({valueStr, "profilerPath", errorReason}));

@@ -15,7 +15,7 @@
 
 using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::message;
-using namespace Analysis::Dvvp::Plugin;
+using namespace Collector::Dvvp::Plugin;
 
 class PROF_APPLICATION_TEST: public testing::Test {
 protected:

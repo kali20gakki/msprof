@@ -32,7 +32,7 @@ using namespace Analysis::Dvvp::Msprof;
 using namespace Analysis::Dvvp::Common::Config;
 using namespace Analysis::Dvvp::Common::Platform;
 using namespace analysis::dvvp::common::utils;
-using namespace Analysis::Dvvp::Plugin;
+using namespace Collector::Dvvp::Plugin;
 
 RunningMode::RunningMode(std::string preCheckParams, std::string modeName, SHARED_PTR_ALIA<ProfileParams> params)
     : isQuit_(false), modeName_(modeName), taskPid_(MSVP_MMPROCESS), preCheckParams_(preCheckParams),

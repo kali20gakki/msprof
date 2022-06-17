@@ -6,7 +6,7 @@
  */
 #include "driver_plugin.h"
 
-namespace Analysis {
+namespace Collector {
 namespace Dvvp {
 namespace Plugin {
 void DriverPlugin::LoadDriverSo()
@@ -446,4 +446,4 @@ drvError_t DriverPlugin::MsprofDrvHdcGetCapacity(struct drvHdcCapacity *capacity
 }
 } // Plugin
 } // Dvvp
-} // Analysis
+} // Collector

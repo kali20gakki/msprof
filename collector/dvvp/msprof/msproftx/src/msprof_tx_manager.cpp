@@ -17,7 +17,7 @@
 using namespace analysis::dvvp::common::config;
 using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::common::utils;
-using namespace Analysis::Dvvp::Plugin;
+using namespace Collector::Dvvp::Plugin;
 
 namespace Msprof {
 namespace MsprofTx {
