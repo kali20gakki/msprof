@@ -19,7 +19,7 @@ namespace Dvvp {
 namespace Driver {
 using namespace analysis::dvvp::common::error;
 using namespace Analysis::Dvvp::Common::Config;
-using namespace Analysis::Dvvp::Plugin;
+using namespace Collector::Dvvp::Plugin;
 
 int DrvGetAicoreInfo(int deviceId, int64_t &freq)
 {

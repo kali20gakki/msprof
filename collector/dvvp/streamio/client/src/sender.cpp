@@ -22,7 +22,7 @@ namespace client {
 using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::common::utils;
 using namespace analysis::dvvp::common::config;
-using namespace Analysis::Dvvp::Plugin;
+using namespace Collector::Dvvp::Plugin;
 
 Sender::Sender(SHARED_PTR_ALIA<ITransport> transport, const std::string &engineName,
                SHARED_PTR_ALIA<analysis::dvvp::common::memory::ChunkPool> chunkPool)

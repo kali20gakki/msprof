@@ -52,7 +52,7 @@ using namespace Analysis::Dvvp::Common::Platform;
 using namespace Analysis::Dvvp::JobWrapper;
 using namespace Analysis::Dvvp::MsprofErrMgr;
 using namespace Msprof::MsprofTx;
-using namespace Analysis::Dvvp::Plugin;
+using namespace Collector::Dvvp::Plugin;
 
 namespace Msprofiler {
 namespace Api {
@@ -1590,8 +1590,6 @@ int32_t ProfAclMgr::MsprofInitAclEnv(const std::string &envValue)
     SetModeToCmd();
     MSPROF_LOGI("MsprofInitAclEnv, mode:%d, dataTypeConfig:0x%x, baseDir:%s",
                 mode_, dataTypeConfig_, Utils::BaseName(baseDir_).c_str());
-    MSPROF_INNER_ERROR("EK9999", "MsprofInitAclEnv, mode:%d, dataTypeConfig:0x%lx, baseDir:%s",
-        mode_, dataTypeConfig_, Utils::BaseName(baseDir_).c_str());
     return MSPROF_ERROR_NONE;
 }
 

@@ -90,7 +90,7 @@ enum {
 
 #define MSPROF_MODULE_NAME PROFILING
 
-using SlogPlugin = Analysis::Dvvp::Plugin::SlogPlugin;
+using SlogPlugin = Collector::Dvvp::Plugin::SlogPlugin;
 
 #define MSPROF_LOGD(format, ...) do {                                           \
             printf("[PROFILING] [DEBUG] [%s:%u] >>> (tid:%d) " format "\n",   \

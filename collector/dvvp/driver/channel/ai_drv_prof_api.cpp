@@ -15,7 +15,7 @@ namespace analysis {
 namespace dvvp {
 namespace driver {
 using namespace analysis::dvvp::common::error;
-using namespace Analysis::Dvvp::Plugin;
+using namespace Collector::Dvvp::Plugin;
 // 32 * 1024 * 0.8  is the full threshold  of ai_core_sample
 constexpr uint32_t AI_CORE_SAMPLE_FULL_THRESHOLD = 32 * 1024 * 0.8;
 

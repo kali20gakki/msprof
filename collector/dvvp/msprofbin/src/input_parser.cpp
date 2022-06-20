@@ -35,7 +35,7 @@ using namespace Analysis::Dvvp::Common::Config;
 using namespace Analysis::Dvvp::Common::Platform;
 using namespace analysis::dvvp::common::config;
 using namespace Collector::Dvvp::Msprofbin;
-using namespace Analysis::Dvvp::Plugin;
+using namespace Collector::Dvvp::Plugin;
 
 const int MSPROF_DAEMON_ERROR       = -1;
 const int MSPROF_DAEMON_OK          = 0;

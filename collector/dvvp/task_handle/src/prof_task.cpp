@@ -33,7 +33,7 @@ using namespace analysis::dvvp::common::config;
 using namespace analysis::dvvp::message;
 using namespace analysis::dvvp::transport;
 using namespace Analysis::Dvvp::MsprofErrMgr;
-using namespace Analysis::Dvvp::Plugin;
+using namespace Collector::Dvvp::Plugin;
 
 ProfTask::ProfTask(const std::vector<std::string> &devices,
                    SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> param)
