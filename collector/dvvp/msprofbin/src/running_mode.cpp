@@ -425,6 +425,9 @@ int RunningMode::WaitRunningProcess(std::string processUsage) const
         if (isExited) {
             MSPROF_EVENT("%s process %d exited, exit code:%d", processUsage.c_str(),
                 reinterpret_cast<int>(taskPid_), exitCode);
+            if (exitCode != 0) {
+                return PROFILING_FAILED;
+            }
             return PROFILING_SUCCESS;
         }
         analysis::dvvp::common::utils::Utils::UsleepInterupt(sleepIntevalUs);

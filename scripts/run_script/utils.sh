@@ -7,6 +7,8 @@ user_right=550
 root_ini_right=444
 user_ini_right=400
 
+mindstudio_msprof_spc_right=500
+
 # product constant
 LIBMSPROFILER="libmsprofiler.so"
 LIBMSPROFILER_STUB="stub/libmsprofiler.so"
