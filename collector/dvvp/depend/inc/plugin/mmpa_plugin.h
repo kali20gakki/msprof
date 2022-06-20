@@ -11,7 +11,7 @@
 #include "mmpa/mmpa_api.h"
 #include "plugin_handle.h"
 
-namespace Analysis {
+namespace Collector {
 namespace Dvvp {
 namespace Plugin {
 using MmOpen2Func = std::function<INT32(const CHAR *, INT32, MODE)>;
@@ -356,5 +356,5 @@ private:
 };
 } // Plugin
 } // Dvvp
-} // Analysis
+} // Collector
 #endif

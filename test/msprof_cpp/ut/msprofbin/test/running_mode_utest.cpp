@@ -23,7 +23,7 @@ using namespace analysis::dvvp::transport;
 using namespace Analysis::Dvvp::Common::Config;
 using namespace Analysis::Dvvp::Msprof;
 using namespace Collector::Dvvp::Msprofbin;
-using namespace Analysis::Dvvp::Plugin;
+using namespace Collector::Dvvp::Plugin;
 
 class RUNNING_MODE_UTEST : public testing::Test {
 protected:

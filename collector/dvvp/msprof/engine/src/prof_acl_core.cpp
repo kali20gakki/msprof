@@ -32,7 +32,7 @@ using namespace Msprofiler::Api;
 using namespace Msprof::MsprofTx;
 using namespace analysis::dvvp::transport;
 using namespace Analysis::Dvvp::Common::Platform;
-using namespace Analysis::Dvvp::Plugin;
+using namespace Collector::Dvvp::Plugin;
 
 static std::mutex g_aclprofMutex;
 static uint64_t g_indexId = 1;
@@ -51,8 +51,9 @@ aclError aclprofInit(CONST_CHAR_PTR profilerResultPath, size_t length)
     if (profilerResultPath == nullptr || strlen(profilerResultPath) != length) {
         MSPROF_LOGE("profilerResultPath is nullptr or its length does not equals given length");
         std::string errorReason = "profilerResultPath is nullptr or its length does not equals given length";
+        std::string valueStr = (profilerResultPath == nullptr) ? "nullptr" : std::string(profilerResultPath);
         MSPROF_INPUT_ERROR("EK0001", std::vector<std::string>({"value", "param", "reason"}),
-            std::vector<std::string>({std::string(profilerResultPath), "profilerResultPath", errorReason}));
+            std::vector<std::string>({valueStr, "profilerResultPath", errorReason}));
         return ACL_ERROR_INVALID_PARAM;
     }
     const static size_t aclProfPathMaxLen = 4096;   // path max length: 4096
@@ -72,7 +73,6 @@ aclError aclprofInit(CONST_CHAR_PTR profilerResultPath, size_t length)
 
     if (ProfAclMgr::instance()->Init() != PROFILING_SUCCESS) {
         MSPROF_LOGE("Failed to init acl manager");
-        MSPROF_INNER_ERROR("EK9999", "Failed to init acl manager");
         return ACL_ERROR_PROFILING_FAILURE;
     }
     MSPROF_LOGI("Initialize profiling by using ProfInit");
@@ -80,7 +80,6 @@ aclError aclprofInit(CONST_CHAR_PTR profilerResultPath, size_t length)
     ret = ProfAclMgr::instance()->ProfAclInit(path);
     if (ret != ACL_SUCCESS) {
         MSPROF_LOGE("AclProfiling init fail, profiling result = %d", ret);
-        MSPROF_INNER_ERROR("EK9999", "AclProfiling init fail, profiling result = %d", ret);
         return ret;
     }
 

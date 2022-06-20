@@ -8,7 +8,7 @@
 
 using namespace analysis::dvvp::common::thread;
 using namespace analysis::dvvp::common::error;
-using namespace Analysis::Dvvp::Plugin;
+using namespace Collector::Dvvp::Plugin;
 
 class COMMON_THREAD_TEST: public testing::Test {
 protected:

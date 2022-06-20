@@ -8,7 +8,7 @@
 
 using namespace analysis::dvvp::common::error;
 using namespace Analysis::Dvvp::Msprof;
-using namespace Analysis::Dvvp::Plugin;
+using namespace Collector::Dvvp::Plugin;
 
 class INPUT_PARSER_UTEST : public testing::Test {
 protected:
