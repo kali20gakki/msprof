@@ -33,15 +33,15 @@ function deal_precheck() {
     # check spc backup so
     local backup_dir=${install_path}/${SPC_DIR}/${BACKUP_DIR}/${MSPROF_RUN_NAME}
 	if [ "$cann_package_name" = "ascend-toolkit" ]; then
-		dir_check ${backup_dir}/${ANALYSIS_PATH}/${ANALYSIS} ${ANALYSIS}
-		file_check ${backup_dir}/${MSPROF_PATH}/${MSPROF} ${MSPROF}
+		dir_check ${backup_dir}/${ANALYSIS} ${ANALYSIS}
+		file_check ${backup_dir}/${MSPROF} ${MSPROF}
 	fi
 	
 	if [ "$cann_package_name" != "nnae" ]; then
-		file_check ${backup_dir}${LIBMSPROFILER_PATH}${LIBMSPROFILER_STUB} ${LIBMSPROFILER_STUB}
+		file_check ${backup_dir}/${LIBMSPROFILER_STUB} ${LIBMSPROFILER_STUB}
 	fi
     
-	file_check ${backup_dir}/${LIBMSPROFILER_PATH}/${LIBMSPROFILER} ${LIBMSPROFILER}
+	file_check ${backup_dir}/${LIBMSPROFILER} ${LIBMSPROFILER}
     exit 0
 }
 
