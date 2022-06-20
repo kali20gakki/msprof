@@ -180,7 +180,7 @@ Status aclgrphProfInit(CONST_CHAR_PTR profilerPath, uint32_t length)
     }
 
     int32_t ret = ProfAclMgr::instance()->ProfInitPrecheck();
-    FUNRET_CHECK_FAIL_RET_VALUE(ret, ACL_SUCCESS, FAILED);
+    RETURN_IF_NOT_SUCCESS(ret);
 
     if (ProfAclMgr::instance()->Init() != PROFILING_SUCCESS) {
         MSPROF_LOGE("Failed to init acl manager");
@@ -434,7 +434,7 @@ Status aclgrphProfStop(ACL_GRPH_PROF_CONFIG_PTR profilerConfig)
     }
 
     int32_t ret = ProfAclMgr::instance()->ProfStopPrecheck();
-    FUNRET_CHECK_FAIL_RET_VALUE(ret, ACL_SUCCESS, FAILED);
+    RETURN_IF_NOT_SUCCESS(ret);
 
     // check config
     uint64_t dataTypeConfig = 0;
