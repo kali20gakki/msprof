@@ -95,15 +95,6 @@ class QueryCommand:
         sorted_table_data = sorted(table_data, key=itemgetter(0, 3))
         self._format_print(sorted_table_data)
 
-    def _get_query_data(self: any) -> list:
-        result_data = []
-        if DataCheckManager.contain_info_json_data(self.collection_path):  # find profiling data dir
-            result = self._do_get_query_data(os.path.realpath(self.collection_path))
-            result_data.extend(result)
-        else:
-            self.process_sub_dirs(result_data)
-        return result_data
-
     def process_sub_dirs(self: any, result_data: list):
         sub_dirs = get_path_dir(self.collection_path)
         for sub_dir in sub_dirs:  # result_dir
@@ -116,6 +107,15 @@ class QueryCommand:
                 break
             else:
                 self._process_sub_dirs(result_data, sub_dir)
+
+    def _get_query_data(self: any) -> list:
+        result_data = []
+        if DataCheckManager.contain_info_json_data(self.collection_path):  # find profiling data dir
+            result = self._do_get_query_data(os.path.realpath(self.collection_path))
+            result_data.extend(result)
+        else:
+            self.process_sub_dirs(result_data)
+        return result_data
 
     def _process_sub_dirs(self: any, result_data: list, subdir: str = '') -> None:
         collect_path = self.collection_path
