@@ -113,6 +113,7 @@ target_compile_options(msprofbin PRIVATE
     -D_GLIBCXX_USE_CXX11_ABI=0
     -fno-strict-aliasing
     -fno-common
+    -fstack-protector-all
 )
 
 target_compile_definitions(msprofbin PRIVATE
@@ -122,8 +123,11 @@ target_compile_definitions(msprofbin PRIVATE
 )
 
 target_link_options(msprofbin PRIVATE
+    -Wl,-z,relro,-z,now,-z,noexecstack
     -Wl,-Bsymbolic
     -Wl,--exclude-libs=ALL
+    -pie
+    -s
 )
 
 target_link_libraries(msprofbin PRIVATE
