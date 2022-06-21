@@ -50,12 +50,9 @@ class AiCoreOpReport:
             # 2 stream id; 1 task id of datum
 
             ai_core_queue = ai_core_group_dict.get((datum[2], datum[1]), deque([]))
-            try:
-                if not ai_core_queue:
-                    logging.warning("Losing ai core data of stream %d, task %d", datum[2], datum[1])
-                    continue
-            except:
-                x=10
+            if not ai_core_queue:
+                logging.warning("Losing ai core data of stream %d, task %d", datum[2], datum[1])
+                continue
             ai_core_datum = ai_core_queue.popleft()
             union_data.append(datum + ai_core_datum)
 
