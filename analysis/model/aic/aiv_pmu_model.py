@@ -41,20 +41,6 @@ class AivPmuModel(ParserModel):
         """
         self.insert_data_to_db(DBNameConstant.TABLE_AIV_METRIC_SUMMARY, data_list)
 
-    @abstractmethod
-    def get_timeline_data(self: any) -> list:
-        """
-        get timeline data from db. aic data do not support now.
-        :return:
-        """
-
-    @abstractmethod
-    def get_summary_data(self: any) -> list:
-        """
-        get summary data from db. aic data do not support now.
-        :return:
-        """
-
     def clear(self: any) -> None:
         """
         clear ai core metric table
