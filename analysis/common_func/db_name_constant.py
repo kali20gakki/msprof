@@ -60,7 +60,7 @@ class DBNameConstant(metaclass=ABCMeta):
     # DB tables
     TABLE_ACL_DATA = "acl_data"
     TABLE_AI_CORE_METRIC_SUMMARY = "MetricSummary"
-    TABLE_AIV_METRIC_SUMMARY = "AivMetricSummary"
+    TABLE_AIV_METRIC_SUMMARY = "MetricSummary"
     TABLE_AI_CORE_REC = "AiCoreRec"
     TABLE_AI_CPU = "ai_cpu_datas"
     TABLE_ALL_REDUCE = "all_reduce"

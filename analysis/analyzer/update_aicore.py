@@ -283,10 +283,6 @@ class UpdateAICoreData:
         :param stream_id_index: index for stream id
         :return: block dim
         """
-        if self.STREAM_TASK_KEY_FMT.format(ai_core_data[task_id_index],
-                                                               ai_core_data[stream_id_index]) == "7-263":
-            x = 10
-
         block = block_dims.get(self.STREAM_TASK_KEY_FMT.format(ai_core_data[task_id_index],
                                                                ai_core_data[stream_id_index]))
         if not block:
