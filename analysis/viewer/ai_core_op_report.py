@@ -50,9 +50,12 @@ class AiCoreOpReport:
             # 2 stream id; 1 task id of datum
 
             ai_core_queue = ai_core_group_dict.get((datum[2], datum[1]), deque([]))
-            if not ai_core_queue:
-                logging.warning("Losing ai core data of stream %d, task %d", datum[2], datum[1])
-                continue
+            try:
+                if not ai_core_queue:
+                    logging.warning("Losing ai core data of stream %d, task %d", datum[2], datum[1])
+                    continue
+            except:
+                x=10
             ai_core_datum = ai_core_queue.popleft()
             union_data.append(datum + ai_core_datum)
 
@@ -409,12 +412,15 @@ class AiCoreOpReport:
     def _get_table_sql_and_headers_without_ge(cls: any, headers: list) -> tuple:
         cls.clear_no_ge_data_headers(headers)
         index_info = "{0}.index_id, ".format(DBNameConstant.TABLE_SUMMARY_TASK_TIME)
+        model_id = 'model_id, '
         if ProfilingScene().is_operator():
             index_info = ''
-        sql = "select model_id, task_id, stream_id, {index_info} task_type, start_time, " \
+            model_id = "{0}, ".format(NumberConstant.DEFAULT_MODEL_ID)
+        sql = "select {model_id} task_id, stream_id, {index_info} task_type, start_time, " \
               "duration_time/{NS_TO_US}, wait_time/{NS_TO_US} from {0} where " \
               "task_type!=? order by start_time" \
-            .format(DBNameConstant.TABLE_SUMMARY_TASK_TIME, NS_TO_US=NumberConstant.NS_TO_US, index_info=index_info)
+            .format(DBNameConstant.TABLE_SUMMARY_TASK_TIME, NS_TO_US=NumberConstant.NS_TO_US,
+                    index_info=index_info, model_id=model_id)
         return sql, headers
 
     @classmethod
