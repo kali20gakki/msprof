@@ -100,72 +100,11 @@ class StrConstant:
 
     BANDWIDTH = "bw"
     ACCURACY = "%.6f"
-    AYNC_MEMCPY_NUM = "21"
+    AYNC_MEMCPY = "MemcpyAsync"
 
     TRACE_HEADER_PID = "pid"
     TRACE_HEADER_TID = "tid"
     TRACE_HEADER_NAME = "name"
-
-    API_TYPE_MAPPING = {
-        "0": "DevBinaryRegister",
-        "1": "DevBinaryUnRegister",
-        "2": "FunctionRegister",
-        "3": "KernelLaunch",
-        "4": "KernelFusionStart",
-        "5": "KernelFusionEnd",
-        "6": "StreamCreate",
-        "7": "StreamDestroy",
-        "8": "StreamWaitEvent",
-        "9": "StreamSynchronize",
-        "10": "EventCreate",
-        "11": "EventDestroy",
-        "12": "EventRecord",
-        "13": "EventSynchronize",
-        "14": "DevMalloc",
-        "15": "DevFree",
-        "16": "HostMalloc",
-        "17": "HostFree",
-        "18": "ManagedMemAlloc",
-        "19": "ManagedMemFree",
-        "20": "MemCopySync",
-        "21": "MemcpyAsync",
-        "22": "SetDevice",
-        "23": "DeviceReset",
-        "24": "DeviceSynchronize",
-        "25": "ContextCreate",
-        "26": "ContextDestroy",
-        "27": "ContextSetCurrent",
-        "28": "ContextSynchronize",
-        "29": "IPC_EVENT_CREATE",
-        "30": "IPC_EVENT_OPEN",
-        "31": "IPC_MEMORY_CREATE",
-        "32": "IPC_MEMORY_OPEN",
-        "33": "IPC_MEMORY_CLOSE",
-        "34": "MEMORY_ADVISE",
-        "35": "ModelCreate",
-        "36": "ModelBindStream",
-        "37": "GetFunctionByName",
-        "38": "ModelGetTaskId",
-        "39": "ModelExecute",
-        "40": "ModelUnbindStream",
-        "41": "ModelDestroy",
-        "42": "RDMASend ",
-        "43": "NotifyCreate",
-        "44": "NotifyDestroy",
-        "45": "NotifyRecord",
-        "46": "NotifyWait",
-        "47": "IpcOpenNotify",
-        "48": "rtSwitch",
-        "49": "rtStreamActive",
-        "50": "rtSubscribeReport",
-        "51": "rtCallbackLaunch",
-        "52": "rtProcessReport",
-        "53": "rtUnSubscribeReport",
-        "54": "rtGetRunMode",
-        "55": "GetEventID",
-        "56": "RdmaDbSend",
-        "": ""
-    }
 
     TASK_TYPE_MAPPING = {
         "0": 'kernel AI core task',

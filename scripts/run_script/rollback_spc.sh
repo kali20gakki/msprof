@@ -10,10 +10,10 @@ UNINSTALL_SCRIPT="uninstall.sh"
 
 function deal_rollback() {
 	local backup_dir=${install_path}/${SPC_DIR}/${BACKUP_DIR}/${MSPROF_RUN_NAME}
-    copy_file ${backup_dir}/${LIBMSPROFILER_PATH}/${LIBMSPROFILER} ${install_path}/${LIBMSPROFILER_PATH}/${LIBMSPROFILER}
-    copy_file ${backup_dir}/${ANALYSIS_PATH}/${ANALYSIS} ${install_path}/${ANALYSIS_PATH}/${ANALYSIS}
-	copy_file ${backup_dir}/${MSPROF_PATH}/${MSPROF} ${install_path}/${MSPROF_PATH}/${MSPROF}
-	copy_file ${backup_dir}/${LIBMSPROFILER_PATH}/${LIBMSPROFILER_STUB} ${install_path}/${LIBMSPROFILER_PATH}/${LIBMSPROFILER_STUB}
+    copy_file ${backup_dir}/${LIBMSPROFILER} ${install_path}/${LIBMSPROFILER_PATH}/${LIBMSPROFILER}
+    copy_file ${backup_dir}/${ANALYSIS} ${install_path}/${ANALYSIS_PATH}/${ANALYSIS}
+	copy_file ${backup_dir}/${MSPROF} ${install_path}/${MSPROF_PATH}/${MSPROF}
+	copy_file ${backup_dir}/${LIBMSPROFILER_STUB} ${install_path}/${LIBMSPROFILER_PATH}/${LIBMSPROFILER_STUB}
 	
 	# uninstall backup
 	uninstall_backup

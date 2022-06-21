@@ -28,14 +28,16 @@ FILTER_PARAM_SCRIPT=${RUN_SCRIPT_DIR}/help.conf
 MAIN_SCRIPT=main.sh
 INSTALL_SCRIPT=install.sh
 UTILS_SCRIPT=utils.sh
+CANN_UNINSTALL=cann_uninstall.sh
+UNINSTALL=uninstall.sh
 
 # script for spc
 MAIN_SPC=main_spc.sh
 FILTER_PARAM_SCRIPT_SPC=${RUN_SCRIPT_DIR}/help_spc.conf
 BACKUP=backup.sh
 ROLLBACK_PRECHECK=rollback_precheck.sh
-ROLLBACK=rollback_spc.sh
-UNINSTALL=uninstall_spc.sh
+ROLLBACK_SPC=rollback_spc.sh
+UNINSTALL_SPC=uninstall_spc.sh
 COMMON_ROLLBACK=rollback.sh
 COMMON_UNINSTALL=uninstall.sh
 
@@ -82,13 +84,15 @@ function create_temp_dir() {
 			copy_script ${MAIN_SPC} ${temp_dir}
 			copy_script ${BACKUP} ${temp_dir}
 			copy_script ${ROLLBACK_PRECHECK} ${temp_dir}
-			copy_script ${ROLLBACK} ${temp_dir}
-			copy_script ${UNINSTALL} ${temp_dir}
+			copy_script ${ROLLBACK_SPC} ${temp_dir}
+			copy_script ${UNINSTALL_SPC} ${temp_dir}
 			copy_script ${COMMON_DIR}/${COMMON_ROLLBACK} ${temp_dir}
 			copy_script ${COMMON_DIR}/${COMMON_UNINSTALL} ${temp_dir}
 
 		else
 			copy_script ${MAIN_SCRIPT} ${temp_dir}
+			copy_script ${COMMON_DIR}/${COMMON_UNINSTALL} ${temp_dir}
+			copy_script ${UNINSTALL} ${temp_dir}
 			cp ${TEMP_OUTPUT}/lib/libmsprofiler.so ${temp_dir}
 			cp -r ${TEMP_OUTPUT}/stub ${temp_dir}
 			cp ${TEMP_OUTPUT}/bin/msprof ${temp_dir}

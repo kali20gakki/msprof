@@ -38,7 +38,7 @@ void AnalyzerGe::Parse(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> mess
         return;
     }
     if (message->tag().find("id_map_info") != std::string::npos) {
-        totalBytes_ += message->chunksizeinbytes();
+        totalBytes_ += static_cast<uint64_t>(message->chunksizeinbytes());
         if (message->chunksizeinbytes() < GE_ID_MAP_SIZE) {
             MSPROF_LOGE("id_map_info is incomplete data");
             return;
@@ -47,7 +47,7 @@ void AnalyzerGe::Parse(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> mess
         return;
     }
     if (message->tag().find("task_desc_info") != std::string::npos) {
-        totalBytes_ += message->chunksizeinbytes();
+        totalBytes_ += static_cast<uint64_t>(message->chunksizeinbytes());
         ParseTaskDesc(message->chunk().c_str(), message->chunksizeinbytes());
         return;
     }

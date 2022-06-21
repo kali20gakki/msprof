@@ -28,7 +28,7 @@ namespace common {
 namespace utils {
 using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::common::config;
-using namespace Analysis::Dvvp::Plugin;
+using namespace Collector::Dvvp::Plugin;
 
 std::mutex g_envMtx;
 const unsigned long long CHANGE_FROM_S_TO_NS = 1000000000;
@@ -842,7 +842,7 @@ std::string Utils::TimestampToTime(const std::string &timestamp, int unit /* = 1
     uint32_t microTime;
     try {
         secTime = std::stoll(timestamp) / unit;
-        microTime = std::stoll(timestamp) % unit;
+        microTime = static_cast<uint32_t>(std::stoll(timestamp) % unit);
     } catch (...) {
         return "0";
     }

@@ -10,7 +10,7 @@
 #include "singleton/singleton.h"
 #include "plugin_handle.h"
 
-namespace Analysis {
+namespace Collector {
 namespace Dvvp {
 namespace Plugin {
 enum {
@@ -69,6 +69,6 @@ private:
 };
 } // Plugin
 } // Dvvp
-} // Analysis
+} // Collector
 
 #endif
