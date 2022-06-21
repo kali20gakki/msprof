@@ -11,7 +11,7 @@
 using namespace analysis::dvvp::common::error;
 using namespace Analysis::Dvvp::JobWrapper;
 using namespace Analysis::Dvvp::MsprofErrMgr;
-using namespace Analysis::Dvvp::Plugin;
+using namespace Collector::Dvvp::Plugin;
 
 class PROF_STAT_FILE_HANDLER_TEST: public testing::Test {
 protected:

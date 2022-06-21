@@ -12,13 +12,12 @@
 #include "config.h"
 #include "securec.h"
 
-namespace Analysis {
+namespace Collector {
 namespace Dvvp {
 namespace Plugin {
 using namespace analysis::dvvp::common::config;
 PluginHandle::~PluginHandle()
 {
-    CloseHandle();
 }
 
 const std::string PluginHandle::GetSoName() const
@@ -135,6 +134,6 @@ bool PluginHandle::IsFuncExist(const std::string funcName) const
     }
     return true;
 }
-} // namespace Plugin
-} // namespace Dvvp
-} // namespace Analysis
+} // Plugin
+} // Dvvp
+} // Collector

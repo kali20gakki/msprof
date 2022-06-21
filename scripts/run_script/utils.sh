@@ -7,9 +7,12 @@ user_right=550
 root_ini_right=444
 user_ini_right=400
 
+mindstudio_msprof_spc_right=500
+
 # product constant
 LIBMSPROFILER="libmsprofiler.so"
 LIBMSPROFILER_STUB="stub/libmsprofiler.so"
+# never use analysis/, or remove important file by softlink
 ANALYSIS="analysis"
 MSPROF="msprof"
 
@@ -98,6 +101,24 @@ function uninstall_script() {
         chmod -R u+w ${install_path}/${SPC_DIR}/${SCRIPT_DIR}/${MSPROF_RUN_NAME}
         del_dir ${install_path}/${SPC_DIR}/${SCRIPT_DIR}/${MSPROF_RUN_NAME}
         remove_empty_dir ${install_path}/${SPC_DIR}/${SCRIPT_DIR}
+    fi
+}
+
+function rm_file_safe() {
+    local file_path=$1
+    if [ -n "${file_path}" ]; then
+        if [ -f "${file_path}" ] || [ -h "${file_path}" ]; then
+            rm -f "${file_path}"
+            if [ $? -ne 0 ]; then
+                print "ERROR" "delete file ${file_path} failed, please delete it by yourself."
+            else
+            print "INFO" "delete file ${file_path} successfully"
+            fi
+        else
+            print "WARNING" "the file is not exist"
+        fi
+    else
+        print "WARNING" "the file path is NULL"
     fi
 }
 

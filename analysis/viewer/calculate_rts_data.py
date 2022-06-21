@@ -120,7 +120,7 @@ def calculate_task_schedule_data(curs: any, device: str) -> list:
                  _per_state_time.get('running') / NumberConstant.NS_TO_US,
                  _per_state_time.get('pending') / NumberConstant.NS_TO_US,
                  StrConstant.TASK_TYPE_MAPPING.get(str(tasktype), "unknown {}".format(str(tasktype))),
-                 StrConstant.API_TYPE_MAPPING.get(str(api), "unknown {}".format(str(api))),
+                 api,
                  task_id, stream_id, device, batch_id))
         return sorted(total_data, key=lambda x: float(x[0].replace('%', '')), reverse=True)
     except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
