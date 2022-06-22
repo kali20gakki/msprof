@@ -79,11 +79,11 @@ class TestParsingRoceData(unittest.TestCase):
             check.start_parsing_data_file()
 
     def test_save(self):
-        with mock.patch('model.hardware.roce_model.RoceModel.init'), \
-                mock.patch('model.hardware.roce_model.RoceModel.flush'), \
-                mock.patch('model.hardware.roce_model.RoceModel.create_table'), \
-                mock.patch('model.hardware.roce_model.RoceModel.report_data'), \
-                mock.patch('model.hardware.roce_model.RoceModel.finalize'):
+        with mock.patch('msmodel.hardware.roce_model.RoceModel.init'), \
+                mock.patch('msmodel.hardware.roce_model.RoceModel.flush'), \
+                mock.patch('msmodel.hardware.roce_model.RoceModel.create_table'), \
+                mock.patch('msmodel.hardware.roce_model.RoceModel.report_data'), \
+                mock.patch('msmodel.hardware.roce_model.RoceModel.finalize'):
             InfoConfReader()._info_json = {"devices": '0'}
             check = ParsingRoceData(self.file_list, CONFIG)
             check.roce_data = [123]

@@ -33,7 +33,7 @@ class TestGeInfoReport(unittest.TestCase):
 
         with mock.patch(NAMESPACE + '.ViewModel.check_table', return_value=True), \
              mock.patch(NAMESPACE + '.get_ge_hash_dict', return_value={}), \
-             mock.patch('model.interface.view_model.ViewModel.get_sql_data', return_value=data):
+             mock.patch('msmodel.interface.view_model.ViewModel.get_sql_data', return_value=data):
             res = get_ge_model_data({}, DBNameConstant.TABLE_GE_FUSION_OP_INFO, configs)
         self.assertEqual(res[2], 1)
 

@@ -21,7 +21,7 @@ from common_func.msprof_exception import ProfException
 from common_func.msvp_common import is_valid_original_data
 from common_func.path_manager import PathManager
 from framework.offset_calculator import OffsetCalculator
-from model.aic.ai_core_sample_model import AiCoreSampleModel
+from msmodel.aic.ai_core_sample_model import AiCoreSampleModel
 from msparser.data_struct_size_constant import StructFmt
 from profiling_bean.prof_enum.data_tag import DataTag
 from profiling_bean.struct_info.aicore_sample import AicoreSample

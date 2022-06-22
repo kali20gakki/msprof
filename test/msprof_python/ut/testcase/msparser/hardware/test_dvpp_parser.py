@@ -69,11 +69,11 @@ class TestParsingPeripheralData(unittest.TestCase):
             check.start_parsing_data_file()
 
     def test_save(self):
-        with mock.patch('model.hardware.dvpp_model.DvppModel.init'), \
-                mock.patch('model.hardware.dvpp_model.DvppModel.create_table'), \
-                mock.patch('model.hardware.dvpp_model.DvppModel.flush'), \
-                mock.patch('model.hardware.dvpp_model.DvppModel.report_data'), \
-                mock.patch('model.hardware.dvpp_model.DvppModel.finalize'):
+        with mock.patch('msmodel.hardware.dvpp_model.DvppModel.init'), \
+                mock.patch('msmodel.hardware.dvpp_model.DvppModel.create_table'), \
+                mock.patch('msmodel.hardware.dvpp_model.DvppModel.flush'), \
+                mock.patch('msmodel.hardware.dvpp_model.DvppModel.report_data'), \
+                mock.patch('msmodel.hardware.dvpp_model.DvppModel.finalize'):
             InfoConfReader()._info_json = {"devices": '0'}
             check = ParsingPeripheralData(self.file_list, CONFIG)
             check.dvpp_data = [123]

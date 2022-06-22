@@ -7,11 +7,11 @@ from analyzer.scene_base.profiling_scene import ProfilingScene
 from common_func.constant import Constant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.platform.chip_manager import ChipManager
-from ms_interface.msprof_export_data import MsProfExportDataUtils
+from msinterface.msprof_export_data import MsProfExportDataUtils
 from profiling_bean.prof_enum.chip_model import ChipModel
 from viewer.stars.stars_soc_view import StarsSocView
 
-NAMESPACE = 'ms_interface.msprof_export_data'
+NAMESPACE = 'msinterface.msprof_export_data'
 
 
 class TestMsProfExportDataUtils(unittest.TestCase):
@@ -697,7 +697,7 @@ class TestMsProfExportDataUtils(unittest.TestCase):
     def test_get_bulk_data_1(self):
         sample_configs = {"test": 2}
         params = {"export_type": "timeline"}
-        with mock.patch('ms_interface.msprof_timeline.StepTraceViewer.get_one_iter_timeline_data',
+        with mock.patch('msinterface.msprof_timeline.StepTraceViewer.get_one_iter_timeline_data',
                         return_value=json.dumps({'a': 1})):
             InfoConfReader()._info_json = {"pid": 123}
             key = MsProfExportDataUtils()

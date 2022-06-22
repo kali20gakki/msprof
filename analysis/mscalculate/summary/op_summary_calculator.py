@@ -5,7 +5,7 @@ Copyright Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
 
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
-from model.stars.op_summary_model import OpSummaryModel
+from msmodel.stars.op_summary_model import OpSummaryModel
 from mscalculate.interface.icalculator import ICalculator
 
 

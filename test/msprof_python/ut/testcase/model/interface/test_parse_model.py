@@ -1,8 +1,8 @@
 import unittest
 from unittest import mock
-from model.interface.parser_model import ParserModel
+from msmodel.interface.parser_model import ParserModel
 
-NAMESPACE = 'model.interface.parser_model'
+NAMESPACE = 'msmodel.interface.parser_model'
 
 
 class DemoClass(ParserModel):

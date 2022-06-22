@@ -14,7 +14,7 @@ from common_func.ms_multi_process import MsMultiProcess
 from common_func.os_manager import check_file_readable
 from common_func.path_manager import PathManager
 from framework.offset_calculator import OffsetCalculator
-from model.runtime.runtime_api_model import RuntimeApiModel
+from msmodel.runtime.runtime_api_model import RuntimeApiModel
 from msparser.data_struct_size_constant import StructFmt
 from msparser.interface.iparser import IParser
 from msparser.runtime.runtime_api_bean import RunTimeApiBean

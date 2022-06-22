@@ -83,11 +83,11 @@ class TestMiniLLCParser(unittest.TestCase):
         self.assertEqual(result, None)
 
     def test_save(self):
-        with mock.patch('model.hardware.mini_llc_model.MiniLlcModel.init'), \
-                mock.patch('model.hardware.mini_llc_model.MiniLlcModel.create_table'), \
-                mock.patch('model.hardware.mini_llc_model.MiniLlcModel.flush'), \
-                mock.patch('model.hardware.mini_llc_model.MiniLlcModel.calculate'), \
-                mock.patch('model.hardware.mini_llc_model.MiniLlcModel.finalize'):
+        with mock.patch('msmodel.hardware.mini_llc_model.MiniLlcModel.init'), \
+                mock.patch('msmodel.hardware.mini_llc_model.MiniLlcModel.create_table'), \
+                mock.patch('msmodel.hardware.mini_llc_model.MiniLlcModel.flush'), \
+                mock.patch('msmodel.hardware.mini_llc_model.MiniLlcModel.calculate'), \
+                mock.patch('msmodel.hardware.mini_llc_model.MiniLlcModel.finalize'):
             InfoConfReader()._info_json = {"devices": '0'}
             check = MiniLLCParser(self.file_list, CONFIG)
             check.llc_data = [123]

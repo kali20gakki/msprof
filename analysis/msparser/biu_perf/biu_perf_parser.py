@@ -9,7 +9,7 @@ from common_func.ms_multi_process import MsMultiProcess
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.db_name_constant import DBNameConstant
 from msparser.interface.iparser import IParser
-from model.biu_perf.biu_perf_model import BiuPerfModel
+from msmodel.biu_perf.biu_perf_model import BiuPerfModel
 from msparser.biu_perf.biu_core_parser import BiuCubeParser
 from msparser.biu_perf.biu_core_parser import BiuVectorParser
 from profiling_bean.prof_enum.data_tag import DataTag

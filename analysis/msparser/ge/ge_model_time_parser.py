@@ -11,7 +11,7 @@ from common_func.constant import Constant
 from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
-from model.ge.ge_model_time_load import GeModelTimeModel
+from msmodel.ge.ge_model_time_load import GeModelTimeModel
 from msparser.data_struct_size_constant import StructFmt
 from msparser.interface.data_parser import DataParser
 from profiling_bean.ge.ge_model_time_bean import GeModelTimeBean
