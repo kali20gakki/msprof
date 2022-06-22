@@ -140,7 +140,10 @@ class OpSummaryOpScene:
                             "maybe the data of framework is not collected.")
             if not DBManager.check_tables_in_db(
                     PathManager.get_db_path(self.project_path, DBNameConstant.DB_RUNTIME),
-                    DBNameConstant.TABLE_METRICS_SUMMARY):
+                    DBNameConstant.TABLE_METRICS_SUMMARY) and \
+                not DBManager.check_tables_in_db(
+                    PathManager.get_db_path(self.project_path, DBNameConstant.DB_RUNTIME),
+                    DBNameConstant.TABLE_AIV_METRIC_SUMMARY):
                 logging.warning("No need to create db for op summary, "
                                 "maybe the data of aicore is not collected.")
                 return
