@@ -499,13 +499,32 @@ int InputParser::CheckAppValid(const struct MsprofCmdInfo &cmdInfo)
     if (index != std::string::npos) {
         params_->app_parameters = appParam.substr(index + 1);
     }
-    std::string appPath = Utils::RelativePathToAbsolutePath(appParam.substr(0, index));
+    std::string appPath = appParam.substr(0, index);
+    if (!Utils::IsAppName(appPath) && appPath.find("/") == std::string::npos) {
+        params_->app_dir = "MS_SYS_PATH";
+        params_->app = appPath;
+        return MSPROF_DAEMON_OK;
+    }
+    appPath = Utils::RelativePathToAbsolutePath(appPath);
     std::string appDir;
     std::string appName;
     int ret = Utils::SplitPath(appPath, appDir, appName);
     if (ret != PROFILING_SUCCESS) {
         MSPROF_LOGE("Failed to get app dir");
         return MSPROF_DAEMON_ERROR;
+    }
+    if (!Utils::IsAppName(appPath)) {
+        if (Utils::CanonicalizePath(appPath).empty()) {
+            CmdLog::instance()->CmdErrorLog("App path(%s) does not exist or permission denied.", appPath.c_str());
+            return MSPROF_DAEMON_ERROR;
+        }
+        if (MmpaPlugin::instance()->MsprofMmAccess2(appPath.c_str(), M_X_OK) != EN_OK) {
+            CmdLog::instance()->CmdErrorLog("This app(%s) has no executable permission.", appPath.c_str());
+            return MSPROF_DAEMON_ERROR;
+        }
+        params_->app_dir = appDir;
+        params_->app = appName;
+        return MSPROF_DAEMON_OK;
     }
     ret = PreCheckApp(appDir, appName);
     if (ret == MSPROF_DAEMON_OK) {
