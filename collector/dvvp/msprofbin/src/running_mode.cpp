@@ -525,6 +525,12 @@ int AppMode::RunModeTasks()
         return PROFILING_FAILED;
     }
     UpdateOutputDirInfo();
+
+    if (jobResultDirList_.empty()) {
+        MSPROF_LOGE("[App Mode] Invalid collection result.");
+        return PROFILING_FAILED;
+    }
+
     if (CheckAnalysisEnv() != PROFILING_SUCCESS) {
         MSPROF_LOGW("[App Mode] Analysis environment is not OK, auto parse will not start.");
         return PROFILING_SUCCESS;
