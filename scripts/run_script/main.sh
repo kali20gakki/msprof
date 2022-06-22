@@ -111,6 +111,18 @@ function get_default_install_path() {
 	fi
 }
 
+function store_uninstall_script() {
+	if [ -f "${install_path}/${MSPROF_RUN_NAME}/script/uninstall.sh" ] || [ -f "${install_path}/${MSPROF_RUN_NAME}/script/utils.sh" ]; then
+		return
+	fi
+
+	mkdir -p "${install_path}/${MSPROF_RUN_NAME}/script/"
+	cp "uninstall.sh" "${install_path}/${MSPROF_RUN_NAME}/script/"
+	cp "utils.sh" "${install_path}/${MSPROF_RUN_NAME}/script/"
+
+	chmod -R ${script_right} ${install_path}/${MSPROF_RUN_NAME}
+}
+
 function set_latest() {
 	local latest_path=${install_path}/../latest/
 	remove_latest_link ${latest_path}
@@ -134,20 +146,7 @@ function prepar_uninstall() {
 		return
 	fi
 
-	store_uninstall_script
 	regist_uninstall
-}
-
-function store_uninstall_script() {
-	if [ -f "${install_path}/${MSPROF_RUN_NAME}/script/uninstall.sh" ] || [ -f "${install_path}/${MSPROF_RUN_NAME}/script/utils.sh" ]; then
-		return
-	fi
-
-	mkdir -p "${install_path}/${MSPROF_RUN_NAME}/script/"
-	cp "uninstall.sh" "${install_path}/${MSPROF_RUN_NAME}/script/"
-	cp "utils.sh" "${install_path}/${MSPROF_RUN_NAME}/script/"
-
-	chmod -R ${script_right} ${install_path}/${MSPROF_RUN_NAME}
 }
 
 function regist_uninstall() {
@@ -174,6 +173,7 @@ install_path=$(get_default_install_path)
 parse_script_args $*
 check_args
 execute_run
+store_uninstall_script
 set_latest
 prepar_uninstall
 print "INFO" "${MSPROF_RUN_NAME} package install success."
