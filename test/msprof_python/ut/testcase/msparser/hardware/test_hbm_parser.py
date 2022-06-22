@@ -59,11 +59,11 @@ class TestParsingHBMData(unittest.TestCase):
                 check.start_parsing_data_file()
 
     def test_save(self):
-        with mock.patch('model.hardware.hbm_model.HbmModel.init'), \
-             mock.patch('model.hardware.hbm_model.HbmModel.create_table'), \
-             mock.patch('model.hardware.hbm_model.HbmModel.flush'), \
-             mock.patch('model.hardware.hbm_model.HbmModel.insert_bw_data'), \
-             mock.patch('model.hardware.hbm_model.HbmModel.finalize'):
+        with mock.patch('msmodel.hardware.hbm_model.HbmModel.init'), \
+             mock.patch('msmodel.hardware.hbm_model.HbmModel.create_table'), \
+             mock.patch('msmodel.hardware.hbm_model.HbmModel.flush'), \
+             mock.patch('msmodel.hardware.hbm_model.HbmModel.insert_bw_data'), \
+             mock.patch('msmodel.hardware.hbm_model.HbmModel.finalize'):
             InfoConfReader()._info_json = {"devices": '0'}
             check = ParsingHBMData(self.file_list, CONFIG)
             check.hbm_data = [123]

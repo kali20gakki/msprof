@@ -17,7 +17,7 @@ from common_func.msvp_common import is_valid_original_data
 from common_func.path_manager import PathManager
 from common_func.utils import Utils
 from framework.offset_calculator import OffsetCalculator
-from model.hardware.tscpu_model import TscpuModel
+from msmodel.hardware.tscpu_model import TscpuModel
 from msparser.data_struct_size_constant import StructFmt
 from profiling_bean.hardware.mdc_tscpu import MdcTscpuDecoder
 from profiling_bean.hardware.tscpu import TscpuDecoder

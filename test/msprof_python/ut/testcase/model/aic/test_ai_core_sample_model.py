@@ -7,11 +7,11 @@ import pytest
 
 from common_func.info_conf_reader import InfoConfReader
 from common_func.msprof_exception import ProfException
-from model.aic.ai_core_sample_model import AiCoreSampleModel
+from msmodel.aic.ai_core_sample_model import AiCoreSampleModel
 
 from sqlite.db_manager import DBManager
 
-NAMESPACE = 'model.aic.ai_core_sample_model'
+NAMESPACE = 'msmodel.aic.ai_core_sample_model'
 
 
 class TestAiCoreSampleModel(unittest.TestCase):

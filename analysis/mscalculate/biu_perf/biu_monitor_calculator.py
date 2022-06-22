@@ -9,7 +9,7 @@ from abc import abstractmethod
 
 from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
-from model.biu_perf.biu_perf_model import BiuPerfModel
+from msmodel.biu_perf.biu_perf_model import BiuPerfModel
 
 
 class BiuMonitorCalculator:

@@ -11,7 +11,7 @@ from common_func.db_name_constant import DBNameConstant
 from common_func.msvp_common import path_check
 from common_func.path_manager import PathManager
 from common_func.trace_view_manager import TraceViewManager
-from model.interface.view_model import ViewModel
+from msmodel.interface.view_model import ViewModel
 
 
 class AclToHwts:

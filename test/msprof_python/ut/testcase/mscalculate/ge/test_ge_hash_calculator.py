@@ -18,8 +18,8 @@ class TestGeHashCalculator(unittest.TestCase):
     file_list = {DataTag.GE_TASK: ['Framework.task_desc_info.0.slice_0']}
 
     def test_get_ge_task_data(self):
-        with mock.patch('model.interface.view_model.ViewModel.check_table', return_value={0: 'test'}), \
-                mock.patch('model.interface.view_model.ViewModel.get_all_data', return_value=[[1, 1, 0, 8, 1]]):
+        with mock.patch('msmodel.interface.view_model.ViewModel.check_table', return_value={0: 'test'}), \
+                mock.patch('msmodel.interface.view_model.ViewModel.get_all_data', return_value=[[1, 1, 0, 8, 1]]):
             check = GeHashCalculator(self.file_list, CONFIG)
             check._ge_data = [(1, 0, 1, 1, 8, 0)]
             check.get_ge_task_data()
@@ -39,10 +39,10 @@ class TestGeHashCalculator(unittest.TestCase):
             check.calculate()
 
     def test_save(self):
-        with mock.patch('model.ge.ge_info_model.GeModel.init'), \
-                mock.patch('model.ge.ge_info_model.GeModel.insert_data_to_db'), \
-                mock.patch('model.ge.ge_info_model.GeModel.delete_table'), \
-                mock.patch('model.ge.ge_info_model.GeModel.finalize'):
+        with mock.patch('msmodel.ge.ge_info_model.GeModel.init'), \
+                mock.patch('msmodel.ge.ge_info_model.GeModel.insert_data_to_db'), \
+                mock.patch('msmodel.ge.ge_info_model.GeModel.delete_table'), \
+                mock.patch('msmodel.ge.ge_info_model.GeModel.finalize'):
             check = GeHashCalculator(self.file_list, CONFIG)
             check._aic_data_list = [123]
             check.save()
