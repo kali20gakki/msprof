@@ -696,7 +696,7 @@ void ProfHostService::Run(const struct error_message::Context &errorContext)
     do {
         std::string fileName = profHostOutDir_ + std::to_string(outDataNumber_);
         long long len = analysis::dvvp::common::utils::Utils::GetFileSize(fileName);
-        MSPROF_EVENT("[XXX]fileName:%s tool:%s len:%ul", fileName.c_str(), toolName_.c_str(), len);      
+        MSPROF_EVENT("[XXX]fileName:%s tool:%s len:%ul", fileName.c_str(), toolName_.c_str(), len);
         if (len > MSVP_SMALL_FILE_MAX_LEN) {
             Handler();
             MSPROF_LOGI("The file:%s data is too large, and the file is fragmented.",
