@@ -559,6 +559,12 @@ void AppMode::SetDefaultParams() const
         if (params_->hwts_log.empty()) {
             params_->hwts_log = "on";
         }
+        if (params_->hwts_log1.empty()) {
+            params_->hwts_log1 = "on";
+        }
+    }
+    if (params_->ts_memcpy.empty()) {
+        params_->ts_memcpy = "on";
     }
     if (params_->ts_keypoint.empty()) {
         params_->ts_keypoint = "on";
