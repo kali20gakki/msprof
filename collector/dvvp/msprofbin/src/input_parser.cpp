@@ -1217,7 +1217,7 @@ ArgsManager::ArgsManager()
                      "The value is all or ID list (split with ',')."},
     {"hccl", "Show hccl profiling data, the default value is off.", OFF},
     {"biu", "Show biu profiling data, the default value is off.", OFF},
-    {"biu-freq", "The biu sampling period in clock-cycle, xxx"
+    {"biu-freq", "The biu sampling period in clock-cycle, xxx-2"
                 "the default value is 1000 cycle, the range is 300 to 30000 cycle.", "1000"},
     {"msproftx", "Show msproftx data, the default value is off.", OFF}
     };
