@@ -18,20 +18,48 @@ function get_version(){
     fi
 }
 
+function is_process_exist() {
+    count=`pgrep $1 | wc -l`
+    if [[ $count == 0 ]];then
+        return 0
+    else
+        return 1
+    fi
+}
+
 function pkill_prof_cmd(){
+    echo "xxxxxxxxx   ${command_param} xxxxxxxxxx "
+    logfile="/tmp/111.log"
     if [ "${command_param}" = "perf" ] || [ "${command_param}" = "ltrace" ] || [ "${command_param}" = "iotop" ]; then
         try_times=0
         while [ ${try_times} -lt 10 ]
         do
             pkill -2 "${command_param}"
-            if [ $? -eq 0 ]; then
+            sleep 1
+            is_process_exist ${command_param}
+            if [ $? -eq 0 ];then
+                date >> $logfile
+                echo "'pkill -2 ${command_param}' success" >> $logfile
                 exit 0
+            else
+                date >> $logfile
+                echo "'pkill -2 ${command_param}' failed" >> $logfile
             fi
             let try_times+=1
-            sleep 1
         done
-        echo "'pkill -2 ${command_param}' executed ${try_times} times failed"
+        date >> $logfile
+        echo "'pkill -2 ${command_param}' executed ${try_times} times failed" >> $logfile
         pkill -9 "${command_param}"
+        sleep 1
+        is_process_exist ${command_param}
+        if [ $? -eq 0 ];then
+             date >> $logfile
+            echo "'pkill -9 ${command_param}' success" >> $logfile
+            exit 0
+        else
+            date >> $logfile
+            echo "'pkill -9 ${command_param}' failed" >> $logfile
+        fi
         exit 1
     else
         printf "The value of the second parameter is incorrect, please enter the correct parameter, "
