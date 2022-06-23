@@ -605,7 +605,7 @@ int ProfHostService::GetCollectPthreadsCmd(int pid, std::string &profHostCmd)
     ssPerfHostCmd << pid;
 
     profHostCmd = ssPerfHostCmd.str();
-    startProcessCmd_ = "ltrace -ttt -T -e pthread_";
+    startProcessCmd_ = "ltrace -ttt -T -f -e pthread_";
     return PROFILING_SUCCESS;
 }
 
