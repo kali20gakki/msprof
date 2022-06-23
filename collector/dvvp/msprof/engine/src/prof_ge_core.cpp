@@ -105,7 +105,7 @@ Status aclgrphProfGraphUnSubscribe(const uint32_t graphId)
 
     if (!ProfAclMgr::instance()->IsModelSubscribed(graphId)) {
         MSPROF_LOGE("Graph Id %u is not subscribed when unsubcribed", graphId);
-        MSPROF_INPUT_ERROR("EK0002", std::vector<std::string>({"intf", "intf"}),
+        MSPROF_INPUT_ERROR("EK0002", std::vector<std::string>({"intf1", "intf2"}),
             std::vector<std::string>({"aclgrphProfGraphUnSubscribe", "aclgrphProfGraphSubscribe"}));
         return ACL_ERROR_INVALID_MODEL_ID;
     }

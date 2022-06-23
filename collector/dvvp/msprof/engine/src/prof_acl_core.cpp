@@ -148,7 +148,7 @@ bool IsValidProfConfigPreCheck(CONST_UINT32_T_PTR deviceIdList, uint32_t deviceN
 
     if (deviceNums > MSVP_MAX_DEV_NUM) {
         MSPROF_LOGE("The device nums is invalid.");
-        std::string errorReason = "The number of device should be smaller than" + std::to_string(MSVP_MAX_DEV_NUM);
+        std::string errorReason = "The number of device should be smaller than " + std::to_string(MSVP_MAX_DEV_NUM);
         MSPROF_INPUT_ERROR("EK0001", std::vector<std::string>({"value", "param", "reason"}),
             std::vector<std::string>({std::to_string(deviceNums), "deviceNums", errorReason}));
         return false;
@@ -473,6 +473,8 @@ aclError aclprofModelUnSubscribe(const uint32_t modelId)
 
     if (!ProfAclMgr::instance()->IsModelSubscribed(modelId)) {
         MSPROF_LOGE("Model Id %u is not subscribed when unsubcribed", modelId);
+        MSPROF_INPUT_ERROR("EK0002", std::vector<std::string>({"intf1", "intf2"}),
+            std::vector<std::string>({"aclprofModelUnSubscribe", "aclprofModelSubscribe"}));
         return ACL_ERROR_INVALID_MODEL_ID;
     }
 
