@@ -141,6 +141,7 @@ int32_t MsprofSetDeviceCallbackImpl(VOID_PTR data, uint32_t len)
 
         ge::GeOpenDeviceHandle(setCfg->deviceId);
     }
+    return MSPROF_ERROR_NONE;
 }
 
 inline int32_t InternalErrorCodeToExternal(int32_t internalErrorCode)
