@@ -14,7 +14,7 @@ from common_func.ms_constant.str_constant import StrConstant
 from common_func.msvp_constant import MsvpConstant
 from common_func.trace_view_header_constant import TraceViewHeaderConstant
 from common_func.trace_view_manager import TraceViewManager
-from model.ge.ge_op_execute_view_model import GeOpExecuteViewModel
+from msmodel.ge.ge_op_execute_view_model import GeOpExecuteViewModel
 from viewer.ge_info_report import get_ge_hash_dict
 
 

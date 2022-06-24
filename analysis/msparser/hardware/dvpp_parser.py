@@ -12,7 +12,7 @@ from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.msvp_common import is_valid_original_data
 from common_func.utils import Utils
-from model.hardware.dvpp_model import DvppModel
+from msmodel.hardware.dvpp_model import DvppModel
 from profiling_bean.prof_enum.data_tag import DataTag
 
 

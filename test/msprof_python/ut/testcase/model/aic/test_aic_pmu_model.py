@@ -2,15 +2,15 @@ import unittest
 from unittest import mock
 
 from common_func.info_conf_reader import InfoConfReader
-from model.aic.aic_pmu_model import AicPmuModel
+from msmodel.aic.aic_pmu_model import AicPmuModel
 
-NAMESPACE = 'model.aic.aic_pmu_model'
+NAMESPACE = 'msmodel.aic.aic_pmu_model'
 
 
 class TestPcieModel(unittest.TestCase):
 
     def test_init(self):
-        with mock.patch('model.interface.base_model.BaseModel.init'),\
+        with mock.patch('msmodel.interface.base_model.BaseModel.init'),\
                 mock.patch(NAMESPACE + '.AicPmuModel.create_table'):
             check = AicPmuModel('test')
             check.init()

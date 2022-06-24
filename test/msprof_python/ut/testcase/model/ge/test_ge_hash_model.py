@@ -1,9 +1,9 @@
 import unittest
 from unittest import mock
 
-from model.ge.ge_hash_model import GeHashModel
+from msmodel.ge.ge_hash_model import GeHashModel
 
-NAMESPACE = 'model.ge.ge_hash_model'
+NAMESPACE = 'msmodel.ge.ge_hash_model'
 
 
 class TestGeHashModel(unittest.TestCase):

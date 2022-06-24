@@ -2,9 +2,9 @@ import unittest
 from unittest import mock
 
 from common_func.info_conf_reader import InfoConfReader
-from model.hardware.sys_mem_model import SysMemModel
+from msmodel.hardware.sys_mem_model import SysMemModel
 
-NAMESPACE = 'model.hardware.sys_mem_model'
+NAMESPACE = 'msmodel.hardware.sys_mem_model'
 
 
 class TestSysMemModel(unittest.TestCase):

@@ -7,7 +7,7 @@ Copyright Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 from abc import abstractmethod
 
 from common_func.platform.chip_manager import ChipManager
-from model.stars.ffts_log_model import FftsLogModel
+from msmodel.stars.ffts_log_model import FftsLogModel
 from msparser.interface.istars_parser import IStarsParser
 from profiling_bean.stars.ffts_log import FftsLogDecoder
 from profiling_bean.stars.ffts_plus_log import FftsPlusLogDecoder

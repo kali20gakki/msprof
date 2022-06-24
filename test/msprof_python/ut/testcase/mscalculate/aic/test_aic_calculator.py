@@ -30,22 +30,22 @@ class TestAicCalculator(unittest.TestCase):
 
     def test_get_offset_and_total(self):
         with mock.patch(NAMESPACE + '.AicCalculator._get_total_aic_count', return_value=7), \
-                mock.patch('model.iter_rec.iter_rec_model.HwtsIterModel.get_task_offset_and_sum',
+                mock.patch('msmodel.iter_rec.iter_rec_model.HwtsIterModel.get_task_offset_and_sum',
                            return_value=(0, 0)), \
-                mock.patch('model.iter_rec.iter_rec_model.HwtsIterModel.get_aic_sum_count',
+                mock.patch('msmodel.iter_rec.iter_rec_model.HwtsIterModel.get_aic_sum_count',
                            return_value=8):
             check = AicCalculator(self.file_list, CONFIG)
             result = check._get_offset_and_total(0)
             self.assertEqual(result, (0, -1))
 
     def test_parse_by_iter(self):
-        with mock.patch('model.iter_rec.iter_rec_model.HwtsIterModel.check_db', return_value=True), \
-                mock.patch('model.iter_rec.iter_rec_model.HwtsIterModel.check_table', return_value=True), \
+        with mock.patch('msmodel.iter_rec.iter_rec_model.HwtsIterModel.check_db', return_value=True), \
+                mock.patch('msmodel.iter_rec.iter_rec_model.HwtsIterModel.check_table', return_value=True), \
                 mock.patch(NAMESPACE + '.MsprofIteration.get_iteration_id_by_index_id', return_value=10):
             with mock.patch(NAMESPACE + '.AicCalculator._get_offset_and_total', return_value=(127, 1280)), \
                     mock.patch(NAMESPACE + '.AicCalculator._parse'), \
                     mock.patch('framework.offset_calculator.FileCalculator.prepare_process'), \
-                    mock.patch('model.aic.aic_pmu_model.AicPmuModel.finalize'):
+                    mock.patch('msmodel.aic.aic_pmu_model.AicPmuModel.finalize'):
                 check = AicCalculator(self.file_list, CONFIG)
                 check._parse_by_iter()
             with mock.patch(NAMESPACE + '.AicCalculator._get_offset_and_total', return_value=(128, 0)), \
@@ -97,9 +97,9 @@ class TestAicCalculator(unittest.TestCase):
             check.calculate_pmu_list(_aic_pmu_log, [], [])
 
     def test_save(self):
-        with mock.patch('model.aic.aic_pmu_model.AicPmuModel.init'), \
-                mock.patch('model.aic.aic_pmu_model.AicPmuModel.flush'), \
-                mock.patch('model.aic.aic_pmu_model.AicPmuModel.finalize'):
+        with mock.patch('msmodel.aic.aic_pmu_model.AicPmuModel.init'), \
+                mock.patch('msmodel.aic.aic_pmu_model.AicPmuModel.flush'), \
+                mock.patch('msmodel.aic.aic_pmu_model.AicPmuModel.finalize'):
             InfoConfReader()._info_json = {"devices": '0'}
             check = AicCalculator(self.file_list, CONFIG)
             check._aic_data_list = [123]

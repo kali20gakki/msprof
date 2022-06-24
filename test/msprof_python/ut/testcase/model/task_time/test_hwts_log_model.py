@@ -1,9 +1,9 @@
 import unittest
 from unittest import mock
 
-from model.task_time.hwts_log_model import HwtsLogModel
+from msmodel.task_time.hwts_log_model import HwtsLogModel
 
-NAMESPACE = 'model.task_time.hwts_log_model'
+NAMESPACE = 'msmodel.task_time.hwts_log_model'
 
 
 class TestHwtsLogModel(unittest.TestCase):
