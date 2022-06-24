@@ -2,12 +2,12 @@ import sqlite3
 import unittest
 from unittest import mock
 
-from model.ai_cpu.ai_cpu_model import AiCpuModel
+from msmodel.ai_cpu.ai_cpu_model import AiCpuModel
 from sqlite.db_manager import ConnDemo
 from sqlite.db_manager import CursorDemo
 
 sample_config = {"model_id": 1, 'iter_id': 'dasfsd', 'result_dir': 'jasdfjfjs'}
-NAMESPACE = 'model.ai_cpu.ai_cpu_model'
+NAMESPACE = 'msmodel.ai_cpu.ai_cpu_model'
 
 
 class TestAiCpuModel(unittest.TestCase):

@@ -10,7 +10,7 @@ from abc import ABC
 from common_func.info_conf_reader import InfoConfReader
 from common_func.trace_view_header_constant import TraceViewHeaderConstant
 from common_func.trace_view_manager import TraceViewManager
-from model.stars.acc_pmu_model import AccPmuModel
+from msmodel.stars.acc_pmu_model import AccPmuModel
 from viewer.interface.base_viewer import BaseViewer
 
 

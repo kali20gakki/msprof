@@ -2,9 +2,9 @@ import unittest
 from unittest import mock
 
 from common_func.info_conf_reader import InfoConfReader
-from model.hardware.pcie_model import PcieModel
+from msmodel.hardware.pcie_model import PcieModel
 
-NAMESPACE = 'model.hardware.pcie_model'
+NAMESPACE = 'msmodel.hardware.pcie_model'
 
 
 class TestPcieModel(unittest.TestCase):

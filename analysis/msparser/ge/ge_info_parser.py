@@ -11,7 +11,7 @@ from common_func.constant import Constant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.msprof_exception import ProfException
-from model.ge.ge_info_model import GeModel
+from msmodel.ge.ge_info_model import GeModel
 from msparser.ge.ge_session_parser import GeSessionParser
 from msparser.ge.ge_step_parser import GeStepParser
 from msparser.ge.ge_task_parser import GeTaskParser

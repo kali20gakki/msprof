@@ -1,10 +1,10 @@
 import unittest
 from unittest import mock
 
-from model.hccl.hccl_model import HCCLModel
+from msmodel.hccl.hccl_model import HCCLModel
 from profiling_bean.prof_enum.data_tag import DataTag
 
-NAMESPACE = 'model.hccl.hccl_model'
+NAMESPACE = 'msmodel.hccl.hccl_model'
 
 
 class TestHCCLModel(unittest.TestCase):

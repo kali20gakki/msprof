@@ -1,9 +1,9 @@
 import unittest
 from unittest import mock
 
-from ms_interface.msprof_job_summary import MsprofJobSummary
+from msinterface.msprof_job_summary import MsprofJobSummary
 
-NAMESPACE = 'ms_interface.msprof_job_summary'
+NAMESPACE = 'msinterface.msprof_job_summary'
 
 
 class TestMsprofJobSummary(unittest.TestCase):
