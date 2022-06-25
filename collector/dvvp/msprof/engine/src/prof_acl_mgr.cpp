@@ -420,9 +420,9 @@ int ProfAclMgr::ProfAclStop(PROF_CONF_CONST_PTR profStopCfg)
         auto iter = devTasks_.find(devId);
         if (iter != devTasks_.end()) {
             if (iter->second.dataTypeConfig != profStopCfg->dataTypeConfig) {
-                MSPROF_LOGE("DataTypeConfig stop: 0x%16x different from start: 0x%16x",
+                MSPROF_LOGE("DataTypeConfig stop: 0x%lx different from start: 0x%lx",
                     profStopCfg->dataTypeConfig, iter->second.dataTypeConfig);
-                MSPROF_INNER_ERROR("EK9999", "DataTypeConfig stop: 0x%16lx different from start: 0x%16lx",
+                MSPROF_INNER_ERROR("EK9999", "DataTypeConfig stop: 0x%lx different from start: 0x%lx",
                     profStopCfg->dataTypeConfig, iter->second.dataTypeConfig);
                 return ACL_ERROR_INVALID_PROFILING_CONFIG;
             }
@@ -491,7 +491,7 @@ int ProfAclMgr::ProfAclGetDataTypeConfig(const uint32_t devId, uint64_t &dataTyp
         return ACL_ERROR_PROF_NOT_RUN;
     }
     dataTypeConfig = iter->second.dataTypeConfig;
-    MSPROF_LOGI("Get dataTypeConfig %llu of device %u", dataTypeConfig, devId);
+    MSPROF_LOGI("Get dataTypeConfig 0x%lx of device %u", dataTypeConfig, devId);
     return ACL_SUCCESS;
 }
 
@@ -586,7 +586,7 @@ int ProfAclMgr::ProfAclModelSubscribe(const uint32_t modelId, const uint32_t dev
     }
     uint32_t devIdList[1] = {devId};
     uint64_t dataTypeConfig = ProfAclGetDataTypeConfig(profSubscribeConfig);
-    MSPROF_LOGI("Allocate subscription config to Runtime, dataTypeConfig %llx", dataTypeConfig);
+    MSPROF_LOGI("Allocate subscription config to Runtime, dataTypeConfig 0x%lx", dataTypeConfig);
     return Analysis::Dvvp::ProfilerCommon::CommandHandleProfStart(devIdList, 1, dataTypeConfig);
 }
 
@@ -615,7 +615,7 @@ int ProfAclMgr::ProfAclModelUnSubscribe(const uint32_t modelId)
         if (iterDev->second.count == 0) {
             uint32_t devIdList[1] = {iter->second.devId};
             uint64_t dataTypeConfig = iterDev->second.dataTypeConfig;
-            MSPROF_LOGI("Allocate Unsubscription config to Runtime, dataTypeConfig %x", dataTypeConfig);
+            MSPROF_LOGI("Allocate Unsubscription config to Runtime, dataTypeConfig 0x%lx", dataTypeConfig);
             ret = Analysis::Dvvp::ProfilerCommon::CommandHandleProfStop(devIdList, 1, dataTypeConfig);
             RETURN_IF_NOT_SUCCESS(ret);
             iterDev->second.params->is_cancel = true;
@@ -1096,9 +1096,9 @@ int ProfAclMgr::UpdateSubscribeInfo(const uint32_t modelId, const uint32_t devId
     // check dataTypeConfig
     auto dataTypeConfig = ProfAclGetDataTypeConfig(profSubscribeConfig);
     if (iterDev->second.dataTypeConfig != dataTypeConfig) {
-        MSPROF_LOGE("Subscribe config %x is different from previous one: %x",
+        MSPROF_LOGE("Subscribe config 0x%lx is different from previous one: 0x%lx",
             dataTypeConfig, iterDev->second.dataTypeConfig);
-        MSPROF_INNER_ERROR("EK9999", "Subscribe config %lx is different from previous one: %lx",
+        MSPROF_INNER_ERROR("EK9999", "Subscribe config 0x%lx is different from previous one: 0x%lx",
             dataTypeConfig, iterDev->second.dataTypeConfig);
         return ACL_ERROR_INVALID_PROFILING_CONFIG;
     }
@@ -1589,7 +1589,7 @@ int32_t ProfAclMgr::MsprofInitAclEnv(const std::string &envValue)
     }
     ProfDataTypeConfigHandle(params_);
     SetModeToCmd();
-    MSPROF_LOGI("MsprofInitAclEnv, mode:%d, dataTypeConfig:0x%x, baseDir:%s",
+    MSPROF_LOGI("MsprofInitAclEnv, mode:%d, dataTypeConfig:0x%lx, baseDir:%s",
                 mode_, dataTypeConfig_, Utils::BaseName(baseDir_).c_str());
     return MSPROF_ERROR_NONE;
 }

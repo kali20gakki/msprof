@@ -79,7 +79,7 @@ Status aclgrphProfGraphSubscribe(const uint32_t graphId, const aclprofSubscribeC
     }
 
     uint64_t dataTypeConfig = ProfAclMgr::instance()->ProfAclGetDataTypeConfig(&profSubscribeConfig->config);
-    MSPROF_LOGI("Allocate subscription config to Ge, dataTypeConfig %x", dataTypeConfig);
+    MSPROF_LOGI("Allocate subscription config to Ge, dataTypeConfig 0x%lx", dataTypeConfig);
     ProfAclMgr::instance()->AddModelLoadConf(dataTypeConfig);
     ret = Analysis::Dvvp::ProfilerCommon::CommandHandleProfSubscribe(graphId, dataTypeConfig);
     RETURN_IF_NOT_SUCCESS(ret);
