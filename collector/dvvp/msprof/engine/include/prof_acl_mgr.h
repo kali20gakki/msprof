@@ -86,6 +86,7 @@ public:
     void SetModeToOff();
     bool IsCmdMode();
     bool IsModeOff();
+    int32_t StopProfConfigCheck(uint64_t dataTypeConfigStop, uint64_t dataTypeConfigStart);
 
     // api ctrl
     int ProfAclInit(const std::string& profResultPath);
@@ -197,6 +198,8 @@ private:
     int32_t MsprofResultPathAdapter(const std::string &dir, std::string &resultPath);
     void PrintWorkMode(WorkMode mode);
     int32_t MsprofHelperParamConstruct(const std::string &msprofPath, const std::string &paramsJson);
+    int MsprofAiCoreMetricsAdapter(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params,
+        SHARED_PTR_ALIA<analysis::dvvp::proto::ProfGeOptionsConfig> inputCfgPb);
 
 private:
     bool isReady_;
