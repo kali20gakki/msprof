@@ -86,8 +86,14 @@ int ConfigManager::GetAicoreEvents(const std::string &aicoreMetricsType, std::st
         return PROFILING_SUCCESS;
     }
     MSPROF_LOGE("Invalid metrics type %s", aicoreMetricsType.c_str());
-    std::string errReason = std::string("aic_metrics type should be in [ArithmeticUtilization|") +
-        std::string("PipeUtilization|Memory|MemoryL0|ResourceConflictRatio|MemoryUB]");
+    std::string errReason = "aic_metrics type should be in [";
+    for (auto aiCoreType : AICORE_METRICS_LIST) {
+        errReason += aiCoreType.first;
+        errReason += "|";
+    }
+    if (errReason[errReason.size() - 1] == '|') {
+        errReason.replace(errReason.size() - 1, 1, "]");
+    }
     MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
         std::vector<std::string>({"aic_metrics", aicoreMetricsType, errReason}));
     return PROFILING_FAILED;

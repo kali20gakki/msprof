@@ -218,6 +218,10 @@ Status aclgrphProfFinalize()
     std::lock_guard<std::mutex> lock(g_aclgraphProfMutex);
     int32_t ret = ProfAclMgr::instance()->ProfFinalizePrecheck();
     if (ret != ACL_SUCCESS) {
+        if (ret == ACL_ERROR_PROF_NOT_RUN) {
+            MSPROF_INPUT_ERROR("EK0002", std::vector<std::string>({"intf1", "intf2"}),
+                std::vector<std::string>({"aclgrphProfFinalize", "aclgrphProfInit"}));
+        }
         return FAILED;
     }
 
@@ -385,6 +389,10 @@ Status aclgrphProfStart(ACL_GRPH_PROF_CONFIG_PTR profilerConfig)
 
     int32_t ret = ProfAclMgr::instance()->ProfStartPrecheck();
     if (ret != ACL_SUCCESS) {
+        if (ret == ACL_ERROR_PROF_NOT_RUN) {
+            MSPROF_INPUT_ERROR("EK0002", std::vector<std::string>({"intf1", "intf2"}),
+                std::vector<std::string>({"aclgrphProfStart", "aclgrphProfInit"}));
+        }
         return FAILED;
     }
     // check switch
@@ -442,18 +450,11 @@ Status aclgrphProfStop(ACL_GRPH_PROF_CONFIG_PTR profilerConfig)
         ret = ProfAclMgr::instance()->ProfAclGetDataTypeConfig(
             profilerConfig->config.devIdList[i], dataTypeConfig);
         if (ret != ACL_SUCCESS) {
-            return ret;
+            return FAILED;
         }
-        if (dataTypeConfig != profilerConfig->config.dataTypeConfig) {
-            MSPROF_LOGE("DataTypeConfig stop: %lx different from start: %lx",
-                        profilerConfig->config.dataTypeConfig, dataTypeConfig);
-            std::string dataTypeConfigStr = "0x" +
-                Utils::Int2HexStr<uint64_t>(profilerConfig->config.dataTypeConfig);
-            std::string errorReason = "dataTypeConfig is different from start:0x" +
-                Utils::Int2HexStr<uint64_t>(dataTypeConfig);
-            MSPROF_INPUT_ERROR("EK0001", std::vector<std::string>({"value", "param", "reason"}),
-                std::vector<std::string>({dataTypeConfigStr, "dataTypeConfig", errorReason}));
-            return ACL_ERROR_INVALID_PROFILING_CONFIG;
+        ret = ProfAclMgr::instance()->StopProfConfigCheck(profilerConfig->config.dataTypeConfig, dataTypeConfig);
+        if (ret != PROFILING_SUCCESS) {
+            return FAILED;
         }
     }
 

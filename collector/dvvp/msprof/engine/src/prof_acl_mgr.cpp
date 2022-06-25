@@ -169,9 +169,6 @@ int ProfAclMgr::ProfStartPrecheck()
     }
     if (mode_ == WORK_MODE_OFF) {
         MSPROF_LOGE("Acl profiling api mode is not inited");
-        std::string aclApiStr = "acl(grph)ProfStart|acl(grph)ProfStop|acl(grph)ProfFinalize";
-        MSPROF_INPUT_ERROR("EK0002", std::vector<std::string>({"intf1", "intf2"}),
-            std::vector<std::string>({aclApiStr, "acl(grph)ProfInit"}));
         return ACL_ERROR_PROF_NOT_RUN;
     }
     MSPROF_LOGE("Acl profiling api ctrl conflicts with other api mode %d", mode_);
@@ -1814,6 +1811,22 @@ void ProfAclMgr::CloseSubscribeFd(const uint32_t devId, const uint32_t modelId)
         Utils::PrintSysErrorMsg();
     }
     *fd = -1;
+}
+
+int32_t ProfAclMgr::StopProfConfigCheck(uint64_t dataTypeConfigStop, uint64_t dataTypeConfigStart)
+{
+    if (dataTypeConfigStop != dataTypeConfigStart) {
+        MSPROF_LOGE("DataTypeConfig stop:0x%lx different from start:0x%lx",
+            dataTypeConfigStop, dataTypeConfigStart);
+        std::string dataTypeConfigStr = "0x" +
+            Utils::Int2HexStr<uint64_t>(dataTypeConfigStop);
+        std::string errorReason = "dataTypeConfig is different from start:0x" +
+            Utils::Int2HexStr<uint64_t>(dataTypeConfigStart);
+        MSPROF_INPUT_ERROR("EK0001", std::vector<std::string>({"value", "param", "reason"}),
+            std::vector<std::string>({dataTypeConfigStr, "dataTypeConfig", errorReason}));
+        return PROFILING_FAILED;
+    }
+    return PROFILING_SUCCESS;
 }
 }   // namespace Api
 }   // namespace Msprofiler
