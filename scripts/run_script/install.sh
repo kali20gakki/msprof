@@ -77,6 +77,31 @@ function chmod_ini_file() {
 	fi
 }
 
+function set_libmsprofiler_right() {
+	libmsprofiler_right=${user_libmsprofiler_right}
+	if [ "$install_for_all_flag" = "1" ] || [ "$UID" = "0" ]; then
+		libmsprofiler_right=${root_libmsprofiler_right}
+	fi
+}
+
+function chmod_libmsprofiler() {
+	if [ -f "${install_path}/${package_arch}-linux/hetero-arch-scripts${LIBMSPROFILER_PATH}${LIBMSPROFILER_STUB}" ]; then
+		chmod ${libmsprofiler_right} "${install_path}/${package_arch}-linux/hetero-arch-scripts${LIBMSPROFILER_PATH}${LIBMSPROFILER_STUB}"
+	fi
+
+	if [ -f "${install_path}/${package_arch}-linux/hetero-arch-scripts${LIBMSPROFILER_PATH}${LIBMSPROFILER}" ]; then
+		chmod ${libmsprofiler_right} "${install_path}/${package_arch}-linux/hetero-arch-scripts${LIBMSPROFILER_PATH}${LIBMSPROFILER}"
+	fi
+
+	if [ -f "${install_path}${LIBMSPROFILER_PATH}${LIBMSPROFILER_STUB}" ]; then
+		chmod ${libmsprofiler_right} "${install_path}${LIBMSPROFILER_PATH}${LIBMSPROFILER_STUB}"
+	fi
+
+	if [ -f "${install_path}${LIBMSPROFILER_PATH}${LIBMSPROFILER}" ]; then
+		chmod ${libmsprofiler_right} "${install_path}${LIBMSPROFILER_PATH}${LIBMSPROFILER}"
+	fi
+}
+
 source utils.sh
 
 right=${user_right}
@@ -84,3 +109,5 @@ get_right
 get_cann_package_name
 implement_install
 chmod_ini_file
+set_libmsprofiler_right
+chmod_libmsprofiler
