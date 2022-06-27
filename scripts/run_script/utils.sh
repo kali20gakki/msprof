@@ -10,6 +10,9 @@ script_right=500
 
 mindstudio_msprof_spc_right=500
 
+root_libmsprofiler_right=444
+user_libmsprofiler_right=440
+
 MSPROF_RUN_NAME="mindstudio-msprof"
 # product constant
 LIBMSPROFILER="libmsprofiler.so"

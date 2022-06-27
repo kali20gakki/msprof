@@ -142,7 +142,7 @@ function add_latest_link() {
 }
 
 function prepar_uninstall() {
-    if [ "${package_arch}" != "$(arch)" ] && [ -d "${install_path}/${package_arch}-linux/hetero-arch-scripts" ]; then
+    if [ "${package_arch}" != "$(arch)" ]; then
 		return
 	fi
 
