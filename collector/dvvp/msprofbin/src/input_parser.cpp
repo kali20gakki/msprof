@@ -97,6 +97,19 @@ SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> InputParser::MsprofGetOp
     return ParamsCheck() == MSPROF_DAEMON_OK ? params_ : nullptr;
 }
 
+bool InputParser::HasHelpParamOnly()
+{
+    bool ret = false;
+    if (params_ == nullptr) {
+        return ret;
+    }
+    if (params_->usedParams.size() == 1 &&
+        params_->usedParams.count(ARGS_HELP)) {
+        ret = true;
+    }
+    return ret;
+}
+
 int InputParser::PreCheckPlatform(int opt, CONST_CHAR_PTR argv[])
 {
     std::vector<MsprofArgsType> miniBlackSwith = {ARGS_INTERCONNECTION_PROFILING, ARGS_INTERCONNECTION_FREQ,
@@ -167,7 +180,9 @@ int InputParser::ProcessOptions(int opt, struct MsprofCmdInfo &cmdInfo)
     } else if (opt >= ARGS_HOST_SYS && opt <= ARGS_HOST_SYS_PID) {
         ret = MsprofHostCheckValid(cmdInfo, opt);
     } else {
+        // when opt matches ARGS_HELP
         MsprofCmdUsage("");
+        ret = MSPROF_DAEMON_OK;
     }
     return ret;
 }
