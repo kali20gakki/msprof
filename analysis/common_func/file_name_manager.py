@@ -6,6 +6,8 @@ Copyright Huawei Technologies Co., Ltd. 2020. All rights reserved.
 """
 
 import re
+from collections import namedtuple
+
 
 from common_func.constant import Constant
 from common_func.empty_class import EmptyClass
@@ -207,6 +209,9 @@ class FileNameManagerConstant:
         return self.__dict__
 
 
+AiCorePattern = namedtuple('AiCorePattern', ['ai_core', 'ai_core_infer', 'ai_core_training', 'ffts_pmu'])
+
+
 def get_file_name_pattern_match(file_name: str, *file_pattern_compiles: any) -> any:
     """
     get file name pattern match
@@ -296,10 +301,10 @@ def get_ai_core_compiles() -> tuple:
     """
     get ai core regex compiles
     """
-    ai_core_compiles = (re.compile(FileNameManagerConstant.AI_CORE_FILE_PATTERN), re.compile(
-        FileNameManagerConstant.AI_CORE_INFER_FILE_PATTERN), re.compile(
-        FileNameManagerConstant.AI_CORE_TRAINING_FILE_PATTERN), re.compile(
-        FileNameManagerConstant.FFTS_PMU_FILE_PATTERN))
+    ai_core_compiles = AiCorePattern(re.compile(FileNameManagerConstant.AI_CORE_FILE_PATTERN),
+                                     re.compile(FileNameManagerConstant.AI_CORE_INFER_FILE_PATTERN),
+                                     re.compile(FileNameManagerConstant.AI_CORE_TRAINING_FILE_PATTERN),
+                                     re.compile(FileNameManagerConstant.FFTS_PMU_FILE_PATTERN))
     return ai_core_compiles
 
 
