@@ -605,7 +605,7 @@ int ProfHostService::GetCollectPthreadsCmd(int pid, std::string &profHostCmd)
     ssPerfHostCmd << pid;
 
     profHostCmd = ssPerfHostCmd.str();
-    startProcessCmd_ = "ltrace -ttt -T -f -e pthread_";
+    startProcessCmd_ = "ltrace -ttt -T -e pthread_";
     MSPROF_EVENT("[WWW]toolName:%s startProcessCmd_:%s ", toolName_.c_str(), startProcessCmd_.c_str());
     return PROFILING_SUCCESS;
 }
@@ -697,7 +697,6 @@ void ProfHostService::Run(const struct error_message::Context &errorContext)
     do {
         std::string fileName = profHostOutDir_ + std::to_string(outDataNumber_);
         long long len = analysis::dvvp::common::utils::Utils::GetFileSize(fileName);
-        MSPROF_EVENT("[XXX]fileName:%s tool:%s len:%ul", fileName.c_str(), toolName_.c_str(), len);
         if (len > MSVP_SMALL_FILE_MAX_LEN) {
             Handler();
             MSPROF_LOGI("The file:%s data is too large, and the file is fragmented.",

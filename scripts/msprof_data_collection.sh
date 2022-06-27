@@ -28,8 +28,6 @@ function is_process_exist() {
 }
 
 function pkill_prof_cmd(){
-    echo "xxxxxxxxx   ${command_param} xxxxxxxxxx "
-    logfile="/tmp/111.log"
     if [ "${command_param}" = "perf" ] || [ "${command_param}" = "ltrace" ] || [ "${command_param}" = "iotop" ]; then
         try_times=0
         while [ ${try_times} -lt 10 ]
@@ -38,27 +36,16 @@ function pkill_prof_cmd(){
             sleep 1
             is_process_exist ${command_param}
             if [ $? -eq 0 ];then
-                date >> $logfile
-                echo "'pkill -2 ${command_param}' success" >> $logfile
                 exit 0
-            else
-                date >> $logfile
-                echo "'pkill -2 ${command_param}' failed" >> $logfile
             fi
             let try_times+=1
         done
-        date >> $logfile
         echo "'pkill -2 ${command_param}' executed ${try_times} times failed" >> $logfile
         pkill -9 "${command_param}"
-        sleep 1
+        sleep 2
         is_process_exist ${command_param}
-        if [ $? -eq 0 ];then
-             date >> $logfile
-            echo "'pkill -9 ${command_param}' success" >> $logfile
-            exit 0
-        else
-            date >> $logfile
-            echo "'pkill -9 ${command_param}' failed" >> $logfile
+        if [ $? -ne 0 ];then
+            pkill -9 "${command_param}"
         fi
         exit 1
     else
