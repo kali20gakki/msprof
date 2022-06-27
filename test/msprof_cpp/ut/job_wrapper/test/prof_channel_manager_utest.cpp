@@ -10,7 +10,7 @@
 using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::message;
 using namespace Analysis::Dvvp::JobWrapper;
-using namespace Analysis::Dvvp::Plugin;
+using namespace Collector::Dvvp::Plugin;
 
 class PROF_CHANNEL_MANAGER_UTEST: public testing::Test {
 protected:

@@ -12,7 +12,7 @@ from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.msvp_constant import MsvpConstant
 from common_func.utils import Utils
-from model.interface.view_model import ViewModel
+from msmodel.interface.view_model import ViewModel
 
 
 def get_ge_model_data(params: dict, table_name: str, configs: dict) -> tuple:

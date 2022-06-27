@@ -7,7 +7,7 @@ Copyright Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 
 import unittest
 
-from model.interface.ianalysis_model import IAnalysisModel
+from msmodel.interface.ianalysis_model import IAnalysisModel
 
 
 class UTAnalysis(IAnalysisModel):

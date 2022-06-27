@@ -6,7 +6,7 @@ Copyright Huawei Technologies Co., Ltd. 2021. All rights reserved.
 
 from abc import abstractmethod
 
-from model.stars.acc_pmu_model import AccPmuModel
+from msmodel.stars.acc_pmu_model import AccPmuModel
 from msparser.interface.istars_parser import IStarsParser
 from profiling_bean.stars.acc_pmu import AccPmuDecoder
 

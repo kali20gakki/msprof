@@ -2,11 +2,11 @@ import unittest
 from unittest import mock
 
 from common_func.info_conf_reader import InfoConfReader
-from model.hardware.nic_model import NicModel
+from msmodel.hardware.nic_model import NicModel
 from sqlite.db_manager import DBManager
 from profiling_bean.db_dto.nic_dto import NicDto
 
-NAMESPACE = 'model.hardware.nic_model'
+NAMESPACE = 'msmodel.hardware.nic_model'
 
 
 class TestParsingMemoryData(unittest.TestCase):

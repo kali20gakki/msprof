@@ -1,12 +1,12 @@
 import unittest
 from unittest import mock
 from common_func.info_conf_reader import InfoConfReader
-from ms_interface.msprof_query import QueryCommand
+from msinterface.msprof_query import QueryCommand
 from profiling_bean.basic_info.query_data_bean import QueryDataBean
 
 from constant.constant import INFO_JSON
 
-NAMESPACE = 'ms_interface.msprof_query'
+NAMESPACE = 'msinterface.msprof_query'
 
 
 class TestQueryCommand(unittest.TestCase):

@@ -7,11 +7,11 @@ from analyzer.scene_base.profiling_scene import ProfilingScene
 from common_func.constant import Constant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.platform.chip_manager import ChipManager
-from ms_interface.msprof_data_storage import MsprofDataStorage
+from msinterface.msprof_data_storage import MsprofDataStorage
 from profiling_bean.prof_enum.chip_model import ChipModel
 from viewer.stars.stars_soc_view import StarsSocView
 
-NAMESPACE = 'ms_interface.msprof_data_storage'
+NAMESPACE = 'msinterface.msprof_data_storage'
 
 
 class TestMsprofDataStorage(unittest.TestCase):

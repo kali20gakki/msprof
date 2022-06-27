@@ -6,7 +6,7 @@
  */
 #include "slog_plugin.h"
 
-namespace Analysis {
+namespace Collector {
 namespace Dvvp {
 namespace Plugin {
 void SlogPlugin::LoadSlogSo()
@@ -39,4 +39,4 @@ int SlogPlugin::MsprofCheckLogLevelForC(int moduleId, int logLevel)
 }
 } // Plugin
 } // Dvvp
-} // Analysis
+} // Collector

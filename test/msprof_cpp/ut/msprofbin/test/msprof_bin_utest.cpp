@@ -41,7 +41,7 @@ TEST_F(MSPROF_BIN_UTEST, LltMain) {
     chmod("./prof_bin_test", 0700);
     argv[2] = "--app=./prof_bin_test";
     argv[3] = "--task-time=on";
-    EXPECT_EQ(PROFILING_SUCCESS, LltMain(4, (const char**)argv, (const char**)envp));
+    EXPECT_EQ(PROFILING_FAILED, LltMain(4, (const char**)argv, (const char**)envp));
     std::remove("prof_bin_test");
     argv[4] = "--sys-devices=0";
     argv[5] = "--output=./msprof_bin_utest";

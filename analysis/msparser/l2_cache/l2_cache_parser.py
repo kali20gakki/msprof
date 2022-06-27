@@ -13,7 +13,7 @@ from common_func.file_manager import FileManager
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.path_manager import PathManager
-from model.l2_cache.l2_cache_parser_model import L2CacheParserModel
+from msmodel.l2_cache.l2_cache_parser_model import L2CacheParserModel
 from msparser.data_struct_size_constant import StructFmt
 from msparser.interface.iparser import IParser
 from profiling_bean.prof_enum.data_tag import DataTag

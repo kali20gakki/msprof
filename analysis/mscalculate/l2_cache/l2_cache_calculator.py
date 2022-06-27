@@ -17,7 +17,7 @@ from common_func.ms_constant.str_constant import StrConstant
 from common_func.constant import Constant
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.msvp_common import MsvpCommonConst
-from model.l2_cache.l2_cache_calculator_model import L2CacheCalculatorModel
+from msmodel.l2_cache.l2_cache_calculator_model import L2CacheCalculatorModel
 from mscalculate.interface.icalculator import ICalculator
 from mscalculate.l2_cache.l2_cache_metric import HitRateMetric
 from mscalculate.l2_cache.l2_cache_metric import VictimRateMetric

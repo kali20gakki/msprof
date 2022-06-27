@@ -30,7 +30,7 @@ using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::message;
 using namespace analysis::dvvp::common::config;
 using namespace analysis::dvvp::common::utils;
-using namespace Analysis::Dvvp::Plugin;
+using namespace Collector::Dvvp::Plugin;
 
 ConfigManager::ConfigManager()
     : isInit_(false)
@@ -86,7 +86,16 @@ int ConfigManager::GetAicoreEvents(const std::string &aicoreMetricsType, std::st
         return PROFILING_SUCCESS;
     }
     MSPROF_LOGE("Invalid metrics type %s", aicoreMetricsType.c_str());
-    MSPROF_INNER_ERROR("EK9999", "Invalid metrics type %s", aicoreMetricsType.c_str());
+    std::string errReason = "aic_metrics type should be in [";
+    for (auto aiCoreType : AICORE_METRICS_LIST) {
+        errReason += aiCoreType.first;
+        errReason += "|";
+    }
+    if (errReason[errReason.size() - 1] == '|') {
+        errReason.replace(errReason.size() - 1, 1, "]");
+    }
+    MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
+        std::vector<std::string>({"aic_metrics", aicoreMetricsType, errReason}));
     return PROFILING_FAILED;
 }
 

@@ -33,7 +33,7 @@ using namespace analysis::dvvp::common::utils;
 using namespace analysis::dvvp::common::config;
 using namespace Analysis::Dvvp::Common::Platform;
 using namespace Analysis::Dvvp::Common::Config;
-using namespace Analysis::Dvvp::Plugin;
+using namespace Collector::Dvvp::Plugin;
 
 const char * const PROF_NET_CARD = "/sys/class/net";
 const char * const PROF_PROC_MEM = "/proc/meminfo";

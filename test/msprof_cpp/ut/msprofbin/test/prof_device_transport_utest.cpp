@@ -12,7 +12,7 @@ using namespace analysis::dvvp::host;
 using namespace analysis::dvvp::transport;
 using namespace analysis::dvvp::common::error;
 using namespace Analysis::Dvvp::MsprofErrMgr;
-using namespace Analysis::Dvvp::Plugin;
+using namespace Collector::Dvvp::Plugin;
 
 class HOST_PROF_DEVICE_TRANSPORT_UTEST: public testing::Test {
 protected:

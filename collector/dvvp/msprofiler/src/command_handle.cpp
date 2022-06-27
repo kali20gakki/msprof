@@ -18,7 +18,7 @@ namespace ProfilerCommon {
 using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::common::utils;
 using namespace Analysis::Dvvp::Common::Platform;
-using namespace Analysis::Dvvp::Plugin;
+using namespace Collector::Dvvp::Plugin;
 using ProfCommand = MsprofCommandHandle;
 
 int32_t SetCommandHandleProf(ProfCommand &command)
@@ -27,13 +27,13 @@ int32_t SetCommandHandleProf(ProfCommand &command)
     std::string msprofParams = Msprofiler::Api::ProfAclMgr::instance()->GetParamJsonStr();
     if (msprofParams.size() > PARAM_LEN_MAX) {
         MSPROF_LOGE("tparamsLen:%d, exceeds:%d", msprofParams.size(), PARAM_LEN_MAX);
-        return ACL_ERROR;
+        return ACL_ERROR_PROFILING_FAILURE;
     }
     command.params.profDataLen = msprofParams.size();
     errno_t err = strncpy_s(command.params.profData, PARAM_LEN_MAX, msprofParams.c_str(), msprofParams.size() + 1);
     if (err != EOK) {
         MSPROF_LOGE("string copy failed, err: %d", err);
-        return ACL_ERROR;
+        return ACL_ERROR_PROFILING_FAILURE;
     }
     return ACL_SUCCESS;
 }
@@ -47,7 +47,7 @@ int32_t CommandHandleProfInit()
     if (SetCommandHandleProf(command) != ACL_SUCCESS) {
         MSPROF_LOGE("ProfInit CommandHandle set failed");
         MSPROF_INNER_ERROR("EK9999", "ProfInit CommandHandle set failed");
-        return ACL_ERROR;
+        return ACL_ERROR_PROFILING_FAILURE;
     }
     return ProfApiPlugin::instance()->MsprofProfSetProfCommand(static_cast<VOID_PTR>(&command), sizeof(ProfCommand));
 }
@@ -81,7 +81,7 @@ int32_t CommandHandleProfStart(const uint32_t devIdList[], uint32_t devNums, uin
     if (SetCommandHandleProf(command) != ACL_SUCCESS) {
         MSPROF_LOGE("ProfStart CommandHandle set failed");
         MSPROF_INNER_ERROR("EK9999", "ProfStart CommandHandle set failed");
-        return ACL_ERROR;
+        return ACL_ERROR_PROFILING_FAILURE;
     }
     return ProfApiPlugin::instance()->MsprofProfSetProfCommand(static_cast<VOID_PTR>(&command), sizeof(ProfCommand));
 }
@@ -104,7 +104,7 @@ int32_t CommandHandleProfStop(const uint32_t devIdList[], uint32_t devNums, uint
     if (SetCommandHandleProf(command) != ACL_SUCCESS) {
         MSPROF_LOGE("ProfStop CommandHandle set failed");
         MSPROF_INNER_ERROR("EK9999", "ProfStop CommandHandle set failed");
-        return ACL_ERROR;
+        return ACL_ERROR_PROFILING_FAILURE;
     }
     return ProfApiPlugin::instance()->MsprofProfSetProfCommand(static_cast<VOID_PTR>(&command), sizeof(ProfCommand));
 }
@@ -118,7 +118,7 @@ int32_t CommandHandleProfFinalize()
     if (SetCommandHandleProf(command) != ACL_SUCCESS) {
         MSPROF_LOGE("ProfFinalize CommandHandle set failed");
         MSPROF_INNER_ERROR("EK9999", "ProfFinalize CommandHandle set failed");
-        return ACL_ERROR;
+        return ACL_ERROR_PROFILING_FAILURE;
     }
     return ProfApiPlugin::instance()->MsprofProfSetProfCommand(static_cast<VOID_PTR>(&command), sizeof(ProfCommand));
 }
@@ -134,7 +134,7 @@ int32_t CommandHandleProfSubscribe(uint32_t modelId, uint64_t profSwitch)
     if (SetCommandHandleProf(command) != ACL_SUCCESS) {
         MSPROF_LOGE("ProfSubscribe CommandHandle set failed");
         MSPROF_INNER_ERROR("EK9999", "ProfSubscribe CommandHandle set failed");
-        return ACL_ERROR;
+        return ACL_ERROR_PROFILING_FAILURE;
     }
     return ProfApiPlugin::instance()->MsprofProfSetProfCommand(static_cast<VOID_PTR>(&command), sizeof(ProfCommand));
 }
@@ -149,7 +149,7 @@ int32_t CommandHandleProfUnSubscribe(uint32_t modelId)
     if (SetCommandHandleProf(command) != ACL_SUCCESS) {
         MSPROF_LOGE("ProfUnSubscribe Set params failed!");
         MSPROF_INNER_ERROR("EK9999", "ProfUnSubscribe Set params failed!");
-        return ACL_ERROR;
+        return ACL_ERROR_PROFILING_FAILURE;
     }
     return ProfApiPlugin::instance()->MsprofProfSetProfCommand(static_cast<VOID_PTR>(&command), sizeof(ProfCommand));
 }

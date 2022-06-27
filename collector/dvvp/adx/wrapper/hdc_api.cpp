@@ -30,7 +30,7 @@ namespace Analysis {
 namespace Dvvp {
 namespace Adx {
 using namespace IdeDaemon::Common::Config;
-using namespace Analysis::Dvvp::Plugin;
+using namespace Collector::Dvvp::Plugin;
 
 struct DataSendMsg {
     IdeSendBuffT buf;

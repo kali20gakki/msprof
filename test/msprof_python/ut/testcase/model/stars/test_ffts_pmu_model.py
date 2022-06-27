@@ -3,11 +3,11 @@ from unittest import mock
 
 from constant.ut_db_name_constant import DB_FFTS_PMU
 from constant.ut_db_name_constant import TABLE_FFTS_PMU
-from model.stars.ffts_pmu_model import FftsPmuModel
+from msmodel.stars.ffts_pmu_model import FftsPmuModel
 from msparser.aic.ffts_pmu_parser import FftsPmuBean
 from sqlite.db_manager import DBOpen
 
-NAMESPACE = 'model.stars.ffts_pmu_model'
+NAMESPACE = 'msmodel.stars.ffts_pmu_model'
 
 
 class TestFftsPmuModel(unittest.TestCase):

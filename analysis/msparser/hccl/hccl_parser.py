@@ -17,7 +17,7 @@ from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.os_manager import check_dir_writable
 from common_func.path_manager import PathManager
-from model.hccl.hccl_model import HCCLModel
+from msmodel.hccl.hccl_model import HCCLModel
 from msparser.hccl.hccl_data import HCCLData
 from profiling_bean.prof_enum.data_tag import DataTag
 

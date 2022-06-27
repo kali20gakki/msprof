@@ -4,10 +4,10 @@ from unittest import mock
 
 from common_func.empty_class import EmptyClass
 
-from ms_interface.msprof_timeline import MsprofTimeline
+from msinterface.msprof_timeline import MsprofTimeline
 from profiling_bean.prof_enum.export_data_type import ExportDataType
 
-NAMESPACE = 'ms_interface.msprof_timeline'
+NAMESPACE = 'msinterface.msprof_timeline'
 
 
 class TestMsprofTimeline(unittest.TestCase):
@@ -45,7 +45,7 @@ class TestMsprofTimeline(unittest.TestCase):
             key.export_all_data()
 
     def test_is_in_iteration_1(self):
-        from ms_interface.msprof_timeline import MsprofTimeline
+        from msinterface.msprof_timeline import MsprofTimeline
         time_stamp = 111
         key = MsprofTimeline()
         key._iteration_time = [[1, 2], [3, 4]]
@@ -53,7 +53,7 @@ class TestMsprofTimeline(unittest.TestCase):
         self.assertEqual(result, False)
 
     def test_is_in_iteration_2(self):
-        from ms_interface.msprof_timeline import MsprofTimeline
+        from msinterface.msprof_timeline import MsprofTimeline
         time_stamp = 1
         key = MsprofTimeline()
         key._iteration_time = [[1, 2], [1, 2]]
