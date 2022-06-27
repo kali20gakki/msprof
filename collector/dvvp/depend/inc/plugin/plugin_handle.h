@@ -12,7 +12,7 @@
 #include <functional>
 #include <dlfcn.h>
 
-namespace Analysis {
+namespace Collector {
 namespace Dvvp {
 namespace Plugin {
 
@@ -57,7 +57,7 @@ private:
     HandleType handle_;
     bool load_;
 };
-} // namespace Plugin
-} // namespace Dvvp
-} // namespace Analysis
+} // Plugin
+} // Dvvp
+} // Collector
 #endif

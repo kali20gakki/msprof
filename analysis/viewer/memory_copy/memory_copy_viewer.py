@@ -6,7 +6,7 @@ Copyright Huawei Technologies Co., Ltd. 2021. All rights reserved.
 """
 from collections import OrderedDict
 
-from model.memory_copy.memcpy_model import MemcpyModel
+from msmodel.memory_copy.memcpy_model import MemcpyModel
 from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.trace_view_manager import TraceViewManager

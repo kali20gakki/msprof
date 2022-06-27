@@ -2,9 +2,9 @@
 import unittest
 from unittest import mock
 
-from model.ge.ge_model_time_load import GeModelTimeModel
+from msmodel.ge.ge_model_time_load import GeModelTimeModel
 
-NAMESPACE = 'model.ge.ge_model_time_load'
+NAMESPACE = 'msmodel.ge.ge_model_time_load'
 
 
 class TestGeHashModel(unittest.TestCase):

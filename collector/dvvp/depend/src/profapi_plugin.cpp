@@ -6,7 +6,7 @@
  */
 #include "profapi_plugin.h"
 
-namespace Analysis {
+namespace Collector {
 namespace Dvvp {
 namespace Plugin {
 void ProfApiPlugin::LoadProfApiSo()
@@ -110,4 +110,4 @@ int32_t ProfApiPlugin::MsprofProfSetStepInfo(const uint64_t indexId, const uint1
 }
 } // Plugin
 } // Dvvp
-} // Analysis
+} // Collector

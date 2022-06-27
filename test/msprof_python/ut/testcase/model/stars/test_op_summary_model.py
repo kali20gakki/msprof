@@ -2,9 +2,9 @@ import sqlite3
 import unittest
 from unittest import mock
 
-from model.stars.op_summary_model import OpSummaryModel
+from msmodel.stars.op_summary_model import OpSummaryModel
 
-NAMESPACE = 'model.stars.op_summary_model'
+NAMESPACE = 'msmodel.stars.op_summary_model'
 SAMPLE_CONFIG = {"result_dir": "test",
                  "iter_id": 1,
                  "model_id": 1}

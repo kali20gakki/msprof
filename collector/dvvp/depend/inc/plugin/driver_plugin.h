@@ -11,7 +11,7 @@
 #include "driver/ascend_hal.h"
 #include "plugin_handle.h"
 
-namespace Analysis {
+namespace Collector {
 namespace Dvvp {
 namespace Plugin {
 using HalHdcRecvFunc = std::function<hdcError_t(HDC_SESSION, struct drvHdcMsg *, int, UINT64, int *, UINT32)>;
@@ -186,6 +186,6 @@ private:
 
 } // Plugin
 } // Dvvp
-} // Analysis
+} // Collector
 
 #endif

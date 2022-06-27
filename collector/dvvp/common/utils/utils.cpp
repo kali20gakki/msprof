@@ -28,7 +28,7 @@ namespace common {
 namespace utils {
 using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::common::config;
-using namespace Analysis::Dvvp::Plugin;
+using namespace Collector::Dvvp::Plugin;
 
 std::mutex g_envMtx;
 const unsigned long long CHANGE_FROM_S_TO_NS = 1000000000;
@@ -1275,6 +1275,17 @@ void Utils::RemoveEndCharacter(std::string &input, const char end)
         return;
     }
     input.resize(input.size() - 1);
+}
+
+bool Utils::IsAppName(const std::string paramsName)
+{
+    std::string paramBaseName = BaseName(paramsName);
+    std::string pythonName = "python";
+    if (paramBaseName.compare("bash") == 0 || paramBaseName.compare("sh") == 0 ||
+        paramBaseName.substr(0, pythonName.size()) == pythonName) {
+        return false;
+    }
+    return true;
 }
 
 int32_t WriteFile(const std::string &absolutePath, const std::string &recordFile, const std::string &profName)

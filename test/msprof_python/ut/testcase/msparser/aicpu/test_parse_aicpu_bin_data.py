@@ -53,10 +53,10 @@ class TestParseAiCpuBinData(unittest.TestCase):
         self.assertEqual(result, None)
 
     def test_save(self):
-        with mock.patch('model.ai_cpu.ai_cpu_model.AiCpuModel.init'), \
-                mock.patch('model.ai_cpu.ai_cpu_model.AiCpuModel.create_table'), \
-                mock.patch('model.ai_cpu.ai_cpu_model.AiCpuModel.flush'), \
-                mock.patch('model.ai_cpu.ai_cpu_model.AiCpuModel.finalize'), \
+        with mock.patch('msmodel.ai_cpu.ai_cpu_model.AiCpuModel.init'), \
+                mock.patch('msmodel.ai_cpu.ai_cpu_model.AiCpuModel.create_table'), \
+                mock.patch('msmodel.ai_cpu.ai_cpu_model.AiCpuModel.flush'), \
+                mock.patch('msmodel.ai_cpu.ai_cpu_model.AiCpuModel.finalize'), \
                 mock.patch('common_func.msprof_iteration.Utils.is_step_scene', return_value=True):
             InfoConfReader()._info_json = {"devices": '0'}
             check = ParseAiCpuBinData(self.file_list, CONFIG)

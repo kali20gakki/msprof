@@ -7,7 +7,7 @@ Copyright Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 import logging
 
 from common_func.constant import Constant
-from model.stars.lowpower_model import LowPowerModel
+from msmodel.stars.lowpower_model import LowPowerModel
 from msparser.interface.istars_parser import IStarsParser
 from profiling_bean.stars.lowpower_bean import LowPowerBean
 
