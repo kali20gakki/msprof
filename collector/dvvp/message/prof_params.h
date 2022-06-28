@@ -221,7 +221,8 @@ struct ProfileParams : BaseInfo {
             for (auto iter = object.begin(); iter != object.end(); iter++) {
                 ss << iter.key() << ": ";
                 if (iter.key() == "result_dir" || iter.key() == "app_dir") {
-                    ss << "***/" << Utils::BaseName(iter.value());
+                    // ss << "***/" << Utils::BaseName(iter.value());
+                    ss << iter.value();
                 } else {
                     ss << iter.value();
                 }
