@@ -456,7 +456,8 @@ void JobDeviceSoc::CreateCollectionJobArray()
     std::string dataDir = tmpResultDir_ + MSVP_SLASH + "data";
     int ret = analysis::dvvp::common::utils::Utils::CreateDir(dataDir);
     if (ret != PROFILING_SUCCESS) {
-        MSPROF_LOGE("Creating dir: %s err!", analysis::dvvp::common::utils::Utils::BaseName(dataDir).c_str());
+        // MSPROF_LOGE("Creating dir: %s err!", analysis::dvvp::common::utils::Utils::BaseName(dataDir).c_str());
+        MSPROF_LOGE("Creating dir: %s err!", dataDir.c_str());
         analysis::dvvp::common::utils::Utils::PrintSysErrorMsg();
     }
 
