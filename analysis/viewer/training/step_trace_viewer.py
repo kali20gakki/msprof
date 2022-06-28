@@ -76,16 +76,16 @@ class TimeLineJsonMaker:
         trace_parm[StepTraceConstant.DATA_AUGMENTATION] = data[7] if is_number(data[7]) else 0
 
     @staticmethod
-    def make_iter_time(trace_parm: dict, pid: int, index: int) -> list:
+    def make_iter_time(trace_parm: dict, pid: int, tid: int) -> list:
         """
         make iter time
         :param trace_parm: trace parm
         :param pid: pid
-        :param index: index
+        :param tid: tid
         :return: list
         """
         return ["Iteration {}".format(trace_parm[StepTraceConstant.ITER_ID]),
-                pid, 0 + 3 * int(index),
+                pid, tid,
                 trace_parm.get(StepTraceConstant.STEP_END) - trace_parm.get(StepTraceConstant.ITER_TIME),
                 trace_parm.get(StepTraceConstant.ITER_TIME),
                 OrderedDict([("Iteration ID", trace_parm[StepTraceConstant.ITER_ID]),
@@ -98,16 +98,16 @@ class TimeLineJsonMaker:
                 "Iteration Time"]
 
     @staticmethod
-    def make_fp_bp_data(trace_parm: dict, pid: int, index: int) -> list:
+    def make_fp_bp_data(trace_parm: dict, pid: int, tid: int) -> list:
         """
         make fp bp data
         :param trace_parm: data parm
         :param pid: pid
-        :param index: index
+        :param tid: tid
         :return: list
         """
         return ["FP_BP Time {}".format(trace_parm[StepTraceConstant.ITER_ID]),
-                pid, 1 + 3 * int(index),
+                pid, tid,
                 trace_parm[StepTraceConstant.FORWARD_PROPAGATION],
                 (trace_parm[StepTraceConstant.BACK_PROPAGATION] - trace_parm[StepTraceConstant.FORWARD_PROPAGATION]),
                 OrderedDict([("Iteration ID", trace_parm[StepTraceConstant.ITER_ID]),
@@ -119,16 +119,16 @@ class TimeLineJsonMaker:
                 "FP_BP Time"]
 
     @staticmethod
-    def make_grad_refresh_data(trace_parm: dict, pid: int, index: int) -> list:
+    def make_grad_refresh_data(trace_parm: dict, pid: int, tid: int) -> list:
         """
         make grad refresh data
         :param trace_parm: trace parm
         :param pid: pid
-        :param index: index
+        :param tid: tid
         :return: list
         """
         return ["Iteration Refresh {}".format(trace_parm[StepTraceConstant.ITER_ID]),
-                pid, 1 + 3 * int(index),
+                pid, tid,
                 trace_parm[StepTraceConstant.BACK_PROPAGATION],
                 (trace_parm[StepTraceConstant.STEP_END] - trace_parm[StepTraceConstant.BACK_PROPAGATION]),
                 OrderedDict([("Iteration ID", trace_parm[StepTraceConstant.ITER_ID]),
@@ -258,12 +258,17 @@ class StepTraceViewer:
         else:
             model_ids_set = set(map(lambda trace_datum: trace_datum[8], trace_data))
             model_ids = sorted(model_ids_set)
-
+        result_data.extend(TraceViewManager.metadata_event(
+            [["process_name", InfoConfReader().get_json_pid_data(),
+              InfoConfReader().get_json_tid_data(), "Step Trace"]]))
         for i, model_id in enumerate(model_ids):
             StepTraceViewer.model_to_pid[model_id] = InfoConfReader().get_json_pid_data() + i
             result_data.extend(TraceViewManager.metadata_event(
-                [["process_name", StepTraceViewer.model_to_pid.get(model_id),
-                  InfoConfReader().get_json_tid_data(), "Model ID:{}".format(model_id)]]))
+                [["thread_name", InfoConfReader().get_json_pid_data(),
+                  StepTraceViewer.model_to_pid.get(model_id), "Model ID:{}".format(model_id)],
+                 ["thread_sort_index", InfoConfReader().get_json_pid_data(),
+                  StepTraceViewer.model_to_pid.get(model_id), model_id]
+                 ]))
 
     @staticmethod
     def add_reduce_headers(conn: any, headers: list, message: dict) -> None:
@@ -284,13 +289,13 @@ class StepTraceViewer:
                            int(reduce_data[0])
 
     @staticmethod
-    def format_reduce_json(data: list, trace_parm: dict, pid: int, index: int, result_data: list) -> None:
+    def format_reduce_json(data: list, trace_parm: dict, pid: int, tid: int, result_data: list) -> None:
         """
         format reduce json
         :param data: data
         :param trace_parm: trace parm
         :param pid: pid
-        :param index: index
+        :param tid: index
         :param result_data: result data
         :return: void
         """
@@ -303,7 +308,7 @@ class StepTraceViewer:
                 trace_parm[StepTraceConstant.REDUCE_END] = reduce_data[1]
                 grad_refresh_data = \
                     ["Reduce_{}_{}".format(trace_parm[StepTraceConstant.ITER_ID], i),
-                     pid, 2 + 3 * int(index),
+                     pid, tid,
                      trace_parm[StepTraceConstant.REDUCE_START],
                      (trace_parm[StepTraceConstant.REDUCE_END] -
                       trace_parm[StepTraceConstant.REDUCE_START]),
@@ -461,15 +466,14 @@ class StepTraceViewer:
         trace_parm = {}
         result_dict = {}
         StepTraceViewer.make_model_meta(result_data, trace_data)
-        for index, data in enumerate(trace_data):
+        pid = InfoConfReader().get_json_pid_data()
+        for _, data in enumerate(trace_data):
             trace_view_data = []
             TimeLineJsonMaker.create_trace_parm(trace_parm, data)
 
-            pid = StepTraceViewer.get_model_pid(data)
-            result_data = StepTraceViewer.__get_mata_trace_data(
-                result_data, index, trace_parm.get(StepTraceConstant.ITER_ID), pid)
+            tid = StepTraceViewer.get_model_pid(data)
 
-            iter_time_data = TimeLineJsonMaker.make_iter_time(trace_parm, pid, index)
+            iter_time_data = TimeLineJsonMaker.make_iter_time(trace_parm, pid, tid)
 
             if data[1] == "N/A" or data[2] == "N/A":
                 trace_view_data.append(iter_time_data)
@@ -477,8 +481,8 @@ class StepTraceViewer:
                     TraceViewManager.time_graph_trace(TraceViewHeaderConstant.GRPC_TIME_GRAPH_HEAD, trace_view_data))
 
             else:
-                fp_bp_data = TimeLineJsonMaker.make_fp_bp_data(trace_parm, pid, index)
-                grad_refresh_data = TimeLineJsonMaker.make_grad_refresh_data(trace_parm, pid, index)
+                fp_bp_data = TimeLineJsonMaker.make_fp_bp_data(trace_parm, pid, tid)
+                grad_refresh_data = TimeLineJsonMaker.make_grad_refresh_data(trace_parm, pid, tid)
                 result_dict["data_aug_dict0"] = TimeLineJsonMaker.make_data_aug_dict0(trace_parm, pid)
                 result_dict["data_aug_dict1"] = TimeLineJsonMaker.make_data_aug_dict1(trace_parm, pid)
 
@@ -489,7 +493,7 @@ class StepTraceViewer:
                     TraceViewManager.time_graph_trace(TraceViewHeaderConstant.GRPC_TIME_GRAPH_HEAD, trace_view_data))
                 result_data.extend([result_dict.get("data_aug_dict0", {}), result_dict.get("data_aug_dict1", {})])
 
-            StepTraceViewer.format_reduce_json(data, trace_parm, pid, index, result_data)
+            StepTraceViewer.format_reduce_json(data, trace_parm, pid, tid, result_data)
 
         return json.dumps(result_data)
 
@@ -506,33 +510,6 @@ class StepTraceViewer:
             result = 0
         curs.close()
         return result
-
-    @staticmethod
-    def __get_mata_trace_data(result_data: list, index: int, iter_id: int, pid: int) -> list:
-        """
-        get training trace mata data
-        :param result_data: result data
-        :param index: index
-        :param iter_id: iter id
-        :param pid: pid
-        :return: result
-        """
-        # each training trace include three tid
-        tid_value = [int(0 + 3 * int(index)), int(1 + 3 * int(index)), int(2 + 3 * int(index))]
-        meta_data = [["thread_name", pid,
-                      tid_value[0], "Iteration {}".format(iter_id)],
-                     ["thread_name", pid,
-                      tid_value[1], " "],
-                     ["thread_name", pid,
-                      tid_value[2], " "],
-                     ["thread_sort_index", pid,
-                      tid_value[0], tid_value[0]],
-                     ["thread_sort_index", pid,
-                      tid_value[1], tid_value[1]],
-                     ["thread_sort_index", pid,
-                      tid_value[2], tid_value[2]]]
-        result_data.extend(TraceViewManager.metadata_event(meta_data))
-        return result_data
 
     @staticmethod
     def __select_reduce(conn: any, trace: list) -> list:
