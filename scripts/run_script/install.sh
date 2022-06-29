@@ -23,22 +23,22 @@ function get_cann_package_name() {
 }
 
 function implement_install() {
-    if [ "${package_arch}" != "$(arch)" ] && [ -d "${install_path}/${package_arch}-linux/hetero-arch-scripts" ]; then
-		copy_file ${LIBMSPROFILER_STUB} ${install_path}/${package_arch}-linux/hetero-arch-scripts${LIBMSPROFILER_PATH}${LIBMSPROFILER_STUB}
-		copy_file ${LIBMSPROFILER} ${install_path}/${package_arch}-linux/hetero-arch-scripts${LIBMSPROFILER_PATH}${LIBMSPROFILER}
+    if [ "${package_arch}" != "$(arch)" ] && [ -d "${install_path}/${arch_name}/${HETE_PATH}" ]; then
+		copy_file ${LIBMSPROFILER_STUB} "${install_path}/${arch_name}/${HETE_PATH}/${LIBMSPROFILER_PATH}/${LIBMSPROFILER_STUB}"
+		copy_file ${LIBMSPROFILER} "${install_path}/${arch_name}/${HETE_PATH}/${LIBMSPROFILER_PATH}/${LIBMSPROFILER}"
 		return
 	fi
 
 	if [ "$cann_package_name" = "ascend-toolkit" ]; then
-		copy_file ${ANALYSIS} ${install_path}${ANALYSIS_PATH}${ANALYSIS}
-		copy_file ${MSPROF} ${install_path}${MSPROF_PATH}${MSPROF}
+		copy_file ${ANALYSIS} ${install_path}/${ANALYSIS_PATH}/${ANALYSIS}
+		copy_file ${MSPROF} ${install_path}/${MSPROF_PATH}/${MSPROF}
 	fi
 	
 	if [ "$cann_package_name" != "nnae" ]; then
-		copy_file ${LIBMSPROFILER_STUB} ${install_path}${LIBMSPROFILER_PATH}${LIBMSPROFILER_STUB}
+		copy_file ${LIBMSPROFILER_STUB} ${install_path}/${LIBMSPROFILER_PATH}/${LIBMSPROFILER_STUB}
 	fi
 
-	copy_file ${LIBMSPROFILER} ${install_path}${LIBMSPROFILER_PATH}${LIBMSPROFILER}
+	copy_file ${LIBMSPROFILER} ${install_path}/${LIBMSPROFILER_PATH}/${LIBMSPROFILER}
 }
 
 function copy_file() {
@@ -85,12 +85,12 @@ function set_libmsprofiler_right() {
 }
 
 function chmod_libmsprofiler() {
-	if [ -f "${install_path}/${package_arch}-linux/hetero-arch-scripts/${LIBMSPROFILER_PATH}/${LIBMSPROFILER_STUB}" ]; then
-		chmod ${libmsprofiler_right} "${install_path}/${package_arch}-linux/hetero-arch-scripts/${LIBMSPROFILER_PATH}/${LIBMSPROFILER_STUB}"
+	if [ -f "${install_path}/${arch_name}/${HETE_PATH}/${LIBMSPROFILER_PATH}/${LIBMSPROFILER_STUB}" ]; then
+		chmod ${libmsprofiler_right} "${install_path}/${arch_name}/${HETE_PATH}/${LIBMSPROFILER_PATH}/${LIBMSPROFILER_STUB}"
 	fi
 
-	if [ -f "${install_path}/${package_arch}-linux/hetero-arch-scripts/${LIBMSPROFILER_PATH}/${LIBMSPROFILER}" ]; then
-		chmod ${libmsprofiler_right} "${install_path}/${package_arch}-linux/hetero-arch-scripts/${LIBMSPROFILER_PATH}/${LIBMSPROFILER}"
+	if [ -f "${install_path}/${arch_name}/${HETE_PATH}/${LIBMSPROFILER_PATH}/${LIBMSPROFILER}" ]; then
+		chmod ${libmsprofiler_right} "${install_path}/${arch_name}/${HETE_PATH}/${LIBMSPROFILER_PATH}/${LIBMSPROFILER}"
 	fi
 
 	if [ -f "${install_path}/${LIBMSPROFILER_PATH}/${LIBMSPROFILER_STUB}" ]; then
@@ -105,6 +105,7 @@ function chmod_libmsprofiler() {
 source utils.sh
 
 right=${user_right}
+arch_name="${package_arch}-linux"
 get_right
 get_cann_package_name
 implement_install
