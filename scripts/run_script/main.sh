@@ -16,6 +16,9 @@ function parse_script_args() {
         --install-path=*)
 			let "install_path_num+=1"
 			install_path=${3#--install-path=}/${VERSION}
+			check_path ${install_path}
+			install_path=$(readlink -f ${install_path})
+			check_path ${install_path}
 			shift
 			continue
             ;;
@@ -76,16 +79,11 @@ function check_args() {
 
 function execute_run() {
 	if [ ${uninstall_flag} = 1 ]; then
-		if [ -f "${install_path}/${MSPROF_RUN_NAME}/script/uninstall.sh" ];
-		then
+		if [ -f "${install_path}/${MSPROF_RUN_NAME}/script/uninstall.sh" ]; then
 			bash "${install_path}/${MSPROF_RUN_NAME}/script/uninstall.sh"
 			print "INFO" "${MSPROF_RUN_NAME} package uninstall success."
-			exit 0
-		else
-			print "ERROR" "${MSPROF_RUN_NAME} package uninstall failed."
-			exit 1
 		fi
-		
+		exit 0
 	fi
 
 	if [ ${upgrade_flag} = 1 ] && [ -L "${install_path}/../latest/${MSPROF_RUN_NAME}" ]; then
@@ -141,14 +139,6 @@ function add_latest_link() {
     ln -sf ../${VERSION}/${MSPROF_RUN_NAME} ${latest_path}/${MSPROF_RUN_NAME}
 }
 
-function prepar_uninstall() {
-    if [ "${package_arch}" != "$(arch)" ] && [ -d "${install_path}/${package_arch}-linux/hetero-arch-scripts" ]; then
-		return
-	fi
-
-	regist_uninstall
-}
-
 function regist_uninstall() {
     if [ -f "${install_path}/cann_uninstall.sh" ]; then
         write_cann_uninstall
@@ -173,7 +163,9 @@ install_path=$(get_default_install_path)
 parse_script_args $*
 check_args
 execute_run
-store_uninstall_script
-set_latest
-prepar_uninstall
+if [ "${package_arch}" = "$(arch)" ]; then
+	store_uninstall_script
+	set_latest
+	regist_uninstall
+fi
 print "INFO" "${MSPROF_RUN_NAME} package install success."
