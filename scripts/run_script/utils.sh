@@ -32,6 +32,9 @@ SPC_DIR="spc"
 BACKUP_DIR="backup"
 SCRIPT_DIR="script"
 
+# hete path
+HETE_PATH="hetero-arch-scripts"
+
 function print() {
     if [ ! -f "$log_file" ]; then
         echo "[${MSPROF_RUN_NAME}] [$(date +"%Y-%m-%d %H:%M:%S")] [$1]: $2"
@@ -148,7 +151,7 @@ function check_path() {
     fi
     # white list
     if echo "${path_str}" | grep -Eq '^\~?[a-zA-Z0-9./_-]*$'; then
-        print "INFO" "The path ${path_str} is correct."
+        return
     else
         print "ERROR" "The path ${path_str} is invalid, only [a-z,A-Z,0-9,-,_] is support!"
         exit 1
