@@ -1,15 +1,9 @@
 #!/bin/bash
 # get install path
-# use utils function and constant
-source $(dirname "$0")/utils.sh
-
 install_path="$(
     cd "$(dirname "$0")/../../../"
     pwd
 )"
-
-install_path=$(readlink -f ${install_path})
-check_path ${install_path}
 
 # script for spc
 UNINSTALL_SCRIPT="uninstall.sh"
@@ -49,5 +43,8 @@ function copy_file() {
 		return
 	fi
 }
+
+# use utils function and constant
+source $(dirname "$0")/utils.sh
 
 deal_rollback
