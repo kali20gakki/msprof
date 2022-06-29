@@ -104,9 +104,10 @@ function uninstall_latest() {
 }
 
 # must use readlink, or can not bash by latest
-uninstall_location=$(readlink -f ${0})
+source $(dirname "$0")/utils.sh
 
-source $(dirname ${uninstall_location})/utils.sh
+uninstall_location=$(readlink -f ${0})
+check_path ${uninstall_location}
 
 # get path
 install_path=$(dirname ${uninstall_location})/../../
