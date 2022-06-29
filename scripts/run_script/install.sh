@@ -86,19 +86,19 @@ function set_libmsprofiler_right() {
 
 function chmod_libmsprofiler() {
 	if [ -f "${install_path}/${package_arch}-linux/hetero-arch-scripts${LIBMSPROFILER_PATH}${LIBMSPROFILER_STUB}" ]; then
-		chmod ${libmsprofiler_right} "${install_path}/${package_arch}-linux/hetero-arch-scripts${LIBMSPROFILER_PATH}${LIBMSPROFILER_STUB}"
+		chmod ${libmsprofiler_right} "${install_path}/${package_arch}-linux/hetero-arch-scripts/${LIBMSPROFILER_PATH}/${LIBMSPROFILER_STUB}"
 	fi
 
 	if [ -f "${install_path}/${package_arch}-linux/hetero-arch-scripts${LIBMSPROFILER_PATH}${LIBMSPROFILER}" ]; then
-		chmod ${libmsprofiler_right} "${install_path}/${package_arch}-linux/hetero-arch-scripts${LIBMSPROFILER_PATH}${LIBMSPROFILER}"
+		chmod ${libmsprofiler_right} "${install_path}/${package_arch}-linux/hetero-arch-scripts/${LIBMSPROFILER_PATH}/${LIBMSPROFILER}"
 	fi
 
 	if [ -f "${install_path}${LIBMSPROFILER_PATH}${LIBMSPROFILER_STUB}" ]; then
-		chmod ${libmsprofiler_right} "${install_path}${LIBMSPROFILER_PATH}${LIBMSPROFILER_STUB}"
+		chmod ${libmsprofiler_right} "${install_path}/${LIBMSPROFILER_PATH}/${LIBMSPROFILER_STUB}"
 	fi
 
 	if [ -f "${install_path}${LIBMSPROFILER_PATH}${LIBMSPROFILER}" ]; then
-		chmod ${libmsprofiler_right} "${install_path}${LIBMSPROFILER_PATH}${LIBMSPROFILER}"
+		chmod ${libmsprofiler_right} "${install_path}/${LIBMSPROFILER_PATH}/${LIBMSPROFILER}"
 	fi
 }
 

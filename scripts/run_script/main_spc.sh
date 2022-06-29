@@ -13,8 +13,9 @@ function parse_script_args() {
         --install-path=*)
 			let "install_path_num+=1"
 			install_path=${3#--install-path=}/${VERSION}
-			install_path_readlinked=$(readlink -f ${install_path})
-			check_path ${install_path_readlinked}
+            check_path ${install_path}
+			install_path=$(readlink -f ${install_path})
+			check_path ${install_path}
 			shift
 			continue
             ;;
