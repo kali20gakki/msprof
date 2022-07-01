@@ -86,7 +86,6 @@ public:
     void SetModeToOff();
     bool IsCmdMode();
     bool IsModeOff();
-    bool IsSubscribeMode();
     int32_t StopProfConfigCheck(uint64_t dataTypeConfigStop, uint64_t dataTypeConfigStart);
 
     // api ctrl
