@@ -21,7 +21,7 @@ namespace message {
 using BOOL = int;
 using namespace analysis::dvvp::common::config;
 using namespace analysis::dvvp::common::utils;
-using namespace Analysis::Dvvp::Plugin;
+using namespace Collector::Dvvp::Plugin;
 const char * const PROFILING_MODE_SAMPLE_BASED = "sample-based";
 const char * const PROFILING_MODE_TASK_BASED = "task-based";
 const char * const PROFILING_ANALYSIS_TARGET = "launch application";

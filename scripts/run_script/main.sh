@@ -16,6 +16,9 @@ function parse_script_args() {
         --install-path=*)
 			let "install_path_num+=1"
 			install_path=${3#--install-path=}/${VERSION}
+			check_path ${install_path}
+			install_path=$(readlink -f ${install_path})
+			check_path ${install_path}
 			shift
 			continue
             ;;
@@ -76,15 +79,23 @@ function check_args() {
 
 function execute_run() {
 	if [ ${uninstall_flag} = 1 ]; then
-		bash "${install_path}/${MSPROF_RUN_NAME}/script/uninstall.sh"
-		print "INFO" "Mindstudio msprof package uninstall success."
+		if [ -f "${install_path}/${MSPROF_RUN_NAME}/script/uninstall.sh" ]; then
+			bash "${install_path}/${MSPROF_RUN_NAME}/script/uninstall.sh"
+			print "INFO" "${MSPROF_RUN_NAME} package uninstall success."
+		fi
 		exit 0
 	fi
 
 	if [ ${upgrade_flag} = 1 ] && [ -L "${install_path}/../latest/${MSPROF_RUN_NAME}" ]; then
 		local uninstall_absolute_path=$(readlink -f "${install_path}/../latest/${MSPROF_RUN_NAME}/script/uninstall.sh")
-		bash ${uninstall_absolute_path}
-		print "INFO" "Mindstudio msprof package uninstall success."
+		if [ -f ${uninstall_absolute_path} ];
+		then
+			bash ${uninstall_absolute_path}
+			print "INFO" "${MSPROF_RUN_NAME} package uninstall success."
+		else
+			print "ERROR" "${MSPROF_RUN_NAME} package uninstall failed."
+			exit 1
+		fi
 	fi
 
 	bash install.sh ${install_path} ${package_arch} ${install_for_all_flag}
@@ -99,9 +110,7 @@ function get_default_install_path() {
 }
 
 function store_uninstall_script() {
-	local install_right=500
-
-	if [ -f "${install_path}/${MSPROF_RUN_NAME}/script/uninstall.sh" ]; then
+	if [ -f "${install_path}/${MSPROF_RUN_NAME}/script/uninstall.sh" ] || [ -f "${install_path}/${MSPROF_RUN_NAME}/script/utils.sh" ]; then
 		return
 	fi
 
@@ -109,7 +118,7 @@ function store_uninstall_script() {
 	cp "uninstall.sh" "${install_path}/${MSPROF_RUN_NAME}/script/"
 	cp "utils.sh" "${install_path}/${MSPROF_RUN_NAME}/script/"
 
-	chmod -R ${install_right} ${install_path}/${MSPROF_RUN_NAME}
+	chmod -R ${script_right} ${install_path}/${MSPROF_RUN_NAME}
 }
 
 function set_latest() {
@@ -153,8 +162,10 @@ install_path=$(get_default_install_path)
 #0, this footnote path;1, path for executing run;2, parents' dir for run package;3, run params
 parse_script_args $*
 check_args
-store_uninstall_script
 execute_run
-set_latest
-regist_uninstall
+if [ "${package_arch}" = "$(arch)" ]; then
+	store_uninstall_script
+	set_latest
+	regist_uninstall
+fi
 print "INFO" "${MSPROF_RUN_NAME} package install success."

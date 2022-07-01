@@ -18,7 +18,7 @@ from common_func.ms_multi_process import MsMultiProcess
 from common_func.msvp_common import is_valid_original_data
 from common_func.path_manager import PathManager
 from common_func.utils import Utils
-from model.hardware.sys_usage_model import SysUsageModel
+from msmodel.hardware.sys_usage_model import SysUsageModel
 from profiling_bean.prof_enum.data_tag import DataTag
 
 

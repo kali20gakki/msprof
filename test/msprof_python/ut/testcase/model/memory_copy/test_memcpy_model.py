@@ -3,9 +3,9 @@ import shutil
 import unittest
 from common_func.db_name_constant import DBNameConstant
 from common_func.memcpy_constant import MemoryCopyConstant
-from model.memory_copy.memcpy_model import MemcpyModel
+from msmodel.memory_copy.memcpy_model import MemcpyModel
 
-NAMESPACE = 'model.memcopy_copy.'
+NAMESPACE = 'msmodel.memcopy_copy.'
 
 
 class TestMemcpyModel(unittest.TestCase):

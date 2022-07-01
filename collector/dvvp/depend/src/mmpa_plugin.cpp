@@ -8,7 +8,7 @@
 
 #include "securec.h"
 
-namespace Analysis {
+namespace Collector {
 namespace Dvvp {
 namespace Plugin {
 void MmpaPlugin::LoadMmpaSo()
@@ -828,6 +828,6 @@ INT32 MmpaPlugin::MsprofMmGetOpt(INT32 argc, CHAR * const * argv, const CHAR *op
     }
     return mmGetOpt_(argc, argv, opts);
 }
-} // namespace Plugin
-} // namespace Dvvp
-} // namespace Analysis
+} // Plugin
+} // Dvvp
+} // Collector

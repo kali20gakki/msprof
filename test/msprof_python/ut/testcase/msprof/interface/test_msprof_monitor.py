@@ -2,16 +2,16 @@ import unittest
 from unittest import mock
 import pytest
 import multiprocessing
-from ms_interface.msprof_monitor import JobDispatcher
-from ms_interface.msprof_monitor import JobMonitor
-from ms_interface.msprof_monitor import _dispatch_job
-from ms_interface.msprof_monitor import _monitor_job
-from ms_interface.msprof_monitor import monitor
+from msinterface.msprof_monitor import JobDispatcher
+from msinterface.msprof_monitor import JobMonitor
+from msinterface.msprof_monitor import _dispatch_job
+from msinterface.msprof_monitor import _monitor_job
+from msinterface.msprof_monitor import monitor
 
 from constant.constant import INFO_JSON
 from common_func.info_conf_reader import InfoConfReader
 
-NAMESPACE = 'ms_interface.msprof_monitor'
+NAMESPACE = 'msinterface.msprof_monitor'
 
 
 class TestJobDispatcher(unittest.TestCase):

@@ -23,7 +23,7 @@ using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::common::config;
 using namespace Analysis::Dvvp::Common::Platform;
 using namespace analysis::dvvp::host;
-using namespace Analysis::Dvvp::Plugin;
+using namespace Collector::Dvvp::Plugin;
 
 bool CheckMsprofBin(std::string &envValue)
 {
@@ -141,6 +141,7 @@ int32_t MsprofSetDeviceCallbackImpl(VOID_PTR data, uint32_t len)
 
         ge::GeOpenDeviceHandle(setCfg->deviceId);
     }
+    return MSPROF_ERROR_NONE;
 }
 
 inline int32_t InternalErrorCodeToExternal(int32_t internalErrorCode)

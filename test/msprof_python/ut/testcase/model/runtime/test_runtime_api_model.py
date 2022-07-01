@@ -1,10 +1,10 @@
 import unittest
 from unittest import mock
 
-from model.runtime.runtime_api_model import RuntimeApiModel
+from msmodel.runtime.runtime_api_model import RuntimeApiModel
 
 
-NAMESPACE = 'model.runtime.runtime_api_model'
+NAMESPACE = 'msmodel.runtime.runtime_api_model'
 
 
 class TestMsprofTxModel(unittest.TestCase):

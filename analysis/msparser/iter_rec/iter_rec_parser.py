@@ -20,8 +20,8 @@ from common_func.batch_counter import BatchCounter
 from common_func.iter_recorder import IterRecorder
 from common_func.msprof_exception import ProfException
 from framework.offset_calculator import OffsetCalculator
-from model.ge.ge_info_calculate_model import GeInfoModel
-from model.iter_rec.iter_rec_model import HwtsIterModel
+from msmodel.ge.ge_info_calculate_model import GeInfoModel
+from msmodel.iter_rec.iter_rec_model import HwtsIterModel
 from msparser.interface.iparser import IParser
 from profiling_bean.prof_enum.data_tag import DataTag
 from profiling_bean.struct_info.aic_pmu import AicPmuBean

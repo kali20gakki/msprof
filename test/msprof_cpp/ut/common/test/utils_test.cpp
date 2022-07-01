@@ -30,7 +30,7 @@
 
 using namespace analysis::dvvp::common::utils;
 using namespace analysis::dvvp::common::error;
-using namespace Analysis::Dvvp::Plugin;
+using namespace Collector::Dvvp::Plugin;
 
 class COMMON_UTILS_UTILS_TEST: public testing::Test {
 protected:

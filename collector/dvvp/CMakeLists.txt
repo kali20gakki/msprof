@@ -67,6 +67,13 @@ target_compile_options(stub_msprofiler PRIVATE
     -Wextra
 )
 
+target_link_options(stub_msprofiler PRIVATE
+    -Wl,-z,relro,-z,now,-z,noexecstack
+    -Wl,-Bsymbolic
+    -Wl,--exclude-libs=ALL
+    $<$<NOT:$<STREQUAL:${CMAKE_BUILD_TYPE},Debug>>:-s>
+)
+
 install(TARGETS stub_msprofiler OPTIONAL
     LIBRARY DESTINATION stub
 )
@@ -225,6 +232,7 @@ target_link_options(msprofiler_share PRIVATE
     -Wl,-z,relro,-z,now,-z,noexecstack
     -Wl,-Bsymbolic
     -Wl,--exclude-libs=ALL
+    $<$<NOT:$<STREQUAL:${CMAKE_BUILD_TYPE},Debug>>:-s>
 )
 
 target_link_libraries(msprofiler_share PRIVATE

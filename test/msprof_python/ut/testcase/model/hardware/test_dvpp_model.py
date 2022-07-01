@@ -5,7 +5,7 @@ from unittest import mock
 import pytest
 
 from sqlite.db_manager import DBManager
-from model.hardware.dvpp_model import DvppModel
+from msmodel.hardware.dvpp_model import DvppModel
 from constant.constant import CONFIG
 import unittest
 from unittest import mock
@@ -14,7 +14,7 @@ from common_func.info_conf_reader import InfoConfReader
 
 from sqlite.db_manager import DBManager
 
-NAMESPACE = 'model.hardware.dvpp_model'
+NAMESPACE = 'msmodel.hardware.dvpp_model'
 
 
 class TestDvppModel(unittest.TestCase):

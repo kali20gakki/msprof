@@ -23,8 +23,8 @@ from common_func.utils import Utils
 from common_func.batch_counter import BatchCounter
 from framework.offset_calculator import FileCalculator
 from framework.offset_calculator import OffsetCalculator
-from model.iter_rec.iter_rec_model import HwtsIterModel
-from model.task_time.hwts_log_model import HwtsLogModel
+from msmodel.iter_rec.iter_rec_model import HwtsIterModel
+from msmodel.task_time.hwts_log_model import HwtsLogModel
 from mscalculate.interface.icalculator import ICalculator
 from profiling_bean.prof_enum.data_tag import DataTag
 from profiling_bean.struct_info.hwts_log import HwtsLogBean

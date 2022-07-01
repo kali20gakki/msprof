@@ -30,7 +30,7 @@ using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::message;
 using namespace Analysis::Dvvp::JobWrapper;
 using namespace Analysis::Dvvp::MsprofErrMgr;
-using namespace Analysis::Dvvp::Plugin;
+using namespace Collector::Dvvp::Plugin;
 
 class JOB_WRAPPER_PROF_TsCPu_JOB_TEST: public testing::Test {
 protected:
