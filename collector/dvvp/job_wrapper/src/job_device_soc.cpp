@@ -453,12 +453,14 @@ void JobDeviceSoc::CreateCollectionJobArray()
     MSVP_MAKE_SHARED0_VOID(CollectionJobV_[HOST_CPU_COLLECTION_JOB].collectionJob, ProfHostCpuJob);
     MSVP_MAKE_SHARED0_VOID(CollectionJobV_[HOST_MEM_COLLECTION_JOB].collectionJob, ProfHostMemJob);
     MSVP_MAKE_SHARED0_VOID(CollectionJobV_[HOST_NETWORK_COLLECTION_JOB].collectionJob, ProfHostNetworkJob);
-    std::string dataDir = tmpResultDir_ + MSVP_SLASH + "data";
-    int ret = analysis::dvvp::common::utils::Utils::CreateDir(dataDir);
-    if (ret != PROFILING_SUCCESS) {
-        // MSPROF_LOGE("Creating dir: %s err!", analysis::dvvp::common::utils::Utils::BaseName(dataDir).c_str());
-        MSPROF_LOGE("Creating dir: %s err!", dataDir.c_str());
-        analysis::dvvp::common::utils::Utils::PrintSysErrorMsg();
+
+    if (!Msprofiler::Api::ProfAclMgr::instance()->IsSubscribeMode()) {
+        std::string dataDir = tmpResultDir_ + MSVP_SLASH + "data";
+        int ret = analysis::dvvp::common::utils::Utils::CreateDir(dataDir);
+        if (ret != PROFILING_SUCCESS) {
+            MSPROF_LOGE("Creating dir: %s err!", analysis::dvvp::common::utils::Utils::BaseName(dataDir).c_str());
+            analysis::dvvp::common::utils::Utils::PrintSysErrorMsg();
+        }
     }
 
     for (int cnt = 0; cnt < NR_MAX_COLLECTION_JOB; cnt++) {
