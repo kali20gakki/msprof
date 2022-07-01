@@ -246,6 +246,14 @@ bool ProfAclMgr::IsModeOff()
     return false;
 }
 
+bool ProfAclMgr::IsSubscribeMode()
+{
+    if (mode_ == WORK_MODE_SUBSCRIBE) {
+        return true;
+    }
+    return false;
+}
+
 /**
  * Init resources for acl api call
  */
