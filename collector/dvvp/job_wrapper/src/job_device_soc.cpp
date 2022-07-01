@@ -454,7 +454,7 @@ void JobDeviceSoc::CreateCollectionJobArray()
     MSVP_MAKE_SHARED0_VOID(CollectionJobV_[HOST_MEM_COLLECTION_JOB].collectionJob, ProfHostMemJob);
     MSVP_MAKE_SHARED0_VOID(CollectionJobV_[HOST_NETWORK_COLLECTION_JOB].collectionJob, ProfHostNetworkJob);
 
-    if (!Msprofiler::Api::ProfAclMgr::instance()->IsSubscribeMode()) {
+    if (tmpResultDir_.length() != 0) {
         std::string dataDir = tmpResultDir_ + MSVP_SLASH + "data";
         int ret = analysis::dvvp::common::utils::Utils::CreateDir(dataDir);
         if (ret != PROFILING_SUCCESS) {
