@@ -7,7 +7,7 @@ from msparser.hccl.hccl_parser import HCCLParser
 from profiling_bean.prof_enum.data_tag import DataTag
 
 NAMESPACE = 'msparser.hccl.hccl_parser'
-MODEL_NAMESPACE = 'model.hccl.hccl_model'
+MODEL_NAMESPACE = 'msmodel.hccl.hccl_model'
 
 
 class TestHCCLParser(unittest.TestCase):

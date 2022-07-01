@@ -13,7 +13,7 @@ namespace analysis {
 namespace dvvp {
 namespace driver {
 using namespace analysis::dvvp::common::error;
-using namespace Analysis::Dvvp::Plugin;
+using namespace Collector::Dvvp::Plugin;
 
 int DrvGetDevNum(void)
 {

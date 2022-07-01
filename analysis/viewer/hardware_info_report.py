@@ -15,7 +15,7 @@ from common_func.ms_constant.str_constant import StrConstant
 from common_func.msvp_constant import MsvpConstant
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.utils import Utils
-from model.hardware.mini_llc_model import cal_core2cpu
+from msmodel.hardware.mini_llc_model import cal_core2cpu
 
 
 def _get_ddr_data_from_db(curs: any, device_id: str) -> list:

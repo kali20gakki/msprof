@@ -72,10 +72,10 @@ class TestMsprofTxParser(unittest.TestCase):
             check.parse()
 
     def test_save(self):
-        with mock.patch('model.msproftx.msproftx_model.MsprofTxModel.init'), \
-                mock.patch('model.msproftx.msproftx_model.MsprofTxModel.create_table'), \
-                mock.patch('model.msproftx.msproftx_model.MsprofTxModel.flush'), \
-                mock.patch('model.msproftx.msproftx_model.MsprofTxModel.finalize'):
+        with mock.patch('msmodel.msproftx.msproftx_model.MsprofTxModel.init'), \
+                mock.patch('msmodel.msproftx.msproftx_model.MsprofTxModel.create_table'), \
+                mock.patch('msmodel.msproftx.msproftx_model.MsprofTxModel.flush'), \
+                mock.patch('msmodel.msproftx.msproftx_model.MsprofTxModel.finalize'):
             InfoConfReader()._info_json = {"devices": '0'}
             check = MsprofTxParser(self.file_list, CONFIG)
             check.msproftx_data = [123]

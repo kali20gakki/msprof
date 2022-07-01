@@ -26,7 +26,7 @@ using namespace analysis::dvvp::common::error;
 using namespace Analysis::Dvvp::Common::Platform;
 using namespace analysis::dvvp::common::utils;
 using namespace Analysis::Dvvp::MsprofErrMgr;
-using namespace Analysis::Dvvp::Plugin;
+using namespace Collector::Dvvp::Plugin;
 
 const int FILE_FIND_REPLAY          = 10;
 

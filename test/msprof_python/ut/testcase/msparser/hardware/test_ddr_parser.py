@@ -82,11 +82,11 @@ class TestParsingDDRData(unittest.TestCase):
             self.assertEqual(result, None)
 
     def test_save(self):
-        with mock.patch('model.hardware.ddr_model.DdrModel.init'), \
-                mock.patch('model.hardware.ddr_model.DdrModel.create_table'), \
-                mock.patch('model.hardware.ddr_model.DdrModel.flush'), \
-                mock.patch('model.hardware.ddr_model.DdrModel.insert_metric_data'), \
-                mock.patch('model.hardware.ddr_model.DdrModel.finalize'):
+        with mock.patch('msmodel.hardware.ddr_model.DdrModel.init'), \
+                mock.patch('msmodel.hardware.ddr_model.DdrModel.create_table'), \
+                mock.patch('msmodel.hardware.ddr_model.DdrModel.flush'), \
+                mock.patch('msmodel.hardware.ddr_model.DdrModel.insert_metric_data'), \
+                mock.patch('msmodel.hardware.ddr_model.DdrModel.finalize'):
             InfoConfReader()._info_json = {"devices": '0'}
             check = ParsingDDRData(self.file_list, CONFIG)
             check.ddr_data = [123]

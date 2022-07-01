@@ -20,7 +20,7 @@ from common_func.path_manager import PathManager
 from common_func.batch_counter import BatchCounter
 from common_func.iter_recorder import IterRecorder
 from framework.offset_calculator import OffsetCalculator
-from model.ai_cpu.ai_cpu_model import AiCpuModel
+from msmodel.ai_cpu.ai_cpu_model import AiCpuModel
 from msparser.data_struct_size_constant import StructFmt
 from profiling_bean.prof_enum.data_tag import DataTag
 from profiling_bean.struct_info.ai_cpu_data import AiCpuData

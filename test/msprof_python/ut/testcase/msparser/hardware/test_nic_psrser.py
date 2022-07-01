@@ -79,11 +79,11 @@ class TestParsingNicData(unittest.TestCase):
             check.start_parsing_data_file()
 
     def test_save(self):
-        with mock.patch('model.hardware.nic_model.NicModel.init'), \
-                mock.patch('model.hardware.nic_model.NicModel.flush'), \
-                mock.patch('model.hardware.nic_model.NicModel.create_table'), \
-                mock.patch('model.hardware.nic_model.NicModel.report_data'), \
-                mock.patch('model.hardware.nic_model.NicModel.finalize'):
+        with mock.patch('msmodel.hardware.nic_model.NicModel.init'), \
+                mock.patch('msmodel.hardware.nic_model.NicModel.flush'), \
+                mock.patch('msmodel.hardware.nic_model.NicModel.create_table'), \
+                mock.patch('msmodel.hardware.nic_model.NicModel.report_data'), \
+                mock.patch('msmodel.hardware.nic_model.NicModel.finalize'):
             InfoConfReader()._info_json = {"devices": '0'}
             check = ParsingNicData(self.file_list, CONFIG)
             check.nic_data = [123]

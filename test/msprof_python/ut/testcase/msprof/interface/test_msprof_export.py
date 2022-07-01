@@ -10,12 +10,12 @@ from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.msprof_exception import ProfException
 from common_func.system_data_check_manager import SystemDataCheckManager
-from ms_interface.msprof_export import ExportCommand
+from msinterface.msprof_export import ExportCommand
 from profiling_bean.prof_enum.export_data_type import ExportDataType
 
 from sqlite.db_manager import DBManager
 
-NAMESPACE = 'ms_interface.msprof_export'
+NAMESPACE = 'msinterface.msprof_export'
 
 
 def create_trace_db():
@@ -187,9 +187,9 @@ class TestExportCommand(unittest.TestCase):
                 mock.patch(NAMESPACE + ".ExportCommand._check_index_id"), \
                 mock.patch(NAMESPACE + ".ExportCommand._check_model_id"), \
                 mock.patch(NAMESPACE + ".DataAnalysisFactory.run"), \
-                mock.patch("ms_interface.msprof_timeline" + ".MsprofIteration.get_iteration_time",
+                mock.patch("msinterface.msprof_timeline" + ".MsprofIteration.get_iteration_time",
                            return_value=100), \
-                mock.patch("ms_interface.msprof_timeline" + ".MsprofIteration.get_iteration_id_by_index_id",
+                mock.patch("msinterface.msprof_timeline" + ".MsprofIteration.get_iteration_id_by_index_id",
                            return_value=1), \
                 mock.patch(NAMESPACE + ".PathManager.get_summary_dir", return_value=""), \
                 mock.patch(NAMESPACE + ".check_path_valid"), \

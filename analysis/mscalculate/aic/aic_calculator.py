@@ -17,8 +17,8 @@ from common_func.path_manager import PathManager
 from common_func.utils import Utils
 from framework.offset_calculator import FileCalculator
 from framework.offset_calculator import OffsetCalculator
-from model.aic.aic_pmu_model import AicPmuModel
-from model.iter_rec.iter_rec_model import HwtsIterModel
+from msmodel.aic.aic_pmu_model import AicPmuModel
+from msmodel.iter_rec.iter_rec_model import HwtsIterModel
 from mscalculate.aic.aic_utils import AicPmuUtils
 from mscalculate.calculate_ai_core_data import CalculateAiCoreData
 from mscalculate.interface.icalculator import ICalculator

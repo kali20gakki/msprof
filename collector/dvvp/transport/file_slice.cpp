@@ -20,7 +20,7 @@ namespace transport {
 using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::common::config;
 using namespace analysis::dvvp::common::utils;
-using namespace Analysis::Dvvp::Plugin;
+using namespace Collector::Dvvp::Plugin;
 
 FileSlice::FileSlice(int sliceFileMaxKByte, const std::string &storageDir, const std::string &storageLimit)
     : sliceFileMaxKByte_(sliceFileMaxKByte), storageDir_(storageDir),

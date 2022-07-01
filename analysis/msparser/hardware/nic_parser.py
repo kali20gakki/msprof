@@ -17,7 +17,7 @@ from common_func.msvp_common import MsvpCommonConst
 from common_func.msvp_common import is_valid_original_data
 from common_func.path_manager import PathManager
 from common_func.utils import Utils
-from model.hardware.nic_model import NicModel
+from msmodel.hardware.nic_model import NicModel
 from profiling_bean.prof_enum.data_tag import DataTag
 
 

@@ -15,7 +15,7 @@
 #include "driver_plugin.h"
 using namespace Analysis::Dvvp::Common::Config;
 using namespace analysis::dvvp::common::error;
-using namespace Analysis::Dvvp::Plugin;
+using namespace Collector::Dvvp::Plugin;
 static const std::string TYPE_CONFIG = "type";
 
 class COMMON_CONFIG_MANAGER_TEST: public testing::Test {

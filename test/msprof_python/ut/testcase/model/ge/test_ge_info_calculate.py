@@ -2,10 +2,10 @@ import unittest
 import os
 from unittest import mock
 from sqlite.db_manager import DBManager
-from model.ge.ge_info_calculate_model import GeInfoModel
+from msmodel.ge.ge_info_calculate_model import GeInfoModel
 from common_func.constant import Constant
 
-NAMESPACE = 'model.ge.ge_info_calculate_model'
+NAMESPACE = 'msmodel.ge.ge_info_calculate_model'
 
 
 class TestGeInfoModel(unittest.TestCase):
