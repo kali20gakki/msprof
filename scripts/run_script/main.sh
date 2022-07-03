@@ -79,14 +79,14 @@ function check_args() {
 
 function execute_run() {
 	if [ ${uninstall_flag} = 1 ]; then
-		if [ -f "${install_path}/${MSPROF_RUN_NAME}/script/uninstall.sh" ]; then
+		if [ -f "${install_path}/${MSPROF_RUN_NAME}/script/uninstall.sh" ] && [ "${package_arch}" = "$(arch)" ]; then
 			bash "${install_path}/${MSPROF_RUN_NAME}/script/uninstall.sh"
 			print "INFO" "${MSPROF_RUN_NAME} package uninstall success."
 		fi
 		exit 0
 	fi
 
-	if [ ${upgrade_flag} = 1 ] && [ -L "${install_path}/../latest/${MSPROF_RUN_NAME}" ]; then
+	if [ ${upgrade_flag} = 1 ] && [ -L "${install_path}/../latest/${MSPROF_RUN_NAME}" ] && [ "${package_arch}" = "$(arch)" ]; then
 		local uninstall_absolute_path=$(readlink -f "${install_path}/../latest/${MSPROF_RUN_NAME}/script/uninstall.sh")
 		if [ -f ${uninstall_absolute_path} ];
 		then
