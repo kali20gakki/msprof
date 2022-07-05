@@ -519,7 +519,7 @@ int Utils::ExecCmd(const ExecCmdParams &execCmdParams,
         if (envpArray == nullptr) {
             MSPROF_LOGE("envpArray malloc memory failed.");
             return PROFILING_FAILED;
-        }                                            
+        }
         for (ii = 0; ii < static_cast<uint32_t>(envp.size()); ++ii) {
             envpArray.get()[ii] = const_cast<CHAR_PTR>(envp[ii].c_str());
         }
