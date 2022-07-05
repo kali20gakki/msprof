@@ -13,7 +13,6 @@ import sys
 import traceback
 
 from analyzer.training.time_parser import TimeParser
-from analyzer.training.training_trace_parser import TrainingTraceParser
 from common_func.common import print_msg
 from common_func.constant import Constant
 from common_func.info_conf_reader import InfoConfReader
@@ -85,7 +84,7 @@ class AI:
         deal with analysis with different scene
         """
         # init data parsing object
-        data_analysis = [TimeParser, TrainingTraceParser]
+        data_analysis = [TimeParser]
         return data_analysis
 
     def import_control_flow(self: any) -> None:
