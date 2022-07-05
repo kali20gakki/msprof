@@ -61,7 +61,7 @@ int ConfigManager::Init()
         }
     } else {
         chipId = ((static_cast<uint64_t>(versionInfo) >> 8) & 0xff); // 8:shift 8 bits, get the low 8 bits(0xff)
-        if (chipId >= PlatformType::END_TYPE) {
+        if (chipId >= static_cast<uint32_t>(PlatformType::END_TYPE)) {
             MSPROF_LOGE("halGetDeviceInfo get chip invalid, versionInfo:0x%llx, chipId:%u", versionInfo, chipId);
         }
     }
