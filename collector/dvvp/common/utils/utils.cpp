@@ -28,7 +28,7 @@ namespace common {
 namespace utils {
 using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::common::config;
-using namespace Collector::Dvvp::Plugin;
+using namespace Analysis::Dvvp::Plugin;
 
 std::mutex g_envMtx;
 const unsigned long long CHANGE_FROM_S_TO_NS = 1000000000;
@@ -98,7 +98,8 @@ long long Utils::GetFileSize(const std::string &path)
 
     int ret = MmpaPlugin::instance()->MsprofMmGetFileSize(path.c_str(), &size);
     if (ret < 0) {
-        return -1;
+        MSPROF_LOGW("MsprofMmGetFileSize fail, ret=%d, errno=%d.", ret, errno);
+        return PROFILING_FAILED;
     }
 
     return (long long)size;
@@ -1275,17 +1276,6 @@ void Utils::RemoveEndCharacter(std::string &input, const char end)
         return;
     }
     input.resize(input.size() - 1);
-}
-
-bool Utils::IsAppName(const std::string paramsName)
-{
-    std::string paramBaseName = BaseName(paramsName);
-    std::string pythonName = "python";
-    if (paramBaseName.compare("bash") == 0 || paramBaseName.compare("sh") == 0 ||
-        paramBaseName.substr(0, pythonName.size()) == pythonName) {
-        return false;
-    }
-    return true;
 }
 
 int32_t WriteFile(const std::string &absolutePath, const std::string &recordFile, const std::string &profName)
