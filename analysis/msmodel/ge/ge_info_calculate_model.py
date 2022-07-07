@@ -68,9 +68,6 @@ class GeInfoModel(BaseModel):
         if Utils.is_step_scene(self.result_dir):
             self.__get_ge_data_step_scene(ge_op_iter_dict, datatype)
 
-        elif Utils.is_training_trace_scene(self.result_dir):
-            self.__get_ge_data_training_trace_scene(ge_op_iter_dict)
-
         return ge_op_iter_dict
 
     def get_batch_dict(self: any, datatype: str) -> dict:

@@ -54,8 +54,6 @@ class MsprofIteration:
         """
         if Utils.is_step_scene(self._result_dir):
             return self._generate_trace_result(self.get_step_iteration_time(index_id, model_id))
-        if Utils.is_training_trace_scene(self._result_dir):
-            return self._generate_trace_result(self.get_train_iteration_time(index_id))
         return []
 
     def get_step_iteration_time(self: any, index_id: int, model_id: int) -> list:
@@ -197,8 +195,6 @@ class MsprofIteration:
         """
         if Utils.is_step_scene(self._result_dir):
             return self.__get_trace_iteration_end()
-        if Utils.is_training_trace_scene(self._result_dir):
-            return self.__get_iter_by_training_trace()
         return {}
 
     def get_iteration_dict(self: any) -> dict:
