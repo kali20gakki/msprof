@@ -216,7 +216,7 @@ void Analyzer::UploadKeypointOp()
 {
     auto &tsKeypointOp = analyzerTs_->keypointOpInfo_;
 
-    for (uint32_t i = 0; i < tsKeypointOp.size(); i++) {
+    for (size_t i = 0; i < tsKeypointOp.size(); i++) {
         if (tsKeypointOp[i].uploaded) {
             continue;
         }
@@ -260,7 +260,7 @@ uint64_t Analyzer::GetOpIndexId(uint64_t opTimeStamp)
             return tsKeypointOp[endIndex - i].indexId;
         }
     }
-    MSPROF_LOGI("GetOpIndexId failed. opNum %d, opTimeStamp %llu", opNum, opTimeStamp);
+    MSPROF_LOGI("Unable to get OpIndexID. opNum %d, opTimeStamp %llu.", opNum, opTimeStamp);
 
     return 0;
 }
