@@ -140,7 +140,7 @@ void AnalyzerTs::ParseTsKeypointData(CONST_CHAR_PTR data, uint32_t len)
         opData.taskId = tsData->taskId;
         opData.uploaded = false;
         keypointOpInfo_.push_back(opData);
-    } else if (tsData->tagId == TS_KEYPOINT_END_TASK_STATE && !keypointOpInfo_.empty) {
+    } else if (tsData->tagId == TS_KEYPOINT_END_TASK_STATE && !keypointOpInfo_.empty()) {
         KeypointOp &lastOp = keypointOpInfo_.back();
         uint64_t ts = static_cast<uint64_t>(tsData->timestamp / frequency_);
         if (lastOp.endTime || ts <= lastOp.startTime) {
