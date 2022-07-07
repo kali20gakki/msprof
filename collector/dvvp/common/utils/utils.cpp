@@ -505,6 +505,10 @@ int Utils::ExecCmd(const ExecCmdParams &execCmdParams,
         const int reserveArgvLen = 2;
         SHARED_PTR_ALIA<CHAR_PTR> argvArray(new(std::nothrow) CHAR_PTR[argv.size() + reserveArgvLen],
                                             std::default_delete<CHAR_PTR[]>());
+        if (argvArray == nullptr) {
+            MSPROF_LOGE("argvArray malloc memory failed.");
+            return PROFILING_FAILED;
+        }
         argvArray.get()[0] = const_cast<CHAR_PTR>(cmd.c_str());
         for (ii = 0; ii < static_cast<uint32_t>(argv.size()); ++ii) {
             argvArray.get()[ii + 1] = const_cast<CHAR_PTR>(argv[ii].c_str());
