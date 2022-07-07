@@ -101,7 +101,6 @@ int JobDeviceSoc::StartProfHandle(SHARED_PTR_ALIA<analysis::dvvp::message::Profi
         TaskRelationshipMgr::instance()->GetFlushSuffixDevId(params_->job_id, devIndexId_);
     MSVP_MAKE_SHARED0_RET(collectionjobComnCfg_->params, analysis::dvvp::message::ProfileParams, PROFILING_FAILED);
     collectionjobComnCfg_->params = params;
-    MSPROF_EVENT("[XXX]tmpResultDir_ %s", tmpResultDir_.c_str());
     if (tmpResultDir_.length() != 0) {
         std::string dataDir = tmpResultDir_ + MSVP_SLASH + "data";
         int ret = analysis::dvvp::common::utils::Utils::CreateDir(dataDir);
@@ -109,8 +108,6 @@ int JobDeviceSoc::StartProfHandle(SHARED_PTR_ALIA<analysis::dvvp::message::Profi
             MSPROF_LOGE("Creating dir: %s err!", analysis::dvvp::common::utils::Utils::BaseName(dataDir).c_str());
             analysis::dvvp::common::utils::Utils::PrintSysErrorMsg();
         }
-    } else {
-        MSPROF_EVENT("[XXX]tmpResultDir_.length is null");
     }
     CreateCollectionJobArray();
     GetAndStoreStartTime(params_->host_profiling);
