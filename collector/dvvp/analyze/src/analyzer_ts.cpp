@@ -155,7 +155,7 @@ void AnalyzerTs::ParseTsKeypointData(CONST_CHAR_PTR data, uint32_t len)
                         lastOp.startTime, lastOp.endTime, lastOp.indexId, tsData->timestamp);
         }
     } else {
-        MSPROF_LOGE("keypoint tagId error. tagId %u, keypointOp %u", tsData->tagId, keypointOpInfo_.size());        
+        MSPROF_LOGE("keypoint tagId error. tagId %u, keypointOp %u", tsData->tagId, keypointOpInfo_.size());
         return;
     }
     analyzedBytes_ += sizeof(TsProfileKeypoint);
