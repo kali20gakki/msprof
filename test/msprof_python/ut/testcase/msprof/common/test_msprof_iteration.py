@@ -31,16 +31,6 @@ class TestMsprofIteration(unittest.TestCase):
             key = MsprofIteration('123')
             result = key.get_iteration_time(index_id, model_id)
         self.assertEqual(result, [])
-        with mock.patch(NAMESPACE + '.Utils.is_step_scene', return_value=False), \
-             mock.patch(NAMESPACE + '.Utils.is_training_trace_scene', return_value=True):
-            key = MsprofIteration('123')
-            result = key.get_iteration_time(index_id, model_id)
-        self.assertEqual(result, [])
-        with mock.patch(NAMESPACE + '.Utils.is_step_scene', return_value=False), \
-             mock.patch(NAMESPACE + '.Utils.is_training_trace_scene', return_value=False):
-            key = MsprofIteration('123')
-            result = key.get_iteration_time(index_id, model_id)
-        self.assertEqual(result, [])
 
     def test_get_step_iteration_time_1(self):
         index_id = 1
