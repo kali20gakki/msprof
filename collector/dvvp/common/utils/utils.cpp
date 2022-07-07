@@ -98,8 +98,7 @@ long long Utils::GetFileSize(const std::string &path)
 
     int ret = MmpaPlugin::instance()->MsprofMmGetFileSize(path.c_str(), &size);
     if (ret < 0) {
-        MSPROF_LOGW("MsprofMmGetFileSize fail, ret=%d, errno=%d.", ret, errno);
-        return PROFILING_FAILED;
+        return -1;
     }
 
     return (long long)size;
@@ -517,6 +516,10 @@ int Utils::ExecCmd(const ExecCmdParams &execCmdParams,
 
         SHARED_PTR_ALIA<CHAR_PTR> envpArray(new(std::nothrow) CHAR_PTR[envp.size() + 1],
                                             std::default_delete<CHAR_PTR[]>());
+        if (envpArray == nullptr) {
+            MSPROF_LOGE("envpArray malloc memory failed.");
+            return PROFILING_FAILED;
+        }
         for (ii = 0; ii < static_cast<uint32_t>(envp.size()); ++ii) {
             envpArray.get()[ii] = const_cast<CHAR_PTR>(envp[ii].c_str());
         }
