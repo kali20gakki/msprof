@@ -125,6 +125,3 @@ class AI:
             self.formulat_list([CpuUsageAnalysis, MemUsageAnalysis,
                                 DiskUsageAnalysis, NetworkUsageAnalysis,
                                 HostSyscallAnalysis])
-        else:
-            data_analysis = self.make_data_analysis()
-            self.formulat_list(data_analysis)
