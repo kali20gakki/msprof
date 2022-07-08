@@ -99,7 +99,7 @@ long long Utils::GetFileSize(const std::string &path)
     int ret = MmpaPlugin::instance()->MsprofMmGetFileSize(path.c_str(), &size);
     if (ret < 0) {
         MSPROF_LOGW("MsprofMmGetFileSize fail, ret=%d, errno=%d.", ret, errno);
-        return PROFILING_FAILED;
+        return -1;
     }
 
     return (long long)size;
