@@ -109,6 +109,31 @@ class MsTimeParser(IParser, MsMultiProcess):
         logging.info("Parsing sync data finished...")
         return message
 
+    def save(self: any) -> None:
+        try:
+            if self._check_time_format(self._message_dict):
+                message_list = self._pre_time_data(self._message_dict)
+                ms_time_model = MsTimeModel(self._project_path)
+                if ms_time_model.init():
+                    ms_time_model.flush(message_list)
+                    ms_time_model.finalize()
+        except sqlite3.Error as trace_err:
+            logging.error("Save hwts iter failed, "
+                          "%s", str(trace_err), exc_info=Constant.TRACE_BACK_SWITCH)
+        finally:
+            pass
+
+    def ms_run(self: any) -> None:
+        """
+        entrance of time parser
+        :return: None
+        """
+        try:
+            self.parse()
+        except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
+            logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
+        self.save()
+
     def _check_time_format(self, message: dict) -> bool:
         result = False
         if not message:
@@ -134,31 +159,6 @@ class MsTimeParser(IParser, MsMultiProcess):
                                         pb_time_mesg["host_wall"]]
                                        for pb_time_mesg in message["data"])
         return message_list
-
-    def save(self: any) -> None:
-        try:
-            if self._check_time_format(self._message_dict):
-                message_list = self._pre_time_data(self._message_dict)
-                ms_time_model = MsTimeModel(self._project_path)
-                if ms_time_model.init():
-                    ms_time_model.flush(message_list)
-                    ms_time_model.finalize()
-        except sqlite3.Error as trace_err:
-            logging.error("Save hwts iter failed, "
-                          "%s", str(trace_err), exc_info=Constant.TRACE_BACK_SWITCH)
-        finally:
-            pass
-
-    def ms_run(self: any) -> None:
-        """
-        entrance of time parser
-        :return: None
-        """
-        try:
-            self.parse()
-            self.save()
-        except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
-            logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
 
     def __parse_time_data_helper(self: any, message: dict, index: int) -> None:
         host_start_path = os.path.join(self._project_path, "host_start.log.{}".format(index))
