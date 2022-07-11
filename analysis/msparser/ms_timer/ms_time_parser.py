@@ -20,7 +20,7 @@ from common_func.ms_multi_process import MsMultiProcess
 from common_func.msprof_exception import ProfException
 from common_func.msvp_common import is_valid_original_data
 from common_func.utils import Utils
-from model.ms_timer.ms_time_model import MsTimeModel
+from msmodel.ms_timer.ms_time_model import MsTimeModel
 from msparser.interface.iparser import IParser
 
 

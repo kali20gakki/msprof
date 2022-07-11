@@ -1,9 +1,9 @@
 import unittest
 from unittest import mock
 
-from model.ms_timer.ms_time_model import MsTimeModel
+from msmodel.ms_timer.ms_time_model import MsTimeModel
 
-NAMESPACE = "model.ms_timer.ms_time_model"
+NAMESPACE = "msmodel.ms_timer.ms_time_model"
 
 
 class TsetMsTimeModel(unittest.TestCase):
