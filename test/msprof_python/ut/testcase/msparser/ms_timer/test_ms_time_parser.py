@@ -29,9 +29,9 @@ class TestMsTimeParser(unittest.TestCase):
     def test_save(self):
         with mock.patch(NAMESPACE + '.MsTimeParser._check_time_format'), \
              mock.patch(NAMESPACE + '.MsTimeParser._pre_time_data'), \
-             mock.patch('model.ms_timer.ms_time_model.MsTimeModel.init'), \
-             mock.patch('model.ms_timer.ms_time_model.MsTimeModel.flush'), \
-             mock.patch('model.ms_timer.ms_time_model.MsTimeModel.finalize'), \
+             mock.patch('msmodel.ms_timer.ms_time_model.MsTimeModel.init'), \
+             mock.patch('msmodel.ms_timer.ms_time_model.MsTimeModel.flush'), \
+             mock.patch('msmodel.ms_timer.ms_time_model.MsTimeModel.finalize'), \
              mock.patch(NAMESPACE + '.logging.error'):
             check = MsTimeParser(self.file_list, CONFIG)
             check.save()

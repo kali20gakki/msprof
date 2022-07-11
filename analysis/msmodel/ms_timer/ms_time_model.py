@@ -5,7 +5,7 @@ function: save time data to db
 Copyright Huawei Technologies Co., Ltd. 2022. All rights reserved.
 """
 from common_func.db_name_constant import DBNameConstant
-from model.interface.parser_model import ParserModel
+from msmodel.interface.parser_model import ParserModel
 
 
 class MsTimeModel(ParserModel):

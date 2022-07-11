@@ -12,8 +12,6 @@ import os
 import sys
 import traceback
 
-from analyzer.training.time_parser import TimeParser
-from analyzer.training.training_trace_parser import TrainingTraceParser
 from common_func.common import print_msg
 from common_func.constant import Constant
 from common_func.info_conf_reader import InfoConfReader
@@ -78,15 +76,6 @@ class AI:
                     os.chmod(PathManager.get_collection_log_path(project_dir), NumberConstant.FILE_AUTHORITY)
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
             error(cls.FILE_NAME, err)
-
-    @staticmethod
-    def make_data_analysis() -> list:
-        """
-        deal with analysis with different scene
-        """
-        # init data parsing object
-        data_analysis = [TimeParser, TrainingTraceParser]
-        return data_analysis
 
     def import_control_flow(self: any) -> None:
         """
