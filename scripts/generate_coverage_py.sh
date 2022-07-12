@@ -1,4 +1,7 @@
 #!/bin/bash
+# This script is used to generate llt-python coverage.
+# Copyright Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
+
 set -e
 real_path=$(readlink -f "$0")
 script_dir=$(dirname "$real_path")

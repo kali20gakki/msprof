@@ -1,15 +1,25 @@
 #!/bin/bash
 # right constant
-MSPROF_RUN_NAME="mindstudio-msprof"
 root_right=555
 user_right=550
 
 root_ini_right=444
 user_ini_right=400
 
+script_right=500
+
+mindstudio_msprof_spc_right=500
+
+root_libmsprofiler_right=444
+user_libmsprofiler_right=440
+
+PATH_LENGTH=4096
+
+MSPROF_RUN_NAME="mindstudio-msprof"
 # product constant
 LIBMSPROFILER="libmsprofiler.so"
 LIBMSPROFILER_STUB="stub/libmsprofiler.so"
+# never use analysis/, or remove important file by softlink
 ANALYSIS="analysis"
 MSPROF="msprof"
 
@@ -21,6 +31,9 @@ MSPROF_PATH="/tools/profiler/bin/"
 SPC_DIR="spc"
 BACKUP_DIR="backup"
 SCRIPT_DIR="script"
+
+# hete path
+HETE_PATH="hetero-arch-scripts"
 
 function print() {
     if [ ! -f "$log_file" ]; then
@@ -98,6 +111,50 @@ function uninstall_script() {
         chmod -R u+w ${install_path}/${SPC_DIR}/${SCRIPT_DIR}/${MSPROF_RUN_NAME}
         del_dir ${install_path}/${SPC_DIR}/${SCRIPT_DIR}/${MSPROF_RUN_NAME}
         remove_empty_dir ${install_path}/${SPC_DIR}/${SCRIPT_DIR}
+    fi
+}
+
+function rm_file_safe() {
+    local file_path=$1
+    if [ -n "${file_path}" ]; then
+        if [ -f "${file_path}" ] || [ -h "${file_path}" ]; then
+            rm -f "${file_path}"
+            if [ $? -ne 0 ]; then
+                print "ERROR" "delete file ${file_path} failed, please delete it by yourself."
+            else
+            print "INFO" "delete file ${file_path} successfully"
+            fi
+        else
+            print "WARNING" "the file is not exist"
+        fi
+    else
+        print "WARNING" "the file path is NULL"
+    fi
+}
+
+function check_path() {
+    local path_str=${1}
+    # check the length of path
+    if [ ${#path_str} -gt ${PATH_LENGTH} ]; then
+        print "ERROR" "parameter error $path_str, the length exceeds ${PATH_LENGTH}."
+        exit 1
+    fi
+    # check absolute path
+    if [[ ! "${path_str}" =~ ^/.* ]]; then
+        print "ERROR" "parameter error $path_str, must be an absolute path."
+        exit 1
+    fi
+    # black list
+    if echo "${path_str}" | grep -Eq '\/{2,}|\.{3,}'; then
+        print "ERROR" "The path ${path_str} is invalid, cannot contain the following characters: // ...!"
+        exit 1
+    fi
+    # white list
+    if echo "${path_str}" | grep -Eq '^\~?[a-zA-Z0-9./_-]*$'; then
+        return
+    else
+        print "ERROR" "The path ${path_str} is invalid, only [a-z,A-Z,0-9,-,_] is support!"
+        exit 1
     fi
 }
 

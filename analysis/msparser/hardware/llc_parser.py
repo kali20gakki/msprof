@@ -18,7 +18,7 @@ from common_func.msvp_common import is_valid_original_data
 from common_func.path_manager import PathManager
 from common_func.platform.chip_manager import ChipManager
 from framework.offset_calculator import OffsetCalculator
-from model.hardware.llc_model import LlcModel
+from msmodel.hardware.llc_model import LlcModel
 from msparser.data_struct_size_constant import StructFmt
 from profiling_bean.prof_enum.data_tag import DataTag
 

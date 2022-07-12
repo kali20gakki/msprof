@@ -152,9 +152,11 @@ class HostCpuUsagePresenter(HostProfPresenterBase):
                                         curr_info_data.get("curr_timestamp"),
                                         str(cpu_no), float(usage)])
 
-        # compute cpu avg usage
-        usage = (total_delta * NumberConstant.PERCENTAGE / (delta_jiffies * cpu_num)) \
-            .quantize(NumberConstant.USAGE_PLACES)
+        usage = 0
+        if not NumberConstant.is_zero(cpu_num):
+            # compute cpu avg usage
+            usage = (total_delta * NumberConstant.PERCENTAGE / (delta_jiffies * cpu_num)) \
+                .quantize(NumberConstant.USAGE_PLACES)
         self.cpu_usage_info.append([last_info_data.get("last_timestamp"),
                                     curr_info_data.get("curr_timestamp"),
                                     'Avg', float(usage)])

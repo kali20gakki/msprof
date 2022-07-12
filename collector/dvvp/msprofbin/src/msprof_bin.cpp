@@ -25,15 +25,6 @@ using namespace analysis::dvvp::common::error;
 using namespace Analysis::Dvvp::Common::Platform;
 using namespace Collector::Dvvp::Msprofbin;
 
-void PrintOutPutDir()
-{
-    if (MsprofManager::instance()->rMode_ == nullptr || MsprofManager::instance()->rMode_->jobResultDir_.empty()) {
-        return;
-    }
-    auto& outputDirInfo = MsprofManager::instance()->rMode_->jobResultDir_;
-    CmdLog::instance()->CmdInfoLog("Process profiling data complete. Data is saved in %s",
-        outputDirInfo.c_str());
-}
 
 void SetEnvList(CONST_CHAR_PTR_PTR envp, std::vector<std::string> &envpList)
 {
@@ -55,14 +46,14 @@ int LltMain(int argc, const char **argv, const char **envp)
 int main(int argc, const char **argv, const char **envp)
 #endif
 {
+    InputParser parser = InputParser();
+    if (argc <= 1) {
+        parser.MsprofCmdUsage("msprof needs input parameter.");
+        return PROFILING_FAILED;
+    }
     std::vector<std::string> envpList;
     SetEnvList(envp, envpList);
     EnvManager::instance()->SetGlobalEnv(envpList);
-    InputParser parser = InputParser();
-    if (argc <= 1) {
-        parser.MsprofCmdUsage("");
-        return PROFILING_FAILED;
-    }
     int ret = Platform::instance()->PlatformInitByDriver();
     if (ret != PROFILING_SUCCESS) {
         CmdLog::instance()->CmdErrorLog("Init platform by driver faild!");
@@ -71,6 +62,9 @@ int main(int argc, const char **argv, const char **envp)
     auto params = parser.MsprofGetOpts(argc, argv);
     if (params == nullptr) {
         return PROFILING_FAILED;
+    }
+    if (parser.HasHelpParamOnly()) {
+        return PROFILING_SUCCESS;
     }
     ret = MsprofManager::instance()->Init(params);
     if (ret != PROFILING_SUCCESS) {
@@ -87,7 +81,11 @@ int main(int argc, const char **argv, const char **envp)
         return PROFILING_FAILED;
     } else {
         CmdLog::instance()->CmdInfoLog("Profiling finished.");
-        PrintOutPutDir();
+        if (MsprofManager::instance()->rMode_ != nullptr &&
+            !MsprofManager::instance()->rMode_->jobResultDir_.empty()) {
+            CmdLog::instance()->CmdInfoLog("Process profiling data complete. Data is saved in %s",
+                MsprofManager::instance()->rMode_->jobResultDir_.c_str());
+        }
     }
     return PROFILING_SUCCESS;
 }

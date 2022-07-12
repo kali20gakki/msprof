@@ -11,7 +11,7 @@ from common_func.db_manager import DBManager, ClassRowType
 from common_func.db_name_constant import DBNameConstant
 from common_func.empty_class import EmptyClass
 from common_func.utils import Utils
-from model.interface.base_model import BaseModel
+from msmodel.interface.base_model import BaseModel
 from profiling_bean.db_dto.step_trace_dto import StepTraceDto
 
 

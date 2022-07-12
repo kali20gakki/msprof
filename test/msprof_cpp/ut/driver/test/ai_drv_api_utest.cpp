@@ -11,7 +11,7 @@
 #include "driver_plugin.h"
 
 using namespace analysis::dvvp::common::error;
-using namespace Analysis::Dvvp::Plugin;
+using namespace Collector::Dvvp::Plugin;
 #define CHANNEL_STR(s) #s
 
 ///////////////////////////////////////////////////////////////////

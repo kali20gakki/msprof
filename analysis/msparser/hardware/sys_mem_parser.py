@@ -16,7 +16,7 @@ from common_func.file_name_manager import get_pid_mem_compiles
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.msvp_common import is_valid_original_data
 from common_func.path_manager import PathManager
-from model.hardware.sys_mem_model import SysMemModel
+from msmodel.hardware.sys_mem_model import SysMemModel
 from profiling_bean.prof_enum.data_tag import DataTag
 
 

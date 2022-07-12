@@ -22,8 +22,8 @@ from common_func.ms_constant.str_constant import StrConstant
 from common_func.trace_view_header_constant import TraceViewHeaderConstant
 from common_func.trace_view_manager import TraceViewManager
 from common_func.utils import Utils
-from model.hardware.mini_llc_model import cal_core2cpu
-from model.hardware.mini_llc_model import MiniLlcModel
+from msmodel.hardware.mini_llc_model import cal_core2cpu
+from msmodel.hardware.mini_llc_model import MiniLlcModel
 from viewer.get_trace_timeline import TraceViewer
 
 

@@ -9,7 +9,7 @@ import os
 
 from common_func.common_prof_rule import CommonProfRule
 from common_func.path_manager import PathManager
-from tuning.base_turing_view import BaseTuningView
+from tuning.base_tuning_view import BaseTuningView
 
 
 class TuningView(BaseTuningView):

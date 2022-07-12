@@ -297,7 +297,6 @@ int ProfManager::LaunchTask(SHARED_PTR_ALIA<ProfTask> task, const std::string &j
     }
     if (GetTaskNoLock(jobId) != nullptr) {
         MSPROF_LOGE("task(%s) already exist, don't start again", jobId.c_str());
-        MSPROF_INNER_ERROR("EK9999", "task(%s) already exist, don't start again", jobId.c_str());
         task.reset();
         return PROFILING_FAILED;
     }

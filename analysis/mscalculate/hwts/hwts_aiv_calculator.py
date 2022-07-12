@@ -12,7 +12,7 @@ from common_func.info_conf_reader import InfoConfReader
 from common_func.utils import Utils
 from common_func.constant import Constant
 from common_func.batch_counter import BatchCounter
-from model.task_time.hwts_aiv_model import HwtsAivModel
+from msmodel.task_time.hwts_aiv_model import HwtsAivModel
 from mscalculate.hwts.hwts_calculator import HwtsCalculator
 from profiling_bean.prof_enum.data_tag import DataTag
 

@@ -1,4 +1,4 @@
-set(MOCKCPP_CXXFLAGS "-fPIC -std=c++11 -D_GLIBCXX_USE_CXX11_ABI=0")
+set(MOCKCPP_CXXFLAGS "-fPIC -std=c++11 -D_GLIBCXX_USE_CXX11_ABI=0 -Wno-unused-parameter")
 set(MOCKCPP_LDFLAGS "-Wl,-z,relro,-z,now,-z,noexecstack")
 set(MOCKCPP_LINKER_FLAGS "")
 

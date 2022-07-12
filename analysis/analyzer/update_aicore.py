@@ -188,11 +188,12 @@ class UpdateAICoreData:
               "order by timestamp".format(DBNameConstant.TABLE_GE_TASK, Constant.TASK_TYPE_AI_CORE)
         if not ProfilingScene().is_operator():
             iter_id = self.sample_config.get("iter_id", NumberConstant.DEFAULT_ITER_ID)
+            model_id = self.sample_config.get("model_id", NumberConstant.DEFAULT_MODEL_ID)
             sql = "select task_id, stream_id, block_dim from {0} " \
-                  "where (index_id=0 or index_id=?) " \
+                  "where model_id=? and (index_id=0 or index_id=?) " \
                   "and task_type='{1}' order by timestamp".format(
                 DBNameConstant.TABLE_GE_TASK, Constant.TASK_TYPE_AI_CORE)
-            return sql, (iter_id,)
+            return sql, (model_id, iter_id,)
         return sql, ()
 
     def __get_config_params(self: any) -> tuple:

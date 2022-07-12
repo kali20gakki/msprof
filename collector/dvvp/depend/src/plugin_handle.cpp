@@ -12,13 +12,12 @@
 #include "config.h"
 #include "securec.h"
 
-namespace Analysis {
+namespace Collector {
 namespace Dvvp {
 namespace Plugin {
 using namespace analysis::dvvp::common::config;
 PluginHandle::~PluginHandle()
 {
-    CloseHandle();
 }
 
 const std::string PluginHandle::GetSoName() const
@@ -48,7 +47,7 @@ bool PluginHandle::IsSoftLink(const std::string &path) const
 
 std::string PluginHandle::RealPath(const std::string &path) const
 {
-    char resoved_path[MAX_PATH_LENGTH] = {0x00};
+    char resoved_path[MAX_PATH_LENGTH * 2] = {0};
     std::string res = "";
     if (realpath(path.c_str(), resoved_path)) {
         res = resoved_path;
@@ -135,6 +134,6 @@ bool PluginHandle::IsFuncExist(const std::string funcName) const
     }
     return true;
 }
-} // namespace Plugin
-} // namespace Dvvp
-} // namespace Analysis
+} // Plugin
+} // Dvvp
+} // Collector

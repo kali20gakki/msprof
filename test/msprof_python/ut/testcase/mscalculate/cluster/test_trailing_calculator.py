@@ -62,8 +62,9 @@ class TestTrailingCalculator(unittest.TestCase):
         check = TrailingCalculator(['device_0', 'device_1'])
         check.trailing_dict = {'test_1': 10, 'test_2': 20}
         self.assertEqual(check.calculate_slow_node(),
-                         {'Slow Node': ['Node: test_2, enhanced tailing time of node tie data is 20 ns, '
-                                        'and the ratio of slow node is 33.33%.\t']})
+                         {'Slow Node': ['Node: test_2, with a data augmentation bound duration of 20 ns '
+                                        'on average, which is 33.33% higher than the average duration '
+                                        'consumed by nodes.\t']})
         check.trailing_dict = {}
         self.assertEqual(check.calculate_slow_node(), {'Slow Node': []})
         with mock.patch(NAMESPACE + '.logging.error'):

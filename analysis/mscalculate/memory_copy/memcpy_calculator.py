@@ -11,7 +11,7 @@ from common_func.db_name_constant import DBNameConstant
 from common_func.memcpy_constant import MemoryCopyConstant
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.msprof_iteration import MsprofIteration
-from model.memory_copy.memcpy_model import MemcpyModel
+from msmodel.memory_copy.memcpy_model import MemcpyModel
 from mscalculate.interface.icalculator import ICalculator
 from profiling_bean.struct_info.memcpy_state_machine import MemcpyRecorder
 

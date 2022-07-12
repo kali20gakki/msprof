@@ -15,7 +15,7 @@ from common_func.ms_constant.stars_constant import StarsConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.trace_view_header_constant import TraceViewHeaderConstant
 from common_func.trace_view_manager import TraceViewManager
-from model.interface.view_model import ViewModel
+from msmodel.interface.view_model import ViewModel
 
 
 class StarsChipTransView:

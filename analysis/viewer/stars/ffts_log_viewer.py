@@ -8,7 +8,7 @@ from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.stars_constant import StarsConstant
 from common_func.trace_view_header_constant import TraceViewHeaderConstant
 from common_func.trace_view_manager import TraceViewManager
-from model.stars.ffts_log_model import FftsLogModel
+from msmodel.stars.ffts_log_model import FftsLogModel
 from profiling_bean.prof_enum.export_data_type import ExportDataType
 from viewer.interface.base_viewer import BaseViewer
 

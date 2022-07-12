@@ -13,7 +13,7 @@ from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.file_manager import check_path_valid
 from common_func.path_manager import PathManager
-from model.interface.base_model import BaseModel
+from msmodel.interface.base_model import BaseModel
 
 
 class Utils:
