@@ -44,11 +44,11 @@ class TestParsingHCCSData(unittest.TestCase):
             check.start_parsing_data_file()
 
     def test_save(self):
-        with mock.patch('model.hardware.hccs_model.HccsModel.init'), \
-                mock.patch('model.hardware.hccs_model.HccsModel.create_table'), \
-                mock.patch('model.hardware.hccs_model.HccsModel.flush'), \
-                mock.patch('model.hardware.hccs_model.HccsModel.insert_metrics'), \
-                mock.patch('model.hardware.hccs_model.HccsModel.finalize'):
+        with mock.patch('msmodel.hardware.hccs_model.HccsModel.init'), \
+                mock.patch('msmodel.hardware.hccs_model.HccsModel.create_table'), \
+                mock.patch('msmodel.hardware.hccs_model.HccsModel.flush'), \
+                mock.patch('msmodel.hardware.hccs_model.HccsModel.insert_metrics'), \
+                mock.patch('msmodel.hardware.hccs_model.HccsModel.finalize'):
             InfoConfReader()._info_json = {"devices": '0'}
             check = ParsingHCCSData(self.file_list, CONFIG)
             check.origin_data = [123]

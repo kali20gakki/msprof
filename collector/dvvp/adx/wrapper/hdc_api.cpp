@@ -30,7 +30,7 @@ namespace Analysis {
 namespace Dvvp {
 namespace Adx {
 using namespace IdeDaemon::Common::Config;
-using namespace Analysis::Dvvp::Plugin;
+using namespace Collector::Dvvp::Plugin;
 
 struct DataSendMsg {
     IdeSendBuffT buf;
@@ -373,9 +373,9 @@ static hdcError_t HdcWritePackage(HDC_SESSION session, DataSendMsg dataSendMsg,
     DRV_HDC_MSG_T_PTR pmsg, IDE_HDC_PACKET_T_PTR packet, int flag)
 {
     hdcError_t hdcError = DRV_ERROR_NONE;
-    unsigned int totalLen = dataSendMsg.bufLen;
+    unsigned int totalLen = static_cast<uint32_t>(dataSendMsg.bufLen);
     unsigned int reservedLen = totalLen;
-    int sendLen = 0;
+    unsigned int sendLen = 0;
     unsigned int timeout = 0;
     IdeSendBuffT buf = dataSendMsg.buf;
 
@@ -396,7 +396,8 @@ static hdcError_t HdcWritePackage(HDC_SESSION session, DataSendMsg dataSendMsg,
         packet->type = IDE_DAEMON_LITTLE_PACKAGE;
 
         errno_t ret = memcpy_s(packet->value, dataSendMsg.maxSendLen,
-                               static_cast<IdeU8Pt>(const_cast<IdeBuffT>(buf)) + (totalLen - reservedLen), sendLen);
+                               static_cast<IdeU8Pt>(const_cast<IdeBuffT>(buf)) + (totalLen - reservedLen),
+                               static_cast<int32_t>(sendLen));
         IDE_CTRL_VALUE_FAILED(ret == EOK, return DRV_ERROR_INVALID_VALUE, "memory copy failed");
 
         // add buffer to hdc message
@@ -664,7 +665,7 @@ int IdeCreatePacket(CmdClassT type, IdeString value,
     IDE_CTRL_VALUE_FAILED(sendBuf != nullptr, return IDE_DAEMON_ERROR, "malloc memory failed");
     IdeTlvReq req = (IdeTlvReq)sendBuf;
     req->dev_id = 0;
-    req->len = valueLen;
+    req->len = static_cast<int32_t>(valueLen);
     req->type = type;
     errno_t err = memcpy_s(req->value, mallocValueLen, value, valueLen);
     if (err != EOK) {

@@ -32,7 +32,7 @@ using namespace Analysis::Dvvp::Msprof;
 using namespace Analysis::Dvvp::Common::Config;
 using namespace Analysis::Dvvp::Common::Platform;
 using namespace analysis::dvvp::common::utils;
-using namespace Analysis::Dvvp::Plugin;
+using namespace Collector::Dvvp::Plugin;
 
 RunningMode::RunningMode(std::string preCheckParams, std::string modeName, SHARED_PTR_ALIA<ProfileParams> params)
     : isQuit_(false), modeName_(modeName), taskPid_(MSVP_MMPROCESS), preCheckParams_(preCheckParams),
@@ -322,11 +322,11 @@ int RunningMode::RunExportSummaryTask(const ExecCmdParams &execCmdParams,
         analysisPath_,
         "export", "summary",
         "-dir=" + jobResultDir_,
-        "--iteration-id=" + std::to_string(params_->exportIterationId),
+        "--iteration-id=" + params_->exportIterationId,
         "--format=" + params_->exportSummaryFormat
     };
     if (params_->exportModelId != DEFAULT_MODEL_ID) {
-        argsSummaryV.emplace_back("--model-id=" + std::to_string(params_->exportModelId));
+        argsSummaryV.emplace_back("--model-id=" + params_->exportModelId);
     }
     int ret = analysis::dvvp::common::utils::Utils::ExecCmd(execCmdParams, argsSummaryV, envsV, exitCode, taskPid_);
     if (ret == PROFILING_FAILED) {
@@ -349,10 +349,10 @@ int RunningMode::RunExportTimelineTask(const ExecCmdParams &execCmdParams,
         analysisPath_,
         "export", "timeline",
         "-dir=" + jobResultDir_,
-        "--iteration-id=" + std::to_string(params_->exportIterationId)
+        "--iteration-id=" + params_->exportIterationId
     };
     if (params_->exportModelId != DEFAULT_MODEL_ID) {
-        argsTimelineV.emplace_back("--model-id=" + std::to_string(params_->exportModelId));
+        argsTimelineV.emplace_back("--model-id=" + params_->exportModelId);
     }
     int ret = analysis::dvvp::common::utils::Utils::ExecCmd(execCmdParams, argsTimelineV, envsV, exitCode, taskPid_);
     if (ret == PROFILING_FAILED) {
@@ -525,6 +525,12 @@ int AppMode::RunModeTasks()
         return PROFILING_FAILED;
     }
     UpdateOutputDirInfo();
+
+    if (jobResultDirList_.empty()) {
+        MSPROF_LOGE("[App Mode] Invalid collection result.");
+        return PROFILING_FAILED;
+    }
+
     if (CheckAnalysisEnv() != PROFILING_SUCCESS) {
         MSPROF_LOGW("[App Mode] Analysis environment is not OK, auto parse will not start.");
         return PROFILING_SUCCESS;
@@ -559,6 +565,12 @@ void AppMode::SetDefaultParams() const
         if (params_->hwts_log.empty()) {
             params_->hwts_log = "on";
         }
+        if (params_->hwts_log1.empty()) {
+            params_->hwts_log1 = "on";
+        }
+    }
+    if (params_->ts_memcpy.empty()) {
+        params_->ts_memcpy = "on";
     }
     if (params_->ts_keypoint.empty()) {
         params_->ts_keypoint = "on";

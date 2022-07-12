@@ -120,9 +120,9 @@ class TestParsingTSData(unittest.TestCase):
             check.start_parsing_data_file()
 
     def test_save(self):
-        with mock.patch('model.hardware.tscpu_model.TscpuModel.init'), \
-                mock.patch('model.hardware.tscpu_model.TscpuModel.flush'), \
-                mock.patch('model.hardware.tscpu_model.TscpuModel.finalize'):
+        with mock.patch('msmodel.hardware.tscpu_model.TscpuModel.init'), \
+                mock.patch('msmodel.hardware.tscpu_model.TscpuModel.flush'), \
+                mock.patch('msmodel.hardware.tscpu_model.TscpuModel.finalize'):
             InfoConfReader()._info_json = {"devices": '0'}
             check = ParsingTSData(self.file_list, CONFIG)
             check.ts_data = [123]

@@ -8,6 +8,7 @@ import json
 import logging
 import sys
 
+from common_func.common import print_msg
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msprof_exception import ProfException
 
@@ -24,7 +25,7 @@ class ReturnCodeCheck:
         """
         print and return error code
         """
-        print(json_dump)
+        print_msg(json_dump)
         cls.finish_with_error_code(json_dump)
 
     @classmethod

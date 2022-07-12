@@ -10,12 +10,12 @@ from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.msprof_exception import ProfException
 from common_func.system_data_check_manager import SystemDataCheckManager
-from ms_interface.msprof_export import ExportCommand
+from msinterface.msprof_export import ExportCommand
 from profiling_bean.prof_enum.export_data_type import ExportDataType
 
 from sqlite.db_manager import DBManager
 
-NAMESPACE = 'ms_interface.msprof_export'
+NAMESPACE = 'msinterface.msprof_export'
 
 
 def create_trace_db():
@@ -187,9 +187,9 @@ class TestExportCommand(unittest.TestCase):
                 mock.patch(NAMESPACE + ".ExportCommand._check_index_id"), \
                 mock.patch(NAMESPACE + ".ExportCommand._check_model_id"), \
                 mock.patch(NAMESPACE + ".DataAnalysisFactory.run"), \
-                mock.patch("ms_interface.msprof_timeline" + ".MsprofIteration.get_iteration_time",
+                mock.patch("msinterface.msprof_timeline" + ".MsprofIteration.get_iteration_time",
                            return_value=100), \
-                mock.patch("ms_interface.msprof_timeline" + ".MsprofIteration.get_iteration_id_by_index_id",
+                mock.patch("msinterface.msprof_timeline" + ".MsprofIteration.get_iteration_id_by_index_id",
                            return_value=1), \
                 mock.patch(NAMESPACE + ".PathManager.get_summary_dir", return_value=""), \
                 mock.patch(NAMESPACE + ".check_path_valid"), \
@@ -324,23 +324,28 @@ class TestExportCommand(unittest.TestCase):
                 test.list_map["devices_list"] = ["1"]
                 test.process()
 
-    def test_process_sub_dirs(self):
-        json_data_result = [True, False]
+    def test_process_1(self):
         args_dic = {"collection_path": "test", "iteration_id": 3, "model_id": 1}
         args = Namespace(**args_dic)
-        with mock.patch(NAMESPACE + '.get_path_dir', return_value=['device_0', 'host']),\
-                mock.patch('os.path.join', return_value='JOB/device_0'),\
-                mock.patch('os.path.realpath', return_value='JOB/device_0'),\
-                mock.patch('os.listdir', return_value=[]),\
-                mock.patch(NAMESPACE + '.check_path_valid'),\
+        json_data_result = (False, True)
+        path_dir = (['device_0'], ['host'], ['device_1'])
+        with mock.patch(NAMESPACE + '.check_path_valid'),\
                 mock.patch(NAMESPACE + '.DataCheckManager.contain_info_json_data', side_effect=json_data_result),\
-                mock.patch(NAMESPACE + '.ExportCommand._handle_export'),\
-                mock.patch(NAMESPACE + '.ExportCommand._show_tuning_result'),\
-                mock.patch(NAMESPACE + '.warn'),\
                 mock.patch(NAMESPACE + '.MsprofJobSummary.export'):
-            test = ExportCommand("summary", args)
-            test.list_map["devices_list"] = ["1"]
-            test._process_sub_dirs()
+            with mock.patch(NAMESPACE + '.get_path_dir', side_effect=path_dir), \
+                    mock.patch('os.path.join', return_value='JOB/device_0'), \
+                    mock.patch('os.path.realpath', return_value='JOB/device_0'), \
+                    mock.patch('os.listdir', return_value=[]), \
+                    mock.patch(NAMESPACE + '.check_path_valid'), \
+                    mock.patch(NAMESPACE + '.DataCheckManager.contain_info_json_data', side_effect=json_data_result), \
+                    mock.patch(NAMESPACE + '.ExportCommand._handle_export'), \
+                    mock.patch(NAMESPACE + '.ExportCommand._show_tuning_result'), \
+                    mock.patch(NAMESPACE + '.warn'), \
+                    mock.patch(NAMESPACE + '.MsprofJobSummary.export'):
+
+                test = ExportCommand("summary", args)
+                test.list_map["devices_list"] = ["1"]
+                test.process()
 
 
 if __name__ == '__main__':

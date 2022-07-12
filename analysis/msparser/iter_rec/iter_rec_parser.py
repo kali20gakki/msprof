@@ -20,8 +20,8 @@ from common_func.batch_counter import BatchCounter
 from common_func.iter_recorder import IterRecorder
 from common_func.msprof_exception import ProfException
 from framework.offset_calculator import OffsetCalculator
-from model.ge.ge_info_calculate_model import GeInfoModel
-from model.iter_rec.iter_rec_model import HwtsIterModel
+from msmodel.ge.ge_info_calculate_model import GeInfoModel
+from msmodel.iter_rec.iter_rec_model import HwtsIterModel
 from msparser.interface.iparser import IParser
 from profiling_bean.prof_enum.data_tag import DataTag
 from profiling_bean.struct_info.aic_pmu import AicPmuBean
@@ -100,11 +100,18 @@ class IterParser(IParser, MsMultiProcess):
         :return: None
         """
 
+    def ms_run(self):
+        """
+
+        :return:
+        """
+        pass
+
     def _calculate_task_count(self: any, task_log: HwtsLogBean) -> None:
-        iter_info = self._iter_info_dict.setdefault(self._iter_recorder.current_iter_id,
-                                                    IterInfo(self._iter_recorder.current_iter_id,
+        iter_info = self._iter_info_dict.setdefault(self._iter_recorder.current_op_iter,
+                                                    IterInfo(self._iter_recorder.current_op_iter,
                                                              self._iter_recorder.iter_end_dict.get(
-                                                                 self._iter_recorder.current_iter_id)))
+                                                                 self._iter_recorder.current_op_iter)))
         iter_info.task_count += 1
         if task_log.task_type == self.HWTS_TASK_END \
                 and self._is_ai_core_task(task_log.task_id, task_log.stream_id, task_log.batch_id):

@@ -170,6 +170,10 @@ MSVP_PROF_API int32_t profAclSetStampCategory(VOID_PTR stamp, uint32_t category)
 
 MSVP_PROF_API int32_t profAclSetStampPayload(VOID_PTR stamp, const int32_t type, VOID_PTR value);
 
+#ifdef __cplusplus
+}
+#endif
+
 // acl define
 using aclError = int;
 using aclrtStream = void*;
@@ -316,9 +320,5 @@ using Status = uint32_t;
     GE_ERRORNO(0, 0, 0, 0, 0, SUCCESS, 0, "success");
     GE_ERRORNO(0b11, 0b11, 0b111, 0xFFU, 0b11111, FAILED, 0xFFFU, "failed"); /*lint !e401*/
 } // namespace ge
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

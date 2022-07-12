@@ -17,7 +17,7 @@ from common_func.path_manager import PathManager
 from common_func.platform.chip_manager import ChipManager
 from common_func.utils import Utils
 from framework.offset_calculator import OffsetCalculator
-from model.stars.ffts_pmu_model import FftsPmuModel
+from msmodel.stars.ffts_pmu_model import FftsPmuModel
 from msparser.interface.iparser import IParser
 from profiling_bean.prof_enum.data_tag import DataTag
 from profiling_bean.stars.ffts_plus_pmu import FftsPlusPmuBean
@@ -58,20 +58,6 @@ class FftsPmuParser(IParser, MsMultiProcess):
         except (OSError, SystemError, RuntimeError) as err:
             logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
 
-    def _parse_binary_file(self: any, file_path: str) -> None:
-        """
-        read binary data an decode
-        :param file_path:
-        :return:
-        """
-        check_file_readable(file_path)
-        offset_calculator = OffsetCalculator(self._file_list, self.AIC_PMU_SIZE, self._project_path)
-        with FileOpen(file_path, 'rb') as _pmu_file:
-            _file_size = os.path.getsize(file_path)
-            file_data = offset_calculator.pre_process(_pmu_file.file_reader, _file_size)
-            for chunk in Utils.chunks(file_data, self.AIC_PMU_SIZE):
-                self._data_list.append(self._decoder.decode(chunk))
-
     def save(self: any) -> None:
         """
         save parser data to db
@@ -101,3 +87,17 @@ class FftsPmuParser(IParser, MsMultiProcess):
         if self._file_list:
             self.parse()
             self.save()
+
+    def _parse_binary_file(self: any, file_path: str) -> None:
+        """
+        read binary data an decode
+        :param file_path:
+        :return:
+        """
+        check_file_readable(file_path)
+        offset_calculator = OffsetCalculator(self._file_list, self.AIC_PMU_SIZE, self._project_path)
+        with FileOpen(file_path, 'rb') as _pmu_file:
+            _file_size = os.path.getsize(file_path)
+            file_data = offset_calculator.pre_process(_pmu_file.file_reader, _file_size)
+            for chunk in Utils.chunks(file_data, self.AIC_PMU_SIZE):
+                self._data_list.append(self._decoder.decode(chunk))

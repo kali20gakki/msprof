@@ -14,7 +14,7 @@ from common_func.msvp_constant import MsvpConstant
 from common_func.trace_view_header_constant import TraceViewHeaderConstant
 from common_func.trace_view_manager import TraceViewManager
 from common_func.utils import Utils
-from model.msproftx.msproftx_model import MsprofTxModel
+from msmodel.msproftx.msproftx_model import MsprofTxModel
 from viewer.get_trace_timeline import TraceViewer
 
 
@@ -27,41 +27,6 @@ class MsprofTxViewer:
         self.configs = configs
         self.params = params
         self.model = None
-
-    def get_summary_data(self: any) -> tuple:
-        """
-        to get summary data
-        :return:summary data
-        """
-        self.init_model()
-        try:
-            msproftx_data = self.model.get_all_data(self.configs.get('table'))
-            return self.configs.get('headers'), msproftx_data, len(msproftx_data)
-        except (ValueError, IOError, TypeError) as error:
-            logging.error(error, exc_info=Constant.TRACE_BACK_SWITCH)
-            return MsvpConstant.MSVP_EMPTY_DATA
-        finally:
-            self.model.finalize()
-
-    def get_timeline_data(self: any) -> str:
-        """
-        to get timeline data
-        :return:timeline data
-        """
-        self.init_model()
-        msproftx_data = self.model.get_timeline_data()
-        try:
-            trace_data = self.format_data(msproftx_data)
-        except (ValueError, TypeError) as error:
-            logging.error(error, exc_info=Constant.TRACE_BACK_SWITCH)
-            return '[]'
-        finally:
-            self.model.finalize()
-        _trace = TraceViewManager.time_graph_trace(TraceViewHeaderConstant.TOP_DOWN_TIME_GRAPH_HEAD, trace_data)
-        result = TraceViewManager.metadata_event(self.get_time_timeline_header(msproftx_data))
-        result.extend(_trace)
-        return TraceViewer("MsprofTxViewer").format_trace_events(result)
-
 
     @staticmethod
     def get_time_timeline_header(data: tuple) -> list:
@@ -108,6 +73,40 @@ class MsprofTxViewer:
                                    trace_data_args]
             trace_data.append(trace_data_msproftx)
         return trace_data
+
+    def get_summary_data(self: any) -> tuple:
+        """
+        to get summary data
+        :return:summary data
+        """
+        self.init_model()
+        try:
+            msproftx_data = self.model.get_all_data(self.configs.get('table'))
+            return self.configs.get('headers'), msproftx_data, len(msproftx_data)
+        except (ValueError, IOError, TypeError) as error:
+            logging.error(error, exc_info=Constant.TRACE_BACK_SWITCH)
+            return MsvpConstant.MSVP_EMPTY_DATA
+        finally:
+            self.model.finalize()
+
+    def get_timeline_data(self: any) -> str:
+        """
+        to get timeline data
+        :return:timeline data
+        """
+        self.init_model()
+        msproftx_data = self.model.get_timeline_data()
+        try:
+            trace_data = self.format_data(msproftx_data)
+        except (ValueError, TypeError) as error:
+            logging.error(error, exc_info=Constant.TRACE_BACK_SWITCH)
+            return '[]'
+        finally:
+            self.model.finalize()
+        _trace = TraceViewManager.time_graph_trace(TraceViewHeaderConstant.TOP_DOWN_TIME_GRAPH_HEAD, trace_data)
+        result = TraceViewManager.metadata_event(self.get_time_timeline_header(msproftx_data))
+        result.extend(_trace)
+        return TraceViewer("MsprofTxViewer").format_trace_events(result)
 
     def init_model(self: any) -> None:
         """

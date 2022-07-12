@@ -6,12 +6,18 @@
  */
 #include "profapi_plugin.h"
 
-namespace Analysis {
+namespace Collector {
 namespace Dvvp {
 namespace Plugin {
-ProfApiPlugin::~ProfApiPlugin()
+void ProfApiPlugin::LoadProfApiSo()
 {
-    pluginHandle_.CloseHandle();
+    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
+    if (!pluginHandle_.HasLoad()) {
+        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+        if (ret != PLUGIN_LOAD_SUCCESS) {
+            return;
+        }
+    }
 }
 
 bool ProfApiPlugin::IsFuncExist(const std::string &funcName) const
@@ -22,110 +28,86 @@ bool ProfApiPlugin::IsFuncExist(const std::string &funcName) const
 // profRegReporterCallback
 int32_t ProfApiPlugin::MsprofProfRegReporterCallback(ProfReportHandle reporter)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {ProfApiPlugin::instance()->LoadProfApiSo();});
+    if (profRegReporterCallback_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<int32_t, ProfReportHandle>("profRegReporterCallback",
+            profRegReporterCallback_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
     }
-    MSPROF_PROFREGREPORTERCALLBACK_T func;
-    ret = pluginHandle_.GetFunction<int32_t, ProfReportHandle>("profRegReporterCallback", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return -1;
-    }
-    return func(reporter);
+    return profRegReporterCallback_(reporter);
 }
 
 // profRegCtrlCallback
 int32_t ProfApiPlugin::MsprofProfRegCtrlCallback(ProfCtrlHandle handle)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {ProfApiPlugin::instance()->LoadProfApiSo();});
+    if (profRegCtrlCallback_  == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<int32_t, ProfCtrlHandle>("profRegCtrlCallback",
+            profRegCtrlCallback_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
     }
-    MSPROF_PROFREGCTRLCALLBACK_T func;
-    ret = pluginHandle_.GetFunction<int32_t, ProfCtrlHandle>("profRegCtrlCallback", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return -1;
-    }
-    return func(handle);
+    return profRegCtrlCallback_(handle);
 }
 
 // profRegDeviceStateCallback
 int32_t ProfApiPlugin::MsprofProfRegDeviceStateCallback(ProfSetDeviceHandle handle)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {ProfApiPlugin::instance()->LoadProfApiSo();});
+    if (profRegDeviceStateCallback_  == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<int32_t, ProfSetDeviceHandle>("profRegDeviceStateCallback",
+            profRegDeviceStateCallback_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
     }
-    MSPROF_PROFREGDEVICESTATECALLBACK_T func;
-    ret = pluginHandle_.GetFunction<int32_t, ProfSetDeviceHandle>("profRegDeviceStateCallback", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return -1;
-    }
-    return func(handle);
+    return profRegDeviceStateCallback_(handle);
 }
 
 // profGetDeviceIdByGeModelIdx
 int32_t ProfApiPlugin::MsprofProfGetDeviceIdByGeModelIdx(const uint32_t modelIdx, uint32_t *deviceId)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {ProfApiPlugin::instance()->LoadProfApiSo();});
+    if (profGetDeviceIdByGeModelIdx_   == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<int32_t, uint32_t, uint32_t *>("profGetDeviceIdByGeModelIdx",
+            profGetDeviceIdByGeModelIdx_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
     }
-    MSPROF_PROFGETDEVICEIDBYGEMODELIDX_T func;
-    ret = pluginHandle_.GetFunction<int32_t, uint32_t, uint32_t *>("profGetDeviceIdByGeModelIdx", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return -1;
-    }
-    return func(modelIdx, deviceId);
+    return profGetDeviceIdByGeModelIdx_(modelIdx, deviceId);
 }
 
 // profSetProfCommand
 int32_t ProfApiPlugin::MsprofProfSetProfCommand(PROFAPI_PROF_COMMAND_PTR command, uint32_t len)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {ProfApiPlugin::instance()->LoadProfApiSo();});
+    if (profSetProfCommand_  == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<int32_t, PROFAPI_PROF_COMMAND_PTR, uint32_t>("profSetProfCommand",
+            profSetProfCommand_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
     }
-    MSPROF_PROFSETPROFCOMMAND_T func;
-    ret = pluginHandle_.GetFunction<int32_t, PROFAPI_PROF_COMMAND_PTR, uint32_t>("profSetProfCommand", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return -1;
-    }
-    return func(command, len);
+    return profSetProfCommand_(command, len);
 }
 
 // profSetStepInfo
 int32_t ProfApiPlugin::MsprofProfSetStepInfo(const uint64_t indexId, const uint16_t tagId, void* const stream)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {ProfApiPlugin::instance()->LoadProfApiSo();});
+    if (profSetStepInfo_  == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<int32_t, uint64_t, uint16_t, void*>("profSetStepInfo",
+            profSetStepInfo_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
     }
-    MSPROF_PROFSETSTEPINFO_T func;
-    ret = pluginHandle_.GetFunction<int32_t, uint64_t, uint16_t, void*>("profSetStepInfo", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return -1;
-    }
-    return func(indexId, tagId, stream);
+    return profSetStepInfo_(indexId, tagId, stream);
 }
 } // Plugin
 } // Dvvp
-} // Analysis
+} // Collector

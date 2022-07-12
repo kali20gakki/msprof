@@ -12,7 +12,7 @@ from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.utils import Utils
-from model.ge.ge_hash_model import GeHashModel
+from msmodel.ge.ge_hash_model import GeHashModel
 from msparser.interface.data_parser import DataParser
 from profiling_bean.prof_enum.data_tag import DataTag
 
@@ -32,6 +32,10 @@ class GeHashParser(DataParser, MsMultiProcess):
         self._model = GeHashModel(self._project_path, self._table_list)
         self._ge_hash_data = []
 
+    @staticmethod
+    def _get_ge_hash_data(data_lines: any) -> list:
+        return Utils.generator_to_list(line.strip().split(":") for line in data_lines if line.find(":") >= 0)
+
     def parse(self: any) -> None:
         """
         parse ge hash data
@@ -39,10 +43,6 @@ class GeHashParser(DataParser, MsMultiProcess):
         fusion_hash_file = self._file_list.get(DataTag.GE_HASH, [])
         if fusion_hash_file:
             self._ge_hash_data = self.parse_plaintext_data(fusion_hash_file, self._get_ge_hash_data)
-
-    @staticmethod
-    def _get_ge_hash_data(data_lines: any) -> list:
-        return Utils.generator_to_list(line.strip().split(":") for line in data_lines if line.find(":") >= 0)
 
     def save(self: any) -> None:
         """

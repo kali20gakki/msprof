@@ -1,11 +1,8 @@
 #include "driver_plugin.h"
  
-namespace Analysis {
+namespace Collector {
 namespace Dvvp {
 namespace Plugin {
- 
-DriverPlugin::~DriverPlugin() {}
- 
 bool DriverPlugin::IsFuncExist(const std::string &funcName) const
 {
     return true;

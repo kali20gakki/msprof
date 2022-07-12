@@ -35,7 +35,7 @@ using namespace Analysis::Dvvp::Common::Config;
 using namespace Analysis::Dvvp::Common::Platform;
 using namespace analysis::dvvp::common::config;
 using namespace Collector::Dvvp::Msprofbin;
-using namespace Analysis::Dvvp::Plugin;
+using namespace Collector::Dvvp::Plugin;
 
 const int MSPROF_DAEMON_ERROR       = -1;
 const int MSPROF_DAEMON_OK          = 0;
@@ -97,6 +97,19 @@ SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> InputParser::MsprofGetOp
     return ParamsCheck() == MSPROF_DAEMON_OK ? params_ : nullptr;
 }
 
+bool InputParser::HasHelpParamOnly()
+{
+    bool ret = false;
+    if (params_ == nullptr) {
+        return ret;
+    }
+    if (params_->usedParams.size() == 1 &&
+        params_->usedParams.count(ARGS_HELP)) {
+        ret = true;
+    }
+    return ret;
+}
+
 int InputParser::PreCheckPlatform(int opt, CONST_CHAR_PTR argv[])
 {
     std::vector<MsprofArgsType> miniBlackSwith = {ARGS_INTERCONNECTION_PROFILING, ARGS_INTERCONNECTION_FREQ,
@@ -137,7 +150,7 @@ int InputParser::PreCheckPlatform(int opt, CONST_CHAR_PTR argv[])
     }
     std::vector<MsprofArgsType> platSwithList = platformArgsType[platformType];
     if (std::find(platSwithList.begin(), platSwithList.end(), opt) != platSwithList.end()) {
-        std::cout << Utils::GetSelfPath() << ": unrecognized option '" 
+        std::cout << Utils::GetSelfPath() << ": unrecognized option '"
                   << argv[MmpaPlugin::instance()->MsprofMmGetOptInd() - 1] << "'" << std::endl;
         std::cout << "PlatformType:" << static_cast<uint8_t>(platformType) << std::endl;
         MsprofCmdUsage("");
@@ -167,7 +180,9 @@ int InputParser::ProcessOptions(int opt, struct MsprofCmdInfo &cmdInfo)
     } else if (opt >= ARGS_HOST_SYS && opt <= ARGS_HOST_SYS_PID) {
         ret = MsprofHostCheckValid(cmdInfo, opt);
     } else {
+        // when opt matches ARGS_HELP
         MsprofCmdUsage("");
+        ret = MSPROF_DAEMON_OK;
     }
     return ret;
 }
@@ -499,13 +514,32 @@ int InputParser::CheckAppValid(const struct MsprofCmdInfo &cmdInfo)
     if (index != std::string::npos) {
         params_->app_parameters = appParam.substr(index + 1);
     }
-    std::string appPath = Utils::RelativePathToAbsolutePath(appParam.substr(0, index));
+    std::string appPath = appParam.substr(0, index);
+    if (!Utils::IsAppName(appPath) && appPath.find("/") == std::string::npos) {
+        params_->app_dir = "MS_SYS_PATH";
+        params_->app = appPath;
+        return MSPROF_DAEMON_OK;
+    }
+    appPath = Utils::RelativePathToAbsolutePath(appPath);
     std::string appDir;
     std::string appName;
     int ret = Utils::SplitPath(appPath, appDir, appName);
     if (ret != PROFILING_SUCCESS) {
         MSPROF_LOGE("Failed to get app dir");
         return MSPROF_DAEMON_ERROR;
+    }
+    if (!Utils::IsAppName(appPath)) {
+        if (Utils::CanonicalizePath(appPath).empty()) {
+            CmdLog::instance()->CmdErrorLog("App path(%s) does not exist or permission denied.", appPath.c_str());
+            return MSPROF_DAEMON_ERROR;
+        }
+        if (MmpaPlugin::instance()->MsprofMmAccess2(appPath.c_str(), M_X_OK) != EN_OK) {
+            CmdLog::instance()->CmdErrorLog("This app(%s) has no executable permission.", appPath.c_str());
+            return MSPROF_DAEMON_ERROR;
+        }
+        params_->app_dir = appDir;
+        params_->app = appName;
+        return MSPROF_DAEMON_OK;
     }
     ret = PreCheckApp(appDir, appName);
     if (ret == MSPROF_DAEMON_OK) {
@@ -837,7 +871,7 @@ int InputParser::CheckArgsIsNumber(const struct MsprofCmdInfo &cmdInfo, int opt)
         CmdLog::instance()->CmdErrorLog("Argument --%s is empty, please enter a valid value.", longOptions[opt].name);
         return MSPROF_DAEMON_ERROR;
     }
-    if (!Utils::CheckStringIsNonNegativeIntNum(cmdInfo.args[opt])) {
+    if (!Utils::CheckStringIsValidNatureNum(cmdInfo.args[opt])) {
         CmdLog::instance()->CmdErrorLog("Argument --%s: invalid value: %s."
             "Please input an integer value.", longOptions[opt].name, cmdInfo.args[opt]);
         return MSPROF_DAEMON_ERROR;
@@ -1082,10 +1116,10 @@ void InputParser::MsprofFreqUpdateParams(const struct MsprofCmdInfo &cmdInfo, in
             params_->interconnection_sampling_interval = (THOUSAND / std::stoi(cmdInfo.args[opt]));
             break;
         case ARGS_EXPORT_ITERATION_ID:
-            params_->exportIterationId = std::stoi(cmdInfo.args[opt]);
+            params_->exportIterationId = cmdInfo.args[opt];
             break;
         case ARGS_EXPORT_MODEL_ID:
-            params_->exportModelId = std::stoi(cmdInfo.args[opt]);
+            params_->exportModelId = cmdInfo.args[opt];
             break;
         default:
             break;

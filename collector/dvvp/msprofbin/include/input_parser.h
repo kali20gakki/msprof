@@ -168,6 +168,7 @@ public:
 
     void MsprofCmdUsage(const std::string msg);
     SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> MsprofGetOpts(int argc, MsprofString argv[]);
+    bool HasHelpParamOnly();
 private:
     int CheckPythonPathValid(const struct MsprofCmdInfo &cmdInfo) const;
     int CheckOutputValid(const struct MsprofCmdInfo &cmdInfo);

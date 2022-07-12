@@ -45,6 +45,24 @@ class GeDataType(Enum):
     DT_INT2 = 31
     DT_UINT2 = 32
     DT_MAX = 33
+    NUMBER_TYPE_BEGIN_ = 229
+    BOOL_ = 230
+    INT_ = 231
+    INT8_ = 232
+    INT16_ = 233
+    INT32_ = 234
+    INT64_ = 235
+    UINT_ = 236
+    UINT8_ = 237
+    UINT16_ = 238
+    UINT32_ = 239
+    UINT64_ = 240
+    FLOAT_ = 241
+    FLOAT16_ = 242
+    FLOAT32_ = 243
+    FLOAT64_ = 244
+    COMPLEX_ = 245
+    NUMBER_TYPE_END_ = 246
 
     @classmethod
     def member_map(cls: any) -> dict:
@@ -107,6 +125,28 @@ class GeDataFormat(Enum):
     FRACTAL_ZN_RNN = 44
     END = 45
     MAX = 0xff
+    UNKNOWN_ = 200
+    DEFAULT_ = 201
+    NC1KHKWHWC0_ = 202
+    ND_ = 203
+    NCHW_ = 204
+    NHWC_ = 205
+    HWCN_ = 206
+    NC1HWC0_ = 207
+    FRAC_Z_ = 208
+    C1HWNCOC0_ = 209
+    FRAC_NZ_ = 210
+    NC1HWC0_C04_ = 211
+    FRACTAL_Z_C04_ = 212
+    NDHWC_ = 213
+    FRACTAL_ZN_LSTM_ = 214
+    FRACTAL_ZN_RNN_ = 215
+    ND_RNN_BIAS_ = 216
+    NDC1HWC0_ = 217
+    NCDHW_ = 218
+    FRACTAL_Z_3D_ = 219
+    DHWNC_ = 220
+    DHWCN_ = 221
 
     @classmethod
     def member_map(cls: any) -> dict:

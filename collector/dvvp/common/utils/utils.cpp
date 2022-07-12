@@ -28,7 +28,7 @@ namespace common {
 namespace utils {
 using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::common::config;
-using namespace Analysis::Dvvp::Plugin;
+using namespace Collector::Dvvp::Plugin;
 
 std::mutex g_envMtx;
 const unsigned long long CHANGE_FROM_S_TO_NS = 1000000000;
@@ -194,7 +194,8 @@ std::vector<std::string> Utils::Split(const std::string &input_str,
     }
     std::string str = input_str + pattern;
     std::string::size_type size = str.size();
-    for (std::string::size_type i = 0; i < size; i++) {
+    std::string::size_type i = 0;
+    while (i < size) {
         pos = str.find(pattern, i);
         if (pos < size) {
             bool isOk = true;
@@ -210,6 +211,7 @@ std::vector<std::string> Utils::Split(const std::string &input_str,
 
             i = pos + pattern.size() - 1;
         }
+        i++;
     }
 
     return res;
@@ -502,6 +504,10 @@ int Utils::ExecCmd(const ExecCmdParams &execCmdParams,
         const int reserveArgvLen = 2;
         SHARED_PTR_ALIA<CHAR_PTR> argvArray(new(std::nothrow) CHAR_PTR[argv.size() + reserveArgvLen],
                                             std::default_delete<CHAR_PTR[]>());
+        if (argvArray == nullptr) {
+            MSPROF_LOGE("argvArray malloc memory failed.");
+            return PROFILING_FAILED;
+        }
         argvArray.get()[0] = const_cast<CHAR_PTR>(cmd.c_str());
         for (ii = 0; ii < static_cast<uint32_t>(argv.size()); ++ii) {
             argvArray.get()[ii + 1] = const_cast<CHAR_PTR>(argv[ii].c_str());
@@ -510,6 +516,10 @@ int Utils::ExecCmd(const ExecCmdParams &execCmdParams,
 
         SHARED_PTR_ALIA<CHAR_PTR> envpArray(new(std::nothrow) CHAR_PTR[envp.size() + 1],
                                             std::default_delete<CHAR_PTR[]>());
+        if (envpArray == nullptr) {
+            MSPROF_LOGE("envpArray malloc memory failed.");
+            return PROFILING_FAILED;
+        }
         for (ii = 0; ii < static_cast<uint32_t>(envp.size()); ++ii) {
             envpArray.get()[ii] = const_cast<CHAR_PTR>(envp[ii].c_str());
         }
@@ -840,7 +850,7 @@ std::string Utils::TimestampToTime(const std::string &timestamp, int unit /* = 1
     uint32_t microTime;
     try {
         secTime = std::stoll(timestamp) / unit;
-        microTime = std::stoll(timestamp) % unit;
+        microTime = static_cast<uint32_t>(std::stoll(timestamp) % unit);
     } catch (...) {
         return "0";
     }
@@ -935,7 +945,7 @@ bool Utils::CheckStringIsNonNegativeIntNum(const std::string &numberStr)
         return false;
     }
 
-    const std::string maxIntValStr = "2147483647";  // max int string
+    const std::string maxIntValStr = std::to_string(INT32_MAX);  // max int string
     if (numberStr.length() > maxIntValStr.length()) {  // over max int value
         MSPROF_LOGE("[Utils::CheckStringIsNonNegativeIntNum]numberStr(%s) is too long", numberStr.c_str());
         return false;
@@ -959,6 +969,23 @@ bool Utils::CheckStringIsNonNegativeIntNum(const std::string &numberStr)
             } else {
                 break;
             }
+        }
+    }
+    return true;
+}
+
+bool Utils::CheckStringIsValidNatureNum(const std::string &numberStr)
+{
+    // length of nature number [1, 10]
+    if (numberStr.empty() || numberStr.length() > std::to_string(UINT32_MAX).length()) {
+        MSPROF_LOGE("[Utils::CheckStringIsValidNatureNum]numberStr(%s) is too empty or too long", numberStr.c_str());
+        return false;
+    }
+
+    for (unsigned int i = 0; i < numberStr.length(); ++i) {
+        if (numberStr[i] < '0' || numberStr[i] > '9') {  // numberStr must be pure number
+            MSPROF_LOGE("[Utils::CheckStringIsValidNatureNum]numberStr(%s) is not a number", numberStr.c_str());
+            return false;
         }
     }
     return true;
@@ -1232,7 +1259,7 @@ uint32_t Utils::GenerateSignature(CONST_UINT8_PTR data, uint64_t len)
     };
 
     static const int offset = 8;
-    while (len--) {
+    for (uint32_t i = 0; i < len; ++i) {
         signature = signatureTable[(signature ^ *data++) & 0xff] ^ (signature >> offset);
     }
     return signature;
@@ -1256,6 +1283,17 @@ void Utils::RemoveEndCharacter(std::string &input, const char end)
         return;
     }
     input.resize(input.size() - 1);
+}
+
+bool Utils::IsAppName(const std::string paramsName)
+{
+    std::string paramBaseName = BaseName(paramsName);
+    std::string pythonName = "python";
+    if (paramBaseName.compare("bash") == 0 || paramBaseName.compare("sh") == 0 ||
+        paramBaseName.substr(0, pythonName.size()) == pythonName) {
+        return false;
+    }
+    return true;
 }
 
 int32_t WriteFile(const std::string &absolutePath, const std::string &recordFile, const std::string &profName)

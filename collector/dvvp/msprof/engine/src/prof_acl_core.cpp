@@ -32,15 +32,17 @@ using namespace Msprofiler::Api;
 using namespace Msprof::MsprofTx;
 using namespace analysis::dvvp::transport;
 using namespace Analysis::Dvvp::Common::Platform;
-using namespace Analysis::Dvvp::Plugin;
+using namespace Collector::Dvvp::Plugin;
 
-std::mutex g_aclprofMutex;
+static std::mutex g_aclprofMutex;
 static uint64_t g_indexId = 1;
 
 aclError aclprofInit(CONST_CHAR_PTR profilerResultPath, size_t length)
 {
     if (Platform::instance()->PlatformIsHelperHostSide()) {
         MSPROF_LOGE("acl api not support in helper");
+        MSPROF_ENV_ERROR("EK0004", std::vector<std::string>({"intf", "platform"}),
+            std::vector<std::string>({"aclprofInit", "SocCloud"}));
         return ACL_ERROR_FEATURE_UNSUPPORTED;
     }
     MSPROF_LOGI("Start to execute aclprofInit");
@@ -48,17 +50,19 @@ aclError aclprofInit(CONST_CHAR_PTR profilerResultPath, size_t length)
 
     if (profilerResultPath == nullptr || strlen(profilerResultPath) != length) {
         MSPROF_LOGE("profilerResultPath is nullptr or its length does not equals given length");
-        MSPROF_INPUT_ERROR("EK0002", std::vector<std::string>({"path"}),
-            std::vector<std::string>({"profilerResultPath"}));
+        std::string errorReason = "profilerResultPath is nullptr or its length does not equals given length";
+        std::string valueStr = (profilerResultPath == nullptr) ? "nullptr" : std::string(profilerResultPath);
+        MSPROF_INPUT_ERROR("EK0001", std::vector<std::string>({"value", "param", "reason"}),
+            std::vector<std::string>({valueStr, "profilerResultPath", errorReason}));
         return ACL_ERROR_INVALID_PARAM;
     }
     const static size_t aclProfPathMaxLen = 4096;   // path max length: 4096
     if (length > aclProfPathMaxLen || length == 0) {
         MSPROF_LOGE("length of profilerResultPath is illegal, the value is %zu, it should be in (0, %zu)",
                     length, aclProfPathMaxLen);
-        std::string aclProfPathMaxLenStr = std::to_string(aclProfPathMaxLen);
-        MSPROF_INPUT_ERROR("EK0006", std::vector<std::string>({"config", "value", "min", "max"}),
-            std::vector<std::string>({"profilerResultPath", std::to_string(length), "0", aclProfPathMaxLenStr}));
+        std::string ErrorReason = "it should be in (0, " + std::to_string(aclProfPathMaxLen)+ ")";
+        MSPROF_INPUT_ERROR("EK0001", std::vector<std::string>({"value", "param", "reason"}),
+            std::vector<std::string>({std::to_string(length), "profilerResultPath length", ErrorReason}));
         return ACL_ERROR_INVALID_PARAM;
     }
 
@@ -69,7 +73,6 @@ aclError aclprofInit(CONST_CHAR_PTR profilerResultPath, size_t length)
 
     if (ProfAclMgr::instance()->Init() != PROFILING_SUCCESS) {
         MSPROF_LOGE("Failed to init acl manager");
-        MSPROF_INNER_ERROR("EK9999", "Failed to init acl manager");
         return ACL_ERROR_PROFILING_FAILURE;
     }
     MSPROF_LOGI("Initialize profiling by using ProfInit");
@@ -77,7 +80,6 @@ aclError aclprofInit(CONST_CHAR_PTR profilerResultPath, size_t length)
     ret = ProfAclMgr::instance()->ProfAclInit(path);
     if (ret != ACL_SUCCESS) {
         MSPROF_LOGE("AclProfiling init fail, profiling result = %d", ret);
-        MSPROF_INNER_ERROR("EK9999", "AclProfiling init fail, profiling result = %d", ret);
         return ret;
     }
 
@@ -96,6 +98,8 @@ aclError aclprofFinalize()
 {
     if (Platform::instance()->PlatformIsHelperHostSide()) {
         MSPROF_LOGE("acl api not support in helper");
+        MSPROF_ENV_ERROR("EK0004", std::vector<std::string>({"intf", "platform"}),
+            std::vector<std::string>({"aclprofFinalize", "SocCloud"}));
         return ACL_ERROR_FEATURE_UNSUPPORTED;
     }
     MSPROF_LOGI("Start to execute aclprofFinalize");
@@ -103,6 +107,10 @@ aclError aclprofFinalize()
 
     int32_t ret = ProfAclMgr::instance()->ProfFinalizePrecheck();
     if (ret != ACL_SUCCESS) {
+        if (ret == ACL_ERROR_PROF_NOT_RUN) {
+            MSPROF_INPUT_ERROR("EK0002", std::vector<std::string>({"intf1", "intf2"}),
+                std::vector<std::string>({"aclprofFinalize", "aclprofInit"}));
+        }
         return ret;
     }
 
@@ -125,27 +133,38 @@ aclError aclprofFinalize()
 }
 
 using ACL_PROF_AICORE_EVENTS_PTR = aclprofAicoreEvents *;
-bool IsValidProfConfig(CONST_UINT32_T_PTR deviceIdList, uint32_t deviceNums, ACL_PROF_AICORE_EVENTS_PTR aicoreEvents)
+bool IsValidProfConfigPreCheck(CONST_UINT32_T_PTR deviceIdList, uint32_t deviceNums,
+    ACL_PROF_AICORE_EVENTS_PTR aicoreEvents)
 {
     if (deviceNums != 0 && deviceIdList == nullptr) {
         MSPROF_LOGE("deviceIdList is nullptr");
-        MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config"}),
-            std::vector<std::string>({"deviceIdList"}));
+        MSPROF_INPUT_ERROR("EK0001", std::vector<std::string>({"value", "param", "reason"}),
+            std::vector<std::string>({"nullptr", "deviceIdList", "The value of deviceIdList should not be nullptr"}));
         return false;
     }
 
     if (aicoreEvents != nullptr) {
         MSPROF_LOGE("aicoreEvents must be nullptr");
-        MSPROF_INPUT_ERROR("EK0004", std::vector<std::string>({"config"}),
-            std::vector<std::string>({"aicoreEvents"}));
+        MSPROF_INPUT_ERROR("EK0001", std::vector<std::string>({"value", "param", "reason"}),
+            std::vector<std::string>({"*aicoreEvents", "aicoreEvents", "The value of aicoreEvents must be nullptr"}));
         return false;
     }
 
     if (deviceNums > MSVP_MAX_DEV_NUM) {
         MSPROF_LOGE("The device nums is invalid.");
+        std::string errorReason = "The number of device should be smaller than " + std::to_string(MSVP_MAX_DEV_NUM);
+        MSPROF_INPUT_ERROR("EK0001", std::vector<std::string>({"value", "param", "reason"}),
+            std::vector<std::string>({std::to_string(deviceNums), "deviceNums", errorReason}));
         return false;
     }
+    return true;
+}
 
+bool IsValidProfConfig(CONST_UINT32_T_PTR deviceIdList, uint32_t deviceNums, ACL_PROF_AICORE_EVENTS_PTR aicoreEvents)
+{
+    if (!IsValidProfConfigPreCheck(deviceIdList, deviceNums, aicoreEvents)) {
+        return false;
+    }
     int32_t devCount = analysis::dvvp::driver::DrvGetDevNum();
     if (devCount == PROFILING_FAILED) {
         MSPROF_LOGE("Get the Device count fail.");
@@ -154,8 +173,9 @@ bool IsValidProfConfig(CONST_UINT32_T_PTR deviceIdList, uint32_t deviceNums, ACL
 
     if (deviceNums > static_cast<uint32_t>(devCount)) {
         MSPROF_LOGE("Device num(%u) is not in range 1 ~ %d.", deviceNums, devCount);
-        MSPROF_INPUT_ERROR("EK0006", std::vector<std::string>({"config", "value", "min", "max"}),
-            std::vector<std::string>({"Device num", std::to_string(deviceNums), "1", std::to_string(devCount)}));
+        std::string errorReason = "device number should be in range [1, " + std::to_string(devCount) + "]";
+        MSPROF_INPUT_ERROR("EK0001", std::vector<std::string>({"value", "param", "reason"}),
+            std::vector<std::string>({std::to_string(deviceNums), "deviceNums", errorReason}));
         return false;
     }
 
@@ -165,14 +185,16 @@ bool IsValidProfConfig(CONST_UINT32_T_PTR deviceIdList, uint32_t deviceNums, ACL
         if (devId >= static_cast<uint32_t>(devCount)) {
             MSPROF_LOGE("[IsValidProfConfig]Device id %u is not in range 0 ~ %d(exclude %d)",
                 devId, devCount, devCount);
-            MSPROF_INPUT_ERROR("EK0006", std::vector<std::string>({"config", "value", "min", "max"}),
-                std::vector<std::string>({"Device id", std::to_string(devId), "0", std::to_string(devCount)}));
+            std::string errorReason = "device id should be in range (0," + std::to_string(devCount) + "]";
+            MSPROF_INPUT_ERROR("EK0001", std::vector<std::string>({"value", "param", "reason"}),
+                std::vector<std::string>({std::to_string(devId), "device id", errorReason}));
             return false;
         }
         if (record.count(devId) > 0) {
             MSPROF_LOGE("[IsValidProfConfig]Device id %u is duplicatedly set", devId);
-            MSPROF_INPUT_ERROR("EK0007", std::vector<std::string>({"config", "value"}),
-                std::vector<std::string>({"Device id", std::to_string(devId)}));
+            std::string errorReason = "device id is duplicatedly set";
+            MSPROF_INPUT_ERROR("EK0001", std::vector<std::string>({"value", "param", "reason"}),
+                std::vector<std::string>({std::to_string(devId), "device id", errorReason}));
             return false;
         }
         record.insert(devId);
@@ -191,6 +213,8 @@ ACL_PROF_CONFIG_PTR aclprofCreateConfig(UINT32_T_PTR deviceIdList, uint32_t devi
 {
     if (Platform::instance()->PlatformIsHelperHostSide()) {
         MSPROF_LOGE("acl api not support in helper");
+        MSPROF_ENV_ERROR("EK0004", std::vector<std::string>({"intf", "platform"}),
+            std::vector<std::string>({"aclprofCreateConfig", "SocCloud"}));
         return nullptr;
     }
     if (!IsValidProfConfig(deviceIdList, deviceNums, aicoreEvents)) {
@@ -232,12 +256,15 @@ aclError aclprofDestroyConfig(ACL_PROF_CONFIG_CONST_PTR profilerConfig)
 {
     if (Platform::instance()->PlatformIsHelperHostSide()) {
         MSPROF_LOGE("acl api not support in helper");
+        MSPROF_ENV_ERROR("EK0004", std::vector<std::string>({"intf", "platform"}),
+            std::vector<std::string>({"aclprofDestroyConfig", "SocCloud"}));
         return ACL_ERROR_FEATURE_UNSUPPORTED;
     }
     if (profilerConfig == nullptr) {
         MSPROF_LOGE("destroy profilerConfig failed, profilerConfig must not be nullptr");
-        MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config"}),
-            std::vector<std::string>({"profilerConfig"}));
+        std::string errorReason = "profilerConfig can not be nullptr";
+        MSPROF_INPUT_ERROR("EK0001", std::vector<std::string>({"value", "param", "reason"}),
+            std::vector<std::string>({"nullptr", "profilerConfig", errorReason}));
         return ACL_ERROR_INVALID_PARAM;
     }
     delete profilerConfig;
@@ -245,34 +272,34 @@ aclError aclprofDestroyConfig(ACL_PROF_CONFIG_CONST_PTR profilerConfig)
     return ACL_SUCCESS;
 }
 
-static aclError preCheckProfConfig(ACL_PROF_CONFIG_CONST_PTR profilerConfig)
+static aclError PreCheckProfConfig(ACL_PROF_CONFIG_CONST_PTR profilerConfig)
 {
     if (profilerConfig == nullptr) {
         MSPROF_LOGE("Param profilerConfig is nullptr");
-        MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config"}),
-            std::vector<std::string>({"profilerConfig"}));
+        MSPROF_INPUT_ERROR("EK0001", std::vector<std::string>({"value", "param", "reason"}),
+            std::vector<std::string>({"nullptr", "profilerConfig", "Prof config can not be nullptr"}));
         return ACL_ERROR_INVALID_PARAM;
     }
     if (profilerConfig->config.dataTypeConfig == 0) {
         MSPROF_LOGE("Param profilerConfig dataTypeConfig is zero");
-        MSPROF_INPUT_ERROR("EK0005", std::vector<std::string>({"config"}),
-            std::vector<std::string>({"profilerConfig dataTypeConfig"}));
+        MSPROF_INPUT_ERROR("EK0001", std::vector<std::string>({"value", "param", "reason"}),
+            std::vector<std::string>({"0", "dataTypeConfig", "dataTypeConfig can not be zero"}));
         return ACL_ERROR_INVALID_PARAM;
     }
     // check switch
     if ((profilerConfig->config.dataTypeConfig & (~PROF_SWITCH_SUPPORT)) != 0) {
-        MSPROF_LOGE("dataTypeConfig:0x%x, supported switch is:0x%x",
+        MSPROF_LOGE("dataTypeConfig:0x%lx, supported switch is:0x%lx",
                     profilerConfig->config.dataTypeConfig, PROF_SWITCH_SUPPORT);
-        std::string dataTypeConfigStr = std::to_string(profilerConfig->config.dataTypeConfig);
-        MSPROF_INPUT_ERROR("EK0008", std::vector<std::string>({"switch_use", "switch_support"}),
-            std::vector<std::string>({dataTypeConfigStr, std::to_string(PROF_SWITCH_SUPPORT)}));
+        std::string dataTypeConfigStr = "0x" + Utils::Int2HexStr<uint64_t>(profilerConfig->config.dataTypeConfig);
+        std::string supportConfigStr = "0x" + Utils::Int2HexStr<uint64_t>(PROF_SWITCH_SUPPORT);
+        std::string errorReason = "dataTypeConfig is not support, supported switch is:" + supportConfigStr;
+        MSPROF_INPUT_ERROR("EK0001", std::vector<std::string>({"value", "param", "reason"}),
+            std::vector<std::string>({dataTypeConfigStr, "dataTypeConfig", errorReason}));
         return ACL_ERROR_PROF_MODULES_UNSUPPORTED;
     }
     if (profilerConfig->config.devNums > MSVP_MAX_DEV_NUM + 1) {
         MSPROF_LOGE("Param prolilerConfig is invalid");
         std::string devNumsStr = std::to_string(profilerConfig->config.devNums);
-        MSPROF_INPUT_ERROR("EK0006", std::vector<std::string>({"config", "value", "min", "max"}),
-            std::vector<std::string>({"profilerConfig devNums", devNumsStr, "1", std::to_string(MSVP_MAX_DEV_NUM)}));
         return ACL_ERROR_INVALID_PARAM;
     }
     return ACL_SUCCESS;
@@ -282,18 +309,23 @@ aclError aclprofStart(ACL_PROF_CONFIG_CONST_PTR profilerConfig)
 {
     if (Platform::instance()->PlatformIsHelperHostSide()) {
         MSPROF_LOGE("acl api not support in helper");
+        MSPROF_ENV_ERROR("EK0004", std::vector<std::string>({"intf", "platform"}),
+            std::vector<std::string>({"aclprofStart", "SocCloud"}));
         return ACL_ERROR_FEATURE_UNSUPPORTED;
     }
     MSPROF_LOGI("Start to execute aclprofStartProfiling");
     std::lock_guard<std::mutex> lock(g_aclprofMutex);
-    aclError aclRet = preCheckProfConfig(profilerConfig);
+    aclError aclRet = PreCheckProfConfig(profilerConfig);
     if (aclRet != ACL_SUCCESS) {
         MSPROF_LOGE("PreCheck ProfConfig Failed.");
-        MSPROF_INNER_ERROR("EK9999", "PreCheck ProfConfig Failed.");
         return aclRet;
     }
     int32_t ret = ProfAclMgr::instance()->ProfStartPrecheck();
     if (ret != ACL_SUCCESS) {
+        if (ret == ACL_ERROR_PROF_NOT_RUN) {
+            MSPROF_INPUT_ERROR("EK0002", std::vector<std::string>({"intf1", "intf2"}),
+                std::vector<std::string>({"aclprofStart", "aclprofInit"}));
+        }
         return ret;
     }
 
@@ -320,35 +352,33 @@ aclError aclprofStop(ACL_PROF_CONFIG_CONST_PTR profilerConfig)
 {
     if (Platform::instance()->PlatformIsHelperHostSide()) {
         MSPROF_LOGE("acl api not support in helper");
+        MSPROF_ENV_ERROR("EK0004", std::vector<std::string>({"intf", "platform"}),
+            std::vector<std::string>({"aclprofStop", "SocCloud"}));
         return ACL_ERROR_FEATURE_UNSUPPORTED;
     }
     MSPROF_LOGI("Start to execute aclprofStopProfiling");
     std::lock_guard<std::mutex> lock(g_aclprofMutex);
-    aclError aclRet = preCheckProfConfig(profilerConfig);
+    aclError aclRet = PreCheckProfConfig(profilerConfig);
     if (aclRet != ACL_SUCCESS) {
         MSPROF_LOGE("PreCheck ProfConfig Failed.");
-        MSPROF_INNER_ERROR("EK9999", "PreCheck ProfConfig Failed.");
         return aclRet;
     }
 
     int32_t ret = ProfAclMgr::instance()->ProfStopPrecheck();
     if (ret != ACL_SUCCESS) {
+        if (ret == ACL_ERROR_PROF_NOT_RUN) {
+            MSPROF_INPUT_ERROR("EK0002", std::vector<std::string>({"intf1", "intf2"}),
+                std::vector<std::string>({"aclprofStop", "aclprofInit"}));
+        }
         return ret;
     }
+
     uint64_t dataTypeConfig = 0;
     for (uint32_t i = 0; i < profilerConfig->config.devNums; i++) {
         ret = ProfAclMgr::instance()->ProfAclGetDataTypeConfig(profilerConfig->config.devIdList[i], dataTypeConfig);
-        if (ret != ACL_SUCCESS) {
-            return ret;
-        }
-        if (dataTypeConfig != profilerConfig->config.dataTypeConfig) {
-            MSPROF_LOGE("DataTypeConfig stop: %x different from start: %x", profilerConfig->config.dataTypeConfig,
-                dataTypeConfig);
-            std::string dataTypeConfigStr = std::to_string(profilerConfig->config.dataTypeConfig);
-            MSPROF_INPUT_ERROR("EK0009", std::vector<std::string>({"switch_start", "switch_end"}),
-                std::vector<std::string>({dataTypeConfigStr, std::to_string(dataTypeConfig)}));
-            return ACL_ERROR_INVALID_PROFILING_CONFIG;
-        }
+        RETURN_IF_NOT_SUCCESS(ret);
+        ret = ProfAclMgr::instance()->StopProfConfigCheck(profilerConfig->config.dataTypeConfig, dataTypeConfig);
+        RETURN_IF_NOT_SUCCESS(ret);
     }
     MSPROF_LOGI("Allocate stop config of profiling modules to Acl");
     ProfAclMgr::instance()->AddModelLoadConf(dataTypeConfig);
@@ -362,7 +392,6 @@ aclError aclprofStop(ACL_PROF_CONFIG_CONST_PTR profilerConfig)
     ret = ProfAclMgr::instance()->ProfAclStop(&profilerConfig->config);
     if (ret != ACL_SUCCESS) {
         MSPROF_LOGE("Stop profiling failed, prof result = %d", ret);
-        MSPROF_INNER_ERROR("EK9999", "Stop profiling failed, prof result = %d", ret);
         return ret;
     }
 
@@ -374,29 +403,30 @@ aclError aclprofModelSubscribe(const uint32_t modelId, const aclprofSubscribeCon
 {
     if (Platform::instance()->PlatformIsHelperHostSide()) {
         MSPROF_LOGE("acl api not support in helper");
+        MSPROF_ENV_ERROR("EK0004", std::vector<std::string>({"intf", "platform"}),
+            std::vector<std::string>({"aclprofModelSubscribe", "SocCloud"}));
         return ACL_ERROR_FEATURE_UNSUPPORTED;
     }
     MSPROF_LOGI("Start to execute aclprofModelSubscribe");
     std::lock_guard<std::mutex> lock(g_aclprofMutex);
 
     if (profSubscribeConfig == nullptr) {
-        MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config"}),
-            std::vector<std::string>({"profSubscribeConfig"}));
         MSPROF_LOGE("Param profSubscribeConfig is nullptr");
+        std::string errorReason = "Param profSubscribeConfig can not be nullptr";
+        MSPROF_INPUT_ERROR("EK0001", std::vector<std::string>({"value", "param", "reason"}),
+            std::vector<std::string>({"nullptr", "profSubscribeConfig", errorReason}));
         return ACL_ERROR_INVALID_PARAM;
     }
 
     int32_t ret = ProfAclMgr::instance()->ProfSubscribePrecheck();
-    if (ret != ACL_SUCCESS) {
-        return ret;
-    }
+    RETURN_IF_NOT_SUCCESS(ret);
 
     uint32_t deviceId = 0;
     aclError aclRet = ProfApiPlugin::instance()->MsprofProfGetDeviceIdByGeModelIdx(modelId, &deviceId);
     if (aclRet != ACL_SUCCESS) {
         MSPROF_LOGE("Model id %u is not loaded", modelId);
-        MSPROF_INPUT_ERROR("EK0010", std::vector<std::string>({"param", "value"}),
-            std::vector<std::string>({"Model id", std::to_string(modelId)}));
+        MSPROF_INPUT_ERROR("EK0001", std::vector<std::string>({"value", "param", "reason"}),
+            std::vector<std::string>({std::to_string(modelId), "modelId", "model id is not loaded"}));
         return ACL_ERROR_INVALID_MODEL_ID;
     }
 
@@ -415,7 +445,7 @@ aclError aclprofModelSubscribe(const uint32_t modelId, const aclprofSubscribeCon
 
     uint64_t dataTypeConfig = ProfAclMgr::instance()->ProfAclGetDataTypeConfig(&profSubscribeConfig->config);
     ProfAclMgr::instance()->AddModelLoadConf(dataTypeConfig);
-    MSPROF_LOGI("Allocate subscription config to Acl, dataTypeConfig:%x, modelId:%ul", dataTypeConfig, modelId);
+    MSPROF_LOGI("Allocate subscription config to Acl, dataTypeConfig:0x%lx, modelId:%ul", dataTypeConfig, modelId);
     ret = Analysis::Dvvp::ProfilerCommon::CommandHandleProfSubscribe(modelId, dataTypeConfig);
     RETURN_IF_NOT_SUCCESS(ret);
 
@@ -432,6 +462,8 @@ aclError aclprofModelUnSubscribe(const uint32_t modelId)
 {
     if (Platform::instance()->PlatformIsHelperHostSide()) {
         MSPROF_LOGE("acl api not support in helper");
+        MSPROF_ENV_ERROR("EK0004", std::vector<std::string>({"intf", "platform"}),
+            std::vector<std::string>({"aclprofModelUnSubscribe", "SocCloud"}));
         return ACL_ERROR_FEATURE_UNSUPPORTED;
     }
     MSPROF_LOGI("Start to execute aclprofModelUnSubscribe");
@@ -444,8 +476,8 @@ aclError aclprofModelUnSubscribe(const uint32_t modelId)
 
     if (!ProfAclMgr::instance()->IsModelSubscribed(modelId)) {
         MSPROF_LOGE("Model Id %u is not subscribed when unsubcribed", modelId);
-        MSPROF_INPUT_ERROR("EK0011", std::vector<std::string>({"param", "value"}),
-            std::vector<std::string>({"Model Id", std::to_string(modelId)}));
+        MSPROF_INPUT_ERROR("EK0002", std::vector<std::string>({"intf1", "intf2"}),
+            std::vector<std::string>({"aclprofModelUnSubscribe", "aclprofModelSubscribe"}));
         return ACL_ERROR_INVALID_MODEL_ID;
     }
 
@@ -471,6 +503,8 @@ size_t aclprofGetModelId(CONST_VOID_PTR opInfo, size_t opInfoLen, uint32_t index
 {
     if (Platform::instance()->PlatformIsHelperHostSide()) {
         MSPROF_LOGE("acl api not support in helper");
+        MSPROF_ENV_ERROR("EK0004", std::vector<std::string>({"intf", "platform"}),
+            std::vector<std::string>({"aclprofGetModelId", "SocCloud"}));
         return static_cast<size_t>(ACL_ERROR_FEATURE_UNSUPPORTED);
     }
     MSPROF_LOGD("Start to execute aclprofGetModelId");
@@ -497,12 +531,14 @@ aclError aclprofGetStepTimestamp(ACLPROF_STEPINFO_PTR stepInfo, aclprofStepTag t
 {
     if (Platform::instance()->PlatformIsHelperHostSide()) {
         MSPROF_LOGE("acl api not support in helper");
+        MSPROF_ENV_ERROR("EK0004", std::vector<std::string>({"intf", "platform"}),
+            std::vector<std::string>({"aclprofGetStepTimestamp", "SocCloud"}));
         return ACL_ERROR_FEATURE_UNSUPPORTED;
     }
     if (stepInfo == nullptr) {
         MSPROF_LOGE("stepInfo is nullptr.");
-        MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config"}),
-            std::vector<std::string>({"stepInfo"}));
+        MSPROF_INPUT_ERROR("EK0001", std::vector<std::string>({"value", "param", "reason"}),
+            std::vector<std::string>({"nullptr", "stepInfo", "stepInfo can not be nullptr"}));
         return ACL_ERROR_INVALID_PARAM;
     }
     if (stepInfo->startFlag && tag == ACL_STEP_START) {
@@ -531,6 +567,8 @@ ACLPROF_STEPINFO_PTR aclprofCreateStepInfo()
 {
     if (Platform::instance()->PlatformIsHelperHostSide()) {
         MSPROF_LOGE("acl api not support in helper");
+        MSPROF_ENV_ERROR("EK0004", std::vector<std::string>({"intf", "platform"}),
+            std::vector<std::string>({"aclprofCreateStepInfo", "SocCloud"}));
         return nullptr;
     }
     auto stepInfo = new (std::nothrow)aclprofStepInfo();
@@ -551,12 +589,14 @@ void aclprofDestroyStepInfo(ACLPROF_STEPINFO_PTR stepInfo)
 {
     if (Platform::instance()->PlatformIsHelperHostSide()) {
         MSPROF_LOGE("acl api not support in helper");
+        MSPROF_ENV_ERROR("EK0004", std::vector<std::string>({"intf", "platform"}),
+            std::vector<std::string>({"aclprofDestroyStepInfo", "SocCloud"}));
         return;
     }
     if (stepInfo == nullptr) {
         MSPROF_LOGE("destroy stepInfo failed, stepInfo must not be nullptr");
-        MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config"}),
-            std::vector<std::string>({"stepInfo"}));
+        MSPROF_INPUT_ERROR("EK0001", std::vector<std::string>({"value", "param", "reason"}),
+            std::vector<std::string>({"nullptr", "stepInfo", "stepInfo can not be nullptr when destroy"}));
     } else {
         delete stepInfo;
         MSPROF_LOGI("Successfully destroy stepInfo");
@@ -567,6 +607,8 @@ void *aclprofCreateStamp()
 {
     if (Platform::instance()->PlatformIsHelperHostSide()) {
         MSPROF_LOGE("acl api not support in helper");
+        MSPROF_ENV_ERROR("EK0004", std::vector<std::string>({"intf", "platform"}),
+            std::vector<std::string>({"aclprofCreateStamp", "SocCloud"}));
         return nullptr;
     }
     return MsprofTxManager::instance()->CreateStamp();
@@ -576,6 +618,8 @@ void aclprofDestroyStamp(VOID_PTR stamp)
 {
     if (Platform::instance()->PlatformIsHelperHostSide()) {
         MSPROF_LOGE("acl api not support in helper");
+        MSPROF_ENV_ERROR("EK0004", std::vector<std::string>({"intf", "platform"}),
+            std::vector<std::string>({"aclprofDestroyStamp", "SocCloud"}));
         return;
     }
     if (stamp == nullptr) {
@@ -589,6 +633,8 @@ aclError aclprofSetCategoryName(uint32_t category, const char *categoryName)
 {
     if (Platform::instance()->PlatformIsHelperHostSide()) {
         MSPROF_LOGE("acl api not support in helper");
+        MSPROF_ENV_ERROR("EK0004", std::vector<std::string>({"intf", "platform"}),
+            std::vector<std::string>({"aclprofSetCategoryName", "SocCloud"}));
         return ACL_ERROR_FEATURE_UNSUPPORTED;
     }
     return MsprofTxManager::instance()->SetCategoryName(category, categoryName);
@@ -598,6 +644,8 @@ aclError aclprofSetStampCategory(VOID_PTR stamp, uint32_t category)
 {
     if (Platform::instance()->PlatformIsHelperHostSide()) {
         MSPROF_LOGE("acl api not support in helper");
+        MSPROF_ENV_ERROR("EK0004", std::vector<std::string>({"intf", "platform"}),
+            std::vector<std::string>({"aclprofSetStampCategory", "SocCloud"}));
         return ACL_ERROR_FEATURE_UNSUPPORTED;
     }
     auto stampInstancePtr = static_cast<ACL_PROF_STAMP_PTR>(stamp);
@@ -608,6 +656,8 @@ aclError aclprofSetStampPayload(VOID_PTR stamp, const int32_t type, VOID_PTR val
 {
     if (Platform::instance()->PlatformIsHelperHostSide()) {
         MSPROF_LOGE("acl api not support in helper");
+        MSPROF_ENV_ERROR("EK0004", std::vector<std::string>({"intf", "platform"}),
+            std::vector<std::string>({"aclprofSetStampPayload", "SocCloud"}));
         return ACL_ERROR_FEATURE_UNSUPPORTED;
     }
     auto stampInstancePtr = static_cast<ACL_PROF_STAMP_PTR>(stamp);
@@ -618,6 +668,8 @@ aclError aclprofSetStampTraceMessage(VOID_PTR stamp, const char *msg, uint32_t m
 {
     if (Platform::instance()->PlatformIsHelperHostSide()) {
         MSPROF_LOGE("acl api not support in helper");
+        MSPROF_ENV_ERROR("EK0004", std::vector<std::string>({"intf", "platform"}),
+            std::vector<std::string>({"aclprofSetStampTraceMessage", "SocCloud"}));
         return ACL_ERROR_FEATURE_UNSUPPORTED;
     }
     auto stampInstancePtr = static_cast<ACL_PROF_STAMP_PTR>(stamp);
@@ -628,6 +680,8 @@ aclError aclprofMark(VOID_PTR stamp)
 {
     if (Platform::instance()->PlatformIsHelperHostSide()) {
         MSPROF_LOGE("acl api not support in helper");
+        MSPROF_ENV_ERROR("EK0004", std::vector<std::string>({"intf", "platform"}),
+            std::vector<std::string>({"aclprofMark", "SocCloud"}));
         return ACL_ERROR_FEATURE_UNSUPPORTED;
     }
     auto stampInstancePtr = static_cast<ACL_PROF_STAMP_PTR>(stamp);
@@ -638,6 +692,8 @@ aclError aclprofPush(VOID_PTR stamp)
 {
     if (Platform::instance()->PlatformIsHelperHostSide()) {
         MSPROF_LOGE("acl api not support in helper");
+        MSPROF_ENV_ERROR("EK0004", std::vector<std::string>({"intf", "platform"}),
+            std::vector<std::string>({"aclprofPush", "SocCloud"}));
         return ACL_ERROR_FEATURE_UNSUPPORTED;
     }
     auto stampInstancePtr = static_cast<ACL_PROF_STAMP_PTR>(stamp);
@@ -648,6 +704,8 @@ aclError aclprofPop()
 {
     if (Platform::instance()->PlatformIsHelperHostSide()) {
         MSPROF_LOGE("acl api not support in helper");
+        MSPROF_ENV_ERROR("EK0004", std::vector<std::string>({"intf", "platform"}),
+            std::vector<std::string>({"aclprofPop", "SocCloud"}));
         return ACL_ERROR_FEATURE_UNSUPPORTED;
     }
     return MsprofTxManager::instance()->Pop();
@@ -657,6 +715,8 @@ aclError aclprofRangeStart(VOID_PTR stamp, uint32_t *rangeId)
 {
     if (Platform::instance()->PlatformIsHelperHostSide()) {
         MSPROF_LOGE("acl api not support in helper");
+        MSPROF_ENV_ERROR("EK0004", std::vector<std::string>({"intf", "platform"}),
+            std::vector<std::string>({"aclprofRangeStart", "SocCloud"}));
         return ACL_ERROR_FEATURE_UNSUPPORTED;
     }
     auto stampInstancePtr = static_cast<ACL_PROF_STAMP_PTR>(stamp);
@@ -667,6 +727,8 @@ aclError aclprofRangeStop(uint32_t rangeId)
 {
     if (Platform::instance()->PlatformIsHelperHostSide()) {
         MSPROF_LOGE("acl api not support in helper");
+        MSPROF_ENV_ERROR("EK0004", std::vector<std::string>({"intf", "platform"}),
+            std::vector<std::string>({"aclprofRangeStop", "SocCloud"}));
         return ACL_ERROR_FEATURE_UNSUPPORTED;
     }
     return MsprofTxManager::instance()->RangeStop(rangeId);

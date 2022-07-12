@@ -15,12 +15,14 @@ int32_t FormatErrorMessage(char_t *str_dst, size_t dst_max, const char_t *format
 
 thread_local error_message::Context ErrorManager::error_context_ = {0UL, "", "", ""};
 
-ErrorManager &ErrorManager::GetInstance() {
+ErrorManager &ErrorManager::GetInstance()
+{
     static ErrorManager instance;
     return instance;
 }
 
-error_message::Context &ErrorManager::GetErrorManagerContext() {
+error_message::Context &ErrorManager::GetErrorManagerContext()
+{
     return error_context_;
 }
 

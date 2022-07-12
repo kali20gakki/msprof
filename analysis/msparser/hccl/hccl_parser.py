@@ -12,12 +12,12 @@ import sqlite3
 
 from common_func.constant import Constant
 from common_func.db_name_constant import DBNameConstant
+from common_func.file_manager import FileOpen
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_multi_process import MsMultiProcess
-from common_func.file_manager import FileOpen
 from common_func.os_manager import check_dir_writable
 from common_func.path_manager import PathManager
-from model.hccl.hccl_model import HCCLModel
+from msmodel.hccl.hccl_model import HCCLModel
 from msparser.hccl.hccl_data import HCCLData
 from profiling_bean.prof_enum.data_tag import DataTag
 
@@ -46,6 +46,35 @@ class HCCLParser(MsMultiProcess):
         self._prepare_for_parse()
         self._parse_hccl_data()
         self._hccl_trace_data()
+
+    def save(self: any) -> None:
+        """
+        save hccl data to db
+        :return:
+        """
+        if self._hccl_data:
+            self._model.init()
+            self._model.flush(self._hccl_data)
+            self._model.finalize()
+
+    def ms_run(self: any) -> None:
+        """
+        Entry for hccl parse.
+        """
+        if not self._file_list:
+            return
+        try:
+            self.parse()
+        except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
+            logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
+        else:
+            try:
+                self.save()
+            except sqlite3.Error as err:
+                logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
+        finally:
+            if os.path.exists(self._hccl_dir):
+                shutil.rmtree(self._hccl_dir)
 
     def _prepare_for_parse(self: any) -> None:
         if os.path.exists(self._hccl_dir):
@@ -76,32 +105,3 @@ class HCCLParser(MsMultiProcess):
                                             hccl.notify_id, hccl.stage, hccl.step, hccl.bandwidth,
                                             hccl.stream_id, hccl.task_id, hccl.task_type, hccl.src_rank,
                                             hccl.dst_rank, hccl.transport_type, hccl.size])
-
-    def save(self: any) -> None:
-        """
-        save hccl data to db
-        :return:
-        """
-        if self._hccl_data:
-            self._model.init()
-            self._model.flush(self._hccl_data)
-            self._model.finalize()
-
-    def ms_run(self: any) -> None:
-        """
-        Entry for hccl parse.
-        """
-        if not self._file_list:
-            return
-        try:
-            self.parse()
-        except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
-            logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
-        else:
-            try:
-                self.save()
-            except sqlite3.Error as err:
-                logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
-        finally:
-            if os.path.exists(self._hccl_dir):
-                shutil.rmtree(self._hccl_dir)

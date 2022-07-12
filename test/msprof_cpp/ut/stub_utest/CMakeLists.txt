@@ -2,6 +2,7 @@
 add_executable(stub_file_utest
     ${MSPROF_SOURCE_DIR}/dvvp/adx/wrapper/hdc_api.cpp  
     ${MSPROF_SOURCE_DIR}/dvvp/adx/wrapper/memory_utils.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/src/plugin_handle.cpp
     test/main.cpp
     test/hdc_api_utest.cpp
     ..//stub/mmpa_stub.cpp
@@ -15,7 +16,7 @@ add_executable(stub_file_utest
 target_include_directories(stub_file_utest PRIVATE
     ${GTEST_INCLUDE_DIR}
     ${MOCKCPP_INCLUDE_DIR}
-    ${TOP_DIR}/opensource/securec/include
+    ${TOP_DIR}/platform/securec/include
     ${TOP_DIR}/opensource/json/include
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/slog
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/metadef/error_manager/error_manager_stub
@@ -63,7 +64,7 @@ target_link_options(stub_file_utest PRIVATE
 
 target_link_libraries(stub_file_utest PRIVATE
     ascend_protobuf_static
-    c_sec
+    c_sec_static
     pthread
     ${GTEST_STATIC_LIBRARY}
     ${MOCKCPP_STATIC_LIBRARY}

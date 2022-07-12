@@ -10,7 +10,7 @@ set(msprofBinHeader
     ../
     ../app
     ${TOP_DIR}/collector/dvvp/depend/inc/mmpa
-    ${TOP_DIR}/opensource/securec/include
+    ${TOP_DIR}/platform/securec/include
     ${TOP_DIR}/collector/dvvp/depend/inc/slog
     ${TOP_DIR}/opensource/json/include
     ${TOP_DIR}/collector/dvvp/depend/inc/metadef/error_manager/error_manager_stub
@@ -113,6 +113,7 @@ target_compile_options(msprofbin PRIVATE
     -D_GLIBCXX_USE_CXX11_ABI=0
     -fno-strict-aliasing
     -fno-common
+    -fstack-protector-all
 )
 
 target_compile_definitions(msprofbin PRIVATE
@@ -122,8 +123,11 @@ target_compile_definitions(msprofbin PRIVATE
 )
 
 target_link_options(msprofbin PRIVATE
+    -Wl,-z,relro,-z,now,-z,noexecstack
     -Wl,-Bsymbolic
     -Wl,--exclude-libs=ALL
+    -pie
+    $<$<NOT:$<STREQUAL:${CMAKE_BUILD_TYPE},Debug>>:-s>
 )
 
 target_link_libraries(msprofbin PRIVATE

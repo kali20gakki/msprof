@@ -1,4 +1,7 @@
 #!/bin/bash
+# This script is used to generate llt-python coverage.
+# Copyright Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
+
 set -e
 real_path=$(readlink -f "$0")
 script_dir=$(dirname "$real_path")
@@ -9,7 +12,7 @@ export PYTHONPATH=${src_code}:${test_code}:${PYTHONPATH}
 mkdir -p ${output_dir}
 cd ${output_dir}
 rm -f .coverage
-coverage run --branch --source=${src_code} -m pytest -s "${test_code}" --junit-xml=./report.xml
+coverage run --branch --source=${src_code} -m pytest -s "${test_code}" --junit-xml=./final.xml
 coverage xml
 coverage report > python_coverage_report.log
 echo "report: ${output_dir}"

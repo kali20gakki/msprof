@@ -11,7 +11,7 @@ from common_func.db_name_constant import DBNameConstant
 from common_func.memcpy_constant import MemoryCopyConstant
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.msprof_iteration import MsprofIteration
-from model.memory_copy.memcpy_model import MemcpyModel
+from msmodel.memory_copy.memcpy_model import MemcpyModel
 from mscalculate.interface.icalculator import ICalculator
 from profiling_bean.struct_info.memcpy_state_machine import MemcpyRecorder
 
@@ -37,6 +37,20 @@ class MemcpyCalculator(ICalculator, MsMultiProcess):
         self._conn = None
         self._curs = None
         self._has_table = False
+
+    @staticmethod
+    def _state_groupby_stream_task(ts_data: tuple) -> list:
+        stream_task_group = {}
+        for ts_datum in ts_data:
+            memcpy_recorder = stream_task_group.setdefault(
+                (ts_datum[MemoryCopyConstant.STREAM_INDEX], ts_datum[MemoryCopyConstant.TASK_INDEX]),
+                MemcpyRecorder(ts_datum[MemoryCopyConstant.STREAM_INDEX],
+                               ts_datum[MemoryCopyConstant.TASK_INDEX]))
+
+            memcpy_recorder.process_state_tag(ts_datum[MemoryCopyConstant.TASK_STATE_INDEX],
+            ts_datum[MemoryCopyConstant.TIMESTAMP_INDEX])
+
+        return stream_task_group
 
     def calculator_connect_db(self: any) -> None:
         """
@@ -74,35 +88,6 @@ class MemcpyCalculator(ICalculator, MsMultiProcess):
             stream_task_group = self._state_groupby_stream_task(ts_data)
             self._reshape_memcpy_data(stream_task_group)
 
-    @staticmethod
-    def _state_groupby_stream_task(ts_data: tuple) -> list:
-        stream_task_group = {}
-        for ts_datum in ts_data:
-            memcpy_recorder = stream_task_group.setdefault(
-                (ts_datum[MemoryCopyConstant.STREAM_INDEX], ts_datum[MemoryCopyConstant.TASK_INDEX]),
-                MemcpyRecorder(ts_datum[MemoryCopyConstant.STREAM_INDEX],
-                               ts_datum[MemoryCopyConstant.TASK_INDEX]))
-
-            memcpy_recorder.process_state_tag(ts_datum[MemoryCopyConstant.TASK_STATE_INDEX],
-            ts_datum[MemoryCopyConstant.TIMESTAMP_INDEX])
-
-        return stream_task_group
-
-    def _reshape_memcpy_data(self: any, stream_task_group: dict) -> None:
-        for stream_task, memcpy_recorder in stream_task_group.items():
-            for states_timestamp in memcpy_recorder.each_batch_timestamp:
-                memcpy_datum = list(stream_task)
-                if MemoryCopyConstant.DEFAULT_TIMESTAMP in states_timestamp:
-                    continue
-
-                memcpy_datum.extend(states_timestamp)
-                memcpy_datum.append(
-                    memcpy_datum[MemoryCopyConstant.END_INDEX] - memcpy_datum[MemoryCopyConstant.START_INDEX])
-                memcpy_datum.append(MemoryCopyConstant.ASYNC_MEMCPY_NAME)
-                memcpy_datum.append(MemoryCopyConstant.TYPE)
-
-                self._memcpy_data.append(tuple(memcpy_datum))
-
     def save(self: any) -> None:
         """
         save memcpy data
@@ -121,3 +106,18 @@ class MemcpyCalculator(ICalculator, MsMultiProcess):
         self.calculator_connect_db()
         self.calculate()
         self.save()
+
+    def _reshape_memcpy_data(self: any, stream_task_group: dict) -> None:
+        for stream_task, memcpy_recorder in stream_task_group.items():
+            for states_timestamp in memcpy_recorder.each_batch_timestamp:
+                memcpy_datum = list(stream_task)
+                if MemoryCopyConstant.DEFAULT_TIMESTAMP in states_timestamp:
+                    continue
+
+                memcpy_datum.extend(states_timestamp)
+                memcpy_datum.append(
+                    memcpy_datum[MemoryCopyConstant.END_INDEX] - memcpy_datum[MemoryCopyConstant.START_INDEX])
+                memcpy_datum.append(MemoryCopyConstant.ASYNC_MEMCPY_NAME)
+                memcpy_datum.append(MemoryCopyConstant.TYPE)
+
+                self._memcpy_data.append(tuple(memcpy_datum))

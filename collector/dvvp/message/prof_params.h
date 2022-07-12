@@ -21,7 +21,7 @@ namespace message {
 using BOOL = int;
 using namespace analysis::dvvp::common::config;
 using namespace analysis::dvvp::common::utils;
-using namespace Analysis::Dvvp::Plugin;
+using namespace Collector::Dvvp::Plugin;
 const char * const PROFILING_MODE_SAMPLE_BASED = "sample-based";
 const char * const PROFILING_MODE_TASK_BASED = "task-based";
 const char * const PROFILING_ANALYSIS_TARGET = "launch application";
@@ -166,8 +166,8 @@ struct ProfileParams : BaseInfo {
     std::string querySwitch;
     std::string exportSwitch;
     std::string exportSummaryFormat;
-    int exportIterationId;
-    int exportModelId;
+    std::string exportIterationId;
+    std::string exportModelId;
 
     // subset of MsprofArgsType
     std::set<int> usedParams;

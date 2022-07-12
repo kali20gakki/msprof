@@ -22,13 +22,6 @@ class GeHostBean(StructDecoder):
         self._start_time = _data[5]
         self._end_time = _data[6]
 
-    def check_data_complete(self: any) -> None:
-        """
-        check data for ge op execute bean
-        :return: complete or not
-        """
-        return self._magic_num == 23130 and self._data_tag == 27
-
     @property
     def thread_id(self: any) -> int:
         """
@@ -68,3 +61,10 @@ class GeHostBean(StructDecoder):
         :return: end time
         """
         return self._end_time
+
+    def check_data_complete(self: any) -> None:
+        """
+        check data for ge op execute bean
+        :return: complete or not
+        """
+        return self._magic_num == 23130 and self._data_tag == 27

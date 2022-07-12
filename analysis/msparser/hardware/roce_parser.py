@@ -18,7 +18,7 @@ from common_func.msvp_common import MsvpCommonConst
 from common_func.msvp_common import is_valid_original_data
 from common_func.path_manager import PathManager
 from common_func.utils import Utils
-from model.hardware.roce_model import RoceModel
+from msmodel.hardware.roce_model import RoceModel
 from profiling_bean.prof_enum.data_tag import DataTag
 
 
@@ -39,18 +39,6 @@ class ParsingRoceData(MsMultiProcess):
         self._model = RoceModel(self.project_path, DBNameConstant.DB_ROCE_ORIGIN, [DBNameConstant.TABLE_ROCE_ORIGIN])
         self._file_list.sort(key=lambda x: int(x.split("_")[-1]))
         self._device_id = self.sample_config.get("device_id")
-
-    def _generate_roce_data(self: any, network_data: list) -> None:
-        tables_path = os.path.join(MsvpCommonConst.CONFIG_PATH, 'Tables_training.ini')
-        nic_header_num = DBManager.get_table_field_num(DBNameConstant.TABLE_ROCE_ORIGIN + "Map", tables_path)
-        self.roce_data = []
-        # chip 0 nic diff, exclude device_id and replay_id
-        for nd in network_data:
-            item = [self._device_id, 0, float(nd[0].replace(":", ''))]
-            item.extend(nd[1:])
-            if nic_header_num != len(network_data[0]) + 2:
-                item.extend([self.DEFAULT_NIC_FUNC_ID])
-            self.roce_data.append(tuple(item))
 
     def start_parsing_data_file(self: any) -> None:
         """
@@ -118,3 +106,15 @@ class ParsingRoceData(MsMultiProcess):
                 self.save()
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as roce_err:
             logging.error(str(roce_err), exc_info=Constant.TRACE_BACK_SWITCH)
+
+    def _generate_roce_data(self: any, network_data: list) -> None:
+        tables_path = os.path.join(MsvpCommonConst.CONFIG_PATH, 'Tables_training.ini')
+        nic_header_num = DBManager.get_table_field_num(DBNameConstant.TABLE_ROCE_ORIGIN + "Map", tables_path)
+        self.roce_data = []
+        # chip 0 nic diff, exclude device_id and replay_id
+        for nd in network_data:
+            item = [self._device_id, 0, float(nd[0].replace(":", ''))]
+            item.extend(nd[1:])
+            if nic_header_num != len(network_data[0]) + 2:
+                item.extend([self.DEFAULT_NIC_FUNC_ID])
+            self.roce_data.append(tuple(item))

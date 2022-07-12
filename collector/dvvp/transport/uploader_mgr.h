@@ -9,7 +9,7 @@
 */
 #ifndef ANALYSIS_DVVP_TRANSPORT_UPLOADER_MGR_H
 #define ANALYSIS_DVVP_TRANSPORT_UPLOADER_MGR_H
-
+#include "cstdint"
 #include "config/config.h"
 #include "message/prof_params.h"
 #include "singleton/singleton.h"

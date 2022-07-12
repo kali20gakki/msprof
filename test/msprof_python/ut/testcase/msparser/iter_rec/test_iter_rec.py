@@ -65,21 +65,21 @@ class TestIterRecParser(unittest.TestCase):
             check_1._parse_hwts_data()
 
     def test_parse(self):
-        with mock.patch('model.ge.ge_info_calculate_model.GeInfoModel.check_db', return_value=True), \
-             mock.patch('model.ge.ge_info_calculate_model.GeInfoModel.check_table', return_value=True), \
-             mock.patch('model.ge.ge_info_calculate_model.GeInfoModel.get_ge_data', return_value={}), \
-             mock.patch('model.ge.ge_info_calculate_model.GeInfoModel.finalize'), \
+        with mock.patch('msmodel.ge.ge_info_calculate_model.GeInfoModel.check_db', return_value=True), \
+             mock.patch('msmodel.ge.ge_info_calculate_model.GeInfoModel.check_table', return_value=True), \
+             mock.patch('msmodel.ge.ge_info_calculate_model.GeInfoModel.get_ge_data', return_value={}), \
+             mock.patch('msmodel.ge.ge_info_calculate_model.GeInfoModel.finalize'), \
              mock.patch(NAMESPACE + '.IterRecParser._parse_hwts_data'), \
              mock.patch(NAMESPACE + '.logging.error'), \
              mock.patch('common_func.msprof_iteration.MsprofIteration.get_iteration_end_dict', return_value={1: 101}), \
-             mock.patch('model.ge.ge_info_calculate_model.GeInfoModel.get_batch_dict', return_value={}):
+             mock.patch('msmodel.ge.ge_info_calculate_model.GeInfoModel.get_batch_dict', return_value={}):
             check = IterRecParser(self.file_list, CONFIG)
             check.parse()
 
     def test_save(self):
-        with mock.patch('model.iter_rec.iter_rec_model.HwtsIterModel.init'), \
-             mock.patch('model.iter_rec.iter_rec_model.HwtsIterModel.flush'), \
-             mock.patch('model.iter_rec.iter_rec_model.HwtsIterModel.finalize', side_effect=sqlite3.Error), \
+        with mock.patch('msmodel.iter_rec.iter_rec_model.HwtsIterModel.init'), \
+             mock.patch('msmodel.iter_rec.iter_rec_model.HwtsIterModel.flush'), \
+             mock.patch('msmodel.iter_rec.iter_rec_model.HwtsIterModel.finalize', side_effect=sqlite3.Error), \
              mock.patch(NAMESPACE + '.Utils.obj_list_to_list'), \
              mock.patch(NAMESPACE + '.logging.error'), \
              mock.patch('common_func.msprof_iteration.MsprofIteration.get_iteration_end_dict', return_value={1: 101}):

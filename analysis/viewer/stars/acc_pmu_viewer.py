@@ -10,7 +10,7 @@ from abc import ABC
 from common_func.info_conf_reader import InfoConfReader
 from common_func.trace_view_header_constant import TraceViewHeaderConstant
 from common_func.trace_view_manager import TraceViewManager
-from model.stars.acc_pmu_model import AccPmuModel
+from msmodel.stars.acc_pmu_model import AccPmuModel
 from viewer.interface.base_viewer import BaseViewer
 
 
@@ -26,7 +26,7 @@ class AccPmuViewer(BaseViewer, ABC):
         super().__init__(configs, params)
         self.pid = 0
         self.model_list = {
-            'acc_pmu_summary': AccPmuModel,
+            'acc_pmu': AccPmuModel,
         }
 
     def get_timeline_header(self: any) -> list:

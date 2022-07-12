@@ -18,7 +18,7 @@ from common_func.ms_multi_process import MsMultiProcess
 from common_func.msvp_common import is_valid_original_data
 from common_func.path_manager import PathManager
 from framework.offset_calculator import OffsetCalculator
-from model.hardware.pcie_model import PcieModel
+from msmodel.hardware.pcie_model import PcieModel
 from msparser.data_struct_size_constant import StructFmt
 from profiling_bean.prof_enum.data_tag import DataTag
 
