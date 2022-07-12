@@ -190,7 +190,7 @@ class StepTraceViewer:
     def get_step_trace_data(curs: any, message: dict) -> list:
         """
         get training trace data
-        :param cur: sqlite cur
+        :param curs: sqlite cur
         :param message: message
         :return: data
         """
@@ -488,7 +488,7 @@ class StepTraceViewer:
                 result_dict["data_aug_dict0"] = TimeLineJsonMaker.make_data_aug_dict0(trace_parm, pid, tid)
                 result_dict["data_aug_dict1"] = TimeLineJsonMaker.make_data_aug_dict1(trace_parm, pid, tid)
 
-            trace_view_data.append(iter_time_data)
+                trace_view_data.append(iter_time_data)
                 trace_view_data.append(fp_bp_data)
                 trace_view_data.append(grad_refresh_data)
                 result_data.extend(
