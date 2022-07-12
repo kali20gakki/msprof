@@ -34,34 +34,34 @@ class CalculateTaskScheduler:
         self.index_id = sample_config.get("iter_id")
         self.model_id = sample_config.get("model_id")
 
-    def __get_iter_time_range(self: any, project_path: str) -> list:
-        time_range_result = []
-        step_conn, step_curs = DBManager.check_connect_db(project_path, DBNameConstant.DB_STEP_TRACE)
-        if not step_conn or not step_curs \
-                or not DBManager.judge_table_exist(step_curs, DBNameConstant.TABLE_STEP_TRACE_DATA):
-            return time_range_result
-        sql = "select step_start, step_end from {0} " \
-              "where index_id=? and model_id=?".format(DBNameConstant.TABLE_STEP_TRACE_DATA)
-        try:
-            time_range = step_curs.execute(sql, (self.index_id, self.model_id)).fetchone()
-        except sqlite3.Error as step_err:
-            logging.error(step_err, exc_info=Constant.TRACE_BACK_SWITCH)
-            return time_range_result
-        finally:
-            DBManager.destroy_db_connect(step_conn, step_curs)
-        if time_range:
-            time_range_result = list(time_range)
-        return time_range_result
+    @staticmethod
+    def update(api_data: list) -> list:
+        """
+        api update data
+        :param api_data: api data
+        :return:
+        """
+        api_down_task = []
+        for api in api_data:
+            # API data is in the format of api,rowid,stream_id,task_id,batch_id for step scene
+            task_id = api[3].split(',')
+            batch_id = api[4].split(',')
+            if len(task_id) != len(batch_id):
+                logging.error("The num of task id is not equal to batch id")
+                return []
+            for task, batch in zip(task_id, batch_id):
+                api_down_task.append(api[0:3] + (task, batch,))
+        return api_down_task
 
-    def _insert_task_time_data(self: any, cal_task_data: list, runtime_conn: any, runtime_curs: any) -> None:
-        # 0 is default batch id
-        task_time = (task_data + (
-            self.index_id, self.model_id, NumberConstant.DEFAULT_BATCH_ID) for task_data in cal_task_data)
-        # sort by complete time
-        task_time = sorted(task_time, key=lambda data: data[self.COMPLETE_TIME_INDEX])
-        insert_sql = "insert into TaskTime " \
-                     "values ({value})".format(value="?," * (len(task_time[0]) - 1) + "?")
-        DBManager.executemany_sql(runtime_conn, insert_sql, task_time)
+    @staticmethod
+    def _insert_report_task_data(runtime_conn: any, runtime_curs: any, device_id: str) -> None:
+        report_data = calculate_task_schedule_data(runtime_curs, device_id)
+        if not report_data:
+            logging.info('Unable to get report task data')
+            return
+        sql = 'insert into ReportTask values({value})'.format(
+            value='?,' * (len(report_data[0]) - 1) + '?')
+        DBManager.executemany_sql(runtime_conn, sql, report_data)
 
     def create_task_time(self: any, runtime_conn: any, device: int, iter_time_range: list) -> None:
         """
@@ -85,56 +85,6 @@ class CalculateTaskScheduler:
             return
         self._insert_task_time_data(cal_task_data, runtime_conn, runtime_curs)
         logging.info('create task time table end')
-
-    def _create_task_time_table(self: any, runtime_conn: any, runtime_curs: any) -> None:
-        if DBManager.judge_table_exist(runtime_curs, DBNameConstant.TABLE_RUNTIME_TASK_TIME):
-            DBManager.drop_table(runtime_conn, DBNameConstant.TABLE_RUNTIME_TASK_TIME)
-        sql = DBManager.sql_create_general_table('TaskTimeMap', DBNameConstant.TABLE_RUNTIME_TASK_TIME,
-                                                 self.TABLE_PATH)
-        DBManager.execute_sql(runtime_conn, sql)
-
-    def _get_timeline_data(self: any, device: int, iter_time_range: list, runtime_curs: any) -> list:
-        timeline_sql = "select replayId,device_id,'','',taskType," \
-                       "task_id,stream_id,timeStamp,taskState " \
-                       "from TimeLine WHERE device_id=? and timestamp>? and timestamp<?" \
-                       "order by task_id, stream_id,timeStamp,taskState,device_id;"
-        timeline_data = DBManager.fetch_all_data(runtime_curs, timeline_sql, (device,
-                                                                              iter_time_range[0], iter_time_range[1]))
-        cal_task_data = multi_calculate_task_cost_time(timeline_data, self.project_path)
-        return cal_task_data
-
-    @staticmethod
-    def update(api_data: list) -> list:
-        """
-        api update data
-        :param api_data: api data
-        :return:
-        """
-        api_down_task = []
-        for api in api_data:
-            # API data is in the format of api,rowid,stream_id,task_id,batch_id for step scene
-            task_id = api[3].split(',')
-            batch_id = api[4].split(',')
-            if len(task_id) != len(batch_id):
-                logging.error("The num of task id is not equal to batch id")
-                return []
-            for task, batch in zip(task_id, batch_id):
-                api_down_task.append(api[0:3] + (task, batch,))
-        return api_down_task
-
-    def __pre_mini_task_data(self: any, project_path: str, device_id: int, iter_time_range: list) -> None:
-        runtime_conn, runtime_curs = \
-            DBManager.check_connect_db_path(PathManager.get_db_path(project_path, DBNameConstant.DB_RUNTIME))
-        if not runtime_conn or not runtime_curs:
-            return
-        try:
-            self.create_task_time(runtime_conn, device_id, iter_time_range)
-        except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
-            logging.error(err, exc_info=Constant.TRACE_BACK_SWITCH)
-        else:
-            self.update_timeline_api(runtime_conn)
-        finally:
-            DBManager.destroy_db_connect(runtime_conn, runtime_curs)
 
     def update_timeline_api(self: any, runtime_conn: any) -> None:
         """
@@ -180,23 +130,6 @@ class CalculateTaskScheduler:
         logging.info('Insert data into report table finished.')
         DBManager.destroy_db_connect(runtime_conn, runtime_curs)
 
-    @staticmethod
-    def _insert_report_task_data(runtime_conn: any, runtime_curs: any, device_id: str) -> None:
-        report_data = calculate_task_schedule_data(runtime_curs, device_id)
-        if not report_data:
-            logging.info('Unable to get report task data')
-            return
-        sql = 'insert into ReportTask values({value})'.format(
-            value='?,' * (len(report_data[0]) - 1) + '?')
-        DBManager.executemany_sql(runtime_conn, sql, report_data)
-
-    def _create_report_task_table(self: any, runtime_conn: any, runtime_curs: any) -> None:
-        if DBManager.check_tables_in_db(PathManager.get_db_path(self.project_path, DBNameConstant.DB_RUNTIME),
-                                        DBNameConstant.TABLE_RUNTIME_REPORT_TASK):
-            DBManager.drop_table(runtime_conn, DBNameConstant.TABLE_RUNTIME_REPORT_TASK)
-        sql = DBManager.sql_create_general_table('ReportTaskMap', 'ReportTask', self.TABLE_PATH)
-        DBManager.execute_sql(runtime_conn, sql)
-
     def generate_report_data(self: any) -> None:
         """
         insert report task table
@@ -224,3 +157,70 @@ class CalculateTaskScheduler:
             logging.error(str(err))
         finally:
             pass
+
+    def __get_iter_time_range(self: any, project_path: str) -> list:
+        time_range_result = []
+        step_conn, step_curs = DBManager.check_connect_db(project_path, DBNameConstant.DB_STEP_TRACE)
+        if not step_conn or not step_curs \
+                or not DBManager.judge_table_exist(step_curs, DBNameConstant.TABLE_STEP_TRACE_DATA):
+            return time_range_result
+        sql = "select step_start, step_end from {0} " \
+              "where index_id=? and model_id=?".format(DBNameConstant.TABLE_STEP_TRACE_DATA)
+        try:
+            time_range = step_curs.execute(sql, (self.index_id, self.model_id)).fetchone()
+        except sqlite3.Error as step_err:
+            logging.error(step_err, exc_info=Constant.TRACE_BACK_SWITCH)
+            return time_range_result
+        finally:
+            DBManager.destroy_db_connect(step_conn, step_curs)
+        if time_range:
+            time_range_result = list(time_range)
+        return time_range_result
+
+    def _insert_task_time_data(self: any, cal_task_data: list, runtime_conn: any, runtime_curs: any) -> None:
+        # 0 is default batch id
+        task_time = (task_data + (
+            self.index_id, self.model_id, NumberConstant.DEFAULT_BATCH_ID) for task_data in cal_task_data)
+        # sort by complete time
+        task_time = sorted(task_time, key=lambda data: data[self.COMPLETE_TIME_INDEX])
+        insert_sql = "insert into TaskTime " \
+                     "values ({value})".format(value="?," * (len(task_time[0]) - 1) + "?")
+        DBManager.executemany_sql(runtime_conn, insert_sql, task_time)
+
+    def _create_task_time_table(self: any, runtime_conn: any, runtime_curs: any) -> None:
+        if DBManager.judge_table_exist(runtime_curs, DBNameConstant.TABLE_RUNTIME_TASK_TIME):
+            DBManager.drop_table(runtime_conn, DBNameConstant.TABLE_RUNTIME_TASK_TIME)
+        sql = DBManager.sql_create_general_table('TaskTimeMap', DBNameConstant.TABLE_RUNTIME_TASK_TIME,
+                                                 self.TABLE_PATH)
+        DBManager.execute_sql(runtime_conn, sql)
+
+    def _get_timeline_data(self: any, device: int, iter_time_range: list, runtime_curs: any) -> list:
+        timeline_sql = "select replayId,device_id,'','',taskType," \
+                       "task_id,stream_id,timeStamp,taskState " \
+                       "from TimeLine WHERE device_id=? and timestamp>? and timestamp<?" \
+                       "order by task_id, stream_id,timeStamp,taskState,device_id;"
+        timeline_data = DBManager.fetch_all_data(runtime_curs, timeline_sql, (device,
+                                                                              iter_time_range[0], iter_time_range[1]))
+        cal_task_data = multi_calculate_task_cost_time(timeline_data, self.project_path)
+        return cal_task_data
+
+    def __pre_mini_task_data(self: any, project_path: str, device_id: int, iter_time_range: list) -> None:
+        runtime_conn, runtime_curs = \
+            DBManager.check_connect_db_path(PathManager.get_db_path(project_path, DBNameConstant.DB_RUNTIME))
+        if not runtime_conn or not runtime_curs:
+            return
+        try:
+            self.create_task_time(runtime_conn, device_id, iter_time_range)
+        except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
+            logging.error(err, exc_info=Constant.TRACE_BACK_SWITCH)
+        else:
+            self.update_timeline_api(runtime_conn)
+        finally:
+            DBManager.destroy_db_connect(runtime_conn, runtime_curs)
+
+    def _create_report_task_table(self: any, runtime_conn: any, runtime_curs: any) -> None:
+        if DBManager.check_tables_in_db(PathManager.get_db_path(self.project_path, DBNameConstant.DB_RUNTIME),
+                                        DBNameConstant.TABLE_RUNTIME_REPORT_TASK):
+            DBManager.drop_table(runtime_conn, DBNameConstant.TABLE_RUNTIME_REPORT_TASK)
+        sql = DBManager.sql_create_general_table('ReportTaskMap', 'ReportTask', self.TABLE_PATH)
+        DBManager.execute_sql(runtime_conn, sql)

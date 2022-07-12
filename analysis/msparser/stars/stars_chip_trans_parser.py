@@ -6,7 +6,7 @@ Copyright Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 """
 from collections import defaultdict
 
-from model.stars.stars_chip_trans_model import StarsChipTransModel
+from msmodel.stars.stars_chip_trans_model import StarsChipTransModel
 from msparser.interface.istars_parser import IStarsParser
 from profiling_bean.stars.stars_chip_trans_bean import StarsChipTransBean
 

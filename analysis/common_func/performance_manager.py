@@ -4,11 +4,9 @@
 Copyright Huawei Technologies Co., Ltd. 2020. All rights reserved.
 """
 
-import json
 import os
 import re
 
-from common_func.msvp_common import MsvpCommonConst
 from common_func.constant import Constant
 
 
@@ -16,7 +14,6 @@ class PerformanceManager:
     """
     Performance metrics Manager
     """
-    PROF_METRIC_FILE = "prof_metric.json"
 
     class PerformanceError(Exception):
         """
@@ -27,14 +24,7 @@ class PerformanceManager:
             super().__init__(message)
             self.message = message
 
-    @staticmethod
-    def check_metric_file(file_path: str) -> bool:
-        """
-        check validity of file path.
-        :param file_path: file path
-        :return: result of check file size
-        """
-        return os.path.exists(file_path) and os.path.getsize(file_path) <= Constant.MAX_READ_FILE_BYTES
+    PROF_METRIC_FILE = "prof_metric.json"
 
     @classmethod
     def filter_case_underscore(cls: any, metric_name: str) -> str:
@@ -60,3 +50,12 @@ class PerformanceManager:
             return "{metric_name} : {explanation}".format(
                 metric_name=cls.filter_case_underscore(metric_name), explanation=explanation)
         return "Unrecognized metric name: {metric_name}".format(metric_name=metric_name)
+
+    @staticmethod
+    def check_metric_file(file_path: str) -> bool:
+        """
+        check validity of file path.
+        :param file_path: file path
+        :return: result of check file size
+        """
+        return os.path.exists(file_path) and os.path.getsize(file_path) <= Constant.MAX_READ_FILE_BYTES

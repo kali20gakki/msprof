@@ -287,14 +287,17 @@ class CoreCpuReduceViewer:
         hwts_freq = InfoConfReader().get_freq(StrConstant.HWTS)
 
         for training_trace_data in cls._get_trace_one_device(trace_curs, device_id, iter_id, model_id):
-            if training_trace_data:
-                all_reduces = cls._get_reduce(trace_curs, device_id, training_trace_data[3])
-                for index, all_reduce in enumerate(all_reduces):
-                    all_reduce_datas.append(
-                        ("AR {}".format(index), cls.TRACE_PID_MAP.get(TraceViewHeaderConstant.PROCESS_ALL_REDUCE, ""),
-                         InfoConfReader().get_json_tid_data(),
-                         InfoConfReader().time_from_syscnt(all_reduce[0], time_fmt=NumberConstant.MICRO_SECOND),
-                         all_reduce[1] / hwts_freq * NumberConstant.MICRO_SECOND,
-                         OrderedDict([("Reduce Duration(us)",
-                                       all_reduce[1] / hwts_freq * NumberConstant.MICRO_SECOND)])))
+            if not training_trace_data:
+                continue
+            all_reduces = cls._get_reduce(trace_curs, device_id, training_trace_data[3])
+            for index, all_reduce in enumerate(all_reduces):
+                all_reduce_time = 0
+                if not NumberConstant.is_zero(hwts_freq):
+                    all_reduce_time = all_reduce[1] / hwts_freq * NumberConstant.MICRO_SECOND
+                all_reduce_datas.append(
+                    ("AR {}".format(index), cls.TRACE_PID_MAP.get(TraceViewHeaderConstant.PROCESS_ALL_REDUCE, ""),
+                     InfoConfReader().get_json_tid_data(),
+                     InfoConfReader().time_from_syscnt(all_reduce[0], time_fmt=NumberConstant.MICRO_SECOND),
+                     all_reduce_time,
+                     OrderedDict([("Reduce Duration(us)", all_reduce_time)])))
         return all_reduce_datas

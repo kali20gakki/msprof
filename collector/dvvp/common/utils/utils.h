@@ -330,11 +330,11 @@ namespace utils {
 
 #define MSVP_TRY_BLOCK_BREAK(block) \
     do {                            \
-        try                         \
-            block catch (...)       \
-            {                       \
+        try {                       \
+            block                   \
+        } catch (...) {             \
                 break;              \
-            }                       \
+        }                           \
     } while (0)
 
 #define FUNRET_CHECK_RET_VALUE(inPut, checkValue, checkOkRetValue, checkFailRetValue) do {   \
@@ -504,6 +504,7 @@ public:
     static VOID_PTR ProfMalloc(size_t size);
     static void ProfFree(VOID_PTR &ptr);
     static bool CheckStringIsNonNegativeIntNum(const std::string &numberStr);
+    static bool CheckStringIsValidNatureNum(const std::string &numberStr);
     static bool IsDeviceMapping();
     static std::string GetCoresStr(const std::vector<int> &cores, const std::string &separator = ",");
     static std::string GetEventsStr(const std::vector<std::string> &events, const std::string &separator = ",");
@@ -519,6 +520,16 @@ public:
     static std::string GetCwdString(void);
     static std::string RelativePathToAbsolutePath(const std::string &path);
     static bool IsSoftLink(const std::string &path);
+    template<typename T>
+    static std::string Int2HexStr(T number)
+    {
+        std::stringstream ioss;
+        std::string ret;
+        ioss << std::hex << number;
+        ioss >> ret;
+        return ret;
+    }
+    static bool IsAppName(const std::string paramsName);
 };
 
 template<class T>

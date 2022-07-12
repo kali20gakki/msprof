@@ -3,7 +3,6 @@ from unittest import mock
 
 from saver.training.time_saver import TimeSaver
 from sqlite.db_manager import DBManager
-import sqlite3
 
 NAMESPACE = 'saver.training.time_saver'
 
@@ -31,7 +30,7 @@ class TestTimeSaver(unittest.TestCase):
     def test_create_timedb_conn(self):
         sql_path = "time.db"
         with mock.patch('os.path.join', return_value="time.db"), \
-                mock.patch(NAMESPACE + '.sqlite3.connect', return_value=True):
+                mock.patch(NAMESPACE + '.DBManager.create_connect_db', return_value=(True, True)):
             key = TimeSaver()
             result = key.create_timedb_conn(sql_path)
         self.assertEqual(len(result), 2)

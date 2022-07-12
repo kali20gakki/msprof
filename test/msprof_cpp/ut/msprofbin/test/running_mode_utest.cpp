@@ -23,7 +23,7 @@ using namespace analysis::dvvp::transport;
 using namespace Analysis::Dvvp::Common::Config;
 using namespace Analysis::Dvvp::Msprof;
 using namespace Collector::Dvvp::Msprofbin;
-using namespace Analysis::Dvvp::Plugin;
+using namespace Collector::Dvvp::Plugin;
 
 class RUNNING_MODE_UTEST : public testing::Test {
 protected:
@@ -286,7 +286,7 @@ TEST_F(RUNNING_MODE_UTEST, StartExportTask){
     EXPECT_EQ(PROFILING_FAILED, rMode.StartExportTask());
     rMode.jobResultDir_ = "123";
     rMode.analysisPath_ = "path_test";
-    params->exportModelId = 1;
+    params->exportModelId = "1";
     MOCKER_CPP(&RunningMode::RunExportSummaryTask)
         .stubs()
         .will(returnValue(PROFILING_FAILED))

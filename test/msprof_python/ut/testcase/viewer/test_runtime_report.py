@@ -93,16 +93,14 @@ class TestRuntimeReport(unittest.TestCase):
                 (50, 10000, 1, 10000, 10000,
                  10000, 0.0, 1596.19790625, 0.0, 'kernel AI core task', '', 3, 5)]
         memcpy_summary = [(0, 20000, 1, 20000, 20000, 20000, 100, 200, MemoryCopyConstant.DEFAULT_VIEWER_VALUE,
-                           MemoryCopyConstant.TYPE, StrConstant.API_TYPE_MAPPING.get(
-                StrConstant.AYNC_MEMCPY_NUM), 1,
+                           MemoryCopyConstant.TYPE, StrConstant.AYNC_MEMCPY, 1,
                            MemoryCopyConstant.DEFAULT_VIEWER_VALUE, 1)]
         expect_res = [(25.0, 10000, 1, 10000, 10000,
                  10000, 116.770796875, 47177.968796875, 0.0, 'model execute task', '', 2, 2),
                 (25.0, 10000, 1, 10000, 10000,
                  10000, 0.0, 1596.19790625, 0.0, 'kernel AI core task', '', 3, 5),
                       (50.0, 20000, 1, 20000, 20000, 20000, 100, 200, MemoryCopyConstant.DEFAULT_VIEWER_VALUE,
-                       MemoryCopyConstant.TYPE, StrConstant.API_TYPE_MAPPING.get(
-                          StrConstant.AYNC_MEMCPY_NUM), 1,
+                       MemoryCopyConstant.TYPE, StrConstant.AYNC_MEMCPY, 1,
                        MemoryCopyConstant.DEFAULT_VIEWER_VALUE, 1)
                       ]
 

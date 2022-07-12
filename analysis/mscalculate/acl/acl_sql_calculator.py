@@ -18,21 +18,6 @@ class AclSqlCalculator:
     """
 
     @classmethod
-    def _select_data(cls: any, db_path: str, table_name: str, sql: str) -> list:
-        """
-        select data from the db of acl
-        :param db_path: db path
-        :param table_name: table name
-        :return: acl data
-        """
-        conn, curs = DBManager.check_connect_db_path(db_path)
-        acl_data = []
-        if conn and curs and DBManager.judge_table_exist(curs, table_name):
-            acl_data = DBManager.fetch_all_data(curs, sql)
-        DBManager.destroy_db_connect(conn, curs)
-        return acl_data
-
-    @classmethod
     def select_acl_data(cls: any, db_path: str, table_name: str) -> list:
         """
         select acl data
@@ -83,3 +68,18 @@ class AclSqlCalculator:
             sql = 'insert into {0} values ({1})'.format(table_name, "?," * (len(acl_data[0]) - 1) + "?")
             DBManager.executemany_sql(conn, sql, acl_data)
         DBManager.destroy_db_connect(conn, curs)
+
+    @classmethod
+    def _select_data(cls: any, db_path: str, table_name: str, sql: str) -> list:
+        """
+        select data from the db of acl
+        :param db_path: db path
+        :param table_name: table name
+        :return: acl data
+        """
+        conn, curs = DBManager.check_connect_db_path(db_path)
+        acl_data = []
+        if conn and curs and DBManager.judge_table_exist(curs, table_name):
+            acl_data = DBManager.fetch_all_data(curs, sql)
+        DBManager.destroy_db_connect(conn, curs)
+        return acl_data

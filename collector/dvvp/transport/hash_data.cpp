@@ -74,8 +74,8 @@ uint64_t HashData::DoubleHash(std::string &data) const
     uint32_t hash[2] = {0};
 
     for (char d : data) {
-        hash[0] = hash[0] * prime[0] + d;
-        hash[1] = hash[1] * prime[1] + d;
+        hash[0] = hash[0] * prime[0] + static_cast<uint32_t>(d);
+        hash[1] = hash[1] * prime[1] + static_cast<uint32_t>(d);
     }
 
     return (((static_cast<uint64_t>(hash[0])) << uint32Bits) | hash[1]);

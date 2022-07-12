@@ -20,7 +20,7 @@ namespace transport {
 using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::common::config;
 using namespace analysis::dvvp::common::utils;
-using namespace Analysis::Dvvp::Plugin;
+using namespace Collector::Dvvp::Plugin;
 
 FileSlice::FileSlice(int sliceFileMaxKByte, const std::string &storageDir, const std::string &storageLimit)
     : sliceFileMaxKByte_(sliceFileMaxKByte), storageDir_(storageDir),
@@ -154,7 +154,7 @@ int FileSlice::WriteToLocalFiles(const std::string &key, CONST_CHAR_PTR data, in
         out.write(data, dataLen);
         out.flush();
         out.close();
-        totalSize_[key] += dataLen;
+        totalSize_[key] += static_cast<uint32_t>(dataLen);
         uint64_t endRawTime = analysis::dvvp::common::utils::Utils::GetClockMonotonicRaw();
         writeFilePerfCount_->UpdatePerfInfo(startRawTime, endRawTime, dataLen); // update the PerfCount info
     }
@@ -317,7 +317,7 @@ bool FileSlice::CreateDoneFile(const std::string &absolutePath, const std::strin
     }
     file.flush();
     file.close();
-    uint64_t doneFileSize = analysis::dvvp::common::utils::Utils::GetFileSize(tempPath);
+    uint64_t doneFileSize = static_cast<uint64_t>(analysis::dvvp::common::utils::Utils::GetFileSize(tempPath));
     fileAgeing_->AppendAgeingFile(absolutePath, tempPath, stoull(fileSize), doneFileSize);
     if (fileAgeing_->IsNeedAgeingFile()) {
         fileAgeing_->RemoveAgeingFile();

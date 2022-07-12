@@ -28,7 +28,7 @@ using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::common::config;
 using namespace analysis::dvvp::common::validation;
 using namespace analysis::dvvp::common::utils;
-using namespace Analysis::Dvvp::Plugin;
+using namespace Collector::Dvvp::Plugin;
 
 int ITransport::SendFile(const std::string &jobCtx,
                          const std::string &file,
@@ -63,7 +63,7 @@ int ITransport::SendFile(const std::string &jobCtx,
             FileChunk chunk;
             chunk.relativeFileName = relativePath;
             chunk.dataBuf = (UNSIGNED_CHAR_PTR)buffer.get();
-            chunk.bufLen = static_cast<unsigned int>(sizeRead);;
+            chunk.bufLen = static_cast<unsigned int>(sizeRead);
             chunk.offset = offset;
             chunk.isLastChunk = ((offset + sizeRead < len) ? false : true);
             ret = SendFileChunk(jobCtx, chunk);

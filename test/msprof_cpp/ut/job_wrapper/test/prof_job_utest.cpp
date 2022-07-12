@@ -30,7 +30,7 @@ using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::message;
 using namespace Analysis::Dvvp::JobWrapper;
 using namespace Analysis::Dvvp::MsprofErrMgr;
-using namespace Analysis::Dvvp::Plugin;
+using namespace Collector::Dvvp::Plugin;
 
 class JOB_WRAPPER_PROF_TsCPu_JOB_TEST: public testing::Test {
 protected:
@@ -82,10 +82,6 @@ TEST_F(JOB_WRAPPER_PROF_TsCPu_JOB_TEST, Process) {
     collectionJobCfg_->jobParams.events->push_back("0x11");
     collectionJobCfg_->comParams->params->cpu_sampling_interval = 20;
     proTsCpuJob->Init(collectionJobCfg_);
-    EXPECT_EQ(PROFILING_SUCCESS, proTsCpuJob->Process());
-    MOCKER(malloc)
-        .stubs()
-        .will(returnValue((void*)NULL));
     EXPECT_EQ(PROFILING_SUCCESS, proTsCpuJob->Process());
 }
 
@@ -158,10 +154,6 @@ TEST_F(JOB_WRAPPER_PROF_TsTrack_JOB_TEST, Process) {
     collectionJobCfg_->jobParams.events->push_back("0x11");
     collectionJobCfg_->comParams->params->cpu_sampling_interval = 20;
     profTsTrackJob->Init(collectionJobCfg_);
-    EXPECT_EQ(PROFILING_SUCCESS, profTsTrackJob->Process());
-    MOCKER(malloc)
-        .stubs()
-        .will(returnValue((void*)NULL));
     EXPECT_EQ(PROFILING_SUCCESS, profTsTrackJob->Process());
 }
 
@@ -246,10 +238,6 @@ TEST_F(JOB_WRAPPER_PROF_AICORE_JOB_TEST, Process) {
     collectionJobCfg_->comParams->params->aicore_sampling_interval = 20;
     profAicoreJob->Init(collectionJobCfg_);
     EXPECT_EQ(PROFILING_SUCCESS, profAicoreJob->Process());
-    MOCKER(malloc)
-        .stubs()
-        .will(returnValue((void*)NULL));
-    EXPECT_EQ(PROFILING_FAILED, profAicoreJob->Process());
 }
 
 TEST_F(JOB_WRAPPER_PROF_AICORE_JOB_TEST, Uninit) {
@@ -339,10 +327,6 @@ TEST_F(JOB_WRAPPER_PROF_AICORETASK_JOB_TEST, Process) {
     collectionJobCfg_->jobParams.cores->push_back(1);
     collectionJobCfg_->comParams->params->aicore_sampling_interval = 20;
     profAicoreTaskBasedJob->Init(collectionJobCfg_);
-    EXPECT_EQ(PROFILING_SUCCESS, profAicoreTaskBasedJob->Process());
-    MOCKER(malloc)
-        .stubs()
-        .will(returnValue((void*)NULL));
     EXPECT_EQ(PROFILING_SUCCESS, profAicoreTaskBasedJob->Process());
 }
 

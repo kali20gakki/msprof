@@ -7,7 +7,7 @@ Copyright Huawei Technologies Co., Ltd. 2022. All rights reserved.
 import json
 from collections import OrderedDict
 
-from model.biu_perf.biu_perf_model import BiuPerfModel
+from msmodel.biu_perf.biu_perf_model import BiuPerfModel
 from common_func.trace_view_manager import TraceViewManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.trace_view_header_constant import TraceViewHeaderConstant

@@ -12,7 +12,7 @@
 #include <functional>
 #include <dlfcn.h>
 
-namespace Analysis {
+namespace Collector {
 namespace Dvvp {
 namespace Plugin {
 
@@ -20,7 +20,11 @@ using PluginStatus = uint32_t;
 using HandleType = void*;
 const PluginStatus PLUGIN_LOAD_SUCCESS = 0x0;
 const PluginStatus PLUGIN_LOAD_FAILED = 0xFFFFFFFF;
-
+#define PTHREAD_ONCE_T pthread_once_t
+inline void PthreadOnce(pthread_once_t *flag, void (*func)(void))
+{
+    (void)pthread_once(flag, func);
+}
 class PluginHandle {
 public:
     explicit PluginHandle(const std::string &name)
@@ -28,7 +32,7 @@ public:
       handle_(nullptr),
       load_(false)
     {}
-    ~PluginHandle() {}
+    ~PluginHandle();
     const std::string GetSoName() const;
     PluginStatus OpenPlugin(const std::string envValue);
     void CloseHandle();
@@ -53,7 +57,7 @@ private:
     HandleType handle_;
     bool load_;
 };
-} // namespace Plugin
-} // namespace Dvvp
-} // namespace Analysis
+} // Plugin
+} // Dvvp
+} // Collector
 #endif

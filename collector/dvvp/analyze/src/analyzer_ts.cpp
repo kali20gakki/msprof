@@ -29,7 +29,7 @@ void AnalyzerTs::Parse(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> mess
         return;
     }
 
-    totalBytes_ += message->chunksizeinbytes();
+    totalBytes_ += static_cast<uint64_t>(message->chunksizeinbytes());
     ParseTsTrackData(message->chunk().c_str(), message->chunksizeinbytes());
 }
 
@@ -83,16 +83,16 @@ void AnalyzerTs::ParseTsTimelineData(CONST_CHAR_PTR data, uint32_t len)
         }
         switch (tsData->taskState) {
             case TS_TIMELINE_START_TASK_STATE:
-                iter->second.start = tsData->timestamp / frequency_;
+                iter->second.start = static_cast<uint64_t>(tsData->timestamp / frequency_);
                 break;
             case TS_TIMELINE_AICORE_START_TASK_STATE:
-                iter->second.startAicore = tsData->timestamp / frequency_;
+                iter->second.startAicore = static_cast<uint64_t>(tsData->timestamp / frequency_);
                 break;
             case TS_TIMELINE_AICORE_END_TASK_STATE:
-                iter->second.endAicore = tsData->timestamp / frequency_;
+                iter->second.endAicore = static_cast<uint64_t>(tsData->timestamp / frequency_);
                 break;
             case TS_TIMELINE_END_TASK_STATE:
-                iter->second.end = tsData->timestamp / frequency_;
+                iter->second.end = static_cast<uint64_t>(tsData->timestamp / frequency_);
                 break;
             default:
                 MSPROF_LOGD("AnalyzerTs dropped timeline task state: %u", tsData->taskState);
@@ -133,16 +133,16 @@ void AnalyzerTs::ParseTsKeypointData(CONST_CHAR_PTR data, uint32_t len)
             return;
         }
         KeypointOp opData = {0, 0, 0, 0, 0, 0, 0, 0};
-        opData.startTime = tsData->timestamp / frequency_;
+        opData.startTime = static_cast<uint64_t>(tsData->timestamp / frequency_);
         opData.indexId = tsData->indexId;
         opData.modelId = tsData->modelId;
         opData.streamId = tsData->streamId;
         opData.taskId = tsData->taskId;
         opData.uploaded = false;
         keypointOpInfo_.push_back(opData);
-    } else if (tsData->tagId == TS_KEYPOINT_END_TASK_STATE) {
+    } else if (tsData->tagId == TS_KEYPOINT_END_TASK_STATE && !keypointOpInfo_.empty()) {
         KeypointOp &lastOp = keypointOpInfo_.back();
-        uint64_t ts = tsData->timestamp / frequency_;
+        uint64_t ts = static_cast<uint64_t>(tsData->timestamp / frequency_);
         if (lastOp.endTime || ts <= lastOp.startTime) {
             MSPROF_LOGE("keypoint op error. indexId %llu, taskId %u, streamId %u, "
                         "startTime %llu, endTime %llu, timestamp %llu",
@@ -155,7 +155,7 @@ void AnalyzerTs::ParseTsKeypointData(CONST_CHAR_PTR data, uint32_t len)
                         lastOp.startTime, lastOp.endTime, lastOp.indexId, tsData->timestamp);
         }
     } else {
-        MSPROF_LOGE("keypoint tagId error. tagId %u", tsData->tagId);
+        MSPROF_LOGE("keypoint tagId error. tagId %u, keypointOp %u", tsData->tagId, keypointOpInfo_.size());
         return;
     }
     analyzedBytes_ += sizeof(TsProfileKeypoint);

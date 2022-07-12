@@ -68,22 +68,22 @@ class CalculateRtsDataConst:
 
 def _get_task_schedule_sql() -> str:
     sql = "select ifnull(taskType, '')||'|'||ifnull(api, '')||'|'||task_id||'|'||stream_id||'|'||batch_id, " \
-          "sum(case when waittime=0 or completetime=0.0 then 0 " \
-          "when runtime<waittime then completetime-waittime " \
-          "else runtime-waittime end) as waitting," \
-          " sum(case when runtime=0 or completetime=0.0 then 0 " \
-          "else completetime-runtime end) as running, " \
-          "sum(case when pendingtime=0 or completetime=0.0 then 0 " \
-          "else completetime-pendingtime end) as pending," \
-          "min(case when completetime=0.0 then 0 " \
-          "when runtime=0 then completetime-pendingtime " \
-          "else completetime-runtime end) as min_time," \
-          "max(case when completetime=0.0 then 0 " \
-          "when runtime=0 then completetime-pendingtime " \
-          "else completetime-runtime end) as max_time, " \
-          "sum(case when completetime=0.0 then 0 " \
-          "when runtime=0 then completetime-pendingtime " \
-          "else completetime-runtime end)/count(rowid) as avg, " \
+          "sum(case when waittime=0 or complete=0.0 then 0 " \
+          "when running<waittime then complete-waittime " \
+          "else running-waittime end) as waitting," \
+          " sum(case when running=0 or complete=0.0 then 0 " \
+          "else complete-running end) as running, " \
+          "sum(case when pendingtime=0 or complete=0.0 then 0 " \
+          "else complete-pendingtime end) as pending," \
+          "min(case when complete=0.0 then 0 " \
+          "when running=0 then complete-pendingtime " \
+          "else complete-running end) as min_time," \
+          "max(case when complete=0.0 then 0 " \
+          "when running=0 then complete-pendingtime " \
+          "else complete-running end) as max_time, " \
+          "sum(case when complete=0.0 then 0 " \
+          "when running=0 then complete-pendingtime " \
+          "else complete-running end)/count(rowid) as avg, " \
           "count(rowid) from TaskTime where device_id = ?" \
           "group by taskType, api, task_id, stream_id, batch_id;"
     return sql
@@ -120,7 +120,7 @@ def calculate_task_schedule_data(curs: any, device: str) -> list:
                  _per_state_time.get('running') / NumberConstant.NS_TO_US,
                  _per_state_time.get('pending') / NumberConstant.NS_TO_US,
                  StrConstant.TASK_TYPE_MAPPING.get(str(tasktype), "unknown {}".format(str(tasktype))),
-                 StrConstant.API_TYPE_MAPPING.get(str(api), "unknown {}".format(str(api))),
+                 api,
                  task_id, stream_id, device, batch_id))
         return sorted(total_data, key=lambda x: float(x[0].replace('%', '')), reverse=True)
     except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
@@ -158,7 +158,7 @@ def _compute_multi_process(timeline_data: list, project_path: str, task_time: di
     cpu_count = multiprocessing.cpu_count() / 3 * 3
     processes = []
     step = len(timeline_data)
-    if len(timeline_data) > CalculateRtsDataConst.MAX_LENGTH:
+    if len(timeline_data) > CalculateRtsDataConst.MAX_LENGTH and not NumberConstant.is_zero(cpu_count):
         step = int(len(timeline_data) / cpu_count) - 1
     count = 0
     for i in range(0, len(timeline_data), step):

@@ -19,7 +19,7 @@ from common_func.ms_multi_process import MsMultiProcess
 from common_func.msvp_common import is_valid_original_data
 from common_func.path_manager import PathManager
 from framework.offset_calculator import OffsetCalculator
-from model.hardware.hbm_model import HbmModel
+from msmodel.hardware.hbm_model import HbmModel
 from msparser.data_struct_size_constant import StructFmt
 from profiling_bean.prof_enum.data_tag import DataTag
 from common_func.msprof_exception import ProfException
@@ -71,15 +71,6 @@ class ParsingHBMData(MsMultiProcess):
             logging.error("%s: %s", file_name, err, exc_info=Constant.TRACE_BACK_SWITCH)
             return status
 
-    def _original_data_handler(self: any, file_name: str) -> None:
-        device_id = self.sample_config.get("device_id", "0")
-        logging.info("start parsing HBM data file: %s", file_name)
-        status = self.read_binary_data(file_name, device_id, '0')  # replay is is 0
-        FileManager.add_complete_file(self.project_path, file_name)
-        if status:
-            logging.error('Insert HBM bandwidth data error.')
-        logging.info("Create HBM DB finished!")
-
     def start_parsing_data_file(self: any) -> None:
         """
         parsing data file
@@ -114,3 +105,12 @@ class ParsingHBMData(MsMultiProcess):
                 self.save()
         except (OSError, SystemError, ValueError, TypeError, RuntimeError, ProfException) as hbm_err:
             logging.error(str(hbm_err), exc_info=Constant.TRACE_BACK_SWITCH)
+
+    def _original_data_handler(self: any, file_name: str) -> None:
+        device_id = self.sample_config.get("device_id", "0")
+        logging.info("start parsing HBM data file: %s", file_name)
+        status = self.read_binary_data(file_name, device_id, '0')  # replay is is 0
+        FileManager.add_complete_file(self.project_path, file_name)
+        if status:
+            logging.error('Insert HBM bandwidth data error.')
+        logging.info("Create HBM DB finished!")

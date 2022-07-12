@@ -14,7 +14,7 @@ from common_func.file_manager import FileManager, check_path_valid, FileOpen
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.msvp_common import is_valid_original_data
 from common_func.path_manager import PathManager
-from model.hardware.hccs_model import HccsModel
+from msmodel.hardware.hccs_model import HccsModel
 from profiling_bean.prof_enum.data_tag import DataTag
 
 
@@ -32,17 +32,6 @@ class ParsingHCCSData(MsMultiProcess):
         self.device_id = self.sample_config.get("device_id", "0")
         self.origin_data = []
         self._file_list.sort(key=lambda x: int(x.split("_")[-1]))
-
-    def _read_binary_helper(self: any, _file: any) -> None:
-        while True:
-            one_slice = _file.readline(Constant.MAX_READ_LINE_BYTES)
-            if one_slice:
-                timestamp, tx_count, rx_count = one_slice.split()
-                timestamp = timestamp.replace(':', '')
-                self.origin_data.append(
-                    (self.device_id, timestamp, tx_count, rx_count))
-            else:
-                break
 
     def read_binary_data(self: any, file_name: str) -> None:
         """
@@ -94,3 +83,14 @@ class ParsingHCCSData(MsMultiProcess):
                 self.save()
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as hccs_err:
             logging.error(str(hccs_err), exc_info=Constant.TRACE_BACK_SWITCH)
+
+    def _read_binary_helper(self: any, _file: any) -> None:
+        while True:
+            one_slice = _file.readline(Constant.MAX_READ_LINE_BYTES)
+            if one_slice:
+                timestamp, tx_count, rx_count = one_slice.split()
+                timestamp = timestamp.replace(':', '')
+                self.origin_data.append(
+                    (self.device_id, timestamp, tx_count, rx_count))
+            else:
+                break

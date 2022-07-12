@@ -1,10 +1,10 @@
-add_subdirectory(transport) # done
-add_subdirectory(msprof) # done
-add_subdirectory(app) # done
-add_subdirectory(common) # done
-add_subdirectory(driver) # done
-add_subdirectory(job_wrapper) # done
-add_subdirectory(message)  # done
-add_subdirectory(streamio) # done
-add_subdirectory(msprofbin) # done
-add_subdirectory(stub_utest) # done
+add_subdirectory(transport)
+add_subdirectory(msprof)
+add_subdirectory(app)
+add_subdirectory(common)
+add_subdirectory(driver)
+add_subdirectory(job_wrapper)
+add_subdirectory(message)
+add_subdirectory(streamio)
+add_subdirectory(msprofbin)
+add_subdirectory(stub_utest)

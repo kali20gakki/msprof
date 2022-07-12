@@ -1,11 +1,13 @@
 #include "common/util/error_manager/error_manager.h"
 
-ErrorManager &ErrorManager::GetInstance() {
+ErrorManager &ErrorManager::GetInstance()
+{
   static ErrorManager instance;
   return instance;
 }
 
-error_message::Context &ErrorManager::GetErrorManagerContext() {
+error_message::Context &ErrorManager::GetErrorManagerContext()
+{
     error_message::Context error_context = {0UL, "", "", ""};
     return error_context;
 }

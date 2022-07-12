@@ -24,19 +24,6 @@ class FileManager:
     """
     FILE_AUTHORITY = 0o640
 
-    @staticmethod
-    def macth_process(pattern: str, file_name: str) -> any:
-        """
-        match files
-        :param pattern: check pattern
-        :param file_name: check files
-        :return:
-        """
-        matched_name = re.match(pattern, file_name)
-        if matched_name:
-            return matched_name
-        return EmptyClass("empty match name")
-
     @classmethod
     def is_info_json_file(cls: any, file_name: str) -> any:
         """
@@ -96,8 +83,19 @@ class FileManager:
         except OSError as err:
             error(os.path.basename(__file__), str(err))
             return False
-        finally:
-            pass
+
+    @staticmethod
+    def macth_process(pattern: str, file_name: str) -> any:
+        """
+        match files
+        :param pattern: check pattern
+        :param file_name: check files
+        :return:
+        """
+        matched_name = re.match(pattern, file_name)
+        if matched_name:
+            return matched_name
+        return EmptyClass("empty match name")
 
 
 class FileOpen:

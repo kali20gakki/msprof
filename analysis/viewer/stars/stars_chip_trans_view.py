@@ -15,7 +15,7 @@ from common_func.ms_constant.stars_constant import StarsConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.trace_view_header_constant import TraceViewHeaderConstant
 from common_func.trace_view_manager import TraceViewManager
-from model.interface.view_model import ViewModel
+from msmodel.interface.view_model import ViewModel
 
 
 class StarsChipTransView:
@@ -26,8 +26,8 @@ class StarsChipTransView:
     PA_LINK_TX = "PA Link Tx"
     PCIE_WRITE = "PCIE Write Bandwidth"
     PCIE_READ = "PCIE Read Bandwidth"
-    PA_ID = "pa link id"
-    PCIE_ID = "pcie id"
+    PA_ID = "PA Link ID"
+    PCIE_ID = "PCIE ID"
 
     TIMELINE_MAP = {StarsConstant.TYPE_STARS_PA: [PA_LINK_RX, PA_LINK_TX, PA_ID],
                     StarsConstant.TYPE_STARS_PCIE: [PCIE_WRITE, PCIE_READ, PCIE_ID]}

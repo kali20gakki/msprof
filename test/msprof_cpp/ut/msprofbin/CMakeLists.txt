@@ -42,7 +42,7 @@ set(common_file
     ${MSPROF_SOURCE_DIR}/dvvp/transport/hdc/hdc_transport.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/transport/hdc/device_transport.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/transport/hdc/platform/rpc/dev_mgr_api.cpp
-    ${MSPROF_SOURCE_DIR}/dvvp/adx/stub_lhisi/adx_prof_api.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/adx/stub/adx_prof_api.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/depend/src/slog_plugin.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/depend/src/plugin_handle.cpp
 )
@@ -76,6 +76,7 @@ add_executable(msprof_bin_utest
     ../stub/profile_drv_user_stub.cpp
     ../stub/hdc-api-stub.cpp
     ../stub/hdc-log-stub.cpp
+    ../stub/ide-cmd-stub.cpp
     ../stub/devdrv_runtime_api_stub.cpp
     ../../stub/driver_plugin_stub.cpp
     ${CppPath}
@@ -84,7 +85,7 @@ add_executable(msprof_bin_utest
 target_include_directories(msprof_bin_utest PRIVATE
     ${GTEST_INCLUDE_DIR}
     ${MOCKCPP_INCLUDE_DIR}
-    ${TOP_DIR}/opensource/securec/include
+    ${TOP_DIR}/platform/securec/include
     ${TOP_DIR}/opensource/json/include
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/slog
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/metadef/error_manager/error_manager_stub
@@ -141,7 +142,7 @@ target_compile_definitions(msprof_bin_utest PRIVATE
 
 target_link_libraries(msprof_bin_utest PRIVATE
     ascend_protobuf_static
-    c_sec
+    c_sec_static
     pthread
     ${GTEST_STATIC_LIBRARY}
     ${MOCKCPP_STATIC_LIBRARY}

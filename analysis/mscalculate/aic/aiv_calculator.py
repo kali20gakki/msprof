@@ -6,7 +6,7 @@ Copyright Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
 from common_func.config_mgr import ConfigMgr
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.utils import Utils
-from model.aic.aiv_pmu_model import AivPmuModel
+from msmodel.aic.aiv_pmu_model import AivPmuModel
 from mscalculate.aic.aic_calculator import AicCalculator
 from mscalculate.aic.aic_utils import AicPmuUtils
 from profiling_bean.prof_enum.data_tag import DataTag
@@ -32,13 +32,6 @@ class AivCalculator(AicCalculator, MsMultiProcess):
         """
         self._parse_all_file()
 
-    def _parse(self: any, all_log_bytes: bytes) -> None:
-        aic_pmu_events = AicPmuUtils.get_pmu_events(
-            ConfigMgr.read_sample_config(self._project_path).get('aiv_profiling_events'))
-        for log_data in Utils.chunks(all_log_bytes, self.AICORE_LOG_SIZE):
-            _aic_pmu_log = AivPmuBean.decode(log_data)
-            self.calculate_pmu_list(_aic_pmu_log, aic_pmu_events, self._aiv_data_list)
-
     def save(self: any) -> None:
         """
         :return:
@@ -57,3 +50,10 @@ class AivCalculator(AicCalculator, MsMultiProcess):
         if self._file_list:
             self.aiv_calculate()
             self.save()
+
+    def _parse(self: any, all_log_bytes: bytes) -> None:
+        aic_pmu_events = AicPmuUtils.get_pmu_events(
+            ConfigMgr.read_sample_config(self._project_path).get('aiv_profiling_events'))
+        for log_data in Utils.chunks(all_log_bytes, self.AICORE_LOG_SIZE):
+            _aic_pmu_log = AivPmuBean.decode(log_data)
+            self.calculate_pmu_list(_aic_pmu_log, aic_pmu_events, self._aiv_data_list)

@@ -50,10 +50,10 @@ class TestRunTimeApiParser(unittest.TestCase):
             check.read_binary_data('test', 256)
 
     def test_save(self):
-        with mock.patch('model.runtime.runtime_api_model.RuntimeApiModel.init'), \
-                mock.patch('model.runtime.runtime_api_model.RuntimeApiModel.create_table'), \
-                mock.patch('model.runtime.runtime_api_model.RuntimeApiModel.flush'), \
-                mock.patch('model.runtime.runtime_api_model.RuntimeApiModel.finalize'):
+        with mock.patch('msmodel.runtime.runtime_api_model.RuntimeApiModel.init'), \
+                mock.patch('msmodel.runtime.runtime_api_model.RuntimeApiModel.create_table'), \
+                mock.patch('msmodel.runtime.runtime_api_model.RuntimeApiModel.flush'), \
+                mock.patch('msmodel.runtime.runtime_api_model.RuntimeApiModel.finalize'):
             InfoConfReader()._info_json = {"devices": '0'}
             check = RunTimeApiParser(self.file_list, CONFIG)
             check._data_list = [123]

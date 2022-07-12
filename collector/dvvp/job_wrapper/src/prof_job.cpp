@@ -5,6 +5,7 @@
  */
 #include "prof_job.h"
 #include "config/config_manager.h"
+#include "config/config.h"
 #include "param_validation.h"
 #include "prof_channel_manager.h"
 #include "proto/profiler.pb.h"
@@ -456,7 +457,7 @@ int ProfFftsProfileJob::Uninit()
     return PROFILING_SUCCESS;
 }
 
-ProfBiuPerfJob::ProfBiuPerfJob()
+ProfBiuPerfJob::ProfBiuPerfJob() : sampleCycle_(DEFAULT_PROFILING_BIU_FREQ)
 {
 }
 
@@ -468,7 +469,7 @@ int ProfBiuPerfJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 {
     CHECK_JOB_CONTEXT_PARAM_RET(cfg, PROFILING_FAILED);
     collectionJobCfg_ = cfg;
-    sampleCycle_ = cfg->comParams->params->biu_freq;
+    sampleCycle_ = static_cast<uint32_t>(cfg->comParams->params->biu_freq);
     if (cfg->comParams->params->host_profiling) {
         return PROFILING_FAILED;
     }
@@ -487,7 +488,7 @@ int ProfBiuPerfJob::Process()
 {
     CHECK_JOB_CONTEXT_PARAM_RET(collectionJobCfg_, PROFILING_FAILED);
     int32_t ret = PROFILING_SUCCESS;
-    uint32_t devId = collectionJobCfg_->comParams->devId;
+    uint32_t devId = static_cast<uint32_t>(collectionJobCfg_->comParams->devId);
     std::vector<std::string> coreName = {"aic", "aiv0", "aiv1"};
 
     for (auto groupId : groupIds_) {

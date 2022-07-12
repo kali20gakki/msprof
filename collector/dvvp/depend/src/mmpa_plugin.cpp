@@ -8,12 +8,18 @@
 
 #include "securec.h"
 
-namespace Analysis {
+namespace Collector {
 namespace Dvvp {
 namespace Plugin {
-MmpaPlugin::~MmpaPlugin()
+void MmpaPlugin::LoadMmpaSo()
 {
-    pluginHandle_.CloseHandle();
+    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
+    if (!pluginHandle_.HasLoad()) {
+        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+        if (ret != PLUGIN_LOAD_SUCCESS) {
+            return;
+        }
+    }
 }
 
 bool MmpaPlugin::IsFuncExist(const std::string &funcName) const
@@ -23,121 +29,87 @@ bool MmpaPlugin::IsFuncExist(const std::string &funcName) const
 
 INT32 MmpaPlugin::MsprofMmOpen2(const CHAR *pathName, INT32 flags, MODE mode)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");;
+    PthreadOnce(&loadFlag_, []()->void {MmpaPlugin::instance()->LoadMmpaSo();});
+    if (mmOpen2_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<INT32, const CHAR *, INT32, MODE>("mmOpen2", mmOpen2_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
     }
-    MSPROF_MMOPEN2_T func;
-    ret = pluginHandle_.GetFunction<INT32, const CHAR *, INT32, MODE>("mmOpen2", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return -1;
-    }
-    return func(pathName, flags, mode);
+    return mmOpen2_(pathName, flags, mode);
 }
 
 mmSsize_t MmpaPlugin::MsprofMmRead(INT32 fd, VOID *buf, UINT32 bufLen)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {MmpaPlugin::instance()->LoadMmpaSo();});
+    if (mmRead_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<mmSsize_t, INT32, VOID *, UINT32>("mmRead", mmRead_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
-            return -1;
+            return 0;
         }
     }
-    MSPROF_MMREAD_T func;
-    ret = pluginHandle_.GetFunction<mmSsize_t, INT32, VOID *, UINT32>("mmRead", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return -1;
-    }
-    return func(fd, buf, bufLen);
+    return mmRead_(fd, buf, bufLen);
 }
 
 mmSsize_t MmpaPlugin::MsprofMmWrite(INT32 fd, VOID *buf, UINT32 bufLen)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {MmpaPlugin::instance()->LoadMmpaSo();});
+    if (mmWrite_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<mmSsize_t, INT32, VOID *, UINT32>("mmWrite", mmWrite_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
-            return -1;
+            return 0;
         }
     }
-    MSPROF_MMWRITE_T func;
-    ret = pluginHandle_.GetFunction<mmSsize_t, INT32, VOID *, UINT32>("mmWrite", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return -1;
-    }
-    return func(fd, buf, bufLen);
+    return mmWrite_(fd, buf, bufLen);
 }
 
 INT32 MmpaPlugin::MsprofMmClose(INT32 fd)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {MmpaPlugin::instance()->LoadMmpaSo();});
+    if (mmClose_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<INT32, INT32>("mmClose", mmClose_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
     }
-    MSPROF_MMCLOSE_T func;
-    ret = pluginHandle_.GetFunction<INT32, INT32>("mmClose", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return -1;
-    }
-    return func(fd);
+    return mmClose_(fd);
 }
 
 CHAR *MmpaPlugin::MsprofMmGetErrorFormatMessage(mmErrorMsg errnum, CHAR *buf, mmSize size)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {MmpaPlugin::instance()->LoadMmpaSo();});
+    if (mmGetErrorFormatMessage_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<CHAR *, mmErrorMsg, CHAR *, mmSize>("mmGetErrorFormatMessage",
+            mmGetErrorFormatMessage_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return nullptr;
         }
     }
-    MSPROF_MMGETERRORFORMATMESSAGE_T func;
-    ret = pluginHandle_.GetFunction<CHAR *, mmErrorMsg, CHAR *, mmSize>("mmGetErrorFormatMessage", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return nullptr;
-    }
-    return func(errnum, buf, size);
+    return mmGetErrorFormatMessage_(errnum, buf, size);
 }
 
 INT32 MmpaPlugin::MsprofMmGetErrorCode()
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {MmpaPlugin::instance()->LoadMmpaSo();});
+    if (mmGetErrorCode_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<INT32>("mmGetErrorCode", mmGetErrorCode_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
     }
-    MSPROF_MMGETERRORCODE_T func;
-    ret = pluginHandle_.GetFunction<INT32>("mmGetErrorCode", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return -1;
-    }
-    return func();
+    return mmGetErrorCode_();
 }
 
 INT32 MmpaPlugin::MsprofMmAccess2(const CHAR *pathName, INT32 mode)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {MmpaPlugin::instance()->LoadMmpaSo();});
+    if (mmAccess2_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<INT32, const CHAR *, INT32>("mmAccess2", mmAccess2_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
     }
-    MSPROF_MMACCESS2_T func;
-    ret = pluginHandle_.GetFunction<INT32, const CHAR *, INT32>("mmAccess2", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return -1;
-    }
-    return func(pathName, mode);
+    return mmAccess2_(pathName, mode);
 }
 
 INT32 MmpaPlugin::MsprofMmGetOptLong(INT32 argc,
@@ -146,984 +118,716 @@ INT32 MmpaPlugin::MsprofMmGetOptLong(INT32 argc,
                                      const mmStructOption *longOpts,
                                      INT32 *longIndex)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {MmpaPlugin::instance()->LoadMmpaSo();});
+    if (mmGetOptLong_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<INT32, INT32, CHAR *const *, const CHAR *,
+                              const mmStructOption *, INT32 *>("mmGetOptLong", mmGetOptLong_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
     }
-    MSPROF_MMGETOPTLONG_T func;
-    ret = pluginHandle_.GetFunction<INT32, INT32, CHAR *const *, const CHAR *,
-                                    const mmStructOption *, INT32 *>("mmGetOptLong", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return -1;
-    }
-    return func(argc, argv, opts, longOpts, longIndex);
+    return mmGetOptLong_(argc, argv, opts, longOpts, longIndex);
 }
 
 INT32 MmpaPlugin::MsprofMmGetOptInd()
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {MmpaPlugin::instance()->LoadMmpaSo();});
+    if (mmGetOptInd_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<INT32>("mmGetOptInd", mmGetOptInd_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
     }
-    MSPROF_MMGETOPTIND_T func;
-    ret = pluginHandle_.GetFunction<INT32>("mmGetOptInd", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return -1;
-    }
-    return func();
+    return mmGetOptInd_();
 }
 
 CHAR *MmpaPlugin::MsprofMmGetOptArg()
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {MmpaPlugin::instance()->LoadMmpaSo();});
+    if (mmGetOptArg_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<CHAR *>("mmGetOptArg", mmGetOptArg_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return nullptr;
         }
     }
-    MSPROF_MMGETOPTARG_T func;
-    ret = pluginHandle_.GetFunction<CHAR *>("mmGetOptArg", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return nullptr;
-    }
-    return func();
+    return mmGetOptArg_();
 }
 
 INT32 MmpaPlugin::MsprofMmSleep(UINT32 milliSecond)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {MmpaPlugin::instance()->LoadMmpaSo();});
+    if (mmSleep_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<INT32, UINT32>("mmSleep", mmSleep_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
     }
-    MSPROF_MMSLEEP_T func;
-    ret = pluginHandle_.GetFunction<INT32, UINT32>("mmSleep", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return -1;
-    }
-    return func(milliSecond);
+    return mmSleep_(milliSecond);
 }
 
 INT32 MmpaPlugin::MsprofMmUnlink(const CHAR *filename)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {MmpaPlugin::instance()->LoadMmpaSo();});
+    if (mmUnlink_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<INT32, const CHAR *>("mmUnlink", mmUnlink_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
     }
-    MSPROF_MMUNLINK_T func;
-    ret = pluginHandle_.GetFunction<INT32, const CHAR *>("mmUnlink", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return -1;
-    }
-    return func(filename);
+    return mmUnlink_(filename);
 }
 
 INT32 MmpaPlugin::MsprofMmGetTid()
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {MmpaPlugin::instance()->LoadMmpaSo();});
+    if (mmGetTid_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<INT32>("mmGetTid", mmGetTid_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
     }
-    MSPROF_MMGETTID_T func;
-    ret = pluginHandle_.GetFunction<INT32>("mmGetTid", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return -1;
-    }
-    return func();
+    return mmGetTid_();
 }
 
 INT32 MmpaPlugin::MsprofMmGetTimeOfDay(mmTimeval *timeVal, mmTimezone *timeZone)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {MmpaPlugin::instance()->LoadMmpaSo();});
+    if (mmGetTimeOfDay_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<INT32, mmTimeval *, mmTimezone *>("mmGetTimeOfDay",
+            mmGetTimeOfDay_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
     }
-    MSPROF_MMGETTIMEOFDAY_T func;
-    ret = pluginHandle_.GetFunction<INT32, mmTimeval *, mmTimezone *>("mmGetTimeOfDay", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return -1;
-    }
-    return func(timeVal, timeZone);
+    return mmGetTimeOfDay_(timeVal, timeZone);
 }
 
 mmTimespec MmpaPlugin::MsprofMmGetTickCount()
 {
     mmTimespec rts;
     memset_s(&rts, sizeof(mmTimespec), 0, sizeof(mmTimespec));
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {MmpaPlugin::instance()->LoadMmpaSo();});
+    if (mmGetTickCount_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<mmTimespec>("mmGetTickCount", mmGetTickCount_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return rts;
         }
     }
-    MSPROF_MMGETTICKCOUNT_T func;
-    ret = pluginHandle_.GetFunction<mmTimespec>("mmGetTickCount", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return rts;
-    }
-    return func();
+    return mmGetTickCount_();
 }
 
 INT32 MmpaPlugin::MsprofMmGetFileSize(const CHAR *fileName, ULONGLONG *length)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {MmpaPlugin::instance()->LoadMmpaSo();});
+    if (mmGetFileSize_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<INT32, const CHAR *, ULONGLONG *>("mmGetFileSize",
+            mmGetFileSize_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
     }
-    MSPROF_MMGETFILESIZE_T func;
-    ret = pluginHandle_.GetFunction<INT32, const CHAR *, ULONGLONG *>("mmGetFileSize", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return -1;
-    }
-    return func(fileName, length);
+    return mmGetFileSize_(fileName, length);
 }
 
 INT32 MmpaPlugin::MsprofMmGetDiskFreeSpace(const CHAR *path, mmDiskSize *diskSize)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {MmpaPlugin::instance()->LoadMmpaSo();});
+    if (mmGetDiskFreeSpace_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<INT32, const CHAR *, mmDiskSize *>("mmGetDiskFreeSpace",
+            mmGetDiskFreeSpace_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
     }
-    MSPROF_MMGETDISKFREESPACE_T func;
-    ret = pluginHandle_.GetFunction<INT32, const CHAR *, mmDiskSize *>("mmGetDiskFreeSpace", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return -1;
-    }
-    return func(path, diskSize);
+    return mmGetDiskFreeSpace_(path, diskSize);
 }
 
 INT32 MmpaPlugin::MsprofMmIsDir(const CHAR *fileName)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {MmpaPlugin::instance()->LoadMmpaSo();});
+    if (mmIsDir_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<INT32, const CHAR *>("mmIsDir", mmIsDir_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
     }
-    MSPROF_MMISDIR_T func;
-    ret = pluginHandle_.GetFunction<INT32, const CHAR *>("mmIsDir", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return -1;
-    }
-    return func(fileName);
+    return mmIsDir_(fileName);
 }
 
 INT32 MmpaPlugin::MsprofMmAccess(const CHAR *pathName)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {MmpaPlugin::instance()->LoadMmpaSo();});
+    if (mmAccess_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<INT32, const CHAR *>("mmAccess", mmAccess_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
     }
-    MSPROF_MMACCESS_T func;
-    ret = pluginHandle_.GetFunction<INT32, const CHAR *>("mmAccess", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return -1;
-    }
-    return func(pathName);
+    return mmAccess_(pathName);
 }
 
 CHAR *MmpaPlugin::MsprofMmDirName(CHAR *path)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {MmpaPlugin::instance()->LoadMmpaSo();});
+    if (mmDirName_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<CHAR *, CHAR *>("mmDirName", mmDirName_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return nullptr;
         }
     }
-    MSPROF_MMDIRNAME_T func;
-    ret = pluginHandle_.GetFunction<CHAR *, CHAR *>("mmDirName", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return nullptr;
-    }
-    return func(path);
+    return mmDirName_(path);
 }
 
 CHAR *MmpaPlugin::MsprofMmBaseName(CHAR *path)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {MmpaPlugin::instance()->LoadMmpaSo();});
+    if (mmBaseName_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<CHAR *, CHAR *>("mmBaseName", mmBaseName_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return nullptr;
         }
     }
-    MSPROF_MMBASENAME_T func;
-    ret = pluginHandle_.GetFunction<CHAR *, CHAR *>("mmBaseName", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return nullptr;
-    }
-    return func(path);
+    return mmBaseName_(path);
 }
 
 INT32 MmpaPlugin::MsprofMmMkdir(const CHAR *pathName, mmMode_t mode)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {MmpaPlugin::instance()->LoadMmpaSo();});
+    if (mmMkdir_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<INT32, const CHAR *, mmMode_t>("mmMkdir", mmMkdir_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
     }
-    MSPROF_MMMKDIR_T func;
-    ret = pluginHandle_.GetFunction<INT32, const CHAR *, mmMode_t>("mmMkdir", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return -1;
-    }
-    return func(pathName, mode);
+    return mmMkdir_(pathName, mode);
 }
 
 INT32 MmpaPlugin::MsprofMmChmod(const CHAR *filename, INT32 mode)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {MmpaPlugin::instance()->LoadMmpaSo();});
+    if (mmChmod_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<INT32, const CHAR *, INT32>("mmChmod", mmChmod_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
     }
-    MSPROF_MMCHMOD_T func;
-    ret = pluginHandle_.GetFunction<INT32, const CHAR *, INT32>("mmChmod", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return -1;
-    }
-    return func(filename, mode);
+    return mmChmod_(filename, mode);
 }
 
 INT32 MmpaPlugin::MsprofMmScandir(const CHAR *path, mmDirent ***entryList, mmFilter filterFunc, mmSort sort)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {MmpaPlugin::instance()->LoadMmpaSo();});
+    if (mmScandir_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<INT32, const CHAR *, mmDirent ***, mmFilter, mmSort>("mmScandir",
+            mmScandir_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
     }
-    MSPROF_MMSCANDIR_T func;
-    ret = pluginHandle_.GetFunction<INT32, const CHAR *, mmDirent ***, mmFilter, mmSort>("mmScandir", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return -1;
-    }
-    return func(path, entryList, filterFunc, sort);
+    return mmScandir_(path, entryList, filterFunc, sort);
 }
 
 INT32 MmpaPlugin::MsprofMmRmdir(const CHAR *pathName)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {MmpaPlugin::instance()->LoadMmpaSo();});
+    if (mmRmdir_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<INT32, const CHAR *>("mmRmdir", mmRmdir_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
     }
-    MSPROF_MMRMDIR_T func;
-    ret = pluginHandle_.GetFunction<INT32, const CHAR *>("mmRmdir", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return -1;
-    }
-    return func(pathName);
+    return mmRmdir_(pathName);
 }
 
 INT32 MmpaPlugin::MsprofMmRealPath(const CHAR *path, CHAR *realPath, INT32 realPathLen)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {MmpaPlugin::instance()->LoadMmpaSo();});
+    if (mmRealPath_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<INT32, const CHAR *, CHAR *, INT32>("mmRealPath", mmRealPath_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
     }
-    MSPROF_MMREALPATH_T func;
-    ret = pluginHandle_.GetFunction<INT32, const CHAR *, CHAR *, INT32>("mmRealPath", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return -1;
-    }
-    return func(path, realPath, realPathLen);
+    return mmRealPath_(path, realPath, realPathLen);
 }
 
 INT32 MmpaPlugin::MsprofMmCreateProcess(const CHAR *fileName, const mmArgvEnv *env,
                                         const CHAR* stdoutRedirectFile, mmProcess *id)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {MmpaPlugin::instance()->LoadMmpaSo();});
+    if (mmCreateProcess_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<INT32, const CHAR *, const mmArgvEnv *,
+                              const CHAR*, mmProcess *>("mmCreateProcess", mmCreateProcess_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
     }
-    MSPROF_MMCREATEPROCESS_T func;
-    ret = pluginHandle_.GetFunction<INT32, const CHAR *, const mmArgvEnv *,
-        const CHAR*, mmProcess *>("mmCreateProcess", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return -1;
-    }
-    return func(fileName, env, stdoutRedirectFile, id);
+    return mmCreateProcess_(fileName, env, stdoutRedirectFile, id);
 }
 
 VOID MmpaPlugin::MsprofMmScandirFree(mmDirent **entryList, INT32 count)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {MmpaPlugin::instance()->LoadMmpaSo();});
+    if (mmScandirFree_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<VOID, mmDirent **, INT32>("mmScandirFree", mmScandirFree_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return;
         }
     }
-    MSPROF_MMSCANDIRFREE_T func;
-    ret = pluginHandle_.GetFunction<VOID, mmDirent **, INT32>("mmScandirFree", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return;
-    }
-    return func(entryList, count);
+    return mmScandirFree_(entryList, count);
 }
 
 INT32 MmpaPlugin::MsprofMmChdir(const CHAR *path)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {MmpaPlugin::instance()->LoadMmpaSo();});
+    if (mmChdir_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<INT32, const CHAR *>("mmChdir", mmChdir_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
     }
-    MSPROF_MMCHDIR_T func;
-    ret = pluginHandle_.GetFunction<INT32, const CHAR *>("mmChdir", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return -1;
-    }
-    return func(path);
+    return mmChdir_(path);
 }
 
 INT32 MmpaPlugin::MsprofMmWaitPid(mmProcess pid, INT32 *status, INT32 options)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {MmpaPlugin::instance()->LoadMmpaSo();});
+    if (mmWaitPid_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<INT32, mmProcess, INT32 *, INT32>("mmWaitPid", mmWaitPid_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
     }
-    MSPROF_MMWAITPID_T func;
-    ret = pluginHandle_.GetFunction<INT32, mmProcess, INT32 *, INT32>("mmWaitPid", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return -1;
-    }
-    return func(pid, status, options);
+    return mmWaitPid_(pid, status, options);
 }
 
 INT32 MmpaPlugin::MsprofMmGetMac(mmMacInfo **list, INT32 *count)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {MmpaPlugin::instance()->LoadMmpaSo();});
+    if (mmGetMac_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<INT32, mmMacInfo **, INT32 *>("mmGetMac", mmGetMac_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
     }
-    MSPROF_MMGETMAC_T func;
-    ret = pluginHandle_.GetFunction<INT32, mmMacInfo **, INT32 *>("mmGetMac", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return -1;
-    }
-    return func(list, count);
+    return mmGetMac_(list, count);
 }
 
 INT32 MmpaPlugin::MsprofMmGetMacFree(mmMacInfo *list, INT32 count)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {MmpaPlugin::instance()->LoadMmpaSo();});
+    if (mmGetMacFree_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<INT32, mmMacInfo *, INT32>("mmGetMacFree", mmGetMacFree_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
     }
-    MSPROF_MMGETMACFREE_T func;
-    ret = pluginHandle_.GetFunction<INT32, mmMacInfo *, INT32>("mmGetMacFree", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return -1;
-    }
-    return func(list, count);
+    return mmGetMacFree_(list, count);
 }
 
 INT32 MmpaPlugin::MsprofMmGetLocalTime(mmSystemTime_t *sysTimePtr)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {MmpaPlugin::instance()->LoadMmpaSo();});
+    if (mmGetLocalTime_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<INT32, mmSystemTime_t *>("mmGetLocalTime", mmGetLocalTime_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
     }
-    MSPROF_MMGETLOCALTIME_T func;
-    ret = pluginHandle_.GetFunction<INT32, mmSystemTime_t *>("mmGetLocalTime", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return -1;
-    }
-    return func(sysTimePtr);
+    return mmGetLocalTime_(sysTimePtr);
 }
 
 INT32 MmpaPlugin::MsprofMmGetPid()
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {MmpaPlugin::instance()->LoadMmpaSo();});
+    if (mmGetPid_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<INT32>("mmGetPid", mmGetPid_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
     }
-    MSPROF_MMGETPID_T func;
-    ret = pluginHandle_.GetFunction<INT32>("mmGetPid", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return -1;
-    }
-    return func();
+    return mmGetPid_();
 }
 
 INT32 MmpaPlugin::MsprofMmGetCwd(CHAR *buffer, INT32 maxLen)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {MmpaPlugin::instance()->LoadMmpaSo();});
+    if (mmGetCwd_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<INT32, CHAR *, INT32>("mmGetCwd", mmGetCwd_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
     }
-    MSPROF_MMGETCWD_T func;
-    ret = pluginHandle_.GetFunction<INT32, CHAR *, INT32>("mmGetCwd", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return -1;
-    }
-    return func(buffer, maxLen);
+    return mmGetCwd_(buffer, maxLen);
 }
 
 INT32 MmpaPlugin::MsprofMmGetEnv(const CHAR *name, CHAR *value, UINT32 len)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {MmpaPlugin::instance()->LoadMmpaSo();});
+    if (mmGetEnv_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<INT32, const CHAR *, CHAR *, UINT32>("mmGetEnv", mmGetEnv_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
     }
-    MSPROF_MMGETENV_T func;
-    ret = pluginHandle_.GetFunction<INT32, const CHAR *, CHAR *, UINT32>("mmGetEnv", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return -1;
-    }
-    return func(name, value, len);
+    return mmGetEnv_(name, value, len);
 }
 
 INT32 MmpaPlugin::MsprofMmCreateTaskWithThreadAttr(mmThread *threadHandle, const mmUserBlock_t *funcBlock,
                                                    const mmThreadAttr *threadAttr)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {MmpaPlugin::instance()->LoadMmpaSo();});
+    if (mmCreateTaskWithThreadAttr_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<INT32, mmThread *, const mmUserBlock_t *,
+                              const mmThreadAttr *>("mmCreateTaskWithThreadAttr", mmCreateTaskWithThreadAttr_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
     }
-    MSPROF_MMCREATETASKWITHTHREADATTR_T func;
-    ret = pluginHandle_.GetFunction<INT32, mmThread *, const mmUserBlock_t *,
-        const mmThreadAttr *>("mmCreateTaskWithThreadAttr", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return -1;
-    }
-    return func(threadHandle, funcBlock, threadAttr);
+    return mmCreateTaskWithThreadAttr_(threadHandle, funcBlock, threadAttr);
 }
 
 INT32 MmpaPlugin::MsprofMmJoinTask(mmThread *threadHandle)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {MmpaPlugin::instance()->LoadMmpaSo();});
+    if (mmJoinTask_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<INT32, mmThread *>("mmJoinTask", mmJoinTask_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
     }
-    MSPROF_MMJOINTASK_T func;
-    ret = pluginHandle_.GetFunction<INT32, mmThread *>("mmJoinTask", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return -1;
-    }
-    return func(threadHandle);
+    return mmJoinTask_(threadHandle);
 }
 
 INT32 MmpaPlugin::MsprofMmSetCurrentThreadName(const CHAR* name)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {MmpaPlugin::instance()->LoadMmpaSo();});
+    if (mmSetCurrentThreadName_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<INT32, const CHAR *>("mmSetCurrentThreadName",
+            mmSetCurrentThreadName_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
     }
-    MSPROF_MMSETCURRENTTHREADNAME_T func;
-    ret = pluginHandle_.GetFunction<INT32, const CHAR *>("mmSetCurrentThreadName", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return -1;
-    }
-    return func(name);
+    return mmSetCurrentThreadName_(name);
 }
 
 INT32 MmpaPlugin::MsprofMmStatGet(const CHAR *path, mmStat_t *buffer)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {MmpaPlugin::instance()->LoadMmpaSo();});
+    if (mmStatGet_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<INT32, const CHAR *, mmStat_t *>("mmStatGet", mmStatGet_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
     }
-    MSPROF_MMSTATGET_T func;
-    ret = pluginHandle_.GetFunction<INT32, const CHAR *, mmStat_t *>("mmStatGet", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return -1;
-    }
-    return func(path, buffer);
+    return mmStatGet_(path, buffer);
 }
 
 INT32 MmpaPlugin::MsprofMmGetOsVersion(CHAR* versionInfo, INT32 versionLength)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {MmpaPlugin::instance()->LoadMmpaSo();});
+    if (mmGetOsVersion_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<INT32, CHAR*, INT32>("mmGetOsVersion", mmGetOsVersion_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
     }
-    MSPROF_MMGETOSVERSION_T func;
-    ret = pluginHandle_.GetFunction<INT32, CHAR*, INT32>("mmGetOsVersion", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return -1;
-    }
-    return func(versionInfo, versionLength);
+    return mmGetOsVersion_(versionInfo, versionLength);
 }
 
 INT32 MmpaPlugin::MsprofMmGetOsName(CHAR* name, INT32 nameSize)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {MmpaPlugin::instance()->LoadMmpaSo();});
+    if (mmGetOsName_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<INT32, CHAR *, INT32>("mmGetOsName", mmGetOsName_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
     }
-    MSPROF_MMGETOSNAME_T func;
-    ret = pluginHandle_.GetFunction<INT32, CHAR *, INT32>("mmGetOsName", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return -1;
-    }
-    return func(name, nameSize);
+    return mmGetOsName_(name, nameSize);
 }
 
 INT32 MmpaPlugin::MsprofMmGetCpuInfo(mmCpuDesc **cpuInfo, INT32 *count)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {MmpaPlugin::instance()->LoadMmpaSo();});
+    if (MsprofMmGetCpuInfo_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<INT32, mmCpuDesc **, INT32 *>("mmGetCpuInfo",
+            MsprofMmGetCpuInfo_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
     }
-    MSPROF_MMGETCPUINFO_T func;
-    ret = pluginHandle_.GetFunction<INT32, mmCpuDesc **, INT32 *>("mmGetCpuInfo", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return -1;
-    }
-    return func(cpuInfo, count);
+    return MsprofMmGetCpuInfo_(cpuInfo, count);
 }
 
 INT32 MmpaPlugin::MsprofMmCpuInfoFree(mmCpuDesc *cpuInfo, INT32 count)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {MmpaPlugin::instance()->LoadMmpaSo();});
+    if (mmCpuInfoFree_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<INT32, mmCpuDesc *, INT32>("mmCpuInfoFree", mmCpuInfoFree_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
     }
-    MSPROF_MMCPUINFOFORFREE_T func;
-    ret = pluginHandle_.GetFunction<INT32, mmCpuDesc *, INT32>("mmCpuInfoFree", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return -1;
-    }
-    return func(cpuInfo, count);
+    return mmCpuInfoFree_(cpuInfo, count);
 }
 
 INT32 MmpaPlugin::MsprofMmDup2(INT32 oldFd, INT32 newFd)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {MmpaPlugin::instance()->LoadMmpaSo();});
+    if (mmDup2_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<INT32, INT32, INT32>("mmDup2", mmDup2_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
     }
-    MSPROF_MMDUP2_T func;
-    ret = pluginHandle_.GetFunction<INT32, INT32, INT32>("mmDup2", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return -1;
-    }
-    return func(oldFd, newFd);
+    return mmDup2_(oldFd, newFd);
 }
 
 // mmGetPidHandle
 INT32 MmpaPlugin::MsprofMmGetPidHandle(mmProcess *pstProcessHandle)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {MmpaPlugin::instance()->LoadMmpaSo();});
+    if (mmGetPidHandle_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<INT32, mmProcess *>("mmGetPidHandle", mmGetPidHandle_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
     }
-    MSPROF_MMGETPIDHANDLE_T func;
-    ret = pluginHandle_.GetFunction<INT32, mmProcess *>("mmGetPidHandle", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return -1;
-    }
-    return func(pstProcessHandle);
+    return mmGetPidHandle_(pstProcessHandle);
 }
     
 // mmCloseSocket
 INT32 MmpaPlugin::MsprofMmCloseSocket(mmSockHandle sockFd)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {MmpaPlugin::instance()->LoadMmpaSo();});
+    if (mmCloseSocket_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<INT32, mmSockHandle>("mmCloseSocket", mmCloseSocket_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
     }
-    MSPROF_MMCLOSESOCKET_T func;
-    ret = pluginHandle_.GetFunction<INT32, mmSockHandle>("mmCloseSocket", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return -1;
-    }
-    return func(sockFd);
+    return mmCloseSocket_(sockFd);
 }
     
 // mmSocketSend
-mmSsize_t MmpaPlugin::MsprofMmSocketSend(mmSockHandle sockFd,VOID *pstSendBuf, INT32 sendLen, INT32 sendFlag)
+mmSsize_t MmpaPlugin::MsprofMmSocketSend(mmSockHandle sockFd, VOID *pstSendBuf, INT32 sendLen, INT32 sendFlag)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {MmpaPlugin::instance()->LoadMmpaSo();});
+    if (mmSocketSend_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<mmSsize_t, mmSockHandle, VOID *, INT32, INT32>("mmSocketSend",
+            mmSocketSend_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
-            return -1;
+            return 0;
         }
     }
-    MSPROF_MMSOCKETSEND_T func;
-    ret = pluginHandle_.GetFunction<mmSsize_t, mmSockHandle, VOID *, INT32, INT32>("mmSocketSend", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return -1;
-    }
-    return func(sockFd, pstSendBuf, sendLen, sendFlag);
+    return mmSocketSend_(sockFd, pstSendBuf, sendLen, sendFlag);
 }
     
 // mmSocketRecv
 mmSsize_t MmpaPlugin::MsprofMmSocketRecv(mmSockHandle sockFd, VOID *pstRecvBuf, INT32 recvLen, INT32 recvFlag)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {MmpaPlugin::instance()->LoadMmpaSo();});
+    if (mmSocketRecv_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<mmSsize_t, mmSockHandle, VOID *, INT32, INT32>("mmSocketRecv",
+            mmSocketRecv_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
-            return -1;
+            return 0;
         }
     }
-    MSPROF_MMSOCKETRECV_T func;
-    ret = pluginHandle_.GetFunction<mmSsize_t, mmSockHandle, VOID *, INT32, INT32>("mmSocketRecv", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return -1;
-    }
-    return func(sockFd, pstRecvBuf, recvLen, recvFlag);
+    return mmSocketRecv_(sockFd, pstRecvBuf, recvLen, recvFlag);
 }
     
 // mmSocket
 mmSockHandle MmpaPlugin::MspofMmSocket(INT32 sockFamily, INT32 type, INT32 protocol)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {MmpaPlugin::instance()->LoadMmpaSo();});
+    if (mmSocket_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<mmSockHandle, INT32, INT32, INT32>("mmSocket", mmSocket_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
     }
-    MSPROF_MMSOCKET_T func;
-    ret = pluginHandle_.GetFunction<mmSockHandle, INT32, INT32, INT32>("mmSocket", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return -1;
-    }
-    return func(sockFamily, type, protocol);
+    return mmSocket_(sockFamily, type, protocol);
 }
     
 // mmBind
 INT32 MmpaPlugin::MsprofMmBind(mmSockHandle sockFd, mmSockAddr* addr, mmSocklen_t addrLen)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {MmpaPlugin::instance()->LoadMmpaSo();});
+    if (mmBind_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<INT32, mmSockHandle, mmSockAddr*, mmSocklen_t>("mmBind", mmBind_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
     }
-    MSPROF_MMBIND_T func;
-    ret = pluginHandle_.GetFunction<INT32, mmSockHandle, mmSockAddr*, mmSocklen_t>("mmBind", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return -1;
-    }
-    return func(sockFd, addr, addrLen);
+    return mmBind_(sockFd, addr, addrLen);
 }
     
 // mmListen
 INT32 MmpaPlugin::MsprofMmListen(mmSockHandle sockFd, INT32 backLog)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {MmpaPlugin::instance()->LoadMmpaSo();});
+    if (mmListen_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<INT32, mmSockHandle, INT32>("mmListen", mmListen_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
     }
-    MSPROF_MMLISTEN_T func;
-    ret = pluginHandle_.GetFunction<INT32, mmSockHandle, INT32>("mmListen", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return -1;
-    }
-    return func(sockFd, backLog);
+    return mmListen_(sockFd, backLog);
 }
     
 // mmAccept
 mmSockHandle MmpaPlugin::MsprofMmAccept(mmSockHandle sockFd, mmSockAddr *addr, mmSocklen_t *addrLen)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {MmpaPlugin::instance()->LoadMmpaSo();});
+    if (mmAccept_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<mmSockHandle, mmSockHandle, mmSockAddr *,
+            mmSocklen_t *>("mmAccept", mmAccept_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
     }
-    MSPROF_MMSOCKETHANDLE_T func;
-    ret = pluginHandle_.GetFunction<mmSockHandle, mmSockHandle, mmSockAddr *, mmSocklen_t *>("mmAccept", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return -1;
-    }
-    return func(sockFd, addr, addrLen);
+    return mmAccept_(sockFd, addr, addrLen);
 }
     
 // mmConnect
 INT32 MmpaPlugin::MsprofMmConnect(mmSockHandle sockFd, mmSockAddr* addr, mmSocklen_t addrLen)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {MmpaPlugin::instance()->LoadMmpaSo();});
+    if (mmConnect_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<INT32, mmSockHandle, mmSockAddr*, mmSocklen_t>("mmConnect",
+            mmConnect_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
     }
-    MSPROF_MMCONNECT_T func;
-    ret = pluginHandle_.GetFunction<INT32, mmSockHandle, mmSockAddr*, mmSocklen_t>("mmConnect", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return -1;
-    }
-    return func(sockFd, addr, addrLen);
+    return mmConnect_(sockFd, addr, addrLen);
 }
 
 // mmSAStartup
 INT32 MmpaPlugin::MsprofMmSAStartup()
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {MmpaPlugin::instance()->LoadMmpaSo();});
+    if (mmSAStartup_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<INT32>("mmSAStartup", mmSAStartup_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
     }
-    MSPROF_MMSASTARTUP_T func;
-    ret = pluginHandle_.GetFunction<INT32>("mmSAStartup", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return -1;
-    }
-    return func();
+    return mmSAStartup_();
 }
 
 // mmSACleanup
 INT32 MmpaPlugin::MsprofMmSACleanup()
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {MmpaPlugin::instance()->LoadMmpaSo();});
+    if (mmSACleanup_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<INT32>("mmSACleanup", mmSACleanup_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
     }
-    MSPROF_MMSACLEANUP_T func;
-    ret = pluginHandle_.GetFunction<INT32>("mmSACleanup", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return -1;
-    }
-    return func();
+    return mmSACleanup_();
 }
 
 // mmCreateTask
 INT32 MmpaPlugin::MsprofMmCreateTask(mmThread *threadHandle, mmUserBlock_t *funcBlock)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {MmpaPlugin::instance()->LoadMmpaSo();});
+    if (mmCreateTask_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<INT32, mmThread *, mmUserBlock_t *>("mmCreateTask",
+            mmCreateTask_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
     }
-    MSPROF_MMCREATETASK_T func;
-    ret = pluginHandle_.GetFunction<INT32, mmThread *, mmUserBlock_t *>("mmCreateTask", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return -1;
-    }
-    return func(threadHandle, funcBlock);
+    return mmCreateTask_(threadHandle, funcBlock);
 }
 
 // mmCreateTaskWithThreadAttrStub
 INT32 MmpaPlugin::MsprofMmCreateTaskWithThreadAttrStub(mmThread *threadHandle, const mmUserBlock_t *funcBlock,
                                                        const mmThreadAttr *threadAttr)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {MmpaPlugin::instance()->LoadMmpaSo();});
+    if (mmCreateTaskWithThreadAttrStub_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<INT32, mmThread *, const mmUserBlock_t *,
+            const mmThreadAttr *>("mmCreateTaskWithThreadAttrStub", mmCreateTaskWithThreadAttrStub_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
     }
-    MSPROF_MMCREATETASKWITHTHREADATTRSTUB_T func;
-    ret = pluginHandle_.GetFunction<INT32, mmThread *, const mmUserBlock_t *,
-        const mmThreadAttr *>("mmCreateTaskWithThreadAttrStub", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return -1;
-    }
-    return func(threadHandle, funcBlock, threadAttr);
+    return mmCreateTaskWithThreadAttrStub_(threadHandle, funcBlock, threadAttr);
 }
                                      
 // mmCreateTaskWithThreadAttrNormalStub
 INT32 MmpaPlugin::MsprofMmCreateTaskWithThreadAttrNormalStub(mmThread *threadHandle, const mmUserBlock_t *funcBlock,
                                                              const mmThreadAttr *threadAttr)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {MmpaPlugin::instance()->LoadMmpaSo();});
+    if (mmCreateTaskWithThreadAttrNormalStub_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<INT32, mmThread *, const mmUserBlock_t *,
+            const mmThreadAttr *>("mmCreateTaskWithThreadAttrNormalStub", mmCreateTaskWithThreadAttrNormalStub_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
     }
-    MSPROF_MMCREATETASKWITHTHREADATTRNORMALSTUB_T func;
-    ret = pluginHandle_.GetFunction<INT32, mmThread *, const mmUserBlock_t *,
-        const mmThreadAttr *>("mmCreateTaskWithThreadAttrNormalStub", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return -1;
-    }
-    return func(threadHandle, funcBlock, threadAttr);
+    return mmCreateTaskWithThreadAttrNormalStub_(threadHandle, funcBlock, threadAttr);
 }
 
 // mmMutexInit
 INT32 MmpaPlugin::MsprofMmMutexInit(mmMutex_t *mutex)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {MmpaPlugin::instance()->LoadMmpaSo();});
+    if (mmMutexInit_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<INT32, mmMutex_t *>("mmMutexInit", mmMutexInit_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
     }
-    MSPROF_MMMUTEXINIT_T func;
-    ret = pluginHandle_.GetFunction<INT32, mmMutex_t *>("mmMutexInit", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return -1;
-    }
-    return func(mutex);
+    return mmMutexInit_(mutex);
 }
 
 // mmMutexLock
 INT32 MmpaPlugin::MsprofMmMutexLock(mmMutex_t *mutex)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {MmpaPlugin::instance()->LoadMmpaSo();});
+    if (mmMutexLock_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<INT32, mmMutex_t *>("mmMutexLock", mmMutexLock_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
     }
-    MSPROF_MMMUTEXLOCK_T func;
-    ret = pluginHandle_.GetFunction<INT32, mmMutex_t *>("mmMutexLock", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return -1;
-    }
-    return func(mutex);
+    return mmMutexLock_(mutex);
 }
     
 // mmMutexUnLock
 INT32 MmpaPlugin::MsprofMmMutexUnLock(mmMutex_t *mutex)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {MmpaPlugin::instance()->LoadMmpaSo();});
+    if (mmMutexUnLock_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<INT32, mmMutex_t *>("mmMutexUnLock", mmMutexUnLock_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
     }
-    MSPROF_MMMUTEXUNLOCK_T func;
-    ret = pluginHandle_.GetFunction<INT32, mmMutex_t *>("mmMutexUnLock", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return -1;
-    }
-    return func(mutex);
+    return mmMutexUnLock_(mutex);
 }
 
 // mmGetOpt
 INT32 MmpaPlugin::MsprofMmGetOpt(INT32 argc, CHAR * const * argv, const CHAR *opts)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    PthreadOnce(&loadFlag_, []()->void {MmpaPlugin::instance()->LoadMmpaSo();});
+    if (mmGetOpt_ == nullptr) {
+        PluginStatus ret = pluginHandle_.GetFunction<INT32, INT32, CHAR * const *, const CHAR *>("mmGetOpt",
+            mmGetOpt_);
         if (ret != PLUGIN_LOAD_SUCCESS) {
             return -1;
         }
     }
-    MSPROF_MMGETOPT_T func;
-    ret = pluginHandle_.GetFunction<INT32, INT32, CHAR * const *, const CHAR *>("mmGetOpt", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return -1;
-    }
-    return func(argc, argv, opts);
+    return mmGetOpt_(argc, argv, opts);
 }
-} // namespace Plugin
-} // namespace Dvvp
-} // namespace Analysis
+} // Plugin
+} // Dvvp
+} // Collector

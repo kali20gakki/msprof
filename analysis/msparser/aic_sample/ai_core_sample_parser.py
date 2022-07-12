@@ -21,7 +21,7 @@ from common_func.msprof_exception import ProfException
 from common_func.msvp_common import is_valid_original_data
 from common_func.path_manager import PathManager
 from framework.offset_calculator import OffsetCalculator
-from model.aic.ai_core_sample_model import AiCoreSampleModel
+from msmodel.aic.ai_core_sample_model import AiCoreSampleModel
 from msparser.data_struct_size_constant import StructFmt
 from profiling_bean.prof_enum.data_tag import DataTag
 from profiling_bean.struct_info.aicore_sample import AicoreSample
@@ -74,7 +74,7 @@ class ParsingCoreSampleData(MsMultiProcess):
             for file_name in self.file_list:
                 if is_valid_original_data(file_name, self.result_dir):
                     logging.info(
-                        "start parsing data file: {0}".format(file_name))
+                        "start parsing data file: %s", file_name)
                     self.read_binary_data(file_name)
                     FileManager.add_complete_file(self.result_dir, file_name)
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:

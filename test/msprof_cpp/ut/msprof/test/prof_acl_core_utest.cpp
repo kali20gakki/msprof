@@ -45,7 +45,7 @@ using namespace Analysis::Dvvp::Analyze;
 using namespace analysis::dvvp::transport;
 using namespace Analysis::Dvvp::ProfilerCommon;
 using namespace Analysis::Dvvp::Common::Platform;
-using namespace Analysis::Dvvp::Plugin;
+using namespace Collector::Dvvp::Plugin;
 const int RECEIVE_CHUNK_SIZE = 320; // chunk size:320
 
 class MSPROF_ACL_CORE_UTEST: public testing::Test {
@@ -1880,7 +1880,7 @@ TEST_F(COMMANDHANDLE_TEST, commandHandle_api) {
     MOCKER_CPP(&Analysis::Dvvp::Common::Platform::Platform::PlatformIsHelperHostSide)
         .stubs()
         .will(returnValue(false));
-    EXPECT_EQ(ACL_ERROR, CommandHandleProfInit());
+    EXPECT_EQ(ACL_ERROR_PROFILING_FAILURE, CommandHandleProfInit());
     uint32_t devList[] = {0, 1};
     uint32_t devNums = 2;
     EXPECT_EQ(ACL_SUCCESS, CommandHandleProfStart(devList, devNums, 0));

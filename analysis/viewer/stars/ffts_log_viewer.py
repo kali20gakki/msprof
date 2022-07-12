@@ -8,7 +8,7 @@ from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.stars_constant import StarsConstant
 from common_func.trace_view_header_constant import TraceViewHeaderConstant
 from common_func.trace_view_manager import TraceViewManager
-from model.stars.ffts_log_model import FftsLogModel
+from msmodel.stars.ffts_log_model import FftsLogModel
 from profiling_bean.prof_enum.export_data_type import ExportDataType
 from viewer.interface.base_viewer import BaseViewer
 
@@ -55,7 +55,7 @@ class FftsLogViewer(BaseViewer):
                  data[3],  # subtask type
                  data[5],  # start time
                  data[6],  # duration
-                 {'ffts_type': data[4], 'stream_id': data[2], 'task_id': data[1]}])
+                 {'FFTS Type': data[4], 'Stream ID': data[2], 'Task ID': data[1]}])
         _trace = TraceViewManager.time_graph_trace(TraceViewHeaderConstant.TOP_DOWN_TIME_GRAPH_HEAD,
                                                    result)
         result = TraceViewManager.metadata_event(self.get_time_timeline_header(result))

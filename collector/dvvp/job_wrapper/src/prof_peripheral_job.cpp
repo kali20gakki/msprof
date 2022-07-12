@@ -99,7 +99,7 @@ int ProfPeripheralJob::Process()
 
     peripheralCfg_.profDeviceId     = collectionJobCfg_->comParams->devId;
     peripheralCfg_.profChannel      = channelId_;
-    peripheralCfg_.profSamplePeriod = samplePeriod_;
+    peripheralCfg_.profSamplePeriod = static_cast<int32_t>(samplePeriod_);
     peripheralCfg_.profDataFile = "";
     ret = DrvPeripheralStart(peripheralCfg_);
     MSPROF_LOGI("start profiling Channel %d, events:%s, ret=%d",
@@ -179,7 +179,7 @@ int ProfDdrJob::SetPeripheralConfig()
     samplePeriod_ = PERIPHERAL_INTERVAL_MS_MIN;
     if (collectionJobCfg_->comParams->params->ddr_interval >= PERIPHERAL_INTERVAL_MS_MIN &&
         collectionJobCfg_->comParams->params->ddr_interval <= PERIPHERAL_INTERVAL_MS_MAX) {
-        samplePeriod_ = collectionJobCfg_->comParams->params->ddr_interval;
+        samplePeriod_ = static_cast<uint32_t>(collectionJobCfg_->comParams->params->ddr_interval);
     }
 
     eventsStr_ = GetEventsStr(*(collectionJobCfg_->jobParams.events));
@@ -258,7 +258,7 @@ int ProfHbmJob::SetPeripheralConfig()
     samplePeriod_ = PERIPHERAL_INTERVAL_MS_MIN;
     if (collectionJobCfg_->comParams->params->hbmInterval >= PERIPHERAL_INTERVAL_MS_MIN &&
         collectionJobCfg_->comParams->params->hbmInterval <= PERIPHERAL_INTERVAL_MS_MAX) {
-        samplePeriod_ = collectionJobCfg_->comParams->params->hbmInterval;
+        samplePeriod_ = static_cast<uint32_t>(collectionJobCfg_->comParams->params->hbmInterval);
     }
 
     eventsStr_ = GetEventsStr(*(collectionJobCfg_->jobParams.events));
@@ -328,7 +328,7 @@ int ProfHccsJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
     samplePeriod_ = PERIPHERAL_INTERVAL_MS_MIN;
     if (collectionJobCfg_->comParams->params->hccsInterval >= PERIPHERAL_INTERVAL_MS_MIN &&
         collectionJobCfg_->comParams->params->hccsInterval <= PERIPHERAL_INTERVAL_MS_MAX) {
-        samplePeriod_ = collectionJobCfg_->comParams->params->hccsInterval;
+        samplePeriod_ = static_cast<uint32_t>(collectionJobCfg_->comParams->params->hccsInterval);
     }
 
     peripheralCfg_.configP = nullptr;
@@ -374,7 +374,7 @@ int ProfPcieJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
     samplePeriod_ = PERIPHERAL_INTERVAL_MS_MIN;
     if (collectionJobCfg_->comParams->params->pcieInterval >= PERIPHERAL_INTERVAL_MS_MIN &&
         collectionJobCfg_->comParams->params->pcieInterval <= PERIPHERAL_INTERVAL_MS_MAX) {
-        samplePeriod_ = collectionJobCfg_->comParams->params->pcieInterval;
+        samplePeriod_ = static_cast<uint32_t>(collectionJobCfg_->comParams->params->pcieInterval);
     }
 
     peripheralCfg_.configP = nullptr;
@@ -418,7 +418,7 @@ int ProfNicJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
     collectionJobCfg_->jobParams.dataPath = analysis::dvvp::common::utils::Utils::JoinPath(profDataFilePathV);
     samplePeriod_ = PERIPHERAL_INTERVAL_MS_SMIN;
     if (collectionJobCfg_->comParams->params->nicInterval > 0) {
-        samplePeriod_ = collectionJobCfg_->comParams->params->nicInterval;
+        samplePeriod_ = static_cast<uint32_t>(collectionJobCfg_->comParams->params->nicInterval);
     }
     MSPROF_LOGI("NIC Profiling samplePeriod_:%d", samplePeriod_);
 
@@ -480,7 +480,7 @@ int ProfDvppJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
     collectionJobCfg_->jobParams.dataPath = analysis::dvvp::common::utils::Utils::JoinPath(profDataFilePathV);
     samplePeriod_ = PERIPHERAL_INTERVAL_MS_SMIN;
     if (collectionJobCfg_->comParams->params->dvpp_sampling_interval > 0) {
-        samplePeriod_ = collectionJobCfg_->comParams->params->dvpp_sampling_interval;
+        samplePeriod_ = static_cast<uint32_t>(collectionJobCfg_->comParams->params->dvpp_sampling_interval);
     }
 
     peripheralCfg_.configP = nullptr;
@@ -508,7 +508,7 @@ int ProfDvppJob::Process()
                 static_cast<int>(channelId), collectionJobCfg_->comParams->devIdOnHost);
             peripheralCfg_.profDeviceId     = collectionJobCfg_->comParams->devId;
             peripheralCfg_.profChannel      = channelId;
-            peripheralCfg_.profSamplePeriod = samplePeriod_;
+            peripheralCfg_.profSamplePeriod = static_cast<int32_t>(samplePeriod_);
             peripheralCfg_.profDataFile = "";
             int ret = DrvPeripheralStart(peripheralCfg_);
             MSPROF_LOGI("start profiling Channel %d, events:%s, ret=%d",
@@ -602,7 +602,7 @@ int ProfLlcJob::SetPeripheralConfig()
     samplePeriod_ = PERIPHERAL_INTERVAL_MS_MIN;
     if (collectionJobCfg_->comParams->params->llc_interval >= PERIPHERAL_INTERVAL_MS_MIN &&
         collectionJobCfg_->comParams->params->llc_interval <= PERIPHERAL_INTERVAL_MS_MAX) {
-        samplePeriod_ = collectionJobCfg_->comParams->params->llc_interval;
+        samplePeriod_ = static_cast<uint32_t>(collectionJobCfg_->comParams->params->llc_interval);
     }
 
     eventsStr_ = GetEventsStr(*(collectionJobCfg_->jobParams.events));
@@ -877,7 +877,7 @@ int ProfRoceJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
     collectionJobCfg_->jobParams.dataPath = analysis::dvvp::common::utils::Utils::JoinPath(profDataFilePathV);
     samplePeriod_ = PERIPHERAL_INTERVAL_MS_SMIN;
     if (collectionJobCfg_->comParams->params->roceInterval > 0) {
-        samplePeriod_ = collectionJobCfg_->comParams->params->roceInterval;
+        samplePeriod_ = static_cast<uint32_t>(collectionJobCfg_->comParams->params->roceInterval);
     }
 
     peripheralCfg_.configP = nullptr;
@@ -917,13 +917,13 @@ int ProfStarsSocProfileJob::SetPeripheralConfig()
         analysis::dvvp::common::config::MSVP_PROF_ON) {
         period = collectionJobCfg_->comParams->params->interconnection_sampling_interval;
         configP->inter_chip.innerSwitch = TS_PROFILE_COMMAND_TYPE_PROFILING_ENABLE;
-        configP->inter_chip.period = period > 0 ? period : DEFAULT_PROFILING_INTERVAL_20MS;
+        configP->inter_chip.period = static_cast<uint32_t>(period > 0 ? period : DEFAULT_PROFILING_INTERVAL_20MS);
     }
 
     if (collectionJobCfg_->comParams->params->hardware_mem == analysis::dvvp::common::config::MSVP_PROF_ON) {
         period = collectionJobCfg_->comParams->params->hardware_mem_sampling_interval;
         configP->on_chip.innerSwitch = TS_PROFILE_COMMAND_TYPE_PROFILING_ENABLE;
-        configP->on_chip.period = period > 0 ? period : DEFAULT_PROFILING_INTERVAL_20MS;
+        configP->on_chip.period = static_cast<uint32_t>(period > 0 ? period : DEFAULT_PROFILING_INTERVAL_20MS);
     }
 
     if (collectionJobCfg_->comParams->params->low_power == analysis::dvvp::common::config::MSVP_PROF_ON) {

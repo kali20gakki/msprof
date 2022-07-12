@@ -84,6 +84,12 @@ class MetaConditionManager:
     def __init__(self: any, condition_file_path: str) -> None:
         self.conditions = load_condition_files(condition_file_path)
 
+    @abstractmethod
+    def cal_count_condition(self: any, operator_data_list: dict, condition: dict) -> any:
+        """
+        calculate count condition
+        """
+
     @staticmethod
     def __format_operator(expression: str) -> str:
         """
@@ -107,19 +113,6 @@ class MetaConditionManager:
             cal_result = cls.calculate_basic_expression(sub_expression[1:-1])
             expression = expression.replace(sub_expression, cal_result, 1)
         return cls.calculate_basic_expression(expression)
-
-    @classmethod
-    def __calculate_with_operator(cls: any, operator: str, sub_expression: str) -> str:
-        if operator in cls.REGEX_CALCULATE_MAP:
-            match_expression = re.search(cls.REGEX_CALCULATE_MAP.get(operator), sub_expression).group()
-        else:
-            logging.error("Not support operator type: %s ", operator)
-            return sub_expression
-        if match_expression:
-            cal_result = cls.CALCULATE_MAP.get(operator)(match_expression.split(operator)[0],
-                                                         match_expression.split(operator)[1])
-            sub_expression = sub_expression.replace(str(match_expression), str(cal_result))
-        return sub_expression
 
     @classmethod
     def calculate_basic_expression(cls: any, sub_expression: str) -> str:
@@ -160,12 +153,6 @@ class MetaConditionManager:
                 op_names.append(operator_data.get("op_name"))
         return op_names
 
-    @abstractmethod
-    def cal_count_condition(self: any, operator_data_list: dict, condition: dict) -> any:
-        """
-        calculate count condition
-        """
-
     @classmethod
     def cal_normal_condition(cls: any, operator_data: dict, condition: dict) -> list:
         """
@@ -179,6 +166,19 @@ class MetaConditionManager:
                     condition.get(CommonProfRule.CONDITION_RIGHT)):
                 op_names.append(operator_data.get("op_name"))
         return op_names
+
+    @classmethod
+    def __calculate_with_operator(cls: any, operator: str, sub_expression: str) -> str:
+        if operator in cls.REGEX_CALCULATE_MAP:
+            match_expression = re.search(cls.REGEX_CALCULATE_MAP.get(operator), sub_expression).group()
+        else:
+            logging.error("Not support operator type: %s ", operator)
+            return sub_expression
+        if match_expression:
+            cal_result = cls.CALCULATE_MAP.get(operator)(match_expression.split(operator)[0],
+                                                         match_expression.split(operator)[1])
+            sub_expression = sub_expression.replace(str(match_expression), str(cal_result))
+        return sub_expression
 
     def merge_set(self: any, condition_id: str, condition_id_dict: dict) -> str:
         """
@@ -242,15 +242,15 @@ class OperatorConditionManager(MetaConditionManager):
     operator condition manager
     """
 
+    def __init__(self: any, condition_file_path: str) -> None:
+        MetaConditionManager.__init__(self, condition_file_path)
+
     @staticmethod
     def cal_count_condition(operator_data_list: dict, condition: dict) -> list:
         """
         calculate count condition
         """
         return []
-
-    def __init__(self: any, condition_file_path: str) -> None:
-        MetaConditionManager.__init__(self, condition_file_path)
 
 
 class NetConditionManager(MetaConditionManager):
@@ -260,15 +260,6 @@ class NetConditionManager(MetaConditionManager):
 
     def __init__(self: any, condition_file_path: str) -> None:
         MetaConditionManager.__init__(self, condition_file_path)
-
-    def cal_count_condition(self: any, operator_data_list: dict, condition: dict) -> list:
-        """
-        calculate count condition
-        """
-        op_names = self.cal_condition(operator_data_list, condition.get(CommonProfRule.CONDITION_DEPENDENCY))
-        if op_names and len(op_names) < int(condition.get(CommonProfRule.CONDITION_THRESHOLD)):
-            op_names.clear()
-        return op_names
 
     @classmethod
     def cal_normal_condition(cls: any, operator_data: dict, condition: dict) -> list:
@@ -292,6 +283,15 @@ class NetConditionManager(MetaConditionManager):
             ops = super().cal_formula_condition(operator.operator_data, condition)
             if ops:
                 op_names.extend(ops)
+        return op_names
+
+    def cal_count_condition(self: any, operator_data_list: dict, condition: dict) -> list:
+        """
+        calculate count condition
+        """
+        op_names = self.cal_condition(operator_data_list, condition.get(CommonProfRule.CONDITION_DEPENDENCY))
+        if op_names and len(op_names) < int(condition.get(CommonProfRule.CONDITION_THRESHOLD)):
+            op_names.clear()
         return op_names
 
 

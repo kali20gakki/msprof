@@ -3,10 +3,10 @@ from unittest import mock
 
 from common_func.info_conf_reader import InfoConfReader
 from common_func.msprof_exception import ProfException
-from model.hardware.hbm_model import HbmModel
+from msmodel.hardware.hbm_model import HbmModel
 from sqlite.db_manager import DBManager
 
-NAMESPACE = 'model.hardware.hbm_model'
+NAMESPACE = 'msmodel.hardware.hbm_model'
 
 
 class TestHbmModel(unittest.TestCase):
