@@ -120,7 +120,7 @@ def calculate_task_schedule_data(curs: any, device: str) -> list:
                  _per_state_time.get('running') / NumberConstant.NS_TO_US,
                  _per_state_time.get('pending') / NumberConstant.NS_TO_US,
                  StrConstant.TASK_TYPE_MAPPING.get(str(tasktype), "unknown {}".format(str(tasktype))),
-                 StrConstant.API_TYPE_MAPPING.get(str(api), "unknown {}".format(str(api))),
+                 api,
                  task_id, stream_id, device, batch_id))
         return sorted(total_data, key=lambda x: float(x[0].replace('%', '')), reverse=True)
     except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
@@ -158,7 +158,7 @@ def _compute_multi_process(timeline_data: list, project_path: str, task_time: di
     cpu_count = multiprocessing.cpu_count() / 3 * 3
     processes = []
     step = len(timeline_data)
-    if len(timeline_data) > CalculateRtsDataConst.MAX_LENGTH:
+    if len(timeline_data) > CalculateRtsDataConst.MAX_LENGTH and not NumberConstant.is_zero(cpu_count):
         step = int(len(timeline_data) / cpu_count) - 1
     count = 0
     for i in range(0, len(timeline_data), step):

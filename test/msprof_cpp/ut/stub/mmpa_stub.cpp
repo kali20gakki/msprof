@@ -1,5 +1,5 @@
 #include "mmpa_plugin.h"
-namespace Analysis {
+namespace Collector {
 namespace Dvvp {
 namespace Plugin {
 mmTimespec MmpaPlugin::MsprofMmGetTickCount()

@@ -16,7 +16,7 @@ using namespace std;
 using namespace analysis::dvvp::streamio::client;
 using namespace analysis::dvvp::streamio::common;
 using namespace analysis::dvvp::common::error;
-using namespace Analysis::Dvvp::Plugin;
+using namespace Collector::Dvvp::Plugin;
 
 class PROFILER_SENDER_TEST: public testing::Test {
 

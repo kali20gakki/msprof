@@ -28,7 +28,7 @@ namespace common {
 namespace utils {
 using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::common::config;
-using namespace Analysis::Dvvp::Plugin;
+using namespace Collector::Dvvp::Plugin;
 
 std::mutex g_envMtx;
 const unsigned long long CHANGE_FROM_S_TO_NS = 1000000000;
@@ -504,6 +504,10 @@ int Utils::ExecCmd(const ExecCmdParams &execCmdParams,
         const int reserveArgvLen = 2;
         SHARED_PTR_ALIA<CHAR_PTR> argvArray(new(std::nothrow) CHAR_PTR[argv.size() + reserveArgvLen],
                                             std::default_delete<CHAR_PTR[]>());
+        if (argvArray == nullptr) {
+            MSPROF_LOGE("argvArray malloc memory failed.");
+            return PROFILING_FAILED;
+        }
         argvArray.get()[0] = const_cast<CHAR_PTR>(cmd.c_str());
         for (ii = 0; ii < static_cast<uint32_t>(argv.size()); ++ii) {
             argvArray.get()[ii + 1] = const_cast<CHAR_PTR>(argv[ii].c_str());
@@ -512,6 +516,10 @@ int Utils::ExecCmd(const ExecCmdParams &execCmdParams,
 
         SHARED_PTR_ALIA<CHAR_PTR> envpArray(new(std::nothrow) CHAR_PTR[envp.size() + 1],
                                             std::default_delete<CHAR_PTR[]>());
+        if (envpArray == nullptr) {
+            MSPROF_LOGE("envpArray malloc memory failed.");
+            return PROFILING_FAILED;
+        }
         for (ii = 0; ii < static_cast<uint32_t>(envp.size()); ++ii) {
             envpArray.get()[ii] = const_cast<CHAR_PTR>(envp[ii].c_str());
         }
@@ -842,7 +850,7 @@ std::string Utils::TimestampToTime(const std::string &timestamp, int unit /* = 1
     uint32_t microTime;
     try {
         secTime = std::stoll(timestamp) / unit;
-        microTime = std::stoll(timestamp) % unit;
+        microTime = static_cast<uint32_t>(std::stoll(timestamp) % unit);
     } catch (...) {
         return "0";
     }
@@ -1275,6 +1283,17 @@ void Utils::RemoveEndCharacter(std::string &input, const char end)
         return;
     }
     input.resize(input.size() - 1);
+}
+
+bool Utils::IsAppName(const std::string paramsName)
+{
+    std::string paramBaseName = BaseName(paramsName);
+    std::string pythonName = "python";
+    if (paramBaseName.compare("bash") == 0 || paramBaseName.compare("sh") == 0 ||
+        paramBaseName.substr(0, pythonName.size()) == pythonName) {
+        return false;
+    }
+    return true;
 }
 
 int32_t WriteFile(const std::string &absolutePath, const std::string &recordFile, const std::string &profName)

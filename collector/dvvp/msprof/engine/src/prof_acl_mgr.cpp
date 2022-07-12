@@ -52,7 +52,7 @@ using namespace Analysis::Dvvp::Common::Platform;
 using namespace Analysis::Dvvp::JobWrapper;
 using namespace Analysis::Dvvp::MsprofErrMgr;
 using namespace Msprof::MsprofTx;
-using namespace Analysis::Dvvp::Plugin;
+using namespace Collector::Dvvp::Plugin;
 
 namespace Msprofiler {
 namespace Api {
@@ -169,7 +169,6 @@ int ProfAclMgr::ProfStartPrecheck()
     }
     if (mode_ == WORK_MODE_OFF) {
         MSPROF_LOGE("Acl profiling api mode is not inited");
-        MSPROF_INNER_ERROR("EK9999", "Acl profiling api mode is not inited");
         return ACL_ERROR_PROF_NOT_RUN;
     }
     MSPROF_LOGE("Acl profiling api ctrl conflicts with other api mode %d", mode_);
@@ -308,7 +307,6 @@ int32_t ProfAclMgr::ProfAclInit(const std::string &profResultPath)
     path = Utils::CanonicalizePath(path);
     if (path.empty()) {
         MSPROF_LOGE("Invalid path of profInit");
-        MSPROF_INNER_ERROR("EK9999", "Invalid path of profInit");
         return ACL_ERROR_INVALID_FILE;
     }
 
@@ -355,7 +353,6 @@ int ProfAclMgr::ProfAclStart(PROF_CONF_CONST_PTR profStartCfg)
 
     if (mode_ != WORK_MODE_API_CTRL) {
         MSPROF_LOGE("Profiling has not been inited");
-        MSPROF_INNER_ERROR("EK9999", "Profiling has not been inited");
         return ACL_ERROR_PROF_NOT_RUN;
     }
 
@@ -415,7 +412,6 @@ int ProfAclMgr::ProfAclStop(PROF_CONF_CONST_PTR profStopCfg)
 
     if (mode_ != WORK_MODE_API_CTRL) {
         MSPROF_LOGE("Profiling has not been inited");
-        MSPROF_INNER_ERROR("EK9999", "Profiling has not been inited");
         return ACL_ERROR_PROF_NOT_RUN;
     }
     // check device is started and
@@ -424,15 +420,14 @@ int ProfAclMgr::ProfAclStop(PROF_CONF_CONST_PTR profStopCfg)
         auto iter = devTasks_.find(devId);
         if (iter != devTasks_.end()) {
             if (iter->second.dataTypeConfig != profStopCfg->dataTypeConfig) {
-                MSPROF_LOGE("DataTypeConfig stop: 0x%16x different from start: 0x%16x",
+                MSPROF_LOGE("DataTypeConfig stop: 0x%lx different from start: 0x%lx",
                     profStopCfg->dataTypeConfig, iter->second.dataTypeConfig);
-                MSPROF_INNER_ERROR("EK9999", "DataTypeConfig stop: 0x%16lx different from start: 0x%16lx",
+                MSPROF_INNER_ERROR("EK9999", "DataTypeConfig stop: 0x%lx different from start: 0x%lx",
                     profStopCfg->dataTypeConfig, iter->second.dataTypeConfig);
                 return ACL_ERROR_INVALID_PROFILING_CONFIG;
             }
         } else {
             MSPROF_LOGE("Device %u has not been started", devId);
-            MSPROF_INNER_ERROR("EK9999", "Device %u has not been started", devId);
             return ACL_ERROR_PROF_NOT_RUN;
         }
     }
@@ -466,7 +461,6 @@ int ProfAclMgr::ProfAclFinalize()
     std::lock_guard<std::mutex> lk(mtx_);
     if (mode_ != WORK_MODE_API_CTRL) {
         MSPROF_LOGE("Profiling has not been inited");
-        MSPROF_INNER_ERROR("EK9999", "Profiling has not been inited");
         return ACL_ERROR_PROF_NOT_RUN;
     }
     for (auto iter = devTasks_.begin(); iter != devTasks_.end(); iter++) {
@@ -497,7 +491,7 @@ int ProfAclMgr::ProfAclGetDataTypeConfig(const uint32_t devId, uint64_t &dataTyp
         return ACL_ERROR_PROF_NOT_RUN;
     }
     dataTypeConfig = iter->second.dataTypeConfig;
-    MSPROF_LOGI("Get dataTypeConfig %llu of device %u", dataTypeConfig, devId);
+    MSPROF_LOGI("Get dataTypeConfig 0x%lx of device %u", dataTypeConfig, devId);
     return ACL_SUCCESS;
 }
 
@@ -592,7 +586,7 @@ int ProfAclMgr::ProfAclModelSubscribe(const uint32_t modelId, const uint32_t dev
     }
     uint32_t devIdList[1] = {devId};
     uint64_t dataTypeConfig = ProfAclGetDataTypeConfig(profSubscribeConfig);
-    MSPROF_LOGI("Allocate subscription config to Runtime, dataTypeConfig %llx", dataTypeConfig);
+    MSPROF_LOGI("Allocate subscription config to Runtime, dataTypeConfig 0x%lx", dataTypeConfig);
     return Analysis::Dvvp::ProfilerCommon::CommandHandleProfStart(devIdList, 1, dataTypeConfig);
 }
 
@@ -602,13 +596,14 @@ int ProfAclMgr::ProfAclModelUnSubscribe(const uint32_t modelId)
     std::lock_guard<std::mutex> lk(mtx_);
     if (!isReady_) {
         MSPROF_LOGE("Model %u has not been subscribed", modelId);
-        MSPROF_INNER_ERROR("EK9999", "Model %u has not been subscribed", modelId);
         return ACL_ERROR_INVALID_MODEL_ID;
     }
     auto iter = subscribeInfos_.find(modelId);
     if (iter == subscribeInfos_.end() || !iter->second.subscribed) {
         MSPROF_LOGE("Model %u has not been subscribed", modelId);
-        MSPROF_INNER_ERROR("EK9999", "Model %u has not been subscribed", modelId);
+        std::string errorReason = "Model id has not been subscribed";
+        MSPROF_INPUT_ERROR("EK0001", std::vector<std::string>({"value", "param", "reason"}),
+            std::vector<std::string>({std::to_string(modelId), "modelId", errorReason}));
         return ACL_ERROR_INVALID_MODEL_ID;
     }
     int ret = ACL_SUCCESS;
@@ -620,13 +615,12 @@ int ProfAclMgr::ProfAclModelUnSubscribe(const uint32_t modelId)
         if (iterDev->second.count == 0) {
             uint32_t devIdList[1] = {iter->second.devId};
             uint64_t dataTypeConfig = iterDev->second.dataTypeConfig;
-            MSPROF_LOGI("Allocate Unsubscription config to Runtime, dataTypeConfig %x", dataTypeConfig);
+            MSPROF_LOGI("Allocate Unsubscription config to Runtime, dataTypeConfig 0x%lx", dataTypeConfig);
             ret = Analysis::Dvvp::ProfilerCommon::CommandHandleProfStop(devIdList, 1, dataTypeConfig);
             RETURN_IF_NOT_SUCCESS(ret);
             iterDev->second.params->is_cancel = true;
             if (ProfManager::instance()->IdeCloudProfileProcess(iterDev->second.params) != PROFILING_SUCCESS) {
                 MSPROF_LOGE("Failed to stop profiling on device %u", iterDev->first);
-                MSPROF_INNER_ERROR("EK9999", "Failed to stop profiling on device %u", iterDev->first);
                 ret = ACL_ERROR_PROFILING_FAILURE;
             }
             CloseSubscribeFd(iterDev->first);
@@ -1102,9 +1096,9 @@ int ProfAclMgr::UpdateSubscribeInfo(const uint32_t modelId, const uint32_t devId
     // check dataTypeConfig
     auto dataTypeConfig = ProfAclGetDataTypeConfig(profSubscribeConfig);
     if (iterDev->second.dataTypeConfig != dataTypeConfig) {
-        MSPROF_LOGE("Subscribe config %x is different from previous one: %x",
+        MSPROF_LOGE("Subscribe config 0x%lx is different from previous one: 0x%lx",
             dataTypeConfig, iterDev->second.dataTypeConfig);
-        MSPROF_INNER_ERROR("EK9999", "Subscribe config %lx is different from previous one: %lx",
+        MSPROF_INNER_ERROR("EK9999", "Subscribe config 0x%lx is different from previous one: 0x%lx",
             dataTypeConfig, iterDev->second.dataTypeConfig);
         return ACL_ERROR_INVALID_PROFILING_CONFIG;
     }
@@ -1318,12 +1312,10 @@ int32_t ProfAclMgr::MsprofAclJsonParamConstruct(SHARED_PTR_ALIA<analysis::dvvp::
     params_->storageLimit = inputCfgPb->storage_limit();
     storageLimit_ = params_->storageLimit;
     if (!ParamValidation::instance()->CheckStorageLimit(storageLimit_)) {
-        MSPROF_LOGE("storage_limit para is invalid");
-        MSPROF_INNER_ERROR("EK9999", "storage_limit para is invalid");
         return MSPROF_ERROR_CONFIG_INVALID;
     }
     params_->biu = inputCfgPb->biu();
-    params_->biu_freq = inputCfgPb->biu_freq();
+    params_->biu_freq = static_cast<int32_t>(inputCfgPb->biu_freq());
     if ((params_->biu.compare(MSVP_PROF_ON) == 0) &&
         (!ParamValidation::instance()->CheckBiuFreqValid(params_->biu_freq))) {
         return MSPROF_ERROR_CONFIG_INVALID;
@@ -1334,7 +1326,6 @@ int32_t ProfAclMgr::MsprofAclJsonParamConstruct(SHARED_PTR_ALIA<analysis::dvvp::
     int ret = ConfigManager::instance()->GetAicoreEvents(aicoreMetricsType, params_->ai_core_profiling_events);
     if (ret != PROFILING_SUCCESS) {
         MSPROF_LOGE("The ai_core_metrics of input aclJsonConfig is invalid");
-        MSPROF_INNER_ERROR("EK9999", "The ai_core_metrics of input aclJsonConfig is invalid");
         return MSPROF_ERROR_CONFIG_INVALID;
     }
     params_->ai_core_metrics = aicoreMetricsType;
@@ -1346,7 +1337,9 @@ int32_t ProfAclMgr::MsprofAclJsonParamConstruct(SHARED_PTR_ALIA<analysis::dvvp::
     bool isValidSwith = ParamValidation::instance()->IsValidSwitch(inputCfgPb->l2());
     if (!isValidSwith) {
         MSPROF_LOGE("MsprofInitAclJson, The l2 cache switch of input aclJsonConfig is invalid");
-        MSPROF_INNER_ERROR("EK9999", "MsprofInitAclJson, The l2 cache switch of input aclJsonConfig is invalid");
+        std::string errReason = "l2 should be on or off";
+        MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
+            std::vector<std::string>({"l2", inputCfgPb->l2(), errReason}));
         return MSPROF_ERROR_CONFIG_INVALID;
     }
     params_->l2CacheTaskProfiling = inputCfgPb->l2();
@@ -1387,6 +1380,25 @@ int32_t ProfAclMgr::MsprofInitAclJson(VOID_PTR data, uint32_t len)
     ConfigManager::instance()->MsprofL2CacheAdapter(params_);
     ProfDataTypeConfigHandle(params_);
     SetModeToCmd();
+    return MSPROF_ERROR_NONE;
+}
+
+int ProfAclMgr::MsprofAiCoreMetricsAdapter(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params,
+    SHARED_PTR_ALIA<analysis::dvvp::proto::ProfGeOptionsConfig> inputCfgPb)
+{
+    std::string aiCoreMetrics = inputCfgPb->aic_metrics();
+    if (!aiCoreMetrics.empty()) {
+        int ret = ConfigManager::instance()->GetAicoreEvents(aiCoreMetrics, params->ai_core_profiling_events);
+        if (ret != PROFILING_SUCCESS) {
+            MSPROF_LOGE("The ai_core_metrics of input aclJsonConfig is invalid");
+            return MSPROF_ERROR_CONFIG_INVALID;
+        }
+        params->ai_core_profiling = MSVP_PROF_ON;
+        params->ai_core_metrics = aiCoreMetrics;
+        params->ai_core_profiling_mode = PROFILING_MODE_TASK_BASED;
+    }
+    MSPROF_LOGI("MsprofInitGeOptions, aicoreMetricsType:%s, aicoreEvents:%s", params->ai_core_metrics.c_str(),
+        params->ai_core_profiling_events.c_str());
     return MSPROF_ERROR_NONE;
 }
 
@@ -1444,6 +1456,9 @@ int32_t ProfAclMgr::MsprofResultPathAdapter(const std::string &dir, std::string 
     result = analysis::dvvp::common::utils::Utils::CanonicalizePath(path);
     if (result.empty() || !analysis::dvvp::common::utils::Utils::IsDirAccessible(result)) {
         MSPROF_LOGE("Result path is not accessible or not exist, result path: %s", Utils::BaseName(dir).c_str());
+        std::string errReason = "result path is not accessible or not exist";
+        MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
+            std::vector<std::string>({"output", dir, errReason}));
         return PROFILING_FAILED;
     }
     resultPath = result;
@@ -1468,34 +1483,28 @@ int32_t ProfAclMgr::MsprofGeOptionsParamConstruct(const std::string &jobInfo,
     } else {
         MSVP_MAKE_SHARED0_RET(params_, analysis::dvvp::message::ProfileParams, MSPROF_ERROR_MEM_NOT_ENOUGH);
     }
-    int ret = MsprofResultPathAdapter(inputCfgPb->output(), params_->result_dir);
-    if (ret != PROFILING_SUCCESS) {
-        return MSPROF_ERROR_CONFIG_INVALID;
+    int ret = PROFILING_SUCCESS;
+    if (!Platform::instance()->PlatformIsHelperHostSide()) {
+        ret = MsprofResultPathAdapter(inputCfgPb->output(), params_->result_dir);
+        if (ret != PROFILING_SUCCESS) {
+            return MSPROF_ERROR_CONFIG_INVALID;
+        }
     }
     MsprofInitGeOptionsParamAdaper(params_, jobInfo, inputCfgPb);
     MSPROF_LOGI("MsprofInitGeOptions, stars_acsq_task Param:%s, stars_sub_task:%s, ffts_thread_task:%s, ffts_block:%s"
                 "low_power:%s, hcclTrace:%s",
         params_->stars_acsq_task.c_str(), params_->stars_sub_task.c_str(), params_->ffts_thread_task.c_str(),
         params_->ffts_block.c_str(), params_->low_power.c_str(), params_->hcclTrace.c_str());
-
-    std::string aiCoreMetrics = inputCfgPb->aic_metrics();
-    if (!aiCoreMetrics.empty()) {
-        ret = ConfigManager::instance()->GetAicoreEvents(aiCoreMetrics, params_->ai_core_profiling_events);
-        if (ret != PROFILING_SUCCESS) {
-            MSPROF_LOGE("The ai_core_metrics of input aclJsonConfig is invalid");
-            MSPROF_INNER_ERROR("EK9999", "The ai_core_metrics of input aclJsonConfig is invalid");
-            return MSPROF_ERROR_CONFIG_INVALID;
-        }
-        params_->ai_core_profiling = MSVP_PROF_ON;
-        params_->ai_core_metrics = aiCoreMetrics;
-        params_->ai_core_profiling_mode = PROFILING_MODE_TASK_BASED;
+    ret = MsprofAiCoreMetricsAdapter(params_, inputCfgPb);
+    if (ret != PROFILING_SUCCESS) {
+        return MSPROF_ERROR_CONFIG_INVALID;
     }
-    MSPROF_LOGI("MsprofInitGeOptions, aicoreMetricsType:%s, aicoreEvents:%s", params_->ai_core_metrics.c_str(),
-        params_->ai_core_profiling_events.c_str());
     bool isValidSwith = ParamValidation::instance()->IsValidSwitch(inputCfgPb->l2());
     if (!isValidSwith) {
         MSPROF_LOGE("MsprofInitGeOptions, The l2 cache switch of input optionConfig is invalid");
-        MSPROF_INNER_ERROR("EK9999", "MsprofInitGeOptions, The l2 cache switch of input optionConfig is invalid");
+        std::string errReason = "l2 should be on or off";
+        MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
+            std::vector<std::string>({"l2", inputCfgPb->l2(), errReason}));
         return MSPROF_ERROR_CONFIG_INVALID;
     }
     params_->l2CacheTaskProfiling = inputCfgPb->l2();
@@ -1504,11 +1513,10 @@ int32_t ProfAclMgr::MsprofGeOptionsParamConstruct(const std::string &jobInfo,
     storageLimit_ = params_->storageLimit;
     if (!ParamValidation::instance()->CheckStorageLimit(storageLimit_)) {
         MSPROF_LOGE("storage_limit para is invalid");
-        MSPROF_INNER_ERROR("EK9999", "storage_limit para is invalid");
         return MSPROF_ERROR_CONFIG_INVALID;
     }
     params_->biu = inputCfgPb->biu();
-    params_->biu_freq = inputCfgPb->biu_freq();
+    params_->biu_freq = static_cast<int32_t>(inputCfgPb->biu_freq());
     if ((params_->biu.compare(MSVP_PROF_ON) == 0) &&
         (!ParamValidation::instance()->CheckBiuFreqValid(params_->biu_freq))) {
         return MSPROF_ERROR_CONFIG_INVALID;
@@ -1581,15 +1589,12 @@ int32_t ProfAclMgr::MsprofInitAclEnv(const std::string &envValue)
     }
     ProfDataTypeConfigHandle(params_);
     SetModeToCmd();
-    MSPROF_LOGI("MsprofInitAclEnv, mode:%d, dataTypeConfig:0x%x, baseDir:%s",
+    MSPROF_LOGI("MsprofInitAclEnv, mode:%d, dataTypeConfig:0x%lx, baseDir:%s",
                 mode_, dataTypeConfig_, Utils::BaseName(baseDir_).c_str());
-    MSPROF_INNER_ERROR("EK9999", "MsprofInitAclEnv, mode:%d, dataTypeConfig:0x%lx, baseDir:%s",
-        mode_, dataTypeConfig_, Utils::BaseName(baseDir_).c_str());
     return MSPROF_ERROR_NONE;
 }
 
-int32_t ProfAclMgr::MsprofHelperParamConstruct(const std::string &msprofPath,
-    uint32_t storageLimit, const std::string &paramsJson)
+int32_t ProfAclMgr::MsprofHelperParamConstruct(const std::string &msprofPath, const std::string &paramsJson)
 {
     if (params_ != nullptr) {
         MSPROF_LOGW("MsprofHelper params exist");
@@ -1603,7 +1608,6 @@ int32_t ProfAclMgr::MsprofHelperParamConstruct(const std::string &msprofPath,
     }
     resultPath_ = params_->result_dir;
     baseDir_ = Utils::CreateTaskId(0);
-    params_->storageLimit = std::to_string(storageLimit) + "MB";
     if (!ParamValidation::instance()->CheckStorageLimit(params_->storageLimit)) {
         MSPROF_LOGE("storage_limit para is invalid");
         MSPROF_INNER_ERROR("EK9999", "storage_limit para is invalid");
@@ -1631,10 +1635,8 @@ int32_t ProfAclMgr::MsprofInitHelper(VOID_PTR data, uint32_t len)
     MsprofCommandHandleParams *commandHandleParams = static_cast<struct MsprofCommandHandleParams *>(data);
     std::string msprofPath = MsprofCheckAndGetChar(commandHandleParams->path, PATH_LEN_MAX);
     std::string msprofParams = MsprofCheckAndGetChar(commandHandleParams->profData, PARAM_LEN_MAX);
-    uint32_t storageLimit = commandHandleParams->storageLimit;
-    MSPROF_LOGI("MsprofInitHelper, path:%s, storageLimit:%u, params:%s",
-        msprofPath.c_str(), storageLimit, msprofParams.c_str());
-    ret = MsprofHelperParamConstruct(msprofPath, storageLimit, msprofParams);
+    MSPROF_LOGI("MsprofInitHelper, path:%s, params:%s", msprofPath.c_str(), msprofParams.c_str());
+    ret = MsprofHelperParamConstruct(msprofPath, msprofParams);
     if (ret != MSPROF_ERROR_NONE) {
         return ret;
     }
@@ -1809,6 +1811,22 @@ void ProfAclMgr::CloseSubscribeFd(const uint32_t devId, const uint32_t modelId)
         Utils::PrintSysErrorMsg();
     }
     *fd = -1;
+}
+
+int32_t ProfAclMgr::StopProfConfigCheck(uint64_t dataTypeConfigStop, uint64_t dataTypeConfigStart)
+{
+    if (dataTypeConfigStop != dataTypeConfigStart) {
+        MSPROF_LOGE("DataTypeConfig stop:0x%lx different from start:0x%lx",
+            dataTypeConfigStop, dataTypeConfigStart);
+        std::string dataTypeConfigStr = "0x" +
+            Utils::Int2HexStr<uint64_t>(dataTypeConfigStop);
+        std::string errorReason = "dataTypeConfig is different from start:0x" +
+            Utils::Int2HexStr<uint64_t>(dataTypeConfigStart);
+        MSPROF_INPUT_ERROR("EK0001", std::vector<std::string>({"value", "param", "reason"}),
+            std::vector<std::string>({dataTypeConfigStr, "dataTypeConfig", errorReason}));
+        return PROFILING_FAILED;
+    }
+    return PROFILING_SUCCESS;
 }
 }   // namespace Api
 }   // namespace Msprofiler

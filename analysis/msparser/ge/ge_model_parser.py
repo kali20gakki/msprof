@@ -10,7 +10,7 @@ from common_func.constant import Constant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.msprof_exception import ProfException
-from model.ge.ge_model_load_model import GeFusionModel
+from msmodel.ge.ge_model_load_model import GeFusionModel
 from msparser.ge.ge_fusion_op_info_parser import GeFusionOpParser
 from msparser.ge.ge_model_load_info_parser import GeModelLoadParser
 from msparser.interface.iparser import IParser

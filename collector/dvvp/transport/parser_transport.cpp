@@ -19,7 +19,7 @@ namespace dvvp {
 namespace transport {
 using namespace analysis::dvvp::common::error;
 using namespace Msprofiler::Api;
-using namespace Analysis::Dvvp::Plugin;
+using namespace Collector::Dvvp::Plugin;
 
 ParserTransport::ParserTransport(SHARED_PTR_ALIA<Uploader> uploader)
 {

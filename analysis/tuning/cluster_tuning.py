@@ -1,12 +1,14 @@
-#!usr/bin/env python
-# coding:utf-8
+#!/usr/bin/python3
+# coding=utf-8
 """
-Copyright Huawei Technologies Co., Ltd. 2020. All rights reserved.
+function: this script used to calculate cluster link from hccl.
+Copyright Huawei Technologies Co., Ltd. 2022-2023. All rights reserved.
 """
 from common_func.common import print_msg
 from common_func.common_prof_rule import CommonProfRule
 from mscalculate.cluster.trailing_calculator import TrailingCalculator
-from tuning.base_turing_view import BaseTuningView
+from mscalculate.cluster.cluster_link_calculate import ClusterLinkCalculator
+from tuning.base_tuning_view import BaseTuningView
 
 
 class ClusterTuning(BaseTuningView):
@@ -17,7 +19,12 @@ class ClusterTuning(BaseTuningView):
     def __init__(self: any, cluster_params: list) -> None:
         super().__init__()
         self.cluster_params = cluster_params
-        self.calculate_list = {TrailingCalculator: 'slow node, threshold value 20%'}
+        self.calculate_list = {
+            TrailingCalculator:
+                'For slow nodes, pay attention to the data preparation phase (threshold: 20%)',
+            ClusterLinkCalculator:
+                "For slow link, pay attention to the data bandwidth (threshold: 20%)"
+        }
         self.data = []
         self.turing_start = "Cluster Tuning Report"
 

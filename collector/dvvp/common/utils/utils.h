@@ -520,6 +520,16 @@ public:
     static std::string GetCwdString(void);
     static std::string RelativePathToAbsolutePath(const std::string &path);
     static bool IsSoftLink(const std::string &path);
+    template<typename T>
+    static std::string Int2HexStr(T number)
+    {
+        std::stringstream ioss;
+        std::string ret;
+        ioss << std::hex << number;
+        ioss >> ret;
+        return ret;
+    }
+    static bool IsAppName(const std::string paramsName);
 };
 
 template<class T>

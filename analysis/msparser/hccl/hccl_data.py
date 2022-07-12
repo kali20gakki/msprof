@@ -2,7 +2,7 @@
 # coding=utf-8
 """
 function: HCCL data
-Copyright Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
+Copyright Huawei Technologies Co., Ltd. 2022-2023. All rights reserved.
 """
 
 from common_func.constant import Constant

@@ -11,7 +11,7 @@
 
 using namespace analysis::dvvp::common::error;
 using namespace Analysis::Dvvp::Adx;
-using namespace Analysis::Dvvp::Plugin;
+using namespace Collector::Dvvp::Plugin;
 
 extern int g_sprintf_s_flag;
 class HDC_API_UTEST: public testing::Test {

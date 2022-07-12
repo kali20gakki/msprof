@@ -4,11 +4,11 @@ from collections import OrderedDict
 from unittest import mock
 
 from common_func.info_conf_reader import InfoConfReader
-from model.hardware.roce_model import RoceModel
+from msmodel.hardware.roce_model import RoceModel
 from sqlite.db_manager import DBManager
 from sqlite.db_manager import DBOpen
 
-NAMESPACE = 'model.hardware.roce_model'
+NAMESPACE = 'msmodel.hardware.roce_model'
 
 
 class TestParsingMemoryData(unittest.TestCase):

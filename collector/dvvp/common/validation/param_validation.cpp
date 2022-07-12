@@ -22,7 +22,7 @@ using namespace analysis::dvvp::common::config;
 using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::message;
 using namespace analysis::dvvp::common::utils;
-using namespace Analysis::Dvvp::Plugin;
+using namespace Collector::Dvvp::Plugin;
 
 const int MIN_INTERVAL = 1;
 const int MAX_INTERVAL = 15 * 24 * 3600 * 1000; // 15 * 24 * 3600 * 1000 = 15day's micro seconds
@@ -697,41 +697,48 @@ bool ParamValidation::CheckStorageLimit(const std::string &storageLimit)
         MSPROF_LOGI("storage_limit is empty");
         return true;
     }
+    std::string errReason = "storage-limit should be in range [" + std::to_string(STORAGE_LIMIT_DOWN_THD) +
+        "," + std::to_string(UINT32_MAX) + "], end with MB";
 
     uint32_t unitLen = strlen(STORAGE_LIMIT_UNIT);
     if (storageLimit.size() <= unitLen) {
         MSPROF_LOGE("storage_limit:%s, length is less than %u", storageLimit.c_str(), unitLen + 1);
-        MSPROF_INNER_ERROR("EK9999", "storage_limit:%s, length is less than %u", storageLimit.c_str(), unitLen + 1);
+        MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
+            std::vector<std::string>({"storage_limit", storageLimit, errReason}));
         return false;
     }
 
     std::string unitStr = storageLimit.substr(storageLimit.size() - unitLen);
     if (unitStr != STORAGE_LIMIT_UNIT) {
         MSPROF_LOGE("storage_limit:%s, not end with MB", storageLimit.c_str());
-        MSPROF_INNER_ERROR("EK9999", "storage_limit:%s, not end with MB", storageLimit.c_str());
+        MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
+            std::vector<std::string>({"storage_limit", storageLimit, errReason}));
         return false;
     }
 
     std::string digitStr = storageLimit.substr(0, storageLimit.size() - unitLen);
     if (!Utils::IsAllDigit(digitStr)) {
         MSPROF_LOGE("storage_limit:%s, invalid numbers", storageLimit.c_str());
-        MSPROF_INNER_ERROR("EK9999", "storage_limit:%s, invalid numbers", storageLimit.c_str());
+        MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
+            std::vector<std::string>({"storage_limit", storageLimit, errReason}));
         return false;
     } else if (digitStr.size() > 10) { // digitStr range is 0 ~ 4294967296, max length is 10
         MSPROF_LOGE("storage_limit:%s, valid range is 200~4294967296", storageLimit.c_str());
-        MSPROF_INNER_ERROR("EK9999", "storage_limit:%s, valid range is 200~4294967296", storageLimit.c_str());
+        MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
+            std::vector<std::string>({"storage_limit", storageLimit, errReason}));
         return false;
     }
 
     uint64_t limit = stoull(digitStr);
     if (limit < STORAGE_LIMIT_DOWN_THD) {
         MSPROF_LOGE("storage_limit:%s, min value is %uMB", storageLimit.c_str(), STORAGE_LIMIT_DOWN_THD);
-        MSPROF_INNER_ERROR("EK9999", "storage_limit:%s, min value is %uMB", storageLimit.c_str(),
-            STORAGE_LIMIT_DOWN_THD);
+        MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
+            std::vector<std::string>({"storage_limit", storageLimit, errReason}));
         return false;
     } else if (limit > UINT32_MAX) {
         MSPROF_LOGE("storage_limit:%s, max value is %uMB", storageLimit.c_str(), UINT32_MAX);
-        MSPROF_INNER_ERROR("EK9999", "storage_limit:%s, max value is %uMB", storageLimit.c_str(), UINT32_MAX);
+        MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
+            std::vector<std::string>({"storage_limit", storageLimit, errReason}));
         return false;
     }
     return true;
@@ -741,6 +748,10 @@ bool ParamValidation::CheckBiuFreqValid(const uint32_t biuFreq)
 {
     if ((biuFreq < BIU_SAMPLE_FREQ_MIN) || (biuFreq > BIU_SAMPLE_FREQ_MAX)) {
         MSPROF_LOGE("biu_freq %u is invalid (%u~%u).", biuFreq, BIU_SAMPLE_FREQ_MIN, BIU_SAMPLE_FREQ_MAX);
+        std::string errReason = "biu_freq should be in range [" + std::to_string(BIU_SAMPLE_FREQ_MIN) +
+            "," + std::to_string(BIU_SAMPLE_FREQ_MAX) + "]";
+        MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
+            std::vector<std::string>({"biu_freq", std::to_string(biuFreq), errReason}));
         return false;
     }
     return true;

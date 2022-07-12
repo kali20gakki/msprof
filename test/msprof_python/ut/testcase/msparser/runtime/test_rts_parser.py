@@ -39,11 +39,11 @@ class TestRtsTrackParser(unittest.TestCase):
             check._read_rts_file('test', 256)
 
     def test_save(self):
-        with mock.patch('model.runtime.rts_track_model.RtsModel.init'), \
-                mock.patch('model.runtime.rts_track_model.RtsModel.check_db'), \
-                mock.patch('model.runtime.rts_track_model.RtsModel.create_table'), \
-                mock.patch('model.runtime.rts_track_model.RtsModel.insert_data_to_db'), \
-                mock.patch('model.runtime.rts_track_model.RtsModel.finalize'):
+        with mock.patch('msmodel.runtime.rts_track_model.RtsModel.init'), \
+                mock.patch('msmodel.runtime.rts_track_model.RtsModel.check_db'), \
+                mock.patch('msmodel.runtime.rts_track_model.RtsModel.create_table'), \
+                mock.patch('msmodel.runtime.rts_track_model.RtsModel.insert_data_to_db'), \
+                mock.patch('msmodel.runtime.rts_track_model.RtsModel.finalize'):
             InfoConfReader()._info_json = {"devices": '0'}
             check = RtsTrackParser(self.file_list, CONFIG)
             check._rts_data = [123]

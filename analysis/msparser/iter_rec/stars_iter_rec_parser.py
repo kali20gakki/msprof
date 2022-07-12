@@ -18,7 +18,7 @@ from common_func.path_manager import PathManager
 from common_func.platform.chip_manager import ChipManager
 from common_func.utils import Utils
 from framework.offset_calculator import OffsetCalculator
-from model.iter_rec.iter_rec_model import HwtsIterModel
+from msmodel.iter_rec.iter_rec_model import HwtsIterModel
 from msparser.interface.iparser import IParser
 from msparser.iter_rec.iter_rec_parser import IterInfo
 from profiling_bean.prof_enum.data_tag import DataTag

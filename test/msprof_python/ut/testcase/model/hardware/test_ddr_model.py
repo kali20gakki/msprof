@@ -4,10 +4,10 @@ from unittest import mock
 
 from common_func.info_conf_reader import InfoConfReader
 from constant.constant import INFO_JSON
-from model.hardware.ddr_model import DdrModel
+from msmodel.hardware.ddr_model import DdrModel
 from sqlite.db_manager import DBManager
 
-NAMESPACE = 'model.hardware.ddr_model'
+NAMESPACE = 'msmodel.hardware.ddr_model'
 sample_config = {"model_id": 1, 'iter_id': 'dasfsd', 'result_dir': 'jasdfjfjs'}
 
 

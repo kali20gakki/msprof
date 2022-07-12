@@ -112,7 +112,7 @@ int ChannelReader::Execute()
     int totalLen = 0;
     int currLen = 0;
     static const int maxReadLen = 1024 * 1024 * 32;
-    static const int maxThresholdSize = MAX_BUFFER_SIZE * 0.8;
+    static const int maxThresholdSize = static_cast<int>(MAX_BUFFER_SIZE * 0.8);
     SetSchedulingStatus(false);
     std::lock_guard<std::mutex> lk(mtx_);
     std::unique_lock<std::mutex> guard(flushMutex_, std::defer_lock);
@@ -154,7 +154,7 @@ int ChannelReader::Execute()
         totalLen += currLen;
         totalSize_ += static_cast<long long>(currLen);
 
-        dataSize_ += currLen;
+        dataSize_ += static_cast<uint32_t>(currLen);
     } while (static_cast<unsigned int>(currLen) == (spaceSize_) && (totalLen < maxReadLen));
 
     return PROFILING_SUCCESS;
