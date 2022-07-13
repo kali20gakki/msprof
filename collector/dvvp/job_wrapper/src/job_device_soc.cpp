@@ -108,7 +108,7 @@ int JobDeviceSoc::StartProfHandle(SHARED_PTR_ALIA<analysis::dvvp::message::Profi
             MSPROF_LOGE("Creating dir: %s err!", analysis::dvvp::common::utils::Utils::BaseName(dataDir).c_str());
             analysis::dvvp::common::utils::Utils::PrintSysErrorMsg();
         }
-    }    
+    }
     CreateCollectionJobArray();
     GetAndStoreStartTime(params_->host_profiling);
     return PROFILING_SUCCESS;
