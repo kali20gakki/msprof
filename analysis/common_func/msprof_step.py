@@ -6,6 +6,8 @@ This file mainly involves iteration.
 Copyright Information:
 Huawei Technologies Co., Ltd. All Rights Reserved © 2022
 """
+from collections import OrderedDict
+
 from common_func.constant import Constant
 from common_func.db_manager import DBManager, ClassRowType
 from common_func.db_name_constant import DBNameConstant
@@ -129,3 +131,20 @@ class MsprofStep:
             if data.iter_id == iter_id:
                 return data.model_id, data.index_id
         return EmptyClass(), EmptyClass()
+
+    def get_op_iteration_dict(self: any) -> dict:
+        """
+        get iteration end dict where model id is 4294967295 in mix op and graph scene
+        :return:
+        """
+        iter_dict = OrderedDict()
+        op_data = list(filter(lambda _data: _data.model_id == Constant.GE_OP_MODEL_ID, self.data))
+        for index, data in enumerate(op_data):
+            if data.iter_id == 1:
+                start_time = 0
+                end_time = data.step_end
+            else:
+                start_time = op_data[index - 1].step_end
+                end_time = data.step_end
+            iter_dict.setdefault(data.iter_id, [start_time, end_time])
+        return iter_dict
