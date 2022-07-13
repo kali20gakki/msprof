@@ -12,6 +12,7 @@
 #include "msprof_callback_impl.h"
 #include "errno/error_code.h"
 #include "profapi_plugin.h"
+#include "toolchain/prof_acl_api.h"
 
 using namespace Analysis::Dvvp::Analyze;
 using namespace analysis::dvvp::common::error;
