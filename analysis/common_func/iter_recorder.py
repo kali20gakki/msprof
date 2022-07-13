@@ -119,10 +119,9 @@ class IterRecorder:
     def _update_current_iter_id(self: any, sys_cnt: int) -> None:
         self._current_iter_id = self._current_graph_iter
         while self._check_mix_current_iter_id(sys_cnt):
-            if self._op_iter_dict.get(self._current_op_iter) and self._op_iter_dict.get(self._current_op_iter)[
-                0] <= sys_cnt \
-                    <= self._op_iter_dict.get(self._current_op_iter)[1]:
-                # sys time in interval [op_iter_start, op_iter_end]
+            if self._op_iter_dict.get(self._current_op_iter) and self._op_iter_dict.get(self._current_op_iter)[1] <= \
+                    sys_cnt <= self._op_iter_dict.get(self._current_op_iter)[1]:
+                # sys time in interval [prior_op_iter_end, op_iter_end]
 
                 if self._graph_iter_dict.get(self._current_graph_iter + 1) \
                         and (self._graph_iter_dict.get(self._current_graph_iter + 1)[0] <= sys_cnt
