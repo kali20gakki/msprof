@@ -101,14 +101,6 @@ int JobDeviceSoc::StartProfHandle(SHARED_PTR_ALIA<analysis::dvvp::message::Profi
         TaskRelationshipMgr::instance()->GetFlushSuffixDevId(params_->job_id, devIndexId_);
     MSVP_MAKE_SHARED0_RET(collectionjobComnCfg_->params, analysis::dvvp::message::ProfileParams, PROFILING_FAILED);
     collectionjobComnCfg_->params = params;
-    if (tmpResultDir_.length() != 0) {
-        std::string dataDir = tmpResultDir_ + MSVP_SLASH + "data";
-        int ret = analysis::dvvp::common::utils::Utils::CreateDir(dataDir);
-        if (ret != PROFILING_SUCCESS) {
-            MSPROF_LOGE("Creating dir: %s err!", analysis::dvvp::common::utils::Utils::BaseName(dataDir).c_str());
-            analysis::dvvp::common::utils::Utils::PrintSysErrorMsg();
-        }
-    }
     CreateCollectionJobArray();
     GetAndStoreStartTime(params_->host_profiling);
     return PROFILING_SUCCESS;
@@ -461,6 +453,12 @@ void JobDeviceSoc::CreateCollectionJobArray()
     MSVP_MAKE_SHARED0_VOID(CollectionJobV_[HOST_CPU_COLLECTION_JOB].collectionJob, ProfHostCpuJob);
     MSVP_MAKE_SHARED0_VOID(CollectionJobV_[HOST_MEM_COLLECTION_JOB].collectionJob, ProfHostMemJob);
     MSVP_MAKE_SHARED0_VOID(CollectionJobV_[HOST_NETWORK_COLLECTION_JOB].collectionJob, ProfHostNetworkJob);
+    std::string dataDir = tmpResultDir_ + MSVP_SLASH + "data";
+    int ret = analysis::dvvp::common::utils::Utils::CreateDir(dataDir);
+    if (ret != PROFILING_SUCCESS) {
+        MSPROF_LOGE("Creating dir: %s err!", analysis::dvvp::common::utils::Utils::BaseName(dataDir).c_str());
+        analysis::dvvp::common::utils::Utils::PrintSysErrorMsg();
+    }
 
     for (int cnt = 0; cnt < NR_MAX_COLLECTION_JOB; cnt++) {
         MSVP_MAKE_SHARED0_VOID(CollectionJobV_[cnt].jobCfg, CollectionJobCfg);
