@@ -147,6 +147,9 @@ def get_llc_bandwidth(curs: any) -> str:
         .format(cols=cols, table_name=DBNameConstant.TABLE_LLC_METRIC_DATA)
     bandwidth_data = DBManager.fetch_all_data(curs, sql)
     bandwidth_data = Utils.generator_to_list(list(i) for i in bandwidth_data)
+    if not bandwidth_data:
+        return json.dumps({"status": NumberConstant.ERROR,
+                           "info": "Failed to get read and write of llc_bandwidth."})
 
     trace_data = _format_llc_trace_data(bandwidth_data, delta_dev)
     if not trace_data:
@@ -196,6 +199,9 @@ def get_llc_capacity(params: dict, curs: any) -> str:
         return json.dumps({"status": NumberConstant.ERROR,
                            "info": "Failed to get data of llc_capacity."})
     else:
+        if not dsid_sql_data:
+            return json.dumps({"status": NumberConstant.ERROR,
+                               "info": "Failed to get read and write of llc_capacity."})
         dsid_sql_data = Utils.generator_to_list(list(i) for i in dsid_sql_data)
         trace_data = _format_llc_capacity(dsid_sql_data)
         meta_data = [["process_name", InfoConfReader().get_json_pid_data(),

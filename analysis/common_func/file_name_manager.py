@@ -152,10 +152,6 @@ class FileNameManagerConstant:
     SYS_CPU_USAGE_TRAINING_FILE_PATTERN = \
         r"^SystemCpuUsage\.data\.dev\.profiler_default_tag\.(\d+)\.slice_\d+"
 
-    TRAINING_TRACE_FILE_PATTERN = r"^training_trace\.data\.(\d+)\.slice_\d+"
-    TRAINING_TRACE_TRAINING_FILE_PATTERN = \
-        r"^training_trace\.\d+\.(dev|host)\.profiler_default_tag\.(\d+).slice_\d+"
-
     TS_CPU_FILE_PATTERN = r"^tscpu\.data\.(\d+)\.slice_\d+"
     TS_CPU_INFER_FILE_PATTERN = r"^tscpu\.data\.\d+\.(\d+)\.\d+"
     TS_CPU_TRAINING_FILE_PATTERN = \
@@ -566,14 +562,6 @@ def get_sys_cpu_usage_compiles() -> tuple:
     return re.compile(FileNameManagerConstant.SYS_CPU_USAGE_FILE_PATTERN), re.compile(
         FileNameManagerConstant.SYS_CPU_USAGE_INFER_FILE_PATTERN), re.compile(
         FileNameManagerConstant.SYS_CPU_USAGE_TRAINING_FILE_PATTERN)
-
-
-def get_training_trace_compiles() -> tuple:
-    """
-    get training trace compiles
-    """
-    return re.compile(FileNameManagerConstant.TRAINING_TRACE_FILE_PATTERN), re.compile(
-        FileNameManagerConstant.TRAINING_TRACE_TRAINING_FILE_PATTERN)
 
 
 def get_ts_cpu_compiles() -> tuple:

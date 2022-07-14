@@ -47,7 +47,6 @@ from common_func.file_name_manager import get_runtime_task_track_compiles
 from common_func.file_name_manager import get_soc_log_compiles
 from common_func.file_name_manager import get_sys_cpu_usage_compiles
 from common_func.file_name_manager import get_sys_mem_compiles
-from common_func.file_name_manager import get_training_trace_compiles
 from common_func.file_name_manager import get_ts_cpu_compiles
 from common_func.file_name_manager import get_ts_track_aiv_compiles
 from common_func.file_name_manager import get_soc_profiler_compiles
@@ -83,7 +82,6 @@ class FileDispatch:
         DataTag.HWTS: get_hwts_compiles(),
         DataTag.AI_CORE: get_ai_core_compiles(),
         DataTag.AI_CPU: get_data_preprocess_compiles(Constant.DATA_PROCESS_AI_CPU),
-        DataTag.TRAINING_TRACE: get_training_trace_compiles(),
         DataTag.DATA_PROCESS: get_data_preprocess_compiles(Constant.DATA_PROCESS_DP),
         DataTag.STARS_LOG: get_soc_log_compiles(),
         DataTag.FFTS_PMU: get_ffts_pmu_compiles(),

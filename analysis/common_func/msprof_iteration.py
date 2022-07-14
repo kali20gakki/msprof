@@ -54,8 +54,6 @@ class MsprofIteration:
         """
         if Utils.is_step_scene(self._result_dir):
             return self._generate_trace_result(self.get_step_iteration_time(index_id, model_id))
-        if Utils.is_training_trace_scene(self._result_dir):
-            return self._generate_trace_result(self.get_train_iteration_time(index_id))
         return []
 
     def get_step_iteration_time(self: any, index_id: int, model_id: int) -> list:
@@ -197,8 +195,6 @@ class MsprofIteration:
         """
         if Utils.is_step_scene(self._result_dir):
             return self.__get_trace_iteration_end()
-        if Utils.is_training_trace_scene(self._result_dir):
-            return self.__get_iter_by_training_trace()
         return {}
 
     def get_iteration_dict(self: any) -> dict:
@@ -266,21 +262,6 @@ class MsprofIteration:
             return iter_end_dict
         sql = "select iter_id, step_end from {0} " \
               "order by step_start".format(DBNameConstant.TABLE_STEP_TRACE_DATA)
-        trace_datas = DBManager.fetch_all_data(trace_curs, sql)
-        DBManager.destroy_db_connect(trace_conn, trace_curs)
-        if not trace_datas:
-            return iter_end_dict
-        return MsprofIteration._generate_trace_iter_end_result(trace_datas)
-
-    def __get_iter_by_training_trace(self: any) -> dict:
-        iter_end_dict = OrderedDict()
-        db_path = PathManager.get_db_path(self._result_dir, DBNameConstant.DB_TRACE)
-        trace_conn, trace_curs = DBManager.check_connect_db(self._result_dir, DBNameConstant.DB_STEP_TRACE)
-        if not trace_conn or not trace_curs \
-                or not DBManager.check_tables_in_db(db_path, DBNameConstant.TABLE_TRAINING_TRACE):
-            return iter_end_dict
-        sql = "select iteration_id, iteration_end from {0} order by iteration_id".format(
-            DBNameConstant.TABLE_TRAINING_TRACE)
         trace_datas = DBManager.fetch_all_data(trace_curs, sql)
         DBManager.destroy_db_connect(trace_conn, trace_curs)
         if not trace_datas:

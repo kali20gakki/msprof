@@ -140,11 +140,12 @@ class TimeLineJsonMaker:
                 "Iteration Refresh"]
 
     @staticmethod
-    def make_data_aug_dict0(trace_parm: dict, pid: int) -> dict:
+    def make_data_aug_dict0(trace_parm: dict, pid: int, tid: int) -> dict:
         """
         make data aug dict0
         :param trace_parm: trace parm
         :param pid: pid
+        :param tid: tid
         :return: dict
         """
         return OrderedDict([("name", "Data_aug Bound {}".format(trace_parm[StepTraceConstant.ITER_ID])),
@@ -152,16 +153,17 @@ class TimeLineJsonMaker:
                             ("ph", "s"),
                             ("ts", trace_parm[StepTraceConstant.STEP_END]),
                             ("pid", pid),
-                            ("tid", 0),
+                            ("tid", tid),
                             ("id", "Data_aug Bound {}".format(trace_parm[StepTraceConstant.ITER_ID])),
                             ("args", OrderedDict([("Iteration ID", trace_parm[StepTraceConstant.ITER_ID])]))])
 
     @staticmethod
-    def make_data_aug_dict1(trace_parm: dict, pid: int) -> dict:
+    def make_data_aug_dict1(trace_parm: dict, pid: int, tid: int) -> dict:
         """
         make data aug dict1
         :param trace_parm: trace parm
         :param pid: pid
+        :param tid: tid
         :return: dict
         """
         data_aug_bound = round(trace_parm[StepTraceConstant.DATA_AUGMENTATION],
@@ -171,8 +173,8 @@ class TimeLineJsonMaker:
                             ("ph", "t"),
                             ("ts", (trace_parm[StepTraceConstant.STEP_END] + trace_parm[
                                 StepTraceConstant.DATA_AUGMENTATION])),
-                            ("pid", pid + trace_parm.get(StepTraceConstant.ITER_ID) + 1),
-                            ("tid", 0),
+                            ("pid", pid),
+                            ("tid", tid),
                             ("id", "Data_aug Bound {}".format(trace_parm[StepTraceConstant.ITER_ID])),
                             ("args", OrderedDict([("Data_aug Bound(us)",
                                                    data_aug_bound)]))])
@@ -188,7 +190,7 @@ class StepTraceViewer:
     def get_step_trace_data(curs: any, message: dict) -> list:
         """
         get training trace data
-        :param cur: sqlite cur
+        :param curs: sqlite cur
         :param message: message
         :return: data
         """
@@ -483,8 +485,8 @@ class StepTraceViewer:
             else:
                 fp_bp_data = TimeLineJsonMaker.make_fp_bp_data(trace_parm, pid, tid)
                 grad_refresh_data = TimeLineJsonMaker.make_grad_refresh_data(trace_parm, pid, tid)
-                result_dict["data_aug_dict0"] = TimeLineJsonMaker.make_data_aug_dict0(trace_parm, pid)
-                result_dict["data_aug_dict1"] = TimeLineJsonMaker.make_data_aug_dict1(trace_parm, pid)
+                result_dict["data_aug_dict0"] = TimeLineJsonMaker.make_data_aug_dict0(trace_parm, pid, tid)
+                result_dict["data_aug_dict1"] = TimeLineJsonMaker.make_data_aug_dict1(trace_parm, pid, tid)
 
                 trace_view_data.append(iter_time_data)
                 trace_view_data.append(fp_bp_data)

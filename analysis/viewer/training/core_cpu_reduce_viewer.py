@@ -107,12 +107,6 @@ class CoreCpuReduceViewer:
                       "fp_bp_time, grad_refresh_bound, data_aug_bound from {0} " \
                       "where device_id=? and iteration_id=? and model_id=?".format(DBNameConstant.TABLE_TRAINING_TRACE)
                 result = DBManager.fetch_all_data(trace_curs, sql, (device_id, iter_id, model_id))
-            elif ProfilingScene().is_training_trace():
-                sql = "select iteration_id, FP_start, BP_end, iteration_end, iteration_time, " \
-                      "fp_bp_time, grad_refresh_bound, data_aug_bound from {0} " \
-                      "where device_id=? and iteration_id=?".format(DBNameConstant.TABLE_TRAINING_TRACE)
-                result = DBManager.fetch_all_data(trace_curs, sql, (device_id, iter_id))
-
         return result
 
     @staticmethod

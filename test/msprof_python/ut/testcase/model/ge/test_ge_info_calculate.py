@@ -57,14 +57,6 @@ class TestGeInfoModel(unittest.TestCase):
             result = check.get_ge_data(Constant.TASK_TYPE_AI_CORE)
         self.assertEqual(result, {})
 
-    def test_get_ge_data_train(self):
-        with mock.patch(NAMESPACE + '.Utils.is_step_scene', return_value=False), \
-             mock.patch(NAMESPACE + '.Utils.is_training_trace_scene', return_value=True), \
-             mock.patch(NAMESPACE + '.GeInfoModel._GeInfoModel__get_ge_data_training_trace_scene', return_value=[]):
-            check = GeInfoModel("")
-            result = check.get_ge_data(Constant.TASK_TYPE_AI_CORE)
-        self.assertEqual(result, {})
-
     def test_get_ge_data_step_scene(self):
         with mock.patch(NAMESPACE + '.GeInfoModel.map_model_to_iter', return_value=[]), \
              mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True), \

@@ -18,6 +18,7 @@
 #include "proto/profiler.pb.h"
 #include "uploader.h"
 #include "uploader_mgr.h"
+#include "toolchain/prof_acl_api.h"
 
 namespace Analysis {
 namespace Dvvp {
