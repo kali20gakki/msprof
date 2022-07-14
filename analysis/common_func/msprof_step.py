@@ -76,8 +76,8 @@ class MsprofStep:
         :return: [min_iter_id - 1, max_iter_id]
         """
         iter_data = None
-        iter_id_min = None
-        iter_id_max = None
+        iter_id_min = Constant.DEFAULT_COUNT
+        iter_id_max = max([data.iter_id for data in self.data])
         for data in self.data:
             if data.model_id == model_id and data.index_id == index_id:
                 iter_data = data
@@ -90,8 +90,6 @@ class MsprofStep:
             if data.model_id == Constant.GE_OP_MODEL_ID and iter_data.step_start < data.step_start:
                 iter_id_max = data.iter_id - 1
                 break
-        if iter_id_min is None or iter_id_max is None:
-            return ()
         return iter_id_min, iter_id_max
 
     def get_graph_iter_id(self: any, index_id: int, model_id: int) -> tuple:
@@ -140,11 +138,7 @@ class MsprofStep:
         iter_dict = OrderedDict()
         op_data = list(filter(lambda _data: _data.model_id == Constant.GE_OP_MODEL_ID, self.data))
         for index, data in enumerate(op_data):
-            if data.iter_id == 1:
-                start_time = 0
-                end_time = data.step_end
-            else:
-                start_time = op_data[index - 1].step_end
-                end_time = data.step_end
+            start_time = 0 if data.iter_id == 1 else op_data[index - 1].step_end
+            end_time = data.step_end
             iter_dict.setdefault(data.iter_id, [start_time, end_time])
         return iter_dict
