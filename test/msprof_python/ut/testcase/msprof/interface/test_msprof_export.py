@@ -153,31 +153,6 @@ class TestExportCommand(unittest.TestCase):
         (test_sql[1]).execute("drop Table {}".format(DBNameConstant.TABLE_STEP_TRACE_DATA))
         db_manager.destroy(test_sql)
 
-    def test__check_index_id_range_5(self):
-        args_dic = {"collection_path": "test", "iteration_id": 3, "model_id": 2}
-        args = Namespace(**args_dic)
-        create_sql = "CREATE TABLE IF NOT EXISTS " + DBNameConstant.TABLE_TRAINING_TRACE + \
-                     "(device_id, model_id, iteration_id)"
-        data = ((0, 1, 0), (0, 2, 1))
-        insert_sql = "insert into {0} values ({value})".format(
-            DBNameConstant.TABLE_TRAINING_TRACE, value="?," * (len(data[0]) - 1) + "?")
-        db_manager = DBManager()
-        test_sql = db_manager.create_table(DBNameConstant.DB_TRACE, create_sql, insert_sql, data)
-        with mock.patch(NAMESPACE + ".Utils.get_scene", return_value=Constant.TRAIN), \
-                mock.patch(NAMESPACE + ".DBManager.check_connect_db", return_value=test_sql), \
-                mock.patch(NAMESPACE + ".DBManager.judge_table_exist", return_value=True), \
-                mock.patch(NAMESPACE + ".DBManager.destroy_db_connect"), \
-                mock.patch(NAMESPACE + ".error"):
-            with pytest.raises(ProfException) as err:
-                ProfilingScene().init('')
-                ProfilingScene()._scene = Constant.TRAIN
-                test = ExportCommand("timeline", args)
-                test._check_index_id("")
-
-        (test_sql[1]).execute("drop Table {}".format(DBNameConstant.TABLE_TRAINING_TRACE))
-        db_manager.destroy(test_sql)
-        self.assertEqual(err.value.code, 1)
-
     def test_prepare_for_export(self):
         args_dic = {"collection_path": "test", "iteration_id": 3, "model_id": 3}
         args = Namespace(**args_dic)
