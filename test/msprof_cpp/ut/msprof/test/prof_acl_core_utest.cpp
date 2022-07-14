@@ -39,6 +39,7 @@
 #include "ai_drv_dev_api.h"
 #include "mmpa_plugin.h"
 #include "prof_api.h"
+#include "toolchain/prof_acl_api.h"
 
 using namespace analysis::dvvp::common::error;
 using namespace Analysis::Dvvp::Analyze;
