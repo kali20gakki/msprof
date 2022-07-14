@@ -119,7 +119,7 @@ class MsTimeParser(IParser, MsMultiProcess):
                     ms_time_model.flush(message_list)
                     ms_time_model.finalize()
         except sqlite3.Error as trace_err:
-            logging.error("Save hwts iter failed, "
+            logging.error("Save time failed, "
                           "%s", str(trace_err), exc_info=Constant.TRACE_BACK_SWITCH)
         finally:
             pass
