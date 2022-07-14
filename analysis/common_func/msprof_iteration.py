@@ -267,18 +267,3 @@ class MsprofIteration:
         if not trace_datas:
             return iter_end_dict
         return MsprofIteration._generate_trace_iter_end_result(trace_datas)
-
-    def __get_iter_by_training_trace(self: any) -> dict:
-        iter_end_dict = OrderedDict()
-        db_path = PathManager.get_db_path(self._result_dir, DBNameConstant.DB_TRACE)
-        trace_conn, trace_curs = DBManager.check_connect_db(self._result_dir, DBNameConstant.DB_STEP_TRACE)
-        if not trace_conn or not trace_curs \
-                or not DBManager.check_tables_in_db(db_path, DBNameConstant.TABLE_TRAINING_TRACE):
-            return iter_end_dict
-        sql = "select iteration_id, iteration_end from {0} order by iteration_id".format(
-            DBNameConstant.TABLE_TRAINING_TRACE)
-        trace_datas = DBManager.fetch_all_data(trace_curs, sql)
-        DBManager.destroy_db_connect(trace_conn, trace_curs)
-        if not trace_datas:
-            return iter_end_dict
-        return MsprofIteration._generate_trace_iter_end_result(trace_datas)

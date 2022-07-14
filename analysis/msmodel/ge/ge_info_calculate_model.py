@@ -98,15 +98,6 @@ class GeInfoModel(BaseModel):
                     batch_dict.setdefault((iter_id, stream_id), (task_id, batch_id))
             return batch_dict
 
-    def __get_ge_data_training_trace_scene(self: any, ge_op_iter_dict: dict) -> None:
-        ge_sql = "select index_id, stream_id, task_id from {0} where (index_id=0 or index_id>0) " \
-                 "and task_type='{1}'".format(DBNameConstant.TABLE_GE_TASK,
-                                              Constant.TASK_TYPE_AI_CORE)
-        ge_dynamic_data = self.cur.execute(ge_sql).fetchall()
-        for per_data in ge_dynamic_data:
-            ge_op_iter_dict.setdefault(str(per_data[0]), set()).add(
-                self.STREAM_TASK_KEY_FMT.format(*per_data[1:]))
-
     def __update_iter_dict(self: any, model_to_iter_dict: dict, ge_op_iter_dict: dict, ge_data: list) -> None:
         for key, value in model_to_iter_dict.items():
             if key[0] == ge_data[0]:

@@ -29,7 +29,6 @@ class ParseAiCoreOpSummary:
     TASK_TIME_COL_NUM = 8
     TRAIN_TASK_TIME_COL_NUM = 7
     TABLE_PATH = os.path.join(MsvpConstant.CONFIG_PATH, 'Tables.ini')
-    TRAIN_TABLE_PATH = os.path.join(MsvpConstant.CONFIG_PATH, 'Tables_training.ini')
     TABLES_PATH = os.path.join(MsvpConstant.CONFIG_PATH, 'Tables.ini')
 
     def __init__(self: any, sample_config: dict) -> None:
@@ -159,10 +158,8 @@ class ParseAiCoreOpSummary:
         :param conn: sqlite conn
         :return: true or false
         """
-        table_path = \
-            self.TRAIN_TABLE_PATH if ProfilingScene().is_training_trace() else self.TABLE_PATH
         create_table_sql = DBManager.sql_create_general_table("ModifiedTaskTimeMap", "task_time",
-                                                              table_path)
+                                                              self.TABLE_PATH)
         if not create_table_sql:
             logging.error("unable to create task time table, generate sql statement failed!")
             return
