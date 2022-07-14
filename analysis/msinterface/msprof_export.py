@@ -253,12 +253,6 @@ class ExportCommand:
                 DBNameConstant.TABLE_STEP_TRACE_DATA)
             conn, curs = DBManager.check_connect_db(project_path, DBNameConstant.DB_STEP_TRACE)
             judge_table = DBManager.judge_table_exist(curs, DBNameConstant.TABLE_STEP_TRACE_DATA)
-
-        elif profiling_scene.is_training_trace():
-            sql = "select max(iteration_id) from {0} " \
-                  "where model_id=?".format(DBNameConstant.TABLE_TRAINING_TRACE)
-            conn, curs = DBManager.check_connect_db(project_path, DBNameConstant.DB_TRACE)
-            judge_table = DBManager.judge_table_exist(curs, DBNameConstant.TABLE_TRAINING_TRACE)
         else:
             init_success = False
         if not conn or not curs or not judge_table:
