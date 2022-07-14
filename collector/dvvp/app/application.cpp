@@ -102,6 +102,17 @@ int Application::LaunchApp(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParam
         MSPROF_LOGE("app_dir(%s) is not valid.", Utils::BaseName(paramsCmd[0]).c_str());
         return PROFILING_FAILED;
     }
+    std::string changeworkdirpath = cmd;
+    if ((cmd.find("bash") != std::string::npos) || (cmd.find("python") != std::string::npos)) {
+        for (uint32_t i = 1; i < paramsCmd.size(); i++) {
+            paramsCmd[i] = analysis::dvvp::common::utils::Utils::CanonicalizePath(paramsCmd[i]);
+            if (paramsCmd[i].empty()) {
+                MSPROF_LOGE("app_args_dir(%s) is not valid.", Utils::BaseName(paramsCmd[i]).c_str());
+                return PROFILING_FAILED;
+            }
+        }
+        changeworkdirpath = paramsCmd[1];
+    }
     std::vector<std::string> argsVec;
     std::vector<std::string> envsVec;
     PrepareAppArgs(paramsCmd, argsVec);  // args
@@ -111,7 +122,7 @@ int Application::LaunchApp(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParam
         return PROFILING_FAILED;
     }
     appProcess = MSVP_MMPROCESS;  // run
-    if (analysis::dvvp::common::utils::Utils::ChangeWorkDir(cmd) == PROFILING_FAILED) {
+    if (analysis::dvvp::common::utils::Utils::ChangeWorkDir(changeworkdirpath) == PROFILING_FAILED) {
         return PROFILING_FAILED;
     }
 
