@@ -10,7 +10,7 @@
 #include "errno/error_code.h"
 #include "message/codec.h"
 #include "proto/profiler.pb.h"
-
+#include "toolchain/prof_acl_api.h"
 namespace Analysis {
 namespace Dvvp {
 namespace Analyze {
