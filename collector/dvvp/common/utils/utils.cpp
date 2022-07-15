@@ -535,23 +535,12 @@ int Utils::ExecCmd(const ExecCmdParams &execCmdParams,
     } while (0);
     return ret;
 }
-int Utils::GetChangeWorkDirPath(std::vector<std::string> &paramCmd,
-                                std::string &cmdPath,
-                                std::string &workDirPath)
+int Utils::GetWorkDirPath(std::vector<std::string> &paramCmd, std::string &workDirPath)
 {
     if (paramCmd.empty()) {
         return PROFILING_FAILED;
     }
-    cmdPath = CanonicalizePath(paramCmd[0]);
-    if (cmdPath.empty()) {
-        MSPROF_LOGE("app_dir(%s) is not valid.", BaseName(cmdPath).c_str());
-        return PROFILING_FAILED;
-    }
-    if (IsSoftLink(cmdPath)) {
-        MSPROF_LOGE("app_dir(%s) is soft link.", BaseName(cmdPath).c_str());
-        return PROFILING_FAILED;
-    }
-    if (!IsAppName(cmdPath)) {
+    if (!IsAppName(paramCmd[0])) {
         for (uint32_t i = 1; i < paramCmd.size(); i++) {
             paramCmd[i] = CanonicalizePath(paramCmd[i]);
             if (paramCmd[i].empty()) {
@@ -560,10 +549,7 @@ int Utils::GetChangeWorkDirPath(std::vector<std::string> &paramCmd,
             }
         }
         workDirPath = paramCmd[1];
-    } else {
-        workDirPath = cmdPath;
     }
-    
     return PROFILING_SUCCESS;
 }
 int Utils::ChangeWorkDir(const std::string &fileName)

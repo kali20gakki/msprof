@@ -119,11 +119,18 @@ int Application::LaunchApp(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParam
         MSPROF_LOGE("[LaunchApp]paramsCmd is empty.");
         return PROFILING_FAILED;
     }
-    std::string cmdPath;
-    std::string changeWorkDirPath;
-    if (analysis::dvvp::common::utils::Utils::GetChangeWorkDirPath(paramsCmd,
-        cmdPath, changeWorkDirPath) != PROFILING_SUCCESS) {
+    std::string cmd = GetCmdString(paramsCmd[0]);
+    if (cmd.empty()) {
+        MSPROF_LOGE("app_dir(%s) is not valid.", Utils::BaseName(paramsCmd[0]).c_str());
+        return PROFILING_FAILED;
+    }
+    std::string workDirPath = cmd;
+    if (analysis::dvvp::common::utils::Utils::GetWorkDirPath(paramsCmd, workDirPath) != PROFILING_SUCCESS) {
         MSPROF_LOGE("App params are invalid");
+        return PROFILING_FAILED;
+    }
+    if (analysis::dvvp::common::utils::Utils::IsSoftLink(workDirPath)) {
+        MSPROF_LOGE("app_dir(%s) is soft link.", Utils::BaseName(workDirPath).c_str());
         return PROFILING_FAILED;
     }
     std::vector<std::string> argsVec;
@@ -131,19 +138,18 @@ int Application::LaunchApp(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParam
     PrepareAppArgs(paramsCmd, argsVec);  // args
     int ret = PrepareAppEnvs(params, envsVec);  // envs
     if (ret != PROFILING_SUCCESS) {
-        MSPROF_LOGE("Failed to PrepareAppEnvs, cmd:%s", cmdPath.c_str());
+        MSPROF_LOGE("Failed to PrepareAppEnvs, cmd:%s", cmd.c_str());
         return PROFILING_FAILED;
     }
     appProcess = MSVP_MMPROCESS;  // run
-    if (analysis::dvvp::common::utils::Utils::ChangeWorkDir(changeWorkDirPath) == PROFILING_FAILED) {
+    if (analysis::dvvp::common::utils::Utils::ChangeWorkDir(workDirPath) == PROFILING_FAILED) {
         return PROFILING_FAILED;
     }
-
     int exitCode = analysis::dvvp::common::utils::INVALID_EXIT_CODE;
-    ExecCmdParams execCmdParams(cmdPath, true, "");
+    ExecCmdParams execCmdParams(cmd, true, "");
     ret = analysis::dvvp::common::utils::Utils::ExecCmd(execCmdParams, argsVec, envsVec, exitCode, appProcess);
     if (ret != PROFILING_SUCCESS) {
-        MSPROF_LOGE("Failed to launch app: %s", cmdPath.c_str());
+        MSPROF_LOGE("Failed to launch app: %s", cmd.c_str());
         return PROFILING_FAILED;
     }
     return ret;
