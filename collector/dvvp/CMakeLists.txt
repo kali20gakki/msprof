@@ -241,6 +241,7 @@ target_link_libraries(msprofiler_share PRIVATE
     ascend_protobuf_shared
     error_manager
     -Wl,--as-needed
+    dl
 )
 
 install(TARGETS msprofiler_share OPTIONAL
