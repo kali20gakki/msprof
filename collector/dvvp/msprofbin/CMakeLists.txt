@@ -127,7 +127,7 @@ target_link_options(msprofbin PRIVATE
     -Wl,-Bsymbolic
     -Wl,--exclude-libs=ALL
     -pie
-    -s
+    $<$<NOT:$<STREQUAL:${CMAKE_BUILD_TYPE},Debug>>:-s>
 )
 
 target_link_libraries(msprofbin PRIVATE

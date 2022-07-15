@@ -4,7 +4,7 @@ from viewer.memory_copy.memory_copy_viewer import MemoryCopyViewer
 from common_func.memcpy_constant import MemoryCopyConstant
 from common_func.ms_constant.str_constant import StrConstant
 
-NAMESPACE = 'model.memory_copy.memcpy_model.MemcpyModel'
+NAMESPACE = 'msmodel.memory_copy.memcpy_model.MemcpyModel'
 
 
 class TestMemoryCopyViewer(unittest.TestCase):

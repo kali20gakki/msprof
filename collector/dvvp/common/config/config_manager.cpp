@@ -61,6 +61,10 @@ int ConfigManager::Init()
         }
     } else {
         chipId = ((static_cast<uint64_t>(versionInfo) >> 8) & 0xff); // 8:shift 8 bits, get the low 8 bits(0xff)
+        if (chipId >= static_cast<uint32_t>(PlatformType::END_TYPE)) {
+            MSPROF_LOGE("halGetDeviceInfo get chip invalid, versionInfo:0x%llx, chipId:%u", versionInfo, chipId);
+            return PROFILING_FAILED;
+        }
     }
     configMap_[TYPE_CONFIG] = std::to_string(chipId);
     InitFrequency();
@@ -86,7 +90,16 @@ int ConfigManager::GetAicoreEvents(const std::string &aicoreMetricsType, std::st
         return PROFILING_SUCCESS;
     }
     MSPROF_LOGE("Invalid metrics type %s", aicoreMetricsType.c_str());
-    MSPROF_INNER_ERROR("EK9999", "Invalid metrics type %s", aicoreMetricsType.c_str());
+    std::string errReason = "aic_metrics type should be in [";
+    for (auto aiCoreType : AICORE_METRICS_LIST) {
+        errReason += aiCoreType.first;
+        errReason += "|";
+    }
+    if (errReason[errReason.size() - 1] == '|') {
+        errReason.replace(errReason.size() - 1, 1, "]");
+    }
+    MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
+        std::vector<std::string>({"aic_metrics", aicoreMetricsType, errReason}));
     return PROFILING_FAILED;
 }
 

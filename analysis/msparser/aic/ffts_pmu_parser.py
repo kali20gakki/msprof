@@ -17,7 +17,7 @@ from common_func.path_manager import PathManager
 from common_func.platform.chip_manager import ChipManager
 from common_func.utils import Utils
 from framework.offset_calculator import OffsetCalculator
-from model.stars.ffts_pmu_model import FftsPmuModel
+from msmodel.stars.ffts_pmu_model import FftsPmuModel
 from msparser.interface.iparser import IParser
 from profiling_bean.prof_enum.data_tag import DataTag
 from profiling_bean.stars.ffts_plus_pmu import FftsPlusPmuBean

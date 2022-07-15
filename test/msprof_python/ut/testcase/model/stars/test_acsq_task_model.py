@@ -1,8 +1,8 @@
 import unittest
 from unittest import mock
-from model.stars.acsq_task_model import AcsqTaskModel
+from msmodel.stars.acsq_task_model import AcsqTaskModel
 
-NAMESPACE = 'model.stars.acsq_task_model'
+NAMESPACE = 'msmodel.stars.acsq_task_model'
 
 
 class TestAcsqTaskModel(unittest.TestCase):

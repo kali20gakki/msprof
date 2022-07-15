@@ -71,7 +71,7 @@ target_link_options(stub_msprofiler PRIVATE
     -Wl,-z,relro,-z,now,-z,noexecstack
     -Wl,-Bsymbolic
     -Wl,--exclude-libs=ALL
-    -s
+    $<$<NOT:$<STREQUAL:${CMAKE_BUILD_TYPE},Debug>>:-s>
 )
 
 install(TARGETS stub_msprofiler OPTIONAL
@@ -232,7 +232,7 @@ target_link_options(msprofiler_share PRIVATE
     -Wl,-z,relro,-z,now,-z,noexecstack
     -Wl,-Bsymbolic
     -Wl,--exclude-libs=ALL
-    -s
+    $<$<NOT:$<STREQUAL:${CMAKE_BUILD_TYPE},Debug>>:-s>
 )
 
 target_link_libraries(msprofiler_share PRIVATE
@@ -241,6 +241,7 @@ target_link_libraries(msprofiler_share PRIVATE
     ascend_protobuf_shared
     error_manager
     -Wl,--as-needed
+    dl
 )
 
 install(TARGETS msprofiler_share OPTIONAL

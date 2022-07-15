@@ -16,6 +16,9 @@ function parse_script_args() {
         --install-path=*)
 			let "install_path_num+=1"
 			install_path=${3#--install-path=}/${VERSION}
+			check_path ${install_path}
+			install_path=$(readlink -f ${install_path})
+			check_path ${install_path}
 			shift
 			continue
             ;;
@@ -76,19 +79,14 @@ function check_args() {
 
 function execute_run() {
 	if [ ${uninstall_flag} = 1 ]; then
-		if [ -f "${install_path}/${MSPROF_RUN_NAME}/script/uninstall.sh" ];
-		then
+		if [ -f "${install_path}/${MSPROF_RUN_NAME}/script/uninstall.sh" ] && [ "${package_arch}" = "$(arch)" ]; then
 			bash "${install_path}/${MSPROF_RUN_NAME}/script/uninstall.sh"
 			print "INFO" "${MSPROF_RUN_NAME} package uninstall success."
-			exit 0
-		else
-			print "ERROR" "${MSPROF_RUN_NAME} package uninstall failed."
-			exit 1
 		fi
-		
+		exit 0
 	fi
 
-	if [ ${upgrade_flag} = 1 ] && [ -L "${install_path}/../latest/${MSPROF_RUN_NAME}" ]; then
+	if [ ${upgrade_flag} = 1 ] && [ -L "${install_path}/../latest/${MSPROF_RUN_NAME}" ] && [ "${package_arch}" = "$(arch)" ]; then
 		local uninstall_absolute_path=$(readlink -f "${install_path}/../latest/${MSPROF_RUN_NAME}/script/uninstall.sh")
 		if [ -f ${uninstall_absolute_path} ];
 		then
@@ -112,8 +110,6 @@ function get_default_install_path() {
 }
 
 function store_uninstall_script() {
-	local install_right=500
-
 	if [ -f "${install_path}/${MSPROF_RUN_NAME}/script/uninstall.sh" ] || [ -f "${install_path}/${MSPROF_RUN_NAME}/script/utils.sh" ]; then
 		return
 	fi
@@ -122,7 +118,7 @@ function store_uninstall_script() {
 	cp "uninstall.sh" "${install_path}/${MSPROF_RUN_NAME}/script/"
 	cp "utils.sh" "${install_path}/${MSPROF_RUN_NAME}/script/"
 
-	chmod -R ${install_right} ${install_path}/${MSPROF_RUN_NAME}
+	chmod -R ${script_right} ${install_path}/${MSPROF_RUN_NAME}
 }
 
 function set_latest() {
@@ -167,7 +163,9 @@ install_path=$(get_default_install_path)
 parse_script_args $*
 check_args
 execute_run
-store_uninstall_script
-set_latest
-regist_uninstall
+if [ "${package_arch}" = "$(arch)" ]; then
+	store_uninstall_script
+	set_latest
+	regist_uninstall
+fi
 print "INFO" "${MSPROF_RUN_NAME} package install success."

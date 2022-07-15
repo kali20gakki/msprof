@@ -1,11 +1,11 @@
 import unittest
 from unittest import mock
 
-from model.iter_rec.iter_rec_model import HwtsIterModel
+from msmodel.iter_rec.iter_rec_model import HwtsIterModel
 from sqlite.db_manager import DBManager
 from sqlite.db_manager import CursorDemo
 
-NAMESPACE = 'model.iter_rec.iter_rec_model'
+NAMESPACE = 'msmodel.iter_rec.iter_rec_model'
 
 
 class TestHwtsIterModel(unittest.TestCase):

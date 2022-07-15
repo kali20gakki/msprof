@@ -97,6 +97,8 @@ function copy_script() {
     cp -p ${UTILS_SCRIPT} ${install_path}/${SPC_DIR}/${SCRIPT_DIR}/${MSPROF_RUN_NAME}/
     cp -p ${ROLLBACK} ${install_path}/${SPC_DIR}/${SCRIPT_DIR}/${MSPROF_RUN_NAME}/rollback.sh
     cp -p ${UNINSTALL_SPC} ${install_path}/${SPC_DIR}/${SCRIPT_DIR}/${MSPROF_RUN_NAME}/uninstall.sh
+
+	chmod -R ${mindstudio_msprof_spc_right} ${install_path}/${SPC_DIR}/${SCRIPT_DIR}/${MSPROF_RUN_NAME}
 }
 
 function place_common_script() {

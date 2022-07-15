@@ -40,9 +40,10 @@ int Application::PrepareLaunchAppCmd(std::stringstream &ssCmdApp,
         MSPROF_LOGE("app_parameters(%s) contains not allowed character.", params->app_parameters.c_str());
         return PROFILING_FAILED;
     }
-
-    ssCmdApp << params->app_dir;
-    ssCmdApp << MSVP_SLASH;
+    if (params->app_dir != "MS_SYS_PATH") {
+        ssCmdApp << params->app_dir;
+        ssCmdApp << MSVP_SLASH;
+    }
     ssCmdApp << params->app;
     if (!params->app_parameters.empty()) {
         ssCmdApp << " ";
@@ -75,6 +76,32 @@ int Application::PrepareAppEnvs(SHARED_PTR_ALIA<analysis::dvvp::message::Profile
     return PROFILING_SUCCESS;
 }
 
+std::string Application::GetAppPath(std::vector<std::string> paramsCmd)
+{
+    if (paramsCmd.empty()) {
+        return "";
+    }
+    std::string ret = "";
+    if (analysis::dvvp::common::utils::Utils::IsAppName(paramsCmd[0])) {
+        ret = paramsCmd[0];
+    } else if (paramsCmd.size() > 1) {
+        ret = paramsCmd[1];
+    }
+    return ret;
+}
+
+std::string Application::GetCmdString(const std::string paramsName)
+{
+    if (paramsName.empty()) {
+        return "";
+    }
+    if (analysis::dvvp::common::utils::Utils::IsAppName(paramsName)) {
+        return analysis::dvvp::common::utils::Utils::CanonicalizePath(paramsName);
+    } else {
+        return paramsName;
+    }
+}
+
 int Application::LaunchApp(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params,
     mmProcess &appProcess)
 {
@@ -87,14 +114,18 @@ int Application::LaunchApp(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParam
         return PROFILING_FAILED;
     }
     MSPROF_LOGI("launch app cmd: %s", ssCmdApp.str().c_str());
-    std::vector<std::string> paramsCmd =
-        analysis::dvvp::common::utils::Utils::Split(ssCmdApp.str());
+    std::vector<std::string> paramsCmd = analysis::dvvp::common::utils::Utils::Split(ssCmdApp.str());
     if (paramsCmd.empty()) {
         MSPROF_LOGE("[LaunchApp]paramsCmd is empty.");
         return PROFILING_FAILED;
     }
-    if (analysis::dvvp::common::utils::Utils::IsSoftLink(paramsCmd[0])) {
-        MSPROF_LOGE("app_dir(%s) is soft link.", Utils::BaseName(paramsCmd[0]).c_str());
+    std::string appPath = GetAppPath(paramsCmd);
+    if (appPath.empty()) {
+        MSPROF_LOGE("app_dir is empty.");
+        return PROFILING_FAILED;
+    }
+    if (analysis::dvvp::common::utils::Utils::IsSoftLink(appPath)) {
+        MSPROF_LOGE("app_dir(%s) is soft link.", Utils::BaseName(appPath).c_str());
         return PROFILING_FAILED;
     }
     std::string cmd;

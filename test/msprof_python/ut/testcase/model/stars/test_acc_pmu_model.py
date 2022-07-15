@@ -2,9 +2,9 @@ import sqlite3
 import unittest
 from unittest import mock
 
-from model.stars.acc_pmu_model import AccPmuModel
+from msmodel.stars.acc_pmu_model import AccPmuModel
 
-NAMESPACE = 'model.stars.acc_pmu_model'
+NAMESPACE = 'msmodel.stars.acc_pmu_model'
 
 
 class TestAccPmuModel(unittest.TestCase):

@@ -1,8 +1,8 @@
 import unittest
 from unittest import mock
-from model.stars.inter_soc_model import InterSocModel
+from msmodel.stars.inter_soc_model import InterSocModel
 
-NAMESPACE = 'model.stars.inter_soc_model'
+NAMESPACE = 'msmodel.stars.inter_soc_model'
 
 
 class TestInterSocModel(unittest.TestCase):

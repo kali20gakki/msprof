@@ -15,7 +15,7 @@ from common_func.msvp_common import is_valid_original_data
 from common_func.os_manager import check_file_readable
 from common_func.path_manager import PathManager
 from common_func.utils import Utils
-from model.hardware.mini_llc_model import MiniLlcModel
+from msmodel.hardware.mini_llc_model import MiniLlcModel
 from profiling_bean.prof_enum.data_tag import DataTag
 
 
