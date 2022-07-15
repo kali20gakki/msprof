@@ -130,7 +130,7 @@ int Application::LaunchApp(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParam
     }
     std::string cmd;
     std::string changeworkdirpath;
-    if (analysis::dvvp::common::utils::Utils::GetChangeWorkDirPath(paramsCmd, cmd, changeworkdirpath) 
+    if (analysis::dvvp::common::utils::Utils::GetChangeWorkDirPath(paramsCmd, cmd, changeworkdirpath)
         != PROFILING_SUCCESS) {
         MSPROF_LOGE("App params are invalid");
         return PROFILING_FAILED;
