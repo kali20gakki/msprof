@@ -129,7 +129,6 @@ class MsTimeParser(IParser, MsMultiProcess):
         entrance of time parser
         :return: None
         """
-        #if not InfoConfReader().is_host_profiling():
         try:
             self.parse()
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
