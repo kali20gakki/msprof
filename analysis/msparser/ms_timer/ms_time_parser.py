@@ -129,17 +129,16 @@ class MsTimeParser(IParser, MsMultiProcess):
         entrance of time parser
         :return: None
         """
-        if not InfoConfReader().is_host_profiling():
-            try:
-                self.parse()
-            except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
-                logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
-            self.save()
+        #if not InfoConfReader().is_host_profiling():
+        try:
+            self.parse()
+        except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
+            logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
+        self.save()
 
     def _check_time_format(self, message: dict) -> bool:
         result = False
         if not message:
-            logging.error("No time_sync message collected")
             return result
         for items in message["data"]:
             check_int_item = [items["dev_mon"],
