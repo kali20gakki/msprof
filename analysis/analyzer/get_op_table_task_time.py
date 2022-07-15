@@ -98,7 +98,7 @@ class GetOpTableTsTime:
         return ai_cpu_time
 
     def _get_ai_core_sql(self: any) -> str:
-        if ProfilingScene().is_training_trace() or ProfilingScene().is_operator():
+        if ProfilingScene().is_operator():
             return self._get_op_ai_core_task_time_sql()
         return self._get_no_op_ai_core_task_time_sql()
 
