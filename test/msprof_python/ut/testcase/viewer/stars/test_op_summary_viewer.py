@@ -17,7 +17,7 @@ class TestOpSummaryViewer(unittest.TestCase):
 
     def test_get_summary_data(self):
         with mock.patch(NAMESPACE + '.OpSummaryModel.get_summary_data', return_value=[]),\
-             mock.patch('model.interface.view_model.ViewModel.init'):
+             mock.patch('msmodel.interface.view_model.ViewModel.init'):
             check = OpSummaryViewer({}, {})
             ret = check.get_summary_data()
             self.assertEqual([], ret)

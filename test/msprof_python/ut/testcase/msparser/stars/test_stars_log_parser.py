@@ -58,12 +58,12 @@ class TestStarsLogCalCulator(unittest.TestCase):
     #             key._parse_all_file()
 
     def test_parse_by_iter(self):
-        with mock.patch('model.interface.parser_model.ParserModel.init'), \
+        with mock.patch('msmodel.interface.parser_model.ParserModel.init'), \
              mock.patch(NAMESPACE + '.HwtsIterModel.get_task_offset_and_sum', return_value=(0, 0)):
             key = StarsLogCalCulator(file_list={DataTag.STARS_LOG: ['a_2', 'b_1']}, sample_config={'1': 'ada'})
             key._parser_dispatcher = ParserDispatcher(result_dir='11')
             key._parse_by_iter()
-        with mock.patch('model.interface.parser_model.ParserModel.init'), \
+        with mock.patch('msmodel.interface.parser_model.ParserModel.init'), \
              mock.patch(NAMESPACE + '.HwtsIterModel.get_task_offset_and_sum', return_value=(63, 63)), \
                 mock.patch(NAMESPACE + '.FileCalculator.prepare_process', return_value=(63, 63)):
             key = StarsLogCalCulator(file_list={DataTag.STARS_LOG: ['a_2', 'b_1']}, sample_config={'1': 'ada'})

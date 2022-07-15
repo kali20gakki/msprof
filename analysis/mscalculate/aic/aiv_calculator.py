@@ -6,7 +6,7 @@ Copyright Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
 from common_func.config_mgr import ConfigMgr
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.utils import Utils
-from model.aic.aiv_pmu_model import AivPmuModel
+from msmodel.aic.aiv_pmu_model import AivPmuModel
 from mscalculate.aic.aic_calculator import AicCalculator
 from mscalculate.aic.aic_utils import AicPmuUtils
 from profiling_bean.prof_enum.data_tag import DataTag

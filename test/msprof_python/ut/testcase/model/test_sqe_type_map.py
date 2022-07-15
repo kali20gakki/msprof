@@ -1,7 +1,7 @@
 import unittest
-from model.sqe_type_map import SqeType
+from msmodel.sqe_type_map import SqeType
 
-NAMESPACE = 'model.sqe_type_map'
+NAMESPACE = 'msmodel.sqe_type_map'
 
 
 class TestSqeType(unittest.TestCase):

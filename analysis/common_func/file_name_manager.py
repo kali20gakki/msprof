@@ -6,6 +6,8 @@ Copyright Huawei Technologies Co., Ltd. 2020. All rights reserved.
 """
 
 import re
+from collections import namedtuple
+
 
 from common_func.constant import Constant
 from common_func.empty_class import EmptyClass
@@ -150,10 +152,6 @@ class FileNameManagerConstant:
     SYS_CPU_USAGE_TRAINING_FILE_PATTERN = \
         r"^SystemCpuUsage\.data\.dev\.profiler_default_tag\.(\d+)\.slice_\d+"
 
-    TRAINING_TRACE_FILE_PATTERN = r"^training_trace\.data\.(\d+)\.slice_\d+"
-    TRAINING_TRACE_TRAINING_FILE_PATTERN = \
-        r"^training_trace\.\d+\.(dev|host)\.profiler_default_tag\.(\d+).slice_\d+"
-
     TS_CPU_FILE_PATTERN = r"^tscpu\.data\.(\d+)\.slice_\d+"
     TS_CPU_INFER_FILE_PATTERN = r"^tscpu\.data\.\d+\.(\d+)\.\d+"
     TS_CPU_TRAINING_FILE_PATTERN = \
@@ -205,6 +203,9 @@ class FileNameManagerConstant:
         get file name manager class member num
         """
         return self.__dict__
+
+
+AiCorePattern = namedtuple('AiCorePattern', ['ai_core', 'ai_core_infer', 'ai_core_training', 'ffts_pmu'])
 
 
 def get_file_name_pattern_match(file_name: str, *file_pattern_compiles: any) -> any:
@@ -296,10 +297,10 @@ def get_ai_core_compiles() -> tuple:
     """
     get ai core regex compiles
     """
-    ai_core_compiles = (re.compile(FileNameManagerConstant.AI_CORE_FILE_PATTERN), re.compile(
-        FileNameManagerConstant.AI_CORE_INFER_FILE_PATTERN), re.compile(
-        FileNameManagerConstant.AI_CORE_TRAINING_FILE_PATTERN), re.compile(
-        FileNameManagerConstant.FFTS_PMU_FILE_PATTERN))
+    ai_core_compiles = AiCorePattern(re.compile(FileNameManagerConstant.AI_CORE_FILE_PATTERN),
+                                     re.compile(FileNameManagerConstant.AI_CORE_INFER_FILE_PATTERN),
+                                     re.compile(FileNameManagerConstant.AI_CORE_TRAINING_FILE_PATTERN),
+                                     re.compile(FileNameManagerConstant.FFTS_PMU_FILE_PATTERN))
     return ai_core_compiles
 
 
@@ -561,14 +562,6 @@ def get_sys_cpu_usage_compiles() -> tuple:
     return re.compile(FileNameManagerConstant.SYS_CPU_USAGE_FILE_PATTERN), re.compile(
         FileNameManagerConstant.SYS_CPU_USAGE_INFER_FILE_PATTERN), re.compile(
         FileNameManagerConstant.SYS_CPU_USAGE_TRAINING_FILE_PATTERN)
-
-
-def get_training_trace_compiles() -> tuple:
-    """
-    get training trace compiles
-    """
-    return re.compile(FileNameManagerConstant.TRAINING_TRACE_FILE_PATTERN), re.compile(
-        FileNameManagerConstant.TRAINING_TRACE_TRAINING_FILE_PATTERN)
 
 
 def get_ts_cpu_compiles() -> tuple:

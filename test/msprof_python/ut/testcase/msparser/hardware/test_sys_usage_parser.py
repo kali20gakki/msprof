@@ -102,10 +102,10 @@ class TestParsingCpuUsageData(unittest.TestCase):
         self.assertEqual(check.device_id, '0')
 
     def test_save(self):
-        with mock.patch('model.hardware.sys_usage_model.SysUsageModel.init'), \
-                mock.patch('model.hardware.sys_usage_model.SysUsageModel.flush'), \
-                mock.patch('model.hardware.sys_usage_model.SysUsageModel.create_table'), \
-                mock.patch('model.hardware.sys_usage_model.SysUsageModel.finalize'):
+        with mock.patch('msmodel.hardware.sys_usage_model.SysUsageModel.init'), \
+                mock.patch('msmodel.hardware.sys_usage_model.SysUsageModel.flush'), \
+                mock.patch('msmodel.hardware.sys_usage_model.SysUsageModel.create_table'), \
+                mock.patch('msmodel.hardware.sys_usage_model.SysUsageModel.finalize'):
             InfoConfReader()._info_json = {"devices": '0'}
             check = ParsingCpuUsageData(self.file_list, CONFIG)
             check.data_dict = {'sys_data_list': [123]}

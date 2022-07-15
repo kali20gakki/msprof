@@ -532,6 +532,7 @@ public:
         ioss >> ret;
         return ret;
     }
+    static bool IsAppName(const std::string paramsName);
 };
 
 template<class T>

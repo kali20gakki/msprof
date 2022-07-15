@@ -1,9 +1,9 @@
 import unittest
 from unittest import mock
 
-from ms_interface.msprof_import import ImportCommand
+from msinterface.msprof_import import ImportCommand
 
-NAMESPACE = 'ms_interface.msprof_import'
+NAMESPACE = 'msinterface.msprof_import'
 
 
 class TestImportCommand(unittest.TestCase):

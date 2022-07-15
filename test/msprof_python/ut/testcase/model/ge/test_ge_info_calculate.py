@@ -2,10 +2,10 @@ import unittest
 import os
 from unittest import mock
 from sqlite.db_manager import DBManager
-from model.ge.ge_info_calculate_model import GeInfoModel
+from msmodel.ge.ge_info_calculate_model import GeInfoModel
 from common_func.constant import Constant
 
-NAMESPACE = 'model.ge.ge_info_calculate_model'
+NAMESPACE = 'msmodel.ge.ge_info_calculate_model'
 
 
 class TestGeInfoModel(unittest.TestCase):
@@ -53,14 +53,6 @@ class TestGeInfoModel(unittest.TestCase):
     def test_get_ge_data_step(self):
         with mock.patch(NAMESPACE + '.Utils.is_step_scene', return_value=True), \
              mock.patch(NAMESPACE + '.GeInfoModel._GeInfoModel__get_ge_data_step_scene', return_value=[]):
-            check = GeInfoModel("")
-            result = check.get_ge_data(Constant.TASK_TYPE_AI_CORE)
-        self.assertEqual(result, {})
-
-    def test_get_ge_data_train(self):
-        with mock.patch(NAMESPACE + '.Utils.is_step_scene', return_value=False), \
-             mock.patch(NAMESPACE + '.Utils.is_training_trace_scene', return_value=True), \
-             mock.patch(NAMESPACE + '.GeInfoModel._GeInfoModel__get_ge_data_training_trace_scene', return_value=[]):
             check = GeInfoModel("")
             result = check.get_ge_data(Constant.TASK_TYPE_AI_CORE)
         self.assertEqual(result, {})

@@ -55,6 +55,7 @@ int MsprofTxManager::Init()
     ret = reporter_->Init();
     if (ret != PROFILING_SUCCESS) {
         MSPROF_LOGE("[Init]reporter init failed!");
+        stampPool_->UnInit();
         return PROFILING_FAILED;
     }
 

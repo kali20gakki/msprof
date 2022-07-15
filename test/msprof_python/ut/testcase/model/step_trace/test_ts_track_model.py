@@ -3,10 +3,10 @@ import unittest
 from unittest import mock
 
 from common_func.info_conf_reader import InfoConfReader
-from model.step_trace.ts_track_model import TsTrackModel
+from msmodel.step_trace.ts_track_model import TsTrackModel
 from sqlite.db_manager import DBManager
 
-NAMESPACE = 'model.step_trace.ts_track_model'
+NAMESPACE = 'msmodel.step_trace.ts_track_model'
 
 
 class TestTsTrackModel(unittest.TestCase):

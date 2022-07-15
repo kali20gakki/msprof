@@ -59,12 +59,12 @@ class TestNonMiniLLCParser(unittest.TestCase):
         self.assertEqual(result, None)
 
     def test_save(self):
-        with mock.patch('model.hardware.llc_model.LlcModel.init'), \
-             mock.patch('model.hardware.llc_model.LlcModel.create_events_trigger'), \
-             mock.patch('model.hardware.llc_model.LlcModel.flush'), \
-             mock.patch('model.hardware.llc_model.LlcModel.create_table'), \
-             mock.patch('model.hardware.llc_model.LlcModel.insert_metrics_data'), \
-             mock.patch('model.hardware.llc_model.LlcModel.finalize'):
+        with mock.patch('msmodel.hardware.llc_model.LlcModel.init'), \
+             mock.patch('msmodel.hardware.llc_model.LlcModel.create_events_trigger'), \
+             mock.patch('msmodel.hardware.llc_model.LlcModel.flush'), \
+             mock.patch('msmodel.hardware.llc_model.LlcModel.create_table'), \
+             mock.patch('msmodel.hardware.llc_model.LlcModel.insert_metrics_data'), \
+             mock.patch('msmodel.hardware.llc_model.LlcModel.finalize'):
             InfoConfReader()._info_json = {"devices": '0'}
             check = NonMiniLLCParser(self.file_list, CONFIG)
             check.origin_data = [123]
