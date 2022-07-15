@@ -536,18 +536,22 @@ int Utils::ExecCmd(const ExecCmdParams &execCmdParams,
     return ret;
 }
 int Utils::GetChangeWorkDirPath(std::vector<std::string> &paramCmd,
-                                std::string &appCmd,
+                                std::string &cmdPath,
                                 std::string &workDirPath)
 {
-    if (paramCmd.size() == 0) {
+    if (paramCmd.empty()) {
         return PROFILING_FAILED;
     }
-    appCmd = CanonicalizePath(paramCmd[0]);
-    if (appCmd.empty()) {
-        MSPROF_LOGE("app_dir(%s) is not valid.", BaseName(paramCmd[0]).c_str());
+    cmdPath = CanonicalizePath(paramCmd[0]);
+    if (cmdPath.empty()) {
+        MSPROF_LOGE("app_dir(%s) is not valid.", BaseName(cmdPath).c_str());
+        return PROFILING_FAILED;
+    }    
+    if (IsSoftLink(cmdPath)) {
+        MSPROF_LOGE("app_dir(%s) is soft link.", BaseName(cmdPath).c_str());
         return PROFILING_FAILED;
     }
-    if ((appCmd.find("bash") != std::string::npos) || (appCmd.find("python") != std::string::npos)) {
+    if(!IsAppName(cmdPath)) {
         for (uint32_t i = 1; i < paramCmd.size(); i++) {
             paramCmd[i] = CanonicalizePath(paramCmd[i]);
             if (paramCmd[i].empty()) {
@@ -557,8 +561,9 @@ int Utils::GetChangeWorkDirPath(std::vector<std::string> &paramCmd,
         }
         workDirPath = paramCmd[1];
     } else {
-        workDirPath = appCmd;
+        workDirPath = cmdPath;
     }
+    
     return PROFILING_SUCCESS;
 }
 int Utils::ChangeWorkDir(const std::string &fileName)
