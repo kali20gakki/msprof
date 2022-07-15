@@ -526,29 +526,31 @@ int Utils::ExecCmd(const ExecCmdParams &execCmdParams,
     } while (0);
     return ret;
 }
-std::string Utils::GetChangeWorkDirPath(std::vector<std::string> &paramCmd)
+int Utils::GetChangeWorkDirPath(std::vector<std::string> &paramCmd,
+                                std::string &appCmd,
+                                std::string &workDirPath)
 {
     if (paramCmd.size() == 0) {
-        return "";
+        return PROFILING_FAILED;
     }
-    paramCmd[0] = CanonicalizePath(paramCmd[0]);
-    if (paramCmd[0].empty()) {
+    appCmd = CanonicalizePath(paramCmd[0]);
+    if (appCmd.empty()) {
         MSPROF_LOGE("app_dir(%s) is not valid.", BaseName(paramCmd[0]).c_str());
-        return "";
+        return PROFILING_FAILED;
     }
-
-    if ((paramCmd[0].find("bash") != std::string::npos) || (paramCmd[0].find("python") != std::string::npos)) {
+    if ((appCmd.find("bash") != std::string::npos) || (appCmd.find("python") != std::string::npos)) {
         for (uint32_t i = 1; i < paramCmd.size(); i++) {
             paramCmd[i] = CanonicalizePath(paramCmd[i]);
             if (paramCmd[i].empty()) {
                 MSPROF_LOGE("app_args_dir(%s) is not valid.", BaseName(paramCmd[i]).c_str());
-                return "";
+                return PROFILING_FAILED;
             }
         }
-        return paramCmd[1];
+        workDirPath = paramCmd[1];
     } else {
-        return paramCmd[0];
+        workDirPath = appCmd;
     }
+    return PROFILING_SUCCESS;
 }
 int Utils::ChangeWorkDir(const std::string &fileName)
 {
