@@ -116,8 +116,8 @@ class TestUpdateAICoreData(unittest.TestCase):
             with mock.patch(NAMESPACE + '.DBManager.check_tables_in_db', return_value=True):
                 with mock.patch(NAMESPACE + '.DBManager.check_connect_db_path', return_value=res), \
                         mock.patch('os.path.join', return_value=True), \
-                        mock.patch(NAMESPACE + '.UpdateAICoreData._UpdateAICoreData__get_block_dim_sql',
-                                   return_value=(select_sql, (1,))):
+                        mock.patch(NAMESPACE + '.UpdateAICoreData._UpdateAICoreData__get_block_dim_data',
+                                   return_value=[]):
                     key = UpdateAICoreData(CONFIG)
                     result = key._UpdateAICoreData__get_block_dim_from_ge()
                 self.assertEqual(result, {})
@@ -129,8 +129,8 @@ class TestUpdateAICoreData(unittest.TestCase):
                 with mock.patch(NAMESPACE + '.DBManager.check_connect_db_path', return_value=res), \
                      mock.patch(NAMESPACE + '.DBManager.destroy_db_connect'), \
                      mock.patch('os.path.join', return_value=True):
-                    with mock.patch(NAMESPACE + '.UpdateAICoreData._UpdateAICoreData__get_block_dim_sql',
-                                    return_value=(select_sql, (1,))):
+                    with mock.patch(NAMESPACE + '.UpdateAICoreData._UpdateAICoreData__get_block_dim_data',
+                                    return_value=[(3,5,2)]):
                         key = UpdateAICoreData(CONFIG)
                         result = key._UpdateAICoreData__get_block_dim_from_ge()
                     self.assertEqual(result, {'3-5': [2]})
