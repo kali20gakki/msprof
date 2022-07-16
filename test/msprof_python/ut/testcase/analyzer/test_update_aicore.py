@@ -130,7 +130,7 @@ class TestUpdateAICoreData(unittest.TestCase):
                      mock.patch(NAMESPACE + '.DBManager.destroy_db_connect'), \
                      mock.patch('os.path.join', return_value=True):
                     with mock.patch(NAMESPACE + '.UpdateAICoreData._UpdateAICoreData__get_block_dim_data',
-                                    return_value=[(3,5,2)]):
+                                    return_value=[(3, 5, 2)]):
                         key = UpdateAICoreData(CONFIG)
                         result = key._UpdateAICoreData__get_block_dim_from_ge()
                     self.assertEqual(result, {'3-5': [2]})
