@@ -10,12 +10,16 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include "config.h"
+#include "mmpa/mmpa_api.h"
 #include "securec.h"
+#include "utils/utils.h"
 
 namespace Collector {
 namespace Dvvp {
 namespace Plugin {
 using namespace analysis::dvvp::common::config;
+using namespace analysis::dvvp::common::utils;
+using namespace Collector::Dvvp::Mmpa;
 PluginHandle::~PluginHandle()
 {
 }
@@ -25,55 +29,26 @@ const std::string PluginHandle::GetSoName() const
     return soName_;
 }
 
-bool PluginHandle::IsSoftLink(const std::string &path) const
-{
-    struct stat buf1;
-    int ret = stat(path.c_str(), &buf1);
-    if (ret != 0) {
-        return true;
-    }
-
-    struct stat buf2;
-    ret = lstat(path.c_str(), &buf2);
-    if (ret != 0) {
-        return true;
-    }
-
-    if (buf1.st_ino != buf2.st_ino) {
-        return true;     // soft-link
-    }
-    return false;   // not soft-link
-}
-
-std::string PluginHandle::RealPath(const std::string &path) const
-{
-    char resoved_path[MAX_PATH_LENGTH * 2] = {0};
-    std::string res = "";
-    if (realpath(path.c_str(), resoved_path)) {
-        res = resoved_path;
-    }
-    return res;
-}
-
-PluginStatus PluginHandle::OpenPlugin(const std::string envValue)
+int32_t PluginHandle::OpenPlugin(const std::string envValue)
 {
     if (envValue.empty() || envValue.size() >= MAX_PATH_LENGTH) {
-        return PLUGIN_LOAD_FAILED;
+        return PROFILING_FAILED;
     }
     std::string soPath = GetSoPath(envValue);
     if (soPath.empty()) {
-        return PLUGIN_LOAD_FAILED;
+        return PROFILING_FAILED;
     }
-    std::string absoluteDir = RealPath(soPath);
-    if (absoluteDir.empty() || IsSoftLink(absoluteDir)) {
-        return PLUGIN_LOAD_FAILED;
+    char trustedPath[MMPA_MAX_PATH] = {'\0'};
+    int32_t ret = MmRealPath(soPath.c_str(), trustedPath, sizeof(trustedPath));
+    if (ret != PROFILING_SUCCESS || Utils::IsSoftLink(std::string(trustedPath))) {
+        return PROFILING_FAILED;
     }
-    handle_ = dlopen(absoluteDir.c_str(), RTLD_NOW | RTLD_GLOBAL);
+    handle_ = dlopen(trustedPath, RTLD_NOW | RTLD_GLOBAL);
     if (!handle_) {
-        return PLUGIN_LOAD_FAILED;
+        return PROFILING_FAILED;
     }
     load_ = true;
-    return PLUGIN_LOAD_SUCCESS;
+    return PROFILING_SUCCESS;
 }
 
 void PluginHandle::CloseHandle()
