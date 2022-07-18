@@ -540,7 +540,6 @@ int Utils::GetWorkDirPath(std::vector<std::string> &paramCmd, std::string &workD
     if (paramCmd.empty()) {
         return PROFILING_FAILED;
     }
-    
     std::string tmpStr;
     if (!IsAppName(paramCmd[0])) {
         for (uint32_t i = 1; i < paramCmd.size(); i++) {
