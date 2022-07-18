@@ -4,11 +4,11 @@
 #include "thread/thread.h"
 #include "stub/common-utils-stub.h"
 #include "utils/utils.h"
-#include "mmpa_plugin.h"
+#include "mmpa_api.h"
 
 using namespace analysis::dvvp::common::thread;
 using namespace analysis::dvvp::common::error;
-using namespace Collector::Dvvp::Plugin;
+using namespace Collector::Dvvp::Mmpa;
 
 class COMMON_THREAD_TEST: public testing::Test {
 protected:
@@ -28,14 +28,14 @@ TEST_F(COMMON_THREAD_TEST, start_stop) {
     GlobalMockObject::verify();
 
     ThreadClass my_thread;
-    MOCKER(&MmpaPlugin::MsprofMmCreateTaskWithThreadAttr)
+    MOCKER(&MmCreateTaskWithThreadAttr)
         .stubs()
-        .will(returnValue(EN_ERROR))
-        .then(returnValue(EN_OK));
+        .will(returnValue(PROFILING_FAILED))
+        .then(returnValue(PROFILING_SUCCESS));
 
-    MOCKER(&MmpaPlugin::MsprofMmJoinTask)
+    MOCKER(&MmJoinTask)
         .stubs()
-        .will(returnValue(EN_OK));
+        .will(returnValue(PROFILING_SUCCESS));
 
     EXPECT_EQ(PROFILING_FAILED, my_thread.Start());
     EXPECT_EQ(PROFILING_SUCCESS, my_thread.Start());
@@ -48,14 +48,14 @@ TEST_F(COMMON_THREAD_TEST, join) {
 
     ThreadClass my_thread;
 
-    MOCKER(&MmpaPlugin::MsprofMmCreateTaskWithThreadAttr)
+    MOCKER(&MmCreateTaskWithThreadAttr)
         .stubs()
-        .will(returnValue(EN_OK));
+        .will(returnValue(PROFILING_SUCCESS));
 
-    MOCKER(&MmpaPlugin::MsprofMmJoinTask)
+    MOCKER(&MmJoinTask)
         .stubs()
-        .will(returnValue(EN_ERROR))
-        .then(returnValue(EN_OK));
+        .will(returnValue(PROFILING_FAILED))
+        .then(returnValue(PROFILING_SUCCESS));
 
     my_thread.Start();
     my_thread.tid_ = 1;
@@ -69,13 +69,13 @@ TEST_F(COMMON_THREAD_TEST, IsQuit) {
 
     ThreadClass my_thread;
 
-    MOCKER(&MmpaPlugin::MsprofMmCreateTaskWithThreadAttr)
+    MOCKER(&MmCreateTaskWithThreadAttr)
         .stubs()
-        .will(returnValue(EN_OK));
+        .will(returnValue(PROFILING_SUCCESS));
 
-    MOCKER(&MmpaPlugin::MsprofMmJoinTask)
+    MOCKER(&MmJoinTask)
         .stubs()
-        .will(returnValue(EN_OK));
+        .will(returnValue(PROFILING_SUCCESS));
 
     my_thread.Start();
     EXPECT_FALSE(my_thread.IsQuit());

@@ -11,7 +11,7 @@
 #include "message/codec.h"
 #include "uploader_mgr.h"
 #include "transport.h"
-#include "mmpa_plugin.h"
+#include "mmpa_api.h"
 
 using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::message;
