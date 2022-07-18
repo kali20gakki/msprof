@@ -87,8 +87,8 @@ TEST_F(HOST_PROF_MANAGER_TEST, ProfInotifyStart) {
     
     MOCKER(mmCreateTaskWithThreadAttr)
         .stubs()
-        .will(returnValue(EN_ERROR))
-        .then(returnValue(EN_OK));
+        .will(returnValue(PROFILING_FAILED))
+        .then(returnValue(PROFILING_SUCCESS));
     
     std::string hostLocalDir = "";
     auto entry = analysis::dvvp::host::ProfManager::instance();
@@ -384,7 +384,7 @@ TEST_F(HOST_PROF_MANAGER_TEST, LaunchTask) {
 
 	MOCKER(mmCreateTaskWithThreadAttr)
         .stubs()
-        .will(returnValue(EN_OK));
+        .will(returnValue(PROFILING_SUCCESS));
     // MOCKER_CPP(&analysis::dvvp::common::thread::Thread::Start)
 
 
@@ -445,7 +445,7 @@ TEST_F(HOST_PROF_MANAGER_TEST, StopTask) {
 
     MOCKER(mmJoinTask)
         .stubs()
-        .will(returnValue(EN_OK));
+        .will(returnValue(PROFILING_SUCCESS));
     // MOCKER_CPP(&analysis::dvvp::common::thread::Thread::Stop)
     //    .stubs()
     //    .will(returnValue(PROFILING_SUCCESS));
@@ -545,7 +545,7 @@ TEST_F(HOST_PROF_MANAGER_TEST, PowerdownHandler) {
     // MOCKER_CPP(&analysis::dvvp::host::ProfTask::Stop)
     MOCKER(mmJoinTask)
         .stubs()
-        .will(returnValue(EN_OK));
+        .will(returnValue(PROFILING_SUCCESS));
 
     devInfo.devId = 1;
     entry->_tasks.clear();
