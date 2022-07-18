@@ -16,6 +16,8 @@
 #include <string>
 #include <ctime>
 #include "config/config.h"
+#include "errno/error_code.h"
+#include "msprof_dlog.h"
 #include "securec.h"
 
 #if (defined(linux) || defined(__linux__))

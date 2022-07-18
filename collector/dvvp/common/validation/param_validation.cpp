@@ -12,6 +12,7 @@
 #include "errno/error_code.h"
 #include "message/codec.h"
 #include "message/prof_params.h"
+#include "msprof_error_manager.h"
 #include "param_validation.h"
 
 namespace analysis {

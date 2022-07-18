@@ -8,6 +8,7 @@
 #include "config/config.h"
 #include "errno/error_code.h"
 #include "msprof_dlog.h"
+#include "msprof_error_manager.h"
 #include "utils/utils.h"
 
 namespace analysis {
