@@ -540,12 +540,14 @@ int Utils::GetWorkDirPath(std::vector<std::string> &paramCmd, std::string &workD
     if (paramCmd.empty()) {
         return PROFILING_FAILED;
     }
+    std::string tmpStr;
     if (!IsAppName(paramCmd[0])) {
         for (uint32_t i = 1; i < paramCmd.size(); i++) {
-            paramCmd[i] = CanonicalizePath(paramCmd[i]);
-            if (paramCmd[i].empty()) {
-                MSPROF_LOGE("app_args_dir(%s) is not valid.", BaseName(paramCmd[i]).c_str());
-                return PROFILING_FAILED;
+            tmpStr = CanonicalizePath(paramCmd[i]);
+            if (tmpStr.empty()) {
+                continue;
+            } else {
+                paramCmd[i] = tmpStr;
             }
         }
         workDirPath = paramCmd[1];
