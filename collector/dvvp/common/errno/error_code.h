@@ -11,10 +11,10 @@ namespace analysis {
 namespace dvvp {
 namespace common {
 namespace error {
+const int PROFILING_ERROR = 1;
 const int PROFILING_SUCCESS = 0;
 const int PROFILING_FAILED = -1;
 const int PROFILING_NOTSUPPORT = -2;
-const int PROFILING_ERROR = 1;
 const int PROFILING_INVALID_PARAM = -3;
 }  // namespace error
 }  // namespace common
