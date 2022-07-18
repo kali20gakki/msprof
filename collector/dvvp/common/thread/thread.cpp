@@ -7,6 +7,8 @@
 #include "thread.h"
 #include "config/config.h"
 #include "errno/error_code.h"
+#include "msprof_dlog.h"
+#include "msprof_error_manager.h"
 #include "securec.h"
 #include "utils/utils.h"
 

@@ -10,6 +10,7 @@
 #include <atomic>
 #include <thread>
 #include "mmpa_api.h"
+#include "msprof_error_manager.h"
 #include "utils/utils.h"
 
 namespace analysis {

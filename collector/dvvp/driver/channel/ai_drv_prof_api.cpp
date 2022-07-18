@@ -7,10 +7,11 @@
 #include "ai_drv_prof_api.h"
 #include <cerrno>
 #include <map>
-#include "errno/error_code.h"
-#include "securec.h"
 #include "ai_drv_dev_api.h"
 #include "driver_plugin.h"
+#include "errno/error_code.h"
+#include "msprof_error_manager.h"
+#include "securec.h"
 namespace analysis {
 namespace dvvp {
 namespace driver {

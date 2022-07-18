@@ -7,20 +7,19 @@
 
 #include "msprof_tx_manager.h"
 
-#include "mmpa_plugin.h"
-
-#include "utils.h"
-#include "errno/error_code.h"
-#include "msprof_dlog.h"
 #include "config/config.h"
+#include "errno/error_code.h"
+#include "mmpa_plugin.h"
+#include "msprof_dlog.h"
+#include "msprof_error_manager.h"
+#include "utils.h"
 
+namespace Msprof {
+namespace MsprofTx {
 using namespace analysis::dvvp::common::config;
 using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::common::utils;
 using namespace Collector::Dvvp::Plugin;
-
-namespace Msprof {
-namespace MsprofTx {
 MsprofTxManager::MsprofTxManager() : isInit_(false), reporter_(nullptr), stampPool_(nullptr)
 {
 }
