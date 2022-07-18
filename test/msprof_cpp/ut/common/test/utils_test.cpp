@@ -1028,10 +1028,6 @@ TEST_F(COMMON_UTILS_UTILS_TEST, TimestampToTime2){
 
     (void)memset_s(timeStr, sizeof(timeStr), 0, sizeof(timeStr));
     int ret = sprintf_s(timeStr, sizeof(timeStr), "%06u", 100);
-    // if (ret == -1) {
-    //     MSPROF_LOGI("[XXX] %d", __LINE__);
-    // }
-
 
     GlobalMockObject::verify();
     MOCKER(localtime_r)

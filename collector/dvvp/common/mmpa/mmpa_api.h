@@ -283,8 +283,8 @@ int32_t MmGetCpuInfo(mmCpuDesc **cpuInfo, int32_t *count);
 int32_t MmCpuInfoFree(mmCpuDesc *cpuInfo, int32_t count);
 ssize_t MmRead(int32_t fd, void *buf, uint32_t bufLen);
 ssize_t MmSocketSend(mmSockHandle sockFd, void *sendBuf, int32_t sendLen, int32_t sendFlag);
-int32_t mmMutexLock(mmMutex_t *mutex);
-int32_t mmMutexUnLock(mmMutex_t *mutex);
+int32_t MmMutexLock(mmMutex_t *mutex);
+int32_t MmMutexUnLock(mmMutex_t *mutex);
 } // Mmpa
 } // Dvvp
 } // Collector
