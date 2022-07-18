@@ -22,11 +22,12 @@
 #include <sstream>
 #include <string>
 #include <vector>
-#include "mmpa_plugin.h"
+#include "mmpa_api.h"
 
 template <typename T>
 using SHARED_PTR_ALIA = std::shared_ptr<T>;
-
+using mmProcess = Collector::Dvvp::Mmpa::mmProcess;
+using mmArgvEnv = Collector::Dvvp::Mmpa::mmArgvEnv;
 namespace analysis {
 namespace dvvp {
 namespace common {

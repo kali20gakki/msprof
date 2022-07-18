@@ -9,7 +9,7 @@
 
 #include "config/config.h"
 #include "errno/error_code.h"
-#include "mmpa_plugin.h"
+#include "mmpa_api.h"
 #include "msprof_dlog.h"
 #include "msprof_error_manager.h"
 #include "utils.h"
@@ -20,6 +20,7 @@ using namespace analysis::dvvp::common::config;
 using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::common::utils;
 using namespace Collector::Dvvp::Plugin;
+using namespace Collector::Dvvp::Mmpa;
 MsprofTxManager::MsprofTxManager() : isInit_(false), reporter_(nullptr), stampPool_(nullptr)
 {
 }
@@ -318,8 +319,8 @@ int MsprofTxManager::ReportStampData(MsprofStampInfo &stamp) const
     }
     static const std::string MSPROF_TX_REPORTER_TAG = "msproftx";
 
-    stamp.processId = static_cast<uint32_t>(MmpaPlugin::instance()->MsprofMmGetPid());
-    stamp.threadId = static_cast<uint32_t>(MmpaPlugin::instance()->MsprofMmGetTid());
+    stamp.processId = static_cast<uint32_t>(MmGetPid());
+    stamp.threadId = static_cast<uint32_t>(MmGetTid());
     stamp.dataTag = MSPROF_MSPROFTX_DATA_TAG;
     stamp.magicNumber = static_cast<uint16_t>(MSPROF_DATA_HEAD_MAGIC_NUM);
 
