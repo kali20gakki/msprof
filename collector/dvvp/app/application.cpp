@@ -124,7 +124,7 @@ int Application::LaunchApp(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParam
         MSPROF_LOGE("app_dir(%s) is not valid.", Utils::BaseName(paramsCmd[0]).c_str());
         return PROFILING_FAILED;
     }
-    std::string workDirPath = cmd;
+    std::string workDirPath;
     if (analysis::dvvp::common::utils::Utils::GetWorkDirPath(paramsCmd, workDirPath) != PROFILING_SUCCESS) {
         MSPROF_LOGE("App params are invalid");
         return PROFILING_FAILED;

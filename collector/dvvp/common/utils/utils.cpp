@@ -549,6 +549,8 @@ int Utils::GetWorkDirPath(std::vector<std::string> &paramCmd, std::string &workD
             }
         }
         workDirPath = paramCmd[1];
+    } else {
+        workDirPath = CanonicalizePath(paramCmd[0]);
     }
     return PROFILING_SUCCESS;
 }
