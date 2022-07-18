@@ -104,7 +104,7 @@ long long Utils::GetFileSize(const std::string &path)
         return -1;
     }
 
-    return (long long)size;
+    return static_cast<long long>(size);
 }
 
 int Utils::GetFreeVolume(const std::string &path, unsigned long long &size)

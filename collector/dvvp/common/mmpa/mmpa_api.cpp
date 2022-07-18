@@ -736,7 +736,8 @@ int32_t MmGetTimeOfDay(mmTimeval *timeVal, mmTimezone *timeZone)
     if (timeVal == nullptr) {
         return PROFILING_INVALID_PARAM;
     }
-    int32_t ret = gettimeofday((struct timeval *)timeVal, (struct timezone *)timeZone);
+    int32_t ret = gettimeofday(reinterpret_cast<struct timeval *>(timeVal),
+        reinterpret_cast<struct timezone *>(timeZone));
     if (ret != PROFILING_SUCCESS) {
         ret = PROFILING_FAILED;
     }
@@ -914,19 +915,24 @@ static void LocalGetCpuProcV1(FILE *fp, mmCpuDesc *cpuInfo)
     uint32_t length = 0U;
     while (fgets(buf, static_cast<int>(sizeof(buf)), fp) != nullptr) {
         length = static_cast<uint32_t>(strlen(buf));
-        if (LocalLookup(buf, length, "manufacturer", cpuInfo->manufacturer, sizeof(cpuInfo->manufacturer)) == PROFILING_SUCCESS) {
+        if (LocalLookup(buf, length, "manufacturer", cpuInfo->manufacturer,
+            sizeof(cpuInfo->manufacturer)) == PROFILING_SUCCESS) {
             continue;
         }
-        if (LocalLookup(buf, length, "vendor_id", cpuInfo->manufacturer, sizeof(cpuInfo->manufacturer)) == PROFILING_SUCCESS) {
+        if (LocalLookup(buf, length, "vendor_id", cpuInfo->manufacturer,
+            sizeof(cpuInfo->manufacturer)) == PROFILING_SUCCESS) {
             continue;
         }
-        if (LocalLookup(buf, length, "CPU implementer", cpuImplememter, sizeof(cpuImplememter)) == PROFILING_SUCCESS) {
+        if (LocalLookup(buf, length, "CPU implementer", cpuImplememter,
+            sizeof(cpuImplememter)) == PROFILING_SUCCESS) {
             continue; /* ARM and aarch64 */
         }
-        if (LocalLookup(buf, length, "CPU part", cpuPart, sizeof(cpuPart)) == PROFILING_SUCCESS) {
+        if (LocalLookup(buf, length, "CPU part", cpuPart,
+            sizeof(cpuPart)) == PROFILING_SUCCESS) {
             continue; /* ARM and aarch64 */
         }
-        if (LocalLookup(buf, length, "model name", cpuInfo->version, sizeof(cpuInfo->version)) == PROFILING_SUCCESS) {
+        if (LocalLookup(buf, length, "model name", cpuInfo->version,
+            sizeof(cpuInfo->version)) == PROFILING_SUCCESS) {
             ;
         }
     }
@@ -1074,9 +1080,22 @@ ssize_t MmSocketSend(mmSockHandle sockFd, void *sendBuf, int32_t sendLen, int32_
     return ret;
 }
 
-int32_t mmMutexUnLock(mmMutex_t *mutex)
+int32_t MmMutexLock(mmMutex_t *mutex)
 {
-    if (mutex == NULL) {
+    if (mutex == nullptr) {
+        return PROFILING_INVALID_PARAM;
+    }
+
+    int32_t ret = pthread_mutex_lock(mutex);
+    if (ret != PROFILING_SUCCESS) {
+        ret = PROFILING_FAILED;
+    }
+    return ret;
+}
+
+int32_t MmMutexUnLock(mmMutex_t *mutex)
+{
+    if (mutex == nullptr) {
         return PROFILING_INVALID_PARAM;
     }
 
