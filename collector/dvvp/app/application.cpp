@@ -129,10 +129,6 @@ int Application::LaunchApp(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParam
         MSPROF_LOGE("App params are invalid");
         return PROFILING_FAILED;
     }
-    if (analysis::dvvp::common::utils::Utils::IsSoftLink(workDirPath)) {
-        MSPROF_LOGE("app_dir(%s) is soft link.", Utils::BaseName(workDirPath).c_str());
-        return PROFILING_FAILED;
-    }
     std::vector<std::string> argsVec;
     std::vector<std::string> envsVec;
     PrepareAppArgs(paramsCmd, argsVec);  // args
