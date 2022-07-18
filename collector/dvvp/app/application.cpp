@@ -119,18 +119,18 @@ int Application::LaunchApp(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParam
         MSPROF_LOGE("[LaunchApp]paramsCmd is empty.");
         return PROFILING_FAILED;
     }
-    std::string appPath = GetAppPath(paramsCmd);
-    if (appPath.empty()) {
-        MSPROF_LOGE("app_dir is empty.");
-        return PROFILING_FAILED;
-    }
-    if (analysis::dvvp::common::utils::Utils::IsSoftLink(appPath)) {
-        MSPROF_LOGE("app_dir(%s) is soft link.", Utils::BaseName(appPath).c_str());
-        return PROFILING_FAILED;
-    }
     std::string cmd = GetCmdString(paramsCmd[0]);
     if (cmd.empty()) {
         MSPROF_LOGE("app_dir(%s) is not valid.", Utils::BaseName(paramsCmd[0]).c_str());
+        return PROFILING_FAILED;
+    }
+    std::string workDirPath;
+    if (analysis::dvvp::common::utils::Utils::GetWorkDirPath(paramsCmd, workDirPath) != PROFILING_SUCCESS) {
+        MSPROF_LOGE("App params are invalid");
+        return PROFILING_FAILED;
+    }
+    if (analysis::dvvp::common::utils::Utils::IsSoftLink(workDirPath)) {
+        MSPROF_LOGE("app_dir(%s) is soft link.", Utils::BaseName(workDirPath).c_str());
         return PROFILING_FAILED;
     }
     std::vector<std::string> argsVec;
@@ -142,10 +142,9 @@ int Application::LaunchApp(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParam
         return PROFILING_FAILED;
     }
     appProcess = MSVP_MMPROCESS;  // run
-    if (analysis::dvvp::common::utils::Utils::ChangeWorkDir(cmd) == PROFILING_FAILED) {
+    if (analysis::dvvp::common::utils::Utils::ChangeWorkDir(workDirPath) == PROFILING_FAILED) {
         return PROFILING_FAILED;
     }
-
     int exitCode = analysis::dvvp::common::utils::INVALID_EXIT_CODE;
     ExecCmdParams execCmdParams(cmd, true, "");
     ret = analysis::dvvp::common::utils::Utils::ExecCmd(execCmdParams, argsVec, envsVec, exitCode, appProcess);
