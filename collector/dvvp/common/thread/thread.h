@@ -18,6 +18,7 @@ namespace dvvp {
 namespace common {
 namespace thread {
 using namespace analysis::dvvp::common::utils;
+using mmThread = Collector::Dvvp::Mmpa::mmThread;
 class Thread {
 public:
     Thread();
