@@ -59,15 +59,6 @@ class Utils:
         return bin(header & 960)[2:].zfill(6)
 
     @staticmethod
-    def is_training_trace_scene(result_dir: str) -> bool:
-        """
-        check the scene of training trace or not
-        :param result_dir: project path
-        :return: True or False
-        """
-        return AiStackDataCheckManager.contain_training_trace_data(result_dir)
-
-    @staticmethod
     def is_step_scene(result_dir: str) -> bool:
         """
         check the scene of step info or not
@@ -84,7 +75,7 @@ class Utils:
         :param result_dir: project path
         :return: True or False
         """
-        return not Utils.is_step_scene(result_dir) and not Utils.is_training_trace_scene(result_dir)
+        return not Utils.is_step_scene(result_dir)
 
     @staticmethod
     def is_single_op_graph_mix(result_dir: str) -> bool:
@@ -118,8 +109,6 @@ class Utils:
             return Constant.MIX_OP_AND_GRAPH
         if Utils.is_step_scene(result_dir):
             return Constant.STEP_INFO
-        if Utils.is_training_trace_scene(result_dir):
-            return Constant.TRAIN
         return Constant.SINGLE_OP
 
     @staticmethod

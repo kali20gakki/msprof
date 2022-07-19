@@ -52,7 +52,6 @@ class TestTrailingCalculator(unittest.TestCase):
     def test_ms_run(self):
         with mock.patch('common_func.utils.Utils.is_step_scene', side_effect=(False, True)), \
                 mock.patch('common_func.utils.Utils.is_single_op_graph_mix', return_value=False), \
-                mock.patch('common_func.utils.Utils.is_training_trace_scene', return_value=False), \
                 mock.patch(NAMESPACE + '.TrailingCalculator.calculate'), \
                 mock.patch(NAMESPACE + '.TrailingCalculator.calculate_slow_node', return_value=[]):
             check = TrailingCalculator(['device_0', 'device_1'])

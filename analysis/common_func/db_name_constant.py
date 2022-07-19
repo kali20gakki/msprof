@@ -94,7 +94,7 @@ class DBNameConstant(metaclass=ABCMeta):
     TABLE_SUMMARY_TASK_TIME = "task_time"
     TABLE_SUMMARY_TENSOR = "ge_tensor"
     TABLE_TS_MEMCPY_CALCULATION = "TsMemcpyCalculation"
-    TABLE_TIME = 'time'
+    TABLE_TIME = 'Time'
     TABLE_TRACE_FILES = 'files'
     TABLE_TRAINING_TRACE = 'training_trace'
     # step trace
