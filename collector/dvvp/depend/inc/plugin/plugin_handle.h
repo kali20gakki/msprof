@@ -49,7 +49,6 @@ public:
 
 private:
     std::string GetSoPath(const std::string &envValue) const;
-    void SplitPath(const std::string &mutilPath, std::vector<std::string> &patVec) const;
     std::string GetAscendHalPath() const;
     std::string soName_;
     HandleType handle_;
