@@ -205,7 +205,7 @@ int InputParser::ParamsCheck() const
             }
             tmpDir = Utils::CanonicalizePath(tmpDir);
             if (tmpDir.empty()) {
-                MSPROF_LOGE("App params path (%s) is invalid!", Utils::BaseName(tmpDir).c_str());
+                MSPROF_LOGE("App params path is invalid!");
                 return MSPROF_DAEMON_ERROR;
             }
             if (Utils::IsSoftLink(tmpDir)) {
