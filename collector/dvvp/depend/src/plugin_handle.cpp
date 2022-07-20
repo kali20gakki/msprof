@@ -6,10 +6,6 @@
  */
 #include "plugin_handle.h"
 
-#include <fstream>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <unistd.h>
 #include "config.h"
 #include "mmpa/mmpa_api.h"
 #include "securec.h"
@@ -69,14 +65,19 @@ bool PluginHandle::HasLoad()
 std::string PluginHandle::GetAscendHalPath() const
 {
     std::string ascendInstallInfoPath = "/etc/ascend_install.info";
-    std::ifstream in(ascendInstallInfoPath);
-    if (!in) {
+    // max file size:1024 Byte
+    if ((Utils::GetFileSize(ascendInstallInfoPath) > MAX_ASCEND_INSTALL_INFO_FILE_SIZE) ||
+        (Utils::IsSoftLink(ascendInstallInfoPath))) {
+        return "";
+    }
+    std::ifstream infoFile(ascendInstallInfoPath);
+    if (!infoFile) {
         return "";
     }
     std::string line;
     std::string installPath;
-    const int numPerInfo = 2;
-    while (getline(in, line)) {
+    const int numPerInfo = 2; // Driver_Install_Path_Param=/usr/local/Ascend
+    while (getline(infoFile, line)) {
         std::vector<std::string> installInfo = Utils::Split(line, false, "", "=");
         if (installInfo.size() == numPerInfo && installInfo[0].compare("Driver_Install_Path_Param") == 0) {
             installPath = installInfo[1];
@@ -112,8 +113,8 @@ std::string PluginHandle::GetSoPath(const std::string &envValue) const
     std::string pathEnv = env;
     std::vector<std::string> pathVec = Utils::Split(pathEnv, false, "", ":");
     for (auto path : pathVec) {
-        std::string ret = path + "/" + soName_;
-        if (access(ret.c_str(), F_OK) != -1) {
+        std::string ret = path + MSVP_SLASH + soName_;
+        if (MmAccess2(ret, M_R_OK) == PROFILING_SUCCESS) {
             return ret;
         }
     }
