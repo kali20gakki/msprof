@@ -75,9 +75,10 @@ std::string PluginHandle::GetAscendHalPath() const
     }
     std::string line;
     std::string installPath;
-    while(getline(in, line)) {
-        std::vector<std::string>installInfo = Utils::Split(line, false, "", "=");
-        if (installInfo.size() == 2 && installInfo[0].compare("Driver_Install_Path_Param") == 0) {
+    const int numPerInfo = 2;
+    while (getline(in, line)) {
+        std::vector<std::string> installInfo = Utils::Split(line, false, "", "=");
+        if (installInfo.size() == numPerInfo && installInfo[0].compare("Driver_Install_Path_Param") == 0) {
             installPath = installInfo[1];
             break;
         }
@@ -95,8 +96,7 @@ std::string PluginHandle::GetAscendHalPath() const
 
 std::string PluginHandle::GetSoPath(const std::string &envValue) const
 {
-    if (soName_.compare("libascend_hal.so") == 0)
-    {
+    if (soName_.compare("libascend_hal.so") == 0) {
         std::string ascendHalPath = GetAscendHalPath();
         if (!ascendHalPath.empty()) {
             std::string driverSoPath = ascendHalPath + MSVP_SLASH + soName_;
