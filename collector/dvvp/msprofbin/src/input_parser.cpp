@@ -193,7 +193,27 @@ int InputParser::ParamsCheck() const
         return MSPROF_DAEMON_ERROR;
     }
     if (params_->result_dir.empty() && !params_->app_dir.empty()) {
-        params_->result_dir = params_->app_dir;
+        if (params_->app_dir != "MS_SYS_PATH") {
+            params_->result_dir = params_->app_dir;
+        } else {
+            std::string tmpDir;
+            size_t index = params_->app_parameters.find_first_of(" ");
+            if (index == std::string::npos) {
+                tmpDir = params_->app_parameters;
+            } else {
+                tmpDir = params_->app_parameters.substr(0, index);
+            }
+            tmpDir = Utils::CanonicalizePath(tmpDir);
+            if (tmpDir.empty()) {
+                MSPROF_LOGE("App params path (%s) is invalid!", Utils::BaseName(tmpDir).c_str());
+                return MSPROF_DAEMON_ERROR;
+            }
+            if (Utils::IsSoftLink(tmpDir)) {
+                MSPROF_LOGE("App params path (%s) is soft link.", Utils::BaseName(tmpDir).c_str());
+                return MSPROF_DAEMON_ERROR;
+            }
+            params_->result_dir = Utils::DirName(tmpDir);
+        }
     }
     return MSPROF_DAEMON_OK;
 }
