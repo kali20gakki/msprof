@@ -66,21 +66,6 @@ bool PluginHandle::HasLoad()
     return load_;
 }
 
-void PluginHandle::SplitPath(const std::string &mutilPath, std::vector<std::string> &pathVec) const
-{
-    const std::string tmpString = mutilPath + ":";
-    std::string::size_type startPos = 0U;
-    std::string::size_type curPos = tmpString.find(':', 0U);
-    while (curPos != std::string::npos) {
-        const std::string path = tmpString.substr(startPos, curPos - startPos);
-        if (!path.empty()) {
-        pathVec.push_back(path);
-        }
-        startPos = curPos + 1U;
-        curPos = tmpString.find(':', startPos);
-    }
-}
-
 std::string PluginHandle::GetAscendHalPath() const
 {
     std::string ascendInstallInfoPath = "/etc/ascend_install.info";
@@ -125,8 +110,7 @@ std::string PluginHandle::GetSoPath(const std::string &envValue) const
         return "";
     }
     std::string pathEnv = env;
-    std::vector<std::string> pathVec;
-    SplitPath(std::string(pathEnv), pathVec);
+    std::vector<std::string> pathVec = Utils::Split(pathEnv, false, "", ":");
     for (auto path : pathVec) {
         std::string ret = path + "/" + soName_;
         if (access(ret.c_str(), F_OK) != -1) {
