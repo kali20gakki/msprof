@@ -16,6 +16,8 @@
 #include <string>
 #include <ctime>
 #include "config/config.h"
+#include "errno/error_code.h"
+#include "msprof_dlog.h"
 #include "securec.h"
 
 #if (defined(linux) || defined(__linux__))
@@ -29,7 +31,7 @@ namespace utils {
 using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::common::config;
 using namespace Collector::Dvvp::Plugin;
-
+using namespace Collector::Dvvp::Mmpa;
 std::mutex g_envMtx;
 const unsigned long long CHANGE_FROM_S_TO_NS = 1000000000;
 
@@ -38,7 +40,7 @@ unsigned long long Utils::GetClockRealtime()
 #if (defined(_WIN32) || defined(_WIN64) || defined(_MSC_VER))
     mmTimespec now;
     (void)memset_s(&now, sizeof(now), 0, sizeof(now));
-    now = MmpaPlugin::instance()->MsprofMmGetTickCount();
+    now = MmGetTickCount();
     return ((unsigned long long)(now.tv_sec) * CHANGE_FROM_S_TO_NS) + (unsigned long long)(now.tv_nsec);
 #else
     struct timespec now;
@@ -53,7 +55,7 @@ unsigned long long Utils::GetClockMonotonicRaw()
 {
     mmTimespec now;
     (void)memset_s(&now, sizeof(now), 0, sizeof(now));
-    now = MmpaPlugin::instance()->MsprofMmGetTickCount();
+    now = MmGetTickCount();
     return (static_cast<unsigned long long>(now.tv_sec) * CHANGE_FROM_S_TO_NS) +
         static_cast<unsigned long long>(now.tv_nsec);
 }
@@ -94,22 +96,22 @@ std::string Utils::GenerateStartTime(const unsigned long long startRealtime, con
 
 long long Utils::GetFileSize(const std::string &path)
 {
-    ULONGLONG size = 0;
+    unsigned long long size = 0;
 
-    int ret = MmpaPlugin::instance()->MsprofMmGetFileSize(path.c_str(), &size);
+    int ret = MmGetFileSize(path, &size);
     if (ret < 0) {
         MSPROF_LOGW("MsprofMmGetFileSize fail, ret=%d, errno=%d.", ret, errno);
         return -1;
     }
 
-    return (long long)size;
+    return static_cast<long long>(size);
 }
 
 int Utils::GetFreeVolume(const std::string &path, unsigned long long &size)
 {
     mmDiskSize diskSize;
 
-    int ret = MmpaPlugin::instance()->MsprofMmGetDiskFreeSpace(path.c_str(), &diskSize);
+    int ret = MmGetDiskFreeSpace(path, &diskSize);
     if (ret < 0) {
         return PROFILING_FAILED;
     }
@@ -122,7 +124,7 @@ int Utils::GetTotalVolume(const std::string &path, unsigned long long &size)
 {
     mmDiskSize diskSize;
 
-    int ret = MmpaPlugin::instance()->MsprofMmGetDiskFreeSpace(path.c_str(), &diskSize);
+    int ret = MmGetDiskFreeSpace(path, &diskSize);
     if (ret < 0) {
         return PROFILING_FAILED;
     }
@@ -137,7 +139,7 @@ bool Utils::IsDir(const std::string &path)
         return false;
     }
 
-    if (MmpaPlugin::instance()->MsprofMmIsDir(path.c_str()) != EN_OK) {
+    if (MmIsDir(path) != PROFILING_SUCCESS) {
         return false;
     }
 
@@ -163,7 +165,7 @@ bool Utils::IsDirAccessible(const std::string &path)
         MSPROF_LOGE("Path %s is not a dir", BaseName(path).c_str());
         return false;
     }
-    if (MmpaPlugin::instance()->MsprofMmAccess2(path.c_str(), M_W_OK) == EN_OK) {
+    if (MmAccess2(path, M_W_OK) == PROFILING_SUCCESS) {
         return true;
     }
     MSPROF_LOGE("No access to dir %s", BaseName(path).c_str());
@@ -176,7 +178,7 @@ bool Utils::IsFileExist(const std::string &path)
         return false;
     }
 
-    if (MmpaPlugin::instance()->MsprofMmAccess(path.c_str()) == EN_OK) {
+    if (MmAccess(path) == PROFILING_SUCCESS) {
         return true;
     }
 
@@ -240,7 +242,7 @@ std::string Utils::DirName(const std::string &path)
     std::string result;
     char *pathc = MSVP_STRDUP(path.c_str());
     if (pathc != nullptr) {
-        char *dirc = MmpaPlugin::instance()->MsprofMmDirName(pathc);
+        char *dirc = MmDirName(pathc);
         if (dirc != nullptr) {
             result = dirc;
         }
@@ -268,7 +270,7 @@ std::string Utils::BaseName(const std::string &path)
     std::string result;
     char *pathc = MSVP_STRDUP(path.c_str());
     if (pathc != nullptr) {
-        char *basec = MmpaPlugin::instance()->MsprofMmBaseName(pathc);
+        char *basec = MmBaseName(pathc);
         if (basec != nullptr) {
             result = basec;
         }
@@ -302,8 +304,8 @@ int Utils::SplitPath(const std::string &path, std::string &dir, std::string &bas
     dirc = MSVP_STRDUP(path.c_str());
     basec = MSVP_STRDUP(path.c_str());
     if (dirc != nullptr && basec != nullptr) {
-        dname = MmpaPlugin::instance()->MsprofMmDirName(dirc);
-        bname = MmpaPlugin::instance()->MsprofMmBaseName(basec);
+        dname = MmDirName(dirc);
+        bname = MmBaseName(basec);
         if (dname != nullptr && bname != nullptr) {
             dir = std::string(dname);
             base = std::string(bname);
@@ -356,11 +358,11 @@ int Utils::CreateDir(const std::string &path)
 
     const mmMode_t defaultFileMode = (mmMode_t)0750;  // 0750 means xwrx-r
     MSPROF_LOGI("CreateDir dir %s with 750", BaseName(path).c_str());
-    if ((MmpaPlugin::instance()->MsprofMmMkdir(path.c_str(), defaultFileMode) != EN_OK) && (errno != EEXIST)) {
+    if ((MmMkdir(path, defaultFileMode) != PROFILING_SUCCESS) && (errno != EEXIST)) {
         return PROFILING_FAILED;
     }
 
-    if (MmpaPlugin::instance()->MsprofMmChmod(path.c_str(), defaultFileMode) != EN_OK) {
+    if (MmChmod(path, defaultFileMode) != PROFILING_SUCCESS) {
         MSPROF_LOGW("Chmod : %s unsuccessfully", BaseName(path).c_str());
     }
     MSPROF_LOGI("Success to mkdir, FilePath : %s, FileMode : %o",
@@ -380,11 +382,11 @@ int Utils::CreateDir(const std::string &path)
         return PROFILING_SUCCESS;
     }
     const mmMode_t defaultFileMode = (mmMode_t)0750;  // 0750 means xwrx-r
-    if ((MmpaPlugin::instance()->MsprofMmMkdir(path.c_str(), defaultFileMode) != EN_OK) && (errno != EEXIST)) {
+    if ((MmMkdir(path, defaultFileMode) != PROFILING_SUCCESS) && (errno != EEXIST)) {
         char errBuf[MAX_ERR_STRING_LEN + 1] = {0};
         MSPROF_LOGE("Failed to mkdir, FilePath : %s, FileMode : %o, ErrorCode : %d, ERRORInfo : %s",
-            BaseName(path).c_str(), static_cast<int>(defaultFileMode), MmpaPlugin::instance()->MsprofMmGetErrorCode(),
-            MmpaPlugin::instance()->MsprofMmGetErrorFormatMessage(MmpaPlugin::instance()->MsprofMmGetErrorCode(),
+            BaseName(path).c_str(), static_cast<int>(defaultFileMode), MmGetErrorCode(),
+            MmGetErrorFormatMessage(MmGetErrorCode(),
                 errBuf, MAX_ERR_STRING_LEN));
         return PROFILING_FAILED;
     }
@@ -402,10 +404,10 @@ void Utils::RemoveDir(const std::string &dir, bool rmTopDir)
 
     if (!rmTopDir) {
         mmDirent **nameList = nullptr;
-        int count = MmpaPlugin::instance()->MsprofMmScandir(dir.c_str(), &nameList, nullptr, nullptr);
-        if (count == EN_ERROR || count == EN_INVALID_PARAM) {
+        int count = MmScandir(dir, &nameList, nullptr, nullptr);
+        if (count == PROFILING_FAILED || count == PROFILING_INVALID_PARAM) {
             MSPROF_LOGW("mmScandir failed %s. ErrorCode : %d", BaseName(dir).c_str(),
-                MmpaPlugin::instance()->MsprofMmGetErrorCode());
+                MmGetErrorCode());
             return;
         }
 
@@ -418,17 +420,17 @@ void Utils::RemoveDir(const std::string &dir, bool rmTopDir)
             }
 
             if (IsDir(childPath)) {
-                MmpaPlugin::instance()->MsprofMmRmdir(childPath.c_str());
+                MmRmdir(childPath);
             } else {
-                MmpaPlugin::instance()->MsprofMmUnlink(childPath.c_str());
+                MmUnlink(childPath);
             }
         }
 
-        MmpaPlugin::instance()->MsprofMmScandirFree(nameList, count);
+        MmScandirFree(nameList, count);
     } else {
-        if (MmpaPlugin::instance()->MsprofMmRmdir(dir.c_str()) != EN_OK) {
+        if (MmRmdir(dir) != PROFILING_SUCCESS) {
             MSPROF_LOGW("mmRmdir failed %s. ErrorCode : %d", BaseName(dir).c_str(),
-                MmpaPlugin::instance()->MsprofMmGetErrorCode());
+                MmGetErrorCode());
         }
     }
 }
@@ -469,8 +471,8 @@ std::string Utils::CanonicalizePath(const std::string &path)
     }
 
     char realPath[MMPA_MAX_PATH] = { 0 };
-    int ret = MmpaPlugin::instance()->MsprofMmRealPath(tmpPath.c_str(), realPath, MMPA_MAX_PATH);
-    if (ret == EN_OK) {
+    int ret = MmRealPath(tmpPath.c_str(), realPath, MMPA_MAX_PATH);
+    if (ret == PROFILING_SUCCESS) {
         MSPROF_LOGI("mmRealPath ret=%d.", ret);
         resolvedPath = realPath;
     }
@@ -568,8 +570,8 @@ int Utils::ChangeWorkDir(const std::string &fileName)
     if (dirc == nullptr) {
         return PROFILING_FAILED;
     }
-    dName = MmpaPlugin::instance()->MsprofMmDirName(dirc);
-    if (dName == nullptr || MmpaPlugin::instance()->MsprofMmChdir(dName) != EN_OK) {
+    dName = MmDirName(dirc);
+    if (dName == nullptr || MmChdir(std::string(dName)) != PROFILING_SUCCESS) {
         MSPROF_LOGW("chdir(%s) failed.", dirc);
     }
     if (dirc != nullptr) {
@@ -600,14 +602,8 @@ int Utils::DoCreateCmdProcess(const std::string &stdoutRedirectFile,
                               mmArgvEnv &argvEnv,
                               mmProcess &tid)
 {
-    int ret = 0;
-    if (stdoutRedirectFile.empty()) {
-        ret = MmpaPlugin::instance()->MsprofMmCreateProcess(fileName.c_str(), &argvEnv, nullptr, &tid);
-    } else {
-        ret = MmpaPlugin::instance()->MsprofMmCreateProcess(fileName.c_str(), &argvEnv,
-            stdoutRedirectFile.c_str(), &tid);
-    }
-    if (ret != EN_OK) {
+    int ret = MmCreateProcess(fileName, &argvEnv, stdoutRedirectFile, &tid);
+    if (ret != PROFILING_SUCCESS) {
         return PROFILING_FAILED;
     }
     return PROFILING_SUCCESS;
@@ -686,12 +682,12 @@ int Utils::WaitProcess(mmProcess process, bool &isExited, int &exitCode, bool ha
     }
 
     uint32_t flags2 = options & flags1;
-    int ret = MmpaPlugin::instance()->MsprofMmWaitPid(process, &waitStatus, options);
-    if (ret != EN_INVALID_PARAM && ret != EN_ERROR) {
-        if ((flags2 != 0) && (ret == EN_OK)) {
+    int ret = MmWaitPid(process, &waitStatus, options);
+    if (ret != PROFILING_INVALID_PARAM && ret != PROFILING_FAILED) {
+        if ((flags2 != 0) && (ret == PROFILING_SUCCESS)) {
             return PROFILING_SUCCESS;
         }
-        if (ret == EN_ERR) {
+        if (ret == PROFILING_ERROR) {
             isExited = true;
             exitCode = waitStatus;
             return PROFILING_SUCCESS;
@@ -704,8 +700,8 @@ bool Utils::ProcessIsRuning(mmProcess process)
 {
     int waitStatus = 0;
 
-    int ret = MmpaPlugin::instance()->MsprofMmWaitPid(process, &waitStatus, M_WAIT_NOHANG);
-    if (ret == EN_OK) {
+    int ret = MmWaitPid(process, &waitStatus, M_WAIT_NOHANG);
+    if (ret == PROFILING_SUCCESS) {
         return true;
     }
     return false;
@@ -770,7 +766,7 @@ int Utils::UsleepInterupt(unsigned long usec)
 {
     // here we don't need accurate sleep time, so we don't check error code
     const int changeFormUsToMs = 1000;
-    (void)MmpaPlugin::instance()->MsprofMmSleep(usec / changeFormUsToMs);
+    (void)MmSleep(usec / changeFormUsToMs);
 
     return PROFILING_SUCCESS;
 }
@@ -782,8 +778,8 @@ void Utils::GetFiles(const std::string &dir, bool isRecur, std::vector<std::stri
     }
 
     mmDirent **dirNameList = nullptr;
-    int count = MmpaPlugin::instance()->MsprofMmScandir(dir.c_str(), &dirNameList, nullptr, nullptr);
-    if (count == EN_ERROR || count == EN_INVALID_PARAM) {
+    int count = MmScandir(dir, &dirNameList, nullptr, nullptr);
+    if (count == PROFILING_FAILED || count == PROFILING_INVALID_PARAM) {
         return;
     }
 
@@ -806,7 +802,7 @@ void Utils::GetFiles(const std::string &dir, bool isRecur, std::vector<std::stri
         }
     }
 
-    MmpaPlugin::instance()->MsprofMmScandirFree(dirNameList, count);
+    MmScandirFree(dirNameList, count);
 }
 
 void Utils::GetChildDirs(const std::string &dir, bool isRecur, std::vector<std::string> &childDirs)
@@ -816,8 +812,8 @@ void Utils::GetChildDirs(const std::string &dir, bool isRecur, std::vector<std::
     }
 
     mmDirent **nameList = nullptr;
-    int count = MmpaPlugin::instance()->MsprofMmScandir(dir.c_str(), &nameList, nullptr, nullptr);
-    if (count == EN_ERROR || count == EN_INVALID_PARAM) {
+    int count = MmScandir(dir, &nameList, nullptr, nullptr);
+    if (count == PROFILING_FAILED || count == PROFILING_INVALID_PARAM) {
         return;
     }
 
@@ -837,7 +833,7 @@ void Utils::GetChildDirs(const std::string &dir, bool isRecur, std::vector<std::
         }
     }
 
-    MmpaPlugin::instance()->MsprofMmScandirFree(nameList, count);
+    MmScandirFree(nameList, count);
 }
 
 void Utils::GetChildFilenames(const std::string &dir, std::vector<std::string> &files)
@@ -846,8 +842,8 @@ void Utils::GetChildFilenames(const std::string &dir, std::vector<std::string> &
         return;
     }
     mmDirent **dirNameList = nullptr;
-    int count = MmpaPlugin::instance()->MsprofMmScandir(dir.c_str(), &dirNameList, nullptr, nullptr);
-    if (count == EN_INVALID_PARAM || count == EN_ERROR) {
+    int count = MmScandir(dir, &dirNameList, nullptr, nullptr);
+    if (count == PROFILING_INVALID_PARAM || count == PROFILING_FAILED) {
         return;
     }
     for (int j = 0; j < count; j++) {
@@ -858,7 +854,7 @@ void Utils::GetChildFilenames(const std::string &dir, std::vector<std::string> &
         files.push_back(fileName);
     }
 
-    MmpaPlugin::instance()->MsprofMmScandirFree(dirNameList, count);
+    MmScandirFree(dirNameList, count);
 }
 
 std::string Utils::TimestampToTime(const std::string &timestamp, int unit /* = 1 */)
@@ -907,15 +903,15 @@ std::string Utils::TimestampToTime(const std::string &timestamp, int unit /* = 1
 int Utils::GetMac(std::string &macAddress)
 {
     mmMacInfo *macInfo = nullptr;
-    INT32 count = 0;
+    int32_t count = 0;
 
-    int ret = MmpaPlugin::instance()->MsprofMmGetMac(&macInfo, &count);
-    if (ret != EN_OK || count == 0) {
+    int ret = MmGetMac(&macInfo, &count);
+    if (ret != PROFILING_SUCCESS || count == 0) {
         return PROFILING_FAILED;
     }
 
     macAddress = macInfo[0].addr;
-    (void)MmpaPlugin::instance()->MsprofMmGetMacFree(macInfo, count);
+    (void)MmGetMacFree(macInfo, count);
 
     return PROFILING_SUCCESS;
 }
@@ -927,8 +923,8 @@ std::string Utils::GetEnvString(const std::string &name)
     std::string curEnv;
     constexpr int envValMaxLen = 1024 * 8; // 1024 * 8 : 8k
     char val[envValMaxLen + 1] = { 0 };
-    int ret = MmpaPlugin::instance()->MsprofMmGetEnv(name.c_str(), val, envValMaxLen);
-    if (ret == EN_OK) {
+    int ret = MmGetEnv(name, val, envValMaxLen);
+    if (ret == PROFILING_SUCCESS) {
         return std::string(val);
     }
     return curEnv;
@@ -953,8 +949,8 @@ std::string Utils::GetCwdString(void)
     constexpr int cwdValMaxLen = 1024 * 8; // 1024 * 8 : 8k
     char val[cwdValMaxLen + 1] = { 0 };
     (void)memset_s(val, cwdValMaxLen + 1, 0, cwdValMaxLen + 1);
-    int ret = MmpaPlugin::instance()->MsprofMmGetCwd(val, cwdValMaxLen);
-    if (ret == EN_OK) {
+    int ret = MmGetCwd(val, cwdValMaxLen);
+    if (ret == PROFILING_SUCCESS) {
         return std::string(val);
     }
     return "";
@@ -1119,8 +1115,8 @@ std::string Utils::GetEventsStr(const std::vector<std::string> &events, const st
 void Utils::PrintSysErrorMsg()
 {
     char errBuf[MAX_ERR_STRING_LEN + 1] = {0};
-    INT32 errorNo = MmpaPlugin::instance()->MsprofMmGetErrorCode();
-    MSPROF_LOGE("ErrorCode:%d, errinfo:%s", errorNo, MmpaPlugin::instance()->MsprofMmGetErrorFormatMessage(errorNo,
+    int32_t errorNo = MmGetErrorCode();
+    MSPROF_LOGE("ErrorCode:%d, errinfo:%s", errorNo, MmGetErrorFormatMessage(errorNo,
         errBuf, MAX_ERR_STRING_LEN));
 }
 
@@ -1186,7 +1182,7 @@ std::string Utils::CreateTaskId(uint64_t index)
     std::string result = "PROF_" + taskId.str() + "_";
 
     mmSystemTime_t sysTime;
-    int ret = MmpaPlugin::instance()->MsprofMmGetLocalTime(&sysTime);
+    int ret = MmGetLocalTime(&sysTime);
     if (ret == -1) {
         MSPROF_LOGW("Get time failed");
     }
@@ -1295,7 +1291,7 @@ std::string Utils::ConvertIntToStr(const int interval)
 
 int32_t Utils::GetPid()
 {
-    return MmpaPlugin::instance()->MsprofMmGetPid();
+    return MmGetPid();
 }
 
 void Utils::RemoveEndCharacter(std::string &input, const char end)

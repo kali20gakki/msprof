@@ -7,15 +7,17 @@
 #include "ai_drv_prof_api.h"
 #include <cerrno>
 #include <map>
-#include "errno/error_code.h"
-#include "securec.h"
 #include "ai_drv_dev_api.h"
 #include "driver_plugin.h"
+#include "errno/error_code.h"
+#include "msprof_error_manager.h"
+#include "securec.h"
 namespace analysis {
 namespace dvvp {
 namespace driver {
 using namespace analysis::dvvp::common::error;
 using namespace Collector::Dvvp::Plugin;
+using namespace Collector::Dvvp::Mmpa;
 // 32 * 1024 * 0.8  is the full threshold  of ai_core_sample
 constexpr uint32_t AI_CORE_SAMPLE_FULL_THRESHOLD = 32 * 1024 * 0.8;
 
@@ -421,7 +423,7 @@ int DrvStarsSocLogStart(const DrvPeripheralProfileCfg &peripheralCfg,
     AI_DRV_CHANNEL profChannel = peripheralCfg.profChannel;
     StarsSocLogConfigT configP;
     (void)memset_s(&configP, sizeof(StarsSocLogConfigT), 0, sizeof(StarsSocLogConfigT));
-    configP.pid = static_cast<uint32_t>(MmpaPlugin::instance()->MsprofMmGetPid());
+    configP.pid = static_cast<uint32_t>(MmGetPid());
 
     if (profileParams->stars_acsq_task.compare(analysis::dvvp::common::config::MSVP_PROF_ON) == 0) {
         configP.acsq_task = TS_PROFILE_COMMAND_TYPE_PROFILING_ENABLE;
@@ -494,7 +496,7 @@ int DrvFftsProfileStart(const DrvPeripheralProfileCfg &peripheralCfg, const std:
     }
     (void)memset_s(configP, configSize, 0, configSize);
     configP->cfgMode = peripheralCfg.cfgMode; // 0-none,1-aic,2-aiv,3-aic&aiv
-    configP->pid = static_cast<uint32_t>(MmpaPlugin::instance()->MsprofMmGetPid());
+    configP->pid = static_cast<uint32_t>(MmGetPid());
 
     DrvPackPmuParam(FFTS_PROF_MODE_AIC, *configP, peripheralCfg, aicCores, aicEvents);
     DrvPackPmuParam(FFTS_PROF_MODE_AIV, *configP, peripheralCfg, aivCores, aivEvents);
