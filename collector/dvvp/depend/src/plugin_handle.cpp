@@ -6,6 +6,7 @@
  */
 #include "plugin_handle.h"
 
+#include <fstream>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -80,8 +81,45 @@ void PluginHandle::SplitPath(const std::string &mutilPath, std::vector<std::stri
     }
 }
 
+std::string PluginHandle::GetAscendHalPath() const
+{
+    std::string ascendInstallInfoPath = "/etc/ascend_install.info";
+    std::ifstream in(ascendInstallInfoPath);
+    if (!in) {
+        return "";
+    }
+    std::string line;
+    std::string installPath;
+    while(getline(in, line)) {
+        std::vector<std::string>installInfo = Utils::Split(line, false, "", "=");
+        if (installInfo.size() == 2 && installInfo[0].compare("Driver_Install_Path_Param") == 0) {
+            installPath = installInfo[1];
+            break;
+        }
+    }
+    if (installPath.empty()) {
+        return "";
+    }
+    std::string driverInfo = installPath + MSVP_SLASH + "driver" + MSVP_SLASH + "version.info";
+    int ret = MmAccess2(driverInfo.c_str(), M_R_OK);
+    if (ret != PROFILING_SUCCESS) {
+        return "";
+    }
+    return installPath + MSVP_SLASH + "driver" + MSVP_SLASH + "lib64";
+}
+
 std::string PluginHandle::GetSoPath(const std::string &envValue) const
 {
+    if (soName_.compare("libascend_hal.so") == 0)
+    {
+        std::string ascendHalPath = GetAscendHalPath();
+        if (!ascendHalPath.empty()) {
+            std::string driverSoPath = ascendHalPath + MSVP_SLASH + soName_;
+            if (MmAccess2(ascendHalPath.c_str(), M_R_OK) == PROFILING_SUCCESS) {
+                return driverSoPath;
+            }
+        }
+    }
     const char *env = std::getenv(envValue.c_str());
     if (env == nullptr) {
         return "";
