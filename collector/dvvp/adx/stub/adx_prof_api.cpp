@@ -7,6 +7,7 @@
 #include "adx_prof_api.h"
 #include "msprof_dlog.h"
 #include "memory_utils.h"
+#include "errno/error_code.h"
 
 namespace Analysis {
 namespace Dvvp {
