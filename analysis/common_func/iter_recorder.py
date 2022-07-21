@@ -26,9 +26,9 @@ class IterRecorder:
         self._current_iter_id = self.DEFAULT_ITER_ID
         self._current_op_iter = 0
         self._op_iter_dict = MsprofIteration(self._project_path).get_op_iteration_dict()
-        self._op_iter_queue = sorted(self._op_iter_dict.keys(),reverse=True)
+        self._op_iter_queue = sorted(self._op_iter_dict.keys(), reverse=True)
         self._graph_iter_dict = MsprofIteration(self._project_path).get_graph_iteration_dict()
-        self._graph_iter_queue = sorted(self._graph_iter_dict.keys(),reverse=True)
+        self._graph_iter_queue = sorted(self._graph_iter_dict.keys(), reverse=True)
 
     @property
     def iter_end_dict(self: any) -> dict:
