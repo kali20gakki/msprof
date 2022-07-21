@@ -56,6 +56,7 @@ const int MSVP_CLN_SENDER_POOL_THREAD_NUM = 2;
 
 const int STORAGE_LIMIT_DOWN_THD = 200; // 200MB
 
+const int MAX_ASCEND_INSTALL_INFO_FILE_SIZE = 1024; // 1024 Byte
 
 #if (defined(_WIN32) || defined(_WIN64) || defined(_MSC_VER))
 const int MSVP_MMPROCESS = NULL;
