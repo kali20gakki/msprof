@@ -189,7 +189,7 @@ class MsprofIteration:
         get iteration start and end timestamp
         """
         if ProfilingScene().is_mix_operator_and_graph():
-            return self.__get_graph_iteration_dict()
+            return self.get_graph_iteration_dict()
         if Utils.is_step_scene(self._result_dir):
             return self.__get_iteration_dict()
         return {}
@@ -206,7 +206,7 @@ class MsprofIteration:
             return []
         return trace_data
 
-    def __get_graph_iteration_dict(self: any) -> dict:
+    def get_graph_iteration_dict(self: any) -> dict:
         iter_dict = OrderedDict()
         db_path = PathManager.get_db_path(self._result_dir, DBNameConstant.DB_STEP_TRACE)
         trace_conn, trace_curs = DBManager.check_connect_db(self._result_dir, DBNameConstant.DB_STEP_TRACE)
@@ -254,3 +254,17 @@ class MsprofIteration:
         if not trace_datas:
             return iter_end_dict
         return MsprofIteration._generate_trace_iter_end_result(trace_datas)
+
+    def get_iteration_time_by_index_id(self: any, index_id: int, model_id: int) -> list:
+        db_path = PathManager.get_db_path(self._result_dir, DBNameConstant.DB_STEP_TRACE)
+        trace_conn, trace_curs = DBManager.check_connect_db(self._result_dir, DBNameConstant.DB_STEP_TRACE)
+        if not trace_conn or not trace_curs \
+                or not DBManager.check_tables_in_db(db_path, DBNameConstant.TABLE_STEP_TRACE_DATA):
+            return []
+        sql = "select iter_id, step_start, step_end from {0} " \
+              "where model_id={1} and index_id={2}".format(DBNameConstant.TABLE_STEP_TRACE_DATA, model_id, index_id)
+        iter_start_end_time = DBManager.fetch_all_data(trace_curs, sql)[0]
+        DBManager.destroy_db_connect(trace_conn, trace_curs)
+        if not iter_start_end_time:
+            return []
+        return iter_start_end_time
