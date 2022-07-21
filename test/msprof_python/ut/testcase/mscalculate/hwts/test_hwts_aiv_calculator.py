@@ -21,9 +21,6 @@ class TestHwtsAivCalculator(unittest.TestCase):
     def test_ms_run(self):
 
         with mock.patch(NAMESPACE + '.HwtsAivCalculator._parse_all_file'), \
-             mock.patch('common_func.msprof_iteration' + '.MsprofIteration.get_iteration_end_dict', return_value=[]), \
-             mock.patch('common_func.msprof_iteration' + '.MsprofIteration.get_op_iteration_dict', return_value=[]), \
-             mock.patch('common_func.msprof_iteration' + '.MsprofIteration.get_iteration_dict', return_value=[]), \
              mock.patch(NAMESPACE + '.HwtsAivCalculator.save'):
             ProfilingScene()._scene = "single_op"
             check = HwtsAivCalculator(self.file_list, CONFIG)

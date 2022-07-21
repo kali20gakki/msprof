@@ -16,6 +16,7 @@ from common_func.iter_recorder import IterRecorder
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.constant import Constant
 from common_func.ms_multi_process import MsMultiProcess
+from common_func.msprof_exception import ProfException
 from common_func.msprof_iteration import MsprofIteration
 from common_func.msprof_step import MsprofStep
 from common_func.path_manager import PathManager
@@ -157,8 +158,13 @@ class HwtsCalculator(ICalculator, MsMultiProcess):
                     batch_id]
         else:
             self._iter_model.init()
-            _iter_id = MsprofIteration(self._project_path). \
-                get_iter_id_by_index_id(self._sample_config.get("iter_id"), self._sample_config.get("model_id"))
+            if ProfilingScene().is_mix_operator_and_graph() and self._sample_config.get("model_id") != Constant.GE_OP_MODEL_ID:
+                _iter_start_end_time = MsprofIteration(self._project_path). \
+                get_iteration_time_by_index_id(self._sample_config.get("iter_id"), self._sample_config.get("model_id"))
+                _iter_id = (_iter_start_end_time[0]-1, _iter_start_end_time[0])
+            else:
+                _iter_id = MsprofIteration(self._project_path). \
+                    get_iter_id_by_index_id(self._sample_config.get("iter_id"), self._sample_config.get("model_id"))
             batch_list = self._iter_model.get_batch_list(_iter_id, DBNameConstant.TABLE_HWTS_BATCH)
 
             if len(batch_list) != len(prep_data_res):
@@ -178,7 +184,18 @@ class HwtsCalculator(ICalculator, MsMultiProcess):
         return prep_data_res
 
     def _parse(self: any, all_log_bytes: bytes) -> None:
-        for log_data in Utils.chunks(all_log_bytes, self.HWTS_LOG_SIZE):
-            _task_log = HwtsLogBean.decode(log_data)
-            if _task_log.is_log_type():
-                self._log_data.append(_task_log)
+        if ProfilingScene().is_mix_operator_and_graph() and self._sample_config.get("model_id") != Constant.GE_OP_MODEL_ID:
+            self._iter_start_end_time = MsprofIteration(self._project_path). \
+                get_iteration_time_by_index_id(self._sample_config.get("iter_id"), self._sample_config.get("model_id"))
+            if not self._iter_start_end_time:
+                return
+            for log_data in Utils.chunks(all_log_bytes, self.HWTS_LOG_SIZE):
+                _task_log = HwtsLogBean.decode(log_data)
+                if _task_log.is_log_type() and self._iter_start_end_time[1] <= _task_log.sys_cnt and \
+                        _task_log.sys_cnt <= self._iter_start_end_time[2]:
+                    self._log_data.append(_task_log)
+        else:
+            for log_data in Utils.chunks(all_log_bytes, self.HWTS_LOG_SIZE):
+                _task_log = HwtsLogBean.decode(log_data)
+                if _task_log.is_log_type():
+                    self._log_data.append(_task_log)
