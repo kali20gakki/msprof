@@ -9,6 +9,7 @@
 #include "acl_prof.h"
 #include "errno/error_code.h"
 #include "message/codec.h"
+#include "msprof_dlog.h"
 #include "proto/profiler.pb.h"
 #include "toolchain/prof_acl_api.h"
 
