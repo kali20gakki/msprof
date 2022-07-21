@@ -25,9 +25,10 @@ class IterRecorder:
         self._iter_end_dict = MsprofIteration(self._project_path).get_iteration_end_dict()
         self._current_iter_id = self.DEFAULT_ITER_ID
         self._current_op_iter = 0
-        self._current_graph_iter = 0
         self._op_iter_dict = MsprofIteration(self._project_path).get_op_iteration_dict()
-        self._graph_iter_dict = MsprofIteration(self._project_path).get_iteration_dict()
+        self._op_iter_queue = sorted(self._op_iter_dict.keys(),reverse=True)
+        self._graph_iter_dict = MsprofIteration(self._project_path).get_graph_iteration_dict()
+        self._graph_iter_queue = sorted(self._graph_iter_dict.keys(),reverse=True)
 
     @property
     def iter_end_dict(self: any) -> dict:
@@ -46,18 +47,10 @@ class IterRecorder:
         return self._current_iter_id
 
     @property
-    def current_graph_iter(self: any) -> int:
-        """
-        get graph iter id
-        :return: iter id
-        """
-        return self._current_graph_iter
-
-    @property
     def current_op_iter(self: any) -> int:
         """
         get op iter id
-        :return: iter id
+        :return: op iter id
         """
         return self._current_op_iter
 
@@ -84,55 +77,34 @@ class IterRecorder:
             self._current_op_iter = self._current_iter_id
 
     def set_current_mix_iter_id(self: any, sys_cnt: int) -> None:
-        if self._current_iter_id == self.DEFAULT_ITER_ID:
-            self.set_current_graph_iter(sys_cnt)
-            if not self.set_current_op_iter(sys_cnt):
-                logging.error("Data cannot be found in any iteration.")
-                raise ProfException(ProfException.PROF_INVALID_DATA_ERROR)
+        self.set_current_graph_iter(sys_cnt)
+        if not self.set_current_op_iter(sys_cnt):
+            logging.error("Data cannot be found in any iteration.")
+            raise ProfException(ProfException.PROF_INVALID_DATA_ERROR)
+        if self._graph_iter_queue and sys_cnt >= self._graph_iter_dict.get(self._graph_iter_queue[-1])[0]:
+            self._current_iter_id = self._graph_iter_queue[-1]
 
-        self._update_current_iter_id(sys_cnt)
+        else:
+            self._current_iter_id = self._op_iter_queue[-1]
 
     def set_current_graph_iter(self: any, sys_cnt: int) -> None:
-        for iter_id, iter_sys_cnt in self._graph_iter_dict.items():
-            # iter_sys_cnt include start_sys_cnt and end_sys_cnt
-            if sys_cnt <= iter_sys_cnt[1]:
-                self._current_iter_id = iter_id
-                self._current_graph_iter = iter_id
-                break
+        if self._graph_iter_queue:
+            while sys_cnt > self._graph_iter_dict.get(self._graph_iter_queue[-1])[1]:
+                self._graph_iter_queue.pop()
+                if not self._graph_iter_queue:
+                    return
 
     def set_current_op_iter(self: any, sys_cnt: int) -> bool:
-        for iter_id, iter_sys_cnt in self._op_iter_dict.items():
-            # iter_sys_cnt include start_sys_cnt and end_sys_cnt
-            if iter_sys_cnt[0] <= sys_cnt <= iter_sys_cnt[1]:
-                self._current_op_iter = iter_id
-                return True
-        return False
+        while sys_cnt > self._op_iter_dict.get(self._op_iter_queue[-1])[1]:
+            self._op_iter_queue.pop()
+            if not self._op_iter_queue:
+                return False
+        if sys_cnt >= self._op_iter_dict.get(self._op_iter_queue[-1])[0]:
+            self._current_op_iter = self._op_iter_queue[-1]
+            return True
+        else:
+            return False
 
     def _check_current_iter_id(self: any, sys_cnt: int) -> int:
         iter_end = self._iter_end_dict.get(self._current_iter_id)
         return iter_end is not None and sys_cnt > iter_end
-
-    def _check_mix_current_iter_id(self: any, sys_cnt: int) -> int:
-        iter_time = self._graph_iter_dict.get(self._current_iter_id)
-        return iter_time is not None and (sys_cnt > iter_time[1] or sys_cnt < iter_time[0])
-
-    def _update_current_iter_id(self: any, sys_cnt: int) -> None:
-        self._current_iter_id = self._current_graph_iter
-        while self._check_mix_current_iter_id(sys_cnt):
-            if self._op_iter_dict.get(self._current_op_iter) and self._op_iter_dict.get(self._current_op_iter)[0] <= \
-                    sys_cnt <= self._op_iter_dict.get(self._current_op_iter)[1]:
-                # sys time in interval [prior_op_iter_end, op_iter_end]
-
-                if self._graph_iter_dict.get(self._current_graph_iter + 1) \
-                        and (self._graph_iter_dict.get(self._current_graph_iter + 1)[0] <= sys_cnt
-                             <= self._graph_iter_dict.get(self._current_graph_iter + 1)[1]):
-                    # sys in interval [iter+1_start, iter+1_end]
-                    self._current_graph_iter = self._current_graph_iter + 1
-                    self._current_iter_id = self._current_graph_iter
-                    break
-                # sys in interval [op_iter_start, iter_start] or [iter_end, iter+1_start]
-                self._current_iter_id = self._current_op_iter
-                break
-            self._current_op_iter = self._current_graph_iter + 1
-            self._current_graph_iter = self._current_graph_iter + 2
-            self._current_iter_id = self._current_graph_iter
