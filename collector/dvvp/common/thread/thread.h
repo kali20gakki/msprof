@@ -10,6 +10,7 @@
 #include <atomic>
 #include <thread>
 #include "mmpa_api.h"
+#include "msprof_error_manager.h"
 #include "utils/utils.h"
 
 namespace analysis {
@@ -17,6 +18,7 @@ namespace dvvp {
 namespace common {
 namespace thread {
 using namespace analysis::dvvp::common::utils;
+using mmThread = Collector::Dvvp::Mmpa::mmThread;
 class Thread {
 public:
     Thread();

@@ -6,8 +6,9 @@
  */
 #include "ai_drv_dev_api.h"
 #include "errno/error_code.h"
-#include "msprof_dlog.h"
 #include "driver_plugin.h"
+#include "msprof_dlog.h"
+#include "msprof_error_manager.h"
 
 namespace analysis {
 namespace dvvp {

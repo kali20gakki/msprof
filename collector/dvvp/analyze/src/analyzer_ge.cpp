@@ -11,6 +11,7 @@
 #include "data_struct.h"
 #include "errno/error_code.h"
 #include "message/codec.h"
+#include "msprof_dlog.h"
 #include "proto/profiler.pb.h"
 #include "transport/hash_data.h"
 

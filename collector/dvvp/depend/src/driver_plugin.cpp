@@ -11,10 +11,10 @@ namespace Dvvp {
 namespace Plugin {
 void DriverPlugin::LoadDriverSo()
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
+    int32_t ret = PROFILING_SUCCESS;
     if (!pluginHandle_.HasLoad()) {
         ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
-        if (ret != PLUGIN_LOAD_SUCCESS) {
+        if (ret != PROFILING_SUCCESS) {
             return;
         }
     }
@@ -31,9 +31,9 @@ hdcError_t DriverPlugin::MsprofHalHdcRecv(HDC_SESSION session, struct drvHdcMsg 
 {
     PthreadOnce(&loadFlag_, []()->void {DriverPlugin::instance()->LoadDriverSo();});
     if (halHdcRecv_ == nullptr) {
-        PluginStatus ret = pluginHandle_.GetFunction<hdcError_t, HDC_SESSION, struct drvHdcMsg *, int, UINT64,
+        int32_t ret = pluginHandle_.GetFunction<hdcError_t, HDC_SESSION, struct drvHdcMsg *, int, UINT64,
                                                      int *, UINT32>("halHdcRecv", halHdcRecv_);
-        if (ret != PLUGIN_LOAD_SUCCESS) {
+        if (ret != PROFILING_SUCCESS) {
             return DRV_ERROR_INVALID_HANDLE;
         }
     }
@@ -45,9 +45,9 @@ hdcError_t DriverPlugin::MsprofHalHdcSend(HDC_SESSION session, struct drvHdcMsg 
 {
     PthreadOnce(&loadFlag_, []()->void {DriverPlugin::instance()->LoadDriverSo();});
     if (halHdcSend_ == nullptr) {
-        PluginStatus ret = pluginHandle_.GetFunction<hdcError_t, HDC_SESSION, struct drvHdcMsg *,
+        int32_t ret = pluginHandle_.GetFunction<hdcError_t, HDC_SESSION, struct drvHdcMsg *,
             UINT64, UINT32>("halHdcSend", halHdcSend_);
-        if (ret != PLUGIN_LOAD_SUCCESS) {
+        if (ret != PROFILING_SUCCESS) {
             return DRV_ERROR_INVALID_HANDLE;
         }
     }
@@ -60,9 +60,9 @@ hdcError_t DriverPlugin::MsprofHalHdcSessionConnectEx(int peer_node, int peer_de
 {
     PthreadOnce(&loadFlag_, []()->void {DriverPlugin::instance()->LoadDriverSo();});
     if (halHdcSessionConnectEx_ == nullptr) {
-        PluginStatus ret = pluginHandle_.GetFunction<hdcError_t, int, int, int, HDC_CLIENT,
+        int32_t ret = pluginHandle_.GetFunction<hdcError_t, int, int, int, HDC_CLIENT,
                               HDC_SESSION *>("halHdcSessionConnectEx", halHdcSessionConnectEx_);
-        if (ret != PLUGIN_LOAD_SUCCESS) {
+        if (ret != PROFILING_SUCCESS) {
             return DRV_ERROR_INVALID_HANDLE;
         }
     }
@@ -74,9 +74,9 @@ drvError_t DriverPlugin::MsprofDrvHdcSetSessionReference(HDC_SESSION session)
 {
     PthreadOnce(&loadFlag_, []()->void {DriverPlugin::instance()->LoadDriverSo();});
     if (drvHdcSetSessionReference_ == nullptr) {
-        PluginStatus ret = pluginHandle_.GetFunction<drvError_t, HDC_SESSION>("drvHdcSetSessionReference",
+        int32_t ret = pluginHandle_.GetFunction<drvError_t, HDC_SESSION>("drvHdcSetSessionReference",
             drvHdcSetSessionReference_);
-        if (ret != PLUGIN_LOAD_SUCCESS) {
+        if (ret != PROFILING_SUCCESS) {
             return DRV_ERROR_INVALID_HANDLE;
         }
     }
@@ -88,9 +88,9 @@ drvError_t DriverPlugin::MsprofHalHdcGetSessionAttr(HDC_SESSION session, int att
 {
     PthreadOnce(&loadFlag_, []()->void {DriverPlugin::instance()->LoadDriverSo();});
     if (halHdcGetSessionAttr_ == nullptr) {
-        PluginStatus ret = pluginHandle_.GetFunction<drvError_t, HDC_SESSION, int, int *>("halHdcGetSessionAttr",
+        int32_t ret = pluginHandle_.GetFunction<drvError_t, HDC_SESSION, int, int *>("halHdcGetSessionAttr",
             halHdcGetSessionAttr_);
-        if (ret != PLUGIN_LOAD_SUCCESS) {
+        if (ret != PROFILING_SUCCESS) {
             return DRV_ERROR_INVALID_HANDLE;
         }
     }
@@ -102,9 +102,9 @@ drvError_t DriverPlugin::MsprofHalGetChipInfo(unsigned int devId, halChipInfo *c
 {
     PthreadOnce(&loadFlag_, []()->void {DriverPlugin::instance()->LoadDriverSo();});
     if (halGetChipInfo_ == nullptr) {
-        PluginStatus ret = pluginHandle_.GetFunction<drvError_t, unsigned int, halChipInfo *>("halGetChipInfo",
+        int32_t ret = pluginHandle_.GetFunction<drvError_t, unsigned int, halChipInfo *>("halGetChipInfo",
             halGetChipInfo_);
-        if (ret != PLUGIN_LOAD_SUCCESS) {
+        if (ret != PROFILING_SUCCESS) {
             return DRV_ERROR_INVALID_HANDLE;
         }
     }
@@ -116,9 +116,9 @@ drvError_t DriverPlugin::MsprofHalGetDeviceInfo(uint32_t devId, int32_t moduleTy
 {
     PthreadOnce(&loadFlag_, []()->void {DriverPlugin::instance()->LoadDriverSo();});
     if (halGetDeviceInfo_ == nullptr) {
-        PluginStatus ret = pluginHandle_.GetFunction<drvError_t, uint32_t, int32_t, int32_t,
+        int32_t ret = pluginHandle_.GetFunction<drvError_t, uint32_t, int32_t, int32_t,
             int64_t *>("halGetDeviceInfo", halGetDeviceInfo_);
-        if (ret != PLUGIN_LOAD_SUCCESS) {
+        if (ret != PROFILING_SUCCESS) {
             return DRV_ERROR_INVALID_HANDLE;
         }
     }
@@ -130,9 +130,9 @@ int DriverPlugin::MsprofHalProfDataFlush(unsigned int device_id, unsigned int ch
 {
     PthreadOnce(&loadFlag_, []()->void {DriverPlugin::instance()->LoadDriverSo();});
     if (halProfDataFlush_ == nullptr) {
-        PluginStatus ret = pluginHandle_.GetFunction<int, unsigned int, unsigned int,
+        int32_t ret = pluginHandle_.GetFunction<int, unsigned int, unsigned int,
             unsigned int *>("halProfDataFlush", halProfDataFlush_);
-        if (ret != PLUGIN_LOAD_SUCCESS) {
+        if (ret != PROFILING_SUCCESS) {
             return -1;
         }
     }
@@ -144,9 +144,9 @@ int DriverPlugin::MsprofDrvGetChannels(unsigned int device_id, channel_list_t *c
 {
     PthreadOnce(&loadFlag_, []()->void {DriverPlugin::instance()->LoadDriverSo();});
     if (profDrvGetChannels_ == nullptr) {
-        PluginStatus ret = pluginHandle_.GetFunction<int, unsigned int, channel_list_t *>("prof_drv_get_channels",
+        int32_t ret = pluginHandle_.GetFunction<int, unsigned int, channel_list_t *>("prof_drv_get_channels",
             profDrvGetChannels_);
-        if (ret != PLUGIN_LOAD_SUCCESS) {
+        if (ret != PROFILING_SUCCESS) {
             return -1;
         }
     }
@@ -158,9 +158,9 @@ int DriverPlugin::MsprofDrvStart(unsigned int device_id, unsigned int channel_id
 {
     PthreadOnce(&loadFlag_, []()->void {DriverPlugin::instance()->LoadDriverSo();});
     if (profDrvStart_ == nullptr) {
-        PluginStatus ret = pluginHandle_.GetFunction<int, unsigned int, unsigned int,
+        int32_t ret = pluginHandle_.GetFunction<int, unsigned int, unsigned int,
                               struct prof_start_para *>("prof_drv_start", profDrvStart_);
-        if (ret != PLUGIN_LOAD_SUCCESS) {
+        if (ret != PROFILING_SUCCESS) {
             return -1;
         }
     }
@@ -172,8 +172,8 @@ int DriverPlugin::MsprofDrvStop(unsigned int device_id, unsigned int channel_id)
 {
     PthreadOnce(&loadFlag_, []()->void {DriverPlugin::instance()->LoadDriverSo();});
     if (profStop_ == nullptr) {
-        PluginStatus ret = pluginHandle_.GetFunction<int, unsigned int, unsigned int>("prof_stop", profStop_);
-        if (ret != PLUGIN_LOAD_SUCCESS) {
+        int32_t ret = pluginHandle_.GetFunction<int, unsigned int, unsigned int>("prof_stop", profStop_);
+        if (ret != PROFILING_SUCCESS) {
             return -1;
         }
     }
@@ -186,9 +186,9 @@ int DriverPlugin::MsprofChannelRead(unsigned int device_id, unsigned int channel
 {
     PthreadOnce(&loadFlag_, []()->void {DriverPlugin::instance()->LoadDriverSo();});
     if (profChannelRead_ == nullptr) {
-        PluginStatus ret = pluginHandle_.GetFunction<int, unsigned int, unsigned int,
+        int32_t ret = pluginHandle_.GetFunction<int, unsigned int, unsigned int,
             char *, unsigned int>("prof_channel_read", profChannelRead_);
-        if (ret != PLUGIN_LOAD_SUCCESS) {
+        if (ret != PROFILING_SUCCESS) {
             return -1;
         }
     }
@@ -200,9 +200,9 @@ int DriverPlugin::MsprofChannelPoll(struct prof_poll_info *out_buf, int num, int
 {
     PthreadOnce(&loadFlag_, []()->void {DriverPlugin::instance()->LoadDriverSo();});
     if (profChannelPoll_ == nullptr) {
-        PluginStatus ret = pluginHandle_.GetFunction<int, struct prof_poll_info *, int, int>("prof_channel_poll",
+        int32_t ret = pluginHandle_.GetFunction<int, struct prof_poll_info *, int, int>("prof_channel_poll",
             profChannelPoll_);
-        if (ret != PLUGIN_LOAD_SUCCESS) {
+        if (ret != PROFILING_SUCCESS) {
             return -1;
         }
     }
@@ -214,8 +214,8 @@ drvError_t DriverPlugin::MsprofDrvGetDevNum(uint32_t *num_dev)
 {
     PthreadOnce(&loadFlag_, []()->void {DriverPlugin::instance()->LoadDriverSo();});
     if (drvGetDevNum_ == nullptr) {
-        PluginStatus ret = pluginHandle_.GetFunction<drvError_t, uint32_t *>("drvGetDevNum", drvGetDevNum_);
-        if (ret != PLUGIN_LOAD_SUCCESS) {
+        int32_t ret = pluginHandle_.GetFunction<drvError_t, uint32_t *>("drvGetDevNum", drvGetDevNum_);
+        if (ret != PROFILING_SUCCESS) {
             return DRV_ERROR_INVALID_HANDLE;
         }
     }
@@ -227,9 +227,9 @@ drvError_t DriverPlugin::MsprofDrvGetDevIDByLocalDevID(uint32_t localDevId, uint
 {
     PthreadOnce(&loadFlag_, []()->void {DriverPlugin::instance()->LoadDriverSo();});
     if (drvGetDevIDByLocalDevID_ == nullptr) {
-        PluginStatus ret = pluginHandle_.GetFunction<drvError_t, uint32_t, uint32_t*>("drvGetDevIDByLocalDevID",
+        int32_t ret = pluginHandle_.GetFunction<drvError_t, uint32_t, uint32_t*>("drvGetDevIDByLocalDevID",
             drvGetDevIDByLocalDevID_);
-        if (ret != PLUGIN_LOAD_SUCCESS) {
+        if (ret != PROFILING_SUCCESS) {
             return DRV_ERROR_INVALID_HANDLE;
         }
     }
@@ -241,8 +241,8 @@ drvError_t DriverPlugin::MsprofDrvGetDevIDs(uint32_t *devices, uint32_t len)
 {
     PthreadOnce(&loadFlag_, []()->void {DriverPlugin::instance()->LoadDriverSo();});
     if (drvGetDevIDs_ == nullptr) {
-        PluginStatus ret = pluginHandle_.GetFunction<drvError_t, uint32_t *, uint32_t>("drvGetDevIDs", drvGetDevIDs_);
-        if (ret != PLUGIN_LOAD_SUCCESS) {
+        int32_t ret = pluginHandle_.GetFunction<drvError_t, uint32_t *, uint32_t>("drvGetDevIDs", drvGetDevIDs_);
+        if (ret != PROFILING_SUCCESS) {
             return DRV_ERROR_INVALID_HANDLE;
         }
     }
@@ -254,9 +254,9 @@ drvError_t DriverPlugin::MsprofDrvGetPlatformInfo(uint32_t *info)
 {
     PthreadOnce(&loadFlag_, []()->void {DriverPlugin::instance()->LoadDriverSo();});
     if (drvGetPlatformInfo_ == nullptr) {
-        PluginStatus ret = pluginHandle_.GetFunction<drvError_t, uint32_t *>("drvGetPlatformInfo",
+        int32_t ret = pluginHandle_.GetFunction<drvError_t, uint32_t *>("drvGetPlatformInfo",
             drvGetPlatformInfo_);
-        if (ret != PLUGIN_LOAD_SUCCESS) {
+        if (ret != PROFILING_SUCCESS) {
             return DRV_ERROR_INVALID_HANDLE;
         }
     }
@@ -268,9 +268,9 @@ drvError_t DriverPlugin::MsprofDrvHdcClientCreate(HDC_CLIENT *client, int maxSes
 {
     PthreadOnce(&loadFlag_, []()->void {DriverPlugin::instance()->LoadDriverSo();});
     if (drvHdcClientCreate_ == nullptr) {
-        PluginStatus ret = pluginHandle_.GetFunction<drvError_t, HDC_CLIENT *, int, int, int>("drvHdcClientCreate",
+        int32_t ret = pluginHandle_.GetFunction<drvError_t, HDC_CLIENT *, int, int, int>("drvHdcClientCreate",
             drvHdcClientCreate_);
-        if (ret != PLUGIN_LOAD_SUCCESS) {
+        if (ret != PROFILING_SUCCESS) {
             return DRV_ERROR_INVALID_HANDLE;
         }
     }
@@ -282,9 +282,9 @@ drvError_t DriverPlugin::MsprofDrvHdcClientDestroy(HDC_CLIENT client)
 {
     PthreadOnce(&loadFlag_, []()->void {DriverPlugin::instance()->LoadDriverSo();});
     if (drvHdcClientDestroy_ == nullptr) {
-        PluginStatus ret = pluginHandle_.GetFunction<drvError_t, HDC_CLIENT>("drvHdcClientDestroy",
+        int32_t ret = pluginHandle_.GetFunction<drvError_t, HDC_CLIENT>("drvHdcClientDestroy",
             drvHdcClientDestroy_);
-        if (ret != PLUGIN_LOAD_SUCCESS) {
+        if (ret != PROFILING_SUCCESS) {
             return DRV_ERROR_INVALID_HANDLE;
         }
     }
@@ -296,9 +296,9 @@ drvError_t DriverPlugin::MsprofDrvHdcServerCreate(int devid, int serviceType, HD
 {
     PthreadOnce(&loadFlag_, []()->void {DriverPlugin::instance()->LoadDriverSo();});
     if (drvHdcServerCreate_ == nullptr) {
-        PluginStatus ret = pluginHandle_.GetFunction<drvError_t, int, int, HDC_SERVER *>("drvHdcServerCreate",
+        int32_t ret = pluginHandle_.GetFunction<drvError_t, int, int, HDC_SERVER *>("drvHdcServerCreate",
             drvHdcServerCreate_);
-        if (ret != PLUGIN_LOAD_SUCCESS) {
+        if (ret != PROFILING_SUCCESS) {
             return DRV_ERROR_INVALID_HANDLE;
         }
     }
@@ -310,9 +310,9 @@ drvError_t DriverPlugin::MsprofDrvHdcServerDestroy(HDC_SERVER server)
 {
     PthreadOnce(&loadFlag_, []()->void {DriverPlugin::instance()->LoadDriverSo();});
     if (drvHdcServerDestroy_ == nullptr) {
-        PluginStatus ret = pluginHandle_.GetFunction<drvError_t, HDC_SERVER>("drvHdcServerDestroy",
+        int32_t ret = pluginHandle_.GetFunction<drvError_t, HDC_SERVER>("drvHdcServerDestroy",
             drvHdcServerDestroy_);
-        if (ret != PLUGIN_LOAD_SUCCESS) {
+        if (ret != PROFILING_SUCCESS) {
             return DRV_ERROR_INVALID_HANDLE;
         }
     }
@@ -324,9 +324,9 @@ drvError_t DriverPlugin::MsprofDrvHdcSessionAccept(HDC_SERVER server, HDC_SESSIO
 {
     PthreadOnce(&loadFlag_, []()->void {DriverPlugin::instance()->LoadDriverSo();});
     if (drvHdcSessionAccept_ == nullptr) {
-        PluginStatus ret = pluginHandle_.GetFunction<drvError_t, HDC_SERVER, HDC_SESSION *>("drvHdcSessionAccept",
+        int32_t ret = pluginHandle_.GetFunction<drvError_t, HDC_SERVER, HDC_SESSION *>("drvHdcSessionAccept",
             drvHdcSessionAccept_);
-        if (ret != PLUGIN_LOAD_SUCCESS) {
+        if (ret != PROFILING_SUCCESS) {
             return DRV_ERROR_INVALID_HANDLE;
         }
     }
@@ -338,9 +338,9 @@ drvError_t DriverPlugin::MsprofDrvHdcGetMsgBuffer(struct drvHdcMsg *msg, int ind
 {
     PthreadOnce(&loadFlag_, []()->void {DriverPlugin::instance()->LoadDriverSo();});
     if (drvHdcGetMsgBuffer_ == nullptr) {
-        PluginStatus ret = pluginHandle_.GetFunction<drvError_t, struct drvHdcMsg *,
+        int32_t ret = pluginHandle_.GetFunction<drvError_t, struct drvHdcMsg *,
             int, char **, int *>("drvHdcGetMsgBuffer", drvHdcGetMsgBuffer_);
-        if (ret != PLUGIN_LOAD_SUCCESS) {
+        if (ret != PROFILING_SUCCESS) {
             return DRV_ERROR_INVALID_HANDLE;
         }
     }
@@ -352,9 +352,9 @@ drvError_t DriverPlugin::MsprofDrvHdcAllocMsg(HDC_SESSION session, struct drvHdc
 {
     PthreadOnce(&loadFlag_, []()->void {DriverPlugin::instance()->LoadDriverSo();});
     if (drvHdcAllocMsg_ == nullptr) {
-        PluginStatus ret = pluginHandle_.GetFunction<drvError_t, HDC_SESSION,
+        int32_t ret = pluginHandle_.GetFunction<drvError_t, HDC_SESSION,
             struct drvHdcMsg **, int>("drvHdcAllocMsg", drvHdcAllocMsg_);
-        if (ret != PLUGIN_LOAD_SUCCESS) {
+        if (ret != PROFILING_SUCCESS) {
             return DRV_ERROR_INVALID_HANDLE;
         }
     }
@@ -366,8 +366,8 @@ drvError_t DriverPlugin::MsprofDrvHdcFreeMsg(struct drvHdcMsg *msg)
 {
     PthreadOnce(&loadFlag_, []()->void {DriverPlugin::instance()->LoadDriverSo();});
     if (drvHdcFreeMsg_ == nullptr) {
-        PluginStatus ret = pluginHandle_.GetFunction<drvError_t, struct drvHdcMsg *>("drvHdcFreeMsg", drvHdcFreeMsg_);
-        if (ret != PLUGIN_LOAD_SUCCESS) {
+        int32_t ret = pluginHandle_.GetFunction<drvError_t, struct drvHdcMsg *>("drvHdcFreeMsg", drvHdcFreeMsg_);
+        if (ret != PROFILING_SUCCESS) {
             return DRV_ERROR_INVALID_HANDLE;
         }
     }
@@ -379,9 +379,9 @@ drvError_t DriverPlugin::MsprofDrvHdcReuseMsg(struct drvHdcMsg *msg)
 {
     PthreadOnce(&loadFlag_, []()->void {DriverPlugin::instance()->LoadDriverSo();});
     if (drvHdcReuseMsg_ == nullptr) {
-        PluginStatus ret = pluginHandle_.GetFunction<drvError_t, struct drvHdcMsg *>("drvHdcReuseMsg",
+        int32_t ret = pluginHandle_.GetFunction<drvError_t, struct drvHdcMsg *>("drvHdcReuseMsg",
             drvHdcReuseMsg_);
-        if (ret != PLUGIN_LOAD_SUCCESS) {
+        if (ret != PROFILING_SUCCESS) {
             return DRV_ERROR_INVALID_HANDLE;
         }
     }
@@ -393,9 +393,9 @@ drvError_t DriverPlugin::MsprofDrvHdcAddMsgBuffer(struct drvHdcMsg *msg, char *p
 {
     PthreadOnce(&loadFlag_, []()->void {DriverPlugin::instance()->LoadDriverSo();});
     if (drvHdcAddMsgBuffer_ == nullptr) {
-        PluginStatus ret = pluginHandle_.GetFunction<drvError_t, struct drvHdcMsg *, char *,
+        int32_t ret = pluginHandle_.GetFunction<drvError_t, struct drvHdcMsg *, char *,
             int>("drvHdcAddMsgBuffer", drvHdcAddMsgBuffer_);
-        if (ret != PLUGIN_LOAD_SUCCESS) {
+        if (ret != PROFILING_SUCCESS) {
             return DRV_ERROR_INVALID_HANDLE;
         }
     }
@@ -408,9 +408,9 @@ drvError_t DriverPlugin::MsprofDrvHdcSessionConnect(int peer_node, int peer_devi
 {
     PthreadOnce(&loadFlag_, []()->void {DriverPlugin::instance()->LoadDriverSo();});
     if (drvHdcSessionConnect_ == nullptr) {
-        PluginStatus ret = pluginHandle_.GetFunction<drvError_t, int, int, HDC_CLIENT,
+        int32_t ret = pluginHandle_.GetFunction<drvError_t, int, int, HDC_CLIENT,
             HDC_SESSION *>("drvHdcSessionConnect", drvHdcSessionConnect_);
-        if (ret != PLUGIN_LOAD_SUCCESS) {
+        if (ret != PROFILING_SUCCESS) {
             return DRV_ERROR_INVALID_HANDLE;
         }
     }
@@ -422,9 +422,9 @@ drvError_t DriverPlugin::MsprofDrvHdcSessionClose(HDC_SESSION session)
 {
     PthreadOnce(&loadFlag_, []()->void {DriverPlugin::instance()->LoadDriverSo();});
     if (drvHdcSessionClose_ == nullptr) {
-        PluginStatus ret = pluginHandle_.GetFunction<drvError_t, HDC_SESSION>("drvHdcSessionClose",
+        int32_t ret = pluginHandle_.GetFunction<drvError_t, HDC_SESSION>("drvHdcSessionClose",
             drvHdcSessionClose_);
-        if (ret != PLUGIN_LOAD_SUCCESS) {
+        if (ret != PROFILING_SUCCESS) {
             return DRV_ERROR_INVALID_HANDLE;
         }
     }
@@ -436,9 +436,9 @@ drvError_t DriverPlugin::MsprofDrvHdcGetCapacity(struct drvHdcCapacity *capacity
 {
     PthreadOnce(&loadFlag_, []()->void {DriverPlugin::instance()->LoadDriverSo();});
     if (drvHdcGetCapacity_ == nullptr) {
-        PluginStatus ret = pluginHandle_.GetFunction<drvError_t, struct drvHdcCapacity *>("drvHdcGetCapacity",
+        int32_t ret = pluginHandle_.GetFunction<drvError_t, struct drvHdcCapacity *>("drvHdcGetCapacity",
             drvHdcGetCapacity_);
-        if (ret != PLUGIN_LOAD_SUCCESS) {
+        if (ret != PROFILING_SUCCESS) {
             return DRV_ERROR_INVALID_HANDLE;
         }
     }

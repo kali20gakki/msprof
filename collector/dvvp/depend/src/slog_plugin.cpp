@@ -11,10 +11,10 @@ namespace Dvvp {
 namespace Plugin {
 void SlogPlugin::LoadSlogSo()
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
+    int32_t ret = PROFILING_SUCCESS;
     if (!pluginHandle_.HasLoad()) {
         ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
-        if (ret != PLUGIN_LOAD_SUCCESS) {
+        if (ret != PROFILING_SUCCESS) {
             return;
         }
     }
@@ -30,8 +30,8 @@ int SlogPlugin::MsprofCheckLogLevelForC(int moduleId, int logLevel)
 {
     PthreadOnce(&loadFlag_, []()->void {SlogPlugin::instance()->LoadSlogSo();});
     if (checkLogLevelForC_ == nullptr) {
-        PluginStatus ret = pluginHandle_.GetFunction<int, int, int>("CheckLogLevelForC", checkLogLevelForC_);
-        if (ret != PLUGIN_LOAD_SUCCESS) {
+        int32_t ret = pluginHandle_.GetFunction<int, int, int>("CheckLogLevelForC", checkLogLevelForC_);
+        if (ret != PROFILING_SUCCESS) {
             return -1;
         }
     }

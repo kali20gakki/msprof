@@ -10,13 +10,14 @@
 #include "message/prof_params.h"
 #include "securec.h"
 #include "sender.h"
-#include "mmpa_plugin.h"
+#include "mmpa_api.h"
 
 using namespace std;
 using namespace analysis::dvvp::streamio::client;
 using namespace analysis::dvvp::streamio::common;
 using namespace analysis::dvvp::common::error;
 using namespace Collector::Dvvp::Plugin;
+using namespace Collector::Dvvp::Mmpa;
 
 class PROFILER_SENDER_TEST: public testing::Test {
 
@@ -376,9 +377,9 @@ TEST_F(PROFILER_SENDER_TEST, CloseFileFds)
     EXPECT_EQ(PROFILING_SUCCESS, sender.Init());
     sender.fileFdMap_["file_name"] = 5;
 
-    MOCKER(&MmpaPlugin::MsprofMmClose)
+    MOCKER(&MmClose)
         .stubs()
-        .will(returnValue(EN_OK));
+        .will(returnValue(PROFILING_SUCCESS));
 
     sender.CloseFileFds();
     sender.Uninit();
@@ -399,7 +400,7 @@ TEST_F(PROFILER_SENDER_TEST, OpenWriteFile)
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
 
-    MOCKER(&MmpaPlugin::MsprofMmOpen2)
+    MOCKER(&MmOpen2)
         .stubs()
         .will(returnValue(-1))
         .then(returnValue(7));
@@ -455,7 +456,7 @@ TEST_F(PROFILER_SENDER_TEST, SendData)
 
     char buf[24] = {0};
 
-    MOCKER(&MmpaPlugin::MsprofMmSocketSend)
+    MOCKER(&MmSocketSend)
         .stubs()
         .will(returnValue(-1))
         .then(returnValue(7));
@@ -566,7 +567,7 @@ TEST_F(PROFILER_SENDER_TEST, ExecuteFileMode)
         .will(returnValue(-1))
         .then(returnValue(7));
 
-    MOCKER(&MmpaPlugin::MsprofMmWrite)
+    MOCKER(&MmWrite)
         .stubs()
         .will(returnValue(-1));
 
