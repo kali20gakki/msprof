@@ -158,7 +158,8 @@ class HwtsCalculator(ICalculator, MsMultiProcess):
                     batch_id]
         else:
             self._iter_model.init()
-            if ProfilingScene().is_mix_operator_and_graph() and self._sample_config.get("model_id") != Constant.GE_OP_MODEL_ID:
+            if ProfilingScene().is_mix_operator_and_graph() and \
+                    self._sample_config.get("model_id") != Constant.GE_OP_MODEL_ID:
                 _iter_start_end_time = MsprofIteration(self._project_path). \
                 get_iteration_time_by_index_id(self._sample_config.get("iter_id"), self._sample_config.get("model_id"))
                 _iter_id = (_iter_start_end_time[0]-1, _iter_start_end_time[0])
@@ -184,15 +185,16 @@ class HwtsCalculator(ICalculator, MsMultiProcess):
         return prep_data_res
 
     def _parse(self: any, all_log_bytes: bytes) -> None:
-        if ProfilingScene().is_mix_operator_and_graph() and self._sample_config.get("model_id") != Constant.GE_OP_MODEL_ID:
-            self._iter_start_end_time = MsprofIteration(self._project_path). \
+        if ProfilingScene().is_mix_operator_and_graph() and \
+                self._sample_config.get("model_id") != Constant.GE_OP_MODEL_ID:
+            _iter_start_end_time = MsprofIteration(self._project_path). \
                 get_iteration_time_by_index_id(self._sample_config.get("iter_id"), self._sample_config.get("model_id"))
-            if not self._iter_start_end_time:
+            if not _iter_start_end_time:
                 return
             for log_data in Utils.chunks(all_log_bytes, self.HWTS_LOG_SIZE):
                 _task_log = HwtsLogBean.decode(log_data)
-                if _task_log.is_log_type() and self._iter_start_end_time[1] <= _task_log.sys_cnt and \
-                        _task_log.sys_cnt <= self._iter_start_end_time[2]:
+                if _task_log.is_log_type() and _iter_start_end_time[1] <= _task_log.sys_cnt and \
+                        _task_log.sys_cnt <= _iter_start_end_time[2]:
                     self._log_data.append(_task_log)
         else:
             for log_data in Utils.chunks(all_log_bytes, self.HWTS_LOG_SIZE):
