@@ -6,9 +6,6 @@
  */
 #include "plugin_handle.h"
 
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <unistd.h>
 #include "config.h"
 #include "mmpa/mmpa_api.h"
 #include "securec.h"
@@ -65,33 +62,59 @@ bool PluginHandle::HasLoad()
     return load_;
 }
 
-void PluginHandle::SplitPath(const std::string &mutilPath, std::vector<std::string> &pathVec) const
+std::string PluginHandle::GetAscendHalPath() const
 {
-    const std::string tmpString = mutilPath + ":";
-    std::string::size_type startPos = 0U;
-    std::string::size_type curPos = tmpString.find(':', 0U);
-    while (curPos != std::string::npos) {
-        const std::string path = tmpString.substr(startPos, curPos - startPos);
-        if (!path.empty()) {
-        pathVec.push_back(path);
-        }
-        startPos = curPos + 1U;
-        curPos = tmpString.find(':', startPos);
+    std::string ascendInstallInfoPath = "/etc/ascend_install.info";
+    // max file size:1024 Byte
+    if ((Utils::GetFileSize(ascendInstallInfoPath) > MAX_ASCEND_INSTALL_INFO_FILE_SIZE) ||
+        (Utils::IsSoftLink(ascendInstallInfoPath))) {
+        return "";
     }
+    std::ifstream infoFile(ascendInstallInfoPath);
+    if (!infoFile) {
+        return "";
+    }
+    std::string line;
+    std::string installPath;
+    const int numPerInfo = 2; // Driver_Install_Path_Param=/usr/local/Ascend
+    while (getline(infoFile, line)) {
+        std::vector<std::string> installInfo = Utils::Split(line, false, "", "=");
+        if (installInfo.size() == numPerInfo && installInfo[0].compare("Driver_Install_Path_Param") == 0) {
+            installPath = installInfo[1];
+            break;
+        }
+    }
+    if (installPath.empty()) {
+        return "";
+    }
+    std::string driverInfo = installPath + MSVP_SLASH + "driver" + MSVP_SLASH + "version.info";
+    int ret = MmAccess2(driverInfo.c_str(), M_R_OK);
+    if (ret != PROFILING_SUCCESS) {
+        return "";
+    }
+    return installPath + MSVP_SLASH + "driver" + MSVP_SLASH + "lib64";
 }
 
 std::string PluginHandle::GetSoPath(const std::string &envValue) const
 {
+    if (soName_.compare("libascend_hal.so") == 0) {
+        std::string ascendHalPath = GetAscendHalPath();
+        if (!ascendHalPath.empty()) {
+            std::string driverSoPath = ascendHalPath + MSVP_SLASH + soName_;
+            if (MmAccess2(ascendHalPath.c_str(), M_R_OK) == PROFILING_SUCCESS) {
+                return driverSoPath;
+            }
+        }
+    }
     const char *env = std::getenv(envValue.c_str());
     if (env == nullptr) {
         return "";
     }
     std::string pathEnv = env;
-    std::vector<std::string> pathVec;
-    SplitPath(std::string(pathEnv), pathVec);
+    std::vector<std::string> pathVec = Utils::Split(pathEnv, false, "", ":");
     for (auto path : pathVec) {
-        std::string ret = path + "/" + soName_;
-        if (access(ret.c_str(), F_OK) != -1) {
+        std::string ret = path + MSVP_SLASH + soName_;
+        if (MmAccess2(ret, M_R_OK) == PROFILING_SUCCESS) {
             return ret;
         }
     }
