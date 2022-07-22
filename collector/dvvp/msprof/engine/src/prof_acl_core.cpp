@@ -340,11 +340,10 @@ aclError aclprofStart(ACL_PROF_CONFIG_CONST_PTR profilerConfig)
     MSPROF_LOGI("Allocate start profiling config to Acl");
     uint64_t dataTypeConfig = profilerConfig->config.dataTypeConfig;
     ProfAclMgr::instance()->AddModelLoadConf(dataTypeConfig);
-    dataTypeConfig |= PROF_RUNTIME_TRACE;
-    MSPROF_EVENT("ProfDataTypeConfigHandle dataTypeConfig:0x%llx", dataTypeConfig);
     ret = Analysis::Dvvp::ProfilerCommon::CommandHandleProfStart(
         profilerConfig->config.devIdList, profilerConfig->config.devNums, dataTypeConfig | PROF_OP_DETAIL);
     RETURN_IF_NOT_SUCCESS(ret);
+
     MSPROF_LOGI("Acl has been allocated start profiling config, successfully execute aclprofStartProfiling");
     return ACL_SUCCESS;
 }
