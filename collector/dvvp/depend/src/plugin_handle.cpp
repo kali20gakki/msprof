@@ -87,12 +87,22 @@ std::string PluginHandle::GetAscendHalPath() const
     if (installPath.empty()) {
         return "";
     }
-    std::string driverInfo = installPath + MSVP_SLASH + "driver" + MSVP_SLASH + "version.info";
+    std::string driverPath = installPath + MSVP_SLASH + "driver" + MSVP_SLASH;
+    std::string driverInfo = driverPath + "version.info";
     int ret = MmAccess2(driverInfo.c_str(), M_R_OK);
     if (ret != PROFILING_SUCCESS) {
         return "";
     }
-    return installPath + MSVP_SLASH + "driver" + MSVP_SLASH + "lib64";
+    std::string soName = "libascend_hal.so";
+    std::string libPath = driverPath + "lib64" + MSVP_SLASH;
+    if (MmAccess2((libPath + soName).c_str(), M_R_OK) == PROFILING_SUCCESS) {
+        return libPath + soName;
+    } else if (MmAccess2((libPath + "common" + MSVP_SLASH + soName).c_str(), M_R_OK) == PROFILING_SUCCESS) {
+        return libPath + "common" + MSVP_SLASH + soName;
+    } else if (MmAccess2((libPath + "driver" + MSVP_SLASH + soName).c_str(), M_R_OK) == PROFILING_SUCCESS) {
+        return libPath + "driver" + MSVP_SLASH + soName;
+    }
+    return "";
 }
 
 std::string PluginHandle::GetSoPath(const std::string &envValue) const
@@ -100,9 +110,8 @@ std::string PluginHandle::GetSoPath(const std::string &envValue) const
     if (soName_.compare("libascend_hal.so") == 0) {
         std::string ascendHalPath = GetAscendHalPath();
         if (!ascendHalPath.empty()) {
-            std::string driverSoPath = ascendHalPath + MSVP_SLASH + soName_;
             if (MmAccess2(ascendHalPath.c_str(), M_R_OK) == PROFILING_SUCCESS) {
-                return driverSoPath;
+                return ascendHalPath;
             }
         }
     }
