@@ -85,6 +85,16 @@ function remove_dir_by_order() {
 }
 
 function uninstall_latest() {
+    local latest_bin="${latest_path}/${arch_name}/bin"
+    if [ -L "${latest_bin}/${MSPROF}" ]; then
+        chmod u+w ${latest_bin}/../
+        chmod u+w ${latest_bin}
+        rm_file_safe ${latest_bin}/${MSPROF}
+        remove_empty_dir ${latest_bin}
+        chmod u-w ${latest_bin}
+        chmod u-w ${latest_bin}/../
+    fi
+
     # runtime has been uninstall
     local leader_package="runtime"
 
