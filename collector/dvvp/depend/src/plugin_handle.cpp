@@ -66,8 +66,8 @@ std::string PluginHandle::GetAscendHalPath() const
 {
     std::string ascendInstallInfoPath = "/etc/ascend_install.info";
     // max file size:1024 Byte
-    if (!Utils::IsFileExist(ascendInstallInfoPath) ||
-        Utils::GetFileSize(ascendInstallInfoPath) > MAX_ASCEND_INSTALL_INFO_FILE_SIZE) {
+    if ((Utils::GetFileSize(ascendInstallInfoPath) > MAX_ASCEND_INSTALL_INFO_FILE_SIZE) ||
+        (Utils::IsSoftLink(ascendInstallInfoPath))) {
         return "";
     }
     std::ifstream infoFile(ascendInstallInfoPath);
