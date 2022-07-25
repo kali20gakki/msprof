@@ -91,7 +91,9 @@ function uninstall_latest() {
         chmod u+w ${latest_bin}
         rm_file_safe ${latest_bin}/${MSPROF}
         remove_empty_dir ${latest_bin}
-        chmod u-w ${latest_bin}
+        if [ -d ${latest_bin} ]; then
+            chmod u-w ${latest_bin}
+        fi
         chmod u-w ${latest_bin}/../
     fi
 
