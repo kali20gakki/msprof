@@ -82,7 +82,6 @@ class IterRecorder:
         if not self._op_iter_queue:
             logging.error("Data cannot be found in any op_iteration.")
             raise ProfException(ProfException.PROF_INVALID_DATA_ERROR)
-            return
         if self._op_iter_queue and self._graph_iter_queue and \
                 sys_cnt >= self._graph_iter_dict.get(self._graph_iter_queue[-1])[0]:
             self._current_op_iter = self._op_iter_queue[-1]
