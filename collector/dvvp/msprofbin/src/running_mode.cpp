@@ -448,10 +448,6 @@ int RunningMode::CheckAnalysisEnv()
         MSPROF_LOGE("Check Analysis env failed, msprofbin has quited");
         return PROFILING_FAILED;
     }
-    if (Platform::instance()->RunSocSide()) {
-        CmdLog::instance()->CmdWarningLog("Not in host side, analysis is not supported");
-        return PROFILING_FAILED;
-    }
     if (params_->pythonPath.empty()) {
         const std::string PYTHON_CMD{"python3"};
         params_->pythonPath = PYTHON_CMD;
@@ -469,7 +465,7 @@ int RunningMode::CheckAnalysisEnv()
     const std::string ANALYSIS_SCRIPT_PATH{"profiler_tool/analysis/msprof/msprof.py"};
     analysisPath_ = msprofToolsPath + ANALYSIS_SCRIPT_PATH;
     if (!Utils::IsFileExist(analysisPath_)) {
-        CmdLog::instance()->CmdWarningLog("No analysis script found in %s", Utils::BaseName(analysisPath_).c_str());
+        CmdLog::instance()->CmdWarningLog("No find analysis script msprof.py, analysis is not supported");
         return PROFILING_FAILED;
     }
     if (MmAccess2(analysisPath_, M_X_OK) != PROFILING_SUCCESS) {
