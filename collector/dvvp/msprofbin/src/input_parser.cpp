@@ -1290,7 +1290,7 @@ void ArgsManager::AddAnalysisArgs()
     {"parse", "Switch for using msprof to parse collecting data, the default value is off.", OFF},
     {"query", "Switch for using msprof to query collecting data, the default value is off.", OFF},
     {"export", "Switch for using msprof to export collecting data, the default value is off.", OFF},
-    {"iteration-id", "The export iteration id, only uesd when argument export is on, the default value is 1", "1"},
+    {"iteration-id", "The export iteration id, only uesd when argument export is on, the default value is 1...", "1"},
     {"model-id", "The export model id, only uesd when argument export is on, "
         "msprof will export minium accessible model by default.",
         "-1"},
