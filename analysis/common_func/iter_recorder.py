@@ -78,32 +78,32 @@ class IterRecorder:
 
     def set_current_mix_iter_id(self: any, sys_cnt: int) -> None:
         self.set_current_graph_iter(sys_cnt)
-        if not self.set_current_op_iter(sys_cnt):
-            logging.error("Data cannot be found in any iteration.")
+        self.set_current_op_iter(sys_cnt)
+        if not self._op_iter_queue:
+            logging.error("Data cannot be found in any op_iteration.")
             raise ProfException(ProfException.PROF_INVALID_DATA_ERROR)
-        if self._graph_iter_queue and sys_cnt >= self._graph_iter_dict.get(self._graph_iter_queue[-1])[0]:
+            return
+        if self._op_iter_queue and self._graph_iter_queue and \
+                sys_cnt >= self._graph_iter_dict.get(self._graph_iter_queue[-1])[0]:
+            self._current_op_iter = self._op_iter_queue[-1]
             self._current_iter_id = self._graph_iter_queue[-1]
-
         else:
-            self._current_iter_id = self._op_iter_queue[-1]
+            self._current_op_iter = self._op_iter_queue[-1]
+            self._current_iter_id = self._current_op_iter
 
     def set_current_graph_iter(self: any, sys_cnt: int) -> None:
-        if self._graph_iter_queue:
-            while sys_cnt > self._graph_iter_dict.get(self._graph_iter_queue[-1])[1]:
+        while self._graph_iter_queue:
+            if sys_cnt > self._graph_iter_dict.get(self._graph_iter_queue[-1])[1]:
                 self._graph_iter_queue.pop()
-                if not self._graph_iter_queue:
-                    return
+            else:
+                break
 
     def set_current_op_iter(self: any, sys_cnt: int) -> bool:
-        while sys_cnt > self._op_iter_dict.get(self._op_iter_queue[-1])[1]:
-            self._op_iter_queue.pop()
-            if not self._op_iter_queue:
-                return False
-        if sys_cnt >= self._op_iter_dict.get(self._op_iter_queue[-1])[0]:
-            self._current_op_iter = self._op_iter_queue[-1]
-            return True
-        else:
-            return False
+        while self._op_iter_queue:
+            if sys_cnt > self._op_iter_dict.get(self._op_iter_queue[-1])[1]:
+                self._op_iter_queue.pop()
+            else:
+                break
 
     def _check_current_iter_id(self: any, sys_cnt: int) -> int:
         iter_end = self._iter_end_dict.get(self._current_iter_id)
