@@ -465,7 +465,7 @@ int RunningMode::CheckAnalysisEnv()
     const std::string ANALYSIS_SCRIPT_PATH{"profiler_tool/analysis/msprof/msprof.py"};
     analysisPath_ = msprofToolsPath + ANALYSIS_SCRIPT_PATH;
     if (!Utils::IsFileExist(analysisPath_)) {
-        CmdLog::instance()->CmdWarningLog("The msprof.py file is not found, analysis is not supported");
+        CmdLog::instance()->CmdWarningLog("The msprof.py file is not found, so analysis is not supported.");
         return PROFILING_FAILED;
     }
     if (MmAccess2(analysisPath_, M_X_OK) != PROFILING_SUCCESS) {
