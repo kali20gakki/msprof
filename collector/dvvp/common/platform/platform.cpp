@@ -11,7 +11,6 @@
 #include "errno/error_code.h"
 #include "ai_drv_dev_api.h"
 #include "platform/platform.h"
-#include "cmd_log.h"
 
 namespace Analysis {
 namespace Dvvp {
@@ -61,7 +60,6 @@ bool Platform::PlatformIsHelperHostSide() const
 
 bool Platform::RunSocSide()
 {
-    CmdLog::instance()->CmdErrorLog("xxx: runSide_ %d", runSide_);
     if (runSide_ == SysPlatformType::DEVICE || runSide_ == SysPlatformType::LHISI) {
         return true;
     }
