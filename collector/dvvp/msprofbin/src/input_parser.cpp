@@ -1501,7 +1501,7 @@ void ArgsManager::PrintHelp()
 
 void ArgsManager::AddHostArgs()
 {
-    CmdLog::instance()->CmdErrorLog("xxx: AddHostArgs entry");
+    CmdLog::instance()->CmdErrorLog("xxx: AddHostArgs entry %d", Platform::instance()->GetPlatform());
     if (Platform::instance()->RunSocSide()) {
         CmdLog::instance()->CmdErrorLog("xxx: RunSocSide return true");
         return;
