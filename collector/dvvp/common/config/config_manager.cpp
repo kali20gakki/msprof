@@ -9,14 +9,16 @@
  */
 #include "config_manager.h"
 #include <string>
-#include "message/prof_params.h"
-#include "singleton/singleton.h"
-#include "utils/utils.h"
-#include "errno/error_code.h"
+#include "ai_drv_dev_api.h"
 #include "config/config.h"
 #include "config/config_manager.h"
 #include "driver_plugin.h"
-#include "ai_drv_dev_api.h"
+#include "errno/error_code.h"
+#include "message/prof_params.h"
+#include "msprof_error_manager.h"
+#include "singleton/singleton.h"
+#include "utils/utils.h"
+
 namespace Analysis {
 namespace Dvvp {
 namespace Common {

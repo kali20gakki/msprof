@@ -5,8 +5,9 @@
  * Create: 2018-06-13
  */
 #include "thread_pool.h"
-#include "errno/error_code.h"
 #include "config/config.h"
+#include "errno/error_code.h"
+#include "msprof_error_manager.h"
 
 namespace analysis {
 namespace dvvp {

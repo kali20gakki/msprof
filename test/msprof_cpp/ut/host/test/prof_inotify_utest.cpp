@@ -81,7 +81,7 @@ protected:
         // .will(returnValue(0));
         MOCKER(mmCreateTaskWithThreadAttr)
             .stubs()
-            .will(returnValue(EN_OK));
+            .will(returnValue(PROFILING_SUCCESS));
 
         inotify->InotifyCloseEventsProcess(*event);
     }
@@ -172,7 +172,7 @@ TEST_F(PROF_INOTIFY_UTEST, CloudTaskUinit)
 
     MOCKER(mmJoinTask)
         .stubs()
-        .will(returnValue(EN_OK));
+        .will(returnValue(PROFILING_SUCCESS));
     // MOCKER_CPP(&analysis::dvvp::host::ProfInotify::CloudTask::Stop)
     //     .stubs()
     //     .will(returnValue(PROFILING_SUCCESS));
@@ -943,7 +943,7 @@ TEST_F(PROF_INOTIFY_UTEST, InotifyCloseEventsProcess)
     //     .will(returnValue(0));
     MOCKER(mmCreateTaskWithThreadAttr)
         .stubs()
-        .will(returnValue(EN_OK));
+        .will(returnValue(PROFILING_SUCCESS));
 
     MOCKER_CPP(&analysis::dvvp::host::ProfInotify::GetMsProfCfgJobId)
             .stubs()

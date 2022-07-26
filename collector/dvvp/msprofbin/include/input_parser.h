@@ -22,6 +22,7 @@ namespace Dvvp {
 namespace Msprof {
 using namespace analysis::dvvp::common::validation;
 using namespace analysis::dvvp::common::utils;
+using mmStructOption = Collector::Dvvp::Mmpa::mmStructOption;
 
 const int THOUSAND = 1000; // 1000 : 1k
 

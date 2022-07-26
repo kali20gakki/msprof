@@ -12,6 +12,7 @@
 #include "errno/error_code.h"
 #include "message/codec.h"
 #include "message/prof_params.h"
+#include "msprof_error_manager.h"
 #include "param_validation.h"
 
 namespace analysis {
@@ -23,6 +24,7 @@ using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::message;
 using namespace analysis::dvvp::common::utils;
 using namespace Collector::Dvvp::Plugin;
+using namespace Collector::Dvvp::Mmpa;
 
 const int MIN_INTERVAL = 1;
 const int MAX_INTERVAL = 15 * 24 * 3600 * 1000; // 15 * 24 * 3600 * 1000 = 15day's micro seconds
@@ -662,7 +664,7 @@ bool ParamValidation::CheckHostSysPidIsValid(const int hostSysPid)
 
     std::string hostPidPath = "/proc/" + std::to_string(hostSysPid) + "/status";
     mmStat_t statBuf;
-    int ret = MmpaPlugin::instance()->MsprofMmStatGet(hostPidPath.c_str(), &statBuf);
+    int ret = MmStatGet(hostPidPath, &statBuf);
     if (ret < 0) {
         MSPROF_LOGE("Invalid --host-sys-pid: %d", hostSysPid);
         return false;

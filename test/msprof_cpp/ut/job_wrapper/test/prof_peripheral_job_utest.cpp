@@ -286,7 +286,7 @@ TEST_F(JOB_WRAPPER_PROF_LLC_JOB_TEST, Init) {
     collectionJobCfg_->comParams->params->host_profiling = false;
     collectionJobCfg_->jobParams.events = nullptr;
     EXPECT_EQ(PROFILING_FAILED, profLlcJob->Init(collectionJobCfg_));
-    EXPECT_EQ(PROFILING_FAILED, profLlcJob->Uninit());
+    EXPECT_EQ(PROFILING_SUCCESS, profLlcJob->Uninit());
 }
 
 TEST_F(JOB_WRAPPER_PROF_LLC_JOB_TEST, IsGlobalJobLevel) {
