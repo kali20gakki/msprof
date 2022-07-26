@@ -11,6 +11,7 @@
 #include "errno/error_code.h"
 #include "ai_drv_dev_api.h"
 #include "platform/platform.h"
+#include "cmd_log.h"
 
 namespace Analysis {
 namespace Dvvp {
