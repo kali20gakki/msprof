@@ -60,6 +60,7 @@ bool Platform::PlatformIsHelperHostSide() const
 
 bool Platform::RunSocSide()
 {
+    CmdLog::instance()->CmdErrorLog("xxx: runSide_ %d", runSide_);
     if (runSide_ == SysPlatformType::DEVICE || runSide_ == SysPlatformType::LHISI) {
         return true;
     }
