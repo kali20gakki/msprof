@@ -457,9 +457,6 @@ int RunningMode::CheckAnalysisEnv()
     std::string dirName = Utils::DirName(absolutePath);
     std::string msprofToolsPath;
     std::string binPath;
-
-    CmdLog::instance()->CmdWarningLog("xxx: RunSocSide return %d", Platform::instance()->RunSocSide());
-
     if (Utils::SplitPath(dirName, msprofToolsPath, binPath) != PROFILING_SUCCESS) {
         CmdLog::instance()->CmdWarningLog("Get profiler path failed.");
         return PROFILING_FAILED;
