@@ -37,7 +37,7 @@
 #include "acl_prof.h"
 #include "data_struct.h"
 #include "ai_drv_dev_api.h"
-#include "mmpa_plugin.h"
+#include "mmpa_api.h"
 #include "prof_api.h"
 #include "toolchain/prof_acl_api.h"
 
@@ -47,6 +47,7 @@ using namespace analysis::dvvp::transport;
 using namespace Analysis::Dvvp::ProfilerCommon;
 using namespace Analysis::Dvvp::Common::Platform;
 using namespace Collector::Dvvp::Plugin;
+using namespace Collector::Dvvp::Mmpa;
 const int RECEIVE_CHUNK_SIZE = 320; // chunk size:320
 
 class MSPROF_ACL_CORE_UTEST: public testing::Test {
@@ -491,12 +492,12 @@ TEST_F(MSPROF_ACL_CORE_UTEST, acl_api_subscribe) {
 
     Analysis::Dvvp::Common::Config::ConfigManager::instance()->Init();
 
-    MOCKER(&MmpaPlugin::MsprofMmWrite)
+    MOCKER(&MmWrite)
         .stubs()
         .will(invoke(mmWriteStub));
-    MOCKER(&MmpaPlugin::MsprofMmClose)
+    MOCKER(&MmClose)
         .stubs()
-        .will(returnValue(EN_OK));
+        .will(returnValue(PROFILING_SUCCESS));
     MOCKER_CPP(&analysis::dvvp::host::ProfManager::IdeCloudProfileProcess)
         .stubs()
         .will(returnValue(PROFILING_SUCCESS))
@@ -709,12 +710,12 @@ TEST_F(MSPROF_ACL_CORE_UTEST, ge_api_subscribe) {
 
     Analysis::Dvvp::Common::Config::ConfigManager::instance()->Init();
 
-    MOCKER(&MmpaPlugin::MsprofMmWrite)
+    MOCKER(&MmWrite)
         .stubs()
         .will(invoke(mmWriteStub));
-    MOCKER(&MmpaPlugin::MsprofMmClose)
+    MOCKER(&MmClose)
         .stubs()
-        .will(returnValue(EN_OK));
+        .will(returnValue(PROFILING_SUCCESS));
 
     using namespace Msprofiler::Api;
 
@@ -1547,12 +1548,12 @@ TEST_F(MSPROF_ACL_CORE_UTEST, acl_api_subscribe_fail) {
 
     Analysis::Dvvp::Common::Config::ConfigManager::instance()->Init();
 
-    MOCKER(&MmpaPlugin::MsprofMmWrite)
+    MOCKER(&MmWrite)
         .stubs()
         .will(invoke(mmWriteStub));
-    MOCKER(&MmpaPlugin::MsprofMmClose)
+    MOCKER(&MmClose)
         .stubs()
-        .will(returnValue(EN_OK));
+        .will(returnValue(PROFILING_SUCCESS));
 
     MOCKER(Analysis::Dvvp::ProfilerCommon::RegisterReporterCallback)
         .stubs()

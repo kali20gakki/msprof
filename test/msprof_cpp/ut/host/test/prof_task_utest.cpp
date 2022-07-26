@@ -69,7 +69,7 @@ TEST_F(HOST_PROF_TASK_TEST, Init) {
 
     MOCKER(mmCreateTaskWithThreadAttr)
         .stubs()
-        .will(returnValue(EN_OK));
+        .will(returnValue(PROFILING_SUCCESS));
 
     MOCKER(pthread_create)
         .stubs()
@@ -117,7 +117,7 @@ TEST_F(HOST_PROF_TASK_TEST, GetHostAndDeviceInfo) {
 
     MOCKER(mmCreateTaskWithThreadAttr)
         .stubs()
-        .will(returnValue(EN_OK));
+        .will(returnValue(PROFILING_SUCCESS));
 
     MOCKER(gettimeofday)
         .stubs()
@@ -164,7 +164,7 @@ TEST_F(HOST_PROF_TASK_TEST, run) {
 
     MOCKER(mmCreateTaskWithThreadAttr)
         .stubs()
-        .will(returnValue(EN_OK));
+        .will(returnValue(PROFILING_SUCCESS));
 
     task_run = std::shared_ptr<analysis::dvvp::host::ProfTask>(new analysis::dvvp::host::ProfTask(_devices, param_));
     EXPECT_NE(nullptr, task_run);
@@ -227,7 +227,7 @@ TEST_F(HOST_PROF_TASK_TEST, run1) {
 
     MOCKER(mmCreateTaskWithThreadAttr)
         .stubs()
-        .will(returnValue(EN_OK));
+        .will(returnValue(PROFILING_SUCCESS));
 
     MOCKER_CPP(&analysis::dvvp::transport::Uploader::Flush)
         .stubs();
@@ -294,7 +294,7 @@ TEST_F(HOST_PROF_TASK_TEST, run2) {
 
     MOCKER(mmCreateTaskWithThreadAttr)
         .stubs()
-        .will(returnValue(EN_OK));
+        .will(returnValue(PROFILING_SUCCESS));
 
     MOCKER_CPP(&analysis::dvvp::transport::Uploader::Flush)
         .stubs();
@@ -478,9 +478,9 @@ TEST_F(HOST_PROF_TASK_TEST, StartDevices) {
 
     MOCKER(mmCreateTaskWithThreadAttr)
         .stubs()
-        .will(returnValue(EN_ERROR))
-        .then(returnValue(EN_OK))
-        .then(returnValue(EN_OK));
+        .will(returnValue(PROFILING_FAILED))
+        .then(returnValue(PROFILING_SUCCESS))
+        .then(returnValue(PROFILING_SUCCESS));
     //MOCKER_CPP(&analysis::dvvp::common::thread::Thread::Start)
     //    .stubs()
     //    .will(returnValue(PROFILING_FAILED))

@@ -90,6 +90,7 @@ set(msprofilerCpp
     analyze/src/op_desc_parser.cpp
     common/config/config_manager.cpp
     common/memory/chunk_pool.cpp
+    common/mmpa/mmpa_api.cpp
     common/platform/platform.cpp
     common/statistics/perf_count.cpp
     common/thread/thread.cpp
@@ -97,7 +98,6 @@ set(msprofilerCpp
     common/utils/utils.cpp
     common/validation/param_validation.cpp
     depend/src/driver_plugin.cpp
-    depend/src/mmpa_plugin.cpp
     depend/src/plugin_handle.cpp
     depend/src/slog_plugin.cpp
     depend/src/profapi_plugin.cpp
@@ -150,7 +150,6 @@ set(msprofilerInc
     ${TOP_DIR}/collector/dvvp/depend/inc/driver
     ${TOP_DIR}/collector/dvvp/depend/inc/slog
     ${TOP_DIR}/collector/dvvp/depend/inc/metadef
-    ${TOP_DIR}/collector/dvvp/depend/inc/mmpa
     ${TOP_DIR}/collector/dvvp/depend/inc/profapi
     ${TOP_DIR}/collector/inc/toolchain
     ${TOP_DIR}/collector/inc/external
@@ -170,6 +169,7 @@ set(msprofilerInc
     common/logger
     common/queue
     common/singleton
+    common/mmpa
     common/utils
     common/config
     common/validation
