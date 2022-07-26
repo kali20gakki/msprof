@@ -54,7 +54,9 @@ int main(int argc, const char **argv, const char **envp)
     std::vector<std::string> envpList;
     SetEnvList(envp, envpList);
     EnvManager::instance()->SetGlobalEnv(envpList);
+    CmdLog::instance()->CmdErrorLog("xxx: 1 GetPlatform %d", Platform::instance()->GetPlatform());
     int ret = Platform::instance()->PlatformInitByDriver();
+    CmdLog::instance()->CmdErrorLog("xxx: 2 GetPlatform %d", Platform::instance()->GetPlatform());
     if (ret != PROFILING_SUCCESS) {
         CmdLog::instance()->CmdErrorLog("Init platform by driver faild!");
         return PROFILING_FAILED;
