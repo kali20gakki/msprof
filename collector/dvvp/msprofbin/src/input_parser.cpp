@@ -1501,9 +1501,7 @@ void ArgsManager::PrintHelp()
 
 void ArgsManager::AddHostArgs()
 {
-    CmdLog::instance()->CmdErrorLog("xxx: AddHostArgs entry %d", Platform::instance()->GetPlatform());
     if (Platform::instance()->RunSocSide()) {
-        CmdLog::instance()->CmdErrorLog("xxx: RunSocSide return true");
         return;
     }
 #if (defined(_WIN32) || defined(_WIN64) || defined(_MSC_VER))
@@ -1515,8 +1513,6 @@ void ArgsManager::AddHostArgs()
         "which you want to collect performance data."};
     argsList_.push_back(hostSys);
     argsList_.push_back(hostSysPid);
-    CmdLog::instance()->CmdErrorLog("xxx: AddHostArgs success");
-
 }
 }
 }
