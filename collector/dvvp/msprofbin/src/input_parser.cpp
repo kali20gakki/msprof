@@ -531,8 +531,7 @@ int InputParser::GetAppParam(const std::string appParams)
     
     params_->app_dir = appDir;
     params_->app = appName;
-    MSPROF_LOGI("appdir %s; app %s", params_->app_dir.c_str(), params_->app.c_str());
-    return MSPROF_DAEMON_OK; 
+    return MSPROF_DAEMON_OK;
 }
 
 int InputParser::CheckAppValid(const struct MsprofCmdInfo &cmdInfo)
@@ -554,7 +553,6 @@ int InputParser::CheckAppValid(const struct MsprofCmdInfo &cmdInfo)
     std::string cmdPath = appParam.substr(0, index);
     if (!Utils::IsAppName(cmdPath) && cmdPath.find("/") == std::string::npos) {
         params_->cmdPath = cmdPath;
-        MSPROF_LOGI("cmd %s", params_->cmdPath.c_str());
         return GetAppParam(tmpAppParamers);
     }
     cmdPath = Utils::RelativePathToAbsolutePath(cmdPath);
@@ -568,7 +566,6 @@ int InputParser::CheckAppValid(const struct MsprofCmdInfo &cmdInfo)
             return MSPROF_DAEMON_ERROR;
         }
         params_->cmdPath = cmdPath;
-        MSPROF_LOGI("cmd %s", params_->cmdPath.c_str());
         return GetAppParam(tmpAppParamers);
     }
     params_->app_parameters = tmpAppParamers;
@@ -584,7 +581,6 @@ int InputParser::CheckAppValid(const struct MsprofCmdInfo &cmdInfo)
         params_->app_dir = cmdDir;
         params_->app = cmdName;
         params_->cmdPath = cmdPath;
-        MSPROF_LOGI("cmd %s", params_->cmdPath.c_str());
         return MSPROF_DAEMON_OK;
     }
     return MSPROF_DAEMON_ERROR;
