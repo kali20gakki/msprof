@@ -23,8 +23,7 @@ class IterRecorder:
     def __init__(self: any, project_path) -> None:
         self._project_path = project_path
         self._iter_end_dict = MsprofIteration(self._project_path).get_iteration_end_dict()
-        self._iteration_end_time_max = max(
-            self._iter_end_dict.values()) if self._iter_end_dict.values() else self.DEFAULT_ITER_ID
+        self._max_iter_time = self._get_max_iter_time()
         self._current_iter_id = self.DEFAULT_ITER_ID
         self._current_op_iter = self.DEFAULT_ITER_ID
         self._op_iter_dict = MsprofIteration(self._project_path).get_op_iteration_dict()
@@ -58,9 +57,9 @@ class IterRecorder:
         return self._current_op_iter
 
     def check_task_in_iteration(self: any, sys_cnt: int) -> bool:
-        if self._iteration_end_time_max == -1:
+        if self._max_iter_time == self.DEFAULT_ITER_ID:
             return True
-        return self._iteration_end_time_max >= sys_cnt
+        return self._max_iter_time >= sys_cnt
 
     def set_current_iter_id(self: any, sys_cnt: int) -> None:
         """
@@ -89,12 +88,11 @@ class IterRecorder:
         self.set_current_op_iter(sys_cnt)
         if not self._op_iter_queue:
             return
-        if self._op_iter_queue and self._graph_iter_queue and \
+        self._current_op_iter = self._op_iter_queue[-1]
+        if self._graph_iter_queue and \
                 sys_cnt >= self._graph_iter_dict.get(self._graph_iter_queue[-1])[0]:
-            self._current_op_iter = self._op_iter_queue[-1]
             self._current_iter_id = self._graph_iter_queue[-1]
         else:
-            self._current_op_iter = self._op_iter_queue[-1]
             self._current_iter_id = self._current_op_iter
 
     def set_current_graph_iter(self: any, sys_cnt: int) -> None:
@@ -114,3 +112,8 @@ class IterRecorder:
     def _check_current_iter_id(self: any, sys_cnt: int) -> int:
         iter_end = self._iter_end_dict.get(self._current_iter_id)
         return iter_end is not None and sys_cnt > iter_end
+
+    def _get_max_iter_time(self: any) -> int:
+        if self._iter_end_dict.values():
+            return max(self._iter_end_dict.values())
+        return self.DEFAULT_ITER_ID
