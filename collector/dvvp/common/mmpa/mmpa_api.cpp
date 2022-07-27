@@ -273,7 +273,7 @@ int32_t MmGetErrorCode()
     return ret;
 }
 
-char *MmGetErrorFormatMessage(int errnum, char *buf, size_t size)
+char *MmGetErrorFormatMessage(mmErrorMsg  errnum, char *buf, size_t size)
 {
     if ((buf == nullptr) || (size <= 0)) {
         return nullptr;

@@ -246,7 +246,7 @@ char *MmBaseName(char *path);
 int32_t MmMkdir(const std::string &pathName, mmMode_t mode);
 int32_t MmChmod(const std::string &filename, int32_t mode);
 int32_t MmGetErrorCode();
-char *MmGetErrorFormatMessage(int errnum, char *buf, size_t size);
+char *MmGetErrorFormatMessage(mmErrorMsg errnum, char *buf, size_t size);
 int32_t MmScandir(const std::string &path, mmDirent ***entryList, mmFilter filterFunc, mmSort sort);
 void MmScandirFree(mmDirent **entryList, int32_t count);
 int32_t MmRmdir(const std::string &pathName);
