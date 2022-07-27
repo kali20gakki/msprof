@@ -273,7 +273,7 @@ int32_t MmGetErrorCode()
     return ret;
 }
 
-char *MmGetErrorFormatMessage(mmErrorMsg errnum, char *buf, size_t size)
+char *MmGetErrorFormatMessage(int errnum, char *buf, size_t size)
 {
     if ((buf == nullptr) || (size <= 0)) {
         return nullptr;
@@ -953,6 +953,8 @@ static void LocalGetCpuProcV2(FILE *fp, mmCpuDesc *cpuInfo, int32_t *physicalCou
     char physicalID[MMPA_CPUINFO_DEFAULT_SIZE]      = {0};
     char cpuThreads[MMPA_CPUINFO_DEFAULT_SIZE]      = {0};
     char maxSpeed[MMPA_CPUINFO_DEFAULT_SIZE]        = {0};
+    constexpr int base = 10;    // 按10进制转换
+    char *end = nullptr;;
     uint32_t length = 0U;
     while (fgets(buf, static_cast<int>(sizeof(buf)), fp) != nullptr) {
         length = static_cast<uint32_t>(strlen(buf));
@@ -975,12 +977,12 @@ static void LocalGetCpuProcV2(FILE *fp, mmCpuDesc *cpuInfo, int32_t *physicalCou
             ;
         }
     }
-    cpuInfo->frequency = atoi(cpuMhz);
-    cpuInfo->ncores = atoi(cpuCores);
-    cpuInfo->ncounts = atoi(cpuCnt) + 1;
-    *physicalCount += atoi(physicalID);
-    cpuInfo->nthreads = atoi(cpuThreads);
-    cpuInfo->maxFrequency = atoi(maxSpeed);
+    cpuInfo->frequency = std::strtol(cpuMhz, &end, base);
+    cpuInfo->ncores = std::strtol(cpuCores, &end, base);
+    cpuInfo->ncounts = std::strtol(cpuCnt, &end, base) + 1;
+    *physicalCount += std::strtol(physicalID, &end, base);
+    cpuInfo->nthreads = std::strtol(cpuThreads, &end, base);
+    cpuInfo->maxFrequency = std::strtol(maxSpeed, &end, base);
     return;
 }
 

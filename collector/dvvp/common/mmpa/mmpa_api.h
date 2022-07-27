@@ -135,32 +135,32 @@ enum MMPA_MAC_ADDR_TYPE{
     MMPA_MAC_ADDR_SIXTH_BYTE
 };
 
-typedef pthread_t mmThread;
-typedef pthread_mutex_t mmMutex_t;
-typedef struct dirent mmDirent;
-typedef signed int mmProcess;
-typedef mode_t mmMode_t;
-typedef struct option mmStructOption;
-typedef struct stat mmStat_t;
-typedef int mmErrorMsg;
-typedef int mmSockHandle;
+using mmThread = pthread_t;
+using mmMutex_t = pthread_mutex_t;
+using mmDirent = struct dirent;
+using mmProcess = signed int;
+using mmMode_t = mode_t;
+using mmStructOption = struct option;
+using mmStat_t = struct stat;
+using mmErrorMsg = int;
+using mmSockHandle = int;
 // function ptr define
-typedef void *(*userProcFunc)(void *pulArg);
-typedef int (*mmFilter)(const mmDirent *entry);
-typedef int (*mmSort)(const mmDirent **a, const mmDirent **b);
+using userProcFunc = void *(*userProcFunc)(void *pulArg);
+using mmFilter =  int (*mmFilter)(const mmDirent *entry);
+using mmSort =  int (*mmSort)(const mmDirent **a, const mmDirent **b);
 
 // struct define
-typedef struct {
+using mmUserBlock_t = struct {
     userProcFunc procFunc;  // Callback function pointer
     void *pulArg;           // Callback function parameters
-} mmUserBlock_t;
+};
 
 struct CpuTypeTable {
     const char *key;
     const char *value;
 };
 
-typedef struct {
+using mmThreadAttr = struct {
     int32_t detachFlag;    // Determine whether to set separation property 0, not to separate 1
     int32_t priorityFlag;  // Determine whether to set priority 0 and not set 1
     int32_t priority;      // Priority value range to be set 1-99
@@ -171,26 +171,26 @@ typedef struct {
                            //  MMPA_THREAD_SCHED_FIFO
     int32_t stackFlag;     // Set stack size or not: 0 does not set 1 setting
     uint32_t stackSize;    // The stack size unit bytes to be set cannot be less than MMPA_THREAD_STACK_MIN
-} mmThreadAttr;
+};
 
-typedef struct {
+using mmDiskSize = struct {
     unsigned long long totalSize;
     unsigned long long freeSize;
     unsigned long long availSize;
-} mmDiskSize;
+};
 
-typedef struct {
+using mmArgvEnv = struct {
     char **argv;
     int32_t argvCount;
     char **envp;
     int32_t envpCount;
-} mmArgvEnv;
+};
 
-typedef struct {
+using mmMacInfo = struct {
     char addr[MMPA_MACINFO_DEFAULT_SIZE];  // ex:aa-bb-cc-dd-ee-ff\0
-} mmMacInfo;
+};
 
-typedef struct {
+using mmCpuDesc = struct {
     char arch[MMPA_CPUDESC_DEFAULT_SIZE];
     char manufacturer[MMPA_CPUDESC_DEFAULT_SIZE];    // vendor
     char version[MMPA_CPUDESC_DEFAULT_SIZE];         // modelname
@@ -199,9 +199,9 @@ typedef struct {
     int32_t ncores;                                  // cpu cores
     int32_t nthreads;                                // cpu thread count
     int32_t ncounts;                                 // logical cpu nums
-} mmCpuDesc;
+};
 
-typedef struct {
+using mmSystemTime_t = struct {
     int32_t wSecond;             // Seconds. [0-60] (1 leap second)
     int32_t wMinute;             // Minutes. [0-59]
     int32_t wHour;               // Hours. [0-23]
@@ -212,22 +212,22 @@ typedef struct {
     int32_t tm_yday;             // Days in year.[0-365]
     int32_t tm_isdst;            // DST. [-1/0/1]
     long wMilliseconds;          // milliseconds
-} mmSystemTime_t;
+};
 
-typedef struct {
+using mmTimeval = struct {
     long tv_sec;
     long tv_usec;
-} mmTimeval;
+};
 
-typedef struct {
+using mmTimezone = struct {
     int32_t tz_minuteswest;  // How many minutes is it different from Greenwich
     int32_t tz_dsttime;      // type of DST correction
-} mmTimezone;
+};
 
-typedef struct {
+using mmTimespec = struct {
   long long tv_sec;
   long long tv_nsec;
-} mmTimespec;
+};
 
 // function define
 int32_t MmSleep(uint32_t milliSecond);
