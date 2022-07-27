@@ -145,9 +145,9 @@ using mmStat_t = struct stat;
 using mmErrorMsg = int;
 using mmSockHandle = int;
 // function ptr define
-using userProcFunc = void *(*userProcFunc)(void *pulArg);
-using mmFilter =  int (*mmFilter)(const mmDirent *entry);
-using mmSort =  int (*mmSort)(const mmDirent **a, const mmDirent **b);
+using userProcFunc = void *(*)(void *pulArg);
+using mmFilter =  int (*)(const mmDirent *entry);
+using mmSort =  int (*)(const mmDirent **a, const mmDirent **b);
 
 // struct define
 using mmUserBlock_t = struct {
