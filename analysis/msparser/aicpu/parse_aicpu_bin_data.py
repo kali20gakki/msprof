@@ -105,7 +105,7 @@ class ParseAiCpuBinData(MsMultiProcess):
                 self.read_binary_data(os.path.join(data_dir, _file))
                 FileManager.add_complete_file(self.project_path, _file)
         if self._overstep_task_cnt > 0:
-            logging.warning("overstep task numbers is " + str(self._overstep_task_cnt))
+            logging.warning("overstep task number is %s", self._overstep_task_cnt)
 
     def save(self: any) -> None:
         """
