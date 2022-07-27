@@ -23,12 +23,14 @@ class IterRecorder:
     def __init__(self: any, project_path) -> None:
         self._project_path = project_path
         self._iter_end_dict = MsprofIteration(self._project_path).get_iteration_end_dict()
+        self._iteration_end_time_max = max(self._iter_end_dict.values())
         self._current_iter_id = self.DEFAULT_ITER_ID
         self._current_op_iter = 0
         self._op_iter_dict = MsprofIteration(self._project_path).get_op_iteration_dict()
         self._op_iter_queue = sorted(self._op_iter_dict.keys(), reverse=True)
         self._graph_iter_dict = MsprofIteration(self._project_path).get_graph_iteration_dict()
         self._graph_iter_queue = sorted(self._graph_iter_dict.keys(), reverse=True)
+
 
     @property
     def iter_end_dict(self: any) -> dict:
@@ -53,6 +55,11 @@ class IterRecorder:
         :return: op iter id
         """
         return self._current_op_iter
+
+    def check_task_in_iteration(self: any, sys_cnt: int) -> bool:
+        if self._iteration_end_time_max >= sys_cnt:
+            return True
+        return False
 
     def set_current_iter_id(self: any, sys_cnt: int) -> None:
         """
@@ -80,8 +87,7 @@ class IterRecorder:
         self.set_current_graph_iter(sys_cnt)
         self.set_current_op_iter(sys_cnt)
         if not self._op_iter_queue:
-            self._current_op_iter = -1
-            self._current_iter_id = -1
+            return
         if self._op_iter_queue and self._graph_iter_queue and \
                 sys_cnt >= self._graph_iter_dict.get(self._graph_iter_queue[-1])[0]:
             self._current_op_iter = self._op_iter_queue[-1]
