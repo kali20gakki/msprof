@@ -135,19 +135,19 @@ enum MMPA_MAC_ADDR_TYPE{
     MMPA_MAC_ADDR_SIXTH_BYTE
 };
 
-typedef pthread_t mmThread;
-typedef pthread_mutex_t mmMutex_t;
-typedef struct dirent mmDirent;
-typedef signed int mmProcess;
-typedef mode_t mmMode_t;
-typedef struct option mmStructOption;
-typedef struct stat mmStat_t;
-typedef int mmErrorMsg;
-typedef int mmSockHandle;
+using mmThread = pthread_t;
+using mmMutex_t = pthread_mutex_t;
+using mmDirent = struct dirent;
+using mmProcess = signed int;
+using mmMode_t = mode_t;
+using mmStructOption = struct option;
+using mmStat_t = struct stat;
+using mmErrorMsg = int;
+using mmSockHandle = int;
 // function ptr define
-typedef void *(*userProcFunc)(void *pulArg);
-typedef int (*mmFilter)(const mmDirent *entry);
-typedef int (*mmSort)(const mmDirent **a, const mmDirent **b);
+using userProcFunc = void *(*)(void *pulArg);
+using mmFilter =  int (*)(const mmDirent *entry);
+using mmSort =  int (*)(const mmDirent **a, const mmDirent **b);
 
 // struct define
 typedef struct {
@@ -246,7 +246,7 @@ char *MmBaseName(char *path);
 int32_t MmMkdir(const std::string &pathName, mmMode_t mode);
 int32_t MmChmod(const std::string &filename, int32_t mode);
 int32_t MmGetErrorCode();
-char *MmGetErrorFormatMessage(int errnum, char *buf, size_t size);
+char *MmGetErrorFormatMessage(mmErrorMsg errnum, char *buf, size_t size);
 int32_t MmScandir(const std::string &path, mmDirent ***entryList, mmFilter filterFunc, mmSort sort);
 void MmScandirFree(mmDirent **entryList, int32_t count);
 int32_t MmRmdir(const std::string &pathName);
