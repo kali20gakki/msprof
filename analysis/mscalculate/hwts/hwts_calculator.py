@@ -161,7 +161,7 @@ class HwtsCalculator(ICalculator, MsMultiProcess):
             if ProfilingScene().is_mix_operator_and_graph() and \
                     self._sample_config.get("model_id") != Constant.GE_OP_MODEL_ID:
                 _iter_info = MsprofIteration(self._project_path). \
-                get_iteration_time_by_index_id(self._sample_config.get("iter_id"), self._sample_config.get("model_id"))
+                get_iteration_info_by_index_id(self._sample_config.get("iter_id"), self._sample_config.get("model_id"))
                 _iter_id = (_iter_info[0] - 1, _iter_info[0])
             else:
                 _iter_id = MsprofIteration(self._project_path). \
@@ -188,7 +188,7 @@ class HwtsCalculator(ICalculator, MsMultiProcess):
         if ProfilingScene().is_mix_operator_and_graph() and \
                 self._sample_config.get("model_id") != Constant.GE_OP_MODEL_ID:
             _iter_info = MsprofIteration(self._project_path). \
-                get_iteration_time_by_index_id(self._sample_config.get("iter_id"), self._sample_config.get("model_id"))
+                get_iteration_info_by_index_id(self._sample_config.get("iter_id"), self._sample_config.get("model_id"))
             if not _iter_info:
                 return
             for log_data in Utils.chunks(all_log_bytes, self.HWTS_LOG_SIZE):

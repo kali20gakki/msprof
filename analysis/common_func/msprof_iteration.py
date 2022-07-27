@@ -211,7 +211,7 @@ class MsprofIteration:
             iter_dict.setdefault(trace_data[0], [trace_data[1], trace_data[2]])
         return iter_dict
 
-    def get_iteration_time_by_index_id(self: any, index_id: int, model_id: int) -> list:
+    def get_iteration_info_by_index_id(self: any, index_id: int, model_id: int) -> list:
         db_path = PathManager.get_db_path(self._result_dir, DBNameConstant.DB_STEP_TRACE)
         trace_conn, trace_curs = DBManager.check_connect_db(self._result_dir, DBNameConstant.DB_STEP_TRACE)
         if not trace_conn or not trace_curs \
