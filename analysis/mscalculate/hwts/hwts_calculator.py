@@ -192,7 +192,7 @@ class HwtsCalculator(ICalculator, MsMultiProcess):
             if not _iter_info:
                 logging.warning("can not get the actual iter_info")
                 return
-            self._parse_task_log(all_log_bytes,_iter_info)
+            self._parse_task_log(all_log_bytes, _iter_info)
         else:
             self._parse_task_log(all_log_bytes)
 
