@@ -23,9 +23,9 @@ class IterRecorder:
     def __init__(self: any, project_path) -> None:
         self._project_path = project_path
         self._iter_end_dict = MsprofIteration(self._project_path).get_iteration_end_dict()
-        self._iteration_end_time_max = max(self._iter_end_dict.values())
+        self._iteration_end_time_max = max(self._iter_end_dict.values()) if self._iter_end_dict.values() else self.DEFAULT_ITER_ID
         self._current_iter_id = self.DEFAULT_ITER_ID
-        self._current_op_iter = 0
+        self._current_op_iter = self.DEFAULT_ITER_ID
         self._op_iter_dict = MsprofIteration(self._project_path).get_op_iteration_dict()
         self._op_iter_queue = sorted(self._op_iter_dict.keys(), reverse=True)
         self._graph_iter_dict = MsprofIteration(self._project_path).get_graph_iteration_dict()
@@ -57,9 +57,12 @@ class IterRecorder:
         return self._current_op_iter
 
     def check_task_in_iteration(self: any, sys_cnt: int) -> bool:
-        if self._iteration_end_time_max >= sys_cnt:
+        if self._iteration_end_time_max == -1:
             return True
-        return False
+        elif self._iteration_end_time_max >= sys_cnt:
+            return True
+        else:
+            return False
 
     def set_current_iter_id(self: any, sys_cnt: int) -> None:
         """
