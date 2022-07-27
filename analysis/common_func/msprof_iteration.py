@@ -184,16 +184,6 @@ class MsprofIteration:
             return self.__get_trace_iteration_end()
         return {}
 
-    def get_iteration_dict(self: any) -> dict:
-        """
-        get iteration start and end timestamp
-        """
-        if ProfilingScene().is_mix_operator_and_graph():
-            return self.get_graph_iteration_dict()
-        if Utils.is_step_scene(self._result_dir):
-            return self.__get_iteration_dict()
-        return {}
-
     def get_graph_iteration_dict(self: any) -> dict:
         iter_dict = OrderedDict()
         db_path = PathManager.get_db_path(self._result_dir, DBNameConstant.DB_STEP_TRACE)
@@ -219,11 +209,11 @@ class MsprofIteration:
             return []
         sql = "select iter_id, step_start, step_end from {0} " \
               "where model_id={1} and index_id={2}".format(DBNameConstant.TABLE_STEP_TRACE_DATA, model_id, index_id)
-        iter_start_end_time = DBManager.fetch_all_data(trace_curs, sql)[0]
+        iter_info = DBManager.fetch_all_data(trace_curs, sql)
         DBManager.destroy_db_connect(trace_conn, trace_curs)
-        if not iter_start_end_time:
-            return []
-        return iter_start_end_time
+        if iter_info:
+            return iter_info[0]
+        return iter_info
 
     def _get_iteration_time(self: any, trace_curs: any, index_id: int, model_id: int) -> list:
         iter_id = self.get_iteration_id_by_index_id(index_id, model_id)
@@ -233,26 +223,7 @@ class MsprofIteration:
               "where iter_id>=? and iter_id<=? order by " \
               "step_end".format(DBNameConstant.TABLE_STEP_TRACE_DATA)
         trace_data = DBManager.fetch_all_data(trace_curs, sql, iter_id)
-        if not trace_data:
-            return []
         return trace_data
-
-    def __get_iteration_dict(self: any) -> dict:
-        iter_dict = OrderedDict()
-        db_path = PathManager.get_db_path(self._result_dir, DBNameConstant.DB_STEP_TRACE)
-        trace_conn, trace_curs = DBManager.check_connect_db(self._result_dir, DBNameConstant.DB_STEP_TRACE)
-        if not trace_conn or not trace_curs \
-                or not DBManager.check_tables_in_db(db_path, DBNameConstant.TABLE_STEP_TRACE_DATA):
-            return {}
-        sql = "select iter_id, step_start, step_end from {0} " \
-              "order by step_start".format(DBNameConstant.TABLE_STEP_TRACE_DATA)
-        trace_datas = DBManager.fetch_all_data(trace_curs, sql)
-        DBManager.destroy_db_connect(trace_conn, trace_curs)
-        if not trace_datas:
-            return iter_dict
-        for trace_data in trace_datas:
-            iter_dict.setdefault(trace_data[0], [trace_data[1], trace_data[2]])
-        return iter_dict
 
     def __get_trace_iteration_end(self: any) -> dict:
         iter_end_dict = OrderedDict()
