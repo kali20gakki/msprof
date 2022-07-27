@@ -537,27 +537,7 @@ int Utils::ExecCmd(const ExecCmdParams &execCmdParams,
     } while (0);
     return ret;
 }
-int Utils::GetWorkDirPath(std::vector<std::string> &paramCmd, std::string &workDirPath)
-{
-    if (paramCmd.empty()) {
-        return PROFILING_FAILED;
-    }
-    std::string tmpStr;
-    if (!IsAppName(paramCmd[0])) {
-        for (uint32_t i = 1; i < paramCmd.size(); i++) {
-            tmpStr = CanonicalizePath(paramCmd[i]);
-            if (tmpStr.empty()) {
-                continue;
-            } else {
-                paramCmd[i] = tmpStr;
-            }
-        }
-        workDirPath = paramCmd[1];
-    } else {
-        workDirPath = CanonicalizePath(paramCmd[0]);
-    }
-    return PROFILING_SUCCESS;
-}
+
 int Utils::ChangeWorkDir(const std::string &fileName)
 {
     if (fileName.empty()) {

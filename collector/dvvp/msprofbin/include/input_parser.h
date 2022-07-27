@@ -174,6 +174,7 @@ private:
     int CheckPythonPathValid(const struct MsprofCmdInfo &cmdInfo) const;
     int CheckOutputValid(const struct MsprofCmdInfo &cmdInfo);
     int CheckStorageLimitValid(const struct MsprofCmdInfo &cmdInfo) const;
+    int GetAppParam(const std::string appParams);
     int CheckAppValid(const struct MsprofCmdInfo &cmdInfo);
     int CheckEnvironmentValid(const struct MsprofCmdInfo &cmdInfo);
     int CheckSampleModeValid(const struct MsprofCmdInfo &cmdInfo, int opt) const;
