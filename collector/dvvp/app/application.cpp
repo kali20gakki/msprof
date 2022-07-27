@@ -106,6 +106,23 @@ std::string Application::GetCmdString(const std::string paramsName)
     }
 }
 
+int Application::CanonicalizeAppParam(std::vector<std::string> &paramsCmd)
+{
+    if (paramsCmd.empty()) {
+        return PROFILING_FAILED;
+    }
+    std::string tmpStr;
+    for (uint32_t i = 1; i < paramsCmd.size(); i++) {
+        tmpStr = analysis::dvvp::common::utils::Utils::CanonicalizePath(paramsCmd[i]);
+        if (tmpStr.empty()) {
+            continue;
+        } else {
+            paramsCmd[i] = tmpStr;
+        }
+    }
+    return PROFILING_SUCCESS;
+}
+
 int Application::LaunchApp(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params, mmProcess &appProcess)
 {
     if (params == nullptr) {
@@ -127,14 +144,9 @@ int Application::LaunchApp(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParam
         MSPROF_LOGE("app_dir(%s) is not valid.", Utils::BaseName(paramsCmd[0]).c_str());
         return PROFILING_FAILED;
     }
-    std::string tmpStr;
-    for (uint32_t i = 1; i < paramsCmd.size(); i++) {
-        tmpStr = analysis::dvvp::common::utils::Utils::CanonicalizePath(paramsCmd[i]);
-        if (tmpStr.empty()) {
-            continue;
-        } else {
-            paramsCmd[i] = tmpStr;
-        }
+    if (CanonicalizeAppParam(paramsCmd) != PROFILING_SUCCESS) {
+        MSPROF_LOGE("app params are not valid");
+        return PROFILING_FAILED;
     }
     std::string workDirPath = params->app_dir + MSVP_SLASH +params->app;
     std::vector<std::string> argsVec;
