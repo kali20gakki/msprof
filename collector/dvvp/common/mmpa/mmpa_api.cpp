@@ -273,7 +273,7 @@ int32_t MmGetErrorCode()
     return ret;
 }
 
-char *MmGetErrorFormatMessage(mmErrorMsg  errnum, char *buf, size_t size)
+char *MmGetErrorFormatMessage(mmErrorMsg errnum, char *buf, size_t size)
 {
     if ((buf == nullptr) || (size <= 0)) {
         return nullptr;
@@ -953,7 +953,7 @@ static void LocalGetCpuProcV2(FILE *fp, mmCpuDesc *cpuInfo, int32_t *physicalCou
     char physicalID[MMPA_CPUINFO_DEFAULT_SIZE]      = {0};
     char cpuThreads[MMPA_CPUINFO_DEFAULT_SIZE]      = {0};
     char maxSpeed[MMPA_CPUINFO_DEFAULT_SIZE]        = {0};
-    constexpr int base = 10;    // 按10进制转换
+    constexpr int base = 10;
     char *end = nullptr;
     uint32_t length = 0U;
     while (fgets(buf, static_cast<int>(sizeof(buf)), fp) != nullptr) {
