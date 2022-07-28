@@ -500,7 +500,7 @@ int InputParser::CheckStorageLimitValid(const struct MsprofCmdInfo &cmdInfo) con
     return MSPROF_DAEMON_OK;
 }
 
-int InputParser::GetAppParam(const std::string appParams)
+int InputParser::GetAppParam(const std::string &appParams)
 {
     if (appParams.empty()) {
         CmdLog::instance()->CmdErrorLog("Argument --application: expected one script");
