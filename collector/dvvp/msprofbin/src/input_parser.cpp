@@ -525,7 +525,7 @@ int InputParser::GetAppParam(const std::string &appParams)
     std::string appName;
     int ret = Utils::SplitPath(appPath, appDir, appName);
     if (ret != PROFILING_SUCCESS) {
-        MSPROF_LOGE("Failed to get cmd dir");
+        MSPROF_LOGE("Failed to get app dir");
         return MSPROF_DAEMON_ERROR;
     }
     
