@@ -73,6 +73,7 @@ class IterParser(IParser, MsMultiProcess):
         self._iter_info_dict = {}
         self._ge_op_iter_dict = {}
         self._batch_list_for_task_time = []
+        self._overstep_task_cnt = 0
 
     def save(self: any) -> None:
         """
@@ -120,11 +121,15 @@ class IterParser(IParser, MsMultiProcess):
     def _read_hwts_data(self: any, all_bytes: bytes) -> None:
         for _chunk in Utils.chunks(all_bytes, self.HWTS_LOG_SIZE):
             _task_log = HwtsLogBean.decode(_chunk)
-            if _task_log.is_log_type():
+            if not _task_log.is_log_type():
+                continue
+            if self._iter_recorder.check_task_in_iteration(_task_log.sys_cnt):
                 self._iter_recorder.set_current_iter_id(_task_log.sys_cnt)
                 if _task_log.task_type == self.HWTS_TASK_END:
                     self._calculate_batch_list(_task_log)
                 self._calculate_task_count(_task_log)
+            else:
+                self._overstep_task_cnt = self._overstep_task_cnt + 1
 
     def _calculate_batch_list(self: any, task_log: HwtsLogBean) -> None:
         setattr(task_log, "batch_id", self._batch_counter.calculate_batch(
@@ -167,6 +172,8 @@ class IterRecParser(IterParser):
             return
         self._batch_counter.init(Constant.TASK_TYPE_AI_CORE)
         self._parse_hwts_data()
+        if self._overstep_task_cnt > 0:
+            logging.warning("overstep task number is %s", self._overstep_task_cnt)
 
     def ms_run(self: any) -> None:
         """
@@ -213,6 +220,8 @@ class NoGeIterRecParser(IterParser):
         """
         self._parse_ai_core_data()
         self._parse_hwts_data()
+        if self._overstep_task_cnt > 0:
+            logging.warning("overstep task number is %s", self._overstep_task_cnt)
 
     def ms_run(self: any) -> None:
         """
