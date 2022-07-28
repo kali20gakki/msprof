@@ -52,6 +52,7 @@ class TestParseAiCpuData(unittest.TestCase):
              mock.patch(NAMESPACE + '.DBManager.create_connect_db', return_value=(True, True)), \
              mock.patch('common_func.iter_recorder.MsprofIteration.get_iteration_end_dict', return_value=(True, True)), \
              mock.patch(NAMESPACE + '.BatchCounter.init'), \
+             mock.patch(NAMESPACE + '.IterRecorder'), \
              mock.patch(NAMESPACE + '.DBManager.sql_create_general_table', return_value=""), \
              mock.patch(NAMESPACE + '.DBManager.execute_sql'):
             check = ParseAiCpuData(self.file_list, CONFIG)
