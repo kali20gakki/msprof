@@ -24,9 +24,6 @@ class TestHwtsCalculator(unittest.TestCase):
     def test_ms_run(self):
         ProfilingScene()._scene = "single_op"
         with mock.patch(NAMESPACE + '.HwtsCalculator.calculate'), \
-             mock.patch('common_func.msprof_iteration' + '.MsprofIteration.get_iteration_end_dict', return_value=[]), \
-             mock.patch('common_func.msprof_iteration' + '.MsprofIteration.get_op_iteration_dict', return_value=[]), \
-             mock.patch('common_func.msprof_iteration' + '.MsprofIteration.get_iteration_dict', return_value=[]), \
              mock.patch(NAMESPACE + '.HwtsCalculator.save'):
             check = HwtsCalculator(self.file_list, CONFIG)
             check.ms_run()
@@ -58,9 +55,6 @@ class TestHwtsCalculator(unittest.TestCase):
         InfoConfReader()._info_json = {"DeviceInfo": [{'aic_frequency': '1150', "hwts_frequency": "38.4"}]}
 
         with mock.patch(NAMESPACE + '.HwtsCalculator.calculate'), \
-             mock.patch('common_func.msprof_iteration' + '.MsprofIteration.get_iteration_end_dict', return_value=[]), \
-             mock.patch('common_func.msprof_iteration' + '.MsprofIteration.get_op_iteration_dict', return_value=[]), \
-             mock.patch('common_func.msprof_iteration' + '.MsprofIteration.get_iteration_dict', return_value=[]), \
              mock.patch(NAMESPACE + '.HwtsCalculator.save'):
             check = HwtsCalculator(self.file_list, CONFIG)
             check._log_data.append(HwtsLogBean.decode(start_3_2))
@@ -79,9 +73,6 @@ class TestHwtsCalculator(unittest.TestCase):
         ProfilingScene().init("")
 
         with mock.patch(NAMESPACE + '.HwtsCalculator.calculate'), \
-             mock.patch('common_func.msprof_iteration' + '.MsprofIteration.get_iteration_end_dict', return_value=[]), \
-             mock.patch('common_func.msprof_iteration' + '.MsprofIteration.get_op_iteration_dict', return_value=[]), \
-             mock.patch('common_func.msprof_iteration' + '.MsprofIteration.get_iteration_dict', return_value=[]), \
              mock.patch('msmodel.iter_rec.iter_rec_model' + '.HwtsIterModel.get_batch_list',
                         return_value=prep_data_res),\
              mock.patch('msmodel.interface.base_model' + '.BaseModel.check_table', return_value=True), \
