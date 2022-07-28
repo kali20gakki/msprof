@@ -500,6 +500,40 @@ int InputParser::CheckStorageLimitValid(const struct MsprofCmdInfo &cmdInfo) con
     return MSPROF_DAEMON_OK;
 }
 
+int InputParser::GetAppParam(const std::string &appParams)
+{
+    if (appParams.empty()) {
+        CmdLog::instance()->CmdErrorLog("Argument --application: expected one script");
+        return MSPROF_DAEMON_ERROR;
+    }
+    size_t index = appParams.find_first_of(" ");
+    if (index != std::string::npos) {
+        params_->app_parameters = appParams.substr(index + 1);
+    }
+    std::string appPath = appParams.substr(0, index);
+    appPath = Utils::CanonicalizePath(appPath);
+    if (appPath.empty()) {
+        CmdLog::instance()->CmdErrorLog("Script params are invalid");
+        return MSPROF_DAEMON_ERROR;
+    }
+
+    if (Utils::IsSoftLink(appPath)) {
+        MSPROF_LOGE("Script(%s) is soft link.", Utils::BaseName(appPath).c_str());
+        return MSPROF_DAEMON_ERROR;
+    }
+    std::string appDir;
+    std::string appName;
+    int ret = Utils::SplitPath(appPath, appDir, appName);
+    if (ret != PROFILING_SUCCESS) {
+        MSPROF_LOGE("Failed to get app dir");
+        return MSPROF_DAEMON_ERROR;
+    }
+    
+    params_->app_dir = appDir;
+    params_->app = appName;
+    return MSPROF_DAEMON_OK;
+}
+
 int InputParser::CheckAppValid(const struct MsprofCmdInfo &cmdInfo)
 {
     if (cmdInfo.args[ARGS_APPLICATION] == nullptr) {
@@ -511,44 +545,44 @@ int InputParser::CheckAppValid(const struct MsprofCmdInfo &cmdInfo)
         CmdLog::instance()->CmdErrorLog("Argument --application: expected one argument");
         return MSPROF_DAEMON_ERROR;
     }
+    std::string tmpAppParamers;
     size_t index = appParam.find_first_of(" ");
     if (index != std::string::npos) {
-        params_->app_parameters = appParam.substr(index + 1);
+        tmpAppParamers = appParam.substr(index + 1);
     }
-    std::string appPath = appParam.substr(0, index);
-    if (!Utils::IsAppName(appPath) && appPath.find("/") == std::string::npos) {
-        params_->app_dir = "MS_SYS_PATH";
-        params_->app = appPath;
-        return MSPROF_DAEMON_OK;
+    std::string cmdPath = appParam.substr(0, index);
+    if (!Utils::IsAppName(cmdPath) && cmdPath.find("/") == std::string::npos) {
+        params_->cmdPath = cmdPath;
+        return GetAppParam(tmpAppParamers);
     }
-    appPath = Utils::RelativePathToAbsolutePath(appPath);
-    std::string appDir;
-    std::string appName;
-    int ret = Utils::SplitPath(appPath, appDir, appName);
+    cmdPath = Utils::RelativePathToAbsolutePath(cmdPath);
+    if (!Utils::IsAppName(cmdPath)) {
+        if (Utils::CanonicalizePath(cmdPath).empty()) {
+            CmdLog::instance()->CmdErrorLog("App path(%s) does not exist or permission denied.", cmdPath.c_str());
+            return MSPROF_DAEMON_ERROR;
+        }
+        if (MmAccess2(cmdPath, M_X_OK) != PROFILING_SUCCESS) {
+            CmdLog::instance()->CmdErrorLog("This app(%s) has no executable permission.", cmdPath.c_str());
+            return MSPROF_DAEMON_ERROR;
+        }
+        params_->cmdPath = cmdPath;
+        return GetAppParam(tmpAppParamers);
+    }
+    params_->app_parameters = tmpAppParamers;
+    std::string cmdDir;
+    std::string cmdName;
+    int ret = Utils::SplitPath(cmdPath, cmdDir, cmdName);
     if (ret != PROFILING_SUCCESS) {
-        MSPROF_LOGE("Failed to get app dir");
+        MSPROF_LOGE("Failed to get cmd dir");
         return MSPROF_DAEMON_ERROR;
     }
-    if (!Utils::IsAppName(appPath)) {
-        if (Utils::CanonicalizePath(appPath).empty()) {
-            CmdLog::instance()->CmdErrorLog("App path(%s) does not exist or permission denied.", appPath.c_str());
-            return MSPROF_DAEMON_ERROR;
-        }
-        if (MmAccess2(appPath, M_X_OK) != PROFILING_SUCCESS) {
-            CmdLog::instance()->CmdErrorLog("This app(%s) has no executable permission.", appPath.c_str());
-            return MSPROF_DAEMON_ERROR;
-        }
-        params_->app_dir = appDir;
-        params_->app = appName;
-        return MSPROF_DAEMON_OK;
-    }
-    ret = PreCheckApp(appDir, appName);
+    ret = PreCheckApp(cmdDir, cmdName);
     if (ret == MSPROF_DAEMON_OK) {
-        params_->app_dir = appDir;
-        params_->app = appName;
+        params_->app_dir = cmdDir;
+        params_->app = cmdName;
+        params_->cmdPath = cmdPath;
         return MSPROF_DAEMON_OK;
     }
-
     return MSPROF_DAEMON_ERROR;
 }
 
