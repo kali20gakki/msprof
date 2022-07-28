@@ -464,7 +464,6 @@ public:
     static int ExecCmdC(const ExecCmdArgv &execCmdArgv, const ExecCmdParams &execCmdParams, int &exitCodeP);
     static int ExecCmdCAsync(const ExecCmdArgv &execCmdArgv, const ExecCmdParams &execCmdParams,
                              mmProcess &childProcess);
-    static int GetWorkDirPath(std::vector<std::string> &paramCmd, std::string &workDirPath);
     static int ChangeWorkDir(const std::string &fileName);
     static void SetArgEnv(CHAR_PTR_CONST argv[], const int argvCount, CHAR_PTR_CONST envp[],
                           const int envCount, mmArgvEnv &argvEnv);
