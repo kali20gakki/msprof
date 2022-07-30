@@ -289,14 +289,18 @@ int InfoJson::AddHostInfo(SHARED_PTR_ALIA<InfoMain> infoMain)
 
     if (Utils::IsClusterRunEnv()) {
         MSPROF_EVENT("[XXX] Cluster Run Env.");            
-        uint32_t rankId = 0;
-        int ret = HcclPlugin::instance()->MsprofHcomGetLocalRankId(&rankId);
-        if (ret == 0) {
-            MSPROF_EVENT("[XXX] rankId = %u", rankId);            
-            infoMain->set_rank_id(rankId);
-        } else {
-            MSPROF_LOGE("HcomGetLocalRankId failed. ret = %d.", ret);
-        }
+        uint32_t rankId = 123;
+        int ret1 = HcclPlugin::instance()->MsprofHcomGetRankId(&rankId);
+        MSPROF_EVENT("[XXX] MsprofHcomGetRankId ret1 = %d, rankId = %u", ret1, rankId);            
+        int ret2 = HcclPlugin::instance()->MsprofHcomGetLocalRankId(&rankId);
+        MSPROF_EVENT("[XXX] MsprofHcomGetLocalRankId ret2 = %d, rankId = %u", ret2, rankId);            
+        infoMain->set_rank_id(rankId);
+
+        // if (ret == 0) {
+        //     MSPROF_EVENT("[XXX] rankId = %u", rankId);            
+        // } else {
+        //     MSPROF_LOGE("HcomGetLocalRankId failed. ret = %d.", ret);
+        // }
     } else {
         MSPROF_EVENT("[XXX] Not Cluster Run Env.");            
     }
@@ -409,17 +413,21 @@ int InfoJson::AddDeviceInfo(SHARED_PTR_ALIA<InfoMain> infoMain)
         infoDevice->set_aiv_frequency("1000");
 
         if (Utils::IsClusterRunEnv()) {
-            MSPROF_EVENT("[XXX] Cluster Run Env.");
-            uint32_t rankId = 0;
-            int ret = HcclPlugin::instance()->MsprofHcomGetLocalRankId(&rankId);
-            if (ret == 0) {
-                MSPROF_EVENT("[XXX] rankId = %u", rankId);
-                infoDevice->set_rank_id(rankId);
-            } else {
-                MSPROF_LOGE("HcomGetLocalRankId failed. ret = %d.", ret);
-            }
+            MSPROF_EVENT("[XXX] Cluster Run Env.");            
+            uint32_t rankId = 123;
+            int ret1 = HcclPlugin::instance()->MsprofHcomGetRankId(&rankId);
+            MSPROF_EVENT("[XXX] MsprofHcomGetRankId ret1 = %d, rankId = %u", ret1, rankId);            
+            int ret2 = HcclPlugin::instance()->MsprofHcomGetLocalRankId(&rankId);
+            MSPROF_EVENT("[XXX] MsprofHcomGetLocalRankId ret2 = %d, rankId = %u", ret2, rankId);            
+            infoDevice->set_rank_id(rankId);
+
+            // if (ret == 0) {
+            //     MSPROF_EVENT("[XXX] rankId = %u", rankId);            
+            // } else {
+            //     MSPROF_LOGE("HcomGetLocalRankId failed. ret = %d.", ret);
+            // }
         } else {
-            MSPROF_EVENT("[XXX] Not Cluster Run Env.");
+            MSPROF_EVENT("[XXX] Not Cluster Run Env.");            
         }
     }
     infoMain->set_devices(hostIdSerial_);

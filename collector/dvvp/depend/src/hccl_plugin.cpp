@@ -25,6 +25,20 @@ bool HcclPlugin::IsFuncExist(const std::string &funcName) const
     return pluginHandle_.IsFuncExist(funcName);
 }
 
+// HcomGetRankId
+int32_t HcclPlugin::MsprofHcomGetRankId(uint32_t *rankId)
+{
+    PthreadOnce(&loadFlag_, []()->void {HcclPlugin::instance()->LoadDriverSo();});
+    if (hcomGetRankId_ == nullptr) {
+        int32_t ret = pluginHandle_.GetFunction<uint32_t, const char *, uint32_t *>("HcomGetRankId",
+            hcomGetRankId_);
+        if (ret != PROFILING_SUCCESS) {
+            return PROFILING_FAILED;
+        }
+    }
+    return hcomGetRankId_(nullptr, rankId);
+}
+
 // HcomGetLocalRankId
 int32_t HcclPlugin::MsprofHcomGetLocalRankId(uint32_t *localRankId)
 {
