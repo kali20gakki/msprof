@@ -1346,6 +1346,7 @@ int32_t UnFileLock(FILE *file)
 bool Utils::IsClusterRunEnv()
 {
     std::string rankTableFilePath = Utils::GetEnvString(RANK_TABLE_FILE_ENV);
+    MSPROF_EVENT("[XXX] RANK_TABLE_FILE_ENV=%s, rankTableFilePath=%s", RANK_TABLE_FILE_ENV, rankTableFilePath.c_str());            
     // TODO: safe check
     if (rankTableFilePath.empty()) {
         return false;
