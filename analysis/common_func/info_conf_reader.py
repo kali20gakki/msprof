@@ -121,6 +121,13 @@ class InfoConfReader:
             devices += str(device_reader) + ","
         return list(filter(None, devices.split(",")))
 
+    def get_rank_id(self: any):
+        """
+        get rank_id
+        :return: rank_id
+        """
+        return self._info_json.get("rankID")
+
     def get_job_info(self: any) -> str:
         """
         get job info message
