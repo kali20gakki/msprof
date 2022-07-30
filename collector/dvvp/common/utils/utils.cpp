@@ -1299,12 +1299,15 @@ bool Utils::IsClusterRunEnv()
     MSPROF_EVENT("[XXX] RANK_TABLE_FILE_ENV=%s, rankTableFilePath=%s", RANK_TABLE_FILE_ENV, rankTableFilePath.c_str());            
     // TODO: safe check
     if (rankTableFilePath.empty()) {
+        MSPROF_EVENT("[XXX] rankTableFilePath empty");            
         return false;
     }
     if (MmAccess(rankTableFilePath.c_str()) != PROFILING_SUCCESS) {
+        MSPROF_EVENT("[XXX] rankTableFilePath can not access");            
         return false;
     }
     if (MmIsDir(rankTableFilePath.c_str()) == PROFILING_SUCCESS) {
+        MSPROF_EVENT("[XXX] rankTableFilePath is dir");            
         return false;
     }    
     return true;
