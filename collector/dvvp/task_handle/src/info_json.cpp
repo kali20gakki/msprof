@@ -286,6 +286,21 @@ int InfoJson::AddHostInfo(SHARED_PTR_ALIA<InfoMain> infoMain)
         infoCpu->set_logical_cpu_count(cpuInfo[i].nthreads == 0 ? cpuInfo[i].ncounts : cpuInfo[i].nthreads);
     }
     MmCpuInfoFree(cpuInfo, cpuNum);
+
+    if (Utils::IsClusterRunEnv()) {
+        MSPROF_EVENT("[XXX] Cluster Run Env.");            
+        uint32_t rankId = 0;
+        int ret = HcclPlugin::instance()->MsprofHcomGetLocalRankId(&rankId);
+        if (ret == 0) {
+            MSPROF_EVENT("[XXX] rankId = %u", rankId);            
+            infoMain->set_rank_id(rankId);
+        } else {
+            MSPROF_LOGE("HcomGetLocalRankId failed. ret = %d.", ret);
+        }
+    } else {
+        MSPROF_EVENT("[XXX] Not Cluster Run Env.");            
+    }
+
     MSPROF_LOGI("End to AddHostInfo in info.json, devices: %s.", devices_.c_str());
     return PROFILING_SUCCESS;
 }
@@ -399,7 +414,7 @@ int InfoJson::AddDeviceInfo(SHARED_PTR_ALIA<InfoMain> infoMain)
             int ret = HcclPlugin::instance()->MsprofHcomGetLocalRankId(&rankId);
             if (ret == 0) {
                 MSPROF_EVENT("[XXX] rankId = %u", rankId);            
-                infoDevice->set_rank_idrankId;
+                infoDevice->set_rank_id(rankId);
             } else {
                 MSPROF_LOGE("HcomGetLocalRankId failed. ret = %d.", ret);
             }
