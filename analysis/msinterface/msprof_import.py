@@ -50,7 +50,7 @@ class ImportCommand:
         command import command entry
         :return: None
         """
-        if self.cluster_flag == False:
+        if self.cluster_flag is False:
             self._process_parse()
         else:
             check_path_valid(self.collection_path, False)
@@ -91,7 +91,7 @@ class ImportCommand:
 
     def _check_cluster_path(self: any) -> list:
         if DataCheckManager.contain_info_json_data(self.collection_path):
-            logging.error('wrong parse dir(%s), -dir must be cluster data root dir' % self.collection_path)
+            logging.error('wrong parse dir(%s), -dir must be cluster data root dir', self.collection_path)
             raise ProfException(ProfException.PROF_CLUSTER_DIR_ERROR)
         _unparsed_dirs = {}
         _prof_dir_error_list = []
@@ -102,7 +102,7 @@ class ImportCommand:
             first_sub_path = os.path.realpath(
                     os.path.join(self.collection_path, first_sub_dir))
             if DataCheckManager.contain_info_json_data(first_sub_path):
-                logging.error('wrong parse dir(%s), -dir must be cluster data root dir' % self.collection_path)
+                logging.error('wrong parse dir(%s), -dir must be cluster data root dir', self.collection_path)
                 raise ProfException(ProfException.PROF_CLUSTER_DIR_ERROR)
 
             _unparsed_second_dirs = []
@@ -115,13 +115,14 @@ class ImportCommand:
                     del _unparsed_dirs[first_sub_dir]
                     break
                 third_sub_dirs = get_path_dir(second_sub_path)
-                if not 'sqlite' in third_sub_dirs:
+                if 'sqlite' not in third_sub_dirs:
                     _unparsed_second_dirs.append(second_sub_dir)
             if _unparsed_second_dirs:
                 _unparsed_dirs.setdefault(first_sub_dir, _unparsed_second_dirs)
 
         if _prof_dir_error_list:
-            warn(self.FILE_NAME, 'some incorrect prof dirs in the dir(%s):' % self.collection_path, _prof_dir_error_list)
+            warn('some incorrect prof dirs in the dir(%s):%s',
+                 self.collection_path, _prof_dir_error_list)
         return _unparsed_dirs
 
     def _parse_unparsed_dirs(self: any, unparsed_dirs: list) -> None:
