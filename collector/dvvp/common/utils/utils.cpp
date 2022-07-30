@@ -1342,6 +1342,22 @@ int32_t UnFileLock(FILE *file)
     return analysis::dvvp::common::error::PROFILING_FAILED;
 #endif
 }
+
+bool Utils::IsClusterRunEnv()
+{
+    std::string rankTableFilePath = Utils::GetEnvString(RANK_TABLE_FILE_ENV);
+    // TODO: safe check
+    if (rankTableFilePath.empty()) {
+        return false;
+    }
+    if (MmAccess(rankTableFilePath.c_str()) != PROFILING_SUCCESS) {
+        return false;
+    }
+    if (MmIsDir(rankTableFilePath.c_str()) == PROFILING_SUCCESS) {
+        return false;
+    }    
+    return true;
+}
 }  // namespace utils
 }  // namespace common
 }  // namespace dvvp
