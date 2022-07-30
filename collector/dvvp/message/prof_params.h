@@ -46,6 +46,7 @@ struct ProfileParams : BaseInfo {
     std::string profiling_options;
     std::string jobInfo;
     // app
+    std::string cmdPath;
     std::string app;
     std::string app_dir;
     std::string app_parameters;

@@ -174,6 +174,8 @@ class IterRecParser(IterParser):
             return
         self._batch_counter.init(Constant.TASK_TYPE_AI_CORE)
         self._parse_hwts_data()
+        if self._overstep_task_cnt > 0:
+            logging.warning("overstep task number is %s", self._overstep_task_cnt)
 
     def ms_run(self: any) -> None:
         """
@@ -220,6 +222,8 @@ class NoGeIterRecParser(IterParser):
         """
         self._parse_ai_core_data()
         self._parse_hwts_data()
+        if self._overstep_task_cnt > 0:
+            logging.warning("overstep task number is %s", self._overstep_task_cnt)
 
     def ms_run(self: any) -> None:
         """
