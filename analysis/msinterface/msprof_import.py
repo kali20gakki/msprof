@@ -4,7 +4,7 @@
 This scripts is used to parse some project path profiling data
 Copyright Huawei Technologies Co., Ltd. 2019-2020. All rights reserved.
 """
-
+import logging
 import os
 
 from common_func.common import warn
@@ -12,11 +12,13 @@ from common_func.config_mgr import ConfigMgr
 from common_func.data_check_manager import DataCheckManager
 from common_func.msprof_common import analyze_collect_data
 from common_func.msprof_common import check_collection_dir
+from common_func.msvp_common import check_dir_writable
 from common_func.msprof_common import MsProfCommonConstant
 from common_func.msprof_common import check_path_valid
 from common_func.msprof_common import get_path_dir
 from common_func.msprof_exception import ProfException
 from framework.load_info_manager import LoadInfoManager
+from msparser.cluster.cluster_info_parser import ClusterInfoParser
 
 
 class ImportCommand:
@@ -26,8 +28,9 @@ class ImportCommand:
 
     FILE_NAME = os.path.basename(__file__)
 
-    def __init__(self: any, collection_path: str) -> None:
-        self.collection_path = os.path.realpath(collection_path)
+    def __init__(self: any, args: any) -> None:
+        self.collection_path = os.path.realpath(args.collection_path)
+        self.cluster_flag = args.cluster_flag
 
     @staticmethod
     def do_import(result_dir: str) -> None:
@@ -47,6 +50,20 @@ class ImportCommand:
         command import command entry
         :return: None
         """
+        if self.cluster_flag == False:
+            self._process_parse()
+        else:
+            check_path_valid(self.collection_path, False)
+            _unparsed_dirs = self._check_cluster_path()
+            if _unparsed_dirs:
+                self._parse_unparsed_dirs(_unparsed_dirs)
+            sqlite_path = os.path.realpath(os.path.join(self.collection_path, 'sqlite'))
+            if not os.path.exists(sqlite_path):
+                os.makedirs(sqlite_path)
+            cluster_info_parser = ClusterInfoParser(self.collection_path)
+            cluster_info_parser.ms_run()
+
+    def _process_parse(self: any) -> None:
         check_path_valid(self.collection_path, False)
         if DataCheckManager.contain_info_json_data(self.collection_path):  # find profiling data dir
             LoadInfoManager.load_info(self.collection_path)
@@ -71,3 +88,48 @@ class ImportCommand:
                                      'such as PROF_XXX_XXX_XXX' % collect_path)
             else:
                 self._process_sub_dirs(sub_dir, is_cluster=True)
+
+    def _check_cluster_path(self: any) -> list:
+        if DataCheckManager.contain_info_json_data(self.collection_path):
+            logging.error('wrong parse dir(%s), -dir must be cluster data root dir' % self.collection_path)
+            raise ProfException(ProfException.PROF_CLUSTER_DIR_ERROR)
+        _unparsed_dirs = {}
+        _prof_dir_error_list = []
+        first_sub_dirs = get_path_dir(self.collection_path)
+        for first_sub_dir in first_sub_dirs:
+            if first_sub_dir == 'sqlite':
+                continue
+            first_sub_path = os.path.realpath(
+                    os.path.join(self.collection_path, first_sub_dir))
+            if DataCheckManager.contain_info_json_data(first_sub_path):
+                logging.error('wrong parse dir(%s), -dir must be cluster data root dir' % self.collection_path)
+                raise ProfException(ProfException.PROF_CLUSTER_DIR_ERROR)
+
+            _unparsed_second_dirs = []
+            second_sub_dirs = get_path_dir(first_sub_path)
+            for second_sub_dir in second_sub_dirs:
+                second_sub_path = os.path.realpath(
+                        os.path.join(first_sub_path, second_sub_dir))
+                if not DataCheckManager.contain_info_json_data(second_sub_path):
+                    _prof_dir_error_list.append(first_sub_dir)
+                    del _unparsed_dirs[first_sub_dir]
+                    break
+                third_sub_dirs = get_path_dir(second_sub_path)
+                if not 'sqlite' in third_sub_dirs:
+                    _unparsed_second_dirs.append(second_sub_dir)
+            if _unparsed_second_dirs:
+                _unparsed_dirs.setdefault(first_sub_dir, _unparsed_second_dirs)
+
+        if _prof_dir_error_list:
+            warn(self.FILE_NAME, 'some incorrect prof dirs in the dir(%s):' % self.collection_path, _prof_dir_error_list)
+        return _unparsed_dirs
+
+    def _parse_unparsed_dirs(self: any, unparsed_dirs: list) -> None:
+        for pro_dir, result_dir_list in unparsed_dirs.items():
+            prof_path = os.path.join(self.collection_path, pro_dir)
+            for result_dir in result_dir_list:
+                result_path = os.path.realpath(
+                    os.path.join(prof_path, result_dir))
+                check_path_valid(result_path, False)
+                LoadInfoManager.load_info(result_path)
+                self.do_import(result_path)
