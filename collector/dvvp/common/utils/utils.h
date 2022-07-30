@@ -553,6 +553,8 @@ int32_t WriteFile(const std::string &absolutePath, const std::string &recordFile
 
 int32_t UnFileLock(FILE *file);
 
+bool Utils::IsClusterRunEnv();
+
 }  // namespace utils
 }  // namespace common
 }  // namespace dvvp

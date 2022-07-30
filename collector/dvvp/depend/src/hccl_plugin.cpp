@@ -30,7 +30,8 @@ int32_t HcclPlugin::MsprofHcomGetLocalRankId(uint32_t *localRankId)
 {
     PthreadOnce(&loadFlag_, []()->void {HcclPlugin::instance()->LoadDriverSo();});
     if (hcomGetLocalRankId_ == nullptr) {
-        int32_t ret = pluginHandle_.GetFunction<uint32_t, const char *, uint32_t *>("HcomGetLocalRankId", hcomGetLocalRankId_);
+        int32_t ret = pluginHandle_.GetFunction<uint32_t, const char *, uint32_t *>("HcomGetLocalRankId",
+            hcomGetLocalRankId_);
         if (ret != PROFILING_SUCCESS) {
             return PROFILING_FAILED;
         }
