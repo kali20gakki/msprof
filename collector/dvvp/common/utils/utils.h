@@ -524,6 +524,7 @@ public:
         return ret;
     }
     static bool IsAppName(const std::string paramsName);
+    static bool IsClusterRunEnv();
 };
 
 template<class T>
@@ -552,8 +553,6 @@ std::string UtilsStringBuilder<T>::Join(const std::vector<T> &elems, const std::
 int32_t WriteFile(const std::string &absolutePath, const std::string &recordFile, const std::string &profName);
 
 int32_t UnFileLock(FILE *file);
-
-bool Utils::IsClusterRunEnv();
 
 }  // namespace utils
 }  // namespace common

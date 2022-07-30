@@ -1293,6 +1293,23 @@ bool Utils::IsAppName(const std::string paramsName)
     return true;
 }
 
+bool Utils::IsClusterRunEnv()
+{
+    std::string rankTableFilePath = Utils::GetEnvString(RANK_TABLE_FILE_ENV);
+    MSPROF_EVENT("[XXX] RANK_TABLE_FILE_ENV=%s, rankTableFilePath=%s", RANK_TABLE_FILE_ENV, rankTableFilePath.c_str());            
+    // TODO: safe check
+    if (rankTableFilePath.empty()) {
+        return false;
+    }
+    if (MmAccess(rankTableFilePath.c_str()) != PROFILING_SUCCESS) {
+        return false;
+    }
+    if (MmIsDir(rankTableFilePath.c_str()) == PROFILING_SUCCESS) {
+        return false;
+    }    
+    return true;
+}
+
 int32_t WriteFile(const std::string &absolutePath, const std::string &recordFile, const std::string &profName)
 {
 #if (defined(_WIN32) || defined(_WIN64) || defined(_MSC_VER))
@@ -1341,23 +1358,6 @@ int32_t UnFileLock(FILE *file)
     MSPROF_LOGE("Failed to release file lock");
     return analysis::dvvp::common::error::PROFILING_FAILED;
 #endif
-}
-
-bool Utils::IsClusterRunEnv()
-{
-    std::string rankTableFilePath = Utils::GetEnvString(RANK_TABLE_FILE_ENV);
-    MSPROF_EVENT("[XXX] RANK_TABLE_FILE_ENV=%s, rankTableFilePath=%s", RANK_TABLE_FILE_ENV, rankTableFilePath.c_str());            
-    // TODO: safe check
-    if (rankTableFilePath.empty()) {
-        return false;
-    }
-    if (MmAccess(rankTableFilePath.c_str()) != PROFILING_SUCCESS) {
-        return false;
-    }
-    if (MmIsDir(rankTableFilePath.c_str()) == PROFILING_SUCCESS) {
-        return false;
-    }    
-    return true;
 }
 }  // namespace utils
 }  // namespace common

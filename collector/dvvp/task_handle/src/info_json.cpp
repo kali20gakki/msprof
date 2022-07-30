@@ -409,20 +409,18 @@ int InfoJson::AddDeviceInfo(SHARED_PTR_ALIA<InfoMain> infoMain)
         infoDevice->set_aiv_frequency("1000");
 
         if (Utils::IsClusterRunEnv()) {
-            MSPROF_EVENT("[XXX] Cluster Run Env.");            
+            MSPROF_EVENT("[XXX] Cluster Run Env.");
             uint32_t rankId = 0;
             int ret = HcclPlugin::instance()->MsprofHcomGetLocalRankId(&rankId);
             if (ret == 0) {
-                MSPROF_EVENT("[XXX] rankId = %u", rankId);            
+                MSPROF_EVENT("[XXX] rankId = %u", rankId);
                 infoDevice->set_rank_id(rankId);
             } else {
                 MSPROF_LOGE("HcomGetLocalRankId failed. ret = %d.", ret);
             }
         } else {
-            MSPROF_EVENT("[XXX] Not Cluster Run Env.");            
+            MSPROF_EVENT("[XXX] Not Cluster Run Env.");
         }
-
-        sysClockFreq
     }
     infoMain->set_devices(hostIdSerial_);
     MSPROF_LOGI("End to AddDeviceInfo in info.json, hostIds: %s.", hostIdSerial_.c_str());
