@@ -15,6 +15,7 @@
 #include "config/config.h"
 #include "config/config_manager.h"
 #include "errno/error_code.h"
+#include "hccl_plugin.h"
 #include "message/codec.h"
 #include "msprof_dlog.h"
 #include "prof_manager.h"
@@ -391,6 +392,22 @@ int InfoJson::AddDeviceInfo(SHARED_PTR_ALIA<InfoMain> infoMain)
         SetHwtsFrequency(*infoDevice);
         infoDevice->set_aic_frequency(Analysis::Dvvp::Driver::DrvGeAicFrq(devIndexId));
         infoDevice->set_aiv_frequency("1000");
+
+        if (Utils::IsClusterRunEnv()) {
+            MSPROF_EVENT("[XXX] Cluster Run Env.");            
+            uint32_t rankId = 0;
+            int ret = HcclPlugin::instance()->MsprofHcomGetLocalRankId(&rankId);
+            if (ret == 0) {
+                MSPROF_EVENT("[XXX] rankId = %u", rankId);            
+                infoDevice->set_rank_idrankId;
+            } else {
+                MSPROF_LOGE("HcomGetLocalRankId failed. ret = %d.", ret);
+            }
+        } else {
+            MSPROF_EVENT("[XXX] Not Cluster Run Env.");            
+        }
+
+        sysClockFreq
     }
     infoMain->set_devices(hostIdSerial_);
     MSPROF_LOGI("End to AddDeviceInfo in info.json, hostIds: %s.", hostIdSerial_.c_str());
