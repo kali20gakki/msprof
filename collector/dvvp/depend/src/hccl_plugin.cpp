@@ -26,7 +26,7 @@ bool HcclPlugin::IsFuncExist(const std::string &funcName) const
 }
 
 // HcomGetLocalRankId
-int HcclPlugin::MsprofHcomGetLocalRankId(uint32_t *localRankId)
+int32_t HcclPlugin::MsprofHcomGetLocalRankId(uint32_t *localRankId)
 {
     PthreadOnce(&loadFlag_, []()->void {HcclPlugin::instance()->LoadDriverSo();});
     if (hcomGetLocalRankId_ == nullptr) {

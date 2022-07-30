@@ -16,7 +16,7 @@ namespace Collector {
 namespace Dvvp {
 namespace Plugin {
 using HcomGetLocalRankIdFunc = std::function<uint32_t(const char *group, uint32_t *localRankId)>;
-class HcclPlugin : public analysis::dvvp::common::singleton::Singleton<DriverPlugin> {
+class HcclPlugin : public analysis::dvvp::common::singleton::Singleton<HcclPlugin> {
 public:
     HcclPlugin()
      :soName_("libhccl.so"),
@@ -27,7 +27,7 @@ public:
     bool IsFuncExist(const std::string &funcName) const;
 
     // HcomGetLocalRankId
-    uint32_t MsprofHcomGetLocalRankId(uint32_t *localRankId);
+    int32_t MsprofHcomGetLocalRankId(uint32_t *localRankId);
 
 private:
     std::string soName_;
