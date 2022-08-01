@@ -126,7 +126,7 @@ class InfoConfReader:
         get rank_id
         :return: rank_id
         """
-        return self._info_json.get("rankID")
+        return self._info_json.get("rank_id")
 
     def get_job_info(self: any) -> str:
         """
