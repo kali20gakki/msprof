@@ -83,7 +83,7 @@ class QueryCommand:
         print_msg("\n")
 
     @classmethod
-    def _check_cluster_sqlite_db(self: any, sqlite_path: str) -> bool:
+    def _check_cluster_sqlite_db(cls: any, sqlite_path: str) -> bool:
         if not os.path.exists(sqlite_path):
             return False
         rank_db_path = sqlite_path + '\\' + DBNameConstant.DB_CLUSTER
@@ -172,4 +172,4 @@ class QueryCommand:
             logging.error('table ClusterRank do not exist or table ClusterRank data is empty!'
                           ' please check the dir(%s)', os.path.join(sqlite_path, '\\rank.db'))
             return []
-        return MsprofQueryData.query_cluster_data(sqlite_path,cluster_info_list)
+        return MsprofQueryData.query_cluster_data(sqlite_path, cluster_info_list)
