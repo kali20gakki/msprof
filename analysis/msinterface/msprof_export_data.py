@@ -615,7 +615,10 @@ class MsProfExportDataUtils:
                 and hasattr(cls, configs.get(StrConstant.CONFIG_HANDLER)):
             handler = getattr(cls, configs.get(StrConstant.CONFIG_HANDLER))
             if params.get(StrConstant.PARAM_EXPORT_TYPE) == MsProfCommonConstant.SUMMARY:
-                headers, data, _ = handler(configs, params)
+                try:
+                    headers, data, _ = handler(configs, params)
+                except:
+                    x = handler(configs, params)
                 return MsprofDataStorage().export_summary_data(headers, data, params)
             data = handler(configs, params)
             if isinstance(data, EmptyClass):
