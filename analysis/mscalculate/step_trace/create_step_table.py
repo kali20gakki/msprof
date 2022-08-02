@@ -130,8 +130,7 @@ class CreateAllReduce(CreateSubTable):
     def create_table(cls: any, conn: any) -> None:
         create_sql = "create table if not exists {}" \
                      "(device_id int, model_id int," \
-                     "iteration_end int, start int, end int, primary key(device_id," \
-                     "iteration_end, start))".format(DBNameConstant.TABLE_ALL_REDUCE)
+                     "iteration_end int, start int, end int)".format(DBNameConstant.TABLE_ALL_REDUCE)
 
         DBManager.execute_sql(conn, create_sql)
 
@@ -291,7 +290,8 @@ class StepTableBuilder:
         """
         record_dict = {
             StepTraceConstant.INDEX_ID: record[0], StepTraceConstant.MODEL_ID: record[1],
-            StepTraceConstant.TIME_STAMP: record[2], StepTraceConstant.TAG_ID: record[3]
+            StepTraceConstant.TIME_STAMP: record[2], StepTraceConstant.TAG_ID: record[3],
+            StepTraceConstant.STREAM_ID: record[4]
         }
 
         return record_dict
@@ -342,7 +342,7 @@ class StepTableBuilder:
 
         # iteration range table
         select_sql = "select DISTINCT index_id, model_id, " \
-                     "timestamp, tag_id from {}".format(table_name)
+                     "timestamp, tag_id, stream_id from {}".format(table_name)
 
         return DBManager.fetch_all_data(cls.step_curs, select_sql)
 

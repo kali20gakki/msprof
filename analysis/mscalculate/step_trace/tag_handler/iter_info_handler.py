@@ -3,6 +3,7 @@ This script is used to load training_trace data from db
 Copyright Huawei Technologies Co., Ltd. 2021. All rights reserved.
 """
 
+from collections import defaultdict
 from mscalculate.interface.step_trace_tag_handler import StepTraceTagHandler
 from common_func.step_trace_constant import StepTraceConstant
 
@@ -13,6 +14,7 @@ class AllReduceTagHandler(StepTraceTagHandler):
     """
     def __init__(self: any) -> None:
         self.collect_data = []
+        self.next_handler_group = defaultdict(AllReduceForStream)
 
     def receive_record(self: any, record: dict) -> None:
         """
@@ -25,11 +27,30 @@ class AllReduceTagHandler(StepTraceTagHandler):
     def get_data(self: any) -> list:
         """
         return data of this handler
-        :return: dict
+        :return: list
         """
+        for next_handler in self.next_handler_group.values():
+            self.collect_data.extend(next_handler.get_data())
         return self.collect_data
 
     def process_record(self: any, record: dict) -> None:
+        """
+        get reduce start, reduce end from record
+        :param record: contain model_id, tag_id, timestamp
+        :return: void
+        """
+        stream_id = record.get(StepTraceConstant.STREAM_ID)
+        self.next_handler_group[stream_id].receive_record(record)
+
+
+class AllReduceForStream(StepTraceTagHandler):
+    """
+    get each all reduce for stream
+    """
+    def __init__(self: any) -> None:
+        self.collect_data = []
+
+    def receive_record(self: any, record: dict) -> None:
         """
         get reduce start, reduce end from record
         :param record: contain model_id, tag_id, timestamp
@@ -41,6 +62,13 @@ class AllReduceTagHandler(StepTraceTagHandler):
                  StepTraceConstant.REDUCE_END: None})
         if record[StepTraceConstant.TAG_ID] % 2 and self.collect_data:
             self.collect_data[-1][StepTraceConstant.REDUCE_END] = record[StepTraceConstant.TIME_STAMP]
+
+    def get_data(self: any) -> list:
+        """
+        return data of this handler
+        :return: list
+        """
+        return self.collect_data
 
 
 class TrainingTraceTagHandler(StepTraceTagHandler):
