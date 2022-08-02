@@ -46,7 +46,8 @@ class MsprofQueryData:
             else:
                 sql = 'select t0.model_id, t0.max_index, group_concat(t0.index_id ) from (select t.* from' \
                       '(select index_id, model_id, ge_tag, (select count( * ) + 1 from {0} as t2 where ' \
-                      't2.model_id = t1.model_id and ( t2.step_end - t2.step_start ) > ( t1.step_end - t1.step_start ) ) as top,' \
+                      't2.model_id = t1.model_id and ( t2.step_end - t2.step_start ) > ' \
+                      '( t1.step_end - t1.step_start ) ) as top,' \
                       '(select count(0) from {0} as t3 where t3.model_id = t1.model_id ) as max_index ' \
                       'from {0} as t1 ) as t where top <= 5 and ge_tag = 1 order by model_id, top)t0 ' \
                       'group by model_id, max_index'.format(step_table_name)
