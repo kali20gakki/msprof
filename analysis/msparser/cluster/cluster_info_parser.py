@@ -37,7 +37,7 @@ class ClusterInfoParser(IParser):
     def parse(self: any) -> None:
         first_sub_dirs = get_path_dir(self.collect_path)
         for first_sub_dir in first_sub_dirs:
-            if first_sub_dir == 'sqlite' or first_sub_dir == 'log':
+            if first_sub_dir == 'sqlite' or first_sub_dir == 'log' or first_sub_dir == 'query':
                 continue
             first_sub_path = os.path.realpath(
                 os.path.join(self.collect_path, first_sub_dir))
@@ -47,10 +47,9 @@ class ClusterInfoParser(IParser):
                     continue
                 second_sub_path = os.path.realpath(
                         os.path.join(first_sub_path, second_sub_dir))
-                dir_name = '{0}\\{1}'.format(first_sub_dir, second_sub_dir)
                 cluster_info = self._get_cluster_info(second_sub_path)
                 if cluster_info:
-                    cluster_info.append(dir_name)
+                    cluster_info.append(first_sub_dir)
                     self.cluster_info_list.append(cluster_info)
 
     def save(self: any) -> None:
@@ -73,6 +72,10 @@ class ClusterInfoParser(IParser):
         InfoConfReader().load_info(second_sub_path)
         device_id_list = InfoConfReader().get_device_list()
         rank_id = InfoConfReader().get_rank_id()
+        if rank_id == -1:
+            logging.error("the data is not collected in a clustered environment, please check the directory: %s",
+                          second_sub_path)
+            raise ProfException(ProfException().PROF_CLUSTER_DIR_ERROR)
         if rank_id in self.rank_id_set:
             logging.error("parsing not supported! There are different collect data in the dir(%s)")
             raise ProfException(ProfException().PROF_CLUSTER_DIR_ERROR)
