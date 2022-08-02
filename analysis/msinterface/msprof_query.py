@@ -6,19 +6,23 @@ QueryCommand class. This class mainly involves the process function.
 Copyright Information:
 Huawei Technologies Co., Ltd. All Rights Reserved © 2020
 """
-
+import logging
 import os
 from operator import itemgetter
 
-from common_func.common import print_msg
+from common_func.common import print_msg, init_log
 from common_func.common import warn
 from common_func.data_check_manager import DataCheckManager
+from common_func.db_manager import DBManager
+from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.msprof_common import check_path_valid
 from common_func.msprof_common import get_path_dir
+from common_func.msprof_exception import ProfException
 from common_func.msprof_query_data import MsprofQueryData
 from common_func.utils import Utils
 from framework.load_info_manager import LoadInfoManager
+from msmodel.cluster_info.cluster_info_model import ClusterInfoModel
 
 
 class QueryCommand:
@@ -90,10 +94,16 @@ class QueryCommand:
         handle query command
         :return: None
         """
-        self.check_argument_valid()
-        table_data = self._get_query_data()
+        cluster_flag = self._check_cluster_query()
+        if cluster_flag == -1:
+            self.check_argument_valid()
+            table_data = self._get_query_data()
+            headers = self.SHOW_HEADERS
+        else:
+            table_data = self._get_cluster_query_data(cluster_flag)
+            headers = self.SHOW_HEADERS.append('Rank ID')
         sorted_table_data = sorted(table_data, key=itemgetter(0, 3))
-        self._format_print(sorted_table_data)
+        self._format_print(sorted_table_data, headers)
 
     def _get_query_data(self: any) -> list:
         result_data = []
@@ -119,3 +129,47 @@ class QueryCommand:
                     warn(self.FILE_NAME, 'Invalid parsing dir("%s"), -dir must be profiling data dir '
                                          'such as PROF_XXX_XXX_XXX' % path)
         return result_data
+
+    def _check_cluster_query(self: any) -> bool:
+        if DataCheckManager.contain_info_json_data(self.collection_path):
+            return -1
+        sqlite_path = self.collection_path + '\\' + 'sqlite'
+        if self._check_cluster_sqlite_db(sqlite_path):
+            return 1
+        pre_sqlite_path = '\\'.join(self.collection_path.split('\\')[:-1]) + '\\' + 'sqlite'
+        if self._check_cluster_sqlite_db(pre_sqlite_path):
+            return 2
+        return -1
+
+    @classmethod
+    def _check_cluster_sqlite_db(self: any, sqlite_path: str) -> bool:
+        if not os.path.exists(sqlite_path):
+            return False
+        rank_db_path = sqlite_path + '\\' + DBNameConstant.DB_CLUSTER
+        step_db_path = sqlite_path + '\\' + DBNameConstant.DB_CLUSTER_STEP_TRACE
+        if not os.path.exists(rank_db_path):
+            logging.warning("rank.db not created in the dir(%s), "
+                            "please import --cluster first!", sqlite_path)
+            raise ProfException(ProfException.PROF_CLUSTER_INVALID_DB)
+        if not os.path.exists(step_db_path):
+            logging.warning("step_trace.db not created in the dir(%s), "
+                            "please import --cluster first!", sqlite_path)
+            raise ProfException(ProfException.PROF_CLUSTER_INVALID_DB)
+        return True
+
+    def _get_cluster_query_data(self: any, cluster_flag: int) -> list:
+        if cluster_flag == 1:
+            sqlite_path = self.collection_path
+            dir_name = ''
+        elif cluster_flag == 2:
+            sqlite_path = '\\'.join(self.collection_path.split('\\')[:-1])
+            dir_name = self.collection_path.split('\\')[-1]
+        with ClusterInfoModel(sqlite_path) as cluster_info_model:
+            cluster_info_list = cluster_info_model.get_all_data(DBNameConstant.TABLE_CLUSTER_RANK)
+        if not cluster_info_list:
+            logging.error('table ClusterRank do not exist or table ClusterRank data is empty!'
+                          ' please check the dir(%s)', os.path.join(sqlite_path, '\\rank.db'))
+            return []
+        if dir_name:
+            cluster_info_list = filter(lambda x: x[-1] == dir_name, cluster_info_list)
+        return MsprofQueryData(self.collection_path).query_cluster_data(sqlite_path, cluster_info_list)

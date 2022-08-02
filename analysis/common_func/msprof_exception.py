@@ -27,6 +27,7 @@ class ProfException(Exception):
     PROF_INVALID_STEP_TRACE_ERROR = 9
     PROF_SYSTEM_EXIT = 10
     PROF_CLUSTER_DIR_ERROR = 11
+    PROF_CLUSTER_INVALID_DB = 12
 
     def __init__(self: any, code: int) -> None:
         super().__init__(code)
