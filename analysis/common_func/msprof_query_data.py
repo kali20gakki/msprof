@@ -32,6 +32,38 @@ class MsprofQueryData:
         self.data = []
 
     @classmethod
+    def query_cluster_data(cls: any, sqlite_path: str, cluster_info_list: list) -> list:
+        cluster_query_data = []
+        for cluster_info in cluster_info_list:
+            rank_id = cluster_info[3]
+            step_table_name = 'step_trace_{0}'.format(rank_id)
+            db_path = PathManager.get_db_path(sqlite_path, DBNameConstant.DB_CLUSTER_STEP_TRACE)
+            trace_conn, trace_curs = DBManager.check_connect_db(sqlite_path,
+                                                                DBNameConstant.DB_CLUSTER_STEP_TRACE)
+            if not trace_conn or not trace_curs \
+                    or not DBManager.check_tables_in_db(db_path, step_table_name):
+                model_info_list = []
+            else:
+                sql = 'select t0.model_id, t0.max_index, group_concat(t0.index_id ) from (select t.* from' \
+                      '(select index_id, model_id, ge_tag, (select count( * ) + 1 from {0} as t2 where ' \
+                      't2.model_id = t1.model_id and ( t2.step_end - t2.step_start ) > ( t1.step_end - t1.step_start ) ) as top,' \
+                      '(select count(0) from {0} as t3 where t3.model_id = t1.model_id ) as max_index ' \
+                      'from {0} as t1 ) as t where top <= 5 and ge_tag = 1 order by model_id, top)t0 ' \
+                      'group by model_id, max_index'.format(step_table_name)
+                model_info_list = DBManager.fetch_all_data(trace_curs, sql)
+            DBManager.destroy_db_connect(trace_conn, trace_curs)
+            if not model_info_list:
+                data = [cluster_info[0], cluster_info[1], cluster_info[4], cluster_info[2],
+                        'NA', 'NA', 'NA', cluster_info[3]]
+                cluster_query_data.append(data)
+                continue
+            for model_info in model_info_list:
+                data = [cluster_info[0], cluster_info[1], cluster_info[4], cluster_info[2],
+                        model_info[0], model_info[1], model_info[2], cluster_info[3]]
+                cluster_query_data.append(data)
+        return cluster_query_data
+
+    @classmethod
     def _get_iteration_infos(cls: any, curs: any) -> list:
         sql = "select model_id, max(index_id) from {} group by model_id".format(
             DBNameConstant.TABLE_STEP_TRACE_DATA)
@@ -170,31 +202,3 @@ class MsprofQueryData:
 
         iteration_data = self.get_job_iteration_info()
         return self.assembly_job_info(basic_data, iteration_data)
-
-    def query_cluster_data(self: any, sqlite_path: str, cluster_info_list: list) -> list:
-        cluster_query_data = []
-        for cluster_info in cluster_info_list:
-            rank_id = cluster_info[3]
-            step_table_name = 'step_trace_' + str(rank_id)
-            db_path = PathManager.get_db_path(sqlite_path, DBNameConstant.DB_CLUSTER_STEP_TRACE)
-            trace_conn, trace_curs = DBManager.check_connect_db(sqlite_path, DBNameConstant.DB_CLUSTER_STEP_TRACE)
-            if not trace_conn or not trace_curs \
-                    or not DBManager.check_tables_in_db(db_path, step_table_name):
-                model_info_list = []
-            else:
-                sql = 'select t0.model_id, t0.max_index, group_concat(t0.index_id ) from (select t.* from' \
-                      '(select index_id, model_id, ge_tag, (select count( * ) + 1 from {0} as t2 where ' \
-                      't2.model_id = t1.model_id and ( t2.step_end - t2.step_start ) > ( t1.step_end - t1.step_start ) ) as top,' \
-                      '(select count(0) from {0} as t3 where t3.model_id = t1.model_id ) as max_index ' \
-                      'from {0} as t1 ) as t where top <= 5 and ge_tag = 1 order by model_id, top)t0 ' \
-                      'group by model_id, max_index'.format(step_table_name)
-                model_info_list = DBManager.fetch_all_data(trace_curs, sql)
-            DBManager.destroy_db_connect(trace_conn, trace_curs)
-            if not model_info_list:
-                data = [cluster_info[0], cluster_info[1], cluster_info[4], cluster_info[2], 'NA', 'NA', 'NA', cluster_info[3]]
-                cluster_query_data.append(data)
-                continue
-            for model_info in model_info_list:
-                data = [cluster_info[0], cluster_info[1], cluster_info[4], cluster_info[2], model_info[0], model_info[1], model_info[2], cluster_info[3]]
-                cluster_query_data.append(data)
-        return cluster_query_data

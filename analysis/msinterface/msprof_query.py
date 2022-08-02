@@ -82,6 +82,22 @@ class QueryCommand:
             print_msg(str(header).ljust(max_column_list[index], ' '), end="\t")
         print_msg("\n")
 
+    @classmethod
+    def _check_cluster_sqlite_db(self: any, sqlite_path: str) -> bool:
+        if not os.path.exists(sqlite_path):
+            return False
+        rank_db_path = sqlite_path + '\\' + DBNameConstant.DB_CLUSTER
+        step_db_path = sqlite_path + '\\' + DBNameConstant.DB_CLUSTER_STEP_TRACE
+        if not os.path.exists(rank_db_path):
+            logging.warning("rank.db not created in the dir(%s), "
+                            "please import --cluster first!", sqlite_path)
+            raise ProfException(ProfException.PROF_CLUSTER_INVALID_DB)
+        if not os.path.exists(step_db_path):
+            logging.warning("step_trace.db not created in the dir(%s), "
+                            "please import --cluster first!", sqlite_path)
+            raise ProfException(ProfException.PROF_CLUSTER_INVALID_DB)
+        return True
+
     def check_argument_valid(self: any) -> None:
         """
         Check the argument valid
@@ -141,22 +157,6 @@ class QueryCommand:
             return 2
         return -1
 
-    @classmethod
-    def _check_cluster_sqlite_db(self: any, sqlite_path: str) -> bool:
-        if not os.path.exists(sqlite_path):
-            return False
-        rank_db_path = sqlite_path + '\\' + DBNameConstant.DB_CLUSTER
-        step_db_path = sqlite_path + '\\' + DBNameConstant.DB_CLUSTER_STEP_TRACE
-        if not os.path.exists(rank_db_path):
-            logging.warning("rank.db not created in the dir(%s), "
-                            "please import --cluster first!", sqlite_path)
-            raise ProfException(ProfException.PROF_CLUSTER_INVALID_DB)
-        if not os.path.exists(step_db_path):
-            logging.warning("step_trace.db not created in the dir(%s), "
-                            "please import --cluster first!", sqlite_path)
-            raise ProfException(ProfException.PROF_CLUSTER_INVALID_DB)
-        return True
-
     def _get_cluster_query_data(self: any, cluster_flag: int) -> list:
         if cluster_flag == 1:
             sqlite_path = self.collection_path
@@ -166,10 +166,10 @@ class QueryCommand:
             dir_name = self.collection_path.split('\\')[-1]
         with ClusterInfoModel(sqlite_path) as cluster_info_model:
             cluster_info_list = cluster_info_model.get_all_data(DBNameConstant.TABLE_CLUSTER_RANK)
+        if cluster_info_list and dir_name:
+            cluster_info_list = list(filter(lambda x: x[-1] == dir_name, cluster_info_list))
         if not cluster_info_list:
             logging.error('table ClusterRank do not exist or table ClusterRank data is empty!'
                           ' please check the dir(%s)', os.path.join(sqlite_path, '\\rank.db'))
             return []
-        if dir_name:
-            cluster_info_list = filter(lambda x: x[-1] == dir_name, cluster_info_list)
-        return MsprofQueryData(self.collection_path).query_cluster_data(sqlite_path, cluster_info_list)
+        return MsprofQueryData.query_cluster_data(sqlite_path,cluster_info_list)
