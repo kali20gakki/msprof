@@ -82,21 +82,6 @@ class QueryCommand:
             print_msg(str(header).ljust(max_column_list[index], ' '), end="\t")
         print_msg("\n")
 
-    def _check_cluster_sqlite_db(self: any, sqlite_path: str) -> bool:
-        if not os.path.exists(sqlite_path):
-            return False
-        rank_db_path = sqlite_path + '\\' + DBNameConstant.DB_CLUSTER_RANK
-        step_db_path = sqlite_path + '\\' + DBNameConstant.DB_CLUSTER_STEP_TRACE
-        if not os.path.exists(rank_db_path):
-            warn(self.FILE_NAME, "cluster_rank.db not created in the dir(%s), "
-                                 "please import --cluster first!" % sqlite_path)
-            raise ProfException(ProfException.PROF_CLUSTER_INVALID_DB)
-        if not os.path.exists(step_db_path):
-            warn(self.FILE_NAME, "cluster_step_trace.db not created in the dir(%s), "
-                            "please import --cluster first!" % sqlite_path)
-            raise ProfException(ProfException.PROF_CLUSTER_INVALID_DB)
-        return True
-
     def check_argument_valid(self: any) -> None:
         """
         Check the argument valid
@@ -172,3 +157,18 @@ class QueryCommand:
                           ' please check the db(%s)' % (dir_name, os.path.join(sqlite_path, 'sqlite\\cluster_rank.db')))
             return []
         return MsprofQueryData.query_cluster_data(sqlite_path, cluster_info_list)
+
+    def _check_cluster_sqlite_db(self: any, sqlite_path: str) -> bool:
+        if not os.path.exists(sqlite_path):
+            return False
+        rank_db_path = sqlite_path + '\\' + DBNameConstant.DB_CLUSTER_RANK
+        step_db_path = sqlite_path + '\\' + DBNameConstant.DB_CLUSTER_STEP_TRACE
+        if not os.path.exists(rank_db_path):
+            warn(self.FILE_NAME, "cluster_rank.db not created in the dir(%s), "
+                                 "please import --cluster first!" % sqlite_path)
+            raise ProfException(ProfException.PROF_CLUSTER_INVALID_DB)
+        if not os.path.exists(step_db_path):
+            warn(self.FILE_NAME, "cluster_step_trace.db not created in the dir(%s), "
+                            "please import --cluster first!" % sqlite_path)
+            raise ProfException(ProfException.PROF_CLUSTER_INVALID_DB)
+        return True

@@ -99,7 +99,7 @@ class ImportCommand:
         check_path_valid(self.collection_path, False)
         if DataCheckManager.contain_info_json_data(self.collection_path):
             error(MsProfCommonConstant.COMMON_FILE_NAME, 'Incorrect parse dir(%s),'
-                                                         '-dir argument must be cluster data root dir.' % self.collection_path)
+                                     '-dir argument must be cluster data root dir.' % self.collection_path)
             raise ProfException(ProfException.PROF_CLUSTER_DIR_ERROR)
         _unparsed_dirs = {}
         first_sub_dirs = get_path_dir(self.collection_path)
@@ -110,7 +110,7 @@ class ImportCommand:
                     os.path.join(self.collection_path, first_sub_dir))
             if DataCheckManager.contain_info_json_data(first_sub_path):
                 error(MsProfCommonConstant.COMMON_FILE_NAME, 'Incorrect parse dir(%s),'
-                                                             '-dir argument must be cluster data root dir.' % self.collection_path)
+                                         '-dir argument must be cluster data root dir.' % self.collection_path)
                 raise ProfException(ProfException.PROF_CLUSTER_DIR_ERROR)
             _unparsed_second_dirs = []
             second_sub_dirs = get_path_dir(first_sub_path)
