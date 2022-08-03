@@ -58,8 +58,8 @@ class ClusterInfoParser(IParser):
         if not self.cluster_info_list:
             logging.error('no valid cluster data')
             return
+        cluster_model = ClusterInfoModel(self.collect_path)
         try:
-            cluster_model = ClusterInfoModel(self.collect_path)
             if cluster_model.init():
                 cluster_model.flush(self.cluster_info_list)
                 cluster_model.finalize()
