@@ -53,8 +53,8 @@ class ImportCommand:
         if self.cluster_flag is False:
             self._process_parse()
         else:
-            prepare_for_parse(self.collection_path)
             _unparsed_dirs = self._check_cluster_path()
+            prepare_for_parse(self.collection_path)
             if _unparsed_dirs:
                 self._parse_unparsed_dirs(_unparsed_dirs)
             sqlite_path = os.path.realpath(os.path.join(self.collection_path, 'sqlite'))
