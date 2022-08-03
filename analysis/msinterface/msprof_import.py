@@ -19,6 +19,7 @@ from common_func.msprof_common import get_path_dir
 from common_func.msprof_exception import ProfException
 from framework.load_info_manager import LoadInfoManager
 from msparser.cluster.cluster_info_parser import ClusterInfoParser
+from msparser.cluster.cluster_step_trace_parser import ClusterStepTraceParser
 
 
 class ImportCommand:
@@ -64,6 +65,8 @@ class ImportCommand:
                        'Start parse cluster data in "%s" ...' % self.collection_path)
             cluster_info_parser = ClusterInfoParser(self.collection_path)
             cluster_info_parser.ms_run()
+            cluster_step_trace_parser = ClusterStepTraceParser(self.collection_path)
+            cluster_step_trace_parser.ms_run()
             print_info(MsProfCommonConstant.COMMON_FILE_NAME,
                        'cluster data parse finished!')
 
