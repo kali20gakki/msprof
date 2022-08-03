@@ -10,10 +10,10 @@ import logging
 import os
 from operator import itemgetter
 
-from common_func.common import print_msg, init_log
+from common_func.common import print_msg
 from common_func.common import warn
 from common_func.data_check_manager import DataCheckManager
-from common_func.db_manager import DBManager
+from common_func.common import error
 from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.msprof_common import check_path_valid
@@ -82,19 +82,18 @@ class QueryCommand:
             print_msg(str(header).ljust(max_column_list[index], ' '), end="\t")
         print_msg("\n")
 
-    @classmethod
-    def _check_cluster_sqlite_db(cls: any, sqlite_path: str) -> bool:
+    def _check_cluster_sqlite_db(self: any, sqlite_path: str) -> bool:
         if not os.path.exists(sqlite_path):
             return False
-        rank_db_path = sqlite_path + '\\' + DBNameConstant.DB_CLUSTER
+        rank_db_path = sqlite_path + '\\' + DBNameConstant.DB_CLUSTER_RANK
         step_db_path = sqlite_path + '\\' + DBNameConstant.DB_CLUSTER_STEP_TRACE
         if not os.path.exists(rank_db_path):
-            logging.warning("rank.db not created in the dir(%s), "
-                            "please import --cluster first!", sqlite_path)
+            warn(self.FILE_NAME, "cluster_rank.db not created in the dir(%s), "
+                                 "please import --cluster first!" % sqlite_path)
             raise ProfException(ProfException.PROF_CLUSTER_INVALID_DB)
         if not os.path.exists(step_db_path):
-            logging.warning("step_trace.db not created in the dir(%s), "
-                            "please import --cluster first!", sqlite_path)
+            warn(self.FILE_NAME, "cluster_step_trace.db not created in the dir(%s), "
+                            "please import --cluster first!" % sqlite_path)
             raise ProfException(ProfException.PROF_CLUSTER_INVALID_DB)
         return True
 
@@ -169,7 +168,7 @@ class QueryCommand:
         if cluster_info_list and dir_name:
             cluster_info_list = list(filter(lambda x: x[-1] == dir_name, cluster_info_list))
         if not cluster_info_list:
-            logging.error('table ClusterRank do not exist or table ClusterRank do not have the dirname(%s) data!'
-                          ' please check the db(%s)', dir_name, os.path.join(sqlite_path, '\\rank.db'))
+            error(self.FILE_NAME, 'Table ClusterRank does not exist or dirname(%s) data is not in table ClusterRank!'
+                          ' please check the db(%s)' % (dir_name, os.path.join(sqlite_path, 'sqlite\\cluster_rank.db')))
             return []
         return MsprofQueryData.query_cluster_data(sqlite_path, cluster_info_list)

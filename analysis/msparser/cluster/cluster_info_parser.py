@@ -53,14 +53,16 @@ class ClusterInfoParser(IParser):
                     self.cluster_info_list.append(cluster_info)
 
     def save(self: any) -> None:
-        if os.path.exists(PathManager.get_db_path(self.collect_path, DBNameConstant.DB_CLUSTER)):
-            os.remove(PathManager.get_db_path(self.collect_path, DBNameConstant.DB_CLUSTER))
+        if os.path.exists(PathManager.get_db_path(self.collect_path, DBNameConstant.DB_CLUSTER_RANK)):
+            os.remove(PathManager.get_db_path(self.collect_path, DBNameConstant.DB_CLUSTER_RANK))
+        if not self.cluster_info_list:
+            logging.error('no valid cluster data')
+            return
         try:
-            if self.cluster_info_list:
-                cluster_model = ClusterInfoModel(self.collect_path)
-                if cluster_model.init():
-                    cluster_model.flush(self.cluster_info_list)
-                    cluster_model.finalize()
+            cluster_model = ClusterInfoModel(self.collect_path)
+            if cluster_model.init():
+                cluster_model.flush(self.cluster_info_list)
+                cluster_model.finalize()
         except sqlite3.Error as trace_err:
             logging.error("Save cluster rank_id failed, "
                           "%s", str(trace_err), exc_info=Constant.TRACE_BACK_SWITCH)

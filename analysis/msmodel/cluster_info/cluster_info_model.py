@@ -13,7 +13,7 @@ class ClusterInfoModel(ParserModel):
     class used to operate cluster db
     """
     def __init__(self: any, result_dir: str) -> None:
-        super().__init__(result_dir, DBNameConstant.DB_CLUSTER, [DBNameConstant.TABLE_CLUSTER_RANK])
+        super().__init__(result_dir, DBNameConstant.DB_CLUSTER_RANK, [DBNameConstant.TABLE_CLUSTER_RANK])
 
     def flush(self: any, data_list: list) -> None:
         """
