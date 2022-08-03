@@ -169,7 +169,7 @@ class QueryCommand:
         if cluster_info_list and dir_name:
             cluster_info_list = list(filter(lambda x: x[-1] == dir_name, cluster_info_list))
         if not cluster_info_list:
-            logging.error('table ClusterRank do not exist or table ClusterRank data is empty!'
-                          ' please check the dir(%s)', os.path.join(sqlite_path, '\\rank.db'))
+            logging.error('table ClusterRank do not exist or table ClusterRank do not have the dirname(%s) data!'
+                          ' please check the db(%s)', dir_name, os.path.join(sqlite_path, '\\rank.db'))
             return []
         return MsprofQueryData.query_cluster_data(sqlite_path, cluster_info_list)
