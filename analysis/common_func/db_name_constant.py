@@ -57,7 +57,7 @@ class DBNameConstant(metaclass=ABCMeta):
     DB_LOW_POWER = "lowpower.db"
     DB_BIU_PERF = "biu_perf.db"
     DB_CLUSTER = "rank.db"
-    DB_CLUSTER_STEP_TRACE = 'step_trace_cluster.db'
+    DB_CLUSTER_STEP_TRACE = 'cluster_step_trace.db'
 
     # DB tables
     TABLE_ACL_DATA = "acl_data"
