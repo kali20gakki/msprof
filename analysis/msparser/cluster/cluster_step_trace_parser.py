@@ -28,7 +28,7 @@ class ClusterStepTraceParser(IParser):
         self.cluster_model = None
 
     def ms_run(self):
-        if DBNameConstant.DB_CLUSTER not in os.listdir(os.path.join(self.collection_path, PathManager.SQLITE)):
+        if DBNameConstant.DB_CLUSTER_RANK not in os.listdir(os.path.join(self.collection_path, PathManager.SQLITE)):
             logging.error("no valid cluster data")
             return
         self.parse()
@@ -65,7 +65,7 @@ class ClusterStepTraceParser(IParser):
         return True
 
     def _collect_project_paths(self: any) -> None:
-        rank_db_path = PathManager.get_db_path(self.collection_path, DBNameConstant.DB_CLUSTER)
+        rank_db_path = PathManager.get_db_path(self.collection_path, DBNameConstant.DB_CLUSTER_RANK)
         conn, curs = DBManager.check_connect_db_path(rank_db_path)
         if not conn or not curs or not DBManager.check_tables_in_db(rank_db_path, DBNameConstant.TABLE_CLUSTER_RANK):
             DBManager.destroy_db_connect(conn, curs)

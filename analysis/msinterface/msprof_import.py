@@ -11,8 +11,7 @@ from common_func.common import warn, print_info
 from common_func.config_mgr import ConfigMgr
 from common_func.data_check_manager import DataCheckManager
 from common_func.msprof_common import analyze_collect_data, prepare_for_parse
-from common_func.msprof_common import check_collection_dir
-from common_func.msvp_common import check_dir_writable
+from common_func.common import error
 from common_func.msprof_common import MsProfCommonConstant
 from common_func.msprof_common import check_path_valid
 from common_func.msprof_common import get_path_dir
@@ -91,7 +90,7 @@ class ImportCommand:
                 LoadInfoManager.load_info(sub_path)
                 self.do_import(sub_path)
             elif collect_path and is_cluster:
-                warn(self.FILE_NAME, 'Invalid parsing dir("%s"), -dir must be profiling data dir '
+                warn(self.FILE_NAME, 'Invalid parsing dir("%s"), -dir must be profiling data dir. '
                                      'such as PROF_XXX_XXX_XXX' % collect_path)
             else:
                 self._process_sub_dirs(sub_dir, is_cluster=True)
@@ -99,9 +98,8 @@ class ImportCommand:
     def _check_cluster_path(self: any) -> list:
         check_path_valid(self.collection_path, False)
         if DataCheckManager.contain_info_json_data(self.collection_path):
-            logging.error('Incorrect parse dir(%s), '
-                          '-dir argument must be cluster data root dir',
-                          self.collection_path)
+            error(MsProfCommonConstant.COMMON_FILE_NAME, 'Incorrect parse dir(%s),'
+                                                         '-dir argument must be cluster data root dir.' % self.collection_path)
             raise ProfException(ProfException.PROF_CLUSTER_DIR_ERROR)
         _unparsed_dirs = {}
         first_sub_dirs = get_path_dir(self.collection_path)
@@ -111,9 +109,8 @@ class ImportCommand:
             first_sub_path = os.path.realpath(
                     os.path.join(self.collection_path, first_sub_dir))
             if DataCheckManager.contain_info_json_data(first_sub_path):
-                logging.error('Incorrect parse dir(%s), '
-                              '-dir argument must be cluster data root dir',
-                              self.collection_path)
+                error(MsProfCommonConstant.COMMON_FILE_NAME, 'Incorrect parse dir(%s),'
+                                                             '-dir argument must be cluster data root dir.' % self.collection_path)
                 raise ProfException(ProfException.PROF_CLUSTER_DIR_ERROR)
             _unparsed_second_dirs = []
             second_sub_dirs = get_path_dir(first_sub_path)
@@ -121,12 +118,12 @@ class ImportCommand:
                 second_sub_path = os.path.realpath(
                         os.path.join(first_sub_path, second_sub_dir))
                 if not DataCheckManager.contain_info_json_data(second_sub_path):
-                    logging.error('The path (%s) is not a correct PROF dir, '
-                                  'Please check the path.', first_sub_path)
+                    error(MsProfCommonConstant.COMMON_FILE_NAME, 'The path (%s) is not a correct PROF dir.'
+                                                                 ' Please check the path.' % first_sub_path)
                     _unparsed_second_dirs = []
                     break
-                third_sub_dirs = get_path_dir(second_sub_path)
-                if 'sqlite' not in third_sub_dirs:
+                sqlite_path = os.path.join(second_sub_path, 'sqlite')
+                if not os.path.exists(sqlite_path) or not os.listdir(sqlite_path):
                     _unparsed_second_dirs.append(second_sub_dir)
             if _unparsed_second_dirs:
                 _unparsed_dirs.setdefault(first_sub_dir, _unparsed_second_dirs)

@@ -56,7 +56,7 @@ class DBNameConstant(metaclass=ABCMeta):
     DB_STARS_CHIP_TRANS = "chip_trans.db"
     DB_LOW_POWER = "lowpower.db"
     DB_BIU_PERF = "biu_perf.db"
-    DB_CLUSTER = "rank.db"
+    DB_CLUSTER_RANK = "cluster_rank.db"
     DB_CLUSTER_STEP_TRACE = 'cluster_step_trace.db'
 
     # DB tables
