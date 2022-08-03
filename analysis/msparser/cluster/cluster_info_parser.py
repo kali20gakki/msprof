@@ -75,11 +75,12 @@ class ClusterInfoParser(IParser):
         if rank_id == -1:
             logging.error("the data is not collected in a clustered environment, please check the directory: %s",
                           second_sub_path)
-            raise ProfException(ProfException().PROF_CLUSTER_DIR_ERROR)
+            raise ProfException(ProfException.PROF_CLUSTER_DIR_ERROR)
         if rank_id in self.rank_id_set:
-            logging.error("parsing not supported! There are different collect data in the dir(%s)")
-            raise ProfException(ProfException().PROF_CLUSTER_DIR_ERROR)
-        if not rank_id:
+            logging.error("parsing not supported! There are different collect data in the dir(%s)"
+                          , second_sub_path)
+            raise ProfException(ProfException.PROF_CLUSTER_DIR_ERROR)
+        if rank_id is None:
             logging.error("No rank id found in the file of info.json, "
                           "please check the info.json under the directory: %s", second_sub_path)
             return []
