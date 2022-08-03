@@ -37,8 +37,6 @@ class ClusterInfoParser(IParser):
     def parse(self: any) -> None:
         first_sub_dirs = get_path_dir(self.collect_path)
         for first_sub_dir in first_sub_dirs:
-            if first_sub_dir == 'sqlite' or first_sub_dir == 'log' or first_sub_dir == 'query':
-                continue
             first_sub_path = os.path.realpath(
                 os.path.join(self.collect_path, first_sub_dir))
             second_sub_dirs = get_path_dir(first_sub_path)

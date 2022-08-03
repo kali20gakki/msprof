@@ -13,7 +13,6 @@ class TestImportCommand(unittest.TestCase):
         args_dic = {"collection_path": "test", "cluster_flag": False}
         args = Namespace(**args_dic)
         with mock.patch(NAMESPACE + '.ConfigMgr.read_sample_config', return_value=True), \
-                mock.patch(NAMESPACE + '.check_collection_dir'), \
                 mock.patch(NAMESPACE + '.analyze_collect_data'):
             key = ImportCommand(args)
             key.do_import(result_dir)
