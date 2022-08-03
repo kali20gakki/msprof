@@ -104,8 +104,6 @@ class ImportCommand:
         _unparsed_dirs = {}
         first_sub_dirs = get_path_dir(self.collection_path)
         for first_sub_dir in first_sub_dirs:
-            if first_sub_dir == 'sqlite' or first_sub_dir == 'log' or first_sub_dir == 'query':
-                continue
             first_sub_path = os.path.realpath(
                     os.path.join(self.collection_path, first_sub_dir))
             if DataCheckManager.contain_info_json_data(first_sub_path):
@@ -127,7 +125,6 @@ class ImportCommand:
                     _unparsed_second_dirs.append(second_sub_dir)
             if _unparsed_second_dirs:
                 _unparsed_dirs.setdefault(first_sub_dir, _unparsed_second_dirs)
-
         return _unparsed_dirs
 
     def _parse_unparsed_dirs(self: any, unparsed_dirs: list) -> None:
