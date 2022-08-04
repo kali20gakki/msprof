@@ -19,10 +19,11 @@ class AllReduceStreamHandler(StepTraceTagHandler):
     def receive_record(self: any, record: dict) -> None:
         """
         receive record of step trace
-        :param record: contain model_id, tag_id, timestamp
+        :param record: contain model_id, tag_id, timestamp, stream id
         :return: void
         """
-        self.process_record(record)
+        stream_id = record.get(StepTraceConstant.STREAM_ID)
+        self.next_handler_group[stream_id].receive_record(record)
 
     def get_data(self: any) -> list:
         """
@@ -33,15 +34,6 @@ class AllReduceStreamHandler(StepTraceTagHandler):
         for next_handler in self.next_handler_group.values():
             self.collect_data.extend(next_handler.get_data())
         return self.collect_data
-
-    def process_record(self: any, record: dict) -> None:
-        """
-        get reduce start, reduce end from record
-        :param record: contain model_id, tag_id, timestamp
-        :return: void
-        """
-        stream_id = record.get(StepTraceConstant.STREAM_ID)
-        self.next_handler_group[stream_id].receive_record(record)
 
 
 class AllReduceTagHandler(StepTraceTagHandler):
