@@ -130,7 +130,8 @@ class CreateAllReduce(CreateSubTable):
     def create_table(cls: any, conn: any) -> None:
         create_sql = "create table if not exists {}" \
                      "(device_id int, model_id int," \
-                     "iteration_end int, start int, end int)".format(DBNameConstant.TABLE_ALL_REDUCE)
+                     "iteration_end int, start int, end int, primary key(device_id," \
+                     "iteration_end, start))".format(DBNameConstant.TABLE_ALL_REDUCE)
 
         DBManager.execute_sql(conn, create_sql)
 
