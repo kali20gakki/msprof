@@ -8,13 +8,13 @@ from mscalculate.interface.step_trace_tag_handler import StepTraceTagHandler
 from common_func.step_trace_constant import StepTraceConstant
 
 
-class AllReduceTagHandler(StepTraceTagHandler):
+class AllReduceStreamHandler(StepTraceTagHandler):
     """
     get all reduce data
     """
     def __init__(self: any) -> None:
         self.collect_data = []
-        self.next_handler_group = defaultdict(AllReduceForStream)
+        self.next_handler_group = defaultdict(AllReduceTagHandler)
 
     def receive_record(self: any, record: dict) -> None:
         """
@@ -29,6 +29,7 @@ class AllReduceTagHandler(StepTraceTagHandler):
         return data of this handler
         :return: list
         """
+        self.collect_data = []
         for next_handler in self.next_handler_group.values():
             self.collect_data.extend(next_handler.get_data())
         return self.collect_data
@@ -43,14 +44,32 @@ class AllReduceTagHandler(StepTraceTagHandler):
         self.next_handler_group[stream_id].receive_record(record)
 
 
-class AllReduceForStream(StepTraceTagHandler):
+class AllReduceTagHandler(StepTraceTagHandler):
     """
-    get each all reduce for stream
+    get all reduce data
     """
+
     def __init__(self: any) -> None:
         self.collect_data = []
 
     def receive_record(self: any, record: dict) -> None:
+        """
+        receive record of step trace
+        :param record: contain model_id, tag_id, timestamp
+        :return: void
+        """
+        self.process_record(record)
+
+    def get_data(self: any) -> list:
+        """
+        return data of this handler
+        :return: dict
+        """
+
+        return self.collect_data
+
+    def process_record(self: any, record: dict) -> None:
+
         """
         get reduce start, reduce end from record
         :param record: contain model_id, tag_id, timestamp
@@ -62,13 +81,6 @@ class AllReduceForStream(StepTraceTagHandler):
                  StepTraceConstant.REDUCE_END: None})
         if record[StepTraceConstant.TAG_ID] % 2 and self.collect_data:
             self.collect_data[-1][StepTraceConstant.REDUCE_END] = record[StepTraceConstant.TIME_STAMP]
-
-    def get_data(self: any) -> list:
-        """
-        return data of this handler
-        :return: list
-        """
-        return self.collect_data
 
 
 class TrainingTraceTagHandler(StepTraceTagHandler):
