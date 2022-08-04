@@ -176,7 +176,7 @@ int ReceiveData::DoReport(CONST_REPORT_DATA_PTR rData)
             break;
         }
         if (moduleName_ == "runtime" && rData->deviceId >= 64) {  // runtime module, deviceid 64, return
-            MSPROF_LOGE("module:%s, invalid device id:%d", moduleName_.c_str(), rData->deviceId);
+            MSPROF_LOGI("module:%s, invalid device id:%d", moduleName_.c_str(), rData->deviceId);
             return PROFILING_SUCCESS;
         }
         dataChunk.deviceId = rData->deviceId;
