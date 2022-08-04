@@ -4,6 +4,7 @@
 This scripts is used to parse some project path profiling data
 Copyright Huawei Technologies Co., Ltd. 2019-2020. All rights reserved.
 """
+import datetime
 import logging
 import os
 
@@ -58,9 +59,6 @@ class ImportCommand:
             prepare_for_parse(self.collection_path)
             if _unparsed_dirs:
                 self._parse_unparsed_dirs(_unparsed_dirs)
-            sqlite_path = os.path.realpath(os.path.join(self.collection_path, 'sqlite'))
-            if not os.path.exists(sqlite_path):
-                os.makedirs(sqlite_path)
             print_info(MsProfCommonConstant.COMMON_FILE_NAME,
                        'Start parse cluster data in "%s" ...' % self.collection_path)
             cluster_info_parser = ClusterInfoParser(self.collection_path)
@@ -96,7 +94,6 @@ class ImportCommand:
                 self._process_sub_dirs(sub_dir, is_cluster=True)
 
     def _check_cluster_path(self: any) -> list:
-        check_path_valid(self.collection_path, False)
         if DataCheckManager.contain_info_json_data(self.collection_path):
             error(MsProfCommonConstant.COMMON_FILE_NAME, 'Incorrect parse dir(%s),'
                                      '-dir argument must be cluster data root dir.' % self.collection_path)
