@@ -148,7 +148,7 @@ int Application::LaunchApp(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParam
         MSPROF_LOGE("app params are not valid");
         return PROFILING_FAILED;
     }
-    std::string workDirPath = params->app_dir + MSVP_SLASH +params->app;
+    std::string workDirPath = params->app_dir + MSVP_SLASH + params->app;
     std::vector<std::string> argsVec;
     std::vector<std::string> envsVec;
     PrepareAppArgs(paramsCmd, argsVec);  // args
