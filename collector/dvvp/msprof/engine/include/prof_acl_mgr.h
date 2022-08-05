@@ -114,6 +114,7 @@ public:
     std::string GetParamJsonStr();
     // task datatypeconfig add
     void AddAiCpuModelConf(uint64_t &dataTypeConfig) const;
+    void AddRuntimeTraceConf(uint64_t &dataTypeConfig) const;
 
 public:
     int32_t MsprofInitForDynamic(VOID_PTR data, uint32_t len) const;
