@@ -386,6 +386,7 @@ class ExportCommand:
             return min(model_match_set)
         sql = "select model_id, max(index_id) from {} group by model_id".format(DBNameConstant.TABLE_STEP_TRACE_DATA)
         model_and_index = sorted(DBManager.fetch_all_data(curs, sql), key=itemgetter(1, 0))
+        DBManager.destroy_db_connect(conn, curs)
         return model_and_index.pop()[0] if model_and_index else min(model_match_set)
 
     def _prepare_for_export(self: any, result_dir: str) -> None:
