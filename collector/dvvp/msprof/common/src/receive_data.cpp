@@ -175,6 +175,10 @@ int ReceiveData::DoReport(CONST_REPORT_DATA_PTR rData)
                         rData->tag, rData->dataLen, RECEIVE_CHUNK_SIZE);
             break;
         }
+        if (moduleName_ == "runtime" && rData->deviceId >= 64) {  // module runtime, deviceid>=64, return
+            MSPROF_LOGW("module:%s, invalid device id:%d", moduleName_.c_str(), rData->deviceId);
+            return PROFILING_SUCCESS;
+        }
         dataChunk.deviceId = rData->deviceId;
         dataChunk.reportTime = startRawTime;
         dataChunk.dataLen = rData->dataLen;
