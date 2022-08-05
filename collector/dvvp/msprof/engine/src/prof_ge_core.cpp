@@ -418,6 +418,7 @@ Status aclgrphProfStart(ACL_GRPH_PROF_CONFIG_PTR profilerConfig)
     MSPROF_LOGI("Allocate start profiling config to Ge");
     uint64_t dataTypeConfig = profilerConfig->config.dataTypeConfig;
     ProfAclMgr::instance()->AddModelLoadConf(dataTypeConfig);
+    ProfAclMgr::instance()->AddRuntimeTraceConf(dataTypeConfig);
     Status geRet = static_cast<Status>(CommandHandleProfStart(
         profilerConfig->config.devIdList, profilerConfig->config.devNums, dataTypeConfig | PROF_OP_DETAIL));
     RETURN_IF_NOT_SUCCESS(geRet);
@@ -460,6 +461,7 @@ Status aclgrphProfStop(ACL_GRPH_PROF_CONFIG_PTR profilerConfig)
 
     MSPROF_LOGI("Allocate stop config of profiling modules to Acl");
     ProfAclMgr::instance()->AddModelLoadConf(dataTypeConfig);
+    ProfAclMgr::instance()->AddRuntimeTraceConf(dataTypeConfig);
     Status geRet = static_cast<Status>(CommandHandleProfStop(
         profilerConfig->config.devIdList, profilerConfig->config.devNums, dataTypeConfig | PROF_OP_DETAIL));
     RETURN_IF_NOT_SUCCESS(geRet);

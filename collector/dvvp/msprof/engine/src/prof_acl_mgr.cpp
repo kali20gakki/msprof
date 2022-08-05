@@ -533,6 +533,11 @@ void ProfAclMgr::AddAiCpuModelConf(uint64_t &dataTypeConfig) const
     dataTypeConfig |= PROF_AICPU_MODEL;
 }
 
+void ProfAclMgr::AddRuntimeTraceConf(uint64_t &dataTypeConfig) const
+{
+    dataTypeConfig |= PROF_RUNTIME_TRACE;
+}
+
 int ProfAclMgr::ProfAclModelSubscribe(const uint32_t modelId, const uint32_t devId,
                                       PROF_SUB_CONF_CONST_PTR profSubscribeConfig)
 {
