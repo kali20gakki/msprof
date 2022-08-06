@@ -4,7 +4,7 @@ Copyright Huawei Technologies Co., Ltd. 2021. All rights reserved.
 """
 import collections
 
-from mscalculate.step_trace.tag_handler.iter_info_handler import AllReduceTagHandler
+from mscalculate.step_trace.tag_handler.iter_info_handler import AllReduceStreamHandler
 from mscalculate.step_trace.tag_handler.iter_info_handler import TrainingTraceTagHandler
 from mscalculate.step_trace.tag_handler.state_machine.index_tracer import IndexTracker
 from mscalculate.interface.step_trace_tag_handler import StepTraceTagHandler
@@ -113,7 +113,7 @@ class DispatchIterInfoHandler(StepTraceTagHandler):
     def __init__(self: any) -> None:
         self.next_handler = None
         self.next_handler_group = {
-            StepTraceConstant.ALL_REDUCE: AllReduceTagHandler(),
+            StepTraceConstant.ALL_REDUCE: AllReduceStreamHandler(),
             StepTraceConstant.TRAINING_TRACE: TrainingTraceTagHandler()
         }
         self.collect_data = {}

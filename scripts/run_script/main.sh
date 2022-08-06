@@ -137,6 +137,15 @@ function remove_latest_link() {
 function add_latest_link() {
 	local latest_path=$1
     ln -sf ../${VERSION}/${MSPROF_RUN_NAME} ${latest_path}/${MSPROF_RUN_NAME}
+
+	local arch_name="${package_arch}-linux"
+	local latest_bin="${latest_path}/${arch_name}/bin"
+	local msprof_relative_location="../../../${VERSION}/tools/profiler/bin/msprof"
+	if [ -f ${install_path}/${MSPROF_PATH}/${MSPROF} ] && [ -d ${latest_bin} ]; then
+		chmod u+w ${latest_bin}
+		ln -sf ${msprof_relative_location} ${latest_bin}/${MSPROF}
+		chmod u-w ${latest_bin}
+	fi
 }
 
 function regist_uninstall() {

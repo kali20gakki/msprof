@@ -23,6 +23,7 @@ class StepTraceConstant:
     STEP_START = "step_start"
     STEP_END = "step_end"
     MODEL_ID = "model_id"
+    STREAM_ID = "stream_id"
     ALL_REDUCE = "all_reduce"
     REDUCE_START = "reduce_start"
     REDUCE_END = "reduce_end"

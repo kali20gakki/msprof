@@ -22,14 +22,12 @@
 #include <sstream>
 #include <string>
 #include <vector>
-#include "errno/error_code.h"
-#include "mmpa_plugin.h"
-#include "msprof_dlog.h"
-#include "msprof_error_manager.h"
+#include "mmpa_api.h"
 
 template <typename T>
 using SHARED_PTR_ALIA = std::shared_ptr<T>;
-
+using mmProcess = Collector::Dvvp::Mmpa::mmProcess;
+using mmArgvEnv = Collector::Dvvp::Mmpa::mmArgvEnv;
 namespace analysis {
 namespace dvvp {
 namespace common {
@@ -466,7 +464,6 @@ public:
     static int ExecCmdC(const ExecCmdArgv &execCmdArgv, const ExecCmdParams &execCmdParams, int &exitCodeP);
     static int ExecCmdCAsync(const ExecCmdArgv &execCmdArgv, const ExecCmdParams &execCmdParams,
                              mmProcess &childProcess);
-    static int GetWorkDirPath(std::vector<std::string> &paramCmd, std::string &workDirPath);
     static int ChangeWorkDir(const std::string &fileName);
     static void SetArgEnv(CHAR_PTR_CONST argv[], const int argvCount, CHAR_PTR_CONST envp[],
                           const int envCount, mmArgvEnv &argvEnv);
