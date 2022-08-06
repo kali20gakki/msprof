@@ -56,7 +56,6 @@ class AllReduceTagHandler(StepTraceTagHandler):
         return data of this handler
         :return: dict
         """
-
         return self.collect_data
 
     def process_record(self: any, record: dict) -> None:
