@@ -134,6 +134,7 @@ class DispatchIterInfoHandler(StepTraceTagHandler):
         """
         for key, next_handler in self.next_handler_group.items():
             self.collect_data[key] = next_handler.get_data()
+
         return self.collect_data
 
     def set_next(self: any, tag_id: int) -> bool:

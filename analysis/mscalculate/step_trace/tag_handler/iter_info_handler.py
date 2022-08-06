@@ -40,7 +40,6 @@ class AllReduceTagHandler(StepTraceTagHandler):
     """
     get all reduce data
     """
-
     def __init__(self: any) -> None:
         self.collect_data = []
 
@@ -61,7 +60,6 @@ class AllReduceTagHandler(StepTraceTagHandler):
         return self.collect_data
 
     def process_record(self: any, record: dict) -> None:
-
         """
         get reduce start, reduce end from record
         :param record: contain model_id, tag_id, timestamp
