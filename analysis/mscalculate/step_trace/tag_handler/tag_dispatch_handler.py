@@ -158,5 +158,4 @@ class DispatchIterInfoHandler(StepTraceTagHandler):
         clear collect data
         :return: void
         """
-        for next_handler in self.next_handler_group.values():
-            next_handler.collect_data.clear()
+        self.__init__()
