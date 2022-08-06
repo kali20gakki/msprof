@@ -39,6 +39,7 @@ private:
     static void SourceEnv(std::vector<std::string> &argsVec);
     static std::string GetAppPath(std::vector<std::string> paramsCmd);
     static std::string GetCmdString(const std::string paramsName);
+    static int CanonicalizeAppParam(std::vector<std::string> &paramsCmd);
 };
 }  // namespace app
 }  // namespace dvvp

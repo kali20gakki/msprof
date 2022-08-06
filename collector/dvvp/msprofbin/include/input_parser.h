@@ -22,6 +22,7 @@ namespace Dvvp {
 namespace Msprof {
 using namespace analysis::dvvp::common::validation;
 using namespace analysis::dvvp::common::utils;
+using mmStructOption = Collector::Dvvp::Mmpa::mmStructOption;
 
 const int THOUSAND = 1000; // 1000 : 1k
 
@@ -173,6 +174,7 @@ private:
     int CheckPythonPathValid(const struct MsprofCmdInfo &cmdInfo) const;
     int CheckOutputValid(const struct MsprofCmdInfo &cmdInfo);
     int CheckStorageLimitValid(const struct MsprofCmdInfo &cmdInfo) const;
+    int GetAppParam(const std::string &appParams);
     int CheckAppValid(const struct MsprofCmdInfo &cmdInfo);
     int CheckEnvironmentValid(const struct MsprofCmdInfo &cmdInfo);
     int CheckSampleModeValid(const struct MsprofCmdInfo &cmdInfo, int opt) const;

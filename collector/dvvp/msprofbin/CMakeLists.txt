@@ -9,7 +9,6 @@ set(msprofBinHeader
     include
     ../
     ../app
-    ${TOP_DIR}/collector/dvvp/depend/inc/mmpa
     ${TOP_DIR}/platform/securec/include
     ${TOP_DIR}/collector/dvvp/depend/inc/slog
     ${TOP_DIR}/opensource/json/include
@@ -29,6 +28,7 @@ set(msprofBinHeader
     ../common/queue
     ../common/statistics
     ../common/validation
+    ../common/mmpa
     ../common/platform
     ../depend/include/stub
     ../msprof/common/include/
@@ -66,6 +66,7 @@ add_executable(msprofbin
     ../common/statistics/perf_count.cpp
     ../common/validation/param_validation.cpp
     ../common/platform/platform.cpp
+    ../common/mmpa/mmpa_api.cpp
     ../depend/stub/error_manager/msprof_error_manager_stub.cpp
     ../driver/devmgmt/ai_drv_dev_api.cpp
     ../driver/devmgmt/ai_drv_dsmi_api.cpp
@@ -93,7 +94,6 @@ add_executable(msprofbin
     ../transport/hdc/hdc_transport.cpp
     ../transport/hdc/device_transport.cpp
     ../transport/hdc/platform/rpc/dev_mgr_api.cpp
-    ../depend/src/mmpa_plugin.cpp
     ../depend/src/plugin_handle.cpp
     ../depend/src/driver_plugin.cpp
     ../depend/src/slog_plugin.cpp

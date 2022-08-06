@@ -1,7 +1,7 @@
 #include <dlfcn.h>
 #include "gtest/gtest.h"
 #include "mockcpp/mockcpp.hpp"
-#include "mmpa_stub.h"
+#include "mmpa_api.h"
 #include <unistd.h>
 #include <memory>
 #include <thread>
@@ -30,6 +30,7 @@ using namespace analysis::dvvp::common::error;
 using namespace Msprof::Engine;
 using namespace Msprof::MsprofTx;
 using namespace analysis::dvvp::proto;
+using namespace Collector::Dvvp::Mmpa;
 
 class MSPROF_TEST: public testing::Test {
 protected:
@@ -139,7 +140,7 @@ int GetDiskFreeSpaceStub(const char *path, mmDiskSize *diskSize) {
     } catch(...) {
         return -1;
     }
-    return EN_OK;
+    return PROFILING_SUCCESS;
 }
 
 TEST_F(MSPROF_TEST, MsprofTxMemPool)

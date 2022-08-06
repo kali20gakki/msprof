@@ -24,13 +24,14 @@
 #include "platform/platform.h"
 #include "transport/hdc/hdc_transport.h"
 #include "prof_task.h"
-#include "mmpa_plugin.h"
+#include "mmpa_api.h"
 
 using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::message;
 using namespace Analysis::Dvvp::JobWrapper;
 using namespace Analysis::Dvvp::MsprofErrMgr;
 using namespace Collector::Dvvp::Plugin;
+using namespace Collector::Dvvp::Mmpa;
 
 class JOB_WRAPPER_PROF_TsCPu_JOB_TEST: public testing::Test {
 protected:
@@ -522,9 +523,9 @@ TEST_F(JOB_WRAPPER_PROF_CTRLCPU_JOB_TEST, Process) {
         .stubs()
         .will(invoke(fake_get_files_perf));
 
-    MOCKER(&MmpaPlugin::MsprofMmCreateTaskWithThreadAttr)
+    MOCKER(&MmCreateTaskWithThreadAttr)
         .stubs()
-        .will(returnValue(EN_OK));
+        .will(returnValue(PROFILING_SUCCESS));
 
     EXPECT_EQ(PROFILING_SUCCESS, profCtrlCpuBasedJob->Process());
 
@@ -546,7 +547,7 @@ TEST_F(JOB_WRAPPER_PROF_CTRLCPU_JOB_TEST, Uninit) {
     collectionJobCfg_->jobParams.events->push_back("0x11");
     collectionJobCfg_->jobParams.cores->push_back(1);
     profCtrlCpuBasedJob->Init(collectionJobCfg_);
-    EXPECT_EQ(PROFILING_FAILED,profCtrlCpuBasedJob->Uninit());
+    EXPECT_EQ(PROFILING_SUCCESS,profCtrlCpuBasedJob->Uninit());
     MOCKER(analysis::dvvp::common::utils::Utils::ExecCmd)
         .stubs()
         .will(returnValue(PROFILING_SUCCESS));
@@ -1174,9 +1175,9 @@ TEST_F(JOB_WRAPPER_PROF_L2_CACHE_JOB_TEST, TaskInit) {
     MOCKER_CPP(&analysis::dvvp::transport::Uploader::Flush)
         .stubs();
 
-    MOCKER(&MmpaPlugin::MsprofMmCreateTaskWithThreadAttr)
+    MOCKER(&MmCreateTaskWithThreadAttr)
         .stubs()
-        .will(returnValue(EN_OK));
+        .will(returnValue(PROFILING_SUCCESS));
 
     MOCKER(pthread_create)
         .stubs()

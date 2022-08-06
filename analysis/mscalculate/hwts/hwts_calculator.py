@@ -16,6 +16,7 @@ from common_func.iter_recorder import IterRecorder
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.constant import Constant
 from common_func.ms_multi_process import MsMultiProcess
+from common_func.msprof_exception import ProfException
 from common_func.msprof_iteration import MsprofIteration
 from common_func.msprof_step import MsprofStep
 from common_func.path_manager import PathManager
@@ -157,8 +158,14 @@ class HwtsCalculator(ICalculator, MsMultiProcess):
                     batch_id]
         else:
             self._iter_model.init()
-            _iter_id = MsprofIteration(self._project_path). \
-                get_iter_id_by_index_id(self._sample_config.get("iter_id"), self._sample_config.get("model_id"))
+            if ProfilingScene().is_mix_operator_and_graph() and \
+                    self._sample_config.get("model_id") != Constant.GE_OP_MODEL_ID:
+                _iter_info = MsprofIteration(self._project_path). \
+                get_iteration_info_by_index_id(self._sample_config.get("iter_id"), self._sample_config.get("model_id"))
+                _iter_id = (_iter_info[0] - 1, _iter_info[0])
+            else:
+                _iter_id = MsprofIteration(self._project_path). \
+                    get_iter_id_by_index_id(self._sample_config.get("iter_id"), self._sample_config.get("model_id"))
             batch_list = self._iter_model.get_batch_list(_iter_id, DBNameConstant.TABLE_HWTS_BATCH)
 
             if len(batch_list) != len(prep_data_res):
@@ -178,7 +185,22 @@ class HwtsCalculator(ICalculator, MsMultiProcess):
         return prep_data_res
 
     def _parse(self: any, all_log_bytes: bytes) -> None:
+        if ProfilingScene().is_mix_operator_and_graph() and \
+                self._sample_config.get("model_id") != Constant.GE_OP_MODEL_ID:
+            _iter_info = MsprofIteration(self._project_path). \
+                get_iteration_info_by_index_id(self._sample_config.get("iter_id"), self._sample_config.get("model_id"))
+            if not _iter_info:
+                logging.warning("can not get the actual iter_info")
+                return
+            self._parse_task_log(all_log_bytes, _iter_info)
+        else:
+            self._parse_task_log(all_log_bytes)
+
+    def _parse_task_log(self: any, all_log_bytes: bytes, _iter_info=None):
         for log_data in Utils.chunks(all_log_bytes, self.HWTS_LOG_SIZE):
             _task_log = HwtsLogBean.decode(log_data)
             if _task_log.is_log_type():
-                self._log_data.append(_task_log)
+                if not _iter_info:
+                    self._log_data.append(_task_log)
+                elif _iter_info[1] <= _task_log.sys_cnt and  _task_log.sys_cnt <= _iter_info[2]:
+                    self._log_data.append(_task_log)

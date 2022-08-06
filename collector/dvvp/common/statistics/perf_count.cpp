@@ -5,7 +5,7 @@
  * Create: 2018-06-13
  */
 #include "perf_count.h"
-using namespace analysis::dvvp::common::error;
+#include "msprof_dlog.h"
 
 namespace Analysis {
 namespace Dvvp {

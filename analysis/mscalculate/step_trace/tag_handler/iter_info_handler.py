@@ -3,8 +3,37 @@ This script is used to load training_trace data from db
 Copyright Huawei Technologies Co., Ltd. 2021. All rights reserved.
 """
 
+from collections import defaultdict
 from mscalculate.interface.step_trace_tag_handler import StepTraceTagHandler
 from common_func.step_trace_constant import StepTraceConstant
+
+
+class AllReduceStreamHandler(StepTraceTagHandler):
+    """
+    get all reduce data
+    """
+    def __init__(self: any) -> None:
+        self.collect_data = []
+        self.next_handler_group = defaultdict(AllReduceTagHandler)
+
+    def receive_record(self: any, record: dict) -> None:
+        """
+        receive record of step trace
+        :param record: contain model_id, tag_id, timestamp, stream id
+        :return: void
+        """
+        stream_id = record.get(StepTraceConstant.STREAM_ID)
+        self.next_handler_group[stream_id].receive_record(record)
+
+    def get_data(self: any) -> list:
+        """
+        return data of this handler
+        :return: list
+        """
+        self.collect_data = []
+        for next_handler in self.next_handler_group.values():
+            self.collect_data.extend(next_handler.get_data())
+        return self.collect_data
 
 
 class AllReduceTagHandler(StepTraceTagHandler):
