@@ -1,9 +1,10 @@
 # !/usr/bin/python
 # coding=utf-8
 """
-This script used to create step trace database model for cluster.
+This script is used to create step trace database model for cluster.
 Copyright Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
 """
+
 import os
 
 from common_func.db_manager import DBManager
@@ -13,9 +14,8 @@ from msmodel.interface.base_model import BaseModel
 
 class ClusterStepTraceModel(BaseModel):
     """
-    step trace model for cluster scene
+    Step trace model for cluster scene.
     """
-
     FORMAT_TABLE_NAME = "ClusterStepTrace"
 
     def __init__(self: any, result_dir: str, db_name: str, table_list: list) -> None:

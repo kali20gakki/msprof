@@ -1,7 +1,7 @@
 # !/usr/bin/python
 # coding=utf-8
 """
-This script used to parse step trace data for cluster.
+This script is used to parse step trace data for cluster.
 Copyright Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
 """
 import logging
@@ -14,7 +14,7 @@ from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
-from common_func.msprof_common import get_path_dir, MsProfCommonConstant
+from common_func.msprof_common import get_path_dir
 from common_func.path_manager import PathManager
 from common_func.step_trace_constant import StepTraceConstant
 from msmodel.step_trace.cluster_step_trace_model import ClusterStepTraceModel
@@ -23,8 +23,9 @@ from msparser.interface.iparser import IParser
 
 class ClusterStepTraceParser(IParser):
     """
-    step trace data parser for cluster scene
+    Step trace data parser for cluster scene.
     """
+    FILE_NAME = os.path.basename(__file__)
 
     def __init__(self: any, collection_path: str) -> None:
         self.collection_path = collection_path
@@ -34,16 +35,16 @@ class ClusterStepTraceParser(IParser):
 
     def ms_run(self: any) -> None:
         if not self._check_collection_path_valid():
-            logging.error("The input dir path doesn't have cluster database, please check.")
-            error(MsProfCommonConstant.COMMON_FILE_NAME,
-                  "The input dir path doesn't have cluster database, please check.")
+            logging.error("The input dir doesn't have cluster database, please check.")
+            error(ClusterStepTraceParser.FILE_NAME,
+                  "The input dir doesn't have cluster database, please check.")
             return
         self.parse()
         self.save()
 
     def parse(self: any) -> None:
         if not self._collect_project_paths():
-            error(MsProfCommonConstant.COMMON_FILE_NAME,
+            error(ClusterStepTraceParser.FILE_NAME,
                   "The cluster step trace parsing failed.")
 
     def save(self: any) -> None:
@@ -55,11 +56,8 @@ class ClusterStepTraceParser(IParser):
         self.cluster_model.finalize()
 
     def _check_collection_path_valid(self: any) -> bool:
-        sqlite_path = PathManager.get_sql_dir(self.collection_path)
-        if os.path.isdir(sqlite_path) and DBNameConstant.DB_CLUSTER_RANK in os.listdir(sqlite_path):
-            return True
-        else:
-            return False
+        db_path = PathManager.get_db_path(self.collection_path, DBNameConstant.DB_CLUSTER_RANK)
+        return os.path.exists(db_path)
 
     def _init_cluster_step_trace_model(self: any) -> bool:
         rank_ids = list(self.id_with_project_path_map.keys())
@@ -67,7 +65,6 @@ class ClusterStepTraceParser(IParser):
             self.id_with_table_map.setdefault(rank_id, "step_trace_{}".format(rank_id))
         self.cluster_model = ClusterStepTraceModel(self.collection_path, DBNameConstant.DB_CLUSTER_STEP_TRACE,
                                                    self.id_with_table_map.values())
-
         if not self.cluster_model.init():
             logging.error("The cluster step trace datebase initialization is failed.")
             return False
