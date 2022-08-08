@@ -99,6 +99,7 @@ class ImportCommand:
                                      '-dir argument must be cluster data root dir.' % self.collection_path)
             raise ProfException(ProfException.PROF_CLUSTER_DIR_ERROR)
         _unparsed_dirs = {}
+        cluster_tag = 0
         first_sub_dirs = get_path_dir(self.collection_path)
         for first_sub_dir in first_sub_dirs:
             first_sub_path = os.path.realpath(
@@ -108,6 +109,8 @@ class ImportCommand:
                                          '-dir argument must be cluster data root dir.' % self.collection_path)
                 raise ProfException(ProfException.PROF_CLUSTER_DIR_ERROR)
             _unparsed_second_dirs = []
+            if not os.listdir(first_sub_path):
+                continue
             second_sub_dirs = get_path_dir(first_sub_path)
             for second_sub_dir in second_sub_dirs:
                 second_sub_path = os.path.realpath(
@@ -115,13 +118,17 @@ class ImportCommand:
                 if not DataCheckManager.contain_info_json_data(second_sub_path):
                     error(MsProfCommonConstant.COMMON_FILE_NAME, 'The path (%s) is not a correct PROF dir.'
                                                                  ' Please check the path.' % first_sub_path)
-                    _unparsed_second_dirs = []
-                    break
+                    continue
+                cluster_tag = cluster_tag + 1
                 sqlite_path = os.path.join(second_sub_path, 'sqlite')
                 if not os.path.exists(sqlite_path) or not os.listdir(sqlite_path):
                     _unparsed_second_dirs.append(second_sub_dir)
             if _unparsed_second_dirs:
                 _unparsed_dirs.setdefault(first_sub_dir, _unparsed_second_dirs)
+        if not cluster_tag:
+            error(MsProfCommonConstant.COMMON_FILE_NAME, 'Incorrect parse dir(%s),'
+                                          '-dir argument must be cluster data root dir.' % self.collection_path)
+            raise ProfException(ProfException.PROF_CLUSTER_DIR_ERROR)
         return _unparsed_dirs
 
     def _parse_unparsed_dirs(self: any, unparsed_dirs: list) -> None:

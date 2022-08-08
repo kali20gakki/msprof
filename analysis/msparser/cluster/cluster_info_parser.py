@@ -39,6 +39,8 @@ class ClusterInfoParser(IParser):
         for first_sub_dir in first_sub_dirs:
             first_sub_path = os.path.realpath(
                 os.path.join(self.collect_path, first_sub_dir))
+            if not os.listdir(first_sub_path):
+                continue
             second_sub_dirs = get_path_dir(first_sub_path)
             for second_sub_dir in second_sub_dirs:
                 if second_sub_dir.find('device') == -1:
@@ -56,6 +58,7 @@ class ClusterInfoParser(IParser):
         if not self.cluster_info_list:
             logging.error('no valid cluster data')
             return
+        sorted(self.cluster_info_list, key = lambda x : x[4] )
         cluster_model = ClusterInfoModel(self.collect_path)
         try:
             if cluster_model.init():

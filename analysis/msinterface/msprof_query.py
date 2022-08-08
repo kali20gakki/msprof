@@ -126,7 +126,8 @@ class QueryCommand:
                     result = self._do_get_query_data(sub_path)
                     result_data.extend(result)
                 else:
-                    warn(self.FILE_NAME, 'Invalid parsing dir("%s"), -dir must be profiling data dir '
+                    warn(self.FILE_NAME, 'Invalid query dir("%s"), if you want to query cluster data, please import '
+                                         '--cluster first! or -dir must be profiling data, '
                                          'such as PROF_XXX_XXX_XXX' % path)
         return result_data
 
