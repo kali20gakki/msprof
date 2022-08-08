@@ -35,6 +35,14 @@ class AllReduceStreamHandler(StepTraceTagHandler):
             self.collect_data.extend(next_handler.get_data())
         return self.collect_data
 
+    def clear(self: any) -> None:
+        """
+        clear next handler
+        :return: void
+        """
+        for next_handler in self.next_handler_group:
+            next_handler.clear()
+
 
 class AllReduceTagHandler(StepTraceTagHandler):
     """
@@ -70,6 +78,13 @@ class AllReduceTagHandler(StepTraceTagHandler):
                  StepTraceConstant.REDUCE_END: None})
         if record[StepTraceConstant.TAG_ID] % 2 and self.collect_data:
             self.collect_data[-1][StepTraceConstant.REDUCE_END] = record[StepTraceConstant.TIME_STAMP]
+
+    def clear(self: any) -> None:
+        """
+        clear collect data
+        :return: void
+        """
+        self.collect_data.clear()
 
 
 class TrainingTraceTagHandler(StepTraceTagHandler):
@@ -111,3 +126,10 @@ class TrainingTraceTagHandler(StepTraceTagHandler):
 
         if record[StepTraceConstant.TAG_ID] == StepTraceConstant.BP_TAG:
             self.collect_data[StepTraceConstant.BACK_PROPAGATION] = record.get(StepTraceConstant.TIME_STAMP)
+
+    def clear(self: any) -> None:
+        """
+        clear collect data
+        :return: void
+        """
+        self.collect_data.clear()
