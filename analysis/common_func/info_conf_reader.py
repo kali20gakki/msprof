@@ -121,12 +121,19 @@ class InfoConfReader:
             devices += str(device_reader) + ","
         return list(filter(None, devices.split(",")))
 
-    def get_rank_id(self: any):
+    def get_rank_id(self: any) -> str:
         """
         get rank_id
         :return: rank_id
         """
-        return self._info_json.get("rank_id")
+        return self._end_info.get("rankId", Constant.NA)
+
+    def get_device_id(self: any) -> str:
+        """
+        get device_id
+        :return: device id
+        """
+        return self._info_json.get("devices", Constant.NA)
 
     def get_job_info(self: any) -> str:
         """
@@ -255,6 +262,15 @@ class InfoConfReader:
             raise ProfException(ProfException.PROF_INVALID_DATA_ERROR)
 
         return biu_sample_cycle
+
+    def get_job_basic_info(self: any) -> list:
+        job_info = self.get_job_info()
+        device_id = self.get_device_id()
+        rank_id = self.get_rank_id()
+        collection_time, _ = InfoConfReader().get_collect_date()
+        if not collection_time:
+            collection_time = Constant.NA
+        return [job_info, device_id, collection_time, rank_id]
 
     def _load_json(self: any, result_path: str) -> None:
         """
