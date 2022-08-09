@@ -20,6 +20,7 @@ from common_func.ms_constant.str_constant import StrConstant
 from common_func.msprof_common import check_path_valid
 from common_func.msprof_common import get_path_dir
 from common_func.msprof_exception import ProfException
+from common_func.msprof_query_summary_manager import MsprofQuerySummaryManager
 from common_func.msprof_query_data import MsprofQueryData
 from common_func.path_manager import PathManager
 from common_func.utils import Utils
@@ -35,8 +36,9 @@ class QueryCommand:
     SHOW_HEADERS = ['Job Info', 'Device ID', 'Dir Name', 'Collection Time',
                     'Model ID', 'Iteration Number', 'Top Time Iteration', 'Rank ID']
 
-    def __init__(self: any, collection_path: str) -> None:
-        self.collection_path = os.path.realpath(collection_path)
+    def __init__(self: any, args: any) -> None:
+        self.args = args
+        self.collection_path = os.path.realpath(args.collection_path)
 
     @staticmethod
     def _calculate_str_length(headers: list, data: list) -> list:
@@ -96,14 +98,24 @@ class QueryCommand:
         handle query command
         :return: None
         """
-        is_cluster_query = self._check_cluster_query()
-        if not is_cluster_query:
-            self.check_argument_valid()
-            table_data = self._get_query_data()
+        self.check_argument_valid()
+        if self._is_query_summary_data():
+            MsprofQuerySummaryManager(self.args).process()
         else:
-            table_data = self._get_cluster_query_data()
-        sorted_table_data = sorted(table_data, key=itemgetter(0, 3))
-        self._format_print(sorted_table_data)
+            if self._check_cluster_query():
+                table_data = self._get_cluster_query_data()
+            else:
+                table_data = self._get_query_data()
+            sorted_table_data = sorted(table_data, key=itemgetter(0, 3))
+            self._format_print(sorted_table_data)
+
+        self.check_argument_valid()
+        if self._is_query_summary_data():
+            MsprofQuerySummaryManager(self.args).process()
+        else:
+            table_data = self._get_query_data()
+            sorted_table_data = sorted(table_data, key=itemgetter(0, 3))
+            self._format_print(sorted_table_data)
 
     def _get_query_data(self: any) -> list:
         result_data = []
@@ -161,3 +173,9 @@ class QueryCommand:
                             "please import --cluster first!" % cluster_sqlite_path)
             raise ProfException(ProfException.PROF_CLUSTER_INVALID_DB)
         return True
+    
+    def _is_query_summary_data(self: any) -> bool:
+        return self.args.id is not None or \
+               self.args.data_type is not None or \
+               self.args.model_id is not None or \
+               self.args.iteration_id is not None
