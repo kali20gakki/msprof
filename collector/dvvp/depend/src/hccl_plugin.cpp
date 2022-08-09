@@ -20,7 +20,7 @@ void HcclPlugin::LoadDriverSo()
     }    
 }
 
-bool HcclPlugin::IsFuncExist(const std::string &funcName) const
+bool HcclPlugin::IsFuncExist(const std::string &funcName)
 {
     PthreadOnce(&loadFlag_, []()->void {HcclPlugin::instance()->LoadDriverSo();});
     return pluginHandle_.IsFuncExist(funcName);
