@@ -59,8 +59,7 @@ class ClusterStepTraceParser(IParser):
         rank_ids = list(self.id_with_project_path_map.keys())
         for rank_id in rank_ids:
             self.id_with_table_map.setdefault(rank_id, "step_trace_{}".format(rank_id))
-        with ClusterStepTraceModel(self.collection_path, DBNameConstant.DB_CLUSTER_STEP_TRACE,
-                                   self.id_with_table_map.values()) as cluster_model:
+        with ClusterStepTraceModel(self.collection_path, self.id_with_table_map.values()) as cluster_model:
             cluster_model.create_table()
             self._collect_and_save_step_trace_data(cluster_model)
 
