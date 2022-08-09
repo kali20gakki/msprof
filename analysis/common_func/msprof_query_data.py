@@ -13,6 +13,7 @@ from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.msprof_common import MsProfCommonConstant
 from common_func.path_manager import PathManager
+from msmodel.step_trace.cluster_step_trace_model import ClusterStepTraceModel
 from profiling_bean.basic_info.query_data_bean import QueryDataBean
 
 
@@ -24,7 +25,8 @@ class MsprofQueryData:
     FILE_NAME = os.path.basename(__file__)
     QUERY_HEADERS = [MsProfCommonConstant.JOB_INFO, MsProfCommonConstant.DEVICE_ID, MsProfCommonConstant.JOB_NAME,
                      MsProfCommonConstant.COLLECTION_TIME, MsProfCommonConstant.MODEL_ID,
-                     MsProfCommonConstant.ITERATION_ID, MsProfCommonConstant.TOP_TIME_ITERATION]
+                     MsProfCommonConstant.ITERATION_ID, MsProfCommonConstant.TOP_TIME_ITERATION,
+                     MsProfCommonConstant.RANK_ID]
     QUERY_TOP_ITERATION_NUM = 5
 
     def __init__(self: any, project_path: str) -> None:
@@ -32,35 +34,21 @@ class MsprofQueryData:
         self.data = []
 
     @classmethod
-    def query_cluster_data(cls: any, sqlite_path: str, cluster_info_list: list) -> list:
+    def query_cluster_data(cls: any, collection_path: str, cluster_info_list: list) -> list:
         cluster_query_data = []
-        for cluster_info in cluster_info_list:
-            rank_id = cluster_info[3]
-            step_table_name = 'step_trace_{0}'.format(rank_id)
-            db_path = PathManager.get_db_path(sqlite_path, DBNameConstant.DB_CLUSTER_STEP_TRACE)
-            trace_conn, trace_curs = DBManager.check_connect_db(sqlite_path,
-                                                                DBNameConstant.DB_CLUSTER_STEP_TRACE)
-            if not trace_conn or not trace_curs \
-                    or not DBManager.check_tables_in_db(db_path, step_table_name):
-                model_info_list = []
-            else:
-                sql = 'select t0.model_id, t0.max_index, group_concat(t0.iteration_id ) from (select t.* from' \
-                      '(select iteration_id, model_id, ge_tag, (select count( * ) + 1 from {0} as t2 where ' \
-                      't2.model_id = t1.model_id and t2.iteration_time > t1.iteration_time ) as top,' \
-                      '(select count(0) from {0} as t3 where t3.model_id = t1.model_id ) as max_index ' \
-                      'from {0} as t1 ) as t where top <= 5 and ge_tag = 1 order by model_id, top)t0 ' \
-                      'group by model_id, max_index'.format(step_table_name)
-                model_info_list = DBManager.fetch_all_data(trace_curs, sql)
-            DBManager.destroy_db_connect(trace_conn, trace_curs)
-            if not model_info_list:
-                data = [cluster_info[0], cluster_info[1], cluster_info[4], cluster_info[2],
-                        'NA', 'NA', 'NA', cluster_info[3]]
-                cluster_query_data.append(data)
-                continue
-            for model_info in model_info_list:
-                data = [cluster_info[0], cluster_info[1], cluster_info[4], cluster_info[2],
-                        model_info[0], model_info[1], model_info[2], cluster_info[3]]
-                cluster_query_data.append(data)
+        with ClusterStepTraceModel(collection_path, []) as cluster_step_trace:
+            for cluster_info in cluster_info_list:
+                step_table_name = 'step_trace_{0}'.format(cluster_info[3])
+                model_info_list = cluster_step_trace.get_model_info(step_table_name)
+                if not model_info_list:
+                    data = [cluster_info[0], cluster_info[1], cluster_info[4], cluster_info[2],
+                            'N/A', 'N/A', 'N/A', cluster_info[3]]
+                    cluster_query_data.append(data)
+                    continue
+                for model_info in model_info_list:
+                    data = [cluster_info[0], cluster_info[1], cluster_info[4], cluster_info[2],
+                            model_info[0], model_info[1], model_info[2], cluster_info[3]]
+                    cluster_query_data.append(data)
         return cluster_query_data
 
     @classmethod
@@ -180,13 +168,15 @@ class MsprofQueryData:
         result = []
         if not iteration_data:
             # Model id and index id should be 'NA' without iteration data
-            data = basic_data + [Constant.NA, Constant.NA, Constant.NA]
+            data = basic_data[:2] + [os.path.basename(self.project_path)] + [basic_data[2]] + \
+                   [Constant.NA, Constant.NA, Constant.NA] + [basic_data[3]]
             query_bean = QueryDataBean(**dict(zip(self.QUERY_HEADERS, data)))
             result.append(query_bean)
             return result
 
         for _data in iteration_data:
-            data = basic_data + list(_data)
+            data = basic_data[:2] + [os.path.basename(self.project_path)] + [basic_data[2]] + \
+                   list(_data) + [basic_data[3]]
             query_bean = QueryDataBean(**dict(zip(self.QUERY_HEADERS, data)))
             result.append(query_bean)
         return result
@@ -196,7 +186,7 @@ class MsprofQueryData:
         Query data with basic info and iteration info.
         :return: list of query data object
         """
-        basic_data = self.get_job_basic_info()
+        basic_data = InfoConfReader().get_job_basic_info()
         if not basic_data:
             return []
 
