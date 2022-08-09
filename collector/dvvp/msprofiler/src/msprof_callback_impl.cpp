@@ -15,6 +15,8 @@
 #include "msprof_tx_manager.h"
 #include "command_handle.h"
 #include "platform/platform.h"
+#include "plugin_handle.h"
+
 
 namespace Analysis {
 namespace Dvvp {
