@@ -109,6 +109,23 @@ void ProfTask::GenerateFileName(bool isStartTime, std::string &filename)
     }
 }
 
+void ProfTask::SaveRankId(analysis::dvvp::proto::CollectionStartEndTime &timeInfo)
+{
+    if (!Utils::IsClusterRunEnv()) {
+        MSPROF_LOGI("It is not cluster run environment.");
+        return;
+    }
+    uint32_t rankId;
+    int32_t ret = HcclPlugin::instance()->MsprofHcomGetRankId(&rankId);
+    if (ret == 0) {
+        MSPROF_LOGI("Get rank id success, rankId=%d.", rankId);
+        timeInfo->set_rankid(rankId);
+    } else {
+        MSPROF_LOGE("Get rank id fail, ret=%d.", ret);
+        timeInfo->set_rankid(12345); //TODO: delete
+    }
+}
+
 int ProfTask::CreateCollectionTimeInfo(std::string collectionTime, bool isStartTime)
 {
     MSPROF_LOGI("[CreateCollectionTimeInfo]collectionTime:%s us, isStartTime:%d", collectionTime.c_str(), isStartTime);
@@ -119,20 +136,7 @@ int ProfTask::CreateCollectionTimeInfo(std::string collectionTime, bool isStartT
     if (!isStartTime) {
         timeInfo->set_collectiontimeend(collectionTime);
         timeInfo->set_collectiondateend(Utils::TimestampToTime(collectionTime, TIME_US));
-        // save rank id
-        MSPROF_EVENT("[XXX] CreateCollectionTimeInfo 1.");
-        uint32_t rankId = -1;
-        if (Utils::IsClusterRunEnv()) {
-            MSPROF_EVENT("[XXX] IsClusterRunEnv 2.");
-            int ret = HcclPlugin::instance()->MsprofHcomGetRankId(&rankId);
-            if (ret == 0) {
-                MSPROF_EVENT("[XXX] get rank success rankId=%d.", rankId);
-                timeInfo->set_rankid(rankId);
-            } else {
-                MSPROF_EVENT("[XXX] get rank fail ret=%d.", ret);
-                timeInfo->set_rankid(rankId);
-            }
-        }
+        SaveRankId(timeInfo);
     } else {
         timeInfo->set_collectiontimebegin(collectionTime);
         timeInfo->set_collectiondatebegin(Utils::TimestampToTime(collectionTime, TIME_US));
