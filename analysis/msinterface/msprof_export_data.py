@@ -18,7 +18,6 @@ from common_func.empty_class import EmptyClass
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.msprof_common import MsProfCommonConstant
-from common_func.msprof_iteration import MsprofIteration
 from common_func.msvp_common import MsvpCommonConst
 from common_func.msvp_constant import MsvpConstant
 from common_func.path_manager import PathManager
@@ -29,8 +28,7 @@ from host_prof.host_syscall.presenter.host_syscall_presenter import HostSyscallP
 from msinterface.msprof_data_storage import MsprofDataStorage
 from msinterface.msprof_timeline import MsprofTimeline
 from msparser.aicpu.parse_dp_data import ParseDpData
-from viewer.acl_report import get_acl_data
-from viewer.acl_report import get_acl_statistic_data
+from viewer.acl.acl_viewer import AclViewer
 from viewer.ai_core_op_report import AiCoreOpReport
 from viewer.ai_core_op_report import ReportOPCounter
 from viewer.ai_core_report import get_core_sample_data
@@ -52,14 +50,12 @@ from viewer.get_msvp_llc_timeline_training import get_llc_timeline
 from viewer.get_msvp_summary_mem import get_process_mem_data
 from viewer.get_msvp_summary_mem import get_sys_mem_data
 from viewer.get_msvp_summary_training import get_hbm_summary_data
-from viewer.get_trace_timeline import get_acl_timeline_data
 from viewer.get_trace_timeline import get_aicore_utilization_timeline
 from viewer.get_trace_timeline import get_dvpp_timeline
 from viewer.get_trace_timeline import get_ge_timeline_data
 from viewer.get_trace_timeline import get_hccs_timeline
 from viewer.get_trace_timeline import get_network_timeline
 from viewer.get_trace_timeline import get_pcie_timeline
-from viewer.get_trace_timeline import get_runtime_timeline
 from viewer.hardware_info_report import get_ddr_data
 from viewer.hardware_info_report import get_llc_bandwidth
 from viewer.hardware_info_report import llc_capacity_data
@@ -68,12 +64,12 @@ from viewer.interconnection_view import InterConnectionView
 from viewer.msproftx_viewer import MsprofTxViewer
 from viewer.peripheral_report import get_peripheral_dvpp_data
 from viewer.peripheral_report import get_peripheral_nic_data
-from viewer.runtime_report import get_runtime_api_data
+from viewer.runtime.runtime_api_viewer import RuntimeApiViewer
 from viewer.runtime_report import get_task_scheduler_data
+from viewer.stars.acc_pmu_viewer import AccPmuViewer
 from viewer.stars.acsq_task_viewer import AcsqTaskViewer
 from viewer.stars.ffts_log_viewer import FftsLogViewer
 from viewer.stars.low_power_viewer import LowPowerViewer
-from viewer.stars.acc_pmu_viewer import AccPmuViewer
 from viewer.stars.stars_chip_trans_view import StarsChipTransView
 from viewer.stars.stars_soc_view import StarsSocView
 from viewer.thread_group_viewer import ThreadGroupViewer
@@ -98,10 +94,8 @@ class MsProfExportDataUtils:
         get runtime data handler
         """
         if params.get(StrConstant.PARAM_EXPORT_TYPE) == MsProfCommonConstant.TIMELINE:
-            return get_runtime_timeline(params.get(StrConstant.PARAM_RESULT_DIR))
-        db_path = PathManager.get_db_path(params.get(StrConstant.PARAM_RESULT_DIR), configs.get(StrConstant.CONFIG_DB))
-        return get_runtime_api_data(db_path, configs.get(StrConstant.CONFIG_TABLE),
-                                    configs)
+            return RuntimeApiViewer(configs, params).get_timeline_data()
+        return RuntimeApiViewer(configs, params).get_summary_data()
 
     @staticmethod
     def _get_task_time_data(configs: dict, params: dict) -> any:
@@ -214,19 +208,15 @@ class MsProfExportDataUtils:
         get acl data
         """
         if params.get(StrConstant.PARAM_EXPORT_TYPE) == MsProfCommonConstant.TIMELINE:
-            return get_acl_timeline_data(params.get(StrConstant.PARAM_RESULT_DIR))
-        db_path = PathManager.get_db_path(params.get(StrConstant.PARAM_RESULT_DIR), configs.get(StrConstant.CONFIG_DB))
-        return get_acl_data(db_path, configs.get(StrConstant.CONFIG_TABLE),
-                            params.get(StrConstant.PARAM_DEVICE_ID), configs)
+            return AclViewer(configs, params).get_timeline_data()
+        return AclViewer(configs, params).get_summary_data()
 
     @staticmethod
     def _get_acl_statistic_data(configs: dict, params: dict) -> any:
         """
         get acl data
         """
-        db_path = PathManager.get_db_path(params.get(StrConstant.PARAM_RESULT_DIR), configs.get(StrConstant.CONFIG_DB))
-        return get_acl_statistic_data(db_path, configs.get(StrConstant.CONFIG_TABLE),
-                                      params.get(StrConstant.PARAM_DEVICE_ID), configs)
+        return AclViewer(configs, params).get_acl_statistic_data()
 
     @staticmethod
     def _get_op_summary_data(configs: dict, params: dict) -> any:

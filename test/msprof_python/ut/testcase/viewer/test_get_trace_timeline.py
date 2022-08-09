@@ -9,14 +9,13 @@ from common_func.ms_constant.number_constant import NumberConstant
 from sqlite.db_manager import DBManager
 from sqlite.db_manager import DBOpen
 from viewer.get_trace_timeline import TraceViewer
-from viewer.get_trace_timeline import get_acl_timeline_data
 from viewer.get_trace_timeline import get_aicore_utilization_timeline
 from viewer.get_trace_timeline import get_dvpp_timeline
 from viewer.get_trace_timeline import get_ge_timeline_data
 from viewer.get_trace_timeline import get_hccs_timeline
 from viewer.get_trace_timeline import get_network_timeline
 from viewer.get_trace_timeline import get_pcie_timeline
-from viewer.get_trace_timeline import get_runtime_timeline
+from viewer.runtime.runtime_api_viewer import get_runtime_timeline
 
 NAMESPACE = 'viewer.get_trace_timeline'
 param = {"project_path": "", "device_id": 0, "start_time": 0,

@@ -170,8 +170,8 @@ def manipulation_data(file_obj: any, curs: any, conn: any, info: dict, lock: any
         line = line.strip()
 
         if line.startswith(':'):
-            logging.warning("Invalid control cpu data, check "
-                            "ai_ctrl_cpu.data.x.slice_x file around '%s'", line)
+            logging.debug("Invalid control cpu data, check "
+                          "ai_ctrl_cpu.data.x.slice_x file around '%s'", line)
             continue
         matched, pmu_mode = line_match(line, info)
         if not matched:

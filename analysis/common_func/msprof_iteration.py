@@ -30,12 +30,12 @@ class MsprofIteration:
         self._result_dir = result_dir
 
     @staticmethod
-    def _generate_trace_result(trace_datas: list) -> list:
+    def _generate_trace_result(trace_datas: list, time_fmt: int = NumberConstant.MICRO_SECOND) -> list:
         if not trace_datas:
             return []
         result = [(trace_datas[0][0], trace_datas[1][0])] if len(trace_datas) == 2 else [(0, trace_datas[0][0])]
-        result = [(InfoConfReader().time_from_syscnt(result[0][0], NumberConstant.MICRO_SECOND),
-                   InfoConfReader().time_from_syscnt(result[0][1], NumberConstant.MICRO_SECOND))]
+        result = [(InfoConfReader().time_from_syscnt(result[0][0], time_fmt),
+                   InfoConfReader().time_from_syscnt(result[0][1], time_fmt))]
         return result
 
     @staticmethod
@@ -45,15 +45,17 @@ class MsprofIteration:
             iter_end_dict.setdefault(trace_data[0], trace_data[1])
         return iter_end_dict
 
-    def get_iteration_time(self: any, index_id: int, model_id: int) -> list:
+    def get_iteration_time(self: any, index_id: int, model_id: int,
+                           time_fmt: int = NumberConstant.MICRO_SECOND) -> list:
         """
         get iteration start and end timestamp
         :param index_id: index id
         :param model_id: model id
+        :param time_fmt: timestamp format
         :return: iteration list
         """
         if Utils.is_step_scene(self._result_dir):
-            return self._generate_trace_result(self.get_step_iteration_time(index_id, model_id))
+            return self._generate_trace_result(self.get_step_iteration_time(index_id, model_id), time_fmt)
         return []
 
     def get_step_iteration_time(self: any, index_id: int, model_id: int) -> list:

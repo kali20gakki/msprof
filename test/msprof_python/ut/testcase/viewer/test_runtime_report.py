@@ -10,9 +10,11 @@ from common_func.memcpy_constant import MemoryCopyConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.msvp_constant import MsvpConstant
 from sqlite.db_manager import DBManager
-from viewer.runtime_report import get_runtime_api_data, get_task_scheduler_data, add_ts_opname, \
-    get_task_based_core_data, get_output_apicall, get_output_tasktype, _get_output_event_counter, get_opname, \
+from viewer.runtime_report import get_task_scheduler_data, add_ts_opname, \
+    get_task_based_core_data, get_output_tasktype, _get_output_event_counter, get_opname, \
     add_op_total, cal_metrics, add_memcpy_data
+from msmodel.runtime.runtime_api_model import get_output_apicall
+from msmodel.runtime.runtime_api_model import get_runtime_api_data
 
 NAMESPACE = 'viewer.runtime_report'
 configs = {"headers": "Dvpp Id,Engine Type,Engine ID,All Time(us),All Frame,All Utilization(%)",
