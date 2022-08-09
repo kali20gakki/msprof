@@ -54,7 +54,7 @@ private:
     int GetHostAndDeviceInfo();
     std::string GetHostTime();
     void GenerateFileName(bool isStartTime, std::string &filename);
-    void SaveRankId(analysis::dvvp::proto::CollectionStartEndTime &timeInfo);
+    void SaveRankId(SHARED_PTR_ALIA<analysis::dvvp::proto::CollectionStartEndTime> timeInfo);
     int CreateCollectionTimeInfo(std::string collectionTime, bool isStartTime);
 };
 

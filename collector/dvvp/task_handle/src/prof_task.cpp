@@ -109,7 +109,7 @@ void ProfTask::GenerateFileName(bool isStartTime, std::string &filename)
     }
 }
 
-void ProfTask::SaveRankId(analysis::dvvp::proto::CollectionStartEndTime &timeInfo)
+void ProfTask::SaveRankId(SHARED_PTR_ALIA<analysis::dvvp::proto::CollectionStartEndTime> timeInfo)
 {
     if (!Utils::IsClusterRunEnv()) {
         MSPROF_LOGI("It is not cluster run environment.");
@@ -122,7 +122,7 @@ void ProfTask::SaveRankId(analysis::dvvp::proto::CollectionStartEndTime &timeInf
         timeInfo->set_rankid(rankId);
     } else {
         MSPROF_LOGE("Get rank id fail, ret=%d.", ret);
-        timeInfo->set_rankid(12345); //TODO: delete
+        timeInfo->set_rankid(12345); // XXX
     }
 }
 
