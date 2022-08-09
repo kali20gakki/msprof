@@ -1,6 +1,7 @@
 #include "devdrv_runtime_api_stub.h"
 #include "profapi_plugin.h"
 #include "slog_plugin.h"
+#include "hccl_plugin.h"
 
 /*
 函数原型	drvGetPlatformInfo(u32 *info)
@@ -181,4 +182,23 @@ int32_t ProfApiPlugin::MsprofProfSetStepInfo(const uint64_t indexId, const uint1
 //     return 0;
 // }
 
+int32_t HcclPlugin::MsprofHcomGetRankId(uint32_t *rankId)
+{
+    if (rankId == nullptr) {
+        return -1;
+    } else {
+        *rankId = 0;
+        return 0;
+    }
+}
+
+int32_t MsprofHcomGetLocalRankId(uint32_t *localRankId)
+{
+    if (localRankId == nullptr) {
+        return -1;
+    } else {
+        *localRankId = 0;
+        return 0;
+    }
+}
 }}}
