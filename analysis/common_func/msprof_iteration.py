@@ -217,6 +217,17 @@ class MsprofIteration:
             return iter_info[0]
         return iter_info
 
+    def get_condition_within_iteration(self: any, index_id: int, model_id: int, time_start_key: str, time_end_key: str):
+        """
+        get the condition for sql that data should be within iteration_id.
+        """
+        iter_range = self.get_iteration_time(index_id, model_id, time_fmt=NumberConstant.NANO_SECOND)
+        if not iter_range:
+            return ''
+        iter_start, iter_end = iter_range[0]
+        return f'where ({time_start_key}>={iter_start} and {time_start_key}<={iter_end}) ' \
+               f'or ({time_start_key}<={iter_start} and {iter_start}<={time_end_key})'
+
     def _get_iteration_time(self: any, trace_curs: any, index_id: int, model_id: int) -> list:
         iter_id = self.get_iteration_id_by_index_id(index_id, model_id)
         if not iter_id:

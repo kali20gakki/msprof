@@ -68,8 +68,7 @@ class AclModel(ViewModel, IAnalysisModel):
         return DBManager.fetch_all_data(self.cur, search_data_sql)
 
     def _get_where_condition(self):
-        iteration_time = MsprofIteration(self._result_dir).get_iteration_time(self._index_id, self._model_id,
-                                                                              time_fmt=NumberConstant.NANO_SECOND)
-        if not iteration_time:
-            return ''
-        return f'where start_time>={iteration_time[0][0]} and start_time<={iteration_time[0][1]}'
+        return MsprofIteration(self._result_dir).get_condition_within_iteration(self._index_id,
+                                                                                self._model_id,
+                                                                                time_start_key='start_time',
+                                                                                time_end_key='end_time')

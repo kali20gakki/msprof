@@ -21,16 +21,6 @@ class TestMsProfExportDataUtils(unittest.TestCase):
         result = key.export_data(params)
         self.assertEqual(result, '{"status": 1, "info": "Parameter data_type is none."}')
 
-    def test_export_data_2(self):
-        params = {"data_type": 123, "export_type": "summary"}
-        with mock.patch(NAMESPACE + '.MsProfExportDataUtils._load_export_data_config'), \
-             mock.patch(NAMESPACE + '.MsProfExportDataUtils._get_configs_with_data_type',
-                        return_value={"handler": '_get_runtime_api_data'}):
-            key = MsProfExportDataUtils()
-            result = key.export_data(params)
-        self.assertEqual(result, '{"status": 2, "info": "Unable to get 123 data. Maybe the data is not collected, '
-                                 'or the data may fail to be analyzed."}')
-
     def test_export_data_3(self):
         params = {'data_type': 'step_trace', 'project': 't', 'device_id': '0',
                   'job_id': 'job_default', 'export_type': 'timeline', 'iter_id': 1,
@@ -41,7 +31,7 @@ class TestMsProfExportDataUtils(unittest.TestCase):
              mock.patch(NAMESPACE + '.MsProfExportDataUtils.add_timeline_data'):
             key = MsProfExportDataUtils()
             result = key.export_data(params)
-        self.assertEqual(result, '{"status": 1, "info": "Failed to connect acl_module.db."}')
+        self.assertEqual(result, '{"status": 1, "info": "Failed to connect acl_module.db"}')
 
     def test_export_data_4(self):
         params = {"data_type": 123, "export_type": "456"}
@@ -80,7 +70,7 @@ class TestMsProfExportDataUtils(unittest.TestCase):
         with mock.patch(NAMESPACE + '.PathManager.get_db_path', return_value='runtime.db'):
             key = MsProfExportDataUtils()
             result = key._get_runtime_api_data(configs, params)
-        self.assertEqual(result, '{"status": 1, "info": "Failed to connect acl_module.db."}')
+        self.assertEqual(result, '{"status": 1, "info": "Failed to connect acl_module.db"}')
 
     def test_get_runtime_api_data_2(self):
         configs = {"db": '123', "table": '456'}
@@ -232,7 +222,7 @@ class TestMsProfExportDataUtils(unittest.TestCase):
     def test_get_acl_data_1(self):
         configs = {"db": 'res-hwts', "table": '111'}
         params = {"export_type": "timeline", "device_id": '456', "project": '12'}
-        with mock.patch(NAMESPACE + '.get_acl_timeline_data', return_value=111):
+        with mock.patch(NAMESPACE + '.AclViewer.get_timeline_data', return_value=111):
             key = MsProfExportDataUtils()
             result = key._get_acl_data(configs, params)
         self.assertEqual(result, 111)
@@ -241,7 +231,7 @@ class TestMsProfExportDataUtils(unittest.TestCase):
         configs = {"db": 'hwts', "table": '123'}
         params = {"export_type": "summary", "device_id": '456', "project": '12'}
         with mock.patch(NAMESPACE + '.PathManager.get_db_path', return_value='111'), \
-             mock.patch(NAMESPACE + '.get_acl_data', return_value=222):
+             mock.patch(NAMESPACE + '.AclViewer.get_summary_data', return_value=222):
             key = MsProfExportDataUtils()
             result = key._get_acl_data(configs, params)
         self.assertEqual(result, 222)
@@ -250,7 +240,7 @@ class TestMsProfExportDataUtils(unittest.TestCase):
         configs = {"db": 'hwts', "table": '456'}
         params = {"project": '12', "device_id": '456'}
         with mock.patch(NAMESPACE + '.PathManager.get_db_path', return_value='123'), \
-             mock.patch(NAMESPACE + '.get_acl_statistic_data', return_value=123):
+             mock.patch(NAMESPACE + '.AclViewer.get_acl_statistic_data', return_value=123):
             key = MsProfExportDataUtils()
             result = key._get_acl_statistic_data(configs, params)
         self.assertEqual(result, 123)
@@ -267,8 +257,7 @@ class TestMsProfExportDataUtils(unittest.TestCase):
     def test_get_ai_stack_time_data_1(self):
         config = 1
         params = {"export_type": 'timeline', "project": '123', "device_id": '456', "iter_id": '789', "model_id": 1}
-        with mock.patch(NAMESPACE + '.TopDownData.get_top_down_timeline_data', return_value=123), \
-             mock.patch(NAMESPACE + '.MsprofIteration.get_iteration_id_by_index_id', return_value=1):
+        with mock.patch(NAMESPACE + '.TopDownData.get_top_down_timeline_data', return_value=123):
             InfoConfReader()._info_json = {"pid": 123}
             key = MsProfExportDataUtils()
             result = key._get_ai_stack_time_data(config, params)
@@ -277,8 +266,7 @@ class TestMsProfExportDataUtils(unittest.TestCase):
     def test_get_ai_stack_time_data_2(self):
         config = 1
         params = {"export_type": 'summary', "project": '123', "device_id": '456', "iter_id": '789', "model_id": 1}
-        with mock.patch(NAMESPACE + '.TopDownData.get_top_down_data', return_value=123), \
-             mock.patch(NAMESPACE + '.MsprofIteration.get_iteration_id_by_index_id', return_value=1):
+        with mock.patch(NAMESPACE + '.TopDownData.get_top_down_data', return_value=123):
             InfoConfReader()._info_json = {"pid": 123}
             key = MsProfExportDataUtils()
             result = key._get_ai_stack_time_data(config, params)
@@ -569,8 +557,7 @@ class TestMsProfExportDataUtils(unittest.TestCase):
         configs = {'headers': '10'}
         params = {"iter_id": "timeline", "project": "456", "device_id": '123'}
         with mock.patch(NAMESPACE + '.PathManager.get_data_dir', return_value=123), \
-             mock.patch(NAMESPACE + '.ParseDpData.analyse_dp', return_value={}), \
-             mock.patch(NAMESPACE + '.MsprofIteration.get_iteration_id_by_index_id', return_value=1):
+             mock.patch(NAMESPACE + '.ParseDpData.analyse_dp', return_value={}):
             key = MsProfExportDataUtils()
             result = key._get_dp_data(configs, params)
         self.assertEqual(result, ([], [], 0))
@@ -579,8 +566,7 @@ class TestMsProfExportDataUtils(unittest.TestCase):
         configs = {'headers': '10'}
         params = {"iter_id": "timeline", "project": "456", "device_id": '123'}
         with mock.patch(NAMESPACE + '.PathManager.get_data_dir', return_value=123), \
-             mock.patch(NAMESPACE + '.ParseDpData.analyse_dp', return_value={'test': 123}), \
-             mock.patch(NAMESPACE + '.MsprofIteration.get_iteration_id_by_index_id', return_value=1):
+             mock.patch(NAMESPACE + '.ParseDpData.analyse_dp', return_value={'test': 123}):
             key = MsProfExportDataUtils()
             key._get_dp_data(configs, params)
 
