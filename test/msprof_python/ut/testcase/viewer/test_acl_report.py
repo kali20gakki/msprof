@@ -5,10 +5,8 @@ from common_func.db_name_constant import DBNameConstant
 from common_func.msvp_constant import MsvpConstant
 from sqlite.db_manager import DBManager
 from sqlite.db_manager import DBOpen
-from viewer.acl_report import get_acl_data, get_acl_data_for_device, get_acl_statistic_data, \
-    _get_get_acl_statistic_data
 
-NAMESPACE = 'viewer.acl_report'
+NAMESPACE = 'viewer.acl.acl_viewer'
 configs = {'handler': '_get_acl_data',
            'headers': ['Name', 'Type', 'Start Time', 'Duration(us)', 'Process ID', 'Thread ID'],
            'db': 'acl_module.db',
@@ -18,7 +16,7 @@ configs = {'handler': '_get_acl_data',
 class TestAclReport(unittest.TestCase):
     def test_get_acl_data_1(self):
         with mock.patch(NAMESPACE + '.DBManager.check_connect_db_path', return_value=(None, None)):
-            res = get_acl_data('', '', 1, configs)
+            res = AclViewer(configs,).get_summary_data()
         self.assertEqual(res, MsvpConstant.MSVP_EMPTY_DATA)
 
         with mock.patch(NAMESPACE + '.DBManager.check_connect_db_path', return_value=(True, True)), \
