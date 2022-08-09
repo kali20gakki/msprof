@@ -39,11 +39,12 @@ class RuntimeApiViewModel(ViewModel, IAnalysisModel):
               "sum(exit_time-entry_time), count(*), " \
               "sum(exit_time-entry_time)/count(*), min(exit_time-entry_time), " \
               "max(exit_time-entry_time), {process_id}, thread " \
-              "from {1} group by api ".format(time_total[0],
-                                              DBNameConstant.TABLE_API_CALL,
-                                              percent=NumberConstant.PERCENTAGE,
-                                              accuracy=NumberConstant.DECIMAL_ACCURACY,
-                                              process_id=InfoConfReader().get_json_pid_data())
+              "from {1} {where_condition} group by api ".format(time_total[0],
+                                                                DBNameConstant.TABLE_API_CALL,
+                                                                percent=NumberConstant.PERCENTAGE,
+                                                                accuracy=NumberConstant.DECIMAL_ACCURACY,
+                                                                process_id=InfoConfReader().get_json_pid_data(),
+                                                                where_condition=self._get_where_condition())
         return DBManager.fetch_all_data(self.cur, sql)
 
     def get_runtime_total_time(self):
@@ -52,8 +53,7 @@ class RuntimeApiViewModel(ViewModel, IAnalysisModel):
         return total_time[0] if total_time else []
 
     def _get_where_condition(self):
-        iteration_time = MsprofIteration(self._result_dir).get_iteration_time(self._index_id, self._model_id,
-                                                                              time_fmt=NumberConstant.NANO_SECOND)
-        if not iteration_time:
-            return ''
-        return f'where entry_time>={iteration_time[0][0]} and entry_time<={iteration_time[0][1]}'
+        return MsprofIteration(self._result_dir).get_condition_within_iteration(self._index_id,
+                                                                                self._model_id,
+                                                                                time_start_key='entry_time',
+                                                                                time_end_key='exit_time')

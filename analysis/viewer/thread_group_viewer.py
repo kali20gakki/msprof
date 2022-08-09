@@ -13,6 +13,7 @@ from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
+from common_func.msprof_iteration import MsprofIteration
 from common_func.trace_view_header_constant import TraceViewHeaderConstant
 from common_func.trace_view_manager import TraceViewManager
 from profiling_bean.db_dto.acl_dto import AclDto
@@ -36,8 +37,11 @@ class ThreadGroupViewer:
     def __init__(self: any, configs: any, params: dict) -> None:
         self._configs = configs
         self._params = params
+        self._index_id = params.get(StrConstant.PARAM_ITER_ID)
+        self._model_id = params.get(StrConstant.PARAM_MODEL_ID)
         self._project_path = params.get(StrConstant.PARAM_RESULT_DIR)
         self._pid = InfoConfReader().get_json_pid_data()
+        self._iteration = MsprofIteration(self._project_path)
 
     def get_timeline_data(self: any) -> str:
         """
@@ -71,9 +75,16 @@ class ThreadGroupViewer:
         curs.row_factory = ClassRowType.class_row(dto)
         return DBManager.fetch_all_data(curs, sql)
 
+    def _get_acl_api_sql(self):
+        where_condition = self._iteration.get_condition_within_iteration(self._index_id, self._model_id,
+                                                                         time_start_key='start_time',
+                                                                         time_end_key='end_time')
+        return f"select api_name,api_type,start_time,end_time,thread_id " \
+               f"from {DBNameConstant.TABLE_ACL_DATA} {where_condition}"
+
     def _get_acl_api_data(self: any) -> list:
         _format_data = []
-        sql = "select api_name,api_type,start_time,end_time,thread_id from {}".format(DBNameConstant.TABLE_ACL_DATA)
+        sql = self._get_acl_api_sql()
         acl_data = self.get_thread_data(DBNameConstant.DB_ACL_MODULE, DBNameConstant.TABLE_ACL_DATA, sql, AclDto)
 
         if not acl_data:
@@ -88,10 +99,16 @@ class ThreadGroupViewer:
                                  ])
         return TraceViewManager.time_graph_trace(TraceViewHeaderConstant.TOP_DOWN_TIME_GRAPH_HEAD, _format_data)
 
+    def _get_ge_time_sql(self):
+        where_condition = self._iteration.get_condition_within_iteration(self._index_id, self._model_id,
+                                                                         time_start_key='infer_start',
+                                                                         time_end_key='infer_end')
+        return f"select model_name,model_id,thread_id,input_start,input_end,infer_start,infer_end,output_start," \
+               f"output_end from {DBNameConstant.TABLE_GE_MODEL_TIME} {where_condition}"
+
     def _get_ge_time_data(self: any) -> list:
         _format_data = []
-        sql = "select model_name,model_id,thread_id,input_start,input_end,infer_start,infer_end,output_start," \
-              "output_end from {}".format(DBNameConstant.TABLE_GE_MODEL_TIME)
+        sql = self._get_ge_time_sql()
         ge_time_data = self.get_thread_data(DBNameConstant.DB_GE_MODEL_TIME, DBNameConstant.TABLE_GE_MODEL_TIME, sql,
                                             GeTimeDto)
         if not ge_time_data:
@@ -120,10 +137,17 @@ class ThreadGroupViewer:
             _format_data.extend([_input_data, _infer_data, _output_data])
         return TraceViewManager.time_graph_trace(TraceViewHeaderConstant.TOP_DOWN_TIME_GRAPH_HEAD, _format_data)
 
+    def get_ge_op_execute_sql(self):
+        where_condition = self._iteration.get_condition_within_iteration(self._index_id, self._model_id,
+                                                                         time_start_key='start_time',
+                                                                         time_end_key='end_time')
+        return f"select thread_id,op_type,event_type,start_time,end_time " \
+               f"from {DBNameConstant.TABLE_GE_HOST} {where_condition}"
+
     def _get_ge_op_execute_data(self: any) -> list:
         _format_data = []
         hash_dict = get_ge_hash_dict(self._project_path)
-        sql = "select thread_id,op_type,event_type,start_time,end_time from {}".format(DBNameConstant.TABLE_GE_HOST)
+        sql = self.get_ge_op_execute_sql()
         ge_op_execute_data = self.get_thread_data(DBNameConstant.DB_GE_HOST_INFO, DBNameConstant.TABLE_GE_HOST, sql,
                                                   GeOpExecuteDto)
         if not ge_op_execute_data:
@@ -136,10 +160,15 @@ class ThreadGroupViewer:
                 (_data.end_time - _data.start_time) / NumberConstant.NS_TO_US])
         return TraceViewManager.time_graph_trace(TraceViewHeaderConstant.TASK_TIME_GRAPH_HEAD, _format_data)
 
+    def get_runtime_api_sql(self):
+        where_condition = self._iteration.get_condition_within_iteration(self._index_id, self._model_id,
+                                                                         time_start_key='entry_time',
+                                                                         time_end_key='exit_time')
+        return f"select entry_time,exit_time,api,thread from {DBNameConstant.TABLE_API_CALL} {where_condition}"
+
     def _get_runtime_api_data(self: any) -> list:
         _format_data = []
-        sql = "select entry_time,exit_time,api,thread from {}".format(
-            DBNameConstant.TABLE_API_CALL)
+        sql = self.get_runtime_api_sql()
         runtime_api_data = self.get_thread_data(DBNameConstant.DB_RUNTIME, DBNameConstant.TABLE_API_CALL, sql,
                                                 RuntimeApiDto)
         if not runtime_api_data:
