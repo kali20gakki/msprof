@@ -42,6 +42,7 @@ class AllReduceStreamHandler(StepTraceTagHandler):
         """
         for next_handler in self.next_handler_group.values():
             next_handler.clear()
+        self.next_handler_group.clear()
 
 
 class AllReduceTagHandler(StepTraceTagHandler):
