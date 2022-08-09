@@ -20,15 +20,11 @@ using HcomGetLocalRankIdFunc = std::function<uint32_t(const char *group, uint32_
 class HcclPlugin : public analysis::dvvp::common::singleton::Singleton<HcclPlugin> {
 public:
     HcclPlugin() : soName_("libhccl.so"), pluginHandle_(PluginHandle(soName_)), loadFlag_(0) {}
-
     bool IsFuncExist(const std::string &funcName) const;
-
     // HcomGetRankId
     int32_t MsprofHcomGetRankId(uint32_t *rankId);
-
     // HcomGetLocalRankId
     int32_t MsprofHcomGetLocalRankId(uint32_t *localRankId);
-
 
 private:
     std::string soName_;
