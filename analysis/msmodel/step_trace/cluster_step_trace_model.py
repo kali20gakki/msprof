@@ -5,10 +5,7 @@ This script is used to create step trace database model for cluster.
 Copyright Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
 """
 
-import os
-
 from common_func.db_manager import DBManager
-from common_func.path_manager import PathManager
 from msmodel.interface.base_model import BaseModel
 
 
@@ -28,9 +25,3 @@ class ClusterStepTraceModel(BaseModel):
                 DBManager.drop_table(self.conn, table_name)
             sql = DBManager.sql_create_general_table(table_map, table_name, self.TABLES_PATH)
             DBManager.execute_sql(self.conn, sql)
-
-    def init(self: any) -> bool:
-        db_path = PathManager.get_db_path(self.result_dir, self.db_name)
-        if os.path.exists(db_path):
-            os.remove(db_path)
-        return super().init()
