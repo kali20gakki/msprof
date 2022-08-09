@@ -1296,20 +1296,15 @@ bool Utils::IsAppName(const std::string paramsName)
 bool Utils::IsClusterRunEnv()
 {
     std::string rankTableFilePath = Utils::GetEnvString(RANK_TABLE_FILE_ENV);
-    MSPROF_EVENT("[XXX] rankTableFilePath=%s", rankTableFilePath.c_str());            
-    // TODO: safe check
     if (rankTableFilePath.empty()) {
-        MSPROF_EVENT("[XXX] rankTableFilePath empty");            
         return false;
     }
     if (MmAccess(rankTableFilePath.c_str()) != PROFILING_SUCCESS) {
-        MSPROF_EVENT("[XXX] rankTableFilePath can not access");            
         return false;
     }
     if (MmIsDir(rankTableFilePath.c_str()) == PROFILING_SUCCESS) {
-        MSPROF_EVENT("[XXX] rankTableFilePath is dir");            
         return false;
-    }    
+    }
     return true;
 }
 
