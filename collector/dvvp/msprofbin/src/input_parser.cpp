@@ -1262,7 +1262,7 @@ ArgsManager::ArgsManager()
 {
     argsList_ = {
     {"output", "Specify the directory that is used for storing data results."},
-    {"storage-limit", "Specify the output directory volume. range 200MB ~ 4294967296MB xxx"},
+    {"storage-limit", "Specify the output directory volume. range 200MB ~ 4294967296MB"},
     {"application", "Specify application path, considering the risk of privilege escalation, please pay attention to\n"
         "\t\t\t\t\t\t   the group of the application and confirm whether it is the same as the user currently"},
     {"ascendcl", "Show acl profiling data, the default value is on.", ON},

@@ -8,6 +8,7 @@
 #include "prof_task.h"
 #include "errno/error_code.h"
 #include "config/config.h"
+#include "hccl_plugin.h"
 #include "job_factory.h"
 #include "job_device_rpc.h"
 #include "transport/uploader_mgr.h"
@@ -141,6 +142,20 @@ int ProfTask::CreateCollectionTimeInfo(std::string collectionTime, bool isStartT
     if (!isStartTime) {
         timeInfo->set_collectiontimeend(collectionTime);
         timeInfo->set_collectiondateend(Utils::TimestampToTime(collectionTime, TIME_US));
+        // save rank id
+        MSPROF_EVENT("[XXX] CreateCollectionTimeInfo 1.");
+        uint32_t rankId = -1;
+        if (Utils::IsClusterRunEnv()) {
+            MSPROF_EVENT("[XXX] IsClusterRunEnv 2.");
+            int ret = HcclPlugin::instance()->MsprofHcomGetRankId(&rankId);
+            if (ret == 0) {
+                MSPROF_EVENT("[XXX] get rank success rankId=%d.", rankId);
+                timeInfo->set_rankid(rankId);
+            } else {
+                MSPROF_EVENT("[XXX] get rank fail ret=%d.", ret);
+                timeInfo->set_rankid(rankId);
+            }
+        }
     } else {
         timeInfo->set_collectiontimebegin(collectionTime);
         timeInfo->set_collectiondatebegin(Utils::TimestampToTime(collectionTime, TIME_US));
