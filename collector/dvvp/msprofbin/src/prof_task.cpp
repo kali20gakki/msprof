@@ -145,7 +145,6 @@ void ProfTask::SaveRankId(SHARED_PTR_ALIA<analysis::dvvp::proto::CollectionStart
         timeInfo->set_rankid(rankId);
     } else {
         MSPROF_LOGE("Get rank id fail, ret=%d.", ret);
-        timeInfo->set_rankid(12345); // XXX
     }
 }
 

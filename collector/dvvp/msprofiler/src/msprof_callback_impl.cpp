@@ -197,6 +197,13 @@ void RegisterMsprofTxReporterCallback()
 int32_t MsprofilerInit()
 {
     MSPROF_EVENT("Started to register profiling ctrl callback.");
+
+    if (HcclPlugin::instance()->IsFuncExist("HcomGetRankId")) {
+        MSPROF_EVENT("[XXX] HcomGetRankId find success.");
+    } else {
+        MSPROF_EVENT("[XXX] HcomGetRankId find fail.");
+    }
+
     // register ctrl callback
     aclError ret = ProfApiPlugin::instance()->MsprofProfRegCtrlCallback(MsprofCtrlCallbackImpl);
     if (ret != ACL_SUCCESS) {

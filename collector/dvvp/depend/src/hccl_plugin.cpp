@@ -2,7 +2,7 @@
  * Copyright (c) Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
  * Description: driver interface
  * Author: Huawei Technologies Co., Ltd.
- * Create: 2022-04-15
+ * Create: 2022-08-08
  */
 #include "hccl_plugin.h"
 
@@ -11,17 +11,18 @@ namespace Dvvp {
 namespace Plugin {
 void HcclPlugin::LoadDriverSo()
 {
-    int32_t ret = PROFILING_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
-        if (ret != PROFILING_SUCCESS) {
-            return;
-        }
+    if (pluginHandle_.HasLoad()) {
+        return;
     }
+    int32_t ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+    if (ret != PROFILING_SUCCESS) {
+        return;
+    }    
 }
 
 bool HcclPlugin::IsFuncExist(const std::string &funcName) const
 {
+    PthreadOnce(&loadFlag_, []()->void {HcclPlugin::instance()->LoadDriverSo();});
     return pluginHandle_.IsFuncExist(funcName);
 }
 
@@ -37,20 +38,6 @@ int32_t HcclPlugin::MsprofHcomGetRankId(uint32_t *rankId)
         }
     }
     return hcomGetRankId_(nullptr, rankId);
-}
-
-// HcomGetLocalRankId
-int32_t HcclPlugin::MsprofHcomGetLocalRankId(uint32_t *localRankId)
-{
-    PthreadOnce(&loadFlag_, []()->void {HcclPlugin::instance()->LoadDriverSo();});
-    if (hcomGetLocalRankId_ == nullptr) {
-        int32_t ret = pluginHandle_.GetFunction<uint32_t, const char *, uint32_t *>("HcomGetLocalRankId",
-            hcomGetLocalRankId_);
-        if (ret != PROFILING_SUCCESS) {
-            return PROFILING_FAILED;
-        }
-    }
-    return hcomGetLocalRankId_(nullptr, localRankId);
 }
 } // Plugin
 } // Dvvp

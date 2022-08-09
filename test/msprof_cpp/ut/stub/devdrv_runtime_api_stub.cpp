@@ -191,14 +191,4 @@ int32_t HcclPlugin::MsprofHcomGetRankId(uint32_t *rankId)
         return 0;
     }
 }
-
-int32_t MsprofHcomGetLocalRankId(uint32_t *localRankId)
-{
-    if (localRankId == nullptr) {
-        return -1;
-    } else {
-        *localRankId = 0;
-        return 0;
-    }
-}
 }}}
