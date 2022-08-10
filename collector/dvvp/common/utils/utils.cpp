@@ -1308,6 +1308,25 @@ bool Utils::IsClusterRunEnv()
     return true;
 }
 
+int32_t Utils::GetRankId()
+{
+    if (!IsClusterRunEnv()) {
+        MSPROF_EVENT("[XXX] Is not Cluster Run Env");
+        return -1;
+    }
+    std::string rankIdStr = Utils::GetEnvString(RANK_ID_ENV);
+    MSPROF_EVENT("[XXX] rankId=%s",rankIdStr.c_str());
+    if (!CheckStringIsValidNatureNum(rankIdStr)) {
+        MSPROF_EVENT("[XXX] rankId invalide");
+        return -1;
+    }
+    constexpr int base = 10;
+    char *end = nullptr;
+    int32_t rankId = strtol(rankIdStr.c_str(), &end, base);
+    MSPROF_EVENT("[XXX] rankId=%d", rankId);
+    return rankId;
+}
+
 int32_t WriteFile(const std::string &absolutePath, const std::string &recordFile, const std::string &profName)
 {
 #if (defined(_WIN32) || defined(_WIN64) || defined(_MSC_VER))
