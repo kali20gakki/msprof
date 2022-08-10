@@ -25,6 +25,9 @@ class ClusterStepTraceParser(IParser):
     Step trace data parser for cluster scene.
     """
     FILE_NAME = os.path.basename(__file__)
+    MODEL_ID_INDEX = 1
+    MODEL_ID_IN_GE = 1
+    MODEL_ID_NOT_IN_GE = 0
 
     def __init__(self: any, collection_path: str) -> None:
         self.collection_path = collection_path
@@ -151,9 +154,9 @@ class ClusterStepTraceParser(IParser):
         result = []
         for item in step_trace_data:
             item = list(item)
-            if item[1] in model_ids:
-                item.append(1)
+            if item[ClusterStepTraceParser.MODEL_ID_INDEX] in model_ids:
+                item.append(ClusterStepTraceParser.MODEL_ID_IN_GE)
             else:
-                item.append(0)
+                item.append(ClusterStepTraceParser.MODEL_ID_NOT_IN_GE)
             result.append(item)
         return result
