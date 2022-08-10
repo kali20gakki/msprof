@@ -20,6 +20,7 @@ from common_func.msprof_common import MsProfCommonConstant
 from common_func.msprof_common import check_path_valid
 from common_func.msprof_common import get_path_dir
 from common_func.msprof_exception import ProfException
+from common_func.path_manager import PathManager
 from framework.load_info_manager import LoadInfoManager
 from msparser.cluster.cluster_info_parser import ClusterInfoParser
 from msparser.cluster.cluster_step_trace_parser import ClusterStepTraceParser
@@ -105,7 +106,7 @@ class ImportCommand:
         for prof_dir in prof_dirs:
             _unresolved_prof_sub_dirs = []
             prof_path = os.path.realpath(
-                        os.path.join(self.collection_path, prof_dir))
+                os.path.join(self.collection_path, prof_dir))
             if not os.listdir(prof_path):
                 warn(MsProfCommonConstant.COMMON_FILE_NAME, 'The path(%s) is not a PROF dir,'
                                                             ' Please check the path.' % prof_path)
@@ -113,11 +114,11 @@ class ImportCommand:
             prof_sub_dirs = get_path_dir(prof_path)
             for prof_sub_dir in prof_sub_dirs:
                 prof_sub_path = os.path.realpath(
-                                os.path.join(prof_path, prof_sub_dir))
+                    os.path.join(prof_path, prof_sub_dir))
                 is_cluster_device_or_host_path = self._judge_cluster_device_or_host_path(prof_sub_path)
                 if not is_cluster_device_or_host_path:
                     continue
-                sqlite_path = os.path.join(prof_sub_path, 'sqlite')
+                sqlite_path = PathManager.get_sql_dir(prof_sub_path)
                 if not os.path.exists(sqlite_path) or not os.listdir(sqlite_path):
                     _unresolved_prof_sub_dirs.append(prof_sub_path)
             if _unresolved_prof_sub_dirs:
@@ -138,7 +139,7 @@ class ImportCommand:
     def _dir_exception_check(self: any, path: str) -> None:
         if DataCheckManager.contain_info_json_data(path):
             error(MsProfCommonConstant.COMMON_FILE_NAME, 'Incorrect parse dir(%s),'
-                                             '-dir argument must be cluster data root dir.' % self.collection_path)
+                                   '-dir argument must be cluster data root dir.' % self.collection_path)
             raise ProfException(ProfException.PROF_CLUSTER_DIR_ERROR)
 
     def _judge_cluster_device_or_host_path(self: any, path: str) -> bool:
@@ -169,8 +170,8 @@ class ImportCommand:
         print_info(MsProfCommonConstant.COMMON_FILE_NAME,
                    'Unresolved dirs parse finished!')
 
-    def _prepare_for_cluster_parse(self:any) -> None:
-        cluster_sqlite_path = os.path.join(self.collection_path, 'sqlite')
+    def _prepare_for_cluster_parse(self: any) -> None:
+        cluster_sqlite_path = PathManager.get_sql_dir(self.collection_path)
         if os.path.exists(cluster_sqlite_path):
             shutil.rmtree(cluster_sqlite_path)
         prepare_for_parse(self.collection_path)
