@@ -169,6 +169,7 @@ const std::string MEMORY_UB = "MemoryUB";
 const std::string PROFILING_RESULT_PATH_ENV = "PROFILING_RESULT_PATH";
 const std::string PROFILING_AICPU_MODE_ENV = "AICPU_PROFILING_MODE";
 const std::string RANK_TABLE_FILE_ENV = "RANK_TABLE_FILE";
+const std::string RANK_ID_ENV = "RANK_ID";
 
 // llc  profiling events type
 const std::string LLC_PROFILING_CAPACITY = "capacity";
