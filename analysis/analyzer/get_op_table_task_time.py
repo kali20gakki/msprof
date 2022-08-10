@@ -59,7 +59,7 @@ class GetOpTableTsTime:
         ai_core_data = self._get_ai_core_task_time()
         ai_cpu_data = self._get_ai_cpu_task_time()
         aiv_data = self._get_aiv_task_time()
-        fetched_data = ai_core_data + ai_cpu_data + aiv_data
+        fetched_data = ai_cpu_data + ai_core_data + aiv_data
         if not fetched_data:
             logging.warning("Unable to find TaskTime data")
             return []
@@ -74,7 +74,7 @@ class GetOpTableTsTime:
         """
         ai_cpu_sql = "select task_id, stream_id, sys_start*{MS_TO_NS}, (sys_end - sys_start)*{MS_TO_NS}, " \
                      "'{0}', {2}, batch_id from {1} " \
-            .format(Constant.TASK_TYPE_AI_CPU, DBNameConstant.TABLE_AI_CPU, self.iter_id,
+            .format(Constant.TASK_TYPE_AI_CPU, DBNameConstant.TABLE_AI_CPU_FROM_TS, self.iter_id,
                     MS_TO_NS=NumberConstant.MS_TO_NS)
         return ai_cpu_sql
 
@@ -92,7 +92,7 @@ class GetOpTableTsTime:
 
     def _get_ai_cpu_task_time(self: any) -> list:
         ai_cpu_time = []
-        model_view = ViewModel(self.project_path, DBNameConstant.DB_AI_CPU, [DBNameConstant.TABLE_AI_CPU])
+        model_view = ViewModel(self.project_path, DBNameConstant.DB_AI_CPU, [DBNameConstant.TABLE_AI_CPU_FROM_TS])
         if model_view.check_table():
             ai_cpu_time.extend(model_view.get_sql_data(self._get_ai_cpu_task_sql()))
         return ai_cpu_time
