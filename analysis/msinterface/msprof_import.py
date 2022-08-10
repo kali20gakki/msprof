@@ -59,10 +59,10 @@ class ImportCommand:
         if not self.is_cluster_scence:
             self._process_parse()
         else:
-            _unparsed_dirs = self._find_unparsered_dirs()
+            _unresolved_dirs = self._find_unresolved_dirs()
+            if _unresolved_dirs:
+                self._parse_unresolved_dirs(_unresolved_dirs)
             self._prepare_for_cluster_parse()
-            if _unparsed_dirs:
-                self._parse_unparsed_dirs(_unparsed_dirs)
             print_info(MsProfCommonConstant.COMMON_FILE_NAME,
                        'Start parse cluster data in "%s" ...' % self.collection_path)
             cluster_info_parser = ClusterInfoParser(self.collection_path, self.cluster_device_paths)
@@ -97,11 +97,13 @@ class ImportCommand:
             else:
                 self._process_sub_dirs(sub_dir, is_cluster=True)
 
-    def _find_unparsered_dirs(self: any) -> list:
+    def _find_unresolved_dirs(self: any) -> list:
         prof_dirs = self._get_prof_dirs()
-        _unparsed_dirs = {}
+        print_info(MsProfCommonConstant.COMMON_FILE_NAME,
+                   'Verify that all data is parsed in "%s" .' % self.collection_path)
+        _unresolved_dirs = {}
         for prof_dir in prof_dirs:
-            _unparsed_prof_sub_dirs = []
+            _unresolved_prof_sub_dirs = []
             prof_path = os.path.realpath(
                         os.path.join(self.collection_path, prof_dir))
             if not os.listdir(prof_path):
@@ -117,14 +119,14 @@ class ImportCommand:
                     continue
                 sqlite_path = os.path.join(prof_sub_path, 'sqlite')
                 if not os.path.exists(sqlite_path) or not os.listdir(sqlite_path):
-                    _unparsed_prof_sub_dirs.append(prof_sub_path)
-            if _unparsed_prof_sub_dirs:
-                _unparsed_dirs.setdefault(prof_dir, _unparsed_prof_sub_dirs)
+                    _unresolved_prof_sub_dirs.append(prof_sub_path)
+            if _unresolved_prof_sub_dirs:
+                _unresolved_dirs.setdefault(prof_dir, _unresolved_prof_sub_dirs)
         if not self.cluster_device_paths:
             error(MsProfCommonConstant.COMMON_FILE_NAME, 'None of PROF dir find in the dir(%s), '
                                                          'please check the -dir argument' % self.collection_path)
             raise ProfException(ProfException.PROF_CLUSTER_DIR_ERROR)
-        return _unparsed_dirs
+        return _unresolved_dirs
 
     def _get_prof_dirs(self: any) -> list:
         self._dir_exception_check(self.collection_path)
@@ -153,8 +155,10 @@ class ImportCommand:
             self.cluster_device_paths.append(path)
         return True
 
-    def _parse_unparsed_dirs(self: any, unparsed_dirs: list) -> None:
-        for pro_dir, result_dir_list in unparsed_dirs.items():
+    def _parse_unresolved_dirs(self: any, unresolved_dirs: list) -> None:
+        print_info(MsProfCommonConstant.COMMON_FILE_NAME,
+                   'Start parse unresolved dirs in "%s" ...' % self.collection_path)
+        for pro_dir, result_dir_list in unresolved_dirs.items():
             prof_path = os.path.join(self.collection_path, pro_dir)
             for result_dir in result_dir_list:
                 result_path = os.path.realpath(
@@ -162,6 +166,8 @@ class ImportCommand:
                 check_path_valid(result_path, False)
                 LoadInfoManager.load_info(result_path)
                 self.do_import(result_path)
+        print_info(MsProfCommonConstant.COMMON_FILE_NAME,
+                   'Unresolved dirs parse finished!')
 
     def _prepare_for_cluster_parse(self:any) -> None:
         cluster_sqlite_path = os.path.join(self.collection_path, 'sqlite')
