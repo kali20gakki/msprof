@@ -52,6 +52,14 @@ class MsprofQueryData:
         return cluster_query_data
 
     @classmethod
+    def get_job_basic_info(cls: any) -> list:
+        """
+        Get the info under the profiling job data: job info, device id, job name and collect time.
+        :return: list of the basic data.
+        """
+        return InfoConfReader().get_job_basic_info()
+
+    @classmethod
     def _get_iteration_infos(cls: any, curs: any) -> list:
         sql = "select model_id, max(index_id) from {} group by model_id".format(
             DBNameConstant.TABLE_STEP_TRACE_DATA)
@@ -101,14 +109,6 @@ class MsprofQueryData:
                 iteration_info_list.append(top_index_ids_info)
             iteration_infos_result.append(iteration_info_list)
         return iteration_infos_result
-
-    @classmethod
-    def get_job_basic_info(self: any) -> list:
-        """
-        Get the info under the profiling job data: job info, device id, job name and collect time.
-        :return: list of the basic data.
-        """
-        return InfoConfReader().get_job_basic_info()
 
     def get_job_iteration_info(self: any) -> list:
         """
