@@ -71,6 +71,7 @@ private:
     void AddSysTime(SHARED_PTR_ALIA<analysis::dvvp::proto::InfoMain> infoMain);
     void AddMemTotal(SHARED_PTR_ALIA<analysis::dvvp::proto::InfoMain> infoMain);
     void AddNetCardInfo(SHARED_PTR_ALIA<analysis::dvvp::proto::InfoMain> infoMain);
+    void AddRankId(SHARED_PTR_ALIA<InfoMain> infoMain);
 
 private:
     std::string jobInfo_;
