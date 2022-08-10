@@ -4,13 +4,15 @@
 This script is used to dispatch query summary data task.
 Copyright Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 """
-
+import json
 import os
 from enum import IntEnum
 
 from common_func.common import error
+from common_func.data_check_manager import DataCheckManager
 from common_func.db_name_constant import DBNameConstant
-from common_func.msprof_common import MsProfCommonConstant
+from common_func.info_conf_reader import InfoConfReader
+from common_func.msprof_common import MsProfCommonConstant, get_path_dir
 from common_func.msprof_exception import ProfException
 from common_func.path_manager import PathManager
 from profiling_bean.cluster_collection.step_trace_summary import StepTraceSummay
@@ -20,7 +22,6 @@ class MsprofQuerySummaryManager:
     """
     The class for dispatching query summary data task.
     """
-    FOLDER_NAME_TO_STORAGE = "query"
 
     def __init__(self: any, args: any) -> None:
         self.collection_path = os.path.realpath(args.collection_path)
@@ -29,6 +30,30 @@ class MsprofQuerySummaryManager:
         self.model_id = args.model_id
         self.iteration_id = args.iteration_id
         self.is_cluster_scene = False
+
+    @staticmethod
+    def check_rank_id(collection_path: str) -> bool:
+        prof_dirs = get_path_dir(collection_path)
+        for prof_dir in prof_dirs:
+            prof_path = os.path.join(collection_path, prof_dir)
+            if not os.path.isdir(prof_path):
+                continue
+            device_dirs = os.listdir(prof_path)
+            for device_dir in device_dirs:
+                device_path = os.path.join(prof_path, device_dir)
+                if not DataCheckManager.contain_info_json_data(device_path):
+                    continue
+                InfoConfReader().load_info(device_path)
+                if InfoConfReader().get_rank_id() is not None:
+                    return True
+        return False
+
+    @staticmethod
+    def check_cluster_task(collection_path: str) -> None:
+        if MsprofQuerySummaryManager.check_rank_id(collection_path):
+            json.dumps({'ClusterTask': 1})
+        else:
+            json.dumps({'ClusterTask': 0})
 
     @staticmethod
     def _check_integer_with_min_value(arg: any, min_value: int = None, nullable: bool = False) -> bool:
@@ -53,6 +78,8 @@ class MsprofQuerySummaryManager:
                   "npu_id": self.npu_id,
                   "model_id": self.model_id,
                   "iteration_id": self.iteration_id}
+        if self.data_type == QueryDataType.CLUSTER_TASK:
+            MsprofQuerySummaryManager.check_cluster_task(self.collection_path)
         if self.data_type == QueryDataType.STEP_TRACE:
             StepTraceSummay(params).process()
 
@@ -80,4 +107,5 @@ class MsprofQuerySummaryManager:
 
 
 class QueryDataType(IntEnum):
+    CLUSTER_TASK = 0
     STEP_TRACE = 1
