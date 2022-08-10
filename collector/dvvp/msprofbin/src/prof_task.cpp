@@ -8,7 +8,6 @@
 #include "prof_task.h"
 #include "errno/error_code.h"
 #include "config/config.h"
-#include "hccl_plugin.h"
 #include "job_factory.h"
 #include "job_device_rpc.h"
 #include "transport/uploader_mgr.h"

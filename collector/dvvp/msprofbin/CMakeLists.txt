@@ -96,7 +96,6 @@ add_executable(msprofbin
     ../transport/hdc/platform/rpc/dev_mgr_api.cpp
     ../depend/src/plugin_handle.cpp
     ../depend/src/driver_plugin.cpp
-    ../depend/src/hccl_plugin.cpp
     ../depend/src/slog_plugin.cpp
     ${hdcCpp}
     ${CppPath}

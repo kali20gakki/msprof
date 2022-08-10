@@ -16,7 +16,6 @@
 #include "command_handle.h"
 #include "platform/platform.h"
 
-
 namespace Analysis {
 namespace Dvvp {
 namespace ProfilerCommon {
