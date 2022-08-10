@@ -146,7 +146,7 @@ class GetOpTableTsTime:
         try:
             ai_cpu_sql = "select task_id, stream_id, sys_start*{MS_TO_NS}, (sys_end - sys_start)*{MS_TO_NS}, " \
                          "'{1}', {4}, {5}, batch_id from {0} where sys_start >= {2} and sys_end <= {3}" \
-                .format(DBNameConstant.TABLE_AI_CPU, Constant.TASK_TYPE_AI_CPU,
+                .format(DBNameConstant.TABLE_AI_CPU_FROM_TS, Constant.TASK_TYPE_AI_CPU,
                         iter_time[0][0] / NumberConstant.NS_TO_US,
                         iter_time[0][1] / NumberConstant.NS_TO_US,
                         self.iter_id, self.model_id,
