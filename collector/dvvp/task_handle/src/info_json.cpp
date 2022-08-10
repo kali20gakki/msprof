@@ -238,7 +238,6 @@ void InfoJson::AddNetCardInfo(SHARED_PTR_ALIA<InfoMain> infoMain)
 void InfoJson::AddRankId(SHARED_PTR_ALIA<InfoMain> infoMain)
 {
 #if (defined(linux) || defined(__linux__))
-    MSPROF_EVENT("[XXX] AddRankId");
     int32_t rankId = Utils::GetRankId();
     infoMain->set_rank_id(rankId);
 #endif

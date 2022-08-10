@@ -272,5 +272,4 @@ message CollectionStartEndTime {
     string collectionTimeBegin = 3;
     string collectionTimeEnd = 4;
     string clockMonotonicRaw = 5;
-    uint32 rankId = 6;
 }
