@@ -34,8 +34,10 @@ class ClusterInfoParser(IParser):
     def ms_run(self: any):
         self.parse()
         self.save()
+        logging.info("cluster_rank.db created successful!")
 
     def parse(self: any) -> None:
+        logging.info("Start to parse cluster rank data!")
         for cluster_device_path in self.cluster_device_paths:
             check_path_valid(cluster_device_path, False)
             InfoConfReader().load_info(cluster_device_path)
@@ -51,6 +53,7 @@ class ClusterInfoParser(IParser):
                 self.cluster_info_list.append(cluster_info)
 
     def save(self: any) -> None:
+        logging.info("Starting to save cluster_rank data to db!")
         if not self.cluster_info_list:
             logging.error('no valid cluster data!')
             return

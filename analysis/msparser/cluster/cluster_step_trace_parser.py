@@ -33,13 +33,16 @@ class ClusterStepTraceParser(IParser):
         self.cluster_model = None
 
     def ms_run(self: any) -> None:
+        logging.info("Start to parse cluster step_trace data!")
         if not self._check_collection_path_valid():
             logging.error("The input dir doesn't have cluster database, please check.")
             error(ClusterStepTraceParser.FILE_NAME,
                   "The input dir doesn't have cluster database, please check.")
             return
         self.parse()
+        logging.info("Start to save cluster step_trace data to db!")
         self.save()
+        logging.info("cluster_step_trace.db created successful!")
 
     def parse(self: any) -> None:
         if not self._collect_project_paths():
