@@ -137,7 +137,7 @@ class ThreadGroupViewer:
             _format_data.extend([_input_data, _infer_data, _output_data])
         return TraceViewManager.time_graph_trace(TraceViewHeaderConstant.TOP_DOWN_TIME_GRAPH_HEAD, _format_data)
 
-    def get_ge_op_execute_sql(self):
+    def _get_ge_op_execute_sql(self):
         where_condition = self._iteration.get_condition_within_iteration(self._index_id, self._model_id,
                                                                          time_start_key='start_time',
                                                                          time_end_key='end_time')
@@ -147,7 +147,7 @@ class ThreadGroupViewer:
     def _get_ge_op_execute_data(self: any) -> list:
         _format_data = []
         hash_dict = get_ge_hash_dict(self._project_path)
-        sql = self.get_ge_op_execute_sql()
+        sql = self._get_ge_op_execute_sql()
         ge_op_execute_data = self.get_thread_data(DBNameConstant.DB_GE_HOST_INFO, DBNameConstant.TABLE_GE_HOST, sql,
                                                   GeOpExecuteDto)
         if not ge_op_execute_data:
@@ -160,7 +160,7 @@ class ThreadGroupViewer:
                 (_data.end_time - _data.start_time) / NumberConstant.NS_TO_US])
         return TraceViewManager.time_graph_trace(TraceViewHeaderConstant.TASK_TIME_GRAPH_HEAD, _format_data)
 
-    def get_runtime_api_sql(self):
+    def _get_runtime_api_sql(self):
         where_condition = self._iteration.get_condition_within_iteration(self._index_id, self._model_id,
                                                                          time_start_key='entry_time',
                                                                          time_end_key='exit_time')
@@ -168,7 +168,7 @@ class ThreadGroupViewer:
 
     def _get_runtime_api_data(self: any) -> list:
         _format_data = []
-        sql = self.get_runtime_api_sql()
+        sql = self._get_runtime_api_sql()
         runtime_api_data = self.get_thread_data(DBNameConstant.DB_RUNTIME, DBNameConstant.TABLE_API_CALL, sql,
                                                 RuntimeApiDto)
         if not runtime_api_data:
