@@ -9,7 +9,6 @@
 #include "errno/error_code.h"
 #include "message/codec.h"
 #include "msprof_dlog.h"
-#include "hccl_plugin.h"
 #include "prof_acl_mgr.h"
 #include "prof_manager.h"
 #include "securec.h"

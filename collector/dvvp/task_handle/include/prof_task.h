@@ -12,7 +12,6 @@
 #include <mutex>
 #include <queue>
 #include "device.h"
-#include "proto/profiler.pb.h"
 #include "queue/bound_queue.h"
 #include "thread/thread.h"
 #include "uploader.h"
