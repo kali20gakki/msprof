@@ -45,7 +45,8 @@ class AclModel(ViewModel, IAnalysisModel):
         return DBManager.fetch_all_data(self.cur, sql)
 
     def get_acl_total_time(self):
-        search_data_sql = f"select sum(end_time-start_time) from {DBNameConstant.TABLE_ACL_DATA}"
+        search_data_sql = f"select sum(end_time-start_time) " \
+                          f"from {DBNameConstant.TABLE_ACL_DATA} {self._get_where_condition()}"
         return self.cur.execute(search_data_sql).fetchone()[0]
 
     def get_acl_statistic_data(self):
@@ -60,11 +61,13 @@ class AclModel(ViewModel, IAnalysisModel):
                           "min((end_time-start_time)/{1}), " \
                           "max((end_time-start_time)/{1}), " \
                           "process_id, thread_id from {0} " \
+                          "{where_condition} " \
                           "group by api_name".format(DBNameConstant.TABLE_ACL_DATA,
                                                      NumberConstant.NS_TO_US,
                                                      percent=CommonConstant.PERCENT,
                                                      total_time=total_time,
-                                                     accuracy=CommonConstant.ROUND_SIX)
+                                                     accuracy=CommonConstant.ROUND_SIX,
+                                                     where_condition=self._get_where_condition())
         return DBManager.fetch_all_data(self.cur, search_data_sql)
 
     def _get_where_condition(self):
