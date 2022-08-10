@@ -106,25 +106,25 @@ class TestMsprofQueryData(unittest.TestCase):
         self.assertEqual(result, [])
 
     def test_assembly_job_info_1(self):
-        basic_data = []
+        basic_data = [1,2,3,4]
         iteration_data = None
         key = MsprofQueryData('123')
         result = key.assembly_job_info(basic_data, iteration_data)
         self.assertEqual(len(result), 1)
 
     def test_assembly_job_info_2(self):
-        basic_data = []
+        basic_data = [1,2,3,4]
         iteration_data = [(1, 1, "1"), (2, 2, "2,1")]
         key = MsprofQueryData('123')
         result = key.assembly_job_info(basic_data, iteration_data)
         self.assertEqual(len(result), 2)
 
     def test_query_data(self):
-        with mock.patch(NAMESPACE + '.MsprofQueryData.get_job_basic_info', return_value=None):
+        with mock.patch('common_func.info_conf_reader' + '.InfoConfReader.get_job_basic_info', return_value=None):
             key = MsprofQueryData('123')
             result = key.query_data()
         self.assertEqual(result, [])
-        with mock.patch(NAMESPACE + '.MsprofQueryData.get_job_basic_info', return_value=[1, 2]), \
+        with mock.patch('common_func.info_conf_reader' + '.InfoConfReader.get_job_basic_info', return_value=[1, 2]), \
                 mock.patch(NAMESPACE + '.MsprofQueryData.get_job_iteration_info', return_value=[(1, 1), (2, 2)]):
             key = MsprofQueryData('123')
             result = key.query_data()
