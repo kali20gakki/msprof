@@ -120,12 +120,14 @@ class TestMsprofQueryData(unittest.TestCase):
         self.assertEqual(len(result), 2)
 
     def test_query_data(self):
-        with mock.patch('common_func.info_conf_reader' + '.InfoConfReader.get_job_basic_info', return_value=None):
+        with mock.patch('common_func.info_conf_reader.InfoConfReader.get_job_basic_info', return_value=None):
             key = MsprofQueryData('123')
             result = key.query_data()
         self.assertEqual(result, [])
-        with mock.patch('common_func.info_conf_reader' + '.InfoConfReader.get_job_basic_info', return_value=[1, 2, 3, 4]), \
-                mock.patch(NAMESPACE + '.MsprofQueryData.get_job_iteration_info', return_value=[(1, 1, "1"), (2, 2, "2,1")]):
+        with mock.patch('common_func.info_conf_reader.InfoConfReader.get_job_basic_info',
+                        return_value=[1, 2, 3, 4]), \
+             mock.patch(NAMESPACE + '.MsprofQueryData.get_job_iteration_info',
+                        return_value=[(1, 1, "1"), (2, 2, "2,1")]):
             key = MsprofQueryData('123')
             result = key.query_data()
         self.assertEqual(len(result), 2)

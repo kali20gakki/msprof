@@ -21,6 +21,7 @@ from common_func.msprof_common import check_path_valid
 from common_func.msprof_common import get_path_dir
 from common_func.msprof_exception import ProfException
 from common_func.msprof_query_data import MsprofQueryData
+from common_func.path_manager import PathManager
 from common_func.utils import Utils
 from framework.load_info_manager import LoadInfoManager
 from msmodel.cluster_info.cluster_info_model import ClusterInfoModel
@@ -133,7 +134,7 @@ class QueryCommand:
     def _check_cluster_query(self: any) -> bool:
         if DataCheckManager.contain_info_json_data(self.collection_path):
             return False
-        if self._check_cluster_sqlite_db(os.path.join(self.collection_path, 'sqlite')):
+        if self._check_cluster_sqlite_db(PathManager.get_sql_dir(self.collection_path)):
             return True
         return False
 

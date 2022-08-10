@@ -126,7 +126,9 @@ class InfoConfReader:
         get rank_id
         :return: rank_id
         """
-        return self._end_info.get("rankId", Constant.NA)
+        if self._info_json.get("rank_id", Constant.NA) == -1:
+            return Constant.NA
+        return self._info_json.get("rank_id", Constant.NA)
 
     def get_device_id(self: any) -> str:
         """
