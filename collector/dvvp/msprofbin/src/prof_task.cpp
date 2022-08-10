@@ -132,22 +132,6 @@ void ProfTask::GenerateFileName(bool isStartTime, std::string &filename)
     }
 }
 
-void ProfTask::SaveRankId(SHARED_PTR_ALIA<analysis::dvvp::proto::CollectionStartEndTime> timeInfo)
-{
-    if (!Utils::IsClusterRunEnv()) {
-        MSPROF_LOGI("It is not cluster run environment.");
-        return;
-    }
-    uint32_t rankId;
-    int32_t ret = HcclPlugin::instance()->MsprofHcomGetRankId(&rankId);
-    if (ret == 0) {
-        MSPROF_LOGI("Get rank id success, rankId=%d.", rankId);
-        timeInfo->set_rankid(rankId);
-    } else {
-        MSPROF_LOGE("Get rank id fail, ret=%d.", ret);
-    }
-}
-
 int ProfTask::CreateCollectionTimeInfo(std::string collectionTime, bool isStartTime)
 {
     MSPROF_LOGI("collectionTime:%s us, isStartTime:%d", collectionTime.c_str(), isStartTime);
@@ -158,7 +142,6 @@ int ProfTask::CreateCollectionTimeInfo(std::string collectionTime, bool isStartT
     if (!isStartTime) {
         timeInfo->set_collectiontimeend(collectionTime);
         timeInfo->set_collectiondateend(Utils::TimestampToTime(collectionTime, TIME_US));
-        SaveRankId(timeInfo);
     } else {
         timeInfo->set_collectiontimebegin(collectionTime);
         timeInfo->set_collectiondatebegin(Utils::TimestampToTime(collectionTime, TIME_US));

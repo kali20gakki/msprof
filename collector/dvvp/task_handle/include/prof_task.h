@@ -73,7 +73,6 @@ private:
     int GetHostAndDeviceInfo();
     std::string GetHostTime();
     void GenerateFileName(bool isStartTime, std::string &filename);
-    void SaveRankId(SHARED_PTR_ALIA<analysis::dvvp::proto::CollectionStartEndTime> timeInfo);
     int CreateCollectionTimeInfo(std::string collectionTime, bool isStartTime);
     void StartDevices(const std::vector<std::string> &devicesVec);
     void ProcessDefMode();
