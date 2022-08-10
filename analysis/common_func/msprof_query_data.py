@@ -102,28 +102,13 @@ class MsprofQueryData:
             iteration_infos_result.append(iteration_info_list)
         return iteration_infos_result
 
+    @classmethod
     def get_job_basic_info(self: any) -> list:
         """
         Get the info under the profiling job data: job info, device id, job name and collect time.
         :return: list of the basic data.
         """
-        if InfoConfReader().is_host_profiling():
-            device_id = Constant.NA
-        else:
-            device_id_list = InfoConfReader().get_device_list()
-            if not device_id_list:
-                error(self.FILE_NAME, "No device id found in the file of info.json, maybe the file is incomplete,"
-                                      "please check the info.json under the directory: {0}".format(self.project_path))
-                return []
-            device_id = device_id_list[0]
-
-        collection_time, _ = InfoConfReader().get_collect_date()
-        if not collection_time:
-            error(self.FILE_NAME, "No collection start time found in the file of start.info, maybe file is incomplete,"
-                                  "please check the start.info under the directory: {0}".format(self.project_path))
-            return []
-        return [InfoConfReader().get_job_info(), device_id, os.path.basename(self.project_path),
-                collection_time]
+        return InfoConfReader().get_job_basic_info()
 
     def get_job_iteration_info(self: any) -> list:
         """
@@ -186,7 +171,7 @@ class MsprofQueryData:
         Query data with basic info and iteration info.
         :return: list of query data object
         """
-        basic_data = InfoConfReader().get_job_basic_info()
+        basic_data = self.get_job_basic_info()
         if not basic_data:
             return []
 
