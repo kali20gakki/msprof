@@ -48,7 +48,8 @@ class RuntimeApiViewModel(ViewModel, IAnalysisModel):
         return DBManager.fetch_all_data(self.cur, sql)
 
     def get_runtime_total_time(self):
-        search_data_sql = f"select sum(exit_time-entry_time) from {DBNameConstant.TABLE_API_CALL}"
+        search_data_sql = f"select sum(exit_time-entry_time) " \
+                          f"from {DBNameConstant.TABLE_API_CALL} {self._get_where_condition()}"
         total_time = DBManager.fetch_all_data(self.cur, search_data_sql)
         return total_time[0] if total_time else []
 
