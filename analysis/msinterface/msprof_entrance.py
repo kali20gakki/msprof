@@ -52,7 +52,7 @@ class MsprofEntrance:
     @staticmethod
     def _handle_import_command(parser: any, args: any) -> None:
         _ = parser
-        import_command = ImportCommand(args.collection_path)
+        import_command = ImportCommand(args)
         import_command.process()
 
     def main(self: any) -> None:
@@ -144,6 +144,10 @@ class MsprofEntrance:
 
     def _import_parser(self: any, import_parser: any) -> None:
         self._add_collect_path_argument(import_parser)
+        import_parser.add_argument(
+            '--cluster', dest='cluster_flag',
+            action='store_true', default=False,
+            help='<Optional> the cluster scence flag')
 
     def _monitor_parser(self: any, monitor_parser: any) -> None:
         self._add_collect_path_argument(monitor_parser)

@@ -22,30 +22,6 @@ class TestMsprofQueryData(unittest.TestCase):
         _db_manager.destroy(_db_manager.create_sql(DBNameConstant.DB_STEP_TRACE))
         _db_manager.destroy(_db_manager.create_sql(DBNameConstant.DB_GE_INFO))
 
-    def test_get_job_basic_info_1(self):
-        InfoConfReader()._info_json = {"DeviceInfo": None, "devices": [1, 2]}
-        InfoConfReader()._start_info = {"collectionDateBegin": None}
-        InfoConfReader()._end_info = {"collectionDateEnd": None}
-        key = MsprofQueryData('123')
-        result = key.get_job_basic_info()
-        self.assertEqual(result, [])
-
-    def test_get_job_basic_info_2(self):
-        InfoConfReader()._info_json = {"DeviceInfo": 123, "devices": [1, 2]}
-        InfoConfReader()._start_info = {"collectionDateBegin": None}
-        InfoConfReader()._end_info = {"collectionDateEnd": None}
-        key = MsprofQueryData('123')
-        result = key.get_job_basic_info()
-        self.assertEqual(result, [])
-
-    def test_get_job_basic_info_3(self):
-        InfoConfReader()._info_json = {"DeviceInfo": None, "devices": None, "jobInfo": None}
-        InfoConfReader()._start_info = {"collectionDateBegin": 1}
-        InfoConfReader()._end_info = {"collectionDateEnd": 2}
-        key = MsprofQueryData('123')
-        result = key.get_job_basic_info()
-        self.assertEqual(result, [None, 'N/A', '123', 1])
-
     def test_get_job_iteration_info(self):
         create_sql_ge = "create table IF NOT EXISTS TaskInfo (model_id INT)"
         data_ge = ((1,),)
@@ -106,14 +82,14 @@ class TestMsprofQueryData(unittest.TestCase):
         self.assertEqual(result, [])
 
     def test_assembly_job_info_1(self):
-        basic_data = []
+        basic_data = [1, 2, 3, 4]
         iteration_data = None
         key = MsprofQueryData('123')
         result = key.assembly_job_info(basic_data, iteration_data)
         self.assertEqual(len(result), 1)
 
     def test_assembly_job_info_2(self):
-        basic_data = []
+        basic_data = [1, 2, 3, 4]
         iteration_data = [(1, 1, "1"), (2, 2, "2,1")]
         key = MsprofQueryData('123')
         result = key.assembly_job_info(basic_data, iteration_data)
@@ -124,8 +100,9 @@ class TestMsprofQueryData(unittest.TestCase):
             key = MsprofQueryData('123')
             result = key.query_data()
         self.assertEqual(result, [])
-        with mock.patch(NAMESPACE + '.MsprofQueryData.get_job_basic_info', return_value=[1, 2]), \
-                mock.patch(NAMESPACE + '.MsprofQueryData.get_job_iteration_info', return_value=[(1, 1), (2, 2)]):
+        with mock.patch(NAMESPACE + '.MsprofQueryData.get_job_basic_info', return_value=[1, 2, 3, 4]), \
+             mock.patch(NAMESPACE + '.MsprofQueryData.get_job_iteration_info',
+                        return_value=[(1, 1, "1"), (2, 2, "2,1")]):
             key = MsprofQueryData('123')
             result = key.query_data()
         self.assertEqual(len(result), 2)
