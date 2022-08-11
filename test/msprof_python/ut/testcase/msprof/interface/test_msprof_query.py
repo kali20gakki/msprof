@@ -56,7 +56,7 @@ class TestQueryCommand(unittest.TestCase):
         result_dir = '123'
         query_data = {"job_info": '123', "job_name": 'ada', "model_id": 1, "device_id": 1,
                       "iteration_id": 123, "collection_time": 111, "parsed": False,
-                      "top_time_iteration": "1,2"}
+                      "top_time_iteration": "1,2", "rank_id":1}
         with mock.patch(NAMESPACE + '.MsprofQueryData.query_data',
                         return_value=[QueryDataBean(**query_data)]), \
              mock.patch('os.listdir', return_value=['123']), \
@@ -64,7 +64,7 @@ class TestQueryCommand(unittest.TestCase):
             InfoConfReader()._info_json = INFO_JSON
             key = QueryCommand('123')
             result = key._do_get_query_data(result_dir)
-            self.assertEqual(result, [['123', 1, 'ada', 111, 1, 123, "1,2"]])
+            self.assertEqual(result, [['123', 1, 'ada', 111, 1, 123, "1,2", 1]])
 
     def test_get_query_data_without_sub_dir(self):
         with mock.patch(NAMESPACE + '.DataCheckManager.contain_info_json_data', return_value=True), \
