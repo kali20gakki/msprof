@@ -1311,17 +1311,16 @@ bool Utils::IsClusterRunEnv()
 
 int32_t Utils::GetRankId()
 {
+    constexpr int32_t invalidRankId = -1;
     if (!IsClusterRunEnv()) {
-        return -1;
+        return invalidRankId;
     }
     std::string rankIdStr = Utils::GetEnvString(RANK_ID_ENV);
     MSPROF_LOGI("Environment variable RANK_ID = %s", rankIdStr.c_str());
     if (!CheckStringIsValidNatureNum(rankIdStr)) {
-        return -1;
+        return invalidRankId;
     }
-    constexpr int base = 10;
-    char *end = nullptr;
-    return strtol(rankIdStr.c_str(), &end, base);
+    return std::stoi(rankIdStr);
 }
 
 int32_t WriteFile(const std::string &absolutePath, const std::string &recordFile, const std::string &profName)
