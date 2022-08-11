@@ -8,14 +8,15 @@ import json
 import os
 from enum import IntEnum
 
-from common_func.common import error
+from common_func.common import error, print_msg
+from common_func.constant import Constant
 from common_func.data_check_manager import DataCheckManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.msprof_common import MsProfCommonConstant, get_path_dir
 from common_func.msprof_exception import ProfException
 from common_func.path_manager import PathManager
-from profiling_bean.cluster_collection.step_trace_summary import StepTraceSummay
+from msparser.cluster.step_trace_summary import StepTraceSummay
 
 
 class MsprofQuerySummaryManager:
@@ -44,16 +45,16 @@ class MsprofQuerySummaryManager:
                 if not DataCheckManager.contain_info_json_data(device_path):
                     continue
                 InfoConfReader().load_info(device_path)
-                if InfoConfReader().get_rank_id() is not None:
+                if InfoConfReader().get_rank_id() != Constant.NA:
                     return True
         return False
 
     @staticmethod
     def check_cluster_task(collection_path: str) -> None:
         if MsprofQuerySummaryManager.check_rank_id(collection_path):
-            json.dumps({'ClusterTask': 1})
+            print_msg(json.dumps({'ClusterTask': 1}))
         else:
-            json.dumps({'ClusterTask': 0})
+            print_msg(json.dumps({'ClusterTask': 0}))
 
     @staticmethod
     def _check_integer_with_min_value(arg: any, min_value: int = None, nullable: bool = False) -> bool:
@@ -92,11 +93,11 @@ class MsprofQuerySummaryManager:
             error(MsProfCommonConstant.COMMON_FILE_NAME,
                   "The query data type is wrong. Please enter a valid value.")
             raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR)
-        if not MsprofQuerySummaryManager._check_integer_with_min_value(self.npu_id, min_value=-1):
+        if not MsprofQuerySummaryManager._check_integer_with_min_value(self.npu_id, min_value=-1, nullable=True):
             error(MsProfCommonConstant.COMMON_FILE_NAME,
                   "The query id is wrong. Please enter a valid value.")
             raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR)
-        if not MsprofQuerySummaryManager._check_integer_with_min_value(self.model_id, min_value=1):
+        if not MsprofQuerySummaryManager._check_integer_with_min_value(self.model_id, min_value=1, nullable=True):
             error(MsProfCommonConstant.COMMON_FILE_NAME,
                   "The query model id is wrong. Please enter a valid value.")
             raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR)

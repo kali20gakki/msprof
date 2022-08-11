@@ -11,6 +11,7 @@ import logging
 from itertools import chain
 
 from common_func.common import error, print_msg
+from common_func.constant import Constant
 from common_func.data_check_manager import DataCheckManager
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
@@ -39,8 +40,7 @@ class StepTraceSummay:
         self.is_cluster_scene = params["is_cluster"]
         self.npu_id = params["npu_id"]
         self.model_id = params["model_id"]
-        self.iteration_id = params["iteration_id"] if params["iteration_id"] is not None else \
-            StepTraceSummay.ID_NUM_FOR_ALL_ITERATIONS
+        self.iteration_id = params["iteration_id"]
         self.data_collection = []
         self.all_devices = False
 
@@ -79,7 +79,7 @@ class StepTraceSummay:
             error(StepTraceSummay.FILE_NAME,
                   "Get cluster step trace data failed.")
             return
-        self._format_cluster_data(query_data, rank_id_collection)
+        self.data_collection = query_data
 
     def _check_cluster_db_valid(self: any) -> bool:
         db_file = PathManager.get_db_path(self.collection_path, DBNameConstant.DB_CLUSTER_STEP_TRACE)
@@ -90,9 +90,11 @@ class StepTraceSummay:
         return True
 
     def _check_query_all_devices(self: any) -> None:
-        self.all_devices = True if self.npu_id == StepTraceSummay.ID_NUM_FOR_ALL_DEVICES else False
+        self.all_devices = self.npu_id == StepTraceSummay.ID_NUM_FOR_ALL_DEVICES
 
     def _check_iteration_id_valid(self: any) -> bool:
+        if self.iteration_id is None:
+            self.iteration_id = StepTraceSummay.ID_NUM_FOR_ALL_ITERATIONS
         if self.all_devices and self.iteration_id == StepTraceSummay.ID_NUM_FOR_ALL_ITERATIONS:
             error(StepTraceSummay.FILE_NAME,
                   "For querying all devices data, you should input a valid iteration id.")
@@ -107,7 +109,7 @@ class StepTraceSummay:
         data = []
         db_file = PathManager.get_db_path(self.collection_path, DBNameConstant.DB_CLUSTER_STEP_TRACE)
         conn, curs = DBManager.check_connect_db_path(db_file)
-        if not conn or not curs:
+        if not (conn and curs):
             DBManager.destroy_db_connect(conn, curs)
             logging.error("The connect to cluster step trace database is failed.")
             return data
@@ -129,6 +131,7 @@ class StepTraceSummay:
         conn, curs = DBManager.check_connect_db_path(db_file)
         if not (conn and curs):
             logging.error("The connect to cluster rank database is failed.")
+            DBManager.destroy_db_connect(conn, curs)
             return rank_ids
         sql = "select distinct rank_id from {}".format(DBNameConstant.TABLE_CLUSTER_RANK)
         rank_ids = DBManager.fetch_all_data(curs, sql)
@@ -140,41 +143,37 @@ class StepTraceSummay:
         data_colleciton = []
         for rank_id in rank_id_collection:
             table = "step_trace_{}".format(rank_id)
-            sql = self._sql_for_query_all_iteration(table) + " and iteration_id={}".format(self.iteration_id)
+            sql = self._sql_for_query_all_iteration(table, rank_id) + " and iteration_id={}".format(self.iteration_id)
             data = DBManager.fetch_all_data(curs, sql)
             data_colleciton.append(list(chain.from_iterable(data)))
         return data_colleciton
 
     def _query_data_from_single_device(self, curs: any) -> list:
         table = "step_trace_{}".format(self.npu_id)
-        sql = self._sql_for_query_all_iteration(table)
+        sql = self._sql_for_query_all_iteration(table, self.npu_id)
         data = DBManager.fetch_all_data(curs, sql)
         return data
 
-    def _sql_for_query_all_iteration(self: any, table_name: str) -> str:
-        sql = "select (case when model_id={0} then 'N/A' else model_id end), " \
+    def _sql_for_query_all_iteration(self: any, table_name: str, npu_id: int) -> str:
+        sql = "select {0}, (case when model_id={1} then 'N/A' else model_id end), " \
               "iteration_id, " \
-              "(case when iteration_time={1} then 'N/A' else round(iteration_time, {2}) end), " \
-              "(case when fp_bp_time={1} then 'N/A' else round(fp_bp_time, {2}) end), " \
-              "(case when data_aug_bound={1} then 'N/A' else round(data_aug_bound, {2}) end), " \
-              "(case when bp_end={1} then 'N/A' else round(iteration_end - bp_end, {2}) end), " \
-              "(case when iteration_time={1} or iteration_end={1} then 'N/A' else " \
-              "round(iteration_end - iteration_time, {2}) end), " \
-              "(case when fp_start={1} then 'N/A' else round(FP_start, {2}) end), " \
-              "(case when bp_end={1} then 'N/A' else round(BP_end, {2}) end), " \
-              "(case when iteration_end={1} then 'N/A' else round(iteration_end, {2}) end) " \
-              "from {3} where model_id={4}".format(
+              "(case when iteration_time={2} then 'N/A' else round(iteration_time, {3}) end), " \
+              "(case when fp_bp_time={2} then 'N/A' else round(fp_bp_time, {3}) end), " \
+              "(case when data_aug_bound={2} then 'N/A' else round(data_aug_bound, {3}) end), " \
+              "(case when bp_end={2} then 'N/A' else round(iteration_end - bp_end, {3}) end), " \
+              "(case when iteration_time={2} or iteration_end={2} then 'N/A' else " \
+              "round(iteration_end - iteration_time, {3}) end), " \
+              "(case when fp_start={2} then 'N/A' else round(FP_start, {3}) end), " \
+              "(case when bp_end={2} then 'N/A' else round(BP_end, {3}) end), " \
+              "(case when iteration_end={2} then 'N/A' else round(iteration_end, {3}) end) " \
+              "from {4} where model_id={5}".format(
+            npu_id,
             NumberConstant.DEFAULT_MODEL_ID,
             NumberConstant.NULL_NUMBER,
             StepTraceSummay.NUMBER_0F_DECIMAL_PLACE,
             table_name,
             self.model_id)
         return sql
-
-    def _format_cluster_data(self: any, data: list, npu_id_collection: list) -> None:
-        for index, item in enumerate(data):
-            info = [npu_id_collection[index] if self.all_devices else self.npu_id, *item]
-            self.data_collection.append(info)
 
     def _process_in_non_cluster_scene(self: any) -> None:
         project_dir = self._find_info_file_dir()
@@ -186,47 +185,46 @@ class StepTraceSummay:
             raise ProfException(ProfException.PROF_INVALID_PATH_ERROR)
 
     def _find_info_file_dir(self: any) -> str:
-        sub_dirs = get_path_dir(self.collection_path)
+        prof_dirs = get_path_dir(self.collection_path)
         result = ""
         is_found = False
-        for sub_dir in sub_dirs:
-            sub_path = os.path.join(self.collection_path, sub_dir)
-            if not os.path.isdir(sub_path):
+        for prof_dir in prof_dirs:
+            prof_path = os.path.join(self.collection_path, prof_dir)
+            if not os.path.isdir(prof_path):
                 continue
-            child_sub_dirs = os.listdir(sub_path)
-            for child_sub_dir in child_sub_dirs:
-                project_path = os.path.join(sub_path, child_sub_dir)
-                if not DataCheckManager.contain_info_json_data(project_path):
+            device_dirs = os.listdir(prof_path)
+            for device_dir in device_dirs:
+                device_path = os.path.join(prof_path, device_dir)
+                if not DataCheckManager.contain_info_json_data(device_path):
                     continue
-                InfoConfReader().load_info(project_path)
-                if InfoConfReader().get_rank_id() is not None:
+                InfoConfReader().load_info(device_path)
+                if InfoConfReader().get_rank_id() != Constant.NA:
                     logging.error(StepTraceSummay.FILE_NAME,
                                   "To query cluster step trace data, please import cluster info data first.")
                     return ""
                 if InfoConfReader().is_host_profiling():
                     continue
                 devices = InfoConfReader().get_device_list()
-                if str(self.npu_id) in devices:
-                    if not is_found:
-                        result = project_path
-                        is_found = True
-                    else:
-                        logging.error(StepTraceSummay.FILE_NAME,
-                                      "There are duplicate device id numbers in input dir. "
-                                      "Please input a valid dir")
-                        return ""
+                if str(self.npu_id) in devices and not is_found:
+                    result = device_path
+                    is_found = True
+                elif str(self.npu_id) in devices and is_found:
+                    logging.error(StepTraceSummay.FILE_NAME,
+                                  "There are duplicate device id numbers in input dir. "
+                                  "Please input a valid dir")
+                    return ""
         return result
 
     def _query_in_non_cluster_scene(self: any, project_dir: str) -> list:
         data = []
         InfoConfReader().load_info(project_dir)
         db_file = PathManager.get_db_path(project_dir, DBNameConstant.DB_TRACE)
-        if not os.path.exists(db_file):
-            return data
         if not DBManager.check_tables_in_db(db_file, DBNameConstant.TABLE_TRAINING_TRACE):
+            logging.error("The database table doesn't exist.")
             return data
         conn, curs = DBManager.check_connect_db_path(db_file)
         if not (conn and curs):
+            logging.error("The connect to database is failed.")
             return data
         sql = self._sql_for_non_cluster(DBNameConstant.TABLE_TRAINING_TRACE)
         data = DBManager.fetch_all_data(curs, sql)
