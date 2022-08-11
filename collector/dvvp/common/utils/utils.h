@@ -457,10 +457,8 @@ public:
     static void RemoveDir(const std::string &dir, bool rmTopDir = true);
     static std::string CanonicalizePath(const std::string &path);
     static int ExecCmd(const ExecCmdParams &execCmdParams,
-        const std::vector<std::string> &argv,
-        const std::vector<std::string> &envp,
-        int &exitCodeP,
-        mmProcess &childProcess);
+        const std::vector<std::string> &argv, const std::vector<std::string> &envp,
+        int &exitCodeP, mmProcess &childProcess);
     static int ExecCmdC(const ExecCmdArgv &execCmdArgv, const ExecCmdParams &execCmdParams, int &exitCodeP);
     static int ExecCmdCAsync(const ExecCmdArgv &execCmdArgv, const ExecCmdParams &execCmdParams,
                              mmProcess &childProcess);
