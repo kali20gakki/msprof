@@ -418,32 +418,28 @@ TEST_F(RUNNING_MODE_UTEST, CheckAnalysisEnv){
     rMode.isQuit_=true;
     EXPECT_EQ(PROFILING_FAILED, rMode.CheckAnalysisEnv());
     rMode.isQuit_=false;
-    MOCKER_CPP(&Analysis::Dvvp::Common::Platform::Platform::RunSocSide)
-        .stubs()
-        .will(returnValue(true))
-        .then(returnValue(false));
-    EXPECT_EQ(PROFILING_FAILED, rMode.CheckAnalysisEnv());
 
-    std::string resValue = "/tmp/test/msprof";
-    MOCKER(Utils::GetSelfPath)
+    MOCKER(Utils::PythonEnvReady)
         .stubs()
-        .will(returnValue(resValue));
-    
-    MOCKER(Utils::SplitPath)
+        .will(returnValue(true));
+
+    MOCKER(Utils::AnalysisEnvReady)
         .stubs()
-        .will(returnValue(PROFILING_FAILED))
-        .then(returnValue(PROFILING_SUCCESS));
+        .will(returnValue(false))
+        .then(returnValue(true));
     EXPECT_EQ(PROFILING_FAILED, rMode.CheckAnalysisEnv());
+    rMode.analysisPath_="msprof.py";
     MOCKER(Utils::IsFileExist)
         .stubs()
         .will(returnValue(false))
         .then(returnValue(true));
     EXPECT_EQ(PROFILING_FAILED, rMode.CheckAnalysisEnv());
-    MOCKER(&MmAccess2).stubs()
-        .will(returnValue(PROFILING_ERROR))
+    MOCKER(MmAccess2)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
     EXPECT_EQ(PROFILING_FAILED, rMode.CheckAnalysisEnv());
-    EXPECT_EQ(PROFILING_SUCCESS, rMode.CheckAnalysisEnv());    
+    EXPECT_EQ(PROFILING_SUCCESS, rMode.CheckAnalysisEnv());
 }
 
 TEST_F(RUNNING_MODE_UTEST, AppModeModeParamsCheck){

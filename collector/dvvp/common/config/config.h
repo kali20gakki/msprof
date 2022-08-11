@@ -19,6 +19,10 @@ namespace config {
 // /////////////////////common//////////////////////////////////
 const std::string DEVICE_APP_DIR = "/usr/local/profiler/";
 const std::string PROF_SCRIPT_FILE_PATH = "/usr/bin/msprof_data_collection.sh";
+const std::string PROF_MSPROF_PY_PATH = "profiler/profiler_tool/analysis/msprof/msprof.py";
+const std::string PROF_MSPROF_PY_NAME = "msprof.py";
+const std::string PROF_MSPROF_SO_NAME = "libmsprofiler.so";
+const std::string PROF_MSPROF_BIN_NAME = "msprof";
 
 const char * const HOST_TAG_KEY = "Host";
 const char * const DEVICE_TAG_KEY = "Device";
