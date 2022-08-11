@@ -10,6 +10,7 @@ import os
 import sys
 
 from common_func.db_name_constant import DBNameConstant
+from common_func.path_manager import PathManager
 
 
 class MsprofInfoConstruct:
@@ -38,7 +39,7 @@ class MsprofInfoConstruct:
     @staticmethod
     def _check_cluster_sqlite(path: str) -> bool:
         path = os.path.realpath(path)
-        return os.path.exists(os.path.join(path, "sqlite", DBNameConstant.DB_CLUSTER_RANK))
+        return os.path.exists(PathManager.get_db_path(path, DBNameConstant.DB_CLUSTER_RANK))
 
     def load_basic_info_model(self: any, args: any) -> None:
         """

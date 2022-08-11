@@ -57,35 +57,31 @@ class StepTraceSummay:
 
     def _storage_summary_data(self: any) -> None:
         output_file_name = "step_trace_{}_{}_{}.json".format(self.npu_id, self.model_id, self.iteration_id)
-        output_file_path = os.path.join(self.collection_path, PathManager.QUERY_CLUSTER,
-                                        output_file_name)
+        output_file_path = PathManager.get_query_result_path(self.collection_path, output_file_name)
         result = create_json(output_file_path, StepTraceSummay.HEADERS, self.data_collection, save_old_file=False)
         result_json = json.loads(result)
         if result_json["status"] == NumberConstant.SUCCESS:
             print_msg(result)
         else:
-            error(StepTraceSummay.FILE_NAME, result_json["info"])
+            print_msg(json.dumps({'status': NumberConstant.ERROR, 'info': 'query step trace data failed', 'data': ''}))
 
     def _process_in_cluster_scene(self: any) -> None:
         if not self._check_cluster_db_valid():
             return
         rank_id_collection = self._get_all_rank_ids()
         if not rank_id_collection:
-            error(StepTraceSummay.FILE_NAME,
-                  "Get cluster rank id info failed.")
+            logging.error("Get cluster rank id info failed.")
             return
         query_data = self._query_in_cluster_scene(rank_id_collection)
         if not query_data:
-            error(StepTraceSummay.FILE_NAME,
-                  "Get cluster step trace data failed.")
+            logging.error("Get cluster step trace data failed.")
             return
         self.data_collection = query_data
 
     def _check_cluster_db_valid(self: any) -> bool:
         db_file = PathManager.get_db_path(self.collection_path, DBNameConstant.DB_CLUSTER_STEP_TRACE)
         if not os.path.exists(db_file):
-            error(StepTraceSummay.FILE_NAME,
-                  "There is not step trace cluster database file. Please check the input dir.")
+            logging.error("There is not step trace cluster database file. Please check the input dir.")
             return False
         return True
 
@@ -96,12 +92,10 @@ class StepTraceSummay:
         if self.iteration_id is None:
             self.iteration_id = StepTraceSummay.ID_NUM_FOR_ALL_ITERATIONS
         if self.all_devices and self.iteration_id == StepTraceSummay.ID_NUM_FOR_ALL_ITERATIONS:
-            error(StepTraceSummay.FILE_NAME,
-                  "For querying all devices data, you should input a valid iteration id.")
+            logging.error("For querying all devices data, you should input a valid iteration id.")
             return False
         if not self.all_devices and self.iteration_id != StepTraceSummay.ID_NUM_FOR_ALL_ITERATIONS:
-            error(StepTraceSummay.FILE_NAME,
-                  "For querying single device data, you should not input a iteration id.")
+            logging.error("For querying single device data, you should not input a iteration id.")
             return False
         return True
 
@@ -125,12 +119,13 @@ class StepTraceSummay:
     def _get_all_rank_ids(self: any) -> list:
         rank_ids = []
         db_file = PathManager.get_db_path(self.collection_path, DBNameConstant.DB_CLUSTER_RANK)
-        if not DBManager.check_tables_in_db(db_file, DBNameConstant.TABLE_CLUSTER_RANK):
-            logging.error("The cluster rank table doesn't exist.")
-            return rank_ids
         conn, curs = DBManager.check_connect_db_path(db_file)
         if not (conn and curs):
             logging.error("The connect to cluster rank database is failed.")
+            DBManager.destroy_db_connect(conn, curs)
+            return rank_ids
+        if not DBManager.judge_table_exist(curs, DBNameConstant.TABLE_CLUSTER_RANK):
+            logging.error("The cluster rank table doesn't exist.")
             DBManager.destroy_db_connect(conn, curs)
             return rank_ids
         sql = "select distinct rank_id from {}".format(DBNameConstant.TABLE_CLUSTER_RANK)
@@ -143,6 +138,9 @@ class StepTraceSummay:
         data_colleciton = []
         for rank_id in rank_id_collection:
             table = "step_trace_{}".format(rank_id)
+            if not DBManager.judge_table_exist(curs, table):
+                logging.error("The %s table doesn't exist.", table)
+                continue
             sql = self._sql_for_query_all_iteration(table, rank_id) + " and iteration_id={}".format(self.iteration_id)
             data = DBManager.fetch_all_data(curs, sql)
             data_colleciton.append(list(chain.from_iterable(data)))
@@ -180,9 +178,7 @@ class StepTraceSummay:
         if project_dir:
             self.data_collection = self._query_in_non_cluster_scene(project_dir)
         else:
-            error(StepTraceSummay.FILE_NAME,
-                  "The query dir is wrong. Please check.")
-            raise ProfException(ProfException.PROF_INVALID_PATH_ERROR)
+            logging.error("The input dir is wrong. Please check.")
 
     def _find_info_file_dir(self: any) -> str:
         prof_dirs = get_path_dir(self.collection_path)
@@ -199,8 +195,7 @@ class StepTraceSummay:
                     continue
                 InfoConfReader().load_info(device_path)
                 if InfoConfReader().get_rank_id() != Constant.NA:
-                    logging.error(StepTraceSummay.FILE_NAME,
-                                  "To query cluster step trace data, please import cluster info data first.")
+                    logging.error("To query cluster step trace data, please import cluster info data first.")
                     return ""
                 if InfoConfReader().is_host_profiling():
                     continue
@@ -209,8 +204,7 @@ class StepTraceSummay:
                     result = device_path
                     is_found = True
                 elif str(self.npu_id) in devices and is_found:
-                    logging.error(StepTraceSummay.FILE_NAME,
-                                  "There are duplicate device id numbers in input dir. "
+                    logging.error("There are duplicate device id numbers in input dir. "
                                   "Please input a valid dir")
                     return ""
         return result
@@ -219,12 +213,14 @@ class StepTraceSummay:
         data = []
         InfoConfReader().load_info(project_dir)
         db_file = PathManager.get_db_path(project_dir, DBNameConstant.DB_TRACE)
-        if not DBManager.check_tables_in_db(db_file, DBNameConstant.TABLE_TRAINING_TRACE):
-            logging.error("The database table doesn't exist.")
-            return data
         conn, curs = DBManager.check_connect_db_path(db_file)
         if not (conn and curs):
             logging.error("The connect to database is failed.")
+            DBManager.destroy_db_connect(conn, curs)
+            return data
+        if not DBManager.judge_table_exist(curs, DBNameConstant.TABLE_TRAINING_TRACE):
+            logging.error("The %s table doesn't exist.", DBNameConstant.TABLE_TRAINING_TRACE)
+            DBManager.destroy_db_connect(conn, curs)
             return data
         sql = self._sql_for_non_cluster(DBNameConstant.TABLE_TRAINING_TRACE)
         data = DBManager.fetch_all_data(curs, sql)
