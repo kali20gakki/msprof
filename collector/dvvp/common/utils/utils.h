@@ -526,6 +526,10 @@ public:
     static bool IsAppName(const std::string paramsName);
     static bool IsClusterRunEnv();
     static int32_t GetRankId();
+    static std::vector<std::string> GenEnvPairVec(const std::vector<std::string> &envVec);
+    static bool PythonEnvReady();
+    static bool AnalysisEnvReady(std::string &msprofPyPath);
+    static int CloudAnalyze(const std::string &jobDir);
 };
 
 template<class T>
