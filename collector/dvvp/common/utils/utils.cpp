@@ -1293,6 +1293,36 @@ bool Utils::IsAppName(const std::string paramsName)
     return true;
 }
 
+bool Utils::IsClusterRunEnv()
+{
+    std::string rankTableFilePath = Utils::GetEnvString(RANK_TABLE_FILE_ENV);
+    MSPROF_LOGI("Environment variable RANK_TABLE_FILE = %s", rankTableFilePath.c_str());
+    if (rankTableFilePath.empty()) {
+        return false;
+    }
+    if (MmAccess(rankTableFilePath.c_str()) != PROFILING_SUCCESS) {
+        return false;
+    }
+    if (MmIsDir(rankTableFilePath.c_str()) == PROFILING_SUCCESS) {
+        return false;
+    }
+    return true;
+}
+
+int32_t Utils::GetRankId()
+{
+    constexpr int32_t invalidRankId = -1;
+    if (!IsClusterRunEnv()) {
+        return invalidRankId;
+    }
+    std::string rankIdStr = Utils::GetEnvString(RANK_ID_ENV);
+    MSPROF_LOGI("Environment variable RANK_ID = %s", rankIdStr.c_str());
+    if (!CheckStringIsValidNatureNum(rankIdStr)) {
+        return invalidRankId;
+    }
+    return std::stoi(rankIdStr);
+}
+
 int32_t WriteFile(const std::string &absolutePath, const std::string &recordFile, const std::string &profName)
 {
 #if (defined(_WIN32) || defined(_WIN64) || defined(_MSC_VER))

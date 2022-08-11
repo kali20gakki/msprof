@@ -16,7 +16,6 @@
 #include "thread/thread.h"
 #include "uploader.h"
 #include "utils/utils.h"
-
 namespace analysis {
 namespace dvvp {
 namespace host {

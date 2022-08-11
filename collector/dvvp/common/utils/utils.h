@@ -524,6 +524,8 @@ public:
         return ret;
     }
     static bool IsAppName(const std::string paramsName);
+    static bool IsClusterRunEnv();
+    static int32_t GetRankId();
 };
 
 template<class T>
