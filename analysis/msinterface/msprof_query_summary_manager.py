@@ -13,7 +13,8 @@ from common_func.constant import Constant
 from common_func.data_check_manager import DataCheckManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
-from common_func.msprof_common import MsProfCommonConstant, get_path_dir
+from common_func.ms_constant.number_constant import NumberConstant
+from common_func.msprof_common import MsProfCommonConstant, get_path_dir, prepare_log
 from common_func.msprof_exception import ProfException
 from common_func.path_manager import PathManager
 from msparser.cluster.step_trace_summary import StepTraceSummay
@@ -23,6 +24,8 @@ class MsprofQuerySummaryManager:
     """
     The class for dispatching query summary data task.
     """
+    CLUSTER_SCENE = '1'
+    NOT_CLUSTER_SCENE = '0'
 
     def __init__(self: any, args: any) -> None:
         self.collection_path = os.path.realpath(args.collection_path)
@@ -50,11 +53,13 @@ class MsprofQuerySummaryManager:
         return False
 
     @staticmethod
-    def check_cluster_task(collection_path: str) -> None:
+    def check_cluster_scene(collection_path: str) -> None:
         if MsprofQuerySummaryManager.check_rank_id(collection_path):
-            print_msg(json.dumps({'ClusterTask': 1}))
+            print_msg(json.dumps({'status': NumberConstant.SUCCESS, 'info': '', 'data':
+                MsprofQuerySummaryManager.CLUSTER_SCENE}))
         else:
-            print_msg(json.dumps({'ClusterTask': 0}))
+            print_msg(json.dumps({'status': NumberConstant.SUCCESS, 'info': '', 'data':
+                MsprofQuerySummaryManager.NOT_CLUSTER_SCENE}))
 
     @staticmethod
     def _check_integer_with_min_value(arg: any, min_value: int = None, nullable: bool = False) -> bool:
@@ -80,13 +85,15 @@ class MsprofQuerySummaryManager:
                   "model_id": self.model_id,
                   "iteration_id": self.iteration_id}
         if self.data_type == QueryDataType.CLUSTER_TASK:
-            MsprofQuerySummaryManager.check_cluster_task(self.collection_path)
+            MsprofQuerySummaryManager.check_cluster_scene(self.collection_path)
         if self.data_type == QueryDataType.STEP_TRACE:
             StepTraceSummay(params).process()
 
     def _check_cluster_scene(self: any) -> None:
         cluster_rank_file = PathManager.get_db_path(self.collection_path, DBNameConstant.DB_CLUSTER_RANK)
-        self.is_cluster_scene = True if os.path.exists(cluster_rank_file) else False
+        self.is_cluster_scene = os.path.exists(cluster_rank_file)
+        if self.is_cluster_scene:
+            prepare_log(self.collection_path)
 
     def _check_argument(self: any) -> None:
         if self.data_type is None or self.data_type not in QueryDataType.__members__.values():

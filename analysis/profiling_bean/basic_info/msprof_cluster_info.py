@@ -35,7 +35,7 @@ class MsProfClusterInfo:
         if not conn or not curs:
             DBManager.destroy_db_connect(conn, curs)
             return data
-        if not DBManager.check_tables_in_db(db_path, db_table):
+        if not DBManager.judge_table_exist(curs, db_table):
             DBManager.destroy_db_connect(conn, curs)
             return data
         data = DBManager.fetch_all_data(curs, sql)
@@ -50,8 +50,7 @@ class MsProfClusterInfo:
         self._collect_cluster_info_data(self.project_path)
         if not self.info_collection:
             return
-        output_file_path = os.path.join(self.project_path, PathManager.QUERY_CLUSTER,
-                                        MsProfClusterInfo.OUTPUT_FILE_NAME)
+        output_file_path = PathManager.get_query_result_path(self.project_path, MsProfClusterInfo.OUTPUT_FILE_NAME)
         result = create_json(output_file_path, ["Rank Id", "Models"], self.info_collection, save_old_file=False)
         result_json = json.loads(result)
         if result_json["status"] == NumberConstant.SUCCESS:
@@ -73,7 +72,7 @@ class MsProfClusterInfo:
             return
         for rank_id in rank_ids:
             step_trace_table = "step_trace_{}".format(rank_id)
-            if not DBManager.check_tables_in_db(step_trace_db, step_trace_table):
+            if not DBManager.judge_table_exist(curs, step_trace_table):
                 continue
             sql_for_total_iterations = "select model_id, max(iteration_id) " \
                                        "from {} group by model_id".format(step_trace_table)

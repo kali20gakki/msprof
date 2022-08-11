@@ -106,6 +106,13 @@ class PathManager:
         """
         return cls.get_path_under_result_dir(result_dir, cls.HCCL)
 
+    @classmethod
+    def get_query_result_path(cls: any, result_dir: str, file_name: str) -> str:
+        """
+        get query result path in result directory
+        """
+        return cls.get_path_under_result_dir(result_dir, cls.QUERY_CLUSTER, file_name)
+
     @staticmethod
     def get_path_under_result_dir(result_dir: str, *paths: str) -> str:
         """
