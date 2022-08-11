@@ -347,7 +347,6 @@ int ProfAclMgr::ProfAclStart(PROF_CONF_CONST_PTR profStartCfg)
     std::lock_guard<std::mutex> lk(mtx_);
     if (profStartCfg == nullptr) {
         MSPROF_LOGE("Startcfg is nullptr");
-        MSPROF_INNER_ERROR("EK9999", "Startcfg is nullptr");
         return ACL_ERROR_INVALID_PARAM;
     }
 
@@ -475,6 +474,12 @@ int ProfAclMgr::ProfAclFinalize()
     devTasks_.clear();
 
     mode_ = WORK_MODE_OFF;
+    if (Utils::IsClusterRunEnv()) {
+        std::string jobDir = resultPath_ + MSVP_SLASH + baseDir_;
+        if (Utils::CloudAnalyze(jobDir) != PROFILING_SUCCESS) {
+            MSPROF_LOGW("Can't Analyze Data on Cloud. Path: %s, Please do it by yourself.", jobDir.c_str());
+        }
+    }
     return ACL_SUCCESS;
 }
 
@@ -1732,6 +1737,12 @@ int32_t ProfAclMgr::MsprofFinalizeHandle(void)
     UploaderMgr::instance()->DelAllUploader();
     devTasks_.clear();
     SetModeToOff();
+    if (Utils::IsClusterRunEnv()) {
+        std::string jobDir = resultPath_ + MSVP_SLASH + baseDir_;
+        if (Utils::CloudAnalyze(jobDir) != PROFILING_SUCCESS) {
+            MSPROF_LOGW("Can't analyze data on cloud. path: %s, please do it by yourself.", jobDir.c_str());
+        }
+    }
     return MSPROF_ERROR_NONE;
 }
 
