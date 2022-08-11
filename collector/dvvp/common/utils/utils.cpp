@@ -1296,6 +1296,7 @@ bool Utils::IsAppName(const std::string paramsName)
 bool Utils::IsClusterRunEnv()
 {
     std::string rankTableFilePath = Utils::GetEnvString(RANK_TABLE_FILE_ENV);
+    MSPROF_LOGI("Environment variable RANK_TABLE_FILE = %s", rankTableFilePath.c_str());
     if (rankTableFilePath.empty()) {
         return false;
     }
