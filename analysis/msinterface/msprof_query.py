@@ -6,7 +6,6 @@ QueryCommand class. This class mainly involves the process function.
 Copyright Information:
 Huawei Technologies Co., Ltd. All Rights Reserved © 2020
 """
-import logging
 import os
 from operator import itemgetter
 
@@ -15,12 +14,11 @@ from common_func.common import warn
 from common_func.data_check_manager import DataCheckManager
 from common_func.common import error
 from common_func.db_name_constant import DBNameConstant
-from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.msprof_common import check_path_valid
 from common_func.msprof_common import get_path_dir
 from common_func.msprof_exception import ProfException
-from common_func.msprof_query_summary_manager import MsprofQuerySummaryManager
+from msinterface.msprof_query_summary_manager import MsprofQuerySummaryManager
 from common_func.msprof_query_data import MsprofQueryData
 from common_func.path_manager import PathManager
 from common_func.utils import Utils
@@ -106,14 +104,6 @@ class QueryCommand:
                 table_data = self._get_cluster_query_data()
             else:
                 table_data = self._get_query_data()
-            sorted_table_data = sorted(table_data, key=itemgetter(0, 3))
-            self._format_print(sorted_table_data)
-
-        self.check_argument_valid()
-        if self._is_query_summary_data():
-            MsprofQuerySummaryManager(self.args).process()
-        else:
-            table_data = self._get_query_data()
             sorted_table_data = sorted(table_data, key=itemgetter(0, 3))
             self._format_print(sorted_table_data)
 
