@@ -76,9 +76,9 @@ class ClusterStepTraceParser(IParser):
             DBManager.destroy_db_connect(conn, curs)
             logging.error("The connect to cluster rank database is failed.")
             return False
-        if not DBManager.check_tables_in_db(rank_db_path, DBNameConstant.TABLE_CLUSTER_RANK):
-            DBManager.destroy_db_connect(conn, curs)
+        if not DBManager.judge_table_exist(curs, DBNameConstant.TABLE_CLUSTER_RANK):
             logging.error("The cluster rank table doesn't exist.")
+            DBManager.destroy_db_connect(conn, curs)
             return False
         sql = "select rank_id, dir_name from {}".format(DBNameConstant.TABLE_CLUSTER_RANK)
         data = DBManager.fetch_all_data(curs, sql)
@@ -124,7 +124,7 @@ class ClusterStepTraceParser(IParser):
             DBManager.destroy_db_connect(conn, curs)
             logging.error("The connect to %s is failed.", db_name)
             return data
-        if not DBManager.check_tables_in_db(db_path, db_table):
+        if not DBManager.judge_table_exist(curs, db_table):
             DBManager.destroy_db_connect(conn, curs)
             logging.error("The %s table doesn't exist.", db_table)
             return data

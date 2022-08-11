@@ -9,6 +9,9 @@ import importlib
 import os
 import sys
 
+from common_func.db_name_constant import DBNameConstant
+from common_func.path_manager import PathManager
+
 
 class MsprofInfoConstruct:
     """
@@ -16,6 +19,8 @@ class MsprofInfoConstruct:
     """
     BASIC_MODEL_PATH = "profiling_bean.basic_info.msprof_basic_info"
     BASIC_INFO_CLASS_NAME = "MsProfBasicInfo"
+    CLUSTER_INFO_MODEL_PATH = "profiling_bean.basic_info.msprof_cluster_info"
+    CLUSTER_INFO_CLASS_NAME = "MsProfClusterInfo"
 
     @staticmethod
     def construct_argument_parser() -> argparse.ArgumentParser:
@@ -31,6 +36,11 @@ class MsprofInfoConstruct:
                            'creating data collection results.', required=True)
         return parser
 
+    @staticmethod
+    def _check_cluster_sqlite(path: str) -> bool:
+        path = os.path.realpath(path)
+        return os.path.exists(PathManager.get_db_path(path, DBNameConstant.DB_CLUSTER_RANK))
+
     def load_basic_info_model(self: any, args: any) -> None:
         """
         load model of basic info class
@@ -41,11 +51,17 @@ class MsprofInfoConstruct:
         if not hasattr(args, "collection_path"):
             return
 
-        model_obj = importlib.import_module(self.BASIC_MODEL_PATH)
-        if hasattr(model_obj, self.BASIC_INFO_CLASS_NAME):
-            msprof_basic_info = getattr(model_obj, self.BASIC_INFO_CLASS_NAME)(args.collection_path)
-            msprof_basic_info.init()
-            print_msg(msprof_basic_info.run())
+        if MsprofInfoConstruct._check_cluster_sqlite(args.collection_path):
+            model_obj = importlib.import_module(self.CLUSTER_INFO_MODEL_PATH)
+            if hasattr(model_obj, self.CLUSTER_INFO_CLASS_NAME):
+                msprof_cluster_info = getattr(model_obj, self.CLUSTER_INFO_CLASS_NAME)(args.collection_path)
+                msprof_cluster_info.run()
+        else:
+            model_obj = importlib.import_module(self.BASIC_MODEL_PATH)
+            if hasattr(model_obj, self.BASIC_INFO_CLASS_NAME):
+                msprof_basic_info = getattr(model_obj, self.BASIC_INFO_CLASS_NAME)(args.collection_path)
+                msprof_basic_info.init()
+                print_msg(msprof_basic_info.run())
 
     def main(self: any) -> None:
         """

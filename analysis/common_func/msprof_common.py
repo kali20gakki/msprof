@@ -119,6 +119,13 @@ def prepare_for_parse(output_path: str) -> None:
     create data and corresponding directories
     """
     check_path_valid(PathManager.get_sql_dir(output_path), True)
+    prepare_log(output_path)
+
+
+def prepare_log(output_path: str) -> None:
+    """
+    create data and corresponding directories
+    """
     check_path_valid(PathManager.get_log_dir(output_path), True)
     log_path = PathManager.get_collection_log_path(output_path)
     check_file_writable(log_path)
