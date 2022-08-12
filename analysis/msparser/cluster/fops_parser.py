@@ -75,7 +75,7 @@ class FopsParser:
             PathManager.get_db_path(self.collection_path, DBNameConstant.DB_CLUSTER_RANK))
         trace_conn, trace_cur = DBManager.check_connect_db_path(
             PathManager.get_db_path(self.collection_path, DBNameConstant.DB_CLUSTER_STEP_TRACE))
-        rank_sql = 'select * from ClusterRank where rank_id=?'
+        rank_sql = 'select * from {} where rank_id=?'.format(DBNameConstant.TABLE_CLUSTER_RANK)
         rank_cur.row_factory = ClassRowType.class_row(ClusterRankDto)
         rank_data = DBManager.fetch_all_data(rank_cur, rank_sql, (self.rank_id,))
         if not rank_data:
@@ -96,8 +96,7 @@ class FopsParser:
         """
         if self.sample_config.get("ai_core_metrics", '') != "ArithmeticUtilization":
             warn(self.FILE_NAME,
-                 "Query fops data failed, the data can be queryed "
-                 "only when ai_core_metrics equals ArithmeticUtilization. ")
+                 "Query fops data failed, --aic_metrics: This parameter can only be set to ArithmeticUtilization. ")
             return
         fops_data = self.get_fops_data()
         if not fops_data:
@@ -112,7 +111,7 @@ class FopsParser:
         save data into file
         :return: None
         """
-        print_info(self.FILE_NAME, "Cluster data query complete, start to storage data into json file")
+        print_info(self.FILE_NAME, "Fops data query complete, start to storage data into json file")
         file_name = 'fops_{0}_{1}_{2}.json'.format(self.rank_id,
                                                    self.model_id, self.iter_id)
         file_path = self.get_cluster_path(file_name)
@@ -124,8 +123,9 @@ class FopsParser:
                                    Constant.WRITE_MODES), "w") as _file:
                 os.chmod(file_path, NumberConstant.FILE_AUTHORITY)
                 _file.write(json.dumps(json_data))
-        except (OSError, SystemError, RuntimeError, TypeError) as err:
-            error(self.FILE_NAME, err)
+        except (OSError, SystemError, RuntimeError, TypeError):
+            error(self.FILE_NAME,
+                  "Storing data failed, you may not have the permission to write files in the current path.")
         else:
             print_info(self.FILE_NAME, "The data has stored successfully, file path: {}".format(file_path))
 
@@ -160,12 +160,13 @@ class FopsParser:
             op_type = data[0]
             op_fops = data[1]
             if index < self.MAX_TYPE_NUM:
-                detail_list.append({op_type: {'fops_ratio': float(round(100 * sum(op_fops) / total_fops, 4)),
+                detail_list.append({op_type: {'fops_ratio': float(round(100 * sum(op_fops) / total_fops,
+                                                                        NumberConstant.ROUND_TWO_DECIMAL)),
                                               'op_count': len(op_fops),
                                               'fops': sum(op_fops),
                                               'total_fops': total_fops}})
             else:
-                other_fops_ratio += float(round(100 * sum(op_fops) / total_fops, 4))
+                other_fops_ratio += float(round(100 * sum(op_fops) / total_fops, NumberConstant.ROUND_TWO_DECIMAL))
                 other_op_count += len(op_fops)
                 other_fops += sum(op_fops)
         if other_op_count:
@@ -183,7 +184,7 @@ class FopsParser:
         """
         if not all([self.rank_id, self.model_id, self.iter_id]):
             warn(self.FILE_NAME,
-                 "Parameter settings are missing, to query fops data, all parameters are needed.")
+                 "Parameter setting is missing, querying fops data requires all parameters")
             return
         self.calculate()
 
@@ -195,4 +196,4 @@ class FopsParser:
             self.query_fops_data()
         else:
             warn(self.FILE_NAME,
-                 'Invalid parsing dir("%s"), there is no PROF file exist in this path' % self.collection_path)
+                 'Invalid parsing dir("%s"), there is no PROF file in this path' % self.collection_path)
