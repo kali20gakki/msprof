@@ -48,18 +48,23 @@ class ClusterCommunicationParser:
             with self._cluster_info_model as _c_model:
                 if _c_model.check_db() and _c_model.check_table():
                     rank_ids = _c_model.get_all_rank_id()
-            self._data_collection = [_model.get_cluster_communication(rank_id) for rank_id in rank_ids]
+            for rank_id in rank_ids:
+                communication_data = _model.get_cluster_communication(rank_id)
+                if not communication_data:
+                    continue
+                self._data_collection.extend(communication_data)
 
     def _storage_summary_data(self: any) -> None:
         if not self._data_collection:
             return
 
-        self._data_collection = [[data.rank_id, data.compute_time, data.communication_time, data.stage_time] for data in
-                                 self._data_collection]
+        communication_data = []
+        for data in self._data_collection:
+            communication_data.append([data.rank_id, data.compute_time, data.communication_time, data.stage_time])
         output_file_name = "collective_communication_{}_{}_{}.json".format(self._npu_id, self._model_id,
                                                                            self._iteration_id)
         output_file_path = PathManager.get_query_result_path(self._collection_path, output_file_name)
-        result = create_json(output_file_path, self.HEADERS, self._data_collection, save_old_file=False)
+        result = create_json(output_file_path, self.HEADERS, communication_data, save_old_file=False)
         result_json = json.loads(result)
         if result_json["status"] == NumberConstant.SUCCESS:
             print_msg(result)
