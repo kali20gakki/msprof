@@ -18,7 +18,6 @@ from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msvp_common import check_file_writable
 from common_func.path_manager import PathManager
-from common_func.platform.chip_manager import ChipManager
 from profiling_bean.db_dto.cluster_rank_dto import ClusterRankDto
 from profiling_bean.db_dto.fops_dto import FopsDto
 
@@ -54,12 +53,8 @@ class FopsParser:
         sql = "select {0}.cube_fops, {0}.vector_fops, {0}.cube_fops + {0}.vector_fops as total_fops, " \
               "{0}.stream_id, {0}.task_id, {1}.op_type, {0}.total_time " \
               "from {0} join {1} on {0}.stream_id={1}.stream_id and {0}.task_id={1}.task_id".format(
-               DBNameConstant.TABLE_SUMMARY_METRICS, DBNameConstant.TABLE_SUMMARY_GE)
-        if ChipManager().is_chip_v4():
-            sql = "select {0}.aic_cube_fops, {0}.aic_vector_fops, {0}.aic_cube_fops + {0}.aic_vector_fops " \
-                  "as total_fops, {1}.op_type, {0}.stream_id, {0}.task_id, {0}.total_time " \
-                  "from {0} join {1} on {0}.stream_id={1}.stream_id and {0}.task_id={1}.task_id".format(
-                   DBNameConstant.TABLE_SUMMARY_METRICS, DBNameConstant.TABLE_SUMMARY_GE)
+            DBNameConstant.TABLE_SUMMARY_METRICS, DBNameConstant.TABLE_SUMMARY_GE)
+
         cur.row_factory = ClassRowType.class_row(FopsDto)
         fops_data = DBManager.fetch_all_data(cur, sql)
         DBManager.destroy_db_connect(conn, cur)
