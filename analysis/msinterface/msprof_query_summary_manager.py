@@ -17,7 +17,11 @@ from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msprof_common import get_path_dir, prepare_log
 from common_func.msprof_exception import ProfException
 from common_func.path_manager import PathManager
+<<<<<<< Updated upstream
 from msparser.cluster.fops_parser import FopsParser
+=======
+from msparser.cluster.cluster_communication_parser import ClusterCommunicationParser
+>>>>>>> Stashed changes
 from msparser.cluster.step_trace_summary import StepTraceSummay
 
 
@@ -91,6 +95,8 @@ class MsprofQuerySummaryManager:
             StepTraceSummay(params).process()
         if self.data_type == QueryDataType.FOPS_ANALYSE:
             FopsParser(params).process()
+        if self.data_type == QueryDataType.COLLECTIVE_COMMUNICATION:
+            ClusterCommunicationParser(params).process()
 
     def _check_cluster_scene(self: any) -> None:
         cluster_rank_file = PathManager.get_db_path(self.collection_path, DBNameConstant.DB_CLUSTER_RANK)
@@ -129,3 +135,4 @@ class QueryDataType(IntEnum):
     CLUSTER_SCENE = 0
     STEP_TRACE = 1
     FOPS_ANALYSE = 2
+    COLLECTIVE_COMMUNICATION = 5
