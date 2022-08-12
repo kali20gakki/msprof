@@ -104,7 +104,8 @@ class TestFopsParser(unittest.TestCase):
         with mock.patch(NAMESPACE + '.FopsParser.get_cluster_path', return_value='test'), \
                 mock.patch(NAMESPACE + '.check_file_writable'), \
                 mock.patch('builtins.open', mock.mock_open(read_data='')), \
-                mock.patch('os.chmod'):
+                mock.patch('os.chmod'),\
+                mock.patch('os.remove'):
             check = FopsParser(self.params)
             check.sample_config = {'ai_core_metrics': 'ArithmeticUtilization'}
             check.storage_data([])
@@ -132,7 +133,7 @@ class TestFopsParser(unittest.TestCase):
             check = FopsParser(self.params)
             check.sample_config = {'ai_core_metrics': 'ArithmeticUtilization'}
             result = check.get_cluster_path('test\\test')
-            self.assertEqual(result, 'test\\query\\test\\test')
+            self.assertEqual(result, 'test\\query\\test\\test\\test\\test')
 
     def test_check_id_valid(self):
         with DBOpen(DBNameConstant.DB_CLUSTER_RANK) as db_connect:
