@@ -1,0 +1,142 @@
+import unittest
+from unittest import mock
+
+from common_func.platform.chip_manager import ChipManager
+from msparser.cluster.fops_parser import FopsParser
+from profiling_bean.prof_enum.chip_model import ChipModel
+
+
+NAMESPACE = 'msparser.cluster.fops_parser'
+
+
+class TestFopsParser(unittest.TestCase):
+    params = {'model_id': 1, 'iteration_id': 1, 'rank_id': 1, 'collection_path': 'test\\test'}
+
+    def test_get_computation_data(self):
+        with mock.patch(NAMESPACE + '.PathManager.get_db_path', return_value='test'), \
+                mock.patch(NAMESPACE + '.DBManager.check_connect_db_path', return_value=(None, None)), \
+                mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True), \
+                mock.patch(NAMESPACE + '.DBManager.fetch_all_data', return_value=10):
+            check = FopsParser({'model_id': 1, 'iter_id': 1, 'rank_id': 1})
+            self.assertEqual(check.get_fops_data(), [])
+        with mock.patch(NAMESPACE + '.PathManager.get_db_path', return_value='test'), \
+                mock.patch(NAMESPACE + '.DBManager.check_connect_db_path', return_value=(True, True)), \
+                mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True), \
+                mock.patch(NAMESPACE + '.DBManager.fetch_all_data', return_value=10):
+            check = FopsParser({'model_id': 1, 'iter_id': 1, 'rank_id': 1})
+            ChipManager().chip_id = ChipModel.CHIP_V4_1_0
+            self.assertEqual(check.get_fops_data(), 10)
+
+    def test_run(self):
+        with mock.patch('common_func.utils.Utils.is_step_scene', side_effect=(False, True)), \
+                mock.patch('common_func.utils.Utils.is_single_op_graph_mix', return_value=False), \
+                mock.patch(NAMESPACE + '.FopsParser.calculate'):
+            check = FopsParser(self.params)
+            check.process()
+        with mock.patch('common_func.utils.Utils.is_step_scene', side_effect=(False, True)), \
+                mock.patch('common_func.utils.Utils.is_single_op_graph_mix', return_value=False), \
+                mock.patch(NAMESPACE + '.FopsParser.calculate'):
+            check = FopsParser({})
+            check.process()
+
+    def test_calculate_computation_data(self):
+        data_list = [(0.000328, 0.0765599783576033, 0.07688797835760329, 43, 2, 'AtomicAddrClean', 1),
+                     (0.000151, 0.04412810090589286, 0.044279100905892856, 43, 7, 'Mul', 1),
+                     (0.001079, 0.23433068729221793, 0.23540968729221792, 43, 11, 'SquaredDifference', 1),
+                     (0.009855, 0.0897973246166024, 0.09965232461660241, 43, 12, 'ReduceSumD', 1),
+                     (0.000152, 0.04567821088185761, 0.04583021088185761, 43, 15, 'Mul', 1),
+                     (0.000328, 0.0765599783576033, 0.07688797835760329, 43, 2, 'AtomicAddrClean1', 1),
+                     (0.000151, 0.04412810090589286, 0.044279100905892856, 43, 7, 'Mul1', 1),
+                     (0.001079, 0.23433068729221793, 0.23540968729221792, 43, 11, 'SquaredDifference1', 1),
+                     (0.009855, 0.0897973246166024, 0.09965232461660241, 43, 12, 'ReduceSumD1', 1),
+                     (0.000152, 0.04567821088185761, 0.04583021088185761, 43, 15, 'Mul2', 1),
+                     (0.000328, 0.0765599783576033, 0.07688797835760329, 43, 2, 'AtomicAddrClean2', 1),
+                     (0.000151, 0.04412810090589286, 0.044279100905892856, 43, 7, 'Mul3', 1),
+                     (0.001079, 0.23433068729221793, 0.23540968729221792, 43, 11, 'SquaredDifference3', 1),
+                     (0.009855, 0.0897973246166024, 0.09965232461660241, 43, 12, 'ReduceSumD3', 1),
+                     (0.000152, 0.04567821088185761, 0.04583021088185761, 43, 15, 'Mul4', 1),
+                     (0.000328, 0.0765599783576033, 0.07688797835760329, 43, 2, 'AtomicAddrClean4', 1),
+                     (0.000151, 0.04412810090589286, 0.044279100905892856, 43, 7, 'Mul5', 1),
+                     (0.001079, 0.23433068729221793, 0.23540968729221792, 43, 11, 'SquaredDifference6', 1),
+                     (0.009855, 0.0897973246166024, 0.09965232461660241, 43, 12, 'ReduceSumD7', 1),
+                     (0.009855, 0.0897973246166024, 0.09965232461660241, 43, 12, 'ReduceSumD8', 1),
+                     (0.009855, 0.0897973246166024, 0.09965232461660241, 43, 12, 'ReduceSumD9', 1),
+                     (0.009855, 0.0897973246166024, 0.09965232461660241, 43, 12, 'ReduceSumD10', 1),
+                     (0.000152, 0.04567821088185761, 0.04583021088185761, 43, 15, 'Mul7', 1)
+                     ]
+        check = FopsParser(self.params)
+        check.calculate_fops_data(data_list)
+
+    def test_calculate(self):
+        with mock.patch(NAMESPACE + '.FopsParser.check_id_valid', return_value=[(10,)]):
+            with mock.patch(NAMESPACE + '.DataCheckManager.contain_info_json_data',
+                            side_effect=(True, False, False)), \
+                    mock.patch(NAMESPACE + '.warn'), \
+                    mock.patch('os.path.join', return_value=True), \
+                    mock.patch('os.path.realpath', return_value='home\\process'), \
+                    mock.patch(NAMESPACE + '.check_path_valid'), \
+                    mock.patch(NAMESPACE + '.ConfigMgr.read_sample_config'), \
+                    mock.patch('os.listdir', return_value=['123', '456', 'timeline']), \
+                    mock.patch(NAMESPACE + '.FopsParser.query_fops_data', return_value=[1, 2]):
+                check = FopsParser(self.params)
+
+                check.calculate()
+        with mock.patch(NAMESPACE + '.FopsParser.check_id_valid', return_value=False), \
+                mock.patch(NAMESPACE + '.warn'):
+            check = FopsParser(self.params)
+
+            check.calculate()
+
+    def test_storage_data(self):
+        with mock.patch(NAMESPACE + '.FopsParser.get_cluster_path', return_value='test'), \
+                mock.patch(NAMESPACE + '.check_file_writable'), \
+                mock.patch('builtins.open', mock.mock_open(read_data='')), \
+                mock.patch('os.chmod'):
+            check = FopsParser(self.params)
+            check.sample_config = {'ai_core_metrics': 'ArithmeticUtilization'}
+            check.storage_data([])
+
+    def test_query_computation_volume(self):
+        with mock.patch(NAMESPACE + '.FopsParser.get_fops_data', return_value=[]), \
+                mock.patch(NAMESPACE + '.FopsParser.calculate_fops_data', return_value=[]):
+            check = FopsParser(self.params)
+            check.sample_config = {'ai_core_metrics': 'ArithmeticUtilization'}
+            check.query_fops_data()
+        with mock.patch(NAMESPACE + '.FopsParser.get_fops_data', return_value=[]), \
+                mock.patch(NAMESPACE + '.warn', return_value=[]):
+            check = FopsParser(self.params)
+            check.sample_config = {'ai_core_metrics': ''}
+            check.query_fops_data()
+        with mock.patch(NAMESPACE + '.FopsParser.get_fops_data', return_value=[]), \
+                mock.patch(NAMESPACE + '.FopsParser.calculate_fops_data',
+                           return_value=[(1, 2, 3, 4, 5, 6)]):
+            check = FopsParser(self.params)
+            check.sample_config = {'ai_core_metrics': 'ArithmeticUtilization'}
+            check.query_fops_data()
+
+    def test_get_cluster_path(self):
+        with mock.patch('os.path.realpath', return_value='test\\query\\test\\test'):
+            check = FopsParser(self.params)
+            check.sample_config = {'ai_core_metrics': 'ArithmeticUtilization'}
+            result = check.get_cluster_path('test\\test')
+            self.assertEqual(result, 'test\\query\\test\\test')
+
+    def test_check_id_valid(self):
+        with mock.patch(NAMESPACE + '.DBManager.check_connect_db_path', return_value=(None, None)), \
+                mock.patch(NAMESPACE + '.DBManager.fetch_all_data', return_value=[]), \
+                mock.patch(NAMESPACE + '.DBManager.destroy_db_connect', return_value=[]):
+            check = FopsParser(self.params)
+            check.sample_config = {'ai_core_metrics': 'ArithmeticUtilization'}
+            result = check.check_id_valid()
+            self.assertFalse(result)
+        with mock.patch(NAMESPACE + '.DBManager.check_connect_db_path', return_value=(None, None)), \
+                mock.patch(NAMESPACE + '.DBManager.fetch_all_data', return_value=[(1, 2.3, 4, 5, 'test')]), \
+                mock.patch(NAMESPACE + '.DBManager.destroy_db_connect'):
+            check = FopsParser(self.params)
+            check.sample_config = {'ai_core_metrics': 'ArithmeticUtilization'}
+            result = check.check_id_valid()
+            self.assertTrue(result)
+
+
+if __name__ == '__main__':
+    unittest.main()
