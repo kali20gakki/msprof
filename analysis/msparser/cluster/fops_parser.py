@@ -126,14 +126,21 @@ class FopsParser:
                                    Constant.WRITE_MODES), "w") as _file:
                 os.chmod(file_path, NumberConstant.FILE_AUTHORITY)
                 _file.write(json.dumps(json_data))
-        except (OSError, SystemError, RuntimeError, TypeError):
+        except (OSError, SystemError, RuntimeError, TypeError) as err:
             error(self.FILE_NAME,
                   "Storing data failed, you may not have the permission to write files in the current path.")
         else:
             print_info(self.FILE_NAME, "The data has stored successfully, file path: {}".format(file_path))
 
     def get_cluster_path(self: any, file_name: str) -> str:
-        return os.path.realpath(os.path.join(self.collection_path, '..', '..', self.QUERY_FILE_NAME, file_name))
+        query_path = os.path.realpath(os.path.join(self.collection_path, '..', '..', self.QUERY_FILE_NAME))
+        if not os.path.exists(query_path):
+            try:
+                os.makedirs(query_path)
+            except OSError:
+                error(self.FILE_NAME,
+                      "Storing data failed, you may not have the permission to write files in the current path.")
+        return os.path.join(query_path, file_name)
 
     def calculate_fops_data(self: any, data_list: list) -> list:
         """
