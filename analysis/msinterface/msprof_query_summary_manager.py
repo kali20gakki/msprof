@@ -17,11 +17,8 @@ from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msprof_common import get_path_dir, prepare_log
 from common_func.msprof_exception import ProfException
 from common_func.path_manager import PathManager
-<<<<<<< Updated upstream
 from msparser.cluster.fops_parser import FopsParser
-=======
 from msparser.cluster.cluster_communication_parser import ClusterCommunicationParser
->>>>>>> Stashed changes
 from msparser.cluster.step_trace_summary import StepTraceSummay
 
 
