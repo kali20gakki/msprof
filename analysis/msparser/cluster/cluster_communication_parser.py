@@ -32,6 +32,10 @@ class ClusterCommunicationParser:
         self._cluster_info_model = ClusterInfoViewModel(params)
 
     def process(self: any) -> None:
+        if not self._is_cluster_scene:
+            print_msg(json.dumps(
+                {'status': NumberConstant.ERROR,
+                 'info': 'The collective communication could show in the scene of cluster.', 'data': ''}))
         self._get_communication_data()
         self._storage_summary_data()
 
