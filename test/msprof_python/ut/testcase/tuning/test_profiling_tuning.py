@@ -1,6 +1,10 @@
 import os
 import unittest
 from unittest import mock
+
+import pytest
+
+from common_func.msprof_exception import ProfException
 from tuning.profiling_tuning import ProfilingTuning
 from common_func.info_conf_reader import InfoConfReader
 
@@ -13,7 +17,7 @@ class TestOperatorMetric(unittest.TestCase):
         with mock.patch(NAMESPACE + '.DataManager.get_data_by_infer_id',
                         return_value=False), \
                 mock.patch(NAMESPACE + '.logging.warning'):
-            ProfilingTuning.tuning_operator('test', 4, 1)
+            ProfilingTuning.tuning_operator('test', '4', '1')
         operator_dicts = [
             {'model_name': 'ge_default_20210326081018_131', 'model_id': 12, 'task_id': 168, 'stream_id': 50,
              'infer_id': 1, 'op_name': 'Momentum', 'op_type': 'AssignAdd', 'task_type': 'AI_CORE',
@@ -26,7 +30,8 @@ class TestOperatorMetric(unittest.TestCase):
              'memory_bound': '387.086897', 'core_num': 32, 'memory_workspace': 0}]
         with mock.patch(NAMESPACE + '.DataManager.get_data_by_infer_id',
                         return_value=operator_dicts):
-            ProfilingTuning.tuning_operator('test', 4, 1)
+            with pytest.raises(ProfException) as err:
+                ProfilingTuning.tuning_operator('test', '4', '1')
         for root, dirs, files in os.walk('test', topdown=False):
             for name in files:
                 print(name)
@@ -54,7 +59,8 @@ class TestOperatorMetric(unittest.TestCase):
              'memory_bound': '387.086897', 'core_num': 32, 'memory_workspace': 0}]
         with mock.patch(NAMESPACE + '.DataManager.get_data_by_infer_id',
                         return_value=operator_dicts):
-            ProfilingTuning.tuning_network('test', 4, 1)
+            with pytest.raises(ProfException) as err:
+                ProfilingTuning.tuning_network('test', '4', '1')
         for root, dirs, files in os.walk('test', topdown=False):
             for name in files:
                 print(name)
