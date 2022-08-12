@@ -118,7 +118,7 @@ class MsprofQuerySummaryManager:
             error(MsprofQuerySummaryManager.FILE_NAME,
                   "The query id is wrong. Please enter a valid value.")
             raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR)
-        if not MsprofQuerySummaryManager._check_integer_with_min_value(self.model_id, min_value=1):
+        if not MsprofQuerySummaryManager._check_integer_with_min_value(self.model_id, min_value=0):
             error(MsprofQuerySummaryManager.FILE_NAME,
                   "The query model id is wrong. Please enter a valid value.")
             raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR)

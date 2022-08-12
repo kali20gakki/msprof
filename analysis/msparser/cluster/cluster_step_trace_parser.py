@@ -115,7 +115,7 @@ class ClusterStepTraceParser(IParser):
         for rank_id in rank_ids:
             self.id_with_table_map.setdefault(rank_id, DBNameConstant.TABLE_CLUSTER_STEP_TRACE.format(rank_id))
             self.id_with_all_reduce_map.setdefault(rank_id, DBNameConstant.TABLE_CLUSTER_ALL_REDUCE.format(rank_id))
-        all_tables = self.id_with_table_map.values() + self.id_with_all_reduce_map.values()
+        all_tables = list(self.id_with_table_map.values()) + list(self.id_with_all_reduce_map.values())
         with ClusterStepTraceModel(self.collection_path, all_tables) as cluster_model:
             cluster_model.create_table()
             self._collect_and_save_step_trace_data(cluster_model)
@@ -149,11 +149,14 @@ class ClusterStepTraceParser(IParser):
             if InfoConfReader().is_host_profiling():
                 continue
 
+            logging.debug(f"Start to process the table of step trace,table_name: {self.id_with_table_map.get(rank_id)}")
             step_trace_data = self._collect_step_trace_data(project_path)
             if not step_trace_data:
                 continue
             cluster_model.insert_data_to_db(self.id_with_table_map.get(rank_id), step_trace_data)
 
+            logging.debug(f"Start to process the table of all reduce, "
+                          f"table_name: {self.id_with_all_reduce_map.get(rank_id)}")
             all_reduce_data = self._collect_all_reduce_data(project_path)
             if not all_reduce_data:
                 continue
