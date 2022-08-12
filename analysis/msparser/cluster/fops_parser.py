@@ -49,11 +49,12 @@ class FopsParser:
             PathManager.get_db_path(self.collection_path, DBNameConstant.DB_AICORE_OP_SUMMARY))
         if not all([conn, cur, DBManager.judge_table_exist(cur, DBNameConstant.TABLE_SUMMARY_METRICS),
                     DBManager.judge_table_exist(cur, DBNameConstant.TABLE_SUMMARY_GE)]):
+            DBManager.destroy_db_connect(conn, cur)
             return []
         sql = "select {0}.cube_fops, {0}.vector_fops, {0}.cube_fops + {0}.vector_fops as total_fops, " \
               "{0}.stream_id, {0}.task_id, {1}.op_type, {0}.total_time " \
               "from {0} join {1} on {0}.stream_id={1}.stream_id and {0}.task_id={1}.task_id".format(
-            DBNameConstant.TABLE_SUMMARY_METRICS, DBNameConstant.TABLE_SUMMARY_GE)
+               DBNameConstant.TABLE_SUMMARY_METRICS, DBNameConstant.TABLE_SUMMARY_GE)
 
         cur.row_factory = ClassRowType.class_row(FopsDto)
         fops_data = DBManager.fetch_all_data(cur, sql)
@@ -79,6 +80,8 @@ class FopsParser:
         rank_cur.row_factory = ClassRowType.class_row(ClusterRankDto)
         rank_data = DBManager.fetch_all_data(rank_cur, rank_sql, (self.rank_id,))
         if not rank_data:
+            DBManager.destroy_db_connect(rank_conn, rank_cur)
+            DBManager.destroy_db_connect(trace_conn, trace_cur)
             return False
         trace_sql = 'select * from step_trace_{} where model_id=? and iteration_id=?'.format(str(rank_data[0].rank_id))
         trace_data = DBManager.fetch_all_data(trace_cur, trace_sql, (self.model_id, self.iter_id))
