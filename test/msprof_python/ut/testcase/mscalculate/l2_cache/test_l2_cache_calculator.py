@@ -16,7 +16,7 @@ from constant.constant import CONFIG
 from profiling_bean.prof_enum.data_tag import DataTag
 
 NAMESPACE = 'mscalculate.l2_cache.l2_cache_calculator'
-MODEL_NAMESPACE = 'model.l2_cache.l2_cache_calculator_model'
+MODEL_NAMESPACE = 'msmodel.l2_cache.l2_cache_calculator_model'
 
 
 class TestL2CacheCalculator(unittest.TestCase):

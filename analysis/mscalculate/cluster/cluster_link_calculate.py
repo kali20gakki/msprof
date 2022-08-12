@@ -10,7 +10,7 @@ from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.msvp_common import is_number
-from model.hccl.hccl_model import HCCLModel
+from msmodel.hccl.hccl_model import HCCLModel
 
 
 class ClusterLinkCalculator:

@@ -11,16 +11,15 @@
 #include <vector>
 #include <functional>
 #include <dlfcn.h>
+#include "errno/error_code.h"
 
-namespace Analysis {
+#define PTHREAD_ONCE_T pthread_once_t
+namespace Collector {
 namespace Dvvp {
 namespace Plugin {
-
-using PluginStatus = uint32_t;
 using HandleType = void*;
-const PluginStatus PLUGIN_LOAD_SUCCESS = 0x0;
-const PluginStatus PLUGIN_LOAD_FAILED = 0xFFFFFFFF;
-#define PTHREAD_ONCE_T pthread_once_t
+using analysis::dvvp::common::error::PROFILING_SUCCESS;
+using analysis::dvvp::common::error::PROFILING_FAILED;
 inline void PthreadOnce(pthread_once_t *flag, void (*func)(void))
 {
     (void)pthread_once(flag, func);
@@ -34,30 +33,28 @@ public:
     {}
     ~PluginHandle();
     const std::string GetSoName() const;
-    PluginStatus OpenPlugin(const std::string envValue);
+    int32_t OpenPlugin(const std::string envValue);
     void CloseHandle();
     template <typename R, typename... Types>
-    PluginStatus GetFunction(const std::string& funcName, std::function<R(Types... args)>& func) const
+    int32_t GetFunction(const std::string& funcName, std::function<R(Types... args)>& func) const
     {
         func = (R(*)(Types...))dlsym(handle_, funcName.c_str());
         if (!func) {
-            return PLUGIN_LOAD_FAILED;
+            return PROFILING_FAILED;
         }
-        return PLUGIN_LOAD_SUCCESS;
+        return PROFILING_SUCCESS;
     }
     bool HasLoad();
     bool IsFuncExist(const std::string funcName) const;
 
 private:
-    std::string RealPath(const std::string &path) const;
-    bool IsSoftLink(const std::string &path) const;
     std::string GetSoPath(const std::string &envValue) const;
-    void SplitPath(const std::string &mutilPath, std::vector<std::string> &patVec) const;
+    std::string GetAscendHalPath() const;
     std::string soName_;
     HandleType handle_;
     bool load_;
 };
-} // namespace Plugin
-} // namespace Dvvp
-} // namespace Analysis
+} // Plugin
+} // Dvvp
+} // Collector
 #endif

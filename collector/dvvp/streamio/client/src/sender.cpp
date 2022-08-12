@@ -10,7 +10,7 @@
 #include "message/codec.h"
 #include "message/prof_params.h"
 #include "securec.h"
-#include "mmpa_plugin.h"
+#include "mmpa_api.h"
 #include "proto/profiler.pb.h"
 
 using namespace analysis::dvvp::proto;
@@ -22,7 +22,8 @@ namespace client {
 using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::common::utils;
 using namespace analysis::dvvp::common::config;
-using namespace Analysis::Dvvp::Plugin;
+using namespace Collector::Dvvp::Plugin;
+using namespace Collector::Dvvp::Mmpa;
 
 Sender::Sender(SHARED_PTR_ALIA<ITransport> transport, const std::string &engineName,
                SHARED_PTR_ALIA<analysis::dvvp::common::memory::ChunkPool> chunkPool)
@@ -301,11 +302,11 @@ void Sender::CloseFileFds()
 {
     std::lock_guard<std::mutex> lk(fileFdLock_);
 
-    int ret = EN_OK;
+    int ret = PROFILING_SUCCESS;
 
     for (auto iter = fileFdMap_.begin(); iter != fileFdMap_.end(); iter++) {
-        ret = MmpaPlugin::instance()->MsprofMmClose(iter->second);
-        if (ret != EN_OK) {
+        ret = MmClose(iter->second);
+        if (ret != PROFILING_SUCCESS) {
             MSPROF_LOGE("Failed to mmClose ret:%d fd:%d", ret, iter->second);
         }
         fileFdMap_[iter->first] = -1;
@@ -314,7 +315,7 @@ void Sender::CloseFileFds()
     fileFdMap_.clear();
 }
 
-INT32 Sender::OpenWriteFile(const std::string &fileName)
+int32_t Sender::OpenWriteFile(const std::string &fileName)
 {
     size_t index = fileName.find_last_of(MSVP_SLASH);
     std::string dir = fileName.substr(0, index == std::string::npos ? 0 : index);
@@ -325,7 +326,7 @@ INT32 Sender::OpenWriteFile(const std::string &fileName)
         return -1;
     }
 
-    INT32 fd = MmpaPlugin::instance()->MsprofMmOpen2(fileName.c_str(), O_WRONLY | O_CREAT, M_IRUSR | M_IWUSR);
+    int32_t fd = MmOpen2(fileName, O_WRONLY | O_CREAT, M_IRUSR | M_IWUSR);
     if (fd < 0) {
         MSPROF_LOGE("open file %s failed.", fileName.c_str());
         return fd;
@@ -337,7 +338,7 @@ INT32 Sender::OpenWriteFile(const std::string &fileName)
     return fd;
 }
 
-INT32 Sender::GetFileFd(const std::string &fileName)
+int32_t Sender::GetFileFd(const std::string &fileName)
 {
     std::lock_guard<std::mutex> lk(fileFdLock_);
 
@@ -349,7 +350,7 @@ INT32 Sender::GetFileFd(const std::string &fileName)
     return -1;
 }
 
-void Sender::SetFileFd(const std::string &fileName, INT32 fd)
+void Sender::SetFileFd(const std::string &fileName, int32_t fd)
 {
     std::lock_guard<std::mutex> lk(fileFdLock_);
 
@@ -438,7 +439,7 @@ void Sender::ExecuteFileMode(SHARED_PTR_ALIA<File> file)
     auto chunk = file->GetChunk();
     auto fileName = file->GetWriteFileName();
 
-    INT32 fd = GetFileFd(fileName);
+    int32_t fd = GetFileFd(fileName);
     if (fd < 0) {
         fd = OpenWriteFile(fileName);
         MSPROF_LOGI("%s is not exist, create file:%d", fileName.c_str(), static_cast<int>(fd));
@@ -449,7 +450,7 @@ void Sender::ExecuteFileMode(SHARED_PTR_ALIA<File> file)
     }
 
     size_t size = chunk->GetUsedSize();
-    INT32 ret = MmpaPlugin::instance()->MsprofMmWrite(fd,
+    int32_t ret = MmWrite(fd,
         static_cast<void *>(const_cast<UNSIGNED_CHAR_PTR>(chunk->GetBuffer())), size);
     if (static_cast<size_t>(ret) != size) {
         MSPROF_LOGE("write[%d] fileName = %s data size = %u, written size = %d",

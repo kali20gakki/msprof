@@ -37,15 +37,17 @@
 #include "acl_prof.h"
 #include "data_struct.h"
 #include "ai_drv_dev_api.h"
-#include "mmpa_plugin.h"
+#include "mmpa_api.h"
 #include "prof_api.h"
+#include "toolchain/prof_acl_api.h"
 
 using namespace analysis::dvvp::common::error;
 using namespace Analysis::Dvvp::Analyze;
 using namespace analysis::dvvp::transport;
 using namespace Analysis::Dvvp::ProfilerCommon;
 using namespace Analysis::Dvvp::Common::Platform;
-using namespace Analysis::Dvvp::Plugin;
+using namespace Collector::Dvvp::Plugin;
+using namespace Collector::Dvvp::Mmpa;
 const int RECEIVE_CHUNK_SIZE = 320; // chunk size:320
 
 class MSPROF_ACL_CORE_UTEST: public testing::Test {
@@ -490,12 +492,12 @@ TEST_F(MSPROF_ACL_CORE_UTEST, acl_api_subscribe) {
 
     Analysis::Dvvp::Common::Config::ConfigManager::instance()->Init();
 
-    MOCKER(&MmpaPlugin::MsprofMmWrite)
+    MOCKER(&MmWrite)
         .stubs()
         .will(invoke(mmWriteStub));
-    MOCKER(&MmpaPlugin::MsprofMmClose)
+    MOCKER(&MmClose)
         .stubs()
-        .will(returnValue(EN_OK));
+        .will(returnValue(PROFILING_SUCCESS));
     MOCKER_CPP(&analysis::dvvp::host::ProfManager::IdeCloudProfileProcess)
         .stubs()
         .will(returnValue(PROFILING_SUCCESS))
@@ -708,12 +710,12 @@ TEST_F(MSPROF_ACL_CORE_UTEST, ge_api_subscribe) {
 
     Analysis::Dvvp::Common::Config::ConfigManager::instance()->Init();
 
-    MOCKER(&MmpaPlugin::MsprofMmWrite)
+    MOCKER(&MmWrite)
         .stubs()
         .will(invoke(mmWriteStub));
-    MOCKER(&MmpaPlugin::MsprofMmClose)
+    MOCKER(&MmClose)
         .stubs()
-        .will(returnValue(EN_OK));
+        .will(returnValue(PROFILING_SUCCESS));
 
     using namespace Msprofiler::Api;
 
@@ -1546,12 +1548,12 @@ TEST_F(MSPROF_ACL_CORE_UTEST, acl_api_subscribe_fail) {
 
     Analysis::Dvvp::Common::Config::ConfigManager::instance()->Init();
 
-    MOCKER(&MmpaPlugin::MsprofMmWrite)
+    MOCKER(&MmWrite)
         .stubs()
         .will(invoke(mmWriteStub));
-    MOCKER(&MmpaPlugin::MsprofMmClose)
+    MOCKER(&MmClose)
         .stubs()
-        .will(returnValue(EN_OK));
+        .will(returnValue(PROFILING_SUCCESS));
 
     MOCKER(Analysis::Dvvp::ProfilerCommon::RegisterReporterCallback)
         .stubs()
@@ -1880,7 +1882,7 @@ TEST_F(COMMANDHANDLE_TEST, commandHandle_api) {
     MOCKER_CPP(&Analysis::Dvvp::Common::Platform::Platform::PlatformIsHelperHostSide)
         .stubs()
         .will(returnValue(false));
-    EXPECT_EQ(ACL_ERROR, CommandHandleProfInit());
+    EXPECT_EQ(ACL_ERROR_PROFILING_FAILURE, CommandHandleProfInit());
     uint32_t devList[] = {0, 1};
     uint32_t devNums = 2;
     EXPECT_EQ(ACL_SUCCESS, CommandHandleProfStart(devList, devNums, 0));

@@ -49,7 +49,7 @@ class OpCommonFunc:
         Return: task time data
         """
         task_time_col_num = cls.TRAIN_OP_TASK_TIME_COL_NUM
-        if not ProfilingScene().is_training_trace() and not ProfilingScene().is_operator():
+        if not ProfilingScene().is_operator():
             task_time_col_num = cls.TASK_TIME_COL_NUM
         res = Utils.generator_to_list(Utils.generator_to_list(0 for _ in range(task_time_col_num))
                                       for _ in range(len(data)))
@@ -68,7 +68,7 @@ class OpCommonFunc:
             res[row_num][4] = cls._get_wait_time(row_num, float(content[2]), previous_complete_time)
             res[row_num][5] = content[4]
             res[row_num][6] = content[5]  # index_id
-            if not ProfilingScene().is_training_trace() and not ProfilingScene().is_operator():
+            if not ProfilingScene().is_operator():
                 res[row_num][7] = content[6]  # model_id
 
             # index -1 is batch_id

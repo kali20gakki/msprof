@@ -8,7 +8,7 @@ from common_func.constant import Constant
 from common_func.db_manager import DBManager, ClassRowType
 from common_func.db_name_constant import DBNameConstant
 from common_func.ms_multi_process import MsMultiProcess
-from model.stars.acc_pmu_model import AccPmuModel
+from msmodel.stars.acc_pmu_model import AccPmuModel
 from mscalculate.interface.icalculator import ICalculator
 from profiling_bean.db_dto.acc_pmu_dto import AccPmuOriDto
 from profiling_bean.prof_enum.data_tag import DataTag

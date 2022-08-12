@@ -67,6 +67,13 @@ target_compile_options(stub_msprofiler PRIVATE
     -Wextra
 )
 
+target_link_options(stub_msprofiler PRIVATE
+    -Wl,-z,relro,-z,now,-z,noexecstack
+    -Wl,-Bsymbolic
+    -Wl,--exclude-libs=ALL
+    $<$<NOT:$<STREQUAL:${CMAKE_BUILD_TYPE},Debug>>:-s>
+)
+
 install(TARGETS stub_msprofiler OPTIONAL
     LIBRARY DESTINATION stub
 )
@@ -83,6 +90,7 @@ set(msprofilerCpp
     analyze/src/op_desc_parser.cpp
     common/config/config_manager.cpp
     common/memory/chunk_pool.cpp
+    common/mmpa/mmpa_api.cpp
     common/platform/platform.cpp
     common/statistics/perf_count.cpp
     common/thread/thread.cpp
@@ -90,7 +98,6 @@ set(msprofilerCpp
     common/utils/utils.cpp
     common/validation/param_validation.cpp
     depend/src/driver_plugin.cpp
-    depend/src/mmpa_plugin.cpp
     depend/src/plugin_handle.cpp
     depend/src/slog_plugin.cpp
     depend/src/profapi_plugin.cpp
@@ -143,7 +150,6 @@ set(msprofilerInc
     ${TOP_DIR}/collector/dvvp/depend/inc/driver
     ${TOP_DIR}/collector/dvvp/depend/inc/slog
     ${TOP_DIR}/collector/dvvp/depend/inc/metadef
-    ${TOP_DIR}/collector/dvvp/depend/inc/mmpa
     ${TOP_DIR}/collector/dvvp/depend/inc/profapi
     ${TOP_DIR}/collector/inc/toolchain
     ${TOP_DIR}/collector/inc/external
@@ -163,6 +169,7 @@ set(msprofilerInc
     common/logger
     common/queue
     common/singleton
+    common/mmpa
     common/utils
     common/config
     common/validation
@@ -225,6 +232,7 @@ target_link_options(msprofiler_share PRIVATE
     -Wl,-z,relro,-z,now,-z,noexecstack
     -Wl,-Bsymbolic
     -Wl,--exclude-libs=ALL
+    $<$<NOT:$<STREQUAL:${CMAKE_BUILD_TYPE},Debug>>:-s>
 )
 
 target_link_libraries(msprofiler_share PRIVATE
@@ -233,6 +241,7 @@ target_link_libraries(msprofiler_share PRIVATE
     ascend_protobuf_shared
     error_manager
     -Wl,--as-needed
+    dl
 )
 
 install(TARGETS msprofiler_share OPTIONAL

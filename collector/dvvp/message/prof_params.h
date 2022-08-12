@@ -18,10 +18,11 @@
 namespace analysis {
 namespace dvvp {
 namespace message {
-using BOOL = int;
 using namespace analysis::dvvp::common::config;
 using namespace analysis::dvvp::common::utils;
-using namespace Analysis::Dvvp::Plugin;
+using namespace Collector::Dvvp::Plugin;
+const int FALSE = 0;
+const int TRUE = 1;
 const char * const PROFILING_MODE_SAMPLE_BASED = "sample-based";
 const char * const PROFILING_MODE_TASK_BASED = "task-based";
 const char * const PROFILING_ANALYSIS_TARGET = "launch application";
@@ -39,12 +40,13 @@ struct ProfileParams : BaseInfo {
     std::string profiling_mode;
     std::string devices;
     int msprofBinPid;
-    BOOL is_cancel;
+    int is_cancel;
     int profiling_period;
     std::string stream_enabled;
     std::string profiling_options;
     std::string jobInfo;
     // app
+    std::string cmdPath;
     std::string app;
     std::string app_dir;
     std::string app_parameters;
@@ -154,7 +156,7 @@ struct ProfileParams : BaseInfo {
     std::string host_osrt_profiling;
 
     // app cpu/memory/network usage on host
-    BOOL host_profiling;
+    int host_profiling;
     std::string host_cpu_profiling;
     std::string host_mem_profiling;
     std::string host_network_profiling;

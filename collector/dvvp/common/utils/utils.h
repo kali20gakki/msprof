@@ -22,14 +22,12 @@
 #include <sstream>
 #include <string>
 #include <vector>
-#include "errno/error_code.h"
-#include "mmpa_plugin.h"
-#include "msprof_dlog.h"
-#include "msprof_error_manager.h"
+#include "mmpa_api.h"
 
 template <typename T>
 using SHARED_PTR_ALIA = std::shared_ptr<T>;
-
+using mmProcess = Collector::Dvvp::Mmpa::mmProcess;
+using mmArgvEnv = Collector::Dvvp::Mmpa::mmArgvEnv;
 namespace analysis {
 namespace dvvp {
 namespace common {
@@ -459,23 +457,17 @@ public:
     static void RemoveDir(const std::string &dir, bool rmTopDir = true);
     static std::string CanonicalizePath(const std::string &path);
     static int ExecCmd(const ExecCmdParams &execCmdParams,
-        const std::vector<std::string> &argv,
-        const std::vector<std::string> &envp,
-        int &exitCodeP,
-        mmProcess &childProcess);
+        const std::vector<std::string> &argv, const std::vector<std::string> &envp,
+        int &exitCodeP, mmProcess &childProcess);
     static int ExecCmdC(const ExecCmdArgv &execCmdArgv, const ExecCmdParams &execCmdParams, int &exitCodeP);
     static int ExecCmdCAsync(const ExecCmdArgv &execCmdArgv, const ExecCmdParams &execCmdParams,
                              mmProcess &childProcess);
     static int ChangeWorkDir(const std::string &fileName);
-    static void SetArgEnv(CHAR_PTR_CONST argv[],
-                          const int argvCount,
-                          CHAR_PTR_CONST envp[],
-                          const int envCount,
-                          mmArgvEnv &argvEnv);
+    static void SetArgEnv(CHAR_PTR_CONST argv[], const int argvCount, CHAR_PTR_CONST envp[],
+                          const int envCount, mmArgvEnv &argvEnv);
     static int DoCreateCmdProcess(const std::string &stdoutRedirectFile,
                                   const std::string &fileName,
-                                  mmArgvEnv &argvEnv,
-                                  mmProcess &tid);
+                                  mmArgvEnv &argvEnv, mmProcess &tid);
     static int WaitProcess(mmProcess process, bool &isExited, int &exitCode, bool hang = true);
     static bool ProcessIsRuning(mmProcess process);
     static std::string JoinPath(const std::vector<std::string> &paths);
@@ -529,6 +521,13 @@ public:
         ioss >> ret;
         return ret;
     }
+    static bool IsAppName(const std::string paramsName);
+    static bool IsClusterRunEnv();
+    static int32_t GetRankId();
+    static std::vector<std::string> GenEnvPairVec(const std::vector<std::string> &envVec);
+    static bool PythonEnvReady();
+    static bool AnalysisEnvReady(std::string &msprofPyPath);
+    static int CloudAnalyze(const std::string &jobDir);
 };
 
 template<class T>

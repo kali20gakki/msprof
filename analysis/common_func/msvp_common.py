@@ -321,7 +321,7 @@ def create_csv(csv_file: str, headers: list, data: list, save_old_file: bool = T
         return json.dumps({'status': NumberConstant.ERROR, 'info': str('bak or mkdir json dir failed'), 'data': ''})
     try:
         with os.fdopen(os.open(csv_file, Constant.WRITE_FLAGS,
-                               Constant.WRITE_MODES), 'w') as _csv_file:
+                               Constant.WRITE_MODES), 'w', newline='') as _csv_file:
             os.chmod(csv_file, NumberConstant.FILE_AUTHORITY)
             f_csv = csv.writer(_csv_file)
             if headers:

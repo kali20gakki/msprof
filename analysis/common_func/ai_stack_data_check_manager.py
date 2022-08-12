@@ -112,9 +112,7 @@ class AiStackDataCheckManager(DataCheckManager):
         """
         The data path contain training trace data or not
         """
-        return cls.check_data_exist(result_dir, file_name_manager.get_training_trace_compiles(),
-                                    device_id=device_id) or \
-               path_check(PathManager.get_db_path(result_dir, DBNameConstant.DB_TRACE))
+        return True if path_check(PathManager.get_db_path(result_dir, DBNameConstant.DB_TRACE)) else False
 
     @classmethod
     def contain_dp_aicpu_data(cls: any, result_dir: str, device_id: any = None) -> bool:

@@ -6,7 +6,7 @@ Copyright Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 import logging
 import sqlite3
 
-from model.stars.op_summary_model import OpSummaryModel
+from msmodel.stars.op_summary_model import OpSummaryModel
 
 
 class OpSummaryViewer:

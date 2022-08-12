@@ -9,8 +9,8 @@ from abc import ABC
 from common_func.info_conf_reader import InfoConfReader
 from common_func.trace_view_header_constant import TraceViewHeaderConstant
 from common_func.trace_view_manager import TraceViewManager
-from model.stars.inter_soc_model import InterSocModel
-from model.stars.lowpower_model import LowPowerModel
+from msmodel.stars.inter_soc_model import InterSocModel
+from msmodel.stars.lowpower_model import LowPowerModel
 from viewer.interface.base_viewer import BaseViewer
 
 

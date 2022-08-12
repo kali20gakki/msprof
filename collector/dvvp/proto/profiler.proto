@@ -257,6 +257,7 @@ message InfoMain {
     string upTime = 17;
     uint32 netCardNums = 18;
     repeated NetCardInfo netCard = 19;
+    int32 rank_id = 20;
 }
 // for generating info.json _________END
 

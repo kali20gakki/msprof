@@ -3,10 +3,10 @@ from unittest import mock
 
 from common_func.info_conf_reader import InfoConfReader
 from constant.constant import CONFIG, INFO_JSON
-from model.hardware.mini_llc_model import MiniLlcModel, cal_core2cpu
+from msmodel.hardware.mini_llc_model import MiniLlcModel, cal_core2cpu
 from sqlite.db_manager import DBManager
 
-NAMESPACE = 'model.hardware.mini_llc_model'
+NAMESPACE = 'msmodel.hardware.mini_llc_model'
 
 
 class TestMiniLlcModel(unittest.TestCase):

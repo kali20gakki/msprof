@@ -22,6 +22,7 @@ namespace Dvvp {
 namespace Msprof {
 using namespace analysis::dvvp::common::validation;
 using namespace analysis::dvvp::common::utils;
+using mmStructOption = Collector::Dvvp::Mmpa::mmStructOption;
 
 const int THOUSAND = 1000; // 1000 : 1k
 
@@ -139,7 +140,7 @@ const mmStructOption longOptions[] = {
     {"l2", mm_optional_argument, nullptr, ARGS_L2_PROFILING},
     {"parse", mm_optional_argument, nullptr, ARGS_PARSE},
     {"query", mm_optional_argument, nullptr, ARGS_QUERY},
-    {"export ", mm_optional_argument, nullptr, ARGS_EXPORT},
+    {"export", mm_optional_argument, nullptr, ARGS_EXPORT},
     // number
     {"aic-freq", mm_optional_argument, nullptr, ARGS_AIC_FREQ},
     {"aiv-freq", mm_optional_argument, nullptr, ARGS_AIV_FREQ},
@@ -168,10 +169,12 @@ public:
 
     void MsprofCmdUsage(const std::string msg);
     SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> MsprofGetOpts(int argc, MsprofString argv[]);
+    bool HasHelpParamOnly();
 private:
     int CheckPythonPathValid(const struct MsprofCmdInfo &cmdInfo) const;
     int CheckOutputValid(const struct MsprofCmdInfo &cmdInfo);
     int CheckStorageLimitValid(const struct MsprofCmdInfo &cmdInfo) const;
+    int GetAppParam(const std::string &appParams);
     int CheckAppValid(const struct MsprofCmdInfo &cmdInfo);
     int CheckEnvironmentValid(const struct MsprofCmdInfo &cmdInfo);
     int CheckSampleModeValid(const struct MsprofCmdInfo &cmdInfo, int opt) const;

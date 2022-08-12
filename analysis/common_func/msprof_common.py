@@ -50,6 +50,7 @@ class MsProfCommonConstant:
     MODEL_ID = "model_id"
     ITERATION_ID = "iteration_id"
     TOP_TIME_ITERATION = "top_time_iteration"
+    RANK_ID = "rank_id"
 
     def get_msprof_common_class_name(self: any) -> any:
         """
@@ -118,6 +119,13 @@ def prepare_for_parse(output_path: str) -> None:
     create data and corresponding directories
     """
     check_path_valid(PathManager.get_sql_dir(output_path), True)
+    prepare_log(output_path)
+
+
+def prepare_log(output_path: str) -> None:
+    """
+    create data and corresponding directories
+    """
     check_path_valid(PathManager.get_log_dir(output_path), True)
     log_path = PathManager.get_collection_log_path(output_path)
     check_file_writable(log_path)

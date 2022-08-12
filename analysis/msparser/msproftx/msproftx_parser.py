@@ -19,7 +19,7 @@ from common_func.os_manager import check_file_readable
 from common_func.path_manager import PathManager
 from common_func.utils import Utils
 from framework.offset_calculator import OffsetCalculator
-from model.msproftx.msproftx_model import MsprofTxModel
+from msmodel.msproftx.msproftx_model import MsprofTxModel
 from msparser.data_struct_size_constant import StructFmt
 from msparser.interface.iparser import IParser
 from profiling_bean.prof_enum.data_tag import DataTag

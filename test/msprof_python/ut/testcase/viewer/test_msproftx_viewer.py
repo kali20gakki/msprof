@@ -16,7 +16,7 @@ class TestMsprofTxViewer(unittest.TestCase):
               'model_id': 1}
 
     def test_get_summary_data(self):
-        with mock.patch('model.msproftx.msproftx_model.MsprofTxModel.get_all_data',
+        with mock.patch('msmodel.msproftx.msproftx_model.MsprofTxModel.get_all_data',
                         return_value=((0, 0, 0, 0, 0, 0, 0, 5, 0, 'test'), (0, 1, 0, 0, 1, 0, 1, 7, 0, 'test'))):
             result = MsprofTxViewer(self.configs, self.params).get_summary_data()
             self.assertEqual(result, (['pid', ' tid', ' category', ' event_type', ' payload_type',
@@ -25,7 +25,7 @@ class TestMsprofTxViewer(unittest.TestCase):
                                       2))
 
     def test_get_timeline_data(self):
-        with mock.patch('model.msproftx.msproftx_model.MsprofTxModel.get_timeline_data',
+        with mock.patch('msmodel.msproftx.msproftx_model.MsprofTxModel.get_timeline_data',
                         return_value=((0, 0, 0, 0, 0, 0, 0, 5, 0, 'test'), (0, 1, 0, 0, 1, 0, 1, 7, 0, 'test'))):
             result = MsprofTxViewer(self.configs, self.params).get_timeline_data()
             self.assertEqual(type(result), str)

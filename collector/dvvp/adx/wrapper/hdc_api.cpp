@@ -12,7 +12,7 @@
 #include <list>
 
 #include "securec.h"
-#include "mmpa_plugin.h"
+#include "mmpa_api.h"
 #include "driver_plugin.h"
 #include "adx_config.h"
 #include "msprof_dlog.h"
@@ -30,8 +30,8 @@ namespace Analysis {
 namespace Dvvp {
 namespace Adx {
 using namespace IdeDaemon::Common::Config;
-using namespace Analysis::Dvvp::Plugin;
-
+using namespace Collector::Dvvp::Plugin;
+using namespace Collector::Dvvp::Mmpa;
 struct DataSendMsg {
     IdeSendBuffT buf;
     int bufLen;
@@ -103,7 +103,7 @@ void HdcServerDestroy(HDC_SERVER server)
         if (error != DRV_ERROR_NONE) {
             MSPROF_LOGE("[HdcServerDestroy]hdc server destroy error : %d, times %d", error, times);
             times++;
-            MmpaPlugin::instance()->MsprofMmSleep(hdcWaitBaseSleepTime);
+            MmSleep(hdcWaitBaseSleepTime);
         }
     } while (times < hdcMaxTimes && error == DRV_ERROR_CLIENT_BUSY);
 }

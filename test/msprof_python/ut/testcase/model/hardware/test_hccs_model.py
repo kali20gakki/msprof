@@ -2,10 +2,10 @@ import unittest
 from unittest import mock
 
 from common_func.info_conf_reader import InfoConfReader
-from model.hardware.hccs_model import HccsModel
+from msmodel.hardware.hccs_model import HccsModel
 from sqlite.db_manager import DBManager
 
-NAMESPACE = 'model.hardware.hccs_model'
+NAMESPACE = 'msmodel.hardware.hccs_model'
 
 
 class TestHccsModel(unittest.TestCase):

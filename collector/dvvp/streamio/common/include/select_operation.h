@@ -20,6 +20,7 @@ namespace analysis {
 namespace dvvp {
 namespace streamio {
 namespace common {
+using mmSockHandle = Collector::Dvvp::Mmpa::mmSockHandle;
 class SelectOperation {
 public:
     SelectOperation();

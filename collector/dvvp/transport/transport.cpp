@@ -13,7 +13,7 @@
 #include "errno/error_code.h"
 #include "message/codec.h"
 #include "message/prof_params.h"
-#include "mmpa_plugin.h"
+#include "mmpa_api.h"
 #include "msprof_dlog.h"
 #include "securec.h"
 #include "param_validation.h"
@@ -28,7 +28,8 @@ using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::common::config;
 using namespace analysis::dvvp::common::validation;
 using namespace analysis::dvvp::common::utils;
-using namespace Analysis::Dvvp::Plugin;
+using namespace Collector::Dvvp::Plugin;
+using namespace Collector::Dvvp::Mmpa;
 
 int ITransport::SendFile(const std::string &jobCtx,
                          const std::string &file,
@@ -48,8 +49,8 @@ int ITransport::SendFile(const std::string &jobCtx,
     }
     MSPROF_LOGI("size of file: %s is %lld", Utils::BaseName(file).c_str(), len);
 
-    INT32 fd = MmpaPlugin::instance()->MsprofMmOpen2(file.c_str(), M_RDONLY, M_IRUSR | M_IWUSR);
-    if (fd == EN_ERROR || fd == EN_INVALID_PARAM) {
+    int32_t fd = MmOpen2(file, M_RDONLY, M_IRUSR | M_IWUSR);
+    if (fd == PROFILING_FAILED || fd == PROFILING_INVALID_PARAM) {
         MSPROF_LOGE("Failed to open: %s, err=%d", Utils::BaseName(file).c_str(), errno);
         return PROFILING_FAILED;
     }
@@ -58,7 +59,7 @@ int ITransport::SendFile(const std::string &jobCtx,
     long long offset = 0;
     int ret = PROFILING_SUCCESS;
     do {
-        sizeRead = (long long)MmpaPlugin::instance()->MsprofMmRead(fd, buffer.get(), fileBufLen);
+        sizeRead = (long long)MmRead(fd, buffer.get(), fileBufLen);
         if (sizeRead > 0) {
             FileChunk chunk;
             chunk.relativeFileName = relativePath;
@@ -75,7 +76,7 @@ int ITransport::SendFile(const std::string &jobCtx,
             offset += sizeRead;
         }
     } while (sizeRead > 0);
-    MmpaPlugin::instance()->MsprofMmClose(fd);
+    MmClose(fd);
 
     return ret;
 }

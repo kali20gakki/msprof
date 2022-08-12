@@ -2,9 +2,9 @@ import unittest
 from unittest import mock
 
 from common_func.ms_constant.stars_constant import StarsConstant
-from model.stars.stars_chip_trans_model import StarsChipTransModel
+from msmodel.stars.stars_chip_trans_model import StarsChipTransModel
 
-NAMESPACE = 'model.stars.stars_chip_trans_model'
+NAMESPACE = 'msmodel.stars.stars_chip_trans_model'
 
 
 class TestStarsChipTransModel(unittest.TestCase):

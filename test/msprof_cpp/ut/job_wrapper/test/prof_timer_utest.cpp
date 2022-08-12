@@ -6,12 +6,12 @@
 #include "transport/transport.h"
 #include "transport/hdc/hdc_transport.h"
 #include "utils/utils.h"
-#include "mmpa_plugin.h"
+#include "mmpa_api.h"
 
 using namespace analysis::dvvp::common::error;
 using namespace Analysis::Dvvp::JobWrapper;
 using namespace Analysis::Dvvp::MsprofErrMgr;
-using namespace Analysis::Dvvp::Plugin;
+using namespace Collector::Dvvp::Mmpa;
 
 class PROF_STAT_FILE_HANDLER_TEST: public testing::Test {
 protected:
@@ -688,15 +688,15 @@ TEST_F(PROF_TIMER_TEST, Start) {
     //MOCKER_CPP(&analysis::dvvp::common::thread::Thread::Start)
     //    .stubs()
     //    .will(returnValue(PROFILING_SUCCESS));
-    MOCKER(&MmpaPlugin::MsprofMmCreateTaskWithThreadAttr)
+    MOCKER(&MmCreateTaskWithThreadAttr)
         .stubs()
-        .will(returnValue(EN_OK));
+        .will(returnValue(PROFILING_SUCCESS));
     //MOCKER_CPP(&analysis::dvvp::common::thread::Thread::Stop)
     //    .stubs()
     //    .will(returnValue(PROFILING_SUCCESS));
-    MOCKER(&MmpaPlugin::MsprofMmJoinTask)
+    MOCKER(&MmJoinTask)
         .stubs()
-        .will(returnValue(EN_OK));
+        .will(returnValue(PROFILING_SUCCESS));
 
     MOCKER(setitimer)
         .stubs()

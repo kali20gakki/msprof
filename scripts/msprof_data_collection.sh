@@ -24,11 +24,12 @@ function pkill_prof_cmd(){
         while [ ${try_times} -lt 10 ]
         do
             pkill -2 "${command_param}"
-            if [ $? -eq 0 ]; then
+            sleep 1
+            count=`pgrep ${command_param} | wc -l`
+            if [ $count -eq 0 ]; then
                 exit 0
             fi
             let try_times+=1
-            sleep 1
         done
         echo "'pkill -2 ${command_param}' executed ${try_times} times failed"
         pkill -9 "${command_param}"
