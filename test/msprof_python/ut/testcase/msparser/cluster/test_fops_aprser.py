@@ -135,7 +135,7 @@ class TestFopsParser(unittest.TestCase):
             check = FopsParser(self.params)
             check.sample_config = {'ai_core_metrics': 'ArithmeticUtilization'}
             result = check.get_cluster_path('test\\test')
-            self.assertEqual(result, 'test\\query\\test\\test\\test\\test')
+            self.assertEqual(result, 'test\\query\\test\\test')
 
     def test_check_id_valid(self):
         with DBOpen(DBNameConstant.DB_CLUSTER_RANK) as db_connect:
