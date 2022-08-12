@@ -14,7 +14,7 @@ from common_func.data_check_manager import DataCheckManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
-from common_func.msprof_common import MsProfCommonConstant, get_path_dir, prepare_log
+from common_func.msprof_common import get_path_dir, prepare_log
 from common_func.msprof_exception import ProfException
 from common_func.path_manager import PathManager
 from msparser.cluster.fops_parser import FopsParser
@@ -27,6 +27,7 @@ class MsprofQuerySummaryManager:
     """
     CLUSTER_SCENE = '1'
     NOT_CLUSTER_SCENE = '0'
+    FILE_NAME = os.path.basename(__file__)
 
     def __init__(self: any, args: any) -> None:
         self.collection_path = os.path.realpath(args.collection_path)
@@ -72,21 +73,20 @@ class MsprofQuerySummaryManager:
         return False
 
     def process(self: any) -> None:
-        self._preprocess()
+        self._check_data_type_valid()
         self._dispatch()
 
-    def _preprocess(self: any) -> None:
-        self._check_argument()
-        self._check_cluster_scene()
-
     def _dispatch(self: any) -> None:
+        if self.data_type == QueryDataType.CLUSTER_SCENE:
+            MsprofQuerySummaryManager.check_cluster_scene(self.collection_path)
+            return
+        self._check_arguments_valid()
+        self._check_cluster_scene()
         params = {"collection_path": self.collection_path,
                   "is_cluster": self.is_cluster_scene,
                   "npu_id": self.npu_id,
                   "model_id": self.model_id,
                   "iteration_id": self.iteration_id}
-        if self.data_type == QueryDataType.CLUSTER_TASK:
-            MsprofQuerySummaryManager.check_cluster_scene(self.collection_path)
         if self.data_type == QueryDataType.STEP_TRACE:
             StepTraceSummay(params).process()
         if self.data_type == QueryDataType.FOPS_ANALYSE:
@@ -94,30 +94,38 @@ class MsprofQuerySummaryManager:
 
     def _check_cluster_scene(self: any) -> None:
         cluster_rank_file = PathManager.get_db_path(self.collection_path, DBNameConstant.DB_CLUSTER_RANK)
-        self.is_cluster_scene = os.path.exists(cluster_rank_file)
-        if self.is_cluster_scene:
+        if os.path.exists(cluster_rank_file):
+            self.is_cluster_scene = True
             prepare_log(self.collection_path)
+        else:
+            if MsprofQuerySummaryManager.check_rank_id(self.collection_path):
+                error(MsprofQuerySummaryManager.FILE_NAME,
+                      "To query cluster data, please import cluster info data first.")
+                raise ProfException(ProfException.PROF_CLUSTER_DIR_ERROR)
+            self.is_cluster_scene = False
 
-    def _check_argument(self: any) -> None:
+    def _check_data_type_valid(self: any) -> None:
         if self.data_type is None or self.data_type not in QueryDataType.__members__.values():
-            error(MsProfCommonConstant.COMMON_FILE_NAME,
+            error(MsprofQuerySummaryManager.FILE_NAME,
                   "The query data type is wrong. Please enter a valid value.")
             raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR)
-        if not MsprofQuerySummaryManager._check_integer_with_min_value(self.npu_id, min_value=-1, nullable=True):
-            error(MsProfCommonConstant.COMMON_FILE_NAME,
+
+    def _check_arguments_valid(self: any) -> None:
+        if not MsprofQuerySummaryManager._check_integer_with_min_value(self.npu_id, min_value=-1):
+            error(MsprofQuerySummaryManager.FILE_NAME,
                   "The query id is wrong. Please enter a valid value.")
             raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR)
-        if not MsprofQuerySummaryManager._check_integer_with_min_value(self.model_id, min_value=1, nullable=True):
-            error(MsProfCommonConstant.COMMON_FILE_NAME,
+        if not MsprofQuerySummaryManager._check_integer_with_min_value(self.model_id, min_value=1):
+            error(MsprofQuerySummaryManager.FILE_NAME,
                   "The query model id is wrong. Please enter a valid value.")
             raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR)
         if not MsprofQuerySummaryManager._check_integer_with_min_value(self.iteration_id, min_value=1, nullable=True):
-            error(MsProfCommonConstant.COMMON_FILE_NAME,
+            error(MsprofQuerySummaryManager.FILE_NAME,
                   "The query iteration id is wrong. Please enter a valid value.")
             raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR)
 
 
 class QueryDataType(IntEnum):
-    CLUSTER_TASK = 0
+    CLUSTER_SCENE = 0
     STEP_TRACE = 1
     FOPS_ANALYSE = 2
