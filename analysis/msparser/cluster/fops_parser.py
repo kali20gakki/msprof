@@ -140,7 +140,7 @@ class FopsParser:
             except OSError:
                 error(self.FILE_NAME,
                       "Storing data failed, you may not have the permission to write files in the current path.")
-        return os.path.join(query_path, file_name)
+        return os.path.realpath(os.path.join(query_path, file_name))
 
     def calculate_fops_data(self: any, data_list: list) -> list:
         """
