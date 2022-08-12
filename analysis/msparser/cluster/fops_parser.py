@@ -11,7 +11,7 @@ from common_func.common import warn, print_info, error
 from common_func.config_mgr import ConfigMgr
 from common_func.constant import Constant
 from common_func.data_check_manager import DataCheckManager
-from common_func.db_manager import DBManager
+from common_func.db_manager import DBManager, ClassRowType
 from common_func.db_name_constant import DBNameConstant
 from common_func.file_manager import check_path_valid
 from common_func.info_conf_reader import InfoConfReader
@@ -19,6 +19,8 @@ from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msvp_common import check_file_writable
 from common_func.path_manager import PathManager
 from common_func.platform.chip_manager import ChipManager
+from profiling_bean.db_dto.cluster_rank_dto import ClusterRankDto
+from profiling_bean.db_dto.fops_dto import FopsDto
 
 
 class FopsParser:
@@ -58,6 +60,7 @@ class FopsParser:
                   "as total_fops, {1}.op_type, {0}.stream_id, {0}.task_id, {0}.total_time " \
                   "from {0} join {1} on {0}.stream_id={1}.stream_id and {0}.task_id={1}.task_id".format(
                    DBNameConstant.TABLE_SUMMARY_METRICS, DBNameConstant.TABLE_SUMMARY_GE)
+        cur.row_factory = ClassRowType.class_row(FopsDto)
         fops_data = DBManager.fetch_all_data(cur, sql)
         DBManager.destroy_db_connect(conn, cur)
         return fops_data
@@ -78,16 +81,17 @@ class FopsParser:
         trace_conn, trace_cur = DBManager.check_connect_db_path(
             PathManager.get_db_path(self.collection_path, DBNameConstant.DB_CLUSTER_STEP_TRACE))
         rank_sql = 'select * from ClusterRank where rank_id=?'
+        rank_cur.row_factory = ClassRowType.class_row(ClusterRankDto)
         rank_data = DBManager.fetch_all_data(rank_cur, rank_sql, (self.rank_id,))
         if not rank_data:
             return False
-        trace_sql = 'select * from step_trace_{} where model_id=? and iteration_id=?'.format(str(rank_data[0][3]))
+        trace_sql = 'select * from step_trace_{} where model_id=? and iteration_id=?'.format(str(rank_data[0].rank_id))
         trace_data = DBManager.fetch_all_data(trace_cur, trace_sql, (self.model_id, self.iter_id))
         DBManager.destroy_db_connect(rank_conn, rank_cur)
         DBManager.destroy_db_connect(trace_conn, trace_cur)
         if not trace_data:
             return False
-        self.collection_path = os.path.join(self.collection_path, rank_data[0][4])
+        self.collection_path = os.path.join(self.collection_path, rank_data[0].dir_name)
         return True
 
     def query_fops_data(self: any) -> None:
@@ -142,9 +146,9 @@ class FopsParser:
         total_fops = 0
         total_times = 0
         for data in data_list:
-            op_type_dict.setdefault(data[5], []).append(data[2])
-            total_fops += data[2]
-            total_times += data[-1]
+            op_type_dict.setdefault(data.op_type, []).append(data.total_fops)
+            total_fops += data.total_fops
+            total_times += data.total_time
         if not all([total_fops, total_times, op_type_dict]):
             return []
         sorted_data = sorted(zip(op_type_dict.keys(), op_type_dict.values()), key=lambda x: sum(x[1]), reverse=True)
