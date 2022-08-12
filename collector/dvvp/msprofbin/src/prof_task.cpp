@@ -13,7 +13,7 @@
 #include "transport/uploader_mgr.h"
 #include "task_relationship_mgr.h"
 #include "info_json.h"
-#include "mmpa_plugin.h"
+#include "mmpa_api.h"
 
 namespace Analysis {
 namespace Dvvp {
@@ -26,7 +26,8 @@ using namespace analysis::dvvp::common::utils;
 using namespace analysis::dvvp::host;
 using namespace analysis::dvvp::transport;
 using namespace Analysis::Dvvp::MsprofErrMgr;
-using namespace Analysis::Dvvp::Plugin;
+using namespace Collector::Dvvp::Plugin;
+using namespace Collector::Dvvp::Mmpa;
 
 ProfTask::ProfTask(const int devId, SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> param)
     : isInit_(false),
@@ -210,8 +211,8 @@ std::string ProfTask::GetHostTime()
     const int TIME_US = 1000000;
 
     (void)memset_s(&tv, sizeof(tv), 0, sizeof(tv));
-    int ret = MmpaPlugin::instance()->MsprofMmGetTimeOfDay(&tv, nullptr);
-    if (ret != EN_OK) {
+    int ret = MmGetTimeOfDay(&tv, nullptr);
+    if (ret != PROFILING_SUCCESS) {
         MSPROF_LOGE("gettimeofday failed");
     } else {
         hostTime = std::to_string((unsigned long long)tv.tv_sec * TIME_US + (unsigned long long)tv.tv_usec);

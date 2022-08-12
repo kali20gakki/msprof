@@ -2,9 +2,9 @@ import unittest
 from unittest import mock
 
 from common_func.info_conf_reader import InfoConfReader
-from model.hardware.sys_usage_model import SysUsageModel
+from msmodel.hardware.sys_usage_model import SysUsageModel
 
-NAMESPACE = 'model.hardware.sys_usage_model'
+NAMESPACE = 'msmodel.hardware.sys_usage_model'
 
 
 class TestSysUsageModel(unittest.TestCase):

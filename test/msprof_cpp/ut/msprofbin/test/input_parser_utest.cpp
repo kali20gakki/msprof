@@ -4,11 +4,12 @@
 #include "errno/error_code.h"
 #include "input_parser.h"
 #include "config/config_manager.h"
-#include "mmpa_plugin.h"
+#include "mmpa_api.h"
 
 using namespace analysis::dvvp::common::error;
 using namespace Analysis::Dvvp::Msprof;
-using namespace Analysis::Dvvp::Plugin;
+using namespace Collector::Dvvp::Plugin;
+using namespace Collector::Dvvp::Mmpa;
 
 class INPUT_PARSER_UTEST : public testing::Test {
 protected:
@@ -24,7 +25,7 @@ TEST_F(INPUT_PARSER_UTEST, ProcessOptions) {
     EXPECT_EQ(PROFILING_FAILED, parser.ProcessOptions(-1, cmdInfo));
 
     char* resArgs = "on";
-    MOCKER(&MmpaPlugin::MsprofMmGetOptArg)
+    MOCKER(&MmGetOptArg)
         .stubs()
         .will(returnValue(resArgs));
     MOCKER_CPP(&InputParser::MsprofHostCheckValid)
@@ -157,6 +158,7 @@ TEST_F(INPUT_PARSER_UTEST, CheckAppValid) {
     EXPECT_EQ(PROFILING_FAILED, parser.CheckAppValid(cmdInfo));
     cmdInfo.args[ARGS_APPLICATION] = "./CheckAppValid a";
     EXPECT_EQ(PROFILING_FAILED, parser.CheckAppValid(cmdInfo));
+    MOCKER(&MmAccess2).stubs().will(returnValue(0));
     std::ofstream file("CheckAppValid");
     file << "command not found" << std::endl;
     file.close();
@@ -200,7 +202,7 @@ TEST_F(INPUT_PARSER_UTEST, CheckPythonPathValid) {
     EXPECT_EQ(PROFILING_FAILED, parser.CheckPythonPathValid(cmdInfo));
     
     Utils::CreateDir("TestPython");
-    MOCKER(&MmpaPlugin::MsprofMmAccess2).stubs().will(returnValue(-1)).then(returnValue(0));
+    MOCKER(&MmAccess2).stubs().will(returnValue(-1)).then(returnValue(0));
     cmdInfo.args[ARGS_PYTHON_PATH] = "TestPython";
     EXPECT_EQ(PROFILING_FAILED, parser.CheckPythonPathValid(cmdInfo));
     EXPECT_EQ(PROFILING_FAILED, parser.CheckPythonPathValid(cmdInfo));
@@ -411,7 +413,7 @@ TEST_F(INPUT_PARSER_UTEST, PreCheckPlatform) {
         .will(returnValue(Analysis::Dvvp::Common::Config::PlatformType::END_TYPE))
         .then(returnValue(Analysis::Dvvp::Common::Config::PlatformType::DC_TYPE));
     EXPECT_EQ(PROFILING_FAILED, parser.PreCheckPlatform(ARGS_AIV, argv));
-    MOCKER(&MmpaPlugin::MsprofMmGetOptInd)
+    MOCKER(&MmGetOptInd)
         .stubs()
         .will(returnValue(1));
     parser.PreCheckPlatform(ARGS_AIV, argv);
@@ -427,7 +429,7 @@ TEST_F(INPUT_PARSER_UTEST, MsprofCmdCheckValid) {
     cmdInfo.args[ARGS_LOW_POWER] = "bb";
     cmdInfo.args[ARGS_SUMMARY_FORMAT] = "csv";
     cmdInfo.args[ARGS_PYTHON_PATH] = "123";
-    MOCKER(&MmpaPlugin::MsprofMmGetOptInd)
+    MOCKER(&MmGetOptInd)
         .stubs()
         .will(returnValue(1));
     parser.MsprofCmdCheckValid(cmdInfo, ARGS_AIV_MODE);

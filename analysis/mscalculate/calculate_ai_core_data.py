@@ -130,8 +130,8 @@ class CalculateAiCoreData:
 
         if "mac_fp16_ratio" in events_name_list and \
                 "mac_int8_ratio" in events_name_list:
-            cube_fops = ai_core_profiling_events["mac_fp16_ratio"][-1] * task_cyc + \
-                        ai_core_profiling_events["mac_int8_ratio"][-1] * task_cyc
+            cube_fops = ai_core_profiling_events["mac_fp16_ratio"][-1] * task_cyc * 16 * 16 * 16 * 2 + \
+                        ai_core_profiling_events["mac_int8_ratio"][-1] * task_cyc * 16 * 16 * 32 * 2
             ai_core_profiling_events.setdefault("cube_fops", []).append(cube_fops)
 
         if "mte1_iq_full_ratio" in events_name_list and \

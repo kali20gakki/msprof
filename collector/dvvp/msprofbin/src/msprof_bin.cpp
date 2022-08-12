@@ -49,19 +49,22 @@ int main(int argc, const char **argv, const char **envp)
     std::vector<std::string> envpList;
     SetEnvList(envp, envpList);
     EnvManager::instance()->SetGlobalEnv(envpList);
-    InputParser parser = InputParser();
-    if (argc <= 1) {
-        parser.MsprofCmdUsage("");
-        return PROFILING_FAILED;
-    }
     int ret = Platform::instance()->PlatformInitByDriver();
     if (ret != PROFILING_SUCCESS) {
         CmdLog::instance()->CmdErrorLog("Init platform by driver faild!");
         return PROFILING_FAILED;
     }
+    InputParser parser = InputParser();
+    if (argc <= 1) {
+        parser.MsprofCmdUsage("msprof needs input parameter.");
+        return PROFILING_FAILED;
+    }
     auto params = parser.MsprofGetOpts(argc, argv);
     if (params == nullptr) {
         return PROFILING_FAILED;
+    }
+    if (parser.HasHelpParamOnly()) {
+        return PROFILING_SUCCESS;
     }
     ret = MsprofManager::instance()->Init(params);
     if (ret != PROFILING_SUCCESS) {

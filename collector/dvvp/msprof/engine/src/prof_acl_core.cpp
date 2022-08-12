@@ -32,7 +32,7 @@ using namespace Msprofiler::Api;
 using namespace Msprof::MsprofTx;
 using namespace analysis::dvvp::transport;
 using namespace Analysis::Dvvp::Common::Platform;
-using namespace Analysis::Dvvp::Plugin;
+using namespace Collector::Dvvp::Plugin;
 
 static std::mutex g_aclprofMutex;
 static uint64_t g_indexId = 1;
@@ -51,8 +51,9 @@ aclError aclprofInit(CONST_CHAR_PTR profilerResultPath, size_t length)
     if (profilerResultPath == nullptr || strlen(profilerResultPath) != length) {
         MSPROF_LOGE("profilerResultPath is nullptr or its length does not equals given length");
         std::string errorReason = "profilerResultPath is nullptr or its length does not equals given length";
+        std::string valueStr = (profilerResultPath == nullptr) ? "nullptr" : std::string(profilerResultPath);
         MSPROF_INPUT_ERROR("EK0001", std::vector<std::string>({"value", "param", "reason"}),
-            std::vector<std::string>({std::string(profilerResultPath), "profilerResultPath", errorReason}));
+            std::vector<std::string>({valueStr, "profilerResultPath", errorReason}));
         return ACL_ERROR_INVALID_PARAM;
     }
     const static size_t aclProfPathMaxLen = 4096;   // path max length: 4096
@@ -72,7 +73,6 @@ aclError aclprofInit(CONST_CHAR_PTR profilerResultPath, size_t length)
 
     if (ProfAclMgr::instance()->Init() != PROFILING_SUCCESS) {
         MSPROF_LOGE("Failed to init acl manager");
-        MSPROF_INNER_ERROR("EK9999", "Failed to init acl manager");
         return ACL_ERROR_PROFILING_FAILURE;
     }
     MSPROF_LOGI("Initialize profiling by using ProfInit");
@@ -80,7 +80,6 @@ aclError aclprofInit(CONST_CHAR_PTR profilerResultPath, size_t length)
     ret = ProfAclMgr::instance()->ProfAclInit(path);
     if (ret != ACL_SUCCESS) {
         MSPROF_LOGE("AclProfiling init fail, profiling result = %d", ret);
-        MSPROF_INNER_ERROR("EK9999", "AclProfiling init fail, profiling result = %d", ret);
         return ret;
     }
 
@@ -108,6 +107,10 @@ aclError aclprofFinalize()
 
     int32_t ret = ProfAclMgr::instance()->ProfFinalizePrecheck();
     if (ret != ACL_SUCCESS) {
+        if (ret == ACL_ERROR_PROF_NOT_RUN) {
+            MSPROF_INPUT_ERROR("EK0002", std::vector<std::string>({"intf1", "intf2"}),
+                std::vector<std::string>({"aclprofFinalize", "aclprofInit"}));
+        }
         return ret;
     }
 
@@ -149,7 +152,7 @@ bool IsValidProfConfigPreCheck(CONST_UINT32_T_PTR deviceIdList, uint32_t deviceN
 
     if (deviceNums > MSVP_MAX_DEV_NUM) {
         MSPROF_LOGE("The device nums is invalid.");
-        std::string errorReason = "The number of device should be smaller than" + std::to_string(MSVP_MAX_DEV_NUM);
+        std::string errorReason = "The number of device should be smaller than " + std::to_string(MSVP_MAX_DEV_NUM);
         MSPROF_INPUT_ERROR("EK0001", std::vector<std::string>({"value", "param", "reason"}),
             std::vector<std::string>({std::to_string(deviceNums), "deviceNums", errorReason}));
         return false;
@@ -319,6 +322,10 @@ aclError aclprofStart(ACL_PROF_CONFIG_CONST_PTR profilerConfig)
     }
     int32_t ret = ProfAclMgr::instance()->ProfStartPrecheck();
     if (ret != ACL_SUCCESS) {
+        if (ret == ACL_ERROR_PROF_NOT_RUN) {
+            MSPROF_INPUT_ERROR("EK0002", std::vector<std::string>({"intf1", "intf2"}),
+                std::vector<std::string>({"aclprofStart", "aclprofInit"}));
+        }
         return ret;
     }
 
@@ -333,6 +340,7 @@ aclError aclprofStart(ACL_PROF_CONFIG_CONST_PTR profilerConfig)
     MSPROF_LOGI("Allocate start profiling config to Acl");
     uint64_t dataTypeConfig = profilerConfig->config.dataTypeConfig;
     ProfAclMgr::instance()->AddModelLoadConf(dataTypeConfig);
+    ProfAclMgr::instance()->AddRuntimeTraceConf(dataTypeConfig);
     ret = Analysis::Dvvp::ProfilerCommon::CommandHandleProfStart(
         profilerConfig->config.devIdList, profilerConfig->config.devNums, dataTypeConfig | PROF_OP_DETAIL);
     RETURN_IF_NOT_SUCCESS(ret);
@@ -358,28 +366,24 @@ aclError aclprofStop(ACL_PROF_CONFIG_CONST_PTR profilerConfig)
     }
 
     int32_t ret = ProfAclMgr::instance()->ProfStopPrecheck();
-    RETURN_IF_NOT_SUCCESS(ret);
+    if (ret != ACL_SUCCESS) {
+        if (ret == ACL_ERROR_PROF_NOT_RUN) {
+            MSPROF_INPUT_ERROR("EK0002", std::vector<std::string>({"intf1", "intf2"}),
+                std::vector<std::string>({"aclprofStop", "aclprofInit"}));
+        }
+        return ret;
+    }
 
     uint64_t dataTypeConfig = 0;
     for (uint32_t i = 0; i < profilerConfig->config.devNums; i++) {
         ret = ProfAclMgr::instance()->ProfAclGetDataTypeConfig(profilerConfig->config.devIdList[i], dataTypeConfig);
-        if (ret != ACL_SUCCESS) {
-            return ret;
-        }
-        if (dataTypeConfig != profilerConfig->config.dataTypeConfig) {
-            MSPROF_LOGE("DataTypeConfig stop:0x%lx different from start:0x%lx",
-                profilerConfig->config.dataTypeConfig, dataTypeConfig);
-            std::string dataTypeConfigStr = "0x" +
-                Utils::Int2HexStr<uint64_t>(profilerConfig->config.dataTypeConfig);
-            std::string errorReason = "dataTypeConfig is different from start:0x" +
-                Utils::Int2HexStr<uint64_t>(dataTypeConfig);
-            MSPROF_INPUT_ERROR("EK0001", std::vector<std::string>({"value", "param", "reason"}),
-                std::vector<std::string>({dataTypeConfigStr, "dataTypeConfig", errorReason}));
-            return ACL_ERROR_INVALID_PROFILING_CONFIG;
-        }
+        RETURN_IF_NOT_SUCCESS(ret);
+        ret = ProfAclMgr::instance()->StopProfConfigCheck(profilerConfig->config.dataTypeConfig, dataTypeConfig);
+        RETURN_IF_NOT_SUCCESS(ret);
     }
     MSPROF_LOGI("Allocate stop config of profiling modules to Acl");
     ProfAclMgr::instance()->AddModelLoadConf(dataTypeConfig);
+    ProfAclMgr::instance()->AddRuntimeTraceConf(dataTypeConfig);
     ret = Analysis::Dvvp::ProfilerCommon::CommandHandleProfStop(
         profilerConfig->config.devIdList, profilerConfig->config.devNums, dataTypeConfig | PROF_OP_DETAIL);
     RETURN_IF_NOT_SUCCESS(ret);
@@ -474,6 +478,8 @@ aclError aclprofModelUnSubscribe(const uint32_t modelId)
 
     if (!ProfAclMgr::instance()->IsModelSubscribed(modelId)) {
         MSPROF_LOGE("Model Id %u is not subscribed when unsubcribed", modelId);
+        MSPROF_INPUT_ERROR("EK0002", std::vector<std::string>({"intf1", "intf2"}),
+            std::vector<std::string>({"aclprofModelUnSubscribe", "aclprofModelSubscribe"}));
         return ACL_ERROR_INVALID_MODEL_ID;
     }
 

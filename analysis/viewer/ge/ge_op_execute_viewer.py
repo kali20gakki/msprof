@@ -14,7 +14,7 @@ from common_func.ms_constant.str_constant import StrConstant
 from common_func.msvp_constant import MsvpConstant
 from common_func.trace_view_header_constant import TraceViewHeaderConstant
 from common_func.trace_view_manager import TraceViewManager
-from model.ge.ge_op_execute_view_model import GeOpExecuteViewModel
+from msmodel.ge.ge_op_execute_view_model import GeOpExecuteViewModel
 from viewer.ge_info_report import get_ge_hash_dict
 
 
@@ -27,8 +27,7 @@ class GeOpExecuteViewer:
         self._configs = configs
         self._params = params
         self._project_path = params.get(StrConstant.PARAM_RESULT_DIR)
-        self._model = GeOpExecuteViewModel(self._project_path, DBNameConstant.DB_GE_HOST_INFO,
-                                           [DBNameConstant.TABLE_GE_HOST])
+        self._model = GeOpExecuteViewModel(params)
 
     def get_summary_data(self: any) -> tuple:
         """

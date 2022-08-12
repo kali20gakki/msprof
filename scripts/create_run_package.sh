@@ -150,12 +150,20 @@ function sed_param() {
 	local main_script=${1}
 	sed -i "2i VERSION=$version" "${RUN_SCRIPT_DIR}/${main_script}"
 	sed -i "2i package_arch=$(arch)" "${RUN_SCRIPT_DIR}/${main_script}"
+
+	if [ "${main_script}" = "${MAIN_SCRIPT}" ]; then
+		sed -i "2i package_arch=$(arch)" "${RUN_SCRIPT_DIR}/${UNINSTALL}"
+	fi
 }
 
 function delete_sed_param() {
 	local main_script=${1}
 	sed -i "2d" "${RUN_SCRIPT_DIR}/${main_script}"
 	sed -i "2d" "${RUN_SCRIPT_DIR}/${main_script}"
+
+	if [ "${main_script}" = "${MAIN_SCRIPT}" ]; then
+		sed -i "2d" "${RUN_SCRIPT_DIR}/${UNINSTALL}"
+	fi
 }
 
 function sed_main_param() {

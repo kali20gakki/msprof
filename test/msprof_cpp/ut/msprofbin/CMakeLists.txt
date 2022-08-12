@@ -16,6 +16,7 @@ set(common_file
     ${MSPROF_SOURCE_DIR}/dvvp/common/statistics/perf_count.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/validation/param_validation.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/common/mmpa/mmpa_api.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/depend/stub/error_manager/msprof_error_manager_stub.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/driver/devmgmt/ai_drv_dev_api.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/driver/devmgmt/ai_drv_dsmi_api.cpp
@@ -72,7 +73,6 @@ add_executable(msprof_bin_utest
     test/prof_task_utest.cpp
     test/prof_device_transport_utest.cpp
     test/running_mode_utest.cpp
-    ..//stub/mmpa_stub.cpp
     ../stub/profile_drv_user_stub.cpp
     ../stub/hdc-api-stub.cpp
     ../stub/hdc-log-stub.cpp
@@ -90,8 +90,6 @@ target_include_directories(msprof_bin_utest PRIVATE
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/slog
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/metadef/error_manager/error_manager_stub
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/driver
-    ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/adump
-    ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/mmpa
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/plugin
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/profapi
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc
@@ -103,7 +101,7 @@ target_include_directories(msprof_bin_utest PRIVATE
     ${MSPROF_SOURCE_DIR}/dvvp/host/include/
     ${MSPROF_SOURCE_DIR}/dvvp/common
     ${TOP_DIR}/test/msprof_cpp/ut/stub/common/log/
-    # ${MSPROF_SOURCE_DIR}/dvvp/common/logger
+    ${MSPROF_SOURCE_DIR}/dvvp/common/mmpa
     ${MSPROF_SOURCE_DIR}/dvvp/common/statistics
     ${MSPROF_SOURCE_DIR}/dvvp/common/validation
     ${MSPROF_SOURCE_DIR}/dvvp/common/platform

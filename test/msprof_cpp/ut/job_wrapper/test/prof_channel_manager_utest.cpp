@@ -5,12 +5,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include "prof_channel_manager.h"
-#include "mmpa_plugin.h"
+#include "mmpa_api.h"
 
 using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::message;
 using namespace Analysis::Dvvp::JobWrapper;
-using namespace Analysis::Dvvp::Plugin;
+using namespace Collector::Dvvp::Mmpa;
 
 class PROF_CHANNEL_MANAGER_UTEST: public testing::Test {
 protected:
@@ -23,9 +23,9 @@ protected:
 
 TEST_F(PROF_CHANNEL_MANAGER_UTEST, ProfChannelManager_Init) {
     auto entry = ProfChannelManager::instance();
-    MOCKER(&MmpaPlugin::MsprofMmCreateTaskWithThreadAttr)
+    MOCKER(&MmCreateTaskWithThreadAttr)
         .stubs()
-        .will(returnValue(EN_OK));
+        .will(returnValue(PROFILING_SUCCESS));
     EXPECT_EQ(entry->Init(), PROFILING_SUCCESS);
     EXPECT_NE(nullptr, entry->GetChannelPoller());
 }
@@ -35,9 +35,9 @@ TEST_F(PROF_CHANNEL_MANAGER_UTEST, ProfChannelManager_UnInit) {
     // MOCKER_CPP(&analysis::dvvp::transport::ChannelPoll::Stop)
     //     .stubs()
     //     .will(returnValue(PROFILING_SUCCESS));
-    MOCKER(&MmpaPlugin::MsprofMmJoinTask)
+    MOCKER(&MmJoinTask)
         .stubs()
-        .will(returnValue(EN_OK));
+        .will(returnValue(PROFILING_SUCCESS));
     EXPECT_NE(nullptr, entry);
     entry->FlushChannel();
     entry->UnInit();

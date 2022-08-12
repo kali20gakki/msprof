@@ -19,8 +19,9 @@ from common_func.msvp_common import is_valid_original_data
 from common_func.path_manager import PathManager
 from common_func.batch_counter import BatchCounter
 from common_func.iter_recorder import IterRecorder
+from common_func.utils import Utils
 from framework.offset_calculator import OffsetCalculator
-from model.ai_cpu.ai_cpu_model import AiCpuModel
+from msmodel.ai_cpu.ai_cpu_model import AiCpuModel
 from msparser.data_struct_size_constant import StructFmt
 from profiling_bean.prof_enum.data_tag import DataTag
 from profiling_bean.struct_info.ai_cpu_data import AiCpuData
@@ -50,6 +51,7 @@ class ParseAiCpuBinData(MsMultiProcess):
         self._batch_counter = BatchCounter(self.project_path)
         self._batch_counter.init(Constant.TASK_TYPE_AI_CPU)
         self._iter_recorder = IterRecorder(self.project_path)
+        self._overstep_task_cnt = 0
 
     def read_binary_data(self: any, file_path: str) -> None:
         """
@@ -69,20 +71,23 @@ class ParseAiCpuBinData(MsMultiProcess):
                 cpu_f[index * StructFmt.AI_CPU_FMT_SIZE: (index + 1) * StructFmt.AI_CPU_FMT_SIZE])
             if ai_cpu.ai_cpu_time_consuming.ai_cpu_task_start_time != 0 and \
                     ai_cpu.ai_cpu_time_consuming.ai_cpu_task_end_time:
-                self.ai_cpu_datas.append(
-                    [ai_cpu.stream_id,
-                     ai_cpu.task_id,
-                     ai_cpu.ai_cpu_time_consuming.ai_cpu_task_start_time,
-                     ai_cpu.ai_cpu_time_consuming.ai_cpu_task_end_time,
-                     self.NONE_NODE_NAME,
-                     ai_cpu.ai_cpu_time_consuming.compute_time,
-                     ai_cpu.ai_cpu_time_consuming.memory_copy_time,
-                     ai_cpu.ai_cpu_time_consuming.ai_cpu_task_time,
-                     ai_cpu.ai_cpu_time_consuming.dispatch_time,
-                     ai_cpu.ai_cpu_time_consuming.total_time,
-                     self.__calculate_batch_id(
-                         ai_cpu.stream_id, ai_cpu.task_id,
-                         ai_cpu.ai_cpu_time_consuming.ai_cpu_task_end_syscnt)])
+                if self._iter_recorder.check_task_in_iteration(ai_cpu.ai_cpu_time_consuming.ai_cpu_task_end_syscnt):
+                    self.ai_cpu_datas.append(
+                        [ai_cpu.stream_id,
+                         ai_cpu.task_id,
+                         ai_cpu.ai_cpu_time_consuming.ai_cpu_task_start_time,
+                         ai_cpu.ai_cpu_time_consuming.ai_cpu_task_end_time,
+                         self.NONE_NODE_NAME,
+                         ai_cpu.ai_cpu_time_consuming.compute_time,
+                         ai_cpu.ai_cpu_time_consuming.memory_copy_time,
+                         ai_cpu.ai_cpu_time_consuming.ai_cpu_task_time,
+                         ai_cpu.ai_cpu_time_consuming.dispatch_time,
+                         ai_cpu.ai_cpu_time_consuming.total_time,
+                         self.__calculate_batch_id(
+                             ai_cpu.stream_id, ai_cpu.task_id,
+                             ai_cpu.ai_cpu_time_consuming.ai_cpu_task_end_syscnt)])
+                else:
+                    self._overstep_task_cnt = self._overstep_task_cnt + 1
             struct_nums -= 1
             logging.debug(json.dumps(ai_cpu, default=lambda message: message.__dict__, sort_keys=True))
 
@@ -100,6 +105,8 @@ class ParseAiCpuBinData(MsMultiProcess):
                 logging.info("start parsing ai cpu data file: %s", _file)
                 self.read_binary_data(os.path.join(data_dir, _file))
                 FileManager.add_complete_file(self.project_path, _file)
+        if self._overstep_task_cnt > 0:
+            logging.warning("AI_CPU overstep task number is %s", self._overstep_task_cnt)
 
     def save(self: any) -> None:
         """

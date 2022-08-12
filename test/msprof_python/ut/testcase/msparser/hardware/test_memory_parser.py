@@ -118,10 +118,10 @@ class TestParsingMemoryData(unittest.TestCase):
         self.assertEqual(check.device_id, '0')
 
     def test_save(self):
-        with mock.patch('model.hardware.sys_mem_model.SysMemModel.init'), \
-                mock.patch('model.hardware.sys_mem_model.SysMemModel.flush'), \
-                mock.patch('model.hardware.sys_mem_model.SysMemModel.create_table'), \
-                mock.patch('model.hardware.sys_mem_model.SysMemModel.finalize'):
+        with mock.patch('msmodel.hardware.sys_mem_model.SysMemModel.init'), \
+                mock.patch('msmodel.hardware.sys_mem_model.SysMemModel.flush'), \
+                mock.patch('msmodel.hardware.sys_mem_model.SysMemModel.create_table'), \
+                mock.patch('msmodel.hardware.sys_mem_model.SysMemModel.finalize'):
             InfoConfReader()._info_json = {"devices": '0'}
             check = ParsingMemoryData(self.file_list, CONFIG)
             check.data_dict = {'sys_data_list': [123]}

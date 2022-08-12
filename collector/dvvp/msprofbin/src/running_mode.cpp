@@ -19,7 +19,7 @@
 #include "task_relationship_mgr.h"
 #include "platform/platform.h"
 #include "env_manager.h"
-#include "mmpa_plugin.h"
+#include "mmpa_api.h"
 
 namespace Collector {
 namespace Dvvp {
@@ -32,7 +32,8 @@ using namespace Analysis::Dvvp::Msprof;
 using namespace Analysis::Dvvp::Common::Config;
 using namespace Analysis::Dvvp::Common::Platform;
 using namespace analysis::dvvp::common::utils;
-using namespace Analysis::Dvvp::Plugin;
+using namespace Collector::Dvvp::Plugin;
+using namespace Collector::Dvvp::Mmpa;
 
 RunningMode::RunningMode(std::string preCheckParams, std::string modeName, SHARED_PTR_ALIA<ProfileParams> params)
     : isQuit_(false), modeName_(modeName), taskPid_(MSVP_MMPROCESS), preCheckParams_(preCheckParams),
@@ -154,7 +155,7 @@ int RunningMode::GetOutputDirInfoFromRecord()
     } else {
         char errBuf[MAX_ERR_STRING_LEN + 1] = {0};
         MSPROF_LOGE("Open file failed, fileName:%s, error: %s", Utils::BaseName(recordFile).c_str(),
-            MmpaPlugin::instance()->MsprofMmGetErrorFormatMessage(MmpaPlugin::instance()->MsprofMmGetErrorCode(),
+            MmGetErrorFormatMessage(MmGetErrorCode(),
                 errBuf, MAX_ERR_STRING_LEN));
         return PROFILING_FAILED;
     }
@@ -425,9 +426,6 @@ int RunningMode::WaitRunningProcess(std::string processUsage) const
         if (isExited) {
             MSPROF_EVENT("%s process %d exited, exit code:%d", processUsage.c_str(),
                 reinterpret_cast<int>(taskPid_), exitCode);
-            if (exitCode != 0) {
-                return PROFILING_FAILED;
-            }
             return PROFILING_SUCCESS;
         }
         analysis::dvvp::common::utils::Utils::UsleepInterupt(sleepIntevalUs);
@@ -450,36 +448,24 @@ int RunningMode::CheckAnalysisEnv()
         MSPROF_LOGE("Check Analysis env failed, msprofbin has quited");
         return PROFILING_FAILED;
     }
-    if (Platform::instance()->RunSocSide()) {
-        CmdLog::instance()->CmdWarningLog("Not in host side, analysis is not supported");
-        return PROFILING_FAILED;
-    }
-    if (params_->pythonPath.empty()) {
+    if (params_->pythonPath.empty() && Utils::PythonEnvReady()) {
         const std::string PYTHON_CMD{"python3"};
         params_->pythonPath = PYTHON_CMD;
     }
-    // check analysis scripts
-    std::string absolutePath = Utils::GetSelfPath();
-    std::string dirName = Utils::DirName(absolutePath);
-    std::string msprofToolsPath;
-    std::string binPath;
-    if (Utils::SplitPath(dirName, msprofToolsPath, binPath) != PROFILING_SUCCESS) {
-        CmdLog::instance()->CmdWarningLog("Get profiler path failed.");
+    if (!Utils::AnalysisEnvReady(analysisPath_) || analysisPath_.empty()) {
+        CmdLog::instance()->CmdWarningLog("Get msprof.py path failed.");
         return PROFILING_FAILED;
     }
-    Utils::EnsureEndsInSlash(msprofToolsPath);
-    const std::string ANALYSIS_SCRIPT_PATH{"profiler_tool/analysis/msprof/msprof.py"};
-    analysisPath_ = msprofToolsPath + ANALYSIS_SCRIPT_PATH;
     if (!Utils::IsFileExist(analysisPath_)) {
-        CmdLog::instance()->CmdWarningLog("No analysis script found in %s", Utils::BaseName(analysisPath_).c_str());
+        CmdLog::instance()->CmdWarningLog("The msprof.py file is not found, so analysis is not supported.");
         return PROFILING_FAILED;
     }
-    if (MmpaPlugin::instance()->MsprofMmAccess2(analysisPath_.c_str(), M_X_OK) != EN_OK) {
+    if (MmAccess2(analysisPath_, M_X_OK) != PROFILING_SUCCESS) {
         CmdLog::instance()->CmdWarningLog("Analysis script permission denied, path: %s",
             Utils::BaseName(analysisPath_).c_str());
         return PROFILING_FAILED;
     }
-    MSPROF_LOGI("Found avaliable analysis script, script path: %s", Utils::BaseName(ANALYSIS_SCRIPT_PATH).c_str());
+    MSPROF_LOGI("Found avaliable analysis script, script path: %s", Utils::BaseName(analysisPath_).c_str());
 
     return PROFILING_SUCCESS;
 }
@@ -528,6 +514,12 @@ int AppMode::RunModeTasks()
         return PROFILING_FAILED;
     }
     UpdateOutputDirInfo();
+
+    if (jobResultDirList_.empty()) {
+        MSPROF_LOGE("[App Mode] Invalid collection result.");
+        return PROFILING_FAILED;
+    }
+
     if (CheckAnalysisEnv() != PROFILING_SUCCESS) {
         MSPROF_LOGW("[App Mode] Analysis environment is not OK, auto parse will not start.");
         return PROFILING_SUCCESS;
@@ -562,6 +554,12 @@ void AppMode::SetDefaultParams() const
         if (params_->hwts_log.empty()) {
             params_->hwts_log = "on";
         }
+        if (params_->hwts_log1.empty()) {
+            params_->hwts_log1 = "on";
+        }
+    }
+    if (params_->ts_memcpy.empty()) {
+        params_->ts_memcpy = "on";
     }
     if (params_->ts_keypoint.empty()) {
         params_->ts_keypoint = "on";
@@ -774,8 +772,8 @@ int SystemMode::CreateJobDir(std::string device, std::string &resultDir) const
         char errBuf[MAX_ERR_STRING_LEN + 1] = {0};
         CmdLog::instance()->CmdErrorLog("Create dir (%s) failed.ErrorCode: %d, ErrorInfo: %s.",
             Utils::BaseName(resultDir).c_str(),
-            MmpaPlugin::instance()->MsprofMmGetErrorCode(),
-            MmpaPlugin::instance()->MsprofMmGetErrorFormatMessage(MmpaPlugin::instance()->MsprofMmGetErrorCode(),
+            MmGetErrorCode(),
+            MmGetErrorFormatMessage(MmGetErrorCode(),
                 errBuf, MAX_ERR_STRING_LEN));
         return PROFILING_FAILED;
     }

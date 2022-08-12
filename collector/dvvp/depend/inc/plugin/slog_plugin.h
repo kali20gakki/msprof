@@ -10,7 +10,7 @@
 #include "singleton/singleton.h"
 #include "plugin_handle.h"
 
-namespace Analysis {
+namespace Collector {
 namespace Dvvp {
 namespace Plugin {
 enum {
@@ -42,17 +42,17 @@ public:
     template<typename... T>
     void MsprofDlogInnerForC(int moduleId, int level, const char *fmt, T... args)
     {
-        PluginStatus ret = PLUGIN_LOAD_SUCCESS;
+        int32_t ret = PROFILING_SUCCESS;
         if (!pluginHandle_.HasLoad()) {
             ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
-            if (ret != PLUGIN_LOAD_SUCCESS) {
+            if (ret != PROFILING_SUCCESS) {
                 return;
             }
         }
         using DlogInnerForCFunc = std::function<void(int, int, const char *, T...)>;
         DlogInnerForCFunc func;
         ret = pluginHandle_.GetFunction<void, int, int, const char *, T...>("DlogInnerForC", func);
-        if (ret != PLUGIN_LOAD_SUCCESS) {
+        if (ret != PROFILING_SUCCESS) {
             return;
         }
         func(moduleId, level, fmt, args...);
@@ -69,6 +69,6 @@ private:
 };
 } // Plugin
 } // Dvvp
-} // Analysis
+} // Collector
 
 #endif

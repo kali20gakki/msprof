@@ -1,9 +1,9 @@
 import unittest
 from unittest import mock
 
-from model.task_time.task_time import TaskTime
+from msmodel.task_time.task_time import TaskTime
 
-NAMESPACE = 'model.task_time.task_time'
+NAMESPACE = 'msmodel.task_time.task_time'
 
 
 class TestTaskTime(unittest.TestCase):

@@ -19,6 +19,10 @@ namespace config {
 // /////////////////////common//////////////////////////////////
 const std::string DEVICE_APP_DIR = "/usr/local/profiler/";
 const std::string PROF_SCRIPT_FILE_PATH = "/usr/bin/msprof_data_collection.sh";
+const std::string PROF_MSPROF_PY_PATH = "profiler/profiler_tool/analysis/msprof/msprof.py";
+const std::string PROF_MSPROF_PY_NAME = "msprof.py";
+const std::string PROF_MSPROF_SO_NAME = "libmsprofiler.so";
+const std::string PROF_MSPROF_BIN_NAME = "msprof";
 
 const char * const HOST_TAG_KEY = "Host";
 const char * const DEVICE_TAG_KEY = "Device";
@@ -56,6 +60,7 @@ const int MSVP_CLN_SENDER_POOL_THREAD_NUM = 2;
 
 const int STORAGE_LIMIT_DOWN_THD = 200; // 200MB
 
+const int MAX_ASCEND_INSTALL_INFO_FILE_SIZE = 1024; // 1024 Byte
 
 #if (defined(_WIN32) || defined(_WIN64) || defined(_MSC_VER))
 const int MSVP_MMPROCESS = NULL;
@@ -167,6 +172,8 @@ const std::string PROFILER_SAMPLE_CONFIG_ENV = "PROFILER_SAMPLECONFIG";
 const std::string MEMORY_UB = "MemoryUB";
 const std::string PROFILING_RESULT_PATH_ENV = "PROFILING_RESULT_PATH";
 const std::string PROFILING_AICPU_MODE_ENV = "AICPU_PROFILING_MODE";
+const std::string RANK_TABLE_FILE_ENV = "RANK_TABLE_FILE";
+const std::string RANK_ID_ENV = "RANK_ID";
 
 // llc  profiling events type
 const std::string LLC_PROFILING_CAPACITY = "capacity";

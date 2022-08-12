@@ -13,6 +13,7 @@ set(profilerSrcFiles
     ${MSPROF_SOURCE_DIR}/dvvp/common/utils/utils.cpp 
     ${MSPROF_SOURCE_DIR}/dvvp/common/validation/param_validation.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/thread/thread.cpp 
+    ${MSPROF_SOURCE_DIR}/dvvp/common/mmpa/mmpa_api.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/config/config_manager.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/depend/stub/error_manager/msprof_error_manager_stub.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/depend/src/plugin_handle.cpp
@@ -24,7 +25,6 @@ set(localSrcFiles
 	test/select_operation_test.cpp 
 	test/file_slice_test.cpp 
 	test/file_ageing_test.cpp
-	../../stub/common-utils-stub.cpp 
 	../../stub/hdc-log-stub.cpp
     ../../stub/devdrv_runtime_api_stub.cpp
     ../../../stub/driver_plugin_stub.cpp
@@ -44,7 +44,6 @@ target_include_directories(streamio_common_utest PRIVATE
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/metadef/error_manager/error_manager_stub
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/driver
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/adump
-    ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/mmpa
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/plugin
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/profapi
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc
@@ -54,7 +53,7 @@ target_include_directories(streamio_common_utest PRIVATE
 	${MSPROF_SOURCE_DIR}/dvvp/common 
 	${MSPROF_SOURCE_DIR}/dvvp/common/config
     ${TOP_DIR}/test/msprof_cpp/ut/stub/common/log/
-	# ${MSPROF_SOURCE_DIR}/dvvp/common/logger
+	${MSPROF_SOURCE_DIR}/dvvp/common/mmpa
 	${MSPROF_SOURCE_DIR}/dvvp/common/validation 
 	${MSPROF_SOURCE_DIR}/dvvp/aging 
 	${MSPROF_SOURCE_DIR}/dvvp/transport 

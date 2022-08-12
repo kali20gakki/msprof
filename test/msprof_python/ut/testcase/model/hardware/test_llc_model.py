@@ -3,10 +3,10 @@ from unittest import mock
 
 from common_func.info_conf_reader import InfoConfReader
 from common_func.msprof_exception import ProfException
-from model.hardware.llc_model import LlcModel
+from msmodel.hardware.llc_model import LlcModel
 from sqlite.db_manager import DBManager
 
-NAMESPACE = 'model.hardware.llc_model'
+NAMESPACE = 'msmodel.hardware.llc_model'
 
 
 class TestLlcModel(unittest.TestCase):
