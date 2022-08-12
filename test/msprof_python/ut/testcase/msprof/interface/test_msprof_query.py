@@ -98,13 +98,23 @@ class TestQueryCommand(unittest.TestCase):
             key = QueryCommand(args)
             key._get_query_data()
 
-    def test_process(self):
+    def test_process_1(self):
         args_dic = {"collection_path": "123"}
         args = Namespace(**args_dic)
         with mock.patch(NAMESPACE + '.QueryCommand.check_argument_valid'), \
              mock.patch(NAMESPACE + '.QueryCommand._get_query_data', return_value=[[0, 1, 2, 3], ]), \
              mock.patch(NAMESPACE + '.QueryCommand._is_query_summary_data', return_value=False), \
              mock.patch(NAMESPACE + '.QueryCommand._format_print'):
+            key = QueryCommand(args)
+            key.process()
+
+    def test_process_2(self):
+        args_dic = {"collection_path": "123", "data_type": 0, "id": None, "model_id": None, "iteration_id": None}
+        args = Namespace(**args_dic)
+        with mock.patch(NAMESPACE + '.QueryCommand.check_argument_valid'), \
+             mock.patch(NAMESPACE + '.QueryCommand._is_query_summary_data', return_value=True), \
+             mock.patch('msinterface.msprof_query_summary_manager.MsprofQuerySummaryManager.check_rank_id',
+                        return_value=True):
             key = QueryCommand(args)
             key.process()
 
