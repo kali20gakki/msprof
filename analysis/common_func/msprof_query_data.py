@@ -38,7 +38,7 @@ class MsprofQueryData:
         cluster_query_data = []
         with ClusterStepTraceModel(collection_path, []) as cluster_step_trace:
             for cluster_info in cluster_info_list:
-                step_table_name = 'step_trace_{0}'.format(cluster_info[3])
+                step_table_name = DBNameConstant.TABLE_CLUSTER_STEP_TRACE.format(cluster_info[3])
                 model_info_list = cluster_step_trace.get_model_info(step_table_name)
                 if not model_info_list:
                     data = [cluster_info[0], cluster_info[1], cluster_info[4], cluster_info[2],
