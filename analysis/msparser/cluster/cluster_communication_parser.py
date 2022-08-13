@@ -37,6 +37,13 @@ class ClusterCommunicationParser:
                 {'status': NumberConstant.ERROR,
                  'info': 'The collective communication data could be shown in the scene of cluster.', 'data': ''}))
             return
+        if not self._is_cluster_all_device_scene():
+            print_msg(json.dumps(
+                {'status': NumberConstant.ERROR,
+                 'info': f"The collective communication data only supports exporting data by all devices, "
+                         f"and the \'--id\' parameter needs to be set to (-1).",
+                 'data': ''}))
+            return
         self._get_communication_data()
         self._storage_summary_data()
 
