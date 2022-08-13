@@ -137,7 +137,7 @@ class StepTraceSummay:
     def _query_data_from_all_device(self: any, curs: any, rank_id_collection: list) -> list:
         data_colleciton = []
         for rank_id in rank_id_collection:
-            table = "step_trace_{}".format(rank_id)
+            table = DBNameConstant.TABLE_CLUSTER_STEP_TRACE.format(rank_id)
             if not DBManager.judge_table_exist(curs, table):
                 logging.error("The %s table doesn't exist.", table)
                 continue
@@ -147,7 +147,7 @@ class StepTraceSummay:
         return data_colleciton
 
     def _query_data_from_single_device(self, curs: any) -> list:
-        table = "step_trace_{}".format(self.npu_id)
+        table = DBNameConstant.TABLE_CLUSTER_STEP_TRACE.format(self.npu_id)
         sql = self._sql_for_query_all_iteration(table, self.npu_id)
         data = DBManager.fetch_all_data(curs, sql)
         return data
