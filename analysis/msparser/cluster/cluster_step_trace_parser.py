@@ -92,9 +92,9 @@ class ClusterStepTraceParser(IParser):
                   "The input dir doesn't have cluster database, please check.")
             return
         self.parse()
-        logging.info("Start to save cluster step_trace data to db!")
+        logging.info("Start to save cluster step trace data to db!")
         self.save()
-        logging.info("cluster_step_trace.db created successful!")
+        logging.info("Query cluster step trace data finished!")
 
     def parse(self: any) -> None:
         if not self._collect_project_paths():
@@ -102,23 +102,29 @@ class ClusterStepTraceParser(IParser):
                   "The cluster step trace parsing is failed.")
 
     def save(self: any) -> None:
-        if not self.id_with_project_path_map:
+        tables = self._generate_cluster_table_name()
+        if not tables:
+            logging.error("The step trace source database or table is not found.")
             return
-        self._run_cluster_step_trace_model()
+        with ClusterStepTraceModel(self.collection_path, tables) as cluster_model:
+            cluster_model.create_table()
+            self._collect_and_save_step_trace_data(cluster_model)
 
     def _check_collection_path_valid(self: any) -> bool:
         db_path = PathManager.get_db_path(self.collection_path, DBNameConstant.DB_CLUSTER_RANK)
         return os.path.exists(db_path)
-
-    def _run_cluster_step_trace_model(self: any) -> bool:
-        rank_ids = list(self.id_with_project_path_map.keys())
-        for rank_id in rank_ids:
+            
+    def _generate_cluster_table_name(self: any) -> list:
+        for rank_id in list(self.id_with_project_path_map.keys()):
+            path = self.id_with_project_path_map.get(rank_id)
+            device_path = os.path.join(self.collection_path, path)
+            trace_db_path =  PathManager.get_db_path(device_path, DBNameConstant.DB_TRACE)
+            if not DBManager.check_tables_in_db(trace_db_path, DBNameConstant.TABLE_TRAINING_TRACE):
+                self.id_with_project_path_map.pop(rank_id)
+                continue
             self.id_with_table_map.setdefault(rank_id, DBNameConstant.TABLE_CLUSTER_STEP_TRACE.format(rank_id))
             self.id_with_all_reduce_map.setdefault(rank_id, DBNameConstant.TABLE_CLUSTER_ALL_REDUCE.format(rank_id))
-        all_tables = list(self.id_with_table_map.values()) + list(self.id_with_all_reduce_map.values())
-        with ClusterStepTraceModel(self.collection_path, all_tables) as cluster_model:
-            cluster_model.create_table()
-            self._collect_and_save_step_trace_data(cluster_model)
+        return list(self.id_with_table_map.values()) + list(self.id_with_all_reduce_map.values())
 
     def _collect_project_paths(self: any) -> bool:
         rank_db_path = PathManager.get_db_path(self.collection_path, DBNameConstant.DB_CLUSTER_RANK)
