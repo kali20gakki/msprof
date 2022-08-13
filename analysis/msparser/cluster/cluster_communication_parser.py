@@ -35,7 +35,8 @@ class ClusterCommunicationParser:
         if not self._is_cluster_scene:
             print_msg(json.dumps(
                 {'status': NumberConstant.ERROR,
-                 'info': 'The collective communication could show in the scene of cluster.', 'data': ''}))
+                 'info': 'The collective communication data could be shown in the scene of cluster.', 'data': ''}))
+            return
         self._get_communication_data()
         self._storage_summary_data()
 
@@ -60,6 +61,11 @@ class ClusterCommunicationParser:
 
     def _storage_summary_data(self: any) -> None:
         if not self._data_collection:
+            print_msg(json.dumps(
+                {'status': NumberConstant.ERROR,
+                 'info': f'The collective communication data is not found, '
+                         f'maybe you can check whether the data exists in the iteration({self._iteration_id}).',
+                 'data': ''}))
             return
 
         communication_data = []
@@ -74,7 +80,10 @@ class ClusterCommunicationParser:
             print_msg(result)
         else:
             print_msg(json.dumps(
-                {'status': NumberConstant.ERROR, 'info': 'query collective communication data failed', 'data': ''}))
+                {'status': NumberConstant.ERROR,
+                 'info': f'collective communication data generation failed, '
+                         f'maybe you can check the directory({self._collection_path}) permissions.',
+                 'data': ''}))
 
     def _is_cluster_all_device_scene(self: any) -> bool:
         return self._npu_id == self.CLUSTER_ALL_DEVICE_SCENE
