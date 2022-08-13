@@ -21,7 +21,8 @@ class TestHostSyscallAnalysis(unittest.TestCase):
                 mock.patch(NAMESPACE + '.is_valid_original_data', return_value=True), \
                 mock.patch(NAMESPACE + '.logging.info', return_value=True), \
                 mock.patch('host_prof.host_cpu_usage.presenter.'
-                           'host_cpu_usage_presenter.HostCpuUsagePresenter.run'),\
+                           'host_cpu_usage_presenter.HostCpuUsagePresenter.run'), \
+                mock.patch('os.path.isfile', return_value=False), \
                 mock.patch('host_prof.host_prof_base.host_prof_presenter_base.'
                            'PathManager.get_data_file_path', return_value='test'):
             InfoConfReader()._info_json = {'pid': 2}
