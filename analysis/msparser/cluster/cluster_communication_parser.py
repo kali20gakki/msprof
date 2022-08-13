@@ -54,9 +54,6 @@ class ClusterCommunicationParser:
         with self._communication_model as _model:
             if not _model.check_db():
                 return
-            if not self._is_cluster_all_device_scene():
-                return
-
             with self._cluster_info_model as _c_model:
                 if _c_model.check_db() and _c_model.check_table():
                     rank_ids = _c_model.get_all_rank_id()

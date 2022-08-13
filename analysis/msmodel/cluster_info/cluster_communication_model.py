@@ -27,9 +27,9 @@ class ClusterCommunicationModel(ViewModel):
               "t0.iteration_time - t0.communication_time as stage_time " \
               "from (select " \
               "(case when tt.fp_bp_time = 0 then tt.iteration_time else tt.fp_bp_time end) as fp_bp_time, " \
-              "tt.iteration_time, sum(t1.end - t1.start) as communication_time," \
-              "sum(case when fp_bp_time>0 and t1.start>tt.bp_end then 0 else t1.end - t1.start end) " \
-              "as fp_bp_communication_time " \
+              "tt.iteration_time, sum(t1.all_reduce_end - t1.all_reduce_start) as communication_time," \
+              "sum(case when fp_bp_time > 0 and t1.all_reduce_start > tt.bp_end " \
+              "then 0 else t1.all_reduce_end - t1.all_reduce_start end) as fp_bp_communication_time " \
               "from {1} t1 inner join {0} tt " \
               "on t1.model_id = tt.model_id and t1.index_id = tt.iteration_id " \
               "and t1.model_id = {2} and t1.index_id = {3} " \
