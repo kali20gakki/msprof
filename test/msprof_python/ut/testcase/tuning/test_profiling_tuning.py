@@ -2,6 +2,9 @@ import os
 import unittest
 from unittest import mock
 
+import pytest
+
+from common_func.msprof_exception import ProfException
 from tuning.profiling_tuning import ProfilingTuning
 from common_func.info_conf_reader import InfoConfReader
 
@@ -26,18 +29,21 @@ class TestOperatorMetric(unittest.TestCase):
              'mte2_ratio': 0.561276, 'mte3_time': 0.126, 'mte3_ratio': 0.091371, 'icache_miss_rate': 0.000745,
              'memory_bound': '387.086897', 'core_num': 32, 'memory_workspace': 0}]
         with mock.patch(NAMESPACE + '.DataManager.get_data_by_infer_id',
-                        return_value=operator_dicts):
-            pass
-        for root, dirs, files in os.walk('test', topdown=False):
+                        return_value=operator_dicts),\
+            mock.patch('tuning.tuning_control.PathManager.get_summary_dir',
+                       return_value=os.path.join(os.path.dirname(__file__), 'test', 'summary')):
+            ProfilingTuning.tuning_operator('test', '4', '1')
+        for root, dirs, files in os.walk(os.path.join(os.path.dirname(__file__), 'test'), topdown=False):
             for name in files:
                 print(name)
                 os.remove(os.path.join(root, name))
             for name in dirs:
                 print(name)
                 os.rmdir(os.path.join(root, name))
+        os.rmdir(os.path.join(os.path.dirname(__file__), 'test'))
 
     def test_load_rules(self):
-        with mock.patch('builtins.open', side_effect=FileNotFoundError),\
+        with mock.patch('builtins.open', side_effect=FileNotFoundError), \
                 mock.patch(NAMESPACE + '.logging.error'):
             result = ProfilingTuning._load_rules()
         self.assertEqual(result, {})
@@ -54,15 +60,19 @@ class TestOperatorMetric(unittest.TestCase):
              'mte2_ratio': 0.561276, 'mte3_time': 0.126, 'mte3_ratio': 0.091371, 'icache_miss_rate': 0.000745,
              'memory_bound': '387.086897', 'core_num': 32, 'memory_workspace': 0}]
         with mock.patch(NAMESPACE + '.DataManager.get_data_by_infer_id',
-                        return_value=operator_dicts):
+                        return_value=operator_dicts), \
+                mock.patch('tuning.tuning_control.PathManager.get_summary_dir',
+                           return_value=os.path.join(os.path.dirname(__file__), 'test', 'summary')):
             pass
-        for root, dirs, files in os.walk('test', topdown=False):
+            ProfilingTuning.tuning_network('test', '4', '1')
+        for root, dirs, files in os.walk(os.path.join(os.path.dirname(__file__), 'test'), topdown=False):
             for name in files:
                 print(name)
                 os.remove(os.path.join(root, name))
             for name in dirs:
                 print(name)
                 os.rmdir(os.path.join(root, name))
+        os.rmdir(os.path.join(os.path.dirname(__file__), 'test'))
 
     def test_run(self):
         InfoConfReader()._info_json = {'devices': '4'}
