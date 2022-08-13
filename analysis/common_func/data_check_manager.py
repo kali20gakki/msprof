@@ -11,7 +11,6 @@ import os
 
 from common_func import file_name_manager
 from common_func.constant import Constant
-from common_func.file_manager import check_path_valid
 from common_func.os_manager import check_dir_readable
 from common_func.path_manager import PathManager
 
@@ -75,12 +74,3 @@ class DataCheckManager:
                 split_list[cls.DEVICE_ID_INDEX] == device_id:
             return True
         return False
-
-    @staticmethod
-    def process_check(path: str) -> bool:
-        """
-        check result whether the path is JOB dir
-        path : result path
-        """
-        check_path_valid(path, False)
-        return DataCheckManager.contain_info_json_data(path)
