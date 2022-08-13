@@ -71,7 +71,7 @@ class MsProfClusterInfo:
             DBManager.destroy_db_connect(conn, curs)
             return
         for rank_id in rank_ids:
-            step_trace_table = "step_trace_{}".format(rank_id)
+            step_trace_table = DBNameConstant.TABLE_CLUSTER_STEP_TRACE.format(rank_id)
             if not DBManager.judge_table_exist(curs, step_trace_table):
                 continue
             sql_for_total_iterations = "select model_id, max(iteration_id) " \

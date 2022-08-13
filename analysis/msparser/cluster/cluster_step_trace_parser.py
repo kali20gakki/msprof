@@ -33,7 +33,56 @@ class ClusterStepTraceParser(IParser):
         self.collection_path = collection_path
         self.id_with_project_path_map = {}
         self.id_with_table_map = {}
+        self.id_with_all_reduce_map = {}
         self.cluster_model = None
+
+    @staticmethod
+    def _fetch_data_from_database(db_dir: str, db_name: str, db_table: str, sql: str) -> list:
+        data = []
+        db_path = PathManager.get_db_path(db_dir, db_name)
+        conn, curs = DBManager.check_connect_db_path(db_path)
+        if not conn or not curs:
+            DBManager.destroy_db_connect(conn, curs)
+            logging.error("The connect to %s is failed.", db_name)
+            return data
+        if not DBManager.judge_table_exist(curs, db_table):
+            DBManager.destroy_db_connect(conn, curs)
+            logging.error("The %s table doesn't exist.", db_table)
+            return data
+        data = DBManager.fetch_all_data(curs, sql)
+        DBManager.destroy_db_connect(conn, curs)
+        return data
+
+    @staticmethod
+    def _sql_for_step_trace() -> str:
+        sql = "select device_id, " \
+              "model_id, " \
+              "iteration_id, " \
+              "(case when FP_start={1} then {1} else FP_start*{2} end), " \
+              "(case when BP_end={1} then {1} else BP_end*{2} end), " \
+              "(case when iteration_end={1} then {1} else iteration_end*{2} end), " \
+              "(case when iteration_time={1} then {1} else iteration_time*{2} end), " \
+              "(case when fp_bp_time={1} then {1} else fp_bp_time*{2} end), " \
+              "(case when grad_refresh_bound={1} then {1} else grad_refresh_bound*{2} end), " \
+              "(case when data_aug_bound={1} then {1} else data_aug_bound*{2} end) " \
+              "from {3}".format(
+            NumberConstant.DEFAULT_MODEL_ID,
+            NumberConstant.NULL_NUMBER,
+            StepTraceConstant.syscnt_to_micro(),
+            DBNameConstant.TABLE_TRAINING_TRACE)
+        return sql
+
+    @staticmethod
+    def _append_ge_model_tag(step_trace_data: list, model_ids: list) -> list:
+        result = []
+        for item in step_trace_data:
+            item = list(item)
+            if item[ClusterStepTraceParser.MODEL_ID_INDEX] in model_ids:
+                item.append(ClusterStepTraceParser.MODEL_ID_IN_GE)
+            else:
+                item.append(ClusterStepTraceParser.MODEL_ID_NOT_IN_GE)
+            result.append(item)
+        return result
 
     def ms_run(self: any) -> None:
         logging.info("Start to parse cluster step_trace data!")
@@ -64,8 +113,10 @@ class ClusterStepTraceParser(IParser):
     def _run_cluster_step_trace_model(self: any) -> bool:
         rank_ids = list(self.id_with_project_path_map.keys())
         for rank_id in rank_ids:
-            self.id_with_table_map.setdefault(rank_id, "step_trace_{}".format(rank_id))
-        with ClusterStepTraceModel(self.collection_path, self.id_with_table_map.values()) as cluster_model:
+            self.id_with_table_map.setdefault(rank_id, DBNameConstant.TABLE_CLUSTER_STEP_TRACE.format(rank_id))
+            self.id_with_all_reduce_map.setdefault(rank_id, DBNameConstant.TABLE_CLUSTER_ALL_REDUCE.format(rank_id))
+        all_tables = list(self.id_with_table_map.values()) + list(self.id_with_all_reduce_map.values())
+        with ClusterStepTraceModel(self.collection_path, all_tables) as cluster_model:
             cluster_model.create_table()
             self._collect_and_save_step_trace_data(cluster_model)
 
@@ -97,10 +148,26 @@ class ClusterStepTraceParser(IParser):
             InfoConfReader().load_info(project_path)
             if InfoConfReader().is_host_profiling():
                 continue
+
+            logging.debug(f"Start to process the table of step trace,table_name: {self.id_with_table_map.get(rank_id)}")
             step_trace_data = self._collect_step_trace_data(project_path)
             if not step_trace_data:
                 continue
             cluster_model.insert_data_to_db(self.id_with_table_map.get(rank_id), step_trace_data)
+
+            logging.debug(f"Start to process the table of all reduce, "
+                          f"table_name: {self.id_with_all_reduce_map.get(rank_id)}")
+            all_reduce_data = self._collect_all_reduce_data(project_path)
+            if not all_reduce_data:
+                continue
+            cluster_model.insert_data_to_db(self.id_with_all_reduce_map.get(rank_id), all_reduce_data)
+
+    def _collect_all_reduce_data(self: any, project_path: str) -> list:
+        sql = "select device_id,model_id,index_id,iteration_end,start*{syscnt_to_micro},end*{syscnt_to_micro} " \
+              "from {0}".format(DBNameConstant.TABLE_ALL_REDUCE,
+                                syscnt_to_micro=StepTraceConstant.syscnt_to_micro())
+        return self._fetch_data_from_database(project_path, DBNameConstant.DB_TRACE,
+                                              DBNameConstant.TABLE_ALL_REDUCE, sql)
 
     def _collect_step_trace_data(self: any, project_path: str) -> list:
         sql_for_ge_model_ids = "select distinct model_id from {}".format(DBNameConstant.TABLE_GE_TASK)
@@ -115,48 +182,3 @@ class ClusterStepTraceParser(IParser):
             return step_trace_data
         step_trace_data = self._append_ge_model_tag(step_trace_data, model_ids)
         return step_trace_data
-
-    def _fetch_data_from_database(self: any, db_dir: str, db_name: str, db_table: str, sql: str) -> list:
-        data = []
-        db_path = PathManager.get_db_path(db_dir, db_name)
-        conn, curs = DBManager.check_connect_db_path(db_path)
-        if not conn or not curs:
-            DBManager.destroy_db_connect(conn, curs)
-            logging.error("The connect to %s is failed.", db_name)
-            return data
-        if not DBManager.judge_table_exist(curs, db_table):
-            DBManager.destroy_db_connect(conn, curs)
-            logging.error("The %s table doesn't exist.", db_table)
-            return data
-        data = DBManager.fetch_all_data(curs, sql)
-        DBManager.destroy_db_connect(conn, curs)
-        return data
-
-    def _sql_for_step_trace(self: any) -> str:
-        sql = "select device_id, " \
-              "model_id, " \
-              "iteration_id, " \
-              "(case when FP_start={1} then {1} else FP_start*{2} end), " \
-              "(case when BP_end={1} then {1} else BP_end*{2} end), " \
-              "(case when iteration_end={1} then {1} else iteration_end*{2} end), " \
-              "(case when iteration_time={1} then {1} else iteration_time*{2} end), " \
-              "(case when fp_bp_time={1} then {1} else fp_bp_time*{2} end), " \
-              "(case when grad_refresh_bound={1} then {1} else grad_refresh_bound*{2} end), " \
-              "(case when data_aug_bound={1} then {1} else data_aug_bound*{2} end) " \
-              "from {3}".format(
-            NumberConstant.DEFAULT_MODEL_ID,
-            NumberConstant.NULL_NUMBER,
-            StepTraceConstant.syscnt_to_micro(),
-            DBNameConstant.TABLE_TRAINING_TRACE)
-        return sql
-
-    def _append_ge_model_tag(self: any, step_trace_data: list, model_ids: list) -> list:
-        result = []
-        for item in step_trace_data:
-            item = list(item)
-            if item[ClusterStepTraceParser.MODEL_ID_INDEX] in model_ids:
-                item.append(ClusterStepTraceParser.MODEL_ID_IN_GE)
-            else:
-                item.append(ClusterStepTraceParser.MODEL_ID_NOT_IN_GE)
-            result.append(item)
-        return result
