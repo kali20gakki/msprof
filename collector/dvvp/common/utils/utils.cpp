@@ -1409,7 +1409,7 @@ int Utils::CloudAnalyze(const std::string &jobDir)
         msprofPyPath,
         "import", "-dir=" + jobDir
     };
-    std::vector<std::string> varVec = {"PATH", "LD_LIBRARY_PATH"};
+    std::vector<std::string> varVec = {"PATH", "LD_LIBRARY_PATH", "PYTHONPATH"};
     std::vector<std::string> envsVec = GenEnvPairVec(varVec);
     int ret = ExecCmd(execCmdParams, argsImportV, envsVec, exitCode, taskPid);
     if (ret != PROFILING_SUCCESS) {
