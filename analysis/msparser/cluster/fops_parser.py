@@ -159,10 +159,10 @@ class FopsParser:
         sorted_data = sorted(zip(op_type_dict.keys(), op_type_dict.values()), key=lambda x: sum(x[1]), reverse=True)
         res_list = [{'total_fops_info': {
             "total_fops": total_fops,
-            "total_time": round(total_times, 6),
-            "total_fops_speed": round(total_fops / total_times * self.BUS_TO_GS, 6),
+            "total_time": round(total_times, NumberConstant.DECIMAL_ACCURACY),
+            "total_fops_speed": round(total_fops / total_times * self.BUS_TO_GS, NumberConstant.DECIMAL_ACCURACY),
             "total_op_count": len(data_list),
-            "total_fops_avg": round(total_fops / len(data_list), 6)
+            "total_fops_avg": round(total_fops / len(data_list), NumberConstant.DECIMAL_ACCURACY)
         }}]
         other_fops_ratio, other_op_count, other_fops = 0, 0, 0
         detail_list = []
