@@ -22,4 +22,5 @@ class TestDiskUsageAnalysis(unittest.TestCase):
                            'host_cpu_usage_presenter.HostCpuUsagePresenter.run'),\
                 mock.patch('host_prof.host_prof_base.host_prof_presenter_base.'
                            'PathManager.get_data_file_path', return_value='test'):
-            DiskUsageAnalysis({'result': 'test'})
+            check = DiskUsageAnalysis({'result': 'test'})
+            check.ms_run()

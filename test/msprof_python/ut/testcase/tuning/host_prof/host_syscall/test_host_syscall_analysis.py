@@ -25,4 +25,5 @@ class TestHostSyscallAnalysis(unittest.TestCase):
                 mock.patch('host_prof.host_prof_base.host_prof_presenter_base.'
                            'PathManager.get_data_file_path', return_value='test'):
             InfoConfReader()._info_json = {'pid': 2}
-            HostSyscallAnalysis({'result': 'test'})
+            check = HostSyscallAnalysis({'result': 'test'})
+            check.ms_run()
