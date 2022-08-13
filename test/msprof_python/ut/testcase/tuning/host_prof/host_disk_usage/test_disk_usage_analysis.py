@@ -18,8 +18,8 @@ class TestDiskUsageAnalysis(unittest.TestCase):
                            return_value=True), \
                 mock.patch('os.listdir', return_value=['host_disk.data.slice_0']), \
                 mock.patch(NAMESPACE + '.is_valid_original_data', return_value=True), \
-                mock.patch('host_prof.host_cpu_usage.presenter.'
-                           'host_cpu_usage_presenter.HostCpuUsagePresenter.run'),\
+                mock.patch(NAMESPACE + '.HostDiskUsagePresenter.run'),\
                 mock.patch('host_prof.host_prof_base.host_prof_presenter_base.'
                            'PathManager.get_data_file_path', return_value='test'):
-            DiskUsageAnalysis({'result': 'test'})
+            check = DiskUsageAnalysis({'result': 'test'})
+            check.ms_run()
