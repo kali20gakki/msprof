@@ -261,20 +261,6 @@ class ExportCommand:
         init_result = (init_success, sql, conn, curs)
         return init_result
 
-<<<<<<< HEAD:analysis/ms_interface/msprof_export.py
-    def process_sub_dirs(self: any) -> None:
-        sub_dirs = get_path_dir(self.collection_path)
-        for sub_dir in sub_dirs:
-            if sub_dir == StrConstant.TIMELINE_PATH:
-                continue
-            sub_path = os.path.realpath(
-                os.path.join(self.collection_path, sub_dir))
-            if DataCheckManager.process_check(sub_path):
-                self._process_sub_dirs()
-                break
-            else:
-                self._process_sub_dirs(sub_dir)
-=======
     @staticmethod
     def _set_default_model_id(result_dir, model_match_set):
         conn, curs = DBManager.check_connect_db(result_dir, DBNameConstant.DB_STEP_TRACE)
@@ -285,7 +271,6 @@ class ExportCommand:
                                  key=itemgetter(1, 0))
         DBManager.destroy_db_connect(conn, curs)
         return model_and_index.pop()[0] if model_and_index else min(model_match_set)
->>>>>>> upstream/master:analysis/msinterface/msprof_export.py
 
     def check_argument_valid(self: any) -> None:
         """
@@ -310,7 +295,7 @@ class ExportCommand:
             self._handle_export(os.path.realpath(self.collection_path))
             self._show_tuning_result(os.path.realpath(self.collection_path))
         else:
-            self.process_sub_dirs()
+            self._process_sub_dirs()
             if self._cluster_params.get('is_cluster_scene', False):
                 self._show_cluster_tuning()
 
@@ -537,29 +522,31 @@ class ExportCommand:
             return
         ClusterTuning(self._cluster_params.get('cluster_path')).run()
 
-    def _update_cluster_params(self: any, sub_path: str, is_cluster: bool=False) -> None:
+    def _update_cluster_params(self: any, sub_path: str, is_cluster: bool) -> None:
         if is_cluster:
             self._cluster_params['is_cluster_scene'] = True
             self._cluster_params.setdefault('cluster_path', []).append(sub_path)
 
-    def _process_sub_dirs(self: any, subdir: str = '') -> None:
+    def _process_sub_dirs(self: any, sub_path: str = '', is_cluster: bool = False) -> None:
         collect_path = self.collection_path
-        if subdir:
-            collect_path = os.path.join(self.collection_path, subdir)
+        if sub_path:
+            collect_path = os.path.join(self.collection_path, sub_path)
         sub_dirs = get_path_dir(collect_path)
         for sub_dir in sub_dirs:  # result_dir
-            if sub_dir == StrConstant.TIMELINE_PATH:
-                continue
-            sub_path = os.path.realpath(
-                os.path.join(collect_path, sub_dir))
-            if DataCheckManager.process_check(sub_path):
-                self._update_cluster_params(sub_path, bool(subdir))
-                InfoConfReader().load_info(sub_path)
-                self._handle_export(sub_path)
-                self._show_tuning_result(sub_path)
-            else:
-                warn(self.FILE_NAME, 'Invalid parsing dir("%s"), -dir must be profiling data dir '
-                                     'such as PROF_XXX_XXX_XXX' % collect_path)
-            self.list_map['devices_list'] = ''
+            if sub_dir != StrConstant.TIMELINE_PATH:
+                sub_path = os.path.realpath(
+                    os.path.join(collect_path, sub_dir))
+                check_path_valid(sub_path, False)
+                if DataCheckManager.contain_info_json_data(sub_path):
+                    self._update_cluster_params(sub_path, is_cluster)
+                    InfoConfReader().load_info(sub_path)
+                    self._handle_export(sub_path)
+                    self._show_tuning_result(sub_path)
+                elif sub_path and is_cluster:
+                    warn(self.FILE_NAME, 'Invalid parsing dir("%s"), -dir must be profiling data dir '
+                                         'such as PROF_XXX_XXX_XXX' % collect_path)
+                else:
+                    self._process_sub_dirs(sub_dir, is_cluster=True)
+                self.list_map['devices_list'] = ''
         job_summary = MsprofJobSummary(collect_path)
         job_summary.export()
