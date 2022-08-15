@@ -6,6 +6,7 @@ Copyright Huawei Technologies Co., Ltd. 2021. All rights reserved.
 """
 
 from common_func.db_name_constant import DBNameConstant
+from common_func.db_manager import DBManager
 from msmodel.interface.parser_model import ParserModel
 
 
@@ -25,3 +26,14 @@ class AiCpuModel(ParserModel):
         :return:
         """
         self.insert_data_to_db(ai_cpu_table_name, data_list)
+
+    def create_table(self: any) -> None:
+        """
+        create table
+        """
+        for table_name in self.table_list:
+            if DBManager.judge_table_exist(self.cur, table_name):
+                self.drop_table(table_name)
+            table_map = "{0}Map".format(table_name)
+            sql = DBManager.sql_create_general_table(table_map, table_name, self.TABLES_PATH)
+            DBManager.execute_sql(self.conn, sql)
