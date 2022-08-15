@@ -51,7 +51,7 @@ set(profilerSrcList
 	${MSPROF_SOURCE_DIR}/dvvp/msprof/platform/mini/data_dumper.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/msprof/msproftx/src/msprof_tx_manager.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/msprof/msproftx/src/msprof_tx_reporter.cpp
-	${MSPROF_SOURCE_DIR}/dvvp/msprof/msproftx/src/prof_stamp_pool.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/msprof/msproftx/src/msprof_stamp_pool.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/msprofiler/src/command_handle.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/msprofiler/src/msprof_callback_impl.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/msprofiler/src/command_handle.cpp
@@ -230,7 +230,7 @@ add_executable(msprof_utest
     ${MSPROF_SOURCE_DIR}/dvvp/msprof/common/src/receive_data.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/msprof/msproftx/src/msprof_tx_manager.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/msprof/msproftx/src/msprof_tx_reporter.cpp
-    ${MSPROF_SOURCE_DIR}/dvvp/msprof/msproftx/src/prof_stamp_pool.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/msprof/msproftx/src/msprof_stamp_pool.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/msprof/platform/mini/data_dumper.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/streamio/client/src/sender.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/transport/hdc/hdc_transport.cpp

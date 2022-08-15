@@ -112,7 +112,7 @@
     do {                             \
         free(buf);                   \
         buf = nullptr;               \
-    } while(0)                       \
+    } while(0)
 
 namespace Collector {
 namespace Dvvp {

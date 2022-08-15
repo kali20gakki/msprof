@@ -86,7 +86,7 @@ public:
     int Process() override;
     int Uninit() override;
 
-public :
+public:
     bool IsGlobalJobLevel() override;
 
 private:

@@ -22,11 +22,7 @@ using ProfSetProfCommandFunc = std::function<int32_t(PROFAPI_PROF_COMMAND_PTR, u
 using ProfSetStepInfoFunc = std::function<int32_t(uint64_t, uint16_t, void*)>;             // profSetStepInfo
 class ProfApiPlugin : public analysis::dvvp::common::singleton::Singleton<ProfApiPlugin> {
 public:
-    ProfApiPlugin()
-     : soName_("libprofapi.so"),
-       pluginHandle_(PluginHandle(soName_)),
-       loadFlag_(0)
-    {}
+    ProfApiPlugin() : soName_("libprofapi.so"), pluginHandle_(PluginHandle(soName_)), loadFlag_(0) {}
 
     bool IsFuncExist(const std::string &funcName) const;
 

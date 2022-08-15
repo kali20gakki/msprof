@@ -36,5 +36,3 @@ private:
 }  // namespace analysis
 
 #endif  // ANALYSIS_DVVP_COMMON_HDC_SENDER_H
-
-
