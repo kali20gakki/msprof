@@ -315,7 +315,7 @@ using Status = uint32_t;
                               (static_cast<uint32_t>(0xFFU & (static_cast<uint32_t>(level))) << 25U) |   \
                               (static_cast<uint32_t>(0xFFU & (static_cast<uint32_t>(sysid))) << 17U) |   \
                               (static_cast<uint32_t>(0xFFU & (static_cast<uint32_t>(modid))) << 12U) |   \
-                              (static_cast<uint32_t>(0x0FFFU) & (static_cast<uint32_t>(value)));
+                              (static_cast<uint32_t>(0x0FFFU) & (static_cast<uint32_t>(value)))
 
     GE_ERRORNO(0, 0, 0, 0, 0, SUCCESS, 0, "success");
     GE_ERRORNO(0b11, 0b11, 0b111, 0xFFU, 0b11111, FAILED, 0xFFFU, "failed"); /*lint !e401*/

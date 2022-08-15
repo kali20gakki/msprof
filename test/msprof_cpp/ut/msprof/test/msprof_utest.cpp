@@ -18,7 +18,7 @@
 #include "proto/profiler.pb.h"
 #include "proto/profiler_ext.pb.h"
 #include "uploader_mgr.h"
-#include "prof_stamp_pool.h"
+#include "msprof_stamp_pool.h"
 #define private public
 #include "msprof_tx_manager.h"
 

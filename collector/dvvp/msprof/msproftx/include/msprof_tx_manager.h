@@ -14,7 +14,7 @@
 #include "utils.h"
 #include "common/singleton/singleton.h"
 #include "msprof_tx_reporter.h"
-#include "prof_stamp_pool.h"
+#include "msprof_stamp_pool.h"
 
 namespace Msprof {
 namespace MsprofTx {
@@ -76,10 +76,6 @@ private:
     std::shared_ptr<MsprofStampPool> stampPool_;
     std::map<uint32_t, std::string> categoryNameMap_;
 };
-
 }
 }
-
-
-
 #endif //PROFILER_MSPROFTXMANAGER_H

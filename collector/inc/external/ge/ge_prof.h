@@ -1,7 +1,7 @@
 /**
 * @file ge_prof.h
 *
-* Copyright (C) Huawei Technologies Co., Ltd. 2019-2021. All Rights Reserved.
+* Copyright (c) Huawei Technologies Co., Ltd. 2019-2021. All rights reserved.
 *
 * This program is distributed in the hope that it will be useful,
 * but WITHOUT ANY WARRANTY; without even the implied warranty of

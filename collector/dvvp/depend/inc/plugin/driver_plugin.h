@@ -23,7 +23,7 @@ using HalGetChipInfoFunc = std::function<drvError_t(unsigned int, halChipInfo *)
 using HalGetDeviceInfoFunc = std::function<drvError_t(uint32_t, int32_t, int32_t, int64_t *)>;
 using HalProfDataFlushFunc = std::function<int(unsigned int, unsigned int, unsigned int *)>;
 using ProfDrvGetChannelsFunc = std::function<int(unsigned int, channel_list_t *)>;
-using ProfDrvStartFunc = std::function<int(unsigned int, unsigned int, struct prof_start_para *)>; 
+using ProfDrvStartFunc = std::function<int(unsigned int, unsigned int, struct prof_start_para *)>;
 using ProfStopFunc = std::function<int(unsigned int, unsigned int)>;
 using ProfChannelReadFunc = std::function<int(unsigned int, unsigned int, char *, unsigned int)>;
 using ProfChannelPollFunc = std::function<int(struct prof_poll_info *, int, int)>;
@@ -46,11 +46,7 @@ using DrvHdcSessionCloseFunc = std::function<drvError_t(HDC_SESSION)>;
 using DrvHdcGetCapacityFunc = std::function<drvError_t(struct drvHdcCapacity *)>;
 class DriverPlugin : public analysis::dvvp::common::singleton::Singleton<DriverPlugin> {
 public:
-    DriverPlugin()
-     :soName_("libascend_hal.so"),
-      pluginHandle_(PluginHandle(soName_)),
-      loadFlag_(0)
-    {}
+    DriverPlugin() : soName_("libascend_hal.so"), pluginHandle_(PluginHandle(soName_)), loadFlag_(0) {}
 
     bool IsFuncExist(const std::string &funcName) const;
 

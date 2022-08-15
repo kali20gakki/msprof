@@ -28,11 +28,11 @@ using namespace analysis::dvvp::transport;
 typedef analysis::dvvp::common::queue::BoundQueue<SHARED_PTR_ALIA<File>> FileQueue;
 
 struct data_chunk {
-    char*  relativeFileName;// from subpath begin; For example: subA/subB/example.txt; Note: the begin don't has '/';
-    unsigned char*  dataBuf;// the pointer to the data
-    unsigned int    bufLen;// the len of dataBuf
-    unsigned int    isLastChunk;// = 1, the last chunk of the file; != 1, not the last chunk of the file
-    long long       offset;// the begin location of the file to write; if the offset is -1, directly append data.
+    char*  relativeFileName; // from subpath begin; For example: subA/subB/example.txt; Note: the begin don't has '/';
+    unsigned char*  dataBuf; // the pointer to the data
+    unsigned int    bufLen; // the len of dataBuf
+    unsigned int    isLastChunk; // = 1, the last chunk of the file; != 1, not the last chunk of the file
+    long long       offset; // the begin location of the file to write; if the offset is -1, directly append data.
 };
 
 class Sender : public analysis::dvvp::common::thread::Task, public std::enable_shared_from_this<Sender> {
