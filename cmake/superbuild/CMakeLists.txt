@@ -43,7 +43,7 @@ target_link_options(c_sec PRIVATE
 set_target_properties(c_sec
     PROPERTIES
     OUTPUT_NAME c_sec
-    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/securec_shared
+    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_INSTALL_PREFIX}/securec_shared
 )
 
 install(TARGETS c_sec OPTIONAL
@@ -56,6 +56,7 @@ ExternalProject_Add(msprof
                 -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
                 -DCMAKE_BUILD_TYPE=${MSPROF_BUILD_TYPE}
                 -DCMAKE_EXPORT_COMPILE_COMMANDS=1
+                -DSECUREC_LIB_DIR=${CMAKE_INSTALL_PREFIX}/securec_shared
                 <SOURCE_DIR>
     BUILD_COMMAND $(MAKE)
     DEPENDS protoc_build ascend_protobuf_shared_build ascend_protobuf_static_build c_sec

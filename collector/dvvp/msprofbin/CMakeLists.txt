@@ -130,6 +130,10 @@ target_link_options(msprofbin PRIVATE
     $<$<NOT:$<STREQUAL:${CMAKE_BUILD_TYPE},Debug>>:-s>
 )
 
+target_link_directories(msprofbin PRIVATE
+    ${SECUREC_LIB_DIR}
+)
+
 target_link_libraries(msprofbin PRIVATE
     c_sec
     ascend_protobuf_static
