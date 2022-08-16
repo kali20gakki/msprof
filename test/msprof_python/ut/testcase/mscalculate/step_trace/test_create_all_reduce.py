@@ -63,8 +63,5 @@ class TestCreateStepTraceData(unittest.TestCase):
     def test_run(self):
         sample_config = {"result_dir": "./"}
         CreateAllReduce.run(sample_config, A)
-        self.assertEqual(CreateAllReduce.data,
-                         [[None, 1, 7, 4, 6], [None, 1, 12, 8, 10], [None, 1, 24, 23, None]])
-
-
-
+        self.assertEqual([[None, 1, 1, 7, 4, 6], [None, 1, 2, 12, 8, 10], [None, 1, 5, 24, 23, None]],
+                         CreateAllReduce.data)

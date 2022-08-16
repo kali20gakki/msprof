@@ -41,7 +41,7 @@ class MsprofEntrance:
     @staticmethod
     def _handle_query_command(parser: any, args: any) -> None:
         _ = parser
-        query_command = QueryCommand(args.collection_path)
+        query_command = QueryCommand(args)
         query_command.process()
 
     @staticmethod
@@ -52,7 +52,7 @@ class MsprofEntrance:
     @staticmethod
     def _handle_import_command(parser: any, args: any) -> None:
         _ = parser
-        import_command = ImportCommand(args.collection_path)
+        import_command = ImportCommand(args)
         import_command.process()
 
     def main(self: any) -> None:
@@ -118,6 +118,18 @@ class MsprofEntrance:
 
     def _query_parser(self: any, query_parser: any) -> None:
         self._add_collect_path_argument(query_parser)
+        query_parser.add_argument(
+            '--id', dest='id', default=None, metavar='<id>',
+            type=int, help='<Optional> the npu device ID')
+        query_parser.add_argument(
+            '--data-type', dest='data_type', default=None, metavar='<data_type>',
+            type=int, help='<Optional> the data type which want to query')
+        query_parser.add_argument(
+            '--model-id', dest='model_id', default=None, metavar='<model_id>',
+            type=int, help='<Optional> the model ID')
+        query_parser.add_argument(
+            '--iteration-id', dest='iteration_id', default=None, metavar='<iteration_id>',
+            type=int, help='<Optional> the iteration ID')
 
     def _add_export_argument(self: any, parser: any) -> None:
         self._add_collect_path_argument(parser)
@@ -144,6 +156,10 @@ class MsprofEntrance:
 
     def _import_parser(self: any, import_parser: any) -> None:
         self._add_collect_path_argument(import_parser)
+        import_parser.add_argument(
+            '--cluster', dest='cluster_flag',
+            action='store_true', default=False,
+            help='<Optional> the cluster scence flag')
 
     def _monitor_parser(self: any, monitor_parser: any) -> None:
         self._add_collect_path_argument(monitor_parser)

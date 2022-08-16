@@ -140,7 +140,7 @@ const mmStructOption longOptions[] = {
     {"l2", mm_optional_argument, nullptr, ARGS_L2_PROFILING},
     {"parse", mm_optional_argument, nullptr, ARGS_PARSE},
     {"query", mm_optional_argument, nullptr, ARGS_QUERY},
-    {"export ", mm_optional_argument, nullptr, ARGS_EXPORT},
+    {"export", mm_optional_argument, nullptr, ARGS_EXPORT},
     // number
     {"aic-freq", mm_optional_argument, nullptr, ARGS_AIC_FREQ},
     {"aiv-freq", mm_optional_argument, nullptr, ARGS_AIV_FREQ},

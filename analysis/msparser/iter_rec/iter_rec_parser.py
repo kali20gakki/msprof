@@ -147,6 +147,8 @@ class IterParser(IParser, MsMultiProcess):
             with FileOpen(_hwts_file, 'rb') as _hwts_file_reader:
                 all_bytes = _offset_calculator.pre_process(_hwts_file_reader.file_reader, os.path.getsize(_hwts_file))
                 self._read_hwts_data(all_bytes)
+        if self._overstep_task_cnt > 0:
+            logging.warning("HWTS overstep task number is %s", self._overstep_task_cnt)
 
 
 class IterRecParser(IterParser):

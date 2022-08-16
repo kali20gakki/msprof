@@ -457,10 +457,8 @@ public:
     static void RemoveDir(const std::string &dir, bool rmTopDir = true);
     static std::string CanonicalizePath(const std::string &path);
     static int ExecCmd(const ExecCmdParams &execCmdParams,
-        const std::vector<std::string> &argv,
-        const std::vector<std::string> &envp,
-        int &exitCodeP,
-        mmProcess &childProcess);
+        const std::vector<std::string> &argv, const std::vector<std::string> &envp,
+        int &exitCodeP, mmProcess &childProcess);
     static int ExecCmdC(const ExecCmdArgv &execCmdArgv, const ExecCmdParams &execCmdParams, int &exitCodeP);
     static int ExecCmdCAsync(const ExecCmdArgv &execCmdArgv, const ExecCmdParams &execCmdParams,
                              mmProcess &childProcess);
@@ -524,6 +522,12 @@ public:
         return ret;
     }
     static bool IsAppName(const std::string paramsName);
+    static bool IsClusterRunEnv();
+    static int32_t GetRankId();
+    static std::vector<std::string> GenEnvPairVec(const std::vector<std::string> &envVec);
+    static bool PythonEnvReady();
+    static bool AnalysisEnvReady(std::string &msprofPyPath);
+    static int CloudAnalyze(const std::string &jobDir);
 };
 
 template<class T>
