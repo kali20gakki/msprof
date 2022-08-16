@@ -196,9 +196,9 @@ class FopsParser:
         entrance for calculating fops data
         :return: None or dict
         """
-        if self.rank_id is None or self.model_id is None or self.iter_id is None:
+        if list(filter(lambda x: x is None, [self.rank_id, self.model_id, self.iter_id])):
             warn(self.FILE_NAME,
-                 "Parameter setting is missing, querying fops data requires all parameters")
+                 "To query fops data,  id, model-id and iteration-id are required")
             return
         self.calculate()
 
