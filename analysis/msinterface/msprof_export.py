@@ -11,6 +11,7 @@ import json
 import logging
 import os
 import sqlite3
+from operator import itemgetter
 
 from analyzer.data_analysis_factory import DataAnalysisFactory
 from analyzer.scene_base.profiling_scene import ProfilingScene
@@ -260,6 +261,17 @@ class ExportCommand:
         init_result = (init_success, sql, conn, curs)
         return init_result
 
+    @staticmethod
+    def _set_default_model_id(result_dir, model_match_set):
+        conn, curs = DBManager.check_connect_db(result_dir, DBNameConstant.DB_STEP_TRACE)
+        if not (conn and curs):
+            return min(model_match_set)
+        sql = "select model_id, max(index_id) from {} group by model_id".format(DBNameConstant.TABLE_STEP_TRACE_DATA)
+        model_and_index = sorted(filter(lambda x: x[0] in model_match_set, DBManager.fetch_all_data(curs, sql)),
+                                 key=itemgetter(1, 0))
+        DBManager.destroy_db_connect(conn, curs)
+        return model_and_index.pop()[0] if model_and_index else min(model_match_set)
+
     def check_argument_valid(self: any) -> None:
         """
         Check the argument valid
@@ -367,7 +379,7 @@ class ExportCommand:
             logging.warning("ge step info data miss model id.")
 
         if not self.list_map.get(self.INPUT_MODEL_ID):
-            self.list_map[self.MODEL_ID] = min(model_match_set)
+            self.list_map[self.MODEL_ID] = self._set_default_model_id(result_dir, model_match_set)
             if Utils.is_single_op_graph_mix(result_dir):
                 self.list_map[self.MODEL_ID] = Constant.GE_OP_MODEL_ID
             return

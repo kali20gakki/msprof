@@ -9,6 +9,7 @@ Huawei Technologies Co., Ltd. All Rights Reserved © 2021
 import logging
 import sqlite3
 from collections import OrderedDict
+from itertools import chain
 
 from analyzer.scene_base.profiling_scene import ProfilingScene
 from common_func.constant import Constant
@@ -30,12 +31,12 @@ class MsprofIteration:
         self._result_dir = result_dir
 
     @staticmethod
-    def _generate_trace_result(trace_datas: list) -> list:
+    def _generate_trace_result(trace_datas: list, time_fmt: int = NumberConstant.MICRO_SECOND) -> list:
+        trace_datas = list(chain.from_iterable(trace_datas))
         if not trace_datas:
             return []
-        result = [(trace_datas[0][0], trace_datas[1][0])] if len(trace_datas) == 2 else [(0, trace_datas[0][0])]
-        result = [(InfoConfReader().time_from_syscnt(result[0][0], NumberConstant.MICRO_SECOND),
-                   InfoConfReader().time_from_syscnt(result[0][1], NumberConstant.MICRO_SECOND))]
+        trace_datas = [InfoConfReader().time_from_syscnt(timestamp, time_fmt) for timestamp in trace_datas]
+        result = [(0, max(trace_datas))] if len(trace_datas) == 1 else [(min(trace_datas), max(trace_datas))]
         return result
 
     @staticmethod
@@ -45,15 +46,17 @@ class MsprofIteration:
             iter_end_dict.setdefault(trace_data[0], trace_data[1])
         return iter_end_dict
 
-    def get_iteration_time(self: any, index_id: int, model_id: int) -> list:
+    def get_iteration_time(self: any, index_id: int, model_id: int,
+                           time_fmt: int = NumberConstant.MICRO_SECOND) -> list:
         """
         get iteration start and end timestamp
         :param index_id: index id
         :param model_id: model id
+        :param time_fmt: timestamp format
         :return: iteration list
         """
         if Utils.is_step_scene(self._result_dir):
-            return self._generate_trace_result(self.get_step_iteration_time(index_id, model_id))
+            return self._generate_trace_result(self.get_step_iteration_time(index_id, model_id), time_fmt)
         return []
 
     def get_step_iteration_time(self: any, index_id: int, model_id: int) -> list:
@@ -214,6 +217,17 @@ class MsprofIteration:
         if iter_info:
             return iter_info[0]
         return iter_info
+
+    def get_condition_within_iteration(self: any, index_id: int, model_id: int, time_start_key: str, time_end_key: str):
+        """
+        get the condition for sql that data should be within iteration_id.
+        """
+        iter_range = self.get_iteration_time(index_id, model_id, time_fmt=NumberConstant.NANO_SECOND)
+        if not iter_range:
+            return ''
+        iter_start, iter_end = iter_range[0]
+        return f'where ({time_start_key}>={iter_start} and {time_start_key}<={iter_end}) ' \
+               f'or ({time_start_key}<={iter_start} and {iter_start}<={time_end_key})'
 
     def _get_iteration_time(self: any, trace_curs: any, index_id: int, model_id: int) -> list:
         iter_id = self.get_iteration_id_by_index_id(index_id, model_id)

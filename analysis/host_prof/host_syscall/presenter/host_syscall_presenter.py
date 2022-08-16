@@ -10,6 +10,7 @@ import os
 import re
 import time
 
+import msmodel.runtime.runtime_api_model
 from common_func.constant import Constant
 from common_func.empty_class import EmptyClass
 from common_func.file_name_manager import get_file_name_pattern_match

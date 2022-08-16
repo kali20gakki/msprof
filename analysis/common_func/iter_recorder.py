@@ -19,6 +19,7 @@ class IterRecorder:
 
     STREAM_TASK_KEY_FMT = "{0}-{1}"
     DEFAULT_ITER_ID = -1
+    DEFAULT_ITER_TIME = -1
 
     def __init__(self: any, project_path) -> None:
         self._project_path = project_path
@@ -57,7 +58,7 @@ class IterRecorder:
         return self._current_op_iter
 
     def check_task_in_iteration(self: any, sys_cnt: int) -> bool:
-        if self._max_iter_time == self.DEFAULT_ITER_ID:
+        if self._max_iter_time == self.DEFAULT_ITER_TIME:
             return True
         return self._max_iter_time >= sys_cnt
 
@@ -116,4 +117,4 @@ class IterRecorder:
     def _get_max_iter_time(self: any) -> int:
         if self._iter_end_dict.values():
             return max(self._iter_end_dict.values())
-        return self.DEFAULT_ITER_ID
+        return self.DEFAULT_ITER_TIME
