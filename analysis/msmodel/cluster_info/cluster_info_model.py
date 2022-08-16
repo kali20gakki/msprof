@@ -10,6 +10,7 @@ from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from msmodel.interface.parser_model import ParserModel
 from msmodel.interface.view_model import ViewModel
+from profiling_bean.db_dto.cluster_rank_dto import ClusterRankDto
 
 
 class ClusterInfoModel(ParserModel):
@@ -30,10 +31,13 @@ class ClusterInfoModel(ParserModel):
 
 
 class ClusterInfoViewModel(ViewModel):
-    def __init__(self: any, params: dict) -> any:
-        self._collection_path = params["collection_path"]
-        super().__init__(self._collection_path, DBNameConstant.DB_CLUSTER_RANK, [DBNameConstant.TABLE_CLUSTER_RANK])
+    def __init__(self: any, path: str) -> None:
+        super().__init__(path, DBNameConstant.DB_CLUSTER_RANK, [DBNameConstant.TABLE_CLUSTER_RANK])
 
     def get_all_rank_id(self: any) -> set:
         sql = f"select distinct rank_id from {DBNameConstant.TABLE_CLUSTER_RANK}"
         return set(chain.from_iterable(DBManager.fetch_all_data(self.cur, sql)))
+
+    def get_all_cluster_rank_info(self: any) -> list:
+        sql = f"select * from {DBNameConstant.TABLE_CLUSTER_RANK}"
+        return DBManager.fetch_all_data(self.cur, sql, dto_class=ClusterRankDto)

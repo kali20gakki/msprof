@@ -8,6 +8,7 @@ Copyright Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from msmodel.interface.base_model import BaseModel
+from msmodel.interface.view_model import ViewModel
 
 
 class ClusterStepTraceModel(BaseModel):
@@ -35,3 +36,14 @@ class ClusterStepTraceModel(BaseModel):
               'from {0} as t1 ) as t where top <= 5 and ge_tag = 1 order by model_id, top)t0 ' \
               'group by model_id, max_index'.format(table_name)
         return DBManager.fetch_all_data(self.cur, sql)
+
+
+class ClusterStepTraceViewModel(ViewModel):
+    def __init__(self: any, path: str) -> None:
+        super().__init__(path, DBNameConstant.DB_CLUSTER_STEP_TRACE, [])
+
+    def get_sql_data(self: any, sql: str, param: tuple = None, dto_class: any = None) -> list:
+        return DBManager.fetch_all_data(self.cur, sql, param, dto_class)
+
+    def judge_table_exist(self: any, table_name: str) -> bool:
+        return DBManager.judge_table_exist(self.cur, table_name)
