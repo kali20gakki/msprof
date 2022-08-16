@@ -119,17 +119,17 @@ class CreateAllReduce(CreateSubTable):
     @classmethod
     def extract_data(cls: any, collect_data: any) -> None:
         for model_id, model_data in collect_data.items():
-            for _, index_data in model_data.items():
+            for index_id, index_data in model_data.items():
                 for each_reduce in index_data[StepTraceConstant.ALL_REDUCE]:
                     cls.data.append(
-                        [cls.sample_config.get("devices"), model_id,
+                        [cls.sample_config.get("devices"), model_id, index_id,
                          index_data[StepTraceConstant.STEP_END], each_reduce[StepTraceConstant.REDUCE_START],
                          each_reduce[StepTraceConstant.REDUCE_END]])
 
     @classmethod
     def create_table(cls: any, conn: any) -> None:
         create_sql = "create table if not exists {}" \
-                     "(device_id int, model_id int," \
+                     "(device_id int, model_id int, index_id int," \
                      "iteration_end int, start int, end int, primary key(device_id," \
                      "iteration_end, start))".format(DBNameConstant.TABLE_ALL_REDUCE)
 
