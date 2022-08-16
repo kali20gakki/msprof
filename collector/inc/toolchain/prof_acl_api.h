@@ -104,22 +104,18 @@ MSVP_PROF_API uint64_t ProfGetOpExecutionTime(const void *data, uint32_t len, ui
 
 typedef int Status;
 typedef struct aclprofSubscribeConfig aclprofSubscribeConfig1;
-///
 /// @ingroup AscendCL
 /// @brief subscribe profiling data of graph
 /// @param [in] graphId: the graph id subscribed
 /// @param [in] profSubscribeConfig: pointer to config of model subscribe
 /// @return Status result of function
-///
 MSVP_PROF_API Status aclgrphProfGraphSubscribe(const uint32_t graphId,
     const aclprofSubscribeConfig1 *profSubscribeConfig);
 
-///
 /// @ingroup AscendCL
 /// @brief unsubscribe profiling data of graph
 /// @param [in] graphId: the graph id subscribed
 /// @return Status result of function
-///
 MSVP_PROF_API Status aclgrphProfGraphUnSubscribe(const uint32_t graphId);
 
 /**

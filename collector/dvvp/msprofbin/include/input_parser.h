@@ -155,7 +155,7 @@ const mmStructOption longOptions[] = {
     {"sys-interconnection-freq", mm_optional_argument, nullptr, ARGS_INTERCONNECTION_FREQ},
     {"iteration-id", mm_optional_argument, nullptr, ARGS_EXPORT_ITERATION_ID},
     {"model-id", mm_optional_argument, nullptr, ARGS_EXPORT_MODEL_ID},
-    //host
+    // host
     {"host-sys", mm_optional_argument, nullptr, ARGS_HOST_SYS},
     {"host-sys-pid", mm_optional_argument, nullptr, ARGS_HOST_SYS_PID},
     // end

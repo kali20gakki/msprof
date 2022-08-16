@@ -309,8 +309,8 @@ typedef enum {
 // ge define
 namespace ge {
 using Status = uint32_t;
-#define GE_ERRORNO(runtime, type, level, sysid, modid, name, value, desc)                               \
-  constexpr Status name = (static_cast<uint32_t>(0xFFU & (static_cast<uint32_t>(runtime))) << 30U) | \
+#define GE_ERRORNO(runtime, type, level, sysid, modid, name, value, desc)                                \
+    constexpr Status name = (static_cast<uint32_t>(0xFFU & (static_cast<uint32_t>(runtime))) << 30U) |   \
                               (static_cast<uint32_t>(0xFFU & (static_cast<uint32_t>(type))) << 28U) |    \
                               (static_cast<uint32_t>(0xFFU & (static_cast<uint32_t>(level))) << 25U) |   \
                               (static_cast<uint32_t>(0xFFU & (static_cast<uint32_t>(sysid))) << 17U) |   \

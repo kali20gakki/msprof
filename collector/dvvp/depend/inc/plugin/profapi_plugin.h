@@ -16,8 +16,8 @@ namespace Dvvp {
 namespace Plugin {
 using ProfRegReporterCallbackFunc = std::function<int32_t(ProfReportHandle)>;              // profRegReporterCallback
 using ProfRegCtrlCallbackFunc = std::function<int32_t(ProfCtrlHandle)>;                    // profRegCtrlCallback
-using ProfRegDeviceStateCallbackFunc = std::function<int32_t(ProfSetDeviceHandle)>;        // profRegDeviceStateCallback
-using ProfGetDeviceIdByGeModelIdxFunc = std::function<int32_t(uint32_t, uint32_t *)>;      // profGetDeviceIdByGeModelIdx
+using ProfRegDeviceStateCallbackFunc = std::function<int32_t(ProfSetDeviceHandle)>;   // profRegDeviceStateCallback
+using ProfGetDeviceIdByGeModelIdxFunc = std::function<int32_t(uint32_t, uint32_t *)>; // profGetDeviceIdByGeModelIdx
 using ProfSetProfCommandFunc = std::function<int32_t(PROFAPI_PROF_COMMAND_PTR, uint32_t)>; // profSetProfCommand
 using ProfSetStepInfoFunc = std::function<int32_t(uint64_t, uint16_t, void*)>;             // profSetStepInfo
 class ProfApiPlugin : public analysis::dvvp::common::singleton::Singleton<ProfApiPlugin> {

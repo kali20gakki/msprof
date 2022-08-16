@@ -78,4 +78,4 @@ private:
 };
 }
 }
-#endif //PROFILER_MSPROFTXMANAGER_H
+#endif // PROFILER_MSPROFTXMANAGER_H

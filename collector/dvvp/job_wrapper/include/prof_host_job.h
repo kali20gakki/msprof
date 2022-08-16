@@ -73,7 +73,10 @@ public:
     int Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg) override;
     int Process() override;
     int Uninit() override;
-    bool IsGlobalJobLevel() override { return true; }
+    bool IsGlobalJobLevel() override
+    {
+        return true;
+    }
 };
 
 class ProfHostMemJob : public ProfHostDataBase {
@@ -93,7 +96,10 @@ public:
     int Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg) override;
     int Process() override;
     int Uninit() override;
-    bool IsGlobalJobLevel() override { return true; }
+    bool IsGlobalJobLevel() override
+    {
+        return true;
+    }
 };
 
 class ProfHostService : public analysis::dvvp::common::thread::Thread {
