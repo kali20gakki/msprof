@@ -25,43 +25,38 @@
 
 namespace ge {
 enum ProfDataTypeConfig {
-  kProfTaskTime = 0x0002,
-  kProfAiCoreMetrics = 0x0004,
-  kProfAicpu = 0x0008,
-  kProfL2cache = 0x0010,
-  kProfHccl = 0x0020,
-  kProfTrainingTrace = 0x0040,
+    kProfTaskTime = 0x0002,
+    kProfAiCoreMetrics = 0x0004,
+    kProfAicpu = 0x0008,
+    kProfL2cache = 0x0010,
+    kProfHccl = 0x0020,
+    kProfTrainingTrace = 0x0040,
 };
 
 enum ProfilingAicoreMetrics {
-  kAicoreArithmeticUtilization = 0,
-  kAicorePipeUtilization = 1,
-  kAicoreMemory = 2,
-  kAicoreMemoryL0 = 3,
-  kAicoreResourceConflictRatio = 4,
-  kAicoreMemoryUB = 5,
+    kAicoreArithmeticUtilization = 0,
+    kAicorePipeUtilization = 1,
+    kAicoreMemory = 2,
+    kAicoreMemoryL0 = 3,
+    kAicoreResourceConflictRatio = 4,
+    kAicoreMemoryUB = 5,
 };
 
 using ProfAicoreEvents = struct ProfAicoreEvents;
 using aclgrphProfConfig = struct aclgrphProfConfig;
 
-///
 /// @ingroup AscendCL
 /// @brief Initialize the profiling and set profiling configuration path
 /// @param [in] profiler_path: configuration path of profiling
 /// @param [in] length: length of configuration path
 /// @return Status result of function
-///
 MSVP_PROF_API Status aclgrphProfInit(const char *profiler_path, uint32_t length);
 
-///
 /// @ingroup AscendCL
 /// @brief Finalize profiling
 /// @return Status result of function
-///
 MSVP_PROF_API Status aclgrphProfFinalize();
 
-///
 /// @ingroup AscendCL
 /// @brief Create data of type aclgrphProfConfig
 /// @param [in] deviceid_list: device id list
@@ -70,32 +65,25 @@ MSVP_PROF_API Status aclgrphProfFinalize();
 /// @param [in] aicore_events: pointer to aicore events be reserved, only support NULL now
 /// @param [in] data_type_config: modules need profiling
 /// @return Status result of function
-///
 MSVP_PROF_API aclgrphProfConfig *aclgrphProfCreateConfig(uint32_t *deviceid_list, uint32_t device_nums,
     ProfilingAicoreMetrics aicore_metrics, ProfAicoreEvents *aicore_events, uint64_t data_type_config);
 
-///
 /// @ingroup AscendCL
 /// @brief  Destroy data of type aclgrphProfConfig
 /// @param [in] profiler_config: config of profiling
 /// @return Status result of function
-///
 MSVP_PROF_API Status aclgrphProfDestroyConfig(aclgrphProfConfig *profiler_config);
 
-///
 /// @ingroup AscendCL
 /// @brief Start profiling of modules which is configured by profiler config
 /// @param [in] profiler_config: config of profiling
 /// @return Status result of function
-///
 MSVP_PROF_API Status aclgrphProfStart(aclgrphProfConfig *profiler_config);
 
-///
 /// @ingroup AscendCL
 /// @brief Stop profiling of modules which is configured by profiler config
 /// @param [in] profiler_config: config of profiling
 /// @return Status result of function
-///
 MSVP_PROF_API Status aclgrphProfStop(aclgrphProfConfig *profiler_config);
 }  // namespace ge
 

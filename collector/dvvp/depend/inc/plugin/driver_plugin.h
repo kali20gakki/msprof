@@ -58,7 +58,8 @@ public:
     hdcError_t MsprofHalHdcSend(HDC_SESSION session, struct drvHdcMsg *pMsg, UINT64 flag, UINT32 timeout);
 
     // halHdcSessionConnectEx
-    hdcError_t MsprofHalHdcSessionConnectEx(int peer_node, int peer_devid, int peer_pid, HDC_CLIENT client, HDC_SESSION *pSession);
+    hdcError_t MsprofHalHdcSessionConnectEx(int peer_node, int peer_devid, int peer_pid,
+        HDC_CLIENT client, HDC_SESSION *pSession);
 
     // drvHdcSetSessionReference
     drvError_t MsprofDrvHdcSetSessionReference(HDC_SESSION session);
@@ -176,7 +177,7 @@ private:
     DrvHdcSessionCloseFunc drvHdcSessionClose_ = nullptr;
     DrvHdcGetCapacityFunc drvHdcGetCapacity_ = nullptr;
  
- private:
+private:
     void LoadDriverSo();
 };
 

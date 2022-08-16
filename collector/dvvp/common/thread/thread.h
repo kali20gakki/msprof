@@ -27,7 +27,10 @@ public:
 public:
     virtual int Start();
     virtual int Stop();
-    virtual void StopNoWait() { quit_ = true; };
+    virtual void StopNoWait()
+    {
+        quit_ = true;
+    }
     int Join();
     bool IsQuit() const;
     void SetThreadName(const std::string &threadName);
