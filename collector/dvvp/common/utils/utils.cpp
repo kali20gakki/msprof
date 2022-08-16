@@ -1293,6 +1293,131 @@ bool Utils::IsAppName(const std::string paramsName)
     return true;
 }
 
+bool Utils::IsClusterRunEnv()
+{
+    std::string rankTableFilePath = Utils::GetEnvString(RANK_TABLE_FILE_ENV);
+    MSPROF_LOGI("Environment variable RANK_TABLE_FILE = %s", rankTableFilePath.c_str());
+    if (rankTableFilePath.empty()) {
+        return false;
+    }
+    if (MmAccess(rankTableFilePath.c_str()) != PROFILING_SUCCESS) {
+        return false;
+    }
+    if (MmIsDir(rankTableFilePath.c_str()) == PROFILING_SUCCESS) {
+        return false;
+    }
+    return true;
+}
+
+int32_t Utils::GetRankId()
+{
+    constexpr int32_t invalidRankId = -1;
+    if (!IsClusterRunEnv()) {
+        return invalidRankId;
+    }
+    std::string rankIdStr = Utils::GetEnvString(RANK_ID_ENV);
+    MSPROF_LOGI("Environment variable RANK_ID = %s", rankIdStr.c_str());
+    if (!CheckStringIsValidNatureNum(rankIdStr)) {
+        return invalidRankId;
+    }
+    return std::stoi(rankIdStr);
+}
+
+std::vector<std::string> Utils::GenEnvPairVec(const std::vector<std::string> &envVec)
+{
+    std::vector<std::string> envPairVec;
+    for (auto env : envVec) {
+        std::string envStr = GetEnvString(env);
+        if (envStr.empty()) {
+            MSPROF_LOGW("Failed to get value of %s.", env.c_str());
+            continue;
+        }
+        envStr = env + "=" + envStr;
+        envPairVec.push_back(envStr);
+    }
+    return envPairVec;
+}
+
+bool Utils::PythonEnvReady()
+{
+    std::string cmd = "python3";
+    std::vector<std::string> argsVec;
+    argsVec.push_back("--version");
+    mmProcess taskPid = MSVP_MMPROCESS;
+    ExecCmdParams execCmdParams(cmd, false, "/dev/null");
+    int exitCode = VALID_EXIT_CODE;
+    std::vector<std::string> varVec = {"PATH", "LD_LIBRARY_PATH"};
+    std::vector<std::string> envsVec = GenEnvPairVec(varVec);
+    int ret = ExecCmd(execCmdParams, argsVec, envsVec, exitCode, taskPid);
+    return (ret == PROFILING_SUCCESS) ? true : false;
+}
+
+bool Utils::AnalysisEnvReady(std::string &msprofPyPath)
+{
+    Dl_info dlInfo;
+    dladdr((void *)AnalysisEnvReady, &dlInfo);
+    std::string selfPath(dlInfo.dli_fname);
+    char realPathStr[MMPA_MAX_PATH] = { 0 };
+    int ret = MmRealPath(selfPath.c_str(), realPathStr, MMPA_MAX_PATH);
+    if (ret != PROFILING_SUCCESS) {
+        return false;
+    }
+    std::string realPath(realPathStr);
+    std::string baseDir = realPath;
+    const int dirDiff = 3;
+    for (int i = 0; i < dirDiff; i++) {
+        baseDir = DirName(baseDir);
+    }
+    if (BaseName(realPath).compare(PROF_MSPROF_SO_NAME) != 0 &&
+        BaseName(realPath).compare(PROF_MSPROF_BIN_NAME) != 0) {
+        return false;
+    }
+    if (BaseName(realPath).compare(PROF_MSPROF_SO_NAME) == 0) {
+        baseDir = baseDir + MSVP_SLASH + "tools";
+    }
+
+    msprofPyPath = baseDir + MSVP_SLASH + PROF_MSPROF_PY_PATH;
+    return true;
+}
+
+int Utils::CloudAnalyze(const std::string &jobDir)
+{
+    MSPROF_LOGI("Cloud Pre-analysis start.");
+    if (jobDir.empty() || MmAccess2(jobDir.c_str(), M_R_OK) != PROFILING_SUCCESS) {
+        MSPROF_LOGW("jobDir is not exist or jobDir is not accessable.");
+        return PROFILING_FAILED;
+    }
+    if (!PythonEnvReady()) {
+        MSPROF_LOGW("python3 env is not ready.");
+        return PROFILING_FAILED;
+    }
+    std::string msprofPyPath;
+    if (!AnalysisEnvReady(msprofPyPath) || msprofPyPath.empty()) {
+        MSPROF_LOGW("msprof.py is not ready.");
+        return PROFILING_FAILED;
+    }
+    if ((MmAccess2(msprofPyPath, M_X_OK) != PROFILING_SUCCESS) || IsSoftLink(msprofPyPath)) {
+        MSPROF_LOGW("msprof.py can is not executable or it is softlink.");
+        return PROFILING_FAILED;
+    }
+
+    std::string cmd = "python3";
+    ExecCmdParams execCmdParams(cmd, false, "");
+    int exitCode = VALID_EXIT_CODE;
+    mmProcess taskPid = MSVP_MMPROCESS;
+    std::vector<std::string> argsImportV = {
+        msprofPyPath,
+        "import", "-dir=" + jobDir
+    };
+    std::vector<std::string> varVec = {"PATH", "LD_LIBRARY_PATH", "PYTHONPATH"};
+    std::vector<std::string> envsVec = GenEnvPairVec(varVec);
+    int ret = ExecCmd(execCmdParams, argsImportV, envsVec, exitCode, taskPid);
+    if (ret != PROFILING_SUCCESS) {
+        return ret;
+    }
+    return PROFILING_SUCCESS;
+}
+
 int32_t WriteFile(const std::string &absolutePath, const std::string &recordFile, const std::string &profName)
 {
 #if (defined(_WIN32) || defined(_WIN64) || defined(_MSC_VER))

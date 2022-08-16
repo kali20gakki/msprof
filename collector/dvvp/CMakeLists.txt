@@ -235,6 +235,10 @@ target_link_options(msprofiler_share PRIVATE
     $<$<NOT:$<STREQUAL:${CMAKE_BUILD_TYPE},Debug>>:-s>
 )
 
+target_link_directories(msprofiler_share PRIVATE
+    ${SECUREC_LIB_DIR}
+)
+
 target_link_libraries(msprofiler_share PRIVATE
     -Wl,--no-as-needed
     c_sec
