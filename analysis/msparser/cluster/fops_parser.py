@@ -7,11 +7,14 @@ Copyright Huawei Technologies Co., Ltd. 2022-2023. All rights reserved.
 import json
 import os
 
-from common_func.common import warn, print_info, error
+from common_func.common import error
+from common_func.common import print_info
+from common_func.common import warn
 from common_func.config_mgr import ConfigMgr
 from common_func.constant import Constant
 from common_func.data_check_manager import DataCheckManager
-from common_func.db_manager import DBManager, ClassRowType
+from common_func.db_manager import ClassRowType
+from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.file_manager import check_path_valid
 from common_func.info_conf_reader import InfoConfReader
@@ -83,7 +86,8 @@ class FopsParser:
             DBManager.destroy_db_connect(rank_conn, rank_cur)
             DBManager.destroy_db_connect(trace_conn, trace_cur)
             return False
-        trace_sql = 'select * from step_trace_{} where model_id=? and iteration_id=?'.format(str(rank_data[0].rank_id))
+        trace_sql = 'select * from {} where model_id=? ' \
+                    'and iteration_id=?'.format(DBNameConstant.TABLE_CLUSTER_STEP_TRACE.format(rank_data[0].rank_id))
         trace_data = DBManager.fetch_all_data(trace_cur, trace_sql, (self.model_id, self.iter_id))
         DBManager.destroy_db_connect(rank_conn, rank_cur)
         DBManager.destroy_db_connect(trace_conn, trace_cur)
