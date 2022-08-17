@@ -33,7 +33,8 @@ class FopsParser:
     FILE_NAME = os.path.basename(__file__)
     MAX_TYPE_NUM = 19
     QUERY_FILE_NAME = 'query'
-    BUS_TO_GS = 1000000.0 / 1024 / 1024 / 1024
+    BMS_TO_GS = 1000.0 / 1024 / 1024 / 1024
+    BYT_TO_MB = 1.0 / 1000 / 1000
 
     def __init__(self: any, params: dict) -> None:
         self.collection_path = params.get('collection_path')
@@ -162,9 +163,9 @@ class FopsParser:
             return []
         sorted_data = sorted(zip(op_type_dict.keys(), op_type_dict.values()), key=lambda x: sum(x[1]), reverse=True)
         res_list = [{'total_fops_info': {
-            "total_fops": total_fops,
+            "total_fops": total_fops * self.BYT_TO_MB,
             "total_time": round(total_times, NumberConstant.DECIMAL_ACCURACY),
-            "total_fops_speed": round(total_fops / total_times * self.BUS_TO_GS, NumberConstant.DECIMAL_ACCURACY),
+            "total_fops_speed": round(total_fops / total_times * self.BMS_TO_GS, NumberConstant.DECIMAL_ACCURACY),
             "total_op_count": len(data_list),
             "total_fops_avg": round(total_fops / len(data_list), NumberConstant.DECIMAL_ACCURACY)
         }}]
