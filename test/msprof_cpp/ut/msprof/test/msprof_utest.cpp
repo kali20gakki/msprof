@@ -31,7 +31,7 @@ using namespace Msprof::MsprofTx;
 using namespace analysis::dvvp::proto;
 using namespace Collector::Dvvp::Mmpa;
 
-class MSPROF_TEST: public testing::Test {
+class MSPROF_UTEST: public testing::Test {
 protected:
     virtual void SetUp() {
     }
@@ -71,7 +71,7 @@ int GetDiskFreeSpaceStub(const char *path, mmDiskSize *diskSize) {
     return PROFILING_SUCCESS;
 }
 
-TEST_F(MSPROF_TEST, MsprofTxMemPool)
+TEST_F(MSPROF_UTEST, MsprofTxMemPool)
 {
     GlobalMockObject::verify();
     std::shared_ptr<MsprofStampPool> stampPool;
@@ -127,7 +127,7 @@ int32_t MsprofReporterCallbackStub(uint32_t moduleId, uint32_t type, VOID_PTR da
     return 0;
 }
 
-TEST_F(MSPROF_TEST, MsprofTxManager)
+TEST_F(MSPROF_UTEST, MsprofTxManager)
 {
     GlobalMockObject::verify();
     std::shared_ptr<MsprofTxManager> manager;
