@@ -58,7 +58,7 @@ class FopsParser:
         sql = "select {0}.cube_fops, {0}.vector_fops, {0}.cube_fops + {0}.vector_fops as total_fops, " \
               "{0}.stream_id, {0}.task_id, {1}.op_type, {0}.total_time " \
               "from {0} join {1} on {0}.stream_id={1}.stream_id and {0}.task_id={1}.task_id".format(
-               DBNameConstant.TABLE_SUMMARY_METRICS, DBNameConstant.TABLE_SUMMARY_GE)
+            DBNameConstant.TABLE_SUMMARY_METRICS, DBNameConstant.TABLE_SUMMARY_GE)
 
         cur.row_factory = ClassRowType.class_row(FopsDto)
         fops_data = DBManager.fetch_all_data(cur, sql)
@@ -163,11 +163,11 @@ class FopsParser:
             return []
         sorted_data = sorted(zip(op_type_dict.keys(), op_type_dict.values()), key=lambda x: sum(x[1]), reverse=True)
         res_list = [{'total_fops_info': {
-            "total_fops": total_fops * self.BYT_TO_MB,
+            "total_fops": round(total_fops * self.BYT_TO_MB, NumberConstant.DECIMAL_ACCURACY),
             "total_time": round(total_times, NumberConstant.DECIMAL_ACCURACY),
             "total_fops_speed": round(total_fops / total_times * self.BMS_TO_GS, NumberConstant.DECIMAL_ACCURACY),
             "total_op_count": len(data_list),
-            "total_fops_avg": round(total_fops / len(data_list), NumberConstant.DECIMAL_ACCURACY)
+            "total_fops_avg": round(total_fops / len(data_list) * self.BYT_TO_MB, NumberConstant.DECIMAL_ACCURACY)
         }}]
         other_fops_ratio, other_op_count, other_fops = 0, 0, 0
         detail_list = []
@@ -178,8 +178,8 @@ class FopsParser:
                 detail_list.append({op_type: {'fops_ratio': float(round(100 * sum(op_fops) / total_fops,
                                                                         NumberConstant.ROUND_TWO_DECIMAL)),
                                               'op_count': len(op_fops),
-                                              'fops': sum(op_fops),
-                                              'total_fops': total_fops}})
+                                              'fops': round(sum(op_fops) * self.BYT_TO_MB,
+                                                            NumberConstant.DECIMAL_ACCURACY)}})
             else:
                 other_fops_ratio += float(round(100 * sum(op_fops) / total_fops, NumberConstant.ROUND_TWO_DECIMAL))
                 other_op_count += len(op_fops)
@@ -187,8 +187,7 @@ class FopsParser:
         if other_op_count:
             detail_list.append({'other': {'fops_ratio': other_fops_ratio,
                                           'op_count': other_op_count,
-                                          'fops': other_fops,
-                                          'total_fops': float(total_fops)}})
+                                          'fops': round(other_fops * self.BYT_TO_MB, NumberConstant.DECIMAL_ACCURACY)}})
         res_list.append({'details': detail_list})
         return res_list
 
