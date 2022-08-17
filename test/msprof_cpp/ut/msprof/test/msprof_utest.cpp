@@ -12,7 +12,6 @@
 #include "securec.h"
 #include "message/codec.h"
 #include "utils/utils.h"
-#include "prof_engine.h"
 #include "prof_reporter.h"
 #include "config/config_manager.h"
 #include "proto/profiler.pb.h"
