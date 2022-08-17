@@ -33,7 +33,7 @@ class FopsParser:
     FILE_NAME = os.path.basename(__file__)
     MAX_TYPE_NUM = 19
     QUERY_FILE_NAME = 'query'
-    BMS_TO_GS = 1000.0 / 1024 / 1024 / 1024
+    BMS_TO_GS = 1000.0 / 1000 / 1000 / 1000
     BYT_TO_M = 1.0 / 1000 / 1000
 
     def __init__(self: any, params: dict) -> None:
