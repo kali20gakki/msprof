@@ -23,7 +23,7 @@ public:
     int UnInit();
 
     void SetReporterCallback(const MsprofReporterCallback func)
-    { 
+    {
         reporterCallback_ = func;
     }
 
