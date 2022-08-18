@@ -237,6 +237,11 @@ class MsprofIteration:
               "where iter_id>=? and iter_id<=? order by " \
               "step_end".format(DBNameConstant.TABLE_STEP_TRACE_DATA)
         trace_data = DBManager.fetch_all_data(trace_curs, sql, iter_id)
+
+        # if the first op iter is chose, the iter_id (range) will contain iter 0 whose step end is also 0
+        if NumberConstant.ZERO_ITER_ID in iter_id:
+            trace_data = [NumberConstant.ZERO_ITER_END] + trace_data
+
         return trace_data
 
     def __get_trace_iteration_end(self: any) -> dict:
