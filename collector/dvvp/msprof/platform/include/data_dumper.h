@@ -1,7 +1,7 @@
 /*
  * Copyright (c) Huawei Technologies Co., Ltd. 2012-2019. All rights reserved.
  * Description: dump stream file
- * Author: yc
+ * Author: Huawei Technologies Co., Ltd.
  * Create: 2019-12-20
  */
 

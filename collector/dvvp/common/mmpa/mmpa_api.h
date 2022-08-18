@@ -112,7 +112,7 @@
     do {                             \
         free(buf);                   \
         buf = nullptr;               \
-    } while(0)                       \
+    } while(0)
 
 namespace Collector {
 namespace Dvvp {
@@ -126,7 +126,7 @@ const int MMPA_MAX_SLEEP_MICROSECOND_USING_USLEEP = 1000000;
 const int FALSE = 0;
 const int TRUE = 1;
 
-enum MMPA_MAC_ADDR_TYPE{
+enum MMPA_MAC_ADDR_TYPE {
     MMPA_MAC_ADDR_FIRST_BYTE = 0,
     MMPA_MAC_ADDR_SECOND_BYTE,
     MMPA_MAC_ADDR_THIRD_BYTE,
@@ -225,8 +225,8 @@ typedef struct {
 } mmTimezone;
 
 typedef struct {
-  long long tv_sec;
-  long long tv_nsec;
+    long long tv_sec;
+    long long tv_nsec;
 } mmTimespec;
 
 // function define
