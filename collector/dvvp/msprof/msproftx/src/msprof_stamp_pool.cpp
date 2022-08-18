@@ -4,7 +4,7 @@
  * Author:
  * Create: 2021-11-22
  */
-#include "prof_stamp_pool.h"
+#include "msprof_stamp_pool.h"
 
 #include "errno/error_code.h"
 #include "msprof_dlog.h"

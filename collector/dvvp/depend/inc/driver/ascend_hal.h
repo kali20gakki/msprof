@@ -410,8 +410,7 @@ typedef int (*drvDeviceStartupNotify)(uint32_t num, uint32_t *devId);
 #define BUFF_GRP_NAME_LEN 32
 #define BUFF_PUB_POOL_CFG_MAX_NUM 128
 #define EVENT_MAX_MSG_LEN  128  /* Maximum message length */
-typedef enum group_id_type
-{
+typedef enum group_id_type {
     GROUP_ID_CREATE,
     GROUP_ID_ADD
 } GROUP_ID_TYPE;

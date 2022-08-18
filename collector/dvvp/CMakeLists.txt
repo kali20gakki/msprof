@@ -122,7 +122,7 @@ set(msprofilerCpp
     msprof/platform/mini/data_dumper.cpp
     msprof/msproftx/src/msprof_tx_manager.cpp
     msprof/msproftx/src/msprof_tx_reporter.cpp
-    msprof/msproftx/src/prof_stamp_pool.cpp
+    msprof/msproftx/src/msprof_stamp_pool.cpp
     msprofiler/src/command_handle.cpp
     msprofiler/src/msprof_callback_impl.cpp
     task_handle/src/device.cpp

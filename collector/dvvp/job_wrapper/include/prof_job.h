@@ -116,7 +116,10 @@ public:
     int Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg) override;
     int Process() override;
     int Uninit() override;
-    bool IsGlobalJobLevel() override { return true; }
+    bool IsGlobalJobLevel() override
+    {
+        return true;
+    }
 private:
     int GetCollectCtrlCpuEventCmd(const std::vector<std::string> &events, std::string &profCtrlcpuCmd);
     int PrepareDataDir(std::string &file);
@@ -148,7 +151,10 @@ public:
     int Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg) override;
     int Process() override;
     int Uninit() override;
-    bool IsGlobalJobLevel() override { return true; }
+    bool IsGlobalJobLevel() override
+    {
+        return true;
+    }
 };
 
 class ProfAllPidsJob : public ProfSysInfoBase {
@@ -158,7 +164,10 @@ public:
     int Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg) override;
     int Process() override;
     int Uninit() override;
-    bool IsGlobalJobLevel() override { return true; }
+    bool IsGlobalJobLevel() override
+    {
+        return true;
+    }
 };
 
 class ProfSysStatJob : public ProfSysInfoBase {
@@ -168,7 +177,10 @@ public:
     int Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg) override;
     int Process() override;
     int Uninit() override;
-    bool IsGlobalJobLevel() override { return true; }
+    bool IsGlobalJobLevel() override
+    {
+        return true;
+    }
 };
 
 class ProfTscpuJob : public ProfDrvJob {

@@ -12,13 +12,12 @@
 #include "securec.h"
 #include "message/codec.h"
 #include "utils/utils.h"
-#include "prof_engine.h"
 #include "prof_reporter.h"
 #include "config/config_manager.h"
 #include "proto/profiler.pb.h"
 #include "proto/profiler_ext.pb.h"
 #include "uploader_mgr.h"
-#include "prof_stamp_pool.h"
+#include "msprof_stamp_pool.h"
 #define private public
 #include "msprof_tx_manager.h"
 
@@ -32,7 +31,7 @@ using namespace Msprof::MsprofTx;
 using namespace analysis::dvvp::proto;
 using namespace Collector::Dvvp::Mmpa;
 
-class MSPROF_TEST: public testing::Test {
+class MsprofUtest: public testing::Test {
 protected:
     virtual void SetUp() {
     }
@@ -62,77 +61,6 @@ void func_counter(Reporter* reporter) {
     reporter->Flush();
 }
 
-class PluginImpl: public PluginIntf {
-public:
-    explicit PluginImpl(const std::string & module)
-    : reporter_(nullptr)
-    , module_(module) {
-
-    }
-    virtual ~PluginImpl() {
-    }
-
-public:
-    virtual int Init(const Reporter* reporter) {
-        if (pluginInitTrue) {
-            reporter_ = const_cast<Reporter*>(reporter);
-            t1_ = std::make_shared<std::thread>(&func_counter, reporter_);
-            return 0; //PROFILING_SUCCESS;
-        } else {
-            return -1; //PROFILING_FAILED
-        }
-    }
-
-    int OnNewConfig(const ModuleJobConfig * config) {
-        if (config == nullptr) {
-            printf("Input parameter is null\n");
-            return -1;
-        }
-
-        std::cout<<"==> Module Started:"<<module_<<std::endl;
-        for (auto iter = config->switches.begin(); iter != config->switches.end(); ++iter) {
-            std::cout<<iter->first<<"="<<iter->second<<std::endl;
-        }
-        return 0;
-    }
-
-    virtual int UnInit() {
-        std::cout<<"==> Module Ended:"<<module_<<std::endl;
-        t1_->join();
-        t1_.reset();
-        printf("OnJobEnd finished\n\n");
-        return 0;
-    }
-
-private:
-    Reporter* reporter_;
-    std::string module_;
-    std::shared_ptr<std::thread> t1_;
-};
-
-class EngineImpl_0 : public EngineIntf {
-public:
-    EngineImpl_0() {}
-    virtual ~EngineImpl_0() {}
-
-public:
-    virtual PluginIntf * CreatePlugin() {
-        if (createPluginTrue) {
-            return new PluginImpl(moduleName);
-        } else {
-            return nullptr;
-        }
-    }
-
-    virtual int ReleasePlugin(PluginIntf * plugin) {
-        if (plugin) {
-            delete plugin;
-            plugin = nullptr;
-        }
-        return 0;
-    }
-};
-
 int GetDiskFreeSpaceStub(const char *path, mmDiskSize *diskSize) {
     std::string paths(path);
     try {
@@ -143,7 +71,7 @@ int GetDiskFreeSpaceStub(const char *path, mmDiskSize *diskSize) {
     return PROFILING_SUCCESS;
 }
 
-TEST_F(MSPROF_TEST, MsprofTxMemPool)
+TEST_F(MsprofUtest, MsprofTxMemPool)
 {
     GlobalMockObject::verify();
     std::shared_ptr<MsprofStampPool> stampPool;
@@ -199,7 +127,7 @@ int32_t MsprofReporterCallbackStub(uint32_t moduleId, uint32_t type, VOID_PTR da
     return 0;
 }
 
-TEST_F(MSPROF_TEST, MsprofTxManager)
+TEST_F(MsprofUtest, MsprofTxManager)
 {
     GlobalMockObject::verify();
     std::shared_ptr<MsprofTxManager> manager;
@@ -296,21 +224,3 @@ TEST_F(MSPROF_TEST, MsprofTxManager)
     manager->DestroyStamp(stamp);
     manager->UnInit();
 }
-class EngineImplFmk : public EngineIntf {
-public:
-    EngineImplFmk() {}
-    virtual ~EngineImplFmk() {}
-
-public:
-    PluginIntf * CreatePlugin() {
-        return new PluginImpl("runtime");
-    }
-
-    int ReleasePlugin(PluginIntf * plugin) {
-        if (plugin) {
-            delete plugin;
-            plugin = nullptr;
-        }
-        return 0;
-    }
-};
