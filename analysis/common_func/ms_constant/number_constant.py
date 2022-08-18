@@ -74,6 +74,8 @@ class NumberConstant:
     SEC_TO_US = 10 ** 6
 
     INVALID_ITER_ID = -1
+    ZERO_ITER_ID = 0
+    ZERO_ITER_END = (0,)
 
     # training trace index
     FORWARD_PROPAGATION = 3
