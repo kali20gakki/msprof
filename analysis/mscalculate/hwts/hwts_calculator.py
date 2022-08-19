@@ -8,7 +8,6 @@ import logging
 import os
 
 from analyzer.scene_base.profiling_scene import ProfilingScene
-from analyzer.op_common_function import OpCommonFunc
 from common_func.db_name_constant import DBNameConstant
 from common_func.empty_class import EmptyClass
 from common_func.info_conf_reader import InfoConfReader
@@ -16,7 +15,6 @@ from common_func.iter_recorder import IterRecorder
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.constant import Constant
 from common_func.ms_multi_process import MsMultiProcess
-from common_func.msprof_exception import ProfException
 from common_func.msprof_iteration import MsprofIteration
 from common_func.msprof_step import MsprofStep
 from common_func.ms_constant.number_constant import NumberConstant
@@ -27,9 +25,9 @@ from framework.offset_calculator import FileCalculator
 from framework.offset_calculator import OffsetCalculator
 from msmodel.iter_rec.iter_rec_model import HwtsIterModel
 from msmodel.task_time.hwts_log_model import HwtsLogModel
-from msmodel.ge.ge_info_calculate_model import GeInfoModel
 from msmodel.ai_cpu.ai_cpu_model import AiCpuModel
 from mscalculate.interface.icalculator import ICalculator
+from mscalculate.ts_task.ai_cpu.aicpu_from_ts_collector import AICpuFromTsCollector
 from profiling_bean.prof_enum.data_tag import DataTag
 from profiling_bean.struct_info.hwts_log import HwtsLogBean
 
@@ -82,34 +80,22 @@ class HwtsCalculator(ICalculator, MsMultiProcess):
             self._hwts_log_model.flush(hwts_task_with_batch, DBNameConstant.TABLE_HWTS_TASK_TIME)
             self._hwts_log_model.finalize()
 
-            ai_cpu_data = self._filter_aicpu_data(hwts_task_with_batch)
-            with self._aicpu_model:
-                self._aicpu_model.flush(ai_cpu_data, DBNameConstant.TABLE_AI_CPU_FROM_TS)
+            self._collect_aicpu_data(hwts_task_with_batch)
 
-    def _filter_aicpu_data(self: any, hwts_task_with_batch: list) -> list:
-        ge_info_model = GeInfoModel(self._project_path)
-        ge_op_iter_dict = {}
-        if ge_info_model.check_db() and ge_info_model.check_table():
-            ge_op_iter_dict = ge_info_model.get_ge_data(Constant.TASK_TYPE_AI_CPU)
-        ge_info_model.finalize()
+    def _collect_aicpu_data(self: any, hwts_task_with_batch: list) -> None:
+        iter_id = NumberConstant.INVALID_ITER_ID
+        if not ProfilingScene().is_operator():
+            iter_range = MsprofIteration(self._project_path). \
+                get_iter_id_by_index_id(self._sample_config.get("iter_id"), self._sample_config.get("model_id"))
+            if len(iter_range) >= 2:
+                iter_id = iter_range[1]
 
-        ai_cpu_data = []
-        iter_range = MsprofIteration(self._project_path). \
-            get_iter_id_by_index_id(self._sample_config.get("iter_id"), self._sample_config.get("model_id"))
-        iter_id = -1
-        if len(iter_range) == 2:
-            iter_id = iter_range[1]
+        aicpu_collector = AICpuFromTsCollector(self._project_path)
+
         for stream_id, task_id, nano_start, nano_end, _, _, batch_id in hwts_task_with_batch:
-            stream_task_value = self.STREAM_TASK_KEY_FMT.format(stream_id, task_id)
-            stream_task_batch_value = self.STREAM_TASK_BATCH_KEY_FMT.format(stream_id, task_id, batch_id)
-            if stream_task_value in ge_op_iter_dict.get(str(iter_id), set()) or \
-                    stream_task_batch_value in ge_op_iter_dict.get(str(iter_id), set()):
-                ai_cpu_data.append([stream_id,
-                                    task_id,
-                                    nano_start / NumberConstant.MS_TO_NS,
-                                    nano_end / NumberConstant.MS_TO_NS,
-                                    batch_id])
-        return ai_cpu_data
+            aicpu_collector.filter_aicpu(stream_id, task_id, nano_start / NumberConstant.MS_TO_NS,
+                                         nano_end / NumberConstant.MS_TO_NS, batch_id, iter_id)
+        aicpu_collector.save_aicpu()
 
     def ms_run(self: any) -> None:
         """
