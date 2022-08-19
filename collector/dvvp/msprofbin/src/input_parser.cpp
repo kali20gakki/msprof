@@ -113,50 +113,50 @@ bool InputParser::HasHelpParamOnly()
 
 int InputParser::PreCheckPlatform(int opt, CONST_CHAR_PTR argv[])
 {
-    std::vector<MsprofArgsType> miniBlackSwith = {ARGS_INTERCONNECTION_PROFILING, ARGS_INTERCONNECTION_FREQ,
-        ARGS_L2_PROFILING, ARGS_AIV, ARGS_AIV_FREQ, ARGS_AIV_MODE, ARGS_AIV_METRICS, ARGS_LOW_POWER,
-        ARGS_STARS_ACSQ_TASK, ARGS_STARS_SUB_TASK, ARGS_FFTS_THREAD_TASK, ARGS_FFTS_BLOCK, ARGS_ACC_PMU_MODE,
-        ARGS_BIU, ARGS_BIU_FREQ};
-    std::vector<MsprofArgsType> cloudBlackSwith = {ARGS_AIV, ARGS_AIV_FREQ, ARGS_AIV_MODE, ARGS_AIV_METRICS,
-        ARGS_STARS_ACSQ_TASK, ARGS_STARS_SUB_TASK, ARGS_FFTS_THREAD_TASK, ARGS_FFTS_BLOCK, ARGS_ACC_PMU_MODE,
-        ARGS_LOW_POWER, ARGS_BIU, ARGS_BIU_FREQ};
-    std::vector<MsprofArgsType> mdcBlackSwith = {ARGS_IO_PROFILING, ARGS_IO_SAMPLING_FREQ, ARGS_INTERCONNECTION_FREQ,
-        ARGS_INTERCONNECTION_PROFILING, ARGS_AICPU, ARGS_STARS_ACSQ_TASK, ARGS_STARS_SUB_TASK, ARGS_FFTS_THREAD_TASK,
-        ARGS_FFTS_BLOCK, ARGS_ACC_PMU_MODE, ARGS_LOW_POWER, ARGS_PYTHON_PATH, ARGS_SUMMARY_FORMAT, ARGS_PARSE,
-        ARGS_QUERY, ARGS_EXPORT, ARGS_EXPORT_ITERATION_ID, ARGS_EXPORT_MODEL_ID, ARGS_BIU, ARGS_BIU_FREQ};
-    std::vector<MsprofArgsType> dcBlackSwith = {ARGS_AIV, ARGS_AIV_FREQ, ARGS_AIV_MODE, ARGS_AIV_METRICS,
-        ARGS_IO_PROFILING, ARGS_IO_SAMPLING_FREQ, ARGS_STARS_ACSQ_TASK, ARGS_STARS_SUB_TASK, ARGS_FFTS_THREAD_TASK,
-        ARGS_FFTS_BLOCK, ARGS_ACC_PMU_MODE, ARGS_LOW_POWER, ARGS_BIU, ARGS_BIU_FREQ};
-    std::vector<MsprofArgsType> lhisiBlackSwith = {ARGS_AIV, ARGS_AIV_FREQ, ARGS_AIV_MODE, ARGS_AIV_METRICS,
-        ARGS_IO_PROFILING, ARGS_IO_SAMPLING_FREQ, ARGS_INTERCONNECTION_FREQ, ARGS_INTERCONNECTION_PROFILING, ARGS_AICPU,
-        ARGS_HARDWARE_MEM, ARGS_HARDWARE_MEM_SAMPLING_FREQ, ARGS_L2_PROFILING, ARGS_DVPP_PROFILING, ARGS_DVPP_FREQ,
-        ARGS_CPU_SAMPLING_FREQ, ARGS_CPU_PROFILING, ARGS_LLC_PROFILING, ARGS_STARS_ACSQ_TASK, ARGS_STARS_SUB_TASK,
-        ARGS_FFTS_THREAD_TASK, ARGS_FFTS_BLOCK, ARGS_ACC_PMU_MODE, ARGS_LOW_POWER, ARGS_PYTHON_PATH,
-        ARGS_SUMMARY_FORMAT, ARGS_PARSE, ARGS_QUERY, ARGS_EXPORT, ARGS_EXPORT_ITERATION_ID, ARGS_EXPORT_MODEL_ID,
-        ARGS_BIU, ARGS_BIU_FREQ};
-    std::vector<MsprofArgsType> cloudBlackSwithV2 = {};
+    // std::vector<MsprofArgsType> miniBlackSwith = {ARGS_INTERCONNECTION_PROFILING, ARGS_INTERCONNECTION_FREQ,
+    //     ARGS_L2_PROFILING, ARGS_AIV, ARGS_AIV_FREQ, ARGS_AIV_MODE, ARGS_AIV_METRICS, ARGS_POWER,
+    //     ARGS_STARS_ACSQ_TASK, ARGS_STARS_SUB_TASK, ARGS_FFTS_THREAD_TASK, ARGS_FFTS_BLOCK, ARGS_ACC_PMU_MODE,
+    //     ARGS_BIU, ARGS_BIU_FREQ};
+    // std::vector<MsprofArgsType> cloudBlackSwith = {ARGS_AIV, ARGS_AIV_FREQ, ARGS_AIV_MODE, ARGS_AIV_METRICS,
+    //     ARGS_STARS_ACSQ_TASK, ARGS_STARS_SUB_TASK, ARGS_FFTS_THREAD_TASK, ARGS_FFTS_BLOCK, ARGS_ACC_PMU_MODE,
+    //     ARGS_LOW_POWER, ARGS_BIU, ARGS_BIU_FREQ};
+    // std::vector<MsprofArgsType> mdcBlackSwith = {ARGS_IO_PROFILING, ARGS_IO_SAMPLING_FREQ, ARGS_INTERCONNECTION_FREQ,
+    //     ARGS_INTERCONNECTION_PROFILING, ARGS_AICPU, ARGS_STARS_ACSQ_TASK, ARGS_STARS_SUB_TASK, ARGS_FFTS_THREAD_TASK,
+    //     ARGS_FFTS_BLOCK, ARGS_ACC_PMU_MODE, ARGS_LOW_POWER, ARGS_PYTHON_PATH, ARGS_SUMMARY_FORMAT, ARGS_PARSE,
+    //     ARGS_QUERY, ARGS_EXPORT, ARGS_EXPORT_ITERATION_ID, ARGS_EXPORT_MODEL_ID, ARGS_BIU, ARGS_BIU_FREQ};
+    // std::vector<MsprofArgsType> dcBlackSwith = {ARGS_AIV, ARGS_AIV_FREQ, ARGS_AIV_MODE, ARGS_AIV_METRICS,
+    //     ARGS_IO_PROFILING, ARGS_IO_SAMPLING_FREQ, ARGS_STARS_ACSQ_TASK, ARGS_STARS_SUB_TASK, ARGS_FFTS_THREAD_TASK,
+    //     ARGS_FFTS_BLOCK, ARGS_ACC_PMU_MODE, ARGS_LOW_POWER, ARGS_BIU, ARGS_BIU_FREQ};
+    // std::vector<MsprofArgsType> lhisiBlackSwith = {ARGS_AIV, ARGS_AIV_FREQ, ARGS_AIV_MODE, ARGS_AIV_METRICS,
+    //     ARGS_IO_PROFILING, ARGS_IO_SAMPLING_FREQ, ARGS_INTERCONNECTION_FREQ, ARGS_INTERCONNECTION_PROFILING, ARGS_AICPU,
+    //     ARGS_HARDWARE_MEM, ARGS_HARDWARE_MEM_SAMPLING_FREQ, ARGS_L2_PROFILING, ARGS_DVPP_PROFILING, ARGS_DVPP_FREQ,
+    //     ARGS_CPU_SAMPLING_FREQ, ARGS_CPU_PROFILING, ARGS_LLC_PROFILING, ARGS_STARS_ACSQ_TASK, ARGS_STARS_SUB_TASK,
+    //     ARGS_FFTS_THREAD_TASK, ARGS_FFTS_BLOCK, ARGS_ACC_PMU_MODE, ARGS_LOW_POWER, ARGS_PYTHON_PATH,
+    //     ARGS_SUMMARY_FORMAT, ARGS_PARSE, ARGS_QUERY, ARGS_EXPORT, ARGS_EXPORT_ITERATION_ID, ARGS_EXPORT_MODEL_ID,
+    //     ARGS_BIU, ARGS_BIU_FREQ};
+    // std::vector<MsprofArgsType> cloudBlackSwithV2 = {};
 
-    std::map<Analysis::Dvvp::Common::Config::PlatformType, std::vector<MsprofArgsType>> platformArgsType = {
-        {PlatformType::MINI_TYPE, miniBlackSwith},
-        {PlatformType::CLOUD_TYPE, cloudBlackSwith},
-        {PlatformType::MDC_TYPE, mdcBlackSwith},
-        {PlatformType::LHISI_TYPE, lhisiBlackSwith},
-        {PlatformType::DC_TYPE, dcBlackSwith},
-        {PlatformType::CHIP_V4_1_0, cloudBlackSwithV2},
-    };
+    // std::map<Analysis::Dvvp::Common::Config::PlatformType, std::vector<MsprofArgsType>> platformArgsType = {
+    //     {PlatformType::MINI_TYPE, miniBlackSwith},
+    //     {PlatformType::CLOUD_TYPE, cloudBlackSwith},
+    //     {PlatformType::MDC_TYPE, mdcBlackSwith},
+    //     {PlatformType::LHISI_TYPE, lhisiBlackSwith},
+    //     {PlatformType::DC_TYPE, dcBlackSwith},
+    //     {PlatformType::CHIP_V4_1_0, cloudBlackSwithV2},
+    // };
 
-    Analysis::Dvvp::Common::Config::PlatformType platformType = ConfigManager::instance()->GetPlatformType();
-    if (platformType < PlatformType::MINI_TYPE || platformType >= PlatformType::END_TYPE) {
-        return PROFILING_FAILED;
-    }
-    std::vector<MsprofArgsType> platSwithList = platformArgsType[platformType];
-    if (std::find(platSwithList.begin(), platSwithList.end(), opt) != platSwithList.end()) {
-        std::cout << Utils::GetSelfPath() << ": unrecognized option '"
-                  << argv[MmGetOptInd() - 1] << "'" << std::endl;
-        std::cout << "PlatformType:" << static_cast<uint8_t>(platformType) << std::endl;
-        MsprofCmdUsage("");
-        return PROFILING_FAILED;
-    }
+    // Analysis::Dvvp::Common::Config::PlatformType platformType = ConfigManager::instance()->GetPlatformType();
+    // if (platformType < PlatformType::MINI_TYPE || platformType >= PlatformType::END_TYPE) {
+    //     return PROFILING_FAILED;
+    // }
+    // std::vector<MsprofArgsType> platSwithList = platformArgsType[platformType];
+    // if (std::find(platSwithList.begin(), platSwithList.end(), opt) != platSwithList.end()) {
+    //     std::cout << Utils::GetSelfPath() << ": unrecognized option '"
+    //               << argv[MmGetOptInd() - 1] << "'" << std::endl;
+    //     std::cout << "PlatformType:" << static_cast<uint8_t>(platformType) << std::endl;
+    //     MsprofCmdUsage("");
+    //     return PROFILING_FAILED;
+    // }
 
     return PROFILING_SUCCESS;
 }
@@ -178,7 +178,7 @@ int InputParser::ProcessOptions(int opt, struct MsprofCmdInfo &cmdInfo)
         ret = MsprofSwitchCheckValid(cmdInfo, opt);
     } else if (opt >= ARGS_AIC_FREQ && opt <= ARGS_EXPORT_MODEL_ID) {
         ret = MsprofFreqCheckValid(cmdInfo, opt);
-    } else if (opt >= ARGS_HOST_SYS && opt <= ARGS_HOST_SYS_PID) {
+    } else if (opt >= ARGS_HOST_SYS && opt <= ARGS_HOST_USAGE) {
         ret = MsprofHostCheckValid(cmdInfo, opt);
     } else {
         // when opt matches ARGS_HELP
@@ -642,8 +642,7 @@ int InputParser::CheckSampleModeValid(const struct MsprofCmdInfo &cmdInfo, int o
 {
     std::map<int, std::string> sampleMap = {
         {ARGS_AIC_MODE, "--aic-mode"},
-        {ARGS_AIV_MODE, "--aiv-mode"},
-        {ARGS_ACC_PMU_MODE, "--acc_pmu_mode"},
+        {ARGS_AIV_MODE, "--aiv-mode"}
     };
 
     if (cmdInfo.args[opt] == nullptr) {
@@ -657,8 +656,6 @@ int InputParser::CheckSampleModeValid(const struct MsprofCmdInfo &cmdInfo, int o
             cmdInfo.args[ARGS_AIV_MODE] : params_->aiv_profiling_mode;
         params_->ai_core_profiling_mode = (opt == ARGS_AIC_MODE) ?
             cmdInfo.args[ARGS_AIC_MODE] : params_->ai_core_profiling_mode;
-        params_->acc_pmu_mode = (opt == ARGS_ACC_PMU_MODE) ?
-            cmdInfo.args[ARGS_ACC_PMU_MODE] : params_->acc_pmu_mode;
         return MSPROF_DAEMON_OK;
     } else {
         CmdLog::instance()->CmdErrorLog("Argument %s: invalid value: %s."
@@ -983,19 +980,7 @@ void InputParser::ParamsSwitchValid2(const struct MsprofCmdInfo &cmdInfo, int op
         case ARGS_DVPP_PROFILING:
             params_->dvpp_profiling = cmdInfo.args[opt];
             break;
-        case ARGS_STARS_ACSQ_TASK:
-            params_->stars_acsq_task = cmdInfo.args[opt];
-            break;
-        case ARGS_STARS_SUB_TASK:
-            params_->stars_sub_task = cmdInfo.args[opt];
-            break;
-        case ARGS_FFTS_THREAD_TASK:
-            params_->ffts_thread_task = cmdInfo.args[opt];
-            break;
-        case ARGS_FFTS_BLOCK:
-            params_->ffts_block = cmdInfo.args[opt];
-            break;
-        case ARGS_LOW_POWER:
+        case ARGS_POWER:
             params_->low_power = cmdInfo.args[opt];
             break;
         case ARGS_L2_PROFILING:
@@ -1182,7 +1167,6 @@ int InputParser::MsprofCmdCheckValid(const struct MsprofCmdInfo &cmdInfo, int op
             break;
         case ARGS_AIC_MODE:
         case ARGS_AIV_MODE:
-        case ARGS_ACC_PMU_MODE:
             ret = CheckSampleModeValid(cmdInfo, opt);
             break;
         case ARGS_AIC_METRICE:

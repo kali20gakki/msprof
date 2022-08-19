@@ -4,74 +4,72 @@
  * Author: Huawei Technologies Co., Ltd.
  * Create: 2022-08-10
  */
-#ifndef COLLECTOR_DVVP_PARAM_ADAPTER_IMPL_H
-#define COLLECTOR_DVVP_PARAM_ADAPTER_IMPL_H
+#ifndef COLLECTOR_DVVP_PARAMS_ADAPTER_IMPL_H
+#define COLLECTOR_DVVP_PARAMS_ADAPTER_IMPL_H
 
-#include "param_adapter.h"
+#include <unordered_map>
+#include "params_adapter.h"
 #include "proto/profiler_ext.pb.h"
 #include "message/prof_params.h"
 #include "input_parser.h"
 #include "prof_api_common.h"
-#include "acl/acl_prof.h"
 
 namespace Collector {
 namespace Dvvp {
-namespace ParamAdapter {
+namespace ParamsAdapter {
 using analysis::dvvp::message::ProfileParams;
 using Analysis::Dvvp::Msprof::MsprofArgsType;
 using Analysis::Dvvp::Msprof::MsprofCmdInfo;
-using analysis::dvvp::proto::MsProfStartReq;
 using analysis::dvvp::proto::ProfAclConfig;
 using analysis::dvvp::proto::ProfGeOptionsConfig;
 
-class MsprofParamAdapter : public ParamAdapter {
-public:
-    MsprofParamAdapter(SHARED_PTR_ALIA<ProfileParams> params)
-        :params_(params)
-    {
 
-    };
-    SHARED_PTR_ALIA<ProfileParams> GetParamFromInputCfg(std::vector<std::pair<MsprofArgsType, MsprofCmdInfo>> msprofCfg);
+class MsprofParamAdapter : public ParamsAdapter {
+public:
+    MsprofParamAdapter() {}
+
+    int GetParamFromInputCfg(std::vector<std::pair<MsprofArgsType, MsprofCmdInfo>> msprofCfg,
+        SHARED_PTR_ALIA<ProfileParams> params);
+
+private:
+    int Init();
+    void CreateCfgMap();
+    void DefaultCfgSet();
+
 private:
     SHARED_PTR_ALIA<ProfileParams> params_;
-    std::vector<InputCfg>
+    std::array<std::string, INPUT_CFG_MAX> paramContainer_;
+    std::unordered_map<int, InputCfg> cfgMap_;
 };
 
-class AclJsonParamAdapter : public ParamAdapter {
+class AclJsonParamAdapter : public ParamsAdapter {
 public:
-    AclJsonParamAdapter(SHARED_PTR_ALIA<ProfileParams> params)
-        :params_(params)
-    {};
-    SHARED_PTR_ALIA<ProfileParams> GetParamFromInputCfg(ProfAclConfig aclCfg);
+    AclJsonParamAdapter() {};
+    int GetParamFromInputCfg(ProfAclConfig aclCfg, SHARED_PTR_ALIA<ProfileParams> params);
 private:
     SHARED_PTR_ALIA<ProfileParams> params_;
+    std::array<std::string, INPUT_CFG_MAX> paramContainer_;
 };
 
-class GeOptParamAdapter : public ParamAdapter {
+class GeOptParamAdapter : public ParamsAdapter {
 public:
-    GeOptParamAdapter(SHARED_PTR_ALIA<ProfileParams> params)
-        :params_(params),
-         dataTypeConfig_(0)
-    {};
-    SHARED_PTR_ALIA<ProfileParams> GetParamFromInputCfg(ProfGeOptionsConfig geCfg);
+    GeOptParamAdapter() {};
+    int GetParamFromInputCfg(ProfGeOptionsConfig geCfg, SHARED_PTR_ALIA<ProfileParams> params);
 private:
-    uint64_t dataTypeConfig_;
     SHARED_PTR_ALIA<ProfileParams> params_;
+    std::array<std::string, INPUT_CFG_MAX> paramContainer_;
 };
 
-class AclApiParamAdapter : public ParamAdapter {
+class AclApiParamAdapter : public ParamsAdapter {
 public:
-    AclApiParamAdapter(SHARED_PTR_ALIA<ProfileParams> params)
-        :params_(params),
-         dataTypeConfig_(0)
-    {};
-    SHARED_PTR_ALIA<ProfileParams> GetParamFromInputCfg(const ProfConfig * apiCfg);
+    AclApiParamAdapter() {};
+    int GetParamFromInputCfg(const ProfConfig * apiCfg, SHARED_PTR_ALIA<ProfileParams> params);
 private:
-    uint64_t dataTypeConfig_;
     SHARED_PTR_ALIA<ProfileParams> params_;
+    std::array<std::string, INPUT_CFG_MAX> paramContainer_;
 };
 
-} // ParamAdapter
+} // ParamsAdapter
 } // Dvvp
 } // Collector
 
