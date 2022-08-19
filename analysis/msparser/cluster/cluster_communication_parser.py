@@ -5,8 +5,10 @@ function:
 Copyright Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 """
 import json
+import os
 
 from common_func.common import print_msg
+from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msvp_common import create_json
 from common_func.path_manager import PathManager
@@ -51,6 +53,8 @@ class ClusterCommunicationParser:
         """
         communication contains: rank id, compute_time, communication_time, stage_time
         """
+        if not os.path.exists(PathManager.get_db_path(self._collection_path, DBNameConstant.DB_CLUSTER_STEP_TRACE)):
+            return
         with self._communication_model as _model:
             if not _model.check_db():
                 return
