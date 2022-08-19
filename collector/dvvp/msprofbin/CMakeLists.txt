@@ -19,6 +19,7 @@ set(msprofBinHeader
     ${TOP_DIR}/collector/dvvp/depend/inc/plugin
     ${TOP_DIR}/collector/inc/toolchain
     ${TOP_DIR}/collector/dvvp/common/config
+    ${TOP_DIR}/collector/dvvp/params_adapter
     ../common/utils
     ../msprof/engine/include
     ../host/include/
@@ -48,6 +49,8 @@ set(hdcCpp
 )
 
 add_executable(msprofbin
+    ${TOP_DIR}/collector/dvvp/params_adapter/params_adapter.cpp
+    ${TOP_DIR}/collector/dvvp/params_adapter/params_adapter_impl.cpp
     src/msprof_bin.cpp
     src/msprof_manager.cpp
     src/prof_task.cpp

@@ -42,7 +42,6 @@ enum MsprofArgsType {
     ARGS_AIV_MODE,
     ARGS_AIV_METRICS,
     ARGS_SYS_DEVICES,
-    ARGS_ACC_PMU_MODE,
     ARGS_LLC_PROFILING,
     ARGS_PYTHON_PATH,
     ARGS_SUMMARY_FORMAT,
@@ -62,11 +61,7 @@ enum MsprofArgsType {
     ARGS_IO_PROFILING,
     ARGS_INTERCONNECTION_PROFILING,
     ARGS_DVPP_PROFILING,
-    ARGS_STARS_ACSQ_TASK,
-    ARGS_STARS_SUB_TASK,
-    ARGS_FFTS_THREAD_TASK,
-    ARGS_FFTS_BLOCK,
-    ARGS_LOW_POWER,
+    ARGS_POWER,
     ARGS_HCCL,
     ARGS_BIU,
     ARGS_L2_PROFILING,
@@ -90,6 +85,7 @@ enum MsprofArgsType {
     // host
     ARGS_HOST_SYS,
     ARGS_HOST_SYS_PID,
+    ARGS_HOST_USAGE,
     // end
     NR_ARGS
 };
@@ -110,7 +106,6 @@ const mmStructOption longOptions[] = {
     {"aiv-mode", mm_optional_argument, nullptr, ARGS_AIV_MODE},
     {"aiv-metrics", mm_optional_argument, nullptr, ARGS_AIV_METRICS},
     {"sys-devices", mm_optional_argument, nullptr, ARGS_SYS_DEVICES},
-    {"acc_pmu_mode", mm_optional_argument, nullptr, ARGS_ACC_PMU_MODE},
     {"llc-profiling", mm_optional_argument, nullptr, ARGS_LLC_PROFILING},
     {"python-path", mm_optional_argument, nullptr, ARGS_PYTHON_PATH},
     {"summary-format", mm_optional_argument, nullptr, ARGS_SUMMARY_FORMAT},
@@ -130,11 +125,7 @@ const mmStructOption longOptions[] = {
     {"sys-io-profiling", mm_optional_argument, nullptr, ARGS_IO_PROFILING},
     {"sys-interconnection-profiling", mm_optional_argument, nullptr, ARGS_INTERCONNECTION_PROFILING},
     {"dvpp-profiling", mm_optional_argument, nullptr, ARGS_DVPP_PROFILING},
-    {"stars_acsq_task", mm_optional_argument, nullptr, ARGS_STARS_ACSQ_TASK},
-    {"stars_sub_task", mm_optional_argument, nullptr, ARGS_STARS_SUB_TASK},
-    {"ffts_thread_task", mm_optional_argument, nullptr, ARGS_FFTS_THREAD_TASK},
-    {"ffts_block", mm_optional_argument, nullptr, ARGS_FFTS_BLOCK},
-    {"low_power", mm_optional_argument, nullptr, ARGS_LOW_POWER},
+    {"low_power", mm_optional_argument, nullptr, ARGS_POWER},
     {"hccl", mm_optional_argument, nullptr, ARGS_HCCL},  // the default value is off
     {"biu", mm_optional_argument, nullptr, ARGS_BIU},
     {"l2", mm_optional_argument, nullptr, ARGS_L2_PROFILING},
@@ -158,6 +149,7 @@ const mmStructOption longOptions[] = {
     // host
     {"host-sys", mm_optional_argument, nullptr, ARGS_HOST_SYS},
     {"host-sys-pid", mm_optional_argument, nullptr, ARGS_HOST_SYS_PID},
+    {"host-sys-usage", mm_optional_argument, nullptr, ARGS_HOST_USAGE},
     // end
     {nullptr, mm_no_argument, nullptr, ARGS_HELP}
 };
