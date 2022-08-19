@@ -65,6 +65,9 @@ class GeInfoModel(BaseModel):
         """
         ge_op_iter_dict = {}
 
+        if Utils.is_single_op_scene(self.result_dir):
+            self.__get_ge_data_op_scene(ge_op_iter_dict, datatype)
+
         if Utils.is_step_scene(self.result_dir):
             self.__get_ge_data_step_scene(ge_op_iter_dict, datatype)
 
@@ -134,3 +137,26 @@ class GeInfoModel(BaseModel):
                 iter_id = model_to_iter_dict.get((per_data[0], per_data[1]))
                 ge_op_iter_dict.setdefault(str(iter_id), set()).add(
                     self.STREAM_TASK_BATCH_KEY_FMT.format(*per_data[2:]))
+
+    def __get_ge_data_op_scene(self: any, ge_op_iter_dict: dict, datatype: str) -> None:
+        """
+        get ge task data
+        :return: iter dict
+        """
+        ge_sql = "select model_id, index_id, stream_id, task_id, batch_id from {0} " \
+                 "where task_type='{1}'" \
+            .format(DBNameConstant.TABLE_GE_TASK,
+                    datatype)
+        if DBManager.judge_table_exist(self.cur, DBNameConstant.TABLE_GE_TENSOR):
+            ge_sql = "select {0}.model_id, {0}.index_id, {0}.stream_id, {0}.task_id, {0}.batch_id from {0} " \
+                     "inner join {1} on {0}.task_id={1}.task_id and {0}.stream_id={1}.stream_id " \
+                     "and {0}.timestamp={1}.timestamp " \
+                     "and {0}.task_type='{2}'" \
+                .format(DBNameConstant.TABLE_GE_TASK,
+                        DBNameConstant.TABLE_GE_TENSOR,
+                        datatype)
+        ge_op_data = DBManager.fetch_all_data(self.cur, ge_sql)
+        op_set = set()
+        for model_id, _, stream_id, task_id, batch_id in ge_op_data:
+            op_set.add(self.STREAM_TASK_BATCH_KEY_FMT.format(stream_id, task_id, batch_id))
+        ge_op_iter_dict.setdefault(NumberConstant.INVALID_ITER_ID, op_set)
