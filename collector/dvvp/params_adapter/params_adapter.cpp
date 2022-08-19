@@ -7,7 +7,7 @@
 #include "params_adapter.h"
 
 #include <map>
-
+#include "param_validation.h"
 #include "errno/error_code.h"
 
 namespace Collector {
@@ -16,6 +16,7 @@ namespace ParamsAdapter {
 
 using namespace Analysis::Dvvp::Common::Config;
 using namespace analysis::dvvp::common::error;
+using namespace analysis::dvvp::common::validation;
 
 int ParamsAdapter::CheckListInit()
 {
@@ -166,36 +167,70 @@ int ParamsAdapter::ComCfgCheck(EnableType enableType, std::array<std::string, IN
 
 int ParamsAdapter::CheckOutputValid(const std::string &outputParam) const
 {
+    if (!ParamValidation::instance()->CheckOutputIsValid(outputParam)) {
+        return PROFILING_FAILED;
+    }
     return PROFILING_SUCCESS;
 }
 
 int ParamsAdapter::CheckStorageLimitValid(const std::string &storageLimitParam) const
 {
+    if (!ParamValidation::instance()->CheckStorageLimitIsValid(storageLimitParam)) {
+        return PROFILING_FAILED;
+    }
     return PROFILING_SUCCESS;
 }
 
 int ParamsAdapter::CheckSwitchValid(const std::string &switchParam) const
 {
+    if (!ParamValidation::instance()->IsValidSwitch(switchParam)) {
+        return PROFILING_FAILED;
+    }
     return PROFILING_SUCCESS;
 }
 
 int ParamsAdapter::CheckAiMetricsValid(const std::string &aiMetrics) const
 {
+    if (!ParamValidation::instance()->CheckProfilingAicoreMetricsIsValid(aiMetrics)) {
+        return PROFILING_FAILED;
+    }
     return PROFILING_SUCCESS;
 }
 
 int ParamsAdapter::CheckFreqValid(const std::string &freq, const InputCfg freqOpt) const
 {
+    std::map<InputCfg, std::vector<int>> freqRangeMap = {
+        {INPUT_CFG_COM_AIC_FREQ, {1, 100}},
+        {INPUT_CFG_COM_AIV_FREQ, {1, 100}},
+        {INPUT_CFG_COM_SYS_USAGE_FREQ, {1, 10}},
+        {INPUT_CFG_COM_SYS_CPU_FREQ, {1, 50}},
+        {INPUT_CFG_COM_SYS_PID_USAGE_FREQ, {1, 10}},
+        {INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ, {1, 1000}},
+        {INPUT_CFG_COM_SYS_IO_FREQ, {1, 100}},
+        {INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ, {1, 50}},
+        {INPUT_CFG_COM_DVPP_FREQ, {1, 100}},
+        {INPUT_CFG_COM_BIU_FREQ, {300, 30000}},
+    };
+    std::vector<int> checkFreqRange = freqRangeMap[freqOpt];
+    if (!ParamValidation::instance()->CheckFreqIsValid(freq, checkFreqRange[0], checkFreqRange[1])) {
+        return PROFILING_FAILED;
+    }
     return PROFILING_SUCCESS;
 }
 
 int ParamsAdapter::CheckLlcModeValid(const std::string &LlcMode) const
 {
+    if (!ParamValidation::instance()->CheckLlcModeIsValid(LlcMode)) {
+        return PROFILING_FAILED;
+    }
     return PROFILING_SUCCESS;
 }
 
 int ParamsAdapter::CheckHostSysUsageValid(const std::string &HostSysUsage) const
 {
+    if (!ParamValidation::instance()->CheckHostSysUsageIsValid(HostSysUsage)) {
+        return PROFILING_FAILED;
+    }
     return PROFILING_SUCCESS;
 }
 
@@ -231,21 +266,33 @@ int ParamsAdapter::CheckHostSysValid(const std::string &hostSysParam) const
 
 int ParamsAdapter::CheckHostSysPidValid(const std::string &hostSysPidParam) const
 {
+   if (!ParamValidation::instance()->CheckHostSysPidValid(hostSysPidParam)) {
+        return PROFILING_FAILED;
+    }
     return PROFILING_SUCCESS;
 }
 
 int ParamsAdapter::CheckPythonPathValid(const std::string &pythonPathParam) const
 {
+    if (!ParamValidation::instance()->CheckPythonPathIsValid(pythonPathParam)) {
+        return PROFILING_FAILED;
+    }
     return PROFILING_SUCCESS;
 }
 
 int ParamsAdapter::CheckSummaryFormatValid(const std::string &formatParam) const
 {
+    if (!ParamValidation::instance()->CheckExportSummaryFormatIsValid(formatParam)) {
+        return PROFILING_FAILED;
+    }
     return PROFILING_SUCCESS;
 }
 
-int ParamsAdapter::CheckIdValid(const std::string &idParam) const
+int ParamsAdapter::CheckExportIdValid(const std::string &idParam, const std::string &exportIdType) const
 {
+    if (!ParamValidation::instance()->CheckExportIdIsValid(idParam, exportIdType)) {
+        return PROFILING_FAILED;
+    }
     return PROFILING_SUCCESS;
 }
 
