@@ -122,7 +122,7 @@ public:
     int CheckHostSysPidValid(const std::string &hostSysPidParam) const;
     int CheckPythonPathValid(const std::string &pythonPathParam) const;
     int CheckSummaryFormatValid(const std::string &formatParam) const;
-    int CheckIdValid(const std::string &idParam) const;
+    int CheckExportIdValid(const std::string &idParam, const std::string &exportIdType) const;
 
 private:
     std::vector<InputCfg> commonConfig_;

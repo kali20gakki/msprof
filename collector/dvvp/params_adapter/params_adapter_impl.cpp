@@ -95,7 +95,7 @@ int MsprofParamAdapter::ParamsCheckMsprof(std::vector<InputCfg> &cfgList) const
                 break;
             case INPUT_CFG_ITERATION_ID:
             case INPUT_CFG_MODEL_ID:
-                ret = CheckIdValid(cfgValue);
+                ret = CheckExportIdValid(cfgValue, "");
                 break;
             default:
                 ret = PROFILING_FAILED;

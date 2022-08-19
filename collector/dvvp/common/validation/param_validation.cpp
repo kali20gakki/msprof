@@ -11,14 +11,18 @@
 #include "config/config.h"
 #include "errno/error_code.h"
 #include "message/codec.h"
+#include "platform/platform.h"
 #include "message/prof_params.h"
 #include "msprof_error_manager.h"
 #include "param_validation.h"
+#include "config/config_manager.h"
 
 namespace analysis {
 namespace dvvp {
 namespace common {
 namespace validation {
+using namespace Analysis::Dvvp::Common::Platform;
+using namespace Analysis::Dvvp::Common::Config;
 using namespace analysis::dvvp::common::config;
 using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::message;
@@ -50,6 +54,93 @@ int ParamValidation::Init() const
 int ParamValidation::Uninit() const
 {
     return PROFILING_SUCCESS;
+}
+
+bool ParamValidation::CheckOutputIsValid(const std::string &outputPath)
+{
+    if (outputPath.empty()) {
+        MSPROF_LOGI("output is empty");
+        return true;
+    }
+    std::string path = Utils::CanonicalizePath(outputPath);
+    if (!path.empty()) {
+        if (path.size() > MAX_PATH_LENGTH) {
+            MSPROF_LOGE("Invalid value for Argument 'output'. The maximum length is %d.", MAX_PATH_LENGTH);
+            return false;
+        }
+        if (Utils::CreateDir(path) != PROFILING_SUCCESS) {
+            char errBuf[MAX_ERR_STRING_LEN + 1] = {0};
+            MSPROF_LOGE("Create output dir failed.ErrorCode: %d, ErrorInfo: %s.",
+                MmGetErrorCode(),
+                MmGetErrorFormatMessage(MmGetErrorCode(), errBuf, MAX_ERR_STRING_LEN));
+            return false;
+        }
+        if (!Utils::IsDir(path)) {
+            MSPROF_LOGE("Argument 'output' %s is not a dir.", path.c_str());
+            return false;
+        }
+        if (MmAccess2(path, M_W_OK) != PROFILING_SUCCESS) {
+            MSPROF_LOGE("Argument 'output' %s permission denied.", path.c_str());
+            return false;
+        }
+    } else {
+        MSPROF_LOGE("Argument 'output' is invalid. Failed to get the canonicalized absolute pathname.");
+        return false;
+    }
+    return true;
+}
+
+bool ParamValidation::CheckStorageLimitIsValid(const std::string &storageLimit)
+{
+    if (storageLimit.empty()) {
+        MSPROF_LOGI("storage_limit is empty");
+        return true;
+    }
+    std::string errReason = "storage-limit should be in range [" + std::to_string(STORAGE_LIMIT_DOWN_THD) +
+        "," + std::to_string(UINT32_MAX) + "], end with MB";
+
+    uint32_t unitLen = strlen(STORAGE_LIMIT_UNIT);
+    if (storageLimit.size() <= unitLen) {
+        MSPROF_LOGE("storage_limit:%s, length is less than %u", storageLimit.c_str(), unitLen + 1);
+        MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
+            std::vector<std::string>({"storage_limit", storageLimit, errReason}));
+        return false;
+    }
+
+    std::string unitStr = storageLimit.substr(storageLimit.size() - unitLen);
+    if (unitStr != STORAGE_LIMIT_UNIT) {
+        MSPROF_LOGE("storage_limit:%s, not end with MB", storageLimit.c_str());
+        MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
+            std::vector<std::string>({"storage_limit", storageLimit, errReason}));
+        return false;
+    }
+
+    std::string digitStr = storageLimit.substr(0, storageLimit.size() - unitLen);
+    if (!Utils::IsAllDigit(digitStr)) {
+        MSPROF_LOGE("storage_limit:%s, invalid numbers", storageLimit.c_str());
+        MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
+            std::vector<std::string>({"storage_limit", storageLimit, errReason}));
+        return false;
+    } else if (digitStr.size() > 10) { // digitStr range is 0 ~ 4294967296, max length is 10
+        MSPROF_LOGE("storage_limit:%s, valid range is 200~4294967296", storageLimit.c_str());
+        MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
+            std::vector<std::string>({"storage_limit", storageLimit, errReason}));
+        return false;
+    }
+
+    uint64_t limit = stoull(digitStr);
+    if (limit < STORAGE_LIMIT_DOWN_THD) {
+        MSPROF_LOGE("storage_limit:%s, min value is %uMB", storageLimit.c_str(), STORAGE_LIMIT_DOWN_THD);
+        MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
+            std::vector<std::string>({"storage_limit", storageLimit, errReason}));
+        return false;
+    } else if (limit > UINT32_MAX) {
+        MSPROF_LOGE("storage_limit:%s, max value is %uMB", storageLimit.c_str(), UINT32_MAX);
+        MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
+            std::vector<std::string>({"storage_limit", storageLimit, errReason}));
+        return false;
+    }
+    return true;
 }
 
 bool ParamValidation::CheckTsCpuEventIsValid(const std::vector<std::string> &events)
@@ -115,6 +206,146 @@ bool ParamValidation::CheckProfilingAicoreMetricsIsValid(const std::string &aico
 
     MSPROF_LOGE("aicoreMetrics[%s] is invalid", aicoreMetrics.c_str());
     return false;
+}
+
+bool ParamValidation::CheckLlcModeIsValid(const std::string &llcMode)
+{
+    std::vector<std::string> llcModeWhiteList = {
+        "read",
+        "write"
+    };
+    if (ConfigManager::instance()->GetPlatformType() == PlatformType::MINI_TYPE) {
+        llcModeWhiteList = {"capacity", "bandwidth"};
+    }
+    if (llcMode.empty()) {
+        MSPROF_LOGI("llcMode is empty");
+        return true;
+    }
+    for (size_t i = 0; i < llcModeWhiteList.size(); i++) {
+        if (llcMode.compare(llcModeWhiteList[i]) == 0) {
+            return true;
+        }
+    }
+    return false;
+}
+
+
+bool ParamValidation::CheckFreqIsValid(const std::string &freq, const int rangeMin, const int rangeMax)
+{
+    if (freq.empty()) {
+        MSPROF_LOGI("freq is empty");
+        return true;
+    }
+    if (Utils::CheckStringIsNonNegativeIntNum(freq)) {
+        int optRet = std::stoi(freq);
+        if ((optRet >= rangeMin) && (optRet <= rangeMax)) {
+            return true;
+        } else {
+            MSPROF_LOGE("Input freq value is out of value range.");
+            return false;
+        }
+    } else {
+        MSPROF_LOGE("Input freq value is invalid.");
+        return false;
+    }
+}
+
+bool ParamValidation::CheckHostSysUsageIsValid(const std::string &hostSysUsage)
+{
+    if (Platform::instance()->RunSocSide()) {
+        MSPROF_LOGE("Not in host side, host-sys-usage is not supported");
+        return false;
+    }
+    if (hostSysUsage.empty()) {
+        MSPROF_LOGI("hostsysusage is empty");
+        return true;
+    }
+    std::vector<std::string> hostSysUsageArray = Utils::Split(hostSysUsage, false, "", ",");
+    for (size_t i = 0; i < hostSysUsageArray.size(); ++i) {
+        if ((hostSysUsageArray[i].compare("cpu") != 0) || (hostSysUsageArray[i].compare("mem") != 0)) {
+            MSPROF_LOGE("Argument host-sys-usage: invalid value:%s. Please input in the range of "
+                "'cpu | mem'", hostSysUsageArray[i].c_str());
+            return false;
+        }   
+    }
+    return true;
+}
+
+bool ParamValidation::CheckHostSysPidValid(const std::string &hostSysPid)
+{
+    if (hostSysPid.empty()) {
+        MSPROF_LOGE("Argument --host-sys-pid: expected one argument");
+        return false;
+    }
+    if (Utils::CheckStringIsNonNegativeIntNum(hostSysPid)) {
+        auto hostSysRet = std::stoi(hostSysPid);
+        if (!CheckHostSysPidIsValid(hostSysRet)) {
+            MSPROF_LOGE("Argument --host-sys-pid: invalid int value: %d."
+                "The process cannot be found, please enter a correct host-sys-pid.", hostSysRet);
+            return false;
+        }
+        return true;
+    } else {
+        MSPROF_LOGE("Argument --host-sys-pid: invalid value: %s."
+            "Please input an integer value.The min value is 0.", hostSysPid.c_str());
+        return false;
+    }
+}
+
+bool ParamValidation::CheckPythonPathIsValid(const std::string&pythonPath)
+{
+    if (pythonPath.empty()) {
+        MSPROF_LOGE("Argument --python-path: expected one argument");
+        return false;
+    }
+    if (pythonPath.size() > MAX_PATH_LENGTH) {
+        MSPROF_LOGE("Argument --python-path is invalid because of exceeds"
+            " the maximum length of %d", MAX_PATH_LENGTH);
+        return false;
+    }
+    std::string absolutePythonPath = Utils::CanonicalizePath(pythonPath);
+    if (absolutePythonPath.empty()) {
+        MSPROF_LOGE("Argument --python-path %s does not exist or permission denied!!!", pythonPath.c_str());
+        return false;
+    }
+    if (MmAccess2(absolutePythonPath, M_X_OK) != PROFILING_SUCCESS) {
+        MSPROF_LOGE("Argument --python-path %s permission denied.", pythonPath.c_str());
+        return false;
+    }
+    if (Utils::IsDir(absolutePythonPath)) {
+        MSPROF_LOGE("Argument --python-path %s is a directory, "
+            "please enter the executable file path.", pythonPath.c_str());
+        return false;
+    }
+    return true;
+}
+
+bool ParamValidation::CheckExportSummaryFormatIsValid(const std::string &summaryFormat)
+{
+    if (summaryFormat.empty()) {
+        MSPROF_LOGE("Argument --summary-format: expected one argument");
+        return false;
+    }
+    if (summaryFormat != "json" && summaryFormat!= "csv") {
+        MSPROF_LOGE("Argument --summary-format: invalid value: %s. "
+            "Please input 'json' or 'csv'.", summaryFormat.c_str());
+        return false;
+    }
+    return true;
+}
+
+bool ParamValidation::CheckExportIdIsValid(const std::string &exportId, const std::string &exportIdType)
+{
+    if (exportId.empty()) {
+        MSPROF_LOGE("Argument --%s: expected one argument", exportIdType.c_str());
+        return false;
+    }
+    if (!Utils::CheckStringIsValidNatureNum(exportId)) {
+        MSPROF_LOGE("Argument --%s: invalid value: %s."
+            "Please input an integer value.", exportIdType.c_str(), exportId.c_str());
+        return false;
+    }
+    return true;
 }
 
 bool ParamValidation::CheckL2CacheEventsValid(const std::vector<std::string> &events)
