@@ -99,8 +99,21 @@ public:
     int CheckListInit();
     bool BlackSwitchCheck(InputCfg inputCfg) const;
     PlatformType GetPlatform() const;
+    //======common=======
+    int CheckOutputValid(const std::string &outputParam);
+    int CheckStorageLimitValid(const std::string &storageLimitParam);
+    int CheckAiMetricsValid(const std::string &aiMetrics);
+    int CheckSwitchValid(const std::string &switch);
+    int CheckFreqValid(const std::string &freq, const InputCfg freqOpt);
+    int CheckLlcModeValid(const std::string &LlcMode);
+    int CheckHostSysUsageValid(const std::string &HostSysUsage);
+    //======msprof======
+    int CheckHostSysPidValid(const std::string &HostSysUsage);
+    int CheckPythonPathValid(const std::string &HostSysUsage);
+    int CheckSummaryFormatValid(const std::string &HostSysUsage);
+    int CheckPythonPathValid(const std::string &HostSysUsage);
+    int CheckIdValid(const int id);
 private:
-    
     int ComValidCheck(EnableType enableType);
     void ComDefValueSet(); // 放到msprofbin中
     //int TransToParam();
