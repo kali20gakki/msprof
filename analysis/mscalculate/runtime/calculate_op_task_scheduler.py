@@ -98,7 +98,7 @@ class CalculateOpTaskScheduler:
             return
         task_time = self._add_info(cal_task_data)
         self._collect_aicpu(task_time)
-        self._insert_task_time_data(cal_task_data, runtime_conn, runtime_curs)
+        self._insert_task_time_data(task_time, runtime_conn, runtime_curs)
         logging.info('create task time table end')
 
     def _add_info(self: any, cal_task_data: list) -> list:
