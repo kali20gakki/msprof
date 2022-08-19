@@ -77,21 +77,12 @@ int ParamsAdapter::CheckListInit()
     }
     // init common config list
     std::vector<InputCfg>({
-        INPUT_CFG_COM_OUTPUT, INPUT_CFG_COM_STORAGE_LIMIT, INPUT_CFG_COM_MSPROFTX,
-        INPUT_CFG_COM_TASK_TIME, INPUT_CFG_COM_TASK_TRACE, INPUT_CFG_COM_TRAINING_TRACE,
-        INPUT_CFG_COM_AI_CORE, INPUT_CFG_COM_AIC_MODE, INPUT_CFG_COM_AIC_METRICS,
-        INPUT_CFG_COM_AIC_FREQ, INPUT_CFG_COM_AI_VECTOR, INPUT_CFG_COM_AIV_MODE,
-        INPUT_CFG_COM_AIV_METRICS, INPUT_CFG_COM_AIV_FREQ, INPUT_CFG_COM_ASCENDCL,
-        INPUT_CFG_COM_MODEL_EXECUTION, INPUT_CFG_COM_RUNTIME_API, INPUT_CFG_COM_HCCL,
-        INPUT_CFG_COM_L2, INPUT_CFG_COM_AICPU, INPUT_CFG_COM_SYS_DEVICES,
-        INPUT_CFG_COM_SYS_PERIOD, INPUT_CFG_COM_SYS_USAGE, INPUT_CFG_COM_SYS_USAGE_FREQ,
-        INPUT_CFG_COM_SYS_PID_USAGE, INPUT_CFG_COM_SYS_PID_USAGE_FREQ, INPUT_CFG_COM_SYS_CPU,
-        INPUT_CFG_COM_SYS_CPU_FREQ, INPUT_CFG_COM_SYS_HARDWARE_MEM, INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ,
-        INPUT_CFG_COM_LLC_MODE, INPUT_CFG_COM_SYS_IO, INPUT_CFG_COM_SYS_IO_FREQ,
-        INPUT_CFG_COM_SYS_INTERCONNECTION, INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ,
-        INPUT_CFG_COM_DVPP, INPUT_CFG_COM_DVPP_FREQ, INPUT_CFG_COM_POWER,
-        INPUT_CFG_COM_BIU, INPUT_CFG_COM_BIU_FREQ, INPUT_CFG_HOST_SYS, INPUT_CFG_HOST_SYS_PID,
-        INPUT_HOST_SYS_USAGE
+        INPUT_CFG_COM_OUTPUT, INPUT_CFG_COM_STORAGE_LIMIT, INPUT_CFG_COM_MSPROFTX, INPUT_CFG_COM_TASK_TIME,
+        INPUT_CFG_COM_AIC_METRICS, INPUT_CFG_COM_AIV_METRICS, INPUT_CFG_COM_ASCENDCL, INPUT_CFG_COM_RUNTIME_API,
+        INPUT_CFG_COM_HCCL, INPUT_CFG_COM_L2, INPUT_CFG_COM_AICPU, INPUT_CFG_COM_SYS_USAGE_FREQ,
+        INPUT_CFG_COM_SYS_PID_USAGE_FREQ, INPUT_CFG_COM_SYS_CPU_FREQ, INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ,
+        INPUT_CFG_COM_LLC_MODE, INPUT_CFG_COM_SYS_IO_FREQ, INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ,
+        INPUT_CFG_COM_DVPP_FREQ, INPUT_HOST_SYS_USAGE
     }).swap(commonConfig_);
     return PROFILING_SUCCESS;
 }
@@ -111,6 +102,153 @@ PlatformType ParamsAdapter::GetPlatform() const
 {
     return platformType_;
 }
+
+int ParamsAdapter::ComCfgCheck(EnableType enableType, std::array<std::string, INPUT_CFG_MAX> paramContainer,
+    std::vector<InputCfg> &cfgList) const
+{
+    int ret = PROFILING_SUCCESS;
+    bool flag = true;
+    for (auto inputCfg : commonConfig_) {
+        std::string cfgValue = paramContainer[inputCfg];
+        switch (inputCfg) {
+            // output check
+            case INPUT_CFG_COM_OUTPUT:
+                ret = CheckOutputValid(cfgValue);
+                break;
+            // storage-limit check
+            case INPUT_CFG_COM_STORAGE_LIMIT:
+                ret = CheckStorageLimitValid(cfgValue);
+                break;
+            // switch check
+            case INPUT_CFG_COM_MSPROFTX:
+            case INPUT_CFG_COM_TASK_TIME:
+            case INPUT_CFG_COM_ASCENDCL:
+            case INPUT_CFG_COM_RUNTIME_API:
+            case INPUT_CFG_COM_HCCL:
+            case INPUT_CFG_COM_L2:
+            case INPUT_CFG_COM_AICPU:
+                ret = CheckSwitchValid(cfgValue);
+                break;
+            // aic aiv metrics check
+            case INPUT_CFG_COM_AIC_METRICS:
+            case INPUT_CFG_COM_AIV_METRICS:
+                ret = CheckAiMetricsValid(cfgValue);
+                break;
+            // frequency check
+            case INPUT_CFG_COM_SYS_USAGE_FREQ:
+            case INPUT_CFG_COM_SYS_PID_USAGE_FREQ:
+            case INPUT_CFG_COM_SYS_CPU_FREQ:
+            case INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ:
+            case INPUT_CFG_COM_SYS_IO_FREQ:
+            case INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ:
+            case INPUT_CFG_COM_DVPP_FREQ:
+                ret = CheckFreqValid(cfgValue, inputCfg);
+                break;
+            // llc-mode(TODO)
+            case INPUT_CFG_COM_LLC_MODE:
+                ret = CheckLlcModeValid(cfgValue);
+                break;
+            // cpu|mem
+            case INPUT_HOST_SYS_USAGE:
+                ret = CheckHostSysUsageValid(cfgValue);
+                break;
+            default:
+                ret = PROFILING_FAILED;
+        }
+        if (ret != PROFILING_SUCCESS) {
+            cfgList.push_back(inputCfg);
+            flag = false;
+        }
+    }
+    return flag ? PROFILING_SUCCESS : PROFILING_FAILED;
+}
+
+
+int ParamsAdapter::CheckOutputValid(const std::string &outputParam) const
+{
+    return PROFILING_SUCCESS;
+}
+
+int ParamsAdapter::CheckStorageLimitValid(const std::string &storageLimitParam) const
+{
+    return PROFILING_SUCCESS;
+}
+
+int ParamsAdapter::CheckSwitchValid(const std::string &switchParam) const
+{
+    return PROFILING_SUCCESS;
+}
+
+int ParamsAdapter::CheckAiMetricsValid(const std::string &aiMetrics) const
+{
+    return PROFILING_SUCCESS;
+}
+
+int ParamsAdapter::CheckFreqValid(const std::string &freq, const InputCfg freqOpt) const
+{
+    return PROFILING_SUCCESS;
+}
+
+int ParamsAdapter::CheckLlcModeValid(const std::string &LlcMode) const
+{
+    return PROFILING_SUCCESS;
+}
+
+int ParamsAdapter::CheckHostSysUsageValid(const std::string &HostSysUsage) const
+{
+    return PROFILING_SUCCESS;
+}
+
+int ParamsAdapter::CheckAppValid(const std::string &appParam) const
+{
+    return PROFILING_SUCCESS;
+}
+
+int ParamsAdapter::CheckEnvValid(const std::string &envParam) const
+{
+    return PROFILING_SUCCESS;
+}
+
+int ParamsAdapter::CheckAiModeValid(const std::string &envParam) const
+{
+    return PROFILING_SUCCESS;
+}
+
+int ParamsAdapter::CheckSysDeviceValid(const std::string &devListParam) const
+{
+    return PROFILING_SUCCESS;
+}
+
+int ParamsAdapter::CheckSysPeriodValid(const std::string &sysPeriodParam) const
+{
+    return PROFILING_SUCCESS;
+}
+
+int ParamsAdapter::CheckHostSysValid(const std::string &hostSysParam) const
+{
+    return PROFILING_SUCCESS;
+}
+
+int ParamsAdapter::CheckHostSysPidValid(const std::string &hostSysPidParam) const
+{
+    return PROFILING_SUCCESS;
+}
+
+int ParamsAdapter::CheckPythonPathValid(const std::string &pythonPathParam) const
+{
+    return PROFILING_SUCCESS;
+}
+
+int ParamsAdapter::CheckSummaryFormatValid(const std::string &formatParam) const
+{
+    return PROFILING_SUCCESS;
+}
+
+int ParamsAdapter::CheckIdValid(const std::string &idParam) const
+{
+    return PROFILING_SUCCESS;
+}
+
 } // ParamsAdapter
 } // Dvvp
 } // Collector
