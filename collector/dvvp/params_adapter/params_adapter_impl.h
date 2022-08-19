@@ -27,46 +27,65 @@ using analysis::dvvp::proto::ProfGeOptionsConfig;
 class MsprofParamAdapter : public ParamsAdapter {
 public:
     MsprofParamAdapter() {}
-
     int GetParamFromInputCfg(std::vector<std::pair<MsprofArgsType, MsprofCmdInfo>> msprofCfg,
         SHARED_PTR_ALIA<ProfileParams> params);
 
 private:
     int Init();
     void CreateCfgMap();
+    int ParamsCheckMsprof(std::vector<InputCfg> &cfgList) const;
     void DefaultCfgSet();
 
 private:
     SHARED_PTR_ALIA<ProfileParams> params_;
     std::array<std::string, INPUT_CFG_MAX> paramContainer_;
     std::unordered_map<int, InputCfg> cfgMap_;
+    std::vector<InputCfg> msprofConfig_;
 };
 
 class AclJsonParamAdapter : public ParamsAdapter {
 public:
     AclJsonParamAdapter() {};
     int GetParamFromInputCfg(ProfAclConfig aclCfg, SHARED_PTR_ALIA<ProfileParams> params);
+
+private:
+    int Init();
+    int ParamsCheckAclJson(std::vector<InputCfg> &cfgList) const;
+
 private:
     SHARED_PTR_ALIA<ProfileParams> params_;
     std::array<std::string, INPUT_CFG_MAX> paramContainer_;
+    std::vector<InputCfg> aclJsonConfig_;
 };
 
 class GeOptParamAdapter : public ParamsAdapter {
 public:
     GeOptParamAdapter() {};
     int GetParamFromInputCfg(ProfGeOptionsConfig geCfg, SHARED_PTR_ALIA<ProfileParams> params);
+
+private:
+    int Init();
+    int ParamsCheckGeOpt(std::vector<InputCfg> &cfgList) const;
+
 private:
     SHARED_PTR_ALIA<ProfileParams> params_;
     std::array<std::string, INPUT_CFG_MAX> paramContainer_;
+    std::vector<InputCfg> geOptConfig_;
 };
 
 class AclApiParamAdapter : public ParamsAdapter {
 public:
     AclApiParamAdapter() {};
     int GetParamFromInputCfg(const ProfConfig * apiCfg, SHARED_PTR_ALIA<ProfileParams> params);
+
+private:
+    int Init();
+    int ParamsCheckAclApi(std::vector<InputCfg> &cfgList) const;
+
 private:
     SHARED_PTR_ALIA<ProfileParams> params_;
     std::array<std::string, INPUT_CFG_MAX> paramContainer_;
+    std::vector<InputCfg> aclApiConfig_;
 };
 
 } // ParamsAdapter

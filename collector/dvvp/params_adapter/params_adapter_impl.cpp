@@ -23,6 +23,89 @@ int MsprofParamAdapter::Init()
         return PROFILING_FAILED;
     }
     CreateCfgMap();
+    std::vector<InputCfg>({
+        INPUT_CFG_MSPROF_APPLICATION, INPUT_CFG_MSPROF_ENVIRONMENT, INPUT_CFG_COM_AI_CORE,
+        INPUT_CFG_COM_AIC_MODE, INPUT_CFG_COM_AIC_FREQ, INPUT_CFG_COM_AI_VECTOR, INPUT_CFG_COM_AIV_MODE,
+        INPUT_CFG_COM_AIV_FREQ, INPUT_CFG_COM_MODEL_EXECUTION, INPUT_CFG_COM_SYS_DEVICES,
+        INPUT_CFG_COM_SYS_PERIOD, INPUT_CFG_COM_SYS_USAGE, INPUT_CFG_COM_SYS_PID_USAGE,
+        INPUT_CFG_COM_SYS_CPU, INPUT_CFG_COM_SYS_HARDWARE_MEM, INPUT_CFG_COM_SYS_IO,
+        INPUT_CFG_COM_SYS_INTERCONNECTION, INPUT_CFG_COM_DVPP, INPUT_CFG_COM_POWER, 
+        INPUT_CFG_COM_BIU, INPUT_CFG_COM_BIU_FREQ, INPUT_CFG_HOST_SYS, INPUT_CFG_HOST_SYS_PID,
+        INPUT_CFG_PYTHON_PATH, INPUT_CFG_SUMMARY_FORMAT, INPUT_CFG_PARSE, INPUT_CFG_QUERY,
+        INPUT_CFG_EXPORT, INPUT_CFG_ITERATION_ID, INPUT_CFG_MODEL_ID
+    }).swap(msprofConfig_);
+}
+
+int MsprofParamAdapter::ParamsCheckMsprof(std::vector<InputCfg> &cfgList) const
+{
+    int ret = PROFILING_SUCCESS;
+    bool flag = true;
+    for (auto inputCfg : msprofConfig_) {
+        std::string cfgValue = paramContainer_[inputCfg];
+        switch (inputCfg) {
+            case INPUT_CFG_MSPROF_APPLICATION:
+                ret = CheckAppValid(cfgValue);
+                break;
+            case INPUT_CFG_MSPROF_ENVIRONMENT:
+                ret = CheckEnvValid(cfgValue);
+                break;
+            case INPUT_CFG_COM_AI_CORE:
+            case INPUT_CFG_COM_AI_VECTOR:
+            case INPUT_CFG_COM_MODEL_EXECUTION:
+            case INPUT_CFG_COM_SYS_USAGE:
+            case INPUT_CFG_COM_SYS_PID_USAGE:
+            case INPUT_CFG_COM_SYS_CPU:
+            case INPUT_CFG_COM_SYS_HARDWARE_MEM:
+            case INPUT_CFG_COM_SYS_IO:
+            case INPUT_CFG_COM_SYS_INTERCONNECTION:
+            case INPUT_CFG_COM_DVPP:
+            case INPUT_CFG_COM_POWER:
+            case INPUT_CFG_COM_BIU:
+            case INPUT_CFG_PARSE:
+            case INPUT_CFG_QUERY:
+            case INPUT_CFG_EXPORT:
+                ret = CheckSwitchValid(cfgValue);
+                break;
+            case INPUT_CFG_COM_AIV_MODE:
+            case INPUT_CFG_COM_AIC_MODE:
+                ret = CheckAiModeValid(cfgValue);
+                break;
+            case INPUT_CFG_COM_AIC_FREQ:
+            case INPUT_CFG_COM_AIV_FREQ:
+            case INPUT_CFG_COM_BIU_FREQ:
+                ret = CheckFreqValid(cfgValue, inputCfg);
+                break;
+            case INPUT_CFG_COM_SYS_DEVICES:
+                ret = CheckSysDeviceValid(cfgValue);
+                break;
+            case INPUT_CFG_COM_SYS_PERIOD:
+                ret = CheckSysPeriodValid(cfgValue);
+                break;
+            case INPUT_CFG_HOST_SYS:
+                ret = CheckHostSysValid(cfgValue);
+                break;
+            case INPUT_CFG_HOST_SYS_PID:
+                ret = CheckHostSysPidValid(cfgValue);
+                break;
+            case INPUT_CFG_PYTHON_PATH:
+                ret = CheckPythonPathValid(cfgValue);
+                break;
+            case INPUT_CFG_SUMMARY_FORMAT:
+                ret = CheckSummaryFormatValid(cfgValue);
+                break;
+            case INPUT_CFG_ITERATION_ID:
+            case INPUT_CFG_MODEL_ID:
+                ret = CheckIdValid(cfgValue);
+                break;
+            default:
+                ret = PROFILING_FAILED;
+        }
+        if (ret != PROFILING_SUCCESS) {
+            cfgList.push_back(inputCfg);
+            flag = false;
+        }
+    }
+    return flag ? PROFILING_SUCCESS : PROFILING_FAILED;
 }
 
 int MsprofParamAdapter::GetParamFromInputCfg(std::vector<std::pair<MsprofArgsType, MsprofCmdInfo>> msprofCfg,
@@ -31,26 +114,37 @@ int MsprofParamAdapter::GetParamFromInputCfg(std::vector<std::pair<MsprofArgsTyp
     params_ = params;
     Init(); // 派生类初始化+基类初始化
     
-    // [1]黑名单校验+表参数映射
+    // [1]黑名单校验+表参数映射（用户参数-->全量表）
     for (auto argPair : msprofCfg) {
         MsprofArgsType argsType = argPair.first;
         InputCfg cfgType = cfgMap_[argsType];
         if (!BlackSwitchCheck(cfgType)) {
             return PROFILING_FAILED;
         }
+        // TODO 判断argPair.second.args[argsType]是不是空字符串
         paramContainer_[cfgType] = argPair.second.args[argsType];
     }
+    // 
 
+    // [2] 默认值开启还是关闭（用户层面）+ 补全表 + 表中每一个参数都有一个具体的值[TODO]
 
-    // [2] 默认值开启还是关闭（用户层面）
-
-    // [3] 参数转换（补全表）
 
 // ---------------------------- 表格的每一个参数都是确认值（用户层面） --------------------
 
     // [4] 私有参数校验（派生类实现）
-
+    std::vector<InputCfg> errCfgList;
+    int ret = ParamsCheckMsprof(errCfgList);
+    if (ret != PROFILING_SUCCESS && !errCfgList.empty()) {
+        // todo 打印errCfgList中的错误
+        return PROFILING_FAILED;
+    }
     // [5] 公有参数校验（调基类接口）
+    errCfgList.clear();
+    ret = ComCfgCheck(ENABLE_MSPROF, paramContainer_, errCfgList);
+    if (ret != PROFILING_SUCCESS) {
+        // todo 打印errCfgList中的错误
+        return PROFILING_FAILED;
+    }
 
     // [6] 参数转换，转成Params（软件栈转uint64_t， 非软件栈保留在Params）
     
@@ -142,17 +236,143 @@ void MsprofParamAdapter::CreateCfgMap()
 //    }
 //    
 //}
-// ===============================================================================================
+
+
+// ================================================= Acl json ==========================================
+
+int AclJsonParamAdapter::Init()
+{
+    paramContainer_.fill("");
+    int ret = CheckListInit();
+    if (ret != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
+    std::vector<InputCfg>({
+        INPUT_CFG_ACL_JSON_SWITCH, INPUT_CFG_COM_BIU, INPUT_CFG_COM_BIU_FREQ
+    }).swap(aclJsonConfig_);
+}
+
+int AclJsonParamAdapter::ParamsCheckAclJson(std::vector<InputCfg> &cfgList) const
+{
+    int ret = PROFILING_SUCCESS;
+    bool flag = true;
+    for (auto inputCfg : aclJsonConfig_) {
+        std::string cfgValue = paramContainer_[inputCfg];
+        switch (inputCfg) {
+            case INPUT_CFG_ACL_JSON_SWITCH:
+            case INPUT_CFG_COM_BIU:
+                ret = CheckSwitchValid(cfgValue);
+                break;
+            case INPUT_CFG_COM_BIU_FREQ:
+                ret = CheckFreqValid(cfgValue, inputCfg);
+                break;
+            default:
+                ret = PROFILING_FAILED;
+        }
+        if (ret != PROFILING_SUCCESS) {
+            cfgList.push_back(inputCfg);
+            flag = false;
+        }
+    }
+    return flag ? PROFILING_SUCCESS : PROFILING_FAILED;
+}
+
 int AclJsonParamAdapter::GetParamFromInputCfg(ProfAclConfig aclCfg, SHARED_PTR_ALIA<ProfileParams> params)
 {
+    params_ = params;
+    Init();
+    
+}
+
+// ============================================ ge opt ======================================
+int GeOptParamAdapter::Init()
+{
+    paramContainer_.fill("");
+    int ret = CheckListInit();
+    if (ret != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
+    std::vector<InputCfg>({
+        INPUT_CFG_GE_OPT_FP_POINT, INPUT_CFG_GE_OPT_BP_POINT, INPUT_CFG_COM_TASK_TRACE,
+        INPUT_CFG_COM_TRAINING_TRACE, INPUT_CFG_COM_BIU, INPUT_CFG_COM_BIU_FREQ
+    }).swap(geOptConfig_);
+}
+
+int GeOptParamAdapter::ParamsCheckGeOpt(std::vector<InputCfg> &cfgList) const
+{
+    int ret = PROFILING_SUCCESS;
+    bool flag = true;
+    for (auto inputCfg : geOptConfig_) {
+        std::string cfgValue = paramContainer_[inputCfg];
+        switch (inputCfg) {
+            case INPUT_CFG_GE_OPT_FP_POINT:
+            case INPUT_CFG_GE_OPT_BP_POINT:
+            case INPUT_CFG_COM_TASK_TRACE:
+            case INPUT_CFG_COM_TRAINING_TRACE:
+            case INPUT_CFG_COM_BIU:
+                ret = CheckSwitchValid(cfgValue);
+                break;
+            case INPUT_CFG_COM_BIU_FREQ:
+                ret = CheckFreqValid(cfgValue, inputCfg);
+                break;
+            default:
+                ret = PROFILING_FAILED;
+        }
+        if (ret != PROFILING_SUCCESS) {
+            cfgList.push_back(inputCfg);
+            flag = false;
+        }
+    }
+    return flag ? PROFILING_SUCCESS : PROFILING_FAILED;
 }
 
 int GeOptParamAdapter::GetParamFromInputCfg(ProfGeOptionsConfig geCfg, SHARED_PTR_ALIA<ProfileParams> params)
 {
+    params_ = params;
+    Init();
+}
+
+// ============================================ acl json ==================================
+int AclApiParamAdapter::Init()
+{
+    paramContainer_.fill("");
+    int ret = CheckListInit();
+    if (ret != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
+    std::vector<InputCfg>({
+        INPUT_CFG_COM_TRAINING_TRACE, INPUT_CFG_COM_SYS_DEVICES
+    }).swap(aclApiConfig_);
+}
+
+int AclApiParamAdapter::ParamsCheckAclApi(std::vector<InputCfg> &cfgList) const
+{
+    int ret = PROFILING_SUCCESS;
+    bool flag = true;
+    for (auto inputCfg : aclApiConfig_) {
+        std::string cfgValue = paramContainer_[inputCfg];
+        switch (inputCfg) {
+            case INPUT_CFG_COM_TRAINING_TRACE:
+                ret = CheckSwitchValid(cfgValue);
+                break;
+            case INPUT_CFG_COM_SYS_DEVICES:
+                ret = CheckSysDeviceValid(cfgValue);
+                break;
+            default:
+                ret = PROFILING_FAILED;
+        }
+        if (ret != PROFILING_SUCCESS) {
+            cfgList.push_back(inputCfg);
+            flag = false;
+        }
+    }
+    return flag ? PROFILING_SUCCESS : PROFILING_FAILED;
 }
 
 int AclApiParamAdapter::GetParamFromInputCfg(const ProfConfig * apiCfg, SHARED_PTR_ALIA<ProfileParams> params)
 {
+    params_ = params;
+    Init();
 }
 
 } // ParamsAdapter
