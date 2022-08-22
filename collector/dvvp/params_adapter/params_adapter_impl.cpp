@@ -8,13 +8,13 @@
 #include "params_adapter_impl.h"
 
 #include "errno/error_code.h"
-
+#include "config/config.h"
 namespace Collector {
 namespace Dvvp {
 namespace ParamsAdapter {
 using namespace Analysis::Dvvp::Msprof;
 using namespace analysis::dvvp::common::error;
-
+using namespace analysis::dvvp::common::config;
 int MsprofParamAdapter::Init()
 {
     paramContainer_.fill("");
@@ -108,6 +108,14 @@ int MsprofParamAdapter::ParamsCheckMsprof(std::vector<InputCfg> &cfgList) const
     return flag ? PROFILING_SUCCESS : PROFILING_FAILED;
 }
 
+
+int MsprofParamAdapter::TransToParams()
+{
+    params_->acl = MSVP_PROF_ON;
+    params_->result_dir = "/usr/local/Ascend";
+    return PROFILING_SUCCESS;
+}
+
 int MsprofParamAdapter::GetParamFromInputCfg(std::vector<std::pair<MsprofArgsType, MsprofCmdInfo>> msprofCfg,
     SHARED_PTR_ALIA<ProfileParams> params)
 {
@@ -122,6 +130,9 @@ int MsprofParamAdapter::GetParamFromInputCfg(std::vector<std::pair<MsprofArgsTyp
             return PROFILING_FAILED;
         }
         // TODO 判断argPair.second.args[argsType]是不是空字符串
+        if (!argPair.second.args[argsType]) {
+            return PROFILING_FAILED;
+        }
         paramContainer_[cfgType] = argPair.second.args[argsType];
     }
     // 
@@ -147,11 +158,11 @@ int MsprofParamAdapter::GetParamFromInputCfg(std::vector<std::pair<MsprofArgsTyp
     }
 
     // [6] 参数转换，转成Params（软件栈转uint64_t， 非软件栈保留在Params）
-    
-    // 报错打印
-    // analysis::dvvp::message::StatusInfo statusInfo_; 枚举值，状态，信息
-    // 外部使能方式根据枚举值打印参数名 warm加信息到statusInfo_，逻辑往下走，success往下走，不加信息
-    // fail 加信息+返回
+    ret = TransToParams();
+    if (ret != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
+    return PROFILING_SUCCESS;
 
 }
 
