@@ -31,7 +31,7 @@ class ClusterCommunicationParser:
         self._iteration_id = params["iteration_id"]
         self._data_collection = []
         self._communication_model = ClusterCommunicationModel(params)
-        self._cluster_info_model = ClusterInfoViewModel(params)
+        self._cluster_info_model = ClusterInfoViewModel(self._collection_path)
 
     def process(self: any) -> None:
         if not self._is_cluster_scene:
@@ -59,8 +59,9 @@ class ClusterCommunicationParser:
             if not _model.check_db():
                 return
             with self._cluster_info_model as _c_model:
-                if _c_model.check_db() and _c_model.check_table():
-                    rank_ids = _c_model.get_all_rank_id()
+                if not _c_model.check_db() or not _c_model.check_table():
+                    return
+                rank_ids = _c_model.get_all_rank_id()
             for rank_id in rank_ids:
                 communication_data = _model.get_cluster_communication(rank_id)
                 if not communication_data:
