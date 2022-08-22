@@ -95,7 +95,6 @@ public:
     ParamsAdapter()
     {
     }
-    virtual ~ParamsAdapter()=0;
     int CheckListInit();
     bool BlackSwitchCheck(InputCfg inputCfg) const;
     PlatformType GetPlatform() const;
