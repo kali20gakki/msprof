@@ -116,7 +116,7 @@ public:
     int CheckAppScrValid(const std::string &appScript) const;
     int MsprofCheckAppValid(const std::string &appParam) const;
     int MsprofCheckEnvValid(const std::string &envParam) const;
-    int MsprofCheckAiModeValid(const std::string &envParam) const;
+    int MsprofCheckAiModeValid(const std::string &aiModeParam, const InputCfg aiModeTypeOpt) const;
     int MsprofCheckSysDeviceValid(const std::string &devListParam) const;
     int MsprofCheckSysPeriodValid(const std::string &sysPeriodParam) const;
     int MsprofCheckHostSysValid(const std::string &hostSysParam) const;

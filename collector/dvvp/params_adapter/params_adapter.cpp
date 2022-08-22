@@ -10,12 +10,14 @@
 #include "param_validation.h"
 #include "errno/error_code.h"
 #include "mmpa_api.h"
+#include "platform/platform.h"
 
 namespace Collector {
 namespace Dvvp {
 namespace ParamsAdapter {
 
 using namespace Analysis::Dvvp::Common::Config;
+using namespace Analysis::Dvvp::Common::Platform;
 using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::common::validation;
 using namespace analysis::dvvp::common::utils;
@@ -328,26 +330,95 @@ int ParamsAdapter::CheckAppParamValid(const std::string &appParam) const
 
 int ParamsAdapter::MsprofCheckEnvValid(const std::string &envParam) const
 {
+    if (envParam.empty()) {
+        MSPROF_LOGE("Argument --environmet: expected one argument.");
+        return PROFILING_FAILED;
+    }
     return PROFILING_SUCCESS;
 }
 
-int ParamsAdapter::MsprofCheckAiModeValid(const std::string &envParam) const
+int ParamsAdapter::MsprofCheckAiModeValid(const std::string &aiModeParam, const InputCfg aiModeTypeOpt) const
 {
+    std::map<InputCfg, std::string> aiModeTypeList = {
+        {INPUT_CFG_COM_AIC_MODE, "aic-mode"},
+        {INPUT_CFG_COM_AIV_MODE, "aiv-mode"},
+    };
+    if (aiModeParam.empty()) {
+        MSPROF_LOGE("Argument --%s: expected one argument.", aiModeTypeList[aiModeTypeOpt].c_str());
+        return PROFILING_FAILED;
+    }
+    if (aiModeParam != "task-based" && aiModeParam != "sample-based") {
+        MSPROF_LOGE("Argument %s: invalid value: %s."
+            "Please input 'task-based' or 'sample-based'.", aiModeTypeList[aiModeTypeOpt].c_str(), aiModeParam.c_str());
+        return PROFILING_FAILED;
+    }
     return PROFILING_SUCCESS;
 }
 
 int ParamsAdapter::MsprofCheckSysDeviceValid(const std::string &devListParam) const
 {
+    if (devListParam.empty()) {
+        MSPROF_LOGE("Argument --sys-devices is empty, Please enter a valid --sys-devices value.");
+        return PROFILING_FAILED;
+    }
+    if (devListParam == "all") {
+        return PROFILING_SUCCESS;
+    }
+    std::vector<std::string> devices = Utils::Split(devListParam, false, "", ",");
+    for (size_t i = 0; i < devices.size(); ++i) {
+        if (!(ParamValidation::instance()->CheckDeviceIdIsValid(devices[i]))) {
+            MSPROF_LOGE("Argument --sys-devices: invalid value: %s."
+                "Please input data is a id num.", devices[i].c_str());
+            return PROFILING_FAILED;
+        }
+    }
     return PROFILING_SUCCESS;
 }
 
 int ParamsAdapter::MsprofCheckSysPeriodValid(const std::string &sysPeriodParam) const
 {
+    if (sysPeriodParam.empty()) {
+        MSPROF_LOGE("Argument --sys-period is empty, Please enter a valid --sys-period value.");
+        return PROFILING_FAILED;
+    }
+    if (Utils::CheckStringIsNonNegativeIntNum(sysPeriodParam)) {
+        auto syspeRet = std::stoi(sysPeriodParam);
+        if (!(ParamValidation::instance()->IsValidSleepPeriod(syspeRet))) {
+            MSPROF_LOGE("Argument --sys-period: invalid int value: %d."
+                "The max period is 30 days.", syspeRet);
+            return PROFILING_FAILED;
+        } else {
+            return PROFILING_SUCCESS;
+        }
+    } else {
+        MSPROF_LOGE("Argument --sys-period: invalid value: %s."
+            "Please input an integer value.The max period is 30 days.", sysPeriodParam);
+        return PROFILING_FAILED;
+    }
     return PROFILING_SUCCESS;
 }
 
 int ParamsAdapter::MsprofCheckHostSysValid(const std::string &hostSysParam) const
 {
+#if (defined(_WIN32) || defined(_WIN64) || defined(_MSC_VER))
+    MSPROF_LOGE("Currently, --host-sys can be used only in the Linux environment.");
+#endif
+    if (Platform::instance()->RunSocSide()) {
+        MSPROF_LOGE("Not in host side, --host-sys is not supported");
+    }
+    if (hostSysParam.empty()) {
+        MSPROF_LOGE("Argument --host-sys is empty. Please input in the range of "
+            "'cpu|mem|disk|network|osrt'");
+        return PROFILING_FAILED;
+    }
+    std::vector<std::string> hostSysArray = Utils::Split(hostSysParam, false, "", ",");
+    for (size_t i = 0; i < hostSysArray.size(); ++i) {
+        if (!(ParamValidation::instance()->CheckHostSysOptionsIsValid(hostSysArray[i]))) {
+            MSPROF_LOGE("Argument --host-sys: invalid value:%s. Please input in the range of "
+                "'cpu|mem|disk|network|osrt'", hostSysArray[i].c_str());
+            return PROFILING_FAILED;
+        }
+    }
     return PROFILING_SUCCESS;
 }
 
