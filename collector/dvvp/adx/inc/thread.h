@@ -23,10 +23,10 @@ static const int32_t WAIT_TID_TIME   = 500;
 
 class Thread {
 public:
-    static int32_t CreateTask(mmThread &tid, mmUserBlock_t &funcBlock);
-    static int32_t CreateTaskWithDefaultAttr(mmThread &tid, mmUserBlock_t &funcBlock);
-    static int32_t CreateDetachTaskWithDefaultAttr(mmThread &tid, mmUserBlock_t &funcBlock);
-    static int32_t CreateDetachTask(mmThread &tid, mmUserBlock_t &funcBlock);
+    static int32_t CreateTask(MmThread &tid, MmUserBlockT &funcBlock);
+    static int32_t CreateTaskWithDefaultAttr(MmThread &tid, MmUserBlockT &funcBlock);
+    static int32_t CreateDetachTaskWithDefaultAttr(MmThread &tid, MmUserBlockT &funcBlock);
+    static int32_t CreateDetachTask(MmThread &tid, MmUserBlockT &funcBlock);
 };
 
 class Runnable {
@@ -49,7 +49,7 @@ private:
 
 private:
     mutable bool quit_;
-    mmThread tid_;
+    MmThread tid_;
     mutable bool isStarted_;
     std::string threadName_;
 };

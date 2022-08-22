@@ -952,7 +952,7 @@ int ProfCtrlcpuJob::Uninit()
     argsV.push_back("-2");
     argsV.push_back("perf");
 
-    mmProcess appProcess = MSVP_MMPROCESS;
+    MmProcess appProcess = MSVP_MMPROCESS;
     int exitCode = analysis::dvvp::common::utils::VALID_EXIT_CODE;
     static const std::string CMD = "sudo";
     analysis::dvvp::common::utils::ExecCmdParams execCmdParams(CMD, false, "");
@@ -1581,7 +1581,7 @@ void PerfExtraTask::ResolvePerfRecordData(const std::string &fileName)
     argsVec.push_back("--show-kernel-path");
     argsVec.push_back("-f");
     int exitCode = analysis::dvvp::common::utils::VALID_EXIT_CODE;
-    mmProcess appProcess = MSVP_MMPROCESS;
+    MmProcess appProcess = MSVP_MMPROCESS;
     analysis::dvvp::common::utils::ExecCmdParams execCmdParams(cmd, false, newFilePath);
     int ret = analysis::dvvp::common::utils::Utils::ExecCmd(execCmdParams,
                                                             argsVec,   // const std::vector<std::string> & argv,

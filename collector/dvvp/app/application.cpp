@@ -123,7 +123,7 @@ int Application::CanonicalizeAppParam(std::vector<std::string> &paramsCmd)
     return PROFILING_SUCCESS;
 }
 
-int Application::LaunchApp(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params, mmProcess &appProcess)
+int Application::LaunchApp(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params, MmProcess &appProcess)
 {
     if (params == nullptr) {
         MSPROF_LOGE("[LaunchApp]params is empty.");

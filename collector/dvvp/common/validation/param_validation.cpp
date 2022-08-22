@@ -663,7 +663,7 @@ bool ParamValidation::CheckHostSysPidIsValid(const int hostSysPid)
     }
 
     std::string hostPidPath = "/proc/" + std::to_string(hostSysPid) + "/status";
-    mmStat_t statBuf;
+    MmStatT statBuf;
     int ret = MmStatGet(hostPidPath, &statBuf);
     if (ret < 0) {
         MSPROF_LOGE("Invalid --host-sys-pid: %d", hostSysPid);

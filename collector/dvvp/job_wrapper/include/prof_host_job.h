@@ -139,7 +139,7 @@ private:
     std::string profHostOutDir_;
     std::string toolName_;
     HostTimerHandlerTag hostTimerTag_;
-    mmProcess hostProcess_;
+    MmProcess hostProcess_;
     uint32_t outDataNumber_{0};
     SHARED_PTR_ALIA<CollectionJobCfg> collectionJobCfg_;
     struct ProfHostWriteDoneInfo hostWriteDoneInfo_;

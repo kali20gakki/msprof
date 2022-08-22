@@ -93,7 +93,7 @@ TEST_F(INPUT_PARSER_UTEST, CheckHostSysCmdOutIsExist) {
     file << "command not found" << std::endl;
     file.close();
     std::string toolName = "iotop";
-    mmProcess tmpProcess = 1;
+    MmProcess tmpProcess = 1;
     // invalid options
     EXPECT_EQ(PROFILING_FAILED, parser.CheckHostSysCmdOutIsExist(tempFile, toolName, tmpProcess));
 }
@@ -129,7 +129,7 @@ TEST_F(INPUT_PARSER_UTEST, UninitCheckHostSysCmd) {
         .then(returnValue(PROFILING_SUCCESS));
 
     InputParser parser = InputParser();
-    mmProcess checkProcess = 1;
+    MmProcess checkProcess = 1;
 
     EXPECT_EQ(PROFILING_SUCCESS, parser.UninitCheckHostSysCmd(checkProcess));
     EXPECT_EQ(PROFILING_FAILED, parser.UninitCheckHostSysCmd(checkProcess));
