@@ -37,6 +37,7 @@
 #include "msprof_tx_manager.h"
 #include "utils/utils.h"
 #include "mmpa_api.h"
+#include "params_adapter_impl.h"
 
 using namespace analysis::dvvp::common::config;
 using namespace analysis::dvvp::common::error;
@@ -53,6 +54,7 @@ using namespace Analysis::Dvvp::MsprofErrMgr;
 using namespace Msprof::MsprofTx;
 using namespace Collector::Dvvp::Plugin;
 using namespace Collector::Dvvp::Mmpa;
+using namespace Collector::Dvvp::ParamsAdapter;
 
 namespace Msprofiler {
 namespace Api {
@@ -370,6 +372,11 @@ int ProfAclMgr::ProfAclStart(PROF_CONF_CONST_PTR profStartCfg)
     // generate params
     MSVP_MAKE_SHARED0_RET(params_, analysis::dvvp::message::ProfileParams, ACL_ERROR_PROFILING_FAILURE);
     params_->profiling_mode = analysis::dvvp::message::PROFILING_MODE_DEF;
+    auto paramsAdapter = AclApiParamAdapter();
+    ret = paramsAdapter.GetParamFromInputCfg(profStartCfg, params_);
+    if (ret != PROFILING_SUCCESS) {
+        return ACL_ERROR_PROFILING_FAILURE;
+    }
     SHARED_PTR_ALIA<analysis::dvvp::proto::MsProfStartReq> feature = nullptr;
     MSVP_MAKE_SHARED0_RET(feature, analysis::dvvp::proto::MsProfStartReq, ACL_ERROR_PROFILING_FAILURE);
     ProfStartCfgToMsprofCfg(profStartCfg->dataTypeConfig, profStartCfg->aicoreMetrics, feature);
@@ -887,7 +894,7 @@ int ProfAclMgr::ProfStartAiCpuTrace(const uint64_t dataTypeConfig, const uint32_
         return PROFILING_SUCCESS;
     }
     // aicpu trace
-    if (!(dataTypeConfig & PROF_AICPU_TRACE_MASK)) {
+    if (!(dataTypeConfig & PROF_AICPU_MASK)) {
         return PROFILING_SUCCESS;
     }
     for (uint32_t i = 0; i < devNums; i++) {
@@ -919,23 +926,23 @@ void ProfAclMgr::GenerateSystemTraceConf(const uint64_t dataTypeConfig, ProfAico
     bool systemTraceConf = false;
     SHARED_PTR_ALIA<analysis::dvvp::proto::ProfilerConf> conf = nullptr;
     MSVP_MAKE_SHARED0_VOID(conf, analysis::dvvp::proto::ProfilerConf);
-    if (dataTypeConfig & PROF_CPU_MASK) {
+    if (dataTypeConfig & PROF_SYS_CPU_MASK) {
         systemTraceConf = true;
         conf->set_cpusamplinginterval(DEFAULT_PROFILING_INTERVAL_20MS);
         params->ai_ctrl_cpu_profiling_events = "0x11,0x8";
         params->ts_cpu_profiling_events = "0x11,0x8";
     }
-    if (dataTypeConfig & PROF_HARDWARE_MEMORY_MASK) {
+    if (dataTypeConfig & PROF_SYS_HARDWARE_MEM_MASK) {
         systemTraceConf = true;
         conf->set_hardwarememsamplinginterval(analysis::dvvp::message::DEFAULT_PROFILING_INTERVAL_100MS);
         params->ddr_profiling_events = "read,write";
         params->hbm_profiling_events = "read,write";
     }
-    if (dataTypeConfig & PROF_IO_MASK) {
+    if (dataTypeConfig & PROF_SYS_IO_MASK) {
         systemTraceConf = true;
         conf->set_iosamplinginterval(analysis::dvvp::message::DEFAULT_PROFILING_INTERVAL_100MS);
     }
-    if (dataTypeConfig & PROF_INTER_CONNECTION_MASK) {
+    if (dataTypeConfig & PROF_SYS_INTERCONNECTION_MASK) {
         systemTraceConf = true;
         conf->set_interconnectionsamplinginterval(analysis::dvvp::message::DEFAULT_PROFILING_INTERVAL_100MS);
     }
@@ -991,7 +998,7 @@ void ProfAclMgr::ProfStartCfgToMsprofCfg(const uint64_t dataTypeConfig, ProfAico
         conf->set_aicoremetrics(metrics);
     }
     // aiv
-    if ((dataTypeConfig & PROF_AIVECTORCORE_METRICS_MASK) && !metrics.empty()) {
+    if ((dataTypeConfig & PROF_AIV_METRICS_MASK) && !metrics.empty()) {
         conf->set_aivmetrics(metrics);
     }
     // l2cache
@@ -1239,7 +1246,7 @@ void ProfAclMgr::ProfDataTypeConfigHandle(SHARED_PTR_ALIA<analysis::dvvp::messag
         dataTypeConfig_ |= PROF_AICORE_METRICS;
     }
     if (!params->aiv_metrics.empty()) {
-        dataTypeConfig_ |= PROF_AIVECTORCORE_METRICS;
+        dataTypeConfig_ |= PROF_AIV_METRICS;
     }
     if (params->ts_timeline == MSVP_PROF_ON) {
         dataTypeConfig_ |= PROF_SCHEDULE_TIMELINE | PROF_TASK_TIME;
@@ -1250,7 +1257,7 @@ void ProfAclMgr::ProfDataTypeConfigHandle(SHARED_PTR_ALIA<analysis::dvvp::messag
 
     UpdateDataTypeConfigBySwitch(params->acl, PROF_ACL_API);
     UpdateDataTypeConfigBySwitch(params->hwts_log, PROF_TASK_TIME);
-    UpdateDataTypeConfigBySwitch(params->aicpuTrace, PROF_AICPU_TRACE);
+    UpdateDataTypeConfigBySwitch(params->aicpuTrace, PROF_AICPU);
     UpdateDataTypeConfigBySwitch(params->modelExecution, PROF_MODEL_EXECUTE);
     UpdateDataTypeConfigBySwitch(params->runtimeApi, PROF_RUNTIME_API);
     UpdateDataTypeConfigBySwitch(params->runtimeTrace, PROF_RUNTIME_TRACE);
@@ -1842,6 +1849,49 @@ int32_t ProfAclMgr::StopProfConfigCheck(uint64_t dataTypeConfigStop, uint64_t da
             std::vector<std::string>({dataTypeConfigStr, "dataTypeConfig", errorReason}));
         return PROFILING_FAILED;
     }
+    return PROFILING_SUCCESS;
+}
+
+int32_t ProfAclMgr::MsprofSetConfig(aclprofConfigType cfgType, std::string config)
+{
+    int ret = PROFILING_SUCCESS;
+    // param check
+    switch(cfgType) {
+        case ACL_PROF_STORAGE_LIMIT:
+            ret = ParamValidation::instance()->CheckStorageLimit(config) ? PROFILING_SUCCESS : PROFILING_FAILED;
+            break;
+        case ACL_PROF_SYS_USAGE_FREQ:
+            ret = ParamValidation::instance()->CheckSamplingFreq(config, SYS_SAMPLING_FREQ_MIN_NUM, SYS_SAMPLING_FREQ_MAX_NUM) ? PROFILING_SUCCESS : PROFILING_FAILED;
+            break;
+        case ACL_PROF_SYS_CPU_FREQ:
+            ret = ParamValidation::instance()->CheckSamplingFreq(config, CPU_SAMPLING_FREQ_MIN_NUM, CPU_SAMPLING_FREQ_MAX_NUM) ? PROFILING_SUCCESS : PROFILING_FAILED;
+            break;
+        case ACL_PROF_SYS_PID_USAGE_FREQ:
+            ret = ParamValidation::instance()->CheckSamplingFreq(config, PID_SAMPLING_FREQ_MIN_NUM, PID_SAMPLING_FREQ_MAX_NUM) ? PROFILING_SUCCESS : PROFILING_FAILED;
+            break;
+        case ACL_PROF_SYS_HARDWARE_MEM_FREQ:
+            ret = ParamValidation::instance()->CheckSamplingFreq(config, HARDWARE_MEM_SAMPLING_FREQ_MIN_NUM, HARDWARE_MEM_SAMPLING_FREQ_MAX_NUM) ? PROFILING_SUCCESS : PROFILING_FAILED;
+            break;
+        case ACL_PROF_SYS_IO_FREQ:
+            ret = ParamValidation::instance()->CheckSamplingFreq(config, IO_SAMPLING_FREQ_MIN_NUM, IO_SAMPLING_FREQ_MAX_NUM) ? PROFILING_SUCCESS : PROFILING_FAILED;
+            break;
+        case ACL_PROF_SYS_INTERCONNECTION_FREQ:
+            ret = ParamValidation::instance()->CheckSamplingFreq(config, INTERCONNECTION_SAMPLING_FREQ_MIN_NUM, INTERCONNECTION_SAMPLING_FREQ_MAX_NUM) ? PROFILING_SUCCESS : PROFILING_FAILED;
+            break;
+        case ACL_PROF_DVPP_FREQ:
+            ret = ParamValidation::instance()->CheckSamplingFreq(config, DVPP_SAMPLING_FREQ_MIN_NUM, DVPP_SAMPLING_FREQ_MAX_NUM) ? PROFILING_SUCCESS : PROFILING_FAILED;
+            break;
+        case ACL_PROF_HOST_SYS:
+            ret = ParamValidation::instance()->CheckHostSysOptionsIsValid(config) ? PROFILING_SUCCESS : PROFILING_FAILED;
+            break;
+        default:
+            ret = PROFILING_FAILED;
+    }
+    if (ret != PROFILING_SUCCESS) {
+        MSPROF_LOGE("rrr");
+        return ret;
+    }
+    argsArr_[cfgType] = config;
     return PROFILING_SUCCESS;
 }
 }   // namespace Api

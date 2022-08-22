@@ -115,56 +115,6 @@ bool InputParser::HasHelpParamOnly()
     return ret;
 }
 
-int InputParser::PreCheckPlatform(int opt, CONST_CHAR_PTR argv[])
-{
-    // std::vector<MsprofArgsType> miniBlackSwith = {ARGS_INTERCONNECTION_PROFILING, ARGS_INTERCONNECTION_FREQ,
-    //     ARGS_L2_PROFILING, ARGS_AIV, ARGS_AIV_FREQ, ARGS_AIV_MODE, ARGS_AIV_METRICS, ARGS_POWER,
-    //     ARGS_STARS_ACSQ_TASK, ARGS_STARS_SUB_TASK, ARGS_FFTS_THREAD_TASK, ARGS_FFTS_BLOCK, ARGS_ACC_PMU_MODE,
-    //     ARGS_BIU, ARGS_BIU_FREQ};
-    // std::vector<MsprofArgsType> cloudBlackSwith = {ARGS_AIV, ARGS_AIV_FREQ, ARGS_AIV_MODE, ARGS_AIV_METRICS,
-    //     ARGS_STARS_ACSQ_TASK, ARGS_STARS_SUB_TASK, ARGS_FFTS_THREAD_TASK, ARGS_FFTS_BLOCK, ARGS_ACC_PMU_MODE,
-    //     ARGS_LOW_POWER, ARGS_BIU, ARGS_BIU_FREQ};
-    // std::vector<MsprofArgsType> mdcBlackSwith = {ARGS_IO_PROFILING, ARGS_IO_SAMPLING_FREQ, ARGS_INTERCONNECTION_FREQ,
-    //     ARGS_INTERCONNECTION_PROFILING, ARGS_AICPU, ARGS_STARS_ACSQ_TASK, ARGS_STARS_SUB_TASK, ARGS_FFTS_THREAD_TASK,
-    //     ARGS_FFTS_BLOCK, ARGS_ACC_PMU_MODE, ARGS_LOW_POWER, ARGS_PYTHON_PATH, ARGS_SUMMARY_FORMAT, ARGS_PARSE,
-    //     ARGS_QUERY, ARGS_EXPORT, ARGS_EXPORT_ITERATION_ID, ARGS_EXPORT_MODEL_ID, ARGS_BIU, ARGS_BIU_FREQ};
-    // std::vector<MsprofArgsType> dcBlackSwith = {ARGS_AIV, ARGS_AIV_FREQ, ARGS_AIV_MODE, ARGS_AIV_METRICS,
-    //     ARGS_IO_PROFILING, ARGS_IO_SAMPLING_FREQ, ARGS_STARS_ACSQ_TASK, ARGS_STARS_SUB_TASK, ARGS_FFTS_THREAD_TASK,
-    //     ARGS_FFTS_BLOCK, ARGS_ACC_PMU_MODE, ARGS_LOW_POWER, ARGS_BIU, ARGS_BIU_FREQ};
-    // std::vector<MsprofArgsType> lhisiBlackSwith = {ARGS_AIV, ARGS_AIV_FREQ, ARGS_AIV_MODE, ARGS_AIV_METRICS,
-    //     ARGS_IO_PROFILING, ARGS_IO_SAMPLING_FREQ, ARGS_INTERCONNECTION_FREQ, ARGS_INTERCONNECTION_PROFILING, ARGS_AICPU,
-    //     ARGS_HARDWARE_MEM, ARGS_HARDWARE_MEM_SAMPLING_FREQ, ARGS_L2_PROFILING, ARGS_DVPP_PROFILING, ARGS_DVPP_FREQ,
-    //     ARGS_CPU_SAMPLING_FREQ, ARGS_CPU_PROFILING, ARGS_LLC_PROFILING, ARGS_STARS_ACSQ_TASK, ARGS_STARS_SUB_TASK,
-    //     ARGS_FFTS_THREAD_TASK, ARGS_FFTS_BLOCK, ARGS_ACC_PMU_MODE, ARGS_LOW_POWER, ARGS_PYTHON_PATH,
-    //     ARGS_SUMMARY_FORMAT, ARGS_PARSE, ARGS_QUERY, ARGS_EXPORT, ARGS_EXPORT_ITERATION_ID, ARGS_EXPORT_MODEL_ID,
-    //     ARGS_BIU, ARGS_BIU_FREQ};
-    // std::vector<MsprofArgsType> cloudBlackSwithV2 = {};
-
-    // std::map<Analysis::Dvvp::Common::Config::PlatformType, std::vector<MsprofArgsType>> platformArgsType = {
-    //     {PlatformType::MINI_TYPE, miniBlackSwith},
-    //     {PlatformType::CLOUD_TYPE, cloudBlackSwith},
-    //     {PlatformType::MDC_TYPE, mdcBlackSwith},
-    //     {PlatformType::LHISI_TYPE, lhisiBlackSwith},
-    //     {PlatformType::DC_TYPE, dcBlackSwith},
-    //     {PlatformType::CHIP_V4_1_0, cloudBlackSwithV2},
-    // };
-
-    // Analysis::Dvvp::Common::Config::PlatformType platformType = ConfigManager::instance()->GetPlatformType();
-    // if (platformType < PlatformType::MINI_TYPE || platformType >= PlatformType::END_TYPE) {
-    //     return PROFILING_FAILED;
-    // }
-    // std::vector<MsprofArgsType> platSwithList = platformArgsType[platformType];
-    // if (std::find(platSwithList.begin(), platSwithList.end(), opt) != platSwithList.end()) {
-    //     std::cout << Utils::GetSelfPath() << ": unrecognized option '"
-    //               << argv[MmGetOptInd() - 1] << "'" << std::endl;
-    //     std::cout << "PlatformType:" << static_cast<uint8_t>(platformType) << std::endl;
-    //     MsprofCmdUsage("");
-    //     return PROFILING_FAILED;
-    // }
-
-    return PROFILING_SUCCESS;
-}
-
 int InputParser::ProcessOptions(int opt, struct MsprofCmdInfo &cmdInfo)
 {
     int ret = MSPROF_DAEMON_ERROR;

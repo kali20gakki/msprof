@@ -389,8 +389,15 @@ int AclApiParamAdapter::ParamsCheckAclApi(std::vector<InputCfg> &cfgList) const
 
 int AclApiParamAdapter::GetParamFromInputCfg(const ProfConfig * apiCfg, SHARED_PTR_ALIA<ProfileParams> params)
 {
+    MSPROF_LOGE("[qqq]GetParamFromInputCfg start");
     params_ = params;
-    Init();
+    int ret = Init();
+    if (ret != PROFILING_SUCCESS) {
+        MSPROF_LOGE("Init Failed");
+        return PROFILING_FAILED;
+    }
+    
+    MSPROF_LOGE("[qqq]GetParamFromInputCfg end");
 }
 
 } // ParamsAdapter

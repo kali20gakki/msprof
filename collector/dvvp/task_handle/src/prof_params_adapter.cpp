@@ -12,7 +12,6 @@
 #include <google/protobuf/util/json_util.h>
 #include "errno/error_code.h"
 #include "message/codec.h"
-#include "message/prof_params.h"
 #include "config/config.h"
 #include "config/config_manager.h"
 #include "validation/param_validation.h"
