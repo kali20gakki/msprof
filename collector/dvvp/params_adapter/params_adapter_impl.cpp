@@ -71,7 +71,7 @@ int MsprofParamAdapter::ParamsCheckMsprof(std::vector<InputCfg> &cfgList) const
                 break;
             case INPUT_CFG_COM_AIV_MODE:
             case INPUT_CFG_COM_AIC_MODE:
-                ret = MsprofCheckAiModeValid(cfgValue);
+                ret = MsprofCheckAiModeValid(cfgValue, inputCfg);
                 break;
             case INPUT_CFG_COM_AIC_FREQ:
             case INPUT_CFG_COM_AIV_FREQ:
