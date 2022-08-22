@@ -113,16 +113,16 @@ public:
     int CheckLlcModeValid(const std::string &LlcMode) const;
     int CheckHostSysUsageValid(const std::string &HostSysUsage) const;
     //======msprof======
-    int CheckAppValid(const std::string &appParam) const;
-    int CheckEnvValid(const std::string &envParam) const;
-    int CheckAiModeValid(const std::string &envParam) const;
-    int CheckSysDeviceValid(const std::string &devListParam) const;
-    int CheckSysPeriodValid(const std::string &sysPeriodParam) const;
-    int CheckHostSysValid(const std::string &hostSysParam) const;
-    int CheckHostSysPidValid(const std::string &hostSysPidParam) const;
-    int CheckPythonPathValid(const std::string &pythonPathParam) const;
-    int CheckSummaryFormatValid(const std::string &formatParam) const;
-    int CheckExportIdValid(const std::string &idParam, const std::string &exportIdType) const;
+    int MsprofCheckAppValid(const std::string &appParam) const;
+    int MsprofCheckEnvValid(const std::string &envParam) const;
+    int MsprofCheckAiModeValid(const std::string &envParam) const;
+    int MsprofCheckSysDeviceValid(const std::string &devListParam) const;
+    int MsprofCheckSysPeriodValid(const std::string &sysPeriodParam) const;
+    int MsprofCheckHostSysValid(const std::string &hostSysParam) const;
+    int MsprofCheckHostSysPidValid(const std::string &hostSysPidParam) const;
+    int MsprofCheckPythonPathValid(const std::string &pythonPathParam) const;
+    int MsprofCheckSummaryFormatValid(const std::string &formatParam) const;
+    int MsprofCheckExportIdValid(const std::string &idParam, const std::string &exportIdType) const;
 
 private:
     std::vector<InputCfg> commonConfig_;
