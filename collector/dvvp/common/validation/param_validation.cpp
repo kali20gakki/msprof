@@ -15,6 +15,7 @@
 #include "platform/platform.h"
 #include "msprof_error_manager.h"
 #include "config/config_manager.h"
+#include "acl/acl_prof.h"
 
 namespace analysis {
 namespace dvvp {
@@ -261,7 +262,7 @@ bool ParamValidation::CheckHostSysUsageIsValid(const std::string &hostSysUsage)
     }
     std::vector<std::string> hostSysUsageArray = Utils::Split(hostSysUsage, false, "", ",");
     for (size_t i = 0; i < hostSysUsageArray.size(); ++i) {
-        if ((hostSysUsageArray[i].compare("cpu") != 0) || (hostSysUsageArray[i].compare("mem") != 0)) {
+        if ((hostSysUsageArray[i].compare("cpu") != 0) && (hostSysUsageArray[i].compare("mem") != 0)) {
             MSPROF_LOGE("Argument host-sys-usage: invalid value:%s. Please input in the range of "
                 "'cpu | mem'", hostSysUsageArray[i].c_str());
             return false;

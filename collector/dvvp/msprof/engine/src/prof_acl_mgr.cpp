@@ -371,6 +371,7 @@ int ProfAclMgr::ProfAclStart(PROF_CONF_CONST_PTR profStartCfg)
     }
     // generate params
     MSVP_MAKE_SHARED0_RET(params_, analysis::dvvp::message::ProfileParams, ACL_ERROR_PROFILING_FAILURE);
+    params_->result_dir = resultPath_;
     params_->profiling_mode = analysis::dvvp::message::PROFILING_MODE_DEF;
     auto paramsAdapter = AclApiParamAdapter();
     ret = paramsAdapter.GetParamFromInputCfg(profStartCfg, argsArr_, params_);
@@ -1827,22 +1828,30 @@ int32_t ProfAclMgr::StopProfConfigCheck(uint64_t dataTypeConfigStop, uint64_t da
 int32_t ProfAclMgr::MsprofSetConfig(aclprofConfigType cfgType, std::string config)
 {
     int ret = PROFILING_SUCCESS;
+    std::string configStr;
     // param check
     switch(cfgType) {
         case ACL_PROF_STORAGE_LIMIT:
             ret = ParamValidation::instance()->CheckStorageLimit(config) ? PROFILING_SUCCESS : PROFILING_FAILED;
             break;
+        case ACL_PROF_AIV_METRICS:
+            ConfigManager::instance()->AicoreMetricsEnumToName(static_cast<ProfAicoreMetrics>(std::stoi(config)), configStr);
+            ret = ParamValidation::instance()->CheckProfilingAicoreMetricsIsValid(configStr) ? PROFILING_SUCCESS : PROFILING_FAILED;
+            break;
         case ACL_PROF_SYS_USAGE_FREQ:
             ret = ParamValidation::instance()->CheckSamplingFreq(config, SYS_SAMPLING_FREQ_MIN_NUM, SYS_SAMPLING_FREQ_MAX_NUM) ? PROFILING_SUCCESS : PROFILING_FAILED;
-            break;
-        case ACL_PROF_SYS_CPU_FREQ:
-            ret = ParamValidation::instance()->CheckSamplingFreq(config, CPU_SAMPLING_FREQ_MIN_NUM, CPU_SAMPLING_FREQ_MAX_NUM) ? PROFILING_SUCCESS : PROFILING_FAILED;
             break;
         case ACL_PROF_SYS_PID_USAGE_FREQ:
             ret = ParamValidation::instance()->CheckSamplingFreq(config, PID_SAMPLING_FREQ_MIN_NUM, PID_SAMPLING_FREQ_MAX_NUM) ? PROFILING_SUCCESS : PROFILING_FAILED;
             break;
+        case ACL_PROF_SYS_CPU_FREQ:
+            ret = ParamValidation::instance()->CheckSamplingFreq(config, CPU_SAMPLING_FREQ_MIN_NUM, CPU_SAMPLING_FREQ_MAX_NUM) ? PROFILING_SUCCESS : PROFILING_FAILED;
+            break;
         case ACL_PROF_SYS_HARDWARE_MEM_FREQ:
             ret = ParamValidation::instance()->CheckSamplingFreq(config, HARDWARE_MEM_SAMPLING_FREQ_MIN_NUM, HARDWARE_MEM_SAMPLING_FREQ_MAX_NUM) ? PROFILING_SUCCESS : PROFILING_FAILED;
+            break;
+        case ACL_PROF_LLC_MODE:
+            ret = ParamValidation::instance()->CheckLlcModeIsValid(config) ? PROFILING_SUCCESS : PROFILING_FAILED;
             break;
         case ACL_PROF_SYS_IO_FREQ:
             ret = ParamValidation::instance()->CheckSamplingFreq(config, IO_SAMPLING_FREQ_MIN_NUM, IO_SAMPLING_FREQ_MAX_NUM) ? PROFILING_SUCCESS : PROFILING_FAILED;
@@ -1860,8 +1869,12 @@ int32_t ProfAclMgr::MsprofSetConfig(aclprofConfigType cfgType, std::string confi
             ret = PROFILING_FAILED;
     }
     if (ret != PROFILING_SUCCESS) {
-        MSPROF_LOGE("rrr");
+        MSPROF_LOGE("[qqq]");
         return ret;
+    }
+    if (cfgType == ACL_PROF_AIV_METRICS) {
+        argsArr_[cfgType] = configStr;
+        return PROFILING_SUCCESS;
     }
     argsArr_[cfgType] = config;
     return PROFILING_SUCCESS;

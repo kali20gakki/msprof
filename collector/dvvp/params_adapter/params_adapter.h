@@ -101,6 +101,8 @@ public:
     int ComCfgCheck(EnableType enableType, std::array<std::string, INPUT_CFG_MAX> paramContainer,
         std::vector<InputCfg> &cfgList) const;
     int TransToParam();
+    // To Del
+    void Print(std::array<std::string, INPUT_CFG_MAX> paramContainer);
 
 public:
     //======common=======
