@@ -13,6 +13,7 @@
 #include "message/prof_params.h"
 #include "msprofbin/include/input_parser.h"
 #include "prof_api_common.h"
+#include "acl/acl_prof.h"
 
 namespace Collector {
 namespace Dvvp {
@@ -79,11 +80,19 @@ private:
 class AclApiParamAdapter : public ParamsAdapter {
 public:
     AclApiParamAdapter() {};
-    int GetParamFromInputCfg(const ProfConfig * apiCfg, SHARED_PTR_ALIA<ProfileParams> params);
+    int GetParamFromInputCfg(const ProfConfig * apiCfg,
+        std::array<std::string, ACL_PROF_ARGS_MAX> argsArr,
+        SHARED_PTR_ALIA<ProfileParams> params);
 
 private:
     int Init();
     int ParamsCheckAclApi(std::vector<InputCfg> &cfgList) const;
+    void ProfCfgToContainer(const ProfConfig * apiCfg,
+        std::array<std::string, ACL_PROF_ARGS_MAX> argsArr);
+    void ProfTaskCfgToContainer(const ProfConfig * apiCfg,
+        std::array<std::string, ACL_PROF_ARGS_MAX> argsArr);
+    void ProfSystemCfgToContainer(const ProfConfig * apiCfg,
+        std::array<std::string, ACL_PROF_ARGS_MAX> argsArr);
 
 private:
     SHARED_PTR_ALIA<ProfileParams> params_;

@@ -9,12 +9,16 @@
 
 #include "errno/error_code.h"
 #include "config/config.h"
+#include "config_manager.h"
+
 namespace Collector {
 namespace Dvvp {
 namespace ParamsAdapter {
 using namespace Analysis::Dvvp::Msprof;
 using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::common::config;
+using namespace Analysis::Dvvp::Common::Config;
+using namespace analysis::dvvp::message;
 int MsprofParamAdapter::Init()
 {
     paramContainer_.fill("");
@@ -387,7 +391,105 @@ int AclApiParamAdapter::ParamsCheckAclApi(std::vector<InputCfg> &cfgList) const
     return flag ? PROFILING_SUCCESS : PROFILING_FAILED;
 }
 
-int AclApiParamAdapter::GetParamFromInputCfg(const ProfConfig * apiCfg, SHARED_PTR_ALIA<ProfileParams> params)
+void AclApiParamAdapter::ProfTaskCfgToContainer(const ProfConfig * apiCfg,
+    std::array<std::string, ACL_PROF_ARGS_MAX> argsArr)
+{
+    uint64_t dataTypeConfig = apiCfg->dataTypeConfig;
+    ProfAicoreMetrics aicMetrics = apiCfg->aicoreMetrics;
+    if (!argsArr[ACL_PROF_STORAGE_LIMIT].empty()) {
+        paramContainer_[INPUT_CFG_COM_STORAGE_LIMIT] = argsArr[ACL_PROF_STORAGE_LIMIT];
+    }
+    // 是否可以合并
+    if (GetPlatform() == PlatformType::MINI_TYPE) {
+        if ((dataTypeConfig & PROF_SCHEDULE_TIMELINE_MASK) ||
+            (dataTypeConfig & PROF_TASK_TIME_MASK)) {
+            paramContainer_[INPUT_CFG_COM_TASK_TIME] = MSVP_PROF_ON;
+        }
+    } else if (dataTypeConfig & PROF_TASK_TIME_MASK) {
+        paramContainer_[INPUT_CFG_COM_TASK_TIME] = MSVP_PROF_ON;
+    }
+    if (dataTypeConfig & PROF_SCHEDULE_TRACE_MASK) {
+        paramContainer_[INPUT_CFG_COM_TASK_TRACE] = MSVP_PROF_ON; // Check
+    }
+    // training trace
+    if (dataTypeConfig & PROF_TRAINING_TRACE_MASK) {
+        paramContainer_[INPUT_CFG_COM_TRAINING_TRACE] = MSVP_PROF_ON;
+    }
+    
+    std::string metrics;
+    ConfigManager::instance()->AicoreMetricsEnumToName(aicMetrics, metrics);
+    if ((dataTypeConfig & PROF_AICORE_METRICS_MASK) && !metrics.empty()) {
+        paramContainer_[INPUT_CFG_COM_AI_CORE] = MSVP_PROF_ON;
+        paramContainer_[INPUT_CFG_COM_AIC_METRICS] = metrics;
+        paramContainer_[INPUT_CFG_COM_AIC_MODE] = PROFILING_MODE_TASK_BASED;
+        paramContainer_[INPUT_CFG_COM_TASK_TRACE] = MSVP_PROF_ON;
+    }
+    if (!argsArr[ACL_PROF_AIV_METRICS].empty()) {
+        paramContainer_[INPUT_CFG_COM_AI_VECTOR] = MSVP_PROF_ON;
+        paramContainer_[INPUT_CFG_COM_AIV_METRICS] = argsArr[ACL_PROF_AIV_METRICS];
+        paramContainer_[INPUT_CFG_COM_AIV_MODE] = PROFILING_MODE_TASK_BASED;
+        paramContainer_[INPUT_CFG_COM_TASK_TRACE] = MSVP_PROF_ON;
+    }
+    if (dataTypeConfig & PROF_L2CACHE_MASK) {
+        paramContainer_[INPUT_CFG_COM_L2] = MSVP_PROF_ON;
+        paramContainer_[INPUT_CFG_COM_TASK_TRACE] = MSVP_PROF_ON;
+    }
+}
+
+void AclApiParamAdapter::ProfSystemCfgToContainer(const ProfConfig * apiCfg,
+        std::array<std::string, ACL_PROF_ARGS_MAX> argsArr)
+{
+    uint64_t dataTypeConfig = apiCfg->dataTypeConfig;
+    ProfAicoreMetrics aicMetrics = apiCfg->aicoreMetrics;
+    std::string metrics;
+    ConfigManager::instance()->AicoreMetricsEnumToName(aicMetrics, metrics);
+    if (!argsArr[ACL_PROF_SYS_CPU_FREQ].empty()) {
+        paramContainer_[INPUT_CFG_COM_SYS_CPU] = MSVP_PROF_ON;
+        paramContainer_[INPUT_CFG_COM_SYS_CPU_FREQ] = argsArr[ACL_PROF_SYS_CPU_FREQ];
+    }
+    if (!argsArr[ACL_PROF_SYS_HARDWARE_MEM_FREQ].empty()) {
+        paramContainer_[INPUT_CFG_COM_SYS_HARDWARE_MEM] = MSVP_PROF_ON;
+        paramContainer_[INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ] = argsArr[ACL_PROF_SYS_HARDWARE_MEM_FREQ];
+    }
+    if (!argsArr[ACL_PROF_LLC_MODE].empty() && !argsArr[ACL_PROF_SYS_HARDWARE_MEM_FREQ].empty()) {
+        paramContainer_[INPUT_CFG_COM_LLC_MODE] = argsArr[ACL_PROF_LLC_MODE];
+    }
+    if (!argsArr[ACL_PROF_SYS_IO_FREQ].empty()) {
+        paramContainer_[INPUT_CFG_COM_SYS_IO] = MSVP_PROF_ON;
+        paramContainer_[INPUT_CFG_COM_SYS_IO_FREQ] = argsArr[ACL_PROF_SYS_IO_FREQ];
+    }
+    if (!argsArr[ACL_PROF_SYS_INTERCONNECTION_FREQ].empty()) {
+        paramContainer_[INPUT_CFG_COM_SYS_INTERCONNECTION] = MSVP_PROF_ON;
+        paramContainer_[INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ] = argsArr[ACL_PROF_SYS_INTERCONNECTION_FREQ];
+    }
+    if (!argsArr[ACL_PROF_DVPP_FREQ].empty()) {
+        paramContainer_[INPUT_CFG_COM_DVPP] = MSVP_PROF_ON;
+        paramContainer_[INPUT_CFG_COM_DVPP_FREQ] = argsArr[ACL_PROF_DVPP_FREQ];
+    }
+    if (!argsArr[ACL_PROF_SYS_USAGE_FREQ].empty()) {
+        paramContainer_[INPUT_CFG_COM_SYS_USAGE] = MSVP_PROF_ON;
+        paramContainer_[INPUT_CFG_COM_SYS_USAGE_FREQ] = argsArr[ACL_PROF_SYS_USAGE_FREQ];
+    }
+    if (!argsArr[ACL_PROF_SYS_PID_USAGE_FREQ].empty()) {
+        paramContainer_[INPUT_CFG_COM_SYS_PID_USAGE] = MSVP_PROF_ON;
+        paramContainer_[INPUT_CFG_COM_SYS_PID_USAGE_FREQ] = argsArr[ACL_PROF_SYS_PID_USAGE_FREQ];
+    }
+    if (!argsArr[ACL_PROF_HOST_SYS].empty()) {
+        paramContainer_[INPUT_HOST_SYS_USAGE] = argsArr[ACL_PROF_HOST_SYS];
+    }
+    
+}
+
+void AclApiParamAdapter::ProfCfgToContainer(const ProfConfig * apiCfg,
+        std::array<std::string, ACL_PROF_ARGS_MAX> argsArr)
+{
+    ProfTaskCfgToContainer(apiCfg, argsArr);
+    ProfSystemCfgToContainer(apiCfg, argsArr);
+}
+
+int AclApiParamAdapter::GetParamFromInputCfg(const ProfConfig * apiCfg,
+    std::array<std::string, ACL_PROF_ARGS_MAX> argsArr,
+    SHARED_PTR_ALIA<ProfileParams> params)
 {
     MSPROF_LOGE("[qqq]GetParamFromInputCfg start");
     params_ = params;
@@ -396,7 +498,7 @@ int AclApiParamAdapter::GetParamFromInputCfg(const ProfConfig * apiCfg, SHARED_P
         MSPROF_LOGE("Init Failed");
         return PROFILING_FAILED;
     }
-    
+    ProfCfgToContainer(apiCfg, argsArr);
     MSPROF_LOGE("[qqq]GetParamFromInputCfg end");
 }
 

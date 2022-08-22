@@ -17,6 +17,7 @@
 #include "errno/error_code.h"
 #include "utils/utils.h"
 #include "message/prof_params.h"
+#include "prof_api_common.h"
 
 namespace Analysis {
 namespace Dvvp {
@@ -95,6 +96,7 @@ public:
     int GetAicoreEvents(const std::string &aicoreMetricsType, std::string &aicoreEvents) const;
     int GetL2cacheEvents(std::string &l2CacheEvents);
     void MsprofL2CacheAdapter(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params);
+    void AicoreMetricsEnumToName(ProfAicoreMetrics aicMetrics, std::string &name);
 
 private:
     void InitFrequency();
