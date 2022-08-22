@@ -454,6 +454,13 @@ int ParamsAdapter::MsprofCheckExportIdValid(const std::string &idParam, const st
     return PROFILING_SUCCESS;
 }
 
+void ParamsAdapter::Print(std::array<std::string, INPUT_CFG_MAX> paramContainer)
+{
+    for(int i = 0; i < INPUT_CFG_MAX; i++) {
+        MSPROF_LOGE("[Debug_q] %d : %s", i, paramContainer[i].c_str());
+    }
+}
+
 } // ParamsAdapter
 } // Dvvp
 } // Collector

@@ -391,9 +391,29 @@ int AclApiParamAdapter::ParamsCheckAclApi(std::vector<InputCfg> &cfgList) const
     return flag ? PROFILING_SUCCESS : PROFILING_FAILED;
 }
 
+std::string AclApiParamAdapter::devIdToStr(uint32_t devNum, const uint32_t *devList)
+{
+    std::string devStr;
+    bool flag = false;
+    for(uint32_t i = 0; i < devNum; i++) {
+        if(!flag) {
+            flag = true;
+            devStr += std::to_string(devList[i]);
+            continue;
+        }
+        devStr += ",";
+        devStr += std::to_string(devList[i]);
+    }
+    return devStr;
+}
+
 void AclApiParamAdapter::ProfTaskCfgToContainer(const ProfConfig * apiCfg,
     std::array<std::string, ACL_PROF_ARGS_MAX> argsArr)
 {
+    std::string devStr = devIdToStr(apiCfg->devNums, apiCfg->devIdList);
+    if (!devStr.empty()) {
+        paramContainer_[INPUT_CFG_COM_SYS_DEVICES] = devStr;
+    }
     uint64_t dataTypeConfig = apiCfg->dataTypeConfig;
     ProfAicoreMetrics aicMetrics = apiCfg->aicoreMetrics;
     if (!argsArr[ACL_PROF_STORAGE_LIMIT].empty()) {
@@ -487,6 +507,15 @@ void AclApiParamAdapter::ProfCfgToContainer(const ProfConfig * apiCfg,
     ProfSystemCfgToContainer(apiCfg, argsArr);
 }
 
+int AclApiParamAdapter::TransToParams()
+{
+    params_->profiling_mode = analysis::dvvp::message::PROFILING_MODE_DEF;
+    params_->acl = MSVP_PROF_ON;
+    params_->result_dir = "/usr/local/Ascend";
+    params_->ts_keypoint = MSVP_PROF_ON;
+    return PROFILING_SUCCESS;
+}
+
 int AclApiParamAdapter::GetParamFromInputCfg(const ProfConfig * apiCfg,
     std::array<std::string, ACL_PROF_ARGS_MAX> argsArr,
     SHARED_PTR_ALIA<ProfileParams> params)
@@ -498,7 +527,33 @@ int AclApiParamAdapter::GetParamFromInputCfg(const ProfConfig * apiCfg,
         MSPROF_LOGE("Init Failed");
         return PROFILING_FAILED;
     }
+    if (!params_->result_dir.empty()) {
+        paramContainer_[INPUT_CFG_COM_OUTPUT] = params_->result_dir;
+    }
     ProfCfgToContainer(apiCfg, argsArr);
+    
+    // =================================
+    std::vector<InputCfg> errCfgList;
+    ret = ParamsCheckAclApi(errCfgList);
+    if (ret != PROFILING_SUCCESS && !errCfgList.empty()) {
+        // todo 打印errCfgList中的错误
+        return PROFILING_FAILED;
+    }
+    // [5] 公有参数校验（调基类接口）
+    errCfgList.clear();
+    ret = ComCfgCheck(ENABLE_API, paramContainer_, errCfgList);
+    if (ret != PROFILING_SUCCESS) {
+        // todo 打印errCfgList中的错误
+        return PROFILING_FAILED;
+    }
+
+    // [6] 参数转换，转成Params（软件栈转uint64_t， 非软件栈保留在Params）
+    ret = TransToParams();
+    if (ret != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
+    Print(paramContainer_);
+    return PROFILING_SUCCESS;
     MSPROF_LOGE("[qqq]GetParamFromInputCfg end");
 }
 
