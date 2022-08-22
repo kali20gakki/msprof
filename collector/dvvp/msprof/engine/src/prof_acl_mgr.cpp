@@ -373,8 +373,9 @@ int ProfAclMgr::ProfAclStart(PROF_CONF_CONST_PTR profStartCfg)
     MSVP_MAKE_SHARED0_RET(params_, analysis::dvvp::message::ProfileParams, ACL_ERROR_PROFILING_FAILURE);
     params_->profiling_mode = analysis::dvvp::message::PROFILING_MODE_DEF;
     auto paramsAdapter = AclApiParamAdapter();
-    ret = paramsAdapter.GetParamFromInputCfg(profStartCfg, params_);
+    ret = paramsAdapter.GetParamFromInputCfg(profStartCfg, argsArr_, params_);
     if (ret != PROFILING_SUCCESS) {
+        MSPROF_LOGE("[qqq]");
         return ACL_ERROR_PROFILING_FAILURE;
     }
     SHARED_PTR_ALIA<analysis::dvvp::proto::MsProfStartReq> feature = nullptr;
@@ -922,7 +923,7 @@ void ProfAclMgr::GenerateSystemTraceConf(const uint64_t dataTypeConfig, ProfAico
                                          SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params)
 {
     std::string metrics;
-    AicoreMetricsEnumToName(aicMetrics, metrics);
+    ConfigManager::instance()->AicoreMetricsEnumToName(aicMetrics, metrics);
     bool systemTraceConf = false;
     SHARED_PTR_ALIA<analysis::dvvp::proto::ProfilerConf> conf = nullptr;
     MSVP_MAKE_SHARED0_VOID(conf, analysis::dvvp::proto::ProfilerConf);
@@ -992,7 +993,7 @@ void ProfAclMgr::ProfStartCfgToMsprofCfg(const uint64_t dataTypeConfig, ProfAico
     SHARED_PTR_ALIA<analysis::dvvp::proto::ProfilerConf> conf = nullptr;
     MSVP_MAKE_SHARED0_VOID(conf, analysis::dvvp::proto::ProfilerConf);
     std::string metrics;
-    AicoreMetricsEnumToName(aicMetrics, metrics);
+    ConfigManager::instance()->AicoreMetricsEnumToName(aicMetrics, metrics);
     // ai_core
     if ((dataTypeConfig & PROF_AICORE_METRICS_MASK) && !metrics.empty()) {
         conf->set_aicoremetrics(metrics);
@@ -1009,35 +1010,6 @@ void ProfAclMgr::ProfStartCfgToMsprofCfg(const uint64_t dataTypeConfig, ProfAico
         feature->set_task_trace_conf(analysis::dvvp::message::EncodeJson(conf));
     }
     MSPROF_LOGI("Transformed msporf cfg result: %s", feature->DebugString().c_str());
-}
-
-void ProfAclMgr::AicoreMetricsEnumToName(ProfAicoreMetrics aicMetrics, std::string &name)
-{
-    switch (aicMetrics) {
-        case PROF_AICORE_ARITHMETIC_UTILIZATION:
-            name = ARITHMETIC_UTILIZATION;
-            break;
-        case PROF_AICORE_PIPE_UTILIZATION:
-            name = PIPE_UTILIZATION;
-            break;
-        case PROF_AICORE_MEMORY_BANDWIDTH:
-            name = MEMORY_BANDWIDTH;
-            break;
-        case PROF_AICORE_L0B_AND_WIDTH:
-            name = L0B_AND_WIDTH;
-            break;
-        case PROF_AICORE_RESOURCE_CONFLICT_RATIO:
-            name = RESOURCE_CONFLICT_RATIO;
-            break;
-        case PROF_AICORE_MEMORY_UB:
-            name = MEMORY_UB;
-            break;
-        case PROF_AICORE_NONE:
-            break;
-        default:
-            MSPROF_LOGE("Invalid aicore metrics enum: %u", aicMetrics);
-            MSPROF_INNER_ERROR("EK9999", "Invalid aicore metrics enum: %u", aicMetrics);
-    }
 }
 
 /**
@@ -1121,7 +1093,7 @@ int ProfAclMgr::UpdateSubscribeInfo(const uint32_t modelId, const uint32_t devId
     }
     // check aicore
     std::string aicoreMetrics;
-    AicoreMetricsEnumToName(profSubscribeConfig->aicoreMetrics, aicoreMetrics);
+    ConfigManager::instance()->AicoreMetricsEnumToName(profSubscribeConfig->aicoreMetrics, aicoreMetrics);
     if (iterDev->second.params->ai_core_metrics != aicoreMetrics) {
         MSPROF_LOGE("Subscribe aicore metrics %s is different from previous one: %s", aicoreMetrics.c_str(),
             iterDev->second.params->ai_core_metrics.c_str());
