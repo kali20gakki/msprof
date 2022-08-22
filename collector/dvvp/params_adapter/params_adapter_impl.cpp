@@ -47,10 +47,10 @@ int MsprofParamAdapter::ParamsCheckMsprof(std::vector<InputCfg> &cfgList) const
         std::string cfgValue = paramContainer_[inputCfg];
         switch (inputCfg) {
             case INPUT_CFG_MSPROF_APPLICATION:
-                ret = CheckAppValid(cfgValue);
+                ret = MsprofCheckAppValid(cfgValue);
                 break;
             case INPUT_CFG_MSPROF_ENVIRONMENT:
-                ret = CheckEnvValid(cfgValue);
+                ret = MsprofCheckEnvValid(cfgValue);
                 break;
             case INPUT_CFG_COM_AI_CORE:
             case INPUT_CFG_COM_AI_VECTOR:
@@ -71,7 +71,7 @@ int MsprofParamAdapter::ParamsCheckMsprof(std::vector<InputCfg> &cfgList) const
                 break;
             case INPUT_CFG_COM_AIV_MODE:
             case INPUT_CFG_COM_AIC_MODE:
-                ret = CheckAiModeValid(cfgValue);
+                ret = MsprofCheckAiModeValid(cfgValue);
                 break;
             case INPUT_CFG_COM_AIC_FREQ:
             case INPUT_CFG_COM_AIV_FREQ:
@@ -79,26 +79,26 @@ int MsprofParamAdapter::ParamsCheckMsprof(std::vector<InputCfg> &cfgList) const
                 ret = CheckFreqValid(cfgValue, inputCfg);
                 break;
             case INPUT_CFG_COM_SYS_DEVICES:
-                ret = CheckSysDeviceValid(cfgValue);
+                ret = MsprofCheckSysDeviceValid(cfgValue);
                 break;
             case INPUT_CFG_COM_SYS_PERIOD:
-                ret = CheckSysPeriodValid(cfgValue);
+                ret = MsprofCheckSysPeriodValid(cfgValue);
                 break;
             case INPUT_CFG_HOST_SYS:
-                ret = CheckHostSysValid(cfgValue);
+                ret = MsprofCheckHostSysValid(cfgValue);
                 break;
             case INPUT_CFG_HOST_SYS_PID:
-                ret = CheckHostSysPidValid(cfgValue);
+                ret = MsprofCheckHostSysPidValid(cfgValue);
                 break;
             case INPUT_CFG_PYTHON_PATH:
-                ret = CheckPythonPathValid(cfgValue);
+                ret = MsprofCheckPythonPathValid(cfgValue);
                 break;
             case INPUT_CFG_SUMMARY_FORMAT:
-                ret = CheckSummaryFormatValid(cfgValue);
+                ret = MsprofCheckSummaryFormatValid(cfgValue);
                 break;
             case INPUT_CFG_ITERATION_ID:
             case INPUT_CFG_MODEL_ID:
-                ret = CheckExportIdValid(cfgValue, "");
+                ret = MsprofCheckExportIdValid(cfgValue, "");
                 break;
             default:
                 ret = PROFILING_FAILED;
@@ -374,7 +374,7 @@ int AclApiParamAdapter::ParamsCheckAclApi(std::vector<InputCfg> &cfgList) const
                 ret = CheckSwitchValid(cfgValue);
                 break;
             case INPUT_CFG_COM_SYS_DEVICES:
-                ret = CheckSysDeviceValid(cfgValue);
+                ret = MsprofCheckSysDeviceValid(cfgValue);
                 break;
             default:
                 ret = PROFILING_FAILED;
