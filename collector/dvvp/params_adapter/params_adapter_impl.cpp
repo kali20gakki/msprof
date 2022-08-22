@@ -41,6 +41,9 @@ int MsprofParamAdapter::ParamsCheckMsprof(std::vector<InputCfg> &cfgList) const
     int ret = PROFILING_SUCCESS;
     bool flag = true;
     for (auto inputCfg : msprofConfig_) {
+        if (setConfig_.find(inputCfg) == setConfig_.end()) {
+            continue;
+        }
         std::string cfgValue = paramContainer_[inputCfg];
         switch (inputCfg) {
             case INPUT_CFG_MSPROF_APPLICATION:
@@ -120,7 +123,10 @@ int MsprofParamAdapter::GetParamFromInputCfg(std::vector<std::pair<MsprofArgsTyp
     SHARED_PTR_ALIA<ProfileParams> params)
 {
     params_ = params;
-    Init(); // 派生类初始化+基类初始化
+    int ret = Init(); // 派生类初始化+基类初始化
+    if (ret != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
     
     // [1]黑名单校验+表参数映射（用户参数-->全量表）
     for (auto argPair : msprofCfg) {
@@ -134,6 +140,7 @@ int MsprofParamAdapter::GetParamFromInputCfg(std::vector<std::pair<MsprofArgsTyp
             return PROFILING_FAILED;
         }
         paramContainer_[cfgType] = argPair.second.args[argsType];
+        setConfig_.insert(cfgType);
     }
     // 
 
@@ -144,7 +151,7 @@ int MsprofParamAdapter::GetParamFromInputCfg(std::vector<std::pair<MsprofArgsTyp
 
     // [4] 私有参数校验（派生类实现）
     std::vector<InputCfg> errCfgList;
-    int ret = ParamsCheckMsprof(errCfgList);
+    ret = ParamsCheckMsprof(errCfgList);
     if (ret != PROFILING_SUCCESS && !errCfgList.empty()) {
         // todo 打印errCfgList中的错误
         return PROFILING_FAILED;
