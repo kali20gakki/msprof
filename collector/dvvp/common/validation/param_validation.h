@@ -14,7 +14,6 @@
 #include "message/prof_params.h"
 #include "singleton/singleton.h"
 #include "utils/utils.h"
-#include "errno/error_code.h"
 #include "mmpa_api.h"
 
 namespace analysis {
@@ -68,6 +67,7 @@ public:
     bool IsValidSwitch(const std::string &switchStr);
     bool CheckStorageLimit(const std::string &storageLimit);
     bool CheckBiuFreqValid(const uint32_t biuFreq);
+    bool CheckSamplingFreq(std::string freq, int minVal, int maxVal);
 
 private:
     bool CheckTsSwitchProfiling(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params);

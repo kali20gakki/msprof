@@ -7,14 +7,13 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 */
+#include "param_validation.h"
 
 #include "config/config.h"
 #include "errno/error_code.h"
 #include "message/codec.h"
 #include "platform/platform.h"
-#include "message/prof_params.h"
 #include "msprof_error_manager.h"
-#include "param_validation.h"
 #include "config/config_manager.h"
 
 namespace analysis {
@@ -767,6 +766,18 @@ bool ParamValidation::CheckParamsJobIdRegexMatch(const std::string &paramsJobId)
         }
     }
     return true;
+}
+
+bool ParamValidation::CheckSamplingFreq(std::string freq, int minVal, int maxVal)
+{
+    if (Utils::CheckStringIsNonNegativeIntNum(freq)) {
+        int optRet = std::stoi(freq);
+        if ((optRet >= minVal) && (optRet <= maxVal)) {
+            return true;
+        }
+    }
+    MSPROF_LOGE("frequency: %s set failed, it should be in range of (%d, %d)", freq.c_str(), minVal, maxVal);
+    return false;
 }
 
 bool ParamValidation::CheckParamsModeRegexMatch(const std::string &paramsMode)

@@ -11,7 +11,7 @@
 #include "params_adapter.h"
 #include "proto/profiler_ext.pb.h"
 #include "message/prof_params.h"
-#include "input_parser.h"
+#include "msprofbin/include/input_parser.h"
 #include "prof_api_common.h"
 
 namespace Collector {

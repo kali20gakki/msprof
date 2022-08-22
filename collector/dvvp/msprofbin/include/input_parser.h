@@ -200,7 +200,6 @@ private:
     int CheckHostSysCmdOutIsExist(const std::string tmpDir, const std::string toolName, const mmProcess tmpProcess);
     int CheckHostOutString(const std::string tmpStr, const std::string toolName);
     int UninitCheckHostSysCmd(const mmProcess checkProcess);
-    int PreCheckPlatform(int opt, CONST_CHAR_PTR argv[]);
 
 private:
     SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params_;

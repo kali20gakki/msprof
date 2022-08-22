@@ -127,6 +127,7 @@ public:
     void MsprofHostHandle(void);
     int32_t MsprofSetDeviceImpl(uint32_t devId);
     void AddModelLoadConf(uint64_t &dataTypeConfig) const;
+    int32_t MsprofSetConfig(aclprofConfigType cfgType, std::string config);
 
 private:
     int MsprofTxSwitchPrecheck();
@@ -212,6 +213,7 @@ private:
     std::map<uint32_t, SHARED_PTR_ALIA<DeviceResponseHandler>> devResponses_;
     std::map<std::string, std::string> devUuid_;
     std::map<uint32_t, ProfSubscribeInfo> subscribeInfos_;
+    std::array<std::string, ACL_PROF_ARGS_MAX> argsArr_;
     std::mutex mtx_; // mutex for start/stop
     std::mutex mtxUploader_; // mutex for uploader
     std::mutex mtxDevResponse_; // mutex for device response

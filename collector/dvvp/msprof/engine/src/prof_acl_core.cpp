@@ -735,3 +735,28 @@ aclError aclprofRangeStop(uint32_t rangeId)
     }
     return MsprofTxManager::instance()->RangeStop(rangeId);
 }
+
+aclError aclprofSetConfig(aclprofConfigType configType, const char *val, uint32_t valLen)
+{
+    if (Platform::instance()->PlatformIsHelperHostSide()) {
+        MSPROF_LOGE("acl api not support in helper");
+        MSPROF_ENV_ERROR("EK0004", std::vector<std::string>({"intf", "platform"}),
+            std::vector<std::string>({"aclprofSetConfig", "SocCloud"}));
+        return ACL_ERROR_FEATURE_UNSUPPORTED;
+    }
+    if (configType < ACL_PROF_STORAGE_LIMIT || configType >= ACL_PROF_ARGS_MAX) {
+        MSPROF_LOGE("[qqq]");
+        return ACL_ERROR_INVALID_PARAM;
+    }
+    if (val == nullptr || strlen(val) != valLen) {
+        MSPROF_LOGE("[www]");
+        return ACL_ERROR_INVALID_PARAM;
+    }
+    std::string config(val, valLen);
+    int32_t ret = ProfAclMgr::instance()->MsprofSetConfig(configType, config);
+    if (ret != PROFILING_SUCCESS) {
+        MSPROF_LOGE("[eee]");
+        return ACL_ERROR_INVALID_PARAM;
+    }
+    return ACL_SUCCESS;
+}

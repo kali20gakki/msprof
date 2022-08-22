@@ -23,21 +23,39 @@
 extern "C" {
 #endif
 
-#define ACL_PROF_ACL_API                0x0001ULL
-#define ACL_PROF_TASK_TIME              0x0002ULL
-#define ACL_PROF_AICORE_METRICS         0x0004ULL
-#define ACL_PROF_AICPU                  0x0008ULL
-#define ACL_PROF_L2CACHE                0x0010ULL
-#define ACL_PROF_HCCL_TRACE             0x0020ULL
-#define ACL_PROF_TRAINING_TRACE         0x0040ULL
-#define ACL_PROF_MSPROFTX               0x0080ULL
-#define ACL_PROF_RUNTIME_API            0x0100ULL
+#define ACL_PROF_ACL_API                0x00000001ULL
+#define ACL_PROF_TASK_TIME              0x00000002ULL
+#define ACL_PROF_AICORE_METRICS         0x00000004ULL
+#define ACL_PROF_AICPU                  0x00000008ULL
+#define ACL_PROF_L2CACHE                0x00000010ULL
+#define ACL_PROF_HCCL_TRACE             0x00000020ULL
+#define ACL_PROF_TRAINING_TRACE         0x00000040ULL
+#define ACL_PROF_MSPROFTX               0x00000080ULL
+#define ACL_PROF_RUNTIME_API            0x00000100ULL
 
 /**
  * @deprecated please use aclprofGetOpTypeLen and aclprofGetOpTNameLen instead
  */
 #define ACL_PROF_MAX_OP_NAME_LEN        257
 #define ACL_PROF_MAX_OP_TYPE_LEN        65
+
+typedef enum {
+    // common 0-19
+    ACL_PROF_STORAGE_LIMIT = 0,
+    ACL_PROF_AIV_METRICS = 1,
+    // device-sys 20-39
+    ACL_PROF_SYS_USAGE_FREQ = 20,
+    ACL_PROF_SYS_PID_USAGE_FREQ = 21,
+    ACL_PROF_SYS_CPU_FREQ = 22,
+    ACL_PROF_SYS_HARDWARE_MEM_FREQ = 23,
+    ACL_PROF_LLC_MODE = 24,
+    ACL_PROF_SYS_IO_FREQ = 25,
+    ACL_PROF_SYS_INTERCONNECTION_FREQ = 26,
+    ACL_PROF_DVPP_FREQ = 27,
+    // host-sys 40-
+    ACL_PROF_HOST_SYS = 40,
+    ACL_PROF_ARGS_MAX
+} aclprofConfigType;
 
 typedef enum {
     ACL_AICORE_ARITHMETIC_UTILIZATION = 0,
@@ -436,6 +454,15 @@ MSVP_PROF_API aclError aclprofSetStampTraceMessage(void *stamp, const char *msg,
 * @retval OtherValues Failure
 */
 MSVP_PROF_API aclError aclprofMark(void *stamp);
+
+/**
+* @ingroup AscendCL
+* @brief set config value
+*
+* @retval aclError
+*/
+// 【TODO】调用时序，在create config之后，start之前
+MSVP_PROF_API aclError aclprofSetConfig(aclprofConfigType configType, const char *val, uint32_t valLen);
 
 #ifdef __cplusplus
 }
