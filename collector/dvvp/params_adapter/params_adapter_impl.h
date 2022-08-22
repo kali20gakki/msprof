@@ -43,6 +43,7 @@ private:
     std::array<std::string, INPUT_CFG_MAX> paramContainer_;
     std::unordered_map<int, InputCfg> cfgMap_;
     std::vector<InputCfg> msprofConfig_;
+    std::set<InputCfg>setConfig_;
 };
 
 class AclJsonParamAdapter : public ParamsAdapter {

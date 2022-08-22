@@ -99,7 +99,6 @@ SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> InputParser::MsprofGetOp
     if (ret != PROFILING_SUCCESS) {
         return nullptr;
     }
-    CmdLog::instance()->CmdErrorLog("output:%s", params_->result_dir.c_str());
     return ParamsCheck() == MSPROF_DAEMON_OK ? params_ : nullptr;
 }
 
