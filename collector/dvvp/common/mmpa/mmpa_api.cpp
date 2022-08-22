@@ -32,7 +32,7 @@ int32_t MmSleep(uint32_t milliSecond)
     return PROFILING_SUCCESS;
 }
 
-static int32_t LocalSetSchedAttr(pthread_attr_t *attr, const mmThreadAttr *threadAttr)
+static int32_t LocalSetSchedAttr(pthread_attr_t *attr, const MmThreadAttr *threadAttr)
 {
 #ifndef __ANDROID__
     if ((threadAttr->policyFlag == TRUE) || (threadAttr->priorityFlag == TRUE)) {
@@ -66,7 +66,7 @@ static int32_t LocalSetSchedAttr(pthread_attr_t *attr, const mmThreadAttr *threa
     return PROFILING_SUCCESS;
 }
 
-static int32_t LocalSetThreadAttr(pthread_attr_t *attr, const mmThreadAttr *threadAttr)
+static int32_t LocalSetThreadAttr(pthread_attr_t *attr, const MmThreadAttr *threadAttr)
 {
     int32_t ret = LocalSetSchedAttr(attr, threadAttr);
     if (ret != PROFILING_SUCCESS) {
@@ -89,8 +89,8 @@ static int32_t LocalSetThreadAttr(pthread_attr_t *attr, const mmThreadAttr *thre
     return PROFILING_SUCCESS;
 }
 
-int32_t MmCreateTaskWithThreadAttr(mmThread *threadHandle, const mmUserBlock_t *funcBlock,
-    const mmThreadAttr *threadAttr)
+int32_t MmCreateTaskWithThreadAttr(MmThread *threadHandle, const MmUserBlockT *funcBlock,
+    const MmThreadAttr *threadAttr)
 {
     if ((threadHandle == nullptr) || (funcBlock == nullptr) ||
         (funcBlock->procFunc == nullptr) || (threadAttr == nullptr)) {
@@ -119,7 +119,7 @@ int32_t MmCreateTaskWithThreadAttr(mmThread *threadHandle, const mmUserBlock_t *
     return ret;
 }
  
-int32_t MmJoinTask(mmThread *threadHandle)
+int32_t MmJoinTask(MmThread *threadHandle)
 {
     if (threadHandle == nullptr) {
         return PROFILING_INVALID_PARAM;
@@ -144,15 +144,15 @@ int32_t MmSetCurrentThreadName(const std::string &name)
     return PROFILING_SUCCESS;
 }
 
-mmTimespec MmGetTickCount()
+MmTimespec MmGetTickCount()
 {
-    mmTimespec rts;
+    MmTimespec rts;
     memset_s(&rts, sizeof(rts), 0, sizeof(rts));
     struct timespec ts;
     memset_s(&ts, sizeof(ts), 0, sizeof(ts));
     (void)clock_gettime(CLOCK_MONOTONIC_RAW, &ts);
-    rts.tv_sec = ts.tv_sec;
-    rts.tv_nsec = ts.tv_nsec;
+    rts.tvSec = ts.tv_sec;
+    rts.tvNsec = ts.tv_nsec;
     return rts;
 }
 
@@ -171,7 +171,7 @@ int32_t MmGetFileSize(const std::string &fileName, unsigned long long *length)
     return PROFILING_SUCCESS;
 }
 
-int32_t MmGetDiskFreeSpace(const std::string &path, mmDiskSize *diskSize)
+int32_t MmGetDiskFreeSpace(const std::string &path, MmDiskSize *diskSize)
 {
     if (path.empty() || (diskSize == nullptr)) {
         return PROFILING_INVALID_PARAM;
@@ -245,7 +245,7 @@ char *MmBaseName(char *path)
     return basename(path);
 }
 
-int32_t MmMkdir(const std::string &pathName, mmMode_t mode)
+int32_t MmMkdir(const std::string &pathName, MmMode_t mode)
 {
     if (pathName.empty()) {
         return PROFILING_INVALID_PARAM;
@@ -273,7 +273,7 @@ int32_t MmGetErrorCode()
     return ret;
 }
 
-char *MmGetErrorFormatMessage(mmErrorMsg errnum, char *buf, size_t size)
+char *MmGetErrorFormatMessage(MmErrorMsg errnum, char *buf, size_t size)
 {
     if ((buf == nullptr) || (size <= 0)) {
         return nullptr;
@@ -281,7 +281,7 @@ char *MmGetErrorFormatMessage(mmErrorMsg errnum, char *buf, size_t size)
     return strerror_r(errnum, buf, size);
 }
 
-int32_t MmScandir(const std::string &path, mmDirent ***entryList, mmFilter filterFunc, mmSort sort)
+int32_t MmScandir(const std::string &path, MmDirent ***entryList, MmFilter filterFunc, MmSort sort)
 {
     if (path.empty() || (entryList == nullptr)) {
         return PROFILING_INVALID_PARAM;
@@ -293,7 +293,7 @@ int32_t MmScandir(const std::string &path, mmDirent ***entryList, mmFilter filte
     return count;
 }
 
-void MmScandirFree(mmDirent **entryList, int32_t count)
+void MmScandirFree(MmDirent **entryList, int32_t count)
 {
     if (entryList == nullptr) {
         return;
@@ -427,8 +427,8 @@ int32_t MmChdir(const std::string &path)
     return chdir(path.c_str());
 }
 
-int32_t MmCreateProcess(const std::string &fileName, const mmArgvEnv *env,
-    const std::string &stdoutRedirectFile, mmProcess *id)
+int32_t MmCreateProcess(const std::string &fileName, const MmArgvEnv *env,
+    const std::string &stdoutRedirectFile, MmProcess *id)
 {
     if ((id == nullptr) || fileName.empty()) {
         return PROFILING_INVALID_PARAM;
@@ -465,7 +465,7 @@ int32_t MmCreateProcess(const std::string &fileName, const mmArgvEnv *env,
     return PROFILING_SUCCESS;
 }
 
-int32_t MmWaitPid(mmProcess pid, int32_t *status, int32_t options)
+int32_t MmWaitPid(MmProcess pid, int32_t *status, int32_t options)
 {
     if ((options != 0) && (options != M_WAIT_NOHANG) && (options != M_WAIT_UNTRACED)) {
         return PROFILING_INVALID_PARAM;
@@ -501,7 +501,7 @@ static int32_t LocalGetIfConf(int32_t sock, struct ifconf *ifc)
     return PROFILING_SUCCESS;
 }
 
-static int32_t LocalGetMacInfo(int32_t sock, struct ifconf ifc, mmMacInfo *macInfo, int32_t *count)
+static int32_t LocalGetMacInfo(int32_t sock, struct ifconf ifc, MmMacInfo *macInfo, int32_t *count)
 {
     int32_t i = 0;
     struct ifreq ifr;
@@ -522,7 +522,7 @@ static int32_t LocalGetMacInfo(int32_t sock, struct ifconf ifc, mmMacInfo *macIn
             if (ret != 0) {
                 continue;
             }
-            const unsigned char *ptr = (unsigned char *)&ifr.ifr_ifru.ifru_hwaddr.sa_data[0];
+            const unsigned char *ptr = reinterpret_cast<unsigned char *>(&ifr.ifr_ifru.ifru_hwaddr.sa_data[0]);
             ret = snprintf_s(macInfo[i].addr,
                 sizeof(macInfo[i].addr), sizeof(macInfo[i].addr) - 1U,
                 "%02X-%02X-%02X-%02X-%02X-%02X",
@@ -544,7 +544,7 @@ static int32_t LocalGetMacInfo(int32_t sock, struct ifconf ifc, mmMacInfo *macIn
     return PROFILING_SUCCESS;
 }
 
-int32_t MmGetMac(mmMacInfo **list, int32_t *count)
+int32_t MmGetMac(MmMacInfo **list, int32_t *count)
 {
     if ((list == nullptr) || (count == nullptr)) {
         return PROFILING_INVALID_PARAM;
@@ -563,9 +563,9 @@ int32_t MmGetMac(mmMacInfo **list, int32_t *count)
     int32_t len = static_cast<int32_t>(sizeof(struct ifreq));
     *count = (ifc.ifc_len / len);
     uint32_t cnt = static_cast<uint32_t>(*count);
-    size_t needSize = static_cast<size_t>(cnt) * sizeof(mmMacInfo);
+    size_t needSize = static_cast<size_t>(cnt) * sizeof(MmMacInfo);
  
-    mmMacInfo *macInfo = (mmMacInfo*)malloc(needSize);
+    MmMacInfo *macInfo = (MmMacInfo*)malloc(needSize);
     if (macInfo == nullptr) {
         *count = 0;
         (void)close(sock);
@@ -588,7 +588,7 @@ int32_t MmGetMac(mmMacInfo **list, int32_t *count)
     }
 }
 
-int32_t MmGetMacFree(mmMacInfo *list, int32_t count)
+int32_t MmGetMacFree(MmMacInfo *list, int32_t count)
 {
     if ((list == nullptr) || (count < 0)) {
         return PROFILING_INVALID_PARAM;
@@ -638,7 +638,7 @@ int32_t MmGetCwd(char *buffer, int32_t maxLen)
     }
 }
 
-int32_t MmGetLocalTime(mmSystemTime_t *sysTimePtr)
+int32_t MmGetLocalTime(MmSystemTimeT *sysTimePtr)
 {
     if (sysTimePtr == nullptr) {
         return PROFILING_INVALID_PARAM;
@@ -667,9 +667,9 @@ int32_t MmGetLocalTime(mmSystemTime_t *sysTimePtr)
     sysTimePtr->wMonth = nowTime.tm_mon + 1; // in localtime month is [0, 11], but in fact month is [1, 12]
     sysTimePtr->wYear = nowTime.tm_year + MMPA_COMPUTER_BEGIN_YEAR;
     sysTimePtr->wDayOfWeek = nowTime.tm_wday;
-    sysTimePtr->tm_yday = nowTime.tm_yday;
-    sysTimePtr->tm_isdst = nowTime.tm_isdst;
-    sysTimePtr->wMilliseconds = timeVal.tv_usec / MMPA_MSEC_TO_USEC;
+    sysTimePtr->tmYday = nowTime.tm_mday;
+    sysTimePtr->tmIsdst = nowTime.tm_isdst;
+    sysTimePtr->wMilliseconds = timeVal.tv_sec / MMPA_MSEC_TO_USEC;
 
     return PROFILING_SUCCESS;
 }
@@ -689,7 +689,7 @@ int32_t MmGetTid()
     return ret;
 }
 
-int32_t MmStatGet(const std::string &path, mmStat_t *buffer)
+int32_t MmStatGet(const std::string &path, MmStatT *buffer)
 {
     if (path.empty() || (buffer == nullptr)) {
         return PROFILING_INVALID_PARAM;
@@ -715,7 +715,7 @@ int32_t MmClose(int32_t fd)
     return PROFILING_SUCCESS;
 }
 
-int32_t MmGetOptLong(int32_t argc, char *const *argv, const char *opts, const mmStructOption *longOpts,
+int32_t MmGetOptLong(int32_t argc, char *const *argv, const char *opts, const MmStructOption *longOpts,
     int32_t *longIndex)
 {
     return getopt_long(argc, argv, opts, longOpts, longIndex);
@@ -731,7 +731,7 @@ char *MmGetOptArg()
     return optarg;
 }
 
-int32_t MmGetTimeOfDay(mmTimeval *timeVal, mmTimezone *timeZone)
+int32_t MmGetTimeOfDay(MmTimeval *timeVal, MmTimezone *timeZone)
 {
     if (timeVal == nullptr) {
         return PROFILING_INVALID_PARAM;
@@ -744,7 +744,7 @@ int32_t MmGetTimeOfDay(mmTimeval *timeVal, mmTimezone *timeZone)
     return ret;
 }
 
-int32_t MmOpen2(const std::string &pathName, int32_t flags, mmMode_t mode)
+int32_t MmOpen2(const std::string &pathName, int32_t flags, MmMode_t mode)
 {
     if (pathName.empty() || (flags < 0)) {
         return PROFILING_INVALID_PARAM;
@@ -874,7 +874,7 @@ static const char* LocalGetArmVersion(char *cpuImplememter, char *cpuPart)
     return nullptr;
 }
 
-static void LocalGetArmManufacturer(char *cpuImplememter, mmCpuDesc *cpuInfo)
+static void LocalGetArmManufacturer(char *cpuImplememter, MmCpuDesc *cpuInfo)
 {
     size_t len = strlen(cpuInfo->manufacturer);
     if (len != 0U) {
@@ -907,7 +907,7 @@ static void LocalGetArmManufacturer(char *cpuImplememter, mmCpuDesc *cpuInfo)
     return;
 }
 
-static void LocalGetCpuProcV1(FILE *fp, mmCpuDesc *cpuInfo)
+static void LocalGetCpuProcV1(FILE *fp, MmCpuDesc *cpuInfo)
 {
     char buf[MMPA_CPUPROC_BUF_SIZE]                 = {0};
     char cpuImplememter[MMPA_CPUINFO_DEFAULT_SIZE]  = {0};
@@ -944,7 +944,7 @@ static void LocalGetCpuProcV1(FILE *fp, mmCpuDesc *cpuInfo)
     return;
 }
 
-static void LocalGetCpuProcV2(FILE *fp, mmCpuDesc *cpuInfo, int32_t *physicalCount)
+static void LocalGetCpuProcV2(FILE *fp, MmCpuDesc *cpuInfo, int32_t *physicalCount)
 {
     char buf[MMPA_CPUPROC_BUF_SIZE]                 = {0};
     char cpuMhz[MMPA_CPUINFO_DEFAULT_SIZE]          = {0};
@@ -986,7 +986,7 @@ static void LocalGetCpuProcV2(FILE *fp, mmCpuDesc *cpuInfo, int32_t *physicalCou
     return;
 }
 
-static void LocalGetCpuProc(mmCpuDesc *cpuInfo, int32_t *physicalCount)
+static void LocalGetCpuProc(MmCpuDesc *cpuInfo, int32_t *physicalCount)
 {
     FILE *fp = fopen("/proc/cpuinfo", "r");
     if (fp == nullptr) {
@@ -999,7 +999,7 @@ static void LocalGetCpuProc(mmCpuDesc *cpuInfo, int32_t *physicalCount)
     return;
 }
 
-int32_t MmGetCpuInfo(mmCpuDesc **cpuInfo, int32_t *count)
+int32_t MmGetCpuInfo(MmCpuDesc **cpuInfo, int32_t *count)
 {
     if (count == nullptr) {
         return PROFILING_INVALID_PARAM;
@@ -1009,9 +1009,9 @@ int32_t MmGetCpuInfo(mmCpuDesc **cpuInfo, int32_t *count)
     }
     int32_t i = 0;
     int32_t ret = 0;
-    mmCpuDesc cpuDest = {};
+    MmCpuDesc cpuDest = {};
     int32_t physicalCount = 1;
-    mmCpuDesc *pCpuDesc = nullptr;
+    MmCpuDesc *pCpuDesc = nullptr;
     struct utsname sysInfo = {};
 
     LocalGetCpuProc(&cpuDest, &physicalCount);
@@ -1019,9 +1019,9 @@ int32_t MmGetCpuInfo(mmCpuDesc **cpuInfo, int32_t *count)
     if ((physicalCount < MMPA_MIN_PHYSICALCPU_COUNT) || (physicalCount > MMPA_MAX_PHYSICALCPU_COUNT)) {
         return PROFILING_FAILED;
     }
-    uint32_t needSize = static_cast<uint32_t>(physicalCount) * static_cast<uint32_t>(sizeof(mmCpuDesc));
+    uint32_t needSize = static_cast<uint32_t>(physicalCount) * static_cast<uint32_t>(sizeof(MmCpuDesc));
 
-    pCpuDesc = (mmCpuDesc*)malloc(needSize);
+    pCpuDesc = (MmCpuDesc*)malloc(needSize);
     if (pCpuDesc == nullptr) {
         return PROFILING_FAILED;
     }
@@ -1047,7 +1047,7 @@ int32_t MmGetCpuInfo(mmCpuDesc **cpuInfo, int32_t *count)
     return PROFILING_SUCCESS;
 }
 
-int32_t MmCpuInfoFree(mmCpuDesc *cpuInfo, int32_t count)
+int32_t MmCpuInfoFree(MmCpuDesc *cpuInfo, int32_t count)
 {
     if ((cpuInfo == nullptr) || (count == 0)) {
         return PROFILING_INVALID_PARAM;
@@ -1069,7 +1069,7 @@ ssize_t MmRead(int32_t fd, void *buf, uint32_t bufLen)
     return ret;
 }
 
-ssize_t MmSocketSend(mmSockHandle sockFd, void *sendBuf, int32_t sendLen, int32_t sendFlag)
+ssize_t MmSocketSend(MmSockHandle sockFd, void *sendBuf, int32_t sendLen, int32_t sendFlag)
 {
     if ((sockFd < 0) || (sendBuf == nullptr) || (sendLen <= 0) || (sendFlag < 0)) {
         return PROFILING_INVALID_PARAM;
@@ -1082,7 +1082,7 @@ ssize_t MmSocketSend(mmSockHandle sockFd, void *sendBuf, int32_t sendLen, int32_
     return ret;
 }
 
-int32_t MmMutexLock(mmMutex_t *mutex)
+int32_t MmMutexLock(MmMutexT *mutex)
 {
     if (mutex == nullptr) {
         return PROFILING_INVALID_PARAM;
@@ -1095,7 +1095,7 @@ int32_t MmMutexLock(mmMutex_t *mutex)
     return ret;
 }
 
-int32_t MmMutexUnLock(mmMutex_t *mutex)
+int32_t MmMutexUnLock(MmMutexT *mutex)
 {
     if (mutex == nullptr) {
         return PROFILING_INVALID_PARAM;

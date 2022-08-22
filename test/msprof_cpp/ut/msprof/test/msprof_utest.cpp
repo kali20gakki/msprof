@@ -61,7 +61,7 @@ void func_counter(Reporter* reporter) {
     reporter->Flush();
 }
 
-int GetDiskFreeSpaceStub(const char *path, mmDiskSize *diskSize) {
+int GetDiskFreeSpaceStub(const char *path, MmDiskSize *diskSize) {
     std::string paths(path);
     try {
         diskSize->availSize = 6*1024*1024;

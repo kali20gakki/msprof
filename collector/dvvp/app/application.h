@@ -21,7 +21,7 @@ namespace app {
 class Application {
 public:
     static int LaunchApp(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params,
-                         mmProcess &appProcess);
+                         MmProcess &appProcess);
 
 private:
     static int PrepareAppEnvs(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params,

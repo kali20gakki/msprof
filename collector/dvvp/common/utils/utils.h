@@ -26,8 +26,8 @@
 
 template <typename T>
 using SHARED_PTR_ALIA = std::shared_ptr<T>;
-using mmProcess = Collector::Dvvp::Mmpa::mmProcess;
-using mmArgvEnv = Collector::Dvvp::Mmpa::mmArgvEnv;
+using MmProcess = Collector::Dvvp::Mmpa::MmProcess;
+using MmArgvEnv = Collector::Dvvp::Mmpa::MmArgvEnv;
 namespace analysis {
 namespace dvvp {
 namespace common {
@@ -458,18 +458,18 @@ public:
     static std::string CanonicalizePath(const std::string &path);
     static int ExecCmd(const ExecCmdParams &execCmdParams,
         const std::vector<std::string> &argv, const std::vector<std::string> &envp,
-        int &exitCodeP, mmProcess &childProcess);
+        int &exitCodeP, MmProcess &childProcess);
     static int ExecCmdC(const ExecCmdArgv &execCmdArgv, const ExecCmdParams &execCmdParams, int &exitCodeP);
     static int ExecCmdCAsync(const ExecCmdArgv &execCmdArgv, const ExecCmdParams &execCmdParams,
-                             mmProcess &childProcess);
+                             MmProcess &childProcess);
     static int ChangeWorkDir(const std::string &fileName);
     static void SetArgEnv(CHAR_PTR_CONST argv[], const int argvCount, CHAR_PTR_CONST envp[],
-                          const int envCount, mmArgvEnv &argvEnv);
+                          const int envCount, MmArgvEnv &argvEnv);
     static int DoCreateCmdProcess(const std::string &stdoutRedirectFile,
                                   const std::string &fileName,
-                                  mmArgvEnv &argvEnv, mmProcess &tid);
-    static int WaitProcess(mmProcess process, bool &isExited, int &exitCode, bool hang = true);
-    static bool ProcessIsRuning(mmProcess process);
+                                  MmArgvEnv &argvEnv, MmProcess &tid);
+    static int WaitProcess(MmProcess process, bool &isExited, int &exitCode, bool hang = true);
+    static bool ProcessIsRuning(MmProcess process);
     static std::string JoinPath(const std::vector<std::string> &paths);
     static std::string LeftTrim(const std::string &str, const std::string &trims);
     static std::vector<std::string> Split(const std::string &input_str,

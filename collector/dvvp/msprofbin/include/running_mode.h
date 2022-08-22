@@ -57,7 +57,7 @@ protected:
 
     std::string modeName_;
     // In any time, at most one child task Process is running in all the mode except system
-    mmProcess taskPid_;
+    MmProcess taskPid_;
     std::string taskName_;
     std::string preCheckParams_;
     // forbidden params
