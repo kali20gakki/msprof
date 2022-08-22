@@ -9,6 +9,7 @@
 #include <map>
 #include "param_validation.h"
 #include "errno/error_code.h"
+#include "mmpa_api.h"
 
 namespace Collector {
 namespace Dvvp {
@@ -17,6 +18,8 @@ namespace ParamsAdapter {
 using namespace Analysis::Dvvp::Common::Config;
 using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::common::validation;
+using namespace analysis::dvvp::common::utils;
+using namespace Collector::Dvvp::Mmpa;
 
 int ParamsAdapter::CheckListInit()
 {
@@ -234,37 +237,121 @@ int ParamsAdapter::CheckHostSysUsageValid(const std::string &HostSysUsage) const
     return PROFILING_SUCCESS;
 }
 
-int ParamsAdapter::CheckAppValid(const std::string &appParam) const
+int ParamsAdapter::MsprofCheckAppValid(const std::string &appParam) const
+{
+    if (appParam.empty()) {
+        MSPROF_LOGE("Argument --application: expected one argument.");
+        return PROFILING_FAILED;
+    }
+    std::string remainingAppParams;
+    size_t index = appParam.find_first_of(" ");
+    if (index != std::string::npos) {
+        remainingAppParams = appParam.substr(index + 1);
+    }
+    std::string cmdParam = appParam.substr(0, index);
+    if (!Utils::IsAppName(cmdParam)) {
+        if (cmdParam.find("/") != std::string::npos) {
+            std::string absolutePathCmd = Utils::RelativePathToAbsolutePath(cmdParam);
+            if (Utils::CanonicalizePath(absolutePathCmd).empty()) {
+                MSPROF_LOGE("App path(%s) does not exist or permission denied.", absolutePathCmd.c_str());
+                return PROFILING_FAILED;
+            }
+            if (MmAccess2(absolutePathCmd, M_X_OK) != PROFILING_SUCCESS) {
+                MSPROF_LOGE("This app(%s) has no executable permission.", absolutePathCmd.c_str());
+                return PROFILING_FAILED;
+            }
+        }
+        if (CheckAppScrValid(remainingAppParams) != PROFILING_SUCCESS) {
+            return PROFILING_FAILED;
+        }
+        return PROFILING_SUCCESS;
+    }
+    std::string absolutePathApp = Utils::RelativePathToAbsolutePath(cmdParam);
+    if (CheckAppParamValid(absolutePathApp) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
+    return PROFILING_SUCCESS; 
+}
+
+int ParamsAdapter::CheckAppScrValid(const std::string &appScript) const
+{
+    if (appScript.empty()) {
+        MSPROF_LOGE("No input script to run.");
+        return PROFILING_FAILED;
+    }
+    size_t index = appScript.find_first_of(" ");
+    std::string inputScriptParam = appScript.substr(0, index);
+    std::string scriptParam = Utils::CanonicalizePath(inputScriptParam);
+    if (scriptParam.empty()) {
+        MSPROF_LOGE("Invalid input script.");
+        return PROFILING_FAILED;
+    }
+    if (Utils::IsSoftLink(scriptParam)) {
+        MSPROF_LOGE("Input script is soft link, not support", scriptParam.c_str());
+        return PROFILING_FAILED;
+    }
+    return PROFILING_SUCCESS;
+}
+
+int ParamsAdapter::CheckAppParamValid(const std::string &appParam) const
+{
+    if (Utils::IsSoftLink(appParam)) {
+        MSPROF_LOGE("App path(%s) is soft link, not support!", appParam.c_str());
+        return PROFILING_FAILED;
+    }
+    if (Utils::CanonicalizePath(appParam).empty()) {
+        MSPROF_LOGE("App path(%s) does not exist or permission denied!!!", appParam.c_str());
+        return PROFILING_FAILED;
+    }
+    if (MmAccess2(appParam, M_X_OK) != PROFILING_SUCCESS) {
+        MSPROF_LOGE("This app(%s) has no executable permission.", appParam.c_str());
+        return PROFILING_FAILED;
+    }
+    if (Utils::IsDir(appParam)) {
+        MSPROF_LOGE("Argument --application\%s is a directory, "
+            "please enter the executable file path.", appParam.c_str());
+        return PROFILING_FAILED;
+    }
+    std::string appDir;
+    std::string appName;
+    int ret = Utils::SplitPath(appParam, appDir, appName);
+    if (ret != PROFILING_SUCCESS) {
+        MSPROF_LOGE("Failed to get app name");
+        return PROFILING_FAILED;
+    }
+    if (!ParamValidation::instance()->CheckAppNameIsValid(appName)) {
+        MSPROF_LOGE("Argument --application(%s) is invalid.", appName.c_str());
+        return PROFILING_FAILED;
+    }
+    return PROFILING_SUCCESS;
+}
+
+int ParamsAdapter::MsprofCheckEnvValid(const std::string &envParam) const
 {
     return PROFILING_SUCCESS;
 }
 
-int ParamsAdapter::CheckEnvValid(const std::string &envParam) const
+int ParamsAdapter::MsprofCheckAiModeValid(const std::string &envParam) const
 {
     return PROFILING_SUCCESS;
 }
 
-int ParamsAdapter::CheckAiModeValid(const std::string &envParam) const
+int ParamsAdapter::MsprofCheckSysDeviceValid(const std::string &devListParam) const
 {
     return PROFILING_SUCCESS;
 }
 
-int ParamsAdapter::CheckSysDeviceValid(const std::string &devListParam) const
+int ParamsAdapter::MsprofCheckSysPeriodValid(const std::string &sysPeriodParam) const
 {
     return PROFILING_SUCCESS;
 }
 
-int ParamsAdapter::CheckSysPeriodValid(const std::string &sysPeriodParam) const
+int ParamsAdapter::MsprofCheckHostSysValid(const std::string &hostSysParam) const
 {
     return PROFILING_SUCCESS;
 }
 
-int ParamsAdapter::CheckHostSysValid(const std::string &hostSysParam) const
-{
-    return PROFILING_SUCCESS;
-}
-
-int ParamsAdapter::CheckHostSysPidValid(const std::string &hostSysPidParam) const
+int ParamsAdapter::MsprofCheckHostSysPidValid(const std::string &hostSysPidParam) const
 {
    if (!ParamValidation::instance()->CheckHostSysPidValid(hostSysPidParam)) {
         return PROFILING_FAILED;
@@ -272,7 +359,7 @@ int ParamsAdapter::CheckHostSysPidValid(const std::string &hostSysPidParam) cons
     return PROFILING_SUCCESS;
 }
 
-int ParamsAdapter::CheckPythonPathValid(const std::string &pythonPathParam) const
+int ParamsAdapter::MsprofCheckPythonPathValid(const std::string &pythonPathParam) const
 {
     if (!ParamValidation::instance()->CheckPythonPathIsValid(pythonPathParam)) {
         return PROFILING_FAILED;
@@ -280,7 +367,7 @@ int ParamsAdapter::CheckPythonPathValid(const std::string &pythonPathParam) cons
     return PROFILING_SUCCESS;
 }
 
-int ParamsAdapter::CheckSummaryFormatValid(const std::string &formatParam) const
+int ParamsAdapter::MsprofCheckSummaryFormatValid(const std::string &formatParam) const
 {
     if (!ParamValidation::instance()->CheckExportSummaryFormatIsValid(formatParam)) {
         return PROFILING_FAILED;
@@ -288,7 +375,7 @@ int ParamsAdapter::CheckSummaryFormatValid(const std::string &formatParam) const
     return PROFILING_SUCCESS;
 }
 
-int ParamsAdapter::CheckExportIdValid(const std::string &idParam, const std::string &exportIdType) const
+int ParamsAdapter::MsprofCheckExportIdValid(const std::string &idParam, const std::string &exportIdType) const
 {
     if (!ParamValidation::instance()->CheckExportIdIsValid(idParam, exportIdType)) {
         return PROFILING_FAILED;

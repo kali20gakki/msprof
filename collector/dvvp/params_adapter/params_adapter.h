@@ -112,6 +112,8 @@ public:
     int CheckLlcModeValid(const std::string &LlcMode) const;
     int CheckHostSysUsageValid(const std::string &HostSysUsage) const;
     //======msprof======
+    int CheckAppParamValid(const std::string &appParam) const;
+    int CheckAppScrValid(const std::string &appScript) const;
     int MsprofCheckAppValid(const std::string &appParam) const;
     int MsprofCheckEnvValid(const std::string &envParam) const;
     int MsprofCheckAiModeValid(const std::string &envParam) const;
