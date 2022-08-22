@@ -23,6 +23,7 @@
 #include "config/config.h"
 #include "msprof_dlog.h"
 #include "mmpa_api.h"
+#include "params_adapter_impl.h"
 
 namespace Analysis {
 namespace Dvvp {
@@ -37,6 +38,7 @@ using namespace analysis::dvvp::common::config;
 using namespace Collector::Dvvp::Msprofbin;
 using namespace Collector::Dvvp::Plugin;
 using namespace Collector::Dvvp::Mmpa;
+using namespace Collector::Dvvp::ParamsAdapter;
 
 const int MSPROF_DAEMON_ERROR       = -1;
 const int MSPROF_DAEMON_OK          = 0;
@@ -86,15 +88,18 @@ SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> InputParser::MsprofGetOp
     int optionIndex = 0;
     MsprofString optString  = "";
     struct MsprofCmdInfo cmdInfo = { {nullptr} };
+    std::vector<std::pair<MsprofArgsType, MsprofCmdInfo>>argsVec;
     while ((opt = MmGetOptLong(argc, const_cast<MsprofStrBufAddrT>(argv),
         optString, longOptions, &optionIndex)) != MSPROF_DAEMON_ERROR) {
-        if (PreCheckPlatform(opt, argv) == PROFILING_FAILED) {
-            return nullptr;
-        }
-        if (ProcessOptions(opt, cmdInfo) != MSPROF_DAEMON_OK) {
-            return nullptr;
-        }
+        cmdInfo.args[opt] = MmGetOptArg();
+        argsVec.push_back(std::make_pair(MsprofArgsType(opt), cmdInfo));
     }
+    auto paramAdapter = MsprofParamAdapter();
+    int ret = paramAdapter.GetParamFromInputCfg(argsVec, params_);
+    if (ret != PROFILING_SUCCESS) {
+        return nullptr;
+    }
+    CmdLog::instance()->CmdErrorLog("output:%s", params_->result_dir.c_str());
     return ParamsCheck() == MSPROF_DAEMON_OK ? params_ : nullptr;
 }
 

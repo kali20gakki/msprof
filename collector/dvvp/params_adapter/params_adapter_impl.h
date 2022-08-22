@@ -27,6 +27,7 @@ using analysis::dvvp::proto::ProfGeOptionsConfig;
 class MsprofParamAdapter : public ParamsAdapter {
 public:
     MsprofParamAdapter() {}
+    ~MsprofParamAdapter() {}
     int GetParamFromInputCfg(std::vector<std::pair<MsprofArgsType, MsprofCmdInfo>> msprofCfg,
         SHARED_PTR_ALIA<ProfileParams> params);
 
@@ -35,6 +36,7 @@ private:
     void CreateCfgMap();
     int ParamsCheckMsprof(std::vector<InputCfg> &cfgList) const;
     void DefaultCfgSet();
+    int TransToParams();
 
 private:
     SHARED_PTR_ALIA<ProfileParams> params_;
