@@ -6,8 +6,8 @@ Copyright Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
 """
 
 import json
-import os
 import logging
+import os
 from itertools import chain
 
 from common_func.common import error, print_msg
@@ -63,7 +63,7 @@ class StepTraceSummay:
             print_msg(result)
         else:
             logging.error("Save step trace data failed.")
-            print_msg(json.dumps({'status': NumberConstant.ERROR, 'info': 'save step trace data failed', 'data': ''}))
+            print_msg(json.dumps({'status': NumberConstant.ERROR, 'info': 'Save step trace data failed', 'data': ''}))
 
     def _process_in_cluster_scene(self: any) -> list:
         data = []
@@ -89,12 +89,14 @@ class StepTraceSummay:
         if self.iteration_id is None:
             self.iteration_id = StepTraceSummay.ID_NUM_FOR_ALL_ITERATIONS
         if self.all_devices and self.iteration_id == StepTraceSummay.ID_NUM_FOR_ALL_ITERATIONS:
-            error(StepTraceSummay.FILE_NAME,
-                  "For querying all devices data, you should input a valid iteration id.")
+            print_msg(json.dumps(
+                {'status': NumberConstant.ERROR,
+                 'info': 'For querying all devices data, you should input a valid iteration id.', 'data': ''}))
             raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR)
         if not self.all_devices and self.iteration_id != StepTraceSummay.ID_NUM_FOR_ALL_ITERATIONS:
-            error(StepTraceSummay.FILE_NAME,
-                  "For querying all devices data, you should input a valid iteration id.")
+            print_msg(json.dumps(
+                {'status': NumberConstant.ERROR,
+                 'info': 'For querying single device data, you should not input a iteration id.', 'data': ''}))
             raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR)
 
     def _query_in_cluster_scene(self: any, rank_id_collection: list) -> list:
@@ -176,7 +178,6 @@ class StepTraceSummay:
     def _process_in_non_cluster_scene(self: any) -> list:
         project_dir = self._find_info_file_dir()
         if not project_dir:
-            error(StepTraceSummay.FILE_NAME, "The input id is invalid.")
             return []
         prepare_log(self.collection_path)
         return self._query_in_non_cluster_scene(project_dir)
@@ -202,9 +203,14 @@ class StepTraceSummay:
                     result = device_path
                     is_found = True
                 elif str(self.npu_id) in devices and is_found:
-                    error(StepTraceSummay.FILE_NAME,
-                          "There are duplicate device id numbers in input dir. Please input a valid dir")
+                    print_msg(json.dumps(
+                        {'status': NumberConstant.ERROR,
+                         'info': 'There are duplicate device id numbers in input dir. Please input a valid dir.',
+                         'data': ''}))
                     return ""
+        if not result:
+            print_msg(json.dumps(
+                {'status': NumberConstant.ERROR, 'info': 'The input id is invalid.', 'data': ''}))
         return result
 
     def _query_in_non_cluster_scene(self: any, project_dir: str) -> list:
