@@ -90,7 +90,7 @@ enum EnableType {
     ENABLE_API
 };
 
-class ParamsAdapter{
+class ParamsAdapter {
 public:
     ParamsAdapter()
     {
@@ -127,7 +127,7 @@ public:
     int MsprofCheckPythonPathValid(const std::string &pythonPathParam) const;
     int MsprofCheckSummaryFormatValid(const std::string &formatParam) const;
     int MsprofCheckExportIdValid(const std::string &idParam, const std::string &exportIdType) const;
-
+    std::string SetOutputDir(std::string &outputDir);
 private:
     std::vector<InputCfg> commonConfig_;
     std::vector<InputCfg> blackSwitch_;
