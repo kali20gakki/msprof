@@ -10,6 +10,7 @@
 #include "errno/error_code.h"
 #include "config/config.h"
 #include "config_manager.h"
+#include "msprofbin/include/cmd_log.h"
 
 namespace Collector {
 namespace Dvvp {
@@ -19,14 +20,15 @@ using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::common::config;
 using namespace Analysis::Dvvp::Common::Config;
 using namespace analysis::dvvp::message;
+using namespace Collector::Dvvp::Msprofbin;
 int MsprofParamAdapter::Init()
 {
     paramContainer_.fill("");
-    int ret = CheckListInit();
+    int ret = CheckListInit(); // 平台信息获取、黑名单创建、公共参数列表创建
     if (ret != PROFILING_SUCCESS) {
         return PROFILING_FAILED;
     }
-    CreateCfgMap();
+    CreateCfgMap(); // 创建msprof二进制对应的映射表
     std::vector<InputCfg>({
         INPUT_CFG_MSPROF_APPLICATION, INPUT_CFG_MSPROF_ENVIRONMENT, INPUT_CFG_COM_AI_CORE,
         INPUT_CFG_COM_AIC_MODE, INPUT_CFG_COM_AIC_FREQ, INPUT_CFG_COM_AI_VECTOR, INPUT_CFG_COM_AIV_MODE,
@@ -37,7 +39,8 @@ int MsprofParamAdapter::Init()
         INPUT_CFG_COM_BIU, INPUT_CFG_COM_BIU_FREQ, INPUT_CFG_HOST_SYS, INPUT_CFG_HOST_SYS_PID,
         INPUT_CFG_PYTHON_PATH, INPUT_CFG_SUMMARY_FORMAT, INPUT_CFG_PARSE, INPUT_CFG_QUERY,
         INPUT_CFG_EXPORT, INPUT_CFG_ITERATION_ID, INPUT_CFG_MODEL_ID
-    }).swap(msprofConfig_);
+    }).swap(msprofConfig_); // 创建msprof的私有参数列表
+    return PROFILING_SUCCESS;
 }
 
 int MsprofParamAdapter::ParamsCheckMsprof(std::vector<InputCfg> &cfgList) const
@@ -123,7 +126,9 @@ int MsprofParamAdapter::TransToParams()
     return PROFILING_SUCCESS;
 }
 
-int MsprofParamAdapter::GetParamFromInputCfg(std::vector<std::pair<MsprofArgsType, MsprofCmdInfo>> msprofCfg,
+// msprofCfg：用户命令行显示设置的参数对
+int MsprofParamAdapter::GetParamFromInputCfg(std::vector<std::pair<MsprofArgsType, MsprofCmdInfo>> cmdsVec,
+    std::vector<std::pair<MsprofArgsType, std::string>>argvVec,
     SHARED_PTR_ALIA<ProfileParams> params)
 {
     params_ = params;
@@ -133,37 +138,40 @@ int MsprofParamAdapter::GetParamFromInputCfg(std::vector<std::pair<MsprofArgsTyp
     }
     
     // [1]黑名单校验+表参数映射（用户参数-->全量表）
-    for (auto argPair : msprofCfg) {
-        MsprofArgsType argsType = argPair.first;
+    for (uint32_t i = 0; i < cmdsVec.size(); ++i) {
+        MsprofArgsType argsType = cmdsVec[i].first;
         InputCfg cfgType = cfgMap_[argsType];
         if (!BlackSwitchCheck(cfgType)) {
+            std::cout << Utils::GetSelfPath() << ": unrecognized option '"
+                  << argvVec[i].second << "'" << std::endl;
+            std::cout << "PlatformType:" << static_cast<uint8_t>(GetPlatform()) << std::endl;
             return PROFILING_FAILED;
         }
-        // TODO 判断argPair.second.args[argsType]是不是空字符串
-        if (!argPair.second.args[argsType]) {
+        if (!cmdsVec[i].second.args[argsType]) {
             return PROFILING_FAILED;
         }
-        paramContainer_[cfgType] = argPair.second.args[argsType];
+        paramContainer_[cfgType] = cmdsVec[i].second.args[argsType];
         setConfig_.insert(cfgType);
     }
-    // 
-
-    // [2] 默认值开启还是关闭（用户层面）+ 补全表 + 表中每一个参数都有一个具体的值[TODO]
-
-
-// ---------------------------- 表格的每一个参数都是确认值（用户层面） --------------------
 
     // [4] 私有参数校验（派生类实现）
     std::vector<InputCfg> errCfgList;
     ret = ParamsCheckMsprof(errCfgList);
     if (ret != PROFILING_SUCCESS && !errCfgList.empty()) {
-        // todo 打印errCfgList中的错误
+        for (auto errCfg : errCfgList) {
+            CmdLog::instance()->CmdErrorLog("Argument --%s:%s set invalid.", argvVec[reCfgMap_[errCfg]].second.c_str(),
+                paramContainer_[errCfg].c_str());
+        }
         return PROFILING_FAILED;
     }
     // [5] 公有参数校验（调基类接口）
     errCfgList.clear();
-    ret = ComCfgCheck(ENABLE_MSPROF, paramContainer_, errCfgList);
+    ret = ComCfgCheck(ENABLE_MSPROF, paramContainer_, setConfig_, errCfgList);
     if (ret != PROFILING_SUCCESS) {
+        for (auto errCfg : errCfgList) {
+            CmdLog::instance()->CmdErrorLog("Argument --%s:%s set invalid.", argvVec[reCfgMap_[errCfg]].second.c_str(),
+                paramContainer_[errCfg].c_str());
+        }
         // todo 打印errCfgList中的错误
         return PROFILING_FAILED;
     }
@@ -231,35 +239,10 @@ void MsprofParamAdapter::CreateCfgMap()
         {ARGS_HOST_SYS_PID, INPUT_CFG_HOST_SYS_PID},
         {ARGS_HOST_USAGE, INPUT_HOST_SYS_USAGE},
     }).swap(cfgMap_);
+    for (auto index : cfgMap_) {
+        reCfgMap_.insert({index.second, static_cast<MsprofArgsType>(index.first)});
+    }
 }
-
-
-//void MsprofParamAdapter::DefaultCfgSet(RunningMode rMode)
-//{
-//    // ===================== APP ========================
-//    // ascendcl
-//    if (paramContainer_[INPUT_CFG_COM_ASCENDCL].empty()) {
-//        paramContainer_[INPUT_CFG_COM_ASCENDCL] = MSVP_PROF_ON;
-//    }
-//    if (paramContainer_[INPUT_CFG_COM_TASK_TIME].empty()) {
-//        paramContainer_[INPUT_CFG_COM_TASK_TIME] = MSVP_PROF_ON;
-//    }
-//    if (paramContainer_[INPUT_CFG_COM_AI_CORE].empty()) {
-//        paramContainer_[INPUT_CFG_COM_AI_CORE] = MSVP_PROF_ON;
-//    }
-//    if (paramContainer_[INPUT_CFG_COM_AIC_MODE].empty()) {
-//        paramContainer_[INPUT_CFG_COM_AIC_MODE] = PROFILING_MODE_TASK_BASED;
-//    }
-//    if (paramContainer_[INPUT_CFG_COM_AI_VECTOR].empty()) {
-//        paramContainer_[INPUT_CFG_COM_AI_VECTOR] = MSVP_PROF_ON;
-//    }
-//    if (paramContainer_[INPUT_CFG_COM_AIV_MODE].empty()) {
-//        paramContainer_[INPUT_CFG_COM_AIV_MODE] = PROFILING_MODE_TASK_BASED;
-//    }
-//    
-//}
-
-
 // ================================================= Acl json ==========================================
 
 int AclJsonParamAdapter::Init()
@@ -413,46 +396,63 @@ void AclApiParamAdapter::ProfTaskCfgToContainer(const ProfConfig * apiCfg,
     std::string devStr = devIdToStr(apiCfg->devNums, apiCfg->devIdList);
     if (!devStr.empty()) {
         paramContainer_[INPUT_CFG_COM_SYS_DEVICES] = devStr;
+        setConfig_.insert(INPUT_CFG_COM_SYS_DEVICES);
     }
     uint64_t dataTypeConfig = apiCfg->dataTypeConfig;
     ProfAicoreMetrics aicMetrics = apiCfg->aicoreMetrics;
     if (!argsArr[ACL_PROF_STORAGE_LIMIT].empty()) {
         paramContainer_[INPUT_CFG_COM_STORAGE_LIMIT] = argsArr[ACL_PROF_STORAGE_LIMIT];
+        setConfig_.insert(INPUT_CFG_COM_STORAGE_LIMIT);
     }
     // 是否可以合并
     if (GetPlatform() == PlatformType::MINI_TYPE) {
         if ((dataTypeConfig & PROF_SCHEDULE_TIMELINE_MASK) ||
             (dataTypeConfig & PROF_TASK_TIME_MASK)) {
             paramContainer_[INPUT_CFG_COM_TASK_TIME] = MSVP_PROF_ON;
+            setConfig_.insert(INPUT_CFG_COM_TASK_TIME);
         }
     } else if (dataTypeConfig & PROF_TASK_TIME_MASK) {
         paramContainer_[INPUT_CFG_COM_TASK_TIME] = MSVP_PROF_ON;
+        setConfig_.insert(INPUT_CFG_COM_TASK_TIME);
     }
     if (dataTypeConfig & PROF_SCHEDULE_TRACE_MASK) {
         paramContainer_[INPUT_CFG_COM_TASK_TRACE] = MSVP_PROF_ON; // Check
+        setConfig_.insert(INPUT_CFG_COM_TASK_TRACE);
     }
     // training trace
     if (dataTypeConfig & PROF_TRAINING_TRACE_MASK) {
         paramContainer_[INPUT_CFG_COM_TRAINING_TRACE] = MSVP_PROF_ON;
+        setConfig_.insert(INPUT_CFG_COM_TRAINING_TRACE);
     }
     
     std::string metrics;
     ConfigManager::instance()->AicoreMetricsEnumToName(aicMetrics, metrics);
     if ((dataTypeConfig & PROF_AICORE_METRICS_MASK) && !metrics.empty()) {
         paramContainer_[INPUT_CFG_COM_AI_CORE] = MSVP_PROF_ON;
+        setConfig_.insert(INPUT_CFG_COM_AI_CORE);
         paramContainer_[INPUT_CFG_COM_AIC_METRICS] = metrics;
+        setConfig_.insert(INPUT_CFG_COM_AIC_METRICS);
         paramContainer_[INPUT_CFG_COM_AIC_MODE] = PROFILING_MODE_TASK_BASED;
+        setConfig_.insert(INPUT_CFG_COM_AIC_MODE);
         paramContainer_[INPUT_CFG_COM_TASK_TRACE] = MSVP_PROF_ON;
+        setConfig_.insert(INPUT_CFG_COM_TASK_TRACE);
+        
     }
     if (!argsArr[ACL_PROF_AIV_METRICS].empty()) {
         paramContainer_[INPUT_CFG_COM_AI_VECTOR] = MSVP_PROF_ON;
+        setConfig_.insert(INPUT_CFG_COM_AI_VECTOR);
         paramContainer_[INPUT_CFG_COM_AIV_METRICS] = argsArr[ACL_PROF_AIV_METRICS];
+        setConfig_.insert(INPUT_CFG_COM_AIV_METRICS);
         paramContainer_[INPUT_CFG_COM_AIV_MODE] = PROFILING_MODE_TASK_BASED;
+        setConfig_.insert(INPUT_CFG_COM_AIV_MODE);
         paramContainer_[INPUT_CFG_COM_TASK_TRACE] = MSVP_PROF_ON;
+        setConfig_.insert(INPUT_CFG_COM_TASK_TRACE);
     }
     if (dataTypeConfig & PROF_L2CACHE_MASK) {
         paramContainer_[INPUT_CFG_COM_L2] = MSVP_PROF_ON;
+        setConfig_.insert(INPUT_CFG_COM_L2);
         paramContainer_[INPUT_CFG_COM_TASK_TRACE] = MSVP_PROF_ON;
+        setConfig_.insert(INPUT_CFG_COM_TASK_TRACE);
     }
 }
 
@@ -465,37 +465,53 @@ void AclApiParamAdapter::ProfSystemCfgToContainer(const ProfConfig * apiCfg,
     ConfigManager::instance()->AicoreMetricsEnumToName(aicMetrics, metrics);
     if (!argsArr[ACL_PROF_SYS_CPU_FREQ].empty()) {
         paramContainer_[INPUT_CFG_COM_SYS_CPU] = MSVP_PROF_ON;
+        setConfig_.insert(INPUT_CFG_COM_SYS_CPU);
         paramContainer_[INPUT_CFG_COM_SYS_CPU_FREQ] = argsArr[ACL_PROF_SYS_CPU_FREQ];
+        setConfig_.insert(INPUT_CFG_COM_SYS_CPU_FREQ);
     }
     if (!argsArr[ACL_PROF_SYS_HARDWARE_MEM_FREQ].empty()) {
         paramContainer_[INPUT_CFG_COM_SYS_HARDWARE_MEM] = MSVP_PROF_ON;
+        setConfig_.insert(INPUT_CFG_COM_SYS_HARDWARE_MEM);
         paramContainer_[INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ] = argsArr[ACL_PROF_SYS_HARDWARE_MEM_FREQ];
+        setConfig_.insert(INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ);
     }
     if (!argsArr[ACL_PROF_LLC_MODE].empty() && !argsArr[ACL_PROF_SYS_HARDWARE_MEM_FREQ].empty()) {
         paramContainer_[INPUT_CFG_COM_LLC_MODE] = argsArr[ACL_PROF_LLC_MODE];
+        setConfig_.insert(INPUT_CFG_COM_LLC_MODE);
     }
     if (!argsArr[ACL_PROF_SYS_IO_FREQ].empty()) {
         paramContainer_[INPUT_CFG_COM_SYS_IO] = MSVP_PROF_ON;
+        setConfig_.insert(INPUT_CFG_COM_SYS_IO);
         paramContainer_[INPUT_CFG_COM_SYS_IO_FREQ] = argsArr[ACL_PROF_SYS_IO_FREQ];
+        setConfig_.insert(INPUT_CFG_COM_SYS_IO_FREQ);
     }
     if (!argsArr[ACL_PROF_SYS_INTERCONNECTION_FREQ].empty()) {
         paramContainer_[INPUT_CFG_COM_SYS_INTERCONNECTION] = MSVP_PROF_ON;
+        setConfig_.insert(INPUT_CFG_COM_SYS_INTERCONNECTION);
         paramContainer_[INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ] = argsArr[ACL_PROF_SYS_INTERCONNECTION_FREQ];
+        setConfig_.insert(INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ);
     }
     if (!argsArr[ACL_PROF_DVPP_FREQ].empty()) {
         paramContainer_[INPUT_CFG_COM_DVPP] = MSVP_PROF_ON;
+        setConfig_.insert(INPUT_CFG_COM_DVPP);
         paramContainer_[INPUT_CFG_COM_DVPP_FREQ] = argsArr[ACL_PROF_DVPP_FREQ];
+        setConfig_.insert(INPUT_CFG_COM_DVPP_FREQ);
     }
     if (!argsArr[ACL_PROF_SYS_USAGE_FREQ].empty()) {
         paramContainer_[INPUT_CFG_COM_SYS_USAGE] = MSVP_PROF_ON;
+        setConfig_.insert(INPUT_CFG_COM_SYS_USAGE);
         paramContainer_[INPUT_CFG_COM_SYS_USAGE_FREQ] = argsArr[ACL_PROF_SYS_USAGE_FREQ];
+        setConfig_.insert(INPUT_CFG_COM_SYS_USAGE_FREQ);
     }
     if (!argsArr[ACL_PROF_SYS_PID_USAGE_FREQ].empty()) {
         paramContainer_[INPUT_CFG_COM_SYS_PID_USAGE] = MSVP_PROF_ON;
+        setConfig_.insert(INPUT_CFG_COM_SYS_PID_USAGE);
         paramContainer_[INPUT_CFG_COM_SYS_PID_USAGE_FREQ] = argsArr[ACL_PROF_SYS_PID_USAGE_FREQ];
+        setConfig_.insert(INPUT_CFG_COM_SYS_PID_USAGE_FREQ);
     }
     if (!argsArr[ACL_PROF_HOST_SYS].empty()) {
         paramContainer_[INPUT_HOST_SYS_USAGE] = argsArr[ACL_PROF_HOST_SYS];
+        setConfig_.insert(INPUT_HOST_SYS_USAGE);
     }
     
 }
@@ -529,6 +545,7 @@ int AclApiParamAdapter::GetParamFromInputCfg(const ProfConfig * apiCfg,
     }
     if (!params_->result_dir.empty()) {
         paramContainer_[INPUT_CFG_COM_OUTPUT] = params_->result_dir;
+        setConfig_.insert(INPUT_CFG_COM_OUTPUT);
     }
     ProfCfgToContainer(apiCfg, argsArr);
     
@@ -536,12 +553,14 @@ int AclApiParamAdapter::GetParamFromInputCfg(const ProfConfig * apiCfg,
     std::vector<InputCfg> errCfgList;
     ret = ParamsCheckAclApi(errCfgList);
     if (ret != PROFILING_SUCCESS && !errCfgList.empty()) {
-        // todo 打印errCfgList中的错误
+        for (auto errCfg : errCfgList) {
+            MSPROF_LOGW("Warm");
+        }
         return PROFILING_FAILED;
     }
     // [5] 公有参数校验（调基类接口）
     errCfgList.clear();
-    ret = ComCfgCheck(ENABLE_API, paramContainer_, errCfgList);
+    ret = ComCfgCheck(ENABLE_API, paramContainer_, setConfig_, errCfgList);
     if (ret != PROFILING_SUCCESS) {
         // todo 打印errCfgList中的错误
         return PROFILING_FAILED;
