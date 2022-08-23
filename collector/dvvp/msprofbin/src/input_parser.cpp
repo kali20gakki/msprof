@@ -106,9 +106,12 @@ SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> InputParser::MsprofGetOp
     auto paramAdapter = MsprofParamAdapter();
     int ret = paramAdapter.GetParamFromInputCfg(cmdsVec, argvVec, params_);
     if (ret != PROFILING_SUCCESS) {
+        MsprofCmdUsage("");
         return nullptr;
     }
-    return ParamsCheck() == MSPROF_DAEMON_OK ? params_ : nullptr;
+    // Debug
+    return nullptr;
+    //return ParamsCheck() == MSPROF_DAEMON_OK ? params_ : nullptr;
 }
 
 bool InputParser::HasHelpParamOnly()

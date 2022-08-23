@@ -154,6 +154,8 @@ int MsprofParamAdapter::GetParamFromInputCfg(std::vector<std::pair<MsprofArgsTyp
         setConfig_.insert(cfgType);
     }
 
+    // [2] 默认值设置
+
     // [4] 私有参数校验（派生类实现）
     std::vector<InputCfg> errCfgList;
     ret = ParamsCheckMsprof(errCfgList);
@@ -181,8 +183,8 @@ int MsprofParamAdapter::GetParamFromInputCfg(std::vector<std::pair<MsprofArgsTyp
     if (ret != PROFILING_SUCCESS) {
         return PROFILING_FAILED;
     }
+    Print(paramContainer_);
     return PROFILING_SUCCESS;
-
 }
 
 void MsprofParamAdapter::CreateCfgMap()
