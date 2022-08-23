@@ -267,7 +267,7 @@ struct halQueryDevpidInfo {
  */
 struct drvDevInfo {
 #ifndef __linux
-    mmProcess fd;
+    MmProcess fd;
 #else
     int fd;
 #endif

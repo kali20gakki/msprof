@@ -215,29 +215,29 @@ TEST_F(COMMON_UTILS_UTILS_TEST, get_files_recur) {
     std::string path = "/path/to/dir";
     std::vector<std::string> files;
 
-    mmDirent entry1;
+    MmDirent entry1;
     entry1.d_name[0] = '.';
     entry1.d_name[1] = '\0';
 
-    mmDirent entry2;
+    MmDirent entry2;
     entry2.d_name[0] = '.';
     entry2.d_name[1] = '.';
     entry2.d_name[2] = '\0';
 
-    mmDirent entry3;
+    MmDirent entry3;
     entry3.d_name[0] = 'f';
     entry3.d_name[1] = '\0';
 
-    mmDirent entry4;
+    MmDirent entry4;
     entry4.d_name[0] = 'd';
     entry4.d_name[1] = '\0';
 
-    mmDirent *name_list[4];
+    MmDirent *name_list[4];
     name_list[0] = &entry1;
     name_list[1] = &entry2;
     name_list[2] = &entry3;
     name_list[3] = &entry4;
-    mmDirent **p_name_list = name_list;
+    MmDirent **p_name_list = name_list;
 
     MOCKER(&MmScandir)
         .stubs()
@@ -267,29 +267,29 @@ TEST_F(COMMON_UTILS_UTILS_TEST, get_files_non_recur) {
     std::string path = "/path/to/dir";
     std::vector<std::string> files;
 
-    mmDirent entry1;
+    MmDirent entry1;
     entry1.d_name[0] = '.';
     entry1.d_name[1] = '\0';
 
-    mmDirent entry2;
+    MmDirent entry2;
     entry2.d_name[0] = '.';
     entry2.d_name[1] = '.';
     entry2.d_name[2] = '\0';
 
-    mmDirent entry3;
+    MmDirent entry3;
     entry3.d_name[0] = 'f';
     entry3.d_name[1] = '\0';
 
-    mmDirent entry4;
+    MmDirent entry4;
     entry4.d_name[0] = 'd';
     entry4.d_name[1] = '\0';
 
-    mmDirent *name_list[4];
+    MmDirent *name_list[4];
     name_list[0] = &entry1;
     name_list[1] = &entry2;
     name_list[2] = &entry3;
     name_list[3] = &entry4;
-    mmDirent **p_name_list = name_list;
+    MmDirent **p_name_list = name_list;
 
     MOCKER(&MmScandir)
         .stubs()
@@ -430,29 +430,29 @@ TEST_F(COMMON_UTILS_UTILS_TEST, RemoveDir_not_rm_top_dir) {
     GlobalMockObject::verify();
 
     std::string path = "/path/to/dir";
-    mmDirent entry1;
+    MmDirent entry1;
     entry1.d_name[0] = '.';
     entry1.d_name[1] = '\0';
 
-    mmDirent entry2;
+    MmDirent entry2;
     entry2.d_name[0] = '.';
     entry2.d_name[1] = '.';
     entry2.d_name[2] = '\0';
 
-    mmDirent entry3;
+    MmDirent entry3;
     entry3.d_name[0] = 'f';
     entry3.d_name[1] = '\0';
 
-    mmDirent entry4;
+    MmDirent entry4;
     entry4.d_name[0] = 'd';
     entry4.d_name[1] = '\0';
 
-    mmDirent *name_list[4];
+    MmDirent *name_list[4];
     name_list[0] = &entry1;
     name_list[1] = &entry2;
     name_list[2] = &entry3;
     name_list[3] = &entry4;
-    mmDirent **p_name_list = name_list;
+    MmDirent **p_name_list = name_list;
 
     MOCKER(&MmScandir)
         .stubs()
@@ -851,29 +851,29 @@ TEST_F(COMMON_UTILS_UTILS_TEST, get_child_dirs_recur) {
     bool is_recur = true;
     std::vector<std::string> child_dirs;
 
-    mmDirent entry1;
+    MmDirent entry1;
     entry1.d_name[0] = '.';
     entry1.d_name[1] = '\0';
 
-    mmDirent entry2;
+    MmDirent entry2;
     entry2.d_name[0] = '.';
     entry2.d_name[1] = '.';
     entry2.d_name[2] = '\0';
 
-    mmDirent entry3;
+    MmDirent entry3;
     entry3.d_name[0] = 'f';
     entry3.d_name[1] = '\0';
 
-    mmDirent entry4;
+    MmDirent entry4;
     entry4.d_name[0] = 'd';
     entry4.d_name[1] = '\0';
 
-    mmDirent *name_list[4];
+    MmDirent *name_list[4];
     name_list[0] = &entry1;
     name_list[1] = &entry2;
     name_list[2] = &entry3;
     name_list[3] = &entry4;
-    mmDirent **p_name_list = name_list;
+    MmDirent **p_name_list = name_list;
 
     MOCKER(&MmScandir)
         .stubs()
@@ -904,29 +904,29 @@ TEST_F(COMMON_UTILS_UTILS_TEST, get_child_dirs_no_recur) {
     bool is_recur = false;
     std::vector<std::string> child_dirs;
 
-    mmDirent entry1;
+    MmDirent entry1;
     entry1.d_name[0] = '.';
     entry1.d_name[1] = '\0';
 
-    mmDirent entry2;
+    MmDirent entry2;
     entry2.d_name[0] = '.';
     entry2.d_name[1] = '.';
     entry2.d_name[2] = '\0';
 
-    mmDirent entry3;
+    MmDirent entry3;
     entry3.d_name[0] = 'f';
     entry3.d_name[1] = '\0';
 
-    mmDirent entry4;
+    MmDirent entry4;
     entry4.d_name[0] = 'd';
     entry4.d_name[1] = '\0';
 
-    mmDirent *name_list[4];
+    MmDirent *name_list[4];
     name_list[0] = &entry1;
     name_list[1] = &entry2;
     name_list[2] = &entry3;
     name_list[3] = &entry4;
-    mmDirent **p_name_list = name_list;
+    MmDirent **p_name_list = name_list;
 
     MOCKER(&MmScandir)
         .stubs()
@@ -973,29 +973,29 @@ TEST_F(COMMON_UTILS_UTILS_TEST, get_child_filenames_scan_dir_success) {
     std::string dir("/tmp/get_child_filenames_scan_dir_success");
     std::vector<std::string> child_filename;
 
-    mmDirent entry1;
+    MmDirent entry1;
     entry1.d_name[0] = '.';
     entry1.d_name[1] = '\0';
 
-    mmDirent entry2;
+    MmDirent entry2;
     entry2.d_name[0] = '.';
     entry2.d_name[1] = '.';
     entry2.d_name[2] = '\0';
 
-    mmDirent entry3;
+    MmDirent entry3;
     entry3.d_name[0] = 'f';
     entry3.d_name[1] = '\0';
 
-    mmDirent entry4;
+    MmDirent entry4;
     entry4.d_name[0] = 'd';
     entry4.d_name[1] = '\0';
 
-    mmDirent *name_list[4];
+    MmDirent *name_list[4];
     name_list[0] = &entry1;
     name_list[1] = &entry2;
     name_list[2] = &entry3;
     name_list[3] = &entry4;
-    mmDirent **p_name_list = name_list;
+    MmDirent **p_name_list = name_list;
 
     MOCKER(&MmScandir)
         .stubs()
@@ -1055,10 +1055,10 @@ TEST_F(COMMON_UTILS_UTILS_TEST, GetMac) {
     GlobalMockObject::verify();
 
     mac_count = 1;
-    mmMacInfo mac[1];
+    MmMacInfo mac[1];
     std::string str_mac = "00-11-22-33-44-55\n";
     snprintf(mac[0].addr, sizeof(18), str_mac.c_str(), sizeof(18));
-    mmMacInfo *mac_info = mac;
+    MmMacInfo *mac_info = mac;
     MOCKER(&MmGetMac)
         .stubs()
         .with(outBoundP(&mac_info), outBoundP(&mac_count))
@@ -1108,7 +1108,7 @@ TEST_F(COMMON_UTILS_UTILS_TEST, RemoveEndCharacter){
     EXPECT_EQ(input, "mm");
 }
 
-int GetDiskFreeSpaceStub(const char *path, mmDiskSize *diskSize) {
+int GetDiskFreeSpaceStub(const char *path, MmDiskSize *diskSize) {
     std::string paths(path);
     try {
         diskSize->availSize = std::stoi(paths);

@@ -511,7 +511,7 @@ int ProfHostService::KillToolAndWaitHostProcess() const
     argsV.push_back(toolName_);
     int exitCode = analysis::dvvp::common::utils::VALID_EXIT_CODE;
     static const std::string CMD = "sudo";
-    mmProcess appProcess = MSVP_MMPROCESS;
+    MmProcess appProcess = MSVP_MMPROCESS;
     ExecCmdParams execCmdParams(CMD, false, "");
     int ret = analysis::dvvp::common::utils::Utils::ExecCmd(execCmdParams, argsV, envV, exitCode, appProcess);
     if (ret != PROFILING_SUCCESS) {
@@ -783,7 +783,7 @@ int ProfHostService::CollectToolIsRun()
     argsV.push_back("-c");
     argsV.push_back(checkToolRunCmd);
     int exitCode = VALID_EXIT_CODE;
-    mmProcess appProcess = MSVP_MMPROCESS;
+    MmProcess appProcess = MSVP_MMPROCESS;
     std::string redirectionPath = profHostOutDir_ + "temp" + std::to_string(Utils::GetClockRealtime());
     ExecCmdParams execCmdParams("sh", false, redirectionPath);
     int ret = analysis::dvvp::common::utils::Utils::ExecCmd(execCmdParams, argsV, envV, exitCode, appProcess);

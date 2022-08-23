@@ -18,7 +18,7 @@ namespace dvvp {
 namespace common {
 namespace thread {
 using namespace analysis::dvvp::common::utils;
-using mmThread = Collector::Dvvp::Mmpa::mmThread;
+using MmThread = Collector::Dvvp::Mmpa::MmThread;
 class Thread {
 public:
     Thread();
@@ -43,7 +43,7 @@ private:
     static void *ThrProcess(VOID_PTR arg);
 
 private:
-    mmThread tid_;
+    MmThread tid_;
     volatile bool quit_;
     volatile bool isStarted_;
     std::string threadName_;

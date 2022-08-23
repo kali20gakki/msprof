@@ -276,7 +276,7 @@ int InfoJson::AddHostInfo(SHARED_PTR_ALIA<InfoMain> infoMain)
     AddRankId(infoMain);
 
     // fetch and set cpu infos
-    mmCpuDesc *cpuInfo = nullptr;
+    MmCpuDesc *cpuInfo = nullptr;
     int32_t cpuNum = 0;
     ret = MmGetCpuInfo(&cpuInfo, &cpuNum);
     if (ret != PROFILING_SUCCESS || cpuNum <= 0) {
