@@ -9,6 +9,7 @@ Huawei Technologies Co., Ltd. All Rights Reserved © 2021
 import logging
 import sqlite3
 from collections import OrderedDict
+from itertools import chain
 
 from analyzer.scene_base.profiling_scene import ProfilingScene
 from common_func.constant import Constant
@@ -31,11 +32,11 @@ class MsprofIteration:
 
     @staticmethod
     def _generate_trace_result(trace_datas: list, time_fmt: int = NumberConstant.MICRO_SECOND) -> list:
+        trace_datas = list(chain.from_iterable(trace_datas))
         if not trace_datas:
             return []
-        result = [(trace_datas[0][0], trace_datas[1][0])] if len(trace_datas) == 2 else [(0, trace_datas[0][0])]
-        result = [(InfoConfReader().time_from_syscnt(result[0][0], time_fmt),
-                   InfoConfReader().time_from_syscnt(result[0][1], time_fmt))]
+        trace_datas = [InfoConfReader().time_from_syscnt(timestamp, time_fmt) for timestamp in trace_datas]
+        result = [(0, max(trace_datas))] if len(trace_datas) == 1 else [(min(trace_datas), max(trace_datas))]
         return result
 
     @staticmethod
@@ -236,6 +237,11 @@ class MsprofIteration:
               "where iter_id>=? and iter_id<=? order by " \
               "step_end".format(DBNameConstant.TABLE_STEP_TRACE_DATA)
         trace_data = DBManager.fetch_all_data(trace_curs, sql, iter_id)
+
+        # if the first iter is chose, the iter_id (range) will contain iter 0 whose step end is also 0
+        if NumberConstant.ZERO_ITER_ID in iter_id:
+            trace_data = [NumberConstant.ZERO_ITER_END] + trace_data
+
         return trace_data
 
     def __get_trace_iteration_end(self: any) -> dict:
