@@ -352,7 +352,6 @@ int AclJsonParamAdapter::GenAclJsonContainer(ProfAclConfig aclCfg)
                 MSPROF_LOGW("Unrecognized option:%s for PlatformType:%d",
                     aclJsonPrintMap_[configOpt].c_str(), static_cast<uint8_t>(GetPlatform()));
                 paramContainer_[configOpt].clear(); // ignore switch
-                BlackSwitch_.push_back(configOpt);
             }
         }
     }
@@ -392,8 +391,7 @@ int AclJsonParamAdapter::SetAclJsonContainerDefaultValue()
     }
     if (!paramContainer_[INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ].empty()) {
         paramContainer_[INPUT_CFG_COM_SYS_HARDWARE_MEM] = MSVP_PROF_ON;
-        if (paramContainer_[INPUT_CFG_COM_LLC_MODE].empty() &&
-            std::find(BlackSwitch_.begin(), BlackSwitch_.end(), INPUT_CFG_COM_LLC_MODE) == BlackSwitch_.end()) {
+        if (paramContainer_[INPUT_CFG_COM_LLC_MODE].empty()) {
             paramContainer_[INPUT_CFG_COM_LLC_MODE] = GetPlatform() == PlatformType::MINI_TYPE ? "capacity" : "read";
         }
     }
@@ -567,7 +565,6 @@ int GeOptParamAdapter::GenGeOptionsContainer(ProfGeOptionsConfig geCfg)
                 MSPROF_LOGW("Unrecognized option:%s for PlatformType:%d",
                     geOptionsPrintMap_[configOpt].c_str(), static_cast<uint8_t>(GetPlatform()));
                 paramContainer_[configOpt].clear(); // ignore switch
-                BlackSwitch_.push_back(configOpt);
             }
         }
     }
@@ -596,8 +593,7 @@ void GeOptParamAdapter::SetGeOptionsContainerDefaultValue()
     }
     if (!paramContainer_[INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ].empty()) {
         paramContainer_[INPUT_CFG_COM_SYS_HARDWARE_MEM] = MSVP_PROF_ON;
-        if (paramContainer_[INPUT_CFG_COM_LLC_MODE].empty() &&
-            std::find(BlackSwitch_.begin(), BlackSwitch_.end(), INPUT_CFG_COM_LLC_MODE) == BlackSwitch_.end()) {
+        if (paramContainer_[INPUT_CFG_COM_LLC_MODE].empty()) {
             paramContainer_[INPUT_CFG_COM_LLC_MODE] = GetPlatform() == PlatformType::MINI_TYPE ? "capacity" : "read";
         }
     }

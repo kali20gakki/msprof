@@ -67,7 +67,6 @@ private:
     std::map<InputCfg, std::string> aclJsonPrintMap_;
     std::vector<InputCfg> aclJsonWholeConfig_;
     std::vector<InputCfg> aclJsonConfig_;
-    std::vector<InputCfg> BlackSwitch_;
     std::set<InputCfg>setConfig_;
 };
 
@@ -89,7 +88,6 @@ private:
     std::map<InputCfg, std::string> geOptionsPrintMap_;
     std::vector<InputCfg> geOptionsWholeConfig_;
     std::vector<InputCfg> geOptConfig_;
-    std::vector<InputCfg> BlackSwitch_;
     std::set<InputCfg>setConfig_;
 };
 
