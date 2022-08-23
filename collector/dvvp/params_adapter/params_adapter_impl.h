@@ -8,6 +8,7 @@
 #define COLLECTOR_DVVP_PARAMS_ADAPTER_IMPL_H
 
 #include <unordered_map>
+#include <map>
 #include "params_adapter.h"
 #include "proto/profiler_ext.pb.h"
 #include "message/prof_params.h"
@@ -56,11 +57,18 @@ public:
 private:
     int Init();
     int ParamsCheckAclJson(std::vector<InputCfg> &cfgList) const;
+    int GenAclJsonContainer(ProfAclConfig aclCfg);
+    int SetAclJsonContainerDefaultValue();
+    int TransToParams();
 
 private:
     SHARED_PTR_ALIA<ProfileParams> params_;
     std::array<std::string, INPUT_CFG_MAX> paramContainer_;
+    std::map<InputCfg, std::string> aclJsonPrintMap_;
+    std::vector<InputCfg> aclJsonWholeConfig_;
     std::vector<InputCfg> aclJsonConfig_;
+    std::vector<InputCfg> BlackSwitch_;
+    std::set<InputCfg>setConfig_;
 };
 
 class GeOptParamAdapter : public ParamsAdapter {
@@ -71,11 +79,18 @@ public:
 private:
     int Init();
     int ParamsCheckGeOpt(std::vector<InputCfg> &cfgList) const;
+    int GenGeOptionsContainer(ProfGeOptionsConfig geCfg);
+    void SetGeOptionsContainerDefaultValue();
+    int TransToParams();
 
 private:
     SHARED_PTR_ALIA<ProfileParams> params_;
     std::array<std::string, INPUT_CFG_MAX> paramContainer_;
+    std::map<InputCfg, std::string> geOptionsPrintMap_;
+    std::vector<InputCfg> geOptionsWholeConfig_;
     std::vector<InputCfg> geOptConfig_;
+    std::vector<InputCfg> BlackSwitch_;
+    std::set<InputCfg>setConfig_;
 };
 
 class AclApiParamAdapter : public ParamsAdapter {

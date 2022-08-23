@@ -11,6 +11,7 @@
 #include "config/config.h"
 #include "config_manager.h"
 #include "msprofbin/include/cmd_log.h"
+#include "message/prof_params.h"
 
 namespace Collector {
 namespace Dvvp {
@@ -35,7 +36,7 @@ int MsprofParamAdapter::Init()
         INPUT_CFG_COM_AIV_FREQ, INPUT_CFG_COM_MODEL_EXECUTION, INPUT_CFG_COM_SYS_DEVICES,
         INPUT_CFG_COM_SYS_PERIOD, INPUT_CFG_COM_SYS_USAGE, INPUT_CFG_COM_SYS_PID_USAGE,
         INPUT_CFG_COM_SYS_CPU, INPUT_CFG_COM_SYS_HARDWARE_MEM, INPUT_CFG_COM_SYS_IO,
-        INPUT_CFG_COM_SYS_INTERCONNECTION, INPUT_CFG_COM_DVPP, INPUT_CFG_COM_POWER, 
+        INPUT_CFG_COM_SYS_INTERCONNECTION, INPUT_CFG_COM_DVPP, INPUT_CFG_COM_POWER,
         INPUT_CFG_COM_BIU, INPUT_CFG_COM_BIU_FREQ, INPUT_CFG_HOST_SYS, INPUT_CFG_HOST_SYS_PID,
         INPUT_CFG_PYTHON_PATH, INPUT_CFG_SUMMARY_FORMAT, INPUT_CFG_PARSE, INPUT_CFG_QUERY,
         INPUT_CFG_EXPORT, INPUT_CFG_ITERATION_ID, INPUT_CFG_MODEL_ID
@@ -257,6 +258,40 @@ int AclJsonParamAdapter::Init()
     std::vector<InputCfg>({
         INPUT_CFG_ACL_JSON_SWITCH, INPUT_CFG_COM_BIU, INPUT_CFG_COM_BIU_FREQ
     }).swap(aclJsonConfig_);
+    std::vector<InputCfg>({
+        INPUT_CFG_ACL_JSON_SWITCH, INPUT_CFG_COM_OUTPUT, INPUT_CFG_COM_STORAGE_LIMIT,
+        INPUT_CFG_COM_MSPROFTX, INPUT_CFG_COM_TASK_TIME, INPUT_CFG_COM_AICPU, INPUT_CFG_COM_L2,
+        INPUT_CFG_COM_HCCL, INPUT_CFG_COM_ASCENDCL, INPUT_CFG_COM_RUNTIME_API,
+        INPUT_CFG_COM_AIC_METRICS, INPUT_CFG_COM_AIV_METRICS, INPUT_CFG_COM_SYS_USAGE_FREQ,
+        INPUT_CFG_COM_SYS_PID_USAGE_FREQ, INPUT_CFG_COM_SYS_CPU_FREQ, INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ,
+        INPUT_CFG_COM_SYS_IO_FREQ, INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ, INPUT_CFG_COM_DVPP_FREQ,
+        INPUT_CFG_COM_BIU, INPUT_CFG_COM_BIU_FREQ, INPUT_CFG_COM_LLC_MODE, INPUT_HOST_SYS_USAGE
+    }).swap(aclJsonWholeConfig_);
+    std::map<InputCfg, std::string>({
+        {INPUT_CFG_ACL_JSON_SWITCH, "switch"},
+        {INPUT_CFG_COM_OUTPUT, "output"},
+        {INPUT_CFG_COM_STORAGE_LIMIT, "storage_limit"},
+        {INPUT_CFG_COM_MSPROFTX, "msproftx"},
+        {INPUT_CFG_COM_TASK_TIME, "task_time"},
+        {INPUT_CFG_COM_AICPU, "aicpu"},
+        {INPUT_CFG_COM_L2, "l2"},
+        {INPUT_CFG_COM_HCCL, "hccl"},
+        {INPUT_CFG_COM_ASCENDCL, "ascendcl"},
+        {INPUT_CFG_COM_RUNTIME_API, "runtime_api"},
+        {INPUT_CFG_COM_AIC_METRICS, "aic_metrics"},
+        {INPUT_CFG_COM_AIV_METRICS, "aiv_metrics"},
+        {INPUT_CFG_COM_SYS_USAGE_FREQ, "sys_usage_freq"},
+        {INPUT_CFG_COM_SYS_PID_USAGE_FREQ, "sys_pid_usage_freq"},
+        {INPUT_CFG_COM_SYS_CPU_FREQ, "sys_cpu_freq"},
+        {INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ, "sys_hardware_mem_freq"},
+        {INPUT_CFG_COM_SYS_IO_FREQ, "sys_io_freq"},
+        {INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ, "sys_interconnection_freq"},
+        {INPUT_CFG_COM_DVPP_FREQ, "dvpp_freq"},
+        {INPUT_CFG_COM_BIU, "biu"},
+        {INPUT_CFG_COM_BIU_FREQ, "biu_freq"},
+        {INPUT_CFG_COM_LLC_MODE, "llc_mode"},
+        {INPUT_HOST_SYS_USAGE, "host_sys_usage"},
+    }).swap(aclJsonPrintMap_);
 }
 
 int AclJsonParamAdapter::ParamsCheckAclJson(std::vector<InputCfg> &cfgList) const
@@ -284,11 +319,141 @@ int AclJsonParamAdapter::ParamsCheckAclJson(std::vector<InputCfg> &cfgList) cons
     return flag ? PROFILING_SUCCESS : PROFILING_FAILED;
 }
 
+int AclJsonParamAdapter::GenAclJsonContainer(ProfAclConfig aclCfg)
+{
+    paramContainer_[INPUT_CFG_ACL_JSON_SWITCH] = aclCfg.switch_();
+    paramContainer_[INPUT_CFG_COM_OUTPUT] = aclCfg.output();
+    paramContainer_[INPUT_CFG_COM_STORAGE_LIMIT] = aclCfg.storage_limit();
+    paramContainer_[INPUT_CFG_COM_MSPROFTX] = aclCfg.msproftx();
+    paramContainer_[INPUT_CFG_COM_TASK_TIME] = aclCfg.task_time();
+    paramContainer_[INPUT_CFG_COM_AICPU] = aclCfg.aicpu();
+    paramContainer_[INPUT_CFG_COM_L2] = aclCfg.l2();
+    paramContainer_[INPUT_CFG_COM_HCCL] = aclCfg.hccl();
+    paramContainer_[INPUT_CFG_COM_ASCENDCL] = aclCfg.ascendcl();
+    paramContainer_[INPUT_CFG_COM_RUNTIME_API] = aclCfg.runtime_api();
+    paramContainer_[INPUT_CFG_COM_AIC_METRICS] = aclCfg.aic_metrics();
+    paramContainer_[INPUT_CFG_COM_AIV_METRICS] = aclCfg.aiv_metrics();
+    paramContainer_[INPUT_CFG_COM_SYS_USAGE_FREQ] = std::to_string(aclCfg.sys_usage_freq());
+    paramContainer_[INPUT_CFG_COM_SYS_PID_USAGE_FREQ] = std::to_string(aclCfg.sys_pid_usage_freq());
+    paramContainer_[INPUT_CFG_COM_SYS_CPU_FREQ] = std::to_string(aclCfg.sys_cpu_freq());
+    paramContainer_[INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ] = std::to_string(aclCfg.sys_hardware_mem_freq());
+    paramContainer_[INPUT_CFG_COM_SYS_IO_FREQ] = std::to_string(aclCfg.sys_io_freq());
+    paramContainer_[INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ] = std::to_string(aclCfg.sys_interconnection_freq());
+    paramContainer_[INPUT_CFG_COM_DVPP_FREQ] = std::to_string(aclCfg.dvpp_freq());
+    paramContainer_[INPUT_CFG_COM_BIU] = aclCfg.biu();
+    paramContainer_[INPUT_CFG_COM_BIU_FREQ] = std::to_string(aclCfg.biu_freq());
+    paramContainer_[INPUT_CFG_COM_LLC_MODE] = aclCfg.llc_mode();
+    paramContainer_[INPUT_HOST_SYS_USAGE] = aclCfg.host_sys_usage();
+
+    for (auto configOpt : aclJsonWholeConfig_) {
+        if (!paramContainer_[configOpt].empty()) {
+            setConfig_.insert(configOpt);
+            if (!BlackSwitchCheck(configOpt)) {
+                MSPROF_LOGW("Unrecognized option:%s for PlatformType:%d",
+                    aclJsonPrintMap_[configOpt].c_str(), static_cast<uint8_t>(GetPlatform()));
+                paramContainer_[configOpt].clear(); // ignore switch
+                BlackSwitch_.push_back(configOpt);
+            }
+        }
+    }
+    return PROFILING_SUCCESS;
+}
+
+int AclJsonParamAdapter::SetAclJsonContainerDefaultValue()
+{
+    if (paramContainer_[INPUT_CFG_ACL_JSON_SWITCH].empty() ||
+        paramContainer_[INPUT_CFG_ACL_JSON_SWITCH] != MSVP_PROF_ON) {
+        MSPROF_LOGW("Profiling switch is off");
+        return PROFILING_FAILED;
+    }
+    paramContainer_[INPUT_CFG_COM_OUTPUT] = SetOutputDir(paramContainer_[INPUT_CFG_COM_OUTPUT]);
+    if (paramContainer_[INPUT_CFG_COM_ASCENDCL].empty()) {
+        paramContainer_[INPUT_CFG_COM_ASCENDCL] = MSVP_PROF_ON;
+    }
+    if (paramContainer_[INPUT_CFG_COM_RUNTIME_API].empty()) {
+        paramContainer_[INPUT_CFG_COM_RUNTIME_API] = MSVP_PROF_ON;
+    }
+    if (!paramContainer_[INPUT_CFG_COM_AIC_METRICS].empty()) {
+        paramContainer_[INPUT_CFG_COM_AI_CORE] = MSVP_PROF_ON;
+        paramContainer_[INPUT_CFG_COM_AIC_MODE] = PROFILING_MODE_TASK_BASED;
+    }
+    if (!paramContainer_[INPUT_CFG_COM_AIV_METRICS].empty()) {
+        paramContainer_[INPUT_CFG_COM_AI_VECTOR] = MSVP_PROF_ON;
+        paramContainer_[INPUT_CFG_COM_AIV_MODE] = PROFILING_MODE_TASK_BASED;
+    }
+    if (!paramContainer_[INPUT_CFG_COM_SYS_USAGE_FREQ].empty()) {
+        paramContainer_[INPUT_CFG_COM_SYS_USAGE] = MSVP_PROF_ON;
+    }
+    if (!paramContainer_[INPUT_CFG_COM_SYS_CPU_FREQ].empty()) {
+        paramContainer_[INPUT_CFG_COM_SYS_CPU] = MSVP_PROF_ON;
+    }
+    if (!paramContainer_[INPUT_CFG_COM_SYS_PID_USAGE_FREQ].empty()) {
+        paramContainer_[INPUT_CFG_COM_SYS_PID_USAGE] = MSVP_PROF_ON;
+    }
+    if (!paramContainer_[INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ].empty()) {
+        paramContainer_[INPUT_CFG_COM_SYS_HARDWARE_MEM] = MSVP_PROF_ON;
+        if (paramContainer_[INPUT_CFG_COM_LLC_MODE].empty() &&
+            std::find(BlackSwitch_.begin(), BlackSwitch_.end(), INPUT_CFG_COM_LLC_MODE) == BlackSwitch_.end()) {
+            paramContainer_[INPUT_CFG_COM_LLC_MODE] = GetPlatform() == PlatformType::MINI_TYPE ? "capacity" : "read";
+        }
+    }
+    if (!paramContainer_[INPUT_CFG_COM_SYS_IO_FREQ].empty()) {
+        paramContainer_[INPUT_CFG_COM_SYS_IO] = MSVP_PROF_ON;
+    }
+    if (!paramContainer_[INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ].empty()) {
+        paramContainer_[INPUT_CFG_COM_SYS_INTERCONNECTION] = MSVP_PROF_ON;
+    }
+    if (!paramContainer_[INPUT_CFG_COM_DVPP_FREQ].empty()) {
+        paramContainer_[INPUT_CFG_COM_DVPP] = MSVP_PROF_ON;
+    }
+    return PROFILING_SUCCESS;
+}
+
+int AclJsonParamAdapter::TransToParams()
+{
+    return PROFILING_SUCCESS;
+}
+
 int AclJsonParamAdapter::GetParamFromInputCfg(ProfAclConfig aclCfg, SHARED_PTR_ALIA<ProfileParams> params)
 {
     params_ = params;
-    Init();
+    int ret = Init();
+    if (ret != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
     
+    GenAclJsonContainer(aclCfg);
+
+    std::vector<InputCfg> errCfgList;
+    ret = ParamsCheckAclJson(errCfgList);
+    if (ret == PROFILING_FAILED && !errCfgList.empty()) {
+        for (auto errCfg : errCfgList) {
+            MSPROF_LOGW("Argument --%s:%s set invalid.",
+                aclJsonPrintMap_[errCfg].c_str(), paramContainer_[errCfg]);
+        }
+        return PROFILING_FAILED;
+    }
+
+    errCfgList.clear();
+    ret = ComCfgCheck(ENABLE_ACL_JSON, paramContainer_, setConfig_, errCfgList);
+    if (ret != PROFILING_SUCCESS) {
+        for (auto errCfg : errCfgList) {
+            MSPROF_LOGW("Argument --%s:%s set invalid.",
+                aclJsonPrintMap_[errCfg].c_str(), paramContainer_[errCfg]);
+        }
+        return PROFILING_FAILED;
+    }
+
+    ret = SetAclJsonContainerDefaultValue();
+    if (ret != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
+
+    ret = TransToParams();
+    if (ret != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
+    return PROFILING_SUCCESS;
 }
 
 // ============================================ ge opt ======================================
@@ -303,6 +468,42 @@ int GeOptParamAdapter::Init()
         INPUT_CFG_GE_OPT_FP_POINT, INPUT_CFG_GE_OPT_BP_POINT, INPUT_CFG_COM_TASK_TRACE,
         INPUT_CFG_COM_TRAINING_TRACE, INPUT_CFG_COM_BIU, INPUT_CFG_COM_BIU_FREQ
     }).swap(geOptConfig_);
+    std::vector<InputCfg>({
+        INPUT_CFG_GE_OPT_FP_POINT, INPUT_CFG_GE_OPT_BP_POINT, INPUT_CFG_COM_OUTPUT, INPUT_CFG_COM_STORAGE_LIMIT,
+        INPUT_CFG_COM_MSPROFTX, INPUT_CFG_COM_TASK_TIME, INPUT_CFG_COM_TASK_TRACE, INPUT_CFG_COM_TRAINING_TRACE,
+        INPUT_CFG_COM_AICPU, INPUT_CFG_COM_L2, INPUT_CFG_COM_HCCL, INPUT_CFG_COM_RUNTIME_API,
+        INPUT_CFG_COM_AIC_METRICS, INPUT_CFG_COM_AIV_METRICS, INPUT_CFG_COM_SYS_USAGE_FREQ,
+        INPUT_CFG_COM_SYS_PID_USAGE_FREQ, INPUT_CFG_COM_SYS_CPU_FREQ, INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ,
+        INPUT_CFG_COM_SYS_IO_FREQ, INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ, INPUT_CFG_COM_DVPP_FREQ,
+        INPUT_CFG_COM_BIU, INPUT_CFG_COM_BIU_FREQ, INPUT_CFG_COM_LLC_MODE, INPUT_HOST_SYS_USAGE
+    }).swap(geOptionsWholeConfig_);
+    std::map<InputCfg, std::string>({
+        {INPUT_CFG_GE_OPT_FP_POINT, "fp_point"},
+        {INPUT_CFG_GE_OPT_BP_POINT, "bp_point"},
+        {INPUT_CFG_COM_OUTPUT, "output"},
+        {INPUT_CFG_COM_STORAGE_LIMIT, "storage_limit"},
+        {INPUT_CFG_COM_MSPROFTX, "msproftx"},
+        {INPUT_CFG_COM_TASK_TIME, "task_time"},
+        {INPUT_CFG_COM_TASK_TRACE, "task_trace"},
+        {INPUT_CFG_COM_TRAINING_TRACE, "training_trace"},
+        {INPUT_CFG_COM_AICPU, "aicpu"},
+        {INPUT_CFG_COM_L2, "l2"},
+        {INPUT_CFG_COM_HCCL, "hccl"},
+        {INPUT_CFG_COM_RUNTIME_API, "runtime_api"},
+        {INPUT_CFG_COM_AIC_METRICS, "aic_metrics"},
+        {INPUT_CFG_COM_AIV_METRICS, "aiv_metrics"},
+        {INPUT_CFG_COM_SYS_USAGE_FREQ, "sys_usage_freq"},
+        {INPUT_CFG_COM_SYS_PID_USAGE_FREQ, "sys_pid_usage_freq"},
+        {INPUT_CFG_COM_SYS_CPU_FREQ, "sys_cpu_freq"},
+        {INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ, "sys_hardware_mem_freq"},
+        {INPUT_CFG_COM_SYS_IO_FREQ, "sys_io_freq"},
+        {INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ, "sys_interconnection_freq"},
+        {INPUT_CFG_COM_DVPP_FREQ, "dvpp_freq"},
+        {INPUT_CFG_COM_BIU, "biu"},
+        {INPUT_CFG_COM_BIU_FREQ, "biu_freq"},
+        {INPUT_CFG_COM_LLC_MODE, "llc_mode"},
+        {INPUT_HOST_SYS_USAGE, "host_sys_usage"},
+    }).swap(geOptionsPrintMap_);
 }
 
 int GeOptParamAdapter::ParamsCheckGeOpt(std::vector<InputCfg> &cfgList) const
@@ -312,8 +513,6 @@ int GeOptParamAdapter::ParamsCheckGeOpt(std::vector<InputCfg> &cfgList) const
     for (auto inputCfg : geOptConfig_) {
         std::string cfgValue = paramContainer_[inputCfg];
         switch (inputCfg) {
-            case INPUT_CFG_GE_OPT_FP_POINT:
-            case INPUT_CFG_GE_OPT_BP_POINT:
             case INPUT_CFG_COM_TASK_TRACE:
             case INPUT_CFG_COM_TRAINING_TRACE:
             case INPUT_CFG_COM_BIU:
@@ -333,10 +532,128 @@ int GeOptParamAdapter::ParamsCheckGeOpt(std::vector<InputCfg> &cfgList) const
     return flag ? PROFILING_SUCCESS : PROFILING_FAILED;
 }
 
+int GeOptParamAdapter::GenGeOptionsContainer(ProfGeOptionsConfig geCfg)
+{
+    paramContainer_[INPUT_CFG_GE_OPT_FP_POINT] = geCfg.fp_point();
+    paramContainer_[INPUT_CFG_GE_OPT_BP_POINT] = geCfg.bp_point();
+    paramContainer_[INPUT_CFG_COM_OUTPUT] = geCfg.output();
+    paramContainer_[INPUT_CFG_COM_STORAGE_LIMIT] = geCfg.storage_limit();
+    paramContainer_[INPUT_CFG_COM_MSPROFTX] = geCfg.msproftx();
+    paramContainer_[INPUT_CFG_COM_TASK_TIME] = geCfg.task_time();
+    paramContainer_[INPUT_CFG_COM_TRAINING_TRACE] = geCfg.training_trace();
+    paramContainer_[INPUT_CFG_COM_TASK_TRACE] = geCfg.task_trace();
+    paramContainer_[INPUT_CFG_COM_AICPU] = geCfg.aicpu();
+    paramContainer_[INPUT_CFG_COM_L2] = geCfg.l2();
+    paramContainer_[INPUT_CFG_COM_HCCL] = geCfg.hccl();
+    paramContainer_[INPUT_CFG_COM_ASCENDCL] = "off";
+    paramContainer_[INPUT_CFG_COM_RUNTIME_API] = geCfg.runtime_api();
+    paramContainer_[INPUT_CFG_COM_AIC_METRICS] = geCfg.aic_metrics();
+    paramContainer_[INPUT_CFG_COM_AIV_METRICS] = geCfg.aiv_metrics();
+    paramContainer_[INPUT_CFG_COM_SYS_USAGE_FREQ] = std::to_string(geCfg.sys_usage_freq());
+    paramContainer_[INPUT_CFG_COM_SYS_PID_USAGE_FREQ] = std::to_string(geCfg.sys_pid_usage_freq());
+    paramContainer_[INPUT_CFG_COM_SYS_CPU_FREQ] = std::to_string(geCfg.sys_cpu_freq());
+    paramContainer_[INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ] = std::to_string(geCfg.sys_hardware_mem_freq());
+    paramContainer_[INPUT_CFG_COM_SYS_IO_FREQ] = std::to_string(geCfg.sys_io_freq());
+    paramContainer_[INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ] = std::to_string(geCfg.sys_interconnection_freq());
+    paramContainer_[INPUT_CFG_COM_DVPP_FREQ] = std::to_string(geCfg.dvpp_freq());
+    paramContainer_[INPUT_CFG_COM_BIU] = geCfg.biu();
+    paramContainer_[INPUT_CFG_COM_BIU_FREQ] = std::to_string(geCfg.biu_freq());
+    paramContainer_[INPUT_CFG_COM_LLC_MODE] = geCfg.llc_mode();
+    paramContainer_[INPUT_HOST_SYS_USAGE] = geCfg.host_sys_usage();
+    for (auto configOpt : geOptionsWholeConfig_) {
+        if (!paramContainer_[configOpt].empty()) {
+            setConfig_.insert(configOpt);
+            if (!BlackSwitchCheck(configOpt)) {
+                MSPROF_LOGW("Unrecognized option:%s for PlatformType:%d",
+                    geOptionsPrintMap_[configOpt].c_str(), static_cast<uint8_t>(GetPlatform()));
+                paramContainer_[configOpt].clear(); // ignore switch
+                BlackSwitch_.push_back(configOpt);
+            }
+        }
+    }
+    return PROFILING_SUCCESS;
+}
+
+void GeOptParamAdapter::SetGeOptionsContainerDefaultValue()
+{
+    paramContainer_[INPUT_CFG_COM_OUTPUT] = SetOutputDir(paramContainer_[INPUT_CFG_COM_OUTPUT]);
+    if (!paramContainer_[INPUT_CFG_COM_AIC_METRICS].empty()) {
+        paramContainer_[INPUT_CFG_COM_AI_CORE] = MSVP_PROF_ON;
+        paramContainer_[INPUT_CFG_COM_AIC_MODE] = PROFILING_MODE_TASK_BASED;
+    }
+    if (!paramContainer_[INPUT_CFG_COM_AIV_METRICS].empty()) {
+        paramContainer_[INPUT_CFG_COM_AI_VECTOR] = MSVP_PROF_ON;
+        paramContainer_[INPUT_CFG_COM_AIV_MODE] = PROFILING_MODE_TASK_BASED;
+    }
+    if (!paramContainer_[INPUT_CFG_COM_SYS_USAGE_FREQ].empty()) {
+        paramContainer_[INPUT_CFG_COM_SYS_USAGE] = MSVP_PROF_ON;
+    }
+    if (!paramContainer_[INPUT_CFG_COM_SYS_CPU_FREQ].empty()) {
+        paramContainer_[INPUT_CFG_COM_SYS_CPU] = MSVP_PROF_ON;
+    }
+    if (!paramContainer_[INPUT_CFG_COM_SYS_PID_USAGE_FREQ].empty()) {
+        paramContainer_[INPUT_CFG_COM_SYS_PID_USAGE] = MSVP_PROF_ON;
+    }
+    if (!paramContainer_[INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ].empty()) {
+        paramContainer_[INPUT_CFG_COM_SYS_HARDWARE_MEM] = MSVP_PROF_ON;
+        if (paramContainer_[INPUT_CFG_COM_LLC_MODE].empty() &&
+            std::find(BlackSwitch_.begin(), BlackSwitch_.end(), INPUT_CFG_COM_LLC_MODE) == BlackSwitch_.end()) {
+            paramContainer_[INPUT_CFG_COM_LLC_MODE] = GetPlatform() == PlatformType::MINI_TYPE ? "capacity" : "read";
+        }
+    }
+    if (!paramContainer_[INPUT_CFG_COM_SYS_IO_FREQ].empty()) {
+        paramContainer_[INPUT_CFG_COM_SYS_IO] = MSVP_PROF_ON;
+    }
+    if (!paramContainer_[INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ].empty()) {
+        paramContainer_[INPUT_CFG_COM_SYS_INTERCONNECTION] = MSVP_PROF_ON;
+    }
+    if (!paramContainer_[INPUT_CFG_COM_DVPP_FREQ].empty()) {
+        paramContainer_[INPUT_CFG_COM_DVPP] = MSVP_PROF_ON;
+    }
+}
+
+int GeOptParamAdapter::TransToParams()
+{
+    return PROFILING_SUCCESS;
+}
+
 int GeOptParamAdapter::GetParamFromInputCfg(ProfGeOptionsConfig geCfg, SHARED_PTR_ALIA<ProfileParams> params)
 {
     params_ = params;
-    Init();
+    int ret = Init();
+    if (ret != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
+
+    GenGeOptionsContainer(geCfg);
+
+    std::vector<InputCfg> errCfgList;
+    ret = ParamsCheckGeOpt(errCfgList);
+    if (ret == PROFILING_FAILED && !errCfgList.empty()) {
+        for (auto errCfg : errCfgList) {
+            MSPROF_LOGW("Argument --%s:%s set invalid.",
+                geOptionsPrintMap_[errCfg].c_str(), paramContainer_[errCfg]);
+        }
+        return PROFILING_FAILED;
+    }
+
+    errCfgList.clear();
+    ret = ComCfgCheck(ENABLE_GE_OPTION, paramContainer_, setConfig_, errCfgList);
+    if (ret != PROFILING_SUCCESS) {
+        for (auto errCfg : errCfgList) {
+            MSPROF_LOGW("Argument --%s:%s set invalid.",
+                geOptionsPrintMap_[errCfg].c_str(), paramContainer_[errCfg]);
+        }
+        return PROFILING_FAILED;
+    }
+
+    SetGeOptionsContainerDefaultValue();
+
+    ret = TransToParams();
+    if (ret != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
+    return PROFILING_SUCCESS;
 }
 
 // ============================================ acl json ==================================
@@ -380,8 +697,8 @@ std::string AclApiParamAdapter::devIdToStr(uint32_t devNum, const uint32_t *devL
 {
     std::string devStr;
     bool flag = false;
-    for(uint32_t i = 0; i < devNum; i++) {
-        if(!flag) {
+    for (uint32_t i = 0; i < devNum; i++) {
+        if (!flag) {
             flag = true;
             devStr += std::to_string(devList[i]);
             continue;
@@ -438,7 +755,6 @@ void AclApiParamAdapter::ProfTaskCfgToContainer(const ProfConfig * apiCfg,
         setConfig_.insert(INPUT_CFG_COM_AIC_MODE);
         paramContainer_[INPUT_CFG_COM_TASK_TRACE] = MSVP_PROF_ON;
         setConfig_.insert(INPUT_CFG_COM_TASK_TRACE);
-        
     }
     if (!argsArr[ACL_PROF_AIV_METRICS].empty()) {
         paramContainer_[INPUT_CFG_COM_AI_VECTOR] = MSVP_PROF_ON;
