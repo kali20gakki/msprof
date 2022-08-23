@@ -47,7 +47,7 @@ unsigned long long Utils::GetClockRealtime()
     (void)memset_s(&now, sizeof(now), 0, sizeof(now));
     (void)clock_gettime(CLOCK_REALTIME, &now);
     return (static_cast<unsigned long long>(now.tv_sec) * CHANGE_FROM_S_TO_NS) +
-        static_cast<unsigned long long>(now.tv_sec);
+        static_cast<unsigned long long>(now.tv_nsec);
 #endif
 }
 
