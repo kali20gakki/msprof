@@ -485,7 +485,7 @@ std::string ParamsAdapter::SetOutputDir(std::string &outputDir)
             result = result.substr(0, pos + 1);
         }
     }
-    MSPROF_LOGI("MsprofResultDirAdapter result path: %s", Utils::BaseName(result).c_str());
+    MSPROF_LOGI("Profiling result path: %s", Utils::BaseName(result).c_str());
 
     return result;
 }
