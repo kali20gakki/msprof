@@ -706,7 +706,7 @@ int ProfLlcJob::Uninit()
 
         int exitCode = analysis::dvvp::common::utils::VALID_EXIT_CODE;
         static const std::string CMD = "sudo";
-        mmProcess appProcess = MSVP_MMPROCESS;
+        MmProcess appProcess = MSVP_MMPROCESS;
         ExecCmdParams execCmdParams(CMD, false, "");
         int ret = analysis::dvvp::common::utils::Utils::ExecCmd(execCmdParams,
                                                                 argsV,

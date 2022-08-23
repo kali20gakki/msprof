@@ -95,7 +95,7 @@ private:
     void SendData();
 
 private:
-    mmProcess llcProcess_;
+    MmProcess llcProcess_;
 };
 
 class ProfRoceJob : public ProfPeripheralJob {
