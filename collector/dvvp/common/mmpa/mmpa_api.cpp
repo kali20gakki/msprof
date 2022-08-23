@@ -667,9 +667,9 @@ int32_t MmGetLocalTime(MmSystemTimeT *sysTimePtr)
     sysTimePtr->wMonth = nowTime.tm_mon + 1; // in localtime month is [0, 11], but in fact month is [1, 12]
     sysTimePtr->wYear = nowTime.tm_year + MMPA_COMPUTER_BEGIN_YEAR;
     sysTimePtr->wDayOfWeek = nowTime.tm_wday;
-    sysTimePtr->tmYday = nowTime.tm_mday;
+    sysTimePtr->tmYday = nowTime.tm_yday;
     sysTimePtr->tmIsdst = nowTime.tm_isdst;
-    sysTimePtr->wMilliseconds = timeVal.tv_sec / MMPA_MSEC_TO_USEC;
+    sysTimePtr->wMilliseconds = timeVal.tv_usec / MMPA_MSEC_TO_USEC;
 
     return PROFILING_SUCCESS;
 }
