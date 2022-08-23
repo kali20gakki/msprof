@@ -465,6 +465,31 @@ void ParamsAdapter::Print(std::array<std::string, INPUT_CFG_MAX> paramContainer)
     }
 }
 
+std::string ParamsAdapter::SetOutputDir(std::string &outputDir)
+{
+    std::string result;
+    if (outputDir.empty()) {
+        MSPROF_LOGI("No output set, use default path");
+    } else {
+        std::string path = Utils::RelativePathToAbsolutePath(outputDir);
+        if (Utils::CreateDir(path) != PROFILING_SUCCESS) {
+            MSPROF_LOGW("Failed to create dir: %s", Utils::BaseName(path).c_str());
+        }
+        result = analysis::dvvp::common::utils::Utils::CanonicalizePath(path);
+    }
+    if (result.empty() || !analysis::dvvp::common::utils::Utils::IsDirAccessible(result)) {
+        MSPROF_LOGI("No output set or is not accessible, use app dir instead");
+        result = analysis::dvvp::common::utils::Utils::GetSelfPath();
+        size_t pos = result.rfind(analysis::dvvp::common::utils::MSVP_SLASH);
+        if (pos != std::string::npos) {
+            result = result.substr(0, pos + 1);
+        }
+    }
+    MSPROF_LOGI("MsprofResultDirAdapter result path: %s", Utils::BaseName(result).c_str());
+
+    return result;
+}
+
 } // ParamsAdapter
 } // Dvvp
 } // Collector
