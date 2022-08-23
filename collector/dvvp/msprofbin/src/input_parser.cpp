@@ -88,14 +88,23 @@ SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> InputParser::MsprofGetOp
     int optionIndex = 0;
     MsprofString optString  = "";
     struct MsprofCmdInfo cmdInfo = { {nullptr} };
-    std::vector<std::pair<MsprofArgsType, MsprofCmdInfo>>argsVec;
+    std::vector<std::pair<MsprofArgsType, MsprofCmdInfo>>cmdsVec;
+    std::vector<std::pair<MsprofArgsType, std::string>>argvVec;
+    std::string argvStr = "";
     while ((opt = MmGetOptLong(argc, const_cast<MsprofStrBufAddrT>(argv),
         optString, longOptions, &optionIndex)) != MSPROF_DAEMON_ERROR) {
+        if (opt < ARGS_HELP || opt >= NR_ARGS) {
+            MsprofCmdUsage("");
+            return nullptr;
+        }
         cmdInfo.args[opt] = MmGetOptArg();
-        argsVec.push_back(std::make_pair(MsprofArgsType(opt), cmdInfo));
+        argvStr = std::string(argv[MmGetOptInd() - 1]);
+        cmdsVec.push_back(std::make_pair(MsprofArgsType(opt), cmdInfo));
+        argvVec.push_back(std::make_pair(MsprofArgsType(opt), argvStr));
+        params_->usedParams.insert(opt);
     }
     auto paramAdapter = MsprofParamAdapter();
-    int ret = paramAdapter.GetParamFromInputCfg(argsVec, params_);
+    int ret = paramAdapter.GetParamFromInputCfg(cmdsVec, argvVec, params_);
     if (ret != PROFILING_SUCCESS) {
         return nullptr;
     }

@@ -110,11 +110,15 @@ PlatformType ParamsAdapter::GetPlatform() const
 }
 
 int ParamsAdapter::ComCfgCheck(EnableType enableType, std::array<std::string, INPUT_CFG_MAX> paramContainer,
+    std::set<InputCfg> &setArgs,
     std::vector<InputCfg> &cfgList) const
 {
     int ret = PROFILING_SUCCESS;
     bool flag = true;
     for (auto inputCfg : commonConfig_) {
+        if (setArgs.find(inputCfg) == setArgs.end()) {
+            continue;
+        }
         std::string cfgValue = paramContainer[inputCfg];
         switch (inputCfg) {
             // output check

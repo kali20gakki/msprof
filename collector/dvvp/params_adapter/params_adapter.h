@@ -99,6 +99,7 @@ public:
     bool BlackSwitchCheck(InputCfg inputCfg) const;
     PlatformType GetPlatform() const;
     int ComCfgCheck(EnableType enableType, std::array<std::string, INPUT_CFG_MAX> paramContainer,
+        std::set<InputCfg> &setArgs,
         std::vector<InputCfg> &cfgList) const;
     int TransToParam();
     // To Del
