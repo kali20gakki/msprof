@@ -37,7 +37,6 @@ private:
     int Init();
     void CreateCfgMap();
     int ParamsCheckMsprof(std::vector<InputCfg> &cfgList) const;
-    void DefaultCfgSet();
     int TransToParams();
 
 private:
