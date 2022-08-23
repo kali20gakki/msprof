@@ -209,16 +209,16 @@ int ParamsAdapter::CheckAiMetricsValid(const std::string &aiMetrics) const
 int ParamsAdapter::CheckFreqValid(const std::string &freq, const InputCfg freqOpt) const
 {
     std::map<InputCfg, std::vector<int>> freqRangeMap = {
-        {INPUT_CFG_COM_AIC_FREQ, {1, 100}},
-        {INPUT_CFG_COM_AIV_FREQ, {1, 100}},
-        {INPUT_CFG_COM_SYS_USAGE_FREQ, {1, 10}},
-        {INPUT_CFG_COM_SYS_CPU_FREQ, {1, 50}},
-        {INPUT_CFG_COM_SYS_PID_USAGE_FREQ, {1, 10}},
-        {INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ, {1, 1000}},
-        {INPUT_CFG_COM_SYS_IO_FREQ, {1, 100}},
-        {INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ, {1, 50}},
-        {INPUT_CFG_COM_DVPP_FREQ, {1, 100}},
-        {INPUT_CFG_COM_BIU_FREQ, {300, 30000}},
+        {INPUT_CFG_COM_AIC_FREQ, {AIC_FREQ_MIN, AIC_FREQ_MAX}},
+        {INPUT_CFG_COM_AIV_FREQ, {AIV_FREQ_MIN, AIV_FREQ_MAX}},
+        {INPUT_CFG_COM_SYS_USAGE_FREQ, {SYS_USAGE_FREQ_MIN, SYS_USAGE_FREQ_MAX}},
+        {INPUT_CFG_COM_SYS_CPU_FREQ, {SYS_CPU_FREQ_MIN, SYS_CPU_FREQ_MAX}},
+        {INPUT_CFG_COM_SYS_PID_USAGE_FREQ, {SYS_PID_USAGE_FREQ_MIN, SYS_PID_USAGE_FREQ_MAX}},
+        {INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ, {SYS_HARDWARE_MEM_FREQ_MIN, ACC_PMU_MODE_THRED}},
+        {INPUT_CFG_COM_SYS_IO_FREQ, {SYS_IO_FREQ_MIN, SYS_IO_FREQ_MAX}},
+        {INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ, {SYS_INTERCONNECTION_FREQ_MIN, ACC_PMU_MODE_THRED}},
+        {INPUT_CFG_COM_DVPP_FREQ, {DVPP_FREQ_MIN, DVPP_FREQ_MAX}},
+        {INPUT_CFG_COM_BIU_FREQ, {BIU_FREQ_MIN, BIU_FREQ_MAX}},
     };
     std::vector<int> checkFreqRange = freqRangeMap[freqOpt];
     if (!ParamValidation::instance()->CheckFreqIsValid(freq, checkFreqRange[0], checkFreqRange[1])) {
