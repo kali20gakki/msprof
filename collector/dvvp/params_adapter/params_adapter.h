@@ -19,6 +19,28 @@ namespace ParamsAdapter {
 
 using Analysis::Dvvp::Common::Config::PlatformType;
 using analysis::dvvp::message::StatusInfo;
+
+const int AIC_FREQ_MIN = 1;
+const int AIC_FREQ_MAX = 100;
+const int AIV_FREQ_MIN = 1;
+const int AIV_FREQ_MAX = 100;
+const int SYS_USAGE_FREQ_MIN = 1;
+const int SYS_USAGE_FREQ_MAX = 10;
+const int SYS_CPU_FREQ_MIN = 1;
+const int SYS_CPU_FREQ_MAX = 50;
+const int SYS_PID_USAGE_FREQ_MIN = 1;
+const int SYS_PID_USAGE_FREQ_MAX = 10;
+const int SYS_HARDWARE_MEM_FREQ_MIN = 1;
+const int SYS_HARDWARE_MEM_FREQ_MAX = 1000;
+const int SYS_IO_FREQ_MIN = 1;
+const int SYS_IO_FREQ_MAX = 100;
+const int SYS_INTERCONNECTION_FREQ_MIN = 1;
+const int SYS_INTERCONNECTION_FREQ_MAX = 50;
+const int DVPP_FREQ_MIN = 1;
+const int DVPP_FREQ_MAX = 100;
+const int BIU_FREQ_MIN = 300;
+const int BIU_FREQ_MAX = 30000;
+const int ACC_PMU_MODE_THRED = 5000; // Check
 enum InputCfg {
     INPUT_CFG_MSPROF_APPLICATION = 0, // del
     INPUT_CFG_MSPROF_ENVIRONMENT = 1, // del
