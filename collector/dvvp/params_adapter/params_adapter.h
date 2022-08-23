@@ -122,7 +122,7 @@ public:
     PlatformType GetPlatform() const;
     int ComCfgCheck(EnableType enableType, std::array<std::string, INPUT_CFG_MAX> paramContainer,
         std::set<InputCfg> &setArgs,
-        std::vector<InputCfg> &cfgList) const;
+        std::vector<std::pair<InputCfg, std::string>> &cfgList) const;
     int TransToParam();
     // To Del
     void Print(std::array<std::string, INPUT_CFG_MAX> paramContainer);
