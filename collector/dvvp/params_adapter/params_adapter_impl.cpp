@@ -44,7 +44,7 @@ int MsprofParamAdapter::Init()
     return PROFILING_SUCCESS;
 }
 
-int MsprofParamAdapter::ParamsCheckMsprof(std::vector<InputCfg> &cfgList) const
+int MsprofParamAdapter::ParamsCheckMsprof(std::vector<std::pair<InputCfg, std::string>> &cfgList) const
 {
     int ret = PROFILING_SUCCESS;
     bool flag = true;
@@ -112,7 +112,7 @@ int MsprofParamAdapter::ParamsCheckMsprof(std::vector<InputCfg> &cfgList) const
                 ret = PROFILING_FAILED;
         }
         if (ret != PROFILING_SUCCESS) {
-            cfgList.push_back(inputCfg);
+            cfgList.push_back(std::pair<InputCfg, std::string>(inputCfg, cfgValue));
             flag = false;
         }
     }
@@ -128,8 +128,7 @@ int MsprofParamAdapter::TransToParams()
 }
 
 // msprofCfg：用户命令行显示设置的参数对
-int MsprofParamAdapter::GetParamFromInputCfg(std::vector<std::pair<MsprofArgsType, MsprofCmdInfo>> cmdsVec,
-    std::vector<std::pair<MsprofArgsType, std::string>>argvVec,
+int MsprofParamAdapter::GetParamFromInputCfg(std::unordered_map<int, std::pair<MsprofCmdInfo, std::string>> argvMap,
     SHARED_PTR_ALIA<ProfileParams> params)
 {
     params_ = params;
@@ -137,33 +136,32 @@ int MsprofParamAdapter::GetParamFromInputCfg(std::vector<std::pair<MsprofArgsTyp
     if (ret != PROFILING_SUCCESS) {
         return PROFILING_FAILED;
     }
-    
     // [1]黑名单校验+表参数映射（用户参数-->全量表）
-    for (uint32_t i = 0; i < cmdsVec.size(); ++i) {
-        MsprofArgsType argsType = cmdsVec[i].first;
+    for (const std::pair<int, std::pair<MsprofCmdInfo, std::string>> kv : argvMap) {
+        MsprofArgsType argsType = static_cast<MsprofArgsType>(kv.first);
         InputCfg cfgType = cfgMap_[argsType];
         if (!BlackSwitchCheck(cfgType)) {
             std::cout << Utils::GetSelfPath() << ": unrecognized option '"
-                  << argvVec[i].second << "'" << std::endl;
+                  << kv.second.second << "'" << std::endl;
             std::cout << "PlatformType:" << static_cast<uint8_t>(GetPlatform()) << std::endl;
             return PROFILING_FAILED;
         }
-        if (!cmdsVec[i].second.args[argsType]) {
+        if (!kv.second.first.args[argsType]) {
             return PROFILING_FAILED;
         }
-        paramContainer_[cfgType] = cmdsVec[i].second.args[argsType];
+        paramContainer_[cfgType] = kv.second.first.args[argsType];
         setConfig_.insert(cfgType);
     }
 
     // [2] 默认值设置
 
     // [4] 私有参数校验（派生类实现）
-    std::vector<InputCfg> errCfgList;
+    std::vector<std::pair<InputCfg, std::string>> errCfgList;
     ret = ParamsCheckMsprof(errCfgList);
     if (ret != PROFILING_SUCCESS && !errCfgList.empty()) {
         for (auto errCfg : errCfgList) {
-            CmdLog::instance()->CmdErrorLog("Argument --%s:%s set invalid.", argvVec[reCfgMap_[errCfg]].second.c_str(),
-                paramContainer_[errCfg].c_str());
+            MsprofArgsType argsType = reCfgMap_[errCfg.first];
+            CmdLog::instance()->CmdErrorLog("Argument %s set invalid.", argvMap[argsType].second.c_str());
         }
         return PROFILING_FAILED;
     }
@@ -172,8 +170,8 @@ int MsprofParamAdapter::GetParamFromInputCfg(std::vector<std::pair<MsprofArgsTyp
     ret = ComCfgCheck(ENABLE_MSPROF, paramContainer_, setConfig_, errCfgList);
     if (ret != PROFILING_SUCCESS) {
         for (auto errCfg : errCfgList) {
-            CmdLog::instance()->CmdErrorLog("Argument --%s:%s set invalid.", argvVec[reCfgMap_[errCfg]].second.c_str(),
-                paramContainer_[errCfg].c_str());
+            MsprofArgsType argsType = reCfgMap_[errCfg.first];
+            CmdLog::instance()->CmdErrorLog("Argument %s set invalid.", argvMap[argsType].second.c_str());
         }
         // todo 打印errCfgList中的错误
         return PROFILING_FAILED;
@@ -665,7 +663,7 @@ int AclApiParamAdapter::Init()
     }).swap(aclApiConfig_);
 }
 
-int AclApiParamAdapter::ParamsCheckAclApi(std::vector<InputCfg> &cfgList) const
+int AclApiParamAdapter::ParamsCheckAclApi(std::vector<std::pair<InputCfg, std::string>> &cfgList) const
 {
     int ret = PROFILING_SUCCESS;
     bool flag = true;
@@ -682,7 +680,7 @@ int AclApiParamAdapter::ParamsCheckAclApi(std::vector<InputCfg> &cfgList) const
                 ret = PROFILING_FAILED;
         }
         if (ret != PROFILING_SUCCESS) {
-            cfgList.push_back(inputCfg);
+            cfgList.push_back(std::pair<InputCfg, std::string>(inputCfg, cfgValue));
             flag = false;
         }
     }
@@ -864,7 +862,7 @@ int AclApiParamAdapter::GetParamFromInputCfg(const ProfConfig * apiCfg,
     ProfCfgToContainer(apiCfg, argsArr);
     
     // =================================
-    std::vector<InputCfg> errCfgList;
+    std::vector<std::pair<InputCfg, std::string>> errCfgList;
     ret = ParamsCheckAclApi(errCfgList);
     if (ret != PROFILING_SUCCESS && !errCfgList.empty()) {
         for (auto errCfg : errCfgList) {
