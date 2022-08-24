@@ -66,22 +66,9 @@
 #define MMPA_THREAD_SCHED_FIFO SCHED_FIFO
 #define MMPA_THREAD_SCHED_OTHER SCHED_OTHER
 #define MMPA_THREAD_MIN_STACK_SIZE PTHREAD_STACK_MIN
-constexpr int32_t MMPA_MAX_THREAD_PIO = 99;
-constexpr int32_t MMPA_MIN_THREAD_PIO = 1;
-constexpr int32_t PATH_SIZE = 256;
 #define MMPA_MAX_PATH PATH_MAX
 #define M_WAIT_NOHANG WNOHANG
 #define M_WAIT_UNTRACED WUNTRACED
-constexpr uint32_t MMPA_MAX_IF_SIZE = 2048;
-constexpr uint32_t MMPA_MEM_MAX_LEN = 0x7fffffff;
-constexpr int32_t MMPA_COMPUTER_BEGIN_YEAR = 1900;
-constexpr int32_t MMPA_MIN_OS_VERSION_SIZE = 128;
-constexpr int32_t MMPA_MIN_OS_NAME_SIZE = 64;
-constexpr uint32_t MMPA_CPUPROC_BUF_SIZE = 256;
-constexpr uint32_t MMPA_CPUINFO_DEFAULT_SIZE = 64;
-constexpr uint32_t MMPA_CPUINFO_DOUBLE_SIZE = 128;
-constexpr int32_t MMPA_MAX_PHYSICALCPU_COUNT = 4096;
-constexpr int32_t MMPA_MIN_PHYSICALCPU_COUNT = 1;
 
 #define M_F_OK F_OK
 #define M_X_OK X_OK
@@ -116,6 +103,20 @@ constexpr int32_t MMPA_MIN_PHYSICALCPU_COUNT = 1;
 namespace Collector {
 namespace Dvvp {
 namespace Mmpa {
+constexpr int32_t MMPA_MIN_THREAD_PIO = 1;
+constexpr int32_t PATH_SIZE = 256;
+constexpr uint32_t MMPA_CPUINFO_DEFAULT_SIZE = 64;
+constexpr int32_t MMPA_MAX_THREAD_PIO = 99;
+constexpr uint32_t MMPA_MAX_IF_SIZE = 2048;
+constexpr uint32_t MMPA_MEM_MAX_LEN = 0x7fffffff;
+constexpr int32_t MMPA_COMPUTER_BEGIN_YEAR = 1900;
+constexpr int32_t MMPA_MIN_OS_VERSION_SIZE = 128;
+constexpr int32_t MMPA_MIN_OS_NAME_SIZE = 64;
+constexpr uint32_t MMPA_CPUPROC_BUF_SIZE = 256;
+constexpr uint32_t MMPA_CPUINFO_DOUBLE_SIZE = 128;
+constexpr int32_t MMPA_MAX_PHYSICALCPU_COUNT = 4096;
+constexpr int32_t MMPA_MIN_PHYSICALCPU_COUNT = 1;
+
 // data type define
 const int MMPA_MACINFO_DEFAULT_SIZE = 18;
 const int MMPA_CPUDESC_DEFAULT_SIZE = 64;

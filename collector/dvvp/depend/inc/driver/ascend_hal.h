@@ -31,7 +31,6 @@
 extern "C" {
 #endif
 
-/*lint -e116 -e17*/
 #ifndef int8_t
 typedef signed char int8_t;
 #endif
@@ -518,7 +517,7 @@ typedef enum tagDrvError {
 
     DRV_ERROR_NOT_SUPPORT = 0xfffe,
     DRV_ERROR_RESERVED,
-} drvError_t;//lint !e116 !e17
+} drvError_t;
 
 typedef struct {
     unsigned long long maxMemSize; /* max buf size in grp, in KB, if = 0 means no limit */
@@ -2742,8 +2741,8 @@ struct buff_cfg {
  * @ingroup driver
  * @brief Buffer Mbuf info.
  */
-typedef struct mempool_t* poolHandle;//lint !e565
-typedef struct Mbuf Mbuf;//lint !e565
+typedef struct mempool_t* poolHandle;
+typedef struct Mbuf Mbuf;
 typedef struct mp_attr {
     int devid;
     int mGroupId;
@@ -3976,7 +3975,6 @@ typedef struct {
 typedef union {
     QueueSetWorkMode queSetWorkMode;
 } QueueSetInput;
-/*lint +e116 +e17*/
 
 /**
 * @ingroup driver
