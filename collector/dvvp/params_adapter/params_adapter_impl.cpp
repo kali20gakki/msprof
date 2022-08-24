@@ -260,10 +260,7 @@ int AclJsonParamAdapter::Init()
         INPUT_CFG_ACL_JSON_SWITCH, INPUT_CFG_COM_OUTPUT, INPUT_CFG_COM_STORAGE_LIMIT,
         INPUT_CFG_COM_MSPROFTX, INPUT_CFG_COM_TASK_TIME, INPUT_CFG_COM_AICPU, INPUT_CFG_COM_L2,
         INPUT_CFG_COM_HCCL, INPUT_CFG_COM_ASCENDCL, INPUT_CFG_COM_RUNTIME_API,
-        INPUT_CFG_COM_AIC_METRICS, INPUT_CFG_COM_AIV_METRICS, INPUT_CFG_COM_SYS_USAGE_FREQ,
-        INPUT_CFG_COM_SYS_PID_USAGE_FREQ, INPUT_CFG_COM_SYS_CPU_FREQ, INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ,
-        INPUT_CFG_COM_SYS_IO_FREQ, INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ, INPUT_CFG_COM_DVPP_FREQ,
-        INPUT_CFG_COM_BIU, INPUT_CFG_COM_BIU_FREQ, INPUT_CFG_COM_LLC_MODE, INPUT_HOST_SYS_USAGE
+        INPUT_CFG_COM_AIC_METRICS, INPUT_CFG_COM_AIV_METRICS, INPUT_CFG_COM_BIU, INPUT_CFG_COM_BIU_FREQ
     }).swap(aclJsonWholeConfig_);
     std::map<InputCfg, std::string>({
         {INPUT_CFG_ACL_JSON_SWITCH, "switch"},
@@ -278,21 +275,12 @@ int AclJsonParamAdapter::Init()
         {INPUT_CFG_COM_RUNTIME_API, "runtime_api"},
         {INPUT_CFG_COM_AIC_METRICS, "aic_metrics"},
         {INPUT_CFG_COM_AIV_METRICS, "aiv_metrics"},
-        {INPUT_CFG_COM_SYS_USAGE_FREQ, "sys_usage_freq"},
-        {INPUT_CFG_COM_SYS_PID_USAGE_FREQ, "sys_pid_usage_freq"},
-        {INPUT_CFG_COM_SYS_CPU_FREQ, "sys_cpu_freq"},
-        {INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ, "sys_hardware_mem_freq"},
-        {INPUT_CFG_COM_SYS_IO_FREQ, "sys_io_freq"},
-        {INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ, "sys_interconnection_freq"},
-        {INPUT_CFG_COM_DVPP_FREQ, "dvpp_freq"},
         {INPUT_CFG_COM_BIU, "biu"},
         {INPUT_CFG_COM_BIU_FREQ, "biu_freq"},
-        {INPUT_CFG_COM_LLC_MODE, "llc_mode"},
-        {INPUT_HOST_SYS_USAGE, "host_sys_usage"},
     }).swap(aclJsonPrintMap_);
 }
 
-int AclJsonParamAdapter::ParamsCheckAclJson(std::vector<InputCfg> &cfgList) const
+int AclJsonParamAdapter::ParamsCheckAclJson(std::vector<std::pair<InputCfg, std::string>> &cfgList) const
 {
     int ret = PROFILING_SUCCESS;
     bool flag = true;
@@ -310,7 +298,7 @@ int AclJsonParamAdapter::ParamsCheckAclJson(std::vector<InputCfg> &cfgList) cons
                 ret = PROFILING_FAILED;
         }
         if (ret != PROFILING_SUCCESS) {
-            cfgList.push_back(inputCfg);
+            cfgList.push_back(std::pair<InputCfg, std::string>(inputCfg, cfgValue));
             flag = false;
         }
     }
@@ -331,17 +319,8 @@ int AclJsonParamAdapter::GenAclJsonContainer(ProfAclConfig aclCfg)
     paramContainer_[INPUT_CFG_COM_RUNTIME_API] = aclCfg.runtime_api();
     paramContainer_[INPUT_CFG_COM_AIC_METRICS] = aclCfg.aic_metrics();
     paramContainer_[INPUT_CFG_COM_AIV_METRICS] = aclCfg.aiv_metrics();
-    paramContainer_[INPUT_CFG_COM_SYS_USAGE_FREQ] = std::to_string(aclCfg.sys_usage_freq());
-    paramContainer_[INPUT_CFG_COM_SYS_PID_USAGE_FREQ] = std::to_string(aclCfg.sys_pid_usage_freq());
-    paramContainer_[INPUT_CFG_COM_SYS_CPU_FREQ] = std::to_string(aclCfg.sys_cpu_freq());
-    paramContainer_[INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ] = std::to_string(aclCfg.sys_hardware_mem_freq());
-    paramContainer_[INPUT_CFG_COM_SYS_IO_FREQ] = std::to_string(aclCfg.sys_io_freq());
-    paramContainer_[INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ] = std::to_string(aclCfg.sys_interconnection_freq());
-    paramContainer_[INPUT_CFG_COM_DVPP_FREQ] = std::to_string(aclCfg.dvpp_freq());
     paramContainer_[INPUT_CFG_COM_BIU] = aclCfg.biu();
     paramContainer_[INPUT_CFG_COM_BIU_FREQ] = std::to_string(aclCfg.biu_freq());
-    paramContainer_[INPUT_CFG_COM_LLC_MODE] = aclCfg.llc_mode();
-    paramContainer_[INPUT_HOST_SYS_USAGE] = aclCfg.host_sys_usage();
 
     for (auto configOpt : aclJsonWholeConfig_) {
         if (!paramContainer_[configOpt].empty()) {
@@ -378,30 +357,6 @@ int AclJsonParamAdapter::SetAclJsonContainerDefaultValue()
         paramContainer_[INPUT_CFG_COM_AI_VECTOR] = MSVP_PROF_ON;
         paramContainer_[INPUT_CFG_COM_AIV_MODE] = PROFILING_MODE_TASK_BASED;
     }
-    if (!paramContainer_[INPUT_CFG_COM_SYS_USAGE_FREQ].empty()) {
-        paramContainer_[INPUT_CFG_COM_SYS_USAGE] = MSVP_PROF_ON;
-    }
-    if (!paramContainer_[INPUT_CFG_COM_SYS_CPU_FREQ].empty()) {
-        paramContainer_[INPUT_CFG_COM_SYS_CPU] = MSVP_PROF_ON;
-    }
-    if (!paramContainer_[INPUT_CFG_COM_SYS_PID_USAGE_FREQ].empty()) {
-        paramContainer_[INPUT_CFG_COM_SYS_PID_USAGE] = MSVP_PROF_ON;
-    }
-    if (!paramContainer_[INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ].empty()) {
-        paramContainer_[INPUT_CFG_COM_SYS_HARDWARE_MEM] = MSVP_PROF_ON;
-        if (paramContainer_[INPUT_CFG_COM_LLC_MODE].empty()) {
-            paramContainer_[INPUT_CFG_COM_LLC_MODE] = GetPlatform() == PlatformType::MINI_TYPE ? "capacity" : "read";
-        }
-    }
-    if (!paramContainer_[INPUT_CFG_COM_SYS_IO_FREQ].empty()) {
-        paramContainer_[INPUT_CFG_COM_SYS_IO] = MSVP_PROF_ON;
-    }
-    if (!paramContainer_[INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ].empty()) {
-        paramContainer_[INPUT_CFG_COM_SYS_INTERCONNECTION] = MSVP_PROF_ON;
-    }
-    if (!paramContainer_[INPUT_CFG_COM_DVPP_FREQ].empty()) {
-        paramContainer_[INPUT_CFG_COM_DVPP] = MSVP_PROF_ON;
-    }
     return PROFILING_SUCCESS;
 }
 
@@ -420,12 +375,12 @@ int AclJsonParamAdapter::GetParamFromInputCfg(ProfAclConfig aclCfg, SHARED_PTR_A
     
     GenAclJsonContainer(aclCfg);
 
-    std::vector<InputCfg> errCfgList;
+    std::vector<std::pair<InputCfg, std::string>> errCfgList;
     ret = ParamsCheckAclJson(errCfgList);
     if (ret == PROFILING_FAILED && !errCfgList.empty()) {
         for (auto errCfg : errCfgList) {
             MSPROF_LOGW("Argument --%s:%s set invalid.",
-                aclJsonPrintMap_[errCfg].c_str(), paramContainer_[errCfg].c_str());
+                aclJsonPrintMap_[errCfg.first].c_str(), paramContainer_[errCfg.first].c_str());
         }
         return PROFILING_FAILED;
     }
@@ -435,7 +390,7 @@ int AclJsonParamAdapter::GetParamFromInputCfg(ProfAclConfig aclCfg, SHARED_PTR_A
     if (ret != PROFILING_SUCCESS) {
         for (auto errCfg : errCfgList) {
             MSPROF_LOGW("Argument --%s:%s set invalid.",
-                aclJsonPrintMap_[errCfg].c_str(), paramContainer_[errCfg].c_str());
+                aclJsonPrintMap_[errCfg.first].c_str(), paramContainer_[errCfg.first].c_str());
         }
         return PROFILING_FAILED;
     }
@@ -468,10 +423,7 @@ int GeOptParamAdapter::Init()
         INPUT_CFG_GE_OPT_FP_POINT, INPUT_CFG_GE_OPT_BP_POINT, INPUT_CFG_COM_OUTPUT, INPUT_CFG_COM_STORAGE_LIMIT,
         INPUT_CFG_COM_MSPROFTX, INPUT_CFG_COM_TASK_TIME, INPUT_CFG_COM_TASK_TRACE, INPUT_CFG_COM_TRAINING_TRACE,
         INPUT_CFG_COM_AICPU, INPUT_CFG_COM_L2, INPUT_CFG_COM_HCCL, INPUT_CFG_COM_RUNTIME_API,
-        INPUT_CFG_COM_AIC_METRICS, INPUT_CFG_COM_AIV_METRICS, INPUT_CFG_COM_SYS_USAGE_FREQ,
-        INPUT_CFG_COM_SYS_PID_USAGE_FREQ, INPUT_CFG_COM_SYS_CPU_FREQ, INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ,
-        INPUT_CFG_COM_SYS_IO_FREQ, INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ, INPUT_CFG_COM_DVPP_FREQ,
-        INPUT_CFG_COM_BIU, INPUT_CFG_COM_BIU_FREQ, INPUT_CFG_COM_LLC_MODE, INPUT_HOST_SYS_USAGE
+        INPUT_CFG_COM_AIC_METRICS, INPUT_CFG_COM_AIV_METRICS, INPUT_CFG_COM_BIU, INPUT_CFG_COM_BIU_FREQ
     }).swap(geOptionsWholeConfig_);
     std::map<InputCfg, std::string>({
         {INPUT_CFG_GE_OPT_FP_POINT, "fp_point"},
@@ -488,21 +440,12 @@ int GeOptParamAdapter::Init()
         {INPUT_CFG_COM_RUNTIME_API, "runtime_api"},
         {INPUT_CFG_COM_AIC_METRICS, "aic_metrics"},
         {INPUT_CFG_COM_AIV_METRICS, "aiv_metrics"},
-        {INPUT_CFG_COM_SYS_USAGE_FREQ, "sys_usage_freq"},
-        {INPUT_CFG_COM_SYS_PID_USAGE_FREQ, "sys_pid_usage_freq"},
-        {INPUT_CFG_COM_SYS_CPU_FREQ, "sys_cpu_freq"},
-        {INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ, "sys_hardware_mem_freq"},
-        {INPUT_CFG_COM_SYS_IO_FREQ, "sys_io_freq"},
-        {INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ, "sys_interconnection_freq"},
-        {INPUT_CFG_COM_DVPP_FREQ, "dvpp_freq"},
         {INPUT_CFG_COM_BIU, "biu"},
         {INPUT_CFG_COM_BIU_FREQ, "biu_freq"},
-        {INPUT_CFG_COM_LLC_MODE, "llc_mode"},
-        {INPUT_HOST_SYS_USAGE, "host_sys_usage"},
     }).swap(geOptionsPrintMap_);
 }
 
-int GeOptParamAdapter::ParamsCheckGeOpt(std::vector<InputCfg> &cfgList) const
+int GeOptParamAdapter::ParamsCheckGeOpt(std::vector<std::pair<InputCfg, std::string>> &cfgList) const
 {
     int ret = PROFILING_SUCCESS;
     bool flag = true;
@@ -521,7 +464,7 @@ int GeOptParamAdapter::ParamsCheckGeOpt(std::vector<InputCfg> &cfgList) const
                 ret = PROFILING_FAILED;
         }
         if (ret != PROFILING_SUCCESS) {
-            cfgList.push_back(inputCfg);
+            cfgList.push_back(std::pair<InputCfg, std::string>(inputCfg, cfgValue));
             flag = false;
         }
     }
@@ -545,17 +488,8 @@ int GeOptParamAdapter::GenGeOptionsContainer(ProfGeOptionsConfig geCfg)
     paramContainer_[INPUT_CFG_COM_RUNTIME_API] = geCfg.runtime_api();
     paramContainer_[INPUT_CFG_COM_AIC_METRICS] = geCfg.aic_metrics();
     paramContainer_[INPUT_CFG_COM_AIV_METRICS] = geCfg.aiv_metrics();
-    paramContainer_[INPUT_CFG_COM_SYS_USAGE_FREQ] = std::to_string(geCfg.sys_usage_freq());
-    paramContainer_[INPUT_CFG_COM_SYS_PID_USAGE_FREQ] = std::to_string(geCfg.sys_pid_usage_freq());
-    paramContainer_[INPUT_CFG_COM_SYS_CPU_FREQ] = std::to_string(geCfg.sys_cpu_freq());
-    paramContainer_[INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ] = std::to_string(geCfg.sys_hardware_mem_freq());
-    paramContainer_[INPUT_CFG_COM_SYS_IO_FREQ] = std::to_string(geCfg.sys_io_freq());
-    paramContainer_[INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ] = std::to_string(geCfg.sys_interconnection_freq());
-    paramContainer_[INPUT_CFG_COM_DVPP_FREQ] = std::to_string(geCfg.dvpp_freq());
     paramContainer_[INPUT_CFG_COM_BIU] = geCfg.biu();
     paramContainer_[INPUT_CFG_COM_BIU_FREQ] = std::to_string(geCfg.biu_freq());
-    paramContainer_[INPUT_CFG_COM_LLC_MODE] = geCfg.llc_mode();
-    paramContainer_[INPUT_HOST_SYS_USAGE] = geCfg.host_sys_usage();
     for (auto configOpt : geOptionsWholeConfig_) {
         if (!paramContainer_[configOpt].empty()) {
             setConfig_.insert(configOpt);
@@ -580,30 +514,6 @@ void GeOptParamAdapter::SetGeOptionsContainerDefaultValue()
         paramContainer_[INPUT_CFG_COM_AI_VECTOR] = MSVP_PROF_ON;
         paramContainer_[INPUT_CFG_COM_AIV_MODE] = PROFILING_MODE_TASK_BASED;
     }
-    if (!paramContainer_[INPUT_CFG_COM_SYS_USAGE_FREQ].empty()) {
-        paramContainer_[INPUT_CFG_COM_SYS_USAGE] = MSVP_PROF_ON;
-    }
-    if (!paramContainer_[INPUT_CFG_COM_SYS_CPU_FREQ].empty()) {
-        paramContainer_[INPUT_CFG_COM_SYS_CPU] = MSVP_PROF_ON;
-    }
-    if (!paramContainer_[INPUT_CFG_COM_SYS_PID_USAGE_FREQ].empty()) {
-        paramContainer_[INPUT_CFG_COM_SYS_PID_USAGE] = MSVP_PROF_ON;
-    }
-    if (!paramContainer_[INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ].empty()) {
-        paramContainer_[INPUT_CFG_COM_SYS_HARDWARE_MEM] = MSVP_PROF_ON;
-        if (paramContainer_[INPUT_CFG_COM_LLC_MODE].empty()) {
-            paramContainer_[INPUT_CFG_COM_LLC_MODE] = GetPlatform() == PlatformType::MINI_TYPE ? "capacity" : "read";
-        }
-    }
-    if (!paramContainer_[INPUT_CFG_COM_SYS_IO_FREQ].empty()) {
-        paramContainer_[INPUT_CFG_COM_SYS_IO] = MSVP_PROF_ON;
-    }
-    if (!paramContainer_[INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ].empty()) {
-        paramContainer_[INPUT_CFG_COM_SYS_INTERCONNECTION] = MSVP_PROF_ON;
-    }
-    if (!paramContainer_[INPUT_CFG_COM_DVPP_FREQ].empty()) {
-        paramContainer_[INPUT_CFG_COM_DVPP] = MSVP_PROF_ON;
-    }
 }
 
 int GeOptParamAdapter::TransToParams()
@@ -621,12 +531,12 @@ int GeOptParamAdapter::GetParamFromInputCfg(ProfGeOptionsConfig geCfg, SHARED_PT
 
     GenGeOptionsContainer(geCfg);
 
-    std::vector<InputCfg> errCfgList;
+    std::vector<std::pair<InputCfg, std::string>> errCfgList;
     ret = ParamsCheckGeOpt(errCfgList);
     if (ret == PROFILING_FAILED && !errCfgList.empty()) {
         for (auto errCfg : errCfgList) {
             MSPROF_LOGW("Argument --%s:%s set invalid.",
-                geOptionsPrintMap_[errCfg].c_str(), paramContainer_[errCfg].c_str());
+                geOptionsPrintMap_[errCfg.first].c_str(), paramContainer_[errCfg.first].c_str());
         }
         return PROFILING_FAILED;
     }
@@ -636,7 +546,7 @@ int GeOptParamAdapter::GetParamFromInputCfg(ProfGeOptionsConfig geCfg, SHARED_PT
     if (ret != PROFILING_SUCCESS) {
         for (auto errCfg : errCfgList) {
             MSPROF_LOGW("Argument --%s:%s set invalid.",
-                geOptionsPrintMap_[errCfg].c_str(), paramContainer_[errCfg].c_str());
+                geOptionsPrintMap_[errCfg.first].c_str(), paramContainer_[errCfg.first].c_str());
         }
         return PROFILING_FAILED;
     }
