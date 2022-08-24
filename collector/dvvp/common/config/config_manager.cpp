@@ -105,7 +105,7 @@ int ConfigManager::GetAicoreEvents(const std::string &aicoreMetricsType, std::st
     return PROFILING_FAILED;
 }
 
-int ConfigManager::GetL2cacheEvents(std::string &l2CacheEvents)
+int ConfigManager::GetL2cacheEvents(std::string &l2CacheEvents) const
 {
     PlatformType platformType = GetPlatformType();
     auto iter_platform_metric = L2_CACHE_PLATFORM_METRICS_MAP.find(platformType);
@@ -175,7 +175,7 @@ void ConfigManager::InitFrequency()
     configMap_[FRQ_CONFIG] = frequency;
 }
 
-std::string ConfigManager::GetChipIdStr()
+std::string ConfigManager::GetChipIdStr() const
 {
     auto iter =  configMap_.find(TYPE_CONFIG);
     if (iter != configMap_.end()) {
@@ -194,7 +194,7 @@ PlatformType ConfigManager::GetPlatformType() const
     return PlatformType::MINI_TYPE;
 }
 
-bool ConfigManager::IsDriverSupportLlc()
+bool ConfigManager::IsDriverSupportLlc() const
 {
     PlatformType type = GetPlatformType();
     if (type == PlatformType::CLOUD_TYPE || type == PlatformType::DC_TYPE ||

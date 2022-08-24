@@ -617,7 +617,7 @@ int32_t MmGetEnv(const std::string &name, char *value, uint32_t len)
     if ((envLen != 0) && (len < envLen)) {
         return PROFILING_INVALID_PARAM;
     } else {
-        ret = memcpy_s(value, len, envPtr, envLen); //lint !e613
+        ret = memcpy_s(value, len, envPtr, envLen);
         if (ret != PROFILING_SUCCESS) {
             return PROFILING_FAILED;
         }
@@ -819,7 +819,7 @@ static int32_t LocalLookup(char *buf, uint32_t bufLen, const char *pattern, char
 {
     const char *pValue = nullptr;
     char *pBuf = nullptr;
-    uint32_t len = strlen(pattern); //lint !e712
+    uint32_t len = strlen(pattern);
 
     for (pBuf = buf; isspace(*pBuf) != 0; pBuf++) {}
 
