@@ -18,15 +18,6 @@ message ProfAclConfig {
     string aiv_metrics = 13;
     string ascendcl = 14;
     string runtime_api = 15;
-    uint32 sys_usage_freq = 16;
-    uint32 sys_pid_usage_freq = 17;
-    uint32 sys_cpu_freq = 18;
-    uint32 sys_hardware_mem_freq = 19;
-    string llc_mode = 20;
-    uint32 sys_io_freq = 21;
-    uint32 sys_interconnection_freq = 22;
-    uint32 dvpp_freq = 23;
-    string host_sys_usage = 24;
 }
 
 message ProfGeOptionsConfig {
@@ -52,15 +43,6 @@ message ProfGeOptionsConfig {
     string task_time = 20;
     string aiv_metrics = 21;
     string runtime_api = 22;
-    uint32 sys_usage_freq = 23;
-    uint32 sys_pid_usage_freq = 24;
-    uint32 sys_cpu_freq = 25;
-    uint32 sys_hardware_mem_freq = 26;
-    string llc_mode = 27;
-    uint32 sys_io_freq = 28;
-    uint32 sys_interconnection_freq = 29;
-    uint32 dvpp_freq = 30;
-    string host_sys_usage = 31;
 }
 
 message ProfAclInitConfig {

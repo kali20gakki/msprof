@@ -55,7 +55,7 @@ public:
 
 private:
     int Init();
-    int ParamsCheckAclJson(std::vector<InputCfg> &cfgList) const;
+    int ParamsCheckAclJson(std::vector<std::pair<InputCfg, std::string>> &cfgList) const;
     int GenAclJsonContainer(ProfAclConfig aclCfg);
     int SetAclJsonContainerDefaultValue();
     int TransToParams();
@@ -76,7 +76,7 @@ public:
 
 private:
     int Init();
-    int ParamsCheckGeOpt(std::vector<InputCfg> &cfgList) const;
+    int ParamsCheckGeOpt(std::vector<std::pair<InputCfg, std::string>> &cfgList) const;
     int GenGeOptionsContainer(ProfGeOptionsConfig geCfg);
     void SetGeOptionsContainerDefaultValue();
     int TransToParams();
