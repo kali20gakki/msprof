@@ -318,7 +318,7 @@ using Status = uint32_t;
                               (static_cast<uint32_t>(0x0FFFU) & (static_cast<uint32_t>(value)))
 
     GE_ERRORNO(0, 0, 0, 0, 0, SUCCESS, 0, "success");
-    GE_ERRORNO(0b11, 0b11, 0b111, 0xFFU, 0b11111, FAILED, 0xFFFU, "failed"); /*lint !e401*/
+    GE_ERRORNO(0b11, 0b11, 0b111, 0xFFU, 0b11111, FAILED, 0xFFFU, "failed");
 } // namespace ge
 
 #endif
