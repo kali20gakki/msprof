@@ -30,14 +30,13 @@ class MsprofParamAdapter : public ParamsAdapter {
 public:
     MsprofParamAdapter() {}
     ~MsprofParamAdapter() {}
-    int GetParamFromInputCfg(std::vector<std::pair<MsprofArgsType, MsprofCmdInfo>> cmdsVec,
-        std::vector<std::pair<MsprofArgsType, std::string>>argvVec,
-        SHARED_PTR_ALIA<ProfileParams> params);
+    int GetParamFromInputCfg(std::unordered_map<int, std::pair<MsprofCmdInfo, std::string>> argvMap,
+    SHARED_PTR_ALIA<ProfileParams> params);
 
 private:
     int Init();
     void CreateCfgMap();
-    int ParamsCheckMsprof(std::vector<InputCfg> &cfgList) const;
+    int ParamsCheckMsprof(std::vector<std::pair<InputCfg, std::string>> &cfgList) const;
     int TransToParams();
 
 private:
@@ -100,7 +99,7 @@ public:
 
 private:
     int Init();
-    int ParamsCheckAclApi(std::vector<InputCfg> &cfgList) const;
+    int ParamsCheckAclApi(std::vector<std::pair<InputCfg, std::string>> &cfgList) const;
     void ProfCfgToContainer(const ProfConfig * apiCfg,
         std::array<std::string, ACL_PROF_ARGS_MAX> argsArr);
     void ProfTaskCfgToContainer(const ProfConfig * apiCfg,

@@ -111,7 +111,7 @@ PlatformType ParamsAdapter::GetPlatform() const
 
 int ParamsAdapter::ComCfgCheck(EnableType enableType, std::array<std::string, INPUT_CFG_MAX> paramContainer,
     std::set<InputCfg> &setArgs,
-    std::vector<InputCfg> &cfgList) const
+    std::vector<std::pair<InputCfg, std::string>> &cfgList) const
 {
     int ret = PROFILING_SUCCESS;
     bool flag = true;
@@ -166,7 +166,7 @@ int ParamsAdapter::ComCfgCheck(EnableType enableType, std::array<std::string, IN
                 ret = PROFILING_FAILED;
         }
         if (ret != PROFILING_SUCCESS) {
-            cfgList.push_back(inputCfg);
+            cfgList.push_back(std::pair<InputCfg, std::string>(inputCfg, cfgValue));
             flag = false;
         }
     }
