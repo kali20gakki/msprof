@@ -465,7 +465,7 @@ void ParamsAdapter::Print(std::array<std::string, INPUT_CFG_MAX> paramContainer)
     }
 }
 
-std::string ParamsAdapter::SetOutputDir(std::string &outputDir)
+std::string ParamsAdapter::SetOutputDir(const std::string &outputDir)
 {
     std::string result;
     if (outputDir.empty()) {
