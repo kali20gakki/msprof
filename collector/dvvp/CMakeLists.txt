@@ -94,6 +94,7 @@ set(msprofilerCpp
     common/memory/chunk_pool.cpp
     common/mmpa/mmpa_api.cpp
     common/platform/platform.cpp
+    common/logger/cmd_log.cpp
     common/statistics/perf_count.cpp
     common/thread/thread.cpp
     common/thread/thread_pool.cpp

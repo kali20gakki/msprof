@@ -379,6 +379,7 @@ int ProfAclMgr::ProfAclStart(PROF_CONF_CONST_PTR profStartCfg)
         MSPROF_LOGE("[qqq]");
         return ACL_ERROR_PROFILING_FAILURE;
     }
+    return ACL_ERROR_PROFILING_FAILURE;
     SHARED_PTR_ALIA<analysis::dvvp::proto::MsProfStartReq> feature = nullptr;
     MSVP_MAKE_SHARED0_RET(feature, analysis::dvvp::proto::MsProfStartReq, ACL_ERROR_PROFILING_FAILURE);
     ProfStartCfgToMsprofCfg(profStartCfg->dataTypeConfig, profStartCfg->aicoreMetrics, feature);
@@ -1869,14 +1870,10 @@ int32_t ProfAclMgr::MsprofSetConfig(aclprofConfigType cfgType, std::string confi
             ret = PROFILING_FAILED;
     }
     if (ret != PROFILING_SUCCESS) {
-        MSPROF_LOGE("[qqq]");
+        MSPROF_LOGE("[MsprofSetConfig]profiling config check fail");
         return ret;
     }
-    if (cfgType == ACL_PROF_AIV_METRICS) {
-        argsArr_[cfgType] = configStr;
-        return PROFILING_SUCCESS;
-    }
-    argsArr_[cfgType] = config;
+    argsArr_[cfgType] = (cfgType == ACL_PROF_AIV_METRICS) ? configStr : config;
     return PROFILING_SUCCESS;
 }
 }   // namespace Api
