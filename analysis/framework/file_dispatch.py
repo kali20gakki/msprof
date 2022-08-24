@@ -108,7 +108,8 @@ class FileDispatch:
         DataTag.BIU_PERF: get_biu_compiles(),
         DataTag.MSPROFTX: get_msproftx_compiles(),
         DataTag.HELPER_MODEL_WITH_Q: get_helper_model_with_q_compiles(),
-        DataTag.SOC_PROFILER: get_soc_profiler_compiles()
+        DataTag.SOC_PROFILER: get_soc_profiler_compiles(),
+        DataTag.HOST_QUEUE: get_data_preprocess_compiles(Constant.HOST_QUEUE)
     }
 
     def __init__(self: any, sample_config: dict) -> None:

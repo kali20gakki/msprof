@@ -17,6 +17,7 @@ from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msprof_common import get_path_dir, prepare_log
 from common_func.msprof_exception import ProfException
 from common_func.path_manager import PathManager
+from msparser.cluster.data_preprocess_parser import DataPreprocessParser
 from msparser.cluster.fops_parser import FopsParser
 from msparser.cluster.cluster_communication_parser import ClusterCommunicationParser
 from msparser.cluster.step_trace_summary import StepTraceSummay
@@ -92,6 +93,8 @@ class MsprofQuerySummaryManager:
             StepTraceSummay(params).process()
         if self.data_type == QueryDataType.FOPS_ANALYSE:
             FopsParser(params).process()
+        if self.data_type == QueryDataType.HOST_QUEUE:
+            DataPreprocessParser(params).process()
         if self.data_type == QueryDataType.COLLECTIVE_COMMUNICATION:
             ClusterCommunicationParser(params).process()
 
@@ -132,4 +135,5 @@ class QueryDataType(IntEnum):
     CLUSTER_SCENE = 0
     STEP_TRACE = 1
     FOPS_ANALYSE = 2
+    HOST_QUEUE = 3
     COLLECTIVE_COMMUNICATION = 5
