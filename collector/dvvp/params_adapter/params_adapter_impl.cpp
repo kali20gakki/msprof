@@ -10,7 +10,7 @@
 #include "errno/error_code.h"
 #include "config/config.h"
 #include "config_manager.h"
-#include "msprofbin/include/cmd_log.h"
+#include "cmd_log.h"
 #include "message/prof_params.h"
 
 namespace Collector {
@@ -675,6 +675,22 @@ void AclApiParamAdapter::ProfTaskCfgToContainer(const ProfConfig * apiCfg,
         setConfig_.insert(INPUT_CFG_COM_L2);
         paramContainer_[INPUT_CFG_COM_TASK_TRACE] = MSVP_PROF_ON;
         setConfig_.insert(INPUT_CFG_COM_TASK_TRACE);
+    }
+    if (dataTypeConfig & PROF_ACL_API) {
+        paramContainer_[INPUT_CFG_COM_ASCENDCL] = MSVP_PROF_ON;
+        setConfig_.insert(INPUT_CFG_COM_ASCENDCL);
+    }
+    if (dataTypeConfig & PROF_AICPU) {
+        paramContainer_[INPUT_CFG_COM_AICPU] = MSVP_PROF_ON;
+        setConfig_.insert(INPUT_CFG_COM_AICPU);
+    }
+    if (dataTypeConfig & PROF_RUNTIME_API) {
+        paramContainer_[INPUT_CFG_COM_RUNTIME_API] = MSVP_PROF_ON;
+        setConfig_.insert(INPUT_CFG_COM_RUNTIME_API);
+    }
+    if (dataTypeConfig & PROF_HCCL_TRACE) {
+        paramContainer_[INPUT_CFG_COM_HCCL] = MSVP_PROF_ON;
+        setConfig_.insert(INPUT_CFG_COM_HCCL);
     }
 }
 

@@ -40,24 +40,6 @@ extern "C" {
 #define ACL_PROF_MAX_OP_TYPE_LEN        65
 
 typedef enum {
-    // common 0-19
-    ACL_PROF_STORAGE_LIMIT = 0,
-    ACL_PROF_AIV_METRICS = 1,
-    // device-sys 20-39
-    ACL_PROF_SYS_USAGE_FREQ = 20,
-    ACL_PROF_SYS_PID_USAGE_FREQ = 21,
-    ACL_PROF_SYS_CPU_FREQ = 22,
-    ACL_PROF_SYS_HARDWARE_MEM_FREQ = 23,
-    ACL_PROF_LLC_MODE = 24,
-    ACL_PROF_SYS_IO_FREQ = 25,
-    ACL_PROF_SYS_INTERCONNECTION_FREQ = 26,
-    ACL_PROF_DVPP_FREQ = 27,
-    // host-sys 40-
-    ACL_PROF_HOST_SYS = 40,
-    ACL_PROF_ARGS_MAX
-} aclprofConfigType;
-
-typedef enum {
     ACL_AICORE_ARITHMETIC_UTILIZATION = 0,
     ACL_AICORE_PIPE_UTILIZATION = 1,
     ACL_AICORE_MEMORY_BANDWIDTH = 2,
@@ -454,15 +436,6 @@ MSVP_PROF_API aclError aclprofSetStampTraceMessage(void *stamp, const char *msg,
 * @retval OtherValues Failure
 */
 MSVP_PROF_API aclError aclprofMark(void *stamp);
-
-/**
-* @ingroup AscendCL
-* @brief set config value
-*
-* @retval aclError
-*/
-// 【TODO】调用时序，在create config之后，start之前
-MSVP_PROF_API aclError aclprofSetConfig(aclprofConfigType configType, const char *val, uint32_t valLen);
 
 #ifdef __cplusplus
 }

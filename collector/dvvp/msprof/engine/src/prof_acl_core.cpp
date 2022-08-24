@@ -745,17 +745,17 @@ aclError aclprofSetConfig(aclprofConfigType configType, const char *val, uint32_
         return ACL_ERROR_FEATURE_UNSUPPORTED;
     }
     if (configType < ACL_PROF_STORAGE_LIMIT || configType >= ACL_PROF_ARGS_MAX) {
-        MSPROF_LOGE("[qqq]");
+        MSPROF_LOGE("[aclprofSetConfig]");
         return ACL_ERROR_INVALID_PARAM;
     }
     if (val == nullptr || strlen(val) != valLen) {
-        MSPROF_LOGE("[www]");
+        MSPROF_LOGE("[aclprofSetConfig]Input value is invalid.");
         return ACL_ERROR_INVALID_PARAM;
     }
     std::string config(val, valLen);
     int32_t ret = ProfAclMgr::instance()->MsprofSetConfig(configType, config);
     if (ret != PROFILING_SUCCESS) {
-        MSPROF_LOGE("[eee]");
+        MSPROF_LOGE("[aclprofSetConfig]Fail to set profiling config.");
         return ACL_ERROR_INVALID_PARAM;
     }
     return ACL_SUCCESS;

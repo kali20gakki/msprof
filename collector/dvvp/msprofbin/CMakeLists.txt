@@ -53,12 +53,12 @@ set(hdcCpp
 add_executable(msprofbin
     ${TOP_DIR}/collector/dvvp/params_adapter/params_adapter.cpp
     ${TOP_DIR}/collector/dvvp/params_adapter/params_adapter_impl.cpp
+    ${TOP_DIR}/collector/dvvp/common/logger/cmd_log.cpp
     src/msprof_bin.cpp
     src/msprof_manager.cpp
     src/prof_task.cpp
     src/data_handle.cpp
     src/prof_params_adapter.cpp
-    src/cmd_log.cpp
     src/input_parser.cpp
     src/running_mode.cpp
     ../app/application.cpp
