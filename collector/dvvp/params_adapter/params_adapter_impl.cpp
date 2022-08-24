@@ -427,7 +427,7 @@ int AclJsonParamAdapter::GetParamFromInputCfg(ProfAclConfig aclCfg, SHARED_PTR_A
     if (ret == PROFILING_FAILED && !errCfgList.empty()) {
         for (auto errCfg : errCfgList) {
             MSPROF_LOGW("Argument --%s:%s set invalid.",
-                aclJsonPrintMap_[errCfg].c_str(), paramContainer_[errCfg]);
+                aclJsonPrintMap_[errCfg].c_str(), paramContainer_[errCfg].c_str());
         }
         return PROFILING_FAILED;
     }
@@ -437,7 +437,7 @@ int AclJsonParamAdapter::GetParamFromInputCfg(ProfAclConfig aclCfg, SHARED_PTR_A
     if (ret != PROFILING_SUCCESS) {
         for (auto errCfg : errCfgList) {
             MSPROF_LOGW("Argument --%s:%s set invalid.",
-                aclJsonPrintMap_[errCfg].c_str(), paramContainer_[errCfg]);
+                aclJsonPrintMap_[errCfg].c_str(), paramContainer_[errCfg].c_str());
         }
         return PROFILING_FAILED;
     }
@@ -628,7 +628,7 @@ int GeOptParamAdapter::GetParamFromInputCfg(ProfGeOptionsConfig geCfg, SHARED_PT
     if (ret == PROFILING_FAILED && !errCfgList.empty()) {
         for (auto errCfg : errCfgList) {
             MSPROF_LOGW("Argument --%s:%s set invalid.",
-                geOptionsPrintMap_[errCfg].c_str(), paramContainer_[errCfg]);
+                geOptionsPrintMap_[errCfg].c_str(), paramContainer_[errCfg].c_str());
         }
         return PROFILING_FAILED;
     }
@@ -638,7 +638,7 @@ int GeOptParamAdapter::GetParamFromInputCfg(ProfGeOptionsConfig geCfg, SHARED_PT
     if (ret != PROFILING_SUCCESS) {
         for (auto errCfg : errCfgList) {
             MSPROF_LOGW("Argument --%s:%s set invalid.",
-                geOptionsPrintMap_[errCfg].c_str(), paramContainer_[errCfg]);
+                geOptionsPrintMap_[errCfg].c_str(), paramContainer_[errCfg].c_str());
         }
         return PROFILING_FAILED;
     }
