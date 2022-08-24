@@ -116,7 +116,7 @@ class CalculateOpTaskScheduler:
             stream_id = task_time[6]
             start = task_time[9]
             end = task_time[10]
-            batch_id = task_time[13]
+            batch_id = task_time[12]
 
             aicpu_collector.filter_aicpu(stream_id, task_id, start, end, batch_id, NumberConstant.DEFAULT_BATCH_ID)
         aicpu_collector.save_aicpu()

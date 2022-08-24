@@ -21,6 +21,7 @@ from common_func.ms_constant.number_constant import NumberConstant
 from common_func.path_manager import PathManager
 from common_func.utils import Utils
 from common_func.batch_counter import BatchCounter
+from common_func.platform.chip_manager import ChipManager
 from framework.offset_calculator import FileCalculator
 from framework.offset_calculator import OffsetCalculator
 from msmodel.iter_rec.iter_rec_model import HwtsIterModel
@@ -80,13 +81,15 @@ class HwtsCalculator(ICalculator, MsMultiProcess):
             self._hwts_log_model.flush(hwts_task_with_batch, DBNameConstant.TABLE_HWTS_TASK_TIME)
             self._hwts_log_model.finalize()
 
-            self._collect_aicpu_data(hwts_task_with_batch)
+            if not ChipManager().is_chip_v2():
+                self._collect_aicpu_data(hwts_task_with_batch)
 
     def _collect_aicpu_data(self: any, hwts_task_with_batch: list) -> None:
         iter_id = NumberConstant.INVALID_ITER_ID
         if not ProfilingScene().is_operator():
             iter_range = MsprofIteration(self._project_path). \
                 get_iter_id_by_index_id(self._sample_config.get("iter_id"), self._sample_config.get("model_id"))
+            # todo 模式场景下这种写法也许有问题
             if len(iter_range) >= 2:
                 iter_id = iter_range[1]
 

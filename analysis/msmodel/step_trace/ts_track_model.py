@@ -8,6 +8,7 @@ from abc import ABC
 
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
+from common_func.msprof_iteration import MsprofIteration
 from msmodel.interface.base_model import BaseModel
 
 
@@ -35,12 +36,19 @@ class TsTrackModel(BaseModel, ABC):
         sql = DBManager.sql_create_general_table(table_map, table_name, self.TABLES_PATH)
         DBManager.execute_sql(self.conn, sql)
 
-    def get_ai_cpu_data(self: any) -> list:
+    def get_ai_cpu_data(self: any, model_id: int, index_id: int) -> list:
         """
         get ai cpu data
         """
-        sql = "select stream_id, task_id, timestamp, task_state from {0} where task_type={1} " \
-              "order by timestamp".format(DBNameConstant.TABLE_TASK_TYPE, self.TS_AI_CPU_TYPE)
-
-        ai_cpu_with_state = DBManager.fetch_all_data(self.cur, sql)
+        iter_time_range = MsprofIteration(self.result_dir).get_iteration_time(index_id, model_id)
+        if not iter_time_range:
+            sql = "select stream_id, task_id, timestamp, task_state from {0} where task_type={1} " \
+                  "order by timestamp".format(DBNameConstant.TABLE_TASK_TYPE, self.TS_AI_CPU_TYPE)
+            ai_cpu_with_state = DBManager.fetch_all_data(self.cur, sql)
+        else:
+            sql = "select stream_id, task_id, timestamp, task_state from {0} where task_type={1} and " \
+                  "timestamp>=? and timestamp<=? order by timestamp ".format(
+                DBNameConstant.TABLE_TASK_TYPE,
+                self.TS_AI_CPU_TYPE)
+            ai_cpu_with_state = DBManager.fetch_all_data(self.cur, sql, iter_time_range[0])
         return ai_cpu_with_state
