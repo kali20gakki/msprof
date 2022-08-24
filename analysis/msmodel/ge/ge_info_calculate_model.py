@@ -157,6 +157,9 @@ class GeInfoModel(BaseModel):
                         datatype)
         ge_op_data = DBManager.fetch_all_data(self.cur, ge_sql)
         op_set = set()
-        for model_id, _, stream_id, task_id, batch_id in ge_op_data:
-            op_set.add(self.STREAM_TASK_BATCH_KEY_FMT.format(stream_id, task_id, batch_id))
-        ge_op_iter_dict.setdefault(NumberConstant.INVALID_ITER_ID, op_set)
+        for model_id, index, stream_id, task_id, batch_id in ge_op_data:
+            if index == NumberConstant.STATIC_SHAPE_ITER_ID:
+                op_set.add(self.STREAM_TASK_KEY_FMT.format(stream_id, task_id))
+            else:
+                op_set.add(self.STREAM_TASK_BATCH_KEY_FMT.format(stream_id, task_id, batch_id))
+        ge_op_iter_dict.setdefault(str(NumberConstant.INVALID_ITER_ID), op_set)

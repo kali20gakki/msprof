@@ -30,6 +30,7 @@ class AICpuFromTsCollector:
                      batch_id: int, iter_id: int) -> None:
         stream_task_value = self.STREAM_TASK_KEY_FMT.format(stream_id, task_id)
         stream_task_batch_value = self.STREAM_TASK_BATCH_KEY_FMT.format(stream_id, task_id, batch_id)
+        x = self._check_map.get(str(iter_id), set())
         if stream_task_value in self._check_map.get(str(iter_id), set()) or \
                 stream_task_batch_value in self._check_map.get(str(iter_id), set()):
             self._aicpu_list.append([stream_id, task_id, start, end, batch_id])

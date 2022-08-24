@@ -47,7 +47,7 @@ class AICpuFromTsCalculator(MsMultiProcess):
         """
 
         with self._ts_model:
-            ai_cpu_with_state = self._ts_model.get_ai_cpu_data()
+            ai_cpu_with_state = self._ts_model.get_ai_cpu_data(self.sample_config.get("model_id"), self.sample_config.get("iter_id"))
 
         aicpu_timeline_list = self.state_to_timeline(ai_cpu_with_state)
 
