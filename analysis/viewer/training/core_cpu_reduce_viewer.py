@@ -222,27 +222,25 @@ class CoreCpuReduceViewer:
 
     @classmethod
     def _get_ai_cpu_data(cls: any, *args: dict, job_path: str = None) -> list:
-        iter_id, model_id = args
+        _, _ = args
         ai_cpu_datas = []
         dir_path = job_path
-        _, ai_cpu_data = ParseAiCpuData.analysis_aicpu(dir_path, iter_id, model_id)
+        ai_cpu_data = ParseAiCpuData.get_ai_cpu_from_ts(dir_path)
+        op_names, _ = cls.get_op_names_and_task_type(PathManager.get_sql_dir(dir_path))
         result_data = []
         if ai_cpu_data:
             result_data.extend(cls.get_meta_trace_data(TraceViewHeaderConstant.PROCESS_AI_CPU))
-            for each_data in ai_cpu_data:
-                compute_t = each_data[2] * NumberConstant.MS_TO_US if isinstance(each_data[2], float) else Constant.NA
-                memcpy_t = each_data[3] * NumberConstant.MS_TO_US if isinstance(each_data[3], float) else Constant.NA
+            for stream_id, task_id, sys_start, sys_end, batch_id in ai_cpu_data:
+                _key_for_ops = "_".join([str(stream_id), str(task_id), Constant.TASK_TYPE_AI_CPU, str(batch_id)])
+                duration = (float(sys_end) - float(sys_start)) * NumberConstant.MS_TO_US
                 ai_cpu_datas.append(
-                    (each_data[1], cls.TRACE_PID_MAP.get(TraceViewHeaderConstant.PROCESS_AI_CPU, 0),
+                    (cls._get_task_trace_value(_key_for_ops, op_names),
+                     cls.TRACE_PID_MAP.get(TraceViewHeaderConstant.PROCESS_AI_CPU, 0),
                      InfoConfReader().get_json_tid_data(),
-                     float(each_data[0]) * NumberConstant.MS_TO_US,
-                     float(each_data[4]) * NumberConstant.MS_TO_US,
+                     float(sys_start) * NumberConstant.MS_TO_US,
+                     duration,
                      OrderedDict([("Task Type", "AI_CPU"),
-                                  ("Compute Time(us)", compute_t),
-                                  ("Memcpy Time(us)", memcpy_t),
-                                  ("Task Time(us)", float(each_data[4]) * NumberConstant.MS_TO_US),
-                                  ("Dispatch Time(us)", float(each_data[5]) * NumberConstant.MS_TO_US),
-                                  ("Total Time(us)", float(each_data[6]) * NumberConstant.MS_TO_US)])))
+                                  ("Task Time(us)", duration)])))
             result_data.extend(
                 TraceViewManager.time_graph_trace(TraceViewHeaderConstant.TOP_DOWN_TIME_GRAPH_HEAD, ai_cpu_datas))
         return result_data
