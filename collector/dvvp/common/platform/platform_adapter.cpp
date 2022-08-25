@@ -44,6 +44,8 @@ int PlatformAdapter::Init(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams
 void PlatformAdapter::SetParamsForGlobal(struct CommonParams &comParams)
 {
     params_->profiling_mode = analysis::dvvp::message::PROFILING_MODE_DEF;
+    params_->result_dir = comParams.output;
+    params_->storageLimit = comParams.storage_limit;
     params_->app = comParams.appPath;
     params_->app_env = comParams.appEnv;
     params_->msproftx = comParams.msproftx;
