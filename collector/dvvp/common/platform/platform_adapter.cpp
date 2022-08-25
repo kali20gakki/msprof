@@ -39,9 +39,20 @@ int PlatformAdapter::Init(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams
     return PROFILING_SUCCESS;
 }
 
-void PlatformAdapter::SetParamsForGlobal()
+void PlatformAdapter::SetParamsForGlobal(struct CommonParams &comParams)
 {
     params_->profiling_mode = analysis::dvvp::message::PROFILING_MODE_DEF;
+    params_->app = comParams.appPath;
+    params_->app_env = comParams.appEnv;
+    params_->msproftx = comParams.msproftx;
+    params_->host_sys_pid = comParams.hostSysPid;
+    params_->pythonPath = comParams.pythonPath;
+    params_->parseSwitch = comParams.parseSwitch;
+    params_->querySwitch = comParams.querySwitch;
+    params_->exportSwitch = comParams.exportSwitch;
+    params_->exportSummaryFormat = comParams.exportSummaryFormat;
+    params_->exportIterationId = comParams.exportIterationId;
+    params_->exportModelId = comParams.exportModelId;
 }
 
 void PlatformAdapter::SetParamsForTaskTime()
