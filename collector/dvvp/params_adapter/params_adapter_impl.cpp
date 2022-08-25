@@ -305,30 +305,33 @@ int AclJsonParamAdapter::ParamsCheckAclJson(std::vector<std::pair<InputCfg, std:
     return flag ? PROFILING_SUCCESS : PROFILING_FAILED;
 }
 
-int AclJsonParamAdapter::GenAclJsonContainer(ProfAclConfig aclCfg)
+int AclJsonParamAdapter::GenAclJsonContainer(SHARED_PTR_ALIA<ProfAclConfig> aclCfg)
 {
-    paramContainer_[INPUT_CFG_ACL_JSON_SWITCH] = aclCfg.switch_();
-    paramContainer_[INPUT_CFG_COM_OUTPUT] = aclCfg.output();
-    paramContainer_[INPUT_CFG_COM_STORAGE_LIMIT] = aclCfg.storage_limit();
-    paramContainer_[INPUT_CFG_COM_MSPROFTX] = aclCfg.msproftx();
-    paramContainer_[INPUT_CFG_COM_TASK_TIME] = aclCfg.task_time();
-    paramContainer_[INPUT_CFG_COM_AICPU] = aclCfg.aicpu();
-    paramContainer_[INPUT_CFG_COM_L2] = aclCfg.l2();
-    paramContainer_[INPUT_CFG_COM_HCCL] = aclCfg.hccl();
-    paramContainer_[INPUT_CFG_COM_ASCENDCL] = aclCfg.ascendcl();
-    paramContainer_[INPUT_CFG_COM_RUNTIME_API] = aclCfg.runtime_api();
-    paramContainer_[INPUT_CFG_COM_AIC_METRICS] = aclCfg.aic_metrics();
-    paramContainer_[INPUT_CFG_COM_AIV_METRICS] = aclCfg.aiv_metrics();
-    paramContainer_[INPUT_CFG_COM_BIU] = aclCfg.biu();
-    paramContainer_[INPUT_CFG_COM_BIU_FREQ] = std::to_string(aclCfg.biu_freq());
-
+    paramContainer_[INPUT_CFG_ACL_JSON_SWITCH] = aclCfg->switch_();
+    paramContainer_[INPUT_CFG_COM_OUTPUT] = aclCfg->output();
+    paramContainer_[INPUT_CFG_COM_STORAGE_LIMIT] = aclCfg->storage_limit();
+    paramContainer_[INPUT_CFG_COM_MSPROFTX] = aclCfg->msproftx();
+    paramContainer_[INPUT_CFG_COM_TASK_TIME] = aclCfg->task_time();
+    paramContainer_[INPUT_CFG_COM_AICPU] = aclCfg->aicpu();
+    paramContainer_[INPUT_CFG_COM_L2] = aclCfg->l2();
+    paramContainer_[INPUT_CFG_COM_HCCL] = aclCfg->hccl();
+    paramContainer_[INPUT_CFG_COM_ASCENDCL] = aclCfg->ascendcl();
+    paramContainer_[INPUT_CFG_COM_RUNTIME_API] = aclCfg->runtime_api();
+    paramContainer_[INPUT_CFG_COM_AIC_METRICS] = aclCfg->aic_metrics();
+    paramContainer_[INPUT_CFG_COM_AIV_METRICS] = aclCfg->aiv_metrics();
+    paramContainer_[INPUT_CFG_COM_BIU] = aclCfg->biu();
+    std::string biuFreqParam = std::to_string(aclCfg->biu_freq());
+    if (biuFreqParam.compare("0") != 0) {
+        paramContainer_[INPUT_CFG_COM_BIU_FREQ] = biuFreqParam;
+    }
     for (auto configOpt : aclJsonWholeConfig_) {
         if (!paramContainer_[configOpt].empty()) {
-            setConfig_.insert(configOpt);
             if (!BlackSwitchCheck(configOpt)) {
-                MSPROF_LOGW("Unrecognized option:%s for PlatformType:%d",
+                MSPROF_LOGW("Unrecognized option:%s for PlatformType:%d.",
                     aclJsonPrintMap_[configOpt].c_str(), static_cast<uint8_t>(GetPlatform()));
                 paramContainer_[configOpt].clear(); // ignore switch
+            } else {
+                setConfig_.insert(configOpt);
             }
         }
     }
@@ -357,15 +360,19 @@ int AclJsonParamAdapter::SetAclJsonContainerDefaultValue()
         paramContainer_[INPUT_CFG_COM_AI_VECTOR] = MSVP_PROF_ON;
         paramContainer_[INPUT_CFG_COM_AIV_MODE] = PROFILING_MODE_TASK_BASED;
     }
+    paramContainer_[INPUT_CFG_COM_MODEL_EXECUTION] = MSVP_PROF_ON;
     return PROFILING_SUCCESS;
 }
 
 int AclJsonParamAdapter::TransToParams()
 {
+    params_->acl = MSVP_PROF_ON;
+    params_->result_dir = "/usr/local/Ascend";
     return PROFILING_SUCCESS;
 }
 
-int AclJsonParamAdapter::GetParamFromInputCfg(ProfAclConfig aclCfg, SHARED_PTR_ALIA<ProfileParams> params)
+int AclJsonParamAdapter::GetParamFromInputCfg(SHARED_PTR_ALIA<ProfAclConfig> aclCfg,
+    SHARED_PTR_ALIA<ProfileParams> params)
 {
     params_ = params;
     int ret = Init();
@@ -404,6 +411,7 @@ int AclJsonParamAdapter::GetParamFromInputCfg(ProfAclConfig aclCfg, SHARED_PTR_A
     if (ret != PROFILING_SUCCESS) {
         return PROFILING_FAILED;
     }
+    Print(paramContainer_);
     return PROFILING_SUCCESS;
 }
 
@@ -494,8 +502,8 @@ int GeOptParamAdapter::GenGeOptionsContainer(ProfGeOptionsConfig geCfg)
         if (!paramContainer_[configOpt].empty()) {
             setConfig_.insert(configOpt);
             if (!BlackSwitchCheck(configOpt)) {
-                MSPROF_LOGW("Unrecognized option:%s for PlatformType:%d",
-                    geOptionsPrintMap_[configOpt].c_str(), static_cast<uint8_t>(GetPlatform()));
+                // MSPROF_LOGW("Unrecognized option:%s for PlatformType:%d",
+                //     geOptionsPrintMap_[configOpt].c_str(), static_cast<uint8_t>(GetPlatform()));
                 paramContainer_[configOpt].clear(); // ignore switch
             }
         }
@@ -535,8 +543,8 @@ int GeOptParamAdapter::GetParamFromInputCfg(ProfGeOptionsConfig geCfg, SHARED_PT
     ret = ParamsCheckGeOpt(errCfgList);
     if (ret == PROFILING_FAILED && !errCfgList.empty()) {
         for (auto errCfg : errCfgList) {
-            MSPROF_LOGW("Argument --%s:%s set invalid.",
-                geOptionsPrintMap_[errCfg.first].c_str(), paramContainer_[errCfg.first].c_str());
+            // MSPROF_LOGW("Argument --%s:%s set invalid.",
+            //     geOptionsPrintMap_[errCfg.first].c_str(), paramContainer_[errCfg.first].c_str());
         }
         return PROFILING_FAILED;
     }
@@ -545,8 +553,8 @@ int GeOptParamAdapter::GetParamFromInputCfg(ProfGeOptionsConfig geCfg, SHARED_PT
     ret = ComCfgCheck(ENABLE_GE_OPTION, paramContainer_, setConfig_, errCfgList);
     if (ret != PROFILING_SUCCESS) {
         for (auto errCfg : errCfgList) {
-            MSPROF_LOGW("Argument --%s:%s set invalid.",
-                geOptionsPrintMap_[errCfg.first].c_str(), paramContainer_[errCfg.first].c_str());
+            // MSPROF_LOGW("Argument --%s:%s set invalid.",
+            //     geOptionsPrintMap_[errCfg.first].c_str(), paramContainer_[errCfg.first].c_str());
         }
         return PROFILING_FAILED;
     }
