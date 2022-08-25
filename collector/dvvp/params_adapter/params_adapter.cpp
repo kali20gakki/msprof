@@ -17,6 +17,7 @@ namespace Dvvp {
 namespace ParamsAdapter {
 
 using namespace Analysis::Dvvp::Common::Config;
+using namespace analysis::dvvp::common::config;
 using namespace Analysis::Dvvp::Common::Platform;
 using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::common::validation;
@@ -108,19 +109,116 @@ PlatformType ParamsAdapter::GetPlatform() const
 
 int ParamsAdapter::TransToParam(std::array<std::string, INPUT_CFG_MAX> paramContainer, SHARED_PTR_ALIA<ProfileParams> params)
 {
-    // Task
-    std::vector<InputCfg> appConfigs = {INPUT_CFG_MSPROF_APPLICATION, INPUT_CFG_MSPROF_ENVIRONMENT};
-    std::vector<InputCfg> commonConfig = {INPUT_CFG_COM_OUTPUT, INPUT_CFG_COM_STORAGE_LIMIT, INPUT_CFG_COM_MSPROFTX};
-    std::vector<InputCfg> taskComConfig = {INPUT_CFG_COM_TASK_TIME, INPUT_CFG_COM_TASK_TRACE, INPUT_CFG_COM_TRAINING_TRACE, INPUT_CFG_COM_ASCENDCL,
-        INPUT_CFG_COM_MODEL_EXECUTION, INPUT_CFG_COM_RUNTIME_API, INPUT_CFG_COM_HCCL, INPUT_CFG_COM_L2, INPUT_CFG_COM_AICPU};
-    std::vector<InputCfg> aiCoreConfigs = {INPUT_CFG_COM_AI_CORE, INPUT_CFG_COM_AIC_MODE, INPUT_CFG_COM_AIC_METRICS, INPUT_CFG_COM_AIC_FREQ};
-    std::vector<InputCfg> aiVectorConfigs = {INPUT_CFG_COM_AI_VECTOR, INPUT_CFG_COM_AIV_MODE, INPUT_CFG_COM_AIV_METRICS, INPUT_CFG_COM_AIV_FREQ};
+    // auto platformAdapter = PlatformAdapter(params);
+    // =============================== Common ===============================
+    // platformAdapter.SetParamsForGlobal(结构体); // Global Config() 结构体 定义在Platform中
+    // application
+    // enviroment
+    // msproftx
+    // host-sys-pid
+    // {
+    //      python-path
+    //      summary-format
+    //      parse
+    //      query
+    //      export
+    //      iteration_id
+    //      model_id
+    // }
+    // =============================== Task =================================
+    if (paramContainer[INPUT_CFG_COM_TASK_TIME].compare(MSVP_PROF_ON) == 0) {
+        // platformAdapter.SetParamsForTaskTime(); // Task Time
+    }
+    if (paramContainer[INPUT_CFG_COM_TASK_TRACE].compare(MSVP_PROF_ON) == 0) {
+        // platformAdapter.SetParamsForTaskTrace(); // Task Trace
+    }
+    if (paramContainer[INPUT_CFG_COM_TRAINING_TRACE].compare(MSVP_PROF_ON) == 0) {
+        // platformAdapter.SetParamsForTrainingTrace(); // Training Trace
+    }
+    if (paramContainer[INPUT_CFG_COM_ASCENDCL].compare(MSVP_PROF_ON) == 0) {
+        // platformAdapter.SetParamsForAscendCL(); // AscendCL
+    }
+    if (paramContainer[INPUT_CFG_COM_MODEL_EXECUTION].compare(MSVP_PROF_ON) == 0) {
+        // platformAdapter.SetParamsForGE(); // GE
+    }
+    if (paramContainer[INPUT_CFG_COM_RUNTIME_API].compare(MSVP_PROF_ON) == 0) {
+        // platformAdapter.SetParamsForRuntime(); // Runtime
+    }
+    if (paramContainer[INPUT_CFG_COM_AICPU].compare(MSVP_PROF_ON) == 0) {
+        // platformAdapter.SetParamsForAICPU(); // AI CPU
+    }
+    if (paramContainer[INPUT_CFG_COM_HCCL].compare(MSVP_PROF_ON) == 0) {
+        // platformAdapter.SetParamsForHCCL(); // HCCL
+    }
+    if (paramContainer[INPUT_CFG_COM_L2].compare(MSVP_PROF_ON) == 0) {
+        // platformAdapter.SetParamsForL2Cache(); // L2 Cache
+    }
 
-    // System
-    std::vector<InputCfg> sysUsageConfigs = {INPUT_CFG_COM_SYS_USAGE, INPUT_CFG_COM_SYS_USAGE_FREQ};
+    if (paramContainer[INPUT_CFG_COM_AI_CORE].compare(MSVP_PROF_ON) == 0) {
+        // platformAdapter.SetParamsForAICore(paramContainer[INPUT_CFG_COM_AIC_MODE], paramContainer[INPUT_CFG_COM_AIC_METRICS], paramContainer[INPUT_CFG_COM_AIC_FREQ]); // AI Core
+    }
+    if (paramContainer[INPUT_CFG_COM_AI_VECTOR].compare(MSVP_PROF_ON) == 0) {
+        // platformAdapter.SetParamsForAIVector(paramContainer[INPUT_CFG_COM_AIV_MODE], paramContainer[INPUT_CFG_COM_AIV_METRICS], paramContainer[INPUT_CFG_COM_AIV_FREQ]); // AI Core
+    }
 
-    
-    std::vector<InputCfg> hardwareMemConfigs = {INPUT_CFG_COM_SYS_HARDWARE_MEM, INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ, INPUT_CFG_COM_LLC_MODE};
+    // ================================= Dev-System =============================
+    if (paramContainer[INPUT_CFG_COM_SYS_USAGE].compare(MSVP_PROF_ON) == 0) {
+        // platformAdapter.SetParamsForDeviceSysCpuMemUsage(paramContainer[INPUT_CFG_COM_SYS_USAGE_FREQ]); // Dev-Sys cpu & mem
+    }
+    if (paramContainer[INPUT_CFG_COM_SYS_PID_USAGE].compare(MSVP_PROF_ON) == 0) {
+        // platformAdapter.SetParamsForDeviceAllPidCpuMemUsage(paramContainer[INPUT_CFG_COM_SYS_PID_USAGE_FREQ]); // Dev-All Pid cpu & mem
+    }
+    if (paramContainer[INPUT_CFG_COM_SYS_CPU].compare(MSVP_PROF_ON) == 0) {
+        // platformAdapter.SetParamsForDeviceAiCpuCtrlCpuTSCpuHotFuncPMU(paramContainer[INPUT_CFG_COM_SYS_CPU_FREQ]); // Dev-All Pid cpu & mem
+    }
+    if (paramContainer[INPUT_CFG_COM_SYS_HARDWARE_MEM].compare(MSVP_PROF_ON) == 0) {
+        // platformAdapter.SetParamsForDeviceHardwareMem(paramContainer[INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ], paramContainer[INPUT_CFG_COM_LLC_MODE]); // Hardware memory
+    }
+    if (paramContainer[INPUT_CFG_COM_SYS_IO].compare(MSVP_PROF_ON) == 0) {
+        // platformAdapter.SetParamsForDeviceIO(paramContainer[INPUT_CFG_COM_SYS_IO_FREQ]); // Dev-Sys IO
+    }
+    if (paramContainer[INPUT_CFG_COM_SYS_INTERCONNECTION].compare(MSVP_PROF_ON) == 0) {
+        // platformAdapter.SetParamsForDeviceIntercommection(paramContainer[INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ]); // Dev-Sys IO
+    }
+    if (paramContainer[INPUT_CFG_COM_DVPP].compare(MSVP_PROF_ON) == 0) {
+        // platformAdapter.SetParamsForDeviceDVPP(paramContainer[INPUT_CFG_COM_DVPP_FREQ]); // Dev-Sys Dvpp
+    }
+
+    if (paramContainer[INPUT_CFG_COM_POWER].compare(MSVP_PROF_ON) == 0) {
+        // platformAdapter.SetParamsForDevicePower(); // Dev-Sys Power
+    }
+
+    if (paramContainer[INPUT_CFG_COM_BIU].compare(MSVP_PROF_ON) == 0) {
+        // platformAdapter.SetParamsForDeviceBIU(paramContainer[INPUT_CFG_COM_BIU_FREQ]); // Dev-Sys BIU
+    }
+
+    // ============================== Host-Sys Pid============================
+    std::vector<std::string> hostSysPidList = Utils::Split(paramContainer[INPUT_CFG_HOST_SYS], false, "", ",");
+    for (auto entry : hostSysPidList) {
+        if (entry.compare(HOST_SYS_CPU) == 0) {
+            // platformAdapter.SetParamsForHostPidCpu(); // Host-Sys Pid CPU
+        } else if (entry.compare(HOST_SYS_MEM) == 0) {
+            // platformAdapter.SetParamsForHostPidMem(); // Host-Sys Pid Mem
+        } else if (entry.compare(HOST_SYS_DISK) == 0) {
+            // platformAdapter.SetParamsForHostPidDisk(); // Host-Sys Pid Disk
+        } else if (entry.compare(HOST_SYS_OSRT) == 0) {
+            // platformAdapter.SetParamsForHostPidOSRT(); // Host-Sys Pid osrt
+        } else if (entry.compare(HOST_SYS_NETWORK) == 0) {
+            // platformAdapter.SetParamsForHostNetwork(); // Host-Sys All Pid Network
+        }
+    }
+
+    // ============================== Host-Sys============================
+    // 需要按照"|"切割字符串 paramContainer[INPUT_HOST_SYS_USAGE]，之后对每一个元素进行循环判断
+    std::vector<std::string> hostSysList = Utils::Split(paramContainer[INPUT_HOST_SYS_USAGE], false, "", ",");
+    for (auto entry : hostSysList) {
+        if (entry.compare(HOST_SYS_CPU) == 0) {
+            // platformAdapter.SetParamsForHostSysAllPidCpuUsage(); // Host-Sys CPU
+        } else if (entry.compare(HOST_SYS_MEM) == 0) {
+            // platformAdapter.SetParamsForHostSysAllPidMemUsage(); // Host-Sys Mem
+        }
+    }
+
     
     return PROFILING_SUCCESS;
 }
