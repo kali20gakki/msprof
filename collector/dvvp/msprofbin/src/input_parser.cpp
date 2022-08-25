@@ -104,7 +104,7 @@ SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> InputParser::MsprofGetOp
     auto paramAdapter = MsprofParamAdapter();
     int ret = paramAdapter.GetParamFromInputCfg(argvMap, params_);
     if (ret != PROFILING_SUCCESS) {
-        MsprofCmdUsage("");
+        MsprofCmdUsage("get params from input config failed.");
         return nullptr;
     }
     // Debug

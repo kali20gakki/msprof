@@ -37,7 +37,6 @@ private:
     int Init();
     void CreateCfgMap();
     int ParamsCheckMsprof(std::vector<std::pair<InputCfg, std::string>> &cfgList) const;
-    int TransToParams();
 
 private:
     SHARED_PTR_ALIA<ProfileParams> params_;
@@ -59,7 +58,6 @@ private:
     int ParamsCheckAclJson(std::vector<std::pair<InputCfg, std::string>> &cfgList) const;
     int GenAclJsonContainer(SHARED_PTR_ALIA<ProfAclConfig> aclCfg);
     int SetAclJsonContainerDefaultValue();
-    int TransToParams();
 
 private:
     SHARED_PTR_ALIA<ProfileParams> params_;
@@ -80,7 +78,6 @@ private:
     int ParamsCheckGeOpt(std::vector<std::pair<InputCfg, std::string>> &cfgList) const;
     int GenGeOptionsContainer(SHARED_PTR_ALIA<ProfGeOptionsConfig> geCfg);
     void SetGeOptionsContainerDefaultValue();
-    int TransToParams();
 
 private:
     SHARED_PTR_ALIA<ProfileParams> params_;
@@ -107,7 +104,6 @@ private:
         std::array<std::string, ACL_PROF_ARGS_MAX> argsArr);
     void ProfSystemCfgToContainer(const ProfConfig * apiCfg,
         std::array<std::string, ACL_PROF_ARGS_MAX> argsArr);
-    int TransToParams();
     std::string devIdToStr(uint32_t devNum, const uint32_t *devList);
 
 private:

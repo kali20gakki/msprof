@@ -11,12 +11,13 @@
 #include <string>
 #include <vector>
 
+#include "message/prof_params.h"
 #include "config/config_manager.h"
 
 namespace Collector {
 namespace Dvvp {
 namespace ParamsAdapter {
-
+using analysis::dvvp::message::ProfileParams;
 using Analysis::Dvvp::Common::Config::PlatformType;
 using analysis::dvvp::message::StatusInfo;
 
@@ -120,7 +121,7 @@ public:
     int ComCfgCheck(EnableType enableType, std::array<std::string, INPUT_CFG_MAX> paramContainer,
         std::set<InputCfg> &setArgs,
         std::vector<std::pair<InputCfg, std::string>> &cfgList) const;
-    int TransToParam(std::array<std::string, INPUT_CFG_MAX> input);
+    int TransToParam(std::array<std::string, INPUT_CFG_MAX> paramContainer, SHARED_PTR_ALIA<ProfileParams> params);
     // To Del
     void Print(std::array<std::string, INPUT_CFG_MAX> paramContainer);
 
