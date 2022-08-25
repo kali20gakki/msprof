@@ -17,7 +17,7 @@ namespace Plugin {
 using HalHdcRecvFunc = std::function<hdcError_t(HDC_SESSION, struct drvHdcMsg *, int, UINT64, int *, UINT32)>;
 using HalHdcSendFunc = std::function<hdcError_t(HDC_SESSION, struct drvHdcMsg *, UINT64, UINT32)>;
 using HalHdcSessionConnectExFunc = std::function<hdcError_t(int, int, int, HDC_CLIENT, HDC_SESSION *)>;
-using DrvHdcSetSessionReferenceFunc = std::function<drvError_t(HDC_SESSION)>; 
+using DrvHdcSetSessionReferenceFunc = std::function<drvError_t(HDC_SESSION)>;
 using HalHdcGetSessionAttrFunc = std::function<drvError_t(HDC_SESSION, int, int *)>;
 using HalGetChipInfoFunc = std::function<drvError_t(unsigned int, halChipInfo *)>;
 using HalGetDeviceInfoFunc = std::function<drvError_t(uint32_t, int32_t, int32_t, int64_t *)>;

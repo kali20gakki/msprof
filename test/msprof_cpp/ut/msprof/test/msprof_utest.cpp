@@ -39,7 +39,7 @@ protected:
     }
 };
 
-void func_counter(Reporter* reporter) {
+void func_counter(ProfReporter* reporter) {
     uint64_t loop = 0;
     std::string data_str = "This is func counter test, second send data test, third send data test,This is func counter test, second send data test, third send data test,This is func counter test, second send data test, third send data test,This is func counter test, second send data test, third send data testThis is func counter test, second send data test, third send data test,This is func counter test, second send data test, third send data test,This is func counter test, second send data test, third send data test,This is func counter test, second send data test, third send data test,This is func counter test, second send data test, third send data test,This is func counter test, second send data test, third send data test,This is func counter test, second send data test, third send data test,This is func counter test, second send data test, third send data test,This is func counter test, second send data test, third send data test,This is func counter test, second send data test, third send data test\n";
 
