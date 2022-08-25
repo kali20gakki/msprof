@@ -98,15 +98,31 @@ bool ParamsAdapter::BlackSwitchCheck(InputCfg inputCfg) const
     if (inputCfg < INPUT_CFG_MSPROF_APPLICATION || inputCfg >= INPUT_CFG_MAX) {
         return false;
     }
-    if (std::find(blackSwitch_.begin(), blackSwitch_.end(), inputCfg) != blackSwitch_.end()) {
-        return false;
-    }
-    return true;
+    return (std::find(blackSwitch_.begin(), blackSwitch_.end(), inputCfg) != blackSwitch_.end()) ? false : true;
 }
 
 PlatformType ParamsAdapter::GetPlatform() const
 {
     return platformType_;
+}
+
+int ParamsAdapter::TransToParam(std::array<std::string, INPUT_CFG_MAX> paramContainer, SHARED_PTR_ALIA<ProfileParams> params)
+{
+    // Task
+    std::vector<InputCfg> appConfigs = {INPUT_CFG_MSPROF_APPLICATION, INPUT_CFG_MSPROF_ENVIRONMENT};
+    std::vector<InputCfg> commonConfig = {INPUT_CFG_COM_OUTPUT, INPUT_CFG_COM_STORAGE_LIMIT, INPUT_CFG_COM_MSPROFTX};
+    std::vector<InputCfg> taskComConfig = {INPUT_CFG_COM_TASK_TIME, INPUT_CFG_COM_TASK_TRACE, INPUT_CFG_COM_TRAINING_TRACE, INPUT_CFG_COM_ASCENDCL,
+        INPUT_CFG_COM_MODEL_EXECUTION, INPUT_CFG_COM_RUNTIME_API, INPUT_CFG_COM_HCCL, INPUT_CFG_COM_L2, INPUT_CFG_COM_AICPU};
+    std::vector<InputCfg> aiCoreConfigs = {INPUT_CFG_COM_AI_CORE, INPUT_CFG_COM_AIC_MODE, INPUT_CFG_COM_AIC_METRICS, INPUT_CFG_COM_AIC_FREQ};
+    std::vector<InputCfg> aiVectorConfigs = {INPUT_CFG_COM_AI_VECTOR, INPUT_CFG_COM_AIV_MODE, INPUT_CFG_COM_AIV_METRICS, INPUT_CFG_COM_AIV_FREQ};
+
+    // System
+    std::vector<InputCfg> sysUsageConfigs = {INPUT_CFG_COM_SYS_USAGE, INPUT_CFG_COM_SYS_USAGE_FREQ};
+
+    
+    std::vector<InputCfg> hardwareMemConfigs = {INPUT_CFG_COM_SYS_HARDWARE_MEM, INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ, INPUT_CFG_COM_LLC_MODE};
+    
+    return PROFILING_SUCCESS;
 }
 
 int ParamsAdapter::ComCfgCheck(EnableType enableType, std::array<std::string, INPUT_CFG_MAX> paramContainer,
@@ -456,11 +472,6 @@ int ParamsAdapter::MsprofCheckExportIdValid(const std::string &idParam, const st
         return PROFILING_FAILED;
     }
     return PROFILING_SUCCESS;
-}
-
-int ParamsAdapter::TransToParam(std::array<std::string, INPUT_CFG_MAX> input)
-{
-
 }
 
 void ParamsAdapter::Print(std::array<std::string, INPUT_CFG_MAX> paramContainer)

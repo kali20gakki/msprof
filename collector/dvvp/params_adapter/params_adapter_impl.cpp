@@ -25,11 +25,11 @@ using namespace Collector::Dvvp::Msprofbin;
 int MsprofParamAdapter::Init()
 {
     paramContainer_.fill("");
-    int ret = CheckListInit(); // 平台信息获取、黑名单创建、公共参数列表创建
+    int ret = CheckListInit();
     if (ret != PROFILING_SUCCESS) {
         return PROFILING_FAILED;
     }
-    CreateCfgMap(); // 创建msprof二进制对应的映射表
+    CreateCfgMap();
     std::vector<InputCfg>({
         INPUT_CFG_MSPROF_APPLICATION, INPUT_CFG_MSPROF_ENVIRONMENT, INPUT_CFG_COM_AI_CORE,
         INPUT_CFG_COM_AIC_MODE, INPUT_CFG_COM_AIC_FREQ, INPUT_CFG_COM_AI_VECTOR, INPUT_CFG_COM_AIV_MODE,
@@ -40,7 +40,7 @@ int MsprofParamAdapter::Init()
         INPUT_CFG_COM_BIU, INPUT_CFG_COM_BIU_FREQ, INPUT_CFG_HOST_SYS, INPUT_CFG_HOST_SYS_PID,
         INPUT_CFG_PYTHON_PATH, INPUT_CFG_SUMMARY_FORMAT, INPUT_CFG_PARSE, INPUT_CFG_QUERY,
         INPUT_CFG_EXPORT, INPUT_CFG_ITERATION_ID, INPUT_CFG_MODEL_ID
-    }).swap(msprofConfig_); // 创建msprof的私有参数列表
+    }).swap(msprofConfig_);
     return PROFILING_SUCCESS;
 }
 
@@ -120,23 +120,20 @@ int MsprofParamAdapter::ParamsCheckMsprof(std::vector<std::pair<InputCfg, std::s
 }
 
 
-int MsprofParamAdapter::TransToParams()
-{
-    params_->acl = MSVP_PROF_ON;
-    params_->result_dir = "/usr/local/Ascend";
-    return PROFILING_SUCCESS;
-}
-
-// msprofCfg：用户命令行显示设置的参数对
 int MsprofParamAdapter::GetParamFromInputCfg(std::unordered_map<int, std::pair<MsprofCmdInfo, std::string>> argvMap,
     SHARED_PTR_ALIA<ProfileParams> params)
 {
-    params_ = params;
-    int ret = Init(); // 派生类初始化+基类初始化
-    if (ret != PROFILING_SUCCESS) {
+    if (!params) {
+        MSPROF_LOGE("memory of params is empty.");
         return PROFILING_FAILED;
     }
-    // [1]黑名单校验+表参数映射（用户参数-->全量表）
+    params_ = params;
+    int ret = Init();
+    if (ret != PROFILING_SUCCESS) {
+        MSPROF_LOGE("[GetParamFromInputCfg]msprof Init failed.");
+        return PROFILING_FAILED;
+    }
+
     for (const std::pair<int, std::pair<MsprofCmdInfo, std::string>> kv : argvMap) {
         MsprofArgsType argsType = static_cast<MsprofArgsType>(kv.first);
         InputCfg cfgType = cfgMap_[argsType];
@@ -153,9 +150,6 @@ int MsprofParamAdapter::GetParamFromInputCfg(std::unordered_map<int, std::pair<M
         setConfig_.insert(cfgType);
     }
 
-    // [2] 默认值设置
-
-    // [4] 私有参数校验（派生类实现）
     std::vector<std::pair<InputCfg, std::string>> errCfgList;
     ret = ParamsCheckMsprof(errCfgList);
     if (ret != PROFILING_SUCCESS && !errCfgList.empty()) {
@@ -165,7 +159,7 @@ int MsprofParamAdapter::GetParamFromInputCfg(std::unordered_map<int, std::pair<M
         }
         return PROFILING_FAILED;
     }
-    // [5] 公有参数校验（调基类接口）
+
     errCfgList.clear();
     ret = ComCfgCheck(ENABLE_MSPROF, paramContainer_, setConfig_, errCfgList);
     if (ret != PROFILING_SUCCESS) {
@@ -178,7 +172,7 @@ int MsprofParamAdapter::GetParamFromInputCfg(std::unordered_map<int, std::pair<M
     }
 
     // [6] 参数转换，转成Params（软件栈转uint64_t， 非软件栈保留在Params）
-    ret = TransToParams();
+    ret = TransToParam(paramContainer_, params_);
     if (ret != PROFILING_SUCCESS) {
         return PROFILING_FAILED;
     }
@@ -359,13 +353,6 @@ int AclJsonParamAdapter::SetAclJsonContainerDefaultValue()
     return PROFILING_SUCCESS;
 }
 
-int AclJsonParamAdapter::TransToParams()
-{
-    params_->acl = MSVP_PROF_ON;
-    params_->result_dir = "/usr/local/Ascend";
-    return PROFILING_SUCCESS;
-}
-
 int AclJsonParamAdapter::GetParamFromInputCfg(SHARED_PTR_ALIA<ProfAclConfig> aclCfg,
     SHARED_PTR_ALIA<ProfileParams> params)
 {
@@ -402,7 +389,7 @@ int AclJsonParamAdapter::GetParamFromInputCfg(SHARED_PTR_ALIA<ProfAclConfig> acl
         return PROFILING_FAILED;
     }
 
-    ret = TransToParams();
+    ret = TransToParam(paramContainer_, params_);
     if (ret != PROFILING_SUCCESS) {
         return PROFILING_FAILED;
     }
@@ -515,11 +502,6 @@ void GeOptParamAdapter::SetGeOptionsContainerDefaultValue()
     }
 }
 
-int GeOptParamAdapter::TransToParams()
-{
-    return PROFILING_SUCCESS;
-}
-
 int GeOptParamAdapter::GetParamFromInputCfg(SHARED_PTR_ALIA<ProfGeOptionsConfig> geCfg, SHARED_PTR_ALIA<ProfileParams> params)
 {
     params_ = params;
@@ -552,14 +534,14 @@ int GeOptParamAdapter::GetParamFromInputCfg(SHARED_PTR_ALIA<ProfGeOptionsConfig>
 
     SetGeOptionsContainerDefaultValue();
 
-    ret = TransToParams();
+    ret = TransToParam(paramContainer_, params_);
     if (ret != PROFILING_SUCCESS) {
         return PROFILING_FAILED;
     }
     return PROFILING_SUCCESS;
 }
 
-// ============================================ acl json ==================================
+// ============================================ Acl api ==================================
 int AclApiParamAdapter::Init()
 {
     paramContainer_.fill("");
@@ -620,13 +602,14 @@ void AclApiParamAdapter::ProfTaskCfgToContainer(const ProfConfig * apiCfg,
         paramContainer_[INPUT_CFG_COM_SYS_DEVICES] = devStr;
         setConfig_.insert(INPUT_CFG_COM_SYS_DEVICES);
     }
-    uint64_t dataTypeConfig = apiCfg->dataTypeConfig;
-    ProfAicoreMetrics aicMetrics = apiCfg->aicoreMetrics;
+
     if (!argsArr[ACL_PROF_STORAGE_LIMIT].empty()) {
         paramContainer_[INPUT_CFG_COM_STORAGE_LIMIT] = argsArr[ACL_PROF_STORAGE_LIMIT];
         setConfig_.insert(INPUT_CFG_COM_STORAGE_LIMIT);
     }
     // 是否可以合并
+    uint64_t dataTypeConfig = apiCfg->dataTypeConfig;
+    ProfAicoreMetrics aicMetrics = apiCfg->aicoreMetrics;
     if (GetPlatform() == PlatformType::MINI_TYPE) {
         if ((dataTypeConfig & PROF_SCHEDULE_TIMELINE_MASK) ||
             (dataTypeConfig & PROF_TASK_TIME_MASK)) {
@@ -636,10 +619,6 @@ void AclApiParamAdapter::ProfTaskCfgToContainer(const ProfConfig * apiCfg,
     } else if (dataTypeConfig & PROF_TASK_TIME_MASK) {
         paramContainer_[INPUT_CFG_COM_TASK_TIME] = MSVP_PROF_ON;
         setConfig_.insert(INPUT_CFG_COM_TASK_TIME);
-    }
-    if (dataTypeConfig & PROF_SCHEDULE_TRACE_MASK) {
-        paramContainer_[INPUT_CFG_COM_TASK_TRACE] = MSVP_PROF_ON; // Check
-        setConfig_.insert(INPUT_CFG_COM_TASK_TRACE);
     }
     // training trace
     if (dataTypeConfig & PROF_TRAINING_TRACE_MASK) {
@@ -760,15 +739,6 @@ void AclApiParamAdapter::ProfCfgToContainer(const ProfConfig * apiCfg,
     ProfSystemCfgToContainer(apiCfg, argsArr);
 }
 
-int AclApiParamAdapter::TransToParams()
-{
-    params_->profiling_mode = analysis::dvvp::message::PROFILING_MODE_DEF;
-    params_->acl = MSVP_PROF_ON;
-    params_->result_dir = "/usr/local/Ascend";
-    params_->ts_keypoint = MSVP_PROF_ON;
-    return PROFILING_SUCCESS;
-}
-
 int AclApiParamAdapter::GetParamFromInputCfg(const ProfConfig * apiCfg,
     std::array<std::string, ACL_PROF_ARGS_MAX> argsArr,
     SHARED_PTR_ALIA<ProfileParams> params)
@@ -804,7 +774,7 @@ int AclApiParamAdapter::GetParamFromInputCfg(const ProfConfig * apiCfg,
     }
 
     // [6] 参数转换，转成Params（软件栈转uint64_t， 非软件栈保留在Params）
-    ret = TransToParams();
+    ret = TransToParam(paramContainer_, params_);
     if (ret != PROFILING_SUCCESS) {
         return PROFILING_FAILED;
     }
