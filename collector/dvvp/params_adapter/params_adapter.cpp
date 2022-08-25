@@ -115,6 +115,8 @@ int ParamsAdapter::TransToParam(std::array<std::string, INPUT_CFG_MAX> paramCont
     platformAdapter.Init(params, platformType_);
     // =============================== Common ===============================
     struct CommonParams commonParams;
+    commonParams.output = paramContainer[INPUT_CFG_COM_OUTPUT];
+    commonParams.storage_limit = paramContainer[INPUT_CFG_COM_STORAGE_LIMIT];
     commonParams.appPath = paramContainer[INPUT_CFG_MSPROF_APPLICATION];
     commonParams.appEnv = paramContainer[INPUT_CFG_MSPROF_ENVIRONMENT];
     commonParams.msproftx = paramContainer[INPUT_CFG_COM_MSPROFTX];

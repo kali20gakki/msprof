@@ -66,6 +66,8 @@ enum CollectorTypesForPlatform {
 };
 
 struct CommonParams {
+    std::string output;
+    std::string storage_limit;
     std::string appPath;
     std::string appEnv;
     std::string msproftx;
