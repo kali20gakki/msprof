@@ -31,6 +31,18 @@
 extern "C" {
 #endif
 
+#ifndef int8_t
+typedef signed char int8_t;
+#endif
+
+#ifndef int32_t
+typedef signed int int32_t;
+#endif
+
+#ifndef uint32_t
+typedef unsigned int uint32_t;
+#endif
+
 /**
  * @ingroup driver
  * @brief API major version.
@@ -139,6 +151,9 @@ typedef void *drvReport_t;
 #define DLLEXPORT
 #else
 #define DLLEXPORT _declspec(dllexport)
+#ifndef pid_t
+typedef int pid_t;
+#endif
 #endif
 
 typedef enum tagDrvStatus {
@@ -1157,6 +1172,11 @@ DLLEXPORT drvError_t halDevIpcMsgRecv(unsigned int devId, unsigned short channel
 #define DV_ONLINE
 #define DV_OFF_ONLINE
 #define DV_LITE
+
+typedef unsigned long long UINT64;
+typedef unsigned int UINT32;
+typedef unsigned short UINT16;
+typedef unsigned char UINT8;
 
 #define ADVISE_TYPE (1UL)       /**< 0: DDR memory 1: HBM memory */
 #define ADVISE_EXE (1UL << 1)   /**< setting executable permissions */
@@ -2298,6 +2318,10 @@ int log_set_level(int device_id, int channel_type, unsigned int log_level);
 int log_get_channel_type(int device_id, int *channel_type_set, int *channel_type_num, int set_size);
 int log_get_device_id(int *device_id_set, int *device_id_num, int set_size);
 int log_read(int device_id, char *buf, unsigned int *size, int timeout);
+
+#ifndef dma_addr_t
+typedef unsigned long long dma_addr_t;
+#endif
 
 /**< profile drv user */
 #define PROF_DRIVER_NAME "prof_drv"
