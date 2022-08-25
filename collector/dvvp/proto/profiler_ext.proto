@@ -28,14 +28,9 @@ message ProfGeOptionsConfig {
     string fp_point =5;
     string bp_point = 6;
     string aic_metrics = 7;
-    string stars_acsq_task = 8;
-    string stars_sub_task = 9;
-    string ffts_thread_task = 10;
     string l2 = 11;
     string storage_limit = 12;
-    string ffts_block = 13;
-    string low_power = 14;
-    string acc_pmu_mode = 15;
+    string power = 14;
     string hccl = 16;
     string msproftx = 17;
     string biu = 18;

@@ -125,7 +125,7 @@ const mmStructOption longOptions[] = {
     {"sys-io-profiling", mm_optional_argument, nullptr, ARGS_IO_PROFILING},
     {"sys-interconnection-profiling", mm_optional_argument, nullptr, ARGS_INTERCONNECTION_PROFILING},
     {"dvpp-profiling", mm_optional_argument, nullptr, ARGS_DVPP_PROFILING},
-    {"low_power", mm_optional_argument, nullptr, ARGS_POWER},
+    {"power", mm_optional_argument, nullptr, ARGS_POWER},
     {"hccl", mm_optional_argument, nullptr, ARGS_HCCL},  // the default value is off
     {"biu", mm_optional_argument, nullptr, ARGS_BIU},
     {"l2", mm_optional_argument, nullptr, ARGS_L2_PROFILING},

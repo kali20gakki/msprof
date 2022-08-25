@@ -218,7 +218,6 @@ int InputParser::CheckHostSysValid(const struct MsprofCmdInfo &cmdInfo)
         }
     }
     params_->host_sys = cmdInfo.args[ARGS_HOST_SYS];
-    params_->host_disk_freq = 50; // host_disk_freq the default value is 50 Hz.
     return MSPROF_DAEMON_OK;
 }
 
@@ -1288,19 +1287,8 @@ void ArgsManager::AddStarsArgs()
         return;
     }
 
-    Args acsqArgs = {"stars_acsq_task",
-        "Show stars acsq task profiling data, the default value is off."};
-    Args subTaskArgs = {"stars_sub_task", "Show stars sub task profiling data, the default value is off."};
-    Args fftsThreadArgs = {"ffts_thread_task", "Show ffts thread task profiling data, the default value is off."};
-    Args fftsBlockArgs = {"ffts_block", "Show ffts block profiling data, the default value is off."};
-    Args lowPowerArgs = {"low_power", "Show low power profiling data, the default value is off."};
-    Args accPmuModeArgs = {"acc_pmu_mode", "Show acc pmu profiling data, the default value is off."};
-    argsList_.push_back(acsqArgs);
-    argsList_.push_back(subTaskArgs);
-    argsList_.push_back(fftsThreadArgs);
-    argsList_.push_back(fftsBlockArgs);
+    Args lowPowerArgs = {"power", "Show low power profiling data, the default value is off."};
     argsList_.push_back(lowPowerArgs);
-    argsList_.push_back(accPmuModeArgs);
 }
 
 void ArgsManager::AddAicpuArgs()

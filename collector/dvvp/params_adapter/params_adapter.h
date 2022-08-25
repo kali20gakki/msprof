@@ -120,7 +120,7 @@ public:
     int ComCfgCheck(EnableType enableType, std::array<std::string, INPUT_CFG_MAX> paramContainer,
         std::set<InputCfg> &setArgs,
         std::vector<std::pair<InputCfg, std::string>> &cfgList) const;
-    int TransToParam();
+    int TransToParam(std::array<std::string, INPUT_CFG_MAX> input);
     // To Del
     void Print(std::array<std::string, INPUT_CFG_MAX> paramContainer);
 
