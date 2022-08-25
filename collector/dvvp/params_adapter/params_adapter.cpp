@@ -118,14 +118,14 @@ int ParamsAdapter::TransToParam(std::array<std::string, INPUT_CFG_MAX> paramCont
     commonParams.appPath = paramContainer[INPUT_CFG_MSPROF_APPLICATION];
     commonParams.appEnv = paramContainer[INPUT_CFG_MSPROF_ENVIRONMENT];
     commonParams.msproftx = paramContainer[INPUT_CFG_COM_MSPROFTX];
-    commonParams.hostSysPid = std::stoi(paramContainer[INPUT_CFG_HOST_SYS_PID]);
+    commonParams.hostSysPid = (paramContainer[INPUT_CFG_HOST_SYS_PID].empty()) ? -1 : std::stoi(paramContainer[INPUT_CFG_HOST_SYS_PID]);
     commonParams.pythonPath = paramContainer[INPUT_CFG_PYTHON_PATH];
     commonParams.parseSwitch = paramContainer[INPUT_CFG_PARSE];
     commonParams.querySwitch = paramContainer[INPUT_CFG_QUERY];
     commonParams.exportSwitch = paramContainer[INPUT_CFG_EXPORT];
     commonParams.exportSummaryFormat = paramContainer[INPUT_CFG_SUMMARY_FORMAT];
-    commonParams.exportIterationId = std::stoi(paramContainer[INPUT_CFG_ITERATION_ID]);
-    commonParams.exportModelId = std::stoi(paramContainer[INPUT_CFG_MODEL_ID]);
+    commonParams.exportIterationId = (paramContainer[INPUT_CFG_ITERATION_ID].empty()) ? -1 : std::stoi(paramContainer[INPUT_CFG_ITERATION_ID]);
+    commonParams.exportModelId = (paramContainer[INPUT_CFG_MODEL_ID].empty()) ? -1 : std::stoi(paramContainer[INPUT_CFG_MODEL_ID]);
     platformAdapter.SetParamsForGlobal(commonParams);
 
     // =============================== Task =================================
@@ -233,7 +233,6 @@ int ParamsAdapter::TransToParam(std::array<std::string, INPUT_CFG_MAX> paramCont
         }
     }
 
-    
     return PROFILING_SUCCESS;
 }
 
