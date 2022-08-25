@@ -66,20 +66,13 @@ struct ProfileParams : BaseInfo {
     std::string aiv_profiling_mode;
 
     // rts
-    std::string ai_core_status;
-    std::string ts_task_track;
-    std::string ts_cpu_usage;
     std::string ts_timeline;
     std::string ts_keypoint;
     std::string ts_memcpy;
-    std::string ai_vector_status;
-    std::string ts_fw_training;  // unused
+    std::string ts_fw_training;
     std::string hwts_log;
     std::string hwts_log1;
     std::string stars_acsq_task;
-    std::string stars_sub_task;
-    std::string ffts_thread_task;
-    std::string ffts_block;
     std::string low_power;
     std::string acc_pmu_mode;
 
@@ -133,7 +126,6 @@ struct ProfileParams : BaseInfo {
 
     std::string ai_core_profiling_metrics;
     std::string aiv_profiling_metrics;
-    std::string ts_cpu_hot_function;
 
     std::string biu;
     int biu_freq;
@@ -160,7 +152,6 @@ struct ProfileParams : BaseInfo {
     std::string host_cpu_profiling;
     std::string host_mem_profiling;
     std::string host_network_profiling;
-    int host_disk_freq;
 
     // for parse, query and export
     std::string pythonPath;
@@ -173,6 +164,8 @@ struct ProfileParams : BaseInfo {
 
     // subset of MsprofArgsType
     std::set<int> usedParams;
+    // AI STACK
+    uint64_t dataTypeConfig;
 
     ProfileParams()
         : msprofBinPid(MSVP_MMPROCESS), is_cancel(FALSE), profiling_period(-1),
@@ -199,10 +192,10 @@ struct ProfileParams : BaseInfo {
           host_sys(""), host_sys_pid(HOST_PID_DEFAULT),
           host_disk_profiling("off"), host_osrt_profiling("off"),
           host_profiling(FALSE), host_cpu_profiling("off"),
-          host_mem_profiling("off"), host_network_profiling("off"), host_disk_freq(DEFAULT_PROFILING_INTERVAL_50MS),
+          host_mem_profiling("off"), host_network_profiling("off"),
           pythonPath(""), parseSwitch("off"), querySwitch("off"), exportSwitch("off"),
           exportSummaryFormat(PROFILING_SUMMARY_FORMAT), exportIterationId(DEFAULT_INTERATION_ID),
-          exportModelId(DEFAULT_MODEL_ID), usedParams()
+          exportModelId(DEFAULT_MODEL_ID), usedParams(), dataTypeConfig(0)
     {
     }
 
@@ -265,7 +258,6 @@ struct ProfileParams : BaseInfo {
         SET_VALUE(object, ai_core_profiling_mode);
         SET_VALUE(object, ai_core_profiling_events);
         SET_VALUE(object, ai_core_metrics);
-        SET_VALUE(object, ai_core_status);
         // aiv
         SET_VALUE(object, aiv_profiling);
         SET_VALUE(object, aiv_sampling_interval);
@@ -293,7 +285,6 @@ struct ProfileParams : BaseInfo {
         SET_VALUE(object, dvpp_profiling);
         SET_VALUE(object, ai_core_profiling_metrics);
         SET_VALUE(object, aiv_profiling_metrics);
-        SET_VALUE(object, ts_cpu_hot_function);
         SET_VALUE(object, nicProfiling);
         SET_VALUE(object, roceProfiling);
         // host system
@@ -318,12 +309,9 @@ struct ProfileParams : BaseInfo {
         SET_VALUE(object, msproftx);
         SET_VALUE(object, job_id);
         SET_VALUE(object, app);
-        SET_VALUE(object, ts_task_track);
-        SET_VALUE(object, ts_cpu_usage);
         SET_VALUE(object, ts_timeline);
         SET_VALUE(object, ts_memcpy);
         SET_VALUE(object, ts_keypoint);
-        SET_VALUE(object, ai_vector_status);
         SET_VALUE(object, ts_fw_training);
         SET_VALUE(object, hwts_log);
         SET_VALUE(object, hwts_log1);
@@ -360,18 +348,15 @@ struct ProfileParams : BaseInfo {
         SET_VALUE(object, host_sys_pid);
         SET_VALUE(object, host_disk_profiling);
         SET_VALUE(object, host_osrt_profiling);
-        SET_VALUE(object, host_disk_freq);
     }
 
     void ToObjectPartThree(nlohmann::json &object)
     {
         SET_VALUE(object, stars_acsq_task);
-        SET_VALUE(object, stars_sub_task);
-        SET_VALUE(object, ffts_thread_task);
-        SET_VALUE(object, ffts_block);
         SET_VALUE(object, low_power);
         SET_VALUE(object, acc_pmu_mode);
         SET_VALUE(object, msprofBinPid);
+        SET_VALUE(object, dataTypeConfig);
     }
 
     void ToObject(nlohmann::json &object)
@@ -398,7 +383,6 @@ struct ProfileParams : BaseInfo {
         FROM_STRING_VALUE(object, ai_core_profiling_mode);
         FROM_STRING_VALUE(object, ai_core_profiling_events);
         FROM_STRING_VALUE(object, ai_core_metrics);
-        FROM_STRING_VALUE(object, ai_core_status);
         // AIV
         FROM_STRING_VALUE(object, aiv_profiling);
         FROM_INT_VALUE(object, aiv_sampling_interval, DEFAULT_PROFILING_INTERVAL_10MS);
@@ -438,7 +422,6 @@ struct ProfileParams : BaseInfo {
 
     void FromObjectPartTwo(const nlohmann::json &object)
     {
-        FROM_STRING_VALUE(object, ts_cpu_hot_function);
         FROM_STRING_VALUE(object, acl);
         FROM_STRING_VALUE(object, modelExecution);
         FROM_STRING_VALUE(object, runtimeApi);
@@ -450,19 +433,13 @@ struct ProfileParams : BaseInfo {
         FROM_STRING_VALUE(object, msproftx);
         FROM_STRING_VALUE(object, job_id);
         FROM_STRING_VALUE(object, app);
-        FROM_STRING_VALUE(object, ts_task_track);
-        FROM_STRING_VALUE(object, ts_cpu_usage);
         FROM_STRING_VALUE(object, ts_timeline);
         FROM_STRING_VALUE(object, ts_memcpy);
         FROM_STRING_VALUE(object, ts_keypoint);
-        FROM_STRING_VALUE(object, ai_vector_status);
         FROM_STRING_VALUE(object, ts_fw_training);
         FROM_STRING_VALUE(object, hwts_log);
         FROM_STRING_VALUE(object, hwts_log1);
         FROM_STRING_VALUE(object, stars_acsq_task);
-        FROM_STRING_VALUE(object, stars_sub_task);
-        FROM_STRING_VALUE(object, ffts_thread_task);
-        FROM_STRING_VALUE(object, ffts_block);
         FROM_STRING_VALUE(object, low_power);
         FROM_STRING_VALUE(object, acc_pmu_mode);
         FROM_STRING_VALUE(object, l2CacheTaskProfiling);
@@ -500,9 +477,9 @@ struct ProfileParams : BaseInfo {
         FROM_INT_VALUE(object, host_sys_pid, HOST_PID_DEFAULT);
         FROM_STRING_VALUE(object, host_disk_profiling);
         FROM_STRING_VALUE(object, host_osrt_profiling);
-        FROM_INT_VALUE(object, host_disk_freq, DEFAULT_PROFILING_INTERVAL_10MS);
         FROM_STRING_VALUE(object, host_mem_profiling);
         FROM_STRING_VALUE(object, host_network_profiling);
+        FROM_INT_VALUE(object, dataTypeConfig, 0);
     }
 
     void FromObject(const nlohmann::json &object)

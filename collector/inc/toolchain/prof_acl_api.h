@@ -15,7 +15,7 @@
 #define PROF_ACL_API                0x00000001ULL
 #define PROF_TASK_TIME              0x00000002ULL
 #define PROF_AICORE_METRICS         0x00000004ULL
-#define PROF_AICPU                  0x00000008ULL
+#define PROF_AICPU_TRACE            0x00000008ULL
 #define PROF_L2CACHE                0x00000010ULL
 #define PROF_HCCL_TRACE             0x00000020ULL
 #define PROF_TRAINING_TRACE         0x00000040ULL

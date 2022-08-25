@@ -458,6 +458,11 @@ int ParamsAdapter::MsprofCheckExportIdValid(const std::string &idParam, const st
     return PROFILING_SUCCESS;
 }
 
+int ParamsAdapter::TransToParam(std::array<std::string, INPUT_CFG_MAX> input)
+{
+
+}
+
 void ParamsAdapter::Print(std::array<std::string, INPUT_CFG_MAX> paramContainer)
 {
     for(int i = 0; i < INPUT_CFG_MAX; i++) {
