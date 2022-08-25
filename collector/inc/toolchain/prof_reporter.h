@@ -25,12 +25,12 @@ namespace Msprof {
 namespace Engine {
 /**
  * @ingroup reporter
- * @brief class Reporter
- *  the Reporter class .used to send data to profiling
+ * @brief class ProfReporter
+ *  the ProfReporter class .used to send data to profiling
  */
-class MSVP_PROF_API Reporter {
+class MSVP_PROF_API ProfReporter {
 public:
-    virtual ~Reporter() {}
+    virtual ~ProfReporter() {}
 
 public:
     /**

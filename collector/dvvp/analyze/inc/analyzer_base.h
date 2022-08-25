@@ -1,8 +1,8 @@
 /*
- * Copyright (c) Huawei Technologies Co., Ltd. 2020-2019. All rights reserved.
+ * Copyright (c) Huawei Technologies Co., Ltd. 2019-2020. All rights reserved.
  * Description: buffer data
  * Author: Huawei Technologies Co., Ltd.
- * Create: 2020-10-24
+ * Create: 2019-10-24
  */
 #ifndef ANALYSIS_DVVP_ANALYZE_ANALYZER_BASE_H
 #define ANALYSIS_DVVP_ANALYZE_ANALYZER_BASE_H

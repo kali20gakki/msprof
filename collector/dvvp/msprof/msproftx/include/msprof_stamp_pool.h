@@ -65,4 +65,4 @@ private:
 }
 }
 
-#endif //PROF_STAMP_POOL_H
+#endif // PROF_STAMP_POOL_H

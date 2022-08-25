@@ -192,13 +192,15 @@ class DBManager:
             index += cls.INSERT_SIZE
 
     @classmethod
-    def fetch_all_data(cls: any, curs: any, sql: str, param: tuple = None) -> list:
+    def fetch_all_data(cls: any, curs: any, sql: str, param: tuple = None, dto_class: any = None) -> list:
         """
         fetch 10000 num of data each time to get all data
         """
         if not isinstance(curs, sqlite3.Cursor):
             return []
         data = []
+        if dto_class:
+            curs.row_factory = ClassRowType.class_row(dto_class)
         try:
             if param:
                 curs.execute(sql, param)
@@ -217,6 +219,8 @@ class DBManager:
         except sqlite3.Error as _err:
             logging.error(str(_err), exc_info=Constant.TRACE_BACK_SWITCH)
             return []
+        finally:
+            curs.row_factory = None
 
     @classmethod
     def add_new_column(cls: any, *args: str) -> None:

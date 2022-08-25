@@ -1,7 +1,7 @@
 /*
  * Copyright (c) Huawei Technologies Co., Ltd. 2019-2019. All rights reserved.
  * Description: device transport interface
- * Author: 
+ * Author: Huawei Technologies Co., Ltd.
  * Create: 2019-12-22
  */
 #ifndef ANALYSIS_DVVP_HOST_DEV_MGR_API_H

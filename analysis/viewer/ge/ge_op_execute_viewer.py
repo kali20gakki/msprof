@@ -27,8 +27,7 @@ class GeOpExecuteViewer:
         self._configs = configs
         self._params = params
         self._project_path = params.get(StrConstant.PARAM_RESULT_DIR)
-        self._model = GeOpExecuteViewModel(self._project_path, DBNameConstant.DB_GE_HOST_INFO,
-                                           [DBNameConstant.TABLE_GE_HOST])
+        self._model = GeOpExecuteViewModel(params)
 
     def get_summary_data(self: any) -> tuple:
         """

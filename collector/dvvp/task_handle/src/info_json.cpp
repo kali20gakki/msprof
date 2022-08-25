@@ -235,6 +235,14 @@ void InfoJson::AddNetCardInfo(SHARED_PTR_ALIA<InfoMain> infoMain)
 #endif
 }
 
+void InfoJson::AddRankId(SHARED_PTR_ALIA<InfoMain> infoMain)
+{
+#if (defined(linux) || defined(__linux__))
+    int32_t rankId = Utils::GetRankId();
+    infoMain->set_rank_id(rankId);
+#endif
+}
+
 int InfoJson::AddHostInfo(SHARED_PTR_ALIA<InfoMain> infoMain)
 {
     if (Platform::instance()->RunSocSide()) {
@@ -265,9 +273,10 @@ int InfoJson::AddHostInfo(SHARED_PTR_ALIA<InfoMain> infoMain)
     AddSysConf(infoMain);
     AddSysTime(infoMain);
     AddNetCardInfo(infoMain);
+    AddRankId(infoMain);
 
     // fetch and set cpu infos
-    mmCpuDesc *cpuInfo = nullptr;
+    MmCpuDesc *cpuInfo = nullptr;
     int32_t cpuNum = 0;
     ret = MmGetCpuInfo(&cpuInfo, &cpuNum);
     if (ret != PROFILING_SUCCESS || cpuNum <= 0) {

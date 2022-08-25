@@ -26,11 +26,7 @@ inline void PthreadOnce(pthread_once_t *flag, void (*func)(void))
 }
 class PluginHandle {
 public:
-    explicit PluginHandle(const std::string &name)
-    : soName_(name),
-      handle_(nullptr),
-      load_(false)
-    {}
+    explicit PluginHandle(const std::string &name) : soName_(name), handle_(nullptr), load_(false) {}
     ~PluginHandle();
     const std::string GetSoName() const;
     int32_t OpenPlugin(const std::string envValue);

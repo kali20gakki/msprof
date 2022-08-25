@@ -43,7 +43,8 @@ public:
     virtual ~FileTransportFactory() {}
 
 public:
-    SHARED_PTR_ALIA<ITransport> CreateFileTransport(const std::string &storageDir, const std::string &storageLimit, bool needSlice);
+    SHARED_PTR_ALIA<ITransport> CreateFileTransport(const std::string &storageDir, const std::string &storageLimit,
+        bool needSlice);
 };
 }  // namespace transport
 }  // namespace dvvp

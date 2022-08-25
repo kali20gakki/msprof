@@ -298,7 +298,7 @@ int InputParser::CheckHostSysToolsIsExist(const std::string toolName)
     tmpDir += "/tmpPrint" + std::to_string(startRealtime);
     int exitCode = analysis::dvvp::common::utils::INVALID_EXIT_CODE;
     static const std::string CMD = "sudo";
-    mmProcess tmpProcess = MSVP_MMPROCESS;
+    MmProcess tmpProcess = MSVP_MMPROCESS;
     ExecCmdParams execCmdParams(CMD, true, tmpDir);
     int ret = analysis::dvvp::common::utils::Utils::ExecCmd(execCmdParams,
                                                             argsV,
@@ -311,7 +311,7 @@ int InputParser::CheckHostSysToolsIsExist(const std::string toolName)
 }
 
 int InputParser::CheckHostSysCmdOutIsExist(const std::string tmpDir, const std::string toolName,
-                                           const mmProcess tmpProcess)
+                                           const MmProcess tmpProcess)
 {
     MSPROF_LOGI("Start to check whether the file exists.");
     for (int i = 0; i < FILE_FIND_REPLAY; i++) {
@@ -367,7 +367,7 @@ int InputParser::CheckHostOutString(const std::string tmpStr, const std::string 
     return MSPROF_DAEMON_ERROR;
 }
 
-int InputParser::UninitCheckHostSysCmd(const mmProcess checkProcess)
+int InputParser::UninitCheckHostSysCmd(const MmProcess checkProcess)
 {
     if (!(ParamValidation::instance()->CheckHostSysPidIsValid(reinterpret_cast<int>(checkProcess)))) {
         return MSPROF_DAEMON_ERROR;
@@ -385,7 +385,7 @@ int InputParser::UninitCheckHostSysCmd(const mmProcess checkProcess)
     argsV.push_back(killCmd);
     int exitCode = analysis::dvvp::common::utils::VALID_EXIT_CODE;
     static const std::string CMD = "sh";
-    mmProcess tmpProcess = MSVP_MMPROCESS;
+    MmProcess tmpProcess = MSVP_MMPROCESS;
     ExecCmdParams execCmdParams(CMD, true, "");
     int ret = MSPROF_DAEMON_OK;
     for (int i = 0; i < FILE_FIND_REPLAY; i++) {
@@ -1227,12 +1227,12 @@ int InputParser::MsprofHostCheckValid(const struct MsprofCmdInfo &cmdInfo, int o
 }
 
 Args::Args(const std::string &name, const std::string &detail)
-    : name_(name), detail_(detail), optional_(mm_optional_argument)
+    : name_(name), detail_(detail), optional_(MM_OPTIONAL_ARGUMENT)
 {
 }
 
 Args::Args(const std::string &name, const std::string &detail, const std::string &defaultValue)
-    : name_(name), defaultValue_(defaultValue), detail_(detail), optional_(mm_optional_argument)
+    : name_(name), defaultValue_(defaultValue), detail_(detail), optional_(MM_OPTIONAL_ARGUMENT)
 {
 }
 
@@ -1247,7 +1247,7 @@ Args::~Args()
 
 void Args::PrintHelp()
 {
-    std::string ifOptional = (optional_ == mm_optional_argument) ? "<Optional>" : "<Mandatory>";
+    std::string ifOptional = (optional_ == MM_OPTIONAL_ARGUMENT) ? "<Optional>" : "<Mandatory>";
     std::cout << std::right << std::setw(8) << "--"; // 8 space
     std::cout << std::left << std::setw(32) << name_  << ifOptional; // 32 space for option
     std::cout << " " << detail_ << std::endl << std::flush;

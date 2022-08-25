@@ -86,8 +86,8 @@ TEST_F(INFO_JSON_TEST, AddHostInfo) {
         .will(returnValue(0));
 
     INT32 cpu_num = 1;
-    mmCpuDesc cpuInfo[1];
-    mmCpuDesc *p_cpu_info = cpuInfo;
+    MmCpuDesc cpuInfo[1];
+    MmCpuDesc *p_cpu_info = cpuInfo;
     cpuInfo[0].nthreads = 0;
     MOCKER(mmGetCpuInfo)
         .stubs()
