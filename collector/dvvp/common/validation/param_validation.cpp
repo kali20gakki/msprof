@@ -516,22 +516,10 @@ bool ParamValidation::IsValidSwitch(const std::string &switchStr)
 
 bool ParamValidation::CheckTsSwitchProfiling(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params)
 {
-    if (!IsValidSwitch(params->ts_task_track)) {
-        return false;
-    }
-    if (!IsValidSwitch(params->ts_cpu_usage)) {
-        return false;
-    }
-    if (!IsValidSwitch(params->ai_core_status)) {
-        return false;
-    }
     if (!IsValidSwitch(params->ts_timeline)) {
         return false;
     }
     if (!IsValidSwitch(params->ts_keypoint)) {
-        return false;
-    }
-    if (!IsValidSwitch(params->ai_vector_status)) {
         return false;
     }
     if (!IsValidSwitch(params->ts_fw_training)) {
