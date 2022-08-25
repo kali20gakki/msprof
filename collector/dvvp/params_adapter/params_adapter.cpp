@@ -160,11 +160,11 @@ int ParamsAdapter::TransToParam(std::array<std::string, INPUT_CFG_MAX> paramCont
     int samplingInterval = 0;
     if (paramContainer[INPUT_CFG_COM_AI_CORE].compare(MSVP_PROF_ON) == 0) {
         samplingInterval = THOUSAND / std::stoi(paramContainer[INPUT_CFG_COM_AIC_FREQ]);
-        platformAdapter.SetParamsForAICore(paramContainer[INPUT_CFG_COM_AIC_MODE], paramContainer[INPUT_CFG_COM_AIC_METRICS], samplingInterval); // AI Core
+        platformAdapter.SetParamsForAicMetrics(paramContainer[INPUT_CFG_COM_AIC_MODE], paramContainer[INPUT_CFG_COM_AIC_METRICS], samplingInterval); // AI Core
     }
     if (paramContainer[INPUT_CFG_COM_AI_VECTOR].compare(MSVP_PROF_ON) == 0) {
         samplingInterval = THOUSAND / std::stoi(paramContainer[INPUT_CFG_COM_AIV_FREQ]);
-        platformAdapter.SetParamsForAIVector(paramContainer[INPUT_CFG_COM_AIV_MODE], paramContainer[INPUT_CFG_COM_AIV_METRICS], samplingInterval); // AI Core
+        platformAdapter.SetParamsForAivMetrics(paramContainer[INPUT_CFG_COM_AIV_MODE], paramContainer[INPUT_CFG_COM_AIV_METRICS], samplingInterval); // AI Core
     }
 
     // ================================= Dev-System =============================

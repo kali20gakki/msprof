@@ -776,7 +776,6 @@ bool ParamValidation::CheckParamsModeRegexMatch(const std::string &paramsMode)
     }
     std::vector<std::string> profilingModeWhiteList;
     profilingModeWhiteList.push_back(analysis::dvvp::message::PROFILING_MODE_DEF);
-    profilingModeWhiteList.push_back(analysis::dvvp::message::PROFILING_MODE_SYSTEM_WIDE);
 
     for (size_t i = 0; i < profilingModeWhiteList.size(); i++) {
         if (paramsMode.compare(profilingModeWhiteList[i]) == 0) {
