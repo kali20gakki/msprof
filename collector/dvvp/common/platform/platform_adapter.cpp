@@ -12,6 +12,8 @@
 #include "prof_acl_api.h"
 #include "errno/error_code.h"
 #include "config/config.h"
+#include "msprof_dlog.h"
+#include "msprof_error_manager.h"
 
 namespace Collector {
 namespace Dvvp {
@@ -142,15 +144,69 @@ void PlatformAdapter::SetParamsForL2Cache()
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_TASK_L2_CACHE) != supportSwitch_.end()) {
         params_->l2CacheTaskProfiling = MSPROF_SWITCH_ON;
         params_->l2CacheTaskProfilingEvents = l2CacheEvents_;
+        params_->dataTypeConfig |= PROF_L2CACHE;
     }
 }
 
-void PlatformAdapter::SetParamsForAICore(const std::string &mode, const std::string &metrics, int samplingInterval)
+int PlatformAdapter::GetMetricsEvents(const std::string &metricsType, std::string &events) const
 {
+    if (metricsType.empty()) {
+        MSPROF_LOGE("metricsType is  empty");
+        return PROFILING_FAILED;
+    }
+    auto iter = AIC_AIV_METRICS_LIST.find(metricsType);
+    if (iter != AIC_AIV_METRICS_LIST.end()) {
+        events = iter->second;
+        return PROFILING_SUCCESS;
+    }
+    MSPROF_LOGE("Invalid metrics type %s", metricsType.c_str());
+    std::string errReason = "metrics type should be in [";
+    for (auto type : AIC_AIV_METRICS_LIST) {
+        errReason += type.first;
+        errReason += "|";
+    }
+    if (errReason[errReason.size() - 1] == '|') {
+        errReason.replace(errReason.size() - 1, 1, "]");
+    }
+    MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
+        std::vector<std::string>({"metrics", metricsType, errReason}));
+    return PROFILING_FAILED;
 }
 
-void PlatformAdapter::SetParamsForAIVector(const std::string &mode, const std::string &metrics, int samplingInterval)
+void PlatformAdapter::SetParamsForAicMetrics(const std::string &mode, const std::string &metrics, int samplingInterval)
 {
+    if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_TASK_AIC_METRICS) != supportSwitch_.end()) {
+        params_->ai_core_profiling = MSPROF_SWITCH_ON;
+        int ret = GetMetricsEvents(metrics, params_->ai_core_profiling_events);
+        if (ret != PROFILING_SUCCESS) {
+            return;
+        }
+        params_->ai_core_metrics = metrics;
+        params_->ai_core_profiling_mode = mode;
+        if (mode == analysis::dvvp::message::PROFILING_MODE_SAMPLE_BASED) {
+            params_->aicore_sampling_interval = samplingInterval;
+        } else {
+            params_->dataTypeConfig |= PROF_AICORE_METRICS;
+        }
+    }
+}
+
+void PlatformAdapter::SetParamsForAivMetrics(const std::string &mode, const std::string &metrics, int samplingInterval)
+{
+    if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_TASK_AIV_METRICS) != supportSwitch_.end()) {
+        params_->aiv_profiling = MSPROF_SWITCH_ON;
+        int ret = GetMetricsEvents(metrics, params_->aiv_profiling_events);
+        if (ret != PROFILING_SUCCESS) {
+            return;
+        }
+        params_->aiv_metrics = metrics;
+        params_->aiv_profiling_mode = mode;
+        if (mode == analysis::dvvp::message::PROFILING_MODE_SAMPLE_BASED) {
+            params_->aiv_sampling_interval = samplingInterval;
+        } else {
+            params_->dataTypeConfig |= PROF_AIV_METRICS;
+        }
+    }
 }
 
 void PlatformAdapter::SetParamsForDeviceSysCpuMemUsage(int samplingInterval)
