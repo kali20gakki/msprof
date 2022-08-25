@@ -9,15 +9,20 @@
 */
 
 #include "platform_adapter.h"
-#include "toolchain/prof_acl_api.h"
+#include "prof_acl_api.h"
+#include "errno/error_code.h"
+#include "config/config.h"
 
 namespace Collector {
 namespace Dvvp {
 namespace Common {
 namespace PlatformAdapter {
 using namespace analysis::dvvp::common::error;
+using namespace Collector::Dvvp::Common::PlatformAdapter;
+using namespace analysis::dvvp::common::config;
 
-PlatformAdapter::PlatformAdapter() : platformType_(PlatformType::END_TYPE)
+PlatformAdapter::PlatformAdapter()
+    : platformType_(Analysis::Dvvp::Common::Config::PlatformType::END_TYPE), params_(nullptr)
 {
 }
 
@@ -25,21 +30,13 @@ PlatformAdapter::~PlatformAdapter()
 {
 }
 
-int PlatformAdapter::Init()
+int PlatformAdapter::Init(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params,
+    Analysis::Dvvp::Common::Config::PlatformType platformType)
 {
-    getLlcEvents_ = {{"read", GenerateReadEvents},
-                     {"write", GenerateWriteEvents}};
+    platformType_ = platformType;
+    params_ = params;
+    getLlcEvents_ = {{"read", "read"}, {"write", "write"}};
     return PROFILING_SUCCESS;
-}
-
-std::string PlatformAdapter::GenerateReadEvents()
-{
-    return "read";
-}
-
-std::string PlatformAdapter::GenerateWriteEvents()
-{
-    return "write";
 }
 
 void PlatformAdapter::SetParamsForGlobal()
@@ -89,7 +86,7 @@ void PlatformAdapter::SetParamsForTrainingTrace()
 {
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_TASK_TS_TRAINING_TRACE) !=
         supportSwitch_.end()) {
-        params->ts_fw_training = MSPROF_SWITCH_ON;
+        params_->ts_fw_training = MSPROF_SWITCH_ON;
         params_->dataTypeConfig |= PROF_TRAINING_TRACE;
     }
 }
@@ -149,7 +146,7 @@ void PlatformAdapter::SetParamsForDeviceSysCpuMemUsage(int samplingInterval)
 {
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_SYS_DEVICE_SYS_CPU_MEM_USAGE) != supportSwitch_.end()) {
         params_->sys_profiling = MSPROF_SWITCH_ON;
-        params->sys_sampling_interval = samplingInterval;
+        params_->sys_sampling_interval = samplingInterval;
     }
 }
 
@@ -157,7 +154,7 @@ void PlatformAdapter::SetParamsForDeviceAllPidCpuMemUsage(int samplingInterval)
 {
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_SYS_DEVICE_ALL_PID_CPU_MEM_USAGE) != supportSwitch_.end()) {
         params_->pid_profiling = MSPROF_SWITCH_ON;
-        params->pid_sampling_interval = samplingInterval;
+        params_->pid_sampling_interval = samplingInterval;
     }
 }
 
@@ -165,18 +162,18 @@ void PlatformAdapter::SetParamsForDeviceAiCpuCtrlCpuTSCpuHotFuncPMU(int sampling
 {
     bool setFlag = false;
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_SYS_DEVICE_TS_CPU_HOT_FUNC_PMU) != supportSwitch_.end()) {
-        params->tsCpuProfiling = MSPROF_SWITCH_ON;
-        params->ts_cpu_profiling_events = "0x8,0x11";
+        params_->tsCpuProfiling = MSPROF_SWITCH_ON;
+        params_->ts_cpu_profiling_events = "0x8,0x11";
         setFlag = true;
     }
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_SYS_DEVICE_AI_CTRL_CPU_HOT_FUNC_PMU) != supportSwitch_.end()) {
-        params->aiCtrlCpuProfiling = MSPROF_SWITCH_ON;
-        params->ai_ctrl_cpu_profiling_events = "0x8,0x11";
+        params_->aiCtrlCpuProfiling = MSPROF_SWITCH_ON;
+        params_->ai_ctrl_cpu_profiling_events = "0x8,0x11";
         setFlag = true;
     }
     if (setFlag) {
-        params->cpu_profiling = MSPROF_SWITCH_ON;
-        dstParams->cpu_sampling_interval = samplingInterval;
+        params_->cpu_profiling = MSPROF_SWITCH_ON;
+        params_->cpu_sampling_interval = samplingInterval;
     }
 }
 
@@ -184,26 +181,26 @@ void PlatformAdapter::SetParamsForDeviceHardwareMem(int samplingInterval, std::s
 {
     bool setFlag = false;
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_SYS_DEVICE_LLC) != supportSwitch_.end()) {
-        params->msprof_llc_profiling = MSPROF_SWITCH_ON;
-        params->llc_interval = params->samplingInterval;
-        params->llc_profiling_events = getLlcEvents_[llcMode]();
+        params_->msprof_llc_profiling = MSPROF_SWITCH_ON;
+        params_->llc_interval = samplingInterval;
+        params_->llc_profiling_events = getLlcEvents_[llcMode];
         setFlag = true;
     }
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_SYS_DEVICE_DDR) != supportSwitch_.end()) {
-        params->ddr_profiling = MSPROF_SWITCH_ON;
-        params->ddr_interval = samplingInterval;
-        params->ddr_profiling_events = "read,write";
+        params_->ddr_profiling = MSPROF_SWITCH_ON;
+        params_->ddr_interval = samplingInterval;
+        params_->ddr_profiling_events = "read,write";
         setFlag = true;
     }
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_SYS_DEVICE_HBM) != supportSwitch_.end()) {
         params_->hbmProfiling = MSPROF_SWITCH_ON;
-        params->hbmInterval = samplingInterval;
-        params->hbm_profiling_events = "read,write";
+        params_->hbmInterval = samplingInterval;
+        params_->hbm_profiling_events = "read,write";
         setFlag = true;
     }
     if (setFlag) {
-        params->hardware_mem = MSPROF_SWITCH_ON;
-        dstParams->hardware_mem_sampling_interval = samplingInterval;
+        params_->hardware_mem = MSPROF_SWITCH_ON;
+        params_->hardware_mem_sampling_interval = samplingInterval;
     }
 }
 
@@ -211,18 +208,18 @@ void PlatformAdapter::SetParamsForDeviceIO(int samplingInterval)
 {
     bool setFlag = false;
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_SYS_DEVICE_NIC) != supportSwitch_.end()) {
-        params->nicProfiling = MSPROF_SWITCH_ON;
-        params->nicInterval = samplingInterval;
+        params_->nicProfiling = MSPROF_SWITCH_ON;
+        params_->nicInterval = samplingInterval;
         setFlag = true;
     }
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_SYS_DEVICE_ROCE) != supportSwitch_.end()) {
-        params->roceProfiling = MSPROF_SWITCH_ON;
-        params->roceInterval = samplingInterval;
+        params_->roceProfiling = MSPROF_SWITCH_ON;
+        params_->roceInterval = samplingInterval;
         setFlag = true;
     }
     if (setFlag) {
-        params->io_profiling = MSPROF_SWITCH_ON;
-        dstParams->io_sampling_interval = samplingInterval;
+        params_->io_profiling = MSPROF_SWITCH_ON;
+        params_->io_sampling_interval = samplingInterval;
     }
 }
 
@@ -230,26 +227,26 @@ void PlatformAdapter::SetParamsForDeviceIntercommection(int samplingInterval)
 {
     bool setFlag = false;
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_SYS_DEVICE_HCCS) != supportSwitch_.end()) {
-        params->hccsProfiling = MSPROF_SWITCH_ON;
-        params->hccsInterval = samplingInterval;
+        params_->hccsProfiling = MSPROF_SWITCH_ON;
+        params_->hccsInterval = samplingInterval;
         setFlag = true;
     }
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_SYS_DEVICE_PCIE) != supportSwitch_.end()) {
-        params->pcieProfiling = MSPROF_SWITCH_ON;
-        params->pcieInterval = samplingInterval;
+        params_->pcieProfiling = MSPROF_SWITCH_ON;
+        params_->pcieInterval = samplingInterval;
         setFlag = true;
     }
     if (setFlag) {
-        params->interconnection_profiling = MSPROF_SWITCH_ON;
-        dstParams->interconnection_sampling_interval = samplingInterval;
+        params_->interconnection_profiling = MSPROF_SWITCH_ON;
+        params_->interconnection_sampling_interval = samplingInterval;
     }
 }
 
 void PlatformAdapter::SetParamsForDeviceDVPP(int samplingInterval)
 {
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_SYS_DEVICE_DVPP) != supportSwitch_.end()) {
-        params->dvpp_profiling = MSPROF_SWITCH_ON;
-        params->dvpp_sampling_interval = samplingInterval;
+        params_->dvpp_profiling = MSPROF_SWITCH_ON;
+        params_->dvpp_sampling_interval = samplingInterval;
     }
 }
 
@@ -257,7 +254,7 @@ void PlatformAdapter::SetParamsForDeviceBIU(int biuFreq)
 {
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_SYS_DEVICE_BIU) != supportSwitch_.end()) {
         params_->biu = MSPROF_SWITCH_ON;
-        params->biu_freq = biuFreq;
+        params_->biu_freq = biuFreq;
     }
 }
 

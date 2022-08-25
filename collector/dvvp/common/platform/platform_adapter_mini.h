@@ -22,12 +22,13 @@ public:
     PlatformAdapterMini();
     ~PlatformAdapterMini();
 
-    int Init();
+    int Init(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params,
+        Analysis::Dvvp::Common::Config::PlatformType platformType) override;
     int Uninit();
 
 private:
-    std::vector<CollectorTypes> commonSwitch_;
-    Analysis::Dvvp::Common::Config::PlatformType platformType_;
+    std::string GenerateCapacityEvents();
+    std::string GenerateBandwidthEvents();
 };
 }
 }
