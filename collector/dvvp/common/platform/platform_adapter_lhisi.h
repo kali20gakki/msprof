@@ -10,13 +10,13 @@
 #ifndef COLLECTOR_DVVP_COMMON_PLATFORM_ADAPTER_LHISI_H
 #define COLLECTOR_DVVP_COMMON_PLATFORM_ADAPTER_LHISI_H
 
-#include "platform_adapter.h"
+#include "platform_adapter_interface.h"
 
 namespace Collector {
 namespace Dvvp {
 namespace Common {
 namespace PlatformAdapterLhisi {
-class PlatformAdapterLhisi : public Collector::Dvvp::Common::PlatformAdapter::PlatformAdapter {
+class PlatformAdapterLhisi : public Collector::Dvvp::Common::PlatformAdapter::PlatformAdapterInterface {
 public:
     PlatformAdapterLhisi();
     ~PlatformAdapterLhisi();

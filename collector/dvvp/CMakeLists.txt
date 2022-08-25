@@ -94,13 +94,14 @@ set(msprofilerCpp
     common/memory/chunk_pool.cpp
     common/mmpa/mmpa_api.cpp
     common/platform/platform.cpp
-    common/platform/platform_adapter.cpp
+    common/platform/platform_adapter_interface.cpp
     common/platform/platform_adapter_mini.cpp
     common/platform/platform_adapter_mdc.cpp
     common/platform/platform_adapter_lhisi.cpp
     common/platform/platform_adapter_dc.cpp
     common/platform/platform_adapter_cloudv2.cpp
     common/platform/platform_adapter_cloud.cpp
+    common/platform/platform_adapter.cpp
     common/logger/cmd_log.cpp
     common/statistics/perf_count.cpp
     common/thread/thread.cpp
