@@ -1538,10 +1538,21 @@ int32_t ProfAclMgr::MsprofInitGeOptions(VOID_PTR data, uint32_t len)
         MSPROF_INNER_ERROR("EK9999", "The format of input ge options is invalid");
         return MSPROF_ERROR_CONFIG_INVALID;
     }
-    ret = MsprofGeOptionsParamConstruct(jobInfo, inputCfgPb);
-    if (ret != MSPROF_ERROR_NONE) {
-        return ret;
+    if (params_ != nullptr) {
+        MSPROF_LOGW("MsprofInitAclJson params exist");
+    } else {
+        MSVP_MAKE_SHARED0_RET(params_, analysis::dvvp::message::ProfileParams, MSPROF_ERROR_MEM_NOT_ENOUGH);
     }
+    auto paramAdapter = GeOptParamAdapter();
+    ret = paramAdapter.GetParamFromInputCfg(inputCfgPb, params_);
+    if (ret != PROFILING_SUCCESS) {
+        return MSPROF_ERROR_CONFIG_INVALID;
+    }
+    return MSPROF_ERROR_CONFIG_INVALID;
+    // ret = MsprofGeOptionsParamConstruct(jobInfo, inputCfgPb);
+    // if (ret != MSPROF_ERROR_NONE) {
+    //     return ret;
+    // }
     ProfDataTypeConfigHandle(params_);
     SetModeToCmd();
     return MSPROF_ERROR_NONE;
