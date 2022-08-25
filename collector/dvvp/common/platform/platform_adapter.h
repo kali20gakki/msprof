@@ -10,42 +10,18 @@
 #ifndef COLLECTOR_DVVP_COMMON_PLATFORM_ADAPTER_H
 #define COLLECTOR_DVVP_COMMON_PLATFORM_ADAPTER_H
 
+#include <map>
+#include <vector>
 #include "singleton/singleton.h"
+#include "utils/utils.h"
+#include "message/prof_params.h"
+#include "config/config_manager.h"
 
 namespace Collector {
 namespace Dvvp {
 namespace Common {
 namespace PlatformAdapter {
-enum class CollectorTypesForUser {
-    // Task
-    USER_TASK_TASK_TIME,
-    USER_TASK_TASK_TRACE,
-    USER_TASK_TRAINING_TRACE,
-    USER_TASK_ASCENDCL,
-    USER_TASK_GRAPH_ENGINE,
-    USER_TASK_RUNTIME,
-    USER_TASK_AICPU,
-    USER_TASK_HCCL,
-    USER_TASK_L2_CACHE,
-    USER_TASK_AIC_METRICS,
-    USER_TASK_AIV_METRICS,
-    // System-device
-    USER_SYS_DEVICE_SYS_CPU_MEM_USAGE,
-    USER_SYS_DEVICE_ALL_PID_CPU_MEM_USAGE,
-    USER_SYS_DEVICE_AI_CTRL_TS_CPU_HOT_FUNC_PMU,
-    USER_SYS_DEVICE_HARDWARE_MEM,
-    USER_SYS_DEVICE_IO,
-    USER_SYS_DEVICE_INTERCONNECTION,
-    USER_SYS_DEVICE_DVPP,
-    USER_SYS_DEVICE_BIU,
-    // System-host
-    USER_SYS_HOST_ONE_PID_CPU_MEM_DISK_OSRT_NETWORK,
-    USER_SYS_HOST_SYS_ALL_PID_CPU_MEM_USAGE,
-    // MAX
-    USER_COLLECTOR_TYPES_MAX
-};
-
-enum class CollectorTypesForPlatform {
+enum CollectorTypesForPlatform {
     // Task
     PLATFORM_TASK_ASCENDCL,
     PLATFORM_TASK_GRAPH_ENGINE,
@@ -91,11 +67,11 @@ enum class CollectorTypesForPlatform {
 
 class PlatformAdapter : public analysis::dvvp::common::singleton::Singleton<PlatformAdapter> {
 public:
-    explicit PlatformAdapter(SHARED_PTR_ALIA<ProfileParams> params) : params_(params)
-    {};
+    PlatformAdapter();
     virtual ~PlatformAdapter();
 
-    virtual int Init();
+    virtual int Init(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params,
+        Analysis::Dvvp::Common::Config::PlatformType platformType);
     virtual int Uninit();
     virtual void SetParamsForGlobal();
     virtual void SetParamsForTaskTime();
@@ -109,13 +85,13 @@ public:
     virtual void SetParamsForL2Cache();
     virtual void SetParamsForAicMetrics();
     virtual void SetParamsForAivMetrics();
-    virtual void SetParamsForDeviceSysCpuMemUsage();
-    virtual void SetParamsForDeviceAllPidCpuMemUsage();
-    virtual void SetParamsForDeviceAiCpuCtrlCpuTSCpuHotFuncPMU();
-    virtual void SetParamsForDeviceHardwareMem();
-    virtual void SetParamsForDeviceIO();
-    virtual void SetParamsForDeviceIntercommection();
-    virtual void SetParamsForDeviceDVPP();
+    virtual void SetParamsForDeviceSysCpuMemUsage(int samplingInterval);
+    virtual void SetParamsForDeviceAllPidCpuMemUsage(int samplingInterval);
+    virtual void SetParamsForDeviceAiCpuCtrlCpuTSCpuHotFuncPMU(int samplingInterval);
+    virtual void SetParamsForDeviceHardwareMem(int samplingInterval, std::string llcMode);
+    virtual void SetParamsForDeviceIO(int samplingInterval);
+    virtual void SetParamsForDeviceIntercommection(int samplingInterval);
+    virtual void SetParamsForDeviceDVPP(int samplingInterval);
     virtual void SetParamsForDeviceBIU(int biuFreq);
     virtual void SetParamsForDevicePower();
     virtual void SetParamsForHostPidCpu();
@@ -127,17 +103,12 @@ public:
 
 protected:
     std::vector<CollectorTypesForPlatform> supportSwitch_;
-    std::map<std::string, std::function<std::string(void)>> getLlcEvents_;
+    std::map<std::string, std::string> getLlcEvents_;
     std::string aicRunningFreq_;   // to calculate aic total time
     std::string sysCountFreq_;    // to calculate op start/end time
     std::string l2CacheEvents_;
-
-private:
-    std::string GenerateReadEvents();
-    std::string GenerateWriteEvents();
-private:
     Analysis::Dvvp::Common::Config::PlatformType platformType_;
-    SHARED_PTR_ALIA<ProfileParams> params_;
+    SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params_;
 };
 }
 }

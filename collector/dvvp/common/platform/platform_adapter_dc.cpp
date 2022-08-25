@@ -15,8 +15,9 @@ namespace Dvvp {
 namespace Common {
 namespace PlatformAdapterDc {
 using namespace analysis::dvvp::common::error;
+using namespace Collector::Dvvp::Common::PlatformAdapter;
 
-PlatformAdapterDc::PlatformAdapterDc() : platformType_(PlatformType::END_TYPE)
+PlatformAdapterDc::PlatformAdapterDc()
 {
 }
 
@@ -24,8 +25,11 @@ PlatformAdapterDc::~PlatformAdapterDc()
 {
 }
 
-int PlatformAdapterDc::Init()
+int PlatformAdapterDc::Init(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params,
+    Analysis::Dvvp::Common::Config::PlatformType platformType)
 {
+    platformType_ = platformType;
+    params_ = params;
     supportSwitch_ = {
         PLATFORM_TASK_ASCENDCL, PLATFORM_TASK_GRAPH_ENGINE, PLATFORM_TASK_RUNTIME, PLATFORM_TASK_AICPU,
         PLATFORM_TASK_HCCL, PLATFORM_TASK_L2_CACHE, PLATFORM_TASK_TS_STEP_TRACE,
@@ -35,7 +39,7 @@ int PlatformAdapterDc::Init()
         PLATFORM_SYS_DEVICE_AI_CTRL_CPU_HOT_FUNC_PMU, PLATFORM_SYS_DEVICE_LLC, PLATFORM_SYS_DEVICE_DDR,
         PLATFORM_SYS_DEVICE_HBM, PLATFORM_SYS_DEVICE_PCIE, PLATFORM_SYS_DEVICE_DVPP, PLATFORM_SYS_HOST_ONE_PID_CPU,
         PLATFORM_SYS_HOST_ONE_PID_MEM, PLATFORM_SYS_HOST_ONE_PID_DISK, PLATFORM_SYS_HOST_ONE_PID_OSRT,
-        PLATFORM_SYS_HOST_DISK, PLATFORM_SYS_HOST_SYS_CPU_MEM_USAGE, PLATFORM_SYS_HOST_ALL_PID_CPU_MEM_USAGE};
+        PLATFORM_SYS_HOST_NETWORK, PLATFORM_SYS_HOST_SYS_CPU_MEM_USAGE, PLATFORM_SYS_HOST_ALL_PID_CPU_MEM_USAGE};
     aicRunningFreq_ = "1150";
     sysCountFreq_ = "38.4";
     l2CacheEvents_ = "0x78,0x79,0x77,0x71,0x6a,0x6c,0x74,0x62";

@@ -15,18 +15,15 @@
 namespace Collector {
 namespace Dvvp {
 namespace Common {
-namespace PlatformAdapter {
+namespace PlatformAdapterCloudV2 {
 class PlatformAdapterCloudV2 : public Collector::Dvvp::Common::PlatformAdapter::PlatformAdapter {
 public:
     PlatformAdapterCloudV2();
     ~PlatformAdapterCloudV2();
 
-    int Init();
+    int Init(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params,
+        Analysis::Dvvp::Common::Config::PlatformType platformType) override;
     int Uninit();
-
-private:
-    std::vector<CollectorTypes> commonSwitch_;
-    Analysis::Dvvp::Common::Config::PlatformType platformType_;
 };
 }
 }

@@ -15,8 +15,9 @@ namespace Dvvp {
 namespace Common {
 namespace PlatformAdapterMdc {
 using namespace analysis::dvvp::common::error;
+using namespace Collector::Dvvp::Common::PlatformAdapter;
 
-PlatformAdapterMdc::PlatformAdapterMdc() : platformType_(PlatformType::END_TYPE)
+PlatformAdapterMdc::PlatformAdapterMdc()
 {
 }
 
@@ -24,8 +25,11 @@ PlatformAdapterMdc::~PlatformAdapterMdc()
 {
 }
 
-int PlatformAdapterMdc::Init()
+int PlatformAdapterMdc::Init(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params,
+    Analysis::Dvvp::Common::Config::PlatformType platformType)
 {
+    platformType_ = platformType;
+    params_ = params;
     supportSwitch_ = {
         PLATFORM_TASK_ASCENDCL, PLATFORM_TASK_GRAPH_ENGINE, PLATFORM_TASK_RUNTIME,
         PLATFORM_TASK_HCCL, PLATFORM_TASK_L2_CACHE, PLATFORM_TASK_TS_STEP_TRACE,

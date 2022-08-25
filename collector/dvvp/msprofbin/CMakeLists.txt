@@ -71,6 +71,13 @@ add_executable(msprofbin
     ../common/statistics/perf_count.cpp
     ../common/validation/param_validation.cpp
     ../common/platform/platform.cpp
+    ../common/platform/platform_adapter.cpp
+    ../common/platform/platform_adapter_mini.cpp
+    ../common/platform/platform_adapter_mdc.cpp
+    ../common/platform/platform_adapter_lhisi.cpp
+    ../common/platform/platform_adapter_dc.cpp
+    ../common/platform/platform_adapter_cloudv2.cpp
+    ../common/platform/platform_adapter_cloud.cpp
     ../common/mmpa/mmpa_api.cpp
     ../depend/stub/error_manager/msprof_error_manager_stub.cpp
     ../driver/devmgmt/ai_drv_dev_api.cpp
