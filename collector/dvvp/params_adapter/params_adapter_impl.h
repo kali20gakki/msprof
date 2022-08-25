@@ -73,12 +73,12 @@ private:
 class GeOptParamAdapter : public ParamsAdapter {
 public:
     GeOptParamAdapter() {};
-    int GetParamFromInputCfg(ProfGeOptionsConfig geCfg, SHARED_PTR_ALIA<ProfileParams> params);
+    int GetParamFromInputCfg(SHARED_PTR_ALIA<ProfGeOptionsConfig> geCfg, SHARED_PTR_ALIA<ProfileParams> params);
 
 private:
     int Init();
     int ParamsCheckGeOpt(std::vector<std::pair<InputCfg, std::string>> &cfgList) const;
-    int GenGeOptionsContainer(ProfGeOptionsConfig geCfg);
+    int GenGeOptionsContainer(SHARED_PTR_ALIA<ProfGeOptionsConfig> geCfg);
     void SetGeOptionsContainerDefaultValue();
     int TransToParams();
 
