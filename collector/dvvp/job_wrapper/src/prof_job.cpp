@@ -192,10 +192,7 @@ int ProfTsTrackJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
     if (cfg->comParams->params->host_profiling) {
         return PROFILING_FAILED;
     }
-    if (cfg->comParams->params->ts_task_track.compare("on") != 0 &&
-        cfg->comParams->params->ts_cpu_usage.compare("on") != 0 &&
-        cfg->comParams->params->ai_core_status.compare("on") != 0 &&
-        cfg->comParams->params->ts_timeline.compare("on") != 0 &&
+    if (cfg->comParams->params->ts_timeline.compare("on") != 0 &&
         cfg->comParams->params->ts_keypoint.compare("on") != 0 &&
         cfg->comParams->params->ts_memcpy.compare("on") != 0) {
         return PROFILING_FAILED;
@@ -550,10 +547,7 @@ int ProfAivTsTrackJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
     if (cfg->comParams->params->host_profiling) {
         return PROFILING_FAILED;
     }
-    if (cfg->comParams->params->ts_task_track.compare("on") != 0 &&
-        cfg->comParams->params->ts_cpu_usage.compare("on") != 0 &&
-        cfg->comParams->params->ai_core_status.compare("on") != 0 &&
-        cfg->comParams->params->ts_timeline.compare("on") != 0) {
+    if (cfg->comParams->params->ts_timeline.compare("on") != 0) {
         return PROFILING_FAILED;
     }
 

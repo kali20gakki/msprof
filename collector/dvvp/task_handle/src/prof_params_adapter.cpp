@@ -61,10 +61,6 @@ int ProfParamsAdapter::UpdateSampleConfig(SHARED_PTR_ALIA<analysis::dvvp::proto:
     if (!feature->ts_timeline().empty()) {
         params->ts_timeline = feature->ts_timeline();
     }
-    if (!feature->ts_task_track().empty()) {
-        params->ts_task_track = feature->ts_task_track();
-    }
-
     if (!feature->system_trace_conf().empty()) {
         HandleSystemTraceConf(feature->system_trace_conf(), params);
     }

@@ -350,20 +350,8 @@ int DrvSetTsCommandType(TsTsFwProfileConfigT &configP,
     if (profileParams == nullptr) {
         return PROFILING_FAILED;
     }
-    if (profileParams->ts_task_track.compare("on") == 0) {
-        configP.ts_task_track = TS_PROFILE_COMMAND_TYPE_PROFILING_ENABLE;
-    }
-    if (profileParams->ts_cpu_usage.compare("on") == 0) {
-        configP.ts_cpu_usage = TS_PROFILE_COMMAND_TYPE_PROFILING_ENABLE;
-    }
-    if (profileParams->ai_core_status.compare("on") == 0) {
-        configP.ai_core_status = TS_PROFILE_COMMAND_TYPE_PROFILING_ENABLE;
-    }
     if (profileParams->ts_timeline.compare("on") == 0) {
         configP.ts_timeline = TS_PROFILE_COMMAND_TYPE_PROFILING_ENABLE;
-    }
-    if (profileParams->ai_vector_status.compare("on") == 0) {
-        configP.ai_vector_status = TS_PROFILE_COMMAND_TYPE_PROFILING_ENABLE;
     }
     if (profileParams->ts_keypoint.compare("on") == 0) {
         configP.ts_keypoint = TS_PROFILE_COMMAND_TYPE_PROFILING_ENABLE;
@@ -392,9 +380,9 @@ int DrvTsFwStart(const DrvPeripheralProfileCfg &peripheralCfg,
     }
     MSPROF_EVENT("Begin to start profiling DrvTsFwStart, profDeviceId=%d, profChannel=%d",
         profDeviceId, static_cast<int>(profChannel));
-    MSPROF_LOGI("DrvTsFwStart profDeviceId=%d, profChannel=%d, taskTrack=%u, cpuUsage=%u, aiCoreStatus=%u, timeLine=%u,"
-        " aiVecStatus=%u, keyPoint=%u, memCpy=%u", profDeviceId, static_cast<int>(profChannel), configP.ts_task_track,
-        configP.ts_cpu_usage, configP.ai_core_status, configP.ts_timeline, configP.ai_vector_status,
+    MSPROF_LOGI("DrvTsFwStart profDeviceId=%d, profChannel=%d, timeLine=%u,"
+        " keyPoint=%u, memCpy=%u", profDeviceId, static_cast<int>(profChannel),
+        configP.ts_timeline,
         configP.ts_keypoint, configP.ts_memcpy);
     struct prof_start_para profStartPara;
     profStartPara.channel_type = PROF_TS_TYPE;
@@ -427,22 +415,14 @@ int DrvStarsSocLogStart(const DrvPeripheralProfileCfg &peripheralCfg,
 
     if (profileParams->stars_acsq_task.compare(analysis::dvvp::common::config::MSVP_PROF_ON) == 0) {
         configP.acsq_task = TS_PROFILE_COMMAND_TYPE_PROFILING_ENABLE;
-    }
-    if (profileParams->stars_sub_task.compare(analysis::dvvp::common::config::MSVP_PROF_ON) == 0 ||
-        profileParams->ffts_thread_task.compare(analysis::dvvp::common::config::MSVP_PROF_ON) == 0) {
         configP.ffts_thread_task = TS_PROFILE_COMMAND_TYPE_PROFILING_ENABLE;
-    }
-    if (profileParams->ffts_block.compare(analysis::dvvp::common::config::MSVP_PROF_ON) == 0) {
-        configP.ffts_block = TS_PROFILE_COMMAND_TYPE_PROFILING_ENABLE;
-    }
-    if (profileParams->acc_pmu_mode == "task-based") {
         configP.acc_pmu = TS_PROFILE_COMMAND_TYPE_PROFILING_ENABLE;
     }
     MSPROF_LOGI("DrvStarsSocLogStart pid:%u, profDeviceId=%d, profChannel=%d, acsq_task=%u, acc_pmu=%u, cdqm_reg=%u,"
-        "dvpp_vpc_block=%u, dvpp_jpegd_block=%u, dvpp_jpede_block=%u" "ffts_thread_task=%u, ffts_block=%u, sdma_dmu=%u",
+        "dvpp_vpc_block=%u, dvpp_jpegd_block=%u, dvpp_jpede_block=%u" "ffts_thread_task=%u, sdma_dmu=%u",
         configP.pid, profDeviceId, static_cast<int>(profChannel), configP.acsq_task, configP.acc_pmu, configP.cdqm_reg,
         configP.dvpp_vpc_block, configP.dvpp_jpegd_block, configP.dvpp_jpede_block,
-        configP.ffts_thread_task, configP.ffts_block, configP.sdma_dmu);
+        configP.ffts_thread_task, configP.sdma_dmu);
 
     struct prof_start_para profStartPara;
     profStartPara.channel_type = PROF_TS_TYPE;

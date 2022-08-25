@@ -977,16 +977,11 @@ void ProfAclMgr::ProfStartCfgToMsprofCfg(const uint64_t dataTypeConfig, ProfAico
     feature->set_feature_name(PROF_FEATURE_TASK);
     // ts_timeline & hwts
     if (ConfigManager::instance()->GetPlatformType() == PlatformType::MINI_TYPE) {
-        if ((dataTypeConfig & PROF_SCHEDULE_TIMELINE_MASK) ||
-            (dataTypeConfig & PROF_TASK_TIME_MASK)) {
+        if (dataTypeConfig & PROF_TASK_TIME_MASK) {
             feature->set_ts_timeline("on");
         }
     } else if (dataTypeConfig & PROF_TASK_TIME_MASK) {
             feature->set_hwts_log("on");
-    }
-    // ts_track
-    if (dataTypeConfig & PROF_SCHEDULE_TRACE_MASK) {
-        feature->set_ts_task_track("on");
     }
     // training trace
     if (dataTypeConfig & PROF_TRAINING_TRACE_MASK) {
@@ -1140,7 +1135,6 @@ int ProfAclMgr::StartDeviceSubscribeTask(const uint32_t modelId, const uint32_t 
     params->ts_keypoint = MSVP_PROF_ON;
     if (ConfigManager::instance()->GetPlatformType() == PlatformType::CHIP_V4_1_0) {
         params->stars_acsq_task = MSVP_PROF_ON;
-        params->ffts_thread_task = MSVP_PROF_ON;
     }
 
     std::string devIdStr = std::to_string(devId);
@@ -1225,13 +1219,10 @@ void ProfAclMgr::ProfDataTypeConfigHandle(SHARED_PTR_ALIA<analysis::dvvp::messag
     if (params->ts_timeline == MSVP_PROF_ON) {
         dataTypeConfig_ |= PROF_SCHEDULE_TIMELINE | PROF_TASK_TIME;
     }
-    if (params->ts_task_track == MSVP_PROF_ON) {
-        dataTypeConfig_ |= PROF_SCHEDULE_TRACE;
-    }
 
     UpdateDataTypeConfigBySwitch(params->acl, PROF_ACL_API);
     UpdateDataTypeConfigBySwitch(params->hwts_log, PROF_TASK_TIME);
-    UpdateDataTypeConfigBySwitch(params->aicpuTrace, PROF_AICPU);
+    UpdateDataTypeConfigBySwitch(params->aicpuTrace, PROF_AICPU_TRACE);
     UpdateDataTypeConfigBySwitch(params->modelExecution, PROF_MODEL_EXECUTE);
     UpdateDataTypeConfigBySwitch(params->runtimeApi, PROF_RUNTIME_API);
     UpdateDataTypeConfigBySwitch(params->runtimeTrace, PROF_RUNTIME_TRACE);
@@ -1435,12 +1426,7 @@ void ProfAclMgr::MsprofInitGeOptionsParamAdaper(SHARED_PTR_ALIA<analysis::dvvp::
             params->hwts_log = MSVP_PROF_ON;
         }
     }
-    params_->stars_acsq_task = inputCfgPb->stars_acsq_task();
-    params_->stars_sub_task = inputCfgPb->stars_sub_task();
-    params_->ffts_thread_task = inputCfgPb->ffts_thread_task();
-    params_->ffts_block = inputCfgPb->ffts_block();
-    params_->low_power = inputCfgPb->low_power();
-    params_->acc_pmu_mode = inputCfgPb->acc_pmu_mode();
+    params_->low_power = inputCfgPb->power();
     params_->hcclTrace = inputCfgPb->hccl();
 }
 
@@ -1493,10 +1479,10 @@ int32_t ProfAclMgr::MsprofGeOptionsParamConstruct(const std::string &jobInfo,
         }
     }
     MsprofInitGeOptionsParamAdaper(params_, jobInfo, inputCfgPb);
-    MSPROF_LOGI("MsprofInitGeOptions, stars_acsq_task Param:%s, stars_sub_task:%s, ffts_thread_task:%s, ffts_block:%s"
+    MSPROF_LOGI("MsprofInitGeOptions, stars_acsq_task Param:%s"
                 "low_power:%s, hcclTrace:%s",
-        params_->stars_acsq_task.c_str(), params_->stars_sub_task.c_str(), params_->ffts_thread_task.c_str(),
-        params_->ffts_block.c_str(), params_->low_power.c_str(), params_->hcclTrace.c_str());
+        params_->stars_acsq_task.c_str(),
+        params_->low_power.c_str(), params_->hcclTrace.c_str());
     ret = MsprofAiCoreMetricsAdapter(params_, inputCfgPb);
     if (ret != PROFILING_SUCCESS) {
         return MSPROF_ERROR_CONFIG_INVALID;

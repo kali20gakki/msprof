@@ -679,7 +679,7 @@ void AclApiParamAdapter::ProfTaskCfgToContainer(const ProfConfig * apiCfg,
         paramContainer_[INPUT_CFG_COM_ASCENDCL] = MSVP_PROF_ON;
         setConfig_.insert(INPUT_CFG_COM_ASCENDCL);
     }
-    if (dataTypeConfig & PROF_AICPU) {
+    if (dataTypeConfig & PROF_AICPU_TRACE) {
         paramContainer_[INPUT_CFG_COM_AICPU] = MSVP_PROF_ON;
         setConfig_.insert(INPUT_CFG_COM_AICPU);
     }
