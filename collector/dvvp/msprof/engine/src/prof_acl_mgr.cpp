@@ -1360,14 +1360,25 @@ int32_t ProfAclMgr::MsprofInitAclJson(VOID_PTR data, uint32_t len)
         MSPROF_INNER_ERROR("EK9999", "The format of input aclJsonConfig is invalid");
         return MSPROF_ERROR_CONFIG_INVALID;
     }
-    if (inputCfgPb->switch_() != MSVP_PROF_ON) {
-        MSPROF_LOGW("Profiling switch is off");
-        return MSPROF_ERROR_ACL_JSON_OFF;
+    // if (inputCfgPb->switch_() != MSVP_PROF_ON) {
+    //     MSPROF_LOGW("Profiling switch is off");
+    //     return MSPROF_ERROR_ACL_JSON_OFF;
+    // }
+    // ret = MsprofAclJsonParamConstruct(inputCfgPb);
+    // if (ret != MSPROF_ERROR_NONE) {
+    //     return ret;
+    // }
+    if (params_ != nullptr) {
+        MSPROF_LOGW("MsprofInitAclJson params exist");
+    } else {
+        MSVP_MAKE_SHARED0_RET(params_, analysis::dvvp::message::ProfileParams, MSPROF_ERROR_MEM_NOT_ENOUGH);
     }
-    ret = MsprofAclJsonParamConstruct(inputCfgPb);
-    if (ret != MSPROF_ERROR_NONE) {
-        return ret;
+    auto paramAdapter = AclJsonParamAdapter();
+    ret = paramAdapter.GetParamFromInputCfg(inputCfgPb, params_);
+    if (ret != PROFILING_SUCCESS) {
+        return MSPROF_ERROR_CONFIG_INVALID;
     }
+    return MSPROF_ERROR_CONFIG_INVALID;
     ConfigManager::instance()->MsprofL2CacheAdapter(params_);
     ProfDataTypeConfigHandle(params_);
     SetModeToCmd();

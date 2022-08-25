@@ -51,12 +51,13 @@ private:
 class AclJsonParamAdapter : public ParamsAdapter {
 public:
     AclJsonParamAdapter() {};
-    int GetParamFromInputCfg(ProfAclConfig aclCfg, SHARED_PTR_ALIA<ProfileParams> params);
+    int GetParamFromInputCfg(SHARED_PTR_ALIA<ProfAclConfig> aclCfg,
+        SHARED_PTR_ALIA<ProfileParams> params);
 
 private:
     int Init();
     int ParamsCheckAclJson(std::vector<std::pair<InputCfg, std::string>> &cfgList) const;
-    int GenAclJsonContainer(ProfAclConfig aclCfg);
+    int GenAclJsonContainer(SHARED_PTR_ALIA<ProfAclConfig> aclCfg);
     int SetAclJsonContainerDefaultValue();
     int TransToParams();
 
