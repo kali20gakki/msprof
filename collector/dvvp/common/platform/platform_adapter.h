@@ -97,8 +97,8 @@ public:
     virtual void SetParamsForAICPU();
     virtual void SetParamsForHCCL();
     virtual void SetParamsForL2Cache();
-    virtual void SetParamsForAicMetrics();
-    virtual void SetParamsForAivMetrics();
+    virtual void SetParamsForAICore(const std::string &mode, const std::string &metrics, int samplingInterval);
+    virtual void SetParamsForAIVector(const std::string &mode, const std::string &metrics, int samplingInterval);
     virtual void SetParamsForDeviceSysCpuMemUsage(int samplingInterval);
     virtual void SetParamsForDeviceAllPidCpuMemUsage(int samplingInterval);
     virtual void SetParamsForDeviceAiCpuCtrlCpuTSCpuHotFuncPMU(int samplingInterval);
@@ -113,7 +113,8 @@ public:
     virtual void SetParamsForHostPidDisk();
     virtual void SetParamsForHostPidOSRT();
     virtual void SetParamsForHostNetwork();
-    virtual void SetParamsForHostSysAllPidCpuMemUsage();
+    virtual void SetParamsForHostSysAllPidCpuUsage();
+    virtual void SetParamsForHostSysAllPidMemUsage();
 
 protected:
     std::vector<CollectorTypesForPlatform> supportSwitch_;

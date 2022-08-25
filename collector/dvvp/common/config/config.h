@@ -62,6 +62,8 @@ const int STORAGE_LIMIT_DOWN_THD = 200; // 200MB
 
 const int MAX_ASCEND_INSTALL_INFO_FILE_SIZE = 1024; // 1024 Byte
 
+const int THOUSAND = 1000; // 1000 : 1k
+
 #if (defined(_WIN32) || defined(_WIN64) || defined(_MSC_VER))
 const int MSVP_MMPROCESS = NULL;
 const char * const MSVP_ENV_DELIMITER = ":";
