@@ -121,9 +121,6 @@ struct ProfileParams : BaseInfo {
     std::string dvpp_profiling;
     int dvpp_sampling_interval;
 
-    std::string ai_core_profiling_metrics;
-    std::string aiv_profiling_metrics;
-
     std::string biu;
     int biu_freq;
 
@@ -280,8 +277,6 @@ struct ProfileParams : BaseInfo {
         SET_VALUE(object, interconnection_profiling);
         SET_VALUE(object, interconnection_sampling_interval);
         SET_VALUE(object, dvpp_profiling);
-        SET_VALUE(object, ai_core_profiling_metrics);
-        SET_VALUE(object, aiv_profiling_metrics);
         SET_VALUE(object, nicProfiling);
         SET_VALUE(object, roceProfiling);
         // host system
@@ -410,8 +405,6 @@ struct ProfileParams : BaseInfo {
         FROM_INT_VALUE(object, dvpp_sampling_interval, DEFAULT_PROFILING_INTERVAL_10MS);
         FROM_INT_VALUE(object, aicore_sampling_interval, DEFAULT_PROFILING_INTERVAL_10MS);
         FROM_INT_VALUE(object, biu_freq, DEFAULT_PROFILING_BIU_FREQ);
-        FROM_STRING_VALUE(object, ai_core_profiling_metrics);
-        FROM_STRING_VALUE(object, aiv_profiling_metrics);
         // host system
         FROM_BOOL_VALUE(object, host_profiling);
         FROM_STRING_VALUE(object, host_cpu_profiling);

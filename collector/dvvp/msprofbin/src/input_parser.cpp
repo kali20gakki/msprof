@@ -107,8 +107,6 @@ SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> InputParser::MsprofGetOp
         MsprofCmdUsage("get params from input config failed.");
         return nullptr;
     }
-    // Debug
-    //return nullptr;
     return ParamsCheck() == MSPROF_DAEMON_OK ? params_ : nullptr;
 }
 
