@@ -10,13 +10,13 @@
 #ifndef COLLECTOR_DVVP_COMMON_PLATFORM_ADAPTER_CLOUD_H
 #define COLLECTOR_DVVP_COMMON_PLATFORM_ADAPTER_CLOUD_H
 
-#include "platform_adapter.h"
+#include "platform_adapter_interface.h"
 
 namespace Collector {
 namespace Dvvp {
 namespace Common {
 namespace PlatformAdapterCloud {
-class PlatformAdapterCloud : public Collector::Dvvp::Common::PlatformAdapter::PlatformAdapter {
+class PlatformAdapterCloud : public Collector::Dvvp::Common::PlatformAdapter::PlatformAdapterInterface {
 public:
     PlatformAdapterCloud();
     ~PlatformAdapterCloud();

@@ -112,11 +112,11 @@ PlatformType ParamsAdapter::GetPlatform() const
 int ParamsAdapter::TransToParam(std::array<std::string, INPUT_CFG_MAX> paramContainer, SHARED_PTR_ALIA<ProfileParams> params)
 {
     auto platformAdapter = PlatformAdapter();
-    platformAdapter.Init(params, platformType_);
+    auto adapter = platformAdapter.Init(params, platformType_);
     // =============================== Common ===============================
     struct CommonParams commonParams;
     commonParams.output = paramContainer[INPUT_CFG_COM_OUTPUT];
-    commonParams.storage_limit = paramContainer[INPUT_CFG_COM_STORAGE_LIMIT];
+    commonParams.storageLimit = paramContainer[INPUT_CFG_COM_STORAGE_LIMIT];
     commonParams.appPath = paramContainer[INPUT_CFG_MSPROF_APPLICATION];
     commonParams.appEnv = paramContainer[INPUT_CFG_MSPROF_ENVIRONMENT];
     commonParams.msproftx = paramContainer[INPUT_CFG_COM_MSPROFTX];
@@ -128,99 +128,99 @@ int ParamsAdapter::TransToParam(std::array<std::string, INPUT_CFG_MAX> paramCont
     commonParams.exportSummaryFormat = paramContainer[INPUT_CFG_SUMMARY_FORMAT];
     commonParams.exportIterationId = (paramContainer[INPUT_CFG_ITERATION_ID].empty()) ? -1 : std::stoi(paramContainer[INPUT_CFG_ITERATION_ID]);
     commonParams.exportModelId = (paramContainer[INPUT_CFG_MODEL_ID].empty()) ? -1 : std::stoi(paramContainer[INPUT_CFG_MODEL_ID]);
-    platformAdapter.SetParamsForGlobal(commonParams);
+    adapter->SetParamsForGlobal(commonParams);
 
     // =============================== Task =================================
     if (paramContainer[INPUT_CFG_COM_TASK_TIME].compare(MSVP_PROF_ON) == 0) {
-        platformAdapter.SetParamsForTaskTime(); // Task Time
+        adapter->SetParamsForTaskTime(); // Task Time
     }
     if (paramContainer[INPUT_CFG_COM_TASK_TRACE].compare(MSVP_PROF_ON) == 0) {
-        platformAdapter.SetParamsForTaskTrace(); // Task Trace
+        adapter->SetParamsForTaskTrace(); // Task Trace
     }
     if (paramContainer[INPUT_CFG_COM_TRAINING_TRACE].compare(MSVP_PROF_ON) == 0) {
-        platformAdapter.SetParamsForTrainingTrace(); // Training Trace
+        adapter->SetParamsForTrainingTrace(); // Training Trace
     }
     if (paramContainer[INPUT_CFG_COM_ASCENDCL].compare(MSVP_PROF_ON) == 0) {
-        platformAdapter.SetParamsForAscendCL(); // AscendCL
+        adapter->SetParamsForAscendCL(); // AscendCL
     }
     if (paramContainer[INPUT_CFG_COM_MODEL_EXECUTION].compare(MSVP_PROF_ON) == 0) {
-        platformAdapter.SetParamsForGE(); // GE
+        adapter->SetParamsForGE(); // GE
     }
     if (paramContainer[INPUT_CFG_COM_RUNTIME_API].compare(MSVP_PROF_ON) == 0) {
-        platformAdapter.SetParamsForRuntime(); // Runtime
+        adapter->SetParamsForRuntime(); // Runtime
     }
     if (paramContainer[INPUT_CFG_COM_AICPU].compare(MSVP_PROF_ON) == 0) {
-        platformAdapter.SetParamsForAICPU(); // AI CPU
+        adapter->SetParamsForAICPU(); // AI CPU
     }
     if (paramContainer[INPUT_CFG_COM_HCCL].compare(MSVP_PROF_ON) == 0) {
-        platformAdapter.SetParamsForHCCL(); // HCCL
+        adapter->SetParamsForHCCL(); // HCCL
     }
     if (paramContainer[INPUT_CFG_COM_L2].compare(MSVP_PROF_ON) == 0) {
-        platformAdapter.SetParamsForL2Cache(); // L2 Cache
+        adapter->SetParamsForL2Cache(); // L2 Cache
     }
 
     int samplingInterval = 0;
     if (paramContainer[INPUT_CFG_COM_AI_CORE].compare(MSVP_PROF_ON) == 0) {
         samplingInterval = THOUSAND / std::stoi(paramContainer[INPUT_CFG_COM_AIC_FREQ]);
-        platformAdapter.SetParamsForAicMetrics(paramContainer[INPUT_CFG_COM_AIC_MODE], paramContainer[INPUT_CFG_COM_AIC_METRICS], samplingInterval); // AI Core
+        adapter->SetParamsForAicMetrics(paramContainer[INPUT_CFG_COM_AIC_MODE], paramContainer[INPUT_CFG_COM_AIC_METRICS], samplingInterval); // AI Core
     }
     if (paramContainer[INPUT_CFG_COM_AI_VECTOR].compare(MSVP_PROF_ON) == 0) {
         samplingInterval = THOUSAND / std::stoi(paramContainer[INPUT_CFG_COM_AIV_FREQ]);
-        platformAdapter.SetParamsForAivMetrics(paramContainer[INPUT_CFG_COM_AIV_MODE], paramContainer[INPUT_CFG_COM_AIV_METRICS], samplingInterval); // AI Core
+        adapter->SetParamsForAivMetrics(paramContainer[INPUT_CFG_COM_AIV_MODE], paramContainer[INPUT_CFG_COM_AIV_METRICS], samplingInterval); // AI Core
     }
 
     // ================================= Dev-System =============================
     if (paramContainer[INPUT_CFG_COM_SYS_USAGE].compare(MSVP_PROF_ON) == 0) {
         samplingInterval = THOUSAND / std::stoi(paramContainer[INPUT_CFG_COM_SYS_USAGE_FREQ]);
-        platformAdapter.SetParamsForDeviceSysCpuMemUsage(samplingInterval); // Dev-Sys cpu & mem
+        adapter->SetParamsForDeviceSysCpuMemUsage(samplingInterval); // Dev-Sys cpu & mem
     }
     if (paramContainer[INPUT_CFG_COM_SYS_PID_USAGE].compare(MSVP_PROF_ON) == 0) {
         samplingInterval = THOUSAND / std::stoi(paramContainer[INPUT_CFG_COM_SYS_PID_USAGE_FREQ]);
-        platformAdapter.SetParamsForDeviceAllPidCpuMemUsage(samplingInterval); // Dev-All Pid cpu & mem
+        adapter->SetParamsForDeviceAllPidCpuMemUsage(samplingInterval); // Dev-All Pid cpu & mem
     }
     if (paramContainer[INPUT_CFG_COM_SYS_CPU].compare(MSVP_PROF_ON) == 0) {
         samplingInterval = THOUSAND / std::stoi(paramContainer[INPUT_CFG_COM_SYS_CPU_FREQ]);
-        platformAdapter.SetParamsForDeviceAiCpuCtrlCpuTSCpuHotFuncPMU(samplingInterval); // Dev-All Pid cpu & mem
+        adapter->SetParamsForDeviceAiCpuCtrlCpuTSCpuHotFuncPMU(samplingInterval); // Dev-All Pid cpu & mem
     }
     if (paramContainer[INPUT_CFG_COM_SYS_HARDWARE_MEM].compare(MSVP_PROF_ON) == 0) {
         samplingInterval = THOUSAND / std::stoi(paramContainer[INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ]);
-        platformAdapter.SetParamsForDeviceHardwareMem(samplingInterval, paramContainer[INPUT_CFG_COM_LLC_MODE]); // Hardware memory
+        adapter->SetParamsForDeviceHardwareMem(samplingInterval, paramContainer[INPUT_CFG_COM_LLC_MODE]); // Hardware memory
     }
     if (paramContainer[INPUT_CFG_COM_SYS_IO].compare(MSVP_PROF_ON) == 0) {
         samplingInterval = THOUSAND / std::stoi(paramContainer[INPUT_CFG_COM_SYS_IO_FREQ]);
-        platformAdapter.SetParamsForDeviceIO(samplingInterval); // Dev-Sys IO
+        adapter->SetParamsForDeviceIO(samplingInterval); // Dev-Sys IO
     }
     if (paramContainer[INPUT_CFG_COM_SYS_INTERCONNECTION].compare(MSVP_PROF_ON) == 0) {
         samplingInterval = THOUSAND / std::stoi(paramContainer[INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ]);
-        platformAdapter.SetParamsForDeviceIntercommection(samplingInterval); // Dev-Sys IO
+        adapter->SetParamsForDeviceIntercommection(samplingInterval); // Dev-Sys IO
     }
     if (paramContainer[INPUT_CFG_COM_DVPP].compare(MSVP_PROF_ON) == 0) {
         samplingInterval = THOUSAND / std::stoi(paramContainer[INPUT_CFG_COM_DVPP_FREQ]);
-        platformAdapter.SetParamsForDeviceDVPP(samplingInterval); // Dev-Sys Dvpp
+        adapter->SetParamsForDeviceDVPP(samplingInterval); // Dev-Sys Dvpp
     }
 
     if (paramContainer[INPUT_CFG_COM_POWER].compare(MSVP_PROF_ON) == 0) {
-        platformAdapter.SetParamsForDevicePower(); // Dev-Sys Power
+        adapter->SetParamsForDevicePower(); // Dev-Sys Power
     }
 
     if (paramContainer[INPUT_CFG_COM_BIU].compare(MSVP_PROF_ON) == 0) {
         samplingInterval = THOUSAND / std::stoi(paramContainer[INPUT_CFG_COM_DVPP_FREQ]);
-        platformAdapter.SetParamsForDeviceBIU(samplingInterval); // Dev-Sys BIU
+        adapter->SetParamsForDeviceBIU(samplingInterval); // Dev-Sys BIU
     }
 
     // ============================== Host-Sys Pid============================
     std::vector<std::string> hostSysPidList = Utils::Split(paramContainer[INPUT_CFG_HOST_SYS], false, "", ",");
     for (auto entry : hostSysPidList) {
         if (entry.compare(HOST_SYS_CPU) == 0) {
-            platformAdapter.SetParamsForHostPidCpu(); // Host-Sys Pid CPU
+            adapter->SetParamsForHostPidCpu(); // Host-Sys Pid CPU
         } else if (entry.compare(HOST_SYS_MEM) == 0) {
-            platformAdapter.SetParamsForHostPidMem(); // Host-Sys Pid Mem
+            adapter->SetParamsForHostPidMem(); // Host-Sys Pid Mem
         } else if (entry.compare(HOST_SYS_DISK) == 0) {
-            platformAdapter.SetParamsForHostPidDisk(); // Host-Sys Pid Disk
+            adapter->SetParamsForHostPidDisk(); // Host-Sys Pid Disk
         } else if (entry.compare(HOST_SYS_OSRT) == 0) {
-            platformAdapter.SetParamsForHostPidOSRT(); // Host-Sys Pid osrt
+            adapter->SetParamsForHostPidOSRT(); // Host-Sys Pid osrt
         } else if (entry.compare(HOST_SYS_NETWORK) == 0) {
-            platformAdapter.SetParamsForHostNetwork(); // Host-Sys All Pid Network
+            adapter->SetParamsForHostNetwork(); // Host-Sys All Pid Network
         }
     }
 
@@ -229,9 +229,9 @@ int ParamsAdapter::TransToParam(std::array<std::string, INPUT_CFG_MAX> paramCont
     std::vector<std::string> hostSysList = Utils::Split(paramContainer[INPUT_HOST_SYS_USAGE], false, "", ",");
     for (auto entry : hostSysList) {
         if (entry.compare(HOST_SYS_CPU) == 0) {
-            platformAdapter.SetParamsForHostSysAllPidCpuUsage(); // Host-Sys CPU
+            adapter->SetParamsForHostSysAllPidCpuUsage(); // Host-Sys CPU
         } else if (entry.compare(HOST_SYS_MEM) == 0) {
-            platformAdapter.SetParamsForHostSysAllPidMemUsage(); // Host-Sys Mem
+            adapter->SetParamsForHostSysAllPidMemUsage(); // Host-Sys Mem
         }
     }
 
