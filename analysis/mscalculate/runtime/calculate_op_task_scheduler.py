@@ -114,11 +114,11 @@ class CalculateOpTaskScheduler:
         for task_time in task_time_list:
             task_id = task_time[5]
             stream_id = task_time[6]
-            start = task_time[9]
-            end = task_time[10]
+            start = task_time[9] / NumberConstant.MS_TO_NS
+            end = task_time[10] / NumberConstant.MS_TO_NS
             batch_id = task_time[12]
 
-            aicpu_collector.filter_aicpu(stream_id, task_id, start, end, batch_id, NumberConstant.DEFAULT_BATCH_ID)
+            aicpu_collector.filter_aicpu(stream_id, task_id, start, end, batch_id, NumberConstant.INVALID_ITER_ID)
         aicpu_collector.save_aicpu()
 
     def op_pre_mini_task_data(self: any, project_path: str, device_id: int) -> None:

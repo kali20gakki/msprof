@@ -17,6 +17,7 @@ from common_func.info_conf_reader import InfoConfReader
 from common_func.path_manager import PathManager
 from common_func.platform.chip_manager import ChipManager
 from common_func.ms_constant.number_constant import NumberConstant
+from common_func.msprof_iteration import MsprofIteration
 from viewer.calculate_rts_data import calculate_task_schedule_data
 from viewer.calculate_rts_data import multi_calculate_task_cost_time
 from mscalculate.ts_task.ai_cpu.aicpu_from_ts_collector import AICpuFromTsCollector
@@ -85,7 +86,7 @@ class CalculateTaskScheduler:
             logging.error(err, exc_info=Constant.TRACE_BACK_SWITCH)
             return
         task_time = self._add_info(cal_task_data)
-        self._collect_aicpu(task_time, iter_time_range)
+        self._collect_aicpu(task_time)
         self._insert_task_time_data(task_time, runtime_conn, runtime_curs)
         logging.info('create task time table end')
 
@@ -95,16 +96,17 @@ class CalculateTaskScheduler:
             self.index_id, self.model_id, NumberConstant.DEFAULT_BATCH_ID) for task_data in cal_task_data]
         return task_time
 
-    def _collect_aicpu(self: any, task_time_list: list, iter_time_range: list) -> None:
-        iter_id = iter_time_range[1] if len(iter_time_range) >= 2 else NumberConstant.INVALID_ITER_ID
-
+    def _collect_aicpu(self: any, task_time_list: list) -> None:
+        iter_range = MsprofIteration(self.project_path). \
+            get_iter_id_by_index_id(self.sample_config.get("iter_id"), self.sample_config.get("model_id"))
+        iter_id = iter_range[1] if len(iter_range) >= 2 else NumberConstant.INVALID_ITER_ID
         aicpu_collector = AICpuFromTsCollector(self.project_path)
 
         for task_time in task_time_list:
             task_id = task_time[5]
             stream_id = task_time[6]
-            start = task_time[9]
-            end = task_time[10]
+            start = task_time[9] / NumberConstant.MS_TO_NS
+            end = task_time[10] / NumberConstant.MS_TO_NS
             batch_id = task_time[13]
 
             aicpu_collector.filter_aicpu(stream_id, task_id, start, end, batch_id, iter_id)
