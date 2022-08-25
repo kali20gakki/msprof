@@ -145,11 +145,11 @@ void PlatformAdapter::SetParamsForL2Cache()
     }
 }
 
-void PlatformAdapter::SetParamsForAicMetrics()
+void PlatformAdapter::SetParamsForAICore(const std::string &mode, const std::string &metrics, int samplingInterval)
 {
 }
 
-void PlatformAdapter::SetParamsForAivMetrics()
+void PlatformAdapter::SetParamsForAIVector(const std::string &mode, const std::string &metrics, int samplingInterval)
 {
 }
 
@@ -316,7 +316,11 @@ void PlatformAdapter::SetParamsForHostNetwork()
     }
 }
 
-void PlatformAdapter::SetParamsForHostSysAllPidCpuMemUsage()
+void PlatformAdapter::SetParamsForHostSysAllPidCpuUsage()
+{
+}
+
+void PlatformAdapter::SetParamsForHostSysAllPidMemUsage()
 {
 }
 
