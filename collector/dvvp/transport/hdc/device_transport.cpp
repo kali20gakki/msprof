@@ -50,7 +50,7 @@ DeviceTransport::~DeviceTransport()
     Join();
 }
 
-bool DeviceTransport::IsInitialized()
+bool DeviceTransport::IsInitialized() const
 {
     return (dataInitialized_ && ctrlInitialized_);
 }

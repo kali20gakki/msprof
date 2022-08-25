@@ -86,7 +86,10 @@ public:
     int Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg) override;
     int Process() override;
     int Uninit() override;
-    bool IsGlobalJobLevel() override { return true; }
+    bool IsGlobalJobLevel() override
+    {
+        return true;
+    }
 };
 
 class ProfHostNetworkJob : public ProfHostDataBase {
