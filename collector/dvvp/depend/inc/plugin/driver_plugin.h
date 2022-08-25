@@ -17,13 +17,13 @@ namespace Plugin {
 using HalHdcRecvFunc = std::function<hdcError_t(HDC_SESSION, struct drvHdcMsg *, int, UINT64, int *, UINT32)>;
 using HalHdcSendFunc = std::function<hdcError_t(HDC_SESSION, struct drvHdcMsg *, UINT64, UINT32)>;
 using HalHdcSessionConnectExFunc = std::function<hdcError_t(int, int, int, HDC_CLIENT, HDC_SESSION *)>;
-using DrvHdcSetSessionReferenceFunc = std::function<drvError_t(HDC_SESSION)>; 
+using DrvHdcSetSessionReferenceFunc = std::function<drvError_t(HDC_SESSION)>;
 using HalHdcGetSessionAttrFunc = std::function<drvError_t(HDC_SESSION, int, int *)>;
 using HalGetChipInfoFunc = std::function<drvError_t(unsigned int, halChipInfo *)>;
 using HalGetDeviceInfoFunc = std::function<drvError_t(uint32_t, int32_t, int32_t, int64_t *)>;
 using HalProfDataFlushFunc = std::function<int(unsigned int, unsigned int, unsigned int *)>;
 using ProfDrvGetChannelsFunc = std::function<int(unsigned int, channel_list_t *)>;
-using ProfDrvStartFunc = std::function<int(unsigned int, unsigned int, struct prof_start_para *)>; 
+using ProfDrvStartFunc = std::function<int(unsigned int, unsigned int, struct prof_start_para *)>;
 using ProfStopFunc = std::function<int(unsigned int, unsigned int)>;
 using ProfChannelReadFunc = std::function<int(unsigned int, unsigned int, char *, unsigned int)>;
 using ProfChannelPollFunc = std::function<int(struct prof_poll_info *, int, int)>;
@@ -46,11 +46,7 @@ using DrvHdcSessionCloseFunc = std::function<drvError_t(HDC_SESSION)>;
 using DrvHdcGetCapacityFunc = std::function<drvError_t(struct drvHdcCapacity *)>;
 class DriverPlugin : public analysis::dvvp::common::singleton::Singleton<DriverPlugin> {
 public:
-    DriverPlugin()
-     :soName_("libascend_hal.so"),
-      pluginHandle_(PluginHandle(soName_)),
-      loadFlag_(0)
-    {}
+    DriverPlugin() : soName_("libascend_hal.so"), pluginHandle_(PluginHandle(soName_)), loadFlag_(0) {}
 
     bool IsFuncExist(const std::string &funcName) const;
 
@@ -62,7 +58,8 @@ public:
     hdcError_t MsprofHalHdcSend(HDC_SESSION session, struct drvHdcMsg *pMsg, UINT64 flag, UINT32 timeout);
 
     // halHdcSessionConnectEx
-    hdcError_t MsprofHalHdcSessionConnectEx(int peer_node, int peer_devid, int peer_pid, HDC_CLIENT client, HDC_SESSION *pSession);
+    hdcError_t MsprofHalHdcSessionConnectEx(int peer_node, int peer_devid, int peer_pid,
+        HDC_CLIENT client, HDC_SESSION *pSession);
 
     // drvHdcSetSessionReference
     drvError_t MsprofDrvHdcSetSessionReference(HDC_SESSION session);
@@ -180,7 +177,7 @@ private:
     DrvHdcSessionCloseFunc drvHdcSessionClose_ = nullptr;
     DrvHdcGetCapacityFunc drvHdcGetCapacity_ = nullptr;
  
- private:
+private:
     void LoadDriverSo();
 };
 

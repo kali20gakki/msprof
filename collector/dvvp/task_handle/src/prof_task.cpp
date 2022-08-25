@@ -188,7 +188,7 @@ int ProfTask::GetHostAndDeviceInfo()
 std::string ProfTask::GetHostTime()
 {
     std::string hostTime;
-    mmTimeval tv;
+    MmTimeval tv;
 
     (void)memset_s(&tv, sizeof(tv), 0, sizeof(tv));
     int ret = MmGetTimeOfDay(&tv, nullptr);
@@ -197,7 +197,7 @@ std::string ProfTask::GetHostTime()
         MSPROF_INNER_ERROR("EK9999", "gettimeofday failed");
     } else {
         const int TIME_US = 1000000;
-        hostTime = std::to_string((unsigned long long)tv.tv_sec * TIME_US + (unsigned long long)tv.tv_usec);
+        hostTime = std::to_string((unsigned long long)tv.tvSec * TIME_US + (unsigned long long)tv.tvUsec);
     }
     return hostTime;
 }

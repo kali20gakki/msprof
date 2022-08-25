@@ -217,7 +217,7 @@ void RunningMode::StopRunningTasks() const
     std::vector<std::string> argsV;
     argsV.push_back(std::to_string(reinterpret_cast<int>(taskPid_)));
     int exitCode = INVALID_EXIT_CODE;
-    mmProcess killProces = MSVP_MMPROCESS;
+    MmProcess killProces = MSVP_MMPROCESS;
     int ret = analysis::dvvp::common::utils::Utils::ExecCmd(execCmdParams, argsV, envsV, exitCode, killProces);
     MSPROF_LOGI("[%s mode] Stop %s Process：%d, ret=%d", modeName_.c_str(), taskName_.c_str(),
         reinterpret_cast<int>(taskPid_), ret);
@@ -448,22 +448,14 @@ int RunningMode::CheckAnalysisEnv()
         MSPROF_LOGE("Check Analysis env failed, msprofbin has quited");
         return PROFILING_FAILED;
     }
-    if (params_->pythonPath.empty()) {
+    if (params_->pythonPath.empty() && Utils::PythonEnvReady()) {
         const std::string PYTHON_CMD{"python3"};
         params_->pythonPath = PYTHON_CMD;
     }
-    // check analysis scripts
-    std::string absolutePath = Utils::GetSelfPath();
-    std::string dirName = Utils::DirName(absolutePath);
-    std::string msprofToolsPath;
-    std::string binPath;
-    if (Utils::SplitPath(dirName, msprofToolsPath, binPath) != PROFILING_SUCCESS) {
-        CmdLog::instance()->CmdWarningLog("Get profiler path failed.");
+    if (!Utils::AnalysisEnvReady(analysisPath_) || analysisPath_.empty()) {
+        CmdLog::instance()->CmdWarningLog("Get msprof.py path failed.");
         return PROFILING_FAILED;
     }
-    Utils::EnsureEndsInSlash(msprofToolsPath);
-    const std::string ANALYSIS_SCRIPT_PATH{"profiler_tool/analysis/msprof/msprof.py"};
-    analysisPath_ = msprofToolsPath + ANALYSIS_SCRIPT_PATH;
     if (!Utils::IsFileExist(analysisPath_)) {
         CmdLog::instance()->CmdWarningLog("The msprof.py file is not found, so analysis is not supported.");
         return PROFILING_FAILED;
@@ -473,7 +465,7 @@ int RunningMode::CheckAnalysisEnv()
             Utils::BaseName(analysisPath_).c_str());
         return PROFILING_FAILED;
     }
-    MSPROF_LOGI("Found avaliable analysis script, script path: %s", Utils::BaseName(ANALYSIS_SCRIPT_PATH).c_str());
+    MSPROF_LOGI("Found avaliable analysis script, script path: %s", Utils::BaseName(analysisPath_).c_str());
 
     return PROFILING_SUCCESS;
 }

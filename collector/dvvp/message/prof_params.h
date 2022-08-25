@@ -174,7 +174,6 @@ struct ProfileParams : BaseInfo {
     // subset of MsprofArgsType
     std::set<int> usedParams;
 
-
     ProfileParams()
         : msprofBinPid(MSVP_MMPROCESS), is_cancel(FALSE), profiling_period(-1),
           stream_enabled("on"), profiling_options(""),

@@ -1,7 +1,7 @@
 /*
- * Copyright (c) Huawei Technologies Co., Ltd. 2012-2019. All rights reserved.
+ * Copyright (c) Huawei Technologies Co., Ltd. 2019-2019. All rights reserved.
  * Description: dump stream file
- * Author: yc
+ * Author: Huawei Technologies Co., Ltd.
  * Create: 2019-12-20
  */
 
@@ -16,7 +16,7 @@
 
 namespace Msprof {
 namespace Engine {
-class DataDumper : public ReceiveData, public Reporter, public analysis::dvvp::common::thread::Thread {
+class DataDumper : public ReceiveData, public ProfReporter, public analysis::dvvp::common::thread::Thread {
 public:
     /* *
      * @brief DataDumper: the construct function

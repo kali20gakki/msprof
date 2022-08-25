@@ -73,7 +73,10 @@ public:
     int Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg) override;
     int Process() override;
     int Uninit() override;
-    bool IsGlobalJobLevel() override { return true; }
+    bool IsGlobalJobLevel() override
+    {
+        return true;
+    }
 };
 
 class ProfHostMemJob : public ProfHostDataBase {
@@ -83,7 +86,10 @@ public:
     int Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg) override;
     int Process() override;
     int Uninit() override;
-    bool IsGlobalJobLevel() override { return true; }
+    bool IsGlobalJobLevel() override
+    {
+        return true;
+    }
 };
 
 class ProfHostNetworkJob : public ProfHostDataBase {
@@ -93,7 +99,10 @@ public:
     int Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg) override;
     int Process() override;
     int Uninit() override;
-    bool IsGlobalJobLevel() override { return true; }
+    bool IsGlobalJobLevel() override
+    {
+        return true;
+    }
 };
 
 class ProfHostService : public analysis::dvvp::common::thread::Thread {
@@ -133,7 +142,7 @@ private:
     std::string profHostOutDir_;
     std::string toolName_;
     HostTimerHandlerTag hostTimerTag_;
-    mmProcess hostProcess_;
+    MmProcess hostProcess_;
     uint32_t outDataNumber_{0};
     SHARED_PTR_ALIA<CollectionJobCfg> collectionJobCfg_;
     struct ProfHostWriteDoneInfo hostWriteDoneInfo_;

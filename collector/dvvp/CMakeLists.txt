@@ -53,6 +53,7 @@ target_include_directories(stub_msprofiler PRIVATE
     ${TOP_DIR}/collector/dvvp/depend/inc/metadef
     ${TOP_DIR}/collector/inc/external
     ${TOP_DIR}/collector/dvvp/depend/inc/profapi
+    ${TOP_DIR}/collector/dvvp/depend/inc/acl
 )
 
 target_compile_options(stub_msprofiler PRIVATE
@@ -122,7 +123,7 @@ set(msprofilerCpp
     msprof/platform/mini/data_dumper.cpp
     msprof/msproftx/src/msprof_tx_manager.cpp
     msprof/msproftx/src/msprof_tx_reporter.cpp
-    msprof/msproftx/src/prof_stamp_pool.cpp
+    msprof/msproftx/src/msprof_stamp_pool.cpp
     msprofiler/src/command_handle.cpp
     msprofiler/src/msprof_callback_impl.cpp
     task_handle/src/device.cpp
@@ -151,6 +152,7 @@ set(msprofilerInc
     ${TOP_DIR}/collector/dvvp/depend/inc/slog
     ${TOP_DIR}/collector/dvvp/depend/inc/metadef
     ${TOP_DIR}/collector/dvvp/depend/inc/profapi
+    ${TOP_DIR}/collector/dvvp/depend/inc/acl
     ${TOP_DIR}/collector/inc/toolchain
     ${TOP_DIR}/collector/inc/external
     ${TOP_DIR}/collector/inc/external/acl
@@ -233,6 +235,10 @@ target_link_options(msprofiler_share PRIVATE
     -Wl,-Bsymbolic
     -Wl,--exclude-libs=ALL
     $<$<NOT:$<STREQUAL:${CMAKE_BUILD_TYPE},Debug>>:-s>
+)
+
+target_link_directories(msprofiler_share PRIVATE
+    ${SECUREC_LIB_DIR}
 )
 
 target_link_libraries(msprofiler_share PRIVATE

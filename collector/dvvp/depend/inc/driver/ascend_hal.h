@@ -31,7 +31,6 @@
 extern "C" {
 #endif
 
-/*lint -e116 -e17*/
 #ifndef int8_t
 typedef signed char int8_t;
 #endif
@@ -267,7 +266,7 @@ struct halQueryDevpidInfo {
  */
 struct drvDevInfo {
 #ifndef __linux
-    mmProcess fd;
+    MmProcess fd;
 #else
     int fd;
 #endif
@@ -410,8 +409,7 @@ typedef int (*drvDeviceStartupNotify)(uint32_t num, uint32_t *devId);
 #define BUFF_GRP_NAME_LEN 32
 #define BUFF_PUB_POOL_CFG_MAX_NUM 128
 #define EVENT_MAX_MSG_LEN  128  /* Maximum message length */
-typedef enum group_id_type
-{
+typedef enum group_id_type {
     GROUP_ID_CREATE,
     GROUP_ID_ADD
 } GROUP_ID_TYPE;
@@ -519,7 +517,7 @@ typedef enum tagDrvError {
 
     DRV_ERROR_NOT_SUPPORT = 0xfffe,
     DRV_ERROR_RESERVED,
-} drvError_t;//lint !e116 !e17
+} drvError_t;
 
 typedef struct {
     unsigned long long maxMemSize; /* max buf size in grp, in KB, if = 0 means no limit */
@@ -2743,8 +2741,8 @@ struct buff_cfg {
  * @ingroup driver
  * @brief Buffer Mbuf info.
  */
-typedef struct mempool_t* poolHandle;//lint !e565
-typedef struct Mbuf Mbuf;//lint !e565
+typedef struct mempool_t* poolHandle;
+typedef struct Mbuf Mbuf;
 typedef struct mp_attr {
     int devid;
     int mGroupId;
@@ -3977,7 +3975,6 @@ typedef struct {
 typedef union {
     QueueSetWorkMode queSetWorkMode;
 } QueueSetInput;
-/*lint +e116 +e17*/
 
 /**
 * @ingroup driver

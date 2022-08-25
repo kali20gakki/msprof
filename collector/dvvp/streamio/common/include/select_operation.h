@@ -20,18 +20,18 @@ namespace analysis {
 namespace dvvp {
 namespace streamio {
 namespace common {
-using mmSockHandle = Collector::Dvvp::Mmpa::mmSockHandle;
+using MmSockHandle = Collector::Dvvp::Mmpa::MmSockHandle;
 class SelectOperation {
 public:
     SelectOperation();
     ~SelectOperation();
-    void SelectAdd(mmSockHandle fd);
-    void SelectDel(mmSockHandle fd);
-    bool SelectIsSet(mmSockHandle fd);
+    void SelectAdd(MmSockHandle fd);
+    void SelectDel(MmSockHandle fd);
+    bool SelectIsSet(MmSockHandle fd);
     void SelectClear();
 
 private:
-    mmSockHandle maxFd_;
+    MmSockHandle maxFd_;
     fd_set readfd_;
 
     SelectOperation &operator=(const SelectOperation &op);

@@ -25,7 +25,7 @@ public:
 
     int Init();
     void CloseConn();
-    bool IsInitialized();
+    bool IsInitialized() const;
     int SendMsgAndRecvResponse(const std::string &msg, TLV_REQ_2PTR packet) override;
     int HandlePacket(TLV_REQ_PTR packet, analysis::dvvp::message::StatusInfo &status) override;
 
