@@ -5,10 +5,13 @@ function: this script used to operate ts track
 Copyright Huawei Technologies Co., Ltd. 2021. All rights reserved.
 """
 from abc import ABC
+from itertools import chain
 
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.msprof_iteration import MsprofIteration
+from common_func.info_conf_reader import InfoConfReader
+from common_func.ms_constant.number_constant import NumberConstant
 from msmodel.interface.base_model import BaseModel
 
 
@@ -40,15 +43,25 @@ class TsTrackModel(BaseModel, ABC):
         """
         get ai cpu data
         """
-        iter_time_range = MsprofIteration(self.result_dir).get_iteration_time(index_id, model_id)
+        iter_time_range = list(chain.from_iterable(
+            MsprofIteration(self.result_dir).get_iteration_time(index_id, model_id)))
         if not iter_time_range:
             sql = "select stream_id, task_id, timestamp, task_state from {0} where task_type={1} " \
                   "order by timestamp".format(DBNameConstant.TABLE_TASK_TYPE, self.TS_AI_CPU_TYPE)
             ai_cpu_with_state = DBManager.fetch_all_data(self.cur, sql)
         else:
-            sql = "select stream_id, task_id, timestamp, task_state from {0} where task_type={1} and " \
-                  "timestamp>=? and timestamp<=? order by timestamp ".format(
+            sql = "select stream_id, task_id, timestamp, " \
+                  "task_state from {0} where task_type={1} order by timestamp ".format(
                 DBNameConstant.TABLE_TASK_TYPE,
                 self.TS_AI_CPU_TYPE)
-            ai_cpu_with_state = DBManager.fetch_all_data(self.cur, sql, iter_time_range[0])
+            ai_cpu_with_state = DBManager.fetch_all_data(self.cur, sql)
+            min_timestamp = min(iter_time_range)
+            max_timestamp = max(iter_time_range)
+
+            # data index 2 is timestamp
+            ai_cpu_with_state = list(filter(lambda data: min_timestamp <=
+                                                         InfoConfReader().time_from_syscnt(
+                                                         data[2], NumberConstant.MICRO_SECOND) <=
+                                                         max_timestamp, ai_cpu_with_state))
+
         return ai_cpu_with_state
