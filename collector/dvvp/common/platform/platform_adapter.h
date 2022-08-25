@@ -65,6 +65,20 @@ enum CollectorTypesForPlatform {
     PLATFORM_COLLECTOR_TYPES_MAX
 };
 
+struct CommonParams {
+    std::string appPath;
+    std::string appEnv;
+    std::string msproftx;
+    std::string pythonPath;
+    std::string parseSwitch;
+    std::string querySwitch;
+    std::string exportSwitch;
+    std::string exportSummaryFormat;
+    int exportIterationId;
+    int exportModelId;
+    int hostSysPid;
+};
+
 class PlatformAdapter : public analysis::dvvp::common::singleton::Singleton<PlatformAdapter> {
 public:
     PlatformAdapter();
@@ -73,7 +87,7 @@ public:
     virtual int Init(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params,
         Analysis::Dvvp::Common::Config::PlatformType platformType);
     virtual int Uninit();
-    virtual void SetParamsForGlobal();
+    virtual void SetParamsForGlobal(struct CommonParams &comParams);
     virtual void SetParamsForTaskTime();
     virtual void SetParamsForTaskTrace();
     virtual void SetParamsForTrainingTrace();
