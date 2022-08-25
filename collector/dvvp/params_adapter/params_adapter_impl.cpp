@@ -245,6 +245,7 @@ int AclJsonParamAdapter::Init()
     paramContainer_.fill("");
     int ret = CheckListInit();
     if (ret != PROFILING_SUCCESS) {
+        MSPROF_LOGE("[GetParamFromInputCfg]acl json Init failed.");
         return PROFILING_FAILED;
     }
     std::vector<InputCfg>({
@@ -269,6 +270,7 @@ int AclJsonParamAdapter::Init()
         {INPUT_CFG_COM_BIU, "biu"},
         {INPUT_CFG_COM_BIU_FREQ, "biu_freq"},
     }).swap(aclJsonPrintMap_);
+    return PROFILING_SUCCESS;
 }
 
 int AclJsonParamAdapter::ParamsCheckAclJson(std::vector<std::pair<InputCfg, std::string>> &cfgList) const
@@ -356,19 +358,31 @@ int AclJsonParamAdapter::SetAclJsonContainerDefaultValue()
 int AclJsonParamAdapter::GetParamFromInputCfg(SHARED_PTR_ALIA<ProfAclConfig> aclCfg,
     SHARED_PTR_ALIA<ProfileParams> params)
 {
+    if (!params) {
+        MSPROF_LOGE("memory for params is empty.");
+        return PROFILING_FAILED;
+    }
+    if (!aclCfg) {
+        MSPROF_LOGE("memory for acljson config is empty.");
+        return PROFILING_FAILED;
+    }
     params_ = params;
     int ret = Init();
     if (ret != PROFILING_SUCCESS) {
+        MSPROF_LOGE("[GetParamFromInputCfg]acljson Init failed.");
         return PROFILING_FAILED;
     }
     
-    GenAclJsonContainer(aclCfg);
+    ret = GenAclJsonContainer(aclCfg);
+    if (ret != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
 
     std::vector<std::pair<InputCfg, std::string>> errCfgList;
     ret = ParamsCheckAclJson(errCfgList);
     if (ret == PROFILING_FAILED && !errCfgList.empty()) {
         for (auto errCfg : errCfgList) {
-            MSPROF_LOGW("Argument --%s:%s set invalid.",
+            MSPROF_LOGE("Argument --%s:%s set invalid.",
                 aclJsonPrintMap_[errCfg.first].c_str(), paramContainer_[errCfg.first].c_str());
         }
         return PROFILING_FAILED;
@@ -378,7 +392,7 @@ int AclJsonParamAdapter::GetParamFromInputCfg(SHARED_PTR_ALIA<ProfAclConfig> acl
     ret = ComCfgCheck(ENABLE_ACL_JSON, paramContainer_, setConfig_, errCfgList);
     if (ret != PROFILING_SUCCESS) {
         for (auto errCfg : errCfgList) {
-            MSPROF_LOGW("Argument --%s:%s set invalid.",
+            MSPROF_LOGE("Argument --%s:%s set invalid.",
                 aclJsonPrintMap_[errCfg.first].c_str(), paramContainer_[errCfg.first].c_str());
         }
         return PROFILING_FAILED;
@@ -393,7 +407,6 @@ int AclJsonParamAdapter::GetParamFromInputCfg(SHARED_PTR_ALIA<ProfAclConfig> acl
     if (ret != PROFILING_SUCCESS) {
         return PROFILING_FAILED;
     }
-    Print(paramContainer_);
     return PROFILING_SUCCESS;
 }
 
@@ -504,9 +517,18 @@ void GeOptParamAdapter::SetGeOptionsContainerDefaultValue()
 
 int GeOptParamAdapter::GetParamFromInputCfg(SHARED_PTR_ALIA<ProfGeOptionsConfig> geCfg, SHARED_PTR_ALIA<ProfileParams> params)
 {
+    if (!params) {
+        MSPROF_LOGE("memory for params is empty.");
+        return PROFILING_FAILED;
+    }
+    if (!geCfg) {
+        MSPROF_LOGE("memory for ge options config is empty.");
+        return PROFILING_FAILED;
+    }
     params_ = params;
     int ret = Init();
     if (ret != PROFILING_SUCCESS) {
+        MSPROF_LOGE("[GetParamFromInputCfg]ge options Init failed.");
         return PROFILING_FAILED;
     }
 
@@ -516,7 +538,7 @@ int GeOptParamAdapter::GetParamFromInputCfg(SHARED_PTR_ALIA<ProfGeOptionsConfig>
     ret = ParamsCheckGeOpt(errCfgList);
     if (ret == PROFILING_FAILED && !errCfgList.empty()) {
         for (auto errCfg : errCfgList) {
-            MSPROF_LOGW("Argument --%s:%s set invalid.",
+            MSPROF_LOGE("Argument --%s:%s set invalid.",
                 geOptionsPrintMap_[errCfg.first].c_str(), paramContainer_[errCfg.first].c_str());
         }
         return PROFILING_FAILED;
@@ -526,7 +548,7 @@ int GeOptParamAdapter::GetParamFromInputCfg(SHARED_PTR_ALIA<ProfGeOptionsConfig>
     ret = ComCfgCheck(ENABLE_GE_OPTION, paramContainer_, setConfig_, errCfgList);
     if (ret != PROFILING_SUCCESS) {
         for (auto errCfg : errCfgList) {
-            MSPROF_LOGW("Argument --%s:%s set invalid.",
+            MSPROF_LOGE("Argument --%s:%s set invalid.",
                 geOptionsPrintMap_[errCfg.first].c_str(), paramContainer_[errCfg.first].c_str());
         }
         return PROFILING_FAILED;
