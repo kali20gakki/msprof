@@ -79,6 +79,15 @@ struct CommonParams {
     int hostSysPid;
 };
 
+const std::map<std::string, std::string> AIC_AIV_METRICS_LIST = {
+    {"ArithmeticUtilization", "0x49,0x4a,0x4b,0x4c,0x4d,0x4e,0x4f"},
+    {"PipeUtilization", "0x8,0xa,0x9,0xb,0xc,0xd,0x54,0x55"},
+    {"Memory", "0x15,0x16,0x31,0x32,0xf,0x10,0x12,0x13"},
+    {"MemoryL0", "0x1b,0x1c,0x21,0x22,0x27,0x28,0x29,0x2a"},
+    {"ResourceConflictRatio", "0x64,0x65,0x66"},
+    {"MemoryUB", "0x10,0x13,0x37,0x38,0x3d,0x3e,0x43,0x44"}
+};
+
 class PlatformAdapter : public analysis::dvvp::common::singleton::Singleton<PlatformAdapter> {
 public:
     PlatformAdapter();
@@ -97,8 +106,8 @@ public:
     virtual void SetParamsForAICPU();
     virtual void SetParamsForHCCL();
     virtual void SetParamsForL2Cache();
-    virtual void SetParamsForAICore(const std::string &mode, const std::string &metrics, int samplingInterval);
-    virtual void SetParamsForAIVector(const std::string &mode, const std::string &metrics, int samplingInterval);
+    virtual void SetParamsForAicMetrics(const std::string &mode, const std::string &metrics, int samplingInterval);
+    virtual void SetParamsForAivMetrics(const std::string &mode, const std::string &metrics, int samplingInterval);
     virtual void SetParamsForDeviceSysCpuMemUsage(int samplingInterval);
     virtual void SetParamsForDeviceAllPidCpuMemUsage(int samplingInterval);
     virtual void SetParamsForDeviceAiCpuCtrlCpuTSCpuHotFuncPMU(int samplingInterval);
@@ -124,6 +133,9 @@ protected:
     std::string l2CacheEvents_;
     Analysis::Dvvp::Common::Config::PlatformType platformType_;
     SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params_;
+
+private:
+    int GetMetricsEvents(const std::string &metricsType, std::string &events) const;
 };
 }
 }

@@ -25,10 +25,7 @@ const int FALSE = 0;
 const int TRUE = 1;
 const char * const PROFILING_MODE_SAMPLE_BASED = "sample-based";
 const char * const PROFILING_MODE_TASK_BASED = "task-based";
-const char * const PROFILING_ANALYSIS_TARGET = "launch application";
 const char * const PROFILING_MODE_DEF = "def_mode";
-const char * const PROFILING_MODE_SYSTEM_WIDE = "system-wide";
-const std::string PROFILING_STATE_FILE = "job_state.ini";
 
 // Attention:
 // intervals of ProfileParams maybe large,
