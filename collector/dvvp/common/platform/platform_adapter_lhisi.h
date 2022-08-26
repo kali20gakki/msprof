@@ -15,7 +15,7 @@
 namespace Collector {
 namespace Dvvp {
 namespace Common {
-namespace PlatformAdapterLhisi {
+namespace PlatformAdapter {
 class PlatformAdapterLhisi : public Collector::Dvvp::Common::PlatformAdapter::PlatformAdapterInterface {
 public:
     PlatformAdapterLhisi();

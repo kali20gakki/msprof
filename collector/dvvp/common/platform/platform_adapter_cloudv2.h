@@ -15,7 +15,7 @@
 namespace Collector {
 namespace Dvvp {
 namespace Common {
-namespace PlatformAdapterCloudV2 {
+namespace PlatformAdapter {
 class PlatformAdapterCloudV2 : public Collector::Dvvp::Common::PlatformAdapter::PlatformAdapterInterface {
 public:
     PlatformAdapterCloudV2();

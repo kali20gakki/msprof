@@ -47,7 +47,6 @@ struct ProfileParams : BaseInfo {
     std::string app;
     std::string app_dir;
     std::string app_parameters;
-    std::string app_location;
     std::string app_env;
     // ai core
     std::string ai_core_profiling;
@@ -245,7 +244,6 @@ struct ProfileParams : BaseInfo {
         SET_VALUE(object, ts_cpu_profiling_events);
         SET_VALUE(object, app_dir);
         SET_VALUE(object, app_parameters);
-        SET_VALUE(object, app_location);
         SET_VALUE(object, app_env);
         // ai core
         SET_VALUE(object, ai_core_profiling);
@@ -368,7 +366,6 @@ struct ProfileParams : BaseInfo {
         FROM_STRING_VALUE(object, ts_cpu_profiling_events);
         FROM_STRING_VALUE(object, app_dir);
         FROM_STRING_VALUE(object, app_parameters);
-        FROM_STRING_VALUE(object, app_location);
         FROM_STRING_VALUE(object, app_env);
         // ai core
         FROM_STRING_VALUE(object, ai_core_profiling);
