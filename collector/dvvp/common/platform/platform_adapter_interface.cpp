@@ -24,7 +24,7 @@ using namespace Collector::Dvvp::Common::PlatformAdapter;
 using namespace analysis::dvvp::common::config;
 
 PlatformAdapterInterface::PlatformAdapterInterface()
-    : platformType_(Analysis::Dvvp::Common::Config::PlatformType::END_TYPE), params_(nullptr)
+    : params_(nullptr)
 {
 }
 
@@ -32,10 +32,8 @@ PlatformAdapterInterface::~PlatformAdapterInterface()
 {
 }
 
-int PlatformAdapterInterface::Init(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params,
-    Analysis::Dvvp::Common::Config::PlatformType platformType)
+int PlatformAdapterInterface::Init(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params)
 {
-    platformType_ = platformType;
     params_ = params;
     getLlcEvents_ = {{"read", "read"}, {"write", "write"}};
     return PROFILING_SUCCESS;

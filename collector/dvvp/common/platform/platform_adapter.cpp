@@ -32,7 +32,6 @@ using namespace analysis::dvvp::common::config;
 using namespace Analysis::Dvvp::Common::Config;
 
 PlatformAdapter::PlatformAdapter()
-    : platformType_(PlatformType::END_TYPE), params_(nullptr)
 {
 }
 
@@ -58,7 +57,7 @@ SHARED_PTR_ALIA<PlatformAdapterInterface> PlatformAdapter::Init(SHARED_PTR_ALIA<
         MSVP_MAKE_SHARED0_RET(platformAdapter, PlatformAdapterCloudV2, nullptr);
     }
     if (platformAdapter != nullptr) {
-        int ret = platformAdapter->Init(params, platformType);
+        int ret = platformAdapter->Init(params);
         if (ret != PROFILING_SUCCESS) {
             platformAdapter = nullptr;
         }

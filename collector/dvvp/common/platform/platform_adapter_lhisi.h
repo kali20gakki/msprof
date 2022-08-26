@@ -21,8 +21,7 @@ public:
     PlatformAdapterLhisi();
     ~PlatformAdapterLhisi();
 
-    int Init(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params,
-        Analysis::Dvvp::Common::Config::PlatformType platformType) override;
+    int Init(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params) override;
     int Uninit();
 };
 }
