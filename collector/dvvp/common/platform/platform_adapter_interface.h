@@ -95,8 +95,7 @@ public:
     PlatformAdapterInterface();
     virtual ~PlatformAdapterInterface();
 
-    virtual int Init(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params,
-        Analysis::Dvvp::Common::Config::PlatformType platformType);
+    virtual int Init(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params);
     virtual int Uninit();
     virtual void SetParamsForGlobal(struct CommonParams &comParams);
     virtual void SetParamsForTaskTime();
@@ -133,7 +132,6 @@ protected:
     std::string aicRunningFreq_;   // to calculate aic total time
     std::string sysCountFreq_;    // to calculate op start/end time
     std::string l2CacheEvents_;
-    Analysis::Dvvp::Common::Config::PlatformType platformType_;
     SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params_;
 
 private:
