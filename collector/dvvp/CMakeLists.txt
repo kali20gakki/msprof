@@ -130,12 +130,12 @@ set(msprofilerCpp
     msprof/engine/src/prof_api_common.cpp
     msprof/engine/src/prof_acl_mgr.cpp
     msprof/engine/src/uploader_dumper.cpp
+    msprof/engine/src/command_handle.cpp
+    msprof/engine/src/msprof_callback_impl.cpp
     msprof/platform/mini/data_dumper.cpp
     msprof/msproftx/src/msprof_tx_manager.cpp
     msprof/msproftx/src/msprof_tx_reporter.cpp
     msprof/msproftx/src/msprof_stamp_pool.cpp
-    msprofiler/src/command_handle.cpp
-    msprofiler/src/msprof_callback_impl.cpp
     task_handle/src/device.cpp
     task_handle/src/info_json.cpp
     task_handle/src/prof_manager.cpp
@@ -187,14 +187,12 @@ set(msprofilerInc
     common/validation
     common/statistics
     common/platform
-    msprofiler/inc
     msprof/common/include
     message
     transport
     task_handle/include
     driver/inc
     job_wrapper/include
-    msprofiler/inc
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_BINARY_DIR}/proto/profiler_proto/
 )
