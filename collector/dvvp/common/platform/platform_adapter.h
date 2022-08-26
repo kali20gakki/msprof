@@ -25,10 +25,6 @@ public:
     SHARED_PTR_ALIA<PlatformAdapterInterface> Init(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params,
         Analysis::Dvvp::Common::Config::PlatformType platformType);
     int Uninit();
-
-private:
-    Analysis::Dvvp::Common::Config::PlatformType platformType_;
-    SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params_;
 };
 }
 }

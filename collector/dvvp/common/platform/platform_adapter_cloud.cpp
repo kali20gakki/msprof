@@ -25,10 +25,8 @@ PlatformAdapterCloud::~PlatformAdapterCloud()
 {
 }
 
-int PlatformAdapterCloud::Init(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params,
-    Analysis::Dvvp::Common::Config::PlatformType platformType)
+int PlatformAdapterCloud::Init(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params)
 {
-    platformType_ = platformType;
     params_ = params;
     supportSwitch_ = {
         PLATFORM_TASK_ASCENDCL, PLATFORM_TASK_GRAPH_ENGINE, PLATFORM_TASK_RUNTIME, PLATFORM_TASK_AICPU,
