@@ -136,8 +136,8 @@ public:
     int CheckHostSysUsageValid(const std::string &HostSysUsage) const;
     //======msprof======
     int CheckAppParamValid(const std::string &appParam) const;
-    int CheckAppScrValid(const std::string &appScript) const;
-    int MsprofCheckAppValid(const std::string &appParam) const;
+    int CheckAppScriptValid(const std::vector<std::string> &appParams) const;
+    int MsprofCheckAppValid(std::string &appParam) const;
     int MsprofCheckEnvValid(const std::string &envParam) const;
     int MsprofCheckAiModeValid(const std::string &aiModeParam, const InputCfg aiModeTypeOpt) const;
     int MsprofCheckSysDeviceValid(const std::string &devListParam) const;

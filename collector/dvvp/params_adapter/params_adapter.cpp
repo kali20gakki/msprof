@@ -372,51 +372,74 @@ int ParamsAdapter::CheckHostSysUsageValid(const std::string &HostSysUsage) const
     return PROFILING_SUCCESS;
 }
 
-int ParamsAdapter::MsprofCheckAppValid(const std::string &appParam) const
+int ParamsAdapter::MsprofCheckAppValid(std::string &appParam) const
 {
     if (appParam.empty()) {
         MSPROF_LOGE("Argument --application: expected one argument.");
         return PROFILING_FAILED;
     }
-    std::string remainingAppParams;
-    size_t index = appParam.find_first_of(" ");
-    if (index != std::string::npos) {
-        remainingAppParams = appParam.substr(index + 1);
-    }
-    std::string cmdParam = appParam.substr(0, index);
+    std::string resultAppParam;
+    std::vector<std::string> AppParamsList = Utils::Split(appParam, false, "", " ");
+    std::string cmdParam = AppParamsList[0];
     if (!Utils::IsAppName(cmdParam)) {
         if (cmdParam.find("/") != std::string::npos) {
-            std::string absolutePathCmd = Utils::RelativePathToAbsolutePath(cmdParam);
-            if (Utils::CanonicalizePath(absolutePathCmd).empty()) {
-                MSPROF_LOGE("App path(%s) does not exist or permission denied.", absolutePathCmd.c_str());
+            std::string absolutePathCmdParam = Utils::CanonicalizePath(cmdParam);
+            if (absolutePathCmdParam.empty()) {
+                MSPROF_LOGE("App path(%s) does not exist or permission denied.", absolutePathCmdParam.c_str());
                 return PROFILING_FAILED;
             }
-            if (MmAccess2(absolutePathCmd, M_X_OK) != PROFILING_SUCCESS) {
-                MSPROF_LOGE("This app(%s) has no executable permission.", absolutePathCmd.c_str());
+            if (MmAccess2(absolutePathCmdParam, M_X_OK) != PROFILING_SUCCESS) {
+                MSPROF_LOGE("This app(%s) has no executable permission.", absolutePathCmdParam.c_str());
                 return PROFILING_FAILED;
             }
+            resultAppParam = absolutePathCmdParam + " ";
+        } else {
+            resultAppParam = cmdParam + " ";
         }
-        if (CheckAppScrValid(remainingAppParams) != PROFILING_SUCCESS) {
+        if (CheckAppScriptValid(AppParamsList) != PROFILING_SUCCESS) {
             return PROFILING_FAILED;
         }
+        for (size_t i = 1; i < AppParamsList.size(); i++) {
+            std::string tmpStr = Utils::CanonicalizePath(AppParamsList[i]);
+            if (!tmpStr.empty()) {
+                resultAppParam += tmpStr;
+            } else {
+                resultAppParam += AppParamsList[i];
+            }
+            if (i < (AppParamsList.size() - 1)) {
+                resultAppParam += " ";
+            }
+        }
+        appParam = resultAppParam;
         return PROFILING_SUCCESS;
     }
     std::string absolutePathApp = Utils::RelativePathToAbsolutePath(cmdParam);
     if (CheckAppParamValid(absolutePathApp) != PROFILING_SUCCESS) {
         return PROFILING_FAILED;
     }
+    for (size_t i = 0; i < AppParamsList.size(); i++) {
+        std::string tmpStr = Utils::CanonicalizePath(AppParamsList[i]);
+        if (!tmpStr.empty()) {
+            resultAppParam += tmpStr;
+        } else {
+            resultAppParam += AppParamsList[i];
+        }
+        if (i < (AppParamsList.size() - 1)) {
+            resultAppParam += " ";
+        }
+    }
+    appParam = resultAppParam;
     return PROFILING_SUCCESS; 
 }
 
-int ParamsAdapter::CheckAppScrValid(const std::string &appScript) const
+int ParamsAdapter::CheckAppScriptValid(const std::vector<std::string> &appParams) const
 {
-    if (appScript.empty()) {
+    if (appParams.size() < 2) {
         MSPROF_LOGE("No input script to run.");
         return PROFILING_FAILED;
     }
-    size_t index = appScript.find_first_of(" ");
-    std::string inputScriptParam = appScript.substr(0, index);
-    std::string scriptParam = Utils::CanonicalizePath(inputScriptParam);
+    std::string appScript = appParams[1];
+    std::string scriptParam = Utils::CanonicalizePath(appScript);
     if (scriptParam.empty()) {
         MSPROF_LOGE("Invalid input script.");
         return PROFILING_FAILED;

@@ -44,7 +44,7 @@ int MsprofParamAdapter::Init()
     return PROFILING_SUCCESS;
 }
 
-int MsprofParamAdapter::ParamsCheckMsprof(std::vector<std::pair<InputCfg, std::string>> &cfgList) const
+int MsprofParamAdapter::ParamsCheckMsprof(std::vector<std::pair<InputCfg, std::string>> &cfgList)
 {
     int ret = PROFILING_SUCCESS;
     bool flag = true;
@@ -55,7 +55,7 @@ int MsprofParamAdapter::ParamsCheckMsprof(std::vector<std::pair<InputCfg, std::s
         std::string cfgValue = paramContainer_[inputCfg];
         switch (inputCfg) {
             case INPUT_CFG_MSPROF_APPLICATION:
-                ret = MsprofCheckAppValid(cfgValue);
+                ret = MsprofCheckAppValid(paramContainer_[inputCfg]);
                 break;
             case INPUT_CFG_MSPROF_ENVIRONMENT:
                 ret = MsprofCheckEnvValid(cfgValue);
