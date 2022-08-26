@@ -13,7 +13,7 @@
 namespace Collector {
 namespace Dvvp {
 namespace Common {
-namespace PlatformAdapterMini {
+namespace PlatformAdapter {
 using namespace analysis::dvvp::common::error;
 using namespace Collector::Dvvp::Common::PlatformAdapter;
 
