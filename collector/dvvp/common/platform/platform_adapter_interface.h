@@ -12,7 +12,6 @@
 
 #include <map>
 #include <vector>
-#include "singleton/singleton.h"
 #include "utils/utils.h"
 #include "message/prof_params.h"
 #include "config/config_manager.h"
@@ -90,7 +89,7 @@ const std::map<std::string, std::string> AIC_AIV_METRICS_LIST = {
     {"MemoryUB", "0x10,0x13,0x37,0x38,0x3d,0x3e,0x43,0x44"}
 };
 
-class PlatformAdapterInterface : public analysis::dvvp::common::singleton::Singleton<PlatformAdapterInterface> {
+class PlatformAdapterInterface {
 public:
     PlatformAdapterInterface();
     virtual ~PlatformAdapterInterface();
