@@ -12,6 +12,7 @@
 #include "mmpa_api.h"
 #include "platform/platform.h"
 #include "platform/platform_adapter.h"
+#include "ai_drv_dev_api.h"
 
 namespace Collector {
 namespace Dvvp {
@@ -25,7 +26,7 @@ using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::common::validation;
 using namespace analysis::dvvp::common::utils;
 using namespace Collector::Dvvp::Mmpa;
-
+using namespace analysis::dvvp::driver;
 int ParamsAdapter::CheckListInit()
 {
     // get platform info
@@ -109,6 +110,33 @@ PlatformType ParamsAdapter::GetPlatform() const
     return platformType_;
 }
 
+void ParamsAdapter::SpliteAppPath(const std::string &appParams, std::string &cmdPath, std::string &appParameters, std::string &appDir, std::string &app)
+{
+    if (appParams.empty()) {
+        return;
+    }
+    std::string tmpAppParamers;
+    size_t index = appParams.find_first_of(" ");
+    if (index != std::string::npos) {
+        tmpAppParamers = appParams.substr(index + 1);
+    }
+    // cmd path
+    cmdPath = appParams.substr(0, index);
+    cmdPath = Utils::RelativePathToAbsolutePath(cmdPath);
+    if (!Utils::IsAppName(cmdPath)) {
+        // bash xxx.sh args...
+        index = tmpAppParamers.find_first_of(" ");
+        if (index != std::string::npos) {
+            appParameters = tmpAppParamers.substr(index + 1);
+            Utils::SplitPath(tmpAppParamers.substr(0, index), appDir, app);
+        }
+    } else {
+        // ./main args...
+        appParameters = tmpAppParamers;
+        Utils::SplitPath(cmdPath, appDir, app);
+    }
+}
+
 int ParamsAdapter::TransToParam(std::array<std::string, INPUT_CFG_MAX> paramContainer, SHARED_PTR_ALIA<ProfileParams> params)
 {
     if (params == nullptr) {
@@ -120,7 +148,7 @@ int ParamsAdapter::TransToParam(std::array<std::string, INPUT_CFG_MAX> paramCont
     struct CommonParams commonParams;
     commonParams.output = paramContainer[INPUT_CFG_COM_OUTPUT];
     commonParams.storageLimit = paramContainer[INPUT_CFG_COM_STORAGE_LIMIT];
-    commonParams.appPath = paramContainer[INPUT_CFG_MSPROF_APPLICATION];
+    SpliteAppPath(paramContainer[INPUT_CFG_MSPROF_APPLICATION], commonParams.appCmdPath, commonParams.appParameters, commonParams.appDir, commonParams.app);
     commonParams.appEnv = paramContainer[INPUT_CFG_MSPROF_ENVIRONMENT];
     commonParams.msproftx = paramContainer[INPUT_CFG_COM_MSPROFTX];
     commonParams.hostSysPid = (paramContainer[INPUT_CFG_HOST_SYS_PID].empty()) ? -1 : std::stoi(paramContainer[INPUT_CFG_HOST_SYS_PID]);
@@ -131,8 +159,9 @@ int ParamsAdapter::TransToParam(std::array<std::string, INPUT_CFG_MAX> paramCont
     commonParams.exportSummaryFormat = paramContainer[INPUT_CFG_SUMMARY_FORMAT];
     commonParams.exportIterationId = paramContainer[INPUT_CFG_ITERATION_ID];
     commonParams.exportModelId = paramContainer[INPUT_CFG_MODEL_ID];
+    commonParams.device = (paramContainer[INPUT_CFG_COM_SYS_DEVICES].compare("all") == 0) ? DrvGetDevIdsStr() : paramContainer[INPUT_CFG_COM_SYS_DEVICES];
+    commonParams.profilingPeriod = (paramContainer[INPUT_CFG_COM_SYS_PERIOD].empty()) ? -1 : std::stoi(paramContainer[INPUT_CFG_COM_SYS_PERIOD]);
     adapter->SetParamsForGlobal(commonParams);
-
     // =============================== Task =================================
     if (paramContainer[INPUT_CFG_COM_TASK_TIME].compare(MSVP_PROF_ON) == 0) {
         adapter->SetParamsForTaskTime(); // Task Time
@@ -228,7 +257,6 @@ int ParamsAdapter::TransToParam(std::array<std::string, INPUT_CFG_MAX> paramCont
     }
 
     // ============================== Host-Sys============================
-    // 需要按照"|"切割字符串 paramContainer[INPUT_HOST_SYS_USAGE]，之后对每一个元素进行循环判断
     std::vector<std::string> hostSysList = Utils::Split(paramContainer[INPUT_HOST_SYS_USAGE], false, "", ",");
     for (auto entry : hostSysList) {
         if (entry.compare(HOST_SYS_CPU) == 0) {
@@ -236,9 +264,6 @@ int ParamsAdapter::TransToParam(std::array<std::string, INPUT_CFG_MAX> paramCont
         } else if (entry.compare(HOST_SYS_MEM) == 0) {
             adapter->SetParamsForHostSysAllPidMemUsage(); // Host-Sys Mem
         }
-    }
-    if (params->result_dir.empty() && !params->app_dir.empty()) {
-        params->result_dir = params->app_dir;
     }
     return PROFILING_SUCCESS;
 }

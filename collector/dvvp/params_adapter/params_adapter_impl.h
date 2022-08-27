@@ -25,6 +25,13 @@ using Analysis::Dvvp::Msprof::MsprofCmdInfo;
 using analysis::dvvp::proto::ProfAclConfig;
 using analysis::dvvp::proto::ProfGeOptionsConfig;
 
+enum MsprofMode {
+    MSPROF_MODE_APP,
+    MSPROF_MODE_SYSTEM,
+    MSPROF_MODE_PARSE,
+    MSPROF_MODE_QUERY,
+    MSPROF_MODE_EXPORT
+};
 
 class MsprofParamAdapter : public ParamsAdapter {
 public:
@@ -37,7 +44,13 @@ private:
     int Init();
     void CreateCfgMap();
     int ParamsCheckMsprof(std::vector<std::pair<InputCfg, std::string>> &cfgList);
-    void SetDefaultParams();
+    void SetDefaultParamsApp();
+    void SetDefaultParamsSystem();
+    void SetDefaultParamsParse();
+    void SetDefaultParamsQuery();
+    void SetDefaultParamsExport();
+    int GetMsprofMode();
+    std::string GetAppDir(const std::string appPath);
 
 private:
     SHARED_PTR_ALIA<ProfileParams> params_;
@@ -46,6 +59,7 @@ private:
     std::unordered_map<int, MsprofArgsType> reCfgMap_;
     std::vector<InputCfg> msprofConfig_;
     std::set<InputCfg>setConfig_;
+    MsprofMode msprofMode_;
 };
 
 class AclJsonParamAdapter : public ParamsAdapter {

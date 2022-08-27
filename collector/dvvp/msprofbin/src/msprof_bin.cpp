@@ -63,9 +63,6 @@ int main(int argc, const char **argv, const char **envp)
     if (params == nullptr) {
         return PROFILING_FAILED;
     }
-    // Debug
-    params->PrintAllFields();
-    return PROFILING_FAILED;
     if (parser.HasHelpParamOnly()) {
         return PROFILING_SUCCESS;
     }
