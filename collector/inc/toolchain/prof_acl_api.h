@@ -18,7 +18,7 @@
 #define PROF_AICPU_TRACE            0x00000008ULL
 #define PROF_L2CACHE                0x00000010ULL
 #define PROF_HCCL_TRACE             0x00000020ULL
-#define PROF_TRAINING_TRACE         0x00000040ULL
+#define PROF_KEYPOINT_TRACE         0x00000040ULL
 #define PROF_MSPROFTX               0x00000080ULL
 #define PROF_RUNTIME_API            0x00000100ULL
 #define PROF_AIV_METRICS            0x00000200ULL
@@ -29,7 +29,6 @@
 #define PROF_SUBTASK_TIME           0x00004000ULL
 #define PROF_OP_DETAIL              0x00008000ULL
 
-#define PROF_KEYPOINT_TRACE         PROF_TRAINING_TRACE
 #define PROF_TASK_TRACE             (PROF_MODEL_EXECUTE | PROF_RUNTIME_TRACE | PROF_KEYPOINT_TRACE | \
                                      PROF_HCCL_TRACE | PROF_TASK_TIME)
 
@@ -45,7 +44,7 @@
 #define PROF_AIVECTORCORE_SAMPLE     0x010000000000ULL
 
 // Other
-#define PROF_AICPU_MODEL             0x4000000000000000ULL
+#define PROF_KEYPOINT_TRACE_HELPER   0x4000000000000000ULL
 #define PROF_MODEL_LOAD              0x8000000000000000ULL
 
 // ========================================== mask ====================================
