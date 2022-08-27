@@ -67,7 +67,10 @@ enum CollectorTypesForPlatform {
 struct CommonParams {
     std::string output;
     std::string storageLimit;
-    std::string appPath;
+    std::string app;
+    std::string appCmdPath;
+    std::string appParameters;
+    std::string appDir;
     std::string appEnv;
     std::string msproftx;
     std::string pythonPath;
@@ -80,7 +83,6 @@ struct CommonParams {
     std::string device;
     int profilingPeriod;
     int hostSysPid;
-    int msprofBinPid;
 };
 
 const std::map<std::string, std::string> AIC_AIV_METRICS_LIST = {
@@ -138,7 +140,6 @@ protected:
 
 private:
     int GetMetricsEvents(const std::string &metricsType, std::string &events) const;
-    void SpliteAppPath(const std::string &appParams);
 };
 }
 }
