@@ -59,6 +59,7 @@ void PlatformAdapterInterface::SetParamsForGlobal(struct CommonParams &comParams
 
 void PlatformAdapterInterface::SetParamsForTaskTime()
 {
+    params_->ts_keypoint = MSPROF_SWITCH_ON;
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_TASK_TS_TIMELINE) != supportSwitch_.end()) {
         params_->ts_timeline = MSPROF_SWITCH_ON;
         params_->dataTypeConfig |= PROF_SCHEDULE_TIMELINE | PROF_TASK_TIME;
@@ -89,6 +90,7 @@ void PlatformAdapterInterface::SetParamsForTaskTime()
 
 void PlatformAdapterInterface::SetParamsForTaskTrace()
 {
+    params_->ts_keypoint = MSPROF_SWITCH_ON;
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_TASK_HCCL) != supportSwitch_.end()) {
         params_->dataTypeConfig |= PROF_HCCL_TRACE;
     }
@@ -97,6 +99,7 @@ void PlatformAdapterInterface::SetParamsForTaskTrace()
 
 void PlatformAdapterInterface::SetParamsForTrainingTrace()
 {
+    params_->ts_keypoint = MSPROF_SWITCH_ON;
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_TASK_TS_TRAINING_TRACE) !=
         supportSwitch_.end()) {
         params_->ts_fw_training = MSPROF_SWITCH_ON;
@@ -173,7 +176,8 @@ int PlatformAdapterInterface::GetMetricsEvents(const std::string &metricsType, s
     return PROFILING_FAILED;
 }
 
-void PlatformAdapterInterface::SetParamsForAicMetrics(const std::string &mode, const std::string &metrics, int samplingInterval)
+void PlatformAdapterInterface::SetParamsForAicMetrics(const std::string &mode, const std::string &metrics,
+    int samplingInterval)
 {
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_TASK_AIC_METRICS) != supportSwitch_.end()) {
         params_->ai_core_profiling = MSPROF_SWITCH_ON;
@@ -191,7 +195,8 @@ void PlatformAdapterInterface::SetParamsForAicMetrics(const std::string &mode, c
     }
 }
 
-void PlatformAdapterInterface::SetParamsForAivMetrics(const std::string &mode, const std::string &metrics, int samplingInterval)
+void PlatformAdapterInterface::SetParamsForAivMetrics(const std::string &mode, const std::string &metrics,
+    int samplingInterval)
 {
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_TASK_AIV_METRICS) != supportSwitch_.end()) {
         params_->aiv_profiling = MSPROF_SWITCH_ON;
@@ -211,7 +216,8 @@ void PlatformAdapterInterface::SetParamsForAivMetrics(const std::string &mode, c
 
 void PlatformAdapterInterface::SetParamsForDeviceSysCpuMemUsage(int samplingInterval)
 {
-    if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_SYS_DEVICE_SYS_CPU_MEM_USAGE) != supportSwitch_.end()) {
+    if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_SYS_DEVICE_SYS_CPU_MEM_USAGE) !=
+        supportSwitch_.end()) {
         params_->sys_profiling = MSPROF_SWITCH_ON;
         params_->sys_sampling_interval = samplingInterval;
     }
@@ -219,7 +225,8 @@ void PlatformAdapterInterface::SetParamsForDeviceSysCpuMemUsage(int samplingInte
 
 void PlatformAdapterInterface::SetParamsForDeviceAllPidCpuMemUsage(int samplingInterval)
 {
-    if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_SYS_DEVICE_ALL_PID_CPU_MEM_USAGE) != supportSwitch_.end()) {
+    if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_SYS_DEVICE_ALL_PID_CPU_MEM_USAGE) !=
+        supportSwitch_.end()) {
         params_->pid_profiling = MSPROF_SWITCH_ON;
         params_->pid_sampling_interval = samplingInterval;
     }
@@ -228,12 +235,14 @@ void PlatformAdapterInterface::SetParamsForDeviceAllPidCpuMemUsage(int samplingI
 void PlatformAdapterInterface::SetParamsForDeviceAiCpuCtrlCpuTSCpuHotFuncPMU(int samplingInterval)
 {
     bool setFlag = false;
-    if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_SYS_DEVICE_TS_CPU_HOT_FUNC_PMU) != supportSwitch_.end()) {
+    if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_SYS_DEVICE_TS_CPU_HOT_FUNC_PMU) !=
+        supportSwitch_.end()) {
         params_->tsCpuProfiling = MSPROF_SWITCH_ON;
         params_->ts_cpu_profiling_events = "0x8,0x11";
         setFlag = true;
     }
-    if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_SYS_DEVICE_AI_CTRL_CPU_HOT_FUNC_PMU) != supportSwitch_.end()) {
+    if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_SYS_DEVICE_AI_CTRL_CPU_HOT_FUNC_PMU) !=
+        supportSwitch_.end()) {
         params_->aiCtrlCpuProfiling = MSPROF_SWITCH_ON;
         params_->ai_ctrl_cpu_profiling_events = "0x8,0x11";
         setFlag = true;
@@ -334,7 +343,8 @@ void PlatformAdapterInterface::SetParamsForDevicePower()
 
 void PlatformAdapterInterface::SetParamsForHostPidCpu()
 {
-    if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_SYS_HOST_ONE_PID_CPU) != supportSwitch_.end()) {
+    if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_SYS_HOST_ONE_PID_CPU) !=
+        supportSwitch_.end()) {
         params_->host_cpu_profiling = MSPROF_SWITCH_ON;
         params_->host_sys = MSPROF_SWITCH_ON;
     }
@@ -342,7 +352,8 @@ void PlatformAdapterInterface::SetParamsForHostPidCpu()
 
 void PlatformAdapterInterface::SetParamsForHostPidMem()
 {
-    if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_SYS_HOST_ONE_PID_MEM) != supportSwitch_.end()) {
+    if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_SYS_HOST_ONE_PID_MEM) !=
+        supportSwitch_.end()) {
         params_->host_mem_profiling = MSPROF_SWITCH_ON;
         params_->host_sys = MSPROF_SWITCH_ON;
     }
@@ -350,7 +361,8 @@ void PlatformAdapterInterface::SetParamsForHostPidMem()
 
 void PlatformAdapterInterface::SetParamsForHostPidDisk()
 {
-    if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_SYS_HOST_ONE_PID_DISK) != supportSwitch_.end()) {
+    if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_SYS_HOST_ONE_PID_DISK) !=
+        supportSwitch_.end()) {
         params_->host_disk_profiling = MSPROF_SWITCH_ON;
         params_->host_sys = MSPROF_SWITCH_ON;
     }
@@ -358,7 +370,8 @@ void PlatformAdapterInterface::SetParamsForHostPidDisk()
 
 void PlatformAdapterInterface::SetParamsForHostPidOSRT()
 {
-    if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_SYS_HOST_ONE_PID_OSRT) != supportSwitch_.end()) {
+    if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_SYS_HOST_ONE_PID_OSRT) !=
+        supportSwitch_.end()) {
         params_->host_osrt_profiling = MSPROF_SWITCH_ON;
         params_->host_sys = MSPROF_SWITCH_ON;
     }
@@ -384,7 +397,6 @@ int PlatformAdapterInterface::Uninit()
 {
     return PROFILING_SUCCESS;
 }
-
 }
 }
 }
