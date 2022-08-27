@@ -32,7 +32,7 @@ class ClusterParallelParser:
 
     def __init__(self, params: dict) -> None:
         self.collection_path = params["collection_path"]
-        self._cluster_info_model = ClusterInfoViewModel(params)
+        self._cluster_info_model = ClusterInfoViewModel(params["collection_path"])
         self._cluster_communication_model = ClusterCommunicationModel(params)
         self.parallel_analysis_result = {}
 
@@ -42,10 +42,10 @@ class ClusterParallelParser:
 
     def _get_rank_ids(self: any) -> any:
         if not os.path.exists(PathManager.get_db_path(self.collection_path, DBNameConstant.DB_CLUSTER_RANK)):
-            error(MsProfCommonConstant.COMMON_FILE_NAME, "Cannot find the cluster_rank.db!")
+            error(MsProfCommonConstant.COMMON_FILE_NAME, "Cannot find the cluster_rank.db or Permission denied!")
             return Constant.DEFAULT_INVALID_VALUE
         if not os.path.exists(PathManager.get_db_path(self.collection_path, DBNameConstant.DB_CLUSTER_STEP_TRACE)):
-            error(MsProfCommonConstant.COMMON_FILE_NAME, "Cannot find the cluster_step_trace.db!")
+            error(MsProfCommonConstant.COMMON_FILE_NAME, "Cannot find the cluster_step_trace.db or Permission denied!")
             return Constant.DEFAULT_INVALID_VALUE
         with self._cluster_info_model as _model:
             return _model.get_all_rank_id()
@@ -104,7 +104,10 @@ class ClusterParallelParser:
                 error(MsProfCommonConstant.COMMON_FILE_NAME,
                       "Storing data failed, you may not have the permission to write files in the current path.")
         output_file_path = PathManager.get_query_result_path(self.collection_path, output_file_name)
-        with os.fdopen(os.open(output_file_path, Constant.WRITE_FLAGS,
-                               Constant.WRITE_MODES), 'w') as file:
-            os.chmod(output_file_path, NumberConstant.FILE_AUTHORITY)
-            json.dump(self.parallel_analysis_result, file, indent=4)
+        try:
+            with os.fdopen(os.open(output_file_path, Constant.WRITE_FLAGS,
+                                   Constant.WRITE_MODES), 'w') as file:
+                os.chmod(output_file_path, NumberConstant.FILE_AUTHORITY)
+                json.dump(self.parallel_analysis_result, file, indent=4)
+        except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
+            error(MsProfCommonConstant.COMMON_FILE_NAME, err)
