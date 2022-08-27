@@ -475,7 +475,9 @@ int AclJsonParamAdapter::SetAclJsonContainerDefaultValue()
         paramContainer_[INPUT_CFG_COM_RUNTIME_API] = MSVP_PROF_ON;
     }
     paramContainer_[INPUT_CFG_COM_MODEL_EXECUTION] = MSVP_PROF_ON;
-    paramContainer_[INPUT_CFG_COM_TASK_TIME] = MSVP_PROF_ON;
+    if (paramContainer_[INPUT_CFG_COM_TASK_TIME].empty()) {
+        paramContainer_[INPUT_CFG_COM_TASK_TIME] = MSVP_PROF_ON;
+    }
 
     paramContainer_[INPUT_CFG_COM_AI_CORE] = MSVP_PROF_ON;
     paramContainer_[INPUT_CFG_COM_AIC_MODE] = PROFILING_MODE_TASK_BASED;
