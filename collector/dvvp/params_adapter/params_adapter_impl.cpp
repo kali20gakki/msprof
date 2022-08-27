@@ -119,6 +119,31 @@ int MsprofParamAdapter::ParamsCheckMsprof(std::vector<std::pair<InputCfg, std::s
     return flag ? PROFILING_SUCCESS : PROFILING_FAILED;
 }
 
+void MsprofParamAdapter::SetDefaultParams()
+{
+    if (paramContainer_[INPUT_CFG_COM_ASCENDCL].empty()) {
+        paramContainer_[INPUT_CFG_COM_ASCENDCL] = MSVP_PROF_ON;
+    }
+    if (paramContainer_[INPUT_CFG_COM_TASK_TIME].empty()) {
+        paramContainer_[INPUT_CFG_COM_TASK_TIME] = MSVP_PROF_ON;
+    }
+    if (paramContainer_[INPUT_CFG_COM_AI_CORE].empty()) {
+        paramContainer_[INPUT_CFG_COM_AI_CORE] = MSVP_PROF_ON;
+        paramContainer_[INPUT_CFG_COM_AIC_MODE] = PROFILING_MODE_TASK_BASED;
+    }
+    if (paramContainer_[INPUT_CFG_COM_AI_CORE].empty()) {
+        paramContainer_[INPUT_CFG_COM_AI_CORE] = MSVP_PROF_ON;
+        paramContainer_[INPUT_CFG_COM_AIC_MODE] = PROFILING_MODE_TASK_BASED;
+        paramContainer_[INPUT_CFG_COM_AIC_FREQ] = std::to_string(THOUSAND / DEFAULT_PROFILING_INTERVAL_10MS);
+    }
+    paramContainer_[INPUT_CFG_COM_AIC_METRICS] = (paramContainer_[INPUT_CFG_COM_AIC_METRICS].empty()) ? PIPE_UTILIZATION : paramContainer_[INPUT_CFG_COM_AIC_METRICS];
+    if (paramContainer_[INPUT_CFG_COM_AI_VECTOR].empty()) {
+        paramContainer_[INPUT_CFG_COM_AI_VECTOR] = MSVP_PROF_ON;
+        paramContainer_[INPUT_CFG_COM_AIV_MODE] = PROFILING_MODE_TASK_BASED;
+        paramContainer_[INPUT_CFG_COM_AIV_FREQ] = std::to_string(THOUSAND / DEFAULT_PROFILING_INTERVAL_10MS);
+    }
+    paramContainer_[INPUT_CFG_COM_AIV_METRICS] = (paramContainer_[INPUT_CFG_COM_AIV_METRICS].empty()) ? PIPE_UTILIZATION : paramContainer_[INPUT_CFG_COM_AIV_METRICS];
+}
 
 int MsprofParamAdapter::GetParamFromInputCfg(std::unordered_map<int, std::pair<MsprofCmdInfo, std::string>> argvMap,
     SHARED_PTR_ALIA<ProfileParams> params)
@@ -167,11 +192,11 @@ int MsprofParamAdapter::GetParamFromInputCfg(std::unordered_map<int, std::pair<M
             MsprofArgsType argsType = reCfgMap_[errCfg.first];
             CmdLog::instance()->CmdErrorLog("Argument %s set invalid.", argvMap[argsType].second.c_str());
         }
-        // todo 打印errCfgList中的错误
         return PROFILING_FAILED;
     }
 
-    // [6] 参数转换，转成Params（软件栈转uint64_t， 非软件栈保留在Params）
+    // 默认值设置
+    SetDefaultParams();
     ret = TransToParam(paramContainer_, params_);
     if (ret != PROFILING_SUCCESS) {
         return PROFILING_FAILED;

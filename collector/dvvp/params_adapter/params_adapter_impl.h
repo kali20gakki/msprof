@@ -37,6 +37,7 @@ private:
     int Init();
     void CreateCfgMap();
     int ParamsCheckMsprof(std::vector<std::pair<InputCfg, std::string>> &cfgList);
+    void SetDefaultParams();
 
 private:
     SHARED_PTR_ALIA<ProfileParams> params_;

@@ -161,44 +161,6 @@ public:
     void MsprofCmdUsage(const std::string msg);
     SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> MsprofGetOpts(int argc, MsprofString argv[]);
     bool HasHelpParamOnly();
-private:
-    int CheckPythonPathValid(const struct MsprofCmdInfo &cmdInfo) const;
-    int CheckOutputValid(const struct MsprofCmdInfo &cmdInfo);
-    int CheckStorageLimitValid(const struct MsprofCmdInfo &cmdInfo) const;
-    int GetAppParam(const std::string &appParams);
-    int CheckAppValid(const struct MsprofCmdInfo &cmdInfo);
-    int CheckEnvironmentValid(const struct MsprofCmdInfo &cmdInfo);
-    int CheckSampleModeValid(const struct MsprofCmdInfo &cmdInfo, int opt) const;
-    int CheckArgOnOff(const struct MsprofCmdInfo &cmdInfo, int opt);
-    int CheckArgRange(const struct MsprofCmdInfo &cmdInfo, int opt, int min, int max);
-    int CheckAiCoreMetricsValid(const struct MsprofCmdInfo &cmdInfo, int opt) const;
-    int CheckArgsIsNumber(const struct MsprofCmdInfo &cmdInfo, int opt) const;
-    int CheckExportSummaryFormat(const struct MsprofCmdInfo &cmdInfo) const;
-    int CheckLlcProfilingVaild(const struct MsprofCmdInfo &cmdInfo);
-    int CheckSysPeriodVaild(const struct MsprofCmdInfo &cmdInfo);
-    int CheckSysDevicesVaild(const struct MsprofCmdInfo &cmdInfo);
-    int CheckHostSysValid(const struct MsprofCmdInfo &cmdInfo);
-    int CheckHostSysPidValid(const struct MsprofCmdInfo &cmdInfo);
-    int MsprofCmdCheckValid(const struct MsprofCmdInfo &cmdInfo, int opt);
-    int MsprofFreqCheckValid(const struct MsprofCmdInfo &cmdInfo, int opt);
-    int MsprofHostCheckValid(const struct MsprofCmdInfo &cmdInfo, int opt);
-    void MsprofFreqUpdateParams(const struct MsprofCmdInfo &cmdInfo, int opt);
-    int MsprofSwitchCheckValid(const struct MsprofCmdInfo &cmdInfo, int opt);
-    void ParamsSwitchValid(const struct MsprofCmdInfo &cmdInfo, int opt);
-    void ParamsSwitchValid2(const struct MsprofCmdInfo &cmdInfo, int opt);
-    void ParamsSwitchValid3(const struct MsprofCmdInfo &cmdInfo, int opt);
-    void ParamsFreqValid(const struct MsprofCmdInfo &cmdInfo, const int freq, int opt);
-    int CheckLlcProfilingIsValid(const std::string &llcProfiling);
-    int PreCheckApp(const std::string &appDir, const std::string &appName);
-    int ParamsCheck() const;
-    int HostAndDevParamsCheck();
-    int ProcessOptions(int opt, struct MsprofCmdInfo &cmdInfo);
-    void SetTaskTimeSwitch(const std::string timeSwitch);
-    int CheckHostSysToolsIsExist(const std::string toolName);
-    void SetHostSysParam(const std::string hostSysParam);
-    int CheckHostSysCmdOutIsExist(const std::string tmpDir, const std::string toolName, const mmProcess tmpProcess);
-    int CheckHostOutString(const std::string tmpStr, const std::string toolName);
-    int UninitCheckHostSysCmd(const mmProcess checkProcess);
 
 private:
     SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params_;
