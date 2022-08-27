@@ -539,51 +539,12 @@ int AppMode::RunModeTasks()
     return PROFILING_SUCCESS;
 }
 
-void AppMode::SetDefaultParams() const
-{
-    if (params_->acl.empty()) {
-        params_->acl = "on";
-    }
-
-    if (ConfigManager::instance()->GetPlatformType() == PlatformType::MINI_TYPE) {
-        if (params_->ts_timeline.empty()) {
-            params_->ts_timeline = "on";
-        }
-    } else {
-        if (params_->hwts_log.empty()) {
-            params_->hwts_log = "on";
-        }
-        if (params_->hwts_log1.empty()) {
-            params_->hwts_log1 = "on";
-        }
-    }
-    if (params_->ts_memcpy.empty()) {
-        params_->ts_memcpy = "on";
-    }
-    if (params_->ts_keypoint.empty()) {
-        params_->ts_keypoint = "on";
-    }
-    if (params_->ai_core_profiling.empty()) {
-        params_->ai_core_profiling = "on";
-    }
-    if (params_->ai_core_profiling_mode.empty()) {
-        params_->ai_core_profiling_mode = PROFILING_MODE_TASK_BASED;
-    }
-    if (params_->aiv_profiling.empty()) {
-        params_->aiv_profiling = "on";
-    }
-    if (params_->aiv_profiling_mode.empty()) {
-        params_->aiv_profiling_mode = PROFILING_MODE_TASK_BASED;
-    }
-}
-
 int AppMode::StartAppTask(bool needWait)
 {
     if (isQuit_) {
         MSPROF_LOGE("Failed to launch app, msprofbin has quited");
         return PROFILING_FAILED;
     }
-    SetDefaultParams();
     int ret = analysis::dvvp::app::Application::LaunchApp(params_, taskPid_);
     if (ret == PROFILING_FAILED) {
         MSPROF_LOGE("Failed to launch app");
@@ -1087,6 +1048,7 @@ int SystemMode::StartSysTask()
 {
     std::vector<std::string> devices = Utils::Split(params_->devices, false, "", ",");
     params_->PrintAllFields();
+    return PROFILING_FAILED;
     baseDir_ = Utils::CreateTaskId(0);
     if (RecordOutPut() != PROFILING_SUCCESS) {
         MSPROF_LOGW("Failed to record output dir: %s", Utils::BaseName(baseDir_).c_str());
