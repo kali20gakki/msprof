@@ -38,29 +38,30 @@ class CoreCpuReduceViewer:
     }
 
     @staticmethod
-    def get_op_names_and_task_type(sql_path: str) -> tuple:
+    def get_op_names_and_task_type(sql_path: str, model_id: int) -> tuple:
         """
         get op_name and task_type value
         """
         op_names = {}
         task_types = {}
         sql = "SELECT op_name, stream_id, task_id, " \
-              "task_type, batch_id FROM {} ".format(DBNameConstant.TABLE_GE_TASK)
+              "model_id, task_type, batch_id FROM {} where model_id=?".format(DBNameConstant.TABLE_GE_TASK)
         conn_ge, cur_ge = DBManager.check_connect_db_path(
             os.path.join(sql_path, DBNameConstant.DB_GE_INFO))
         if conn_ge and cur_ge:
             if not DBManager.judge_table_exist(cur_ge, DBNameConstant.TABLE_GE_TASK):
                 return op_names, task_types
-            ge_datas = DBManager.fetch_all_data(cur_ge, sql)
+            ge_datas = DBManager.fetch_all_data(cur_ge, sql, (model_id,))
             for ge_data in ge_datas:
+                # 0 op_name; 1 stream_id; 2 task_id; 3 model_id; 4 task_type
                 ge_data_key = "_".join(list(map(str, [ge_data[1], ge_data[2], ge_data[3], ge_data[-1]])))
                 op_names[ge_data_key] = ge_data[0]
-                task_types[ge_data_key] = ge_data[3]
+                task_types[ge_data_key] = ge_data[4]
         DBManager.destroy_db_connect(conn_ge, cur_ge)
         return op_names, task_types
 
     @staticmethod
-    def get_total_cycle(sql_path: str) -> tuple:
+    def get_total_cycle(sql_path: str, model_id: int) -> tuple:
         """
         get total_cycle value
         """
@@ -75,7 +76,7 @@ class CoreCpuReduceViewer:
             total_cycles = OpCommonFunc.deal_batch_id(stream_index=1, task_index=2, merge_data=total_cycles)
             for total_cycle in total_cycles:
                 total_data_key = "_".join(
-                    [str(total_cycle[1]), str(total_cycle[2]), Constant.TASK_TYPE_AI_CORE, str(total_cycle[-1])])
+                    [str(total_cycle[1]), str(total_cycle[2]), str(model_id), str(total_cycle[-1])])
                 total_cycle_data[total_data_key] = total_cycle[0]
                 total_time_data[total_data_key] = total_cycle[3]
         DBManager.destroy_db_connect(conn_ge, cur_ge)
@@ -153,9 +154,9 @@ class CoreCpuReduceViewer:
         trace_data_memcpy = memory_copy_viewer.get_memory_copy_timeline()
 
         trace_data_sql = \
-            cls._get_task_scheduler_data(sql_path=PathManager.get_sql_dir(result_dir))
+            cls._get_task_scheduler_data(model_id, sql_path=PathManager.get_sql_dir(result_dir))
         trace_data_job = \
-            cls._get_ai_cpu_data(iter_id, model_id, job_path=result_dir)
+            cls._get_ai_cpu_data(model_id, job_path=result_dir)
 
         trace_data_result = \
             cls._get_all_reduce_data(device_id, iter_id, model_id, result_dir=result_dir)
@@ -166,7 +167,7 @@ class CoreCpuReduceViewer:
         return json.dumps(trace_data)
 
     @classmethod
-    def _get_task_scheduler_data(cls: any, sql_path: str) -> list:
+    def _get_task_scheduler_data(cls: any, model_id, sql_path: str) -> list:
         result_data = []
         db_path = os.path.join(sql_path, DBNameConstant.DB_AICORE_OP_SUMMARY)
         conn, curs = DBManager.check_connect_db_path(db_path)
@@ -182,7 +183,7 @@ class CoreCpuReduceViewer:
         try:
             if task_scheduler_data:
                 task_trace_datas = \
-                    cls._format_task_trace_data(task_scheduler_data, sql_path)
+                    cls._format_task_trace_data(task_scheduler_data, sql_path, model_id)
                 result_data.extend(TraceViewManager.time_graph_trace(
                     TraceViewHeaderConstant.TOP_DOWN_TIME_GRAPH_HEAD, task_trace_datas))
         except (TypeError, IndexError, ValueError) as err:
@@ -191,13 +192,13 @@ class CoreCpuReduceViewer:
         return result_data
 
     @classmethod
-    def _format_task_trace_data(cls: any, sql_datas: list, sql_path: str) -> list:
+    def _format_task_trace_data(cls: any, sql_datas: list, sql_path: str, model_id: int) -> list:
         trace_data = []
-        op_names, task_types = cls.get_op_names_and_task_type(sql_path)
-        total_cycle, total_time = cls.get_total_cycle(sql_path)
+        op_names, task_types = cls.get_op_names_and_task_type(sql_path, model_id)
+        total_cycle, total_time = cls.get_total_cycle(sql_path, model_id)
         for sql_data in sql_datas:
-            # key: stream_id task_id task_type batch_id
-            _key_for_ops = "_".join([str(sql_data[0]), str(sql_data[1]), str(sql_data[-3]), str(sql_data[-1])])
+            # key: stream_id task_id model_id batch_id
+            _key_for_ops = "_".join([str(sql_data[0]), str(sql_data[1]), str(model_id), str(sql_data[-1])])
             total_time_value = cls._get_task_trace_value(_key_for_ops, total_time)
             if is_number(total_time_value):
                 total_time_value = round(total_time_value, CommonConstant.ROUND_SIX)
@@ -221,17 +222,16 @@ class CoreCpuReduceViewer:
         return data.get(_key_for_ops, default_value)
 
     @classmethod
-    def _get_ai_cpu_data(cls: any, *args: dict, job_path: str = None) -> list:
-        _, _ = args
+    def _get_ai_cpu_data(cls: any, model_id: int, job_path: str = None) -> list:
         ai_cpu_datas = []
         dir_path = job_path
         ai_cpu_data = ParseAiCpuData.get_ai_cpu_from_ts(dir_path)
-        op_names, _ = cls.get_op_names_and_task_type(PathManager.get_sql_dir(dir_path))
+        op_names, _ = cls.get_op_names_and_task_type(PathManager.get_sql_dir(dir_path), model_id)
         result_data = []
         if ai_cpu_data:
             result_data.extend(cls.get_meta_trace_data(TraceViewHeaderConstant.PROCESS_AI_CPU))
             for stream_id, task_id, sys_start, sys_end, batch_id in ai_cpu_data:
-                _key_for_ops = "_".join([str(stream_id), str(task_id), Constant.TASK_TYPE_AI_CPU, str(batch_id)])
+                _key_for_ops = "_".join([str(stream_id), str(task_id), str(model_id), str(batch_id)])
                 duration = (float(sys_end) - float(sys_start)) * NumberConstant.MS_TO_US
                 ai_cpu_datas.append(
                     (cls._get_task_trace_value(_key_for_ops, op_names),
