@@ -235,12 +235,13 @@ class MsProfExportDataUtils:
         """
         _ = configs
         device_id = params.get(StrConstant.PARAM_DEVICE_ID)
+        model_id = params.get(StrConstant.PARAM_MODEL_ID)
         index_id = params.get(StrConstant.PARAM_ITER_ID)
         result_dir = params.get(StrConstant.PARAM_RESULT_DIR)
 
         if params.get(StrConstant.PARAM_EXPORT_TYPE) == MsProfCommonConstant.TIMELINE:
             return TopDownData.get_top_down_timeline_data(
-                result_dir, device_id, index_id)
+                result_dir, device_id, index_id, model_id)
 
         return TopDownData.get_top_down_data(result_dir, device_id, index_id)
 

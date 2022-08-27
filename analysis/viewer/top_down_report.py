@@ -108,7 +108,7 @@ class TopDownData:
         return headers, top_down_data, len(top_down_data)
 
     @classmethod
-    def get_top_down_timeline_data(cls: any, project_path: str, device_id: str, iter_id: int) -> str:
+    def get_top_down_timeline_data(cls: any, project_path: str, device_id: str, iter_id: int, model_id: int) -> str:
         """
         export top down tracing data
         """
@@ -126,7 +126,7 @@ class TopDownData:
                       cls.TASK_TID, TraceViewHeaderConstant.PROCESS_TASK]]
         result_data.extend(TraceViewManager.metadata_event(meta_data))
         try:
-            cls._export_top_down_data_by_iter(project_path, device_id, result_data, iter_id)
+            cls._export_top_down_data_by_iter(project_path, device_id, result_data, iter_id, model_id)
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
             logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
             return ""
@@ -275,7 +275,7 @@ class TopDownData:
 
     @classmethod
     def _fill_top_down_trace_data(cls: any, project_path: str, device_id: str,
-                                  result_data: list, top_down_datas: list) -> None:
+                                  result_data: list, top_down_datas: list, model_id) -> None:
         # top_down_datas:acl,ge include (input,infer,output), runtime,ts
         # top down data dispatch and deal by module.
         dispatch_result = cls._dispatch_top_down_datas(top_down_datas)
@@ -283,7 +283,7 @@ class TopDownData:
         cls._fill_ge_trace_data(result_data, dispatch_result.get(cls.MODULE_GE))
         cls._fill_runtime_trace_data(project_path, result_data,
                                      dispatch_result.get(cls.MODULE_RUNTIME))
-        cls._fill_ts_trace_data(project_path, result_data, dispatch_result.get(cls.MODULE_TASK_SCHEDULER))
+        cls._fill_ts_trace_data(project_path, result_data, dispatch_result.get(cls.MODULE_TASK_SCHEDULER), model_id)
 
     @classmethod
     def _reformat_acl_trace_data(cls: any, acl_data: list, acl_iter_data: any) -> list:
@@ -381,7 +381,8 @@ class TopDownData:
         return res
 
     @classmethod
-    def _fill_ts_trace_data(cls: any, project_path: str, result_data: list, top_down_datas: list) -> None:
+    def _fill_ts_trace_data(cls: any, project_path: str, result_data: list,
+                            top_down_datas: list, model_id: int) -> None:
         conn, cur = DBManager.check_connect_db(project_path, DBNameConstant.DB_AICORE_OP_SUMMARY)
         if conn and cur and top_down_datas:
             if not DBManager.judge_table_exist(cur, cls.OP_SUMMARY_METRICS):
@@ -391,8 +392,10 @@ class TopDownData:
                             "order by start_time".format(cls.OP_SUMMARY_TASK_TIME_TABLE)
             ts_traces = DBManager.fetch_all_data(cur, acl_query_sql)
             if ts_traces:
-                op_names, _ = CoreCpuReduceViewer.get_op_names_and_task_type(PathManager.get_sql_dir(project_path))
-                _, total_time = CoreCpuReduceViewer.get_total_cycle(PathManager.get_sql_dir(project_path))
+                op_names, _ = CoreCpuReduceViewer.get_op_names_and_task_type(
+                    PathManager.get_sql_dir(project_path), model_id)
+                _, total_time = CoreCpuReduceViewer.get_total_cycle(
+                    PathManager.get_sql_dir(project_path), model_id)
                 ts_trace_data = Utils.generator_to_list(
                     cls._reformat_ts_trace_data(top_down_datas, op_names, total_time, ts_trace)
                     for ts_trace in ts_traces)
@@ -403,12 +406,12 @@ class TopDownData:
 
     @classmethod
     def _export_top_down_data_by_iter(cls: any, project_path: str, device_id: str,
-                                      result_data: list, iter_id: int) -> None:
+                                      result_data: list, iter_id: int, model_id: int) -> None:
         top_down_datas = cls._get_top_down_data_one_iter(
             project_path, device_id, iter_id)
         if top_down_datas:
             cls._fill_top_down_trace_data(
-                project_path, device_id, result_data, top_down_datas)
+                project_path, device_id, result_data, top_down_datas, model_id)
 
     @staticmethod
     def _check_sql_file(conn: any, curs: any, table_name: str) -> bool:
