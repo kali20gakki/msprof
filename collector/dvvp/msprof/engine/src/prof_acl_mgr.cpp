@@ -545,7 +545,7 @@ void ProfAclMgr::AddModelLoadConf(uint64_t &dataTypeConfig) const
 
 void ProfAclMgr::AddAiCpuModelConf(uint64_t &dataTypeConfig) const
 {
-    dataTypeConfig |= PROF_AICPU_MODEL;
+    dataTypeConfig |= PROF_KEYPOINT_TRACE_HELPER;
 }
 
 void ProfAclMgr::AddRuntimeTraceConf(uint64_t &dataTypeConfig) const
@@ -1201,8 +1201,8 @@ void ProfAclMgr::ProfDataTypeConfigHandle(SHARED_PTR_ALIA<analysis::dvvp::messag
     UpdateDataTypeConfigBySwitch(params->modelExecution, PROF_MODEL_EXECUTE);
     UpdateDataTypeConfigBySwitch(params->runtimeApi, PROF_RUNTIME_API);
     UpdateDataTypeConfigBySwitch(params->runtimeTrace, PROF_RUNTIME_TRACE);
-    UpdateDataTypeConfigBySwitch(params->ts_fw_training, PROF_TRAINING_TRACE);
-    UpdateDataTypeConfigBySwitch(params->ts_keypoint, PROF_TRAINING_TRACE);
+    UpdateDataTypeConfigBySwitch(params->ts_fw_training, PROF_KEYPOINT_TRACE);
+    UpdateDataTypeConfigBySwitch(params->ts_keypoint, PROF_KEYPOINT_TRACE);
     UpdateDataTypeConfigBySwitch(params->hcclTrace, PROF_HCCL_TRACE);
     UpdateDataTypeConfigBySwitch(params->l2CacheTaskProfiling, PROF_L2CACHE);
 
