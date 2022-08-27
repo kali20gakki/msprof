@@ -96,5 +96,5 @@ class ParseAiCpuData:
         """
         aicpu_model = AiCpuModel(project_path, DBNameConstant.TABLE_AI_CPU_FROM_TS)
         with aicpu_model:
-            aicpu_data = aicpu_model.get_all_data(DBNameConstant.TABLE_AI_CPU_FROM_TS)
+            aicpu_data = aicpu_model.get_ai_cpu_data(DBNameConstant.TABLE_AI_CPU_FROM_TS)
         return aicpu_data

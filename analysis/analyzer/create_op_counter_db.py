@@ -49,7 +49,7 @@ class MergeOPCounter:
               "min(duration) as min, sum(duration)/count(op_type) as avg, " \
               "max(duration) as max, {0}.model_id from {0}, {1} " \
               "where {0}.task_id={1}.task_id and {0}.stream_id={1}.stream_id " \
-              "and {0}.task_type={1}.task_type and {0}.batch_id={1}.batch_id " \
+              "and {0}.batch_id={1}.batch_id " \
               "group by op_type,{0}.task_type" \
             .format(CommonConstant.GE_TASK_MEGED_TABLE, CommonConstant.RTS_TASK_TABLE)
         return sql
