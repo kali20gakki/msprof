@@ -39,8 +39,8 @@ PlatformAdapter::~PlatformAdapter()
 {
 }
 
-SHARED_PTR_ALIA<PlatformAdapterInterface> PlatformAdapter::Init(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params,
-    PlatformType platformType)
+SHARED_PTR_ALIA<PlatformAdapterInterface> PlatformAdapter::Init(
+    SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params, PlatformType platformType)
 {
     SHARED_PTR_ALIA<PlatformAdapterInterface> platformAdapter = nullptr;
     if (platformType == PlatformType::MINI_TYPE) {
