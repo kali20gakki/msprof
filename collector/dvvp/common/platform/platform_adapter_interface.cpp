@@ -59,7 +59,10 @@ void PlatformAdapterInterface::SetParamsForGlobal(struct CommonParams &comParams
 
 void PlatformAdapterInterface::SetParamsForTaskTime()
 {
-    params_->ts_keypoint = MSPROF_SWITCH_ON;
+    if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_TASK_TS_KEYPOINT) != supportSwitch_.end()) {
+        params_->ts_keypoint = MSPROF_SWITCH_ON;
+        params_->dataTypeConfig |= PROF_KEYPOINT_TRACE;
+    }
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_TASK_TS_TIMELINE) != supportSwitch_.end()) {
         params_->ts_timeline = MSPROF_SWITCH_ON;
         params_->dataTypeConfig |= PROF_SCHEDULE_TIMELINE | PROF_TASK_TIME;
@@ -90,7 +93,6 @@ void PlatformAdapterInterface::SetParamsForTaskTime()
 
 void PlatformAdapterInterface::SetParamsForTaskTrace()
 {
-    params_->ts_keypoint = MSPROF_SWITCH_ON;
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_TASK_HCCL) != supportSwitch_.end()) {
         params_->dataTypeConfig |= PROF_HCCL_TRACE;
     }
@@ -100,10 +102,11 @@ void PlatformAdapterInterface::SetParamsForTaskTrace()
 void PlatformAdapterInterface::SetParamsForTrainingTrace()
 {
     params_->ts_keypoint = MSPROF_SWITCH_ON;
-    if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_TASK_TS_TRAINING_TRACE) !=
+    if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_TASK_TS_KEYPOINT_TRAINING) !=
         supportSwitch_.end()) {
+        params_->ts_keypoint = MSPROF_SWITCH_ON;
         params_->ts_fw_training = MSPROF_SWITCH_ON;
-        params_->dataTypeConfig |= PROF_TRAINING_TRACE;
+        params_->dataTypeConfig |= PROF_KEYPOINT_TRACE;
     }
 }
 
