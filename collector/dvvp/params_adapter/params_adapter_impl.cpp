@@ -368,15 +368,22 @@ int AclJsonParamAdapter::SetAclJsonContainerDefaultValue()
     if (paramContainer_[INPUT_CFG_COM_RUNTIME_API].empty()) {
         paramContainer_[INPUT_CFG_COM_RUNTIME_API] = MSVP_PROF_ON;
     }
-    if (!paramContainer_[INPUT_CFG_COM_AIC_METRICS].empty()) {
-        paramContainer_[INPUT_CFG_COM_AI_CORE] = MSVP_PROF_ON;
-        paramContainer_[INPUT_CFG_COM_AIC_MODE] = PROFILING_MODE_TASK_BASED;
-    }
-    if (!paramContainer_[INPUT_CFG_COM_AIV_METRICS].empty()) {
-        paramContainer_[INPUT_CFG_COM_AI_VECTOR] = MSVP_PROF_ON;
-        paramContainer_[INPUT_CFG_COM_AIV_MODE] = PROFILING_MODE_TASK_BASED;
-    }
     paramContainer_[INPUT_CFG_COM_MODEL_EXECUTION] = MSVP_PROF_ON;
+    paramContainer_[INPUT_CFG_COM_TASK_TIME] = MSVP_PROF_ON;
+
+    paramContainer_[INPUT_CFG_COM_AI_CORE] = MSVP_PROF_ON;
+    paramContainer_[INPUT_CFG_COM_AIC_MODE] = PROFILING_MODE_TASK_BASED;
+    paramContainer_[INPUT_CFG_COM_AIC_METRICS] = paramContainer_[INPUT_CFG_COM_AIC_METRICS].empty() ?
+        PIPE_UTILIZATION : paramContainer_[INPUT_CFG_COM_AIC_METRICS];
+    paramContainer_[INPUT_CFG_COM_AIC_FREQ] = std::to_string(DEFAULT_PROFILING_INTERVAL_10MS);
+
+    paramContainer_[INPUT_CFG_COM_AI_VECTOR] = MSVP_PROF_ON;
+    paramContainer_[INPUT_CFG_COM_AIV_MODE] = PROFILING_MODE_TASK_BASED;
+    paramContainer_[INPUT_CFG_COM_AIV_METRICS] = paramContainer_[INPUT_CFG_COM_AIV_METRICS].empty() ?
+        PIPE_UTILIZATION : paramContainer_[INPUT_CFG_COM_AIV_METRICS];
+    paramContainer_[INPUT_CFG_COM_AIV_FREQ] = std::to_string(DEFAULT_PROFILING_INTERVAL_10MS);
+    paramContainer_[INPUT_CFG_COM_MODEL_EXECUTION] = MSVP_PROF_ON;
+    
     return PROFILING_SUCCESS;
 }
 
