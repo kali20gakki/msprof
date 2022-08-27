@@ -12,11 +12,13 @@
 #include "config_manager.h"
 #include "cmd_log.h"
 #include "message/prof_params.h"
+#include "platform/platform.h"
 
 namespace Collector {
 namespace Dvvp {
 namespace ParamsAdapter {
 using namespace Analysis::Dvvp::Msprof;
+using namespace Analysis::Dvvp::Common::Platform;
 using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::common::config;
 using namespace Analysis::Dvvp::Common::Config;
@@ -375,15 +377,12 @@ int AclJsonParamAdapter::SetAclJsonContainerDefaultValue()
     paramContainer_[INPUT_CFG_COM_AIC_MODE] = PROFILING_MODE_TASK_BASED;
     paramContainer_[INPUT_CFG_COM_AIC_METRICS] = paramContainer_[INPUT_CFG_COM_AIC_METRICS].empty() ?
         PIPE_UTILIZATION : paramContainer_[INPUT_CFG_COM_AIC_METRICS];
-    paramContainer_[INPUT_CFG_COM_AIC_FREQ] = std::to_string(DEFAULT_PROFILING_INTERVAL_10MS);
 
     paramContainer_[INPUT_CFG_COM_AI_VECTOR] = MSVP_PROF_ON;
     paramContainer_[INPUT_CFG_COM_AIV_MODE] = PROFILING_MODE_TASK_BASED;
     paramContainer_[INPUT_CFG_COM_AIV_METRICS] = paramContainer_[INPUT_CFG_COM_AIV_METRICS].empty() ?
         PIPE_UTILIZATION : paramContainer_[INPUT_CFG_COM_AIV_METRICS];
-    paramContainer_[INPUT_CFG_COM_AIV_FREQ] = std::to_string(DEFAULT_PROFILING_INTERVAL_10MS);
-    paramContainer_[INPUT_CFG_COM_MODEL_EXECUTION] = MSVP_PROF_ON;
-    
+
     return PROFILING_SUCCESS;
 }
 
@@ -515,6 +514,7 @@ int GeOptParamAdapter::GenGeOptionsContainer(SHARED_PTR_ALIA<ProfGeOptionsConfig
     paramContainer_[INPUT_CFG_COM_RUNTIME_API] = geCfg->runtime_api();
     paramContainer_[INPUT_CFG_COM_AIC_METRICS] = geCfg->aic_metrics();
     paramContainer_[INPUT_CFG_COM_AIV_METRICS] = geCfg->aiv_metrics();
+    paramContainer_[INPUT_CFG_COM_POWER] = geCfg->power();
     paramContainer_[INPUT_CFG_COM_BIU] = geCfg->biu();
     std::string biuFreqParam = std::to_string(geCfg->biu_freq());
     if (biuFreqParam.compare("0") != 0) {
@@ -536,7 +536,11 @@ int GeOptParamAdapter::GenGeOptionsContainer(SHARED_PTR_ALIA<ProfGeOptionsConfig
 
 void GeOptParamAdapter::SetGeOptionsContainerDefaultValue()
 {
-    paramContainer_[INPUT_CFG_COM_OUTPUT] = SetOutputDir(paramContainer_[INPUT_CFG_COM_OUTPUT]);
+    if (!Platform::instance()->PlatformIsHelperHostSide()) {
+        paramContainer_[INPUT_CFG_COM_OUTPUT] = SetOutputDir(paramContainer_[INPUT_CFG_COM_OUTPUT]);
+    } else {
+        paramContainer_[INPUT_CFG_COM_OUTPUT].clear();
+    }
     if (!paramContainer_[INPUT_CFG_COM_AIC_METRICS].empty()) {
         paramContainer_[INPUT_CFG_COM_AI_CORE] = MSVP_PROF_ON;
         paramContainer_[INPUT_CFG_COM_AIC_MODE] = PROFILING_MODE_TASK_BASED;

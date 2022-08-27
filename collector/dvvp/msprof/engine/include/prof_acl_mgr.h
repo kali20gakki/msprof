@@ -187,17 +187,11 @@ private:
     void ProfDataTypeConfigHandle(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params);
     void UpdateDataTypeConfigBySwitch(const std::string &sw, const uint64_t dataTypeConfig);
     std::string MsprofCheckAndGetChar(CHAR_PTR data, uint32_t dataLen);
-    int32_t MsprofGeOptionsParamConstruct(const std::string &jobInfo,
-        SHARED_PTR_ALIA<analysis::dvvp::proto::ProfGeOptionsConfig> inputCfgPb);
-    void MsprofInitGeOptionsParamAdaper(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params,
-        const std::string &jobInfo, SHARED_PTR_ALIA<analysis::dvvp::proto::ProfGeOptionsConfig> inputCfgPb);
     void CloseSubscribeFd(const uint32_t devId);
     void CloseSubscribeFd(const uint32_t devId, const uint32_t modelId);
     int32_t MsprofResultPathAdapter(const std::string &dir, std::string &resultPath);
     void PrintWorkMode(WorkMode mode);
     int32_t MsprofHelperParamConstruct(const std::string &msprofPath, const std::string &paramsJson);
-    int MsprofAiCoreMetricsAdapter(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params,
-        SHARED_PTR_ALIA<analysis::dvvp::proto::ProfGeOptionsConfig> inputCfgPb);
     void MsprofSetMemberValue();
 
 private:
