@@ -184,12 +184,9 @@ private:
                             PROF_SUB_CONF_CONST_PTR profSubscribeConfig);
     int StartDeviceSubscribeTask(const uint32_t modelId, const uint32_t devId,
                                  PROF_SUB_CONF_CONST_PTR profSubscribeConfig);
-    std::string MsprofResultDirAdapter(const std::string &dir);
     void ProfDataTypeConfigHandle(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params);
     void UpdateDataTypeConfigBySwitch(const std::string &sw, const uint64_t dataTypeConfig);
     std::string MsprofCheckAndGetChar(CHAR_PTR data, uint32_t dataLen);
-    void MsprofAclJsonParamAdaper(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params);
-    int32_t MsprofAclJsonParamConstruct(SHARED_PTR_ALIA<analysis::dvvp::proto::ProfAclConfig> inputCfgPb);
     int32_t MsprofGeOptionsParamConstruct(const std::string &jobInfo,
         SHARED_PTR_ALIA<analysis::dvvp::proto::ProfGeOptionsConfig> inputCfgPb);
     void MsprofInitGeOptionsParamAdaper(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params,
@@ -201,6 +198,7 @@ private:
     int32_t MsprofHelperParamConstruct(const std::string &msprofPath, const std::string &paramsJson);
     int MsprofAiCoreMetricsAdapter(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params,
         SHARED_PTR_ALIA<analysis::dvvp::proto::ProfGeOptionsConfig> inputCfgPb);
+    void MsprofSetMemberValue();
 
 private:
     bool isReady_;

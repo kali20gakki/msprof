@@ -1178,31 +1178,6 @@ int ProfAclMgr::StartDeviceSubscribeTask(const uint32_t modelId, const uint32_t 
     return ACL_SUCCESS;
 }
 
-std::string ProfAclMgr::MsprofResultDirAdapter(const std::string &dir)
-{
-    std::string result;
-    if (dir.empty()) {
-        MSPROF_LOGI("No output set, use default path");
-    } else {
-        std::string path = Utils::RelativePathToAbsolutePath(dir);
-        if (Utils::CreateDir(path) != PROFILING_SUCCESS) {
-            MSPROF_LOGW("Failed to create dir: %s", Utils::BaseName(path).c_str());
-        }
-        result = analysis::dvvp::common::utils::Utils::CanonicalizePath(path);
-    }
-    if (result.empty() || !analysis::dvvp::common::utils::Utils::IsDirAccessible(result)) {
-        MSPROF_LOGI("No output set or is not accessible, use app dir instead");
-        result = analysis::dvvp::common::utils::Utils::GetSelfPath();
-        size_t pos = result.rfind(analysis::dvvp::common::utils::MSVP_SLASH);
-        if (pos != std::string::npos) {
-            result = result.substr(0, pos + 1);
-        }
-    }
-    MSPROF_LOGI("MsprofResultDirAdapter result path: %s", Utils::BaseName(result).c_str());
-
-    return result;
-}
-
 void ProfAclMgr::ProfDataTypeConfigHandle(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params)
 {
     if (params == nullptr) {
@@ -1258,74 +1233,12 @@ std::string ProfAclMgr::MsprofCheckAndGetChar(CHAR_PTR data, uint32_t dataLen)
     }
 }
 
-void ProfAclMgr::MsprofAclJsonParamAdaper(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params)
+void ProfAclMgr::MsprofSetMemberValue()
 {
-    if (params == nullptr) {
-        return;
-    }
-    params->profiling_mode = analysis::dvvp::message::PROFILING_MODE_DEF;
-    params->job_id = Utils::ProfCreateId(0);
-    params->ai_core_profiling = MSVP_PROF_ON;
-    params->ai_core_profiling_mode = PROFILING_MODE_TASK_BASED;
-    params->acl = MSVP_PROF_ON;
-    params->modelExecution = MSVP_PROF_ON;
-    params->runtimeApi = MSVP_PROF_ON;
-    params->runtimeTrace = MSVP_PROF_ON;
-    params_->ts_keypoint = MSVP_PROF_ON;
-    params->ts_memcpy = MSVP_PROF_ON;
-    if (ConfigManager::instance()->GetPlatformType() == PlatformType::MINI_TYPE) {
-        params->ts_timeline = MSVP_PROF_ON;
-    } else {
-        params->hwts_log = MSVP_PROF_ON;
-    }
-}
-
-int32_t ProfAclMgr::MsprofAclJsonParamConstruct(SHARED_PTR_ALIA<analysis::dvvp::proto::ProfAclConfig> inputCfgPb)
-{
-    if (params_ != nullptr) {
-        MSPROF_LOGW("MsprofInitAclJson params exist");
-    } else {
-        MSVP_MAKE_SHARED0_RET(params_, analysis::dvvp::message::ProfileParams, MSPROF_ERROR_MEM_NOT_ENOUGH);
-    }
-    MsprofAclJsonParamAdaper(params_);
-    params_->result_dir = MsprofResultDirAdapter(inputCfgPb->output());
+    storageLimit_ = params_->storageLimit;
     resultPath_ = params_->result_dir;
     baseDir_ = Utils::CreateTaskId(0);
-    params_->storageLimit = inputCfgPb->storage_limit();
-    storageLimit_ = params_->storageLimit;
-    if (!ParamValidation::instance()->CheckStorageLimit(storageLimit_)) {
-        return MSPROF_ERROR_CONFIG_INVALID;
-    }
-    params_->biu = inputCfgPb->biu();
-    params_->biu_freq = static_cast<int32_t>(inputCfgPb->biu_freq());
-    if ((params_->biu.compare(MSVP_PROF_ON) == 0) &&
-        (!ParamValidation::instance()->CheckBiuFreqValid(params_->biu_freq))) {
-        return MSPROF_ERROR_CONFIG_INVALID;
-    }
-
-    std::string aicoreMetricsType =
-        inputCfgPb->aic_metrics().empty() ? PIPE_UTILIZATION : inputCfgPb->aic_metrics();
-    int ret = ConfigManager::instance()->GetAicoreEvents(aicoreMetricsType, params_->ai_core_profiling_events);
-    if (ret != PROFILING_SUCCESS) {
-        MSPROF_LOGE("The ai_core_metrics of input aclJsonConfig is invalid");
-        return MSPROF_ERROR_CONFIG_INVALID;
-    }
-    params_->ai_core_metrics = aicoreMetricsType;
-    params_->aicpuTrace = inputCfgPb->aicpu();
-    params_->hcclTrace = inputCfgPb->hccl();
-    params_->msproftx = inputCfgPb->msproftx();
-    MSPROF_LOGI("MsprofInitAclJson, aicoreMetricsType:%s, aicoreEvents:%s, hcclTrace: %s",
-        params_->ai_core_metrics.c_str(), params_->ai_core_profiling_events.c_str(), params_->hcclTrace.c_str());
-    bool isValidSwith = ParamValidation::instance()->IsValidSwitch(inputCfgPb->l2());
-    if (!isValidSwith) {
-        MSPROF_LOGE("MsprofInitAclJson, The l2 cache switch of input aclJsonConfig is invalid");
-        std::string errReason = "l2 should be on or off";
-        MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
-            std::vector<std::string>({"l2", inputCfgPb->l2(), errReason}));
-        return MSPROF_ERROR_CONFIG_INVALID;
-    }
-    params_->l2CacheTaskProfiling = inputCfgPb->l2();
-    return MSPROF_ERROR_NONE;
+    dataTypeConfig_ = params_->dataTypeConfig;
 }
 
 int32_t ProfAclMgr::MsprofInitAclJson(VOID_PTR data, uint32_t len)
@@ -1351,14 +1264,6 @@ int32_t ProfAclMgr::MsprofInitAclJson(VOID_PTR data, uint32_t len)
         MSPROF_INNER_ERROR("EK9999", "The format of input aclJsonConfig is invalid");
         return MSPROF_ERROR_CONFIG_INVALID;
     }
-    // if (inputCfgPb->switch_() != MSVP_PROF_ON) {
-    //     MSPROF_LOGW("Profiling switch is off");
-    //     return MSPROF_ERROR_ACL_JSON_OFF;
-    // }
-    // ret = MsprofAclJsonParamConstruct(inputCfgPb);
-    // if (ret != MSPROF_ERROR_NONE) {
-    //     return ret;
-    // }
     if (params_ != nullptr) {
         MSPROF_LOGW("MsprofInitAclJson params exist");
     } else {
@@ -1369,9 +1274,9 @@ int32_t ProfAclMgr::MsprofInitAclJson(VOID_PTR data, uint32_t len)
     if (ret != PROFILING_SUCCESS) {
         return MSPROF_ERROR_CONFIG_INVALID;
     }
-    return MSPROF_ERROR_CONFIG_INVALID;
-    ConfigManager::instance()->MsprofL2CacheAdapter(params_);
-    ProfDataTypeConfigHandle(params_);
+    params_->job_id = Utils::ProfCreateId(0);
+    AddAiCpuModelConf(params_->dataTypeConfig);
+    MsprofSetMemberValue();
     SetModeToCmd();
     return MSPROF_ERROR_NONE;
 }
