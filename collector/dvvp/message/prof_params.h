@@ -245,6 +245,7 @@ struct ProfileParams : BaseInfo {
         SET_VALUE(object, app_dir);
         SET_VALUE(object, app_parameters);
         SET_VALUE(object, app_env);
+        SET_VALUE(object, cmdPath);
         // ai core
         SET_VALUE(object, ai_core_profiling);
         SET_VALUE(object, ai_core_profiling_mode);
@@ -367,6 +368,7 @@ struct ProfileParams : BaseInfo {
         FROM_STRING_VALUE(object, app_dir);
         FROM_STRING_VALUE(object, app_parameters);
         FROM_STRING_VALUE(object, app_env);
+        FROM_STRING_VALUE(object, cmdPath);
         // ai core
         FROM_STRING_VALUE(object, ai_core_profiling);
         FROM_STRING_VALUE(object, ai_core_profiling_mode);

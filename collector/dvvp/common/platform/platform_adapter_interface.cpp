@@ -14,6 +14,7 @@
 #include "config/config.h"
 #include "msprof_dlog.h"
 #include "msprof_error_manager.h"
+#include "utils/utils.h"
 
 namespace Collector {
 namespace Dvvp {
@@ -22,6 +23,7 @@ namespace PlatformAdapter {
 using namespace analysis::dvvp::common::error;
 using namespace Collector::Dvvp::Common::PlatformAdapter;
 using namespace analysis::dvvp::common::config;
+using namespace analysis::dvvp::common::utils;
 
 PlatformAdapterInterface::PlatformAdapterInterface()
     : params_(nullptr)
@@ -39,22 +41,48 @@ int PlatformAdapterInterface::Init(SHARED_PTR_ALIA<analysis::dvvp::message::Prof
     return PROFILING_SUCCESS;
 }
 
+
+void PlatformAdapterInterface::SpliteAppPath(const std::string &appParams)
+{
+    std::string tmpAppParamers;
+    size_t index = appParams.find_first_of(" ");
+    if (index != std::string::npos) {
+        tmpAppParamers = appParams.substr(index + 1);
+    }
+    // cmd path
+    std::string cmdPath = appParams.substr(0, index);
+    cmdPath = Utils::RelativePathToAbsolutePath(cmdPath);
+    params_->cmdPath = cmdPath;
+    if (!Utils::IsAppName(cmdPath)) {
+        // bash xxx.sh args...
+        index = tmpAppParamers.find_first_of(" ");
+        if (index != std::string::npos) {
+            params_->app_parameters = tmpAppParamers.substr(index + 1);
+            Utils::SplitPath(tmpAppParamers.substr(0, index), params_->app_dir, params_->app);
+        }
+    } else {
+        // ./main args...
+        params_->app_parameters = tmpAppParamers;
+        Utils::SplitPath(cmdPath, params_->app_dir, params_->app);
+    }
+}
+
 void PlatformAdapterInterface::SetParamsForGlobal(struct CommonParams &comParams)
 {
     params_->profiling_mode = analysis::dvvp::message::PROFILING_MODE_DEF;
-    params_->result_dir = comParams.output;
-    params_->storageLimit = comParams.storageLimit;
-    params_->app = comParams.appPath;
-    params_->app_env = comParams.appEnv;
-    params_->msproftx = comParams.msproftx;
+    params_->result_dir = comParams.output.empty() ? params_->result_dir : comParams.output;
+    params_->storageLimit = comParams.storageLimit.empty() ? params_->storageLimit : comParams.storageLimit;
+    SpliteAppPath(comParams.appPath);
+    params_->app_env = comParams.appEnv.empty() ? params_->app_env : comParams.appEnv;
+    params_->msproftx = comParams.msproftx.empty() ? params_->msproftx : comParams.msproftx;
     params_->host_sys_pid = comParams.hostSysPid;
-    params_->pythonPath = comParams.pythonPath;
-    params_->parseSwitch = comParams.parseSwitch;
-    params_->querySwitch = comParams.querySwitch;
-    params_->exportSwitch = comParams.exportSwitch;
-    params_->exportSummaryFormat = comParams.exportSummaryFormat;
-    params_->exportIterationId = comParams.exportIterationId;
-    params_->exportModelId = comParams.exportModelId;
+    params_->pythonPath = comParams.pythonPath.empty() ? params_->pythonPath : comParams.pythonPath;
+    params_->parseSwitch = comParams.parseSwitch.empty() ? params_->parseSwitch : comParams.parseSwitch;
+    params_->querySwitch = comParams.querySwitch.empty() ? params_->querySwitch : comParams.querySwitch;
+    params_->exportSwitch = comParams.exportSwitch.empty() ? params_->exportSwitch : comParams.exportSwitch;
+    params_->exportSummaryFormat = comParams.exportSummaryFormat.empty() ? params_->exportSummaryFormat : comParams.exportSummaryFormat;
+    params_->exportIterationId = comParams.exportIterationId.empty() ? params_->exportIterationId : comParams.exportIterationId;
+    params_->exportModelId = comParams.exportModelId.empty() ? params_->exportModelId : comParams.exportModelId;
 }
 
 void PlatformAdapterInterface::SetParamsForTaskTime()
