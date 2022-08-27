@@ -1281,59 +1281,6 @@ int32_t ProfAclMgr::MsprofInitAclJson(VOID_PTR data, uint32_t len)
     return MSPROF_ERROR_NONE;
 }
 
-int ProfAclMgr::MsprofAiCoreMetricsAdapter(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params,
-    SHARED_PTR_ALIA<analysis::dvvp::proto::ProfGeOptionsConfig> inputCfgPb)
-{
-    std::string aiCoreMetrics = inputCfgPb->aic_metrics();
-    if (!aiCoreMetrics.empty()) {
-        int ret = ConfigManager::instance()->GetAicoreEvents(aiCoreMetrics, params->ai_core_profiling_events);
-        if (ret != PROFILING_SUCCESS) {
-            MSPROF_LOGE("The ai_core_metrics of input aclJsonConfig is invalid");
-            return MSPROF_ERROR_CONFIG_INVALID;
-        }
-        params->ai_core_profiling = MSVP_PROF_ON;
-        params->ai_core_metrics = aiCoreMetrics;
-        params->ai_core_profiling_mode = PROFILING_MODE_TASK_BASED;
-    }
-    MSPROF_LOGI("MsprofInitGeOptions, aicoreMetricsType:%s, aicoreEvents:%s", params->ai_core_metrics.c_str(),
-        params->ai_core_profiling_events.c_str());
-    return MSPROF_ERROR_NONE;
-}
-
-void ProfAclMgr::MsprofInitGeOptionsParamAdaper(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params,
-    const std::string &jobInfo, SHARED_PTR_ALIA<analysis::dvvp::proto::ProfGeOptionsConfig> inputCfgPb)
-{
-    if (params == nullptr) {
-        return;
-    }
-    params->profiling_mode = analysis::dvvp::message::PROFILING_MODE_DEF;
-    params->job_id = Utils::ProfCreateId(0);
-    params->jobInfo = jobInfo;
-    params->ts_keypoint = MSVP_PROF_ON;
-    resultPath_ = params_->result_dir;
-    baseDir_ = Utils::CreateTaskId(0);
-    if (inputCfgPb->aicpu() == MSVP_PROF_ON) {
-        params->aicpuTrace = MSVP_PROF_ON;
-    }
-    if (inputCfgPb->training_trace() == MSVP_PROF_ON) {
-        params->modelExecution = MSVP_PROF_ON;
-        params->runtimeTrace = MSVP_PROF_ON;
-        params->ts_fw_training = MSVP_PROF_ON;
-    }
-    if (inputCfgPb->task_trace() == MSVP_PROF_ON) {
-        params->modelExecution = MSVP_PROF_ON;
-        params->runtimeTrace = MSVP_PROF_ON;
-        params->hcclTrace = MSVP_PROF_ON;
-        params->ts_memcpy = MSVP_PROF_ON;
-        if (ConfigManager::instance()->GetPlatformType() == PlatformType::MINI_TYPE) {
-            params->ts_timeline = MSVP_PROF_ON;
-        } else {
-            params->hwts_log = MSVP_PROF_ON;
-        }
-    }
-    params_->low_power = inputCfgPb->power();
-    params_->hcclTrace = inputCfgPb->hccl();
-}
 
 int32_t ProfAclMgr::MsprofResultPathAdapter(const std::string &dir, std::string &resultPath)
 {
@@ -1365,55 +1312,6 @@ int32_t ProfAclMgr::MsprofInitForDynamic(VOID_PTR data /* = nullptr */, uint32_t
     UNUSED(data);
     UNUSED(len);
     MSPROF_EVENT("Init profiling for dynamic profiling");
-    return MSPROF_ERROR_NONE;
-}
-
-int32_t ProfAclMgr::MsprofGeOptionsParamConstruct(const std::string &jobInfo,
-    SHARED_PTR_ALIA<analysis::dvvp::proto::ProfGeOptionsConfig> inputCfgPb)
-{
-    if (params_ != nullptr) {
-        MSPROF_LOGW("MsprofInitGeOptions params exist");
-    } else {
-        MSVP_MAKE_SHARED0_RET(params_, analysis::dvvp::message::ProfileParams, MSPROF_ERROR_MEM_NOT_ENOUGH);
-    }
-    int ret = PROFILING_SUCCESS;
-    if (!Platform::instance()->PlatformIsHelperHostSide()) {
-        ret = MsprofResultPathAdapter(inputCfgPb->output(), params_->result_dir);
-        if (ret != PROFILING_SUCCESS) {
-            return MSPROF_ERROR_CONFIG_INVALID;
-        }
-    }
-    MsprofInitGeOptionsParamAdaper(params_, jobInfo, inputCfgPb);
-    MSPROF_LOGI("MsprofInitGeOptions, stars_acsq_task Param:%s"
-                "low_power:%s, hcclTrace:%s",
-        params_->stars_acsq_task.c_str(),
-        params_->low_power.c_str(), params_->hcclTrace.c_str());
-    ret = MsprofAiCoreMetricsAdapter(params_, inputCfgPb);
-    if (ret != PROFILING_SUCCESS) {
-        return MSPROF_ERROR_CONFIG_INVALID;
-    }
-    bool isValidSwith = ParamValidation::instance()->IsValidSwitch(inputCfgPb->l2());
-    if (!isValidSwith) {
-        MSPROF_LOGE("MsprofInitGeOptions, The l2 cache switch of input optionConfig is invalid");
-        std::string errReason = "l2 should be on or off";
-        MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
-            std::vector<std::string>({"l2", inputCfgPb->l2(), errReason}));
-        return MSPROF_ERROR_CONFIG_INVALID;
-    }
-    params_->l2CacheTaskProfiling = inputCfgPb->l2();
-    ConfigManager::instance()->MsprofL2CacheAdapter(params_);
-    params_->storageLimit = inputCfgPb->storage_limit();
-    storageLimit_ = params_->storageLimit;
-    if (!ParamValidation::instance()->CheckStorageLimit(storageLimit_)) {
-        MSPROF_LOGE("storage_limit para is invalid");
-        return MSPROF_ERROR_CONFIG_INVALID;
-    }
-    params_->biu = inputCfgPb->biu();
-    params_->biu_freq = static_cast<int32_t>(inputCfgPb->biu_freq());
-    if ((params_->biu.compare(MSVP_PROF_ON) == 0) &&
-        (!ParamValidation::instance()->CheckBiuFreqValid(params_->biu_freq))) {
-        return MSPROF_ERROR_CONFIG_INVALID;
-    }
     return MSPROF_ERROR_NONE;
 }
 
@@ -1453,12 +1351,10 @@ int32_t ProfAclMgr::MsprofInitGeOptions(VOID_PTR data, uint32_t len)
     if (ret != PROFILING_SUCCESS) {
         return MSPROF_ERROR_CONFIG_INVALID;
     }
-    return MSPROF_ERROR_CONFIG_INVALID;
-    // ret = MsprofGeOptionsParamConstruct(jobInfo, inputCfgPb);
-    // if (ret != MSPROF_ERROR_NONE) {
-    //     return ret;
-    // }
-    ProfDataTypeConfigHandle(params_);
+    params_->job_id = Utils::ProfCreateId(0);
+    params_->jobInfo = jobInfo;
+    AddAiCpuModelConf(params_->dataTypeConfig);
+    MsprofSetMemberValue();
     SetModeToCmd();
     return MSPROF_ERROR_NONE;
 }
