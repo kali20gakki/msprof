@@ -121,8 +121,39 @@ int MsprofParamAdapter::ParamsCheckMsprof(std::vector<std::pair<InputCfg, std::s
     return flag ? PROFILING_SUCCESS : PROFILING_FAILED;
 }
 
-void MsprofParamAdapter::SetDefaultParams()
+std::string MsprofParamAdapter::GetAppDir(const std::string appPath)
 {
+    if (appPath.empty()) {
+        return "";
+    }
+    std::string tmpAppParamers;
+    size_t index = appPath.find_first_of(" ");
+    if (index != std::string::npos) {
+        tmpAppParamers = appPath.substr(index + 1);
+    }
+    // cmd path
+    std::string cmdPath = appPath.substr(0, index);
+    cmdPath = Utils::RelativePathToAbsolutePath(cmdPath);
+    std::string appDir;
+    std::string app;
+    if (!Utils::IsAppName(cmdPath)) {
+        // bash xxx.sh args...
+        index = tmpAppParamers.find_first_of(" ");
+        if (index != std::string::npos) {
+            Utils::SplitPath(tmpAppParamers.substr(0, index), appDir, app);
+        }
+    } else {
+        // ./main args...
+        Utils::SplitPath(cmdPath, appDir, app);
+    }
+    return appDir;
+}
+
+void MsprofParamAdapter::SetDefaultParamsApp()
+{
+    if (paramContainer_[INPUT_CFG_COM_OUTPUT].empty()) {
+        paramContainer_[INPUT_CFG_COM_OUTPUT] = GetAppDir(paramContainer_[INPUT_CFG_MSPROF_APPLICATION]);
+    }
     if (paramContainer_[INPUT_CFG_COM_ASCENDCL].empty()) {
         paramContainer_[INPUT_CFG_COM_ASCENDCL] = MSVP_PROF_ON;
     }
@@ -145,6 +176,55 @@ void MsprofParamAdapter::SetDefaultParams()
         paramContainer_[INPUT_CFG_COM_AIV_FREQ] = std::to_string(THOUSAND / DEFAULT_PROFILING_INTERVAL_10MS);
     }
     paramContainer_[INPUT_CFG_COM_AIV_METRICS] = (paramContainer_[INPUT_CFG_COM_AIV_METRICS].empty()) ? PIPE_UTILIZATION : paramContainer_[INPUT_CFG_COM_AIV_METRICS];
+}
+
+int MsprofParamAdapter::GetMsprofMode()
+{
+    if (!paramContainer_[INPUT_CFG_MSPROF_APPLICATION].empty()) {
+        msprofMode_ = MSPROF_MODE_APP;
+        return PROFILING_SUCCESS;
+    }
+    if (!paramContainer_[INPUT_CFG_COM_SYS_DEVICES].empty()) {
+        msprofMode_ = MSPROF_MODE_SYSTEM;
+        return PROFILING_SUCCESS;
+    }
+    if (!paramContainer_[INPUT_CFG_HOST_SYS].empty()) {
+        msprofMode_ = MSPROF_MODE_SYSTEM;
+        return PROFILING_SUCCESS;
+    }
+    if (!paramContainer_[INPUT_CFG_PARSE].empty()) {
+        msprofMode_ = MSPROF_MODE_PARSE;
+        return PROFILING_SUCCESS;
+    }
+    if (!paramContainer_[INPUT_CFG_QUERY].empty()) {
+        msprofMode_ = MSPROF_MODE_QUERY;
+        return PROFILING_SUCCESS;
+    }
+    if (!paramContainer_[INPUT_CFG_EXPORT].empty()) {
+        msprofMode_ = MSPROF_MODE_EXPORT;
+        return PROFILING_SUCCESS;
+    }
+    return PROFILING_FAILED;
+}
+
+void MsprofParamAdapter::SetDefaultParamsSystem()
+{
+    return;
+}
+
+void MsprofParamAdapter::SetDefaultParamsParse()
+{
+    return;
+}
+
+void MsprofParamAdapter::SetDefaultParamsQuery()
+{
+    return;
+}
+
+void MsprofParamAdapter::SetDefaultParamsExport()
+{
+
 }
 
 int MsprofParamAdapter::GetParamFromInputCfg(std::unordered_map<int, std::pair<MsprofCmdInfo, std::string>> argvMap,
@@ -196,9 +276,33 @@ int MsprofParamAdapter::GetParamFromInputCfg(std::unordered_map<int, std::pair<M
         }
         return PROFILING_FAILED;
     }
-
+    // 判断模式
+    ret = GetMsprofMode();
+    if (ret != PROFILING_SUCCESS) {
+        CmdLog::instance()->CmdErrorLog("Get msprof running mode fail.");
+        return PROFILING_FAILED;
+    }
     // 默认值设置
-    SetDefaultParams();
+    switch (msprofMode_) {
+        case MSPROF_MODE_APP:
+            SetDefaultParamsApp();
+            break;
+        case MSPROF_MODE_SYSTEM:
+            SetDefaultParamsSystem();
+            break;
+        case MSPROF_MODE_PARSE:
+            SetDefaultParamsParse();
+            break;
+        case MSPROF_MODE_QUERY:
+            SetDefaultParamsQuery();
+            break;
+        case MSPROF_MODE_EXPORT:
+            SetDefaultParamsExport();
+            break;
+        default:
+            return PROFILING_FAILED;
+    }
+    
     ret = TransToParam(paramContainer_, params_);
     if (ret != PROFILING_SUCCESS) {
         return PROFILING_FAILED;

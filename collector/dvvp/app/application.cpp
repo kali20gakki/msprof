@@ -157,6 +157,9 @@ int Application::LaunchApp(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParam
         MSPROF_LOGE("Failed to PrepareAppEnvs, cmd:%s", cmd.c_str());
         return PROFILING_FAILED;
     }
+    // Debug
+    params->PrintAllFields();
+    return PROFILING_FAILED;
     appProcess = MSVP_MMPROCESS;  // run
     if (analysis::dvvp::common::utils::Utils::ChangeWorkDir(workDirPath) == PROFILING_FAILED) {
         return PROFILING_FAILED;

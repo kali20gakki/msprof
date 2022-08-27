@@ -83,7 +83,6 @@ public:
     int RunModeTasks() override;
 private:
     int StartAppTask(bool needWait = true);
-    void SetDefaultParams() const;
 };
 
 class SystemMode : public RunningMode {

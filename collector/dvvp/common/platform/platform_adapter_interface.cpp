@@ -41,38 +41,15 @@ int PlatformAdapterInterface::Init(SHARED_PTR_ALIA<analysis::dvvp::message::Prof
     return PROFILING_SUCCESS;
 }
 
-
-void PlatformAdapterInterface::SpliteAppPath(const std::string &appParams)
-{
-    std::string tmpAppParamers;
-    size_t index = appParams.find_first_of(" ");
-    if (index != std::string::npos) {
-        tmpAppParamers = appParams.substr(index + 1);
-    }
-    // cmd path
-    std::string cmdPath = appParams.substr(0, index);
-    cmdPath = Utils::RelativePathToAbsolutePath(cmdPath);
-    params_->cmdPath = cmdPath;
-    if (!Utils::IsAppName(cmdPath)) {
-        // bash xxx.sh args...
-        index = tmpAppParamers.find_first_of(" ");
-        if (index != std::string::npos) {
-            params_->app_parameters = tmpAppParamers.substr(index + 1);
-            Utils::SplitPath(tmpAppParamers.substr(0, index), params_->app_dir, params_->app);
-        }
-    } else {
-        // ./main args...
-        params_->app_parameters = tmpAppParamers;
-        Utils::SplitPath(cmdPath, params_->app_dir, params_->app);
-    }
-}
-
 void PlatformAdapterInterface::SetParamsForGlobal(struct CommonParams &comParams)
 {
     params_->profiling_mode = analysis::dvvp::message::PROFILING_MODE_DEF;
     params_->result_dir = comParams.output.empty() ? params_->result_dir : comParams.output;
     params_->storageLimit = comParams.storageLimit.empty() ? params_->storageLimit : comParams.storageLimit;
-    SpliteAppPath(comParams.appPath);
+    params_->app = comParams.app;
+    params_->cmdPath = comParams.appCmdPath;
+    params_->app_parameters = comParams.appParameters;
+    params_->app_dir = comParams.appDir;
     params_->app_env = comParams.appEnv.empty() ? params_->app_env : comParams.appEnv;
     params_->msproftx = comParams.msproftx.empty() ? params_->msproftx : comParams.msproftx;
     params_->host_sys_pid = comParams.hostSysPid;
@@ -83,13 +60,15 @@ void PlatformAdapterInterface::SetParamsForGlobal(struct CommonParams &comParams
     params_->exportSummaryFormat = comParams.exportSummaryFormat.empty() ? params_->exportSummaryFormat : comParams.exportSummaryFormat;
     params_->exportIterationId = comParams.exportIterationId.empty() ? params_->exportIterationId : comParams.exportIterationId;
     params_->exportModelId = comParams.exportModelId.empty() ? params_->exportModelId : comParams.exportModelId;
+    params_->devices = comParams.device;
+    params_->profiling_period = comParams.profilingPeriod;
 }
 
 void PlatformAdapterInterface::SetParamsForTaskTime()
 {
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_TASK_TS_KEYPOINT) != supportSwitch_.end()) {
         params_->ts_keypoint = MSPROF_SWITCH_ON;
-        params_->dataTypeConfig |= PROF_KEYPOINT_TRACE;
+        params_->dataTypeConfig |= PROF_KEYPOINT_TRACE | PROF_KEYPOINT_TRACE_HELPER;
     }
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_TASK_TS_TIMELINE) != supportSwitch_.end()) {
         params_->ts_timeline = MSPROF_SWITCH_ON;
@@ -116,6 +95,7 @@ void PlatformAdapterInterface::SetParamsForTaskTime()
     }
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_TASK_GRAPH_ENGINE) != supportSwitch_.end()) {
         params_->dataTypeConfig |= PROF_MODEL_EXECUTE;
+        params_->dataTypeConfig |= PROF_MODEL_LOAD;
     }
 }
 
@@ -129,18 +109,18 @@ void PlatformAdapterInterface::SetParamsForTaskTrace()
 
 void PlatformAdapterInterface::SetParamsForTrainingTrace()
 {
-    params_->ts_keypoint = MSPROF_SWITCH_ON;
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_TASK_TS_KEYPOINT_TRAINING) !=
         supportSwitch_.end()) {
         params_->ts_keypoint = MSPROF_SWITCH_ON;
         params_->ts_fw_training = MSPROF_SWITCH_ON;
-        params_->dataTypeConfig |= PROF_KEYPOINT_TRACE;
+        params_->dataTypeConfig |= PROF_KEYPOINT_TRACE | PROF_KEYPOINT_TRACE_HELPER;
     }
 }
 
 void PlatformAdapterInterface::SetParamsForAscendCL()
 {
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_TASK_ASCENDCL) != supportSwitch_.end()) {
+        params_->acl = MSPROF_SWITCH_ON;
         params_->dataTypeConfig |= PROF_ACL_API;
     }
 }
@@ -148,6 +128,7 @@ void PlatformAdapterInterface::SetParamsForAscendCL()
 void PlatformAdapterInterface::SetParamsForGE()
 {
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_TASK_GRAPH_ENGINE) != supportSwitch_.end()) {
+        params_->modelExecution = MSPROF_SWITCH_ON;
         params_->dataTypeConfig |= PROF_MODEL_EXECUTE;
     }
 }
@@ -155,6 +136,7 @@ void PlatformAdapterInterface::SetParamsForGE()
 void PlatformAdapterInterface::SetParamsForRuntime()
 {
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_TASK_RUNTIME) != supportSwitch_.end()) {
+        params_->runtimeApi = MSPROF_SWITCH_ON;
         params_->dataTypeConfig |= PROF_RUNTIME_API;
     }
 }
@@ -162,6 +144,7 @@ void PlatformAdapterInterface::SetParamsForRuntime()
 void PlatformAdapterInterface::SetParamsForAICPU()
 {
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_TASK_AICPU) != supportSwitch_.end()) {
+        params_->aicpuTrace = MSPROF_SWITCH_ON;
         params_->dataTypeConfig |= PROF_AICPU_TRACE;
     }
 }
@@ -169,6 +152,7 @@ void PlatformAdapterInterface::SetParamsForAICPU()
 void PlatformAdapterInterface::SetParamsForHCCL()
 {
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_TASK_HCCL) != supportSwitch_.end()) {
+        params_->hcclTrace = MSPROF_SWITCH_ON;
         params_->dataTypeConfig |= PROF_HCCL_TRACE;
     }
 }

@@ -148,6 +148,9 @@ public:
     int MsprofCheckSummaryFormatValid(const std::string &formatParam) const;
     int MsprofCheckExportIdValid(const std::string &idParam, const std::string &exportIdType) const;
     std::string SetOutputDir(const std::string &outputDir);
+
+private:
+    void SpliteAppPath(const std::string &appParams, std::string &cmdPath, std::string &appParameters, std::string &appDir, std::string &app);
 private:
     std::vector<InputCfg> commonConfig_;
     std::vector<InputCfg> blackSwitch_;
