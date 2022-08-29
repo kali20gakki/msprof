@@ -854,7 +854,7 @@ void AclApiParamAdapter::ProfTaskCfgToContainer(const ProfConfig * apiCfg,
         paramContainer_[INPUT_CFG_COM_STORAGE_LIMIT] = argsArr[ACL_PROF_STORAGE_LIMIT];
         setConfig_.insert(INPUT_CFG_COM_STORAGE_LIMIT);
     }
-    // 是否可以合并
+
     uint64_t dataTypeConfig = apiCfg->dataTypeConfig;
     ProfAicoreMetrics aicMetrics = apiCfg->aicoreMetrics;
     if (GetPlatform() == PlatformType::MINI_TYPE) {
@@ -868,7 +868,7 @@ void AclApiParamAdapter::ProfTaskCfgToContainer(const ProfConfig * apiCfg,
         setConfig_.insert(INPUT_CFG_COM_TASK_TIME);
     }
     // training trace
-    if (dataTypeConfig & PROF_TRAINING_TRACE_MASK) {
+    if (dataTypeConfig & PROF_KEYPOINT_TRACE_MASK) {
         paramContainer_[INPUT_CFG_COM_TRAINING_TRACE] = MSVP_PROF_ON;
         setConfig_.insert(INPUT_CFG_COM_TRAINING_TRACE);
     }
@@ -990,7 +990,6 @@ int AclApiParamAdapter::GetParamFromInputCfg(const ProfConfig * apiCfg,
     std::array<std::string, ACL_PROF_ARGS_MAX> argsArr,
     SHARED_PTR_ALIA<ProfileParams> params)
 {
-    MSPROF_LOGE("[qqq]GetParamFromInputCfg start");
     params_ = params;
     int ret = Init();
     if (ret != PROFILING_SUCCESS) {

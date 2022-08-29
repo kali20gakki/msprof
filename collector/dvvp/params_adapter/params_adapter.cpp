@@ -256,7 +256,6 @@ int ParamsAdapter::TransToParam(std::array<std::string, INPUT_CFG_MAX> paramCont
             adapter->SetParamsForHostSysAllPidMemUsage(); // Host-Sys Mem
         }
     }
-    params->PrintAllFields();
     return PROFILING_SUCCESS;
 }
 
