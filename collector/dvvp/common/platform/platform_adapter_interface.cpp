@@ -81,10 +81,7 @@ void PlatformAdapterInterface::SetParamsForTaskTime()
         params_->ts_memcpy = MSPROF_SWITCH_ON;
         params_->dataTypeConfig |= PROF_TASK_TIME;
     }
-    if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_TASK_GRAPH_ENGINE) != supportSwitch_.end()) {
-        params_->dataTypeConfig |= PROF_MODEL_EXECUTE;
-        params_->dataTypeConfig |= PROF_MODEL_LOAD;
-    }
+    SetParamsForGE();
 }
 
 void PlatformAdapterInterface::SetParamsForTaskTrace()
@@ -108,7 +105,6 @@ void PlatformAdapterInterface::SetParamsForTrainingTrace()
 void PlatformAdapterInterface::SetParamsForAscendCL()
 {
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_TASK_ASCENDCL) != supportSwitch_.end()) {
-        params_->acl = MSPROF_SWITCH_ON;
         params_->dataTypeConfig |= PROF_ACL_API;
     }
 }
@@ -116,15 +112,15 @@ void PlatformAdapterInterface::SetParamsForAscendCL()
 void PlatformAdapterInterface::SetParamsForGE()
 {
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_TASK_GRAPH_ENGINE) != supportSwitch_.end()) {
-        params_->modelExecution = MSPROF_SWITCH_ON;
-        params_->dataTypeConfig |= PROF_MODEL_EXECUTE;
+        params_->dataTypeConfig |= PROF_MODEL_EXECUTE; // model_time_info data
+        params_->dataTypeConfig |= PROF_MODEL_LOAD;
+        params_->dataTypeConfig |= PROF_OP_DETAIL;  // dynamic_op_execute data
     }
 }
 
 void PlatformAdapterInterface::SetParamsForRuntime()
 {
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_TASK_RUNTIME) != supportSwitch_.end()) {
-        params_->runtimeApi = MSPROF_SWITCH_ON;
         params_->dataTypeConfig |= PROF_RUNTIME_API;
     }
 }
@@ -132,7 +128,6 @@ void PlatformAdapterInterface::SetParamsForRuntime()
 void PlatformAdapterInterface::SetParamsForAICPU()
 {
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_TASK_AICPU) != supportSwitch_.end()) {
-        params_->aicpuTrace = MSPROF_SWITCH_ON;
         params_->dataTypeConfig |= PROF_AICPU_TRACE;
     }
 }
@@ -140,7 +135,6 @@ void PlatformAdapterInterface::SetParamsForAICPU()
 void PlatformAdapterInterface::SetParamsForHCCL()
 {
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_TASK_HCCL) != supportSwitch_.end()) {
-        params_->hcclTrace = MSPROF_SWITCH_ON;
         params_->dataTypeConfig |= PROF_HCCL_TRACE;
     }
 }

@@ -372,22 +372,12 @@ int ProfAclMgr::ProfAclStart(PROF_CONF_CONST_PTR profStartCfg)
     // generate params
     MSVP_MAKE_SHARED0_RET(params_, analysis::dvvp::message::ProfileParams, ACL_ERROR_PROFILING_FAILURE);
     params_->result_dir = resultPath_;
-    params_->profiling_mode = analysis::dvvp::message::PROFILING_MODE_DEF;
     auto paramsAdapter = AclApiParamAdapter();
     ret = paramsAdapter.GetParamFromInputCfg(profStartCfg, argsArr_, params_);
     if (ret != PROFILING_SUCCESS) {
         MSPROF_LOGE("[qqq]");
         return ACL_ERROR_PROFILING_FAILURE;
     }
-    return ACL_ERROR_PROFILING_FAILURE;
-    SHARED_PTR_ALIA<analysis::dvvp::proto::MsProfStartReq> feature = nullptr;
-    MSVP_MAKE_SHARED0_RET(feature, analysis::dvvp::proto::MsProfStartReq, ACL_ERROR_PROFILING_FAILURE);
-    ProfStartCfgToMsprofCfg(profStartCfg->dataTypeConfig, profStartCfg->aicoreMetrics, feature);
-    GenerateSystemTraceConf(profStartCfg->dataTypeConfig, profStartCfg->aicoreMetrics, feature, params_);
-    ProfParamsAdapter::instance()->UpdateSampleConfig(feature, params_);
-    ProfParamsAdapter::instance()->ProfStartCfgToParamsCfg(profStartCfg->dataTypeConfig, params_);
-    params_->ts_keypoint = MSVP_PROF_ON;
-
     for (uint32_t i = 0; i < profStartCfg->devNums; i++) {
         uint32_t devId = profStartCfg->devIdList[i];
         MSPROF_LOGI("Process ProfAclStart of device %u", devId);
@@ -1352,7 +1342,6 @@ int32_t ProfAclMgr::MsprofInitAclEnv(const std::string &envValue)
         MSPROF_INNER_ERROR("EK9999", "ProfileParams Parse Failed %s", envValue.c_str());
         return MSPROF_ERROR;
     }
-    params_->runtimeTrace = MSVP_PROF_ON;
     params_->host_sys_pid = analysis::dvvp::common::utils::Utils::GetPid();
     resultPath_ = params_->result_dir;
     baseDir_ = Utils::CreateTaskId(0);

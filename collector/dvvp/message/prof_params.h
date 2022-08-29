@@ -124,12 +124,6 @@ struct ProfileParams : BaseInfo {
     int biu_freq;
 
     // for msprof
-    std::string acl;
-    std::string modelExecution;
-    std::string runtimeApi;
-    std::string aicpuTrace;
-    std::string runtimeTrace;
-    std::string hcclTrace;
     std::string modelLoad;
     std::string msprof;
     std::string msproftx;
@@ -180,8 +174,8 @@ struct ProfileParams : BaseInfo {
           hccsProfiling("off"), hccsInterval(DEFAULT_PROFILING_INTERVAL_20MS),
           pcieInterval(DEFAULT_PROFILING_INTERVAL_20MS),
           dvpp_profiling("off"), dvpp_sampling_interval(DEFAULT_PROFILING_INTERVAL_20MS),
-          biu_freq(DEFAULT_PROFILING_BIU_FREQ), modelExecution("off"),
-          runtimeApi("off"), msprof("off"), msproftx("off"),
+          biu_freq(DEFAULT_PROFILING_BIU_FREQ),
+          msprof("off"), msproftx("off"),
           host_sys(""), host_sys_pid(HOST_PID_DEFAULT),
           host_disk_profiling("off"), host_osrt_profiling("off"),
           host_profiling(FALSE), host_cpu_profiling("off"),
@@ -289,12 +283,6 @@ struct ProfileParams : BaseInfo {
     {
         SET_VALUE(object, dvpp_sampling_interval);
         SET_VALUE(object, aicore_sampling_interval);
-        SET_VALUE(object, acl);
-        SET_VALUE(object, modelExecution);
-        SET_VALUE(object, runtimeApi);
-        SET_VALUE(object, aicpuTrace);
-        SET_VALUE(object, runtimeTrace);
-        SET_VALUE(object, hcclTrace);
         SET_VALUE(object, modelLoad);
         SET_VALUE(object, msprof);
         SET_VALUE(object, msproftx);
@@ -411,12 +399,6 @@ struct ProfileParams : BaseInfo {
 
     void FromObjectPartTwo(const nlohmann::json &object)
     {
-        FROM_STRING_VALUE(object, acl);
-        FROM_STRING_VALUE(object, modelExecution);
-        FROM_STRING_VALUE(object, runtimeApi);
-        FROM_STRING_VALUE(object, aicpuTrace);
-        FROM_STRING_VALUE(object, runtimeTrace);
-        FROM_STRING_VALUE(object, hcclTrace);
         FROM_STRING_VALUE(object, modelLoad);
         FROM_STRING_VALUE(object, msprof);
         FROM_STRING_VALUE(object, msproftx);
