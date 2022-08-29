@@ -691,7 +691,10 @@ int GeOptParamAdapter::GenGeOptionsContainer(SHARED_PTR_ALIA<ProfGeOptionsConfig
 void GeOptParamAdapter::SetGeOptionsContainerDefaultValue()
 {
     if (!Platform::instance()->PlatformIsHelperHostSide()) {
-        paramContainer_[INPUT_CFG_COM_OUTPUT] = SetOutputDir(paramContainer_[INPUT_CFG_COM_OUTPUT]);
+        int ret = SetOutputDir(paramContainer_[INPUT_CFG_COM_OUTPUT]);
+        if (ret != PROFILING_SUCCESS) {
+            return PROFILING_FAILED;
+        }
     } else {
         paramContainer_[INPUT_CFG_COM_OUTPUT].clear();
     }
