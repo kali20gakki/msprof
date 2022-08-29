@@ -121,38 +121,11 @@ int MsprofParamAdapter::ParamsCheckMsprof(std::vector<std::pair<InputCfg, std::s
     return flag ? PROFILING_SUCCESS : PROFILING_FAILED;
 }
 
-std::string MsprofParamAdapter::GetAppDir(const std::string appPath)
-{
-    if (appPath.empty()) {
-        return "";
-    }
-    std::string tmpAppParamers;
-    size_t index = appPath.find_first_of(" ");
-    if (index != std::string::npos) {
-        tmpAppParamers = appPath.substr(index + 1);
-    }
-    // cmd path
-    std::string cmdPath = appPath.substr(0, index);
-    cmdPath = Utils::RelativePathToAbsolutePath(cmdPath);
-    std::string appDir;
-    std::string app;
-    if (!Utils::IsAppName(cmdPath)) {
-        // bash xxx.sh args...
-        index = tmpAppParamers.find_first_of(" ");
-        if (index != std::string::npos) {
-            Utils::SplitPath(tmpAppParamers.substr(0, index), appDir, app);
-        }
-    } else {
-        // ./main args...
-        Utils::SplitPath(cmdPath, appDir, app);
-    }
-    return appDir;
-}
 
 void MsprofParamAdapter::SetDefaultParamsApp()
 {
     if (paramContainer_[INPUT_CFG_COM_OUTPUT].empty()) {
-        paramContainer_[INPUT_CFG_COM_OUTPUT] = GetAppDir(paramContainer_[INPUT_CFG_MSPROF_APPLICATION]);
+        paramContainer_[INPUT_CFG_COM_OUTPUT] = appDir_;
     }
     if (paramContainer_[INPUT_CFG_COM_ASCENDCL].empty()) {
         paramContainer_[INPUT_CFG_COM_ASCENDCL] = MSVP_PROF_ON;
@@ -182,6 +155,7 @@ int MsprofParamAdapter::GetMsprofMode()
 {
     if (!paramContainer_[INPUT_CFG_MSPROF_APPLICATION].empty()) {
         msprofMode_ = MSPROF_MODE_APP;
+        SpliteAppPath(paramContainer_[INPUT_CFG_MSPROF_APPLICATION]);
         return PROFILING_SUCCESS;
     }
     if (!paramContainer_[INPUT_CFG_COM_SYS_DEVICES].empty()) {
@@ -255,7 +229,6 @@ void MsprofParamAdapter::SpliteAppPath(const std::string &appParams)
 
 void MsprofParamAdapter::SetParamsSelf()
 {
-    SpliteAppPath(paramContainer_[INPUT_CFG_MSPROF_APPLICATION]);
     params_->app = app_;
     params_->cmdPath = cmdPath_;
     params_->app_parameters = appParameters_;
