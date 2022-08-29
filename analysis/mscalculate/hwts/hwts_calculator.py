@@ -43,8 +43,6 @@ class HwtsCalculator(ICalculator, MsMultiProcess):
     HWTS_LOG_SIZE = 64
     HWTS_MAX_CNT = 16
     TASK_TIME_COMPLETE_INDEX = 3
-    STREAM_TASK_KEY_FMT = "{0}-{1}"
-    STREAM_TASK_BATCH_KEY_FMT = "{0}-{1}-{2}"
 
     def __init__(self: any, file_list: dict, sample_config: dict) -> None:
         super().__init__(sample_config)
@@ -89,8 +87,8 @@ class HwtsCalculator(ICalculator, MsMultiProcess):
         if not ProfilingScene().is_operator():
             iter_range = MsprofIteration(self._project_path). \
                 get_iter_id_by_index_id(self._sample_config.get("iter_id"), self._sample_config.get("model_id"))
-            # todo 模式场景下这种写法也许有问题
             if len(iter_range) >= 2:
+                # if not chip2, there is no mix operator and graph
                 iter_id = iter_range[1]
 
         aicpu_collector = AICpuFromTsCollector(self._project_path)
