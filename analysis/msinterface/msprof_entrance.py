@@ -7,6 +7,7 @@ import argparse
 import os
 import sys
 
+from common_func.common import call_sys_exit
 from common_func.common import error
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msprof_exception import ProfException
@@ -66,7 +67,7 @@ class MsprofEntrance:
         args = parser.parse_args(sys.argv[1:])
         if len(sys.argv) < 2:
             parser.print_help()
-            sys.exit(ProfException.PROF_INVALID_PARAM_ERROR)
+            call_sys_exit(ProfException.PROF_INVALID_PARAM_ERROR)
 
         if hasattr(args, "collection_path"):
             path_len = len(os.path.realpath(args.collection_path))
@@ -74,7 +75,7 @@ class MsprofEntrance:
                 error(self.FILE_NAME,
                       "Please ensure the length of input dir absolute path(%s) less than %s" %
                       (path_len, NumberConstant.PROF_PATH_MAX_LEN))
-                sys.exit(ProfException.PROF_INVALID_PARAM_ERROR)
+                call_sys_exit(ProfException.PROF_INVALID_PARAM_ERROR)
 
         command_handler = {
             'export': {'parser': export_parser,
@@ -90,10 +91,10 @@ class MsprofEntrance:
         try:
             handler.get('handler')(handler.get('parser'), args)
         except ProfException as ex:
-            sys.exit(ex.code)
+            call_sys_exit(ex.code)
         finally:
             pass
-        sys.exit(ProfException.PROF_NONE_ERROR)
+        call_sys_exit(ProfException.PROF_NONE_ERROR)
 
     def construct_arg_parser(self: any) -> tuple:
         """

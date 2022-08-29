@@ -62,7 +62,7 @@ void MsprofCallbackHandler::ForceFlush(const std::string &devId)
         if (!devId.empty()) {
             reporter_->DumpModelLoadData(devId);
         }
-        (std::dynamic_pointer_cast<Msprof::Engine::Reporter>(reporter_))->Flush();
+        (std::dynamic_pointer_cast<Msprof::Engine::ProfReporter>(reporter_))->Flush();
     }
 }
 
@@ -107,10 +107,10 @@ int MsprofCallbackHandler::FlushData()
 {
     MSPROF_LOGI("FlushData from module: %s", module_.c_str());
     if (reporter_ == nullptr) {
-        MSPROF_LOGE("Reporter is not started, module: %s", module_.c_str());
+        MSPROF_LOGE("ProfReporter is not started, module: %s", module_.c_str());
         return PROFILING_FAILED;
     }
-    return (std::dynamic_pointer_cast<Msprof::Engine::Reporter>(reporter_))->Flush();
+    return (std::dynamic_pointer_cast<Msprof::Engine::ProfReporter>(reporter_))->Flush();
 }
 
 int MsprofCallbackHandler::StartReporter()
@@ -121,7 +121,7 @@ int MsprofCallbackHandler::StartReporter()
         return PROFILING_FAILED;
     }
     if (reporter_ != nullptr) {
-        MSPROF_LOGW("Reporter is already started, module: %s", module_.c_str());
+        MSPROF_LOGW("ProfReporter is already started, module: %s", module_.c_str());
         return PROFILING_SUCCESS;
     }
     if (!Msprofiler::Api::ProfAclMgr::instance()->IsInited()) {
@@ -147,10 +147,10 @@ int MsprofCallbackHandler::StopReporter()
 {
     MSPROF_LOGI("StopReporter from module: %s", module_.c_str());
     if (reporter_ == nullptr) {
-        MSPROF_LOGW("Reporter is not started, module: %s", module_.c_str());
+        MSPROF_LOGW("ProfReporter is not started, module: %s", module_.c_str());
         return PROFILING_SUCCESS;
     }
-    (std::dynamic_pointer_cast<Msprof::Engine::Reporter>(reporter_))->Flush();
+    (std::dynamic_pointer_cast<Msprof::Engine::ProfReporter>(reporter_))->Flush();
     int ret = reporter_->Stop();
     if (ret != PROFILING_SUCCESS) {
         MSPROF_LOGE("Failed to stop reporter of %s", module_.c_str());
