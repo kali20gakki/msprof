@@ -1204,7 +1204,6 @@ void ProfAclMgr::MsprofSetMemberValue()
     storageLimit_ = params_->storageLimit;
     resultPath_ = params_->result_dir;
     baseDir_ = Utils::CreateTaskId(0);
-    dataTypeConfig_ = params_->dataTypeConfig;
 }
 
 int32_t ProfAclMgr::MsprofInitAclJson(VOID_PTR data, uint32_t len)
@@ -1241,8 +1240,8 @@ int32_t ProfAclMgr::MsprofInitAclJson(VOID_PTR data, uint32_t len)
         return MSPROF_ERROR_CONFIG_INVALID;
     }
     params_->job_id = Utils::ProfCreateId(0);
-    AddAiCpuModelConf(params_->dataTypeConfig);
     MsprofSetMemberValue();
+    ProfDataTypeConfigHandle(params_);
     SetModeToCmd();
     return MSPROF_ERROR_NONE;
 }
@@ -1319,8 +1318,8 @@ int32_t ProfAclMgr::MsprofInitGeOptions(VOID_PTR data, uint32_t len)
     }
     params_->job_id = Utils::ProfCreateId(0);
     params_->jobInfo = jobInfo;
-    AddAiCpuModelConf(params_->dataTypeConfig);
     MsprofSetMemberValue();
+    ProfDataTypeConfigHandle(params_);
     SetModeToCmd();
     return MSPROF_ERROR_NONE;
 }
