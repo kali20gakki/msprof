@@ -45,16 +45,17 @@ class TsTrackModel(BaseModel, ABC):
         """
         iter_time_range = list(chain.from_iterable(
             MsprofIteration(self.result_dir).get_iteration_time(index_id, model_id)))
-        if not iter_time_range:
-            sql = "select stream_id, task_id, timestamp, task_state from {0} where task_type={1} " \
-                  "order by timestamp".format(DBNameConstant.TABLE_TASK_TYPE, self.TS_AI_CPU_TYPE)
-            ai_cpu_with_state = DBManager.fetch_all_data(self.cur, sql)
-        else:
-            sql = "select stream_id, task_id, timestamp, " \
-                  "task_state from {0} where task_type={1} order by timestamp ".format(
-                DBNameConstant.TABLE_TASK_TYPE,
-                self.TS_AI_CPU_TYPE)
-            ai_cpu_with_state = DBManager.fetch_all_data(self.cur, sql)
+        sql = "select stream_id, task_id, timestamp, " \
+              "task_state from {0} where task_type={1} order by timestamp ".format(
+            DBNameConstant.TABLE_TASK_TYPE,
+            self.TS_AI_CPU_TYPE)
+        ai_cpu_with_state = DBManager.fetch_all_data(self.cur, sql)
+
+        for index, datum in enumerate(ai_cpu_with_state):
+            ai_cpu_with_state[index] = list(datum)
+            ai_cpu_with_state[index][2] = int(datum[2])
+
+        if iter_time_range:
             min_timestamp = min(iter_time_range)
             max_timestamp = max(iter_time_range)
 

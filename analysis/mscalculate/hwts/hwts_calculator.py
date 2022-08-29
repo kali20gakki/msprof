@@ -94,8 +94,11 @@ class HwtsCalculator(ICalculator, MsMultiProcess):
         aicpu_collector = AICpuFromTsCollector(self._project_path)
 
         for stream_id, task_id, nano_start, nano_end, _, _, batch_id in hwts_task_with_batch:
-            aicpu_collector.filter_aicpu(stream_id, task_id, nano_start / NumberConstant.MS_TO_NS,
-                                         nano_end / NumberConstant.MS_TO_NS, batch_id, iter_id)
+            aicpu_feature = [stream_id, task_id,
+                             nano_start / NumberConstant.MS_TO_NS,
+                             nano_end / NumberConstant.MS_TO_NS,
+                             batch_id, iter_id]
+            aicpu_collector.filter_aicpu(aicpu_feature)
         aicpu_collector.save_aicpu()
 
     def ms_run(self: any) -> None:

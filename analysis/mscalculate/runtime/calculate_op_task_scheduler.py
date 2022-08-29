@@ -118,7 +118,8 @@ class CalculateOpTaskScheduler:
             end = task_time[10] / NumberConstant.MS_TO_NS
             batch_id = task_time[12]
 
-            aicpu_collector.filter_aicpu(stream_id, task_id, start, end, batch_id, NumberConstant.INVALID_ITER_ID)
+            aicpu_feature = [stream_id, task_id, start, end, batch_id, NumberConstant.INVALID_ITER_ID]
+            aicpu_collector.filter_aicpu(aicpu_feature)
         aicpu_collector.save_aicpu()
 
     def op_pre_mini_task_data(self: any, project_path: str, device_id: int) -> None:
