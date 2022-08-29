@@ -599,6 +599,175 @@ int ParamsAdapter::MsprofCheckHostSysValid(const std::string &hostSysParam) cons
     return PROFILING_SUCCESS;
 }
 
+int ParamsAdapter::CheckHostSysToolsExit(const std::string &hostSysParam, const std::string &resultDir,
+    const std::string &appDir) const
+{
+    if (hostSysParam.empty()) {
+        MSPROF_LOGE("Argument --host-sys is empty. Please input in the range of "
+            "'cpu|mem|disk|network|osrt'");
+        return PROFILING_FAILED;
+    }
+    std::vector<std::string> hostSysArray = Utils::Split(hostSysParam, false, "", ",");
+    if (std::find(hostSysArray.begin(), hostSysArray.end(), HOST_SYS_OSRT) != hostSysArray.end()) {
+        if (CheckHostSysToolsIsExist(TOOL_NAME_PERF, resultDir, appDir) != PROFILING_SUCCESS) {
+            MSPROF_LOGE("The tool perf is invalid, please check if the tool and sudo are available.");
+            return PROFILING_FAILED;
+        }
+        if (CheckHostSysToolsIsExist(TOOL_NAME_LTRACE, resultDir, appDir) != PROFILING_SUCCESS) {
+            MSPROF_LOGE("The tool ltrace is invalid, please check if the tool and sudo are available.");
+            return PROFILING_FAILED;
+        }
+    }
+    if (std::find(hostSysArray.begin(), hostSysArray.end(), HOST_SYS_DISK) != hostSysArray.end()) {
+        if (CheckHostSysToolsIsExist(TOOL_NAME_IOTOP, resultDir, appDir) != PROFILING_SUCCESS) {
+            MSPROF_LOGE("The tool iotop is invalid, please check if the tool and sudo are available.");
+            return PROFILING_FAILED;
+        }
+    }
+    return PROFILING_SUCCESS;
+}
+
+int ParamsAdapter::CheckHostSysToolsIsExist(const std::string toolName, const std::string &resultDir,
+    const std::string &appDir) const
+{
+    if (resultDir.empty() && appDir.empty()) {
+        MSPROF_LOGE("If you want to use this parameter:--host-sys,"
+            "please put it behind the --output or --application. ");
+        return PROFILING_FAILED;
+    }
+    MSPROF_LOGI("Start the detection tool.");
+    std::string tmpDir;
+    if (!resultDir.empty()) {
+        tmpDir = resultDir;
+    } else if (!appDir.empty()) {
+        tmpDir = appDir;
+    }
+    static const std::string ENV_PATH = "PATH=/usr/bin/:/usr/sbin:/var";
+    std::vector<std::string> envV;
+    envV.push_back(ENV_PATH);
+    std::vector<std::string> argsV;
+    argsV.push_back(PROF_SCRIPT_FILE_PATH);
+    argsV.push_back("get-version");
+    argsV.push_back(toolName);
+    unsigned long long startRealtime = analysis::dvvp::common::utils::Utils::GetClockRealtime();
+    tmpDir += "/tmpPrint" + std::to_string(startRealtime);
+    int exitCode = analysis::dvvp::common::utils::INVALID_EXIT_CODE;
+    static const std::string CMD = "sudo";
+    mmProcess tmpProcess = MSVP_MMPROCESS;
+    ExecCmdParams execCmdParams(CMD, true, tmpDir);
+    int ret = analysis::dvvp::common::utils::Utils::ExecCmd(execCmdParams,
+                                                            argsV,
+                                                            envV,
+                                                            exitCode,
+                                                            tmpProcess);
+    FUNRET_CHECK_FAIL_PRINT(ret, PROFILING_SUCCESS);
+    ret = CheckHostSysCmdOutIsExist(tmpDir, toolName, tmpProcess);
+    return ret;
+}
+
+int ParamsAdapter::CheckHostSysCmdOutIsExist(const std::string tmpDir, const std::string toolName,
+                                           const mmProcess tmpProcess) const
+{
+    MSPROF_LOGI("Start to check whether the file exists.");
+    for (int i = 0; i < FILE_FIND_REPLAY; i++) {
+        if (!(Utils::IsFileExist(tmpDir))) {
+            MmSleep(20); // If the file is not found, the delay is 20 ms.
+            continue;
+        } else {
+            break;
+        }
+    }
+    for (int i = 0; i < FILE_FIND_REPLAY; i++) {
+        long long len = analysis::dvvp::common::utils::Utils::GetFileSize(tmpDir);
+        if (len < static_cast<int>(toolName.length())) {
+            MmSleep(5); // If the file has no content, the delay is 5 ms.
+            continue;
+        } else {
+            break;
+        }
+    }
+    std::ifstream in(tmpDir);
+    std::ostringstream tmp;
+    tmp << in.rdbuf();
+    std::string tmpStr = tmp.str();
+    MmUnlink(tmpDir);
+    int ret = CheckHostOutString(tmpStr, toolName);
+    if (ret != PROFILING_SUCCESS) {
+        ret = UninitCheckHostSysCmd(tmpProcess); // stop check process.
+        if (ret != PROFILING_SUCCESS) {
+            MSPROF_LOGE("Failed to kill the process.");
+        }
+        MSPROF_LOGE("The tool %s useless", toolName.c_str());
+        return PROFILING_FAILED;
+    }
+    return ret;
+}
+
+int ParamsAdapter::CheckHostOutString(const std::string tmpStr, const std::string toolName) const
+{
+    std::vector<std::string> checkToolArray = Utils::Split(tmpStr.c_str());
+    if (checkToolArray.size() > 0) {
+        if (checkToolArray[0].compare(toolName) == 0) {
+            MSPROF_LOGI("The returned value is correct.%s", checkToolArray[0].c_str());
+            return PROFILING_SUCCESS;
+        } else {
+            MSPROF_LOGE("The return value is incorrect.%s", checkToolArray[0].c_str());
+            return PROFILING_FAILED;
+        }
+    }
+    MSPROF_LOGE("The file has no content.");
+    return PROFILING_FAILED;
+}
+
+int ParamsAdapter::UninitCheckHostSysCmd(const mmProcess checkProcess) const
+{
+    if (!(ParamValidation::instance()->CheckHostSysPidIsValid(reinterpret_cast<int>(checkProcess)))) {
+        return PROFILING_FAILED;
+    }
+    if (!analysis::dvvp::common::utils::Utils::ProcessIsRuning(checkProcess)) {
+        MSPROF_LOGI("Process:%d is not exist", reinterpret_cast<int>(checkProcess));
+        return PROFILING_SUCCESS;
+    }
+    static const std::string ENV_PATH = "PATH=/usr/bin/:/usr/sbin:/var:/bin";
+    std::vector<std::string> envV;
+    envV.push_back(ENV_PATH);
+    std::vector<std::string> argsV;
+    std::string killCmd = "kill -2 " + std::to_string(reinterpret_cast<int>(checkProcess));
+    argsV.push_back("-c");
+    argsV.push_back(killCmd);
+    int exitCode = analysis::dvvp::common::utils::VALID_EXIT_CODE;
+    static const std::string CMD = "sh";
+    mmProcess tmpProcess = MSVP_MMPROCESS;
+    ExecCmdParams execCmdParams(CMD, true, "");
+    int ret = PROFILING_SUCCESS;
+    for (int i = 0; i < FILE_FIND_REPLAY; i++) {
+        if (ParamValidation::instance()->CheckHostSysPidIsValid(reinterpret_cast<int>(checkProcess))) {
+            ret = analysis::dvvp::common::utils::Utils::ExecCmd(execCmdParams, argsV, envV, exitCode, tmpProcess);
+            MmSleep(20); // If failed stop check process, the delay is 20 ms.
+            continue;
+        } else {
+            break;
+        }
+    }
+    if (checkProcess > 0) {
+        bool isExited = false;
+        ret = analysis::dvvp::common::utils::Utils::WaitProcess(checkProcess,
+                                                                isExited,
+                                                                exitCode,
+                                                                true);
+        if (ret != PROFILING_SUCCESS) {
+            ret = PROFILING_FAILED;
+            MSPROF_LOGE("Failed to wait process %d, ret=%d",
+                        reinterpret_cast<int>(checkProcess), ret);
+        } else {
+            ret = PROFILING_SUCCESS;
+            MSPROF_LOGI("Process %d exited, exit code=%d",
+                        reinterpret_cast<int>(checkProcess), exitCode);
+        }
+    }
+    return ret;
+}
+
 int ParamsAdapter::MsprofCheckHostSysPidValid(const std::string &hostSysPidParam) const
 {
    if (!ParamValidation::instance()->CheckHostSysPidValid(hostSysPidParam)) {
@@ -636,31 +805,6 @@ void ParamsAdapter::Print(std::array<std::string, INPUT_CFG_MAX> paramContainer)
     for(int i = 0; i < INPUT_CFG_MAX; i++) {
         MSPROF_LOGI("[Debug_q] %d : %s", i, paramContainer[i].c_str());
     }
-}
-
-std::string ParamsAdapter::SetOutputDir(const std::string &outputDir)
-{
-    std::string result;
-    if (outputDir.empty()) {
-        MSPROF_LOGI("No output set, use default path");
-    } else {
-        std::string path = Utils::RelativePathToAbsolutePath(outputDir);
-        if (Utils::CreateDir(path) != PROFILING_SUCCESS) {
-            MSPROF_LOGW("Failed to create dir: %s", Utils::BaseName(path).c_str());
-        }
-        result = analysis::dvvp::common::utils::Utils::CanonicalizePath(path);
-    }
-    if (result.empty() || !analysis::dvvp::common::utils::Utils::IsDirAccessible(result)) {
-        MSPROF_LOGI("No output set or is not accessible, use app dir instead");
-        result = analysis::dvvp::common::utils::Utils::GetSelfPath();
-        size_t pos = result.rfind(analysis::dvvp::common::utils::MSVP_SLASH);
-        if (pos != std::string::npos) {
-            result = result.substr(0, pos + 1);
-        }
-    }
-    MSPROF_LOGI("Profiling result path: %s", Utils::BaseName(result).c_str());
-
-    return result;
 }
 
 } // ParamsAdapter
