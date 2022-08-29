@@ -688,7 +688,7 @@ int GeOptParamAdapter::GenGeOptionsContainer(SHARED_PTR_ALIA<ProfGeOptionsConfig
     return PROFILING_SUCCESS;
 }
 
-void GeOptParamAdapter::SetGeOptionsContainerDefaultValue()
+int GeOptParamAdapter::SetGeOptionsContainerDefaultValue()
 {
     if (!Platform::instance()->PlatformIsHelperHostSide()) {
         int ret = SetOutputDir(paramContainer_[INPUT_CFG_COM_OUTPUT]);
@@ -751,7 +751,10 @@ int GeOptParamAdapter::GetParamFromInputCfg(SHARED_PTR_ALIA<ProfGeOptionsConfig>
         return PROFILING_FAILED;
     }
 
-    GenGeOptionsContainer(geCfg);
+    ret = GenGeOptionsContainer(geCfg);
+    if (ret != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
 
     std::vector<std::pair<InputCfg, std::string>> errCfgList;
     ret = ParamsCheckGeOpt(errCfgList);
