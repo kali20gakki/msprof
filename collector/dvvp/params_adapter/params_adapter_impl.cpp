@@ -776,7 +776,10 @@ int GeOptParamAdapter::GetParamFromInputCfg(SHARED_PTR_ALIA<ProfGeOptionsConfig>
         return PROFILING_FAILED;
     }
 
-    SetGeOptionsContainerDefaultValue();
+    ret = SetGeOptionsContainerDefaultValue();
+    if (ret != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
 
     ret = TransToParam(paramContainer_, params_);
     if (ret != PROFILING_SUCCESS) {
