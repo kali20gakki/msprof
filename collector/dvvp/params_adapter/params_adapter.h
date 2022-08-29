@@ -42,6 +42,10 @@ const int DVPP_FREQ_MAX = 100;
 const int BIU_FREQ_MIN = 300;
 const int BIU_FREQ_MAX = 30000;
 const int ACC_PMU_MODE_THRED = 5000; // Check
+const int FILE_FIND_REPLAY          = 100;
+const std::string TOOL_NAME_PERF     = "perf";
+const std::string TOOL_NAME_LTRACE   = "ltrace";
+const std::string TOOL_NAME_IOTOP    = "iotop";
 enum InputCfg {
     INPUT_CFG_MSPROF_APPLICATION = 0, // del
     INPUT_CFG_MSPROF_ENVIRONMENT = 1, // del
@@ -147,8 +151,15 @@ public:
     int MsprofCheckPythonPathValid(const std::string &pythonPathParam) const;
     int MsprofCheckSummaryFormatValid(const std::string &formatParam) const;
     int MsprofCheckExportIdValid(const std::string &idParam, const std::string &exportIdType) const;
-    std::string SetOutputDir(const std::string &outputDir);
-
+    int CheckHostSysToolsExit(const std::string &hostSysParam, const std::string &resultDir,
+        const std::string &appDir) const;
+private:   
+    int CheckHostSysToolsIsExist(const std::string toolName, const std::string &resultDir,
+        const std::string &appDir) const;
+    int CheckHostSysCmdOutIsExist(const std::string tmpDir, const std::string toolName,
+                                           const mmProcess tmpProcess) const;
+    int CheckHostOutString(const std::string tmpStr, const std::string toolName) const;
+    int UninitCheckHostSysCmd(const mmProcess checkProcess) const;
 private:
     void SpliteAppPath(const std::string &appParams, std::string &cmdPath, std::string &appParameters, std::string &appDir, std::string &app);
 private:

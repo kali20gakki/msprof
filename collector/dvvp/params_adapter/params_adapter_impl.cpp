@@ -504,11 +504,13 @@ int AclJsonParamAdapter::SetAclJsonContainerDefaultValue()
     paramContainer_[INPUT_CFG_COM_AIC_METRICS] = paramContainer_[INPUT_CFG_COM_AIC_METRICS].empty() ?
         PIPE_UTILIZATION : paramContainer_[INPUT_CFG_COM_AIC_METRICS];
 
-    paramContainer_[INPUT_CFG_COM_AI_VECTOR] = MSVP_PROF_ON;
-    paramContainer_[INPUT_CFG_COM_AIV_MODE] = PROFILING_MODE_TASK_BASED;
-    paramContainer_[INPUT_CFG_COM_AIV_METRICS] = paramContainer_[INPUT_CFG_COM_AIV_METRICS].empty() ?
-        PIPE_UTILIZATION : paramContainer_[INPUT_CFG_COM_AIV_METRICS];
-
+    if (std::find(setConfig_.begin(), setConfig_.end(), INPUT_CFG_COM_AI_VECTOR) != setConfig_.end()) {
+        paramContainer_[INPUT_CFG_COM_AI_VECTOR] = MSVP_PROF_ON;
+        paramContainer_[INPUT_CFG_COM_AIV_MODE] = PROFILING_MODE_TASK_BASED;
+        paramContainer_[INPUT_CFG_COM_AIV_METRICS] = paramContainer_[INPUT_CFG_COM_AIV_METRICS].empty() ?
+            PIPE_UTILIZATION : paramContainer_[INPUT_CFG_COM_AIV_METRICS];
+    }
+    
     return PROFILING_SUCCESS;
 }
 
@@ -697,9 +699,6 @@ int GeOptParamAdapter::SetGeOptionsContainerDefaultValue()
         }
     } else {
         paramContainer_[INPUT_CFG_COM_OUTPUT].clear();
-    }
-    if (paramContainer_[INPUT_CFG_COM_TASK_TIME].empty()) {
-        paramContainer_[INPUT_CFG_COM_TASK_TIME] = MSVP_PROF_ON;
     }
     if (!paramContainer_[INPUT_CFG_COM_AIC_METRICS].empty()) {
         paramContainer_[INPUT_CFG_COM_AI_CORE] = MSVP_PROF_ON;
