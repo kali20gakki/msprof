@@ -324,6 +324,7 @@ int MsprofParamAdapter::GetParamFromInputCfg(std::unordered_map<int, std::pair<M
     if (ret != PROFILING_SUCCESS) {
         return PROFILING_FAILED;
     }
+    MSPROF_LOGI("[qqq]dataTypeConfig:%lx", params_->dataTypeConfig);
     SetParamsSelf();
     return PROFILING_SUCCESS;
 }
