@@ -135,12 +135,10 @@ int RunningMode::GetOutputDirInfoFromRecord()
     std::string baseDir;
     std::ifstream fin;
     std::string resultDirTmp = params_->result_dir;
-    MSPROF_LOGE("[qqq]resultDirTmp:%s", resultDirTmp.c_str());
     Utils::EnsureEndsInSlash(resultDirTmp);
     std::string pidStr = std::to_string(Utils::GetPid());
     std::string recordFile = pidStr + MSVP_UNDERLINE + OUTPUT_RECORD;
     std::string outPut = resultDirTmp + recordFile;
-    MSPROF_LOGE("[qqq]outPut:%s", outPut.c_str());
     long long fileSize = Utils::GetFileSize(outPut);
     if (fileSize > MSVP_SMALL_FILE_MAX_LEN || fileSize <= 0) {
         MSPROF_LOGE("File size is invalid. fileName:%s, size:%lld.", recordFile.c_str(), fileSize);

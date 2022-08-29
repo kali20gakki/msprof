@@ -768,7 +768,6 @@ int ProfAclMgr::RecordOutPut(const std::string &data)
     }
     std::string pidStr = std::to_string(params_->msprofBinPid);
     std::string recordFile = pidStr + MSVP_UNDERLINE + OUTPUT_RECORD;
-    MSPROF_LOGE("[ddd]recordFile:%s", recordFile.c_str());
     std::string absolutePath = resultPath_ + MSVP_SLASH + recordFile;
     std::string profName = data + "\n";
     int ret = WriteFile(absolutePath, recordFile, profName);

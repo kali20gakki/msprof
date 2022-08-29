@@ -1025,7 +1025,6 @@ int AclApiParamAdapter::GetParamFromInputCfg(const ProfConfig * apiCfg,
         return PROFILING_FAILED;
     }
     return PROFILING_SUCCESS;
-    MSPROF_LOGE("[qqq]GetParamFromInputCfg end");
 }
 
 } // ParamsAdapter
