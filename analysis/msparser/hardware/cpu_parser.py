@@ -9,13 +9,13 @@ import logging
 import multiprocessing
 import os
 import sqlite3
-import sys
 import traceback
 from functools import reduce
 from operator import add
 
 from common_func import multi_process_cb
 from common_func.common import CommonConstant
+from common_func.common import call_sys_exit
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.file_manager import FileManager
@@ -209,7 +209,7 @@ class ParsingCPUData(MsMultiProcess):
         if not os.path.exists(project_path):
             logging.info("No project path found in %s", CommonConstant.SAMPLE_JSON)
             error(self.FILE_NAME, "No project path found in {}".format(CommonConstant.SAMPLE_JSON))
-            sys.exit(NumberConstant.ERROR)
+            call_sys_exit(NumberConstant.ERROR)
         self.conn = sqlite3.connect(
             os.path.join(
                 project_path,
@@ -220,14 +220,14 @@ class ParsingCPUData(MsMultiProcess):
         except sqlite3.Error:
             logging.error(traceback.format_exc(), exc_info=Constant.TRACE_BACK_SWITCH)
             self.conn.close()
-            sys.exit(NumberConstant.ERROR)
+            call_sys_exit(NumberConstant.ERROR)
         else:
             try:
                 self.curs.execute("PRAGMA journal_mode=WAL")
             except sqlite3.Error:
                 logging.error(traceback.format_exc(), exc_info=Constant.TRACE_BACK_SWITCH)
                 self.conn.close()
-                sys.exit(NumberConstant.ERROR)
+                call_sys_exit(NumberConstant.ERROR)
             else:
                 self.conn.commit()
 

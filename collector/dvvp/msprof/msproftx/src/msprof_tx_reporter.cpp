@@ -68,7 +68,7 @@ int MsprofTxReporter::Report(ReporterData &data) const
     }
 
     if (!isInit_) {
-        MSPROF_LOGE("[Report]Reporter is not inited!");
+        MSPROF_LOGE("[Report]ProfReporter is not inited!");
         return PROFILING_FAILED;
     }
 

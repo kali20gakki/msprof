@@ -227,8 +227,8 @@ private:
 
     inline bool IsValidErrorCode(const std::string &error_codes) const
     {
-      const uint32_t kErrorCodeValidLength = 6U;
-      return error_codes.size() == kErrorCodeValidLength;
+        const uint32_t kErrorCodeValidLength = 6U;
+        return error_codes.size() == kErrorCodeValidLength;
     }
 
     std::vector<ErrorItem> &GetErrorMsgContainerByWorkId(uint64_t work_id);
