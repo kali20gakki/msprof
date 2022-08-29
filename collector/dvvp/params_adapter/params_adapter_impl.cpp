@@ -426,6 +426,9 @@ int AclJsonParamAdapter::ParamsCheckAclJson(std::vector<std::pair<InputCfg, std:
     int ret = PROFILING_SUCCESS;
     bool flag = true;
     for (auto inputCfg : aclJsonConfig_) {
+        if (setConfig_.find(inputCfg) == setConfig_.end()) {
+            continue;
+        }
         std::string cfgValue = paramContainer_[inputCfg];
         switch (inputCfg) {
             case INPUT_CFG_COM_BIU:
@@ -507,6 +510,31 @@ int AclJsonParamAdapter::SetAclJsonContainerDefaultValue()
         PIPE_UTILIZATION : paramContainer_[INPUT_CFG_COM_AIV_METRICS];
 
     return PROFILING_SUCCESS;
+}
+
+std::string AclJsonParamAdapter::SetOutputDir(const std::string &outputDir)
+{
+    std::string result;
+    if (outputDir.empty()) {
+        MSPROF_LOGI("No output set, use default path");
+    } else {
+        std::string path = Utils::RelativePathToAbsolutePath(outputDir);
+        if (Utils::CreateDir(path) != PROFILING_SUCCESS) {
+            MSPROF_LOGW("Failed to create dir: %s", Utils::BaseName(path).c_str());
+        }
+        result = Utils::CanonicalizePath(path);
+    }
+    if (result.empty() || !Utils::IsDirAccessible(result)) {
+        MSPROF_LOGI("No output set or is not accessible, use app dir instead");
+        result = Utils::GetSelfPath();
+        size_t pos = result.rfind(MSVP_SLASH);
+        if (pos != std::string::npos) {
+            result = result.substr(0, pos + 1);
+        }
+    }
+    MSPROF_LOGI("Profiling result path: %s", Utils::BaseName(result).c_str());
+
+    return result;
 }
 
 int AclJsonParamAdapter::GetParamFromInputCfg(SHARED_PTR_ALIA<ProfAclConfig> aclCfg,
@@ -601,6 +629,9 @@ int GeOptParamAdapter::ParamsCheckGeOpt(std::vector<std::pair<InputCfg, std::str
     int ret = PROFILING_SUCCESS;
     bool flag = true;
     for (auto inputCfg : geOptConfig_) {
+        if (setConfig_.find(inputCfg) == setConfig_.end()) {
+            continue;
+        }
         std::string cfgValue = paramContainer_[inputCfg];
         switch (inputCfg) {
             case INPUT_CFG_COM_TASK_TRACE:
@@ -664,6 +695,9 @@ void GeOptParamAdapter::SetGeOptionsContainerDefaultValue()
     } else {
         paramContainer_[INPUT_CFG_COM_OUTPUT].clear();
     }
+    if (paramContainer_[INPUT_CFG_COM_TASK_TIME].empty()) {
+        paramContainer_[INPUT_CFG_COM_TASK_TIME] = MSVP_PROF_ON;
+    }
     if (!paramContainer_[INPUT_CFG_COM_AIC_METRICS].empty()) {
         paramContainer_[INPUT_CFG_COM_AI_CORE] = MSVP_PROF_ON;
         paramContainer_[INPUT_CFG_COM_AIC_MODE] = PROFILING_MODE_TASK_BASED;
@@ -672,6 +706,29 @@ void GeOptParamAdapter::SetGeOptionsContainerDefaultValue()
         paramContainer_[INPUT_CFG_COM_AI_VECTOR] = MSVP_PROF_ON;
         paramContainer_[INPUT_CFG_COM_AIV_MODE] = PROFILING_MODE_TASK_BASED;
     }
+}
+
+int GeOptParamAdapter::SetOutputDir(std::string &outputDir)
+{
+    std::string result;
+    if (outputDir.empty()) {
+        MSPROF_LOGE("Result path is empty");
+        return PROFILING_FAILED;
+    }
+    std::string path = Utils::RelativePathToAbsolutePath(outputDir);
+    if (Utils::CreateDir(path) != PROFILING_SUCCESS) {
+        MSPROF_LOGW("Failed to create dir: %s", Utils::BaseName(path).c_str());
+    }
+    result = analysis::dvvp::common::utils::Utils::CanonicalizePath(path);
+    if (result.empty() || !analysis::dvvp::common::utils::Utils::IsDirAccessible(result)) {
+        MSPROF_LOGE("Result path is not accessible or not exist, result path: %s", Utils::BaseName(outputDir).c_str());
+        std::string errReason = "result path is not accessible or not exist";
+        MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
+            std::vector<std::string>({"output", outputDir, errReason}));
+        return PROFILING_FAILED;
+    }
+    outputDir = result;
+    return PROFILING_SUCCESS;
 }
 
 int GeOptParamAdapter::GetParamFromInputCfg(SHARED_PTR_ALIA<ProfGeOptionsConfig> geCfg, SHARED_PTR_ALIA<ProfileParams> params)
