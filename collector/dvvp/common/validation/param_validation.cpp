@@ -62,7 +62,7 @@ bool ParamValidation::CheckOutputIsValid(const std::string &outputPath)
         MSPROF_LOGI("output is empty");
         return true;
     }
-    std::string path = Utils::CanonicalizePath(outputPath);
+    std::string path = Utils::RelativePathToAbsolutePath(outputPath);
     if (!path.empty()) {
         if (path.size() > MAX_PATH_LENGTH) {
             MSPROF_LOGE("Invalid value for Argument 'output'. The maximum length is %d.", MAX_PATH_LENGTH);

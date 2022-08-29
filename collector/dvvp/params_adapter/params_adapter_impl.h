@@ -52,7 +52,6 @@ private:
     int GetMsprofMode();
     void SetParamsSelf();
     void SpliteAppPath(const std::string &appParams);
-    std::string GetAppDir(const std::string appPath);
 
 private:
     std::string cmdPath_;
