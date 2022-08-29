@@ -148,17 +148,8 @@ int ParamsAdapter::TransToParam(std::array<std::string, INPUT_CFG_MAX> paramCont
     struct CommonParams commonParams;
     commonParams.output = paramContainer[INPUT_CFG_COM_OUTPUT];
     commonParams.storageLimit = paramContainer[INPUT_CFG_COM_STORAGE_LIMIT];
-    SpliteAppPath(paramContainer[INPUT_CFG_MSPROF_APPLICATION], commonParams.appCmdPath, commonParams.appParameters, commonParams.appDir, commonParams.app);
-    commonParams.appEnv = paramContainer[INPUT_CFG_MSPROF_ENVIRONMENT];
     commonParams.msproftx = paramContainer[INPUT_CFG_COM_MSPROFTX];
     commonParams.hostSysPid = (paramContainer[INPUT_CFG_HOST_SYS_PID].empty()) ? -1 : std::stoi(paramContainer[INPUT_CFG_HOST_SYS_PID]);
-    commonParams.pythonPath = paramContainer[INPUT_CFG_PYTHON_PATH];
-    commonParams.parseSwitch = paramContainer[INPUT_CFG_PARSE];
-    commonParams.querySwitch = paramContainer[INPUT_CFG_QUERY];
-    commonParams.exportSwitch = paramContainer[INPUT_CFG_EXPORT];
-    commonParams.exportSummaryFormat = paramContainer[INPUT_CFG_SUMMARY_FORMAT];
-    commonParams.exportIterationId = paramContainer[INPUT_CFG_ITERATION_ID];
-    commonParams.exportModelId = paramContainer[INPUT_CFG_MODEL_ID];
     commonParams.device = (paramContainer[INPUT_CFG_COM_SYS_DEVICES].compare("all") == 0) ? DrvGetDevIdsStr() : paramContainer[INPUT_CFG_COM_SYS_DEVICES];
     commonParams.profilingPeriod = (paramContainer[INPUT_CFG_COM_SYS_PERIOD].empty()) ? -1 : std::stoi(paramContainer[INPUT_CFG_COM_SYS_PERIOD]);
     adapter->SetParamsForGlobal(commonParams);
@@ -265,6 +256,7 @@ int ParamsAdapter::TransToParam(std::array<std::string, INPUT_CFG_MAX> paramCont
             adapter->SetParamsForHostSysAllPidMemUsage(); // Host-Sys Mem
         }
     }
+    params->PrintAllFields();
     return PROFILING_SUCCESS;
 }
 
@@ -643,7 +635,7 @@ int ParamsAdapter::MsprofCheckExportIdValid(const std::string &idParam, const st
 void ParamsAdapter::Print(std::array<std::string, INPUT_CFG_MAX> paramContainer)
 {
     for(int i = 0; i < INPUT_CFG_MAX; i++) {
-        MSPROF_LOGE("[Debug_q] %d : %s", i, paramContainer[i].c_str());
+        MSPROF_LOGI("[Debug_q] %d : %s", i, paramContainer[i].c_str());
     }
 }
 

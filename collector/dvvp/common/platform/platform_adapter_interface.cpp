@@ -46,20 +46,8 @@ void PlatformAdapterInterface::SetParamsForGlobal(struct CommonParams &comParams
     params_->profiling_mode = analysis::dvvp::message::PROFILING_MODE_DEF;
     params_->result_dir = comParams.output.empty() ? params_->result_dir : comParams.output;
     params_->storageLimit = comParams.storageLimit.empty() ? params_->storageLimit : comParams.storageLimit;
-    params_->app = comParams.app;
-    params_->cmdPath = comParams.appCmdPath;
-    params_->app_parameters = comParams.appParameters;
-    params_->app_dir = comParams.appDir;
-    params_->app_env = comParams.appEnv.empty() ? params_->app_env : comParams.appEnv;
     params_->msproftx = comParams.msproftx.empty() ? params_->msproftx : comParams.msproftx;
     params_->host_sys_pid = comParams.hostSysPid;
-    params_->pythonPath = comParams.pythonPath.empty() ? params_->pythonPath : comParams.pythonPath;
-    params_->parseSwitch = comParams.parseSwitch.empty() ? params_->parseSwitch : comParams.parseSwitch;
-    params_->querySwitch = comParams.querySwitch.empty() ? params_->querySwitch : comParams.querySwitch;
-    params_->exportSwitch = comParams.exportSwitch.empty() ? params_->exportSwitch : comParams.exportSwitch;
-    params_->exportSummaryFormat = comParams.exportSummaryFormat.empty() ? params_->exportSummaryFormat : comParams.exportSummaryFormat;
-    params_->exportIterationId = comParams.exportIterationId.empty() ? params_->exportIterationId : comParams.exportIterationId;
-    params_->exportModelId = comParams.exportModelId.empty() ? params_->exportModelId : comParams.exportModelId;
     params_->devices = comParams.device;
     params_->profiling_period = comParams.profilingPeriod;
 }

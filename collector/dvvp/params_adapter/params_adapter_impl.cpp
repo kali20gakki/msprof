@@ -227,6 +227,50 @@ void MsprofParamAdapter::SetDefaultParamsExport()
 
 }
 
+void MsprofParamAdapter::SpliteAppPath(const std::string &appParams)
+{
+    if (appParams.empty()) {
+        return;
+    }
+    std::string tmpAppParamers;
+    size_t index = appParams.find_first_of(" ");
+    if (index != std::string::npos) {
+        tmpAppParamers = appParams.substr(index + 1);
+    }
+    cmdPath_ = appParams.substr(0, index);
+    cmdPath_ = Utils::RelativePathToAbsolutePath(cmdPath_);
+    if (!Utils::IsAppName(cmdPath_)) {
+        // bash xxx.sh args...
+        index = tmpAppParamers.find_first_of(" ");
+        if (index != std::string::npos) {
+            appParameters_ = tmpAppParamers.substr(index + 1);
+            Utils::SplitPath(tmpAppParamers.substr(0, index), appDir_, app_);
+        }
+    } else {
+        // ./main args...
+        appParameters_ = tmpAppParamers;
+        Utils::SplitPath(cmdPath_, appDir_, app_);
+    }
+}
+
+void MsprofParamAdapter::SetParamsSelf()
+{
+    SpliteAppPath(paramContainer_[INPUT_CFG_MSPROF_APPLICATION]);
+    params_->app = app_;
+    params_->cmdPath = cmdPath_;
+    params_->app_parameters = appParameters_;
+    params_->app_dir = appDir_;
+    params_->app_env = paramContainer_[INPUT_CFG_MSPROF_ENVIRONMENT].empty() ? params_->app_env : paramContainer_[INPUT_CFG_MSPROF_ENVIRONMENT];
+    params_->pythonPath = paramContainer_[INPUT_CFG_PYTHON_PATH].empty() ? params_->pythonPath : paramContainer_[INPUT_CFG_PYTHON_PATH];
+    params_->parseSwitch = paramContainer_[INPUT_CFG_PARSE].empty() ? params_->parseSwitch : paramContainer_[INPUT_CFG_PARSE];
+    params_->querySwitch = paramContainer_[INPUT_CFG_QUERY].empty() ? params_->querySwitch : paramContainer_[INPUT_CFG_QUERY];
+    params_->exportSwitch = paramContainer_[INPUT_CFG_EXPORT].empty() ? params_->exportSwitch : paramContainer_[INPUT_CFG_EXPORT];
+    params_->exportSummaryFormat = paramContainer_[INPUT_CFG_SUMMARY_FORMAT].empty() ? params_->exportSummaryFormat : paramContainer_[INPUT_CFG_SUMMARY_FORMAT];
+    params_->exportIterationId = paramContainer_[INPUT_CFG_ITERATION_ID].empty() ? params_->exportIterationId : paramContainer_[INPUT_CFG_ITERATION_ID];
+    params_->exportModelId = paramContainer_[INPUT_CFG_MODEL_ID].empty() ? params_->exportModelId : paramContainer_[INPUT_CFG_MODEL_ID];
+    params_->msprofBinPid = Utils::GetPid();
+}
+
 int MsprofParamAdapter::GetParamFromInputCfg(std::unordered_map<int, std::pair<MsprofCmdInfo, std::string>> argvMap,
     SHARED_PTR_ALIA<ProfileParams> params)
 {
@@ -302,12 +346,12 @@ int MsprofParamAdapter::GetParamFromInputCfg(std::unordered_map<int, std::pair<M
         default:
             return PROFILING_FAILED;
     }
-    
+
     ret = TransToParam(paramContainer_, params_);
     if (ret != PROFILING_SUCCESS) {
         return PROFILING_FAILED;
     }
-    Print(paramContainer_);
+    SetParamsSelf();
     return PROFILING_SUCCESS;
 }
 
@@ -942,7 +986,6 @@ int AclApiParamAdapter::GetParamFromInputCfg(const ProfConfig * apiCfg,
     if (ret != PROFILING_SUCCESS) {
         return PROFILING_FAILED;
     }
-    Print(paramContainer_);
     return PROFILING_SUCCESS;
     MSPROF_LOGE("[qqq]GetParamFromInputCfg end");
 }
