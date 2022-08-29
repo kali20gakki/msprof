@@ -50,9 +50,15 @@ private:
     void SetDefaultParamsQuery();
     void SetDefaultParamsExport();
     int GetMsprofMode();
+    void SetParamsSelf();
+    void SpliteAppPath(const std::string &appParams);
     std::string GetAppDir(const std::string appPath);
 
 private:
+    std::string cmdPath_;
+    std::string appParameters_;
+    std::string appDir_;
+    std::string app_;
     SHARED_PTR_ALIA<ProfileParams> params_;
     std::array<std::string, INPUT_CFG_MAX> paramContainer_;
     std::unordered_map<int, InputCfg> cfgMap_;

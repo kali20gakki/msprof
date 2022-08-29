@@ -67,19 +67,7 @@ enum CollectorTypesForPlatform {
 struct CommonParams {
     std::string output;
     std::string storageLimit;
-    std::string app;
-    std::string appCmdPath;
-    std::string appParameters;
-    std::string appDir;
-    std::string appEnv;
     std::string msproftx;
-    std::string pythonPath;
-    std::string parseSwitch;
-    std::string querySwitch;
-    std::string exportSwitch;
-    std::string exportSummaryFormat;
-    std::string exportIterationId;
-    std::string exportModelId;
     std::string device;
     int profilingPeriod;
     int hostSysPid;

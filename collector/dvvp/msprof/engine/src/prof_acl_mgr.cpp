@@ -777,6 +777,7 @@ int ProfAclMgr::RecordOutPut(const std::string &data)
     }
     std::string pidStr = std::to_string(params_->msprofBinPid);
     std::string recordFile = pidStr + MSVP_UNDERLINE + OUTPUT_RECORD;
+    MSPROF_LOGE("[ddd]recordFile:%s", recordFile.c_str());
     std::string absolutePath = resultPath_ + MSVP_SLASH + recordFile;
     std::string profName = data + "\n";
     int ret = WriteFile(absolutePath, recordFile, profName);
@@ -1180,32 +1181,7 @@ int ProfAclMgr::StartDeviceSubscribeTask(const uint32_t modelId, const uint32_t 
 
 void ProfAclMgr::ProfDataTypeConfigHandle(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params)
 {
-    if (params == nullptr) {
-        return;
-    }
-    dataTypeConfig_ = 0;
-    AddAiCpuModelConf(dataTypeConfig_);
-    if (!params->ai_core_metrics.empty()) {
-        dataTypeConfig_ |= PROF_AICORE_METRICS;
-    }
-    if (!params->aiv_metrics.empty()) {
-        dataTypeConfig_ |= PROF_AIV_METRICS;
-    }
-    if (params->ts_timeline == MSVP_PROF_ON) {
-        dataTypeConfig_ |= PROF_SCHEDULE_TIMELINE | PROF_TASK_TIME;
-    }
-
-    UpdateDataTypeConfigBySwitch(params->acl, PROF_ACL_API);
-    UpdateDataTypeConfigBySwitch(params->hwts_log, PROF_TASK_TIME);
-    UpdateDataTypeConfigBySwitch(params->aicpuTrace, PROF_AICPU_TRACE);
-    UpdateDataTypeConfigBySwitch(params->modelExecution, PROF_MODEL_EXECUTE);
-    UpdateDataTypeConfigBySwitch(params->runtimeApi, PROF_RUNTIME_API);
-    UpdateDataTypeConfigBySwitch(params->runtimeTrace, PROF_RUNTIME_TRACE);
-    UpdateDataTypeConfigBySwitch(params->ts_fw_training, PROF_KEYPOINT_TRACE);
-    UpdateDataTypeConfigBySwitch(params->ts_keypoint, PROF_KEYPOINT_TRACE);
-    UpdateDataTypeConfigBySwitch(params->hcclTrace, PROF_HCCL_TRACE);
-    UpdateDataTypeConfigBySwitch(params->l2CacheTaskProfiling, PROF_L2CACHE);
-
+    dataTypeConfig_ = params->dataTypeConfig;
     MSPROF_EVENT("ProfDataTypeConfigHandle dataTypeConfig:0x%llx", dataTypeConfig_);
 }
 
