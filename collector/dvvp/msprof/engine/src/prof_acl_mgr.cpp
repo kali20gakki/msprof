@@ -375,14 +375,15 @@ int ProfAclMgr::ProfAclStart(PROF_CONF_CONST_PTR profStartCfg)
     auto paramsAdapter = AclApiParamAdapter();
     ret = paramsAdapter.GetParamFromInputCfg(profStartCfg, argsArr_, params_);
     if (ret != PROFILING_SUCCESS) {
-        MSPROF_LOGE("[qqq]");
+        MSPROF_LOGE("[ProfAclStart]GetParamFromInputCfg fail.");
         return ACL_ERROR_PROFILING_FAILURE;
     }
+
     for (uint32_t i = 0; i < profStartCfg->devNums; i++) {
         uint32_t devId = profStartCfg->devIdList[i];
         MSPROF_LOGI("Process ProfAclStart of device %u", devId);
         if (devId == DEFAULT_HOST_ID) {
-            dataTypeConfig_ = profStartCfg->dataTypeConfig;
+            dataTypeConfig_ = params_->dataTypeConfig;
             MsprofTxHandle();
             continue;
         }
@@ -888,7 +889,7 @@ int ProfAclMgr::ProfStartAiCpuTrace(const uint64_t dataTypeConfig, const uint32_
         return PROFILING_SUCCESS;
     }
     // aicpu trace
-    if (!(dataTypeConfig & PROF_AICPU_MASK)) {
+    if (!(dataTypeConfig & PROF_AICPU_TRACE_MASK)) {
         return PROFILING_SUCCESS;
     }
     for (uint32_t i = 0; i < devNums; i++) {
@@ -975,7 +976,7 @@ void ProfAclMgr::ProfStartCfgToMsprofCfg(const uint64_t dataTypeConfig, ProfAico
             feature->set_hwts_log("on");
     }
     // training trace
-    if (dataTypeConfig & PROF_TRAINING_TRACE_MASK) {
+    if (dataTypeConfig & PROF_KEYPOINT_TRACE_MASK) {
         feature->set_ts_fw_training("on");
     }
     SHARED_PTR_ALIA<analysis::dvvp::proto::ProfilerConf> conf = nullptr;
