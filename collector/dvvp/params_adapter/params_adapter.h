@@ -13,6 +13,7 @@
 
 #include "message/prof_params.h"
 #include "config/config_manager.h"
+#include "mmpa_api.h"
 
 namespace Collector {
 namespace Dvvp {
@@ -157,9 +158,9 @@ private:
     int CheckHostSysToolsIsExist(const std::string toolName, const std::string &resultDir,
         const std::string &appDir) const;
     int CheckHostSysCmdOutIsExist(const std::string tmpDir, const std::string toolName,
-                                           const mmProcess tmpProcess) const;
+                                           const MmProcess tmpProcess) const;
     int CheckHostOutString(const std::string tmpStr, const std::string toolName) const;
-    int UninitCheckHostSysCmd(const mmProcess checkProcess) const;
+    int UninitCheckHostSysCmd(const MmProcess checkProcess) const;
 private:
     void SpliteAppPath(const std::string &appParams, std::string &cmdPath, std::string &appParameters, std::string &appDir, std::string &app);
 private:

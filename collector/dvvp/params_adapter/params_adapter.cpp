@@ -9,7 +9,6 @@
 #include <map>
 #include "param_validation.h"
 #include "errno/error_code.h"
-#include "mmpa_api.h"
 #include "platform/platform.h"
 #include "platform/platform_adapter.h"
 #include "ai_drv_dev_api.h"
@@ -653,7 +652,7 @@ int ParamsAdapter::CheckHostSysToolsIsExist(const std::string toolName, const st
     tmpDir += "/tmpPrint" + std::to_string(startRealtime);
     int exitCode = analysis::dvvp::common::utils::INVALID_EXIT_CODE;
     static const std::string CMD = "sudo";
-    mmProcess tmpProcess = MSVP_MMPROCESS;
+    MmProcess tmpProcess = MSVP_MMPROCESS;
     ExecCmdParams execCmdParams(CMD, true, tmpDir);
     int ret = analysis::dvvp::common::utils::Utils::ExecCmd(execCmdParams,
                                                             argsV,
@@ -666,7 +665,7 @@ int ParamsAdapter::CheckHostSysToolsIsExist(const std::string toolName, const st
 }
 
 int ParamsAdapter::CheckHostSysCmdOutIsExist(const std::string tmpDir, const std::string toolName,
-                                           const mmProcess tmpProcess) const
+                                           const MmProcess tmpProcess) const
 {
     MSPROF_LOGI("Start to check whether the file exists.");
     for (int i = 0; i < FILE_FIND_REPLAY; i++) {
@@ -719,7 +718,7 @@ int ParamsAdapter::CheckHostOutString(const std::string tmpStr, const std::strin
     return PROFILING_FAILED;
 }
 
-int ParamsAdapter::UninitCheckHostSysCmd(const mmProcess checkProcess) const
+int ParamsAdapter::UninitCheckHostSysCmd(const MmProcess checkProcess) const
 {
     if (!(ParamValidation::instance()->CheckHostSysPidIsValid(reinterpret_cast<int>(checkProcess)))) {
         return PROFILING_FAILED;
@@ -737,7 +736,7 @@ int ParamsAdapter::UninitCheckHostSysCmd(const mmProcess checkProcess) const
     argsV.push_back(killCmd);
     int exitCode = analysis::dvvp::common::utils::VALID_EXIT_CODE;
     static const std::string CMD = "sh";
-    mmProcess tmpProcess = MSVP_MMPROCESS;
+    MmProcess tmpProcess = MSVP_MMPROCESS;
     ExecCmdParams execCmdParams(CMD, true, "");
     int ret = PROFILING_SUCCESS;
     for (int i = 0; i < FILE_FIND_REPLAY; i++) {
