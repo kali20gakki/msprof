@@ -224,7 +224,7 @@ class Constant:
     TASK_TYPE_AIV = "AI_VECTOR_CORE"
     DATA_PROCESS_AI_CPU = "AICPU"
     DATA_PROCESS_DP = "DP"
-    HOST_QUEUE = "AICPUMI"
+    DATA_QUEUE = "AICPUMI"
     WRITE_MODES = stat.S_IWUSR | stat.S_IRUSR | stat.S_IRGRP
     WRITE_FLAGS = os.O_WRONLY | os.O_CREAT | os.O_TRUNC
 
