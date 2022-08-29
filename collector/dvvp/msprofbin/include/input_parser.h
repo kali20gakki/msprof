@@ -22,7 +22,7 @@ namespace Dvvp {
 namespace Msprof {
 using namespace analysis::dvvp::common::validation;
 using namespace analysis::dvvp::common::utils;
-using mmStructOption = Collector::Dvvp::Mmpa::mmStructOption;
+using MmStructOption = Collector::Dvvp::Mmpa::MmStructOption;
 
 
 using MsprofStringBuffer = char *;
@@ -93,64 +93,64 @@ struct MsprofCmdInfo {
     char *args[NR_ARGS];
 };
 
-const mmStructOption longOptions[] = {
+const MmStructOption longOptions[] = {
     // cmd
-    {"help", mm_no_argument, nullptr, ARGS_HELP},
-    {"output", mm_optional_argument, nullptr, ARGS_OUTPUT},
-    {"storage-limit", mm_optional_argument, nullptr, ARGS_STORAGE_LIMIT},
-    {"application", mm_optional_argument, nullptr, ARGS_APPLICATION},
-    {"environment", mm_optional_argument, nullptr, ARGS_ENVIRONMENT},
-    {"aic-mode", mm_optional_argument, nullptr, ARGS_AIC_MODE},
-    {"aic-metrics", mm_optional_argument, nullptr, ARGS_AIC_METRICE},
-    {"aiv-mode", mm_optional_argument, nullptr, ARGS_AIV_MODE},
-    {"aiv-metrics", mm_optional_argument, nullptr, ARGS_AIV_METRICS},
-    {"sys-devices", mm_optional_argument, nullptr, ARGS_SYS_DEVICES},
-    {"llc-profiling", mm_optional_argument, nullptr, ARGS_LLC_PROFILING},
-    {"python-path", mm_optional_argument, nullptr, ARGS_PYTHON_PATH},
-    {"summary-format", mm_optional_argument, nullptr, ARGS_SUMMARY_FORMAT},
+    {"help", MM_NO_ARGUMENT, nullptr, ARGS_HELP},
+    {"output", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_OUTPUT},
+    {"storage-limit", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_STORAGE_LIMIT},
+    {"application", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_APPLICATION},
+    {"environment", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_ENVIRONMENT},
+    {"aic-mode", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_AIC_MODE},
+    {"aic-metrics", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_AIC_METRICE},
+    {"aiv-mode", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_AIV_MODE},
+    {"aiv-metrics", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_AIV_METRICS},
+    {"sys-devices", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_SYS_DEVICES},
+    {"llc-profiling", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_LLC_PROFILING},
+    {"python-path", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_PYTHON_PATH},
+    {"summary-format", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_SUMMARY_FORMAT},
     // switch
-    {"ascendcl", mm_optional_argument, nullptr, ARGS_ASCENDCL},             // the default value is on
-    {"ai-core", mm_optional_argument, nullptr, ARGS_AI_CORE},
-    {"ai-vector-core", mm_optional_argument, nullptr, ARGS_AIV},
-    {"model-execution", mm_optional_argument, nullptr, ARGS_MODEL_EXECUTION}, // the default value is off
-    {"runtime-api", mm_optional_argument, nullptr, ARGS_RUNTIME_API},  // the default value is off
-    {"task-time", mm_optional_argument, nullptr, ARGS_TASK_TIME},         // the default value is on
-    {"aicpu", mm_optional_argument, nullptr, ARGS_AICPU},
-    {"msproftx", mm_optional_argument, nullptr, ARGS_MSPROFTX},
-    {"sys-cpu-profiling", mm_optional_argument, nullptr, ARGS_CPU_PROFILING},
-    {"sys-profiling", mm_optional_argument, nullptr, ARGS_SYS_PROFILING},
-    {"sys-pid-profiling", mm_optional_argument, nullptr, ARGS_PID_PROFILING},
-    {"sys-hardware-mem", mm_optional_argument, nullptr, ARGS_HARDWARE_MEM},
-    {"sys-io-profiling", mm_optional_argument, nullptr, ARGS_IO_PROFILING},
-    {"sys-interconnection-profiling", mm_optional_argument, nullptr, ARGS_INTERCONNECTION_PROFILING},
-    {"dvpp-profiling", mm_optional_argument, nullptr, ARGS_DVPP_PROFILING},
-    {"power", mm_optional_argument, nullptr, ARGS_POWER},
-    {"hccl", mm_optional_argument, nullptr, ARGS_HCCL},  // the default value is off
-    {"biu", mm_optional_argument, nullptr, ARGS_BIU},
-    {"l2", mm_optional_argument, nullptr, ARGS_L2_PROFILING},
-    {"parse", mm_optional_argument, nullptr, ARGS_PARSE},
-    {"query", mm_optional_argument, nullptr, ARGS_QUERY},
-    {"export", mm_optional_argument, nullptr, ARGS_EXPORT},
+    {"ascendcl", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_ASCENDCL},             // the default value is on
+    {"ai-core", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_AI_CORE},
+    {"ai-vector-core", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_AIV},
+    {"model-execution", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_MODEL_EXECUTION}, // the default value is off
+    {"runtime-api", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_RUNTIME_API},  // the default value is off
+    {"task-time", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_TASK_TIME},         // the default value is on
+    {"aicpu", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_AICPU},
+    {"msproftx", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_MSPROFTX},
+    {"sys-cpu-profiling", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_CPU_PROFILING},
+    {"sys-profiling", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_SYS_PROFILING},
+    {"sys-pid-profiling", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_PID_PROFILING},
+    {"sys-hardware-mem", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_HARDWARE_MEM},
+    {"sys-io-profiling", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_IO_PROFILING},
+    {"sys-interconnection-profiling", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_INTERCONNECTION_PROFILING},
+    {"dvpp-profiling", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_DVPP_PROFILING},
+    {"power", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_POWER},
+    {"hccl", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_HCCL},  // the default value is off
+    {"biu", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_BIU},
+    {"l2", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_L2_PROFILING},
+    {"parse", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_PARSE},
+    {"query", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_QUERY},
+    {"export", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_EXPORT},
     // number
-    {"aic-freq", mm_optional_argument, nullptr, ARGS_AIC_FREQ},
-    {"aiv-freq", mm_optional_argument, nullptr, ARGS_AIV_FREQ},
-    {"biu-freq", mm_optional_argument, nullptr, ARGS_BIU_FREQ},
-    {"sys-period", mm_optional_argument, nullptr, ARGS_SYS_PERIOD},
-    {"sys-sampling-freq", mm_optional_argument, nullptr, ARGS_SYS_SAMPLING_FREQ},
-    {"sys-pid-sampling-freq", mm_optional_argument, nullptr, ARGS_PID_SAMPLING_FREQ},
-    {"sys-hardware-mem-freq", mm_optional_argument, nullptr, ARGS_HARDWARE_MEM_SAMPLING_FREQ},
-    {"sys-io-sampling-freq", mm_optional_argument, nullptr, ARGS_IO_SAMPLING_FREQ},
-    {"dvpp-freq", mm_optional_argument, nullptr, ARGS_DVPP_FREQ},
-    {"sys-cpu-freq", mm_optional_argument, nullptr, ARGS_CPU_SAMPLING_FREQ},
-    {"sys-interconnection-freq", mm_optional_argument, nullptr, ARGS_INTERCONNECTION_FREQ},
-    {"iteration-id", mm_optional_argument, nullptr, ARGS_EXPORT_ITERATION_ID},
-    {"model-id", mm_optional_argument, nullptr, ARGS_EXPORT_MODEL_ID},
+    {"aic-freq", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_AIC_FREQ},
+    {"aiv-freq", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_AIV_FREQ},
+    {"biu-freq", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_BIU_FREQ},
+    {"sys-period", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_SYS_PERIOD},
+    {"sys-sampling-freq", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_SYS_SAMPLING_FREQ},
+    {"sys-pid-sampling-freq", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_PID_SAMPLING_FREQ},
+    {"sys-hardware-mem-freq", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_HARDWARE_MEM_SAMPLING_FREQ},
+    {"sys-io-sampling-freq", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_IO_SAMPLING_FREQ},
+    {"dvpp-freq", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_DVPP_FREQ},
+    {"sys-cpu-freq", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_CPU_SAMPLING_FREQ},
+    {"sys-interconnection-freq", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_INTERCONNECTION_FREQ},
+    {"iteration-id", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_EXPORT_ITERATION_ID},
+    {"model-id", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_EXPORT_MODEL_ID},
     // host
-    {"host-sys", mm_optional_argument, nullptr, ARGS_HOST_SYS},
-    {"host-sys-pid", mm_optional_argument, nullptr, ARGS_HOST_SYS_PID},
-    {"host-sys-usage", mm_optional_argument, nullptr, ARGS_HOST_USAGE},
+    {"host-sys", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_HOST_SYS},
+    {"host-sys-pid", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_HOST_SYS_PID},
+    {"host-sys-usage", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_HOST_USAGE},
     // end
-    {nullptr, mm_no_argument, nullptr, ARGS_HELP}
+    {nullptr, MM_NO_ARGUMENT, nullptr, ARGS_HELP}
 };
 
 class InputParser {

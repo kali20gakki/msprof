@@ -21,7 +21,7 @@ SelectOperation::~SelectOperation()
 {
 }
 
-void SelectOperation::SelectAdd(mmSockHandle fd)
+void SelectOperation::SelectAdd(MmSockHandle fd)
 {
     if (fd < 0) {
         return;
@@ -34,7 +34,7 @@ void SelectOperation::SelectAdd(mmSockHandle fd)
     FD_SET(fd, &readfd_);
 }
 
-void SelectOperation::SelectDel(mmSockHandle fd)
+void SelectOperation::SelectDel(MmSockHandle fd)
 {
     if (fd < 0) {
         return;
@@ -43,7 +43,7 @@ void SelectOperation::SelectDel(mmSockHandle fd)
     FD_CLR(fd, &readfd_);
 }
 
-bool SelectOperation::SelectIsSet(mmSockHandle fd)
+bool SelectOperation::SelectIsSet(MmSockHandle fd)
 {
     if (fd < 0) {
         return false;

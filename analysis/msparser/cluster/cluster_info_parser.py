@@ -2,17 +2,14 @@
 This script is used to parse cluster rank_id data to db.
 Copyright Huawei Technologies Co., Ltd. 2022. All rights reserved.
 """
-import json
 import logging
 import os
-import sqlite3
+import shutil
 
-from common_func.constant import Constant
-from common_func.db_name_constant import DBNameConstant
 from common_func.file_manager import check_path_valid
-from common_func.file_name_manager import get_info_json_compiles
 from common_func.info_conf_reader import InfoConfReader
-from common_func.msprof_common import get_path_dir
+from common_func.common import error
+from common_func.msprof_common import MsProfCommonConstant
 from common_func.msprof_exception import ProfException
 from common_func.path_manager import PathManager
 from msmodel.cluster_info.cluster_info_model import ClusterInfoModel
@@ -43,8 +40,10 @@ class ClusterInfoParser(IParser):
             InfoConfReader().load_info(cluster_device_path)
             rank_id = InfoConfReader().get_rank_id()
             if rank_id in self.rank_id_set:
-                logging.error("Parsing not supported! There are different collect data in the dir(%s)"
-                              , cluster_device_path)
+                cluster_sqlite_path = PathManager.get_sql_dir(self.collect_path)
+                shutil.rmtree(cluster_sqlite_path)
+                error(MsProfCommonConstant.COMMON_FILE_NAME, 'There are same rank_id(%s) in the dir(%s).'
+                                        ' Please check the PROF dirs!' % (rank_id, self.collect_path))
                 raise ProfException(ProfException.PROF_CLUSTER_DIR_ERROR)
             self.rank_id_set.add(rank_id)
             cluster_info = InfoConfReader().get_job_basic_info()
@@ -55,7 +54,7 @@ class ClusterInfoParser(IParser):
     def save(self: any) -> None:
         logging.info("Starting to save cluster_rank data to db!")
         if not self.cluster_info_list:
-            logging.error('no valid cluster data!')
+            error(MsProfCommonConstant.COMMON_FILE_NAME, 'No valid cluster data in the dir(%s).', self.collect_path)
             return
         self.cluster_info_list.sort(key=lambda x:x[3])
         with ClusterInfoModel(self.collect_path) as cluster_info_model:

@@ -1,6 +1,6 @@
 #include "hdc-api-stub.h"
 #include <stdio.h>
-#define mmProcess int
+#define MmProcess int
 
 namespace Analysis {
 namespace Dvvp {
