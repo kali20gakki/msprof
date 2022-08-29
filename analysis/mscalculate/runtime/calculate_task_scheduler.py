@@ -109,7 +109,8 @@ class CalculateTaskScheduler:
             end = task_time[10] / NumberConstant.MS_TO_NS
             batch_id = task_time[13]
 
-            aicpu_collector.filter_aicpu(stream_id, task_id, start, end, batch_id, iter_id)
+            aicpu_data = [stream_id, task_id, start, end, batch_id, iter_id]
+            aicpu_collector.filter_aicpu(aicpu_data)
         aicpu_collector.save_aicpu()
 
     def update_timeline_api(self: any, runtime_conn: any) -> None:

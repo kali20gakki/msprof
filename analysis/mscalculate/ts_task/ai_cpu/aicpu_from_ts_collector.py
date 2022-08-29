@@ -15,8 +15,8 @@ class AICpuFromTsCollector:
     def __init__(self: any, project_path: str) -> None:
         self._project_path = project_path
         self._aicpu_model = AiCpuModel(self._project_path, [DBNameConstant.TABLE_AI_CPU_FROM_TS])
-        self._aicpu_list = []
         self._check_map = self._get_check_map()
+        self.aicpu_list = []
 
     def _get_check_map(self: any) -> dict:
         ge_info_model = GeInfoModel(self._project_path)
@@ -26,17 +26,17 @@ class AICpuFromTsCollector:
         ge_info_model.finalize()
         return ge_op_iter_dict
 
-    def filter_aicpu(self: any, stream_id: int, task_id: int, start: float, end: float,
-                     batch_id: int, iter_id: int) -> None:
+    def filter_aicpu(self: any, aicpu_feature: list) -> None:
+        stream_id, task_id, start, end, batch_id, iter_id = aicpu_feature
         stream_task_value = self.STREAM_TASK_KEY_FMT.format(stream_id, task_id)
         stream_task_batch_value = self.STREAM_TASK_BATCH_KEY_FMT.format(stream_id, task_id, batch_id)
         if stream_task_value in self._check_map.get(str(iter_id), set()) or \
                 stream_task_batch_value in self._check_map.get(str(iter_id), set()):
-            self._aicpu_list.append([stream_id, task_id, start, end, batch_id])
+            self.aicpu_list.append([stream_id, task_id, start, end, batch_id])
 
     def save_aicpu(self: any) -> None:
         """
         save ai cpu data
         """
         with self._aicpu_model:
-            self._aicpu_model.flush(self._aicpu_list, DBNameConstant.TABLE_AI_CPU_FROM_TS)
+            self._aicpu_model.flush(self.aicpu_list, DBNameConstant.TABLE_AI_CPU_FROM_TS)

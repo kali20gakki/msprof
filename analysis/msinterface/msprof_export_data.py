@@ -241,7 +241,7 @@ class MsProfExportDataUtils:
 
         if params.get(StrConstant.PARAM_EXPORT_TYPE) == MsProfCommonConstant.TIMELINE:
             return TopDownData.get_top_down_timeline_data(
-                result_dir, device_id, index_id, model_id)
+                result_dir, device_id, index_id)
 
         return TopDownData.get_top_down_data(result_dir, device_id, index_id)
 

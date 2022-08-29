@@ -94,7 +94,7 @@ class ParseAiCpuData:
         get ai cpu query sql
         :return: control statement
         """
-        aicpu_model = AiCpuModel(project_path, [DBNameConstant.TABLE_AI_CPU_FROM_TS])
+        aicpu_model = AiCpuModel(project_path, [])
         with aicpu_model:
-            aicpu_data = aicpu_model.get_ai_cpu_data(DBNameConstant.TABLE_AI_CPU_FROM_TS)
+            aicpu_data = aicpu_model.get_ai_cpu_data_from_ts()
         return aicpu_data
