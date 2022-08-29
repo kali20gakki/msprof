@@ -4,93 +4,182 @@
 This script is used to parse step trace data for cluster.
 Copyright Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
 """
+import json
 import logging
 import os
+from collections import OrderedDict
 from itertools import chain
 
-from common_func.common import error
+from common_func.common import error, warn, print_info
+from common_func.config_mgr import ConfigMgr
+from common_func.constant import Constant
 from common_func.data_check_manager import DataCheckManager
-from common_func.db_manager import DBManager
+from common_func.db_manager import DBManager, ClassRowType
 from common_func.db_name_constant import DBNameConstant
+from common_func.file_manager import check_path_valid
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
+from common_func.msprof_iteration import MsprofIteration
+from common_func.msprof_step import MsprofStep
+from common_func.msvp_common import check_file_writable
 from common_func.path_manager import PathManager
 from common_func.step_trace_constant import StepTraceConstant
+from msmodel.ai_cpu.data_queue_model import DataQueueModel
 from msmodel.step_trace.cluster_step_trace_model import ClusterStepTraceModel
 from msparser.interface.iparser import IParser
+from profiling_bean.db_dto.cluster_rank_dto import ClusterRankDto
 
 
-class DataPreprocessParser(IParser):
+class DataPreprocessParser:
     """
     Step trace data parser for cluster scene.
     """
     FILE_NAME = os.path.basename(__file__)
+    QUERY_FILE_NAME = 'query'
     MODEL_ID_INDEX = 1
     MODEL_ID_IN_GE = 1
     MODEL_ID_NOT_IN_GE = 0
 
-    def __init__(self: any, collection_path: str) -> None:
-        self.collection_path = collection_path
-        self.id_with_project_path_map = {}
-        self.id_with_table_map = {}
-        self.id_with_all_reduce_map = {}
-        self.cluster_model = None
+    def __init__(self: any, params: dict) -> None:
+        self.collection_path = params.get('collection_path')
+        self.data_type = params.get('data_type')
+        self.model_id = params.get('model_id')
+        self.iter_id = params.get('iteration_id')
+        self.rank_id = params.get('npu_id')
+        self.sample_config = None
 
-    @staticmethod
-    def _fetch_data_from_database(db_dir: str, db_name: str, db_table: str, sql: str) -> list:
-        data = []
-        db_path = PathManager.get_db_path(db_dir, db_name)
-        conn, curs = DBManager.check_connect_db_path(db_path)
-        if not conn or not curs:
-            DBManager.destroy_db_connect(conn, curs)
-            logging.error("The connect to %s is failed.", db_name)
-            return data
-        if not DBManager.judge_table_exist(curs, db_table):
-            DBManager.destroy_db_connect(conn, curs)
-            logging.error("The %s table doesn't exist.", db_table)
-            return data
-        data = DBManager.fetch_all_data(curs, sql)
-        DBManager.destroy_db_connect(conn, curs)
-        return data
-
-    @staticmethod
-    def _append_ge_model_tag(step_trace_data: list, model_ids: list) -> list:
-        result = []
-        for item in step_trace_data:
-            item = list(item)
-            if item[ClusterStepTraceParser.MODEL_ID_INDEX] in model_ids:
-                item.append(ClusterStepTraceParser.MODEL_ID_IN_GE)
-            else:
-                item.append(ClusterStepTraceParser.MODEL_ID_NOT_IN_GE)
-            result.append(item)
-        return result
-
-    def ms_run(self: any) -> None:
-        logging.info("Start to parse cluster step_trace data!")
-        if not self._check_collection_path_valid():
-            logging.error("The input dir doesn't have cluster database, please check.")
-            error(ClusterStepTraceParser.FILE_NAME,
-                  "The input dir doesn't have cluster database, please check.")
+    def calculate(self: any) -> None:
+        """
+        calculate data and data storage
+        :return: None
+        """
+        if not self.check_id_valid():
+            warn(self.FILE_NAME, "Parameter settings are incorrect, please check input: --id. ")
             return
-        self.parse()
-        logging.info("Start to save cluster step trace data to db!")
-        self.save()
-        logging.info("Query cluster step trace data finished!")
+        self._query_data()
 
-    def parse(self: any) -> None:
-        if not self._collect_project_paths():
-            error(ClusterStepTraceParser.FILE_NAME,
-                  "The cluster step trace parsing is failed.")
+    def check_id_valid(self: any) -> bool:
+        rank_conn, rank_cur = DBManager.check_connect_db_path(
+            PathManager.get_db_path(self.collection_path, DBNameConstant.DB_CLUSTER_RANK))
+        rank_sql = 'select * from {} where rank_id=?'.format(DBNameConstant.TABLE_CLUSTER_RANK)
+        rank_cur.row_factory = ClassRowType.class_row(ClusterRankDto)
+        rank_data = DBManager.fetch_all_data(rank_cur, rank_sql, (self.rank_id,))
+        if not rank_data:
+            DBManager.destroy_db_connect(rank_conn, rank_cur)
+            return False
+        DBManager.destroy_db_connect(rank_conn, rank_cur)
+        self.collection_path = os.path.join(self.collection_path, rank_data[0].dir_name)
+        return True
 
-    def save(self: any) -> None:
-        tables = self._generate_cluster_table_name()
-        if not tables:
-            logging.error("The step trace source database or table is not found.")
+    def query_data_queue_data(self: any) -> None:
+        """
+        query cluster data
+        :return: None
+        """
+        data_queue_data = self.get_data_queue_data()
+        step_trace_data = self.get_step_trace_data()
+        if not (data_queue_data and step_trace_data):
+            error(self.FILE_NAME, "Query data failed, maybe import command has not run successfully yet, "
+                                  "please run import command first")
             return
-        with ClusterStepTraceModel(self.collection_path, tables) as cluster_model:
-            cluster_model.create_table()
-            self._collect_and_save_step_trace_data(cluster_model)
+        json_data = self.calculate_queue_data(data_queue_data, step_trace_data)
+        self.storage_data(json_data)
 
-    def _check_collection_path_valid(self: any) -> bool:
-        db_path = PathManager.get_db_path(self.collection_path, DBNameConstant.DB_CLUSTER_RANK)
-        return os.path.exists(db_path)
+    def get_data_queue_data(self: any) -> list:
+        data_queue_data = []
+        model = DataQueueModel(self.collection_path, [DBNameConstant.TABLE_DATA_QUEUE])
+        with model as _model:
+            if not _model.check_db() or not _model.check_table():
+                return data_queue_data
+            data_queue_data = _model.get_all_data(DBNameConstant.TABLE_DATA_QUEUE)
+        return data_queue_data
+
+    def get_step_trace_data(self: any) -> dict:
+        with MsprofStep(self.collection_path) as step_trace:
+            trace_data = step_trace.data
+        iter_dict = OrderedDict()
+        for index, data in enumerate(trace_data):
+            start_time = 0 if data.iter_id == 1 else trace_data[index - 1].step_end
+            end_time = data.step_end
+            iter_dict.setdefault(data.iter_id, [start_time, end_time])
+        return iter_dict
+
+    def storage_data(self: any, json_data: list) -> None:
+        """
+        save data into file
+        :return: None
+        """
+        print_info(self.FILE_NAME, "Fops data query complete, start to storage data into json file")
+        file_name = 'data_queue_{0}_{1}.json'.format(self.rank_id,
+                                                     self.model_id)
+        file_path = self.get_cluster_path(file_name)
+        check_file_writable(file_path)
+        if os.path.exists(file_path):
+            os.remove(file_path)
+        try:
+            with os.fdopen(os.open(file_path, Constant.WRITE_FLAGS,
+                                   Constant.WRITE_MODES), "w") as _file:
+                os.chmod(file_path, NumberConstant.FILE_AUTHORITY)
+                _file.write(json.dumps(json_data))
+        except (OSError, SystemError, RuntimeError, TypeError):
+            error(self.FILE_NAME,
+                  "Storing data failed, you may not have the permission to write files in the current path.")
+        else:
+            print_info(self.FILE_NAME, "The data has stored successfully, file path: {}".format(file_path))
+
+    def get_cluster_path(self: any, file_name: str) -> str:
+        query_path = os.path.realpath(os.path.join(self.collection_path, '..', '..', self.QUERY_FILE_NAME))
+        if not os.path.exists(query_path):
+            try:
+                os.makedirs(query_path)
+            except OSError:
+                error(self.FILE_NAME,
+                      "Storing data failed, you may not have the permission to write files in the current path.")
+        return os.path.realpath(os.path.join(query_path, file_name))
+
+    def calculate_queue_data(self: any, queue_list: list, trace_data: dict) -> dict:
+        """
+        calculate fops data
+        :return: json data list
+        """
+        total_info = {"step_count": len(trace_data.values()),
+                      "empty_queue": 0,
+                      "total_time": 0,
+                      "avg_time": 0}
+        total_time = 0
+        empty_queue = 0
+        data_list = []
+        for data_index in range(len(trace_data)):
+            if 2 * data_index + 1 > len(queue_list):
+                data_list.append({"step": data_index + 1, "duration": 0, "queue_size": 0})
+                continue
+            queue_size = queue_list[2 * data_index][1] + queue_list[2 * data_index + 1][1]
+            duration = queue_list[2 * data_index][4] + queue_list[2 * data_index + 1][4]
+            total_time += duration
+            empty_queue += int(bool(queue_size == 0))
+            data_list.append({"step": data_index + 1, "duration": duration, "queue_size": queue_size})
+        total_info["empty_queue"] = empty_queue
+        total_info["total_time"] = total_time
+        total_info["avg_time"] = round(total_time / len(trace_data), NumberConstant.DECIMAL_ACCURACY)
+        return {"total_info": total_info, "data_list": data_list}
+
+    def process(self: any) -> None:
+        """
+        entrance for calculating fops data
+        :return: None or dict
+        """
+        if self.rank_id is None:
+            warn(self.FILE_NAME,
+                 "To query fops data,  id is required")
+            return
+        self.calculate()
+
+    def _query_data(self):
+        check_path_valid(self.collection_path, False)
+        if DataCheckManager.contain_info_json_data(self.collection_path):
+            InfoConfReader().load_info(self.collection_path)
+            self.sample_config = ConfigMgr.read_sample_config(self.collection_path)
+            self.query_data_queue_data()
+        else:
+            warn(self.FILE_NAME,
+                 'Invalid parsing dir("%s"), there is no PROF file in this path' % self.collection_path)

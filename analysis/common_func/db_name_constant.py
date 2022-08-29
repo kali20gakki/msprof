@@ -212,7 +212,7 @@ class DBNameConstant(metaclass=ABCMeta):
 
     #cluster
     TABLE_CLUSTER_RANK = "ClusterRank"
-    TABLE_HOST_QUEUE = "HostQueue"
+    TABLE_DATA_QUEUE = "DataQueue"
 
     @abstractmethod
     def get_db_name(self: any) -> str:

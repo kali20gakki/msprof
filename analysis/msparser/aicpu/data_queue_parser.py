@@ -14,12 +14,12 @@ from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.os_manager import check_file_readable
 from common_func.path_manager import PathManager
-from msmodel.ai_cpu.host_queue_model import HostQueueModel
+from msmodel.ai_cpu.data_queue_model import DataQueueModel
 from msparser.interface.iparser import IParser
 from profiling_bean.prof_enum.data_tag import DataTag
 
 
-class HostQueueParser(IParser, MsMultiProcess):
+class DataQueueParser(IParser, MsMultiProcess):
     """
     class used to calculate fops data in cluster
     """
@@ -28,10 +28,10 @@ class HostQueueParser(IParser, MsMultiProcess):
 
     def __init__(self: any, file_list: dict, sample_config: dict) -> None:
         MsMultiProcess.__init__(self, sample_config)
-        self._file_list = file_list.get(DataTag.HOST_QUEUE, [])
+        self._file_list = file_list.get(DataTag.DATA_QUEUE, [])
         self._sample_config = sample_config
         self._project_path = self._sample_config.get(StrConstant.SAMPLE_CONFIG_PROJECT_PATH)
-        self._model = HostQueueModel(self._project_path, [DBNameConstant.TABLE_HOST_QUEUE])
+        self._model = DataQueueModel(self._project_path, [DBNameConstant.TABLE_DATA_QUEUE])
         self._data_list = []
         self._file_list.sort(key=lambda x: int(x.split("_")[-1]))
 

@@ -10,7 +10,7 @@ from common_func.db_name_constant import DBNameConstant
 from msmodel.interface.parser_model import ParserModel
 
 
-class HostQueueModel(ParserModel):
+class DataQueueModel(ParserModel):
     """
     host queue model class
     """
@@ -34,4 +34,4 @@ class HostQueueModel(ParserModel):
         :param data_list: host queue data
         :return:
         """
-        self.insert_data_to_db(DBNameConstant.TABLE_HOST_QUEUE, data_list)
+        self.insert_data_to_db(DBNameConstant.TABLE_DATA_QUEUE, data_list)

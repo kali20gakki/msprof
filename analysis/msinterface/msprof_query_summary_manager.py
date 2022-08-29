@@ -93,7 +93,7 @@ class MsprofQuerySummaryManager:
             StepTraceSummay(params).process()
         if self.data_type == QueryDataType.FOPS_ANALYSE:
             FopsParser(params).process()
-        if self.data_type == QueryDataType.HOST_QUEUE:
+        if self.data_type == QueryDataType.DATA_QUEUE:
             DataPreprocessParser(params).process()
         if self.data_type == QueryDataType.COLLECTIVE_COMMUNICATION:
             ClusterCommunicationParser(params).process()
@@ -135,5 +135,5 @@ class QueryDataType(IntEnum):
     CLUSTER_SCENE = 0
     STEP_TRACE = 1
     FOPS_ANALYSE = 2
-    HOST_QUEUE = 3
+    DATA_QUEUE = 3
     COLLECTIVE_COMMUNICATION = 5
