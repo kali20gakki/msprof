@@ -233,7 +233,6 @@ ACL_PROF_CONFIG_PTR aclprofCreateConfig(UINT32_T_PTR deviceIdList, uint32_t devi
     }
     profConfig->config.aicoreMetrics = static_cast<ProfAicoreMetrics>(aicoreMetrics);
     profConfig->config.dataTypeConfig = dataTypeConfig;
-    ProfAclMgr::instance()->AddAiCpuModelConf(profConfig->config.dataTypeConfig);
 
     profConfig->config.devNums = deviceNums;
     if (deviceNums != 0) {
