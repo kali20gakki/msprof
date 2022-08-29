@@ -48,7 +48,7 @@ class TestMsprofIteration(unittest.TestCase):
             key = MsprofIteration('123')
             InfoConfReader()._info_json = INFO_JSON
             result = key.get_step_iteration_time(index_id, model_id)
-        self.assertEqual(len(result), 1)
+        self.assertEqual(len(result), 2)
         with mock.patch(NAMESPACE + '.MsprofIteration._get_iteration_time', side_effect=sqlite3.Error), \
              mock.patch(NAMESPACE + '.logging.error'):
             key = MsprofIteration('123')

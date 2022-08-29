@@ -125,7 +125,7 @@ private:
     int PrepareDataDir(std::string &file);
 
 private:
-    mmProcess ctrlcpuProcess_;
+    MmProcess ctrlcpuProcess_;
     SHARED_PTR_ALIA<CollectionJobCfg> collectionJobCfg_;
     SHARED_PTR_ALIA<PerfExtraTask> perfExtraTask_;
 };

@@ -124,12 +124,12 @@ bool InputParser::HasHelpParamOnly()
 }
 
 Args::Args(const std::string &name, const std::string &detail)
-    : name_(name), detail_(detail), optional_(mm_optional_argument)
+    : name_(name), detail_(detail), optional_(MM_OPTIONAL_ARGUMENT)
 {
 }
 
 Args::Args(const std::string &name, const std::string &detail, const std::string &defaultValue)
-    : name_(name), defaultValue_(defaultValue), detail_(detail), optional_(mm_optional_argument)
+    : name_(name), defaultValue_(defaultValue), detail_(detail), optional_(MM_OPTIONAL_ARGUMENT)
 {
 }
 
@@ -144,7 +144,7 @@ Args::~Args()
 
 void Args::PrintHelp()
 {
-    std::string ifOptional = (optional_ == mm_optional_argument) ? "<Optional>" : "<Mandatory>";
+    std::string ifOptional = (optional_ == MM_OPTIONAL_ARGUMENT) ? "<Optional>" : "<Mandatory>";
     std::cout << std::right << std::setw(8) << "--"; // 8 space
     std::cout << std::left << std::setw(32) << name_  << ifOptional; // 32 space for option
     std::cout << " " << detail_ << std::endl << std::flush;

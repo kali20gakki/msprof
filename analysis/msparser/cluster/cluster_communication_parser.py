@@ -5,8 +5,10 @@ function:
 Copyright Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 """
 import json
+import os
 
 from common_func.common import print_msg
+from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msvp_common import create_json
 from common_func.path_manager import PathManager
@@ -29,7 +31,7 @@ class ClusterCommunicationParser:
         self._iteration_id = params["iteration_id"]
         self._data_collection = []
         self._communication_model = ClusterCommunicationModel(params)
-        self._cluster_info_model = ClusterInfoViewModel(params)
+        self._cluster_info_model = ClusterInfoViewModel(self._collection_path)
 
     def process(self: any) -> None:
         if not self._is_cluster_scene:
@@ -51,12 +53,15 @@ class ClusterCommunicationParser:
         """
         communication contains: rank id, compute_time, communication_time, stage_time
         """
+        if not os.path.exists(PathManager.get_db_path(self._collection_path, DBNameConstant.DB_CLUSTER_STEP_TRACE)):
+            return
         with self._communication_model as _model:
             if not _model.check_db():
                 return
             with self._cluster_info_model as _c_model:
-                if _c_model.check_db() and _c_model.check_table():
-                    rank_ids = _c_model.get_all_rank_id()
+                if not _c_model.check_db() or not _c_model.check_table():
+                    return
+                rank_ids = _c_model.get_all_rank_id()
             for rank_id in rank_ids:
                 communication_data = _model.get_cluster_communication(rank_id)
                 if not communication_data:

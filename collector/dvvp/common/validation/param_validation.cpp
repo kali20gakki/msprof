@@ -163,7 +163,7 @@ bool ParamValidation::CheckCtrlCpuEventIsValid(const std::vector<std::string> &e
     return true;
 }
 
-bool ParamValidation::CheckLlcEventsIsValid(const std::string &events)
+bool ParamValidation::CheckLlcEventsIsValid(const std::string &events) const
 {
     for (auto ch : events) {
         if (ch == '_' || ch == '/' || (ch == ',' || ch == ' ')) {
@@ -181,7 +181,7 @@ bool ParamValidation::CheckLlcEventsIsValid(const std::string &events)
     return true;
 }
 
-bool ParamValidation::CheckProfilingAicoreMetricsIsValid(const std::string &aicoreMetrics)
+bool ParamValidation::CheckProfilingAicoreMetricsIsValid(const std::string &aicoreMetrics) const
 {
     if (aicoreMetrics.empty()) {
         MSPROF_LOGI("aicoreMetrics is empty");
@@ -505,7 +505,7 @@ bool ParamValidation::CheckProfilingSwitchIsValid(SHARED_PTR_ALIA<analysis::dvvp
     return true;
 }
 
-bool ParamValidation::IsValidSwitch(const std::string &switchStr)
+bool ParamValidation::IsValidSwitch(const std::string &switchStr) const
 {
     if (switchStr.empty()) {
         return true;
@@ -559,7 +559,7 @@ bool ParamValidation::CheckPmuSwitchProfiling(SHARED_PTR_ALIA<analysis::dvvp::me
     return true;
 }
 
-bool ParamValidation::CheckDeviceIdIsValid(const std::string &devId)
+bool ParamValidation::CheckDeviceIdIsValid(const std::string &devId) const
 {
     if (!analysis::dvvp::common::utils::Utils::CheckStringIsNonNegativeIntNum(devId)) {
         MSPROF_LOGE("devId(%s) is not valid.", devId.c_str());
@@ -590,13 +590,13 @@ bool ParamValidation::CheckAiCoreEventsIsValid(const std::vector<std::string> &e
     return true;
 }
 
-bool ParamValidation::CheckPmuEventSizeIsValid(const int eventSize)
+bool ParamValidation::CheckPmuEventSizeIsValid(const int eventSize) const
 {
     MSPROF_LOGD("eventSize: %d", eventSize);
     return eventSize <= MAX_EVENT_SIZE;
 }
 
-bool ParamValidation::CheckCoreIdSizeIsValid(const int eventSize)
+bool ParamValidation::CheckCoreIdSizeIsValid(const int eventSize) const
 {
     return eventSize <= MAX_CORE_ID_SIZE;
 }
@@ -653,7 +653,7 @@ bool ParamValidation::CheckAivEventsIsValid(const std::vector<std::string> &even
     return CheckAiCoreEventsIsValid(events);  // same with ai core events
 }
 
-bool ParamValidation::CheckNameContainsDangerCharacter(const std::string &cmd)
+bool ParamValidation::CheckNameContainsDangerCharacter(const std::string &cmd) const
 {
     const std::string dangerList[] = {"rm ", "mv ", "reboot", "shutdown", "halt", "> ", "wget ", "poweroff"};
     for (std::string str: dangerList) {
@@ -664,7 +664,7 @@ bool ParamValidation::CheckNameContainsDangerCharacter(const std::string &cmd)
     return true;
 }
 
-bool ParamValidation::CheckAppNameIsValid(const std::string &appName)
+bool ParamValidation::CheckAppNameIsValid(const std::string &appName) const
 {
     if (appName.empty()) {
         MSPROF_LOGE("appName is empty");
@@ -707,7 +707,7 @@ bool ParamValidation::CheckDataTagIsValid(const std::string &tag) const
 }
 
 bool ParamValidation::CheckParamsDevices(const std::string &app, const std::string &paramsDevices,
-                                         const std::string &paramsHostSys)
+                                         const std::string &paramsHostSys) const
 {
     if (paramsDevices.empty() && app.empty()) {
         // If only host data is collected, the device parameter is not required.
@@ -735,7 +735,7 @@ bool ParamValidation::CheckParamsDevices(const std::string &app, const std::stri
     return result;
 }
 
-bool ParamValidation::CheckParamsJobIdRegexMatch(const std::string &paramsJobId)
+bool ParamValidation::CheckParamsJobIdRegexMatch(const std::string &paramsJobId) const
 {
     size_t jobIdStrMaxLength = 512; // 512 : max length of joid
     if (paramsJobId.empty() || paramsJobId.length() > jobIdStrMaxLength) {
@@ -757,19 +757,7 @@ bool ParamValidation::CheckParamsJobIdRegexMatch(const std::string &paramsJobId)
     return true;
 }
 
-bool ParamValidation::CheckSamplingFreq(std::string freq, int minVal, int maxVal)
-{
-    if (Utils::CheckStringIsNonNegativeIntNum(freq)) {
-        int optRet = std::stoi(freq);
-        if ((optRet >= minVal) && (optRet <= maxVal)) {
-            return true;
-        }
-    }
-    MSPROF_LOGE("frequency: %s set failed, it should be in range of (%d, %d)", freq.c_str(), minVal, maxVal);
-    return false;
-}
-
-bool ParamValidation::CheckParamsModeRegexMatch(const std::string &paramsMode)
+bool ParamValidation::CheckParamsModeRegexMatch(const std::string &paramsMode) const
 {
     if (paramsMode.empty()) {
         return true;
@@ -841,7 +829,7 @@ int ParamValidation::CheckEventsSize(const std::string &events) const
     return PROFILING_SUCCESS;
 }
 
-bool ParamValidation::IsValidInterval(const int interval, const std::string &logKey)
+bool ParamValidation::IsValidInterval(const int interval, const std::string &logKey) const
 {
     if (interval < MIN_INTERVAL || interval > MAX_INTERVAL) {
         MSPROF_LOGE("invalid %s interval: %d", logKey.c_str(), interval);
@@ -850,7 +838,7 @@ bool ParamValidation::IsValidInterval(const int interval, const std::string &log
     return true;
 }
 
-bool ParamValidation::IsValidSleepPeriod(const int period)
+bool ParamValidation::IsValidSleepPeriod(const int period) const
 {
     if (period < MIN_INTERVAL || period > MAX_PERIOD) {
         MSPROF_LOGE("Invalid --sys-period: %d", period);
@@ -859,7 +847,7 @@ bool ParamValidation::IsValidSleepPeriod(const int period)
     return true;
 }
 
-bool ParamValidation::CheckHostSysOptionsIsValid(const std::string &hostSysOptions)
+bool ParamValidation::CheckHostSysOptionsIsValid(const std::string &hostSysOptions) const
 {
     if (hostSysOptions.empty()) {
         MSPROF_LOGI("hostSysOptions is empty");
@@ -885,7 +873,7 @@ bool ParamValidation::CheckHostSysOptionsIsValid(const std::string &hostSysOptio
     return false;
 }
 
-bool ParamValidation::CheckHostSysPidIsValid(const int hostSysPid)
+bool ParamValidation::CheckHostSysPidIsValid(const int hostSysPid) const
 {
     if (hostSysPid < 0) {
         MSPROF_LOGE("Invalid --host-sys-pid: %d", hostSysPid);
@@ -893,7 +881,7 @@ bool ParamValidation::CheckHostSysPidIsValid(const int hostSysPid)
     }
 
     std::string hostPidPath = "/proc/" + std::to_string(hostSysPid) + "/status";
-    mmStat_t statBuf;
+    MmStatT statBuf;
     int ret = MmStatGet(hostPidPath, &statBuf);
     if (ret < 0) {
         MSPROF_LOGE("Invalid --host-sys-pid: %d", hostSysPid);
@@ -902,7 +890,7 @@ bool ParamValidation::CheckHostSysPidIsValid(const int hostSysPid)
     return true;
 }
 
-bool ParamValidation::ProfStarsAcsqParamIsValid(const std::string &param)
+bool ParamValidation::ProfStarsAcsqParamIsValid(const std::string &param) const
 {
     if (param.empty()) {
         return true;
@@ -923,7 +911,7 @@ bool ParamValidation::ProfStarsAcsqParamIsValid(const std::string &param)
     return true;
 }
 
-bool ParamValidation::CheckStorageLimit(const std::string &storageLimit)
+bool ParamValidation::CheckStorageLimit(const std::string &storageLimit) const
 {
     if (storageLimit.empty()) {
         MSPROF_LOGI("storage_limit is empty");
@@ -976,7 +964,7 @@ bool ParamValidation::CheckStorageLimit(const std::string &storageLimit)
     return true;
 }
 
-bool ParamValidation::CheckBiuFreqValid(const uint32_t biuFreq)
+bool ParamValidation::CheckBiuFreqValid(const uint32_t biuFreq) const
 {
     if ((biuFreq < BIU_SAMPLE_FREQ_MIN) || (biuFreq > BIU_SAMPLE_FREQ_MAX)) {
         MSPROF_LOGE("biu_freq %u is invalid (%u~%u).", biuFreq, BIU_SAMPLE_FREQ_MIN, BIU_SAMPLE_FREQ_MAX);

@@ -53,6 +53,7 @@ target_include_directories(stub_msprofiler PRIVATE
     ${TOP_DIR}/collector/dvvp/depend/inc/metadef
     ${TOP_DIR}/collector/inc/external
     ${TOP_DIR}/collector/dvvp/depend/inc/profapi
+    ${TOP_DIR}/collector/dvvp/depend/inc/acl
 )
 
 target_compile_options(stub_msprofiler PRIVATE
@@ -162,6 +163,7 @@ set(msprofilerInc
     ${TOP_DIR}/collector/dvvp/depend/inc/slog
     ${TOP_DIR}/collector/dvvp/depend/inc/metadef
     ${TOP_DIR}/collector/dvvp/depend/inc/profapi
+    ${TOP_DIR}/collector/dvvp/depend/inc/acl
     ${TOP_DIR}/collector/inc/toolchain
     ${TOP_DIR}/collector/inc/external
     ${TOP_DIR}/collector/inc/external/acl

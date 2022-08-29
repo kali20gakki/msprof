@@ -7,11 +7,11 @@
 #ifndef MMPA_API_H
 #define MMPA_API_H
 
-#include <stdint.h>
-#include <string.h>
-#include <stdio.h>
+#include <cstdint>
+#include <cstring>
+#include <cstdio>
 #include <errno.h>
-#include <time.h>
+#include <ctime>
 #include <unistd.h>
 #include <semaphore.h>
 #include <fcntl.h>
@@ -20,14 +20,13 @@
 #include <syslog.h>
 #include <dirent.h>
 #include <arpa/inet.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cstdlib>
 #include <poll.h>
 #include <net/if.h>
-#include <stdarg.h>
-#include <limits.h>
-#include <ctype.h>
-#include <stddef.h>
+#include <cstdarg>
+#include <climits>
+#include <cctype>
+#include <cstddef>
 #include <dirent.h>
 #include <getopt.h>
 #include <libgen.h>
@@ -67,22 +66,9 @@
 #define MMPA_THREAD_SCHED_FIFO SCHED_FIFO
 #define MMPA_THREAD_SCHED_OTHER SCHED_OTHER
 #define MMPA_THREAD_MIN_STACK_SIZE PTHREAD_STACK_MIN
-#define MMPA_MAX_THREAD_PIO 99
-#define MMPA_MIN_THREAD_PIO 1
-#define PATH_SIZE 256
 #define MMPA_MAX_PATH PATH_MAX
 #define M_WAIT_NOHANG WNOHANG
 #define M_WAIT_UNTRACED WUNTRACED
-#define MMPA_MAX_IF_SIZE 2048
-#define MMPA_MEM_MAX_LEN (0x7fffffff)
-#define MMPA_COMPUTER_BEGIN_YEAR 1900
-#define MMPA_MIN_OS_VERSION_SIZE 128
-#define MMPA_MIN_OS_NAME_SIZE 64
-#define MMPA_CPUPROC_BUF_SIZE 256
-#define MMPA_CPUINFO_DEFAULT_SIZE 64
-#define MMPA_CPUINFO_DOUBLE_SIZE 128
-#define MMPA_MAX_PHYSICALCPU_COUNT 4096
-#define MMPA_MIN_PHYSICALCPU_COUNT 1
 
 #define M_F_OK F_OK
 #define M_X_OK X_OK
@@ -104,19 +90,33 @@
 #define M_IWUSR S_IWUSR
 #define M_IXUSR S_IXUSR
 #define FDSIZE 64
-#define mm_no_argument        no_argument
-#define mm_required_argument  required_argument
-#define mm_optional_argument  optional_argument
+#define MM_NO_ARGUMENT        no_argument
+#define MM_REQUIRED_ARGUMENT  required_argument
+#define MM_OPTIONAL_ARGUMENT  optional_argument
 
 #define FREE_BUF(buf)                \
     do {                             \
         free(buf);                   \
         buf = nullptr;               \
-    } while(0)
+    } while (0)
 
 namespace Collector {
 namespace Dvvp {
 namespace Mmpa {
+constexpr int32_t MMPA_MIN_THREAD_PIO = 1;
+constexpr int32_t PATH_SIZE = 256;
+constexpr uint32_t MMPA_CPUINFO_DEFAULT_SIZE = 64;
+constexpr int32_t MMPA_MAX_THREAD_PIO = 99;
+constexpr uint32_t MMPA_MAX_IF_SIZE = 2048;
+constexpr uint32_t MMPA_MEM_MAX_LEN = 0x7fffffff;
+constexpr int32_t MMPA_COMPUTER_BEGIN_YEAR = 1900;
+constexpr int32_t MMPA_MIN_OS_VERSION_SIZE = 128;
+constexpr int32_t MMPA_MIN_OS_NAME_SIZE = 64;
+constexpr uint32_t MMPA_CPUPROC_BUF_SIZE = 256;
+constexpr uint32_t MMPA_CPUINFO_DOUBLE_SIZE = 128;
+constexpr int32_t MMPA_MAX_PHYSICALCPU_COUNT = 4096;
+constexpr int32_t MMPA_MIN_PHYSICALCPU_COUNT = 1;
+
 // data type define
 const int MMPA_MACINFO_DEFAULT_SIZE = 18;
 const int MMPA_CPUDESC_DEFAULT_SIZE = 64;
@@ -135,25 +135,25 @@ enum MMPA_MAC_ADDR_TYPE {
     MMPA_MAC_ADDR_SIXTH_BYTE
 };
 
-using mmThread = pthread_t;
-using mmMutex_t = pthread_mutex_t;
-using mmDirent = struct dirent;
-using mmProcess = signed int;
-using mmMode_t = mode_t;
-using mmStructOption = struct option;
-using mmStat_t = struct stat;
-using mmErrorMsg = int;
-using mmSockHandle = int;
+using MmThread = pthread_t;
+using MmMutexT = pthread_mutex_t;
+using MmDirent = struct dirent;
+using MmProcess = signed int;
+using MmMode_t = mode_t;
+using MmStructOption = struct option;
+using MmStatT = struct stat;
+using MmErrorMsg = int;
+using MmSockHandle = int;
 // function ptr define
-using userProcFunc = void *(*)(void *pulArg);
-using mmFilter =  int (*)(const mmDirent *entry);
-using mmSort =  int (*)(const mmDirent **a, const mmDirent **b);
+using UserProcFunc = void *(*)(void *pulArg);
+using MmFilter =  int (*)(const MmDirent *entry);
+using MmSort =  int (*)(const MmDirent **a, const MmDirent **b);
 
 // struct define
 typedef struct {
-    userProcFunc procFunc;  // Callback function pointer
+    UserProcFunc procFunc;  // Callback function pointer
     void *pulArg;           // Callback function parameters
-} mmUserBlock_t;
+} MmUserBlockT;
 
 struct CpuTypeTable {
     const char *key;
@@ -171,24 +171,24 @@ typedef struct {
                            //  MMPA_THREAD_SCHED_FIFO
     int32_t stackFlag;     // Set stack size or not: 0 does not set 1 setting
     uint32_t stackSize;    // The stack size unit bytes to be set cannot be less than MMPA_THREAD_STACK_MIN
-} mmThreadAttr;
+} MmThreadAttr;
 
 typedef struct {
     unsigned long long totalSize;
     unsigned long long freeSize;
     unsigned long long availSize;
-} mmDiskSize;
+} MmDiskSize;
 
 typedef struct {
     char **argv;
     int32_t argvCount;
     char **envp;
     int32_t envpCount;
-} mmArgvEnv;
+} MmArgvEnv;
 
 typedef struct {
     char addr[MMPA_MACINFO_DEFAULT_SIZE];  // ex:aa-bb-cc-dd-ee-ff\0
-} mmMacInfo;
+} MmMacInfo;
 
 typedef struct {
     char arch[MMPA_CPUDESC_DEFAULT_SIZE];
@@ -199,7 +199,7 @@ typedef struct {
     int32_t ncores;                                  // cpu cores
     int32_t nthreads;                                // cpu thread count
     int32_t ncounts;                                 // logical cpu nums
-} mmCpuDesc;
+} MmCpuDesc;
 
 typedef struct {
     int32_t wSecond;             // Seconds. [0-60] (1 leap second)
@@ -209,82 +209,82 @@ typedef struct {
     int32_t wMonth;              // Month. [1-12]
     int32_t wYear;               // Year
     int32_t wDayOfWeek;          // Day of week. [0-6]
-    int32_t tm_yday;             // Days in year.[0-365]
-    int32_t tm_isdst;            // DST. [-1/0/1]
+    int32_t tmYday;             // Days in year.[0-365]
+    int32_t tmIsdst;            // DST. [-1/0/1]
     long wMilliseconds;          // milliseconds
-} mmSystemTime_t;
+} MmSystemTimeT;
 
 typedef struct {
-    long tv_sec;
-    long tv_usec;
-} mmTimeval;
+    long tvSec;
+    long tvUsec;
+} MmTimeval;
 
 typedef struct {
-    int32_t tz_minuteswest;  // How many minutes is it different from Greenwich
-    int32_t tz_dsttime;      // type of DST correction
-} mmTimezone;
+    int32_t tzMinuteswest;  // How many minutes is it different from Greenwich
+    int32_t tzDsttime;      // type of DST correction
+} MmTimezone;
 
 typedef struct {
-    long long tv_sec;
-    long long tv_nsec;
-} mmTimespec;
+    long long tvSec;
+    long long tvNsec;
+} MmTimespec;
 
 // function define
 int32_t MmSleep(uint32_t milliSecond);
-int32_t MmCreateTaskWithThreadAttr(mmThread *threadHandle, const mmUserBlock_t *funcBlock,
-    const mmThreadAttr *threadAttr);
-int32_t MmJoinTask(mmThread *threadHandle);
+int32_t MmCreateTaskWithThreadAttr(MmThread *threadHandle, const MmUserBlockT *funcBlock,
+    const MmThreadAttr *threadAttr);
+int32_t MmJoinTask(MmThread *threadHandle);
 int32_t MmSetCurrentThreadName(const std::string &name);
-mmTimespec MmGetTickCount();
+MmTimespec MmGetTickCount();
 int32_t MmGetFileSize(const std::string &fileName, unsigned long long *length);
-int32_t MmGetDiskFreeSpace(const std::string &path, mmDiskSize *diskSize);
+int32_t MmGetDiskFreeSpace(const std::string &path, MmDiskSize *diskSize);
 int32_t MmIsDir(const std::string &fileName);
 int32_t MmAccess2(const std::string &pathName, int32_t mode);
 int32_t MmAccess(const std::string &pathName);
 char *MmDirName(char *path);
 char *MmBaseName(char *path);
-int32_t MmMkdir(const std::string &pathName, mmMode_t mode);
+int32_t MmMkdir(const std::string &pathName, MmMode_t mode);
 int32_t MmChmod(const std::string &filename, int32_t mode);
 int32_t MmGetErrorCode();
-char *MmGetErrorFormatMessage(mmErrorMsg errnum, char *buf, size_t size);
-int32_t MmScandir(const std::string &path, mmDirent ***entryList, mmFilter filterFunc, mmSort sort);
-void MmScandirFree(mmDirent **entryList, int32_t count);
+char *MmGetErrorFormatMessage(MmErrorMsg errnum, char *buf, size_t size);
+int32_t MmScandir(const std::string &path, MmDirent ***entryList, MmFilter filterFunc, MmSort sort);
+void MmScandirFree(MmDirent **entryList, int32_t count);
 int32_t MmRmdir(const std::string &pathName);
 int32_t MmUnlink(const std::string &filename);
 int32_t MmRealPath(const char *path, char *realPath, int32_t realPathLen);
 int32_t MmChdir(const std::string &path);
 int32_t MmCreateProcess(const std::string &fileName,
-                        const mmArgvEnv *env,
+                        const MmArgvEnv *env,
                         const std::string &stdoutRedirectFile,
-                        mmProcess *id);
-int32_t MmWaitPid(mmProcess pid, int32_t *status, int32_t options);
-int32_t MmGetMac(mmMacInfo **list, int32_t *count);
-int32_t MmGetMacFree(mmMacInfo *list, int32_t count);
+                        MmProcess *id);
+int32_t MmWaitPid(MmProcess pid, int32_t *status, int32_t options);
+int32_t MmGetMac(MmMacInfo **list, int32_t *count);
+int32_t MmGetMacFree(MmMacInfo *list, int32_t count);
 int32_t MmGetEnv(const std::string &name, char *value, uint32_t len);
 int32_t MmGetCwd(char *buffer, int32_t maxLen);
-int32_t MmGetLocalTime(mmSystemTime_t *sysTimePtr);
+int32_t MmGetLocalTime(MmSystemTimeT *sysTimePtr);
 int32_t MmGetPid();
 int32_t MmGetTid();
-int32_t MmStatGet(const std::string &path, mmStat_t *buffer);
+int32_t MmStatGet(const std::string &path, MmStatT *buffer);
 int32_t MmClose(int32_t fd);
 int32_t MmGetOptLong(int32_t argc,
                      char *const *argv,
                      const char *opts,
-                     const mmStructOption *longOpts,
+                     const MmStructOption *longOpts,
                      int32_t *longIndex);
 int32_t MmGetOptInd();
 char *MmGetOptArg();
-int32_t MmGetTimeOfDay(mmTimeval *timeVal, mmTimezone *timeZone);
-int32_t MmOpen2(const std::string &pathName, int32_t flags, mmMode_t mode);
+int32_t MmGetTimeOfDay(MmTimeval *timeVal, MmTimezone *timeZone);
+int32_t MmOpen2(const std::string &pathName, int32_t flags, MmMode_t mode);
 ssize_t MmWrite(int32_t fd, void *buf, uint32_t bufLen);
 int32_t MmGetOsVersion(char *versionInfo, int32_t versionLength);
 int32_t MmGetOsName(char *name, int32_t nameSize);
-int32_t MmGetCpuInfo(mmCpuDesc **cpuInfo, int32_t *count);
-int32_t MmCpuInfoFree(mmCpuDesc *cpuInfo, int32_t count);
+int32_t MmGetCpuInfo(MmCpuDesc **cpuInfo, int32_t *count);
+int32_t MmCpuInfoFree(MmCpuDesc *cpuInfo, int32_t count);
 ssize_t MmRead(int32_t fd, void *buf, uint32_t bufLen);
-ssize_t MmSocketSend(mmSockHandle sockFd, void *sendBuf, int32_t sendLen, int32_t sendFlag);
-int32_t MmMutexLock(mmMutex_t *mutex);
-int32_t MmMutexUnLock(mmMutex_t *mutex);
+ssize_t MmSocketSend(MmSockHandle sockFd, void *sendBuf, int32_t sendLen, int32_t sendFlag);
+int32_t MmMutexLock(MmMutexT *mutex);
+int32_t MmMutexUnLock(MmMutexT *mutex);
 } // Mmpa
 } // Dvvp
 } // Collector

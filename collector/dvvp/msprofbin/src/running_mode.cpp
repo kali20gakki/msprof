@@ -219,7 +219,7 @@ void RunningMode::StopRunningTasks() const
     std::vector<std::string> argsV;
     argsV.push_back(std::to_string(reinterpret_cast<int>(taskPid_)));
     int exitCode = INVALID_EXIT_CODE;
-    mmProcess killProces = MSVP_MMPROCESS;
+    MmProcess killProces = MSVP_MMPROCESS;
     int ret = analysis::dvvp::common::utils::Utils::ExecCmd(execCmdParams, argsV, envsV, exitCode, killProces);
     MSPROF_LOGI("[%s mode] Stop %s Process：%d, ret=%d", modeName_.c_str(), taskName_.c_str(),
         reinterpret_cast<int>(taskPid_), ret);
