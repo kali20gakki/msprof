@@ -62,10 +62,13 @@ bool ParamValidation::CheckOutputIsValid(const std::string &outputPath)
         MSPROF_LOGI("output is empty");
         return true;
     }
+    std::string errReason = "output should be a valid dir and path lenth shoule be shorter than 1024.";
     std::string path = Utils::RelativePathToAbsolutePath(outputPath);
     if (!path.empty()) {
         if (path.size() > MAX_PATH_LENGTH) {
             MSPROF_LOGE("Invalid value for Argument 'output'. The maximum length is %d.", MAX_PATH_LENGTH);
+            MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
+                std::vector<std::string>({"output", outputPath, errReason}));
             return false;
         }
         if (Utils::CreateDir(path) != PROFILING_SUCCESS) {
@@ -73,14 +76,20 @@ bool ParamValidation::CheckOutputIsValid(const std::string &outputPath)
             MSPROF_LOGE("Create output dir failed.ErrorCode: %d, ErrorInfo: %s.",
                 MmGetErrorCode(),
                 MmGetErrorFormatMessage(MmGetErrorCode(), errBuf, MAX_ERR_STRING_LEN));
+            MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
+                std::vector<std::string>({"output", outputPath, errReason}));
             return false;
         }
         if (!Utils::IsDir(path)) {
             MSPROF_LOGE("Argument 'output' %s is not a dir.", path.c_str());
+            MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
+                std::vector<std::string>({"output", outputPath, errReason}));
             return false;
         }
         if (MmAccess2(path, M_W_OK) != PROFILING_SUCCESS) {
             MSPROF_LOGE("Argument 'output' %s permission denied.", path.c_str());
+            MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
+                std::vector<std::string>({"output", outputPath, errReason}));
             return false;
         }
     } else {
@@ -226,6 +235,9 @@ bool ParamValidation::CheckLlcModeIsValid(const std::string &llcMode)
             return true;
         }
     }
+    std::string errReason = "llc-mode should be in range [" + llcModeWhiteList[0] + "," + llcModeWhiteList[1] + "].";
+    MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
+        std::vector<std::string>({"llc-mode", llcMode, errReason}));
     return false;
 }
 
@@ -236,16 +248,22 @@ bool ParamValidation::CheckFreqIsValid(const std::string &freq, const int rangeM
         MSPROF_LOGI("freq is empty");
         return true;
     }
+    std::string errReason = "input freq should be in range [" + std::to_string(rangeMin) + "," +
+        std::to_string(rangeMax) + "].";
     if (Utils::CheckStringIsNonNegativeIntNum(freq)) {
         int optRet = std::stoi(freq);
         if ((optRet >= rangeMin) && (optRet <= rangeMax)) {
             return true;
         } else {
             MSPROF_LOGE("Input freq value is out of value range.");
+            MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
+                std::vector<std::string>({"freq", freq, errReason}));
             return false;
         }
     } else {
         MSPROF_LOGE("Input freq value is invalid.");
+        MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
+            std::vector<std::string>({"freq", freq, errReason}));
         return false;
     }
 }
@@ -260,11 +278,14 @@ bool ParamValidation::CheckHostSysUsageIsValid(const std::string &hostSysUsage)
         MSPROF_LOGI("hostsysusage is empty");
         return true;
     }
+    std::string errReason = "host_sys_usage should be in range of 'cpu | mem'.";
     std::vector<std::string> hostSysUsageArray = Utils::Split(hostSysUsage, false, "", ",");
     for (size_t i = 0; i < hostSysUsageArray.size(); ++i) {
         if ((hostSysUsageArray[i].compare("cpu") != 0) && (hostSysUsageArray[i].compare("mem") != 0)) {
             MSPROF_LOGE("Argument host-sys-usage: invalid value:%s. Please input in the range of "
                 "'cpu | mem'", hostSysUsageArray[i].c_str());
+            MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
+                std::vector<std::string>({"host_sys_usage", hostSysUsage, errReason}));
             return false;
         }   
     }
@@ -277,23 +298,29 @@ bool ParamValidation::CheckHostSysPidValid(const std::string &hostSysPid)
         MSPROF_LOGE("Argument --host-sys-pid: expected one argument");
         return false;
     }
+    std::string errReason = "host_sys_pid should be a valid integer pid number, min value is 0.";
     if (Utils::CheckStringIsNonNegativeIntNum(hostSysPid)) {
         auto hostSysRet = std::stoi(hostSysPid);
         if (!CheckHostSysPidIsValid(hostSysRet)) {
             MSPROF_LOGE("Argument --host-sys-pid: invalid int value: %d."
                 "The process cannot be found, please enter a correct host-sys-pid.", hostSysRet);
+            MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
+                std::vector<std::string>({"host_sys_pid", hostSysPid, errReason}));
             return false;
         }
         return true;
     } else {
         MSPROF_LOGE("Argument --host-sys-pid: invalid value: %s."
             "Please input an integer value.The min value is 0.", hostSysPid.c_str());
+        MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
+            std::vector<std::string>({"host_sys_pid", hostSysPid, errReason}));
         return false;
     }
 }
 
 bool ParamValidation::CheckPythonPathIsValid(const std::string&pythonPath)
 {
+    std::string errReason = "python-path should be a valid file path and path lenth shoule be shorter than 1024.";
     if (pythonPath.empty()) {
         MSPROF_LOGE("Argument --python-path: expected one argument");
         return false;
@@ -301,20 +328,28 @@ bool ParamValidation::CheckPythonPathIsValid(const std::string&pythonPath)
     if (pythonPath.size() > MAX_PATH_LENGTH) {
         MSPROF_LOGE("Argument --python-path is invalid because of exceeds"
             " the maximum length of %d", MAX_PATH_LENGTH);
+        MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
+            std::vector<std::string>({"python-path", pythonPath, errReason}));
         return false;
     }
     std::string absolutePythonPath = Utils::CanonicalizePath(pythonPath);
     if (absolutePythonPath.empty()) {
         MSPROF_LOGE("Argument --python-path %s does not exist or permission denied!!!", pythonPath.c_str());
+        MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
+            std::vector<std::string>({"python-path", pythonPath, errReason}));
         return false;
     }
     if (MmAccess2(absolutePythonPath, M_X_OK) != PROFILING_SUCCESS) {
         MSPROF_LOGE("Argument --python-path %s permission denied.", pythonPath.c_str());
+        MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
+            std::vector<std::string>({"python-path", pythonPath, errReason}));
         return false;
     }
     if (Utils::IsDir(absolutePythonPath)) {
         MSPROF_LOGE("Argument --python-path %s is a directory, "
             "please enter the executable file path.", pythonPath.c_str());
+        MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
+            std::vector<std::string>({"python-path", pythonPath, errReason}));
         return false;
     }
     return true;
@@ -322,13 +357,18 @@ bool ParamValidation::CheckPythonPathIsValid(const std::string&pythonPath)
 
 bool ParamValidation::CheckExportSummaryFormatIsValid(const std::string &summaryFormat)
 {
+    std::string errReason = "summary-format should be in range of 'json | csv'.";
     if (summaryFormat.empty()) {
         MSPROF_LOGE("Argument --summary-format: expected one argument");
+        MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
+            std::vector<std::string>({"summary-format", summaryFormat, errReason}));
         return false;
     }
     if (summaryFormat != "json" && summaryFormat!= "csv") {
         MSPROF_LOGE("Argument --summary-format: invalid value: %s. "
             "Please input 'json' or 'csv'.", summaryFormat.c_str());
+        MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
+            std::vector<std::string>({"summary-format", summaryFormat, errReason}));
         return false;
     }
     return true;
@@ -336,13 +376,18 @@ bool ParamValidation::CheckExportSummaryFormatIsValid(const std::string &summary
 
 bool ParamValidation::CheckExportIdIsValid(const std::string &exportId, const std::string &exportIdType)
 {
+    std::string errReason = exportIdType + "should be a valid integer number.";
     if (exportId.empty()) {
         MSPROF_LOGE("Argument --%s: expected one argument", exportIdType.c_str());
+        MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
+            std::vector<std::string>({exportIdType, exportId, errReason}));
         return false;
     }
     if (!Utils::CheckStringIsValidNatureNum(exportId)) {
         MSPROF_LOGE("Argument --%s: invalid value: %s."
             "Please input an integer value.", exportIdType.c_str(), exportId.c_str());
+        MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
+            std::vector<std::string>({exportIdType, exportId, errReason}));
         return false;
     }
     return true;
