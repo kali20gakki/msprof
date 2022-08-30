@@ -98,8 +98,12 @@ SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> InputParser::MsprofGetOp
         }
         cmdInfo.args[opt] = MmGetOptArg();
         argvStr = std::string(argv[MmGetOptInd() - 1]);
-        argvMap.insert({opt, std::pair<MsprofCmdInfo, std::string>(cmdInfo, argvStr)});
-        params_->usedParams.insert(opt);
+        if (argvMap.find(opt) == argvMap.end()) {
+            argvMap.insert({opt, std::pair<MsprofCmdInfo, std::string>(cmdInfo, argvStr)});
+            params_->usedParams.insert(opt);
+        } else {
+            argvMap[opt] = std::pair<MsprofCmdInfo, std::string>(cmdInfo, argvStr);
+        }
     }
     auto paramAdapter = MsprofParamAdapter();
     int ret = paramAdapter.GetParamFromInputCfg(argvMap, params_);
