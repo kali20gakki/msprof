@@ -5,10 +5,8 @@ This script is used to parse step trace data for cluster.
 Copyright Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
 """
 import json
-import logging
 import os
 from collections import OrderedDict
-from itertools import chain
 
 from common_func.common import error, warn, print_info
 from common_func.config_mgr import ConfigMgr
@@ -19,14 +17,10 @@ from common_func.db_name_constant import DBNameConstant
 from common_func.file_manager import check_path_valid
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
-from common_func.msprof_iteration import MsprofIteration
 from common_func.msprof_step import MsprofStep
 from common_func.msvp_common import check_file_writable
 from common_func.path_manager import PathManager
-from common_func.step_trace_constant import StepTraceConstant
 from msmodel.ai_cpu.data_queue_model import DataQueueModel
-from msmodel.step_trace.cluster_step_trace_model import ClusterStepTraceModel
-from msparser.interface.iparser import IParser
 from profiling_bean.db_dto.cluster_rank_dto import ClusterRankDto
 
 
@@ -104,7 +98,7 @@ class DataPreprocessParser:
             iter_dict.setdefault(data.iter_id, [start_time, end_time])
         return iter_dict
 
-    def storage_data(self: any, json_data: list) -> None:
+    def storage_data(self: any, json_data: dict) -> None:
         """
         save data into file
         :return: None
