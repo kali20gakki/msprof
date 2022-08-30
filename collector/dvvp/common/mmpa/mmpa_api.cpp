@@ -119,7 +119,7 @@ int32_t MmCreateTaskWithThreadAttr(MmThread *threadHandle, const MmUserBlockT *f
     return ret;
 }
  
-int32_t MmJoinTask(MmThread *threadHandle)
+int32_t MmJoinTask(const MmThread *threadHandle)
 {
     if (threadHandle == nullptr) {
         return PROFILING_INVALID_PARAM;
@@ -526,12 +526,12 @@ static int32_t LocalGetMacInfo(int32_t sock, struct ifconf ifc, MmMacInfo *macIn
             ret = snprintf_s(macInfo[i].addr,
                 sizeof(macInfo[i].addr), sizeof(macInfo[i].addr) - 1U,
                 "%02X-%02X-%02X-%02X-%02X-%02X",
-                *(ptr + MMPA_MAC_ADDR_FIRST_BYTE),
-                *(ptr + MMPA_MAC_ADDR_SECOND_BYTE),
-                *(ptr + MMPA_MAC_ADDR_THIRD_BYTE),
-                *(ptr + MMPA_MAC_ADDR_FOURTH_BYTE),
-                *(ptr + MMPA_MAC_ADDR_FIFTH_BYTE),
-                *(ptr + MMPA_MAC_ADDR_SIXTH_BYTE));
+                *(ptr + static_cast<uint32_t>(MMPA_MAC_ADDR_TYPE::MMPA_MAC_ADDR_FIRST_BYTE)),
+                *(ptr + static_cast<uint32_t>(MMPA_MAC_ADDR_TYPE::MMPA_MAC_ADDR_SECOND_BYTE)),
+                *(ptr + static_cast<uint32_t>(MMPA_MAC_ADDR_TYPE::MMPA_MAC_ADDR_THIRD_BYTE)),
+                *(ptr + static_cast<uint32_t>(MMPA_MAC_ADDR_TYPE::MMPA_MAC_ADDR_FOURTH_BYTE)),
+                *(ptr + static_cast<uint32_t>(MMPA_MAC_ADDR_TYPE::MMPA_MAC_ADDR_FIFTH_BYTE)),
+                *(ptr + static_cast<uint32_t>(MMPA_MAC_ADDR_TYPE::MMPA_MAC_ADDR_SIXTH_BYTE)));
             if (ret == PROFILING_FAILED) {
                 *count = 0;
                 return PROFILING_FAILED;
@@ -848,7 +848,8 @@ static int32_t LocalLookup(char *buf, uint32_t bufLen, const char *pattern, char
     return PROFILING_SUCCESS;
 }
 
-static const char* LocalGetArmVersion(char *cpuImplememter, char *cpuPart)
+static const char* LocalGetArmVersion(const char *cpuImplememter, uint32_t cpuImplememterLen,
+    const char *cpuPart, uint32_t cpuPartLen)
 {
     static struct CpuTypeTable gParamatersTable[] = {
         { "0x410xd03", "ARMv8_Cortex_A53"},
@@ -859,6 +860,9 @@ static const char* LocalGetArmVersion(char *cpuImplememter, char *cpuPart)
         { "0x480xd01", "TaishanV110"}
     };
     char cpuArmVersion[MMPA_CPUINFO_DOUBLE_SIZE] = {0};
+    if (cpuImplememterLen + cpuPartLen >= sizeof(cpuArmVersion)) {
+        return nullptr;
+    }
     int32_t ret = snprintf_s(cpuArmVersion, sizeof(cpuArmVersion), sizeof(cpuArmVersion) - 1U,
                            "%s%s", cpuImplememter, cpuPart);
     if (ret == PROFILING_FAILED) {
@@ -936,7 +940,7 @@ static void LocalGetCpuProcV1(FILE *fp, MmCpuDesc *cpuInfo)
             ;
         }
     }
-    const char* tmp = LocalGetArmVersion(cpuImplememter, cpuPart);
+    const char* tmp = LocalGetArmVersion(cpuImplememter, strlen(cpuImplememter), cpuPart, strlen(cpuPart));
     if (tmp != nullptr) {
         (void)memcpy_s(cpuInfo->version, sizeof(cpuInfo->version), tmp, strlen(tmp) + 1U);
     }
