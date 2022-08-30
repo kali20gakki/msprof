@@ -493,7 +493,6 @@ void GeOpenDeviceHandle(const uint32_t devId)
         MSPROF_LOGI("CommandHandleProfStart, Allocate start profiling config");
         uint32_t devIdList[1] = {devId};
         uint64_t dataTypeConfig = ProfAclMgr::instance()->GetCmdModeDataTypeConfig();
-        ProfAclMgr::instance()->AddModelLoadConf(dataTypeConfig);
         ret = Analysis::Dvvp::ProfilerCommon::CommandHandleProfStart(devIdList, 1,
             dataTypeConfig | PROF_OP_DETAIL);
         if (ret != SUCCESS) {
@@ -517,7 +516,6 @@ void GeFinalizeHandle()
             continue;
         }
         uint32_t devIdList[1] = {devId};
-        ProfAclMgr::instance()->AddModelLoadConf(dataTypeConfig);
         if (CommandHandleProfStop(devIdList, 1, dataTypeConfig) != SUCCESS) {
             MSPROF_LOGE("Failed to CommandHandleProfStop on device:%u", devId);
             MSPROF_INNER_ERROR("EK9999", "Failed to CommandHandleProfStop on device:%u", devId);
