@@ -235,7 +235,6 @@ class MsProfExportDataUtils:
         """
         _ = configs
         device_id = params.get(StrConstant.PARAM_DEVICE_ID)
-        model_id = params.get(StrConstant.PARAM_MODEL_ID)
         index_id = params.get(StrConstant.PARAM_ITER_ID)
         result_dir = params.get(StrConstant.PARAM_RESULT_DIR)
 

@@ -1,5 +1,7 @@
+#!/usr/bin/python3
+# coding=utf-8
 """
-function: analysis the data of ai cpu by iteration.
+function: collect the data of ai cpu by iteration.
 Copyright Huawei Technologies Co., Ltd. 2022. All rights reserved.
 """
 from msmodel.ai_cpu.ai_cpu_model import AiCpuModel
@@ -9,6 +11,9 @@ from common_func.constant import Constant
 
 
 class AICpuFromTsCollector:
+    """
+    AI Cpu from ts collector
+    """
     STREAM_TASK_KEY_FMT = "{0}-{1}"
     STREAM_TASK_BATCH_KEY_FMT = "{0}-{1}-{2}"
 
@@ -27,6 +32,10 @@ class AICpuFromTsCollector:
         return ge_op_iter_dict
 
     def filter_aicpu(self: any, aicpu_feature: list) -> None:
+        """
+        filter ai cpu
+        :param aicpu_feature: aicpu feature
+        """
         stream_id, task_id, start, end, batch_id, iter_id = aicpu_feature
         stream_task_value = self.STREAM_TASK_KEY_FMT.format(stream_id, task_id)
         stream_task_batch_value = self.STREAM_TASK_BATCH_KEY_FMT.format(stream_id, task_id, batch_id)

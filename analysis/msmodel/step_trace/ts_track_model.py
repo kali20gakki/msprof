@@ -42,6 +42,9 @@ class TsTrackModel(BaseModel, ABC):
     def get_ai_cpu_data(self: any, model_id: int, index_id: int) -> list:
         """
         get ai cpu data
+        :param model_id: model id
+        :param index_id: index id
+        :return: ai cpu with state
         """
         iter_time_range = list(chain.from_iterable(
             MsprofIteration(self.result_dir).get_iteration_time(index_id, model_id)))

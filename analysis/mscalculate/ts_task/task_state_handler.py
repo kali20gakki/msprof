@@ -2,30 +2,57 @@
 # coding=utf-8
 """
 function: this script used to operate ts track
-Copyright Huawei Technologies Co., Ltd. 2021. All rights reserved.
+Copyright Huawei Technologies Co., Ltd. 2022. All rights reserved.
 """
 
 
 class TaskTimeline:
+    """
+    contain start and end time of task
+    """
     def __init__(self: any, stream_id: int, task_id: int) -> None:
-        self.stream_id = stream_id
-        self.task_id = task_id
+        self._stream_id = stream_id
+        self._task_id = task_id
         self.start = None
         self.end = None
 
+    @property
+    def stream_id(self: any) -> int:
+        """
+        stream id
+        :return: stream id
+        """
+        return self._stream_id
+
+    @property
+    def task_id(self: any) -> int:
+        """
+        task id
+        :return: task id
+        """
+        return self._task_id
+
 
 class TaskStateHandler:
+    """
+    handle task state
+    """
     RECEIVE_TAG = 0
     START_TAG = 1
     END_TAG = 2
 
     def __init__(self: any, stream_id: int, task_id: int) -> None:
-        self.stream_id = stream_id
-        self.task_id = task_id
+        self._stream_id = stream_id
+        self._task_id = task_id
         self.new_task = None
         self.task_timeline_list = []
 
     def process_record(self: any, timestamp: int, task_state: int) -> None:
+        """
+        process record
+        :param timestamp: timestamp
+        :param task_state: task state
+        """
         if task_state == self.START_TAG:
             self.new_task = TaskTimeline(self.stream_id, self.task_id)
             self.new_task.start = timestamp
@@ -33,3 +60,19 @@ class TaskStateHandler:
         if task_state == self.END_TAG and self.new_task:
             self.new_task.end = timestamp
             self.task_timeline_list.append(self.new_task)
+
+    @property
+    def stream_id(self: any) -> int:
+        """
+        stream id
+        :return: stream id
+        """
+        return self._stream_id
+
+    @property
+    def task_id(self: any) -> int:
+        """
+        task id
+        :return: task id
+        """
+        return self._task_id

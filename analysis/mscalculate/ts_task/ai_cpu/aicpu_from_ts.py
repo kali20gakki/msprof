@@ -1,5 +1,7 @@
+#!/usr/bin/python3
+# coding=utf-8
 """
-function: analysis the data of ai cpu by iteration.
+function: analysis the data of ai cpu from ts by iteration.
 Copyright Huawei Technologies Co., Ltd. 2022. All rights reserved.
 """
 
@@ -35,6 +37,11 @@ class AICpuFromTsCalculator(MsMultiProcess):
 
     @staticmethod
     def state_to_timeline(ai_cpu_with_state: list) -> list:
+        """
+        transfer state to start and end
+        :param ai_cpu_with_state: ai cpu data with start and end
+        :return: ai cpu timeline list
+        """
         stream_task_group = {}
         for stream_id, task_id, timestamp, task_state in ai_cpu_with_state:
             task_state_handler = stream_task_group.setdefault(
@@ -59,7 +66,6 @@ class AICpuFromTsCalculator(MsMultiProcess):
         """
         process ai cpu data
         """
-
         with self._ts_model:
             ai_cpu_with_state = self._ts_model.get_ai_cpu_data(
                 self.sample_config.get("model_id"), self.sample_config.get("iter_id"))
@@ -80,6 +86,13 @@ class AICpuFromTsCalculator(MsMultiProcess):
         self._aicpu_collector.aicpu_list = aicpu_list
 
     def calculate_batch_id(self: any, stream_id: int, task_id: int, syscnt: int) -> int:
+        """
+        calculate batch id
+        :param stream_id: stream id
+        :param task_id: task id
+        :param syscnt: syscnt
+        :return: batch id
+        """
         if ProfilingScene().is_operator():
             batch_id = self._batch_counter.calculate_batch(stream_id, task_id)
         else:
