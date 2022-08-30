@@ -98,7 +98,7 @@ class CalculateTaskScheduler:
 
     def _collect_aicpu(self: any, task_time_list: list) -> None:
         iter_range = MsprofIteration(self.project_path). \
-            get_iter_id_by_index_id(self.sample_config.get("iter_id"), self.sample_config.get("model_id"))
+            get_iter_id_by_index_id(self.index_id, self.model_id)
         iter_id = iter_range[1] if len(iter_range) >= 2 else NumberConstant.INVALID_ITER_ID
         aicpu_collector = AICpuFromTsCollector(self.project_path)
 
