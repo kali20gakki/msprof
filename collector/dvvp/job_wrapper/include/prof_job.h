@@ -34,35 +34,35 @@ using namespace analysis::dvvp::common::config;
 namespace Analysis {
 namespace Dvvp {
 namespace JobWrapper {
-#define CHECK_JOB_EVENT_PARAM_RET(cfg, ret)  do {                                      \
-    if ((cfg) == nullptr || (cfg)->comParams == nullptr ||                             \
-        (cfg)->jobParams.events == nullptr || (cfg)->jobParams.events->size() == 0) {  \
-        MSPROF_LOGI("Job check event param not pass");                                   \
-        return ret;                                                                    \
-    }                                                                                  \
-} while (0)
 
-#define CHECK_JOB_CONTEXT_PARAM_RET(cfg, ret)  do {                                        \
-    if ((cfg) == nullptr || (cfg)->comParams == nullptr ||                                 \
-        (cfg)->comParams->jobCtx == nullptr || (cfg)->comParams->params == nullptr) {      \
-        MSPROF_LOGI("Job check context param failed");                                     \
-        return ret;                                                                        \
-    }                                                                                      \
-} while (0)
+inline int32_t CheckJobEventParam(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
+{
+    if (cfg == nullptr || cfg->comParams == nullptr || cfg->jobParams.events == nullptr ||
+        cfg->jobParams.events->size() == 0) {
+        MSPROF_LOGI("Job check event param not pass");
+        return analysis::dvvp::common::error::PROFILING_FAILED;
+    }
+    return analysis::dvvp::common::error::PROFILING_SUCCESS;
+}
 
-#define CHECK_JOB_COMMON_PARAM_RET(cfg, ret) do {                                          \
-    if ((cfg) == nullptr || (cfg)->comParams == nullptr) {                                 \
-        MSPROF_LOGI("Job check comm param failed");                                        \
-        return ret;                                                                        \
-    }                                                                                      \
-} while (0)
+inline int32_t CheckJobContextParam(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
+{
+    if (cfg == nullptr || cfg->comParams == nullptr || cfg->comParams->jobCtx == nullptr ||
+        cfg->comParams->params == nullptr) {
+        MSPROF_LOGI("Job check context param failed");
+        return analysis::dvvp::common::error::PROFILING_FAILED;
+    }
+    return analysis::dvvp::common::error::PROFILING_SUCCESS;
+}
 
-#define CHECK_JOB_CONFIG_UNSIGNED_SIZE_RET(size, ret) do {                             \
-    if ((size) == 0 || (size) > 0x7FFFFFFF) {                                      \
-        MSPROF_LOGE("Profiling Config Size Out Range");                               \
-        return ret;                                                                    \
-    }                                                                                  \
-} while (0)
+inline int32_t CheckJobCommonParam(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
+{
+    if (cfg == nullptr || cfg->comParams == nullptr) {
+        MSPROF_LOGI("Job check comm param failed");
+        return analysis::dvvp::common::error::PROFILING_FAILED;
+    }
+    return analysis::dvvp::common::error::PROFILING_SUCCESS;
+}
 
 constexpr int DEFAULT_PERIOD_TIME = 10;
 
