@@ -27,7 +27,7 @@ class DataQueueParser(IParser, MsMultiProcess):
     AIC_PMU_SIZE = 128
 
     def __init__(self: any, file_list: dict, sample_config: dict) -> None:
-        MsMultiProcess.__init__(self, sample_config)
+        super(DataQueueParser, self).__init__(sample_config)
         self._file_list = file_list.get(DataTag.DATA_QUEUE, [])
         self._sample_config = sample_config
         self._project_path = self._sample_config.get(StrConstant.SAMPLE_CONFIG_PROJECT_PATH)

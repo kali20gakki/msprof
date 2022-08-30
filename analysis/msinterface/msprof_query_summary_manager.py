@@ -82,19 +82,19 @@ class MsprofQuerySummaryManager:
         if self.data_type == QueryDataType.CLUSTER_SCENE:
             MsprofQuerySummaryManager.check_cluster_scene(self.collection_path)
             return
-        self._check_arguments_valid()
         self._check_cluster_scene()
         params = {"collection_path": self.collection_path,
                   "is_cluster": self.is_cluster_scene,
                   "npu_id": self.npu_id,
                   "model_id": self.model_id,
                   "iteration_id": self.iteration_id}
+        if self.data_type == QueryDataType.DATA_QUEUE:
+            DataPreprocessParser(params).process()
+        self._check_arguments_valid()
         if self.data_type == QueryDataType.STEP_TRACE:
             StepTraceSummay(params).process()
         if self.data_type == QueryDataType.FOPS_ANALYSE:
             FopsParser(params).process()
-        if self.data_type == QueryDataType.DATA_QUEUE:
-            DataPreprocessParser(params).process()
         if self.data_type == QueryDataType.COLLECTIVE_COMMUNICATION:
             ClusterCommunicationParser(params).process()
 
