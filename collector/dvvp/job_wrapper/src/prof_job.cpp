@@ -114,7 +114,9 @@ ProfTscpuJob::~ProfTscpuJob()
 
 int ProfTscpuJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 {
-    CHECK_JOB_EVENT_PARAM_RET(cfg, PROFILING_FAILED);
+    if (CheckJobEventParam(cfg) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
     if (cfg->comParams->params->host_profiling) {
         return PROFILING_FAILED;
     }
@@ -125,7 +127,9 @@ int ProfTscpuJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 
 int ProfTscpuJob::Process()
 {
-    CHECK_JOB_EVENT_PARAM_RET(collectionJobCfg_, PROFILING_FAILED);
+    if (CheckJobEventParam(collectionJobCfg_) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
     if (!DrvChannelsMgr::instance()->ChannelIsValid(collectionJobCfg_->comParams->devId, PROF_CHANNEL_TS_CPU)) {
         MSPROF_LOGW("Channel is invalid, devId:%d, channelId:%d", collectionJobCfg_->comParams->devId,
             PROF_CHANNEL_TS_CPU);
@@ -160,7 +164,9 @@ int ProfTscpuJob::Process()
 
 int ProfTscpuJob::Uninit()
 {
-    CHECK_JOB_EVENT_PARAM_RET(collectionJobCfg_, PROFILING_SUCCESS);
+    if (CheckJobEventParam(collectionJobCfg_) != PROFILING_SUCCESS) {
+        return PROFILING_SUCCESS;
+    }
     if (!DrvChannelsMgr::instance()->ChannelIsValid(collectionJobCfg_->comParams->devId, PROF_CHANNEL_TS_CPU)) {
         MSPROF_LOGW("Channel is invalid, devId:%d, channelId:%d", collectionJobCfg_->comParams->devId,
             PROF_CHANNEL_TS_CPU);
@@ -188,7 +194,9 @@ ProfTsTrackJob::~ProfTsTrackJob()
 
 int ProfTsTrackJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 {
-    CHECK_JOB_COMMON_PARAM_RET(cfg, PROFILING_FAILED);
+    if (CheckJobCommonParam(cfg) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
     if (cfg->comParams->params->host_profiling) {
         return PROFILING_FAILED;
     }
@@ -203,7 +211,9 @@ int ProfTsTrackJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 
 int ProfTsTrackJob::Process()
 {
-    CHECK_JOB_COMMON_PARAM_RET(collectionJobCfg_, PROFILING_FAILED);
+    if (CheckJobCommonParam(collectionJobCfg_) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
     int cpuProfilingInterval = 10;
     if (collectionJobCfg_->comParams->params->cpu_sampling_interval > 0) {
         cpuProfilingInterval = collectionJobCfg_->comParams->params->cpu_sampling_interval;
@@ -232,7 +242,9 @@ int ProfTsTrackJob::Process()
 
 int ProfTsTrackJob::Uninit()
 {
-    CHECK_JOB_COMMON_PARAM_RET(collectionJobCfg_, PROFILING_SUCCESS);
+    if (CheckJobCommonParam(collectionJobCfg_) != PROFILING_SUCCESS) {
+        return PROFILING_SUCCESS;
+    }
 
     if (!DrvChannelsMgr::instance()->ChannelIsValid(collectionJobCfg_->comParams->devId, channelId_)) {
         MSPROF_LOGW("Channel is invalid, devId:%d, channelId:%d", collectionJobCfg_->comParams->devId,
@@ -260,7 +272,9 @@ ProfStarsSocLogJob::~ProfStarsSocLogJob()
 
 int ProfStarsSocLogJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 {
-    CHECK_JOB_COMMON_PARAM_RET(cfg, PROFILING_FAILED);
+    if (CheckJobCommonParam(cfg) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
     if (cfg->comParams->params->host_profiling) {
         return PROFILING_FAILED;
     }
@@ -271,7 +285,9 @@ int ProfStarsSocLogJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 
 int ProfStarsSocLogJob::Process()
 {
-    CHECK_JOB_COMMON_PARAM_RET(collectionJobCfg_, PROFILING_FAILED);
+    if (CheckJobCommonParam(collectionJobCfg_) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
 
     if (!DrvChannelsMgr::instance()->ChannelIsValid(collectionJobCfg_->comParams->devId, channelId_)) {
         MSPROF_LOGW("Channel is invalid, devId:%d, channelId:%d", collectionJobCfg_->comParams->devId, channelId_);
@@ -297,7 +313,9 @@ int ProfStarsSocLogJob::Process()
 
 int ProfStarsSocLogJob::Uninit()
 {
-    CHECK_JOB_COMMON_PARAM_RET(collectionJobCfg_, PROFILING_SUCCESS);
+    if (CheckJobCommonParam(collectionJobCfg_) != PROFILING_SUCCESS) {
+        return PROFILING_SUCCESS;
+    }
 
     if (!DrvChannelsMgr::instance()->ChannelIsValid(collectionJobCfg_->comParams->devId, channelId_)) {
         MSPROF_LOGW("Channel is invalid, devId:%d, channelId:%d", collectionJobCfg_->comParams->devId,
@@ -325,7 +343,9 @@ ProfStarsBlockLogJob::~ProfStarsBlockLogJob()
 
 int ProfStarsBlockLogJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 {
-    CHECK_JOB_COMMON_PARAM_RET(cfg, PROFILING_FAILED);
+    if (CheckJobCommonParam(cfg) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
     if (cfg->comParams->params->host_profiling) {
         return PROFILING_FAILED;
     }
@@ -357,7 +377,9 @@ ProfFftsProfileJob::~ProfFftsProfileJob()
 
 int ProfFftsProfileJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 {
-    CHECK_JOB_EVENT_PARAM_RET(cfg, PROFILING_FAILED);
+    if (CheckJobEventParam(cfg) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
     if (cfg->comParams->params->host_profiling) {
         return PROFILING_FAILED;
     }
@@ -405,7 +427,9 @@ int ProfFftsProfileJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 
 int ProfFftsProfileJob::Process()
 {
-    CHECK_JOB_COMMON_PARAM_RET(collectionJobCfg_, PROFILING_FAILED);
+    if (CheckJobCommonParam(collectionJobCfg_) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
     if (!DrvChannelsMgr::instance()->ChannelIsValid(collectionJobCfg_->comParams->devId, channelId_)) {
         MSPROF_LOGW("Channel is invalid, devId:%d, channelId:%d", collectionJobCfg_->comParams->devId, channelId_);
         return PROFILING_SUCCESS;
@@ -464,7 +488,9 @@ ProfBiuPerfJob::~ProfBiuPerfJob()
 
 int ProfBiuPerfJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 {
-    CHECK_JOB_CONTEXT_PARAM_RET(cfg, PROFILING_FAILED);
+    if (CheckJobContextParam(cfg) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
     collectionJobCfg_ = cfg;
     sampleCycle_ = static_cast<uint32_t>(cfg->comParams->params->biu_freq);
     if (cfg->comParams->params->host_profiling) {
@@ -483,7 +509,9 @@ int ProfBiuPerfJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 
 int ProfBiuPerfJob::Process()
 {
-    CHECK_JOB_CONTEXT_PARAM_RET(collectionJobCfg_, PROFILING_FAILED);
+    if (CheckJobContextParam(collectionJobCfg_) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
     int32_t ret = PROFILING_SUCCESS;
     uint32_t devId = static_cast<uint32_t>(collectionJobCfg_->comParams->devId);
     std::vector<std::string> coreName = {"aic", "aiv0", "aiv1"};
@@ -514,7 +542,9 @@ int ProfBiuPerfJob::Process()
 
 int ProfBiuPerfJob::Uninit()
 {
-    CHECK_JOB_CONTEXT_PARAM_RET(collectionJobCfg_, PROFILING_FAILED);
+    if (CheckJobContextParam(collectionJobCfg_) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
     int32_t ret = PROFILING_SUCCESS;
     int32_t devId = collectionJobCfg_->comParams->devId;
 
@@ -543,7 +573,9 @@ ProfAivTsTrackJob::~ProfAivTsTrackJob() {}
 
 int ProfAivTsTrackJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 {
-    CHECK_JOB_COMMON_PARAM_RET(cfg, PROFILING_FAILED);
+    if (CheckJobCommonParam(cfg) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
     if (cfg->comParams->params->host_profiling) {
         return PROFILING_FAILED;
     }
@@ -568,7 +600,9 @@ ProfAicoreJob::~ProfAicoreJob()
 
 int ProfAicoreJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 {
-    CHECK_JOB_EVENT_PARAM_RET(cfg, PROFILING_FAILED);
+    if (CheckJobEventParam(cfg) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
     if (cfg->comParams->params->host_profiling) {
         return PROFILING_FAILED;
     }
@@ -588,7 +622,9 @@ int ProfAicoreJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 
 int ProfAicoreJob::Process()
 {
-    CHECK_JOB_EVENT_PARAM_RET(collectionJobCfg_, PROFILING_FAILED);
+    if (CheckJobEventParam(collectionJobCfg_) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
     if (!DrvChannelsMgr::instance()->ChannelIsValid(collectionJobCfg_->comParams->devId, channelId_)) {
         MSPROF_LOGW("Channel is invalid, devId:%d, channelId_:%d", collectionJobCfg_->comParams->devId,
             channelId_);
@@ -623,8 +659,9 @@ int ProfAicoreJob::Process()
 
 int ProfAicoreJob::Uninit()
 {
-    CHECK_JOB_EVENT_PARAM_RET(collectionJobCfg_, PROFILING_SUCCESS);
-
+    if (CheckJobEventParam(collectionJobCfg_) != PROFILING_SUCCESS) {
+        return PROFILING_SUCCESS;
+    }
     std::string eventsStr = GetEventsStr(*collectionJobCfg_->jobParams.events);
     if (!DrvChannelsMgr::instance()->ChannelIsValid(collectionJobCfg_->comParams->devId, channelId_)) {
         MSPROF_LOGW("Channel is invalid, devId:%d, channelId:%d", collectionJobCfg_->comParams->devId,
@@ -653,7 +690,9 @@ ProfAivJob::~ProfAivJob()
 
 int ProfAivJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 {
-    CHECK_JOB_EVENT_PARAM_RET(cfg, PROFILING_FAILED);
+    if (CheckJobEventParam(cfg) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
     if (cfg->comParams->params->host_profiling) {
         return PROFILING_FAILED;
     }
@@ -685,7 +724,9 @@ ProfAicoreTaskBasedJob::~ProfAicoreTaskBasedJob()
 int ProfAicoreTaskBasedJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 {
     MSPROF_LOGI("ProfAicoreTaskBasedJob init");
-    CHECK_JOB_EVENT_PARAM_RET(cfg, PROFILING_FAILED);
+    if (CheckJobEventParam(cfg) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
     if (cfg->comParams->params->host_profiling) {
         return PROFILING_FAILED;
     }
@@ -702,7 +743,9 @@ int ProfAicoreTaskBasedJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 
 int ProfAicoreTaskBasedJob::Process()
 {
-    CHECK_JOB_EVENT_PARAM_RET(collectionJobCfg_, PROFILING_FAILED);
+    if (CheckJobEventParam(collectionJobCfg_) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
     if (!DrvChannelsMgr::instance()->ChannelIsValid(collectionJobCfg_->comParams->devId, channelId_)) {
         MSPROF_LOGW("Channel is invalid, devId:%d, channelId:%d", collectionJobCfg_->comParams->devId,
             channelId_);
@@ -726,7 +769,9 @@ int ProfAicoreTaskBasedJob::Process()
 
 int ProfAicoreTaskBasedJob::Uninit()
 {
-    CHECK_JOB_EVENT_PARAM_RET(collectionJobCfg_, PROFILING_SUCCESS);
+    if (CheckJobEventParam(collectionJobCfg_) != PROFILING_SUCCESS) {
+        return PROFILING_SUCCESS;
+    }
     if (!DrvChannelsMgr::instance()->ChannelIsValid(collectionJobCfg_->comParams->devId, channelId_)) {
         MSPROF_LOGW("Channel is invalid, devId:%d, channelId:%d", collectionJobCfg_->comParams->devId,
             channelId_);
@@ -752,7 +797,9 @@ ProfAivTaskBasedJob::~ProfAivTaskBasedJob()
 int ProfAivTaskBasedJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 {
     MSPROF_LOGI("ProfAivTaskBasedJob init");
-    CHECK_JOB_EVENT_PARAM_RET(cfg, PROFILING_FAILED);
+    if (CheckJobEventParam(cfg) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
     if (cfg->comParams->params->host_profiling) {
         return PROFILING_FAILED;
     }
@@ -779,7 +826,9 @@ ProfCtrlcpuJob::~ProfCtrlcpuJob()
 
 int ProfCtrlcpuJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 {
-    CHECK_JOB_EVENT_PARAM_RET(cfg, PROFILING_FAILED);
+    if (CheckJobEventParam(cfg) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
     if (cfg->comParams->params->host_profiling) {
         return PROFILING_FAILED;
     }
@@ -810,7 +859,9 @@ int ProfCtrlcpuJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 int ProfCtrlcpuJob::Process()
 {
     std::string profCtrlcpuCmd;
-    CHECK_JOB_COMMON_PARAM_RET(collectionJobCfg_, PROFILING_FAILED);
+    if (CheckJobCommonParam(collectionJobCfg_) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
     if (collectionJobCfg_->jobParams.events != nullptr &&
         collectionJobCfg_->jobParams.events->size()) {
         GetCollectCtrlCpuEventCmd(*(collectionJobCfg_->jobParams.events), profCtrlcpuCmd);
@@ -988,7 +1039,9 @@ static unsigned long long ProfTimerJobCommonInit(const SHARED_PTR_ALIA<Collectio
     SHARED_PTR_ALIA<analysis::dvvp::transport::Uploader> &upLoader,
     TimerHandlerTag timerTag)
 {
-    CHECK_JOB_CONTEXT_PARAM_RET(cfg, PROFILING_FAILED);
+    if (CheckJobContextParam(cfg) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
     static const unsigned int profStatMemIntervalHundredMs = 100;  // 100 MS
     static const unsigned int profMsToNs = 1000000;  // 1000000 NS
     int sampleIntervalMs = profStatMemIntervalHundredMs;
@@ -1028,7 +1081,9 @@ ProfSysStatJob::~ProfSysStatJob()
 
 int ProfSysStatJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 {
-    CHECK_JOB_CONTEXT_PARAM_RET(cfg, PROFILING_FAILED);
+    if (CheckJobContextParam(cfg) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
     if (cfg->comParams->params->host_profiling) {
         return PROFILING_FAILED;
     }
@@ -1053,7 +1108,9 @@ int ProfSysStatJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 
 int ProfSysStatJob::Process()
 {
-    CHECK_JOB_COMMON_PARAM_RET(collectionJobCfg_, PROFILING_FAILED);
+    if (CheckJobCommonParam(collectionJobCfg_) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
     static const unsigned int PROC_SYS_STAT_BUF_SIZE = (1 << 13); // 1 << 13  means 8k
 
     std::string retFileName(PROF_SYS_CPU_USAGE_FILE);
@@ -1123,7 +1180,9 @@ int ProfAllPidsJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 
 int ProfAllPidsJob::Process()
 {
-    CHECK_JOB_COMMON_PARAM_RET(collectionJobCfg_, PROFILING_FAILED);
+    if (CheckJobCommonParam(collectionJobCfg_) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
     SHARED_PTR_ALIA<ProcAllPidsFileHandler> pidsHandler;
     MSVP_MAKE_SHARED6_RET(pidsHandler, ProcAllPidsFileHandler,
         PROF_ALL_PID, collectionJobCfg_->comParams->devId,
@@ -1158,7 +1217,9 @@ ProfSysMemJob::~ProfSysMemJob()
 
 int ProfSysMemJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 {
-    CHECK_JOB_CONTEXT_PARAM_RET(cfg, PROFILING_FAILED);
+    if (CheckJobContextParam(cfg) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
     if (cfg->comParams->params->host_profiling) {
         return PROFILING_FAILED;
     }
@@ -1185,7 +1246,9 @@ int ProfSysMemJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 
 int ProfSysMemJob::Process()
 {
-    CHECK_JOB_COMMON_PARAM_RET(collectionJobCfg_, PROFILING_FAILED);
+    if (CheckJobCommonParam(collectionJobCfg_) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
     static const unsigned int PROC_SYS_MEM_BUF_SIZE = (1 << 15);  // 1 << 15  means 32k
     std::string retFileName(PROF_SYS_MEM_FILE);
 
@@ -1222,7 +1285,9 @@ ProfFmkJob::~ProfFmkJob()
 
 int ProfFmkJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 {
-    CHECK_JOB_CONTEXT_PARAM_RET(cfg, PROFILING_FAILED);
+    if (CheckJobContextParam(cfg) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
     if (cfg->comParams->params->host_profiling) {
         return PROFILING_FAILED;
     }
@@ -1233,7 +1298,9 @@ int ProfFmkJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 
 int ProfFmkJob::Process()
 {
-    CHECK_JOB_COMMON_PARAM_RET(collectionJobCfg_, PROFILING_FAILED);
+    if (CheckJobCommonParam(collectionJobCfg_) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
     if (collectionJobCfg_->comParams->params->ts_fw_training.compare("on") != 0) {
         MSPROF_LOGI("ts_fw_training not enabled");
         return PROFILING_SUCCESS;
@@ -1256,7 +1323,9 @@ int ProfFmkJob::Process()
 
 int ProfFmkJob::Uninit()
 {
-    CHECK_JOB_COMMON_PARAM_RET(collectionJobCfg_, PROFILING_SUCCESS);
+    if (CheckJobCommonParam(collectionJobCfg_) != PROFILING_SUCCESS) {
+        return PROFILING_SUCCESS;
+    }
 
     if (collectionJobCfg_->comParams->params->ts_fw_training.compare("on") != 0) {
         return PROFILING_SUCCESS;
@@ -1286,7 +1355,9 @@ ProfHwtsLogJob::~ProfHwtsLogJob()
 
 int ProfHwtsLogJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 {
-    CHECK_JOB_CONTEXT_PARAM_RET(cfg, PROFILING_FAILED);
+    if (CheckJobContextParam(cfg) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
     if (cfg->comParams->params->host_profiling) {
         return PROFILING_FAILED;
     }
@@ -1301,7 +1372,9 @@ int ProfHwtsLogJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 
 int ProfHwtsLogJob::Process()
 {
-    CHECK_JOB_COMMON_PARAM_RET(collectionJobCfg_, PROFILING_FAILED);
+    if (CheckJobCommonParam(collectionJobCfg_) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
 
     MSPROF_LOGI("[ProfHwtsLogJob]Process, hwts_log:%s, aiv_hwts_log:%s",
         collectionJobCfg_->comParams->params->hwts_log.c_str(),
@@ -1325,7 +1398,9 @@ int ProfHwtsLogJob::Process()
 
 int ProfHwtsLogJob::Uninit()
 {
-    CHECK_JOB_COMMON_PARAM_RET(collectionJobCfg_, PROFILING_SUCCESS);
+    if (CheckJobCommonParam(collectionJobCfg_) != PROFILING_SUCCESS) {
+        return PROFILING_SUCCESS;
+    }
 
     MSPROF_LOGI("[ProfHwtsLogJob]Uninit, hwts_log:%s, aiv_hwts_log:%s",
         collectionJobCfg_->comParams->params->hwts_log.c_str(),
@@ -1353,7 +1428,9 @@ ProfAivHwtsLogJob::~ProfAivHwtsLogJob() {}
 
 int ProfAivHwtsLogJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 {
-    CHECK_JOB_CONTEXT_PARAM_RET(cfg, PROFILING_FAILED);
+    if (CheckJobContextParam(cfg) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
     if (cfg->comParams->params->host_profiling) {
         return PROFILING_FAILED;
     }
@@ -1373,7 +1450,9 @@ ProfL2CacheTaskJob::~ProfL2CacheTaskJob() {}
 
 int ProfL2CacheTaskJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 {
-    CHECK_JOB_COMMON_PARAM_RET(cfg, PROFILING_FAILED);
+    if (CheckJobCommonParam(cfg) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
     if (cfg->comParams->params->host_profiling) {
         return PROFILING_FAILED;
     }
@@ -1403,7 +1482,9 @@ int ProfL2CacheTaskJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 
 int ProfL2CacheTaskJob::Process()
 {
-    CHECK_JOB_EVENT_PARAM_RET(collectionJobCfg_, PROFILING_FAILED);
+    if (CheckJobEventParam(collectionJobCfg_) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
     if (!DrvChannelsMgr::instance()->ChannelIsValid(collectionJobCfg_->comParams->devId, PROF_CHANNEL_L2_CACHE)) {
         MSPROF_LOGW("Channel is invalid, devId:%d, channelId:%d", collectionJobCfg_->comParams->devId,
             PROF_CHANNEL_L2_CACHE);
@@ -1427,7 +1508,9 @@ int ProfL2CacheTaskJob::Process()
 
 int ProfL2CacheTaskJob::Uninit()
 {
-    CHECK_JOB_EVENT_PARAM_RET(collectionJobCfg_, PROFILING_SUCCESS);
+    if (CheckJobEventParam(collectionJobCfg_) != PROFILING_SUCCESS) {
+        return PROFILING_SUCCESS;
+    }
     if (!DrvChannelsMgr::instance()->ChannelIsValid(collectionJobCfg_->comParams->devId, PROF_CHANNEL_L2_CACHE)) {
         MSPROF_LOGW("Channel is invalid, devId:%d, channelId:%d", collectionJobCfg_->comParams->devId,
             PROF_CHANNEL_L2_CACHE);
