@@ -34,7 +34,7 @@ public:
     uint64_t GenHashId(const std::string &module, CONST_CHAR_PTR data, uint32_t dataLen);
 
 private:
-    uint64_t DoubleHash(std::string &data) const;
+    uint64_t DoubleHash(const std::string &data) const;
     void FillPbData(const std::string &module, int32_t upDevId, const std::string &saveHashData,
                     SHARED_PTR_ALIA<FileChunkReq> fileChunk);
 private:

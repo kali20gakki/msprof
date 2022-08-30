@@ -48,9 +48,6 @@ int PlatformAdapterCloudV2::Uninit()
 {
     return PROFILING_SUCCESS;
 }
-
-// TODO acc pmu
-
 }
 }
 }
