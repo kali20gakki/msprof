@@ -9,14 +9,14 @@ bool DriverPlugin::IsFuncExist(const std::string &funcName) const
 }
  
 hdcError_t DriverPlugin::MsprofHalHdcRecv(HDC_SESSION session, struct drvHdcMsg *pMsg, int bufLen,
-    uint64_t flag, int *recvBufCount, unsigned int timeout)
+    uint64_t flag, int *recvBufCount, uint32_t timeout)
 {
     *recvBufCount = 1;
     return DRV_ERROR_NONE;
 }
  
 hdcError_t DriverPlugin::MsprofHalHdcSend(HDC_SESSION session, struct drvHdcMsg *pMsg, uint64_t flag,
-    unsigned int timeout)
+    uint32_t timeout)
 {
     return DRV_ERROR_NONE;
 }
