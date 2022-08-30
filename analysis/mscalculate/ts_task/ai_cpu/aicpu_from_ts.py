@@ -22,7 +22,7 @@ class AICpuFromTsCalculator(MsMultiProcess):
     parse ai cpu from ts
     """
     def __init__(self: any, file_list: dict, sample_config: dict) -> None:
-        MsMultiProcess.__init__(self, sample_config)
+        super().__init__(sample_config)
         self._file_list = file_list
         self._project_path = sample_config.get(StrConstant.SAMPLE_CONFIG_PROJECT_PATH)
         self._ts_model = TsTrackModel(self._project_path,
@@ -37,7 +37,8 @@ class AICpuFromTsCalculator(MsMultiProcess):
     def state_to_timeline(ai_cpu_with_state: list) -> list:
         stream_task_group = {}
         for stream_id, task_id, timestamp, task_state in ai_cpu_with_state:
-            task_state_handler = stream_task_group.setdefault((stream_id, task_id), TaskStateHandler(stream_id, task_id))
+            task_state_handler = stream_task_group.setdefault(
+                (stream_id, task_id), TaskStateHandler(stream_id, task_id))
             task_state_handler.process_record(timestamp, task_state)
 
         aicpu_timeline_list = []
