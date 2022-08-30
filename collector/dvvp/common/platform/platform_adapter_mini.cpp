@@ -48,7 +48,6 @@ int PlatformAdapterMini::Init(SHARED_PTR_ALIA<analysis::dvvp::message::ProfilePa
 std::string PlatformAdapterMini::GenerateCapacityEvents()
 {
     std::vector<std::string> llcProfilingEvents;
-    const int MAX_LLC_EVENTS = 8; // llc events list size
     for (int i = 0; i < MAX_LLC_EVENTS; i++) {
         std::string tempEvents;
         tempEvents.append("hisi_l3c0_1/dsid");
