@@ -212,7 +212,11 @@ using TsAiCoreProfileConfigT = struct TagTsAiCoreProfileConfig {
 
 using TsTsFwProfileConfigT = struct TagTsTsFwProfileConfig {
     uint32_t period;
+    uint32_t ts_task_track;     // 1-enable,2-disable
+    uint32_t ts_cpu_usage;      // 1-enable,2-disable
+    uint32_t ai_core_status;    // 1-enable,2-disable
     uint32_t ts_timeline;       // 1-enable,2-disable
+    uint32_t ai_vector_status;  // 1-enable,2-disable
     uint32_t ts_keypoint;       // 1-enable,2-disable
     uint32_t ts_memcpy;         // 1-enable,2-disable
 };
