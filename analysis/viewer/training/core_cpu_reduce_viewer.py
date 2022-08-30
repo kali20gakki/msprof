@@ -155,7 +155,7 @@ class CoreCpuReduceViewer:
         trace_data_sql = \
             cls._get_task_scheduler_data(sql_path=PathManager.get_sql_dir(result_dir))
         trace_data_job = \
-            cls._get_ai_cpu_data(iter_id, model_id, job_path=result_dir)
+            cls._get_ai_cpu_data(job_path=result_dir)
 
         trace_data_result = \
             cls._get_all_reduce_data(device_id, iter_id, model_id, result_dir=result_dir)
@@ -221,8 +221,7 @@ class CoreCpuReduceViewer:
         return data.get(_key_for_ops, default_value)
 
     @classmethod
-    def _get_ai_cpu_data(cls: any, *args: dict, job_path: str = None) -> list:
-        _, _ = args
+    def _get_ai_cpu_data(cls: any, job_path: str = None) -> list:
         ai_cpu_datas = []
         dir_path = job_path
         ai_cpu_data = ParseAiCpuData.get_ai_cpu_from_ts(dir_path)

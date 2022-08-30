@@ -5,8 +5,8 @@ function: this script used to operate AI_CPU
 Copyright Huawei Technologies Co., Ltd. 2021. All rights reserved.
 """
 
-from common_func.db_name_constant import DBNameConstant
 from common_func.db_manager import DBManager
+from common_func.db_name_constant import DBNameConstant
 from msmodel.interface.parser_model import ParserModel
 
 
@@ -41,7 +41,7 @@ class AiCpuModel(ParserModel):
     def get_ai_cpu_data_from_ts(self: any) -> list:
         """
         get all data from db
-        :param table_name:
+        :param table_name: table name
         :return:
         """
         if not DBManager.judge_table_exist(self.cur, DBNameConstant.TABLE_AI_CPU_FROM_TS):
