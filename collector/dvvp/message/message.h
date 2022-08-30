@@ -45,18 +45,16 @@ namespace message {
         (root)[MSG_STR(vector)] = array_obj;           \
     } while (0)
 
-#define FROM_ARRAY_OBJECT_VALUE(root, field, Type)                           \
-    do {                                                                     \
-        (field).clear();                                                       \
-        const nlohmann::json & jarray = (root).at(MSG_STR(field));              \
-        if (jarray.is_array()) {                                             \
-            for (auto iter = jarray.begin(); iter != jarray.end(); ++iter) { \
-                Type value;                                                  \
-                value.FromObject(*iter);                                    \
-                (field).push_back(value);                                      \
-            }                                                                \
-        }                                                                    \
-    } while (0)
+#define FROM_ARRAY_OBJECT_VALUE(root, field, Type) do {                  \
+    const nlohmann::json & jarray = (root).at(MSG_STR(field));           \
+    if (jarray.is_array()) {                                             \
+        for (auto iter = jarray.begin(); iter != jarray.end(); ++iter) { \
+            Type value;                                                  \
+            value.FromObject(*iter);                                     \
+            (field).push_back(value);                                    \
+        }                                                                \
+    }                                                                    \
+} while (0)
 
 #define FROM_STRING_VALUE(root, field)          \
     do {                                        \
@@ -186,6 +184,7 @@ struct Status : BaseInfo {
     void FromObject(const nlohmann::json &object) override
     {
         FROM_INT_VALUE(object, status, ERR);
+        info.clear();
         FROM_ARRAY_OBJECT_VALUE(object, info, StatusInfo);
     }
 };

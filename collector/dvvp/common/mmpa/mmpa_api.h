@@ -126,7 +126,7 @@ const int MMPA_MAX_SLEEP_MICROSECOND_USING_USLEEP = 1000000;
 const int FALSE = 0;
 const int TRUE = 1;
 
-enum MMPA_MAC_ADDR_TYPE {
+enum class MMPA_MAC_ADDR_TYPE {
     MMPA_MAC_ADDR_FIRST_BYTE = 0,
     MMPA_MAC_ADDR_SECOND_BYTE,
     MMPA_MAC_ADDR_THIRD_BYTE,
@@ -233,7 +233,7 @@ typedef struct {
 int32_t MmSleep(uint32_t milliSecond);
 int32_t MmCreateTaskWithThreadAttr(MmThread *threadHandle, const MmUserBlockT *funcBlock,
     const MmThreadAttr *threadAttr);
-int32_t MmJoinTask(MmThread *threadHandle);
+int32_t MmJoinTask(const MmThread *threadHandle);
 int32_t MmSetCurrentThreadName(const std::string &name);
 MmTimespec MmGetTickCount();
 int32_t MmGetFileSize(const std::string &fileName, unsigned long long *length);
