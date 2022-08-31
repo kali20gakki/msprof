@@ -13,7 +13,7 @@
 #include "cmd_log.h"
 #include "message/prof_params.h"
 #include "platform/platform.h"
-#include "utils.h"
+#include "param_validation.h"
 
 namespace Collector {
 namespace Dvvp {
@@ -25,6 +25,7 @@ using namespace analysis::dvvp::common::config;
 using namespace Analysis::Dvvp::Common::Config;
 using namespace analysis::dvvp::message;
 using namespace Collector::Dvvp::Msprofbin;
+using namespace analysis::dvvp::common::validation;
 int MsprofParamAdapter::Init()
 {
     paramContainer_.fill("");
@@ -49,6 +50,10 @@ int MsprofParamAdapter::Init()
 
 int MsprofParamAdapter::ParamsCheckMsprof(std::vector<std::pair<InputCfg, std::string>> &cfgList)
 {
+    std::map<InputCfg, std::string> aiModeTypeList = {
+        {INPUT_CFG_COM_AIC_MODE, "aic-mode"},
+        {INPUT_CFG_COM_AIV_MODE, "aiv-mode"},
+    };
     int ret = PROFILING_SUCCESS;
     bool flag = true;
     for (auto inputCfg : msprofConfig_) {
@@ -58,10 +63,10 @@ int MsprofParamAdapter::ParamsCheckMsprof(std::vector<std::pair<InputCfg, std::s
         std::string cfgValue = paramContainer_[inputCfg];
         switch (inputCfg) {
             case INPUT_CFG_MSPROF_APPLICATION:
-                ret = MsprofCheckAppValid(paramContainer_[inputCfg]);
+                ret = ParamValidation::instance()->MsprofCheckAppValid(paramContainer_[inputCfg]);
                 break;
             case INPUT_CFG_MSPROF_ENVIRONMENT:
-                ret = MsprofCheckEnvValid(cfgValue);
+                ret = ParamValidation::instance()->MsprofCheckEnvValid(cfgValue);
                 break;
             case INPUT_CFG_COM_AI_CORE:
             case INPUT_CFG_COM_AI_VECTOR:
@@ -78,11 +83,11 @@ int MsprofParamAdapter::ParamsCheckMsprof(std::vector<std::pair<InputCfg, std::s
             case INPUT_CFG_PARSE:
             case INPUT_CFG_QUERY:
             case INPUT_CFG_EXPORT:
-                ret = CheckSwitchValid(cfgValue);
+                ret = ParamValidation::instance()->IsValidSwitch(cfgValue);
                 break;
             case INPUT_CFG_COM_AIV_MODE:
             case INPUT_CFG_COM_AIC_MODE:
-                ret = MsprofCheckAiModeValid(cfgValue, inputCfg);
+                ret = ParamValidation::instance()->MsprofCheckAiModeValid(cfgValue, aiModeTypeList[inputCfg]);
                 break;
             case INPUT_CFG_COM_AIC_FREQ:
             case INPUT_CFG_COM_AIV_FREQ:
@@ -90,26 +95,26 @@ int MsprofParamAdapter::ParamsCheckMsprof(std::vector<std::pair<InputCfg, std::s
                 ret = CheckFreqValid(cfgValue, inputCfg);
                 break;
             case INPUT_CFG_COM_SYS_DEVICES:
-                ret = MsprofCheckSysDeviceValid(cfgValue);
+                ret = ParamValidation::instance()->MsprofCheckSysDeviceValid(cfgValue);
                 break;
             case INPUT_CFG_COM_SYS_PERIOD:
-                ret = MsprofCheckSysPeriodValid(cfgValue);
+                ret = ParamValidation::instance()->MsprofCheckSysPeriodValid(cfgValue);
                 break;
             case INPUT_CFG_HOST_SYS:
-                ret = MsprofCheckHostSysValid(cfgValue);
+                ret = ParamValidation::instance()->MsprofCheckHostSysValid(cfgValue);
                 break;
             case INPUT_CFG_HOST_SYS_PID:
-                ret = MsprofCheckHostSysPidValid(cfgValue);
+                ret = ParamValidation::instance()->CheckHostSysPidValid(cfgValue);
                 break;
             case INPUT_CFG_PYTHON_PATH:
-                ret = MsprofCheckPythonPathValid(cfgValue);
+                ret = ParamValidation::instance()->CheckPythonPathIsValid(cfgValue);
                 break;
             case INPUT_CFG_SUMMARY_FORMAT:
-                ret = MsprofCheckSummaryFormatValid(cfgValue);
+                ret = ParamValidation::instance()->CheckExportSummaryFormatIsValid(cfgValue);
                 break;
             case INPUT_CFG_ITERATION_ID:
             case INPUT_CFG_MODEL_ID:
-                ret = MsprofCheckExportIdValid(cfgValue, "");
+                ret = ParamValidation::instance()->CheckExportIdIsValid(cfgValue, "");
                 break;
             default:
                 ret = PROFILING_FAILED;
@@ -251,6 +256,13 @@ void MsprofParamAdapter::SetParamsSelf()
     params_->msprofBinPid = Utils::GetPid();
 }
 
+static void PrintContainer(std::array<std::string, INPUT_CFG_MAX> paramContainer)
+{
+    for (int i = 0; i < INPUT_CFG_MAX; i++) {
+        MSPROF_LOGI("[qqq]%d:%s", i, paramContainer[i].c_str());
+    }
+}
+
 int MsprofParamAdapter::GetParamFromInputCfg(std::unordered_map<int, std::pair<MsprofCmdInfo, std::string>> argvMap,
     SHARED_PTR_ALIA<ProfileParams> params)
 {
@@ -311,6 +323,7 @@ int MsprofParamAdapter::GetParamFromInputCfg(std::unordered_map<int, std::pair<M
     if (ret != PROFILING_SUCCESS) {
         return PROFILING_FAILED;
     }
+    MSPROF_LOGI("[qqq]dataTypeConfig:%lx", params_->dataTypeConfig);
     SetParamsSelf();
     return PROFILING_SUCCESS;
 }
@@ -458,7 +471,7 @@ int AclJsonParamAdapter::ParamsCheckAclJson(std::vector<std::pair<InputCfg, std:
         std::string cfgValue = paramContainer_[inputCfg];
         switch (inputCfg) {
             case INPUT_CFG_COM_BIU:
-                ret = CheckSwitchValid(cfgValue);
+                ret = ParamValidation::instance()->IsValidSwitch(cfgValue);
                 break;
             case INPUT_CFG_COM_BIU_FREQ:
                 ret = CheckFreqValid(cfgValue, inputCfg);
@@ -658,7 +671,6 @@ int GeOptParamAdapter::Init()
         {INPUT_CFG_COM_BIU, "biu"},
         {INPUT_CFG_COM_BIU_FREQ, "biu_freq"},
     }).swap(geOptionsPrintMap_);
-    return PROFILING_SUCCESS;
 }
 
 int GeOptParamAdapter::ParamsCheckGeOpt(std::vector<std::pair<InputCfg, std::string>> &cfgList) const
@@ -674,7 +686,7 @@ int GeOptParamAdapter::ParamsCheckGeOpt(std::vector<std::pair<InputCfg, std::str
             case INPUT_CFG_COM_TASK_TRACE:
             case INPUT_CFG_COM_TRAINING_TRACE:
             case INPUT_CFG_COM_BIU:
-                ret = CheckSwitchValid(cfgValue);
+                ret = ParamValidation::instance()->IsValidSwitch(cfgValue);
                 break;
             case INPUT_CFG_COM_BIU_FREQ:
                 ret = CheckFreqValid(cfgValue, inputCfg);
@@ -845,10 +857,10 @@ int AclApiParamAdapter::ParamsCheckAclApi(std::vector<std::pair<InputCfg, std::s
         std::string cfgValue = paramContainer_[inputCfg];
         switch (inputCfg) {
             case INPUT_CFG_COM_TRAINING_TRACE:
-                ret = CheckSwitchValid(cfgValue);
+                ret = ParamValidation::instance()->IsValidSwitch(cfgValue);
                 break;
             case INPUT_CFG_COM_SYS_DEVICES:
-                ret = MsprofCheckSysDeviceValid(cfgValue);
+                ret = ParamValidation::instance()->MsprofCheckSysDeviceValid(cfgValue);
                 break;
             default:
                 ret = PROFILING_FAILED;
@@ -866,9 +878,6 @@ std::string AclApiParamAdapter::DevIdToStr(uint32_t devNum, const uint32_t *devL
     std::string devStr;
     bool flag = false;
     for (uint32_t i = 0; i < devNum; i++) {
-        if (devList[i] == DEFAULT_HOST_ID) {
-            continue; // except Host id
-        }
         if (!flag) {
             flag = true;
             devStr += std::to_string(devList[i]);
