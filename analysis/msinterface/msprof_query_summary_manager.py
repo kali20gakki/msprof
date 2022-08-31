@@ -90,6 +90,7 @@ class MsprofQuerySummaryManager:
                   "iteration_id": self.iteration_id}
         if self.data_type == QueryDataType.DATA_PREPARATION:
             DataPreprocessParser(params).process()
+            return
         self._check_arguments_valid()
         if self.data_type == QueryDataType.STEP_TRACE:
             StepTraceSummay(params).process()

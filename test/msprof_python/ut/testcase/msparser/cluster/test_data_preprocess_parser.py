@@ -1,7 +1,10 @@
 import unittest
 from unittest import mock
 
+import pytest
+
 from common_func.db_name_constant import DBNameConstant
+from common_func.msprof_exception import ProfException
 from common_func.platform.chip_manager import ChipManager
 from msparser.cluster.data_preprocess_parser import DataPreprocessParser
 from profiling_bean.prof_enum.chip_model import ChipModel
@@ -81,43 +84,48 @@ class TestDataPreprocessParser(unittest.TestCase):
                 check.calculate()
         with mock.patch(NAMESPACE + '.DataPreprocessParser.check_id_valid', return_value=False), \
                 mock.patch(NAMESPACE + '.logging.warning'):
-            check = DataPreprocessParser(self.params)
+            with pytest.raises(ProfException) as err:
+                check = DataPreprocessParser(self.params)
 
-            check.calculate()
+                check.calculate()
 
     def test_storage_data(self):
         with mock.patch(NAMESPACE + '.DataPreprocessParser.get_cluster_path', return_value='test'), \
                 mock.patch(NAMESPACE + '.check_file_writable'), \
                 mock.patch('builtins.open', mock.mock_open(read_data='')), \
                 mock.patch('os.fdopen', side_effect=OSError), \
-                mock.patch('os.chmod'), \
+                mock.patch('os.chmod'),\
                 mock.patch('os.remove'):
-            check = DataPreprocessParser(self.params)
-            check.sample_config = {'ai_core_metrics': 'ArithmeticUtilization'}
-            check.storage_data({'total_info':
-                                    {'step_count': 469, 'empty_queue': 0, 'total_time': 37856.0, 'avg_time': 80.7164}})
+            with pytest.raises(ProfException) as err:
+                check = DataPreprocessParser(self.params)
+                check.sample_config = {'ai_core_metrics': 'ArithmeticUtilization'}
+                check.storage_data({'total_info': {'step_count': 469, 'empty_queue': 0,
+                                                   'total_time': 37856.0, 'avg_time': 80.7164}})
 
     def test_query_data_queue_data(self):
         with mock.patch(NAMESPACE + '.DataPreprocessParser.get_data_queue_data', return_value=[]), \
                 mock.patch(NAMESPACE + '.DataPreprocessParser.get_step_trace_data', return_value=[]), \
                 mock.patch(NAMESPACE + '.DataPreprocessParser.calculate_queue_data', return_value=[]):
-            check = DataPreprocessParser(self.params)
-            check.query_data_queue_data()
+            with pytest.raises(ProfException) as err:
+                check = DataPreprocessParser(self.params)
+                check.query_data_queue_data()
         with mock.patch(NAMESPACE + '.DataPreprocessParser.get_data_queue_data', return_value=[]), \
                 mock.patch(NAMESPACE + '.DataPreprocessParser.get_step_trace_data', return_value=[]), \
                 mock.patch(NAMESPACE + '.logging.warning', return_value=[]):
-            check = DataPreprocessParser(self.params)
-            check.sample_config = {'ai_core_metrics': ''}
-            check.query_data_queue_data()
+            with pytest.raises(ProfException) as err:
+                check = DataPreprocessParser(self.params)
+                check.sample_config = {'ai_core_metrics': ''}
+                check.query_data_queue_data()
         with mock.patch(NAMESPACE + '.DataPreprocessParser.get_data_queue_data', return_value=[]), \
                 mock.patch(NAMESPACE + '.DataPreprocessParser.get_step_trace_data', return_value=[]), \
                 mock.patch(NAMESPACE + '.DataPreprocessParser.calculate_queue_data',
                            return_value=[(1, 2, 3, 4, 5, 6)]):
-            check = DataPreprocessParser(self.params)
-            check.query_data_queue_data()
+            with pytest.raises(ProfException) as err:
+                check = DataPreprocessParser(self.params)
+                check.query_data_queue_data()
 
     def test_get_cluster_path(self):
-        with mock.patch('os.path.realpath', return_value='test\\query\\test\\test'), \
+        with mock.patch('os.path.realpath', return_value='test\\query\\test\\test'),\
                 mock.patch("os.path.exists", return_value=True):
             check = DataPreprocessParser(self.params)
             result = check.get_cluster_path('test\\test')

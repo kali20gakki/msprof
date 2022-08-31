@@ -17,6 +17,7 @@ from common_func.db_name_constant import DBNameConstant
 from common_func.file_manager import check_path_valid
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
+from common_func.msprof_exception import ProfException
 from common_func.msprof_step import MsprofStep
 from common_func.msvp_common import check_file_writable
 from common_func.path_manager import PathManager
@@ -72,7 +73,7 @@ class DataPreprocessParser:
         """
         if not self.check_id_valid():
             logging.warning("Parameter settings are incorrect, please check input: --id. ")
-            return
+            raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR)
         self._query_data()
 
     def check_id_valid(self: any) -> bool:
@@ -98,7 +99,7 @@ class DataPreprocessParser:
         if not (data_queue_data and step_trace_data):
             logging.error("Query data failed, maybe import command has not run successfully yet, "
                           "please run import command first")
-            return
+            raise ProfException(ProfException.PROF_INVALID_PATH_ERROR)
         json_data = self.calculate_queue_data(data_queue_data, step_trace_data)
         self.storage_data(json_data)
 
@@ -138,8 +139,9 @@ class DataPreprocessParser:
                 _file.write(json.dumps(json_data))
         except (OSError, SystemError, RuntimeError, TypeError):
             logging.error("Storing data failed, you may not have the permission to write files in the current path.")
+            raise ProfException(ProfException.PROF_INVALID_PATH_ERROR)
         else:
-            print_msg({"status": 0, "info": "", "data": file_path})
+            print_msg({"status": NumberConstant.SUCCESS, "info": "", "data": file_path})
 
     def get_cluster_path(self: any, file_name: str) -> str:
         query_path = os.path.realpath(os.path.join(self.collection_path, '..', '..', self.QUERY_FILE_NAME))
@@ -149,6 +151,7 @@ class DataPreprocessParser:
             except OSError:
                 logging.error("Storing data failed, "
                               "you may not have the permission to write files in the current path.")
+                raise ProfException(ProfException.PROF_INVALID_PATH_ERROR)
         return os.path.realpath(os.path.join(query_path, file_name))
 
     def process(self: any) -> None:
@@ -157,9 +160,15 @@ class DataPreprocessParser:
         :return: None or dict
         """
         if self.rank_id is None:
-            logging.warning("To query data queue,  id is required")
+            logging.warning("To query data queue, id is required")
+            print_msg({"status": NumberConstant.ERROR, "info": "To query data queue, id is required", "data": ''})
             return
-        self.calculate()
+        try:
+            self.calculate()
+        except ProfException:
+            print_msg({"status": NumberConstant.ERROR,
+                       "info": "some error occurred, please check data path or necessary commands have been run",
+                       "data": ""})
 
     def _query_data(self):
         check_path_valid(self.collection_path, False)
@@ -167,4 +176,5 @@ class DataPreprocessParser:
             InfoConfReader().load_info(self.collection_path)
             self.query_data_queue_data()
         else:
-            logging.warning('Invalid parsing dir("%s"), there is no PROF file in this path' % self.collection_path)
+            logging.warning('Invalid parsing dir("%s"), there is no PROF file in this path', self.collection_path)
+            raise ProfException(ProfException.PROF_INVALID_PATH_ERROR)
