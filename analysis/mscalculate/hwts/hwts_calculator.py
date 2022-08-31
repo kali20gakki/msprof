@@ -72,10 +72,9 @@ class HwtsCalculator(ICalculator, MsMultiProcess):
         """
         self._hwts_log_model.clear()
         if self._log_data:
-            hwts_task_with_batch = self._add_batch_id(self._prep_data())
             self._hwts_log_model.init()
             self._hwts_log_model.flush(Utils.obj_list_to_list(self._log_data), DBNameConstant.TABLE_HWTS_TASK)
-            self._hwts_log_model.flush(hwts_task_with_batch, DBNameConstant.TABLE_HWTS_TASK_TIME)
+            self._hwts_log_model.flush(self._add_batch_id(self._prep_data()), DBNameConstant.TABLE_HWTS_TASK_TIME)
             self._hwts_log_model.finalize()
 
     def ms_run(self: any) -> None:
