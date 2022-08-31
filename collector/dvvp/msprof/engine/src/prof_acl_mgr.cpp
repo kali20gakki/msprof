@@ -351,6 +351,7 @@ int ProfAclMgr::ProfAclStart(PROF_CONF_CONST_PTR profStartCfg)
         MSPROF_LOGE("Startcfg is nullptr");
         return ACL_ERROR_INVALID_PARAM;
     }
+    profStratCfg_ = profStartCfg;
 
     if (mode_ != WORK_MODE_API_CTRL) {
         MSPROF_LOGE("Profiling has not been inited");
@@ -378,11 +379,12 @@ int ProfAclMgr::ProfAclStart(PROF_CONF_CONST_PTR profStartCfg)
         MSPROF_LOGE("[ProfAclStart]GetParamFromInputCfg fail.");
         return ACL_ERROR_PROFILING_FAILURE;
     }
-    dataTypeConfig_ = params_->dataTypeConfig;
+
     for (uint32_t i = 0; i < profStartCfg->devNums; i++) {
         uint32_t devId = profStartCfg->devIdList[i];
         MSPROF_LOGI("Process ProfAclStart of device %u", devId);
         if (devId == DEFAULT_HOST_ID) {
+            dataTypeConfig_ = params_->dataTypeConfig;
             MsprofTxHandle();
             continue;
         }
@@ -390,7 +392,7 @@ int ProfAclMgr::ProfAclStart(PROF_CONF_CONST_PTR profStartCfg)
         if (ret != ACL_SUCCESS) {
             return ret;
         }
-        devTasks_[devId].dataTypeConfig = profStartCfg->dataTypeConfig;
+        devTasks_[devId].dataTypeConfig = params_->dataTypeConfig;
     }
     WaitAllDeviceResponse();
     return ACL_SUCCESS;
@@ -414,18 +416,14 @@ int ProfAclMgr::ProfAclStop(PROF_CONF_CONST_PTR profStopCfg)
         return ACL_ERROR_PROF_NOT_RUN;
     }
     // check device is started and
+    if (profStopCfg != profStratCfg_) {
+        MSPROF_LOGE("aclprofConfig is different from the start and stop.");
+        return ACL_ERROR_INVALID_PROFILING_CONFIG;
+    }
     for (uint32_t i = 0; i < profStopCfg->devNums; i++) {
         uint32_t devId = profStopCfg->devIdList[i];
         auto iter = devTasks_.find(devId);
-        if (iter != devTasks_.end()) {
-            if (iter->second.dataTypeConfig != profStopCfg->dataTypeConfig) {
-                MSPROF_LOGE("DataTypeConfig stop: 0x%lx different from start: 0x%lx",
-                    profStopCfg->dataTypeConfig, iter->second.dataTypeConfig);
-                MSPROF_INNER_ERROR("EK9999", "DataTypeConfig stop: 0x%lx different from start: 0x%lx",
-                    profStopCfg->dataTypeConfig, iter->second.dataTypeConfig);
-                return ACL_ERROR_INVALID_PROFILING_CONFIG;
-            }
-        } else {
+        if (iter == devTasks_.end()) {
             MSPROF_LOGE("Device %u has not been started", devId);
             return ACL_ERROR_PROF_NOT_RUN;
         }
@@ -869,6 +867,8 @@ int ProfAclMgr::CheckDeviceTask(PROF_CONF_CONST_PTR profStartCfg)
     std::vector<uint32_t> devIds;
     for (uint32_t i = 0; i < profStartCfg->devNums; i++) {
         uint32_t devId = profStartCfg->devIdList[i];
+
+        
         if (devTasks_.find(devId) != devTasks_.end()) {
             MSPROF_LOGE("Device %u already started", devId);
             MSPROF_INNER_ERROR("EK9999", "Device %u already started", devId);
