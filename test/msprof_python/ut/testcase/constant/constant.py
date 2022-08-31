@@ -16,13 +16,13 @@ CONFIG = {
 UT_CONFIG_FILE_PATH = os.path.join(os.path.dirname(__file__), "..", "config")
 WRITE_MODES = stat.S_IWUSR | stat.S_IRUSR | stat.S_IRGRP
 WRITE_FLAGS = os.O_WRONLY | os.O_CREAT | os.O_TRUNC
+
+
 def clear_dt_project(path):
     if os.path.exists(path):
         for root, dirs, files in os.walk(path, topdown=False):
             for name in files:
-                print(name)
                 os.remove(os.path.join(root, name))
             for name in dirs:
-                print(name)
                 os.rmdir(os.path.join(root, name))
         os.rmdir(path)
