@@ -250,13 +250,6 @@ void MsprofParamAdapter::SetParamsSelf()
     params_->msprofBinPid = Utils::GetPid();
 }
 
-static void PrintContainer(std::array<std::string, INPUT_CFG_MAX> paramContainer)
-{
-    for (int i = 0; i < INPUT_CFG_MAX; i++) {
-        MSPROF_LOGI("[qqq]%d:%s", i, paramContainer[i].c_str());
-    }
-}
-
 int MsprofParamAdapter::GetParamFromInputCfg(std::unordered_map<int, std::pair<MsprofCmdInfo, std::string>> argvMap,
     SHARED_PTR_ALIA<ProfileParams> params)
 {
@@ -317,7 +310,6 @@ int MsprofParamAdapter::GetParamFromInputCfg(std::unordered_map<int, std::pair<M
     if (ret != PROFILING_SUCCESS) {
         return PROFILING_FAILED;
     }
-    MSPROF_LOGI("[qqq]dataTypeConfig:%lx", params_->dataTypeConfig);
     SetParamsSelf();
     return PROFILING_SUCCESS;
 }
@@ -665,6 +657,7 @@ int GeOptParamAdapter::Init()
         {INPUT_CFG_COM_BIU, "biu"},
         {INPUT_CFG_COM_BIU_FREQ, "biu_freq"},
     }).swap(geOptionsPrintMap_);
+    return PROFILING_SUCCESS;
 }
 
 int GeOptParamAdapter::ParamsCheckGeOpt(std::vector<std::pair<InputCfg, std::string>> &cfgList) const
