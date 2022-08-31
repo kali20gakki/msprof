@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Huawei Technologies Co., Ltd. 2022-2023. All rights reserved.
+ * Copyright (c) Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
  * Description: handle params from user's input config
  * Author: Huawei Technologies Co., Ltd.
  * Create: 2022-08-10
@@ -52,6 +52,7 @@ private:
     int GetMsprofMode();
     void SetParamsSelf();
     void SpliteAppPath(const std::string &appParams);
+    int SetModeDefaultParams(MsprofMode modeType);
 
 private:
     std::string cmdPath_;
@@ -120,13 +121,13 @@ public:
 private:
     int Init();
     int ParamsCheckAclApi(std::vector<std::pair<InputCfg, std::string>> &cfgList) const;
-    void ProfCfgToContainer(const ProfConfig * apiCfg,
+    void ProfCfgToContainer(const ProfConfig* apiCfg,
         std::array<std::string, ACL_PROF_ARGS_MAX> argsArr);
-    void ProfTaskCfgToContainer(const ProfConfig * apiCfg,
+    void ProfTaskCfgToContainer(const ProfConfig* apiCfg,
         std::array<std::string, ACL_PROF_ARGS_MAX> argsArr);
-    void ProfSystemCfgToContainer(const ProfConfig * apiCfg,
+    void ProfSystemCfgToContainer(const ProfConfig* apiCfg,
         std::array<std::string, ACL_PROF_ARGS_MAX> argsArr);
-    std::string devIdToStr(uint32_t devNum, const uint32_t *devList);
+    std::string devIdToStr(uint32_t devNum, const uint32_t* devList);
 
 private:
     SHARED_PTR_ALIA<ProfileParams> params_;
