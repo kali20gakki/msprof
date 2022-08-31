@@ -337,7 +337,7 @@ aclError aclprofStart(ACL_PROF_CONFIG_CONST_PTR profilerConfig)
     }
 
     MSPROF_LOGI("Allocate start profiling config to Acl");
-    uint64_t dataTypeConfig = profilerConfig->config.dataTypeConfig;
+    uint64_t dataTypeConfig = ProfAclMgr::instance()->GetDataTypeConfigFromParams();
     ret = Analysis::Dvvp::ProfilerCommon::CommandHandleProfStart(
         profilerConfig->config.devIdList, profilerConfig->config.devNums, dataTypeConfig);
     RETURN_IF_NOT_SUCCESS(ret);
@@ -379,6 +379,7 @@ aclError aclprofStop(ACL_PROF_CONFIG_CONST_PTR profilerConfig)
         RETURN_IF_NOT_SUCCESS(ret);
     }
     MSPROF_LOGI("Allocate stop config of profiling modules to Acl");
+    dataTypeConfig = ProfAclMgr::instance()->GetDataTypeConfigFromParams();
     ret = Analysis::Dvvp::ProfilerCommon::CommandHandleProfStop(
         profilerConfig->config.devIdList, profilerConfig->config.devNums, dataTypeConfig);
     RETURN_IF_NOT_SUCCESS(ret);

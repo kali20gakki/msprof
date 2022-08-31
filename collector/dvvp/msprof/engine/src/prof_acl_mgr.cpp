@@ -378,12 +378,11 @@ int ProfAclMgr::ProfAclStart(PROF_CONF_CONST_PTR profStartCfg)
         MSPROF_LOGE("[ProfAclStart]GetParamFromInputCfg fail.");
         return ACL_ERROR_PROFILING_FAILURE;
     }
-
+    dataTypeConfig_ = params_->dataTypeConfig;
     for (uint32_t i = 0; i < profStartCfg->devNums; i++) {
         uint32_t devId = profStartCfg->devIdList[i];
         MSPROF_LOGI("Process ProfAclStart of device %u", devId);
         if (devId == DEFAULT_HOST_ID) {
-            dataTypeConfig_ = params_->dataTypeConfig;
             MsprofTxHandle();
             continue;
         }
@@ -499,6 +498,11 @@ int ProfAclMgr::ProfAclGetDataTypeConfig(const uint32_t devId, uint64_t &dataTyp
     dataTypeConfig = iter->second.dataTypeConfig;
     MSPROF_LOGI("Get dataTypeConfig 0x%lx of device %u", dataTypeConfig, devId);
     return ACL_SUCCESS;
+}
+
+uint64_t ProfAclMgr::GetDataTypeConfigFromParams()
+{
+    return dataTypeConfig_;
 }
 
 /**
