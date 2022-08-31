@@ -88,7 +88,7 @@ class MsprofQuerySummaryManager:
                   "npu_id": self.npu_id,
                   "model_id": self.model_id,
                   "iteration_id": self.iteration_id}
-        if self.data_type == QueryDataType.DATA_QUEUE:
+        if self.data_type == QueryDataType.DATA_PREPARATION:
             DataPreprocessParser(params).process()
         self._check_arguments_valid()
         if self.data_type == QueryDataType.STEP_TRACE:
@@ -135,5 +135,5 @@ class QueryDataType(IntEnum):
     CLUSTER_SCENE = 0
     STEP_TRACE = 1
     FOPS_ANALYSE = 2
-    DATA_QUEUE = 3
+    DATA_PREPARATION = 3
     COLLECTIVE_COMMUNICATION = 5
