@@ -110,7 +110,7 @@ class HwtsCalculator(ICalculator, MsMultiProcess):
                 task_end_list.append(task.sys_cnt)
                 task_type_list.append(task.task_type)
             else:
-                logging.error("invalid task type of hwts: %s", task.sys_tag)
+                logging.error("invalid sys tag of hwts: %s", task.sys_tag)
             task_value.update({self.HWTS_TASK_START: task_satrt_list,
                                self.HWTS_TASK_END: task_end_list,
                                self.HWTS_TASK_TYPE: task_type_list})
