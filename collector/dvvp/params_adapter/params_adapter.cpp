@@ -421,17 +421,17 @@ int ParamsAdapter::CheckFreqValid(const std::string &freq, const InputCfg freqOp
     return PROFILING_SUCCESS;
 }
 
-int ParamsAdapter::CheckLlcModeValid(const std::string &LlcMode) const
+int ParamsAdapter::CheckLlcModeValid(const std::string &llcMode) const
 {
-    if (!ParamValidation::instance()->CheckLlcModeIsValid(LlcMode)) {
+    if (!ParamValidation::instance()->CheckLlcModeIsValid(llcMode)) {
         return PROFILING_FAILED;
     }
     return PROFILING_SUCCESS;
 }
 
-int ParamsAdapter::CheckHostSysUsageValid(const std::string &HostSysUsage) const
+int ParamsAdapter::CheckHostSysUsageValid(const std::string &hostSysUsage) const
 {
-    if (!ParamValidation::instance()->CheckHostSysUsageIsValid(HostSysUsage)) {
+    if (!ParamValidation::instance()->CheckHostSysUsageIsValid(hostSysUsage)) {
         return PROFILING_FAILED;
     }
     return PROFILING_SUCCESS;

@@ -127,7 +127,7 @@ private:
         std::array<std::string, ACL_PROF_ARGS_MAX> argsArr);
     void ProfSystemCfgToContainer(const ProfConfig* apiCfg,
         std::array<std::string, ACL_PROF_ARGS_MAX> argsArr);
-    std::string devIdToStr(uint32_t devNum, const uint32_t* devList);
+    std::string DevIdToStr(uint32_t devNum, const uint32_t* devList);
 
 private:
     SHARED_PTR_ALIA<ProfileParams> params_;

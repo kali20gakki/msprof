@@ -310,9 +310,9 @@ int MsprofParamAdapter::GetParamFromInputCfg(std::unordered_map<int, std::pair<M
     }
     ret = SetModeDefaultParams(msprofMode_);
     if (ret != PROFILING_SUCCESS) {
-        CmdLog::instance()->CmdErrorLog("msprof running mode invalid.");
+        CmdLog::instance()->CmdErrorLog("msprof set default value fail.");
         return PROFILING_FAILED;
-    }  
+    }
     ret = TransToParam(paramContainer_, params_);
     if (ret != PROFILING_SUCCESS) {
         return PROFILING_FAILED;
@@ -331,6 +331,7 @@ int MsprofParamAdapter::SetModeDefaultParams(MsprofMode modeType)
     switch (modeType) {
         case MSPROF_MODE_APP:
             SetDefaultParamsApp();
+            break;
         case MSPROF_MODE_SYSTEM:
             SetDefaultParamsSystem();
             break;
@@ -351,7 +352,7 @@ int MsprofParamAdapter::SetModeDefaultParams(MsprofMode modeType)
 
 void MsprofParamAdapter::CreateCfgMap()
 {
-    std::unordered_map<int, InputCfg>({ 
+    std::unordered_map<int, InputCfg>({
         {ARGS_OUTPUT, INPUT_CFG_COM_OUTPUT},
         {ARGS_STORAGE_LIMIT, INPUT_CFG_COM_STORAGE_LIMIT},
         {ARGS_APPLICATION, INPUT_CFG_MSPROF_APPLICATION},
@@ -866,7 +867,7 @@ int AclApiParamAdapter::ParamsCheckAclApi(std::vector<std::pair<InputCfg, std::s
     return flag ? PROFILING_SUCCESS : PROFILING_FAILED;
 }
 
-std::string AclApiParamAdapter::devIdToStr(uint32_t devNum, const uint32_t *devList)
+std::string AclApiParamAdapter::DevIdToStr(uint32_t devNum, const uint32_t *devList)
 {
     std::string devStr;
     bool flag = false;
@@ -885,7 +886,7 @@ std::string AclApiParamAdapter::devIdToStr(uint32_t devNum, const uint32_t *devL
 void AclApiParamAdapter::ProfTaskCfgToContainer(const ProfConfig * apiCfg,
     std::array<std::string, ACL_PROF_ARGS_MAX> argsArr)
 {
-    std::string devStr = devIdToStr(apiCfg->devNums, apiCfg->devIdList);
+    std::string devStr = DevIdToStr(apiCfg->devNums, apiCfg->devIdList);
     if (!devStr.empty()) {
         paramContainer_[INPUT_CFG_COM_SYS_DEVICES] = devStr;
         setConfig_.insert(INPUT_CFG_COM_SYS_DEVICES);
