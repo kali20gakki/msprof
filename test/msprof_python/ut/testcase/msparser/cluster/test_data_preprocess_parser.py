@@ -90,11 +90,12 @@ class TestDataPreprocessParser(unittest.TestCase):
                 mock.patch(NAMESPACE + '.check_file_writable'), \
                 mock.patch('builtins.open', mock.mock_open(read_data='')), \
                 mock.patch('os.fdopen', side_effect=OSError), \
-                mock.patch('os.chmod'),\
+                mock.patch('os.chmod'), \
                 mock.patch('os.remove'):
             check = DataPreprocessParser(self.params)
             check.sample_config = {'ai_core_metrics': 'ArithmeticUtilization'}
-            check.storage_data({'total_info': {'step_count': 469, 'empty_queue': 0, 'total_time': 37856.0, 'avg_time': 80.7164}})
+            check.storage_data({'total_info':
+                                    {'step_count': 469, 'empty_queue': 0, 'total_time': 37856.0, 'avg_time': 80.7164}})
 
     def test_query_data_queue_data(self):
         with mock.patch(NAMESPACE + '.DataPreprocessParser.get_data_queue_data', return_value=[]), \
@@ -116,7 +117,7 @@ class TestDataPreprocessParser(unittest.TestCase):
             check.query_data_queue_data()
 
     def test_get_cluster_path(self):
-        with mock.patch('os.path.realpath', return_value='test\\query\\test\\test'),\
+        with mock.patch('os.path.realpath', return_value='test\\query\\test\\test'), \
                 mock.patch("os.path.exists", return_value=True):
             check = DataPreprocessParser(self.params)
             result = check.get_cluster_path('test\\test')
