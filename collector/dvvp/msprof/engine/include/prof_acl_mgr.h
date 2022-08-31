@@ -212,6 +212,7 @@ private:
     std::mutex mtxSubscribe_;
     std::map<int32_t, SHARED_PTR_ALIA<Msprof::Engine::AicpuPlugin>> enginMap_;
     SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params_;
+    PROF_CONF_CONST_PTR profStratCfg_;
     uint64_t dataTypeConfig_;
     uint64_t startIndex_;
 };
