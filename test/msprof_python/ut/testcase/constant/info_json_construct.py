@@ -64,7 +64,7 @@ class InfoJsonReaderManager:
         self._reload_info_json()
 
     def _update_info_json(self):
-        json_data = json.dumps(self._info_json, default=lambda o: o.__dict__)
+        json_data = json.dumps(self._info_json, default=lambda json_obj: json_obj.__dict__)
         with os.fdopen(os.open(self._get_info_json_path(), constant.constant.WRITE_FLAGS,
                                constant.constant.WRITE_MODES), 'w') as _json_file:
             json.dump(json.loads(json_data), _json_file)

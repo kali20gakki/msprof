@@ -7,8 +7,9 @@ Copyright Huawei Technologies Co., Ltd. 2022. All rights reserved.
 import unittest
 from unittest import mock
 
-from common_func.info_conf_reader import InfoConfReader
 from common_func.msvp_constant import MsvpConstant
+from constant.info_json_construct import InfoJson
+from constant.info_json_construct import InfoJsonReaderManager
 from viewer.runtime.runtime_api_viewer import RuntimeApiViewer
 
 NAMESPACE = 'viewer.runtime.runtime_api_viewer'
@@ -82,7 +83,7 @@ class TestRuntimeApiViewer(unittest.TestCase):
                 mock.patch(NAMESPACE + '.RuntimeApiViewModel.check_table', return_value=True), \
                 mock.patch(NAMESPACE + ".RuntimeApiViewModel.get_timeline_data",
                            return_value=[(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)]):
-            InfoConfReader()._info_json = {"pid": 100}
+            InfoJsonReaderManager(InfoJson(pid=100)).process()
             check = RuntimeApiViewer(config, params)
             ret = check.get_timeline_data()
             self.assertEqual('[{"name": "process_name", '

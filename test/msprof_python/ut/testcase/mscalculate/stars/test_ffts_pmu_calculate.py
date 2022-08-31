@@ -27,16 +27,6 @@ class TestFftsPmuCalculate(TestCase):
             check = FftsPmuCalculate({DataTag.FFTS_PMU: ['ffts_profile.data.0.slice_0']}, CONFIG)
             check.ms_run()
 
-    def test_need_to_analyse(self):
-        with mock.patch(NAMESPACE + ".DBManager.check_tables_in_db", return_value=True), \
-                mock.patch('os.path.exists', return_value=True):
-            check = FftsPmuCalculate({DataTag.FFTS_PMU: ['ffts_profile.data.0.slice_0']}, CONFIG)
-            self.assertEqual(check._need_to_analyse(), False)
-        with mock.patch(NAMESPACE + ".DBManager.check_tables_in_db", return_value=False), \
-                mock.patch('os.path.exists', return_value=True):
-            check = FftsPmuCalculate({DataTag.FFTS_PMU: ['ffts_profile.data.0.slice_0']}, CONFIG)
-            self.assertEqual(check._need_to_analyse(), True)
-
     def test_ms_run_task_based(self):
         with mock.patch(NAMESPACE + '.generate_config',
                         return_value={"ai_core_profiling_mode": "task-based", "aiv_profiling_mode": "task-based"}), \

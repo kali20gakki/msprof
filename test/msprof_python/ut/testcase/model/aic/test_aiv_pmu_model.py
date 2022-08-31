@@ -7,7 +7,8 @@ Copyright Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 import unittest
 from unittest import mock
 
-from common_func.info_conf_reader import InfoConfReader
+from constant.info_json_construct import InfoJson
+from constant.info_json_construct import InfoJsonReaderManager
 from msmodel.aic.aiv_pmu_model import AivPmuModel
 
 NAMESPACE = 'msmodel.aic.aiv_pmu_model'
@@ -17,7 +18,7 @@ class TestAivPmuModel(unittest.TestCase):
 
     @staticmethod
     def setup_class():
-        InfoConfReader()._info_json = {'devices': '0'}
+        InfoJsonReaderManager(InfoJson(devices='0')).process()
 
     def test_init(self):
         with mock.patch('msmodel.interface.base_model.BaseModel.init'), \
