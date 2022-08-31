@@ -19,10 +19,10 @@ namespace PlatformAdapter {
 class PlatformAdapterCloudV2 : public Collector::Dvvp::Common::PlatformAdapter::PlatformAdapterInterface {
 public:
     PlatformAdapterCloudV2();
-    ~PlatformAdapterCloudV2();
+    ~PlatformAdapterCloudV2() override;
 
     int Init(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params) override;
-    int Uninit();
+    int Uninit() override;
 };
 }
 }

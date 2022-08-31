@@ -10,7 +10,7 @@
 #include <cstdint>
 #include <cstring>
 #include <cstdio>
-#include <errno.h>
+#include <cerrno>
 #include <ctime>
 #include <unistd.h>
 #include <semaphore.h>
