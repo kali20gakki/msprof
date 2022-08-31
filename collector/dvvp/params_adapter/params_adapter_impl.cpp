@@ -482,11 +482,6 @@ int AclJsonParamAdapter::ParamsCheckAclJson(std::vector<std::pair<InputCfg, std:
 
 int AclJsonParamAdapter::GenAclJsonContainer(SHARED_PTR_ALIA<ProfAclConfig> aclCfg)
 {
-    std::string aclJsonSwitch = aclCfg->switch_();
-    if (aclJsonSwitch.empty() || aclJsonSwitch != MSVP_PROF_ON) {
-        MSPROF_LOGW("Profiling switch is off");
-        return PROFILING_FAILED;
-    }
     paramContainer_[INPUT_CFG_COM_OUTPUT] = aclCfg->output();
     paramContainer_[INPUT_CFG_COM_STORAGE_LIMIT] = aclCfg->storage_limit();
     paramContainer_[INPUT_CFG_COM_MSPROFTX] = aclCfg->msproftx();
