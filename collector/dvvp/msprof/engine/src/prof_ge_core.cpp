@@ -328,7 +328,6 @@ ACL_GRPH_PROF_CONFIG_PTR aclgrphProfCreateConfig(UINT32_T_PTR deviceidList, uint
     }
 
     config->config.aicoreMetrics = static_cast<ProfAicoreMetrics>(aicoreMetrics);
-    ProfAclMgr::instance()->AddAiCpuModelConf(dataTypeConfig);
     config->config.dataTypeConfig = dataTypeConfig;
     MSPROF_LOGI("Successfully create prof config");
     return config;
@@ -417,6 +416,7 @@ Status aclgrphProfStart(ACL_GRPH_PROF_CONFIG_PTR profilerConfig)
 
     MSPROF_LOGI("Allocate start profiling config to Ge");
     uint64_t dataTypeConfig = profilerConfig->config.dataTypeConfig;
+    ProfAclMgr::instance()->AddAiCpuModelConf(dataTypeConfig);
     ProfAclMgr::instance()->AddModelLoadConf(dataTypeConfig);
     ProfAclMgr::instance()->AddRuntimeTraceConf(dataTypeConfig);
     Status geRet = static_cast<Status>(CommandHandleProfStart(
@@ -462,6 +462,7 @@ Status aclgrphProfStop(ACL_GRPH_PROF_CONFIG_PTR profilerConfig)
     MSPROF_LOGI("Allocate stop config of profiling modules to Acl");
     ProfAclMgr::instance()->AddModelLoadConf(dataTypeConfig);
     ProfAclMgr::instance()->AddRuntimeTraceConf(dataTypeConfig);
+    ProfAclMgr::instance()->AddAiCpuModelConf(dataTypeConfig);
     Status geRet = static_cast<Status>(CommandHandleProfStop(
         profilerConfig->config.devIdList, profilerConfig->config.devNums, dataTypeConfig | PROF_OP_DETAIL));
     RETURN_IF_NOT_SUCCESS(geRet);
