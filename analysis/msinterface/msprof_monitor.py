@@ -9,11 +9,11 @@ import hashlib
 import logging
 import multiprocessing
 import os
-import sys
 import time
 
 from common_func.common import CommonConstant
 from common_func.common import LogFactory
+from common_func.common import call_sys_exit
 from common_func.common import generate_config
 from common_func.common import print_info
 from common_func.constant import Constant
@@ -70,7 +70,7 @@ class JobDispatcher:
                 time.sleep(3)
         except KeyboardInterrupt:
             print_info(self.SCRIPT_NAME, "KeyboardInterrupt")
-            sys.exit(0)
+            call_sys_exit(0)
         finally:
             pass
 
@@ -173,7 +173,7 @@ class JobMonitor:
                 time.sleep(5)  # sleep 5 seconds
         except KeyboardInterrupt:
             print_info(self.SCRIPT_NAME, "KeyboardInterrupt\n")
-            sys.exit(NumberConstant.SUCCESS)
+            call_sys_exit(NumberConstant.SUCCESS)
 
     def _analysis_job_profiling(self: any, job_path: str, job_tag: str) -> None:
         sample_file = PathManager.get_sample_json_path(job_path)

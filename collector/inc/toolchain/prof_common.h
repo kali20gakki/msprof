@@ -7,11 +7,11 @@
 #ifndef MSPROFILER_PROF_COMMON_H_
 #define MSPROFILER_PROF_COMMON_H_
 
+#include <stdint.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif // __cplusplus
-
-#include <stdint.h>
 
 #define MSPROF_DATA_HEAD_MAGIC_NUM  0x5a5a
 
