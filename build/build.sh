@@ -51,7 +51,7 @@ function bep_env_init() {
     fi
 }
 
-#bep_env_init
+bep_env_init
 
 cd ${TOP_DIR}/build
 cmake ../cmake/superbuild/ -DMSPROF_BUILD_TYPE=${BUILD_TYPE}
