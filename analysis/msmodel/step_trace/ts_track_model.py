@@ -12,6 +12,7 @@ from common_func.db_name_constant import DBNameConstant
 from common_func.msprof_iteration import MsprofIteration
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
+from common_func.path_manager import PathManager
 from msmodel.interface.base_model import BaseModel
 
 
@@ -46,6 +47,10 @@ class TsTrackModel(BaseModel, ABC):
         :param index_id: index id
         :return: ai cpu with state
         """
+        if not DBManager.check_tables_in_db(
+            PathManager.get_db_path(self.result_dir, DBNameConstant.DB_STEP_TRACE), DBNameConstant.TABLE_TASK_TYPE):
+            return []
+
         iter_time_range = list(chain.from_iterable(
             MsprofIteration(self.result_dir).get_iteration_time(index_id, model_id)))
         sql = "select stream_id, task_id, timestamp, " \
@@ -56,6 +61,7 @@ class TsTrackModel(BaseModel, ABC):
 
         for index, datum in enumerate(ai_cpu_with_state):
             ai_cpu_with_state[index] = list(datum)
+            # index 2 is timestamp
             ai_cpu_with_state[index][2] = int(datum[2])
 
         if iter_time_range:
