@@ -30,17 +30,38 @@ class DataPreprocessParser:
     """
     FILE_NAME = os.path.basename(__file__)
     QUERY_FILE_NAME = 'query'
-    MODEL_ID_INDEX = 1
-    MODEL_ID_IN_GE = 1
-    MODEL_ID_NOT_IN_GE = 0
 
     def __init__(self: any, params: dict) -> None:
         self.collection_path = params.get('collection_path')
         self.data_type = params.get('data_type')
-        self.model_id = params.get('model_id')
-        self.iter_id = params.get('iteration_id')
         self.rank_id = params.get('npu_id')
-        self.sample_config = None
+
+    @staticmethod
+    def calculate_queue_data(queue_list: list, trace_data: dict) -> dict:
+        """
+        calculate fops data
+        :return: json data list
+        """
+        total_info = {"step_count": len(trace_data.values()),
+                      "empty_queue": 0,
+                      "total_time": 0,
+                      "avg_time": 0}
+        total_time = 0
+        empty_queue = 0
+        data_list = []
+        for data_index in range(len(trace_data)):
+            if 2 * data_index + 1 > len(queue_list):
+                data_list.append({"step": data_index + 1, "duration": 0, "queue_size": 0})
+                continue
+            queue_size = queue_list[2 * data_index][1] + queue_list[2 * data_index + 1][1]
+            duration = queue_list[2 * data_index][4] + queue_list[2 * data_index + 1][4]
+            total_time += duration
+            empty_queue += int(bool(queue_size == 0))
+            data_list.append({"step": data_index + 1, "duration": duration, "queue_size": queue_size})
+        total_info["empty_queue"] = empty_queue
+        total_info["total_time"] = total_time
+        total_info["avg_time"] = round(total_time / len(trace_data), NumberConstant.DECIMAL_ACCURACY)
+        return {"total_info": total_info, "data_list": data_list}
 
     def calculate(self: any) -> None:
         """
@@ -103,9 +124,8 @@ class DataPreprocessParser:
         save data into file
         :return: None
         """
-        print_info(self.FILE_NAME, "Fops data query complete, start to storage data into json file")
-        file_name = 'data_queue_{0}_{1}.json'.format(self.rank_id,
-                                                     self.model_id)
+        print_info(self.FILE_NAME, "Data queue query complete, start to storage data into json file")
+        file_name = 'data_queue_{0}.json'.format(self.rank_id)
         file_path = self.get_cluster_path(file_name)
         check_file_writable(file_path)
         if os.path.exists(file_path):
@@ -131,32 +151,6 @@ class DataPreprocessParser:
                       "Storing data failed, you may not have the permission to write files in the current path.")
         return os.path.realpath(os.path.join(query_path, file_name))
 
-    def calculate_queue_data(self: any, queue_list: list, trace_data: dict) -> dict:
-        """
-        calculate fops data
-        :return: json data list
-        """
-        total_info = {"step_count": len(trace_data.values()),
-                      "empty_queue": 0,
-                      "total_time": 0,
-                      "avg_time": 0}
-        total_time = 0
-        empty_queue = 0
-        data_list = []
-        for data_index in range(len(trace_data)):
-            if 2 * data_index + 1 > len(queue_list):
-                data_list.append({"step": data_index + 1, "duration": 0, "queue_size": 0})
-                continue
-            queue_size = queue_list[2 * data_index][1] + queue_list[2 * data_index + 1][1]
-            duration = queue_list[2 * data_index][4] + queue_list[2 * data_index + 1][4]
-            total_time += duration
-            empty_queue += int(bool(queue_size == 0))
-            data_list.append({"step": data_index + 1, "duration": duration, "queue_size": queue_size})
-        total_info["empty_queue"] = empty_queue
-        total_info["total_time"] = total_time
-        total_info["avg_time"] = round(total_time / len(trace_data), NumberConstant.DECIMAL_ACCURACY)
-        return {"total_info": total_info, "data_list": data_list}
-
     def process(self: any) -> None:
         """
         entrance for calculating fops data
@@ -164,7 +158,7 @@ class DataPreprocessParser:
         """
         if self.rank_id is None:
             warn(self.FILE_NAME,
-                 "To query fops data,  id is required")
+                 "To query data queue,  id is required")
             return
         self.calculate()
 
@@ -172,7 +166,6 @@ class DataPreprocessParser:
         check_path_valid(self.collection_path, False)
         if DataCheckManager.contain_info_json_data(self.collection_path):
             InfoConfReader().load_info(self.collection_path)
-            self.sample_config = ConfigMgr.read_sample_config(self.collection_path)
             self.query_data_queue_data()
         else:
             warn(self.FILE_NAME,
