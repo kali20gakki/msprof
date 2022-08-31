@@ -137,8 +137,8 @@ public:
     int CheckAiMetricsValid(const std::string &aiMetrics) const;
     int CheckSwitchValid(const std::string &switchParam) const;
     int CheckFreqValid(const std::string &freq, const InputCfg freqOpt) const;
-    int CheckLlcModeValid(const std::string &LlcMode) const;
-    int CheckHostSysUsageValid(const std::string &HostSysUsage) const;
+    int CheckLlcModeValid(const std::string &llcMode) const;
+    int CheckHostSysUsageValid(const std::string &hostSysUsage) const;
     int CheckAppParamValid(const std::string &appParam) const;
     int CheckAppScriptValid(const std::vector<std::string> &appParams) const;
     int MsprofCheckAppValid(std::string &appParam) const;
