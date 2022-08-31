@@ -115,9 +115,11 @@ class DataPreprocessParser:
     def get_step_trace_data(self: any) -> dict:
         with MsprofStep(self.collection_path) as step_trace:
             trace_data = step_trace.data
-        iter_dict = OrderedDict()
-        for index, data in enumerate(trace_data):
-            start_time = 0 if data.iter_id == 1 else trace_data[index - 1].step_end
+        if not trace_data:
+            return {}
+        iter_dict = OrderedDict([(trace_data[0].iter_id, [0, trace_data[0].step_end])])
+        for index, data in enumerate(trace_data[1:]):
+            start_time = trace_data[index - 1].step_end
             end_time = data.step_end
             iter_dict.setdefault(data.iter_id, [start_time, end_time])
         return iter_dict
@@ -137,9 +139,9 @@ class DataPreprocessParser:
             with os.fdopen(os.open(file_path, Constant.WRITE_FLAGS,
                                    Constant.WRITE_MODES), "w") as _file:
                 _file.write(json.dumps(json_data))
-        except (OSError, SystemError, RuntimeError, TypeError):
+        except (OSError, SystemError, RuntimeError, TypeError) as error:
             logging.error("Storing data failed, you may not have the permission to write files in the current path.")
-            raise ProfException(ProfException.PROF_INVALID_PATH_ERROR)
+            raise ProfException(ProfException.PROF_INVALID_PATH_ERROR) from error
         else:
             print_msg({"status": NumberConstant.SUCCESS, "info": "", "data": file_path})
 
@@ -148,10 +150,10 @@ class DataPreprocessParser:
         if not os.path.exists(query_path):
             try:
                 os.makedirs(query_path)
-            except OSError:
+            except OSError as err:
                 logging.error("Storing data failed, "
                               "you may not have the permission to write files in the current path.")
-                raise ProfException(ProfException.PROF_INVALID_PATH_ERROR)
+                raise ProfException(ProfException.PROF_INVALID_PATH_ERROR) from err
         return os.path.realpath(os.path.join(query_path, file_name))
 
     def process(self: any) -> None:
