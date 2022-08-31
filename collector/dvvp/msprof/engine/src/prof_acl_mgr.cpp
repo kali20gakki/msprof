@@ -502,7 +502,7 @@ int ProfAclMgr::ProfAclGetDataTypeConfig(const uint32_t devId, uint64_t &dataTyp
 
 uint64_t ProfAclMgr::GetDataTypeConfigFromParams()
 {
-    return dataTypeConfig_;
+    return params_->dataTypeConfig;
 }
 
 /**
@@ -1318,6 +1318,7 @@ int32_t ProfAclMgr::MsprofInitGeOptions(VOID_PTR data, uint32_t len)
     auto paramAdapter = GeOptParamAdapter();
     ret = paramAdapter.GetParamFromInputCfg(inputCfgPb, params_);
     if (ret != PROFILING_SUCCESS) {
+        MSPROF_LOGE("[MsprofInitGeOptions]GetParamFromInputCfg fail.");
         return MSPROF_ERROR_CONFIG_INVALID;
     }
     params_->job_id = Utils::ProfCreateId(0);

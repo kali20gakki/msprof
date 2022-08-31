@@ -302,7 +302,7 @@ int MsprofParamAdapter::GetParamFromInputCfg(std::unordered_map<int, std::pair<M
         CmdLog::instance()->CmdErrorLog("Get msprof running mode fail.");
         return PROFILING_FAILED;
     }
-    // 默认值设置
+
     switch (msprofMode_) {
         case MSPROF_MODE_APP:
             SetDefaultParamsApp();
@@ -323,12 +323,10 @@ int MsprofParamAdapter::GetParamFromInputCfg(std::unordered_map<int, std::pair<M
             return PROFILING_FAILED;
     }
 
-    PrintContainer(paramContainer_);
     ret = TransToParam(paramContainer_, params_);
     if (ret != PROFILING_SUCCESS) {
         return PROFILING_FAILED;
     }
-    MSPROF_LOGI("[qqq]dataTypeConfig:%lx", params_->dataTypeConfig);
     SetParamsSelf();
     return PROFILING_SUCCESS;
 }
@@ -713,6 +711,7 @@ int GeOptParamAdapter::SetGeOptionsContainerDefaultValue()
         paramContainer_[INPUT_CFG_COM_AI_VECTOR] = MSVP_PROF_ON;
         paramContainer_[INPUT_CFG_COM_AIV_MODE] = PROFILING_MODE_TASK_BASED;
     }
+    return PROFILING_SUCCESS;
 }
 
 int GeOptParamAdapter::SetOutputDir(std::string &outputDir)
