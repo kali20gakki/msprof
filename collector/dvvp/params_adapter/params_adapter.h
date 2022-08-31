@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Huawei Technologies Co., Ltd. 2022-2023. All rights reserved.
+ * Copyright (c) Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
  * Description: handle params from user's input config
  * Author: Huawei Technologies Co., Ltd.
  * Create: 2022-08-10
@@ -47,6 +47,7 @@ const int FILE_FIND_REPLAY          = 100;
 const std::string TOOL_NAME_PERF     = "perf";
 const std::string TOOL_NAME_LTRACE   = "ltrace";
 const std::string TOOL_NAME_IOTOP    = "iotop";
+const int MIN_APP_LENTH_WITH_SCRIPT  = 2;
 enum InputCfg {
     INPUT_CFG_MSPROF_APPLICATION = 0, // del
     INPUT_CFG_MSPROF_ENVIRONMENT = 1, // del
@@ -131,7 +132,6 @@ public:
     void Print(std::array<std::string, INPUT_CFG_MAX> paramContainer);
 
 public:
-    //======common=======
     int CheckOutputValid(const std::string &outputParam) const;
     int CheckStorageLimitValid(const std::string &storageLimitParam) const;
     int CheckAiMetricsValid(const std::string &aiMetrics) const;
@@ -139,7 +139,6 @@ public:
     int CheckFreqValid(const std::string &freq, const InputCfg freqOpt) const;
     int CheckLlcModeValid(const std::string &LlcMode) const;
     int CheckHostSysUsageValid(const std::string &HostSysUsage) const;
-    //======msprof======
     int CheckAppParamValid(const std::string &appParam) const;
     int CheckAppScriptValid(const std::vector<std::string> &appParams) const;
     int MsprofCheckAppValid(std::string &appParam) const;
@@ -154,7 +153,14 @@ public:
     int MsprofCheckExportIdValid(const std::string &idParam, const std::string &exportIdType) const;
     int CheckHostSysToolsExit(const std::string &hostSysParam, const std::string &resultDir,
         const std::string &appDir) const;
-private:   
+private:
+    void GetMiniBlackSwitch();
+    void GetCloudBlackSwitch();
+    void GetMdcBlackSwitch();
+    void GetLhisiBlackSwitch();
+    void GetDcBlackSwitch();
+    void GetCloudV2BlackSwitch();
+    void GetCommonConfig();
     int CheckHostSysToolsIsExist(const std::string toolName, const std::string &resultDir,
         const std::string &appDir) const;
     int CheckHostSysCmdOutIsExist(const std::string tmpDir, const std::string toolName,
@@ -162,7 +168,8 @@ private:
     int CheckHostOutString(const std::string tmpStr, const std::string toolName) const;
     int UninitCheckHostSysCmd(const MmProcess checkProcess) const;
 private:
-    void SpliteAppPath(const std::string &appParams, std::string &cmdPath, std::string &appParameters, std::string &appDir, std::string &app);
+    void SpliteAppPath(const std::string &appParams, std::string &cmdPath, std::string &appParameters,
+        std::string &appDir, std::string &app);
 private:
     std::vector<InputCfg> commonConfig_;
     std::vector<InputCfg> blackSwitch_;

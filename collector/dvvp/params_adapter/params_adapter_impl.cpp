@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Huawei Technologies Co., Ltd. 2022-2023. All rights reserved.
+ * Copyright (c) Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
  * Description: handle params from user's input config
  * Author: Huawei Technologies Co., Ltd.
  * Create: 2022-08-10
@@ -138,13 +138,15 @@ void MsprofParamAdapter::SetDefaultParamsApp()
         paramContainer_[INPUT_CFG_COM_AIC_MODE] = PROFILING_MODE_TASK_BASED;
         paramContainer_[INPUT_CFG_COM_AIC_FREQ] = std::to_string(THOUSAND / DEFAULT_PROFILING_INTERVAL_10MS);
     }
-    paramContainer_[INPUT_CFG_COM_AIC_METRICS] = (paramContainer_[INPUT_CFG_COM_AIC_METRICS].empty()) ? PIPE_UTILIZATION : paramContainer_[INPUT_CFG_COM_AIC_METRICS];
+    paramContainer_[INPUT_CFG_COM_AIC_METRICS] = (paramContainer_[INPUT_CFG_COM_AIC_METRICS].empty()) ?
+        PIPE_UTILIZATION : paramContainer_[INPUT_CFG_COM_AIC_METRICS];
     if (paramContainer_[INPUT_CFG_COM_AI_VECTOR].empty()) {
         paramContainer_[INPUT_CFG_COM_AI_VECTOR] = MSVP_PROF_ON;
         paramContainer_[INPUT_CFG_COM_AIV_MODE] = PROFILING_MODE_TASK_BASED;
         paramContainer_[INPUT_CFG_COM_AIV_FREQ] = std::to_string(THOUSAND / DEFAULT_PROFILING_INTERVAL_10MS);
     }
-    paramContainer_[INPUT_CFG_COM_AIV_METRICS] = (paramContainer_[INPUT_CFG_COM_AIV_METRICS].empty()) ? PIPE_UTILIZATION : paramContainer_[INPUT_CFG_COM_AIV_METRICS];
+    paramContainer_[INPUT_CFG_COM_AIV_METRICS] = (paramContainer_[INPUT_CFG_COM_AIV_METRICS].empty()) ?
+        PIPE_UTILIZATION : paramContainer_[INPUT_CFG_COM_AIV_METRICS];
 }
 
 int MsprofParamAdapter::GetMsprofMode()
@@ -194,7 +196,7 @@ void MsprofParamAdapter::SetDefaultParamsQuery()
 
 void MsprofParamAdapter::SetDefaultParamsExport()
 {
-
+    return;
 }
 
 void MsprofParamAdapter::SpliteAppPath(const std::string &appParams)
@@ -229,14 +231,22 @@ void MsprofParamAdapter::SetParamsSelf()
     params_->cmdPath = cmdPath_;
     params_->app_parameters = appParameters_;
     params_->app_dir = appDir_;
-    params_->app_env = paramContainer_[INPUT_CFG_MSPROF_ENVIRONMENT].empty() ? params_->app_env : paramContainer_[INPUT_CFG_MSPROF_ENVIRONMENT];
-    params_->pythonPath = paramContainer_[INPUT_CFG_PYTHON_PATH].empty() ? params_->pythonPath : paramContainer_[INPUT_CFG_PYTHON_PATH];
-    params_->parseSwitch = paramContainer_[INPUT_CFG_PARSE].empty() ? params_->parseSwitch : paramContainer_[INPUT_CFG_PARSE];
-    params_->querySwitch = paramContainer_[INPUT_CFG_QUERY].empty() ? params_->querySwitch : paramContainer_[INPUT_CFG_QUERY];
-    params_->exportSwitch = paramContainer_[INPUT_CFG_EXPORT].empty() ? params_->exportSwitch : paramContainer_[INPUT_CFG_EXPORT];
-    params_->exportSummaryFormat = paramContainer_[INPUT_CFG_SUMMARY_FORMAT].empty() ? params_->exportSummaryFormat : paramContainer_[INPUT_CFG_SUMMARY_FORMAT];
-    params_->exportIterationId = paramContainer_[INPUT_CFG_ITERATION_ID].empty() ? params_->exportIterationId : paramContainer_[INPUT_CFG_ITERATION_ID];
-    params_->exportModelId = paramContainer_[INPUT_CFG_MODEL_ID].empty() ? params_->exportModelId : paramContainer_[INPUT_CFG_MODEL_ID];
+    params_->app_env = paramContainer_[INPUT_CFG_MSPROF_ENVIRONMENT].empty() ?
+        params_->app_env : paramContainer_[INPUT_CFG_MSPROF_ENVIRONMENT];
+    params_->pythonPath = paramContainer_[INPUT_CFG_PYTHON_PATH].empty() ?
+        params_->pythonPath : paramContainer_[INPUT_CFG_PYTHON_PATH];
+    params_->parseSwitch = paramContainer_[INPUT_CFG_PARSE].empty() ?
+        params_->parseSwitch : paramContainer_[INPUT_CFG_PARSE];
+    params_->querySwitch = paramContainer_[INPUT_CFG_QUERY].empty() ?
+        params_->querySwitch : paramContainer_[INPUT_CFG_QUERY];
+    params_->exportSwitch = paramContainer_[INPUT_CFG_EXPORT].empty() ?
+        params_->exportSwitch : paramContainer_[INPUT_CFG_EXPORT];
+    params_->exportSummaryFormat = paramContainer_[INPUT_CFG_SUMMARY_FORMAT].empty() ?
+        params_->exportSummaryFormat : paramContainer_[INPUT_CFG_SUMMARY_FORMAT];
+    params_->exportIterationId = paramContainer_[INPUT_CFG_ITERATION_ID].empty() ?
+        params_->exportIterationId : paramContainer_[INPUT_CFG_ITERATION_ID];
+    params_->exportModelId = paramContainer_[INPUT_CFG_MODEL_ID].empty() ?
+        params_->exportModelId : paramContainer_[INPUT_CFG_MODEL_ID];
     params_->msprofBinPid = Utils::GetPid();
 }
 
@@ -260,7 +270,6 @@ int MsprofParamAdapter::GetParamFromInputCfg(std::unordered_map<int, std::pair<M
         MSPROF_LOGE("[GetParamFromInputCfg]msprof Init failed.");
         return PROFILING_FAILED;
     }
-
     for (const std::pair<int, std::pair<MsprofCmdInfo, std::string>> kv : argvMap) {
         MsprofArgsType argsType = static_cast<MsprofArgsType>(kv.first);
         InputCfg cfgType = cfgMap_[argsType];
@@ -276,7 +285,6 @@ int MsprofParamAdapter::GetParamFromInputCfg(std::unordered_map<int, std::pair<M
         paramContainer_[cfgType] = kv.second.first.args[argsType];
         setConfig_.insert(cfgType);
     }
-
     std::vector<std::pair<InputCfg, std::string>> errCfgList;
     ret = ParamsCheckMsprof(errCfgList);
     if (ret != PROFILING_SUCCESS && !errCfgList.empty()) {
@@ -286,7 +294,6 @@ int MsprofParamAdapter::GetParamFromInputCfg(std::unordered_map<int, std::pair<M
         }
         return PROFILING_FAILED;
     }
-
     errCfgList.clear();
     ret = ComCfgCheck(ENABLE_MSPROF, paramContainer_, setConfig_, errCfgList);
     if (ret != PROFILING_SUCCESS) {
@@ -296,17 +303,33 @@ int MsprofParamAdapter::GetParamFromInputCfg(std::unordered_map<int, std::pair<M
         }
         return PROFILING_FAILED;
     }
-    // 判断模式
     ret = GetMsprofMode();
     if (ret != PROFILING_SUCCESS) {
         CmdLog::instance()->CmdErrorLog("Get msprof running mode fail.");
         return PROFILING_FAILED;
     }
+    ret = SetModeDefaultParams(msprofMode_);
+        CmdLog::instance()->CmdErrorLog("msprof running mode invalid.");
+        return PROFILING_FAILED;
+    }
+    ret = TransToParam(paramContainer_, params_);
+    if (ret != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
+    MSPROF_LOGI("[qqq]dataTypeConfig:%lx", params_->dataTypeConfig);
+    SetParamsSelf();
+    return PROFILING_SUCCESS;
+}
 
-    switch (msprofMode_) {
+int MsprofParamAdapter::SetModeDefaultParams(MsprofMode modeType)
+{
+    if (modeType < MSPROF_MODE_APP || modeType > MSPROF_MODE_EXPORT) {
+        MSPROF_LOGE("msprof mode invalid.");
+        return PROFILING_FAILED;
+    }
+    switch (modeType) {
         case MSPROF_MODE_APP:
             SetDefaultParamsApp();
-            break;
         case MSPROF_MODE_SYSTEM:
             SetDefaultParamsSystem();
             break;
@@ -322,21 +345,11 @@ int MsprofParamAdapter::GetParamFromInputCfg(std::unordered_map<int, std::pair<M
         default:
             return PROFILING_FAILED;
     }
-
-    ret = TransToParam(paramContainer_, params_);
-    if (ret != PROFILING_SUCCESS) {
-        return PROFILING_FAILED;
-    }
-    SetParamsSelf();
     return PROFILING_SUCCESS;
 }
 
 void MsprofParamAdapter::CreateCfgMap()
-{
-    std::unordered_map<int, InputCfg>({
         {ARGS_OUTPUT, INPUT_CFG_COM_OUTPUT},
-        {ARGS_STORAGE_LIMIT, INPUT_CFG_COM_STORAGE_LIMIT},
-        {ARGS_APPLICATION, INPUT_CFG_MSPROF_APPLICATION},
         {ARGS_ENVIRONMENT, INPUT_CFG_MSPROF_ENVIRONMENT},
         {ARGS_AIC_MODE, INPUT_CFG_COM_AIC_MODE},
         {ARGS_AIC_METRICE, INPUT_CFG_COM_AIC_METRICS},
@@ -403,8 +416,19 @@ int AclJsonParamAdapter::Init()
         INPUT_CFG_COM_BIU, INPUT_CFG_COM_BIU_FREQ
     }).swap(aclJsonConfig_);
     std::vector<InputCfg>({
-        INPUT_CFG_COM_OUTPUT, INPUT_CFG_COM_STORAGE_LIMIT, INPUT_CFG_COM_MSPROFTX, INPUT_CFG_COM_TASK_TIME, INPUT_CFG_COM_AICPU, INPUT_CFG_COM_L2, INPUT_CFG_COM_HCCL, INPUT_CFG_COM_ASCENDCL,
-        INPUT_CFG_COM_RUNTIME_API, INPUT_CFG_COM_AIC_METRICS, INPUT_CFG_COM_AIV_METRICS, INPUT_CFG_COM_BIU, INPUT_CFG_COM_BIU_FREQ
+        INPUT_CFG_COM_OUTPUT,
+        INPUT_CFG_COM_STORAGE_LIMIT,
+        INPUT_CFG_COM_MSPROFTX,
+        INPUT_CFG_COM_TASK_TIME,
+        INPUT_CFG_COM_AICPU,
+        INPUT_CFG_COM_L2,
+        INPUT_CFG_COM_HCCL,
+        INPUT_CFG_COM_ASCENDCL,
+        INPUT_CFG_COM_RUNTIME_API,
+        INPUT_CFG_COM_AIC_METRICS,
+        INPUT_CFG_COM_AIV_METRICS,
+        INPUT_CFG_COM_BIU,
+        INPUT_CFG_COM_BIU_FREQ
     }).swap(aclJsonWholeConfig_);
     std::map<InputCfg, std::string>({
         {INPUT_CFG_COM_OUTPUT, "output"},
@@ -609,7 +633,20 @@ int GeOptParamAdapter::Init()
         INPUT_CFG_COM_TASK_TRACE, INPUT_CFG_COM_TRAINING_TRACE, INPUT_CFG_COM_BIU, INPUT_CFG_COM_BIU_FREQ
     }).swap(geOptConfig_);
     std::vector<InputCfg>({
-        INPUT_CFG_COM_OUTPUT, INPUT_CFG_COM_STORAGE_LIMIT, INPUT_CFG_COM_MSPROFTX, INPUT_CFG_COM_TASK_TIME, INPUT_CFG_COM_TASK_TRACE, INPUT_CFG_COM_TRAINING_TRACE, INPUT_CFG_COM_AICPU, INPUT_CFG_COM_L2, INPUT_CFG_COM_HCCL, INPUT_CFG_COM_RUNTIME_API, INPUT_CFG_COM_AIC_METRICS, INPUT_CFG_COM_AIV_METRICS, INPUT_CFG_COM_BIU, INPUT_CFG_COM_BIU_FREQ
+        INPUT_CFG_COM_OUTPUT,
+        INPUT_CFG_COM_STORAGE_LIMIT,
+        INPUT_CFG_COM_MSPROFTX,
+        INPUT_CFG_COM_TASK_TIME,
+        INPUT_CFG_COM_TASK_TRACE,
+        INPUT_CFG_COM_TRAINING_TRACE,
+        INPUT_CFG_COM_AICPU,
+        INPUT_CFG_COM_L2,
+        INPUT_CFG_COM_HCCL,
+        INPUT_CFG_COM_RUNTIME_API,
+        INPUT_CFG_COM_AIC_METRICS,
+        INPUT_CFG_COM_AIV_METRICS,
+        INPUT_CFG_COM_BIU,
+        INPUT_CFG_COM_BIU_FREQ
     }).swap(geOptionsWholeConfig_);
     std::map<InputCfg, std::string>({
         {INPUT_CFG_COM_OUTPUT, "output"},
@@ -737,7 +774,8 @@ int GeOptParamAdapter::SetOutputDir(std::string &outputDir)
     return PROFILING_SUCCESS;
 }
 
-int GeOptParamAdapter::GetParamFromInputCfg(SHARED_PTR_ALIA<ProfGeOptionsConfig> geCfg, SHARED_PTR_ALIA<ProfileParams> params)
+int GeOptParamAdapter::GetParamFromInputCfg(SHARED_PTR_ALIA<ProfGeOptionsConfig> geCfg,
+    SHARED_PTR_ALIA<ProfileParams> params)
 {
     if (!params) {
         MSPROF_LOGE("memory for params is empty.");
@@ -923,7 +961,7 @@ void AclApiParamAdapter::ProfTaskCfgToContainer(const ProfConfig * apiCfg,
 }
 
 void AclApiParamAdapter::ProfSystemCfgToContainer(const ProfConfig * apiCfg,
-        std::array<std::string, ACL_PROF_ARGS_MAX> argsArr)
+    std::array<std::string, ACL_PROF_ARGS_MAX> argsArr)
 {
     uint64_t dataTypeConfig = apiCfg->dataTypeConfig;
     ProfAicoreMetrics aicMetrics = apiCfg->aicoreMetrics;
@@ -979,11 +1017,10 @@ void AclApiParamAdapter::ProfSystemCfgToContainer(const ProfConfig * apiCfg,
         paramContainer_[INPUT_HOST_SYS_USAGE] = argsArr[ACL_PROF_HOST_SYS];
         setConfig_.insert(INPUT_HOST_SYS_USAGE);
     }
-    
 }
 
 void AclApiParamAdapter::ProfCfgToContainer(const ProfConfig * apiCfg,
-        std::array<std::string, ACL_PROF_ARGS_MAX> argsArr)
+    std::array<std::string, ACL_PROF_ARGS_MAX> argsArr)
 {
     ProfTaskCfgToContainer(apiCfg, argsArr);
     ProfSystemCfgToContainer(apiCfg, argsArr);
