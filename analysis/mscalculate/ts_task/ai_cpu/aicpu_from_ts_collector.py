@@ -39,17 +39,17 @@ class AICpuFromTsCollector:
         stream_id, task_id, start, end, task_type = aicpu_feature
         if task_type == self.AI_CPU_TYPE:
             batch_id = NumberConstant.DEFAULT_BATCH_ID
+            start_ms = InfoConfReader().time_from_syscnt(start)
+            end_ms = InfoConfReader().time_from_syscnt(end)
             if not ChipManager().is_chip_v1():
                 batch_id = self.calculate_batch_id(stream_id, task_id, end)
-                start = InfoConfReader().time_from_syscnt(start)
-                end = InfoConfReader().time_from_syscnt(end)
-            start = start / NumberConstant.MS_TO_NS
-            end = end / NumberConstant.MS_TO_NS
+                start_ms = InfoConfReader().time_from_syscnt(start) / NumberConstant.MS_TO_NS
+                end_ms = InfoConfReader().time_from_syscnt(end) / NumberConstant.MS_TO_NS
 
             self.aicpu_list.append([int(stream_id),
                                     int(task_id),
-                                    start,
-                                    end,
+                                    start_ms,
+                                    end_ms,
                                     batch_id])
 
     def save_aicpu(self: any) -> None:
