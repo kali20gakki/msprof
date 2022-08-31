@@ -15,7 +15,7 @@ class AiCpuModel(ParserModel):
     ai_cpu model class
     """
 
-    def __init__(self: any, result_dir: str, table_list: list) -> None:
+    def __init__(self: any, result_dir: str, table_list: any = ()) -> None:
         super().__init__(result_dir, DBNameConstant.DB_AI_CPU, table_list)
 
     def flush(self: any, data_list: list, ai_cpu_table_name: str = DBNameConstant.TABLE_AI_CPU) -> None:

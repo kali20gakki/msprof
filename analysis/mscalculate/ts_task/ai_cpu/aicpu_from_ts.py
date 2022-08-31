@@ -7,12 +7,11 @@ Copyright Huawei Technologies Co., Ltd. 2022. All rights reserved.
 
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.ms_constant.str_constant import StrConstant
-from common_func.ms_constant.number_constant import NumberConstant
 from common_func.db_name_constant import DBNameConstant
-from common_func.info_conf_reader import InfoConfReader
 from msmodel.step_trace.ts_track_model import TsTrackModel
 from mscalculate.ts_task.task_state_handler import TaskStateHandler
 from mscalculate.ts_task.ai_cpu.aicpu_from_ts_collector import AICpuFromTsCollector
+from common_func.step_trace_constant import StepTraceConstant
 
 
 class AICpuFromTsCalculator(MsMultiProcess):
@@ -61,7 +60,7 @@ class AICpuFromTsCalculator(MsMultiProcess):
         """
         with self._ts_model:
             ai_cpu_with_state = self._ts_model.get_ai_cpu_data(
-                self.sample_config.get("model_id"), self.sample_config.get("iter_id"))
+                self.sample_config.get(StepTraceConstant.MODEL_ID), self.sample_config.get(StepTraceConstant.ITER_ID))
 
         aicpu_timeline_list = self.state_to_timeline(ai_cpu_with_state)
 
