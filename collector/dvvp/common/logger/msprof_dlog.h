@@ -89,43 +89,48 @@ enum {
 };
 
 #define MSPROF_MODULE_NAME PROFILING
-#define __FILENAME__ (strrchr("/" __FILE__, '/') + 1)
+#define FILENAME (strrchr("/" __FILE__, '/') + 1)
 
 using SlogPlugin = Collector::Dvvp::Plugin::SlogPlugin;
 
-#define MSPROF_LOGD(format, ...) do {                                                                      \
-    if (SlogPlugin::instance()->MsprofCheckLogLevelForC(MSPROF_MODULE_NAME, Collector::Dvvp::Plugin::DLOG_DEBUG) == 1) {                 \
-        SlogPlugin::instance()->MsprofDlogInnerForC(MSPROF_MODULE_NAME, Collector::Dvvp::Plugin::DLOG_DEBUG, "[%s:%d]" " >>> (tid:%ld) " \
-            format "\n", __FILENAME__, __LINE__, syscall(SYS_gettid), ##__VA_ARGS__);                          \
-    }                                                                                                      \
+#define MSPROF_LOGD(format, ...) do {                                                                           \
+    if (SlogPlugin::instance()->MsprofCheckLogLevelForC(MSPROF_MODULE_NAME,                                     \
+        Collector::Dvvp::Plugin::DLOG_DEBUG) == 1) {                                                            \
+        SlogPlugin::instance()->MsprofDlogInnerForC(MSPROF_MODULE_NAME, Collector::Dvvp::Plugin::DLOG_DEBUG,    \
+        "[%s:%d]" " >>> (tid:%ld) " format "\n", FILENAME, __LINE__, syscall(SYS_gettid), ##__VA_ARGS__);       \
+    }                                                                                                           \
 } while (0)
 
-#define MSPROF_LOGI(format, ...) do {                                                                      \
-    if (SlogPlugin::instance()->MsprofCheckLogLevelForC(MSPROF_MODULE_NAME, Collector::Dvvp::Plugin::DLOG_INFO) == 1) {                 \
-        SlogPlugin::instance()->MsprofDlogInnerForC(MSPROF_MODULE_NAME, Collector::Dvvp::Plugin::DLOG_INFO, "[%s:%d]" " >>> (tid:%ld) " \
-            format "\n", __FILENAME__, __LINE__, syscall(SYS_gettid), ##__VA_ARGS__);                         \
-    }                                                                                                     \
+#define MSPROF_LOGI(format, ...) do {                                                                           \
+    if (SlogPlugin::instance()->MsprofCheckLogLevelForC(MSPROF_MODULE_NAME,                                     \
+        Collector::Dvvp::Plugin::DLOG_INFO) == 1) {                                                             \
+        SlogPlugin::instance()->MsprofDlogInnerForC(MSPROF_MODULE_NAME, Collector::Dvvp::Plugin::DLOG_INFO,     \
+        "[%s:%d]" " >>> (tid:%ld) " format "\n", FILENAME, __LINE__, syscall(SYS_gettid), ##__VA_ARGS__);       \
+    }                                                                                                           \
 } while (0)
 
-#define MSPROF_LOGW(format, ...) do {                                                                        \
-    if (SlogPlugin::instance()->MsprofCheckLogLevelForC(MSPROF_MODULE_NAME, Collector::Dvvp::Plugin::DLOG_WARN) == 1) {                 \
-        SlogPlugin::instance()->MsprofDlogInnerForC(MSPROF_MODULE_NAME, Collector::Dvvp::Plugin::DLOG_WARN, "[%s:%d]" " >>> (tid:%ld) " \
-            format "\n", __FILENAME__, __LINE__, syscall(SYS_gettid), ##__VA_ARGS__);                            \
-    }                                                                                                        \
+#define MSPROF_LOGW(format, ...) do {                                                                           \
+    if (SlogPlugin::instance()->MsprofCheckLogLevelForC(MSPROF_MODULE_NAME,                                     \
+        Collector::Dvvp::Plugin::DLOG_WARN) == 1) {                                                             \
+        SlogPlugin::instance()->MsprofDlogInnerForC(MSPROF_MODULE_NAME, Collector::Dvvp::Plugin::DLOG_WARN,     \
+        "[%s:%d]" " >>> (tid:%ld) " format "\n", FILENAME, __LINE__, syscall(SYS_gettid), ##__VA_ARGS__);       \
+    }                                                                                                           \
 } while (0)
 
-#define MSPROF_LOGE(format, ...) do {                                                                      \
-    if (SlogPlugin::instance()->MsprofCheckLogLevelForC(MSPROF_MODULE_NAME, Collector::Dvvp::Plugin::DLOG_ERROR) == 1) {                 \
-        SlogPlugin::instance()->MsprofDlogInnerForC(MSPROF_MODULE_NAME, Collector::Dvvp::Plugin::DLOG_ERROR, "[%s:%d]" " >>> (tid:%ld) " \
-            format "\n", __FILENAME__, __LINE__, syscall(SYS_gettid), ##__VA_ARGS__);                          \
-    }                                                                                                      \
+#define MSPROF_LOGE(format, ...) do {                                                                           \
+    if (SlogPlugin::instance()->MsprofCheckLogLevelForC(MSPROF_MODULE_NAME,                                     \
+        Collector::Dvvp::Plugin::DLOG_ERROR) == 1) {                                                            \
+        SlogPlugin::instance()->MsprofDlogInnerForC(MSPROF_MODULE_NAME, Collector::Dvvp::Plugin::DLOG_ERROR,    \
+        "[%s:%d]" " >>> (tid:%ld) " format "\n", FILENAME, __LINE__, syscall(SYS_gettid), ##__VA_ARGS__);       \
+    }                                                                                                           \
 } while (0)
 
-#define MSPROF_EVENT(format, ...) do {                                                                     \
-    if (SlogPlugin::instance()->MsprofCheckLogLevelForC(MSPROF_MODULE_NAME, Collector::Dvvp::Plugin::DLOG_EVENT) == 1) {                 \
-        SlogPlugin::instance()->MsprofDlogInnerForC(MSPROF_MODULE_NAME, Collector::Dvvp::Plugin::DLOG_EVENT, "[%s:%d]" " >>> (tid:%ld) " \
-            format "\n", __FILENAME__, __LINE__, syscall(SYS_gettid), ##__VA_ARGS__);                          \
-    }                                                                                                      \
+#define MSPROF_EVENT(format, ...) do {                                                                          \
+    if (SlogPlugin::instance()->MsprofCheckLogLevelForC(MSPROF_MODULE_NAME,                                     \
+        Collector::Dvvp::Plugin::DLOG_EVENT) == 1) {                                                            \
+        SlogPlugin::instance()->MsprofDlogInnerForC(MSPROF_MODULE_NAME, Collector::Dvvp::Plugin::DLOG_EVENT,    \
+        "[%s:%d]" " >>> (tid:%ld) " format "\n", FILENAME, __LINE__, syscall(SYS_gettid), ##__VA_ARGS__);       \
+    }                                                                                                           \
 } while (0)
 
 #endif  // MSPROF_LOG_H

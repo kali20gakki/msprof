@@ -7,6 +7,9 @@
 #ifndef PROF_API_H
 #define PROF_API_H
 
+#include "stddef.h"
+#include "stdint.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif // __cplusplus
@@ -16,9 +19,6 @@ extern "C" {
 #else
 #define MSVP_PROF_API __attribute__((visibility("default")))
 #endif
-
-#include "stddef.h"
-#include "stdint.h"
 
 /**
  * @name  profCtrlCallbackType

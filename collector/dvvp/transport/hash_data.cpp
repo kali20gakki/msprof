@@ -67,7 +67,7 @@ bool HashData::IsInit() const
     return inited_;
 }
 
-uint64_t HashData::DoubleHash(std::string &data) const
+uint64_t HashData::DoubleHash(const std::string &data) const
 {
     static const uint32_t uint32Bits = 32;  // the number of unsigned int bits
     uint32_t prime[2] = {29, 131};  // hash step size,

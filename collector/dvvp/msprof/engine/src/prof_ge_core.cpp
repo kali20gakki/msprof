@@ -32,7 +32,7 @@ using namespace Collector::Dvvp::Plugin;
 using namespace Analysis::Dvvp::ProfilerCommon;
 static std::mutex g_aclgraphProfMutex;
 
-Status aclgrphProfGraphSubscribe(const uint32_t graphId, const aclprofSubscribeConfig *profSubscribeConfig)
+int aclgrphProfGraphSubscribe(const uint32_t graphId, const aclprofSubscribeConfig *profSubscribeConfig)
 {
     if (Platform::instance()->PlatformIsHelperHostSide()) {
         MSPROF_LOGE("aclgrph api not support in helper");
@@ -88,7 +88,7 @@ Status aclgrphProfGraphSubscribe(const uint32_t graphId, const aclprofSubscribeC
     return ACL_SUCCESS;
 }
 
-Status aclgrphProfGraphUnSubscribe(const uint32_t graphId)
+int aclgrphProfGraphUnSubscribe(const uint32_t graphId)
 {
     if (Platform::instance()->PlatformIsHelperHostSide()) {
         MSPROF_LOGE("aclgrph api not support in helper");
@@ -354,7 +354,7 @@ Status aclgrphProfDestroyConfig(ACL_GRPH_PROF_CONFIG_PTR profilerConfig)
     return SUCCESS;
 }
 
-static bool PreCheckGraphProfConfig(ACL_GRPH_PROF_CONFIG_PTR profilerConfig)
+static bool PreCheckGraphProfConfig(const ACL_GRPH_PROF_CONFIG_PTR profilerConfig)
 {
     if (profilerConfig == nullptr) {
         MSPROF_LOGE("Param profilerConfig is nullptr");

@@ -148,7 +148,37 @@ TEST_F(INPUT_PARSER_UTEST, CheckOutputValid) {
     EXPECT_EQ(PROFILING_SUCCESS, parser.CheckOutputValid(cmdInfo));
 }
 
-TEST_F(INPUT_PARSER_UTEST, CheckAppValid) {
+TEST_F(INPUT_PARSER_UTEST, CheckStorageLimitValid)
+{
+    GlobalMockObject::verify();
+    InputParser parser = InputParser();
+    struct MsprofCmdInfo cmdInfo = { {nullptr} };
+
+    EXPECT_EQ(PROFILING_SUCCESS, parser.CheckStorageLimitValid(cmdInfo));
+    cmdInfo.args[ARGS_STORAGE_LIMIT] = "";
+    EXPECT_EQ(PROFILING_FAILED, parser.CheckStorageLimitValid(cmdInfo));
+    cmdInfo.args[ARGS_STORAGE_LIMIT] = "1";
+    EXPECT_EQ(PROFILING_FAILED, parser.CheckStorageLimitValid(cmdInfo));
+    cmdInfo.args[ARGS_STORAGE_LIMIT] = "200MB";
+    EXPECT_EQ(PROFILING_SUCCESS, parser.CheckStorageLimitValid(cmdInfo));
+}
+
+TEST_F(INPUT_PARSER_UTEST, GetAppParam)
+{
+    GlobalMockObject::verify();
+    InputParser parser = InputParser();
+    struct MsprofCmdInfo cmdInfo = { {nullptr} };
+
+    std::string appParams1;
+    EXPECT_EQ(PROFILING_FAILED, parser.GetAppParam(appParams1));
+    std::string appParams2 = " bash xx.sh";
+    EXPECT_EQ(PROFILING_FAILED, parser.GetAppParam(appParams2));
+    std::string appParams3 = "bash xx.sh";
+    EXPECT_EQ(PROFILING_FAILED, parser.GetAppParam(appParams3));
+}
+
+TEST_F(INPUT_PARSER_UTEST, CheckAppValid)
+{
     GlobalMockObject::verify();
     InputParser parser = InputParser();
     struct MsprofCmdInfo cmdInfo = { {nullptr} };
