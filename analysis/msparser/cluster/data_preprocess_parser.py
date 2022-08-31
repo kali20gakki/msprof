@@ -128,7 +128,7 @@ class DataPreprocessParser:
         :return: None
         """
         logging.info(self.FILE_NAME, "Data queue query complete, start to storage data into json file")
-        file_name = 'data_queue_{0}.json'.format(self.rank_id)
+        file_name = 'data_preparation_{0}.json'.format(self.rank_id)
         file_path = self.get_cluster_path(file_name)
         check_file_writable(file_path)
         if os.path.exists(file_path):
@@ -136,7 +136,6 @@ class DataPreprocessParser:
         try:
             with os.fdopen(os.open(file_path, Constant.WRITE_FLAGS,
                                    Constant.WRITE_MODES), "w") as _file:
-                os.chmod(file_path, NumberConstant.FILE_AUTHORITY)
                 _file.write(json.dumps(json_data))
         except (OSError, SystemError, RuntimeError, TypeError):
             logging.error(self.FILE_NAME,
@@ -151,7 +150,8 @@ class DataPreprocessParser:
                 os.makedirs(query_path)
             except OSError:
                 logging.error(self.FILE_NAME,
-                              "Storing data failed, you may not have the permission to write files in the current path.")
+                              "Storing data failed, "
+                              "you may not have the permission to write files in the current path.")
         return os.path.realpath(os.path.join(query_path, file_name))
 
     def process(self: any) -> None:
