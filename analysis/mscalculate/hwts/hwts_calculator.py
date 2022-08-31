@@ -17,7 +17,6 @@ from common_func.constant import Constant
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.msprof_iteration import MsprofIteration
 from common_func.msprof_step import MsprofStep
-from common_func.ms_constant.number_constant import NumberConstant
 from common_func.path_manager import PathManager
 from common_func.utils import Utils
 from common_func.batch_counter import BatchCounter
@@ -26,7 +25,6 @@ from framework.offset_calculator import FileCalculator
 from framework.offset_calculator import OffsetCalculator
 from msmodel.iter_rec.iter_rec_model import HwtsIterModel
 from msmodel.task_time.hwts_log_model import HwtsLogModel
-from msmodel.ai_cpu.ai_cpu_model import AiCpuModel
 from mscalculate.interface.icalculator import ICalculator
 from mscalculate.ts_task.ai_cpu.aicpu_from_ts_collector import AICpuFromTsCollector
 from profiling_bean.prof_enum.data_tag import DataTag
@@ -40,6 +38,7 @@ class HwtsCalculator(ICalculator, MsMultiProcess):
     # Tags for differnt HWTS log type.
     HWTS_TASK_START = 0
     HWTS_TASK_END = 1
+    HWTS_TASK_TYPE = 2
     HWTS_LOG_SIZE = 64
     HWTS_MAX_CNT = 16
     TASK_TIME_COMPLETE_INDEX = 3
@@ -50,7 +49,7 @@ class HwtsCalculator(ICalculator, MsMultiProcess):
         self._project_path = sample_config.get(StrConstant.SAMPLE_CONFIG_PROJECT_PATH)
         self._file_list = file_list.get(DataTag.HWTS, [])
         self._hwts_log_model = HwtsLogModel(self._project_path)
-        self._aicpu_model = AiCpuModel(self._project_path, [DBNameConstant.TABLE_AI_CPU_FROM_TS])
+        self._aicpu_collector = AICpuFromTsCollector(self._project_path)
         self._iter_model = HwtsIterModel(self._project_path)
         self._log_data = []
         self._file_list.sort(key=lambda x: int(x.split("_")[-1]))
@@ -79,28 +78,6 @@ class HwtsCalculator(ICalculator, MsMultiProcess):
             self._hwts_log_model.flush(hwts_task_with_batch, DBNameConstant.TABLE_HWTS_TASK_TIME)
             self._hwts_log_model.finalize()
 
-            if not ChipManager().is_chip_v2():
-                self._collect_aicpu_data(hwts_task_with_batch)
-
-    def _collect_aicpu_data(self: any, hwts_task_with_batch: list) -> None:
-        iter_id = NumberConstant.INVALID_ITER_ID
-        if not ProfilingScene().is_operator():
-            iter_range = MsprofIteration(self._project_path). \
-                get_iter_id_by_index_id(self._sample_config.get("iter_id"), self._sample_config.get("model_id"))
-            if len(iter_range) >= 2:
-                # if not chip2, there is no mix operator and graph
-                iter_id = iter_range[1]
-
-        aicpu_collector = AICpuFromTsCollector(self._project_path)
-
-        for stream_id, task_id, nano_start, nano_end, _, _, batch_id in hwts_task_with_batch:
-            aicpu_feature = [stream_id, task_id,
-                             nano_start / NumberConstant.MS_TO_NS,
-                             nano_end / NumberConstant.MS_TO_NS,
-                             batch_id, iter_id]
-            aicpu_collector.filter_aicpu(aicpu_feature)
-        aicpu_collector.save_aicpu()
-
     def ms_run(self: any) -> None:
         """
         entrance for calculating hwts
@@ -121,28 +98,40 @@ class HwtsCalculator(ICalculator, MsMultiProcess):
             task_value = prep.get(index, {})
             task_satrt_list = task_value.get(self.HWTS_TASK_START, [])
             task_end_list = task_value.get(self.HWTS_TASK_END, [])
-            if self.HWTS_TASK_START == task.task_type:
+            task_type_list = task_value.get(self.HWTS_TASK_TYPE, [])
+            if self.HWTS_TASK_START == task.sys_tag:
                 if len(task_satrt_list) > len(task_end_list):
                     task_satrt_list.pop()
                     logging.warning("stream id: %s, task id: %s is no end task, index of the stream and task is %s",
                                     task.stream_id, task.task_id, str(len(task_satrt_list)))
                 task_satrt_list.append(task.sys_cnt)
-            elif self.HWTS_TASK_END == task.task_type:
+            elif self.HWTS_TASK_END == task.sys_tag:
                 if len(task_satrt_list) == len(task_end_list):
                     continue
                 task_end_list.append(task.sys_cnt)
+                task_type_list.append(task.task_type)
             else:
-                logging.error("invalid task type of hwts: %s", task.task_type)
-            task_value.update({self.HWTS_TASK_START: task_satrt_list, self.HWTS_TASK_END: task_end_list})
+                logging.error("invalid task type of hwts: %s", task.sys_tag)
+            task_value.update({self.HWTS_TASK_START: task_satrt_list,
+                               self.HWTS_TASK_END: task_end_list,
+                               self.HWTS_TASK_TYPE: task_type_list})
             prep.update({index: task_value})
         train_data = []
 
         for index in prep:
             _index_value = prep.get(index)
             while _index_value.get(self.HWTS_TASK_START) and _index_value.get(self.HWTS_TASK_END):
-                train_data.append(tuple(list(index.split(",")) + [
+                data_info = tuple(list(index.split(",")) + [
                     _index_value[self.HWTS_TASK_START].pop(0),
-                    _index_value[self.HWTS_TASK_END].pop(0)]))
+                    _index_value[self.HWTS_TASK_END].pop(0)])
+
+                train_data.append(data_info)
+
+                if not ChipManager().is_chip_v2():
+                    self._aicpu_collector.filter_aicpu(data_info + (_index_value[self.HWTS_TASK_TYPE].pop(0),))
+
+        if not ChipManager().is_chip_v2():
+            self._aicpu_collector.save_aicpu()
         return sorted(train_data, key=lambda data: data[self.TASK_TIME_COMPLETE_INDEX])
 
     def _parse_by_iter(self: any) -> None:
