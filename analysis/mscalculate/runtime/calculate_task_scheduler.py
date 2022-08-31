@@ -96,14 +96,14 @@ class CalculateTaskScheduler:
             self.index_id, self.model_id, NumberConstant.DEFAULT_BATCH_ID) for task_data in cal_task_data]
         return task_time
 
-    def _collect_aicpu(self: any, task_time_list: list) -> None:
+    def _collect_aicpu(self: any, task_time: list) -> None:
         aicpu_collector = AICpuFromTsCollector(self.project_path)
-        for task_time in task_time_list:
-            task_id = task_time[5]
-            stream_id = task_time[6]
-            start = task_time[9]
-            end = task_time[10]
-            task_type = task_time[4]
+        for data in task_time:
+            task_id = data[5]
+            stream_id = data[6]
+            start = data[9]
+            end = data[10]
+            task_type = data[4]
 
             aicpu_data = (stream_id, task_id, start, end, task_type)
             aicpu_collector.filter_aicpu(aicpu_data)
