@@ -98,6 +98,7 @@ public:
     int ProfAclFinalize();
     int ProfAclGetDataTypeConfig(const uint32_t devId, uint64_t& dataTypeConfig);
     void HandleResponse(const uint32_t devId);
+    uint64_t GetDataTypeConfigFromParams();
 
     // subscribe
     uint64_t ProfAclGetDataTypeConfig(PROF_SUB_CONF_CONST_PTR profSubscribeConfig);
