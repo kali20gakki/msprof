@@ -105,10 +105,10 @@ class ClusterParallelParser:
         if not os.path.exists(query_path):
             try:
                 os.makedirs(query_path)
-                os.chmod(query_path, NumberConstant.DIR_AUTHORITY)
             except OSError:
                 error(MsProfCommonConstant.COMMON_FILE_NAME,
                       "Storing data failed, you may not have the permission to write files in the current path.")
+            os.chmod(query_path, NumberConstant.DIR_AUTHORITY)
         output_file_path = PathManager.get_query_result_path(self.collection_path, output_file_name)
         try:
             with os.fdopen(os.open(output_file_path, Constant.WRITE_FLAGS,
