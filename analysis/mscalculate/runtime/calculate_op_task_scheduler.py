@@ -108,17 +108,16 @@ class CalculateOpTaskScheduler:
         return task_time
 
     def _collect_aicpu(self: any, task_time_list: list) -> None:
-
         aicpu_collector = AICpuFromTsCollector(self.project_path)
 
         for task_time in task_time_list:
             task_id = task_time[5]
             stream_id = task_time[6]
-            start = task_time[9] / NumberConstant.MS_TO_NS
-            end = task_time[10] / NumberConstant.MS_TO_NS
-            batch_id = task_time[12]
+            start = task_time[9]
+            end = task_time[10]
+            task_type = task_time[4]
 
-            aicpu_feature = [stream_id, task_id, start, end, batch_id, NumberConstant.INVALID_ITER_ID]
+            aicpu_feature = (stream_id, task_id, start, end, task_type)
             aicpu_collector.filter_aicpu(aicpu_feature)
         aicpu_collector.save_aicpu()
 

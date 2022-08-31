@@ -9,14 +9,10 @@ from common_func.ms_multi_process import MsMultiProcess
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.db_name_constant import DBNameConstant
-from common_func.iter_recorder import IterRecorder
-from common_func.batch_counter import BatchCounter
 from common_func.info_conf_reader import InfoConfReader
-from common_func.constant import Constant
 from msmodel.step_trace.ts_track_model import TsTrackModel
 from mscalculate.ts_task.task_state_handler import TaskStateHandler
 from mscalculate.ts_task.ai_cpu.aicpu_from_ts_collector import AICpuFromTsCollector
-from analyzer.scene_base.profiling_scene import ProfilingScene
 
 
 class AICpuFromTsCalculator(MsMultiProcess):
@@ -31,9 +27,6 @@ class AICpuFromTsCalculator(MsMultiProcess):
                                    DBNameConstant.DB_STEP_TRACE,
                                    [DBNameConstant.TABLE_TASK_TYPE])
         self._aicpu_collector = AICpuFromTsCollector(self._project_path)
-        self._iter_recorder = IterRecorder(self._project_path)
-        self._batch_counter = BatchCounter(self._project_path)
-        self._batch_counter.init(Constant.TASK_TYPE_AI_CPU)
 
     @staticmethod
     def state_to_timeline(ai_cpu_with_state: list) -> list:
@@ -72,30 +65,10 @@ class AICpuFromTsCalculator(MsMultiProcess):
 
         aicpu_timeline_list = self.state_to_timeline(ai_cpu_with_state)
 
-        aicpu_list = []
         for aicpu_timeline in aicpu_timeline_list:
-            aicpu_list.append([aicpu_timeline.stream_id,
+            aicpu_feature = (aicpu_timeline.stream_id,
                                aicpu_timeline.task_id,
-                               InfoConfReader().time_from_syscnt(aicpu_timeline.start,
-                               NumberConstant.MILLI_SECOND),
-                               InfoConfReader().time_from_syscnt(aicpu_timeline.end,
-                               NumberConstant.MILLI_SECOND),
-                               self.calculate_batch_id(aicpu_timeline.stream_id,
-                               aicpu_timeline.task_id, aicpu_timeline.end)])
-
-        self._aicpu_collector.aicpu_list = aicpu_list
-
-    def calculate_batch_id(self: any, stream_id: int, task_id: int, syscnt: int) -> int:
-        """
-        calculate batch id
-        :param stream_id: stream id
-        :param task_id: task id
-        :param syscnt: syscnt
-        :return: batch id
-        """
-        if ProfilingScene().is_operator():
-            batch_id = self._batch_counter.calculate_batch(stream_id, task_id)
-        else:
-            self._iter_recorder.set_current_iter_id(syscnt)
-            batch_id = self._batch_counter.calculate_batch(stream_id, task_id, self._iter_recorder.current_iter_id)
-        return batch_id
+                               aicpu_timeline.start,
+                               aicpu_timeline.end,
+                               AICpuFromTsCollector.AI_CPU_TYPE)
+            self._aicpu_collector.filter_aicpu(aicpu_feature)

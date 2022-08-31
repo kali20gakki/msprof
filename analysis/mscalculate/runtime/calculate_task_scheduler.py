@@ -97,19 +97,15 @@ class CalculateTaskScheduler:
         return task_time
 
     def _collect_aicpu(self: any, task_time_list: list) -> None:
-        iter_range = MsprofIteration(self.project_path). \
-            get_iter_id_by_index_id(self.index_id, self.model_id)
-        iter_id = iter_range[1] if len(iter_range) >= 2 else NumberConstant.INVALID_ITER_ID
         aicpu_collector = AICpuFromTsCollector(self.project_path)
-
         for task_time in task_time_list:
             task_id = task_time[5]
             stream_id = task_time[6]
-            start = task_time[9] / NumberConstant.MS_TO_NS
-            end = task_time[10] / NumberConstant.MS_TO_NS
-            batch_id = task_time[13]
+            start = task_time[9]
+            end = task_time[10]
+            task_type = task_time[4]
 
-            aicpu_data = [stream_id, task_id, start, end, batch_id, iter_id]
+            aicpu_data = (stream_id, task_id, start, end, task_type)
             aicpu_collector.filter_aicpu(aicpu_data)
         aicpu_collector.save_aicpu()
 
