@@ -14,6 +14,7 @@
 #include "message/prof_params.h"
 #include "platform/platform.h"
 #include "param_validation.h"
+#include "utils.h"
 
 namespace Collector {
 namespace Dvvp {
@@ -878,6 +879,9 @@ std::string AclApiParamAdapter::DevIdToStr(uint32_t devNum, const uint32_t *devL
     std::string devStr;
     bool flag = false;
     for (uint32_t i = 0; i < devNum; i++) {
+        if (devList[i] == DEFAULT_HOST_ID) {
+            continue; // except Host id
+        }
         if (!flag) {
             flag = true;
             devStr += std::to_string(devList[i]);
