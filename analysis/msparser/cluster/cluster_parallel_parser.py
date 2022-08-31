@@ -21,14 +21,13 @@ class ClusterParallelParser:
     """
         cluster parallel data analysis
     """
-    TYPE_0_MESSAGE = "The communication time ratio of all NPU devices is good and below the threshold of 10%."
-    TYPE_1_MESSAGE = "The communication time ratio of all NPU devices exceeds the threshold of 10%. " \
-                     "You can try to set the all_reduce_fusion_config parameter and adjust the gradient " \
-                     "allreduce fusion by referring to the MindSpore distributed parallel tutorial."
-    TYPE_2_MESSAGE = "The communication time ratio of some NPU devices exceeds the threshold of 10%." \
-                     "You need to check whether there are slow nodes or slow links, then you can try to set " \
-                     "the all_reduce_fusion_config parameter and adjust the gradient allreduce fusion " \
-                     "by referring to the MindSpore distributed parallel tutorial."
+    THRESHOLD_VALUE = 0.1
+    TYPE_0_MESSAGE = "The communication time ratio of all NPU cards is good and " \
+                     "below the threshold of %s." % format(THRESHOLD_VALUE, '.0%')
+    TYPE_1_MESSAGE = "The communication time ratio of all NPU cards exceeds " \
+                     "the threshold of %s." % format(THRESHOLD_VALUE, '.0%')
+    TYPE_2_MESSAGE = "The communication time ratio of some NPU cards exceeds the threshold of %s. " \
+                     "You need to check whether there are slow nodes or slow links." % format(THRESHOLD_VALUE, '.0%')
 
     def __init__(self, params: dict) -> None:
         self.collection_path = params["collection_path"]
@@ -40,7 +39,7 @@ class ClusterParallelParser:
         self._parallel_analysis()
         self._storage_parallel_analysis_result()
 
-    def _get_rank_ids(self: any) -> any:
+    def _get_device_and_rank_ids(self: any) -> any:
         if not os.path.exists(PathManager.get_db_path(self.collection_path, DBNameConstant.DB_CLUSTER_RANK)):
             error(MsProfCommonConstant.COMMON_FILE_NAME, "Cannot find the cluster_rank.db or Permission denied!")
             return Constant.DEFAULT_INVALID_VALUE
@@ -48,37 +47,44 @@ class ClusterParallelParser:
             error(MsProfCommonConstant.COMMON_FILE_NAME, "Cannot find the cluster_step_trace.db or Permission denied!")
             return Constant.DEFAULT_INVALID_VALUE
         with self._cluster_info_model as _model:
-            return _model.get_all_rank_id()
+            return _model.get_device_and_rank_ids()
 
-    def _get_parallel_data(self: any, rank_ids: set) -> any:
+    def _get_parallel_data(self: any, device_and_rank_ids: list) -> any:
         parallel_data = []
         with self._cluster_communication_model as _model:
-            for rank_id in rank_ids:
-                communication_time_ratio = _model.get_communication_time_ratio(rank_id)
+            for device_and_rank in device_and_rank_ids:
+                if device_and_rank[1] == Constant.NA:
+                    id_name = 'device_id'
+                    id_value = device_and_rank[0]
+                else:
+                    id_name = 'rank_id'
+                    id_value = device_and_rank[1]
+                communication_time_ratio = _model.get_communication_time_ratio(id_value)
                 if communication_time_ratio == Constant.DEFAULT_INVALID_VALUE or communication_time_ratio is None:
                     error(MsProfCommonConstant.COMMON_FILE_NAME, "Invalid communication_time_ratio!")
                     return Constant.DEFAULT_INVALID_VALUE
-                if communication_time_ratio < 0.1:
+                if communication_time_ratio < self.THRESHOLD_VALUE:
                     continue
-                rank_communication_ratio = {}
-                rank_communication_ratio.setdefault("rank_id", rank_id)
-                rank_communication_ratio.setdefault("communication_time_ratio", communication_time_ratio)
-                parallel_data.append(rank_communication_ratio)
+                parallel_analysis_value = {}
+                parallel_analysis_value.setdefault(id_name, id_value)
+                parallel_analysis_value.setdefault("communication_time_ratio", communication_time_ratio)
+                parallel_data.append(parallel_analysis_value)
         if parallel_data:
             parallel_data.sort(key=lambda x: x["communication_time_ratio"], reverse=True)
         return parallel_data
 
-    def _parallel_analysis(self: any, ):
+    def _parallel_analysis(self: any) -> None:
         self.parallel_analysis_result["type"] = Constant.DEFAULT_INVALID_VALUE
         self.parallel_analysis_result["value"] = []
         self.parallel_analysis_result["message"] = "Invalid parallel analysis data!"
-        rank_ids = self._get_rank_ids()
-        if rank_ids == Constant.DEFAULT_INVALID_VALUE:
+        device_and_rank_ids = self._get_device_and_rank_ids()
+        if device_and_rank_ids == Constant.DEFAULT_INVALID_VALUE:
             return
-        if not rank_ids:
-            error(MsProfCommonConstant.COMMON_FILE_NAME, "Cannot get the rank_ids, please check the table ClusterRank!")
+        if not device_and_rank_ids:
+            error(MsProfCommonConstant.COMMON_FILE_NAME, "Cannot get the device or rank ids, "
+                                                         "please check the table ClusterRank!")
             return
-        parallel_data = self._get_parallel_data(rank_ids)
+        parallel_data = self._get_parallel_data(device_and_rank_ids)
         if parallel_data == Constant.DEFAULT_INVALID_VALUE:
             return
         elif not parallel_data:
@@ -86,13 +92,12 @@ class ClusterParallelParser:
             self.parallel_analysis_result["message"] = self.TYPE_0_MESSAGE
             return
         self.parallel_analysis_result["value"] = parallel_data
-        if len(parallel_data) == len(rank_ids):
+        if len(parallel_data) == len(device_and_rank_ids):
             self.parallel_analysis_result["type"] = 1
             self.parallel_analysis_result["message"] = self.TYPE_1_MESSAGE
         else:
             self.parallel_analysis_result["type"] = 2
             self.parallel_analysis_result["message"] = self.TYPE_2_MESSAGE
-        return
 
     def _storage_parallel_analysis_result(self: any) -> None:
         output_file_name = "cluster_parallel_analysis.json"
@@ -100,6 +105,7 @@ class ClusterParallelParser:
         if not os.path.exists(query_path):
             try:
                 os.makedirs(query_path)
+                os.chmod(query_path, NumberConstant.DIR_AUTHORITY)
             except OSError:
                 error(MsProfCommonConstant.COMMON_FILE_NAME,
                       "Storing data failed, you may not have the permission to write files in the current path.")
