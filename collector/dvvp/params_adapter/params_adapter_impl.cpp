@@ -311,7 +311,6 @@ int MsprofParamAdapter::GetParamFromInputCfg(std::unordered_map<int, std::pair<M
     ret = SetModeDefaultParams(msprofMode_);
         CmdLog::instance()->CmdErrorLog("msprof running mode invalid.");
         return PROFILING_FAILED;
-    }
     ret = TransToParam(paramContainer_, params_);
     if (ret != PROFILING_SUCCESS) {
         return PROFILING_FAILED;
@@ -349,6 +348,8 @@ int MsprofParamAdapter::SetModeDefaultParams(MsprofMode modeType)
 }
 
 void MsprofParamAdapter::CreateCfgMap()
+{
+    std::unordered_map<int, InputCfg>({ 
         {ARGS_OUTPUT, INPUT_CFG_COM_OUTPUT},
         {ARGS_ENVIRONMENT, INPUT_CFG_MSPROF_ENVIRONMENT},
         {ARGS_AIC_MODE, INPUT_CFG_COM_AIC_MODE},
