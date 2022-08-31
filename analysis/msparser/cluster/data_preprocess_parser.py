@@ -9,8 +9,7 @@ import logging
 import os
 from collections import OrderedDict
 
-from common_func.common import error, warn, print_info
-from common_func.config_mgr import ConfigMgr
+from common_func.common import print_msg
 from common_func.constant import Constant
 from common_func.data_check_manager import DataCheckManager
 from common_func.db_manager import DBManager, ClassRowType
@@ -72,7 +71,7 @@ class DataPreprocessParser:
         :return: None
         """
         if not self.check_id_valid():
-            logging.warning(self.FILE_NAME, "Parameter settings are incorrect, please check input: --id. ")
+            logging.warning("Parameter settings are incorrect, please check input: --id. ")
             return
         self._query_data()
 
@@ -97,8 +96,8 @@ class DataPreprocessParser:
         data_queue_data = self.get_data_queue_data()
         step_trace_data = self.get_step_trace_data()
         if not (data_queue_data and step_trace_data):
-            logging.error(self.FILE_NAME, "Query data failed, maybe import command has not run successfully yet, "
-                                          "please run import command first")
+            logging.error("Query data failed, maybe import command has not run successfully yet, "
+                          "please run import command first")
             return
         json_data = self.calculate_queue_data(data_queue_data, step_trace_data)
         self.storage_data(json_data)
@@ -127,7 +126,7 @@ class DataPreprocessParser:
         save data into file
         :return: None
         """
-        logging.info(self.FILE_NAME, "Data queue query complete, start to storage data into json file")
+        logging.info("Data queue query complete, start to storage data into json file")
         file_name = 'data_preparation_{0}.json'.format(self.rank_id)
         file_path = self.get_cluster_path(file_name)
         check_file_writable(file_path)
@@ -138,10 +137,9 @@ class DataPreprocessParser:
                                    Constant.WRITE_MODES), "w") as _file:
                 _file.write(json.dumps(json_data))
         except (OSError, SystemError, RuntimeError, TypeError):
-            logging.error(self.FILE_NAME,
-                          "Storing data failed, you may not have the permission to write files in the current path.")
+            logging.error("Storing data failed, you may not have the permission to write files in the current path.")
         else:
-            print_info({"status": 0, "info": "", "data": file_path})
+            print_msg({"status": 0, "info": "", "data": file_path})
 
     def get_cluster_path(self: any, file_name: str) -> str:
         query_path = os.path.realpath(os.path.join(self.collection_path, '..', '..', self.QUERY_FILE_NAME))
@@ -149,8 +147,7 @@ class DataPreprocessParser:
             try:
                 os.makedirs(query_path)
             except OSError:
-                logging.error(self.FILE_NAME,
-                              "Storing data failed, "
+                logging.error("Storing data failed, "
                               "you may not have the permission to write files in the current path.")
         return os.path.realpath(os.path.join(query_path, file_name))
 
@@ -160,8 +157,7 @@ class DataPreprocessParser:
         :return: None or dict
         """
         if self.rank_id is None:
-            logging.warning(self.FILE_NAME,
-                            "To query data queue,  id is required")
+            logging.warning("To query data queue,  id is required")
             return
         self.calculate()
 
@@ -171,5 +167,4 @@ class DataPreprocessParser:
             InfoConfReader().load_info(self.collection_path)
             self.query_data_queue_data()
         else:
-            logging.warning(self.FILE_NAME,
-                            'Invalid parsing dir("%s"), there is no PROF file in this path' % self.collection_path)
+            logging.warning('Invalid parsing dir("%s"), there is no PROF file in this path' % self.collection_path)
