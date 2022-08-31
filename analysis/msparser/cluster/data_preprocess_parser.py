@@ -5,6 +5,7 @@ This script is used to parse step trace data for cluster.
 Copyright Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
 """
 import json
+import logging
 import os
 from collections import OrderedDict
 
@@ -39,17 +40,19 @@ class DataPreprocessParser:
     @staticmethod
     def calculate_queue_data(queue_list: list, trace_data: dict) -> dict:
         """
-        calculate fops data
+        calculate data queue
         :return: json data list
         """
-        total_info = {"step_count": len(trace_data.values()),
-                      "empty_queue": 0,
-                      "total_time": 0,
-                      "avg_time": 0}
+        total_info = {
+            "step_count": len(trace_data),
+            "empty_queue": 0,
+            "total_time": 0,
+            "avg_time": 0
+        }
         total_time = 0
         empty_queue = 0
         data_list = []
-        for data_index in range(len(trace_data)):
+        for data_index, data in enumerate(trace_data):
             if 2 * data_index + 1 > len(queue_list):
                 data_list.append({"step": data_index + 1, "duration": 0, "queue_size": 0})
                 continue
@@ -60,7 +63,7 @@ class DataPreprocessParser:
             data_list.append({"step": data_index + 1, "duration": duration, "queue_size": queue_size})
         total_info["empty_queue"] = empty_queue
         total_info["total_time"] = total_time
-        total_info["avg_time"] = round(total_time / len(trace_data), NumberConstant.DECIMAL_ACCURACY)
+        total_info["avg_time"] = round(total_time / len(trace_data), NumberConstant.ROUND_FOUR_DECIMAL)
         return {"total_info": total_info, "data_list": data_list}
 
     def calculate(self: any) -> None:
@@ -69,7 +72,7 @@ class DataPreprocessParser:
         :return: None
         """
         if not self.check_id_valid():
-            warn(self.FILE_NAME, "Parameter settings are incorrect, please check input: --id. ")
+            logging.warning(self.FILE_NAME, "Parameter settings are incorrect, please check input: --id. ")
             return
         self._query_data()
 
@@ -94,8 +97,8 @@ class DataPreprocessParser:
         data_queue_data = self.get_data_queue_data()
         step_trace_data = self.get_step_trace_data()
         if not (data_queue_data and step_trace_data):
-            error(self.FILE_NAME, "Query data failed, maybe import command has not run successfully yet, "
-                                  "please run import command first")
+            logging.error(self.FILE_NAME, "Query data failed, maybe import command has not run successfully yet, "
+                                          "please run import command first")
             return
         json_data = self.calculate_queue_data(data_queue_data, step_trace_data)
         self.storage_data(json_data)
@@ -124,7 +127,7 @@ class DataPreprocessParser:
         save data into file
         :return: None
         """
-        print_info(self.FILE_NAME, "Data queue query complete, start to storage data into json file")
+        logging.info(self.FILE_NAME, "Data queue query complete, start to storage data into json file")
         file_name = 'data_queue_{0}.json'.format(self.rank_id)
         file_path = self.get_cluster_path(file_name)
         check_file_writable(file_path)
@@ -136,10 +139,10 @@ class DataPreprocessParser:
                 os.chmod(file_path, NumberConstant.FILE_AUTHORITY)
                 _file.write(json.dumps(json_data))
         except (OSError, SystemError, RuntimeError, TypeError):
-            error(self.FILE_NAME,
-                  "Storing data failed, you may not have the permission to write files in the current path.")
+            logging.error(self.FILE_NAME,
+                          "Storing data failed, you may not have the permission to write files in the current path.")
         else:
-            print_info(self.FILE_NAME, "The data has stored successfully, file path: {}".format(file_path))
+            print_info({"status": 0, "info": "", "data": file_path})
 
     def get_cluster_path(self: any, file_name: str) -> str:
         query_path = os.path.realpath(os.path.join(self.collection_path, '..', '..', self.QUERY_FILE_NAME))
@@ -147,18 +150,18 @@ class DataPreprocessParser:
             try:
                 os.makedirs(query_path)
             except OSError:
-                error(self.FILE_NAME,
-                      "Storing data failed, you may not have the permission to write files in the current path.")
+                logging.error(self.FILE_NAME,
+                              "Storing data failed, you may not have the permission to write files in the current path.")
         return os.path.realpath(os.path.join(query_path, file_name))
 
     def process(self: any) -> None:
         """
-        entrance for calculating fops data
+        entrance for calculating data queue
         :return: None or dict
         """
         if self.rank_id is None:
-            warn(self.FILE_NAME,
-                 "To query data queue,  id is required")
+            logging.warning(self.FILE_NAME,
+                            "To query data queue,  id is required")
             return
         self.calculate()
 
@@ -168,5 +171,5 @@ class DataPreprocessParser:
             InfoConfReader().load_info(self.collection_path)
             self.query_data_queue_data()
         else:
-            warn(self.FILE_NAME,
-                 'Invalid parsing dir("%s"), there is no PROF file in this path' % self.collection_path)
+            logging.warning(self.FILE_NAME,
+                            'Invalid parsing dir("%s"), there is no PROF file in this path' % self.collection_path)

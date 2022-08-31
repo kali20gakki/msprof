@@ -1,8 +1,8 @@
 #!/usr/bin/python3
 # coding=utf-8
 """
-function: this script used to operate host queue data
-Copyright Huawei Technologies Co., Ltd. 2022. All rights reserved.
+function: this script used to operate data queue
+Copyright Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
 """
 
 from common_func.db_manager import DBManager
@@ -12,7 +12,7 @@ from msmodel.interface.parser_model import ParserModel
 
 class DataQueueModel(ParserModel):
     """
-    host queue model class
+    data queue model class
     """
 
     def __init__(self: any, result_dir: str, table_list: list) -> None:
@@ -31,7 +31,7 @@ class DataQueueModel(ParserModel):
     def flush(self: any, data_list: list) -> None:
         """
         insert data to table
-        :param data_list: host queue data
+        :param data_list: data queue
         :return:
         """
         self.insert_data_to_db(DBNameConstant.TABLE_DATA_QUEUE, data_list)
