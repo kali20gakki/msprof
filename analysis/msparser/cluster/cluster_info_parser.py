@@ -51,13 +51,13 @@ class ClusterInfoParser(IParser):
 
 
 class ClusterBasicInfo:
-    def __init__(self: any, result_path: str):
-        InfoConfReader().load_info(result_path)
-        self._is_host_profiling = InfoConfReader().is_host_profiling()
-        self._job_info = InfoConfReader().get_job_info()
-        self._device_id = InfoConfReader().get_device_id()
-        self._collection_time = InfoConfReader().get_collect_start_time()
-        self._rank_id = InfoConfReader().get_rank_id()
+    def __init__(self: any, collection_path: str):
+        self.collection_path = collection_path
+        self._is_host_profiling = Constant.NA
+        self._job_info = Constant.NA
+        self._device_id = Constant.NA
+        self._collection_time = Constant.NA
+        self._rank_id = Constant.NA
 
     @property
     def is_host_profiling(self: any) -> bool:
@@ -78,3 +78,11 @@ class ClusterBasicInfo:
     @property
     def rank_id(self: any) -> str:
         return self._rank_id
+
+    def init(self: any) -> None:
+        InfoConfReader().load_info(self.collection_path)
+        self._is_host_profiling = InfoConfReader().is_host_profiling()
+        self._job_info = InfoConfReader().get_job_info()
+        self._device_id = InfoConfReader().get_device_id()
+        self._collection_time = InfoConfReader().get_collect_start_time()
+        self._rank_id = InfoConfReader().get_rank_id()
