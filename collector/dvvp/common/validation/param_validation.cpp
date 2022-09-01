@@ -1032,11 +1032,7 @@ int ParamValidation::MsprofCheckAppValid(std::string &appParam) const
     std::vector<std::string> AppParamsList = Utils::Split(appParam, false, "", " ");
     std::string cmdParam = AppParamsList[0];
     if (!Utils::IsAppName(cmdParam)) {
-        if (MsprofCheckNotAppValid(AppParamsList, resultAppParam) != PROFLING_SUCCESS) {
-            return PROFILING_FAILED;
-        }
-        appParam = resultAppParam;
-        return PROFILING_SUCCESS;
+        return MsprofCheckNotAppValid(AppParamsList, resultAppParam);
     }
     std::string absolutePathApp = Utils::RelativePathToAbsolutePath(cmdParam);
     if (MsprofCheckAppParamValid(absolutePathApp) != PROFILING_SUCCESS) {
