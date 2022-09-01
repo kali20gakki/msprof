@@ -71,6 +71,7 @@ target_include_directories(client_utest PRIVATE
     ${MSPROF_SOURCE_DIR}/dvvp/adx/inc
     ${CMAKE_BINARY_DIR}/proto/profiler/
     ${MSPROF_SOURCE_DIR}/dvvp/depend/include/stub
+    ${MSPROF_SOURCE_DIR}/dvvp/driver/inc
 )
 
 target_compile_options(client_utest PRIVATE
