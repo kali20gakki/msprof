@@ -154,7 +154,7 @@ class ImportCommand:
         cluster_basic_info = ClusterBasicInfo(prof_sub_path)
         cluster_basic_info.init()
         if not cluster_basic_info.is_host_profiling:
-            _have_rank_id = False if cluster_basic_info.rank_id == Constant.NA else True
+            _have_rank_id = cluster_basic_info.rank_id != Constant.NA
             if self.have_rank_id.setdefault("have_rank_id", _have_rank_id) != _have_rank_id:
                 error(MsProfCommonConstant.COMMON_FILE_NAME, 'The dir(%s) contains unqualified '
                                                              'data!' % self.collection_path)
