@@ -138,6 +138,7 @@ void MsprofParamAdapter::SetDefaultParamsApp()
     if (paramContainer_[INPUT_CFG_COM_OUTPUT].empty()) {
         paramContainer_[INPUT_CFG_COM_OUTPUT] = appDir_;
     }
+    paramContainer_[INPUT_CFG_COM_OUTPUT] = Utils::RelativePathToAbsolutePath(paramContainer_[INPUT_CFG_COM_OUTPUT]);
     if (paramContainer_[INPUT_CFG_COM_ASCENDCL].empty()) {
         paramContainer_[INPUT_CFG_COM_ASCENDCL] = MSVP_PROF_ON;
     }
