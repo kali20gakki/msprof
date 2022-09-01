@@ -201,7 +201,7 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvTsFwStart) {
 
     EXPECT_EQ(PROFILING_FAILED, analysis::dvvp::driver::DrvTsFwStart(peripheralCfg, nullptr));
 
-    auto profileParams = std::make_shared<analysis::dvvp::message::ProfileParams>();
+    auto profileParams = std::make_shared<analysis::dvvp::driver::TsTsFwProfileConfigT>();
 
     profileParams->ts_timeline = "on";
     profileParams->ts_task_track = "on";

@@ -143,6 +143,7 @@ target_include_directories(msprofiler_utest PRIVATE
 	${MSPROF_SOURCE_DIR}/dvvp/streamio/client/include
 	${MSPROF_SOURCE_DIR}/dvvp/streamio/common/include
 	${MSPROF_SOURCE_DIR}/dvvp/streamio/server/include
+    ${MSPROF_SOURCE_DIR}/dvvp/params_adapter
 	${MSPROF_SOURCE_DIR}/dvvp
 	${MSPROF_SOURCE_DIR}/dvvp/task_handle/include
 	${MSPROF_SOURCE_DIR}/dvvp/driver/inc
