@@ -12,7 +12,7 @@ set(common_file
     ${MSPROF_SOURCE_DIR}/dvvp/common/config/config_manager.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/logger/cmd_log.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/depend/src/slog_plugin.cpp
-    ${MSPROF_SOURCE_DIR}/dvvp/depend/src/driver_plugin.cpp
+    # ${MSPROF_SOURCE_DIR}/dvvp/depend/src/driver_plugin.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform.cpp    
     ${MSPROF_SOURCE_DIR}/dvvp/driver/devmgmt/ai_drv_dev_api.cpp        
     ${MSPROF_SOURCE_DIR}/dvvp/driver/devmgmt/ai_drv_dev_api.cpp        
@@ -54,7 +54,15 @@ set(common_file
     ${MSPROF_SOURCE_DIR}/dvvp/depend/src/plugin_handle.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/params_adapter/params_adapter_impl.cpp
     ${TOP_DIR}/collector/dvvp/params_adapter/params_adapter.cpp
-    ${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter_cloud.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter_cloudv2.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter_dc.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter_interface.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter_lhisi.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter_mdc.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter_mini.cpp   
 )
 
 
