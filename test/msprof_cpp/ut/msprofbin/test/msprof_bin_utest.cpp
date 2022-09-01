@@ -71,85 +71,163 @@ TEST_F(MSPROF_BIN_UTEST, SetEnvList) {
     SetEnvList((const char**)envp, envpList);
 }
 
-TEST_F(MSPROF_BIN_UTEST, PlatformTypeInterfaceInit) {
+TEST_F(MSPROF_BIN_UTEST, PlatformTypeInterfaceModule) {
     GlobalMockObject::verify();
-    std::shared_ptr<PlatformAdapterInterface> PlatformTypeInterface;
-    MSVP_MAKE_SHARED0_BREAK(PlatformTypeInterface, PlatformAdapterInterface);
+    std::shared_ptr<PlatformAdapterInterface> PlatformTypeInterfaceMgr;
+    MSVP_MAKE_SHARED0_BREAK(PlatformTypeInterfaceMgr, PlatformAdapterInterface);
 
     SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params;
 
-    int ret = PlatformTypeInterface->Init(params);
+    int ret = PlatformTypeInterfaceMgr->Init(params);
     EXPECT_EQ(PROFILING_SUCCESS, ret);
     
-    PlatformTypeInterface->SetParamsForTaskTime();
+    PlatformTypeInterfaceMgr->SetParamsForTaskTime();
     
-    PlatformTypeInterface->SetParamsForTaskTrace();
+    PlatformTypeInterfaceMgr->SetParamsForTaskTrace();
 
-    PlatformTypeInterface->SetParamsForTrainingTrace();
+    PlatformTypeInterfaceMgr->SetParamsForTrainingTrace();
 
-    PlatformTypeInterface->SetParamsForAscendCL();
+    PlatformTypeInterfaceMgr->SetParamsForAscendCL();
 
-    PlatformTypeInterface->SetParamsForGE();
+    PlatformTypeInterfaceMgr->SetParamsForGE();
 
-    PlatformTypeInterface->SetParamsForRuntime();
+    PlatformTypeInterfaceMgr->SetParamsForRuntime();
 
-    PlatformTypeInterface->SetParamsForAICPU();
+    PlatformTypeInterfaceMgr->SetParamsForAICPU();
 
-    PlatformTypeInterface->SetParamsForHCCL();
+    PlatformTypeInterfaceMgr->SetParamsForHCCL();
 
-    PlatformTypeInterface->SetParamsForL2Cache();
+    PlatformTypeInterfaceMgr->SetParamsForL2Cache();
 
     std::string metricsType;
     std::string events;
-    ret = PlatformTypeInterface->GetMetricsEvents(metricsType, events);
+    ret = PlatformTypeInterfaceMgr->GetMetricsEvents(metricsType, events);
     EXPECT_EQ(PROFILING_FAILED, ret);
     metricsType = "ArithmeticUtilization";
-    ret = PlatformTypeInterface->GetMetricsEvents(metricsType, events);
+    ret = PlatformTypeInterfaceMgr->GetMetricsEvents(metricsType, events);
     EXPECT_EQ(PROFILING_SUCCESS, ret);
     metricsType = "xxx";
-    ret = PlatformTypeInterface->GetMetricsEvents(metricsType, events);
+    ret = PlatformTypeInterfaceMgr->GetMetricsEvents(metricsType, events);
     EXPECT_EQ(PROFILING_FAILED, ret);
     
     std::string aiMode = "task-based";
     std::string metrics = "ArithmeticUtilization";
     int samplingInterval = 500;
-    PlatformTypeInterface->SetParamsForAicMetrics(aiMode, metrics, samplingInterval);
+    PlatformTypeInterfaceMgr->SetParamsForAicMetrics(aiMode, metrics, samplingInterval);
 
-    PlatformTypeInterface->SetParamsForAivMetrics(aiMode, metrics, samplingInterval);
+    PlatformTypeInterfaceMgr->SetParamsForAivMetrics(aiMode, metrics, samplingInterval);
 
-    PlatformTypeInterface->SetParamsForDeviceSysCpuMemUsage(samplingInterval);
+    PlatformTypeInterfaceMgr->SetParamsForDeviceSysCpuMemUsage(samplingInterval);
 
-    PlatformTypeInterface->SetParamsForDeviceAiCpuCtrlCpuTSCpuHotFuncPMU(samplingInterval);
+    PlatformTypeInterfaceMgr->SetParamsForDeviceAiCpuCtrlCpuTSCpuHotFuncPMU(samplingInterval);
 
     std::string llcMode = "read";
-    PlatformTypeInterface->SetParamsForDeviceHardwareMem(samplingInterval, llcMode);
+    PlatformTypeInterfaceMgr->SetParamsForDeviceHardwareMem(samplingInterval, llcMode);
 
-    PlatformTypeInterface->SetParamsForDeviceIO(samplingInterval);
+    PlatformTypeInterfaceMgr->SetParamsForDeviceIO(samplingInterval);
 
-    PlatformTypeInterface->SetParamsForDeviceIntercommection(samplingInterval);
+    PlatformTypeInterfaceMgr->SetParamsForDeviceIntercommection(samplingInterval);
 
-    PlatformTypeInterface->SetParamsForDeviceDVPP(samplingInterval);
+    PlatformTypeInterfaceMgr->SetParamsForDeviceDVPP(samplingInterval);
 
     int biuFreq = 100;
-    PlatformTypeInterface->SetParamsForDeviceBIU(biuFreq);
+    PlatformTypeInterfaceMgr->SetParamsForDeviceBIU(biuFreq);
 
-    PlatformTypeInterface->SetParamsForDevicePower();
+    PlatformTypeInterfaceMgr->SetParamsForDevicePower();
     
-    PlatformTypeInterface->SetParamsForHostPidCpu();
+    PlatformTypeInterfaceMgr->SetParamsForHostPidCpu();
 
-    PlatformTypeInterface->SetParamsForHostPidMem();
+    PlatformTypeInterfaceMgr->SetParamsForHostPidMem();
 
-    PlatformTypeInterface->SetParamsForHostPidDisk();
+    PlatformTypeInterfaceMgr->SetParamsForHostPidDisk();
 
-    PlatformTypeInterface->SetParamsForHostPidOSRT();
+    PlatformTypeInterfaceMgr->SetParamsForHostPidOSRT();
 
-    PlatformTypeInterface->SetParamsForHostNetwork();
+    PlatformTypeInterfaceMgr->SetParamsForHostNetwork();
 
-    PlatformTypeInterface->SetParamsForHostSysAllPidCpuUsage();
+    PlatformTypeInterfaceMgr->SetParamsForHostSysAllPidCpuUsage();
 
-    PlatformTypeInterface->SetParamsForHostSysAllPidMemUsage();
+    PlatformTypeInterfaceMgr->SetParamsForHostSysAllPidMemUsage();
 
-    ret = PlatformTypeInterface->Uninit();
+    ret = PlatformTypeInterfaceMgr->Uninit();
+    EXPECT_EQ(PROFILING_SUCCESS, ret);
+}
+
+TEST_F(MSPROF_BIN_UTEST, PlatformAdapterCloudModule) {
+    GlobalMockObject::verify();
+    std::shared_ptr<PlatformAdapterCloud> PlatformAdapterCloudMgr;
+    MSVP_MAKE_SHARED0_BREAK(PlatformAdapterCloudMgr, PlatformAdapterCloud);
+
+    SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params;
+    int ret = PlatformAdapterCloudMgr->Init(params);
+    EXPECT_EQ(PROFILING_SUCCESS, ret);
+
+    ret = PlatformAdapterCloudMgr->Uninit();
+    EXPECT_EQ(PROFILING_SUCCESS, ret);
+}
+
+TEST_F(MSPROF_BIN_UTEST, PlatformAdapterCloudv2Module) {
+    GlobalMockObject::verify();
+    std::shared_ptr<PlatformAdapterCloudV2> PlatformAdapterCloudv2Mgr;
+    MSVP_MAKE_SHARED0_BREAK(PlatformAdapterCloudv2Mgr, PlatformAdapterCloudV2);
+
+    SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params;
+    int ret = PlatformAdapterCloudv2Mgr->Init(params);
+    EXPECT_EQ(PROFILING_SUCCESS, ret);
+
+    ret = PlatformAdapterCloudv2Mgr->Uninit();
+    EXPECT_EQ(PROFILING_SUCCESS, ret);
+}
+
+TEST_F(MSPROF_BIN_UTEST, PlatformAdapterDcModule) {
+    GlobalMockObject::verify();
+    std::shared_ptr<PlatformAdapterDc> PlatformAdapterDcMgr;
+    MSVP_MAKE_SHARED0_BREAK(PlatformAdapterDcMgr, PlatformAdapterDc);
+
+    SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params;
+    int ret = PlatformAdapterDcMgr->Init(params);
+    EXPECT_EQ(PROFILING_SUCCESS, ret);
+
+    ret = PlatformAdapterDcMgr->Uninit();
+    EXPECT_EQ(PROFILING_SUCCESS, ret);
+}
+
+TEST_F(MSPROF_BIN_UTEST, PlatformAdapterLhisiModule) {
+    GlobalMockObject::verify();
+    std::shared_ptr<PlatformAdapterLhisi> PlatformAdapterLhisiMgr;
+    MSVP_MAKE_SHARED0_BREAK(PlatformAdapterLhisiMgr, PlatformAdapterLhisi);
+
+    SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params;
+    int ret = PlatformAdapterLhisiMgr->Init(params);
+    EXPECT_EQ(PROFILING_SUCCESS, ret);
+
+    ret = PlatformAdapterLhisiMgr->Uninit();
+    EXPECT_EQ(PROFILING_SUCCESS, ret);
+}
+
+TEST_F(MSPROF_BIN_UTEST, PlatformAdapterMiniModule) {
+    GlobalMockObject::verify();
+    std::shared_ptr<PlatformAdapterMini> PlatformAdapterMiniMgr;
+    MSVP_MAKE_SHARED0_BREAK(PlatformAdapterMiniMgr, PlatformAdapterMini);
+
+    SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params;
+    int ret = PlatformAdapterMiniMgr->Init(params);
+    EXPECT_EQ(PROFILING_SUCCESS, ret);
+
+    ret = PlatformAdapterMiniMgr->Uninit();
+    EXPECT_EQ(PROFILING_SUCCESS, ret);
+}
+
+TEST_F(MSPROF_BIN_UTEST, PlatformAdapterMdcModule) {
+    GlobalMockObject::verify();
+    std::shared_ptr<PlatformAdapterMdc> PlatformAdapterMdcMgr;
+    MSVP_MAKE_SHARED0_BREAK(PlatformAdapterMdcMgr, PlatformAdapterMdc);
+
+    SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params;
+    int ret = PlatformAdapterMdcMgr->Init(params);
+    EXPECT_EQ(PROFILING_SUCCESS, ret);
+
+    ret = PlatformAdapterMdcMgr->Uninit();
     EXPECT_EQ(PROFILING_SUCCESS, ret);
 }
 
