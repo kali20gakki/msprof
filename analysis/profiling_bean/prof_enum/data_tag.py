@@ -59,7 +59,6 @@ class DataTag(Enum):
     SOC_PROFILER = 42
     HELPER_MODEL_WITH_Q = 43
     BIU_PERF = 44
-    DATA_QUEUE = 45
 
 
 @unique

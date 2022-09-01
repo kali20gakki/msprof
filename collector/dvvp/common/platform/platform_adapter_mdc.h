@@ -19,10 +19,10 @@ namespace PlatformAdapter {
 class PlatformAdapterMdc : public Collector::Dvvp::Common::PlatformAdapter::PlatformAdapterInterface {
 public:
     PlatformAdapterMdc();
-    ~PlatformAdapterMdc() override;
+    ~PlatformAdapterMdc();
 
     int Init(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params) override;
-    int Uninit() override;
+    int Uninit();
 };
 }
 }

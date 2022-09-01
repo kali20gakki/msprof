@@ -19,10 +19,10 @@ namespace PlatformAdapter {
 class PlatformAdapterLhisi : public Collector::Dvvp::Common::PlatformAdapter::PlatformAdapterInterface {
 public:
     PlatformAdapterLhisi();
-    ~PlatformAdapterLhisi() override;
+    ~PlatformAdapterLhisi();
 
     int Init(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params) override;
-    int Uninit() override;
+    int Uninit();
 };
 }
 }
