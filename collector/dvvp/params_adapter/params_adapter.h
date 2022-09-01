@@ -106,7 +106,7 @@ enum InputCfg {
     INPUT_CFG_MAX = 52
 };
 
-enum EnableType {
+enum class EnableType {
     ENABLE_MSPROF,
     ENABLE_ACL_JSON,
     ENABLE_GE_OPTION,

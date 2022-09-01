@@ -159,28 +159,28 @@ void MsprofParamAdapter::SetDefaultParamsApp()
 int MsprofParamAdapter::GetMsprofMode()
 {
     if (!paramContainer_[INPUT_CFG_MSPROF_APPLICATION].empty()) {
-        msprofMode_ = MSPROF_MODE_APP;
+        msprofMode_ = MsprofMode::MSPROF_MODE_APP;
         SpliteAppPath(paramContainer_[INPUT_CFG_MSPROF_APPLICATION]);
         return PROFILING_SUCCESS;
     }
     if (!paramContainer_[INPUT_CFG_COM_SYS_DEVICES].empty()) {
-        msprofMode_ = MSPROF_MODE_SYSTEM;
+        msprofMode_ = MsprofMode::MSPROF_MODE_SYSTEM;
         return PROFILING_SUCCESS;
     }
     if (!paramContainer_[INPUT_CFG_HOST_SYS].empty()) {
-        msprofMode_ = MSPROF_MODE_SYSTEM;
+        msprofMode_ = MsprofMode::MSPROF_MODE_SYSTEM;
         return PROFILING_SUCCESS;
     }
     if (!paramContainer_[INPUT_CFG_PARSE].empty()) {
-        msprofMode_ = MSPROF_MODE_PARSE;
+        msprofMode_ = MsprofMode::MSPROF_MODE_PARSE;
         return PROFILING_SUCCESS;
     }
     if (!paramContainer_[INPUT_CFG_QUERY].empty()) {
-        msprofMode_ = MSPROF_MODE_QUERY;
+        msprofMode_ = MsprofMode::MSPROF_MODE_QUERY;
         return PROFILING_SUCCESS;
     }
     if (!paramContainer_[INPUT_CFG_EXPORT].empty()) {
-        msprofMode_ = MSPROF_MODE_EXPORT;
+        msprofMode_ = MsprofMode::MSPROF_MODE_EXPORT;
         return PROFILING_SUCCESS;
     }
     return PROFILING_FAILED;
@@ -302,7 +302,7 @@ int MsprofParamAdapter::GetParamFromInputCfg(std::unordered_map<int, std::pair<M
         return PROFILING_FAILED;
     }
     errCfgList.clear();
-    ret = ComCfgCheck(ENABLE_MSPROF, paramContainer_, setConfig_, errCfgList);
+    ret = ComCfgCheck(EnableType::ENABLE_MSPROF, paramContainer_, setConfig_, errCfgList);
     if (ret != PROFILING_SUCCESS) {
         for (auto errCfg : errCfgList) {
             MsprofArgsType argsType = reCfgMap_[errCfg.first];
@@ -331,24 +331,24 @@ int MsprofParamAdapter::GetParamFromInputCfg(std::unordered_map<int, std::pair<M
 
 int MsprofParamAdapter::SetModeDefaultParams(MsprofMode modeType)
 {
-    if (modeType < MSPROF_MODE_APP || modeType > MSPROF_MODE_EXPORT) {
+    if (modeType < MsprofMode::MSPROF_MODE_APP || modeType > MsprofMode::MSPROF_MODE_EXPORT) {
         MSPROF_LOGE("msprof mode invalid.");
         return PROFILING_FAILED;
     }
     switch (modeType) {
-        case MSPROF_MODE_APP:
+        case MsprofMode::MSPROF_MODE_APP:
             SetDefaultParamsApp();
             break;
-        case MSPROF_MODE_SYSTEM:
+        case MsprofMode::MSPROF_MODE_SYSTEM:
             SetDefaultParamsSystem();
             break;
-        case MSPROF_MODE_PARSE:
+        case MsprofMode::MSPROF_MODE_PARSE:
             SetDefaultParamsParse();
             break;
-        case MSPROF_MODE_QUERY:
+        case MsprofMode::MSPROF_MODE_QUERY:
             SetDefaultParamsQuery();
             break;
-        case MSPROF_MODE_EXPORT:
+        case MsprofMode::MSPROF_MODE_EXPORT:
             SetDefaultParamsExport();
             break;
         default:
@@ -608,7 +608,7 @@ int AclJsonParamAdapter::GetParamFromInputCfg(SHARED_PTR_ALIA<ProfAclConfig> acl
     }
 
     errCfgList.clear();
-    ret = ComCfgCheck(ENABLE_ACL_JSON, paramContainer_, setConfig_, errCfgList);
+    ret = ComCfgCheck(EnableType::ENABLE_ACL_JSON, paramContainer_, setConfig_, errCfgList);
     if (ret != PROFILING_SUCCESS) {
         for (auto errCfg : errCfgList) {
             MSPROF_LOGE("Argument --%s:%s set invalid.",
@@ -816,7 +816,7 @@ int GeOptParamAdapter::GetParamFromInputCfg(SHARED_PTR_ALIA<ProfGeOptionsConfig>
     }
 
     errCfgList.clear();
-    ret = ComCfgCheck(ENABLE_GE_OPTION, paramContainer_, setConfig_, errCfgList);
+    ret = ComCfgCheck(EnableType::ENABLE_GE_OPTION, paramContainer_, setConfig_, errCfgList);
     if (ret != PROFILING_SUCCESS) {
         for (auto errCfg : errCfgList) {
             MSPROF_LOGE("Argument --%s:%s set invalid.",
@@ -1064,7 +1064,7 @@ int AclApiParamAdapter::GetParamFromInputCfg(const ProfConfig * apiCfg,
     }
     // [5] 公有参数校验（调基类接口）
     errCfgList.clear();
-    ret = ComCfgCheck(ENABLE_API, paramContainer_, setConfig_, errCfgList);
+    ret = ComCfgCheck(EnableType::ENABLE_API, paramContainer_, setConfig_, errCfgList);
     if (ret != PROFILING_SUCCESS) {
         // todo 打印errCfgList中的错误
         return PROFILING_FAILED;

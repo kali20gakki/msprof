@@ -25,7 +25,7 @@ using Analysis::Dvvp::Msprof::MsprofCmdInfo;
 using analysis::dvvp::proto::ProfAclConfig;
 using analysis::dvvp::proto::ProfGeOptionsConfig;
 
-enum MsprofMode {
+enum class MsprofMode {
     MSPROF_MODE_APP,
     MSPROF_MODE_SYSTEM,
     MSPROF_MODE_PARSE,
