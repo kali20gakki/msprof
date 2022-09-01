@@ -9,6 +9,7 @@ import logging
 import os
 import platform
 import re
+import sys
 import time
 from logging.handlers import RotatingFileHandler
 
@@ -390,3 +391,12 @@ def check_free_memory(result_dir: str) -> None:
         warn(os.path.basename(__file__),
              "Requires {:.2f}MB of space to store parsed data, actually only {:.2f}MB, "
              "parsed data may not be complete.".format(need_free_memory, free_memory))
+
+
+def call_sys_exit(status: any = None) -> None:
+    """
+    call sys.exit to exit the program.
+    :param status: the exit status or other object to be printed.
+    :return:
+    """
+    sys.exit(status)
