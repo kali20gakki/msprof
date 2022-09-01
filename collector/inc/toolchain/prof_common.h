@@ -28,7 +28,7 @@ enum MsprofDataTag {
     MSPROF_RUNTIME_DATA_TAG_API = 40,   // runtime data tag, range: 40~59
     MSPROF_RUNTIME_DATA_TAG_TRACK = 41,
     MSPROF_AICPU_DATA_TAG = 60,         // aicpu data tag, range: 60~79
-    MSPROF_AICPU_MODEL_TAG = 61,
+    MSPROF_KEYPOINT_TRACE_HELPER_TAG = 61,
     MSPROF_HCCL_DATA_TAG = 80,          // hccl data tag, range: 80~99
     MSPROF_DP_DATA_TAG = 100,           // dp data tag, range: 100~119
     MSPROF_MSPROFTX_DATA_TAG = 120,     // hccl data tag, range: 120~139
@@ -320,7 +320,7 @@ struct MsprofAicpuProfData {
 
 struct MsprofAicpuModelProfData {
     uint16_t magicNumber = MSPROF_DATA_HEAD_MAGIC_NUM;
-    uint16_t dataTag = MSPROF_AICPU_MODEL_TAG;
+    uint16_t dataTag = MSPROF_KEYPOINT_TRACE_HELPER_TAG;
     uint32_t rsv;   // Ensure 8-byte alignment
     uint64_t timeStamp;
     uint64_t indexId;

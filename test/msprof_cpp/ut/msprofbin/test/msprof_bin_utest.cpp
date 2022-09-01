@@ -7,11 +7,20 @@
 #include "msprof_bin.h"
 #include "running_mode.h"
 #include "msprof_manager.h"
-
+#include "message/prof_params.h"
+#include "prof_callback.h"
+#include "platform/platform_adapter.h"
+#include "platform/platform_adapter_interface.h"
+#include "platform/platform_adapter_cloud.h"
+#include "platform/platform_adapter_cloudv2.h"
+#include "platform/platform_adapter_dc.h"
+#include "platform/platform_adapter_lhisi.h"
+#include "platform/platform_adapter_mdc.h"
+#include "platform/platform_adapter_mini.h"
 
 using namespace analysis::dvvp::common::error;
 using namespace Analysis::Dvvp::Msprof;
-
+using namespace Collector::Dvvp::Common::PlatformAdapter;
 class MSPROF_BIN_UTEST : public testing::Test {
 protected:
   virtual void SetUp() {}
@@ -61,3 +70,86 @@ TEST_F(MSPROF_BIN_UTEST, SetEnvList) {
     std::vector<std::string> envpList;
     SetEnvList((const char**)envp, envpList);
 }
+
+TEST_F(MSPROF_BIN_UTEST, PlatformTypeInterfaceInit) {
+    GlobalMockObject::verify();
+    std::shared_ptr<PlatformAdapterInterface> PlatformTypeInterface;
+    MSVP_MAKE_SHARED0_BREAK(PlatformTypeInterface, PlatformAdapterInterface);
+
+    SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params;
+
+    int ret = PlatformTypeInterface->Init(params);
+    EXPECT_EQ(PROFILING_SUCCESS, ret);
+    
+    PlatformTypeInterface->SetParamsForTaskTime();
+    
+    PlatformTypeInterface->SetParamsForTaskTrace();
+
+    PlatformTypeInterface->SetParamsForTrainingTrace();
+
+    PlatformTypeInterface->SetParamsForAscendCL();
+
+    PlatformTypeInterface->SetParamsForGE();
+
+    PlatformTypeInterface->SetParamsForRuntime();
+
+    PlatformTypeInterface->SetParamsForAICPU();
+
+    PlatformTypeInterface->SetParamsForHCCL();
+
+    PlatformTypeInterface->SetParamsForL2Cache();
+
+    std::string metricsType;
+    std::string events;
+    ret = PlatformTypeInterface->GetMetricsEvents(metricsType, events);
+    EXPECT_EQ(PROFILING_FAILED, ret);
+    metricsType = "ArithmeticUtilization";
+    ret = PlatformTypeInterface->GetMetricsEvents(metricsType, events);
+    EXPECT_EQ(PROFILING_SUCCESS, ret);
+    metricsType = "xxx";
+    ret = PlatformTypeInterface->GetMetricsEvents(metricsType, events);
+    EXPECT_EQ(PROFILING_FAILED, ret);
+    
+    std::string aiMode = "task-based";
+    std::string metrics = "ArithmeticUtilization";
+    int samplingInterval = 500;
+    PlatformTypeInterface->SetParamsForAicMetrics(aiMode, metrics, samplingInterval);
+
+    PlatformTypeInterface->SetParamsForAivMetrics(aiMode, metrics, samplingInterval);
+
+    PlatformTypeInterface->SetParamsForDeviceSysCpuMemUsage(samplingInterval);
+
+    PlatformTypeInterface->SetParamsForDeviceAiCpuCtrlCpuTSCpuHotFuncPMU(samplingInterval);
+
+    std::string llcMode = "read";
+    PlatformTypeInterface->SetParamsForDeviceHardwareMem(samplingInterval, llcMode);
+
+    PlatformTypeInterface->SetParamsForDeviceIO(samplingInterval);
+
+    PlatformTypeInterface->SetParamsForDeviceIntercommection(samplingInterval);
+
+    PlatformTypeInterface->SetParamsForDeviceDVPP(samplingInterval);
+
+    int biuFreq = 100;
+    PlatformTypeInterface->SetParamsForDeviceBIU(biuFreq);
+
+    PlatformTypeInterface->SetParamsForDevicePower();
+    
+    PlatformTypeInterface->SetParamsForHostPidCpu();
+
+    PlatformTypeInterface->SetParamsForHostPidMem();
+
+    PlatformTypeInterface->SetParamsForHostPidDisk();
+
+    PlatformTypeInterface->SetParamsForHostPidOSRT();
+
+    PlatformTypeInterface->SetParamsForHostNetwork();
+
+    PlatformTypeInterface->SetParamsForHostSysAllPidCpuUsage();
+
+    PlatformTypeInterface->SetParamsForHostSysAllPidMemUsage();
+
+    ret = PlatformTypeInterface->Uninit();
+    EXPECT_EQ(PROFILING_SUCCESS, ret);
+}
+

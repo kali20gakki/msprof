@@ -10,7 +10,9 @@
 #include "devdrv_runtime_api_stub.h"
 #include "errno/error_code.h"
 #include "ai_drv_dev_api.h"
+#include "utils/utils.h"
 using namespace analysis::dvvp::common::error;
+using namespace analysis::dvvp::common::utils;
 
 class COMMON_VALIDATION_PARAM_VALIDATION_TEST: public testing::Test {
 protected:
@@ -331,6 +333,124 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckProfilingAicoreMetricsIsVal
     EXPECT_EQ(0, entry->CheckProfilingAicoreMetricsIsValid(aicoreMetrics));
     aicoreMetrics = "trace";
     EXPECT_EQ(0, entry->CheckProfilingAicoreMetricsIsValid(aicoreMetrics));
+}
+
+TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckFreqIsValid) {
+    GlobalMockObject::verify();
+    
+    std::string freq;
+    int rangeMin = 1;
+    int rangeMax = 10;
+    auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
+    freq = "";
+    EXPECT_EQ(true, entry->CheckFreqIsValid(freq, rangeMin, rangeMax));
+    freq = "ww11";
+    EXPECT_EQ(false, entry->CheckFreqIsValid(freq, rangeMin, rangeMax));
+    freq = "0";
+    EXPECT_EQ(false, entry->CheckFreqIsValid(freq, rangeMin, rangeMax));
+    freq = "11";
+    EXPECT_EQ(false, entry->CheckFreqIsValid(freq, rangeMin, rangeMax));
+    freq = "5";
+    EXPECT_EQ(true, entry->CheckFreqIsValid(freq, rangeMin, rangeMax));
+}
+
+TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckHostSysPidValid) {
+    GlobalMockObject::verify();
+    
+    std::string hostSysPid;
+    auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
+    EXPECT_EQ(false, entry->CheckHostSysPidValid(hostSysPid));
+    hostSysPid = "ww11";
+    EXPECT_EQ(false, entry->CheckHostSysPidValid(hostSysPid));
+    hostSysPid = "1";
+    EXPECT_EQ(true, entry->CheckHostSysPidValid(hostSysPid));
+    hostSysPid = "-1";
+    EXPECT_EQ(false, entry->CheckHostSysPidValid(hostSysPid));
+    hostSysPid = "100000000";
+    EXPECT_EQ(false, entry->CheckHostSysPidValid(hostSysPid));
+}
+
+TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, MsprofCheckEnvValid) {
+    GlobalMockObject::verify();
+    
+    std::string env;
+    auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
+    EXPECT_EQ(false, entry->MsprofCheckEnvValid(env));
+    env = "ww11";
+    EXPECT_EQ(true, entry->MsprofCheckEnvValid(env));
+}
+
+TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, MsprofCheckAiModeValid) {
+    GlobalMockObject::verify();
+    
+    std::string aiMode;
+    std::string aiModeType = "";
+    auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
+    EXPECT_EQ(false, entry->MsprofCheckAiModeValid(aiMode, aiModeType));
+    aiMode = "ww11";
+    EXPECT_EQ(false, entry->MsprofCheckAiModeValid(aiMode, aiModeType));
+    aiMode = "task-based";
+    EXPECT_EQ(true, entry->MsprofCheckAiModeValid(aiMode, aiModeType));
+    aiMode = "sample-based";
+    EXPECT_EQ(true, entry->MsprofCheckAiModeValid(aiMode, aiModeType));
+}
+
+TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, MsprofCheckSysDeviceValid) {
+    GlobalMockObject::verify();
+    
+    std::string sysDevId;
+    auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
+    EXPECT_EQ(false, entry->MsprofCheckSysDeviceValid(sysDevId));
+    sysDevId = "all";
+    EXPECT_EQ(true, entry->MsprofCheckSysDeviceValid(sysDevId));
+    sysDevId = "2ss,2,3";
+    EXPECT_EQ(false, entry->MsprofCheckSysDeviceValid(sysDevId));
+    sysDevId = "1,2,3";
+    EXPECT_EQ(true, entry->MsprofCheckSysDeviceValid(sysDevId));
+    sysDevId = "1,2,65";
+    EXPECT_EQ(false, entry->MsprofCheckSysDeviceValid(sysDevId));
+}
+
+TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckExportIdIsValid) {
+    GlobalMockObject::verify();
+    
+    std::string exportId;
+    auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
+    EXPECT_EQ(false, entry->CheckExportIdIsValid(exportId, ""));
+    exportId = "www";
+    EXPECT_EQ(false, entry->CheckExportIdIsValid(exportId, ""));
+    exportId = "-1";
+    EXPECT_EQ(false, entry->CheckExportIdIsValid(exportId, ""));
+    exportId = "1";
+    EXPECT_EQ(true, entry->CheckExportIdIsValid(exportId, ""));
+}
+
+TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckExportSummaryFormatIsValid) {
+    GlobalMockObject::verify();
+    
+    std::string summaryFormat;
+    auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
+    EXPECT_EQ(false, entry->CheckExportSummaryFormatIsValid(summaryFormat));
+    summaryFormat = "www";
+    EXPECT_EQ(false, entry->CheckExportSummaryFormatIsValid(summaryFormat));
+    summaryFormat = "json";
+    EXPECT_EQ(true, entry->CheckExportSummaryFormatIsValid(summaryFormat));
+    summaryFormat = "csv";
+    EXPECT_EQ(true, entry->CheckExportSummaryFormatIsValid(summaryFormat));
+}
+
+TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, MsprofCheckAppValid) {
+    GlobalMockObject::verify();
+    
+    std::string app;
+    auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
+    EXPECT_EQ(false, entry->MsprofCheckAppValid(app));
+    app = "bash";
+    EXPECT_EQ(false, entry->MsprofCheckAppValid(app));
+    app = "bash 1";
+    EXPECT_EQ(false, entry->MsprofCheckAppValid(app));
+    app = "main";
+    EXPECT_EQ(false, entry->MsprofCheckAppValid(app));
 }
 
 TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckL2CacheEventsValid) {
