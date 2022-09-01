@@ -51,10 +51,21 @@ set(profilerSrcList
 	${MSPROF_SOURCE_DIR}/dvvp/msprof/engine/src/prof_acl_mgr.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/msprof/engine/src/prof_ge_core.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/params_adapter/params_adapter_impl.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/params_adapter/params_adapter.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/msprof/engine/src/prof_acl_core.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/msprof/engine/src/prof_api_common.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/msprof/engine/src/uploader_dumper.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/msprof/platform/mini/data_dumper.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/params_adapter/params_adapter.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter_cloud.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter_cloudv2.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter_dc.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter_interface.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter_lhisi.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter_mdc.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter_mini.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/msprof/msproftx/src/msprof_tx_manager.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/msprof/msproftx/src/msprof_tx_reporter.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/msprof/msproftx/src/msprof_stamp_pool.cpp
