@@ -276,6 +276,7 @@ target_include_directories(msprof_utest PRIVATE
 	${MSPROF_SOURCE_DIR}/dvvp/common/queue
 	${MSPROF_SOURCE_DIR}/dvvp/common/singleton
 	${MSPROF_SOURCE_DIR}/dvvp/common/utils
+    ${MSPROF_SOURCE_DIR}/dvvp/msprof/engine/include
 	${MSPROF_SOURCE_DIR}/dvvp/common/config
 	${MSPROF_SOURCE_DIR}/dvvp/message
 	${MSPROF_SOURCE_DIR}/dvvp/transport

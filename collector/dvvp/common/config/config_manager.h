@@ -17,6 +17,7 @@
 #include "errno/error_code.h"
 #include "utils/utils.h"
 #include "message/prof_params.h"
+#include "prof_api_common.h"
 
 namespace Analysis {
 namespace Dvvp {

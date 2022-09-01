@@ -201,13 +201,9 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvTsFwStart) {
 
     EXPECT_EQ(PROFILING_FAILED, analysis::dvvp::driver::DrvTsFwStart(peripheralCfg, nullptr));
 
-    auto profileParams = std::make_shared<analysis::dvvp::driver::TsTsFwProfileConfigT>();
+    auto profileParams = std::make_shared<analysis::dvvp::message::ProfileParams>();
 
     profileParams->ts_timeline = "on";
-    profileParams->ts_task_track = "on";
-    profileParams->ts_cpu_usage = "on";
-    profileParams->ai_core_status = "on";
-    profileParams->ai_vector_status = "on";
     MOCKER(&DriverPlugin::MsprofDrvStart)
         .stubs()
         .will(returnValue(PROF_ERROR))
