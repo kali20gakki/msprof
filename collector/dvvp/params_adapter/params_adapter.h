@@ -142,6 +142,10 @@ private:
     void SetDeviceSysParams(std::array<std::string, INPUT_CFG_MAX> paramContainer) const;
     void SetHostSysParams(std::array<std::string, INPUT_CFG_MAX> paramContainer) const;
     void SetHostSysUsageParams(std::array<std::string, INPUT_CFG_MAX> paramContainer) const;
+    bool ComCfgCheck1(const InputCfg cfgOpt, const std::string &cfgParam,
+        std::vector<std::pair<InputCfg, std::string>> &cfgList) const;
+    bool ComCfgCheck2(const InputCfg cfgOpt, const std::string &cfgParam,
+        std::vector<std::pair<InputCfg, std::string>> &cfgList) const
 
 private:
     std::vector<InputCfg> commonConfig_;

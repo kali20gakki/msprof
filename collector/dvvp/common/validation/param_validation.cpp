@@ -1228,9 +1228,9 @@ int ParamValidation::CheckHostSysToolsIsExist(const std::string toolName, const 
     } else if (!appDir.empty()) {
         tmpDir = appDir;
     }
-    static const std::string ENV_PATH = "PATH=/usr/bin/:/usr/sbin:/var";
+    static const std::string envPath = "PATH=/usr/bin/:/usr/sbin:/var";
     std::vector<std::string> envV;
-    envV.push_back(ENV_PATH);
+    envV.push_back(envPath);
     std::vector<std::string> argsV;
     argsV.push_back(PROF_SCRIPT_FILE_PATH);
     argsV.push_back("get-version");
@@ -1251,8 +1251,9 @@ int ParamValidation::CheckHostSysToolsIsExist(const std::string toolName, const 
     return ret;
 }
  
-int ParamValidation::CheckHostSysCmdOutIsExist(const std::string tmpDir, const std::string toolName,
-                                                const MmProcess tmpProcess) const
+int ParamValidation::CheckHostSysCmdOutIsExist(const std::string tmpDir,
+                                               const std::string toolName,
+                                               const MmProcess tmpProcess) const
 {
     MSPROF_LOGI("Start to check whether the file exists.");
     for (int i = 0; i < FILE_FIND_REPLAY; i++) {
@@ -1314,9 +1315,9 @@ int ParamValidation::UninitCheckHostSysCmd(const MmProcess checkProcess) const
         MSPROF_LOGI("Process:%d is not exist", reinterpret_cast<int>(checkProcess));
         return PROFILING_SUCCESS;
     }
-    static const std::string ENV_PATH = "PATH=/usr/bin/:/usr/sbin:/var:/bin";
+    static const std::string envPath = "PATH=/usr/bin/:/usr/sbin:/var:/bin";
     std::vector<std::string> envV;
-    envV.push_back(ENV_PATH);
+    envV.push_back(envPath);
     std::vector<std::string> argsV;
     std::string killCmd = "kill -2 " + std::to_string(reinterpret_cast<int>(checkProcess));
     argsV.push_back("-c");

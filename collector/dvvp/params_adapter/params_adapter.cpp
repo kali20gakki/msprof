@@ -335,60 +335,87 @@ void ParamsAdapter::SetHostSysUsageParams(std::array<std::string, INPUT_CFG_MAX>
 }
 
 int ParamsAdapter::ComCfgCheck(EnableType enableType, std::array<std::string, INPUT_CFG_MAX> paramContainer,
-    std::set<InputCfg> &setArgs,
-    std::vector<std::pair<InputCfg, std::string>> &cfgList) const
+    std::set<InputCfg> &setArgs, std::vector<std::pair<InputCfg, std::string>> &cfgList) const
 {
     bool ret = true;
-    bool flag = true;
     for (auto inputCfg : commonConfig_) {
         if (setArgs.find(inputCfg) == setArgs.end()) {
             continue;
         }
         std::string cfgValue = paramContainer[inputCfg];
-        switch (inputCfg) {
-            case INPUT_CFG_COM_OUTPUT:
-                ret = ParamValidation::instance()->CheckOutputIsValid(cfgValue);
-                break;
-            case INPUT_CFG_COM_STORAGE_LIMIT:
-                ret = ParamValidation::instance()->CheckStorageLimit(cfgValue);
-                break;
-            case INPUT_CFG_COM_MSPROFTX:
-            case INPUT_CFG_COM_TASK_TIME:
-            case INPUT_CFG_COM_ASCENDCL:
-            case INPUT_CFG_COM_RUNTIME_API:
-            case INPUT_CFG_COM_HCCL:
-            case INPUT_CFG_COM_L2:
-            case INPUT_CFG_COM_AICPU:
-                ret = ParamValidation::instance()->IsValidSwitch(cfgValue);
-                break;
-            case INPUT_CFG_COM_AIC_METRICS:
-            case INPUT_CFG_COM_AIV_METRICS:
-                ret = ParamValidation::instance()->CheckProfilingAicoreMetricsIsValid(cfgValue);
-                break;
-            case INPUT_CFG_COM_SYS_USAGE_FREQ:
-            case INPUT_CFG_COM_SYS_PID_USAGE_FREQ:
-            case INPUT_CFG_COM_SYS_CPU_FREQ:
-            case INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ:
-            case INPUT_CFG_COM_SYS_IO_FREQ:
-            case INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ:
-            case INPUT_CFG_COM_DVPP_FREQ:
-                ret = CheckFreqValid(cfgValue, inputCfg);
-                break;
-            case INPUT_CFG_COM_LLC_MODE:
-                ret = ParamValidation::instance()->CheckLlcModeIsValid(cfgValue);
-                break;
-            case INPUT_HOST_SYS_USAGE:
-                ret = ParamValidation::instance()->CheckHostSysUsageIsValid(cfgValue);
-                break;
-            default:
-                ret = false;
-        }
-        if (ret != true) {
-            cfgList.push_back(std::pair<InputCfg, std::string>(inputCfg, cfgValue));
-            flag = false;
+        if (inputCfg <= INPUT_CFG_COM_AICPU) {
+            ret = ComCfgCheck1(inputCfg, cfgValue, cfgList);
+        } else {
+            ret = ComCfgCheck2(inputCfg, cfgValue, cfgList);
         }
     }
-    return flag ? PROFILING_SUCCESS : PROFILING_FAILED;
+    return ret ? PROFILING_SUCCESS : PROFILING_FAILED;
+}
+
+bool ParamsAdapter::ComCfgCheck1(const InputCfg cfgOpt, const std::string &cfgParam,
+    std::vector<std::pair<InputCfg, std::string>> &cfgList) const
+{
+    bool ret = true;
+    bool flag = true;
+    switch (cfgOpt) {
+        case INPUT_CFG_COM_OUTPUT:
+            ret = ParamValidation::instance()->CheckOutputIsValid(cfgValue);
+            break;
+        case INPUT_CFG_COM_STORAGE_LIMIT:
+            ret = ParamValidation::instance()->CheckProfilingAicoreMetricsIsValid(cfgValue);
+            break;
+        case INPUT_CFG_COM_MSPROFTX:
+        case INPUT_CFG_COM_TASK_TIME:
+        case INPUT_CFG_COM_ASCENDCL:
+        case INPUT_CFG_COM_RUNTIME_API:
+        case INPUT_CFG_COM_HCCL:
+        case INPUT_CFG_COM_L2:
+        case INPUT_CFG_COM_AICPU:
+            ret = ParamValidation::instance()->IsValidSwitch(cfgValue);
+            break;
+        case INPUT_CFG_COM_AIC_METRICS:
+        case INPUT_CFG_COM_AIV_METRICS:
+            ret = ParamValidation::instance()->CheckProfilingAicoreMetricsIsValid(cfgValue);
+            break;
+        default:
+            ret = false;
+    }
+    if (ret != true) {
+        cfgList.push_back(std::pair<InputCfg, std::string>(inputCfg, cfgValue));
+        flag = false;
+    }
+    return flag;
+}
+
+bool ParamsAdapter::ComCfgCheck2(const InputCfg cfgOpt, const std::string &cfgParam,
+    std::vector<std::pair<InputCfg, std::string>> &cfgList) const
+{
+    bool ret = true;
+    bool flag = true;
+    switch (cfgOpt) {
+        case INPUT_CFG_COM_SYS_USAGE_FREQ:
+        case INPUT_CFG_COM_SYS_PID_USAGE_FREQ:
+        case INPUT_CFG_COM_SYS_CPU_FREQ:
+        case INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ:
+        case INPUT_CFG_COM_SYS_IO_FREQ:
+        case INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ:
+        case INPUT_CFG_COM_DVPP_FREQ:
+            ret = CheckFreqValid(cfgValue, inputCfg);
+            break;
+        case INPUT_CFG_COM_LLC_MODE:
+            ret = ParamValidation::instance()->CheckLlcModeIsValid(cfgValue);
+            break;
+        case INPUT_HOST_SYS_USAGE:
+            ret = ParamValidation::instance()->CheckHostSysUsageIsValid(cfgValue);
+            break;
+        default:
+            ret = false;
+    }
+    if (ret != true) {
+        cfgList.push_back(std::pair<InputCfg, std::string>(inputCfg, cfgValue));
+        flag = false;
+    }
+    return flag;
 }
 
 bool ParamsAdapter::CheckFreqValid(const std::string &freq, const InputCfg freqOpt) const
