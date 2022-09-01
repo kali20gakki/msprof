@@ -1358,6 +1358,9 @@ bool Utils::AnalysisEnvReady(std::string &msprofPyPath)
     dladdr((void *)AnalysisEnvReady, &dlInfo);
     std::string selfPath(dlInfo.dli_fname);
     char realPathStr[MMPA_MAX_PATH] = { 0 };
+    if (selfPath.compare(PROF_MSPROF_BIN_NAME) == 0) {
+        selfPath = GetSelfPath();
+    }
     int ret = MmRealPath(selfPath.c_str(), realPathStr, MMPA_MAX_PATH);
     if (ret != PROFILING_SUCCESS) {
         return false;
