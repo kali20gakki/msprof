@@ -1031,22 +1031,6 @@ TEST_F(MSPROF_ACL_CORE_UTEST, MsprofCheckAndGetChar) {
     EXPECT_EQ(test1, ProfAclMgr::instance()->MsprofCheckAndGetChar(const_cast<char *>(test.c_str()), test.size()));
 }
 
-TEST_F(MSPROF_ACL_CORE_UTEST, MsprofInitGeOptionsParamAdaper) {
-    GlobalMockObject::verify();
-    using namespace Msprofiler::Api;
-
-    std::shared_ptr<analysis::dvvp::message::ProfileParams> params(
-		new analysis::dvvp::message::ProfileParams());
-    std::shared_ptr<analysis::dvvp::proto::ProfGeOptionsConfig> message(new analysis::dvvp::proto::ProfGeOptionsConfig);
-
-    message->set_aicpu("on");
-    message->set_training_trace("on");
-    message->set_task_trace("on");
-    std::string jobInfo = "123";
-
-    ProfAclMgr::instance()->MsprofInitGeOptionsParamAdaper(nullptr, jobInfo, message);
-    ProfAclMgr::instance()->MsprofInitGeOptionsParamAdaper(params, jobInfo, message);
-}
 
 TEST_F(MSPROF_ACL_CORE_UTEST, MsprofGeOptionsResultPathAdapter) {
     GlobalMockObject::verify();

@@ -48,6 +48,7 @@ target_include_directories(common_utest PRIVATE
     ../stub
     ${GTEST_INCLUDE_DIR}
     ${MOCKCPP_INCLUDE_DIR}
+    ${TOP_DIR}/collector/inc/external
     ${TOP_DIR}/platform/securec/include
     ${TOP_DIR}/opensource/json/include
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/slog
@@ -62,6 +63,7 @@ target_include_directories(common_utest PRIVATE
     ${MSPROF_SOURCE_DIR}/dvvp/common
     ${MSPROF_SOURCE_DIR}/dvvp/common/statistics
     ${TOP_DIR}/test/msprof_cpp/ut/stub/common/log/
+    ${MSPROF_SOURCE_DIR}/dvvp/msprof/engine/include
     ${MSPROF_SOURCE_DIR}/dvvp/common/config
     ${MSPROF_SOURCE_DIR}/dvvp/driver/inc
     ${MSPROF_SOURCE_DIR}/dvvp/common/errno
