@@ -15,8 +15,17 @@ class AiCpuModel(ParserModel):
     ai_cpu model class
     """
 
-    def __init__(self: any, result_dir: str, table_list: list) -> None:
+    def __init__(self: any, result_dir: str, table_list: any = ()) -> None:
         super().__init__(result_dir, DBNameConstant.DB_AI_CPU, table_list)
+
+    def flush(self: any, data_list: list, ai_cpu_table_name: str = DBNameConstant.TABLE_AI_CPU) -> None:
+        """
+        insert data to table
+        :param data_list: ai_cpu data
+        :param ai_cpu_table_name: ai cpu table name
+        :return:
+        """
+        self.insert_data_to_db(ai_cpu_table_name, data_list)
 
     def create_table(self: any) -> None:
         """
@@ -24,14 +33,19 @@ class AiCpuModel(ParserModel):
         """
         for table_name in self.table_list:
             if DBManager.judge_table_exist(self.cur, table_name):
-                continue
-            sql = DBManager.sql_create_general_table('AiCpuDataMap', table_name, self.TABLES_PATH)
+                self.drop_table(table_name)
+            table_map = "{0}Map".format(table_name)
+            sql = DBManager.sql_create_general_table(table_map, table_name, self.TABLES_PATH)
             DBManager.execute_sql(self.conn, sql)
 
-    def flush(self: any, data_list: list) -> None:
+    def get_ai_cpu_data_from_ts(self: any) -> list:
         """
-        insert data to table
-        :param data_list: ai_cpu data
+        get all data from db
+        :param table_name: table name
         :return:
         """
-        self.insert_data_to_db(DBNameConstant.TABLE_AI_CPU, data_list)
+        if not DBManager.judge_table_exist(self.cur, DBNameConstant.TABLE_AI_CPU_FROM_TS):
+            return []
+        all_data_sql = "select stream_id, task_id, sys_start, sys_end, batch_id from {}".format(
+            DBNameConstant.TABLE_AI_CPU_FROM_TS)
+        return DBManager.fetch_all_data(self.cur, all_data_sql)
