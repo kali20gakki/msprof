@@ -20,6 +20,11 @@ namespace analysis {
 namespace dvvp {
 namespace common {
 namespace validation {
+const int FILE_FIND_REPLAY          = 100;
+const std::string TOOL_NAME_PERF     = "perf";
+const std::string TOOL_NAME_LTRACE   = "ltrace";
+const std::string TOOL_NAME_IOTOP    = "iotop";
+const int MIN_APP_LENTH_WITH_SCRIPT  = 2;
 class ParamValidation : public analysis::dvvp::common::singleton::Singleton<ParamValidation> {
 public:
     ParamValidation();
@@ -67,6 +72,14 @@ public:
     bool IsValidSwitch(const std::string &switchStr) const;
     bool CheckStorageLimit(const std::string &storageLimit) const;
     bool CheckBiuFreqValid(const uint32_t biuFreq) const;
+    bool MsprofCheckAppValid(std::string &appParam) const;
+    bool MsprofCheckEnvValid(const std::string &envParam) const;
+    bool MsprofCheckAiModeValid(const std::string &aiModeParam, const std::string &aiModeType) const;
+    bool MsprofCheckSysDeviceValid(const std::string &devListParam) const;
+    bool MsprofCheckSysPeriodValid(const std::string &sysPeriodParam) const;
+    bool MsprofCheckHostSysValid(const std::string &hostSysParam) const;
+    bool CheckHostSysToolsExit(const std::string &hostSysParam, const std::string &resultDir,
+        const std::string &appDir) const;
 
 private:
     bool CheckTsSwitchProfiling(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params);
@@ -75,6 +88,15 @@ private:
     bool CheckProfilingIntervalIsValid(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params);
     bool CheckProfilingIntervalIsValidTWO(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params);
     bool CheckSystemTraceSwitchProfiling(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params);
+    int MsprofCheckNotAppValid(const std::vector<std::string> &AppParamsList, std::string &resultAppParam) const;
+    int MsprofCheckAppParamValid(const std::string &appParam) const;
+    int MsprofCheckAppScriptValid(const std::vector<std::string> &appParams) const;
+    int CheckHostSysToolsIsExist(const std::string toolName, const std::string &resultDir,
+        const std::string &appDir) const;
+    int CheckHostSysCmdOutIsExist(const std::string tmpDir, const std::string toolName,
+                                           const MmProcess tmpProcess) const;
+    int CheckHostOutString(const std::string tmpStr, const std::string toolName) const;
+    int UninitCheckHostSysCmd(const MmProcess checkProcess) const;
 };
 }
 }

@@ -14,6 +14,7 @@
 #include "message/prof_params.h"
 #include "config/config_manager.h"
 #include "mmpa_api.h"
+#include "platform_adapter_interface.h"
 
 namespace Collector {
 namespace Dvvp {
@@ -21,6 +22,7 @@ namespace ParamsAdapter {
 using analysis::dvvp::message::ProfileParams;
 using Analysis::Dvvp::Common::Config::PlatformType;
 using analysis::dvvp::message::StatusInfo;
+using namespace Collector::Dvvp::Common::PlatformAdapter;
 
 const int AIC_FREQ_MIN = 1;
 const int AIC_FREQ_MAX = 100;
@@ -43,14 +45,9 @@ const int DVPP_FREQ_MAX = 100;
 const int BIU_FREQ_MIN = 300;
 const int BIU_FREQ_MAX = 30000;
 const int ACC_PMU_MODE_THRED = 5000; // Check
-const int FILE_FIND_REPLAY          = 100;
-const std::string TOOL_NAME_PERF     = "perf";
-const std::string TOOL_NAME_LTRACE   = "ltrace";
-const std::string TOOL_NAME_IOTOP    = "iotop";
-const int MIN_APP_LENTH_WITH_SCRIPT  = 2;
 enum InputCfg {
-    INPUT_CFG_MSPROF_APPLICATION = 0, // del
-    INPUT_CFG_MSPROF_ENVIRONMENT = 1, // del
+    INPUT_CFG_MSPROF_APPLICATION = 0,
+    INPUT_CFG_MSPROF_ENVIRONMENT = 1,
     // other
     INPUT_CFG_COM_OUTPUT = 2,
     INPUT_CFG_COM_STORAGE_LIMIT = 3,
@@ -121,6 +118,7 @@ public:
     ParamsAdapter()
     {
     }
+    virtual ~ParamsAdapter();
     int CheckListInit();
     bool BlackSwitchCheck(InputCfg inputCfg) const;
     PlatformType GetPlatform() const;
@@ -128,53 +126,29 @@ public:
         std::set<InputCfg> &setArgs,
         std::vector<std::pair<InputCfg, std::string>> &cfgList) const;
     int TransToParam(std::array<std::string, INPUT_CFG_MAX> paramContainer, SHARED_PTR_ALIA<ProfileParams> params);
-    // To Del
-    void Print(std::array<std::string, INPUT_CFG_MAX> paramContainer);
-
 public:
-    int CheckOutputValid(const std::string &outputParam) const;
-    int CheckStorageLimitValid(const std::string &storageLimitParam) const;
-    int CheckAiMetricsValid(const std::string &aiMetrics) const;
-    int CheckSwitchValid(const std::string &switchParam) const;
-    int CheckFreqValid(const std::string &freq, const InputCfg freqOpt) const;
-    int CheckLlcModeValid(const std::string &llcMode) const;
-    int CheckHostSysUsageValid(const std::string &hostSysUsage) const;
-    int CheckAppParamValid(const std::string &appParam) const;
-    int CheckAppScriptValid(const std::vector<std::string> &appParams) const;
-    int MsprofCheckAppValid(std::string &appParam) const;
-    int MsprofCheckEnvValid(const std::string &envParam) const;
-    int MsprofCheckAiModeValid(const std::string &aiModeParam, const InputCfg aiModeTypeOpt) const;
-    int MsprofCheckSysDeviceValid(const std::string &devListParam) const;
-    int MsprofCheckSysPeriodValid(const std::string &sysPeriodParam) const;
-    int MsprofCheckHostSysValid(const std::string &hostSysParam) const;
-    int MsprofCheckHostSysPidValid(const std::string &hostSysPidParam) const;
-    int MsprofCheckPythonPathValid(const std::string &pythonPathParam) const;
-    int MsprofCheckSummaryFormatValid(const std::string &formatParam) const;
-    int MsprofCheckExportIdValid(const std::string &idParam, const std::string &exportIdType) const;
-    int CheckHostSysToolsExit(const std::string &hostSysParam, const std::string &resultDir,
-        const std::string &appDir) const;
+    bool CheckFreqValid(const std::string &freq, const InputCfg freqOpt) const;
 private:
-    void GetMiniBlackSwitch();
-    void GetCloudBlackSwitch();
-    void GetMdcBlackSwitch();
-    void GetLhisiBlackSwitch();
-    void GetDcBlackSwitch();
-    void GetCloudV2BlackSwitch();
-    void GetCommonConfig();
-    int CheckHostSysToolsIsExist(const std::string toolName, const std::string &resultDir,
-        const std::string &appDir) const;
-    int CheckHostSysCmdOutIsExist(const std::string tmpDir, const std::string toolName,
-                                           const MmProcess tmpProcess) const;
-    int CheckHostOutString(const std::string tmpStr, const std::string toolName) const;
-    int UninitCheckHostSysCmd(const MmProcess checkProcess) const;
-private:
-    void SpliteAppPath(const std::string &appParams, std::string &cmdPath, std::string &appParameters,
-        std::string &appDir, std::string &app);
+    void SetMiniBlackSwitch();
+    void SetCloudBlackSwitch();
+    void SetMdcBlackSwitch();
+    void SetLhisiBlackSwitch();
+    void SetDcBlackSwitch();
+    void SetCloudV2BlackSwitch();
+    void SetCommonConfig();
+    void SetCommonParams(std::array<std::string, INPUT_CFG_MAX> paramContainer) const;
+    void SetTaskParams(std::array<std::string, INPUT_CFG_MAX> paramContainer) const;
+    void SetAiMetricsParams(std::array<std::string, INPUT_CFG_MAX> paramContainer) const;
+    void SetDeviceSysParams(std::array<std::string, INPUT_CFG_MAX> paramContainer) const;
+    void SetHostSysParams(std::array<std::string, INPUT_CFG_MAX> paramContainer) const;
+    void SetHostSysUsageParams(std::array<std::string, INPUT_CFG_MAX> paramContainer) const;
+
 private:
     std::vector<InputCfg> commonConfig_;
     std::vector<InputCfg> blackSwitch_;
     StatusInfo statusInfo_;
     PlatformType platformType_;
+    SHARED_PTR_ALIA<PlatformAdapterInterface> platformAdapter_;
 };
 } // ParamsAdapter
 } // Dvpp
