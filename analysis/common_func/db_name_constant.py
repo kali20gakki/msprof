@@ -58,7 +58,6 @@ class DBNameConstant(metaclass=ABCMeta):
     DB_BIU_PERF = "biu_perf.db"
     DB_CLUSTER_RANK = "cluster_rank.db"
     DB_CLUSTER_STEP_TRACE = 'cluster_step_trace.db'
-    DB_CLUSTER_DATA_PREPROCESS = 'data_preprocess.db'
 
     # DB tables
     TABLE_ACL_DATA = "acl_data"
@@ -212,7 +211,6 @@ class DBNameConstant(metaclass=ABCMeta):
 
     #cluster
     TABLE_CLUSTER_RANK = "ClusterRank"
-    TABLE_DATA_QUEUE = "DataQueue"
 
     @abstractmethod
     def get_db_name(self: any) -> str:
