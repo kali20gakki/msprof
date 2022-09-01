@@ -19,7 +19,6 @@ class StepTraceReader:
         self._data = []
         self._table_name = DBNameConstant.TABLE_STEP_TRACE
 
-
     @property
     def data(self: any) -> list:
         """
