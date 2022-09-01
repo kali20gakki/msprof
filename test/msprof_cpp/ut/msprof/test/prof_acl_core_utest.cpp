@@ -1488,28 +1488,28 @@ TEST_F(MSPROF_ACL_CORE_UTEST, Graph_aclgrphProfGraphSubscribe) {
 TEST_F(MSPROF_ACL_CORE_UTEST, AicoreMetricsEnumToName) {
     std::string metrics;
 
-    Msprofiler::Api::ProfAclMgr::instance()->AicoreMetricsEnumToName(PROF_AICORE_ARITHMETIC_UTILIZATION, metrics);
+    ConfigManager::instance()->AicoreMetricsEnumToName(PROF_AICORE_ARITHMETIC_UTILIZATION, metrics);
     EXPECT_EQ("ArithmeticUtilization", metrics);
 
-    Msprofiler::Api::ProfAclMgr::instance()->AicoreMetricsEnumToName(PROF_AICORE_PIPE_UTILIZATION, metrics);
+    ConfigManager::instance()->AicoreMetricsEnumToName(PROF_AICORE_PIPE_UTILIZATION, metrics);
     EXPECT_EQ("PipeUtilization", metrics);
 
-    Msprofiler::Api::ProfAclMgr::instance()->AicoreMetricsEnumToName(PROF_AICORE_MEMORY_BANDWIDTH, metrics);
+    ConfigManager::instance()->AicoreMetricsEnumToName(PROF_AICORE_MEMORY_BANDWIDTH, metrics);
     EXPECT_EQ("Memory", metrics);
 
-    Msprofiler::Api::ProfAclMgr::instance()->AicoreMetricsEnumToName(PROF_AICORE_L0B_AND_WIDTH, metrics);
+    ConfigManager::instance()->AicoreMetricsEnumToName(PROF_AICORE_L0B_AND_WIDTH, metrics);
     EXPECT_EQ("MemoryL0", metrics);
 
-    Msprofiler::Api::ProfAclMgr::instance()->AicoreMetricsEnumToName(PROF_AICORE_RESOURCE_CONFLICT_RATIO, metrics);
+    ConfigManager::instance()->AicoreMetricsEnumToName(PROF_AICORE_RESOURCE_CONFLICT_RATIO, metrics);
     EXPECT_EQ("ResourceConflictRatio", metrics);
 
-    Msprofiler::Api::ProfAclMgr::instance()->AicoreMetricsEnumToName(PROF_AICORE_MEMORY_UB, metrics);
+    ConfigManager::instance()->AicoreMetricsEnumToName(PROF_AICORE_MEMORY_UB, metrics);
     EXPECT_EQ("MemoryUB", metrics);
 
-    Msprofiler::Api::ProfAclMgr::instance()->AicoreMetricsEnumToName(PROF_AICORE_NONE, metrics);
+    ConfigManager::instance()->AicoreMetricsEnumToName(PROF_AICORE_NONE, metrics);
     EXPECT_EQ("MemoryUB", metrics);
 
-    Msprofiler::Api::ProfAclMgr::instance()->AicoreMetricsEnumToName(PROF_AICORE_METRICS_COUNT, metrics);
+    ConfigManager::instance()->AicoreMetricsEnumToName(PROF_AICORE_METRICS_COUNT, metrics);
     EXPECT_EQ("MemoryUB", metrics);
 }
 
