@@ -51,7 +51,7 @@ set(common_file
 
 set(src_file
     ${MSPROF_SOURCE_DIR}/dvvp/msprofbin/src/msprof_bin.cpp
-    ${MSPROF_SOURCE_DIR}/dvvp/msprofbin/src/cmd_log.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/common/logger/cmd_log.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/msprofbin/src/msprof_manager.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/msprofbin/src/prof_params_adapter.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/msprofbin/src/data_handle.cpp
