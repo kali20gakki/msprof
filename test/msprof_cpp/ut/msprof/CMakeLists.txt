@@ -283,7 +283,7 @@ target_include_directories(msprof_utest PRIVATE
 	${MSPROF_SOURCE_DIR}/dvvp/common/errno
     ${MSPROF_SOURCE_DIR}/dvvp/common/platform
     ${MSPROF_SOURCE_DIR}/dvvp/message
-    ${MSPROF_SOURCE_DIR}/dvvp/driver/devmgmt/inc
+    ${MSPROF_SOURCE_DIR}/dvvp/driver/inc
 	${MSPROF_SOURCE_DIR}/dvvp/message
 	${MSPROF_SOURCE_DIR}/dvvp/transport
 	${MSPROF_SOURCE_DIR}/dvvp/adx/inc
