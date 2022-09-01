@@ -139,6 +139,7 @@ struct ProfileParams : BaseInfo {
     std::string host_cpu_profiling;
     std::string host_mem_profiling;
     std::string host_network_profiling;
+    int host_disk_freq;
 
     // for parse, query and export
     std::string pythonPath;
@@ -181,7 +182,7 @@ struct ProfileParams : BaseInfo {
           host_sys(""), host_sys_pid(HOST_PID_DEFAULT),
           host_disk_profiling("off"), host_osrt_profiling("off"),
           host_profiling(FALSE), host_cpu_profiling("off"),
-          host_mem_profiling("off"), host_network_profiling("off"),
+          host_mem_profiling("off"), host_network_profiling("off"), host_disk_freq(DEFAULT_PROFILING_INTERVAL_50MS),
           pythonPath(""), parseSwitch("off"), querySwitch("off"), exportSwitch("off"),
           exportSummaryFormat(PROFILING_SUMMARY_FORMAT), exportIterationId(DEFAULT_INTERATION_ID),
           exportModelId(DEFAULT_MODEL_ID), usedParams(), dataTypeConfig(0), dataTypeConfigHigh(0),
@@ -330,6 +331,7 @@ struct ProfileParams : BaseInfo {
         SET_VALUE(object, host_sys_pid);
         SET_VALUE(object, host_disk_profiling);
         SET_VALUE(object, host_osrt_profiling);
+        SET_VALUE(object, host_disk_freq);
     }
 
     void ToObjectPartThree(nlohmann::json &object)
@@ -454,6 +456,7 @@ struct ProfileParams : BaseInfo {
         FROM_INT_VALUE(object, host_sys_pid, HOST_PID_DEFAULT);
         FROM_STRING_VALUE(object, host_disk_profiling);
         FROM_STRING_VALUE(object, host_osrt_profiling);
+        FROM_INT_VALUE(object, host_disk_freq, DEFAULT_PROFILING_INTERVAL_10MS);
         FROM_STRING_VALUE(object, host_mem_profiling);
         FROM_STRING_VALUE(object, host_network_profiling);
         FROM_INT_VALUE(object, dataTypeConfigHigh, 0);
