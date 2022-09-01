@@ -43,11 +43,14 @@
 
 using namespace analysis::dvvp::common::error;
 using namespace Analysis::Dvvp::Analyze;
+using namespace Analysis::Dvvp::Common::Config;
 using namespace analysis::dvvp::transport;
 using namespace Analysis::Dvvp::ProfilerCommon;
 using namespace Analysis::Dvvp::Common::Platform;
 using namespace Collector::Dvvp::Plugin;
 using namespace Collector::Dvvp::Mmpa;
+using namespace Collector::Dvvp::Mmpa;
+
 const int RECEIVE_CHUNK_SIZE = 320; // chunk size:320
 
 class MSPROF_ACL_CORE_UTEST: public testing::Test {

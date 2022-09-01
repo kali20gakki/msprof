@@ -22,6 +22,7 @@ set(msprofBinHeader
     ${TOP_DIR}/collector/dvvp/common/config
     ${TOP_DIR}/collector/dvvp/params_adapter
     ${TOP_DIR}/collector/inc/external
+    ${TOP_DIR}/collector/dvvp/depend/inc/acl
     ../common/utils
     ../msprof/engine/include
     ../host/include/
@@ -65,11 +66,15 @@ add_executable(msprofbin
     ../app/env_manager.cpp
     ../common/utils/utils.cpp
     ../common/config/config_manager.cpp
+    ../common/logger/cmd_log.cpp
+    ../depend/src/slog_plugin.cpp
+    ../common/platform/platform.cpp    
     ../common/memory/chunk_pool.cpp
     ../common/thread/thread.cpp
     ../common/thread/thread_pool.cpp
     ../common/statistics/perf_count.cpp
     ../common/validation/param_validation.cpp
+    ../driver/devmgmt/ai_drv_dev_api.cpp        
     ../common/platform/platform.cpp
     ../common/platform/platform_adapter_interface.cpp
     ../common/platform/platform_adapter_mini.cpp

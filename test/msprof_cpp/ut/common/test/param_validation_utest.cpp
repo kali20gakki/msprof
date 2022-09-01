@@ -153,36 +153,6 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckSystemTraceSwitchProfiling)
     EXPECT_EQ(true, entry->CheckSystemTraceSwitchProfiling(params));
 }
 
-TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckTsSwitchProfiling) {
-    std::shared_ptr<analysis::dvvp::message::ProfileParams> params(new analysis::dvvp::message::ProfileParams());
-    auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
-    params->ts_task_track = "asd";
-    EXPECT_EQ(false, entry->CheckTsSwitchProfiling(params));
-    params->ts_cpu_usage = "asd";
-    params->ts_task_track = "on";
-    EXPECT_EQ(false, entry->CheckTsSwitchProfiling(params));
-    params->ai_core_status = "asd";
-    params->ts_cpu_usage = "on";
-    EXPECT_EQ(false, entry->CheckTsSwitchProfiling(params));
-    params->ai_core_status = "on";
-    params->ts_timeline = "asd";
-    EXPECT_EQ(false, entry->CheckTsSwitchProfiling(params));
-    params->ts_timeline = "on";
-    params->ts_fw_training = "asd";
-    EXPECT_EQ(false, entry->CheckTsSwitchProfiling(params));
-    params->ts_fw_training = "on";
-    params->hwts_log = "asd";
-    EXPECT_EQ(false, entry->CheckTsSwitchProfiling(params));
-    params->hwts_log = "on";
-    params->hwts_log1 = "asd";
-    EXPECT_EQ(false, entry->CheckTsSwitchProfiling(params));
-    params->hwts_log1 = "on";
-    params->ai_vector_status = "ada";
-    EXPECT_EQ(false, entry->CheckTsSwitchProfiling(params));
-    params->ai_vector_status = "on";
-    EXPECT_EQ(true, entry->CheckTsSwitchProfiling(params));
-}
-
 TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckPmuSwitchProfiling) {
     std::shared_ptr<analysis::dvvp::message::ProfileParams> params(new analysis::dvvp::message::ProfileParams());
     auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
