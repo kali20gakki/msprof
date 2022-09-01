@@ -230,8 +230,6 @@ enum FileChunkDataModule {
 };
 
 // biu perf
-constexpr int BIU_GROUP_MAX_NUM = 25;       // biu group id 0 ~ 24
-constexpr int BIU_GROUP_CHANNEL_NUM = 3;    // biu group contains 3 channel
 constexpr int BIU_SAMPLE_FREQ_MIN = 300;    // biu sampling frequency min value
 constexpr int BIU_SAMPLE_FREQ_MAX = 30000;  // biu sampling frequency max value
 
