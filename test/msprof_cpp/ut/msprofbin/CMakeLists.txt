@@ -85,6 +85,7 @@ add_executable(msprof_bin_utest
 target_include_directories(msprof_bin_utest PRIVATE
     ${GTEST_INCLUDE_DIR}
     ${MOCKCPP_INCLUDE_DIR}
+    ${TOP_DIR}/collector/inc/toolchain
     ${TOP_DIR}/collector/inc/external
     ${TOP_DIR}/platform/securec/include
     ${TOP_DIR}/opensource/json/include

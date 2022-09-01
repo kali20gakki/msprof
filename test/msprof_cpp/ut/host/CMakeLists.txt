@@ -83,6 +83,7 @@ target_include_directories(host_utest PRIVATE
     ${TOP_DIR}/open_source/json/include 
     ${TOP_DIR}/ace/npuruntime/inc
     ${TOP_DIR}/metadef/inc
+    ${TOP_DIR}/collector/inc/toolchain
     ../stub/ 
     ${TOP_DIR}/llt/abl/msprof/msprof_cpp/st/stub 
     ${MSPROF_SOURCE_DIR}/dvvp 
