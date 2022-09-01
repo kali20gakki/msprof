@@ -27,12 +27,12 @@ bool DriverPlugin::IsFuncExist(const std::string &funcName) const
 
 // halHdcRecv
 hdcError_t DriverPlugin::MsprofHalHdcRecv(HDC_SESSION session, struct drvHdcMsg *pMsg, int bufLen,
-    UINT64 flag, int *recvBufCount, UINT32 timeout)
+    uint64_t flag, int *recvBufCount, uint32_t timeout)
 {
     PthreadOnce(&loadFlag_, []()->void {DriverPlugin::instance()->LoadDriverSo();});
     if (halHdcRecv_ == nullptr) {
-        int32_t ret = pluginHandle_.GetFunction<hdcError_t, HDC_SESSION, struct drvHdcMsg *, int, UINT64,
-                                                     int *, UINT32>("halHdcRecv", halHdcRecv_);
+        int32_t ret = pluginHandle_.GetFunction<hdcError_t, HDC_SESSION, struct drvHdcMsg *, int, uint64_t,
+                                                     int *, uint32_t>("halHdcRecv", halHdcRecv_);
         if (ret != PROFILING_SUCCESS) {
             return DRV_ERROR_INVALID_HANDLE;
         }
@@ -41,12 +41,12 @@ hdcError_t DriverPlugin::MsprofHalHdcRecv(HDC_SESSION session, struct drvHdcMsg 
 }
 
 // halHdcSend
-hdcError_t DriverPlugin::MsprofHalHdcSend(HDC_SESSION session, struct drvHdcMsg *pMsg, UINT64 flag, UINT32 timeout)
+hdcError_t DriverPlugin::MsprofHalHdcSend(HDC_SESSION session, struct drvHdcMsg *pMsg, uint64_t flag, uint32_t timeout)
 {
     PthreadOnce(&loadFlag_, []()->void {DriverPlugin::instance()->LoadDriverSo();});
     if (halHdcSend_ == nullptr) {
         int32_t ret = pluginHandle_.GetFunction<hdcError_t, HDC_SESSION, struct drvHdcMsg *,
-            UINT64, UINT32>("halHdcSend", halHdcSend_);
+            uint64_t, uint32_t>("halHdcSend", halHdcSend_);
         if (ret != PROFILING_SUCCESS) {
             return DRV_ERROR_INVALID_HANDLE;
         }

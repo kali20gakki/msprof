@@ -6,14 +6,14 @@ Copyright Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
 """
 
 import logging
-import sys
 from abc import abstractmethod
 
+from common_func.common import call_sys_exit
 from common_func.constant import Constant
 from common_func.ms_constant.number_constant import NumberConstant
+from common_func.msprof_exception import ProfException
 from common_func.os_manager import check_file_readable
 from common_func.path_manager import PathManager
-from common_func.msprof_exception import ProfException
 
 
 class HostProfPresenterBase:
@@ -90,5 +90,5 @@ class HostProfPresenterBase:
     def _create_tables(self: any) -> None:
         if not self.cur_model.init():
             logging.error("Failed to connect to host usage database.")
-            sys.exit(NumberConstant.ERROR)
+            call_sys_exit(NumberConstant.ERROR)
         self.cur_model.create_table()

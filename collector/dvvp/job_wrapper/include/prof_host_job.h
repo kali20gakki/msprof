@@ -40,13 +40,6 @@ struct ProfHostWriteDoneInfo {
     std::string endTime;
 };
 
-#define CHECK_TIMER_TAG_PARAM_RET(cfg, ret) do {                                      \
-    if ((cfg) < PROF_HOST_SYS_CALL || (cfg) >= PROF_HOST_MAX_TAG) {                     \
-        MSPROF_LOGI("hostTimerTag  invalid");                                    \
-        return ret;                                                                    \
-    }                                                                                  \
-} while (0)
-
 static const unsigned int PROC_HOST_PROC_DATA_BUF_SIZE = (1 << 13); // 1 << 13  means 8k
 
 // task interface

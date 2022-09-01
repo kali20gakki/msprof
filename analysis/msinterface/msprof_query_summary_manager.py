@@ -18,6 +18,7 @@ from common_func.msprof_common import get_path_dir, prepare_log
 from common_func.msprof_exception import ProfException
 from common_func.path_manager import PathManager
 from msparser.cluster.cluster_parallel_parser import ClusterParallelParser
+from msparser.cluster.data_preprocess_parser import DataPreprocessParser
 from msparser.cluster.fops_parser import FopsParser
 from msparser.cluster.cluster_communication_parser import ClusterCommunicationParser
 from msparser.cluster.step_trace_summary import StepTraceSummay
@@ -90,6 +91,9 @@ class MsprofQuerySummaryManager:
         if self.data_type == QueryDataType.PARALLEL_ANALYSIS:
             ClusterParallelParser(params).process()
             return
+        if self.data_type == QueryDataType.DATA_PREPARATION:
+            DataPreprocessParser(params).process()
+            return
         self._check_arguments_valid()
         self._check_cluster_scene()
         if self.data_type == QueryDataType.STEP_TRACE:
@@ -136,5 +140,6 @@ class QueryDataType(IntEnum):
     CLUSTER_SCENE = 0
     STEP_TRACE = 1
     FOPS_ANALYSE = 2
+    DATA_PREPARATION = 3
     PARALLEL_ANALYSIS = 4
     COLLECTIVE_COMMUNICATION = 5

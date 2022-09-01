@@ -72,8 +72,7 @@ class ThreadGroupViewer:
         conn, curs = DBManager.check_connect_db(self._project_path, db_name)
         if not DBManager.judge_table_exist(curs, table_name):
             return []
-        curs.row_factory = ClassRowType.class_row(dto)
-        return DBManager.fetch_all_data(curs, sql)
+        return DBManager.fetch_all_data(curs, sql, dto_class=dto)
 
     def _get_acl_api_sql(self):
         where_condition = self._iteration.get_condition_within_iteration(self._index_id, self._model_id,
