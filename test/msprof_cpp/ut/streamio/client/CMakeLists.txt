@@ -39,6 +39,7 @@ add_executable(client_utest
 target_include_directories(client_utest PRIVATE
     ${GTEST_INCLUDE_DIR}
     ${MOCKCPP_INCLUDE_DIR}
+    ${TOP_DIR}/collector/inc/external
     ${TOP_DIR}/platform/securec/include
     ${TOP_DIR}/opensource/json/include
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/slog
@@ -52,6 +53,7 @@ target_include_directories(client_utest PRIVATE
     ${MSPROF_SOURCE_DIR}/dvvp/common
     ${TOP_DIR}/test/msprof_cpp/ut/stub/common/log/
     ${MSPROF_SOURCE_DIR}/dvvp/common/mmpa
+    ${MSPROF_SOURCE_DIR}/dvvp/msprof/engine/include
     ${MSPROF_SOURCE_DIR}/dvvp/common/config
     ${MSPROF_SOURCE_DIR}/dvvp/common/validation
     ${MSPROF_SOURCE_DIR}/dvvp/streamio/client/include
