@@ -287,7 +287,7 @@ bool ParamValidation::CheckHostSysUsageIsValid(const std::string &hostSysUsage)
             MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
                 std::vector<std::string>({"host_sys_usage", hostSysUsage, errReason}));
             return false;
-        }   
+        }
     }
     return true;
 }
@@ -1032,7 +1032,7 @@ int ParamValidation::MsprofCheckAppValid(std::string &appParam) const
     std::vector<std::string> AppParamsList = Utils::Split(appParam, false, "", " ");
     std::string cmdParam = AppParamsList[0];
     if (!Utils::IsAppName(cmdParam)) {
-        if (MsprofCheckNotAppValid(AppParamsList, resultAppParam) != PROFLING_SUCCESS) {
+        if (MsprofCheckNotAppValid(AppParamsList, resultAppParam) != PROFILING_SUCCESS) {
             return PROFILING_FAILED;
         }
         appParam = resultAppParam;
@@ -1302,7 +1302,7 @@ int ParamValidation::CheckHostSysToolsIsExist(const std::string toolName, const 
 }
 
 int ParamValidation::CheckHostSysCmdOutIsExist(const std::string tmpDir, const std::string toolName,
-                                             const MmProcess tmpProcess) const
+                                            const MmProcess tmpProcess) const
 {
     MSPROF_LOGI("Start to check whether the file exists.");
     for (int i = 0; i < FILE_FIND_REPLAY; i++) {
