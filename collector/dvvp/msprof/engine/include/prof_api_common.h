@@ -20,8 +20,16 @@ static const uint64_t PROF_SWITCH_SUPPORT = PROF_ACL_API | PROF_TASK_TIME | PROF
     PROF_CPU | PROF_HARDWARE_MEMORY | PROF_IO | PROF_INTER_CONNECTION | PROF_DVPP | PROF_SYS_AICORE_SAMPLE |
     PROF_AIVECTORCORE_SAMPLE | PROF_L2CACHE | PROF_MSPROFTX | PROF_KEYPOINT_TRACE_HELPER;
 #else
-static const uint64_t PROF_SWITCH_SUPPORT = PROF_ACL_API | PROF_TASK_TIME | PROF_AICORE_METRICS | PROF_AICPU_TRACE |
-    PROF_L2CACHE | PROF_HCCL_TRACE | PROF_KEYPOINT_TRACE | PROF_MSPROFTX | PROF_RUNTIME_API | PROF_KEYPOINT_TRACE_HELPER;
+static const uint64_t PROF_SWITCH_SUPPORT = PROF_ACL_API |
+                                            PROF_TASK_TIME |
+                                            PROF_AICORE_METRICS |
+                                            PROF_AICPU_TRACE |
+                                            PROF_L2CACHE |
+                                            PROF_HCCL_TRACE |
+                                            PROF_KEYPOINT_TRACE |
+                                            PROF_MSPROFTX |
+                                            PROF_RUNTIME_API |
+                                            PROF_KEYPOINT_TRACE_HELPER;
 #endif // MSPROF_DEBUG
 
 /**
