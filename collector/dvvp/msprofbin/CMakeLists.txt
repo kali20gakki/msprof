@@ -52,6 +52,7 @@ set(hdcCpp
 )
 
 add_executable(msprofbin
+    ${TOP_DIR}/collector/dvvp/common/platform/platform_adapter.cpp
     ${TOP_DIR}/collector/dvvp/params_adapter/params_adapter.cpp
     ${TOP_DIR}/collector/dvvp/params_adapter/params_adapter_impl.cpp
     ${TOP_DIR}/collector/dvvp/common/logger/cmd_log.cpp
@@ -68,6 +69,7 @@ add_executable(msprofbin
     ../common/config/config_manager.cpp
     ../common/logger/cmd_log.cpp
     ../depend/src/slog_plugin.cpp
+    ../depend/src/driver_plugin.cpp
     ../common/platform/platform.cpp    
     ../common/memory/chunk_pool.cpp
     ../common/thread/thread.cpp
