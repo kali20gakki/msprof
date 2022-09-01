@@ -38,7 +38,7 @@ class ImportCommand:
         self.is_cluster_scence = args.cluster_flag
         self.device_cluster_basic_info = {}
         self.device_or_rank_ids = set()
-        self.have_rank_id = Constant.DEFAULT_INVALID_VALUE
+        self.have_rank_id = {}
 
     @staticmethod
     def do_import(result_dir: str) -> None:
@@ -145,26 +145,21 @@ class ImportCommand:
     def _dir_exception_check(self: any, path: str) -> None:
         if DataCheckManager.contain_info_json_data(path):
             error(MsProfCommonConstant.COMMON_FILE_NAME, 'Incorrect parse dir(%s),'
-                                            '-dir argument must be cluster data root dir.' % self.collection_path)
+                                             '-dir argument must be cluster data root dir.' % self.collection_path)
             raise ProfException(ProfException.PROF_CLUSTER_DIR_ERROR)
 
     def _check_prof_sub_path(self: any, prof_sub_path: str) -> int:
         if not DataCheckManager.contain_info_json_data(prof_sub_path):
             return Constant.DEFAULT_INVALID_VALUE
         cluster_basic_info = ClusterBasicInfo(prof_sub_path)
+        cluster_basic_info.init()
         if not cluster_basic_info.is_host_profiling:
-            if cluster_basic_info.rank_id == Constant.NA:
-                _have_rank_id = Constant.DEFAULT_FALSE_VALUE
-                _device_or_rank_id = cluster_basic_info.device_id
-            else:
-                _have_rank_id = Constant.DEFAULT_TURE_VALUE
-                _device_or_rank_id = cluster_basic_info.rank_id
-            if self.have_rank_id == Constant.DEFAULT_INVALID_VALUE:
-                self.have_rank_id = _have_rank_id
-            elif self.have_rank_id != _have_rank_id:
+            _have_rank_id = False if cluster_basic_info.rank_id == Constant.NA else True
+            if self.have_rank_id.setdefault("have_rank_id", _have_rank_id) != _have_rank_id:
                 error(MsProfCommonConstant.COMMON_FILE_NAME, 'The dir(%s) contains unqualified '
                                                              'data!' % self.collection_path)
                 raise ProfException(ProfException.PROF_CLUSTER_DIR_ERROR)
+            _device_or_rank_id = int(cluster_basic_info.rank_id) if _have_rank_id else int(cluster_basic_info.device_id)
             if _device_or_rank_id in self.device_or_rank_ids:
                 error(MsProfCommonConstant.COMMON_FILE_NAME, 'There are same rank_id or device_id ( %s ) in '
                                                              'the dir(%s). Please check the PROF dirs!' % (
