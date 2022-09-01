@@ -10,6 +10,11 @@ set(common_file
     ${MSPROF_SOURCE_DIR}/dvvp/app/env_manager.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/utils/utils.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/config/config_manager.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/common/logger/cmd_log.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/src/slog_plugin.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform.cpp    
+    ${MSPROF_SOURCE_DIR}/dvvp/driver/devmgmt/ai_drv_dev_api.cpp        
+    ${MSPROF_SOURCE_DIR}/dvvp/driver/devmgmt/ai_drv_dev_api.cpp        
     ${MSPROF_SOURCE_DIR}/dvvp/common/memory/chunk_pool.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/thread/thread.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/thread/thread_pool.cpp
@@ -46,6 +51,8 @@ set(common_file
     ${MSPROF_SOURCE_DIR}/dvvp/adx/stub/adx_prof_api.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/depend/src/slog_plugin.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/depend/src/plugin_handle.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/params_adapter/params_adapter_impl.cpp
+    ${TOP_DIR}/collector/dvvp/params_adapter/params_adapter.cpp
 )
 
 
@@ -58,7 +65,6 @@ set(src_file
     ${MSPROF_SOURCE_DIR}/dvvp/msprofbin/src/input_parser.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/msprofbin/src/prof_task.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/msprofbin/src/running_mode.cpp
-
 )
 
 add_executable(msprof_bin_utest
@@ -87,6 +93,7 @@ target_include_directories(msprof_bin_utest PRIVATE
     ${MOCKCPP_INCLUDE_DIR}
     ${TOP_DIR}/collector/inc/toolchain
     ${TOP_DIR}/collector/inc/external
+    ${TOP_DIR}/collector/dvvp/depend/inc/acl
     ${TOP_DIR}/platform/securec/include
     ${TOP_DIR}/opensource/json/include
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/slog
@@ -102,11 +109,14 @@ target_include_directories(msprof_bin_utest PRIVATE
     ${MSPROF_SOURCE_DIR}/dvvp/
     ${MSPROF_SOURCE_DIR}/dvvp/host/include/
     ${MSPROF_SOURCE_DIR}/dvvp/common
+    ${MSPROF_SOURCE_DIR}/dvvp/params_adapter
     ${TOP_DIR}/test/msprof_cpp/ut/stub/common/log/
     ${MSPROF_SOURCE_DIR}/dvvp/common/mmpa
+    ${MSPROF_SOURCE_DIR}/dvvp/common/logger
     ${MSPROF_SOURCE_DIR}/dvvp/common/statistics
     ${MSPROF_SOURCE_DIR}/dvvp/common/validation
     ${MSPROF_SOURCE_DIR}/dvvp/common/platform
+    ${MSPROF_SOURCE_DIR}/dvvp/common/utils 
     ${MSPROF_SOURCE_DIR}/dvvp/msprof/engine/include
     ${MSPROF_SOURCE_DIR}/dvvp/common/config
     ${MSPROF_SOURCE_DIR}/dvvp/job_wrapper/include

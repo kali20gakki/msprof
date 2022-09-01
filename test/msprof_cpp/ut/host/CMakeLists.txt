@@ -11,6 +11,7 @@ set(commonSrcFiles
     ${MSPROF_SOURCE_DIR}//dvvp/common/thread/thread.cpp 
     ${MSPROF_SOURCE_DIR}//dvvp/common/thread/thread_pool.cpp 
     ${MSPROF_SOURCE_DIR}//dvvp/common/memory/chunk_pool.cpp 
+    ${MSPROF_SOURCE_DIR}/dvvp/driver/devmgmt/ai_drv_dev_api.cpp        
     ${MSPROF_SOURCE_DIR}//dvvp/common/platform/platform.cpp    
     ${MSPROF_SOURCE_DIR}//dvvp/common/statistics/perf_count.cpp 
     ${MSPROF_SOURCE_DIR}//dvvp/app/application.cpp 
@@ -47,7 +48,11 @@ set(profilerSrcFiles
     ${MSPROF_SOURCE_DIR}//dvvp/transport/hdc/device_transport.cpp 
     ${MSPROF_SOURCE_DIR}//dvvp/transport/hdc/hdc_transport.cpp 
     ${MSPROF_SOURCE_DIR}//dvvp/transport/hdc/platform/rpc/dev_mgr_api.cpp 
-    ${MSPROF_SOURCE_DIR}//dvvp/common/validation/param_validation.cpp
+    ${MSPROF_SOURCE_DIR}//dvvp/common/validation/
+    ${MSPROF_SOURCE_DIR}/dvvp/common/logger/cmd_log.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/src/slog_plugin.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform.cpp    
+    ${MSPROF_SOURCE_DIR}/dvvp/driver/devmgmt/ai_drv_dev_api.cpp        
     ${commonSrcFiles}
 )
 
@@ -90,6 +95,7 @@ target_include_directories(host_utest PRIVATE
     ${MSPROF_SOURCE_DIR}/dvvp/adx/inc    
     ${MSPROF_SOURCE_DIR}/dvvp/aging 
     ${MSPROF_SOURCE_DIR}/dvvp/common 
+    ${MSPROF_SOURCE_DIR}/dvvp/common/utils 
     ${MSPROF_SOURCE_DIR}/dvvp/msprof/engine/include
     ${MSPROF_SOURCE_DIR}/dvvp/common/config 
     # ${MSPROF_SOURCE_DIR}/dvvp/common/logger
