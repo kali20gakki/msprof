@@ -11,6 +11,7 @@
 
 #include "config/config.h"
 #include "errno/error_code.h"
+#include "message/prof_params.h"
 #include "message/codec.h"
 #include "platform/platform.h"
 #include "msprof_error_manager.h"
@@ -507,10 +508,22 @@ bool ParamValidation::IsValidSwitch(const std::string &switchStr) const
 
 bool ParamValidation::CheckTsSwitchProfiling(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params)
 {
+    if (!IsValidSwitch(params->ts_task_track)) {
+        return false;
+    }
+    if (!IsValidSwitch(params->ts_cpu_usage)) {
+        return false;
+    }
+    if (!IsValidSwitch(params->ai_core_status)) {
+        return false;
+    }
     if (!IsValidSwitch(params->ts_timeline)) {
         return false;
     }
     if (!IsValidSwitch(params->ts_keypoint)) {
+        return false;
+    }
+    if (!IsValidSwitch(params->ai_vector_status)) {
         return false;
     }
     if (!IsValidSwitch(params->ts_fw_training)) {
@@ -755,7 +768,7 @@ bool ParamValidation::CheckParamsModeRegexMatch(const std::string &paramsMode) c
     }
     std::vector<std::string> profilingModeWhiteList;
     profilingModeWhiteList.push_back(analysis::dvvp::message::PROFILING_MODE_DEF);
-
+    profilingModeWhiteList.push_back(analysis::dvvp::message::PROFILING_MODE_SYSTEM_WIDE);
     for (size_t i = 0; i < profilingModeWhiteList.size(); i++) {
         if (paramsMode.compare(profilingModeWhiteList[i]) == 0) {
             return true;

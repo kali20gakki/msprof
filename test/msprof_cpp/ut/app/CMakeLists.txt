@@ -6,7 +6,11 @@ protobuf_generate(profiler
 )
 
 set(profilerSrcList
-    ${MSPROF_SOURCE_DIR}/dvvp/common/validation/param_validation.cpp 
+    ${MSPROF_SOURCE_DIR}/dvvp/common/validation/param_validation.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/common/config/config_manager.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/driver/devmgmt/ai_drv_dev_api.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/src/driver_plugin.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/app/application.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/app/env_manager.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/utils/utils.cpp
@@ -57,6 +61,11 @@ target_include_directories(application_utest PRIVATE
     ${MSPROF_SOURCE_DIR}/dvvp/common/validation
     ${MSPROF_SOURCE_DIR}/dvvp/common/statistics
     ${MSPROF_SOURCE_DIR}/dvvp/common/config
+    ${MSPROF_SOURCE_DIR}/dvvp/common/errno
+    ${MSPROF_SOURCE_DIR}/dvvp/common/platform
+    ${MSPROF_SOURCE_DIR}/dvvp/message
+    ${MSPROF_SOURCE_DIR}/dvvp/driver/devmgmt/inc
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/plugin
     ${MSPROF_SOURCE_DIR}/dvvp/host/include
     ${MSPROF_SOURCE_DIR}/dvvp/streamio/server/include
     ${MSPROF_SOURCE_DIR}/dvvp/job_wrapper/include
