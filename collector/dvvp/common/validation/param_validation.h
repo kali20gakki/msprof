@@ -12,6 +12,7 @@
 
 #include <string>
 #include "message/prof_params.h"
+#include "errno/error_code.h"
 #include "singleton/singleton.h"
 #include "utils/utils.h"
 #include "mmpa_api.h"
