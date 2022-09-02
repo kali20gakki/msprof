@@ -6,7 +6,6 @@ import logging
 import os
 import shutil
 
-from common_func.constant import Constant
 from common_func.file_manager import check_path_valid
 from common_func.info_conf_reader import InfoConfReader
 from common_func.common import error
@@ -23,10 +22,11 @@ class ClusterInfoParser(IParser):
     """
     FILE_NAME = os.path.basename(__file__)
 
-    def __init__(self: any, collect_path: str, device_cluster_basic_info: dict) -> None:
+    def __init__(self: any, collect_path: str, cluster_device_paths: list) -> None:
         self.collect_path = collect_path
-        self.device_cluster_basic_info = device_cluster_basic_info
+        self.cluster_device_paths = cluster_device_paths
         self.cluster_info_list = []
+        self.rank_id_set = set()
 
     def ms_run(self: any):
         self.parse()
@@ -35,54 +35,27 @@ class ClusterInfoParser(IParser):
 
     def parse(self: any) -> None:
         logging.info("Start to parse cluster rank data!")
-        for dir_name, cluster_basic_info in self.device_cluster_basic_info.items():
-            cluster_info = [cluster_basic_info.job_info, cluster_basic_info.device_id,
-                            cluster_basic_info.collection_time, cluster_basic_info.rank_id, dir_name]
-            self.cluster_info_list.append(cluster_info)
+        for cluster_device_path in self.cluster_device_paths:
+            check_path_valid(cluster_device_path, False)
+            InfoConfReader().load_info(cluster_device_path)
+            rank_id = InfoConfReader().get_rank_id()
+            if rank_id in self.rank_id_set:
+                cluster_sqlite_path = PathManager.get_sql_dir(self.collect_path)
+                shutil.rmtree(cluster_sqlite_path)
+                error(MsProfCommonConstant.COMMON_FILE_NAME, 'There are same rank_id(%s) in the dir(%s).'
+                                        ' Please check the PROF dirs!' % (rank_id, self.collect_path))
+                raise ProfException(ProfException.PROF_CLUSTER_DIR_ERROR)
+            self.rank_id_set.add(rank_id)
+            cluster_info = InfoConfReader().get_job_basic_info()
+            if cluster_info:
+                cluster_info.append(os.sep.join(cluster_device_path.split(os.sep)[-2:]))
+                self.cluster_info_list.append(cluster_info)
 
     def save(self: any) -> None:
         logging.info("Starting to save cluster_rank data to db!")
         if not self.cluster_info_list:
             error(MsProfCommonConstant.COMMON_FILE_NAME, 'No valid cluster data in the dir(%s).', self.collect_path)
             return
-        self.cluster_info_list.sort(key=lambda x: str(x[3]))
+        self.cluster_info_list.sort(key=lambda x:x[3])
         with ClusterInfoModel(self.collect_path) as cluster_info_model:
             cluster_info_model.flush(self.cluster_info_list)
-
-
-class ClusterBasicInfo:
-    def __init__(self: any, collection_path: str):
-        self.collection_path = collection_path
-        self._is_host_profiling = Constant.NA
-        self._job_info = Constant.NA
-        self._device_id = Constant.NA
-        self._collection_time = Constant.NA
-        self._rank_id = Constant.NA
-
-    @property
-    def is_host_profiling(self: any) -> bool:
-        return self._is_host_profiling
-
-    @property
-    def job_info(self: any) -> str:
-        return self._job_info
-
-    @property
-    def device_id(self: any) -> str:
-        return self._device_id
-
-    @property
-    def collection_time(self: any) -> str:
-        return self._collection_time
-
-    @property
-    def rank_id(self: any) -> str:
-        return self._rank_id
-
-    def init(self: any) -> None:
-        InfoConfReader().load_info(self.collection_path)
-        self._is_host_profiling = InfoConfReader().is_host_profiling()
-        self._job_info = InfoConfReader().get_job_info()
-        self._device_id = InfoConfReader().get_device_id()
-        self._collection_time = InfoConfReader().get_collect_start_time()
-        self._rank_id = InfoConfReader().get_rank_id()

@@ -108,11 +108,11 @@ class TestMergeOPCounter(unittest.TestCase):
             ProfilingScene().init('')
             result = check._get_op_report_sql()
         self.assertEqual(result,
-                         "select op_type, ge_task_merge.task_type, count(op_type), sum(duration) as total_time, min(duration) as min, "
+                         "select op_type, rts_task.task_type, count(op_type), sum(duration) as total_time, min(duration) as min, "
                          "sum(duration)/count(op_type) as avg, max(duration) as max, ge_task_merge.model_id "
                          "from ge_task_merge, rts_task "
                          "where ge_task_merge.task_id=rts_task.task_id and ge_task_merge.stream_id=rts_task.stream_id "
-                         "and ge_task_merge.batch_id=rts_task.batch_id group by op_type,ge_task_merge.task_type")
+                         "and ge_task_merge.task_type=rts_task.task_type and ge_task_merge.batch_id=rts_task.batch_id group by op_type,ge_task_merge.task_type")
 
     def test_create_ge_merge(self):
 

@@ -22,7 +22,7 @@ from common_func.msprof_common import get_path_dir
 from common_func.msprof_exception import ProfException
 from common_func.path_manager import PathManager
 from framework.load_info_manager import LoadInfoManager
-from msparser.cluster.cluster_info_parser import ClusterInfoParser, ClusterBasicInfo
+from msparser.cluster.cluster_info_parser import ClusterInfoParser
 from msparser.cluster.cluster_step_trace_parser import ClusterStepTraceParser
 
 
@@ -36,9 +36,7 @@ class ImportCommand:
     def __init__(self: any, args: any) -> None:
         self.collection_path = os.path.realpath(args.collection_path)
         self.is_cluster_scence = args.cluster_flag
-        self.device_cluster_basic_info = {}
-        self.device_or_rank_ids = set()
-        self.have_rank_id = {}
+        self.cluster_device_paths = []
 
     @staticmethod
     def do_import(result_dir: str) -> None:
@@ -68,7 +66,7 @@ class ImportCommand:
             self._prepare_for_cluster_parse()
             print_info(MsProfCommonConstant.COMMON_FILE_NAME,
                        'Start parse cluster data in "%s" ...' % self.collection_path)
-            cluster_info_parser = ClusterInfoParser(self.collection_path, self.device_cluster_basic_info)
+            cluster_info_parser = ClusterInfoParser(self.collection_path, self.cluster_device_paths)
             cluster_info_parser.ms_run()
             cluster_step_trace_parser = ClusterStepTraceParser(self.collection_path)
             cluster_step_trace_parser.ms_run()
@@ -103,11 +101,10 @@ class ImportCommand:
     def _find_unresolved_dirs(self: any) -> list:
         prof_dirs = self._get_prof_dirs()
         print_info(MsProfCommonConstant.COMMON_FILE_NAME,
-                   'Start verify that all data is parsed in "%s" .' % self.collection_path)
+                   'Verify that all data is parsed in "%s" .' % self.collection_path)
         _unresolved_dirs = {}
         for prof_dir in prof_dirs:
             _unresolved_prof_sub_dirs = []
-            _invalid_prof_sub_dirs = []
             prof_path = os.path.realpath(
                 os.path.join(self.collection_path, prof_dir))
             if not os.listdir(prof_path):
@@ -118,19 +115,16 @@ class ImportCommand:
             for prof_sub_dir in prof_sub_dirs:
                 prof_sub_path = os.path.realpath(
                     os.path.join(prof_path, prof_sub_dir))
-                prof_sub_path_check = self._check_prof_sub_path(prof_sub_path)
-                if prof_sub_path_check == Constant.DEFAULT_TURE_VALUE:
+                is_cluster_device_or_host_path = self._judge_cluster_device_or_host_path(prof_sub_path)
+                if not is_cluster_device_or_host_path:
+                    continue
+                sqlite_path = PathManager.get_sql_dir(prof_sub_path)
+                if not os.path.exists(sqlite_path) or not os.listdir(sqlite_path):
                     _unresolved_prof_sub_dirs.append(prof_sub_path)
-                if prof_sub_path_check == Constant.DEFAULT_INVALID_VALUE:
-                    _invalid_prof_sub_dirs.append(prof_sub_dir)
             if _unresolved_prof_sub_dirs:
                 _unresolved_dirs.setdefault(prof_dir, _unresolved_prof_sub_dirs)
-            if _invalid_prof_sub_dirs:
-                warn(MsProfCommonConstant.COMMON_FILE_NAME, 'There are some invalid PROF dirs in the path(%s)! '
-                                                            'please check the dirs: %s' % (
-                         prof_path, _invalid_prof_sub_dirs))
-        if not self.device_cluster_basic_info:
-            error(MsProfCommonConstant.COMMON_FILE_NAME, 'None of device PROF dir find in the dir(%s), '
+        if not self.cluster_device_paths:
+            error(MsProfCommonConstant.COMMON_FILE_NAME, 'None of PROF dir find in the dir(%s), '
                                                          'please check the -dir argument' % self.collection_path)
             raise ProfException(ProfException.PROF_CLUSTER_DIR_ERROR)
         return _unresolved_dirs
@@ -145,33 +139,22 @@ class ImportCommand:
     def _dir_exception_check(self: any, path: str) -> None:
         if DataCheckManager.contain_info_json_data(path):
             error(MsProfCommonConstant.COMMON_FILE_NAME, 'Incorrect parse dir(%s),'
-                                             '-dir argument must be cluster data root dir.' % self.collection_path)
+                                   '-dir argument must be cluster data root dir.' % self.collection_path)
             raise ProfException(ProfException.PROF_CLUSTER_DIR_ERROR)
 
-    def _check_prof_sub_path(self: any, prof_sub_path: str) -> int:
-        if not DataCheckManager.contain_info_json_data(prof_sub_path):
-            return Constant.DEFAULT_INVALID_VALUE
-        cluster_basic_info = ClusterBasicInfo(prof_sub_path)
-        cluster_basic_info.init()
-        if not cluster_basic_info.is_host_profiling:
-            _have_rank_id = cluster_basic_info.rank_id != Constant.NA
-            if self.have_rank_id.setdefault("have_rank_id", _have_rank_id) != _have_rank_id:
-                error(MsProfCommonConstant.COMMON_FILE_NAME, 'The dir(%s) contains unqualified '
-                                                             'data!' % self.collection_path)
+    def _judge_cluster_device_or_host_path(self: any, path: str) -> bool:
+        if not DataCheckManager.contain_info_json_data(path):
+            warn(MsProfCommonConstant.COMMON_FILE_NAME, 'The path(%s) is not a PROF data dir,'
+                                                        ' Please check the path.' % path)
+            return False
+        InfoConfReader().load_info(path)
+        if not InfoConfReader().is_host_profiling():
+            if InfoConfReader().get_rank_id() == Constant.NA:
+                error(MsProfCommonConstant.COMMON_FILE_NAME, "The data is not collected in a clustered environment, "
+                                                             "please check the directory: %s" % path)
                 raise ProfException(ProfException.PROF_CLUSTER_DIR_ERROR)
-            _device_or_rank_id = int(cluster_basic_info.rank_id) if _have_rank_id else int(cluster_basic_info.device_id)
-            if _device_or_rank_id in self.device_or_rank_ids:
-                error(MsProfCommonConstant.COMMON_FILE_NAME, 'There are same rank_id or device_id ( %s ) in '
-                                                             'the dir(%s). Please check the PROF dirs!' % (
-                          _device_or_rank_id, self.collection_path))
-                raise ProfException(ProfException.PROF_CLUSTER_DIR_ERROR)
-            self.device_or_rank_ids.add(_device_or_rank_id)
-            dir_name = os.sep.join(prof_sub_path.split(os.sep)[-2:])
-            self.device_cluster_basic_info[dir_name] = cluster_basic_info
-        sqlite_path = PathManager.get_sql_dir(prof_sub_path)
-        if not os.path.exists(sqlite_path) or not os.listdir(sqlite_path):
-            return Constant.DEFAULT_TURE_VALUE
-        return Constant.DEFAULT_FALSE_VALUE
+            self.cluster_device_paths.append(path)
+        return True
 
     def _parse_unresolved_dirs(self: any, unresolved_dirs: list) -> None:
         print_info(MsProfCommonConstant.COMMON_FILE_NAME,

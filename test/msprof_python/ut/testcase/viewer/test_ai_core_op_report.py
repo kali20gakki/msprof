@@ -181,6 +181,7 @@ class TestAiCoreOpReport(unittest.TestCase):
                   "task_time.duration_time/1000.0, task_time.wait_time/1000.0, block_dim " \
                   "from task_time inner join ge_summary " \
                   "on task_time.task_id=ge_summary.task_id " \
+                  "and task_time.task_type = ge_summary.task_type " \
                   "and task_time.stream_id=ge_summary.stream_id " \
                   "and ge_summary.task_type=? " \
                   "and task_time.batch_id=ge_summary.batch_id"

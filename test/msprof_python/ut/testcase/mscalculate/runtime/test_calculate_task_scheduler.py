@@ -4,6 +4,7 @@
 function:
 Copyright Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 """
+import sqlite3
 import unittest
 from unittest import mock
 
@@ -13,7 +14,6 @@ from profiling_bean.prof_enum.chip_model import ChipModel
 from constant.constant import CONFIG
 from mscalculate.runtime.calculate_task_scheduler import CalculateTaskScheduler
 from sqlite.db_manager import DBManager
-from analyzer.scene_base.profiling_scene import ProfilingScene
 
 NAMESPACE = 'mscalculate.runtime.calculate_task_scheduler'
 
@@ -77,8 +77,7 @@ class TestCalculateTaskScheduler(unittest.TestCase):
                 mock.patch(NAMESPACE + '.DBManager.sql_create_general_table', return_value=create_sql), \
                 mock.patch(NAMESPACE + '.multi_calculate_task_cost_time',
                            return_value=[(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11)]):
-            key = CalculateTaskScheduler({"result_dir": ""})
-            ProfilingScene().init("")
+            key = CalculateTaskScheduler({"result_dir": 123})
             key.index_id = 0
             key.model_id = 1
             key.create_task_time(runtime_conn, device, iter_time_range)

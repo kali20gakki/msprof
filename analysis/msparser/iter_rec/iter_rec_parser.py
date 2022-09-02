@@ -114,7 +114,7 @@ class IterParser(IParser, MsMultiProcess):
                                                              self._iter_recorder.iter_end_dict.get(
                                                                  self._iter_recorder.current_op_iter)))
         iter_info.task_count += 1
-        if task_log.sys_tag == self.HWTS_TASK_END \
+        if task_log.task_type == self.HWTS_TASK_END \
                 and self._is_ai_core_task(task_log.task_id, task_log.stream_id, task_log.batch_id):
             iter_info.aic_count += 1
 
@@ -125,7 +125,7 @@ class IterParser(IParser, MsMultiProcess):
                 continue
             if self._iter_recorder.check_task_in_iteration(_task_log.sys_cnt):
                 self._iter_recorder.set_current_iter_id(_task_log.sys_cnt)
-                if _task_log.sys_tag == self.HWTS_TASK_END:
+                if _task_log.task_type == self.HWTS_TASK_END:
                     self._calculate_batch_list(_task_log)
                 self._calculate_task_count(_task_log)
             else:

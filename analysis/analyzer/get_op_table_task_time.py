@@ -56,10 +56,10 @@ class GetOpTableTsTime:
         get op counter task time data
         :return:
         """
-        aicore_and_aicpu = self._get_aicore_and_aicpu()
-        aicpu_for_chip2 = self._get_aicpu_for_chip2()
+        ai_core_data = self._get_ai_core_task_time()
+        ai_cpu_data = self._get_ai_cpu_task_time()
         aiv_data = self._get_aiv_task_time()
-        fetched_data = aicpu_for_chip2 + aicore_and_aicpu + aiv_data
+        fetched_data = ai_core_data + ai_cpu_data + aiv_data
         if not fetched_data:
             logging.warning("Unable to find TaskTime data")
             return []
@@ -74,11 +74,11 @@ class GetOpTableTsTime:
         """
         ai_cpu_sql = "select task_id, stream_id, sys_start*{MS_TO_NS}, (sys_end - sys_start)*{MS_TO_NS}, " \
                      "'{0}', {2}, batch_id from {1} " \
-            .format(Constant.TASK_TYPE_AI_CPU, DBNameConstant.TABLE_AI_CPU_FROM_TS, self.iter_id,
+            .format(Constant.TASK_TYPE_AI_CPU, DBNameConstant.TABLE_AI_CPU, self.iter_id,
                     MS_TO_NS=NumberConstant.MS_TO_NS)
         return ai_cpu_sql
 
-    def _get_aicore_and_aicpu(self: any) -> list:
+    def _get_ai_core_task_time(self: any) -> list:
         model_view = ViewModel(self.project_path, self._get_db_name(), [self._task_time_table])
         if model_view.check_table():
             return model_view.get_sql_data(self._get_ai_core_sql())
@@ -90,10 +90,10 @@ class GetOpTableTsTime:
             return model_view.get_sql_data(self._get_aiv_task_sql())
         return []
 
-    def _get_aicpu_for_chip2(self: any) -> list:
+    def _get_ai_cpu_task_time(self: any) -> list:
         ai_cpu_time = []
-        model_view = ViewModel(self.project_path, DBNameConstant.DB_AI_CPU, [DBNameConstant.TABLE_AI_CPU_FROM_TS])
-        if model_view.check_table() and ChipManager().is_chip_v2():
+        model_view = ViewModel(self.project_path, DBNameConstant.DB_AI_CPU, [DBNameConstant.TABLE_AI_CPU])
+        if model_view.check_table():
             ai_cpu_time.extend(model_view.get_sql_data(self._get_ai_cpu_task_sql()))
         return ai_cpu_time
 
@@ -107,9 +107,10 @@ class GetOpTableTsTime:
         get ai core task time sql without model id
         :return:
         """
+        limit = 'where tasktype=0' if ChipManager().is_chip_v1() else ''
         sql = "select {1}.task_id, {1}.stream_id, {1}.running, {1}.complete - {1}.running, '{0}', " \
-              "{1}.index_id, {1}.batch_id from {1} group by running order by running" \
-            .format(Constant.TASK_TYPE_AI_CORE, self._task_time_table)
+              "{1}.index_id, {1}.batch_id from {1} {limit} group by running order by running" \
+            .format(Constant.TASK_TYPE_AI_CORE, self._task_time_table, limit=limit)
         return sql
 
     def _get_no_op_ai_core_task_time_sql(self: any) -> str:
@@ -117,17 +118,19 @@ class GetOpTableTsTime:
         get ai core task time sql with model id
         :return:
         """
+        limit = 'and tasktype=0' if ChipManager().is_chip_v1() else ''
         sql = "select {1}.task_id, {1}.stream_id, {1}.running, {1}.complete - {1}.running, '{0}'," \
               " {1}.index_id, {1}.model_id, {1}.batch_id from {1} where " \
-              "{1}.index_id={2} and {1}.model_id={3} order by running " \
+              "{1}.index_id={2} and {1}.model_id={3} {limit} order by running " \
             .format(Constant.TASK_TYPE_AI_CORE, self._task_time_table,
-                    self.iter_id, self.model_id)
+                    self.iter_id, self.model_id, limit=limit)
         if Utils.need_all_model_in_one_iter(self.project_path, self.model_id):
             # export all index data when pytorch graph no model_id set
+            limit = 'where tasktype=0' if ChipManager().is_chip_v1() else ''
             sql = "select {1}.task_id, {1}.stream_id, {1}.running, {1}.complete - {1}.running, '{0}'," \
                   " {1}.index_id, {1}.model_id, {1}.batch_id from {1} " \
-                  "order by running " \
-                .format(Constant.TASK_TYPE_AI_CORE, self._task_time_table)
+                  "{limit} order by running " \
+                .format(Constant.TASK_TYPE_AI_CORE, self._task_time_table, limit=limit)
         return sql
 
     def _get_ai_cpu_task_sql(self: any) -> str:
@@ -143,7 +146,7 @@ class GetOpTableTsTime:
         try:
             ai_cpu_sql = "select task_id, stream_id, sys_start*{MS_TO_NS}, (sys_end - sys_start)*{MS_TO_NS}, " \
                          "'{1}', {4}, {5}, batch_id from {0} where sys_start >= {2} and sys_end <= {3}" \
-                .format(DBNameConstant.TABLE_AI_CPU_FROM_TS, Constant.TASK_TYPE_AI_CPU,
+                .format(DBNameConstant.TABLE_AI_CPU, Constant.TASK_TYPE_AI_CPU,
                         iter_time[0][0] / NumberConstant.NS_TO_US,
                         iter_time[0][1] / NumberConstant.NS_TO_US,
                         self.iter_id, self.model_id,
