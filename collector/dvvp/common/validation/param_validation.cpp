@@ -1019,37 +1019,6 @@ bool ParamValidation::MsprofCheckAppValid(std::string &appParam) const
 int ParamValidation::MsprofCheckNotAppValid(const std::vector<std::string> &AppParamsList,
     std::string &resultAppParam) const
 {
-    std::string cmdParam = AppParamsList[0];
-    if (cmdParam.find("/") != std::string::npos) {
-        std::string absolutePathCmdParam = Utils::CanonicalizePath(cmdParam);
-        if (absolutePathCmdParam.empty()) {
-            MSPROF_LOGE("App path(%s) does not exist or permission denied.",
-                absolutePathCmdParam.c_str());
-            return PROFILING_FAILED;
-        }
-        if (MmAccess2(absolutePathCmdParam, M_X_OK) != PROFILING_SUCCESS) {
-            MSPROF_LOGE("This app(%s) has no executable permission.",
-                absolutePathCmdParam.c_str());
-            return PROFILING_FAILED;
-        }
-        resultAppParam = absolutePathCmdParam + " ";
-    } else {
-        resultAppParam = cmdParam + " ";
-    }
-    if (MsprofCheckAppScriptValid(AppParamsList) != PROFILING_SUCCESS) {
-        return PROFILING_FAILED;
-    }
-    for (size_t i = 1; i < AppParamsList.size(); i++) {
-        std::string tmpStr = Utils::CanonicalizePath(AppParamsList[i]);
-        if (!tmpStr.empty()) {
-            resultAppParam += tmpStr;
-        } else {
-            resultAppParam += AppParamsList[i];
-        }
-        if (i < (AppParamsList.size() - 1)) {
-            resultAppParam += " ";
-        }
-    }
     return PROFILING_SUCCESS;
 }
  
