@@ -12,6 +12,9 @@ set(profilerSrcFiles
     ${MSPROF_SOURCE_DIR}/dvvp/common/memory/chunk_pool.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/mmpa/mmpa_api.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/validation/param_validation.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/common/config/config_manager.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/driver/devmgmt/ai_drv_dev_api.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/depend/stub/error_manager/msprof_error_manager_stub.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/streamio/common/src/select_operation.cpp 
     ${MSPROF_SOURCE_DIR}/dvvp/streamio/client/src/sender.cpp
@@ -54,6 +57,8 @@ target_include_directories(client_utest PRIVATE
     ${MSPROF_SOURCE_DIR}/dvvp/common/mmpa
     ${MSPROF_SOURCE_DIR}/dvvp/common/config
     ${MSPROF_SOURCE_DIR}/dvvp/common/validation
+    ${MSPROF_SOURCE_DIR}/dvvp/common/platform/
+    ${MSPROF_SOURCE_DIR}/dvvp/driver/inc
     ${MSPROF_SOURCE_DIR}/dvvp/streamio/client/include
     ${MSPROF_SOURCE_DIR}/dvvp/streamio/common/include
     ${MSPROF_SOURCE_DIR}/dvvp/adx/inc
