@@ -107,7 +107,7 @@ class GeInfoModel(BaseModel):
     def __get_ge_data_step_scene(self: any, ge_op_iter_dict: dict, datatype: str) -> None:
         """
         get ge task data
-        :return: iter dict
+        :return:
         """
         model_to_iter_dict = self.map_model_to_iter()
         ge_sql = "select model_id, index_id, stream_id, task_id, batch_id from {0} " \
