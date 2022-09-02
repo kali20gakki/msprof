@@ -29,6 +29,10 @@ class ClusterInfoModel(ParserModel):
         """
         self.insert_data_to_db(DBNameConstant.TABLE_CLUSTER_RANK, data_list)
 
+    def get_rank_id_count(self: any) -> list:
+        sql = f"select count(*) from {DBNameConstant.TABLE_CLUSTER_RANK} where rank_id!='N/A'"
+        return DBManager.fetch_all_data(self.cur, sql)
+
 
 class ClusterInfoViewModel(ViewModel):
     def __init__(self: any, path: str) -> None:
@@ -41,3 +45,7 @@ class ClusterInfoViewModel(ViewModel):
     def get_all_cluster_rank_info(self: any) -> list:
         sql = f"select * from {DBNameConstant.TABLE_CLUSTER_RANK}"
         return DBManager.fetch_all_data(self.cur, sql, dto_class=ClusterRankDto)
+
+    def get_device_and_rank_ids(self: any) -> list:
+        sql = "select device_id, rank_id from {}".format(DBNameConstant.TABLE_CLUSTER_RANK)
+        return DBManager.fetch_all_data(self.cur, sql)
