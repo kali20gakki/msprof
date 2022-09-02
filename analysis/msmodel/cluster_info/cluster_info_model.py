@@ -29,6 +29,10 @@ class ClusterInfoModel(ParserModel):
         """
         self.insert_data_to_db(DBNameConstant.TABLE_CLUSTER_RANK, data_list)
 
+    def get_rank_id_count(self: any) -> list:
+        sql = f"select count(*) from {DBNameConstant.TABLE_CLUSTER_RANK} where rank_id!='N/A'"
+        return DBManager.fetch_all_data(self.cur, sql)
+
 
 class ClusterInfoViewModel(ViewModel):
     def __init__(self: any, path: str) -> None:
