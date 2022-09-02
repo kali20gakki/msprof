@@ -291,7 +291,7 @@ int MsprofParamAdapter::GetParamFromInputCfg(std::unordered_map<int, std::pair<M
         if (!kv.second.first.args[argsType]) {
             return PROFILING_FAILED;
         }
-        paramContainer_[cfgType] = kv.second.first.args[argsType];
+        paramContainer_[cfgType] = std::string(kv.second.first.args[argsType]);
         setConfig_.insert(cfgType);
     }
     std::vector<std::pair<InputCfg, std::string>> errCfgList;
