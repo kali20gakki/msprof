@@ -80,7 +80,8 @@ class DataPreprocessParser:
             InfoConfReader().load_info(self.collection_path)
             self.query_data_queue_data()
         else:
-            warn(self.FILE_NAME, 'Invalid parsing dir("%s"), there is no PROF file in this path.' % self.collection_path)
+            warn(self.FILE_NAME,
+                 'Invalid parsing dir("%s"), there is no PROF file in this path.' % self.collection_path)
             raise ProfException(ProfException.PROF_INVALID_PATH_ERROR)
 
     def check_id_valid(self: any) -> bool:
@@ -145,10 +146,10 @@ class DataPreprocessParser:
             with os.fdopen(os.open(file_path, Constant.WRITE_FLAGS,
                                    Constant.WRITE_MODES), "w") as _file:
                 _file.write(json.dumps(json_data))
-        except (OSError, SystemError, RuntimeError, TypeError) as error:
+        except (OSError, SystemError, RuntimeError, TypeError) as err:
             error(self.FILE_NAME,
                   "Storing data failed, you may not have the permission to write files in the current path.")
-            raise ProfException(ProfException.PROF_INVALID_PATH_ERROR) from error
+            raise ProfException(ProfException.PROF_INVALID_PATH_ERROR) from err
         else:
             print_msg({"status": NumberConstant.SUCCESS, "info": "", "data": file_path})
 
