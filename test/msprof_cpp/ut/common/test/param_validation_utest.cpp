@@ -458,8 +458,6 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, MsprofCheckAppValid)
     EXPECT_EQ(false, entry->MsprofCheckAppValid(app));
     app = "bash";
     EXPECT_EQ(false, entry->MsprofCheckAppValid(app));
-    app = "bash 1";
-    EXPECT_EQ(false, entry->MsprofCheckAppValid(app));
     app = "main";
     EXPECT_EQ(false, entry->MsprofCheckAppValid(app));
 }
@@ -526,11 +524,9 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckOutputIsValid)
     auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
     std::string output;
     EXPECT_EQ(true, entry->CheckOutputIsValid(output));
-    output = std::string(1025, 'x');
+    output = std::string(1025, 'x'); // 1025 = MAX_PATH_LENGTH + 1;
     EXPECT_EQ(false, entry->CheckOutputIsValid(output));
     output.clear();
-    output = "1";
-    EXPECT_EQ(false, entry->CheckOutputIsValid(output));
     output = "./";
     EXPECT_EQ(true, entry->CheckOutputIsValid(output));
 }
@@ -590,7 +586,7 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckPythonPathIsValid)
     auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
     EXPECT_EQ(false, entry->CheckPythonPathIsValid(pythonPath));
 
-    pythonPath = std::string(1025, 'c');
+    pythonPath = std::string(1025, 'c'); // 1025 = MAX_PATH_LENGTH + 1;
     EXPECT_EQ(false, entry->CheckPythonPathIsValid(pythonPath));
 
     pythonPath = "@";
@@ -615,7 +611,7 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckParamsJobIdRegexMatch)
     auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
     std::string JobId;
     EXPECT_EQ(false, entry->CheckParamsJobIdRegexMatch(JobId));
-    JobId = std::string(513, 'c');
+    JobId = std::string(513, 'c'); // 513 = MAX_JOBID_LENGTH + 1;
     EXPECT_EQ(false, entry->CheckParamsJobIdRegexMatch(JobId));
     JobId.clear();
     JobId = "12";
@@ -714,7 +710,8 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckHostSysCmdOutIsExist)
     EXPECT_EQ(PROFILING_FAILED, entry->CheckHostSysCmdOutIsExist(tempFile, toolName, tmpProcess));
 }
 
-TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckHostOutString) {
+TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckHostOutString)
+{
     GlobalMockObject::verify();
     auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
     std::string tmpStr = "";
@@ -726,7 +723,8 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckHostOutString) {
     EXPECT_EQ(PROFILING_SUCCESS, entry->CheckHostOutString(tmpStr, toolName));
 }
 
-TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, UninitCheckHostSysCmd) {
+TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, UninitCheckHostSysCmd)
+{
     GlobalMockObject::verify();
 
     MOCKER(analysis::dvvp::common::utils::Utils::ExecCmd)
