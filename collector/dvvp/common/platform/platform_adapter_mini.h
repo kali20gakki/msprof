@@ -21,10 +21,10 @@ const int MAX_LLC_EVENTS = 8; // llc events list size
 class PlatformAdapterMini : public Collector::Dvvp::Common::PlatformAdapter::PlatformAdapterInterface {
 public:
     PlatformAdapterMini();
-    ~PlatformAdapterMini();
+    ~PlatformAdapterMini() override;
 
     int Init(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params) override;
-    int Uninit();
+    int Uninit() override;
 
 private:
     std::string GenerateCapacityEvents();
