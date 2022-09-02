@@ -45,15 +45,15 @@ class CoreCpuReduceViewer:
         op_names = {}
         task_types = {}
         sql = "SELECT op_name, stream_id, task_id, " \
-              "task_type, batch_id FROM {} ".format(DBNameConstant.TABLE_GE_TASK)
+              "task_type, batch_id FROM {} ".format(DBNameConstant.TABLE_SUMMARY_GE)
         conn_ge, cur_ge = DBManager.check_connect_db_path(
-            os.path.join(sql_path, DBNameConstant.DB_GE_INFO))
+            os.path.join(sql_path, DBNameConstant.DB_AICORE_OP_SUMMARY))
         if conn_ge and cur_ge:
-            if not DBManager.judge_table_exist(cur_ge, DBNameConstant.TABLE_GE_TASK):
+            if not DBManager.judge_table_exist(cur_ge, DBNameConstant.TABLE_SUMMARY_GE):
                 return op_names, task_types
             ge_datas = DBManager.fetch_all_data(cur_ge, sql)
             for ge_data in ge_datas:
-                ge_data_key = "_".join(list(map(str, [ge_data[1], ge_data[2], ge_data[3], ge_data[-1]])))
+                ge_data_key = "_".join(list(map(str, [ge_data[1], ge_data[2], ge_data[-1]])))
                 op_names[ge_data_key] = ge_data[0]
                 task_types[ge_data_key] = ge_data[3]
         DBManager.destroy_db_connect(conn_ge, cur_ge)
@@ -75,7 +75,7 @@ class CoreCpuReduceViewer:
             total_cycles = OpCommonFunc.deal_batch_id(stream_index=1, task_index=2, merge_data=total_cycles)
             for total_cycle in total_cycles:
                 total_data_key = "_".join(
-                    [str(total_cycle[1]), str(total_cycle[2]), Constant.TASK_TYPE_AI_CORE, str(total_cycle[-1])])
+                    [str(total_cycle[1]), str(total_cycle[2]), str(total_cycle[-1])])
                 total_cycle_data[total_data_key] = total_cycle[0]
                 total_time_data[total_data_key] = total_cycle[3]
         DBManager.destroy_db_connect(conn_ge, cur_ge)
@@ -155,7 +155,7 @@ class CoreCpuReduceViewer:
         trace_data_sql = \
             cls._get_task_scheduler_data(sql_path=PathManager.get_sql_dir(result_dir))
         trace_data_job = \
-            cls._get_ai_cpu_data(iter_id, model_id, job_path=result_dir)
+            cls._get_ai_cpu_data(job_path=result_dir)
 
         trace_data_result = \
             cls._get_all_reduce_data(device_id, iter_id, model_id, result_dir=result_dir)
@@ -197,7 +197,7 @@ class CoreCpuReduceViewer:
         total_cycle, total_time = cls.get_total_cycle(sql_path)
         for sql_data in sql_datas:
             # key: stream_id task_id task_type batch_id
-            _key_for_ops = "_".join([str(sql_data[0]), str(sql_data[1]), str(sql_data[-3]), str(sql_data[-1])])
+            _key_for_ops = "_".join([str(sql_data[0]), str(sql_data[1]), str(sql_data[-1])])
             total_time_value = cls._get_task_trace_value(_key_for_ops, total_time)
             if is_number(total_time_value):
                 total_time_value = round(total_time_value, CommonConstant.ROUND_SIX)
@@ -221,28 +221,25 @@ class CoreCpuReduceViewer:
         return data.get(_key_for_ops, default_value)
 
     @classmethod
-    def _get_ai_cpu_data(cls: any, *args: dict, job_path: str = None) -> list:
-        iter_id, model_id = args
+    def _get_ai_cpu_data(cls: any, job_path: str = None) -> list:
         ai_cpu_datas = []
         dir_path = job_path
-        _, ai_cpu_data = ParseAiCpuData.analysis_aicpu(dir_path, iter_id, model_id)
+        ai_cpu_data = ParseAiCpuData.get_ai_cpu_from_ts(dir_path)
+        op_names, _ = cls.get_op_names_and_task_type(PathManager.get_sql_dir(dir_path))
         result_data = []
         if ai_cpu_data:
             result_data.extend(cls.get_meta_trace_data(TraceViewHeaderConstant.PROCESS_AI_CPU))
-            for each_data in ai_cpu_data:
-                compute_t = each_data[2] * NumberConstant.MS_TO_US if isinstance(each_data[2], float) else Constant.NA
-                memcpy_t = each_data[3] * NumberConstant.MS_TO_US if isinstance(each_data[3], float) else Constant.NA
+            for stream_id, task_id, sys_start, sys_end, batch_id in ai_cpu_data:
+                _key_for_ops = "_".join([str(stream_id), str(task_id), str(batch_id)])
+                duration = (float(sys_end) - float(sys_start)) * NumberConstant.MS_TO_US
                 ai_cpu_datas.append(
-                    (each_data[1], cls.TRACE_PID_MAP.get(TraceViewHeaderConstant.PROCESS_AI_CPU, 0),
+                    (cls._get_task_trace_value(_key_for_ops, op_names),
+                     cls.TRACE_PID_MAP.get(TraceViewHeaderConstant.PROCESS_AI_CPU, 0),
                      InfoConfReader().get_json_tid_data(),
-                     float(each_data[0]) * NumberConstant.MS_TO_US,
-                     float(each_data[4]) * NumberConstant.MS_TO_US,
+                     float(sys_start) * NumberConstant.MS_TO_US,
+                     duration,
                      OrderedDict([("Task Type", "AI_CPU"),
-                                  ("Compute Time(us)", compute_t),
-                                  ("Memcpy Time(us)", memcpy_t),
-                                  ("Task Time(us)", float(each_data[4]) * NumberConstant.MS_TO_US),
-                                  ("Dispatch Time(us)", float(each_data[5]) * NumberConstant.MS_TO_US),
-                                  ("Total Time(us)", float(each_data[6]) * NumberConstant.MS_TO_US)])))
+                                  ("Task Time(us)", duration)])))
             result_data.extend(
                 TraceViewManager.time_graph_trace(TraceViewHeaderConstant.TOP_DOWN_TIME_GRAPH_HEAD, ai_cpu_datas))
         return result_data
