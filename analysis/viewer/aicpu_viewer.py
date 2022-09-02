@@ -4,9 +4,6 @@ This script is used for parsing and present dp data
 Copyright Huawei Technologies Co., Ltd. 2018-2019. All rights reserved.
 """
 
-import logging
-import sqlite3
-
 from analyzer.scene_base.profiling_scene import ProfilingScene
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
@@ -14,7 +11,7 @@ from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msprof_iteration import MsprofIteration
 from common_func.path_manager import PathManager
-from viewer.ge_info_report import get_ge_hash_dict
+from msmodel.ai_cpu.ai_cpu_model import AiCpuModel
 
 
 class ParseAiCpuData:
@@ -90,3 +87,14 @@ class ParseAiCpuData:
         for iteration_id, model_id in iter_dict.values():
             ai_cpu_data.extend(DBManager.fetch_all_data(ai_cpu_conn.cursor(), sql, (iteration_id, model_id)))
         return ai_cpu_data
+
+    @staticmethod
+    def get_ai_cpu_from_ts(project_path: str) -> list:
+        """
+        get ai cpu query sql
+        :return: control statement
+        """
+        aicpu_model = AiCpuModel(project_path)
+        with aicpu_model:
+            aicpu_data = aicpu_model.get_ai_cpu_data_from_ts()
+        return aicpu_data

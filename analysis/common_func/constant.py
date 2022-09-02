@@ -233,6 +233,9 @@ class Constant:
 
     # default value
     DEFAULT_VALUE = 0
+    DEFAULT_INVALID_VALUE = -1
+    DEFAULT_TURE_VALUE = 1
+    DEFAULT_FALSE_VALUE = 0
 
     # ge timeline
     GE_TIMELINE_MODEL_ID_INDEX = 0
