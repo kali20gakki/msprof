@@ -132,7 +132,6 @@ int MsprofParamAdapter::ParamsCheckMsprof(std::vector<std::pair<InputCfg, std::s
     return flag ? PROFILING_SUCCESS : PROFILING_FAILED;
 }
 
-
 void MsprofParamAdapter::SetDefaultParamsApp()
 {
     if (paramContainer_[INPUT_CFG_COM_OUTPUT].empty()) {
@@ -911,13 +910,7 @@ void AclApiParamAdapter::ProfTaskCfgToContainer(const ProfConfig * apiCfg,
 
     uint64_t dataTypeConfig = apiCfg->dataTypeConfig;
     ProfAicoreMetrics aicMetrics = apiCfg->aicoreMetrics;
-    if (GetPlatform() == PlatformType::MINI_TYPE) {
-        if ((dataTypeConfig & PROF_SCHEDULE_TIMELINE_MASK) ||
-            (dataTypeConfig & PROF_TASK_TIME_MASK)) {
-            paramContainer_[INPUT_CFG_COM_TASK_TIME] = MSVP_PROF_ON;
-            setConfig_.insert(INPUT_CFG_COM_TASK_TIME);
-        }
-    } else if (dataTypeConfig & PROF_TASK_TIME_MASK) {
+    if (dataTypeConfig & PROF_TASK_TIME_MASK) {
         paramContainer_[INPUT_CFG_COM_TASK_TIME] = MSVP_PROF_ON;
         setConfig_.insert(INPUT_CFG_COM_TASK_TIME);
     }
@@ -936,8 +929,6 @@ void AclApiParamAdapter::ProfTaskCfgToContainer(const ProfConfig * apiCfg,
         setConfig_.insert(INPUT_CFG_COM_AIC_METRICS);
         paramContainer_[INPUT_CFG_COM_AIC_MODE] = PROFILING_MODE_TASK_BASED;
         setConfig_.insert(INPUT_CFG_COM_AIC_MODE);
-        paramContainer_[INPUT_CFG_COM_TASK_TRACE] = MSVP_PROF_ON;
-        setConfig_.insert(INPUT_CFG_COM_TASK_TRACE);
     }
     if (!argsArr[ACL_PROF_AIV_METRICS].empty()) {
         paramContainer_[INPUT_CFG_COM_AI_VECTOR] = MSVP_PROF_ON;
@@ -946,14 +937,10 @@ void AclApiParamAdapter::ProfTaskCfgToContainer(const ProfConfig * apiCfg,
         setConfig_.insert(INPUT_CFG_COM_AIV_METRICS);
         paramContainer_[INPUT_CFG_COM_AIV_MODE] = PROFILING_MODE_TASK_BASED;
         setConfig_.insert(INPUT_CFG_COM_AIV_MODE);
-        paramContainer_[INPUT_CFG_COM_TASK_TRACE] = MSVP_PROF_ON;
-        setConfig_.insert(INPUT_CFG_COM_TASK_TRACE);
     }
     if (dataTypeConfig & PROF_L2CACHE_MASK) {
         paramContainer_[INPUT_CFG_COM_L2] = MSVP_PROF_ON;
         setConfig_.insert(INPUT_CFG_COM_L2);
-        paramContainer_[INPUT_CFG_COM_TASK_TRACE] = MSVP_PROF_ON;
-        setConfig_.insert(INPUT_CFG_COM_TASK_TRACE);
     }
     if (dataTypeConfig & PROF_ACL_API) {
         paramContainer_[INPUT_CFG_COM_ASCENDCL] = MSVP_PROF_ON;
@@ -1054,25 +1041,20 @@ int AclApiParamAdapter::GetParamFromInputCfg(const ProfConfig * apiCfg,
         setConfig_.insert(INPUT_CFG_COM_OUTPUT);
     }
     ProfCfgToContainer(apiCfg, argsArr);
-    
-    // =================================
+
     std::vector<std::pair<InputCfg, std::string>> errCfgList;
     ret = ParamsCheckAclApi(errCfgList);
     if (ret != PROFILING_SUCCESS && !errCfgList.empty()) {
-        for (auto errCfg : errCfgList) {
-            MSPROF_LOGW("Warm");
-        }
+        MSPROF_LOGE("private param check fail.");
         return PROFILING_FAILED;
     }
-    // [5] 公有参数校验（调基类接口）
     errCfgList.clear();
     ret = ComCfgCheck(ENABLE_API, paramContainer_, setConfig_, errCfgList);
-    if (ret != PROFILING_SUCCESS) {
-        // todo 打印errCfgList中的错误
+    if (ret != PROFILING_SUCCESS && !errCfgList.empty()) {
+        MSPROF_LOGE("common param check fail.");
         return PROFILING_FAILED;
     }
 
-    // [6] 参数转换，转成Params（软件栈转uint64_t， 非软件栈保留在Params）
     ret = TransToParam(paramContainer_, params_);
     if (ret != PROFILING_SUCCESS) {
         return PROFILING_FAILED;
