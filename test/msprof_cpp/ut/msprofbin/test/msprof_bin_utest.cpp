@@ -71,7 +71,8 @@ TEST_F(MSPROF_BIN_UTEST, SetEnvList) {
     SetEnvList((const char**)envp, envpList);
 }
 
-TEST_F(MSPROF_BIN_UTEST, PlatformTypeInterfaceModule) {
+TEST_F(MSPROF_BIN_UTEST, PlatformTypeInterfaceModule)
+{
     GlobalMockObject::verify();
     std::shared_ptr<PlatformAdapterInterface> PlatformTypeInterfaceMgr;
     MSVP_MAKE_SHARED0_BREAK(PlatformTypeInterfaceMgr, PlatformAdapterInterface);
@@ -153,7 +154,8 @@ TEST_F(MSPROF_BIN_UTEST, PlatformTypeInterfaceModule) {
     EXPECT_EQ(PROFILING_SUCCESS, ret);
 }
 
-TEST_F(MSPROF_BIN_UTEST, PlatformAdapterCloudModule) {
+TEST_F(MSPROF_BIN_UTEST, PlatformAdapterCloudModule)
+{
     GlobalMockObject::verify();
     std::shared_ptr<PlatformAdapterCloud> PlatformAdapterCloudMgr;
     MSVP_MAKE_SHARED0_BREAK(PlatformAdapterCloudMgr, PlatformAdapterCloud);
@@ -192,7 +194,8 @@ TEST_F(MSPROF_BIN_UTEST, PlatformAdapterDcModule) {
     EXPECT_EQ(PROFILING_SUCCESS, ret);
 }
 
-TEST_F(MSPROF_BIN_UTEST, PlatformAdapterLhisiModule) {
+TEST_F(MSPROF_BIN_UTEST, PlatformAdapterLhisiModule)
+{
     GlobalMockObject::verify();
     std::shared_ptr<PlatformAdapterLhisi> PlatformAdapterLhisiMgr;
     MSVP_MAKE_SHARED0_BREAK(PlatformAdapterLhisiMgr, PlatformAdapterLhisi);
@@ -205,7 +208,8 @@ TEST_F(MSPROF_BIN_UTEST, PlatformAdapterLhisiModule) {
     EXPECT_EQ(PROFILING_SUCCESS, ret);
 }
 
-TEST_F(MSPROF_BIN_UTEST, PlatformAdapterMiniModule) {
+TEST_F(MSPROF_BIN_UTEST, PlatformAdapterMiniModule)
+{
     GlobalMockObject::verify();
     std::shared_ptr<PlatformAdapterMini> PlatformAdapterMiniMgr;
     MSVP_MAKE_SHARED0_BREAK(PlatformAdapterMiniMgr, PlatformAdapterMini);
@@ -218,7 +222,8 @@ TEST_F(MSPROF_BIN_UTEST, PlatformAdapterMiniModule) {
     EXPECT_EQ(PROFILING_SUCCESS, ret);
 }
 
-TEST_F(MSPROF_BIN_UTEST, PlatformAdapterMdcModule) {
+TEST_F(MSPROF_BIN_UTEST, PlatformAdapterMdcModule)
+{
     GlobalMockObject::verify();
     std::shared_ptr<PlatformAdapterMdc> PlatformAdapterMdcMgr;
     MSVP_MAKE_SHARED0_BREAK(PlatformAdapterMdcMgr, PlatformAdapterMdc);

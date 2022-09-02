@@ -335,7 +335,8 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckProfilingAicoreMetricsIsVal
     EXPECT_EQ(0, entry->CheckProfilingAicoreMetricsIsValid(aicoreMetrics));
 }
 
-TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckFreqIsValid) {
+TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckFreqIsValid)
+{
     GlobalMockObject::verify();
     
     std::string freq;
@@ -354,7 +355,8 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckFreqIsValid) {
     EXPECT_EQ(true, entry->CheckFreqIsValid(freq, rangeMin, rangeMax));
 }
 
-TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckHostSysPidValid) {
+TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckHostSysPidValid)
+{
     GlobalMockObject::verify();
     
     std::string hostSysPid;
@@ -370,7 +372,8 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckHostSysPidValid) {
     EXPECT_EQ(false, entry->CheckHostSysPidValid(hostSysPid));
 }
 
-TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, MsprofCheckEnvValid) {
+TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, MsprofCheckEnvValid)
+{
     GlobalMockObject::verify();
     
     std::string env;
@@ -380,7 +383,8 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, MsprofCheckEnvValid) {
     EXPECT_EQ(true, entry->MsprofCheckEnvValid(env));
 }
 
-TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, MsprofCheckAiModeValid) {
+TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, MsprofCheckAiModeValid)
+{
     GlobalMockObject::verify();
     
     std::string aiMode;
@@ -395,7 +399,8 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, MsprofCheckAiModeValid) {
     EXPECT_EQ(true, entry->MsprofCheckAiModeValid(aiMode, aiModeType));
 }
 
-TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, MsprofCheckSysDeviceValid) {
+TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, MsprofCheckSysDeviceValid)
+{
     GlobalMockObject::verify();
     
     std::string sysDevId;
@@ -411,7 +416,8 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, MsprofCheckSysDeviceValid) {
     EXPECT_EQ(false, entry->MsprofCheckSysDeviceValid(sysDevId));
 }
 
-TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckExportIdIsValid) {
+TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckExportIdIsValid)
+{
     GlobalMockObject::verify();
     
     std::string exportId;
@@ -425,7 +431,8 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckExportIdIsValid) {
     EXPECT_EQ(true, entry->CheckExportIdIsValid(exportId, ""));
 }
 
-TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckExportSummaryFormatIsValid) {
+TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckExportSummaryFormatIsValid)
+{
     GlobalMockObject::verify();
     
     std::string summaryFormat;
@@ -439,7 +446,8 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckExportSummaryFormatIsValid)
     EXPECT_EQ(true, entry->CheckExportSummaryFormatIsValid(summaryFormat));
 }
 
-TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, MsprofCheckAppValid) {
+TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, MsprofCheckAppValid)
+{
     GlobalMockObject::verify();
     
     std::string app;

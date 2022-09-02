@@ -380,7 +380,7 @@ bool ParamsAdapter::ComCfgCheck1(const InputCfg cfgOpt, const std::string &cfgPa
         default:
             ret = false;
     }
-    if (ret != true) {
+    if (!ret) {
         cfgList.push_back(std::pair<InputCfg, std::string>(inputCfg, cfgValue));
         flag = false;
     }
@@ -411,7 +411,7 @@ bool ParamsAdapter::ComCfgCheck2(const InputCfg cfgOpt, const std::string &cfgPa
         default:
             ret = false;
     }
-    if (ret != true) {
+    if (!ret) {
         cfgList.push_back(std::pair<InputCfg, std::string>(inputCfg, cfgValue));
         flag = false;
     }
