@@ -5,11 +5,10 @@ This script is used to parse step trace data for cluster.
 Copyright Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
 """
 import json
-import logging
 import os
 from collections import OrderedDict
 
-from common_func.common import print_msg
+from common_func.common import print_msg, error, warn, print_info
 from common_func.constant import Constant
 from common_func.data_check_manager import DataCheckManager
 from common_func.db_manager import DBManager, ClassRowType
@@ -36,6 +35,8 @@ class DataPreprocessParser:
         self.collection_path = params.get('collection_path')
         self.data_type = params.get('data_type')
         self.rank_id = params.get('npu_id')
+        self.model_id = params["model_id"]
+        self.iteration_id = params["iteration_id"]
 
     @staticmethod
     def calculate_queue_data(queue_list: list, trace_data: dict) -> dict:
@@ -52,7 +53,7 @@ class DataPreprocessParser:
         total_time = 0
         empty_queue = 0
         data_list = []
-        for data_index, data in enumerate(trace_data):
+        for data_index, _ in enumerate(trace_data):
             if 2 * data_index + 1 > len(queue_list):
                 data_list.append({"step": data_index + 1, "duration": 0, "queue_size": 0})
                 continue
@@ -71,10 +72,16 @@ class DataPreprocessParser:
         calculate data and data storage
         :return: None
         """
+        check_path_valid(self.collection_path, False)
         if not self.check_id_valid():
-            logging.warning("Parameter settings are incorrect, please check input: --id. ")
+            error(self.FILE_NAME, "Parameter settings are incorrect, please check input: --id. ")
             raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR)
-        self._query_data()
+        if DataCheckManager.contain_info_json_data(self.collection_path):
+            InfoConfReader().load_info(self.collection_path)
+            self.query_data_queue_data()
+        else:
+            warn(self.FILE_NAME, 'Invalid parsing dir("%s"), there is no PROF file in this path.' % self.collection_path)
+            raise ProfException(ProfException.PROF_INVALID_PATH_ERROR)
 
     def check_id_valid(self: any) -> bool:
         rank_conn, rank_cur = DBManager.check_connect_db_path(
@@ -97,8 +104,8 @@ class DataPreprocessParser:
         data_queue_data = self.get_data_queue_data()
         step_trace_data = self.get_step_trace_data()
         if not (data_queue_data and step_trace_data):
-            logging.error("Query data failed, maybe import command has not run successfully yet, "
-                          "please run import command first")
+            error(self.FILE_NAME, "Query data failed, maybe import command has not run successfully yet, "
+                                  "please run import command first.")
             raise ProfException(ProfException.PROF_INVALID_PATH_ERROR)
         json_data = self.calculate_queue_data(data_queue_data, step_trace_data)
         self.storage_data(json_data)
@@ -129,7 +136,6 @@ class DataPreprocessParser:
         save data into file
         :return: None
         """
-        logging.info("Data queue query complete, start to storage data into json file")
         file_name = 'data_preparation_{0}.json'.format(self.rank_id)
         file_path = self.get_cluster_path(file_name)
         check_file_writable(file_path)
@@ -140,7 +146,8 @@ class DataPreprocessParser:
                                    Constant.WRITE_MODES), "w") as _file:
                 _file.write(json.dumps(json_data))
         except (OSError, SystemError, RuntimeError, TypeError) as error:
-            logging.error("Storing data failed, you may not have the permission to write files in the current path.")
+            error(self.FILE_NAME,
+                  "Storing data failed, you may not have the permission to write files in the current path.")
             raise ProfException(ProfException.PROF_INVALID_PATH_ERROR) from error
         else:
             print_msg({"status": NumberConstant.SUCCESS, "info": "", "data": file_path})
@@ -151,7 +158,7 @@ class DataPreprocessParser:
             try:
                 os.makedirs(query_path)
             except OSError as err:
-                logging.error("Storing data failed, "
+                error(self.FILE_NAME, "Storing data failed, "
                               "you may not have the permission to write files in the current path.")
                 raise ProfException(ProfException.PROF_INVALID_PATH_ERROR) from err
         return os.path.realpath(os.path.join(query_path, file_name))
@@ -162,21 +169,14 @@ class DataPreprocessParser:
         :return: None or dict
         """
         if self.rank_id is None:
-            logging.warning("To query data queue, id is required")
+            error(self.FILE_NAME, "The query id is wrong. Please enter a valid value.")
             print_msg({"status": NumberConstant.ERROR, "info": "To query data queue, id is required", "data": ''})
             return
+        if self.model_id or self.iteration_id:
+            warn(self.FILE_NAME, "To query data queue, the parameters: '--model-id' and '--iteration-id' is invalid.")
         try:
             self.calculate()
         except ProfException:
             print_msg({"status": NumberConstant.ERROR,
-                       "info": "some error occurred, please check data path or necessary commands have been run",
+                       "info": "some error occurred, please check data path or necessary commands have been run.",
                        "data": ""})
-
-    def _query_data(self):
-        check_path_valid(self.collection_path, False)
-        if DataCheckManager.contain_info_json_data(self.collection_path):
-            InfoConfReader().load_info(self.collection_path)
-            self.query_data_queue_data()
-        else:
-            logging.warning('Invalid parsing dir("%s"), there is no PROF file in this path', self.collection_path)
-            raise ProfException(ProfException.PROF_INVALID_PATH_ERROR)
