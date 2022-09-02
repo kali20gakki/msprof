@@ -126,10 +126,9 @@ class InfoConfReader:
         get rank_id
         :return: rank_id
         """
-        rank_id = self._info_json.get("rank_id", Constant.NA)
-        if rank_id == Constant.DEFAULT_INVALID_VALUE or len(str(rank_id)) == 0:
+        if self._info_json.get("rank_id", Constant.NA) == -1:
             return Constant.NA
-        return rank_id
+        return self._info_json.get("rank_id", Constant.NA)
 
     def get_device_id(self: any) -> str:
         """
@@ -166,15 +165,6 @@ class InfoConfReader:
         Compatibility for getting collection time
         """
         return self._start_info.get(StrConstant.COLLECT_TIME_BEGIN), self._end_info.get(StrConstant.COLLECT_TIME_END)
-
-    def get_collect_start_time(self: any) -> str:
-        """
-        Compatibility for getting collection start time
-        """
-        collect_time = self._start_info.get(StrConstant.COLLECT_DATE_BEGIN, Constant.NA)
-        if not collect_time:
-            return Constant.NA
-        return collect_time
 
     def get_collect_raw_time(self: any) -> tuple:
         """
