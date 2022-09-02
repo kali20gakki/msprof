@@ -8,7 +8,7 @@ import json
 import os
 from collections import OrderedDict
 
-from common_func.common import print_msg, error, warn, print_info
+from common_func.common import print_msg, error, warn
 from common_func.constant import Constant
 from common_func.data_check_manager import DataCheckManager
 from common_func.db_manager import DBManager, ClassRowType
@@ -35,8 +35,8 @@ class DataPreprocessParser:
         self.collection_path = params.get('collection_path')
         self.data_type = params.get('data_type')
         self.rank_id = params.get('npu_id')
-        self.model_id = params["model_id"]
-        self.iteration_id = params["iteration_id"]
+        self.model_id = params.get("model_id")
+        self.iteration_id = params.get("iteration_id")
 
     @staticmethod
     def calculate_queue_data(queue_list: list, trace_data: dict) -> dict:

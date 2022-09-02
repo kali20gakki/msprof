@@ -73,7 +73,6 @@ class TestDataPreprocessParser(unittest.TestCase):
         with mock.patch(NAMESPACE + '.DataPreprocessParser.check_id_valid', return_value=[(10,)]):
             with mock.patch(NAMESPACE + '.DataCheckManager.contain_info_json_data',
                             side_effect=(True, False, False)), \
-                    mock.patch(NAMESPACE + '.logging.warning'), \
                     mock.patch('os.path.join', return_value=True), \
                     mock.patch('os.path.realpath', return_value='home\\process'), \
                     mock.patch(NAMESPACE + '.check_path_valid'), \
@@ -82,19 +81,27 @@ class TestDataPreprocessParser(unittest.TestCase):
                 check = DataPreprocessParser(self.params)
 
                 check.calculate()
-        with mock.patch(NAMESPACE + '.DataPreprocessParser.check_id_valid', return_value=False), \
-                mock.patch(NAMESPACE + '.logging.warning'):
+        with mock.patch(NAMESPACE + '.check_path_valid'), \
+                mock.patch(NAMESPACE + '.DataPreprocessParser.check_id_valid', return_value=False):
             with pytest.raises(ProfException) as err:
                 check = DataPreprocessParser(self.params)
 
                 check.calculate()
+        with mock.patch(NAMESPACE + '.DataPreprocessParser.check_id_valid', return_value=[(10,)]):
+            with mock.patch(NAMESPACE + '.DataCheckManager.contain_info_json_data',
+                            side_effect=(False,)), \
+                    mock.patch(NAMESPACE + '.check_path_valid'):
+                with pytest.raises(ProfException) as err:
+                    check = DataPreprocessParser(self.params)
+
+                    check.calculate()
 
     def test_storage_data(self):
         with mock.patch(NAMESPACE + '.DataPreprocessParser.get_cluster_path', return_value='test'), \
                 mock.patch(NAMESPACE + '.check_file_writable'), \
                 mock.patch('builtins.open', mock.mock_open(read_data='')), \
                 mock.patch('os.fdopen', side_effect=OSError), \
-                mock.patch('os.chmod'),\
+                mock.patch('os.chmod'), \
                 mock.patch('os.remove'):
             with pytest.raises(ProfException) as err:
                 check = DataPreprocessParser(self.params)
@@ -109,13 +116,14 @@ class TestDataPreprocessParser(unittest.TestCase):
             with pytest.raises(ProfException) as err:
                 check = DataPreprocessParser(self.params)
                 check.query_data_queue_data()
-        with mock.patch(NAMESPACE + '.DataPreprocessParser.get_data_queue_data', return_value=[]), \
-                mock.patch(NAMESPACE + '.DataPreprocessParser.get_step_trace_data', return_value=[]), \
-                mock.patch(NAMESPACE + '.logging.warning', return_value=[]):
-            with pytest.raises(ProfException) as err:
-                check = DataPreprocessParser(self.params)
-                check.sample_config = {'ai_core_metrics': ''}
-                check.query_data_queue_data()
+        with mock.patch(NAMESPACE + '.DataPreprocessParser.get_data_queue_data',
+                        return_value=[('GetNext_dequeue_wait', 108, 65347257104.0, 65347257142.0, 38.0),
+                                      ('GetNext_dequeue_wait', 108, 65347257104.0, 65347257142.0, 38.0)]), \
+                mock.patch(NAMESPACE + '.DataPreprocessParser.get_step_trace_data',
+                           return_value={1: [0, 43423945119245]}):
+            check = DataPreprocessParser(self.params)
+            check.sample_config = {'ai_core_metrics': ''}
+            check.query_data_queue_data()
         with mock.patch(NAMESPACE + '.DataPreprocessParser.get_data_queue_data', return_value=[]), \
                 mock.patch(NAMESPACE + '.DataPreprocessParser.get_step_trace_data', return_value=[]), \
                 mock.patch(NAMESPACE + '.DataPreprocessParser.calculate_queue_data',
@@ -125,7 +133,7 @@ class TestDataPreprocessParser(unittest.TestCase):
                 check.query_data_queue_data()
 
     def test_get_cluster_path(self):
-        with mock.patch('os.path.realpath', return_value='test\\query\\test\\test'),\
+        with mock.patch('os.path.realpath', return_value='test\\query\\test\\test'), \
                 mock.patch("os.path.exists", return_value=True):
             check = DataPreprocessParser(self.params)
             result = check.get_cluster_path('test\\test')
