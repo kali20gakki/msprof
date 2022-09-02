@@ -11,9 +11,12 @@
 #include "errno/error_code.h"
 #include "ai_drv_dev_api.h"
 #include "utils/utils.h"
+#include "config/config_manager.h"
+#include "mmpa_api.h"
 using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::common::utils;
-
+using namespace Collector::Dvvp::Mmpa;
+using namespace Analysis::Dvvp::Common::Config;
 class COMMON_VALIDATION_PARAM_VALIDATION_TEST: public testing::Test {
 protected:
     virtual void SetUp() {
@@ -515,6 +518,238 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, ProfStarsAcsqParamIsValid) {
     auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
     EXPECT_EQ(0, entry->ProfStarsAcsqParamIsValid("ddd"));
     EXPECT_EQ(1, entry->ProfStarsAcsqParamIsValid("dsa,vdec"));
+}
+
+TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckOutputIsValid)
+{
+    GlobalMockObject::verify();
+    auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
+    std::string output;
+    EXPECT_EQ(true, entry->CheckOutputIsValid(output));
+    output = std::string(1025, 'x');
+    EXPECT_EQ(false, entry->CheckOutputIsValid(output));
+    output.clear();
+    output = "1";
+    EXPECT_EQ(false, entry->CheckOutputIsValid(output));
+    output = "./";
+    EXPECT_EQ(true, entry->CheckOutputIsValid(output));
+}
+
+TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckLlcModeIsValid1)
+{
+    GlobalMockObject::verify();
+    auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
+    std::string llcMode;
+    EXPECT_EQ(true, entry->CheckLlcModeIsValid(llcMode));
+    MOCKER_CPP(&Analysis::Dvvp::Common::Config::ConfigManager::GetPlatformType)
+        .stubs()
+        .will(returnValue(0));
+    llcMode = "xxx";
+    EXPECT_EQ(false, entry->CheckLlcModeIsValid(llcMode));
+    llcMode = "capacity";
+    EXPECT_EQ(true, entry->CheckLlcModeIsValid(llcMode));
+    llcMode = "bandwidth";
+    EXPECT_EQ(true, entry->CheckLlcModeIsValid(llcMode));
+}
+
+TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckLlcModeIsValid2)
+{
+    GlobalMockObject::verify();
+    auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
+    std::string llcMode;
+    EXPECT_EQ(true, entry->CheckLlcModeIsValid(llcMode));
+    MOCKER_CPP(&Analysis::Dvvp::Common::Config::ConfigManager::GetPlatformType)
+        .stubs()
+        .will(returnValue(1));
+    llcMode = "xxx";
+    EXPECT_EQ(false, entry->CheckLlcModeIsValid(llcMode));
+    llcMode = "read";
+    EXPECT_EQ(true, entry->CheckLlcModeIsValid(llcMode));
+    llcMode = "write";
+    EXPECT_EQ(true, entry->CheckLlcModeIsValid(llcMode));
+}
+
+TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckHostSysUsageIsValid)
+{
+    GlobalMockObject::verify();
+    auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
+    std::string hostSysUsage;
+    EXPECT_EQ(true, entry->CheckHostSysUsageIsValid(hostSysUsage));
+    hostSysUsage = "cpu";
+    EXPECT_EQ(true, entry->CheckHostSysUsageIsValid(hostSysUsage));
+    hostSysUsage = "mem";
+    EXPECT_EQ(true, entry->CheckHostSysUsageIsValid(hostSysUsage));
+    hostSysUsage = "false";
+    EXPECT_EQ(false, entry->CheckHostSysUsageIsValid(hostSysUsage));
+}
+
+TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckPythonPathIsValid)
+{
+    GlobalMockObject::verify();
+    std::string pythonPath;
+    auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
+    EXPECT_EQ(false, entry->CheckPythonPathIsValid(pythonPath));
+
+    pythonPath = std::string(1025, 'c');
+    EXPECT_EQ(false, entry->CheckPythonPathIsValid(pythonPath));
+
+    pythonPath = "@";
+    EXPECT_EQ(false, entry->CheckPythonPathIsValid(pythonPath));
+    
+    Utils::CreateDir("TestPython");
+    MOCKER(&MmAccess2).stubs().will(returnValue(-1)).then(returnValue(0));
+    pythonPath = "TestPython";
+    EXPECT_EQ(false, entry->CheckPythonPathIsValid(pythonPath));
+    Utils::RemoveDir("TestPython");
+    pythonPath = "testpython";
+    std::ofstream ftest("testpython");
+    ftest << "test";
+    ftest.close();
+    EXPECT_EQ(true, entry->CheckPythonPathIsValid(pythonPath));
+    remove("testpython");
+}
+
+TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckParamsJobIdRegexMatch)
+{
+    GlobalMockObject::verify();
+    auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
+    std::string JobId;
+    EXPECT_EQ(false, entry->CheckParamsJobIdRegexMatch(JobId));
+    JobId = std::string(513, 'c');
+    EXPECT_EQ(false, entry->CheckParamsJobIdRegexMatch(JobId));
+    JobId.clear();
+    JobId = "12";
+    EXPECT_EQ(true, entry->CheckParamsJobIdRegexMatch(JobId));
+    JobId = "ad";
+    EXPECT_EQ(true, entry->CheckParamsJobIdRegexMatch(JobId));
+    JobId = "AF";
+    EXPECT_EQ(true, entry->CheckParamsJobIdRegexMatch(JobId));
+    JobId = "--";
+    EXPECT_EQ(true, entry->CheckParamsJobIdRegexMatch(JobId));
+    JobId = "@@";
+    EXPECT_EQ(false, entry->CheckParamsJobIdRegexMatch(JobId));
+}
+
+TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, MsprofCheckSysPeriodValid)
+{
+    GlobalMockObject::verify();
+    auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
+    std::string SysPerid;
+    EXPECT_EQ(false, entry->MsprofCheckSysPeriodValid(SysPerid));
+    SysPerid = "xq2";
+    EXPECT_EQ(false, entry->MsprofCheckSysPeriodValid(SysPerid));
+    SysPerid = "0";
+    EXPECT_EQ(false, entry->MsprofCheckSysPeriodValid(SysPerid));
+    SysPerid = "1296000001";
+    EXPECT_EQ(false, entry->MsprofCheckSysPeriodValid(SysPerid));
+    SysPerid = "10";
+    EXPECT_EQ(true, entry->MsprofCheckSysPeriodValid(SysPerid));
+}
+
+TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, MsprofCheckHostSysValid)
+{
+    GlobalMockObject::verify();
+    auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
+    std::string hostSys;
+    EXPECT_EQ(false, entry->MsprofCheckHostSysValid(hostSys));
+    hostSys = "xxx";
+    EXPECT_EQ(false, entry->MsprofCheckHostSysValid(hostSys));
+    hostSys = "cpu";
+    EXPECT_EQ(true, entry->MsprofCheckHostSysValid(hostSys));
+    hostSys = "cpu,mem";
+    EXPECT_EQ(true, entry->MsprofCheckHostSysValid(hostSys));
+}
+
+TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckHostSysToolsExit)
+{
+    GlobalMockObject::verify();
+    auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
+    std::string hostSys;
+    std::string resultDir;
+    std::string appDir;
+    EXPECT_EQ(false, entry->CheckHostSysToolsExit(hostSys, resultDir, appDir));
+    hostSys = "cpu";
+    EXPECT_EQ(true, entry->CheckHostSysToolsExit(hostSys, resultDir, appDir));
+    hostSys = "osrt,disk";
+    MOCKER_CPP(&analysis::dvvp::common::validation::ParamValidation::CheckHostSysToolsIsExist)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+    EXPECT_EQ(true, entry->CheckHostSysToolsExit(hostSys, resultDir, appDir));
+}
+
+TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckHostSysToolsIsExist)
+{
+    GlobalMockObject::verify();
+    auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
+    std::string tool;
+    std::string resultDir;
+    std::string appDir;
+    EXPECT_EQ(PROFILING_FAILED, entry->CheckHostSysToolsIsExist(tool, resultDir, appDir));
+    tool = "iotop";
+    EXPECT_EQ(PROFILING_FAILED, entry->CheckHostSysToolsIsExist(tool, resultDir, appDir));
+    MOCKER_CPP(&analysis::dvvp::common::utils::Utils::ExecCmd)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+    MOCKER_CPP(&analysis::dvvp::common::validation::ParamValidation::CheckHostSysCmdOutIsExist)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+    resultDir = "./";
+    EXPECT_EQ(PROFILING_SUCCESS, entry->CheckHostSysToolsIsExist(tool, resultDir, appDir));
+}
+
+TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckHostSysCmdOutIsExist)
+{
+    GlobalMockObject::verify();
+    auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
+    MOCKER(analysis::dvvp::common::utils::Utils::ExecCmd)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+    std::string tempFile = "./CheckHostSysCmdOutIsExist";
+    std::ofstream file(tempFile);
+    file << "command not found" << std::endl;
+    file.close();
+    std::string toolName = "iotop";
+    MmProcess tmpProcess = 1;
+    // invalid options
+    EXPECT_EQ(PROFILING_FAILED, entry->CheckHostSysCmdOutIsExist(tempFile, toolName, tmpProcess));
+}
+
+TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckHostOutString) {
+    GlobalMockObject::verify();
+    auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
+    std::string tmpStr = "";
+    std::string toolName = "iotop";
+    EXPECT_EQ(PROFILING_FAILED, entry->CheckHostOutString(tmpStr, toolName));
+    tmpStr = "sudo";
+    EXPECT_EQ(PROFILING_FAILED, entry->CheckHostOutString(tmpStr, toolName));
+    tmpStr = "iotop";
+    EXPECT_EQ(PROFILING_SUCCESS, entry->CheckHostOutString(tmpStr, toolName));
+}
+
+TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, UninitCheckHostSysCmd) {
+    GlobalMockObject::verify();
+
+    MOCKER(analysis::dvvp::common::utils::Utils::ExecCmd)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED))
+        .then(returnValue(PROFILING_SUCCESS));
+
+    MOCKER(analysis::dvvp::common::utils::Utils::ProcessIsRuning)
+        .stubs()
+        .will(returnValue(false))
+        .then(returnValue(true));
+
+    MOCKER(analysis::dvvp::common::utils::Utils::WaitProcess)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED))
+        .then(returnValue(PROFILING_SUCCESS));
+
+    auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
+    MmProcess checkProcess = 1;
+
+    EXPECT_EQ(PROFILING_SUCCESS, entry->UninitCheckHostSysCmd(checkProcess));
+    EXPECT_EQ(PROFILING_FAILED, entry->UninitCheckHostSysCmd(checkProcess));
+    EXPECT_EQ(PROFILING_SUCCESS, entry->UninitCheckHostSysCmd(checkProcess));
 }
 
 TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckStorageLimit) {
