@@ -257,6 +257,7 @@ void PlatformAdapterInterface::SetParamsForDeviceHardwareMem(int samplingInterva
         params_->msprof_llc_profiling = MSPROF_SWITCH_ON;
         params_->llc_interval = samplingInterval;
         params_->llc_profiling_events = getLlcEvents_[llcMode];
+        params_->llc_profiling = llcMode;
         setFlag = true;
     }
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_SYS_DEVICE_DDR) != supportSwitch_.end()) {
