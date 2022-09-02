@@ -11,16 +11,12 @@ from enum import IntEnum
 from common_func.common import error, print_msg
 from common_func.constant import Constant
 from common_func.data_check_manager import DataCheckManager
-from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msprof_common import get_path_dir, prepare_log
 from common_func.msprof_exception import ProfException
 from common_func.path_manager import PathManager
-from msmodel.cluster_info.cluster_info_model import ClusterInfoModel
-from msparser.cluster.cluster_parallel_parser import ClusterParallelParser
-from msparser.cluster.data_preprocess_parser import DataPreprocessParser
 from msparser.cluster.fops_parser import FopsParser
 from msparser.cluster.cluster_communication_parser import ClusterCommunicationParser
 from msparser.cluster.step_trace_summary import StepTraceSummay
@@ -85,19 +81,13 @@ class MsprofQuerySummaryManager:
         if self.data_type == QueryDataType.CLUSTER_SCENE:
             MsprofQuerySummaryManager.check_cluster_scene(self.collection_path)
             return
+        self._check_arguments_valid()
         self._check_cluster_scene()
         params = {"collection_path": self.collection_path,
                   "is_cluster": self.is_cluster_scene,
                   "npu_id": self.npu_id,
                   "model_id": self.model_id,
                   "iteration_id": self.iteration_id}
-        if self.data_type == QueryDataType.PARALLEL_ANALYSIS:
-            ClusterParallelParser(params).process()
-            return
-        if self.data_type == QueryDataType.DATA_PREPARATION:
-            DataPreprocessParser(params).process()
-            return
-        self._check_arguments_valid()
         if self.data_type == QueryDataType.STEP_TRACE:
             StepTraceSummay(params).process()
         if self.data_type == QueryDataType.FOPS_ANALYSE:
@@ -106,7 +96,8 @@ class MsprofQuerySummaryManager:
             ClusterCommunicationParser(params).process()
 
     def _check_cluster_scene(self: any) -> None:
-        if self._check_rank_id_valid():
+        cluster_rank_file = PathManager.get_db_path(self.collection_path, DBNameConstant.DB_CLUSTER_RANK)
+        if os.path.exists(cluster_rank_file):
             self.is_cluster_scene = True
             prepare_log(self.collection_path)
         else:
@@ -115,16 +106,6 @@ class MsprofQuerySummaryManager:
                       "To query cluster data, please import cluster info data first.")
                 raise ProfException(ProfException.PROF_CLUSTER_DIR_ERROR)
             self.is_cluster_scene = False
-
-    def _check_rank_id_valid(self: any) -> bool:
-        db_path = PathManager.get_db_path(self.collection_path, DBNameConstant.DB_CLUSTER_RANK)
-        if not DBManager.check_tables_in_db(db_path, DBNameConstant.TABLE_CLUSTER_RANK):
-            return False
-        with ClusterInfoModel(self.collection_path) as cluster_info_model:
-            rank_id_count = cluster_info_model.get_rank_id_count()
-        if not rank_id_count:
-            return False
-        return rank_id_count[0][0] != 0
 
     def _check_data_type_valid(self: any) -> None:
         if self.data_type is None or self.data_type not in QueryDataType.__members__.values():
@@ -151,6 +132,4 @@ class QueryDataType(IntEnum):
     CLUSTER_SCENE = 0
     STEP_TRACE = 1
     FOPS_ANALYSE = 2
-    DATA_PREPARATION = 3
-    PARALLEL_ANALYSIS = 4
     COLLECTIVE_COMMUNICATION = 5

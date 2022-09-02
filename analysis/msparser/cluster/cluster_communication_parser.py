@@ -20,7 +20,7 @@ class ClusterCommunicationParser:
     """
     collective communication data parser
     """
-    HEADERS = ['Rank ID', 'Computation Time', 'Communication Time', 'Stage Time']
+    HEADERS = ['Rank ID', 'Compute Time', 'Communication Time', 'Stage Time']
     CLUSTER_ALL_DEVICE_SCENE = -1
 
     def __init__(self: any, params: dict) -> None:

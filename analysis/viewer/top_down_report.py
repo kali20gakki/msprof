@@ -371,7 +371,7 @@ class TopDownData:
                                 ts_trace: any) -> list:
         # top_down_datas: iter_id, type
         # ts_trace: start_time, duration_time, stream_id, task_id, task_type, batch_id
-        stream_task_key = "_".join(map(str, [ts_trace[2], ts_trace[3], ts_trace[5]]))
+        stream_task_key = "_".join(map(str, ts_trace[-4:]))
         res = []
         res.extend(top_down_datas[0][:2])
         res.append(op_names.get(stream_task_key, Constant.NA))

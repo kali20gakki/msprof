@@ -4,7 +4,7 @@ from unittest import mock
 from constant.ut_db_name_constant import DB_FFTS_PMU
 from constant.ut_db_name_constant import TABLE_FFTS_PMU
 from msmodel.stars.ffts_pmu_model import FftsPmuModel
-from profiling_bean.stars.ffts_pmu import FftsPmuBean
+from msparser.aic.ffts_pmu_parser import FftsPmuBean
 from sqlite.db_manager import DBOpen
 
 NAMESPACE = 'msmodel.stars.ffts_pmu_model'

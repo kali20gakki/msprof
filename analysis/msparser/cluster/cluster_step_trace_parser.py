@@ -137,8 +137,7 @@ class ClusterStepTraceParser(IParser):
             logging.error("The cluster rank table doesn't exist.")
             DBManager.destroy_db_connect(conn, curs)
             return False
-        sql = "select case when rank_id='N/A' then device_id else rank_id end as rank_id," \
-              " dir_name from {}".format(DBNameConstant.TABLE_CLUSTER_RANK)
+        sql = "select rank_id, dir_name from {}".format(DBNameConstant.TABLE_CLUSTER_RANK)
         data = DBManager.fetch_all_data(curs, sql)
         DBManager.destroy_db_connect(conn, curs)
         if not data:

@@ -126,7 +126,7 @@ class TestOpCounterOpScene(unittest.TestCase):
                        " min(duration) as min, sum(duration)/count(op_type) as avg, max(duration) as max " \
                        "from ge_task_merge, rts_task where ge_task_merge.task_id=rts_task.task_id " \
                        "and ge_task_merge.stream_id=rts_task.stream_id and ge_task_merge.batch_id=rts_task.batch_id " \
-                       "group by op_type,ge_task_merge.task_type"
+                       "and ge_task_merge.task_type=rts_task.task_type group by op_type,ge_task_merge.task_type"
         self.assertEqual(result, expected_sql)
 
     def test_create_report(self):
