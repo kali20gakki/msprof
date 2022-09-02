@@ -535,7 +535,7 @@ void ProfAclMgr::AddModelLoadConf(uint64_t &dataTypeConfig) const
 
 void ProfAclMgr::AddAiCpuModelConf(uint64_t &dataTypeConfig) const
 {
-    dataTypeConfig |= PROF_AICPU_MODEL;
+    dataTypeConfig |= PROF_KEYPOINT_TRACE_HELPER;
 }
 
 void ProfAclMgr::AddRuntimeTraceConf(uint64_t &dataTypeConfig) const
@@ -979,7 +979,7 @@ void ProfAclMgr::ProfStartCfgToMsprofCfg(const uint64_t dataTypeConfig, ProfAico
         feature->set_ts_task_track("on");
     }
     // training trace
-    if (dataTypeConfig & PROF_TRAINING_TRACE_MASK) {
+    if (dataTypeConfig & PROF_KEYPOINT_TRACE_MASK) {
         feature->set_ts_fw_training("on");
     }
     SHARED_PTR_ALIA<analysis::dvvp::proto::ProfilerConf> conf = nullptr;
@@ -991,7 +991,7 @@ void ProfAclMgr::ProfStartCfgToMsprofCfg(const uint64_t dataTypeConfig, ProfAico
         conf->set_aicoremetrics(metrics);
     }
     // aiv
-    if ((dataTypeConfig & PROF_AIVECTORCORE_METRICS_MASK) && !metrics.empty()) {
+    if ((dataTypeConfig & PROF_AIV_METRICS_MASK) && !metrics.empty()) {
         conf->set_aivmetrics(metrics);
     }
     // l2cache
@@ -1239,7 +1239,7 @@ void ProfAclMgr::ProfDataTypeConfigHandle(SHARED_PTR_ALIA<analysis::dvvp::messag
         dataTypeConfig_ |= PROF_AICORE_METRICS;
     }
     if (!params->aiv_metrics.empty()) {
-        dataTypeConfig_ |= PROF_AIVECTORCORE_METRICS;
+        dataTypeConfig_ |= PROF_AIV_METRICS;
     }
     if (params->ts_timeline == MSVP_PROF_ON) {
         dataTypeConfig_ |= PROF_SCHEDULE_TIMELINE | PROF_TASK_TIME;
@@ -1254,8 +1254,8 @@ void ProfAclMgr::ProfDataTypeConfigHandle(SHARED_PTR_ALIA<analysis::dvvp::messag
     UpdateDataTypeConfigBySwitch(params->modelExecution, PROF_MODEL_EXECUTE);
     UpdateDataTypeConfigBySwitch(params->runtimeApi, PROF_RUNTIME_API);
     UpdateDataTypeConfigBySwitch(params->runtimeTrace, PROF_RUNTIME_TRACE);
-    UpdateDataTypeConfigBySwitch(params->ts_fw_training, PROF_TRAINING_TRACE);
-    UpdateDataTypeConfigBySwitch(params->ts_keypoint, PROF_TRAINING_TRACE);
+    UpdateDataTypeConfigBySwitch(params->ts_fw_training, PROF_KEYPOINT_TRACE);
+    UpdateDataTypeConfigBySwitch(params->ts_keypoint, PROF_KEYPOINT_TRACE);
     UpdateDataTypeConfigBySwitch(params->hcclTrace, PROF_HCCL_TRACE);
     UpdateDataTypeConfigBySwitch(params->l2CacheTaskProfiling, PROF_L2CACHE);
 

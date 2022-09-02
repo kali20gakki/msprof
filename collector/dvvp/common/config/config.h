@@ -161,6 +161,7 @@ const std::string FILE_PERFCOUNT_MODULE_NAME = std::string("FileTransport");
 const uint64_t TRANSPORT_PRI_FREQ = 128;
 
 const char * const MSVP_PROF_ON = "on";
+const std::string MSPROF_SWITCH_ON = "on";
 
 // ai core metrics type
 const std::string ARITHMETIC_UTILIZATION = "ArithmeticUtilization";

@@ -225,6 +225,9 @@ add_executable(msprof_utest
     ${MSPROF_SOURCE_DIR}/dvvp/common/utils/utils.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/common/mmpa/mmpa_api.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/validation/param_validation.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/common/config/config_manager.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/driver/devmgmt/ai_drv_dev_api.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/depend/stub/error_manager/msprof_error_manager_stub.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/message/codec.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/msprof/common/src/receive_data.cpp
@@ -234,7 +237,6 @@ add_executable(msprof_utest
     ${MSPROF_SOURCE_DIR}/dvvp/msprof/platform/mini/data_dumper.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/streamio/client/src/sender.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/transport/hdc/hdc_transport.cpp
-    ${MSPROF_SOURCE_DIR}/dvvp/transport/hdc/hdc_sender.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/transport/transport.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/transport/uploader.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/transport/uploader_mgr.cpp
@@ -277,6 +279,10 @@ target_include_directories(msprof_utest PRIVATE
 	${MSPROF_SOURCE_DIR}/dvvp/common/singleton
 	${MSPROF_SOURCE_DIR}/dvvp/common/utils
 	${MSPROF_SOURCE_DIR}/dvvp/common/config
+	${MSPROF_SOURCE_DIR}/dvvp/common/errno
+    ${MSPROF_SOURCE_DIR}/dvvp/common/platform
+    ${MSPROF_SOURCE_DIR}/dvvp/message
+    ${MSPROF_SOURCE_DIR}/dvvp/driver/inc
 	${MSPROF_SOURCE_DIR}/dvvp/message
 	${MSPROF_SOURCE_DIR}/dvvp/transport
 	${MSPROF_SOURCE_DIR}/dvvp/adx/inc

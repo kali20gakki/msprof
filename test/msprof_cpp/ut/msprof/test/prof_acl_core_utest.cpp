@@ -896,6 +896,53 @@ TEST_F(MSPROF_ACL_CORE_UTEST, DoHostHandle) {
     EXPECT_EQ(PROFILING_SUCCESS, ret);
 }
 
+TEST_F(MSPROF_ACL_CORE_UTEST, MsprofCtrlCallbackImpl)
+{
+    GlobalMockObject::verify();
+    using namespace Msprofiler::Api;
+    uint32_t type = MSPROF_CTRL_FINALIZE;
+    VOID_PTR data = nullptr;
+    uint32_t len = 0;
+    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::MsprofFinalizeHandle)
+        .stubs()
+        .will(returnValue(0));
+    int ret = Analysis::Dvvp::ProfilerCommon::MsprofCtrlCallbackImpl(type, data, len);
+    EXPECT_EQ(MSPROF_ERROR_NONE, ret);
+    type = MSPROF_CTRL_INIT_DYNA;
+    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::IsModeOff)
+        .stubs()
+        .will(returnValue(false));
+    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::MsprofInitForDynamic)
+        .stubs()
+        .will(returnValue((int)MSPROF_ERROR_NONE));
+    ret = Analysis::Dvvp::ProfilerCommon::MsprofCtrlCallbackImpl(type, data, len);
+    EXPECT_EQ(MSPROF_ERROR_NONE, ret);
+    MOCKER_CPP(&Analysis::Dvvp::Common::Platform::Platform::PlatformIsHelperHostSide)
+        .stubs()
+        .will(returnValue(true));
+    MOCKER_CPP(&Analysis::Dvvp::ProfilerCommon::RegisterReporterCallback)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED));
+    ret = Analysis::Dvvp::ProfilerCommon::MsprofCtrlCallbackImpl(type, data, len);
+    EXPECT_EQ(MSPROF_ERROR_NONE, ret);
+    MOCKER_CPP(&Analysis::Dvvp::ProfilerCommon::RegisterReporterCallback)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+    MOCKER_CPP(&Analysis::Dvvp::ProfilerCommon::CommandHandleProfStart)
+        .stubs()
+        .will(returnValue(ACL_SUCCESS))
+        .then(returnValue(ACL_ERROR_PROFILING_FAILURE));
+    ret = Analysis::Dvvp::ProfilerCommon::MsprofCtrlCallbackImpl(type, data, len);
+    EXPECT_EQ(MSPROF_ERROR_NONE, ret);
+    EXPECT_EQ(MSPROF_ERROR_NONE, ret);
+}
+
+TEST_F(MSPROF_ACL_CORE_UTEST, RegisterMsprofTxReporterCallback)
+{
+    GlobalMockObject::verify();
+    RegisterMsprofTxReporterCallback();
+}
+
 TEST_F(MSPROF_ACL_CORE_UTEST, OpDescParserNullptr) {
     GlobalMockObject::verify();
 
