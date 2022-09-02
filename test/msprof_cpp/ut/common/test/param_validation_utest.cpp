@@ -375,6 +375,18 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckHostSysPidValid)
     EXPECT_EQ(false, entry->CheckHostSysPidValid(hostSysPid));
 }
 
+TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckBiuFreqValid)
+{
+    GlobalMockObject::verify();
+    uint32_t biuFreq = 0;
+    auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
+    EXPECT_EQ(false, entry->CheckBiuFreqValid(biuFreq));
+    biuFreq = 300000;
+    EXPECT_EQ(false, entry->CheckBiuFreqValid(biuFreq));
+    biuFreq = 500;
+    EXPECT_EQ(true, entry->CheckBiuFreqValid(biuFreq));
+}
+
 TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, MsprofCheckEnvValid)
 {
     GlobalMockObject::verify();
@@ -496,6 +508,18 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckL2CacheEventsValid) {
     EXPECT_EQ(0, entry->CheckL2CacheEventsValid(events));
     events = {"0x78", "0x79", "0x77", "0x71", "0x6a", "0x6c", "0x74", "0x62"};
     EXPECT_EQ(1, entry->CheckL2CacheEventsValid(events));
+}
+
+TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckParamsModeRegexMatch)
+{
+    GlobalMockObject::verify();
+    std::string paramsMode;
+    auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
+    EXPECT_EQ(true, entry->CheckParamsModeRegexMatch(paramsMode));
+    paramsMode = "xxx";
+    EXPECT_EQ(false, entry->CheckParamsModeRegexMatch(paramsMode));
+    paramsMode = "def_mode";
+    EXPECT_EQ(true, entry->CheckParamsModeRegexMatch(paramsMode));
 }
 
 TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, IsValidSleepPeriod) {

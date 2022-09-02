@@ -81,6 +81,21 @@ TEST_F(MSPROF_BIN_UTEST, SetEnvList) {
     SetEnvList((const char**)envp, envpList);
 }
 
+TEST_F(MSPROF_BIN_UTEST, PlatformAdapterModule)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<PlatformAdapter> PlatformAdapterMgr;
+    MSVP_MAKE_SHARED0_BREAK(PlatformAdapterMgr, PlatformAdapter);
+    SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params;
+    MSVP_MAKE_SHARED0_VOID(params, analysis::dvvp::message::ProfileParams);
+    SHARED_PTR_ALIA<PlatformAdapterInterface> ret = PlatformAdapterMgr->Init(params, PlatformType::END_TYPE);
+    EXPECT_EQ(nullptr, ret);
+    
+    ret = PlatformAdapterMgr->Init(params, PlatformType::MINI_TYPE);
+    int val = ret->Init(params);
+    EXPECT_EQ(PROFILING_SUCCESS, val);
+}
+
 TEST_F(MSPROF_BIN_UTEST, PlatformAdapterInterfaceModule1)
 {
     GlobalMockObject::verify();
