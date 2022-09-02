@@ -462,6 +462,26 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, MsprofCheckAppValid)
     EXPECT_EQ(false, entry->MsprofCheckAppValid(app));
 }
 
+TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, MsprofCheckAppParamValid)
+{
+    GlobalMockObject::verify();
+    
+    std::string app;
+    auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
+    EXPECT_EQ(PROFILING_FAILED, entry->MsprofCheckAppParamValid(app));
+    app = "1";
+    EXPECT_EQ(PROFILING_FAILED, entry->MsprofCheckAppParamValid(app));
+    MOCKER(&MmAccess2).stubs().will(returnValue(0));
+    app = "./";
+    EXPECT_EQ(PROFILING_FAILED, entry->MsprofCheckAppParamValid(app));
+    std::remove("./CheckAppValid");
+    std::ofstream file("CheckAppValid");
+    file << "command not found" << std::endl;
+    file.close();
+    app = "./CheckAppValid";
+    EXPECT_EQ(PROFILING_SUCCESS, entry->MsprofCheckAppParamValid(app));
+}
+
 TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckL2CacheEventsValid) {
     GlobalMockObject::verify();
 
