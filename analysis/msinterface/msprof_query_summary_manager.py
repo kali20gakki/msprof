@@ -17,6 +17,7 @@ from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msprof_common import get_path_dir, prepare_log
 from common_func.msprof_exception import ProfException
 from common_func.path_manager import PathManager
+from msparser.cluster.cluster_parallel_parser import ClusterParallelParser
 from msparser.cluster.data_preprocess_parser import DataPreprocessParser
 from msparser.cluster.fops_parser import FopsParser
 from msparser.cluster.cluster_communication_parser import ClusterCommunicationParser
@@ -82,16 +83,19 @@ class MsprofQuerySummaryManager:
         if self.data_type == QueryDataType.CLUSTER_SCENE:
             MsprofQuerySummaryManager.check_cluster_scene(self.collection_path)
             return
-        self._check_cluster_scene()
         params = {"collection_path": self.collection_path,
                   "is_cluster": self.is_cluster_scene,
                   "npu_id": self.npu_id,
                   "model_id": self.model_id,
                   "iteration_id": self.iteration_id}
+        if self.data_type == QueryDataType.PARALLEL_ANALYSIS:
+            ClusterParallelParser(params).process()
+            return
         if self.data_type == QueryDataType.DATA_PREPARATION:
             DataPreprocessParser(params).process()
             return
         self._check_arguments_valid()
+        self._check_cluster_scene()
         if self.data_type == QueryDataType.STEP_TRACE:
             StepTraceSummay(params).process()
         if self.data_type == QueryDataType.FOPS_ANALYSE:
@@ -137,4 +141,5 @@ class QueryDataType(IntEnum):
     STEP_TRACE = 1
     FOPS_ANALYSE = 2
     DATA_PREPARATION = 3
+    PARALLEL_ANALYSIS = 4
     COLLECTIVE_COMMUNICATION = 5

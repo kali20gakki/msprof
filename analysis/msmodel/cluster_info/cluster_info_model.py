@@ -41,3 +41,7 @@ class ClusterInfoViewModel(ViewModel):
     def get_all_cluster_rank_info(self: any) -> list:
         sql = f"select * from {DBNameConstant.TABLE_CLUSTER_RANK}"
         return DBManager.fetch_all_data(self.cur, sql, dto_class=ClusterRankDto)
+
+    def get_device_and_rank_ids(self: any) -> list:
+        sql = "select device_id, rank_id from {}".format(DBNameConstant.TABLE_CLUSTER_RANK)
+        return DBManager.fetch_all_data(self.cur, sql)
