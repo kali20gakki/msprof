@@ -650,12 +650,11 @@ TEST_F(MSPROF_BIN_UTEST, DevIdToStr)
     uint32_t devList[devNum] = {
         1, 64
     };
-    std::string ret;
-    ret = AclApiParamAdapterMgr->DevIdToStr(devNum, devList);
+    std::string ret = AclApiParamAdapterMgr->DevIdToStr(devNum, devList);
     std::string result = "1";
     EXPECT_EQ(result, ret);
     devList[0] = 1;
-    devList[1] = 2;
+    devList[1] = 2; // 2 test num
     ret = AclApiParamAdapterMgr->DevIdToStr(devNum, devList);
     result = "1,2";
     EXPECT_EQ(result, ret);
