@@ -1,8 +1,7 @@
-# coding=utf-8
-"""
-Function: Data splicing for command line of query interface.
-Copyright Huawei Technologies Co., Ltd. 2021. All rights reserved.
-"""
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
+
 import struct
 
 from common_func.decode_tool.byte_interpreter import ByteInterpreter

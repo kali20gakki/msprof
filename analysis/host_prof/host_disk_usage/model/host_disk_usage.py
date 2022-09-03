@@ -1,9 +1,7 @@
 #!/usr/bin/python3
-# coding=utf-8
-"""
-host disk usage model
-Copyright Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
-"""
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
+
 from abc import abstractmethod
 
 from common_func.db_manager import DBManager

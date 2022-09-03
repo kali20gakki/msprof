@@ -1,9 +1,6 @@
 #!/usr/bin/python3
-# -*-coding:utf-8 -*-
-"""
-This script is used to provide function for analyzer entry of gRPC client
-Copyright Huawei Technologies Co., Ltd. 2018-2019. All rights reserved.
-"""
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 
 import hashlib
 import logging

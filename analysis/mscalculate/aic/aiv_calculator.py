@@ -1,8 +1,7 @@
-# coding=utf-8
-"""
-function: script used to parse ffts pmu data and save it to db
-Copyright Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
-"""
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
+
 from common_func.config_mgr import ConfigMgr
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.utils import Utils
