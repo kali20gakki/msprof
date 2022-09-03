@@ -1,9 +1,6 @@
 #!/usr/bin/python3
-# -*-coding:utf-8 -*-
-"""
-provides APIs to call methods of parsing data, creating databases
-and insert them into databases
-"""
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 
 import json
 import logging

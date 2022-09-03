@@ -846,6 +846,7 @@ int AclApiParamAdapter::Init()
     std::vector<InputCfg>({
         INPUT_CFG_COM_TRAINING_TRACE, INPUT_CFG_COM_SYS_DEVICES
     }).swap(aclApiConfig_);
+    return ret;
 }
 
 int AclApiParamAdapter::ParamsCheckAclApi(std::vector<std::pair<InputCfg, std::string>> &cfgList) const

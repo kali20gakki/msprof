@@ -1,9 +1,6 @@
 #!/usr/bin/python3
-# coding=utf-8
-"""
-function: this script used to operate task scheduler
-Copyright Huawei Technologies Co., Ltd. 2021. All rights reserved.
-"""
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
 
 import logging
 import os
@@ -89,25 +86,6 @@ class CalculateTaskScheduler:
         self._collect_aicpu(task_time)
         self._insert_task_time_data(task_time, runtime_conn, runtime_curs)
         logging.info('create task time table end')
-
-    def _add_info(self: any, cal_task_data: list) -> list:
-        # 0 is default batch id
-        task_time = [task_data + (
-            self.index_id, self.model_id, NumberConstant.DEFAULT_BATCH_ID) for task_data in cal_task_data]
-        return task_time
-
-    def _collect_aicpu(self: any, task_time: list) -> None:
-        aicpu_collector = AICpuFromTsCollector(self.project_path)
-        for data in task_time:
-            task_id = data[5]
-            stream_id = data[6]
-            start = data[9]
-            end = data[10]
-            task_type = data[4]
-
-            aicpu_data = (stream_id, task_id, start, end, task_type)
-            aicpu_collector.filter_aicpu(aicpu_data)
-        aicpu_collector.save_aicpu()
 
     def update_timeline_api(self: any, runtime_conn: any) -> None:
         """
@@ -244,3 +222,22 @@ class CalculateTaskScheduler:
             DBManager.drop_table(runtime_conn, DBNameConstant.TABLE_RUNTIME_REPORT_TASK)
         sql = DBManager.sql_create_general_table('ReportTaskMap', 'ReportTask', self.TABLE_PATH)
         DBManager.execute_sql(runtime_conn, sql)
+
+    def _add_info(self: any, cal_task_data: list) -> list:
+        # 0 is default batch id
+        task_time = [task_data + (
+            self.index_id, self.model_id, NumberConstant.DEFAULT_BATCH_ID) for task_data in cal_task_data]
+        return task_time
+
+    def _collect_aicpu(self: any, task_time: list) -> None:
+        aicpu_collector = AICpuFromTsCollector(self.project_path)
+        for data in task_time:
+            task_id = data[5]
+            stream_id = data[6]
+            start = data[9]
+            end = data[10]
+            task_type = data[4]
+
+            aicpu_data = (stream_id, task_id, start, end, task_type)
+            aicpu_collector.filter_aicpu(aicpu_data)
+        aicpu_collector.save_aicpu()

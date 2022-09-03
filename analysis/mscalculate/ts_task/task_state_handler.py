@@ -1,15 +1,13 @@
 #!/usr/bin/python3
-# coding=utf-8
-"""
-function: this script used to operate ts track
-Copyright Huawei Technologies Co., Ltd. 2022. All rights reserved.
-"""
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
 
 
 class TaskTimeline:
     """
     contain start and end time of task
     """
+
     def __init__(self: any, stream_id: int, task_id: int) -> None:
         self._stream_id = stream_id
         self._task_id = task_id
@@ -47,20 +45,6 @@ class TaskStateHandler:
         self.new_task = None
         self.task_timeline_list = []
 
-    def process_record(self: any, timestamp: int, task_state: int) -> None:
-        """
-        process record
-        :param timestamp: timestamp
-        :param task_state: task state
-        """
-        if task_state == self.START_TAG:
-            self.new_task = TaskTimeline(self.stream_id, self.task_id)
-            self.new_task.start = timestamp
-
-        if task_state == self.END_TAG and self.new_task:
-            self.new_task.end = timestamp
-            self.task_timeline_list.append(self.new_task)
-
     @property
     def stream_id(self: any) -> int:
         """
@@ -76,3 +60,17 @@ class TaskStateHandler:
         :return: task id
         """
         return self._task_id
+
+    def process_record(self: any, timestamp: int, task_state: int) -> None:
+        """
+        process record
+        :param timestamp: timestamp
+        :param task_state: task state
+        """
+        if task_state == self.START_TAG:
+            self.new_task = TaskTimeline(self.stream_id, self.task_id)
+            self.new_task.start = timestamp
+
+        if task_state == self.END_TAG and self.new_task:
+            self.new_task.end = timestamp
+            self.task_timeline_list.append(self.new_task)

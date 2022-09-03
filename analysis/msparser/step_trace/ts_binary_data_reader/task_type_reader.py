@@ -1,9 +1,6 @@
-#!/usr/bin/env python
-# coding=utf-8
-"""
-This script is used to create database for task type data
-Copyright Huawei Technologies Co., Ltd. 2022. All rights reserved.
-"""
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2021-2022. All rights reserved.
 
 from common_func.db_name_constant import DBNameConstant
 from profiling_bean.struct_info.task_type import TaskTypeBean

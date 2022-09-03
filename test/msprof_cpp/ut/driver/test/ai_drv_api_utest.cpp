@@ -105,8 +105,6 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvTscpuStart) {
 }
 
 TEST_F(DRIVER_AI_DRV_API_TEST, DrvAicoreStart) {
-    GlobalMockObject::verify();
-
     analysis::dvvp::driver::DrvPeripheralProfileCfg peripheralCfg;
     peripheralCfg.profDeviceId = 0;
     peripheralCfg.profChannel = analysis::dvvp::driver::PROF_CHANNEL_AI_CORE;
@@ -124,12 +122,26 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvAicoreStart) {
         .stubs()
         .will(returnValue(PROF_ERROR))
         .then(returnValue(PROF_OK));
-
     EXPECT_EQ(PROFILING_FAILED, analysis::dvvp::driver::DrvAicoreStart(peripheralCfg, prof_cores, prof_events));
-
     EXPECT_EQ(PROFILING_SUCCESS, analysis::dvvp::driver::DrvAicoreStart(peripheralCfg, prof_cores, prof_events));
 }
 
+TEST_F(DRIVER_AI_DRV_API_TEST, DrvBiuProfileStart)
+{
+    GlobalMockObject::verify();
+    MOCKER(&DriverPlugin::MsprofDrvStart)
+        .stubs()
+        .will(returnValue(PROF_ERROR))
+        .then(returnValue(PROF_OK));
+
+    analysis::dvvp::driver::DrvPeripheralProfileCfg peripheralCfg;
+    peripheralCfg.profDeviceId = 0;
+    peripheralCfg.profChannel = analysis::dvvp::driver::PROF_CHANNEL_AI_CORE;
+    peripheralCfg.profSamplePeriod = 1;
+    peripheralCfg.profDataFilePath = "/path/to/data";
+    EXPECT_EQ(PROFILING_FAILED, analysis::dvvp::driver::DrvBiuProfileStart(0, peripheralCfg.profChannel, 1));
+    EXPECT_EQ(PROFILING_SUCCESS, analysis::dvvp::driver::DrvBiuProfileStart(0, peripheralCfg.profChannel, 1));
+}
 TEST_F(DRIVER_AI_DRV_API_TEST, DrvAicoreTaskBasedStart) {
     GlobalMockObject::verify();
 
@@ -196,7 +208,7 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvTsFwStart) {
     analysis::dvvp::driver::DrvPeripheralProfileCfg peripheralCfg;
     peripheralCfg.profDeviceId = 0;
     peripheralCfg.profChannel = analysis::dvvp::driver::PROF_CHANNEL_TS_FW;
-    peripheralCfg.profSamplePeriod = 10;
+    peripheralCfg.profSamplePeriod = 1;
     peripheralCfg.profDataFilePath = "/path/to/data";
 
     EXPECT_EQ(PROFILING_FAILED, analysis::dvvp::driver::DrvTsFwStart(peripheralCfg, nullptr));

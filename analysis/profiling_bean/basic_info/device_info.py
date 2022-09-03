@@ -1,8 +1,6 @@
-# !/usr/bin/python
-# coding=utf-8
-"""
-Copyright Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
-"""
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 
 from common_func.info_conf_reader import InfoConfReader
 from profiling_bean.basic_info.base_info import BaseInfo

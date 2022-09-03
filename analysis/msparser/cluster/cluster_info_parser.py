@@ -1,7 +1,7 @@
-"""
-This script is used to parse cluster rank_id data to db.
-Copyright Huawei Technologies Co., Ltd. 2022. All rights reserved.
-"""
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
+
 import logging
 import os
 import shutil

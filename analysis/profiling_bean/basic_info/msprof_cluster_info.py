@@ -1,9 +1,7 @@
-# !/usr/bin/python
-# coding=utf-8
-"""
-This script is used to construct the cluster info for ide.
-Copyright Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
-"""
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
+
 import json
 import os.path
 from collections import OrderedDict

@@ -1,7 +1,6 @@
-"""
-function: analysis the data of ai cpu by iteration.
-Copyright Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
-"""
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
 
 import json
 import logging

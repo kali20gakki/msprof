@@ -1,9 +1,7 @@
 #!/usr/bin/python3
-# coding=utf-8
-"""
-function: collect the data of ai cpu by iteration.
-Copyright Huawei Technologies Co., Ltd. 2022. All rights reserved.
-"""
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
+
 from analyzer.scene_base.profiling_scene import ProfilingScene
 from msmodel.ai_cpu.ai_cpu_model import AiCpuModel
 from common_func.batch_counter import BatchCounter

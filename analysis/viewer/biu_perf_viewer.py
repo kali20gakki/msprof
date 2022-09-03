@@ -1,9 +1,7 @@
 #!/usr/bin/python3
-# coding:utf-8
-"""
-This scripts is used to export biu perf data to files
-Copyright Huawei Technologies Co., Ltd. 2022. All rights reserved.
-"""
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2021-2022. All rights reserved.
+
 import json
 from collections import OrderedDict
 

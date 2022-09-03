@@ -1,8 +1,7 @@
-# coding=utf-8
-"""
-Function: construct the basic info for ide
-Copyright Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
-"""
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
+
 import json
 
 from common_func.info_conf_reader import InfoConfReader

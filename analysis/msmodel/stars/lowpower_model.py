@@ -1,9 +1,7 @@
 #!/usr/bin/python3
-# coding=utf-8
-"""
-function: save lowpower sample data to db
-Copyright Huawei Technologies Co., Ltd. 2022. All rights reserved.
-"""
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2021-2022. All rights reserved.
+
 from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.stars_constant import StarsConstant
 from msmodel.interface.parser_model import ParserModel
