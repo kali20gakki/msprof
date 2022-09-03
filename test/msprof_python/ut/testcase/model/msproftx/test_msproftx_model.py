@@ -1,10 +1,10 @@
 import unittest
 from unittest import mock
 
-from model.msproftx.msproftx_model import MsprofTxModel
+from msmodel.msproftx.msproftx_model import MsprofTxModel
 
 
-NAMESPACE = 'model.msproftx.msproftx_model'
+NAMESPACE = 'msmodel.msproftx.msproftx_model'
 
 
 class TestMsprofTxModel(unittest.TestCase):

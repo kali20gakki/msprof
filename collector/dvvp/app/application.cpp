@@ -40,10 +40,15 @@ int Application::PrepareLaunchAppCmd(std::stringstream &ssCmdApp,
         MSPROF_LOGE("app_parameters(%s) contains not allowed character.", params->app_parameters.c_str());
         return PROFILING_FAILED;
     }
+    ssCmdApp << params->cmdPath;
+    ssCmdApp << " ";
 
-    ssCmdApp << params->app_dir;
-    ssCmdApp << MSVP_SLASH;
-    ssCmdApp << params->app;
+    if (!analysis::dvvp::common::utils::Utils::IsAppName(params->cmdPath)) {
+        ssCmdApp << params->app_dir;
+        ssCmdApp << MSVP_SLASH;
+        ssCmdApp << params->app;
+    }
+
     if (!params->app_parameters.empty()) {
         ssCmdApp << " ";
         ssCmdApp << params->app_parameters;
@@ -75,8 +80,50 @@ int Application::PrepareAppEnvs(SHARED_PTR_ALIA<analysis::dvvp::message::Profile
     return PROFILING_SUCCESS;
 }
 
-int Application::LaunchApp(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params,
-    mmProcess &appProcess)
+std::string Application::GetAppPath(std::vector<std::string> paramsCmd)
+{
+    if (paramsCmd.empty()) {
+        return "";
+    }
+    std::string ret = "";
+    if (analysis::dvvp::common::utils::Utils::IsAppName(paramsCmd[0])) {
+        ret = paramsCmd[0];
+    } else if (paramsCmd.size() > 1) {
+        ret = paramsCmd[1];
+    }
+    return ret;
+}
+
+std::string Application::GetCmdString(const std::string paramsName)
+{
+    if (paramsName.empty()) {
+        return "";
+    }
+    if (analysis::dvvp::common::utils::Utils::IsAppName(paramsName)) {
+        return analysis::dvvp::common::utils::Utils::CanonicalizePath(paramsName);
+    } else {
+        return paramsName;
+    }
+}
+
+int Application::CanonicalizeAppParam(std::vector<std::string> &paramsCmd)
+{
+    if (paramsCmd.empty()) {
+        return PROFILING_FAILED;
+    }
+    std::string tmpStr;
+    for (uint32_t i = 1; i < paramsCmd.size(); i++) {
+        tmpStr = analysis::dvvp::common::utils::Utils::CanonicalizePath(paramsCmd[i]);
+        if (tmpStr.empty()) {
+            continue;
+        } else {
+            paramsCmd[i] = tmpStr;
+        }
+    }
+    return PROFILING_SUCCESS;
+}
+
+int Application::LaunchApp(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params, MmProcess &appProcess)
 {
     if (params == nullptr) {
         MSPROF_LOGE("[LaunchApp]params is empty.");
@@ -87,21 +134,21 @@ int Application::LaunchApp(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParam
         return PROFILING_FAILED;
     }
     MSPROF_LOGI("launch app cmd: %s", ssCmdApp.str().c_str());
-    std::vector<std::string> paramsCmd =
-        analysis::dvvp::common::utils::Utils::Split(ssCmdApp.str());
+    std::vector<std::string> paramsCmd = analysis::dvvp::common::utils::Utils::Split(ssCmdApp.str());
     if (paramsCmd.empty()) {
         MSPROF_LOGE("[LaunchApp]paramsCmd is empty.");
         return PROFILING_FAILED;
     }
-    if (analysis::dvvp::common::utils::Utils::IsSoftLink(paramsCmd[0])) {
-        MSPROF_LOGE("app_dir(%s) is soft link.", Utils::BaseName(paramsCmd[0]).c_str());
-        return PROFILING_FAILED;
-    }
-    std::string cmd = analysis::dvvp::common::utils::Utils::CanonicalizePath(paramsCmd[0]);
+    std::string cmd = GetCmdString(paramsCmd[0]);
     if (cmd.empty()) {
         MSPROF_LOGE("app_dir(%s) is not valid.", Utils::BaseName(paramsCmd[0]).c_str());
         return PROFILING_FAILED;
     }
+    if (CanonicalizeAppParam(paramsCmd) != PROFILING_SUCCESS) {
+        MSPROF_LOGE("app params are not valid");
+        return PROFILING_FAILED;
+    }
+    std::string workDirPath = params->app_dir + MSVP_SLASH + params->app;
     std::vector<std::string> argsVec;
     std::vector<std::string> envsVec;
     PrepareAppArgs(paramsCmd, argsVec);  // args
@@ -111,10 +158,9 @@ int Application::LaunchApp(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParam
         return PROFILING_FAILED;
     }
     appProcess = MSVP_MMPROCESS;  // run
-    if (analysis::dvvp::common::utils::Utils::ChangeWorkDir(cmd) == PROFILING_FAILED) {
+    if (analysis::dvvp::common::utils::Utils::ChangeWorkDir(workDirPath) == PROFILING_FAILED) {
         return PROFILING_FAILED;
     }
-
     int exitCode = analysis::dvvp::common::utils::INVALID_EXIT_CODE;
     ExecCmdParams execCmdParams(cmd, true, "");
     ret = analysis::dvvp::common::utils::Utils::ExecCmd(execCmdParams, argsVec, envsVec, exitCode, appProcess);

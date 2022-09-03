@@ -6,12 +6,18 @@
  */
 #include "slog_plugin.h"
 
-namespace Analysis {
+namespace Collector {
 namespace Dvvp {
 namespace Plugin {
-SlogPlugin::~SlogPlugin()
+void SlogPlugin::LoadSlogSo()
 {
-    pluginHandle_.CloseHandle();
+    int32_t ret = PROFILING_SUCCESS;
+    if (!pluginHandle_.HasLoad()) {
+        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
+        if (ret != PROFILING_SUCCESS) {
+            return;
+        }
+    }
 }
 
 bool SlogPlugin::IsFuncExist(const std::string &funcName) const
@@ -22,20 +28,15 @@ bool SlogPlugin::IsFuncExist(const std::string &funcName) const
 // CheckLogLevelForC
 int SlogPlugin::MsprofCheckLogLevelForC(int moduleId, int logLevel)
 {
-    PluginStatus ret = PLUGIN_LOAD_SUCCESS;
-    if (!pluginHandle_.HasLoad()) {
-        ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
-        if (ret != PLUGIN_LOAD_SUCCESS) {
+    PthreadOnce(&loadFlag_, []()->void {SlogPlugin::instance()->LoadSlogSo();});
+    if (checkLogLevelForC_ == nullptr) {
+        int32_t ret = pluginHandle_.GetFunction<int, int, int>("CheckLogLevelForC", checkLogLevelForC_);
+        if (ret != PROFILING_SUCCESS) {
             return -1;
         }
     }
-    MSPROF_CHECKLOGLEVELFORC_T func;
-    ret = pluginHandle_.GetFunction<int, int, int>("CheckLogLevelForC", func);
-    if (ret != PLUGIN_LOAD_SUCCESS) {
-        return -1;
-    }
-    return func(moduleId, logLevel);
+    return checkLogLevelForC_(moduleId, logLevel);
 }
 } // Plugin
 } // Dvvp
-} // Analysis
+} // Collector

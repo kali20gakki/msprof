@@ -31,6 +31,15 @@ class GeTensorParser(DataParser, MsMultiProcess):
         """
         return bean_class().fusion_decode(bean_data)
 
+    @staticmethod
+    def _get_tensor_data(bean_data: any) -> list:
+        if not bean_data:
+            return []
+        return [bean_data.model_id, bean_data.stream_id, bean_data.task_id,
+                bean_data.tensor_num, bean_data.input_format, bean_data.input_data_type,
+                bean_data.input_shape, bean_data.output_format, bean_data.output_data_type,
+                bean_data.output_shape, bean_data.index_num, bean_data.timestamp, bean_data.batch_id]
+
     @classmethod
     def _generate_new_hash_dict_data(cls: any, hash_dict: dict, key: any, data: list) -> None:
         hash_dict[key] = {
@@ -54,15 +63,6 @@ class GeTensorParser(DataParser, MsMultiProcess):
         value['output_data_type'] += (";" + str(data[8])) if data[8] else ''
         value['output_shape'] += (";" + str(data[9])) if data[9] else ''
         hash_dict[key] = value
-
-    @staticmethod
-    def _get_tensor_data(bean_data: any) -> list:
-        if not bean_data:
-            return []
-        return [bean_data.model_id, bean_data.stream_id, bean_data.task_id,
-                bean_data.tensor_num, bean_data.input_format, bean_data.input_data_type,
-                bean_data.input_shape, bean_data.output_format, bean_data.output_data_type,
-                bean_data.output_shape, bean_data.index_num, bean_data.timestamp, bean_data.batch_id]
 
     def parse(self: any) -> None:
         """

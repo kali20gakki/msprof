@@ -27,7 +27,6 @@ from viewer.get_msvp_timeline_training import get_dvpp_engine_id
 from viewer.get_msvp_timeline_training import get_dvpp_ids
 from viewer.get_msvp_timeline_training import get_dvpp_legend
 from viewer.get_msvp_timeline_training import get_dvpp_total_data
-from viewer.memory_copy.memory_copy_viewer import MemoryCopyViewer
 
 
 class TraceViewer:
@@ -394,42 +393,6 @@ def _get_acl_data(acl_iter_datas: list) -> list:
     return result_data
 
 
-def get_acl_timeline_data(project_path: str) -> str:
-    """
-    get acl data and json from acl_module.db
-    :param project_path:
-    :return: json format data
-    """
-    logging.info("Start to get acl tracing data.")
-    conn, cur = DBManager.check_connect_db(project_path, DBNameConstant.DB_ACL_MODULE)
-    if not cur:
-        return json.dumps({"status": NumberConstant.ERROR,
-                           "info": "Failed to get {0}.".format(DBNameConstant.TABLE_ACL_DATA)})
-    if not DBManager.judge_table_exist(cur, DBNameConstant.TABLE_ACL_DATA):
-        return json.dumps({"status": NumberConstant.ERROR,
-                           "info": "Failed to get {0}.".format(DBNameConstant.TABLE_ACL_DATA)})
-    sql = "select api_name, start_time, (end_time-start_time) " \
-          "as output_duration, process_id, thread_id, api_type " \
-          " from {0} order by start_time".format(DBNameConstant.TABLE_ACL_DATA)
-    acl_iter_datas = DBManager.fetch_all_data(cur, sql)
-    try:
-        if acl_iter_datas:
-            top_down_datas = Utils.generator_to_list((TraceViewHeaderConstant.PROCESS_ACL,) + acl_iter_data
-                                                     for acl_iter_data in acl_iter_datas)
-            trace_data = _format_single_data(top_down_datas)
-            result_data = _get_acl_data(acl_iter_datas)
-            result_data.extend(TraceViewManager.time_graph_trace(
-                TraceViewHeaderConstant.TOP_DOWN_TIME_GRAPH_HEAD, trace_data))
-            return json.dumps(result_data)
-        return json.dumps(
-            {"status": NumberConstant.ERROR, "info": "Failed to connect {0}.".format(DBNameConstant.DB_ACL_MODULE)})
-    except (OSError, SystemError, ValueError, TypeError, RuntimeError) as error:
-        logging.error(str(error), exc_info=Constant.TRACE_BACK_SWITCH)
-        return json.dumps({"status": NumberConstant.ERROR, "info": "Failed to get acl data."})
-    finally:
-        DBManager.destroy_db_connect(conn, cur)
-
-
 def _format_single_data(top_down_datas: list) -> list:
     """
     conforms acl and ge data to the trace view format
@@ -520,68 +483,5 @@ def get_ge_timeline_data(project_path: str) -> str:
         logging.error(str(error), exc_info=Constant.TRACE_BACK_SWITCH)
         return json.dumps(
             {"status": NumberConstant.ERROR, "info": "Failed to get ge data."})
-    finally:
-        DBManager.destroy_db_connect(conn, cur)
-
-
-def _get_runtime_data(sql_datas: list, pid: str) -> list:
-    trace_data = []
-    for sql_data in sql_datas:
-        runtime_name = str(sql_data[0]) if str(sql_data[0]) else Constant.NA
-        args = OrderedDict([('Thread Id', sql_data[3])])
-        args = MemoryCopyViewer.add_runtime_memcpy_args(sql_data, args)
-        trace_data.append(
-            (runtime_name, pid,
-             sql_data[3], sql_data[1] / NumberConstant.CONVERSION_TIME,
-             sql_data[2] / NumberConstant.CONVERSION_TIME,
-             args))
-    return trace_data
-
-
-def _get_runtime_result_data(sql_datas: list, pid: str, tid: str) -> list:
-    result_data = []
-    tid_values = set()
-    for sql_data in sql_datas:
-        tid_values.add(sql_data[3])
-
-    meta_data = [["process_name", pid, tid, TraceViewHeaderConstant.PROCESS_RUNTIME]]
-    meta_data.extend(["thread_name",
-                      pid, tid_value,
-                      "Thread {}".format(tid_value)] for tid_value in tid_values)
-    meta_data.extend(["thread_sort_index",
-                      pid,
-                      tid_value, tid_value] for tid_value in tid_values)
-    result_data.extend(TraceViewManager.metadata_event(meta_data))
-    return result_data
-
-
-def get_runtime_timeline(project_path: str) -> str:
-    """
-    get data for runtime timeline
-    """
-    conn, cur = DBManager.check_connect_db(project_path, DBNameConstant.DB_RUNTIME)
-    try:
-        if conn and cur:
-            if not DBManager.judge_table_exist(cur, DBNameConstant.TABLE_API_CALL):
-                return json.dumps({"status": NumberConstant.ERROR,
-                                   "info": "Failed to get {0}.".format(DBNameConstant.TABLE_API_CALL)})
-            sql = "select api, entry_time, (exit_time - entry_time), " \
-                  "thread, data_size, memcpy_direction," \
-                  "stream_id, task_id from {}".format(DBNameConstant.TABLE_API_CALL)
-            sql_datas = DBManager.fetch_all_data(cur, sql)
-            if sql_datas:
-                pid = InfoConfReader().get_json_pid_data()
-                tid = InfoConfReader().get_json_tid_data()
-                result_data = _get_runtime_result_data(sql_datas, pid, tid)
-                trace_data = _get_runtime_data(sql_datas, pid)
-                result_data.extend(
-                    TraceViewManager.time_graph_trace(TraceViewHeaderConstant.TOP_DOWN_TIME_GRAPH_HEAD, trace_data))
-                return json.dumps(result_data)
-        return json.dumps(
-            {"status": NumberConstant.ERROR, "info": "Failed to connect {0}.".format(DBNameConstant.DB_ACL_MODULE)})
-    except (OSError, SystemError, ValueError, TypeError, RuntimeError) as error:
-        logging.error(str(error), exc_info=Constant.TRACE_BACK_SWITCH)
-        return json.dumps(
-            {"status": NumberConstant.ERROR, "info": "Failed to get runtime data"})
     finally:
         DBManager.destroy_db_connect(conn, cur)

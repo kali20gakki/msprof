@@ -175,6 +175,10 @@ int ReceiveData::DoReport(CONST_REPORT_DATA_PTR rData)
                         rData->tag, rData->dataLen, RECEIVE_CHUNK_SIZE);
             break;
         }
+        if (moduleName_ == "runtime" && rData->deviceId >= 64) {  // module runtime, deviceid>=64, return
+            MSPROF_LOGW("module:%s, invalid device id:%d", moduleName_.c_str(), rData->deviceId);
+            return PROFILING_SUCCESS;
+        }
         dataChunk.deviceId = rData->deviceId;
         dataChunk.reportTime = startRawTime;
         dataChunk.dataLen = rData->dataLen;
@@ -284,7 +288,7 @@ int ReceiveData::DumpData(std::vector<ReporterDataChunk> &message, SHARED_PTR_AL
     std::string chunk = "";
     bool isFirstMessage = true;
     for (size_t i = 0; i < message.size(); i++) {
-        int messageLen = message[i].dataLen;
+        size_t messageLen = static_cast<size_t>(message[i].dataLen);
         CHAR_PTR dataPtr = reinterpret_cast<CHAR_PTR>(&message[i].data[0]);
         if (dataPtr == nullptr) {
             return PROFILING_FAILED;

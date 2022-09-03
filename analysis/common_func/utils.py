@@ -13,7 +13,7 @@ from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.file_manager import check_path_valid
 from common_func.path_manager import PathManager
-from model.interface.base_model import BaseModel
+from msmodel.interface.base_model import BaseModel
 
 
 class Utils:
@@ -24,14 +24,39 @@ class Utils:
     def __init__(self: any) -> any:
         pass
 
-    @staticmethod
-    def is_training_trace_scene(result_dir: str) -> bool:
+    @classmethod
+    def need_all_model_in_one_iter(cls: any, result_dir: str, model_id: int) -> bool:
         """
-        check the scene of training trace or not
-        :param result_dir: project path
-        :return: True or False
+        check the scene of need export all model in one iter or not
+        :param result_dir:
+        :param model_id:
+        :return:
         """
-        return AiStackDataCheckManager.contain_training_trace_data(result_dir)
+        if cls.is_single_op_scene(result_dir):
+            return True
+        if cls.is_single_op_graph_mix(result_dir) and model_id == Constant.GE_OP_MODEL_ID:
+            return True
+        return False
+
+    @classmethod
+    def get_func_type(cls: any, header: int) -> str:
+        """
+        func type is the lower 6 bits of the first byte, used to distinguish different data types.
+        keep 6 lower bits which represent func type
+        :param header:
+        :return: func_type.For example: 000011
+        """
+        return bin(header & 63)[2:].zfill(6)
+
+    @classmethod
+    def get_cnt(cls: any, header: int) -> str:
+        """
+        cnt is the 7 - 10 bits of the first byte.
+        keep 7 - 10 bits which represent cnt
+        :param header:
+        :return: func_type.For example: 1111
+        """
+        return bin(header & 960)[2:].zfill(6)
 
     @staticmethod
     def is_step_scene(result_dir: str) -> bool:
@@ -50,7 +75,7 @@ class Utils:
         :param result_dir: project path
         :return: True or False
         """
-        return not Utils.is_step_scene(result_dir) and not Utils.is_training_trace_scene(result_dir)
+        return not Utils.is_step_scene(result_dir)
 
     @staticmethod
     def is_single_op_graph_mix(result_dir: str) -> bool:
@@ -84,8 +109,6 @@ class Utils:
             return Constant.MIX_OP_AND_GRAPH
         if Utils.is_step_scene(result_dir):
             return Constant.STEP_INFO
-        if Utils.is_training_trace_scene(result_dir):
-            return Constant.TRAIN
         return Constant.SINGLE_OP
 
     @staticmethod
@@ -157,37 +180,3 @@ class Utils:
             json_data = json_reader.read()
             json_data = json.loads(json_data)
             return json_data
-
-    @classmethod
-    def need_all_model_in_one_iter(cls: any, result_dir: str, model_id: int) -> bool:
-        """
-        check the scene of need export all model in one iter or not
-        :param result_dir:
-        :param model_id:
-        :return:
-        """
-        if cls.is_single_op_scene(result_dir):
-            return True
-        if cls.is_single_op_graph_mix(result_dir) and model_id == Constant.GE_OP_MODEL_ID:
-            return True
-        return False
-
-    @classmethod
-    def get_func_type(cls: any, header: int) -> str:
-        """
-        func type is the lower 6 bits of the first byte, used to distinguish different data types.
-        63 is 0b00111111 keep 6 lower bits which represent func type
-        :param header:
-        :return: func_type.For example: 000011
-        """
-        return bin(header & 63)[2:].zfill(6)
-
-    @classmethod
-    def get_cnt(cls: any, header: int) -> str:
-        """
-        cnt is the 7 - 10 bits of the first byte.
-        960 is 0b001111000000 keep 7 - 10 bits which represent cnt
-        :param header:
-        :return: func_type.For example: 1111
-        """
-        return bin(header & 960)[2:].zfill(6)

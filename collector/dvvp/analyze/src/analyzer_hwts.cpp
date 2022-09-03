@@ -9,8 +9,9 @@
 #include "data_struct.h"
 #include "errno/error_code.h"
 #include "message/codec.h"
+#include "msprof_dlog.h"
 #include "proto/profiler.pb.h"
-
+#include "toolchain/prof_acl_api.h"
 namespace Analysis {
 namespace Dvvp {
 namespace Analyze {
@@ -28,7 +29,7 @@ void AnalyzerHwts::Parse(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> me
     if (message == nullptr) {
         return;
     }
-    totalBytes_ += message->chunksizeinbytes();
+    totalBytes_ += static_cast<uint64_t>(message->chunksizeinbytes());
     ParseHwtsData(message->chunk().c_str(), message->chunksizeinbytes());
 }
 
@@ -103,7 +104,7 @@ void AnalyzerHwts::ParseTaskStartEndData(CONST_CHAR_PTR data, uint32_t len, uint
         OpTime opTime = {0, 0, 0, 0, 0, 0, ACL_SUBSCRIBE_OP};
             iter = opTimeDrafts_.insert(std::make_pair(key, opTime)).first;
         }
-        uint64_t sysTime = hwtsData->syscnt / frequency_;  // ns
+        uint64_t sysTime = static_cast<uint64_t>(hwtsData->syscnt / frequency_);  // ns
         switch (rptType) {
             case HWTS_TASK_START_TYPE:
                 CheckData(iter->second, key, rptType, sysTime);

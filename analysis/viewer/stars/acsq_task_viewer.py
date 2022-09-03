@@ -12,8 +12,8 @@ from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.trace_view_header_constant import TraceViewHeaderConstant
 from common_func.trace_view_manager import TraceViewManager
-from model.sqe_type_map import SqeType
-from model.stars.acsq_task_model import AcsqTaskModel
+from msmodel.sqe_type_map import SqeType
+from msmodel.stars.acsq_task_model import AcsqTaskModel
 from viewer.interface.base_viewer import BaseViewer
 
 

@@ -63,7 +63,7 @@ public:
     uint32_t GetReportDataMaxLen();
 
     /**
-    * @brief DumpModelLoadData: dump cached model load data 
+    * @brief DumpModelLoadData: dump cached model load data
     */
     void DumpModelLoadData(const std::string &devId) override;
     /**
@@ -79,7 +79,7 @@ protected:
     void Run(const struct error_message::Context &errorContext) override;
 private:
     /**
-    * @brief Dump: transfer FileChunkReq 
+    * @brief Dump: transfer FileChunkReq
     * @param [in] message: the user data to be send to remote host
     * @return : success return PROFILING_SUCCESS, failed return PROFIING_FAILED
     */

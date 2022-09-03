@@ -86,7 +86,7 @@ public:
     int Process() override;
     int Uninit() override;
 
-public :
+public:
     bool IsGlobalJobLevel() override;
 
 private:
@@ -95,7 +95,7 @@ private:
     void SendData();
 
 private:
-    mmProcess llcProcess_;
+    MmProcess llcProcess_;
 };
 
 class ProfRoceJob : public ProfPeripheralJob {

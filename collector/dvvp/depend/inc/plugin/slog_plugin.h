@@ -10,7 +10,7 @@
 #include "singleton/singleton.h"
 #include "plugin_handle.h"
 
-namespace Analysis {
+namespace Collector {
 namespace Dvvp {
 namespace Plugin {
 enum {
@@ -24,35 +24,31 @@ enum {
     DLOG_EVENT = 0x10
 };
 
+using CheckLogLevelForCFunc = std::function<int(int, int)>;
 class SlogPlugin : public analysis::dvvp::common::singleton::Singleton<SlogPlugin> {
 public:
-    SlogPlugin()
-    : soName_("libalog.so"),
-      pluginHandle_(PluginHandle(soName_))
-    {}
-    ~SlogPlugin();
+    SlogPlugin() : soName_("libalog.so"), pluginHandle_(PluginHandle(soName_)), loadFlag_(0) {}
 
     bool IsFuncExist(const std::string &funcName) const;
 
     // CheckLogLevelForC
-    using MSPROF_CHECKLOGLEVELFORC_T = std::function<int(int, int)>;
     int MsprofCheckLogLevelForC(int moduleId, int logLevel);
 
     // DlogInnerForC
     template<typename... T>
     void MsprofDlogInnerForC(int moduleId, int level, const char *fmt, T... args)
     {
-        PluginStatus ret = PLUGIN_LOAD_SUCCESS;
+        int32_t ret = PROFILING_SUCCESS;
         if (!pluginHandle_.HasLoad()) {
             ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
-            if (ret != PLUGIN_LOAD_SUCCESS) {
+            if (ret != PROFILING_SUCCESS) {
                 return;
             }
         }
-        using MSPROF_DLOGINNERFORC_T = std::function<void(int, int, const char *, T...)>;
-        MSPROF_DLOGINNERFORC_T func;
+        using DlogInnerForCFunc = std::function<void(int, int, const char *, T...)>;
+        DlogInnerForCFunc func;
         ret = pluginHandle_.GetFunction<void, int, int, const char *, T...>("DlogInnerForC", func);
-        if (ret != PLUGIN_LOAD_SUCCESS) {
+        if (ret != PROFILING_SUCCESS) {
             return;
         }
         func(moduleId, level, fmt, args...);
@@ -61,9 +57,14 @@ public:
 private:
     std::string soName_;
     PluginHandle pluginHandle_;
+    PTHREAD_ONCE_T loadFlag_;
+    CheckLogLevelForCFunc checkLogLevelForC_ = nullptr;
+
+private:
+    void LoadSlogSo();
 };
 } // Plugin
 } // Dvvp
-} // Analysis
+} // Collector
 
 #endif

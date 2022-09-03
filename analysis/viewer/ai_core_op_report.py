@@ -6,7 +6,6 @@ Copyright Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
 """
 
 import logging
-import sqlite3
 from collections import deque
 
 from analyzer.scene_base.profiling_scene import ProfilingScene
@@ -209,6 +208,29 @@ class AiCoreOpReport:
             i += 1
 
     @classmethod
+    def get_ai_core_op_summary_data(cls: any, project_path: str, db_path: str, iter_id: int, configs: dict) -> tuple:
+        """
+        get ai core op summary data
+        :param project_path:
+        :param db_path:
+        :param iter_id:
+        :param configs:
+        :return:
+        """
+        conn, curs = DBManager.check_connect_db_path(db_path)
+        if not cls._check_op_summary_table_no_op_scene(conn, curs):
+            return MsvpConstant.MSVP_EMPTY_DATA
+        headers = cls.get_op_header(configs)
+        try:
+            data, headers = cls._get_op_summary_data(project_path, curs, headers, iter_id)
+            return headers, data, len(data)
+        except (OSError, SystemError, ValueError, TypeError, RuntimeError) as op_err:
+            logging.error(str(op_err), exc_info=Constant.TRACE_BACK_SWITCH)
+            return MsvpConstant.MSVP_EMPTY_DATA
+        finally:
+            DBManager.destroy_db_connect(conn, curs)
+
+    @classmethod
     def _check_ai_cpu_data(cls: any, conn: any, curs: any) -> bool:
         """
         check ai cpu sqlite data
@@ -242,29 +264,6 @@ class AiCoreOpReport:
         cls._add_memory_bound(headers, data)
         headers = add_aicore_units(headers)
         return data, headers
-
-    @classmethod
-    def get_ai_core_op_summary_data(cls: any, project_path: str, db_path: str, iter_id: int, configs: dict) -> tuple:
-        """
-        get ai core op summary data
-        :param project_path:
-        :param db_path:
-        :param iter_id:
-        :param configs:
-        :return:
-        """
-        conn, curs = DBManager.check_connect_db_path(db_path)
-        if not cls._check_op_summary_table_no_op_scene(conn, curs):
-            return MsvpConstant.MSVP_EMPTY_DATA
-        headers = cls.get_op_header(configs)
-        try:
-            data, headers = cls._get_op_summary_data(project_path, curs, headers, iter_id)
-            return headers, data, len(data)
-        except (OSError, SystemError, ValueError, TypeError, RuntimeError) as op_err:
-            logging.error(str(op_err), exc_info=Constant.TRACE_BACK_SWITCH)
-            return MsvpConstant.MSVP_EMPTY_DATA
-        finally:
-            DBManager.destroy_db_connect(conn, curs)
 
     @classmethod
     def _update_model_name_and_infer_id(cls: any, project_path: str, ai_core_data: list) -> list:
@@ -349,7 +348,6 @@ class AiCoreOpReport:
                     "{0}.start_time, {0}.duration_time/{NS_TO_US}, " \
                     "{0}.wait_time/{NS_TO_US}, block_dim from {0} " \
                     "inner join {1} on {0}.task_id={1}.task_id " \
-                    "and {0}.task_type = {1}.task_type " \
                     "and {0}.stream_id={1}.stream_id " \
                     "and {1}.task_type=? {BATCH_LIMIT}" \
             .format(DBNameConstant.TABLE_SUMMARY_TASK_TIME, DBNameConstant.TABLE_SUMMARY_GE,
@@ -365,7 +363,6 @@ class AiCoreOpReport:
                         "output_shapes, output_data_types, output_formats " \
                         "from {0} inner join {1} on {0}.task_id={1}.task_id " \
                         "and {0}.stream_id={1}.stream_id " \
-                        "and {0}.task_type = {1}.task_type " \
                         "inner join {2} on {0}.task_id={2}.task_id and {0}.stream_id={2}.stream_id " \
                         "and {1}.timestamp={2}.timestamp " \
                         "and {1}.task_type=? {BATCH_LIMIT}" \
@@ -410,12 +407,15 @@ class AiCoreOpReport:
     def _get_table_sql_and_headers_without_ge(cls: any, headers: list) -> tuple:
         cls.clear_no_ge_data_headers(headers)
         index_info = "{0}.index_id, ".format(DBNameConstant.TABLE_SUMMARY_TASK_TIME)
+        model_id = 'model_id, '
         if ProfilingScene().is_operator():
             index_info = ''
-        sql = "select model_id, task_id, stream_id, {index_info} task_type, start_time, " \
+            model_id = "{0}, ".format(NumberConstant.DEFAULT_MODEL_ID)
+        sql = "select {model_id} task_id, stream_id, {index_info} task_type, start_time, " \
               "duration_time/{NS_TO_US}, wait_time/{NS_TO_US} from {0} where " \
               "task_type!=? order by start_time" \
-            .format(DBNameConstant.TABLE_SUMMARY_TASK_TIME, NS_TO_US=NumberConstant.NS_TO_US, index_info=index_info)
+            .format(DBNameConstant.TABLE_SUMMARY_TASK_TIME, NS_TO_US=NumberConstant.NS_TO_US,
+                    index_info=index_info, model_id=model_id)
         return sql, headers
 
     @classmethod
@@ -459,12 +459,6 @@ class ReportOPCounter:
         return sql
 
     @classmethod
-    def _clear_unused_headers(cls: any, headers: list) -> None:
-        for head in cls.OPERATOR_UNUSED_HEADERS:
-            if head in headers:
-                headers.remove(head)
-
-    @classmethod
     def report_op(cls: any, db_path: str, headers: list) -> tuple:
         """
         report op counter
@@ -482,3 +476,9 @@ class ReportOPCounter:
         data = DBManager.fetch_all_data(curs, sql)
         DBManager.destroy_db_connect(conn, curs)
         return headers, data, len(data)
+
+    @classmethod
+    def _clear_unused_headers(cls: any, headers: list) -> None:
+        for head in cls.OPERATOR_UNUSED_HEADERS:
+            if head in headers:
+                headers.remove(head)

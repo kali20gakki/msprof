@@ -14,7 +14,7 @@ from common_func.msvp_constant import MsvpConstant
 from common_func.trace_view_header_constant import TraceViewHeaderConstant
 from common_func.trace_view_manager import TraceViewManager
 from common_func.utils import Utils
-from model.msproftx.msproftx_model import MsprofTxModel
+from msmodel.msproftx.msproftx_model import MsprofTxModel
 from viewer.get_trace_timeline import TraceViewer
 
 

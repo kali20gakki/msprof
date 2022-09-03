@@ -90,31 +90,32 @@ enum {
 
 #define MSPROF_MODULE_NAME PROFILING
 
-using SlogPlugin = Analysis::Dvvp::Plugin::SlogPlugin;
+using SlogPlugin = Collector::Dvvp::Plugin::SlogPlugin;
 
+#define FILENAME (strrchr("/" __FILE__, '/') + 1)
 #define MSPROF_LOGD(format, ...) do {                                           \
             printf("[PROFILING] [DEBUG] [%s:%u] >>> (tid:%d) " format "\n",   \
-            __FILE__, __LINE__, syscall(SYS_gettid), ##__VA_ARGS__);            \
+            FILENAME, __LINE__, syscall(SYS_gettid), ##__VA_ARGS__);            \
     } while (0)
 
 #define MSPROF_LOGI(format, ...) do {                                           \
             printf("[PROFILING] [INFO] [%s:%u] >>> (tid:%d) " format "\n",    \
-            __FILE__, __LINE__, syscall(SYS_gettid), ##__VA_ARGS__);            \
+            FILENAME, __LINE__, syscall(SYS_gettid), ##__VA_ARGS__);            \
     } while (0)
 
 #define MSPROF_LOGW(format, ...) do {                                           \
             printf("[PROFILING] [WARNING] [%s:%u] >>> (tid:%d) " format "\n", \
-            __FILE__, __LINE__, syscall(SYS_gettid), ##__VA_ARGS__);            \
+            FILENAME, __LINE__, syscall(SYS_gettid), ##__VA_ARGS__);            \
     } while (0)
 
 #define MSPROF_LOGE(format, ...) do {                                           \
             printf("[PROFILING] [ERROR] [%s:%u] >>> (tid:%d) " format "\n",   \
-            __FILE__, __LINE__, syscall(SYS_gettid), ##__VA_ARGS__);            \
+            FILENAME, __LINE__, syscall(SYS_gettid), ##__VA_ARGS__);            \
     } while (0)
 
 #define MSPROF_EVENT(format, ...) do {                                          \
             printf("[PROFILING] [EVENT] [%s:%u] >>> (tid:%d) " format "\n",   \
-            __FILE__, __LINE__, syscall(SYS_gettid), ##__VA_ARGS__);            \
+            FILENAME, __LINE__, syscall(SYS_gettid), ##__VA_ARGS__);            \
     } while (0)
 #endif  // MSPROF_LOG_H
 

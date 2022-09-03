@@ -6,71 +6,46 @@
  */
 #include "plugin_handle.h"
 
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <unistd.h>
 #include "config.h"
+#include "mmpa/mmpa_api.h"
 #include "securec.h"
+#include "utils/utils.h"
 
-namespace Analysis {
+namespace Collector {
 namespace Dvvp {
 namespace Plugin {
 using namespace analysis::dvvp::common::config;
+using namespace analysis::dvvp::common::utils;
+using namespace Collector::Dvvp::Mmpa;
+PluginHandle::~PluginHandle()
+{
+}
 
 const std::string PluginHandle::GetSoName() const
 {
     return soName_;
 }
 
-bool PluginHandle::IsSoftLink(const std::string &path) const
-{
-    struct stat buf1;
-    int ret = stat(path.c_str(), &buf1);
-    if (ret != 0) {
-        return true;
-    }
-
-    struct stat buf2;
-    ret = lstat(path.c_str(), &buf2);
-    if (ret != 0) {
-        return true;
-    }
-
-    if (buf1.st_ino != buf2.st_ino) {
-        return true;     // soft-link
-    }
-    return false;   // not soft-link
-}
-
-std::string PluginHandle::RealPath(const std::string &path) const
-{
-    char resoved_path[MAX_PATH_LENGTH] = {0x00};
-    std::string res = "";
-    if (realpath(path.c_str(), resoved_path)) {
-        res = resoved_path;
-    }
-    return res;
-}
-
-PluginStatus PluginHandle::OpenPlugin(const std::string envValue)
+int32_t PluginHandle::OpenPlugin(const std::string envValue)
 {
     if (envValue.empty() || envValue.size() >= MAX_PATH_LENGTH) {
-        return PLUGIN_LOAD_FAILED;
+        return PROFILING_FAILED;
     }
     std::string soPath = GetSoPath(envValue);
     if (soPath.empty()) {
-        return PLUGIN_LOAD_FAILED;
+        return PROFILING_FAILED;
     }
-    std::string absoluteDir = RealPath(soPath);
-    if (absoluteDir.empty() || IsSoftLink(absoluteDir)) {
-        return PLUGIN_LOAD_FAILED;
+    char trustedPath[MMPA_MAX_PATH] = {'\0'};
+    int32_t ret = MmRealPath(soPath.c_str(), trustedPath, sizeof(trustedPath));
+    if (ret != PROFILING_SUCCESS || Utils::IsSoftLink(std::string(trustedPath))) {
+        return PROFILING_FAILED;
     }
-    handle_ = dlopen(absoluteDir.c_str(), RTLD_NOW | RTLD_GLOBAL);
+    handle_ = dlopen(trustedPath, RTLD_NOW | RTLD_GLOBAL);
     if (!handle_) {
-        return PLUGIN_LOAD_FAILED;
+        return PROFILING_FAILED;
     }
     load_ = true;
-    return PLUGIN_LOAD_SUCCESS;
+    return PROFILING_SUCCESS;
 }
 
 void PluginHandle::CloseHandle()
@@ -79,6 +54,7 @@ void PluginHandle::CloseHandle()
         return;
     }
     dlclose(handle_);
+    handle_ = nullptr;
 }
 
 bool PluginHandle::HasLoad()
@@ -86,34 +62,72 @@ bool PluginHandle::HasLoad()
     return load_;
 }
 
-void PluginHandle::SplitPath(const std::string &mutilPath, std::vector<std::string> &pathVec) const
+std::string PluginHandle::GetAscendHalPath() const
 {
-    const std::string tmpString = mutilPath + ":";
-    std::string::size_type startPos = 0U;
-    std::string::size_type curPos = tmpString.find(':', 0U);
-    while (curPos != std::string::npos) {
-        const std::string path = tmpString.substr(startPos, curPos - startPos);
-        if (!path.empty()) {
-        pathVec.push_back(path);
-        }
-        startPos = curPos + 1U;
-        curPos = tmpString.find(':', startPos);
+    std::string ascendInstallInfoPath = "/etc/ascend_install.info";
+    // max file size:1024 Byte
+    if ((Utils::GetFileSize(ascendInstallInfoPath) > MAX_ASCEND_INSTALL_INFO_FILE_SIZE) ||
+        (Utils::IsSoftLink(ascendInstallInfoPath))) {
+        return "";
     }
+    std::ifstream infoFile(ascendInstallInfoPath);
+    if (!infoFile) {
+        return "";
+    }
+    std::string line;
+    std::string installPath;
+    const int numPerInfo = 2; // Driver_Install_Path_Param=/usr/local/Ascend
+    while (getline(infoFile, line)) {
+        std::vector<std::string> installInfo = Utils::Split(line, false, "", "=");
+        if (installInfo.size() == numPerInfo && installInfo[0].compare("Driver_Install_Path_Param") == 0) {
+            installPath = installInfo[1];
+            break;
+        }
+    }
+    if (installPath.empty()) {
+        return "";
+    }
+    std::string driverPath = installPath + MSVP_SLASH + "driver" + MSVP_SLASH;
+    std::string driverInfo = driverPath + "version.info";
+    int ret = MmAccess2(driverInfo.c_str(), M_R_OK);
+    if (ret != PROFILING_SUCCESS) {
+        return "";
+    }
+
+    std::string libPath = driverPath + "lib64" + MSVP_SLASH;
+    if (MmAccess2((libPath + soName_).c_str(), M_R_OK) == PROFILING_SUCCESS) {
+        return libPath + soName_;
+    } else if (MmAccess2((libPath + "common" + MSVP_SLASH + soName_).c_str(), M_R_OK) == PROFILING_SUCCESS) {
+        return libPath + "common" + MSVP_SLASH + soName_;
+    } else if (MmAccess2((libPath + "driver" + MSVP_SLASH + soName_).c_str(), M_R_OK) == PROFILING_SUCCESS) {
+        return libPath + "driver" + MSVP_SLASH + soName_;
+    }
+    return "";
 }
 
 std::string PluginHandle::GetSoPath(const std::string &envValue) const
 {
+    // get so path from set_env.sh
     const char *env = std::getenv(envValue.c_str());
     if (env == nullptr) {
         return "";
     }
     std::string pathEnv = env;
-    std::vector<std::string> pathVec;
-    SplitPath(std::string(pathEnv), pathVec);
+    std::vector<std::string> pathVec = Utils::Split(pathEnv, false, "", ":");
     for (auto path : pathVec) {
-        std::string ret = path + "/" + soName_;
-        if (access(ret.c_str(), F_OK) != -1) {
+        std::string ret = path + MSVP_SLASH + soName_;
+        if (MmAccess2(ret, M_R_OK) == PROFILING_SUCCESS) {
             return ret;
+        }
+    }
+
+    // get driver so path from install path when driver path is not set in set_env.sh
+    if (soName_.compare("libascend_hal.so") == 0) {
+        std::string ascendHalPath = GetAscendHalPath();
+        if (!ascendHalPath.empty()) {
+            if (MmAccess2(ascendHalPath.c_str(), M_R_OK) == PROFILING_SUCCESS) {
+                return ascendHalPath;
+            }
         }
     }
     return "";
@@ -130,6 +144,6 @@ bool PluginHandle::IsFuncExist(const std::string funcName) const
     }
     return true;
 }
-} // namespace Plugin
-} // namespace Dvvp
-} // namespace Analysis
+} // Plugin
+} // Dvvp
+} // Collector

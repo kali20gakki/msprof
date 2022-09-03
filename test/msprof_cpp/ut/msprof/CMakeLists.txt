@@ -12,7 +12,7 @@ set(profilerSrcList
 	${MSPROF_SOURCE_DIR}/dvvp/analyze/src/analyzer.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/analyze/src/analyzer_base.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/analyze/src/analyzer_ge.cpp
-        ${MSPROF_SOURCE_DIR}/dvvp/analyze/src/analyzer_ffts.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/analyze/src/analyzer_ffts.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/analyze/src/analyzer_hwts.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/analyze/src/analyzer_ts.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/analyze/src/op_desc_parser.cpp
@@ -23,6 +23,7 @@ set(profilerSrcList
 	${MSPROF_SOURCE_DIR}/dvvp/common/thread/thread.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/common/thread/thread_pool.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/common/utils/utils.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/common/mmpa/mmpa_api.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/common/validation/param_validation.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/depend/stub/error_manager/msprof_error_manager_stub.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/depend/src/slog_plugin.cpp
@@ -50,7 +51,7 @@ set(profilerSrcList
 	${MSPROF_SOURCE_DIR}/dvvp/msprof/platform/mini/data_dumper.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/msprof/msproftx/src/msprof_tx_manager.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/msprof/msproftx/src/msprof_tx_reporter.cpp
-	${MSPROF_SOURCE_DIR}/dvvp/msprof/msproftx/src/prof_stamp_pool.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/msprof/msproftx/src/msprof_stamp_pool.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/msprofiler/src/command_handle.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/msprofiler/src/msprof_callback_impl.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/msprofiler/src/command_handle.cpp
@@ -75,18 +76,17 @@ set(profilerSrcList
 )
 
 set(profilerSrcFile
-	test/main.cpp
-        test/msprof_callback_handler_utest.cpp
-	test/prof_acl_core_utest.cpp
-	test/aicpu_plugin_utest.cpp
-	../stub/mmpa_stub.cpp
-        ../stub/ge_stub.cpp
-	../stub/hdc-log-stub.cpp
-	../stub/devdrv_runtime_api_stub.cpp
-	../stub/profile_drv_user_stub.cpp
-	../stub/hdc-api-stub.cpp
-	../../stub/driver_plugin_stub.cpp
-        ${profilerSrcList}
+    test/main.cpp
+    test/msprof_callback_handler_utest.cpp
+    test/prof_acl_core_utest.cpp
+    test/aicpu_plugin_utest.cpp
+    ../stub/ge_stub.cpp
+    ../stub/hdc-log-stub.cpp
+    ../stub/devdrv_runtime_api_stub.cpp
+    ../stub/profile_drv_user_stub.cpp
+    ../stub/hdc-api-stub.cpp
+    ../../stub/driver_plugin_stub.cpp
+    ${profilerSrcList}
 )
 
 
@@ -102,7 +102,7 @@ target_include_directories(msprofiler_utest PRIVATE
 	../stub/
 	${GTEST_INCLUDE_DIR}
     ${MOCKCPP_INCLUDE_DIR}
-    ${TOP_DIR}/opensource/securec/include
+    ${TOP_DIR}/platform/securec/include
     ${TOP_DIR}/opensource/json/include
     ${TOP_DIR}/collector/inc/
     ${TOP_DIR}/collector/inc/toolchain/
@@ -113,7 +113,6 @@ target_include_directories(msprofiler_utest PRIVATE
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/metadef/error_manager/error_manager_stub
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/driver
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/adump
-    ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/mmpa
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/plugin
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/profapi
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc
@@ -132,13 +131,13 @@ target_include_directories(msprofiler_utest PRIVATE
 	${MSPROF_SOURCE_DIR}/dvvp/msprof/include
 	${MSPROF_SOURCE_DIR}/dvvp/common
 	${MSPROF_SOURCE_DIR}/dvvp/common/errno
-	#${MSPROF_SOURCE_DIR}/dvvp/common/logger
     ${TOP_DIR}/test/msprof_cpp/ut/stub/common/log/
 	${MSPROF_SOURCE_DIR}/dvvp/common/validation
 	${MSPROF_SOURCE_DIR}/dvvp/common/queue
 	${MSPROF_SOURCE_DIR}/dvvp/common/singleton
 	${MSPROF_SOURCE_DIR}/dvvp/common/utils
 	${MSPROF_SOURCE_DIR}/dvvp/common/config
+	${MSPROF_SOURCE_DIR}/dvvp/common/mmpa
 	${MSPROF_SOURCE_DIR}/dvvp/message
 	${MSPROF_SOURCE_DIR}/dvvp/transport
 	${MSPROF_SOURCE_DIR}/dvvp/common/memory/
@@ -151,7 +150,6 @@ target_include_directories(msprofiler_utest PRIVATE
 	${MSPROF_SOURCE_DIR}/dvvp/job_wrapper/include
 	${MSPROF_SOURCE_DIR}/dvvp/adx/inc	
 	${TOP_DIR}/graphengine/inc/external
-	#${TOP_DIR}/graphengine/inc/framework/common
 	${TOP_DIR}/inc
 	${TOP_DIR}/inc/driver
 	${TOP_DIR}/inc/external
@@ -212,51 +210,54 @@ run_llt_test(
 add_executable(msprof_utest
 	test/main.cpp
 	test/msprof_utest.cpp
-	../stub/mmpa_stub.cpp
 	../stub/hdc-log-stub.cpp
 	../stub/devdrv_runtime_api_stub.cpp
 	../stub/profile_drv_user_stub.cpp
 	../stub/hdc-api-stub.cpp
+	../stub/ide-cmd-stub.cpp
 	../../stub/driver_plugin_stub.cpp
-	${MSPROF_SOURCE_DIR}/dvvp/adx/stub_lhisi/adx_prof_api.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/adx/stub/adx_prof_api.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/common/config/config_manager.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/memory/chunk_pool.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/statistics/perf_count.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/thread/thread.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/thread/thread_pool.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/utils/utils.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/common/mmpa/mmpa_api.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/validation/param_validation.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/common/config/config_manager.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/driver/devmgmt/ai_drv_dev_api.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/depend/stub/error_manager/msprof_error_manager_stub.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/message/codec.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/msprof/common/src/receive_data.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/msprof/msproftx/src/msprof_tx_manager.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/msprof/msproftx/src/msprof_tx_reporter.cpp
-    ${MSPROF_SOURCE_DIR}/dvvp/msprof/msproftx/src/prof_stamp_pool.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/msprof/msproftx/src/msprof_stamp_pool.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/msprof/platform/mini/data_dumper.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/streamio/client/src/sender.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/transport/hdc/hdc_transport.cpp
-    ${MSPROF_SOURCE_DIR}/dvvp/transport/hdc/hdc_sender.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/transport/transport.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/transport/uploader.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/transport/uploader_mgr.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/depend/src/plugin_handle.cpp
 	${CppPath}
 )
 
 target_include_directories(msprof_utest PRIVATE
 	${GTEST_INCLUDE_DIR}
 	${MOCKCPP_INCLUDE_DIR}
-	${TOP_DIR}/opensource/securec/include
+	${TOP_DIR}/platform/securec/include
 	${TOP_DIR}/opensource/json/include
-        ${TOP_DIR}/collector/inc/
-        ${TOP_DIR}/collector/inc/toolchain/
-        ${TOP_DIR}/collector/inc/external/
-        ${TOP_DIR}/collector/inc/external/acl
-        ${TOP_DIR}/collector/inc/external/ge
+    ${TOP_DIR}/collector/inc/
+    ${TOP_DIR}/collector/inc/toolchain/
+    ${TOP_DIR}/collector/inc/external/
+    ${TOP_DIR}/collector/inc/external/acl
+    ${TOP_DIR}/collector/inc/external/ge
 	${MSPROF_SOURCE_DIR}/dvvp/depend/inc/slog
 	${MSPROF_SOURCE_DIR}/dvvp/depend/inc/metadef/error_manager/error_manager_stub
 	${MSPROF_SOURCE_DIR}/dvvp/depend/inc/driver
 	${MSPROF_SOURCE_DIR}/dvvp/depend/inc/adump
-	${MSPROF_SOURCE_DIR}/dvvp/depend/inc/mmpa
 	${MSPROF_SOURCE_DIR}/dvvp/depend/inc/plugin
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/profapi
 	${MSPROF_SOURCE_DIR}/dvvp/depend/inc
@@ -270,14 +271,18 @@ target_include_directories(msprof_utest PRIVATE
 	${MSPROF_SOURCE_DIR}/dvvp/msprof/platform/include
 	${MSPROF_SOURCE_DIR}/dvvp/msprof/msproftx/include
 	${MSPROF_SOURCE_DIR}/dvvp/common
+	${MSPROF_SOURCE_DIR}/dvvp/common/mmpa
 	${MSPROF_SOURCE_DIR}/dvvp/common/validation
 	${MSPROF_SOURCE_DIR}/dvvp/common/errno
-	#${MSPROF_SOURCE_DIR}/dvvp/common/logger
     ${TOP_DIR}/test/msprof_cpp/ut/stub/common/log/
 	${MSPROF_SOURCE_DIR}/dvvp/common/queue
 	${MSPROF_SOURCE_DIR}/dvvp/common/singleton
 	${MSPROF_SOURCE_DIR}/dvvp/common/utils
 	${MSPROF_SOURCE_DIR}/dvvp/common/config
+	${MSPROF_SOURCE_DIR}/dvvp/common/errno
+    ${MSPROF_SOURCE_DIR}/dvvp/common/platform
+    ${MSPROF_SOURCE_DIR}/dvvp/message
+    ${MSPROF_SOURCE_DIR}/dvvp/driver/inc
 	${MSPROF_SOURCE_DIR}/dvvp/message
 	${MSPROF_SOURCE_DIR}/dvvp/transport
 	${MSPROF_SOURCE_DIR}/dvvp/adx/inc

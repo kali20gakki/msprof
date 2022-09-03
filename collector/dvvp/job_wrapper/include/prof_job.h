@@ -29,40 +29,38 @@
 #include "transport/transport.h"
 #include "transport/uploader.h"
 
-using namespace analysis::dvvp::driver;
-using namespace analysis::dvvp::common::config;
 namespace Analysis {
 namespace Dvvp {
 namespace JobWrapper {
-#define CHECK_JOB_EVENT_PARAM_RET(cfg, ret)  do {                                      \
-    if ((cfg) == nullptr || (cfg)->comParams == nullptr ||                             \
-        (cfg)->jobParams.events == nullptr || (cfg)->jobParams.events->size() == 0) {  \
-        MSPROF_LOGI("Job check event param not pass");                                   \
-        return ret;                                                                    \
-    }                                                                                  \
-} while (0)
 
-#define CHECK_JOB_CONTEXT_PARAM_RET(cfg, ret)  do {                                        \
-    if ((cfg) == nullptr || (cfg)->comParams == nullptr ||                                 \
-        (cfg)->comParams->jobCtx == nullptr || (cfg)->comParams->params == nullptr) {      \
-        MSPROF_LOGI("Job check context param failed");                                     \
-        return ret;                                                                        \
-    }                                                                                      \
-} while (0)
+inline int32_t CheckJobEventParam(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
+{
+    if (cfg == nullptr || cfg->comParams == nullptr || cfg->jobParams.events == nullptr ||
+        cfg->jobParams.events->size() == 0) {
+        MSPROF_LOGI("Job check event param not pass");
+        return analysis::dvvp::common::error::PROFILING_FAILED;
+    }
+    return analysis::dvvp::common::error::PROFILING_SUCCESS;
+}
 
-#define CHECK_JOB_COMMON_PARAM_RET(cfg, ret) do {                                          \
-    if ((cfg) == nullptr || (cfg)->comParams == nullptr) {                                 \
-        MSPROF_LOGI("Job check comm param failed");                                        \
-        return ret;                                                                        \
-    }                                                                                      \
-} while (0)
+inline int32_t CheckJobContextParam(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
+{
+    if (cfg == nullptr || cfg->comParams == nullptr || cfg->comParams->jobCtx == nullptr ||
+        cfg->comParams->params == nullptr) {
+        MSPROF_LOGI("Job check context param failed");
+        return analysis::dvvp::common::error::PROFILING_FAILED;
+    }
+    return analysis::dvvp::common::error::PROFILING_SUCCESS;
+}
 
-#define CHECK_JOB_CONFIG_UNSIGNED_SIZE_RET(size, ret) do {                             \
-    if ((size) == 0 || (size) > 0x7FFFFFFF) {                                      \
-        MSPROF_LOGE("Profiling Config Size Out Range");                               \
-        return ret;                                                                    \
-    }                                                                                  \
-} while (0)
+inline int32_t CheckJobCommonParam(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
+{
+    if (cfg == nullptr || cfg->comParams == nullptr) {
+        MSPROF_LOGI("Job check comm param failed");
+        return analysis::dvvp::common::error::PROFILING_FAILED;
+    }
+    return analysis::dvvp::common::error::PROFILING_SUCCESS;
+}
 
 constexpr int DEFAULT_PERIOD_TIME = 10;
 
@@ -116,13 +114,16 @@ public:
     int Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg) override;
     int Process() override;
     int Uninit() override;
-    bool IsGlobalJobLevel() override { return true; }
+    bool IsGlobalJobLevel() override
+    {
+        return true;
+    }
 private:
     int GetCollectCtrlCpuEventCmd(const std::vector<std::string> &events, std::string &profCtrlcpuCmd);
     int PrepareDataDir(std::string &file);
 
 private:
-    mmProcess ctrlcpuProcess_;
+    MmProcess ctrlcpuProcess_;
     SHARED_PTR_ALIA<CollectionJobCfg> collectionJobCfg_;
     SHARED_PTR_ALIA<PerfExtraTask> perfExtraTask_;
 };
@@ -148,7 +149,10 @@ public:
     int Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg) override;
     int Process() override;
     int Uninit() override;
-    bool IsGlobalJobLevel() override { return true; }
+    bool IsGlobalJobLevel() override
+    {
+        return true;
+    }
 };
 
 class ProfAllPidsJob : public ProfSysInfoBase {
@@ -158,7 +162,10 @@ public:
     int Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg) override;
     int Process() override;
     int Uninit() override;
-    bool IsGlobalJobLevel() override { return true; }
+    bool IsGlobalJobLevel() override
+    {
+        return true;
+    }
 };
 
 class ProfSysStatJob : public ProfSysInfoBase {
@@ -168,7 +175,10 @@ public:
     int Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg) override;
     int Process() override;
     int Uninit() override;
-    bool IsGlobalJobLevel() override { return true; }
+    bool IsGlobalJobLevel() override
+    {
+        return true;
+    }
 };
 
 class ProfTscpuJob : public ProfDrvJob {
@@ -323,6 +333,8 @@ public:
     int Uninit() override;
 };
 
+constexpr int BIU_GROUP_MAX_NUM = 25;       // biu group id 0 ~ 24
+constexpr int BIU_GROUP_CHANNEL_NUM = 3;    // biu group contains 3 channel
 class ProfBiuPerfJob : public ProfDrvJob {
 public:
     ProfBiuPerfJob();
@@ -334,33 +346,7 @@ public:
 protected:
     uint32_t sampleCycle_;
     std::vector<uint32_t> groupIds_;
-    AI_DRV_CHANNEL groupChannelIdMap_[BIU_GROUP_MAX_NUM][BIU_GROUP_CHANNEL_NUM] = {
-        {PROF_CHANNEL_BIU_GROUP0_AIC, PROF_CHANNEL_BIU_GROUP0_AIV0, PROF_CHANNEL_BIU_GROUP0_AIV1},
-        {PROF_CHANNEL_BIU_GROUP1_AIC, PROF_CHANNEL_BIU_GROUP1_AIV0, PROF_CHANNEL_BIU_GROUP1_AIV1},
-        {PROF_CHANNEL_BIU_GROUP2_AIC, PROF_CHANNEL_BIU_GROUP2_AIV0, PROF_CHANNEL_BIU_GROUP2_AIV1},
-        {PROF_CHANNEL_BIU_GROUP3_AIC, PROF_CHANNEL_BIU_GROUP3_AIV0, PROF_CHANNEL_BIU_GROUP3_AIV1},
-        {PROF_CHANNEL_BIU_GROUP4_AIC, PROF_CHANNEL_BIU_GROUP4_AIV0, PROF_CHANNEL_BIU_GROUP4_AIV1},
-        {PROF_CHANNEL_BIU_GROUP5_AIC, PROF_CHANNEL_BIU_GROUP5_AIV0, PROF_CHANNEL_BIU_GROUP5_AIV1},
-        {PROF_CHANNEL_BIU_GROUP6_AIC, PROF_CHANNEL_BIU_GROUP6_AIV0, PROF_CHANNEL_BIU_GROUP6_AIV1},
-        {PROF_CHANNEL_BIU_GROUP7_AIC, PROF_CHANNEL_BIU_GROUP7_AIV0, PROF_CHANNEL_BIU_GROUP7_AIV1},
-        {PROF_CHANNEL_BIU_GROUP8_AIC, PROF_CHANNEL_BIU_GROUP8_AIV0, PROF_CHANNEL_BIU_GROUP8_AIV1},
-        {PROF_CHANNEL_BIU_GROUP9_AIC, PROF_CHANNEL_BIU_GROUP9_AIV0, PROF_CHANNEL_BIU_GROUP9_AIV1},
-        {PROF_CHANNEL_BIU_GROUP10_AIC, PROF_CHANNEL_BIU_GROUP10_AIV0, PROF_CHANNEL_BIU_GROUP10_AIV1},
-        {PROF_CHANNEL_BIU_GROUP11_AIC, PROF_CHANNEL_BIU_GROUP11_AIV0, PROF_CHANNEL_BIU_GROUP11_AIV1},
-        {PROF_CHANNEL_BIU_GROUP12_AIC, PROF_CHANNEL_BIU_GROUP12_AIV0, PROF_CHANNEL_BIU_GROUP12_AIV1},
-        {PROF_CHANNEL_BIU_GROUP13_AIC, PROF_CHANNEL_BIU_GROUP13_AIV0, PROF_CHANNEL_BIU_GROUP13_AIV1},
-        {PROF_CHANNEL_BIU_GROUP14_AIC, PROF_CHANNEL_BIU_GROUP14_AIV0, PROF_CHANNEL_BIU_GROUP14_AIV1},
-        {PROF_CHANNEL_BIU_GROUP15_AIC, PROF_CHANNEL_BIU_GROUP15_AIV0, PROF_CHANNEL_BIU_GROUP15_AIV1},
-        {PROF_CHANNEL_BIU_GROUP16_AIC, PROF_CHANNEL_BIU_GROUP16_AIV0, PROF_CHANNEL_BIU_GROUP16_AIV1},
-        {PROF_CHANNEL_BIU_GROUP17_AIC, PROF_CHANNEL_BIU_GROUP17_AIV0, PROF_CHANNEL_BIU_GROUP17_AIV1},
-        {PROF_CHANNEL_BIU_GROUP18_AIC, PROF_CHANNEL_BIU_GROUP18_AIV0, PROF_CHANNEL_BIU_GROUP18_AIV1},
-        {PROF_CHANNEL_BIU_GROUP19_AIC, PROF_CHANNEL_BIU_GROUP19_AIV0, PROF_CHANNEL_BIU_GROUP19_AIV1},
-        {PROF_CHANNEL_BIU_GROUP20_AIC, PROF_CHANNEL_BIU_GROUP20_AIV0, PROF_CHANNEL_BIU_GROUP20_AIV1},
-        {PROF_CHANNEL_BIU_GROUP21_AIC, PROF_CHANNEL_BIU_GROUP21_AIV0, PROF_CHANNEL_BIU_GROUP21_AIV1},
-        {PROF_CHANNEL_BIU_GROUP22_AIC, PROF_CHANNEL_BIU_GROUP22_AIV0, PROF_CHANNEL_BIU_GROUP22_AIV1},
-        {PROF_CHANNEL_BIU_GROUP23_AIC, PROF_CHANNEL_BIU_GROUP23_AIV0, PROF_CHANNEL_BIU_GROUP23_AIV1},
-        {PROF_CHANNEL_BIU_GROUP24_AIC, PROF_CHANNEL_BIU_GROUP24_AIV0, PROF_CHANNEL_BIU_GROUP24_AIV1}
-    };
+    analysis::dvvp::driver::AI_DRV_CHANNEL groupChannelIdMap_[BIU_GROUP_MAX_NUM][BIU_GROUP_CHANNEL_NUM];
 };
 }}}
 #endif

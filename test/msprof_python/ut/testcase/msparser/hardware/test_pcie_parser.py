@@ -68,10 +68,10 @@ class TestMergeOPCounter(unittest.TestCase):
                     check.start_parsing_data_file()
 
     def test_save(self):
-        with mock.patch('model.hardware.pcie_model.PcieModel.init'), \
-                mock.patch('model.hardware.pcie_model.PcieModel.flush'), \
-                mock.patch('model.hardware.pcie_model.PcieModel.flush'), \
-                mock.patch('model.hardware.pcie_model.PcieModel.finalize'):
+        with mock.patch('msmodel.hardware.pcie_model.PcieModel.init'), \
+                mock.patch('msmodel.hardware.pcie_model.PcieModel.flush'), \
+                mock.patch('msmodel.hardware.pcie_model.PcieModel.flush'), \
+                mock.patch('msmodel.hardware.pcie_model.PcieModel.finalize'):
             InfoConfReader()._info_json = {"devices": '0'}
             check = ParsingPcieData(self.file_list, CONFIG)
             check.pcie_data = [123]

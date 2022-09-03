@@ -19,7 +19,8 @@ namespace dvvp {
 namespace transport {
 using namespace analysis::dvvp::common::error;
 using namespace Msprofiler::Api;
-using namespace Analysis::Dvvp::Plugin;
+using namespace Collector::Dvvp::Plugin;
+using namespace Collector::Dvvp::Mmpa;
 
 ParserTransport::ParserTransport(SHARED_PTR_ALIA<Uploader> uploader)
 {
@@ -87,7 +88,7 @@ int PipeTransport::SendBuffer(CONST_VOID_PTR buffer, int length)
     MSPROF_LOGD("Write %d bytes to fd %d", length, fd);
     int count = 0;
     while (true) {
-        sent = MmpaPlugin::instance()->MsprofMmWrite(fd, const_cast<VOID_PTR>(buffer), length);
+        sent = MmWrite(fd, const_cast<VOID_PTR>(buffer), length);
         if (sent >= 0) {
             break;
         }

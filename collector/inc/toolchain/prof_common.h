@@ -7,17 +7,17 @@
 #ifndef MSPROFILER_PROF_COMMON_H_
 #define MSPROFILER_PROF_COMMON_H_
 
+#include <stdint.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif // __cplusplus
 
-#include <stdint.h>
-
 #define MSPROF_DATA_HEAD_MAGIC_NUM  0x5a5a
 
 enum MsprofDataTag {
-    MSPROF_ACL_DATA_TAG = 0,            //acl data tag, range: 0~19
-    MSPROF_GE_DATA_TAG_MODEL_LOAD = 20, //ge data tag, range: 20~39
+    MSPROF_ACL_DATA_TAG = 0,            // acl data tag, range: 0~19
+    MSPROF_GE_DATA_TAG_MODEL_LOAD = 20, // ge data tag, range: 20~39
     MSPROF_GE_DATA_TAG_FUSION = 21,
     MSPROF_GE_DATA_TAG_INFER = 22,
     MSPROF_GE_DATA_TAG_TASK = 23,
@@ -25,14 +25,14 @@ enum MsprofDataTag {
     MSPROF_GE_DATA_TAG_STEP = 25,
     MSPROF_GE_DATA_TAG_ID_MAP = 26,
     MSPROF_GE_DATA_TAG_HOST_SCH = 27,
-    MSPROF_RUNTIME_DATA_TAG_API = 40,   //runtime data tag, range: 40~59
+    MSPROF_RUNTIME_DATA_TAG_API = 40,   // runtime data tag, range: 40~59
     MSPROF_RUNTIME_DATA_TAG_TRACK = 41,
-    MSPROF_AICPU_DATA_TAG = 60,         //aicpu data tag, range: 60~79
+    MSPROF_AICPU_DATA_TAG = 60,         // aicpu data tag, range: 60~79
     MSPROF_AICPU_MODEL_TAG = 61,
-    MSPROF_HCCL_DATA_TAG = 80,          //hccl data tag, range: 80~99
-    MSPROF_DP_DATA_TAG = 100,           //dp data tag, range: 100~119
-    MSPROF_MSPROFTX_DATA_TAG = 120,     //hccl data tag, range: 120~139
-    MSPROF_DATA_TAG_MAX = 65536,        //data tag value type is uint16_t
+    MSPROF_HCCL_DATA_TAG = 80,          // hccl data tag, range: 80~99
+    MSPROF_DP_DATA_TAG = 100,           // dp data tag, range: 100~119
+    MSPROF_MSPROFTX_DATA_TAG = 120,     // hccl data tag, range: 120~139
+    MSPROF_DATA_TAG_MAX = 65536,        // data tag value type is uint16_t
 };
 
 /**
@@ -448,11 +448,10 @@ struct MsprofStampInfo {
     uint16_t dataTag;
     uint32_t processId;
     uint32_t threadId;
-    uint32_t category;         //marker category
+    uint32_t category;      // marker category
     uint32_t  eventType;
     int32_t payloadType;
-    union PayloadValue         //payload info for marker
-    {
+    union PayloadValue {    // payload info for marker
         uint64_t ullValue;
         int64_t llValue;
         double dValue;

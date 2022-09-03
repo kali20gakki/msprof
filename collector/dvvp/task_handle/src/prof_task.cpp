@@ -20,7 +20,7 @@
 #include "utils/utils.h"
 #include "info_json.h"
 #include "config/config_manager.h"
-#include "mmpa_plugin.h"
+#include "mmpa_api.h"
 
 namespace analysis {
 namespace dvvp {
@@ -33,7 +33,8 @@ using namespace analysis::dvvp::common::config;
 using namespace analysis::dvvp::message;
 using namespace analysis::dvvp::transport;
 using namespace Analysis::Dvvp::MsprofErrMgr;
-using namespace Analysis::Dvvp::Plugin;
+using namespace Collector::Dvvp::Plugin;
+using namespace Collector::Dvvp::Mmpa;
 
 ProfTask::ProfTask(const std::vector<std::string> &devices,
                    SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> param)
@@ -187,16 +188,16 @@ int ProfTask::GetHostAndDeviceInfo()
 std::string ProfTask::GetHostTime()
 {
     std::string hostTime;
-    mmTimeval tv;
+    MmTimeval tv;
 
     (void)memset_s(&tv, sizeof(tv), 0, sizeof(tv));
-    int ret = MmpaPlugin::instance()->MsprofMmGetTimeOfDay(&tv, nullptr);
-    if (ret != EN_OK) {
+    int ret = MmGetTimeOfDay(&tv, nullptr);
+    if (ret != PROFILING_SUCCESS) {
         MSPROF_LOGE("[GetHostTime]gettimeofday failed");
         MSPROF_INNER_ERROR("EK9999", "gettimeofday failed");
     } else {
         const int TIME_US = 1000000;
-        hostTime = std::to_string((unsigned long long)tv.tv_sec * TIME_US + (unsigned long long)tv.tv_usec);
+        hostTime = std::to_string((unsigned long long)tv.tvSec * TIME_US + (unsigned long long)tv.tvUsec);
     }
     return hostTime;
 }

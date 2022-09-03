@@ -12,6 +12,7 @@
 #include "acl_prof.h"
 #include "singleton/singleton.h"
 #include "utils/utils.h"
+#include "toolchain/prof_acl_api.h"
 
 namespace Analysis {
 namespace Dvvp {
@@ -37,7 +38,8 @@ public:
     static uint64_t GetOpCubeFops(CONST_VOID_PTR data, uint32_t len, uint32_t index);
     static uint64_t GetOpVectorFops(CONST_VOID_PTR data, uint32_t len, uint32_t index);
     static uint32_t GetOpFlag(CONST_VOID_PTR data, uint32_t len, uint32_t index);
-    static const char *GetOpAttriValue(CONST_VOID_PTR data, uint32_t len, uint32_t index, aclprofSubscribeOpAttri attri);
+    static const char *GetOpAttriValue(CONST_VOID_PTR data, uint32_t len, uint32_t index,
+        aclprofSubscribeOpAttri attri);
     uint64_t SetOpTypeAndOpName(const std::string &opType, const std::string &opName);
     int32_t GetOpTypeLen(CONST_VOID_PTR data, uint32_t len, SIZE_T_PTR opTypeLen, uint32_t index);
     int32_t GetOpType(CONST_VOID_PTR data, uint32_t len, CHAR_PTR opType, uint32_t opTypeLen, uint32_t index);

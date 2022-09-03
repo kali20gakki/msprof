@@ -14,7 +14,7 @@
 #include "platform/platform.h"
 #include <fstream>
 #include <memory>
-#include "mmpa_plugin.h"
+#include "mmpa_api.h"
 
 using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::common::utils;
@@ -23,7 +23,8 @@ using namespace analysis::dvvp::transport;
 using namespace Analysis::Dvvp::Common::Config;
 using namespace Analysis::Dvvp::Msprof;
 using namespace Collector::Dvvp::Msprofbin;
-using namespace Analysis::Dvvp::Plugin;
+using namespace Collector::Dvvp::Plugin;
+using namespace Collector::Dvvp::Mmpa;
 
 class RUNNING_MODE_UTEST : public testing::Test {
 protected:
@@ -286,7 +287,7 @@ TEST_F(RUNNING_MODE_UTEST, StartExportTask){
     EXPECT_EQ(PROFILING_FAILED, rMode.StartExportTask());
     rMode.jobResultDir_ = "123";
     rMode.analysisPath_ = "path_test";
-    params->exportModelId = 1;
+    params->exportModelId = "1";
     MOCKER_CPP(&RunningMode::RunExportSummaryTask)
         .stubs()
         .will(returnValue(PROFILING_FAILED))
@@ -417,32 +418,28 @@ TEST_F(RUNNING_MODE_UTEST, CheckAnalysisEnv){
     rMode.isQuit_=true;
     EXPECT_EQ(PROFILING_FAILED, rMode.CheckAnalysisEnv());
     rMode.isQuit_=false;
-    MOCKER_CPP(&Analysis::Dvvp::Common::Platform::Platform::RunSocSide)
-        .stubs()
-        .will(returnValue(true))
-        .then(returnValue(false));
-    EXPECT_EQ(PROFILING_FAILED, rMode.CheckAnalysisEnv());
 
-    std::string resValue = "/tmp/test/msprof";
-    MOCKER(Utils::GetSelfPath)
+    MOCKER(Utils::PythonEnvReady)
         .stubs()
-        .will(returnValue(resValue));
-    
-    MOCKER(Utils::SplitPath)
+        .will(returnValue(true));
+
+    MOCKER(Utils::AnalysisEnvReady)
         .stubs()
-        .will(returnValue(PROFILING_FAILED))
-        .then(returnValue(PROFILING_SUCCESS));
+        .will(returnValue(false))
+        .then(returnValue(true));
     EXPECT_EQ(PROFILING_FAILED, rMode.CheckAnalysisEnv());
+    rMode.analysisPath_="msprof.py";
     MOCKER(Utils::IsFileExist)
         .stubs()
         .will(returnValue(false))
         .then(returnValue(true));
     EXPECT_EQ(PROFILING_FAILED, rMode.CheckAnalysisEnv());
-    MOCKER(&MmpaPlugin::MsprofMmAccess2).stubs()
-        .will(returnValue(EN_ERR))
-        .then(returnValue(EN_OK));
+    MOCKER(MmAccess2)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED))
+        .then(returnValue(PROFILING_SUCCESS));
     EXPECT_EQ(PROFILING_FAILED, rMode.CheckAnalysisEnv());
-    EXPECT_EQ(PROFILING_SUCCESS, rMode.CheckAnalysisEnv());    
+    EXPECT_EQ(PROFILING_SUCCESS, rMode.CheckAnalysisEnv());
 }
 
 TEST_F(RUNNING_MODE_UTEST, AppModeModeParamsCheck){

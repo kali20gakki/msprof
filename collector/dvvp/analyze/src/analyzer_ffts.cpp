@@ -9,7 +9,9 @@
 #include "data_struct.h"
 #include "errno/error_code.h"
 #include "message/codec.h"
+#include "msprof_dlog.h"
 #include "proto/profiler.pb.h"
+#include "toolchain/prof_acl_api.h"
 
 namespace Analysis {
 namespace Dvvp {
@@ -28,7 +30,7 @@ void AnalyzerFfts::Parse(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> me
     if (message == nullptr) {
         return;
     }
-    totalBytes_ += message->chunksizeinbytes();
+    totalBytes_ += static_cast<uint64_t>(message->chunksizeinbytes());
     ParseData(message->chunk().c_str(), message->chunksizeinbytes());
 }
 
@@ -76,9 +78,9 @@ void AnalyzerFfts::ParseAcsqTaskData(const FftsLogHead *data, uint32_t logType)
     constexpr uint32_t offsetBit = 32;
     uint64_t sysTime = ((static_cast<uint64_t>(acsqLog->sysCountHigh) << offsetBit) | acsqLog->sysCountLow);
     if (logType == ACSQ_TASK_START_FUNC_TYPE) {
-        iter->second.start = sysTime / frequency_;  // to ns
+        iter->second.start = static_cast<uint64_t>(sysTime / frequency_);  // to ns
     } else {
-        iter->second.end = sysTime / frequency_;
+        iter->second.end = static_cast<uint64_t>(sysTime / frequency_);
     }
     analyzedBytes_ += FFTS_DATA_SIZE;
     if (iter->second.start > 0 && iter->second.end > 0) {
@@ -103,10 +105,10 @@ void AnalyzerFfts::ParseSubTaskThreadData(const FftsLogHead *data, uint32_t logT
     constexpr uint32_t offsetBit = 32;
     uint64_t sysTime = ((static_cast<uint64_t>(cxtLog->sysCountHigh) << offsetBit) | cxtLog->sysCountLow);
     if (logType == FFTS_SUBTASK_THREAD_START_FUNC_TYPE) {
-        iter->second.start = sysTime / frequency_; // to ns
+        iter->second.start = static_cast<uint64_t>(sysTime / frequency_); // to ns
         iter->second.threadId = cxtLog->threadId;
     } else {
-        iter->second.end = sysTime / frequency_;
+        iter->second.end = static_cast<uint64_t>(sysTime / frequency_);
         if (iter->second.threadId != cxtLog->threadId) {
             MSPROF_LOGE("Ffts subtask op thread threadId error, %s %llu %llu",
                         key.c_str(), iter->second.threadId, cxtLog->threadId);

@@ -34,8 +34,6 @@ enum class DataStatus {
 template <class T>
 class RingBuffer {
 public:
-
-
     explicit RingBuffer(const T& initialVal, size_t maxCycles = RING_BUFFER_DEFAULT_MAX_PUSH_CYCLES)
         : capacity_(0),
           initialVal_(initialVal),

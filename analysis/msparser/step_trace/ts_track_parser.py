@@ -18,7 +18,7 @@ from common_func.ms_multi_process import MsMultiProcess
 from common_func.msvp_common import is_valid_original_data
 from common_func.utils import Utils
 from framework.offset_calculator import OffsetCalculator
-from model.step_trace.ts_track_model import TsTrackModel
+from msmodel.step_trace.ts_track_model import TsTrackModel
 from mscalculate.step_trace.create_step_table import StepTableBuilder
 from msparser.data_struct_size_constant import StructFmt
 from msparser.interface.data_parser import DataParser

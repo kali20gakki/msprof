@@ -8,24 +8,23 @@ import logging
 import multiprocessing
 import os
 import sqlite3
-import sys
 from collections import OrderedDict
 from functools import reduce
 from operator import add
 
+from common_func.common import call_sys_exit
 from common_func.common import generate_config
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
+from common_func.ms_constant.number_constant import NumberConstant
+from common_func.ms_constant.str_constant import StrConstant
 from common_func.msvp_common import config_file_obj
 from common_func.msvp_common import error
 from common_func.msvp_common import read_cpu_cfg
-from common_func.ms_constant.str_constant import StrConstant
-from common_func.ms_constant.number_constant import NumberConstant
 from common_func.path_manager import PathManager
 from common_func.utils import Utils
-from common_func.msprof_exception import ProfException
 from framework.load_info_manager import LoadInfoManager
 from mscalculate.calculate_ai_core_data import CalculateAiCoreData
 
@@ -120,7 +119,7 @@ def calculate_task_schedule_data(curs: any, device: str) -> list:
                  _per_state_time.get('running') / NumberConstant.NS_TO_US,
                  _per_state_time.get('pending') / NumberConstant.NS_TO_US,
                  StrConstant.TASK_TYPE_MAPPING.get(str(tasktype), "unknown {}".format(str(tasktype))),
-                 StrConstant.API_TYPE_MAPPING.get(str(api), "unknown {}".format(str(api))),
+                 api,
                  task_id, stream_id, device, batch_id))
         return sorted(total_data, key=lambda x: float(x[0].replace('%', '')), reverse=True)
     except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
@@ -158,7 +157,7 @@ def _compute_multi_process(timeline_data: list, project_path: str, task_time: di
     cpu_count = multiprocessing.cpu_count() / 3 * 3
     processes = []
     step = len(timeline_data)
-    if len(timeline_data) > CalculateRtsDataConst.MAX_LENGTH:
+    if len(timeline_data) > CalculateRtsDataConst.MAX_LENGTH and not NumberConstant.is_zero(cpu_count):
         step = int(len(timeline_data) / cpu_count) - 1
     count = 0
     for i in range(0, len(timeline_data), step):
@@ -274,7 +273,7 @@ def check_aicore_events(events: list) -> None:
     """
     if not events:
         error(CalculateRtsDataConst.FILE_NAME, 'Insert data error, aicore event list is empty. ')
-        sys.exit(NumberConstant.ERROR)
+        call_sys_exit(NumberConstant.ERROR)
     ai_core_config = config_file_obj(file_name='AICore')
     formula_key = Utils.generator_to_list(item[0] for item in ai_core_config.items('events'))
     for event in events:
@@ -445,7 +444,7 @@ def get_metrics_from_sample_config(project_path: str,
         if tmp.lower() not in \
                 Utils.generator_to_list(item[0] for item in config_file_obj(file_name='AICore').items('metrics')):
             error(CalculateRtsDataConst.FILE_NAME, 'Invalid metric {} .'.format(tmp))
-            sys.exit(NumberConstant.ERROR)
+            call_sys_exit(NumberConstant.ERROR)
     metrics.extend(sample_metrics)
     cal = CalculateAiCoreData(project_path)
     cal.add_fops_header(StrConstant.AI_CORE_PROFILING_METRICS, metrics)

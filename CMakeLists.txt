@@ -14,30 +14,4 @@ find_package(ascend_protobuf_shared)
 find_package(ascend_protobuf_static)
 
 ########################## securec ###################################
-set(SECUREC_DIR ${TOP_DIR}/opensource/securec)
-file(GLOB_RECURSE SECUREC_SRC ${SECUREC_DIR}/src/*.c)
-
-add_library(c_sec SHARED
-    ${SECUREC_SRC}
-)
-
-target_include_directories(c_sec PRIVATE
-    ${SECUREC_DIR}/include
-)
-
-target_compile_options(c_sec PRIVATE
-    -fPIC
-    -fstack-protector-all
-    -fno-common
-    -fno-strict-aliasing
-    -Wfloat-equal
-    -Wextra
-)
-
-target_link_options(c_sec PRIVATE
-    -Wl,-z,relro,-z,now,-z,noexecstack
-    -s
-)
-
-########################## securec ###################################
 add_subdirectory(collector)

@@ -10,6 +10,7 @@
 #include <atomic>
 #include <thread>
 #include "mmpa_api.h"
+#include "msprof_error_manager.h"
 #include "utils/utils.h"
 
 namespace analysis {
@@ -17,6 +18,7 @@ namespace dvvp {
 namespace common {
 namespace thread {
 using namespace analysis::dvvp::common::utils;
+using MmThread = Collector::Dvvp::Mmpa::MmThread;
 class Thread {
 public:
     Thread();
@@ -25,7 +27,10 @@ public:
 public:
     virtual int Start();
     virtual int Stop();
-    virtual void StopNoWait() { quit_ = true; };
+    virtual void StopNoWait()
+    {
+        quit_ = true;
+    }
     int Join();
     bool IsQuit() const;
     void SetThreadName(const std::string &threadName);
@@ -38,7 +43,7 @@ private:
     static void *ThrProcess(VOID_PTR arg);
 
 private:
-    mmThread tid_;
+    MmThread tid_;
     volatile bool quit_;
     volatile bool isStarted_;
     std::string threadName_;

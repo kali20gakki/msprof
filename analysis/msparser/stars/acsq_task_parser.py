@@ -5,8 +5,8 @@ Copyright Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 """
 import logging
 
-from model.sqe_type_map import SqeType
-from model.stars.acsq_task_model import AcsqTaskModel
+from msmodel.sqe_type_map import SqeType
+from msmodel.stars.acsq_task_model import AcsqTaskModel
 from msparser.interface.istars_parser import IStarsParser
 from common_func.ms_constant.stars_constant import StarsConstant
 from profiling_bean.stars.acsq_task import AcsqTask
@@ -47,7 +47,7 @@ class AcsqTaskParser(IStarsParser):
                 task_map[task_key] = {data.func_type: [data]}
 
         result_list = []
-        for task_key, data_dict in task_map.items():
+        for data_dict in task_map.values():
             start_que = data_dict.get(StarsConstant.ACSQ_START_FUNCTYPE, [])
             end_que = data_dict.get(StarsConstant.ACSQ_END_FUNCTYPE, [])
             if len(start_que) != len(end_que):

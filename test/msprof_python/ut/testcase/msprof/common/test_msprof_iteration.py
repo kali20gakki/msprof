@@ -31,16 +31,6 @@ class TestMsprofIteration(unittest.TestCase):
             key = MsprofIteration('123')
             result = key.get_iteration_time(index_id, model_id)
         self.assertEqual(result, [])
-        with mock.patch(NAMESPACE + '.Utils.is_step_scene', return_value=False), \
-             mock.patch(NAMESPACE + '.Utils.is_training_trace_scene', return_value=True):
-            key = MsprofIteration('123')
-            result = key.get_iteration_time(index_id, model_id)
-        self.assertEqual(result, [])
-        with mock.patch(NAMESPACE + '.Utils.is_step_scene', return_value=False), \
-             mock.patch(NAMESPACE + '.Utils.is_training_trace_scene', return_value=False):
-            key = MsprofIteration('123')
-            result = key.get_iteration_time(index_id, model_id)
-        self.assertEqual(result, [])
 
     def test_get_step_iteration_time_1(self):
         index_id = 1
@@ -58,7 +48,7 @@ class TestMsprofIteration(unittest.TestCase):
             key = MsprofIteration('123')
             InfoConfReader()._info_json = INFO_JSON
             result = key.get_step_iteration_time(index_id, model_id)
-        self.assertEqual(len(result), 1)
+        self.assertEqual(len(result), 2)
         with mock.patch(NAMESPACE + '.MsprofIteration._get_iteration_time', side_effect=sqlite3.Error), \
              mock.patch(NAMESPACE + '.logging.error'):
             key = MsprofIteration('123')
@@ -235,40 +225,6 @@ class TestMsprofIteration(unittest.TestCase):
              mock.patch(NAMESPACE + '.PathManager.get_db_path', return_value="step_trace.db"):
             key = MsprofIteration('123')
             result = key._MsprofIteration__get_trace_iteration_end()
-        self.assertEqual(result, OrderedDict())
-
-    def test_get_iter_by_training_trace(self):
-        with mock.patch(NAMESPACE + '.PathManager.get_db_path', return_value=True), \
-             mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=(True, True)), \
-             mock.patch(NAMESPACE + '.DBManager.check_tables_in_db', return_value=True), \
-             mock.patch(NAMESPACE + '.MsprofIteration._generate_trace_iter_end_result', return_value=1), \
-             mock.patch(NAMESPACE + '.DBManager.fetch_all_data', return_value=1), \
-             mock.patch(NAMESPACE + '.DBManager.destroy_db_connect'), \
-             mock.patch(NAMESPACE + '.PathManager.get_db_path', return_value="step_trace.db"):
-            key = MsprofIteration('123')
-            result = key._MsprofIteration__get_iter_by_training_trace()
-        self.assertEqual(result, 1)
-
-        with mock.patch(NAMESPACE + '.PathManager.get_db_path', return_value=True), \
-             mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=(True, True)), \
-             mock.patch(NAMESPACE + '.DBManager.check_tables_in_db', return_value=False), \
-             mock.patch(NAMESPACE + '.MsprofIteration._generate_trace_iter_end_result', return_value=1), \
-             mock.patch(NAMESPACE + '.DBManager.fetch_all_data', return_value=1), \
-             mock.patch(NAMESPACE + '.DBManager.destroy_db_connect'), \
-             mock.patch(NAMESPACE + '.PathManager.get_db_path', return_value="step_trace.db"):
-            key = MsprofIteration('123')
-            result = key._MsprofIteration__get_iter_by_training_trace()
-        self.assertEqual(result, OrderedDict())
-
-        with mock.patch(NAMESPACE + '.PathManager.get_db_path', return_value=True), \
-             mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=(True, True)), \
-             mock.patch(NAMESPACE + '.DBManager.check_tables_in_db', return_value=True), \
-             mock.patch(NAMESPACE + '.MsprofIteration._generate_trace_iter_end_result', return_value=1), \
-             mock.patch(NAMESPACE + '.DBManager.fetch_all_data', return_value=[]), \
-             mock.patch(NAMESPACE + '.DBManager.destroy_db_connect'), \
-             mock.patch(NAMESPACE + '.PathManager.get_db_path', return_value="step_trace.db"):
-            key = MsprofIteration('123')
-            result = key._MsprofIteration__get_iter_by_training_trace()
         self.assertEqual(result, OrderedDict())
 
 

@@ -45,13 +45,6 @@ class ProfilingScene:
         """
         return self.get_scene() == Constant.STEP_INFO or self.get_scene() == Constant.MIX_OP_AND_GRAPH
 
-    def is_training_trace(self: any) -> bool:
-        """
-        check whether training trace
-        :return: True or False
-        """
-        return self.get_scene() == Constant.TRAIN
-
     def is_operator(self: any) -> bool:
         """
         check whether operator
