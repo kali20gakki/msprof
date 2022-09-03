@@ -34,13 +34,13 @@ public:
     int Init() const;
     int Uninit() const;
     bool CheckOutputIsValid(const std::string &outputPath);
-    bool CheckLlcModeIsValid(const std::string &llcMode);
-    bool CheckFreqIsValid(const std::string &freq, const int rangeMin, const int rangeMax);
+    bool CheckLlcModeIsValid(const std::string &llcMode) const;
+    bool CheckFreqIsValid(const std::string &freq, const int rangeMin, const int rangeMax) const;
     bool CheckHostSysUsageIsValid(const std::string &hostSysUsage);
     bool CheckHostSysPidValid(const std::string &hostSysPid);
     bool CheckPythonPathIsValid(const std::string &pythonPath);
-    bool CheckExportSummaryFormatIsValid(const std::string &summaryFormat);
-    bool CheckExportIdIsValid(const std::string &exportId, const std::string &exportIdType);
+    bool CheckExportSummaryFormatIsValid(const std::string &summaryFormat) const;
+    bool CheckExportIdIsValid(const std::string &exportId, const std::string &exportIdType) const;
     bool CheckProfilingParams(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params);
     bool CheckParamsDevices(const std::string &app, const std::string &paramsDevices,
         const std::string &paramsHostSys) const;
