@@ -160,7 +160,8 @@ TEST_F(MSPROF_ACL_CORE_UTEST, get_op_xxx) {
     EXPECT_EQ(0, OpDescParser::GetOpExecutionTime(&data, bufLen, 0));
 }
 
-TEST_F(MSPROF_ACL_CORE_UTEST, ConstructAndUploadData) {
+TEST_F(MSPROF_ACL_CORE_UTEST, ConstructAndUploadData)
+{
     GlobalMockObject::verify();
 
     std::shared_ptr<Analyzer> analyzer(new Analyzer(nullptr));
