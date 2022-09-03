@@ -30,7 +30,7 @@ int32_t ProfApiPlugin::MsprofProfRegReporterCallback(ProfReportHandle reporter)
 {
     PthreadOnce(&loadFlag_, []()->void {ProfApiPlugin::instance()->LoadProfApiSo();});
     if (profRegReporterCallback_ == nullptr) {
-        int32_t ret = pluginHandle_.GetFunction<int32_t, ProfReportHandle>("profRegReporterCallback",
+        int32_t ret = pluginHandle_.GetFunction<int32_t, ProfReportHandle>("ProfRegReporterCallback",
             profRegReporterCallback_);
         if (ret != PROFILING_SUCCESS) {
             return -1;
@@ -44,7 +44,7 @@ int32_t ProfApiPlugin::MsprofProfRegCtrlCallback(ProfCtrlHandle handle)
 {
     PthreadOnce(&loadFlag_, []()->void {ProfApiPlugin::instance()->LoadProfApiSo();});
     if (profRegCtrlCallback_  == nullptr) {
-        int32_t ret = pluginHandle_.GetFunction<int32_t, ProfCtrlHandle>("profRegCtrlCallback",
+        int32_t ret = pluginHandle_.GetFunction<int32_t, ProfCtrlHandle>("ProfRegCtrlCallback",
             profRegCtrlCallback_);
         if (ret != PROFILING_SUCCESS) {
             return -1;
@@ -58,7 +58,7 @@ int32_t ProfApiPlugin::MsprofProfRegDeviceStateCallback(ProfSetDeviceHandle hand
 {
     PthreadOnce(&loadFlag_, []()->void {ProfApiPlugin::instance()->LoadProfApiSo();});
     if (profRegDeviceStateCallback_  == nullptr) {
-        int32_t ret = pluginHandle_.GetFunction<int32_t, ProfSetDeviceHandle>("profRegDeviceStateCallback",
+        int32_t ret = pluginHandle_.GetFunction<int32_t, ProfSetDeviceHandle>("ProfRegDeviceStateCallback",
             profRegDeviceStateCallback_);
         if (ret != PROFILING_SUCCESS) {
             return -1;
@@ -72,7 +72,7 @@ int32_t ProfApiPlugin::MsprofProfGetDeviceIdByGeModelIdx(const uint32_t modelIdx
 {
     PthreadOnce(&loadFlag_, []()->void {ProfApiPlugin::instance()->LoadProfApiSo();});
     if (profGetDeviceIdByGeModelIdx_   == nullptr) {
-        int32_t ret = pluginHandle_.GetFunction<int32_t, uint32_t, uint32_t *>("profGetDeviceIdByGeModelIdx",
+        int32_t ret = pluginHandle_.GetFunction<int32_t, uint32_t, uint32_t *>("ProfGetDeviceIdByGeModelIdx",
             profGetDeviceIdByGeModelIdx_);
         if (ret != PROFILING_SUCCESS) {
             return -1;
@@ -86,7 +86,7 @@ int32_t ProfApiPlugin::MsprofProfSetProfCommand(PROFAPI_PROF_COMMAND_PTR command
 {
     PthreadOnce(&loadFlag_, []()->void {ProfApiPlugin::instance()->LoadProfApiSo();});
     if (profSetProfCommand_  == nullptr) {
-        int32_t ret = pluginHandle_.GetFunction<int32_t, PROFAPI_PROF_COMMAND_PTR, uint32_t>("profSetProfCommand",
+        int32_t ret = pluginHandle_.GetFunction<int32_t, PROFAPI_PROF_COMMAND_PTR, uint32_t>("ProfSetProfCommand",
             profSetProfCommand_);
         if (ret != PROFILING_SUCCESS) {
             return -1;

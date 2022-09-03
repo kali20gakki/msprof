@@ -61,11 +61,11 @@ using ProfReportHandle = int32_t (*)(uint32_t moduleId, uint32_t type, VOID_PTR 
 using ProfCtrlHandle = int32_t (*)(uint32_t type, VOID_PTR data, uint32_t len);
 using ProfSetDeviceHandle = int32_t (*)(VOID_PTR data, uint32_t len);
 
-MSVP_PROF_API int32_t profRegReporterCallback(ProfReportHandle reporter);
-MSVP_PROF_API int32_t profRegCtrlCallback(ProfCtrlHandle hanle);
-MSVP_PROF_API int32_t profRegDeviceStateCallback(ProfSetDeviceHandle hanle);
-MSVP_PROF_API int32_t profGetDeviceIdByGeModelIdx(const uint32_t modelIdx, uint32_t *deviceId);
-MSVP_PROF_API int32_t profSetProfCommand(PROFAPI_PROF_COMMAND_PTR command, uint32_t len);
+MSVP_PROF_API int32_t ProfRegReporterCallback(ProfReportHandle reporter);
+MSVP_PROF_API int32_t ProfRegCtrlCallback(ProfCtrlHandle hanle);
+MSVP_PROF_API int32_t ProfRegDeviceStateCallback(ProfSetDeviceHandle hanle);
+MSVP_PROF_API int32_t ProfGetDeviceIdByGeModelIdx(const uint32_t modelIdx, uint32_t *deviceId);
+MSVP_PROF_API int32_t ProfSetProfCommand(PROFAPI_PROF_COMMAND_PTR command, uint32_t len);
 MSVP_PROF_API int32_t profSetStepInfo(const uint64_t indexId, const uint16_t tagId, void* const stream);
 
 MSVP_PROF_API int32_t MsprofInit(uint32_t moduleId, void *data, uint32_t dataLen);
