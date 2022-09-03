@@ -40,8 +40,6 @@
 #include "mmpa_api.h"
 #include "prof_api.h"
 #include "toolchain/prof_acl_api.h"
-#include <stdio.h>
-#include <iostream>
 #include "uploader.h"
 #include "transport/hdc/hdc_transport.h"
 
