@@ -1537,7 +1537,7 @@ TEST_F(MSPROF_ACL_CORE_UTEST, AnalyzerTs_UploadKeypointOp) {
     MOCKER_CPP(&Analysis::Dvvp::Analyze::Analyzer::ConstructAndUploadData)
         .stubs();
 
-    auto analyzer = std::make_shared<Analysis::Dvvp::Analyze::Analyzer>();
+    auto analyzer = std::make_shared<Analysis::Dvvp::Analyze::Analyzer>(nullptr);
 
     TsProfileKeypoint data;
     data.head.bufSize = sizeof(TsProfileKeypoint);
