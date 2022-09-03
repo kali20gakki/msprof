@@ -867,8 +867,6 @@ int ProfAclMgr::CheckDeviceTask(PROF_CONF_CONST_PTR profStartCfg)
     std::vector<uint32_t> devIds;
     for (uint32_t i = 0; i < profStartCfg->devNums; i++) {
         uint32_t devId = profStartCfg->devIdList[i];
-
-        
         if (devTasks_.find(devId) != devTasks_.end()) {
             MSPROF_LOGE("Device %u already started", devId);
             MSPROF_INNER_ERROR("EK9999", "Device %u already started", devId);
@@ -1619,38 +1617,39 @@ int32_t ProfAclMgr::MsprofSetConfig(aclprofConfigType cfgType, std::string confi
             break;
         case ACL_PROF_AIV_METRICS:
             ConfigManager::instance()->AicoreMetricsEnumToName(static_cast<ProfAicoreMetrics>(std::stoi(config)), configStr);
-            ret = ParamValidation::instance()->CheckProfilingAicoreMetricsIsValid(configStr) ? PROFILING_SUCCESS : PROFILING_FAILED;
+            ret = ParamValidation::instance()->CheckProfilingAicoreMetricsIsValid(configStr) ?
+                PROFILING_SUCCESS : PROFILING_FAILED;
             break;
         case ACL_PROF_SYS_USAGE_FREQ:
-            ret = ParamValidation::instance()->CheckFreqIsValid(config, SYS_SAMPLING_FREQ_MIN_NUM, SYS_SAMPLING_FREQ_MAX_NUM) ?
-                PROFILING_SUCCESS : PROFILING_FAILED;
+            ret = ParamValidation::instance()->CheckFreqIsValid(config, SYS_SAMPLING_FREQ_MIN_NUM,
+                SYS_SAMPLING_FREQ_MAX_NUM) ? PROFILING_SUCCESS : PROFILING_FAILED;
             break;
         case ACL_PROF_SYS_PID_USAGE_FREQ:
-            ret = ParamValidation::instance()->CheckFreqIsValid(config, PID_SAMPLING_FREQ_MIN_NUM, PID_SAMPLING_FREQ_MAX_NUM) ?
-                PROFILING_SUCCESS : PROFILING_FAILED;
+            ret = ParamValidation::instance()->CheckFreqIsValid(config, PID_SAMPLING_FREQ_MIN_NUM,
+                PID_SAMPLING_FREQ_MAX_NUM) ? PROFILING_SUCCESS : PROFILING_FAILED;
             break;
         case ACL_PROF_SYS_CPU_FREQ:
-            ret = ParamValidation::instance()->CheckFreqIsValid(config, CPU_SAMPLING_FREQ_MIN_NUM, CPU_SAMPLING_FREQ_MAX_NUM) ?
-                PROFILING_SUCCESS : PROFILING_FAILED;
+            ret = ParamValidation::instance()->CheckFreqIsValid(config, CPU_SAMPLING_FREQ_MIN_NUM,
+                CPU_SAMPLING_FREQ_MAX_NUM) ? PROFILING_SUCCESS : PROFILING_FAILED;
             break;
         case ACL_PROF_SYS_HARDWARE_MEM_FREQ:
-            ret = ParamValidation::instance()->CheckFreqIsValid(config, HARDWARE_MEM_SAMPLING_FREQ_MIN_NUM, HARDWARE_MEM_SAMPLING_FREQ_MAX_NUM) ?
-                PROFILING_SUCCESS : PROFILING_FAILED;
+            ret = ParamValidation::instance()->CheckFreqIsValid(config, HARDWARE_MEM_SAMPLING_FREQ_MIN_NUM,
+                HARDWARE_MEM_SAMPLING_FREQ_MAX_NUM) ? PROFILING_SUCCESS : PROFILING_FAILED;
             break;
         case ACL_PROF_LLC_MODE:
             ret = ParamValidation::instance()->CheckLlcModeIsValid(config) ? PROFILING_SUCCESS : PROFILING_FAILED;
             break;
         case ACL_PROF_SYS_IO_FREQ:
-            ret = ParamValidation::instance()->CheckFreqIsValid(config, IO_SAMPLING_FREQ_MIN_NUM, IO_SAMPLING_FREQ_MAX_NUM) ?
-                PROFILING_SUCCESS : PROFILING_FAILED;
+            ret = ParamValidation::instance()->CheckFreqIsValid(config, IO_SAMPLING_FREQ_MIN_NUM,
+                IO_SAMPLING_FREQ_MAX_NUM) ? PROFILING_SUCCESS : PROFILING_FAILED;
             break;
         case ACL_PROF_SYS_INTERCONNECTION_FREQ:
-            ret = ParamValidation::instance()->CheckFreqIsValid(config, INTERCONNECTION_SAMPLING_FREQ_MIN_NUM, INTERCONNECTION_SAMPLING_FREQ_MAX_NUM) ?
-                PROFILING_SUCCESS : PROFILING_FAILED;
+            ret = ParamValidation::instance()->CheckFreqIsValid(config, INTERCONNECTION_SAMPLING_FREQ_MIN_NUM,
+                INTERCONNECTION_SAMPLING_FREQ_MAX_NUM) ? PROFILING_SUCCESS : PROFILING_FAILED;
             break;
         case ACL_PROF_DVPP_FREQ:
-            ret = ParamValidation::instance()->CheckFreqIsValid(config, DVPP_SAMPLING_FREQ_MIN_NUM, DVPP_SAMPLING_FREQ_MAX_NUM) ?
-                PROFILING_SUCCESS : PROFILING_FAILED;
+            ret = ParamValidation::instance()->CheckFreqIsValid(config, DVPP_SAMPLING_FREQ_MIN_NUM,
+                DVPP_SAMPLING_FREQ_MAX_NUM) ? PROFILING_SUCCESS : PROFILING_FAILED;
             break;
         case ACL_PROF_HOST_SYS:
             ret = ParamValidation::instance()->CheckHostSysOptionsIsValid(config) ? PROFILING_SUCCESS : PROFILING_FAILED;
