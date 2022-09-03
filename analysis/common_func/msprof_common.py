@@ -25,6 +25,7 @@ from common_func.file_manager import FileManager
 from common_func.file_name_manager import FileNameManagerConstant
 from framework.collection_engine import AI
 from framework.file_dispatch import FileDispatch
+from functools import partial
 
 
 class MsProfCommonConstant:
