@@ -1,7 +1,6 @@
-"""
-This script is used to report top down data from db.
-Copyright Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
-"""
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 
 import json
 import logging

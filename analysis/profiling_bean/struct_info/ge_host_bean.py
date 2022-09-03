@@ -1,9 +1,7 @@
-#!/usr/bin/env python
-# coding=utf-8
-"""
-function:Ge host bean struct
-Copyright Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
-"""
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
+
 from profiling_bean.struct_info.struct_decoder import StructDecoder
 
 

@@ -1,9 +1,7 @@
 #!/usr/bin/python3
-# coding:utf-8
-"""
-This scripts is used to export summary timeline
-Copyright Huawei Technologies Co., Ltd. 2021-2022. All rights reserved.
-"""
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2021-2022. All rights reserved.
+
 import os
 
 from common_func.ai_stack_data_check_manager import AiStackDataCheckManager

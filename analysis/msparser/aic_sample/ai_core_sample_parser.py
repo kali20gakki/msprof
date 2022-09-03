@@ -1,13 +1,9 @@
 #!/usr/bin/python3
-# coding=utf-8
-"""
-This script is used to create ai core db for sample-based ai core data
-Copyright Huawei Technologies Co., Ltd. 2018-2020. All rights reserved.
-"""
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2018-2020. All rights reserved.
 
 import logging
 import os
-from abc import abstractmethod
 
 from common_func.constant import Constant
 from common_func.db_name_constant import DBNameConstant

@@ -1,8 +1,6 @@
-# coding=utf-8
-"""
-This script is used to provide methods for creating system memory and pid memory db
-Copyright Huawei Technologies Co., Ltd. 2018-2019. All rights reserved.
-"""
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2018-2019. All rights reserved.
 
 import logging
 import re

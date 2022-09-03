@@ -1,9 +1,7 @@
-#!usr/bin/env python
-# coding:utf-8
-"""
-This script is used to provide runtime reports
-Copyright Huawei Technologies Co., Ltd. 2019-2020. All rights reserved.
-"""
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2019-2020. All rights reserved.
+
 import logging
 import os
 import sqlite3

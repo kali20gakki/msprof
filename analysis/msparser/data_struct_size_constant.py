@@ -1,8 +1,7 @@
 #!/usr/bin/python3
-"""
-This script is used to provid profiling constants
-Copyright Huawei Technologies Co., Ltd. 2021. All rights reserved.
-"""
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2021-2022. All rights reserved.
+
 import struct
 
 
