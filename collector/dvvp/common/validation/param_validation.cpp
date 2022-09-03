@@ -10,13 +10,12 @@
 #include "param_validation.h"
 
 #include "config/config.h"
-#include "cmd_log.h"
 #include "errno/error_code.h"
+#include "message/prof_params.h"
 #include "message/codec.h"
 #include "platform/platform.h"
 #include "msprof_error_manager.h"
 #include "config/config_manager.h"
-#include "acl/acl_prof.h"
 
 namespace analysis {
 namespace dvvp {
@@ -28,7 +27,6 @@ using namespace analysis::dvvp::common::config;
 using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::message;
 using namespace analysis::dvvp::common::utils;
-using namespace Collector::Dvvp::Msprofbin;
 using namespace Collector::Dvvp::Plugin;
 using namespace Collector::Dvvp::Mmpa;
 
@@ -96,59 +94,6 @@ bool ParamValidation::CheckOutputIsValid(const std::string &outputPath)
         }
     } else {
         MSPROF_LOGE("Argument 'output' is invalid. Failed to get the canonicalized absolute pathname.");
-        return false;
-    }
-    return true;
-}
-
-bool ParamValidation::CheckStorageLimitIsValid(const std::string &storageLimit)
-{
-    if (storageLimit.empty()) {
-        MSPROF_LOGI("storage_limit is empty");
-        return true;
-    }
-    std::string errReason = "storage-limit should be in range [" + std::to_string(STORAGE_LIMIT_DOWN_THD) +
-        "," + std::to_string(UINT32_MAX) + "], end with MB";
-
-    uint32_t unitLen = strlen(STORAGE_LIMIT_UNIT);
-    if (storageLimit.size() <= unitLen) {
-        MSPROF_LOGE("storage_limit:%s, length is less than %u", storageLimit.c_str(), unitLen + 1);
-        MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
-            std::vector<std::string>({"storage_limit", storageLimit, errReason}));
-        return false;
-    }
-
-    std::string unitStr = storageLimit.substr(storageLimit.size() - unitLen);
-    if (unitStr != STORAGE_LIMIT_UNIT) {
-        MSPROF_LOGE("storage_limit:%s, not end with MB", storageLimit.c_str());
-        MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
-            std::vector<std::string>({"storage_limit", storageLimit, errReason}));
-        return false;
-    }
-
-    std::string digitStr = storageLimit.substr(0, storageLimit.size() - unitLen);
-    if (!Utils::IsAllDigit(digitStr)) {
-        MSPROF_LOGE("storage_limit:%s, invalid numbers", storageLimit.c_str());
-        MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
-            std::vector<std::string>({"storage_limit", storageLimit, errReason}));
-        return false;
-    } else if (digitStr.size() > 10) { // digitStr range is 0 ~ 4294967296, max length is 10
-        MSPROF_LOGE("storage_limit:%s, valid range is 200~4294967296", storageLimit.c_str());
-        MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
-            std::vector<std::string>({"storage_limit", storageLimit, errReason}));
-        return false;
-    }
-
-    uint64_t limit = stoull(digitStr);
-    if (limit < STORAGE_LIMIT_DOWN_THD) {
-        MSPROF_LOGE("storage_limit:%s, min value is %uMB", storageLimit.c_str(), STORAGE_LIMIT_DOWN_THD);
-        MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
-            std::vector<std::string>({"storage_limit", storageLimit, errReason}));
-        return false;
-    } else if (limit > UINT32_MAX) {
-        MSPROF_LOGE("storage_limit:%s, max value is %uMB", storageLimit.c_str(), UINT32_MAX);
-        MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
-            std::vector<std::string>({"storage_limit", storageLimit, errReason}));
         return false;
     }
     return true;
@@ -811,7 +756,6 @@ bool ParamValidation::CheckParamsModeRegexMatch(const std::string &paramsMode) c
     }
     std::vector<std::string> profilingModeWhiteList;
     profilingModeWhiteList.push_back(analysis::dvvp::message::PROFILING_MODE_DEF);
-
     for (size_t i = 0; i < profilingModeWhiteList.size(); i++) {
         if (paramsMode.compare(profilingModeWhiteList[i]) == 0) {
             return true;
@@ -1027,7 +971,7 @@ bool ParamValidation::CheckBiuFreqValid(const uint32_t biuFreq) const
 bool ParamValidation::MsprofCheckAppValid(std::string &appParam) const
 {
     if (appParam.empty()) {
-        CmdLog::instance()->CmdErrorLog("Argument --application: expected one argument.");
+        MSPROF_LOGE("Argument --application: expected one argument.");
         return false;
     }
     std::string resultAppParam;
@@ -1059,58 +1003,26 @@ bool ParamValidation::MsprofCheckAppValid(std::string &appParam) const
     return true;
 }
  
-// 运行脚本的情况下，检测可执行程序和脚本的有效性
 int ParamValidation::MsprofCheckNotAppValid(const std::vector<std::string> &AppParamsList,
     std::string &resultAppParam) const
 {
-    std::string cmdParam = AppParamsList[0];
-    if (cmdParam.find("/") != std::string::npos) {
-        std::string absolutePathCmdParam = Utils::CanonicalizePath(cmdParam);
-        if (absolutePathCmdParam.empty()) {
-            CmdLog::instance()->CmdErrorLog("App path(%s) does not exist or permission denied.",
-                absolutePathCmdParam.c_str());
-            return PROFILING_FAILED;
-        }
-        if (MmAccess2(absolutePathCmdParam, M_X_OK) != PROFILING_SUCCESS) {
-            CmdLog::instance()->CmdErrorLog("This app(%s) has no executable permission.",
-                absolutePathCmdParam.c_str());
-            return PROFILING_FAILED;
-        }
-        resultAppParam = absolutePathCmdParam + " ";
-    } else {
-        resultAppParam = cmdParam + " ";
-    }
-    if (MsprofCheckAppScriptValid(AppParamsList) != PROFILING_SUCCESS) {
-        return PROFILING_FAILED;
-    }
-    for (size_t i = 1; i < AppParamsList.size(); i++) {
-        std::string tmpStr = Utils::CanonicalizePath(AppParamsList[i]);
-        if (!tmpStr.empty()) {
-            resultAppParam += tmpStr;
-        } else {
-            resultAppParam += AppParamsList[i];
-        }
-        if (i < (AppParamsList.size() - 1)) {
-            resultAppParam += " ";
-        }
-    }
     return PROFILING_SUCCESS;
 }
  
 int ParamValidation::MsprofCheckAppScriptValid(const std::vector<std::string> &appParams) const
 {
     if (appParams.size() < MIN_APP_LENTH_WITH_SCRIPT) {
-        CmdLog::instance()->CmdErrorLog("No input script to run.");
+        MSPROF_LOGE("No input script to run.");
         return PROFILING_FAILED;
     }
     std::string appScript = appParams[1];
     std::string scriptParam = Utils::CanonicalizePath(appScript);
     if (scriptParam.empty()) {
-        CmdLog::instance()->CmdErrorLog("Invalid input script.");
+        MSPROF_LOGE("Invalid input script.");
         return PROFILING_FAILED;
     }
     if (Utils::IsSoftLink(scriptParam)) {
-        CmdLog::instance()->CmdErrorLog("Input script is soft link, not support", scriptParam.c_str());
+        MSPROF_LOGE("Input script is soft link, not support", scriptParam.c_str());
         return PROFILING_FAILED;
     }
     return PROFILING_SUCCESS;
@@ -1119,19 +1031,19 @@ int ParamValidation::MsprofCheckAppScriptValid(const std::vector<std::string> &a
 int ParamValidation::MsprofCheckAppParamValid(const std::string &appParam) const
 {
     if (Utils::IsSoftLink(appParam)) {
-        CmdLog::instance()->CmdErrorLog("App path(%s) is soft link, not support!", appParam.c_str());
+        MSPROF_LOGE("App path(%s) is soft link, not support!", appParam.c_str());
         return PROFILING_FAILED;
     }
     if (Utils::CanonicalizePath(appParam).empty()) {
-        CmdLog::instance()->CmdErrorLog("App path(%s) does not exist or permission denied!!!", appParam.c_str());
+        MSPROF_LOGE("App path(%s) does not exist or permission denied!!!", appParam.c_str());
         return PROFILING_FAILED;
     }
     if (MmAccess2(appParam, M_X_OK) != PROFILING_SUCCESS) {
-        CmdLog::instance()->CmdErrorLog("This app(%s) has no executable permission.", appParam.c_str());
+        MSPROF_LOGE("This app(%s) has no executable permission.", appParam.c_str());
         return PROFILING_FAILED;
     }
     if (Utils::IsDir(appParam)) {
-        CmdLog::instance()->CmdErrorLog("Argument --application\%s is a directory, "
+        MSPROF_LOGE("Argument --application\%s is a directory, "
             "please enter the executable file path.", appParam.c_str());
         return PROFILING_FAILED;
     }
@@ -1139,11 +1051,11 @@ int ParamValidation::MsprofCheckAppParamValid(const std::string &appParam) const
     std::string appName;
     int ret = Utils::SplitPath(appParam, appDir, appName);
     if (ret != PROFILING_SUCCESS) {
-        CmdLog::instance()->CmdErrorLog("Failed to get app name");
+        MSPROF_LOGE("Failed to get app name");
         return PROFILING_FAILED;
     }
     if (!ParamValidation::instance()->CheckAppNameIsValid(appName)) {
-        CmdLog::instance()->CmdErrorLog("Argument --application(%s) is invalid.", appName.c_str());
+        MSPROF_LOGE("Argument --application(%s) is invalid.", appName.c_str());
         return PROFILING_FAILED;
     }
     return PROFILING_SUCCESS;
@@ -1152,7 +1064,7 @@ int ParamValidation::MsprofCheckAppParamValid(const std::string &appParam) const
 bool ParamValidation::MsprofCheckEnvValid(const std::string &envParam) const
 {
     if (envParam.empty()) {
-        CmdLog::instance()->CmdErrorLog("Argument --environmet: expected one argument.");
+        MSPROF_LOGE("Argument --environmet: expected one argument.");
         return false;
     }
     return true;
@@ -1161,11 +1073,11 @@ bool ParamValidation::MsprofCheckEnvValid(const std::string &envParam) const
 bool ParamValidation::MsprofCheckAiModeValid(const std::string &aiModeParam, const std::string &aiModeType) const
 {
     if (aiModeParam.empty()) {
-        CmdLog::instance()->CmdErrorLog("Argument --%s: expected one argument.", aiModeType.c_str());
+        MSPROF_LOGE("Argument --%s: expected one argument.", aiModeType.c_str());
         return false;
     }
     if (aiModeParam != "task-based" && aiModeParam != "sample-based") {
-        CmdLog::instance()->CmdErrorLog("Argument %s: invalid value: %s."
+        MSPROF_LOGE("Argument %s: invalid value: %s."
             "Please input 'task-based' or 'sample-based'.", aiModeType.c_str(), aiModeParam.c_str());
         return false;
     }
@@ -1175,7 +1087,7 @@ bool ParamValidation::MsprofCheckAiModeValid(const std::string &aiModeParam, con
 bool ParamValidation::MsprofCheckSysDeviceValid(const std::string &devListParam) const
 {
     if (devListParam.empty()) {
-        CmdLog::instance()->CmdErrorLog("Argument --sys-devices is empty, Please enter a valid --sys-devices value.");
+        MSPROF_LOGE("Argument --sys-devices is empty, Please enter a valid --sys-devices value.");
         return false;
     }
     if (devListParam == "all") {
@@ -1184,7 +1096,7 @@ bool ParamValidation::MsprofCheckSysDeviceValid(const std::string &devListParam)
     std::vector<std::string> devices = Utils::Split(devListParam, false, "", ",");
     for (size_t i = 0; i < devices.size(); ++i) {
         if (!CheckDeviceIdIsValid(devices[i])) {
-            CmdLog::instance()->CmdErrorLog("Argument --sys-devices: invalid value: %s."
+            MSPROF_LOGE("Argument --sys-devices: invalid value: %s."
                 "Please input data is a id num.", devices[i].c_str());
             return false;
         }
@@ -1195,20 +1107,20 @@ bool ParamValidation::MsprofCheckSysDeviceValid(const std::string &devListParam)
 bool ParamValidation::MsprofCheckSysPeriodValid(const std::string &sysPeriodParam) const
 {
     if (sysPeriodParam.empty()) {
-        CmdLog::instance()->CmdErrorLog("Argument --sys-period is empty, Please enter a valid --sys-period value.");
+        MSPROF_LOGE("Argument --sys-period is empty, Please enter a valid --sys-period value.");
         return false;
     }
     if (Utils::CheckStringIsNonNegativeIntNum(sysPeriodParam)) {
         auto syspeRet = std::stoi(sysPeriodParam);
         if (!IsValidSleepPeriod(syspeRet)) {
-            CmdLog::instance()->CmdErrorLog("Argument --sys-period: invalid int value: %d."
+            MSPROF_LOGE("Argument --sys-period: invalid int value: %d."
                 "The max period is 30 days.", syspeRet);
             return false;
         } else {
             return true;
         }
     } else {
-        CmdLog::instance()->CmdErrorLog("Argument --sys-period: invalid value: %s."
+        MSPROF_LOGE("Argument --sys-period: invalid value: %s."
             "Please input an integer value.The max period is 30 days.", sysPeriodParam);
         return false;
     }
@@ -1218,20 +1130,20 @@ bool ParamValidation::MsprofCheckSysPeriodValid(const std::string &sysPeriodPara
 bool ParamValidation::MsprofCheckHostSysValid(const std::string &hostSysParam) const
 {
 #if (defined(_WIN32) || defined(_WIN64) || defined(_MSC_VER))
-    CmdLog::instance()->CmdErrorLog("Currently, --host-sys can be used only in the Linux environment.");
+    MSPROF_LOGE("Currently, --host-sys can be used only in the Linux environment.");
 #endif
     if (Platform::instance()->RunSocSide()) {
-        CmdLog::instance()->CmdErrorLog("Not in host side, --host-sys is not supported");
+        MSPROF_LOGE("Not in host side, --host-sys is not supported");
     }
     if (hostSysParam.empty()) {
-        CmdLog::instance()->CmdErrorLog("Argument --host-sys is empty. Please input in the range of "
+        MSPROF_LOGE("Argument --host-sys is empty. Please input in the range of "
             "'cpu|mem|disk|network|osrt'");
         return false;
     }
     std::vector<std::string> hostSysArray = Utils::Split(hostSysParam, false, "", ",");
     for (size_t i = 0; i < hostSysArray.size(); ++i) {
         if (!CheckHostSysOptionsIsValid(hostSysArray[i])) {
-            CmdLog::instance()->CmdErrorLog("Argument --host-sys: invalid value:%s. Please input in the range of "
+            MSPROF_LOGE("Argument --host-sys: invalid value:%s. Please input in the range of "
                 "'cpu|mem|disk|network|osrt'", hostSysArray[i].c_str());
             return false;
         }
@@ -1243,26 +1155,26 @@ bool ParamValidation::CheckHostSysToolsExit(const std::string &hostSysParam, con
     const std::string &appDir) const
 {
     if (hostSysParam.empty()) {
-        CmdLog::instance()->CmdErrorLog("Argument --host-sys is empty. Please input in the range of "
+        MSPROF_LOGE("Argument --host-sys is empty. Please input in the range of "
             "'cpu|mem|disk|network|osrt'");
         return false;
     }
     std::vector<std::string> hostSysArray = Utils::Split(hostSysParam, false, "", ",");
     if (std::find(hostSysArray.begin(), hostSysArray.end(), HOST_SYS_OSRT) != hostSysArray.end()) {
         if (CheckHostSysToolsIsExist(TOOL_NAME_PERF, resultDir, appDir) != PROFILING_SUCCESS) {
-            CmdLog::instance()->CmdErrorLog("The tool perf is invalid, please check"
+            MSPROF_LOGE("The tool perf is invalid, please check"
                 " if the tool and sudo are available.");
             return false;
         }
         if (CheckHostSysToolsIsExist(TOOL_NAME_LTRACE, resultDir, appDir) != PROFILING_SUCCESS) {
-            CmdLog::instance()->CmdErrorLog("The tool ltrace is invalid, please check"
+            MSPROF_LOGE("The tool ltrace is invalid, please check"
                 " if the tool and sudo are available.");
             return false;
         }
     }
     if (std::find(hostSysArray.begin(), hostSysArray.end(), HOST_SYS_DISK) != hostSysArray.end()) {
         if (CheckHostSysToolsIsExist(TOOL_NAME_IOTOP, resultDir, appDir) != PROFILING_SUCCESS) {
-            CmdLog::instance()->CmdErrorLog("The tool iotop is invalid, please check if"
+            MSPROF_LOGE("The tool iotop is invalid, please check if"
                 " the tool and sudo are available.");
             return false;
         }
@@ -1274,7 +1186,7 @@ int ParamValidation::CheckHostSysToolsIsExist(const std::string toolName, const 
     const std::string &appDir) const
 {
     if (resultDir.empty() && appDir.empty()) {
-        CmdLog::instance()->CmdErrorLog("If you want to use this parameter:--host-sys,"
+        MSPROF_LOGE("If you want to use this parameter:--host-sys,"
             "please put it behind the --output or --application. ");
         return PROFILING_FAILED;
     }
@@ -1285,9 +1197,9 @@ int ParamValidation::CheckHostSysToolsIsExist(const std::string toolName, const 
     } else if (!appDir.empty()) {
         tmpDir = appDir;
     }
-    static const std::string ENV_PATH = "PATH=/usr/bin/:/usr/sbin:/var";
+    static const std::string envPath = "PATH=/usr/bin/:/usr/sbin:/var";
     std::vector<std::string> envV;
-    envV.push_back(ENV_PATH);
+    envV.push_back(envPath);
     std::vector<std::string> argsV;
     argsV.push_back(PROF_SCRIPT_FILE_PATH);
     argsV.push_back("get-version");
@@ -1295,9 +1207,9 @@ int ParamValidation::CheckHostSysToolsIsExist(const std::string toolName, const 
     unsigned long long startRealtime = analysis::dvvp::common::utils::Utils::GetClockRealtime();
     tmpDir += "/tmpPrint" + std::to_string(startRealtime);
     int exitCode = analysis::dvvp::common::utils::INVALID_EXIT_CODE;
-    static const std::string CMD = "sudo";
+    static const std::string cmd = "sudo";
     MmProcess tmpProcess = MSVP_MMPROCESS;
-    ExecCmdParams execCmdParams(CMD, true, tmpDir);
+    ExecCmdParams execCmdParams(cmd, true, tmpDir);
     int ret = analysis::dvvp::common::utils::Utils::ExecCmd(execCmdParams,
                                                             argsV,
                                                             envV,
@@ -1308,8 +1220,9 @@ int ParamValidation::CheckHostSysToolsIsExist(const std::string toolName, const 
     return ret;
 }
  
-int ParamValidation::CheckHostSysCmdOutIsExist(const std::string tmpDir, const std::string toolName,
-                                                const MmProcess tmpProcess) const
+int ParamValidation::CheckHostSysCmdOutIsExist(const std::string tmpDir,
+                                               const std::string toolName,
+                                               const MmProcess tmpProcess) const
 {
     MSPROF_LOGI("Start to check whether the file exists.");
     for (int i = 0; i < FILE_FIND_REPLAY; i++) {
@@ -1371,17 +1284,17 @@ int ParamValidation::UninitCheckHostSysCmd(const MmProcess checkProcess) const
         MSPROF_LOGI("Process:%d is not exist", reinterpret_cast<int>(checkProcess));
         return PROFILING_SUCCESS;
     }
-    static const std::string ENV_PATH = "PATH=/usr/bin/:/usr/sbin:/var:/bin";
+    static const std::string envPath = "PATH=/usr/bin/:/usr/sbin:/var:/bin";
     std::vector<std::string> envV;
-    envV.push_back(ENV_PATH);
+    envV.push_back(envPath);
     std::vector<std::string> argsV;
     std::string killCmd = "kill -2 " + std::to_string(reinterpret_cast<int>(checkProcess));
     argsV.push_back("-c");
     argsV.push_back(killCmd);
     int exitCode = analysis::dvvp::common::utils::VALID_EXIT_CODE;
-    static const std::string CMD = "sh";
+    static const std::string cmd = "sh";
     MmProcess tmpProcess = MSVP_MMPROCESS;
-    ExecCmdParams execCmdParams(CMD, true, "");
+    ExecCmdParams execCmdParams(cmd, true, "");
     int ret = PROFILING_SUCCESS;
     for (int i = 0; i < FILE_FIND_REPLAY; i++) {
         if (ParamValidation::instance()->CheckHostSysPidIsValid(reinterpret_cast<int>(checkProcess))) {

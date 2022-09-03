@@ -12,6 +12,8 @@ set(profilerSrcFiles
     ${MSPROF_SOURCE_DIR}/dvvp/common/statistics/perf_count.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/utils/utils.cpp 
     ${MSPROF_SOURCE_DIR}/dvvp/common/validation/param_validation.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/driver/devmgmt/ai_drv_dev_api.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/thread/thread.cpp 
     ${MSPROF_SOURCE_DIR}/dvvp/common/mmpa/mmpa_api.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/config/config_manager.cpp
@@ -62,6 +64,7 @@ target_include_directories(streamio_common_utest PRIVATE
 	${MSPROF_SOURCE_DIR}/dvvp/common/config
     ${MSPROF_SOURCE_DIR}/dvvp/common/utils 
     ${MSPROF_SOURCE_DIR}/dvvp/msprof/engine/include
+    ${MSPROF_SOURCE_DIR}/dvvp/common/platform/
     ${TOP_DIR}/test/msprof_cpp/ut/stub/common/log/
 	${MSPROF_SOURCE_DIR}/dvvp/common/mmpa
 	${MSPROF_SOURCE_DIR}/dvvp/common/validation 
