@@ -51,14 +51,6 @@ int MsprofParamAdapter::Init()
 
 int MsprofParamAdapter::ParamsCheckMsprof(std::vector<std::pair<InputCfg, std::string>> &cfgList)
 {
-    std::map<InputCfg, std::string> aiModeTypeList = {
-        {INPUT_CFG_COM_AIC_MODE, "aic-mode"},
-        {INPUT_CFG_COM_AIV_MODE, "aiv-mode"},
-    };
-    std::map<InputCfg, std::string> exportIdList = {
-        {INPUT_CFG_ITERATION_ID, "iteration-id"},
-        {INPUT_CFG_MODEL_ID, "model-id"},
-    };
     bool ret = true;
     bool flag = true;
     for (auto inputCfg : msprofConfig_) {
@@ -90,39 +82,8 @@ int MsprofParamAdapter::ParamsCheckMsprof(std::vector<std::pair<InputCfg, std::s
             case INPUT_CFG_EXPORT:
                 ret = ParamValidation::instance()->IsValidSwitch(cfgValue);
                 break;
-            case INPUT_CFG_COM_AIV_MODE:
-            case INPUT_CFG_COM_AIC_MODE:
-                ret = ParamValidation::instance()->MsprofCheckAiModeValid(cfgValue, aiModeTypeList[inputCfg]);
-                break;
-            case INPUT_CFG_COM_AIC_FREQ:
-            case INPUT_CFG_COM_AIV_FREQ:
-            case INPUT_CFG_COM_BIU_FREQ:
-                ret = CheckFreqValid(cfgValue, inputCfg);
-                break;
-            case INPUT_CFG_COM_SYS_DEVICES:
-                ret = ParamValidation::instance()->MsprofCheckSysDeviceValid(cfgValue);
-                break;
-            case INPUT_CFG_COM_SYS_PERIOD:
-                ret = ParamValidation::instance()->MsprofCheckSysPeriodValid(cfgValue);
-                break;
-            case INPUT_CFG_HOST_SYS:
-                ret = ParamValidation::instance()->MsprofCheckHostSysValid(cfgValue);
-                break;
-            case INPUT_CFG_HOST_SYS_PID:
-                ret = ParamValidation::instance()->CheckHostSysPidValid(cfgValue);
-                break;
-            case INPUT_CFG_PYTHON_PATH:
-                ret = ParamValidation::instance()->CheckPythonPathIsValid(cfgValue);
-                break;
-            case INPUT_CFG_SUMMARY_FORMAT:
-                ret = ParamValidation::instance()->CheckExportSummaryFormatIsValid(cfgValue);
-                break;
-            case INPUT_CFG_ITERATION_ID:
-            case INPUT_CFG_MODEL_ID:
-                ret = ParamValidation::instance()->CheckExportIdIsValid(cfgValue, exportIdList[inputCfg]);
-                break;
             default:
-                ret = false;
+                ret = ParamsCheckMsprofV1(inputCfg, cfgValue);
         }
         if (ret != true) {
             cfgList.push_back(std::pair<InputCfg, std::string>(inputCfg, cfgValue));
@@ -130,6 +91,55 @@ int MsprofParamAdapter::ParamsCheckMsprof(std::vector<std::pair<InputCfg, std::s
         }
     }
     return flag ? PROFILING_SUCCESS : PROFILING_FAILED;
+}
+
+bool MsprofParamAdapter::ParamsCheckMsprofV1(InputCfg inputCfg, std::string cfgValue)
+{
+    std::map<InputCfg, std::string> aiModeTypeList = {
+        {INPUT_CFG_COM_AIC_MODE, "aic-mode"},
+        {INPUT_CFG_COM_AIV_MODE, "aiv-mode"},
+    };
+    std::map<InputCfg, std::string> exportIdList = {
+        {INPUT_CFG_ITERATION_ID, "iteration-id"},
+        {INPUT_CFG_MODEL_ID, "model-id"},
+    };
+    bool ret = true;
+    switch (inputCfg) {
+        case INPUT_CFG_COM_AIV_MODE:
+        case INPUT_CFG_COM_AIC_MODE:
+            ret = ParamValidation::instance()->MsprofCheckAiModeValid(cfgValue, aiModeTypeList[inputCfg]);
+            break;
+        case INPUT_CFG_COM_AIC_FREQ:
+        case INPUT_CFG_COM_AIV_FREQ:
+        case INPUT_CFG_COM_BIU_FREQ:
+            ret = CheckFreqValid(cfgValue, inputCfg);
+            break;
+        case INPUT_CFG_COM_SYS_DEVICES:
+            ret = ParamValidation::instance()->MsprofCheckSysDeviceValid(cfgValue);
+            break;
+        case INPUT_CFG_COM_SYS_PERIOD:
+            ret = ParamValidation::instance()->MsprofCheckSysPeriodValid(cfgValue);
+            break;
+        case INPUT_CFG_HOST_SYS:
+            ret = ParamValidation::instance()->MsprofCheckHostSysValid(cfgValue);
+            break;
+        case INPUT_CFG_HOST_SYS_PID:
+            ret = ParamValidation::instance()->CheckHostSysPidValid(cfgValue);
+            break;
+        case INPUT_CFG_PYTHON_PATH:
+            ret = ParamValidation::instance()->CheckPythonPathIsValid(cfgValue);
+            break;
+        case INPUT_CFG_SUMMARY_FORMAT:
+            ret = ParamValidation::instance()->CheckExportSummaryFormatIsValid(cfgValue);
+            break;
+        case INPUT_CFG_ITERATION_ID:
+        case INPUT_CFG_MODEL_ID:
+            ret = ParamValidation::instance()->CheckExportIdIsValid(cfgValue, exportIdList[inputCfg]);
+            break;
+        default:
+            ret = false;
+    }
+    return ret;
 }
 
 void MsprofParamAdapter::SetDefaultParamsApp()
@@ -293,22 +303,9 @@ int MsprofParamAdapter::GetParamFromInputCfg(std::unordered_map<int, std::pair<M
         paramContainer_[cfgType] = std::string(kv.second.first.args[argsType]);
         setConfig_.insert(cfgType);
     }
-    std::vector<std::pair<InputCfg, std::string>> errCfgList;
-    ret = ParamsCheckMsprof(errCfgList);
-    if (ret != PROFILING_SUCCESS && !errCfgList.empty()) {
-        for (auto errCfg : errCfgList) {
-            MsprofArgsType argsType = reCfgMap_[errCfg.first];
-            CmdLog::instance()->CmdErrorLog("Argument %s set invalid.", argvMap[argsType].second.c_str());
-        }
-        return PROFILING_FAILED;
-    }
-    errCfgList.clear();
-    ret = ComCfgCheck(ENABLE_MSPROF, paramContainer_, setConfig_, errCfgList);
+    ret = ParamsCheck(argvMap);
     if (ret != PROFILING_SUCCESS) {
-        for (auto errCfg : errCfgList) {
-            MsprofArgsType argsType = reCfgMap_[errCfg.first];
-            CmdLog::instance()->CmdErrorLog("Argument %s set invalid.", argvMap[argsType].second.c_str());
-        }
+        CmdLog::instance()->CmdErrorLog("msprof input param check fail.");
         return PROFILING_FAILED;
     }
     ret = GetMsprofMode();
@@ -326,6 +323,29 @@ int MsprofParamAdapter::GetParamFromInputCfg(std::unordered_map<int, std::pair<M
         return PROFILING_FAILED;
     }
     SetParamsSelf();
+    return PROFILING_SUCCESS;
+}
+
+int MsprofParamAdapter::ParamsCheck(std::unordered_map<int, std::pair<MsprofCmdInfo, std::string>> argvMap)
+{
+    std::vector<std::pair<InputCfg, std::string>> errCfgList;
+    int ret = ParamsCheckMsprof(errCfgList);
+    if (ret != PROFILING_SUCCESS && !errCfgList.empty()) {
+        for (auto errCfg : errCfgList) {
+            MsprofArgsType argsType = reCfgMap_[errCfg.first];
+            CmdLog::instance()->CmdErrorLog("Argument %s set invalid.", argvMap[argsType].second.c_str());
+        }
+        return PROFILING_FAILED;
+    }
+    errCfgList.clear();
+    ret = ComCfgCheck(ENABLE_MSPROF, paramContainer_, setConfig_, errCfgList);
+    if (ret != PROFILING_SUCCESS) {
+        for (auto errCfg : errCfgList) {
+            MsprofArgsType argsType = reCfgMap_[errCfg.first];
+            CmdLog::instance()->CmdErrorLog("Argument %s set invalid.", argvMap[argsType].second.c_str());
+        }
+        return PROFILING_FAILED;
+    }
     return PROFILING_SUCCESS;
 }
 
@@ -360,55 +380,32 @@ int MsprofParamAdapter::SetModeDefaultParams(MsprofMode modeType)
 void MsprofParamAdapter::CreateCfgMap()
 {
     std::unordered_map<int, InputCfg>({
-        {ARGS_OUTPUT, INPUT_CFG_COM_OUTPUT},
-        {ARGS_STORAGE_LIMIT, INPUT_CFG_COM_STORAGE_LIMIT},
-        {ARGS_APPLICATION, INPUT_CFG_MSPROF_APPLICATION},
-        {ARGS_ENVIRONMENT, INPUT_CFG_MSPROF_ENVIRONMENT},
-        {ARGS_AIC_MODE, INPUT_CFG_COM_AIC_MODE},
-        {ARGS_AIC_METRICE, INPUT_CFG_COM_AIC_METRICS},
-        {ARGS_AIV_MODE, INPUT_CFG_COM_AIV_MODE},
-        {ARGS_AIV_METRICS, INPUT_CFG_COM_AIV_METRICS},
-        {ARGS_SYS_DEVICES, INPUT_CFG_COM_SYS_DEVICES},
-        {ARGS_LLC_PROFILING, INPUT_CFG_COM_LLC_MODE},
-        {ARGS_PYTHON_PATH, INPUT_CFG_PYTHON_PATH},
-        {ARGS_SUMMARY_FORMAT, INPUT_CFG_SUMMARY_FORMAT},
-        {ARGS_ASCENDCL, INPUT_CFG_COM_ASCENDCL},
-        {ARGS_AI_CORE, INPUT_CFG_COM_AI_CORE},
-        {ARGS_AIV, INPUT_CFG_COM_AI_VECTOR},
-        {ARGS_MODEL_EXECUTION, INPUT_CFG_COM_MODEL_EXECUTION},
-        {ARGS_RUNTIME_API, INPUT_CFG_COM_RUNTIME_API},
-        {ARGS_TASK_TIME, INPUT_CFG_COM_TASK_TIME},
-        {ARGS_AICPU, INPUT_CFG_COM_AICPU},
-        {ARGS_MSPROFTX, INPUT_CFG_COM_MSPROFTX},
-        {ARGS_CPU_PROFILING, INPUT_CFG_COM_SYS_CPU},
-        {ARGS_SYS_PROFILING, INPUT_CFG_COM_SYS_USAGE},
-        {ARGS_PID_PROFILING, INPUT_CFG_COM_SYS_PID_USAGE},
-        {ARGS_HARDWARE_MEM, INPUT_CFG_COM_SYS_HARDWARE_MEM},
-        {ARGS_IO_PROFILING, INPUT_CFG_COM_SYS_IO},
-        {ARGS_INTERCONNECTION_PROFILING, INPUT_CFG_COM_SYS_INTERCONNECTION},
-        {ARGS_DVPP_PROFILING, INPUT_CFG_COM_DVPP},
-        {ARGS_POWER, INPUT_CFG_COM_POWER},
-        {ARGS_HCCL, INPUT_CFG_COM_HCCL},
-        {ARGS_BIU, INPUT_CFG_COM_BIU},
-        {ARGS_L2_PROFILING, INPUT_CFG_COM_L2},
-        {ARGS_PARSE, INPUT_CFG_PARSE},
-        {ARGS_QUERY, INPUT_CFG_QUERY},
-        {ARGS_EXPORT, INPUT_CFG_EXPORT},
-        {ARGS_AIC_FREQ, INPUT_CFG_COM_AIC_FREQ},
-        {ARGS_AIV_FREQ, INPUT_CFG_COM_AIV_FREQ},
-        {ARGS_BIU_FREQ, INPUT_CFG_COM_BIU_FREQ},
-        {ARGS_SYS_PERIOD, INPUT_CFG_COM_SYS_PERIOD},
-        {ARGS_SYS_SAMPLING_FREQ, INPUT_CFG_COM_SYS_USAGE_FREQ},
-        {ARGS_PID_SAMPLING_FREQ, INPUT_CFG_COM_SYS_PID_USAGE_FREQ},
+        {ARGS_OUTPUT, INPUT_CFG_COM_OUTPUT}, {ARGS_STORAGE_LIMIT, INPUT_CFG_COM_STORAGE_LIMIT},
+        {ARGS_APPLICATION, INPUT_CFG_MSPROF_APPLICATION}, {ARGS_ENVIRONMENT, INPUT_CFG_MSPROF_ENVIRONMENT},
+        {ARGS_AIC_MODE, INPUT_CFG_COM_AIC_MODE}, {ARGS_AIC_METRICE, INPUT_CFG_COM_AIC_METRICS},
+        {ARGS_AIV_MODE, INPUT_CFG_COM_AIV_MODE}, {ARGS_AIV_METRICS, INPUT_CFG_COM_AIV_METRICS},
+        {ARGS_SYS_DEVICES, INPUT_CFG_COM_SYS_DEVICES}, {ARGS_LLC_PROFILING, INPUT_CFG_COM_LLC_MODE},
+        {ARGS_PYTHON_PATH, INPUT_CFG_PYTHON_PATH}, {ARGS_SUMMARY_FORMAT, INPUT_CFG_SUMMARY_FORMAT},
+        {ARGS_ASCENDCL, INPUT_CFG_COM_ASCENDCL}, {ARGS_AI_CORE, INPUT_CFG_COM_AI_CORE},
+        {ARGS_AIV, INPUT_CFG_COM_AI_VECTOR}, {ARGS_MODEL_EXECUTION, INPUT_CFG_COM_MODEL_EXECUTION},
+        {ARGS_RUNTIME_API, INPUT_CFG_COM_RUNTIME_API}, {ARGS_TASK_TIME, INPUT_CFG_COM_TASK_TIME},
+        {ARGS_AICPU, INPUT_CFG_COM_AICPU}, {ARGS_MSPROFTX, INPUT_CFG_COM_MSPROFTX},
+        {ARGS_CPU_PROFILING, INPUT_CFG_COM_SYS_CPU}, {ARGS_SYS_PROFILING, INPUT_CFG_COM_SYS_USAGE},
+        {ARGS_PID_PROFILING, INPUT_CFG_COM_SYS_PID_USAGE}, {ARGS_HARDWARE_MEM, INPUT_CFG_COM_SYS_HARDWARE_MEM},
+        {ARGS_IO_PROFILING, INPUT_CFG_COM_SYS_IO}, {ARGS_INTERCONNECTION_PROFILING, INPUT_CFG_COM_SYS_INTERCONNECTION},
+        {ARGS_DVPP_PROFILING, INPUT_CFG_COM_DVPP}, {ARGS_POWER, INPUT_CFG_COM_POWER},
+        {ARGS_HCCL, INPUT_CFG_COM_HCCL}, {ARGS_BIU, INPUT_CFG_COM_BIU}, {ARGS_L2_PROFILING, INPUT_CFG_COM_L2},
+        {ARGS_PARSE, INPUT_CFG_PARSE}, {ARGS_QUERY, INPUT_CFG_QUERY}, {ARGS_EXPORT, INPUT_CFG_EXPORT},
+        {ARGS_AIC_FREQ, INPUT_CFG_COM_AIC_FREQ}, {ARGS_AIV_FREQ, INPUT_CFG_COM_AIV_FREQ},
+        {ARGS_BIU_FREQ, INPUT_CFG_COM_BIU_FREQ}, {ARGS_SYS_PERIOD, INPUT_CFG_COM_SYS_PERIOD},
+        {ARGS_SYS_SAMPLING_FREQ, INPUT_CFG_COM_SYS_USAGE_FREQ}, 
+        {ARGS_PID_SAMPLING_FREQ, INPUT_CFG_COM_SYS_PID_USAGE_FREQ}, 
         {ARGS_HARDWARE_MEM_SAMPLING_FREQ, INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ},
-        {ARGS_IO_SAMPLING_FREQ, INPUT_CFG_COM_SYS_IO_FREQ},
-        {ARGS_DVPP_FREQ, INPUT_CFG_COM_DVPP_FREQ},
+        {ARGS_IO_SAMPLING_FREQ, INPUT_CFG_COM_SYS_IO_FREQ}, {ARGS_DVPP_FREQ, INPUT_CFG_COM_DVPP_FREQ},
         {ARGS_CPU_SAMPLING_FREQ, INPUT_CFG_COM_SYS_CPU_FREQ},
         {ARGS_INTERCONNECTION_FREQ, INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ},
-        {ARGS_EXPORT_ITERATION_ID, INPUT_CFG_ITERATION_ID},
-        {ARGS_EXPORT_MODEL_ID, INPUT_CFG_MODEL_ID},
-        {ARGS_HOST_SYS, INPUT_CFG_HOST_SYS},
-        {ARGS_HOST_SYS_PID, INPUT_CFG_HOST_SYS_PID},
+        {ARGS_EXPORT_ITERATION_ID, INPUT_CFG_ITERATION_ID}, {ARGS_EXPORT_MODEL_ID, INPUT_CFG_MODEL_ID},
+        {ARGS_HOST_SYS, INPUT_CFG_HOST_SYS}, {ARGS_HOST_SYS_PID, INPUT_CFG_HOST_SYS_PID},
         {ARGS_HOST_USAGE, INPUT_HOST_SYS_USAGE},
     }).swap(cfgMap_);
     for (auto index : cfgMap_) {
@@ -902,12 +899,10 @@ void AclApiParamAdapter::ProfTaskCfgToContainer(const ProfConfig * apiCfg,
         paramContainer_[INPUT_CFG_COM_SYS_DEVICES] = devStr;
         setConfig_.insert(INPUT_CFG_COM_SYS_DEVICES);
     }
-
     if (!argsArr[ACL_PROF_STORAGE_LIMIT].empty()) {
         paramContainer_[INPUT_CFG_COM_STORAGE_LIMIT] = argsArr[ACL_PROF_STORAGE_LIMIT];
         setConfig_.insert(INPUT_CFG_COM_STORAGE_LIMIT);
     }
-
     uint64_t dataTypeConfig = apiCfg->dataTypeConfig;
     ProfAicoreMetrics aicMetrics = apiCfg->aicoreMetrics;
     if (dataTypeConfig & PROF_TASK_TIME_MASK) {
@@ -918,26 +913,8 @@ void AclApiParamAdapter::ProfTaskCfgToContainer(const ProfConfig * apiCfg,
     if (dataTypeConfig & PROF_KEYPOINT_TRACE_MASK) {
         paramContainer_[INPUT_CFG_COM_TRAINING_TRACE] = MSVP_PROF_ON;
         setConfig_.insert(INPUT_CFG_COM_TRAINING_TRACE);
-    }
-    
-    std::string metrics;
-    ConfigManager::instance()->AicoreMetricsEnumToName(aicMetrics, metrics);
-    if ((dataTypeConfig & PROF_AICORE_METRICS_MASK) && !metrics.empty()) {
-        paramContainer_[INPUT_CFG_COM_AI_CORE] = MSVP_PROF_ON;
-        setConfig_.insert(INPUT_CFG_COM_AI_CORE);
-        paramContainer_[INPUT_CFG_COM_AIC_METRICS] = metrics;
-        setConfig_.insert(INPUT_CFG_COM_AIC_METRICS);
-        paramContainer_[INPUT_CFG_COM_AIC_MODE] = PROFILING_MODE_TASK_BASED;
-        setConfig_.insert(INPUT_CFG_COM_AIC_MODE);
-    }
-    if (!argsArr[ACL_PROF_AIV_METRICS].empty()) {
-        paramContainer_[INPUT_CFG_COM_AI_VECTOR] = MSVP_PROF_ON;
-        setConfig_.insert(INPUT_CFG_COM_AI_VECTOR);
-        paramContainer_[INPUT_CFG_COM_AIV_METRICS] = argsArr[ACL_PROF_AIV_METRICS];
-        setConfig_.insert(INPUT_CFG_COM_AIV_METRICS);
-        paramContainer_[INPUT_CFG_COM_AIV_MODE] = PROFILING_MODE_TASK_BASED;
-        setConfig_.insert(INPUT_CFG_COM_AIV_MODE);
-    }
+    } 
+    ProfMetricsCfgToContainer(aicMetrics, dataTypeConfig, argsArr);
     if (dataTypeConfig & PROF_L2CACHE_MASK) {
         paramContainer_[INPUT_CFG_COM_L2] = MSVP_PROF_ON;
         setConfig_.insert(INPUT_CFG_COM_L2);
@@ -960,6 +937,30 @@ void AclApiParamAdapter::ProfTaskCfgToContainer(const ProfConfig * apiCfg,
     }
 }
 
+void AclApiParamAdapter::ProfMetricsCfgToContainer(const ProfAicoreMetrics aicMetrics,
+    const uint64_t dataTypeConfig, std::array<std::string, ACL_PROF_ARGS_MAX> argsArr)
+{
+    std::string metrics;
+    ConfigManager::instance()->AicoreMetricsEnumToName(aicMetrics, metrics);
+    if ((dataTypeConfig & PROF_AICORE_METRICS_MASK) && !metrics.empty()) {
+        paramContainer_[INPUT_CFG_COM_AI_CORE] = MSVP_PROF_ON;
+        setConfig_.insert(INPUT_CFG_COM_AI_CORE);
+        paramContainer_[INPUT_CFG_COM_AIC_METRICS] = metrics;
+        setConfig_.insert(INPUT_CFG_COM_AIC_METRICS);
+        paramContainer_[INPUT_CFG_COM_AIC_MODE] = PROFILING_MODE_TASK_BASED;
+        setConfig_.insert(INPUT_CFG_COM_AIC_MODE);
+    }
+    if (!argsArr[ACL_PROF_AIV_METRICS].empty()) {
+        paramContainer_[INPUT_CFG_COM_AI_VECTOR] = MSVP_PROF_ON;
+        setConfig_.insert(INPUT_CFG_COM_AI_VECTOR);
+        paramContainer_[INPUT_CFG_COM_AIV_METRICS] = argsArr[ACL_PROF_AIV_METRICS];
+        setConfig_.insert(INPUT_CFG_COM_AIV_METRICS);
+        paramContainer_[INPUT_CFG_COM_AIV_MODE] = PROFILING_MODE_TASK_BASED;
+        setConfig_.insert(INPUT_CFG_COM_AIV_MODE);
+    }
+    return;
+}
+
 void AclApiParamAdapter::ProfSystemCfgToContainer(const ProfConfig * apiCfg,
     std::array<std::string, ACL_PROF_ARGS_MAX> argsArr)
 {
@@ -973,16 +974,7 @@ void AclApiParamAdapter::ProfSystemCfgToContainer(const ProfConfig * apiCfg,
         paramContainer_[INPUT_CFG_COM_SYS_CPU_FREQ] = argsArr[ACL_PROF_SYS_CPU_FREQ];
         setConfig_.insert(INPUT_CFG_COM_SYS_CPU_FREQ);
     }
-    if (!argsArr[ACL_PROF_SYS_HARDWARE_MEM_FREQ].empty()) {
-        paramContainer_[INPUT_CFG_COM_SYS_HARDWARE_MEM] = MSVP_PROF_ON;
-        setConfig_.insert(INPUT_CFG_COM_SYS_HARDWARE_MEM);
-        paramContainer_[INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ] = argsArr[ACL_PROF_SYS_HARDWARE_MEM_FREQ];
-        setConfig_.insert(INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ);
-    }
-    if (!argsArr[ACL_PROF_LLC_MODE].empty() && !argsArr[ACL_PROF_SYS_HARDWARE_MEM_FREQ].empty()) {
-        paramContainer_[INPUT_CFG_COM_LLC_MODE] = argsArr[ACL_PROF_LLC_MODE];
-        setConfig_.insert(INPUT_CFG_COM_LLC_MODE);
-    }
+    ProfSystemHardwareMemCfgToContainer(argsArr);
     if (!argsArr[ACL_PROF_SYS_IO_FREQ].empty()) {
         paramContainer_[INPUT_CFG_COM_SYS_IO] = MSVP_PROF_ON;
         setConfig_.insert(INPUT_CFG_COM_SYS_IO);
@@ -1017,6 +1009,21 @@ void AclApiParamAdapter::ProfSystemCfgToContainer(const ProfConfig * apiCfg,
         paramContainer_[INPUT_HOST_SYS_USAGE] = argsArr[ACL_PROF_HOST_SYS];
         setConfig_.insert(INPUT_HOST_SYS_USAGE);
     }
+}
+
+void AclApiParamAdapter::ProfSystemHardwareMemCfgToContainer(std::array<std::string, ACL_PROF_ARGS_MAX> argsArr)
+{
+    if (!argsArr[ACL_PROF_SYS_HARDWARE_MEM_FREQ].empty()) {
+        paramContainer_[INPUT_CFG_COM_SYS_HARDWARE_MEM] = MSVP_PROF_ON;
+        setConfig_.insert(INPUT_CFG_COM_SYS_HARDWARE_MEM);
+        paramContainer_[INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ] = argsArr[ACL_PROF_SYS_HARDWARE_MEM_FREQ];
+        setConfig_.insert(INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ);
+    }
+    if (!argsArr[ACL_PROF_LLC_MODE].empty() && !argsArr[ACL_PROF_SYS_HARDWARE_MEM_FREQ].empty()) {
+        paramContainer_[INPUT_CFG_COM_LLC_MODE] = argsArr[ACL_PROF_LLC_MODE];
+        setConfig_.insert(INPUT_CFG_COM_LLC_MODE);
+    }
+    return;
 }
 
 void AclApiParamAdapter::ProfCfgToContainer(const ProfConfig * apiCfg,

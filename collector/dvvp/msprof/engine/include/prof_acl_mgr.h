@@ -133,6 +133,7 @@ public:
 private:
     int MsprofTxSwitchPrecheck();
     int DoHostHandle();
+    int32_t MsprofSetDeviceSysConfig(aclprofConfigType cfgType, std::string config);
 // struct of acltask info
 struct ProfAclTaskInfo {
     uint64_t count;

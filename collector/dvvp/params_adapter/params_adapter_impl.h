@@ -44,6 +44,8 @@ private:
     int Init();
     void CreateCfgMap();
     int ParamsCheckMsprof(std::vector<std::pair<InputCfg, std::string>> &cfgList);
+    bool ParamsCheckMsprofV1(InputCfg inputCfg, std::string cfgValue);
+    int ParamsCheck(std::unordered_map<int, std::pair<MsprofCmdInfo, std::string>> argvMap);
     void SetDefaultParamsApp();
     void SetDefaultParamsSystem();
     void SetDefaultParamsParse();
@@ -123,8 +125,11 @@ private:
     int ParamsCheckAclApi(std::vector<std::pair<InputCfg, std::string>> &cfgList) const;
     void ProfCfgToContainer(const ProfConfig* apiCfg,
         std::array<std::string, ACL_PROF_ARGS_MAX> argsArr);
+    void ProfMetricsCfgToContainer(const ProfAicoreMetrics aicMetrics,
+        const uint64_t dataTypeConfig, std::array<std::string, ACL_PROF_ARGS_MAX> argsArr);
     void ProfTaskCfgToContainer(const ProfConfig* apiCfg,
         std::array<std::string, ACL_PROF_ARGS_MAX> argsArr);
+    void ProfSystemHardwareMemCfgToContainer(std::array<std::string, ACL_PROF_ARGS_MAX> argsArr);
     void ProfSystemCfgToContainer(const ProfConfig* apiCfg,
         std::array<std::string, ACL_PROF_ARGS_MAX> argsArr);
     std::string DevIdToStr(uint32_t devNum, const uint32_t* devList);
