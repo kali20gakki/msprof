@@ -1014,9 +1014,11 @@ int32_t MmGetCpuInfo(MmCpuDesc **cpuInfo, int32_t *count)
     int32_t i = 0;
     int32_t ret = 0;
     MmCpuDesc cpuDest = {};
+    (void)memset_s(&cpuDest, sizeof(cpuDest), 0, sizeof(cpuDest));
     int32_t physicalCount = 1;
     MmCpuDesc *pCpuDesc = nullptr;
     struct utsname sysInfo = {};
+    (void)memset_s(&sysInfo, sizeof(sysInfo), 0, sizeof(sysInfo));
 
     LocalGetCpuProc(&cpuDest, &physicalCount);
 
