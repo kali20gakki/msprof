@@ -24,6 +24,7 @@ from common_func.file_manager import FileManager
 from common_func.file_name_manager import FileNameManagerConstant
 from framework.collection_engine import AI
 from framework.file_dispatch import FileDispatch
+from functools import partial
 
 
 class MsProfCommonConstant:
@@ -210,12 +211,14 @@ def get_path_dir(path: str) -> list:
     check result path exist JOB dir
     path : result path
     """
-    path_dir_filter = filter(lambda item: item not in Constant.FILTER_DIRS and
-                                          os.path.isdir(os.path.realpath(os.path.join(path, item))),
-                             os.listdir(path))
+    path_dir_filter = filter(partial(_path_dir_filter_func, root_dir=path), os.listdir(path))
     sub_dirs = list(path_dir_filter)
     if not sub_dirs:
         error(MsProfCommonConstant.COMMON_FILE_NAME, 'The path "%s" does not have PROF dir.'
                                                      ' Please check the path.' % path)
         raise ProfException(ProfException.PROF_INVALID_PATH_ERROR)
     return sub_dirs
+
+
+def _path_dir_filter_func(sub_path, root_dir):
+    return sub_path not in Constant.FILTER_DIRS and os.path.isdir(os.path.realpath(os.path.join(root_dir, sub_path)))
