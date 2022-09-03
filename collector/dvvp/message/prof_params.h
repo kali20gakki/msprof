@@ -340,7 +340,7 @@ struct ProfileParams : BaseInfo {
         SET_VALUE(object, low_power);
         SET_VALUE(object, acc_pmu_mode);
         SET_VALUE(object, msprofBinPid);
-        dataTypeConfigHigh = (dataTypeConfig & 0xffffffff00000000) >> 32;
+        dataTypeConfigHigh = (dataTypeConfig & 0xffffffff00000000) >> 32; // 32 high32bit
         dataTypeConfigLow = (dataTypeConfig & 0xffffffff);
         SET_VALUE(object, dataTypeConfigHigh);
         SET_VALUE(object, dataTypeConfigLow);
@@ -461,7 +461,7 @@ struct ProfileParams : BaseInfo {
         FROM_STRING_VALUE(object, host_network_profiling);
         FROM_INT_VALUE(object, dataTypeConfigHigh, 0);
         FROM_INT_VALUE(object, dataTypeConfigLow, 0);
-        dataTypeConfig = (static_cast<uint64_t>(dataTypeConfigHigh) << 32) | dataTypeConfigLow;
+        dataTypeConfig = (static_cast<uint64_t>(dataTypeConfigHigh) << 32) | dataTypeConfigLow; // 32 high32bit
     }
 
     void FromObject(const nlohmann::json &object)
