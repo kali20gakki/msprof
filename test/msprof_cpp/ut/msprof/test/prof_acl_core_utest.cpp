@@ -1073,7 +1073,7 @@ TEST_F(MSPROF_ACL_CORE_UTEST, MsprofInitAclJson) {
     EXPECT_EQ(0, ProfAclMgr::instance()->MsprofInitAclJson((void *)aclJson.c_str(), aclJson.size()));
     EXPECT_EQ(0, ProfAclMgr::instance()->MsprofInitAclJson((void *)aclJson.c_str(), aclJson.size()));
 
-    aclJson = "{\"switch\": \"on\", \"output\": \"output\",\"aic_metrics\": \"ArithmeticUtilization\",\"aicpu\": \"on\",\"l2\": \"xx\"}";
+    aclJson = "{\"switch\": \"on\", \"output\": \"output\",\"aic_metrics\": \"ArithmeticUtilization\",\"aicpu\": \"xx\",\"l2\": \"on\"}";
     EXPECT_EQ(3, ProfAclMgr::instance()->MsprofInitAclJson((void *)aclJson.c_str(), aclJson.size()));
     aclJson = "{\"switch\": \"on\", \"output\": \"output\",\"aic_metrics\": \"ArithmeticUtilization\",\"aicpu\": \"on\",\"l2\": \"off\"}";
     EXPECT_EQ(0, ProfAclMgr::instance()->MsprofInitAclJson((void *)aclJson.c_str(), aclJson.size()));
@@ -1137,7 +1137,7 @@ TEST_F(MSPROF_ACL_CORE_UTEST, MsprofInitGeOptions) {
     ge_json = "{\"output\": \"/tmp/MsprofInitGeOptions\",\"aic_metrics\": \"ArithmeticUtilization\",\"aicpu\": \"on\",\"l2\": \"xx\"}";
     strcpy(options.jobId, "123");
     strcpy(options.options, ge_json.c_str());
-    EXPECT_EQ(3, ProfAclMgr::instance()->MsprofInitGeOptions((void *)&options, sizeof(options)));
+    EXPECT_EQ(0, ProfAclMgr::instance()->MsprofInitGeOptions((void *)&options, sizeof(options)));
 
     analysis::dvvp::common::utils::Utils::RemoveDir(result);
 }
@@ -1661,7 +1661,10 @@ TEST_F(MSPROF_ACL_CORE_UTEST, ProfAclStop) {
     config.devNums = 1;
     config.devIdList[0] = 0;
     config.aicoreMetrics = PROF_AICORE_ARITHMETIC_UTILIZATION;
-    config.dataTypeConfig = 0x7d7f001f;
+    config.dataTypeConfig = ACL_PROF_AICPU | ACL_PROF_ACL_API | ACL_PROF_HCCL_TRACE;
+    MOCKER_CPP(&Collector::Dvvp::ParamsAdapter::AclApiParamAdapter::GetParamFromInputCfg)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
 
     std::shared_ptr<analysis::dvvp::message::ProfileParams> params(new analysis::dvvp::message::ProfileParams());
     ProfAclMgr::ProfAclTaskInfo taskInfo = {1, 0, params};

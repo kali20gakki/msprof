@@ -1,6 +1,5 @@
 #include "mockcpp/mockcpp.hpp"
 #include "gtest/gtest.h"
-#include <iostream>
 #include "errno/error_code.h"
 #include "input_parser.h"
 #include "config/config_manager.h"
