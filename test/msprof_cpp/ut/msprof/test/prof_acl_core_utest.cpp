@@ -123,7 +123,7 @@ TEST_F(MSPROF_ACL_CORE_UTEST, get_op_xxx) {
     data.threadId = 0;
     data.modelId = 0;
     data.opIndex = OpDescParser::instance()->SetOpTypeAndOpName("OpType", "OpName");
-    data.executionTime = 1000;
+    data.executionTime = 0;
     data.signature = analysis::dvvp::common::utils::Utils::GenerateSignature(
         reinterpret_cast<const uint8_t *>(&data) + sizeof(uint32_t), bufLen - sizeof(uint32_t));
     
@@ -157,18 +157,22 @@ TEST_F(MSPROF_ACL_CORE_UTEST, get_op_xxx) {
     EXPECT_EQ(ACL_SUBSCRIBE_OP_THREAD, OpDescParser::GetOpFlag(&data, bufLen, 0));
     EXPECT_NE(nullptr, OpDescParser::GetOpAttriValue(&data, bufLen, 0, ACL_SUBSCRIBE_ATTRI_THREADID));
     EXPECT_EQ(nullptr, OpDescParser::GetOpAttriValue(&data, bufLen, 0, ACL_SUBSCRIBE_ATTRI_NONE));
-    EXPECT_EQ(1000, OpDescParser::GetOpExecutionTime(&data, bufLen, 0));
+    EXPECT_EQ(0, OpDescParser::GetOpExecutionTime(&data, bufLen, 0));
 }
 
 TEST_F(MSPROF_ACL_CORE_UTEST, ConstructAndUploadData) {
     GlobalMockObject::verify();
 
     std::shared_ptr<Analyzer> analyzer(new Analyzer(nullptr));
+    const uint64_t start = 1;
+    const uint64_t end = 2;
+    const uint64_t startAicore = 3;
+    const uint64_t endAicore = 4;
     OpTime opTime;
-    opTime.start = 1;
-    opTime.end = 2;
-    opTime.startAicore = 3;
-    opTime.endAicore = 4;
+    opTime.start = start;
+    opTime.end = end;
+    opTime.startAicore = startAicore;
+    opTime.endAicore = endAicore;
     opTime.indexId = 1;
     opTime.threadId = 1;
     const std::string nullStr = "";
@@ -1532,7 +1536,8 @@ TEST_F(MSPROF_ACL_CORE_UTEST, AnalyzerTs_UploadKeypointOp) {
     MOCKER_CPP(&Analysis::Dvvp::Analyze::Analyzer::ConstructAndUploadData)
         .stubs();
 
-    std::shared_ptr<Analyzer> analyzer(new Analyzer(nullptr));
+    auto analyzer = std::make_shared<Analysis::Dvvp::Analyze::Analyzer>();
+
     TsProfileKeypoint data;
     data.head.bufSize = sizeof(TsProfileKeypoint);
     data.taskId = 1;
