@@ -354,7 +354,7 @@ void Analyzer::ConstructAndUploadData(const std::string &opId, OpTime &opTime)
     opDesc.signature = analysis::dvvp::common::utils::Utils::GenerateSignature(
         reinterpret_cast<uint8_t *>(&opDesc) + sizeof(uint32_t), sizeof(ProfOpDesc) - sizeof(uint32_t));
     if (uploader_ == nullptr) {
-        MSPROF_LOGE("uploader_ is nullptr");
+        MSPROF_LOGE("Analyzer::uploader_ is nullptr");
         return;
     }
     uploader_->UploadData(reinterpret_cast<CHAR_PTR>(&opDesc), sizeof(ProfOpDesc));
