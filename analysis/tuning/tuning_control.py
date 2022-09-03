@@ -23,16 +23,11 @@ class TuningControl:
     def __init__(self: any) -> None:
         self._init_tuning_data()
         self.title_map = {
-            CommonProfRule.RESULT_MODEL_COMPUTATION: lambda result: self.model_computation.get(
-                CommonProfRule.RESULT_KEY).append(result),
-            CommonProfRule.RESULT_MODEL_MEMORY: lambda result: self.model_memory.get(
-                CommonProfRule.RESULT_KEY).append(result),
-            CommonProfRule.RESULT_OPERATOR_SCHEDULE: lambda result: self.operator_schedule.get(
-                CommonProfRule.RESULT_KEY).append(result),
-            CommonProfRule.RESULT_OPERATOR_PROCESSING: lambda result: self.operator_processing.get(
-                CommonProfRule.RESULT_KEY).append(result),
-            CommonProfRule.RESULT_OPERATOR_METRICS: lambda result: self.operator_metrics.get(
-                CommonProfRule.RESULT_KEY).append(result)
+            CommonProfRule.RESULT_MODEL_COMPUTATION: self._model_computation_tuning,
+            CommonProfRule.RESULT_MODEL_MEMORY: self._model_memory_tuning,
+            CommonProfRule.RESULT_OPERATOR_SCHEDULE: self._operator_schedule_tuning,
+            CommonProfRule.RESULT_OPERATOR_PROCESSING: self._operator_process_tuning,
+            CommonProfRule.RESULT_OPERATOR_METRICS: self._operator_metrics_tuning
         }
 
     def tuning_callback(self: any, **param: dict) -> None:
@@ -73,3 +68,18 @@ class TuningControl:
                                  CommonProfRule.RESULT_KEY: []}
         self.data = [self.model_computation, self.model_memory, self.operator_schedule,
                      self.operator_processing, self.operator_metrics]
+
+    def _model_computation_tuning(self, result):
+        return self.model_computation.get(CommonProfRule.RESULT_KEY).append(result)
+
+    def _model_memory_tuning(self, result):
+        return self.model_memory.get(CommonProfRule.RESULT_KEY).append(result)
+
+    def _operator_schedule_tuning(self, result):
+        return self.operator_schedule.get(CommonProfRule.RESULT_KEY).append(result)
+
+    def _operator_process_tuning(self, result):
+        return self.operator_processing.get(CommonProfRule.RESULT_KEY).append(result)
+
+    def _operator_metrics_tuning(self, result):
+        return self.operator_metrics.get(CommonProfRule.RESULT_KEY).append(result)
