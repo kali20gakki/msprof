@@ -1,8 +1,6 @@
-# coding=utf-8
-"""
-This script is used to parse stars data
-Copyright Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
-"""
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2021-2022. All rights reserved.
 
 import os
 

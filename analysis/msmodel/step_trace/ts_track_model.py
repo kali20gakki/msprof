@@ -1,9 +1,7 @@
 #!/usr/bin/python3
-# coding=utf-8
-"""
-function: this script used to operate ts track
-Copyright Huawei Technologies Co., Ltd. 2021. All rights reserved.
-"""
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2021-2022. All rights reserved.
+
 from abc import ABC
 from itertools import chain
 
@@ -21,6 +19,11 @@ class TsTrackModel(BaseModel, ABC):
     acsq task model class
     """
     TS_AI_CPU_TYPE = 1
+
+    @staticmethod
+    def __aicpu_in_time_range(data, min_timestamp, max_timestamp):
+        return min_timestamp <= InfoConfReader().time_from_syscnt(data[2],
+                                                                  NumberConstant.MICRO_SECOND) <= max_timestamp
 
     def flush(self: any, table_name: str, data_list: list) -> None:
         """
@@ -47,8 +50,8 @@ class TsTrackModel(BaseModel, ABC):
         :param index_id: index id
         :return: ai cpu with state
         """
-        if not DBManager.check_tables_in_db(
-            PathManager.get_db_path(self.result_dir, DBNameConstant.DB_STEP_TRACE), DBNameConstant.TABLE_TASK_TYPE):
+        if not DBManager.check_tables_in_db(PathManager.get_db_path(self.result_dir, DBNameConstant.DB_STEP_TRACE),
+                                            DBNameConstant.TABLE_TASK_TYPE):
             return []
 
         iter_time_range = list(chain.from_iterable(
@@ -69,9 +72,6 @@ class TsTrackModel(BaseModel, ABC):
             max_timestamp = max(iter_time_range)
 
             # data index 2 is timestamp
-            ai_cpu_with_state = list(filter(lambda data: min_timestamp <=
-                                                         InfoConfReader().time_from_syscnt(
-                                                         data[2], NumberConstant.MICRO_SECOND) <=
-                                                         max_timestamp, ai_cpu_with_state))
+            ai_cpu_with_state = list(filter(TsTrackModel.__aicpu_in_time_range, ai_cpu_with_state))
 
         return ai_cpu_with_state

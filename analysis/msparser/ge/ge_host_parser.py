@@ -1,9 +1,7 @@
-#!/usr/bin/env python
-# coding=utf-8
-"""
-function: host data of GE for infer shape, tiling,prepare task and execute task
-Copyright Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
-"""
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
+
 import logging
 import os
 import sqlite3

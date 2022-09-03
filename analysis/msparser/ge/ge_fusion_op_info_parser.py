@@ -1,9 +1,7 @@
 #!/usr/bin/python3
-# coding=utf-8
-"""
-function: parser for ge fusion op info
-Copyright Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
-"""
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
+
 from common_func.db_name_constant import DBNameConstant
 from common_func.ms_multi_process import MsMultiProcess
 from msparser.data_struct_size_constant import StructFmt

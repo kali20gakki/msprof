@@ -1,8 +1,6 @@
-# coding=utf-8
-"""
-Function: The entry for constructing the basic info.
-Copyright Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
-"""
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 
 import argparse
 import importlib

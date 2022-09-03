@@ -1,6 +1,6 @@
 #!/usr/bin/python3
-# coding:utf-8
-"""msvp common function"""
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 
 import configparser
 import csv

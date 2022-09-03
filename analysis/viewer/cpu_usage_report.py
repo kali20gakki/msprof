@@ -1,9 +1,6 @@
 #!/usr/bin/python3
-# coding:utf-8
-"""
-get and report cpu usage data
-Copyright Huawei Technologies Co., Ltd. 2019-2020. All rights reserved.
-"""
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2019-2020. All rights reserved.
 import logging
 import sqlite3
 

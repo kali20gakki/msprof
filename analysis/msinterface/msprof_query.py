@@ -1,11 +1,7 @@
 #!/usr/bin/python3
-# coding=utf-8
-"""
-Function:
-QueryCommand class. This class mainly involves the process function.
-Copyright Information:
-Huawei Technologies Co., Ltd. All Rights Reserved © 2020
-"""
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
+
 import os
 from operator import itemgetter
 

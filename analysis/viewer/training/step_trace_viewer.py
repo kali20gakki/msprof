@@ -1,7 +1,6 @@
-"""
-This script is used to load training_trace data from db
-Copyright Huawei Technologies Co., Ltd. 2018-2021. All rights reserved.
-"""
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 
 import os
 import json
@@ -420,13 +419,9 @@ class StepTraceViewer:
         try:
             for line in values:
                 trace = list(line)
-
-                all_reduce = StepTraceViewer.__select_reduce(cnn,
-                                                             trace)
+                all_reduce = StepTraceViewer.__select_reduce(cnn, trace)
                 all_reduce = Utils.generator_to_list(
-                    list(map(lambda cnt:
-                             InfoConfReader().time_from_syscnt(cnt, NumberConstant.MICRO_SECOND),
-                             data)) for data in all_reduce)
+                    list(map(StepTraceViewer.__time_from_syscnt, data)) for data in all_reduce)
                 trace.extend(all_reduce)
                 StepTraceViewer.transfer_trace_unit(trace)
                 data[step] = tuple(trace)
@@ -558,3 +553,7 @@ class StepTraceViewer:
         # index_id
         curs.close()
         return result
+
+    @staticmethod
+    def __time_from_syscnt(cnt):
+        return InfoConfReader().time_from_syscnt(cnt, NumberConstant.MICRO_SECOND)

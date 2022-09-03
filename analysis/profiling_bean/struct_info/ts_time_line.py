@@ -1,11 +1,6 @@
 #!/usr/bin/python3
-# coding=utf-8
-"""
-Function:
-This file mainly decode timeline data.
-Copyright Information:
-Huawei Technologies Co., Ltd. All Rights Reserved © 2020
-"""
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 
 from profiling_bean.struct_info.struct_decoder import StructDecoder
 

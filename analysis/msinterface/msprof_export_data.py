@@ -1,9 +1,6 @@
 #!/usr/bin/python3
-# coding:utf-8
-"""
-This scripts is used to export data to files
-Copyright Huawei Technologies Co., Ltd. 2020. All rights reserved.
-"""
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 
 import configparser
 import json

@@ -1,11 +1,7 @@
 #!/usr/bin/python3
-# coding=utf-8
-"""
-Function:
-This file mainly involves iteration.
-Copyright Information:
-Huawei Technologies Co., Ltd. All Rights Reserved © 2022
-"""
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
+
 from collections import OrderedDict
 
 from common_func.constant import Constant

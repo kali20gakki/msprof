@@ -1,9 +1,7 @@
 #!/usr/bin/python3
-# coding=utf-8
-"""
-This script is used to provid profiling constants
-Copyright Huawei Technologies Co., Ltd. 2018-2019. All rights reserved.
-"""
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2018-2019. All rights reserved.
+
 import os
 import stat
 from common_func.ms_constant.number_constant import NumberConstant
@@ -43,6 +41,220 @@ class PmuMetricCalculate:
         return float_bit * pmu / task_cyc
 
 
+class PmuCalculateFunc:
+    """
+    define diff pmu formula
+    """
+
+    @staticmethod
+    def mac_fp16_ratio(pmu, task_cyc):
+        return PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc)
+
+    @staticmethod
+    def mac_int8_ratio(pmu, task_cyc):
+        return PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc)
+
+    @staticmethod
+    def vec_fp32_ratio(pmu, task_cyc):
+        return PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc)
+
+    @staticmethod
+    def vec_fp16_128lane_ratio(pmu, task_cyc):
+        return PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc)
+
+    @staticmethod
+    def vec_fp16_64lane_ratio(pmu, task_cyc):
+        return PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc)
+
+    @staticmethod
+    def vec_fp16_ratio(pmu1, pmu2, task_cyc):
+        return 1.0 * (pmu1 + pmu2) / task_cyc
+
+    @staticmethod
+    def vec_int32_ratio(pmu, task_cyc):
+        return PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc)
+
+    @staticmethod
+    def vec_misc_ratio(pmu, task_cyc):
+        return PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc)
+
+    @staticmethod
+    def vec_ratio(pmu, task_cyc):
+        return PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc)
+
+    @staticmethod
+    def mac_ratio(pmu, task_cyc):
+        return PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc)
+
+    @staticmethod
+    def scalar_ratio(pmu, task_cyc):
+        return PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc)
+
+    @staticmethod
+    def mte1_ratio(pmu, task_cyc):
+        return PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc)
+
+    @staticmethod
+    def mte2_ratio(pmu, task_cyc):
+        return PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc)
+
+    @staticmethod
+    def mte3_ratio(pmu, task_cyc):
+        return PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc)
+
+    @staticmethod
+    def icache_miss_rate(pmu, task_cyc):
+        return PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc)
+
+    @staticmethod
+    def icache_req_ratio(pmu, task_cyc):
+        return PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc)
+
+    @staticmethod
+    def scalar_waitflag_ratio(pmu, task_cyc):
+        return PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc)
+
+    @staticmethod
+    def cube_waitflag_ratio(pmu, task_cyc):
+        return PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc)
+
+    @staticmethod
+    def vector_waitflag_ratio(pmu, task_cyc):
+        return PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc)
+
+    @staticmethod
+    def mte1_waitflag_ratio(pmu, task_cyc):
+        return PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc)
+
+    @staticmethod
+    def mte2_waitflag_ratio(pmu, task_cyc):
+        return PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc)
+
+    @staticmethod
+    def mte3_waitflag_ratio(pmu, task_cyc):
+        return PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc)
+
+    @staticmethod
+    def scalar_ld_ratio(pmu, task_cyc):
+        return PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc)
+
+    @staticmethod
+    def scalar_st_ratio(pmu, task_cyc):
+        return PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc)
+
+    @staticmethod
+    def vec_bankgroup_cflt_ratio(pmu, task_cyc):
+        return PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc)
+
+    @staticmethod
+    def vec_bank_cflt_ratio(pmu, task_cyc):
+        return PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc)
+
+    @staticmethod
+    def vec_resc_cflt_ratio(pmu, task_cyc):
+        return PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc)
+
+    @staticmethod
+    def mte1_iq_full_ratio(pmu, task_cyc):
+        return PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc)
+
+    @staticmethod
+    def mte2_iq_full_ratio(pmu, task_cyc):
+        return PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc)
+
+    @staticmethod
+    def mte3_iq_full_ratio(pmu, task_cyc):
+        return PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc)
+
+    @staticmethod
+    def cube_iq_full_ratio(pmu, task_cyc):
+        return PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc)
+
+    @staticmethod
+    def vec_iq_full_ratio(pmu, task_cyc):
+        return PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc)
+
+    @staticmethod
+    def ub_read_bw(pmu, task_cyc, freq):
+        return PmuMetricCalculate.pmu_metric_calculate_with_freq(1.0, 256.0, 4.0, pmu, task_cyc, freq)
+
+    @staticmethod
+    def ub_write_bw(pmu, task_cyc, freq):
+        return PmuMetricCalculate.pmu_metric_calculate_with_freq(1.0, 256.0, 4.0, pmu, task_cyc, freq)
+
+    @staticmethod
+    def l1_read_bw(pmu, task_cyc, freq):
+        return PmuMetricCalculate.pmu_metric_calculate_with_freq(1.0, 256.0, 16.0, pmu, task_cyc, freq)
+
+    @staticmethod
+    def l1_write_bw(pmu, task_cyc, freq):
+        return PmuMetricCalculate.pmu_metric_calculate_with_freq(1.0, 128.0, 8.0, pmu, task_cyc, freq)
+
+    @staticmethod
+    def l2_read_bw(pmu, task_cyc, freq):
+        return PmuMetricCalculate.pmu_metric_calculate_with_freq(1.0, 256.0, 8.0, pmu, task_cyc, freq)
+
+    @staticmethod
+    def l2_write_bw(pmu, task_cyc, freq):
+        return PmuMetricCalculate.pmu_metric_calculate_with_freq(1.0, 256.0, 8.0, pmu, task_cyc, freq)
+
+    @staticmethod
+    def main_mem_read_bw(pmu, task_cyc, freq):
+        return PmuMetricCalculate.pmu_metric_calculate_with_freq(1.0, 256.0, 8.0, pmu, task_cyc, freq)
+
+    @staticmethod
+    def main_mem_write_bw(pmu, task_cyc, freq):
+        return PmuMetricCalculate.pmu_metric_calculate_with_freq(1.0, 256.0, 8.0, pmu, task_cyc, freq)
+
+    @staticmethod
+    def l0a_read_bw(pmu, task_cyc, freq):
+        return PmuMetricCalculate.pmu_metric_calculate_with_freq(1.0, 256.0, 16.0, pmu, task_cyc, freq)
+
+    @staticmethod
+    def l0a_write_bw(pmu, task_cyc, freq):
+        return PmuMetricCalculate.pmu_metric_calculate_with_freq(1.0, 256.0, 16.0, pmu, task_cyc, freq)
+
+    @staticmethod
+    def l0b_read_bw(pmu, task_cyc, freq):
+        return PmuMetricCalculate.pmu_metric_calculate_with_freq(1.0, 256.0, 16.0, pmu, task_cyc, freq)
+
+    @staticmethod
+    def l0b_write_bw(pmu, task_cyc, freq):
+        return PmuMetricCalculate.pmu_metric_calculate_with_freq(1.0, 256.0, 8.0, pmu, task_cyc, freq)
+
+    @staticmethod
+    def l0c_read_bw(pmu, task_cyc, freq):
+        return PmuMetricCalculate.pmu_metric_calculate_with_freq(1.0, 256.0, 8.0, pmu, task_cyc, freq)
+
+    @staticmethod
+    def l0c_write_bw(pmu, task_cyc, freq):
+        return PmuMetricCalculate.pmu_metric_calculate_with_freq(1.0, 256.0, 8.0, pmu, task_cyc, freq)
+
+    @staticmethod
+    def l0c_read_bw_cube(pmu, task_cyc, freq):
+        return PmuMetricCalculate.pmu_metric_calculate_with_freq(1.0, 256.0, 32.0, pmu, task_cyc, freq)
+
+    @staticmethod
+    def l0c_write_bw_cube(pmu, task_cyc, freq):
+        return PmuMetricCalculate.pmu_metric_calculate_with_freq(1.0, 256.0, 32.0, pmu, task_cyc, freq)
+
+    @staticmethod
+    def ub_read_bw_vector(pmu, task_cyc, freq):
+        return PmuMetricCalculate.pmu_metric_calculate_with_freq(1.0, 256.0, 16.0, pmu, task_cyc, freq)
+
+    @staticmethod
+    def ub_write_bw_vector(pmu, task_cyc, freq):
+        return PmuMetricCalculate.pmu_metric_calculate_with_freq(1.0, 256.0, 8.0, pmu, task_cyc, freq)
+
+    @staticmethod
+    def ub_read_bw_scalar(pmu, task_cyc, freq):
+        return PmuMetricCalculate.pmu_metric_calculate_with_freq(1.0, 256.0, 32.0, pmu, task_cyc, freq)
+
+    @staticmethod
+    def ub_write_bw_scalar(pmu, task_cyc, freq):
+        return PmuMetricCalculate.pmu_metric_calculate_with_freq(1.0, 256.0, 32.0, pmu, task_cyc, freq)
+
+
 class Constant:
     """
     constant class
@@ -56,109 +268,58 @@ class Constant:
     INVALID_INDEX = -1
 
     AI_CORE_CALCULATION_FORMULA = {
-        "mac_fp16_ratio": lambda pmu, task_cyc:
-        PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc),
-        "mac_int8_ratio": lambda pmu, task_cyc:
-        PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc),
-        "vec_fp32_ratio": lambda pmu, task_cyc:
-        PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc),
-        "vec_fp16_128lane_ratio": lambda pmu, task_cyc:
-        PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc),
-        "vec_fp16_64lane_ratio": lambda pmu, task_cyc:
-        PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc),
-        "vec_fp16_ratio": lambda pmu1, pmu2, task_cyc: 1.0 * (pmu1 + pmu2) / task_cyc,
-        "vec_int32_ratio": lambda pmu, task_cyc:
-        PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc),
-        "vec_misc_ratio": lambda pmu, task_cyc:
-        PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc),
-        "vec_ratio": lambda pmu, task_cyc:
-        PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc),
-        "mac_ratio": lambda pmu, task_cyc:
-        PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc),
-        "scalar_ratio": lambda pmu, task_cyc:
-        PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc),
-        "mte1_ratio": lambda pmu, task_cyc:
-        PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc),
-        "mte2_ratio": lambda pmu, task_cyc:
-        PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc),
-        "mte3_ratio": lambda pmu, task_cyc:
-        PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc),
-        "icache_miss_rate": lambda pmu, task_cyc:
-        PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc),
-        "icache_req_ratio": lambda pmu, task_cyc:
-        PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc),
-        "scalar_waitflag_ratio": lambda pmu, task_cyc:
-        PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc),
-        "cube_waitflag_ratio": lambda pmu, task_cyc:
-        PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc),
-        "vector_waitflag_ratio": lambda pmu, task_cyc:
-        PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc),
-        "mte1_waitflag_ratio": lambda pmu, task_cyc:
-        PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc),
-        "mte2_waitflag_ratio": lambda pmu, task_cyc:
-        PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc),
-        "mte3_waitflag_ratio": lambda pmu, task_cyc:
-        PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc),
-        "scalar_ld_ratio": lambda pmu, task_cyc:
-        PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc),
-        "scalar_st_ratio": lambda pmu, task_cyc:
-        PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc),
-        "vec_bankgroup_cflt_ratio": lambda pmu, task_cyc:
-        PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc),
-        "vec_bank_cflt_ratio": lambda pmu, task_cyc:
-        PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc),
-        "vec_resc_cflt_ratio": lambda pmu, task_cyc:
-        PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc),
-        "mte1_iq_full_ratio": lambda pmu, task_cyc:
-        PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc),
-        "mte2_iq_full_ratio": lambda pmu, task_cyc:
-        PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc),
-        "mte3_iq_full_ratio": lambda pmu, task_cyc:
-        PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc),
-        "cube_iq_full_ratio": lambda pmu, task_cyc:
-        PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc),
-        "vec_iq_full_ratio": lambda pmu, task_cyc:
-        PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc),
-        "ub_read_bw(GB/s)": lambda pmu, task_cyc, freq:
-        PmuMetricCalculate.pmu_metric_calculate_with_freq(1.0, 256.0, 4.0, pmu, task_cyc, freq),
-        "ub_write_bw(GB/s)": lambda pmu, task_cyc, freq:
-        PmuMetricCalculate.pmu_metric_calculate_with_freq(1.0, 256.0, 4.0, pmu, task_cyc, freq),
-        "l1_read_bw(GB/s)": lambda pmu, task_cyc, freq:
-        PmuMetricCalculate.pmu_metric_calculate_with_freq(1.0, 256.0, 16.0, pmu, task_cyc, freq),
-        "l1_write_bw(GB/s)": lambda pmu, task_cyc, freq:
-        PmuMetricCalculate.pmu_metric_calculate_with_freq(1.0, 128.0, 8.0, pmu, task_cyc, freq),
-        "l2_read_bw(GB/s)": lambda pmu, task_cyc, freq:
-        PmuMetricCalculate.pmu_metric_calculate_with_freq(1.0, 256.0, 8.0, pmu, task_cyc, freq),
-        "l2_write_bw(GB/s)": lambda pmu, task_cyc, freq:
-        PmuMetricCalculate.pmu_metric_calculate_with_freq(1.0, 256.0, 8.0, pmu, task_cyc, freq),
-        "main_mem_read_bw(GB/s)": lambda pmu, task_cyc, freq:
-        PmuMetricCalculate.pmu_metric_calculate_with_freq(1.0, 256.0, 8.0, pmu, task_cyc, freq),
-        "main_mem_write_bw(GB/s)": lambda pmu, task_cyc, freq:
-        PmuMetricCalculate.pmu_metric_calculate_with_freq(1.0, 256.0, 8.0, pmu, task_cyc, freq),
-        "l0a_read_bw(GB/s)": lambda pmu, task_cyc, freq:
-        PmuMetricCalculate.pmu_metric_calculate_with_freq(1.0, 256.0, 16.0, pmu, task_cyc, freq),
-        "l0a_write_bw(GB/s)": lambda pmu, task_cyc, freq:
-        PmuMetricCalculate.pmu_metric_calculate_with_freq(1.0, 256.0, 16.0, pmu, task_cyc, freq),
-        "l0b_read_bw(GB/s)": lambda pmu, task_cyc, freq:
-        PmuMetricCalculate.pmu_metric_calculate_with_freq(1.0, 256.0, 16.0, pmu, task_cyc, freq),
-        "l0b_write_bw(GB/s)": lambda pmu, task_cyc, freq:
-        PmuMetricCalculate.pmu_metric_calculate_with_freq(1.0, 256.0, 8.0, pmu, task_cyc, freq),
-        "l0c_read_bw(GB/s)": lambda pmu, task_cyc, freq:
-        PmuMetricCalculate.pmu_metric_calculate_with_freq(1.0, 256.0, 8.0, pmu, task_cyc, freq),
-        "l0c_write_bw(GB/s)": lambda pmu, task_cyc, freq:
-        PmuMetricCalculate.pmu_metric_calculate_with_freq(1.0, 256.0, 8.0, pmu, task_cyc, freq),
-        "l0c_read_bw_cube(GB/s)": lambda pmu, task_cyc, freq:
-        PmuMetricCalculate.pmu_metric_calculate_with_freq(1.0, 256.0, 32.0, pmu, task_cyc, freq),
-        "l0c_write_bw_cube(GB/s)": lambda pmu, task_cyc, freq:
-        PmuMetricCalculate.pmu_metric_calculate_with_freq(1.0, 256.0, 32.0, pmu, task_cyc, freq),
-        "ub_read_bw_vector(GB/s)": lambda pmu, task_cyc, freq:
-        PmuMetricCalculate.pmu_metric_calculate_with_freq(1.0, 256.0, 16.0, pmu, task_cyc, freq),
-        "ub_write_bw_vector(GB/s)": lambda pmu, task_cyc, freq:
-        PmuMetricCalculate.pmu_metric_calculate_with_freq(1.0, 256.0, 8.0, pmu, task_cyc, freq),
-        "ub_read_bw_scalar(GB/s)": lambda pmu, task_cyc, freq:
-        PmuMetricCalculate.pmu_metric_calculate_with_freq(1.0, 256.0, 32.0, pmu, task_cyc, freq),
-        "ub_write_bw_scalar(GB/s)": lambda pmu, task_cyc, freq:
-        PmuMetricCalculate.pmu_metric_calculate_with_freq(1.0, 256.0, 32.0, pmu, task_cyc, freq),
+        "mac_fp16_ratio": PmuCalculateFunc.mac_fp16_ratio,
+        "mac_int8_ratio": PmuCalculateFunc.mac_int8_ratio,
+        "vec_fp32_ratio": PmuCalculateFunc.vec_fp32_ratio,
+        "vec_fp16_128lane_ratio": PmuCalculateFunc.vec_fp16_128lane_ratio,
+        "vec_fp16_64lane_ratio": PmuCalculateFunc.vec_fp16_64lane_ratio,
+        "vec_fp16_ratio": PmuCalculateFunc.vec_fp16_ratio,
+        "vec_int32_ratio": PmuCalculateFunc.vec_int32_ratio,
+        "vec_misc_ratio": PmuCalculateFunc.vec_misc_ratio,
+        "vec_ratio": PmuCalculateFunc.vec_ratio,
+        "mac_ratio": PmuCalculateFunc.mac_ratio,
+        "scalar_ratio": PmuCalculateFunc.scalar_ratio,
+        "mte1_ratio": PmuCalculateFunc.mte1_ratio,
+        "mte2_ratio": PmuCalculateFunc.mte2_ratio,
+        "mte3_ratio": PmuCalculateFunc.mte3_ratio,
+        "icache_miss_rate": PmuCalculateFunc.icache_miss_rate,
+        "icache_req_ratio": PmuCalculateFunc.icache_req_ratio,
+        "scalar_waitflag_ratio": PmuCalculateFunc.scalar_waitflag_ratio,
+        "cube_waitflag_ratio": PmuCalculateFunc.cube_waitflag_ratio,
+        "vector_waitflag_ratio": PmuCalculateFunc.vector_waitflag_ratio,
+        "mte1_waitflag_ratio": PmuCalculateFunc.mte1_waitflag_ratio,
+        "mte2_waitflag_ratio": PmuCalculateFunc.mte2_waitflag_ratio,
+        "mte3_waitflag_ratio": PmuCalculateFunc.mte3_waitflag_ratio,
+        "scalar_ld_ratio": PmuCalculateFunc.scalar_ld_ratio,
+        "scalar_st_ratio": PmuCalculateFunc.scalar_st_ratio,
+        "vec_bankgroup_cflt_ratio": PmuCalculateFunc.vec_bankgroup_cflt_ratio,
+        "vec_bank_cflt_ratio": PmuCalculateFunc.vec_bank_cflt_ratio,
+        "vec_resc_cflt_ratio": PmuCalculateFunc.vec_resc_cflt_ratio,
+        "mte1_iq_full_ratio": PmuCalculateFunc.mte1_iq_full_ratio,
+        "mte2_iq_full_ratio": PmuCalculateFunc.mte2_iq_full_ratio,
+        "mte3_iq_full_ratio": PmuCalculateFunc.mte3_iq_full_ratio,
+        "cube_iq_full_ratio": PmuCalculateFunc.cube_iq_full_ratio,
+        "vec_iq_full_ratio": PmuCalculateFunc.vec_iq_full_ratio,
+        "ub_read_bw(GB/s)": PmuCalculateFunc.ub_read_bw,
+        "ub_write_bw(GB/s)": PmuCalculateFunc.ub_write_bw,
+        "l1_read_bw(GB/s)": PmuCalculateFunc.l1_read_bw,
+        "l1_write_bw(GB/s)": PmuCalculateFunc.l1_write_bw,
+        "l2_read_bw(GB/s)": PmuCalculateFunc.l2_read_bw,
+        "l2_write_bw(GB/s)": PmuCalculateFunc.l2_write_bw,
+        "main_mem_read_bw(GB/s)": PmuCalculateFunc.main_mem_read_bw,
+        "main_mem_write_bw(GB/s)": PmuCalculateFunc.main_mem_write_bw,
+        "l0a_read_bw(GB/s)": PmuCalculateFunc.l0a_read_bw,
+        "l0a_write_bw(GB/s)": PmuCalculateFunc.l0a_write_bw,
+        "l0b_read_bw(GB/s)": PmuCalculateFunc.l0b_read_bw,
+        "l0b_write_bw(GB/s)": PmuCalculateFunc.l0b_write_bw,
+        "l0c_read_bw(GB/s)": PmuCalculateFunc.l0c_read_bw,
+        "l0c_write_bw(GB/s)": PmuCalculateFunc.l0c_write_bw,
+        "l0c_read_bw_cube(GB/s)": PmuCalculateFunc.l0c_read_bw_cube,
+        "l0c_write_bw_cube(GB/s)": PmuCalculateFunc.l0c_write_bw_cube,
+        "ub_read_bw_vector(GB/s)": PmuCalculateFunc.ub_read_bw_vector,
+        "ub_write_bw_vector(GB/s)": PmuCalculateFunc.ub_write_bw_vector,
+        "ub_read_bw_scalar(GB/s)": PmuCalculateFunc.ub_read_bw_scalar,
+        "ub_write_bw_scalar(GB/s)": PmuCalculateFunc.ub_write_bw_scalar,
     }
 
     AICORE_PIPE_LIST = ["vec_time", "mac_time", "scalar_time", "mte1_time", "mte2_time", "mte3_time"]
