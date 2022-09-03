@@ -1,8 +1,7 @@
-# coding:utf-8
-"""
-This script is used for ge tensor struct
-Copyright Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
-"""
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2021-2022. All rights reserved.
+
 import struct
 
 from common_func.constant import Constant

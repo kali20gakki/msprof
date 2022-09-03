@@ -1,9 +1,6 @@
-#!usr/bin/env python
-# coding:utf-8
-"""
-acsq task model
-Copyright Huawei Technologies Co., Ltd. 2021. All rights reserved.
-"""
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2021-2022. All rights reserved.
 
 from abc import ABC
 

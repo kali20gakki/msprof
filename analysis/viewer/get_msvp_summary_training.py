@@ -1,9 +1,7 @@
 #!/usr/bin/python3
-# coding: utf-8
-"""
-This script is used to provide methods for providing summary results
-Copyright Huawei Technologies Co., Ltd. 2018-2019. All rights reserved.
-"""
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2018-2019. All rights reserved.
+
 import json
 import sqlite3
 from collections import OrderedDict

@@ -1,9 +1,6 @@
 #!/usr/bin/python3
-# coding=utf-8
-"""
-This script is used to provide methods for creating db methods
-Copyright Huawei Technologies Co., Ltd. 2018-2019. All rights reserved.
-"""
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2018-2019. All rights reserved.
 
 from common_func.file_name_manager import get_ctrl_cpu_compiles
 from msparser.hardware.cpu_parser import ParsingCPUData

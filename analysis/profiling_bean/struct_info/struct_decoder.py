@@ -1,11 +1,6 @@
-# !/usr/bin/python
-# coding=utf-8
-"""
-Function:
-This file mainly decode binary data.
-Copyright Information:
-Huawei Technologies Co., Ltd. All Rights Reserved © 2020
-"""
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 
 import struct
 
