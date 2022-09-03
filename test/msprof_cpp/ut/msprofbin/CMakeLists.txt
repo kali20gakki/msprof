@@ -22,6 +22,14 @@ set(common_file
     ${MSPROF_SOURCE_DIR}/dvvp/common/statistics/perf_count.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/validation/param_validation.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter_interface.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter_mini.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter_mdc.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter_lhisi.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter_dc.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter_cloudv2.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter_cloud.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/mmpa/mmpa_api.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/depend/stub/error_manager/msprof_error_manager_stub.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/driver/devmgmt/ai_drv_dev_api.cpp
@@ -129,6 +137,8 @@ target_include_directories(msprof_bin_utest PRIVATE
     ${MSPROF_SOURCE_DIR}/dvvp/common/utils 
     ${MSPROF_SOURCE_DIR}/dvvp/msprof/engine/include
     ${MSPROF_SOURCE_DIR}/dvvp/common/config
+    ${MSPROF_SOURCE_DIR}/dvvp/common/utils
+    ${MSPROF_SOURCE_DIR}/inc/toolchain
     ${MSPROF_SOURCE_DIR}/dvvp/job_wrapper/include
     ${MSPROF_SOURCE_DIR}/dvvp/adx/inc
     ${MSPROF_SOURCE_DIR}/dvvp/driver/inc
