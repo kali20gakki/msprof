@@ -1,7 +1,6 @@
-"""
-This script is used to create ai core operator op_summary db from other db.
-Copyright Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
-"""
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
 
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess

@@ -1,9 +1,7 @@
 #!/usr/bin/python3
-# coding=utf-8
-"""
-function: this script used to record hwts log db
-Copyright Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
-"""
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
+
 import os
 
 from common_func.db_name_constant import DBNameConstant

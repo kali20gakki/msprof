@@ -1,10 +1,7 @@
-# coding=utf-8
-"""
-Function:
-DataCheckManager class, This class mainly involves chip info.
-Copyright Information:
-Huawei Technologies Co., Ltd. All Rights Reserved © 2021
-"""
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
+
 import os
 
 from common_func.common import error

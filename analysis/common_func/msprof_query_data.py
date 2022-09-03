@@ -1,8 +1,6 @@
-# coding=utf-8
-"""
-Function: Data splicing for command line of query interface.
-Copyright Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
-"""
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 
 import os
 

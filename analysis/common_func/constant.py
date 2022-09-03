@@ -1,9 +1,7 @@
 #!/usr/bin/python3
-# coding=utf-8
-"""
-This script is used to provid profiling constants
-Copyright Huawei Technologies Co., Ltd. 2018-2019. All rights reserved.
-"""
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2018-2019. All rights reserved.
+
 import os
 import stat
 from common_func.ms_constant.number_constant import NumberConstant

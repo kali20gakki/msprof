@@ -1,7 +1,6 @@
-"""
-This script is used to provide profiling recommend constant.
-Copyright Huawei Technologies Co., Ltd. 2018-2019. All rights reserved.
-"""
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2018-2019. All rights reserved.
 
 
 class CommonProfRule:

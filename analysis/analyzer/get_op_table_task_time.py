@@ -1,7 +1,7 @@
-"""
-This script is used to create ai core operator summary db from other db.
-Copyright Huawei Technologies Co., Ltd. 2021-2022. All rights reserved.
-"""
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2021-2022. All rights reserved.
+
 import logging
 import sqlite3
 
