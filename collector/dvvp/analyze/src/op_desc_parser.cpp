@@ -282,7 +282,7 @@ int32_t OpDescParser::CheckData(CONST_VOID_PTR data, uint32_t len)
             addr + i * GetOpDescSize() + sizeof(uint32_t), GetOpDescSize() - sizeof(uint32_t));
         auto opDesc = reinterpret_cast<const ProfOpDesc *>(addr + i * GetOpDescSize());
         if (opDesc->signature != signature) {
-            MSPROF_LOGE("Part %u of data is invalid %u %u opDesc=%x, addr=%x", i, opDesc->signature, signature, opDesc, addr);
+            MSPROF_LOGE("Part %u of data is invalid", i);
             return ACL_ERROR_INVALID_PARAM;
         }
     }

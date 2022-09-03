@@ -210,7 +210,7 @@ int DrvTscpuStart(const DrvPeripheralProfileCfg &peripheralCfg,
 
 int DrvAicoreStart(const DrvPeripheralProfileCfg &peripheralCfg, const std::vector<int> &profCores,
                    const std::vector<std::string> &profEvents)
-{    
+{
     uint32_t profDeviceId = (uint32_t)peripheralCfg.profDeviceId;
     AI_DRV_CHANNEL profChannel = peripheralCfg.profChannel;
     uint32_t profSamplePeriod = (uint32_t)peripheralCfg.profSamplePeriod;
