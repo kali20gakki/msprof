@@ -1,7 +1,6 @@
-"""
-This script is used to export tracing graph fro ai core, ai cpu, all reduce.
-Copyright Huawei Technologies Co., Ltd. 2018-2020. All rights reserved.
-"""
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 
 import json
 import logging

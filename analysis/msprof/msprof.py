@@ -1,11 +1,7 @@
 #!/usr/bin/python3
-# coding=utf-8
-"""
-Function:
-This class mainly involves the main function.
-Copyright Information:
-Huawei Technologies Co., Ltd. All Rights Reserved © 2020
-"""
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2020-2022. All rights reserved.
+
 import importlib
 import os
 import sys

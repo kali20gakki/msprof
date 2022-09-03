@@ -98,26 +98,6 @@ class CalculateOpTaskScheduler:
         self._insert_task_time_data(task_time, runtime_conn, runtime_curs)
         logging.info('create task time table end')
 
-    def _add_info(self: any, cal_task_data: list) -> list:
-        # 0 is default batch id
-        task_time = [task_data + (
-            self.index_id, NumberConstant.DEFAULT_BATCH_ID) for task_data in cal_task_data]
-        return task_time
-
-    def _collect_aicpu(self: any, task_time: list) -> None:
-        aicpu_collector = AICpuFromTsCollector(self.project_path)
-
-        for data in task_time:
-            task_id = data[5]
-            stream_id = data[6]
-            start = data[9]
-            end = data[10]
-            task_type = data[4]
-
-            aicpu_feature = (stream_id, task_id, start, end, task_type)
-            aicpu_collector.filter_aicpu(aicpu_feature)
-        aicpu_collector.save_aicpu()
-
     def op_pre_mini_task_data(self: any, project_path: str, device_id: int) -> None:
         """
         deal with the ts track data for operator
@@ -191,6 +171,26 @@ class CalculateOpTaskScheduler:
         sql = 'update TaskTime set api=?, apiRowId=? where stream_id=? and task_id=? and batch_id=?'
         DBManager.executemany_sql(runtime_conn, sql, api_down_data)
         logging.info('Update TimeLine API finished.')
+
+    def _add_info(self: any, cal_task_data: list) -> list:
+        # 0 is default batch id
+        task_time = [task_data + (
+            self.index_id, NumberConstant.DEFAULT_BATCH_ID) for task_data in cal_task_data]
+        return task_time
+
+    def _collect_aicpu(self: any, task_time: list) -> None:
+        aicpu_collector = AICpuFromTsCollector(self.project_path)
+
+        for data in task_time:
+            task_id = data[5]
+            stream_id = data[6]
+            start = data[9]
+            end = data[10]
+            task_type = data[4]
+
+            aicpu_feature = (stream_id, task_id, start, end, task_type)
+            aicpu_collector.filter_aicpu(aicpu_feature)
+        aicpu_collector.save_aicpu()
 
     def _insert_task_time_data(self: any, task_time: list, runtime_conn: any, runtime_curs: any) -> None:
         # sort by complete time

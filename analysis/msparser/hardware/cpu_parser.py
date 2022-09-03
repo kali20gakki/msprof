@@ -1,9 +1,6 @@
-# !/usr/bin/python
-# coding=utf-8
-"""
-This script is used to provide methods for parsing cpu data file and create cpu db
-Copyright Huawei Technologies Co., Ltd. 2018-2019. All rights reserved.
-"""
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2018-2019. All rights reserved.
 
 import logging
 import multiprocessing

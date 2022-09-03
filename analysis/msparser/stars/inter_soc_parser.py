@@ -1,8 +1,7 @@
-# coding=utf-8
-"""
-function: inter_soc transmission data parsers
-Copyright Huawei Technologies Co., Ltd. 2021. All rights reserved.
-"""
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2021-2022. All rights reserved.
+
 from abc import abstractmethod
 
 from msmodel.stars.inter_soc_model import InterSocModel

@@ -1,8 +1,6 @@
-# coding=utf-8
-"""
-parsing ai cpu data file and create ai cpu db
-Copyright Huawei Technologies Co., Ltd. 2021. All rights reserved.
-"""
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 
 from common_func.file_name_manager import get_ai_cpu_compiles
 
