@@ -40,6 +40,8 @@
 #include "mmpa_api.h"
 #include "prof_api.h"
 #include "toolchain/prof_acl_api.h"
+#include "uploader.h"
+#include "transport/hdc/hdc_transport.h"
 
 using namespace analysis::dvvp::common::error;
 using namespace Analysis::Dvvp::Analyze;
@@ -115,13 +117,69 @@ int mmWriteStub(int fd, void *buf, unsigned int bufLen) {
 
 TEST_F(MSPROF_ACL_CORE_UTEST, get_op_xxx) {
     ProfOpDesc data;
+    uint32_t bufLen = sizeof(ProfOpDesc);
     data.modelId = 0;
     data.flag = ACL_SUBSCRIBE_OP_THREAD;
     data.threadId = 0;
     data.modelId = 0;
+    data.opIndex = OpDescParser::instance()->SetOpTypeAndOpName("OpType", "OpName");
+    data.executionTime = 0;
+    data.signature = analysis::dvvp::common::utils::Utils::GenerateSignature(
+        reinterpret_cast<const uint8_t *>(&data) + sizeof(uint32_t), bufLen - sizeof(uint32_t));
+    
     EXPECT_EQ(ACL_SUBSCRIBE_OP_THREAD, OpDescParser::GetOpFlag(&data, sizeof(data), 0));
     EXPECT_NE(nullptr, OpDescParser::GetOpAttriValue(&data, sizeof(data), 0, ACL_SUBSCRIBE_ATTRI_THREADID));
     EXPECT_EQ(nullptr, OpDescParser::GetOpAttriValue(&data, sizeof(data), 0, ACL_SUBSCRIBE_ATTRI_NONE));
+
+    EXPECT_EQ(sizeof(ProfOpDesc), OpDescParser::GetOpDescSize());
+    uint32_t opNum = 0;
+    EXPECT_EQ(ACL_SUCCESS, OpDescParser::GetOpNum(&data, bufLen, &opNum));
+    EXPECT_EQ(1, opNum);
+
+    uint32_t modelId = 0;
+    OpDescParser::GetModelId(&data, bufLen, 0, &modelId);
+    EXPECT_EQ(0, modelId);
+    size_t opTypeLen = 0;
+    EXPECT_EQ(ACL_SUCCESS, OpDescParser::instance()->GetOpTypeLen(&data, bufLen, &opTypeLen, 0));
+    char opType[opTypeLen];
+    EXPECT_EQ(ACL_SUCCESS, OpDescParser::instance()->GetOpType(&data, bufLen, opType, opTypeLen, 0));
+    EXPECT_EQ("OpType", std::string(opType));
+    size_t opNameLen = 0;
+    EXPECT_EQ(ACL_SUCCESS, OpDescParser::instance()->GetOpNameLen(&data, bufLen, &opNameLen, 0));
+    char opName[opNameLen];
+    EXPECT_EQ(ACL_SUCCESS, OpDescParser::instance()->GetOpName(&data, bufLen, opName, opNameLen, 0));
+    EXPECT_EQ("OpName", std::string(opName));
+    EXPECT_EQ(true, OpDescParser::GetOpStart(&data, bufLen, 0) > 0);
+    EXPECT_EQ(true, OpDescParser::GetOpEnd(&data, bufLen, 0) > 0);
+    EXPECT_EQ(true, OpDescParser::GetOpDuration(&data, bufLen, 0) > 0);
+    EXPECT_EQ(true, OpDescParser::GetOpCubeFops(&data, bufLen, 0) >= 0);
+    EXPECT_EQ(true, OpDescParser::GetOpVectorFops(&data, bufLen, 0) >= 0);
+    EXPECT_EQ(ACL_SUBSCRIBE_OP_THREAD, OpDescParser::GetOpFlag(&data, bufLen, 0));
+    EXPECT_NE(nullptr, OpDescParser::GetOpAttriValue(&data, bufLen, 0, ACL_SUBSCRIBE_ATTRI_THREADID));
+    EXPECT_EQ(nullptr, OpDescParser::GetOpAttriValue(&data, bufLen, 0, ACL_SUBSCRIBE_ATTRI_NONE));
+    EXPECT_EQ(0, OpDescParser::GetOpExecutionTime(&data, bufLen, 0));
+}
+
+TEST_F(MSPROF_ACL_CORE_UTEST, ConstructAndUploadData)
+{
+    GlobalMockObject::verify();
+
+    std::shared_ptr<Analyzer> analyzer(new Analyzer(nullptr));
+    const uint64_t start = 1;
+    const uint64_t end = 2;
+    const uint64_t startAicore = 3;
+    const uint64_t endAicore = 4;
+    OpTime opTime;
+    opTime.start = start;
+    opTime.end = end;
+    opTime.startAicore = startAicore;
+    opTime.endAicore = endAicore;
+    opTime.indexId = 1;
+    opTime.threadId = 1;
+    const std::string nullStr = "";
+    analyzer->ConstructAndUploadData(nullStr, opTime);
+    const std::string opId = "123";
+    analyzer->ConstructAndUploadData(opId, opTime);
 }
 
 TEST_F(MSPROF_ACL_CORE_UTEST, acl_api) {
@@ -1479,7 +1537,8 @@ TEST_F(MSPROF_ACL_CORE_UTEST, AnalyzerTs_UploadKeypointOp) {
     MOCKER_CPP(&Analysis::Dvvp::Analyze::Analyzer::ConstructAndUploadData)
         .stubs();
 
-    std::shared_ptr<Analyzer> analyzer(new Analyzer(nullptr));
+    auto analyzer = std::make_shared<Analysis::Dvvp::Analyze::Analyzer>(nullptr);
+
     TsProfileKeypoint data;
     data.head.bufSize = sizeof(TsProfileKeypoint);
     data.taskId = 1;
