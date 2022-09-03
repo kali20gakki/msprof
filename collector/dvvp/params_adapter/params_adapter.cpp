@@ -362,7 +362,7 @@ bool ParamsAdapter::ComCfgCheck1(const InputCfg inputCfg, const std::string &cfg
             ret = ParamValidation::instance()->CheckOutputIsValid(cfgValue);
             break;
         case INPUT_CFG_COM_STORAGE_LIMIT:
-            ret = ParamValidation::instance()->CheckProfilingAicoreMetricsIsValid(cfgValue);
+            ret = ParamValidation::instance()->CheckStorageLimit(cfgValue);
             break;
         case INPUT_CFG_COM_MSPROFTX:
         case INPUT_CFG_COM_TASK_TIME:

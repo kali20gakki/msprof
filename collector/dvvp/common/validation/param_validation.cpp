@@ -164,7 +164,7 @@ bool ParamValidation::CheckProfilingAicoreMetricsIsValid(const std::string &aico
     return false;
 }
 
-bool ParamValidation::CheckLlcModeIsValid(const std::string &llcMode)
+bool ParamValidation::CheckLlcModeIsValid(const std::string &llcMode) const
 {
     std::vector<std::string> llcModeWhiteList = {
         "read",
@@ -189,7 +189,7 @@ bool ParamValidation::CheckLlcModeIsValid(const std::string &llcMode)
 }
 
 
-bool ParamValidation::CheckFreqIsValid(const std::string &freq, const int rangeMin, const int rangeMax)
+bool ParamValidation::CheckFreqIsValid(const std::string &freq, const int rangeMin, const int rangeMax) const
 {
     if (freq.empty()) {
         MSPROF_LOGI("freq is empty");
@@ -302,7 +302,7 @@ bool ParamValidation::CheckPythonPathIsValid(const std::string&pythonPath)
     return true;
 }
 
-bool ParamValidation::CheckExportSummaryFormatIsValid(const std::string &summaryFormat)
+bool ParamValidation::CheckExportSummaryFormatIsValid(const std::string &summaryFormat) const
 {
     std::string errReason = "summary-format should be in range of 'json | csv'.";
     if (summaryFormat.empty()) {
@@ -321,7 +321,7 @@ bool ParamValidation::CheckExportSummaryFormatIsValid(const std::string &summary
     return true;
 }
 
-bool ParamValidation::CheckExportIdIsValid(const std::string &exportId, const std::string &exportIdType)
+bool ParamValidation::CheckExportIdIsValid(const std::string &exportId, const std::string &exportIdType) const
 {
     std::string errReason = exportIdType + "should be a valid integer number.";
     if (exportId.empty()) {
