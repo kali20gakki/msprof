@@ -88,9 +88,11 @@ def get_hbm_summary_data(project_path: str, device_id: str) -> any:
         if not hbm_id_count:
             return json.dumps({'status': NumberConstant.ERROR, "info": "Failed to get hbm data."})
         sql = 'select hbmId,' \
-              '(select round(AVG(bandwidth), {accuracy}) from HBMbwData where event_type="read"),' \
-              '(select round(AVG(bandwidth), {accuracy}) from HBMbwData where event_type="write")' \
-              ' from HBMbwData where device_id=? group by hbmId'.format(accuracy=NumberConstant.DECIMAL_ACCURACY)
+              'sum(case when event_type="read" then bandwidth else 0 end) / ' \
+              'sum(case when event_type="read" then 1 else 0 end) as read,' \
+              'sum(case when event_type="write" then bandwidth else 0 end) / ' \
+              'sum(case when event_type="write" then 1 else 0 end) as write' \
+              ' FROM "HBMbwData"  WHERE device_id = ? GROUP BY hbmid'.format(accuracy=NumberConstant.DECIMAL_ACCURACY)
         data = DBManager.fetch_all_data(curs, sql, (device_id,))
         _insert_hbm_data(data, hbm_id_count)
         return data
