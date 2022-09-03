@@ -211,13 +211,17 @@ int DrvTscpuStart(const DrvPeripheralProfileCfg &peripheralCfg,
 int DrvAicoreStart(const DrvPeripheralProfileCfg &peripheralCfg, const std::vector<int> &profCores,
                    const std::vector<std::string> &profEvents)
 {
+    MSPROF_EVENT("[XXX]DrvAicoreStart 1");
+    
     uint32_t profDeviceId = (uint32_t)peripheralCfg.profDeviceId;
     AI_DRV_CHANNEL profChannel = peripheralCfg.profChannel;
     uint32_t profSamplePeriod = (uint32_t)peripheralCfg.profSamplePeriod;
     uint32_t configSize = sizeof(TsAiCoreProfileConfigT) + profEvents.size() * sizeof(uint32_t);
+    MSPROF_EVENT("[XXX]DrvAicoreStart 2");
 
     auto configP = static_cast<TsAiCoreProfileConfigT *>(malloc(configSize));
     if (configP == nullptr) {
+    MSPROF_EVENT("[XXX]DrvAicoreStart 2");
         return PROFILING_FAILED;
     }
     (void)memset_s(configP, configSize, 0, configSize);
@@ -227,6 +231,7 @@ int DrvAicoreStart(const DrvPeripheralProfileCfg &peripheralCfg, const std::vect
     for (uint32_t i = 0; i < (uint32_t)profCores.size(); i++) {
         configP->core_mask |= ((uint32_t)1 << (uint32_t)profCores[i]);
     }
+    MSPROF_EVENT("[XXX]DrvAicoreStart 3");
     std::string eventStr;
     configP->event_num = (uint32_t)profEvents.size();
     for (uint32_t i = 0; i < (uint32_t)profEvents.size(); i++) {

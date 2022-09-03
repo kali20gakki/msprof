@@ -272,6 +272,30 @@ TEST_F(HOST_PROF_DEVICE_TRANSPORT_UTEST, HandlePacket)
     TLV_REQ_PTR packet = nullptr;
     analysis::dvvp::message::StatusInfo status;
     EXPECT_EQ(PROFILING_FAILED, dev_tran->HandlePacket(packet, status));
+
+    // struct tlv_req {
+    //     enum cmd_class type; /**< command type */
+    //     int dev_id;          /**< device id */
+    //     int len;             /**< data len */
+    //     char value[12];       /**< data */
+    // } packet1;
+    // packet1.value[0] = 'F';
+    // packet1.value[1] = 'F';
+    // packet1.value[2] = 'F';
+    // packet1.value[3] = 'F';
+    // packet1.value[4] = 0;
+    // packet1.len = 4;
+    // packet1.dev_id = 0;
+    // packet1.type = cmd_class::IDE_EXEC_COMMAND_REQ; // IDE_EXEC_COMMAND_REQ
+    // packet = reinterpret_cast<TLV_REQ_PTR>(&packet1);
+    // EXPECT_EQ(PROFILING_FAILED, dev_tran->HandlePacket(packet, status));
+
+    // packet1.value[0] = '0';
+    // packet1.value[1] = '0';
+    // packet1.value[2] = '0';
+    // packet1.value[3] = '0';
+    // packet1.value[4] = 0;
+    // EXPECT_EQ(PROFILING_FAILED, dev_tran->HandlePacket(packet, status));
 }
 
 TEST_F(HOST_PROF_DEVICE_TRANSPORT_UTEST, HandleShake)

@@ -314,6 +314,8 @@ bool Analyzer::IsNeedUpdateIndexId()
 
 void Analyzer::ConstructAndUploadData(const std::string &opId, OpTime &opTime)
 {
+    MSPROF_EVENT("[XXX] ConstructAndUploadData 1");
+
     if (opTime.start > opTime.end || opTime.startAicore > opTime.endAicore) {
         MSPROF_LOGE("End timestamp is less then start. op:%s start:%llu end:%llu startAicore:%llu endAicore:%llu",
                     opId.c_str(), opTime.start, opTime.end, opTime.startAicore, opTime.endAicore);
@@ -339,6 +341,7 @@ void Analyzer::ConstructAndUploadData(const std::string &opId, OpTime &opTime)
     }
     uint64_t opIndex = OpDescParser::instance()->SetOpTypeAndOpName(opType, opName);
     if (opIndex == 0) {
+    MSPROF_EVENT("[XXX] ConstructAndUploadData 2");
         return;
     }
     opDesc.opIndex = opIndex;
@@ -353,9 +356,13 @@ void Analyzer::ConstructAndUploadData(const std::string &opId, OpTime &opTime)
     opDesc.executionTime = opTime.endAicore - opTime.startAicore; // chipId 0 only
     opDesc.signature = analysis::dvvp::common::utils::Utils::GenerateSignature(
         reinterpret_cast<uint8_t *>(&opDesc) + sizeof(uint32_t), sizeof(ProfOpDesc) - sizeof(uint32_t));
-
+    if (uploader_ == nullptr) {
+        MSPROF_LOGE("uploader_ is nullptr");
+        return;
+    }
     uploader_->UploadData(reinterpret_cast<CHAR_PTR>(&opDesc), sizeof(ProfOpDesc));
     resultCount_++;
+    MSPROF_EVENT("[XXX] ConstructAndUploadData 3");
 }
 
 void Analyzer::SetDevId(const std::string &devIdStr)

@@ -1214,6 +1214,7 @@ std::string Utils::ProfCreateId(uint64_t addr)
 uint32_t Utils::GenerateSignature(CONST_UINT8_PTR data, uint64_t len)
 {
     uint32_t signature = ~0U;
+    MSPROF_LOGE("[XXX]  data=%llx, len=%llu", data, len);
 
     if (data == nullptr) {
         return signature;
