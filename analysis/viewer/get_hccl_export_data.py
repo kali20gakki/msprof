@@ -1,9 +1,7 @@
 #!/usr/bin/python3
-# coding:utf-8
-"""
-This scripts is used to provide for time line page
-Copyright Huawei Technologies Co., Ltd. 2019-2020. All rights reserved.
-"""
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2019-2020. All rights reserved.
+
 import json
 import logging
 import sqlite3

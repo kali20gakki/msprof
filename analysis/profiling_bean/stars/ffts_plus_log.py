@@ -1,8 +1,7 @@
-# coding=utf-8
-"""
-This script is used to parse ffts pmu data
-Copyright Huawei Technologies Co., Ltd. 2021. All rights reserved.
-"""
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2021-2022. All rights reserved.
+
 from common_func.utils import Utils
 from profiling_bean.stars.ffts_log import FftsLogDecoder
 from profiling_bean.stars.stars_common import StarsCommon

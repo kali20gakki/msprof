@@ -1,10 +1,6 @@
-#!/usr/bin/env python
-# coding=utf-8
-
-"""
-Generate stub api.
-Copyright Huawei Technologies Co., Ltd. 2010-2022. All rights reserved.
-"""
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2021-2022. All rights reserved.
 
 import os
 import re

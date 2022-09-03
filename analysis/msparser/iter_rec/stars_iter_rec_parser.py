@@ -1,8 +1,7 @@
-# coding=utf-8
-"""
-function: script used to parse parse stars iter message
-Copyright Huawei Technologies Co., Ltd. 2021-2022. All rights reserved.
-"""
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2021-2022. All rights reserved.
+
 import logging
 import os
 import sqlite3

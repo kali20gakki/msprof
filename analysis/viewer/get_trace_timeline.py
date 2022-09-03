@@ -1,9 +1,6 @@
 #!/usr/bin/python3
-# coding=utf-8
-"""
-This script is used to generate json for trace-viewer
-Copyright Huawei Technologies Co., Ltd. 2018-2019. All rights reserved.
-"""
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2018-2019. All rights reserved.
 
 import json
 import logging

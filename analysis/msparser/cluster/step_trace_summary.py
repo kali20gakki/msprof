@@ -1,9 +1,6 @@
-# !/usr/bin/python
-# coding=utf-8
-"""
-This script is used to process querying step trace summary data.
-Copyright Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
-"""
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
 
 import json
 import logging

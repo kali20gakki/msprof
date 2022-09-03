@@ -1,8 +1,6 @@
 #!/usr/bin/python3
-"""
-This script is used for parsing and present dp data
-Copyright Huawei Technologies Co., Ltd. 2018-2019. All rights reserved.
-"""
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 
 from analyzer.scene_base.profiling_scene import ProfilingScene
 from common_func.constant import Constant

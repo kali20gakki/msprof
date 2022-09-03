@@ -1,9 +1,7 @@
-#!usr/bin/env python
-# coding:utf-8
-"""
-This script is used to calculate rts data
-Copyright Huawei Technologies Co., Ltd. 2021. All rights reserved.
-"""
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
+
 from collections import OrderedDict
 
 from common_func.data_manager import DataManager

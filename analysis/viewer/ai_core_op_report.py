@@ -1,9 +1,6 @@
-#!usr/bin/env python
-# coding:utf-8
-"""
-This script is used to report ai core operator summary data from db.
-Copyright Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
-"""
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 
 import logging
 from collections import deque
