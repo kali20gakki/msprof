@@ -27,6 +27,7 @@ generate_coverage(){
 #----------------------------------------------------------
 test_obj=(
     job_wrapper_utest
+    driver_utest    
     common_utest
     msprof_bin_utest
     streamio_common_utest
