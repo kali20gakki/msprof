@@ -40,6 +40,7 @@
 #include "mmpa_api.h"
 #include "prof_api.h"
 #include "toolchain/prof_acl_api.h"
+#include "params_adapter_impl.h"
 
 using namespace analysis::dvvp::common::error;
 using namespace Analysis::Dvvp::Analyze;
@@ -140,7 +141,7 @@ TEST_F(MSPROF_ACL_CORE_UTEST, acl_api) {
     config.devNums = 1;
     config.devIdList[0] = 0;
     config.aicoreMetrics = PROF_AICORE_ARITHMETIC_UTILIZATION;
-    config.dataTypeConfig = 0x7d7f001f;
+    config.dataTypeConfig = ACL_PROF_ACL_API|ACL_PROF_AICORE_METRICS|ACL_PROF_AICPU;
 
     ge::aclgrphProfConfig *aclConfig = ge::aclgrphProfCreateConfig(
         config.devIdList, config.devNums, (ge::ProfilingAicoreMetrics)config.aicoreMetrics, nullptr, config.dataTypeConfig);
@@ -151,6 +152,9 @@ TEST_F(MSPROF_ACL_CORE_UTEST, acl_api) {
     memset(zeroConfig, 0, sizeof(ProfConfig));
 
     EXPECT_NE(nullptr, aclConfig);
+    MOCKER_CPP(&Collector::Dvvp::ParamsAdapter::AclApiParamAdapter::GetParamFromInputCfg)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
 
     EXPECT_EQ(ge::FAILED, ge::aclgrphProfStart(zeroConfig));
     EXPECT_EQ(ge::FAILED, ge::aclgrphProfStart(invalidConfig));
@@ -330,7 +334,7 @@ TEST_F(MSPROF_ACL_CORE_UTEST, acl_prof_api) {
     config.devNums = 1;
     config.devIdList[0] = 0;
     config.aicoreMetrics = PROF_AICORE_ARITHMETIC_UTILIZATION;
-    config.dataTypeConfig = 0x7d7f001f;
+    config.dataTypeConfig = ACL_PROF_ACL_API|ACL_PROF_AICORE_METRICS|ACL_PROF_AICPU;
 
     aclprofConfig *aclConfig = aclprofCreateConfig(
         config.devIdList, config.devNums, (aclprofAicoreMetrics)config.aicoreMetrics, nullptr, config.dataTypeConfig);
@@ -341,7 +345,9 @@ TEST_F(MSPROF_ACL_CORE_UTEST, acl_prof_api) {
     memset(zeroConfig, 0, sizeof(ProfConfig));
 
     EXPECT_NE(nullptr, aclConfig);
-
+    MOCKER_CPP(&Collector::Dvvp::ParamsAdapter::AclApiParamAdapter::GetParamFromInputCfg)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
     EXPECT_EQ(ACL_ERROR_INVALID_PARAM, aclprofStart(nullptr));
     EXPECT_EQ(ACL_ERROR_INVALID_PARAM, aclprofStart(zeroConfig));
     EXPECT_EQ(200007, aclprofStart(invalidConfig));
@@ -1049,6 +1055,9 @@ TEST_F(MSPROF_ACL_CORE_UTEST, MsprofInitAclJson) {
         .stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
+    MOCKER_CPP(&Collector::Dvvp::ParamsAdapter::ParamsAdapter::BlackSwitchCheck)
+        .stubs()
+        .will(returnValue(true));
     std::string result = "/tmp/MsprofInitAclJson";
     analysis::dvvp::common::utils::Utils::RemoveDir(result);
     analysis::dvvp::common::utils::Utils::CreateDir(result);
