@@ -1,8 +1,7 @@
 #!/usr/bin/python3
-"""
-This script is used to provide common_func-used functions
-Copyright Huawei Technologies Co., Ltd. 2018-2019. All rights reserved.
-"""
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2018-2019. All rights reserved.
+
 import ctypes
 import json
 import logging

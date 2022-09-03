@@ -1,7 +1,6 @@
-"""
-This script is used to load training_trace data from db
-Copyright Huawei Technologies Co., Ltd. 2021. All rights reserved.
-"""
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 
 from collections import defaultdict
 from mscalculate.interface.step_trace_tag_handler import StepTraceTagHandler

@@ -1,8 +1,7 @@
 #!/usr/bin/python3
-"""
-This scripts is used to provide system constants
-Copyright Huawei Technologies Co., Ltd. 2019-2020. All rights reserved.
-"""
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2019-2020. All rights reserved.
+
 from enum import Enum
 from enum import unique
 
