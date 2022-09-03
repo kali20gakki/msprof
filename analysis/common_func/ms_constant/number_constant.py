@@ -36,6 +36,7 @@ class NumberConstant:
     RATIO_NAME_LEN = 5
     PERCENTAGE = 100
     DECIMAL_ACCURACY = 6
+    ROUND_FOUR_DECIMAL = 4
     ROUND_TWO_DECIMAL = 2
     LLC_CAPACITY = 64.0
     CPU_FREQ = 680000
@@ -74,6 +75,8 @@ class NumberConstant:
     SEC_TO_US = 10 ** 6
 
     INVALID_ITER_ID = -1
+    ZERO_ITER_ID = 0
+    ZERO_ITER_END = (0,)
 
     # training trace index
     FORWARD_PROPAGATION = 3

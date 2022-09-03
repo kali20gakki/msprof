@@ -8,16 +8,16 @@ import logging
 import os
 
 from common_func.constant import Constant
-from common_func.db_name_constant import DBNameConstant
 from common_func.db_manager import DBManager
-from common_func.ms_multi_process import MsMultiProcess
+from common_func.db_name_constant import DBNameConstant
 from common_func.file_manager import FileManager
 from common_func.file_manager import FileOpen
+from common_func.ms_multi_process import MsMultiProcess
 from common_func.msvp_common import MsvpCommonConst
 from common_func.msvp_common import is_valid_original_data
 from common_func.path_manager import PathManager
 from common_func.utils import Utils
-from model.hardware.nic_model import NicModel
+from msmodel.hardware.nic_model import NicModel
 from profiling_bean.prof_enum.data_tag import DataTag
 
 
@@ -68,16 +68,6 @@ class ParsingNicData(MsMultiProcess):
             return
         self._insert_nic_data(network_data)
 
-    def _insert_nic_data(self: any, network_data: list) -> None:
-        nic_header_num = DBManager.get_table_field_num(DBNameConstant.TABLE_NIC_ORIGIN + "Map", self.TABLE_PATH)
-        # chip 0 nic diff, exclude device_id and replay_id
-        for nd in network_data:
-            item = [self.device_id, self.replay_id, float(nd[0].replace(":", ''))]
-            item.extend(nd[1:])
-            if nic_header_num != len(network_data[0]) + 2:
-                item.extend([self.DEFAULT_NIC_FUNC_ID])
-            self.nic_data.append(tuple(item))
-
     def start_parsing_data_file(self: any) -> None:
         """
         start parsing data file
@@ -116,3 +106,13 @@ class ParsingNicData(MsMultiProcess):
                 self.save()
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as error:
             logging.error(str(error), exc_info=Constant.TRACE_BACK_SWITCH)
+
+    def _insert_nic_data(self: any, network_data: list) -> None:
+        nic_header_num = DBManager.get_table_field_num(DBNameConstant.TABLE_NIC_ORIGIN + "Map", self.TABLE_PATH)
+        # chip 0 nic diff, exclude device_id and replay_id
+        for nd in network_data:
+            item = [self.device_id, self.replay_id, float(nd[0].replace(":", ''))]
+            item.extend(nd[1:])
+            if nic_header_num != len(network_data[0]) + 2:
+                item.extend([self.DEFAULT_NIC_FUNC_ID])
+            self.nic_data.append(tuple(item))

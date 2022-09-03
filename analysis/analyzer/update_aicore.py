@@ -17,6 +17,7 @@ from common_func.file_manager import FileManager
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_constant.number_constant import NumberConstant
+from common_func.msprof_iteration import MsprofIteration
 from common_func.path_manager import PathManager
 
 
@@ -174,8 +175,7 @@ class UpdateAICoreData:
         ge_conn, ge_curs = DBManager.check_connect_db_path(
             os.path.join(self.sql_dir, DBNameConstant.DB_GE_INFO))
         if ge_conn and ge_curs:
-            block_dim_sql, iter_id = self.__get_block_dim_sql()
-            ge_data = DBManager.fetch_all_data(ge_curs, block_dim_sql, iter_id)
+            ge_data = self.__get_block_dim_data(ge_curs)
             if not ge_data:
                 DBManager.destroy_db_connect(ge_conn, ge_curs)
                 return res_data
@@ -183,17 +183,23 @@ class UpdateAICoreData:
         DBManager.destroy_db_connect(ge_conn, ge_curs)
         return res_data
 
-    def __get_block_dim_sql(self: any) -> tuple:
-        sql = "select task_id, stream_id, block_dim from {0} where task_type='{1}' " \
-              "order by timestamp".format(DBNameConstant.TABLE_GE_TASK, Constant.TASK_TYPE_AI_CORE)
-        if not ProfilingScene().is_operator():
-            iter_id = self.sample_config.get("iter_id", NumberConstant.DEFAULT_ITER_ID)
-            sql = "select task_id, stream_id, block_dim from {0} " \
-                  "where (index_id=0 or index_id=?) " \
-                  "and task_type='{1}' order by timestamp".format(
-                DBNameConstant.TABLE_GE_TASK, Constant.TASK_TYPE_AI_CORE)
-            return sql, (iter_id,)
-        return sql, ()
+    def __get_block_dim_data(self: any, ge_curs: any) -> list:
+        if ProfilingScene().is_operator():
+            sql = "select task_id, stream_id, block_dim from {0} where task_type='{1}' " \
+                  "order by timestamp".format(DBNameConstant.TABLE_GE_TASK, Constant.TASK_TYPE_AI_CORE)
+            return DBManager.fetch_all_data(ge_curs, sql)
+        ge_data = []
+        index_id = self.sample_config.get("iter_id", NumberConstant.DEFAULT_ITER_ID)
+        model_id = self.sample_config.get("model_id", NumberConstant.DEFAULT_MODEL_ID)
+        iter_dict = MsprofIteration(self.project_path).get_iter_dict_with_index_and_model(index_id, model_id)
+        sql = "select task_id, stream_id, block_dim from {0} " \
+              "where model_id=? and (index_id=0 or index_id=?) " \
+              "and task_type='{1}' order by timestamp".format(
+            DBNameConstant.TABLE_GE_TASK, Constant.TASK_TYPE_AI_CORE)
+        for iter_id, model_id in iter_dict.values():
+            ge_data.extend(DBManager.fetch_all_data(ge_curs, sql, (model_id, iter_id)))
+
+        return ge_data
 
     def __get_config_params(self: any) -> tuple:
         """

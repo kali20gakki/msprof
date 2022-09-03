@@ -22,7 +22,10 @@ public:
 
     int UnInit();
 
-    void SetReporterCallback(const MsprofReporterCallback func) { reporterCallback_ = func; }
+    void SetReporterCallback(const MsprofReporterCallback func)
+    {
+        reporterCallback_ = func;
+    }
 
     int Report(ReporterData &data) const;
 
@@ -30,9 +33,6 @@ private:
     bool isInit_;
     MsprofReporterCallback reporterCallback_;
 };
-
 }
 }
-
-
-#endif //PROFILER_MSPROFTXREPORTER_H
+#endif // PROFILER_MSPROFTXREPORTER_H

@@ -7,6 +7,8 @@
 #include "thread.h"
 #include "config/config.h"
 #include "errno/error_code.h"
+#include "msprof_dlog.h"
+#include "msprof_error_manager.h"
 #include "securec.h"
 #include "utils/utils.h"
 
@@ -17,8 +19,8 @@ namespace thread {
 using namespace analysis::dvvp::common::config;
 using namespace analysis::dvvp::common::error;
 using namespace Analysis::Dvvp::MsprofErrMgr;
-using namespace Analysis::Dvvp::Plugin;
-
+using namespace Collector::Dvvp::Plugin;
+using namespace Collector::Dvvp::Mmpa;
 Thread::Thread()
     :tid_(0),
      quit_(false),
@@ -41,10 +43,10 @@ int Thread::Start()
         return PROFILING_SUCCESS;
     }
 
-    mmUserBlock_t funcBlock;
-    (void)memset_s(&funcBlock, sizeof(mmUserBlock_t), 0, sizeof(mmUserBlock_t));
-    mmThreadAttr threadAttr;
-    (void)memset_s(&threadAttr, sizeof(mmThreadAttr), 0, sizeof(mmThreadAttr));
+    MmUserBlockT funcBlock;
+    (void)memset_s(&funcBlock, sizeof(MmUserBlockT), 0, sizeof(MmUserBlockT));
+    MmThreadAttr threadAttr;
+    (void)memset_s(&threadAttr, sizeof(MmThreadAttr), 0, sizeof(MmThreadAttr));
 
     funcBlock.procFunc = Thread::ThrProcess;
     funcBlock.pulArg = this;
@@ -54,8 +56,8 @@ int Thread::Start()
 
     quit_ = false;
     errorContext_ = MsprofErrorManager::instance()->GetErrorManagerContext();
-    int ret = MmpaPlugin::instance()->MsprofMmCreateTaskWithThreadAttr(&tid_, &funcBlock, &threadAttr);
-    if (ret != EN_OK) {
+    int ret = MmCreateTaskWithThreadAttr(&tid_, &funcBlock, &threadAttr);
+    if (ret != PROFILING_SUCCESS) {
         tid_ = 0;
         return PROFILING_FAILED;
     }
@@ -78,8 +80,8 @@ int Thread::Stop()
 int Thread::Join()
 {
     if (tid_ != 0) {
-        int ret = MmpaPlugin::instance()->MsprofMmJoinTask(&tid_);
-        if (ret != EN_OK) {
+        int ret = MmJoinTask(&tid_);
+        if (ret != PROFILING_SUCCESS) {
             return PROFILING_FAILED;
         }
         isStarted_ = false;
@@ -110,7 +112,7 @@ void *Thread::ThrProcess(VOID_PTR arg)
         return nullptr;
     }
     auto runnable = reinterpret_cast<Thread *>(arg);
-    (void)MmpaPlugin::instance()->MsprofMmSetCurrentThreadName(runnable->threadName_.c_str());
+    (void)MmSetCurrentThreadName(runnable->threadName_);
 
     MSPROF_LOGI("New thread %s begins to run", runnable->threadName_.c_str());
 

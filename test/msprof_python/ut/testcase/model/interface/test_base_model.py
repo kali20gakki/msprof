@@ -1,9 +1,9 @@
 import sqlite3
 import unittest
 from unittest import mock
-from model.interface.base_model import BaseModel
+from msmodel.interface.base_model import BaseModel
 
-NAMESPACE = 'model.interface.base_model'
+NAMESPACE = 'msmodel.interface.base_model'
 
 
 class TestBaseModel(unittest.TestCase):

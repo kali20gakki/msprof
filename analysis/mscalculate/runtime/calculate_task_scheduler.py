@@ -17,8 +17,10 @@ from common_func.info_conf_reader import InfoConfReader
 from common_func.path_manager import PathManager
 from common_func.platform.chip_manager import ChipManager
 from common_func.ms_constant.number_constant import NumberConstant
+from common_func.msprof_iteration import MsprofIteration
 from viewer.calculate_rts_data import calculate_task_schedule_data
 from viewer.calculate_rts_data import multi_calculate_task_cost_time
+from mscalculate.ts_task.ai_cpu.aicpu_from_ts_collector import AICpuFromTsCollector
 
 
 class CalculateTaskScheduler:
@@ -83,8 +85,29 @@ class CalculateTaskScheduler:
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
             logging.error(err, exc_info=Constant.TRACE_BACK_SWITCH)
             return
-        self._insert_task_time_data(cal_task_data, runtime_conn, runtime_curs)
+        task_time = self._add_info(cal_task_data)
+        self._collect_aicpu(task_time)
+        self._insert_task_time_data(task_time, runtime_conn, runtime_curs)
         logging.info('create task time table end')
+
+    def _add_info(self: any, cal_task_data: list) -> list:
+        # 0 is default batch id
+        task_time = [task_data + (
+            self.index_id, self.model_id, NumberConstant.DEFAULT_BATCH_ID) for task_data in cal_task_data]
+        return task_time
+
+    def _collect_aicpu(self: any, task_time: list) -> None:
+        aicpu_collector = AICpuFromTsCollector(self.project_path)
+        for data in task_time:
+            task_id = data[5]
+            stream_id = data[6]
+            start = data[9]
+            end = data[10]
+            task_type = data[4]
+
+            aicpu_data = (stream_id, task_id, start, end, task_type)
+            aicpu_collector.filter_aicpu(aicpu_data)
+        aicpu_collector.save_aicpu()
 
     def update_timeline_api(self: any, runtime_conn: any) -> None:
         """
@@ -102,7 +125,6 @@ class CalculateTaskScheduler:
         select_api_sql = 'select api,rowid,stream_id,task_id,batch_id from ApiCall ' \
                          'where tasknum != 0 order by entry_time;'
         api_thread = DBManager.fetch_all_data(runtime_curs, select_api_sql)
-        api_down_data = []
         try:
             api_down_data = self.update(api_thread)
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
@@ -178,10 +200,7 @@ class CalculateTaskScheduler:
             time_range_result = list(time_range)
         return time_range_result
 
-    def _insert_task_time_data(self: any, cal_task_data: list, runtime_conn: any, runtime_curs: any) -> None:
-        # 0 is default batch id
-        task_time = (task_data + (
-            self.index_id, self.model_id, NumberConstant.DEFAULT_BATCH_ID) for task_data in cal_task_data)
+    def _insert_task_time_data(self: any, task_time: list, runtime_conn: any, runtime_curs: any) -> None:
         # sort by complete time
         task_time = sorted(task_time, key=lambda data: data[self.COMPLETE_TIME_INDEX])
         insert_sql = "insert into TaskTime " \

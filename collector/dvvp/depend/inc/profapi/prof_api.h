@@ -7,6 +7,9 @@
 #ifndef PROF_API_H
 #define PROF_API_H
 
+#include "stddef.h"
+#include "stdint.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif // __cplusplus
@@ -16,9 +19,6 @@ extern "C" {
 #else
 #define MSVP_PROF_API __attribute__((visibility("default")))
 #endif
-
-#include "stddef.h"
-#include "stdint.h"
 
 /**
  * @name  profCtrlCallbackType
@@ -170,6 +170,10 @@ MSVP_PROF_API int32_t profAclSetStampCategory(VOID_PTR stamp, uint32_t category)
 
 MSVP_PROF_API int32_t profAclSetStampPayload(VOID_PTR stamp, const int32_t type, VOID_PTR value);
 
+#ifdef __cplusplus
+}
+#endif
+
 // acl define
 using aclError = int;
 using aclrtStream = void*;
@@ -305,20 +309,16 @@ typedef enum {
 // ge define
 namespace ge {
 using Status = uint32_t;
-#define GE_ERRORNO(runtime, type, level, sysid, modid, name, value, desc)                               \
-  constexpr Status name = (static_cast<uint32_t>(0xFFU & (static_cast<uint32_t>(runtime))) << 30U) | \
+#define GE_ERRORNO(runtime, type, level, sysid, modid, name, value, desc)                                \
+    constexpr Status name = (static_cast<uint32_t>(0xFFU & (static_cast<uint32_t>(runtime))) << 30U) |   \
                               (static_cast<uint32_t>(0xFFU & (static_cast<uint32_t>(type))) << 28U) |    \
                               (static_cast<uint32_t>(0xFFU & (static_cast<uint32_t>(level))) << 25U) |   \
                               (static_cast<uint32_t>(0xFFU & (static_cast<uint32_t>(sysid))) << 17U) |   \
                               (static_cast<uint32_t>(0xFFU & (static_cast<uint32_t>(modid))) << 12U) |   \
-                              (static_cast<uint32_t>(0x0FFFU) & (static_cast<uint32_t>(value)));
+                              (static_cast<uint32_t>(0x0FFFU) & (static_cast<uint32_t>(value)))
 
     GE_ERRORNO(0, 0, 0, 0, 0, SUCCESS, 0, "success");
-    GE_ERRORNO(0b11, 0b11, 0b111, 0xFFU, 0b11111, FAILED, 0xFFFU, "failed"); /*lint !e401*/
+    GE_ERRORNO(0b11, 0b11, 0b111, 0xFFU, 0b11111, FAILED, 0xFFFU, "failed");
 } // namespace ge
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

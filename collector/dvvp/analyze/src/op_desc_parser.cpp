@@ -10,6 +10,7 @@
 #include "errno/error_code.h"
 #include "utils/utils.h"
 #include "prof_acl_mgr.h"
+#include "toolchain/prof_acl_api.h"
 
 namespace Analysis {
 namespace Dvvp {

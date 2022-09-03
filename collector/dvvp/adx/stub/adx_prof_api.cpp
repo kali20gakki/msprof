@@ -7,6 +7,7 @@
 #include "adx_prof_api.h"
 #include "msprof_dlog.h"
 #include "memory_utils.h"
+#include "errno/error_code.h"
 
 namespace Analysis {
 namespace Dvvp {
@@ -32,7 +33,7 @@ int DoAdxIdeCreatePacket(CmdClassT type, IdeString value, uint32_t valueLen, Ide
     IdeTlvReq req = (IdeTlvReq)sendBuf;
     req->type = type;
     req->dev_id = 0;
-    req->len = valueLen;
+    req->len = static_cast<int32_t>(valueLen);
     errno_t err = memcpy_s(req->value, mallocValueLen, value, valueLen);
     if (err != EOK) {
         MSPROF_LOGE("memory copy failed, err: %d", err);

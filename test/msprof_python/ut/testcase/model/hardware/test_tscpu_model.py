@@ -2,10 +2,10 @@ import unittest
 from unittest import mock
 
 from common_func.info_conf_reader import InfoConfReader
-from model.hardware.tscpu_model import TscpuModel
+from msmodel.hardware.tscpu_model import TscpuModel
 from sqlite.db_manager import DBManager
 
-NAMESPACE = 'model.hardware.tscpu_model'
+NAMESPACE = 'msmodel.hardware.tscpu_model'
 
 
 class TestTscpuModel(unittest.TestCase):

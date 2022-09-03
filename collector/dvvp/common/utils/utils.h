@@ -22,14 +22,12 @@
 #include <sstream>
 #include <string>
 #include <vector>
-#include "errno/error_code.h"
-#include "mmpa_plugin.h"
-#include "msprof_dlog.h"
-#include "msprof_error_manager.h"
+#include "mmpa_api.h"
 
 template <typename T>
 using SHARED_PTR_ALIA = std::shared_ptr<T>;
-
+using MmProcess = Collector::Dvvp::Mmpa::MmProcess;
+using MmArgvEnv = Collector::Dvvp::Mmpa::MmArgvEnv;
 namespace analysis {
 namespace dvvp {
 namespace common {
@@ -459,25 +457,19 @@ public:
     static void RemoveDir(const std::string &dir, bool rmTopDir = true);
     static std::string CanonicalizePath(const std::string &path);
     static int ExecCmd(const ExecCmdParams &execCmdParams,
-        const std::vector<std::string> &argv,
-        const std::vector<std::string> &envp,
-        int &exitCodeP,
-        mmProcess &childProcess);
+        const std::vector<std::string> &argv, const std::vector<std::string> &envp,
+        int &exitCodeP, MmProcess &childProcess);
     static int ExecCmdC(const ExecCmdArgv &execCmdArgv, const ExecCmdParams &execCmdParams, int &exitCodeP);
     static int ExecCmdCAsync(const ExecCmdArgv &execCmdArgv, const ExecCmdParams &execCmdParams,
-                             mmProcess &childProcess);
+                             MmProcess &childProcess);
     static int ChangeWorkDir(const std::string &fileName);
-    static void SetArgEnv(CHAR_PTR_CONST argv[],
-                          const int argvCount,
-                          CHAR_PTR_CONST envp[],
-                          const int envCount,
-                          mmArgvEnv &argvEnv);
+    static void SetArgEnv(CHAR_PTR_CONST argv[], const int argvCount, CHAR_PTR_CONST envp[],
+                          const int envCount, MmArgvEnv &argvEnv);
     static int DoCreateCmdProcess(const std::string &stdoutRedirectFile,
                                   const std::string &fileName,
-                                  mmArgvEnv &argvEnv,
-                                  mmProcess &tid);
-    static int WaitProcess(mmProcess process, bool &isExited, int &exitCode, bool hang = true);
-    static bool ProcessIsRuning(mmProcess process);
+                                  MmArgvEnv &argvEnv, MmProcess &tid);
+    static int WaitProcess(MmProcess process, bool &isExited, int &exitCode, bool hang = true);
+    static bool ProcessIsRuning(MmProcess process);
     static std::string JoinPath(const std::vector<std::string> &paths);
     static std::string LeftTrim(const std::string &str, const std::string &trims);
     static std::vector<std::string> Split(const std::string &input_str,
@@ -504,6 +496,7 @@ public:
     static VOID_PTR ProfMalloc(size_t size);
     static void ProfFree(VOID_PTR &ptr);
     static bool CheckStringIsNonNegativeIntNum(const std::string &numberStr);
+    static bool CheckStringIsValidNatureNum(const std::string &numberStr);
     static bool IsDeviceMapping();
     static std::string GetCoresStr(const std::vector<int> &cores, const std::string &separator = ",");
     static std::string GetEventsStr(const std::vector<std::string> &events, const std::string &separator = ",");
@@ -519,6 +512,22 @@ public:
     static std::string GetCwdString(void);
     static std::string RelativePathToAbsolutePath(const std::string &path);
     static bool IsSoftLink(const std::string &path);
+    template<typename T>
+    static std::string Int2HexStr(T number)
+    {
+        std::stringstream ioss;
+        std::string ret;
+        ioss << std::hex << number;
+        ioss >> ret;
+        return ret;
+    }
+    static bool IsAppName(const std::string paramsName);
+    static bool IsClusterRunEnv();
+    static int32_t GetRankId();
+    static std::vector<std::string> GenEnvPairVec(const std::vector<std::string> &envVec);
+    static bool PythonEnvReady();
+    static bool AnalysisEnvReady(std::string &msprofPyPath);
+    static int CloudAnalyze(const std::string &jobDir);
 };
 
 template<class T>

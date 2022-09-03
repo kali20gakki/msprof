@@ -4,11 +4,12 @@
 #include "errno/error_code.h"
 #include "input_parser.h"
 #include "config/config_manager.h"
-#include "mmpa_plugin.h"
+#include "mmpa_api.h"
 
 using namespace analysis::dvvp::common::error;
 using namespace Analysis::Dvvp::Msprof;
-using namespace Analysis::Dvvp::Plugin;
+using namespace Collector::Dvvp::Plugin;
+using namespace Collector::Dvvp::Mmpa;
 
 class INPUT_PARSER_UTEST : public testing::Test {
 protected:
@@ -24,7 +25,7 @@ TEST_F(INPUT_PARSER_UTEST, ProcessOptions) {
     EXPECT_EQ(PROFILING_FAILED, parser.ProcessOptions(-1, cmdInfo));
 
     char* resArgs = "on";
-    MOCKER(&MmpaPlugin::MsprofMmGetOptArg)
+    MOCKER(&MmGetOptArg)
         .stubs()
         .will(returnValue(resArgs));
     MOCKER_CPP(&InputParser::MsprofHostCheckValid)
@@ -92,7 +93,7 @@ TEST_F(INPUT_PARSER_UTEST, CheckHostSysCmdOutIsExist) {
     file << "command not found" << std::endl;
     file.close();
     std::string toolName = "iotop";
-    mmProcess tmpProcess = 1;
+    MmProcess tmpProcess = 1;
     // invalid options
     EXPECT_EQ(PROFILING_FAILED, parser.CheckHostSysCmdOutIsExist(tempFile, toolName, tmpProcess));
 }
@@ -128,7 +129,7 @@ TEST_F(INPUT_PARSER_UTEST, UninitCheckHostSysCmd) {
         .then(returnValue(PROFILING_SUCCESS));
 
     InputParser parser = InputParser();
-    mmProcess checkProcess = 1;
+    MmProcess checkProcess = 1;
 
     EXPECT_EQ(PROFILING_SUCCESS, parser.UninitCheckHostSysCmd(checkProcess));
     EXPECT_EQ(PROFILING_FAILED, parser.UninitCheckHostSysCmd(checkProcess));
@@ -147,7 +148,37 @@ TEST_F(INPUT_PARSER_UTEST, CheckOutputValid) {
     EXPECT_EQ(PROFILING_SUCCESS, parser.CheckOutputValid(cmdInfo));
 }
 
-TEST_F(INPUT_PARSER_UTEST, CheckAppValid) {
+TEST_F(INPUT_PARSER_UTEST, CheckStorageLimitValid)
+{
+    GlobalMockObject::verify();
+    InputParser parser = InputParser();
+    struct MsprofCmdInfo cmdInfo = { {nullptr} };
+
+    EXPECT_EQ(PROFILING_SUCCESS, parser.CheckStorageLimitValid(cmdInfo));
+    cmdInfo.args[ARGS_STORAGE_LIMIT] = "";
+    EXPECT_EQ(PROFILING_FAILED, parser.CheckStorageLimitValid(cmdInfo));
+    cmdInfo.args[ARGS_STORAGE_LIMIT] = "1";
+    EXPECT_EQ(PROFILING_FAILED, parser.CheckStorageLimitValid(cmdInfo));
+    cmdInfo.args[ARGS_STORAGE_LIMIT] = "200MB";
+    EXPECT_EQ(PROFILING_SUCCESS, parser.CheckStorageLimitValid(cmdInfo));
+}
+
+TEST_F(INPUT_PARSER_UTEST, GetAppParam)
+{
+    GlobalMockObject::verify();
+    InputParser parser = InputParser();
+    struct MsprofCmdInfo cmdInfo = { {nullptr} };
+
+    std::string appParams1;
+    EXPECT_EQ(PROFILING_FAILED, parser.GetAppParam(appParams1));
+    std::string appParams2 = " bash xx.sh";
+    EXPECT_EQ(PROFILING_FAILED, parser.GetAppParam(appParams2));
+    std::string appParams3 = "bash xx.sh";
+    EXPECT_EQ(PROFILING_FAILED, parser.GetAppParam(appParams3));
+}
+
+TEST_F(INPUT_PARSER_UTEST, CheckAppValid)
+{
     GlobalMockObject::verify();
     InputParser parser = InputParser();
     struct MsprofCmdInfo cmdInfo = { {nullptr} };
@@ -157,6 +188,7 @@ TEST_F(INPUT_PARSER_UTEST, CheckAppValid) {
     EXPECT_EQ(PROFILING_FAILED, parser.CheckAppValid(cmdInfo));
     cmdInfo.args[ARGS_APPLICATION] = "./CheckAppValid a";
     EXPECT_EQ(PROFILING_FAILED, parser.CheckAppValid(cmdInfo));
+    MOCKER(&MmAccess2).stubs().will(returnValue(0));
     std::ofstream file("CheckAppValid");
     file << "command not found" << std::endl;
     file.close();
@@ -200,7 +232,7 @@ TEST_F(INPUT_PARSER_UTEST, CheckPythonPathValid) {
     EXPECT_EQ(PROFILING_FAILED, parser.CheckPythonPathValid(cmdInfo));
     
     Utils::CreateDir("TestPython");
-    MOCKER(&MmpaPlugin::MsprofMmAccess2).stubs().will(returnValue(-1)).then(returnValue(0));
+    MOCKER(&MmAccess2).stubs().will(returnValue(-1)).then(returnValue(0));
     cmdInfo.args[ARGS_PYTHON_PATH] = "TestPython";
     EXPECT_EQ(PROFILING_FAILED, parser.CheckPythonPathValid(cmdInfo));
     EXPECT_EQ(PROFILING_FAILED, parser.CheckPythonPathValid(cmdInfo));
@@ -411,7 +443,7 @@ TEST_F(INPUT_PARSER_UTEST, PreCheckPlatform) {
         .will(returnValue(Analysis::Dvvp::Common::Config::PlatformType::END_TYPE))
         .then(returnValue(Analysis::Dvvp::Common::Config::PlatformType::DC_TYPE));
     EXPECT_EQ(PROFILING_FAILED, parser.PreCheckPlatform(ARGS_AIV, argv));
-    MOCKER(&MmpaPlugin::MsprofMmGetOptInd)
+    MOCKER(&MmGetOptInd)
         .stubs()
         .will(returnValue(1));
     parser.PreCheckPlatform(ARGS_AIV, argv);
@@ -427,7 +459,7 @@ TEST_F(INPUT_PARSER_UTEST, MsprofCmdCheckValid) {
     cmdInfo.args[ARGS_LOW_POWER] = "bb";
     cmdInfo.args[ARGS_SUMMARY_FORMAT] = "csv";
     cmdInfo.args[ARGS_PYTHON_PATH] = "123";
-    MOCKER(&MmpaPlugin::MsprofMmGetOptInd)
+    MOCKER(&MmGetOptInd)
         .stubs()
         .will(returnValue(1));
     parser.MsprofCmdCheckValid(cmdInfo, ARGS_AIV_MODE);

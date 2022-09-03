@@ -13,7 +13,7 @@ from common_func.ms_multi_process import MsMultiProcess
 from common_func.path_manager import PathManager
 from common_func.utils import Utils
 from framework.offset_calculator import FileCalculator, OffsetCalculator
-from model.iter_rec.iter_rec_model import HwtsIterModel
+from msmodel.iter_rec.iter_rec_model import HwtsIterModel
 from mscalculate.interface.icalculator import ICalculator
 from msparser.stars.parser_dispatcher import ParserDispatcher
 from profiling_bean.prof_enum.data_tag import DataTag

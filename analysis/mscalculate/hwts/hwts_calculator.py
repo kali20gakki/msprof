@@ -8,7 +8,6 @@ import logging
 import os
 
 from analyzer.scene_base.profiling_scene import ProfilingScene
-from analyzer.op_common_function import OpCommonFunc
 from common_func.db_name_constant import DBNameConstant
 from common_func.empty_class import EmptyClass
 from common_func.info_conf_reader import InfoConfReader
@@ -21,11 +20,13 @@ from common_func.msprof_step import MsprofStep
 from common_func.path_manager import PathManager
 from common_func.utils import Utils
 from common_func.batch_counter import BatchCounter
+from common_func.platform.chip_manager import ChipManager
 from framework.offset_calculator import FileCalculator
 from framework.offset_calculator import OffsetCalculator
-from model.iter_rec.iter_rec_model import HwtsIterModel
-from model.task_time.hwts_log_model import HwtsLogModel
+from msmodel.iter_rec.iter_rec_model import HwtsIterModel
+from msmodel.task_time.hwts_log_model import HwtsLogModel
 from mscalculate.interface.icalculator import ICalculator
+from mscalculate.ts_task.ai_cpu.aicpu_from_ts_collector import AICpuFromTsCollector
 from profiling_bean.prof_enum.data_tag import DataTag
 from profiling_bean.struct_info.hwts_log import HwtsLogBean
 
@@ -37,6 +38,7 @@ class HwtsCalculator(ICalculator, MsMultiProcess):
     # Tags for differnt HWTS log type.
     HWTS_TASK_START = 0
     HWTS_TASK_END = 1
+    HWTS_TASK_TYPE = 2
     HWTS_LOG_SIZE = 64
     HWTS_MAX_CNT = 16
     TASK_TIME_COMPLETE_INDEX = 3
@@ -47,6 +49,7 @@ class HwtsCalculator(ICalculator, MsMultiProcess):
         self._project_path = sample_config.get(StrConstant.SAMPLE_CONFIG_PROJECT_PATH)
         self._file_list = file_list.get(DataTag.HWTS, [])
         self._hwts_log_model = HwtsLogModel(self._project_path)
+        self._aicpu_collector = AICpuFromTsCollector(self._project_path)
         self._iter_model = HwtsIterModel(self._project_path)
         self._log_data = []
         self._file_list.sort(key=lambda x: int(x.split("_")[-1]))
@@ -94,28 +97,40 @@ class HwtsCalculator(ICalculator, MsMultiProcess):
             task_value = prep.get(index, {})
             task_satrt_list = task_value.get(self.HWTS_TASK_START, [])
             task_end_list = task_value.get(self.HWTS_TASK_END, [])
-            if self.HWTS_TASK_START == task.task_type:
+            task_type_list = task_value.get(self.HWTS_TASK_TYPE, [])
+            if self.HWTS_TASK_START == task.sys_tag:
                 if len(task_satrt_list) > len(task_end_list):
                     task_satrt_list.pop()
                     logging.warning("stream id: %s, task id: %s is no end task, index of the stream and task is %s",
                                     task.stream_id, task.task_id, str(len(task_satrt_list)))
                 task_satrt_list.append(task.sys_cnt)
-            elif self.HWTS_TASK_END == task.task_type:
+            elif self.HWTS_TASK_END == task.sys_tag:
                 if len(task_satrt_list) == len(task_end_list):
                     continue
                 task_end_list.append(task.sys_cnt)
+                task_type_list.append(task.task_type)
             else:
-                logging.error("invalid task type of hwts: %s", task.task_type)
-            task_value.update({self.HWTS_TASK_START: task_satrt_list, self.HWTS_TASK_END: task_end_list})
+                logging.error("invalid sys tag of hwts: %s", task.sys_tag)
+            task_value.update({self.HWTS_TASK_START: task_satrt_list,
+                               self.HWTS_TASK_END: task_end_list,
+                               self.HWTS_TASK_TYPE: task_type_list})
             prep.update({index: task_value})
         train_data = []
 
         for index in prep:
             _index_value = prep.get(index)
             while _index_value.get(self.HWTS_TASK_START) and _index_value.get(self.HWTS_TASK_END):
-                train_data.append(tuple(list(index.split(",")) + [
+                data_info = tuple(list(index.split(",")) + [
                     _index_value[self.HWTS_TASK_START].pop(0),
-                    _index_value[self.HWTS_TASK_END].pop(0)]))
+                    _index_value[self.HWTS_TASK_END].pop(0)])
+
+                train_data.append(data_info)
+
+                if not ChipManager().is_chip_v2():
+                    self._aicpu_collector.filter_aicpu(data_info + (_index_value[self.HWTS_TASK_TYPE].pop(0),))
+
+        if not ChipManager().is_chip_v2():
+            self._aicpu_collector.save_aicpu()
         return sorted(train_data, key=lambda data: data[self.TASK_TIME_COMPLETE_INDEX])
 
     def _parse_by_iter(self: any) -> None:
@@ -157,8 +172,14 @@ class HwtsCalculator(ICalculator, MsMultiProcess):
                     batch_id]
         else:
             self._iter_model.init()
-            _iter_id = MsprofIteration(self._project_path). \
-                get_iter_id_by_index_id(self._sample_config.get("iter_id"), self._sample_config.get("model_id"))
+            if ProfilingScene().is_mix_operator_and_graph() and \
+                    self._sample_config.get("model_id") != Constant.GE_OP_MODEL_ID:
+                _iter_info = MsprofIteration(self._project_path). \
+                get_iteration_info_by_index_id(self._sample_config.get("iter_id"), self._sample_config.get("model_id"))
+                _iter_id = (_iter_info[0] - 1, _iter_info[0])
+            else:
+                _iter_id = MsprofIteration(self._project_path). \
+                    get_iter_id_by_index_id(self._sample_config.get("iter_id"), self._sample_config.get("model_id"))
             batch_list = self._iter_model.get_batch_list(_iter_id, DBNameConstant.TABLE_HWTS_BATCH)
 
             if len(batch_list) != len(prep_data_res):
@@ -178,7 +199,22 @@ class HwtsCalculator(ICalculator, MsMultiProcess):
         return prep_data_res
 
     def _parse(self: any, all_log_bytes: bytes) -> None:
+        if ProfilingScene().is_mix_operator_and_graph() and \
+                self._sample_config.get("model_id") != Constant.GE_OP_MODEL_ID:
+            _iter_info = MsprofIteration(self._project_path). \
+                get_iteration_info_by_index_id(self._sample_config.get("iter_id"), self._sample_config.get("model_id"))
+            if not _iter_info:
+                logging.warning("can not get the actual iter_info")
+                return
+            self._parse_task_log(all_log_bytes, _iter_info)
+        else:
+            self._parse_task_log(all_log_bytes)
+
+    def _parse_task_log(self: any, all_log_bytes: bytes, _iter_info=None):
         for log_data in Utils.chunks(all_log_bytes, self.HWTS_LOG_SIZE):
             _task_log = HwtsLogBean.decode(log_data)
             if _task_log.is_log_type():
-                self._log_data.append(_task_log)
+                if not _iter_info:
+                    self._log_data.append(_task_log)
+                elif _iter_info[1] <= _task_log.sys_cnt and  _task_log.sys_cnt <= _iter_info[2]:
+                    self._log_data.append(_task_log)

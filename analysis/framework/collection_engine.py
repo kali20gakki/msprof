@@ -12,15 +12,14 @@ import os
 import sys
 import traceback
 
-from analyzer.training.time_parser import TimeParser
-from analyzer.training.training_trace_parser import TrainingTraceParser
+from common_func.common import print_msg
 from common_func.constant import Constant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msvp_common import check_dir_writable
 from common_func.msvp_common import check_file_writable
-from common_func.msvp_common import error
 from common_func.msvp_common import clear_project_dirs
+from common_func.msvp_common import error
 from common_func.path_manager import PathManager
 from host_prof.host_cpu_usage.cpu_usage_analysis import CpuUsageAnalysis
 from host_prof.host_disk_usage.disk_usage_analysis import DiskUsageAnalysis
@@ -42,18 +41,6 @@ class AI:
         sys.path.append(os.path.realpath(os.path.dirname(os.path.realpath(sys.argv[0])) + "/.."))
         self._version = None
 
-    def import_control_flow(self: any) -> None:
-        """
-        parse the collected data and load data into database
-        """
-        try:
-            self.data_analysis()
-        except multiprocessing.ProcessError as err:
-            logging.error(str(err))
-            print(json.dumps({'status': NumberConstant.ERROR, 'info': traceback.format_exc()}))
-        logging.info('Database process finished.')
-        logging.info('Analysis finished.')
-
     @classmethod
     def project_preparation(cls: any, project_dir: str) -> None:
         """
@@ -63,44 +50,6 @@ class AI:
             cls.create_project_dirs(project_dir)
         except (OSError, SystemError, IOError) as err:
             error(cls.FILE_NAME, err)
-
-    def formulat_list(self: any, data_class: any) -> None:
-        """
-        use multi-processing to run data class
-        :param data_class: class ready to be parsed
-        :return:
-        """
-        parsing_obj = []
-        for parsing_class in data_class:
-            parsing_obj.append(parsing_class(self.sample_config))
-            # start parsing processor
-        for item in parsing_obj:
-            item.start()
-        # join parsing processor
-        for item in parsing_obj:
-            item.join()
-
-    @staticmethod
-    def make_data_analysis() -> list:
-        """
-        deal with analysis with different scene
-        """
-        # init data parsing object
-        data_analysis = [TimeParser, TrainingTraceParser]
-        return data_analysis
-
-    def data_analysis(self: any) -> None:
-        """
-        parsing data file
-        """
-        # init data parsing object
-        if InfoConfReader().is_host_profiling():
-            self.formulat_list([CpuUsageAnalysis, MemUsageAnalysis,
-                                DiskUsageAnalysis, NetworkUsageAnalysis,
-                                HostSyscallAnalysis])
-        else:
-            data_analysis = self.make_data_analysis()
-            self.formulat_list(data_analysis)
 
     @classmethod
     def create_project_dirs(cls: any, project_dir: str) -> None:
@@ -127,3 +76,41 @@ class AI:
                     os.chmod(PathManager.get_collection_log_path(project_dir), NumberConstant.FILE_AUTHORITY)
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
             error(cls.FILE_NAME, err)
+
+    def import_control_flow(self: any) -> None:
+        """
+        parse the collected data and load data into database
+        """
+        try:
+            self.data_analysis()
+        except multiprocessing.ProcessError as err:
+            logging.error(str(err))
+            print_msg(json.dumps({'status': NumberConstant.ERROR, 'info': traceback.format_exc()}))
+        logging.info('Database process finished.')
+        logging.info('Analysis finished.')
+
+    def formulat_list(self: any, data_class: any) -> None:
+        """
+        use multi-processing to run data class
+        :param data_class: class ready to be parsed
+        :return:
+        """
+        parsing_obj = []
+        for parsing_class in data_class:
+            parsing_obj.append(parsing_class(self.sample_config))
+            # start parsing processor
+        for item in parsing_obj:
+            item.start()
+        # join parsing processor
+        for item in parsing_obj:
+            item.join()
+
+    def data_analysis(self: any) -> None:
+        """
+        parsing data file
+        """
+        # init data parsing object
+        if InfoConfReader().is_host_profiling():
+            self.formulat_list([CpuUsageAnalysis, MemUsageAnalysis,
+                                DiskUsageAnalysis, NetworkUsageAnalysis,
+                                HostSyscallAnalysis])

@@ -14,10 +14,10 @@ from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.path_manager import PathManager
 from framework.offset_calculator import OffsetCalculator
-from model.runtime.rts_track_model import RtsModel
+from msmodel.runtime.rts_track_model import RtsModel
+from msparser.data_struct_size_constant import StructFmt
 from msparser.interface.iparser import IParser
 from msparser.runtime.rts_data_bean import RtsDataBean
-from msparser.data_struct_size_constant import StructFmt
 from profiling_bean.prof_enum.data_tag import DataTag
 
 
@@ -35,28 +35,6 @@ class RtsTrackParser(IParser, MsMultiProcess):
         self._device_id = self._sample_config.get("device_id", "0")
         self._model = RtsModel(self._project_path, DBNameConstant.DB_RTS_TRACK,
                                [DBNameConstant.TABLE_RUNTIME_TRACK])
-
-    def _read_rts_file(self: any, _file_path: str, _file_size: int) -> None:
-        offset_calculator = OffsetCalculator(self._file_list.get(DataTag.RUNTIME_TRACK),
-                                             StructFmt.RTS_TRACK_FMT_SIZE,
-                                             self._project_path)
-        with open(_file_path, 'rb') as _rts_file:
-            _all_rts_data = offset_calculator.pre_process(_rts_file, _file_size)
-            for _index in range(len(_all_rts_data) // StructFmt.RTS_TRACK_FMT_SIZE):
-                rts_data_bean = RtsDataBean.decode(
-                    _all_rts_data[
-                        _index * StructFmt.RTS_TRACK_FMT_SIZE:(_index + 1) * StructFmt.RTS_TRACK_FMT_SIZE])
-
-                if rts_data_bean is not None:
-                    self._rts_data.append([
-                        self._device_id,
-                        rts_data_bean.timestamp,
-                        rts_data_bean.task_type,
-                        rts_data_bean.stream_id,
-                        rts_data_bean.task_id,
-                        rts_data_bean.thread_id,
-                        rts_data_bean.batch_id
-                    ])
 
     def parse(self: any) -> None:
         """
@@ -92,3 +70,25 @@ class RtsTrackParser(IParser, MsMultiProcess):
 
         self.parse()
         self.save()
+
+    def _read_rts_file(self: any, _file_path: str, _file_size: int) -> None:
+        offset_calculator = OffsetCalculator(self._file_list.get(DataTag.RUNTIME_TRACK),
+                                             StructFmt.RTS_TRACK_FMT_SIZE,
+                                             self._project_path)
+        with open(_file_path, 'rb') as _rts_file:
+            _all_rts_data = offset_calculator.pre_process(_rts_file, _file_size)
+            for _index in range(len(_all_rts_data) // StructFmt.RTS_TRACK_FMT_SIZE):
+                rts_data_bean = RtsDataBean.decode(
+                    _all_rts_data[
+                    _index * StructFmt.RTS_TRACK_FMT_SIZE:(_index + 1) * StructFmt.RTS_TRACK_FMT_SIZE])
+
+                if rts_data_bean is not None:
+                    self._rts_data.append([
+                        self._device_id,
+                        rts_data_bean.timestamp,
+                        rts_data_bean.task_type,
+                        rts_data_bean.stream_id,
+                        rts_data_bean.task_id,
+                        rts_data_bean.thread_id,
+                        rts_data_bean.batch_id
+                    ])

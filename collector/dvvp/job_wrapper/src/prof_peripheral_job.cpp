@@ -45,7 +45,9 @@ ProfPeripheralJob::~ProfPeripheralJob() {}
  */
 int ProfPeripheralJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 {
-    CHECK_JOB_COMMON_PARAM_RET(cfg, PROFILING_FAILED);
+    if (CheckJobCommonParam(cfg) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
     if (cfg->comParams->params->host_profiling) {
         return PROFILING_FAILED;
     }
@@ -75,7 +77,9 @@ int ProfPeripheralJob::SetPeripheralConfig()
  */
 int ProfPeripheralJob::Process()
 {
-    CHECK_JOB_COMMON_PARAM_RET(collectionJobCfg_, PROFILING_FAILED);
+    if (CheckJobCommonParam(collectionJobCfg_) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
     if (!DrvChannelsMgr::instance()->ChannelIsValid(collectionJobCfg_->comParams->devId, channelId_)) {
         MSPROF_LOGW("Channel is invalid, devId:%d, channelId:%d", collectionJobCfg_->comParams->devId,
             static_cast<int>(channelId_));
@@ -99,7 +103,7 @@ int ProfPeripheralJob::Process()
 
     peripheralCfg_.profDeviceId     = collectionJobCfg_->comParams->devId;
     peripheralCfg_.profChannel      = channelId_;
-    peripheralCfg_.profSamplePeriod = samplePeriod_;
+    peripheralCfg_.profSamplePeriod = static_cast<int32_t>(samplePeriod_);
     peripheralCfg_.profDataFile = "";
     ret = DrvPeripheralStart(peripheralCfg_);
     MSPROF_LOGI("start profiling Channel %d, events:%s, ret=%d",
@@ -120,7 +124,9 @@ int ProfPeripheralJob::Process()
  */
 int ProfPeripheralJob::Uninit()
 {
-    CHECK_JOB_COMMON_PARAM_RET(collectionJobCfg_, PROFILING_SUCCESS);
+    if (CheckJobCommonParam(collectionJobCfg_) != PROFILING_SUCCESS) {
+        return PROFILING_SUCCESS;
+    }
     if (!DrvChannelsMgr::instance()->ChannelIsValid(collectionJobCfg_->comParams->devId, channelId_)) {
         MSPROF_LOGW("Channel is invalid, devId:%d, channelId:%d", collectionJobCfg_->comParams->devId,
             static_cast<int>(channelId_));
@@ -154,7 +160,9 @@ ProfDdrJob::~ProfDdrJob() {}
  */
 int ProfDdrJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 {
-    CHECK_JOB_EVENT_PARAM_RET(cfg, PROFILING_FAILED);
+    if (CheckJobEventParam(cfg) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
     if (cfg->comParams->params->host_profiling) {
         return PROFILING_FAILED;
     }
@@ -179,13 +187,16 @@ int ProfDdrJob::SetPeripheralConfig()
     samplePeriod_ = PERIPHERAL_INTERVAL_MS_MIN;
     if (collectionJobCfg_->comParams->params->ddr_interval >= PERIPHERAL_INTERVAL_MS_MIN &&
         collectionJobCfg_->comParams->params->ddr_interval <= PERIPHERAL_INTERVAL_MS_MAX) {
-        samplePeriod_ = collectionJobCfg_->comParams->params->ddr_interval;
+        samplePeriod_ = static_cast<uint32_t>(collectionJobCfg_->comParams->params->ddr_interval);
     }
 
     eventsStr_ = GetEventsStr(*(collectionJobCfg_->jobParams.events));
     uint32_t configSize = sizeof(TagDdrProfileConfig) +
                           (sizeof(uint32_t) * GetEventSize(*(collectionJobCfg_->jobParams.events)));
-    CHECK_JOB_CONFIG_UNSIGNED_SIZE_RET(configSize, PROFILING_FAILED);
+    if (configSize == 0 || configSize > 0x7FFFFFFF) {
+        MSPROF_LOGE("Profiling Config Size Out Range");
+        return PROFILING_FAILED;
+    }
 
     TagDdrProfileConfig *configP = reinterpret_cast<TagDdrProfileConfig *>(Utils::ProfMalloc((size_t)configSize));
     if (configP == nullptr) {
@@ -232,7 +243,9 @@ ProfHbmJob::~ProfHbmJob()
  */
 int ProfHbmJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 {
-    CHECK_JOB_EVENT_PARAM_RET(cfg, PROFILING_FAILED);
+    if (CheckJobEventParam(cfg) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
     if (cfg->comParams->params->host_profiling) {
         return PROFILING_FAILED;
     }
@@ -258,14 +271,16 @@ int ProfHbmJob::SetPeripheralConfig()
     samplePeriod_ = PERIPHERAL_INTERVAL_MS_MIN;
     if (collectionJobCfg_->comParams->params->hbmInterval >= PERIPHERAL_INTERVAL_MS_MIN &&
         collectionJobCfg_->comParams->params->hbmInterval <= PERIPHERAL_INTERVAL_MS_MAX) {
-        samplePeriod_ = collectionJobCfg_->comParams->params->hbmInterval;
+        samplePeriod_ = static_cast<uint32_t>(collectionJobCfg_->comParams->params->hbmInterval);
     }
 
     eventsStr_ = GetEventsStr(*(collectionJobCfg_->jobParams.events));
     uint32_t configSize = sizeof(TagTsHbmProfileConfig) +
                           (sizeof(uint32_t) * GetEventSize(*(collectionJobCfg_->jobParams.events)));
-    CHECK_JOB_CONFIG_UNSIGNED_SIZE_RET(configSize, PROFILING_FAILED);
-
+    if (configSize == 0 || configSize > 0x7FFFFFFF) {
+        MSPROF_LOGE("Profiling Config Size Out Range");
+        return PROFILING_FAILED;
+    }
     TagTsHbmProfileConfig *configP = reinterpret_cast<TagTsHbmProfileConfig *>(Utils::ProfMalloc(configSize));
     if (configP == nullptr) {
         MSPROF_LOGE("ProfHbmJob ProfMalloc TagTsHbmProfileConfig failed");
@@ -308,7 +323,9 @@ ProfHccsJob::~ProfHccsJob() {}
  */
 int ProfHccsJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 {
-    CHECK_JOB_COMMON_PARAM_RET(cfg, PROFILING_FAILED);
+    if (CheckJobCommonParam(cfg) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
     if (cfg->comParams->params->host_profiling) {
         return PROFILING_FAILED;
     }
@@ -328,7 +345,7 @@ int ProfHccsJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
     samplePeriod_ = PERIPHERAL_INTERVAL_MS_MIN;
     if (collectionJobCfg_->comParams->params->hccsInterval >= PERIPHERAL_INTERVAL_MS_MIN &&
         collectionJobCfg_->comParams->params->hccsInterval <= PERIPHERAL_INTERVAL_MS_MAX) {
-        samplePeriod_ = collectionJobCfg_->comParams->params->hccsInterval;
+        samplePeriod_ = static_cast<uint32_t>(collectionJobCfg_->comParams->params->hccsInterval);
     }
 
     peripheralCfg_.configP = nullptr;
@@ -354,7 +371,9 @@ ProfPcieJob::~ProfPcieJob() {}
  */
 int ProfPcieJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 {
-    CHECK_JOB_COMMON_PARAM_RET(cfg, PROFILING_FAILED);
+    if (CheckJobCommonParam(cfg) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
     if (cfg->comParams->params->host_profiling) {
         return PROFILING_FAILED;
     }
@@ -374,7 +393,7 @@ int ProfPcieJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
     samplePeriod_ = PERIPHERAL_INTERVAL_MS_MIN;
     if (collectionJobCfg_->comParams->params->pcieInterval >= PERIPHERAL_INTERVAL_MS_MIN &&
         collectionJobCfg_->comParams->params->pcieInterval <= PERIPHERAL_INTERVAL_MS_MAX) {
-        samplePeriod_ = collectionJobCfg_->comParams->params->pcieInterval;
+        samplePeriod_ = static_cast<uint32_t>(collectionJobCfg_->comParams->params->pcieInterval);
     }
 
     peripheralCfg_.configP = nullptr;
@@ -400,7 +419,9 @@ ProfNicJob::~ProfNicJob() {}
  */
 int ProfNicJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 {
-    CHECK_JOB_COMMON_PARAM_RET(cfg, PROFILING_FAILED);
+    if (CheckJobCommonParam(cfg) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
     if (cfg->comParams->params->host_profiling) {
         return PROFILING_FAILED;
     }
@@ -418,7 +439,7 @@ int ProfNicJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
     collectionJobCfg_->jobParams.dataPath = analysis::dvvp::common::utils::Utils::JoinPath(profDataFilePathV);
     samplePeriod_ = PERIPHERAL_INTERVAL_MS_SMIN;
     if (collectionJobCfg_->comParams->params->nicInterval > 0) {
-        samplePeriod_ = collectionJobCfg_->comParams->params->nicInterval;
+        samplePeriod_ = static_cast<uint32_t>(collectionJobCfg_->comParams->params->nicInterval);
     }
     MSPROF_LOGI("NIC Profiling samplePeriod_:%d", samplePeriod_);
 
@@ -462,7 +483,9 @@ ProfDvppJob::~ProfDvppJob()
  */
 int ProfDvppJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 {
-    CHECK_JOB_COMMON_PARAM_RET(cfg, PROFILING_FAILED);
+    if (CheckJobCommonParam(cfg) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
     if (cfg->comParams->params->host_profiling) {
         return PROFILING_FAILED;
     }
@@ -480,7 +503,7 @@ int ProfDvppJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
     collectionJobCfg_->jobParams.dataPath = analysis::dvvp::common::utils::Utils::JoinPath(profDataFilePathV);
     samplePeriod_ = PERIPHERAL_INTERVAL_MS_SMIN;
     if (collectionJobCfg_->comParams->params->dvpp_sampling_interval > 0) {
-        samplePeriod_ = collectionJobCfg_->comParams->params->dvpp_sampling_interval;
+        samplePeriod_ = static_cast<uint32_t>(collectionJobCfg_->comParams->params->dvpp_sampling_interval);
     }
 
     peripheralCfg_.configP = nullptr;
@@ -492,7 +515,9 @@ int ProfDvppJob::Process()
 {
     if (ConfigManager::instance()->GetPlatformType() == PlatformType::MDC_TYPE ||
         ConfigManager::instance()->GetPlatformType() == PlatformType::DC_TYPE) {
-        CHECK_JOB_COMMON_PARAM_RET(collectionJobCfg_, PROFILING_FAILED);
+        if (CheckJobCommonParam(collectionJobCfg_) != PROFILING_SUCCESS) {
+            return PROFILING_FAILED;
+        }
         (void)SetPeripheralConfig();
         for (auto channelId : channelList_) {
             if (!DrvChannelsMgr::instance()->ChannelIsValid(collectionJobCfg_->comParams->devId, channelId)) {
@@ -508,7 +533,7 @@ int ProfDvppJob::Process()
                 static_cast<int>(channelId), collectionJobCfg_->comParams->devIdOnHost);
             peripheralCfg_.profDeviceId     = collectionJobCfg_->comParams->devId;
             peripheralCfg_.profChannel      = channelId;
-            peripheralCfg_.profSamplePeriod = samplePeriod_;
+            peripheralCfg_.profSamplePeriod = static_cast<int32_t>(samplePeriod_);
             peripheralCfg_.profDataFile = "";
             int ret = DrvPeripheralStart(peripheralCfg_);
             MSPROF_LOGI("start profiling Channel %d, events:%s, ret=%d",
@@ -532,7 +557,9 @@ int ProfDvppJob::Uninit()
     using namespace Analysis::Dvvp::Common::Config;
     if (ConfigManager::instance()->GetPlatformType() == PlatformType::MDC_TYPE ||
         ConfigManager::instance()->GetPlatformType() == PlatformType::DC_TYPE) {
-        CHECK_JOB_COMMON_PARAM_RET(collectionJobCfg_, PROFILING_SUCCESS);
+        if (CheckJobCommonParam(collectionJobCfg_) != PROFILING_SUCCESS) {
+            return PROFILING_SUCCESS;
+        }
         for (auto channelId : channelList_) {
             if (!DrvChannelsMgr::instance()->ChannelIsValid(collectionJobCfg_->comParams->devId, channelId)) {
                 MSPROF_LOGW("Channel is invalid, devId:%d, channelId:%d", collectionJobCfg_->comParams->devId,
@@ -571,7 +598,9 @@ ProfLlcJob::~ProfLlcJob() {}
  */
 int ProfLlcJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 {
-    CHECK_JOB_EVENT_PARAM_RET(cfg, PROFILING_FAILED);
+    if (CheckJobEventParam(cfg) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
     if (cfg->comParams->params->host_profiling) {
         return PROFILING_FAILED;
     }
@@ -602,7 +631,7 @@ int ProfLlcJob::SetPeripheralConfig()
     samplePeriod_ = PERIPHERAL_INTERVAL_MS_MIN;
     if (collectionJobCfg_->comParams->params->llc_interval >= PERIPHERAL_INTERVAL_MS_MIN &&
         collectionJobCfg_->comParams->params->llc_interval <= PERIPHERAL_INTERVAL_MS_MAX) {
-        samplePeriod_ = collectionJobCfg_->comParams->params->llc_interval;
+        samplePeriod_ = static_cast<uint32_t>(collectionJobCfg_->comParams->params->llc_interval);
     }
 
     eventsStr_ = GetEventsStr(*(collectionJobCfg_->jobParams.events));
@@ -645,7 +674,9 @@ int ProfLlcJob::Process()
         return ProfPeripheralJob::Process();
     } else {
         std::string profLlcCmd;
-        CHECK_JOB_EVENT_PARAM_RET(collectionJobCfg_, PROFILING_FAILED);
+        if (CheckJobEventParam(collectionJobCfg_) != PROFILING_SUCCESS) {
+            return PROFILING_FAILED;
+        }
         GetCollectLlcEventsCmd(collectionJobCfg_->comParams->devId, *(collectionJobCfg_->jobParams.events), profLlcCmd);
         MSPROF_LOGI("llc_event:%s, profLlcCmd:%s",
             GetEventsStr(*collectionJobCfg_->jobParams.events).c_str(), profLlcCmd.c_str());
@@ -706,7 +737,7 @@ int ProfLlcJob::Uninit()
 
         int exitCode = analysis::dvvp::common::utils::VALID_EXIT_CODE;
         static const std::string CMD = "sudo";
-        mmProcess appProcess = MSVP_MMPROCESS;
+        MmProcess appProcess = MSVP_MMPROCESS;
         ExecCmdParams execCmdParams(CMD, false, "");
         int ret = analysis::dvvp::common::utils::Utils::ExecCmd(execCmdParams,
                                                                 argsV,
@@ -858,7 +889,9 @@ ProfRoceJob::~ProfRoceJob() {}
  */
 int ProfRoceJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 {
-    CHECK_JOB_COMMON_PARAM_RET(cfg, PROFILING_FAILED);
+    if (CheckJobCommonParam(cfg) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
     if (cfg->comParams->params->host_profiling) {
         return PROFILING_FAILED;
     }
@@ -877,7 +910,7 @@ int ProfRoceJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
     collectionJobCfg_->jobParams.dataPath = analysis::dvvp::common::utils::Utils::JoinPath(profDataFilePathV);
     samplePeriod_ = PERIPHERAL_INTERVAL_MS_SMIN;
     if (collectionJobCfg_->comParams->params->roceInterval > 0) {
-        samplePeriod_ = collectionJobCfg_->comParams->params->roceInterval;
+        samplePeriod_ = static_cast<uint32_t>(collectionJobCfg_->comParams->params->roceInterval);
     }
 
     peripheralCfg_.configP = nullptr;
@@ -894,7 +927,9 @@ ProfStarsSocProfileJob::~ProfStarsSocProfileJob() {}
 
 int ProfStarsSocProfileJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 {
-    CHECK_JOB_COMMON_PARAM_RET(cfg, PROFILING_FAILED);
+    if (CheckJobCommonParam(cfg) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
     if (cfg->comParams->params->host_profiling) {
         return PROFILING_FAILED;
     }
@@ -917,13 +952,13 @@ int ProfStarsSocProfileJob::SetPeripheralConfig()
         analysis::dvvp::common::config::MSVP_PROF_ON) {
         period = collectionJobCfg_->comParams->params->interconnection_sampling_interval;
         configP->inter_chip.innerSwitch = TS_PROFILE_COMMAND_TYPE_PROFILING_ENABLE;
-        configP->inter_chip.period = period > 0 ? period : DEFAULT_PROFILING_INTERVAL_20MS;
+        configP->inter_chip.period = static_cast<uint32_t>(period > 0 ? period : DEFAULT_PROFILING_INTERVAL_20MS);
     }
 
     if (collectionJobCfg_->comParams->params->hardware_mem == analysis::dvvp::common::config::MSVP_PROF_ON) {
         period = collectionJobCfg_->comParams->params->hardware_mem_sampling_interval;
         configP->on_chip.innerSwitch = TS_PROFILE_COMMAND_TYPE_PROFILING_ENABLE;
-        configP->on_chip.period = period > 0 ? period : DEFAULT_PROFILING_INTERVAL_20MS;
+        configP->on_chip.period = static_cast<uint32_t>(period > 0 ? period : DEFAULT_PROFILING_INTERVAL_20MS);
     }
 
     if (collectionJobCfg_->comParams->params->low_power == analysis::dvvp::common::config::MSVP_PROF_ON) {

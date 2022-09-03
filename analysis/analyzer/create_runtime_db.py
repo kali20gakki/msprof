@@ -16,7 +16,6 @@ from common_func.db_name_constant import DBNameConstant
 from common_func.file_manager import FileManager
 from common_func.file_name_manager import FileNameManagerConstant
 from common_func.file_name_manager import get_ai_core_compiles
-from common_func.file_name_manager import get_aiv_compiles
 from common_func.file_name_manager import get_file_name_pattern_match
 from common_func.file_name_manager import get_ts_track_aiv_compiles
 from common_func.file_name_manager import get_ts_track_compiles
@@ -25,7 +24,6 @@ from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.msvp_common import MsvpCommonConst
-from common_func.msvp_common import error
 from common_func.msvp_common import is_valid_original_data
 from common_func.path_manager import PathManager
 from common_func.platform.chip_manager import ChipManager
@@ -34,8 +32,8 @@ from mscalculate.step_trace.create_step_table import StepTableBuilder
 from msparser.data_struct_size_constant import StructFmt
 from profiling_bean.struct_info.event_counter import AiCoreTaskInfo
 from profiling_bean.struct_info.step_trace import StepTrace
-from profiling_bean.struct_info.ts_time_line import TimeLineData
 from profiling_bean.struct_info.ts_memcpy import TsMemcpy
+from profiling_bean.struct_info.ts_time_line import TimeLineData
 from viewer.calculate_rts_data import create_ai_event_tables
 from viewer.calculate_rts_data import insert_event_value
 
@@ -98,44 +96,6 @@ class ParsingRuntimeData(MsMultiProcess):
                 api_down_task.append(api[0:3] + (task,))
         return api_down_task
 
-    def _time_line(self: any, *args: any) -> None:
-
-        mode = args[0]
-        try:
-            time_line_data = TimeLineData.decode(args[2])
-        except struct.error:
-            logging.error('Get time line original data error. ', exc_info=Constant.TRACE_BACK_SWITCH)
-            return
-        self.rts_data.get("time_line").append(
-            (self.parse_info.get("replayid"),
-             time_line_data.task_type, time_line_data.task_id,
-             time_line_data.stream_id, time_line_data.task_state,
-             time_line_data.time_stamp, time_line_data.thread,
-             self.parse_info.get("device_id"), mode))
-
-    def _event_count(self: any, *args: any) -> None:
-        try:
-            ai_core_pmu = AiCoreTaskInfo.decode(args[2])
-        except struct.error:
-            logging.error('Get event count original data error. ', exc_info=Constant.TRACE_BACK_SWITCH)
-            return
-        # when overflow=0, overflowCycle is a number full of F.
-        # The number is bigger than sqlite's scope
-        if ai_core_pmu.counter_info.overflow == 0:
-            ai_core_pmu.counter_info.overflow_cycle = 0  # set overflowCycle to 0
-        self.rts_data.get("event_count").append(
-            tuple([self.parse_info.get("replayid"),
-                   ai_core_pmu.task_type,
-                   ai_core_pmu.task_id,
-                   ai_core_pmu.stream_id,
-                   ai_core_pmu.counter_info.overflow,
-                   ai_core_pmu.counter_info.overflow_cycle,
-                   ai_core_pmu.counter_info.time_stamp] +
-                  Utils.generator_to_list(i for i in ai_core_pmu.counter_info.event_counter) +
-                  [ai_core_pmu.counter_info.task_cyc,
-                   ai_core_pmu.counter_info.block, 0,
-                   self.parse_info.get("device_id"), args[0]]))
-
     @staticmethod
     def _running_ts_tag(*args: any) -> None:
         """
@@ -167,36 +127,6 @@ class ParsingRuntimeData(MsMultiProcess):
         :param args: ai vector core status
         :return: None
         """
-
-    def _step_trace_status_tag(self: any, *args: any) -> None:
-        """
-        analysis step trace data
-        :param args: bytes for step trace
-        :return: None
-        """
-        try:
-            step_trace = StepTrace.decode(args[2])
-        except struct.error:
-            logging.error('Get step trace original data error. ', exc_info=Constant.TRACE_BACK_SWITCH)
-            return
-        self.rts_data.get("step_trace").append(
-            (step_trace.index_id, step_trace.model_id,
-             step_trace.timestamp,
-             step_trace.stream_id, step_trace.task_id, step_trace.tag_id))
-
-    def _ts_memcpy_tag(self: any, *args: any) -> None:
-        """
-        analysis ts memcpy data
-        :param args: bytes for ts memcpy
-        :return: None
-        """
-        try:
-            ts_memcpy = TsMemcpy.decode(args[2])
-        except struct.error:
-            logging.error('Get memory copy data error. ', exc_info=Constant.TRACE_BACK_SWITCH)
-            return
-        self.rts_data.get("ts_memcpy").append(
-            (ts_memcpy.timestamp, ts_memcpy.stream_id, ts_memcpy.task_id, ts_memcpy.task_state))
 
     @staticmethod
     def _read_binary_align_reserved(file_: any, fmt: str) -> None:
@@ -254,7 +184,7 @@ class ParsingRuntimeData(MsMultiProcess):
         """
 
         column = 'replayId,taskType,task_id,stream_id,overflow,' \
-                 'overflowCycle,timeStamp,{0},task_cyc,block,thread,device_id,mode'\
+                 'overflowCycle,timeStamp,{0},task_cyc,block,thread,device_id,mode' \
             .format(','.join('event{}'.format(i) for i in range(1, len(self.rts_data.get("event_count")[0]) - 11)))
         event_sql = 'insert into {table_name} ({column}) values ' \
                     '({value})'.format(table_name=DBNameConstant.TABLE_EVENT_COUNTER,
@@ -321,6 +251,113 @@ class ParsingRuntimeData(MsMultiProcess):
         del self.rts_data.get("time_line")[:]
         del self.rts_data.get("event_count")[:]
 
+    def read_binary_data(self: any, binary_data_path: str, legacy_bytes: bytes) -> bytes:
+        """
+        parsing binary data
+        :param binary_data_path: binary data file path
+        :param legacy_bytes: bytes remind last file
+        :return:
+        """
+        project_path = self.sample_config.get("result_dir")
+        file_name = PathManager.get_data_file_path(project_path, binary_data_path)
+        legacy_bytes = self._do_read_binary_data(file_name, binary_data_path, legacy_bytes)
+        try:
+            self.insert_data()
+        except sqlite3.Error as err:
+            logging.error("%s: %s", binary_data_path, err, exc_info=Constant.TRACE_BACK_SWITCH)
+            return legacy_bytes
+        logging.info("End parsing rts data file: %s", os.path.basename(file_name))
+        return legacy_bytes
+
+    def ms_run(self: any) -> None:
+        """
+        entrance for data parser
+        :return: None
+        """
+        try:
+            self.create_runtime_db()
+        except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
+            logging.error("%s", str(err), exc_info=Constant.TRACE_BACK_SWITCH)
+
+    def _time_line(self: any, *args: any) -> None:
+
+        mode = args[0]
+        try:
+            time_line_data = TimeLineData.decode(args[2])
+        except struct.error:
+            logging.error('Get time line original data error. ', exc_info=Constant.TRACE_BACK_SWITCH)
+            return
+        self.rts_data.get("time_line").append(
+            (self.parse_info.get("replayid"),
+             time_line_data.task_type, time_line_data.task_id,
+             time_line_data.stream_id, time_line_data.task_state,
+             time_line_data.time_stamp, time_line_data.thread,
+             self.parse_info.get("device_id"), mode))
+
+    def _start_parsing_data_file(self: any) -> int:
+        """
+        start parsing the data
+        :return: result or data parse
+        """
+        try:
+            return self._do_parse_data_file()
+        except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
+            logging.error("%s", str(err), exc_info=Constant.TRACE_BACK_SWITCH)
+            return NumberConstant.ERROR
+
+    def _step_trace_status_tag(self: any, *args: any) -> None:
+        """
+        analysis step trace data
+        :param args: bytes for step trace
+        :return: None
+        """
+        try:
+            step_trace = StepTrace.decode(args[2])
+        except struct.error:
+            logging.error('Get step trace original data error. ', exc_info=Constant.TRACE_BACK_SWITCH)
+            return
+        self.rts_data.get("step_trace").append(
+            (step_trace.index_id, step_trace.model_id,
+             step_trace.timestamp,
+             step_trace.stream_id, step_trace.task_id, step_trace.tag_id))
+
+    def _event_count(self: any, *args: any) -> None:
+        try:
+            ai_core_pmu = AiCoreTaskInfo.decode(args[2])
+        except struct.error:
+            logging.error('Get event count original data error. ', exc_info=Constant.TRACE_BACK_SWITCH)
+            return
+        # when overflow=0, overflowCycle is a number full of F.
+        # The number is bigger than sqlite's scope
+        if ai_core_pmu.counter_info.overflow == 0:
+            ai_core_pmu.counter_info.overflow_cycle = 0  # set overflowCycle to 0
+        self.rts_data.get("event_count").append(
+            tuple([self.parse_info.get("replayid"),
+                   ai_core_pmu.task_type,
+                   ai_core_pmu.task_id,
+                   ai_core_pmu.stream_id,
+                   ai_core_pmu.counter_info.overflow,
+                   ai_core_pmu.counter_info.overflow_cycle,
+                   ai_core_pmu.counter_info.time_stamp] +
+                  Utils.generator_to_list(i for i in ai_core_pmu.counter_info.event_counter) +
+                  [ai_core_pmu.counter_info.task_cyc,
+                   ai_core_pmu.counter_info.block, 0,
+                   self.parse_info.get("device_id"), args[0]]))
+
+    def _ts_memcpy_tag(self: any, *args: any) -> None:
+        """
+        analysis ts memcpy data
+        :param args: bytes for ts memcpy
+        :return: None
+        """
+        try:
+            ts_memcpy = TsMemcpy.decode(args[2])
+        except struct.error:
+            logging.error('Get memory copy data error. ', exc_info=Constant.TRACE_BACK_SWITCH)
+            return
+        self.rts_data.get("ts_memcpy").append(
+            (ts_memcpy.timestamp, ts_memcpy.stream_id, ts_memcpy.task_id, ts_memcpy.task_state))
+
     def _do_read_binary_data(self: any, file_name: str, binary_data_path: str, legacy_bytes: any) -> any:
         parse_dct = {
             self.TIME_LINE: self._time_line,
@@ -362,24 +399,6 @@ class ParsingRuntimeData(MsMultiProcess):
                 # complete file, set empty legacy bytes
                 if offset == binary_data_size:
                     legacy_bytes = bytes()
-        return legacy_bytes
-
-    def read_binary_data(self: any, binary_data_path: str, legacy_bytes: bytes) -> bytes:
-        """
-        parsing binary data
-        :param binary_data_path: binary data file path
-        :param legacy_bytes: bytes remind last file
-        :return:
-        """
-        project_path = self.sample_config.get("result_dir")
-        file_name = PathManager.get_data_file_path(project_path, binary_data_path)
-        legacy_bytes = self._do_read_binary_data(file_name, binary_data_path, legacy_bytes)
-        try:
-            self.insert_data()
-        except sqlite3.Error as err:
-            logging.error("%s: %s", binary_data_path, err, exc_info=Constant.TRACE_BACK_SWITCH)
-            return legacy_bytes
-        logging.info("End parsing rts data file: %s", os.path.basename(file_name))
         return legacy_bytes
 
     def _check_file_with_task_based(self: any, core_patterns: tuple, core_profiling_mode: str, file_name: str) -> any:
@@ -436,24 +455,3 @@ class ParsingRuntimeData(MsMultiProcess):
             last_data_type = data_type
             legacy_bytes = self.read_binary_data(file_name, legacy_bytes)
         return NumberConstant.SUCCESS
-
-    def _start_parsing_data_file(self: any) -> int:
-        """
-        start parsing the data
-        :return: result or data parse
-        """
-        try:
-            return self._do_parse_data_file()
-        except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
-            logging.error("%s", str(err), exc_info=Constant.TRACE_BACK_SWITCH)
-            return NumberConstant.ERROR
-
-    def ms_run(self: any) -> None:
-        """
-        entrance for data parser
-        :return: None
-        """
-        try:
-            self.create_runtime_db()
-        except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
-            logging.error("%s", str(err), exc_info=Constant.TRACE_BACK_SWITCH)

@@ -86,6 +86,7 @@ public:
     void SetModeToOff();
     bool IsCmdMode();
     bool IsModeOff();
+    int32_t StopProfConfigCheck(uint64_t dataTypeConfigStop, uint64_t dataTypeConfigStart);
 
     // api ctrl
     int ProfAclInit(const std::string& profResultPath);
@@ -113,6 +114,7 @@ public:
     std::string GetParamJsonStr();
     // task datatypeconfig add
     void AddAiCpuModelConf(uint64_t &dataTypeConfig) const;
+    void AddRuntimeTraceConf(uint64_t &dataTypeConfig) const;
 
 public:
     int32_t MsprofInitForDynamic(VOID_PTR data, uint32_t len) const;
@@ -196,7 +198,9 @@ private:
     void CloseSubscribeFd(const uint32_t devId, const uint32_t modelId);
     int32_t MsprofResultPathAdapter(const std::string &dir, std::string &resultPath);
     void PrintWorkMode(WorkMode mode);
-    int32_t MsprofHelperParamConstruct(const std::string &msprofPath, uint32_t storageLimit, const std::string &paramsJson);
+    int32_t MsprofHelperParamConstruct(const std::string &msprofPath, const std::string &paramsJson);
+    int MsprofAiCoreMetricsAdapter(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params,
+        SHARED_PTR_ALIA<analysis::dvvp::proto::ProfGeOptionsConfig> inputCfgPb);
 
 private:
     bool isReady_;

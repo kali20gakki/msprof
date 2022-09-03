@@ -9,6 +9,7 @@ import logging
 import os
 import platform
 import re
+import sys
 import time
 from logging.handlers import RotatingFileHandler
 
@@ -48,7 +49,7 @@ class CommonConstant:
     MAX_LOG_BACKUPS = 1
     FILE_NAME = os.path.basename(__file__)
     FILE_NAME_DONE_LEN = 5  # filename example: Framework.host.task_desc_info.0.slice_0.done
-    KERNEL_LAUNCH_INDEX = 3
+    KERNEL_LAUNCH = "KernelLaunch"
     LOG_LEVEL = logging.INFO
     MINIMUM_DISK_MEMORY = 512
     MEMORY_BUFFER_NUM = 3
@@ -77,9 +78,9 @@ def error(file_name: str, msg: str) -> None:
     """
     if file_name is None or msg is None:
         return
-    print(time.strftime("%a %d %b %Y %H:%M:%S ", time.localtime())
-          + "[ERROR] [MSVP] [{0}] {1}: {2}".format(str(os.getpid()), file_name, str(msg)),
-          flush=True)
+    print_msg(time.strftime("%a %d %b %Y %H:%M:%S ", time.localtime())
+              + "[ERROR] [MSVP] [{0}] {1}: {2}".format(str(os.getpid()), file_name, str(msg)),
+              flush=True)
 
 
 def print_info(file_name: str, msg: str) -> None:
@@ -88,9 +89,9 @@ def print_info(file_name: str, msg: str) -> None:
     """
     if file_name is None or msg is None:
         return
-    print(time.strftime("%a %d %b %Y %H:%M:%S ", time.localtime())
-          + "[INFO] [MSVP] [{0}] {1}: {2}".format(str(os.getpid()), file_name, str(msg)),
-          flush=True)
+    print_msg(time.strftime("%a %d %b %Y %H:%M:%S ", time.localtime())
+              + "[INFO] [MSVP] [{0}] {1}: {2}".format(str(os.getpid()), file_name, str(msg)),
+              flush=True)
 
 
 def warn(file_name: str, msg: str) -> None:
@@ -99,9 +100,16 @@ def warn(file_name: str, msg: str) -> None:
     """
     if file_name is None or msg is None:
         return
-    print(time.strftime("%a %d %b %Y %H:%M:%S ", time.localtime())
-          + "[WARNING] [MSVP] [{0}] {1}: {2}".format(str(os.getpid()), file_name, str(msg)),
-          flush=True)
+    print_msg(time.strftime("%a %d %b %Y %H:%M:%S ", time.localtime())
+              + "[WARNING] [MSVP] [{0}] {1}: {2}".format(str(os.getpid()), file_name, str(msg)),
+              flush=True)
+
+
+def print_msg(*args: any, **kwargs: any) -> None:
+    """
+    execute print
+    """
+    print(*args, **kwargs)
 
 
 def generate_config(sample_path: str) -> dict:
@@ -383,3 +391,12 @@ def check_free_memory(result_dir: str) -> None:
         warn(os.path.basename(__file__),
              "Requires {:.2f}MB of space to store parsed data, actually only {:.2f}MB, "
              "parsed data may not be complete.".format(need_free_memory, free_memory))
+
+
+def call_sys_exit(status: any = None) -> None:
+    """
+    call sys.exit to exit the program.
+    :param status: the exit status or other object to be printed.
+    :return:
+    """
+    sys.exit(status)

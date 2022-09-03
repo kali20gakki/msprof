@@ -3,10 +3,10 @@ from unittest import mock
 
 from constant.ut_db_name_constant import DB_SOC_LOG
 from constant.ut_db_name_constant import TABLE_THREAD_TASK
-from model.stars.ffts_log_model import FftsLogModel
+from msmodel.stars.ffts_log_model import FftsLogModel
 from sqlite.db_manager import DBManager
 
-NAMESPACE = 'model.stars.ffts_log_model'
+NAMESPACE = 'msmodel.stars.ffts_log_model'
 
 
 class StarsCommon:

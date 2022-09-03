@@ -1,24 +1,22 @@
 #include "driver_plugin.h"
  
-namespace Analysis {
+namespace Collector {
 namespace Dvvp {
 namespace Plugin {
- 
-DriverPlugin::~DriverPlugin() {}
- 
 bool DriverPlugin::IsFuncExist(const std::string &funcName) const
 {
     return true;
 }
  
 hdcError_t DriverPlugin::MsprofHalHdcRecv(HDC_SESSION session, struct drvHdcMsg *pMsg, int bufLen,
-    UINT64 flag, int *recvBufCount, UINT32 timeout)
+    uint64_t flag, int *recvBufCount, uint32_t timeout)
 {
     *recvBufCount = 1;
     return DRV_ERROR_NONE;
 }
  
-hdcError_t DriverPlugin::MsprofHalHdcSend(HDC_SESSION session, struct drvHdcMsg *pMsg, UINT64 flag, UINT32 timeout)
+hdcError_t DriverPlugin::MsprofHalHdcSend(HDC_SESSION session, struct drvHdcMsg *pMsg, uint64_t flag,
+    uint32_t timeout)
 {
     return DRV_ERROR_NONE;
 }

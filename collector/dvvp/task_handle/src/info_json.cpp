@@ -22,7 +22,7 @@
 #include "utils/utils.h"
 #include "platform/platform.h"
 #include "task_relationship_mgr.h"
-#include "mmpa_plugin.h"
+#include "mmpa_api.h"
 
 namespace analysis {
 namespace dvvp {
@@ -33,7 +33,8 @@ using namespace analysis::dvvp::common::utils;
 using namespace analysis::dvvp::common::config;
 using namespace Analysis::Dvvp::Common::Platform;
 using namespace Analysis::Dvvp::Common::Config;
-using namespace Analysis::Dvvp::Plugin;
+using namespace Collector::Dvvp::Plugin;
+using namespace Collector::Dvvp::Mmpa;
 
 const char * const PROF_NET_CARD = "/sys/class/net";
 const char * const PROF_PROC_MEM = "/proc/meminfo";
@@ -111,13 +112,13 @@ void InfoJson::AddSysConf(SHARED_PTR_ALIA<InfoMain> infoMain)
 #if (defined(linux) || defined(__linux__))
     long tck = sysconf(_SC_CLK_TCK);
     if (tck == -1) {
-        MSPROF_LOGW("Get system clock failed, err=%d.", MmpaPlugin::instance()->MsprofMmGetErrorCode());
+        MSPROF_LOGW("Get system clock failed, err=%d.", MmGetErrorCode());
         return;
     }
     infoMain->set_sysclockfreq(tck);
     long cpu = sysconf(_SC_NPROCESSORS_CONF);
     if (cpu == -1) {
-        MSPROF_LOGW("Get system cpu num failed, err=%d.", MmpaPlugin::instance()->MsprofMmGetErrorCode());
+        MSPROF_LOGW("Get system cpu num failed, err=%d.", MmGetErrorCode());
         return;
     }
     infoMain->set_cpunums(cpu);
@@ -234,6 +235,14 @@ void InfoJson::AddNetCardInfo(SHARED_PTR_ALIA<InfoMain> infoMain)
 #endif
 }
 
+void InfoJson::AddRankId(SHARED_PTR_ALIA<InfoMain> infoMain)
+{
+#if (defined(linux) || defined(__linux__))
+    int32_t rankId = Utils::GetRankId();
+    infoMain->set_rank_id(rankId);
+#endif
+}
+
 int InfoJson::AddHostInfo(SHARED_PTR_ALIA<InfoMain> infoMain)
 {
     if (Platform::instance()->RunSocSide()) {
@@ -243,8 +252,8 @@ int InfoJson::AddHostInfo(SHARED_PTR_ALIA<InfoMain> infoMain)
     // fetch and set OS
     MSPROF_LOGI("Begin to AddHostInfo in info.json, devices: %s.", devices_.c_str());
     char str[MMPA_MAX_PATH] = {0};
-    int ret = MmpaPlugin::instance()->MsprofMmGetOsVersion(str, MMPA_MAX_PATH);
-    if (ret != EN_OK) {
+    int ret = MmGetOsVersion(str, MMPA_MAX_PATH);
+    if (ret != PROFILING_SUCCESS) {
         MSPROF_LOGW("mmGetOsVersion failed");
     }
     std::string os(str);
@@ -252,8 +261,8 @@ int InfoJson::AddHostInfo(SHARED_PTR_ALIA<InfoMain> infoMain)
 
     // fetch and set hostname
     (void)memset_s(str, MMPA_MAX_PATH, 0, MMPA_MAX_PATH);
-    ret = MmpaPlugin::instance()->MsprofMmGetOsName(str, MMPA_MAX_PATH);
-    if (ret != EN_OK) {
+    ret = MmGetOsName(str, MMPA_MAX_PATH);
+    if (ret != PROFILING_SUCCESS) {
         MSPROF_LOGW("mmGetOsName failed");
     }
     std::string hostName(str);
@@ -264,18 +273,19 @@ int InfoJson::AddHostInfo(SHARED_PTR_ALIA<InfoMain> infoMain)
     AddSysConf(infoMain);
     AddSysTime(infoMain);
     AddNetCardInfo(infoMain);
+    AddRankId(infoMain);
 
     // fetch and set cpu infos
-    mmCpuDesc *cpuInfo = nullptr;
-    INT32 cpuNum = 0;
-    ret = MmpaPlugin::instance()->MsprofMmGetCpuInfo(&cpuInfo, &cpuNum);
-    if (ret != EN_OK || cpuNum <= 0) {
+    MmCpuDesc *cpuInfo = nullptr;
+    int32_t cpuNum = 0;
+    ret = MmGetCpuInfo(&cpuInfo, &cpuNum);
+    if (ret != PROFILING_SUCCESS || cpuNum <= 0) {
         MSPROF_LOGE("mmGetCpuInfo failed");
         return PROFILING_FAILED;
     }
     infoMain->set_hwtype(cpuInfo[0].arch);
     infoMain->set_cpucores(cpuNum);
-    for (INT32 i = 0; i < cpuNum; i++) {
+    for (int32_t i = 0; i < cpuNum; i++) {
         auto infoCpu = infoMain->add_cpu();
         infoCpu->set_id(i);
         infoCpu->set_name(cpuInfo[i].manufacturer);
@@ -283,7 +293,7 @@ int InfoJson::AddHostInfo(SHARED_PTR_ALIA<InfoMain> infoMain)
         infoCpu->set_frequency(cpuInfo[i].maxFrequency);
         infoCpu->set_logical_cpu_count(cpuInfo[i].nthreads == 0 ? cpuInfo[i].ncounts : cpuInfo[i].nthreads);
     }
-    MmpaPlugin::instance()->MsprofMmCpuInfoFree(cpuInfo, cpuNum);
+    MmCpuInfoFree(cpuInfo, cpuNum);
     MSPROF_LOGI("End to AddHostInfo in info.json, devices: %s.", devices_.c_str());
     return PROFILING_SUCCESS;
 }
@@ -381,10 +391,16 @@ int InfoJson::AddDeviceInfo(SHARED_PTR_ALIA<InfoMain> infoMain)
         infoDevice->set_aicpu_occupy_bitmap(devInfo.aicpu_occupy_bitmap);
         SetCtrlCpuId(*infoDevice, devInfo.ctrl_cpu_id);
         std::string ctrlCpu;
-        CPU_ID_STR(ctrlCpu, 0, devInfo.ctrl_cpu_core_num); // ctrl cpu, begin with 0
+        for (int64_t i = 0; i < devInfo.ctrl_cpu_core_num; i++) {
+            ctrlCpu.append((i == 0) ? std::to_string(0) : ("," + std::to_string(i)));
+        }
+
         infoDevice->set_ctrl_cpu(ctrlCpu);
         std::string aiCpu;
-        CPU_ID_STR(aiCpu, devInfo.ai_cpu_core_id, (devInfo.ctrl_cpu_core_num + devInfo.ai_cpu_core_num)); // ai cpu
+        for (int64_t i = devInfo.ai_cpu_core_id; i < devInfo.ctrl_cpu_core_num + devInfo.ai_cpu_core_num; i++) {
+            aiCpu.append((i == devInfo.ai_cpu_core_id) ?
+                std::to_string(devInfo.ai_cpu_core_id) : ("," + std::to_string(i)));
+        }
         infoDevice->set_ai_cpu(aiCpu);
         SetHwtsFrequency(*infoDevice);
         infoDevice->set_aic_frequency(Analysis::Dvvp::Driver::DrvGeAicFrq(devIndexId));

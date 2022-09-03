@@ -6,13 +6,14 @@
 #include "prof_manager.h"
 #include "hdc/device_transport.h"
 #include "data_handle.h"
-#include "mmpa_plugin.h"
+#include "mmpa_api.h"
 
 using namespace analysis::dvvp::host;
 using namespace analysis::dvvp::transport;
 using namespace analysis::dvvp::common::error;
 using namespace Analysis::Dvvp::MsprofErrMgr;
-using namespace Analysis::Dvvp::Plugin;
+using namespace Collector::Dvvp::Plugin;
+using namespace Collector::Dvvp::Mmpa;
 
 class HOST_PROF_DEVICE_TRANSPORT_UTEST: public testing::Test {
 protected:
@@ -38,8 +39,6 @@ TEST_F(HOST_PROF_DEVICE_TRANSPORT_UTEST, CreateCoparamsnn){
 
     std::shared_ptr<analysis::dvvp::proto::DataChannelHandshake> data_message(
             new analysis::dvvp::proto::DataChannelHandshake());
-    EXPECT_EQ(nullptr, dev_tran->CreateConn());
-    // EXPECT_EQ(PROFILING_FAILED, dev_tran->HandleShake(nullptr, data_message));
 
     data_tran = std::make_shared<HDCTransport>(client);
     std::shared_ptr<AdxTransport> fake_trans;
@@ -120,9 +119,9 @@ TEST_F(HOST_PROF_DEVICE_TRANSPORT_UTEST, DoInit) {
         .then(returnValue(-1))
         .then(returnValue(0));
 
-    MOCKER(&MmpaPlugin::MsprofMmCreateTaskWithThreadAttr)
+    MOCKER(&MmCreateTaskWithThreadAttr)
         .stubs()
-        .will(returnValue(EN_OK));
+        .will(returnValue(PROFILING_SUCCESS));
 
     std::vector<int> devIds;
     devIds.push_back(0);

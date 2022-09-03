@@ -22,6 +22,7 @@ set(profilerSrcFiles
     ${MSPROF_SOURCE_DIR}/dvvp/common/thread/thread.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/thread/thread_pool.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/utils/utils.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/common/mmpa/mmpa_api.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/validation/param_validation.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/depend/stub/error_manager/msprof_error_manager_stub.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/driver/channel/ai_drv_prof_api.cpp
@@ -45,7 +46,7 @@ set(profilerSrcFiles
     ${MSPROF_SOURCE_DIR}/dvvp/msprof/platform/mini/data_dumper.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/msprof/msproftx/src/msprof_tx_manager.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/msprof/msproftx/src/msprof_tx_reporter.cpp
-    ${MSPROF_SOURCE_DIR}/dvvp/msprof/msproftx/src/prof_stamp_pool.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/msprof/msproftx/src/msprof_stamp_pool.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/msprofiler/src/command_handle.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/msprofiler/src/msprof_callback_impl.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/task_handle/src/device.cpp
@@ -75,7 +76,6 @@ set(localSrcFiles
     ../stub/ge_stub.cpp
     ../stub/hdc-api-stub.cpp
     ../stub/hdc-log-stub.cpp
-    ../stub/common-utils-stub.cpp
     ../stub/devdrv_runtime_api_stub.cpp
     ../stub/profile_drv_user_stub.cpp
     ../../stub/driver_plugin_stub.cpp
@@ -104,7 +104,7 @@ target_compile_definitions(job_wrapper_utest PRIVATE
 target_include_directories(job_wrapper_utest PRIVATE
     ${GTEST_INCLUDE_DIR}
     ${MOCKCPP_INCLUDE_DIR}
-    ${TOP_DIR}/opensource/securec/include
+    ${TOP_DIR}/platform/securec/include
     ${TOP_DIR}/opensource/json/include
     ${TOP_DIR}/inc/toolchain
     ${TOP_DIR}/collector/inc/
@@ -115,8 +115,6 @@ target_include_directories(job_wrapper_utest PRIVATE
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/slog
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/metadef/error_manager/error_manager_stub
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/driver
-    ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/adump
-    ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/mmpa
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/profapi
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/plugin
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/acl
@@ -127,6 +125,7 @@ target_include_directories(job_wrapper_utest PRIVATE
     ${MSPROF_SOURCE_DIR}/../inc
     ${MSPROF_SOURCE_DIR}/dvvp/msprof/engine/include
     ${MSPROF_SOURCE_DIR}/dvvp/common/utils 
+    ${MSPROF_SOURCE_DIR}/dvvp/common/mmpa
     ${TOP_DIR}/abl/msprof/inc/toolchain
     ${TOP_DIR}/abl/libc_sec/include
     ${TOP_DIR}/open_source/json/include
@@ -160,7 +159,6 @@ target_include_directories(job_wrapper_utest PRIVATE
     ${MSPROF_SOURCE_DIR}/dvvp/job_wrapper/include
     ${MSPROF_SOURCE_DIR}/dvvp/adx/inc
     ${TOP_DIR}/graphengine/inc/external
-    # ${TOP_DIR}/graphengine/inc/framework/common
     ${TOP_DIR}/inc
     ${TOP_DIR}/inc/driver
     ${TOP_DIR}/inc/external

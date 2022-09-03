@@ -13,7 +13,7 @@
 #endif
 #include "config/config.h"
 #include "msprof_dlog.h"
-#include "mmpa_plugin.h"
+#include "mmpa_api.h"
 #include "platform/platform.h"
 #include "uploader_mgr.h"
 #include "utils/utils.h"
@@ -26,7 +26,8 @@ using namespace analysis::dvvp::common::error;
 using namespace Analysis::Dvvp::Common::Platform;
 using namespace analysis::dvvp::common::utils;
 using namespace Analysis::Dvvp::MsprofErrMgr;
-using namespace Analysis::Dvvp::Plugin;
+using namespace Collector::Dvvp::Plugin;
+using namespace Collector::Dvvp::Mmpa;
 
 const int FILE_FIND_REPLAY          = 10;
 
@@ -44,7 +45,9 @@ static void StopHostProfTimer(TimerHandlerTag tag)
 
 int ProfHostDataBase::CheckHostProfiling(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 {
-    CHECK_JOB_CONTEXT_PARAM_RET(cfg, PROFILING_FAILED);
+    if (CheckJobContextParam(cfg) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
     if (!(cfg->comParams->params->host_profiling)) {
         return PROFILING_NOTSUPPORT;
     }
@@ -62,7 +65,9 @@ int ProfHostDataBase::CheckHostProfiling(const SHARED_PTR_ALIA<CollectionJobCfg>
 
 int ProfHostDataBase::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 {
-    CHECK_JOB_CONTEXT_PARAM_RET(cfg, PROFILING_FAILED);
+    if (CheckJobContextParam(cfg) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
     int ret = CheckHostProfiling(cfg);
     if (ret != PROFILING_SUCCESS) {
         return ret;
@@ -98,7 +103,9 @@ ProfHostCpuJob::~ProfHostCpuJob()
 
 int ProfHostCpuJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 {
-    CHECK_JOB_CONTEXT_PARAM_RET(cfg, PROFILING_FAILED);
+    if (CheckJobContextParam(cfg) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
     int ret = ProfHostDataBase::Init(cfg);
     if (ret != PROFILING_SUCCESS) {
         return ret;
@@ -114,7 +121,9 @@ int ProfHostCpuJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 
 int ProfHostCpuJob::Process()
 {
-    CHECK_JOB_COMMON_PARAM_RET(collectionJobCfg_, PROFILING_FAILED);
+    if (CheckJobCommonParam(collectionJobCfg_) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
 
     SHARED_PTR_ALIA<ProcHostCpuHandler> cpuHandler;
     MSVP_MAKE_SHARED7_RET(cpuHandler, ProcHostCpuHandler,
@@ -149,7 +158,9 @@ ProfHostMemJob::~ProfHostMemJob()
 
 int ProfHostMemJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 {
-    CHECK_JOB_CONTEXT_PARAM_RET(cfg, PROFILING_FAILED);
+    if (CheckJobContextParam(cfg) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
     int ret = ProfHostDataBase::Init(cfg);
     if (ret != PROFILING_SUCCESS) {
         return ret;
@@ -165,7 +176,9 @@ int ProfHostMemJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 
 int ProfHostMemJob::Process()
 {
-    CHECK_JOB_COMMON_PARAM_RET(collectionJobCfg_, PROFILING_FAILED);
+    if (CheckJobCommonParam(collectionJobCfg_) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
 
     SHARED_PTR_ALIA<ProcHostMemHandler> memHandler;
     MSVP_MAKE_SHARED7_RET(memHandler, ProcHostMemHandler,
@@ -200,7 +213,9 @@ ProfHostNetworkJob::~ProfHostNetworkJob()
 
 int ProfHostNetworkJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 {
-    CHECK_JOB_CONTEXT_PARAM_RET(cfg, PROFILING_FAILED);
+    if (CheckJobContextParam(cfg) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
     int ret = ProfHostDataBase::Init(cfg);
     if (ret != PROFILING_SUCCESS) {
         return ret;
@@ -216,7 +231,9 @@ int ProfHostNetworkJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 
 int ProfHostNetworkJob::Process()
 {
-    CHECK_JOB_COMMON_PARAM_RET(collectionJobCfg_, PROFILING_FAILED);
+    if (CheckJobCommonParam(collectionJobCfg_) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
 
     SHARED_PTR_ALIA<ProcHostNetworkHandler> networkHandler;
     MSVP_MAKE_SHARED7_RET(networkHandler, ProcHostNetworkHandler,
@@ -251,7 +268,9 @@ ProfHostSysCallsJob::~ProfHostSysCallsJob()
 
 int ProfHostSysCallsJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 {
-    CHECK_JOB_CONTEXT_PARAM_RET(cfg, PROFILING_FAILED);
+    if (CheckJobContextParam(cfg) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
     int ret = ProfHostDataBase::CheckHostProfiling(cfg);
     if (ret != PROFILING_SUCCESS) {
         return ret;
@@ -268,7 +287,9 @@ int ProfHostSysCallsJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 
 int ProfHostSysCallsJob::Process()
 {
-    CHECK_JOB_COMMON_PARAM_RET(collectionJobCfg_, PROFILING_FAILED);
+    if (CheckJobCommonParam(collectionJobCfg_) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
     MSVP_MAKE_SHARED0_RET(profHostService_, ProfHostService, PROFILING_FAILED);
 
     int ret = profHostService_->Init(collectionJobCfg_, PROF_HOST_SYS_CALL);
@@ -314,7 +335,9 @@ ProfHostPthreadJob::~ProfHostPthreadJob()
 
 int ProfHostPthreadJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 {
-    CHECK_JOB_CONTEXT_PARAM_RET(cfg, PROFILING_FAILED);
+    if (CheckJobContextParam(cfg) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
     int ret = ProfHostDataBase::CheckHostProfiling(cfg);
     if (ret != PROFILING_SUCCESS) {
         return ret;
@@ -331,7 +354,9 @@ int ProfHostPthreadJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 
 int ProfHostPthreadJob::Process()
 {
-    CHECK_JOB_COMMON_PARAM_RET(collectionJobCfg_, PROFILING_FAILED);
+    if (CheckJobCommonParam(collectionJobCfg_) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
     MSVP_MAKE_SHARED0_RET(profHostService_, ProfHostService, PROFILING_FAILED);
 
     int ret = profHostService_->Init(collectionJobCfg_, PROF_HOST_SYS_PTHREAD);
@@ -377,7 +402,9 @@ ProfHostDiskJob::~ProfHostDiskJob()
 
 int ProfHostDiskJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 {
-    CHECK_JOB_CONTEXT_PARAM_RET(cfg, PROFILING_FAILED);
+    if (CheckJobContextParam(cfg) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
     int ret = ProfHostDataBase::CheckHostProfiling(cfg);
     if (ret != PROFILING_SUCCESS) {
         return ret;
@@ -394,7 +421,9 @@ int ProfHostDiskJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 
 int ProfHostDiskJob::Process()
 {
-    CHECK_JOB_COMMON_PARAM_RET(collectionJobCfg_, PROFILING_FAILED);
+    if (CheckJobCommonParam(collectionJobCfg_) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
     MSVP_MAKE_SHARED0_RET(profHostService_, ProfHostService, PROFILING_FAILED);
 
     int ret = profHostService_->Init(collectionJobCfg_, PROF_HOST_SYS_DISK);
@@ -510,7 +539,7 @@ int ProfHostService::KillToolAndWaitHostProcess() const
     argsV.push_back(toolName_);
     int exitCode = analysis::dvvp::common::utils::VALID_EXIT_CODE;
     static const std::string CMD = "sudo";
-    mmProcess appProcess = MSVP_MMPROCESS;
+    MmProcess appProcess = MSVP_MMPROCESS;
     ExecCmdParams execCmdParams(CMD, false, "");
     int ret = analysis::dvvp::common::utils::Utils::ExecCmd(execCmdParams, argsV, envV, exitCode, appProcess);
     if (ret != PROFILING_SUCCESS) {
@@ -629,8 +658,13 @@ int ProfHostService::GetCollectIOTopCmd(int pid, std::string &profHostCmd)
 
 int ProfHostService::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg, const HostTimerHandlerTag hostTimerTag)
 {
-    CHECK_JOB_CONTEXT_PARAM_RET(cfg, PROFILING_FAILED);
-    CHECK_TIMER_TAG_PARAM_RET(hostTimerTag, PROFILING_FAILED);
+    if (CheckJobContextParam(cfg) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
+    if (hostTimerTag < PROF_HOST_SYS_CALL || hostTimerTag >= PROF_HOST_MAX_TAG) {
+        MSPROF_LOGI("hostTimerTag invalid");
+        return PROFILING_FAILED;
+    }
 
     MSVP_MAKE_SHARED0_RET(collectionJobCfg_, CollectionJobCfg, PROFILING_FAILED);
     collectionJobCfg_ = cfg;
@@ -782,7 +816,7 @@ int ProfHostService::CollectToolIsRun()
     argsV.push_back("-c");
     argsV.push_back(checkToolRunCmd);
     int exitCode = VALID_EXIT_CODE;
-    mmProcess appProcess = MSVP_MMPROCESS;
+    MmProcess appProcess = MSVP_MMPROCESS;
     std::string redirectionPath = profHostOutDir_ + "temp" + std::to_string(Utils::GetClockRealtime());
     ExecCmdParams execCmdParams("sh", false, redirectionPath);
     int ret = analysis::dvvp::common::utils::Utils::ExecCmd(execCmdParams, argsV, envV, exitCode, appProcess);
@@ -793,7 +827,7 @@ int ProfHostService::CollectToolIsRun()
     }
     for (int i = 0; i < FILE_FIND_REPLAY; ++i) {
         if (!(Utils::IsFileExist(redirectionPath))) {
-            MmpaPlugin::instance()->MsprofMmSleep(1); // If the file is not found, the delay is 1 ms.
+            MmSleep(1); // If the file is not found, the delay is 1 ms.
             continue;
         } else {
             break;
@@ -806,7 +840,7 @@ int ProfHostService::CollectToolIsRun()
     }
     PrintFileContent(redirectionPath);
     long long len = Utils::GetFileSize(redirectionPath);
-    MmpaPlugin::instance()->MsprofMmUnlink(redirectionPath.c_str());
+    MmUnlink(redirectionPath);
     if (len > 0) {
         return PROFILING_SUCCESS;
     }

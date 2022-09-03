@@ -18,7 +18,7 @@ from common_func.msvp_common import is_valid_original_data
 from common_func.path_manager import PathManager
 from common_func.platform.chip_manager import ChipManager
 from framework.offset_calculator import OffsetCalculator
-from model.hardware.llc_model import LlcModel
+from msmodel.hardware.llc_model import LlcModel
 from msparser.data_struct_size_constant import StructFmt
 from profiling_bean.prof_enum.data_tag import DataTag
 
@@ -41,18 +41,6 @@ class NonMiniLLCParser(MsMultiProcess):
         self.origin_data = []
         self._file_list.sort(key=lambda x: int(x.split("_")[-1]))
 
-    def _read_binary_helper(self: any, llc_file: any, _file_size: int) -> None:
-        llc_data = self.calculate.pre_process(llc_file, _file_size)
-        for _index in range(_file_size // StructFmt.LLC_FMT_SIZE):
-            one_slice = llc_data[_index * StructFmt.LLC_FMT_SIZE:(_index + 1) * StructFmt.LLC_FMT_SIZE]
-
-            if one_slice:
-                timestamp, count, event_id, l3t_id = struct.unpack(StructFmt.LLC_FMT, one_slice)
-                self.origin_data.append(
-                    (self.device_id, timestamp, count, event_id, l3t_id))
-            else:
-                break
-
     def read_binary_data(self: any, file_name: str) -> None:
         """
         parsing llc data and insert into llc.db
@@ -68,15 +56,6 @@ class NonMiniLLCParser(MsMultiProcess):
             logging.error("%s: %s", file_name, err)
         finally:
             pass
-
-    def _original_data_handler(self: any, file_name: str) -> None:
-        if is_valid_original_data(file_name, self.project_path):
-            logging.info(
-                "start parsing llc data file: %s", file_name)
-            self.read_binary_data(file_name)
-            if not ChipManager().is_chip_v3():
-                FileManager.add_complete_file(self.project_path, file_name)
-            logging.info("Create LLC DB finished!")
 
     def start_parsing_data_file(self: any) -> None:
         """
@@ -113,5 +92,24 @@ class NonMiniLLCParser(MsMultiProcess):
                 self.save()
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as llc_err:
             logging.error(str(llc_err), exc_info=Constant.TRACE_BACK_SWITCH)
-        finally:
-            pass
+
+    def _read_binary_helper(self: any, llc_file: any, _file_size: int) -> None:
+        llc_data = self.calculate.pre_process(llc_file, _file_size)
+        for _index in range(_file_size // StructFmt.LLC_FMT_SIZE):
+            one_slice = llc_data[_index * StructFmt.LLC_FMT_SIZE:(_index + 1) * StructFmt.LLC_FMT_SIZE]
+
+            if one_slice:
+                timestamp, count, event_id, l3t_id = struct.unpack(StructFmt.LLC_FMT, one_slice)
+                self.origin_data.append(
+                    (self.device_id, timestamp, count, event_id, l3t_id))
+            else:
+                break
+
+    def _original_data_handler(self: any, file_name: str) -> None:
+        if is_valid_original_data(file_name, self.project_path):
+            logging.info(
+                "start parsing llc data file: %s", file_name)
+            self.read_binary_data(file_name)
+            if not ChipManager().is_chip_v3():
+                FileManager.add_complete_file(self.project_path, file_name)
+            logging.info("Create LLC DB finished!")

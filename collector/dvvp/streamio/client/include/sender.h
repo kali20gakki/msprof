@@ -28,11 +28,11 @@ using namespace analysis::dvvp::transport;
 typedef analysis::dvvp::common::queue::BoundQueue<SHARED_PTR_ALIA<File>> FileQueue;
 
 struct data_chunk {
-    char*  relativeFileName;// from subpath begin; For example: subA/subB/example.txt; Note: the begin don't has '/';
-    unsigned char*  dataBuf;// the pointer to the data
-    unsigned int    bufLen;// the len of dataBuf
-    unsigned int    isLastChunk;// = 1, the last chunk of the file; != 1, not the last chunk of the file
-    long long       offset;// the begin location of the file to write; if the offset is -1, directly append data.
+    char*  relativeFileName; // from subpath begin; For example: subA/subB/example.txt; Note: the begin don't has '/';
+    unsigned char*  dataBuf; // the pointer to the data
+    unsigned int    bufLen; // the len of dataBuf
+    unsigned int    isLastChunk; // = 1, the last chunk of the file; != 1, not the last chunk of the file
+    long long       offset; // the begin location of the file to write; if the offset is -1, directly append data.
 };
 
 class Sender : public analysis::dvvp::common::thread::Task, public std::enable_shared_from_this<Sender> {
@@ -67,9 +67,9 @@ private:
                                             const size_t chunkSize);
     int SaveFileData(const std::string &jobCtxJson, const struct data_chunk &data);
     void CloseFileFds();
-    INT32 OpenWriteFile(const std::string &fileName);
-    INT32 GetFileFd(const std::string &fileName);
-    void SetFileFd(const std::string &fileName, INT32 fd);
+    int32_t OpenWriteFile(const std::string &fileName);
+    int32_t GetFileFd(const std::string &fileName);
+    void SetFileFd(const std::string &fileName, int32_t fd);
     int SendData(CONST_CHAR_PTR buffer, int size);
     void ExecuteStreamMode(SHARED_PTR_ALIA<File> file);
     void ExecuteFileMode(SHARED_PTR_ALIA<File> file);
@@ -89,7 +89,7 @@ private:
     volatile bool isFinished_;
     size_t hashId_;
     std::mutex fileFdLock_;
-    std::map<std::string, INT32> fileFdMap_;
+    std::map<std::string, int32_t> fileFdMap_;
     SHARED_PTR_ALIA<FileQueue> fileQueue_;
     std::mutex fileMapLock_;
     std::map<std::string, SHARED_PTR_ALIA<File>> fileMap_;

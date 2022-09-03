@@ -134,7 +134,7 @@ def cal_ave(result_data: dict, pos_cores: dict) -> dict:
         for _, item in enumerate(data_keys):
             if len(result_data['usage'][item]) > i and len(result_data['usage'][item][i]) == 2:
                 sum_count += float(result_data['usage'][item][i][1])
-        if not NumberConstant.is_zero(key_len):
+        if not NumberConstant.is_zero(key_len) and not NumberConstant.is_zero(sum_count):
             result_data['usage']['average'].append([result_data['usage'][item][i][0],
                                                     StrConstant.ACCURACY % (sum_count / key_len)])
     return result_data

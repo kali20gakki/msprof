@@ -7,6 +7,7 @@
 
 #include "prof_channel_manager.h"
 #include "errno/error_code.h"
+#include "msprof_error_manager.h"
 #include "transport/prof_channel.h"
 #include "utils/utils.h"
 

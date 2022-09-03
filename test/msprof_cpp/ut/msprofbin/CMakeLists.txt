@@ -16,6 +16,15 @@ set(common_file
     ${MSPROF_SOURCE_DIR}/dvvp/common/statistics/perf_count.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/validation/param_validation.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter_interface.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter_mini.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter_mdc.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter_lhisi.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter_dc.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter_cloudv2.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter_cloud.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/common/mmpa/mmpa_api.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/depend/stub/error_manager/msprof_error_manager_stub.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/driver/devmgmt/ai_drv_dev_api.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/driver/devmgmt/ai_drv_dsmi_api.cpp
@@ -42,7 +51,7 @@ set(common_file
     ${MSPROF_SOURCE_DIR}/dvvp/transport/hdc/hdc_transport.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/transport/hdc/device_transport.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/transport/hdc/platform/rpc/dev_mgr_api.cpp
-    ${MSPROF_SOURCE_DIR}/dvvp/adx/stub_lhisi/adx_prof_api.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/adx/stub/adx_prof_api.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/depend/src/slog_plugin.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/depend/src/plugin_handle.cpp
 )
@@ -72,10 +81,10 @@ add_executable(msprof_bin_utest
     test/prof_task_utest.cpp
     test/prof_device_transport_utest.cpp
     test/running_mode_utest.cpp
-    ..//stub/mmpa_stub.cpp
     ../stub/profile_drv_user_stub.cpp
     ../stub/hdc-api-stub.cpp
     ../stub/hdc-log-stub.cpp
+    ../stub/ide-cmd-stub.cpp
     ../stub/devdrv_runtime_api_stub.cpp
     ../../stub/driver_plugin_stub.cpp
     ${CppPath}
@@ -84,13 +93,11 @@ add_executable(msprof_bin_utest
 target_include_directories(msprof_bin_utest PRIVATE
     ${GTEST_INCLUDE_DIR}
     ${MOCKCPP_INCLUDE_DIR}
-    ${TOP_DIR}/opensource/securec/include
+    ${TOP_DIR}/platform/securec/include
     ${TOP_DIR}/opensource/json/include
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/slog
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/metadef/error_manager/error_manager_stub
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/driver
-    ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/adump
-    ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/mmpa
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/plugin
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/profapi
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc
@@ -102,11 +109,13 @@ target_include_directories(msprof_bin_utest PRIVATE
     ${MSPROF_SOURCE_DIR}/dvvp/host/include/
     ${MSPROF_SOURCE_DIR}/dvvp/common
     ${TOP_DIR}/test/msprof_cpp/ut/stub/common/log/
-    # ${MSPROF_SOURCE_DIR}/dvvp/common/logger
+    ${MSPROF_SOURCE_DIR}/dvvp/common/mmpa
     ${MSPROF_SOURCE_DIR}/dvvp/common/statistics
     ${MSPROF_SOURCE_DIR}/dvvp/common/validation
     ${MSPROF_SOURCE_DIR}/dvvp/common/platform
     ${MSPROF_SOURCE_DIR}/dvvp/common/config
+    ${MSPROF_SOURCE_DIR}/dvvp/common/utils
+    ${MSPROF_SOURCE_DIR}/inc/toolchain
     ${MSPROF_SOURCE_DIR}/dvvp/job_wrapper/include
     ${MSPROF_SOURCE_DIR}/dvvp/adx/inc
     ${MSPROF_SOURCE_DIR}/dvvp/driver/inc

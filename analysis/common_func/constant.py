@@ -216,7 +216,7 @@ class Constant:
     L2_CACHE_ITEM = 8
     HEX_NUMBER = 16
     DVPP_TYPE_NAME = ['VDEC', 'JPEGD', 'PNGD', 'JPEGE', 'VPC']
-    FILTER_DIRS = [".profiler", "HCCL_PROF"]
+    FILTER_DIRS = [".profiler", "HCCL_PROF", "timeline", "query", 'sqlite', 'log']
     NA = 'N/A'
     TASK_TYPE_OTHER = "Other"
     TASK_TYPE_AI_CORE = "AI_CORE"
@@ -224,6 +224,7 @@ class Constant:
     TASK_TYPE_AIV = "AI_VECTOR_CORE"
     DATA_PROCESS_AI_CPU = "AICPU"
     DATA_PROCESS_DP = "DP"
+    DATA_QUEUE = "AICPUMI"
     WRITE_MODES = stat.S_IWUSR | stat.S_IRUSR | stat.S_IRGRP
     WRITE_FLAGS = os.O_WRONLY | os.O_CREAT | os.O_TRUNC
 
@@ -233,6 +234,9 @@ class Constant:
 
     # default value
     DEFAULT_VALUE = 0
+    DEFAULT_INVALID_VALUE = -1
+    DEFAULT_TURE_VALUE = 1
+    DEFAULT_FALSE_VALUE = 0
 
     # ge timeline
     GE_TIMELINE_MODEL_ID_INDEX = 0
@@ -240,6 +244,12 @@ class Constant:
     GE_TIMELINE_TID_INDEX = 8
 
     GE_OP_MODEL_ID = 4294967295
+
+    # hccl
+    TYPE_RDMA = "RDMA"
+    TYPE_SDMA = "SDMA"
+    ILLEGAL_RANK = 4294967295
+    LINK_TYPE_LIST = [TYPE_SDMA, TYPE_RDMA]
 
     def get_constant_class_name(self: any) -> any:
         """

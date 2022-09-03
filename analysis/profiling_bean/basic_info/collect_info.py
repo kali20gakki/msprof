@@ -8,8 +8,8 @@ import os
 
 from common_func.constant import Constant
 from common_func.info_conf_reader import InfoConfReader
-from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_constant.number_constant import NumberConstant
+from common_func.ms_constant.str_constant import StrConstant
 from profiling_bean.basic_info.base_info import BaseInfo
 
 
@@ -18,18 +18,18 @@ class CollectInfo(BaseInfo):
     collect info
     """
 
+    def __init__(self: any) -> None:
+        super(CollectInfo, self).__init__()
+        self.collection_start_time = ""
+        self.collection_end_time = ""
+        self.result_size = ""
+
     def merge_data(self: any) -> any:
         """
         merge data
         :return:
         """
         self.get_collect_time()
-
-    def __init__(self: any) -> None:
-        super(CollectInfo, self).__init__()
-        self.collection_start_time = ""
-        self.collection_end_time = ""
-        self.result_size = ""
 
     def get_collect_time(self: any) -> None:
         """
