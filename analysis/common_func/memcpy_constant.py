@@ -1,8 +1,7 @@
-# coding=utf-8
-"""
-This script is amid to define step trace names.
-Copyright Huawei Technologies Co., Ltd. 2021. All rights reserved.
-"""
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
+
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant

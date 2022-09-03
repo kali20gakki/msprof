@@ -1,11 +1,6 @@
 #!/usr/bin/python3
-# coding=utf-8
-"""
-Function:
-DataCheckManager class, This class mainly involves the check data function.
-Copyright Information:
-Huawei Technologies Co., Ltd. All Rights Reserved © 2020
-"""
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
 
 from common_func import file_name_manager
 from common_func.config_mgr import ConfigMgr

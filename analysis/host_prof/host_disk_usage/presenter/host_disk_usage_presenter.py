@@ -1,9 +1,6 @@
 #!/usr/bin/python3
-# coding=utf-8
-"""
-This script is used to parse host disk usage
-Copyright Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
-"""
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
 
 import logging
 import os

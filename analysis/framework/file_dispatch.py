@@ -1,9 +1,6 @@
 #!/usr/bin/python3
-# coding=utf-8
-"""
-function: file dispatcher that dispatch the file to the different parsers
-Copyright Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
-"""
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 
 import itertools
 import os

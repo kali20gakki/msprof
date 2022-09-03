@@ -1,9 +1,7 @@
 #!/usr/bin/python3
-# coding=utf-8
-"""
-function: this script used to parse hwts log.
-Copyright Huawei Technologies Co., Ltd. 2021. All rights reserved.
-"""
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
+
 from msmodel.ge.ge_info_calculate_model import GeInfoModel
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msvp_common import is_number
