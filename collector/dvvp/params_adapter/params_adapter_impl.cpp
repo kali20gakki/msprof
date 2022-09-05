@@ -174,7 +174,7 @@ void MsprofParamAdapter::SetDefaultParamsApp()
         PIPE_UTILIZATION : paramContainer_[INPUT_CFG_COM_AIV_METRICS];
 }
 
-int MsprofParamAdapter::GetMsprofMode()
+int MsprofParamAdapter::SetMsprofMode()
 {
     if (!paramContainer_[INPUT_CFG_MSPROF_APPLICATION].empty()) {
         msprofMode_ = MSPROF_MODE_APP;
@@ -308,7 +308,7 @@ int MsprofParamAdapter::GetParamFromInputCfg(std::unordered_map<int, std::pair<M
         CmdLog::instance()->CmdErrorLog("msprof input param check fail.");
         return PROFILING_FAILED;
     }
-    ret = GetMsprofMode();
+    ret = SetMsprofMode();
     if (ret != PROFILING_SUCCESS) {
         CmdLog::instance()->CmdErrorLog("Get msprof running mode fail.");
         return PROFILING_FAILED;
