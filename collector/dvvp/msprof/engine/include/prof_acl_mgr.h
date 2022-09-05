@@ -98,6 +98,7 @@ public:
     int ProfAclFinalize();
     int ProfAclGetDataTypeConfig(const uint32_t devId, uint64_t& dataTypeConfig);
     void HandleResponse(const uint32_t devId);
+    uint64_t GetDataTypeConfigFromParams();
 
     // subscribe
     uint64_t ProfAclGetDataTypeConfig(PROF_SUB_CONF_CONST_PTR profSubscribeConfig);
@@ -127,10 +128,12 @@ public:
     void MsprofHostHandle(void);
     int32_t MsprofSetDeviceImpl(uint32_t devId);
     void AddModelLoadConf(uint64_t &dataTypeConfig) const;
+    int32_t MsprofSetConfig(aclprofConfigType cfgType, std::string config);
 
 private:
     int MsprofTxSwitchPrecheck();
     int DoHostHandle();
+    int32_t MsprofSetDeviceSysConfig(aclprofConfigType cfgType, std::string config);
 // struct of acltask info
 struct ProfAclTaskInfo {
     uint64_t count;
@@ -172,7 +175,6 @@ private:
     int CheckDeviceTask(PROF_CONF_CONST_PTR profStartCfg);
     void ProfStartCfgToMsprofCfg(const uint64_t dataTypeConfig, ProfAicoreMetrics aicMetrics,
                                  SHARED_PTR_ALIA<analysis::dvvp::proto::MsProfStartReq> feature);
-    void AicoreMetricsEnumToName(ProfAicoreMetrics aicMetrics, std::string &name);
     int StartDeviceTask(const uint32_t devId, SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params);
     void WaitAllDeviceResponse();
     void WaitDeviceResponse(const uint32_t devId);
@@ -184,23 +186,15 @@ private:
                             PROF_SUB_CONF_CONST_PTR profSubscribeConfig);
     int StartDeviceSubscribeTask(const uint32_t modelId, const uint32_t devId,
                                  PROF_SUB_CONF_CONST_PTR profSubscribeConfig);
-    std::string MsprofResultDirAdapter(const std::string &dir);
     void ProfDataTypeConfigHandle(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params);
     void UpdateDataTypeConfigBySwitch(const std::string &sw, const uint64_t dataTypeConfig);
     std::string MsprofCheckAndGetChar(CHAR_PTR data, uint32_t dataLen);
-    void MsprofAclJsonParamAdaper(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params);
-    int32_t MsprofAclJsonParamConstruct(SHARED_PTR_ALIA<analysis::dvvp::proto::ProfAclConfig> inputCfgPb);
-    int32_t MsprofGeOptionsParamConstruct(const std::string &jobInfo,
-        SHARED_PTR_ALIA<analysis::dvvp::proto::ProfGeOptionsConfig> inputCfgPb);
-    void MsprofInitGeOptionsParamAdaper(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params,
-        const std::string &jobInfo, SHARED_PTR_ALIA<analysis::dvvp::proto::ProfGeOptionsConfig> inputCfgPb);
     void CloseSubscribeFd(const uint32_t devId);
     void CloseSubscribeFd(const uint32_t devId, const uint32_t modelId);
     int32_t MsprofResultPathAdapter(const std::string &dir, std::string &resultPath);
     void PrintWorkMode(WorkMode mode);
     int32_t MsprofHelperParamConstruct(const std::string &msprofPath, const std::string &paramsJson);
-    int MsprofAiCoreMetricsAdapter(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params,
-        SHARED_PTR_ALIA<analysis::dvvp::proto::ProfGeOptionsConfig> inputCfgPb);
+    void MsprofSetMemberValue();
 
 private:
     bool isReady_;
@@ -212,12 +206,14 @@ private:
     std::map<uint32_t, SHARED_PTR_ALIA<DeviceResponseHandler>> devResponses_;
     std::map<std::string, std::string> devUuid_;
     std::map<uint32_t, ProfSubscribeInfo> subscribeInfos_;
+    std::array<std::string, ACL_PROF_ARGS_MAX> argsArr_;
     std::mutex mtx_; // mutex for start/stop
     std::mutex mtxUploader_; // mutex for uploader
     std::mutex mtxDevResponse_; // mutex for device response
     std::mutex mtxSubscribe_;
     std::map<int32_t, SHARED_PTR_ALIA<Msprof::Engine::AicpuPlugin>> enginMap_;
     SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params_;
+    PROF_CONF_CONST_PTR profStratCfg_;
     uint64_t dataTypeConfig_;
     uint64_t startIndex_;
 };

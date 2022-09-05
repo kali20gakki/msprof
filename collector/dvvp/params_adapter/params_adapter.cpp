@@ -352,17 +352,17 @@ int ParamsAdapter::ComCfgCheck(EnableType enableType, std::array<std::string, IN
     return ret ? PROFILING_SUCCESS : PROFILING_FAILED;
 }
 
-bool ParamsAdapter::ComCfgCheck1(const InputCfg cfgOpt, const std::string &cfgParam,
+bool ParamsAdapter::ComCfgCheck1(const InputCfg inputCfg, const std::string &cfgValue,
     std::vector<std::pair<InputCfg, std::string>> &cfgList) const
 {
     bool ret = true;
     bool flag = true;
-    switch (cfgOpt) {
+    switch (inputCfg) {
         case INPUT_CFG_COM_OUTPUT:
             ret = ParamValidation::instance()->CheckOutputIsValid(cfgValue);
             break;
         case INPUT_CFG_COM_STORAGE_LIMIT:
-            ret = ParamValidation::instance()->CheckProfilingAicoreMetricsIsValid(cfgValue);
+            ret = ParamValidation::instance()->CheckStorageLimit(cfgValue);
             break;
         case INPUT_CFG_COM_MSPROFTX:
         case INPUT_CFG_COM_TASK_TIME:
@@ -387,12 +387,12 @@ bool ParamsAdapter::ComCfgCheck1(const InputCfg cfgOpt, const std::string &cfgPa
     return flag;
 }
 
-bool ParamsAdapter::ComCfgCheck2(const InputCfg cfgOpt, const std::string &cfgParam,
+bool ParamsAdapter::ComCfgCheck2(const InputCfg inputCfg, const std::string &cfgValue,
     std::vector<std::pair<InputCfg, std::string>> &cfgList) const
 {
     bool ret = true;
     bool flag = true;
-    switch (cfgOpt) {
+    switch (inputCfg) {
         case INPUT_CFG_COM_SYS_USAGE_FREQ:
         case INPUT_CFG_COM_SYS_PID_USAGE_FREQ:
         case INPUT_CFG_COM_SYS_CPU_FREQ:

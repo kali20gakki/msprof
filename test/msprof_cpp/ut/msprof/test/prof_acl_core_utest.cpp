@@ -40,16 +40,20 @@
 #include "mmpa_api.h"
 #include "prof_api.h"
 #include "toolchain/prof_acl_api.h"
+#include "params_adapter_impl.h"
 #include "uploader.h"
 #include "transport/hdc/hdc_transport.h"
 
 using namespace analysis::dvvp::common::error;
 using namespace Analysis::Dvvp::Analyze;
+using namespace Analysis::Dvvp::Common::Config;
 using namespace analysis::dvvp::transport;
 using namespace Analysis::Dvvp::ProfilerCommon;
 using namespace Analysis::Dvvp::Common::Platform;
 using namespace Collector::Dvvp::Plugin;
 using namespace Collector::Dvvp::Mmpa;
+using namespace Collector::Dvvp::Mmpa;
+
 const int RECEIVE_CHUNK_SIZE = 320; // chunk size:320
 
 class MSPROF_ACL_CORE_UTEST: public testing::Test {
@@ -195,7 +199,7 @@ TEST_F(MSPROF_ACL_CORE_UTEST, acl_api) {
     config.devNums = 1;
     config.devIdList[0] = 0;
     config.aicoreMetrics = PROF_AICORE_ARITHMETIC_UTILIZATION;
-    config.dataTypeConfig = 0x7d7f001f;
+    config.dataTypeConfig = ACL_PROF_ACL_API|ACL_PROF_AICORE_METRICS|ACL_PROF_AICPU;
 
     ge::aclgrphProfConfig *aclConfig = ge::aclgrphProfCreateConfig(
         config.devIdList, config.devNums, (ge::ProfilingAicoreMetrics)config.aicoreMetrics, nullptr, config.dataTypeConfig);
@@ -206,6 +210,9 @@ TEST_F(MSPROF_ACL_CORE_UTEST, acl_api) {
     memset(zeroConfig, 0, sizeof(ProfConfig));
 
     EXPECT_NE(nullptr, aclConfig);
+    MOCKER_CPP(&Collector::Dvvp::ParamsAdapter::AclApiParamAdapter::GetParamFromInputCfg)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
 
     EXPECT_EQ(ge::FAILED, ge::aclgrphProfStart(zeroConfig));
     EXPECT_EQ(ge::FAILED, ge::aclgrphProfStart(invalidConfig));
@@ -385,7 +392,7 @@ TEST_F(MSPROF_ACL_CORE_UTEST, acl_prof_api) {
     config.devNums = 1;
     config.devIdList[0] = 0;
     config.aicoreMetrics = PROF_AICORE_ARITHMETIC_UTILIZATION;
-    config.dataTypeConfig = 0x7d7f001f;
+    config.dataTypeConfig = ACL_PROF_ACL_API|ACL_PROF_AICORE_METRICS|ACL_PROF_AICPU;
 
     aclprofConfig *aclConfig = aclprofCreateConfig(
         config.devIdList, config.devNums, (aclprofAicoreMetrics)config.aicoreMetrics, nullptr, config.dataTypeConfig);
@@ -396,7 +403,9 @@ TEST_F(MSPROF_ACL_CORE_UTEST, acl_prof_api) {
     memset(zeroConfig, 0, sizeof(ProfConfig));
 
     EXPECT_NE(nullptr, aclConfig);
-
+    MOCKER_CPP(&Collector::Dvvp::ParamsAdapter::AclApiParamAdapter::GetParamFromInputCfg)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
     EXPECT_EQ(ACL_ERROR_INVALID_PARAM, aclprofStart(nullptr));
     EXPECT_EQ(ACL_ERROR_INVALID_PARAM, aclprofStart(zeroConfig));
     EXPECT_EQ(200007, aclprofStart(invalidConfig));
@@ -1104,6 +1113,9 @@ TEST_F(MSPROF_ACL_CORE_UTEST, MsprofInitAclJson) {
         .stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
+    MOCKER_CPP(&Collector::Dvvp::ParamsAdapter::ParamsAdapter::BlackSwitchCheck)
+        .stubs()
+        .will(returnValue(true));
     std::string result = "/tmp/MsprofInitAclJson";
     analysis::dvvp::common::utils::Utils::RemoveDir(result);
     analysis::dvvp::common::utils::Utils::CreateDir(result);
@@ -1119,7 +1131,7 @@ TEST_F(MSPROF_ACL_CORE_UTEST, MsprofInitAclJson) {
     EXPECT_EQ(0, ProfAclMgr::instance()->MsprofInitAclJson((void *)aclJson.c_str(), aclJson.size()));
     EXPECT_EQ(0, ProfAclMgr::instance()->MsprofInitAclJson((void *)aclJson.c_str(), aclJson.size()));
 
-    aclJson = "{\"switch\": \"on\", \"output\": \"output\",\"aic_metrics\": \"ArithmeticUtilization\",\"aicpu\": \"on\",\"l2\": \"xx\"}";
+    aclJson = "{\"switch\": \"on\", \"output\": \"output\",\"aic_metrics\": \"ArithmeticUtilization\",\"aicpu\": \"xx\",\"l2\": \"on\"}";
     EXPECT_EQ(3, ProfAclMgr::instance()->MsprofInitAclJson((void *)aclJson.c_str(), aclJson.size()));
     aclJson = "{\"switch\": \"on\", \"output\": \"output\",\"aic_metrics\": \"ArithmeticUtilization\",\"aicpu\": \"on\",\"l2\": \"off\"}";
     EXPECT_EQ(0, ProfAclMgr::instance()->MsprofInitAclJson((void *)aclJson.c_str(), aclJson.size()));
@@ -1136,22 +1148,6 @@ TEST_F(MSPROF_ACL_CORE_UTEST, MsprofCheckAndGetChar) {
     EXPECT_EQ(test1, ProfAclMgr::instance()->MsprofCheckAndGetChar(const_cast<char *>(test.c_str()), test.size()));
 }
 
-TEST_F(MSPROF_ACL_CORE_UTEST, MsprofInitGeOptionsParamAdaper) {
-    GlobalMockObject::verify();
-    using namespace Msprofiler::Api;
-
-    std::shared_ptr<analysis::dvvp::message::ProfileParams> params(
-		new analysis::dvvp::message::ProfileParams());
-    std::shared_ptr<analysis::dvvp::proto::ProfGeOptionsConfig> message(new analysis::dvvp::proto::ProfGeOptionsConfig);
-
-    message->set_aicpu("on");
-    message->set_training_trace("on");
-    message->set_task_trace("on");
-    std::string jobInfo = "123";
-
-    ProfAclMgr::instance()->MsprofInitGeOptionsParamAdaper(nullptr, jobInfo, message);
-    ProfAclMgr::instance()->MsprofInitGeOptionsParamAdaper(params, jobInfo, message);
-}
 
 TEST_F(MSPROF_ACL_CORE_UTEST, MsprofGeOptionsResultPathAdapter) {
     GlobalMockObject::verify();
@@ -1199,7 +1195,7 @@ TEST_F(MSPROF_ACL_CORE_UTEST, MsprofInitGeOptions) {
     ge_json = "{\"output\": \"/tmp/MsprofInitGeOptions\",\"aic_metrics\": \"ArithmeticUtilization\",\"aicpu\": \"on\",\"l2\": \"xx\"}";
     strcpy(options.jobId, "123");
     strcpy(options.options, ge_json.c_str());
-    EXPECT_EQ(3, ProfAclMgr::instance()->MsprofInitGeOptions((void *)&options, sizeof(options)));
+    EXPECT_EQ(0, ProfAclMgr::instance()->MsprofInitGeOptions((void *)&options, sizeof(options)));
 
     analysis::dvvp::common::utils::Utils::RemoveDir(result);
 }
@@ -1610,28 +1606,28 @@ TEST_F(MSPROF_ACL_CORE_UTEST, Graph_aclgrphProfGraphSubscribe) {
 TEST_F(MSPROF_ACL_CORE_UTEST, AicoreMetricsEnumToName) {
     std::string metrics;
 
-    Msprofiler::Api::ProfAclMgr::instance()->AicoreMetricsEnumToName(PROF_AICORE_ARITHMETIC_UTILIZATION, metrics);
+    ConfigManager::instance()->AicoreMetricsEnumToName(PROF_AICORE_ARITHMETIC_UTILIZATION, metrics);
     EXPECT_EQ("ArithmeticUtilization", metrics);
 
-    Msprofiler::Api::ProfAclMgr::instance()->AicoreMetricsEnumToName(PROF_AICORE_PIPE_UTILIZATION, metrics);
+    ConfigManager::instance()->AicoreMetricsEnumToName(PROF_AICORE_PIPE_UTILIZATION, metrics);
     EXPECT_EQ("PipeUtilization", metrics);
 
-    Msprofiler::Api::ProfAclMgr::instance()->AicoreMetricsEnumToName(PROF_AICORE_MEMORY_BANDWIDTH, metrics);
+    ConfigManager::instance()->AicoreMetricsEnumToName(PROF_AICORE_MEMORY_BANDWIDTH, metrics);
     EXPECT_EQ("Memory", metrics);
 
-    Msprofiler::Api::ProfAclMgr::instance()->AicoreMetricsEnumToName(PROF_AICORE_L0B_AND_WIDTH, metrics);
+    ConfigManager::instance()->AicoreMetricsEnumToName(PROF_AICORE_L0B_AND_WIDTH, metrics);
     EXPECT_EQ("MemoryL0", metrics);
 
-    Msprofiler::Api::ProfAclMgr::instance()->AicoreMetricsEnumToName(PROF_AICORE_RESOURCE_CONFLICT_RATIO, metrics);
+    ConfigManager::instance()->AicoreMetricsEnumToName(PROF_AICORE_RESOURCE_CONFLICT_RATIO, metrics);
     EXPECT_EQ("ResourceConflictRatio", metrics);
 
-    Msprofiler::Api::ProfAclMgr::instance()->AicoreMetricsEnumToName(PROF_AICORE_MEMORY_UB, metrics);
+    ConfigManager::instance()->AicoreMetricsEnumToName(PROF_AICORE_MEMORY_UB, metrics);
     EXPECT_EQ("MemoryUB", metrics);
 
-    Msprofiler::Api::ProfAclMgr::instance()->AicoreMetricsEnumToName(PROF_AICORE_NONE, metrics);
+    ConfigManager::instance()->AicoreMetricsEnumToName(PROF_AICORE_NONE, metrics);
     EXPECT_EQ("MemoryUB", metrics);
 
-    Msprofiler::Api::ProfAclMgr::instance()->AicoreMetricsEnumToName(PROF_AICORE_METRICS_COUNT, metrics);
+    ConfigManager::instance()->AicoreMetricsEnumToName(PROF_AICORE_METRICS_COUNT, metrics);
     EXPECT_EQ("MemoryUB", metrics);
 }
 
@@ -1724,7 +1720,10 @@ TEST_F(MSPROF_ACL_CORE_UTEST, ProfAclStop) {
     config.devNums = 1;
     config.devIdList[0] = 0;
     config.aicoreMetrics = PROF_AICORE_ARITHMETIC_UTILIZATION;
-    config.dataTypeConfig = 0x7d7f001f;
+    config.dataTypeConfig = ACL_PROF_AICPU | ACL_PROF_ACL_API | ACL_PROF_HCCL_TRACE;
+    MOCKER_CPP(&Collector::Dvvp::ParamsAdapter::AclApiParamAdapter::GetParamFromInputCfg)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
 
     std::shared_ptr<analysis::dvvp::message::ProfileParams> params(new analysis::dvvp::message::ProfileParams());
     ProfAclMgr::ProfAclTaskInfo taskInfo = {1, 0, params};

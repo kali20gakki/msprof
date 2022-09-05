@@ -361,8 +361,7 @@ SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> ProfManager::HandleProfi
     Analysis::Dvvp::Host::Adapter::ProfParamsAdapter::instance()->GenerateLlcEvents(params);
 
     analysis::dvvp::common::utils::Utils::EnsureEndsInSlash(params->result_dir);
-    MSPROF_LOGI("job_id:%s, result_dir:%s, app_location:%s",
-                params->job_id.c_str(), Utils::BaseName(params->result_dir).c_str(), params->app_location.c_str());
+    MSPROF_LOGI("job_id:%s, result_dir:%s", params->job_id.c_str(), Utils::BaseName(params->result_dir).c_str());
     if (!CreateSampleJsonFile(params, params->result_dir)) {
         MSPROF_LOGE("Failed to create sample.json");
         MSPROF_INNER_ERROR("EK9999", "Failed to create sample.json");
