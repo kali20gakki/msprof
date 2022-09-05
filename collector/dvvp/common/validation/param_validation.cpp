@@ -56,7 +56,7 @@ int ParamValidation::Uninit() const
     return PROFILING_SUCCESS;
 }
 
-bool ParamValidation::CheckOutputIsValid(const std::string &outputPath)
+bool ParamValidation::CheckOutputIsValid(const std::string &outputPath) const
 {
     if (outputPath.empty()) {
         MSPROF_LOGI("output is empty");
@@ -164,7 +164,7 @@ bool ParamValidation::CheckProfilingAicoreMetricsIsValid(const std::string &aico
     return false;
 }
 
-bool ParamValidation::CheckLlcModeIsValid(const std::string &llcMode)
+bool ParamValidation::CheckLlcModeIsValid(const std::string &llcMode) const
 {
     std::vector<std::string> llcModeWhiteList = {
         "read",
@@ -189,7 +189,7 @@ bool ParamValidation::CheckLlcModeIsValid(const std::string &llcMode)
 }
 
 
-bool ParamValidation::CheckFreqIsValid(const std::string &freq, const int rangeMin, const int rangeMax)
+bool ParamValidation::CheckFreqIsValid(const std::string &freq, const int rangeMin, const int rangeMax) const
 {
     if (freq.empty()) {
         MSPROF_LOGI("freq is empty");
@@ -215,7 +215,7 @@ bool ParamValidation::CheckFreqIsValid(const std::string &freq, const int rangeM
     }
 }
 
-bool ParamValidation::CheckHostSysUsageIsValid(const std::string &hostSysUsage)
+bool ParamValidation::CheckHostSysUsageIsValid(const std::string &hostSysUsage) const
 {
     if (Platform::instance()->RunSocSide()) {
         MSPROF_LOGE("Not in host side, host-sys-usage is not supported");
@@ -239,7 +239,7 @@ bool ParamValidation::CheckHostSysUsageIsValid(const std::string &hostSysUsage)
     return true;
 }
 
-bool ParamValidation::CheckHostSysPidValid(const std::string &hostSysPid)
+bool ParamValidation::CheckHostSysPidValid(const std::string &hostSysPid) const
 {
     if (hostSysPid.empty()) {
         MSPROF_LOGE("Argument --host-sys-pid: expected one argument");
@@ -265,7 +265,7 @@ bool ParamValidation::CheckHostSysPidValid(const std::string &hostSysPid)
     }
 }
 
-bool ParamValidation::CheckPythonPathIsValid(const std::string&pythonPath)
+bool ParamValidation::CheckPythonPathIsValid(const std::string&pythonPath) const
 {
     std::string errReason = "python-path should be a valid file path and path lenth shoule be shorter than 1024.";
     if (pythonPath.empty()) {
@@ -302,7 +302,7 @@ bool ParamValidation::CheckPythonPathIsValid(const std::string&pythonPath)
     return true;
 }
 
-bool ParamValidation::CheckExportSummaryFormatIsValid(const std::string &summaryFormat)
+bool ParamValidation::CheckExportSummaryFormatIsValid(const std::string &summaryFormat) const
 {
     std::string errReason = "summary-format should be in range of 'json | csv'.";
     if (summaryFormat.empty()) {
@@ -321,7 +321,7 @@ bool ParamValidation::CheckExportSummaryFormatIsValid(const std::string &summary
     return true;
 }
 
-bool ParamValidation::CheckExportIdIsValid(const std::string &exportId, const std::string &exportIdType)
+bool ParamValidation::CheckExportIdIsValid(const std::string &exportId, const std::string &exportIdType) const
 {
     std::string errReason = exportIdType + "should be a valid integer number.";
     if (exportId.empty()) {
@@ -1017,8 +1017,10 @@ bool ParamValidation::MsprofCheckAppValid(std::string &appParam) const
 }
  
 int ParamValidation::MsprofCheckNotAppValid(const std::vector<std::string> &AppParamsList,
-    std::string &resultAppParam) const
+    const std::string &resultAppParam) const
 {
+    UNUSED(AppParamsList);
+    UNUSED(resultAppParam);
     return PROFILING_SUCCESS;
 }
  

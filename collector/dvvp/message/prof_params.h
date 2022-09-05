@@ -204,7 +204,7 @@ struct ProfileParams : BaseInfo {
           host_mem_profiling("off"), host_network_profiling("off"), host_disk_freq(DEFAULT_PROFILING_INTERVAL_50MS),
           pythonPath(""), parseSwitch("off"), querySwitch("off"), exportSwitch("off"),
           exportSummaryFormat(PROFILING_SUMMARY_FORMAT), exportIterationId(DEFAULT_INTERATION_ID),
-          exportModelId(DEFAULT_MODEL_ID), usedParams()
+          exportModelId(DEFAULT_MODEL_ID), usedParams(), dataTypeConfig(0)
     {
     }
 
