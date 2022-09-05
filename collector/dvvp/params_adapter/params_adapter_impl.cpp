@@ -1034,7 +1034,7 @@ void AclApiParamAdapter::ProfCfgToContainer(const ProfConfig * apiCfg,
     ProfSystemCfgToContainer(apiCfg, argsArr);
 }
 
-int AclApiParamAdapter::GetParamFromInputCfg(const ProfConfig * apiCfg,
+int AclApiParamAdapter::GetParamFromInputCfg(const ProfConfig *apiCfg,
     std::array<std::string, ACL_PROF_ARGS_MAX> argsArr,
     SHARED_PTR_ALIA<ProfileParams> params)
 {
