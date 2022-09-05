@@ -50,6 +50,7 @@ int32_t CommandHandleProfInit()
         MSPROF_INNER_ERROR("EK9999", "ProfInit CommandHandle set failed");
         return ACL_ERROR_PROFILING_FAILURE;
     }
+    MSPROF_LOGI("CommandHandleProfInit, type:%u", command.type);
     return ProfApiPlugin::instance()->MsprofProfSetProfCommand(static_cast<VOID_PTR>(&command), sizeof(ProfCommand));
 }
 
@@ -84,6 +85,8 @@ int32_t CommandHandleProfStart(const uint32_t devIdList[], uint32_t devNums, uin
         MSPROF_INNER_ERROR("EK9999", "ProfStart CommandHandle set failed");
         return ACL_ERROR_PROFILING_FAILURE;
     }
+    MSPROF_LOGI("CommandHandleProfStart, profSwitch:0x%lx, profSwitchHi:0x%lx, device[0]:%u, devNums:%u",
+        command.profSwitch, command.profSwitchHi, command.devIdList[0], command.devNums);
     return ProfApiPlugin::instance()->MsprofProfSetProfCommand(static_cast<VOID_PTR>(&command), sizeof(ProfCommand));
 }
 
@@ -107,6 +110,8 @@ int32_t CommandHandleProfStop(const uint32_t devIdList[], uint32_t devNums, uint
         MSPROF_INNER_ERROR("EK9999", "ProfStop CommandHandle set failed");
         return ACL_ERROR_PROFILING_FAILURE;
     }
+    MSPROF_LOGI("CommandHandleProfStop, profSwitch:0x%lx, profSwitchHi:0x%lx, device[0]:%u, devNums:%u",
+        command.profSwitch, command.profSwitchHi, command.devIdList[0], command.devNums);
     return ProfApiPlugin::instance()->MsprofProfSetProfCommand(static_cast<VOID_PTR>(&command), sizeof(ProfCommand));
 }
 
@@ -121,6 +126,7 @@ int32_t CommandHandleProfFinalize()
         MSPROF_INNER_ERROR("EK9999", "ProfFinalize CommandHandle set failed");
         return ACL_ERROR_PROFILING_FAILURE;
     }
+    MSPROF_LOGI("CommandHandleProfFinalize, type:%u", command.type);
     return ProfApiPlugin::instance()->MsprofProfSetProfCommand(static_cast<VOID_PTR>(&command), sizeof(ProfCommand));
 }
 
@@ -137,6 +143,8 @@ int32_t CommandHandleProfSubscribe(uint32_t modelId, uint64_t profSwitch)
         MSPROF_INNER_ERROR("EK9999", "ProfSubscribe CommandHandle set failed");
         return ACL_ERROR_PROFILING_FAILURE;
     }
+    MSPROF_LOGI("CommandHandleProfSubscribe, profSwitch:0x%lx, profSwitchHi:0x%lx, modelId:%u",
+        command.profSwitch, command.profSwitchHi, command.modelId);
     return ProfApiPlugin::instance()->MsprofProfSetProfCommand(static_cast<VOID_PTR>(&command), sizeof(ProfCommand));
 }
 
@@ -152,6 +160,7 @@ int32_t CommandHandleProfUnSubscribe(uint32_t modelId)
         MSPROF_INNER_ERROR("EK9999", "ProfUnSubscribe Set params failed!");
         return ACL_ERROR_PROFILING_FAILURE;
     }
+    MSPROF_LOGI("CommandHandleProfUnSubscribe, modelId:%u", command.modelId);
     return ProfApiPlugin::instance()->MsprofProfSetProfCommand(static_cast<VOID_PTR>(&command), sizeof(ProfCommand));
 }
 }  // namespace ProfilerCommon

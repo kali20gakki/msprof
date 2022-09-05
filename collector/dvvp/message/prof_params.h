@@ -25,10 +25,7 @@ const int FALSE = 0;
 const int TRUE = 1;
 const char * const PROFILING_MODE_SAMPLE_BASED = "sample-based";
 const char * const PROFILING_MODE_TASK_BASED = "task-based";
-const char * const PROFILING_ANALYSIS_TARGET = "launch application";
 const char * const PROFILING_MODE_DEF = "def_mode";
-const char * const PROFILING_MODE_SYSTEM_WIDE = "system-wide";
-const std::string PROFILING_STATE_FILE = "job_state.ini";
 
 // Attention:
 // intervals of ProfileParams maybe large,
@@ -50,7 +47,6 @@ struct ProfileParams : BaseInfo {
     std::string app;
     std::string app_dir;
     std::string app_parameters;
-    std::string app_location;
     std::string app_env;
     // ai core
     std::string ai_core_profiling;
@@ -66,20 +62,13 @@ struct ProfileParams : BaseInfo {
     std::string aiv_profiling_mode;
 
     // rts
-    std::string ai_core_status;
-    std::string ts_task_track;
-    std::string ts_cpu_usage;
     std::string ts_timeline;
     std::string ts_keypoint;
     std::string ts_memcpy;
-    std::string ai_vector_status;
-    std::string ts_fw_training;  // unused
+    std::string ts_fw_training;
     std::string hwts_log;
     std::string hwts_log1;
     std::string stars_acsq_task;
-    std::string stars_sub_task;
-    std::string ffts_thread_task;
-    std::string ffts_block;
     std::string low_power;
     std::string acc_pmu_mode;
 
@@ -131,20 +120,10 @@ struct ProfileParams : BaseInfo {
     std::string dvpp_profiling;
     int dvpp_sampling_interval;
 
-    std::string ai_core_profiling_metrics;
-    std::string aiv_profiling_metrics;
-    std::string ts_cpu_hot_function;
-
     std::string biu;
     int biu_freq;
 
     // for msprof
-    std::string acl;
-    std::string modelExecution;
-    std::string runtimeApi;
-    std::string aicpuTrace;
-    std::string runtimeTrace;
-    std::string hcclTrace;
     std::string modelLoad;
     std::string msprof;
     std::string msproftx;
@@ -173,8 +152,10 @@ struct ProfileParams : BaseInfo {
 
     // subset of MsprofArgsType
     std::set<int> usedParams;
-
+    // AI STACK
     uint64_t dataTypeConfig;
+    int dataTypeConfigHigh;
+    int dataTypeConfigLow;
 
     ProfileParams()
         : msprofBinPid(MSVP_MMPROCESS), is_cancel(FALSE), profiling_period(-1),
@@ -196,15 +177,16 @@ struct ProfileParams : BaseInfo {
           hccsProfiling("off"), hccsInterval(DEFAULT_PROFILING_INTERVAL_20MS),
           pcieInterval(DEFAULT_PROFILING_INTERVAL_20MS),
           dvpp_profiling("off"), dvpp_sampling_interval(DEFAULT_PROFILING_INTERVAL_20MS),
-          biu_freq(DEFAULT_PROFILING_BIU_FREQ), modelExecution("off"),
-          runtimeApi("off"), msprof("off"), msproftx("off"),
+          biu_freq(DEFAULT_PROFILING_BIU_FREQ),
+          msprof("off"), msproftx("off"),
           host_sys(""), host_sys_pid(HOST_PID_DEFAULT),
           host_disk_profiling("off"), host_osrt_profiling("off"),
           host_profiling(FALSE), host_cpu_profiling("off"),
           host_mem_profiling("off"), host_network_profiling("off"), host_disk_freq(DEFAULT_PROFILING_INTERVAL_50MS),
           pythonPath(""), parseSwitch("off"), querySwitch("off"), exportSwitch("off"),
           exportSummaryFormat(PROFILING_SUMMARY_FORMAT), exportIterationId(DEFAULT_INTERATION_ID),
-          exportModelId(DEFAULT_MODEL_ID), usedParams(), dataTypeConfig(0)
+          exportModelId(DEFAULT_MODEL_ID), usedParams(), dataTypeConfig(0), dataTypeConfigHigh(0),
+          dataTypeConfigLow(0)
     {
     }
 
@@ -260,14 +242,13 @@ struct ProfileParams : BaseInfo {
         SET_VALUE(object, ts_cpu_profiling_events);
         SET_VALUE(object, app_dir);
         SET_VALUE(object, app_parameters);
-        SET_VALUE(object, app_location);
         SET_VALUE(object, app_env);
+        SET_VALUE(object, cmdPath);
         // ai core
         SET_VALUE(object, ai_core_profiling);
         SET_VALUE(object, ai_core_profiling_mode);
         SET_VALUE(object, ai_core_profiling_events);
         SET_VALUE(object, ai_core_metrics);
-        SET_VALUE(object, ai_core_status);
         // aiv
         SET_VALUE(object, aiv_profiling);
         SET_VALUE(object, aiv_sampling_interval);
@@ -293,9 +274,6 @@ struct ProfileParams : BaseInfo {
         SET_VALUE(object, interconnection_profiling);
         SET_VALUE(object, interconnection_sampling_interval);
         SET_VALUE(object, dvpp_profiling);
-        SET_VALUE(object, ai_core_profiling_metrics);
-        SET_VALUE(object, aiv_profiling_metrics);
-        SET_VALUE(object, ts_cpu_hot_function);
         SET_VALUE(object, nicProfiling);
         SET_VALUE(object, roceProfiling);
         // host system
@@ -309,23 +287,14 @@ struct ProfileParams : BaseInfo {
     {
         SET_VALUE(object, dvpp_sampling_interval);
         SET_VALUE(object, aicore_sampling_interval);
-        SET_VALUE(object, acl);
-        SET_VALUE(object, modelExecution);
-        SET_VALUE(object, runtimeApi);
-        SET_VALUE(object, aicpuTrace);
-        SET_VALUE(object, runtimeTrace);
-        SET_VALUE(object, hcclTrace);
         SET_VALUE(object, modelLoad);
         SET_VALUE(object, msprof);
         SET_VALUE(object, msproftx);
         SET_VALUE(object, job_id);
         SET_VALUE(object, app);
-        SET_VALUE(object, ts_task_track);
-        SET_VALUE(object, ts_cpu_usage);
         SET_VALUE(object, ts_timeline);
         SET_VALUE(object, ts_memcpy);
         SET_VALUE(object, ts_keypoint);
-        SET_VALUE(object, ai_vector_status);
         SET_VALUE(object, ts_fw_training);
         SET_VALUE(object, hwts_log);
         SET_VALUE(object, hwts_log1);
@@ -368,12 +337,13 @@ struct ProfileParams : BaseInfo {
     void ToObjectPartThree(nlohmann::json &object)
     {
         SET_VALUE(object, stars_acsq_task);
-        SET_VALUE(object, stars_sub_task);
-        SET_VALUE(object, ffts_thread_task);
-        SET_VALUE(object, ffts_block);
         SET_VALUE(object, low_power);
         SET_VALUE(object, acc_pmu_mode);
         SET_VALUE(object, msprofBinPid);
+        dataTypeConfigHigh = (dataTypeConfig & 0xffffffff00000000) >> 32; // 32 high32bit
+        dataTypeConfigLow = (dataTypeConfig & 0xffffffff);
+        SET_VALUE(object, dataTypeConfigHigh);
+        SET_VALUE(object, dataTypeConfigLow);
     }
 
     void ToObject(nlohmann::json &object)
@@ -393,14 +363,13 @@ struct ProfileParams : BaseInfo {
         FROM_STRING_VALUE(object, ts_cpu_profiling_events);
         FROM_STRING_VALUE(object, app_dir);
         FROM_STRING_VALUE(object, app_parameters);
-        FROM_STRING_VALUE(object, app_location);
         FROM_STRING_VALUE(object, app_env);
+        FROM_STRING_VALUE(object, cmdPath);
         // ai core
         FROM_STRING_VALUE(object, ai_core_profiling);
         FROM_STRING_VALUE(object, ai_core_profiling_mode);
         FROM_STRING_VALUE(object, ai_core_profiling_events);
         FROM_STRING_VALUE(object, ai_core_metrics);
-        FROM_STRING_VALUE(object, ai_core_status);
         // AIV
         FROM_STRING_VALUE(object, aiv_profiling);
         FROM_INT_VALUE(object, aiv_sampling_interval, DEFAULT_PROFILING_INTERVAL_10MS);
@@ -431,8 +400,6 @@ struct ProfileParams : BaseInfo {
         FROM_INT_VALUE(object, dvpp_sampling_interval, DEFAULT_PROFILING_INTERVAL_10MS);
         FROM_INT_VALUE(object, aicore_sampling_interval, DEFAULT_PROFILING_INTERVAL_10MS);
         FROM_INT_VALUE(object, biu_freq, DEFAULT_PROFILING_BIU_FREQ);
-        FROM_STRING_VALUE(object, ai_core_profiling_metrics);
-        FROM_STRING_VALUE(object, aiv_profiling_metrics);
         // host system
         FROM_BOOL_VALUE(object, host_profiling);
         FROM_STRING_VALUE(object, host_cpu_profiling);
@@ -440,31 +407,18 @@ struct ProfileParams : BaseInfo {
 
     void FromObjectPartTwo(const nlohmann::json &object)
     {
-        FROM_STRING_VALUE(object, ts_cpu_hot_function);
-        FROM_STRING_VALUE(object, acl);
-        FROM_STRING_VALUE(object, modelExecution);
-        FROM_STRING_VALUE(object, runtimeApi);
-        FROM_STRING_VALUE(object, aicpuTrace);
-        FROM_STRING_VALUE(object, runtimeTrace);
-        FROM_STRING_VALUE(object, hcclTrace);
         FROM_STRING_VALUE(object, modelLoad);
         FROM_STRING_VALUE(object, msprof);
         FROM_STRING_VALUE(object, msproftx);
         FROM_STRING_VALUE(object, job_id);
         FROM_STRING_VALUE(object, app);
-        FROM_STRING_VALUE(object, ts_task_track);
-        FROM_STRING_VALUE(object, ts_cpu_usage);
         FROM_STRING_VALUE(object, ts_timeline);
         FROM_STRING_VALUE(object, ts_memcpy);
         FROM_STRING_VALUE(object, ts_keypoint);
-        FROM_STRING_VALUE(object, ai_vector_status);
         FROM_STRING_VALUE(object, ts_fw_training);
         FROM_STRING_VALUE(object, hwts_log);
         FROM_STRING_VALUE(object, hwts_log1);
         FROM_STRING_VALUE(object, stars_acsq_task);
-        FROM_STRING_VALUE(object, stars_sub_task);
-        FROM_STRING_VALUE(object, ffts_thread_task);
-        FROM_STRING_VALUE(object, ffts_block);
         FROM_STRING_VALUE(object, low_power);
         FROM_STRING_VALUE(object, acc_pmu_mode);
         FROM_STRING_VALUE(object, l2CacheTaskProfiling);
@@ -505,6 +459,9 @@ struct ProfileParams : BaseInfo {
         FROM_INT_VALUE(object, host_disk_freq, DEFAULT_PROFILING_INTERVAL_10MS);
         FROM_STRING_VALUE(object, host_mem_profiling);
         FROM_STRING_VALUE(object, host_network_profiling);
+        FROM_INT_VALUE(object, dataTypeConfigHigh, 0);
+        FROM_INT_VALUE(object, dataTypeConfigLow, 0);
+        dataTypeConfig = (static_cast<uint64_t>(dataTypeConfigHigh) << 32) | dataTypeConfigLow; // 32 high32bit
     }
 
     void FromObject(const nlohmann::json &object)

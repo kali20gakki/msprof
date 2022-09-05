@@ -26,11 +26,16 @@
 #include "platform/platform_adapter_mdc.h"
 #include "platform/platform_adapter_mini.h"
 #include "config/config_manager.h"
+#include "params_adapter_impl.h"
+#include "params_adapter.h"
+#include "input_parser.h"
+#include "platform/platform.h"
 
 using namespace analysis::dvvp::common::error;
 using namespace Analysis::Dvvp::Msprof;
 using namespace Collector::Dvvp::Common::PlatformAdapter;
 using namespace Analysis::Dvvp::Common::Config;
+using namespace Collector::Dvvp::ParamsAdapter;
 class MSPROF_BIN_UTEST : public testing::Test {
 protected:
     virtual void SetUp() {}
@@ -315,3 +320,557 @@ TEST_F(MSPROF_BIN_UTEST, PlatformAdapterMdcModule)
     EXPECT_EQ(PROFILING_SUCCESS, ret);
 }
 
+TEST_F(MSPROF_BIN_UTEST, MsprofParamAdapterModule)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<MsprofParamAdapter> MsprofParamAdapterMgr;
+    MSVP_MAKE_SHARED0_BREAK(MsprofParamAdapterMgr, MsprofParamAdapter);
+    int ret = MsprofParamAdapterMgr->Init();
+    EXPECT_EQ(PROFILING_SUCCESS, ret);
+    std::vector<std::pair<InputCfg, std::string>> cfgList;
+    MOCKER_CPP(&analysis::dvvp::common::validation::ParamValidation::MsprofCheckAppValid)
+        .stubs()
+        .will(returnValue(true));
+    MOCKER_CPP(&analysis::dvvp::common::validation::ParamValidation::MsprofCheckEnvValid)
+        .stubs()
+        .will(returnValue(true));
+    MOCKER_CPP(&analysis::dvvp::common::validation::ParamValidation::IsValidSwitch)
+        .stubs()
+        .will(returnValue(true));
+    MOCKER_CPP(&Collector::Dvvp::ParamsAdapter::MsprofParamAdapter::ParamsCheckMsprofV1)
+        .stubs()
+        .will(returnValue(true));
+    for (auto setCfg : MsprofParamAdapterMgr->msprofConfig_) {
+        MsprofParamAdapterMgr->setConfig_.insert(setCfg);
+        ret = MsprofParamAdapterMgr->ParamsCheckMsprof(cfgList);
+        EXPECT_EQ(PROFILING_SUCCESS, ret);
+    }
+}
+
+TEST_F(MSPROF_BIN_UTEST, ParamsCheckMsprofV1)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<MsprofParamAdapter> MsprofParamAdapterMgr;
+    MSVP_MAKE_SHARED0_BREAK(MsprofParamAdapterMgr, MsprofParamAdapter);
+    int ret;
+    std::vector<InputCfg> inputCfgList = {
+        INPUT_CFG_COM_AIV_MODE,
+        INPUT_CFG_COM_AIC_MODE,
+        INPUT_CFG_COM_BIU_FREQ,
+        INPUT_CFG_COM_SYS_DEVICES,
+        INPUT_CFG_COM_SYS_PERIOD,
+        INPUT_CFG_HOST_SYS,
+        INPUT_CFG_HOST_SYS_PID,
+        INPUT_CFG_PYTHON_PATH,
+        INPUT_CFG_SUMMARY_FORMAT,
+        INPUT_CFG_ITERATION_ID
+    };
+    MOCKER_CPP(&analysis::dvvp::common::validation::ParamValidation::MsprofCheckAiModeValid)
+        .stubs()
+        .will(returnValue(true));
+    MOCKER_CPP(&Collector::Dvvp::ParamsAdapter::ParamsAdapter::CheckFreqValid)
+        .stubs()
+        .will(returnValue(true));
+    MOCKER_CPP(&analysis::dvvp::common::validation::ParamValidation::MsprofCheckSysDeviceValid)
+        .stubs()
+        .will(returnValue(true));
+    MOCKER_CPP(&analysis::dvvp::common::validation::ParamValidation::MsprofCheckSysPeriodValid)
+            .stubs()
+            .will(returnValue(true));
+    MOCKER_CPP(&analysis::dvvp::common::validation::ParamValidation::MsprofCheckHostSysValid)
+            .stubs()
+            .will(returnValue(true));
+    MOCKER_CPP(&analysis::dvvp::common::validation::ParamValidation::CheckHostSysPidValid)
+        .stubs()
+        .will(returnValue(true));
+    MOCKER_CPP(&analysis::dvvp::common::validation::ParamValidation::CheckExportIdIsValid)
+        .stubs()
+        .will(returnValue(true));
+    MOCKER_CPP(&analysis::dvvp::common::validation::ParamValidation::CheckExportSummaryFormatIsValid)
+        .stubs()
+        .will(returnValue(true));
+    MOCKER_CPP(&analysis::dvvp::common::validation::ParamValidation::CheckPythonPathIsValid)
+        .stubs()
+        .will(returnValue(true));
+    for (auto inputCfg : inputCfgList) {
+        ret = MsprofParamAdapterMgr->ParamsCheckMsprofV1(inputCfg, " ");
+        EXPECT_EQ(true, ret);
+    }
+}
+
+TEST_F(MSPROF_BIN_UTEST, SetDefaultParamsApp)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<MsprofParamAdapter> MsprofParamAdapterMgr;
+    MSVP_MAKE_SHARED0_BREAK(MsprofParamAdapterMgr, MsprofParamAdapter);
+    MsprofParamAdapterMgr->SetDefaultParamsApp();
+}
+
+TEST_F(MSPROF_BIN_UTEST, GetMsprofMode)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<MsprofParamAdapter> MsprofParamAdapterMgr;
+    MSVP_MAKE_SHARED0_BREAK(MsprofParamAdapterMgr, MsprofParamAdapter);
+    int ret = MsprofParamAdapterMgr->GetMsprofMode();
+    EXPECT_EQ(PROFILING_FAILED, ret);
+    std::vector<InputCfg> cfgList = {
+        INPUT_CFG_MSPROF_APPLICATION,
+        INPUT_CFG_COM_SYS_DEVICES,
+        INPUT_CFG_HOST_SYS,
+        INPUT_CFG_PARSE,
+        INPUT_CFG_QUERY,
+        INPUT_CFG_EXPORT
+    };
+    for (auto cfg : cfgList) {
+        MsprofParamAdapterMgr->paramContainer_[cfg] = "on";
+        ret = MsprofParamAdapterMgr->GetMsprofMode();
+        EXPECT_EQ(PROFILING_SUCCESS, ret);
+    }
+}
+
+TEST_F(MSPROF_BIN_UTEST, MsprofSetDefaultParams)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<MsprofParamAdapter> MsprofParamAdapterMgr;
+    MSVP_MAKE_SHARED0_BREAK(MsprofParamAdapterMgr, MsprofParamAdapter);
+    MsprofParamAdapterMgr->SetDefaultParamsSystem();
+    MsprofParamAdapterMgr->SetDefaultParamsParse();
+    MsprofParamAdapterMgr->SetDefaultParamsQuery();
+    MsprofParamAdapterMgr->SetDefaultParamsExport();
+}
+
+TEST_F(MSPROF_BIN_UTEST, SpliteAppPath)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<MsprofParamAdapter> MsprofParamAdapterMgr;
+    MSVP_MAKE_SHARED0_BREAK(MsprofParamAdapterMgr, MsprofParamAdapter);
+    std::string appParam;
+    MsprofParamAdapterMgr->SpliteAppPath(appParam);
+    appParam = "./main 1";
+    MsprofParamAdapterMgr->SpliteAppPath(appParam);
+    appParam = "/bin/bash test.sh 1";
+    MsprofParamAdapterMgr->SpliteAppPath(appParam);
+}
+
+TEST_F(MSPROF_BIN_UTEST, SetParamsSelf)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<MsprofParamAdapter> MsprofParamAdapterMgr;
+    MSVP_MAKE_SHARED0_BREAK(MsprofParamAdapterMgr, MsprofParamAdapter);
+    SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params;
+    MSVP_MAKE_SHARED0_VOID(params, analysis::dvvp::message::ProfileParams);
+    MsprofParamAdapterMgr->params_ = params;
+    MsprofParamAdapterMgr->SetParamsSelf();
+}
+
+TEST_F(MSPROF_BIN_UTEST, CreateCfgMap)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<MsprofParamAdapter> MsprofParamAdapterMgr;
+    MSVP_MAKE_SHARED0_BREAK(MsprofParamAdapterMgr, MsprofParamAdapter);
+    MsprofParamAdapterMgr->CreateCfgMap();
+}
+
+TEST_F(MSPROF_BIN_UTEST, SetModeDefaultParams)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<MsprofParamAdapter> MsprofParamAdapterMgr;
+    MSVP_MAKE_SHARED0_BREAK(MsprofParamAdapterMgr, MsprofParamAdapter);
+    std::vector<MsprofMode> modeTypeList = {
+        MSPROF_MODE_APP,
+        MSPROF_MODE_SYSTEM,
+        MSPROF_MODE_PARSE,
+        MSPROF_MODE_QUERY,
+        MSPROF_MODE_EXPORT
+    };
+    int ret;
+    for (auto modeType : modeTypeList) {
+        ret = MsprofParamAdapterMgr->SetModeDefaultParams(modeType);
+        EXPECT_EQ(PROFILING_SUCCESS, ret);
+    }
+}
+
+TEST_F(MSPROF_BIN_UTEST, AclJsonParamAdapterModule)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<AclJsonParamAdapter> AclJsonParamAdapterMgr;
+    MSVP_MAKE_SHARED0_BREAK(AclJsonParamAdapterMgr, AclJsonParamAdapter);
+    int ret = AclJsonParamAdapterMgr->Init();
+    EXPECT_EQ(PROFILING_SUCCESS, ret);
+
+    SHARED_PTR_ALIA<analysis::dvvp::proto::ProfAclConfig> aclCfg;
+    MSVP_MAKE_SHARED0_VOID(aclCfg, analysis::dvvp::proto::ProfAclConfig);
+    aclCfg->set_storage_limit("200MB");
+    ret = AclJsonParamAdapterMgr->GenAclJsonContainer(aclCfg);
+    MOCKER_CPP(&Collector::Dvvp::ParamsAdapter::ParamsAdapter::BlackSwitchCheck)
+        .stubs()
+        .will(returnValue(true));
+    EXPECT_EQ(PROFILING_SUCCESS, ret);
+}
+
+TEST_F(MSPROF_BIN_UTEST, GenAclJsonContainer)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<AclJsonParamAdapter> AclJsonParamAdapterMgr;
+    MSVP_MAKE_SHARED0_BREAK(AclJsonParamAdapterMgr, AclJsonParamAdapter);
+    SHARED_PTR_ALIA<analysis::dvvp::proto::ProfAclConfig> aclCfg;
+    MSVP_MAKE_SHARED0_VOID(aclCfg, analysis::dvvp::proto::ProfAclConfig);
+    aclCfg->set_storage_limit("200MB");
+    aclCfg->set_l2("on");
+    int ret = AclJsonParamAdapterMgr->GenAclJsonContainer(aclCfg);
+    EXPECT_EQ(PROFILING_SUCCESS, ret);
+}
+
+TEST_F(MSPROF_BIN_UTEST, ParamsCheckAclJson)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<AclJsonParamAdapter> AclJsonParamAdapterMgr;
+    MSVP_MAKE_SHARED0_BREAK(AclJsonParamAdapterMgr, AclJsonParamAdapter);
+    AclJsonParamAdapterMgr->Init();
+    MOCKER_CPP(&analysis::dvvp::common::validation::ParamValidation::IsValidSwitch)
+        .stubs()
+        .will(returnValue(true));
+    MOCKER_CPP(&Collector::Dvvp::ParamsAdapter::ParamsAdapter::CheckFreqValid)
+        .stubs()
+        .will(returnValue(true));
+    std::vector<std::pair<InputCfg, std::string>> cfgList;
+    for (auto cfg : AclJsonParamAdapterMgr->aclJsonConfig_) {
+        AclJsonParamAdapterMgr->setConfig_.insert(cfg);
+        int ret = AclJsonParamAdapterMgr->ParamsCheckAclJson(cfgList);
+        EXPECT_EQ(PROFILING_SUCCESS, ret);
+    }
+}
+
+TEST_F(MSPROF_BIN_UTEST, SetAclJsonContainerDefaultValue)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<AclJsonParamAdapter> AclJsonParamAdapterMgr;
+    MSVP_MAKE_SHARED0_BREAK(AclJsonParamAdapterMgr, AclJsonParamAdapter);
+    AclJsonParamAdapterMgr->setConfig_.insert(INPUT_CFG_COM_AI_VECTOR);
+    int ret = AclJsonParamAdapterMgr->SetAclJsonContainerDefaultValue();
+    EXPECT_EQ(PROFILING_SUCCESS, ret);
+}
+
+TEST_F(MSPROF_BIN_UTEST, AclJsonSetOutputDir)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<AclJsonParamAdapter> AclJsonParamAdapterMgr;
+    MSVP_MAKE_SHARED0_BREAK(AclJsonParamAdapterMgr, AclJsonParamAdapter);
+    
+    std::string output;
+    std::string ret = AclJsonParamAdapterMgr->SetOutputDir(output);
+    std::string result1 = analysis::dvvp::common::utils::Utils::GetSelfPath();
+    size_t pos = result1.rfind(MSVP_SLASH);
+        if (pos != std::string::npos) {
+            result1 = result1.substr(0, pos + 1);
+        }
+    EXPECT_EQ(result1, ret);
+
+    std::string result2 = analysis::dvvp::common::utils::Utils::GetSelfPath();
+    result2 = analysis::dvvp::common::utils::Utils::DirName(result2) + "/";
+    output = "/var";
+    ret = AclJsonParamAdapterMgr->SetOutputDir(output);
+    EXPECT_EQ(result2, ret);
+
+    output = "/tmp/test";
+    ret = AclJsonParamAdapterMgr->SetOutputDir(output);
+    EXPECT_EQ(output, ret);
+}
+
+TEST_F(MSPROF_BIN_UTEST, GeOptParamAdapterModule)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<GeOptParamAdapter> GeOptParamAdapterMgr;
+    MSVP_MAKE_SHARED0_BREAK(GeOptParamAdapterMgr, GeOptParamAdapter);
+    int ret = GeOptParamAdapterMgr->Init();
+    EXPECT_EQ(PROFILING_SUCCESS, ret);
+
+    SHARED_PTR_ALIA<analysis::dvvp::proto::ProfGeOptionsConfig> geCfg;
+    MSVP_MAKE_SHARED0_VOID(geCfg, analysis::dvvp::proto::ProfGeOptionsConfig);
+    geCfg->set_storage_limit("200MB");
+    ret = GeOptParamAdapterMgr->GenGeOptionsContainer(geCfg);
+    MOCKER_CPP(&Collector::Dvvp::ParamsAdapter::ParamsAdapter::BlackSwitchCheck)
+        .stubs()
+        .will(returnValue(true));
+    EXPECT_EQ(PROFILING_SUCCESS, ret);
+}
+
+TEST_F(MSPROF_BIN_UTEST, ParamsCheckGeOpt)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<GeOptParamAdapter> GeOptParamAdapterMgr;
+    MSVP_MAKE_SHARED0_BREAK(GeOptParamAdapterMgr, GeOptParamAdapter);
+    GeOptParamAdapterMgr->Init();
+    std::vector<std::pair<InputCfg, std::string>> cfgList;
+    MOCKER_CPP(&analysis::dvvp::common::validation::ParamValidation::IsValidSwitch)
+        .stubs()
+        .will(returnValue(true));
+    MOCKER_CPP(&Collector::Dvvp::ParamsAdapter::ParamsAdapter::CheckFreqValid)
+        .stubs()
+        .will(returnValue(true));
+    for (auto cfg : GeOptParamAdapterMgr->geOptConfig_) {
+        GeOptParamAdapterMgr->setConfig_.insert(cfg);
+        int ret = GeOptParamAdapterMgr->ParamsCheckGeOpt(cfgList);
+        EXPECT_EQ(PROFILING_SUCCESS, ret);
+    }
+}
+
+TEST_F(MSPROF_BIN_UTEST, SetGeOptionsContainerDefaultValue)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<GeOptParamAdapter> GeOptParamAdapterMgr;
+    MSVP_MAKE_SHARED0_BREAK(GeOptParamAdapterMgr, GeOptParamAdapter);
+
+    GeOptParamAdapterMgr->paramContainer_[INPUT_CFG_COM_AIC_METRICS] = "ArithmeticUtilization";
+    GeOptParamAdapterMgr->paramContainer_[INPUT_CFG_COM_AIV_METRICS] = "ArithmeticUtilization";
+    int ret = GeOptParamAdapterMgr->SetGeOptionsContainerDefaultValue();
+    MOCKER_CPP(&Collector::Dvvp::ParamsAdapter::GeOptParamAdapter::SetOutputDir)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED));
+    MOCKER_CPP(&Analysis::Dvvp::Common::Platform::Platform::PlatformIsHelperHostSide)
+        .stubs()
+        .will(returnValue(false));
+    EXPECT_EQ(PROFILING_FAILED, ret);
+}
+
+TEST_F(MSPROF_BIN_UTEST, GeOptionsSetOutputDir)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<GeOptParamAdapter> GeOptParamAdapterMgr;
+    MSVP_MAKE_SHARED0_BREAK(GeOptParamAdapterMgr, GeOptParamAdapter);
+
+    std::string output;
+    int ret = GeOptParamAdapterMgr->SetOutputDir(output);
+    EXPECT_EQ(PROFILING_FAILED, ret);
+    output = "./";
+    ret = GeOptParamAdapterMgr->SetOutputDir(output);
+    EXPECT_EQ(PROFILING_SUCCESS, ret);
+    output = "/var";
+    ret = GeOptParamAdapterMgr->SetOutputDir(output);
+    EXPECT_EQ(PROFILING_FAILED, ret);
+}
+
+TEST_F(MSPROF_BIN_UTEST, GeGetParamFromInputCfg)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<GeOptParamAdapter> GeOptParamAdapterMgr;
+    MSVP_MAKE_SHARED0_BREAK(GeOptParamAdapterMgr, GeOptParamAdapter);
+    SHARED_PTR_ALIA<analysis::dvvp::proto::ProfGeOptionsConfig> geCfg = nullptr;
+    SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params = nullptr;
+    int ret = GeOptParamAdapterMgr->GetParamFromInputCfg(geCfg, params);
+    EXPECT_EQ(PROFILING_FAILED, ret);
+    MSVP_MAKE_SHARED0_VOID(geCfg, analysis::dvvp::proto::ProfGeOptionsConfig);
+    MSVP_MAKE_SHARED0_VOID(params, analysis::dvvp::message::ProfileParams);
+    MOCKER_CPP(&Collector::Dvvp::ParamsAdapter::GeOptParamAdapter::GenGeOptionsContainer)
+        .stubs()
+        .will(returnValue(false))
+        .then(returnValue(true));
+    MOCKER_CPP(&Collector::Dvvp::ParamsAdapter::GeOptParamAdapter::GenGeOptionsContainer)
+        .stubs()
+        .will(returnValue(true));
+    MOCKER_CPP(&Collector::Dvvp::ParamsAdapter::GeOptParamAdapter::SetGeOptionsContainerDefaultValue)
+        .stubs()
+        .will(returnValue(true));
+    MOCKER_CPP(&Collector::Dvvp::ParamsAdapter::GeOptParamAdapter::SetGeOptionsContainerDefaultValue)
+        .stubs()
+        .will(returnValue(true));
+    MOCKER_CPP(&Collector::Dvvp::ParamsAdapter::GeOptParamAdapter::SetGeOptionsContainerDefaultValue)
+        .stubs()
+        .will(returnValue(true));
+    EXPECT_EQ(PROFILING_FAILED, ret);
+}
+
+TEST_F(MSPROF_BIN_UTEST, DevIdToStr)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<AclApiParamAdapter> AclApiParamAdapterMgr;
+    MSVP_MAKE_SHARED0_BREAK(AclApiParamAdapterMgr, AclApiParamAdapter);
+
+    uint32_t devNum = 2;
+    uint32_t devList[devNum] = {
+        1, 64
+    };
+    std::string ret = AclApiParamAdapterMgr->DevIdToStr(devNum, devList);
+    std::string result = "1";
+    EXPECT_EQ(result, ret);
+    devList[0] = 1;
+    devList[1] = 2; // 2 test num
+    ret = AclApiParamAdapterMgr->DevIdToStr(devNum, devList);
+    result = "1,2";
+    EXPECT_EQ(result, ret);
+}
+
+TEST_F(MSPROF_BIN_UTEST, AclApiParamAdapterInit)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<AclApiParamAdapter> AclApiParamAdapterMgr;
+    MSVP_MAKE_SHARED0_BREAK(AclApiParamAdapterMgr, AclApiParamAdapter);
+    int ret = AclApiParamAdapterMgr->Init();
+    EXPECT_EQ(PROFILING_SUCCESS, ret);
+}
+
+TEST_F(MSPROF_BIN_UTEST, ParamsCheckAclApi)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<AclApiParamAdapter> AclApiParamAdapterMgr;
+    MSVP_MAKE_SHARED0_BREAK(AclApiParamAdapterMgr, AclApiParamAdapter);
+    
+    std::vector<std::pair<InputCfg, std::string>> cfgList;
+    AclApiParamAdapterMgr->Init();
+    MOCKER_CPP(&analysis::dvvp::common::validation::ParamValidation::IsValidSwitch)
+        .stubs()
+        .will(returnValue(true));
+    MOCKER_CPP(&analysis::dvvp::common::validation::ParamValidation::MsprofCheckSysDeviceValid)
+        .stubs()
+        .will(returnValue(true));
+    int ret = AclApiParamAdapterMgr->ParamsCheckAclApi(cfgList);
+    EXPECT_EQ(PROFILING_SUCCESS, ret);
+}
+
+TEST_F(MSPROF_BIN_UTEST, ProfTaskCfgToContainer)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<AclApiParamAdapter> AclApiParamAdapterMgr;
+    MSVP_MAKE_SHARED0_BREAK(AclApiParamAdapterMgr, AclApiParamAdapter);
+
+    struct ProfConfig apiCfg;
+    apiCfg.devNums = 1;
+    apiCfg.devIdList[0] = {1};
+    apiCfg.dataTypeConfig = PROF_TASK_TIME | PROF_KEYPOINT_TRACE |
+                            PROF_L2CACHE | PROF_ACL_API |
+                            PROF_AICPU_TRACE | PROF_RUNTIME_API |
+                            PROF_HCCL_TRACE | PROF_AICORE_METRICS;
+    apiCfg.aicoreMetrics = PROF_AICORE_ARITHMETIC_UTILIZATION;
+    std::array<std::string, ACL_PROF_ARGS_MAX> argsArr;
+    argsArr[ACL_PROF_STORAGE_LIMIT] = "200MB";
+    argsArr[ACL_PROF_AIV_METRICS] = "ArithmeticUtilization";
+    AclApiParamAdapterMgr->ProfTaskCfgToContainer(&apiCfg, argsArr);
+}
+
+TEST_F(MSPROF_BIN_UTEST, ProfSystemCfgToContainer)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<AclApiParamAdapter> AclApiParamAdapterMgr;
+    MSVP_MAKE_SHARED0_BREAK(AclApiParamAdapterMgr, AclApiParamAdapter);
+    struct ProfConfig apiCfg;
+    apiCfg.devNums = 1;
+    apiCfg.devIdList[0] = {1};
+    apiCfg.dataTypeConfig = PROF_TASK_TIME | PROF_KEYPOINT_TRACE |
+                            PROF_L2CACHE | PROF_ACL_API |
+                            PROF_AICPU_TRACE | PROF_RUNTIME_API |
+                            PROF_HCCL_TRACE | PROF_AICORE_METRICS;
+    apiCfg.aicoreMetrics = PROF_AICORE_ARITHMETIC_UTILIZATION;
+    std::array<std::string, ACL_PROF_ARGS_MAX> argsArr;
+    argsArr[ACL_PROF_SYS_CPU_FREQ] = "10";
+    argsArr[ACL_PROF_SYS_IO_FREQ] = "10";
+    argsArr[ACL_PROF_SYS_INTERCONNECTION_FREQ] = "10";
+    argsArr[ACL_PROF_DVPP_FREQ] = "10";
+    argsArr[ACL_PROF_SYS_USAGE_FREQ] = "10";
+    argsArr[ACL_PROF_SYS_PID_USAGE_FREQ] = "10";
+    argsArr[ACL_PROF_HOST_SYS] = "10";
+    AclApiParamAdapterMgr->ProfSystemCfgToContainer(&apiCfg, argsArr);
+}
+
+TEST_F(MSPROF_BIN_UTEST, ProfSystemHardwareMemCfgToContainer)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<AclApiParamAdapter> AclApiParamAdapterMgr;
+    MSVP_MAKE_SHARED0_BREAK(AclApiParamAdapterMgr, AclApiParamAdapter);
+    std::array<std::string, ACL_PROF_ARGS_MAX> argsArr;
+    argsArr[ACL_PROF_SYS_HARDWARE_MEM_FREQ] = "10";
+    argsArr[ACL_PROF_LLC_MODE] = "10";
+    AclApiParamAdapterMgr->ProfSystemHardwareMemCfgToContainer(argsArr);
+}
+
+TEST_F(MSPROF_BIN_UTEST, CheckListInit)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<ParamsAdapter> ParamsAdapterMgr;
+    MSVP_MAKE_SHARED0_BREAK(ParamsAdapterMgr, ParamsAdapter);
+    int ret = ParamsAdapterMgr->CheckListInit();
+    MOCKER_CPP(&Analysis::Dvvp::Common::Config::ConfigManager::GetPlatformType)
+        .stubs()
+        .will(returnValue(PlatformType::MINI_TYPE))
+        .then(returnValue(PlatformType::CLOUD_TYPE))
+        .then(returnValue(PlatformType::MDC_TYPE))
+        .then(returnValue(PlatformType::LHISI_TYPE))
+        .then(returnValue(PlatformType::DC_TYPE))
+        .then(returnValue(PlatformType::CHIP_V4_1_0));
+    EXPECT_EQ(PROFILING_SUCCESS, ret);
+    EXPECT_EQ(PROFILING_SUCCESS, ret);
+    EXPECT_EQ(PROFILING_SUCCESS, ret);
+    EXPECT_EQ(PROFILING_SUCCESS, ret);
+    EXPECT_EQ(PROFILING_SUCCESS, ret);
+    EXPECT_EQ(PROFILING_SUCCESS, ret);
+}
+
+TEST_F(MSPROF_BIN_UTEST, TransToParam)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<ParamsAdapter> ParamsAdapterMgr;
+    MSVP_MAKE_SHARED0_BREAK(ParamsAdapterMgr, ParamsAdapter);
+
+    std::array<std::string, INPUT_CFG_MAX> paramContainer;
+    SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params;
+    MSVP_MAKE_SHARED0_VOID(params, analysis::dvvp::message::ProfileParams);
+    paramContainer[INPUT_CFG_COM_TASK_TRACE] = "on";
+    paramContainer[INPUT_CFG_COM_TRAINING_TRACE] = "on";
+    paramContainer[INPUT_CFG_COM_HCCL] = "on";
+    paramContainer[INPUT_CFG_COM_SYS_USAGE] = "on";
+    paramContainer[INPUT_CFG_COM_SYS_CPU] = "on";
+    paramContainer[INPUT_CFG_COM_SYS_HARDWARE_MEM] = "on";
+    paramContainer[INPUT_CFG_COM_SYS_IO] = "on";
+    paramContainer[INPUT_CFG_COM_SYS_INTERCONNECTION] = "on";
+    paramContainer[INPUT_CFG_COM_DVPP] = "on";
+    paramContainer[INPUT_CFG_COM_POWER] = "on";
+    paramContainer[INPUT_CFG_COM_BIU] = "on";
+    paramContainer[INPUT_CFG_HOST_SYS] = "cpu,mem,disk,osrt,network";
+    paramContainer[INPUT_HOST_SYS_USAGE] = "cpu,mem";
+    int ret = ParamsAdapterMgr->TransToParam(paramContainer, params);
+    EXPECT_EQ(PROFILING_SUCCESS, ret);
+}
+
+
+TEST_F(MSPROF_BIN_UTEST, ComCfgCheck2)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<ParamsAdapter> ParamsAdapterMgr;
+    MSVP_MAKE_SHARED0_BREAK(ParamsAdapterMgr, ParamsAdapter);
+    std::vector<std::pair<InputCfg, std::string>> cfgErrList;
+    std::vector<InputCfg> cfgList = {
+        INPUT_CFG_COM_SYS_USAGE_FREQ,
+        INPUT_CFG_COM_LLC_MODE,
+        INPUT_HOST_SYS_USAGE
+    };
+    std::string cfgValue = "on";
+    MOCKER_CPP(&Collector::Dvvp::ParamsAdapter::ParamsAdapter::CheckFreqValid)
+        .stubs()
+        .will(returnValue(true));
+    MOCKER_CPP(&analysis::dvvp::common::validation::ParamValidation::CheckLlcModeIsValid)
+        .stubs()
+        .will(returnValue(true));
+    MOCKER_CPP(&analysis::dvvp::common::validation::ParamValidation::CheckHostSysUsageIsValid)
+        .stubs()
+        .will(returnValue(true));
+    for (auto cfg : cfgList) {
+        bool ret = ParamsAdapterMgr->ComCfgCheck2(cfg, cfgValue, cfgErrList);
+        EXPECT_EQ(true, ret);
+    }
+    InputCfg  errCfg = INPUT_CFG_COM_TASK_TIME;
+    bool ret = ParamsAdapterMgr->ComCfgCheck2(errCfg, cfgValue, cfgErrList);
+    EXPECT_EQ(false, ret);
+}
+
+TEST_F(MSPROF_BIN_UTEST, CheckFreqValid)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<ParamsAdapter> ParamsAdapterMgr;
+    MSVP_MAKE_SHARED0_BREAK(ParamsAdapterMgr, ParamsAdapter);
+    std::string freq = "20";
+    InputCfg freqOpt = INPUT_CFG_COM_AIC_FREQ;
+    bool ret = ParamsAdapterMgr->CheckFreqValid(freq, freqOpt);
+    MOCKER_CPP(&analysis::dvvp::common::validation::ParamValidation::CheckFreqIsValid)
+        .stubs()
+        .will(returnValue(true));
+    EXPECT_EQ(true, ret);
+}
