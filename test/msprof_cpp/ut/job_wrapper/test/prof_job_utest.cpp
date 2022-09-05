@@ -126,9 +126,6 @@ TEST_F(JOB_WRAPPER_PROF_TsTrack_JOB_TEST, Init) {
     collectionJobCfg_->comParams->params->host_profiling = true;
     EXPECT_EQ(PROFILING_FAILED, profTsTrackJob->Init(collectionJobCfg_));
     collectionJobCfg_->comParams->params->host_profiling = false;
-    collectionJobCfg_->comParams->params->ts_task_track = "off";
-    collectionJobCfg_->comParams->params->ts_cpu_usage = "off";
-    collectionJobCfg_->comParams->params->ai_core_status = "off";
     collectionJobCfg_->comParams->params->ts_timeline = "off";
     collectionJobCfg_->comParams->params->ts_keypoint = "off";
     EXPECT_EQ(PROFILING_FAILED, profTsTrackJob->Init(collectionJobCfg_));

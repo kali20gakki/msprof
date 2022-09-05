@@ -479,8 +479,7 @@ AppMode::AppMode(std::string preCheckParams, SHARED_PTR_ALIA<ProfileParams> para
         ARGS_ASCENDCL, ARGS_AI_CORE, ARGS_AIV, ARGS_MODEL_EXECUTION,
         ARGS_RUNTIME_API, ARGS_TASK_TIME, ARGS_AICPU, ARGS_CPU_PROFILING, ARGS_SYS_PROFILING,
         ARGS_PID_PROFILING, ARGS_HARDWARE_MEM, ARGS_IO_PROFILING, ARGS_INTERCONNECTION_PROFILING,
-        ARGS_DVPP_PROFILING, ARGS_STARS_ACSQ_TASK, ARGS_STARS_SUB_TASK, ARGS_FFTS_THREAD_TASK,
-        ARGS_L2_PROFILING, ARGS_AIC_FREQ, ARGS_AIV_FREQ, ARGS_BIU_FREQ, ARGS_BIU, ARGS_HCCL,
+        ARGS_DVPP_PROFILING, ARGS_L2_PROFILING, ARGS_AIC_FREQ, ARGS_AIV_FREQ, ARGS_BIU_FREQ, ARGS_BIU, ARGS_HCCL,
         ARGS_SYS_SAMPLING_FREQ, ARGS_PID_SAMPLING_FREQ, ARGS_HARDWARE_MEM_SAMPLING_FREQ,
         ARGS_IO_SAMPLING_FREQ, ARGS_DVPP_FREQ,  ARGS_CPU_SAMPLING_FREQ, ARGS_INTERCONNECTION_FREQ,
         ARGS_HOST_SYS, ARGS_PYTHON_PATH, ARGS_MSPROFTX
@@ -496,10 +495,6 @@ int AppMode::ModeParamsCheck()
         return PROFILING_FAILED;
     }
     OutputUselessParams();
-    if (HandleProfilingParams() != PROFILING_SUCCESS) {
-        MSPROF_LOGE("[App Mode] HandleProfilingParams failed");
-        return PROFILING_FAILED;
-    }
     return PROFILING_SUCCESS;
 }
 
@@ -540,51 +535,12 @@ int AppMode::RunModeTasks()
     return PROFILING_SUCCESS;
 }
 
-void AppMode::SetDefaultParams() const
-{
-    if (params_->acl.empty()) {
-        params_->acl = "on";
-    }
-
-    if (ConfigManager::instance()->GetPlatformType() == PlatformType::MINI_TYPE) {
-        if (params_->ts_timeline.empty()) {
-            params_->ts_timeline = "on";
-        }
-    } else {
-        if (params_->hwts_log.empty()) {
-            params_->hwts_log = "on";
-        }
-        if (params_->hwts_log1.empty()) {
-            params_->hwts_log1 = "on";
-        }
-    }
-    if (params_->ts_memcpy.empty()) {
-        params_->ts_memcpy = "on";
-    }
-    if (params_->ts_keypoint.empty()) {
-        params_->ts_keypoint = "on";
-    }
-    if (params_->ai_core_profiling.empty()) {
-        params_->ai_core_profiling = "on";
-    }
-    if (params_->ai_core_profiling_mode.empty()) {
-        params_->ai_core_profiling_mode = PROFILING_MODE_TASK_BASED;
-    }
-    if (params_->aiv_profiling.empty()) {
-        params_->aiv_profiling = "on";
-    }
-    if (params_->aiv_profiling_mode.empty()) {
-        params_->aiv_profiling_mode = PROFILING_MODE_TASK_BASED;
-    }
-}
-
 int AppMode::StartAppTask(bool needWait)
 {
     if (isQuit_) {
         MSPROF_LOGE("Failed to launch app, msprofbin has quited");
         return PROFILING_FAILED;
     }
-    SetDefaultParams();
     int ret = analysis::dvvp::app::Application::LaunchApp(params_, taskPid_);
     if (ret == PROFILING_FAILED) {
         MSPROF_LOGE("Failed to launch app");

@@ -233,7 +233,6 @@ ACL_PROF_CONFIG_PTR aclprofCreateConfig(UINT32_T_PTR deviceIdList, uint32_t devi
     }
     profConfig->config.aicoreMetrics = static_cast<ProfAicoreMetrics>(aicoreMetrics);
     profConfig->config.dataTypeConfig = dataTypeConfig;
-    ProfAclMgr::instance()->AddAiCpuModelConf(profConfig->config.dataTypeConfig);
 
     profConfig->config.devNums = deviceNums;
     if (deviceNums != 0) {
@@ -338,11 +337,9 @@ aclError aclprofStart(ACL_PROF_CONFIG_CONST_PTR profilerConfig)
     }
 
     MSPROF_LOGI("Allocate start profiling config to Acl");
-    uint64_t dataTypeConfig = profilerConfig->config.dataTypeConfig;
-    ProfAclMgr::instance()->AddModelLoadConf(dataTypeConfig);
-    ProfAclMgr::instance()->AddRuntimeTraceConf(dataTypeConfig);
+    uint64_t dataTypeConfig = ProfAclMgr::instance()->GetDataTypeConfigFromParams();
     ret = Analysis::Dvvp::ProfilerCommon::CommandHandleProfStart(
-        profilerConfig->config.devIdList, profilerConfig->config.devNums, dataTypeConfig | PROF_OP_DETAIL);
+        profilerConfig->config.devIdList, profilerConfig->config.devNums, dataTypeConfig);
     RETURN_IF_NOT_SUCCESS(ret);
 
     MSPROF_LOGI("Acl has been allocated start profiling config, successfully execute aclprofStartProfiling");
@@ -374,18 +371,10 @@ aclError aclprofStop(ACL_PROF_CONFIG_CONST_PTR profilerConfig)
         return ret;
     }
 
-    uint64_t dataTypeConfig = 0;
-    for (uint32_t i = 0; i < profilerConfig->config.devNums; i++) {
-        ret = ProfAclMgr::instance()->ProfAclGetDataTypeConfig(profilerConfig->config.devIdList[i], dataTypeConfig);
-        RETURN_IF_NOT_SUCCESS(ret);
-        ret = ProfAclMgr::instance()->StopProfConfigCheck(profilerConfig->config.dataTypeConfig, dataTypeConfig);
-        RETURN_IF_NOT_SUCCESS(ret);
-    }
     MSPROF_LOGI("Allocate stop config of profiling modules to Acl");
-    ProfAclMgr::instance()->AddModelLoadConf(dataTypeConfig);
-    ProfAclMgr::instance()->AddRuntimeTraceConf(dataTypeConfig);
+    uint64_t dataTypeConfig = ProfAclMgr::instance()->GetDataTypeConfigFromParams();
     ret = Analysis::Dvvp::ProfilerCommon::CommandHandleProfStop(
-        profilerConfig->config.devIdList, profilerConfig->config.devNums, dataTypeConfig | PROF_OP_DETAIL);
+        profilerConfig->config.devIdList, profilerConfig->config.devNums, dataTypeConfig);
     RETURN_IF_NOT_SUCCESS(ret);
 
     for (uint32_t i = 0; i < profilerConfig->config.devNums; i++) {
@@ -734,4 +723,29 @@ aclError aclprofRangeStop(uint32_t rangeId)
         return ACL_ERROR_FEATURE_UNSUPPORTED;
     }
     return MsprofTxManager::instance()->RangeStop(rangeId);
+}
+
+aclError aclprofSetConfig(aclprofConfigType configType, const char *val, uint32_t valLen)
+{
+    if (Platform::instance()->PlatformIsHelperHostSide()) {
+        MSPROF_LOGE("acl api not support in helper");
+        MSPROF_ENV_ERROR("EK0004", std::vector<std::string>({"intf", "platform"}),
+            std::vector<std::string>({"aclprofSetConfig", "SocCloud"}));
+        return ACL_ERROR_FEATURE_UNSUPPORTED;
+    }
+    if (configType < ACL_PROF_STORAGE_LIMIT || configType >= ACL_PROF_ARGS_MAX) {
+        MSPROF_LOGE("[aclprofSetConfig]");
+        return ACL_ERROR_INVALID_PARAM;
+    }
+    if (val == nullptr || strlen(val) != valLen) {
+        MSPROF_LOGE("[aclprofSetConfig]Input value is invalid.");
+        return ACL_ERROR_INVALID_PARAM;
+    }
+    std::string config(val, valLen);
+    int32_t ret = ProfAclMgr::instance()->MsprofSetConfig(configType, config);
+    if (ret != PROFILING_SUCCESS) {
+        MSPROF_LOGE("[aclprofSetConfig]Fail to set profiling config.");
+        return ACL_ERROR_INVALID_PARAM;
+    }
+    return ACL_SUCCESS;
 }

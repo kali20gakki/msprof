@@ -214,6 +214,35 @@ std::string ConfigManager::GetDefaultWorkDir() const
 {
     return std::string(INOTIFY_CFG_PATH_STR);
 }
+
+void ConfigManager::AicoreMetricsEnumToName(ProfAicoreMetrics aicMetrics, std::string &name)
+{
+    switch (aicMetrics) {
+        case PROF_AICORE_ARITHMETIC_UTILIZATION:
+            name = ARITHMETIC_UTILIZATION;
+            break;
+        case PROF_AICORE_PIPE_UTILIZATION:
+            name = PIPE_UTILIZATION;
+            break;
+        case PROF_AICORE_MEMORY_BANDWIDTH:
+            name = MEMORY_BANDWIDTH;
+            break;
+        case PROF_AICORE_L0B_AND_WIDTH:
+            name = L0B_AND_WIDTH;
+            break;
+        case PROF_AICORE_RESOURCE_CONFLICT_RATIO:
+            name = RESOURCE_CONFLICT_RATIO;
+            break;
+        case PROF_AICORE_MEMORY_UB:
+            name = MEMORY_UB;
+            break;
+        case PROF_AICORE_NONE:
+            break;
+        default:
+            MSPROF_LOGE("Invalid aicore metrics enum: %u", aicMetrics);
+            MSPROF_INNER_ERROR("EK9999", "Invalid aicore metrics enum: %u", aicMetrics);
+    }
+}
 }
 }
 }

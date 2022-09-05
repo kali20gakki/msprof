@@ -449,11 +449,6 @@ TEST_F(RUNNING_MODE_UTEST, AppModeModeParamsCheck){
     Collector::Dvvp::Msprofbin::AppMode rMode("app", nullptr);
     EXPECT_EQ(PROFILING_FAILED, rMode.ModeParamsCheck());
     rMode.params_ = params;
-    MOCKER_CPP(&RunningMode::HandleProfilingParams)
-        .stubs()
-        .will(returnValue(PROFILING_FAILED))
-        .then(returnValue(PROFILING_SUCCESS));
-    EXPECT_EQ(PROFILING_FAILED, rMode.ModeParamsCheck());
     EXPECT_EQ(PROFILING_SUCCESS, rMode.ModeParamsCheck());
 }
 
@@ -486,29 +481,6 @@ TEST_F(RUNNING_MODE_UTEST, AppModeRunModeTasks){
     EXPECT_EQ(PROFILING_SUCCESS, rMode.RunModeTasks());
     EXPECT_EQ(PROFILING_SUCCESS, rMode.RunModeTasks());
     EXPECT_EQ(PROFILING_SUCCESS, rMode.RunModeTasks());
-}
-
-TEST_F(RUNNING_MODE_UTEST, AppModeSetDefaultParams){
-    GlobalMockObject::verify();
-    std::shared_ptr<analysis::dvvp::message::ProfileParams> params(
-    new analysis::dvvp::message::ProfileParams);
-    Collector::Dvvp::Msprofbin::AppMode rMode("app", params);
-    MOCKER_CPP(&ConfigManager::GetPlatformType)
-        .stubs()
-        .will(returnValue(0))
-        .then(returnValue(1));
-
-    rMode.SetDefaultParams();
-    EXPECT_EQ(params->acl, "on");
-    EXPECT_EQ(params->ts_timeline, "on");
-    EXPECT_EQ(params->ts_keypoint, "on");
-    EXPECT_EQ(params->ai_core_profiling, "on");
-    EXPECT_EQ(params->ai_core_profiling_mode, "task-based");
-    EXPECT_EQ(params->aiv_profiling, "on");
-    EXPECT_EQ(params->aiv_profiling_mode, "task-based");
-    EXPECT_EQ(params->hwts_log, "");
-    rMode.SetDefaultParams();
-    EXPECT_EQ(params->hwts_log, "on");
 }
 
 TEST_F(RUNNING_MODE_UTEST, AppModeStartAppTask){

@@ -216,10 +216,6 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvTsFwStart) {
     auto profileParams = std::make_shared<analysis::dvvp::message::ProfileParams>();
 
     profileParams->ts_timeline = "on";
-    profileParams->ts_task_track = "on";
-    profileParams->ts_cpu_usage = "on";
-    profileParams->ai_core_status = "on";
-    profileParams->ai_vector_status = "on";
     MOCKER(&DriverPlugin::MsprofDrvStart)
         .stubs()
         .will(returnValue(PROF_ERROR))
@@ -244,7 +240,6 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvStarsSocLogStart) {
     auto profileParams = std::make_shared<analysis::dvvp::message::ProfileParams>();
 
     profileParams->stars_acsq_task = "on";
-    profileParams->ffts_block = "on";
     profileParams->low_power  = "on";
     MOCKER(&DriverPlugin::MsprofDrvStart)
         .stubs()

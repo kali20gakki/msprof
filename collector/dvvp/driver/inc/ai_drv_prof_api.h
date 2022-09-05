@@ -26,10 +26,8 @@ using namespace analysis::dvvp::common::utils;
 enum AI_DRV_CHANNEL {
     PROF_CHANNEL_UNKNOWN = 0,
     PROF_CHANNEL_HBM     = CHANNEL_HBM, // 1
-    PROF_CHANNEL_BUS     = CHANNEL_BUS, // 2
     PROF_CHANNEL_PCIE    = CHANNEL_PCIE, // 3
     PROF_CHANNEL_NIC     = CHANNEL_NIC, // 4
-    PROF_CHANNEL_DMA     = CHANNEL_DMA, // 5
     PROF_CHANNEL_DVPP    = CHANNEL_DVPP, // 6
     PROF_CHANNEL_DDR     = CHANNEL_DDR, // 7
     PROF_CHANNEL_LLC     = CHANNEL_LLC, // 8

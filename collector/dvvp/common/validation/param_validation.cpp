@@ -508,22 +508,10 @@ bool ParamValidation::IsValidSwitch(const std::string &switchStr) const
 
 bool ParamValidation::CheckTsSwitchProfiling(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params)
 {
-    if (!IsValidSwitch(params->ts_task_track)) {
-        return false;
-    }
-    if (!IsValidSwitch(params->ts_cpu_usage)) {
-        return false;
-    }
-    if (!IsValidSwitch(params->ai_core_status)) {
-        return false;
-    }
     if (!IsValidSwitch(params->ts_timeline)) {
         return false;
     }
     if (!IsValidSwitch(params->ts_keypoint)) {
-        return false;
-    }
-    if (!IsValidSwitch(params->ai_vector_status)) {
         return false;
     }
     if (!IsValidSwitch(params->ts_fw_training)) {
@@ -768,7 +756,6 @@ bool ParamValidation::CheckParamsModeRegexMatch(const std::string &paramsMode) c
     }
     std::vector<std::string> profilingModeWhiteList;
     profilingModeWhiteList.push_back(analysis::dvvp::message::PROFILING_MODE_DEF);
-    profilingModeWhiteList.push_back(analysis::dvvp::message::PROFILING_MODE_SYSTEM_WIDE);
     for (size_t i = 0; i < profilingModeWhiteList.size(); i++) {
         if (paramsMode.compare(profilingModeWhiteList[i]) == 0) {
             return true;
@@ -1017,10 +1004,39 @@ bool ParamValidation::MsprofCheckAppValid(std::string &appParam) const
 }
  
 int ParamValidation::MsprofCheckNotAppValid(const std::vector<std::string> &AppParamsList,
-    const std::string &resultAppParam) const
+    std::string &resultAppParam)
 {
-    UNUSED(AppParamsList);
-    UNUSED(resultAppParam);
+    std::string cmdParam = AppParamsList[0];
+    if (cmdParam.find("/") != std::string::npos) {
+        std::string absolutePathCmdParam = Utils::CanonicalizePath(cmdParam);
+        if (absolutePathCmdParam.empty()) {
+            MSPROF_LOGE("App path(%s) does not exist or permission denied.",
+                absolutePathCmdParam.c_str());
+            return PROFILING_FAILED;
+        }
+        if (MmAccess2(absolutePathCmdParam, M_X_OK) != PROFILING_SUCCESS) {
+            MSPROF_LOGE("This app(%s) has no executable permission.",
+                absolutePathCmdParam.c_str());
+            return PROFILING_FAILED;
+        }
+        resultAppParam = absolutePathCmdParam + " ";
+    } else {
+        resultAppParam = cmdParam + " ";
+    }
+    if (MsprofCheckAppScriptValid(AppParamsList) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
+    for (size_t i = 1; i < AppParamsList.size(); i++) {
+        std::string tmpStr = Utils::CanonicalizePath(AppParamsList[i]);
+        if (!tmpStr.empty()) {
+            resultAppParam += tmpStr;
+        } else {
+            resultAppParam += AppParamsList[i];
+        }
+        if (i < (AppParamsList.size() - 1)) {
+            resultAppParam += " ";
+        }
+    }
     return PROFILING_SUCCESS;
 }
  
