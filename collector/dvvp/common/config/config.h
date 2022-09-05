@@ -62,6 +62,8 @@ const int STORAGE_LIMIT_DOWN_THD = 200; // 200MB
 
 const int MAX_ASCEND_INSTALL_INFO_FILE_SIZE = 1024; // 1024 Byte
 
+const int THOUSAND = 1000; // 1000 : 1k
+
 #if (defined(_WIN32) || defined(_WIN64) || defined(_MSC_VER))
 const int MSVP_MMPROCESS = NULL;
 const char * const MSVP_ENV_DELIMITER = ":";
@@ -230,6 +232,25 @@ enum FileChunkDataModule {
 constexpr int BIU_SAMPLE_FREQ_MIN = 300;    // biu sampling frequency min value
 constexpr int BIU_SAMPLE_FREQ_MAX = 30000;  // biu sampling frequency max value
 
+// device-sys
+constexpr int SYS_SAMPLING_FREQ_MIN_NUM = 1;
+constexpr int SYS_SAMPLING_FREQ_MAX_NUM = 10;
+constexpr int PID_SAMPLING_FREQ_MIN_NUM = 1;
+constexpr int PID_SAMPLING_FREQ_MAX_NUM = 10;
+constexpr int CPU_SAMPLING_FREQ_MIN_NUM = 1;
+constexpr int CPU_SAMPLING_FREQ_MAX_NUM = 50;
+constexpr int INTERCONNECTION_SAMPLING_FREQ_MIN_NUM = 1;
+constexpr int INTERCONNECTION_SAMPLING_FREQ_MAX_NUM = 50;
+constexpr int IO_SAMPLING_FREQ_MIN_NUM = 1;
+constexpr int IO_SAMPLING_FREQ_MAX_NUM = 100;
+constexpr int DVPP_SAMPLING_FREQ_MIN_NUM = 1;
+constexpr int DVPP_SAMPLING_FREQ_MAX_NUM = 100;
+constexpr int HARDWARE_MEM_SAMPLING_FREQ_MIN_NUM = 1;
+constexpr int HARDWARE_MEM_SAMPLING_FREQ_MAX_NUM = 1000;
+constexpr int AIC_SAMPLING_FREQ_MIN_NUM = 1;
+constexpr int AIC_SAMPLING_FREQ_MAX_NUM = 100;
+constexpr int AIV_SAMPLING_FREQ_MIN_NUM = 1;
+constexpr int AIV_SAMPLING_FREQ_MAX_NUM = 100;
 }  // namespace config
 }  // namespace common
 }  // namespace dvvp

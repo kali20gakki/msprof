@@ -9,8 +9,11 @@ set(profilerSrcFiles
     ${MSPROF_SOURCE_DIR}/dvvp/transport/file_transport.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/adx/wrapper/adx_prof_api.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/config/config_manager.cpp
-    ${MSPROF_SOURCE_DIR}/dvvp/common/utils/utils.cpp 
+    ${MSPROF_SOURCE_DIR}/dvvp/common/logger/cmd_log.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/src/slog_plugin.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/driver/devmgmt/ai_drv_dev_api.cpp        
+    ${MSPROF_SOURCE_DIR}/dvvp/common/utils/utils.cpp 
     ${MSPROF_SOURCE_DIR}/dvvp/common/mmpa/mmpa_api.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/statistics/perf_count.cpp 
     ${MSPROF_SOURCE_DIR}/dvvp/message/codec.cpp
@@ -60,6 +63,7 @@ target_include_directories(transport_utest PRIVATE
     ${TOP_DIR}/collector/inc/external
     ${TOP_DIR}/collector/inc/external/acl
     ${TOP_DIR}/collector/inc/external/ge
+    ${TOP_DIR}/collector/dvvp/depend/inc/acl
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/metadef/error_manager/error_manager_stub
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/driver
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/adump
@@ -72,6 +76,7 @@ target_include_directories(transport_utest PRIVATE
     ../stub/
     ${MSPROF_SOURCE_DIR}/dvvp 
     ${MSPROF_SOURCE_DIR}/dvvp/adx/inc    
+    ${MSPROF_SOURCE_DIR}/dvvp/common/logger
     ${MSPROF_SOURCE_DIR}/dvvp/common 
     ${MSPROF_SOURCE_DIR}/dvvp/common/statistics 
     ${MSPROF_SOURCE_DIR}/dvvp/common/utils 

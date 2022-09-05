@@ -82,6 +82,8 @@ install(TARGETS stub_msprofiler OPTIONAL
 
 ######################## libmsprofiler.so ###########################
 set(msprofilerCpp
+    ${TOP_DIR}/collector/dvvp/params_adapter/params_adapter_impl.cpp
+    ${TOP_DIR}/collector/dvvp/params_adapter/params_adapter.cpp
     analyze/src/analyzer.cpp
     analyze/src/analyzer_base.cpp
     analyze/src/analyzer_ge.cpp
@@ -93,6 +95,15 @@ set(msprofilerCpp
     common/memory/chunk_pool.cpp
     common/mmpa/mmpa_api.cpp
     common/platform/platform.cpp
+    common/platform/platform_adapter_interface.cpp
+    common/platform/platform_adapter_mini.cpp
+    common/platform/platform_adapter_mdc.cpp
+    common/platform/platform_adapter_lhisi.cpp
+    common/platform/platform_adapter_dc.cpp
+    common/platform/platform_adapter_cloudv2.cpp
+    common/platform/platform_adapter_cloud.cpp
+    common/platform/platform_adapter.cpp
+    common/logger/cmd_log.cpp
     common/statistics/perf_count.cpp
     common/thread/thread.cpp
     common/thread/thread_pool.cpp
@@ -120,12 +131,12 @@ set(msprofilerCpp
     msprof/engine/src/prof_api_common.cpp
     msprof/engine/src/prof_acl_mgr.cpp
     msprof/engine/src/uploader_dumper.cpp
+    msprof/engine/src/command_handle.cpp
+    msprof/engine/src/msprof_callback_impl.cpp
     msprof/platform/mini/data_dumper.cpp
     msprof/msproftx/src/msprof_tx_manager.cpp
     msprof/msproftx/src/msprof_tx_reporter.cpp
     msprof/msproftx/src/msprof_stamp_pool.cpp
-    msprofiler/src/command_handle.cpp
-    msprofiler/src/msprof_callback_impl.cpp
     task_handle/src/device.cpp
     task_handle/src/info_json.cpp
     task_handle/src/prof_manager.cpp
@@ -159,6 +170,7 @@ set(msprofilerInc
     ${TOP_DIR}/platform/securec/include
     ${TOP_DIR}/opensource/json/include
     ${TOP_DIR}/collector/dvvp/depend/inc/plugin
+    ${TOP_DIR}/collector/dvvp/params_adapter
     msprof/engine/include
     msprof/common/include
     msprof/drvprof/include
@@ -177,14 +189,12 @@ set(msprofilerInc
     common/validation
     common/statistics
     common/platform
-    msprofiler/inc
     msprof/common/include
     message
     transport
     task_handle/include
     driver/inc
     job_wrapper/include
-    msprofiler/inc
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_BINARY_DIR}/proto/profiler_proto/
 )

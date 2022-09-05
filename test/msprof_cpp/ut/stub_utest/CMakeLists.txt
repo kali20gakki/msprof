@@ -17,6 +17,7 @@ add_executable(stub_file_utest
 target_include_directories(stub_file_utest PRIVATE
     ${GTEST_INCLUDE_DIR}
     ${MOCKCPP_INCLUDE_DIR}
+    ${TOP_DIR}/collector/inc/toolchain
     ${TOP_DIR}/platform/securec/include
     ${TOP_DIR}/opensource/json/include
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/slog
@@ -31,6 +32,8 @@ target_include_directories(stub_file_utest PRIVATE
     ${TOP_DIR}/test/msprof_cpp/ut/stub/common/log/
     ${MSPROF_SOURCE_DIR}/dvvp/common/
     ${MSPROF_SOURCE_DIR}/dvvp/common/config
+    ${MSPROF_SOURCE_DIR}/dvvp/common/utils 
+    ${MSPROF_SOURCE_DIR}/dvvp/msprof/engine/include
     ${MSPROF_SOURCE_DIR}/dvvp/adx/inc
     ${MSPROF_SOURCE_DIR}/dvvp/depend/include/wrapper
     ${MSPROF_SOURCE_DIR}/dvvp/depend/include/profapi

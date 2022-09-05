@@ -24,7 +24,6 @@ using namespace analysis::dvvp::common::validation;
 using namespace analysis::dvvp::common::utils;
 using MmStructOption = Collector::Dvvp::Mmpa::MmStructOption;
 
-const int THOUSAND = 1000; // 1000 : 1k
 
 using MsprofStringBuffer = char *;
 using MsprofString = const char *;
@@ -42,7 +41,6 @@ enum MsprofArgsType {
     ARGS_AIV_MODE,
     ARGS_AIV_METRICS,
     ARGS_SYS_DEVICES,
-    ARGS_ACC_PMU_MODE,
     ARGS_LLC_PROFILING,
     ARGS_PYTHON_PATH,
     ARGS_SUMMARY_FORMAT,
@@ -62,11 +60,7 @@ enum MsprofArgsType {
     ARGS_IO_PROFILING,
     ARGS_INTERCONNECTION_PROFILING,
     ARGS_DVPP_PROFILING,
-    ARGS_STARS_ACSQ_TASK,
-    ARGS_STARS_SUB_TASK,
-    ARGS_FFTS_THREAD_TASK,
-    ARGS_FFTS_BLOCK,
-    ARGS_LOW_POWER,
+    ARGS_POWER,
     ARGS_HCCL,
     ARGS_BIU,
     ARGS_L2_PROFILING,
@@ -90,6 +84,7 @@ enum MsprofArgsType {
     // host
     ARGS_HOST_SYS,
     ARGS_HOST_SYS_PID,
+    ARGS_HOST_USAGE,
     // end
     NR_ARGS
 };
@@ -110,7 +105,6 @@ const MmStructOption longOptions[] = {
     {"aiv-mode", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_AIV_MODE},
     {"aiv-metrics", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_AIV_METRICS},
     {"sys-devices", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_SYS_DEVICES},
-    {"acc_pmu_mode", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_ACC_PMU_MODE},
     {"llc-profiling", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_LLC_PROFILING},
     {"python-path", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_PYTHON_PATH},
     {"summary-format", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_SUMMARY_FORMAT},
@@ -130,11 +124,7 @@ const MmStructOption longOptions[] = {
     {"sys-io-profiling", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_IO_PROFILING},
     {"sys-interconnection-profiling", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_INTERCONNECTION_PROFILING},
     {"dvpp-profiling", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_DVPP_PROFILING},
-    {"stars_acsq_task", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_STARS_ACSQ_TASK},
-    {"stars_sub_task", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_STARS_SUB_TASK},
-    {"ffts_thread_task", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_FFTS_THREAD_TASK},
-    {"ffts_block", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_FFTS_BLOCK},
-    {"low_power", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_LOW_POWER},
+    {"power", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_POWER},
     {"hccl", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_HCCL},  // the default value is off
     {"biu", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_BIU},
     {"l2", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_L2_PROFILING},
@@ -158,6 +148,7 @@ const MmStructOption longOptions[] = {
     // host
     {"host-sys", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_HOST_SYS},
     {"host-sys-pid", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_HOST_SYS_PID},
+    {"host-sys-usage", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_HOST_USAGE},
     // end
     {nullptr, MM_NO_ARGUMENT, nullptr, ARGS_HELP}
 };
@@ -170,45 +161,6 @@ public:
     void MsprofCmdUsage(const std::string msg);
     SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> MsprofGetOpts(int argc, MsprofString argv[]);
     bool HasHelpParamOnly();
-private:
-    int CheckPythonPathValid(const struct MsprofCmdInfo &cmdInfo) const;
-    int CheckOutputValid(const struct MsprofCmdInfo &cmdInfo);
-    int CheckStorageLimitValid(const struct MsprofCmdInfo &cmdInfo) const;
-    int GetAppParam(const std::string &appParams);
-    int CheckAppValid(const struct MsprofCmdInfo &cmdInfo);
-    int CheckEnvironmentValid(const struct MsprofCmdInfo &cmdInfo);
-    int CheckSampleModeValid(const struct MsprofCmdInfo &cmdInfo, int opt) const;
-    int CheckArgOnOff(const struct MsprofCmdInfo &cmdInfo, int opt);
-    int CheckArgRange(const struct MsprofCmdInfo &cmdInfo, int opt, int min, int max);
-    int CheckAiCoreMetricsValid(const struct MsprofCmdInfo &cmdInfo, int opt) const;
-    int CheckArgsIsNumber(const struct MsprofCmdInfo &cmdInfo, int opt) const;
-    int CheckExportSummaryFormat(const struct MsprofCmdInfo &cmdInfo) const;
-    int CheckLlcProfilingVaild(const struct MsprofCmdInfo &cmdInfo);
-    int CheckSysPeriodVaild(const struct MsprofCmdInfo &cmdInfo);
-    int CheckSysDevicesVaild(const struct MsprofCmdInfo &cmdInfo);
-    int CheckHostSysValid(const struct MsprofCmdInfo &cmdInfo);
-    int CheckHostSysPidValid(const struct MsprofCmdInfo &cmdInfo);
-    int MsprofCmdCheckValid(const struct MsprofCmdInfo &cmdInfo, int opt);
-    int MsprofFreqCheckValid(const struct MsprofCmdInfo &cmdInfo, int opt);
-    int MsprofHostCheckValid(const struct MsprofCmdInfo &cmdInfo, int opt);
-    void MsprofFreqUpdateParams(const struct MsprofCmdInfo &cmdInfo, int opt);
-    int MsprofSwitchCheckValid(const struct MsprofCmdInfo &cmdInfo, int opt);
-    void ParamsSwitchValid(const struct MsprofCmdInfo &cmdInfo, int opt);
-    void ParamsSwitchValid2(const struct MsprofCmdInfo &cmdInfo, int opt);
-    void ParamsSwitchValid3(const struct MsprofCmdInfo &cmdInfo, int opt);
-    void ParamsFreqValid(const struct MsprofCmdInfo &cmdInfo, const int freq, int opt);
-    int CheckLlcProfilingIsValid(const std::string &llcProfiling);
-    int PreCheckApp(const std::string &appDir, const std::string &appName);
-    int ParamsCheck() const;
-    int HostAndDevParamsCheck();
-    int ProcessOptions(int opt, struct MsprofCmdInfo &cmdInfo);
-    void SetTaskTimeSwitch(const std::string timeSwitch);
-    int CheckHostSysToolsIsExist(const std::string toolName);
-    void SetHostSysParam(const std::string hostSysParam);
-    int CheckHostSysCmdOutIsExist(const std::string tmpDir, const std::string toolName, const MmProcess tmpProcess);
-    int CheckHostOutString(const std::string tmpStr, const std::string toolName);
-    int UninitCheckHostSysCmd(const MmProcess checkProcess);
-    int PreCheckPlatform(int opt, CONST_CHAR_PTR argv[]);
 
 private:
     SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params_;
