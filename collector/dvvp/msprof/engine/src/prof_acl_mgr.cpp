@@ -75,7 +75,7 @@ uint64_t ProfGetOpExecutionTime(CONST_VOID_PTR data, uint32_t len, uint32_t inde
 }
 
 ProfAclMgr::ProfAclMgr() : isReady_(false), mode_(WORK_MODE_OFF), params_(nullptr), dataTypeConfig_(0),
-                           startIndex_(0) {}
+                           profStratCfg_(nullptr), startIndex_(0) {}
 
 ProfAclMgr::~ProfAclMgr()
 {
