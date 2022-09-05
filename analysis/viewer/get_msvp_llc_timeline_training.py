@@ -425,9 +425,6 @@ def get_hbm_timeline(param: dict) -> str:
         return json.dumps({"status": NumberConstant.ERROR, "info": "No data is collected."})
     finally:
         DBManager.destroy_db_connect(conn, curs)
-    if _result:
-        return trace_parser.format_trace_events(_result)
-    return json.dumps({"status": NumberConstant.ERROR, "info": "No data is collected."})
 
 
 def get_hbm_bw_data(param: dict, curs: any) -> dict:
