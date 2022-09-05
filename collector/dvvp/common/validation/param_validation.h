@@ -88,7 +88,7 @@ private:
     bool CheckProfilingIntervalIsValid(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params);
     bool CheckProfilingIntervalIsValidTWO(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params);
     bool CheckSystemTraceSwitchProfiling(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params);
-    int MsprofCheckNotAppValid(const std::vector<std::string> &AppParamsList, const std::string &resultAppParam) const;
+    int MsprofCheckNotAppValid(const std::vector<std::string> &AppParamsList, std::string &resultAppParam) const;
     int MsprofCheckAppParamValid(const std::string &appParam) const;
     int MsprofCheckAppScriptValid(const std::vector<std::string> &appParams) const;
     int CheckHostSysToolsIsExist(const std::string toolName, const std::string &resultDir,

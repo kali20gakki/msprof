@@ -1004,7 +1004,7 @@ bool ParamValidation::MsprofCheckAppValid(std::string &appParam) const
 }
  
 int ParamValidation::MsprofCheckNotAppValid(const std::vector<std::string> &AppParamsList,
-    std::string &resultAppParam)
+    std::string &resultAppParam) const
 {
     std::string cmdParam = AppParamsList[0];
     if (cmdParam.find("/") != std::string::npos) {
