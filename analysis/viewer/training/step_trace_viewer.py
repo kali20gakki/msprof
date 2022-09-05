@@ -420,8 +420,8 @@ class StepTraceViewer:
             for line in values:
                 trace = list(line)
                 all_reduce = StepTraceViewer.__select_reduce(cnn, trace)
-                all_reduce = Utils.generator_to_list(
-                    list(map(StepTraceViewer.__time_from_syscnt, data)) for data in all_reduce)
+                all_reduce = Utils.generator_to_list(list(map(StepTraceViewer.__time_from_syscnt, data))
+                                                     for data in all_reduce)
                 trace.extend(all_reduce)
                 StepTraceViewer.transfer_trace_unit(trace)
                 data[step] = tuple(trace)
