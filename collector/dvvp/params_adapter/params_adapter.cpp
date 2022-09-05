@@ -356,7 +356,6 @@ int ParamsAdapter::ComCfgCheck(EnableType enableType, std::array<std::string, IN
 bool ParamsAdapter::ComCfgCheck1(const InputCfg inputCfg, const std::string &cfgValue,
     std::vector<std::pair<InputCfg, std::string>> &cfgList) const
 {
-    UNUSED(cfgParam);
     bool ret = true;
     bool flag = true;
     switch (inputCfg) {
@@ -392,7 +391,6 @@ bool ParamsAdapter::ComCfgCheck1(const InputCfg inputCfg, const std::string &cfg
 bool ParamsAdapter::ComCfgCheck2(const InputCfg inputCfg, const std::string &cfgValue,
     std::vector<std::pair<InputCfg, std::string>> &cfgList) const
 {
-    UNUSED(cfgParam);
     bool ret = true;
     bool flag = true;
     switch (inputCfg) {
