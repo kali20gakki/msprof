@@ -3,6 +3,7 @@
 # Copyright (c) Huawei Technologies Co., Ltd. 2021-2022. All rights reserved.
 
 from abc import ABC
+from functools import partial
 from itertools import chain
 
 from common_func.db_manager import DBManager
@@ -72,6 +73,7 @@ class TsTrackModel(BaseModel, ABC):
             max_timestamp = max(iter_time_range)
 
             # data index 2 is timestamp
-            ai_cpu_with_state = list(filter(TsTrackModel.__aicpu_in_time_range, ai_cpu_with_state))
+            ai_cpu_with_state = list(filter(partial(self.__aicpu_in_time_range, min_timestamp=min_timestamp,
+                                                    max_timestamp=max_timestamp), ai_cpu_with_state))
 
         return ai_cpu_with_state
