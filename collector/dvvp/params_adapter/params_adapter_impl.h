@@ -36,7 +36,7 @@ enum MsprofMode {
 class MsprofParamAdapter : public ParamsAdapter {
 public:
     MsprofParamAdapter() {}
-    ~MsprofParamAdapter() {}
+    ~MsprofParamAdapter() override {}
     int GetParamFromInputCfg(std::unordered_map<int, std::pair<MsprofCmdInfo, std::string>> argvMap,
     SHARED_PTR_ALIA<ProfileParams> params);
 
@@ -116,7 +116,7 @@ private:
 class AclApiParamAdapter : public ParamsAdapter {
 public:
     AclApiParamAdapter() {};
-    int GetParamFromInputCfg(const ProfConfig * apiCfg,
+    int GetParamFromInputCfg(const ProfConfig *apiCfg,
         std::array<std::string, ACL_PROF_ARGS_MAX> argsArr,
         SHARED_PTR_ALIA<ProfileParams> params);
 
