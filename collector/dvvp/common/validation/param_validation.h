@@ -33,14 +33,14 @@ public:
 
     int Init() const;
     int Uninit() const;
-    bool CheckOutputIsValid(const std::string &outputPath);
-    bool CheckLlcModeIsValid(const std::string &llcMode);
-    bool CheckFreqIsValid(const std::string &freq, const int rangeMin, const int rangeMax);
-    bool CheckHostSysUsageIsValid(const std::string &hostSysUsage);
-    bool CheckHostSysPidValid(const std::string &hostSysPid);
-    bool CheckPythonPathIsValid(const std::string &pythonPath);
-    bool CheckExportSummaryFormatIsValid(const std::string &summaryFormat);
-    bool CheckExportIdIsValid(const std::string &exportId, const std::string &exportIdType);
+    bool CheckOutputIsValid(const std::string &outputPath) const;
+    bool CheckLlcModeIsValid(const std::string &llcMode) const;
+    bool CheckFreqIsValid(const std::string &freq, const int rangeMin, const int rangeMax) const;
+    bool CheckHostSysUsageIsValid(const std::string &hostSysUsage) const;
+    bool CheckHostSysPidValid(const std::string &hostSysPid) const;
+    bool CheckPythonPathIsValid(const std::string &pythonPath) const;
+    bool CheckExportSummaryFormatIsValid(const std::string &summaryFormat) const;
+    bool CheckExportIdIsValid(const std::string &exportId, const std::string &exportIdType) const;
     bool CheckProfilingParams(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params);
     bool CheckParamsDevices(const std::string &app, const std::string &paramsDevices,
         const std::string &paramsHostSys) const;
@@ -88,7 +88,7 @@ private:
     bool CheckProfilingIntervalIsValid(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params);
     bool CheckProfilingIntervalIsValidTWO(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params);
     bool CheckSystemTraceSwitchProfiling(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params);
-    int MsprofCheckNotAppValid(const std::vector<std::string> &AppParamsList, std::string &resultAppParam) const;
+    int MsprofCheckNotAppValid(const std::vector<std::string> &AppParamsList, const std::string &resultAppParam) const;
     int MsprofCheckAppParamValid(const std::string &appParam) const;
     int MsprofCheckAppScriptValid(const std::vector<std::string> &appParams) const;
     int CheckHostSysToolsIsExist(const std::string toolName, const std::string &resultDir,
