@@ -51,7 +51,7 @@ private:
     void SetDefaultParamsParse();
     void SetDefaultParamsQuery();
     void SetDefaultParamsExport();
-    int GetMsprofMode();
+    int SetMsprofMode();
     void SetParamsSelf();
     void SpliteAppPath(const std::string &appParams);
     int SetModeDefaultParams(MsprofMode modeType);

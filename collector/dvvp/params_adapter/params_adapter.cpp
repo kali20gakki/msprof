@@ -334,10 +334,9 @@ void ParamsAdapter::SetHostSysUsageParams(std::array<std::string, INPUT_CFG_MAX>
     return;
 }
 
-int ParamsAdapter::ComCfgCheck(EnableType enableType, std::array<std::string, INPUT_CFG_MAX> paramContainer,
+int ParamsAdapter::ComCfgCheck(std::array<std::string, INPUT_CFG_MAX> paramContainer,
     std::set<InputCfg> &setArgs, std::vector<std::pair<InputCfg, std::string>> &cfgList) const
 {
-    UNUSED(enableType);
     bool ret = true;
     for (auto inputCfg : commonConfig_) {
         if (setArgs.find(inputCfg) == setArgs.end()) {
