@@ -56,7 +56,7 @@ int ParamValidation::Uninit() const
     return PROFILING_SUCCESS;
 }
 
-bool ParamValidation::CheckOutputIsValid(const std::string &outputPath)
+bool ParamValidation::CheckOutputIsValid(const std::string &outputPath) const
 {
     if (outputPath.empty()) {
         MSPROF_LOGI("output is empty");
@@ -215,7 +215,7 @@ bool ParamValidation::CheckFreqIsValid(const std::string &freq, const int rangeM
     }
 }
 
-bool ParamValidation::CheckHostSysUsageIsValid(const std::string &hostSysUsage)
+bool ParamValidation::CheckHostSysUsageIsValid(const std::string &hostSysUsage) const
 {
     if (Platform::instance()->RunSocSide()) {
         MSPROF_LOGE("Not in host side, host-sys-usage is not supported");
@@ -239,7 +239,7 @@ bool ParamValidation::CheckHostSysUsageIsValid(const std::string &hostSysUsage)
     return true;
 }
 
-bool ParamValidation::CheckHostSysPidValid(const std::string &hostSysPid)
+bool ParamValidation::CheckHostSysPidValid(const std::string &hostSysPid) const
 {
     if (hostSysPid.empty()) {
         MSPROF_LOGE("Argument --host-sys-pid: expected one argument");
@@ -265,7 +265,7 @@ bool ParamValidation::CheckHostSysPidValid(const std::string &hostSysPid)
     }
 }
 
-bool ParamValidation::CheckPythonPathIsValid(const std::string&pythonPath)
+bool ParamValidation::CheckPythonPathIsValid(const std::string&pythonPath) const
 {
     std::string errReason = "python-path should be a valid file path and path lenth shoule be shorter than 1024.";
     if (pythonPath.empty()) {

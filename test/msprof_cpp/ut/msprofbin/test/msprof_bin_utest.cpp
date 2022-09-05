@@ -406,12 +406,12 @@ TEST_F(MSPROF_BIN_UTEST, SetDefaultParamsApp)
     MsprofParamAdapterMgr->SetDefaultParamsApp();
 }
 
-TEST_F(MSPROF_BIN_UTEST, GetMsprofMode)
+TEST_F(MSPROF_BIN_UTEST, SetMsprofMode)
 {
     GlobalMockObject::verify();
     std::shared_ptr<MsprofParamAdapter> MsprofParamAdapterMgr;
     MSVP_MAKE_SHARED0_BREAK(MsprofParamAdapterMgr, MsprofParamAdapter);
-    int ret = MsprofParamAdapterMgr->GetMsprofMode();
+    int ret = MsprofParamAdapterMgr->SetMsprofMode();
     EXPECT_EQ(PROFILING_FAILED, ret);
     std::vector<InputCfg> cfgList = {
         INPUT_CFG_MSPROF_APPLICATION,
@@ -423,7 +423,7 @@ TEST_F(MSPROF_BIN_UTEST, GetMsprofMode)
     };
     for (auto cfg : cfgList) {
         MsprofParamAdapterMgr->paramContainer_[cfg] = "on";
-        ret = MsprofParamAdapterMgr->GetMsprofMode();
+        ret = MsprofParamAdapterMgr->SetMsprofMode();
         EXPECT_EQ(PROFILING_SUCCESS, ret);
     }
 }

@@ -174,7 +174,7 @@ void MsprofParamAdapter::SetDefaultParamsApp()
         PIPE_UTILIZATION : paramContainer_[INPUT_CFG_COM_AIV_METRICS];
 }
 
-int MsprofParamAdapter::GetMsprofMode()
+int MsprofParamAdapter::SetMsprofMode()
 {
     if (!paramContainer_[INPUT_CFG_MSPROF_APPLICATION].empty()) {
         msprofMode_ = MSPROF_MODE_APP;
@@ -308,7 +308,7 @@ int MsprofParamAdapter::GetParamFromInputCfg(std::unordered_map<int, std::pair<M
         CmdLog::instance()->CmdErrorLog("msprof input param check fail.");
         return PROFILING_FAILED;
     }
-    ret = GetMsprofMode();
+    ret = SetMsprofMode();
     if (ret != PROFILING_SUCCESS) {
         CmdLog::instance()->CmdErrorLog("Get msprof running mode fail.");
         return PROFILING_FAILED;
@@ -338,7 +338,7 @@ int MsprofParamAdapter::ParamsCheck(std::unordered_map<int, std::pair<MsprofCmdI
         return PROFILING_FAILED;
     }
     errCfgList.clear();
-    ret = ComCfgCheck(ENABLE_MSPROF, paramContainer_, setConfig_, errCfgList);
+    ret = ComCfgCheck(paramContainer_, setConfig_, errCfgList);
     if (ret != PROFILING_SUCCESS) {
         for (auto errCfg : errCfgList) {
             MsprofArgsType argsType = reCfgMap_[errCfg.first];
@@ -605,7 +605,7 @@ int AclJsonParamAdapter::GetParamFromInputCfg(SHARED_PTR_ALIA<ProfAclConfig> acl
     }
 
     errCfgList.clear();
-    ret = ComCfgCheck(ENABLE_ACL_JSON, paramContainer_, setConfig_, errCfgList);
+    ret = ComCfgCheck(paramContainer_, setConfig_, errCfgList);
     if (ret != PROFILING_SUCCESS) {
         for (auto errCfg : errCfgList) {
             MSPROF_LOGE("Argument --%s:%s set invalid.",
@@ -814,7 +814,7 @@ int GeOptParamAdapter::GetParamFromInputCfg(SHARED_PTR_ALIA<ProfGeOptionsConfig>
     }
 
     errCfgList.clear();
-    ret = ComCfgCheck(ENABLE_GE_OPTION, paramContainer_, setConfig_, errCfgList);
+    ret = ComCfgCheck(paramContainer_, setConfig_, errCfgList);
     if (ret != PROFILING_SUCCESS) {
         for (auto errCfg : errCfgList) {
             MSPROF_LOGE("Argument --%s:%s set invalid.",
@@ -1034,7 +1034,7 @@ void AclApiParamAdapter::ProfCfgToContainer(const ProfConfig * apiCfg,
     ProfSystemCfgToContainer(apiCfg, argsArr);
 }
 
-int AclApiParamAdapter::GetParamFromInputCfg(const ProfConfig * apiCfg,
+int AclApiParamAdapter::GetParamFromInputCfg(const ProfConfig *apiCfg,
     std::array<std::string, ACL_PROF_ARGS_MAX> argsArr,
     SHARED_PTR_ALIA<ProfileParams> params)
 {
@@ -1057,7 +1057,7 @@ int AclApiParamAdapter::GetParamFromInputCfg(const ProfConfig * apiCfg,
         return PROFILING_FAILED;
     }
     errCfgList.clear();
-    ret = ComCfgCheck(ENABLE_API, paramContainer_, setConfig_, errCfgList);
+    ret = ComCfgCheck(paramContainer_, setConfig_, errCfgList);
     if (ret != PROFILING_SUCCESS && !errCfgList.empty()) {
         MSPROF_LOGE("common param check fail.");
         return PROFILING_FAILED;
