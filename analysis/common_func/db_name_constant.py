@@ -1,8 +1,7 @@
-# coding=utf-8
-"""
-This script is amid to define db names.
-Copyright Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
-"""
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
+
 from abc import ABCMeta
 from abc import abstractmethod
 
@@ -56,15 +55,21 @@ class DBNameConstant(metaclass=ABCMeta):
     DB_STARS_CHIP_TRANS = "chip_trans.db"
     DB_LOW_POWER = "lowpower.db"
     DB_BIU_PERF = "biu_perf.db"
+    DB_CLUSTER_RANK = "cluster_rank.db"
+    DB_CLUSTER_STEP_TRACE = 'cluster_step_trace.db'
+    DB_CLUSTER_DATA_PREPROCESS = 'data_preprocess.db'
 
     # DB tables
     TABLE_ACL_DATA = "acl_data"
     TABLE_AI_CORE_METRIC_SUMMARY = "MetricSummary"
     TABLE_AIV_METRIC_SUMMARY = "AivMetricSummary"
     TABLE_AI_CORE_REC = "AiCoreRec"
-    TABLE_AI_CPU = "ai_cpu_datas"
+    TABLE_AI_CPU = "AiCpuData"
+    TABLE_AI_CPU_FROM_TS = "AiCpuFromTs"
     TABLE_ALL_REDUCE = "all_reduce"
     TABLE_API_CALL = "ApiCall"
+    TABLE_CLUSTER_STEP_TRACE = "ClusterStepTrace_{}"
+    TABLE_CLUSTER_ALL_REDUCE = "AllReduce_{}"
     TABLE_EVENT_COUNTER = "EventCounter"
     TABLE_EVENT_COUNT = "EventCount"
     TABLE_GE_LOAD_TABLE = "GELoad"
@@ -204,6 +209,10 @@ class DBNameConstant(metaclass=ABCMeta):
     TABLE_MONITOR1 = "Monitor1"
     TABLE_BIU_FLOW = "BiuFlow"
     TABLE_BIU_CYCLES = "BiuCycles"
+
+    #cluster
+    TABLE_CLUSTER_RANK = "ClusterRank"
+    TABLE_DATA_QUEUE = "DataQueue"
 
     @abstractmethod
     def get_db_name(self: any) -> str:

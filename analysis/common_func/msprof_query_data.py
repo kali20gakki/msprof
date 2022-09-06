@@ -1,8 +1,6 @@
-# coding=utf-8
-"""
-Function: Data splicing for command line of query interface.
-Copyright Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
-"""
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 
 import os
 
@@ -13,6 +11,7 @@ from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.msprof_common import MsProfCommonConstant
 from common_func.path_manager import PathManager
+from msmodel.step_trace.cluster_step_trace_model import ClusterStepTraceModel
 from profiling_bean.basic_info.query_data_bean import QueryDataBean
 
 
@@ -24,12 +23,39 @@ class MsprofQueryData:
     FILE_NAME = os.path.basename(__file__)
     QUERY_HEADERS = [MsProfCommonConstant.JOB_INFO, MsProfCommonConstant.DEVICE_ID, MsProfCommonConstant.JOB_NAME,
                      MsProfCommonConstant.COLLECTION_TIME, MsProfCommonConstant.MODEL_ID,
-                     MsProfCommonConstant.ITERATION_ID, MsProfCommonConstant.TOP_TIME_ITERATION]
+                     MsProfCommonConstant.ITERATION_ID, MsProfCommonConstant.TOP_TIME_ITERATION,
+                     MsProfCommonConstant.RANK_ID]
     QUERY_TOP_ITERATION_NUM = 5
 
     def __init__(self: any, project_path: str) -> None:
         self.project_path = project_path
         self.data = []
+
+    @classmethod
+    def query_cluster_data(cls: any, collection_path: str, cluster_info_list: list) -> list:
+        cluster_query_data = []
+        with ClusterStepTraceModel(collection_path, []) as cluster_step_trace:
+            for cluster_info in cluster_info_list:
+                step_table_name = DBNameConstant.TABLE_CLUSTER_STEP_TRACE.format(cluster_info[3])
+                model_info_list = cluster_step_trace.get_model_info(step_table_name)
+                if not model_info_list:
+                    data = [cluster_info[0], cluster_info[1], cluster_info[4], cluster_info[2],
+                            'N/A', 'N/A', 'N/A', cluster_info[3]]
+                    cluster_query_data.append(data)
+                    continue
+                for model_info in model_info_list:
+                    data = [cluster_info[0], cluster_info[1], cluster_info[4], cluster_info[2],
+                            model_info[0], model_info[1], model_info[2], cluster_info[3]]
+                    cluster_query_data.append(data)
+        return cluster_query_data
+
+    @classmethod
+    def get_job_basic_info(cls: any) -> list:
+        """
+        Get the info under the profiling job data: job info, device id, job name and collect time.
+        :return: list of the basic data.
+        """
+        return InfoConfReader().get_job_basic_info()
 
     @classmethod
     def _get_iteration_infos(cls: any, curs: any) -> list:
@@ -82,29 +108,6 @@ class MsprofQueryData:
             iteration_infos_result.append(iteration_info_list)
         return iteration_infos_result
 
-    def get_job_basic_info(self: any) -> list:
-        """
-        Get the info under the profiling job data: job info, device id, job name and collect time.
-        :return: list of the basic data.
-        """
-        if InfoConfReader().is_host_profiling():
-            device_id = Constant.NA
-        else:
-            device_id_list = InfoConfReader().get_device_list()
-            if not device_id_list:
-                error(self.FILE_NAME, "No device id found in the file of info.json, maybe the file is incomplete,"
-                                      "please check the info.json under the directory: {0}".format(self.project_path))
-                return []
-            device_id = device_id_list[0]
-
-        collection_time, _ = InfoConfReader().get_collect_date()
-        if not collection_time:
-            error(self.FILE_NAME, "No collection start time found in the file of start.info, maybe file is incomplete,"
-                                  "please check the start.info under the directory: {0}".format(self.project_path))
-            return []
-        return [InfoConfReader().get_job_info(), device_id, os.path.basename(self.project_path),
-                collection_time]
-
     def get_job_iteration_info(self: any) -> list:
         """
         Get the iteration info under the profiling job data: model id and index id.
@@ -148,13 +151,15 @@ class MsprofQueryData:
         result = []
         if not iteration_data:
             # Model id and index id should be 'NA' without iteration data
-            data = basic_data + [Constant.NA, Constant.NA, Constant.NA]
+            data = basic_data[:2] + [os.path.basename(self.project_path)] + [basic_data[2]] + \
+                   [Constant.NA, Constant.NA, Constant.NA] + [basic_data[3]]
             query_bean = QueryDataBean(**dict(zip(self.QUERY_HEADERS, data)))
             result.append(query_bean)
             return result
 
         for _data in iteration_data:
-            data = basic_data + list(_data)
+            data = basic_data[:2] + [os.path.basename(self.project_path)] + [basic_data[2]] + \
+                   list(_data) + [basic_data[3]]
             query_bean = QueryDataBean(**dict(zip(self.QUERY_HEADERS, data)))
             result.append(query_bean)
         return result

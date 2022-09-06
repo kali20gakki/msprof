@@ -45,7 +45,9 @@ ProfPeripheralJob::~ProfPeripheralJob() {}
  */
 int ProfPeripheralJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 {
-    CHECK_JOB_COMMON_PARAM_RET(cfg, PROFILING_FAILED);
+    if (CheckJobCommonParam(cfg) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
     if (cfg->comParams->params->host_profiling) {
         return PROFILING_FAILED;
     }
@@ -75,7 +77,9 @@ int ProfPeripheralJob::SetPeripheralConfig()
  */
 int ProfPeripheralJob::Process()
 {
-    CHECK_JOB_COMMON_PARAM_RET(collectionJobCfg_, PROFILING_FAILED);
+    if (CheckJobCommonParam(collectionJobCfg_) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
     if (!DrvChannelsMgr::instance()->ChannelIsValid(collectionJobCfg_->comParams->devId, channelId_)) {
         MSPROF_LOGW("Channel is invalid, devId:%d, channelId:%d", collectionJobCfg_->comParams->devId,
             static_cast<int>(channelId_));
@@ -120,7 +124,9 @@ int ProfPeripheralJob::Process()
  */
 int ProfPeripheralJob::Uninit()
 {
-    CHECK_JOB_COMMON_PARAM_RET(collectionJobCfg_, PROFILING_SUCCESS);
+    if (CheckJobCommonParam(collectionJobCfg_) != PROFILING_SUCCESS) {
+        return PROFILING_SUCCESS;
+    }
     if (!DrvChannelsMgr::instance()->ChannelIsValid(collectionJobCfg_->comParams->devId, channelId_)) {
         MSPROF_LOGW("Channel is invalid, devId:%d, channelId:%d", collectionJobCfg_->comParams->devId,
             static_cast<int>(channelId_));
@@ -154,7 +160,9 @@ ProfDdrJob::~ProfDdrJob() {}
  */
 int ProfDdrJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 {
-    CHECK_JOB_EVENT_PARAM_RET(cfg, PROFILING_FAILED);
+    if (CheckJobEventParam(cfg) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
     if (cfg->comParams->params->host_profiling) {
         return PROFILING_FAILED;
     }
@@ -185,7 +193,10 @@ int ProfDdrJob::SetPeripheralConfig()
     eventsStr_ = GetEventsStr(*(collectionJobCfg_->jobParams.events));
     uint32_t configSize = sizeof(TagDdrProfileConfig) +
                           (sizeof(uint32_t) * GetEventSize(*(collectionJobCfg_->jobParams.events)));
-    CHECK_JOB_CONFIG_UNSIGNED_SIZE_RET(configSize, PROFILING_FAILED);
+    if (configSize == 0 || configSize > 0x7FFFFFFF) {
+        MSPROF_LOGE("Profiling Config Size Out Range");
+        return PROFILING_FAILED;
+    }
 
     TagDdrProfileConfig *configP = reinterpret_cast<TagDdrProfileConfig *>(Utils::ProfMalloc((size_t)configSize));
     if (configP == nullptr) {
@@ -232,7 +243,9 @@ ProfHbmJob::~ProfHbmJob()
  */
 int ProfHbmJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 {
-    CHECK_JOB_EVENT_PARAM_RET(cfg, PROFILING_FAILED);
+    if (CheckJobEventParam(cfg) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
     if (cfg->comParams->params->host_profiling) {
         return PROFILING_FAILED;
     }
@@ -264,8 +277,10 @@ int ProfHbmJob::SetPeripheralConfig()
     eventsStr_ = GetEventsStr(*(collectionJobCfg_->jobParams.events));
     uint32_t configSize = sizeof(TagTsHbmProfileConfig) +
                           (sizeof(uint32_t) * GetEventSize(*(collectionJobCfg_->jobParams.events)));
-    CHECK_JOB_CONFIG_UNSIGNED_SIZE_RET(configSize, PROFILING_FAILED);
-
+    if (configSize == 0 || configSize > 0x7FFFFFFF) {
+        MSPROF_LOGE("Profiling Config Size Out Range");
+        return PROFILING_FAILED;
+    }
     TagTsHbmProfileConfig *configP = reinterpret_cast<TagTsHbmProfileConfig *>(Utils::ProfMalloc(configSize));
     if (configP == nullptr) {
         MSPROF_LOGE("ProfHbmJob ProfMalloc TagTsHbmProfileConfig failed");
@@ -308,7 +323,9 @@ ProfHccsJob::~ProfHccsJob() {}
  */
 int ProfHccsJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 {
-    CHECK_JOB_COMMON_PARAM_RET(cfg, PROFILING_FAILED);
+    if (CheckJobCommonParam(cfg) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
     if (cfg->comParams->params->host_profiling) {
         return PROFILING_FAILED;
     }
@@ -354,7 +371,9 @@ ProfPcieJob::~ProfPcieJob() {}
  */
 int ProfPcieJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 {
-    CHECK_JOB_COMMON_PARAM_RET(cfg, PROFILING_FAILED);
+    if (CheckJobCommonParam(cfg) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
     if (cfg->comParams->params->host_profiling) {
         return PROFILING_FAILED;
     }
@@ -400,7 +419,9 @@ ProfNicJob::~ProfNicJob() {}
  */
 int ProfNicJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 {
-    CHECK_JOB_COMMON_PARAM_RET(cfg, PROFILING_FAILED);
+    if (CheckJobCommonParam(cfg) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
     if (cfg->comParams->params->host_profiling) {
         return PROFILING_FAILED;
     }
@@ -462,7 +483,9 @@ ProfDvppJob::~ProfDvppJob()
  */
 int ProfDvppJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 {
-    CHECK_JOB_COMMON_PARAM_RET(cfg, PROFILING_FAILED);
+    if (CheckJobCommonParam(cfg) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
     if (cfg->comParams->params->host_profiling) {
         return PROFILING_FAILED;
     }
@@ -492,7 +515,9 @@ int ProfDvppJob::Process()
 {
     if (ConfigManager::instance()->GetPlatformType() == PlatformType::MDC_TYPE ||
         ConfigManager::instance()->GetPlatformType() == PlatformType::DC_TYPE) {
-        CHECK_JOB_COMMON_PARAM_RET(collectionJobCfg_, PROFILING_FAILED);
+        if (CheckJobCommonParam(collectionJobCfg_) != PROFILING_SUCCESS) {
+            return PROFILING_FAILED;
+        }
         (void)SetPeripheralConfig();
         for (auto channelId : channelList_) {
             if (!DrvChannelsMgr::instance()->ChannelIsValid(collectionJobCfg_->comParams->devId, channelId)) {
@@ -532,7 +557,9 @@ int ProfDvppJob::Uninit()
     using namespace Analysis::Dvvp::Common::Config;
     if (ConfigManager::instance()->GetPlatformType() == PlatformType::MDC_TYPE ||
         ConfigManager::instance()->GetPlatformType() == PlatformType::DC_TYPE) {
-        CHECK_JOB_COMMON_PARAM_RET(collectionJobCfg_, PROFILING_SUCCESS);
+        if (CheckJobCommonParam(collectionJobCfg_) != PROFILING_SUCCESS) {
+            return PROFILING_SUCCESS;
+        }
         for (auto channelId : channelList_) {
             if (!DrvChannelsMgr::instance()->ChannelIsValid(collectionJobCfg_->comParams->devId, channelId)) {
                 MSPROF_LOGW("Channel is invalid, devId:%d, channelId:%d", collectionJobCfg_->comParams->devId,
@@ -571,7 +598,9 @@ ProfLlcJob::~ProfLlcJob() {}
  */
 int ProfLlcJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 {
-    CHECK_JOB_EVENT_PARAM_RET(cfg, PROFILING_FAILED);
+    if (CheckJobEventParam(cfg) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
     if (cfg->comParams->params->host_profiling) {
         return PROFILING_FAILED;
     }
@@ -645,7 +674,9 @@ int ProfLlcJob::Process()
         return ProfPeripheralJob::Process();
     } else {
         std::string profLlcCmd;
-        CHECK_JOB_EVENT_PARAM_RET(collectionJobCfg_, PROFILING_FAILED);
+        if (CheckJobEventParam(collectionJobCfg_) != PROFILING_SUCCESS) {
+            return PROFILING_FAILED;
+        }
         GetCollectLlcEventsCmd(collectionJobCfg_->comParams->devId, *(collectionJobCfg_->jobParams.events), profLlcCmd);
         MSPROF_LOGI("llc_event:%s, profLlcCmd:%s",
             GetEventsStr(*collectionJobCfg_->jobParams.events).c_str(), profLlcCmd.c_str());
@@ -706,7 +737,7 @@ int ProfLlcJob::Uninit()
 
         int exitCode = analysis::dvvp::common::utils::VALID_EXIT_CODE;
         static const std::string CMD = "sudo";
-        mmProcess appProcess = MSVP_MMPROCESS;
+        MmProcess appProcess = MSVP_MMPROCESS;
         ExecCmdParams execCmdParams(CMD, false, "");
         int ret = analysis::dvvp::common::utils::Utils::ExecCmd(execCmdParams,
                                                                 argsV,
@@ -858,7 +889,9 @@ ProfRoceJob::~ProfRoceJob() {}
  */
 int ProfRoceJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 {
-    CHECK_JOB_COMMON_PARAM_RET(cfg, PROFILING_FAILED);
+    if (CheckJobCommonParam(cfg) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
     if (cfg->comParams->params->host_profiling) {
         return PROFILING_FAILED;
     }
@@ -894,7 +927,9 @@ ProfStarsSocProfileJob::~ProfStarsSocProfileJob() {}
 
 int ProfStarsSocProfileJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 {
-    CHECK_JOB_COMMON_PARAM_RET(cfg, PROFILING_FAILED);
+    if (CheckJobCommonParam(cfg) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
     if (cfg->comParams->params->host_profiling) {
         return PROFILING_FAILED;
     }

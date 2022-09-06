@@ -2,17 +2,22 @@ import os
 import sqlite3
 import unittest
 from unittest import mock
-import pytest
+
 from common_func.constant import Constant
 from common_func.db_name_constant import DBNameConstant
-from common_func.info_conf_reader import InfoConfReader
 from common_func.memcpy_constant import MemoryCopyConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.msvp_constant import MsvpConstant
 from sqlite.db_manager import DBManager
-from viewer.runtime_report import get_runtime_api_data, get_task_scheduler_data, add_ts_opname, \
-    get_task_based_core_data, get_output_apicall, get_output_tasktype, _get_output_event_counter, get_opname, \
-    add_op_total, cal_metrics, add_memcpy_data
+from viewer.runtime_report import _get_output_event_counter
+from viewer.runtime_report import add_memcpy_data
+from viewer.runtime_report import add_op_total
+from viewer.runtime_report import add_ts_opname
+from viewer.runtime_report import cal_metrics
+from viewer.runtime_report import get_opname
+from viewer.runtime_report import get_output_tasktype
+from viewer.runtime_report import get_task_based_core_data
+from viewer.runtime_report import get_task_scheduler_data
 
 NAMESPACE = 'viewer.runtime_report'
 configs = {"headers": "Dvpp Id,Engine Type,Engine ID,All Time(us),All Frame,All Utilization(%)",
@@ -26,32 +31,6 @@ params = {'data_type': '',
 
 
 class TestRuntimeReport(unittest.TestCase):
-    def test_get_runtime_api_data_1(self):
-        db_manager = DBManager()
-        test_sql = db_manager.create_table("runtime.db")
-        with mock.patch(NAMESPACE + '.DBManager.check_connect_db_path', return_value=(None, None)), \
-                mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=False):
-            res = get_runtime_api_data('', "ApiCall", configs)
-        self.assertEqual(res, MsvpConstant.MSVP_EMPTY_DATA)
-
-    def test_get_runtime_api_data_2(self):
-        create_sql = "CREATE TABLE IF NOT EXISTS ApiCall" \
-                     " (replayid, entry_time, exit_time, api, retcode, thread, device_id, " \
-                     "stream_id, tasknum, task_id, detail, mode)"
-        data = ((0, 117960819118, 117962052296, 25, 0, 2246, 0, 65535, 2, "0,0", None, 0),
-                (0, 117962212631, 117962485483, 6, 0, 2246, 0, 4, 1, 0, None, 0))
-        db_manager = DBManager()
-        insert_sql = db_manager.insert_sql("ApiCall", data)
-
-        test_sql = db_manager.create_table("runtime.db", create_sql, insert_sql, data)
-        with mock.patch(NAMESPACE + '.DBManager.check_connect_db_path', return_value=test_sql), \
-                mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True):
-            InfoConfReader()._info_json = {'pid': 1}
-            res = get_runtime_api_data('', "ApiCall", configs)
-        test_sql = db_manager.connect_db("runtime.db")
-        (test_sql[1]).execute("drop Table ApiCall")
-        db_manager.destroy(test_sql)
-        self.assertEqual(res[2], 2)
 
     def test_get_task_scheduler_data_1(self):
         db_manager = DBManager()
@@ -62,7 +41,7 @@ class TestRuntimeReport(unittest.TestCase):
                 mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=False):
             res = get_task_scheduler_data('', "ReportTask", configs, params)
         self.assertEqual(res, ("Time(%),Time(us),Count,Avg(us),Min(us),Max(us),"
-                              "Waiting(us),Running(us),Pending(us),Type,API,Task ID,Op Name,Stream ID",
+                               "Waiting(us),Running(us),Pending(us),Type,API,Task ID,Op Name,Stream ID",
                                [],
                                0))
 
@@ -96,9 +75,9 @@ class TestRuntimeReport(unittest.TestCase):
                            MemoryCopyConstant.TYPE, StrConstant.AYNC_MEMCPY, 1,
                            MemoryCopyConstant.DEFAULT_VIEWER_VALUE, 1)]
         expect_res = [(25.0, 10000, 1, 10000, 10000,
-                 10000, 116.770796875, 47177.968796875, 0.0, 'model execute task', '', 2, 2),
-                (25.0, 10000, 1, 10000, 10000,
-                 10000, 0.0, 1596.19790625, 0.0, 'kernel AI core task', '', 3, 5),
+                       10000, 116.770796875, 47177.968796875, 0.0, 'model execute task', '', 2, 2),
+                      (25.0, 10000, 1, 10000, 10000,
+                       10000, 0.0, 1596.19790625, 0.0, 'kernel AI core task', '', 3, 5),
                       (50.0, 20000, 1, 20000, 20000, 20000, 100, 200, MemoryCopyConstant.DEFAULT_VIEWER_VALUE,
                        MemoryCopyConstant.TYPE, StrConstant.AYNC_MEMCPY, 1,
                        MemoryCopyConstant.DEFAULT_VIEWER_VALUE, 1)
@@ -169,22 +148,6 @@ class TestRuntimeReport(unittest.TestCase):
         (test_sql[1]).execute("drop Table {}".format(DBNameConstant.TABLE_AIV_METRIC_SUMMARY))
         db_manager.destroy(test_sql)
         self.assertEqual(res[0], 1)
-
-    def test_get_output_apicall(self):
-        db_manager = DBManager()
-        test_sql = db_manager.create_table(DBNameConstant.DB_RUNTIME)
-        db_manager.destroy(test_sql)
-        res = get_output_apicall(None)
-        self.assertEqual(res, [])
-        test_sql = db_manager.create_table(DBNameConstant.DB_RUNTIME)
-        with mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True):
-            res = get_output_apicall(test_sql[1])
-        self.assertEqual(res, [])
-
-        with mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=None):
-            res = get_output_apicall(test_sql[1])
-        self.assertEqual(res, [])
-        db_manager.destroy(test_sql)
 
     def test_get_output_tasktype(self):
         db_manager = DBManager()

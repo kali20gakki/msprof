@@ -1,31 +1,28 @@
-# coding:utf-8
-"""
-This script is used to calculate rts data
-Copyright Huawei Technologies Co., Ltd. 2018-2020. All rights reserved.
-"""
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 
 import logging
 import multiprocessing
 import os
 import sqlite3
-import sys
 from collections import OrderedDict
 from functools import reduce
 from operator import add
 
+from common_func.common import call_sys_exit
 from common_func.common import generate_config
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
+from common_func.ms_constant.number_constant import NumberConstant
+from common_func.ms_constant.str_constant import StrConstant
 from common_func.msvp_common import config_file_obj
 from common_func.msvp_common import error
 from common_func.msvp_common import read_cpu_cfg
-from common_func.ms_constant.str_constant import StrConstant
-from common_func.ms_constant.number_constant import NumberConstant
 from common_func.path_manager import PathManager
 from common_func.utils import Utils
-from common_func.msprof_exception import ProfException
 from framework.load_info_manager import LoadInfoManager
 from mscalculate.calculate_ai_core_data import CalculateAiCoreData
 
@@ -274,7 +271,7 @@ def check_aicore_events(events: list) -> None:
     """
     if not events:
         error(CalculateRtsDataConst.FILE_NAME, 'Insert data error, aicore event list is empty. ')
-        sys.exit(NumberConstant.ERROR)
+        call_sys_exit(NumberConstant.ERROR)
     ai_core_config = config_file_obj(file_name='AICore')
     formula_key = Utils.generator_to_list(item[0] for item in ai_core_config.items('events'))
     for event in events:
@@ -445,7 +442,7 @@ def get_metrics_from_sample_config(project_path: str,
         if tmp.lower() not in \
                 Utils.generator_to_list(item[0] for item in config_file_obj(file_name='AICore').items('metrics')):
             error(CalculateRtsDataConst.FILE_NAME, 'Invalid metric {} .'.format(tmp))
-            sys.exit(NumberConstant.ERROR)
+            call_sys_exit(NumberConstant.ERROR)
     metrics.extend(sample_metrics)
     cal = CalculateAiCoreData(project_path)
     cal.add_fops_header(StrConstant.AI_CORE_PROFILING_METRICS, metrics)

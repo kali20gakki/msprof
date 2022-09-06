@@ -142,7 +142,10 @@ public:
     virtual int Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg) = 0;
     virtual int Process() = 0;
     virtual int Uninit() = 0;
-    virtual bool IsGlobalJobLevel() { return false; };
+    virtual bool IsGlobalJobLevel()
+    {
+        return false;
+    };
 };
 
 class CollectionRegisterMgr : public analysis::dvvp::common::singleton::Singleton<CollectionRegisterMgr> {

@@ -1,9 +1,6 @@
 #!/usr/bin/python3
-# coding: utf-8
-"""
-function provides for time line page
-Copyright Huawei Technologies Co., Ltd. 2018-2019. All rights reserved.
-"""
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2018-2019. All rights reserved.
 
 import json
 import os
@@ -428,9 +425,6 @@ def get_hbm_timeline(param: dict) -> str:
         return json.dumps({"status": NumberConstant.ERROR, "info": "No data is collected."})
     finally:
         DBManager.destroy_db_connect(conn, curs)
-    if _result:
-        return trace_parser.format_trace_events(_result)
-    return json.dumps({"status": NumberConstant.ERROR, "info": "No data is collected."})
 
 
 def get_hbm_bw_data(param: dict, curs: any) -> dict:

@@ -1,7 +1,6 @@
-"""
-function: Empty class, using it when need get a useless or temporarily instance
-Copyright Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
-"""
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 
 
 class EmptyClass:

@@ -1,7 +1,7 @@
-# -*-coding:utf-8 -*-
-"""
-parsing peripheral data file and create peripheral db
-"""
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
+
 import logging
 import os
 

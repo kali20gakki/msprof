@@ -161,7 +161,7 @@ class HwtsCalculator(ICalculator, MsMultiProcess):
             if ProfilingScene().is_mix_operator_and_graph() and \
                     self._sample_config.get("model_id") != Constant.GE_OP_MODEL_ID:
                 _iter_info = MsprofIteration(self._project_path). \
-                get_iteration_time_by_index_id(self._sample_config.get("iter_id"), self._sample_config.get("model_id"))
+                get_iteration_info_by_index_id(self._sample_config.get("iter_id"), self._sample_config.get("model_id"))
                 _iter_id = (_iter_info[0] - 1, _iter_info[0])
             else:
                 _iter_id = MsprofIteration(self._project_path). \
@@ -188,16 +188,19 @@ class HwtsCalculator(ICalculator, MsMultiProcess):
         if ProfilingScene().is_mix_operator_and_graph() and \
                 self._sample_config.get("model_id") != Constant.GE_OP_MODEL_ID:
             _iter_info = MsprofIteration(self._project_path). \
-                get_iteration_time_by_index_id(self._sample_config.get("iter_id"), self._sample_config.get("model_id"))
+                get_iteration_info_by_index_id(self._sample_config.get("iter_id"), self._sample_config.get("model_id"))
             if not _iter_info:
+                logging.warning("can not get the actual iter_info")
                 return
-            for log_data in Utils.chunks(all_log_bytes, self.HWTS_LOG_SIZE):
-                _task_log = HwtsLogBean.decode(log_data)
-                if _task_log.is_log_type() and _iter_info[1] <= _task_log.sys_cnt and \
-                        _task_log.sys_cnt <= _iter_info[2]:
-                    self._log_data.append(_task_log)
+            self._parse_task_log(all_log_bytes, _iter_info)
         else:
-            for log_data in Utils.chunks(all_log_bytes, self.HWTS_LOG_SIZE):
-                _task_log = HwtsLogBean.decode(log_data)
-                if _task_log.is_log_type():
+            self._parse_task_log(all_log_bytes)
+
+    def _parse_task_log(self: any, all_log_bytes: bytes, _iter_info=None):
+        for log_data in Utils.chunks(all_log_bytes, self.HWTS_LOG_SIZE):
+            _task_log = HwtsLogBean.decode(log_data)
+            if _task_log.is_log_type():
+                if not _iter_info:
+                    self._log_data.append(_task_log)
+                elif _iter_info[1] <= _task_log.sys_cnt and  _task_log.sys_cnt <= _iter_info[2]:
                     self._log_data.append(_task_log)

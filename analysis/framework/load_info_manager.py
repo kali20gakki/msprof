@@ -1,10 +1,7 @@
 #!/usr/bin/python3
-# coding=utf-8
-"""
-function:
-Initial load configuration information
-Copyright Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
-"""
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
+
 from analyzer.scene_base.profiling_scene import ProfilingScene
 from common_func.info_conf_reader import InfoConfReader
 from common_func.platform.chip_manager import ChipManager

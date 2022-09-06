@@ -207,7 +207,7 @@ int ProfTask::GetHostAndDeviceInfo()
 std::string ProfTask::GetHostTime()
 {
     std::string hostTime;
-    mmTimeval tv;
+    MmTimeval tv;
     const int TIME_US = 1000000;
 
     (void)memset_s(&tv, sizeof(tv), 0, sizeof(tv));
@@ -215,7 +215,7 @@ std::string ProfTask::GetHostTime()
     if (ret != PROFILING_SUCCESS) {
         MSPROF_LOGE("gettimeofday failed");
     } else {
-        hostTime = std::to_string((unsigned long long)tv.tv_sec * TIME_US + (unsigned long long)tv.tv_usec);
+        hostTime = std::to_string((unsigned long long)tv.tvSec * TIME_US + (unsigned long long)tv.tvUsec);
     }
     return hostTime;
 }

@@ -16,8 +16,13 @@ set(profilerSrcFiles
     ${MSPROF_SOURCE_DIR}/dvvp/analyze/src/analyzer_ts.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/analyze/src/op_desc_parser.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/config/config_manager.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/common/logger/cmd_log.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/src/slog_plugin.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform.cpp    
     ${MSPROF_SOURCE_DIR}/dvvp/common/memory/chunk_pool.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/driver/devmgmt/ai_drv_dev_api.cpp        
     ${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/driver/devmgmt/ai_drv_dev_api.cpp        
     ${MSPROF_SOURCE_DIR}/dvvp/common/statistics/perf_count.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/thread/thread.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/thread/thread_pool.cpp
@@ -42,13 +47,14 @@ set(profilerSrcFiles
     ${MSPROF_SOURCE_DIR}/dvvp/msprof/engine/src/aicpu_plugin.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/msprof/engine/src/prof_acl_mgr.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/msprof/engine/src/prof_ge_core.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/params_adapter/params_adapter_impl.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/msprof/engine/src/uploader_dumper.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/msprof/platform/mini/data_dumper.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/msprof/msproftx/src/msprof_tx_manager.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/msprof/msproftx/src/msprof_tx_reporter.cpp
-    ${MSPROF_SOURCE_DIR}/dvvp/msprof/msproftx/src/prof_stamp_pool.cpp
-    ${MSPROF_SOURCE_DIR}/dvvp/msprofiler/src/command_handle.cpp
-    ${MSPROF_SOURCE_DIR}/dvvp/msprofiler/src/msprof_callback_impl.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/msprof/msproftx/src/msprof_stamp_pool.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/msprof/engine/src/command_handle.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/msprof/engine/src/msprof_callback_impl.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/task_handle/src/device.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/task_handle/src/info_json.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/task_handle/src/prof_manager.cpp
@@ -68,6 +74,16 @@ set(profilerSrcFiles
     ${MSPROF_SOURCE_DIR}/dvvp/transport/uploader_mgr.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/depend/src/slog_plugin.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/depend/src/plugin_handle.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/params_adapter/params_adapter.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter_cloud.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter_cloudv2.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter_dc.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter_interface.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter_lhisi.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter_mdc.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter_mini.cpp    
     ${CppPath}
 )
 
@@ -141,6 +157,8 @@ target_include_directories(job_wrapper_utest PRIVATE
     ${MSPROF_SOURCE_DIR}/dvvp/msprof/include
     ${MSPROF_SOURCE_DIR}/dvvp/common
     ${MSPROF_SOURCE_DIR}/dvvp/common/errno
+    ${MSPROF_SOURCE_DIR}/dvvp/params_adapter
+    ${MSPROF_SOURCE_DIR}/dvvp/common/platform
     ${MSPROF_SOURCE_DIR}/dvvp/common/logger
     ${MSPROF_SOURCE_DIR}/dvvp/common/validation
     ${MSPROF_SOURCE_DIR}/dvvp/common/queue
@@ -163,6 +181,8 @@ target_include_directories(job_wrapper_utest PRIVATE
     ${TOP_DIR}/inc/driver
     ${TOP_DIR}/inc/external
     ${TOP_DIR}/inc/external/acl
+    ${TOP_DIR}/collector/dvvp/depend/inc/acl
+    ${TOP_DIR}/collector/dvvp/depend/inc/profapi
     ${TOP_DIR}/ace/npuruntime/inc
     ${MSPROF_SOURCE_DIR}/dvvp/msprofiler/inc
     ../stub/

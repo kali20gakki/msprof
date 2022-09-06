@@ -9,6 +9,7 @@ Huawei Technologies Co., Ltd. All Rights Reserved © 2021
 import logging
 import sqlite3
 from collections import OrderedDict
+from itertools import chain
 
 from analyzer.scene_base.profiling_scene import ProfilingScene
 from common_func.constant import Constant
@@ -30,12 +31,12 @@ class MsprofIteration:
         self._result_dir = result_dir
 
     @staticmethod
-    def _generate_trace_result(trace_datas: list) -> list:
+    def _generate_trace_result(trace_datas: list, time_fmt: int = NumberConstant.MICRO_SECOND) -> list:
+        trace_datas = list(chain.from_iterable(trace_datas))
         if not trace_datas:
             return []
-        result = [(trace_datas[0][0], trace_datas[1][0])] if len(trace_datas) == 2 else [(0, trace_datas[0][0])]
-        result = [(InfoConfReader().time_from_syscnt(result[0][0], NumberConstant.MICRO_SECOND),
-                   InfoConfReader().time_from_syscnt(result[0][1], NumberConstant.MICRO_SECOND))]
+        trace_datas = [InfoConfReader().time_from_syscnt(timestamp, time_fmt) for timestamp in trace_datas]
+        result = [(0, max(trace_datas))] if len(trace_datas) == 1 else [(min(trace_datas), max(trace_datas))]
         return result
 
     @staticmethod
@@ -45,15 +46,17 @@ class MsprofIteration:
             iter_end_dict.setdefault(trace_data[0], trace_data[1])
         return iter_end_dict
 
-    def get_iteration_time(self: any, index_id: int, model_id: int) -> list:
+    def get_iteration_time(self: any, index_id: int, model_id: int,
+                           time_fmt: int = NumberConstant.MICRO_SECOND) -> list:
         """
         get iteration start and end timestamp
         :param index_id: index id
         :param model_id: model id
+        :param time_fmt: timestamp format
         :return: iteration list
         """
         if Utils.is_step_scene(self._result_dir):
-            return self._generate_trace_result(self.get_step_iteration_time(index_id, model_id))
+            return self._generate_trace_result(self.get_step_iteration_time(index_id, model_id), time_fmt)
         return []
 
     def get_step_iteration_time(self: any, index_id: int, model_id: int) -> list:
@@ -184,16 +187,6 @@ class MsprofIteration:
             return self.__get_trace_iteration_end()
         return {}
 
-    def get_iteration_dict(self: any) -> dict:
-        """
-        get iteration start and end timestamp
-        """
-        if ProfilingScene().is_mix_operator_and_graph():
-            return self.get_graph_iteration_dict()
-        if Utils.is_step_scene(self._result_dir):
-            return self.__get_iteration_dict()
-        return {}
-
     def get_graph_iteration_dict(self: any) -> dict:
         iter_dict = OrderedDict()
         db_path = PathManager.get_db_path(self._result_dir, DBNameConstant.DB_STEP_TRACE)
@@ -211,7 +204,7 @@ class MsprofIteration:
             iter_dict.setdefault(trace_data[0], [trace_data[1], trace_data[2]])
         return iter_dict
 
-    def get_iteration_time_by_index_id(self: any, index_id: int, model_id: int) -> list:
+    def get_iteration_info_by_index_id(self: any, index_id: int, model_id: int) -> list:
         db_path = PathManager.get_db_path(self._result_dir, DBNameConstant.DB_STEP_TRACE)
         trace_conn, trace_curs = DBManager.check_connect_db(self._result_dir, DBNameConstant.DB_STEP_TRACE)
         if not trace_conn or not trace_curs \
@@ -219,11 +212,22 @@ class MsprofIteration:
             return []
         sql = "select iter_id, step_start, step_end from {0} " \
               "where model_id={1} and index_id={2}".format(DBNameConstant.TABLE_STEP_TRACE_DATA, model_id, index_id)
-        iter_start_end_time = DBManager.fetch_all_data(trace_curs, sql)[0]
+        iter_info = DBManager.fetch_all_data(trace_curs, sql)
         DBManager.destroy_db_connect(trace_conn, trace_curs)
-        if not iter_start_end_time:
-            return []
-        return iter_start_end_time
+        if iter_info:
+            return iter_info[0]
+        return iter_info
+
+    def get_condition_within_iteration(self: any, index_id: int, model_id: int, time_start_key: str, time_end_key: str):
+        """
+        get the condition for sql that data should be within iteration_id.
+        """
+        iter_range = self.get_iteration_time(index_id, model_id, time_fmt=NumberConstant.NANO_SECOND)
+        if not iter_range:
+            return ''
+        iter_start, iter_end = iter_range[0]
+        return f'where ({time_start_key}>={iter_start} and {time_start_key}<={iter_end}) ' \
+               f'or ({time_start_key}<={iter_start} and {iter_start}<={time_end_key})'
 
     def _get_iteration_time(self: any, trace_curs: any, index_id: int, model_id: int) -> list:
         iter_id = self.get_iteration_id_by_index_id(index_id, model_id)
@@ -233,26 +237,12 @@ class MsprofIteration:
               "where iter_id>=? and iter_id<=? order by " \
               "step_end".format(DBNameConstant.TABLE_STEP_TRACE_DATA)
         trace_data = DBManager.fetch_all_data(trace_curs, sql, iter_id)
-        if not trace_data:
-            return []
-        return trace_data
 
-    def __get_iteration_dict(self: any) -> dict:
-        iter_dict = OrderedDict()
-        db_path = PathManager.get_db_path(self._result_dir, DBNameConstant.DB_STEP_TRACE)
-        trace_conn, trace_curs = DBManager.check_connect_db(self._result_dir, DBNameConstant.DB_STEP_TRACE)
-        if not trace_conn or not trace_curs \
-                or not DBManager.check_tables_in_db(db_path, DBNameConstant.TABLE_STEP_TRACE_DATA):
-            return {}
-        sql = "select iter_id, step_start, step_end from {0} " \
-              "order by step_start".format(DBNameConstant.TABLE_STEP_TRACE_DATA)
-        trace_datas = DBManager.fetch_all_data(trace_curs, sql)
-        DBManager.destroy_db_connect(trace_conn, trace_curs)
-        if not trace_datas:
-            return iter_dict
-        for trace_data in trace_datas:
-            iter_dict.setdefault(trace_data[0], [trace_data[1], trace_data[2]])
-        return iter_dict
+        # if the first iter is chose, the iter_id (range) will contain iter 0 whose step end is also 0
+        if NumberConstant.ZERO_ITER_ID in iter_id:
+            trace_data = [NumberConstant.ZERO_ITER_END] + trace_data
+
+        return trace_data
 
     def __get_trace_iteration_end(self: any) -> dict:
         iter_end_dict = OrderedDict()

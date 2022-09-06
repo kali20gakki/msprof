@@ -1,9 +1,7 @@
 #!/usr/bin/python3
-# coding=utf-8
-"""
-function: this script used to parse hwts log.
-Copyright Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
-"""
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
+
 import logging
 import os
 import sqlite3
@@ -73,6 +71,7 @@ class IterParser(IParser, MsMultiProcess):
         self._iter_info_dict = {}
         self._ge_op_iter_dict = {}
         self._batch_list_for_task_time = []
+        self._overstep_task_cnt = 0
 
     def save(self: any) -> None:
         """
@@ -113,18 +112,22 @@ class IterParser(IParser, MsMultiProcess):
                                                              self._iter_recorder.iter_end_dict.get(
                                                                  self._iter_recorder.current_op_iter)))
         iter_info.task_count += 1
-        if task_log.task_type == self.HWTS_TASK_END \
+        if task_log.sys_tag == self.HWTS_TASK_END \
                 and self._is_ai_core_task(task_log.task_id, task_log.stream_id, task_log.batch_id):
             iter_info.aic_count += 1
 
     def _read_hwts_data(self: any, all_bytes: bytes) -> None:
         for _chunk in Utils.chunks(all_bytes, self.HWTS_LOG_SIZE):
             _task_log = HwtsLogBean.decode(_chunk)
-            if _task_log.is_log_type():
+            if not _task_log.is_log_type():
+                continue
+            if self._iter_recorder.check_task_in_iteration(_task_log.sys_cnt):
                 self._iter_recorder.set_current_iter_id(_task_log.sys_cnt)
-                if _task_log.task_type == self.HWTS_TASK_END:
+                if _task_log.sys_tag == self.HWTS_TASK_END:
                     self._calculate_batch_list(_task_log)
                 self._calculate_task_count(_task_log)
+            else:
+                self._overstep_task_cnt = self._overstep_task_cnt + 1
 
     def _calculate_batch_list(self: any, task_log: HwtsLogBean) -> None:
         setattr(task_log, "batch_id", self._batch_counter.calculate_batch(
@@ -142,6 +145,8 @@ class IterParser(IParser, MsMultiProcess):
             with FileOpen(_hwts_file, 'rb') as _hwts_file_reader:
                 all_bytes = _offset_calculator.pre_process(_hwts_file_reader.file_reader, os.path.getsize(_hwts_file))
                 self._read_hwts_data(all_bytes)
+        if self._overstep_task_cnt > 0:
+            logging.warning("HWTS overstep task number is %s", self._overstep_task_cnt)
 
 
 class IterRecParser(IterParser):
@@ -167,6 +172,8 @@ class IterRecParser(IterParser):
             return
         self._batch_counter.init(Constant.TASK_TYPE_AI_CORE)
         self._parse_hwts_data()
+        if self._overstep_task_cnt > 0:
+            logging.warning("overstep task number is %s", self._overstep_task_cnt)
 
     def ms_run(self: any) -> None:
         """
@@ -213,6 +220,8 @@ class NoGeIterRecParser(IterParser):
         """
         self._parse_ai_core_data()
         self._parse_hwts_data()
+        if self._overstep_task_cnt > 0:
+            logging.warning("overstep task number is %s", self._overstep_task_cnt)
 
     def ms_run(self: any) -> None:
         """

@@ -19,7 +19,7 @@
 namespace Msprof {
 namespace Engine {
 using namespace analysis::dvvp::common::utils;
-class AicpuPlugin: public analysis::dvvp::common::thread::Thread {
+class AicpuPlugin : public analysis::dvvp::common::thread::Thread {
 public:
     AicpuPlugin();
     virtual ~AicpuPlugin();

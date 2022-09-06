@@ -1,8 +1,7 @@
-# coding:utf-8
-"""
-This script is used for hwts log struct
-Copyright Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
-"""
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
+
 from profiling_bean.struct_info.struct_decoder import StructDecoder
 
 
@@ -14,10 +13,11 @@ class HwtsLogBean(StructDecoder):
     def __init__(self: any, *args: any) -> None:
         # 3=0b00000011, keep 2 lower bits which represent log type
         args = args[0]
+        self._task_type = args[1]
         self._stream_id = args[6]
         self._task_id = args[4]
         self._sys_cnt = args[5]
-        self._task_type = args[0] & 7
+        self._sys_tag = args[0] & 7
 
     @property
     def task_type(self: any) -> int:
@@ -25,6 +25,13 @@ class HwtsLogBean(StructDecoder):
         for task type
         """
         return self._task_type
+
+    @property
+    def sys_tag(self: any) -> int:
+        """
+        for sys tag
+        """
+        return self._sys_tag
 
     @property
     def task_id(self: any) -> int:
@@ -52,4 +59,4 @@ class HwtsLogBean(StructDecoder):
         check hwts log type ,and 0 is start log ,1 is end log.
         :return:
         """
-        return self._task_type in (0, 1)
+        return self._sys_tag in (0, 1)

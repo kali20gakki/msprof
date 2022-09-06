@@ -17,6 +17,7 @@
 #include "errno/error_code.h"
 #include "utils/utils.h"
 #include "message/prof_params.h"
+#include "prof_api_common.h"
 
 namespace Analysis {
 namespace Dvvp {
@@ -86,15 +87,16 @@ public:
     int Init();
     void Uninit();
     std::string GetFrequency() const;
-    std::string GetChipIdStr();
+    std::string GetChipIdStr() const;
     PlatformType GetPlatformType() const;
     std::string GetAicDefFrequency() const;
-    bool IsDriverSupportLlc();
+    bool IsDriverSupportLlc() const;
     std::string GetPerfDataDir(const int devId = 0) const;
     std::string GetDefaultWorkDir() const;
     int GetAicoreEvents(const std::string &aicoreMetricsType, std::string &aicoreEvents) const;
-    int GetL2cacheEvents(std::string &l2CacheEvents);
+    int GetL2cacheEvents(std::string &l2CacheEvents) const;
     void MsprofL2CacheAdapter(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params);
+    void AicoreMetricsEnumToName(ProfAicoreMetrics aicMetrics, std::string &name);
 
 private:
     void InitFrequency();

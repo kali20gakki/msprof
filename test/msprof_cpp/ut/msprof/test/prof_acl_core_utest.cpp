@@ -40,14 +40,20 @@
 #include "mmpa_api.h"
 #include "prof_api.h"
 #include "toolchain/prof_acl_api.h"
+#include "params_adapter_impl.h"
+#include "uploader.h"
+#include "transport/hdc/hdc_transport.h"
 
 using namespace analysis::dvvp::common::error;
 using namespace Analysis::Dvvp::Analyze;
+using namespace Analysis::Dvvp::Common::Config;
 using namespace analysis::dvvp::transport;
 using namespace Analysis::Dvvp::ProfilerCommon;
 using namespace Analysis::Dvvp::Common::Platform;
 using namespace Collector::Dvvp::Plugin;
 using namespace Collector::Dvvp::Mmpa;
+using namespace Collector::Dvvp::Mmpa;
+
 const int RECEIVE_CHUNK_SIZE = 320; // chunk size:320
 
 class MSPROF_ACL_CORE_UTEST: public testing::Test {
@@ -115,13 +121,69 @@ int mmWriteStub(int fd, void *buf, unsigned int bufLen) {
 
 TEST_F(MSPROF_ACL_CORE_UTEST, get_op_xxx) {
     ProfOpDesc data;
+    uint32_t bufLen = sizeof(ProfOpDesc);
     data.modelId = 0;
     data.flag = ACL_SUBSCRIBE_OP_THREAD;
     data.threadId = 0;
     data.modelId = 0;
+    data.opIndex = OpDescParser::instance()->SetOpTypeAndOpName("OpType", "OpName");
+    data.executionTime = 0;
+    data.signature = analysis::dvvp::common::utils::Utils::GenerateSignature(
+        reinterpret_cast<const uint8_t *>(&data) + sizeof(uint32_t), bufLen - sizeof(uint32_t));
+    
     EXPECT_EQ(ACL_SUBSCRIBE_OP_THREAD, OpDescParser::GetOpFlag(&data, sizeof(data), 0));
     EXPECT_NE(nullptr, OpDescParser::GetOpAttriValue(&data, sizeof(data), 0, ACL_SUBSCRIBE_ATTRI_THREADID));
     EXPECT_EQ(nullptr, OpDescParser::GetOpAttriValue(&data, sizeof(data), 0, ACL_SUBSCRIBE_ATTRI_NONE));
+
+    EXPECT_EQ(sizeof(ProfOpDesc), OpDescParser::GetOpDescSize());
+    uint32_t opNum = 0;
+    EXPECT_EQ(ACL_SUCCESS, OpDescParser::GetOpNum(&data, bufLen, &opNum));
+    EXPECT_EQ(1, opNum);
+
+    uint32_t modelId = 0;
+    OpDescParser::GetModelId(&data, bufLen, 0, &modelId);
+    EXPECT_EQ(0, modelId);
+    size_t opTypeLen = 0;
+    EXPECT_EQ(ACL_SUCCESS, OpDescParser::instance()->GetOpTypeLen(&data, bufLen, &opTypeLen, 0));
+    char opType[opTypeLen];
+    EXPECT_EQ(ACL_SUCCESS, OpDescParser::instance()->GetOpType(&data, bufLen, opType, opTypeLen, 0));
+    EXPECT_EQ("OpType", std::string(opType));
+    size_t opNameLen = 0;
+    EXPECT_EQ(ACL_SUCCESS, OpDescParser::instance()->GetOpNameLen(&data, bufLen, &opNameLen, 0));
+    char opName[opNameLen];
+    EXPECT_EQ(ACL_SUCCESS, OpDescParser::instance()->GetOpName(&data, bufLen, opName, opNameLen, 0));
+    EXPECT_EQ("OpName", std::string(opName));
+    EXPECT_EQ(true, OpDescParser::GetOpStart(&data, bufLen, 0) > 0);
+    EXPECT_EQ(true, OpDescParser::GetOpEnd(&data, bufLen, 0) > 0);
+    EXPECT_EQ(true, OpDescParser::GetOpDuration(&data, bufLen, 0) > 0);
+    EXPECT_EQ(true, OpDescParser::GetOpCubeFops(&data, bufLen, 0) >= 0);
+    EXPECT_EQ(true, OpDescParser::GetOpVectorFops(&data, bufLen, 0) >= 0);
+    EXPECT_EQ(ACL_SUBSCRIBE_OP_THREAD, OpDescParser::GetOpFlag(&data, bufLen, 0));
+    EXPECT_NE(nullptr, OpDescParser::GetOpAttriValue(&data, bufLen, 0, ACL_SUBSCRIBE_ATTRI_THREADID));
+    EXPECT_EQ(nullptr, OpDescParser::GetOpAttriValue(&data, bufLen, 0, ACL_SUBSCRIBE_ATTRI_NONE));
+    EXPECT_EQ(0, OpDescParser::GetOpExecutionTime(&data, bufLen, 0));
+}
+
+TEST_F(MSPROF_ACL_CORE_UTEST, ConstructAndUploadData)
+{
+    GlobalMockObject::verify();
+
+    std::shared_ptr<Analyzer> analyzer(new Analyzer(nullptr));
+    const uint64_t start = 1;
+    const uint64_t end = 2;
+    const uint64_t startAicore = 3;
+    const uint64_t endAicore = 4;
+    OpTime opTime;
+    opTime.start = start;
+    opTime.end = end;
+    opTime.startAicore = startAicore;
+    opTime.endAicore = endAicore;
+    opTime.indexId = 1;
+    opTime.threadId = 1;
+    const std::string nullStr = "";
+    analyzer->ConstructAndUploadData(nullStr, opTime);
+    const std::string opId = "123";
+    analyzer->ConstructAndUploadData(opId, opTime);
 }
 
 TEST_F(MSPROF_ACL_CORE_UTEST, acl_api) {
@@ -137,7 +199,7 @@ TEST_F(MSPROF_ACL_CORE_UTEST, acl_api) {
     config.devNums = 1;
     config.devIdList[0] = 0;
     config.aicoreMetrics = PROF_AICORE_ARITHMETIC_UTILIZATION;
-    config.dataTypeConfig = 0x7d7f001f;
+    config.dataTypeConfig = ACL_PROF_ACL_API|ACL_PROF_AICORE_METRICS|ACL_PROF_AICPU;
 
     ge::aclgrphProfConfig *aclConfig = ge::aclgrphProfCreateConfig(
         config.devIdList, config.devNums, (ge::ProfilingAicoreMetrics)config.aicoreMetrics, nullptr, config.dataTypeConfig);
@@ -148,6 +210,9 @@ TEST_F(MSPROF_ACL_CORE_UTEST, acl_api) {
     memset(zeroConfig, 0, sizeof(ProfConfig));
 
     EXPECT_NE(nullptr, aclConfig);
+    MOCKER_CPP(&Collector::Dvvp::ParamsAdapter::AclApiParamAdapter::GetParamFromInputCfg)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
 
     EXPECT_EQ(ge::FAILED, ge::aclgrphProfStart(zeroConfig));
     EXPECT_EQ(ge::FAILED, ge::aclgrphProfStart(invalidConfig));
@@ -327,7 +392,7 @@ TEST_F(MSPROF_ACL_CORE_UTEST, acl_prof_api) {
     config.devNums = 1;
     config.devIdList[0] = 0;
     config.aicoreMetrics = PROF_AICORE_ARITHMETIC_UTILIZATION;
-    config.dataTypeConfig = 0x7d7f001f;
+    config.dataTypeConfig = ACL_PROF_ACL_API|ACL_PROF_AICORE_METRICS|ACL_PROF_AICPU;
 
     aclprofConfig *aclConfig = aclprofCreateConfig(
         config.devIdList, config.devNums, (aclprofAicoreMetrics)config.aicoreMetrics, nullptr, config.dataTypeConfig);
@@ -338,7 +403,9 @@ TEST_F(MSPROF_ACL_CORE_UTEST, acl_prof_api) {
     memset(zeroConfig, 0, sizeof(ProfConfig));
 
     EXPECT_NE(nullptr, aclConfig);
-
+    MOCKER_CPP(&Collector::Dvvp::ParamsAdapter::AclApiParamAdapter::GetParamFromInputCfg)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
     EXPECT_EQ(ACL_ERROR_INVALID_PARAM, aclprofStart(nullptr));
     EXPECT_EQ(ACL_ERROR_INVALID_PARAM, aclprofStart(zeroConfig));
     EXPECT_EQ(200007, aclprofStart(invalidConfig));
@@ -896,6 +963,53 @@ TEST_F(MSPROF_ACL_CORE_UTEST, DoHostHandle) {
     EXPECT_EQ(PROFILING_SUCCESS, ret);
 }
 
+TEST_F(MSPROF_ACL_CORE_UTEST, MsprofCtrlCallbackImpl)
+{
+    GlobalMockObject::verify();
+    using namespace Msprofiler::Api;
+    uint32_t type = MSPROF_CTRL_FINALIZE;
+    VOID_PTR data = nullptr;
+    uint32_t len = 0;
+    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::MsprofFinalizeHandle)
+        .stubs()
+        .will(returnValue(0));
+    int ret = Analysis::Dvvp::ProfilerCommon::MsprofCtrlCallbackImpl(type, data, len);
+    EXPECT_EQ(MSPROF_ERROR_NONE, ret);
+    type = MSPROF_CTRL_INIT_DYNA;
+    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::IsModeOff)
+        .stubs()
+        .will(returnValue(false));
+    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::MsprofInitForDynamic)
+        .stubs()
+        .will(returnValue((int)MSPROF_ERROR_NONE));
+    ret = Analysis::Dvvp::ProfilerCommon::MsprofCtrlCallbackImpl(type, data, len);
+    EXPECT_EQ(MSPROF_ERROR_NONE, ret);
+    MOCKER_CPP(&Analysis::Dvvp::Common::Platform::Platform::PlatformIsHelperHostSide)
+        .stubs()
+        .will(returnValue(true));
+    MOCKER_CPP(&Analysis::Dvvp::ProfilerCommon::RegisterReporterCallback)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED));
+    ret = Analysis::Dvvp::ProfilerCommon::MsprofCtrlCallbackImpl(type, data, len);
+    EXPECT_EQ(MSPROF_ERROR_NONE, ret);
+    MOCKER_CPP(&Analysis::Dvvp::ProfilerCommon::RegisterReporterCallback)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+    MOCKER_CPP(&Analysis::Dvvp::ProfilerCommon::CommandHandleProfStart)
+        .stubs()
+        .will(returnValue(ACL_SUCCESS))
+        .then(returnValue(ACL_ERROR_PROFILING_FAILURE));
+    ret = Analysis::Dvvp::ProfilerCommon::MsprofCtrlCallbackImpl(type, data, len);
+    EXPECT_EQ(MSPROF_ERROR_NONE, ret);
+    EXPECT_EQ(MSPROF_ERROR_NONE, ret);
+}
+
+TEST_F(MSPROF_ACL_CORE_UTEST, RegisterMsprofTxReporterCallback)
+{
+    GlobalMockObject::verify();
+    RegisterMsprofTxReporterCallback();
+}
+
 TEST_F(MSPROF_ACL_CORE_UTEST, OpDescParserNullptr) {
     GlobalMockObject::verify();
 
@@ -999,6 +1113,9 @@ TEST_F(MSPROF_ACL_CORE_UTEST, MsprofInitAclJson) {
         .stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
+    MOCKER_CPP(&Collector::Dvvp::ParamsAdapter::ParamsAdapter::BlackSwitchCheck)
+        .stubs()
+        .will(returnValue(true));
     std::string result = "/tmp/MsprofInitAclJson";
     analysis::dvvp::common::utils::Utils::RemoveDir(result);
     analysis::dvvp::common::utils::Utils::CreateDir(result);
@@ -1014,7 +1131,7 @@ TEST_F(MSPROF_ACL_CORE_UTEST, MsprofInitAclJson) {
     EXPECT_EQ(0, ProfAclMgr::instance()->MsprofInitAclJson((void *)aclJson.c_str(), aclJson.size()));
     EXPECT_EQ(0, ProfAclMgr::instance()->MsprofInitAclJson((void *)aclJson.c_str(), aclJson.size()));
 
-    aclJson = "{\"switch\": \"on\", \"output\": \"output\",\"aic_metrics\": \"ArithmeticUtilization\",\"aicpu\": \"on\",\"l2\": \"xx\"}";
+    aclJson = "{\"switch\": \"on\", \"output\": \"output\",\"aic_metrics\": \"ArithmeticUtilization\",\"aicpu\": \"xx\",\"l2\": \"on\"}";
     EXPECT_EQ(3, ProfAclMgr::instance()->MsprofInitAclJson((void *)aclJson.c_str(), aclJson.size()));
     aclJson = "{\"switch\": \"on\", \"output\": \"output\",\"aic_metrics\": \"ArithmeticUtilization\",\"aicpu\": \"on\",\"l2\": \"off\"}";
     EXPECT_EQ(0, ProfAclMgr::instance()->MsprofInitAclJson((void *)aclJson.c_str(), aclJson.size()));
@@ -1031,22 +1148,6 @@ TEST_F(MSPROF_ACL_CORE_UTEST, MsprofCheckAndGetChar) {
     EXPECT_EQ(test1, ProfAclMgr::instance()->MsprofCheckAndGetChar(const_cast<char *>(test.c_str()), test.size()));
 }
 
-TEST_F(MSPROF_ACL_CORE_UTEST, MsprofInitGeOptionsParamAdaper) {
-    GlobalMockObject::verify();
-    using namespace Msprofiler::Api;
-
-    std::shared_ptr<analysis::dvvp::message::ProfileParams> params(
-		new analysis::dvvp::message::ProfileParams());
-    std::shared_ptr<analysis::dvvp::proto::ProfGeOptionsConfig> message(new analysis::dvvp::proto::ProfGeOptionsConfig);
-
-    message->set_aicpu("on");
-    message->set_training_trace("on");
-    message->set_task_trace("on");
-    std::string jobInfo = "123";
-
-    ProfAclMgr::instance()->MsprofInitGeOptionsParamAdaper(nullptr, jobInfo, message);
-    ProfAclMgr::instance()->MsprofInitGeOptionsParamAdaper(params, jobInfo, message);
-}
 
 TEST_F(MSPROF_ACL_CORE_UTEST, MsprofGeOptionsResultPathAdapter) {
     GlobalMockObject::verify();
@@ -1094,7 +1195,7 @@ TEST_F(MSPROF_ACL_CORE_UTEST, MsprofInitGeOptions) {
     ge_json = "{\"output\": \"/tmp/MsprofInitGeOptions\",\"aic_metrics\": \"ArithmeticUtilization\",\"aicpu\": \"on\",\"l2\": \"xx\"}";
     strcpy(options.jobId, "123");
     strcpy(options.options, ge_json.c_str());
-    EXPECT_EQ(3, ProfAclMgr::instance()->MsprofInitGeOptions((void *)&options, sizeof(options)));
+    EXPECT_EQ(0, ProfAclMgr::instance()->MsprofInitGeOptions((void *)&options, sizeof(options)));
 
     analysis::dvvp::common::utils::Utils::RemoveDir(result);
 }
@@ -1432,7 +1533,8 @@ TEST_F(MSPROF_ACL_CORE_UTEST, AnalyzerTs_UploadKeypointOp) {
     MOCKER_CPP(&Analysis::Dvvp::Analyze::Analyzer::ConstructAndUploadData)
         .stubs();
 
-    std::shared_ptr<Analyzer> analyzer(new Analyzer(nullptr));
+    auto analyzer = std::make_shared<Analysis::Dvvp::Analyze::Analyzer>(nullptr);
+
     TsProfileKeypoint data;
     data.head.bufSize = sizeof(TsProfileKeypoint);
     data.taskId = 1;
@@ -1504,28 +1606,28 @@ TEST_F(MSPROF_ACL_CORE_UTEST, Graph_aclgrphProfGraphSubscribe) {
 TEST_F(MSPROF_ACL_CORE_UTEST, AicoreMetricsEnumToName) {
     std::string metrics;
 
-    Msprofiler::Api::ProfAclMgr::instance()->AicoreMetricsEnumToName(PROF_AICORE_ARITHMETIC_UTILIZATION, metrics);
+    ConfigManager::instance()->AicoreMetricsEnumToName(PROF_AICORE_ARITHMETIC_UTILIZATION, metrics);
     EXPECT_EQ("ArithmeticUtilization", metrics);
 
-    Msprofiler::Api::ProfAclMgr::instance()->AicoreMetricsEnumToName(PROF_AICORE_PIPE_UTILIZATION, metrics);
+    ConfigManager::instance()->AicoreMetricsEnumToName(PROF_AICORE_PIPE_UTILIZATION, metrics);
     EXPECT_EQ("PipeUtilization", metrics);
 
-    Msprofiler::Api::ProfAclMgr::instance()->AicoreMetricsEnumToName(PROF_AICORE_MEMORY_BANDWIDTH, metrics);
+    ConfigManager::instance()->AicoreMetricsEnumToName(PROF_AICORE_MEMORY_BANDWIDTH, metrics);
     EXPECT_EQ("Memory", metrics);
 
-    Msprofiler::Api::ProfAclMgr::instance()->AicoreMetricsEnumToName(PROF_AICORE_L0B_AND_WIDTH, metrics);
+    ConfigManager::instance()->AicoreMetricsEnumToName(PROF_AICORE_L0B_AND_WIDTH, metrics);
     EXPECT_EQ("MemoryL0", metrics);
 
-    Msprofiler::Api::ProfAclMgr::instance()->AicoreMetricsEnumToName(PROF_AICORE_RESOURCE_CONFLICT_RATIO, metrics);
+    ConfigManager::instance()->AicoreMetricsEnumToName(PROF_AICORE_RESOURCE_CONFLICT_RATIO, metrics);
     EXPECT_EQ("ResourceConflictRatio", metrics);
 
-    Msprofiler::Api::ProfAclMgr::instance()->AicoreMetricsEnumToName(PROF_AICORE_MEMORY_UB, metrics);
+    ConfigManager::instance()->AicoreMetricsEnumToName(PROF_AICORE_MEMORY_UB, metrics);
     EXPECT_EQ("MemoryUB", metrics);
 
-    Msprofiler::Api::ProfAclMgr::instance()->AicoreMetricsEnumToName(PROF_AICORE_NONE, metrics);
+    ConfigManager::instance()->AicoreMetricsEnumToName(PROF_AICORE_NONE, metrics);
     EXPECT_EQ("MemoryUB", metrics);
 
-    Msprofiler::Api::ProfAclMgr::instance()->AicoreMetricsEnumToName(PROF_AICORE_METRICS_COUNT, metrics);
+    ConfigManager::instance()->AicoreMetricsEnumToName(PROF_AICORE_METRICS_COUNT, metrics);
     EXPECT_EQ("MemoryUB", metrics);
 }
 
@@ -1618,7 +1720,10 @@ TEST_F(MSPROF_ACL_CORE_UTEST, ProfAclStop) {
     config.devNums = 1;
     config.devIdList[0] = 0;
     config.aicoreMetrics = PROF_AICORE_ARITHMETIC_UTILIZATION;
-    config.dataTypeConfig = 0x7d7f001f;
+    config.dataTypeConfig = ACL_PROF_AICPU | ACL_PROF_ACL_API | ACL_PROF_HCCL_TRACE;
+    MOCKER_CPP(&Collector::Dvvp::ParamsAdapter::AclApiParamAdapter::GetParamFromInputCfg)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
 
     std::shared_ptr<analysis::dvvp::message::ProfileParams> params(new analysis::dvvp::message::ProfileParams());
     ProfAclMgr::ProfAclTaskInfo taskInfo = {1, 0, params};

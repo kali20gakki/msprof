@@ -188,8 +188,6 @@ message MsProfStartReq {
     string task_base = 3;
     string hwts_log = 4;
     string ts_timeline = 5;
-    string ts_task_track = 6;
-    string docker_id = 7;
     string job_info = 8;   // job id send by GE
     string feature_name = 9;
     string ai_core_events = 10;
@@ -257,6 +255,7 @@ message InfoMain {
     string upTime = 17;
     uint32 netCardNums = 18;
     repeated NetCardInfo netCard = 19;
+    int32 rank_id = 20;
 }
 // for generating info.json _________END
 

@@ -19,6 +19,10 @@ namespace config {
 // /////////////////////common//////////////////////////////////
 const std::string DEVICE_APP_DIR = "/usr/local/profiler/";
 const std::string PROF_SCRIPT_FILE_PATH = "/usr/bin/msprof_data_collection.sh";
+const std::string PROF_MSPROF_PY_PATH = "profiler/profiler_tool/analysis/msprof/msprof.py";
+const std::string PROF_MSPROF_PY_NAME = "msprof.py";
+const std::string PROF_MSPROF_SO_NAME = "libmsprofiler.so";
+const std::string PROF_MSPROF_BIN_NAME = "msprof";
 
 const char * const HOST_TAG_KEY = "Host";
 const char * const DEVICE_TAG_KEY = "Device";
@@ -57,6 +61,8 @@ const int MSVP_CLN_SENDER_POOL_THREAD_NUM = 2;
 const int STORAGE_LIMIT_DOWN_THD = 200; // 200MB
 
 const int MAX_ASCEND_INSTALL_INFO_FILE_SIZE = 1024; // 1024 Byte
+
+const int THOUSAND = 1000; // 1000 : 1k
 
 #if (defined(_WIN32) || defined(_WIN64) || defined(_MSC_VER))
 const int MSVP_MMPROCESS = NULL;
@@ -157,6 +163,7 @@ const std::string FILE_PERFCOUNT_MODULE_NAME = std::string("FileTransport");
 const uint64_t TRANSPORT_PRI_FREQ = 128;
 
 const char * const MSVP_PROF_ON = "on";
+const std::string MSPROF_SWITCH_ON = "on";
 
 // ai core metrics type
 const std::string ARITHMETIC_UTILIZATION = "ArithmeticUtilization";
@@ -168,6 +175,8 @@ const std::string PROFILER_SAMPLE_CONFIG_ENV = "PROFILER_SAMPLECONFIG";
 const std::string MEMORY_UB = "MemoryUB";
 const std::string PROFILING_RESULT_PATH_ENV = "PROFILING_RESULT_PATH";
 const std::string PROFILING_AICPU_MODE_ENV = "AICPU_PROFILING_MODE";
+const std::string RANK_TABLE_FILE_ENV = "RANK_TABLE_FILE";
+const std::string RANK_ID_ENV = "RANK_ID";
 
 // llc  profiling events type
 const std::string LLC_PROFILING_CAPACITY = "capacity";
@@ -220,11 +229,28 @@ enum FileChunkDataModule {
 };
 
 // biu perf
-constexpr int BIU_GROUP_MAX_NUM = 25;       // biu group id 0 ~ 24
-constexpr int BIU_GROUP_CHANNEL_NUM = 3;    // biu group contains 3 channel
 constexpr int BIU_SAMPLE_FREQ_MIN = 300;    // biu sampling frequency min value
 constexpr int BIU_SAMPLE_FREQ_MAX = 30000;  // biu sampling frequency max value
 
+// device-sys
+constexpr int SYS_SAMPLING_FREQ_MIN_NUM = 1;
+constexpr int SYS_SAMPLING_FREQ_MAX_NUM = 10;
+constexpr int PID_SAMPLING_FREQ_MIN_NUM = 1;
+constexpr int PID_SAMPLING_FREQ_MAX_NUM = 10;
+constexpr int CPU_SAMPLING_FREQ_MIN_NUM = 1;
+constexpr int CPU_SAMPLING_FREQ_MAX_NUM = 50;
+constexpr int INTERCONNECTION_SAMPLING_FREQ_MIN_NUM = 1;
+constexpr int INTERCONNECTION_SAMPLING_FREQ_MAX_NUM = 50;
+constexpr int IO_SAMPLING_FREQ_MIN_NUM = 1;
+constexpr int IO_SAMPLING_FREQ_MAX_NUM = 100;
+constexpr int DVPP_SAMPLING_FREQ_MIN_NUM = 1;
+constexpr int DVPP_SAMPLING_FREQ_MAX_NUM = 100;
+constexpr int HARDWARE_MEM_SAMPLING_FREQ_MIN_NUM = 1;
+constexpr int HARDWARE_MEM_SAMPLING_FREQ_MAX_NUM = 1000;
+constexpr int AIC_SAMPLING_FREQ_MIN_NUM = 1;
+constexpr int AIC_SAMPLING_FREQ_MAX_NUM = 100;
+constexpr int AIV_SAMPLING_FREQ_MIN_NUM = 1;
+constexpr int AIV_SAMPLING_FREQ_MAX_NUM = 100;
 }  // namespace config
 }  // namespace common
 }  // namespace dvvp

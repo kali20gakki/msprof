@@ -1,8 +1,7 @@
-# -*-coding:utf-8 -*-
-"""
-This script is used to create database for ts memcpy data
-Copyright Huawei Technologies Co., Ltd. 2021. All rights reserved.
-"""
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2021-2022. All rights reserved.
+
 import struct
 from msparser.data_struct_size_constant import StructFmt
 from common_func.db_name_constant import DBNameConstant

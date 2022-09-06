@@ -38,10 +38,10 @@ const unsigned long long CHANGE_FROM_S_TO_NS = 1000000000;
 unsigned long long Utils::GetClockRealtime()
 {
 #if (defined(_WIN32) || defined(_WIN64) || defined(_MSC_VER))
-    mmTimespec now;
+    MmTimespec now;
     (void)memset_s(&now, sizeof(now), 0, sizeof(now));
     now = MmGetTickCount();
-    return ((unsigned long long)(now.tv_sec) * CHANGE_FROM_S_TO_NS) + (unsigned long long)(now.tv_nsec);
+    return ((unsigned long long)(now.tvSec) * CHANGE_FROM_S_TO_NS) + (unsigned long long)(now.tvNsec);
 #else
     struct timespec now;
     (void)memset_s(&now, sizeof(now), 0, sizeof(now));
@@ -53,11 +53,11 @@ unsigned long long Utils::GetClockRealtime()
 
 unsigned long long Utils::GetClockMonotonicRaw()
 {
-    mmTimespec now;
+    MmTimespec now;
     (void)memset_s(&now, sizeof(now), 0, sizeof(now));
     now = MmGetTickCount();
-    return (static_cast<unsigned long long>(now.tv_sec) * CHANGE_FROM_S_TO_NS) +
-        static_cast<unsigned long long>(now.tv_nsec);
+    return (static_cast<unsigned long long>(now.tvSec) * CHANGE_FROM_S_TO_NS) +
+        static_cast<unsigned long long>(now.tvNsec);
 }
 
 unsigned long long Utils::GetCPUCycleCounter()
@@ -109,7 +109,7 @@ long long Utils::GetFileSize(const std::string &path)
 
 int Utils::GetFreeVolume(const std::string &path, unsigned long long &size)
 {
-    mmDiskSize diskSize;
+    MmDiskSize diskSize;
 
     int ret = MmGetDiskFreeSpace(path, &diskSize);
     if (ret < 0) {
@@ -122,7 +122,7 @@ int Utils::GetFreeVolume(const std::string &path, unsigned long long &size)
 
 int Utils::GetTotalVolume(const std::string &path, unsigned long long &size)
 {
-    mmDiskSize diskSize;
+    MmDiskSize diskSize;
 
     int ret = MmGetDiskFreeSpace(path, &diskSize);
     if (ret < 0) {
@@ -356,7 +356,7 @@ int Utils::CreateDir(const std::string &path)
         }
     }
 
-    const mmMode_t defaultFileMode = (mmMode_t)0750;  // 0750 means xwrx-r
+    const MmMode_t defaultFileMode = (MmMode_t)0750;  // 0750 means xwrx-r
     MSPROF_LOGI("CreateDir dir %s with 750", BaseName(path).c_str());
     if ((MmMkdir(path, defaultFileMode) != PROFILING_SUCCESS) && (errno != EEXIST)) {
         return PROFILING_FAILED;
@@ -381,7 +381,7 @@ int Utils::CreateDir(const std::string &path)
         MSPROF_LOGD("The file already exists, %s", BaseName(path).c_str());
         return PROFILING_SUCCESS;
     }
-    const mmMode_t defaultFileMode = (mmMode_t)0750;  // 0750 means xwrx-r
+    const MmMode_t defaultFileMode = (MmMode_t)0750;  // 0750 means xwrx-r
     if ((MmMkdir(path, defaultFileMode) != PROFILING_SUCCESS) && (errno != EEXIST)) {
         char errBuf[MAX_ERR_STRING_LEN + 1] = {0};
         MSPROF_LOGE("Failed to mkdir, FilePath : %s, FileMode : %o, ErrorCode : %d, ERRORInfo : %s",
@@ -403,7 +403,7 @@ void Utils::RemoveDir(const std::string &dir, bool rmTopDir)
     MSPROF_LOGI("RemoveDir dir %s", BaseName(dir).c_str());
 
     if (!rmTopDir) {
-        mmDirent **nameList = nullptr;
+        MmDirent **nameList = nullptr;
         int count = MmScandir(dir, &nameList, nullptr, nullptr);
         if (count == PROFILING_FAILED || count == PROFILING_INVALID_PARAM) {
             MSPROF_LOGW("mmScandir failed %s. ErrorCode : %d", BaseName(dir).c_str(),
@@ -486,7 +486,7 @@ int Utils::ExecCmd(const ExecCmdParams &execCmdParams,
     const std::vector<std::string> &argv,
     const std::vector<std::string> &envp,
     int &exitCodeP,
-    mmProcess &childProcess)
+    MmProcess &childProcess)
 {
     int ret = PROFILING_FAILED;
     const std::string &cmd = execCmdParams.cmd;
@@ -537,27 +537,7 @@ int Utils::ExecCmd(const ExecCmdParams &execCmdParams,
     } while (0);
     return ret;
 }
-int Utils::GetWorkDirPath(std::vector<std::string> &paramCmd, std::string &workDirPath)
-{
-    if (paramCmd.empty()) {
-        return PROFILING_FAILED;
-    }
-    std::string tmpStr;
-    if (!IsAppName(paramCmd[0])) {
-        for (uint32_t i = 1; i < paramCmd.size(); i++) {
-            tmpStr = CanonicalizePath(paramCmd[i]);
-            if (tmpStr.empty()) {
-                continue;
-            } else {
-                paramCmd[i] = tmpStr;
-            }
-        }
-        workDirPath = paramCmd[1];
-    } else {
-        workDirPath = CanonicalizePath(paramCmd[0]);
-    }
-    return PROFILING_SUCCESS;
-}
+
 int Utils::ChangeWorkDir(const std::string &fileName)
 {
     if (fileName.empty()) {
@@ -585,10 +565,10 @@ void Utils::SetArgEnv(CHAR_PTR_CONST argv[],
                       const int argvCount,
                       CHAR_PTR_CONST envp[],
                       const int envCount,
-                      mmArgvEnv &argvEnv)
+                      MmArgvEnv &argvEnv)
 {
     if (argv != nullptr && envp != nullptr) {
-        (void)memset_s(&argvEnv, sizeof(mmArgvEnv), 0, sizeof(mmArgvEnv));
+        (void)memset_s(&argvEnv, sizeof(MmArgvEnv), 0, sizeof(MmArgvEnv));
 
         argvEnv.argv = const_cast<CHAR_PTR_PTR>(argv);
         argvEnv.argvCount = argvCount;
@@ -599,8 +579,8 @@ void Utils::SetArgEnv(CHAR_PTR_CONST argv[],
 
 int Utils::DoCreateCmdProcess(const std::string &stdoutRedirectFile,
                               const std::string &fileName,
-                              mmArgvEnv &argvEnv,
-                              mmProcess &tid)
+                              MmArgvEnv &argvEnv,
+                              MmProcess &tid)
 {
     int ret = MmCreateProcess(fileName, &argvEnv, stdoutRedirectFile, &tid);
     if (ret != PROFILING_SUCCESS) {
@@ -622,8 +602,8 @@ int Utils::ExecCmdC(const ExecCmdArgv &execCmdArgv, const ExecCmdParams &execCmd
         return PROFILING_FAILED;
     }
 
-    mmArgvEnv argvEnv;
-    mmProcess tid = 0;
+    MmArgvEnv argvEnv;
+    MmProcess tid = 0;
     SetArgEnv(argv, argvCount, envp, envCount, argvEnv);
 
     if (ChangeWorkDir(filename) == PROFILING_FAILED) {
@@ -647,7 +627,7 @@ int Utils::ExecCmdC(const ExecCmdArgv &execCmdArgv, const ExecCmdParams &execCmd
 }
 
 int Utils::ExecCmdCAsync(const ExecCmdArgv &execCmdArgv, const ExecCmdParams &execCmdParams,
-                         mmProcess &childProcess)
+                         MmProcess &childProcess)
 {
     std::string filename = execCmdParams.cmd;
     CHAR_PTR_CONST *argv = execCmdArgv.argv;
@@ -659,8 +639,8 @@ int Utils::ExecCmdCAsync(const ExecCmdArgv &execCmdArgv, const ExecCmdParams &ex
     if (filename.empty() || argv == nullptr || envp == nullptr) {
         return PROFILING_FAILED;
     }
-    mmProcess tid = 0;
-    mmArgvEnv argvEnv;
+    MmProcess tid = 0;
+    MmArgvEnv argvEnv;
     SetArgEnv(argv, argvCount, envp, envCount, argvEnv);
     int ret = DoCreateCmdProcess(stdoutRedirectFile, filename, argvEnv, tid);
     if (ret == PROFILING_FAILED) {
@@ -671,7 +651,7 @@ int Utils::ExecCmdCAsync(const ExecCmdArgv &execCmdArgv, const ExecCmdParams &ex
     return PROFILING_SUCCESS;
 }
 
-int Utils::WaitProcess(mmProcess process, bool &isExited, int &exitCode, bool hang /* = true */)
+int Utils::WaitProcess(MmProcess process, bool &isExited, int &exitCode, bool hang /* = true */)
 {
     isExited = false;
     int waitStatus = 0;
@@ -696,7 +676,7 @@ int Utils::WaitProcess(mmProcess process, bool &isExited, int &exitCode, bool ha
     return PROFILING_FAILED;
 }
 
-bool Utils::ProcessIsRuning(mmProcess process)
+bool Utils::ProcessIsRuning(MmProcess process)
 {
     int waitStatus = 0;
 
@@ -777,7 +757,7 @@ void Utils::GetFiles(const std::string &dir, bool isRecur, std::vector<std::stri
         return;
     }
 
-    mmDirent **dirNameList = nullptr;
+    MmDirent **dirNameList = nullptr;
     int count = MmScandir(dir, &dirNameList, nullptr, nullptr);
     if (count == PROFILING_FAILED || count == PROFILING_INVALID_PARAM) {
         return;
@@ -811,7 +791,7 @@ void Utils::GetChildDirs(const std::string &dir, bool isRecur, std::vector<std::
         return;
     }
 
-    mmDirent **nameList = nullptr;
+    MmDirent **nameList = nullptr;
     int count = MmScandir(dir, &nameList, nullptr, nullptr);
     if (count == PROFILING_FAILED || count == PROFILING_INVALID_PARAM) {
         return;
@@ -841,7 +821,7 @@ void Utils::GetChildFilenames(const std::string &dir, std::vector<std::string> &
     if (dir.empty()) {
         return;
     }
-    mmDirent **dirNameList = nullptr;
+    MmDirent **dirNameList = nullptr;
     int count = MmScandir(dir, &dirNameList, nullptr, nullptr);
     if (count == PROFILING_INVALID_PARAM || count == PROFILING_FAILED) {
         return;
@@ -902,7 +882,7 @@ std::string Utils::TimestampToTime(const std::string &timestamp, int unit /* = 1
 
 int Utils::GetMac(std::string &macAddress)
 {
-    mmMacInfo *macInfo = nullptr;
+    MmMacInfo *macInfo = nullptr;
     int32_t count = 0;
 
     int ret = MmGetMac(&macInfo, &count);
@@ -1181,7 +1161,7 @@ std::string Utils::CreateTaskId(uint64_t index)
     taskId << std::setw(fillLen) << ((index % maxLen) + 1);
     std::string result = "PROF_" + taskId.str() + "_";
 
-    mmSystemTime_t sysTime;
+    MmSystemTimeT sysTime;
     int ret = MmGetLocalTime(&sysTime);
     if (ret == -1) {
         MSPROF_LOGW("Get time failed");
@@ -1311,6 +1291,134 @@ bool Utils::IsAppName(const std::string paramsName)
         return false;
     }
     return true;
+}
+
+bool Utils::IsClusterRunEnv()
+{
+    std::string rankTableFilePath = Utils::GetEnvString(RANK_TABLE_FILE_ENV);
+    MSPROF_LOGI("Environment variable RANK_TABLE_FILE = %s", rankTableFilePath.c_str());
+    if (rankTableFilePath.empty()) {
+        return false;
+    }
+    if (MmAccess(rankTableFilePath.c_str()) != PROFILING_SUCCESS) {
+        return false;
+    }
+    if (MmIsDir(rankTableFilePath.c_str()) == PROFILING_SUCCESS) {
+        return false;
+    }
+    return true;
+}
+
+int32_t Utils::GetRankId()
+{
+    constexpr int32_t invalidRankId = -1;
+    if (!IsClusterRunEnv()) {
+        return invalidRankId;
+    }
+    std::string rankIdStr = Utils::GetEnvString(RANK_ID_ENV);
+    MSPROF_LOGI("Environment variable RANK_ID = %s", rankIdStr.c_str());
+    if (!CheckStringIsValidNatureNum(rankIdStr)) {
+        return invalidRankId;
+    }
+    return std::stoi(rankIdStr);
+}
+
+std::vector<std::string> Utils::GenEnvPairVec(const std::vector<std::string> &envVec)
+{
+    std::vector<std::string> envPairVec;
+    for (auto env : envVec) {
+        std::string envStr = GetEnvString(env);
+        if (envStr.empty()) {
+            MSPROF_LOGW("Failed to get value of %s.", env.c_str());
+            continue;
+        }
+        envStr = env + "=" + envStr;
+        envPairVec.push_back(envStr);
+    }
+    return envPairVec;
+}
+
+bool Utils::PythonEnvReady()
+{
+    std::string cmd = "python3";
+    std::vector<std::string> argsVec;
+    argsVec.push_back("--version");
+    MmProcess taskPid = MSVP_MMPROCESS;
+    ExecCmdParams execCmdParams(cmd, false, "/dev/null");
+    int exitCode = VALID_EXIT_CODE;
+    std::vector<std::string> varVec = {"PATH", "LD_LIBRARY_PATH"};
+    std::vector<std::string> envsVec = GenEnvPairVec(varVec);
+    int ret = ExecCmd(execCmdParams, argsVec, envsVec, exitCode, taskPid);
+    return (ret == PROFILING_SUCCESS) ? true : false;
+}
+
+bool Utils::AnalysisEnvReady(std::string &msprofPyPath)
+{
+    Dl_info dlInfo;
+    dladdr((void *)AnalysisEnvReady, &dlInfo);
+    std::string selfPath(dlInfo.dli_fname);
+    char realPathStr[MMPA_MAX_PATH] = { 0 };
+    if (selfPath.compare(PROF_MSPROF_BIN_NAME) == 0) {
+        selfPath = GetSelfPath();
+    }
+    int ret = MmRealPath(selfPath.c_str(), realPathStr, MMPA_MAX_PATH);
+    if (ret != PROFILING_SUCCESS) {
+        return false;
+    }
+    std::string realPath(realPathStr);
+    std::string baseDir = realPath;
+    const int dirDiff = 3;
+    for (int i = 0; i < dirDiff; i++) {
+        baseDir = DirName(baseDir);
+    }
+    if (BaseName(realPath).compare(PROF_MSPROF_SO_NAME) != 0 &&
+        BaseName(realPath).compare(PROF_MSPROF_BIN_NAME) != 0) {
+        return false;
+    }
+    if (BaseName(realPath).compare(PROF_MSPROF_SO_NAME) == 0) {
+        baseDir = baseDir + MSVP_SLASH + "tools";
+    }
+
+    msprofPyPath = baseDir + MSVP_SLASH + PROF_MSPROF_PY_PATH;
+    return true;
+}
+
+int Utils::CloudAnalyze(const std::string &jobDir)
+{
+    MSPROF_LOGI("Cloud Pre-analysis start.");
+    if (jobDir.empty() || MmAccess2(jobDir.c_str(), M_R_OK) != PROFILING_SUCCESS) {
+        MSPROF_LOGW("jobDir is not exist or jobDir is not accessable.");
+        return PROFILING_FAILED;
+    }
+    if (!PythonEnvReady()) {
+        MSPROF_LOGW("python3 env is not ready.");
+        return PROFILING_FAILED;
+    }
+    std::string msprofPyPath;
+    if (!AnalysisEnvReady(msprofPyPath) || msprofPyPath.empty()) {
+        MSPROF_LOGW("msprof.py is not ready.");
+        return PROFILING_FAILED;
+    }
+    if ((MmAccess2(msprofPyPath, M_X_OK) != PROFILING_SUCCESS) || IsSoftLink(msprofPyPath)) {
+        MSPROF_LOGW("msprof.py can is not executable or it is softlink.");
+        return PROFILING_FAILED;
+    }
+
+    std::string cmd = "python3";
+    ExecCmdParams execCmdParams(cmd, false, "");
+    int exitCode = VALID_EXIT_CODE;
+    MmProcess taskPid = MSVP_MMPROCESS;
+    std::vector<std::string> argsImportV = {
+        msprofPyPath,
+        "import", "-dir=" + jobDir
+    };
+    std::vector<std::string> varVec = {"PATH", "LD_LIBRARY_PATH", "PYTHONPATH"};
+    std::vector<std::string> envsVec = GenEnvPairVec(varVec);
+    int ret = ExecCmd(execCmdParams, argsImportV, envsVec, exitCode, taskPid);
+    if (ret != PROFILING_SUCCESS) {
+        return ret;
+    }
+    return PROFILING_SUCCESS;
 }
 
 int32_t WriteFile(const std::string &absolutePath, const std::string &recordFile, const std::string &profName)

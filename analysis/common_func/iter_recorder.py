@@ -19,16 +19,19 @@ class IterRecorder:
 
     STREAM_TASK_KEY_FMT = "{0}-{1}"
     DEFAULT_ITER_ID = -1
+    DEFAULT_ITER_TIME = -1
 
     def __init__(self: any, project_path) -> None:
         self._project_path = project_path
         self._iter_end_dict = MsprofIteration(self._project_path).get_iteration_end_dict()
+        self._max_iter_time = self._get_max_iter_time()
         self._current_iter_id = self.DEFAULT_ITER_ID
-        self._current_op_iter = 0
+        self._current_op_iter = self.DEFAULT_ITER_ID
         self._op_iter_dict = MsprofIteration(self._project_path).get_op_iteration_dict()
         self._op_iter_queue = sorted(self._op_iter_dict.keys(), reverse=True)
         self._graph_iter_dict = MsprofIteration(self._project_path).get_graph_iteration_dict()
         self._graph_iter_queue = sorted(self._graph_iter_dict.keys(), reverse=True)
+
 
     @property
     def iter_end_dict(self: any) -> dict:
@@ -53,6 +56,11 @@ class IterRecorder:
         :return: op iter id
         """
         return self._current_op_iter
+
+    def check_task_in_iteration(self: any, sys_cnt: int) -> bool:
+        if self._max_iter_time == self.DEFAULT_ITER_TIME:
+            return True
+        return self._max_iter_time >= sys_cnt
 
     def set_current_iter_id(self: any, sys_cnt: int) -> None:
         """
@@ -80,15 +88,12 @@ class IterRecorder:
         self.set_current_graph_iter(sys_cnt)
         self.set_current_op_iter(sys_cnt)
         if not self._op_iter_queue:
-            logging.error("Data cannot be found in any op_iteration.")
-            raise ProfException(ProfException.PROF_INVALID_DATA_ERROR)
             return
-        if self._op_iter_queue and self._graph_iter_queue and \
+        self._current_op_iter = self._op_iter_queue[-1]
+        if self._graph_iter_queue and \
                 sys_cnt >= self._graph_iter_dict.get(self._graph_iter_queue[-1])[0]:
-            self._current_op_iter = self._op_iter_queue[-1]
             self._current_iter_id = self._graph_iter_queue[-1]
         else:
-            self._current_op_iter = self._op_iter_queue[-1]
             self._current_iter_id = self._current_op_iter
 
     def set_current_graph_iter(self: any, sys_cnt: int) -> None:
@@ -108,3 +113,8 @@ class IterRecorder:
     def _check_current_iter_id(self: any, sys_cnt: int) -> int:
         iter_end = self._iter_end_dict.get(self._current_iter_id)
         return iter_end is not None and sys_cnt > iter_end
+
+    def _get_max_iter_time(self: any) -> int:
+        if self._iter_end_dict.values():
+            return max(self._iter_end_dict.values())
+        return self.DEFAULT_ITER_TIME

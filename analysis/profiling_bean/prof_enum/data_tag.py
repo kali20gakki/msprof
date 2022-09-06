@@ -1,9 +1,6 @@
 #!/usr/bin/python3
-# coding=utf-8
-"""
-function: data tag
-Copyright Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
-"""
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2021-2022. All rights reserved.
 
 from enum import Enum
 from enum import unique
@@ -59,6 +56,7 @@ class DataTag(Enum):
     SOC_PROFILER = 42
     HELPER_MODEL_WITH_Q = 43
     BIU_PERF = 44
+    DATA_QUEUE = 45
 
 
 @unique
