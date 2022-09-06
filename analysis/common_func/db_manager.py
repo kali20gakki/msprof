@@ -1,9 +1,6 @@
 #!/usr/bin/python3
-# coding:utf-8
-"""
-This script is used to provide function to modify db
-Copyright Huawei Technologies Co., Ltd. 2020. All rights reserved.
-"""
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
 
 import configparser
 import logging
@@ -192,13 +189,15 @@ class DBManager:
             index += cls.INSERT_SIZE
 
     @classmethod
-    def fetch_all_data(cls: any, curs: any, sql: str, param: tuple = None) -> list:
+    def fetch_all_data(cls: any, curs: any, sql: str, param: tuple = None, dto_class: any = None) -> list:
         """
         fetch 10000 num of data each time to get all data
         """
         if not isinstance(curs, sqlite3.Cursor):
             return []
         data = []
+        if dto_class:
+            curs.row_factory = ClassRowType.class_row(dto_class)
         try:
             if param:
                 curs.execute(sql, param)
@@ -217,6 +216,8 @@ class DBManager:
         except sqlite3.Error as _err:
             logging.error(str(_err), exc_info=Constant.TRACE_BACK_SWITCH)
             return []
+        finally:
+            curs.row_factory = None
 
     @classmethod
     def add_new_column(cls: any, *args: str) -> None:

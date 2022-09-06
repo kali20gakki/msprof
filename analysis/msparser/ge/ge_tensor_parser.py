@@ -1,9 +1,6 @@
 #!/usr/bin/python3
-# coding=utf-8
-"""
-function: parser for ge tensor
-Copyright Huawei Technologies Co., Ltd. 2021-2022. All rights reserved.
-"""
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2021-2022. All rights reserved.
 
 from common_func.db_name_constant import DBNameConstant
 from common_func.ms_multi_process import MsMultiProcess

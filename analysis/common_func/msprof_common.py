@@ -1,16 +1,12 @@
 #!/usr/bin/python3
-# coding=utf-8
-"""
-Function:
-This file mainly involves the common function.
-Copyright Information:
-Huawei Technologies Co., Ltd. All Rights Reserved © 2020
-"""
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
 
 import logging
 import os
 import re
 
+from functools import partial
 from common_func.common import init_log
 from common_func.common import check_free_memory
 from common_func.common import error
@@ -50,6 +46,7 @@ class MsProfCommonConstant:
     MODEL_ID = "model_id"
     ITERATION_ID = "iteration_id"
     TOP_TIME_ITERATION = "top_time_iteration"
+    RANK_ID = "rank_id"
 
     def get_msprof_common_class_name(self: any) -> any:
         """
@@ -118,6 +115,13 @@ def prepare_for_parse(output_path: str) -> None:
     create data and corresponding directories
     """
     check_path_valid(PathManager.get_sql_dir(output_path), True)
+    prepare_log(output_path)
+
+
+def prepare_log(output_path: str) -> None:
+    """
+    create data and corresponding directories
+    """
     check_path_valid(PathManager.get_log_dir(output_path), True)
     log_path = PathManager.get_collection_log_path(output_path)
     check_file_writable(log_path)
@@ -207,12 +211,14 @@ def get_path_dir(path: str) -> list:
     check result path exist JOB dir
     path : result path
     """
-    path_dir_filter = filter(lambda item: item not in Constant.FILTER_DIRS and
-                                          os.path.isdir(os.path.realpath(os.path.join(path, item))),
-                             os.listdir(path))
+    path_dir_filter = filter(partial(_path_dir_filter_func, root_dir=path), os.listdir(path))
     sub_dirs = list(path_dir_filter)
     if not sub_dirs:
         error(MsProfCommonConstant.COMMON_FILE_NAME, 'The path "%s" does not have PROF dir.'
                                                      ' Please check the path.' % path)
         raise ProfException(ProfException.PROF_INVALID_PATH_ERROR)
     return sub_dirs
+
+
+def _path_dir_filter_func(sub_path, root_dir):
+    return sub_path not in Constant.FILTER_DIRS and os.path.isdir(os.path.realpath(os.path.join(root_dir, sub_path)))

@@ -235,6 +235,14 @@ void InfoJson::AddNetCardInfo(SHARED_PTR_ALIA<InfoMain> infoMain)
 #endif
 }
 
+void InfoJson::AddRankId(SHARED_PTR_ALIA<InfoMain> infoMain)
+{
+#if (defined(linux) || defined(__linux__))
+    int32_t rankId = Utils::GetRankId();
+    infoMain->set_rank_id(rankId);
+#endif
+}
+
 int InfoJson::AddHostInfo(SHARED_PTR_ALIA<InfoMain> infoMain)
 {
     if (Platform::instance()->RunSocSide()) {
@@ -265,9 +273,10 @@ int InfoJson::AddHostInfo(SHARED_PTR_ALIA<InfoMain> infoMain)
     AddSysConf(infoMain);
     AddSysTime(infoMain);
     AddNetCardInfo(infoMain);
+    AddRankId(infoMain);
 
     // fetch and set cpu infos
-    mmCpuDesc *cpuInfo = nullptr;
+    MmCpuDesc *cpuInfo = nullptr;
     int32_t cpuNum = 0;
     ret = MmGetCpuInfo(&cpuInfo, &cpuNum);
     if (ret != PROFILING_SUCCESS || cpuNum <= 0) {
@@ -382,11 +391,16 @@ int InfoJson::AddDeviceInfo(SHARED_PTR_ALIA<InfoMain> infoMain)
         infoDevice->set_aicpu_occupy_bitmap(devInfo.aicpu_occupy_bitmap);
         SetCtrlCpuId(*infoDevice, devInfo.ctrl_cpu_id);
         std::string ctrlCpu;
-        CPU_ID_STR(ctrlCpu, 0, devInfo.ctrl_cpu_core_num); // ctrl cpu, begin with 0
+        for (int64_t i = 0; i < devInfo.ctrl_cpu_core_num; i++) {
+            ctrlCpu.append((i == 0) ? std::to_string(0) : ("," + std::to_string(i)));
+        }
+
         infoDevice->set_ctrl_cpu(ctrlCpu);
         std::string aiCpu;
-        CPU_ID_STR(aiCpu, (static_cast<uint64_t>(devInfo.ai_cpu_core_id)),
-            (static_cast<uint64_t>(devInfo.ctrl_cpu_core_num + devInfo.ai_cpu_core_num))); // ai cpu
+        for (int64_t i = devInfo.ai_cpu_core_id; i < devInfo.ctrl_cpu_core_num + devInfo.ai_cpu_core_num; i++) {
+            aiCpu.append((i == devInfo.ai_cpu_core_id) ?
+                std::to_string(devInfo.ai_cpu_core_id) : ("," + std::to_string(i)));
+        }
         infoDevice->set_ai_cpu(aiCpu);
         SetHwtsFrequency(*infoDevice);
         infoDevice->set_aic_frequency(Analysis::Dvvp::Driver::DrvGeAicFrq(devIndexId));

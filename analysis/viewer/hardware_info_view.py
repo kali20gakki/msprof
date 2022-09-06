@@ -1,6 +1,7 @@
-"""
-Copyright Huawei Technologies Co., Ltd. 2018-2020. All rights reserved.
-"""
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2018-2020. All rights reserved.
+
 import json
 import os
 import sqlite3

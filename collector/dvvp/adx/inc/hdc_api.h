@@ -15,23 +15,23 @@
 #include "adx_log.h"
 
 enum cmd_class {
-    IDE_EXEC_COMMAND_REQ = 0, /**< 执行device命令请求\n */
-    IDE_SEND_FILE_REQ,        /**< 发送文件到device命令请求\n */
-    IDE_DEBUG_REQ,            /**< Debug命令请求\n */
-    IDE_BBOX_REQ,             /**< Bbox命令请求\n */
-    IDE_LOG_REQ,              /**< Log命令请求\n */
-    IDE_PROFILING_REQ,        /**< Profiling命令请求\n */
-    IDE_OME_DUMP_REQ,         /**< Ome dump命令请求\n */
-    IDE_FILE_SYNC_REQ,        /**< 发送文件到AiHost 命令请求\n */
-    IDE_EXEC_API_REQ,         /**< 执行AiHost Api命令请求\n */
-    IDE_EXEC_HOSTCMD_REQ,     /**< 执行AiHost 命令命令请求\n */
-    IDE_DETECT_REQ,           /**< 执行AiHost 通路命令请求\n */
-    IDE_FILE_GET_REQ,         /**< 获取AiHost侧文件命令请求\n */
-    IDE_NV_REQ,               /**< 执行AiHost Nv命令请求\n */
-    IDE_DUMP_REQ,             /**< Dump命令请求\n */
-    IDE_FILE_GETD_REQ,        /**< 获取Device侧文件命令请求\n */
-    IDE_INVALID_REQ,          /**< 无效命令请求\n */
-    NR_IDE_CMD_CLASS,         /**< 标识命令请求最大值\n */
+    IDE_EXEC_COMMAND_REQ = 0,
+    IDE_SEND_FILE_REQ,
+    IDE_DEBUG_REQ,
+    IDE_BBOX_REQ,
+    IDE_LOG_REQ,
+    IDE_PROFILING_REQ,
+    IDE_OME_DUMP_REQ,
+    IDE_FILE_SYNC_REQ,
+    IDE_EXEC_API_REQ,
+    IDE_EXEC_HOSTCMD_REQ,
+    IDE_DETECT_REQ,
+    IDE_FILE_GET_REQ,
+    IDE_NV_REQ,
+    IDE_DUMP_REQ,
+    IDE_FILE_GETD_REQ,
+    IDE_INVALID_REQ,
+    NR_IDE_CMD_CLASS,
 };
 typedef enum cmd_class CmdClassT;
 
@@ -101,7 +101,6 @@ int32_t HdcSessionClose(HDC_SESSION session);
 int HdcGetDeviceBasePath(int32_t peerNode, int32_t peerDevid, IdeStringBuffer path, uint32_t pathLength);
 int32_t HdcCapacity(IdeU32Pt segment);
 
-/* ide-cmd与host-daemon通信使用的接口 */
 int32_t IdeSockWriteData(IdeSession sockDesc, IdeSendBuffT buf, int32_t len);
 int32_t IdeSockReadData(IdeSession sockDesc, IdeRecvBuffT readBuf, IdeI32Pt recvLen);
 IdeSession IdeSockDupCreate(IdeSession sock);

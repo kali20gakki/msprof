@@ -1,9 +1,6 @@
 #!/usr/bin/python3
-# coding=utf-8
-"""
-function: file dispatcher that dispatch the file to the different parsers
-Copyright Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
-"""
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 
 import itertools
 import os
@@ -108,7 +105,8 @@ class FileDispatch:
         DataTag.BIU_PERF: get_biu_compiles(),
         DataTag.MSPROFTX: get_msproftx_compiles(),
         DataTag.HELPER_MODEL_WITH_Q: get_helper_model_with_q_compiles(),
-        DataTag.SOC_PROFILER: get_soc_profiler_compiles()
+        DataTag.SOC_PROFILER: get_soc_profiler_compiles(),
+        DataTag.DATA_QUEUE: get_data_preprocess_compiles(Constant.DATA_QUEUE)
     }
 
     def __init__(self: any, sample_config: dict) -> None:

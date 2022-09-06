@@ -1,9 +1,7 @@
-#!/usr/bin/env python
-# coding=utf-8
-"""
-function:
-Copyright Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
-"""
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
+
 import json
 import logging
 
@@ -27,8 +25,7 @@ class GeOpExecuteViewer:
         self._configs = configs
         self._params = params
         self._project_path = params.get(StrConstant.PARAM_RESULT_DIR)
-        self._model = GeOpExecuteViewModel(self._project_path, DBNameConstant.DB_GE_HOST_INFO,
-                                           [DBNameConstant.TABLE_GE_HOST])
+        self._model = GeOpExecuteViewModel(params)
 
     def get_summary_data(self: any) -> tuple:
         """

@@ -1,9 +1,6 @@
-#!usr/bin/env python
-# coding:utf-8
-"""
-This script is used to report ai core operator summary data from db.
-Copyright Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
-"""
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 
 import logging
 from collections import deque
@@ -348,7 +345,6 @@ class AiCoreOpReport:
                     "{0}.start_time, {0}.duration_time/{NS_TO_US}, " \
                     "{0}.wait_time/{NS_TO_US}, block_dim from {0} " \
                     "inner join {1} on {0}.task_id={1}.task_id " \
-                    "and {0}.task_type = {1}.task_type " \
                     "and {0}.stream_id={1}.stream_id " \
                     "and {1}.task_type=? {BATCH_LIMIT}" \
             .format(DBNameConstant.TABLE_SUMMARY_TASK_TIME, DBNameConstant.TABLE_SUMMARY_GE,
@@ -364,7 +360,6 @@ class AiCoreOpReport:
                         "output_shapes, output_data_types, output_formats " \
                         "from {0} inner join {1} on {0}.task_id={1}.task_id " \
                         "and {0}.stream_id={1}.stream_id " \
-                        "and {0}.task_type = {1}.task_type " \
                         "inner join {2} on {0}.task_id={2}.task_id and {0}.stream_id={2}.stream_id " \
                         "and {1}.timestamp={2}.timestamp " \
                         "and {1}.task_type=? {BATCH_LIMIT}" \

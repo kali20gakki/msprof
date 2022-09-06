@@ -56,4 +56,4 @@ bep_env_init
 cd ${TOP_DIR}/build
 cmake ../cmake/superbuild/ -DMSPROF_BUILD_TYPE=${BUILD_TYPE}
 make -j64
-bash ${TOP_DIR}/scripts/create_run_package.sh ${VERSION} ${PACKAGE_TYPE}
+bash ${TOP_DIR}/scripts/create_run_package_pack.sh ${VERSION} ${PACKAGE_TYPE}

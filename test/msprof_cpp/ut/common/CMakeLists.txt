@@ -8,11 +8,16 @@ set(profilerSrcFiles
     ${MSPROF_SOURCE_DIR}//dvvp/common/memory/chunk_pool.cpp
     ${MSPROF_SOURCE_DIR}//dvvp/common/thread/thread.cpp
     ${MSPROF_SOURCE_DIR}//dvvp/common/config/config_manager.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/common/logger/cmd_log.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/src/slog_plugin.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/driver/devmgmt/ai_drv_dev_api.cpp        
+    ${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform.cpp    
     ${MSPROF_SOURCE_DIR}//dvvp/common/thread/thread_pool.cpp
     ${MSPROF_SOURCE_DIR}//dvvp/common/statistics/perf_count.cpp
     ${MSPROF_SOURCE_DIR}//dvvp/common/utils/utils.cpp
     ${MSPROF_SOURCE_DIR}//dvvp/common/mmpa/mmpa_api.cpp
     ${MSPROF_SOURCE_DIR}//dvvp/common/validation/param_validation.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform.cpp
     ${MSPROF_SOURCE_DIR}//dvvp/driver/devmgmt/ai_drv_dev_api.cpp
     ${MSPROF_SOURCE_DIR}//dvvp/driver/channel/ai_drv_prof_api.cpp
     ${MSPROF_SOURCE_DIR}//dvvp/message/codec.cpp
@@ -48,6 +53,9 @@ target_include_directories(common_utest PRIVATE
     ../stub
     ${GTEST_INCLUDE_DIR}
     ${MOCKCPP_INCLUDE_DIR}
+    ${TOP_DIR}/collector/inc/toolchain
+    ${TOP_DIR}/collector/inc/external
+    ${TOP_DIR}/collector/dvvp/depend/inc/acl
     ${TOP_DIR}/platform/securec/include
     ${TOP_DIR}/opensource/json/include
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/slog
@@ -62,11 +70,15 @@ target_include_directories(common_utest PRIVATE
     ${MSPROF_SOURCE_DIR}/dvvp/common
     ${MSPROF_SOURCE_DIR}/dvvp/common/statistics
     ${TOP_DIR}/test/msprof_cpp/ut/stub/common/log/
+    ${MSPROF_SOURCE_DIR}/dvvp/msprof/engine/include
+    ${MSPROF_SOURCE_DIR}/dvvp/common/utils 
     ${MSPROF_SOURCE_DIR}/dvvp/common/config
     ${MSPROF_SOURCE_DIR}/dvvp/driver/inc
+    ${MSPROF_SOURCE_DIR}/dvvp/common/logger
     ${MSPROF_SOURCE_DIR}/dvvp/common/errno
     ${MSPROF_SOURCE_DIR}/dvvp/common/mmpa
     ${MSPROF_SOURCE_DIR}/dvvp/common/validation
+    ${MSPROF_SOURCE_DIR}/dvvp/common/platform/
     ${CMAKE_BINARY_DIR}/proto/profiler/
     ${MSPROF_SOURCE_DIR}/dvvp/depend/include/stub
 )

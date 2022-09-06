@@ -97,7 +97,7 @@ void ChannelReader::SetChannelStopped()
     isChannelStopped_ = true;
 }
 
-bool ChannelReader::GetSchedulingStatus()
+bool ChannelReader::GetSchedulingStatus() const
 {
     return isScheduling_;
 }

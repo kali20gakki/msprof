@@ -1,13 +1,9 @@
 #!/usr/bin/python3
-# coding=utf-8
-"""
-function: this script used to calculate op task scheduler
-Copyright Huawei Technologies Co., Ltd. 2021. All rights reserved.
-"""
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
 
 import logging
 import os
-import sqlite3
 
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
@@ -18,6 +14,7 @@ from common_func.platform.chip_manager import ChipManager
 from common_func.ms_constant.number_constant import NumberConstant
 from viewer.calculate_rts_data import calculate_task_schedule_data
 from viewer.calculate_rts_data import multi_calculate_task_cost_time
+from mscalculate.ts_task.ai_cpu.aicpu_from_ts_collector import AICpuFromTsCollector
 
 
 class CalculateOpTaskScheduler:
@@ -96,7 +93,9 @@ class CalculateOpTaskScheduler:
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
             logging.error(err, exc_info=Constant.TRACE_BACK_SWITCH)
             return
-        self._insert_task_time_data(cal_task_data, runtime_conn, runtime_curs)
+        task_time = self._add_info(cal_task_data)
+        self._collect_aicpu(task_time)
+        self._insert_task_time_data(task_time, runtime_conn, runtime_curs)
         logging.info('create task time table end')
 
     def op_pre_mini_task_data(self: any, project_path: str, device_id: int) -> None:
@@ -173,9 +172,27 @@ class CalculateOpTaskScheduler:
         DBManager.executemany_sql(runtime_conn, sql, api_down_data)
         logging.info('Update TimeLine API finished.')
 
-    def _insert_task_time_data(self: any, cal_task_data: list, runtime_conn: any, runtime_curs: any) -> None:
+    def _add_info(self: any, cal_task_data: list) -> list:
         # 0 is default batch id
-        task_time = (task_data + (self.index_id, NumberConstant.DEFAULT_BATCH_ID) for task_data in cal_task_data)
+        task_time = [task_data + (
+            self.index_id, NumberConstant.DEFAULT_BATCH_ID) for task_data in cal_task_data]
+        return task_time
+
+    def _collect_aicpu(self: any, task_time: list) -> None:
+        aicpu_collector = AICpuFromTsCollector(self.project_path)
+
+        for data in task_time:
+            task_id = data[5]
+            stream_id = data[6]
+            start = data[9]
+            end = data[10]
+            task_type = data[4]
+
+            aicpu_feature = (stream_id, task_id, start, end, task_type)
+            aicpu_collector.filter_aicpu(aicpu_feature)
+        aicpu_collector.save_aicpu()
+
+    def _insert_task_time_data(self: any, task_time: list, runtime_conn: any, runtime_curs: any) -> None:
         # sort by complete time
         task_time = sorted(task_time, key=lambda data: data[self.COMPLETE_TIME_INDEX])
         insert_sql = "insert into TaskTime " \

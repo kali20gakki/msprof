@@ -43,10 +43,10 @@ int Thread::Start()
         return PROFILING_SUCCESS;
     }
 
-    mmUserBlock_t funcBlock;
-    (void)memset_s(&funcBlock, sizeof(mmUserBlock_t), 0, sizeof(mmUserBlock_t));
-    mmThreadAttr threadAttr;
-    (void)memset_s(&threadAttr, sizeof(mmThreadAttr), 0, sizeof(mmThreadAttr));
+    MmUserBlockT funcBlock;
+    (void)memset_s(&funcBlock, sizeof(MmUserBlockT), 0, sizeof(MmUserBlockT));
+    MmThreadAttr threadAttr;
+    (void)memset_s(&threadAttr, sizeof(MmThreadAttr), 0, sizeof(MmThreadAttr));
 
     funcBlock.procFunc = Thread::ThrProcess;
     funcBlock.pulArg = this;

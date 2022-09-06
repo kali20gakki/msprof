@@ -105,7 +105,7 @@ int ConfigManager::GetAicoreEvents(const std::string &aicoreMetricsType, std::st
     return PROFILING_FAILED;
 }
 
-int ConfigManager::GetL2cacheEvents(std::string &l2CacheEvents)
+int ConfigManager::GetL2cacheEvents(std::string &l2CacheEvents) const
 {
     PlatformType platformType = GetPlatformType();
     auto iter_platform_metric = L2_CACHE_PLATFORM_METRICS_MAP.find(platformType);
@@ -175,7 +175,7 @@ void ConfigManager::InitFrequency()
     configMap_[FRQ_CONFIG] = frequency;
 }
 
-std::string ConfigManager::GetChipIdStr()
+std::string ConfigManager::GetChipIdStr() const
 {
     auto iter =  configMap_.find(TYPE_CONFIG);
     if (iter != configMap_.end()) {
@@ -194,7 +194,7 @@ PlatformType ConfigManager::GetPlatformType() const
     return PlatformType::MINI_TYPE;
 }
 
-bool ConfigManager::IsDriverSupportLlc()
+bool ConfigManager::IsDriverSupportLlc() const
 {
     PlatformType type = GetPlatformType();
     if (type == PlatformType::CLOUD_TYPE || type == PlatformType::DC_TYPE ||
@@ -213,6 +213,35 @@ std::string ConfigManager::GetPerfDataDir(const int devId) const
 std::string ConfigManager::GetDefaultWorkDir() const
 {
     return std::string(INOTIFY_CFG_PATH_STR);
+}
+
+void ConfigManager::AicoreMetricsEnumToName(ProfAicoreMetrics aicMetrics, std::string &name)
+{
+    switch (aicMetrics) {
+        case PROF_AICORE_ARITHMETIC_UTILIZATION:
+            name = ARITHMETIC_UTILIZATION;
+            break;
+        case PROF_AICORE_PIPE_UTILIZATION:
+            name = PIPE_UTILIZATION;
+            break;
+        case PROF_AICORE_MEMORY_BANDWIDTH:
+            name = MEMORY_BANDWIDTH;
+            break;
+        case PROF_AICORE_L0B_AND_WIDTH:
+            name = L0B_AND_WIDTH;
+            break;
+        case PROF_AICORE_RESOURCE_CONFLICT_RATIO:
+            name = RESOURCE_CONFLICT_RATIO;
+            break;
+        case PROF_AICORE_MEMORY_UB:
+            name = MEMORY_UB;
+            break;
+        case PROF_AICORE_NONE:
+            break;
+        default:
+            MSPROF_LOGE("Invalid aicore metrics enum: %u", aicMetrics);
+            MSPROF_INNER_ERROR("EK9999", "Invalid aicore metrics enum: %u", aicMetrics);
+    }
 }
 }
 }

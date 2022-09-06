@@ -1,6 +1,7 @@
-"""
-Copyright Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
-"""
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
+
 from analyzer.create_ai_core_op_summary_db import ParseAiCoreOpSummary
 from analyzer.create_op_counter_db import MergeOPCounter
 from analyzer.scene_base.op_counter_op_scene import OpCounterOpScene

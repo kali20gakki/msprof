@@ -1,9 +1,7 @@
 #!/usr/bin/python3
-# coding:utf-8
-"""
-This scripts is used to hardware data
-Copyright Huawei Technologies Co., Ltd. 2019-2020. All rights reserved.
-"""
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2019-2020. All rights reserved.
+
 import sqlite3
 
 from common_func.common import pre_check_sample

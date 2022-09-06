@@ -87,25 +87,27 @@ std::string PluginHandle::GetAscendHalPath() const
     if (installPath.empty()) {
         return "";
     }
-    std::string driverInfo = installPath + MSVP_SLASH + "driver" + MSVP_SLASH + "version.info";
+    std::string driverPath = installPath + MSVP_SLASH + "driver" + MSVP_SLASH;
+    std::string driverInfo = driverPath + "version.info";
     int ret = MmAccess2(driverInfo.c_str(), M_R_OK);
     if (ret != PROFILING_SUCCESS) {
         return "";
     }
-    return installPath + MSVP_SLASH + "driver" + MSVP_SLASH + "lib64";
+
+    std::string libPath = driverPath + "lib64" + MSVP_SLASH;
+    if (MmAccess2((libPath + soName_).c_str(), M_R_OK) == PROFILING_SUCCESS) {
+        return libPath + soName_;
+    } else if (MmAccess2((libPath + "common" + MSVP_SLASH + soName_).c_str(), M_R_OK) == PROFILING_SUCCESS) {
+        return libPath + "common" + MSVP_SLASH + soName_;
+    } else if (MmAccess2((libPath + "driver" + MSVP_SLASH + soName_).c_str(), M_R_OK) == PROFILING_SUCCESS) {
+        return libPath + "driver" + MSVP_SLASH + soName_;
+    }
+    return "";
 }
 
 std::string PluginHandle::GetSoPath(const std::string &envValue) const
 {
-    if (soName_.compare("libascend_hal.so") == 0) {
-        std::string ascendHalPath = GetAscendHalPath();
-        if (!ascendHalPath.empty()) {
-            std::string driverSoPath = ascendHalPath + MSVP_SLASH + soName_;
-            if (MmAccess2(ascendHalPath.c_str(), M_R_OK) == PROFILING_SUCCESS) {
-                return driverSoPath;
-            }
-        }
-    }
+    // get so path from set_env.sh
     const char *env = std::getenv(envValue.c_str());
     if (env == nullptr) {
         return "";
@@ -116,6 +118,16 @@ std::string PluginHandle::GetSoPath(const std::string &envValue) const
         std::string ret = path + MSVP_SLASH + soName_;
         if (MmAccess2(ret, M_R_OK) == PROFILING_SUCCESS) {
             return ret;
+        }
+    }
+
+    // get driver so path from install path when driver path is not set in set_env.sh
+    if (soName_.compare("libascend_hal.so") == 0) {
+        std::string ascendHalPath = GetAscendHalPath();
+        if (!ascendHalPath.empty()) {
+            if (MmAccess2(ascendHalPath.c_str(), M_R_OK) == PROFILING_SUCCESS) {
+                return ascendHalPath;
+            }
         }
     }
     return "";

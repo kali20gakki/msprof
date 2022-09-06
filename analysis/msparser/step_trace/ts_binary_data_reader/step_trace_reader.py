@@ -1,8 +1,6 @@
-# -*-coding:utf-8 -*-
-"""
-This script is used to create database for step trace data
-Copyright Huawei Technologies Co., Ltd. 2021. All rights reserved.
-"""
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2021-2022. All rights reserved.
 
 import struct
 from msparser.data_struct_size_constant import StructFmt
@@ -18,7 +16,6 @@ class StepTraceReader:
     def __init__(self: any) -> None:
         self._data = []
         self._table_name = DBNameConstant.TABLE_STEP_TRACE
-
 
     @property
     def data(self: any) -> list:

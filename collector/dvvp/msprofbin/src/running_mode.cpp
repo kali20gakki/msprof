@@ -217,7 +217,7 @@ void RunningMode::StopRunningTasks() const
     std::vector<std::string> argsV;
     argsV.push_back(std::to_string(reinterpret_cast<int>(taskPid_)));
     int exitCode = INVALID_EXIT_CODE;
-    mmProcess killProces = MSVP_MMPROCESS;
+    MmProcess killProces = MSVP_MMPROCESS;
     int ret = analysis::dvvp::common::utils::Utils::ExecCmd(execCmdParams, argsV, envsV, exitCode, killProces);
     MSPROF_LOGI("[%s mode] Stop %s Process：%d, ret=%d", modeName_.c_str(), taskName_.c_str(),
         reinterpret_cast<int>(taskPid_), ret);
@@ -448,28 +448,16 @@ int RunningMode::CheckAnalysisEnv()
         MSPROF_LOGE("Check Analysis env failed, msprofbin has quited");
         return PROFILING_FAILED;
     }
-    if (Platform::instance()->RunSocSide()) {
-        CmdLog::instance()->CmdWarningLog("Not in host side, analysis is not supported");
-        return PROFILING_FAILED;
-    }
-    if (params_->pythonPath.empty()) {
+    if (params_->pythonPath.empty() && Utils::PythonEnvReady()) {
         const std::string PYTHON_CMD{"python3"};
         params_->pythonPath = PYTHON_CMD;
     }
-    // check analysis scripts
-    std::string absolutePath = Utils::GetSelfPath();
-    std::string dirName = Utils::DirName(absolutePath);
-    std::string msprofToolsPath;
-    std::string binPath;
-    if (Utils::SplitPath(dirName, msprofToolsPath, binPath) != PROFILING_SUCCESS) {
-        CmdLog::instance()->CmdWarningLog("Get profiler path failed.");
+    if (!Utils::AnalysisEnvReady(analysisPath_) || analysisPath_.empty()) {
+        CmdLog::instance()->CmdWarningLog("Get msprof.py path failed.");
         return PROFILING_FAILED;
     }
-    Utils::EnsureEndsInSlash(msprofToolsPath);
-    const std::string ANALYSIS_SCRIPT_PATH{"profiler_tool/analysis/msprof/msprof.py"};
-    analysisPath_ = msprofToolsPath + ANALYSIS_SCRIPT_PATH;
     if (!Utils::IsFileExist(analysisPath_)) {
-        CmdLog::instance()->CmdWarningLog("No analysis script found in %s", Utils::BaseName(analysisPath_).c_str());
+        CmdLog::instance()->CmdWarningLog("The msprof.py file is not found, so analysis is not supported.");
         return PROFILING_FAILED;
     }
     if (MmAccess2(analysisPath_, M_X_OK) != PROFILING_SUCCESS) {
@@ -477,7 +465,7 @@ int RunningMode::CheckAnalysisEnv()
             Utils::BaseName(analysisPath_).c_str());
         return PROFILING_FAILED;
     }
-    MSPROF_LOGI("Found avaliable analysis script, script path: %s", Utils::BaseName(ANALYSIS_SCRIPT_PATH).c_str());
+    MSPROF_LOGI("Found avaliable analysis script, script path: %s", Utils::BaseName(analysisPath_).c_str());
 
     return PROFILING_SUCCESS;
 }
@@ -491,8 +479,7 @@ AppMode::AppMode(std::string preCheckParams, SHARED_PTR_ALIA<ProfileParams> para
         ARGS_ASCENDCL, ARGS_AI_CORE, ARGS_AIV, ARGS_MODEL_EXECUTION,
         ARGS_RUNTIME_API, ARGS_TASK_TIME, ARGS_AICPU, ARGS_CPU_PROFILING, ARGS_SYS_PROFILING,
         ARGS_PID_PROFILING, ARGS_HARDWARE_MEM, ARGS_IO_PROFILING, ARGS_INTERCONNECTION_PROFILING,
-        ARGS_DVPP_PROFILING, ARGS_STARS_ACSQ_TASK, ARGS_STARS_SUB_TASK, ARGS_FFTS_THREAD_TASK,
-        ARGS_L2_PROFILING, ARGS_AIC_FREQ, ARGS_AIV_FREQ, ARGS_BIU_FREQ, ARGS_BIU, ARGS_HCCL,
+        ARGS_DVPP_PROFILING, ARGS_L2_PROFILING, ARGS_AIC_FREQ, ARGS_AIV_FREQ, ARGS_BIU_FREQ, ARGS_BIU, ARGS_HCCL,
         ARGS_SYS_SAMPLING_FREQ, ARGS_PID_SAMPLING_FREQ, ARGS_HARDWARE_MEM_SAMPLING_FREQ,
         ARGS_IO_SAMPLING_FREQ, ARGS_DVPP_FREQ,  ARGS_CPU_SAMPLING_FREQ, ARGS_INTERCONNECTION_FREQ,
         ARGS_HOST_SYS, ARGS_PYTHON_PATH, ARGS_MSPROFTX
@@ -508,10 +495,6 @@ int AppMode::ModeParamsCheck()
         return PROFILING_FAILED;
     }
     OutputUselessParams();
-    if (HandleProfilingParams() != PROFILING_SUCCESS) {
-        MSPROF_LOGE("[App Mode] HandleProfilingParams failed");
-        return PROFILING_FAILED;
-    }
     return PROFILING_SUCCESS;
 }
 
@@ -552,51 +535,12 @@ int AppMode::RunModeTasks()
     return PROFILING_SUCCESS;
 }
 
-void AppMode::SetDefaultParams() const
-{
-    if (params_->acl.empty()) {
-        params_->acl = "on";
-    }
-
-    if (ConfigManager::instance()->GetPlatformType() == PlatformType::MINI_TYPE) {
-        if (params_->ts_timeline.empty()) {
-            params_->ts_timeline = "on";
-        }
-    } else {
-        if (params_->hwts_log.empty()) {
-            params_->hwts_log = "on";
-        }
-        if (params_->hwts_log1.empty()) {
-            params_->hwts_log1 = "on";
-        }
-    }
-    if (params_->ts_memcpy.empty()) {
-        params_->ts_memcpy = "on";
-    }
-    if (params_->ts_keypoint.empty()) {
-        params_->ts_keypoint = "on";
-    }
-    if (params_->ai_core_profiling.empty()) {
-        params_->ai_core_profiling = "on";
-    }
-    if (params_->ai_core_profiling_mode.empty()) {
-        params_->ai_core_profiling_mode = PROFILING_MODE_TASK_BASED;
-    }
-    if (params_->aiv_profiling.empty()) {
-        params_->aiv_profiling = "on";
-    }
-    if (params_->aiv_profiling_mode.empty()) {
-        params_->aiv_profiling_mode = PROFILING_MODE_TASK_BASED;
-    }
-}
-
 int AppMode::StartAppTask(bool needWait)
 {
     if (isQuit_) {
         MSPROF_LOGE("Failed to launch app, msprofbin has quited");
         return PROFILING_FAILED;
     }
-    SetDefaultParams();
     int ret = analysis::dvvp::app::Application::LaunchApp(params_, taskPid_);
     if (ret == PROFILING_FAILED) {
         MSPROF_LOGE("Failed to launch app");

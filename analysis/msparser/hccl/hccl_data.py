@@ -1,9 +1,6 @@
 #!/usr/bin/python3
-# coding=utf-8
-"""
-function: HCCL data
-Copyright Huawei Technologies Co., Ltd. 2022-2023. All rights reserved.
-"""
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 
 from common_func.constant import Constant
 from common_func.info_conf_reader import InfoConfReader

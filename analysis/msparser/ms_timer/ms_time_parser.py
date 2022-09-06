@@ -1,7 +1,6 @@
-"""
-This script is used to parse and save time data to db.
-Copyright Huawei Technologies Co., Ltd. 2018-2019. All rights reserved.
-"""
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2018-2019. All rights reserved.
 
 import configparser
 import logging

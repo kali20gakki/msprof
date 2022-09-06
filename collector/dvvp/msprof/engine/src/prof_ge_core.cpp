@@ -32,7 +32,7 @@ using namespace Collector::Dvvp::Plugin;
 using namespace Analysis::Dvvp::ProfilerCommon;
 static std::mutex g_aclgraphProfMutex;
 
-Status aclgrphProfGraphSubscribe(const uint32_t graphId, const aclprofSubscribeConfig *profSubscribeConfig)
+int aclgrphProfGraphSubscribe(const uint32_t graphId, const aclprofSubscribeConfig *profSubscribeConfig)
 {
     if (Platform::instance()->PlatformIsHelperHostSide()) {
         MSPROF_LOGE("aclgrph api not support in helper");
@@ -88,7 +88,7 @@ Status aclgrphProfGraphSubscribe(const uint32_t graphId, const aclprofSubscribeC
     return ACL_SUCCESS;
 }
 
-Status aclgrphProfGraphUnSubscribe(const uint32_t graphId)
+int aclgrphProfGraphUnSubscribe(const uint32_t graphId)
 {
     if (Platform::instance()->PlatformIsHelperHostSide()) {
         MSPROF_LOGE("aclgrph api not support in helper");
@@ -328,7 +328,6 @@ ACL_GRPH_PROF_CONFIG_PTR aclgrphProfCreateConfig(UINT32_T_PTR deviceidList, uint
     }
 
     config->config.aicoreMetrics = static_cast<ProfAicoreMetrics>(aicoreMetrics);
-    ProfAclMgr::instance()->AddAiCpuModelConf(dataTypeConfig);
     config->config.dataTypeConfig = dataTypeConfig;
     MSPROF_LOGI("Successfully create prof config");
     return config;
@@ -354,7 +353,7 @@ Status aclgrphProfDestroyConfig(ACL_GRPH_PROF_CONFIG_PTR profilerConfig)
     return SUCCESS;
 }
 
-static bool PreCheckGraphProfConfig(ACL_GRPH_PROF_CONFIG_PTR profilerConfig)
+static bool PreCheckGraphProfConfig(const ACL_GRPH_PROF_CONFIG_PTR profilerConfig)
 {
     if (profilerConfig == nullptr) {
         MSPROF_LOGE("Param profilerConfig is nullptr");
@@ -416,10 +415,9 @@ Status aclgrphProfStart(ACL_GRPH_PROF_CONFIG_PTR profilerConfig)
     }
 
     MSPROF_LOGI("Allocate start profiling config to Ge");
-    uint64_t dataTypeConfig = profilerConfig->config.dataTypeConfig;
-    ProfAclMgr::instance()->AddModelLoadConf(dataTypeConfig);
+    uint64_t dataTypeConfig = ProfAclMgr::instance()->GetDataTypeConfigFromParams();
     Status geRet = static_cast<Status>(CommandHandleProfStart(
-        profilerConfig->config.devIdList, profilerConfig->config.devNums, dataTypeConfig | PROF_OP_DETAIL));
+        profilerConfig->config.devIdList, profilerConfig->config.devNums, dataTypeConfig));
     RETURN_IF_NOT_SUCCESS(geRet);
 
     MSPROF_LOGI("successfully execute aclgrphProfStart");
@@ -444,24 +442,10 @@ Status aclgrphProfStop(ACL_GRPH_PROF_CONFIG_PTR profilerConfig)
     int32_t ret = ProfAclMgr::instance()->ProfStopPrecheck();
     RETURN_IF_NOT_SUCCESS(ret);
 
-    // check config
-    uint64_t dataTypeConfig = 0;
-    for (uint32_t i = 0; i < profilerConfig->config.devNums; i++) {
-        ret = ProfAclMgr::instance()->ProfAclGetDataTypeConfig(
-            profilerConfig->config.devIdList[i], dataTypeConfig);
-        if (ret != ACL_SUCCESS) {
-            return FAILED;
-        }
-        ret = ProfAclMgr::instance()->StopProfConfigCheck(profilerConfig->config.dataTypeConfig, dataTypeConfig);
-        if (ret != PROFILING_SUCCESS) {
-            return FAILED;
-        }
-    }
-
     MSPROF_LOGI("Allocate stop config of profiling modules to Acl");
-    ProfAclMgr::instance()->AddModelLoadConf(dataTypeConfig);
+    uint64_t dataTypeConfig = ProfAclMgr::instance()->GetDataTypeConfigFromParams();
     Status geRet = static_cast<Status>(CommandHandleProfStop(
-        profilerConfig->config.devIdList, profilerConfig->config.devNums, dataTypeConfig | PROF_OP_DETAIL));
+        profilerConfig->config.devIdList, profilerConfig->config.devNums, dataTypeConfig));
     RETURN_IF_NOT_SUCCESS(geRet);
 
     for (uint32_t i = 0; i < profilerConfig->config.devNums; i++) {
@@ -491,7 +475,6 @@ void GeOpenDeviceHandle(const uint32_t devId)
         MSPROF_LOGI("CommandHandleProfStart, Allocate start profiling config");
         uint32_t devIdList[1] = {devId};
         uint64_t dataTypeConfig = ProfAclMgr::instance()->GetCmdModeDataTypeConfig();
-        ProfAclMgr::instance()->AddModelLoadConf(dataTypeConfig);
         ret = Analysis::Dvvp::ProfilerCommon::CommandHandleProfStart(devIdList, 1,
             dataTypeConfig | PROF_OP_DETAIL);
         if (ret != SUCCESS) {
@@ -515,7 +498,6 @@ void GeFinalizeHandle()
             continue;
         }
         uint32_t devIdList[1] = {devId};
-        ProfAclMgr::instance()->AddModelLoadConf(dataTypeConfig);
         if (CommandHandleProfStop(devIdList, 1, dataTypeConfig) != SUCCESS) {
             MSPROF_LOGE("Failed to CommandHandleProfStop on device:%u", devId);
             MSPROF_INNER_ERROR("EK9999", "Failed to CommandHandleProfStop on device:%u", devId);

@@ -1,19 +1,15 @@
-#!usr/bin/env python
-# coding:utf-8
-"""
-This script is used to provide runtime reports
-Copyright Huawei Technologies Co., Ltd. 2019-2020. All rights reserved.
-"""
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2019-2020. All rights reserved.
+
 import logging
 import os
 import sqlite3
-import sys
 
 from common_func.common import pre_check_sample
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
-from common_func.info_conf_reader import InfoConfReader
 from common_func.msvp_common import add_aicore_units
 from common_func.msvp_common import is_number
 from common_func.ms_constant.number_constant import NumberConstant
@@ -21,19 +17,6 @@ from common_func.msvp_constant import MsvpConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.utils import Utils
 from viewer.memory_copy.memory_copy_viewer import MemoryCopyViewer
-
-
-def get_runtime_api_data(db_path: str, table_name: str, configs: dict) -> tuple:
-    """
-    get runtime api data
-    """
-    conn, curs = DBManager.check_connect_db_path(db_path)
-    if not (conn and curs and DBManager.judge_table_exist(curs, table_name)):
-        return MsvpConstant.MSVP_EMPTY_DATA
-    data = get_output_apicall(curs)
-    count = DBManager.fetch_all_data(curs, "select count(*) from {} group by api".format(table_name))
-    DBManager.destroy_db_connect(conn, curs)
-    return configs.get(StrConstant.CONFIG_HEADERS), data, len(count)
 
 
 def get_task_scheduler_data(db_path: str, table_name: str, configs: dict, params: dict) -> tuple:
@@ -146,41 +129,6 @@ def get_task_based_core_data(result_dir: str, db_name: str, params: dict) -> tup
     count = DBManager.fetch_all_data(curs, "select count(*) from {} ".format(table_name))
     DBManager.destroy_db_connect(conn, curs)
     return data[0], data[1:], count
-
-
-def get_output_apicall(cursor: any) -> list:
-    """
-    get api call data
-    """
-    if not cursor:
-        return []
-    exist = DBManager.judge_table_exist(cursor, "ApiCall")
-    if not exist:
-        return []
-    try:
-        time_total = cursor.execute("select sum(exit_time-entry_time) from ApiCall").fetchone()[0]
-    except sqlite3.Error:
-        return []
-    sql = "select 1.0*sum(exit_time-entry_time)/{}, sum(exit_time-entry_time), count(*), " \
-          "sum(exit_time-entry_time)/count(*), min(exit_time-entry_time), " \
-          "max(exit_time-entry_time), thread, api, (case when stream_id=65535 then 'N/A' " \
-          "else stream_id end) from ApiCall group by api ".format(time_total)
-    result = DBManager.fetch_all_data(cursor, sql)
-    if result:
-        process_id = InfoConfReader().get_json_pid_data()
-        api_call = Utils.generator_to_list(
-            [str(x[-2]), x[-1],
-             round(x[0] * NumberConstant.PERCENTAGE, NumberConstant.DECIMAL_ACCURACY),
-             int(x[1]),
-             int(x[2]),
-             x[3],
-             x[4],
-             x[5],
-             process_id,
-             x[6]]
-            for x in result)
-        return api_call
-    return []
 
 
 def get_output_tasktype(cursor: any, param: dict) -> list:

@@ -24,13 +24,6 @@ const char * const PLATFORM_CLOUD = "cloud";
 
 const std::string INFO_FILE_NAME = "info.json";
 
-#define CPU_ID_STR(id_str, begin, num)                                                                 \
-    do {                                                                                               \
-        for (unsigned int i = begin; i < num; i++) {                                                   \
-            id_str.append((i == (unsigned int)begin) ? std::to_string(i) : ("," + std::to_string(i))); \
-        }                                                                                              \
-    } while (0)
-
 struct DeviceInfo {
     int64_t env_type; /**< 0, FPGA  1, EMU 2, ESL*/
     int64_t ctrl_cpu_id;
@@ -71,6 +64,7 @@ private:
     void AddSysTime(SHARED_PTR_ALIA<analysis::dvvp::proto::InfoMain> infoMain);
     void AddMemTotal(SHARED_PTR_ALIA<analysis::dvvp::proto::InfoMain> infoMain);
     void AddNetCardInfo(SHARED_PTR_ALIA<analysis::dvvp::proto::InfoMain> infoMain);
+    void AddRankId(SHARED_PTR_ALIA<analysis::dvvp::proto::InfoMain> infoMain);
 
 private:
     std::string jobInfo_;

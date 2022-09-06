@@ -1,7 +1,7 @@
-"""
-This script is used to parsing llc data file and create llc db.
-Copyright Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
-"""
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
+
 import logging
 from collections import OrderedDict
 

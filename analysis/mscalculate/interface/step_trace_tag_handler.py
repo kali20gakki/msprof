@@ -1,9 +1,6 @@
 #!/usr/bin/python3
-# coding=utf-8
-"""
-This script is used to load training_trace data from db
-Copyright Huawei Technologies Co., Ltd. 2021. All rights reserved.
-"""
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
 
 from abc import ABCMeta
 from abc import abstractmethod

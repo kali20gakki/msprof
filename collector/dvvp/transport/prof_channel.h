@@ -39,7 +39,7 @@ public:
     void UploadData();
     void FlushBuffToUpload();
     void SetChannelStopped();
-    bool GetSchedulingStatus();
+    bool GetSchedulingStatus() const;
     void SetSchedulingStatus(bool isScheduling);
     void FlushDrvBuff();
     void CheckIfSendFlush(const size_t curLen);

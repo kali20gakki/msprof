@@ -138,9 +138,9 @@ struct HwtsProfileType3 {
 #define FFTS_SUBTASK_THREAD_START_FUNC_TYPE 34  // ffts thread subtask start log
 #define FFTS_SUBTASK_THREAD_END_FUNC_TYPE   35  // ffts thread subtask end log
 struct FftsLogHead {
-    uint16_t logType:6;
-    uint16_t cnt:4;
-    uint16_t sqeType:6;
+    uint16_t logType : 6;
+    uint16_t cnt : 4;
+    uint16_t sqeType : 6;
     uint16_t hex6bd3;
 };
 

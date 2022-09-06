@@ -1,9 +1,7 @@
 #!/usr/bin/python3
-# coding=utf-8
-"""
-function: this script used to calculate cluster link from hccl.
-Copyright Huawei Technologies Co., Ltd. 2022-2023. All rights reserved.
-"""
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
+
 from common_func.common import print_msg
 from common_func.common_prof_rule import CommonProfRule
 from mscalculate.cluster.trailing_calculator import TrailingCalculator

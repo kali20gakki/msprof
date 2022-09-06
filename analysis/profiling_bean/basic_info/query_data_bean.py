@@ -1,8 +1,6 @@
-# coding=utf-8
-"""
-Function: Bean for the data info used by query.
-Copyright Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
-"""
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 
 from common_func.msprof_common import MsProfCommonConstant
 
@@ -20,6 +18,7 @@ class QueryDataBean:
         self._iteration_nums = args.get(MsProfCommonConstant.ITERATION_ID)
         self._collection_time = args.get(MsProfCommonConstant.COLLECTION_TIME)
         self._top_time_iteration = args.get(MsProfCommonConstant.TOP_TIME_ITERATION)
+        self._rank_id = args.get(MsProfCommonConstant.RANK_ID)
 
     @property
     def job_info(self: any) -> str:
@@ -76,3 +75,11 @@ class QueryDataBean:
         :return: top time iteration
         """
         return self._top_time_iteration
+
+    @property
+    def rank_id(self: any) -> str:
+        """
+        rank id
+        :return: rank id
+        """
+        return self._rank_id

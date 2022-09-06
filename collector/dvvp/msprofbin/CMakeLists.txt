@@ -17,8 +17,12 @@ set(msprofBinHeader
     ${TOP_DIR}/collector/dvvp/depend/inc/driver
     ${TOP_DIR}/collector/dvvp/depend/inc/adump
     ${TOP_DIR}/collector/dvvp/depend/inc/plugin
+    ${TOP_DIR}/collector/dvvp/depend/inc/profapi
     ${TOP_DIR}/collector/inc/toolchain
     ${TOP_DIR}/collector/dvvp/common/config
+    ${TOP_DIR}/collector/dvvp/params_adapter
+    ${TOP_DIR}/collector/inc/external
+    ${TOP_DIR}/collector/dvvp/depend/inc/acl
     ../common/utils
     ../msprof/engine/include
     ../host/include/
@@ -48,24 +52,40 @@ set(hdcCpp
 )
 
 add_executable(msprofbin
+    ${TOP_DIR}/collector/dvvp/common/platform/platform_adapter.cpp
+    ${TOP_DIR}/collector/dvvp/params_adapter/params_adapter.cpp
+    ${TOP_DIR}/collector/dvvp/params_adapter/params_adapter_impl.cpp
+    ${TOP_DIR}/collector/dvvp/common/logger/cmd_log.cpp
     src/msprof_bin.cpp
     src/msprof_manager.cpp
     src/prof_task.cpp
     src/data_handle.cpp
     src/prof_params_adapter.cpp
-    src/cmd_log.cpp
     src/input_parser.cpp
     src/running_mode.cpp
     ../app/application.cpp
     ../app/env_manager.cpp
     ../common/utils/utils.cpp
     ../common/config/config_manager.cpp
+    ../common/logger/cmd_log.cpp
+    ../depend/src/slog_plugin.cpp
+    ../depend/src/driver_plugin.cpp
+    ../common/platform/platform.cpp    
     ../common/memory/chunk_pool.cpp
     ../common/thread/thread.cpp
     ../common/thread/thread_pool.cpp
     ../common/statistics/perf_count.cpp
     ../common/validation/param_validation.cpp
+    ../driver/devmgmt/ai_drv_dev_api.cpp        
     ../common/platform/platform.cpp
+    ../common/platform/platform_adapter_interface.cpp
+    ../common/platform/platform_adapter_mini.cpp
+    ../common/platform/platform_adapter_mdc.cpp
+    ../common/platform/platform_adapter_lhisi.cpp
+    ../common/platform/platform_adapter_dc.cpp
+    ../common/platform/platform_adapter_cloudv2.cpp
+    ../common/platform/platform_adapter_cloud.cpp
+    ../common/platform/platform_adapter.cpp
     ../common/mmpa/mmpa_api.cpp
     ../depend/stub/error_manager/msprof_error_manager_stub.cpp
     ../driver/devmgmt/ai_drv_dev_api.cpp
@@ -128,6 +148,10 @@ target_link_options(msprofbin PRIVATE
     -Wl,--exclude-libs=ALL
     -pie
     $<$<NOT:$<STREQUAL:${CMAKE_BUILD_TYPE},Debug>>:-s>
+)
+
+target_link_directories(msprofbin PRIVATE
+    ${SECUREC_LIB_DIR}
 )
 
 target_link_libraries(msprofbin PRIVATE

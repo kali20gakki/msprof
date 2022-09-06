@@ -7,6 +7,9 @@
 #ifndef PROF_API_H
 #define PROF_API_H
 
+#include "stddef.h"
+#include "stdint.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif // __cplusplus
@@ -16,9 +19,6 @@ extern "C" {
 #else
 #define MSVP_PROF_API __attribute__((visibility("default")))
 #endif
-
-#include "stddef.h"
-#include "stdint.h"
 
 /**
  * @name  profCtrlCallbackType
@@ -61,11 +61,11 @@ using ProfReportHandle = int32_t (*)(uint32_t moduleId, uint32_t type, VOID_PTR 
 using ProfCtrlHandle = int32_t (*)(uint32_t type, VOID_PTR data, uint32_t len);
 using ProfSetDeviceHandle = int32_t (*)(VOID_PTR data, uint32_t len);
 
-MSVP_PROF_API int32_t profRegReporterCallback(ProfReportHandle reporter);
-MSVP_PROF_API int32_t profRegCtrlCallback(ProfCtrlHandle hanle);
-MSVP_PROF_API int32_t profRegDeviceStateCallback(ProfSetDeviceHandle hanle);
-MSVP_PROF_API int32_t profGetDeviceIdByGeModelIdx(const uint32_t modelIdx, uint32_t *deviceId);
-MSVP_PROF_API int32_t profSetProfCommand(PROFAPI_PROF_COMMAND_PTR command, uint32_t len);
+MSVP_PROF_API int32_t ProfRegReporterCallback(ProfReportHandle reporter);
+MSVP_PROF_API int32_t ProfRegCtrlCallback(ProfCtrlHandle hanle);
+MSVP_PROF_API int32_t ProfRegDeviceStateCallback(ProfSetDeviceHandle hanle);
+MSVP_PROF_API int32_t ProfGetDeviceIdByGeModelIdx(const uint32_t modelIdx, uint32_t *deviceId);
+MSVP_PROF_API int32_t ProfSetProfCommand(PROFAPI_PROF_COMMAND_PTR command, uint32_t len);
 MSVP_PROF_API int32_t profSetStepInfo(const uint64_t indexId, const uint16_t tagId, void* const stream);
 
 MSVP_PROF_API int32_t MsprofInit(uint32_t moduleId, void *data, uint32_t dataLen);
@@ -309,16 +309,16 @@ typedef enum {
 // ge define
 namespace ge {
 using Status = uint32_t;
-#define GE_ERRORNO(runtime, type, level, sysid, modid, name, value, desc)                               \
-  constexpr Status name = (static_cast<uint32_t>(0xFFU & (static_cast<uint32_t>(runtime))) << 30U) | \
+#define GE_ERRORNO(runtime, type, level, sysid, modid, name, value, desc)                                \
+    constexpr Status name = (static_cast<uint32_t>(0xFFU & (static_cast<uint32_t>(runtime))) << 30U) |   \
                               (static_cast<uint32_t>(0xFFU & (static_cast<uint32_t>(type))) << 28U) |    \
                               (static_cast<uint32_t>(0xFFU & (static_cast<uint32_t>(level))) << 25U) |   \
                               (static_cast<uint32_t>(0xFFU & (static_cast<uint32_t>(sysid))) << 17U) |   \
                               (static_cast<uint32_t>(0xFFU & (static_cast<uint32_t>(modid))) << 12U) |   \
-                              (static_cast<uint32_t>(0x0FFFU) & (static_cast<uint32_t>(value)));
+                              (static_cast<uint32_t>(0x0FFFU) & (static_cast<uint32_t>(value)))
 
     GE_ERRORNO(0, 0, 0, 0, 0, SUCCESS, 0, "success");
-    GE_ERRORNO(0b11, 0b11, 0b111, 0xFFU, 0b11111, FAILED, 0xFFFU, "failed"); /*lint !e401*/
+    GE_ERRORNO(0b11, 0b11, 0b111, 0xFFU, 0b11111, FAILED, 0xFFFU, "failed");
 } // namespace ge
 
 #endif

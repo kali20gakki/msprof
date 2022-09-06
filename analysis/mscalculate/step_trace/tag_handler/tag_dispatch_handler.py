@@ -1,10 +1,10 @@
-"""
-This script is used to load training_trace data from db
-Copyright Huawei Technologies Co., Ltd. 2021. All rights reserved.
-"""
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
+
 import collections
 
-from mscalculate.step_trace.tag_handler.iter_info_handler import AllReduceTagHandler
+from mscalculate.step_trace.tag_handler.iter_info_handler import AllReduceStreamHandler
 from mscalculate.step_trace.tag_handler.iter_info_handler import TrainingTraceTagHandler
 from mscalculate.step_trace.tag_handler.state_machine.index_tracer import IndexTracker
 from mscalculate.interface.step_trace_tag_handler import StepTraceTagHandler
@@ -113,7 +113,7 @@ class DispatchIterInfoHandler(StepTraceTagHandler):
     def __init__(self: any) -> None:
         self.next_handler = None
         self.next_handler_group = {
-            StepTraceConstant.ALL_REDUCE: AllReduceTagHandler(),
+            StepTraceConstant.ALL_REDUCE: AllReduceStreamHandler(),
             StepTraceConstant.TRAINING_TRACE: TrainingTraceTagHandler()
         }
         self.collect_data = {}
@@ -155,8 +155,8 @@ class DispatchIterInfoHandler(StepTraceTagHandler):
 
     def clear(self: any) -> None:
         """
-        clear collect data
+        clear next handler
         :return: void
         """
         for next_handler in self.next_handler_group.values():
-            next_handler.collect_data.clear()
+            next_handler.clear()

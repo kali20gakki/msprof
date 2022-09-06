@@ -1,9 +1,7 @@
 #!/usr/bin/python3
-# coding=utf-8
-"""
-This script is used to provide function to modify data
-Copyright Huawei Technologies Co., Ltd. 2020. All rights reserved.
-"""
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
+
 from common_func.db_name_constant import DBNameConstant
 from msmodel.interface.view_model import ViewModel
 
