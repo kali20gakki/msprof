@@ -1,11 +1,14 @@
 #!/usr/bin/python3
-# -*- coding: utf-8 -*-
-# Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
-
+# coding=utf-8
+"""
+function: this script used to calculate hwts offset and parse it.
+Copyright Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
+"""
 import logging
 import os
 
 from analyzer.scene_base.profiling_scene import ProfilingScene
+from analyzer.op_common_function import OpCommonFunc
 from common_func.db_name_constant import DBNameConstant
 from common_func.empty_class import EmptyClass
 from common_func.info_conf_reader import InfoConfReader
@@ -13,18 +16,17 @@ from common_func.iter_recorder import IterRecorder
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.constant import Constant
 from common_func.ms_multi_process import MsMultiProcess
+from common_func.msprof_exception import ProfException
 from common_func.msprof_iteration import MsprofIteration
 from common_func.msprof_step import MsprofStep
 from common_func.path_manager import PathManager
 from common_func.utils import Utils
 from common_func.batch_counter import BatchCounter
-from common_func.platform.chip_manager import ChipManager
 from framework.offset_calculator import FileCalculator
 from framework.offset_calculator import OffsetCalculator
 from msmodel.iter_rec.iter_rec_model import HwtsIterModel
 from msmodel.task_time.hwts_log_model import HwtsLogModel
 from mscalculate.interface.icalculator import ICalculator
-from mscalculate.ts_task.ai_cpu.aicpu_from_ts_collector import AICpuFromTsCollector
 from profiling_bean.prof_enum.data_tag import DataTag
 from profiling_bean.struct_info.hwts_log import HwtsLogBean
 
@@ -36,7 +38,6 @@ class HwtsCalculator(ICalculator, MsMultiProcess):
     # Tags for differnt HWTS log type.
     HWTS_TASK_START = 0
     HWTS_TASK_END = 1
-    HWTS_TASK_TYPE = 2
     HWTS_LOG_SIZE = 64
     HWTS_MAX_CNT = 16
     TASK_TIME_COMPLETE_INDEX = 3
@@ -47,7 +48,6 @@ class HwtsCalculator(ICalculator, MsMultiProcess):
         self._project_path = sample_config.get(StrConstant.SAMPLE_CONFIG_PROJECT_PATH)
         self._file_list = file_list.get(DataTag.HWTS, [])
         self._hwts_log_model = HwtsLogModel(self._project_path)
-        self._aicpu_collector = AICpuFromTsCollector(self._project_path)
         self._iter_model = HwtsIterModel(self._project_path)
         self._log_data = []
         self._file_list.sort(key=lambda x: int(x.split("_")[-1]))
@@ -95,40 +95,28 @@ class HwtsCalculator(ICalculator, MsMultiProcess):
             task_value = prep.get(index, {})
             task_satrt_list = task_value.get(self.HWTS_TASK_START, [])
             task_end_list = task_value.get(self.HWTS_TASK_END, [])
-            task_type_list = task_value.get(self.HWTS_TASK_TYPE, [])
-            if self.HWTS_TASK_START == task.sys_tag:
+            if self.HWTS_TASK_START == task.task_type:
                 if len(task_satrt_list) > len(task_end_list):
                     task_satrt_list.pop()
                     logging.warning("stream id: %s, task id: %s is no end task, index of the stream and task is %s",
                                     task.stream_id, task.task_id, str(len(task_satrt_list)))
                 task_satrt_list.append(task.sys_cnt)
-            elif self.HWTS_TASK_END == task.sys_tag:
+            elif self.HWTS_TASK_END == task.task_type:
                 if len(task_satrt_list) == len(task_end_list):
                     continue
                 task_end_list.append(task.sys_cnt)
-                task_type_list.append(task.task_type)
             else:
-                logging.error("invalid sys tag of hwts: %s", task.sys_tag)
-            task_value.update({self.HWTS_TASK_START: task_satrt_list,
-                               self.HWTS_TASK_END: task_end_list,
-                               self.HWTS_TASK_TYPE: task_type_list})
+                logging.error("invalid task type of hwts: %s", task.task_type)
+            task_value.update({self.HWTS_TASK_START: task_satrt_list, self.HWTS_TASK_END: task_end_list})
             prep.update({index: task_value})
         train_data = []
 
         for index in prep:
             _index_value = prep.get(index)
             while _index_value.get(self.HWTS_TASK_START) and _index_value.get(self.HWTS_TASK_END):
-                data_info = tuple(list(index.split(",")) + [
+                train_data.append(tuple(list(index.split(",")) + [
                     _index_value[self.HWTS_TASK_START].pop(0),
-                    _index_value[self.HWTS_TASK_END].pop(0)])
-
-                train_data.append(data_info)
-
-                if not ChipManager().is_chip_v2():
-                    self._aicpu_collector.filter_aicpu(data_info + (_index_value[self.HWTS_TASK_TYPE].pop(0),))
-
-        if not ChipManager().is_chip_v2():
-            self._aicpu_collector.save_aicpu()
+                    _index_value[self.HWTS_TASK_END].pop(0)]))
         return sorted(train_data, key=lambda data: data[self.TASK_TIME_COMPLETE_INDEX])
 
     def _parse_by_iter(self: any) -> None:

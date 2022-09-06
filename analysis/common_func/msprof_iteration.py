@@ -1,7 +1,11 @@
 #!/usr/bin/python3
-# -*- coding: utf-8 -*-
-# Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
-
+# coding=utf-8
+"""
+Function:
+This file mainly involves iteration.
+Copyright Information:
+Huawei Technologies Co., Ltd. All Rights Reserved © 2021
+"""
 import logging
 import sqlite3
 from collections import OrderedDict
