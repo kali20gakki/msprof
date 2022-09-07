@@ -15,6 +15,7 @@ from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msprof_common import get_path_dir, prepare_log
 from common_func.msprof_exception import ProfException
+from common_func.msprof_query_data import QueryArgumentCheck
 from common_func.msvp_common import create_json
 from common_func.path_manager import PathManager
 from common_func.step_trace_constant import StepTraceConstant
@@ -40,6 +41,7 @@ class StepTraceSummay:
         self.all_devices = False
 
     def process(self: any) -> None:
+        QueryArgumentCheck.check_arguments_valid(self.npu_id, self.model_id, self.iteration_id)
         self._check_query_all_devices()
         self._check_iteration_id_valid()
         if self.is_cluster_scene:

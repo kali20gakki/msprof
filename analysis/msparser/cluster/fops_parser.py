@@ -17,6 +17,7 @@ from common_func.db_name_constant import DBNameConstant
 from common_func.file_manager import check_path_valid
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
+from common_func.msprof_query_data import QueryArgumentCheck
 from common_func.msvp_common import check_file_writable
 from common_func.path_manager import PathManager
 from profiling_bean.db_dto.cluster_rank_dto import ClusterRankDto
@@ -194,6 +195,7 @@ class FopsParser:
         entrance for calculating fops data
         :return: None or dict
         """
+        QueryArgumentCheck.check_arguments_valid(self.rank_id, self.model_id, self.iter_id)
         if list(filter(lambda x: x is None, [self.rank_id, self.model_id, self.iter_id])):
             warn(self.FILE_NAME,
                  "To query fops data,  id, model-id and iteration-id are required")
