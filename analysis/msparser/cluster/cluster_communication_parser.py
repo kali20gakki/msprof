@@ -8,6 +8,7 @@ import os
 from common_func.common import print_msg
 from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.number_constant import NumberConstant
+from common_func.msprof_query_data import QueryArgumentCheck
 from common_func.msvp_common import create_json
 from common_func.path_manager import PathManager
 from msmodel.cluster_info.cluster_communication_model import ClusterCommunicationModel
@@ -32,6 +33,7 @@ class ClusterCommunicationParser:
         self._cluster_info_model = ClusterInfoViewModel(self._collection_path)
 
     def process(self: any) -> None:
+        QueryArgumentCheck.check_arguments_valid(self._npu_id, self._model_id, self._iteration_id)
         if not self._is_cluster_scene:
             print_msg(json.dumps(
                 {'status': NumberConstant.ERROR,

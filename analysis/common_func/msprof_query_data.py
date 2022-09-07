@@ -10,6 +10,7 @@ from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.msprof_common import MsProfCommonConstant
+from common_func.msprof_exception import ProfException
 from common_func.path_manager import PathManager
 from msmodel.step_trace.cluster_step_trace_model import ClusterStepTraceModel
 from profiling_bean.basic_info.query_data_bean import QueryDataBean
@@ -175,3 +176,30 @@ class MsprofQueryData:
 
         iteration_data = self.get_job_iteration_info()
         return self.assembly_job_info(basic_data, iteration_data)
+
+
+class QueryArgumentCheck:
+
+    @staticmethod
+    def _check_integer_with_min_value(arg: any, min_value: int = None, nullable: bool = False) -> bool:
+        if nullable and arg is None:
+            return True
+        if arg is not None and isinstance(arg, int):
+            if min_value is not None:
+                return arg >= min_value
+        return False
+
+    @staticmethod
+    def check_arguments_valid(npu_id: int, model_id: int, iteration_id: int) -> None:
+        if not QueryArgumentCheck._check_integer_with_min_value(npu_id, min_value=-1):
+            error(MsProfCommonConstant.COMMON_FILE_NAME,
+                  "The query id is wrong. Please enter a valid value.")
+            raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR)
+        if not QueryArgumentCheck._check_integer_with_min_value(model_id, min_value=0):
+            error(MsProfCommonConstant.COMMON_FILE_NAME,
+                  "The query model id is wrong. Please enter a valid value.")
+            raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR)
+        if not QueryArgumentCheck._check_integer_with_min_value(iteration_id, min_value=1, nullable=True):
+            error(MsProfCommonConstant.COMMON_FILE_NAME,
+                  "The query iteration id is wrong. Please enter a valid value.")
+            raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR)
