@@ -122,6 +122,7 @@ class TestStepTraceSummary(unittest.TestCase):
                 mock.patch(NAMESPACE + '.StepTraceSummay._check_cluster_db_valid', return_value=True), \
                 mock.patch(NAMESPACE + '.StepTraceSummay._get_all_rank_ids', return_value=[1]), \
                 mock.patch(NAMESPACE + '.DBManager.check_connect_db_path', return_value=(1, 1)), \
+                mock.patch(NAMESPACE + '.QueryArgumentCheck.check_arguments_valid'), \
                 mock.patch(NAMESPACE + '.DBManager.destroy_db_connect'), \
                 mock.patch(NAMESPACE + '.DBManager.fetch_all_data', return_value=[]):
             check = StepTraceSummay(case_param)
