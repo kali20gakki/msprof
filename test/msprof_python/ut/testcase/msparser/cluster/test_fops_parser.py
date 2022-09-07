@@ -43,11 +43,13 @@ class TestFopsParser(unittest.TestCase):
     def test_run(self):
         with mock.patch('common_func.utils.Utils.is_step_scene', side_effect=(False, True)), \
                 mock.patch('common_func.utils.Utils.is_single_op_graph_mix', return_value=False), \
+                mock.patch(NAMESPACE + '.QueryArgumentCheck.check_arguments_valid'), \
                 mock.patch(NAMESPACE + '.FopsParser.calculate'):
             check = FopsParser(self.params)
             check.process()
         with mock.patch('common_func.utils.Utils.is_step_scene', side_effect=(False, True)), \
                 mock.patch('common_func.utils.Utils.is_single_op_graph_mix', return_value=False), \
+                mock.patch(NAMESPACE + '.QueryArgumentCheck.check_arguments_valid'), \
                 mock.patch(NAMESPACE + '.FopsParser.calculate'):
             check = FopsParser({})
             check.process()

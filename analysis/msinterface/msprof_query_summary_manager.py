@@ -13,7 +13,7 @@ from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
-from common_func.msprof_common import get_path_dir, prepare_log
+from common_func.msprof_common import get_path_dir, prepare_log, MsProfCommonConstant
 from common_func.msprof_exception import ProfException
 from common_func.path_manager import PathManager
 from msmodel.cluster_info.cluster_info_model import ClusterInfoModel
@@ -24,6 +24,15 @@ from msparser.cluster.cluster_communication_parser import ClusterCommunicationPa
 from msparser.cluster.step_trace_summary import StepTraceSummay
 
 
+class QueryDataType(IntEnum):
+    CLUSTER_SCENE = 0
+    STEP_TRACE = 1
+    FOPS_ANALYSE = 2
+    DATA_PREPARATION = 3
+    PARALLEL_ANALYSIS = 4
+    COLLECTIVE_COMMUNICATION = 5
+
+
 class MsprofQuerySummaryManager:
     """
     The class for dispatching query summary data task.
@@ -31,6 +40,11 @@ class MsprofQuerySummaryManager:
     CLUSTER_SCENE = '1'
     NOT_CLUSTER_SCENE = '0'
     FILE_NAME = os.path.basename(__file__)
+    QUERY_DATA_TYPE_PARSER = {QueryDataType.STEP_TRACE: StepTraceSummay,
+                              QueryDataType.FOPS_ANALYSE: FopsParser,
+                              QueryDataType.DATA_PREPARATION: DataPreprocessParser,
+                              QueryDataType.PARALLEL_ANALYSIS: ClusterParallelParser,
+                              QueryDataType.COLLECTIVE_COMMUNICATION: ClusterCommunicationParser}
 
     def __init__(self: any, args: any) -> None:
         self.collection_path = os.path.realpath(args.collection_path)
@@ -66,15 +80,6 @@ class MsprofQuerySummaryManager:
             print_msg(json.dumps({'status': NumberConstant.SUCCESS, 'info': '', 'data':
                 MsprofQuerySummaryManager.NOT_CLUSTER_SCENE}))
 
-    @staticmethod
-    def _check_integer_with_min_value(arg: any, min_value: int = None, nullable: bool = False) -> bool:
-        if nullable and arg is None:
-            return True
-        if arg is not None and isinstance(arg, int):
-            if min_value is not None:
-                return arg >= min_value
-        return False
-
     def process(self: any) -> None:
         self._check_data_type_valid()
         self._dispatch()
@@ -83,27 +88,10 @@ class MsprofQuerySummaryManager:
         if self.data_type == QueryDataType.CLUSTER_SCENE:
             MsprofQuerySummaryManager.check_cluster_scene(self.collection_path)
             return
-        self._check_cluster_scene()
-        params = {"collection_path": self.collection_path,
-                  "is_cluster": self.is_cluster_scene,
-                  "npu_id": self.npu_id,
-                  "model_id": self.model_id,
-                  "iteration_id": self.iteration_id}
-        if self.data_type == QueryDataType.PARALLEL_ANALYSIS:
-            ClusterParallelParser(params).process()
-            return
-        if self.data_type == QueryDataType.DATA_PREPARATION:
-            DataPreprocessParser(params).process()
-            return
-        self._check_arguments_valid()
-        if self.data_type == QueryDataType.STEP_TRACE:
-            StepTraceSummay(params).process()
-        if self.data_type == QueryDataType.FOPS_ANALYSE:
-            FopsParser(params).process()
-        if self.data_type == QueryDataType.COLLECTIVE_COMMUNICATION:
-            ClusterCommunicationParser(params).process()
+        params = self._check_cluster_scene()
+        self.QUERY_DATA_TYPE_PARSER.get(self.data_type)(params).process()
 
-    def _check_cluster_scene(self: any) -> None:
+    def _check_cluster_scene(self: any) -> dict:
         if self._check_rank_id_valid():
             self.is_cluster_scene = True
             prepare_log(self.collection_path)
@@ -113,6 +101,12 @@ class MsprofQuerySummaryManager:
                       "To query cluster data, please import cluster info data first.")
                 raise ProfException(ProfException.PROF_CLUSTER_DIR_ERROR)
             self.is_cluster_scene = False
+        params = {"collection_path": self.collection_path,
+                  "is_cluster": self.is_cluster_scene,
+                  "npu_id": self.npu_id,
+                  "model_id": self.model_id,
+                  "iteration_id": self.iteration_id}
+        return params
 
     def _check_rank_id_valid(self: any) -> bool:
         db_path = PathManager.get_db_path(self.collection_path, DBNameConstant.DB_CLUSTER_RANK)
@@ -129,26 +123,3 @@ class MsprofQuerySummaryManager:
             error(MsprofQuerySummaryManager.FILE_NAME,
                   "The query data type is wrong. Please enter a valid value.")
             raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR)
-
-    def _check_arguments_valid(self: any) -> None:
-        if not MsprofQuerySummaryManager._check_integer_with_min_value(self.npu_id, min_value=-1):
-            error(MsprofQuerySummaryManager.FILE_NAME,
-                  "The query id is wrong. Please enter a valid value.")
-            raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR)
-        if not MsprofQuerySummaryManager._check_integer_with_min_value(self.model_id, min_value=0):
-            error(MsprofQuerySummaryManager.FILE_NAME,
-                  "The query model id is wrong. Please enter a valid value.")
-            raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR)
-        if not MsprofQuerySummaryManager._check_integer_with_min_value(self.iteration_id, min_value=1, nullable=True):
-            error(MsprofQuerySummaryManager.FILE_NAME,
-                  "The query iteration id is wrong. Please enter a valid value.")
-            raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR)
-
-
-class QueryDataType(IntEnum):
-    CLUSTER_SCENE = 0
-    STEP_TRACE = 1
-    FOPS_ANALYSE = 2
-    DATA_PREPARATION = 3
-    PARALLEL_ANALYSIS = 4
-    COLLECTIVE_COMMUNICATION = 5
