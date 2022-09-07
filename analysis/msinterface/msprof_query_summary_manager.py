@@ -122,3 +122,4 @@ class MsprofQuerySummaryManager:
         if self.data_type is None or self.data_type not in QueryDataType.__members__.values():
             error(MsprofQuerySummaryManager.FILE_NAME,
                   "The query data type is wrong. Please enter a valid value.")
+            raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR)
