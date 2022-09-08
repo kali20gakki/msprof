@@ -978,12 +978,14 @@ bool ParamValidation::MsprofCheckAppValid(std::string &appParam) const
     std::vector<std::string> AppParamsList = Utils::Split(appParam, false, "", " ");
     std::string cmdParam = AppParamsList[0];
     if (!Utils::IsAppName(cmdParam)) {
+        // bash xxx.sh args... or python xxx/main.py args...
         if (MsprofCheckNotAppValid(AppParamsList, resultAppParam) == PROFILING_SUCCESS) {
             appParam = resultAppParam;
             return true;
         }
         return false;
     }
+    // ./main args...
     std::string absolutePathApp = Utils::RelativePathToAbsolutePath(cmdParam);
     if (MsprofCheckAppParamValid(absolutePathApp) != PROFILING_SUCCESS) {
         return false;
@@ -1002,7 +1004,7 @@ bool ParamValidation::MsprofCheckAppValid(std::string &appParam) const
     appParam = resultAppParam;
     return true;
 }
- 
+
 int ParamValidation::MsprofCheckNotAppValid(const std::vector<std::string> &AppParamsList,
     std::string &resultAppParam) const
 {

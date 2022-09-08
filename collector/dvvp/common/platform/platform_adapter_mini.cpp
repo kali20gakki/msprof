@@ -25,7 +25,8 @@ PlatformAdapterMini::~PlatformAdapterMini()
 {
 }
 
-int PlatformAdapterMini::Init(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params)
+int PlatformAdapterMini::Init(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params,
+    PlatformType platformType)
 {
     params_ = params;
     supportSwitch_ = {
@@ -42,6 +43,7 @@ int PlatformAdapterMini::Init(SHARED_PTR_ALIA<analysis::dvvp::message::ProfilePa
                      {"bandwidth", bandwidthEvents}};
     aicRunningFreq_ = "680";
     sysCountFreq_ = "19.2";
+    platformType_ = platformType;
     return PROFILING_SUCCESS;
 }
 

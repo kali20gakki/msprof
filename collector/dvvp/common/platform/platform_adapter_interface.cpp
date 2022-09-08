@@ -34,10 +34,12 @@ PlatformAdapterInterface::~PlatformAdapterInterface()
 {
 }
 
-int PlatformAdapterInterface::Init(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params)
+int PlatformAdapterInterface::Init(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params,
+    PlatformType platformType)
 {
     params_ = params;
     getLlcEvents_ = {{"read", "read"}, {"write", "write"}};
+    platformType_ = platformType;
     return PROFILING_SUCCESS;
 }
 
@@ -54,58 +56,84 @@ void PlatformAdapterInterface::SetParamsForGlobal(struct CommonParams &comParams
 
 void PlatformAdapterInterface::SetParamsForTaskTime()
 {
+    bool ret = false;
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_TASK_TS_KEYPOINT) != supportSwitch_.end()) {
         params_->ts_keypoint = MSPROF_SWITCH_ON;
         params_->dataTypeConfig |= PROF_KEYPOINT_TRACE | PROF_KEYPOINT_TRACE_HELPER;
+        ret = true;
     }
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_TASK_TS_TIMELINE) != supportSwitch_.end()) {
         params_->ts_timeline = MSPROF_SWITCH_ON;
         params_->dataTypeConfig |= PROF_SCHEDULE_TIMELINE | PROF_TASK_TIME;
+        ret = true;
     }
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_TASK_AIC_HWTS) != supportSwitch_.end()) {
         params_->hwts_log = MSPROF_SWITCH_ON;
         params_->dataTypeConfig |= PROF_TASK_TIME;
+        ret = true;
     }
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_TASK_AIV_HWTS) != supportSwitch_.end()) {
         params_->hwts_log1 = MSPROF_SWITCH_ON;
         params_->dataTypeConfig |= PROF_TASK_TIME;
+        ret = true;
     }
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_TASK_STARS_ACSQ) != supportSwitch_.end()) {
         params_->stars_acsq_task = MSPROF_SWITCH_ON;
         params_->dataTypeConfig |= PROF_TASK_TIME;
+        ret = true;
     }
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_TASK_RUNTIME) != supportSwitch_.end()) {
         params_->dataTypeConfig |= PROF_RUNTIME_TRACE;
+        ret = true;
     }
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_TASK_TS_MEMCPY) != supportSwitch_.end()) {
         params_->ts_memcpy = MSPROF_SWITCH_ON;
         params_->dataTypeConfig |= PROF_TASK_TIME;
+        ret = true;
     }
     SetParamsForGE();
+    if (!ret) {
+        MSPROF_LOGW("Unrecognized option:task_time for PlatformType:%d", static_cast<uint8_t>(platformType_));
+    }
 }
 
 void PlatformAdapterInterface::SetParamsForTaskTrace()
 {
+    bool ret = false;
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_TASK_HCCL) != supportSwitch_.end()) {
         params_->dataTypeConfig |= PROF_HCCL_TRACE;
+        ret = true;
     }
     SetParamsForTaskTime();
+    if (!ret) {
+        MSPROF_LOGW("Unrecognized option:task_trace for PlatformType:%d", static_cast<uint8_t>(platformType_));
+    }
 }
 
 void PlatformAdapterInterface::SetParamsForTrainingTrace()
 {
+    bool ret = false;
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_TASK_TS_KEYPOINT_TRAINING) !=
         supportSwitch_.end()) {
         params_->ts_keypoint = MSPROF_SWITCH_ON;
         params_->ts_fw_training = MSPROF_SWITCH_ON;
         params_->dataTypeConfig |= PROF_KEYPOINT_TRACE | PROF_KEYPOINT_TRACE_HELPER;
+        ret = true;
+    }
+    if (!ret) {
+        MSPROF_LOGW("Unrecognized option:training_trace for PlatformType:%d", static_cast<uint8_t>(platformType_));
     }
 }
 
 void PlatformAdapterInterface::SetParamsForAscendCL()
 {
+    bool ret = false;
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_TASK_ASCENDCL) != supportSwitch_.end()) {
         params_->dataTypeConfig |= PROF_ACL_API;
+        ret = true;
+    }
+    if (!ret) {
+        MSPROF_LOGW("Unrecognized option:ascendcl for PlatformType:%d", static_cast<uint8_t>(platformType_));
     }
 }
 
@@ -120,31 +148,51 @@ void PlatformAdapterInterface::SetParamsForGE()
 
 void PlatformAdapterInterface::SetParamsForRuntime()
 {
+    bool ret = false;
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_TASK_RUNTIME) != supportSwitch_.end()) {
         params_->dataTypeConfig |= PROF_RUNTIME_API;
+        ret = true;
+    }
+    if (!ret) {
+        MSPROF_LOGW("Unrecognized option:runtime_api for PlatformType:%d", static_cast<uint8_t>(platformType_));
     }
 }
 
 void PlatformAdapterInterface::SetParamsForAICPU()
 {
+    bool ret = false;
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_TASK_AICPU) != supportSwitch_.end()) {
         params_->dataTypeConfig |= PROF_AICPU_TRACE;
+        ret = true;
+    }
+    if (!ret) {
+        MSPROF_LOGW("Unrecognized option:aicpu for PlatformType:%d", static_cast<uint8_t>(platformType_));
     }
 }
 
 void PlatformAdapterInterface::SetParamsForHCCL()
 {
+    bool ret = false;
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_TASK_HCCL) != supportSwitch_.end()) {
         params_->dataTypeConfig |= PROF_HCCL_TRACE;
+        ret = true;
+    }
+    if (!ret) {
+        MSPROF_LOGW("Unrecognized option:hccl for PlatformType:%d", static_cast<uint8_t>(platformType_));
     }
 }
 
 void PlatformAdapterInterface::SetParamsForL2Cache()
 {
+    bool ret = false;
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_TASK_L2_CACHE) != supportSwitch_.end()) {
         params_->l2CacheTaskProfiling = MSPROF_SWITCH_ON;
         params_->l2CacheTaskProfilingEvents = l2CacheEvents_;
         params_->dataTypeConfig |= PROF_L2CACHE;
+        ret = true;
+    }
+    if (!ret) {
+        MSPROF_LOGW("Unrecognized option:l2 for PlatformType:%d", static_cast<uint8_t>(platformType_));
     }
 }
 
@@ -195,6 +243,7 @@ void PlatformAdapterInterface::SetParamsForAicMetrics(const std::string &mode, c
 void PlatformAdapterInterface::SetParamsForAivMetrics(const std::string &mode, const std::string &metrics,
     int samplingInterval)
 {
+    bool val = false;
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_TASK_AIV_METRICS) != supportSwitch_.end()) {
         params_->aiv_profiling = MSPROF_SWITCH_ON;
         int ret = GetMetricsEvents(metrics, params_->aiv_profiling_events);
@@ -208,6 +257,10 @@ void PlatformAdapterInterface::SetParamsForAivMetrics(const std::string &mode, c
         } else {
             params_->dataTypeConfig |= PROF_AIV_METRICS;
         }
+        val = true;
+    }
+    if (!val) {
+        MSPROF_LOGW("Unrecognized option:aiv_metrics for PlatformType:%d", static_cast<uint8_t>(platformType_));
     }
 }
 
@@ -326,9 +379,14 @@ void PlatformAdapterInterface::SetParamsForDeviceDVPP(int samplingInterval)
 
 void PlatformAdapterInterface::SetParamsForDeviceBIU(int biuFreq)
 {
+    bool ret = false;
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_SYS_DEVICE_BIU) != supportSwitch_.end()) {
         params_->biu = MSPROF_SWITCH_ON;
         params_->biu_freq = biuFreq;
+        ret = true;
+    }
+    if (!ret) {
+        MSPROF_LOGW("Unrecognized option:biu for PlatformType:%d", static_cast<uint8_t>(platformType_));
     }
 }
 

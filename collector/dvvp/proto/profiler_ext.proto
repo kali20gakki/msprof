@@ -12,12 +12,11 @@ message ProfAclConfig {
     string storage_limit = 7;
     string hccl = 8;
     string msproftx = 9;
-    string biu = 10;
-    uint32 biu_freq = 11;
-    string task_time = 12;
-    string aiv_metrics = 13;
-    string ascendcl = 14;
-    string runtime_api = 15;
+    uint32 biu_freq = 10;
+    string task_time = 11;
+    string aiv_metrics = 12;
+    string ascendcl = 13;
+    string runtime_api = 14;
 }
 
 message ProfGeOptionsConfig {
@@ -30,14 +29,13 @@ message ProfGeOptionsConfig {
     string aic_metrics = 7;
     string l2 = 11;
     string storage_limit = 12;
-    string power = 14;
-    string hccl = 16;
-    string msproftx = 17;
-    string biu = 18;
-    uint32 biu_freq = 19;
-    string task_time = 20;
-    string aiv_metrics = 21;
-    string runtime_api = 22;
+    string power = 13;
+    string hccl = 14;
+    string msproftx = 15;
+    uint32 biu_freq = 16;
+    string task_time = 18;
+    string aiv_metrics = 19;
+    string runtime_api = 20;
 }
 
 message ProfAclInitConfig {
