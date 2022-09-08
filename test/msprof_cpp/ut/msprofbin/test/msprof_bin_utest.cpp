@@ -97,7 +97,7 @@ TEST_F(MSPROF_BIN_UTEST, PlatformAdapterModule)
     EXPECT_EQ(nullptr, ret);
     
     ret = PlatformAdapterMgr->Init(params, PlatformType::MINI_TYPE);
-    int val = ret->Init(params);
+    int val = ret->Init(params, PlatformType::MINI_TYPE);
     EXPECT_EQ(PROFILING_SUCCESS, val);
 }
 
@@ -108,7 +108,7 @@ TEST_F(MSPROF_BIN_UTEST, PlatformAdapterInterfaceModule1)
     MSVP_MAKE_SHARED0_BREAK(PlatformAdapterInterfaceMgr, PlatformAdapterInterface);
     SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params;
     MSVP_MAKE_SHARED0_VOID(params, analysis::dvvp::message::ProfileParams);
-    int ret = PlatformAdapterInterfaceMgr->Init(params);
+    int ret = PlatformAdapterInterfaceMgr->Init(params, PlatformType::MINI_TYPE);
     EXPECT_EQ(PROFILING_SUCCESS, ret);
     PlatformAdapterInterfaceMgr->supportSwitch_ = {
         PLATFORM_TASK_ASCENDCL, PLATFORM_TASK_GRAPH_ENGINE, PLATFORM_TASK_RUNTIME, PLATFORM_TASK_AICPU,
@@ -156,7 +156,7 @@ TEST_F(MSPROF_BIN_UTEST, PlatformAdapterInterfaceModule2)
     MSVP_MAKE_SHARED0_BREAK(PlatformAdapterInterfaceMgr, PlatformAdapterInterface);
     SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params;
     MSVP_MAKE_SHARED0_VOID(params, analysis::dvvp::message::ProfileParams);
-    int ret = PlatformAdapterInterfaceMgr->Init(params);
+    int ret = PlatformAdapterInterfaceMgr->Init(params, PlatformType::MINI_TYPE);
     EXPECT_EQ(PROFILING_SUCCESS, ret);
     PlatformAdapterInterfaceMgr->supportSwitch_ = {
         PLATFORM_TASK_ASCENDCL, PLATFORM_TASK_GRAPH_ENGINE, PLATFORM_TASK_RUNTIME, PLATFORM_TASK_AICPU,
@@ -193,7 +193,7 @@ TEST_F(MSPROF_BIN_UTEST, PlatformAdapterInterfaceModule3)
     MSVP_MAKE_SHARED0_BREAK(PlatformAdapterInterfaceMgr, PlatformAdapterInterface);
     SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params;
     MSVP_MAKE_SHARED0_VOID(params, analysis::dvvp::message::ProfileParams);
-    int ret = PlatformAdapterInterfaceMgr->Init(params);
+    int ret = PlatformAdapterInterfaceMgr->Init(params, PlatformType::MINI_TYPE);
     EXPECT_EQ(PROFILING_SUCCESS, ret);
     PlatformAdapterInterfaceMgr->supportSwitch_ = {
         PLATFORM_TASK_ASCENDCL, PLATFORM_TASK_GRAPH_ENGINE, PLATFORM_TASK_RUNTIME, PLATFORM_TASK_AICPU,
@@ -237,7 +237,7 @@ TEST_F(MSPROF_BIN_UTEST, PlatformAdapterCloudModule)
     MSVP_MAKE_SHARED0_BREAK(PlatformAdapterCloudMgr, PlatformAdapterCloud);
 
     SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params;
-    int ret = PlatformAdapterCloudMgr->Init(params);
+    int ret = PlatformAdapterCloudMgr->Init(params, PlatformType::CLOUD_TYPE);
     EXPECT_EQ(PROFILING_SUCCESS, ret);
     params = nullptr;
 
@@ -252,7 +252,7 @@ TEST_F(MSPROF_BIN_UTEST, PlatformAdapterCloudv2Module)
     MSVP_MAKE_SHARED0_BREAK(PlatformAdapterCloudv2Mgr, PlatformAdapterCloudV2);
 
     SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params;
-    int ret = PlatformAdapterCloudv2Mgr->Init(params);
+    int ret = PlatformAdapterCloudv2Mgr->Init(params, PlatformType::CHIP_V4_1_0);
     EXPECT_EQ(PROFILING_SUCCESS, ret);
     params = nullptr;
 
@@ -267,7 +267,7 @@ TEST_F(MSPROF_BIN_UTEST, PlatformAdapterDcModule)
     MSVP_MAKE_SHARED0_BREAK(PlatformAdapterDcMgr, PlatformAdapterDc);
 
     SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params;
-    int ret = PlatformAdapterDcMgr->Init(params);
+    int ret = PlatformAdapterDcMgr->Init(params, PlatformType::DC_TYPE);
     EXPECT_EQ(PROFILING_SUCCESS, ret);
     params = nullptr;
 
@@ -282,7 +282,7 @@ TEST_F(MSPROF_BIN_UTEST, PlatformAdapterLhisiModule)
     MSVP_MAKE_SHARED0_BREAK(PlatformAdapterLhisiMgr, PlatformAdapterLhisi);
 
     SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params;
-    int ret = PlatformAdapterLhisiMgr->Init(params);
+    int ret = PlatformAdapterLhisiMgr->Init(params, PlatformType::LHISI_TYPE);
     EXPECT_EQ(PROFILING_SUCCESS, ret);
     params = nullptr;
 
@@ -297,7 +297,7 @@ TEST_F(MSPROF_BIN_UTEST, PlatformAdapterMiniModule)
     MSVP_MAKE_SHARED0_BREAK(PlatformAdapterMiniMgr, PlatformAdapterMini);
 
     SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params;
-    int ret = PlatformAdapterMiniMgr->Init(params);
+    int ret = PlatformAdapterMiniMgr->Init(params, PlatformType::MINI_TYPE);
     EXPECT_EQ(PROFILING_SUCCESS, ret);
     params = nullptr;
 
@@ -312,7 +312,7 @@ TEST_F(MSPROF_BIN_UTEST, PlatformAdapterMdcModule)
     MSVP_MAKE_SHARED0_BREAK(PlatformAdapterMdcMgr, PlatformAdapterMdc);
 
     SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params;
-    int ret = PlatformAdapterMdcMgr->Init(params);
+    int ret = PlatformAdapterMdcMgr->Init(params, PlatformType::MDC_TYPE);
     EXPECT_EQ(PROFILING_SUCCESS, ret);
     params = nullptr;
 
@@ -406,12 +406,12 @@ TEST_F(MSPROF_BIN_UTEST, SetDefaultParamsApp)
     MsprofParamAdapterMgr->SetDefaultParamsApp();
 }
 
-TEST_F(MSPROF_BIN_UTEST, GetMsprofMode)
+TEST_F(MSPROF_BIN_UTEST, SetMsprofMode)
 {
     GlobalMockObject::verify();
     std::shared_ptr<MsprofParamAdapter> MsprofParamAdapterMgr;
     MSVP_MAKE_SHARED0_BREAK(MsprofParamAdapterMgr, MsprofParamAdapter);
-    int ret = MsprofParamAdapterMgr->GetMsprofMode();
+    int ret = MsprofParamAdapterMgr->SetMsprofMode();
     EXPECT_EQ(PROFILING_FAILED, ret);
     std::vector<InputCfg> cfgList = {
         INPUT_CFG_MSPROF_APPLICATION,
@@ -423,7 +423,7 @@ TEST_F(MSPROF_BIN_UTEST, GetMsprofMode)
     };
     for (auto cfg : cfgList) {
         MsprofParamAdapterMgr->paramContainer_[cfg] = "on";
-        ret = MsprofParamAdapterMgr->GetMsprofMode();
+        ret = MsprofParamAdapterMgr->SetMsprofMode();
         EXPECT_EQ(PROFILING_SUCCESS, ret);
     }
 }
@@ -477,11 +477,11 @@ TEST_F(MSPROF_BIN_UTEST, SetModeDefaultParams)
     std::shared_ptr<MsprofParamAdapter> MsprofParamAdapterMgr;
     MSVP_MAKE_SHARED0_BREAK(MsprofParamAdapterMgr, MsprofParamAdapter);
     std::vector<MsprofMode> modeTypeList = {
-        MSPROF_MODE_APP,
-        MSPROF_MODE_SYSTEM,
-        MSPROF_MODE_PARSE,
-        MSPROF_MODE_QUERY,
-        MSPROF_MODE_EXPORT
+        MsprofMode::MSPROF_MODE_APP,
+        MsprofMode::MSPROF_MODE_SYSTEM,
+        MsprofMode::MSPROF_MODE_PARSE,
+        MsprofMode::MSPROF_MODE_QUERY,
+        MsprofMode::MSPROF_MODE_EXPORT
     };
     int ret;
     for (auto modeType : modeTypeList) {
@@ -501,11 +501,7 @@ TEST_F(MSPROF_BIN_UTEST, AclJsonParamAdapterModule)
     SHARED_PTR_ALIA<analysis::dvvp::proto::ProfAclConfig> aclCfg;
     MSVP_MAKE_SHARED0_VOID(aclCfg, analysis::dvvp::proto::ProfAclConfig);
     aclCfg->set_storage_limit("200MB");
-    ret = AclJsonParamAdapterMgr->GenAclJsonContainer(aclCfg);
-    MOCKER_CPP(&Collector::Dvvp::ParamsAdapter::ParamsAdapter::BlackSwitchCheck)
-        .stubs()
-        .will(returnValue(true));
-    EXPECT_EQ(PROFILING_SUCCESS, ret);
+    AclJsonParamAdapterMgr->GenAclJsonContainer(aclCfg);
 }
 
 TEST_F(MSPROF_BIN_UTEST, GenAclJsonContainer)
@@ -517,8 +513,7 @@ TEST_F(MSPROF_BIN_UTEST, GenAclJsonContainer)
     MSVP_MAKE_SHARED0_VOID(aclCfg, analysis::dvvp::proto::ProfAclConfig);
     aclCfg->set_storage_limit("200MB");
     aclCfg->set_l2("on");
-    int ret = AclJsonParamAdapterMgr->GenAclJsonContainer(aclCfg);
-    EXPECT_EQ(PROFILING_SUCCESS, ret);
+    AclJsonParamAdapterMgr->GenAclJsonContainer(aclCfg);
 }
 
 TEST_F(MSPROF_BIN_UTEST, ParamsCheckAclJson)
@@ -547,8 +542,7 @@ TEST_F(MSPROF_BIN_UTEST, SetAclJsonContainerDefaultValue)
     std::shared_ptr<AclJsonParamAdapter> AclJsonParamAdapterMgr;
     MSVP_MAKE_SHARED0_BREAK(AclJsonParamAdapterMgr, AclJsonParamAdapter);
     AclJsonParamAdapterMgr->setConfig_.insert(INPUT_CFG_COM_AI_VECTOR);
-    int ret = AclJsonParamAdapterMgr->SetAclJsonContainerDefaultValue();
-    EXPECT_EQ(PROFILING_SUCCESS, ret);
+    AclJsonParamAdapterMgr->SetAclJsonContainerDefaultValue();
 }
 
 TEST_F(MSPROF_BIN_UTEST, AclJsonSetOutputDir)
@@ -572,6 +566,7 @@ TEST_F(MSPROF_BIN_UTEST, AclJsonSetOutputDir)
     ret = AclJsonParamAdapterMgr->SetOutputDir(output);
     EXPECT_EQ(result2, ret);
 
+    Utils::RemoveDir("/tmp/test", false);
     output = "/tmp/test";
     ret = AclJsonParamAdapterMgr->SetOutputDir(output);
     EXPECT_EQ(output, ret);
@@ -588,11 +583,7 @@ TEST_F(MSPROF_BIN_UTEST, GeOptParamAdapterModule)
     SHARED_PTR_ALIA<analysis::dvvp::proto::ProfGeOptionsConfig> geCfg;
     MSVP_MAKE_SHARED0_VOID(geCfg, analysis::dvvp::proto::ProfGeOptionsConfig);
     geCfg->set_storage_limit("200MB");
-    ret = GeOptParamAdapterMgr->GenGeOptionsContainer(geCfg);
-    MOCKER_CPP(&Collector::Dvvp::ParamsAdapter::ParamsAdapter::BlackSwitchCheck)
-        .stubs()
-        .will(returnValue(true));
-    EXPECT_EQ(PROFILING_SUCCESS, ret);
+    GeOptParamAdapterMgr->GenGeOptionsContainer(geCfg);
 }
 
 TEST_F(MSPROF_BIN_UTEST, ParamsCheckGeOpt)
@@ -661,13 +652,6 @@ TEST_F(MSPROF_BIN_UTEST, GeGetParamFromInputCfg)
     EXPECT_EQ(PROFILING_FAILED, ret);
     MSVP_MAKE_SHARED0_VOID(geCfg, analysis::dvvp::proto::ProfGeOptionsConfig);
     MSVP_MAKE_SHARED0_VOID(params, analysis::dvvp::message::ProfileParams);
-    MOCKER_CPP(&Collector::Dvvp::ParamsAdapter::GeOptParamAdapter::GenGeOptionsContainer)
-        .stubs()
-        .will(returnValue(false))
-        .then(returnValue(true));
-    MOCKER_CPP(&Collector::Dvvp::ParamsAdapter::GeOptParamAdapter::GenGeOptionsContainer)
-        .stubs()
-        .will(returnValue(true));
     MOCKER_CPP(&Collector::Dvvp::ParamsAdapter::GeOptParamAdapter::SetGeOptionsContainerDefaultValue)
         .stubs()
         .will(returnValue(true));
@@ -809,7 +793,7 @@ TEST_F(MSPROF_BIN_UTEST, TransToParam)
     GlobalMockObject::verify();
     std::shared_ptr<ParamsAdapter> ParamsAdapterMgr;
     MSVP_MAKE_SHARED0_BREAK(ParamsAdapterMgr, ParamsAdapter);
-
+    ParamsAdapterMgr->CheckListInit();
     std::array<std::string, INPUT_CFG_MAX> paramContainer;
     SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params;
     MSVP_MAKE_SHARED0_VOID(params, analysis::dvvp::message::ProfileParams);

@@ -106,7 +106,7 @@ enum InputCfg {
     INPUT_CFG_MAX
 };
 
-enum EnableType {
+enum class EnableType {
     ENABLE_MSPROF,
     ENABLE_ACL_JSON,
     ENABLE_GE_OPTION,
@@ -122,9 +122,8 @@ public:
     int CheckListInit();
     bool BlackSwitchCheck(InputCfg inputCfg) const;
     PlatformType GetPlatform() const;
-    int ComCfgCheck(EnableType enableType, std::array<std::string, INPUT_CFG_MAX> paramContainer,
-        std::set<InputCfg> &setArgs,
-        std::vector<std::pair<InputCfg, std::string>> &cfgList) const;
+    int ComCfgCheck(std::array<std::string, INPUT_CFG_MAX> paramContainer,
+        std::set<InputCfg> &setArgs, std::vector<std::pair<InputCfg, std::string>> &cfgList) const;
     int TransToParam(std::array<std::string, INPUT_CFG_MAX> paramContainer, SHARED_PTR_ALIA<ProfileParams> params);
 public:
     bool CheckFreqValid(const std::string &freq, const InputCfg freqOpt) const;

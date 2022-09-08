@@ -20,6 +20,7 @@ namespace Collector {
 namespace Dvvp {
 namespace Common {
 namespace PlatformAdapter {
+using Analysis::Dvvp::Common::Config::PlatformType;
 enum CollectorTypesForPlatform {
     // Task
     PLATFORM_TASK_ASCENDCL,
@@ -87,7 +88,7 @@ public:
     PlatformAdapterInterface();
     virtual ~PlatformAdapterInterface();
 
-    virtual int Init(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params);
+    virtual int Init(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params, PlatformType platformType);
     virtual int Uninit();
     virtual void SetParamsForGlobal(struct CommonParams &comParams);
     virtual void SetParamsForTaskTime();
@@ -124,6 +125,7 @@ protected:
     std::string aicRunningFreq_;   // to calculate aic total time
     std::string sysCountFreq_;    // to calculate op start/end time
     std::string l2CacheEvents_;
+    PlatformType platformType_;
     SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params_;
 
 private:

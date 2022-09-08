@@ -25,7 +25,8 @@ PlatformAdapterLhisi::~PlatformAdapterLhisi()
 {
 }
 
-int PlatformAdapterLhisi::Init(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params)
+int PlatformAdapterLhisi::Init(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params,
+    PlatformType platformType)
 {
     params_ = params;
     supportSwitch_ = {
@@ -36,6 +37,7 @@ int PlatformAdapterLhisi::Init(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileP
         PLATFORM_SYS_DEVICE_ALL_PID_CPU_MEM_USAGE};
     aicRunningFreq_ = "300";
     sysCountFreq_ = "24";
+    platformType_ = platformType;
     return PROFILING_SUCCESS;
 }
 
