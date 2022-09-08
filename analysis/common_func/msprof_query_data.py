@@ -181,15 +181,6 @@ class MsprofQueryData:
 class QueryArgumentCheck:
 
     @staticmethod
-    def _check_integer_with_min_value(arg: any, min_value: int = None, nullable: bool = False) -> bool:
-        if nullable and arg is None:
-            return True
-        if arg is not None and isinstance(arg, int):
-            if min_value is not None:
-                return arg >= min_value
-        return False
-
-    @staticmethod
     def check_arguments_valid(npu_id: int, model_id: int, iteration_id: int) -> None:
         if not QueryArgumentCheck._check_integer_with_min_value(npu_id, min_value=-1):
             error(MsProfCommonConstant.COMMON_FILE_NAME,
@@ -203,3 +194,12 @@ class QueryArgumentCheck:
             error(MsProfCommonConstant.COMMON_FILE_NAME,
                   "The query iteration id is wrong. Please enter a valid value.")
             raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR)
+
+    @staticmethod
+    def _check_integer_with_min_value(arg: any, min_value: int = None, nullable: bool = False) -> bool:
+        if nullable and arg is None:
+            return True
+        if arg is not None and isinstance(arg, int):
+            if min_value is not None:
+                return arg >= min_value
+        return False
