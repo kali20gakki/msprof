@@ -23,7 +23,7 @@ public:
     PlatformAdapterMini();
     ~PlatformAdapterMini() override;
 
-    int Init(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params) override;
+    int Init(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params, PlatformType platformType) override;
     int Uninit() override;
 
 private:
