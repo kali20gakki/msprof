@@ -25,7 +25,7 @@ using Analysis::Dvvp::Msprof::MsprofCmdInfo;
 using analysis::dvvp::proto::ProfAclConfig;
 using analysis::dvvp::proto::ProfGeOptionsConfig;
 
-enum MsprofMode {
+enum class MsprofMode {
     MSPROF_MODE_APP,
     MSPROF_MODE_SYSTEM,
     MSPROF_MODE_PARSE,
@@ -36,7 +36,7 @@ enum MsprofMode {
 class MsprofParamAdapter : public ParamsAdapter {
 public:
     MsprofParamAdapter() {}
-    ~MsprofParamAdapter() {}
+    ~MsprofParamAdapter() override {}
     int GetParamFromInputCfg(std::unordered_map<int, std::pair<MsprofCmdInfo, std::string>> argvMap,
     SHARED_PTR_ALIA<ProfileParams> params);
 
@@ -44,14 +44,14 @@ private:
     int Init();
     void CreateCfgMap();
     int ParamsCheckMsprof(std::vector<std::pair<InputCfg, std::string>> &cfgList);
-    bool ParamsCheckMsprofV1(InputCfg inputCfg, std::string cfgValue);
+    bool ParamsCheckMsprofV1(InputCfg inputCfg, std::string cfgValue) const;
     int ParamsCheck(std::unordered_map<int, std::pair<MsprofCmdInfo, std::string>> argvMap);
     void SetDefaultParamsApp();
     void SetDefaultParamsSystem();
     void SetDefaultParamsParse();
     void SetDefaultParamsQuery();
     void SetDefaultParamsExport();
-    int GetMsprofMode();
+    int SetMsprofMode();
     void SetParamsSelf();
     void SpliteAppPath(const std::string &appParams);
     int SetModeDefaultParams(MsprofMode modeType);
@@ -79,9 +79,9 @@ public:
 private:
     int Init();
     int ParamsCheckAclJson(std::vector<std::pair<InputCfg, std::string>> &cfgList) const;
-    int GenAclJsonContainer(SHARED_PTR_ALIA<ProfAclConfig> aclCfg);
-    int SetAclJsonContainerDefaultValue();
-    std::string SetOutputDir(const std::string &outputDir);
+    void GenAclJsonContainer(SHARED_PTR_ALIA<ProfAclConfig> aclCfg);
+    void SetAclJsonContainerDefaultValue();
+    std::string SetOutputDir(const std::string &outputDir) const;
 
 private:
     SHARED_PTR_ALIA<ProfileParams> params_;
@@ -100,9 +100,9 @@ public:
 private:
     int Init();
     int ParamsCheckGeOpt(std::vector<std::pair<InputCfg, std::string>> &cfgList) const;
-    int GenGeOptionsContainer(SHARED_PTR_ALIA<ProfGeOptionsConfig> geCfg);
+    void GenGeOptionsContainer(SHARED_PTR_ALIA<ProfGeOptionsConfig> geCfg);
     int SetGeOptionsContainerDefaultValue();
-    int SetOutputDir(std::string &outputDir);
+    int SetOutputDir(std::string &outputDir) const;
 
 private:
     SHARED_PTR_ALIA<ProfileParams> params_;
@@ -116,7 +116,7 @@ private:
 class AclApiParamAdapter : public ParamsAdapter {
 public:
     AclApiParamAdapter() {};
-    int GetParamFromInputCfg(const ProfConfig * apiCfg,
+    int GetParamFromInputCfg(const ProfConfig *apiCfg,
         std::array<std::string, ACL_PROF_ARGS_MAX> argsArr,
         SHARED_PTR_ALIA<ProfileParams> params);
 
@@ -132,7 +132,7 @@ private:
     void ProfSystemHardwareMemCfgToContainer(std::array<std::string, ACL_PROF_ARGS_MAX> argsArr);
     void ProfSystemCfgToContainer(const ProfConfig* apiCfg,
         std::array<std::string, ACL_PROF_ARGS_MAX> argsArr);
-    std::string DevIdToStr(uint32_t devNum, const uint32_t* devList);
+    std::string DevIdToStr(uint32_t devNum, const uint32_t* devList) const;
 
 private:
     SHARED_PTR_ALIA<ProfileParams> params_;

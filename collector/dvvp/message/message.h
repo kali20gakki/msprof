@@ -78,6 +78,15 @@ enum COLLECTON_STATUS {
 };
 
 struct BaseInfo {
+    void SetUint64Value(nlohmann::json &object, const std::string key, uint64_t value)
+    {
+        object[key] = value;
+    }
+    void GetUint64Value(const nlohmann::json &object, const std::string key, uint64_t &value, uint64_t defVal)
+    {
+        value = object.value(key, defVal);
+    }
+
     std::string ToString()
     {
         std::string result;
@@ -222,10 +231,10 @@ struct JobContext : BaseInfo {
         SET_VALUE(object, tag);
         SET_VALUE(object, dev_id);
         SET_VALUE(object, job_id);
-        SET_VALUE(object, chunkStartTime);
-        SET_VALUE(object, chunkEndTime);
         SET_VALUE(object, dataModule);
         SET_VALUE(object, stream_enabled);
+        SetUint64Value(object, MSG_STR(chunkStartTime), chunkStartTime);
+        SetUint64Value(object, MSG_STR(chunkEndTime), chunkEndTime);
     }
 
     void FromObject(const nlohmann::json &object) override
@@ -235,10 +244,10 @@ struct JobContext : BaseInfo {
         FROM_STRING_VALUE(object, tag);
         FROM_STRING_VALUE(object, dev_id);
         FROM_STRING_VALUE(object, job_id);
-        FROM_INT_VALUE(object, chunkStartTime, 0);
-        FROM_INT_VALUE(object, chunkEndTime, 0);
         FROM_INT_VALUE(object, dataModule, 0);
         FROM_STRING_VALUE(object, stream_enabled);
+        GetUint64Value(object, MSG_STR(chunkStartTime), chunkStartTime, 0);
+        GetUint64Value(object, MSG_STR(chunkEndTime), chunkEndTime, 0);
     }
 };
 }  // namespace message
