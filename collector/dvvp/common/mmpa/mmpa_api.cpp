@@ -1087,32 +1087,6 @@ ssize_t MmSocketSend(MmSockHandle sockFd, void *sendBuf, int32_t sendLen, int32_
     }
     return ret;
 }
-
-int32_t MmMutexLock(MmMutexT *mutex)
-{
-    if (mutex == nullptr) {
-        return PROFILING_INVALID_PARAM;
-    }
-
-    int32_t ret = pthread_mutex_lock(mutex);
-    if (ret != PROFILING_SUCCESS) {
-        ret = PROFILING_FAILED;
-    }
-    return ret;
-}
-
-int32_t MmMutexUnLock(MmMutexT *mutex)
-{
-    if (mutex == nullptr) {
-        return PROFILING_INVALID_PARAM;
-    }
-
-    int32_t ret = pthread_mutex_unlock(mutex);
-    if (ret != PROFILING_SUCCESS) {
-        ret = PROFILING_FAILED;
-    }
-    return ret;
-}
 } // Mmpa
 } // Dvvp
 } // Collector
