@@ -578,21 +578,17 @@ int ProfAclMgr::ProfAclModelSubscribe(const uint32_t modelId, const uint32_t dev
         MSPROF_INNER_ERROR("EK9999", "Model %u has been subscribed", modelId);
         return ACL_ERROR_PROF_REPEAT_SUBSCRIBE;
     }
-
-    auto iterDev = devTasks_.find(devId);
-    if (iterDev != devTasks_.end()) {
+    if (devTasks_.find(devId) != devTasks_.end()) {
         // device already started, check cfg and add fd to subscribe list
         return UpdateSubscribeInfo(modelId, devId, profSubscribeConfig);
     }
     // start device
-    int ret = StartDeviceSubscribeTask(modelId, devId, profSubscribeConfig);
-    if (ret != ACL_SUCCESS) {
+    if (StartDeviceSubscribeTask(modelId, devId, profSubscribeConfig) != ACL_SUCCESS) {
         MSPROF_LOGE("StartDeviceSubscribeTask failed, Model:%u", modelId);
         MSPROF_INNER_ERROR("EK9999", "StartDeviceSubscribeTask failed, Model:%u", modelId);
         return ACL_ERROR_PROFILING_FAILURE;
     }
-    ret = Analysis::Dvvp::ProfilerCommon::RegisterReporterCallback();
-    if (ret != ACL_SUCCESS) {
+    if (Analysis::Dvvp::ProfilerCommon::RegisterReporterCallback() != ACL_SUCCESS) {
         MSPROF_LOGE("RegisterReporterCallback failed, Model:%u", modelId);
         MSPROF_INNER_ERROR("EK9999", "RegisterReporterCallback failed, Model:%u", modelId);
         return ACL_ERROR_PROFILING_FAILURE;

@@ -194,7 +194,7 @@ void ParamsAdapter::SetCommonParams(std::array<std::string, INPUT_CFG_MAX> param
         -1 : std::stoi(paramContainer[INPUT_CFG_HOST_SYS_PID]);
     commonParams.device = (paramContainer[INPUT_CFG_COM_SYS_DEVICES].compare("all") == 0) ?
         DrvGetDevIdsStr() : paramContainer[INPUT_CFG_COM_SYS_DEVICES];
-    commonParams.profilingPeriod = (paramContainer[INPUT_CFG_COM_SYS_PERIOD].empty()) ?\
+    commonParams.profilingPeriod = (paramContainer[INPUT_CFG_COM_SYS_PERIOD].empty()) ?
         -1 : std::stoi(paramContainer[INPUT_CFG_COM_SYS_PERIOD]);
     platformAdapter_->SetParamsForGlobal(commonParams);
     return;
@@ -293,12 +293,12 @@ void ParamsAdapter::SetDeviceSysParams(std::array<std::string, INPUT_CFG_MAX> pa
     if (paramContainer[INPUT_CFG_COM_POWER].compare(MSVP_PROF_ON) == 0) {
         platformAdapter_->SetParamsForDevicePower();
     }
-
     if (paramContainer[INPUT_CFG_COM_BIU].compare(MSVP_PROF_ON) == 0) {
         int biuFreq = paramContainer[INPUT_CFG_COM_BIU_FREQ].empty() ?
             DEFAULT_PROFILING_BIU_FREQ : std::stoi(paramContainer[INPUT_CFG_COM_BIU_FREQ]);
         platformAdapter_->SetParamsForDeviceBIU(biuFreq);
     }
+
     return;
 }
 
