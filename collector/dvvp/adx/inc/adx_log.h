@@ -25,19 +25,4 @@
     }                                                                  \
 } while (0)
 
-
-#define IDE_CTRL_MUTEX_LOCK(mtx, action) do {                          \
-    if (MmMutexLock(mtx) != PROFILING_SUCCESS) {                                   \
-        MSPROF_LOGE("mutex lock error");                                  \
-        action;                                                        \
-    }                                                                  \
-} while (0)
-
-#define IDE_CTRL_MUTEX_UNLOCK(mtx, action) do {                        \
-    if (MmMutexUnLock(mtx) != PROFILING_SUCCESS) {                                 \
-        MSPROF_LOGE("mutex lock error");                                  \
-        action;                                                        \
-    }                                                                  \
-} while (0)
-
 #endif
