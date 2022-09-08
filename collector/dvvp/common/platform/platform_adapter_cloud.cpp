@@ -25,7 +25,8 @@ PlatformAdapterCloud::~PlatformAdapterCloud()
 {
 }
 
-int PlatformAdapterCloud::Init(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params)
+int PlatformAdapterCloud::Init(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params,
+    PlatformType platformType)
 {
     params_ = params;
     supportSwitch_ = {
@@ -42,6 +43,7 @@ int PlatformAdapterCloud::Init(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileP
     aicRunningFreq_ = "800";
     sysCountFreq_ = "100";
     l2CacheEvents_ = "0x5b,0x59,0x5c,0x7d,0x7e,0x71,0x79,0x7c";
+    platformType_ = platformType;
     return PROFILING_SUCCESS;
 }
 
