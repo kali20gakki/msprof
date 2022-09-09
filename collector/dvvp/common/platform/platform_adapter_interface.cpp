@@ -26,7 +26,7 @@ using namespace analysis::dvvp::common::config;
 using namespace analysis::dvvp::common::utils;
 
 PlatformAdapterInterface::PlatformAdapterInterface()
-    : params_(nullptr)
+    : params_(nullptr), platformType_(PlatformType::MINI_TYPE)
 {
     getLlcEvents_ = {{"read", "read"}, {"write", "write"}};
 }
