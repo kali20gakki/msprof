@@ -28,6 +28,7 @@ using namespace analysis::dvvp::common::utils;
 PlatformAdapterInterface::PlatformAdapterInterface()
     : params_(nullptr)
 {
+    getLlcEvents_ = {{"read", "read"}, {"write", "write"}};
 }
 
 PlatformAdapterInterface::~PlatformAdapterInterface()
@@ -38,7 +39,6 @@ int PlatformAdapterInterface::Init(SHARED_PTR_ALIA<analysis::dvvp::message::Prof
     PlatformType platformType)
 {
     params_ = params;
-    getLlcEvents_ = {{"read", "read"}, {"write", "write"}};
     platformType_ = platformType;
     return PROFILING_SUCCESS;
 }

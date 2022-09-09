@@ -570,6 +570,7 @@ TEST_F(MSPROF_BIN_UTEST, AclJsonSetOutputDir)
     output = "/tmp/test";
     ret = AclJsonParamAdapterMgr->SetOutputDir(output);
     EXPECT_EQ(output, ret);
+    Utils::RemoveDir(output, false);
 }
 
 TEST_F(MSPROF_BIN_UTEST, GeOptParamAdapterModule)
