@@ -19,7 +19,9 @@ from common_func.msprof_step import MsprofStep
 from common_func.msvp_common import check_file_writable
 from common_func.path_manager import PathManager
 from msmodel.ai_cpu.data_queue_model import DataQueueModel
+from msmodel.interface.view_model import ViewModel
 from profiling_bean.db_dto.cluster_rank_dto import ClusterRankDto
+from common_func.msvp_common import path_check
 
 
 class DataPreprocessParser:
@@ -111,9 +113,11 @@ class DataPreprocessParser:
 
     def get_data_queue_data(self: any) -> list:
         data_queue_data = []
+        if not path_check(PathManager.get_db_path(self.collection_path, DBNameConstant.DB_CLUSTER_DATA_PREPROCESS)):
+            return data_queue_data
         model = DataQueueModel(self.collection_path, [DBNameConstant.TABLE_DATA_QUEUE])
         with model as _model:
-            if not _model.check_db() or not _model.check_table():
+            if not _model.check_table():
                 return data_queue_data
             data_queue_data = _model.get_all_data(DBNameConstant.TABLE_DATA_QUEUE)
         return data_queue_data
@@ -158,7 +162,7 @@ class DataPreprocessParser:
                 os.makedirs(query_path)
             except OSError as err:
                 error(self.FILE_NAME, "Storing data failed, "
-                              "you may not have the permission to write files in the current path.")
+                                      "you may not have the permission to write files in the current path.")
                 raise ProfException(ProfException.PROF_INVALID_PATH_ERROR) from err
         return os.path.realpath(os.path.join(query_path, file_name))
 
