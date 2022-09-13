@@ -12,7 +12,6 @@ set(common_file
     ${MSPROF_SOURCE_DIR}/dvvp/common/config/config_manager.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/logger/cmd_log.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/depend/src/slog_plugin.cpp
-    # ${MSPROF_SOURCE_DIR}/dvvp/depend/src/driver_plugin.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform.cpp    
     ${MSPROF_SOURCE_DIR}/dvvp/driver/devmgmt/ai_drv_dev_api.cpp        
     ${MSPROF_SOURCE_DIR}/dvvp/driver/devmgmt/ai_drv_dev_api.cpp        
@@ -60,7 +59,10 @@ set(common_file
     ${MSPROF_SOURCE_DIR}/dvvp/adx/stub/adx_prof_api.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/depend/src/slog_plugin.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/depend/src/plugin_handle.cpp
-    ${MSPROF_SOURCE_DIR}/dvvp/params_adapter/params_adapter_impl.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/params_adapter/params_adapter_msprof.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/params_adapter/params_adapter_aclapi.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/params_adapter/params_adapter_acljson.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/params_adapter/params_adapter_geopt.cpp
     ${TOP_DIR}/collector/dvvp/params_adapter/params_adapter.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter.cpp
@@ -149,6 +151,7 @@ target_include_directories(msprof_bin_utest PRIVATE
     ${CMAKE_BINARY_DIR}/proto/profiler/
     ${MSPROF_SOURCE_DIR}/dvvp/depend/include/stub
     ${MSPROF_SOURCE_DIR}/dvvp
+    ${MSPROF_SOURCE_DIR}/dvvp/message
 )
 
 
