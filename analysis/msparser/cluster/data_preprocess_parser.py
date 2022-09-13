@@ -4,6 +4,7 @@
 
 import json
 import os
+import sqlite3
 from collections import OrderedDict
 
 from common_func.common import print_msg, error, warn
@@ -111,11 +112,12 @@ class DataPreprocessParser:
 
     def get_data_queue_data(self: any) -> list:
         data_queue_data = []
-        model = DataQueueModel(self.collection_path, [DBNameConstant.TABLE_DATA_QUEUE])
-        with model as _model:
-            if not _model.check_db() or not _model.check_table():
-                return data_queue_data
-            data_queue_data = _model.get_all_data(DBNameConstant.TABLE_DATA_QUEUE)
+        conn, curs = DBManager().check_connect_db(self.collection_path, DBNameConstant.DB_CLUSTER_DATA_PREPROCESS)
+        if not all([conn, curs, DBManager.judge_table_exist(curs, DBNameConstant.TABLE_DATA_QUEUE)]):
+            return data_queue_data
+        all_data_sql = "select * from {}".format(DBNameConstant.TABLE_DATA_QUEUE)
+        data_queue_data.extend(DBManager.fetch_all_data(curs, all_data_sql))
+        DBManager.destroy_db_connect(conn, curs)
         return data_queue_data
 
     def get_step_trace_data(self: any) -> dict:
