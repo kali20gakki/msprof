@@ -382,7 +382,6 @@ Status aclgrphProfStart(ACL_GRPH_PROF_CONFIG_PTR profilerConfig)
     std::lock_guard<std::mutex> lock(g_aclgraphProfMutex);
     if (!PreCheckGraphProfConfig(profilerConfig)) {
         MSPROF_LOGE("PreCheck GraphProfConfig Failed.");
-        MSPROF_INNER_ERROR("EK9999", "PreCheck GraphProfConfig Failed.");
         return FAILED;
     }
 
@@ -406,7 +405,6 @@ Status aclgrphProfStart(ACL_GRPH_PROF_CONFIG_PTR profilerConfig)
         return FAILED;
     }
 
-    MSPROF_LOGI("Start profiling config by using aclprofStartProfiling");
     ret = ProfAclMgr::instance()->ProfAclStart(&profilerConfig->config);
     if (ret != ACL_SUCCESS) {
         MSPROF_LOGE("Start profiling failed, prof result = %d", ret);
@@ -414,8 +412,12 @@ Status aclgrphProfStart(ACL_GRPH_PROF_CONFIG_PTR profilerConfig)
         return FAILED;
     }
 
-    MSPROF_LOGI("Allocate start profiling config to Ge");
-    uint64_t dataTypeConfig = ProfAclMgr::instance()->GetDataTypeConfigFromParams();
+    uint64_t dataTypeConfig = 0;
+    ret = ProfAclMgr::instance()->GetDataTypeConfigFromParams(dataTypeConfig);
+    if (ret != PROFILING_SUCCESS) {
+        MSPROF_LOGE("[aclgrphProfStart]get dataTypeConfig from params fail.");
+        return FAILED;
+    }
     Status geRet = static_cast<Status>(CommandHandleProfStart(
         profilerConfig->config.devIdList, profilerConfig->config.devNums, dataTypeConfig));
     RETURN_IF_NOT_SUCCESS(geRet);
@@ -443,7 +445,12 @@ Status aclgrphProfStop(ACL_GRPH_PROF_CONFIG_PTR profilerConfig)
     RETURN_IF_NOT_SUCCESS(ret);
 
     MSPROF_LOGI("Allocate stop config of profiling modules to Acl");
-    uint64_t dataTypeConfig = ProfAclMgr::instance()->GetDataTypeConfigFromParams();
+    uint64_t dataTypeConfig = 0;
+    ret = ProfAclMgr::instance()->GetDataTypeConfigFromParams(dataTypeConfig);
+    if (ret != PROFILING_SUCCESS) {
+        MSPROF_LOGE("[aclgrphProfStop]get dataTypeConfig from params fail.");
+        return FAILED;
+    }
     Status geRet = static_cast<Status>(CommandHandleProfStop(
         profilerConfig->config.devIdList, profilerConfig->config.devNums, dataTypeConfig));
     RETURN_IF_NOT_SUCCESS(geRet);

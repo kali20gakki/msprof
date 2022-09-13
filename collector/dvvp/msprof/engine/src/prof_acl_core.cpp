@@ -337,7 +337,12 @@ aclError aclprofStart(ACL_PROF_CONFIG_CONST_PTR profilerConfig)
     }
 
     MSPROF_LOGI("Allocate start profiling config to Acl");
-    uint64_t dataTypeConfig = ProfAclMgr::instance()->GetDataTypeConfigFromParams();
+    uint64_t dataTypeConfig = 0;
+    ret = ProfAclMgr::instance()->GetDataTypeConfigFromParams(dataTypeConfig);
+    if (ret != PROFILING_SUCCESS) {
+        MSPROF_LOGE("[aclprofStart]get dataTypeConfig from params fail.");
+        return ACL_ERROR_PROFILING_FAILURE;
+    }
     ret = Analysis::Dvvp::ProfilerCommon::CommandHandleProfStart(
         profilerConfig->config.devIdList, profilerConfig->config.devNums, dataTypeConfig);
     RETURN_IF_NOT_SUCCESS(ret);
@@ -372,7 +377,12 @@ aclError aclprofStop(ACL_PROF_CONFIG_CONST_PTR profilerConfig)
     }
 
     MSPROF_LOGI("Allocate stop config of profiling modules to Acl");
-    uint64_t dataTypeConfig = ProfAclMgr::instance()->GetDataTypeConfigFromParams();
+    uint64_t dataTypeConfig = 0;
+    ret = ProfAclMgr::instance()->GetDataTypeConfigFromParams(dataTypeConfig);
+    if (ret != PROFILING_SUCCESS) {
+        MSPROF_LOGE("[aclprofStop]get dataTypeConfig from params fail.");
+        return ACL_ERROR_PROFILING_FAILURE;
+    }
     ret = Analysis::Dvvp::ProfilerCommon::CommandHandleProfStop(
         profilerConfig->config.devIdList, profilerConfig->config.devNums, dataTypeConfig);
     RETURN_IF_NOT_SUCCESS(ret);
