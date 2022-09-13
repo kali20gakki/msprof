@@ -49,6 +49,7 @@ class TestExportCommand(unittest.TestCase):
         _db_manager = DBManager()
         _db_manager.destroy(_db_manager.create_sql(DBNameConstant.DB_STEP_TRACE))
         _db_manager.destroy(_db_manager.create_sql(DBNameConstant.DB_TRACE))
+        _db_manager.destroy(_db_manager.create_sql(DBNameConstant.DB_GE_INFO))
 
     def test_check_argument_valid(self):
         args_dic = {"collection_path": "test", "iteration_id": -1, "model_id": None}

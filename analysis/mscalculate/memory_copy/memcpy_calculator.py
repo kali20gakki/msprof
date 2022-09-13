@@ -84,6 +84,7 @@ class MemcpyCalculator(ICalculator, MsMultiProcess):
             ts_data = self._curs.fetchall()
             stream_task_group = self._state_groupby_stream_task(ts_data)
             self._reshape_memcpy_data(stream_task_group)
+        DBManager.destroy_db_connect(self._conn, self._curs)
 
     def save(self: any) -> None:
         """

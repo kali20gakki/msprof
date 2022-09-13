@@ -145,9 +145,10 @@ class TestMsprofDataStorage(unittest.TestCase):
     def test_get_slice_times(self):
         with mock.patch(NAMESPACE + '.logging.warning'):
             key = MsprofDataStorage()
-            key.data_list = [{'test': 'test'} for _ in range(10000000)]
-            key.tid_set = {i for i in range(100)}
-            key.get_slice_times('a', 1)
+            key.data_list = [{'test': 'test_test'}] * 1000000
+            key.tid_set = {i for i in range(2000)}
+            ret = key.get_slice_times(0, 1)
+            self.assertEqual(3, ret)
 
 
 if __name__ == '__main__':

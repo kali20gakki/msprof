@@ -1,19 +1,23 @@
 import os
-import shutil
 import unittest
-from common_func.db_name_constant import DBNameConstant
+from unittest import mock
+
+from analyzer.scene_base.profiling_scene import ProfilingScene
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
+from common_func.db_name_constant import DBNameConstant
 from common_func.msvp_common import MsvpCommonConst
-from common_func.info_conf_reader import InfoConfReader
+from constant.constant import clear_dt_project
+from constant.info_json_construct import DeviceInfo
+from constant.info_json_construct import InfoJson
+from constant.info_json_construct import InfoJsonReaderManager
 from mscalculate.memory_copy.memcpy_calculator import MemcpyCalculator
-from analyzer.scene_base.profiling_scene import ProfilingScene
 
 NAMESAPCE = "common_func.msprof_iteration"
 
 
-def prepar_step_trace_db(current_dir, sqlite_folder):
-    conn, curs = DBManager.create_connect_db(current_dir + sqlite_folder + DBNameConstant.DB_STEP_TRACE)
+def prepar_step_trace_db(db_path):
+    conn, curs = DBManager.create_connect_db(db_path)
     columns = ["index_id", "model_id", "step_start", "step_end", "iter_id", "ai_core_num"]
     sql = "create table if not exists {0} ({1})".format(DBNameConstant.TABLE_STEP_TRACE_DATA,
                                                         ",".join(columns))
@@ -54,46 +58,37 @@ def prepar_ts_memcpy_data(conn, curs):
 
 
 class TestMemcpyModel(unittest.TestCase):
-    def setup_class(self):
-        self.current_path = "./memcpy_test/"
-        self.file_folder = "sqlite/"
-
-        if not os.path.exists(self.current_path):
-            os.mkdir(self.current_path)
-        if not os.path.exists(self.current_path + self.file_folder):
-            os.mkdir(self.current_path + self.file_folder)
-        prepar_step_trace_db(self.current_path, self.file_folder)
-
-    def teardown_class(self):
-        if os.path.exists(self.current_path):
-            shutil.rmtree(self.current_path)
+    DIR_PATH = os.path.join(os.path.dirname(__file__), 'DT_MEMCPY_TEST')
 
     def setUp(self):
-        file_list = {}
-        sample_config = {"result_dir": self.current_path, "iter_id": 1, "model_id": 2}
-        self.memcpy_calculator = MemcpyCalculator(file_list, sample_config)
+        os.makedirs(os.path.join(self.DIR_PATH, "sqlite"))
+        db_path = os.path.join(self.DIR_PATH, "sqlite", DBNameConstant.DB_STEP_TRACE)
+        prepar_step_trace_db(db_path)
+
+    def tearDown(self):
+        clear_dt_project(self.DIR_PATH)
 
     def test_calculate_1(self):
         # stream_id, task_id, receive_time, start_time, end_time, duration, name, type
         expect_res = [(1, 2, 2.5, 2.6, 2.7, 0.10000000000000009, 'MemcopyAsync', 'other')]
+        memcpy_calculator = MemcpyCalculator({}, {"result_dir": self.DIR_PATH, "iter_id": 1, "model_id": 2})
 
-        self.memcpy_calculator._has_table = True
-        ProfilingScene().init("")
-        ProfilingScene()._scene = Constant.STEP_INFO
-        InfoConfReader()._info_json = {'pid': 1, "DeviceInfo": [{'hwts_frequency': 1000}]}
-        self.memcpy_calculator.calculator_connect_db()
-        self.memcpy_calculator.calculate()
-        self.assertEqual(expect_res, self.memcpy_calculator._memcpy_data)
+        with mock.patch('common_func.utils.Utils.get_scene', return_value=Constant.STEP_INFO):
+            ProfilingScene().init("")
+            InfoJsonReaderManager(InfoJson(pid=1, DeviceInfo=[DeviceInfo(hwts_frequency=1000)])).process()
+            memcpy_calculator.calculator_connect_db()
+            memcpy_calculator.calculate()
+            self.assertEqual(expect_res, memcpy_calculator._memcpy_data)
 
     def test_calculate_2(self):
         # stream_id, task_id, receive_time, start_time, end_time, duration, name, type
         expect_res = [(1, 1, 0.5, 0.6, 0.7, 0.09999999999999998, 'MemcopyAsync', 'other'),
                       (1, 2, 2.5, 2.6, 2.7, 0.10000000000000009, 'MemcopyAsync', 'other')]
+        memcpy_calculator = MemcpyCalculator({}, {"result_dir": self.DIR_PATH, "iter_id": 1, "model_id": 2})
 
-        self.memcpy_calculator._has_table = True
-        ProfilingScene().init("")
-        ProfilingScene()._scene = Constant.SINGLE_OP
-        InfoConfReader()._info_json = {'pid': 1, "DeviceInfo": [{'hwts_frequency': 1000}]}
-        self.memcpy_calculator.calculator_connect_db()
-        self.memcpy_calculator.calculate()
-        self.assertEqual(expect_res, self.memcpy_calculator._memcpy_data)
+        with mock.patch('common_func.utils.Utils.get_scene', return_value=Constant.SINGLE_OP):
+            ProfilingScene().init("")
+            InfoJsonReaderManager(InfoJson(pid=1, DeviceInfo=[DeviceInfo(hwts_frequency=1000)])).process()
+            memcpy_calculator.calculator_connect_db()
+            memcpy_calculator.calculate()
+            self.assertEqual(expect_res, memcpy_calculator._memcpy_data)
