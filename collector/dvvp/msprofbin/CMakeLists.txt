@@ -54,7 +54,7 @@ set(hdcCpp
 add_executable(msprofbin
     ${TOP_DIR}/collector/dvvp/common/platform/platform_adapter.cpp
     ${TOP_DIR}/collector/dvvp/params_adapter/params_adapter.cpp
-    ${TOP_DIR}/collector/dvvp/params_adapter/params_adapter_impl.cpp
+    ${TOP_DIR}/collector/dvvp/params_adapter/params_adapter_msprof.cpp
     ${TOP_DIR}/collector/dvvp/common/logger/cmd_log.cpp
     src/msprof_bin.cpp
     src/msprof_manager.cpp
