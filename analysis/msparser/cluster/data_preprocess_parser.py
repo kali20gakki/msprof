@@ -115,8 +115,7 @@ class DataPreprocessParser:
         data_queue_data = []
         if not path_check(PathManager.get_db_path(self.collection_path, DBNameConstant.DB_CLUSTER_DATA_PREPROCESS)):
             return data_queue_data
-        model = ViewModel(self.collection_path, DBNameConstant.DB_CLUSTER_DATA_PREPROCESS,
-                          [DBNameConstant.TABLE_DATA_QUEUE])
+        model = DataQueueModel(self.collection_path, [DBNameConstant.TABLE_DATA_QUEUE])
         with model as _model:
             if not _model.check_table():
                 return data_queue_data
