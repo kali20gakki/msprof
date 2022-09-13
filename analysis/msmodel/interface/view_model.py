@@ -28,7 +28,8 @@ class ViewModel(BaseModel):
         """
         create db and tables
         """
-        self.conn, self.cur = DBManager.check_connect_db(self.result_dir, self.db_name)
+        self.conn, self.cur = DBManager.create_connect_db(
+            PathManager.get_db_path(self.result_dir, self.db_name))
         if not (self.conn and self.cur):
             return False
         return True
