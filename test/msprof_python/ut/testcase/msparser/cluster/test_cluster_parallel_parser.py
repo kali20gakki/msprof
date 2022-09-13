@@ -1,4 +1,5 @@
 import os
+import pathlib
 import unittest
 from unittest import mock
 
@@ -35,8 +36,8 @@ class TestClusterParallelParser(unittest.TestCase):
         self.assertEqual(ProfException.PROF_CLUSTER_INVALID_DB, err.value.code)
 
     def test_process_should_raise_prof_exception_when_without_cluster_table(self):
-        os.mknod(os.path.join(self.DIR_PATH, 'sqlite', 'cluster_rank.db'))
-        os.mknod(os.path.join(self.DIR_PATH, 'sqlite', 'cluster_step_trace.db'))
+        pathlib.Path(os.path.join(self.DIR_PATH, 'sqlite', 'cluster_rank.db')).touch()
+        pathlib.Path(os.path.join(self.DIR_PATH, 'sqlite', 'cluster_step_trace.db')).touch()
         with pytest.raises(ProfException) as err:
             check = ClusterParallelParser(self.params)
             check.process()

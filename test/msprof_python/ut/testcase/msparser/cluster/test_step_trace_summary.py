@@ -18,14 +18,14 @@ NAMESPACE = 'msparser.cluster.step_trace_summary'
 
 
 class TestStepTraceSummary(unittest.TestCase):
+    DIR_PATH = os.path.join(os.path.dirname(__file__), 'DT_StepTraceSummary')
     param = {
-        "collection_path": "test1",
+        "collection_path": DIR_PATH,
         "is_cluster": True,
         "npu_id": 0,
         "model_id": 1,
         "iteration_id": 1
     }
-    DIR_PATH = os.path.join(os.path.dirname(__file__), 'test1')
 
     def setUp(self) -> None:
         os.mkdir(self.DIR_PATH)

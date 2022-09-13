@@ -5,7 +5,11 @@ import logging
 import pytest
 from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
+from constant.info_json_construct import DeviceInfo
+from constant.info_json_construct import InfoJson
+from constant.info_json_construct import InfoJsonReaderManager
 from sqlite.db_manager import DBManager
+from sqlite.db_manager import DBOpen
 from viewer.calculate_rts_data import calculate_task_schedule_data, \
     multi_calculate_task_cost_time, calculate_timeline_task_time, handle_task_time, check_aicore_events, \
     create_ai_event_tables, insert_event_value, insert_metric_value, get_limit_and_offset, \
@@ -47,6 +51,7 @@ class TestCalculateRts(unittest.TestCase):
     def test_handle_task_time_1(self):
         data = [(1, 0, '', '', 1, 2, 3, 5, 3)]
         list_data = [-1, -1, -1]
+        InfoJsonReaderManager(InfoJson(DeviceInfo=[DeviceInfo(hwts_frequency="680")])).process()
         res = handle_task_time(0, [], data, list_data)
         self.assertEqual(res[0], -1)
 
@@ -140,7 +145,7 @@ class TestCalculateRts(unittest.TestCase):
         self.assertEqual(res, [])
 
     def test_get_limit_and_offset_2(self):
-        create_sql = "CREATE TABLE IF NOT EXISTS " + DBNameConstant.TABLE_STEP_TRACE_DATA +\
+        create_sql = "CREATE TABLE IF NOT EXISTS " + DBNameConstant.TABLE_STEP_TRACE_DATA + \
                      "(index_id, model_id, step_start, step_end, iter_id, ai_core_num)"
         data = ((1, 1, 118562263836, 118571743672, 1, 60),)
         insert_sql = "insert into {0} values ({value})".format(
@@ -198,31 +203,31 @@ class TestCalculateRts(unittest.TestCase):
         db_manager.destroy(test_sql)
 
     def test_insert_metric_summary_table_2(self):
-        db_manager = DBManager()
-        test_sql = db_manager.create_table("runtime.db")
-        with mock.patch(NAMESPACE + ".PathManager.get_db_path", return_value=""), \
-                mock.patch(NAMESPACE + ".DBManager.judge_table_exist", return_value=True), \
-                mock.patch(NAMESPACE + ".DBManager.check_connect_db_path", return_value=test_sql), \
-                mock.patch(NAMESPACE + ".DBManager.destroy_db_connect"), \
-                mock.patch(NAMESPACE + ".DBManager.drop_table"), \
-                mock.patch(NAMESPACE + ".get_metrics_from_sample_config", return_value=[]), \
-                mock.patch(NAMESPACE + ".insert_metric_value", return_value=True):
-            insert_metric_summary_table('', 6800000, index_id=1, model_id=1, have_step_info=False)
+        with DBOpen("runtime.db") as _db_open:
+            test_sql = (_db_open.db_conn, _db_open.db_curs)
+            with mock.patch(NAMESPACE + ".PathManager.get_db_path", return_value=""), \
+                    mock.patch(NAMESPACE + ".DBManager.judge_table_exist", return_value=True), \
+                    mock.patch(NAMESPACE + ".DBManager.check_connect_db_path", return_value=test_sql), \
+                    mock.patch(NAMESPACE + ".DBManager.destroy_db_connect"), \
+                    mock.patch(NAMESPACE + ".DBManager.drop_table"), \
+                    mock.patch(NAMESPACE + ".get_metrics_from_sample_config", return_value=[]), \
+                    mock.patch(NAMESPACE + ".insert_metric_value", return_value=True):
+                insert_metric_summary_table('', 6800000, index_id=1, model_id=1, have_step_info=False)
 
-        with mock.patch(NAMESPACE + ".PathManager.get_db_path", return_value=""), \
-                mock.patch(NAMESPACE + ".DBManager.judge_table_exist", return_value=False), \
-                mock.patch(NAMESPACE + ".DBManager.check_connect_db_path", return_value=test_sql), \
-                mock.patch(NAMESPACE + ".DBManager.destroy_db_connect"):
-            insert_metric_summary_table('', 6800000, index_id=1, model_id=1, have_step_info=False)
+            with mock.patch(NAMESPACE + ".PathManager.get_db_path", return_value=""), \
+                    mock.patch(NAMESPACE + ".DBManager.judge_table_exist", return_value=False), \
+                    mock.patch(NAMESPACE + ".DBManager.check_connect_db_path", return_value=test_sql), \
+                    mock.patch(NAMESPACE + ".DBManager.destroy_db_connect"):
+                insert_metric_summary_table('', 6800000, index_id=1, model_id=1, have_step_info=False)
 
-        with mock.patch(NAMESPACE + ".PathManager.get_db_path", return_value=""), \
-                mock.patch(NAMESPACE + ".DBManager.judge_table_exist", return_value=False), \
-                mock.patch(NAMESPACE + ".DBManager.check_connect_db_path", return_value=test_sql), \
-                mock.patch(NAMESPACE + ".DBManager.destroy_db_connect"):
-            insert_metric_summary_table('', 6800000, index_id=1, model_id=1, have_step_info=False)
+            with mock.patch(NAMESPACE + ".PathManager.get_db_path", return_value=""), \
+                    mock.patch(NAMESPACE + ".DBManager.judge_table_exist", return_value=False), \
+                    mock.patch(NAMESPACE + ".DBManager.check_connect_db_path", return_value=test_sql), \
+                    mock.patch(NAMESPACE + ".DBManager.destroy_db_connect"):
+                insert_metric_summary_table('', 6800000, index_id=1, model_id=1, have_step_info=False)
 
     def test_calculate_timeline_task_time(self):
-        timeline_data = [[0]*10] * 10
+        timeline_data = [[0] * 10] * 10
         with mock.patch(NAMESPACE + ".LoadInfoManager.load_info"):
             calculate_timeline_task_time(timeline_data, {}, 0, "")
 
@@ -238,8 +243,8 @@ class TestCalculateRts(unittest.TestCase):
         curs = mock.Mock()
         conn = mock.Mock()
         with mock.patch(NAMESPACE + ".insert_event_value"), \
-            mock.patch(NAMESPACE + ".DBManager.get_table_headers", return_value=["r1", "r2", "device_id"]), \
-            mock.patch(NAMESPACE + "._get_block_core_device_data"):
+                mock.patch(NAMESPACE + ".DBManager.get_table_headers", return_value=["r1", "r2", "device_id"]), \
+                mock.patch(NAMESPACE + "._get_block_core_device_data"):
             insert_event_value(curs, conn, 0)
 
 
