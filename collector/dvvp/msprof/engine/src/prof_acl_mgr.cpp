@@ -37,7 +37,9 @@
 #include "msprof_tx_manager.h"
 #include "utils/utils.h"
 #include "mmpa_api.h"
-#include "params_adapter_impl.h"
+#include "params_adapter_aclapi.h"
+#include "params_adapter_geopt.h"
+#include "params_adapter_acljson.h"
 
 using namespace analysis::dvvp::common::config;
 using namespace analysis::dvvp::common::error;

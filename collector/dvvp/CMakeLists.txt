@@ -82,7 +82,9 @@ install(TARGETS stub_msprofiler OPTIONAL
 
 ######################## libmsprofiler.so ###########################
 set(msprofilerCpp
-    ${TOP_DIR}/collector/dvvp/params_adapter/params_adapter_impl.cpp
+    ${TOP_DIR}/collector/dvvp/params_adapter/params_adapter_aclapi.cpp
+    ${TOP_DIR}/collector/dvvp/params_adapter/params_adapter_geopt.cpp
+    ${TOP_DIR}/collector/dvvp/params_adapter/params_adapter_acljson.cpp
     ${TOP_DIR}/collector/dvvp/params_adapter/params_adapter.cpp
     analyze/src/analyzer.cpp
     analyze/src/analyzer_base.cpp

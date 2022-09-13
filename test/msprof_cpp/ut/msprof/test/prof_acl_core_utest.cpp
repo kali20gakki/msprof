@@ -40,7 +40,9 @@
 #include "mmpa_api.h"
 #include "prof_api.h"
 #include "toolchain/prof_acl_api.h"
-#include "params_adapter_impl.h"
+#include "params_adapter_acljson.h"
+#include "params_adapter_aclapi.h"
+#include "params_adapter_geopt.h"
 #include "uploader.h"
 #include "transport/hdc/hdc_transport.h"
 
