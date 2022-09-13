@@ -35,7 +35,7 @@ class TestMsProfClusterInfo(unittest.TestCase):
         cluster_rank_dto.rank_id = 0
         cluster_rank_dto.device_id = 0
         cluster_rank_dto.job_info = "NA"
-        cluster_rank_dto.dir_name = 'PROF1/device_0'
+        cluster_rank_dto.dir_name = os.path.join("PROF1", "device_0")
         with mock.patch(NAMESPACE + '.ClusterInfoViewModel.check_table', return_value=True), \
                 mock.patch(NAMESPACE + '.ClusterInfoViewModel.get_all_cluster_rank_info',
                            return_value=[cluster_rank_dto]), \

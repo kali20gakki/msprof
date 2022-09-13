@@ -1,3 +1,4 @@
+import os
 import unittest
 from unittest import mock
 
@@ -6,6 +7,7 @@ import pytest
 from common_func.db_name_constant import DBNameConstant
 from common_func.msprof_exception import ProfException
 from common_func.platform.chip_manager import ChipManager
+from constant.constant import clear_dt_project
 from msparser.cluster.data_preprocess_parser import DataPreprocessParser
 from profiling_bean.prof_enum.chip_model import ChipModel
 from sqlite.db_manager import DBOpen
@@ -23,11 +25,20 @@ class DataList:
 
 
 class TestDataPreprocessParser(unittest.TestCase):
-    params = {'model_id': 1, 'iteration_id': 1, 'npu_id': 1, 'collection_path': 'test\\test'}
+    DIR_PATH = os.path.join(os.path.dirname(__file__), 'DT_DataPreprocessParser')
+    params = {'model_id': 1, 'iteration_id': 1, 'npu_id': 1,
+              'collection_path': os.path.join(DIR_PATH, "PROF1", "device_0", "sqlite")}
+
+    def setUp(self):
+        os.makedirs(os.path.join(self.DIR_PATH, "PROF1", "device_0", "sqlite"))
+
+    def tearDown(self):
+        clear_dt_project(self.DIR_PATH)
 
     def test_get_data_queue_data(self):
+        db_path = os.path.join(self.DIR_PATH, "PROF1", "device_0", "sqlite", "data_preprocess.db")
         with DBOpen(DBNameConstant.DB_CLUSTER_DATA_PREPROCESS) as db_connect:
-            with mock.patch(NAMESPACE + '.PathManager.get_db_path', return_value='test'), \
+            with mock.patch(NAMESPACE + '.PathManager.get_db_path', return_value=db_path), \
                     mock.patch(NAMESPACE + '.DBManager.check_connect_db_path',
                                return_value=(False, False)), \
                     mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True), \
@@ -36,7 +47,7 @@ class TestDataPreprocessParser(unittest.TestCase):
                     mock.patch(NAMESPACE + '.DBManager.fetch_all_data', return_value=[]):
                 check = DataPreprocessParser({'model_id': 1, 'iter_id': 1, 'rank_id': 1})
                 self.assertEqual(check.get_data_queue_data(), [])
-            with mock.patch(NAMESPACE + '.PathManager.get_db_path', return_value='test'), \
+            with mock.patch(NAMESPACE + '.PathManager.get_db_path', return_value=db_path), \
                     mock.patch(NAMESPACE + '.DBManager.check_connect_db_path',
                                return_value=(db_connect.db_conn, db_connect.db_curs)), \
                     mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True), \
@@ -97,7 +108,7 @@ class TestDataPreprocessParser(unittest.TestCase):
                     check.calculate()
 
     def test_storage_data(self):
-        with mock.patch(NAMESPACE + '.DataPreprocessParser.get_cluster_path', return_value='test'), \
+        with mock.patch(NAMESPACE + '.DataPreprocessParser.get_cluster_path', return_value=self.DIR_PATH), \
                 mock.patch(NAMESPACE + '.check_file_writable'), \
                 mock.patch('builtins.open', mock.mock_open(read_data='')), \
                 mock.patch('os.fdopen', side_effect=OSError), \
