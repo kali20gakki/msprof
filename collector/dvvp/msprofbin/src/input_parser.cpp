@@ -23,7 +23,7 @@
 #include "config/config.h"
 #include "msprof_dlog.h"
 #include "mmpa_api.h"
-#include "params_adapter_impl.h"
+#include "params_adapter_msprof.h"
 
 namespace Analysis {
 namespace Dvvp {
