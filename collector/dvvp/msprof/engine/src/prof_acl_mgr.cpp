@@ -500,9 +500,14 @@ int ProfAclMgr::ProfAclGetDataTypeConfig(const uint32_t devId, uint64_t &dataTyp
     return ACL_SUCCESS;
 }
 
-uint64_t ProfAclMgr::GetDataTypeConfigFromParams()
+int ProfAclMgr::GetDataTypeConfigFromParams(uint64_t &dataTypeConfig)
 {
-    return params_->dataTypeConfig;
+    if (!params_) {
+        MSPROF_LOGE("[GetDataTypeConfigFromParams]params's  memory was empty.");
+        return PROFILING_FAILED;
+    }
+    dataTypeConfig = params_->dataTypeConfig;
+    return PROFILING_SUCCESS;
 }
 
 /**
