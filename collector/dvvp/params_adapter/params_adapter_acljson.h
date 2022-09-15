@@ -15,7 +15,7 @@ using analysis::dvvp::proto::ProfAclConfig;
 
 class ParamsAdapterAclJson : public ParamsAdapter {
 public:
-    ParamsAdapterAclJson() {};
+    ParamsAdapterAclJson() : params_(nullptr) {};
     int GetParamFromInputCfg(SHARED_PTR_ALIA<ProfAclConfig> aclCfg,
         SHARED_PTR_ALIA<ProfileParams> params);
 

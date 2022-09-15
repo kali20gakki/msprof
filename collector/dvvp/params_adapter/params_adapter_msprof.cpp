@@ -354,7 +354,7 @@ int ParamsAdapterMsprof::ParamsCheck(std::unordered_map<int, std::pair<MsprofCmd
 
 int ParamsAdapterMsprof::SetModeDefaultParams(MsprofMode modeType)
 {
-    if (modeType < MsprofMode::MSPROF_MODE_APP || modeType > MsprofMode::MSPROF_MODE_EXPORT) {
+    if (modeType < MsprofMode::MSPROF_MODE_APP || modeType >= MsprofMode::MSPROF_MODE_INVALID) {
         MSPROF_LOGE("msprof mode invalid.");
         return PROFILING_FAILED;
     }
