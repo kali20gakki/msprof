@@ -19,7 +19,7 @@ using namespace analysis::dvvp::common::validation;
 using namespace analysis::dvvp::common::config;
 using namespace analysis::dvvp::message;
 using namespace analysis::dvvp::common::utils;
-int AclJsonParamAdapter::Init()
+int ParamsAdapterAclJson::Init()
 {
     paramContainer_.fill("");
     int ret = CheckListInit();
@@ -61,7 +61,7 @@ int AclJsonParamAdapter::Init()
     return PROFILING_SUCCESS;
 }
 
-int AclJsonParamAdapter::ParamsCheckAclJson(std::vector<std::pair<InputCfg, std::string>> &cfgList) const
+int ParamsAdapterAclJson::ParamsCheckAclJson(std::vector<std::pair<InputCfg, std::string>> &cfgList) const
 {
     bool ret = true;
     bool flag = true;
@@ -85,7 +85,7 @@ int AclJsonParamAdapter::ParamsCheckAclJson(std::vector<std::pair<InputCfg, std:
     return flag ? PROFILING_SUCCESS : PROFILING_FAILED;
 }
 
-void AclJsonParamAdapter::GenAclJsonContainer(SHARED_PTR_ALIA<ProfAclConfig> aclCfg)
+void ParamsAdapterAclJson::GenAclJsonContainer(SHARED_PTR_ALIA<ProfAclConfig> aclCfg)
 {
     paramContainer_[INPUT_CFG_COM_OUTPUT] = aclCfg->output();
     paramContainer_[INPUT_CFG_COM_STORAGE_LIMIT] = aclCfg->storage_limit();
@@ -109,7 +109,7 @@ void AclJsonParamAdapter::GenAclJsonContainer(SHARED_PTR_ALIA<ProfAclConfig> acl
     }
 }
 
-void AclJsonParamAdapter::SetAclJsonContainerDefaultValue()
+void ParamsAdapterAclJson::SetAclJsonContainerDefaultValue()
 {
     paramContainer_[INPUT_CFG_COM_OUTPUT] = SetOutputDir(paramContainer_[INPUT_CFG_COM_OUTPUT]);
     if (paramContainer_[INPUT_CFG_COM_ASCENDCL].empty()) {
@@ -137,7 +137,7 @@ void AclJsonParamAdapter::SetAclJsonContainerDefaultValue()
     }
 }
 
-std::string AclJsonParamAdapter::SetOutputDir(const std::string &outputDir) const
+std::string ParamsAdapterAclJson::SetOutputDir(const std::string &outputDir) const
 {
     std::string result;
     if (outputDir.empty()) {
@@ -162,7 +162,7 @@ std::string AclJsonParamAdapter::SetOutputDir(const std::string &outputDir) cons
     return result;
 }
 
-int AclJsonParamAdapter::GetParamFromInputCfg(SHARED_PTR_ALIA<ProfAclConfig> aclCfg,
+int ParamsAdapterAclJson::GetParamFromInputCfg(SHARED_PTR_ALIA<ProfAclConfig> aclCfg,
     SHARED_PTR_ALIA<ProfileParams> params)
 {
     if (!params) {

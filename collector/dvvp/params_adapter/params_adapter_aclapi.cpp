@@ -23,7 +23,7 @@ using namespace analysis::dvvp::common::validation;
 using namespace analysis::dvvp::common::utils;
 using namespace analysis::dvvp::message;
 
-int AclApiParamAdapter::Init()
+int ParamsAdapterAclApi::Init()
 {
     paramContainer_.fill("");
     int ret = CheckListInit();
@@ -37,7 +37,7 @@ int AclApiParamAdapter::Init()
     return ret;
 }
 
-int AclApiParamAdapter::ParamsCheckAclApi(std::vector<std::pair<InputCfg, std::string>> &cfgList) const
+int ParamsAdapterAclApi::ParamsCheckAclApi(std::vector<std::pair<InputCfg, std::string>> &cfgList) const
 {
     bool ret = true;
     bool flag = true;
@@ -61,7 +61,7 @@ int AclApiParamAdapter::ParamsCheckAclApi(std::vector<std::pair<InputCfg, std::s
     return flag ? PROFILING_SUCCESS : PROFILING_FAILED;
 }
 
-std::string AclApiParamAdapter::DevIdToStr(uint32_t devNum, const uint32_t *devList) const
+std::string ParamsAdapterAclApi::DevIdToStr(uint32_t devNum, const uint32_t *devList) const
 {
     std::string devStr;
     bool flag = false;
@@ -80,7 +80,7 @@ std::string AclApiParamAdapter::DevIdToStr(uint32_t devNum, const uint32_t *devL
     return devStr;
 }
 
-void AclApiParamAdapter::ProfTaskCfgToContainer(const ProfConfig * apiCfg,
+void ParamsAdapterAclApi::ProfTaskCfgToContainer(const ProfConfig * apiCfg,
     std::array<std::string, ACL_PROF_ARGS_MAX> argsArr)
 {
     std::string devStr = DevIdToStr(apiCfg->devNums, apiCfg->devIdList);
@@ -126,7 +126,7 @@ void AclApiParamAdapter::ProfTaskCfgToContainer(const ProfConfig * apiCfg,
     }
 }
 
-void AclApiParamAdapter::ProfMetricsCfgToContainer(const ProfAicoreMetrics aicMetrics,
+void ParamsAdapterAclApi::ProfMetricsCfgToContainer(const ProfAicoreMetrics aicMetrics,
     const uint64_t dataTypeConfig, std::array<std::string, ACL_PROF_ARGS_MAX> argsArr)
 {
     std::string metrics;
@@ -150,7 +150,7 @@ void AclApiParamAdapter::ProfMetricsCfgToContainer(const ProfAicoreMetrics aicMe
     return;
 }
 
-void AclApiParamAdapter::ProfSystemCfgToContainer(const ProfConfig * apiCfg,
+void ParamsAdapterAclApi::ProfSystemCfgToContainer(const ProfConfig * apiCfg,
     std::array<std::string, ACL_PROF_ARGS_MAX> argsArr)
 {
     uint64_t dataTypeConfig = apiCfg->dataTypeConfig;
@@ -200,7 +200,7 @@ void AclApiParamAdapter::ProfSystemCfgToContainer(const ProfConfig * apiCfg,
     }
 }
 
-void AclApiParamAdapter::ProfSystemHardwareMemCfgToContainer(std::array<std::string, ACL_PROF_ARGS_MAX> argsArr)
+void ParamsAdapterAclApi::ProfSystemHardwareMemCfgToContainer(std::array<std::string, ACL_PROF_ARGS_MAX> argsArr)
 {
     if (!argsArr[ACL_PROF_SYS_HARDWARE_MEM_FREQ].empty()) {
         paramContainer_[INPUT_CFG_COM_SYS_HARDWARE_MEM] = MSVP_PROF_ON;
@@ -215,14 +215,14 @@ void AclApiParamAdapter::ProfSystemHardwareMemCfgToContainer(std::array<std::str
     return;
 }
 
-void AclApiParamAdapter::ProfCfgToContainer(const ProfConfig * apiCfg,
+void ParamsAdapterAclApi::ProfCfgToContainer(const ProfConfig * apiCfg,
     std::array<std::string, ACL_PROF_ARGS_MAX> argsArr)
 {
     ProfTaskCfgToContainer(apiCfg, argsArr);
     ProfSystemCfgToContainer(apiCfg, argsArr);
 }
 
-int AclApiParamAdapter::GetParamFromInputCfg(const ProfConfig *apiCfg,
+int ParamsAdapterAclApi::GetParamFromInputCfg(const ProfConfig *apiCfg,
     std::array<std::string, ACL_PROF_ARGS_MAX> argsArr,
     SHARED_PTR_ALIA<ProfileParams> params)
 {
