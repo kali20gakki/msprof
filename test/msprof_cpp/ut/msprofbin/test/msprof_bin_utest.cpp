@@ -326,8 +326,8 @@ TEST_F(MSPROF_BIN_UTEST, PlatformAdapterMdcModule)
 TEST_F(MSPROF_BIN_UTEST, MsprofParamAdapterModule)
 {
     GlobalMockObject::verify();
-    std::shared_ptr<MsprofParamAdapter> MsprofParamAdapterMgr;
-    MSVP_MAKE_SHARED0_BREAK(MsprofParamAdapterMgr, MsprofParamAdapter);
+    std::shared_ptr<ParamsAdapterMsprof> MsprofParamAdapterMgr;
+    MSVP_MAKE_SHARED0_BREAK(MsprofParamAdapterMgr, ParamsAdapterMsprof);
     int ret = MsprofParamAdapterMgr->Init();
     EXPECT_EQ(PROFILING_SUCCESS, ret);
     std::vector<std::pair<InputCfg, std::string>> cfgList;
@@ -340,7 +340,7 @@ TEST_F(MSPROF_BIN_UTEST, MsprofParamAdapterModule)
     MOCKER_CPP(&analysis::dvvp::common::validation::ParamValidation::IsValidSwitch)
         .stubs()
         .will(returnValue(true));
-    MOCKER_CPP(&Collector::Dvvp::ParamsAdapter::MsprofParamAdapter::ParamsCheckMsprofV1)
+    MOCKER_CPP(&Collector::Dvvp::ParamsAdapter::ParamsAdapterMsprof::ParamsCheckMsprofV1)
         .stubs()
         .will(returnValue(true));
     for (auto setCfg : MsprofParamAdapterMgr->msprofConfig_) {
@@ -353,8 +353,8 @@ TEST_F(MSPROF_BIN_UTEST, MsprofParamAdapterModule)
 TEST_F(MSPROF_BIN_UTEST, ParamsCheckMsprofV1)
 {
     GlobalMockObject::verify();
-    std::shared_ptr<MsprofParamAdapter> MsprofParamAdapterMgr;
-    MSVP_MAKE_SHARED0_BREAK(MsprofParamAdapterMgr, MsprofParamAdapter);
+    std::shared_ptr<ParamsAdapterMsprof> MsprofParamAdapterMgr;
+    MSVP_MAKE_SHARED0_BREAK(MsprofParamAdapterMgr, ParamsAdapterMsprof);
     int ret;
     std::vector<InputCfg> inputCfgList = {
         INPUT_CFG_COM_AIV_MODE,
@@ -404,16 +404,16 @@ TEST_F(MSPROF_BIN_UTEST, ParamsCheckMsprofV1)
 TEST_F(MSPROF_BIN_UTEST, SetDefaultParamsApp)
 {
     GlobalMockObject::verify();
-    std::shared_ptr<MsprofParamAdapter> MsprofParamAdapterMgr;
-    MSVP_MAKE_SHARED0_BREAK(MsprofParamAdapterMgr, MsprofParamAdapter);
+    std::shared_ptr<ParamsAdapterMsprof> MsprofParamAdapterMgr;
+    MSVP_MAKE_SHARED0_BREAK(MsprofParamAdapterMgr, ParamsAdapterMsprof);
     MsprofParamAdapterMgr->SetDefaultParamsApp();
 }
 
 TEST_F(MSPROF_BIN_UTEST, SetMsprofMode)
 {
     GlobalMockObject::verify();
-    std::shared_ptr<MsprofParamAdapter> MsprofParamAdapterMgr;
-    MSVP_MAKE_SHARED0_BREAK(MsprofParamAdapterMgr, MsprofParamAdapter);
+    std::shared_ptr<ParamsAdapterMsprof> MsprofParamAdapterMgr;
+    MSVP_MAKE_SHARED0_BREAK(MsprofParamAdapterMgr, ParamsAdapterMsprof);
     int ret = MsprofParamAdapterMgr->SetMsprofMode();
     EXPECT_EQ(PROFILING_FAILED, ret);
     std::vector<InputCfg> cfgList = {
@@ -434,8 +434,8 @@ TEST_F(MSPROF_BIN_UTEST, SetMsprofMode)
 TEST_F(MSPROF_BIN_UTEST, MsprofSetDefaultParams)
 {
     GlobalMockObject::verify();
-    std::shared_ptr<MsprofParamAdapter> MsprofParamAdapterMgr;
-    MSVP_MAKE_SHARED0_BREAK(MsprofParamAdapterMgr, MsprofParamAdapter);
+    std::shared_ptr<ParamsAdapterMsprof> MsprofParamAdapterMgr;
+    MSVP_MAKE_SHARED0_BREAK(MsprofParamAdapterMgr, ParamsAdapterMsprof);
     MsprofParamAdapterMgr->SetDefaultParamsSystem();
     MsprofParamAdapterMgr->SetDefaultParamsParse();
     MsprofParamAdapterMgr->SetDefaultParamsQuery();
@@ -445,8 +445,8 @@ TEST_F(MSPROF_BIN_UTEST, MsprofSetDefaultParams)
 TEST_F(MSPROF_BIN_UTEST, SpliteAppPath)
 {
     GlobalMockObject::verify();
-    std::shared_ptr<MsprofParamAdapter> MsprofParamAdapterMgr;
-    MSVP_MAKE_SHARED0_BREAK(MsprofParamAdapterMgr, MsprofParamAdapter);
+    std::shared_ptr<ParamsAdapterMsprof> MsprofParamAdapterMgr;
+    MSVP_MAKE_SHARED0_BREAK(MsprofParamAdapterMgr, ParamsAdapterMsprof);
     std::string appParam;
     MsprofParamAdapterMgr->SpliteAppPath(appParam);
     appParam = "./main 1";
@@ -458,8 +458,8 @@ TEST_F(MSPROF_BIN_UTEST, SpliteAppPath)
 TEST_F(MSPROF_BIN_UTEST, SetParamsSelf)
 {
     GlobalMockObject::verify();
-    std::shared_ptr<MsprofParamAdapter> MsprofParamAdapterMgr;
-    MSVP_MAKE_SHARED0_BREAK(MsprofParamAdapterMgr, MsprofParamAdapter);
+    std::shared_ptr<ParamsAdapterMsprof> MsprofParamAdapterMgr;
+    MSVP_MAKE_SHARED0_BREAK(MsprofParamAdapterMgr, ParamsAdapterMsprof);
     SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params;
     MSVP_MAKE_SHARED0_VOID(params, analysis::dvvp::message::ProfileParams);
     MsprofParamAdapterMgr->params_ = params;
@@ -469,16 +469,16 @@ TEST_F(MSPROF_BIN_UTEST, SetParamsSelf)
 TEST_F(MSPROF_BIN_UTEST, CreateCfgMap)
 {
     GlobalMockObject::verify();
-    std::shared_ptr<MsprofParamAdapter> MsprofParamAdapterMgr;
-    MSVP_MAKE_SHARED0_BREAK(MsprofParamAdapterMgr, MsprofParamAdapter);
+    std::shared_ptr<ParamsAdapterMsprof> MsprofParamAdapterMgr;
+    MSVP_MAKE_SHARED0_BREAK(MsprofParamAdapterMgr, ParamsAdapterMsprof);
     MsprofParamAdapterMgr->CreateCfgMap();
 }
 
 TEST_F(MSPROF_BIN_UTEST, SetModeDefaultParams)
 {
     GlobalMockObject::verify();
-    std::shared_ptr<MsprofParamAdapter> MsprofParamAdapterMgr;
-    MSVP_MAKE_SHARED0_BREAK(MsprofParamAdapterMgr, MsprofParamAdapter);
+    std::shared_ptr<ParamsAdapterMsprof> MsprofParamAdapterMgr;
+    MSVP_MAKE_SHARED0_BREAK(MsprofParamAdapterMgr, ParamsAdapterMsprof);
     std::vector<MsprofMode> modeTypeList = {
         MsprofMode::MSPROF_MODE_APP,
         MsprofMode::MSPROF_MODE_SYSTEM,
@@ -496,8 +496,8 @@ TEST_F(MSPROF_BIN_UTEST, SetModeDefaultParams)
 TEST_F(MSPROF_BIN_UTEST, AclJsonParamAdapterModule)
 {
     GlobalMockObject::verify();
-    std::shared_ptr<AclJsonParamAdapter> AclJsonParamAdapterMgr;
-    MSVP_MAKE_SHARED0_BREAK(AclJsonParamAdapterMgr, AclJsonParamAdapter);
+    std::shared_ptr<ParamsAdapterAclJson> AclJsonParamAdapterMgr;
+    MSVP_MAKE_SHARED0_BREAK(AclJsonParamAdapterMgr, ParamsAdapterAclJson);
     int ret = AclJsonParamAdapterMgr->Init();
     EXPECT_EQ(PROFILING_SUCCESS, ret);
 
@@ -510,8 +510,8 @@ TEST_F(MSPROF_BIN_UTEST, AclJsonParamAdapterModule)
 TEST_F(MSPROF_BIN_UTEST, GenAclJsonContainer)
 {
     GlobalMockObject::verify();
-    std::shared_ptr<AclJsonParamAdapter> AclJsonParamAdapterMgr;
-    MSVP_MAKE_SHARED0_BREAK(AclJsonParamAdapterMgr, AclJsonParamAdapter);
+    std::shared_ptr<ParamsAdapterAclJson> AclJsonParamAdapterMgr;
+    MSVP_MAKE_SHARED0_BREAK(AclJsonParamAdapterMgr, ParamsAdapterAclJson);
     SHARED_PTR_ALIA<analysis::dvvp::proto::ProfAclConfig> aclCfg;
     MSVP_MAKE_SHARED0_VOID(aclCfg, analysis::dvvp::proto::ProfAclConfig);
     aclCfg->set_storage_limit("200MB");
@@ -522,8 +522,8 @@ TEST_F(MSPROF_BIN_UTEST, GenAclJsonContainer)
 TEST_F(MSPROF_BIN_UTEST, ParamsCheckAclJson)
 {
     GlobalMockObject::verify();
-    std::shared_ptr<AclJsonParamAdapter> AclJsonParamAdapterMgr;
-    MSVP_MAKE_SHARED0_BREAK(AclJsonParamAdapterMgr, AclJsonParamAdapter);
+    std::shared_ptr<ParamsAdapterAclJson> AclJsonParamAdapterMgr;
+    MSVP_MAKE_SHARED0_BREAK(AclJsonParamAdapterMgr, ParamsAdapterAclJson);
     AclJsonParamAdapterMgr->Init();
     MOCKER_CPP(&analysis::dvvp::common::validation::ParamValidation::IsValidSwitch)
         .stubs()
@@ -542,8 +542,8 @@ TEST_F(MSPROF_BIN_UTEST, ParamsCheckAclJson)
 TEST_F(MSPROF_BIN_UTEST, SetAclJsonContainerDefaultValue)
 {
     GlobalMockObject::verify();
-    std::shared_ptr<AclJsonParamAdapter> AclJsonParamAdapterMgr;
-    MSVP_MAKE_SHARED0_BREAK(AclJsonParamAdapterMgr, AclJsonParamAdapter);
+    std::shared_ptr<ParamsAdapterAclJson> AclJsonParamAdapterMgr;
+    MSVP_MAKE_SHARED0_BREAK(AclJsonParamAdapterMgr, ParamsAdapterAclJson);
     AclJsonParamAdapterMgr->setConfig_.insert(INPUT_CFG_COM_AI_VECTOR);
     AclJsonParamAdapterMgr->SetAclJsonContainerDefaultValue();
 }
@@ -551,8 +551,8 @@ TEST_F(MSPROF_BIN_UTEST, SetAclJsonContainerDefaultValue)
 TEST_F(MSPROF_BIN_UTEST, AclJsonSetOutputDir)
 {
     GlobalMockObject::verify();
-    std::shared_ptr<AclJsonParamAdapter> AclJsonParamAdapterMgr;
-    MSVP_MAKE_SHARED0_BREAK(AclJsonParamAdapterMgr, AclJsonParamAdapter);
+    std::shared_ptr<ParamsAdapterAclJson> AclJsonParamAdapterMgr;
+    MSVP_MAKE_SHARED0_BREAK(AclJsonParamAdapterMgr, ParamsAdapterAclJson);
     
     std::string output;
     std::string ret = AclJsonParamAdapterMgr->SetOutputDir(output);
@@ -579,8 +579,8 @@ TEST_F(MSPROF_BIN_UTEST, AclJsonSetOutputDir)
 TEST_F(MSPROF_BIN_UTEST, GeOptParamAdapterModule)
 {
     GlobalMockObject::verify();
-    std::shared_ptr<GeOptParamAdapter> GeOptParamAdapterMgr;
-    MSVP_MAKE_SHARED0_BREAK(GeOptParamAdapterMgr, GeOptParamAdapter);
+    std::shared_ptr<ParamsAdapterGeOpt> GeOptParamAdapterMgr;
+    MSVP_MAKE_SHARED0_BREAK(GeOptParamAdapterMgr, ParamsAdapterGeOpt);
     int ret = GeOptParamAdapterMgr->Init();
     EXPECT_EQ(PROFILING_SUCCESS, ret);
 
@@ -593,8 +593,8 @@ TEST_F(MSPROF_BIN_UTEST, GeOptParamAdapterModule)
 TEST_F(MSPROF_BIN_UTEST, ParamsCheckGeOpt)
 {
     GlobalMockObject::verify();
-    std::shared_ptr<GeOptParamAdapter> GeOptParamAdapterMgr;
-    MSVP_MAKE_SHARED0_BREAK(GeOptParamAdapterMgr, GeOptParamAdapter);
+    std::shared_ptr<ParamsAdapterGeOpt> GeOptParamAdapterMgr;
+    MSVP_MAKE_SHARED0_BREAK(GeOptParamAdapterMgr, ParamsAdapterGeOpt);
     GeOptParamAdapterMgr->Init();
     std::vector<std::pair<InputCfg, std::string>> cfgList;
     MOCKER_CPP(&analysis::dvvp::common::validation::ParamValidation::IsValidSwitch)
@@ -613,13 +613,13 @@ TEST_F(MSPROF_BIN_UTEST, ParamsCheckGeOpt)
 TEST_F(MSPROF_BIN_UTEST, SetGeOptionsContainerDefaultValue)
 {
     GlobalMockObject::verify();
-    std::shared_ptr<GeOptParamAdapter> GeOptParamAdapterMgr;
-    MSVP_MAKE_SHARED0_BREAK(GeOptParamAdapterMgr, GeOptParamAdapter);
+    std::shared_ptr<ParamsAdapterGeOpt> GeOptParamAdapterMgr;
+    MSVP_MAKE_SHARED0_BREAK(GeOptParamAdapterMgr, ParamsAdapterGeOpt);
 
     GeOptParamAdapterMgr->paramContainer_[INPUT_CFG_COM_AIC_METRICS] = "ArithmeticUtilization";
     GeOptParamAdapterMgr->paramContainer_[INPUT_CFG_COM_AIV_METRICS] = "ArithmeticUtilization";
     int ret = GeOptParamAdapterMgr->SetGeOptionsContainerDefaultValue();
-    MOCKER_CPP(&Collector::Dvvp::ParamsAdapter::GeOptParamAdapter::SetOutputDir)
+    MOCKER_CPP(&Collector::Dvvp::ParamsAdapter::ParamsAdapterGeOpt::SetOutputDir)
         .stubs()
         .will(returnValue(PROFILING_FAILED));
     MOCKER_CPP(&Analysis::Dvvp::Common::Platform::Platform::PlatformIsHelperHostSide)
@@ -631,8 +631,8 @@ TEST_F(MSPROF_BIN_UTEST, SetGeOptionsContainerDefaultValue)
 TEST_F(MSPROF_BIN_UTEST, GeOptionsSetOutputDir)
 {
     GlobalMockObject::verify();
-    std::shared_ptr<GeOptParamAdapter> GeOptParamAdapterMgr;
-    MSVP_MAKE_SHARED0_BREAK(GeOptParamAdapterMgr, GeOptParamAdapter);
+    std::shared_ptr<ParamsAdapterGeOpt> GeOptParamAdapterMgr;
+    MSVP_MAKE_SHARED0_BREAK(GeOptParamAdapterMgr, ParamsAdapterGeOpt);
 
     std::string output;
     int ret = GeOptParamAdapterMgr->SetOutputDir(output);
@@ -648,21 +648,21 @@ TEST_F(MSPROF_BIN_UTEST, GeOptionsSetOutputDir)
 TEST_F(MSPROF_BIN_UTEST, GeGetParamFromInputCfg)
 {
     GlobalMockObject::verify();
-    std::shared_ptr<GeOptParamAdapter> GeOptParamAdapterMgr;
-    MSVP_MAKE_SHARED0_BREAK(GeOptParamAdapterMgr, GeOptParamAdapter);
+    std::shared_ptr<ParamsAdapterGeOpt> GeOptParamAdapterMgr;
+    MSVP_MAKE_SHARED0_BREAK(GeOptParamAdapterMgr, ParamsAdapterGeOpt);
     SHARED_PTR_ALIA<analysis::dvvp::proto::ProfGeOptionsConfig> geCfg = nullptr;
     SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params = nullptr;
     int ret = GeOptParamAdapterMgr->GetParamFromInputCfg(geCfg, params);
     EXPECT_EQ(PROFILING_FAILED, ret);
     MSVP_MAKE_SHARED0_VOID(geCfg, analysis::dvvp::proto::ProfGeOptionsConfig);
     MSVP_MAKE_SHARED0_VOID(params, analysis::dvvp::message::ProfileParams);
-    MOCKER_CPP(&Collector::Dvvp::ParamsAdapter::GeOptParamAdapter::SetGeOptionsContainerDefaultValue)
+    MOCKER_CPP(&Collector::Dvvp::ParamsAdapter::ParamsAdapterGeOpt::SetGeOptionsContainerDefaultValue)
         .stubs()
         .will(returnValue(true));
-    MOCKER_CPP(&Collector::Dvvp::ParamsAdapter::GeOptParamAdapter::SetGeOptionsContainerDefaultValue)
+    MOCKER_CPP(&Collector::Dvvp::ParamsAdapter::ParamsAdapterGeOpt::SetGeOptionsContainerDefaultValue)
         .stubs()
         .will(returnValue(true));
-    MOCKER_CPP(&Collector::Dvvp::ParamsAdapter::GeOptParamAdapter::SetGeOptionsContainerDefaultValue)
+    MOCKER_CPP(&Collector::Dvvp::ParamsAdapter::ParamsAdapterGeOpt::SetGeOptionsContainerDefaultValue)
         .stubs()
         .will(returnValue(true));
     EXPECT_EQ(PROFILING_FAILED, ret);
@@ -671,8 +671,8 @@ TEST_F(MSPROF_BIN_UTEST, GeGetParamFromInputCfg)
 TEST_F(MSPROF_BIN_UTEST, DevIdToStr)
 {
     GlobalMockObject::verify();
-    std::shared_ptr<AclApiParamAdapter> AclApiParamAdapterMgr;
-    MSVP_MAKE_SHARED0_BREAK(AclApiParamAdapterMgr, AclApiParamAdapter);
+    std::shared_ptr<ParamsAdapterAclApi> AclApiParamAdapterMgr;
+    MSVP_MAKE_SHARED0_BREAK(AclApiParamAdapterMgr, ParamsAdapterAclApi);
 
     uint32_t devNum = 2;
     uint32_t devList[devNum] = {
@@ -691,8 +691,8 @@ TEST_F(MSPROF_BIN_UTEST, DevIdToStr)
 TEST_F(MSPROF_BIN_UTEST, AclApiParamAdapterInit)
 {
     GlobalMockObject::verify();
-    std::shared_ptr<AclApiParamAdapter> AclApiParamAdapterMgr;
-    MSVP_MAKE_SHARED0_BREAK(AclApiParamAdapterMgr, AclApiParamAdapter);
+    std::shared_ptr<ParamsAdapterAclApi> AclApiParamAdapterMgr;
+    MSVP_MAKE_SHARED0_BREAK(AclApiParamAdapterMgr, ParamsAdapterAclApi);
     int ret = AclApiParamAdapterMgr->Init();
     EXPECT_EQ(PROFILING_SUCCESS, ret);
 }
@@ -700,8 +700,8 @@ TEST_F(MSPROF_BIN_UTEST, AclApiParamAdapterInit)
 TEST_F(MSPROF_BIN_UTEST, ParamsCheckAclApi)
 {
     GlobalMockObject::verify();
-    std::shared_ptr<AclApiParamAdapter> AclApiParamAdapterMgr;
-    MSVP_MAKE_SHARED0_BREAK(AclApiParamAdapterMgr, AclApiParamAdapter);
+    std::shared_ptr<ParamsAdapterAclApi> AclApiParamAdapterMgr;
+    MSVP_MAKE_SHARED0_BREAK(AclApiParamAdapterMgr, ParamsAdapterAclApi);
     
     std::vector<std::pair<InputCfg, std::string>> cfgList;
     AclApiParamAdapterMgr->Init();
@@ -718,8 +718,8 @@ TEST_F(MSPROF_BIN_UTEST, ParamsCheckAclApi)
 TEST_F(MSPROF_BIN_UTEST, ProfTaskCfgToContainer)
 {
     GlobalMockObject::verify();
-    std::shared_ptr<AclApiParamAdapter> AclApiParamAdapterMgr;
-    MSVP_MAKE_SHARED0_BREAK(AclApiParamAdapterMgr, AclApiParamAdapter);
+    std::shared_ptr<ParamsAdapterAclApi> AclApiParamAdapterMgr;
+    MSVP_MAKE_SHARED0_BREAK(AclApiParamAdapterMgr, ParamsAdapterAclApi);
 
     struct ProfConfig apiCfg;
     apiCfg.devNums = 1;
@@ -738,8 +738,8 @@ TEST_F(MSPROF_BIN_UTEST, ProfTaskCfgToContainer)
 TEST_F(MSPROF_BIN_UTEST, ProfSystemCfgToContainer)
 {
     GlobalMockObject::verify();
-    std::shared_ptr<AclApiParamAdapter> AclApiParamAdapterMgr;
-    MSVP_MAKE_SHARED0_BREAK(AclApiParamAdapterMgr, AclApiParamAdapter);
+    std::shared_ptr<ParamsAdapterAclApi> AclApiParamAdapterMgr;
+    MSVP_MAKE_SHARED0_BREAK(AclApiParamAdapterMgr, ParamsAdapterAclApi);
     struct ProfConfig apiCfg;
     apiCfg.devNums = 1;
     apiCfg.devIdList[0] = {1};
@@ -762,8 +762,8 @@ TEST_F(MSPROF_BIN_UTEST, ProfSystemCfgToContainer)
 TEST_F(MSPROF_BIN_UTEST, ProfSystemHardwareMemCfgToContainer)
 {
     GlobalMockObject::verify();
-    std::shared_ptr<AclApiParamAdapter> AclApiParamAdapterMgr;
-    MSVP_MAKE_SHARED0_BREAK(AclApiParamAdapterMgr, AclApiParamAdapter);
+    std::shared_ptr<ParamsAdapterAclApi> AclApiParamAdapterMgr;
+    MSVP_MAKE_SHARED0_BREAK(AclApiParamAdapterMgr, ParamsAdapterAclApi);
     std::array<std::string, ACL_PROF_ARGS_MAX> argsArr;
     argsArr[ACL_PROF_SYS_HARDWARE_MEM_FREQ] = "10";
     argsArr[ACL_PROF_LLC_MODE] = "10";

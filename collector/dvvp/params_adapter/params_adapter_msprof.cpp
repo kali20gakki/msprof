@@ -23,7 +23,7 @@ using namespace analysis::dvvp::common::utils;
 using namespace Collector::Dvvp::Msprofbin;
 using namespace Analysis::Dvvp::Msprof;
 using namespace analysis::dvvp::message;
-int MsprofParamAdapter::Init()
+int ParamsAdapterMsprof::Init()
 {
     paramContainer_.fill("");
     int ret = CheckListInit();
@@ -46,7 +46,7 @@ int MsprofParamAdapter::Init()
     return PROFILING_SUCCESS;
 }
 
-int MsprofParamAdapter::ParamsCheckMsprof(std::vector<std::pair<InputCfg, std::string>> &cfgList)
+int ParamsAdapterMsprof::ParamsCheckMsprof(std::vector<std::pair<InputCfg, std::string>> &cfgList)
 {
     bool ret = true;
     bool flag = true;
@@ -90,7 +90,7 @@ int MsprofParamAdapter::ParamsCheckMsprof(std::vector<std::pair<InputCfg, std::s
     return flag ? PROFILING_SUCCESS : PROFILING_FAILED;
 }
 
-bool MsprofParamAdapter::ParamsCheckMsprofV1(InputCfg inputCfg, std::string cfgValue) const
+bool ParamsAdapterMsprof::ParamsCheckMsprofV1(InputCfg inputCfg, std::string cfgValue) const
 {
     std::map<InputCfg, std::string> aiModeTypeList = {
         {INPUT_CFG_COM_AIC_MODE, "aic-mode"},
@@ -139,7 +139,7 @@ bool MsprofParamAdapter::ParamsCheckMsprofV1(InputCfg inputCfg, std::string cfgV
     return ret;
 }
 
-void MsprofParamAdapter::SetDefaultParamsApp()
+void ParamsAdapterMsprof::SetDefaultParamsApp()
 {
     if (paramContainer_[INPUT_CFG_COM_OUTPUT].empty()) {
         paramContainer_[INPUT_CFG_COM_OUTPUT] = appDir_;
@@ -171,7 +171,7 @@ void MsprofParamAdapter::SetDefaultParamsApp()
         PIPE_UTILIZATION : paramContainer_[INPUT_CFG_COM_AIV_METRICS];
 }
 
-int MsprofParamAdapter::SetMsprofMode()
+int ParamsAdapterMsprof::SetMsprofMode()
 {
     if (!paramContainer_[INPUT_CFG_MSPROF_APPLICATION].empty()) {
         msprofMode_ = MsprofMode::MSPROF_MODE_APP;
@@ -202,27 +202,27 @@ int MsprofParamAdapter::SetMsprofMode()
     return PROFILING_FAILED;
 }
 
-void MsprofParamAdapter::SetDefaultParamsSystem()
+void ParamsAdapterMsprof::SetDefaultParamsSystem() const
 {
     return;
 }
 
-void MsprofParamAdapter::SetDefaultParamsParse()
+void ParamsAdapterMsprof::SetDefaultParamsParse() const
 {
     return;
 }
 
-void MsprofParamAdapter::SetDefaultParamsQuery()
+void ParamsAdapterMsprof::SetDefaultParamsQuery() const
 {
     return;
 }
 
-void MsprofParamAdapter::SetDefaultParamsExport()
+void ParamsAdapterMsprof::SetDefaultParamsExport() const
 {
     return;
 }
 
-void MsprofParamAdapter::SpliteAppPath(const std::string &appParams)
+void ParamsAdapterMsprof::SpliteAppPath(const std::string &appParams)
 {
     if (appParams.empty()) {
         return;
@@ -251,7 +251,7 @@ void MsprofParamAdapter::SpliteAppPath(const std::string &appParams)
     }
 }
 
-void MsprofParamAdapter::SetParamsSelf()
+void ParamsAdapterMsprof::SetParamsSelf()
 {
     params_->app = app_;
     params_->cmdPath = cmdPath_;
@@ -276,7 +276,7 @@ void MsprofParamAdapter::SetParamsSelf()
     params_->msprofBinPid = Utils::GetPid();
 }
 
-int MsprofParamAdapter::GetParamFromInputCfg(std::unordered_map<int, std::pair<MsprofCmdInfo, std::string>> argvMap,
+int ParamsAdapterMsprof::GetParamFromInputCfg(std::unordered_map<int, std::pair<MsprofCmdInfo, std::string>> argvMap,
     SHARED_PTR_ALIA<ProfileParams> params)
 {
     if (!params) {
@@ -329,7 +329,7 @@ int MsprofParamAdapter::GetParamFromInputCfg(std::unordered_map<int, std::pair<M
     return PROFILING_SUCCESS;
 }
 
-int MsprofParamAdapter::ParamsCheck(std::unordered_map<int, std::pair<MsprofCmdInfo, std::string>> argvMap)
+int ParamsAdapterMsprof::ParamsCheck(std::unordered_map<int, std::pair<MsprofCmdInfo, std::string>> argvMap)
 {
     std::vector<std::pair<InputCfg, std::string>> errCfgList;
     int ret = ParamsCheckMsprof(errCfgList);
@@ -352,7 +352,7 @@ int MsprofParamAdapter::ParamsCheck(std::unordered_map<int, std::pair<MsprofCmdI
     return PROFILING_SUCCESS;
 }
 
-int MsprofParamAdapter::SetModeDefaultParams(MsprofMode modeType)
+int ParamsAdapterMsprof::SetModeDefaultParams(MsprofMode modeType)
 {
     if (modeType < MsprofMode::MSPROF_MODE_APP || modeType > MsprofMode::MSPROF_MODE_EXPORT) {
         MSPROF_LOGE("msprof mode invalid.");
@@ -380,7 +380,7 @@ int MsprofParamAdapter::SetModeDefaultParams(MsprofMode modeType)
     return PROFILING_SUCCESS;
 }
 
-void MsprofParamAdapter::CreateCfgMap()
+void ParamsAdapterMsprof::CreateCfgMap()
 {
     std::unordered_map<int, InputCfg>({
         {ARGS_OUTPUT, INPUT_CFG_COM_OUTPUT}, {ARGS_STORAGE_LIMIT, INPUT_CFG_COM_STORAGE_LIMIT},

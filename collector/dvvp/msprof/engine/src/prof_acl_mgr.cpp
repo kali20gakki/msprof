@@ -375,7 +375,7 @@ int ProfAclMgr::ProfAclStart(PROF_CONF_CONST_PTR profStartCfg)
     // generate params
     MSVP_MAKE_SHARED0_RET(params_, analysis::dvvp::message::ProfileParams, ACL_ERROR_PROFILING_FAILURE);
     params_->result_dir = resultPath_;
-    auto paramsAdapter = AclApiParamAdapter();
+    auto paramsAdapter = ParamsAdapterAclApi();
     ret = paramsAdapter.GetParamFromInputCfg(profStartCfg, argsArr_, params_);
     if (ret != PROFILING_SUCCESS) {
         MSPROF_LOGE("[ProfAclStart]GetParamFromInputCfg fail.");
@@ -1243,7 +1243,7 @@ int32_t ProfAclMgr::MsprofInitAclJson(VOID_PTR data, uint32_t len)
     } else {
         MSVP_MAKE_SHARED0_RET(params_, analysis::dvvp::message::ProfileParams, MSPROF_ERROR_MEM_NOT_ENOUGH);
     }
-    auto paramAdapter = AclJsonParamAdapter();
+    auto paramAdapter = ParamsAdapterAclJson();
     ret = paramAdapter.GetParamFromInputCfg(inputCfgPb, params_);
     if (ret != PROFILING_SUCCESS) {
         return MSPROF_ERROR_CONFIG_INVALID;
@@ -1320,7 +1320,7 @@ int32_t ProfAclMgr::MsprofInitGeOptions(VOID_PTR data, uint32_t len)
     } else {
         MSVP_MAKE_SHARED0_RET(params_, analysis::dvvp::message::ProfileParams, MSPROF_ERROR_MEM_NOT_ENOUGH);
     }
-    auto paramAdapter = GeOptParamAdapter();
+    auto paramAdapter = ParamsAdapterGeOpt();
     ret = paramAdapter.GetParamFromInputCfg(inputCfgPb, params_);
     if (ret != PROFILING_SUCCESS) {
         MSPROF_LOGE("[MsprofInitGeOptions]GetParamFromInputCfg fail.");
