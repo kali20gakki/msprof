@@ -212,7 +212,7 @@ TEST_F(MSPROF_ACL_CORE_UTEST, acl_api) {
     memset(zeroConfig, 0, sizeof(ProfConfig));
 
     EXPECT_NE(nullptr, aclConfig);
-    MOCKER_CPP(&Collector::Dvvp::ParamsAdapter::AclApiParamAdapter::GetParamFromInputCfg)
+    MOCKER_CPP(&Collector::Dvvp::ParamsAdapter::ParamsAdapterAclApi::GetParamFromInputCfg)
         .stubs()
         .will(returnValue(PROFILING_SUCCESS));
 
@@ -405,7 +405,7 @@ TEST_F(MSPROF_ACL_CORE_UTEST, acl_prof_api) {
     memset(zeroConfig, 0, sizeof(ProfConfig));
 
     EXPECT_NE(nullptr, aclConfig);
-    MOCKER_CPP(&Collector::Dvvp::ParamsAdapter::AclApiParamAdapter::GetParamFromInputCfg)
+    MOCKER_CPP(&Collector::Dvvp::ParamsAdapter::ParamsAdapterAclApi::GetParamFromInputCfg)
         .stubs()
         .will(returnValue(PROFILING_SUCCESS));
     EXPECT_EQ(ACL_ERROR_INVALID_PARAM, aclprofStart(nullptr));
@@ -1723,7 +1723,7 @@ TEST_F(MSPROF_ACL_CORE_UTEST, ProfAclStop) {
     config.devIdList[0] = 0;
     config.aicoreMetrics = PROF_AICORE_ARITHMETIC_UTILIZATION;
     config.dataTypeConfig = ACL_PROF_AICPU | ACL_PROF_ACL_API | ACL_PROF_HCCL_TRACE;
-    MOCKER_CPP(&Collector::Dvvp::ParamsAdapter::AclApiParamAdapter::GetParamFromInputCfg)
+    MOCKER_CPP(&Collector::Dvvp::ParamsAdapter::ParamsAdapterAclApi::GetParamFromInputCfg)
         .stubs()
         .will(returnValue(PROFILING_SUCCESS));
 

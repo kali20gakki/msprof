@@ -26,10 +26,10 @@ enum class MsprofMode {
     MSPROF_MODE_EXPORT
 };
 
-class MsprofParamAdapter : public ParamsAdapter {
+class ParamsAdapterMsprof : public ParamsAdapter {
 public:
-    MsprofParamAdapter() {}
-    ~MsprofParamAdapter() override {}
+    ParamsAdapterMsprof() {}
+    ~ParamsAdapterMsprof() override {}
     int GetParamFromInputCfg(std::unordered_map<int, std::pair<MsprofCmdInfo, std::string>> argvMap,
     SHARED_PTR_ALIA<ProfileParams> params);
 
@@ -40,10 +40,10 @@ private:
     bool ParamsCheckMsprofV1(InputCfg inputCfg, std::string cfgValue) const;
     int ParamsCheck(std::unordered_map<int, std::pair<MsprofCmdInfo, std::string>> argvMap);
     void SetDefaultParamsApp();
-    void SetDefaultParamsSystem();
-    void SetDefaultParamsParse();
-    void SetDefaultParamsQuery();
-    void SetDefaultParamsExport();
+    void SetDefaultParamsSystem() const;
+    void SetDefaultParamsParse() const;
+    void SetDefaultParamsQuery() const;
+    void SetDefaultParamsExport() const;
     int SetMsprofMode();
     void SetParamsSelf();
     void SpliteAppPath(const std::string &appParams);

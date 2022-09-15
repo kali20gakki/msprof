@@ -21,7 +21,7 @@ using namespace analysis::dvvp::common::validation;
 using namespace analysis::dvvp::message;
 using namespace analysis::dvvp::common::config;
 using namespace Analysis::Dvvp::Common::Platform;
-int GeOptParamAdapter::Init()
+int ParamsAdapterGeOpt::Init()
 {
     paramContainer_.fill("");
     int ret = CheckListInit();
@@ -65,7 +65,7 @@ int GeOptParamAdapter::Init()
     return PROFILING_SUCCESS;
 }
 
-int GeOptParamAdapter::ParamsCheckGeOpt(std::vector<std::pair<InputCfg, std::string>> &cfgList) const
+int ParamsAdapterGeOpt::ParamsCheckGeOpt(std::vector<std::pair<InputCfg, std::string>> &cfgList) const
 {
     bool ret = true;
     bool flag = true;
@@ -93,7 +93,7 @@ int GeOptParamAdapter::ParamsCheckGeOpt(std::vector<std::pair<InputCfg, std::str
     return flag ? PROFILING_SUCCESS : PROFILING_FAILED;
 }
 
-void GeOptParamAdapter::GenGeOptionsContainer(SHARED_PTR_ALIA<ProfGeOptionsConfig> geCfg)
+void ParamsAdapterGeOpt::GenGeOptionsContainer(SHARED_PTR_ALIA<ProfGeOptionsConfig> geCfg)
 {
     paramContainer_[INPUT_CFG_COM_OUTPUT] = geCfg->output();
     paramContainer_[INPUT_CFG_COM_STORAGE_LIMIT] = geCfg->storage_limit();
@@ -120,7 +120,7 @@ void GeOptParamAdapter::GenGeOptionsContainer(SHARED_PTR_ALIA<ProfGeOptionsConfi
     }
 }
 
-int GeOptParamAdapter::SetGeOptionsContainerDefaultValue()
+int ParamsAdapterGeOpt::SetGeOptionsContainerDefaultValue()
 {
     if (!Platform::instance()->PlatformIsHelperHostSide()) {
         int ret = SetOutputDir(paramContainer_[INPUT_CFG_COM_OUTPUT]);
@@ -144,7 +144,7 @@ int GeOptParamAdapter::SetGeOptionsContainerDefaultValue()
     return PROFILING_SUCCESS;
 }
 
-int GeOptParamAdapter::SetOutputDir(std::string &outputDir) const
+int ParamsAdapterGeOpt::SetOutputDir(std::string &outputDir) const
 {
     std::string result;
     if (outputDir.empty()) {
@@ -164,7 +164,7 @@ int GeOptParamAdapter::SetOutputDir(std::string &outputDir) const
     return PROFILING_SUCCESS;
 }
 
-int GeOptParamAdapter::GetParamFromInputCfg(SHARED_PTR_ALIA<ProfGeOptionsConfig> geCfg,
+int ParamsAdapterGeOpt::GetParamFromInputCfg(SHARED_PTR_ALIA<ProfGeOptionsConfig> geCfg,
     SHARED_PTR_ALIA<ProfileParams> params)
 {
     if (!params) {

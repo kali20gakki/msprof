@@ -14,9 +14,9 @@ namespace Collector {
 namespace Dvvp {
 namespace ParamsAdapter {
 
-class AclApiParamAdapter : public ParamsAdapter {
+class ParamsAdapterAclApi : public ParamsAdapter {
 public:
-    AclApiParamAdapter() {};
+    ParamsAdapterAclApi() {};
     int GetParamFromInputCfg(const ProfConfig *apiCfg,
         std::array<std::string, ACL_PROF_ARGS_MAX> argsArr,
         SHARED_PTR_ALIA<ProfileParams> params);

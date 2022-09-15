@@ -15,9 +15,9 @@ namespace Dvvp {
 namespace ParamsAdapter {
 using analysis::dvvp::proto::ProfGeOptionsConfig;
 
-class GeOptParamAdapter : public ParamsAdapter {
+class ParamsAdapterGeOpt : public ParamsAdapter {
 public:
-    GeOptParamAdapter() {};
+    ParamsAdapterGeOpt() {};
     int GetParamFromInputCfg(SHARED_PTR_ALIA<ProfGeOptionsConfig> geCfg, SHARED_PTR_ALIA<ProfileParams> params);
 
 private:
