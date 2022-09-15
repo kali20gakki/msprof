@@ -109,7 +109,7 @@ SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> InputParser::MsprofGetOp
             argvMap[opt] = std::pair<MsprofCmdInfo, std::string>(cmdInfo, argvStr);
         }
     }
-    auto paramAdapter = MsprofParamAdapter();
+    auto paramAdapter = ParamsAdapterMsprof();
     int ret = paramAdapter.GetParamFromInputCfg(argvMap, params_);
     if (ret != PROFILING_SUCCESS) {
         MsprofCmdUsage("get params from input config failed.");

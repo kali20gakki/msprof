@@ -13,9 +13,9 @@ namespace Dvvp {
 namespace ParamsAdapter {
 using analysis::dvvp::proto::ProfAclConfig;
 
-class AclJsonParamAdapter : public ParamsAdapter {
+class ParamsAdapterAclJson : public ParamsAdapter {
 public:
-    AclJsonParamAdapter() {};
+    ParamsAdapterAclJson() {};
     int GetParamFromInputCfg(SHARED_PTR_ALIA<ProfAclConfig> aclCfg,
         SHARED_PTR_ALIA<ProfileParams> params);
 
