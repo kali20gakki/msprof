@@ -16,7 +16,7 @@ namespace ParamsAdapter {
 
 class ParamsAdapterAclApi : public ParamsAdapter {
 public:
-    ParamsAdapterAclApi() {};
+    ParamsAdapterAclApi() : params_(nullptr) {};
     int GetParamFromInputCfg(const ProfConfig *apiCfg,
         std::array<std::string, ACL_PROF_ARGS_MAX> argsArr,
         SHARED_PTR_ALIA<ProfileParams> params);

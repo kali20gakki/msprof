@@ -115,9 +115,7 @@ enum class EnableType {
 
 class ParamsAdapter {
 public:
-    ParamsAdapter()
-    {
-    }
+    ParamsAdapter() : platformType_(PlatformType::MINI_TYPE), platformAdapter_(nullptr) {};
     virtual ~ParamsAdapter();
     int CheckListInit();
     bool BlackSwitchCheck(InputCfg inputCfg) const;
