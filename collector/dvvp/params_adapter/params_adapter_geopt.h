@@ -17,7 +17,7 @@ using analysis::dvvp::proto::ProfGeOptionsConfig;
 
 class ParamsAdapterGeOpt : public ParamsAdapter {
 public:
-    ParamsAdapterGeOpt() {};
+    ParamsAdapterGeOpt() : params_(nullptr) {};
     int GetParamFromInputCfg(SHARED_PTR_ALIA<ProfGeOptionsConfig> geCfg, SHARED_PTR_ALIA<ProfileParams> params);
 
 private:
