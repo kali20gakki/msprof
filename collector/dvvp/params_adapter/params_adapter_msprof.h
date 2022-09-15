@@ -23,12 +23,13 @@ enum class MsprofMode {
     MSPROF_MODE_SYSTEM,
     MSPROF_MODE_PARSE,
     MSPROF_MODE_QUERY,
-    MSPROF_MODE_EXPORT
+    MSPROF_MODE_EXPORT,
+    MSPROF_MODE_INVALID
 };
 
 class ParamsAdapterMsprof : public ParamsAdapter {
 public:
-    ParamsAdapterMsprof() {}
+    ParamsAdapterMsprof() : params_(nullptr), msprofMode_(MsprofMode::MSPROF_MODE_INVALID) {}
     ~ParamsAdapterMsprof() override {}
     int GetParamFromInputCfg(std::unordered_map<int, std::pair<MsprofCmdInfo, std::string>> argvMap,
     SHARED_PTR_ALIA<ProfileParams> params);
