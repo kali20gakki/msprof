@@ -134,6 +134,7 @@ target_compile_options(msprofbin PRIVATE
     -fno-strict-aliasing
     -fno-common
     -fstack-protector-all
+    -DMSPROF_BIN
 )
 
 target_compile_definitions(msprofbin PRIVATE
