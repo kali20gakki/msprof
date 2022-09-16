@@ -46,10 +46,9 @@ int ParamsAdapterMsprof::Init()
     return PROFILING_SUCCESS;
 }
 
-int ParamsAdapterMsprof::ParamsCheckMsprof(std::vector<std::pair<InputCfg, std::string>> &cfgList)
+int ParamsAdapterMsprof::ParamsCheckMsprof()
 {
     bool ret = true;
-    bool flag = true;
     for (auto inputCfg : msprofConfig_) {
         if (setConfig_.find(inputCfg) == setConfig_.end()) {
             continue;
@@ -83,11 +82,10 @@ int ParamsAdapterMsprof::ParamsCheckMsprof(std::vector<std::pair<InputCfg, std::
                 ret = ParamsCheckMsprofV1(inputCfg, cfgValue);
         }
         if (ret != true) {
-            cfgList.push_back(std::pair<InputCfg, std::string>(inputCfg, cfgValue));
-            flag = false;
+            return PROFILING_FAILED;
         }
     }
-    return flag ? PROFILING_SUCCESS : PROFILING_FAILED;
+    return PROFILING_SUCCESS;
 }
 
 bool ParamsAdapterMsprof::ParamsCheckMsprofV1(InputCfg inputCfg, std::string cfgValue) const
@@ -305,7 +303,7 @@ int ParamsAdapterMsprof::GetParamFromInputCfg(std::unordered_map<int, std::pair<
         paramContainer_[cfgType] = std::string(kv.second.first.args[argsType]);
         setConfig_.insert(cfgType);
     }
-    ret = ParamsCheck(argvMap);
+    ret = ParamsCheck();
     if (ret != PROFILING_SUCCESS) {
         CmdLog::instance()->CmdErrorLog("msprof input param check fail.");
         return PROFILING_FAILED;
@@ -329,24 +327,16 @@ int ParamsAdapterMsprof::GetParamFromInputCfg(std::unordered_map<int, std::pair<
     return PROFILING_SUCCESS;
 }
 
-int ParamsAdapterMsprof::ParamsCheck(std::unordered_map<int, std::pair<MsprofCmdInfo, std::string>> argvMap)
+int ParamsAdapterMsprof::ParamsCheck()
 {
-    std::vector<std::pair<InputCfg, std::string>> errCfgList;
-    int ret = ParamsCheckMsprof(errCfgList);
-    if (ret != PROFILING_SUCCESS && !errCfgList.empty()) {
-        for (auto errCfg : errCfgList) {
-            MsprofArgsType argsType = reCfgMap_[errCfg.first];
-            CmdLog::instance()->CmdErrorLog("Argument %s set invalid.", argvMap[argsType].second.c_str());
-        }
+    int ret = ParamsCheckMsprof();
+    if (ret != PROFILING_SUCCESS) {
+        MSPROF_LOGE("private param check fail.");
         return PROFILING_FAILED;
     }
-    errCfgList.clear();
-    ret = ComCfgCheck(paramContainer_, setConfig_, errCfgList);
+    ret = ComCfgCheck(paramContainer_, setConfig_);
     if (ret != PROFILING_SUCCESS) {
-        for (auto errCfg : errCfgList) {
-            MsprofArgsType argsType = reCfgMap_[errCfg.first];
-            CmdLog::instance()->CmdErrorLog("Argument %s set invalid.", argvMap[argsType].second.c_str());
-        }
+        MSPROF_LOGE("common param check fail.");
         return PROFILING_FAILED;
     }
     return PROFILING_SUCCESS;

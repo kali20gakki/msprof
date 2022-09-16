@@ -18,10 +18,6 @@
 #include "config/config_manager.h"
 #include "cmd_log.h"
 
-#ifdef MSPROF_BIN
-#undef MSPROF_LOGE
-#define MSPROF_LOGE CmdLog::instance()->CmdErrorLog
-#endif
 namespace analysis {
 namespace dvvp {
 namespace common {

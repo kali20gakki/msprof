@@ -22,7 +22,7 @@ public:
 
 private:
     int Init();
-    int ParamsCheckGeOpt(std::vector<std::pair<InputCfg, std::string>> &cfgList) const;
+    int ParamsCheckGeOpt() const;
     void GenGeOptionsContainer(SHARED_PTR_ALIA<ProfGeOptionsConfig> geCfg);
     int SetGeOptionsContainerDefaultValue();
     int SetOutputDir(std::string &outputDir) const;
