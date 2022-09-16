@@ -120,8 +120,7 @@ public:
     int CheckListInit();
     bool BlackSwitchCheck(InputCfg inputCfg) const;
     PlatformType GetPlatform() const;
-    int ComCfgCheck(std::array<std::string, INPUT_CFG_MAX> paramContainer,
-        std::set<InputCfg> &setArgs, std::vector<std::pair<InputCfg, std::string>> &cfgList) const;
+    int ComCfgCheck(std::array<std::string, INPUT_CFG_MAX> paramContainer, std::set<InputCfg> &setArgs) const;
     int TransToParam(std::array<std::string, INPUT_CFG_MAX> paramContainer, SHARED_PTR_ALIA<ProfileParams> params);
 public:
     bool CheckFreqValid(const std::string &freq, const InputCfg freqOpt) const;
@@ -139,10 +138,8 @@ private:
     void SetDeviceSysParams(std::array<std::string, INPUT_CFG_MAX> paramContainer) const;
     void SetHostSysParams(std::array<std::string, INPUT_CFG_MAX> paramContainer) const;
     void SetHostSysUsageParams(std::array<std::string, INPUT_CFG_MAX> paramContainer) const;
-    bool ComCfgCheck1(const InputCfg inputCfg, const std::string &cfgValue,
-    std::vector<std::pair<InputCfg, std::string>> &cfgList) const;
-    bool ComCfgCheck2(const InputCfg inputCfg, const std::string &cfgValue,
-    std::vector<std::pair<InputCfg, std::string>> &cfgList) const;
+    bool ComCfgCheck1(const InputCfg inputCfg, const std::string &cfgValue) const;
+    bool ComCfgCheck2(const InputCfg inputCfg, const std::string &cfgValue) const;
 
 private:
     std::vector<InputCfg> commonConfig_;

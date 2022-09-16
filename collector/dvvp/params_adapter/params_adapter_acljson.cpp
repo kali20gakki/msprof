@@ -61,10 +61,9 @@ int ParamsAdapterAclJson::Init()
     return PROFILING_SUCCESS;
 }
 
-int ParamsAdapterAclJson::ParamsCheckAclJson(std::vector<std::pair<InputCfg, std::string>> &cfgList) const
+int ParamsAdapterAclJson::ParamsCheckAclJson() const
 {
     bool ret = true;
-    bool flag = true;
     for (auto inputCfg : aclJsonConfig_) {
         if (setConfig_.find(inputCfg) == setConfig_.end()) {
             continue;
@@ -78,11 +77,10 @@ int ParamsAdapterAclJson::ParamsCheckAclJson(std::vector<std::pair<InputCfg, std
                 ret = false;
         }
         if (ret != true) {
-            cfgList.push_back(std::pair<InputCfg, std::string>(inputCfg, cfgValue));
-            flag = false;
+            return PROFILING_FAILED;
         }
     }
-    return flag ? PROFILING_SUCCESS : PROFILING_FAILED;
+    return PROFILING_SUCCESS;
 }
 
 void ParamsAdapterAclJson::GenAclJsonContainer(SHARED_PTR_ALIA<ProfAclConfig> aclCfg)
@@ -182,23 +180,15 @@ int ParamsAdapterAclJson::GetParamFromInputCfg(SHARED_PTR_ALIA<ProfAclConfig> ac
     
     GenAclJsonContainer(aclCfg);
 
-    std::vector<std::pair<InputCfg, std::string>> errCfgList;
-    ret = ParamsCheckAclJson(errCfgList);
-    if (ret == PROFILING_FAILED && !errCfgList.empty()) {
-        for (auto errCfg : errCfgList) {
-            MSPROF_LOGE("Argument --%s:%s set invalid.",
-                aclJsonPrintMap_[errCfg.first].c_str(), paramContainer_[errCfg.first].c_str());
-        }
+    ret = ParamsCheckAclJson();
+    if (ret == PROFILING_FAILED) {
+        MSPROF_LOGE("private param check fail.");
         return PROFILING_FAILED;
     }
 
-    errCfgList.clear();
-    ret = ComCfgCheck(paramContainer_, setConfig_, errCfgList);
+    ret = ComCfgCheck(paramContainer_, setConfig_);
     if (ret != PROFILING_SUCCESS) {
-        for (auto errCfg : errCfgList) {
-            MSPROF_LOGE("Argument --%s:%s set invalid.",
-                aclJsonPrintMap_[errCfg.first].c_str(), paramContainer_[errCfg.first].c_str());
-        }
+        MSPROF_LOGE("common param check fail.");
         return PROFILING_FAILED;
     }
 

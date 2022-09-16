@@ -21,7 +21,7 @@ public:
 
 private:
     int Init();
-    int ParamsCheckAclJson(std::vector<std::pair<InputCfg, std::string>> &cfgList) const;
+    int ParamsCheckAclJson() const;
     void GenAclJsonContainer(SHARED_PTR_ALIA<ProfAclConfig> aclCfg);
     void SetAclJsonContainerDefaultValue();
     std::string SetOutputDir(const std::string &outputDir) const;
