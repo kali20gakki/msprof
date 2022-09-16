@@ -16,7 +16,12 @@
 #include "platform/platform.h"
 #include "msprof_error_manager.h"
 #include "config/config_manager.h"
+#include "cmd_log.h"
 
+#ifdef MSPROF_BIN
+#undef MSPROF_LOGE
+#define MSPROF_LOGE CmdLog::instance()->CmdErrorLog
+#endif
 namespace analysis {
 namespace dvvp {
 namespace common {
@@ -29,6 +34,7 @@ using namespace analysis::dvvp::message;
 using namespace analysis::dvvp::common::utils;
 using namespace Collector::Dvvp::Plugin;
 using namespace Collector::Dvvp::Mmpa;
+using namespace Collector::Dvvp::Msprofbin;
 
 const int MIN_INTERVAL = 1;
 const int MAX_INTERVAL = 15 * 24 * 3600 * 1000; // 15 * 24 * 3600 * 1000 = 15day's micro seconds
@@ -202,7 +208,7 @@ bool ParamValidation::CheckFreqIsValid(const std::string &freq, const int rangeM
         if ((optRet >= rangeMin) && (optRet <= rangeMax)) {
             return true;
         } else {
-            MSPROF_LOGE("Input freq value is out of value range.");
+            MSPROF_LOGE("Input freq value [%d] is out of value range [%d, %d].", optRet, rangeMin, rangeMax);
             MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
                 std::vector<std::string>({"freq", freq, errReason}));
             return false;
@@ -502,8 +508,12 @@ bool ParamValidation::IsValidSwitch(const std::string &switchStr) const
     if (switchStr.empty()) {
         return true;
     }
-    return switchStr.compare("on") == 0 ||
-        switchStr.compare("off") == 0;
+    if (switchStr.compare("on") != 0 &&
+        switchStr.compare("off") != 0) {
+        MSPROF_LOGE("The switch should be set to on or off.");
+        return false;
+    }
+    return true;
 }
 
 bool ParamValidation::CheckTsSwitchProfiling(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params)

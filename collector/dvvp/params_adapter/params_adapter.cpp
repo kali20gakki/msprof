@@ -338,6 +338,7 @@ int ParamsAdapter::ComCfgCheck(std::array<std::string, INPUT_CFG_MAX> paramConta
     std::set<InputCfg> &setArgs, std::vector<std::pair<InputCfg, std::string>> &cfgList) const
 {
     bool ret = true;
+    bool flag = true;
     for (auto inputCfg : commonConfig_) {
         if (setArgs.find(inputCfg) == setArgs.end()) {
             continue;
@@ -348,8 +349,9 @@ int ParamsAdapter::ComCfgCheck(std::array<std::string, INPUT_CFG_MAX> paramConta
         } else {
             ret = ComCfgCheck2(inputCfg, cfgValue, cfgList);
         }
+        flag = ret ? flag : false;
     }
-    return ret ? PROFILING_SUCCESS : PROFILING_FAILED;
+    return flag ? PROFILING_SUCCESS : PROFILING_FAILED;
 }
 
 bool ParamsAdapter::ComCfgCheck1(const InputCfg inputCfg, const std::string &cfgValue,
