@@ -345,7 +345,7 @@ TEST_F(MSPROF_BIN_UTEST, MsprofParamAdapterModule)
         .will(returnValue(true));
     for (auto setCfg : MsprofParamAdapterMgr->msprofConfig_) {
         MsprofParamAdapterMgr->setConfig_.insert(setCfg);
-        ret = MsprofParamAdapterMgr->ParamsCheckMsprof(cfgList);
+        ret = MsprofParamAdapterMgr->ParamsCheckMsprof();
         EXPECT_EQ(PROFILING_SUCCESS, ret);
     }
 }
@@ -534,7 +534,7 @@ TEST_F(MSPROF_BIN_UTEST, ParamsCheckAclJson)
     std::vector<std::pair<InputCfg, std::string>> cfgList;
     for (auto cfg : AclJsonParamAdapterMgr->aclJsonConfig_) {
         AclJsonParamAdapterMgr->setConfig_.insert(cfg);
-        int ret = AclJsonParamAdapterMgr->ParamsCheckAclJson(cfgList);
+        int ret = AclJsonParamAdapterMgr->ParamsCheckAclJson();
         EXPECT_EQ(PROFILING_SUCCESS, ret);
     }
 }
@@ -605,7 +605,7 @@ TEST_F(MSPROF_BIN_UTEST, ParamsCheckGeOpt)
         .will(returnValue(true));
     for (auto cfg : GeOptParamAdapterMgr->geOptConfig_) {
         GeOptParamAdapterMgr->setConfig_.insert(cfg);
-        int ret = GeOptParamAdapterMgr->ParamsCheckGeOpt(cfgList);
+        int ret = GeOptParamAdapterMgr->ParamsCheckGeOpt();
         EXPECT_EQ(PROFILING_SUCCESS, ret);
     }
 }
@@ -711,7 +711,7 @@ TEST_F(MSPROF_BIN_UTEST, ParamsCheckAclApi)
     MOCKER_CPP(&analysis::dvvp::common::validation::ParamValidation::MsprofCheckSysDeviceValid)
         .stubs()
         .will(returnValue(true));
-    int ret = AclApiParamAdapterMgr->ParamsCheckAclApi(cfgList);
+    int ret = AclApiParamAdapterMgr->ParamsCheckAclApi();
     EXPECT_EQ(PROFILING_SUCCESS, ret);
 }
 
@@ -841,11 +841,11 @@ TEST_F(MSPROF_BIN_UTEST, ComCfgCheck2)
         .stubs()
         .will(returnValue(true));
     for (auto cfg : cfgList) {
-        bool ret = ParamsAdapterMgr->ComCfgCheck2(cfg, cfgValue, cfgErrList);
+        bool ret = ParamsAdapterMgr->ComCfgCheck2(cfg, cfgValue);
         EXPECT_EQ(true, ret);
     }
     InputCfg  errCfg = INPUT_CFG_COM_TASK_TIME;
-    bool ret = ParamsAdapterMgr->ComCfgCheck2(errCfg, cfgValue, cfgErrList);
+    bool ret = ParamsAdapterMgr->ComCfgCheck2(errCfg, cfgValue);
     EXPECT_EQ(false, ret);
 }
 

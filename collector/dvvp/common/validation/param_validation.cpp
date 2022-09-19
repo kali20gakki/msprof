@@ -188,9 +188,7 @@ bool ParamValidation::CheckLlcModeIsValid(const std::string &llcMode) const
     }
     if (llcMode.empty()) {
         MSPROF_LOGE("llcMode is empty");
-        CMD_LOGE("Argument --llc-profiling is empty."
-            "Please input in the range of '%s|%s'",
-            llcModeWhiteList[0].c_str(), llcModeWhiteList[1].c_str());
+        CMD_LOGE("Argument --llc-profiling is empty.");
         return false;
     }
     for (size_t i = 0; i < llcModeWhiteList.size(); i++) {
@@ -198,10 +196,9 @@ bool ParamValidation::CheckLlcModeIsValid(const std::string &llcMode) const
             return true;
         }
     }
-    std::string errReason = "llc-profiling should be in range [" + llcModeWhiteList[0] + "," + llcModeWhiteList[1] + "].";
-    CMD_LOGE("Argument --llc-profiling is empty."
-            "Please input in the range of '%s|%s'",
-            llcModeWhiteList[0].c_str(), llcModeWhiteList[1].c_str());
+    std::string errReason = "Argument --llc-profiling should be in range [" + llcModeWhiteList[0] + "," +
+        llcModeWhiteList[1] + "].";
+    CMD_LOGE("llc-profiling mode set fail. %s", errReason.c_str());
     MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
         std::vector<std::string>({"llc-mode", llcMode, errReason}));
     return false;
@@ -251,9 +248,9 @@ bool ParamValidation::CheckHostSysUsageIsValid(const std::string &hostSysUsage) 
     std::vector<std::string> hostSysUsageArray = Utils::Split(hostSysUsage, false, "", ",");
     for (size_t i = 0; i < hostSysUsageArray.size(); ++i) {
         if ((hostSysUsageArray[i].compare("cpu") != 0) && (hostSysUsageArray[i].compare("mem") != 0)) {
-            MSPROF_LOGE("Argument host-sys-usage: invalid value:%s. Please input in the range of "
+            MSPROF_LOGE("Argument --host-sys-usage, invalid value:%s. Please input in the range of "
                 "'cpu | mem'", hostSysUsageArray[i].c_str());
-            CMD_LOGE("Argument host-sys-usage: invalid value:%s. Please input in the range of "
+            CMD_LOGE("Argument --host-sys-usage, invalid value:%s. Please input in the range of "
                 "'cpu | mem'", hostSysUsageArray[i].c_str());
             MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
                 std::vector<std::string>({"host_sys_usage", hostSysUsage, errReason}));
@@ -273,9 +270,9 @@ bool ParamValidation::CheckHostSysPidValid(const std::string &hostSysPid) const
     if (Utils::CheckStringIsNonNegativeIntNum(hostSysPid)) {
         auto hostSysRet = std::stoi(hostSysPid);
         if (!CheckHostSysPidIsValid(hostSysRet)) {
-            MSPROF_LOGE("Argument --host-sys-pid: invalid int value: %d."
+            MSPROF_LOGE("Argument --host-sys-pid, invalid int value: %d."
                 "The process cannot be found, please enter a correct host-sys-pid.", hostSysRet);
-            CMD_LOGE("Argument --host-sys-pid: invalid int value: %d."
+            CMD_LOGE("Argument --host-sys-pid, invalid int value: %d."
                 "The process cannot be found, please enter a correct host-sys-pid.", hostSysRet);
             MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
                 std::vector<std::string>({"host_sys_pid", hostSysPid, errReason}));
@@ -283,9 +280,9 @@ bool ParamValidation::CheckHostSysPidValid(const std::string &hostSysPid) const
         }
         return true;
     } else {
-        MSPROF_LOGE("Argument --host-sys-pid: invalid value: %s."
+        MSPROF_LOGE("Argument --host-sys-pid, invalid value: %s."
             "Please input an integer value.The min value is 0.", hostSysPid.c_str());
-        CMD_LOGE("Argument --host-sys-pid: invalid value: %s."
+        CMD_LOGE("Argument --host-sys-pid, invalid value: %s."
             "Please input an integer value.The min value is 0.", hostSysPid.c_str());
         MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
             std::vector<std::string>({"host_sys_pid", hostSysPid, errReason}));
@@ -340,8 +337,8 @@ bool ParamValidation::CheckExportSummaryFormatIsValid(const std::string &summary
 {
     std::string errReason = "summary-format should be in range of 'json | csv'.";
     if (summaryFormat.empty()) {
-        MSPROF_LOGE("Argument --summary-format: expected one argument");
-        CMD_LOGE("Argument --summary-format: expected one argument");
+        MSPROF_LOGE("Argument --summary-format expected one argument");
+        CMD_LOGE("Argument --summary-format expected one argument");
         MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
             std::vector<std::string>({"summary-format", summaryFormat, errReason}));
         return false;
@@ -873,6 +870,7 @@ bool ParamValidation::IsValidInterval(const int interval, const std::string &log
 {
     if (interval < MIN_INTERVAL || interval > MAX_INTERVAL) {
         MSPROF_LOGE("invalid %s interval: %d", logKey.c_str(), interval);
+        CMD_LOGE("invalid %s interval: %d", logKey.c_str(), interval);
         return false;
     }
     return true;
@@ -955,6 +953,29 @@ bool ParamValidation::ProfStarsAcsqParamIsValid(const std::string &param) const
     return true;
 }
 
+bool ParamValidation::StorageLimitUnitValid(const std::string &storageLimit) const
+{
+    std::string errReason = "storage-limit should be in range [" + std::to_string(STORAGE_LIMIT_DOWN_THD) +
+        "," + std::to_string(UINT32_MAX) + "], end with MB";
+    uint32_t unitLen = strlen(STORAGE_LIMIT_UNIT);
+    if (storageLimit.size() <= unitLen) {
+        MSPROF_LOGE("storage_limit:%s, length is less than %u", storageLimit.c_str(), unitLen + 1);
+        CMD_LOGE("storage_limit:%s, length is less than %u", storageLimit.c_str(), unitLen + 1);
+        MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
+            std::vector<std::string>({"storage_limit", storageLimit, errReason}));
+        return false;
+    }
+    std::string unitStr = storageLimit.substr(storageLimit.size() - unitLen);
+    if (unitStr != STORAGE_LIMIT_UNIT) {
+        MSPROF_LOGE("storage_limit:%s, not end with MB", storageLimit.c_str());
+        CMD_LOGE("storage_limit:%s, not end with MB", storageLimit.c_str());
+        MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
+            std::vector<std::string>({"storage_limit", storageLimit, errReason}));
+        return false;
+    }
+    return true;
+}
+
 bool ParamValidation::CheckStorageLimit(const std::string &storageLimit) const
 {
     if (storageLimit.empty()) {
@@ -964,25 +985,7 @@ bool ParamValidation::CheckStorageLimit(const std::string &storageLimit) const
     std::string errReason = "storage-limit should be in range [" + std::to_string(STORAGE_LIMIT_DOWN_THD) +
         "," + std::to_string(UINT32_MAX) + "], end with MB";
 
-    uint32_t unitLen = strlen(STORAGE_LIMIT_UNIT);
-    if (storageLimit.size() <= unitLen) {
-        MSPROF_LOGE("storage_limit:%s, length is less than %u", storageLimit.c_str(), unitLen + 1);
-        CMD_LOGE("storage_limit:%s, length is less than %u", storageLimit.c_str(), unitLen + 1);
-        MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
-            std::vector<std::string>({"storage_limit", storageLimit, errReason}));
-        return false;
-    }
-
-    std::string unitStr = storageLimit.substr(storageLimit.size() - unitLen);
-    if (unitStr != STORAGE_LIMIT_UNIT) {
-        MSPROF_LOGE("storage_limit:%s, not end with MB", storageLimit.c_str());
-        CMD_LOGE("storage_limit:%s, not end with MB", storageLimit.c_str());
-        MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
-            std::vector<std::string>({"storage_limit", storageLimit, errReason}));
-        return false;
-    }
-
-    std::string digitStr = storageLimit.substr(0, storageLimit.size() - unitLen);
+    std::string digitStr = storageLimit.substr(0, storageLimit.size() - strlen(STORAGE_LIMIT_UNIT));
     if (!Utils::IsAllDigit(digitStr)) {
         MSPROF_LOGE("storage_limit:%s, invalid numbers", storageLimit.c_str());
         CMD_LOGE("storage_limit:%s, invalid numbers", storageLimit.c_str());
@@ -1155,7 +1158,8 @@ int ParamValidation::MsprofCheckAppParamValid(const std::string &appParam) const
     std::string appName;
     int ret = Utils::SplitPath(appParam, appDir, appName);
     if (ret != PROFILING_SUCCESS) {
-        MSPROF_LOGE("Failed to get app name");
+        MSPROF_LOGE("Failed to get app name from %s", appParam.c_str());
+        CMD_LOGE("Failed to get app name from %s", appParam.c_str());
         return PROFILING_FAILED;
     }
     if (!ParamValidation::instance()->CheckAppNameIsValid(appName)) {
@@ -1169,7 +1173,7 @@ int ParamValidation::MsprofCheckAppParamValid(const std::string &appParam) const
 bool ParamValidation::MsprofCheckEnvValid(const std::string &envParam) const
 {
     if (envParam.empty()) {
-        MSPROF_LOGE("Argument --environmet: expected one argument.");
+        MSPROF_LOGE("Argument --environmet expected one argument.");
         return false;
     }
     return true;
@@ -1402,6 +1406,7 @@ int ParamValidation::CheckHostOutString(const std::string tmpStr, const std::str
         }
     }
     MSPROF_LOGE("The file has no content.");
+    CMD_LOGE("The file has no content.");
     return PROFILING_FAILED;
 }
  
