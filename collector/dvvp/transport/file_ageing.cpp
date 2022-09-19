@@ -69,7 +69,7 @@ int FileAgeing::Init()
     unPairCount_[AICORE_DATA] = 0;
     noAgeingFile_ = {std::string("model_load_info"), std::string("task_desc_info"), std::string("id_map_info"),
                      std::string("fusion_op_info"), std::string("tensor_data_info"),
-                     std::string("step_info"), std::string("training_trace"), std::string("info.json"),
+                     std::string("ts_track"), std::string("training_trace"), std::string("info.json"),
                      std::string("hash_dic"), std::string("start_info"), std::string("end_info"),
                      std::string("host_start"), std::string("dev_start"), std::string("sample.json")};
     inited_ = true;
