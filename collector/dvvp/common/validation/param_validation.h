@@ -17,6 +17,8 @@
 #include "utils/utils.h"
 #include "mmpa_api.h"
 
+#define CMD_LOGE CmdLog::instance()->CmdErrorLog
+
 namespace analysis {
 namespace dvvp {
 namespace common {
