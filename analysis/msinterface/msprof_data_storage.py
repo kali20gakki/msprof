@@ -260,6 +260,8 @@ class MsprofDataStorage:
             slice_method = LoadingTimeLevel.FINE_LEVEL.value
         try:
             while time_level >= slice_method:
+                if slice_time > list_length:
+                    return 0
                 slice_length = math.ceil(list_length / slice_time)
                 formula = MsprofDataStorage._calculate_loading_time(row_line_level, slice_length)
                 time_level = self._get_time_level(formula)
