@@ -23,7 +23,7 @@ public:
 
 private:
     int Init();
-    int ParamsCheckAclApi(std::vector<std::pair<InputCfg, std::string>> &cfgList) const;
+    int ParamsCheckAclApi() const;
     void ProfCfgToContainer(const ProfConfig* apiCfg,
         std::array<std::string, ACL_PROF_ARGS_MAX> argsArr);
     void ProfMetricsCfgToContainer(const ProfAicoreMetrics aicMetrics,

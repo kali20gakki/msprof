@@ -550,7 +550,7 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckLlcModeIsValid1)
     GlobalMockObject::verify();
     auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
     std::string llcMode;
-    EXPECT_EQ(true, entry->CheckLlcModeIsValid(llcMode));
+    EXPECT_EQ(false, entry->CheckLlcModeIsValid(llcMode));
     MOCKER_CPP(&Analysis::Dvvp::Common::Config::ConfigManager::GetPlatformType)
         .stubs()
         .will(returnValue(0));
@@ -567,7 +567,7 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckLlcModeIsValid2)
     GlobalMockObject::verify();
     auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
     std::string llcMode;
-    EXPECT_EQ(true, entry->CheckLlcModeIsValid(llcMode));
+    EXPECT_EQ(false, entry->CheckLlcModeIsValid(llcMode));
     MOCKER_CPP(&Analysis::Dvvp::Common::Config::ConfigManager::GetPlatformType)
         .stubs()
         .will(returnValue(1));

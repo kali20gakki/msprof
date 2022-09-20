@@ -37,10 +37,9 @@ int ParamsAdapterAclApi::Init()
     return ret;
 }
 
-int ParamsAdapterAclApi::ParamsCheckAclApi(std::vector<std::pair<InputCfg, std::string>> &cfgList) const
+int ParamsAdapterAclApi::ParamsCheckAclApi() const
 {
     bool ret = true;
-    bool flag = true;
     for (auto inputCfg : aclApiConfig_) {
         std::string cfgValue = paramContainer_[inputCfg];
         switch (inputCfg) {
@@ -54,11 +53,10 @@ int ParamsAdapterAclApi::ParamsCheckAclApi(std::vector<std::pair<InputCfg, std::
                 ret = false;
         }
         if (ret != true) {
-            cfgList.push_back(std::pair<InputCfg, std::string>(inputCfg, cfgValue));
-            flag = false;
+            return PROFILING_FAILED;
         }
     }
-    return flag ? PROFILING_SUCCESS : PROFILING_FAILED;
+    return PROFILING_SUCCESS;
 }
 
 std::string ParamsAdapterAclApi::DevIdToStr(uint32_t devNum, const uint32_t *devList) const
@@ -238,15 +236,13 @@ int ParamsAdapterAclApi::GetParamFromInputCfg(const ProfConfig *apiCfg,
     }
     ProfCfgToContainer(apiCfg, argsArr);
 
-    std::vector<std::pair<InputCfg, std::string>> errCfgList;
-    ret = ParamsCheckAclApi(errCfgList);
-    if (ret != PROFILING_SUCCESS && !errCfgList.empty()) {
+    ret = ParamsCheckAclApi();
+    if (ret != PROFILING_SUCCESS) {
         MSPROF_LOGE("private param check fail.");
         return PROFILING_FAILED;
     }
-    errCfgList.clear();
-    ret = ComCfgCheck(paramContainer_, setConfig_, errCfgList);
-    if (ret != PROFILING_SUCCESS && !errCfgList.empty()) {
+    ret = ComCfgCheck(paramContainer_, setConfig_);
+    if (ret != PROFILING_SUCCESS) {
         MSPROF_LOGE("common param check fail.");
         return PROFILING_FAILED;
     }

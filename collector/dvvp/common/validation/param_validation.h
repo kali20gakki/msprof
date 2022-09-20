@@ -17,6 +17,8 @@
 #include "utils/utils.h"
 #include "mmpa_api.h"
 
+#define CMD_LOGE CmdLog::instance()->CmdErrorLog
+
 namespace analysis {
 namespace dvvp {
 namespace common {
@@ -71,6 +73,7 @@ public:
     bool ProfStarsAcsqParamIsValid(const std::string &param) const;
     bool IsValidSwitch(const std::string &switchStr) const;
     bool CheckStorageLimit(const std::string &storageLimit) const;
+    bool StorageLimitUnitValid(const std::string &storageLimit) const;
     bool CheckBiuFreqValid(const uint32_t biuFreq) const;
     bool MsprofCheckAppValid(std::string &appParam) const;
     bool MsprofCheckEnvValid(const std::string &envParam) const;
