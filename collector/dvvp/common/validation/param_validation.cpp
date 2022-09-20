@@ -1221,9 +1221,9 @@ bool ParamValidation::MsprofCheckSysPeriodValid(const std::string &sysPeriodPara
         }
     } else {
         MSPROF_LOGE("Argument --sys-period: invalid value: %s."
-            "Please input an integer value.The max period is 30 days.", sysPeriodParam);
+            "Please input an integer value.The max period is 30 days.", sysPeriodParam.c_str());
         CMD_LOGE("Argument --sys-period=%s is invalid."
-            "Please input an integer value.The max period is 30 days.", sysPeriodParam);
+            "Please input an integer value.The max period is 30 days.", sysPeriodParam.c_str());
         return false;
     }
     return true;
