@@ -27,7 +27,7 @@ enum {
 using CheckLogLevelForCFunc = std::function<int(int, int)>;
 class SlogPlugin : public analysis::dvvp::common::singleton::Singleton<SlogPlugin> {
 public:
-    SlogPlugin() : soName_("libalog.so"), pluginHandle_(PluginHandle(soName_)), loadFlag_(0) {}
+    SlogPlugin() : soName_("libascendalog.so"), pluginHandle_(PluginHandle(soName_)), loadFlag_(0) {}
 
     bool IsFuncExist(const std::string &funcName) const;
 
