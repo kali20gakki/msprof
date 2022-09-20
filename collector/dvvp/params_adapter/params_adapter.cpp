@@ -335,7 +335,7 @@ void ParamsAdapter::SetHostSysUsageParams(std::array<std::string, INPUT_CFG_MAX>
 }
 
 int ParamsAdapter::ComCfgCheck(std::array<std::string, INPUT_CFG_MAX> paramContainer,
-    std::set<InputCfg> &setArgs, std::vector<std::pair<InputCfg, std::string>> &cfgList) const
+    std::set<InputCfg> &setArgs) const
 {
     bool ret = true;
     for (auto inputCfg : commonConfig_) {
@@ -344,19 +344,21 @@ int ParamsAdapter::ComCfgCheck(std::array<std::string, INPUT_CFG_MAX> paramConta
         }
         std::string cfgValue = paramContainer[inputCfg];
         if (inputCfg <= INPUT_CFG_COM_AICPU) {
-            ret = ComCfgCheck1(inputCfg, cfgValue, cfgList);
+            ret = ComCfgCheck1(inputCfg, cfgValue);
         } else {
-            ret = ComCfgCheck2(inputCfg, cfgValue, cfgList);
+            ret = ComCfgCheck2(inputCfg, cfgValue);
+        }
+        if (!ret) {
+            MSPROF_LOGE("Input argument check fail.");
+            return PROFILING_FAILED;
         }
     }
-    return ret ? PROFILING_SUCCESS : PROFILING_FAILED;
+    return PROFILING_SUCCESS;
 }
 
-bool ParamsAdapter::ComCfgCheck1(const InputCfg inputCfg, const std::string &cfgValue,
-    std::vector<std::pair<InputCfg, std::string>> &cfgList) const
+bool ParamsAdapter::ComCfgCheck1(const InputCfg inputCfg, const std::string &cfgValue) const
 {
     bool ret = true;
-    bool flag = true;
     switch (inputCfg) {
         case INPUT_CFG_COM_OUTPUT:
             ret = ParamValidation::instance()->CheckOutputIsValid(cfgValue);
@@ -380,18 +382,12 @@ bool ParamsAdapter::ComCfgCheck1(const InputCfg inputCfg, const std::string &cfg
         default:
             ret = false;
     }
-    if (!ret) {
-        cfgList.push_back(std::pair<InputCfg, std::string>(inputCfg, cfgValue));
-        flag = false;
-    }
-    return flag;
+    return ret;
 }
 
-bool ParamsAdapter::ComCfgCheck2(const InputCfg inputCfg, const std::string &cfgValue,
-    std::vector<std::pair<InputCfg, std::string>> &cfgList) const
+bool ParamsAdapter::ComCfgCheck2(const InputCfg inputCfg, const std::string &cfgValue) const
 {
     bool ret = true;
-    bool flag = true;
     switch (inputCfg) {
         case INPUT_CFG_COM_SYS_USAGE_FREQ:
         case INPUT_CFG_COM_SYS_PID_USAGE_FREQ:
@@ -411,11 +407,7 @@ bool ParamsAdapter::ComCfgCheck2(const InputCfg inputCfg, const std::string &cfg
         default:
             ret = false;
     }
-    if (!ret) {
-        cfgList.push_back(std::pair<InputCfg, std::string>(inputCfg, cfgValue));
-        flag = false;
-    }
-    return flag;
+    return ret;
 }
 
 bool ParamsAdapter::CheckFreqValid(const std::string &freq, const InputCfg freqOpt) const

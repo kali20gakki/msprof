@@ -65,10 +65,9 @@ int ParamsAdapterGeOpt::Init()
     return PROFILING_SUCCESS;
 }
 
-int ParamsAdapterGeOpt::ParamsCheckGeOpt(std::vector<std::pair<InputCfg, std::string>> &cfgList) const
+int ParamsAdapterGeOpt::ParamsCheckGeOpt() const
 {
     bool ret = true;
-    bool flag = true;
     for (auto inputCfg : geOptConfig_) {
         if (setConfig_.find(inputCfg) == setConfig_.end()) {
             continue;
@@ -86,11 +85,10 @@ int ParamsAdapterGeOpt::ParamsCheckGeOpt(std::vector<std::pair<InputCfg, std::st
                 ret = false;
         }
         if (ret != true) {
-            cfgList.push_back(std::pair<InputCfg, std::string>(inputCfg, cfgValue));
-            flag = false;
+            return PROFILING_FAILED;
         }
     }
-    return flag ? PROFILING_SUCCESS : PROFILING_FAILED;
+    return PROFILING_SUCCESS;
 }
 
 void ParamsAdapterGeOpt::GenGeOptionsContainer(SHARED_PTR_ALIA<ProfGeOptionsConfig> geCfg)
@@ -184,23 +182,15 @@ int ParamsAdapterGeOpt::GetParamFromInputCfg(SHARED_PTR_ALIA<ProfGeOptionsConfig
 
     GenGeOptionsContainer(geCfg);
 
-    std::vector<std::pair<InputCfg, std::string>> errCfgList;
-    ret = ParamsCheckGeOpt(errCfgList);
-    if (ret == PROFILING_FAILED && !errCfgList.empty()) {
-        for (auto errCfg : errCfgList) {
-            MSPROF_LOGE("Argument --%s:%s set invalid.",
-                geOptionsPrintMap_[errCfg.first].c_str(), paramContainer_[errCfg.first].c_str());
-        }
+    ret = ParamsCheckGeOpt();
+    if (ret == PROFILING_FAILED) {
+        MSPROF_LOGE("private param check fail.");
         return PROFILING_FAILED;
     }
 
-    errCfgList.clear();
-    ret = ComCfgCheck(paramContainer_, setConfig_, errCfgList);
+    ret = ComCfgCheck(paramContainer_, setConfig_);
     if (ret != PROFILING_SUCCESS) {
-        for (auto errCfg : errCfgList) {
-            MSPROF_LOGE("Argument --%s:%s set invalid.",
-                geOptionsPrintMap_[errCfg.first].c_str(), paramContainer_[errCfg.first].c_str());
-        }
+        MSPROF_LOGE("common param check fail.");
         return PROFILING_FAILED;
     }
 

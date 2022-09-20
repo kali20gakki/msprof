@@ -37,9 +37,9 @@ public:
 private:
     int Init();
     void CreateCfgMap();
-    int ParamsCheckMsprof(std::vector<std::pair<InputCfg, std::string>> &cfgList);
+    int ParamsCheckMsprof();
     bool ParamsCheckMsprofV1(InputCfg inputCfg, std::string cfgValue) const;
-    int ParamsCheck(std::unordered_map<int, std::pair<MsprofCmdInfo, std::string>> argvMap);
+    int ParamsCheck();
     void SetDefaultParamsApp();
     void SetDefaultParamsSystem() const;
     void SetDefaultParamsParse() const;
