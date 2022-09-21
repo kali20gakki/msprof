@@ -257,7 +257,7 @@ class ExportCommand:
         return init_result
 
     @staticmethod
-    def _set_default_model_id(result_dir, model_match_set, ge_data_tag=True):
+    def _set_default_model_id(result_dir, model_match_set, ge_data_tag):
         if not ge_data_tag:
             return min(model_match_set)
         conn, curs = DBManager.check_connect_db(result_dir, DBNameConstant.DB_STEP_TRACE)
@@ -376,7 +376,7 @@ class ExportCommand:
             logging.warning("ge step info data miss model id.")
 
         if not self.list_map.get(self.INPUT_MODEL_ID):
-            self.list_map[self.MODEL_ID] = self._set_default_model_id(result_dir, model_match_set, bool(model_ids_ge))
+            self.list_map[self.MODEL_ID] = self._set_default_model_id(result_dir, model_match_set, model_ids_ge)
             if Utils.is_single_op_graph_mix(result_dir):
                 self.list_map[self.MODEL_ID] = Constant.GE_OP_MODEL_ID
             return
