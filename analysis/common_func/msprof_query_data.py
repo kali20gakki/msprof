@@ -119,17 +119,22 @@ class MsprofQueryData:
 
         db_path = PathManager.get_db_path(self.project_path, DBNameConstant.DB_STEP_TRACE)
         conn, curs = DBManager.check_connect_db_path(db_path)
-        if not conn_ge or not curs_ge or not DBManager.check_tables_in_db(
-                db_path_ge, DBNameConstant.TABLE_GE_TASK):
-            DBManager.destroy_db_connect(conn_ge, curs_ge)
-            DBManager.destroy_db_connect(conn, curs)
-            return []
-        model_ids_set = self._get_model_id_set(curs_ge)
+        model_ids_set, iter_id_set = set(), set()
 
         if not conn or not curs or not DBManager.check_tables_in_db(
                 db_path, DBNameConstant.TABLE_STEP_TRACE_DATA):
             DBManager.destroy_db_connect(conn_ge, curs_ge)
             DBManager.destroy_db_connect(conn, curs)
+            return []
+
+        if not conn_ge or not curs_ge or not DBManager.check_tables_in_db(
+                db_path_ge, DBNameConstant.TABLE_GE_TASK):
+            DBManager.destroy_db_connect(conn_ge, curs_ge)
+            model_ids_set = self._get_model_id_set_with_noge(curs)
+        else:
+            model_ids_set = self._get_model_id_set(curs_ge)
+
+        if not model_ids_set:
             return []
         iteration_infos = self._get_iteration_infos(curs)
         # filter model which contains no compute op
@@ -177,6 +182,24 @@ class MsprofQueryData:
         iteration_data = self.get_job_iteration_info()
         return self.assembly_job_info(basic_data, iteration_data)
 
+    def _get_model_id_set_with_noge(self: any, trace_curs: any) -> set:
+        db_path = PathManager.get_db_path(self.project_path, DBNameConstant.DB_HWTS_REC)
+        conn, curs = DBManager.check_connect_db_path(db_path)
+        if not (conn and curs):
+            return set()
+        sql = "select iter_id from {} where ai_core_num > 0".format(DBNameConstant.TABLE_HWTS_ITER_SYS)
+        iter_data = DBManager.fetch_all_data(curs, sql)
+        DBManager.destroy_db_connect(conn, curs)
+        iter_id_set = set([iter_id[0] for iter_id in iter_data])
+        filter_sql = "select * from {}".format(
+            DBNameConstant.TABLE_STEP_TRACE_DATA)
+        filter_data = DBManager.fetch_all_data(trace_curs, filter_sql)
+        filter_model_set = set()
+        for data in filter_data:
+            if data[4] in iter_id_set:
+                filter_model_set.add(data[1])
+        return filter_model_set
+
 
 class QueryArgumentCheck:
 
@@ -203,4 +226,3 @@ class QueryArgumentCheck:
             if min_value is not None:
                 return arg >= min_value
         return False
-    

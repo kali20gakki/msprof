@@ -256,18 +256,39 @@ class ExportCommand:
         init_result = (init_success, sql, conn, curs)
         return init_result
 
-    @staticmethod
-    def _set_default_model_id(result_dir, model_match_set, ge_data_tag):
-        if not ge_data_tag:
-            return min(model_match_set)
+    def _set_default_model_id(self, result_dir, model_match_set, ge_data_tag):
         conn, curs = DBManager.check_connect_db(result_dir, DBNameConstant.DB_STEP_TRACE)
         if not (conn and curs):
             return min(model_match_set)
         sql = "select model_id, max(index_id) from {} group by model_id".format(DBNameConstant.TABLE_STEP_TRACE_DATA)
         model_and_index = sorted(filter(lambda x: x[0] in model_match_set, DBManager.fetch_all_data(curs, sql)),
                                  key=itemgetter(1, 0))
+
+        if not ge_data_tag:
+            trace_data = DBManager.fetch_all_data(curs, "select * from {}".format(DBNameConstant.TABLE_STEP_TRACE_DATA))
+            model_and_index = self._update_model_and_index(result_dir, model_and_index, trace_data)
         DBManager.destroy_db_connect(conn, curs)
         return model_and_index.pop()[0] if model_and_index else min(model_match_set)
+
+    @staticmethod
+    def _update_model_and_index(result_dir: str, model_and_index: list, trace_data_list: list) -> list:
+        conn, curs = DBManager.check_connect_db(result_dir, DBNameConstant.DB_HWTS_REC)
+        if not (conn and curs):
+            return []
+        sql = "select ai_core_num, iter_id from {} where ai_core_num > 0".format(DBNameConstant.TABLE_HWTS_ITER_SYS)
+        iter_data = DBManager.fetch_all_data(curs, sql)
+        DBManager.destroy_db_connect(conn, curs)
+        res_set = set()
+        for data in iter_data:
+            iter_id = data[1]
+            for trace_data in trace_data_list:
+                if trace_data[4] == iter_id:
+                    res_set.add(trace_data[1])
+        result = []
+        for iter_info in model_and_index:
+            if iter_info[0] in res_set:
+                result.append(iter_info)
+        return result
 
     def check_argument_valid(self: any) -> None:
         """
