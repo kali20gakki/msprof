@@ -60,6 +60,7 @@ int InfoJson::Generate(std::string &content)
         return PROFILING_FAILED;
     }
     SetPidInfo(infoMain, hostpid_);
+    SetRankId(infoMain);
 
     if (AddHostInfo(infoMain) != PROFILING_SUCCESS) {
         MSPROF_LOGE("Failed to add host info to json.info.");
@@ -235,7 +236,7 @@ void InfoJson::AddNetCardInfo(SHARED_PTR_ALIA<InfoMain> infoMain)
 #endif
 }
 
-void InfoJson::AddRankId(SHARED_PTR_ALIA<InfoMain> infoMain)
+void InfoJson::SetRankId(SHARED_PTR_ALIA<InfoMain> infoMain)
 {
 #if (defined(linux) || defined(__linux__))
     int32_t rankId = Utils::GetRankId();
@@ -273,7 +274,6 @@ int InfoJson::AddHostInfo(SHARED_PTR_ALIA<InfoMain> infoMain)
     AddSysConf(infoMain);
     AddSysTime(infoMain);
     AddNetCardInfo(infoMain);
-    AddRankId(infoMain);
 
     // fetch and set cpu infos
     MmCpuDesc *cpuInfo = nullptr;
