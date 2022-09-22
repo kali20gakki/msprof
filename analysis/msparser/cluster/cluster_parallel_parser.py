@@ -44,8 +44,6 @@ class ClusterParallelParser:
         self._prepare_parallel_analysis()
         self._parallel_analysis()
         self._storage_parallel_analysis_result()
-        print_info(MsProfCommonConstant.COMMON_FILE_NAME,
-                   'Parallel analysis finished!')
 
     def _get_device_and_rank_ids(self: any) -> any:
         if not os.path.exists(PathManager.get_db_path(self.collection_path, DBNameConstant.DB_CLUSTER_RANK)):
@@ -119,6 +117,9 @@ class ClusterParallelParser:
                 json.dump(self.parallel_analysis_result, file, indent=4)
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
             error(MsProfCommonConstant.COMMON_FILE_NAME, err)
+            raise ProfException(ProfException.PROF_CREATE_FILE_ERROR)
+        print_info(MsProfCommonConstant.COMMON_FILE_NAME, "The data has stored successfully, "
+                                                          "file path: {}".format(output_file_path))
 
 
 class ClusterParallelConstant:
