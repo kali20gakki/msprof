@@ -80,20 +80,6 @@ int Application::PrepareAppEnvs(SHARED_PTR_ALIA<analysis::dvvp::message::Profile
     return PROFILING_SUCCESS;
 }
 
-std::string Application::GetAppPath(std::vector<std::string> paramsCmd)
-{
-    if (paramsCmd.empty()) {
-        return "";
-    }
-    std::string ret = "";
-    if (analysis::dvvp::common::utils::Utils::IsAppName(paramsCmd[0])) {
-        ret = paramsCmd[0];
-    } else if (paramsCmd.size() > 1) {
-        ret = paramsCmd[1];
-    }
-    return ret;
-}
-
 std::string Application::GetCmdString(const std::string paramsName)
 {
     if (paramsName.empty()) {

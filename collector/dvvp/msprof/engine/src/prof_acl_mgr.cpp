@@ -134,15 +134,6 @@ int ProfAclMgr::MsprofTxSwitchPrecheck()
     return PROFILING_SUCCESS;
 }
 
-int ProfAclMgr::CallbackFinalizePrecheck()
-{
-    if (mode_ == WORK_MODE_CMD) {
-        return PROFILING_SUCCESS;
-    }
-    PrintWorkMode(mode_);
-    return PROFILING_FAILED;
-}
-
 int ProfAclMgr::ProfInitPrecheck()
 {
     if (mode_ == WORK_MODE_OFF) {
@@ -198,25 +189,6 @@ int ProfAclMgr::ProfSubscribePrecheck()
     if (mode_ == WORK_MODE_CMD) {
         MSPROF_LOGW("Acl profiling api mode is disabled because working on cmd mode");
         return ACL_ERROR_PROF_ALREADY_RUN;
-    }
-    MSPROF_LOGE("Acl profiling api subscribe conflicts with other api mode %d", mode_);
-    MSPROF_INNER_ERROR("EK9999", "Acl profiling api subscribe conflicts with other api mode %d", mode_);
-    return ACL_ERROR_PROF_API_CONFLICT;
-}
-
-int ProfAclMgr::ProfUnSubscribePrecheck()
-{
-    if (mode_ == WORK_MODE_SUBSCRIBE) {
-        return ACL_SUCCESS;
-    }
-    if (mode_ == WORK_MODE_CMD) {
-        MSPROF_LOGW("Acl profiling api mode is disabled because working on cmd mode");
-        return ACL_ERROR_PROF_ALREADY_RUN;
-    }
-    if (mode_ == WORK_MODE_OFF) {
-        MSPROF_LOGE("No model info is subscribed");
-        MSPROF_INNER_ERROR("EK9999", "No model info is subscribed");
-        return ACL_ERROR_INVALID_MODEL_ID;
     }
     MSPROF_LOGE("Acl profiling api subscribe conflicts with other api mode %d", mode_);
     MSPROF_INNER_ERROR("EK9999", "Acl profiling api subscribe conflicts with other api mode %d", mode_);
@@ -330,11 +302,6 @@ int32_t ProfAclMgr::ProfAclInit(const std::string &profResultPath)
 
     mode_ = WORK_MODE_API_CTRL;
     return ACL_SUCCESS;
-}
-
-WorkMode ProfAclMgr::GetWorkMode()
-{
-    return mode_;
 }
 
 bool ProfAclMgr::IsInited()
@@ -541,16 +508,6 @@ uint64_t ProfAclMgr::ProfAclGetDataTypeConfig(PROF_SUB_CONF_CONST_PTR profSubscr
 void ProfAclMgr::AddModelLoadConf(uint64_t &dataTypeConfig) const
 {
     dataTypeConfig |= PROF_MODEL_LOAD;
-}
-
-void ProfAclMgr::AddAiCpuModelConf(uint64_t &dataTypeConfig) const
-{
-    dataTypeConfig |= PROF_KEYPOINT_TRACE_HELPER;
-}
-
-void ProfAclMgr::AddRuntimeTraceConf(uint64_t &dataTypeConfig) const
-{
-    dataTypeConfig |= PROF_RUNTIME_TRACE;
 }
 
 int ProfAclMgr::ProfAclModelSubscribe(const uint32_t modelId, const uint32_t devId,
@@ -916,54 +873,6 @@ int ProfAclMgr::ProfStartAiCpuTrace(const uint64_t dataTypeConfig, const uint32_
     return PROFILING_SUCCESS;
 }
 
-void ProfAclMgr::GenerateSystemTraceConf(const uint64_t dataTypeConfig, ProfAicoreMetrics aicMetrics,
-                                         SHARED_PTR_ALIA<analysis::dvvp::proto::MsProfStartReq> feature,
-                                         SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params)
-{
-    std::string metrics;
-    ConfigManager::instance()->AicoreMetricsEnumToName(aicMetrics, metrics);
-    bool systemTraceConf = false;
-    SHARED_PTR_ALIA<analysis::dvvp::proto::ProfilerConf> conf = nullptr;
-    MSVP_MAKE_SHARED0_VOID(conf, analysis::dvvp::proto::ProfilerConf);
-    if (dataTypeConfig & PROF_SYS_CPU_MASK) {
-        systemTraceConf = true;
-        conf->set_cpusamplinginterval(DEFAULT_PROFILING_INTERVAL_20MS);
-        params->ai_ctrl_cpu_profiling_events = "0x11,0x8";
-        params->ts_cpu_profiling_events = "0x11,0x8";
-    }
-    if (dataTypeConfig & PROF_SYS_HARDWARE_MEM_MASK) {
-        systemTraceConf = true;
-        conf->set_hardwarememsamplinginterval(analysis::dvvp::message::DEFAULT_PROFILING_INTERVAL_100MS);
-        params->ddr_profiling_events = "read,write";
-        params->hbm_profiling_events = "read,write";
-    }
-    if (dataTypeConfig & PROF_SYS_IO_MASK) {
-        systemTraceConf = true;
-        conf->set_iosamplinginterval(analysis::dvvp::message::DEFAULT_PROFILING_INTERVAL_100MS);
-    }
-    if (dataTypeConfig & PROF_SYS_INTERCONNECTION_MASK) {
-        systemTraceConf = true;
-        conf->set_interconnectionsamplinginterval(analysis::dvvp::message::DEFAULT_PROFILING_INTERVAL_100MS);
-    }
-    if (dataTypeConfig & PROF_DVPP_MASK) {
-        systemTraceConf = true;
-        conf->set_dvppsamplinginterval(analysis::dvvp::message::DEFAULT_PROFILING_INTERVAL_100MS);
-    }
-    if ((dataTypeConfig & PROF_SYS_AICORE_SAMPLE_MASK) && (!metrics.empty())) {
-        systemTraceConf = true;
-        conf->set_aicoresamplinginterval(DEFAULT_PROFILING_INTERVAL_10MS);
-        conf->set_aicoremetrics(metrics);
-    }
-    if ((dataTypeConfig & PROF_AIVECTORCORE_SAMPLE_MASK) && (!metrics.empty())) {
-        systemTraceConf = true;
-        conf->set_aivsamplinginterval(DEFAULT_PROFILING_INTERVAL_10MS);
-        conf->set_aivmetrics(metrics);
-    }
-    if (systemTraceConf) {
-        feature->set_system_trace_conf(analysis::dvvp::message::EncodeJson(conf));
-    }
-}
-
 /**
  * Transfer dataTypeConfig and aicoreMetrics to MsProfStartReq
  */
@@ -1178,13 +1087,6 @@ void ProfAclMgr::ProfDataTypeConfigHandle(SHARED_PTR_ALIA<analysis::dvvp::messag
 {
     dataTypeConfig_ = params->dataTypeConfig;
     MSPROF_EVENT("ProfDataTypeConfigHandle dataTypeConfig:0x%llx", dataTypeConfig_);
-}
-
-void ProfAclMgr::UpdateDataTypeConfigBySwitch(const std::string &sw, const uint64_t dataTypeConfig)
-{
-    if (sw == MSVP_PROF_ON) {
-        dataTypeConfig_ |= dataTypeConfig;
-    }
 }
 
 std::string ProfAclMgr::MsprofCheckAndGetChar(CHAR_PTR data, uint32_t dataLen)
@@ -1591,22 +1493,6 @@ void ProfAclMgr::CloseSubscribeFd(const uint32_t devId, const uint32_t modelId)
         Utils::PrintSysErrorMsg();
     }
     *fd = -1;
-}
-
-int32_t ProfAclMgr::StopProfConfigCheck(uint64_t dataTypeConfigStop, uint64_t dataTypeConfigStart)
-{
-    if (dataTypeConfigStop != dataTypeConfigStart) {
-        MSPROF_LOGE("DataTypeConfig stop:0x%lx different from start:0x%lx",
-            dataTypeConfigStop, dataTypeConfigStart);
-        std::string dataTypeConfigStr = "0x" +
-            Utils::Int2HexStr<uint64_t>(dataTypeConfigStop);
-        std::string errorReason = "dataTypeConfig is different from start:0x" +
-            Utils::Int2HexStr<uint64_t>(dataTypeConfigStart);
-        MSPROF_INPUT_ERROR("EK0001", std::vector<std::string>({"value", "param", "reason"}),
-            std::vector<std::string>({dataTypeConfigStr, "dataTypeConfig", errorReason}));
-        return PROFILING_FAILED;
-    }
-    return PROFILING_SUCCESS;
 }
 
 int32_t ProfAclMgr::MsprofSetConfig(aclprofConfigType cfgType, std::string config)
