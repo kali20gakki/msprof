@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "adx_prof_api.h"
+#include "memory_utils.h"
 
 using namespace Analysis::Dvvp::Adx;
 
@@ -35,3 +36,12 @@ TEST_F(ADX_PROF_API_UTEST, AdxIdeFreePacket) {
     AdxIdeFreePacket(outPut);
 }
 
+
+TEST_F(ADX_PROF_API_UTEST, IdeXmalloc) {
+    GlobalMockObject::verify();
+    EXPECT_EQ(nullptr, IdeXmalloc(0));
+    MOCKER(memset_s)
+        .stubs()
+		.will(returnValue(EOK - 1));
+    EXPECT_EQ(nullptr, IdeXmalloc(5));
+}
