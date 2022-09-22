@@ -1,3 +1,10 @@
+/**
+* @file plugin_handle_utest.cpp
+*
+* Copyright (c) Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
+*
+*/
+
 #include <memory>
 #include "gtest/gtest.h"
 #include "mockcpp/mockcpp.hpp"
@@ -9,7 +16,7 @@ using namespace Collector::Dvvp::Plugin;
 using namespace analysis::dvvp::common::utils;
 using namespace Collector::Dvvp::Mmpa;
 
-class PLUGIN_HANDLE_TEST: public testing::Test {
+class PluginHandleUtest : public testing::Test {
 protected:
     virtual void SetUp() {
     }
@@ -17,14 +24,16 @@ protected:
     }
 };
 
-TEST_F(PLUGIN_HANDLE_TEST, GetSoName) {
+TEST_F(PluginHandleUtest, GetSoName)
+{
     GlobalMockObject::verify();
     std::string soName = "libascend_hal.so";
     PluginHandle pluginHandle(soName);
     EXPECT_STREQ(soName.c_str(), pluginHandle.GetSoName().c_str());
 }
 
-TEST_F(PLUGIN_HANDLE_TEST, OpenPlugin) {
+TEST_F(PluginHandleUtest, OpenPlugin)
+{
     GlobalMockObject::verify();
     std::string soName = "libascend_hal.so";
     PluginHandle pluginHandle(soName);
@@ -52,7 +61,8 @@ TEST_F(PLUGIN_HANDLE_TEST, OpenPlugin) {
     EXPECT_EQ(PROFILING_FAILED, pluginHandle.OpenPlugin(envStr));
 }
 
-TEST_F(PLUGIN_HANDLE_TEST, CloseHandle) {
+TEST_F(PluginHandleUtest, CloseHandle)
+{
     GlobalMockObject::verify();
     std::string soName = "libascend_hal.so";
     PluginHandle pluginHandle(soName);
@@ -62,15 +72,16 @@ TEST_F(PLUGIN_HANDLE_TEST, CloseHandle) {
     EXPECT_EQ(true, pluginHandle.HasLoad());
 }
 
-TEST_F(PLUGIN_HANDLE_TEST, GetSoPath) {
+TEST_F(PluginHandleUtest, GetSoPath)
+{
     GlobalMockObject::verify();
     std::string soName = "libascend_hal.so";
     PluginHandle pluginHandle(soName);
-    char *pathEnv = "/usr/local/Ascend/driver/lib64";
+    char* pathEnv = "/usr/local/Ascend/driver/lib64";
     std::string path = "PATH";
     MOCKER(std::getenv)
         .stubs()
-        .will(returnValue((char *)nullptr))
+        .will(returnValue((char *)NULL))
         .then(returnValue(pathEnv));
     std::string strEmpty = "";
     EXPECT_EQ(strEmpty.c_str(), pluginHandle.GetSoPath(path));
