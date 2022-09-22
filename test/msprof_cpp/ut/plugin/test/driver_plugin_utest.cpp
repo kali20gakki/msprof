@@ -1,3 +1,9 @@
+/**
+* @file driver_plugin_utest.cpp
+*
+* Copyright (c) Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
+*
+*/
 #include <memory>
 #include "gtest/gtest.h"
 #include "mockcpp/mockcpp.hpp"
@@ -9,7 +15,7 @@ using namespace Collector::Dvvp::Plugin;
 using namespace analysis::dvvp::common::utils;
 using namespace Collector::Dvvp::Mmpa;
 
-class DRIVER_PLUGIN_TEST: public testing::Test {
+class DriverPluginUtest : public testing::Test {
 protected:
     virtual void SetUp() {
     }
@@ -17,7 +23,8 @@ protected:
     }
 };
 
-TEST_F(DRIVER_PLUGIN_TEST, LoadDriverSo) {
+TEST_F(DriverPluginUtest, LoadDriverSo)
+{
     GlobalMockObject::verify();
     auto driverPlugin = DriverPlugin::instance();
     MOCKER_CPP(&PluginHandle::OpenPlugin)
@@ -28,7 +35,8 @@ TEST_F(DRIVER_PLUGIN_TEST, LoadDriverSo) {
     driverPlugin->LoadDriverSo();
 }
 
-TEST_F(DRIVER_PLUGIN_TEST, IsFuncExist) {
+TEST_F(DriverPluginUtest, IsFuncExist)
+{
     GlobalMockObject::verify();
     auto driverPlugin = DriverPlugin::instance();
     MOCKER_CPP(&PluginHandle::IsFuncExist)
@@ -38,7 +46,8 @@ TEST_F(DRIVER_PLUGIN_TEST, IsFuncExist) {
     EXPECT_EQ(true, driverPlugin->IsFuncExist(funcName));
 }
 
-TEST_F(DRIVER_PLUGIN_TEST, MsprofHalHdcRecv) {
+TEST_F(DriverPluginUtest, MsprofHalHdcRecv)
+{
     GlobalMockObject::verify();
     auto driverPlugin = DriverPlugin::instance();
     MOCKER_CPP(&PluginHandle::IsFuncExist)
