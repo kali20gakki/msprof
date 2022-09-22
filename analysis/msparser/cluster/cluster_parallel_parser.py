@@ -117,7 +117,6 @@ class ClusterParallelParser:
                 json.dump(self.parallel_analysis_result, file, indent=4)
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
             error(MsProfCommonConstant.COMMON_FILE_NAME, err)
-            raise ProfException(ProfException.PROF_CREATE_FILE_ERROR)
         print_info(MsProfCommonConstant.COMMON_FILE_NAME, "The data has stored successfully, "
                                                           "file path: {}".format(output_file_path))
 
