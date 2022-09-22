@@ -6,7 +6,6 @@ protobuf_generate(profiler
 )
 set(profilerSrcFiles
     ${MSPROF_SOURCE_DIR}/dvvp/common/memory/chunk_pool.cpp 
-    ${MSPROF_SOURCE_DIR}/dvvp/streamio/common/src/select_operation.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/transport/file_slice.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/transport/file_ageing.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/statistics/perf_count.cpp
@@ -28,7 +27,6 @@ set(profilerSrcFiles
 
 set(localSrcFiles
 	test/main.cpp 
-	test/select_operation_test.cpp 
 	test/file_slice_test.cpp 
 	test/file_ageing_test.cpp
 	../../stub/hdc-log-stub.cpp
