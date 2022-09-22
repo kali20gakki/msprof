@@ -189,7 +189,6 @@ public:
     ArgsManager();
     virtual ~ArgsManager();
 public:
-    void AddArgs(const Args &args);
     void PrintHelp();
 
 private:

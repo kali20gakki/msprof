@@ -31,7 +31,7 @@ test_obj=(
     common_utest
     msprof_bin_utest
     streamio_common_utest
-    client_utest
+    plugin_utest
     application_utest
     message_utest
     msprofiler_utest
