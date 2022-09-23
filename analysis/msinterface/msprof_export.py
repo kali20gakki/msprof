@@ -269,14 +269,14 @@ class ExportCommand:
             trace_data = DBManager.fetch_all_data(
                 curs, "select model_id, iter_id from {}".format(DBNameConstant.TABLE_STEP_TRACE_DATA),
                 dto_class=StepTraceDto)
-            model_and_index = self._update_model_and_index(result_dir, model_and_index,
+            model_and_index = self._update_model_and_index(result_dir,
                                                            {data.iter_id: data.model_id for data in trace_data})
         model_and_index.sort(key=lambda x: x[1])
         DBManager.destroy_db_connect(conn, curs)
         return model_and_index.pop()[0] if model_and_index else min(model_match_set)
 
     @staticmethod
-    def _update_model_and_index(result_dir: str, model_and_index: list, trace_data_dict: dict) -> list:
+    def _update_model_and_index(result_dir: str, trace_data_dict: dict) -> list:
         conn, curs = DBManager.check_connect_db(result_dir, DBNameConstant.DB_HWTS_REC)
         if not (conn and curs):
             return []
