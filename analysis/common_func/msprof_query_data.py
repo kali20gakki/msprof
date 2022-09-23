@@ -6,7 +6,7 @@ import os
 
 from common_func.common import error
 from common_func.constant import Constant
-from common_func.db_manager import DBManager
+from common_func.db_manager import DBManager, ClassRowType
 from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.msprof_common import MsProfCommonConstant
@@ -14,6 +14,8 @@ from common_func.msprof_exception import ProfException
 from common_func.path_manager import PathManager
 from msmodel.step_trace.cluster_step_trace_model import ClusterStepTraceModel
 from profiling_bean.basic_info.query_data_bean import QueryDataBean
+from profiling_bean.db_dto.hwts_rec_dto import HwtsRecDto
+from profiling_bean.db_dto.step_trace_dto import StepTraceDto
 
 
 class MsprofQueryData:
@@ -130,7 +132,7 @@ class MsprofQueryData:
         if not conn_ge or not curs_ge or not DBManager.check_tables_in_db(
                 db_path_ge, DBNameConstant.TABLE_GE_TASK):
             DBManager.destroy_db_connect(conn_ge, curs_ge)
-            model_ids_set = self._get_model_id_set_with_noge(curs)
+            model_ids_set = self._get_model_id_set_without_ge(curs)
         else:
             model_ids_set = self._get_model_id_set(curs_ge)
 
@@ -182,22 +184,24 @@ class MsprofQueryData:
         iteration_data = self.get_job_iteration_info()
         return self.assembly_job_info(basic_data, iteration_data)
 
-    def _get_model_id_set_with_noge(self: any, trace_curs: any) -> set:
+    def _get_model_id_set_without_ge(self: any, trace_curs: any) -> set:
         db_path = PathManager.get_db_path(self.project_path, DBNameConstant.DB_HWTS_REC)
         conn, curs = DBManager.check_connect_db_path(db_path)
         if not (conn and curs):
             return set()
         sql = "select iter_id from {} where ai_core_num > 0".format(DBNameConstant.TABLE_HWTS_ITER_SYS)
+        curs.row_factory = ClassRowType.class_row(HwtsRecDto)
         iter_data = DBManager.fetch_all_data(curs, sql)
         DBManager.destroy_db_connect(conn, curs)
-        iter_id_set = set([iter_id[0] for iter_id in iter_data])
-        filter_sql = "select * from {}".format(
+        iter_id_set = set([iter_id.iter_id for iter_id in iter_data])
+        filter_sql = "select index_id, model_id, iter_id from {}".format(
             DBNameConstant.TABLE_STEP_TRACE_DATA)
+        trace_curs.row_factory = ClassRowType.class_row(StepTraceDto)
         filter_data = DBManager.fetch_all_data(trace_curs, filter_sql)
         filter_model_set = set()
         for data in filter_data:
-            if data[4] in iter_id_set:
-                filter_model_set.add(data[1])
+            if data.iter_id in iter_id_set:
+                filter_model_set.add(data.model_id)
         return filter_model_set
 
 

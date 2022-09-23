@@ -17,7 +17,7 @@ from common_func.common import warn
 from common_func.config_mgr import ConfigMgr
 from common_func.constant import Constant
 from common_func.data_check_manager import DataCheckManager
-from common_func.db_manager import DBManager
+from common_func.db_manager import DBManager, ClassRowType
 from common_func.db_name_constant import DBNameConstant
 from common_func.file_manager import FileManager
 from common_func.host_data_check_manager import HostDataCheckManager
@@ -39,6 +39,8 @@ from framework.load_info_manager import LoadInfoManager
 from msinterface.msprof_export_data import MsProfExportDataUtils
 from msinterface.msprof_job_summary import MsprofJobSummary
 from msinterface.msprof_timeline import MsprofTimeline
+from profiling_bean.db_dto.hwts_rec_dto import HwtsRecDto
+from profiling_bean.db_dto.step_trace_dto import StepTraceDto
 from profiling_bean.prof_enum.export_data_type import ExportDataType
 from tuning.profiling_tuning import ProfilingTuning
 from tuning.cluster_tuning import ClusterTuning
@@ -265,7 +267,9 @@ class ExportCommand:
                                  key=itemgetter(1, 0))
 
         if not ge_data_tag:
-            trace_data = DBManager.fetch_all_data(curs, "select * from {}".format(DBNameConstant.TABLE_STEP_TRACE_DATA))
+            curs.row_factory = ClassRowType.class_row(StepTraceDto)
+            trace_data = DBManager.fetch_all_data(
+                curs, "select index_id, model_id, iter_id from {}".format(DBNameConstant.TABLE_STEP_TRACE_DATA))
             model_and_index = self._update_model_and_index(result_dir, model_and_index, trace_data)
         DBManager.destroy_db_connect(conn, curs)
         return model_and_index.pop()[0] if model_and_index else min(model_match_set)
@@ -275,15 +279,16 @@ class ExportCommand:
         conn, curs = DBManager.check_connect_db(result_dir, DBNameConstant.DB_HWTS_REC)
         if not (conn and curs):
             return []
-        sql = "select ai_core_num, iter_id from {} where ai_core_num > 0".format(DBNameConstant.TABLE_HWTS_ITER_SYS)
+        sql = "select iter_id from {} where ai_core_num > 0".format(DBNameConstant.TABLE_HWTS_ITER_SYS)
+        curs.row_factory = ClassRowType.class_row(HwtsRecDto)
         iter_data = DBManager.fetch_all_data(curs, sql)
         DBManager.destroy_db_connect(conn, curs)
         res_set = set()
         for data in iter_data:
-            iter_id = data[1]
+            iter_id = data.iter_id
             for trace_data in trace_data_list:
-                if trace_data[4] == iter_id:
-                    res_set.add(trace_data[1])
+                if trace_data.iter_id == iter_id:
+                    res_set.add(trace_data.model_id)
         result = []
         for iter_info in model_and_index:
             if iter_info[0] in res_set:
