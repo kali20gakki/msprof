@@ -13,14 +13,14 @@ from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
-from common_func.msprof_common import get_path_dir, prepare_log, MsProfCommonConstant
+from common_func.msprof_common import get_path_dir, prepare_log
 from common_func.msprof_exception import ProfException
 from common_func.path_manager import PathManager
 from msmodel.cluster_info.cluster_info_model import ClusterInfoModel
+from msparser.cluster.cluster_communication_parser import ClusterCommunicationParser
 from msparser.cluster.cluster_parallel_parser import ClusterParallelParser
 from msparser.cluster.data_preprocess_parser import DataPreprocessParser
 from msparser.cluster.fops_parser import FopsParser
-from msparser.cluster.cluster_communication_parser import ClusterCommunicationParser
 from msparser.cluster.step_trace_summary import StepTraceSummay
 
 
@@ -64,7 +64,7 @@ class MsprofQuerySummaryManager:
             device_dirs = os.listdir(prof_path)
             for device_dir in device_dirs:
                 device_path = os.path.join(prof_path, device_dir)
-                if not DataCheckManager.contain_info_json_data(device_path):
+                if not DataCheckManager.contain_info_json_data(device_path, device_info_only=True):
                     continue
                 InfoConfReader().load_info(device_path)
                 if InfoConfReader().get_rank_id() != Constant.NA:
@@ -88,19 +88,16 @@ class MsprofQuerySummaryManager:
         if self.data_type == QueryDataType.CLUSTER_SCENE:
             MsprofQuerySummaryManager.check_cluster_scene(self.collection_path)
             return
-        params = self._check_cluster_scene()
+        if not self._check_collection_dir_valid():
+            error(MsprofQuerySummaryManager.FILE_NAME,
+                  "For query cluster or summary data, please execute import --cluster first")
+            raise ProfException(ProfException.PROF_CLUSTER_DIR_ERROR)
+        prepare_log(self.collection_path)
+        params = self._generate_query_params()
         self.QUERY_DATA_TYPE_PARSER.get(self.data_type)(params).process()
 
-    def _check_cluster_scene(self: any) -> dict:
-        if self._check_rank_id_valid():
-            self.is_cluster_scene = True
-            prepare_log(self.collection_path)
-        else:
-            if MsprofQuerySummaryManager.check_rank_id(self.collection_path):
-                error(MsprofQuerySummaryManager.FILE_NAME,
-                      "To query cluster data, please import cluster info data first.")
-                raise ProfException(ProfException.PROF_CLUSTER_DIR_ERROR)
-            self.is_cluster_scene = False
+    def _generate_query_params(self: any) -> dict:
+        self.is_cluster_scene = self._check_rank_id_valid()
         params = {"collection_path": self.collection_path,
                   "is_cluster": self.is_cluster_scene,
                   "npu_id": self.npu_id,
@@ -109,14 +106,12 @@ class MsprofQuerySummaryManager:
         return params
 
     def _check_rank_id_valid(self: any) -> bool:
-        db_path = PathManager.get_db_path(self.collection_path, DBNameConstant.DB_CLUSTER_RANK)
-        if not DBManager.check_tables_in_db(db_path, DBNameConstant.TABLE_CLUSTER_RANK):
-            return False
         with ClusterInfoModel(self.collection_path) as cluster_info_model:
-            rank_id_count = cluster_info_model.get_rank_id_count()
-        if not rank_id_count:
-            return False
-        return rank_id_count[0][0] != 0
+            return cluster_info_model.check_rank_id_valid()
+
+    def _check_collection_dir_valid(self: any) -> bool:
+        db_path = PathManager.get_db_path(self.collection_path, DBNameConstant.DB_CLUSTER_RANK)
+        return DBManager.check_tables_in_db(db_path, DBNameConstant.TABLE_CLUSTER_RANK)
 
     def _check_data_type_valid(self: any) -> None:
         if self.data_type is None or self.data_type not in QueryDataType.__members__.values():

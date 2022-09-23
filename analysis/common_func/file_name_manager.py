@@ -5,7 +5,6 @@
 import re
 from collections import namedtuple
 
-
 from common_func.constant import Constant
 from common_func.empty_class import EmptyClass
 
@@ -19,6 +18,8 @@ class FileNameManagerConstant:
     DEV_START_PATTERN = r"^dev_start\.log\.\d+"
 
     INFO_JSON_PATTERN = r"^info\.json"
+
+    INFO_JSON_FOR_DEVICE_PATTERN = r"^info\.json\.\d+$"
 
     START_INFO_PATTERN = r"^start_info"
 
@@ -252,6 +253,13 @@ def get_info_json_compiles() -> tuple:
     get info json regex compiles
     """
     return (re.compile(FileNameManagerConstant.INFO_JSON_PATTERN),)
+
+
+def get_info_json_for_device_compiles() -> tuple:
+    """
+    get info json regex compiles
+    """
+    return (re.compile(FileNameManagerConstant.INFO_JSON_FOR_DEVICE_PATTERN),)
 
 
 def get_host_start_compiles() -> tuple:
