@@ -19,6 +19,7 @@ from common_func.msvp_common import MsvpCommonConst
 from common_func.msvp_constant import MsvpConstant
 from common_func.path_manager import PathManager
 from common_func.platform.chip_manager import ChipManager
+from common_func.utils import Utils
 from host_prof.host_prof_presenter_manager import HostExportType
 from host_prof.host_prof_presenter_manager import get_host_prof_timeline
 from host_prof.host_syscall.presenter.host_syscall_presenter import HostSyscallPresenter
@@ -603,7 +604,8 @@ class MsProfExportDataUtils:
             handler = getattr(cls, configs.get(StrConstant.CONFIG_HANDLER))
             if params.get(StrConstant.PARAM_EXPORT_TYPE) == MsProfCommonConstant.SUMMARY:
                 headers, data, _ = handler(configs, params)
-                return MsprofDataStorage().export_summary_data(headers, data, params)
+                return MsprofDataStorage().export_summary_data(headers, Utils.data_processing_with_decimals(data),
+                                                               params)
             data = handler(configs, params)
             if isinstance(data, EmptyClass):
                 return json.dumps(

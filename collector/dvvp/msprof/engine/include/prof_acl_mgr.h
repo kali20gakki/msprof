@@ -75,22 +75,18 @@ public:
      *  Sub-UnSub            not subscribed    already run        conflict        ok
      */
     int CallbackInitPrecheck();
-    int CallbackFinalizePrecheck();
     int ProfInitPrecheck();
     int ProfStartPrecheck();
     int ProfStopPrecheck();
     int ProfFinalizePrecheck();
     int ProfSubscribePrecheck();
-    int ProfUnSubscribePrecheck();
     void SetModeToCmd();
     void SetModeToOff();
     bool IsCmdMode();
     bool IsModeOff();
-    int32_t StopProfConfigCheck(uint64_t dataTypeConfigStop, uint64_t dataTypeConfigStart);
 
     // api ctrl
     int ProfAclInit(const std::string& profResultPath);
-    WorkMode GetWorkMode();
     bool IsInited();
     int InitUploader(const std::string& devIdStr);
     int ProfAclStart(PROF_CONF_CONST_PTR profStartCfg);
@@ -114,8 +110,6 @@ public:
     uint64_t GetCmdModeDataTypeConfig();
     std::string GetParamJsonStr();
     // task datatypeconfig add
-    void AddAiCpuModelConf(uint64_t &dataTypeConfig) const;
-    void AddRuntimeTraceConf(uint64_t &dataTypeConfig) const;
 
 public:
     int32_t MsprofInitForDynamic(VOID_PTR data, uint32_t len) const;
@@ -178,16 +172,12 @@ private:
     int StartDeviceTask(const uint32_t devId, SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params);
     void WaitAllDeviceResponse();
     void WaitDeviceResponse(const uint32_t devId);
-    void GenerateSystemTraceConf(const uint64_t dataTypeConfig, ProfAicoreMetrics aicMetrics,
-                                 SHARED_PTR_ALIA<analysis::dvvp::proto::MsProfStartReq> feature,
-                                 SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params);
     int ProfStartAiCpuTrace(const uint64_t dataTypeConfig, const uint32_t devNums, CONST_UINT32_T_PTR devIdList);
     int UpdateSubscribeInfo(const uint32_t modelId, const uint32_t devId,
                             PROF_SUB_CONF_CONST_PTR profSubscribeConfig);
     int StartDeviceSubscribeTask(const uint32_t modelId, const uint32_t devId,
                                  PROF_SUB_CONF_CONST_PTR profSubscribeConfig);
     void ProfDataTypeConfigHandle(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params);
-    void UpdateDataTypeConfigBySwitch(const std::string &sw, const uint64_t dataTypeConfig);
     std::string MsprofCheckAndGetChar(CHAR_PTR data, uint32_t dataLen);
     void CloseSubscribeFd(const uint32_t devId);
     void CloseSubscribeFd(const uint32_t devId, const uint32_t modelId);
