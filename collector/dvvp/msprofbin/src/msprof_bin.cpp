@@ -51,7 +51,9 @@ int main(int argc, const char **argv, const char **envp)
     EnvManager::instance()->SetGlobalEnv(envpList);
     int ret = Platform::instance()->PlatformInitByDriver();
     if (ret != PROFILING_SUCCESS) {
-        CmdLog::instance()->CmdErrorLog("Init platform by driver faild!");
+        CmdLog::instance()->CmdErrorLog("Running profiling failed."
+            " Please check the driver package is correctly installed.");
+        MSPROF_LOGE("Init platform by driver faild.");
         return PROFILING_FAILED;
     }
     InputParser parser = InputParser();
@@ -77,7 +79,7 @@ int main(int argc, const char **argv, const char **envp)
     CmdLog::instance()->CmdInfoLog("Start profiling....");
     ret = MsprofManager::instance()->MsProcessCmd();
     if (ret != PROFILING_SUCCESS) {
-        CmdLog::instance()->CmdErrorLog("Running profling failed.Please check slog for more info.");
+        CmdLog::instance()->CmdErrorLog("Running profiling failed.Please check slog for more info.");
         return PROFILING_FAILED;
     } else {
         CmdLog::instance()->CmdInfoLog("Profiling finished.");
