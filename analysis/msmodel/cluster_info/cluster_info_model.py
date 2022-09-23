@@ -27,9 +27,10 @@ class ClusterInfoModel(ParserModel):
         """
         self.insert_data_to_db(DBNameConstant.TABLE_CLUSTER_RANK, data_list)
 
-    def get_rank_id_count(self: any) -> list:
-        sql = f"select count(*) from {DBNameConstant.TABLE_CLUSTER_RANK} where rank_id!='N/A'"
-        return DBManager.fetch_all_data(self.cur, sql)
+    def check_rank_id_valid(self: any) -> bool:
+        sql = f"select exists(select 1 from {DBNameConstant.TABLE_CLUSTER_RANK} where rank_id!='N/A' limit 1)"
+        data = list(chain.from_iterable(DBManager.fetch_all_data(self.cur, sql)))
+        return False if not data else data[0] == 1
 
 
 class ClusterInfoViewModel(ViewModel):

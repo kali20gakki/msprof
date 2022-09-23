@@ -37,13 +37,14 @@ class DataCheckManager:
         return False
 
     @classmethod
-    def contain_info_json_data(cls: any, result_dir: str) -> bool:
+    def contain_info_json_data(cls: any, result_dir: str, device_info_only: bool = False) -> bool:
         """
         The data path contain job info data or not
         """
         if not os.path.isdir(result_dir):
             return False
-        info_json_compiles = file_name_manager.get_info_json_compiles()
+        info_json_compiles = file_name_manager.get_info_json_for_device_compiles() if device_info_only else \
+            file_name_manager.get_info_json_compiles()
         for file_name in os.listdir(result_dir):
             for info_json_compile in info_json_compiles:
                 if info_json_compile.match(file_name):

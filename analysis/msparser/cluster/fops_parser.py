@@ -107,8 +107,8 @@ class FopsParser:
             return
         fops_data = self.get_fops_data()
         if not fops_data:
-            error(self.FILE_NAME, "Query data failed, maybe export command has not run successfully yet, "
-                                  "please run export command first")
+            error(self.FILE_NAME, "Query data failed, maybe Fops data does not exist or export command has not run "
+                                  "successfully yet, please check your data or run export command")
             return
         json_data = self.calculate_fops_data(fops_data)
         self.storage_data(json_data)
