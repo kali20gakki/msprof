@@ -263,7 +263,7 @@ class ExportCommand:
         if not (conn and curs):
             return min(model_match_set)
         sql = "select model_id, max(index_id) from {} group by model_id".format(DBNameConstant.TABLE_STEP_TRACE_DATA)
-        model_and_index = DBManager.fetch_all_data(curs, sql)
+        model_and_index = list(filter(lambda x: x[0] in model_match_set, DBManager.fetch_all_data(curs, sql)))
 
         if not ge_data_set:
             trace_data = DBManager.fetch_all_data(
