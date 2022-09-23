@@ -190,14 +190,12 @@ class MsprofQueryData:
         if not (conn and curs):
             return set()
         sql = "select iter_id from {} where ai_core_num > 0".format(DBNameConstant.TABLE_HWTS_ITER_SYS)
-        curs.row_factory = ClassRowType.class_row(HwtsRecDto)
-        iter_data = DBManager.fetch_all_data(curs, sql)
+        iter_data = DBManager.fetch_all_data(curs, sql, dto_class=HwtsRecDto)
         DBManager.destroy_db_connect(conn, curs)
         iter_id_set = set([iter_id.iter_id for iter_id in iter_data])
         filter_sql = "select index_id, model_id, iter_id from {}".format(
             DBNameConstant.TABLE_STEP_TRACE_DATA)
-        trace_curs.row_factory = ClassRowType.class_row(StepTraceDto)
-        filter_data = DBManager.fetch_all_data(trace_curs, filter_sql)
+        filter_data = DBManager.fetch_all_data(trace_curs, filter_sql, dto_class=StepTraceDto)
         filter_model_set = set()
         for data in filter_data:
             if data.iter_id in iter_id_set:

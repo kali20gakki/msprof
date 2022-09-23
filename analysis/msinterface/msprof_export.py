@@ -267,9 +267,9 @@ class ExportCommand:
                                  key=itemgetter(1, 0))
 
         if not ge_data_tag:
-            curs.row_factory = ClassRowType.class_row(StepTraceDto)
             trace_data = DBManager.fetch_all_data(
-                curs, "select index_id, model_id, iter_id from {}".format(DBNameConstant.TABLE_STEP_TRACE_DATA))
+                curs, "select index_id, model_id, iter_id from {}".format(DBNameConstant.TABLE_STEP_TRACE_DATA),
+                dto_class=StepTraceDto)
             model_and_index = self._update_model_and_index(result_dir, model_and_index, trace_data)
         DBManager.destroy_db_connect(conn, curs)
         return model_and_index.pop()[0] if model_and_index else min(model_match_set)
@@ -280,8 +280,7 @@ class ExportCommand:
         if not (conn and curs):
             return []
         sql = "select iter_id from {} where ai_core_num > 0".format(DBNameConstant.TABLE_HWTS_ITER_SYS)
-        curs.row_factory = ClassRowType.class_row(HwtsRecDto)
-        iter_data = DBManager.fetch_all_data(curs, sql)
+        iter_data = DBManager.fetch_all_data(curs, sql, dto_class=HwtsRecDto)
         DBManager.destroy_db_connect(conn, curs)
         res_set = set()
         for data in iter_data:
