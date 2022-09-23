@@ -5,9 +5,8 @@
 
 class HwtsRecDto:
     """
-    step trace dro
+    hwts res dto
     """
-    DEFAULT_ITER_ID = -1
 
     def __init__(self: any) -> None:
         self._ai_core_num = None

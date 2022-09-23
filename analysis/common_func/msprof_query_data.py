@@ -6,7 +6,7 @@ import os
 
 from common_func.common import error
 from common_func.constant import Constant
-from common_func.db_manager import DBManager, ClassRowType
+from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.msprof_common import MsProfCommonConstant
@@ -121,16 +121,15 @@ class MsprofQueryData:
 
         db_path = PathManager.get_db_path(self.project_path, DBNameConstant.DB_STEP_TRACE)
         conn, curs = DBManager.check_connect_db_path(db_path)
-        model_ids_set, iter_id_set = set(), set()
 
-        if not conn or not curs or not DBManager.check_tables_in_db(
-                db_path, DBNameConstant.TABLE_STEP_TRACE_DATA):
+        if not conn or not curs or not DBManager.judge_table_exist(
+                curs, DBNameConstant.TABLE_STEP_TRACE_DATA):
             DBManager.destroy_db_connect(conn_ge, curs_ge)
             DBManager.destroy_db_connect(conn, curs)
             return []
 
-        if not conn_ge or not curs_ge or not DBManager.check_tables_in_db(
-                db_path_ge, DBNameConstant.TABLE_GE_TASK):
+        if not conn_ge or not curs_ge or not DBManager.judge_table_exist(
+                curs_ge, DBNameConstant.TABLE_GE_TASK):
             DBManager.destroy_db_connect(conn_ge, curs_ge)
             model_ids_set = self._get_model_id_set_without_ge(curs)
         else:
@@ -196,11 +195,8 @@ class MsprofQueryData:
         filter_sql = "select index_id, model_id, iter_id from {}".format(
             DBNameConstant.TABLE_STEP_TRACE_DATA)
         filter_data = DBManager.fetch_all_data(trace_curs, filter_sql, dto_class=StepTraceDto)
-        filter_model_set = set()
-        for data in filter_data:
-            if data.iter_id in iter_id_set:
-                filter_model_set.add(data.model_id)
-        return filter_model_set
+        result = [data.model_id for data in filter_data if data.iter_id in iter_id_set]
+        return set(result)
 
 
 class QueryArgumentCheck:
