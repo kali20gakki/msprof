@@ -92,14 +92,15 @@ SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> InputParser::MsprofGetOp
     std::string argvStr = "";
     while ((opt = MmGetOptLong(argc, const_cast<MsprofStrBufAddrT>(argv),
         optString, longOptions, &optionIndex)) != MSPROF_DAEMON_ERROR) {
-        if (opt < ARGS_HELP || opt >= NR_ARGS) {
+        if (opt <= ARGS_HELP || opt >= NR_ARGS) {
             MsprofCmdUsage("");
             return nullptr;
         }
         cmdInfo.args[opt] = MmGetOptArg();
         argvStr = std::string(argv[MmGetOptInd() - 1]);
-        if (strlen(cmdInfo.args[opt]) == 0) {
+        if (cmdInfo.args[opt] == nullptr) {
             CmdLog::instance()->CmdErrorLog("Argument %s empty value.", argvStr.c_str());
+            MsprofCmdUsage("");
             return nullptr;
         }
         if (argvMap.find(opt) == argvMap.end()) {
@@ -112,7 +113,7 @@ SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> InputParser::MsprofGetOp
     auto paramAdapter = ParamsAdapterMsprof();
     int ret = paramAdapter.GetParamFromInputCfg(argvMap, params_);
     if (ret != PROFILING_SUCCESS) {
-        MsprofCmdUsage("get params from input config failed.");
+        MsprofCmdUsage("Running profiling failed with invalid commandline argument");
         return nullptr;
     }
     return params_;
