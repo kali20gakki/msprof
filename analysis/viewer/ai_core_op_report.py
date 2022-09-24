@@ -177,7 +177,10 @@ class AiCoreOpReport:
                 ai_cpu_data += (Constant.NA,) * (len(op_data[0]) - len(ai_cpu_data))
                 ai_cpu_datas[index] = list(ai_cpu_data)
         op_data.extend(ai_cpu_datas)
-        op_data.sort(key=lambda x: x[cls.START_TIME_INDEX])
+        task_start_index = cls.START_TIME_INDEX
+        if StrConstant.TASK_START_TIME in data[0]:
+            task_start_index = data[0].index(StrConstant.TASK_START_TIME)
+        op_data.sort(key=lambda x: x[task_start_index])
         return data[0], op_data, len(op_data)
 
     @classmethod
