@@ -196,7 +196,6 @@ int ParamsAdapterMsprof::SetMsprofMode()
         msprofMode_ = MsprofMode::MSPROF_MODE_EXPORT;
         return PROFILING_SUCCESS;
     }
-    MSPROF_LOGE("Set msprof mode fail");
     return PROFILING_FAILED;
 }
 
@@ -293,11 +292,11 @@ int ParamsAdapterMsprof::GetParamFromInputCfg(std::unordered_map<int, std::pair<
         if (!BlackSwitchCheck(cfgType)) {
             std::cout << Utils::GetSelfPath() << ": unrecognized option '"
                   << kv.second.second << "'" << std::endl;
-            std::cout << "PlatformType:" << static_cast<uint8_t>(GetPlatform()) << std::endl;
+            std::cout << "PlatformType:" << static_cast<int>(GetPlatform()) << std::endl;
             return PROFILING_FAILED;
         }
-        if (!kv.second.first.args[argsType]) {
-            std::cout << "Argument " << argvMap[argsType].second << " : expected one argument.";
+        if (kv.second.first.args[argsType] != nullptr && kv.second.first.args[argsType][0] == '\0') {
+            CmdLog::instance()->CmdErrorLog("Argument %s : expected one argument.", argvMap[argsType].second.c_str());
             return PROFILING_FAILED;
         }
         paramContainer_[cfgType] = std::string(kv.second.first.args[argsType]);
@@ -305,22 +304,22 @@ int ParamsAdapterMsprof::GetParamFromInputCfg(std::unordered_map<int, std::pair<
     }
     ret = ParamsCheck();
     if (ret != PROFILING_SUCCESS) {
-        CmdLog::instance()->CmdErrorLog("msprof input param check fail.");
+        MSPROF_LOGE("msprof input param check fail.");
         return PROFILING_FAILED;
     }
     ret = SetMsprofMode();
     if (ret != PROFILING_SUCCESS) {
-        CmdLog::instance()->CmdErrorLog("Get msprof running mode fail.");
+        MSPROF_LOGE("Set msprof mode fail");
         return PROFILING_FAILED;
     }
     ret = SetModeDefaultParams(msprofMode_);
     if (ret != PROFILING_SUCCESS) {
-        CmdLog::instance()->CmdErrorLog("msprof set default value fail.");
+        MSPROF_LOGE("msprof set default value fail.");
         return PROFILING_FAILED;
     }
     ret = TransToParam(paramContainer_, params_);
     if (ret != PROFILING_SUCCESS) {
-        CmdLog::instance()->CmdErrorLog("msprof set params fail.");
+        MSPROF_LOGE("msprof trans to params fail.");
         return PROFILING_FAILED;
     }
     SetParamsSelf();
