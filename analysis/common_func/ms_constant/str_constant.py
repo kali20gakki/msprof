@@ -105,6 +105,8 @@ class StrConstant:
     TRACE_HEADER_TID = "tid"
     TRACE_HEADER_NAME = "name"
 
+    TASK_START_TIME = 'Task Start Time'
+
     TASK_TYPE_MAPPING = {
         "0": 'kernel AI core task',
         "1": 'kernel AI cpu task',
