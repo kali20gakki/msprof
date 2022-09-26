@@ -17,11 +17,10 @@ from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msprof_exception import ProfException
 from common_func.msprof_step import MsprofStep
 from common_func.msvp_common import check_file_writable
+from common_func.msvp_common import path_check
 from common_func.path_manager import PathManager
 from msmodel.ai_cpu.data_queue_model import DataQueueModel
-from msmodel.interface.view_model import ViewModel
 from profiling_bean.db_dto.cluster_rank_dto import ClusterRankDto
-from common_func.msvp_common import path_check
 
 
 class DataPreprocessParser:
@@ -105,20 +104,19 @@ class DataPreprocessParser:
         data_queue_data = self.get_data_queue_data()
         step_trace_data = self.get_step_trace_data()
         if not (data_queue_data and step_trace_data):
-            error(self.FILE_NAME, "Query data failed, maybe import command has not run successfully yet, "
-                                  "please run import command first.")
+            error(self.FILE_NAME, "Query data failed, maybe import command has not run successfully yet or "
+                                  "import data preprocess has no data, please check and run import command first.")
             raise ProfException(ProfException.PROF_INVALID_PATH_ERROR)
         json_data = self.calculate_queue_data(data_queue_data, step_trace_data)
         self.storage_data(json_data)
 
     def get_data_queue_data(self: any) -> list:
         data_queue_data = []
-        if not path_check(PathManager.get_db_path(self.collection_path, DBNameConstant.DB_CLUSTER_DATA_PREPROCESS)):
+        db_path = PathManager.get_db_path(self.collection_path, DBNameConstant.DB_CLUSTER_DATA_PREPROCESS)
+        if not (path_check(db_path) and DBManager.check_tables_in_db(db_path, DBNameConstant.TABLE_DATA_QUEUE)):
             return data_queue_data
         model = DataQueueModel(self.collection_path, [DBNameConstant.TABLE_DATA_QUEUE])
         with model as _model:
-            if not _model.check_table():
-                return data_queue_data
             data_queue_data = _model.get_all_data(DBNameConstant.TABLE_DATA_QUEUE)
         return data_queue_data
 
