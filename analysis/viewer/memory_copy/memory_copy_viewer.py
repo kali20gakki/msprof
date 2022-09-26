@@ -98,7 +98,7 @@ class MemoryCopyViewer:
                 export_datum.append(datum[1])
                 export_datum.append(datum[2])
                 export_datum.append(datum[3])
-                export_datum.append("\"" + str(round(datum[4], 2)) + "\"")
+                export_datum.append(str(round(datum[4], 4)))
                 export_datum.append("\"" + str(int(datum[5] * DBManager.NSTOUS)) + "\"")
                 export_datum.append("\"" + str(int(datum[6] * DBManager.NSTOUS)) + "\"")
                 summary_data.append(tuple(export_datum))
