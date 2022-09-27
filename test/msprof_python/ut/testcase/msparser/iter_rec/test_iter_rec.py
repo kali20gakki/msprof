@@ -4,93 +4,36 @@
 function:
 Copyright Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 """
-import sqlite3
-import struct
+import os
 import unittest
 from unittest import mock
 
-import pytest
-from common_func.msprof_exception import ProfException
+from constant.constant import clear_dt_project
 from msparser.iter_rec.iter_rec_parser import IterRecParser
 from profiling_bean.prof_enum.data_tag import DataTag
-
-from constant.constant import CONFIG
 
 NAMESPACE = 'msparser.iter_rec.iter_rec_parser'
 
 
 class TestIterRecParser(unittest.TestCase):
+    DIR_PATH = os.path.join(os.path.dirname(__file__), 'DT_IterRecParser')
+    sample_config = {
+        'result_dir': DIR_PATH, 'device_id': '0', 'iter_id': 1,
+        'job_id': 'job_default', 'ip_address': '127.0.0.1', 'model_id': -1
+    }
     file_list = {DataTag.HWTS: ['hwts.data.0.slice_0']}
+    non_static_data = {1: ['1-1-0', '1-2-0', '1-3-0'], 2: ['2-1-0', '2-2-0', '2-3-0']}
 
-    def test_get_iter_end_dict(self):
-        pass
+    def setUp(self) -> None:
+        os.makedirs(os.path.join(self.DIR_PATH, 'PROF1', 'device_0'))
+        os.makedirs(os.path.join(self.DIR_PATH, 'sqlite'))
 
-    def test_is_ai_core_task(self):
-        with mock.patch('common_func.msprof_iteration.MsprofIteration.get_iteration_end_dict', return_value={1: 101}):
-            check = IterRecParser(self.file_list, CONFIG)
-            check._ge_op_iter_dict = {"100": ("100-3",)}
-            check._iter_recorder.set_current_iter_id(100)
-            check._is_ai_core_task('100', '3', 1)
+    def tearDown(self) -> None:
+        clear_dt_project(self.DIR_PATH)
 
-    def test_set_current_iter_id(self):
-        with mock.patch('common_func.msprof_iteration.MsprofIteration.get_iteration_end_dict', return_value={1: 101}):
-            check = IterRecParser(self.file_list, CONFIG)
-            check._iter_recorder.set_current_iter_id(100)
-        with mock.patch(NAMESPACE + '.logging.error'), \
-             mock.patch('common_func.msprof_iteration.MsprofIteration.get_iteration_end_dict', return_value={}):
-            with pytest.raises(ProfException) as err:
-                check = IterRecParser(self.file_list, CONFIG)
-                check._iter_recorder.set_current_iter_id(100)
-            self.assertEqual(err.value.code, 8)
-
-    def test_read_hwts_data(self):
-        with mock.patch(NAMESPACE + '.IterRecParser._is_ai_core_task', return_value=True), \
-             mock.patch('common_func.msprof_iteration.MsprofIteration.get_iteration_end_dict', return_value={1: 101}):
-            data = struct.pack("=BBHHHQ12I", 1, 2, 3, 4, 5, 6, 7, 8, 9, 7, 8, 9, 5, 3, 2, 5, 4, 6)
-            check = IterRecParser(self.file_list, CONFIG)
-            check._read_hwts_data(bytes(data))
-
-    def test_parse_hwts_data(self):
-        data = struct.pack("=BBHHHQ12I", 1, 2, 3, 4, 5, 6, 7, 8, 9, 7, 8, 9, 5, 3, 2, 5, 4, 6)
-        with mock.patch(NAMESPACE + '.PathManager.get_data_file_path', return_value='test'), \
-             mock.patch(NAMESPACE + '.logging.info'), \
-             mock.patch(NAMESPACE + '.IterRecParser._read_hwts_data'), \
-             mock.patch('common_func.file_manager.check_path_valid'), \
-             mock.patch('os.path.getsize', return_value=len(data)), \
-             mock.patch('builtins.open', mock.mock_open(read_data=data)), \
-             mock.patch('common_func.msprof_iteration.MsprofIteration.get_iteration_end_dict', return_value={1: 101}):
-            check = IterRecParser(self.file_list, CONFIG)
-            check._parse_hwts_data()
-            check_1 = IterRecParser({}, CONFIG)
-            check_1._parse_hwts_data()
-
-    def test_parse(self):
-        with mock.patch('msmodel.ge.ge_info_calculate_model.GeInfoModel.check_db', return_value=True), \
-             mock.patch('msmodel.ge.ge_info_calculate_model.GeInfoModel.check_table', return_value=True), \
-             mock.patch('msmodel.ge.ge_info_calculate_model.GeInfoModel.get_ge_data', return_value={}), \
-             mock.patch('msmodel.ge.ge_info_calculate_model.GeInfoModel.finalize'), \
-             mock.patch(NAMESPACE + '.IterRecParser._parse_hwts_data'), \
-             mock.patch(NAMESPACE + '.logging.error'), \
-             mock.patch('common_func.msprof_iteration.MsprofIteration.get_iteration_end_dict', return_value={1: 101}), \
-             mock.patch('msmodel.ge.ge_info_calculate_model.GeInfoModel.get_batch_dict', return_value={}):
-            check = IterRecParser(self.file_list, CONFIG)
+    def test_parse_should_return_none_when_no_ge_data(self):
+        with mock.patch(NAMESPACE + '.GeInfoModel.check_table'), \
+                mock.patch(NAMESPACE + '.GeInfoModel.get_all_ge_static_shape_data', return_value=[{}, {}]), \
+                mock.patch(NAMESPACE + '.GeInfoModel.get_all_ge_non_static_shape_data', return_value={}):
+            check = IterRecParser(self.file_list, self.sample_config)
             check.parse()
-
-    def test_save(self):
-        with mock.patch('msmodel.iter_rec.iter_rec_model.HwtsIterModel.init'), \
-             mock.patch('msmodel.iter_rec.iter_rec_model.HwtsIterModel.flush'), \
-             mock.patch('msmodel.iter_rec.iter_rec_model.HwtsIterModel.finalize', side_effect=sqlite3.Error), \
-             mock.patch(NAMESPACE + '.Utils.obj_list_to_list'), \
-             mock.patch(NAMESPACE + '.logging.error'), \
-             mock.patch('common_func.msprof_iteration.MsprofIteration.get_iteration_end_dict', return_value={1: 101}):
-            check = IterRecParser(self.file_list, CONFIG)
-            check._iter_info_dict = {'a': 'b'}
-            check.save()
-
-    def test_ms_run(self):
-        with mock.patch(NAMESPACE + '.IterRecParser.parse'), \
-             mock.patch(NAMESPACE + '.IterRecParser.save', side_effect=ProfException(0)), \
-             mock.patch(NAMESPACE + '.logging.warning'), \
-             mock.patch('common_func.msprof_iteration.MsprofIteration.get_iteration_end_dict', return_value={1: 101}):
-            check = IterRecParser(self.file_list, CONFIG)
-            check.ms_run()

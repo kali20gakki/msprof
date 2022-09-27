@@ -13,7 +13,6 @@ import pytest
 from common_func.msprof_exception import ProfException
 from msparser.iter_rec.iter_rec_parser import NoGeIterRecParser
 from profiling_bean.prof_enum.data_tag import DataTag
-
 from constant.constant import CONFIG
 
 NAMESPACE = 'msparser.iter_rec.iter_rec_parser'
@@ -85,20 +84,6 @@ class TestNoGeIterRecParser(unittest.TestCase):
                            return_value={1: 101}):
             check = NoGeIterRecParser(self.file_list, CONFIG)
             check._parse_ai_core_data()
-
-    def test_parse(self):
-        with mock.patch('msmodel.ge.ge_info_calculate_model.GeInfoModel.check_db', return_value=True), \
-                mock.patch(NAMESPACE + '.NoGeIterRecParser._parse_ai_core_data', return_value=True), \
-                mock.patch('msmodel.ge.ge_info_calculate_model.GeInfoModel.check_table', return_value=True), \
-                mock.patch('msmodel.ge.ge_info_calculate_model.GeInfoModel.get_ge_data', return_value={}), \
-                mock.patch('msmodel.ge.ge_info_calculate_model.GeInfoModel.finalize'), \
-                mock.patch(NAMESPACE + '.NoGeIterRecParser._parse_hwts_data'), \
-                mock.patch(NAMESPACE + '.logging.error'), \
-                mock.patch('common_func.msprof_iteration.MsprofIteration.get_iteration_end_dict',
-                           return_value={1: 101}), \
-                mock.patch('msmodel.ge.ge_info_calculate_model.GeInfoModel.get_batch_dict', return_value={}):
-            check = NoGeIterRecParser(self.file_list, CONFIG)
-            check.parse()
 
     def test_save(self):
         with mock.patch('msmodel.iter_rec.iter_rec_model.HwtsIterModel.init'), \
