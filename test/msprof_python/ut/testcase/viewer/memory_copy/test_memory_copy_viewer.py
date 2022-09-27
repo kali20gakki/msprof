@@ -35,7 +35,7 @@ class TestMemoryCopyViewer(unittest.TestCase):
         self.assertEqual(expect_res, res)
 
     def test_get_memory_copy_non_chip0_summary_1(self):
-        expect_res = [("MemcopyAsync", "other", 11, 12, '100', '"2200"', '"2300"')]
+        expect_res = [("MemcopyAsync", "other", 11, 12, 100, '"2200"', '"2300"')]
 
         export_data = [(MemoryCopyConstant.ASYNC_MEMCPY_NAME, MemoryCopyConstant.TYPE, 11,
                         12, 100, 2.2, 2.3)]
