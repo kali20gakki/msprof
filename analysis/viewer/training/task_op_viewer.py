@@ -136,9 +136,7 @@ class TaskOpViewer:
                 # task_data[0] is kernel name, task_data[1] is task type
                 task_time = "N/A"
                 if data[3] != 0:
-                    task_time = "\"" + str(
-                        (data[3] - data[2]) / DBManager.NSTOUS) \
-                                + "\""
+                    task_time = str((data[3] - data[2]) / DBManager.NSTOUS)
                 task_info.append((op_name, str(task_type), data[0],
                                   data[1], task_time,
                                   "\"" + str(data[2]) + "\"",
@@ -154,7 +152,7 @@ class TaskOpViewer:
                                               ge_datum[4]): (ge_datum[2], ge_datum[3])
                             for ge_datum in ge_data}
         for task_datum in task_data:
-            duration = "".join(["\"", str((task_datum[3] - task_datum[2]) / DBManager.NSTOUS), "\""])
+            duration = str((task_datum[3] - task_datum[2]) / DBManager.NSTOUS)
             task_start = "".join(["\"", str(task_datum[2]), "\""])
             task_end = "".join(["\"", str(task_datum[3]), "\""])
             name_type = ge_data_dict.get("{}-{}-{}".format(task_datum[0], task_datum[1],

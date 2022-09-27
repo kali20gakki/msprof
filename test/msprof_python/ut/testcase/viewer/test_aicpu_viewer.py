@@ -17,7 +17,7 @@ NAMESPACE = 'viewer.aicpu_viewer'
 def test_analysis_aicpu():
     project_path = 'home\\project'
     headers = ["Timestamp", "Node", "Compute_time(ms)", "Memcpy_time(ms)", "Task_time(ms)",
-               "Dispatch_time(ms)", "Total_time(ms)"]
+               "Dispatch_time(ms)", "Total_time(ms)", "Stream ID", "Task ID"]
     with mock.patch(NAMESPACE + '.PathManager.get_db_path', return_value='ai_cpu.db'), \
             mock.patch(NAMESPACE + '.DBManager.destroy_db_connect'):
         with mock.patch(NAMESPACE + '.DBManager.check_connect_db_path', return_value=(False, False)):
