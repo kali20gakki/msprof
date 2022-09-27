@@ -170,17 +170,17 @@ int ParamsAdapter::TransToParam(std::array<std::string, INPUT_CFG_MAX> paramCont
     }
 
     SetCommonParams(paramContainer);
- 
+
     SetTaskParams(paramContainer);
- 
+
     SetAiMetricsParams(paramContainer);
- 
+
     SetDeviceSysParams(paramContainer);
- 
+
     SetHostSysParams(paramContainer);
- 
+
     SetHostSysUsageParams(paramContainer);
- 
+
     return PROFILING_SUCCESS;
 }
 
