@@ -143,6 +143,7 @@ void PlatformAdapterInterface::SetParamsForGE()
         params_->dataTypeConfig |= PROF_MODEL_EXECUTE; // model_time_info data
         params_->dataTypeConfig |= PROF_MODEL_LOAD;
         params_->dataTypeConfig |= PROF_OP_DETAIL;  // dynamic_op_execute data
+        params_->dataTypeConfig |= PROF_GE_DYNAMIC_OP_EXECUTE;
     }
 }
 
