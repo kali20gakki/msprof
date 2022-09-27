@@ -49,6 +49,8 @@ private:
     void SetParamsSelf();
     void SpliteAppPath(const std::string &appParams);
     int SetModeDefaultParams(MsprofMode modeType);
+    int SystemToolsIsExist() const;
+    int GenMsprofContainer(std::unordered_map<int, std::pair<MsprofCmdInfo, std::string>> argvMap);
 
 private:
     std::string cmdPath_;

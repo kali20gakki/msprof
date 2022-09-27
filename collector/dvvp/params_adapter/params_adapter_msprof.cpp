@@ -273,6 +273,36 @@ void ParamsAdapterMsprof::SetParamsSelf()
     params_->msprofBinPid = Utils::GetPid();
 }
 
+int ParamsAdapterMsprof::SystemToolsIsExist() const
+{
+    if (setConfig_.find(INPUT_CFG_HOST_SYS) != setConfig_.end()) {
+        return ParamValidation::instance()->CheckHostSysToolsExit(paramContainer_[INPUT_CFG_HOST_SYS],
+            paramContainer_[INPUT_CFG_COM_OUTPUT], appDir_) ? PROFILING_SUCCESS : PROFILING_FAILED;
+    }
+    return PROFILING_SUCCESS;
+}
+
+int ParamsAdapterMsprof::GenMsprofContainer(std::unordered_map<int, std::pair<MsprofCmdInfo, std::string>> argvMap)
+{
+    for (const std::pair<int, std::pair<MsprofCmdInfo, std::string>> kv : argvMap) {
+        MsprofArgsType argsType = static_cast<MsprofArgsType>(kv.first);
+        InputCfg cfgType = cfgMap_[argsType];
+        if (!BlackSwitchCheck(cfgType)) {
+            CmdLog::instance()->CmdErrorLog("%s: unrecognized option '%s'", Utils::GetSelfPath().c_str(),
+                kv.second.second.c_str());
+            MSPROF_LOGE("Blacklist check failed, PlatformType:%d", static_cast<int>(GetPlatform()));
+            return PROFILING_FAILED;
+        }
+        if (kv.second.first.args[argsType] != nullptr && kv.second.first.args[argsType][0] == '\0') {
+            CmdLog::instance()->CmdErrorLog("Argument %s : expected one argument.", argvMap[argsType].second.c_str());
+            return PROFILING_FAILED;
+        }
+        paramContainer_[cfgType] = std::string(kv.second.first.args[argsType]);
+        setConfig_.insert(cfgType);
+    }
+    return PROFILING_SUCCESS;
+}
+
 int ParamsAdapterMsprof::GetParamFromInputCfg(std::unordered_map<int, std::pair<MsprofCmdInfo, std::string>> argvMap,
     SHARED_PTR_ALIA<ProfileParams> params)
 {
@@ -286,35 +316,29 @@ int ParamsAdapterMsprof::GetParamFromInputCfg(std::unordered_map<int, std::pair<
         MSPROF_LOGE("[GetParamFromInputCfg]msprof Init failed.");
         return PROFILING_FAILED;
     }
-    for (const std::pair<int, std::pair<MsprofCmdInfo, std::string>> kv : argvMap) {
-        MsprofArgsType argsType = static_cast<MsprofArgsType>(kv.first);
-        InputCfg cfgType = cfgMap_[argsType];
-        if (!BlackSwitchCheck(cfgType)) {
-            std::cout << Utils::GetSelfPath() << ": unrecognized option '"
-                  << kv.second.second << "'" << std::endl;
-            std::cout << "PlatformType:" << static_cast<int>(GetPlatform()) << std::endl;
-            return PROFILING_FAILED;
-        }
-        if (kv.second.first.args[argsType] != nullptr && kv.second.first.args[argsType][0] == '\0') {
-            CmdLog::instance()->CmdErrorLog("Argument %s : expected one argument.", argvMap[argsType].second.c_str());
-            return PROFILING_FAILED;
-        }
-        paramContainer_[cfgType] = std::string(kv.second.first.args[argsType]);
-        setConfig_.insert(cfgType);
+    ret = GenMsprofContainer(argvMap);
+    if (ret != PROFILING_SUCCESS) {
+        MSPROF_LOGE("[GetParamFromInputCfg]generate container for msprof failed.");
+        return PROFILING_FAILED;
     }
     ret = ParamsCheck();
     if (ret != PROFILING_SUCCESS) {
-        MSPROF_LOGE("msprof input param check fail.");
+        MSPROF_LOGE("[GetParamFromInputCfg]msprof input param check failed.");
         return PROFILING_FAILED;
     }
     ret = SetMsprofMode();
     if (ret != PROFILING_SUCCESS) {
-        MSPROF_LOGE("Set msprof mode fail");
+        MSPROF_LOGE("[GetParamFromInputCfg]Set msprof mode failed.");
         return PROFILING_FAILED;
     }
     ret = SetModeDefaultParams(msprofMode_);
     if (ret != PROFILING_SUCCESS) {
-        MSPROF_LOGE("msprof set default value fail.");
+        MSPROF_LOGE("[GetParamFromInputCfg]msprof set default value failed.");
+        return PROFILING_FAILED;
+    }
+    ret = SystemToolsIsExist();
+    if (ret != PROFILING_SUCCESS) {
+        MSPROF_LOGE("[GetParamFromInputCfg]system tools check failed.");
         return PROFILING_FAILED;
     }
     ret = TransToParam(paramContainer_, params_);
