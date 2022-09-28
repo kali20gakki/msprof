@@ -258,23 +258,6 @@ class ExportCommand:
         init_result = (init_success, sql, conn, curs)
         return init_result
 
-    def _set_default_model_id(self, result_dir, model_match_set, ge_data_set):
-        conn, curs = DBManager.check_connect_db(result_dir, DBNameConstant.DB_STEP_TRACE)
-        if not (conn and curs):
-            return min(model_match_set)
-        sql = "select model_id, max(index_id) from {} group by model_id".format(DBNameConstant.TABLE_STEP_TRACE_DATA)
-        model_and_index = list(filter(lambda x: x[0] in model_match_set, DBManager.fetch_all_data(curs, sql)))
-
-        if not ge_data_set:
-            trace_data = DBManager.fetch_all_data(
-                curs, "select model_id, iter_id from {}".format(DBNameConstant.TABLE_STEP_TRACE_DATA),
-                dto_class=StepTraceDto)
-            model_and_index = self._update_model_and_index(result_dir,
-                                                           {data.iter_id: data.model_id for data in trace_data})
-        model_and_index.sort(key=lambda x: x[1])
-        DBManager.destroy_db_connect(conn, curs)
-        return model_and_index.pop()[0] if model_and_index else min(model_match_set)
-
     @staticmethod
     def _update_model_and_index(result_dir: str, trace_data_dict: dict) -> list:
         conn, curs = DBManager.check_connect_db(result_dir, DBNameConstant.DB_HWTS_REC)
@@ -316,6 +299,23 @@ class ExportCommand:
             self._process_sub_dirs()
             if self._cluster_params.get('is_cluster_scene', False):
                 self._show_cluster_tuning()
+
+    def _set_default_model_id(self, result_dir, model_match_set, ge_data_set):
+        conn, curs = DBManager.check_connect_db(result_dir, DBNameConstant.DB_STEP_TRACE)
+        if not (conn and curs):
+            return min(model_match_set)
+        sql = "select model_id, max(index_id) from {} group by model_id".format(DBNameConstant.TABLE_STEP_TRACE_DATA)
+        model_and_index = list(filter(lambda x: x[0] in model_match_set, DBManager.fetch_all_data(curs, sql)))
+
+        if not ge_data_set:
+            trace_data = DBManager.fetch_all_data(
+                curs, "select model_id, iter_id from {}".format(DBNameConstant.TABLE_STEP_TRACE_DATA),
+                dto_class=StepTraceDto)
+            model_and_index = self._update_model_and_index(result_dir,
+                                                           {data.iter_id: data.model_id for data in trace_data})
+        model_and_index.sort(key=lambda x: x[1])
+        DBManager.destroy_db_connect(conn, curs)
+        return model_and_index.pop()[0] if model_and_index else min(model_match_set)
 
     def _add_export_type(self: any, result_dir: str) -> None:
         export_map = self.EXPORT_HANDLE_MAP.get(self.command_type, [])
