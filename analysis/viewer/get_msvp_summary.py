@@ -9,6 +9,7 @@ import sqlite3
 from common_func.common import CommonConstant
 from common_func.common import generate_config
 from common_func.db_manager import DBManager
+from common_func.info_conf_reader import InfoConfReader
 from common_func.msvp_common import path_check
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_constant.number_constant import NumberConstant
@@ -70,8 +71,9 @@ def calculate_utilization(tmp_data: list, result_data: dict) -> None:
     time_list = [1]
     for i in range(len(tmp_data) - 1):
         time_list.append(tmp_data[i + 1][1] - tmp_data[i][1])
+    freq = InfoConfReader().get_freq(StrConstant.AIC)
     for tmp in tmp_data:  # [timestamp, utilization, coreid]
-        interval = NumberConstant.CPU_FREQ * float(time_list[tmp_data.index(tmp)]) * 10 ** 3
+        interval = freq * float(time_list[tmp_data.index(tmp)])
         if not NumberConstant.is_zero(interval) and len(tmp) >= 3:  # length tmp should be longer than 3
             result_data['usage'].setdefault(str(tmp[2]), []).append(
                 [StrConstant.ACCURACY % float(tmp[1]),
