@@ -126,7 +126,11 @@ class GeInfoModel(BaseModel):
                                 "where index_id=0 and task_type='{1}' " \
                                 "group by model_id".format(DBNameConstant.TABLE_GE_TASK, datatype)
         static_shape_data = DBManager.fetch_all_data(self.cur, static_shape_data_sql)
-        return dict(static_shape_data)
+        static_shape_dict = {}
+        if static_shape_data:
+            for static_shape in static_shape_data:
+                static_shape_dict[static_shape[0]] = set(static_shape[1].split(','))
+        return static_shape_dict
 
     def _get_ge_no_static_shape_data(self: any, datatype: str) -> list:
         non_static_shape_data_sql = "select model_id||'-'||index_id, " \
@@ -134,4 +138,8 @@ class GeInfoModel(BaseModel):
                                     "where index_id<>0 and task_type='{1}' " \
                                     "group by model_id||'-'||index_id".format(DBNameConstant.TABLE_GE_TASK, datatype)
         non_static_shape_data = DBManager.fetch_all_data(self.cur, non_static_shape_data_sql)
-        return dict(non_static_shape_data)
+        non_static_shape_dict = {}
+        if non_static_shape_data:
+            for non_static_shape in non_static_shape_data:
+                non_static_shape_dict[non_static_shape[0]] = set(non_static_shape[1].split(','))
+        return non_static_shape_dict

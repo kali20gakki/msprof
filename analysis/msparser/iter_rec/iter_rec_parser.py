@@ -206,9 +206,8 @@ class IterRecParser(IterParser):
         if stream_task_batch_value in self._ge_non_static_shape_dict.get(self._iter_recorder.current_iter_id, set()):
             return True
         model_id = self._ge_static_shape_iter_model_dict.get(self._iter_recorder.current_iter_id)
-        if not model_id:
-            return False
-        if stream_task_batch_value in self._ge_static_shape_model_task_dict.get(model_id, set()):
+        if model_id is not None and stream_task_batch_value in self._ge_static_shape_model_task_dict.get(model_id,
+                                                                                                         set()):
             return True
         return False
 
