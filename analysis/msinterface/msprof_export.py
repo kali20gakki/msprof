@@ -205,10 +205,11 @@ class ExportCommand:
         self.iteration_id = args.iteration_id if args.iteration_id is not None else NumberConstant.DEFAULT_ITER_ID
         self.sample_config = None
         self.export_format = getattr(args, "export_format", None)
+        self.user_model_id = getattr(args, self.MODEL_ID)
         self.list_map = {
             'export_type_list': [],
             'devices_list': '',
-            'model_id': getattr(args, self.MODEL_ID),
+            'model_id': self.user_model_id,
             'input_model_id': args.model_id is not None
         }
         self._cluster_params = {'is_cluster_scene': False, 'cluster_path': []}
@@ -353,6 +354,7 @@ class ExportCommand:
         profiling_scene = ProfilingScene()
         profiling_scene.init(result_dir)
 
+        self.list_map[self.MODEL_ID] = self.user_model_id
         if not profiling_scene.is_step_trace():
             self.list_map[self.MODEL_ID] = Constant.GE_OP_MODEL_ID
             return
@@ -379,11 +381,10 @@ class ExportCommand:
                 self.list_map[self.MODEL_ID] = Constant.GE_OP_MODEL_ID
             return
 
-        model_id = self.list_map.get(self.MODEL_ID)
-        if model_id not in model_match_set:
+        if self.list_map.get(self.MODEL_ID) not in model_match_set:
             error(self.FILE_NAME, 'The model id {0} is invalid. Must select'
                                   ' from {1}. Please enter a'
-                                  ' valid model id.'.format(model_id, model_match_set))
+                                  ' valid model id.'.format(self.list_map.get(self.MODEL_ID), model_match_set))
             raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR)
 
     def _prepare_for_export(self: any, result_dir: str) -> None:
