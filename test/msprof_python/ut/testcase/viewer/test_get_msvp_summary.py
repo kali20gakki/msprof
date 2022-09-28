@@ -6,6 +6,9 @@ from unittest import mock
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from sqlite.db_manager import DBManager
+from constant.info_json_construct import InfoJson
+from constant.info_json_construct import DeviceInfo
+from constant.info_json_construct import InfoJsonReaderManager
 from sqlite.db_manager import DBOpen
 from viewer.get_msvp_summary import get_aicore_utilization
 from viewer.get_msvp_summary import get_type_db_correspondences
@@ -29,6 +32,10 @@ info_json = {"DeviceInfo": [
 
 
 class TestMsvpSummary(unittest.TestCase):
+
+    @staticmethod
+    def setup_class():
+        InfoJsonReaderManager(InfoJson(DeviceInfo=[DeviceInfo(aic_frequency="680")])).process()
 
     def test_get_type_db_correspondences(self):
         sample_config_test = {"ai_core_profiling_mode": "task-based"}
@@ -109,7 +116,6 @@ class TestMsvpSummary(unittest.TestCase):
                     mock.patch(NAMESPACE + '.pre_check_pmu_events_interface', return_value=(0, "", func_map)), \
                     mock.patch(NAMESPACE + '.DBManager.check_connect_db',
                                return_value=(db_open.db_conn, db_open.db_curs)):
-                InfoConfReader()._info_json = {"DeviceInfo": [{'aic_frequency': 1500}]}
                 res = get_aicore_utilization("", 0, NumberConstant.DEFAULT_NUMBER, NumberConstant.DEFAULT_START_TIME,
                                              NumberConstant.DEFAULT_END_TIME)
             self.assertEqual(len(json.loads(res)), 2)
