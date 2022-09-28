@@ -67,8 +67,9 @@ class BatchCounter:
         stream_task_batch_value = self.STREAM_TASK_BATCH_KEY_FMT.format(stream_id, task_id, 0)
 
         # when scene is single op, ge op iter dict is empty
-        model_id = self._ge_static_shape_model_task_dict.get(current_iter_id)
-        if model_id and stream_task_batch_value in self._ge_static_shape_model_task_dict.get(model_id, set()):
+        model_id = self._ge_static_shape_iter_model_dict.get(current_iter_id)
+        if model_id is not None and stream_task_batch_value in self._ge_static_shape_model_task_dict.get(model_id,
+                                                                                                         set()):
             batch_id = 0
         else:
             batch_id = self.deal_batch_id_for_each_task(
