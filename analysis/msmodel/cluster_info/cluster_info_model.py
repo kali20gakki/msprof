@@ -27,11 +27,6 @@ class ClusterInfoModel(ParserModel):
         """
         self.insert_data_to_db(DBNameConstant.TABLE_CLUSTER_RANK, data_list)
 
-    def check_rank_id_valid(self: any) -> bool:
-        sql = f"select exists(select 1 from {DBNameConstant.TABLE_CLUSTER_RANK} where rank_id!='N/A' limit 1)"
-        data = list(chain.from_iterable(DBManager.fetch_all_data(self.cur, sql)))
-        return False if not data else data[0] == 1
-
 
 class ClusterInfoViewModel(ViewModel):
     def __init__(self: any, path: str) -> None:
@@ -48,3 +43,8 @@ class ClusterInfoViewModel(ViewModel):
     def get_device_and_rank_ids(self: any) -> list:
         sql = "select device_id, rank_id from {}".format(DBNameConstant.TABLE_CLUSTER_RANK)
         return DBManager.fetch_all_data(self.cur, sql)
+
+    def get_rank_or_device_ids(self: any) -> set:
+        sql = f"select case when rank_id='N/A' then device_id else rank_id end " \
+              f"from {DBNameConstant.TABLE_CLUSTER_RANK}"
+        return set(chain.from_iterable(DBManager.fetch_all_data(self.cur, sql)))

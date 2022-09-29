@@ -9,14 +9,13 @@ from enum import IntEnum
 from common_func.common import error, print_msg
 from common_func.constant import Constant
 from common_func.data_check_manager import DataCheckManager
-from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msprof_common import get_path_dir, prepare_log
 from common_func.msprof_exception import ProfException
 from common_func.path_manager import PathManager
-from msmodel.cluster_info.cluster_info_model import ClusterInfoModel
+from msmodel.cluster_info.cluster_info_model import ClusterInfoViewModel
 from msparser.cluster.cluster_communication_parser import ClusterCommunicationParser
 from msparser.cluster.cluster_parallel_parser import ClusterParallelParser
 from msparser.cluster.data_preprocess_parser import DataPreprocessParser
@@ -52,7 +51,6 @@ class MsprofQuerySummaryManager:
         self.npu_id = args.id
         self.model_id = args.model_id
         self.iteration_id = args.iteration_id
-        self.is_cluster_scene = False
 
     @staticmethod
     def check_rank_id(collection_path: str) -> bool:
@@ -67,8 +65,7 @@ class MsprofQuerySummaryManager:
                 if not DataCheckManager.contain_info_json_data(device_path, device_info_only=True):
                     continue
                 InfoConfReader().load_info(device_path)
-                if InfoConfReader().get_rank_id() != Constant.NA:
-                    return True
+                return InfoConfReader().get_rank_id() != Constant.NA
         return False
 
     @staticmethod
@@ -90,28 +87,20 @@ class MsprofQuerySummaryManager:
             return
         if not self._check_collection_dir_valid():
             error(MsprofQuerySummaryManager.FILE_NAME,
-                  "For query cluster or summary data, please execute import --cluster first")
+                  "To query cluster or summary data, please execute import --cluster first")
             raise ProfException(ProfException.PROF_CLUSTER_DIR_ERROR)
         prepare_log(self.collection_path)
-        params = self._generate_query_params()
-        self.QUERY_DATA_TYPE_PARSER.get(self.data_type)(params).process()
-
-    def _generate_query_params(self: any) -> dict:
-        self.is_cluster_scene = self._check_rank_id_valid()
         params = {"collection_path": self.collection_path,
-                  "is_cluster": self.is_cluster_scene,
                   "npu_id": self.npu_id,
                   "model_id": self.model_id,
                   "iteration_id": self.iteration_id}
-        return params
-
-    def _check_rank_id_valid(self: any) -> bool:
-        with ClusterInfoModel(self.collection_path) as cluster_info_model:
-            return cluster_info_model.check_rank_id_valid()
+        self.QUERY_DATA_TYPE_PARSER.get(self.data_type)(params).process()
 
     def _check_collection_dir_valid(self: any) -> bool:
-        db_path = PathManager.get_db_path(self.collection_path, DBNameConstant.DB_CLUSTER_RANK)
-        return DBManager.check_tables_in_db(db_path, DBNameConstant.TABLE_CLUSTER_RANK)
+        if not os.path.exists(PathManager.get_db_path(self.collection_path, DBNameConstant.DB_CLUSTER_RANK)):
+            return False
+        with ClusterInfoViewModel(self.collection_path) as cluster_info_model:
+            return cluster_info_model.check_table()
 
     def _check_data_type_valid(self: any) -> None:
         if self.data_type is None or self.data_type not in QueryDataType.__members__.values():

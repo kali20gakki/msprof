@@ -24,7 +24,6 @@ class ClusterCommunicationParser:
 
     def __init__(self: any, params: dict) -> None:
         self._collection_path = params["collection_path"]
-        self._is_cluster_scene = params["is_cluster"]
         self._npu_id = params["npu_id"]
         self._model_id = params["model_id"]
         self._iteration_id = params["iteration_id"]
@@ -56,13 +55,11 @@ class ClusterCommunicationParser:
             with self._cluster_info_model as _c_model:
                 if not _c_model.check_db() or not _c_model.check_table():
                     return
-                device_and_rank_ids = _c_model.get_device_and_rank_ids()
-            if not device_and_rank_ids:
+                rank_or_device_ids = _c_model.get_rank_or_device_ids()
+            if not rank_or_device_ids:
                 return
-            device_and_rank_ids = list(zip(*device_and_rank_ids))
-            device_or_rank_ids = device_and_rank_ids[1] if self._is_cluster_scene else device_and_rank_ids[0]
-            for device_or_rank_id in device_or_rank_ids:
-                communication_data = _model.get_cluster_communication(device_or_rank_id)
+            for rank_or_device_id in rank_or_device_ids:
+                communication_data = _model.get_cluster_communication(rank_or_device_id)
                 if not communication_data:
                     continue
                 self._data_collection.extend(communication_data)
