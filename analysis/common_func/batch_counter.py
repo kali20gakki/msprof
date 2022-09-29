@@ -47,7 +47,7 @@ class BatchCounter:
         ge_info_model = GeInfoModel(self._project_path)
         if ge_info_model.check_db() and ge_info_model.check_table():
             self._ge_static_shape_iter_model_dict, self._ge_static_shape_model_task_dict = \
-                ge_info_model.get_all_ge_static_shape_data(datatype)
+                ge_info_model.get_ge_data(datatype, Constant.GE_STATIC_SHAPE)
             self._ge_task_batch_dict = ge_info_model.get_batch_dict(datatype)
         ge_info_model.finalize()
 

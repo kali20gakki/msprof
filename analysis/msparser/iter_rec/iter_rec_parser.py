@@ -179,9 +179,9 @@ class IterRecParser(IterParser):
         with GeInfoModel(self._project_path) as ge_info_model:
             if ge_info_model.check_table():
                 self._ge_static_shape_iter_model_dict, self._ge_static_shape_model_task_dict = \
-                    ge_info_model.get_all_ge_static_shape_data(Constant.TASK_TYPE_AI_CORE)
-                self._ge_non_static_shape_dict = ge_info_model.get_all_ge_non_static_shape_data(
-                    Constant.TASK_TYPE_AI_CORE)
+                    ge_info_model.get_ge_data(Constant.TASK_TYPE_AI_CORE, Constant.GE_STATIC_SHAPE)
+                self._ge_non_static_shape_dict = ge_info_model.get_ge_data(
+                    Constant.TASK_TYPE_AI_CORE, Constant.GE_NON_STATIC_SHAPE)
         if not self._ge_static_shape_iter_model_dict and not self._ge_non_static_shape_dict:
             return
         self._batch_counter.init(Constant.TASK_TYPE_AI_CORE)

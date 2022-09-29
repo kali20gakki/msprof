@@ -5,11 +5,20 @@ from unittest import mock
 from sqlite.db_manager import DBManager
 from msmodel.ge.ge_info_calculate_model import GeInfoModel
 from common_func.constant import Constant
+from profiling_bean.db_dto.step_trace_dto import StepTraceDto
 
 NAMESPACE = 'msmodel.ge.ge_info_calculate_model'
 
 
 class TestGeInfoModel(unittest.TestCase):
+    step_trace_dto_1 = StepTraceDto()
+    step_trace_dto_1.model_id = 0
+    step_trace_dto_1.index_id = 1
+    step_trace_dto_1.iter_id = 1
+    step_trace_dto_2 = StepTraceDto()
+    step_trace_dto_2.model_id = 0
+    step_trace_dto_2.index_id = 2
+    step_trace_dto_2.iter_id = 2
 
     def test_check_table(self):
         db_manager = DBManager()
@@ -71,23 +80,23 @@ class TestGeInfoModel(unittest.TestCase):
     def test_get_all_ge_static_shape_data_when_single_op_scence(self):
         with mock.patch(NAMESPACE + ".Utils.is_step_scene", return_value=False):
             check = GeInfoModel("")
-            res = check.get_all_ge_static_shape_data("AI_CORE")
+            res = check.get_ge_data("AI_CORE", Constant.GE_STATIC_SHAPE)
         self.assertEqual(res, [{}, {}])
 
     def test_get_all_ge_static_shape_data_when_no_static_data(self):
         with mock.patch(NAMESPACE + ".Utils.is_step_scene", return_value=True), \
                 mock.patch(NAMESPACE + ".GeInfoModel._get_ge_static_shape_data", return_value={}):
             check = GeInfoModel("")
-            res = check.get_all_ge_static_shape_data("AI_CORE")
+            res = check.get_ge_data("AI_CORE", Constant.GE_STATIC_SHAPE)
         self.assertEqual(res, [{}, {}])
 
     def test_get_all_ge_static_shape_data(self):
         with mock.patch(NAMESPACE + ".Utils.is_step_scene", return_value=True), \
                 mock.patch(NAMESPACE + ".GeInfoModel._get_ge_static_shape_data", return_value={0: 7, 1: 2}), \
-                mock.patch(NAMESPACE + ".GeInfoModel._get_step_trace_primary_key_data",
-                           return_value=[[0, 1, 1], [0, 2, 2]]):
+                mock.patch(NAMESPACE + ".GeInfoModel._get_step_trace_data",
+                           return_value=[self.step_trace_dto_1, self.step_trace_dto_2]):
             check = GeInfoModel("")
-            res = check.get_all_ge_static_shape_data("AI_CORE")
+            res = check.get_ge_data("AI_CORE", Constant.GE_STATIC_SHAPE)
         self.assertEqual([{1: 0, 2: 0}, {0: 7, 1: 2}], res)
 
     def test_get_all_ge_static_shape_data_1(self):
@@ -95,48 +104,49 @@ class TestGeInfoModel(unittest.TestCase):
                 mock.patch(NAMESPACE + ".GeInfoModel._get_ge_static_shape_data", return_value={0: {7}, 1: {2}}), \
                 mock.patch(NAMESPACE + ".PathManager.get_db_path"), \
                 mock.patch(NAMESPACE + ".DBManager.create_connect_db", return_value=[1, 2]), \
-                mock.patch(NAMESPACE + ".DBManager.fetch_all_data", return_value=[[0, 1, 1], [0, 2, 2]]), \
+                mock.patch(NAMESPACE + ".DBManager.fetch_all_data",
+                           return_value=[self.step_trace_dto_1, self.step_trace_dto_2]), \
                 mock.patch(NAMESPACE + ".DBManager.destroy_db_connect"):
             check = GeInfoModel("")
-            res = check.get_all_ge_static_shape_data("AI_CORE")
+            res = check.get_ge_data("AI_CORE", Constant.GE_STATIC_SHAPE)
         self.assertEqual([{1: 0, 2: 0}, {0: {7}, 1: {2}}], res)
 
     def test_get_all_ge_static_shape_data_2(self):
         with mock.patch(NAMESPACE + ".Utils.is_step_scene", return_value=True), \
-                mock.patch(NAMESPACE + ".GeInfoModel._get_step_trace_primary_key_data",
-                           return_value=[[0, 1, 1], [0, 2, 2]]), \
+                mock.patch(NAMESPACE + ".GeInfoModel._get_step_trace_data",
+                           return_value=[self.step_trace_dto_1, self.step_trace_dto_2]), \
                 mock.patch(NAMESPACE + ".DBManager.fetch_all_data", return_value=[[0, '7'], [1, '2']]):
             check = GeInfoModel("")
-            res = check.get_all_ge_static_shape_data("AI_CORE")
+            res = check.get_ge_data("AI_CORE", Constant.GE_STATIC_SHAPE)
         self.assertEqual([{1: 0, 2: 0}, {0: {'7'}, 1: {'2'}}], res)
 
     def test_get_all_ge_non_static_shape_data_when_single_op_scence(self):
         with mock.patch(NAMESPACE + ".Utils.is_step_scene", return_value=False):
             check = GeInfoModel("")
-            res = check.get_all_ge_non_static_shape_data("AI_CORE")
+            res = check.get_ge_data("AI_CORE", Constant.GE_NON_STATIC_SHAPE)
         self.assertEqual({}, res)
 
     def test_get_all_ge_non_static_shape_data_when_no_nonstatic_data(self):
         with mock.patch(NAMESPACE + ".Utils.is_step_scene", return_value=True), \
                 mock.patch(NAMESPACE + ".GeInfoModel._get_ge_no_static_shape_data", return_value={}):
             check = GeInfoModel("")
-            res = check.get_all_ge_non_static_shape_data("AI_CORE")
+            res = check.get_ge_data("AI_CORE", Constant.GE_NON_STATIC_SHAPE)
         self.assertEqual({}, res)
 
     def test_get_all_ge_non_static_shape_data(self):
         with mock.patch(NAMESPACE + ".Utils.is_step_scene", return_value=True), \
                 mock.patch(NAMESPACE + ".GeInfoModel._get_ge_no_static_shape_data", return_value={'0-1': 7}), \
-                mock.patch(NAMESPACE + ".GeInfoModel._get_step_trace_primary_key_data",
-                           return_value=[[0, 1, 1], [0, 2, 2]]):
+                mock.patch(NAMESPACE + ".GeInfoModel._get_step_trace_data",
+                           return_value=[self.step_trace_dto_1, self.step_trace_dto_2]):
             check = GeInfoModel("")
-            res = check.get_all_ge_non_static_shape_data("AI_CORE")
+            res = check.get_ge_data("AI_CORE", Constant.GE_NON_STATIC_SHAPE)
         self.assertEqual({1: 7}, res)
 
     def test_get_all_ge_non_static_shape_data_1(self):
         with mock.patch(NAMESPACE + ".Utils.is_step_scene", return_value=True), \
                 mock.patch(NAMESPACE + ".DBManager.fetch_all_data", return_value=[['0-1', '7,8']]), \
-                mock.patch(NAMESPACE + ".GeInfoModel._get_step_trace_primary_key_data",
-                           return_value=[[0, 1, 1], [0, 2, 2]]):
+                mock.patch(NAMESPACE + ".GeInfoModel._get_step_trace_data",
+                           return_value=[self.step_trace_dto_1, self.step_trace_dto_2]):
             check = GeInfoModel("")
-            res = check.get_all_ge_non_static_shape_data("AI_CORE")
+            res = check.get_ge_data("AI_CORE", Constant.GE_NON_STATIC_SHAPE)
         self.assertEqual({1: {'7', '8'}}, res)
