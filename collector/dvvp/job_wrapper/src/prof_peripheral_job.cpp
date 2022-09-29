@@ -538,13 +538,14 @@ int ProfDvppJob::Process()
             int ret = DrvPeripheralStart(peripheralCfg_);
             MSPROF_LOGI("start profiling Channel %d, events:%s, ret=%d",
                 static_cast<int>(channelId), eventsStr_.c_str(), ret);
+
+            Utils::ProfFree(peripheralCfg_.configP);
+            peripheralCfg_.configP = nullptr;
             if (ret != PROFILING_SUCCESS) {
                 MSPROF_LOGE("ProfDvppJob DrvPeripheralStart failed, channelId:%d", static_cast<int>(channelId));
                 continue;
             }
         }
-        Utils::ProfFree(peripheralCfg_.configP);
-        peripheralCfg_.configP = nullptr;
         return PROFILING_SUCCESS;
     } else {
         return ProfPeripheralJob::Process();

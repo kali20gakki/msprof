@@ -253,11 +253,11 @@ void ArgsManager::AddBiuArgs()
         return;
     }
     Args biu = {"biu", "Show biu profiling data, the default value is off.", OFF};
-    Args biu_freq = {"biu-freq", "The biu sampling period in clock-cycle, "
+    Args biuFreq = {"biu-freq", "The biu sampling period in clock-cycle, "
         "the default value is 1000 cycle, the range is 300 to 30000 cycle.",
         "1000"};
     argsList_.push_back(biu);
-    argsList_.push_back(biu_freq);
+    argsList_.push_back(biuFreq);
 }
 
 void ArgsManager::AddAicpuArgs()
