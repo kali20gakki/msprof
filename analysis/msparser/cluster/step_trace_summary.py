@@ -31,7 +31,6 @@ class StepTraceSummay:
 
     def __init__(self: any, params: dict) -> None:
         self.collection_path = params["collection_path"]
-        self.is_cluster_scene = params["is_cluster"]
         self.npu_id = params["npu_id"]
         self.model_id = params["model_id"]
         self.iteration_id = params["iteration_id"]
@@ -113,16 +112,12 @@ class StepTraceSummay:
         return data_colleciton
 
     def _get_rank_or_device_ids(self: any) -> set:
-        rank_or_device_ids = set()
-        db_file = PathManager.get_db_path(self.collection_path, DBNameConstant.DB_CLUSTER_RANK)
-        if not DBManager.check_tables_in_db(db_file, DBNameConstant.TABLE_CLUSTER_RANK):
-            return rank_or_device_ids
+        if not os.path.exists(PathManager.get_db_path(self.collection_path, DBNameConstant.DB_CLUSTER_RANK)):
+            return set()
         with self.cluster_info_model as model:
-            data = model.get_device_and_rank_ids()
-        if not data:
-            return rank_or_device_ids
-        device_ids, rank_ids = list(zip(*data))
-        return set(rank_ids) if self.is_cluster_scene else set(device_ids)
+            if not model.check_table():
+                return set()
+            return model.get_rank_or_device_ids()
 
     def _sql_for_query_all_iteration(self: any, table_name: str, rank_or_device_id: int) -> str:
         sql = "select {0}, (case when model_id={1} then 'N/A' else model_id end), " \

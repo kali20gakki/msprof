@@ -248,18 +248,12 @@ def get_end_info_compiles() -> tuple:
     return (re.compile(FileNameManagerConstant.END_INFO_PATTERN),)
 
 
-def get_info_json_compiles() -> tuple:
+def get_info_json_compiles(device_info_only: bool = False) -> tuple:
     """
     get info json regex compiles
     """
-    return (re.compile(FileNameManagerConstant.INFO_JSON_PATTERN),)
-
-
-def get_info_json_for_device_compiles() -> tuple:
-    """
-    get info json regex compiles
-    """
-    return (re.compile(FileNameManagerConstant.INFO_JSON_FOR_DEVICE_PATTERN),)
+    return (re.compile(FileNameManagerConstant.INFO_JSON_FOR_DEVICE_PATTERN if device_info_only
+                       else FileNameManagerConstant.INFO_JSON_PATTERN),)
 
 
 def get_host_start_compiles() -> tuple:
