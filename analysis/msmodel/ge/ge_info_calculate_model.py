@@ -13,6 +13,7 @@ from common_func.ms_constant.number_constant import NumberConstant
 from common_func.path_manager import PathManager
 from common_func.utils import Utils
 from msmodel.interface.base_model import BaseModel
+from profiling_bean.db_dto.step_trace_dto import StepTraceDto
 
 
 class GeInfoModel(BaseModel):
@@ -84,42 +85,38 @@ class GeInfoModel(BaseModel):
                     batch_dict.setdefault((iter_id, stream_id), (task_id, batch_id))
             return batch_dict
 
-    def get_all_ge_static_shape_data(self: any, datatype: str) -> list:
-        all_ge_static_shape_data = [{}, {}]
+    def get_ge_data(self: any, datatype: str, is_static_shape: str) -> any:
+        result_data = [{}, {}] if is_static_shape == Constant.GE_STATIC_SHAPE else {}
         if not Utils.is_step_scene(self.result_dir):
-            return all_ge_static_shape_data
-        ge_static_shape_data = self._get_ge_static_shape_data(datatype)
-        if not ge_static_shape_data:
-            return all_ge_static_shape_data
-        step_trace_primary_key_data = self._get_step_trace_primary_key_data()
-        iter_model_dict = {}
-        for primary_key in step_trace_primary_key_data:
-            if primary_key[0] in ge_static_shape_data.keys():
-                iter_model_dict[primary_key[2]] = primary_key[0]
-        all_ge_static_shape_data[0] = iter_model_dict
-        all_ge_static_shape_data[1] = ge_static_shape_data
-        return all_ge_static_shape_data
+            return result_data
+        step_trace_data = self._get_step_trace_data()
+        task_data = self._get_ge_static_shape_data(
+            datatype) if is_static_shape == Constant.GE_STATIC_SHAPE else self._get_ge_no_static_shape_data(
+            datatype)
+        if not step_trace_data or not task_data:
+            return result_data
 
-    def get_all_ge_non_static_shape_data(self: any, datatype: str) -> dict:
-        if not Utils.is_step_scene(self.result_dir):
-            return {}
-        non_static_shape_data = self._get_ge_no_static_shape_data(datatype)
-        if not non_static_shape_data:
-            return {}
-        step_trace_primary_key_data = self._get_step_trace_primary_key_data()
-        for primary_key in step_trace_primary_key_data:
-            model_index = "{0}-{1}".format(primary_key[0], primary_key[1])
-            if model_index in non_static_shape_data.keys():
-                non_static_shape_data[primary_key[2]] = non_static_shape_data.pop(model_index)
-        return non_static_shape_data
+        if is_static_shape == Constant.GE_STATIC_SHAPE:
+            iter_model_dict = {}
+            for step_trace in step_trace_data:
+                if step_trace.model_id in task_data.keys():
+                    iter_model_dict[step_trace.iter_id] = step_trace.model_id
+            result_data[0] = iter_model_dict
+            result_data[1] = task_data
+        else:
+            for step_trace in step_trace_data:
+                model_index = "{0}-{1}".format(step_trace.model_id, step_trace.index_id)
+                if model_index in task_data.keys():
+                    result_data[step_trace.iter_id] = task_data.pop(model_index)
+        return result_data
 
-    def _get_step_trace_primary_key_data(self: any) -> list:
+    def _get_step_trace_data(self: any) -> list:
         db_path = PathManager.get_db_path(self.result_dir, DBNameConstant.DB_STEP_TRACE)
-        trace_conn, trace_curs = DBManager.create_connect_db(db_path)
+        trace_conn, trace_curs = DBManager.check_connect_db_path(db_path)
         sql = "select model_id, index_id, iter_id from {0}".format(DBNameConstant.TABLE_STEP_TRACE_DATA)
-        step_trace_primary_key_data = DBManager.fetch_all_data(trace_curs, sql)
+        step_trace_data = DBManager.fetch_all_data(trace_curs, sql, dto_class=StepTraceDto)
         DBManager.destroy_db_connect(trace_conn, trace_curs)
-        return step_trace_primary_key_data
+        return step_trace_data
 
     def _get_ge_static_shape_data(self: any, datatype: str) -> dict:
         static_shape_data_sql = "select model_id, GROUP_CONCAT(stream_id||'-'||task_id||'-'||batch_id) from {0} " \
@@ -132,7 +129,7 @@ class GeInfoModel(BaseModel):
                 static_shape_dict[static_shape[0]] = set(static_shape[1].split(','))
         return static_shape_dict
 
-    def _get_ge_no_static_shape_data(self: any, datatype: str) -> list:
+    def _get_ge_no_static_shape_data(self: any, datatype: str) -> dict:
         non_static_shape_data_sql = "select model_id||'-'||index_id, " \
                                     "GROUP_CONCAT(stream_id||'-'||task_id||'-'||batch_id) from {0} " \
                                     "where index_id<>0 and task_type='{1}' " \
