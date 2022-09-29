@@ -90,9 +90,7 @@ class GeInfoModel(BaseModel):
         if not Utils.is_step_scene(self.result_dir):
             return result_data
         step_trace_data = self._get_step_trace_data()
-        task_data = self._get_ge_static_shape_data(
-            datatype) if is_static_shape == Constant.GE_STATIC_SHAPE else self._get_ge_no_static_shape_data(
-            datatype)
+        task_data = self._get_ge_task_data(datatype, is_static_shape)
         if not step_trace_data or not task_data:
             return result_data
 
@@ -118,25 +116,19 @@ class GeInfoModel(BaseModel):
         DBManager.destroy_db_connect(trace_conn, trace_curs)
         return step_trace_data
 
-    def _get_ge_static_shape_data(self: any, datatype: str) -> dict:
-        static_shape_data_sql = "select model_id, GROUP_CONCAT(stream_id||'-'||task_id||'-'||batch_id) from {0} " \
-                                "where index_id=0 and task_type='{1}' " \
-                                "group by model_id".format(DBNameConstant.TABLE_GE_TASK, datatype)
-        static_shape_data = DBManager.fetch_all_data(self.cur, static_shape_data_sql)
-        static_shape_dict = {}
-        if static_shape_data:
-            for static_shape in static_shape_data:
-                static_shape_dict[static_shape[0]] = set(static_shape[1].split(','))
-        return static_shape_dict
-
-    def _get_ge_no_static_shape_data(self: any, datatype: str) -> dict:
-        non_static_shape_data_sql = "select model_id||'-'||index_id, " \
-                                    "GROUP_CONCAT(stream_id||'-'||task_id||'-'||batch_id) from {0} " \
-                                    "where index_id<>0 and task_type='{1}' " \
-                                    "group by model_id||'-'||index_id".format(DBNameConstant.TABLE_GE_TASK, datatype)
-        non_static_shape_data = DBManager.fetch_all_data(self.cur, non_static_shape_data_sql)
-        non_static_shape_dict = {}
-        if non_static_shape_data:
-            for non_static_shape in non_static_shape_data:
-                non_static_shape_dict[non_static_shape[0]] = set(non_static_shape[1].split(','))
-        return non_static_shape_dict
+    def _get_ge_task_data(self: any, datatype: str, is_static_shape: str) -> dict:
+        if is_static_shape == Constant.GE_STATIC_SHAPE:
+            sql = "select model_id, GROUP_CONCAT(stream_id||'-'||task_id||'-'||batch_id) from {0} " \
+                  "where index_id=0 and task_type='{1}' " \
+                  "group by model_id".format(DBNameConstant.TABLE_GE_TASK, datatype)
+        else:
+            sql = "select model_id||'-'||index_id, " \
+                  "GROUP_CONCAT(stream_id||'-'||task_id||'-'||batch_id) from {0} " \
+                  "where index_id<>0 and task_type='{1}' " \
+                  "group by model_id||'-'||index_id".format(DBNameConstant.TABLE_GE_TASK, datatype)
+        task_data = DBManager.fetch_all_data(self.cur, sql)
+        task_data_dict = {}
+        if task_data:
+            for task in task_data:
+                task_data_dict[task[0]] = set(task[1].split(','))
+        return task_data_dict
