@@ -203,6 +203,7 @@ ArgsManager::ArgsManager()
     AddInterArgs();
     AddDvvpArgs();
     AddL2Args();
+    AddBiuArgs();
     AddHostArgs();
     AddStarsArgs();
     Args help = {"help", "help message."};
