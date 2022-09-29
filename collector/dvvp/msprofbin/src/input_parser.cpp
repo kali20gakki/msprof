@@ -191,9 +191,6 @@ ArgsManager::ArgsManager()
     {"sys-devices", "Specify the profiling scope by device ID when collect sys profiling."
                      "The value is all or ID list (split with ',')."},
     {"hccl", "Show hccl profiling data, the default value is off.", OFF},
-    {"biu", "Show biu profiling data, the default value is off.", OFF},
-    {"biu-freq", "The biu sampling period in clock-cycle, "
-                "the default value is 1000 cycle, the range is 300 to 30000 cycle.", "1000"},
     {"msproftx", "Show msproftx data, the default value is off.", OFF}
     };
     AddAnalysisArgs();
@@ -248,6 +245,19 @@ void ArgsManager::AddStarsArgs()
 
     Args lowPowerArgs = {"power", "Show low power profiling data, the default value is off."};
     argsList_.push_back(lowPowerArgs);
+}
+
+void ArgsManager::AddBiuArgs()
+{
+    if (ConfigManager::instance()->GetPlatformType() != PlatformType::CHIP_V4_1_0) {
+        return;
+    }
+    Args biu = {"biu", "Show biu profiling data, the default value is off.", OFF};
+    Args biu_freq = {"biu-freq", "The biu sampling period in clock-cycle, "
+        "the default value is 1000 cycle, the range is 300 to 30000 cycle.",
+        "1000"};
+    argsList_.push_back(biu);
+    argsList_.push_back(biu_freq);
 }
 
 void ArgsManager::AddAicpuArgs()
