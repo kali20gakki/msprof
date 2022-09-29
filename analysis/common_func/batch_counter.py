@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
-
+from common_func.constant import Constant
 from msmodel.ge.ge_info_calculate_model import GeInfoModel
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msvp_common import is_number
@@ -13,13 +13,15 @@ class BatchCounter:
     """
 
     STREAM_TASK_KEY_FMT = "{0}-{1}"
+    STREAM_TASK_BATCH_KEY_FMT = "{0}-{1}-{2}"
     TASK_ID = "task_id"
     BATCH_ID = "batch_id"
 
     def __init__(self: any, project_path) -> None:
         self._project_path = project_path
         self._batch_list = []
-        self._ge_op_iter_dict = {}
+        self._ge_static_shape_iter_model_dict = {}
+        self._ge_static_shape_model_task_dict = {}
         self._iter_stream_max_value = {}
         self._ge_task_batch_dict = {}
         self._initialized_stream = {}
@@ -44,7 +46,8 @@ class BatchCounter:
         """
         ge_info_model = GeInfoModel(self._project_path)
         if ge_info_model.check_db() and ge_info_model.check_table():
-            self._ge_op_iter_dict = ge_info_model.get_ge_data(datatype)
+            self._ge_static_shape_iter_model_dict, self._ge_static_shape_model_task_dict = \
+                ge_info_model.get_ge_data(datatype, Constant.GE_STATIC_SHAPE)
             self._ge_task_batch_dict = ge_info_model.get_batch_dict(datatype)
         ge_info_model.finalize()
 
@@ -61,10 +64,12 @@ class BatchCounter:
         iter_stream = (current_iter_id, stream_id)
 
         initial_batch_id = self.calibrate_initial_batch(iter_stream, task_id)
-        stream_task_value = self.STREAM_TASK_KEY_FMT.format(stream_id, task_id)
+        stream_task_batch_value = self.STREAM_TASK_BATCH_KEY_FMT.format(stream_id, task_id, 0)
 
         # when scene is single op, ge op iter dict is empty
-        if stream_task_value in self._ge_op_iter_dict.get(str(current_iter_id), set()):
+        model_id = self._ge_static_shape_iter_model_dict.get(current_iter_id)
+        if model_id is not None and stream_task_batch_value in self._ge_static_shape_model_task_dict.get(model_id,
+                                                                                                         set()):
             batch_id = 0
         else:
             batch_id = self.deal_batch_id_for_each_task(

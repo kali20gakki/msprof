@@ -13,6 +13,7 @@ from common_func.ms_constant.number_constant import NumberConstant
 from common_func.path_manager import PathManager
 from common_func.utils import Utils
 from msmodel.interface.base_model import BaseModel
+from profiling_bean.db_dto.step_trace_dto import StepTraceDto
 
 
 class GeInfoModel(BaseModel):
@@ -56,18 +57,6 @@ class GeInfoModel(BaseModel):
             model_to_iter_dict.setdefault((map_datum[0], map_datum[1]), map_datum[2])
         return model_to_iter_dict
 
-    def get_ge_data(self: any, datatype: str) -> dict:
-        """
-        get ge data
-        :return: iter dict
-        """
-        ge_op_iter_dict = {}
-
-        if Utils.is_step_scene(self.result_dir):
-            self.__get_ge_data_step_scene(ge_op_iter_dict, datatype)
-
-        return ge_op_iter_dict
-
     def get_batch_dict(self: any, datatype: str) -> dict:
         """
         get batch data
@@ -96,39 +85,50 @@ class GeInfoModel(BaseModel):
                     batch_dict.setdefault((iter_id, stream_id), (task_id, batch_id))
             return batch_dict
 
-    def __update_iter_dict(self: any, model_to_iter_dict: dict, ge_op_iter_dict: dict, ge_data: list) -> None:
-        for key, value in model_to_iter_dict.items():
-            if key[0] == ge_data[0]:
-                ge_op_iter_dict.setdefault(str(value), set()).add(
-                    self.STREAM_TASK_KEY_FMT.format(ge_data[2], ge_data[3]))
+    def get_ge_data(self: any, datatype: str, is_static_shape: str) -> any:
+        result_data = [{}, {}] if is_static_shape == Constant.GE_STATIC_SHAPE else {}
+        if not Utils.is_step_scene(self.result_dir):
+            return result_data
+        step_trace_data = self._get_step_trace_data()
+        task_data = self._get_ge_task_data(datatype, is_static_shape)
+        if not step_trace_data or not task_data:
+            return result_data
 
-    def __get_ge_data_step_scene(self: any, ge_op_iter_dict: dict, datatype: str) -> None:
-        """
-        get ge task data
-        :return:
-        """
-        model_to_iter_dict = self.map_model_to_iter()
-        ge_sql = "select model_id, index_id, stream_id, task_id, batch_id from {0} " \
-                 "where (index_id=0 or index_id>0) and task_type='{1}'" \
-            .format(DBNameConstant.TABLE_GE_TASK,
-                    datatype)
-        if DBManager.judge_table_exist(self.cur, DBNameConstant.TABLE_GE_TENSOR):
-            ge_sql = "select {0}.model_id, {0}.index_id, {0}.stream_id, {0}.task_id, {0}.batch_id from {0} " \
-                     "inner join {1} on {0}.task_id={1}.task_id and {0}.stream_id={1}.stream_id " \
-                     "and {0}.timestamp={1}.timestamp " \
-                     "and ({0}.index_id=0 or {0}.index_id>0) and {0}.task_type='{2}'" \
-                .format(DBNameConstant.TABLE_GE_TASK,
-                        DBNameConstant.TABLE_GE_TENSOR,
-                        datatype)
-        ge_dynamic_data = DBManager.fetch_all_data(self.cur, ge_sql)
-        for per_data in ge_dynamic_data:
-            if (per_data[0], per_data[1]) not in model_to_iter_dict:
-                if per_data[1] == NumberConstant.STATIC_SHAPE_ITER_ID:
-                    self.__update_iter_dict(model_to_iter_dict, ge_op_iter_dict, per_data)
-                else:
-                    logging.warning("the combination of ge model id and index id "
-                                    "can't match with step trace data")
-            else:
-                iter_id = model_to_iter_dict.get((per_data[0], per_data[1]))
-                ge_op_iter_dict.setdefault(str(iter_id), set()).add(
-                    self.STREAM_TASK_BATCH_KEY_FMT.format(*per_data[2:]))
+        if is_static_shape == Constant.GE_STATIC_SHAPE:
+            iter_model_dict = {}
+            for step_trace in step_trace_data:
+                if step_trace.model_id in task_data.keys():
+                    iter_model_dict[step_trace.iter_id] = step_trace.model_id
+            result_data[0] = iter_model_dict
+            result_data[1] = task_data
+        else:
+            for step_trace in step_trace_data:
+                model_index = "{0}-{1}".format(step_trace.model_id, step_trace.index_id)
+                if model_index in task_data.keys():
+                    result_data[step_trace.iter_id] = task_data.pop(model_index)
+        return result_data
+
+    def _get_step_trace_data(self: any) -> list:
+        db_path = PathManager.get_db_path(self.result_dir, DBNameConstant.DB_STEP_TRACE)
+        trace_conn, trace_curs = DBManager.check_connect_db_path(db_path)
+        sql = "select model_id, index_id, iter_id from {0}".format(DBNameConstant.TABLE_STEP_TRACE_DATA)
+        step_trace_data = DBManager.fetch_all_data(trace_curs, sql, dto_class=StepTraceDto)
+        DBManager.destroy_db_connect(trace_conn, trace_curs)
+        return step_trace_data
+
+    def _get_ge_task_data(self: any, datatype: str, is_static_shape: str) -> dict:
+        if is_static_shape == Constant.GE_STATIC_SHAPE:
+            sql = "select model_id, GROUP_CONCAT(stream_id||'-'||task_id||'-'||batch_id) from {0} " \
+                  "where index_id=0 and task_type='{1}' " \
+                  "group by model_id".format(DBNameConstant.TABLE_GE_TASK, datatype)
+        else:
+            sql = "select model_id||'-'||index_id, " \
+                  "GROUP_CONCAT(stream_id||'-'||task_id||'-'||batch_id) from {0} " \
+                  "where index_id<>0 and task_type='{1}' " \
+                  "group by model_id||'-'||index_id".format(DBNameConstant.TABLE_GE_TASK, datatype)
+        task_data = DBManager.fetch_all_data(self.cur, sql)
+        task_data_dict = {}
+        if task_data:
+            for task in task_data:
+                task_data_dict[task[0]] = set(task[1].split(','))
+        return task_data_dict
