@@ -99,13 +99,14 @@ class BaseModel(metaclass=ABCMeta):
         if DBManager.judge_table_exist(self.cur, table_name):
             DBManager.drop_table(self.conn, table_name)
 
-    def get_all_data(self: any, table_name: str) -> list:
+    def get_all_data(self: any, table_name: str, dto_class: any = None) -> list:
         """
         get all data from db
         :param table_name:
+        :param dto_class:
         :return:
         """
         if not DBManager.judge_table_exist(self.cur, table_name):
             return []
         all_data_sql = "select * from {}".format(table_name)
-        return DBManager.fetch_all_data(self.cur, all_data_sql)
+        return DBManager.fetch_all_data(self.cur, all_data_sql, dto_class=dto_class)
