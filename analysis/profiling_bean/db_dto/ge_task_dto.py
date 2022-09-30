@@ -9,11 +9,26 @@ class GeTaskDto:
     """
 
     def __init__(self: any) -> None:
+        self._model_id = None
         self._op_name = None
         self._stream_id = None
         self._task_id = None
+        self._block_dim = None
+        self._op_state = None
+        self._task_type = None
+        self._op_type = None
+        self._index_id = None
+        self._thread_id = None
+        self._timestamp = None
         self._batch_id = None
-        self._tasktype = None
+
+    @property
+    def model_id(self: any) -> any:
+        return self._model_id
+
+    @model_id.setter
+    def model_id(self: any, value: any) -> None:
+        self._model_id = value
 
     @property
     def op_name(self: any) -> any:
@@ -40,17 +55,65 @@ class GeTaskDto:
         self._task_id = value
 
     @property
+    def block_dim(self: any) -> any:
+        return self._block_dim
+
+    @block_dim.setter
+    def block_dim(self: any, value: any) -> None:
+        self._block_dim = value
+
+    @property
+    def op_state(self: any) -> any:
+        return self._op_state
+
+    @op_state.setter
+    def op_state(self: any, value: any) -> None:
+        self._op_state = value
+
+    @property
+    def task_type(self: any) -> any:
+        return self._task_type
+
+    @task_type.setter
+    def task_type(self: any, value: any) -> None:
+        self._task_type = value
+
+    @property
+    def op_type(self: any) -> any:
+        return self._op_type
+
+    @op_type.setter
+    def op_type(self: any, value: any) -> None:
+        self._op_type = value
+
+    @property
+    def index_id(self: any) -> any:
+        return self._index_id
+
+    @index_id.setter
+    def index_id(self: any, value: any) -> None:
+        self._index_id = value
+
+    @property
+    def timestamp(self: any) -> any:
+        return self._timestamp
+
+    @timestamp.setter
+    def timestamp(self: any, value: any) -> None:
+        self._timestamp = value
+
+    @property
+    def thread_id(self: any) -> any:
+        return self._thread_id
+
+    @thread_id.setter
+    def thread_id(self: any, value: any) -> None:
+        self._thread_id = value
+
+    @property
     def batch_id(self: any) -> any:
         return self._batch_id
 
     @batch_id.setter
     def batch_id(self: any, value: any) -> None:
         self._batch_id = value
-
-    @property
-    def tasktype(self: any) -> any:
-        return self._tasktype
-
-    @tasktype.setter
-    def tasktype(self: any, value: any) -> None:
-        self._tasktype = value
