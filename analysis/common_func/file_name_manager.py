@@ -252,8 +252,9 @@ def get_info_json_compiles(device_info_only: bool = False) -> tuple:
     """
     get info json regex compiles
     """
-    return (re.compile(FileNameManagerConstant.INFO_JSON_FOR_DEVICE_PATTERN if device_info_only
-                       else FileNameManagerConstant.INFO_JSON_PATTERN),)
+    if device_info_only:
+        return (re.compile(FileNameManagerConstant.INFO_JSON_FOR_DEVICE_PATTERN),)
+    return (re.compile(FileNameManagerConstant.INFO_JSON_PATTERN),)
 
 
 def get_host_start_compiles() -> tuple:
