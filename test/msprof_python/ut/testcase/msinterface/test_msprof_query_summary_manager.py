@@ -1,9 +1,7 @@
-#!/usr/bin/env python
-# coding=utf-8
-"""
-function:
-Copyright Huawei Technologies Co., Ltd. 2022. All rights reserved.
-"""
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
+
 import os
 import unittest
 from argparse import Namespace
@@ -43,6 +41,19 @@ class TestMsprofQuerySummaryManager(unittest.TestCase):
             check.process()
         self.assertEqual(ProfException.PROF_INVALID_PARAM_ERROR, err.value.code)
 
+    def test_dispatch_should_return_empty_when_check_tables_failed(self):
+        args_dic = {"collection_path": self.DIR_PATH,
+                    "id": 1,
+                    "data_type": 1,
+                    "model_id": 1,
+                    "iteration_id": 1}
+        args = Namespace(**args_dic)
+        with mock.patch("os.path.exists", return_value=True), \
+                pytest.raises(ProfException) as err:
+            check = MsprofQuerySummaryManager(args)
+            check.process()
+        self.assertEqual(ProfException.PROF_CLUSTER_DIR_ERROR, err.value.code)
+
     def test_dispatch_should_return_empty_when_data_type_valid_npu_id_invalid(self):
         args_dic = {"collection_path": self.DIR_PATH,
                     "id": -2,
@@ -50,7 +61,8 @@ class TestMsprofQuerySummaryManager(unittest.TestCase):
                     "model_id": 1,
                     "iteration_id": 1}
         args = Namespace(**args_dic)
-        with pytest.raises(ProfException) as err:
+        with mock.patch(NAMESPACE + ".MsprofQuerySummaryManager._check_collection_dir_valid", return_value=True), \
+                pytest.raises(ProfException) as err:
             check = MsprofQuerySummaryManager(args)
             check.process()
         self.assertEqual(ProfException.PROF_INVALID_PARAM_ERROR, err.value.code)
@@ -62,7 +74,8 @@ class TestMsprofQuerySummaryManager(unittest.TestCase):
                     "model_id": -1,
                     "iteration_id": 1}
         args = Namespace(**args_dic)
-        with pytest.raises(ProfException) as err:
+        with mock.patch(NAMESPACE + ".MsprofQuerySummaryManager._check_collection_dir_valid", return_value=True),\
+                pytest.raises(ProfException) as err:
             check = MsprofQuerySummaryManager(args)
             check.process()
         self.assertEqual(ProfException.PROF_INVALID_PARAM_ERROR, err.value.code)
@@ -74,7 +87,8 @@ class TestMsprofQuerySummaryManager(unittest.TestCase):
                     "model_id": 1,
                     "iteration_id": -2}
         args = Namespace(**args_dic)
-        with pytest.raises(ProfException) as err:
+        with mock.patch(NAMESPACE + ".MsprofQuerySummaryManager._check_collection_dir_valid", return_value=True),\
+                pytest.raises(ProfException) as err:
             check = MsprofQuerySummaryManager(args)
             check.process()
         self.assertEqual(ProfException.PROF_INVALID_PARAM_ERROR, err.value.code)
@@ -96,7 +110,8 @@ class TestMsprofQuerySummaryManager(unittest.TestCase):
                     "model_id": 1,
                     "iteration_id": 1}
         args = Namespace(**args_dic)
-        with mock.patch(NAMESPACE + '.StepTraceSummay.process'):
+        with mock.patch(NAMESPACE + ".MsprofQuerySummaryManager._check_collection_dir_valid", return_value=True),\
+                mock.patch(NAMESPACE + '.StepTraceSummay.process'):
             check = MsprofQuerySummaryManager(args)
             check.process()
 
@@ -107,7 +122,8 @@ class TestMsprofQuerySummaryManager(unittest.TestCase):
                     "model_id": 1,
                     "iteration_id": 1}
         args = Namespace(**args_dic)
-        with mock.patch(NAMESPACE + '.FopsParser.process'):
+        with mock.patch(NAMESPACE + ".MsprofQuerySummaryManager._check_collection_dir_valid", return_value=True),\
+                mock.patch(NAMESPACE + '.FopsParser.process'):
             check = MsprofQuerySummaryManager(args)
             check.process()
 
@@ -118,6 +134,7 @@ class TestMsprofQuerySummaryManager(unittest.TestCase):
                     "model_id": 1,
                     "iteration_id": 1}
         args = Namespace(**args_dic)
-        with mock.patch(NAMESPACE + '.ClusterCommunicationParser.process'):
+        with mock.patch(NAMESPACE + ".MsprofQuerySummaryManager._check_collection_dir_valid", return_value=True),\
+                mock.patch(NAMESPACE + '.ClusterCommunicationParser.process'):
             check = MsprofQuerySummaryManager(args)
             check.process()
