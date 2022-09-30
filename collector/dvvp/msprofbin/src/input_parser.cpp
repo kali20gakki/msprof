@@ -70,7 +70,7 @@ InputParser::~InputParser()
 void InputParser::MsprofCmdUsage(const std::string msg)
 {
     if (!msg.empty()) {
-        std::cout << "err: " << const_cast<CHAR_PTR>(msg.c_str()) << std::endl;
+        CmdLog::instance()->CmdErrorLog("%s", msg.c_str());
     }
     ArgsManager::instance()->PrintHelp();
 }
@@ -92,9 +92,15 @@ SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> InputParser::MsprofGetOp
     std::string argvStr = "";
     while ((opt = MmGetOptLong(argc, const_cast<MsprofStrBufAddrT>(argv),
         optString, longOptions, &optionIndex)) != MSPROF_DAEMON_ERROR) {
-        if (opt <= ARGS_HELP || opt >= NR_ARGS) {
+        if (opt < ARGS_HELP || opt >= NR_ARGS) {
             MsprofCmdUsage("");
             return nullptr;
+        }
+        if (opt == ARGS_HELP) {
+            params_->usedParams.clear();
+            params_->usedParams.insert(opt);
+            MsprofCmdUsage("");
+            return params_;
         }
         cmdInfo.args[opt] = MmGetOptArg();
         argvStr = std::string(argv[MmGetOptInd() - 1]);
@@ -113,7 +119,7 @@ SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> InputParser::MsprofGetOp
     auto paramAdapter = ParamsAdapterMsprof();
     int ret = paramAdapter.GetParamFromInputCfg(argvMap, params_);
     if (ret != PROFILING_SUCCESS) {
-        MsprofCmdUsage("Running profiling failed with invalid commandline argument");
+        MSPROF_LOGE("[MsprofGetOpts]get param from InputCfg failed.");
         return nullptr;
     }
     return params_;

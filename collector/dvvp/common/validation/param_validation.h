@@ -37,7 +37,8 @@ public:
     int Uninit() const;
     bool CheckOutputIsValid(const std::string &outputPath) const;
     bool CheckLlcModeIsValid(const std::string &llcMode) const;
-    bool CheckFreqIsValid(const std::string &freq, const int rangeMin, const int rangeMax) const;
+    bool CheckFreqIsValid(const std::string &cfgName, const std::string &freq, const int rangeMin,
+        const int rangeMax) const;
     bool CheckHostSysUsageIsValid(const std::string &hostSysUsage) const;
     bool CheckHostSysPidValid(const std::string &hostSysPid) const;
     bool CheckPythonPathIsValid(const std::string &pythonPath) const;
@@ -65,13 +66,14 @@ public:
     bool CheckCoreIdSizeIsValid(const int eventSize) const;
     bool CheckNameContainsDangerCharacter(const std::string &cmd) const;
     bool CheckDeviceIdIsValid(const std::string &devId) const;
-    bool CheckProfilingAicoreMetricsIsValid(const std::string &aicoreMetrics) const;
+    bool CheckProfilingMetricsIsValid(const std::string &metricsName, const std::string &metricsVal) const;
     int CheckEventsSize(const std::string &events) const;
     bool IsValidSleepPeriod(const int period) const;
     bool CheckHostSysOptionsIsValid(const std::string &hostSysOptions) const;
     bool CheckHostSysPidIsValid(const int hostSysPid) const;
     bool ProfStarsAcsqParamIsValid(const std::string &param) const;
     bool IsValidSwitch(const std::string &switchStr) const;
+    bool IsValidInputCfgSwitch(const std::string &switchName, const std::string &switchVal) const;
     bool CheckStorageLimit(const std::string &storageLimit) const;
     bool StorageLimitUnitValid(const std::string &storageLimit) const;
     bool CheckBiuFreqValid(const uint32_t biuFreq) const;

@@ -1424,6 +1424,16 @@ int Utils::CloudAnalyze(const std::string &jobDir)
     return PROFILING_SUCCESS;
 }
 
+std::string Utils::RealPath(const std::string &path)
+{
+    char realPath[MMPA_MAX_PATH] = { 0 };
+    int ret = MmRealPath(path.c_str(), realPath, MMPA_MAX_PATH);
+    if (ret != PROFILING_SUCCESS) {
+        return "";
+    }
+    return std::string(realPath);
+}
+
 int32_t WriteFile(const std::string &absolutePath, const std::string &recordFile, const std::string &profName)
 {
 #if (defined(_WIN32) || defined(_WIN64) || defined(_MSC_VER))
