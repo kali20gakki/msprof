@@ -528,6 +528,7 @@ public:
     static bool PythonEnvReady();
     static bool AnalysisEnvReady(std::string &msprofPyPath);
     static int CloudAnalyze(const std::string &jobDir);
+    static std::string RealPath(const std::string &path);
 };
 
 template<class T>

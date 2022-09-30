@@ -359,6 +359,16 @@ int ParamsAdapter::ComCfgCheck(std::array<std::string, INPUT_CFG_MAX> paramConta
 bool ParamsAdapter::ComCfgCheck1(const InputCfg inputCfg, const std::string &cfgValue) const
 {
     bool ret = true;
+    std::map<int, std::string> switchNameMap = {
+        {INPUT_CFG_COM_MSPROFTX, "msproftx"}, {INPUT_CFG_COM_TASK_TIME, "task-time"},
+        {INPUT_CFG_COM_ASCENDCL, "ascendcl"}, {INPUT_CFG_COM_RUNTIME_API, "runtime-api"},
+        {INPUT_CFG_COM_HCCL, "hccl"}, {INPUT_CFG_COM_L2, "l2"},
+        {INPUT_CFG_COM_AICPU, "aicpu"}
+    };
+    std::map<int, std::string> metricsNameMap = {
+        {INPUT_CFG_COM_AIC_METRICS, "aic-metrics"},
+        {INPUT_CFG_COM_AIV_METRICS, "aiv-metrics"},
+    };
     switch (inputCfg) {
         case INPUT_CFG_COM_OUTPUT:
             ret = ParamValidation::instance()->CheckOutputIsValid(cfgValue);
@@ -373,11 +383,11 @@ bool ParamsAdapter::ComCfgCheck1(const InputCfg inputCfg, const std::string &cfg
         case INPUT_CFG_COM_HCCL:
         case INPUT_CFG_COM_L2:
         case INPUT_CFG_COM_AICPU:
-            ret = ParamValidation::instance()->IsValidSwitch(cfgValue);
+            ret = ParamValidation::instance()->IsValidInputCfgSwitch(switchNameMap[inputCfg], cfgValue);
             break;
         case INPUT_CFG_COM_AIC_METRICS:
         case INPUT_CFG_COM_AIV_METRICS:
-            ret = ParamValidation::instance()->CheckProfilingAicoreMetricsIsValid(cfgValue);
+            ret = ParamValidation::instance()->CheckProfilingMetricsIsValid(metricsNameMap[inputCfg], cfgValue);
             break;
         default:
             ret = false;
@@ -424,8 +434,21 @@ bool ParamsAdapter::CheckFreqValid(const std::string &freq, const InputCfg freqO
         {INPUT_CFG_COM_DVPP_FREQ, {DVPP_FREQ_MIN, DVPP_FREQ_MAX}},
         {INPUT_CFG_COM_BIU_FREQ, {BIU_FREQ_MIN, BIU_FREQ_MAX}},
     };
+    std::map<InputCfg, std::string> freqCfgNameMap = {
+        {INPUT_CFG_COM_AIC_FREQ, "aic-freq"},
+        {INPUT_CFG_COM_AIV_FREQ, "aiv-freq"},
+        {INPUT_CFG_COM_SYS_USAGE_FREQ, "sys-sampling-freq"},
+        {INPUT_CFG_COM_SYS_CPU_FREQ, "sys-cpu-freq"},
+        {INPUT_CFG_COM_SYS_PID_USAGE_FREQ, "sys-pid-sampling-freq"},
+        {INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ, "sys-hardware-mem-freq"},
+        {INPUT_CFG_COM_SYS_IO_FREQ, "sys-io-sampling-freq"},
+        {INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ, "sys-interconnection-freq"},
+        {INPUT_CFG_COM_DVPP_FREQ, "dvpp-freq"},
+        {INPUT_CFG_COM_BIU_FREQ, "biu_freq"},
+    };
     std::vector<int> checkFreqRange = freqRangeMap[freqOpt];
-    return ParamValidation::instance()->CheckFreqIsValid(freq, checkFreqRange[0], checkFreqRange[1]);
+    return ParamValidation::instance()->CheckFreqIsValid(freqCfgNameMap[freqOpt], freq, checkFreqRange[0],
+        checkFreqRange[1]);
 }
 } // ParamsAdapter
 } // Dvvp
