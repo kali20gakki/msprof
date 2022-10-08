@@ -15,7 +15,7 @@ from msmodel.interface.view_model import ViewModel
 class AclToHwts:
     MODULE_ACL = 'acl'
     MODULE_TASK_TIME = 'task_time'
-    ACL_OP_NAME = ['aclopExecuteV2', 'aclopExecute', 'aclopCompileAndExecute']
+    ACL_OP_NAME = ['aclopExecuteV2', 'aclopExecute', 'aclopCompileAndExecute', 'aclopCompileAndExecuteV2']
     ACL_OP_TYPE = 'ACL_OP'
 
     def __init__(self: any, result_dir: str) -> None:
