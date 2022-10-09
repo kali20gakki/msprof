@@ -49,6 +49,16 @@ int ParamsAdapterMsprof::Init()
 int ParamsAdapterMsprof::ParamsCheckMsprof()
 {
     bool ret = true;
+    std::map<int, std::string> switchNameMap = {
+        {INPUT_CFG_COM_AI_CORE, "ai-core"}, {INPUT_CFG_COM_AI_VECTOR, "ai-vector-core"},
+        {INPUT_CFG_COM_MODEL_EXECUTION, "model-execution"}, {INPUT_CFG_COM_SYS_USAGE, "sys-profiling"},
+        {INPUT_CFG_COM_SYS_PID_USAGE, "sys-pid-profiling"}, {INPUT_CFG_COM_SYS_CPU, "sys-cpu-profiling"},
+        {INPUT_CFG_COM_SYS_HARDWARE_MEM, "sys-hardware-mem"}, {INPUT_CFG_COM_SYS_IO, "sys-io-profiling"},
+        {INPUT_CFG_COM_SYS_INTERCONNECTION, "sys-interconnection-profiling"}, {INPUT_CFG_COM_DVPP, "dvpp-profiling"},
+        {INPUT_CFG_COM_POWER, "power"}, {INPUT_CFG_COM_BIU, "biu"},
+        {INPUT_CFG_PARSE, "parse"}, {INPUT_CFG_QUERY, "query"},
+        {INPUT_CFG_EXPORT, "export"}
+    };
     for (auto inputCfg : msprofConfig_) {
         if (setConfig_.find(inputCfg) == setConfig_.end()) {
             continue;
@@ -76,7 +86,7 @@ int ParamsAdapterMsprof::ParamsCheckMsprof()
             case INPUT_CFG_PARSE:
             case INPUT_CFG_QUERY:
             case INPUT_CFG_EXPORT:
-                ret = ParamValidation::instance()->IsValidSwitch(cfgValue);
+                ret = ParamValidation::instance()->IsValidInputCfgSwitch(switchNameMap[inputCfg], cfgValue);
                 break;
             default:
                 ret = ParamsCheckMsprofV1(inputCfg, cfgValue);
@@ -143,6 +153,7 @@ void ParamsAdapterMsprof::SetDefaultParamsApp()
         paramContainer_[INPUT_CFG_COM_OUTPUT] = appDir_;
     }
     paramContainer_[INPUT_CFG_COM_OUTPUT] = Utils::RelativePathToAbsolutePath(paramContainer_[INPUT_CFG_COM_OUTPUT]);
+    paramContainer_[INPUT_CFG_COM_OUTPUT] = Utils::CanonicalizePath(paramContainer_[INPUT_CFG_COM_OUTPUT]);
     if (paramContainer_[INPUT_CFG_COM_ASCENDCL].empty()) {
         paramContainer_[INPUT_CFG_COM_ASCENDCL] = MSVP_PROF_ON;
     }
@@ -196,6 +207,8 @@ int ParamsAdapterMsprof::SetMsprofMode()
         msprofMode_ = MsprofMode::MSPROF_MODE_EXPORT;
         return PROFILING_SUCCESS;
     }
+    CmdLog::instance()->CmdErrorLog("No valid argument found in --application "
+    "--sys-devices --host-sys --parse --query --export");
     return PROFILING_FAILED;
 }
 
@@ -290,6 +303,7 @@ int ParamsAdapterMsprof::GenMsprofContainer(std::unordered_map<int, std::pair<Ms
         if (!BlackSwitchCheck(cfgType)) {
             CmdLog::instance()->CmdErrorLog("%s: unrecognized option '%s'", Utils::GetSelfPath().c_str(),
                 kv.second.second.c_str());
+            ArgsManager::instance()->PrintHelp();
             MSPROF_LOGE("Blacklist check failed, PlatformType:%d", static_cast<int>(GetPlatform()));
             return PROFILING_FAILED;
         }
