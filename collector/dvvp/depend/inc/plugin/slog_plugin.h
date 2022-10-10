@@ -9,6 +9,7 @@
 
 #include "singleton/singleton.h"
 #include "plugin_handle.h"
+#include "utils.h"
 
 namespace Collector {
 namespace Dvvp {
@@ -27,7 +28,7 @@ enum {
 using CheckLogLevelForCFunc = std::function<int(int, int)>;
 class SlogPlugin : public analysis::dvvp::common::singleton::Singleton<SlogPlugin> {
 public:
-    SlogPlugin() : soName_("libascendalog.so"), pluginHandle_(PluginHandle(soName_)), loadFlag_(0) {}
+    SlogPlugin() : soName_("libascendalog.so"), loadFlag_(0) {}
 
     bool IsFuncExist(const std::string &funcName) const;
 
@@ -38,16 +39,11 @@ public:
     template<typename... T>
     void MsprofDlogInnerForC(int moduleId, int level, const char *fmt, T... args)
     {
+        PthreadOnce(&loadFlag_, []()->void {SlogPlugin::instance()->LoadSlogSo();});
         int32_t ret = PROFILING_SUCCESS;
-        if (!pluginHandle_.HasLoad()) {
-            ret = pluginHandle_.OpenPlugin("LD_LIBRARY_PATH");
-            if (ret != PROFILING_SUCCESS) {
-                return;
-            }
-        }
         using DlogInnerForCFunc = std::function<void(int, int, const char *, T...)>;
         DlogInnerForCFunc func;
-        ret = pluginHandle_.GetFunction<void, int, int, const char *, T...>("DlogInnerForC", func);
+        ret = pluginHandle_->GetFunction<void, int, int, const char *, T...>("DlogInnerForC", func);
         if (ret != PROFILING_SUCCESS) {
             return;
         }
@@ -56,7 +52,7 @@ public:
 
 private:
     std::string soName_;
-    PluginHandle pluginHandle_;
+    static SHARED_PTR_ALIA<PluginHandle> pluginHandle_;
     PTHREAD_ONCE_T loadFlag_;
     CheckLogLevelForCFunc checkLogLevelForC_ = nullptr;
 
