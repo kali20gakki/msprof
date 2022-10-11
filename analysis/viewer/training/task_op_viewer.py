@@ -114,19 +114,17 @@ class TaskOpViewer:
     def _reformat_task_info(task_data: list, task_curs: any, ge_curs: any) -> list:
         ge_sql = "SELECT op_name, stream_id, task_id, batch_id from {0}".format(
             DBNameConstant.TABLE_GE_TASK)
-        track_sql = "SELECT tasktype, stream_id, task_id, batch_id from {0}".format(
+        track_sql = "SELECT tasktype as task_type, stream_id, task_id, batch_id from {0}".format(
             DBNameConstant.TABLE_RUNTIME_TRACK)
 
-        ge_curs.row_factory = ClassRowType.class_row(GeTaskDto)
-        task_curs.row_factory = ClassRowType.class_row(GeTaskDto)
-        op_name_list = DBManager.fetch_all_data(ge_curs, ge_sql)
-        track_data_list = DBManager.fetch_all_data(task_curs, track_sql)
+        op_name_list = DBManager.fetch_all_data(ge_curs, ge_sql, dto_class=GeTaskDto)
+        track_data_list = DBManager.fetch_all_data(task_curs, track_sql, dto_class=GeTaskDto)
 
         op_name_dict, task_type_dict = {}, {}
         if op_name_list:
             op_name_dict = {(row.stream_id, row.task_id, row.batch_id): row.op_name for row in op_name_list}
         if track_data_list:
-            task_type_dict = {(row.stream_id, row.task_id, row.batch_id): row.tasktype for row in track_data_list}
+            task_type_dict = {(row.stream_id, row.task_id, row.batch_id): row.task_type for row in track_data_list}
 
         task_info = []
         for data in task_data:
@@ -136,9 +134,7 @@ class TaskOpViewer:
                 # task_data[0] is kernel name, task_data[1] is task type
                 task_time = "N/A"
                 if data[3] != 0:
-                    task_time = "\"" + str(
-                        (data[3] - data[2]) / DBManager.NSTOUS) \
-                                + "\""
+                    task_time = str((data[3] - data[2]) / DBManager.NSTOUS)
                 task_info.append((op_name, str(task_type), data[0],
                                   data[1], task_time,
                                   "\"" + str(data[2]) + "\"",
@@ -154,7 +150,7 @@ class TaskOpViewer:
                                               ge_datum[4]): (ge_datum[2], ge_datum[3])
                             for ge_datum in ge_data}
         for task_datum in task_data:
-            duration = "".join(["\"", str((task_datum[3] - task_datum[2]) / DBManager.NSTOUS), "\""])
+            duration = str((task_datum[3] - task_datum[2]) / DBManager.NSTOUS)
             task_start = "".join(["\"", str(task_datum[2]), "\""])
             task_end = "".join(["\"", str(task_datum[3]), "\""])
             name_type = ge_data_dict.get("{}-{}-{}".format(task_datum[0], task_datum[1],

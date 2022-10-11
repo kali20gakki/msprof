@@ -262,7 +262,6 @@ add_executable(msprof_utest
     ${MSPROF_SOURCE_DIR}/dvvp/msprof/msproftx/src/msprof_tx_reporter.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/msprof/msproftx/src/msprof_stamp_pool.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/msprof/platform/mini/data_dumper.cpp
-    ${MSPROF_SOURCE_DIR}/dvvp/streamio/client/src/sender.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/transport/hdc/hdc_transport.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/transport/transport.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/transport/uploader.cpp

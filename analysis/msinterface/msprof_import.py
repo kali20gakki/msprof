@@ -154,8 +154,8 @@ class ImportCommand:
         if not cluster_basic_info.is_host_profiling:
             _have_rank_id = cluster_basic_info.rank_id != Constant.NA
             if self.have_rank_id.setdefault("have_rank_id", _have_rank_id) != _have_rank_id:
-                error(MsProfCommonConstant.COMMON_FILE_NAME, 'The dir(%s) contains unqualified '
-                                                             'data!' % self.collection_path)
+                error(MsProfCommonConstant.COMMON_FILE_NAME, 'The dir(%s) contains both cluster and '
+                         'non-cluster data! please check whether all devices hava rank ids.' % self.collection_path)
                 raise ProfException(ProfException.PROF_CLUSTER_DIR_ERROR)
             _device_or_rank_id = int(cluster_basic_info.rank_id) if _have_rank_id else int(cluster_basic_info.device_id)
             if _device_or_rank_id in self.device_or_rank_ids:

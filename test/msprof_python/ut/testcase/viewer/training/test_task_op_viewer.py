@@ -165,7 +165,7 @@ class TestTaskOpViewer(unittest.TestCase):
             DBNameConstant.TABLE_GE_TASK, value="?," * (len(data[0]) - 1) + "?")
         test_ge_sql = db_manager_ge.create_table(DBNameConstant.DB_GE_INFO, create_ge_sql, insert_ge_sql, data)
 
-        expect_res = [("AI CORE NAME", "AI_CORE", 0, 3, '\"0.0\"', '\"18870605628550\"', '\"18870605628550\"')]
+        expect_res = [("AI CORE NAME", "AI_CORE", 0, 3, '0.0', '\"18870605628550\"', '\"18870605628550\"')]
         with mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True), \
                 mock.patch(NAMESPACE + '.logging.error'):
             res = TaskOpViewer.get_op_task_data_summary(test_hwts_sql[1], test_ge_sql[1])
@@ -175,8 +175,8 @@ class TestTaskOpViewer(unittest.TestCase):
         self.assertEqual(res[0], expect_res)
 
     def test_reformat_op_task_info(self):
-        expect_res = [("AI CORE NAME", "AI_CORE", 0, 3, '\"0.0\"', '\"18870605628550\"', '\"18870605628550\"'),
-                      ("AICPU NODE", "AI_CPU", 1, 2, '\"0.01\"', '\"10\"', '\"20\"')]
+        expect_res = [("AI CORE NAME", "AI_CORE", 0, 3, '0.0', '\"18870605628550\"', '\"18870605628550\"'),
+                      ("AICPU NODE", "AI_CPU", 1, 2, '0.01', '\"10\"', '\"20\"')]
         task_data = [[0, 3, 18870605628550, 18870605628550, 0], [1, 2, 10, 20, 0]]
         ge_data = [[0, 3, "AI CORE NAME", "AI_CORE", 0], [1, 2, "AICPU NODE", "AI_CPU", 0]]
         task_info = TaskOpViewer._reformat_op_task_info(task_data, ge_data)

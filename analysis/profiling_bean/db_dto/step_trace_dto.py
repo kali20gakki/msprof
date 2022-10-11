@@ -5,7 +5,7 @@
 
 class StepTraceDto:
     """
-    step trace dro
+    step trace dto
     """
     DEFAULT_ITER_ID = -1
 

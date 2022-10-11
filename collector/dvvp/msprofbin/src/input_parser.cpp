@@ -70,7 +70,7 @@ InputParser::~InputParser()
 void InputParser::MsprofCmdUsage(const std::string msg)
 {
     if (!msg.empty()) {
-        std::cout << "err: " << const_cast<CHAR_PTR>(msg.c_str()) << std::endl;
+        CmdLog::instance()->CmdErrorLog("%s", msg.c_str());
     }
     ArgsManager::instance()->PrintHelp();
 }
@@ -96,10 +96,17 @@ SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> InputParser::MsprofGetOp
             MsprofCmdUsage("");
             return nullptr;
         }
+        if (opt == ARGS_HELP) {
+            params_->usedParams.clear();
+            params_->usedParams.insert(opt);
+            MsprofCmdUsage("");
+            return params_;
+        }
         cmdInfo.args[opt] = MmGetOptArg();
         argvStr = std::string(argv[MmGetOptInd() - 1]);
-        if (strlen(cmdInfo.args[opt]) == 0) {
+        if (cmdInfo.args[opt] == nullptr) {
             CmdLog::instance()->CmdErrorLog("Argument %s empty value.", argvStr.c_str());
+            MsprofCmdUsage("");
             return nullptr;
         }
         if (argvMap.find(opt) == argvMap.end()) {
@@ -112,7 +119,7 @@ SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> InputParser::MsprofGetOp
     auto paramAdapter = ParamsAdapterMsprof();
     int ret = paramAdapter.GetParamFromInputCfg(argvMap, params_);
     if (ret != PROFILING_SUCCESS) {
-        MsprofCmdUsage("get params from input config failed.");
+        MSPROF_LOGE("[MsprofGetOpts]get param from InputCfg failed.");
         return nullptr;
     }
     return params_;
@@ -190,9 +197,6 @@ ArgsManager::ArgsManager()
     {"sys-devices", "Specify the profiling scope by device ID when collect sys profiling."
                      "The value is all or ID list (split with ',')."},
     {"hccl", "Show hccl profiling data, the default value is off.", OFF},
-    {"biu", "Show biu profiling data, the default value is off.", OFF},
-    {"biu-freq", "The biu sampling period in clock-cycle, "
-                "the default value is 1000 cycle, the range is 300 to 30000 cycle.", "1000"},
     {"msproftx", "Show msproftx data, the default value is off.", OFF}
     };
     AddAnalysisArgs();
@@ -205,6 +209,7 @@ ArgsManager::ArgsManager()
     AddInterArgs();
     AddDvvpArgs();
     AddL2Args();
+    AddBiuArgs();
     AddHostArgs();
     AddStarsArgs();
     Args help = {"help", "help message."};
@@ -247,6 +252,19 @@ void ArgsManager::AddStarsArgs()
 
     Args lowPowerArgs = {"power", "Show low power profiling data, the default value is off."};
     argsList_.push_back(lowPowerArgs);
+}
+
+void ArgsManager::AddBiuArgs()
+{
+    if (ConfigManager::instance()->GetPlatformType() != PlatformType::CHIP_V4_1_0) {
+        return;
+    }
+    Args biu = {"biu", "Show biu profiling data, the default value is off.", OFF};
+    Args biuFreq = {"biu-freq", "The biu sampling period in clock-cycle, "
+        "the default value is 1000 cycle, the range is 300 to 30000 cycle.",
+        "1000"};
+    argsList_.push_back(biu);
+    argsList_.push_back(biuFreq);
 }
 
 void ArgsManager::AddAicpuArgs()

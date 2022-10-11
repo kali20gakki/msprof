@@ -405,6 +405,8 @@ class Constant:
     GE_TIMELINE_TID_INDEX = 8
 
     GE_OP_MODEL_ID = 4294967295
+    GE_STATIC_SHAPE = 1
+    GE_NON_STATIC_SHAPE = 0
 
     # hccl
     TYPE_RDMA = "RDMA"

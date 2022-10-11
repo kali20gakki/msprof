@@ -292,20 +292,20 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckEventsSize)
     EXPECT_EQ(PROFILING_FAILED, entry->CheckEventsSize("0x1,0x2,0x3,0x4,0x5,0x6,0x7,0x8,0x9"));
 }
 
-TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckProfilingAicoreMetricsIsValid) {
+TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckProfilingMetricsIsValid) {
     GlobalMockObject::verify();
 
     std::string aicoreMetrics;
     auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
-    EXPECT_EQ(1, entry->CheckProfilingAicoreMetricsIsValid(aicoreMetrics));
+    EXPECT_EQ(1, entry->CheckProfilingMetricsIsValid("aic-metrics", aicoreMetrics));
     aicoreMetrics = "/$$}";
-    EXPECT_EQ(0, entry->CheckProfilingAicoreMetricsIsValid(aicoreMetrics));
+    EXPECT_EQ(0, entry->CheckProfilingMetricsIsValid("aic-metrics", aicoreMetrics));
     aicoreMetrics = "PipeUtilization";
-    EXPECT_EQ(1, entry->CheckProfilingAicoreMetricsIsValid(aicoreMetrics));
+    EXPECT_EQ(1, entry->CheckProfilingMetricsIsValid("aic-metrics", aicoreMetrics));
     aicoreMetrics = "aicoreMetricsAll";
-    EXPECT_EQ(0, entry->CheckProfilingAicoreMetricsIsValid(aicoreMetrics));
+    EXPECT_EQ(0, entry->CheckProfilingMetricsIsValid("aic-metrics", aicoreMetrics));
     aicoreMetrics = "trace";
-    EXPECT_EQ(0, entry->CheckProfilingAicoreMetricsIsValid(aicoreMetrics));
+    EXPECT_EQ(0, entry->CheckProfilingMetricsIsValid("aic-metrics", aicoreMetrics));
 }
 
 TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckFreqIsValid)
@@ -317,15 +317,15 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckFreqIsValid)
     int rangeMax = 10;
     auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
     freq = "";
-    EXPECT_EQ(true, entry->CheckFreqIsValid(freq, rangeMin, rangeMax));
+    EXPECT_EQ(true, entry->CheckFreqIsValid("freqName", freq, rangeMin, rangeMax));
     freq = "ww11";
-    EXPECT_EQ(false, entry->CheckFreqIsValid(freq, rangeMin, rangeMax));
+    EXPECT_EQ(false, entry->CheckFreqIsValid("freqName", freq, rangeMin, rangeMax));
     freq = "0";
-    EXPECT_EQ(false, entry->CheckFreqIsValid(freq, rangeMin, rangeMax));
+    EXPECT_EQ(false, entry->CheckFreqIsValid("freqName", freq, rangeMin, rangeMax));
     freq = "11";
-    EXPECT_EQ(false, entry->CheckFreqIsValid(freq, rangeMin, rangeMax));
+    EXPECT_EQ(false, entry->CheckFreqIsValid("freqName", freq, rangeMin, rangeMax));
     freq = "5";
-    EXPECT_EQ(true, entry->CheckFreqIsValid(freq, rangeMin, rangeMax));
+    EXPECT_EQ(true, entry->CheckFreqIsValid("freqName", freq, rangeMin, rangeMax));
 }
 
 TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckHostSysPidValid)

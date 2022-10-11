@@ -19,12 +19,8 @@ namespace TaskHandle {
 class TaskRelationshipMgr : public analysis::dvvp::common::singleton::Singleton<TaskRelationshipMgr> {
 public:
     // device id - host id
-    void AddHostIdDevIdRelationship(int hostId, int devId);
-    int GetDevIdByHostId(int hostId);
     int GetHostIdByDevId(int devId);
-    void ResetDeviceIdHostId();
     void AddLocalFlushJobId(const std::string &jobId);
-    void DelLocalFlushJobId(const std::string &jobId);
     int GetFlushSuffixDevId(const std::string &jobId, int indexId);
 
 private:

@@ -6,11 +6,12 @@ import json
 import logging
 import os
 
-from common_func.ai_stack_data_check_manager import AiStackDataCheckManager
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.file_manager import check_path_valid
+from common_func.ms_constant.number_constant import NumberConstant
+from common_func.msvp_common import is_number
 from common_func.path_manager import PathManager
 from msmodel.interface.base_model import BaseModel
 
@@ -179,3 +180,25 @@ class Utils:
             json_data = json_reader.read()
             json_data = json.loads(json_data)
             return json_data
+
+    @staticmethod
+    def data_processing_with_decimals(origin_data: list, accuracy=NumberConstant.ROUND_FOUR_DECIMAL):
+        """
+        read json data from file
+        :param origin_data: two-dimensional array
+        :param accuracy: preserve decimal
+        """
+        if not origin_data:
+            return origin_data
+
+        processed_data = [0] * len(origin_data)
+        for index, data in enumerate(origin_data):
+            if not isinstance(data, list) and not isinstance(data, tuple):
+                logging.warning("The format of the origin data is invalid, two-dimensional array needed.")
+                return origin_data
+            processed_data[index] = [Utils.__handle_invalid_zero(_data, accuracy) for _data in data]
+        return processed_data
+
+    @staticmethod
+    def __handle_invalid_zero(data, accuracy):
+        return str(round(float(data), accuracy)).rstrip('0').rstrip('.') if is_number(data) else data

@@ -39,9 +39,11 @@ from framework.load_info_manager import LoadInfoManager
 from msinterface.msprof_export_data import MsProfExportDataUtils
 from msinterface.msprof_job_summary import MsprofJobSummary
 from msinterface.msprof_timeline import MsprofTimeline
+from profiling_bean.db_dto.hwts_rec_dto import HwtsRecDto
+from profiling_bean.db_dto.step_trace_dto import StepTraceDto
 from profiling_bean.prof_enum.export_data_type import ExportDataType
-from tuning.profiling_tuning import ProfilingTuning
 from tuning.cluster_tuning import ClusterTuning
+from tuning.profiling_tuning import ProfilingTuning
 from viewer.top_down_report import TopDownData
 from viewer.tuning_view import TuningView
 
@@ -205,10 +207,11 @@ class ExportCommand:
         self.iteration_id = args.iteration_id if args.iteration_id is not None else NumberConstant.DEFAULT_ITER_ID
         self.sample_config = None
         self.export_format = getattr(args, "export_format", None)
+        self.user_model_id = getattr(args, self.MODEL_ID)
         self.list_map = {
             'export_type_list': [],
             'devices_list': '',
-            'model_id': getattr(args, self.MODEL_ID),
+            'model_id': self.user_model_id,
             'input_model_id': args.model_id is not None
         }
         self._cluster_params = {'is_cluster_scene': False, 'cluster_path': []}
@@ -224,7 +227,7 @@ class ExportCommand:
         """
         db_path = PathManager.get_db_path(result_dir, db_name)
         conn, curs = DBManager.check_connect_db_path(db_path)
-        if not conn or not curs or not DBManager.check_tables_in_db(db_path, table_name):
+        if not conn or not curs or not DBManager.judge_table_exist(curs, table_name):
             logging.warning(
                 "Can not get model id from framework data, maybe framework data is not collected,"
                 " try to export data with no framework data.")
@@ -257,15 +260,19 @@ class ExportCommand:
         return init_result
 
     @staticmethod
-    def _set_default_model_id(result_dir, model_match_set):
-        conn, curs = DBManager.check_connect_db(result_dir, DBNameConstant.DB_STEP_TRACE)
+    def _update_model_and_index(result_dir: str, trace_data_dict: dict) -> list:
+        conn, curs = DBManager.check_connect_db(result_dir, DBNameConstant.DB_HWTS_REC)
         if not (conn and curs):
-            return min(model_match_set)
-        sql = "select model_id, max(index_id) from {} group by model_id".format(DBNameConstant.TABLE_STEP_TRACE_DATA)
-        model_and_index = sorted(filter(lambda x: x[0] in model_match_set, DBManager.fetch_all_data(curs, sql)),
-                                 key=itemgetter(1, 0))
+            return []
+        sql = "select iter_id from {} where ai_core_num > 0".format(DBNameConstant.TABLE_HWTS_ITER_SYS)
+        iter_data = DBManager.fetch_all_data(curs, sql, dto_class=HwtsRecDto)
         DBManager.destroy_db_connect(conn, curs)
-        return model_and_index.pop()[0] if model_and_index else min(model_match_set)
+        result = dict()
+        for data in iter_data:
+            if data.iter_id in trace_data_dict.keys():
+                model_id_times = result.get(trace_data_dict.get(data.iter_id, 0), 0)
+                result[trace_data_dict.get(data.iter_id, 0)] = model_id_times + 1
+        return list(zip(result.keys(), result.values()))
 
     def check_argument_valid(self: any) -> None:
         """
@@ -293,6 +300,23 @@ class ExportCommand:
             self._process_sub_dirs()
             if self._cluster_params.get('is_cluster_scene', False):
                 self._show_cluster_tuning()
+
+    def _set_default_model_id(self, result_dir, model_match_set, ge_data_set):
+        conn, curs = DBManager.check_connect_db(result_dir, DBNameConstant.DB_STEP_TRACE)
+        if not (conn and curs):
+            return min(model_match_set)
+        sql = "select model_id, max(index_id) from {} group by model_id".format(DBNameConstant.TABLE_STEP_TRACE_DATA)
+        model_and_index = list(filter(lambda x: x[0] in model_match_set, DBManager.fetch_all_data(curs, sql)))
+
+        if not ge_data_set:
+            trace_data = DBManager.fetch_all_data(
+                curs, "select model_id, iter_id from {}".format(DBNameConstant.TABLE_STEP_TRACE_DATA),
+                dto_class=StepTraceDto)
+            model_and_index = self._update_model_and_index(result_dir,
+                                                           {data.iter_id: data.model_id for data in trace_data})
+        model_and_index.sort(key=lambda x: x[1])
+        DBManager.destroy_db_connect(conn, curs)
+        return model_and_index.pop()[0] if model_and_index else min(model_match_set)
 
     def _add_export_type(self: any, result_dir: str) -> None:
         export_map = self.EXPORT_HANDLE_MAP.get(self.command_type, [])
@@ -353,6 +377,7 @@ class ExportCommand:
         profiling_scene = ProfilingScene()
         profiling_scene.init(result_dir)
 
+        self.list_map[self.MODEL_ID] = self.user_model_id
         if not profiling_scene.is_step_trace():
             self.list_map[self.MODEL_ID] = Constant.GE_OP_MODEL_ID
             return
@@ -374,16 +399,15 @@ class ExportCommand:
             logging.warning("ge step info data miss model id.")
 
         if not self.list_map.get(self.INPUT_MODEL_ID):
-            self.list_map[self.MODEL_ID] = self._set_default_model_id(result_dir, model_match_set)
+            self.list_map[self.MODEL_ID] = self._set_default_model_id(result_dir, model_match_set, model_ids_ge)
             if Utils.is_single_op_graph_mix(result_dir):
                 self.list_map[self.MODEL_ID] = Constant.GE_OP_MODEL_ID
             return
 
-        model_id = self.list_map.get(self.MODEL_ID)
-        if model_id not in model_match_set:
+        if self.list_map.get(self.MODEL_ID) not in model_match_set:
             error(self.FILE_NAME, 'The model id {0} is invalid. Must select'
                                   ' from {1}. Please enter a'
-                                  ' valid model id.'.format(model_id, model_match_set))
+                                  ' valid model id.'.format(self.list_map.get(self.MODEL_ID), model_match_set))
             raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR)
 
     def _prepare_for_export(self: any, result_dir: str) -> None:

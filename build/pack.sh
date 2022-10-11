@@ -15,6 +15,26 @@ then
     rm -rf ${CUR_DIR}/tmp
 fi
 
+# binary check
+function bep_env_init() {
+    source /etc/profile
+    local bep_env_config=${CUR_DIR}/bep/bep_env.conf
+    local bep_sh=$(which bep_env.sh)
+    echo "has bep sh :${bep_sh}"
+    if [ ! -d "${SECBEPKIT_HOME}" ] && [ ! -f "$bep_sh" ]; then
+        echo "BepKit is not installed, Please install the tool and configure the env var \$SECBEPKIT_HOME"
+    else
+        source ${SECBEPKIT_HOME}/bep_env.sh -s $bep_env_config
+        if [ $? -ne 0 ]; then
+            echo "build bep failed!"
+            exit 1
+        else
+            echo "build bep success."
+        fi
+    fi
+}
+
+bep_env_init
 MINDSTUDIO_TOOLKIT_NAME=Ascend-mindstudio-toolkit*.run
 CANN_TOOLKIT_NAME=CANN-toolkit-*.run
 CANN_RUNTIME_NAME=CANN-runtime-*linux*.run
@@ -58,7 +78,7 @@ for DIR in ${OUT_DIR}/platform/Tuscany/*centos*;
     CANN_TOOLKIT=${CUR_DIR}/tmp/cann_toolkit/${PACKAGE_NAME_TOOLKIT}/toolkit
     CANN_RUNTIME=${CUR_DIR}/tmp/cann_runtime/${PACKAGE_NAME_RUNTIME}/runtime
     COMMENTS=comments
-    
+
     ${CREATE_RUN_SCRIPT} \
     --header ${CONTROL_PARAM_SCRIPT}\
     --help-header ${CANN_TOOLKIT}/scripts/help.info \
