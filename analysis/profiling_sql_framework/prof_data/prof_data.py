@@ -33,10 +33,16 @@ class ProfData:
     def inner_join(self: any, prof_data: any, join_attr_list: list) -> any:
         def concat_left_queue(left_data):
             return left_data
-        return ProfData(JoinOperation(self.data, prof_data.data, join_attr_list, concat_left_queue))
+        return ProfData(JoinOperation(self.data, prof_data.data, join_attr_list, concat_left_queue).join())
 
     def except_join(self: any, prof_data: any, join_attr_list: list) -> any:
         def concat_left_queue(left_data):
             datum = left_data.popleft()
             return [datum]
-        return ProfData(JoinOperation(self.data, prof_data.data, join_attr_list, concat_left_queue))
+        return ProfData(JoinOperation(self.data, prof_data.data, join_attr_list, concat_left_queue).join())
+
+    def accept(self: any, visitor: any) -> any:
+        for datum in self.data:
+            visitor.visit(datum)
+
+        return visitor.get_result()
