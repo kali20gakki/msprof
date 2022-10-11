@@ -68,7 +68,7 @@ void ParamsAdapter::SetMiniBlackSwitch()
         INPUT_CFG_COM_SYS_INTERCONNECTION, INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ,
         INPUT_CFG_COM_L2, INPUT_CFG_COM_AI_VECTOR, INPUT_CFG_COM_AIV_FREQ,
         INPUT_CFG_COM_AIV_MODE, INPUT_CFG_COM_AIV_METRICS, INPUT_CFG_COM_POWER,
-        INPUT_CFG_COM_BIU, INPUT_CFG_COM_BIU_FREQ
+        INPUT_CFG_COM_BIU, INPUT_CFG_COM_BIU_FREQ, INPUT_HOST_SYS_USAGE
     }).swap(blackSwitch_);
     return;
 }
@@ -78,7 +78,7 @@ void ParamsAdapter::SetCloudBlackSwitch()
     std::vector<InputCfg>({
         INPUT_CFG_COM_AI_VECTOR, INPUT_CFG_COM_AIV_FREQ, INPUT_CFG_COM_AIV_MODE,
         INPUT_CFG_COM_AIV_METRICS, INPUT_CFG_COM_POWER, INPUT_CFG_COM_BIU,
-        INPUT_CFG_COM_BIU_FREQ
+        INPUT_CFG_COM_BIU_FREQ, INPUT_HOST_SYS_USAGE
     }).swap(blackSwitch_);
     return;
 }
@@ -90,7 +90,7 @@ void ParamsAdapter::SetMdcBlackSwitch()
         INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ, INPUT_CFG_COM_AICPU, INPUT_CFG_PYTHON_PATH,
         INPUT_CFG_SUMMARY_FORMAT, INPUT_CFG_PARSE, INPUT_CFG_QUERY, INPUT_CFG_EXPORT,
         INPUT_CFG_ITERATION_ID, INPUT_CFG_MODEL_ID, INPUT_CFG_COM_POWER, INPUT_CFG_COM_BIU,
-        INPUT_CFG_COM_BIU_FREQ
+        INPUT_CFG_COM_BIU_FREQ, INPUT_HOST_SYS_USAGE
     }).swap(blackSwitch_);
     return;
 }
@@ -106,7 +106,7 @@ void ParamsAdapter::SetLhisiBlackSwitch()
         INPUT_CFG_COM_SYS_CPU, INPUT_CFG_COM_SYS_CPU_FREQ, INPUT_CFG_COM_L2,
         INPUT_CFG_PYTHON_PATH, INPUT_CFG_SUMMARY_FORMAT, INPUT_CFG_PARSE,
         INPUT_CFG_QUERY, INPUT_CFG_EXPORT, INPUT_CFG_ITERATION_ID, INPUT_CFG_MODEL_ID,
-        INPUT_CFG_COM_POWER, INPUT_CFG_COM_BIU, INPUT_CFG_COM_BIU_FREQ
+        INPUT_CFG_COM_POWER, INPUT_CFG_COM_BIU, INPUT_CFG_COM_BIU_FREQ, INPUT_HOST_SYS_USAGE
     }).swap(blackSwitch_);
     return;
 }
@@ -116,14 +116,14 @@ void ParamsAdapter::SetDcBlackSwitch()
     std::vector<InputCfg>({
         INPUT_CFG_COM_AI_VECTOR, INPUT_CFG_COM_AIV_FREQ, INPUT_CFG_COM_AIV_MODE,
         INPUT_CFG_COM_AIV_METRICS, INPUT_CFG_COM_SYS_IO, INPUT_CFG_COM_SYS_IO_FREQ,
-        INPUT_CFG_COM_POWER, INPUT_CFG_COM_BIU, INPUT_CFG_COM_BIU_FREQ
+        INPUT_CFG_COM_POWER, INPUT_CFG_COM_BIU, INPUT_CFG_COM_BIU_FREQ, INPUT_HOST_SYS_USAGE
     }).swap(blackSwitch_);
     return;
 }
 
 void ParamsAdapter::SetCloudV2BlackSwitch()
 {
-    std::vector<InputCfg>({}).swap(blackSwitch_);
+    std::vector<InputCfg>({INPUT_HOST_SYS_USAGE}).swap(blackSwitch_);
     return;
 }
 
@@ -170,17 +170,17 @@ int ParamsAdapter::TransToParam(std::array<std::string, INPUT_CFG_MAX> paramCont
     }
 
     SetCommonParams(paramContainer);
- 
+
     SetTaskParams(paramContainer);
- 
+
     SetAiMetricsParams(paramContainer);
- 
+
     SetDeviceSysParams(paramContainer);
- 
+
     SetHostSysParams(paramContainer);
- 
+
     SetHostSysUsageParams(paramContainer);
- 
+
     return PROFILING_SUCCESS;
 }
 
@@ -359,6 +359,16 @@ int ParamsAdapter::ComCfgCheck(std::array<std::string, INPUT_CFG_MAX> paramConta
 bool ParamsAdapter::ComCfgCheck1(const InputCfg inputCfg, const std::string &cfgValue) const
 {
     bool ret = true;
+    std::map<int, std::string> switchNameMap = {
+        {INPUT_CFG_COM_MSPROFTX, "msproftx"}, {INPUT_CFG_COM_TASK_TIME, "task-time"},
+        {INPUT_CFG_COM_ASCENDCL, "ascendcl"}, {INPUT_CFG_COM_RUNTIME_API, "runtime-api"},
+        {INPUT_CFG_COM_HCCL, "hccl"}, {INPUT_CFG_COM_L2, "l2"},
+        {INPUT_CFG_COM_AICPU, "aicpu"}
+    };
+    std::map<int, std::string> metricsNameMap = {
+        {INPUT_CFG_COM_AIC_METRICS, "aic-metrics"},
+        {INPUT_CFG_COM_AIV_METRICS, "aiv-metrics"},
+    };
     switch (inputCfg) {
         case INPUT_CFG_COM_OUTPUT:
             ret = ParamValidation::instance()->CheckOutputIsValid(cfgValue);
@@ -373,11 +383,11 @@ bool ParamsAdapter::ComCfgCheck1(const InputCfg inputCfg, const std::string &cfg
         case INPUT_CFG_COM_HCCL:
         case INPUT_CFG_COM_L2:
         case INPUT_CFG_COM_AICPU:
-            ret = ParamValidation::instance()->IsValidSwitch(cfgValue);
+            ret = ParamValidation::instance()->IsValidInputCfgSwitch(switchNameMap[inputCfg], cfgValue);
             break;
         case INPUT_CFG_COM_AIC_METRICS:
         case INPUT_CFG_COM_AIV_METRICS:
-            ret = ParamValidation::instance()->CheckProfilingAicoreMetricsIsValid(cfgValue);
+            ret = ParamValidation::instance()->CheckProfilingMetricsIsValid(metricsNameMap[inputCfg], cfgValue);
             break;
         default:
             ret = false;
@@ -424,8 +434,21 @@ bool ParamsAdapter::CheckFreqValid(const std::string &freq, const InputCfg freqO
         {INPUT_CFG_COM_DVPP_FREQ, {DVPP_FREQ_MIN, DVPP_FREQ_MAX}},
         {INPUT_CFG_COM_BIU_FREQ, {BIU_FREQ_MIN, BIU_FREQ_MAX}},
     };
+    std::map<InputCfg, std::string> freqCfgNameMap = {
+        {INPUT_CFG_COM_AIC_FREQ, "aic-freq"},
+        {INPUT_CFG_COM_AIV_FREQ, "aiv-freq"},
+        {INPUT_CFG_COM_SYS_USAGE_FREQ, "sys-sampling-freq"},
+        {INPUT_CFG_COM_SYS_CPU_FREQ, "sys-cpu-freq"},
+        {INPUT_CFG_COM_SYS_PID_USAGE_FREQ, "sys-pid-sampling-freq"},
+        {INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ, "sys-hardware-mem-freq"},
+        {INPUT_CFG_COM_SYS_IO_FREQ, "sys-io-sampling-freq"},
+        {INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ, "sys-interconnection-freq"},
+        {INPUT_CFG_COM_DVPP_FREQ, "dvpp-freq"},
+        {INPUT_CFG_COM_BIU_FREQ, "biu_freq"},
+    };
     std::vector<int> checkFreqRange = freqRangeMap[freqOpt];
-    return ParamValidation::instance()->CheckFreqIsValid(freq, checkFreqRange[0], checkFreqRange[1]);
+    return ParamValidation::instance()->CheckFreqIsValid(freqCfgNameMap[freqOpt], freq, checkFreqRange[0],
+        checkFreqRange[1]);
 }
 } // ParamsAdapter
 } // Dvvp

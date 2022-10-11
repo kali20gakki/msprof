@@ -14,6 +14,8 @@ from common_func.msprof_exception import ProfException
 from common_func.path_manager import PathManager
 from msmodel.step_trace.cluster_step_trace_model import ClusterStepTraceModel
 from profiling_bean.basic_info.query_data_bean import QueryDataBean
+from profiling_bean.db_dto.hwts_rec_dto import HwtsRecDto
+from profiling_bean.db_dto.step_trace_dto import StepTraceDto
 
 
 class MsprofQueryData:
@@ -37,7 +39,8 @@ class MsprofQueryData:
         cluster_query_data = []
         with ClusterStepTraceModel(collection_path, []) as cluster_step_trace:
             for cluster_info in cluster_info_list:
-                step_table_name = DBNameConstant.TABLE_CLUSTER_STEP_TRACE.format(cluster_info[3])
+                rank_or_device_id = cluster_info[1] if cluster_info[3] == Constant.NA else cluster_info[3]
+                step_table_name = DBNameConstant.TABLE_CLUSTER_STEP_TRACE.format(rank_or_device_id)
                 model_info_list = cluster_step_trace.get_model_info(step_table_name)
                 if not model_info_list:
                     data = [cluster_info[0], cluster_info[1], cluster_info[4], cluster_info[2],
@@ -119,17 +122,21 @@ class MsprofQueryData:
 
         db_path = PathManager.get_db_path(self.project_path, DBNameConstant.DB_STEP_TRACE)
         conn, curs = DBManager.check_connect_db_path(db_path)
-        if not conn_ge or not curs_ge or not DBManager.check_tables_in_db(
-                db_path_ge, DBNameConstant.TABLE_GE_TASK):
+
+        if not conn or not curs or not DBManager.judge_table_exist(
+                curs, DBNameConstant.TABLE_STEP_TRACE_DATA):
             DBManager.destroy_db_connect(conn_ge, curs_ge)
             DBManager.destroy_db_connect(conn, curs)
             return []
-        model_ids_set = self._get_model_id_set(curs_ge)
 
-        if not conn or not curs or not DBManager.check_tables_in_db(
-                db_path, DBNameConstant.TABLE_STEP_TRACE_DATA):
+        if not conn_ge or not curs_ge or not DBManager.judge_table_exist(
+                curs_ge, DBNameConstant.TABLE_GE_TASK):
             DBManager.destroy_db_connect(conn_ge, curs_ge)
-            DBManager.destroy_db_connect(conn, curs)
+            model_ids_set = self._get_model_id_set_without_ge(curs)
+        else:
+            model_ids_set = self._get_model_id_set(curs_ge)
+
+        if not model_ids_set:
             return []
         iteration_infos = self._get_iteration_infos(curs)
         # filter model which contains no compute op
@@ -177,6 +184,21 @@ class MsprofQueryData:
         iteration_data = self.get_job_iteration_info()
         return self.assembly_job_info(basic_data, iteration_data)
 
+    def _get_model_id_set_without_ge(self: any, trace_curs: any) -> set:
+        db_path = PathManager.get_db_path(self.project_path, DBNameConstant.DB_HWTS_REC)
+        conn, curs = DBManager.check_connect_db_path(db_path)
+        if not (conn and curs):
+            return set()
+        sql = "select iter_id from {} where ai_core_num > 0".format(DBNameConstant.TABLE_HWTS_ITER_SYS)
+        iter_data = DBManager.fetch_all_data(curs, sql, dto_class=HwtsRecDto)
+        DBManager.destroy_db_connect(conn, curs)
+        iter_id_set = set(iter_id.iter_id for iter_id in iter_data)
+        filter_sql = "select index_id, model_id, iter_id from {}".format(
+            DBNameConstant.TABLE_STEP_TRACE_DATA)
+        filter_data = DBManager.fetch_all_data(trace_curs, filter_sql, dto_class=StepTraceDto)
+        result = set(data.model_id for data in filter_data if data.iter_id in iter_id_set)
+        return result
+
 
 class QueryArgumentCheck:
 
@@ -203,4 +225,3 @@ class QueryArgumentCheck:
             if min_value is not None:
                 return arg >= min_value
         return False
-    

@@ -13,22 +13,6 @@
 namespace Analysis {
 namespace Dvvp {
 namespace TaskHandle {
-void TaskRelationshipMgr::AddHostIdDevIdRelationship(int hostId, int devId)
-{
-    MSPROF_LOGI("hostId: %d, devId: %d Entering HostId DeviceId Map...", hostId, devId);
-    std::lock_guard<std::mutex> lock(hostIdMapMutex_);
-    hostIdToDevId_[hostId] = devId;
-}
-
-int TaskRelationshipMgr::GetDevIdByHostId(int hostId)
-{
-    std::lock_guard<std::mutex> lock(hostIdMapMutex_);
-    auto iter = hostIdToDevId_.find(hostId);
-    if (iter != hostIdToDevId_.end()) {
-        return iter->second;
-    }
-    return hostId;
-}
 
 int TaskRelationshipMgr::GetHostIdByDevId(int devId)
 {
@@ -41,22 +25,10 @@ int TaskRelationshipMgr::GetHostIdByDevId(int devId)
     return devId;
 }
 
-void TaskRelationshipMgr::ResetDeviceIdHostId()
-{
-    MSPROF_LOGI("Reset host id - device id relationship");
-    std::lock_guard<std::mutex> lock(hostIdMapMutex_);
-    hostIdToDevId_.clear();
-}
-
 void TaskRelationshipMgr::AddLocalFlushJobId(const std::string &jobId)
 {
     MSPROF_LOGI("Job %s should flush locally", jobId.c_str());
     localFlushJobIds_.insert(jobId);
-}
-
-void TaskRelationshipMgr::DelLocalFlushJobId(const std::string &jobId)
-{
-    localFlushJobIds_.erase(jobId);
 }
 
 int TaskRelationshipMgr::GetFlushSuffixDevId(const std::string &jobId, int indexId)

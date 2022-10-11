@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "adx_prof_api.h"
+#include "memory_utils.h"
 
 using namespace Analysis::Dvvp::Adx;
 
@@ -34,4 +35,3 @@ TEST_F(ADX_PROF_API_UTEST, AdxIdeFreePacket) {
     IdeBuffT outPut = nullptr;
     AdxIdeFreePacket(outPut);
 }
-

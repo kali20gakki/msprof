@@ -3,7 +3,6 @@
 # Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 
 import logging
-import os
 
 from common_func.constant import Constant
 from common_func.db_name_constant import DBNameConstant
@@ -11,6 +10,8 @@ from common_func.file_manager import FileManager
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.msvp_common import is_valid_original_data
+from common_func.path_manager import PathManager
+from common_func.platform.chip_manager import ChipManager
 from common_func.utils import Utils
 from msmodel.hardware.dvpp_model import DvppModel
 from profiling_bean.prof_enum.data_tag import DataTag
@@ -22,6 +23,7 @@ class ParsingPeripheralData(MsMultiProcess):
     """
 
     DATA_LENGTH = 11
+    DVPP_HEADER_TAG = 'engine_type'
 
     def __init__(self: any, file_list: dict, sample_config: dict) -> None:
         MsMultiProcess.__init__(self, sample_config)
@@ -40,12 +42,19 @@ class ParsingPeripheralData(MsMultiProcess):
         """
         parsing dvpp data file
         """
-        if "dvpp" not in binary_data_path:
-            return
         try:
-            with open(os.path.join(self.project_path,
-                                   "data", binary_data_path), 'r') as dvpp_file:
+            with open(PathManager.get_data_file_path(self.project_path, binary_data_path), 'r') as dvpp_file:
+                first_line_data = dvpp_file.readline(Constant.MAX_READ_LINE_BYTES)
+                if not first_line_data:
+                    logging.warning("No dvpp data Found!")
+                    return
+                has_header = False
+                first_line_data_lst = list(first_line_data.split())
+                if self.DVPP_HEADER_TAG in first_line_data_lst:
+                    has_header = True
                 lines = dvpp_file.readlines(Constant.MAX_READ_FILE_BYTES)
+                if not has_header:
+                    lines.insert(0, first_line_data)
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
             logging.error("%s: %s", binary_data_path, str(err), exc_info=Constant.TRACE_BACK_SWITCH)
             return
@@ -104,15 +113,11 @@ class ParsingPeripheralData(MsMultiProcess):
 
     def _read_binary_helper(self: any, lines: list) -> None:
         dvpp_data = Utils.generator_to_list(x.split() for x in lines)
-
-        if len(dvpp_data) > 0:
-            for item in dvpp_data[0]:
-                if item == "dvpp_id":
-                    self.has_dvpp_id = True
-                    break
-        else:
+        if not dvpp_data:
             logging.warning("No Dvpp Data Found!")
             return
+        self.has_dvpp_id = ChipManager().is_chip_v2()
+
         dvpp_list = [x for x in dvpp_data if (x[1].isdigit() and len(x) == int(self.has_dvpp_id) + self.DATA_LENGTH)]
         dvpp_data = \
             Utils.generator_to_list(dvpp_list)

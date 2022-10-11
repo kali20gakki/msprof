@@ -189,7 +189,6 @@ public:
     ArgsManager();
     virtual ~ArgsManager();
 public:
-    void AddArgs(const Args &args);
     void PrintHelp();
 
 private:
@@ -201,6 +200,7 @@ private:
     void AddDvvpArgs();
     void AddL2Args();
     void AddAivArgs();
+    void AddBiuArgs();
     void AddAicpuArgs();
     void AddHostArgs();
     void AddStarsArgs();

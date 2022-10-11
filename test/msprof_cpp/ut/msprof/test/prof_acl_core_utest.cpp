@@ -859,43 +859,35 @@ TEST_F(MSPROF_ACL_CORE_UTEST, mode_protect) {
     using namespace Msprofiler::Api;
     ProfAclMgr::instance()->mode_ = WORK_MODE_OFF;
     EXPECT_EQ(ACL_SUCCESS, ProfAclMgr::instance()->CallbackInitPrecheck());
-    EXPECT_NE(ACL_SUCCESS, ProfAclMgr::instance()->CallbackFinalizePrecheck());
     EXPECT_EQ(ACL_SUCCESS, ProfAclMgr::instance()->ProfInitPrecheck());
     EXPECT_NE(ACL_SUCCESS, ProfAclMgr::instance()->ProfStartPrecheck());
     EXPECT_NE(ACL_SUCCESS, ProfAclMgr::instance()->ProfStopPrecheck());
     EXPECT_NE(ACL_SUCCESS, ProfAclMgr::instance()->ProfFinalizePrecheck());
     EXPECT_EQ(ACL_SUCCESS, ProfAclMgr::instance()->ProfSubscribePrecheck());
-    EXPECT_NE(ACL_SUCCESS, ProfAclMgr::instance()->ProfUnSubscribePrecheck());
 
     ProfAclMgr::instance()->mode_ = WORK_MODE_CMD;
     EXPECT_NE(ACL_SUCCESS, ProfAclMgr::instance()->CallbackInitPrecheck());
-    EXPECT_EQ(ACL_SUCCESS, ProfAclMgr::instance()->CallbackFinalizePrecheck());
     EXPECT_NE(ACL_SUCCESS, ProfAclMgr::instance()->ProfInitPrecheck());
     EXPECT_NE(ACL_SUCCESS, ProfAclMgr::instance()->ProfStartPrecheck());
     EXPECT_NE(ACL_SUCCESS, ProfAclMgr::instance()->ProfStopPrecheck());
     EXPECT_NE(ACL_SUCCESS, ProfAclMgr::instance()->ProfFinalizePrecheck());
     EXPECT_NE(ACL_SUCCESS, ProfAclMgr::instance()->ProfSubscribePrecheck());
-    EXPECT_NE(ACL_SUCCESS, ProfAclMgr::instance()->ProfUnSubscribePrecheck());
 
     ProfAclMgr::instance()->mode_ = WORK_MODE_API_CTRL;
     EXPECT_NE(ACL_SUCCESS, ProfAclMgr::instance()->CallbackInitPrecheck());
-    EXPECT_NE(ACL_SUCCESS, ProfAclMgr::instance()->CallbackFinalizePrecheck());
     EXPECT_NE(ACL_SUCCESS, ProfAclMgr::instance()->ProfInitPrecheck());
     EXPECT_EQ(ACL_SUCCESS, ProfAclMgr::instance()->ProfStartPrecheck());
     EXPECT_EQ(ACL_SUCCESS, ProfAclMgr::instance()->ProfStopPrecheck());
     EXPECT_EQ(ACL_SUCCESS, ProfAclMgr::instance()->ProfFinalizePrecheck());
     EXPECT_NE(ACL_SUCCESS, ProfAclMgr::instance()->ProfSubscribePrecheck());
-    EXPECT_NE(ACL_SUCCESS, ProfAclMgr::instance()->ProfUnSubscribePrecheck());
 
     ProfAclMgr::instance()->mode_ = WORK_MODE_SUBSCRIBE;
     EXPECT_NE(ACL_SUCCESS, ProfAclMgr::instance()->CallbackInitPrecheck());
-    EXPECT_NE(ACL_SUCCESS, ProfAclMgr::instance()->CallbackFinalizePrecheck());
     EXPECT_NE(ACL_SUCCESS, ProfAclMgr::instance()->ProfInitPrecheck());
     EXPECT_NE(ACL_SUCCESS, ProfAclMgr::instance()->ProfStartPrecheck());
     EXPECT_NE(ACL_SUCCESS, ProfAclMgr::instance()->ProfStopPrecheck());
     EXPECT_NE(ACL_SUCCESS, ProfAclMgr::instance()->ProfFinalizePrecheck());
     EXPECT_EQ(ACL_SUCCESS, ProfAclMgr::instance()->ProfSubscribePrecheck());
-    EXPECT_EQ(ACL_SUCCESS, ProfAclMgr::instance()->ProfUnSubscribePrecheck());
 }
 
 TEST_F(MSPROF_ACL_CORE_UTEST, MsprofTxSwitchPrecheck) {
@@ -1696,10 +1688,6 @@ TEST_F(MSPROF_ACL_CORE_UTEST, ProfAclStop) {
         .will(returnValue(PROFILING_SUCCESS));
 
     MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::ProfStartCfgToMsprofCfg)
-        .stubs()
-        .will(returnValue(PROFILING_SUCCESS));
-
-    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::GenerateSystemTraceConf)
         .stubs()
         .will(returnValue(PROFILING_SUCCESS));
 

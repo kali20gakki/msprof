@@ -10,6 +10,7 @@
 #include "singleton/singleton.h"
 #include "driver/ascend_hal.h"
 #include "plugin_handle.h"
+#include "utils.h"
 
 namespace Collector {
 namespace Dvvp {
@@ -46,7 +47,7 @@ using DrvHdcSessionCloseFunc = std::function<drvError_t(HDC_SESSION)>;
 using DrvHdcGetCapacityFunc = std::function<drvError_t(struct drvHdcCapacity *)>;
 class DriverPlugin : public analysis::dvvp::common::singleton::Singleton<DriverPlugin> {
 public:
-    DriverPlugin() : soName_("libascend_hal.so"), pluginHandle_(PluginHandle(soName_)), loadFlag_(0) {}
+    DriverPlugin() : soName_("libascend_hal.so"), loadFlag_(0) {}
 
     bool IsFuncExist(const std::string &funcName) const;
 
@@ -144,7 +145,7 @@ public:
 
 private:
     std::string soName_;
-    PluginHandle pluginHandle_;
+    static SHARED_PTR_ALIA<PluginHandle> pluginHandle_;
     PTHREAD_ONCE_T loadFlag_;
     HalHdcRecvFunc halHdcRecv_ = nullptr;
     HalHdcSendFunc halHdcSend_ = nullptr;
