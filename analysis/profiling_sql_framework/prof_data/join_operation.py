@@ -1,4 +1,6 @@
 from collections import deque
+from common_func.decorator.error_decorator import ErrorDecorator
+from common_func.decorator.ErrorDecoratorImp.instance_except_imp import InstanceExceptImp
 from profiling_sql_framework.prof_temp_bean import ProfBean
 
 
@@ -10,6 +12,7 @@ class JoinOperation:
         self.concat_left_queue = concat_left_queue
         self.get_groupby_join_attr()
 
+    @ErrorDecorator(AttributeError, InstanceExceptImp)
     def get_groupby_join_attr(self: any) -> None:
         self.groupby_join_attr = {}
         for left_datum in self.left_data:
@@ -17,6 +20,7 @@ class JoinOperation:
             left_data = self.groupby_join_attr.setdefault(join_value, deque([]))
             left_data.append(left_datum)
 
+    @ErrorDecorator(AttributeError, InstanceExceptImp)
     def join(self: any) -> any:
         for right_datum in self.right_data:
             join_value = tuple(getattr(right_datum, attr) for _, attr in self.join_attr_list)
