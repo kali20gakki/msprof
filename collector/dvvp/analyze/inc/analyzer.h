@@ -35,6 +35,7 @@ public:
     ~Analyzer();
 
 public:
+    int Init();
     void OnNewData(CONST_VOID_PTR data, uint32_t len);
     void Flush();
     void SetDevId(const std::string &devIdStr);
