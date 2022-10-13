@@ -177,7 +177,7 @@ class IterRecParser(IterParser):
         parse hwts data by ge info and iter sys cnt
         :return: None
         """
-        if not path_check(PathManager.get_db_path(self._project_path, DBNameConstant.TABLE_GE_TASK)):
+        if not path_check(PathManager.get_db_path(self._project_path, DBNameConstant.DB_GE_INFO)):
             return
         with GeInfoModel(self._project_path) as ge_info_model:
             if ge_info_model.check_table():
