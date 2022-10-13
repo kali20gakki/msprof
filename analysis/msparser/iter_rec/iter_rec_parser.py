@@ -11,6 +11,7 @@ from common_func.constant import Constant
 from common_func.file_manager import FileOpen
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
+from common_func.msvp_common import path_check
 from common_func.path_manager import PathManager
 from common_func.utils import Utils
 from common_func.db_name_constant import DBNameConstant
@@ -176,6 +177,8 @@ class IterRecParser(IterParser):
         parse hwts data by ge info and iter sys cnt
         :return: None
         """
+        if not path_check(PathManager.get_db_path(self._project_path, DBNameConstant.TABLE_GE_TASK)):
+            return
         with GeInfoModel(self._project_path) as ge_info_model:
             if ge_info_model.check_table():
                 self._ge_static_shape_iter_model_dict, self._ge_static_shape_model_task_dict = \
