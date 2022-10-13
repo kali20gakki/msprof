@@ -42,8 +42,9 @@ class ParseAiCpuData:
         :return: control statement
         """
 
-        if not DBManager.attach_to_db(ai_cpu_conn, project_path, DBNameConstant.DB_GE_INFO,
-                                      DBNameConstant.TABLE_GE_TASK):
+        if not (DBManager.attach_to_db(ai_cpu_conn, project_path, DBNameConstant.DB_GE_INFO,
+                                       DBNameConstant.TABLE_GE_TASK) and DBManager.judge_table_exist(
+                            ai_cpu_conn.cursor(), DBNameConstant.TABLE_GE_TASK)):
             sql = "select sys_start,'{op_name}',compute_time,memcpy_time,task_time,dispatch_time," \
                   "total_time, stream_id, task_id from {0}".format(DBNameConstant.TABLE_AI_CPU, op_name=Constant.NA)
             if not ProfilingScene().is_operator():
