@@ -75,7 +75,7 @@ class RuntimeApiViewer:
             timeline_data = _model.get_timeline_data()
             if not timeline_data:
                 return json.dumps(
-                    {"status": NumberConstant.ERROR, "info": f"Failed to connect {DBNameConstant.DB_ACL_MODULE}."})
+                    {"status": NumberConstant.WARN, "info": f"Unable to get runtime api data."})
             pid = InfoConfReader().get_json_pid_data()
             tid = InfoConfReader().get_json_tid_data()
             result_data = self._get_runtime_result_data(timeline_data, pid, tid)
