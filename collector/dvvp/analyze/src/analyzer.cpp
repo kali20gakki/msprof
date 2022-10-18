@@ -33,11 +33,16 @@ Analyzer::Analyzer(SHARED_PTR_ALIA<analysis::dvvp::transport::Uploader> uploader
       flushQueueLen_(0)
 {
     uploader_ = uploader;
+}
 
-    MSVP_MAKE_SHARED0_VOID(analyzerGe_, AnalyzerGe);
-    MSVP_MAKE_SHARED0_VOID(analyzerHwts_, AnalyzerHwts);
-    MSVP_MAKE_SHARED0_VOID(analyzerTs_, AnalyzerTs);
-    MSVP_MAKE_SHARED0_VOID(analyzerFfts_, AnalyzerFfts);
+Analyzer::~Analyzer() {}
+
+int Analyzer::Init()
+{
+    MSVP_MAKE_SHARED0_RET(analyzerGe_, AnalyzerGe, PROFILING_FAILED);
+    MSVP_MAKE_SHARED0_RET(analyzerHwts_, AnalyzerHwts, PROFILING_FAILED);
+    MSVP_MAKE_SHARED0_RET(analyzerTs_, AnalyzerTs, PROFILING_FAILED);
+    MSVP_MAKE_SHARED0_RET(analyzerFfts_, AnalyzerFfts, PROFILING_FAILED);
 
     inited_ = true;
     if ((analyzerHwts_->InitFrequency() != PROFILING_SUCCESS) ||
@@ -45,10 +50,10 @@ Analyzer::Analyzer(SHARED_PTR_ALIA<analysis::dvvp::transport::Uploader> uploader
         (analyzerFfts_->InitFrequency() != PROFILING_SUCCESS)) {
         inited_ = false;
         MSPROF_LOGE("Analyzer InitFrequency failed. inited_ = false");
+        return PROFILING_FAILED;
     }
+    return PROFILING_SUCCESS;
 }
-
-Analyzer::~Analyzer() {}
 
 void Analyzer::OnNewData(CONST_VOID_PTR data, uint32_t len)
 {
