@@ -61,7 +61,7 @@ class ParsingMemoryData(MsMultiProcess):
         elif re.match(r'{}:'.format(self.SYS_DATA_METRIC[8]), line):
             tmp_list[9] = line.split(':')[1].strip()
         elif line == '\n':
-            self.data_dict.get('sys_data_list', []).append(tmp_list)
+            self.data_dict.setdefault('sys_data_list', []).append(tmp_list)
             tmp_list = [None, None, None, None, None, None, None, None, None, None, None]
             match_flag = False
 
@@ -162,7 +162,7 @@ class ParsingMemoryData(MsMultiProcess):
                     tmp_list[2], tmp_list[3], tmp_list[4], _, _, _, _ = result.groups()
             if line == '\n':
                 tmp_list.append(pid)
-                self.data_dict.get('pid_data_list', []).append(tmp_list)
+                self.data_dict.setdefault('pid_data_list', []).append(tmp_list)
                 tmp_list = [None, None, None, None, None]
                 match_flag = False
             if not line:
