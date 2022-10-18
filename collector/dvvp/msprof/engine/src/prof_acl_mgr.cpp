@@ -806,7 +806,12 @@ int ProfAclMgr::InitSubscribeUploader(const std::string& devIdStr)
         }
         // create transport1 and uploader1
         SHARED_PTR_ALIA<ParserTransport> parserTransport = nullptr;
-        MSVP_MAKE_SHARED1_RET(parserTransport, ParserTransport, pipeUploader, ACL_ERROR_PROFILING_FAILURE);
+        MSVP_MAKE_SHARED0_RET(parserTransport, ParserTransport, ACL_ERROR_PROFILING_FAILURE);
+        if (parserTransport->Init(pipeUploader) != PROFILING_SUCCESS) {
+            MSPROF_LOGE("Failed to init transport for subscribe");
+            MSPROF_INNER_ERROR("EK9999", "Failed to init transport for subscribe");
+            return ACL_ERROR_PROFILING_FAILURE;
+        }
         parserTransport->SetDevIdToAnalyzer(devIdStr);
         const uint32_t capacity = 10240;
         ret = UploaderMgr::instance()->CreateUploader(devIdStr, parserTransport, capacity);
