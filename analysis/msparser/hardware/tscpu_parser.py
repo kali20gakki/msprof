@@ -191,7 +191,7 @@ class ParsingTSData(MsMultiProcess):
             logging.info(
                 "start parsing tscpu data file: %s", file_name)
             self.replayid = '0'  # replay id is 0
-            self.tools.get('devices', []).append(self.device_id)
+            self.tools.setdefault('devices', []).append(self.device_id)
             if self._open_mdc_binary_data(file_name):
                 self.calculate = OffsetCalculator(self._file_list, StructFmt.MDC_TSCPU_FMT_SIZE,
                                                   self.project_path)
