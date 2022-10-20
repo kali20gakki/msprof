@@ -146,7 +146,7 @@ class ParsingCpuUsageData(MsMultiProcess):
         if re.match(r'cpu', line):
             proc_data_list[7] = sum(
                 Utils.generator_to_list(float(i) for i in line.split(' ')[1:] if i != ''))
-            self.data_dict.get("pid_data_list", []).append(proc_data_list)
+            self.data_dict.setdefault("pid_data_list", []).append(proc_data_list)
             return Utils.generator_to_list(None for _ in range(8))
         return proc_data_list
 
@@ -163,4 +163,4 @@ class ParsingCpuUsageData(MsMultiProcess):
             tmp_list[12] = "ctrlcpu"
         elif ai_cpu and tmp_list[1] in ai_cpu:
             tmp_list[12] = "aicpu"
-        self.data_dict.get("sys_data_list", []).append(tmp_list)
+        self.data_dict.setdefault("sys_data_list", []).append(tmp_list)

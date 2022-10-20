@@ -39,7 +39,7 @@ private:
     SHARED_PTR_ALIA<ProfileParams> params_;
     std::array<std::string, INPUT_CFG_MAX> paramContainer_;
     std::vector<InputCfg> aclApiConfig_;
-    std::set<InputCfg>setConfig_;
+    std::set<InputCfg> setConfig_;
 };
 } // ParamsAdapter
 } // Dvvp
