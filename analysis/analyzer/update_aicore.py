@@ -287,6 +287,7 @@ class UpdateAICoreData:
         """
         block = block_dims.get(self.STREAM_TASK_KEY_FMT.format(ai_core_data[task_id_index],
                                                                ai_core_data[stream_id_index]))
+        # todo 这个报错应该怎么消除？
         if not block:
             logging.error("Can not find the stream id and task id from ge data, "
                           "maybe ge data has lost: %s", self.STREAM_TASK_KEY_FMT.format(ai_core_data[task_id_index],

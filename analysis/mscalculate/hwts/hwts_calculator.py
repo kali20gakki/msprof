@@ -140,7 +140,8 @@ class HwtsCalculator(ICalculator, MsMultiProcess):
             _iter_id = MsprofIteration(self._project_path). \
                 get_iter_id_by_index_id(self._sample_config.get("iter_id"), self._sample_config.get("model_id"))
 
-            offset_count, total_count = self._iter_model.get_task_offset_and_sum(_iter_id[0] + 1, 'task_count')
+            offset_count, total_count = self._iter_model.get_task_offset_and_sum(
+                _iter_id[0] + 1, HwtsIterModel.TASK_TYPE)
             if not total_count:
                 return
             _file_calculator = FileCalculator(self._file_list, self.HWTS_LOG_SIZE, self._project_path,

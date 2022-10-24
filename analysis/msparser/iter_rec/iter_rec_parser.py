@@ -25,6 +25,7 @@ from msparser.interface.iparser import IParser
 from profiling_bean.prof_enum.data_tag import DataTag
 from profiling_bean.struct_info.aic_pmu import AicPmuBean
 from profiling_bean.struct_info.hwts_log import HwtsLogBean
+from msparser.iter_rec.iter_info_updater import IterInfoUpdater
 
 
 class IterParser(IParser, MsMultiProcess):
@@ -38,12 +39,14 @@ class IterParser(IParser, MsMultiProcess):
     DEFAULT_TASK_TIME_SIZE = 5000000
 
     def __init__(self: any, file_list: dict, sample_config: dict) -> None:
+        # todo 要删掉冗余代码
         MsMultiProcess.__init__(self, sample_config)
         self._file_list = file_list
         self._sample_config = sample_config
         self._project_path = sample_config.get(StrConstant.SAMPLE_CONFIG_PROJECT_PATH)
         self._batch_counter = BatchCounter(self._project_path)
         self._iter_recorder = IterRecorder(self._project_path)
+        self._iter_info_updater = IterInfoUpdater(self._project_path)
         self._iter_info_dict = {}
         self._ge_static_shape_iter_model_dict = {}
         self._ge_static_shape_model_task_dict = {}
@@ -59,8 +62,15 @@ class IterParser(IParser, MsMultiProcess):
         :return: None
         """
         try:
-            if self._iter_info_dict:
-                self.hwts_iter_model.flush(Utils.obj_list_to_list(self._iter_info_dict.values()),
+            iter_to_iter_info = self._iter_info_updater.iteration_manager.iter_to_iter_info
+            if iter_to_iter_info:
+                hwts_iter_data = [[iter_info.iter_id,
+                                   iter_info.hwts_count,
+                                   iter_info.hwts_offset,
+                                   iter_info.aic_count,
+                                   iter_info.aic_offset,
+                                   iter_info.step_end] for iter_info in iter_to_iter_info.values()]
+                self.hwts_iter_model.flush(hwts_iter_data,
                                            DBNameConstant.TABLE_HWTS_ITER_SYS)
                 self.hwts_iter_model.finalize()
         except sqlite3.Error as trace_err:
@@ -82,16 +92,6 @@ class IterParser(IParser, MsMultiProcess):
         """
         pass
 
-    def _calculate_task_count(self: any, task_log: HwtsLogBean) -> None:
-        iter_info = self._iter_info_dict.setdefault(self._iter_recorder.current_op_iter,
-                                                    IterInfo(self._iter_recorder.current_op_iter,
-                                                             self._iter_recorder.iter_end_dict.get(
-                                                                 self._iter_recorder.current_op_iter)))
-        iter_info.task_count += 1
-        if task_log.sys_tag == self.HWTS_TASK_END \
-                and self._is_ai_core_task(task_log.stream_id, task_log.task_id, task_log.batch_id):
-            iter_info.aic_count += 1
-
     def _read_hwts_data(self: any, all_bytes: bytes) -> None:
         for _chunk in Utils.chunks(all_bytes, self.HWTS_LOG_SIZE):
             _task_log = HwtsLogBean.decode(_chunk)
@@ -101,7 +101,8 @@ class IterParser(IParser, MsMultiProcess):
                 self._iter_recorder.set_current_iter_id(_task_log.sys_cnt)
                 if _task_log.sys_tag == self.HWTS_TASK_END:
                     self._calculate_batch_list(_task_log)
-                self._calculate_task_count(_task_log)
+                self._iter_info_updater.update_parallel_iter_info_pool(self._iter_recorder.current_iter_id)
+                self._iter_info_updater.update_count_and_offset(_task_log)
             else:
                 self._overstep_task_cnt = self._overstep_task_cnt + 1
 
@@ -178,16 +179,6 @@ class IterRecParser(IterParser):
         finally:
             pass
 
-    def _is_ai_core_task(self: any, stream_id: int, task_id: int, batch_id: int) -> bool:
-        stream_task_batch_value = self.STREAM_TASK_BATCH_KEY_FMT.format(stream_id, task_id, batch_id)
-        if stream_task_batch_value in self._ge_non_static_shape_dict.get(self._iter_recorder.current_iter_id, set()):
-            return True
-        model_id = self._ge_static_shape_iter_model_dict.get(self._iter_recorder.current_iter_id)
-        if model_id is not None and stream_task_batch_value in self._ge_static_shape_model_task_dict.get(model_id,
-                                                                                                         set()):
-            return True
-        return False
-
 
 class NoGeIterRecParser(IterParser):
     """
@@ -195,6 +186,7 @@ class NoGeIterRecParser(IterParser):
     """
 
     def __init__(self: any, file_list: dict, sample_config: dict) -> None:
+        # todo 没有GE的情况怎么判断aicore?
         super(NoGeIterRecParser, self).__init__(file_list, sample_config)
         self._file_list = file_list
         self.ai_core_task = set()
@@ -225,12 +217,6 @@ class NoGeIterRecParser(IterParser):
                 self.save()
         except ProfException as rec_error:
             logging.warning("Iter rec parse failed, error code : %s", rec_error.code)
-
-    def _is_ai_core_task(self: any, stream_id: int, task_id: int, batch_id: int) -> bool:
-        stream_task_value = self.STREAM_TASK_KEY_FMT.format(stream_id, task_id)
-        if stream_task_value in self.ai_core_task:
-            return True
-        return False
 
     def _read_ai_core_data(self: any, all_bytes: bytes) -> None:
         for _chunk in Utils.chunks(all_bytes, self.AI_CORE_SIZE):

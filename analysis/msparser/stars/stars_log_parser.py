@@ -84,7 +84,7 @@ class StarsLogCalCulator(ICalculator, MsMultiProcess):
     def _parse_by_iter(self):
         with HwtsIterModel(self._project_path) as iter_model:
             offset_count, total_count = iter_model.get_task_offset_and_sum(
-                self._sample_config.get("iter-id"), 'task_count')
+                self._sample_config.get("iter-id"), HwtsIterModel.TASK_TYPE)
             if not total_count:
                 return
             _file_calculator = FileCalculator(self._file_list, self.DEFAULT_FMT_SIZE, self._project_path,
