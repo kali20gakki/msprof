@@ -89,7 +89,7 @@ class GeInfoModel(BaseModel):
         result_data = [{}, {}] if is_static_shape == Constant.GE_STATIC_SHAPE else {}
         if not Utils.is_step_scene(self.result_dir):
             return result_data
-        step_trace_data = self._get_step_trace_data()
+        step_trace_data = self.get_step_trace_data()
         task_data = self._get_ge_task_data(datatype, is_static_shape)
         if not step_trace_data or not task_data:
             return result_data
@@ -108,10 +108,11 @@ class GeInfoModel(BaseModel):
                     result_data[step_trace.iter_id] = task_data.pop(model_index)
         return result_data
 
-    def _get_step_trace_data(self: any) -> list:
+    def get_step_trace_data(self: any) -> list:
         db_path = PathManager.get_db_path(self.result_dir, DBNameConstant.DB_STEP_TRACE)
         trace_conn, trace_curs = DBManager.check_connect_db_path(db_path)
-        sql = "select model_id, index_id, iter_id from {0}".format(DBNameConstant.TABLE_STEP_TRACE_DATA)
+        sql = "select model_id, index_id, iter_id, step_start, step_end from {0}".format(
+            DBNameConstant.TABLE_STEP_TRACE_DATA)
         step_trace_data = DBManager.fetch_all_data(trace_curs, sql, dto_class=StepTraceDto)
         DBManager.destroy_db_connect(trace_conn, trace_curs)
         return step_trace_data
