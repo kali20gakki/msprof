@@ -81,6 +81,10 @@ int32_t OpDescParser::GetModelId(CONST_VOID_PTR data, uint32_t len, uint32_t ind
     CHECK_INDEX_RET(index, len);
     auto addr = static_cast<CONST_CHAR_PTR>(data);
     auto opDesc = reinterpret_cast<const ProfOpDesc *>(addr + index * GetOpDescSize());
+    if (opDesc == nullptr) {
+        MSPROF_LOGE("Failed to call reinterpret_cast.");
+        return ACL_ERROR_INVALID_RESOURCE_HANDLE;
+    }
     *modelId = opDesc->modelId;
     return ACL_SUCCESS;
 }
@@ -108,6 +112,10 @@ int32_t OpDescParser::GetOpTypeLen(CONST_VOID_PTR data, uint32_t len, SIZE_T_PTR
     CHECK_INDEX_RET(index, len);
     auto addr = static_cast<CONST_CHAR_PTR>(data);
     auto opDesc = reinterpret_cast<const ProfOpDesc *>(addr + index * GetOpDescSize());
+    if (opDesc == nullptr) {
+        MSPROF_LOGE("Failed to call reinterpret_cast.");
+        return ACL_ERROR_INVALID_RESOURCE_HANDLE;
+    }
 
     std::lock_guard<std::mutex> lk(mtx_);
     auto iter = opTypes_.find(opDesc->opIndex);
@@ -129,6 +137,10 @@ int32_t OpDescParser::GetOpType(CONST_VOID_PTR data, uint32_t len, CHAR_PTR opTy
     CHECK_INDEX_RET(index, len);
     auto addr = static_cast<CONST_CHAR_PTR>(data);
     auto opDesc = reinterpret_cast<const ProfOpDesc *>(addr + index * GetOpDescSize());
+    if (opDesc == nullptr) {
+        MSPROF_LOGE("Failed to call reinterpret_cast.");
+        return ACL_ERROR_INVALID_RESOURCE_HANDLE;
+    }
 
     std::lock_guard<std::mutex> lk(mtx_);
     auto iter = opTypes_.find(opDesc->opIndex);
@@ -155,6 +167,10 @@ int32_t OpDescParser::GetOpNameLen(CONST_VOID_PTR data, uint32_t len, SIZE_T_PTR
     CHECK_INDEX_RET(index, len);
     auto addr = static_cast<CONST_CHAR_PTR>(data);
     auto opDesc = reinterpret_cast<const ProfOpDesc *>(addr + index * GetOpDescSize());
+    if (opDesc == nullptr) {
+        MSPROF_LOGE("Failed to call reinterpret_cast.");
+        return ACL_ERROR_INVALID_RESOURCE_HANDLE;
+    }
 
     std::lock_guard<std::mutex> lk(mtx_);
     auto iter = opNames_.find(opDesc->opIndex);
@@ -176,6 +192,10 @@ int32_t OpDescParser::GetOpName(CONST_VOID_PTR data, uint32_t len, CHAR_PTR opNa
     CHECK_INDEX_RET(index, len);
     auto addr = static_cast<CONST_CHAR_PTR>(data);
     auto opDesc = reinterpret_cast<const ProfOpDesc *>(addr + index * GetOpDescSize());
+    if (opDesc == nullptr) {
+        MSPROF_LOGE("Failed to call reinterpret_cast.");
+        return ACL_ERROR_INVALID_RESOURCE_HANDLE;
+    }
 
     std::lock_guard<std::mutex> lk(mtx_);
     auto iter = opNames_.find(opDesc->opIndex);
@@ -202,6 +222,10 @@ uint64_t OpDescParser::GetOpStart(CONST_VOID_PTR data, uint32_t len, uint32_t in
     CHECK_INDEX_RET0(index, len);
     auto addr = static_cast<CONST_CHAR_PTR>(data);
     auto opDesc = reinterpret_cast<const ProfOpDesc *>(addr + index * GetOpDescSize());
+    if (opDesc == nullptr) {
+        MSPROF_LOGE("Failed to call reinterpret_cast.");
+        return ACL_ERROR_INVALID_RESOURCE_HANDLE;
+    }
     return opDesc->start;
 }
 
@@ -215,6 +239,10 @@ uint64_t OpDescParser::GetOpEnd(CONST_VOID_PTR data, uint32_t len, uint32_t inde
     CHECK_INDEX_RET0(index, len);
     auto addr = static_cast<CONST_CHAR_PTR>(data);
     auto opDesc = reinterpret_cast<const ProfOpDesc *>(addr + index * GetOpDescSize());
+    if (opDesc == nullptr) {
+        MSPROF_LOGE("Failed to call reinterpret_cast.");
+        return ACL_ERROR_INVALID_RESOURCE_HANDLE;
+    }
     return opDesc->end;
 }
 
@@ -228,6 +256,10 @@ uint64_t OpDescParser::GetOpDuration(CONST_VOID_PTR data, uint32_t len, uint32_t
     CHECK_INDEX_RET0(index, len);
     auto addr = static_cast<CONST_CHAR_PTR>(data);
     auto opDesc = reinterpret_cast<const ProfOpDesc *>(addr + index * GetOpDescSize());
+    if (opDesc == nullptr) {
+        MSPROF_LOGE("Failed to call reinterpret_cast.");
+        return ACL_ERROR_INVALID_RESOURCE_HANDLE;
+    }
     return opDesc->duration;
 }
 
@@ -241,6 +273,10 @@ uint64_t OpDescParser::GetOpExecutionTime(CONST_VOID_PTR data, uint32_t len, uin
     CHECK_INDEX_RET0(index, len);
     auto addr = static_cast<CONST_CHAR_PTR>(data);
     auto opDesc = reinterpret_cast<const ProfOpDesc *>(addr + index * GetOpDescSize());
+    if (opDesc == nullptr) {
+        MSPROF_LOGE("Failed to call reinterpret_cast.");
+        return ACL_ERROR_INVALID_RESOURCE_HANDLE;
+    }
     return opDesc->executionTime;
 }
 
@@ -254,6 +290,10 @@ uint64_t OpDescParser::GetOpCubeFops(CONST_VOID_PTR data, uint32_t len, uint32_t
     CHECK_INDEX_RET0(index, len);
     auto addr = static_cast<CONST_CHAR_PTR>(data);
     auto opDesc = reinterpret_cast<const ProfOpDesc *>(addr + index * GetOpDescSize());
+    if (opDesc == nullptr) {
+        MSPROF_LOGE("Failed to call reinterpret_cast.");
+        return ACL_ERROR_INVALID_RESOURCE_HANDLE;
+    }
     return opDesc->cubeFops;
 }
 
@@ -267,6 +307,10 @@ uint64_t OpDescParser::GetOpVectorFops(CONST_VOID_PTR data, uint32_t len, uint32
     CHECK_INDEX_RET0(index, len);
     auto addr = static_cast<CONST_CHAR_PTR>(data);
     auto opDesc = reinterpret_cast<const ProfOpDesc *>(addr + index * GetOpDescSize());
+    if (opDesc == nullptr) {
+        MSPROF_LOGE("Failed to call reinterpret_cast.");
+        return ACL_ERROR_INVALID_RESOURCE_HANDLE;
+    }
     return opDesc->vectorFops;
 }
 
@@ -281,6 +325,10 @@ int32_t OpDescParser::CheckData(CONST_VOID_PTR data, uint32_t len)
         uint32_t signature = analysis::dvvp::common::utils::Utils::GenerateSignature(
             addr + i * GetOpDescSize() + sizeof(uint32_t), GetOpDescSize() - sizeof(uint32_t));
         auto opDesc = reinterpret_cast<const ProfOpDesc *>(addr + i * GetOpDescSize());
+        if (opDesc == nullptr) {
+            MSPROF_LOGE("Failed to call reinterpret_cast.");
+            return ACL_ERROR_INVALID_RESOURCE_HANDLE;
+        }
         if (opDesc->signature != signature) {
             MSPROF_LOGE("Part %u of data is invalid", i);
             return ACL_ERROR_INVALID_PARAM;
@@ -298,6 +346,10 @@ uint32_t OpDescParser::GetOpFlag(CONST_VOID_PTR data, uint32_t len, uint32_t ind
     CHECK_INDEX_RET0(index, len);
     auto addr = static_cast<CONST_CHAR_PTR>(data);
     auto opDesc = reinterpret_cast<const ProfOpDesc *>(addr + index * GetOpDescSize());
+    if (opDesc == nullptr) {
+        MSPROF_LOGE("Failed to call reinterpret_cast.");
+        return ACL_ERROR_INVALID_RESOURCE_HANDLE;
+    }
     return opDesc->flag;
 }
 
@@ -311,6 +363,10 @@ const char *OpDescParser::GetOpAttriValue(CONST_VOID_PTR data, uint32_t len, uin
     CHECK_INDEX_RET0(index, len);
     auto addr = static_cast<CONST_CHAR_PTR>(data);
     auto opDesc = reinterpret_cast<const ProfOpDesc *>(addr + index * GetOpDescSize());
+    if (opDesc == nullptr) {
+        MSPROF_LOGE("Failed to call reinterpret_cast.");
+        return nullptr;
+    }
     std::map<aclprofSubscribeOpAttri, aclprofSubscribeOpFlag> opFlagAttriMap = {
         {ACL_SUBSCRIBE_ATTRI_THREADID, ACL_SUBSCRIBE_OP_THREAD}
     };
