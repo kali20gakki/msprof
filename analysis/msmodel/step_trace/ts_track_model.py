@@ -13,7 +13,7 @@ from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.path_manager import PathManager
 from msmodel.interface.base_model import BaseModel
-
+from memory_profiler import profile
 
 class TsTrackModel(BaseModel, ABC):
     """
@@ -75,5 +75,10 @@ class TsTrackModel(BaseModel, ABC):
             # data index 2 is timestamp
             ai_cpu_with_state = list(filter(partial(self.__aicpu_in_time_range, min_timestamp=min_timestamp,
                                                     max_timestamp=max_timestamp), ai_cpu_with_state))
-
         return ai_cpu_with_state
+
+    def get_step_trace(self: any) -> None:
+        """
+        get step trace data
+        """
+        sql = "select index_id, model_id, step_start, step_end, iter_id"
