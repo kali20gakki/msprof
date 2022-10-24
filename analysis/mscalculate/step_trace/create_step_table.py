@@ -90,7 +90,7 @@ class CreateStepTraceData(CreateSubTable):
 
     @classmethod
     def create_table(cls: any, conn: any) -> None:
-        cls.data = sorted(cls.data, key=lambda x: x[2])
+        cls.data = sorted(cls.data, key=lambda x: x[3])
         cls.data = list(map(lambda datum: datum[1] + [datum[0] + 1], enumerate(cls.data)))
 
         create_sql = "create table if not exists {0} (index_id int, model_id int, " \

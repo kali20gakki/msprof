@@ -27,32 +27,6 @@ from profiling_bean.struct_info.aic_pmu import AicPmuBean
 from profiling_bean.struct_info.hwts_log import HwtsLogBean
 
 
-class IterInfo:
-    """
-    class used to record iter info.
-    """
-
-    def __init__(self: any, iter_id: int, iter_end_sys_cnt: int) -> None:
-        self.aic_count = 0
-        self.task_count = 0
-        self.iter_id = iter_id
-        self.iter_end = iter_end_sys_cnt
-
-    @staticmethod
-    def class_name() -> str:
-        """
-        class name
-        """
-        return "IterInfo"
-
-    @staticmethod
-    def file_name() -> str:
-        """
-        file name
-        """
-        return "iter_rec_parser"
-
-
 class IterParser(IParser, MsMultiProcess):
     HWTS_LOG_SIZE = 64
     STREAM_TASK_KEY_FMT = "{0}-{1}"
