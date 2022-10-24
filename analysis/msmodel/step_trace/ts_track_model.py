@@ -13,7 +13,7 @@ from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.path_manager import PathManager
 from msmodel.interface.base_model import BaseModel
-from memory_profiler import profile
+
 
 class TsTrackModel(BaseModel, ABC):
     """
