@@ -47,6 +47,10 @@ void AnalyzerTs::ParseTsTrackData(CONST_CHAR_PTR data, uint32_t len)
             break;
         }
         auto tsHeader = reinterpret_cast<const TsProfileDataHead *>(dataPtr_ + offset);
+        if (tsHeader == nullptr) {
+            MSPROF_LOGE("Failed to call reinterpret_cast.");
+            return;
+        }
         if (tsHeader->bufSize == 0) {
             // invalid data, reset buffer
             MSPROF_LOGE("TsHeader buf size is 0, invalid data");
@@ -76,6 +80,10 @@ void AnalyzerTs::ParseTsTimelineData(CONST_CHAR_PTR data, uint32_t len)
 {
     if (len >= sizeof(TsProfileTimeline)) {
         auto tsData = reinterpret_cast<const TsProfileTimeline *>(data);
+        if (tsData == nullptr) {
+            MSPROF_LOGE("Failed to call reinterpret_cast.");
+            return;
+        }
         std::string key = std::to_string(tsData->taskId) + KEY_SEPARATOR + std::to_string(tsData->streamId) +
             KEY_SEPARATOR + std::to_string(UINT32_MAX);
         auto iter = opTimeDrafts_.find(key);
@@ -120,6 +128,10 @@ void AnalyzerTs::ParseTsKeypointData(CONST_CHAR_PTR data, uint32_t len)
     }
 
     auto tsData = reinterpret_cast<const TsProfileKeypoint *>(data);
+    if (tsData == nullptr) {
+        MSPROF_LOGE("Failed to call reinterpret_cast.");
+        return;
+    }
     if (tsData->head.bufSize != sizeof(TsProfileKeypoint) || !tsData->timestamp) {
         MSPROF_LOGE("keypoint op error. bufSize %llu, struct_len %u, "
                     "indexId %llu, taskId %u, streamId %u, timestamp %llu",

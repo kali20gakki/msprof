@@ -48,6 +48,10 @@ void AnalyzerFfts::ParseData(CONST_CHAR_PTR data, uint32_t len)
             break;
         }
         auto fftsLogHead = reinterpret_cast<const FftsLogHead *>(dataPtr_ + parsedLen);
+        if (fftsLogHead == nullptr) {
+            MSPROF_LOGE("Failed to call reinterpret_cast.");
+            return;
+        }
         uint32_t logType = fftsLogHead->logType;
         if (logType == ACSQ_TASK_START_FUNC_TYPE || logType == ACSQ_TASK_END_FUNC_TYPE) {
             ParseAcsqTaskData(fftsLogHead, logType);
@@ -68,6 +72,10 @@ void AnalyzerFfts::ParseData(CONST_CHAR_PTR data, uint32_t len)
 void AnalyzerFfts::ParseAcsqTaskData(const FftsLogHead *data, uint32_t logType)
 {
     auto acsqLog = reinterpret_cast<const FftsAcsqLog *>(data);
+    if (acsqLog == nullptr) {
+        MSPROF_LOGE("Failed to call reinterpret_cast.");
+        return;
+    }
     std::string key = std::to_string(acsqLog->taskId) + KEY_SEPARATOR +
         std::to_string(acsqLog->streamId) + KEY_SEPARATOR + std::to_string(UINT32_MAX);
     auto iter = opDrafts_.find(key);
@@ -95,6 +103,10 @@ void AnalyzerFfts::ParseAcsqTaskData(const FftsLogHead *data, uint32_t logType)
 void AnalyzerFfts::ParseSubTaskThreadData(const FftsLogHead *data, uint32_t logType)
 {
     auto cxtLog = reinterpret_cast<const FftsCxtLog *>(data);
+    if (cxtLog == nullptr) {
+        MSPROF_LOGE("Failed to call reinterpret_cast.");
+        return;
+    }
     std::string key = std::to_string(cxtLog->taskId) + KEY_SEPARATOR +
         std::to_string(cxtLog->streamId) + KEY_SEPARATOR + std::to_string(cxtLog->cxtId);
     auto iter = opDrafts_.find(key);

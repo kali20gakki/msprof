@@ -62,7 +62,12 @@ void MsprofCallbackHandler::ForceFlush(const std::string &devId)
         if (!devId.empty()) {
             reporter_->DumpModelLoadData(devId);
         }
-        (std::dynamic_pointer_cast<Msprof::Engine::ProfReporter>(reporter_))->Flush();
+        auto profReport = std::dynamic_pointer_cast<Msprof::Engine::ProfReporter>(reporter_);
+        if (profReport == nullptr) {
+            MSPROF_LOGE("Failed to call dynamic_pointer_cast.");
+            return;
+        }
+        profReport->Flush();
     }
 }
 
@@ -100,6 +105,10 @@ int MsprofCallbackHandler::ReportData(CONST_VOID_PTR data, uint32_t len /* = 0 *
         return PROFILING_FAILED;
     }
     auto dataToReport = reinterpret_cast<Msprof::Engine::CONST_REPORT_DATA_PTR>(data);
+    if (dataToReport == nullptr) {
+        MSPROF_LOGE("[ReportData]Failed to call reinterpret_cast.");
+        return PROFILING_FAILED;
+    }
     return reporter_->Report(dataToReport);
 }
 
@@ -110,7 +119,12 @@ int MsprofCallbackHandler::FlushData()
         MSPROF_LOGE("ProfReporter is not started, module: %s", module_.c_str());
         return PROFILING_FAILED;
     }
-    return (std::dynamic_pointer_cast<Msprof::Engine::ProfReporter>(reporter_))->Flush();
+    auto profReport = std::dynamic_pointer_cast<Msprof::Engine::ProfReporter>(reporter_);
+    if (profReport == nullptr) {
+        MSPROF_LOGE("Failed to call dynamic_pointer_cast.");
+        return PROFILING_FAILED;
+    }
+    return profReport->Flush();
 }
 
 int MsprofCallbackHandler::StartReporter()
@@ -150,7 +164,12 @@ int MsprofCallbackHandler::StopReporter()
         MSPROF_LOGW("ProfReporter is not started, module: %s", module_.c_str());
         return PROFILING_SUCCESS;
     }
-    (std::dynamic_pointer_cast<Msprof::Engine::ProfReporter>(reporter_))->Flush();
+    auto profReport = std::dynamic_pointer_cast<Msprof::Engine::ProfReporter>(reporter_);
+    if (profReport == nullptr) {
+        MSPROF_LOGE("Failed to call dynamic_pointer_cast.");
+        return PROFILING_FAILED;
+    }
+    profReport->Flush();
     int ret = reporter_->Stop();
     if (ret != PROFILING_SUCCESS) {
         MSPROF_LOGE("Failed to stop reporter of %s", module_.c_str());
@@ -184,6 +203,10 @@ int MsprofCallbackHandler::GetHashId(VOID_PTR data, uint32_t len) const
         return PROFILING_FAILED;
     }
     auto hData = reinterpret_cast<MsprofHashData *>(data);
+    if (hData == nullptr) {
+        MSPROF_LOGE("Failed to call reinterpret_cast.");
+        return PROFILING_FAILED;
+    }
     if (hData->data == nullptr || hData->dataLen > HASH_DATA_MAX_LEN || hData->dataLen == 0) {
         MSPROF_LOGE("module:%s, data error, data:0x%lx, dataLen:%llu",
             module_.c_str(), hData->data, hData->dataLen);

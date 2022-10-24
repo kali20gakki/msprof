@@ -94,6 +94,10 @@ int AicpuPlugin::ReceiveStreamData(CONST_VOID_PTR data, unsigned int dataLen)
         return PROFILING_FAILED;
     }
     auto fileChunkReq = std::dynamic_pointer_cast<analysis::dvvp::proto::FileChunkReq>(message);
+    if (fileChunkReq == nullptr) {
+        MSPROF_LOGE("Failed to call dynamic_pointer_cast.");
+        return PROFILING_FAILED;
+    }
     if (fileChunkReq->islastchunk() && fileChunkReq->chunksizeinbytes() == 0) {
         Msprof::Engine::FlushModule(logicDevIdStr_);
         return PROFILING_SUCCESS;
