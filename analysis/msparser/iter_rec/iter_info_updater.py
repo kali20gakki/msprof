@@ -3,6 +3,7 @@ from common_func.msvp_common import path_check
 from common_func.path_manager import PathManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.constant import Constant
+import time
 
 
 class IterInfo:
@@ -56,6 +57,7 @@ class IterationManager:
         self.project_path = project_path
         self.iter_to_iter_info = {}
         self.is_parallel_scene = False
+        #self.test_list = []
         self._initial_iter_to_info()
 
     def _initial_iter_to_info(self: any) -> None:
@@ -66,10 +68,16 @@ class IterationManager:
             static_task_dict = ge_info_model.get_ge_task_data(Constant.TASK_TYPE_AI_CORE, Constant.GE_STATIC_SHAPE)
             dynamic_task_dict = ge_info_model.get_ge_task_data(Constant.TASK_TYPE_AI_CORE, Constant.GE_NON_STATIC_SHAPE)
 
+        #for datum in static_task_dict.values():
+        #    self.test_list.extend(datum)
+        #self.test_list = set(self.test_list)
+        #print(len(self.test_list))
+
         self._regist_paralle_set(step_trace_data)
         self._regist_aicore_set(static_task_dict, dynamic_task_dict)
 
     def _regist_paralle_set(self: any, step_trace_data: list) -> None:
+        start_time = time.time()
         for index, step_trace_datum in enumerate(step_trace_data):
             iter_info = self.iter_to_iter_info.setdefault(step_trace_datum.iter_id,
                                                           IterInfo(step_trace_datum.model_id,
@@ -77,7 +85,7 @@ class IterationManager:
                                                                     step_trace_datum.iter_id,
                                                                     step_trace_datum.step_start,
                                                                     step_trace_datum.step_end))
-            for behind_datum in step_trace_data[index + 1:]:
+            for behind_datum in step_trace_data[index:]:
                 behind_iter_info = self.iter_to_iter_info.setdefault(behind_datum.iter_id,
                                                                      IterInfo(behind_datum.model_id,
                                                                                behind_datum.index_id,
@@ -85,7 +93,9 @@ class IterationManager:
                                                                                behind_datum.step_start,
                                                                                behind_datum.step_end))
                 if behind_iter_info.start_time < iter_info.end_time <= behind_iter_info.end_time:
-                    iter_info.behind_parallel_iter.add(behind_iter_info)
+                    iter_info.behind_parallel_iter.add(behind_datum.iter_id)
+        end_time = time.time()
+        print(end_time - start_time)
 
     def _regist_aicore_set(self: any, static_task_dict: dict, dynamic_task_dict: dict) -> None:
         for iter_info_bean in self.iter_to_iter_info.values():
@@ -111,13 +121,14 @@ class IterInfoUpdater:
             return
 
         new_iter_info = self.iteration_manager.iter_to_iter_info.get(iter_id, IterInfo())
-        new_add_parallel_set = new_iter_info.behind_parallel_iter - self.active_parallel_iter_set
-        self._update_new_add_iter_info(new_add_parallel_set)
+        new_add_parallel_id = map(lambda it_id: self.iteration_manager.iter_to_iter_info.get(it_id),
+                                   new_iter_info.behind_parallel_iter - self.active_parallel_iter_set)
+        self._update_new_add_iter_info(new_add_parallel_id)
 
         self.current_iter = iter_id
         self.active_parallel_iter_set = new_iter_info.behind_parallel_iter
 
-    def _update_new_add_iter_info(self: any, new_add_parallel_set: set) -> None:
+    def _update_new_add_iter_info(self: any, new_add_parallel_set: any) -> None:
         current_iter_info = self.iteration_manager.iter_to_iter_info.get(self.current_iter, IterInfo())
 
         for new_add_parallel_iter_info in new_add_parallel_set:
@@ -125,11 +136,19 @@ class IterInfoUpdater:
             new_add_parallel_iter_info.aic_offset = current_iter_info.aic_offset + current_iter_info.aic_count
 
     def update_count_and_offset(self: any, task: any) -> None:
-        if task.sys_tag != self.HWTS_TASK_END:
-            return
+        is_aicore_end_task = False
+        iter_info_list = [self.iteration_manager.iter_to_iter_info.get(iter_id)
+                          for iter_id in self.active_parallel_iter_set]
 
-        is_aicore = any([iter_info_bean.is_aicore(task) for iter_info_bean in self.active_parallel_iter_set])
-        for iter_info_bean in self.active_parallel_iter_set:
+        # todo batch id应该和这里的计算合一
+        if task.sys_tag == self.HWTS_TASK_END:
+            is_aicore_end_task = any([iter_info_bean.is_aicore(task) for iter_info_bean in iter_info_list])
+
+        #if not is_aicore and GeInfoModel.STREAM_TASK_BATCH_KEY_FMT.format(task.stream_id, task.task_id, task.batch_id) in self.iteration_manager.test_list:
+        #    print(self.current_iter)
+        #    print(task.stream_id, task.task_id)
+
+        for iter_info_bean in iter_info_list:
             iter_info_bean.hwts_count += 1
-            if is_aicore:
+            if is_aicore_end_task:
                 iter_info_bean.aic_count += 1
