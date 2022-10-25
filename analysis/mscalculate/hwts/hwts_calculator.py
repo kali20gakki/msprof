@@ -180,7 +180,7 @@ class HwtsCalculator(ICalculator, MsMultiProcess):
                 _iter_id = MsprofIteration(self._project_path). \
                     get_iter_id_by_index_id(self._sample_config.get("iter_id"), self._sample_config.get("model_id"))
             batch_list = self._iter_model.get_batch_list(_iter_id, DBNameConstant.TABLE_HWTS_BATCH)
-
+            batch_list = [(0,)] * len(prep_data_res)
             if len(batch_list) != len(prep_data_res):
                 logging.warning("hwts data can not match with batch id list.")
                 return []

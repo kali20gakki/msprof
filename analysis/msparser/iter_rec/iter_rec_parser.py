@@ -69,7 +69,9 @@ class IterParser(IParser, MsMultiProcess):
                                    iter_info.hwts_offset,
                                    iter_info.aic_count,
                                    iter_info.aic_offset,
-                                   iter_info.step_end] for iter_info in iter_to_iter_info.values()]
+                                   iter_info.end_time,
+                                   iter_info.hwts_count + iter_info.hwts_offset,
+                                   iter_info.aic_count + iter_info.aic_offset] for iter_info in iter_to_iter_info.values()]
                 self.hwts_iter_model.flush(hwts_iter_data,
                                            DBNameConstant.TABLE_HWTS_ITER_SYS)
                 self.hwts_iter_model.finalize()

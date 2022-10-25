@@ -68,8 +68,9 @@ class HwtsIterModel(ParserModel):
         :return: sum of aic count
         """
         try:
-            sql = "select ai_core_num+ai_core_offset from {0} where " \
-                  "iter_id=max(iter_id)".format(DBNameConstant.TABLE_HWTS_ITER_SYS)
+            sql = "select ai_core_num+ai_core_offset from {0} " \
+                  "order by sys_cnt desc limit 0, 1".format(
+                DBNameConstant.TABLE_HWTS_ITER_SYS)
             return self.cur.execute(sql).fetchone()[0]
         except sqlite3.Error as err:
             logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
