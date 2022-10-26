@@ -16,6 +16,7 @@ from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msprof_step import MsprofStep
 from common_func.path_manager import PathManager
 from common_func.utils import Utils
+from profiling_bean.db_dto.step_trace_dto import StepTraceDto
 
 
 class MsprofIteration:
@@ -101,15 +102,17 @@ class MsprofIteration:
         iter_id_list = [index_id - 1, index_id]
         if not Utils.is_step_scene(self._result_dir):
             return iter_id_list
+
+
         db_path = PathManager.get_db_path(self._result_dir, DBNameConstant.DB_STEP_TRACE)
         trace_conn, trace_curs = DBManager.check_connect_db_path(db_path)
         if not trace_conn or not trace_curs \
                 or not DBManager.check_tables_in_db(db_path, DBNameConstant.TABLE_STEP_TRACE_DATA):
             return iter_id_list
-        sql = "select iter_id from {0} " \
-              "where index_id=? and model_id=?".format(DBNameConstant.TABLE_STEP_TRACE_DATA)
-        iter_data = DBManager.fetch_all_data(trace_curs, sql, (index_id, model_id))
-        iter_id_list = [iter_data[0][0] - 1, iter_data[0][0]] if iter_data else iter_id_list
+        iter_range = self.get_step_scene_iter_list(trace_curs, index_id, model_id)
+        iter_id_list = iter_range if iter_range else iter_id_list
+
+        iter_data = []
         if Utils.need_all_model_in_one_iter(self._result_dir, model_id):
             sql = "select iter_id from {0} " \
                   "where index_id>=? and index_id<=? and model_id=?".format(DBNameConstant.TABLE_STEP_TRACE_DATA)
@@ -121,6 +124,26 @@ class MsprofIteration:
                 iter_id_list = [iter_data[0][0] - 1, iter_data[1][0] - 1]
 
         return iter_id_list
+
+    def get_step_scene_iter_list(self: any, trace_curs: any, index_id: int, model_id: int) -> list:
+        sql = "select iter_id, step_start, step_end from {0} " \
+              "where index_id=? and model_id=?".format(DBNameConstant.TABLE_STEP_TRACE_DATA)
+        iter_data = DBManager.fetch_all_data(trace_curs, sql, (index_id, model_id), StepTraceDto)
+
+        if not iter_data:
+            return []
+        step_info = iter_data[0]
+
+        sql = "select iter_id from {0} " \
+              "where step_end>? and step_end<=?".format(DBNameConstant.TABLE_STEP_TRACE_DATA)
+        first_parallel_iter_data = DBManager.fetch_all_data(
+            trace_curs, sql, (step_info.step_start, step_info.step_end), StepTraceDto)
+
+        if not first_parallel_iter_data:
+            return []
+        first_parallel_step_info = first_parallel_iter_data[0]
+
+        return [first_parallel_step_info.iter_id - 1, step_info.iter_id]
 
     def get_iter_id_by_index_id(self: any, index_id: int, model_id: int) -> tuple:
         """

@@ -52,6 +52,8 @@ class HwtsCalculator(ICalculator, MsMultiProcess):
         self._log_data = []
         self._file_list.sort(key=lambda x: int(x.split("_")[-1]))
         self._iter_rec = IterRecorder(self._project_path)
+        self._task_offset = 0
+        self._task_count = 0
 
     def calculate(self: any) -> None:
         """
@@ -139,13 +141,12 @@ class HwtsCalculator(ICalculator, MsMultiProcess):
         if self._iter_model.check_db() and self._iter_model.check_table():
             _iter_id = MsprofIteration(self._project_path). \
                 get_iter_id_by_index_id(self._sample_config.get("iter_id"), self._sample_config.get("model_id"))
-
-            offset_count, total_count = self._iter_model.get_task_offset_and_sum(
+            self._task_offset, self._task_count = self._iter_model.get_task_offset_and_sum(
                 _iter_id[0] + 1, HwtsIterModel.TASK_TYPE)
-            if not total_count:
+            if not self._task_count:
                 return
             _file_calculator = FileCalculator(self._file_list, self.HWTS_LOG_SIZE, self._project_path,
-                                              offset_count, total_count)
+                                              self._task_offset, self._task_count)
             self._parse(_file_calculator.prepare_process())
             self._iter_model.finalize()
 
@@ -171,6 +172,7 @@ class HwtsCalculator(ICalculator, MsMultiProcess):
                     batch_id]
         else:
             self._iter_model.init()
+            is_mix_operator_and_graph = ProfilingScene().is_mix_operator_and_graph()
             if ProfilingScene().is_mix_operator_and_graph() and \
                     self._sample_config.get("model_id") != Constant.GE_OP_MODEL_ID:
                 _iter_info = MsprofIteration(self._project_path). \
@@ -179,21 +181,26 @@ class HwtsCalculator(ICalculator, MsMultiProcess):
             else:
                 _iter_id = MsprofIteration(self._project_path). \
                     get_iter_id_by_index_id(self._sample_config.get("iter_id"), self._sample_config.get("model_id"))
-            batch_list = self._iter_model.get_batch_list(_iter_id, DBNameConstant.TABLE_HWTS_BATCH)
-            batch_list = [(0,)] * len(prep_data_res)
+            batch_list = self._iter_model.get_batch_list(
+                _iter_id, DBNameConstant.TABLE_HWTS_BATCH, self._task_offset, self._task_count)
+
             if len(batch_list) != len(prep_data_res):
                 logging.warning("hwts data can not match with batch id list.")
-                return []
             with MsprofStep(self._project_path) as step_trace:
-                for index, batch in enumerate(batch_list):
+                for index in range(min(len(batch_list), len(prep_data_res))):
+                    batch = batch_list[index]
                     # type of batch is tuple
                     self._iter_rec.set_current_iter_id(prep_data_res[index][2])
                     model_id, index_id = step_trace.get_model_and_index_id_by_iter_id(self._iter_rec.current_iter_id)
                     prep_data_res[index] = list(prep_data_res[index][:2]) + [
                         InfoConfReader().time_from_syscnt(prep_data_res[index][2]),
                         InfoConfReader().time_from_syscnt(prep_data_res[index][3]),
-                        index_id if not isinstance(index_id, EmptyClass) else self._sample_config.get('iter_id'),
-                        model_id if not isinstance(model_id, EmptyClass) else self._sample_config.get('model_id'),
+                        index_id if not isinstance(index_id, EmptyClass)
+                                    and is_mix_operator_and_graph
+                        else self._sample_config.get('iter_id'),
+                        model_id if not isinstance(model_id, EmptyClass)
+                                    and is_mix_operator_and_graph
+                        else self._sample_config.get('model_id'),
                         batch[0]]
         return prep_data_res
 
