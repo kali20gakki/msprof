@@ -136,3 +136,4 @@ class MsprofTimeline:
         self._index_id = index_id
         self._model_id = model_id
         self._iteration_time = iteration.get_iteration_time(index_id, model_id)
+        x = 10

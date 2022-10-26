@@ -40,8 +40,10 @@ class HwtsIterModel(ParserModel):
         sum_count is the number of tasks in this round of iteration
         """
         offset_sql_dict = {
-            self.AI_CORE_TYPE: "select task_offset from {0} where iter_id=?".format(DBNameConstant.TABLE_HWTS_ITER_SYS),
-            self.TASK_TYPE: "select ai_core_offset from {0} where iter_id=?".format(DBNameConstant.TABLE_HWTS_ITER_SYS)
+            self.AI_CORE_TYPE: "select ai_core_offset from {0} where iter_id=?".format(
+                DBNameConstant.TABLE_HWTS_ITER_SYS),
+            self.TASK_TYPE: "select task_offset from {0} where iter_id=?".format(
+                DBNameConstant.TABLE_HWTS_ITER_SYS)
         }
 
         count_sql_dict = {
@@ -78,13 +80,13 @@ class HwtsIterModel(ParserModel):
         finally:
             pass
 
-    def get_batch_list(self: any, iter_id: tuple, table_name) -> list:
+    def get_batch_list(self: any, iter_id: tuple, table_name, task_offset: int, task_count: int) -> list:
         """
         get batch list from hwts batch table
         :return: batch list
         """
-        sql = "select batch_id from {0} where iter_id>? and iter_id<=?".format(table_name)
-        return DBManager.fetch_all_data(self.cur, sql, iter_id)
+        sql = "select batch_id from {0} limit ?, ?".format(table_name)
+        return DBManager.fetch_all_data(self.cur, sql, (task_offset // 2, task_count // 2))
 
     def _get_task_num(self: any, iter_id: int, sql: str) -> (int, int):
         task_num = 0
