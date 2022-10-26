@@ -401,7 +401,9 @@ static hdcError_t HdcWritePackage(HDC_SESSION session, DataSendMsg dataSendMsg,
         IDE_CTRL_VALUE_FAILED(ret == EOK, return DRV_ERROR_INVALID_VALUE, "memory copy failed");
 
         // add buffer to hdc message
-        hdcError = DriverPlugin::instance()->MsprofDrvHdcAddMsgBuffer(pmsg, reinterpret_cast<IdeStringBuffer>(packet),
+        auto ideBuffer = reinterpret_cast<IdeStringBuffer>(packet);
+        IDE_CTRL_VALUE_FAILED(ideBuffer != nullptr, return DRV_ERROR_INVALID_VALUE, "Failed to call reinterpret_cast.");
+        hdcError = DriverPlugin::instance()->MsprofDrvHdcAddMsgBuffer(pmsg, ideBuffer,
             sizeof(struct IdeHdcPacket) + packet->len);
         IDE_CTRL_VALUE_FAILED(hdcError == DRV_ERROR_NONE, return hdcError, "Hdc Add Msg Buffer, error: %d", hdcError);
 
