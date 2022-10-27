@@ -16,8 +16,8 @@ class HwtsIterModel(ParserModel):
     class used to operate hwts iter db
     """
 
-    AI_CORE_TYPE = 'ai_core_num'
-    TASK_TYPE = "task_count"
+    AI_CORE_TYPE = 'ai_core'
+    TASK_TYPE = "task"
 
     def __init__(self: any, result_dir: str) -> None:
         super().__init__(result_dir, DBNameConstant.DB_HWTS_REC, [DBNameConstant.TABLE_HWTS_ITER_SYS,
