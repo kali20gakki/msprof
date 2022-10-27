@@ -24,13 +24,6 @@ class TestNoGeIterRecParser(unittest.TestCase):
     def test_get_iter_end_dict(self):
         pass
 
-    def test_is_ai_core_task(self):
-        with mock.patch('common_func.msprof_iteration.MsprofIteration.get_iteration_end_dict', return_value={1: 101}):
-            check = NoGeIterRecParser(self.file_list, CONFIG)
-            check._iter_recorder.set_current_iter_id(100)
-            check.ai_core_task = {'100-3'}
-            check._is_ai_core_task(100, '3', 1)
-
     def test_set_current_iter_id(self):
         with mock.patch('common_func.msprof_iteration.MsprofIteration.get_iteration_end_dict', return_value={1: 101}):
             check = NoGeIterRecParser(self.file_list, CONFIG)
@@ -43,21 +36,20 @@ class TestNoGeIterRecParser(unittest.TestCase):
             self.assertEqual(err.value.code, 8)
 
     def test_read_hwts_data(self):
-        with mock.patch(NAMESPACE + '.NoGeIterRecParser._is_ai_core_task', return_value=True), \
-                mock.patch('common_func.msprof_iteration.MsprofIteration.get_iteration_end_dict',
-                           return_value={1: 101}):
-            data = struct.pack("=BBHHHQ12I", 1, 2, 3, 4, 5, 6, 7, 8, 9, 7, 8, 9, 5, 3, 2, 5, 4, 6)
-            check = NoGeIterRecParser(self.file_list, CONFIG)
-            check._read_hwts_data(bytes(data))
+        data = struct.pack("=BBHHHQ12I", 1, 2, 3, 4, 5, 6, 7, 8, 9, 7, 8, 9, 5, 3, 2, 5, 4, 6)
+        check = NoGeIterRecParser(self.file_list, CONFIG)
+        check._iter_recorder = mock.Mock()
+        check._iter_recorder.check_task_in_iteration.return_value = True
+
+        check._iter_info_updater = mock.Mock()
+
+        check._read_hwts_data(bytes(data))
 
     def test_read_ai_core_data(self):
-        with mock.patch(NAMESPACE + '.NoGeIterRecParser._is_ai_core_task', return_value=True), \
-                mock.patch('common_func.msprof_iteration.MsprofIteration.get_iteration_end_dict',
-                           return_value={1: 101}):
-            data = struct.pack("=BBHHHII10Q8I", 1, 2, 3, 4, 5, 6, 7, 8, 9, 7, 8, 9, 5, 3, 2, 5, 4, 6, 1, 2, 3, 4, 5, 6,
-                               7)
-            check = NoGeIterRecParser(self.file_list, CONFIG)
-            check._read_ai_core_data(bytes(data))
+        data = struct.pack("=BBHHHII10Q8I", 1, 2, 3, 4, 5, 6, 7, 8, 9, 7, 8, 9, 5, 3, 2, 5, 4, 6, 1, 2, 3, 4, 5, 6,
+                           7)
+        check = NoGeIterRecParser(self.file_list, CONFIG)
+        check._read_ai_core_data(bytes(data))
 
     def test_parse_hwts_data(self):
         data = struct.pack("=BBHHHQ12I", 1, 2, 3, 4, 5, 6, 7, 8, 9, 7, 8, 9, 5, 3, 2, 5, 4, 6)

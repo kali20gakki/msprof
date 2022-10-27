@@ -31,28 +31,34 @@ class TestHwtsIterModel(unittest.TestCase):
 
     def test_get_task_offset_and_sum(self):
         db_manager = DBManager()
-        create_sql = "CREATE TABLE if not exists HwtsIter(ai_core_num INTEGER,task_count INTEGER," \
-                     "iter_id INTEGER,sys_cnt INTEGER)"
-        data = [(1, 2, 1, 456), (1, 2, 0, 6)]
+        create_sql = "CREATE TABLE if not exists HwtsIter(ai_core_num INTEGER, " \
+                     "ai_core_offset INTEGER, " \
+                     "task_count INTEGER, " \
+                     "task_offset INTEGER, " \
+                     "iter_id INTEGER)"
+        data = [(1, 0, 3, 0, 1), (1, 1, 4, 3, 2)]
         insert_sql = "insert into HwtsIter values({value})".format(value="?," * (len(data[0]) - 1) + "?")
         res = db_manager.create_table('hwts.db', create_sql, insert_sql, data)
         check = HwtsIterModel('test')
         check.conn, check.cur = res[0], res[1]
-        result = check.get_task_offset_and_sum(1, 'ai_core_num')
-        self.assertEqual(result, (1, 1))
+        result = check.get_task_offset_and_sum(1, 'ai_core')
+        self.assertEqual(result, (0, 1))
         res[1].execute('drop table if exists HwtsIter')
         with mock.patch(NAMESPACE + '.logging.error'):
             check = HwtsIterModel('test')
             check.conn, check.cur = res[0], res[1]
-            result = check.get_task_offset_and_sum(1, 'ai_core_num')
+            result = check.get_task_offset_and_sum(1, 'ai_core')
             self.assertEqual(result, (0, 0))
         db_manager.destroy(res)
 
     def test_get_aic_sum_count(self):
         db_manager = DBManager()
-        create_sql = "CREATE TABLE if not exists HwtsIter(ai_core_num INTEGER,task_count INTEGER," \
-                     "iter_id INTEGER,sys_cnt INTEGER)"
-        data = [(1, 2, 1, 456), (1, 2, 0, 6)]
+        create_sql = "CREATE TABLE if not exists HwtsIter(ai_core_num INTEGER, " \
+                     "ai_core_offset INTEGER, " \
+                     "task_count INTEGER, " \
+                     "task_offset INTEGER, " \
+                     "iter_id INTEGER)"
+        data = [(1, 0, 3, 0, 1), (1, 1, 4, 3, 2)]
         insert_sql = "insert into HwtsIter values({value})".format(value="?," * (len(data[0]) - 1) + "?")
         res = db_manager.create_table('hwts.db', create_sql, insert_sql, data)
         check = HwtsIterModel('test')
@@ -68,12 +74,10 @@ class TestHwtsIterModel(unittest.TestCase):
         db_manager.destroy(res)
 
     def test_get_batch_list(self: any):
-        iter_id = 1
         table_name = "HwtsBatch"
-        curs = mock.Mock()
-        curs.execute.fetchall = [0, 1]
-
         check = HwtsIterModel('test')
         check.init()
-        check.cur = curs
-        check.get_batch_list(iter_id, table_name)
+
+        with mock.patch("common_func.db_manager.DBManager.fetch_all_data", return_value=[0, 1]):
+            res = check.get_batch_list(table_name, 4, 2)
+        self.assertEqual(res, [0, 1])
