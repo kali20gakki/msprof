@@ -4,7 +4,6 @@
 
 import logging
 import os
-import sqlite3
 
 from analyzer.scene_base.profiling_scene import ProfilingScene
 from common_func.constant import Constant
@@ -37,6 +36,7 @@ class UpdateAICoreData:
         self.device_id = None
         self.project_path = None
         self.sql_dir = None
+        self.warning_cnt = 0
 
     @staticmethod
     def __add_pipe_time(headers: list, ai_core_data: list) -> tuple:
@@ -107,6 +107,9 @@ class UpdateAICoreData:
             logging.warning("Unable to get required data to update ai core data.")
             return
         self.__update_ai_core_data()
+        if self.warning_cnt > 0:
+            logging.warning("Can not find the stream id and task id from ge data when getting block, "
+                            "maybe ge data has lost %d times", self.warning_cnt)
 
     def get_db_path(self: any, db_name: str) -> str:
         """
@@ -287,11 +290,8 @@ class UpdateAICoreData:
         """
         block = block_dims.get(self.STREAM_TASK_KEY_FMT.format(ai_core_data[task_id_index],
                                                                ai_core_data[stream_id_index]))
-        # todo 这个报错应该怎么消除？
         if not block:
-            logging.error("Can not find the stream id and task id from ge data, "
-                          "maybe ge data has lost: %s", self.STREAM_TASK_KEY_FMT.format(ai_core_data[task_id_index],
-                                                                                        ai_core_data[stream_id_index]))
+            self.warning_cnt += 1
             return 0
         return block.pop(0) if len(block) > 1 else block[0]
 

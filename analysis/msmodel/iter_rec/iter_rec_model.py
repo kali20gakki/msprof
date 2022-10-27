@@ -71,16 +71,14 @@ class HwtsIterModel(ParserModel):
         """
         try:
             sql = "select ai_core_num+ai_core_offset from {0} " \
-                  "order by sys_cnt desc limit 0, 1".format(
+                  "order by sys_cnt desc".format(
                 DBNameConstant.TABLE_HWTS_ITER_SYS)
             return self.cur.execute(sql).fetchone()[0]
         except sqlite3.Error as err:
             logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
             return Constant.DEFAULT_COUNT
-        finally:
-            pass
 
-    def get_batch_list(self: any, iter_id: tuple, table_name, task_offset: int, task_count: int) -> list:
+    def get_batch_list(self: any, table_name, task_offset: int, task_count: int) -> list:
         """
         get batch list from hwts batch table
         :return: batch list

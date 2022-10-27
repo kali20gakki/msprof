@@ -173,16 +173,8 @@ class HwtsCalculator(ICalculator, MsMultiProcess):
         else:
             self._iter_model.init()
             is_mix_operator_and_graph = ProfilingScene().is_mix_operator_and_graph()
-            if ProfilingScene().is_mix_operator_and_graph() and \
-                    self._sample_config.get("model_id") != Constant.GE_OP_MODEL_ID:
-                _iter_info = MsprofIteration(self._project_path). \
-                get_iteration_info_by_index_id(self._sample_config.get("iter_id"), self._sample_config.get("model_id"))
-                _iter_id = (_iter_info[0] - 1, _iter_info[0])
-            else:
-                _iter_id = MsprofIteration(self._project_path). \
-                    get_iter_id_by_index_id(self._sample_config.get("iter_id"), self._sample_config.get("model_id"))
             batch_list = self._iter_model.get_batch_list(
-                _iter_id, DBNameConstant.TABLE_HWTS_BATCH, self._task_offset, self._task_count)
+                DBNameConstant.TABLE_HWTS_BATCH, self._task_offset, self._task_count)
 
             if len(batch_list) != len(prep_data_res):
                 logging.warning("hwts data can not match with batch id list.")

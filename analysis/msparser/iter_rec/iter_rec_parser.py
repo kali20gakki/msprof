@@ -39,7 +39,6 @@ class IterParser(IParser, MsMultiProcess):
     DEFAULT_TASK_TIME_SIZE = 5000000
 
     def __init__(self: any, file_list: dict, sample_config: dict) -> None:
-        # todo 要删掉冗余代码
         MsMultiProcess.__init__(self, sample_config)
         self._file_list = file_list
         self._sample_config = sample_config
@@ -47,22 +46,19 @@ class IterParser(IParser, MsMultiProcess):
         self._batch_counter = BatchCounter(self._project_path)
         self._iter_recorder = IterRecorder(self._project_path)
         self._iter_info_updater = IterInfoUpdater(self._project_path)
-        self._iter_info_dict = {}
-        self._ge_static_shape_iter_model_dict = {}
-        self._ge_static_shape_model_task_dict = {}
-        self._ge_non_static_shape_dict = {}
         self._batch_list_for_task_time = [None] * self.DEFAULT_TASK_TIME_SIZE
         self._overstep_task_cnt = 0
         self.default_index = 0
         self.hwts_iter_model = HwtsIterModel(self._project_path)
+        self.ai_core_task = set()
 
     def save(self: any) -> None:
         """
         multiprocess to parse hwts data
         :return: None
         """
+        iter_to_iter_info = self._iter_info_updater.iteration_manager.iter_to_iter_info
         try:
-            iter_to_iter_info = self._iter_info_updater.iteration_manager.iter_to_iter_info
             if iter_to_iter_info:
                 hwts_iter_data = [[iter_info.iter_id,
                                    iter_info.hwts_count,
@@ -71,15 +67,14 @@ class IterParser(IParser, MsMultiProcess):
                                    iter_info.aic_offset,
                                    iter_info.end_time,
                                    iter_info.hwts_count + iter_info.hwts_offset,
-                                   iter_info.aic_count + iter_info.aic_offset] for iter_info in iter_to_iter_info.values()]
+                                   iter_info.aic_count + iter_info.aic_offset]
+                                  for iter_info in iter_to_iter_info.values()]
                 self.hwts_iter_model.flush(hwts_iter_data,
                                            DBNameConstant.TABLE_HWTS_ITER_SYS)
                 self.hwts_iter_model.finalize()
         except sqlite3.Error as trace_err:
             logging.error("Save hwts iter failed, "
                           "%s", str(trace_err), exc_info=Constant.TRACE_BACK_SWITCH)
-        finally:
-            pass
 
     def parse(self: any) -> None:
         """
@@ -104,7 +99,7 @@ class IterParser(IParser, MsMultiProcess):
                 if _task_log.sys_tag == self.HWTS_TASK_END:
                     self._calculate_batch_list(_task_log)
                 self._iter_info_updater.update_parallel_iter_info_pool(self._iter_recorder.current_iter_id)
-                self._iter_info_updater.update_count_and_offset(_task_log)
+                self._iter_info_updater.update_count_and_offset(_task_log, self.ai_core_task)
             else:
                 self._overstep_task_cnt = self._overstep_task_cnt + 1
 
@@ -188,10 +183,8 @@ class NoGeIterRecParser(IterParser):
     """
 
     def __init__(self: any, file_list: dict, sample_config: dict) -> None:
-        # todo 没有GE的情况怎么判断aicore?
         super(NoGeIterRecParser, self).__init__(file_list, sample_config)
         self._file_list = file_list
-        self.ai_core_task = set()
 
     @staticmethod
     def judge_file_scene(file_dict: dict) -> bool:
