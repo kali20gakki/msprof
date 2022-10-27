@@ -25,7 +25,7 @@ from msparser.interface.iparser import IParser
 from profiling_bean.prof_enum.data_tag import DataTag
 from profiling_bean.struct_info.aic_pmu import AicPmuBean
 from profiling_bean.struct_info.hwts_log import HwtsLogBean
-from msparser.iter_rec.iter_info_updater import IterInfoUpdater
+from msparser.iter_rec.iter_info_updater.iter_info_updater import IterInfoUpdater
 
 
 class IterParser(IParser, MsMultiProcess):
