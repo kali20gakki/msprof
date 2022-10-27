@@ -38,12 +38,12 @@ class TestNoGeIterRecParser(unittest.TestCase):
     def test_read_hwts_data(self):
         data = struct.pack("=BBHHHQ12I", 1, 2, 3, 4, 5, 6, 7, 8, 9, 7, 8, 9, 5, 3, 2, 5, 4, 6)
         check = NoGeIterRecParser(self.file_list, CONFIG)
-        check._iter_recorder = mock.Mock()
-        check._iter_recorder.check_task_in_iteration.return_value = True
 
-        check._iter_info_updater = mock.Mock()
-
-        check._read_hwts_data(bytes(data))
+        with mock.patch("common_func.iter_recorder.IterRecorder.check_task_in_iteration", return_value=True), \
+                mock.patch("common_func.iter_recorder.IterRecorder.set_current_iter_id"), \
+        mock.patch("msparser.iter_rec.iter_info_updater.iter_info_updater.IterInfoUpdater.update_count_and_offset"), \
+        mock.patch("msparser.iter_rec.iter_info_updater.iter_info_updater.IterInfoUpdater.update_count_and_offset"):
+            check._read_hwts_data(bytes(data))
 
     def test_read_ai_core_data(self):
         data = struct.pack("=BBHHHII10Q8I", 1, 2, 3, 4, 5, 6, 7, 8, 9, 7, 8, 9, 5, 3, 2, 5, 4, 6, 1, 2, 3, 4, 5, 6,

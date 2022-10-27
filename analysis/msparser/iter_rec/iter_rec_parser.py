@@ -11,7 +11,6 @@ from common_func.constant import Constant
 from common_func.file_manager import FileOpen
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
-from common_func.msvp_common import path_check
 from common_func.path_manager import PathManager
 from common_func.utils import Utils
 from common_func.db_name_constant import DBNameConstant
