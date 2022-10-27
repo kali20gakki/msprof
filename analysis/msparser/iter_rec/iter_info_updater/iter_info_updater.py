@@ -20,8 +20,11 @@ class IterInfoUpdater:
             return
 
         new_iter_info = self.iteration_manager.iter_to_iter_info.get(iter_id, IterInfo())
-        new_add_parallel_id = (self.iteration_manager.iter_to_iter_info.get(it_id) for it_id in
-                               new_iter_info.behind_parallel_iter - self.active_parallel_iter_set)
+
+        new_add_parallel_id = []
+        for it_id in new_iter_info.behind_parallel_iter - self.active_parallel_iter_set:
+            new_add_parallel_id.append(self.iteration_manager.iter_to_iter_info.get(it_id))
+
         self._update_new_add_iter_info(new_add_parallel_id)
 
         self.current_iter = iter_id
