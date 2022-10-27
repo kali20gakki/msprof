@@ -154,7 +154,7 @@ int MsprofTxManager::SetCategoryName(uint32_t category, std::string categoryName
 int MsprofTxManager::SetStampCategory(ACL_PROF_STAMP_PTR stamp, uint32_t category) const
 {
     if (!isInit_) {
-        MSPROF_LOGE("[Mark]MsprofTxManager is not inited yet");
+        MSPROF_LOGE("[SetStampCategory]MsprofTxManager is not inited yet");
         return PROFILING_FAILED;
     }
     if (stamp == nullptr) {
@@ -171,7 +171,7 @@ int MsprofTxManager::SetStampCategory(ACL_PROF_STAMP_PTR stamp, uint32_t categor
 int MsprofTxManager::SetStampPayload(ACL_PROF_STAMP_PTR stamp, const int32_t type, void *value) const
 {
     if (!isInit_) {
-        MSPROF_LOGE("[Mark]MsprofTxManager is not inited yet");
+        MSPROF_LOGE("[SetStampPayload]MsprofTxManager is not inited yet");
         return PROFILING_FAILED;
     }
     if (stamp == nullptr) {
@@ -193,7 +193,7 @@ int MsprofTxManager::SetStampPayload(ACL_PROF_STAMP_PTR stamp, const int32_t typ
 int MsprofTxManager::SetStampTraceMessage(ACL_PROF_STAMP_PTR stamp, CONST_CHAR_PTR msg, uint32_t msgLen) const
 {
     if (!isInit_) {
-        MSPROF_LOGE("[Mark]MsprofTxManager is not inited yet");
+        MSPROF_LOGE("[SetStampTraceMessage]MsprofTxManager is not inited yet");
         return PROFILING_FAILED;
     }
     if (stamp == nullptr) {
