@@ -47,6 +47,7 @@ class IterParser(IParser, MsMultiProcess):
         self._iter_recorder = IterRecorder(self._project_path)
         self._iter_info_updater = IterInfoUpdater(self._project_path)
         self._batch_list_for_task_time = [None] * self.DEFAULT_TASK_TIME_SIZE
+        self.ge_info_model = GeInfoModel(self._project_path)
         self._overstep_task_cnt = 0
         self.default_index = 0
         self.hwts_iter_model = HwtsIterModel(self._project_path)
@@ -149,16 +150,6 @@ class IterRecParser(IterParser):
         parse hwts data by ge info and iter sys cnt
         :return: None
         """
-        if not path_check(PathManager.get_db_path(self._project_path, DBNameConstant.DB_GE_INFO)):
-            return
-        with GeInfoModel(self._project_path) as ge_info_model:
-            if ge_info_model.check_table():
-                self._ge_static_shape_iter_model_dict, self._ge_static_shape_model_task_dict = \
-                    ge_info_model.get_ge_data(Constant.TASK_TYPE_AI_CORE, Constant.GE_STATIC_SHAPE)
-                self._ge_non_static_shape_dict = ge_info_model.get_ge_data(
-                    Constant.TASK_TYPE_AI_CORE, Constant.GE_NON_STATIC_SHAPE)
-        if not self._ge_static_shape_iter_model_dict and not self._ge_non_static_shape_dict:
-            return
         self._batch_counter.init(Constant.TASK_TYPE_AI_CORE)
         self._parse_hwts_data()
 
