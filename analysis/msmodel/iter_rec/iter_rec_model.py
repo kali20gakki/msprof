@@ -71,7 +71,7 @@ class HwtsIterModel(ParserModel):
         """
         try:
             sql = "select ai_core_num+ai_core_offset from {0} " \
-                  "order by sys_cnt desc".format(
+                  "order by iter_id desc".format(
                 DBNameConstant.TABLE_HWTS_ITER_SYS)
             return self.cur.execute(sql).fetchone()[0]
         except sqlite3.Error as err:
