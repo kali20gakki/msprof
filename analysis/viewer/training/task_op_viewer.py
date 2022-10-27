@@ -33,6 +33,8 @@ class TaskOpViewer:
         hwts_conn, hwts_curs = DBManager.check_connect_db(message.get("result_dir"), DBNameConstant.DB_HWTS)
         task_conn, task_curs = DBManager.check_connect_db(message.get("result_dir"), DBNameConstant.DB_RTS_TRACK)
         ge_conn, ge_curs = DBManager.check_connect_db(message.get("result_dir"), DBNameConstant.DB_GE_INFO)
+        if not (hwts_curs and hwts_curs):
+            hwts_conn, hwts_curs = DBManager.check_connect_db(message.get("result_dir"), DBNameConstant.DB_HWTS_AIV)
         if ProfilingScene().is_operator():
             data, _ = TaskOpViewer.get_op_task_data_summary(hwts_curs, ge_curs)
         else:
