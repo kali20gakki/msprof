@@ -31,7 +31,7 @@ class HwtsIterModel(ParserModel):
         """
         self.insert_data_to_db(table_name, data_list)
 
-    def get_task_offset_and_sum(self: any, iter_id: int, data_type: str) -> (int, int):
+    def get_task_offset_and_sum(self: any, model_id: int, index_id: int, data_type: str) -> (int, int):
         """
         Get the number of hwts tasks in all previous iterations and the number of tasks in this round of iteration
         :param data_type:
@@ -40,19 +40,23 @@ class HwtsIterModel(ParserModel):
         sum_count is the number of tasks in this round of iteration
         """
         offset_sql_dict = {
-            self.AI_CORE_TYPE: "select ai_core_offset from {0} where iter_id=?".format(
+            self.AI_CORE_TYPE: "select ai_core_offset from {0} "
+                               "where model_id=? and index_id=?".format(
                 DBNameConstant.TABLE_HWTS_ITER_SYS),
-            self.TASK_TYPE: "select task_offset from {0} where iter_id=?".format(
+            self.TASK_TYPE: "select task_offset from {0} "
+                            "where model_id=? and index_id=?".format(
                 DBNameConstant.TABLE_HWTS_ITER_SYS)
         }
 
         count_sql_dict = {
-            self.AI_CORE_TYPE: "select ai_core_num from {0} where iter_id=?".format(DBNameConstant.TABLE_HWTS_ITER_SYS),
-            self.TASK_TYPE: "select task_count from {0} where iter_id=?".format(DBNameConstant.TABLE_HWTS_ITER_SYS)
+            self.AI_CORE_TYPE: "select ai_core_num from {0} "
+                               "where model_id=? and index_id=?".format(DBNameConstant.TABLE_HWTS_ITER_SYS),
+            self.TASK_TYPE: "select task_count from {0} "
+                            "where model_id=? and index_id=?".format(DBNameConstant.TABLE_HWTS_ITER_SYS)
         }
 
-        return self._get_task_num(iter_id, offset_sql_dict.get(data_type)), \
-               self._get_task_num(iter_id, count_sql_dict.get(data_type))
+        return self._get_task_num(model_id, index_id, offset_sql_dict.get(data_type)), \
+               self._get_task_num(model_id, index_id, count_sql_dict.get(data_type))
 
     def check_table(self: any) -> bool:
         """
@@ -86,10 +90,10 @@ class HwtsIterModel(ParserModel):
         sql = "select batch_id from {0} limit ?, ?".format(table_name)
         return DBManager.fetch_all_data(self.cur, sql, (task_offset // 2, task_count // 2))
 
-    def _get_task_num(self: any, iter_id: int, sql: str) -> (int, int):
+    def _get_task_num(self: any, model_id: int, index_id: int, sql: str) -> (int, int):
         task_num = 0
         try:
-            cur_num = self.cur.execute(sql, (iter_id,)).fetchone()
+            cur_num = self.cur.execute(sql, (model_id, index_id, )).fetchone()
         except sqlite3.Error as err:
             logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
             return task_num

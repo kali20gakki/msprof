@@ -27,6 +27,7 @@ from mscalculate.interface.icalculator import ICalculator
 from mscalculate.ts_task.ai_cpu.aicpu_from_ts_collector import AICpuFromTsCollector
 from profiling_bean.prof_enum.data_tag import DataTag
 from profiling_bean.struct_info.hwts_log import HwtsLogBean
+from mscalculate.hwts.task_dispatch_model_index import TaskDispatchModelIndex
 
 
 class HwtsCalculator(ICalculator, MsMultiProcess):
@@ -139,10 +140,10 @@ class HwtsCalculator(ICalculator, MsMultiProcess):
         :return: None
         """
         if self._iter_model.check_db() and self._iter_model.check_table():
-            _iter_id = MsprofIteration(self._project_path). \
-                get_iter_id_by_index_id(self._sample_config.get("iter_id"), self._sample_config.get("model_id"))
             self._task_offset, self._task_count = self._iter_model.get_task_offset_and_sum(
-                _iter_id[0] + 1, HwtsIterModel.TASK_TYPE)
+                self._sample_config.get("model_id"),
+                self._sample_config.get("iter_id"),
+                HwtsIterModel.TASK_TYPE)
             if not self._task_count:
                 return
             _file_calculator = FileCalculator(self._file_list, self.HWTS_LOG_SIZE, self._project_path,
@@ -172,47 +173,32 @@ class HwtsCalculator(ICalculator, MsMultiProcess):
                     batch_id]
         else:
             self._iter_model.init()
-            is_mix_operator_and_graph = ProfilingScene().is_mix_operator_and_graph()
             batch_list = self._iter_model.get_batch_list(
                 DBNameConstant.TABLE_HWTS_BATCH, self._task_offset, self._task_count)
-
             if len(batch_list) != len(prep_data_res):
                 logging.warning("hwts data can not match with batch id list.")
+
+            task_dispatcher = TaskDispatchModelIndex(
+                self._sample_config.get('model_id'),
+                self._sample_config.get('iter_id'),
+                self._project_path)
+
             with MsprofStep(self._project_path) as step_trace:
                 for index in range(min(len(batch_list), len(prep_data_res))):
                     batch = batch_list[index]
                     # type of batch is tuple
-                    self._iter_rec.set_current_iter_id(prep_data_res[index][2])
-                    model_id, index_id = step_trace.get_model_and_index_id_by_iter_id(self._iter_rec.current_iter_id)
+                    # 3 is end time
+                    model_id, index_id = task_dispatcher.dispatch(prep_data_res[index][3])
                     prep_data_res[index] = list(prep_data_res[index][:2]) + [
                         InfoConfReader().time_from_syscnt(prep_data_res[index][2]),
                         InfoConfReader().time_from_syscnt(prep_data_res[index][3]),
-                        index_id if not isinstance(index_id, EmptyClass)
-                                    and is_mix_operator_and_graph
-                        else self._sample_config.get('iter_id'),
-                        model_id if not isinstance(model_id, EmptyClass)
-                                    and is_mix_operator_and_graph
-                        else self._sample_config.get('model_id'),
+                        index_id,
+                        model_id,
                         batch[0]]
         return prep_data_res
 
     def _parse(self: any, all_log_bytes: bytes) -> None:
-        if ProfilingScene().is_mix_operator_and_graph() and \
-                self._sample_config.get("model_id") != Constant.GE_OP_MODEL_ID:
-            _iter_info = MsprofIteration(self._project_path). \
-                get_iteration_info_by_index_id(self._sample_config.get("iter_id"), self._sample_config.get("model_id"))
-            if not _iter_info:
-                logging.warning("can not get the actual iter_info")
-                return
-            self._parse_task_log(all_log_bytes, _iter_info)
-        else:
-            self._parse_task_log(all_log_bytes)
-
-    def _parse_task_log(self: any, all_log_bytes: bytes, _iter_info=None):
         for log_data in Utils.chunks(all_log_bytes, self.HWTS_LOG_SIZE):
             _task_log = HwtsLogBean.decode(log_data)
             if _task_log.is_log_type():
-                if not _iter_info:
-                    self._log_data.append(_task_log)
-                elif _iter_info[1] <= _task_log.sys_cnt and  _task_log.sys_cnt <= _iter_info[2]:
-                    self._log_data.append(_task_log)
+                self._log_data.append(_task_log)
