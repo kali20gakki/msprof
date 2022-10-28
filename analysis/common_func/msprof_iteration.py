@@ -91,7 +91,7 @@ class MsprofIteration:
         if not trace_datas:
             return []
         return trace_datas
-    # todo 决定（1）时间范围 （2）大迭代与小迭代的关系
+
     def get_iteration_id_by_index_id(self: any, index_id: int, model_id: int) -> list:
         """
         get step iteration time
