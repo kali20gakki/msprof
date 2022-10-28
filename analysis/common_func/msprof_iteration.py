@@ -91,7 +91,7 @@ class MsprofIteration:
         if not trace_datas:
             return []
         return trace_datas
-
+    # todo 决定（1）时间范围 （2）大迭代与小迭代的关系
     def get_iteration_id_by_index_id(self: any, index_id: int, model_id: int) -> list:
         """
         get step iteration time
@@ -103,7 +103,6 @@ class MsprofIteration:
         if not Utils.is_step_scene(self._result_dir):
             return iter_id_list
 
-
         db_path = PathManager.get_db_path(self._result_dir, DBNameConstant.DB_STEP_TRACE)
         trace_conn, trace_curs = DBManager.check_connect_db_path(db_path)
         if not trace_conn or not trace_curs \
@@ -111,18 +110,6 @@ class MsprofIteration:
             return iter_id_list
         iter_range = self.get_step_scene_iter_range(trace_curs, index_id, model_id)
         iter_id_list = iter_range if iter_range else iter_id_list
-
-        iter_data = []
-        if Utils.need_all_model_in_one_iter(self._result_dir, model_id):
-            sql = "select iter_id from {0} " \
-                  "where index_id>=? and index_id<=? and model_id=?".format(DBNameConstant.TABLE_STEP_TRACE_DATA)
-            iter_data = DBManager.fetch_all_data(trace_curs, sql, (index_id, index_id + 1, model_id))
-        DBManager.destroy_db_connect(trace_conn, trace_curs)
-        if iter_data and iter_data[0]:
-            iter_id_list = [iter_data[0][0] - 1, iter_data[0][0]]
-            if len(iter_data) != 1:
-                iter_id_list = [iter_data[0][0] - 1, iter_data[1][0] - 1]
-
         return iter_id_list
 
     def get_step_scene_iter_range(self: any, trace_curs: any, index_id: int, model_id: int) -> list:
@@ -140,16 +127,18 @@ class MsprofIteration:
             return []
         step_info = iter_data[0]
 
+        # regard parallel iter id as a group
         sql = "select iter_id from {0} " \
               "where step_end>? and step_end<=?".format(DBNameConstant.TABLE_STEP_TRACE_DATA)
-        first_parallel_iter_data = DBManager.fetch_all_data(
-            trace_curs, sql, (step_info.step_start, step_info.step_end), StepTraceDto)
+        first_parallel_iter_info = DBManager.fetchone(
+            trace_curs, sql, (step_info.step_start, step_info.step_end, ), dto_class=StepTraceDto)
 
-        if not first_parallel_iter_data:
+        if not first_parallel_iter_info:
             return []
-        first_parallel_step_info = first_parallel_iter_data[0]
 
-        return [first_parallel_step_info.iter_id - 1, step_info.iter_id]
+        # first parallel step info belongs to current iter id parallel group,
+        # first parallel step info - 1 belongs to last group
+        return [first_parallel_iter_info.iter_id - 1, step_info.iter_id]
 
     def get_iter_id_by_index_id(self: any, index_id: int, model_id: int) -> tuple:
         """
@@ -229,18 +218,16 @@ class MsprofIteration:
             iter_dict.setdefault(trace_data[0], [trace_data[1], trace_data[2]])
         return iter_dict
 
-    def get_iteration_info_by_index_id(self: any, index_id: int, model_id: int) -> list:
+    def get_iteration_info_by_index_id(self: any, index_id: int, model_id: int) -> any:
         db_path = PathManager.get_db_path(self._result_dir, DBNameConstant.DB_STEP_TRACE)
         trace_conn, trace_curs = DBManager.check_connect_db(self._result_dir, DBNameConstant.DB_STEP_TRACE)
         if not trace_conn or not trace_curs \
                 or not DBManager.check_tables_in_db(db_path, DBNameConstant.TABLE_STEP_TRACE_DATA):
             return []
-        sql = "select iter_id, step_start, step_end from {0} " \
+        sql = "select model_id, index_id, iter_id, step_start, step_end from {0} " \
               "where model_id={1} and index_id={2}".format(DBNameConstant.TABLE_STEP_TRACE_DATA, model_id, index_id)
-        iter_info = DBManager.fetch_all_data(trace_curs, sql)
+        iter_info = DBManager.fetchone(trace_curs, sql, StepTraceDto)
         DBManager.destroy_db_connect(trace_conn, trace_curs)
-        if iter_info:
-            return iter_info[0]
         return iter_info
 
     def get_condition_within_iteration(self: any, index_id: int, model_id: int, time_start_key: str, time_end_key: str):

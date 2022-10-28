@@ -61,13 +61,13 @@ class IterParser(IParser, MsMultiProcess):
         try:
             if iter_to_iter_info:
                 hwts_iter_data = [[iter_info.iter_id,
+                                   iter_info.model_id,
+                                   iter_info.index_id,
                                    iter_info.hwts_count,
                                    iter_info.hwts_offset,
                                    iter_info.aic_count,
                                    iter_info.aic_offset,
-                                   iter_info.end_time,
-                                   iter_info.hwts_count + iter_info.hwts_offset,
-                                   iter_info.aic_count + iter_info.aic_offset]
+                                   iter_info.end_time]
                                   for iter_info in iter_to_iter_info.values()]
                 self.hwts_iter_model.flush(hwts_iter_data,
                                            DBNameConstant.TABLE_HWTS_ITER_SYS)
