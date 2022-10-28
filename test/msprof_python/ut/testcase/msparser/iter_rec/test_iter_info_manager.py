@@ -15,8 +15,10 @@ from mock_tools import ClassMock
 
 class TestIterInfoUpdater(unittest.TestCase):
     def test_initial_iter_to_info_1(self: any) -> None:
-        with mock.patch("common_func.msvp_common.path_check" , return_value=False):
-            IterInfoManager.initial_iter_to_info(mock.Mock())
+        instance = mock.Mock()
+        instance.project_path = ""
+        with mock.patch("common_func.msvp_common.path_check", return_value=False):
+            IterInfoManager.initial_iter_to_info(instance)
 
     def test_initial_iter_to_info_2(self: any) -> None:
         with mock.patch("common_func.msvp_common.path_check" , return_value=True), \
