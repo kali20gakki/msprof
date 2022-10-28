@@ -3,6 +3,7 @@
 # Copyright (c) Huawei Technologies Co., Ltd. 2022. All rights reserved.
 from analyzer.scene_base.profiling_scene import ProfilingScene
 from common_func.msprof_iteration import MsprofIteration
+from common_func.constant import Constant
 
 
 class TaskDispatchModelIndex:

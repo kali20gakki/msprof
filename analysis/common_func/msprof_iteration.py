@@ -226,7 +226,7 @@ class MsprofIteration:
             return []
         sql = "select model_id, index_id, iter_id, step_start, step_end from {0} " \
               "where model_id={1} and index_id={2}".format(DBNameConstant.TABLE_STEP_TRACE_DATA, model_id, index_id)
-        iter_info = DBManager.fetchone(trace_curs, sql, StepTraceDto)
+        iter_info = DBManager.fetchone(trace_curs, sql, dto_class=StepTraceDto)
         DBManager.destroy_db_connect(trace_conn, trace_curs)
         return iter_info
 
