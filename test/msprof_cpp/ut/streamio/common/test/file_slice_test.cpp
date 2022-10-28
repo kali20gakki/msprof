@@ -328,9 +328,9 @@ TEST_F(COMMON_FILE_SLICE_TEST, FileSliceFlush) {
         .will(returnValue((long long)128 * 1024));
 
     int ret = wfTransport.FileSliceFlush();
-    EXPECT_EQ(false, ret);    
+    EXPECT_EQ(PROFILING_FAILED, ret);    
     ret = wfTransport.FileSliceFlush();
-    EXPECT_EQ(true, ret);    
+    EXPECT_EQ(PROFILING_SUCCESS, ret);    
 }
 
 TEST_F(COMMON_FILE_SLICE_TEST, FileSliceFlushPolymorphism) {

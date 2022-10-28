@@ -340,34 +340,25 @@ bool FileSlice::CreateDoneFile(const std::string &absolutePath, const std::strin
     return true;
 }
 
-bool FileSlice::FileSliceFlush()
+int FileSlice::FileSliceFlush()
 {
     if (!needSlice_) {
-        return true;
+        return PROFILING_SUCCESS;
     }
-    std::map<std::string, uint64_t>::iterator it;
+    MSPROF_LOGI("Flush all file slice.");
+
     std::unique_lock<std::mutex> lk(sliceFileMtx_);
-    for (it = sliceNum_.begin(); it != sliceNum_.end(); ++it) {
-        std::string absolutePath = it->first + std::to_string(it->second);
-        if (analysis::dvvp::common::utils::Utils::IsFileExist(absolutePath)) {
-            MSPROF_LOGI("[FileSliceFlush]file:%s, total_size_file:%llu",
-                        Utils::BaseName(it->first).c_str(), totalSize_[it->first]);
-            long long fileSize = analysis::dvvp::common::utils::Utils::GetFileSize(absolutePath);
-            if (fileSize < 0) {
-                MSPROF_LOGE("[fileSize:%d error", fileSize);
-            }
-            if (!(CreateDoneFile(absolutePath, std::to_string(fileSize), std::to_string(chunkStartTime_[absolutePath]),
-                std::to_string(chunkEndTime_[absolutePath]), absolutePath))) {
-                MSPROF_LOGE("[FileSliceFlush]Failed to create file:%s", Utils::BaseName(absolutePath).c_str());
-                return false;
-            }
-            MSPROF_LOGI("[FileSliceFlush]create done file:%s.done", Utils::BaseName(absolutePath).c_str());
-            sliceNum_[it->first]++;
+    int ret = PROFILING_SUCCESS;
+    for (auto it = sliceNum_.begin(); it != sliceNum_.end(); ++it) {
+        ret = FileFlush(it->first, it->second);
+        if (ret != PROFILING_SUCCESS) {
+            MSPROF_LOGE("[FileSliceFlush] Flush file failed.");
+            return PROFILING_FAILED;
         }
     }
     writeFilePerfCount_->OutPerfInfo("FileSliceFlush");
 
-    return true;
+    return PROFILING_SUCCESS;
 }
 
 int FileSlice::FileSliceFlushByJobID(const std::string &jobIDRelative, const std::string &devID)
@@ -375,38 +366,48 @@ int FileSlice::FileSliceFlushByJobID(const std::string &jobIDRelative, const std
     if (!needSlice_) {
         return PROFILING_SUCCESS;
     }
-    std::map<std::string, uint64_t>::iterator it;
-    std::string fileSliceName = "";
+    MSPROF_LOGI("[FileSliceFlushByJobID]Flush file slice by job id start. jobIDRelative:%s, devID:%s",
+        Utils::BaseName(jobIDRelative).c_str(), devID.c_str());
 
-    MSPROF_LOGI("[FileSliceFlushByJobID]jobIDRelative:%s, devID:%s",
-                Utils::BaseName(jobIDRelative).c_str(), devID.c_str());
-    fileSliceName.append(".").append(devID).append(".slice_");
+    std::string fileSliceName = "." + devID + ".slice_";
     std::unique_lock<std::mutex> lk(sliceFileMtx_);
-    for (it = sliceNum_.begin(); it != sliceNum_.end(); ++it) {
+    int ret = PROFILING_SUCCESS;
+    for (auto it = sliceNum_.begin(); it != sliceNum_.end(); ++it) {
         if (it->first.find(fileSliceName) == std::string::npos ||
             it->first.find(jobIDRelative) == std::string::npos) {
             continue;
         }
-        std::string absolutePath = it->first + std::to_string(it->second);
-        MSPROF_LOGI("[FileSliceFlushByJobID]file:%s, total_size_file:%llu",
-                    Utils::BaseName(it->first).c_str(), totalSize_[it->first]);
-        if (analysis::dvvp::common::utils::Utils::IsFileExist(absolutePath)) {
-            MSPROF_LOGI("[FileSliceFlushByJobID]create done file for:%s", Utils::BaseName(absolutePath).c_str());
-            long long fileSize = analysis::dvvp::common::utils::Utils::GetFileSize(absolutePath);
-            if (fileSize < 0) {
-                MSPROF_LOGE("[fileSize:%d error", fileSize);
-            }
-            if (!(CreateDoneFile(absolutePath, std::to_string(fileSize), std::to_string(chunkStartTime_[absolutePath]),
-                std::to_string(chunkEndTime_[absolutePath]), absolutePath))) {
-                MSPROF_LOGE("[FileSliceFlushByJobID]Failed to create file:%s", Utils::BaseName(absolutePath).c_str());
-                return PROFILING_FAILED;
-            }
-            MSPROF_LOGI("[FileSliceFlushByJobID]create done file:%s.done", Utils::BaseName(absolutePath).c_str());
-            sliceNum_[it->first]++;
+        ret = FileFlush(it->first, it->second);
+        if (ret != PROFILING_SUCCESS) {
+            MSPROF_LOGE("[FileSliceFlushByJobID] Flush file slice by job id failed.");
+            return PROFILING_FAILED;
         }
     }
     writeFilePerfCount_->OutPerfInfo("FileSliceFlushByJobID");
 
+    return PROFILING_SUCCESS;
+}
+
+int FileSlice::FileFlush(const std::string &sliceName, uint64_t sliceId)
+{
+    std::string absolutePath = sliceName + std::to_string(sliceId);
+    MSPROF_LOGI("[FileFlush]file: %s, total_size_file: %llu",
+        Utils::BaseName(sliceName).c_str(), totalSize_[sliceName]);
+    if (analysis::dvvp::common::utils::Utils::IsFileExist(absolutePath)) {
+        MSPROF_LOGI("[FileFlush]create done file for:%s", Utils::BaseName(absolutePath).c_str());
+        long long fileSize = analysis::dvvp::common::utils::Utils::GetFileSize(absolutePath);
+        if (fileSize < 0) {
+            MSPROF_LOGE("[FileFlush]fileSize:%d of %s is error.", fileSize, absolutePath);
+            return PROFILING_FAILED;
+        }
+        if (!(CreateDoneFile(absolutePath, std::to_string(fileSize), std::to_string(chunkStartTime_[absolutePath]),
+                std::to_string(chunkEndTime_[absolutePath]), absolutePath))) {
+            MSPROF_LOGE("[FileFlush]Failed to create file:%s", Utils::BaseName(absolutePath).c_str());
+            return PROFILING_FAILED;
+        }
+        MSPROF_LOGI("[FileFlush]create done file:%s.done", Utils::BaseName(absolutePath).c_str());
+        sliceNum_[sliceName]++;
+    }
     return PROFILING_SUCCESS;
 }
 }
