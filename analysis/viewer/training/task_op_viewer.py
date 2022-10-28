@@ -58,8 +58,8 @@ class TaskOpViewer:
         if not DBManager.judge_table_exist(task_curs, DBNameConstant.TABLE_RUNTIME_TRACK):
             logging.warning("No need to export task time data, maybe the RuntimeTrack table is not created.")
             return [], 0
-        if not (DBManager.judge_table_exist(hwts_curs, DBNameConstant.TABLE_HWTS_TASK_TIME)
-                and DBManager.judge_table_exist(hwts_aiv_curs, DBNameConstant.TABLE_HWTS_TASK_TIME)):
+        if not DBManager.judge_table_exist(hwts_curs, DBNameConstant.TABLE_HWTS_TASK_TIME) \
+                and not DBManager.judge_table_exist(hwts_aiv_curs, DBNameConstant.TABLE_HWTS_TASK_TIME):
             logging.warning("No need to export task time data, maybe the hwts is not collected.")
             return [], 0
 
@@ -91,8 +91,8 @@ class TaskOpViewer:
         if not DBManager.judge_table_exist(ge_curs, DBNameConstant.TABLE_GE_TASK):
             logging.warning(
                 "No ge data collected, maybe the TaskInfo table is not created, try to export data with no ge data")
-        if not (DBManager.judge_table_exist(hwts_curs, DBNameConstant.TABLE_HWTS_TASK_TIME)
-                and DBManager.judge_table_exist(hwts_aiv_curs, DBNameConstant.TABLE_HWTS_TASK_TIME)):
+        if not DBManager.judge_table_exist(hwts_curs, DBNameConstant.TABLE_HWTS_TASK_TIME) \
+                and not DBManager.judge_table_exist(hwts_aiv_curs, DBNameConstant.TABLE_HWTS_TASK_TIME):
             logging.warning("No need to export task time data, maybe the hwts is not collected.")
             return [], 0
 
