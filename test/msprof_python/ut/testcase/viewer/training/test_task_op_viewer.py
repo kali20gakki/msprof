@@ -74,17 +74,17 @@ class TestTaskOpViewer(unittest.TestCase):
         self.assertEqual(expect_res, res)
 
     def test_get_task_data_summary_1(self):
-        res = TaskOpViewer.get_task_data_summary(None, None, None)
+        res = TaskOpViewer.get_task_data_summary(None, None, None, None)
         self.assertEqual(res[1], 0)
 
         with mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=False), \
                 mock.patch(NAMESPACE + '.logging.warning'):
-            res = TaskOpViewer.get_task_data_summary(1, 2, 3)
+            res = TaskOpViewer.get_task_data_summary(1, 2, 3, 4)
         self.assertEqual(res[1], 0)
 
         with mock.patch(NAMESPACE + '.TaskOpViewer._reformat_task_info', side_effect=TypeError), \
                 mock.patch(NAMESPACE + '.logging.error'):
-            res = TaskOpViewer.get_task_data_summary(1, 2, 3)
+            res = TaskOpViewer.get_task_data_summary(1, 2, 3, 4)
         self.assertEqual(res[1], 0)
 
     def test_get_task_data_summary_2(self):
@@ -120,7 +120,7 @@ class TestTaskOpViewer(unittest.TestCase):
 
         with mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True), \
                 mock.patch(NAMESPACE + '.logging.error'):
-            res = TaskOpViewer.get_task_data_summary(test_hwts_sql[1], test_rts_sql[1], test_ge_sql[1])
+            res = TaskOpViewer.get_task_data_summary(test_hwts_sql[1], None, test_rts_sql[1], test_ge_sql[1])
         (test_hwts_sql[1]).execute("drop Table HwtsTaskTime")
         db_manager_hwts.destroy(test_hwts_sql)
         (test_rts_sql[1]).execute("drop Table RuntimeTrack")
@@ -130,17 +130,17 @@ class TestTaskOpViewer(unittest.TestCase):
 
     def test_get_op_task_data_summary_1(self):
         with mock.patch(NAMESPACE + '.logging.warning'):
-            res = TaskOpViewer.get_op_task_data_summary(None, None)
+            res = TaskOpViewer.get_op_task_data_summary(None, None, None)
         self.assertEqual(res[1], 0)
 
         with mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=False), \
                 mock.patch(NAMESPACE + '.logging.warning'):
-            res = TaskOpViewer.get_op_task_data_summary(1, 2)
+            res = TaskOpViewer.get_op_task_data_summary(1, 2, 3)
         self.assertEqual(res[1], 0)
 
         with mock.patch(NAMESPACE + '.TaskOpViewer._reformat_op_task_info', side_effect=TypeError), \
                 mock.patch(NAMESPACE + '.logging.error'):
-            res = TaskOpViewer.get_op_task_data_summary(1, 2)
+            res = TaskOpViewer.get_op_task_data_summary(1, 2, 3)
         self.assertEqual(res[1], 0)
 
     def test_get_op_task_data_summary_2(self):
@@ -168,7 +168,7 @@ class TestTaskOpViewer(unittest.TestCase):
         expect_res = [("AI CORE NAME", "AI_CORE", 0, 3, '0.0', '\"18870605628550\"', '\"18870605628550\"')]
         with mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True), \
                 mock.patch(NAMESPACE + '.logging.error'):
-            res = TaskOpViewer.get_op_task_data_summary(test_hwts_sql[1], test_ge_sql[1])
+            res = TaskOpViewer.get_op_task_data_summary(test_hwts_sql[1], None, test_ge_sql[1])
         (test_hwts_sql[1]).execute("drop Table HwtsTaskTime")
         db_manager_hwts.destroy(test_hwts_sql)
         db_manager_ge.destroy(test_ge_sql)
