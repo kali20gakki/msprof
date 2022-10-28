@@ -35,7 +35,7 @@ class TestAicCalculator(unittest.TestCase):
                 mock.patch('msmodel.iter_rec.iter_rec_model.HwtsIterModel.get_aic_sum_count',
                            return_value=8):
             check = AicCalculator(self.file_list, CONFIG)
-            result = check._get_offset_and_total(0)
+            result = check._get_offset_and_total(0, 1)
             self.assertEqual(result, (0, -1))
 
     def test_parse_by_iter(self):

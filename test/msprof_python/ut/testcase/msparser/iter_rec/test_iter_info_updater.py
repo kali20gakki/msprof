@@ -65,7 +65,7 @@ class TestIterInfoUpdater(unittest.TestCase):
         iter_info_list = [mock.Mock(), mock.Mock()]
         ai_core_task = {"1-1", "2-10"}
 
-        IterInfoUpdater.judge_ai_core(iter_info_list, ai_core_task)
+        IterInfoUpdater.judge_ai_core(task, iter_info_list, ai_core_task)
 
     def test_judge_ai_core_2(self: any) -> None:
         task = mock.Mock()

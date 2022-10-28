@@ -35,19 +35,21 @@ class TestHwtsIterModel(unittest.TestCase):
                      "ai_core_offset INTEGER, " \
                      "task_count INTEGER, " \
                      "task_offset INTEGER, " \
-                     "iter_id INTEGER)"
-        data = [(1, 0, 3, 0, 1), (1, 1, 4, 3, 2)]
+                     "iter_id INTEGER," \
+                     "model_id INTEGER," \
+                     "index_id INTEGER)"
+        data = [(1, 0, 3, 0, 1, 1, 1), (1, 1, 4, 3, 2, 1, 2)]
         insert_sql = "insert into HwtsIter values({value})".format(value="?," * (len(data[0]) - 1) + "?")
         res = db_manager.create_table('hwts.db', create_sql, insert_sql, data)
         check = HwtsIterModel('test')
         check.conn, check.cur = res[0], res[1]
-        result = check.get_task_offset_and_sum(1, 'ai_core')
+        result = check.get_task_offset_and_sum(1, 1, 'ai_core')
         self.assertEqual(result, (0, 1))
         res[1].execute('drop table if exists HwtsIter')
         with mock.patch(NAMESPACE + '.logging.error'):
             check = HwtsIterModel('test')
             check.conn, check.cur = res[0], res[1]
-            result = check.get_task_offset_and_sum(1, 'ai_core')
+            result = check.get_task_offset_and_sum(1, 1, 'ai_core')
             self.assertEqual(result, (0, 0))
         db_manager.destroy(res)
 
