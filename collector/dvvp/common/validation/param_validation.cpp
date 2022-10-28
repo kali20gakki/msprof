@@ -75,8 +75,7 @@ bool ParamValidation::CheckOutputIsValid(const std::string &outputPath) const
     if (!path.empty()) {
         if (path.size() > MAX_PATH_LENGTH) {
             MSPROF_LOGE("Invalid value for Argument 'output'. The maximum length is %d.", MAX_PATH_LENGTH);
-            CMD_LOGE("Argument --output is invalid because of exceeds"
-                " the maximum length of %d", MAX_PATH_LENGTH);
+            CMD_LOGE("Argument --output is invalid because of exceeds the maximum length of %d.", MAX_PATH_LENGTH);
             MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
                 std::vector<std::string>({"output", outputPath, errReason}));
             return false;
@@ -106,8 +105,7 @@ bool ParamValidation::CheckOutputIsValid(const std::string &outputPath) const
         }
         if (Utils::CanonicalizePath(path).empty()) {
             MSPROF_LOGE("output is invalid because of get the canonicalized absolute pathname failed.");
-            CMD_LOGE("Argument --output is invalid because of"
-                " get the canonicalized absolute pathname failed");
+            CMD_LOGE("Argument --output is invalid because of get the canonicalized absolute pathname failed");
             return false;
         }
     } else {
