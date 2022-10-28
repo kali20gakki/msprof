@@ -25,12 +25,12 @@ class IterInfoUpdater:
         for it_id in new_iter_info.behind_parallel_iter - self.active_parallel_iter_set:
             new_add_parallel_id.append(self.iteration_manager.iter_to_iter_info.get(it_id))
 
-        self._update_new_add_iter_info(new_add_parallel_id)
+        self.update_new_add_iter_info(new_add_parallel_id)
 
         self.current_iter = iter_id
         self.active_parallel_iter_set = new_iter_info.behind_parallel_iter
 
-    def _update_new_add_iter_info(self: any, new_add_parallel_id: any) -> None:
+    def update_new_add_iter_info(self: any, new_add_parallel_id: any) -> None:
         current_iter_info = self.iteration_manager.iter_to_iter_info.get(self.current_iter, IterInfo())
 
         for new_add_parallel_iter_info in new_add_parallel_id:
@@ -41,25 +41,25 @@ class IterInfoUpdater:
         iter_info_list = [self.iteration_manager.iter_to_iter_info.get(iter_id)
                           for iter_id in self.active_parallel_iter_set]
 
-        self._update_hwts(iter_info_list)
+        self.update_hwts(iter_info_list)
 
         if task.sys_tag == self.HWTS_TASK_END and \
-                self._judge_ai_core(task, iter_info_list, ai_core_task):
-            self._update_aicore(iter_info_list)
+                self.judge_ai_core(task, iter_info_list, ai_core_task):
+            self.update_aicore(iter_info_list)
 
     @staticmethod
-    def _judge_ai_core(task: any, iter_info_list: list, ai_core_task: set) -> bool:
+    def judge_ai_core(task: any, iter_info_list: list, ai_core_task: set) -> bool:
         # if there are ge data, ai_core_task is empty
         if not ai_core_task:
             return any([iter_info_bean.is_aicore(task) for iter_info_bean in iter_info_list])
         return GeInfoModel.STREAM_TASK_KEY_FMT.format(task.stream_id, task.task_id) in ai_core_task
 
     @staticmethod
-    def _update_hwts(iter_info_list: list) -> None:
+    def update_hwts(iter_info_list: list) -> None:
         for iter_info_bean in iter_info_list:
             iter_info_bean.hwts_count += 1
 
     @staticmethod
-    def _update_aicore(iter_info_list: list) -> None:
+    def update_aicore(iter_info_list: list) -> None:
         for iter_info_bean in iter_info_list:
             iter_info_bean.aic_count += 1

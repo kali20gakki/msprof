@@ -42,13 +42,13 @@ class TestIterInfoUpdater(unittest.TestCase):
         current_iter_info.aic_count = 2
         self_instance.iteration_manager.iter_to_iter_info.get.return_value = current_iter_info
 
-        IterInfoUpdater._update_new_add_iter_info(self_instance, [mock.Mock(), mock.Mock()])
+        IterInfoUpdater.update_new_add_iter_info(self_instance, [mock.Mock(), mock.Mock()])
 
     def test_update_count_and_offset(self: any) -> None:
         self_instance = mock.Mock()
         self_instance.iteration_manager.iter_to_iter_info.get.return_value = mock.Mock()
         self_instance.active_parallel_iter_set = {1, 2, 3}
-        self_instance._judge_ai_core.return_value = True
+        self_instance.judge_ai_core.return_value = True
 
         task = mock.Mock()
         task.sys_tag = IterInfoUpdater.HWTS_TASK_END
@@ -65,7 +65,7 @@ class TestIterInfoUpdater(unittest.TestCase):
         iter_info_list = [mock.Mock(), mock.Mock()]
         ai_core_task = {"1-1", "2-10"}
 
-        IterInfoUpdater._judge_ai_core(iter_info_list, ai_core_task)
+        IterInfoUpdater.judge_ai_core(iter_info_list, ai_core_task)
 
     def test_judge_ai_core_2(self: any) -> None:
         task = mock.Mock()
@@ -75,14 +75,14 @@ class TestIterInfoUpdater(unittest.TestCase):
         iter_info_list = [mock.Mock(), mock.Mock()]
         ai_core_task = {}
 
-        IterInfoUpdater._judge_ai_core(task, iter_info_list, ai_core_task)
+        IterInfoUpdater.judge_ai_core(task, iter_info_list, ai_core_task)
 
     def test_update_hwts(self: any) -> None:
         iter_info_bean = mock.Mock()
         iter_info_bean.hwts_count = 1
         iter_info_list = [iter_info_bean]
 
-        IterInfoUpdater._update_hwts(iter_info_list)
+        IterInfoUpdater.update_hwts(iter_info_list)
 
         self.assertEqual(iter_info_bean.hwts_count, 2)
 
@@ -91,6 +91,6 @@ class TestIterInfoUpdater(unittest.TestCase):
         iter_info_bean.aic_count = 1
         iter_info_list = [iter_info_bean]
 
-        IterInfoUpdater._update_aicore(iter_info_list)
+        IterInfoUpdater.update_aicore(iter_info_list)
 
         self.assertEqual(iter_info_bean.aic_count, 2)
