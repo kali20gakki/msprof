@@ -109,7 +109,7 @@ class MsprofIteration:
         if not trace_conn or not trace_curs \
                 or not DBManager.check_tables_in_db(db_path, DBNameConstant.TABLE_STEP_TRACE_DATA):
             return iter_id_list
-        iter_range = self.get_step_scene_iter_list(trace_curs, index_id, model_id)
+        iter_range = self.get_step_scene_iter_range(trace_curs, index_id, model_id)
         iter_id_list = iter_range if iter_range else iter_id_list
 
         iter_data = []
@@ -125,7 +125,13 @@ class MsprofIteration:
 
         return iter_id_list
 
-    def get_step_scene_iter_list(self: any, trace_curs: any, index_id: int, model_id: int) -> list:
+    def get_step_scene_iter_range(self: any, trace_curs: any, index_id: int, model_id: int) -> list:
+        """
+        get step iteration time
+        :param index_id: index id
+        :param model_id: model id
+        :return: [iter_id - 1, iter_id] or [min_iter_id - 1, max_iter_id] in pytorch graph
+        """
         sql = "select iter_id, step_start, step_end from {0} " \
               "where index_id=? and model_id=?".format(DBNameConstant.TABLE_STEP_TRACE_DATA)
         iter_data = DBManager.fetch_all_data(trace_curs, sql, (index_id, model_id), StepTraceDto)
