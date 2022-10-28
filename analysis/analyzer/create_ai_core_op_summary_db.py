@@ -117,11 +117,11 @@ class ParseAiCoreOpSummary:
                                                                   DBNameConstant.TABLE_SUMMARY_TENSOR, self.TABLES_PATH)
         DBManager.execute_sql(conn, ge_tensor_create_sql)
         ge_data = []
-        iter_dict = MsprofIteration(self.project_path).get_iter_dict_with_index_and_model(self.iter_id, self.model_id)
+        iter_list = MsprofIteration(self.project_path).get_iter_list_with_index_and_model(self.iter_id, self.model_id)
         ge_tensor_sql = "select * from {0} where " \
                         "(index_id=? or index_id=0) and model_id=?" \
             .format(DBNameConstant.TABLE_GE_TENSOR)
-        for index_and_model in iter_dict.values():
+        for index_and_model in iter_list:
             ge_data.extend(DBManager.fetch_all_data(conn.cursor(), ge_tensor_sql, index_and_model))
 
         DBManager.insert_data_into_table(conn, DBNameConstant.TABLE_SUMMARY_TENSOR, ge_data)
@@ -209,11 +209,11 @@ class ParseAiCoreOpSummary:
 
     def _get_ge_data(self: any, conn: any) -> list:
         ge_data = []
-        iter_dict = MsprofIteration(self.project_path).get_iter_dict_with_index_and_model(self.iter_id, self.model_id)
+        iter_list = MsprofIteration(self.project_path).get_iter_list_with_index_and_model(self.iter_id, self.model_id)
         ge_sql = "SELECT model_id, batch_id, task_id, stream_id, " \
                  "op_name, op_type, block_dim, task_type, timestamp, index_id from {0} where " \
                  "(index_id=? or index_id=0) and model_id=?" \
             .format(DBNameConstant.TABLE_GE_TASK)
-        for index_and_model in iter_dict.values():
+        for index_and_model in iter_list:
             ge_data.extend(DBManager.fetch_all_data(conn.cursor(), ge_sql, index_and_model))
         return ge_data

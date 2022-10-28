@@ -76,9 +76,3 @@ class TsTrackModel(BaseModel, ABC):
             ai_cpu_with_state = list(filter(partial(self.__aicpu_in_time_range, min_timestamp=min_timestamp,
                                                     max_timestamp=max_timestamp), ai_cpu_with_state))
         return ai_cpu_with_state
-
-    def get_step_trace(self: any) -> None:
-        """
-        get step trace data
-        """
-        sql = "select index_id, model_id, step_start, step_end, iter_id"

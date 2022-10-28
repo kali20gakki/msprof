@@ -142,11 +142,11 @@ class MergeOPCounter:
 
     def _get_ge_data(self: any, ge_curs: any) -> list:
         ge_data = []
-        iter_dict = MsprofIteration(self.project_path).get_iter_dict_with_index_and_model(self.iter_id, self.model_id)
+        iter_list = MsprofIteration(self.project_path).get_iter_list_with_index_and_model(self.iter_id, self.model_id)
         ge_sql = 'select model_id, op_name, op_type, task_type, task_id, stream_id, batch_id ' \
                  'from {0} where (index_id=? or index_id=0) ' \
                  'and model_id=?'.format(DBNameConstant.TABLE_GE_TASK)
-        for index_and_model in iter_dict.values():
+        for index_and_model in iter_list:
             ge_data.extend(DBManager.fetch_all_data(ge_curs, ge_sql, index_and_model))
 
         return ge_data

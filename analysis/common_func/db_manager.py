@@ -220,7 +220,7 @@ class DBManager:
             curs.row_factory = None
 
     @classmethod
-    def fetchone(cls: any, curs: any, sql: str, param: tuple = None, dto_class: any = None) -> list:
+    def fetchone(cls: any, curs: any, sql: str, param: tuple = None, dto_class: any = None) -> any:
         """
         fetch one data
         """

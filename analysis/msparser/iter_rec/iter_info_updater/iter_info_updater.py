@@ -16,6 +16,9 @@ class IterInfoUpdater:
         self.iteration_manager = IterInfoManager(project_path)
 
     def update_parallel_iter_info_pool(self: any, iter_id: int) -> None:
+        """
+        update parallel iter info pool
+        """
         if iter_id <= self.current_iter:
             return
 
@@ -31,6 +34,9 @@ class IterInfoUpdater:
         self.active_parallel_iter_set = new_iter_info.behind_parallel_iter
 
     def update_new_add_iter_info(self: any, new_add_parallel_id: any) -> None:
+        """
+        update new add iter info
+        """
         current_iter_info = self.iteration_manager.iter_to_iter_info.get(self.current_iter, IterInfo())
 
         for new_add_parallel_iter_info in new_add_parallel_id:
@@ -38,6 +44,9 @@ class IterInfoUpdater:
             new_add_parallel_iter_info.aic_offset = current_iter_info.aic_offset + current_iter_info.aic_count
 
     def update_count_and_offset(self: any, task: any, ai_core_task: set) -> None:
+        """
+        update count and offset
+        """
         iter_info_list = [self.iteration_manager.iter_to_iter_info.get(iter_id)
                           for iter_id in self.active_parallel_iter_set]
 
@@ -49,6 +58,9 @@ class IterInfoUpdater:
 
     @staticmethod
     def judge_ai_core(task: any, iter_info_list: list, ai_core_task: set) -> bool:
+        """
+        judge ai core
+        """
         # if there are ge data, ai_core_task is empty
         if not ai_core_task:
             return any([iter_info_bean.is_aicore(task) for iter_info_bean in iter_info_list])
@@ -56,10 +68,16 @@ class IterInfoUpdater:
 
     @staticmethod
     def update_hwts(iter_info_list: list) -> None:
+        """
+        update hwts
+        """
         for iter_info_bean in iter_info_list:
             iter_info_bean.hwts_count += 1
 
     @staticmethod
     def update_aicore(iter_info_list: list) -> None:
+        """
+        update aicore
+        """
         for iter_info_bean in iter_info_list:
             iter_info_bean.aic_count += 1

@@ -191,12 +191,12 @@ class UpdateAICoreData:
         ge_data = []
         index_id = self.sample_config.get("iter_id", NumberConstant.DEFAULT_ITER_ID)
         model_id = self.sample_config.get("model_id", NumberConstant.DEFAULT_MODEL_ID)
-        iter_dict = MsprofIteration(self.project_path).get_iter_dict_with_index_and_model(index_id, model_id)
+        iter_list = MsprofIteration(self.project_path).get_iter_list_with_index_and_model(index_id, model_id)
         sql = "select task_id, stream_id, block_dim from {0} " \
               "where model_id=? and (index_id=0 or index_id=?) " \
               "and task_type='{1}' order by timestamp".format(
             DBNameConstant.TABLE_GE_TASK, Constant.TASK_TYPE_AI_CORE)
-        for iter_id, model_id in iter_dict.values():
+        for iter_id, model_id in iter_list:
             ge_data.extend(DBManager.fetch_all_data(ge_curs, sql, (model_id, iter_id)))
 
         return ge_data

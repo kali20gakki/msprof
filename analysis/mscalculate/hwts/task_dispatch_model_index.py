@@ -14,15 +14,18 @@ class TaskDispatchModelIndex:
         self.iteration_info_list = self.init_iteration_info_list()
 
     def init_iteration_info_list(self: any) -> any:
-        msprof_iteration = MsprofIteration(self.result_dir)
-        iter_dict = msprof_iteration.get_iter_dict_with_index_and_model(
-            self.index_id, self.model_id)
-
+        """
+        init iteration info list
+        """
         iteration_info_list = []
         if not (ProfilingScene().is_mix_operator_and_graph() and self.model_id == Constant.GE_OP_MODEL_ID):
             return iteration_info_list
 
-        for model_id, index_id in iter_dict.values():
+        msprof_iteration = MsprofIteration(self.result_dir)
+        iter_list = msprof_iteration.get_iter_list_with_index_and_model(
+            self.index_id, self.model_id)
+
+        for model_id, index_id in iter_list:
             iteration_info = msprof_iteration.get_iteration_info_by_index_id(model_id, index_id)
             if iteration_info:
                 iteration_info_list.append(iteration_info)
@@ -31,7 +34,11 @@ class TaskDispatchModelIndex:
         return iteration_info_list
 
     def dispatch(self: any, end_time: int) -> tuple:
+        """
+        dispatch model id and task id for each task
+        """
         for iter_info in self.iteration_info_list:
             if iter_info.step_start < end_time <= iter_info.step_end:
                 return iter_info.model_id, iter_info.index_id
+        # For parallel scene, can not find accurately model id and index id
         return self.model_id, self.index_id
