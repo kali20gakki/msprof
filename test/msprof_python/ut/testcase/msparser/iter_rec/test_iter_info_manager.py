@@ -7,8 +7,8 @@ Copyright Huawei Technologies Co., Ltd. 2022. All rights reserved.
 import unittest
 from unittest import mock
 
-from msparser.iter_rec.iter_info_updater.iter_info_manager import IterInfoManager
 from msmodel.ge.ge_info_calculate_model import GeInfoModel
+from msparser.iter_rec.iter_info_updater.iter_info_manager import IterInfoManager
 
 from mock_tools import ClassMock
 
@@ -16,7 +16,7 @@ from mock_tools import ClassMock
 class TestIterInfoUpdater(unittest.TestCase):
     def test_initial_iter_to_info_1(self: any) -> None:
         with mock.patch("common_func.msvp_common.path_check" , return_value=False):
-            IterInfoManager._initial_iter_to_info(mock.Mock())
+            IterInfoManager.initial_iter_to_info(mock.Mock())
 
     def test_initial_iter_to_info_2(self: any) -> None:
         with mock.patch("common_func.msvp_common.path_check" , return_value=True), \
@@ -25,7 +25,7 @@ class TestIterInfoUpdater(unittest.TestCase):
             ge_mock.__enter__ = GeInfoModel.__enter__
             ge_mock.__exit__ = GeInfoModel.__exit__
             with ClassMock(GeInfoModel, ge_mock()):
-                IterInfoManager._initial_iter_to_info(mock.Mock())
+                IterInfoManager.initial_iter_to_info(mock.Mock())
 
     def test_regist_paralle_set(self: any) -> None:
         instance = mock.Mock()
@@ -40,7 +40,7 @@ class TestIterInfoUpdater(unittest.TestCase):
 
         step_trace_data = [step_trace_datum, step_trace_datum]
 
-        IterInfoManager._regist_paralle_set(instance, step_trace_data)
+        IterInfoManager.regist_paralle_set(instance, step_trace_data)
 
     def test_regist_aicore_set(self: any) -> None:
         instance = mock.Mock()
@@ -49,4 +49,4 @@ class TestIterInfoUpdater(unittest.TestCase):
         iter_info_bean.index_id = 2
         instance.iter_to_iter_info = {1: iter_info_bean}
 
-        IterInfoManager._regist_aicore_set(instance, {}, {})
+        IterInfoManager.regist_aicore_set(instance, {}, {})
