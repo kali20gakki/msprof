@@ -155,7 +155,7 @@ class MsprofIteration:
         :return: {iter_id: [index_id, model_id]} in mix single op and graph
         """
         iter_list = [[index_id, model_id]]
-        if not Utils.is_step_scene(self._result_dir):
+        if not (ProfilingScene().is_mix_operator_and_graph() and self.model_id == Constant.GE_OP_MODEL_ID):
             return iter_list
         db_path = PathManager.get_db_path(self._result_dir, DBNameConstant.DB_STEP_TRACE)
         trace_conn, trace_curs = DBManager.check_connect_db_path(db_path)
