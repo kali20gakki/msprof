@@ -11,7 +11,8 @@ from collections import OrderedDict
 
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
-from common_func.file_manager import FileManager, FileOpen
+from common_func.file_manager import FileManager
+from common_func.file_manager import FileOpen
 from common_func.file_name_manager import FileNameManagerConstant
 from common_func.file_name_manager import get_ai_core_compiles
 from common_func.file_name_manager import get_aiv_compiles
@@ -50,7 +51,7 @@ class ParsingCoreSampleData(MsMultiProcess):
         self.ai_core_data = []
         self.device_list = []
         self.device_id = 0
-        self.replayid = 0
+        self.replay_id = 0
 
     @staticmethod
     def get_ai_core_event_chunk(event: list) -> list:
@@ -309,30 +310,28 @@ class ParsingCoreSampleData(MsMultiProcess):
                 # One Byte for core id
                 core_id = struct.unpack(self.BYTE_ORDER_CHAR + "B", file_.read(1))[0]
                 file_.read(6)  # reserved space
-                tmp = [count_num, mode, self.replayid, timestamp, core_id, task_cyc]
+                tmp = [count_num, mode, self.replay_id, timestamp, core_id, task_cyc]
                 tmp.extend(event_count[:count_num])
                 self.ai_core_data.append(tmp)
             else:
                 break
 
     def __create_ai_event_tables_helper(self: any, events: list) -> int:
-        logging.info(
-            'start create ai core events tables')
-        event_ = events
-        self.__create_event_count_table(event_)
+        logging.info('start create ai core events tables')
+        self.__create_event_count_table(events)
 
         event_sum = {}
-        ai_core_events = self.get_ai_core_event_chunk(event_)
+        ai_core_events = self.get_ai_core_event_chunk(events)
         if not ai_core_events:
             logging.error('get ai core pmu events failed!')
             return NumberConstant.ERROR
 
         self.__create_event_value_table_one_by_one(ai_core_events)
         self.__create_task_cyc_table()
-        self.__update_event_sum(event_, event_sum)
+        self.__update_event_sum(events, event_sum)
 
         event_sum = self.__generate_event_num(event_sum)
-        self.__insert_into_event_count_table(event_, event_sum)
+        self.__insert_into_event_count_table(events, event_sum)
         logging.info(
             'create event tables finished')
         return NumberConstant.SUCCESS
@@ -357,7 +356,7 @@ class ParsingAICoreSampleData(ParsingCoreSampleData):
             result = get_file_name_pattern_match(file_name, *ai_core_compiles)
             if result and is_valid_original_data(file_name, project_path):
                 self.device_id = result.groups()[FileNameManagerConstant.MATCHED_DEV_ID_INX]
-                self.replayid = '0'
+                self.replay_id = '0'
                 self.device_list.append(self.device_id)
                 self.conn, self.curs = DBManager.create_connect_db(os.path.join(
                     project_path,
@@ -432,7 +431,7 @@ class ParsingAIVectorCoreSampleData(ParsingCoreSampleData):
             result = get_file_name_pattern_match(file_name, *aiv_compiles)
             if result:
                 self.device_id = result.groups()[FileNameManagerConstant.MATCHED_DEV_ID_INX]
-                self.replayid = '0'
+                self.replay_id = '0'
                 self.device_list.append(self.device_id)
                 self.conn, self.curs = DBManager.create_connect_db(os.path.join(
                     project_path,

@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2018-2020. All rights reserved.
 
-import os
 import sqlite3
 
 from common_func.common import byte_per_us2_mb_pers
@@ -68,6 +67,18 @@ class InterConnectionView:
             format(accuracy=NumberConstant.DECIMAL_ACCURACY)
         return sql
 
+    @staticmethod
+    def _check_pcie_valid(curs):
+        try:
+            result_data = curs.execute(
+                f"select * from {DBNameConstant.TABLE_PCIE} order by timestamp desc limit 1").fetchone()
+        except sqlite3.Error:
+            return False
+        # check whether the result_data has at least 23 domains.
+        if not (result_data and len(result_data) >= 23):
+            return False
+        return True
+
     def get_hccs_data(self: any, dev_id: str) -> tuple:
         """
         get hccs data
@@ -95,51 +106,42 @@ class InterConnectionView:
         """
         get pcie data
         """
-        db_path = os.path.join(self.result_dir, "sqlite", "pcie.db")
+        db_path = PathManager.get_db_path(self.result_dir, DBNameConstant.DB_PCIE)
         conn, curs = DBManager.check_connect_db_path(db_path)
         if not (conn and curs):
             return MsvpConstant.MSVP_EMPTY_DATA
-        if not DBManager.judge_table_exist(curs, "PcieOriginalData"):
+        if not DBManager.judge_table_exist(curs, DBNameConstant.TABLE_PCIE):
             return MsvpConstant.MSVP_EMPTY_DATA
-        sql = "select * from PcieOriginalData order by timestamp desc limit 1"
-        try:
-            result_data = curs.execute(sql).fetchone()
-        except sqlite3.Error:
+        if not self._check_pcie_valid(curs):
             return MsvpConstant.MSVP_EMPTY_DATA
         try:
-            # check whether the result_data has at least 23 domains.
-            if result_data and len(result_data) >= 23:
-                sql = InterConnectionView._get_pcie_sql_str()
-                result_data = curs.execute(sql).fetchone()
-                table_header = ["Mode", "Min", "Max", "Avg"]
-                table_data = [
-                    ("Tx_p_avg(MB/s)",
-                     byte_per_us2_mb_pers(self.get_domains_element(result_data, 2)),
-                     byte_per_us2_mb_pers(result_data[3]), byte_per_us2_mb_pers(result_data[4])),
-                    ("Tx_np_avg(MB/s)",
-                     byte_per_us2_mb_pers(self.get_domains_element(result_data, 5)),
-                     byte_per_us2_mb_pers(result_data[6]), byte_per_us2_mb_pers(result_data[7])),
-                    ("Tx_cpl_avg(MB/s)",
-                     byte_per_us2_mb_pers(self.get_domains_element(result_data, 8)),
-                     byte_per_us2_mb_pers(result_data[9]), byte_per_us2_mb_pers(result_data[10])),
-                    ("Tx_latency_avg(MB/s)",
-                     byte_per_us2_mb_pers(self.get_domains_element(result_data, 11)),
-                     byte_per_us2_mb_pers(result_data[12]), byte_per_us2_mb_pers(result_data[13])),
-                    ("Rx_p_avg(MB/s)",
-                     byte_per_us2_mb_pers(self.get_domains_element(result_data, 14)),
-                     byte_per_us2_mb_pers(result_data[15]), byte_per_us2_mb_pers(result_data[16])),
-                    ("Rx_np_avg(MB/s)",
-                     byte_per_us2_mb_pers(self.get_domains_element(result_data, 17)),
-                     byte_per_us2_mb_pers(result_data[18]), byte_per_us2_mb_pers(result_data[19])),
-                    (
-                        "Rx_cpl_avg(MB/s)",
-                        byte_per_us2_mb_pers(self.get_domains_element(result_data, 20)),
-                        byte_per_us2_mb_pers(result_data[21]),
-                        byte_per_us2_mb_pers(result_data[22])),
-                ]
-                return table_header, table_data, len(table_data)
-            return MsvpConstant.MSVP_EMPTY_DATA
+            result_data = curs.execute(InterConnectionView._get_pcie_sql_str()).fetchone()
         except sqlite3.Error:
             return MsvpConstant.MSVP_EMPTY_DATA
         finally:
             DBManager.destroy_db_connect(conn, curs)
+        table_data = [
+            ("Tx_p_avg(MB/s)",
+             byte_per_us2_mb_pers(self.get_domains_element(result_data, 2)),
+             byte_per_us2_mb_pers(result_data[3]), byte_per_us2_mb_pers(result_data[4])),
+            ("Tx_np_avg(MB/s)",
+             byte_per_us2_mb_pers(self.get_domains_element(result_data, 5)),
+             byte_per_us2_mb_pers(result_data[6]), byte_per_us2_mb_pers(result_data[7])),
+            ("Tx_cpl_avg(MB/s)",
+             byte_per_us2_mb_pers(self.get_domains_element(result_data, 8)),
+             byte_per_us2_mb_pers(result_data[9]), byte_per_us2_mb_pers(result_data[10])),
+            ("Tx_latency_avg(MB/s)",
+             byte_per_us2_mb_pers(self.get_domains_element(result_data, 11)),
+             byte_per_us2_mb_pers(result_data[12]), byte_per_us2_mb_pers(result_data[13])),
+            ("Rx_p_avg(MB/s)",
+             byte_per_us2_mb_pers(self.get_domains_element(result_data, 14)),
+             byte_per_us2_mb_pers(result_data[15]), byte_per_us2_mb_pers(result_data[16])),
+            ("Rx_np_avg(MB/s)",
+             byte_per_us2_mb_pers(self.get_domains_element(result_data, 17)),
+             byte_per_us2_mb_pers(result_data[18]), byte_per_us2_mb_pers(result_data[19])),
+            ("Rx_cpl_avg(MB/s)",
+             byte_per_us2_mb_pers(self.get_domains_element(result_data, 20)),
+             byte_per_us2_mb_pers(result_data[21]), byte_per_us2_mb_pers(result_data[22])),
+        ]
+        table_header = ["Mode", "Min", "Max", "Avg"]
+        return table_header, table_data, len(table_data)
