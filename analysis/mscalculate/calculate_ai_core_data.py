@@ -146,7 +146,6 @@ class CalculateAiCoreData:
 
         if "icache_miss_rate" in events_name_list and \
                 "icache_req_ratio" in events_name_list:
-            icache_miss_rate = 0
             if ai_core_profiling_events["icache_req_ratio"][-1] != 0:
                 icache_miss_rate = ai_core_profiling_events["icache_miss_rate"][-1] \
                                    / ai_core_profiling_events["icache_req_ratio"][-1]
