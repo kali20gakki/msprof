@@ -123,6 +123,7 @@ class MsprofIteration:
         :param model_id: model id
         :return: [iter_id - 1, iter_id] or [min_iter_id - 1, max_iter_id] in pytorch graph
         """
+        step_info = self.get_iteration_info_by_index_id(index_id, model_id)
         # find parallel iter id before this iter id including itself
         sql = "select model_id, index_id, iter_id, step_start, step_end from {0} " \
               "where step_end>? and step_end<=?".format(DBNameConstant.TABLE_STEP_TRACE_DATA)
