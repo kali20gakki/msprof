@@ -82,13 +82,13 @@ class HwtsIterModel(ParserModel):
             logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
             return Constant.DEFAULT_COUNT
 
-    def get_batch_list(self: any, table_name, task_offset: int, task_count: int) -> list:
+    def get_batch_list(self: any, table_name, iter_range: list) -> list:
         """
         get batch list from hwts batch table
         :return: batch list
         """
-        sql = "select batch_id from {0} limit ?, ?".format(table_name)
-        return DBManager.fetch_all_data(self.cur, sql, (task_offset // 2, task_count // 2))
+        sql = "select batch_id from {0} where iter_id>=? and iter_id<=?".format(table_name)
+        return DBManager.fetch_all_data(self.cur, sql, iter_range)
 
     def _get_task_num(self: any, model_id: int, index_id: int, sql: str) -> (int, int):
         task_num = 0

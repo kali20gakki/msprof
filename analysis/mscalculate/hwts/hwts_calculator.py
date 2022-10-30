@@ -52,9 +52,6 @@ class HwtsCalculator(ICalculator, MsMultiProcess):
         self._iter_model = HwtsIterModel(self._project_path)
         self._log_data = []
         self._file_list.sort(key=lambda x: int(x.split("_")[-1]))
-        self._iter_rec = IterRecorder(self._project_path)
-        self._task_offset = 0
-        self._task_count = 0
 
     def calculate(self: any) -> None:
         """
@@ -159,6 +156,8 @@ class HwtsCalculator(ICalculator, MsMultiProcess):
                 self._parse(_offset_calculator.pre_process(_hwts_log_reader, os.path.getsize(_file)))
 
     def _add_batch_id(self: any, prep_data_res: list) -> list:
+        model_id = self._sample_config.get('model_id')
+        index_id = self._sample_config.get('iter_id')
         if ProfilingScene().is_operator():
             batch_counter = BatchCounter(self._project_path)
             batch_counter.init(Constant.TASK_TYPE_AI_CORE)
@@ -168,33 +167,35 @@ class HwtsCalculator(ICalculator, MsMultiProcess):
                 prep_data_res[index] = list(datum[:2]) + [
                     InfoConfReader().time_from_syscnt(datum[2]),
                     InfoConfReader().time_from_syscnt(datum[3]),
-                    self._sample_config.get('iter_id'),
-                    self._sample_config.get('model_id'),
+                    index_id,
+                    model_id,
                     batch_id]
         else:
-            self._iter_model.init()
-            batch_list = self._iter_model.get_batch_list(
-                DBNameConstant.TABLE_HWTS_BATCH, self._task_offset, self._task_count)
+            iter_range = MsprofIteration(self._project_path).get_parallel_iter_range(
+                index_id,
+                model_id)
+            with self._iter_model:
+                batch_list = self._iter_model.get_batch_list(
+                DBNameConstant.TABLE_HWTS_BATCH, iter_range)
             if len(batch_list) != len(prep_data_res):
                 logging.warning("hwts data can not match with batch id list.")
 
             task_dispatcher = TaskDispatchModelIndex(
-                self._sample_config.get('model_id'),
-                self._sample_config.get('iter_id'),
+                model_id,
+                index_id,
                 self._project_path)
 
-            with MsprofStep(self._project_path) as step_trace:
-                for index in range(min(len(batch_list), len(prep_data_res))):
-                    batch = batch_list[index]
-                    # type of batch is tuple
-                    # 3 is end time
-                    model_id, index_id = task_dispatcher.dispatch(prep_data_res[index][3])
-                    prep_data_res[index] = list(prep_data_res[index][:2]) + [
-                        InfoConfReader().time_from_syscnt(prep_data_res[index][2]),
-                        InfoConfReader().time_from_syscnt(prep_data_res[index][3]),
-                        index_id,
-                        model_id,
-                        batch[0]]
+            for index in range(min(len(batch_list), len(prep_data_res))):
+                batch = batch_list[index]
+                # type of batch is tuple
+                # 3 is end time
+                model_id, index_id = task_dispatcher.dispatch(prep_data_res[index][3])
+                prep_data_res[index] = list(prep_data_res[index][:2]) + [
+                    InfoConfReader().time_from_syscnt(prep_data_res[index][2]),
+                    InfoConfReader().time_from_syscnt(prep_data_res[index][3]),
+                    index_id,
+                    model_id,
+                    batch[0]]
         return prep_data_res
 
     def _parse(self: any, all_log_bytes: bytes) -> None:

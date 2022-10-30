@@ -75,4 +75,5 @@ class TsTrackModel(BaseModel, ABC):
             # data index 2 is timestamp
             ai_cpu_with_state = list(filter(partial(self.__aicpu_in_time_range, min_timestamp=min_timestamp,
                                                     max_timestamp=max_timestamp), ai_cpu_with_state))
+
         return ai_cpu_with_state
