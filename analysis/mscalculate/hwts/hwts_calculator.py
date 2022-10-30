@@ -137,14 +137,14 @@ class HwtsCalculator(ICalculator, MsMultiProcess):
         :return: None
         """
         if self._iter_model.check_db() and self._iter_model.check_table():
-            self._task_offset, self._task_count = self._iter_model.get_task_offset_and_sum(
+            task_offset, task_count = self._iter_model.get_task_offset_and_sum(
                 self._sample_config.get("model_id"),
                 self._sample_config.get("iter_id"),
                 HwtsIterModel.TASK_TYPE)
-            if not self._task_count:
+            if not task_count:
                 return
             _file_calculator = FileCalculator(self._file_list, self.HWTS_LOG_SIZE, self._project_path,
-                                              self._task_offset, self._task_count)
+                                              task_offset, task_count)
             self._parse(_file_calculator.prepare_process())
             self._iter_model.finalize()
 
