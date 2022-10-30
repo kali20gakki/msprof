@@ -40,8 +40,7 @@ class TestAicCalculator(unittest.TestCase):
 
     def test_parse_by_iter(self):
         with mock.patch('msmodel.iter_rec.iter_rec_model.HwtsIterModel.check_db', return_value=True), \
-                mock.patch('msmodel.iter_rec.iter_rec_model.HwtsIterModel.check_table', return_value=True), \
-                mock.patch(NAMESPACE + '.MsprofIteration.get_iteration_id_by_index_id', return_value=10):
+                mock.patch('msmodel.iter_rec.iter_rec_model.HwtsIterModel.check_table', return_value=True):
             with mock.patch(NAMESPACE + '.AicCalculator._get_offset_and_total', return_value=(127, 1280)), \
                     mock.patch(NAMESPACE + '.AicCalculator._parse'), \
                     mock.patch('framework.offset_calculator.FileCalculator.prepare_process'), \
