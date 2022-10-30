@@ -26,11 +26,11 @@ class TestIterInfoUpdater(unittest.TestCase):
         self_instance.iteration_manager.iter_to_iter_info.get.return_value = new_iter_info
         new_iter_info.behind_parallel_iter = {2, 3, 4}
 
-        self_instance.active_parallel_iter_set = {1, 2, 3}
+        self_instance.active_parallel_iter_id = {1, 2, 3}
         IterInfoUpdater.update_parallel_iter_info_pool(self_instance, 11)
 
         self.assertEqual(self_instance.current_iter, 11)
-        self.assertEqual(self_instance.active_parallel_iter_set, {2, 3, 4})
+        self.assertEqual(self_instance.active_parallel_iter_id, {2, 3, 4})
 
     def test_update_new_add_iter_info(self: any) -> None:
         self_instance = mock.Mock()
