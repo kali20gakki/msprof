@@ -16,6 +16,7 @@ from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msprof_step import MsprofStep
 from common_func.path_manager import PathManager
 from common_func.utils import Utils
+from common_func.empty_class import EmptyClass
 from profiling_bean.db_dto.step_trace_dto import StepTraceDto
 
 
@@ -92,45 +93,27 @@ class MsprofIteration:
             return []
         return trace_datas
 
-    def get_iteration_id_by_index_id(self: any, index_id: int, model_id: int) -> list:
+    def get_parallel_iter_range(self: any, index_id: int, model_id: int) -> list:
         """
         get step iteration time
         :param index_id: index id
         :param model_id: model id
         :return: [iter_id - 1, iter_id] or [min_iter_id - 1, max_iter_id] in pytorch graph
         """
-        iter_id_list = [index_id - 1, index_id]
-        if not Utils.is_step_scene(self._result_dir):
-            return iter_id_list
-
         db_path = PathManager.get_db_path(self._result_dir, DBNameConstant.DB_STEP_TRACE)
         trace_conn, trace_curs = DBManager.check_connect_db_path(db_path)
         if not trace_conn or not trace_curs \
                 or not DBManager.check_tables_in_db(db_path, DBNameConstant.TABLE_STEP_TRACE_DATA):
-            return iter_id_list
-        parallel_iter_info_list = self.get_step_scene_iter_range(trace_curs, index_id, model_id)
+            return []
 
-        if not parallel_iter_info_list:
-            return iter_id_list
-
-        # first parallel iter_info - 1 is the latest unparallel iter id
-        return [parallel_iter_info_list[0].iter_id - 1, parallel_iter_info_list[-1].iter_id]
-
-    def get_step_scene_iter_range(self: any, trace_curs: any, index_id: int, model_id: int) -> list:
-        """
-        get step iteration time
-        :param index_id: index id
-        :param model_id: model id
-        :return: [iter_id - 1, iter_id] or [min_iter_id - 1, max_iter_id] in pytorch graph
-        """
-        step_info = self.get_iteration_info_by_index_id(index_id, model_id)
-        # find parallel iter id before this iter id including itself
+        current_iter = self.get_iteration_info_by_index_id(index_id, model_id)
+        # find first parallel iter
         sql = "select model_id, index_id, iter_id, step_start, step_end from {0} " \
-              "where step_end>? and step_end<=?".format(DBNameConstant.TABLE_STEP_TRACE_DATA)
-        parallel_iter_info_list = DBManager.fetch_all_data(
-            trace_curs, sql, (step_info.step_start, step_info.step_end, ), dto_class=StepTraceDto)
-        parallel_iter_info_list.sort(key=lambda parallel_iter_info: parallel_iter_info.step_end)
-        return parallel_iter_info_list
+              "where step_end>? and step_end<=? order by step_end".format(DBNameConstant.TABLE_STEP_TRACE_DATA)
+        first_parallel_iter = DBManager.fetchone(
+            trace_curs, sql, (current_iter.step_start, current_iter.step_end, ), dto_class=StepTraceDto)
+        DBManager.destroy_db_connect(trace_conn, trace_curs)
+        return [first_parallel_iter.iter_id, current_iter.iter_id]
 
     def get_iter_id_by_index_id(self: any, index_id: int, model_id: int) -> tuple:
         """
@@ -157,14 +140,19 @@ class MsprofIteration:
         iter_list = [[index_id, model_id]]
         if not (ProfilingScene().is_mix_operator_and_graph() and self.model_id == Constant.GE_OP_MODEL_ID):
             return iter_list
-        db_path = PathManager.get_db_path(self._result_dir, DBNameConstant.DB_STEP_TRACE)
+
         trace_conn, trace_curs = DBManager.check_connect_db_path(db_path)
         if not trace_conn or not trace_curs \
                 or not DBManager.check_tables_in_db(db_path, DBNameConstant.TABLE_STEP_TRACE_DATA):
+            return []
+        iter_range = self.get_parallel_iter_range(index_id, model_id)
+        if not iter_range:
             return iter_list
-        parallel_iter_info_list = self.get_step_scene_iter_range(trace_curs, index_id, model_id)
-        if not parallel_iter_info_list:
-            return iter_list
+        sql = "select model_id, index_id, iter_id, step_start, step_end from {0} " \
+              "where iter_id>=? and iter_id<=?".format(DBNameConstant.TABLE_STEP_TRACE_DATA)
+        parallel_iter_info_list = DBManager.fetch_all_data(
+            trace_curs, sql, iter_range, dto_class=StepTraceDto)
+
         return [[parallel_iter_info.index_id, parallel_iter_info.model_id]
                 for parallel_iter_info in parallel_iter_info_list]
 
@@ -192,7 +180,7 @@ class MsprofIteration:
         trace_conn, trace_curs = DBManager.check_connect_db(self._result_dir, DBNameConstant.DB_STEP_TRACE)
         if not trace_conn or not trace_curs \
                 or not DBManager.check_tables_in_db(db_path, DBNameConstant.TABLE_STEP_TRACE_DATA):
-            return []
+            return EmptyClass()
         sql = "select model_id, index_id, iter_id, step_start, step_end from {0} " \
               "where model_id={1} and index_id={2}".format(DBNameConstant.TABLE_STEP_TRACE_DATA, model_id, index_id)
         iter_info = DBManager.fetchone(trace_curs, sql, dto_class=StepTraceDto)
@@ -211,19 +199,19 @@ class MsprofIteration:
                f'or ({time_start_key}<={iter_start} and {iter_start}<={time_end_key})'
 
     def _get_iteration_time(self: any, trace_curs: any, index_id: int, model_id: int) -> list:
-        iter_id = self.get_iteration_id_by_index_id(index_id, model_id)
-        if not iter_id:
+        current_iter = self.get_iteration_info_by_index_id(index_id, model_id)
+        if not current_iter:
             return []
+
+        # find last and not parallel iter
         sql = "select step_end from {0} " \
-              "where iter_id>=? and iter_id<=? order by " \
-              "step_end".format(DBNameConstant.TABLE_STEP_TRACE_DATA)
-        trace_data = DBManager.fetch_all_data(trace_curs, sql, iter_id)
+              "where step_end<? order by step_end desc ".format(DBNameConstant.TABLE_STEP_TRACE_DATA)
+        last_not_parallel_iter = DBManager.fetchone(
+            trace_curs, sql, (current_iter.step_start, ), dto_class=StepTraceDto)
 
-        # if the first iter is chose, the iter_id (range) will contain iter 0 whose step end is also 0
-        if NumberConstant.ZERO_ITER_ID in iter_id:
-            trace_data = [NumberConstant.ZERO_ITER_END] + trace_data
-
-        return trace_data
+        if not last_not_parallel_iter:
+            return [NumberConstant.ZERO_ITER_END, (current_iter.step_end, )]
+        return [(last_not_parallel_iter.step_end, ), (current_iter.step_end, )]
 
     def __get_trace_iteration_end(self: any) -> dict:
         iter_end_dict = OrderedDict()
