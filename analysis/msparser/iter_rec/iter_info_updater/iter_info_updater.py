@@ -12,8 +12,9 @@ class IterInfoUpdater:
 
     def __init__(self: any, project_path) -> None:
         self.current_iter = -1
-        self.active_parallel_iter_set = set([])
         self.iteration_manager = IterInfoManager(project_path)
+        self.active_parallel_iter_id = set([])
+        self.active_parallel_iter_info = set([])
 
     def update_parallel_iter_info_pool(self: any, iter_id: int) -> None:
         """
@@ -25,13 +26,16 @@ class IterInfoUpdater:
         new_iter_info = self.iteration_manager.iter_to_iter_info.get(iter_id, IterInfo())
 
         new_add_parallel_id = []
-        for it_id in new_iter_info.behind_parallel_iter - self.active_parallel_iter_set:
+        for it_id in new_iter_info.behind_parallel_iter - self.active_parallel_iter_id:
             new_add_parallel_id.append(self.iteration_manager.iter_to_iter_info.get(it_id))
 
         self.update_new_add_iter_info(new_add_parallel_id)
 
         self.current_iter = iter_id
-        self.active_parallel_iter_set = new_iter_info.behind_parallel_iter
+        self.active_parallel_iter_id = new_iter_info.behind_parallel_iter
+        self.active_parallel_iter_info = {
+            self.iteration_manager.iter_to_iter_info.get(iter_id, IterInfo())
+            for iter_id in self.active_parallel_iter_id}
 
     def update_new_add_iter_info(self: any, new_add_parallel_id: any) -> None:
         """
@@ -47,14 +51,11 @@ class IterInfoUpdater:
         """
         update count and offset
         """
-        iter_info_list = [self.iteration_manager.iter_to_iter_info.get(iter_id)
-                          for iter_id in self.active_parallel_iter_set]
-
-        self.update_hwts(iter_info_list)
+        self.update_hwts(self.active_parallel_iter_info)
 
         if task.sys_tag == self.HWTS_TASK_END and \
-                self.judge_ai_core(task, iter_info_list, ai_core_task):
-            self.update_aicore(iter_info_list)
+                self.judge_ai_core(task, self.active_parallel_iter_info, ai_core_task):
+            self.update_aicore(self.active_parallel_iter_info)
 
     @staticmethod
     def judge_ai_core(task: any, iter_info_list: list, ai_core_task: set) -> bool:
