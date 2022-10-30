@@ -41,7 +41,7 @@ def test_get_ai_cpu_sql():
 
         with mock.patch(NAMESPACE + '.DBManager.attach_to_db', return_value=True), \
              mock.patch(NAMESPACE + '.DBManager.fetch_all_data', return_value=[]), \
-             mock.patch(NAMESPACE + '.MsprofIteration.get_iter_dict_with_index_and_model', return_value={}), \
+             mock.patch(NAMESPACE + '.MsprofIteration.get_iter_list_with_index_and_model', return_value=[]), \
              mock.patch(NAMESPACE + '.MsprofIteration.get_iteration_time', return_value=[[0, 1]]):
             ProfilingScene().init(" ")
             ProfilingScene()._scene = Constant.STEP_INFO

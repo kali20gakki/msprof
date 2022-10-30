@@ -14,6 +14,7 @@ from common_func.constant import Constant
 from mscalculate.hwts.hwts_calculator import HwtsCalculator
 from profiling_bean.prof_enum.data_tag import DataTag
 from profiling_bean.struct_info.hwts_log import HwtsLogBean
+from msmodel.interface.base_model import BaseModel
 
 NAMESPACE = 'mscalculate.hwts.hwts_calculator'
 
@@ -89,7 +90,10 @@ class TestHwtsCalculator(unittest.TestCase):
             res = check._add_batch_id(prep_data_res)
             self.assertEqual(len(res), 2)
 
-            hwts_iter_model = mock.Mock()
+            model_mock = mock.Mock
+            model_mock.__enter__ = BaseModel.__enter__
+            model_mock.__exit__ = BaseModel.__exit__
+            hwts_iter_model = model_mock()
             hwts_iter_model.init = mock.Mock(return_value=None)
             hwts_iter_model.get_batch_list = mock.Mock(return_value=[[0], [0]])
             check._iter_model = hwts_iter_model

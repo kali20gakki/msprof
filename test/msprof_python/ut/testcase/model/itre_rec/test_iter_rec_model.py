@@ -81,5 +81,5 @@ class TestHwtsIterModel(unittest.TestCase):
         check.init()
 
         with mock.patch("common_func.db_manager.DBManager.fetch_all_data", return_value=[0, 1]):
-            res = check.get_batch_list(table_name, 4, 2)
+            res = check.get_batch_list(table_name, [1, 2])
         self.assertEqual(res, [0, 1])
