@@ -6,6 +6,7 @@ from common_func.constant import Constant
 from common_func.db_name_constant import DBNameConstant
 from common_func.msvp_common import path_check
 from common_func.path_manager import PathManager
+from common_func.db_manager import DBManager
 from msmodel.ge.ge_info_calculate_model import GeInfoModel
 from msmodel.step_trace.ts_track_model import TsTrackModel
 from msparser.iter_rec.iter_info_updater.iter_info import IterInfo
@@ -57,12 +58,12 @@ class IterInfoManager:
                 set([]))
 
     @classmethod
-    def check_parallel(cls: any) -> bool:
-        if not DBManager.check_tables_in_db(PathManager.get_db_path(self.result_dir, DBNameConstant.DB_STEP_TRACE),
+    def check_parallel(cls: any, result_dir: str) -> bool:
+        if not DBManager.check_tables_in_db(PathManager.get_db_path(result_dir, DBNameConstant.DB_STEP_TRACE),
                                             DBNameConstant.TABLE_STEP_TRACE_DATA):
             return False
         ts_track_model = TsTrackModel(
-            project_path, DBNameConstant.DB_STEP_TRACE, [DBNameConstant.TABLE_STEP_TRACE_DATA])
+            result_dir, DBNameConstant.DB_STEP_TRACE, [DBNameConstant.TABLE_STEP_TRACE_DATA])
 
         with ts_track_model:
             check_res = ts_track_model.check_parallel()
