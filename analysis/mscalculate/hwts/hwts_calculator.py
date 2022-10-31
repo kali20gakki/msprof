@@ -19,15 +19,17 @@ from common_func.path_manager import PathManager
 from common_func.utils import Utils
 from common_func.batch_counter import BatchCounter
 from common_func.platform.chip_manager import ChipManager
+from common_func.ms_constant.number_constant import NumberConstant
 from framework.offset_calculator import FileCalculator
 from framework.offset_calculator import OffsetCalculator
 from msmodel.iter_rec.iter_rec_model import HwtsIterModel
 from msmodel.task_time.hwts_log_model import HwtsLogModel
 from mscalculate.interface.icalculator import ICalculator
 from mscalculate.ts_task.ai_cpu.aicpu_from_ts_collector import AICpuFromTsCollector
+from mscalculate.hwts.task_dispatch_model_index import TaskDispatchModelIndex
 from profiling_bean.prof_enum.data_tag import DataTag
 from profiling_bean.struct_info.hwts_log import HwtsLogBean
-from mscalculate.hwts.task_dispatch_model_index import TaskDispatchModelIndex
+from msparser.iter_rec.iter_info_updater.iter_info_manager import IterInfoManager
 
 
 class HwtsCalculator(ICalculator, MsMultiProcess):
@@ -174,9 +176,13 @@ class HwtsCalculator(ICalculator, MsMultiProcess):
             iter_range = MsprofIteration(self._project_path).get_parallel_iter_range(
                 index_id,
                 model_id)
-            with self._iter_model:
-                batch_list = self._iter_model.get_batch_list(
-                DBNameConstant.TABLE_HWTS_BATCH, iter_range)
+
+            if IterInfoManager.check_parallel():
+                batch_list = len(prep_data_res) * [NumberConstant.DEFAULT_BATCH_ID]
+            else:
+                with self._iter_model:
+                    batch_list = self._iter_model.get_batch_list(
+                    DBNameConstant.TABLE_HWTS_BATCH, iter_range)
             if len(batch_list) != len(prep_data_res):
                 logging.warning("hwts data can not match with batch id list.")
 

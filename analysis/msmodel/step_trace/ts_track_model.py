@@ -77,3 +77,17 @@ class TsTrackModel(BaseModel, ABC):
                                                     max_timestamp=max_timestamp), ai_cpu_with_state))
 
         return ai_cpu_with_state
+
+    def check_parallel(self: any) -> list:
+        """
+        check parallel
+        """
+        if not self.check_table():
+            return []
+
+        sql = "select * from {0} t1 inner join " \
+              "(select * from {0}) t2 " \
+              "where t1.step_end > t2.step_start and t1.step_end < t2.step_end limit 0, 1".format(
+            DBNameConstant.TABLE_STEP_TRACE_DATA)
+        check_res = DBManager.fetch_all_data(self.cur, sql)
+        return check_res
