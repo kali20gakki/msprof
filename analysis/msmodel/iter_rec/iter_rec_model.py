@@ -39,24 +39,16 @@ class HwtsIterModel(ParserModel):
         :return: offset_count is the number of tasks in all previous iterations
         sum_count is the number of tasks in this round of iteration
         """
-        offset_sql_dict = {
-            self.AI_CORE_TYPE: "select ai_core_offset from {0} "
+        offset_count_dict = {
+            self.AI_CORE_TYPE: "select ai_core_offset, ai_core_num from {0} "
                                "where model_id=? and index_id=?".format(
                 DBNameConstant.TABLE_HWTS_ITER_SYS),
-            self.TASK_TYPE: "select task_offset from {0} "
+            self.TASK_TYPE: "select task_offset, task_count from {0} "
                             "where model_id=? and index_id=?".format(
                 DBNameConstant.TABLE_HWTS_ITER_SYS)
         }
 
-        count_sql_dict = {
-            self.AI_CORE_TYPE: "select ai_core_num from {0} "
-                               "where model_id=? and index_id=?".format(DBNameConstant.TABLE_HWTS_ITER_SYS),
-            self.TASK_TYPE: "select task_count from {0} "
-                            "where model_id=? and index_id=?".format(DBNameConstant.TABLE_HWTS_ITER_SYS)
-        }
-
-        return self._get_task_num(model_id, index_id, offset_sql_dict.get(data_type)), \
-               self._get_task_num(model_id, index_id, count_sql_dict.get(data_type))
+        return self._get_task_num(model_id, index_id, offset_count_dict.get(data_type))
 
     def check_table(self: any) -> bool:
         """
@@ -91,12 +83,12 @@ class HwtsIterModel(ParserModel):
         return DBManager.fetch_all_data(self.cur, sql, iter_range)
 
     def _get_task_num(self: any, model_id: int, index_id: int, sql: str) -> (int, int):
-        task_num = 0
+        task_num = (0, 0)
         try:
-            cur_num = self.cur.execute(sql, (model_id, index_id, )).fetchone()
+            task_num = self.cur.execute(sql, (model_id, index_id, )).fetchone()
         except sqlite3.Error as err:
             logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
             return task_num
-        if cur_num and cur_num[0]:
-            task_num = cur_num[0]
+        if task_num and len(task_num) == 2:
+            return task_num
         return task_num
