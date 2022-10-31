@@ -177,8 +177,8 @@ class HwtsCalculator(ICalculator, MsMultiProcess):
                 index_id,
                 model_id)
 
-            if IterInfoManager.check_parallel():
-                batch_list = len(prep_data_res) * [NumberConstant.DEFAULT_BATCH_ID]
+            if IterInfoManager.check_parallel(self._project_path):
+                batch_list = len(prep_data_res) * [[NumberConstant.DEFAULT_BATCH_ID]]
             else:
                 with self._iter_model:
                     batch_list = self._iter_model.get_batch_list(
