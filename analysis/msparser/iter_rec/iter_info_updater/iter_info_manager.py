@@ -20,6 +20,9 @@ class IterInfoManager:
         self.initial_iter_to_info()
 
     def initial_iter_to_info(self: any) -> None:
+        """
+        get behind parallel iter of each iter and aicore info, then regist them to each iter
+        """
         if not path_check(PathManager.get_db_path(self.project_path, DBNameConstant.DB_GE_INFO)):
             return
         with GeInfoModel(self.project_path) as ge_info_model:
@@ -27,10 +30,13 @@ class IterInfoManager:
             static_task_dict = ge_info_model.get_ge_task_data(Constant.TASK_TYPE_AI_CORE, Constant.GE_STATIC_SHAPE)
             dynamic_task_dict = ge_info_model.get_ge_task_data(Constant.TASK_TYPE_AI_CORE, Constant.GE_NON_STATIC_SHAPE)
 
-        self.regist_paralle_set(step_trace_data)
+        self.regist_parallel_set(step_trace_data)
         self.regist_aicore_set(static_task_dict, dynamic_task_dict)
 
-    def regist_paralle_set(self: any, step_trace_data: list) -> None:
+    def regist_parallel_set(self: any, step_trace_data: list) -> None:
+        """
+        get behind parallel iter of each iter by two for loops
+        """
         for index, step_trace_datum in enumerate(step_trace_data):
             iter_info = self.iter_to_iter_info.setdefault(step_trace_datum.iter_id,
                                                           IterInfo(step_trace_datum.model_id,
@@ -49,6 +55,9 @@ class IterInfoManager:
                     iter_info.behind_parallel_iter.add(behind_datum.iter_id)
 
     def regist_aicore_set(self: any, static_task_dict: dict, dynamic_task_dict: dict) -> None:
+        """
+        get aicore info for each task
+        """
         for iter_info_bean in self.iter_to_iter_info.values():
             iter_info_bean.static_aic_task_set = static_task_dict.get(iter_info_bean.model_id, set([]))
             iter_info_bean.dynamic_aic_task_set = dynamic_task_dict.get(
@@ -59,6 +68,9 @@ class IterInfoManager:
 
     @classmethod
     def check_parallel(cls: any, result_dir: str) -> bool:
+        """
+        check parallel by num of items satisifed condition
+        """
         if not DBManager.check_tables_in_db(PathManager.get_db_path(result_dir, DBNameConstant.DB_STEP_TRACE),
                                             DBNameConstant.TABLE_STEP_TRACE_DATA):
             return False

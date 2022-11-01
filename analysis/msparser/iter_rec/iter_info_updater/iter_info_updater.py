@@ -20,9 +20,11 @@ class IterInfoUpdater:
         """
         update parallel iter info pool
         """
+        # when iter id is increased, iter info should be updated
         if iter_id <= self.current_iter:
             return
 
+        # calculate iter info should be add
         new_iter_info = self.iteration_manager.iter_to_iter_info.get(iter_id, IterInfo())
 
         new_add_parallel_id = []
@@ -31,6 +33,7 @@ class IterInfoUpdater:
 
         self.update_new_add_iter_info(new_add_parallel_id)
 
+        # update current iter info
         self.current_iter = iter_id
         self.active_parallel_iter_id = new_iter_info.behind_parallel_iter
         self.active_parallel_iter_info = {
