@@ -87,7 +87,7 @@ class HwtsIterModel(ParserModel):
             task_num = self.cur.execute(sql, (model_id, index_id, )).fetchone()
         except sqlite3.Error as err:
             logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
-            return task_num
+            return (0, 0)
         if task_num and len(task_num) == 2:
             return task_num
         return (0, 0)

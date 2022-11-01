@@ -29,7 +29,7 @@ class TestIterInfoUpdater(unittest.TestCase):
             with ClassMock(GeInfoModel, ge_mock()):
                 IterInfoManager.initial_iter_to_info(mock.Mock())
 
-    def test_regist_paralle_set(self: any) -> None:
+    def test_regist_parallel_set(self: any) -> None:
         instance = mock.Mock()
         instance.iter_to_iter_info = {}
         step_trace_datum = mock.Mock()
@@ -42,7 +42,7 @@ class TestIterInfoUpdater(unittest.TestCase):
 
         step_trace_data = [step_trace_datum, step_trace_datum]
 
-        IterInfoManager.regist_paralle_set(instance, step_trace_data)
+        IterInfoManager.regist_parallel_set(instance, step_trace_data)
 
     def test_regist_aicore_set(self: any) -> None:
         instance = mock.Mock()
