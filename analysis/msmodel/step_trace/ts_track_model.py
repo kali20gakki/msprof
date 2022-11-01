@@ -85,6 +85,7 @@ class TsTrackModel(BaseModel, ABC):
         if not self.check_table():
             return []
 
+        # one item is enough for checking parallel, and limit 0, 1 can improve speed
         sql = "select * from {0} t1 inner join " \
               "(select * from {0}) t2 " \
               "where t1.step_end > t2.step_start and t1.step_end < t2.step_end limit 0, 1".format(

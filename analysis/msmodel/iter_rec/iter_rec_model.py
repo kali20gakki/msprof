@@ -83,7 +83,6 @@ class HwtsIterModel(ParserModel):
         return DBManager.fetch_all_data(self.cur, sql, iter_range)
 
     def _get_task_num(self: any, model_id: int, index_id: int, sql: str) -> (int, int):
-        task_num = (0, 0)
         try:
             task_num = self.cur.execute(sql, (model_id, index_id, )).fetchone()
         except sqlite3.Error as err:
@@ -91,4 +90,4 @@ class HwtsIterModel(ParserModel):
             return task_num
         if task_num and len(task_num) == 2:
             return task_num
-        return task_num
+        return (0, 0)
