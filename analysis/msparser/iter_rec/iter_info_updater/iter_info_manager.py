@@ -17,7 +17,6 @@ class IterInfoManager:
         self.project_path = project_path
         self.iter_to_iter_info = {}
         self.is_parallel_scene = False
-        self.initial_iter_to_info()
 
     def initial_iter_to_info(self: any) -> None:
         """

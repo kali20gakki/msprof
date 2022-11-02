@@ -14,6 +14,7 @@ from common_func.path_manager import PathManager
 from common_func.utils import Utils
 from msmodel.interface.base_model import BaseModel
 from profiling_bean.db_dto.step_trace_dto import StepTraceDto
+from msmodel.step_trace.ts_track_model import TsTrackModel
 
 
 class GeInfoModel(BaseModel):
@@ -110,12 +111,14 @@ class GeInfoModel(BaseModel):
         return result_data
 
     def get_step_trace_data(self: any) -> list:
-        db_path = PathManager.get_db_path(self.result_dir, DBNameConstant.DB_STEP_TRACE)
-        trace_conn, trace_curs = DBManager.check_connect_db_path(db_path)
-        sql = "select model_id, index_id, iter_id, step_start, step_end from {0}".format(
-            DBNameConstant.TABLE_STEP_TRACE_DATA)
-        step_trace_data = DBManager.fetch_all_data(trace_curs, sql, dto_class=StepTraceDto)
-        DBManager.destroy_db_connect(trace_conn, trace_curs)
+        ts_model = TsTrackModel(self.result_dir,
+                                DBNameConstant.DB_STEP_TRACE,
+                                [DBNameConstant.TABLE_STEP_TRACE_DATA])
+        if not ts_model.check_table():
+            return []
+
+        with ts_model:
+            step_trace_data = ts_model.get_step_trace_data()
         return step_trace_data
 
     def get_ge_task_data(self: any, datatype: str, is_static_shape: str) -> dict:
