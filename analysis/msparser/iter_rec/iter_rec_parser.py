@@ -150,6 +150,7 @@ class IterRecParser(IterParser):
         :return: None
         """
         self._batch_counter.init(Constant.TASK_TYPE_AI_CORE)
+        self._iter_info_updater.iteration_manager.initial_iter_to_info()
         self._parse_hwts_data()
 
     def ms_run(self: any) -> None:

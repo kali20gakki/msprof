@@ -204,6 +204,7 @@ class DBManager:
             else:
                 curs.execute(sql)
         except sqlite3.Error as _err:
+            print(sql)
             logging.error(str(_err), exc_info=Constant.TRACE_BACK_SWITCH)
             return []
         try:

@@ -13,6 +13,7 @@ from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.path_manager import PathManager
 from msmodel.interface.base_model import BaseModel
+from profiling_bean.db_dto.step_trace_dto import StepTraceDto
 
 
 class TsTrackModel(BaseModel, ABC):
@@ -92,3 +93,12 @@ class TsTrackModel(BaseModel, ABC):
             DBNameConstant.TABLE_STEP_TRACE_DATA)
         check_res = DBManager.fetch_all_data(self.cur, sql)
         return check_res
+
+    def get_step_trace_data(self: any) -> list:
+        """
+        get step trace data
+        """
+        sql = "select model_id, index_id, iter_id, step_start, step_end from {0}".format(
+            DBNameConstant.TABLE_STEP_TRACE_DATA)
+        step_trace_data = DBManager.fetch_all_data(self.cur, sql, dto_class=StepTraceDto)
+        return step_trace_data
