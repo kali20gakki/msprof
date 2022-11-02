@@ -2,9 +2,10 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
 from common_func.constant import Constant
-from msmodel.ge.ge_info_calculate_model import GeInfoModel
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msvp_common import is_number
+from msmodel.ge.ge_info_calculate_model import GeInfoModel
+from msparser.iter_rec.iter_info_updater.iter_info_manager import IterInfoManager
 
 
 class BatchCounter:
@@ -25,6 +26,7 @@ class BatchCounter:
         self._iter_stream_max_value = {}
         self._ge_task_batch_dict = {}
         self._initialized_stream = {}
+        self._is_parallel = False
 
     @staticmethod
     def id_to_int(stream_id: any, task_id: any) -> tuple:
@@ -44,6 +46,9 @@ class BatchCounter:
         :param datatype: AI_CORE or AI_CPU
         :return: None
         """
+        if IterInfoManager.check_parallel(self._project_path):
+            self._is_parallel = True
+
         ge_info_model = GeInfoModel(self._project_path)
         if ge_info_model.check_db() and ge_info_model.check_table():
             self._ge_static_shape_iter_model_dict, self._ge_static_shape_model_task_dict = \
@@ -59,6 +64,9 @@ class BatchCounter:
         :param current_iter_id: current iter id
         :return: batch id
         """
+        if self._is_parallel:
+            return 0
+
         stream_id, task_id = BatchCounter.id_to_int(stream_id, task_id)
 
         iter_stream = (current_iter_id, stream_id)

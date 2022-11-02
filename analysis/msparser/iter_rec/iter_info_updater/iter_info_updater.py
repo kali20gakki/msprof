@@ -55,7 +55,8 @@ class IterInfoUpdater:
         update count and offset
         """
         self.update_hwts(self.active_parallel_iter_info)
-
+        if self.current_iter == 514:
+            x = 10
         if task.sys_tag == self.HWTS_TASK_END and \
                 self.judge_ai_core(task, self.active_parallel_iter_info, ai_core_task):
             self.update_aicore(self.active_parallel_iter_info)
