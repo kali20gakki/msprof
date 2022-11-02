@@ -336,10 +336,11 @@ class NetConditionManager(MetaConditionManager):
                 continue
             for key in keys:
                 result += operator.operator_data.get(key, 0)
-        try:
-            result = result / base
-        except ZeroDivisionError:
+        if NumberConstant.is_zero(base):
             result = 0
+            logging.warning("The accumulated result of comparison fields is equal to 0.")
+        else:
+            result = result / base
         if not self.COMPARE_MAP.get(cmp_mode)(result, cpm_threshold):
             op_names_set.clear()
         op_names = list(op_names_set)
