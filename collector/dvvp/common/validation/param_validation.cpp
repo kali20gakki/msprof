@@ -932,6 +932,24 @@ bool ParamValidation::CheckHostSysOptionsIsValid(const std::string &hostSysOptio
     return false;
 }
 
+bool ParamValidation::CheckHostSysUsageOptionsIsValid(const std::string &hostSysUsageOptions) const
+{
+    if (hostSysUsageOptions.empty()) {
+        MSPROF_LOGI("hostSysUsageOptions is empty.");
+        return false;
+    }
+    const std::vector<std::string> hostSysWhiteList = {HOST_SYS_CPU, HOST_SYS_MEM};
+    for (size_t i = 0; i < hostSysWhiteList.size(); i++) {
+        if (hostSysUsageOptions.compare(hostSysWhiteList[i]) == 0) {
+            MSPROF_LOGD("hostSysUsageOptions is %s.", hostSysUsageOptions.c_str());
+            return true;
+        }
+    }
+    MSPROF_LOGE("hostSysUsageOptions[%s] is invalid.", hostSysUsageOptions.c_str());
+    CMD_LOGE("Argument --host-sys-usage[%s] is invalid.", hostSysUsageOptions.c_str());
+    return false;
+}
+
 bool ParamValidation::CheckHostSysPidIsValid(const int hostSysPid) const
 {
     if (hostSysPid < 0) {
@@ -1295,6 +1313,37 @@ bool ParamValidation::MsprofCheckHostSysValid(const std::string &hostSysParam) c
                 "'cpu|mem|disk|network|osrt'", hostSysArray[i].c_str());
             CMD_LOGE("Argument --host-sys=%s is invalid. Please input in the range of "
                 "'cpu|mem|disk|network|osrt'", hostSysParam.c_str());
+            return false;
+        }
+    }
+    return true;
+}
+
+bool ParamValidation::CheckHostSysUsageValid(const std::string &hostSysUsageParam) const
+{
+#if (defined(_WIN32) || defined(_WIN64) || defined(_MSC_VER))
+    MSPROF_LOGE("Currently, --host-sys-usage can be used only in the Linux environment.");
+    CMD_LOGE("Currently, --host-sys-usage can be used only in the Linux environment.");
+#endif
+    if (Platform::instance()->RunSocSide()) {
+        MSPROF_LOGE("Not in host side, --host-sys-usage is not supported.");
+        CMD_LOGE("Not in host side, --host-sys-usage is not supported.");
+        return false;
+    }
+    if (hostSysUsageParam.empty()) {
+        MSPROF_LOGE("Argument --host-sys-usage is empty. Please input in the range of "
+            "'cpu|mem'.");
+        CMD_LOGE("Argument --host-sys-usage is empty. Please input in the range of "
+            "'cpu|mem'.");
+        return false;
+    }
+    std::vector<std::string> hostSysUsageArray = Utils::Split(hostSysUsageParam, false, "", ",");
+    for (size_t i = 0; i < hostSysUsageArray.size(); ++i) {
+        if (!CheckHostSysUsageOptionsIsValid(hostSysUsageArray[i])) {
+            MSPROF_LOGE("Argument --host-sys-usage: invalid value:%s. Please input in the range of "
+                "'cpu|mem'.", hostSysUsageArray[i].c_str());
+            CMD_LOGE("Argument --host-sys-usage=%s is invalid. Please input in the range of "
+                "'cpu|mem'.", hostSysUsageParam.c_str());
             return false;
         }
     }
