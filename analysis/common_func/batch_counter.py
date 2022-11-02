@@ -65,7 +65,7 @@ class BatchCounter:
         :return: batch id
         """
         if self._is_parallel:
-            return 0
+            return NumberConstant.DEFAULT_BATCH_ID
 
         stream_id, task_id = BatchCounter.id_to_int(stream_id, task_id)
 
@@ -78,7 +78,7 @@ class BatchCounter:
         model_id = self._ge_static_shape_iter_model_dict.get(current_iter_id)
         if model_id is not None and stream_task_batch_value in self._ge_static_shape_model_task_dict.get(model_id,
                                                                                                          set()):
-            batch_id = 0
+            batch_id = NumberConstant.DEFAULT_BATCH_ID
         else:
             batch_id = self.deal_batch_id_for_each_task(
                 iter_stream=iter_stream, task_id=task_id,
