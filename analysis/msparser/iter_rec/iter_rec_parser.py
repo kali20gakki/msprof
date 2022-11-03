@@ -17,6 +17,7 @@ from common_func.db_name_constant import DBNameConstant
 from common_func.batch_counter import BatchCounter
 from common_func.iter_recorder import IterRecorder
 from common_func.msprof_exception import ProfException
+from common_func.db_manager import DBManager
 from framework.offset_calculator import OffsetCalculator
 from msmodel.ge.ge_info_calculate_model import GeInfoModel
 from msmodel.iter_rec.iter_rec_model import HwtsIterModel
@@ -149,6 +150,12 @@ class IterRecParser(IterParser):
         parse hwts data by ge info and iter sys cnt
         :return: None
         """
+        # The condition can not be remove, or hwts data would be flush two times without GE.
+        if not DBManager.check_tables_in_db(
+                PathManager.get_db_path(
+                    self._project_path, DBNameConstant.DB_GE_INFO), DBNameConstant.TABLE_GE_TASK):
+            return
+
         self._batch_counter.init(Constant.TASK_TYPE_AI_CORE)
         self._iter_info_updater.iteration_manager.initial_iter_to_info()
         self._parse_hwts_data()
@@ -188,6 +195,7 @@ class NoGeIterRecParser(IterParser):
         :return: None
         """
         self._parse_ai_core_data()
+        self._iter_info_updater.iteration_manager.initial_iter_to_info()
         self._parse_hwts_data()
         if self._overstep_task_cnt > 0:
             logging.warning("overstep task number is %s", self._overstep_task_cnt)
