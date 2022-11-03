@@ -17,19 +17,29 @@ class IterInfoManager:
         self.project_path = project_path
         self.iter_to_iter_info = {}
         self.is_parallel_scene = False
+        self._ts_track_model = TsTrackModel(self.project_path,
+                                DBNameConstant.DB_STEP_TRACE,
+                                [DBNameConstant.TABLE_STEP_TRACE_DATA])
+        self._ge_model = GeInfoModel(self.project_path)
 
     def initial_iter_to_info(self: any) -> None:
         """
         get behind parallel iter of each iter and aicore info, then regist them to each iter
         """
-        if not path_check(PathManager.get_db_path(self.project_path, DBNameConstant.DB_GE_INFO)):
+        if not self._ts_track_model.check_table():
             return
-        with GeInfoModel(self.project_path) as ge_info_model:
-            step_trace_data = ge_info_model.get_step_trace_data()
-            static_task_dict = ge_info_model.get_ge_task_data(Constant.TASK_TYPE_AI_CORE, Constant.GE_STATIC_SHAPE)
-            dynamic_task_dict = ge_info_model.get_ge_task_data(Constant.TASK_TYPE_AI_CORE, Constant.GE_NON_STATIC_SHAPE)
-
+        with self._ts_track_model:
+            step_trace_data = self._ts_track_model.get_step_trace_data()
         self.regist_parallel_set(step_trace_data)
+
+        if not DBManager.check_tables_in_db(PathManager.get_db_path(self.project_path, DBNameConstant.DB_GE_INFO),
+                                            DBNameConstant.TABLE_GE_TASK):
+            return
+        with self._ge_model:
+            static_task_dict = self._ge_model.get_ge_task_data(
+                Constant.TASK_TYPE_AI_CORE, Constant.GE_STATIC_SHAPE)
+            dynamic_task_dict = self._ge_model.get_ge_task_data(
+                Constant.TASK_TYPE_AI_CORE, Constant.GE_NON_STATIC_SHAPE)
         self.regist_aicore_set(static_task_dict, dynamic_task_dict)
 
     def regist_parallel_set(self: any, step_trace_data: list) -> None:
