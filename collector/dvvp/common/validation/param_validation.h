@@ -83,6 +83,7 @@ public:
     bool MsprofCheckSysDeviceValid(const std::string &devListParam) const;
     bool MsprofCheckSysPeriodValid(const std::string &sysPeriodParam) const;
     bool MsprofCheckHostSysValid(const std::string &hostSysParam) const;
+    bool CheckHostSysUsageValid(const std::string &hostSysUsageParam) const;
     bool CheckHostSysToolsExit(const std::string &hostSysParam, const std::string &resultDir,
         const std::string &appDir) const;
 
@@ -102,6 +103,7 @@ private:
                                            const MmProcess tmpProcess) const;
     int CheckHostOutString(const std::string tmpStr, const std::string toolName) const;
     int UninitCheckHostSysCmd(const MmProcess checkProcess) const;
+    bool CheckHostSysUsageOptionsIsValid(const std::string &hostSysUsageOptions) const;
 };
 }
 }
