@@ -107,6 +107,9 @@ class MsprofIteration:
             return []
 
         current_iter = self.get_iteration_info_by_index_id(index_id, model_id)
+        if not current_iter:
+            return []
+
         # find first parallel iter
         sql = "select model_id, index_id, iter_id, step_start, step_end from {0} " \
               "where step_end>? and step_end<=? order by step_end".format(DBNameConstant.TABLE_STEP_TRACE_DATA)

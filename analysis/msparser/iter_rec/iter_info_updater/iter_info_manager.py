@@ -16,7 +16,6 @@ class IterInfoManager:
     def __init__(self: any, project_path: str) -> None:
         self.project_path = project_path
         self.iter_to_iter_info = {}
-        self.is_parallel_scene = False
         self._ts_track_model = TsTrackModel(self.project_path,
                                 DBNameConstant.DB_STEP_TRACE,
                                 [DBNameConstant.TABLE_STEP_TRACE_DATA])
