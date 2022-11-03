@@ -104,7 +104,7 @@ class TestGeInfoModel(unittest.TestCase):
                 mock.patch(NAMESPACE + ".GeInfoModel.get_ge_task_data", return_value={0: {7}, 1: {2}}), \
                 mock.patch(NAMESPACE + ".PathManager.get_db_path"), \
                 mock.patch(NAMESPACE + ".DBManager.create_connect_db", return_value=[1, 2]), \
-                mock.patch(NAMESPACE + ".DBManager.fetch_all_data",
+                mock.patch(NAMESPACE + ".GeInfoModel.get_step_trace_data",
                            return_value=[self.step_trace_dto_1, self.step_trace_dto_2]), \
                 mock.patch(NAMESPACE + ".DBManager.destroy_db_connect"):
             check = GeInfoModel("")
