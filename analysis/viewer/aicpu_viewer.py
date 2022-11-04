@@ -95,7 +95,7 @@ class ParseAiCpuData:
             return DBManager.fetch_all_data(ai_cpu_conn.cursor(), sql)
 
         iter_time = MsprofIteration(project_path).get_iteration_time(iteration_id, model_id)
-        iter_dict = MsprofIteration(project_path).get_iter_dict_with_index_and_model(iteration_id, model_id)
+        iter_list = MsprofIteration(project_path).get_iter_list_with_index_and_model(iteration_id, model_id)
         ai_cpu_data = []
         if not iter_time:
             return ai_cpu_data
@@ -111,6 +111,6 @@ class ParseAiCpuData:
                     DBNameConstant.TABLE_GE_TASK,
                     model_id=model_id, index_id=iteration_id, task_type=Constant.TASK_TYPE_AI_CPU)
 
-        for iteration_id, model_id in iter_dict.values():
+        for iteration_id, model_id in iter_list:
             ai_cpu_data.extend(DBManager.fetch_all_data(ai_cpu_conn.cursor(), sql, (iteration_id, model_id)))
         return ai_cpu_data
