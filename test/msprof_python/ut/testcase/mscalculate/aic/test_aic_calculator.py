@@ -35,13 +35,12 @@ class TestAicCalculator(unittest.TestCase):
                 mock.patch('msmodel.iter_rec.iter_rec_model.HwtsIterModel.get_aic_sum_count',
                            return_value=8):
             check = AicCalculator(self.file_list, CONFIG)
-            result = check._get_offset_and_total(0)
+            result = check._get_offset_and_total(0, 1)
             self.assertEqual(result, (0, -1))
 
     def test_parse_by_iter(self):
         with mock.patch('msmodel.iter_rec.iter_rec_model.HwtsIterModel.check_db', return_value=True), \
-                mock.patch('msmodel.iter_rec.iter_rec_model.HwtsIterModel.check_table', return_value=True), \
-                mock.patch(NAMESPACE + '.MsprofIteration.get_iteration_id_by_index_id', return_value=10):
+                mock.patch('msmodel.iter_rec.iter_rec_model.HwtsIterModel.check_table', return_value=True):
             with mock.patch(NAMESPACE + '.AicCalculator._get_offset_and_total', return_value=(127, 1280)), \
                     mock.patch(NAMESPACE + '.AicCalculator._parse'), \
                     mock.patch('framework.offset_calculator.FileCalculator.prepare_process'), \
