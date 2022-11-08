@@ -13,9 +13,23 @@ void EnvManager::SetGlobalEnv(std::vector<std::string> &envList)
     envList_ = envList;
 }
 
-const std::vector<std::string> EnvManager::GetGlobalEnv()
+std::vector<std::string> EnvManager::GetGlobalEnv()
 {
     return envList_;
+}
+
+int EnvManager::SetEnvList(CONST_CHAR_PTR_PTR envp, std::vector<std::string> &envpList)
+{
+    uint32_t envpLen = 0;
+    constexpr uint32_t maxEnvpLen = 4096;
+    while (*envp) {
+        envpList.emplace_back(*envp++);
+        envpLen++;
+        if (envpLen >= maxEnvpLen) {
+            return -1;
+        }
+    }
+    return 0;
 }
 }
 }
