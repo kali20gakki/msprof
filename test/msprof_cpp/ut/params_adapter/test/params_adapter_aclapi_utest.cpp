@@ -122,15 +122,3 @@ TEST_F(ParamsAdapterAclapiUtest, ProfSystemCfgToContainer)
     argsArr[ACL_PROF_HOST_SYS] = "10";
     AclApiParamAdapterMgr->ProfSystemCfgToContainer(&apiCfg, argsArr);
 }
-
-TEST_F(ParamsAdapterAclapiUtest, ProfSystemHardwareMemCfgToContainer)
-{
-    GlobalMockObject::verify();
-    std::shared_ptr<ParamsAdapterAclApi> AclApiParamAdapterMgr;
-    MSVP_MAKE_SHARED0_BREAK(AclApiParamAdapterMgr, ParamsAdapterAclApi);
-    std::array<std::string, ACL_PROF_ARGS_MAX> argsArr;
-    argsArr[ACL_PROF_SYS_HARDWARE_MEM_FREQ] = "10";
-    argsArr[ACL_PROF_LLC_MODE] = "10";
-    AclApiParamAdapterMgr->ProfSystemHardwareMemCfgToContainer(argsArr);
-}
-

@@ -17,6 +17,7 @@
 #include "msprof_error_manager.h"
 #include "config/config_manager.h"
 #include "cmd_log.h"
+#include "params_adapter.h"
 
 #ifndef MSPROF_BIN
 #undef CMD_LOGE
@@ -36,6 +37,7 @@ using namespace analysis::dvvp::common::utils;
 using namespace Collector::Dvvp::Plugin;
 using namespace Collector::Dvvp::Mmpa;
 using namespace Collector::Dvvp::Msprofbin;
+using namespace Collector::Dvvp::ParamsAdapter;
 
 const int MIN_INTERVAL = 1;
 const int MAX_INTERVAL = 15 * 24 * 3600 * 1000; // 15 * 24 * 3600 * 1000 = 15day's micro seconds
@@ -246,32 +248,6 @@ bool ParamValidation::CheckFreqIsValid(const std::string &cfgName, const std::st
             std::vector<std::string>({"freq", freq, errReason}));
         return false;
     }
-}
-
-bool ParamValidation::CheckHostSysUsageIsValid(const std::string &hostSysUsage) const
-{
-    if (Platform::instance()->RunSocSide()) {
-        MSPROF_LOGE("Not in host side, host-sys-usage is not supported");
-        return false;
-    }
-    if (hostSysUsage.empty()) {
-        MSPROF_LOGI("hostsysusage is empty");
-        return true;
-    }
-    std::string errReason = "host_sys_usage should be in range of 'cpu | mem'.";
-    std::vector<std::string> hostSysUsageArray = Utils::Split(hostSysUsage, false, "", ",");
-    for (size_t i = 0; i < hostSysUsageArray.size(); ++i) {
-        if ((hostSysUsageArray[i].compare("cpu") != 0) && (hostSysUsageArray[i].compare("mem") != 0)) {
-            MSPROF_LOGE("Argument --host-sys-usage=%s is invalid. Please input in the range of "
-                "'cpu | mem'", hostSysUsageArray[i].c_str());
-            CMD_LOGE("Argument --host-sys-usage=%s is invalid. Please input in the range of "
-                "'cpu | mem'", hostSysUsageArray[i].c_str());
-            MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
-                std::vector<std::string>({"host_sys_usage", hostSysUsage, errReason}));
-            return false;
-        }
-    }
-    return true;
 }
 
 bool ParamValidation::CheckHostSysPidValid(const std::string &hostSysPid) const
