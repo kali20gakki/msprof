@@ -22,6 +22,8 @@ typedef enum {
     ACL_PROF_DVPP_FREQ = 27,
     // host-sys 40-
     ACL_PROF_HOST_SYS = 40,
+    ACL_PROF_HOST_SYS_USAGE = 41,
+    ACL_PROF_HOST_SYS_USAGE_FREQ = 42,
     ACL_PROF_ARGS_MAX
 } aclprofConfigType;
 

@@ -246,7 +246,7 @@ void ProcTimerHandler::SendData(CONST_UNSIGNED_CHAR_PTR buf, unsigned int size)
     fileChunk->set_islastchunk(false);
     fileChunk->set_needack(false);
     fileChunk->mutable_hdr()->set_job_ctx(jobCtx_->ToString());
-    if (tag >= PROF_HOST_PROC_CPU && tag <= PROF_HOST_SYS_NETWORK) {
+    if (tag >= PROF_HOST_PID_CPU && tag <= PROF_HOST_SYS_NETWORK) {
         fileChunk->set_datamodule(analysis::dvvp::common::config::FileChunkDataModule::PROFILING_IS_FROM_MSPROF_HOST);
     } else {
         fileChunk->set_datamodule(analysis::dvvp::common::config::FileChunkDataModule::PROFILING_IS_FROM_DEVICE);
@@ -667,7 +667,17 @@ int ProcAllPidsFileHandler::Init()
 {
     MSPROF_LOGI("ProcAllPidsFileHandler Init");
     GetCurPids(prevPids_);
-    HandleNewPids(prevPids_);
+    TimerHandlerTag tag = GetTag();
+    if (tag == PROF_SYS_ALL_PID) {
+        HandleNewPidsCpu(prevPids_);
+        HandleNewPidsMem(prevPids_);
+    } else if (tag == PROF_HOST_ALL_PID_CPU) {
+        HandleNewPidsCpu(prevPids_);
+    } else if (tag == PROF_HOST_ALL_PID_MEM) {
+        HandleNewPidsMem(prevPids_);
+    } else {
+        MSPROF_LOGW("ProcAllPidsFileHandler tag %u is invalid", tag);
+    }
 
     return PROFILING_SUCCESS;
 }
@@ -772,46 +782,49 @@ void ProcAllPidsFileHandler::GetNewExitPids(std::vector<unsigned int> &curPids, 
     }
 }
 
-void ProcAllPidsFileHandler::HandleNewPids(std::vector<unsigned int> &newPids)
+void ProcAllPidsFileHandler::HandleNewPidsMem(std::vector<unsigned int> &newPids)
 {
     SHARED_PTR_ALIA<ProcPidFileHandler> pidFileHandler = nullptr;
     SHARED_PTR_ALIA<ProcPidMemFileHandler> pidMemHandler = nullptr;
-    SHARED_PTR_ALIA<ProcPidStatFileHandler> pidStatHandler = nullptr;
 
-    size_t size = newPids.size();
-    for (size_t i = 0; i < size; i++) {
-        pidFileHandler = std::make_shared<ProcPidFileHandler>();
-
-        std::string str;
-
-        std::string pidSrcMemFileName =  std::string(PROC_FILE) + "/"
-                                         + std::to_string(newPids[i]) + "/" + PROC_PID_MEM;
-        std::string pidSrcStatFileName = std::string(PROC_FILE) + "/"
-                                         + std::to_string(newPids[i]) + "/" + PROC_PID_STAT;
-
+    for (size_t i = 0; i < newPids.size(); i++) {
+        MSVP_MAKE_SHARED0_VOID(pidFileHandler, ProcPidFileHandler);
+        constexpr unsigned int procPidMemBufSize = 4096; // the size of per mem data is about 100Byte
         std::string pidRetMemFileName = PROF_PID_MEM_FILE;
-        pidRetMemFileName += str;
-        std::string pidStatMemFileName = PROF_PID_STAT_FILE;
-        pidStatMemFileName += str;
-
-        const unsigned int procPidMemBufSize = (1 << 12); // 1 << 12, the size of per data is about 100Byte
-        const unsigned int procPidStatBufSize = (1 << 12); // 1 << 12, the size of per stat data is about 300Byte
-
+        std::string pidSrcMemFileName = std::string(PROC_FILE) + "/" + std::to_string(newPids[i]) + "/" + PROC_PID_MEM;
         pidMemHandler = std::make_shared<ProcPidMemFileHandler>(GetTag(), devId_, procPidMemBufSize,
-                                                                sampleIntervalNs_, pidSrcMemFileName,
-                                                                pidRetMemFileName, param_,
-                                                                jobCtx_, upLoader_, newPids[i]);
-        pidStatHandler = std::make_shared<ProcPidStatFileHandler>(GetTag(), devId_, procPidStatBufSize,
-            sampleIntervalNs_, pidSrcStatFileName,
-            pidStatMemFileName, param_, jobCtx_, upLoader_, newPids[i]);
-        if (pidMemHandler->Init() == PROFILING_SUCCESS &&
-            pidStatHandler->Init() == PROFILING_SUCCESS) {
+            sampleIntervalNs_, pidSrcMemFileName, pidRetMemFileName, param_, jobCtx_, upLoader_, newPids[i]);
+        if (pidMemHandler->Init() == PROFILING_SUCCESS) {
             pidFileHandler->memHandler_ = pidMemHandler;
-            pidFileHandler->statHandler_ = pidStatHandler;
-
             pidsMap_.insert(std::pair<unsigned int, SHARED_PTR_ALIA<ProcPidFileHandler> >(newPids[i], pidFileHandler));
+        } else {
+            MSPROF_LOGI("Init pid %d mem stat handler fail", newPids[i]);
         }
     }
+    MSPROF_LOGI("Init pids mem stat handler success");
+}
+
+void ProcAllPidsFileHandler::HandleNewPidsCpu(std::vector<unsigned int> &newPids)
+{
+    SHARED_PTR_ALIA<ProcPidFileHandler> pidFileHandler = nullptr;
+    SHARED_PTR_ALIA<ProcPidStatFileHandler> pidStatHandler = nullptr;
+
+    for (size_t i = 0; i < newPids.size(); i++) {
+        MSVP_MAKE_SHARED0_VOID(pidFileHandler, ProcPidFileHandler);
+        std::string pidStatFileName = PROF_PID_STAT_FILE;
+        constexpr unsigned int procPidStatBufSize = 4096; // the size of per cpu data is about 300Byte
+        std::string pidSrcStatFileName =
+            std::string(PROC_FILE) + "/" + std::to_string(newPids[i]) + "/" + PROC_PID_STAT;
+        pidStatHandler = std::make_shared<ProcPidStatFileHandler>(GetTag(), devId_, procPidStatBufSize,
+            sampleIntervalNs_, pidSrcStatFileName, pidStatFileName, param_, jobCtx_, upLoader_, newPids[i]);
+        if (pidStatHandler->Init() == PROFILING_SUCCESS) {
+            pidFileHandler->statHandler_ = pidStatHandler;
+            pidsMap_.insert(std::pair<unsigned int, SHARED_PTR_ALIA<ProcPidFileHandler> >(newPids[i], pidFileHandler));
+        } else {
+            MSPROF_LOGI("Init pid %d cpu stat handler fail", newPids[i]);
+        }
+    }
+    MSPROF_LOGI("Init pids cpu stat handler success");
 }
 
 void ProcAllPidsFileHandler::HandleExitPids(std::vector<unsigned int> &exitPids)
@@ -850,8 +863,17 @@ int ProcAllPidsFileHandler::Execute()
 
         GetNewExitPids(curPids, prevPids_, newPids, exitPids);
         HandleExitPids(exitPids);
-        HandleNewPids(newPids);
-
+        TimerHandlerTag tag = GetTag();
+        if (tag == PROF_SYS_ALL_PID) {
+            HandleNewPidsCpu(newPids);
+            HandleNewPidsMem(newPids);
+        } else if (tag == PROF_HOST_ALL_PID_CPU) {
+            HandleNewPidsCpu(newPids);
+        } else if (tag == PROF_HOST_ALL_PID_MEM) {
+            HandleNewPidsMem(newPids);
+        } else {
+            MSPROF_LOGW("ProcAllPidsFileHandler tag %u is invalid", tag);
+        }
         prevPids_.swap(curPids);
         for (auto iter = pidsMap_.begin(); iter != pidsMap_.end(); iter++) {
             iter->second->Execute();

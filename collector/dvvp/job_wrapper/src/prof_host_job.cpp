@@ -80,10 +80,7 @@ int ProfHostDataBase::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
         MSPROF_INNER_ERROR("EK9999", "Failed to get host upLoader, job_id=%s", cfg->comParams->params->job_id.c_str());
         return PROFILING_FAILED;
     }
-    // default 20ms collecttion interval
-    static const unsigned int profStatIntervalMs = 20; // 20 MS
-    static const unsigned int profMsToNs = 1000000; // 1000000 NS
-    sampleIntervalNs_ = (static_cast<unsigned long long>(profStatIntervalMs) * profMsToNs);
+
     return PROFILING_SUCCESS;
 }
 
@@ -93,33 +90,34 @@ int ProfHostDataBase::Uninit()
     return PROFILING_SUCCESS;
 }
 
-ProfHostCpuJob::ProfHostCpuJob() : ProfHostDataBase()
+ProfHostPidCpuJob::ProfHostPidCpuJob() : ProfHostDataBase()
 {
 }
 
-ProfHostCpuJob::~ProfHostCpuJob()
+ProfHostPidCpuJob::~ProfHostPidCpuJob()
 {
 }
 
-int ProfHostCpuJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
+int ProfHostPidCpuJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 {
     if (CheckJobContextParam(cfg) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
+    if (cfg->comParams->params->host_one_pid_cpu_profiling.compare(
+        analysis::dvvp::common::config::MSVP_PROF_ON) != 0) {
+        MSPROF_LOGI("Host cpu profiling not enabled");
         return PROFILING_FAILED;
     }
     int ret = ProfHostDataBase::Init(cfg);
     if (ret != PROFILING_SUCCESS) {
         return ret;
     }
-
-    if (collectionJobCfg_->comParams->params->host_cpu_profiling.compare(
-        analysis::dvvp::common::config::MSVP_PROF_ON) != 0) {
-        MSPROF_LOGI("Host cpu profiling not enabled");
-        return PROFILING_FAILED;
-    }
+    sampleIntervalNs_ =
+        static_cast<unsigned long long>(cfg->comParams->params->host_cpu_profiling_sampling_interval) * MS_TO_NS;
     return PROFILING_SUCCESS;
 }
 
-int ProfHostCpuJob::Process()
+int ProfHostPidCpuJob::Process()
 {
     if (CheckJobCommonParam(collectionJobCfg_) != PROFILING_SUCCESS) {
         return PROFILING_FAILED;
@@ -127,54 +125,55 @@ int ProfHostCpuJob::Process()
 
     SHARED_PTR_ALIA<ProcHostCpuHandler> cpuHandler;
     MSVP_MAKE_SHARED7_RET(cpuHandler, ProcHostCpuHandler,
-        PROF_HOST_PROC_CPU, PROC_HOST_PROC_DATA_BUF_SIZE, sampleIntervalNs_,
-        PROF_HOST_PROC_CPU_USAGE_FILE, collectionJobCfg_->comParams->params,
+        PROF_HOST_PID_CPU, PROC_HOST_PROC_DATA_BUF_SIZE, sampleIntervalNs_,
+        PROF_HOST_PID_CPU_USAGE_FILE, collectionJobCfg_->comParams->params,
         collectionJobCfg_->comParams->jobCtx, upLoader_, PROFILING_FAILED);
     if (cpuHandler->Init() != PROFILING_SUCCESS) {
-        MSPROF_LOGE("HostCpuHandler Init Failed");
-        MSPROF_INNER_ERROR("EK9999", "HostCpuHandler Init Failed");
+        MSPROF_LOGE("ProcHostCpuHandler Init Failed");
+        MSPROF_INNER_ERROR("EK9999", "ProcHostCpuHandler Init Failed");
         return PROFILING_FAILED;
     }
-    MSPROF_LOGI("HostCpuHandler Init succ, sampleIntervalNs_:%llu", sampleIntervalNs_);
+    MSPROF_LOGI("ProcHostCpuHandler Init succ, sampleIntervalNs_:%llu", sampleIntervalNs_);
 
-    StartHostProfTimer(PROF_HOST_PROC_CPU, cpuHandler);
+    StartHostProfTimer(PROF_HOST_PID_CPU, cpuHandler);
     return PROFILING_SUCCESS;
 }
 
-int ProfHostCpuJob::Uninit()
+int ProfHostPidCpuJob::Uninit()
 {
-    StopHostProfTimer(PROF_HOST_PROC_CPU);
+    StopHostProfTimer(PROF_HOST_PID_CPU);
     (void)ProfHostDataBase::Uninit();
     return PROFILING_SUCCESS;
 }
 
-ProfHostMemJob::ProfHostMemJob() : ProfHostDataBase()
+ProfHostPidMemJob::ProfHostPidMemJob() : ProfHostDataBase()
 {
 }
 
-ProfHostMemJob::~ProfHostMemJob()
+ProfHostPidMemJob::~ProfHostPidMemJob()
 {
 }
 
-int ProfHostMemJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
+int ProfHostPidMemJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 {
     if (CheckJobContextParam(cfg) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
+    if (cfg->comParams->params->host_one_pid_mem_profiling.compare(
+        analysis::dvvp::common::config::MSVP_PROF_ON) != 0) {
+        MSPROF_LOGI("Host memory profiling not enabled");
         return PROFILING_FAILED;
     }
     int ret = ProfHostDataBase::Init(cfg);
     if (ret != PROFILING_SUCCESS) {
         return ret;
     }
-
-    if (collectionJobCfg_->comParams->params->host_mem_profiling.compare(
-        analysis::dvvp::common::config::MSVP_PROF_ON) != 0) {
-        MSPROF_LOGI("Host memory profiling not enabled");
-        return PROFILING_FAILED;
-    }
+    sampleIntervalNs_ =
+        static_cast<unsigned long long>(cfg->comParams->params->host_mem_profiling_sampling_interval) * MS_TO_NS;
     return PROFILING_SUCCESS;
 }
 
-int ProfHostMemJob::Process()
+int ProfHostPidMemJob::Process()
 {
     if (CheckJobCommonParam(collectionJobCfg_) != PROFILING_SUCCESS) {
         return PROFILING_FAILED;
@@ -182,8 +181,8 @@ int ProfHostMemJob::Process()
 
     SHARED_PTR_ALIA<ProcHostMemHandler> memHandler;
     MSVP_MAKE_SHARED7_RET(memHandler, ProcHostMemHandler,
-        PROF_HOST_PROC_MEM, PROC_HOST_PROC_DATA_BUF_SIZE, sampleIntervalNs_,
-        PROF_HOST_PROC_MEM_USAGE_FILE, collectionJobCfg_->comParams->params,
+        PROF_HOST_PID_MEM, PROC_HOST_PROC_DATA_BUF_SIZE, sampleIntervalNs_,
+        PROF_HOST_PID_MEM_USAGE_FILE, collectionJobCfg_->comParams->params,
         collectionJobCfg_->comParams->jobCtx, upLoader_, PROFILING_FAILED);
     if (memHandler->Init() != PROFILING_SUCCESS) {
         MSPROF_LOGE("HostMemHandler Init Failed");
@@ -192,14 +191,127 @@ int ProfHostMemJob::Process()
     }
     MSPROF_LOGI("HostMemHandler Init succ, sampleIntervalNs_:%llu", sampleIntervalNs_);
 
-    StartHostProfTimer(PROF_HOST_PROC_MEM, memHandler);
+    StartHostProfTimer(PROF_HOST_PID_MEM, memHandler);
     return PROFILING_SUCCESS;
 }
 
-int ProfHostMemJob::Uninit()
+int ProfHostPidMemJob::Uninit()
 {
-    StopHostProfTimer(PROF_HOST_PROC_MEM);
+    StopHostProfTimer(PROF_HOST_PID_MEM);
     (void)ProfHostDataBase::Uninit();
+    return PROFILING_SUCCESS;
+}
+
+ProfHostAllPidCpuJob::ProfHostAllPidCpuJob() : ProfHostDataBase()
+{
+}
+
+ProfHostAllPidCpuJob::~ProfHostAllPidCpuJob()
+{
+}
+
+int ProfHostAllPidCpuJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
+{
+    if (ProfHostDataBase::CheckHostProfiling(cfg) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
+    if (cfg->comParams->params->host_all_pid_cpu_profiling.compare(MSVP_PROF_ON) != 0) {
+        MSPROF_LOGI("host_all_pid_cpu_profiling not enabled");
+        return PROFILING_FAILED;
+    }
+    sampleIntervalNs_ =
+        static_cast<unsigned long long>(cfg->comParams->params->host_cpu_profiling_sampling_interval) * MS_TO_NS;
+    analysis::dvvp::transport::UploaderMgr::instance()->GetUploader(cfg->comParams->params->job_id, upLoader_);
+    if (upLoader_ == nullptr) {
+        MSPROF_LOGE("Failed to get host upLoader, job_id=%s", cfg->comParams->params->job_id.c_str());
+        MSPROF_INNER_ERROR("EK9999", "Failed to get host upLoader, job_id=%s", cfg->comParams->params->job_id.c_str());
+        return PROFILING_FAILED;
+    }
+    collectionJobCfg_ = cfg;
+    return PROFILING_SUCCESS;
+}
+
+int ProfHostAllPidCpuJob::Process()
+{
+    if (CheckJobContextParam(collectionJobCfg_) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
+    SHARED_PTR_ALIA<ProcAllPidsFileHandler> pidsHandler;
+    MSVP_MAKE_SHARED6_RET(pidsHandler, ProcAllPidsFileHandler, PROF_HOST_ALL_PID_CPU,
+        collectionJobCfg_->comParams->devId, sampleIntervalNs_, collectionJobCfg_->comParams->params,
+        collectionJobCfg_->comParams->jobCtx, upLoader_, PROFILING_FAILED);
+    if (pidsHandler->Init() != PROFILING_SUCCESS) {
+        MSPROF_LOGE("All pids handler cpu init fail");
+        MSPROF_INNER_ERROR("EK9999", "pidsHandler Init Failed");
+        return PROFILING_FAILED;
+    }
+    MSPROF_LOGI("All pids handler cpu init success, sampleIntervalNs_:%llu", sampleIntervalNs_);
+    TimerManager::instance()->StartProfTimer();
+    TimerManager::instance()->RegisterProfTimerHandler(PROF_HOST_ALL_PID_CPU, pidsHandler);
+    return PROFILING_SUCCESS;
+}
+
+int ProfHostAllPidCpuJob::Uninit()
+{
+    TimerManager::instance()->RemoveProfTimerHandler(PROF_HOST_ALL_PID_CPU);
+    TimerManager::instance()->StopProfTimer();
+    upLoader_.reset();
+    return PROFILING_SUCCESS;
+}
+
+ProfHostAllPidMemJob::ProfHostAllPidMemJob() : ProfHostDataBase()
+{
+}
+
+ProfHostAllPidMemJob::~ProfHostAllPidMemJob()
+{
+}
+
+int ProfHostAllPidMemJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
+{
+    if (ProfHostDataBase::CheckHostProfiling(cfg) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
+    if (cfg->comParams->params->host_all_pid_mem_profiling.compare(MSVP_PROF_ON) != 0) {
+        MSPROF_LOGI("pid_profiling not enabled");
+        return PROFILING_FAILED;
+    }
+    sampleIntervalNs_ =
+        static_cast<unsigned long long>(cfg->comParams->params->host_mem_profiling_sampling_interval) * MS_TO_NS;
+    analysis::dvvp::transport::UploaderMgr::instance()->GetUploader(cfg->comParams->params->job_id, upLoader_);
+    if (upLoader_ == nullptr) {
+        MSPROF_LOGE("Failed to get host upLoader, job_id=%s", cfg->comParams->params->job_id.c_str());
+        MSPROF_INNER_ERROR("EK9999", "Failed to get host upLoader, job_id=%s", cfg->comParams->params->job_id.c_str());
+        return PROFILING_FAILED;
+    }
+    collectionJobCfg_ = cfg;
+    return PROFILING_SUCCESS;
+}
+
+int ProfHostAllPidMemJob::Process()
+{
+    if (CheckJobContextParam(collectionJobCfg_) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
+    SHARED_PTR_ALIA<ProcAllPidsFileHandler> pidsHandler;
+    MSVP_MAKE_SHARED6_RET(pidsHandler, ProcAllPidsFileHandler, PROF_HOST_ALL_PID_MEM,
+        collectionJobCfg_->comParams->devId, sampleIntervalNs_, collectionJobCfg_->comParams->params,
+        collectionJobCfg_->comParams->jobCtx, upLoader_, PROFILING_FAILED);
+    if (pidsHandler->Init() != PROFILING_SUCCESS) {
+        MSPROF_LOGE("All pids handler mem init fail");
+        MSPROF_INNER_ERROR("EK9999", "pidsHandler Init Failed");
+        return PROFILING_FAILED;
+    }
+    MSPROF_LOGI("All pids handler mem init success, sampleIntervalNs_:%llu", sampleIntervalNs_);
+    TimerManager::instance()->StartProfTimer();
+    TimerManager::instance()->RegisterProfTimerHandler(PROF_HOST_ALL_PID_MEM, pidsHandler);
+    return PROFILING_SUCCESS;
+}
+
+int ProfHostAllPidMemJob::Uninit()
+{
+    StopHostProfTimer(PROF_HOST_ALL_PID_MEM);
+    upLoader_.reset();
     return PROFILING_SUCCESS;
 }
 
@@ -216,16 +328,125 @@ int ProfHostNetworkJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
     if (CheckJobContextParam(cfg) != PROFILING_SUCCESS) {
         return PROFILING_FAILED;
     }
-    int ret = ProfHostDataBase::Init(cfg);
-    if (ret != PROFILING_SUCCESS) {
-        return ret;
-    }
-
-    if (collectionJobCfg_->comParams->params->host_network_profiling.compare(
+    if (cfg->comParams->params->host_network_profiling.compare(
         analysis::dvvp::common::config::MSVP_PROF_ON) != 0) {
         MSPROF_LOGI("Host network profiling not enabled");
         return PROFILING_FAILED;
     }
+    int ret = ProfHostDataBase::Init(cfg);
+    if (ret != PROFILING_SUCCESS) {
+        return ret;
+    }
+    return PROFILING_SUCCESS;
+}
+
+ProfHostSysCpuJob::ProfHostSysCpuJob() : ProfHostDataBase()
+{
+}
+ 
+ProfHostSysCpuJob::~ProfHostSysCpuJob()
+{
+}
+ 
+int ProfHostSysCpuJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
+{
+    if (CheckJobContextParam(cfg) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
+    if (cfg->comParams->params->host_sys_cpu_profiling.compare(
+        analysis::dvvp::common::config::MSVP_PROF_ON) != 0) {
+        MSPROF_LOGI("Host cpu profiling not enabled");
+        return PROFILING_FAILED;
+    }
+    int ret = ProfHostDataBase::Init(cfg);
+    if (ret != PROFILING_SUCCESS) {
+        return ret;
+    }
+    sampleIntervalNs_ =
+        static_cast<unsigned long long>(cfg->comParams->params->host_cpu_profiling_sampling_interval) * MS_TO_NS;
+    return PROFILING_SUCCESS;
+}
+ 
+int ProfHostSysCpuJob::Process()
+{
+    if (CheckJobCommonParam(collectionJobCfg_) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
+    SHARED_PTR_ALIA<ProcStatFileHandler> sysCpuHandler;
+    MSVP_MAKE_SHARED9_RET(sysCpuHandler, ProcStatFileHandler,
+        PROF_HOST_SYS_CPU, DEFAULT_HOST_ID, PROC_HOST_PROC_DATA_BUF_SIZE, sampleIntervalNs_,
+        PROF_PROC_STAT, PROF_HOST_SYS_CPU_USAGE_FILE, collectionJobCfg_->comParams->params,
+        collectionJobCfg_->comParams->jobCtx, upLoader_, PROFILING_FAILED);
+    if (sysCpuHandler->Init() != PROFILING_SUCCESS) {
+        MSPROF_LOGE("ProcStatFileHandler Init Failed");
+        MSPROF_INNER_ERROR("EK9999", "ProcStatFileHandler Init Failed");
+        return PROFILING_FAILED;
+    }
+    MSPROF_LOGI("ProcStatFileHandler Init succ, sampleIntervalNs_:%llu", sampleIntervalNs_);
+    StartHostProfTimer(PROF_HOST_SYS_CPU, sysCpuHandler);
+    return PROFILING_SUCCESS;
+}
+ 
+int ProfHostSysCpuJob::Uninit()
+{
+    StopHostProfTimer(PROF_HOST_SYS_CPU);
+    (void)ProfHostDataBase::Uninit();
+    return PROFILING_SUCCESS;
+}
+ 
+ 
+ProfHostSysMemJob::ProfHostSysMemJob() : ProfHostDataBase()
+{
+}
+ 
+ProfHostSysMemJob::~ProfHostSysMemJob()
+{
+}
+ 
+int ProfHostSysMemJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
+{
+    if (CheckJobContextParam(cfg) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
+    if (cfg->comParams->params->host_sys_mem_profiling.compare(
+        analysis::dvvp::common::config::MSVP_PROF_ON) != 0) {
+        MSPROF_LOGI("Host cpu profiling not enabled");
+        return PROFILING_FAILED;
+    }
+    int ret = ProfHostDataBase::Init(cfg);
+    if (ret != PROFILING_SUCCESS) {
+        return ret;
+    }
+    sampleIntervalNs_ =
+        static_cast<unsigned long long>(cfg->comParams->params->host_mem_profiling_sampling_interval) * MS_TO_NS;
+    return PROFILING_SUCCESS;
+}
+ 
+int ProfHostSysMemJob::Process()
+{
+    if (CheckJobCommonParam(collectionJobCfg_) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
+    SHARED_PTR_ALIA<ProcMemFileHandler> sysMemHandler;
+    MSVP_MAKE_SHARED9_RET(sysMemHandler, ProcMemFileHandler,
+        PROF_HOST_SYS_MEM, DEFAULT_HOST_ID, PROC_HOST_PROC_DATA_BUF_SIZE, sampleIntervalNs_,
+        PROF_PROC_MEM, PROF_HOST_SYS_MEM_USAGE_FILE, collectionJobCfg_->comParams->params,
+        collectionJobCfg_->comParams->jobCtx, upLoader_, PROFILING_FAILED);
+ 
+    if (sysMemHandler->Init() != PROFILING_SUCCESS) {
+        MSPROF_LOGE("ProcMemFileHandler Init Failed");
+        MSPROF_INNER_ERROR("EK9999", "ProcMemFileHandler Init Failed");
+        return PROFILING_FAILED;
+    }
+    MSPROF_LOGI("ProcMemFileHandler Init succ, sampleIntervalNs_:%llu", sampleIntervalNs_);
+    StartHostProfTimer(PROF_HOST_SYS_MEM, sysMemHandler);
+    return PROFILING_SUCCESS;
+}
+ 
+int ProfHostSysMemJob::Uninit()
+{
+    StopHostProfTimer(PROF_HOST_SYS_MEM);
+    (void)ProfHostDataBase::Uninit();
     return PROFILING_SUCCESS;
 }
 

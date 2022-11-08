@@ -131,15 +131,22 @@ struct ProfileParams : BaseInfo {
     // host sys
     std::string host_sys;
     int host_sys_pid;
+    std::string host_sys_usage;
     std::string host_disk_profiling;
     std::string host_osrt_profiling;
 
     // app cpu/memory/network usage on host
     int host_profiling;
-    std::string host_cpu_profiling;
-    std::string host_mem_profiling;
+    std::string host_one_pid_cpu_profiling;
+    std::string host_one_pid_mem_profiling;
+    std::string host_all_pid_cpu_profiling;
+    std::string host_all_pid_mem_profiling;
+    std::string host_sys_cpu_profiling;
+    std::string host_sys_mem_profiling;
     std::string host_network_profiling;
     int host_disk_freq;
+    int host_cpu_profiling_sampling_interval;
+    int host_mem_profiling_sampling_interval;
 
     // for parse, query and export
     std::string pythonPath;
@@ -177,10 +184,14 @@ struct ProfileParams : BaseInfo {
           dvpp_profiling("off"), dvpp_sampling_interval(DEFAULT_PROFILING_INTERVAL_20MS),
           biu_freq(DEFAULT_PROFILING_BIU_FREQ),
           msprof("off"), msproftx("off"),
-          host_sys(""), host_sys_pid(HOST_PID_DEFAULT),
+          host_sys(""), host_sys_pid(HOST_PID_DEFAULT), host_sys_usage(""),
           host_disk_profiling("off"), host_osrt_profiling("off"),
-          host_profiling(FALSE), host_cpu_profiling("off"),
-          host_mem_profiling("off"), host_network_profiling("off"), host_disk_freq(DEFAULT_PROFILING_INTERVAL_50MS),
+          host_profiling(FALSE), host_one_pid_cpu_profiling("off"), host_all_pid_cpu_profiling("off"),
+          host_sys_cpu_profiling("off"), host_sys_mem_profiling("off"),
+          host_one_pid_mem_profiling("off"), host_all_pid_mem_profiling("off"),
+          host_network_profiling("off"), host_disk_freq(DEFAULT_PROFILING_INTERVAL_50MS),
+          host_cpu_profiling_sampling_interval(DEFAULT_PROFILING_INTERVAL_20MS),
+          host_mem_profiling_sampling_interval(DEFAULT_PROFILING_INTERVAL_20MS),
           pythonPath(""), parseSwitch("off"), querySwitch("off"), exportSwitch("off"),
           exportSummaryFormat(PROFILING_SUMMARY_FORMAT), exportIterationId(DEFAULT_INTERATION_ID),
           exportModelId(DEFAULT_MODEL_ID), usedParams(), dataTypeConfig(0)
@@ -215,10 +226,11 @@ struct ProfileParams : BaseInfo {
 
     bool IsHostProfiling()
     {
-        if (host_cpu_profiling.compare("on") == 0 || host_mem_profiling.compare("on") == 0 ||
+        if (host_one_pid_cpu_profiling.compare("on") == 0 || host_one_pid_mem_profiling.compare("on") == 0 ||
+            host_all_pid_cpu_profiling.compare("on") == 0 || host_all_pid_mem_profiling.compare("on") == 0 ||
             host_network_profiling.compare("on") == 0 || host_disk_profiling.compare("on") == 0 ||
-            host_osrt_profiling.compare("on") == 0 ||
-            msproftx.compare("on") == 0) {
+            host_osrt_profiling.compare("on") == 0 ||  host_sys_cpu_profiling.compare("on") == 0 ||
+            host_sys_mem_profiling.compare("on") == 0 || msproftx.compare("on") == 0) {
             return true;
         }
         return false;
@@ -275,8 +287,12 @@ struct ProfileParams : BaseInfo {
         SET_VALUE(object, roceProfiling);
         // host system
         SET_VALUE(object, host_profiling);
-        SET_VALUE(object, host_cpu_profiling);
-        SET_VALUE(object, host_mem_profiling);
+        SET_VALUE(object, host_one_pid_cpu_profiling);
+        SET_VALUE(object, host_all_pid_cpu_profiling);
+        SET_VALUE(object, host_sys_cpu_profiling);
+        SET_VALUE(object, host_one_pid_mem_profiling);
+        SET_VALUE(object, host_all_pid_mem_profiling);
+        SET_VALUE(object, host_sys_mem_profiling);
         SET_VALUE(object, host_network_profiling);
     }
 
@@ -326,9 +342,12 @@ struct ProfileParams : BaseInfo {
         // host
         SET_VALUE(object, host_sys);
         SET_VALUE(object, host_sys_pid);
+        SET_VALUE(object, host_sys_usage);
         SET_VALUE(object, host_disk_profiling);
         SET_VALUE(object, host_osrt_profiling);
         SET_VALUE(object, host_disk_freq);
+        SET_VALUE(object, host_cpu_profiling_sampling_interval);
+        SET_VALUE(object, host_mem_profiling_sampling_interval);
     }
 
     void ToObjectPartThree(nlohmann::json &object)
@@ -396,7 +415,8 @@ struct ProfileParams : BaseInfo {
         FROM_INT_VALUE(object, biu_freq, DEFAULT_PROFILING_BIU_FREQ);
         // host system
         FROM_BOOL_VALUE(object, host_profiling);
-        FROM_STRING_VALUE(object, host_cpu_profiling);
+        FROM_STRING_VALUE(object, host_one_pid_cpu_profiling);
+        FROM_STRING_VALUE(object, host_all_pid_cpu_profiling);
     }
 
     void FromObjectPartTwo(const nlohmann::json &object)
@@ -447,12 +467,18 @@ struct ProfileParams : BaseInfo {
         FROM_INT_VALUE(object, profiling_period, DEFAULT_PROFILING_INTERVAL_5MS);
         // host
         FROM_STRING_VALUE(object, host_sys);
+        FROM_STRING_VALUE(object, host_sys_usage);
         FROM_INT_VALUE(object, host_sys_pid, HOST_PID_DEFAULT);
         FROM_STRING_VALUE(object, host_disk_profiling);
         FROM_STRING_VALUE(object, host_osrt_profiling);
         FROM_INT_VALUE(object, host_disk_freq, DEFAULT_PROFILING_INTERVAL_10MS);
-        FROM_STRING_VALUE(object, host_mem_profiling);
+        FROM_INT_VALUE(object, host_cpu_profiling_sampling_interval, DEFAULT_PROFILING_INTERVAL_20MS);
+        FROM_INT_VALUE(object, host_mem_profiling_sampling_interval, DEFAULT_PROFILING_INTERVAL_20MS);
+        FROM_STRING_VALUE(object, host_one_pid_mem_profiling);
+        FROM_STRING_VALUE(object, host_all_pid_mem_profiling);
         FROM_STRING_VALUE(object, host_network_profiling);
+        FROM_STRING_VALUE(object, host_sys_cpu_profiling);
+        FROM_STRING_VALUE(object, host_sys_mem_profiling);
         GetUint64Value(object, MSG_STR(dataTypeConfig), dataTypeConfig, 0);
     }
 
