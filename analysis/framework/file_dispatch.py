@@ -6,7 +6,7 @@ import itertools
 import os
 
 from common_func.constant import Constant
-from common_func.file_name_manager import get_acl_compiles
+from common_func.file_name_manager import get_acl_compiles, get_parallel_strategy_compiles
 from common_func.file_name_manager import get_acl_hash_compiles
 from common_func.file_name_manager import get_ai_core_compiles
 from common_func.file_name_manager import get_ai_cpu_compiles
@@ -106,7 +106,8 @@ class FileDispatch:
         DataTag.MSPROFTX: get_msproftx_compiles(),
         DataTag.HELPER_MODEL_WITH_Q: get_helper_model_with_q_compiles(),
         DataTag.SOC_PROFILER: get_soc_profiler_compiles(),
-        DataTag.DATA_QUEUE: get_data_preprocess_compiles(Constant.DATA_QUEUE)
+        DataTag.DATA_QUEUE: get_data_preprocess_compiles(Constant.DATA_QUEUE),
+        DataTag.PARALLEL_STRATEGY: get_parallel_strategy_compiles()
     }
 
     def __init__(self: any, sample_config: dict) -> None:

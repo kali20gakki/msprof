@@ -190,6 +190,9 @@ class FileNameManagerConstant:
     # biu perf
     BIU_PERF_FILE_PATTERN = r"^biu\.group_\d+_(aic|aiv0|aiv1).\d+.slice_\d+"
 
+    #parallel
+    PARALLEL_STRATEGY_FILE_PATTERN = r"^Framework\.parallel_strategy\.(\d+)\.slice_\d+"
+
     def get_file_name_manager_class_name(self: any) -> any:
         """
         get file name manager class name
@@ -711,3 +714,10 @@ def get_biu_compiles() -> tuple:
     """
     return (re.compile(FileNameManagerConstant.BIU_PERF_FILE_PATTERN),)
 
+
+def get_parallel_strategy_compiles() -> tuple:
+    """
+    get parallel strategy files regex compiles
+    :return: parallel strategy files regex
+    """
+    return (re.compile(FileNameManagerConstant.PARALLEL_STRATEGY_FILE_PATTERN),)

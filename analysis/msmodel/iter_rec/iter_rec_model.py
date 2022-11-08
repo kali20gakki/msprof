@@ -9,6 +9,8 @@ from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from msmodel.interface.parser_model import ParserModel
+from msmodel.interface.view_model import ViewModel
+from profiling_bean.db_dto.time_section_dto import TimeSectionDto
 
 
 class HwtsIterModel(ParserModel):
@@ -94,3 +96,13 @@ class HwtsIterModel(ParserModel):
         if cur_offset and cur_offset[0]:
             task_offset = cur_offset[0]
         return task_offset
+
+
+class HwtsIterViewModel(ViewModel):
+    def __init__(self: any, path: str) -> None:
+        super().__init__(path, DBNameConstant.DB_HWTS_REC, [])
+
+    def get_ai_core_op_data(self: any) -> list:
+        sql = "select start_time, end_time from {} where is_ai_core=1 and start_time<>-1 order by " \
+              "start_time desc".format(DBNameConstant.TABLE_HWTS_BATCH)
+        return DBManager.fetch_all_data(self.cur, sql, dto_class=TimeSectionDto)

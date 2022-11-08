@@ -73,7 +73,8 @@ class IterParser(IParser, MsMultiProcess):
         self._iter_info_dict = {}
         self._ge_static_shape_iter_model_dict = {}
         self._ge_static_shape_model_task_dict = {}
-        self._ge_non_static_shape_dict = {}
+        self._ge_dynamic_shape_dict = {}
+        self._task_start_dict = {}
         self._batch_list_for_task_time = [None] * self.DEFAULT_TASK_TIME_SIZE
         self._overstep_task_cnt = 0
         self.default_index = 0
@@ -114,8 +115,7 @@ class IterParser(IParser, MsMultiProcess):
                                                              self._iter_recorder.iter_end_dict.get(
                                                                  self._iter_recorder.current_op_iter)))
         iter_info.task_count += 1
-        if task_log.sys_tag == self.HWTS_TASK_END \
-                and self._is_ai_core_task(task_log.stream_id, task_log.task_id, task_log.batch_id):
+        if task_log.sys_tag == self.HWTS_TASK_END and task_log.is_ai_core:
             iter_info.aic_count += 1
 
     def _read_hwts_data(self: any, all_bytes: bytes) -> None:
@@ -125,22 +125,33 @@ class IterParser(IParser, MsMultiProcess):
                 continue
             if self._iter_recorder.check_task_in_iteration(_task_log.sys_cnt):
                 self._iter_recorder.set_current_iter_id(_task_log.sys_cnt)
+                stream_task_id = self.STREAM_TASK_KEY_FMT.format(_task_log.stream_id, _task_log.task_id)
                 if _task_log.sys_tag == self.HWTS_TASK_END:
-                    self._calculate_batch_list(_task_log)
+                    start_time_list = self._task_start_dict.get(stream_task_id, [])
+                    start_time = start_time_list[-1] if start_time_list else -1
+                    self._calculate_batch_list(_task_log, start_time)
+                    del self._task_start_dict[stream_task_id]
+                else:
+                    self._task_start_dict.setdefault(stream_task_id, []).append(_task_log.sys_cnt)
                 self._calculate_task_count(_task_log)
             else:
                 self._overstep_task_cnt = self._overstep_task_cnt + 1
 
-    def _calculate_batch_list(self: any, task_log: HwtsLogBean) -> None:
-        setattr(task_log, "batch_id", self._batch_counter.calculate_batch(
-            task_log.stream_id, task_log.task_id, self._iter_recorder.current_iter_id))
+    def _calculate_batch_list(self: any, task_log: HwtsLogBean, start_time: any) -> bool:
+        if self._ge_dynamic_shape_dict:
+            setattr(task_log, "batch_id", self._batch_counter.calculate_batch(
+                task_log.stream_id, task_log.task_id, self._iter_recorder.current_iter_id))
+        else:
+            setattr(task_log, "batch_id", 0)
+        setattr(task_log, "is_ai_core", self._is_ai_core_task(task_log.stream_id, task_log.task_id, task_log.batch_id))
         if self.default_index == self.DEFAULT_TASK_TIME_SIZE:
             self.hwts_iter_model.flush(self._batch_list_for_task_time,
                                        DBNameConstant.TABLE_HWTS_BATCH)
             self._batch_list_for_task_time = [None] * self.DEFAULT_TASK_TIME_SIZE
             self.default_index = 0
         self._batch_list_for_task_time[self.default_index] = (
-            task_log.stream_id, task_log.task_id, task_log.batch_id, self._iter_recorder.current_iter_id)
+            task_log.stream_id, task_log.task_id, task_log.batch_id, self._iter_recorder.current_iter_id, start_time,
+            task_log.sys_cnt, task_log.is_ai_core)
         self.default_index = self.default_index + 1
 
     def _parse_hwts_data(self: any) -> None:
@@ -154,6 +165,7 @@ class IterParser(IParser, MsMultiProcess):
             with FileOpen(_hwts_file, 'rb') as _hwts_file_reader:
                 all_bytes = _offset_calculator.pre_process(_hwts_file_reader.file_reader, os.path.getsize(_hwts_file))
                 self._read_hwts_data(all_bytes)
+        del self._task_start_dict
         if self.default_index > 0:
             del self._batch_list_for_task_time[self.default_index:]
             self.hwts_iter_model.flush(self._batch_list_for_task_time,
@@ -183,11 +195,12 @@ class IterRecParser(IterParser):
             if ge_info_model.check_table():
                 self._ge_static_shape_iter_model_dict, self._ge_static_shape_model_task_dict = \
                     ge_info_model.get_ge_data(Constant.TASK_TYPE_AI_CORE, Constant.GE_STATIC_SHAPE)
-                self._ge_non_static_shape_dict = ge_info_model.get_ge_data(
-                    Constant.TASK_TYPE_AI_CORE, Constant.GE_NON_STATIC_SHAPE)
-        if not self._ge_static_shape_iter_model_dict and not self._ge_non_static_shape_dict:
+                self._ge_dynamic_shape_dict = ge_info_model.get_ge_data(
+                    Constant.TASK_TYPE_AI_CORE, Constant.GE_DYNAMIC_SHAPE)
+        if not self._ge_static_shape_iter_model_dict and not self._ge_dynamic_shape_dict:
             return
-        self._batch_counter.init(Constant.TASK_TYPE_AI_CORE)
+        if self._ge_dynamic_shape_dict:
+            self._batch_counter.init(Constant.TASK_TYPE_AI_CORE)
         self._parse_hwts_data()
 
     def ms_run(self: any) -> None:
@@ -206,7 +219,7 @@ class IterRecParser(IterParser):
 
     def _is_ai_core_task(self: any, stream_id: int, task_id: int, batch_id: int) -> bool:
         stream_task_batch_value = self.STREAM_TASK_BATCH_KEY_FMT.format(stream_id, task_id, batch_id)
-        if stream_task_batch_value in self._ge_non_static_shape_dict.get(self._iter_recorder.current_iter_id, set()):
+        if stream_task_batch_value in self._ge_dynamic_shape_dict.get(self._iter_recorder.current_iter_id, set()):
             return True
         model_id = self._ge_static_shape_iter_model_dict.get(self._iter_recorder.current_iter_id)
         if model_id is not None and stream_task_batch_value in self._ge_static_shape_model_task_dict.get(model_id,

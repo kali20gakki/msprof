@@ -58,6 +58,9 @@ class DBNameConstant(metaclass=ABCMeta):
     DB_CLUSTER_RANK = "cluster_rank.db"
     DB_CLUSTER_STEP_TRACE = 'cluster_step_trace.db'
     DB_CLUSTER_DATA_PREPROCESS = 'data_preprocess.db'
+    DB_CLUSTER_HCCL = "cluster_hccl.db"
+    DB_PARALLEL = "parallel.db"
+    DB_CLUSTER_PARALLEL = "cluster_parallel.db"
 
     # DB tables
     TABLE_ACL_DATA = "acl_data"
@@ -213,6 +216,13 @@ class DBNameConstant(metaclass=ABCMeta):
     #cluster
     TABLE_CLUSTER_RANK = "ClusterRank"
     TABLE_DATA_QUEUE = "DataQueue"
+    TABLE_HCCL_OPERATOR_EXE = "HcclOperatorExe"
+    TABLE_PARALLEL_STRATEGY = "ParallelStrategy"
+    TABLE_HCCL_OPERATOR_OVERLAP = "HcclOperatorOverlap"
+    TABLE_COMPUTATION_TIME = "ComputationTime"
+    TABLE_CLUSTER_DATA_PARALLEL = "ClusterDataParallel"
+    TABLE_CLUSTER_MODEL_PARALLEL = "ClusterModelParallel"
+    TABLE_CLUSTER_PIPELINE_PARALLEL = "ClusterPipelineParallel"
 
     @abstractmethod
     def get_db_name(self: any) -> str:

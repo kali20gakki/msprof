@@ -1,4 +1,6 @@
-import logging
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
 
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
@@ -9,7 +11,9 @@ from msmodel.interface.view_model import ViewModel
 
 class ParallelModel(ParserModel):
     def __init__(self: any, result_dir: str) -> None:
-        super().__init__(result_dir, DBNameConstant.DB_PARALLEL, [DBNameConstant.TABLE_PARALLEL_STRATEGY])
+        super().__init__(result_dir, DBNameConstant.DB_PARALLEL,
+                         [DBNameConstant.TABLE_PARALLEL_STRATEGY, DBNameConstant.TABLE_HCCL_OPERATOR_OVERLAP,
+                          DBNameConstant.TABLE_COMPUTATION_TIME])
 
     def flush(self: any, table_name: str, data_list: list) -> None:
         """
@@ -30,10 +34,10 @@ class ParallelViewModel(ViewModel):
         if not parallel_mode:
             return Constant.NA
         elif parallel_mode[0] == "data-parallel":
-            return DBNameConstant.TABLE_DATA_PARALLEL
+            return DBNameConstant.TABLE_CLUSTER_DATA_PARALLEL
         elif parallel_mode[0] == "model-parallel":
-            return DBNameConstant.TABLE_MODEL_PARALLEL
+            return DBNameConstant.TABLE_CLUSTER_MODEL_PARALLEL
         elif parallel_mode[0] == "pipeline-parallel":
-            return DBNameConstant.TABLE_PIPELINE_PARALLEL
+            return DBNameConstant.TABLE_CLUSTER_PIPELINE_PARALLEL
         else:
             return Constant.NA
