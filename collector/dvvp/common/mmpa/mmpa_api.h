@@ -150,17 +150,18 @@ using MmFilter =  int (*)(const MmDirent *entry);
 using MmSort =  int (*)(const MmDirent **a, const MmDirent **b);
 
 // struct define
-typedef struct {
+struct MmUserBlockType {
     UserProcFunc procFunc;  // Callback function pointer
     void *pulArg;           // Callback function parameters
-} MmUserBlockT;
+};
+using MmUserBlockT = MmUserBlockType;
 
 struct CpuTypeTable {
     const char *key;
     const char *value;
 };
 
-typedef struct {
+struct MmThreadAttrType {
     int32_t detachFlag;    // Determine whether to set separation property 0, not to separate 1
     int32_t priorityFlag;  // Determine whether to set priority 0 and not set 1
     int32_t priority;      // Priority value range to be set 1-99
@@ -171,26 +172,30 @@ typedef struct {
                            //  MMPA_THREAD_SCHED_FIFO
     int32_t stackFlag;     // Set stack size or not: 0 does not set 1 setting
     uint32_t stackSize;    // The stack size unit bytes to be set cannot be less than MMPA_THREAD_STACK_MIN
-} MmThreadAttr;
+};
+using MmThreadAttr = MmThreadAttrType;
 
-typedef struct {
+struct MmDiskSizeType {
     unsigned long long totalSize;
     unsigned long long freeSize;
     unsigned long long availSize;
-} MmDiskSize;
+};
+using MmDiskSize = MmDiskSizeType;
 
-typedef struct {
+struct MmArgvEnvType {
     char **argv;
     int32_t argvCount;
     char **envp;
     int32_t envpCount;
-} MmArgvEnv;
+};
+using MmArgvEnv = MmArgvEnvType;
 
-typedef struct {
+struct MmMacInfoType {
     char addr[MMPA_MACINFO_DEFAULT_SIZE];  // ex:aa-bb-cc-dd-ee-ff\0
-} MmMacInfo;
+};
+using MmMacInfo = MmMacInfoType;
 
-typedef struct {
+struct MmCpuDescType {
     char arch[MMPA_CPUDESC_DEFAULT_SIZE];
     char manufacturer[MMPA_CPUDESC_DEFAULT_SIZE];    // vendor
     char version[MMPA_CPUDESC_DEFAULT_SIZE];         // modelname
@@ -199,9 +204,10 @@ typedef struct {
     int32_t ncores;                                  // cpu cores
     int32_t nthreads;                                // cpu thread count
     int32_t ncounts;                                 // logical cpu nums
-} MmCpuDesc;
+};
+using MmCpuDesc = MmCpuDescType;
 
-typedef struct {
+struct MmSystemTimeType {
     int32_t wSecond;             // Seconds. [0-60] (1 leap second)
     int32_t wMinute;             // Minutes. [0-59]
     int32_t wHour;               // Hours. [0-23]
@@ -212,22 +218,26 @@ typedef struct {
     int32_t tmYday;             // Days in year.[0-365]
     int32_t tmIsdst;            // DST. [-1/0/1]
     long wMilliseconds;          // milliseconds
-} MmSystemTimeT;
+};
+using MmSystemTimeT = MmSystemTimeType;
 
-typedef struct {
+struct MmTimevalType {
     long tvSec;
     long tvUsec;
-} MmTimeval;
+};
+using MmTimeval = MmTimevalType;
 
-typedef struct {
+struct MmTimezoneType {
     int32_t tzMinuteswest;  // How many minutes is it different from Greenwich
     int32_t tzDsttime;      // type of DST correction
-} MmTimezone;
+};
+using MmTimezone = MmTimezoneType;
 
-typedef struct {
+struct MmTimespecType {
     long long tvSec;
     long long tvNsec;
-} MmTimespec;
+};
+using MmTimespec = MmTimespecType;
 
 // function define
 int32_t MmSleep(uint32_t milliSecond);

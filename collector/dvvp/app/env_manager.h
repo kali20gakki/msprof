@@ -12,10 +12,13 @@
 namespace Analysis {
 namespace Dvvp {
 namespace App {
+using CONST_CHAR_PTR_PTR = const char **;
+
 class EnvManager : public analysis::dvvp::common::singleton::Singleton<EnvManager> {
 public:
     void SetGlobalEnv(std::vector<std::string> &envList);
-    const std::vector<std::string> GetGlobalEnv();
+    std::vector<std::string> GetGlobalEnv();
+    static int SetEnvList(CONST_CHAR_PTR_PTR envp, std::vector<std::string> &envpList);
 private:
     std::vector<std::string> envList_;
 };
