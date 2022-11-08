@@ -57,6 +57,7 @@ class DataTag(Enum):
     HELPER_MODEL_WITH_Q = 43
     BIU_PERF = 44
     DATA_QUEUE = 45
+    HOST_QUEUE = 46
 
 
 @unique
