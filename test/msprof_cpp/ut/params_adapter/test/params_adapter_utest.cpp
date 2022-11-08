@@ -74,7 +74,7 @@ TEST_F(ParamsAdapterUtest, TransToParam)
     paramContainer[INPUT_CFG_COM_POWER] = "on";
     paramContainer[INPUT_CFG_COM_BIU] = "on";
     paramContainer[INPUT_CFG_HOST_SYS] = "cpu,mem,disk,osrt,network";
-    paramContainer[INPUT_HOST_SYS_USAGE] = "cpu,mem";
+    paramContainer[INPUT_CFG_HOST_SYS_USAGE] = "cpu,mem";
     int ret = ParamsAdapterMgr->TransToParam(paramContainer, params);
     EXPECT_EQ(PROFILING_SUCCESS, ret);
 }
@@ -88,7 +88,7 @@ TEST_F(ParamsAdapterUtest, ComCfgCheck2)
     std::vector<InputCfg> cfgList = {
         INPUT_CFG_COM_SYS_USAGE_FREQ,
         INPUT_CFG_COM_LLC_MODE,
-        INPUT_HOST_SYS_USAGE
+        INPUT_CFG_HOST_SYS_USAGE
     };
     std::string cfgValue = "on";
     MOCKER_CPP(&Collector::Dvvp::ParamsAdapter::ParamsAdapter::CheckFreqValid)
@@ -97,7 +97,7 @@ TEST_F(ParamsAdapterUtest, ComCfgCheck2)
     MOCKER_CPP(&analysis::dvvp::common::validation::ParamValidation::CheckLlcModeIsValid)
         .stubs()
         .will(returnValue(true));
-    MOCKER_CPP(&analysis::dvvp::common::validation::ParamValidation::CheckHostSysUsageIsValid)
+    MOCKER_CPP(&analysis::dvvp::common::validation::ParamValidation::CheckHostSysUsageValid)
         .stubs()
         .will(returnValue(true));
     for (auto cfg : cfgList) {

@@ -55,12 +55,14 @@ enum CollectorTypesForPlatform {
     PLATFORM_SYS_DEVICE_POWER,
     // System-host
     PLATFORM_SYS_HOST_ONE_PID_CPU,
+    PLATFORM_SYS_HOST_ALL_PID_CPU,
     PLATFORM_SYS_HOST_ONE_PID_MEM,
+    PLATFORM_SYS_HOST_ALL_PID_MEM,
     PLATFORM_SYS_HOST_ONE_PID_DISK,
     PLATFORM_SYS_HOST_ONE_PID_OSRT,
     PLATFORM_SYS_HOST_NETWORK,
-    PLATFORM_SYS_HOST_SYS_CPU_MEM_USAGE,
-    PLATFORM_SYS_HOST_ALL_PID_CPU_MEM_USAGE,
+    PLATFORM_SYS_HOST_SYS_CPU,
+    PLATFORM_SYS_HOST_SYS_MEM,
     // MAX
     PLATFORM_COLLECTOR_TYPES_MAX
 };
@@ -111,13 +113,15 @@ public:
     virtual void SetParamsForDeviceDVPP(int samplingInterval);
     virtual void SetParamsForDeviceBIU(int biuFreq);
     virtual void SetParamsForDevicePower();
-    virtual void SetParamsForHostPidCpu();
-    virtual void SetParamsForHostPidMem();
     virtual void SetParamsForHostPidDisk();
     virtual void SetParamsForHostPidOSRT();
     virtual void SetParamsForHostNetwork();
-    virtual void SetParamsForHostSysAllPidCpuUsage();
-    virtual void SetParamsForHostSysAllPidMemUsage();
+    virtual void SetParamsForHostOnePidCpu(int samplingInterval);
+    virtual void SetParamsForHostOnePidMem(int samplingInterval);
+    virtual void SetParamsForHostAllPidCpu(int samplingInterval);
+    virtual void SetParamsForHostAllPidMem(int samplingInterval);
+    virtual void SetParamsForHostSysMem(int samplingInterval);
+    virtual void SetParamsForHostSysCpu(int samplingInterval);
 
 protected:
     std::vector<CollectorTypesForPlatform> supportSwitch_;

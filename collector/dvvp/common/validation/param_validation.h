@@ -39,7 +39,6 @@ public:
     bool CheckLlcModeIsValid(const std::string &llcMode) const;
     bool CheckFreqIsValid(const std::string &cfgName, const std::string &freq, const int rangeMin,
         const int rangeMax) const;
-    bool CheckHostSysUsageIsValid(const std::string &hostSysUsage) const;
     bool CheckHostSysPidValid(const std::string &hostSysPid) const;
     bool CheckPythonPathIsValid(const std::string &pythonPath) const;
     bool CheckExportSummaryFormatIsValid(const std::string &summaryFormat) const;

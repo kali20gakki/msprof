@@ -44,6 +44,8 @@ const int DVPP_FREQ_MIN = 1;
 const int DVPP_FREQ_MAX = 100;
 const int BIU_FREQ_MIN = 300;
 const int BIU_FREQ_MAX = 30000;
+const int HOST_SYS_USAGE_FREQ_MIN = 1;
+const int HOST_SYS_USAGE_FREQ_MAX = 50;
 const int ACC_PMU_MODE_THRED = 5000; // Check
 enum InputCfg {
     INPUT_CFG_MSPROF_APPLICATION = 0,
@@ -94,15 +96,16 @@ enum InputCfg {
     // System-host
     INPUT_CFG_HOST_SYS = 42,
     INPUT_CFG_HOST_SYS_PID = 43,
-    INPUT_HOST_SYS_USAGE = 44,
+    INPUT_CFG_HOST_SYS_USAGE = 44,
+    INPUT_CFG_HOST_SYS_USAGE_FREQ = 45,
     // analysis
-    INPUT_CFG_PYTHON_PATH = 45,
     INPUT_CFG_SUMMARY_FORMAT = 46,
     INPUT_CFG_PARSE = 47,
     INPUT_CFG_QUERY = 48,
     INPUT_CFG_EXPORT = 49,
     INPUT_CFG_ITERATION_ID = 50,
     INPUT_CFG_MODEL_ID = 51,
+    INPUT_CFG_PYTHON_PATH = 52,
     INPUT_CFG_MAX
 };
 
