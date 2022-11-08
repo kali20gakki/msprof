@@ -84,7 +84,8 @@ enum MsprofArgsType {
     // host
     ARGS_HOST_SYS,
     ARGS_HOST_SYS_PID,
-    ARGS_HOST_USAGE,
+    ARGS_HOST_SYS_USAGE,
+    ARGS_HOST_SYS_USAGE_FREQ,
     // end
     NR_ARGS
 };
@@ -148,7 +149,8 @@ const MmStructOption longOptions[] = {
     // host
     {"host-sys", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_HOST_SYS},
     {"host-sys-pid", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_HOST_SYS_PID},
-    {"host-sys-usage", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_HOST_USAGE},
+    {"host-sys-usage", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_HOST_SYS_USAGE},
+    {"host-sys-usage-freq", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_HOST_SYS_USAGE_FREQ},
     // end
     {nullptr, MM_NO_ARGUMENT, nullptr, ARGS_HELP}
 };

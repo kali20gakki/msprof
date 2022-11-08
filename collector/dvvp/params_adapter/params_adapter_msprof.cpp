@@ -40,6 +40,7 @@ int ParamsAdapterMsprof::Init()
         INPUT_CFG_COM_SYS_CPU, INPUT_CFG_COM_SYS_HARDWARE_MEM, INPUT_CFG_COM_SYS_IO,
         INPUT_CFG_COM_SYS_INTERCONNECTION, INPUT_CFG_COM_DVPP, INPUT_CFG_COM_POWER,
         INPUT_CFG_COM_BIU, INPUT_CFG_COM_BIU_FREQ, INPUT_CFG_HOST_SYS, INPUT_CFG_HOST_SYS_PID,
+        INPUT_CFG_HOST_SYS_USAGE, INPUT_CFG_HOST_SYS_USAGE_FREQ,
         INPUT_CFG_PYTHON_PATH, INPUT_CFG_SUMMARY_FORMAT, INPUT_CFG_PARSE, INPUT_CFG_QUERY,
         INPUT_CFG_EXPORT, INPUT_CFG_ITERATION_ID, INPUT_CFG_MODEL_ID
     }).swap(msprofConfig_);
@@ -100,23 +101,18 @@ int ParamsAdapterMsprof::ParamsCheckMsprof()
 
 bool ParamsAdapterMsprof::ParamsCheckMsprofV1(InputCfg inputCfg, std::string cfgValue) const
 {
-    std::map<InputCfg, std::string> aiModeTypeList = {
-        {INPUT_CFG_COM_AIC_MODE, "aic-mode"},
-        {INPUT_CFG_COM_AIV_MODE, "aiv-mode"},
-    };
-    std::map<InputCfg, std::string> exportIdList = {
-        {INPUT_CFG_ITERATION_ID, "iteration-id"},
-        {INPUT_CFG_MODEL_ID, "model-id"},
-    };
-    bool ret = true;
+    bool ret = false;
     switch (inputCfg) {
         case INPUT_CFG_COM_AIV_MODE:
+            ret = ParamValidation::instance()->MsprofCheckAiModeValid(cfgValue, "aiv-mode");
+            break;
         case INPUT_CFG_COM_AIC_MODE:
-            ret = ParamValidation::instance()->MsprofCheckAiModeValid(cfgValue, aiModeTypeList[inputCfg]);
+            ret = ParamValidation::instance()->MsprofCheckAiModeValid(cfgValue, "aic-mode");
             break;
         case INPUT_CFG_COM_AIC_FREQ:
         case INPUT_CFG_COM_AIV_FREQ:
         case INPUT_CFG_COM_BIU_FREQ:
+        case INPUT_CFG_HOST_SYS_USAGE_FREQ:
             ret = CheckFreqValid(cfgValue, inputCfg);
             break;
         case INPUT_CFG_COM_SYS_DEVICES:
@@ -128,6 +124,9 @@ bool ParamsAdapterMsprof::ParamsCheckMsprofV1(InputCfg inputCfg, std::string cfg
         case INPUT_CFG_HOST_SYS:
             ret = ParamValidation::instance()->MsprofCheckHostSysValid(cfgValue);
             break;
+        case INPUT_CFG_HOST_SYS_USAGE:
+            ret = ParamValidation::instance()->CheckHostSysUsageValid(cfgValue);
+            break;
         case INPUT_CFG_HOST_SYS_PID:
             ret = ParamValidation::instance()->CheckHostSysPidValid(cfgValue);
             break;
@@ -138,11 +137,13 @@ bool ParamsAdapterMsprof::ParamsCheckMsprofV1(InputCfg inputCfg, std::string cfg
             ret = ParamValidation::instance()->CheckExportSummaryFormatIsValid(cfgValue);
             break;
         case INPUT_CFG_ITERATION_ID:
+            ret = ParamValidation::instance()->CheckExportIdIsValid(cfgValue, "iteration-id");
+            break;
         case INPUT_CFG_MODEL_ID:
-            ret = ParamValidation::instance()->CheckExportIdIsValid(cfgValue, exportIdList[inputCfg]);
+            ret = ParamValidation::instance()->CheckExportIdIsValid(cfgValue, "model-id");
             break;
         default:
-            ret = false;
+            break;
     }
     return ret;
 }
@@ -195,6 +196,10 @@ int ParamsAdapterMsprof::SetMsprofMode()
         msprofMode_ = MsprofMode::MSPROF_MODE_SYSTEM;
         return PROFILING_SUCCESS;
     }
+    if (!paramContainer_[INPUT_CFG_HOST_SYS_USAGE].empty()) {
+        msprofMode_ = MsprofMode::MSPROF_MODE_SYSTEM;
+        return PROFILING_SUCCESS;
+    }
     if (!paramContainer_[INPUT_CFG_PARSE].empty()) {
         msprofMode_ = MsprofMode::MSPROF_MODE_PARSE;
         return PROFILING_SUCCESS;
@@ -208,7 +213,7 @@ int ParamsAdapterMsprof::SetMsprofMode()
         return PROFILING_SUCCESS;
     }
     CmdLog::instance()->CmdErrorLog("No valid argument found in --application "
-    "--sys-devices --host-sys --parse --query --export");
+        "--sys-devices --host-sys --host-sys-usage --parse --query --export");
     return PROFILING_FAILED;
 }
 
@@ -436,7 +441,7 @@ void ParamsAdapterMsprof::CreateCfgMap()
         {ARGS_INTERCONNECTION_FREQ, INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ},
         {ARGS_EXPORT_ITERATION_ID, INPUT_CFG_ITERATION_ID}, {ARGS_EXPORT_MODEL_ID, INPUT_CFG_MODEL_ID},
         {ARGS_HOST_SYS, INPUT_CFG_HOST_SYS}, {ARGS_HOST_SYS_PID, INPUT_CFG_HOST_SYS_PID},
-        {ARGS_HOST_USAGE, INPUT_HOST_SYS_USAGE},
+        {ARGS_HOST_SYS_USAGE, INPUT_CFG_HOST_SYS_USAGE}, {ARGS_HOST_SYS_USAGE_FREQ, INPUT_CFG_HOST_SYS_USAGE_FREQ},
     }).swap(cfgMap_);
     for (auto index : cfgMap_) {
         reCfgMap_.insert({index.second, static_cast<MsprofArgsType>(index.first)});

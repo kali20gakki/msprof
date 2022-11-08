@@ -70,8 +70,8 @@ TEST_F(PlatformAdapterUtest, PlatformAdapterInterfaceModule1)
         PLATFORM_SYS_DEVICE_HCCS, PLATFORM_SYS_DEVICE_PCIE, PLATFORM_SYS_DEVICE_DVPP, PLATFORM_SYS_DEVICE_BIU,
         PLATFORM_SYS_DEVICE_POWER, PLATFORM_SYS_HOST_ONE_PID_CPU, PLATFORM_SYS_HOST_ONE_PID_MEM,
         PLATFORM_SYS_HOST_ONE_PID_DISK, PLATFORM_SYS_HOST_ONE_PID_OSRT, PLATFORM_SYS_HOST_NETWORK,
-        PLATFORM_SYS_HOST_SYS_CPU_MEM_USAGE, PLATFORM_SYS_HOST_ALL_PID_CPU_MEM_USAGE, PLATFORM_TASK_TS_TIMELINE,
-        PLATFORM_TASK_AIC_HWTS, PLATFORM_TASK_AIV_HWTS, PLATFORM_TASK_L2_CACHE
+        PLATFORM_TASK_TS_TIMELINE, PLATFORM_SYS_HOST_ALL_PID_CPU, PLATFORM_SYS_HOST_ALL_PID_MEM,
+        PLATFORM_TASK_AIC_HWTS, PLATFORM_TASK_AIV_HWTS, PLATFORM_TASK_L2_CACHE, PLATFORM_SYS_HOST_SYS_CPU
     };
     struct CommonParams comParams;
     PlatformAdapterInterfaceMgr->SetParamsForGlobal(comParams);
@@ -118,7 +118,7 @@ TEST_F(PlatformAdapterUtest, PlatformAdapterInterfaceModule2)
         PLATFORM_SYS_DEVICE_HCCS, PLATFORM_SYS_DEVICE_PCIE, PLATFORM_SYS_DEVICE_DVPP, PLATFORM_SYS_DEVICE_BIU,
         PLATFORM_SYS_DEVICE_POWER, PLATFORM_SYS_HOST_ONE_PID_CPU, PLATFORM_SYS_HOST_ONE_PID_MEM,
         PLATFORM_SYS_HOST_ONE_PID_DISK, PLATFORM_SYS_HOST_ONE_PID_OSRT, PLATFORM_SYS_HOST_NETWORK,
-        PLATFORM_SYS_HOST_SYS_CPU_MEM_USAGE, PLATFORM_SYS_HOST_ALL_PID_CPU_MEM_USAGE, PLATFORM_TASK_TS_TIMELINE,
+        PLATFORM_TASK_TS_TIMELINE,
         PLATFORM_TASK_AIC_HWTS, PLATFORM_TASK_AIV_HWTS, PLATFORM_TASK_L2_CACHE
     };
     std::string metricsType = "ArithmeticUtilization";
@@ -155,7 +155,7 @@ TEST_F(PlatformAdapterUtest, PlatformAdapterInterfaceModule3)
         PLATFORM_SYS_DEVICE_HCCS, PLATFORM_SYS_DEVICE_PCIE, PLATFORM_SYS_DEVICE_DVPP, PLATFORM_SYS_DEVICE_BIU,
         PLATFORM_SYS_DEVICE_POWER, PLATFORM_SYS_HOST_ONE_PID_CPU, PLATFORM_SYS_HOST_ONE_PID_MEM,
         PLATFORM_SYS_HOST_ONE_PID_DISK, PLATFORM_SYS_HOST_ONE_PID_OSRT, PLATFORM_SYS_HOST_NETWORK,
-        PLATFORM_SYS_HOST_SYS_CPU_MEM_USAGE, PLATFORM_SYS_HOST_ALL_PID_CPU_MEM_USAGE, PLATFORM_TASK_TS_TIMELINE,
+        PLATFORM_TASK_TS_TIMELINE,
         PLATFORM_TASK_AIC_HWTS, PLATFORM_TASK_AIV_HWTS, PLATFORM_TASK_L2_CACHE
     };
     int samplingInterval = 500;
@@ -170,13 +170,13 @@ TEST_F(PlatformAdapterUtest, PlatformAdapterInterfaceModule3)
     int biuFreq = 100;
     PlatformAdapterInterfaceMgr->SetParamsForDeviceBIU(biuFreq);
     PlatformAdapterInterfaceMgr->SetParamsForDevicePower();
-    PlatformAdapterInterfaceMgr->SetParamsForHostPidCpu();
-    PlatformAdapterInterfaceMgr->SetParamsForHostPidMem();
+    PlatformAdapterInterfaceMgr->SetParamsForHostOnePidCpu(samplingInterval);
+    PlatformAdapterInterfaceMgr->SetParamsForHostOnePidMem(samplingInterval);
     PlatformAdapterInterfaceMgr->SetParamsForHostPidDisk();
     PlatformAdapterInterfaceMgr->SetParamsForHostPidOSRT();
     PlatformAdapterInterfaceMgr->SetParamsForHostNetwork();
-    PlatformAdapterInterfaceMgr->SetParamsForHostSysAllPidCpuUsage();
-    PlatformAdapterInterfaceMgr->SetParamsForHostSysAllPidMemUsage();
+    PlatformAdapterInterfaceMgr->SetParamsForHostAllPidCpu(samplingInterval);
+    PlatformAdapterInterfaceMgr->SetParamsForHostAllPidMem(samplingInterval);
     params = nullptr;
 }
 
