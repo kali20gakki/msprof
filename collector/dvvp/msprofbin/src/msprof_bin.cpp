@@ -33,7 +33,7 @@ int main(int argc, const char **argv, const char **envp)
 #endif
 {
     std::vector<std::string> envpList;
-    if (EnvManager::SetEnvList(envp, envpList) < 0) {
+    if (EnvManager::instance()->SetEnvList(envp, envpList)) {
         CmdLog::instance()->CmdErrorLog("Truncate env params due to exceeding limit!");
     }
     EnvManager::instance()->SetGlobalEnv(envpList);
