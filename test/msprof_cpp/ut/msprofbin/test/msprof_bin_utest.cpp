@@ -60,7 +60,7 @@ TEST_F(MSPROF_BIN_UTEST, LltMain) {
     
     MOCKER(&EnvManager::SetEnvList)
         .stubs()
-        .will(returnValue(0));
+        .will(returnValue(false));
     EXPECT_EQ(PROFILING_FAILED, LltMain(1, (const char**)argv, (const char**)envp));
     EXPECT_EQ(PROFILING_FAILED, LltMain(2, (const char**)argv, (const char**)envp));
 
@@ -81,6 +81,8 @@ TEST_F(MSPROF_BIN_UTEST, LltMain) {
 
 TEST_F(MSPROF_BIN_UTEST, SetEnvList) {
     GlobalMockObject::verify();
+    std::shared_ptr<EnvManager> envManager;
+    MSVP_MAKE_SHARED0_BREAK(envManager, EnvManager);
     char* envp[4097];
     char str[] = "a=a";
     for (int i = 0; i < 4097; i++) {
@@ -88,8 +90,8 @@ TEST_F(MSPROF_BIN_UTEST, SetEnvList) {
     }
     envp[4096] = nullptr;
     std::vector<std::string> envpList;
-    int val = EnvManager::SetEnvList((const char**)envp, envpList);
-    EXPECT_EQ(-1, val);
+    bool val = envManager->SetEnvList((const char**)envp, envpList);
+    EXPECT_EQ(true, val);
 }
 
 TEST_F(MSPROF_BIN_UTEST, PlatformAdapterModule)

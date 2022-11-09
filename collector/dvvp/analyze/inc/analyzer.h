@@ -54,7 +54,7 @@ private:
     void FftsDataPostProc();
 
 private:
-    bool inited_{};
+    bool inited_;
     std::string devIdStr_;
     uint64_t resultCount_;
     uint32_t profileMode_;

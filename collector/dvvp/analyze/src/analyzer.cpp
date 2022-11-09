@@ -33,7 +33,8 @@ Analyzer::Analyzer(SHARED_PTR_ALIA<analysis::dvvp::transport::Uploader> uploader
       profileMode_(PROFILE_MODE_STEP_TRACE),
       flushedChannel_(false),
       flushQueueLen_(0),
-      uploader_(std::move(uploader))
+      uploader_(uploader),
+      inited_(false)
 {
 }
 
