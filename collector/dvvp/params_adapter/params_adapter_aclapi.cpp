@@ -151,66 +151,33 @@ void ParamsAdapterAclApi::ProfMetricsCfgToContainer(const ProfAicoreMetrics aicM
 void ParamsAdapterAclApi::ProfSystemCfgToContainer(const ProfConfig * apiCfg,
     std::array<std::string, ACL_PROF_ARGS_MAX> argsArr)
 {
-    uint64_t dataTypeConfig = apiCfg->dataTypeConfig;
-    ProfAicoreMetrics aicMetrics = apiCfg->aicoreMetrics;
-    std::string metrics;
-    ConfigManager::instance()->AicoreMetricsEnumToName(aicMetrics, metrics);
-    if (!argsArr[ACL_PROF_SYS_CPU_FREQ].empty()) {
-        paramContainer_[INPUT_CFG_COM_SYS_CPU] = MSVP_PROF_ON;
-        setConfig_.insert(INPUT_CFG_COM_SYS_CPU);
-        paramContainer_[INPUT_CFG_COM_SYS_CPU_FREQ] = argsArr[ACL_PROF_SYS_CPU_FREQ];
-        setConfig_.insert(INPUT_CFG_COM_SYS_CPU_FREQ);
-    }
-    ProfSystemHardwareMemCfgToContainer(argsArr);
-    if (!argsArr[ACL_PROF_SYS_IO_FREQ].empty()) {
-        paramContainer_[INPUT_CFG_COM_SYS_IO] = MSVP_PROF_ON;
-        setConfig_.insert(INPUT_CFG_COM_SYS_IO);
-        paramContainer_[INPUT_CFG_COM_SYS_IO_FREQ] = argsArr[ACL_PROF_SYS_IO_FREQ];
-        setConfig_.insert(INPUT_CFG_COM_SYS_IO_FREQ);
-    }
-    if (!argsArr[ACL_PROF_SYS_INTERCONNECTION_FREQ].empty()) {
-        paramContainer_[INPUT_CFG_COM_SYS_INTERCONNECTION] = MSVP_PROF_ON;
-        setConfig_.insert(INPUT_CFG_COM_SYS_INTERCONNECTION);
-        paramContainer_[INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ] = argsArr[ACL_PROF_SYS_INTERCONNECTION_FREQ];
-        setConfig_.insert(INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ);
-    }
-    if (!argsArr[ACL_PROF_DVPP_FREQ].empty()) {
-        paramContainer_[INPUT_CFG_COM_DVPP] = MSVP_PROF_ON;
-        setConfig_.insert(INPUT_CFG_COM_DVPP);
-        paramContainer_[INPUT_CFG_COM_DVPP_FREQ] = argsArr[ACL_PROF_DVPP_FREQ];
-        setConfig_.insert(INPUT_CFG_COM_DVPP_FREQ);
-    }
-    if (!argsArr[ACL_PROF_SYS_USAGE_FREQ].empty()) {
-        paramContainer_[INPUT_CFG_COM_SYS_USAGE] = MSVP_PROF_ON;
-        setConfig_.insert(INPUT_CFG_COM_SYS_USAGE);
-        paramContainer_[INPUT_CFG_COM_SYS_USAGE_FREQ] = argsArr[ACL_PROF_SYS_USAGE_FREQ];
-        setConfig_.insert(INPUT_CFG_COM_SYS_USAGE_FREQ);
-    }
-    if (!argsArr[ACL_PROF_SYS_PID_USAGE_FREQ].empty()) {
-        paramContainer_[INPUT_CFG_COM_SYS_PID_USAGE] = MSVP_PROF_ON;
-        setConfig_.insert(INPUT_CFG_COM_SYS_PID_USAGE);
-        paramContainer_[INPUT_CFG_COM_SYS_PID_USAGE_FREQ] = argsArr[ACL_PROF_SYS_PID_USAGE_FREQ];
-        setConfig_.insert(INPUT_CFG_COM_SYS_PID_USAGE_FREQ);
-    }
-    if (!argsArr[ACL_PROF_HOST_SYS].empty()) {
-        paramContainer_[INPUT_HOST_SYS_USAGE] = argsArr[ACL_PROF_HOST_SYS];
-        setConfig_.insert(INPUT_HOST_SYS_USAGE);
-    }
-}
-
-void ParamsAdapterAclApi::ProfSystemHardwareMemCfgToContainer(std::array<std::string, ACL_PROF_ARGS_MAX> argsArr)
-{
-    if (!argsArr[ACL_PROF_SYS_HARDWARE_MEM_FREQ].empty()) {
-        paramContainer_[INPUT_CFG_COM_SYS_HARDWARE_MEM] = MSVP_PROF_ON;
-        setConfig_.insert(INPUT_CFG_COM_SYS_HARDWARE_MEM);
-        paramContainer_[INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ] = argsArr[ACL_PROF_SYS_HARDWARE_MEM_FREQ];
-        setConfig_.insert(INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ);
+    std::map<aclprofConfigType, std::vector<InputCfg>> aclToInput = {
+        {ACL_PROF_SYS_HARDWARE_MEM_FREQ, {INPUT_CFG_COM_SYS_HARDWARE_MEM, INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ}},
+        {ACL_PROF_SYS_CPU_FREQ, {INPUT_CFG_COM_SYS_CPU, INPUT_CFG_COM_SYS_CPU_FREQ}},
+        {ACL_PROF_SYS_IO_FREQ, {INPUT_CFG_COM_SYS_IO, INPUT_CFG_COM_SYS_IO_FREQ}},
+        {ACL_PROF_SYS_INTERCONNECTION_FREQ,
+            {INPUT_CFG_COM_SYS_INTERCONNECTION, INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ}},
+        {ACL_PROF_DVPP_FREQ, {INPUT_CFG_COM_DVPP, INPUT_CFG_COM_DVPP_FREQ}},
+        {ACL_PROF_SYS_USAGE_FREQ, {INPUT_CFG_COM_SYS_USAGE, INPUT_CFG_COM_SYS_USAGE_FREQ}},
+        {ACL_PROF_SYS_PID_USAGE_FREQ, {INPUT_CFG_COM_SYS_PID_USAGE, INPUT_CFG_COM_SYS_PID_USAGE_FREQ}},
+        {ACL_PROF_HOST_SYS, {INPUT_CFG_MAX, INPUT_CFG_HOST_SYS}},
+        {ACL_PROF_HOST_SYS_USAGE, {INPUT_CFG_MAX, INPUT_CFG_HOST_SYS_USAGE}},
+        {ACL_PROF_HOST_SYS_USAGE_FREQ, {INPUT_CFG_MAX, INPUT_CFG_HOST_SYS_USAGE_FREQ}},
+    };
+    for (auto iter : aclToInput) {
+        if (!argsArr[iter.first].empty()) {
+            if (iter.second[0] != INPUT_CFG_MAX) {
+                paramContainer_[iter.second[0]] = MSVP_PROF_ON;
+                setConfig_.insert(iter.second[0]);
+            }
+            paramContainer_[iter.second[1]] = argsArr[iter.first];
+            setConfig_.insert(iter.second[1]);
+        }
     }
     if (!argsArr[ACL_PROF_LLC_MODE].empty() && !argsArr[ACL_PROF_SYS_HARDWARE_MEM_FREQ].empty()) {
         paramContainer_[INPUT_CFG_COM_LLC_MODE] = argsArr[ACL_PROF_LLC_MODE];
         setConfig_.insert(INPUT_CFG_COM_LLC_MODE);
     }
-    return;
 }
 
 void ParamsAdapterAclApi::ProfCfgToContainer(const ProfConfig * apiCfg,

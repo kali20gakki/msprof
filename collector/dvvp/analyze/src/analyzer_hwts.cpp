@@ -97,6 +97,10 @@ void AnalyzerHwts::ParseTaskStartEndData(CONST_CHAR_PTR data, uint32_t len, uint
 {
     if (len >= HWTS_DATA_SIZE) {
         auto hwtsData = reinterpret_cast<const HwtsProfileType01 *>(data);
+        if (hwtsData == nullptr) {
+            MSPROF_LOGE("Failed to call reinterpret_cast.");
+            return;
+        }
         std::string key = std::to_string(hwtsData->taskId) + KEY_SEPARATOR + std::to_string(hwtsData->streamId) +
             KEY_SEPARATOR + std::to_string(UINT32_MAX);
         auto iter = opTimeDrafts_.find(key);

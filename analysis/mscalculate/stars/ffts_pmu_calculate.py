@@ -131,7 +131,7 @@ class FftsPmuCalculate(ICalculator, MsMultiProcess):
         :param iter_id:
         :return: offset count and total aic count
         """
-        offset_count, total_count = self._iter_model.get_task_offset_and_sum(iter_id, 'ai_core_num')
+        offset_count, total_count = self._iter_model.get_task_offset_and_sum(iter_id, HwtsIterModel.AI_CORE_TYPE)
         _total_aic_count = self._get_total_aic_count()
         _sql_aic_count = self._iter_model.get_aic_sum_count()
         # get offset by all aic count and sql record count

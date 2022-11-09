@@ -579,18 +579,14 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckLlcModeIsValid2)
     EXPECT_EQ(true, entry->CheckLlcModeIsValid(llcMode));
 }
 
-TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckHostSysUsageIsValid)
+TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckHostSysUsageValid)
 {
     GlobalMockObject::verify();
     auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
-    std::string hostSysUsage;
-    EXPECT_EQ(true, entry->CheckHostSysUsageIsValid(hostSysUsage));
-    hostSysUsage = "cpu";
-    EXPECT_EQ(true, entry->CheckHostSysUsageIsValid(hostSysUsage));
-    hostSysUsage = "mem";
-    EXPECT_EQ(true, entry->CheckHostSysUsageIsValid(hostSysUsage));
-    hostSysUsage = "false";
-    EXPECT_EQ(false, entry->CheckHostSysUsageIsValid(hostSysUsage));
+    EXPECT_EQ(false, entry->CheckHostSysUsageValid("10"));
+    EXPECT_EQ(false, entry->CheckHostSysUsageValid("disk"));
+    EXPECT_EQ(true, entry->CheckHostSysUsageValid("cpu"));
+    EXPECT_EQ(true, entry->CheckHostSysUsageValid("mem"));
 }
 
 TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckPythonPathIsValid)

@@ -14,12 +14,14 @@ from common_func.path_manager import PathManager
 from common_func.utils import Utils
 from msmodel.interface.base_model import BaseModel
 from profiling_bean.db_dto.step_trace_dto import StepTraceDto
+from msmodel.step_trace.ts_track_model import TsTrackModel
 
 
 class GeInfoModel(BaseModel):
     """
     class used to operate ge info db
     """
+    MODEL_INDEX_KEY_FMT = "{0}-{1}"
     STREAM_TASK_KEY_FMT = "{0}-{1}"
     STREAM_TASK_BATCH_KEY_FMT = "{0}-{1}-{2}"
 
@@ -89,8 +91,8 @@ class GeInfoModel(BaseModel):
         result_data = [{}, {}] if is_static_shape == Constant.GE_STATIC_SHAPE else {}
         if not Utils.is_step_scene(self.result_dir):
             return result_data
-        step_trace_data = self._get_step_trace_data()
-        task_data = self._get_ge_task_data(datatype, is_static_shape)
+        step_trace_data = self.get_step_trace_data()
+        task_data = self.get_ge_task_data(datatype, is_static_shape)
         if not step_trace_data or not task_data:
             return result_data
 
@@ -103,20 +105,23 @@ class GeInfoModel(BaseModel):
             result_data[1] = task_data
         else:
             for step_trace in step_trace_data:
-                model_index = "{0}-{1}".format(step_trace.model_id, step_trace.index_id)
+                model_index = self.MODEL_INDEX_KEY_FMT.format(step_trace.model_id, step_trace.index_id)
                 if model_index in task_data.keys():
                     result_data[step_trace.iter_id] = task_data.pop(model_index)
         return result_data
 
-    def _get_step_trace_data(self: any) -> list:
-        db_path = PathManager.get_db_path(self.result_dir, DBNameConstant.DB_STEP_TRACE)
-        trace_conn, trace_curs = DBManager.check_connect_db_path(db_path)
-        sql = "select model_id, index_id, iter_id from {0}".format(DBNameConstant.TABLE_STEP_TRACE_DATA)
-        step_trace_data = DBManager.fetch_all_data(trace_curs, sql, dto_class=StepTraceDto)
-        DBManager.destroy_db_connect(trace_conn, trace_curs)
+    def get_step_trace_data(self: any) -> list:
+        ts_model = TsTrackModel(self.result_dir,
+                                DBNameConstant.DB_STEP_TRACE,
+                                [DBNameConstant.TABLE_STEP_TRACE_DATA])
+        if not ts_model.check_table():
+            return []
+
+        with ts_model:
+            step_trace_data = ts_model.get_step_trace_data()
         return step_trace_data
 
-    def _get_ge_task_data(self: any, datatype: str, is_static_shape: str) -> dict:
+    def get_ge_task_data(self: any, datatype: str, is_static_shape: str) -> dict:
         if is_static_shape == Constant.GE_STATIC_SHAPE:
             sql = "select model_id, GROUP_CONCAT(stream_id||'-'||task_id||'-'||batch_id) from {0} " \
                   "where index_id=0 and task_type='{1}' " \
