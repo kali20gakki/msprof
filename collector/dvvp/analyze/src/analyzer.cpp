@@ -331,17 +331,10 @@ void Analyzer::ConstructAndUploadData(const std::string &opId, OpTime &opTime)
         MSPROF_LOGE("memset failed ret:%d", ret);
         return;
     }
-    std::string opName;
-    std::string opType;
-    if (opId.length() == 0) {
-        opDesc.modelId = opTime.indexId;
-        opName = KEYPOINT_OP_NAME;
-        opType = KEYPOINT_OP_TYPE;
-    } else {
-        opDesc.modelId = analyzerGe_->GetModelId(opId);
-        opName = analyzerGe_->GetOpName(opId);
-        opType = analyzerGe_->GetOpType(opId);
-    }
+    bool opIdEmpty = (opId.length() == 0);
+    std::string opName = opIdEmpty ? KEYPOINT_OP_NAME : analyzerGe_->GetOpName(opId);
+    std::string opType = opIdEmpty ? KEYPOINT_OP_TYPE : analyzerGe_->GetOpType(opId);
+    opDesc.modelId = opIdEmpty ? opTime.indexId : analyzerGe_->GetModelId(opId);
     uint64_t opIndex = OpDescParser::instance()->SetOpTypeAndOpName(opType, opName);
     if (opIndex == 0) {
         return;
@@ -356,13 +349,19 @@ void Analyzer::ConstructAndUploadData(const std::string &opId, OpTime &opTime)
     }
     opDesc.threadId = opTime.threadId;
     opDesc.executionTime = opTime.endAicore - opTime.startAicore; // chipId 0 only
+    auto opDescIntPtr = reinterpret_cast<uint8_t *>(&opDesc);
+    if (opDescIntPtr == nullptr) {
+        MSPROF_LOGE("Failed to call reinterpret_cast.");
+        return;
+    }
     opDesc.signature = analysis::dvvp::common::utils::Utils::GenerateSignature(
-        reinterpret_cast<uint8_t *>(&opDesc) + sizeof(uint32_t), sizeof(ProfOpDesc) - sizeof(uint32_t));
+        opDescIntPtr + sizeof(uint32_t), sizeof(ProfOpDesc) - sizeof(uint32_t));
     if (uploader_ == nullptr) {
         MSPROF_LOGE("Analyzer::uploader_ is nullptr");
         return;
     }
-    uploader_->UploadData(reinterpret_cast<CHAR_PTR>(&opDesc), sizeof(ProfOpDesc));
+    auto opDescCharPtr = reinterpret_cast<CHAR_PTR>(&opDesc);
+    uploader_->UploadData(opDescCharPtr, sizeof(ProfOpDesc));
     resultCount_++;
 }
 

@@ -5,22 +5,30 @@ protobuf_generate(profiler
 	${MSPROF_SOURCE_DIR}/dvvp/proto/profiler_ext.proto
 )
 set(profilerSrcFiles
-    ${MSPROF_SOURCE_DIR}//dvvp/common/memory/chunk_pool.cpp
-    ${MSPROF_SOURCE_DIR}//dvvp/common/thread/thread.cpp
-    ${MSPROF_SOURCE_DIR}//dvvp/common/config/config_manager.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/common/memory/chunk_pool.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/common/thread/thread.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/common/config/config_manager.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/logger/cmd_log.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/depend/src/slog_plugin.cpp
-    ${MSPROF_SOURCE_DIR}/dvvp/driver/devmgmt/ai_drv_dev_api.cpp        
-    ${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform.cpp    
-    ${MSPROF_SOURCE_DIR}//dvvp/common/thread/thread_pool.cpp
-    ${MSPROF_SOURCE_DIR}//dvvp/common/statistics/perf_count.cpp
-    ${MSPROF_SOURCE_DIR}//dvvp/common/utils/utils.cpp
-    ${MSPROF_SOURCE_DIR}//dvvp/common/mmpa/mmpa_api.cpp
-    ${MSPROF_SOURCE_DIR}//dvvp/common/validation/param_validation.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/driver/devmgmt/ai_drv_dev_api.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform.cpp
-    ${MSPROF_SOURCE_DIR}//dvvp/driver/devmgmt/ai_drv_dev_api.cpp
-    ${MSPROF_SOURCE_DIR}//dvvp/driver/channel/ai_drv_prof_api.cpp
-    ${MSPROF_SOURCE_DIR}//dvvp/message/codec.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter_interface.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter_mini.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter_mdc.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter_lhisi.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter_dc.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter_cloudv2.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter_cloud.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/common/thread/thread_pool.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/common/statistics/perf_count.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/common/utils/utils.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/common/mmpa/mmpa_api.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/common/validation/param_validation.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/driver/devmgmt/ai_drv_dev_api.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/driver/channel/ai_drv_prof_api.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/message/codec.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/depend/stub/error_manager/msprof_error_manager_stub.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/depend/src/plugin_handle.cpp
     ${CppPath}
@@ -41,6 +49,7 @@ set(localSrcFiles
     test/queue_test.cpp
     test/ring_buffer_utest.cpp
     test/param_validation_utest.cpp
+    test/platform_adapter_utest.cpp
 )
 
 add_executable(common_utest
@@ -79,6 +88,7 @@ target_include_directories(common_utest PRIVATE
     ${MSPROF_SOURCE_DIR}/dvvp/common/mmpa
     ${MSPROF_SOURCE_DIR}/dvvp/common/validation
     ${MSPROF_SOURCE_DIR}/dvvp/common/platform/
+    ${MSPROF_SOURCE_DIR}/dvvp/params_adapter
     ${CMAKE_BINARY_DIR}/proto/profiler/
     ${MSPROF_SOURCE_DIR}/dvvp/depend/include/stub
 )

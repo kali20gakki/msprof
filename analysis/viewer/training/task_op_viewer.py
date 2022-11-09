@@ -33,11 +33,13 @@ class TaskOpViewer:
         hwts_conn, hwts_curs = DBManager.check_connect_db(message.get("result_dir"), DBNameConstant.DB_HWTS)
         task_conn, task_curs = DBManager.check_connect_db(message.get("result_dir"), DBNameConstant.DB_RTS_TRACK)
         ge_conn, ge_curs = DBManager.check_connect_db(message.get("result_dir"), DBNameConstant.DB_GE_INFO)
-        if ProfilingScene().is_operator():
-            data, _ = TaskOpViewer.get_op_task_data_summary(hwts_curs, ge_curs)
+        hwts_aiv_conn, hwts_aiv_curs = DBManager.check_connect_db(message.get("result_dir"), DBNameConstant.DB_HWTS_AIV)
+        if TaskOpViewer._is_operator_scene_without_runtime_track(task_curs):
+            data, _ = TaskOpViewer.get_op_task_data_summary(hwts_curs, hwts_aiv_curs, ge_curs)
         else:
-            data, _ = TaskOpViewer.get_task_data_summary(hwts_curs, task_curs, ge_curs)
+            data, _ = TaskOpViewer.get_task_data_summary(hwts_curs, hwts_aiv_curs, task_curs, ge_curs)
         DBManager.destroy_db_connect(hwts_conn, hwts_curs)
+        DBManager.destroy_db_connect(hwts_aiv_conn, hwts_aiv_curs)
         DBManager.destroy_db_connect(task_conn, task_curs)
         DBManager.destroy_db_connect(ge_conn, ge_curs)
         if not data:
@@ -46,7 +48,7 @@ class TaskOpViewer:
         return headers, data, len(data)
 
     @staticmethod
-    def get_task_data_summary(hwts_curs: any, task_curs: any, ge_curs: any) -> tuple:
+    def get_task_data_summary(hwts_curs: any, hwts_aiv_curs: any, task_curs: any, ge_curs: any) -> tuple:
         """
         get task info csv
         """
@@ -56,13 +58,18 @@ class TaskOpViewer:
         if not DBManager.judge_table_exist(task_curs, DBNameConstant.TABLE_RUNTIME_TRACK):
             logging.warning("No need to export task time data, maybe the RuntimeTrack table is not created.")
             return [], 0
-        if not DBManager.judge_table_exist(hwts_curs, DBNameConstant.TABLE_HWTS_TASK_TIME):
+        if not DBManager.judge_table_exist(hwts_curs, DBNameConstant.TABLE_HWTS_TASK_TIME) \
+                and not DBManager.judge_table_exist(hwts_aiv_curs, DBNameConstant.TABLE_HWTS_TASK_TIME):
             logging.warning("No need to export task time data, maybe the hwts is not collected.")
             return [], 0
 
+        hwts_aiv_data = []
         sql = "SELECT stream_id, task_id, running," \
               "complete, batch_id from {0}".format(DBNameConstant.TABLE_HWTS_TASK_TIME)
         hwts_data = DBManager.fetch_all_data(hwts_curs, sql)
+        if hwts_aiv_curs:
+            hwts_aiv_data = DBManager.fetch_all_data(hwts_aiv_curs, sql)
+        hwts_data.extend(hwts_aiv_data)
 
         try:
             task_info = TaskOpViewer._reformat_task_info(hwts_data, task_curs, ge_curs)
@@ -72,10 +79,11 @@ class TaskOpViewer:
         return task_info, len(task_info)
 
     @staticmethod
-    def get_op_task_data_summary(hwts_curs: any, ge_curs: any) -> tuple:
+    def get_op_task_data_summary(hwts_curs: any, hwts_aiv_curs: any, ge_curs: any) -> tuple:
         """
         get task time data for operator scene
         :param hwts_curs: cursor of hwts
+        :param hwts_aiv_curs: cursor of hwts_aiv
         :param ge_curs: cursor of ge
         :return: task data and count of the task data
         """
@@ -83,13 +91,18 @@ class TaskOpViewer:
         if not DBManager.judge_table_exist(ge_curs, DBNameConstant.TABLE_GE_TASK):
             logging.warning(
                 "No ge data collected, maybe the TaskInfo table is not created, try to export data with no ge data")
-        if not DBManager.judge_table_exist(hwts_curs, DBNameConstant.TABLE_HWTS_TASK_TIME):
+        if not DBManager.judge_table_exist(hwts_curs, DBNameConstant.TABLE_HWTS_TASK_TIME) \
+                and not DBManager.judge_table_exist(hwts_aiv_curs, DBNameConstant.TABLE_HWTS_TASK_TIME):
             logging.warning("No need to export task time data, maybe the hwts is not collected.")
             return [], 0
 
+        hwts_aiv_data = []
         sql = "SELECT stream_id, task_id, running, " \
               "complete, batch_id from {0}".format(DBNameConstant.TABLE_HWTS_TASK_TIME)
         hwts_data = DBManager.fetch_all_data(hwts_curs, sql)
+        if hwts_aiv_curs:
+            hwts_aiv_data = DBManager.fetch_all_data(hwts_aiv_curs, sql)
+        hwts_data.extend(hwts_aiv_data)
 
         sql = "SELECT stream_id, task_id, op_name, " \
               "task_type, batch_id from {0}".format(DBNameConstant.TABLE_GE_TASK)
@@ -101,6 +114,11 @@ class TaskOpViewer:
             logging.error(str(error), exc_info=Constant.TRACE_BACK_SWITCH)
             return [], 0
         return task_info, len(task_info)
+
+    @staticmethod
+    def _is_operator_scene_without_runtime_track(task_curs):
+        return ProfilingScene().is_operator() \
+               and (not task_curs or not DBManager.judge_table_exist(task_curs, DBNameConstant.TABLE_RUNTIME_TRACK))
 
     @staticmethod
     def _add_memcpy_data(result_dir: str, data: list) -> list:

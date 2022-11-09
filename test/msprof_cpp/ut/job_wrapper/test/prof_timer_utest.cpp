@@ -321,7 +321,7 @@ TEST_F(PROF_HOST_CPU_HANDLER_TEST, ParseProcFile) {
         .will(returnValue(false))
         .then(returnValue(true));
 
-    ProcHostCpuHandler hostCpuHandler(PROF_HOST_PROC_CPU, bufSize,
+    ProcHostCpuHandler hostCpuHandler(PROF_HOST_PID_CPU, bufSize,
             sampleIntervalMs, retFileName, param, jobCtx, upLoader);
     EXPECT_EQ(PROFILING_FAILED, hostCpuHandler.Init());
     EXPECT_EQ(PROFILING_SUCCESS, hostCpuHandler.Init());
@@ -335,7 +335,7 @@ TEST_F(PROF_HOST_CPU_HANDLER_TEST, ParseProcFile) {
 TEST_F(PROF_HOST_CPU_HANDLER_TEST, ParseSysTime) {
     GlobalMockObject::verify();
 
-    ProcHostCpuHandler hostCpuHandler(PROF_HOST_PROC_CPU, bufSize,
+    ProcHostCpuHandler hostCpuHandler(PROF_HOST_PID_CPU, bufSize,
             sampleIntervalMs, retFileName, param, jobCtx, upLoader);
     std::string data = "PROF_HOST_CPU_HANDLER_TEST/ParseSysTime";
     hostCpuHandler.ParseSysTime(data);
@@ -348,7 +348,7 @@ TEST_F(PROF_HOST_CPU_HANDLER_TEST, ParseProcTidStat) {
         .stubs()
         .will(returnValue(false))
         .then(returnValue(true));
-    ProcHostCpuHandler hostCpuHandler(PROF_HOST_PROC_CPU, bufSize,
+    ProcHostCpuHandler hostCpuHandler(PROF_HOST_PID_CPU, bufSize,
             sampleIntervalMs, retFileName, param, jobCtx, upLoader);
 
     analysis::dvvp::common::utils::Utils::CreateDir("/tmp/PROF_HOST_CPU_HANDLER_TEST/ParseSysTime");
@@ -391,7 +391,7 @@ TEST_F(PROF_HOST_MEM_HANDLER_TEST, ParseProcFile) {
         .stubs()
         .will(returnValue(false))
         .then(returnValue(true));
-    ProcHostMemHandler hostMemHandler(PROF_HOST_PROC_MEM, bufSize,
+    ProcHostMemHandler hostMemHandler(PROF_HOST_PID_MEM, bufSize,
             sampleIntervalMs, retFileName, param, jobCtx, upLoader);
     EXPECT_EQ(PROFILING_FAILED, hostMemHandler.Init());
     EXPECT_EQ(PROFILING_SUCCESS, hostMemHandler.Init());
@@ -584,7 +584,7 @@ void fake_get_child_dirs(const std::string &dir, bool is_recur, std::vector<std:
 TEST_F(PROF_ALL_PID_FILE_HANDLER_TEST, Init) {
     GlobalMockObject::verify();
 
-    ProcAllPidsFileHandler allPidsHandler(PROF_ALL_PID, devId,
+    ProcAllPidsFileHandler allPidsHandler(PROF_SYS_ALL_PID, devId,
             sampleIntervalMs, param, jobCtx, upLoader);
 
     MOCKER(analysis::dvvp::common::utils::Utils::GetChildDirs)
@@ -594,7 +594,9 @@ TEST_F(PROF_ALL_PID_FILE_HANDLER_TEST, Init) {
         .stubs();
     MOCKER_CPP(&Analysis::Dvvp::JobWrapper::ProcAllPidsFileHandler::HandleExitPids)
         .stubs();
-    MOCKER_CPP(&Analysis::Dvvp::JobWrapper::ProcAllPidsFileHandler::HandleNewPids)
+    MOCKER_CPP(&Analysis::Dvvp::JobWrapper::ProcAllPidsFileHandler::HandleNewPidsCpu)
+        .stubs();
+    MOCKER_CPP(&Analysis::Dvvp::JobWrapper::ProcAllPidsFileHandler::HandleNewPidsMem)
         .stubs();
     //Init
     EXPECT_EQ(PROFILING_SUCCESS, allPidsHandler.Init());
@@ -611,7 +613,7 @@ TEST_F(PROF_ALL_PID_FILE_HANDLER_TEST, Init) {
 TEST_F(PROF_ALL_PID_FILE_HANDLER_TEST, GetNewExitPids) {
     GlobalMockObject::verify();
 
-    ProcAllPidsFileHandler allPidsHandler(PROF_ALL_PID, devId,
+    ProcAllPidsFileHandler allPidsHandler(PROF_SYS_ALL_PID, devId,
             sampleIntervalMs, param, jobCtx, upLoader);
 
     //GetNewExitPids
@@ -636,8 +638,10 @@ TEST_F(PROF_ALL_PID_FILE_HANDLER_TEST, GetNewExitPids) {
     EXPECT_EQ(prevPids[1], exitPids[0]);
 
     //HandleNewPids
-    allPidsHandler.HandleNewPids(prevPids);
-    allPidsHandler.HandleNewPids(newPids);
+    allPidsHandler.HandleNewPidsCpu(prevPids);
+    allPidsHandler.HandleNewPidsMem(prevPids);
+    allPidsHandler.HandleNewPidsCpu(newPids);
+    allPidsHandler.HandleNewPidsMem(newPids);
     //HandleExitPids
     allPidsHandler.HandleExitPids(exitPids);
     //Execute
@@ -674,12 +678,12 @@ TEST_F(PROF_TIMER_TEST, Handler) {
             new TimerParam(1000));
     ProfTimer timerHandler(timerParam);
     std::shared_ptr<ProcAllPidsFileHandler> allPidsHandler(
-            new ProcAllPidsFileHandler(PROF_ALL_PID, devId,
+            new ProcAllPidsFileHandler(PROF_SYS_ALL_PID, devId,
                     sampleIntervalMs, param, jobCtx, upLoader));
 
-    EXPECT_EQ(PROFILING_SUCCESS, timerHandler.RegisterTimerHandler(PROF_ALL_PID, allPidsHandler));
+    EXPECT_EQ(PROFILING_SUCCESS, timerHandler.RegisterTimerHandler(PROF_SYS_ALL_PID, allPidsHandler));
     EXPECT_EQ(1, timerHandler.Handler());
-    EXPECT_EQ(PROFILING_SUCCESS, timerHandler.RemoveTimerHandler(PROF_ALL_PID));
+    EXPECT_EQ(PROFILING_SUCCESS, timerHandler.RemoveTimerHandler(PROF_SYS_ALL_PID));
 }
 
 TEST_F(PROF_TIMER_TEST, Start) {
@@ -720,10 +724,10 @@ TEST_F(PROF_TIMER_TEST, Start) {
     EXPECT_EQ(PROFILING_SUCCESS, timerHandler.Stop());
     //stop succ
     std::shared_ptr<ProcAllPidsFileHandler> allPidsHandler(
-            new ProcAllPidsFileHandler(PROF_ALL_PID, devId,
+            new ProcAllPidsFileHandler(PROF_SYS_ALL_PID, devId,
                     sampleIntervalMs, param, jobCtx, upLoader));
 
-    EXPECT_EQ(PROFILING_SUCCESS, timerHandler.RegisterTimerHandler(PROF_ALL_PID, allPidsHandler));
+    EXPECT_EQ(PROFILING_SUCCESS, timerHandler.RegisterTimerHandler(PROF_SYS_ALL_PID, allPidsHandler));
     timerHandler.isStarted_ = true;
     EXPECT_EQ(PROFILING_SUCCESS, timerHandler.Stop());
 }

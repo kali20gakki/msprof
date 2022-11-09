@@ -36,7 +36,7 @@ class MemcpyCalculator(ICalculator, MsMultiProcess):
         self._has_table = False
 
     @staticmethod
-    def _state_groupby_stream_task(ts_data: tuple) -> list:
+    def _state_groupby_stream_task(ts_data: tuple) -> dict:
         stream_task_group = {}
         for ts_datum in ts_data:
             memcpy_recorder = stream_task_group.setdefault(

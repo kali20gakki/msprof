@@ -1079,7 +1079,7 @@ static unsigned long long ProfTimerJobCommonInit(const SHARED_PTR_ALIA<Collectio
 
     if (timerTag == PROF_SYS_MEM) {
         profilingInterval = cfg->comParams->params->sys_sampling_interval;
-    } else if (timerTag == PROF_ALL_PID) {
+    } else if (timerTag == PROF_SYS_ALL_PID) {
         profilingInterval = cfg->comParams->params->pid_sampling_interval;
     }
 
@@ -1143,7 +1143,7 @@ int ProfSysStatJob::Process()
     }
     static const unsigned int PROC_SYS_STAT_BUF_SIZE = (1 << 13); // 1 << 13  means 8k
 
-    std::string retFileName(PROF_SYS_CPU_USAGE_FILE);
+    std::string retFileName(PROF_DEVICE_SYS_CPU_USAGE_FILE);
     SHARED_PTR_ALIA<ProcStatFileHandler> statHandler;
 
     MSVP_MAKE_SHARED9_RET(statHandler, ProcStatFileHandler,
@@ -1200,7 +1200,7 @@ int ProfAllPidsJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
         MSPROF_LOGI("pid_profiling not enabled");
         return PROFILING_FAILED;
     }
-    sampleIntervalNs_ = ProfTimerJobCommonInit(collectionJobCfg_, upLoader_, PROF_ALL_PID);
+    sampleIntervalNs_ = ProfTimerJobCommonInit(collectionJobCfg_, upLoader_, PROF_SYS_ALL_PID);
     if (sampleIntervalNs_ == 0) {
         return PROFILING_FAILED;
     }
@@ -1215,7 +1215,7 @@ int ProfAllPidsJob::Process()
     }
     SHARED_PTR_ALIA<ProcAllPidsFileHandler> pidsHandler;
     MSVP_MAKE_SHARED6_RET(pidsHandler, ProcAllPidsFileHandler,
-        PROF_ALL_PID, collectionJobCfg_->comParams->devId,
+        PROF_SYS_ALL_PID, collectionJobCfg_->comParams->devId,
         sampleIntervalNs_, collectionJobCfg_->comParams->params,
         collectionJobCfg_->comParams->jobCtx, upLoader_, PROFILING_FAILED);
     if (pidsHandler->Init() != PROFILING_SUCCESS) {
@@ -1225,13 +1225,13 @@ int ProfAllPidsJob::Process()
     }
     MSPROF_LOGI("pidsHandler Init succ, sampleIntervalNs_:%llu", sampleIntervalNs_);
     TimerManager::instance()->StartProfTimer();
-    TimerManager::instance()->RegisterProfTimerHandler(PROF_ALL_PID, pidsHandler);
+    TimerManager::instance()->RegisterProfTimerHandler(PROF_SYS_ALL_PID, pidsHandler);
     return PROFILING_SUCCESS;
 }
 
 int ProfAllPidsJob::Uninit()
 {
-    TimerManager::instance()->RemoveProfTimerHandler(PROF_ALL_PID);
+    TimerManager::instance()->RemoveProfTimerHandler(PROF_SYS_ALL_PID);
     TimerManager::instance()->StopProfTimer();
     upLoader_.reset();
     return PROFILING_SUCCESS;
@@ -1280,7 +1280,7 @@ int ProfSysMemJob::Process()
         return PROFILING_FAILED;
     }
     static const unsigned int PROC_SYS_MEM_BUF_SIZE = (1 << 15);  // 1 << 15  means 32k
-    std::string retFileName(PROF_SYS_MEM_FILE);
+    std::string retFileName(PROF_DEVICE_SYS_MEM_USAGE_FILE);
 
     SHARED_PTR_ALIA<ProcMemFileHandler> memHandler;
     MSVP_MAKE_SHARED9_RET(memHandler, ProcMemFileHandler,
