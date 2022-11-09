@@ -8,10 +8,10 @@ import os
 import sqlite3
 
 from common_func.constant import Constant
-from common_func.empty_class import EmptyClass
-from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msvp_common import path_check
+from common_func.ms_constant.number_constant import NumberConstant
 from common_func.path_manager import PathManager
+from common_func.empty_class import EmptyClass
 from profiling_bean.db_dto.database_to_object import DataBaseToObject
 
 
@@ -239,33 +239,6 @@ class DBManager:
             return EmptyClass()
         finally:
             curs.row_factory = None
-
-    @classmethod
-    def fetch_one_data(cls: any, curs: any, sql: str, param: tuple = None, dto_class: any = None) -> any:
-        """
-        fetch the next row query result set as a list
-        :return: one dto_class instance if dto_class, else one tuple
-        """
-        if not isinstance(curs, sqlite3.Cursor):
-            return tuple()
-        if dto_class:
-            curs.row_factory = ClassRowType.class_row(dto_class)
-        try:
-            if param:
-                curs.execute(sql, param)
-            else:
-                curs.execute(sql)
-        except sqlite3.Error as _err:
-            logging.error(str(_err), exc_info=Constant.TRACE_BACK_SWITCH)
-            return tuple()
-        try:
-            res = curs.fetchone()
-        except sqlite3.Error as _err:
-            logging.error(str(_err), exc_info=Constant.TRACE_BACK_SWITCH)
-            return tuple()
-        finally:
-            curs.row_factory = None
-        return res if res else tuple()
 
     @classmethod
     def add_new_column(cls: any, *args: str) -> None:
