@@ -103,12 +103,11 @@ class IterParser(IParser, MsMultiProcess):
                     start_time_list = self._task_start_dict.get(stream_task_id, [])
                     start_time = start_time_list[-1] if start_time_list else -1
                     self._calculate_batch_list(_task_log, start_time)
-                    del self._task_start_dict[stream_task_id]
+                    self._task_start_dict.pop(stream_task_id, None)
                 else:
                     self._task_start_dict.setdefault(stream_task_id, []).append(_task_log.sys_cnt)
-                    self._calculate_batch_list(_task_log)
                 self._iter_info_updater.update_parallel_iter_info_pool(self._iter_recorder.current_iter_id)
-                self._iter_info_updater.update_count_and_offset(_task_log, self.ai_core_task)
+                self._iter_info_updater.update_count_and_offset(_task_log)
             else:
                 self._overstep_task_cnt = self._overstep_task_cnt + 1
 

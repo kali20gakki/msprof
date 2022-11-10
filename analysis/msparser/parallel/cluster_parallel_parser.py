@@ -86,7 +86,7 @@ class ClusterParallelParser(IParser, MsMultiProcess):
             if not ai_cpu_op_data:
                 compare_op = ai_core_op_data.pop()
             elif not ai_core_op_data:
-                compare_op = ai_core_op_data.pop()
+                compare_op = ai_cpu_op_data.pop()
             elif ai_cpu_op_data[-1].start_time < ai_core_op_data[-1].start_time:
                 compare_op = ai_cpu_op_data.pop()
             else:
