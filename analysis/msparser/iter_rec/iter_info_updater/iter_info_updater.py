@@ -50,7 +50,7 @@ class IterInfoUpdater:
             new_add_parallel_iter_info.hwts_offset = current_iter_info.hwts_offset + current_iter_info.hwts_count
             new_add_parallel_iter_info.aic_offset = current_iter_info.aic_offset + current_iter_info.aic_count
 
-    def update_count_and_offset(self: any, task: any, ai_core_task: set) -> None:
+    def update_count_and_offset(self: any, task: any) -> None:
         """
         update count and offset
         """
@@ -59,7 +59,6 @@ class IterInfoUpdater:
         if task.sys_tag == self.HWTS_TASK_END and task.is_ai_core:
             self.update_aicore(self.active_parallel_iter_info)
 
-    @staticmethod
     def judge_ai_core(self: any, task: any, ai_core_task: set) -> bool:
         """
         judge ai core
