@@ -48,3 +48,7 @@ class ClusterInfoViewModel(ViewModel):
         sql = f"select case when rank_id='N/A' then device_id else rank_id end " \
               f"from {DBNameConstant.TABLE_CLUSTER_RANK}"
         return set(chain.from_iterable(DBManager.fetch_all_data(self.cur, sql)))
+
+    def get_info_based_on_rank_or_device_id(self: any, rank_id: int) -> any:
+        sql = f"select * from {DBNameConstant.TABLE_CLUSTER_RANK} where rank_id= ? or device_id= ?"
+        return DBManager.fetch_one_data(self.cur, sql, (rank_id, rank_id), ClusterRankDto)
