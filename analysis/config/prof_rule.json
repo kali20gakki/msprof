@@ -3,7 +3,7 @@
     {
       "rule_id": "rule_block_dim_1",
       "rule_description": "check whether using multi-core",
-      "rule_condition": "condition_block_dim_1",
+      "rule_condition": "condition_block_dim_1 && condition_cube_ratio_2",
       "rule_type": "Operator Processing",
       "rule_subtype": "",
       "rule_suggestion": "please using multi-core"
@@ -35,10 +35,10 @@
     {
       "rule_id": "rule_wait_time_1",
       "rule_description": "check the wait time for tasks.",
-      "rule_condition": "condition_wait_time_1",
+      "rule_condition": "condition_wait_time_2",
       "rule_type": "Operator Schedule",
       "rule_subtype": "",
-      "rule_suggestion": "Task wait time has reached the upper limit"
+      "rule_suggestion": "task wait time has reached the upper limit"
     },
     {
       "rule_id": "rule_aicpu_1",
@@ -51,10 +51,10 @@
     {
       "rule_id": "rule_memory_bound_1",
       "rule_description": "check the memory bound",
-      "rule_condition": "condition_memory_bound_1",
+      "rule_condition": "condition_memory_bound_2",
       "rule_type": "Model/Operator Memory",
       "rule_subtype": "",
-      "rule_suggestion": "Low data memory handling efficiency"
+      "rule_suggestion": "low data memory handling efficiency"
     },
     {
       "rule_id": "rule_vector_bound_1",
@@ -63,6 +63,14 @@
       "rule_type": "Model/Operator Memory",
       "rule_subtype": "",
       "rule_suggestion": "please check repeat counts and vector mask"
+    },
+    {
+      "rule_id": "rule_vector_bound_2",
+      "rule_description": "cube operators reach vector bound",
+      "rule_condition": "condition_vector_ratio_2 && condition_cube_ratio_2 && condition_task_duration_1",
+      "rule_type": "Model/Operator Computation",
+      "rule_subtype": "Cube",
+      "rule_suggestion": "cube operators cost too much time on vector computing"
     },
     {
       "rule_id": "rule_vector_ratio_1",
@@ -81,6 +89,14 @@
       "rule_suggestion": "low cube compute utilization"
     },
     {
+      "rule_id": "rule_scalar_bound_1",
+      "rule_description": "check the scalar bound",
+      "rule_condition": "condition_scalar_ratio_1",
+      "rule_type": "Model/Operator Computation",
+      "rule_subtype": "Scalar",
+      "rule_suggestion": "high scalar compute utilization"
+    },
+    {
       "rule_id": "rule_vec_bankgroup_cflt_ratio_1",
       "rule_description": "check the vec_bankgroup_cflt_ratio",
       "rule_condition": "condition_vec_bankgroup_cflt_ratio_1",
@@ -97,124 +113,20 @@
       "rule_suggestion": "vector bank conflict has reached the upper limit"
     },
     {
-      "rule_id": "rule_conv2d_1",
-      "rule_description": "check the rule for conv2d.",
-      "rule_condition": "condition_conv2d_1 && condition_common_4 && condition_common_1",
-      "rule_type": "",
+      "rule_id": "rule_aicpu_2",
+      "rule_description": "check if the aicpu operator running with int64",
+      "rule_condition": "condition_task_duration_1 && condition_aicpu_1 && condition_int64_1",
+      "rule_type": "Operator Processing",
       "rule_subtype": "",
-      "rule_suggestion": ""
+      "rule_suggestion": "please try converting the type to int32 for aicore operators"
     },
     {
-      "rule_id": "rule_conv2d_2",
-      "rule_description": "check the rule for conv2d.",
-      "rule_condition": "condition_conv2d_1 && condition_common_5 && condition_common_2",
-      "rule_type": "",
+      "rule_id": "rule_aicpu_3",
+      "rule_description": "check the StridedSliceGrad operator",
+      "rule_condition": "condition_strided_slice_grad_1 && condition_aicpu_1 && condition_task_duration_1",
+      "rule_type": "Operator Processing",
       "rule_subtype": "",
-      "rule_suggestion": ""
-    },
-    {
-      "rule_id": "rule_conv2d_3",
-      "rule_description": "check the rule for conv2d.",
-      "rule_condition": "condition_conv2d_1 && condition_common_3",
-      "rule_type": "",
-      "rule_subtype": "",
-      "rule_suggestion": ""
-    },
-    {
-      "rule_id": "rule_MaxPooling_1",
-      "rule_description": "check the rule for MaxPooling.",
-      "rule_condition": "condition_MaxPooling_1 && condition_common_1",
-      "rule_type": "",
-      "rule_subtype": "",
-      "rule_suggestion": ""
-    },
-    {
-      "rule_id": "rule_AvgPooling_1",
-      "rule_description": "check the rule for AvgPooling.",
-      "rule_condition": "condition_AvgPooling_1 && condition_common_1",
-      "rule_type": "",
-      "rule_subtype": "",
-      "rule_suggestion": ""
-    },
-    {
-      "rule_id": "rule_Concat_1",
-      "rule_description": "check the rule for Concat.",
-      "rule_condition": "condition_Concat_1 && condition_common_1",
-      "rule_type": "",
-      "rule_subtype": "",
-      "rule_suggestion": ""
-    },
-    {
-      "rule_id": "rule_RNN_1",
-      "rule_description": "check the rule for RNN.",
-      "rule_condition": "condition_RNN_1 && condition_common_4 && condition_common_1",
-      "rule_type": "",
-      "rule_subtype": "",
-      "rule_suggestion": ""
-    },
-    {
-      "rule_id": "rule_RNN_2",
-      "rule_description": "check the rule for RNN.",
-      "rule_condition": "condition_RNN_1 && condition_common_5 && condition_common_2",
-      "rule_type": "",
-      "rule_subtype": "",
-      "rule_suggestion": ""
-    },
-    {
-      "rule_id": "rule_RNN_3",
-      "rule_description": "check the rule for RNN.",
-      "rule_condition": "condition_RNN_1 && condition_common_6",
-      "rule_type": "",
-      "rule_subtype": "",
-      "rule_suggestion": ""
-    },
-    {
-      "rule_id": "rule_LSTM_1",
-      "rule_description": "check the rule for LSTM.",
-      "rule_condition": "condition_LSTM_1 && condition_common_4 && condition_common_1",
-      "rule_type": "",
-      "rule_subtype": "",
-      "rule_suggestion": ""
-    },
-    {
-      "rule_id": "rule_LSTM_2",
-      "rule_description": "check the rule for LSTM.",
-      "rule_condition": "condition_LSTM_1 && condition_common_5 && condition_common_2",
-      "rule_type": "",
-      "rule_subtype": "",
-      "rule_suggestion": ""
-    },
-    {
-      "rule_id": "rule_LSTM_3",
-      "rule_description": "check the rule for LSTM.",
-      "rule_condition": "condition_LSTM_1 && condition_common_6",
-      "rule_type": "",
-      "rule_subtype": "",
-      "rule_suggestion": ""
-    },
-    {
-      "rule_id": "rule_GRU_1",
-      "rule_description": "check the rule for GRU.",
-      "rule_condition": "condition_GRU_1 && condition_common_4 && condition_common_1",
-      "rule_type": "",
-      "rule_subtype": "",
-      "rule_suggestion": ""
-    },
-    {
-      "rule_id": "rule_GRU_2",
-      "rule_description": "check the rule for GRU.",
-      "rule_condition": "condition_GRU_1 && condition_common_5 && condition_common_2",
-      "rule_type": "",
-      "rule_subtype": "",
-      "rule_suggestion": ""
-    },
-    {
-      "rule_id": "rule_GRU_3",
-      "rule_description": "check the rule for GRU.",
-      "rule_condition": "condition_GRU_1 && condition_common_6",
-      "rule_type": "",
-      "rule_subtype": "",
-      "rule_suggestion": ""
+      "rule_suggestion": "please try StridedSliceGrad on aicore"
     }
   ]
 }

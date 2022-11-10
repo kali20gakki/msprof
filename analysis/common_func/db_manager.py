@@ -220,6 +220,27 @@ class DBManager:
             curs.row_factory = None
 
     @classmethod
+    def fetchone(cls: any, curs: any, sql: str, param: tuple = None, dto_class: any = None) -> any:
+        """
+        fetch one data
+        """
+        if not isinstance(curs, sqlite3.Cursor):
+            return EmptyClass()
+        if dto_class:
+            curs.row_factory = ClassRowType.class_row(dto_class)
+        try:
+            if param:
+                data = curs.execute(sql, param).fetchone()
+            else:
+                data = curs.execute(sql).fetchone()
+            return data
+        except sqlite3.Error as _err:
+            logging.error(str(_err), exc_info=Constant.TRACE_BACK_SWITCH)
+            return EmptyClass()
+        finally:
+            curs.row_factory = None
+
+    @classmethod
     def add_new_column(cls: any, *args: str) -> None:
         """
         add a new column to certain table with default value
