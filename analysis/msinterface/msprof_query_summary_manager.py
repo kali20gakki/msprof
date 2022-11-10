@@ -18,7 +18,7 @@ from common_func.path_manager import PathManager
 from msmodel.cluster_info.cluster_info_model import ClusterInfoViewModel
 from msparser.cluster.cluster_communication_parser import ClusterCommunicationParser
 from msparser.cluster.cluster_parallel_parser import ClusterParallelParser
-from msparser.cluster.data_preprocess_parser import DataPreprocessParser
+from msparser.cluster.cluster_data_preparation_parser import ClusterDataPreparationParser
 from msparser.cluster.fops_parser import FopsParser
 from msparser.cluster.step_trace_summary import StepTraceSummay
 
@@ -41,7 +41,7 @@ class MsprofQuerySummaryManager:
     FILE_NAME = os.path.basename(__file__)
     QUERY_DATA_TYPE_PARSER = {QueryDataType.STEP_TRACE: StepTraceSummay,
                               QueryDataType.FOPS_ANALYSE: FopsParser,
-                              QueryDataType.DATA_PREPARATION: DataPreprocessParser,
+                              QueryDataType.DATA_PREPARATION: ClusterDataPreparationParser,
                               QueryDataType.PARALLEL_ANALYSIS: ClusterParallelParser,
                               QueryDataType.COLLECTIVE_COMMUNICATION: ClusterCommunicationParser}
 
