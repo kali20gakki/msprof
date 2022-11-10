@@ -223,6 +223,7 @@ class DBNameConstant(metaclass=ABCMeta):
     TABLE_CLUSTER_DATA_PARALLEL = "ClusterDataParallel"
     TABLE_CLUSTER_MODEL_PARALLEL = "ClusterModelParallel"
     TABLE_CLUSTER_PIPELINE_PARALLEL = "ClusterPipelineParallel"
+    TABLE_HOST_QUEUE = "HostQueue"
 
     @abstractmethod
     def get_db_name(self: any) -> str:

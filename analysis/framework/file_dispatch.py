@@ -11,6 +11,7 @@ from common_func.file_name_manager import get_acl_hash_compiles
 from common_func.file_name_manager import get_ai_core_compiles
 from common_func.file_name_manager import get_ai_cpu_compiles
 from common_func.file_name_manager import get_aiv_compiles
+from common_func.file_name_manager import get_biu_compiles
 from common_func.file_name_manager import get_ctrl_cpu_compiles
 from common_func.file_name_manager import get_data_preprocess_compiles
 from common_func.file_name_manager import get_ddr_compiles
@@ -29,6 +30,8 @@ from common_func.file_name_manager import get_ge_tensor_info_compiles
 from common_func.file_name_manager import get_hbm_compiles
 from common_func.file_name_manager import get_hccl_hcom_compiles
 from common_func.file_name_manager import get_hccs_compiles
+from common_func.file_name_manager import get_helper_model_with_q_compiles
+from common_func.file_name_manager import get_host_queue_compiles
 from common_func.file_name_manager import get_hwts_compiles
 from common_func.file_name_manager import get_hwts_vector_compiles
 from common_func.file_name_manager import get_l2_cache_compiles
@@ -42,14 +45,12 @@ from common_func.file_name_manager import get_roce_compiles
 from common_func.file_name_manager import get_runtime_api_compiles
 from common_func.file_name_manager import get_runtime_task_track_compiles
 from common_func.file_name_manager import get_soc_log_compiles
+from common_func.file_name_manager import get_soc_profiler_compiles
 from common_func.file_name_manager import get_sys_cpu_usage_compiles
 from common_func.file_name_manager import get_sys_mem_compiles
 from common_func.file_name_manager import get_ts_cpu_compiles
 from common_func.file_name_manager import get_ts_track_aiv_compiles
-from common_func.file_name_manager import get_soc_profiler_compiles
 from common_func.file_name_manager import get_ts_track_compiles
-from common_func.file_name_manager import get_helper_model_with_q_compiles
-from common_func.file_name_manager import get_biu_compiles
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.path_manager import PathManager
 from framework.prof_factory_maker import ProfFactoryMaker
@@ -107,6 +108,7 @@ class FileDispatch:
         DataTag.HELPER_MODEL_WITH_Q: get_helper_model_with_q_compiles(),
         DataTag.SOC_PROFILER: get_soc_profiler_compiles(),
         DataTag.DATA_QUEUE: get_data_preprocess_compiles(Constant.DATA_QUEUE),
+        DataTag.HOST_QUEUE: get_host_queue_compiles(),
         DataTag.PARALLEL_STRATEGY: get_parallel_strategy_compiles()
     }
 
