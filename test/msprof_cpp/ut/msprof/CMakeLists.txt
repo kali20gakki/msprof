@@ -281,6 +281,7 @@ target_include_directories(msprof_utest PRIVATE
     ${TOP_DIR}/collector/inc/external/acl
     ${TOP_DIR}/collector/inc/external/ge
     ${TOP_DIR}/collector/dvvp/depend/inc/acl
+    ${MSPROF_SOURCE_DIR}/dvvp/params_adapter
 	${MSPROF_SOURCE_DIR}/dvvp/depend/inc/slog
 	${MSPROF_SOURCE_DIR}/dvvp/depend/inc/metadef/error_manager/error_manager_stub
 	${MSPROF_SOURCE_DIR}/dvvp/depend/inc/driver

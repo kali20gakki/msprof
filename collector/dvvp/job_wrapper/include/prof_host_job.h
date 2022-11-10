@@ -59,10 +59,10 @@ protected:
     unsigned long long sampleIntervalNs_;
 };
 
-class ProfHostCpuJob : public ProfHostDataBase {
+class ProfHostPidCpuJob : public ProfHostDataBase {
 public:
-    ProfHostCpuJob();
-    ~ProfHostCpuJob() override;
+    ProfHostPidCpuJob();
+    ~ProfHostPidCpuJob() override;
     int Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg) override;
     int Process() override;
     int Uninit() override;
@@ -72,10 +72,10 @@ public:
     }
 };
 
-class ProfHostMemJob : public ProfHostDataBase {
+class ProfHostPidMemJob : public ProfHostDataBase {
 public:
-    ProfHostMemJob();
-    ~ProfHostMemJob() override;
+    ProfHostPidMemJob();
+    ~ProfHostPidMemJob() override;
     int Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg) override;
     int Process() override;
     int Uninit() override;
@@ -83,6 +83,24 @@ public:
     {
         return true;
     }
+};
+
+class ProfHostSysCpuJob : public ProfHostDataBase {
+public:
+    ProfHostSysCpuJob();
+    ~ProfHostSysCpuJob() override;
+    int Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg) override;
+    int Process() override;
+    int Uninit() override;
+};
+ 
+class ProfHostSysMemJob : public ProfHostDataBase {
+public:
+    ProfHostSysMemJob();
+    ~ProfHostSysMemJob() override;
+    int Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg) override;
+    int Process() override;
+    int Uninit() override;
 };
 
 class ProfHostNetworkJob : public ProfHostDataBase {
@@ -178,6 +196,24 @@ public:
 
 private:
     SHARED_PTR_ALIA<ProfHostService> profHostService_{nullptr};
+};
+
+class ProfHostAllPidCpuJob : public ProfHostDataBase {
+public:
+    ProfHostAllPidCpuJob();
+    ~ProfHostAllPidCpuJob() override;
+    int Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg) override;
+    int Process() override;
+    int Uninit() override;
+};
+
+class ProfHostAllPidMemJob : public ProfHostDataBase {
+public:
+    ProfHostAllPidMemJob();
+    ~ProfHostAllPidMemJob() override;
+    int Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg) override;
+    int Process() override;
+    int Uninit() override;
 };
 }}}
 #endif

@@ -457,8 +457,15 @@ void ArgsManager::AddHostArgs()
         HOST_SYS_CPU};
     Args hostSysPid = {"host-sys-pid", "Set the PID of the app process for "
         "which you want to collect performance data."};
+    Args hostSysUsage = {"host-sys-usage", "The host-sys-usage data type, include cpu, mem",
+        HOST_SYS_CPU};
+    Args hostSysUsageFreq = {"host-sys-usage-freq", "The sampling frequency in hertz. "
+        "the default value is 50 Hz, the range is 1 to 50 Hz.",
+        "50"};
     argsList_.push_back(hostSys);
     argsList_.push_back(hostSysPid);
+    argsList_.push_back(hostSysUsage);
+    argsList_.push_back(hostSysUsageFreq);
 }
 }
 }

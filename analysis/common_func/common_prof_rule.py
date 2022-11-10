@@ -24,10 +24,13 @@ class CommonProfRule:
     CONDITION_CMP = "cmp"
     CONDITION_DEPENDENCY = "dependency"
     CONDITION_THRESHOLD = "threshold"
+    CONDITION_ACCUMULATE = "accumulate"
+    CONDITION_COMPARE = "compare"
 
     COND_TYPE_NORMAL = "normal"
     COND_TYPE_FORMULA = "formula"
     COND_TYPE_COUNT = "count"
+    COND_TYPE_ACCUMULATE = "accumulate"
 
     # return json key and value
     RESULT_RULE_TYPE = "rule_type"

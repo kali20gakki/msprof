@@ -128,7 +128,7 @@ class FileDispatch:
 
     def dispatch_parser(self: any) -> None:
         """
-        entry for file dispatch
+        entry of file dispatch for data-parsing
         :return: None
         """
         self.pick_up_files()
@@ -137,7 +137,7 @@ class FileDispatch:
 
     def dispatch_calculator(self: any) -> None:
         """
-        entry for file dispatch
+        entry of file dispatch for data-calculating
         :return: None
         """
         self.pick_up_files()

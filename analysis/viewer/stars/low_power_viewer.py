@@ -19,25 +19,27 @@ class LowPowerViewer(BaseViewer, ABC):
 
     DATA_TYPE = 'data_type'
     TIME_STAMP = 0
-    SAMPLEING_TIMES = 1
-    TEM_OF_AI_CORE = 2
-    TEM_OF_HBM = 3
-    TEM_OF_HBM_GRANULARITY = 4
-    TEM_OF_CPU = 6
-    TEM_OF_3DSRAM = 5
-    TEM_OF_PERIPHERALS = 7
-    TEM_OF_L2_BUFF = 8
-    AIC_CURRENT_DPM = 9
-    POWER_COS_DPM = 10
-    AIC_CURRENT_SD5003 = 11
-    POWER_COS_SD5003 = 12
-    AIC_FREQUENCY = 14
-    IMON = 13
-    WARN_CNT0 = 15
-    WARN_CNT1 = 16
-    WARN_CNT2 = 17
-    WARN_CNT3 = 18
-    VOLTAGE = 29
+    VF_SAMPLEING_TIMES = 1
+    PWR_SAMPLEING_TIMES = 2
+    TEMP_SAMPLEING_TIMES = 3
+    TEM_OF_AI_CORE = 4
+    TEM_OF_HBM = 5
+    TEM_OF_HBM_GRANULARITY = 6
+    TEM_OF_CPU = 8
+    TEM_OF_3DSRAM = 7
+    TEM_OF_PERIPHERALS = 9
+    TEM_OF_L2_BUFF = 10
+    AIC_CURRENT_DPM = 11
+    POWER_COS_DPM = 12
+    AIC_CURRENT_SD5003 = 13
+    POWER_COS_SD5003 = 14
+    AIC_FREQUENCY = 16
+    IMON = 15
+    WARN_CNT0 = 17
+    WARN_CNT1 = 18
+    WARN_CNT2 = 19
+    WARN_CNT3 = 20
+    VOLTAGE = 31
 
     def __init__(self: any, configs: dict, params: dict) -> None:
         super().__init__(configs, params)
@@ -66,8 +68,12 @@ class LowPowerViewer(BaseViewer, ABC):
             return []
         result = []
         for data in datas:
-            result.append(["Sampling Times", data[self.TIME_STAMP], self.pid, self.SAMPLEING_TIMES,
-                           {'Value': data[self.SAMPLEING_TIMES]}])
+            result.append(["VF Sampling cnt", data[self.TIME_STAMP], self.pid, self.VF_SAMPLEING_TIMES,
+                           {'Value': data[self.VF_SAMPLEING_TIMES]}])
+            result.append(["Pwr Sampling cnt", data[self.TIME_STAMP], self.pid, self.PWR_SAMPLEING_TIMES,
+                           {'Value': data[self.PWR_SAMPLEING_TIMES]}])
+            result.append(["Temp Sampling cnt", data[self.TIME_STAMP], self.pid, self.TEMP_SAMPLEING_TIMES,
+                           {'Value': data[self.TEMP_SAMPLEING_TIMES]}])
             result.append(["AIC TEMP (℃)", data[self.TIME_STAMP], self.pid, self.TEM_OF_AI_CORE,
                            {'Value': data[self.TEM_OF_AI_CORE]}])
             result.append(

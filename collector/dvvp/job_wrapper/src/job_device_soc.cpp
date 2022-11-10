@@ -458,8 +458,12 @@ void JobDeviceSoc::CreateCollectionJobArray()
     MSVP_MAKE_SHARED0_VOID(CollectionJobV_[HOST_SYSCALLS_COLLECTION_JOB].collectionJob, ProfHostSysCallsJob);
     MSVP_MAKE_SHARED0_VOID(CollectionJobV_[HOST_PTHREAD_COLLECTION_JOB].collectionJob, ProfHostPthreadJob);
     MSVP_MAKE_SHARED0_VOID(CollectionJobV_[HOST_DISKIO_COLLECTION_JOB].collectionJob, ProfHostDiskJob);
-    MSVP_MAKE_SHARED0_VOID(CollectionJobV_[HOST_CPU_COLLECTION_JOB].collectionJob, ProfHostCpuJob);
-    MSVP_MAKE_SHARED0_VOID(CollectionJobV_[HOST_MEM_COLLECTION_JOB].collectionJob, ProfHostMemJob);
+    MSVP_MAKE_SHARED0_VOID(CollectionJobV_[HOST_PID_CPU_COLLECTION_JOB].collectionJob, ProfHostPidCpuJob);
+    MSVP_MAKE_SHARED0_VOID(CollectionJobV_[HOST_PID_MEM_COLLECTION_JOB].collectionJob, ProfHostPidMemJob);
+    MSVP_MAKE_SHARED0_VOID(CollectionJobV_[HOST_ALL_PID_CPU_COLLECTION_JOB].collectionJob, ProfHostAllPidCpuJob);
+    MSVP_MAKE_SHARED0_VOID(CollectionJobV_[HOST_ALL_PID_MEM_COLLECTION_JOB].collectionJob, ProfHostAllPidMemJob);
+    MSVP_MAKE_SHARED0_VOID(CollectionJobV_[HOST_SYS_CPU_COLLECTION_JOB].collectionJob, ProfHostSysCpuJob);
+    MSVP_MAKE_SHARED0_VOID(CollectionJobV_[HOST_SYS_MEM_COLLECTION_JOB].collectionJob, ProfHostSysMemJob);
     MSVP_MAKE_SHARED0_VOID(CollectionJobV_[HOST_NETWORK_COLLECTION_JOB].collectionJob, ProfHostNetworkJob);
 
     for (int cnt = 0; cnt < NR_MAX_COLLECTION_JOB; cnt++) {

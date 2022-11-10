@@ -28,11 +28,12 @@ public:
 
 public:
     int Init(bool needSlice = true);
-    bool FileSliceFlush();
+    int FileSliceFlush();
     int SaveDataToLocalFiles(SHARED_PTR_ALIA<google::protobuf::Message> message);
 
 private:
     int FileSliceFlushByJobID(const std::string &jobIDRelative, const std::string &devID);
+    int FileFlush(const std::string &sliceName, uint64_t sliceId);
     bool CreateDoneFile(const std::string &absolutePath, const std::string &fileSize,
                         const std::string &startTime, const std::string &endTime, const std::string &timeKey);
     std::string GetSliceKey(const std::string &dir, std::string &fileName);

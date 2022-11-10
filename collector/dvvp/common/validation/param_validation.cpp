@@ -17,6 +17,7 @@
 #include "msprof_error_manager.h"
 #include "config/config_manager.h"
 #include "cmd_log.h"
+#include "params_adapter.h"
 
 #ifndef MSPROF_BIN
 #undef CMD_LOGE
@@ -36,6 +37,7 @@ using namespace analysis::dvvp::common::utils;
 using namespace Collector::Dvvp::Plugin;
 using namespace Collector::Dvvp::Mmpa;
 using namespace Collector::Dvvp::Msprofbin;
+using namespace Collector::Dvvp::ParamsAdapter;
 
 const int MIN_INTERVAL = 1;
 const int MAX_INTERVAL = 15 * 24 * 3600 * 1000; // 15 * 24 * 3600 * 1000 = 15day's micro seconds
@@ -75,8 +77,7 @@ bool ParamValidation::CheckOutputIsValid(const std::string &outputPath) const
     if (!path.empty()) {
         if (path.size() > MAX_PATH_LENGTH) {
             MSPROF_LOGE("Invalid value for Argument 'output'. The maximum length is %d.", MAX_PATH_LENGTH);
-            CMD_LOGE("Argument --output is invalid because of exceeds"
-                " the maximum length of %d", MAX_PATH_LENGTH);
+            CMD_LOGE("Argument --output is invalid because of exceeds the maximum length of %d.", MAX_PATH_LENGTH);
             MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
                 std::vector<std::string>({"output", outputPath, errReason}));
             return false;
@@ -106,8 +107,7 @@ bool ParamValidation::CheckOutputIsValid(const std::string &outputPath) const
         }
         if (Utils::CanonicalizePath(path).empty()) {
             MSPROF_LOGE("output is invalid because of get the canonicalized absolute pathname failed.");
-            CMD_LOGE("Argument --output is invalid because of"
-                " get the canonicalized absolute pathname failed");
+            CMD_LOGE("Argument --output is invalid because of get the canonicalized absolute pathname failed");
             return false;
         }
     } else {
@@ -248,32 +248,6 @@ bool ParamValidation::CheckFreqIsValid(const std::string &cfgName, const std::st
             std::vector<std::string>({"freq", freq, errReason}));
         return false;
     }
-}
-
-bool ParamValidation::CheckHostSysUsageIsValid(const std::string &hostSysUsage) const
-{
-    if (Platform::instance()->RunSocSide()) {
-        MSPROF_LOGE("Not in host side, host-sys-usage is not supported");
-        return false;
-    }
-    if (hostSysUsage.empty()) {
-        MSPROF_LOGI("hostsysusage is empty");
-        return true;
-    }
-    std::string errReason = "host_sys_usage should be in range of 'cpu | mem'.";
-    std::vector<std::string> hostSysUsageArray = Utils::Split(hostSysUsage, false, "", ",");
-    for (size_t i = 0; i < hostSysUsageArray.size(); ++i) {
-        if ((hostSysUsageArray[i].compare("cpu") != 0) && (hostSysUsageArray[i].compare("mem") != 0)) {
-            MSPROF_LOGE("Argument --host-sys-usage=%s is invalid. Please input in the range of "
-                "'cpu | mem'", hostSysUsageArray[i].c_str());
-            CMD_LOGE("Argument --host-sys-usage=%s is invalid. Please input in the range of "
-                "'cpu | mem'", hostSysUsageArray[i].c_str());
-            MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
-                std::vector<std::string>({"host_sys_usage", hostSysUsage, errReason}));
-            return false;
-        }
-    }
-    return true;
 }
 
 bool ParamValidation::CheckHostSysPidValid(const std::string &hostSysPid) const
@@ -934,6 +908,24 @@ bool ParamValidation::CheckHostSysOptionsIsValid(const std::string &hostSysOptio
     return false;
 }
 
+bool ParamValidation::CheckHostSysUsageOptionsIsValid(const std::string &hostSysUsageOptions) const
+{
+    if (hostSysUsageOptions.empty()) {
+        MSPROF_LOGI("hostSysUsageOptions is empty.");
+        return false;
+    }
+    const std::vector<std::string> hostSysWhiteList = {HOST_SYS_CPU, HOST_SYS_MEM};
+    for (size_t i = 0; i < hostSysWhiteList.size(); i++) {
+        if (hostSysUsageOptions.compare(hostSysWhiteList[i]) == 0) {
+            MSPROF_LOGD("hostSysUsageOptions is %s.", hostSysUsageOptions.c_str());
+            return true;
+        }
+    }
+    MSPROF_LOGE("hostSysUsageOptions[%s] is invalid.", hostSysUsageOptions.c_str());
+    CMD_LOGE("Argument --host-sys-usage[%s] is invalid.", hostSysUsageOptions.c_str());
+    return false;
+}
+
 bool ParamValidation::CheckHostSysPidIsValid(const int hostSysPid) const
 {
     if (hostSysPid < 0) {
@@ -1297,6 +1289,37 @@ bool ParamValidation::MsprofCheckHostSysValid(const std::string &hostSysParam) c
                 "'cpu|mem|disk|network|osrt'", hostSysArray[i].c_str());
             CMD_LOGE("Argument --host-sys=%s is invalid. Please input in the range of "
                 "'cpu|mem|disk|network|osrt'", hostSysParam.c_str());
+            return false;
+        }
+    }
+    return true;
+}
+
+bool ParamValidation::CheckHostSysUsageValid(const std::string &hostSysUsageParam) const
+{
+#if (defined(_WIN32) || defined(_WIN64) || defined(_MSC_VER))
+    MSPROF_LOGE("Currently, --host-sys-usage can be used only in the Linux environment.");
+    CMD_LOGE("Currently, --host-sys-usage can be used only in the Linux environment.");
+#endif
+    if (Platform::instance()->RunSocSide()) {
+        MSPROF_LOGE("Not in host side, --host-sys-usage is not supported.");
+        CMD_LOGE("Not in host side, --host-sys-usage is not supported.");
+        return false;
+    }
+    if (hostSysUsageParam.empty()) {
+        MSPROF_LOGE("Argument --host-sys-usage is empty. Please input in the range of "
+            "'cpu|mem'.");
+        CMD_LOGE("Argument --host-sys-usage is empty. Please input in the range of "
+            "'cpu|mem'.");
+        return false;
+    }
+    std::vector<std::string> hostSysUsageArray = Utils::Split(hostSysUsageParam, false, "", ",");
+    for (size_t i = 0; i < hostSysUsageArray.size(); ++i) {
+        if (!CheckHostSysUsageOptionsIsValid(hostSysUsageArray[i])) {
+            MSPROF_LOGE("Argument --host-sys-usage: invalid value:%s. Please input in the range of "
+                "'cpu|mem'.", hostSysUsageArray[i].c_str());
+            CMD_LOGE("Argument --host-sys-usage=%s is invalid. Please input in the range of "
+                "'cpu|mem'.", hostSysUsageParam.c_str());
             return false;
         }
     }
