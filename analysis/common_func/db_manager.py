@@ -66,6 +66,179 @@ class DBManager:
     TENNSTONS = 10
     NSTOUS = 1000
 
+    @staticmethod
+    def create_connect_db(db_path: str) -> tuple:
+        """
+        create and connect database
+        """
+        try:
+            conn = sqlite3.connect(db_path)
+        except sqlite3.Error as err:
+            logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
+            return EmptyClass("empty conn"), EmptyClass("empty curs")
+
+        try:
+            if isinstance(conn, sqlite3.Connection):
+                curs = conn.cursor()
+                os.chmod(db_path, NumberConstant.FILE_AUTHORITY)
+                return conn, curs
+        except sqlite3.Error:
+            return EmptyClass("empty conn"), EmptyClass("empty curs")
+        return EmptyClass("empty conn"), EmptyClass("empty curs")
+
+    @staticmethod
+    def destroy_db_connect(conn: any, cur: any) -> None:
+        """
+        destroy the db connect
+        """
+        try:
+            if isinstance(cur, sqlite3.Cursor):
+                cur.close()
+        except sqlite3.Error as error:
+            logging.error(str(error), exc_info=Constant.TRACE_BACK_SWITCH)
+
+        try:
+            if isinstance(conn, sqlite3.Connection):
+                conn.close()
+        except sqlite3.Error as error:
+            logging.error(str(error), exc_info=Constant.TRACE_BACK_SWITCH)
+
+    @staticmethod
+    def judge_table_exist(cursor: any, table_name: str) -> any:
+        """
+        judge table exist
+        """
+        if not isinstance(cursor, sqlite3.Cursor):
+            return False
+        try:
+            return cursor.execute("select count(*) from sqlite_master where type='table' and "
+                                  "name='{}'".format(table_name)).fetchone()[0]
+        except sqlite3.Error as err:
+            logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
+            return False
+
+    @staticmethod
+    def judge_index_exist(cursor: any, table_name: str) -> int:
+        """
+        judge index exist
+        """
+        if isinstance(cursor, sqlite3.Cursor):
+            return cursor.execute(
+                "select count(*) from sqlite_master where type='index' and "
+                "name='{}'".format(table_name)).fetchone()[0]
+        return 0
+
+    @staticmethod
+    def sql_create_table_with_key(
+            map_name: str,
+            table_name: str,
+            map_file_path: str,
+            key_list: any = None,
+            fields_filter_list: list = None) -> str:
+        """
+        Create a sqlite table with primary key
+        """
+        sql = DBManager.sql_create_general_table(map_name, table_name, map_file_path,
+                                                 fields_filter_list)
+        try:
+            if key_list:
+                key_list_str = "(" + ",".join(key_list) + "))"
+                sql = sql[:-1] + ", PRIMARY KEY" + key_list_str
+            return sql
+        except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
+            logging.error(err, exc_info=Constant.TRACE_BACK_SWITCH)
+            return ""
+        finally:
+            pass
+
+    @staticmethod
+    def get_table_field_num(map_name: str, map_file_path: str) -> int:
+        """
+        get table field number
+        :param map_name: map table name in table.ini
+        :param map_file_path: map file path
+        :return: success: table field number，otherwise return 0
+        """
+        num = NumberConstant.DEFAULT_TABLE_FIELD_NUM
+        if not map_file_path:
+            logging.error("Tables.ini path is None!")
+            return num
+        cfg_parser = configparser.ConfigParser()
+        try:
+            if os.path.realpath(map_file_path):
+                cfg_parser.read(os.path.realpath(map_file_path))
+                if cfg_parser.has_section(map_name):
+                    items = cfg_parser.items(map_name)
+                    num = len(items)
+            return num
+        except (OSError, SystemError, ValueError, TypeError, RuntimeError) as error:
+            logging.exception(error)
+            return num
+
+    @staticmethod
+    def execute_sql(conn: any, sql: str, param: any = None) -> bool:
+        """
+        execute sql
+        """
+        try:
+            if isinstance(conn, sqlite3.Connection):
+                if param:
+                    conn.cursor().execute(sql, param)
+                else:
+                    conn.cursor().execute(sql)
+                conn.commit()
+                return True
+        except sqlite3.Error as err:
+            logging.error(err, exc_info=Constant.TRACE_BACK_SWITCH)
+            return False
+        logging.error("conn is invalid param")
+        return False
+
+    @staticmethod
+    def executemany_sql(conn: any, sql: str, param: any) -> bool:
+        """
+        execute many sql once
+        """
+        try:
+            if isinstance(conn, sqlite3.Connection):
+                conn.cursor().executemany(sql, param)
+                conn.commit()
+                return True
+        except sqlite3.Error as err:
+            logging.error(err, exc_info=Constant.TRACE_BACK_SWITCH)
+            return False
+        logging.error("conn is invalid param")
+        return False
+
+    @staticmethod
+    def _get_headers_and_type_names(cfg_parser: any, map_name: str, fields_filter_list: list,
+                                    map_file_path: str) -> tuple:
+        headers, type_names = [], []
+        if cfg_parser.has_section(map_name):
+            items = cfg_parser.items(map_name)
+
+            for item in items:
+                if item[0] in fields_filter_list:
+                    continue
+                headers.append(item[0])
+                if not item[1]:
+                    item[1] = "TEXT"
+                type_names.append(item[1].split(",")[0])
+        else:
+            msg = "{} does not exist in {}!".format(map_name, map_file_path)
+            logging.error(msg)
+        return headers, type_names
+
+    @staticmethod
+    def _get_hd_with_type_list_str(headers: list, type_names: list) -> str:
+        hd_with_type_list_str = "("
+        hd_with_type_list = []
+        for i, _ in enumerate(headers):
+            hd_with_type_list.append(headers[i] + " " + type_names[i])
+        hd_with_type_list_str += ','.join(hd_with_type_list)
+        hd_with_type_list_str += ")"
+        return hd_with_type_list_str
+
     @classmethod
     def attach_to_db(cls: any, conn: any, project_path: str, db_name: str, attach_name: str) -> bool:
         """
@@ -277,176 +450,3 @@ class DBManager:
         if path_check(db_path):
             return cls.create_connect_db(db_path)
         return EmptyClass("empty conn"), EmptyClass("empty curs")
-
-    @staticmethod
-    def create_connect_db(db_path: str) -> tuple:
-        """
-        create and connect database
-        """
-        try:
-            conn = sqlite3.connect(db_path)
-        except sqlite3.Error as err:
-            logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
-            return EmptyClass("empty conn"), EmptyClass("empty curs")
-
-        try:
-            if isinstance(conn, sqlite3.Connection):
-                curs = conn.cursor()
-                os.chmod(db_path, NumberConstant.FILE_AUTHORITY)
-                return conn, curs
-        except sqlite3.Error:
-            return EmptyClass("empty conn"), EmptyClass("empty curs")
-        return EmptyClass("empty conn"), EmptyClass("empty curs")
-
-    @staticmethod
-    def destroy_db_connect(conn: any, cur: any) -> None:
-        """
-        destroy the db connect
-        """
-        try:
-            if isinstance(cur, sqlite3.Cursor):
-                cur.close()
-        except sqlite3.Error as error:
-            logging.error(str(error), exc_info=Constant.TRACE_BACK_SWITCH)
-
-        try:
-            if isinstance(conn, sqlite3.Connection):
-                conn.close()
-        except sqlite3.Error as error:
-            logging.error(str(error), exc_info=Constant.TRACE_BACK_SWITCH)
-
-    @staticmethod
-    def judge_table_exist(cursor: any, table_name: str) -> any:
-        """
-        judge table exist
-        """
-        if not isinstance(cursor, sqlite3.Cursor):
-            return False
-        try:
-            return cursor.execute("select count(*) from sqlite_master where type='table' and "
-                                  "name='{}'".format(table_name)).fetchone()[0]
-        except sqlite3.Error as err:
-            logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
-            return False
-
-    @staticmethod
-    def judge_index_exist(cursor: any, table_name: str) -> int:
-        """
-        judge index exist
-        """
-        if isinstance(cursor, sqlite3.Cursor):
-            return cursor.execute(
-                "select count(*) from sqlite_master where type='index' and "
-                "name='{}'".format(table_name)).fetchone()[0]
-        return 0
-
-    @staticmethod
-    def sql_create_table_with_key(
-            map_name: str,
-            table_name: str,
-            map_file_path: str,
-            key_list: any = None,
-            fields_filter_list: list = None) -> str:
-        """
-        Create a sqlite table with primary key
-        """
-        sql = DBManager.sql_create_general_table(map_name, table_name, map_file_path,
-                                                 fields_filter_list)
-        try:
-            if key_list:
-                key_list_str = "(" + ",".join(key_list) + "))"
-                sql = sql[:-1] + ", PRIMARY KEY" + key_list_str
-            return sql
-        except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
-            logging.error(err, exc_info=Constant.TRACE_BACK_SWITCH)
-            return ""
-        finally:
-            pass
-
-    @staticmethod
-    def get_table_field_num(map_name: str, map_file_path: str) -> int:
-        """
-        get table field number
-        :param map_name: map table name in table.ini
-        :param map_file_path: map file path
-        :return: success: table field number，otherwise return 0
-        """
-        num = NumberConstant.DEFAULT_TABLE_FIELD_NUM
-        if not map_file_path:
-            logging.error("Tables.ini path is None!")
-            return num
-        cfg_parser = configparser.ConfigParser()
-        try:
-            if os.path.realpath(map_file_path):
-                cfg_parser.read(os.path.realpath(map_file_path))
-                if cfg_parser.has_section(map_name):
-                    items = cfg_parser.items(map_name)
-                    num = len(items)
-            return num
-        except (OSError, SystemError, ValueError, TypeError, RuntimeError) as error:
-            logging.exception(error)
-            return num
-
-    @staticmethod
-    def execute_sql(conn: any, sql: str, param: any = None) -> bool:
-        """
-        execute sql
-        """
-        try:
-            if isinstance(conn, sqlite3.Connection):
-                if param:
-                    conn.cursor().execute(sql, param)
-                else:
-                    conn.cursor().execute(sql)
-                conn.commit()
-                return True
-        except sqlite3.Error as err:
-            logging.error(err, exc_info=Constant.TRACE_BACK_SWITCH)
-            return False
-        logging.error("conn is invalid param")
-        return False
-
-    @staticmethod
-    def executemany_sql(conn: any, sql: str, param: any) -> bool:
-        """
-        execute many sql once
-        """
-        try:
-            if isinstance(conn, sqlite3.Connection):
-                conn.cursor().executemany(sql, param)
-                conn.commit()
-                return True
-        except sqlite3.Error as err:
-            logging.error(err, exc_info=Constant.TRACE_BACK_SWITCH)
-            return False
-        logging.error("conn is invalid param")
-        return False
-
-    @staticmethod
-    def _get_headers_and_type_names(cfg_parser: any, map_name: str, fields_filter_list: list,
-                                    map_file_path: str) -> tuple:
-        headers, type_names = [], []
-        if cfg_parser.has_section(map_name):
-            items = cfg_parser.items(map_name)
-
-            for item in items:
-                if item[0] in fields_filter_list:
-                    continue
-                headers.append(item[0])
-                if not item[1]:
-                    item[1] = "TEXT"
-                type_names.append(item[1].split(",")[0])
-        else:
-            msg = "{} does not exist in {}!".format(map_name, map_file_path)
-            logging.error(msg)
-        return headers, type_names
-
-    @staticmethod
-    def _get_hd_with_type_list_str(headers: list, type_names: list) -> str:
-        hd_with_type_list_str = "("
-        hd_with_type_list = []
-        for i, _ in enumerate(headers):
-            hd_with_type_list.append(headers[i] + " " + type_names[i])
-        hd_with_type_list_str += ','.join(hd_with_type_list)
-        hd_with_type_list_str += ")"
-        return hd_with_type_list_str
