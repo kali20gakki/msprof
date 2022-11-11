@@ -38,13 +38,6 @@ class TestClusterParallelParser(unittest.TestCase):
             check.parse()
         self.assertEqual(ProfException.PROF_SYSTEM_EXIT, err.value.code)
 
-    def test_parse(self):
-        with mock.patch(NAMESPACE + ".ClusterParallelParser._prepare_for_parse", return_value=True), \
-                mock.patch(NAMESPACE + ".ClusterParallelParser._compute_overlap_time", side_effect=self.SIDE_EFFECT):
-            check = ClusterParallelParser(self.FILE_LIST_2, self.SAMPLE_CONFIG)
-            check.parse()
-        self.assertEqual(not check._iter_compute_time_data, False)
-
     def test_ms_run(self):
         with mock.patch(NAMESPACE + ".ClusterParallelParser._prepare_for_parse", return_value=True), \
                 mock.patch(NAMESPACE + ".ClusterParallelParser._compute_overlap_time", side_effect=self.SIDE_EFFECT):

@@ -42,35 +42,6 @@ class TestParallelStrategyParser(unittest.TestCase):
                 check.parse()
             self.assertEqual(ProfException.PROF_SYSTEM_EXIT, err.value.code)
 
-    def test_parse_should_be_data_parallel_mode(self):
-        with mock.patch(NAMESPACE + ".PathManager.get_data_file_path"), \
-                mock.patch(NAMESPACE + ".FileOpen"), \
-                mock.patch(NAMESPACE + ".FileOpen.file_reader.readline"), \
-                mock.patch(NAMESPACE + ".json.loads",
-                           return_value={"config": {"parallelType": "data_parallel", "stage_num": 1}}):
-            check = ParallelStrategyParser(self.FILE_LIST_2, self.SAMPLE_CONFIG)
-            check.parse()
-            self.assertEqual(check._parallel_strategy_data[0][-1], "data-parallel")
-
-    def test_parse_should_be_model_parallel_mode(self):
-        with mock.patch(NAMESPACE + ".PathManager.get_data_file_path"), \
-                mock.patch(NAMESPACE + ".FileOpen"), \
-                mock.patch(NAMESPACE + ".FileOpen.file_reader.readline"), \
-                mock.patch(NAMESPACE + ".json.loads",
-                           return_value={"config": {"parallelType": "auto_parallel", "stage_num": 1}}):
-            check = ParallelStrategyParser(self.FILE_LIST_2, self.SAMPLE_CONFIG)
-            check.parse()
-            self.assertEqual(check._parallel_strategy_data[0][-1], "model-parallel")
-
-    def test_parse_should_be_pipeline_parallel_mode(self):
-        with mock.patch(NAMESPACE + ".PathManager.get_data_file_path"), \
-                mock.patch(NAMESPACE + ".FileOpen"), \
-                mock.patch(NAMESPACE + ".FileOpen.file_reader.readline"), \
-                mock.patch(NAMESPACE + ".json.loads", return_value={"config": {"stage_num": 2}}):
-            check = ParallelStrategyParser(self.FILE_LIST_2, self.SAMPLE_CONFIG)
-            check.parse()
-            self.assertEqual(check._parallel_strategy_data[0][-1], "pipeline-parallel")
-
     def test_ms_run_should_be_data_parallel(self):
         with mock.patch(NAMESPACE + ".PathManager.get_data_file_path"), \
                 mock.patch(NAMESPACE + ".FileOpen"), \
