@@ -139,8 +139,8 @@ int Uploader::Stop(bool force)
 void Uploader::Flush() const
 {
     while (queue_->size() != 0) {
-        const unsigned long UPLOADER_SLEEP_TIME_IN_US = 100000;
-        analysis::dvvp::common::utils::Utils::UsleepInterupt(UPLOADER_SLEEP_TIME_IN_US);
+        const unsigned long uploaderSleepTimeInUs = 100000;
+        analysis::dvvp::common::utils::Utils::UsleepInterupt(uploaderSleepTimeInUs);
     }
 }
 

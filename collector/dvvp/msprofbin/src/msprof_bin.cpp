@@ -26,20 +26,6 @@ using namespace Analysis::Dvvp::Common::Platform;
 using namespace Collector::Dvvp::Msprofbin;
 
 
-void SetEnvList(CONST_CHAR_PTR_PTR envp, std::vector<std::string> &envpList)
-{
-    uint32_t envpLen = 0;
-    constexpr uint32_t maxEnvpLen = 4096;
-    while (*envp) {
-        envpList.push_back(*envp++);
-        envpLen++;
-        if (envpLen >= maxEnvpLen) {
-            CmdLog::instance()->CmdErrorLog("Truncate env params due to exceeding limit!");
-            break;
-        }
-    }
-}
-
 #ifdef __PROF_UT
 int LltMain(int argc, const char **argv, const char **envp)
 #else
@@ -47,7 +33,9 @@ int main(int argc, const char **argv, const char **envp)
 #endif
 {
     std::vector<std::string> envpList;
-    SetEnvList(envp, envpList);
+    if (EnvManager::instance()->SetEnvList(envp, envpList)) {
+        CmdLog::instance()->CmdErrorLog("Truncate env params due to exceeding limit!");
+    }
     EnvManager::instance()->SetGlobalEnv(envpList);
     int ret = Platform::instance()->PlatformInitByDriver();
     if (ret != PROFILING_SUCCESS) {
