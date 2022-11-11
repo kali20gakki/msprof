@@ -54,12 +54,12 @@ class ParallelStrategyParser(IParser, MsMultiProcess):
         with ParallelModel(self._project_path) as _model:
             _model.flush(DBNameConstant.TABLE_PARALLEL_STRATEGY, self._parallel_strategy_data)
 
-    def _get_parallel_mode(self: any, parallelType: str, stage_num: int) -> str:
-        parallelType = "data-parallel" if not parallelType else parallelType
+    def _get_parallel_mode(self: any, parallel_type: str, stage_num: int) -> str:
+        parallel_type = "data-parallel" if not parallel_type else parallel_type
         stage_num = 1 if not stage_num else stage_num
         if stage_num > 1:
             parallel_mode = "pipeline-parallel"
-        elif parallelType != "data_parallel":
+        elif parallel_type != "data_parallel":
             parallel_mode = "model-parallel"
         else:
             parallel_mode = "data-parallel"
