@@ -45,11 +45,11 @@ class TestClusterParallelParser(unittest.TestCase):
             check.parse()
         self.assertEqual(not check._iter_compute_time_data, False)
 
-    def test_save(self):
-        check = ClusterParallelParser(self.FILE_LIST_2, self.SAMPLE_CONFIG)
-        check._hccl_overlap_time_data = [[1, 1, "1", "1", 1, 2, 1]]
-        check._iter_compute_time_data = [[1, 1, 2, 3]]
-        check.save()
+    def test_ms_run(self):
+        with mock.patch(NAMESPACE + ".ClusterParallelParser._prepare_for_parse", return_value=True), \
+                mock.patch(NAMESPACE + ".ClusterParallelParser._compute_overlap_time", side_effect=self.SIDE_EFFECT):
+            check = ClusterParallelParser(self.FILE_LIST_2, self.SAMPLE_CONFIG)
+            check.ms_run()
         with ParallelViewModel(self.DIR_PATH) as _model:
             sql1 = "select count(0) from HcclOperatorOverlap"
             sql2 = "select count(0) from ComputationTime"
