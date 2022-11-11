@@ -8,6 +8,7 @@ from common_func.constant import Constant
 from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
+from common_func.msprof_exception import ProfException
 from msmodel.iter_rec.iter_rec_model import HwtsIterViewModel
 from msmodel.parallel.cluster_hccl_model import ClusterHCCLViewModel
 from msmodel.parallel.parallel_model import ParallelModel
@@ -19,7 +20,7 @@ from profiling_bean.prof_enum.data_tag import DataTag
 class ClusterParallelParser(IParser, MsMultiProcess):
 
     def __init__(self: any, file_list: dict, sample_config: dict) -> None:
-        MsMultiProcess.__init__(self, sample_config)
+        super().__init__(sample_config)
         self._file_list = file_list
         self._sample_config = sample_config
         self._project_path = sample_config.get(StrConstant.SAMPLE_CONFIG_PROJECT_PATH)
@@ -35,19 +36,20 @@ class ClusterParallelParser(IParser, MsMultiProcess):
 
     def parse(self: any) -> None:
         if not self._file_list.get(DataTag.PARALLEL_STRATEGY, []):
-            return
+            raise ProfException(ProfException.PROF_SYSTEM_EXIT)
         logging.info("Start to parse parallel index related data.")
         if not self._prepare_for_parse():
-            return
+            raise ProfException(ProfException.PROF_SYSTEM_EXIT)
         hccl_op_overlap_time = self._compute_overlap_time(self._hccl_op_data, self._merged_compute_op_data)
         iter_overlap_time = self._compute_overlap_time(self._iter_time_data, self._merged_compute_op_data)
         for hccl_op in hccl_op_overlap_time:
             self._hccl_overlap_time_data.append(
                 [hccl_op.model_id, hccl_op.index_id, hccl_op.op_name, hccl_op.op_type, hccl_op.start_time,
                  hccl_op.end_time, hccl_op.overlap_time])
-        for iter in iter_overlap_time:
+        for iter_data in iter_overlap_time:
             self._iter_compute_time_data.append(
-                [iter.model_id, iter.index_id, iter.end_time - iter.start_time, iter.overlap_time])
+                [iter_data.model_id, iter_data.index_id, iter_data.end_time - iter_data.start_time,
+                 iter_data.overlap_time])
 
     def save(self: any) -> None:
         if not self._hccl_overlap_time_data:
@@ -91,6 +93,7 @@ class ClusterParallelParser(IParser, MsMultiProcess):
                 compare_op = ai_cpu_op_data.pop()
             else:
                 compare_op = ai_core_op_data.pop()
+
             if not current_op:
                 current_op = compare_op
             elif compare_op.start_time > current_op.end_time:
