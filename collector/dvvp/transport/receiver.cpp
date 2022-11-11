@@ -112,15 +112,15 @@ void Receiver::Run(const struct error_message::Context &errorContext)
     do {
         // wait for next message
         TLV_REQ_PTR packet = nullptr;
-        int bytes_recved = transport_->RecvPacket(&packet);
-        if (bytes_recved < 0 || packet == nullptr) {
+        int bytesRecved = transport_->RecvPacket(&packet);
+        if (bytesRecved < 0 || packet == nullptr) {
             MSPROF_LOGW("devIdOnHost(%d) Failed to recv packet from host", devIdOnHost_);
             analysis::dvvp::device::TaskManager::instance()->ConnectionReset(transport_);
             StopNoWait();
             break;
         }
 
-        MSPROF_LOGI("DeviceOnHost(%d) Receiver message size %d", devIdOnHost_, bytes_recved);
+        MSPROF_LOGI("DeviceOnHost(%d) Receiver message size %d", devIdOnHost_, bytesRecved);
         std::string buf(packet->value, packet->len);
         transport_->DestroyPacket(packet);
         packet = nullptr;
