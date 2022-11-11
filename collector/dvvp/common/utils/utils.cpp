@@ -32,6 +32,7 @@ using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::common::config;
 using namespace Collector::Dvvp::Plugin;
 using namespace Collector::Dvvp::Mmpa;
+using FuncIntPtr = int(*)(int);
 std::mutex g_envMtx;
 const unsigned long long CHANGE_FROM_S_TO_NS = 1000000000;
 
@@ -719,14 +720,14 @@ std::string Utils::JoinPath(const std::vector<std::string> &paths)
 std::string Utils::ToUpper(const std::string &value)
 {
     std::string result = value;
-    std::transform (result.begin(), result.end(), result.begin(), (int(*)(int))std::toupper);
+    std::transform (result.begin(), result.end(), result.begin(), static_cast<FuncIntPtr>(std::toupper));
     return result;
 }
 
 std::string Utils::ToLower(const std::string &value)
 {
     std::string result = value;
-    std::transform (result.begin(), result.end(), result.begin(), (int(*)(int))std::tolower);
+    std::transform (result.begin(), result.end(), result.begin(), static_cast<FuncIntPtr>(std::tolower));
     return result;
 }
 
@@ -839,8 +840,8 @@ void Utils::GetChildFilenames(const std::string &dir, std::vector<std::string> &
 
 std::string Utils::TimestampToTime(const std::string &timestamp, int unit /* = 1 */)
 {
-    if (timestamp.compare("") == 0 || timestamp.find_first_not_of("1234567890") != std::string::npos
-        || unit == 0) {
+    if (timestamp.empty() || (timestamp.find_first_not_of("1234567890") != std::string::npos) ||
+        (unit == 0)) {
         return "0";
     }
     time_t secTime;
