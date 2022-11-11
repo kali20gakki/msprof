@@ -50,7 +50,6 @@ private:
     void UploadKeypointOp();
     bool IsNeedUpdateIndexId();
     void UpdateOpIndexId(std::multimap<std::string, OpTime> &opTimes);
-    void UpdateHwtsLatestOpIndexId();
     uint64_t GetOpIndexId(uint64_t opTimeStamp);
     void FftsDataPostProc();
 
