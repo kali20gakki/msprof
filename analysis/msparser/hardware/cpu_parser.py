@@ -162,7 +162,7 @@ class ParsingCPUData(MsMultiProcess):
     FILE_SIZE = 10
 
     def __init__(self: any, sample_config: dict) -> None:
-        MsMultiProcess.__init__(self, sample_config)
+        super().__init__(sample_config)
         self.sample_config = sample_config
         self.curs = None
         self.conn = None

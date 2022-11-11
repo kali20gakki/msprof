@@ -19,8 +19,9 @@ def _reformat_aictrl_pmu_data(res: list, headers: list) -> tuple:
     for pmu_data in res:
         new_pmu = pmu_data[0].replace("\x00", '').replace("r", "0x")
         new_pmu1 = pmu_data[0].replace("\x00", '').replace("r", "")
-        item = [new_pmu, aicpu_events_map[
-            int(new_pmu1, 16)].capitalize(), pmu_data[1]]
+        item = [
+            new_pmu, aicpu_events_map[ int(new_pmu1, 16)].capitalize(), pmu_data[1]
+        ]
         data.append(item)
     return headers, data, len(data)
 

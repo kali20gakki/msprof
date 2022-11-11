@@ -31,14 +31,6 @@ class ChipManager:
     def __init__(self: any) -> None:
         self.chip_id = ChipModel.CHIP_V1_1_0
 
-    @classmethod
-    def get_chip_id(cls: any) -> any:
-        """
-        get chip id
-        :return: chip id
-        """
-        return cls.CHIP_RELATION_MAP.get(InfoConfReader().get_root_data(Constant.PLATFORM_VERSION))
-
     @staticmethod
     def is_ffts_type() -> bool:
         """
@@ -54,6 +46,14 @@ class ChipManager:
         :return:
         """
         return True
+
+    @classmethod
+    def get_chip_id(cls: any) -> any:
+        """
+        get chip id
+        :return: chip id
+        """
+        return cls.CHIP_RELATION_MAP.get(InfoConfReader().get_root_data(Constant.PLATFORM_VERSION))
 
     def load_chip_info(self: any) -> None:
         """

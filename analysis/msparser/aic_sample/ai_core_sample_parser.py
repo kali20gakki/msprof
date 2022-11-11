@@ -29,7 +29,7 @@ class ParsingCoreSampleData(MsMultiProcess):
     """
 
     def __init__(self: any, sample_config: dict) -> None:
-        MsMultiProcess.__init__(self, sample_config)
+        super().__init__(sample_config)
         self.sample_config = sample_config
         self.result_dir = self.sample_config.get("result_dir")
         self.file_list = []
@@ -123,9 +123,11 @@ class ParsingCoreSampleData(MsMultiProcess):
             aicore_data_bean = AicoreSample.decode(binary_data)
 
             if aicore_data_bean is not None:
-                tmp = [aicore_data_bean.count_num, aicore_data_bean.mode, self._replayid,
-                       aicore_data_bean.timestamp + delta_dev * NumberConstant.NANO_SECOND,
-                       aicore_data_bean.core_id, aicore_data_bean.task_cyc]
+                tmp = [
+                    aicore_data_bean.count_num, aicore_data_bean.mode, self._replayid,
+                    aicore_data_bean.timestamp + delta_dev * NumberConstant.NANO_SECOND,
+                    aicore_data_bean.core_id, aicore_data_bean.task_cyc
+                ]
                 tmp.extend(aicore_data_bean.event_count[:aicore_data_bean.count_num])
                 self.ai_core_data.append(tmp)
             else:
@@ -138,7 +140,7 @@ class ParsingAICoreSampleData(ParsingCoreSampleData):
     """
 
     def __init__(self: any, file_list: dict, sample_config: dict) -> None:
-        ParsingCoreSampleData.__init__(self, sample_config)
+        super().__init__(sample_config)
         self.file_list = sorted(file_list.get(DataTag.AI_CORE, []), key=lambda x: int(x.split("_")[-1]))
 
 
@@ -148,7 +150,7 @@ class ParsingAIVectorCoreSampleData(ParsingCoreSampleData):
     """
 
     def __init__(self: any, file_list: dict, sample_config: dict) -> None:
-        ParsingCoreSampleData.__init__(self, sample_config)
+        super().__init__(sample_config)
         self.file_list = sorted(file_list.get(DataTag.AIV, []), key=lambda x: int(x.split("_")[-1]))
         self._db_name = 'ai_vector_core_{}.db'.format(self.device_id)
         self._event = self.sample_config.get("aiv_profiling_events", "").split(",")
@@ -168,5 +170,5 @@ class ParsingFftsAICoreSampleData(ParsingCoreSampleData):
     """
 
     def __init__(self: any, file_list: dict, sample_config: dict) -> None:
-        ParsingCoreSampleData.__init__(self, sample_config)
+        super().__init__(sample_config)
         self.file_list = sorted(file_list.get(DataTag.FFTS_PMU, []), key=lambda x: int(x.split("_")[-1]))

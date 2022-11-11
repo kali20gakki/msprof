@@ -23,8 +23,10 @@ class ParseAiCpuData:
         parse and analysis AI CPU related dp data
         :return: ai cpu data , headers
         """
-        headers = ["Timestamp", "Node", "Compute_time(ms)", "Memcpy_time(ms)", "Task_time(ms)",
-                   "Dispatch_time(ms)", "Total_time(ms)", "Stream ID", "Task ID"]
+        headers = [
+            "Timestamp", "Node", "Compute_time(ms)", "Memcpy_time(ms)", "Task_time(ms)",
+            "Dispatch_time(ms)", "Total_time(ms)", "Stream ID", "Task ID"
+        ]
         ai_cpu_results = []
         db_path = PathManager.get_db_path(project_path, DBNameConstant.DB_AI_CPU)
         ai_cpu_conn, ai_cpu_curs = DBManager.check_connect_db_path(db_path)

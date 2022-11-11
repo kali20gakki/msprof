@@ -27,10 +27,13 @@ class AiCoreOpReport:
     """
     TASK_TIME_TABLE = "task_time"
     GE_SUMMARY_TABLE = "ge_summary"
-    AI_CORE_UNUSED_COLS = ["job_id", "host_id", "device_id", "task_id", "stream_id", "index_id",
-                           "model_id", "overflow", "overflowed_cycles", "device_id", "batch_id"]
-    TENSOR_HEADERS = ["Input Shapes", "Input Data Types", "Input Formats",
-                      "Output Shapes", "Output Data Types", "Output Formats"]
+    AI_CORE_UNUSED_COLS = [
+        "job_id", "host_id", "device_id", "task_id", "stream_id", "index_id",
+        "model_id", "overflow", "overflowed_cycles", "device_id", "batch_id"
+    ]
+    TENSOR_HEADERS = [
+        "Input Shapes", "Input Data Types", "Input Formats", "Output Shapes", "Output Data Types", "Output Formats"
+    ]
     OPERATOR_UNUSED_HEADERS = ["Model Name", "Infer ID"]
     HEADERS_WITH_NO_GE_DATA = ["Op Name", "OP Type", "Block Dim"]
     START_TIME_INDEX = 8
