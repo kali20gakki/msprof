@@ -1,5 +1,6 @@
 import os
 import unittest
+from unittest import mock
 
 import pytest
 
@@ -31,10 +32,11 @@ class TestHCCLOperatiorParser(unittest.TestCase):
             check.parse()
         self.assertEqual(ProfException.PROF_SYSTEM_EXIT, err.value.code)
 
-    def test_save(self):
-        check = HCCLOperatiorParser(self.FILE_LIST_2, self.SAMPLE_CONFIG)
-        check._hccl_operator_data = [[1, 1, "1", "1", 1, 2]]
-        check.save()
+    def test_ms_run(self):
+        with mock.patch(NAMESPACE + ".TsTrackViewModel.get_hccl_operator_exe_data",
+                        return_value=[[1, 1, "1", "1", 1, 2]]):
+            check = HCCLOperatiorParser(self.FILE_LIST_2, self.SAMPLE_CONFIG)
+            check.ms_run()
         with ClusterHCCLViewModel(self.DIR_PATH) as _model:
             data = _model.get_hccl_op_data()
         self.assertEqual(not data, False)

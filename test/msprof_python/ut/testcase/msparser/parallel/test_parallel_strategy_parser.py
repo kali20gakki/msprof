@@ -71,23 +71,34 @@ class TestParallelStrategyParser(unittest.TestCase):
             check.parse()
             self.assertEqual(check._parallel_strategy_data[0][-1], "pipeline-parallel")
 
-    def test_save_should_be_data_parallel(self):
-        check = ParallelStrategyParser(self.FILE_LIST_2, self.SAMPLE_CONFIG)
-        check._parallel_strategy_data = [["MindSpore", 1, 1, 0, "data_parallel", "", "data-parallel"]]
-        check.save()
+    def test_ms_run_should_be_data_parallel(self):
+        with mock.patch(NAMESPACE + ".PathManager.get_data_file_path"), \
+                mock.patch(NAMESPACE + ".FileOpen"), \
+                mock.patch(NAMESPACE + ".FileOpen.file_reader.readline"), \
+                mock.patch(NAMESPACE + ".json.loads",
+                           return_value={"config": {"parallelType": "data_parallel", "stage_num": 1}}):
+            check = ParallelStrategyParser(self.FILE_LIST_2, self.SAMPLE_CONFIG)
+            check.ms_run()
         with ParallelViewModel(self.DIR_PATH) as _model:
             self.assertEqual(_model.get_parallel_table_name(), "ClusterDataParallel")
 
-    def test_save_should_be_model_parallel(self):
-        check = ParallelStrategyParser(self.FILE_LIST_2, self.SAMPLE_CONFIG)
-        check._parallel_strategy_data = [["MindSpore", 1, 1, 0, "auto_parallel", "", "model-parallel"]]
-        check.save()
+    def test_ms_run_should_be_model_parallel(self):
+        with mock.patch(NAMESPACE + ".PathManager.get_data_file_path"), \
+                mock.patch(NAMESPACE + ".FileOpen"), \
+                mock.patch(NAMESPACE + ".FileOpen.file_reader.readline"), \
+                mock.patch(NAMESPACE + ".json.loads",
+                           return_value={"config": {"parallelType": "auto_parallel", "stage_num": 1}}):
+            check = ParallelStrategyParser(self.FILE_LIST_2, self.SAMPLE_CONFIG)
+            check.ms_run()
         with ParallelViewModel(self.DIR_PATH) as _model:
             self.assertEqual(_model.get_parallel_table_name(), "ClusterModelParallel")
 
-    def test_save_should_be_pipeline_parallel(self):
-        check = ParallelStrategyParser(self.FILE_LIST_2, self.SAMPLE_CONFIG)
-        check._parallel_strategy_data = [["MindSpore", 2, 1, 0, "semi_parallel", "", "pipeline-parallel"]]
-        check.save()
+    def test_ms_run_should_be_pipeline_parallel(self):
+        with mock.patch(NAMESPACE + ".PathManager.get_data_file_path"), \
+                mock.patch(NAMESPACE + ".FileOpen"), \
+                mock.patch(NAMESPACE + ".FileOpen.file_reader.readline"), \
+                mock.patch(NAMESPACE + ".json.loads", return_value={"config": {"stage_num": 2}}):
+            check = ParallelStrategyParser(self.FILE_LIST_2, self.SAMPLE_CONFIG)
+            check.ms_run()
         with ParallelViewModel(self.DIR_PATH) as _model:
             self.assertEqual(_model.get_parallel_table_name(), "ClusterPipelineParallel")
