@@ -50,6 +50,9 @@ class FileNameManagerConstant:
     DATA_PREPROCESS_FILE_PATTERN = r"^DATA_PREPROCESS\.{}\.(\d+)\.slice_\d+"
     DATA_PREPROCESS_TRAINING_FILE_PATTERN = r"^DATA_PREPROCESS\.dev\.{}\.(\d+)\.slice_\d+"
 
+    DATA_PREPARATION_DEVICE_QUEUE = r"^Framework\.device_queue\.(\d+)\.slice_\d+"
+    DATA_PREPARATION_DATASET_ITERATION = r"^Framework\.dataset_iterator\.(\d+)\.slice_\d+"
+
     DDR_FILE_PATTERN = r"^ddr\.data\.(\d+)\.slice_\d+"
     DDR_INFER_FILE_PATTERN = r"^ddr\.data\.\d+\.(\d+)\.\d+"
     DDR_TRAINING_FILE_PATTERN = r"^ddr\.data\.\d+\.dev\.profiler_default_tag\.(\d+)\.slice_\d+"
@@ -345,6 +348,14 @@ def get_data_preprocess_compiles(tag: str) -> tuple:
     """
     return re.compile(FileNameManagerConstant.DATA_PREPROCESS_FILE_PATTERN.format(tag)), re.compile(
         FileNameManagerConstant.DATA_PREPROCESS_TRAINING_FILE_PATTERN.format(tag))
+
+
+def get_host_queue_compiles() -> tuple:
+    """
+    get host queue compiles
+    """
+    return re.compile(FileNameManagerConstant.DATA_PREPARATION_DEVICE_QUEUE), re.compile(
+        FileNameManagerConstant.DATA_PREPARATION_DATASET_ITERATION)
 
 
 def get_dvpp_compiles() -> tuple:

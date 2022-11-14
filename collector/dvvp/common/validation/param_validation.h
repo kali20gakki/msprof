@@ -39,7 +39,6 @@ public:
     bool CheckLlcModeIsValid(const std::string &llcMode) const;
     bool CheckFreqIsValid(const std::string &cfgName, const std::string &freq, const int rangeMin,
         const int rangeMax) const;
-    bool CheckHostSysUsageIsValid(const std::string &hostSysUsage) const;
     bool CheckHostSysPidValid(const std::string &hostSysPid) const;
     bool CheckPythonPathIsValid(const std::string &pythonPath) const;
     bool CheckExportSummaryFormatIsValid(const std::string &summaryFormat) const;
@@ -83,6 +82,7 @@ public:
     bool MsprofCheckSysDeviceValid(const std::string &devListParam) const;
     bool MsprofCheckSysPeriodValid(const std::string &sysPeriodParam) const;
     bool MsprofCheckHostSysValid(const std::string &hostSysParam) const;
+    bool CheckHostSysUsageValid(const std::string &hostSysUsageParam) const;
     bool CheckHostSysToolsExit(const std::string &hostSysParam, const std::string &resultDir,
         const std::string &appDir) const;
 
@@ -102,6 +102,7 @@ private:
                                            const MmProcess tmpProcess) const;
     int CheckHostOutString(const std::string tmpStr, const std::string toolName) const;
     int UninitCheckHostSysCmd(const MmProcess checkProcess) const;
+    bool CheckHostSysUsageOptionsIsValid(const std::string &hostSysUsageOptions) const;
 };
 }
 }

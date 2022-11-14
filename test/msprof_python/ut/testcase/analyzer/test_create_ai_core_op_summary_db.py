@@ -49,7 +49,9 @@ class TestParseAiCoreOpSummary(unittest.TestCase):
                  mock.patch(NAMESPACE + '.ParseAiCoreOpSummary.create_ai_core_metrics_table',
                             return_value=False), \
                  mock.patch(NAMESPACE + '.ParseAiCoreOpSummary.create_task_time_table',
-                            return_value=False):
+                            return_value=False), \
+                 mock.patch("common_func.msprof_iteration.MsprofIteration.get_iter_list_with_index_and_model",
+                               return_value=[[1, 2]]):
                 check = ParseAiCoreOpSummary(CONFIG)
                 check.create_summary_table()
         db_manager.destroy(res)
@@ -65,7 +67,7 @@ class TestParseAiCoreOpSummary(unittest.TestCase):
         db_manager.destroy(res)
 
     def test_get_ge_data(self):
-        with mock.patch(NAMESPACE + '.MsprofIteration.get_iter_dict_with_index_and_model',
+        with mock.patch(NAMESPACE + '.MsprofIteration.get_iter_list_with_index_and_model',
                         return_value={}), \
              mock.patch(NAMESPACE + '.DBManager.fetch_all_data', return_value=[1]):
             check = ParseAiCoreOpSummary(CONFIG)

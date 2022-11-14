@@ -37,10 +37,10 @@ class DecodeTool:
         decode_result = []
         for fmt in mon_fmts:
             if fmt in self.decoder_dict:
-                each_result = self.decoder_dict.get(fmt).decode_byte(
-                    several_byte_data[offset:offset + self.decoder_dict.get(fmt).input_byte_size])
+                byte_parser = self.decoder_dict.get(fmt)
+                each_result = byte_parser.decode_byte(several_byte_data[offset:offset + byte_parser.input_byte_size])
                 decode_result.extend(each_result)
-                offset += self.decoder_dict.get(fmt).input_byte_size
+                offset += byte_parser.input_byte_size
             else:
                 each_result = struct.unpack_from(fmt, several_byte_data, offset)
                 decode_result.extend(each_result)

@@ -90,8 +90,12 @@ class CreateStepTraceData(CreateSubTable):
 
     @classmethod
     def create_table(cls: any, conn: any) -> None:
+        # sorted data by step end. Index 3 is step end
         cls.data = sorted(cls.data, key=lambda x: x[3])
-        cls.data = list(map(lambda datum: datum[1] + [datum[0] + 1], enumerate(cls.data)))
+
+        # calculate iter id
+        for index, datum in enumerate(cls.data):
+            datum.append(index + 1)
 
         create_sql = "create table if not exists {0} (index_id int, model_id int, " \
                      "step_start int, step_end int, iter_id int)".format(cls.table_name)

@@ -112,6 +112,9 @@ void *Thread::ThrProcess(VOID_PTR arg)
         return nullptr;
     }
     auto runnable = reinterpret_cast<Thread *>(arg);
+    if (runnable == nullptr) {
+        return nullptr;
+    }
     (void)MmSetCurrentThreadName(runnable->threadName_);
 
     MSPROF_LOGI("New thread %s begins to run", runnable->threadName_.c_str());

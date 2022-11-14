@@ -30,10 +30,3 @@ class TestIterRecParser(unittest.TestCase):
 
     def tearDown(self) -> None:
         clear_dt_project(self.DIR_PATH)
-
-    def test_parse_should_return_none_when_no_ge_data(self):
-        side_eff = [[{}, {}], {}]
-        with mock.patch(NAMESPACE + '.GeInfoModel.check_table'), \
-                mock.patch(NAMESPACE + '.GeInfoModel.get_ge_data', side_effect=side_eff):
-            check = IterRecParser(self.file_list, self.sample_config)
-            check.parse()

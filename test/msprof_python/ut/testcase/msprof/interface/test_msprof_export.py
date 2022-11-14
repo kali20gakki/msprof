@@ -165,8 +165,6 @@ class TestExportCommand(unittest.TestCase):
                 mock.patch(NAMESPACE + ".DataAnalysisFactory.run"), \
                 mock.patch("msinterface.msprof_timeline" + ".MsprofIteration.get_iteration_time",
                            return_value=100), \
-                mock.patch("msinterface.msprof_timeline" + ".MsprofIteration.get_iteration_id_by_index_id",
-                           return_value=1), \
                 mock.patch(NAMESPACE + ".PathManager.get_summary_dir", return_value=""), \
                 mock.patch(NAMESPACE + ".check_path_valid"), \
                 mock.patch(NAMESPACE + ".print_info"):

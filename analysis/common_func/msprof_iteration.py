@@ -16,6 +16,8 @@ from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msprof_step import MsprofStep
 from common_func.path_manager import PathManager
 from common_func.utils import Utils
+from common_func.empty_class import EmptyClass
+from profiling_bean.db_dto.step_trace_dto import StepTraceDto
 
 
 class MsprofIteration:
@@ -91,36 +93,30 @@ class MsprofIteration:
             return []
         return trace_datas
 
-    def get_iteration_id_by_index_id(self: any, index_id: int, model_id: int) -> list:
+    def get_parallel_iter_range(self: any, index_id: int, model_id: int) -> list:
         """
         get step iteration time
         :param index_id: index id
         :param model_id: model id
         :return: [iter_id - 1, iter_id] or [min_iter_id - 1, max_iter_id] in pytorch graph
         """
-        iter_id_list = [index_id - 1, index_id]
-        if not Utils.is_step_scene(self._result_dir):
-            return iter_id_list
         db_path = PathManager.get_db_path(self._result_dir, DBNameConstant.DB_STEP_TRACE)
         trace_conn, trace_curs = DBManager.check_connect_db_path(db_path)
         if not trace_conn or not trace_curs \
                 or not DBManager.check_tables_in_db(db_path, DBNameConstant.TABLE_STEP_TRACE_DATA):
-            return iter_id_list
-        sql = "select iter_id from {0} " \
-              "where index_id=? and model_id=?".format(DBNameConstant.TABLE_STEP_TRACE_DATA)
-        iter_data = DBManager.fetch_all_data(trace_curs, sql, (index_id, model_id))
-        iter_id_list = [iter_data[0][0] - 1, iter_data[0][0]] if iter_data else iter_id_list
-        if Utils.need_all_model_in_one_iter(self._result_dir, model_id):
-            sql = "select iter_id from {0} " \
-                  "where index_id>=? and index_id<=? and model_id=?".format(DBNameConstant.TABLE_STEP_TRACE_DATA)
-            iter_data = DBManager.fetch_all_data(trace_curs, sql, (index_id, index_id + 1, model_id))
-        DBManager.destroy_db_connect(trace_conn, trace_curs)
-        if iter_data and iter_data[0]:
-            iter_id_list = [iter_data[0][0] - 1, iter_data[0][0]]
-            if len(iter_data) != 1:
-                iter_id_list = [iter_data[0][0] - 1, iter_data[1][0] - 1]
+            return []
 
-        return iter_id_list
+        current_iter = self.get_iteration_info_by_index_id(index_id, model_id)
+        if not current_iter:
+            return []
+
+        # find first parallel iter
+        sql = "select model_id, index_id, iter_id, step_start, step_end from {0} " \
+              "where step_end>? and step_end<=? order by step_end".format(DBNameConstant.TABLE_STEP_TRACE_DATA)
+        first_parallel_iter = DBManager.fetchone(
+            trace_curs, sql, (current_iter.step_start, current_iter.step_end, ), dto_class=StepTraceDto)
+        DBManager.destroy_db_connect(trace_conn, trace_curs)
+        return [first_parallel_iter.iter_id, current_iter.iter_id]
 
     def get_iter_id_by_index_id(self: any, index_id: int, model_id: int) -> tuple:
         """
@@ -137,35 +133,32 @@ class MsprofIteration:
             return iter_id
         return index_id - 1, index_id
 
-    def get_iter_dict_with_index_and_model(self: any, index_id: int, model_id: int) -> dict:
+    def get_iter_list_with_index_and_model(self: any, index_id: int, model_id: int) -> dict:
         """
         get step iter dict with index and model
         :param index_id: index id
         :param model_id: model id
         :return: {iter_id: [index_id, model_id]} in mix single op and graph
         """
-        iter_dict = {index_id: [index_id, model_id]}
-        if not Utils.is_step_scene(self._result_dir):
-            return iter_dict
+        iter_list = [[index_id, model_id]]
+        if not (ProfilingScene().is_mix_operator_and_graph() and model_id == Constant.GE_OP_MODEL_ID):
+            return iter_list
+
         db_path = PathManager.get_db_path(self._result_dir, DBNameConstant.DB_STEP_TRACE)
         trace_conn, trace_curs = DBManager.check_connect_db_path(db_path)
         if not trace_conn or not trace_curs \
                 or not DBManager.check_tables_in_db(db_path, DBNameConstant.TABLE_STEP_TRACE_DATA):
-            return iter_dict
-        sql = "select iter_id, index_id, model_id from {0} " \
-              "where index_id=? and model_id=?".format(DBNameConstant.TABLE_STEP_TRACE_DATA)
-        iter_datas = DBManager.fetch_all_data(trace_curs, sql, (index_id, model_id))
-        if Utils.need_all_model_in_one_iter(self._result_dir, model_id):
-            iter_id_list = self.get_iteration_id_by_index_id(index_id, model_id)
-            sql = "select iter_id, index_id, model_id from {0} " \
-                  "where iter_id>? and iter_id<=?".format(DBNameConstant.TABLE_STEP_TRACE_DATA)
-            iter_datas = DBManager.fetch_all_data(trace_curs, sql, iter_id_list)
-        DBManager.destroy_db_connect(trace_conn, trace_curs)
-        if iter_datas and iter_datas[0]:
-            iter_dict = {}
-            for data in iter_datas:
-                iter_dict.update({data[0]: [data[1], data[2]]})
-        return iter_dict
+            return []
+        iter_range = self.get_parallel_iter_range(index_id, model_id)
+        if not iter_range:
+            return iter_list
+        sql = "select model_id, index_id, iter_id, step_start, step_end from {0} " \
+              "where iter_id>=? and iter_id<=?".format(DBNameConstant.TABLE_STEP_TRACE_DATA)
+        parallel_iter_info_list = DBManager.fetch_all_data(
+            trace_curs, sql, iter_range, dto_class=StepTraceDto)
+
+        return [[parallel_iter_info.index_id, parallel_iter_info.model_id]
+                for parallel_iter_info in parallel_iter_info_list]
 
     def get_op_iteration_dict(self: any) -> dict:
         """
@@ -183,35 +176,19 @@ class MsprofIteration:
             return self.__get_trace_iteration_end()
         return {}
 
-    def get_graph_iteration_dict(self: any) -> dict:
-        iter_dict = OrderedDict()
+    def get_iteration_info_by_index_id(self: any, index_id: int, model_id: int) -> any:
+        """
+        get iteration info by index_id
+        """
         db_path = PathManager.get_db_path(self._result_dir, DBNameConstant.DB_STEP_TRACE)
         trace_conn, trace_curs = DBManager.check_connect_db(self._result_dir, DBNameConstant.DB_STEP_TRACE)
         if not trace_conn or not trace_curs \
                 or not DBManager.check_tables_in_db(db_path, DBNameConstant.TABLE_STEP_TRACE_DATA):
-            return {}
-        sql = "select iter_id, step_start, step_end from {0}  where model_id!=?" \
-              "order by step_start".format(DBNameConstant.TABLE_STEP_TRACE_DATA)
-        trace_datas = DBManager.fetch_all_data(trace_curs, sql, (Constant.GE_OP_MODEL_ID,))
-        DBManager.destroy_db_connect(trace_conn, trace_curs)
-        if not trace_datas:
-            return iter_dict
-        for trace_data in trace_datas:
-            iter_dict.setdefault(trace_data[0], [trace_data[1], trace_data[2]])
-        return iter_dict
-
-    def get_iteration_info_by_index_id(self: any, index_id: int, model_id: int) -> list:
-        db_path = PathManager.get_db_path(self._result_dir, DBNameConstant.DB_STEP_TRACE)
-        trace_conn, trace_curs = DBManager.check_connect_db(self._result_dir, DBNameConstant.DB_STEP_TRACE)
-        if not trace_conn or not trace_curs \
-                or not DBManager.check_tables_in_db(db_path, DBNameConstant.TABLE_STEP_TRACE_DATA):
-            return []
-        sql = "select iter_id, step_start, step_end from {0} " \
+            return EmptyClass()
+        sql = "select model_id, index_id, iter_id, step_start, step_end from {0} " \
               "where model_id={1} and index_id={2}".format(DBNameConstant.TABLE_STEP_TRACE_DATA, model_id, index_id)
-        iter_info = DBManager.fetch_all_data(trace_curs, sql)
+        iter_info = DBManager.fetchone(trace_curs, sql, dto_class=StepTraceDto)
         DBManager.destroy_db_connect(trace_conn, trace_curs)
-        if iter_info:
-            return iter_info[0]
         return iter_info
 
     def get_condition_within_iteration(self: any, index_id: int, model_id: int, time_start_key: str, time_end_key: str):
@@ -226,19 +203,19 @@ class MsprofIteration:
                f'or ({time_start_key}<={iter_start} and {iter_start}<={time_end_key})'
 
     def _get_iteration_time(self: any, trace_curs: any, index_id: int, model_id: int) -> list:
-        iter_id = self.get_iteration_id_by_index_id(index_id, model_id)
-        if not iter_id:
+        current_iter = self.get_iteration_info_by_index_id(index_id, model_id)
+        if not current_iter:
             return []
+
+        # find last and not parallel iter
         sql = "select step_end from {0} " \
-              "where iter_id>=? and iter_id<=? order by " \
-              "step_end".format(DBNameConstant.TABLE_STEP_TRACE_DATA)
-        trace_data = DBManager.fetch_all_data(trace_curs, sql, iter_id)
+              "where step_end<? order by step_end desc ".format(DBNameConstant.TABLE_STEP_TRACE_DATA)
+        last_not_parallel_iter = DBManager.fetchone(
+            trace_curs, sql, (current_iter.step_start, ), dto_class=StepTraceDto)
 
-        # if the first iter is chose, the iter_id (range) will contain iter 0 whose step end is also 0
-        if NumberConstant.ZERO_ITER_ID in iter_id:
-            trace_data = [NumberConstant.ZERO_ITER_END] + trace_data
-
-        return trace_data
+        if not last_not_parallel_iter:
+            return [NumberConstant.ZERO_ITER_END, (current_iter.step_end, )]
+        return [(last_not_parallel_iter.step_end, ), (current_iter.step_end, )]
 
     def __get_trace_iteration_end(self: any) -> dict:
         iter_end_dict = OrderedDict()
@@ -248,7 +225,7 @@ class MsprofIteration:
                 or not DBManager.check_tables_in_db(db_path, DBNameConstant.TABLE_STEP_TRACE_DATA):
             return iter_end_dict
         sql = "select iter_id, step_end from {0} " \
-              "order by step_start".format(DBNameConstant.TABLE_STEP_TRACE_DATA)
+              "order by step_end".format(DBNameConstant.TABLE_STEP_TRACE_DATA)
         trace_datas = DBManager.fetch_all_data(trace_curs, sql)
         DBManager.destroy_db_connect(trace_conn, trace_curs)
         if not trace_datas:
