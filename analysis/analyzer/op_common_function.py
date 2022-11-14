@@ -16,30 +16,24 @@ class OpCommonFunc:
     TASK_ID = "task_id"
     BATCH_ID = "batch_id"
 
-    @classmethod
-    def deal_batch_id(cls: any, stream_index: int, task_index: int, merge_data: list) -> list:
+    @staticmethod
+    def _is_valid_num(data: float) -> bool:
+        """check if a num is valid"""
+        if data is None or (not isinstance(data, (int, float)) and not data.isdigit()):
+            return False
+        return True
+
+    @staticmethod
+    def _get_wait_time(row_num: int, time_data: float, previous_complete_time: int) -> float:
         """
-        add batch id for op summary
-        :param stream_index: index for stream id
-        :param task_index: index for task id
-        :param merge_data: data to add batch id
-        :return: result
+        get wait time
+        :param time_data:
+        :param per:
+        :return:
         """
-        stream_max_value = {}
-        result = [0] * len(merge_data)
-        for index, ge_data in enumerate(merge_data):
-            stream_id = str(ge_data[stream_index])
-            task_id = ge_data[task_index]
-            if stream_id not in stream_max_value:
-                stream_max_value.setdefault(stream_id, {cls.TASK_ID: task_id, cls.BATCH_ID: 0})
-            else:
-                current_max_value = stream_max_value.pop(stream_id)
-                if int(current_max_value.get(cls.TASK_ID, -1)) >= int(task_id):
-                    current_max_value[cls.BATCH_ID] += 1
-                current_max_value[cls.TASK_ID] = task_id
-                stream_max_value.setdefault(stream_id, current_max_value)
-            result[index] = list(ge_data) + [stream_max_value.get(stream_id).get(cls.BATCH_ID)]
-        return result
+        if row_num == 0 or (int(time_data) - previous_complete_time) < 0:
+            return 0
+        return int(time_data) - previous_complete_time
 
     @classmethod
     def calculate_task_time(cls: any, data: list) -> list:
@@ -75,21 +69,27 @@ class OpCommonFunc:
             previous_complete_time = float(content[2]) + float(content[3])
         return res
 
-    @staticmethod
-    def _is_valid_num(data: float) -> bool:
-        """check if a num is valid"""
-        if data is None or (not isinstance(data, (int, float)) and not data.isdigit()):
-            return False
-        return True
-
-    @staticmethod
-    def _get_wait_time(row_num: int, time_data: float, previous_complete_time: int) -> float:
+    @classmethod
+    def deal_batch_id(cls: any, stream_index: int, task_index: int, merge_data: list) -> list:
         """
-        get wait time
-        :param time_data:
-        :param per:
-        :return:
+        add batch id for op summary
+        :param stream_index: index for stream id
+        :param task_index: index for task id
+        :param merge_data: data to add batch id
+        :return: result
         """
-        if row_num == 0 or (int(time_data) - previous_complete_time) < 0:
-            return 0
-        return int(time_data) - previous_complete_time
+        stream_max_value = {}
+        result = [0] * len(merge_data)
+        for index, ge_data in enumerate(merge_data):
+            stream_id = str(ge_data[stream_index])
+            task_id = ge_data[task_index]
+            if stream_id not in stream_max_value:
+                stream_max_value.setdefault(stream_id, {cls.TASK_ID: task_id, cls.BATCH_ID: 0})
+            else:
+                current_max_value = stream_max_value.pop(stream_id)
+                if int(current_max_value.get(cls.TASK_ID, -1)) >= int(task_id):
+                    current_max_value[cls.BATCH_ID] += 1
+                current_max_value[cls.TASK_ID] = task_id
+                stream_max_value.setdefault(stream_id, current_max_value)
+            result[index] = list(ge_data) + [stream_max_value.get(stream_id).get(cls.BATCH_ID)]
+        return result

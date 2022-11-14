@@ -113,12 +113,16 @@ class MiniLlcModel(BaseModel, ABC):
         if llc_metric:
             llc_first = llc_metric[0]
             if llc_first.timestamp - start_time != 0:
-                llc_read_total_first = [(llc_first.read_allocate + llc_first.read_noallocate) *
-                                        MiniLlcModel.LLC_CAPACITY / (llc_first.timestamp - start_time) /
-                                        (NumberConstant.KILOBYTE * NumberConstant.KILOBYTE)]
-                llc_read_hit_first = [llc_first.read_hit * MiniLlcModel.LLC_CAPACITY /
-                                      (llc_first.timestamp - start_time) /
-                                      (NumberConstant.KILOBYTE * NumberConstant.KILOBYTE)]
+                llc_read_total_first = [
+                    (llc_first.read_allocate + llc_first.read_noallocate) *
+                    MiniLlcModel.LLC_CAPACITY / (llc_first.timestamp - start_time) /
+                    (NumberConstant.KILOBYTE * NumberConstant.KILOBYTE)
+                ]
+                llc_read_hit_first = [
+                    llc_first.read_hit * MiniLlcModel.LLC_CAPACITY /
+                    (llc_first.timestamp - start_time) /
+                    (NumberConstant.KILOBYTE * NumberConstant.KILOBYTE)
+                ]
             else:
                 llc_read_total_first = [0]
                 llc_read_hit_first = [0]
@@ -143,12 +147,16 @@ class MiniLlcModel(BaseModel, ABC):
         if llc_metric:
             llc_first = llc_metric[0]
             if llc_first.timestamp - start_time != 0:
-                llc_write_total_first = [(llc_first.write_allocate + llc_first.write_noallocate) *
-                                         MiniLlcModel.LLC_CAPACITY / (llc_first.timestamp - start_time) /
-                                         (NumberConstant.KILOBYTE * NumberConstant.KILOBYTE)]
-                llc_write_hit_first = [llc_first.write_hit * MiniLlcModel.LLC_CAPACITY /
-                                       (llc_first.timestamp - start_time)
-                                       / (NumberConstant.KILOBYTE * NumberConstant.KILOBYTE)]
+                llc_write_total_first = [
+                    (llc_first.write_allocate + llc_first.write_noallocate) *
+                    MiniLlcModel.LLC_CAPACITY / (llc_first.timestamp - start_time) /
+                    (NumberConstant.KILOBYTE * NumberConstant.KILOBYTE)
+                ]
+                llc_write_hit_first = [
+                    llc_first.write_hit * MiniLlcModel.LLC_CAPACITY /
+                    (llc_first.timestamp - start_time)
+                    / (NumberConstant.KILOBYTE * NumberConstant.KILOBYTE)
+                ]
             else:
                 llc_write_total_first = [0]
                 llc_write_hit_first = [0]
@@ -254,8 +262,8 @@ class MiniLlcModel(BaseModel, ABC):
     def _capacity_data_helper(self: any, device_list: list) -> None:
         for device in device_list:
             core2cpu = cal_core2cpu(self.result_dir, device[0])
-            ctrl_dsid_name = core2cpu['ctrlcpu']
-            ai_dsid_name = core2cpu['aicpu']
+            ctrl_dsid_name = core2cpu.get('ctrlcpu', '')
+            ai_dsid_name = core2cpu.get('aicpu', '')
 
             sql = "select device_id,timestamp," \
                   "({ctrl})*{LLC_CAPACITY}/({KILOBYTE}*{KILOBYTE})," \

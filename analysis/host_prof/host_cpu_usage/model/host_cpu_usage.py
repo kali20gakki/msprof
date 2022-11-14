@@ -94,8 +94,9 @@ class HostCpuUsage(HostProfDataBase):
         per_cpu_usage = DBManager.fetch_all_data(self.cur, cpu_usage_sql)
         for item in per_cpu_usage:
             if is_number(item[0]):
-                time_cpu = ["CPU " + str(item[2]), float(item[0]) / NumberConstant.CONVERSION_TIME,
-                            {"Usage(%)": item[3]}]
+                time_cpu = [
+                    "CPU " + str(item[2]), float(item[0]) / NumberConstant.CONVERSION_TIME, {"Usage(%)": item[3]}
+                ]
                 result.append(time_cpu)
 
         return result

@@ -24,6 +24,15 @@ class PerformanceManager:
 
     PROF_METRIC_FILE = "prof_metric.json"
 
+    @staticmethod
+    def check_metric_file(file_path: str) -> bool:
+        """
+        check validity of file path.
+        :param file_path: file path
+        :return: result of check file size
+        """
+        return os.path.exists(file_path) and os.path.getsize(file_path) <= Constant.MAX_READ_FILE_BYTES
+
     @classmethod
     def filter_case_underscore(cls: any, metric_name: str) -> str:
         """
@@ -48,12 +57,3 @@ class PerformanceManager:
             return "{metric_name} : {explanation}".format(
                 metric_name=cls.filter_case_underscore(metric_name), explanation=explanation)
         return "Unrecognized metric name: {metric_name}".format(metric_name=metric_name)
-
-    @staticmethod
-    def check_metric_file(file_path: str) -> bool:
-        """
-        check validity of file path.
-        :param file_path: file path
-        :return: result of check file size
-        """
-        return os.path.exists(file_path) and os.path.getsize(file_path) <= Constant.MAX_READ_FILE_BYTES

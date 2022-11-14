@@ -24,10 +24,11 @@ class MsprofQueryData:
     """
 
     FILE_NAME = os.path.basename(__file__)
-    QUERY_HEADERS = [MsProfCommonConstant.JOB_INFO, MsProfCommonConstant.DEVICE_ID, MsProfCommonConstant.JOB_NAME,
-                     MsProfCommonConstant.COLLECTION_TIME, MsProfCommonConstant.MODEL_ID,
-                     MsProfCommonConstant.ITERATION_ID, MsProfCommonConstant.TOP_TIME_ITERATION,
-                     MsProfCommonConstant.RANK_ID]
+    QUERY_HEADERS = [
+        MsProfCommonConstant.JOB_INFO, MsProfCommonConstant.DEVICE_ID, MsProfCommonConstant.JOB_NAME,
+        MsProfCommonConstant.COLLECTION_TIME, MsProfCommonConstant.MODEL_ID, MsProfCommonConstant.ITERATION_ID,
+        MsProfCommonConstant.TOP_TIME_ITERATION, MsProfCommonConstant.RANK_ID
+    ]
     QUERY_TOP_ITERATION_NUM = 5
 
     def __init__(self: any, project_path: str) -> None:
@@ -43,13 +44,17 @@ class MsprofQueryData:
                 step_table_name = DBNameConstant.TABLE_CLUSTER_STEP_TRACE.format(rank_or_device_id)
                 model_info_list = cluster_step_trace.get_model_info(step_table_name)
                 if not model_info_list:
-                    data = [cluster_info[0], cluster_info[1], cluster_info[4], cluster_info[2],
-                            'N/A', 'N/A', 'N/A', cluster_info[3]]
+                    data = [
+                        cluster_info[0], cluster_info[1], cluster_info[4], cluster_info[2],
+                        'N/A', 'N/A', 'N/A', cluster_info[3]
+                    ]
                     cluster_query_data.append(data)
                     continue
                 for model_info in model_info_list:
-                    data = [cluster_info[0], cluster_info[1], cluster_info[4], cluster_info[2],
-                            model_info[0], model_info[1], model_info[2], cluster_info[3]]
+                    data = [
+                        cluster_info[0], cluster_info[1], cluster_info[4], cluster_info[2],
+                        model_info[0], model_info[1], model_info[2], cluster_info[3]
+                    ]
                     cluster_query_data.append(data)
         return cluster_query_data
 

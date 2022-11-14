@@ -181,8 +181,7 @@ class HostNetworkUsagePresenter(HostProfPresenterBase):
             return result
 
         for data in mem_usage_data.get("data"):
-            temp_data = ["Network Usage", float(data["start"]) * (10 ** 6),
-                         {"Usage(%)": data["usage"]}]
+            temp_data = ["Network Usage", float(data["start"]) * (10 ** 6), {"Usage(%)": data["usage"]}]
             result.append(temp_data)
         return result
 

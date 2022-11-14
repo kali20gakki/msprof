@@ -12,6 +12,13 @@ class LoadInfoManager:
     class used to load config
     """
 
+    @staticmethod
+    def load_manager() -> None:
+        """
+        manager load info
+        :return:
+        """
+
     @classmethod
     def load_info(cls: any, result_dir: str) -> None:
         """
@@ -22,10 +29,3 @@ class LoadInfoManager:
         InfoConfReader().load_info(result_dir)
         ChipManager().load_chip_info()
         ProfilingScene().init(result_dir)
-
-    @staticmethod
-    def load_manager() -> None:
-        """
-        manager load info
-        :return:
-        """

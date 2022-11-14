@@ -25,7 +25,7 @@ class ParsingCpuUsageData(MsMultiProcess):
     """
 
     def __init__(self: any, file_list: dict, sample_config: dict) -> None:
-        MsMultiProcess.__init__(self, sample_config)
+        super().__init__(sample_config)
         self.project_path = sample_config.get("result_dir", "")
         self._file_list = file_list
         self.device_id = self.sample_config.get("device_id", "0")

@@ -31,7 +31,7 @@ class OperatorRuleManager(MetaRuleManager):
     """
 
     def __init__(self: any) -> None:
-        MetaRuleManager.__init__(self)
+        super().__init__()
 
 
 class NetRuleManager(MetaRuleManager):
@@ -40,4 +40,4 @@ class NetRuleManager(MetaRuleManager):
     """
 
     def __init__(self: any) -> None:
-        MetaRuleManager.__init__(self)
+        super().__init__()
