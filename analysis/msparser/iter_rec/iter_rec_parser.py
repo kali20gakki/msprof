@@ -113,7 +113,8 @@ class IterParser(IParser, MsMultiProcess):
             self._batch_list_for_task_time = [None] * self.DEFAULT_TASK_TIME_SIZE
             self.default_index = 0
         self._batch_list_for_task_time[self.default_index] = (
-            task_log.stream_id, task_log.task_id, task_log.batch_id, self._iter_recorder.current_iter_id)
+            task_log.stream_id, task_log.task_id, task_log.batch_id, self._iter_recorder.current_iter_id
+        )
         self.default_index = self.default_index + 1
 
     def _parse_hwts_data(self: any) -> None:

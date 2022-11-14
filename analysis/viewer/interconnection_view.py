@@ -97,8 +97,7 @@ class InterConnectionView:
         for item in hccs_throughput:
             if item is None:
                 return MsvpConstant.MSVP_EMPTY_DATA
-        _result = [["Tx (MB/s)"] + list(hccs_throughput[0:3]),
-                   ["Rx (MB/s)"] + list(hccs_throughput[3:])]
+        _result = [["Tx (MB/s)"] + list(hccs_throughput[0:3]), ["Rx (MB/s)"] + list(hccs_throughput[3:])]
         headers = ["Mode", "Max", "Min", "Average"]
         return headers, _result, len(_result)
 

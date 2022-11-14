@@ -23,8 +23,10 @@ class StepTraceSummay:
     The class for querying step trace summary data.
     """
     FILE_NAME = os.path.basename(__file__)
-    HEADERS = ["ID", "Model ID", "Iteration ID", "Iteration Time", "FP to BP Time", "Iteration Interval",
-               "Iteration Refresh", "Iteration Start", "FP Start", "BP End", "Iteration End"]
+    HEADERS = [
+        "ID", "Model ID", "Iteration ID", "Iteration Time", "FP to BP Time", "Iteration Interval",
+        "Iteration Refresh", "Iteration Start", "FP Start", "BP End", "Iteration End"
+    ]
     ID_NUM_FOR_ALL_DEVICES = -1
     ID_NUM_FOR_ALL_ITERATIONS = -1
     NUMBER_0F_DECIMAL_PLACE = 2

@@ -32,8 +32,12 @@ def _get_ddr_data_from_db(curs: any, device_id: str) -> list:
     if not NumberConstant.is_zero(len(ddr_data)):
         read_avg = read_sum * 1.0 / len(ddr_data)
         write_avg = write_sum * 1.0 / len(ddr_data)
-    data = [['Average', round(read_avg, NumberConstant.DECIMAL_ACCURACY),
-             round(write_avg, NumberConstant.DECIMAL_ACCURACY)]]
+    data = [
+        [
+            'Average', round(read_avg, NumberConstant.DECIMAL_ACCURACY),
+            round(write_avg, NumberConstant.DECIMAL_ACCURACY)
+        ]
+    ]
     return data
 
 
@@ -80,20 +84,28 @@ def cal_llc_band_res(llc_data: list, max_time: float) -> tuple:
         bandwidth = [["BandWidth(MB/s)", 0.0, 0.0]]
         hit_bandwidth = [["Hit_BandWidth(MB/s)", 0.0, 0.0]]
     else:
-        bandwidth = [["BandWidth(MB/s)",
-                      round((llc_data[0] + llc_data[1]) * NumberConstant.LLC_CAPACITY
-                            / max_time / (NumberConstant.KILOBYTE * NumberConstant.KILOBYTE),
-                            NumberConstant.DECIMAL_ACCURACY),
-                      round((llc_data[3] + llc_data[4]) * NumberConstant.LLC_CAPACITY
-                            / max_time / (NumberConstant.KILOBYTE * NumberConstant.KILOBYTE),
-                            NumberConstant.DECIMAL_ACCURACY)]]
-        hit_bandwidth = [["Hit_BandWidth(MB/s)",
-                          round(llc_data[2] * NumberConstant.LLC_CAPACITY
-                                / max_time / (NumberConstant.KILOBYTE * NumberConstant.KILOBYTE),
-                                NumberConstant.DECIMAL_ACCURACY),
-                          round(llc_data[5] * NumberConstant.LLC_CAPACITY
-                                / max_time / (NumberConstant.KILOBYTE * NumberConstant.KILOBYTE),
-                                NumberConstant.DECIMAL_ACCURACY)]]
+        bandwidth = [
+            [
+                "BandWidth(MB/s)",
+                round((llc_data[0] + llc_data[1]) * NumberConstant.LLC_CAPACITY
+                      / max_time / (NumberConstant.KILOBYTE * NumberConstant.KILOBYTE),
+                      NumberConstant.DECIMAL_ACCURACY),
+                round((llc_data[3] + llc_data[4]) * NumberConstant.LLC_CAPACITY
+                      / max_time / (NumberConstant.KILOBYTE * NumberConstant.KILOBYTE),
+                      NumberConstant.DECIMAL_ACCURACY)
+            ]
+        ]
+        hit_bandwidth = [
+            [
+                "Hit_BandWidth(MB/s)",
+                round(llc_data[2] * NumberConstant.LLC_CAPACITY
+                      / max_time / (NumberConstant.KILOBYTE * NumberConstant.KILOBYTE),
+                      NumberConstant.DECIMAL_ACCURACY),
+                round(llc_data[5] * NumberConstant.LLC_CAPACITY
+                      / max_time / (NumberConstant.KILOBYTE * NumberConstant.KILOBYTE),
+                      NumberConstant.DECIMAL_ACCURACY)
+            ]
+        ]
     result_data = bandwidth + hit_rate + hit_bandwidth
     headers = ['Metric', 'l3c_rd', 'l3c_wr']
     return headers, result_data, len(headers)

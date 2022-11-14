@@ -30,7 +30,7 @@ class MsTimeParser(IParser, MsMultiProcess):
     """
 
     def __init__(self: any, file_list: dict, sample_config: dict) -> None:
-        MsMultiProcess.__init__(self, sample_config)
+        super().__init__(sample_config)
         self.file_list = file_list
         self._project_path = sample_config.get(StrConstant.SAMPLE_CONFIG_PROJECT_PATH)
         self._message_dict = {}
@@ -43,9 +43,11 @@ class MsTimeParser(IParser, MsMultiProcess):
         :param index: device id
         :return: host monotonic time and host wall time
         """
-        if not config.has_section("Device{}".format(index)):
+        if not isinstance(index, int):
             return -1, -1
-        times = config.items("Device{}".format(index))
+        if not config.has_section(f"Device{index}"):
+            return -1, -1
+        times = config.items(f"Device{index}")
         host_wall, host_mon = 0, 0
         for clock in times:
             if clock[0] == "clock_realtime":
@@ -139,11 +141,10 @@ class MsTimeParser(IParser, MsMultiProcess):
         if not message:
             return result
         for items in message["data"]:
-            check_int_item = [items["dev_mon"],
-                              items["dev_wall"],
-                              items["dev_cntvct"],
-                              items["host_mon"],
-                              items["host_wall"]]
+            check_int_item = [
+                items["dev_mon"], items["dev_wall"], items["dev_cntvct"],
+                items["host_mon"], items["host_wall"]
+            ]
             if any(not check_number_valid(item) for item in check_int_item):
                 logging.error("time_sync message check integer value failed")
                 return result
@@ -170,9 +171,11 @@ class MsTimeParser(IParser, MsMultiProcess):
             with FileOpen(dev_start_path, "r") as dev_:
                 dev_wall, dev_mon, dev_cntvct = self.parse_dev_start(dev_.file_reader)
 
-            data = {"device_id": index, "dev_mon": int(dev_mon),
-                    "dev_wall": int(dev_wall), "dev_cntvct": int(dev_cntvct),
-                    "host_mon": int(host_mon), "host_wall": int(host_wall)}
+            data = {
+                "device_id": index, "dev_mon": int(dev_mon),
+                "dev_wall": int(dev_wall), "dev_cntvct": int(dev_cntvct),
+                "host_mon": int(host_mon), "host_wall": int(host_wall)
+            }
             message["data"].append(data)
 
     def __parse_time_data(self: any) -> dict:

@@ -35,7 +35,7 @@ class OperatorMetricManager(MetaMetricManager):
     """
 
     def __init__(self: any) -> None:
-        MetaMetricManager.__init__(self)
+        super().__init__()
 
 
 class NetMetricManager(MetaMetricManager):
@@ -45,4 +45,4 @@ class NetMetricManager(MetaMetricManager):
     """
 
     def __init__(self: any) -> None:
-        MetaMetricManager.__init__(self)
+        super().__init__()

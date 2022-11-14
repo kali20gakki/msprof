@@ -135,8 +135,12 @@ def get_llc_bandwidth(curs: any) -> str:
     get trace view data of llc bandwith
     """
     delta_dev = InfoConfReader().get_delta_time()
-    meta_data = [["process_name", InfoConfReader().get_json_pid_data(),
-                  InfoConfReader().get_json_tid_data(), "LLC Bandwidth"]]
+    meta_data = [
+        [
+            "process_name", InfoConfReader().get_json_pid_data(),
+            InfoConfReader().get_json_tid_data(), "LLC Bandwidth"
+        ]
+    ]
     result_data = TraceViewManager.metadata_event(meta_data)
     cols = "timestamp, sum(read_allocate), sum(read_noallocate), sum(read_hit), " \
            "sum(write_allocate), sum(write_noallocate), sum(write_hit)"
@@ -201,8 +205,12 @@ def get_llc_capacity(params: dict, curs: any) -> str:
                                "info": "Failed to get read and write of llc_capacity."})
         dsid_sql_data = Utils.generator_to_list(list(i) for i in dsid_sql_data)
         trace_data = _format_llc_capacity(dsid_sql_data)
-        meta_data = [["process_name", InfoConfReader().get_json_pid_data(),
-                      InfoConfReader().get_json_tid_data(), "LLC of {}".format(types_map.get(types, ""))]]
+        meta_data = [
+            [
+                "process_name", InfoConfReader().get_json_pid_data(),
+                InfoConfReader().get_json_tid_data(), "LLC of {}".format(types_map.get(types, ""))
+            ]
+        ]
         result_data = TraceViewManager.metadata_event(meta_data)
         result_data.extend(
             TraceViewManager.column_graph_trace(TraceViewHeaderConstant.COLUMN_GRAPH_HEAD_LEAST, trace_data))
@@ -246,8 +254,10 @@ def get_bandwidth_value(bandwidth_data: list, interval_time: float) -> list:
         write_hit_rate_value = round(bandwidth_data[6] / sum_wr_allocate * NumberConstant.PERCENTAGE,
                                      CommonConstant.ROUND_SIX)
 
-    bandwidth_value = [read_bandwidth_value, read_hit_rate_value, read_hit_bandwidth_value,
-                       write_bandwidth_value, write_hit_rate_value, write_hit_bandwidth_value]
+    bandwidth_value = [
+        read_bandwidth_value, read_hit_rate_value, read_hit_bandwidth_value,
+        write_bandwidth_value, write_hit_rate_value, write_hit_bandwidth_value
+    ]
     return bandwidth_value if bandwidth_value else []
 
 
@@ -313,8 +323,10 @@ def _reformat_ddr_data(trace_parser: any, data_total: dict) -> list:
     results = OrderedDict()
     legends = OrderedDict()
     ddr_events = {"Read": ["Read(MB/s)"], "Write": ["Write(MB/s)"]}
-    meta_data = [["process_name", InfoConfReader().get_json_pid_data(),
-                  InfoConfReader().get_json_tid_data(), trace_parser.scope]]
+    meta_data = [
+        ["process_name", InfoConfReader().get_json_pid_data(),
+         InfoConfReader().get_json_tid_data(), trace_parser.scope]
+    ]
     _result = TraceViewManager.metadata_event(meta_data)
     for _direct in ["Read", "Write"]:
         results['DDR/{}'.format(_direct)] = data_total.get(_direct, 0)
@@ -393,10 +405,15 @@ def _reformat_hbm_data(trace_parser: any, param: dict, curs: any) -> list:
     _fill_hbm_data(param, results, legends, curs)
     _result = []
     if legends and results:
-        _result = TraceViewManager.metadata_event([["process_name",
-                                                    InfoConfReader().get_json_pid_data(),
-                                                    InfoConfReader().get_json_tid_data(),
-                                                    trace_parser.scope]])
+        meta_data = [
+            [
+                "process_name",
+                InfoConfReader().get_json_pid_data(),
+                InfoConfReader().get_json_tid_data(),
+                trace_parser.scope
+            ]
+        ]
+        _result = TraceViewManager.metadata_event(meta_data)
         delta_dev = InfoConfReader().get_delta_time()
         _result += trace_parser.multiple_name_dump(results, legends, delta_dev,
                                                    InfoConfReader().get_json_pid_data(),

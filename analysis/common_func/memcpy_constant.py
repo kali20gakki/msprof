@@ -45,6 +45,14 @@ class MemoryCopyConstant:
     D2D_NAME = "device to device"
     DEFAULTE_NAME = "other"
 
+    @staticmethod
+    def syscnt_to_micro() -> int:
+        """
+        syscnt to micro multiplication factor
+        :return: int
+        """
+        return NumberConstant.MICRO_SECOND / InfoConfReader().get_freq(StrConstant.HWTS)
+
     @classmethod
     def get_tag_index(cls: any, tag: int) -> str:
         """
@@ -70,11 +78,3 @@ class MemoryCopyConstant:
             cls.H2H_TAG: cls.H2H_NAME
         }
         return direction_dict.get(tag, cls.DEFAULTE_NAME)
-
-    @staticmethod
-    def syscnt_to_micro() -> int:
-        """
-        syscnt to micro multiplication factor
-        :return: int
-        """
-        return NumberConstant.MICRO_SECOND / InfoConfReader().get_freq(StrConstant.HWTS)
