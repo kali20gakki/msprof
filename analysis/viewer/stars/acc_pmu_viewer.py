@@ -30,8 +30,13 @@ class AccPmuViewer(BaseViewer, ABC):
         """
         to get chrome trace json header
         """
-        acc_header = [["process_name", self.pid,
-                       InfoConfReader().get_json_tid_data(), self.params.get(self.DATA_TYPE)]]
+        acc_header = [
+            [
+                "process_name", self.pid,
+                InfoConfReader().get_json_tid_data(),
+                self.params.get(self.DATA_TYPE)
+            ]
+        ]
         return acc_header
 
     def get_trace_timeline(self: any, datas: list) -> list:

@@ -207,11 +207,13 @@ class CoreCpuReduceViewer:
                  ("Aicore Time(ms)", total_time_value),
                  ("Total Cycle", cls._get_task_trace_value(_key_for_ops, total_cycle))
                  ])
-            trace_data_pice = [cls._get_task_trace_value(_key_for_ops, op_names), NumberConstant.TASK_TIME_PID,
-                               sql_data[0],
-                               float(sql_data[2]) / DBManager.NSTOUS,
-                               int(sql_data[3]) / DBManager.NSTOUS if sql_data[3] > 0 else 0,
-                               trace_data_args]
+            trace_data_pice = [
+                cls._get_task_trace_value(_key_for_ops, op_names), NumberConstant.TASK_TIME_PID,
+                sql_data[0],
+                float(sql_data[2]) / DBManager.NSTOUS,
+                int(sql_data[3]) / DBManager.NSTOUS if sql_data[3] > 0 else 0,
+                trace_data_args
+            ]
             trace_data.append(trace_data_pice)
         return trace_data
 
@@ -250,8 +252,9 @@ class CoreCpuReduceViewer:
         result_data = []
         trace_conn, trace_curs = DBManager.check_connect_db_path(
             os.path.join(sql_path, DBNameConstant.DB_TRACE))
-        if not trace_conn or not trace_curs or \
-                not DBManager.judge_table_exist(trace_curs, DBNameConstant.TABLE_TRAINING_TRACE) or \
+        if not trace_conn or not trace_curs:
+            return result_data
+        if not DBManager.judge_table_exist(trace_curs, DBNameConstant.TABLE_TRAINING_TRACE) or \
                 not DBManager.judge_table_exist(trace_curs, DBNameConstant.TABLE_ALL_REDUCE):
             return result_data
 

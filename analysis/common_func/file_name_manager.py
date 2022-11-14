@@ -213,9 +213,13 @@ def get_file_name_pattern_match(file_name: str, *file_pattern_compiles: any) -> 
     """
     get file name pattern match
     """
-    if isinstance(file_name, str) and (file_name.endswith(Constant.DONE_TAG) or
-                                       file_name.endswith(Constant.COMPLETE_TAG) or
-                                       file_name.endswith(Constant.ZIP_TAG)):
+    if not isinstance(file_name, str):
+        return EmptyClass("not original data")
+    tags = [Constant.DONE_TAG, Constant.COMPLETE_TAG, Constant.ZIP_TAG]
+
+    def check_file_name(tag: str):
+        return file_name.endswith(tag)
+    if any(map(check_file_name, tags)):
         return EmptyClass("not original data")
     for file_pattern_compile in file_pattern_compiles:
         match_res = file_pattern_compile.match(file_name)
@@ -371,10 +375,12 @@ def get_ge_task_compiles() -> tuple:
     """
     get ge task regex compiles
     """
-    ge_task_compiles = (re.compile(FileNameManagerConstant.GE_TASK_FILE_PATTERN),
-                        re.compile(FileNameManagerConstant.GE_TASK_SINGLE_FILE_PATTERN),
-                        re.compile(FileNameManagerConstant.GE_TASK_INFER_FILE_PATTERN),
-                        re.compile(FileNameManagerConstant.GE_TASK_TRAINING_FILE_PATTERN))
+    ge_task_compiles = (
+        re.compile(FileNameManagerConstant.GE_TASK_FILE_PATTERN),
+        re.compile(FileNameManagerConstant.GE_TASK_SINGLE_FILE_PATTERN),
+        re.compile(FileNameManagerConstant.GE_TASK_INFER_FILE_PATTERN),
+        re.compile(FileNameManagerConstant.GE_TASK_TRAINING_FILE_PATTERN)
+    )
     return ge_task_compiles
 
 

@@ -207,14 +207,10 @@ class MergeOPCounter:
         task_data = self._update_model_name(task_data)
         type_time = defaultdict(dict)
         for task in task_data:
-            type_time[task[self.MODEL_NAME_INDEX]]["{}_{}".format(task[0], task[1])] = \
-                {'op_type': task[0],
-                 'task_type': task[1],
-                 'count': task[2],
-                 'duration': task[3],
-                 'min': task[4],
-                 'avg': task[5],
-                 'max': task[6]}
+            type_time[task[self.MODEL_NAME_INDEX]]["{}_{}".format(task[0], task[1])] = {
+                    'op_type': task[0], 'task_type': task[1], 'count': task[2], 'duration': task[3],
+                    'min': task[4], 'avg': task[5], 'max': task[6]
+            }
         total_time = self._cal_total(type_time)
         total_data = []
         for model in type_time:

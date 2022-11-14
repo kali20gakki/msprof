@@ -28,8 +28,12 @@ class FftsLogViewer(BaseViewer):
         to get sequence chrome trace json header
         :return: header of trace data list
         """
-        header = [["process_name", InfoConfReader().get_json_pid_data(),
-                   InfoConfReader().get_json_tid_data(), self.SUBTASK_TIME]]
+        header = [
+            [
+                "process_name", InfoConfReader().get_json_pid_data(),
+                InfoConfReader().get_json_tid_data(), self.SUBTASK_TIME
+            ]
+        ]
         subtask = []
         for item in data:
             subtask.append(
