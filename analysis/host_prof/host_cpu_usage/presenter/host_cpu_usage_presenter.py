@@ -73,8 +73,7 @@ class HostCpuUsagePresenter(HostProfPresenterBase):
         return cpu usage timeline header
         """
         pid = InfoConfReader().get_json_pid_data()
-        result = [["process_name", pid,
-                   InfoConfReader().get_json_tid_data(), "CPU Usage"]]
+        result = [["process_name", pid, InfoConfReader().get_json_tid_data(), "CPU Usage"]]
         cpu_list = self._get_cpu_list()
         for index, cpu_info in enumerate(cpu_list):
             cpu_no = " ".join(["CPU", cpu_info[0]])
@@ -104,12 +103,8 @@ class HostCpuUsagePresenter(HostProfPresenterBase):
         """"
         compute every cpu usage data
         """
-        curr_info_data = {"curr_timestamp": curr_info[0],
-                          "curr_jiffies": curr_info[1],
-                          "curr_data": curr_info[2]}
-        last_info_data = {"last_timestamp": last_info[0],
-                          "last_jiffies": last_info[1],
-                          "last_data": last_info[2]}
+        curr_info_data = {"curr_timestamp": curr_info[0], "curr_jiffies": curr_info[1], "curr_data": curr_info[2]}
+        last_info_data = {"last_timestamp": last_info[0], "last_jiffies": last_info[1], "last_data": last_info[2]}
 
         delta_jiffies = curr_info_data.get("curr_jiffies") - last_info_data.get("last_jiffies")
         if not self.cpu_info or delta_jiffies == 0:

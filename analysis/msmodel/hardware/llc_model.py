@@ -26,14 +26,18 @@ class LlcModel(BaseModel, ABC):
     TABLES_PATH = os.path.join(MsvpCommonConst.CONFIG_PATH, 'Tables_training.ini')
     EVENT_ITEM = 8
     EVENT_LIST = Utils.generator_to_list("event{}".format(i) for i in range(EVENT_ITEM))
-    READ_PMU_LIST = {"event0": int('0x00', Constant.HEX_NUMBER), "event1": int('0x01', Constant.HEX_NUMBER),
-                     "event2": int('0x02', Constant.HEX_NUMBER), "event3": int('0x13', Constant.HEX_NUMBER),
-                     "event4": int('0x20', Constant.HEX_NUMBER), "event5": int('0x22', Constant.HEX_NUMBER),
-                     "event6": int('0x34', Constant.HEX_NUMBER), "event7": int('0x36', Constant.HEX_NUMBER)}
-    WRITE_PMU_LIST = {"event0": int('0x00', Constant.HEX_NUMBER), "event1": int('0x01', Constant.HEX_NUMBER),
-                      "event2": int('0x03', Constant.HEX_NUMBER), "event3": int('0x14', Constant.HEX_NUMBER),
-                      "event4": int('0x21', Constant.HEX_NUMBER), "event5": int('0x23', Constant.HEX_NUMBER),
-                      "event6": int('0x35', Constant.HEX_NUMBER), "event7": int('0x37', Constant.HEX_NUMBER)}
+    READ_PMU_LIST = {
+        "event0": int('0x00', Constant.HEX_NUMBER), "event1": int('0x01', Constant.HEX_NUMBER),
+        "event2": int('0x02', Constant.HEX_NUMBER), "event3": int('0x13', Constant.HEX_NUMBER),
+        "event4": int('0x20', Constant.HEX_NUMBER), "event5": int('0x22', Constant.HEX_NUMBER),
+        "event6": int('0x34', Constant.HEX_NUMBER), "event7": int('0x36', Constant.HEX_NUMBER)
+    }
+    WRITE_PMU_LIST = {
+        "event0": int('0x00', Constant.HEX_NUMBER), "event1": int('0x01', Constant.HEX_NUMBER),
+        "event2": int('0x03', Constant.HEX_NUMBER), "event3": int('0x14', Constant.HEX_NUMBER),
+        "event4": int('0x21', Constant.HEX_NUMBER), "event5": int('0x23', Constant.HEX_NUMBER),
+        "event6": int('0x35', Constant.HEX_NUMBER), "event7": int('0x37', Constant.HEX_NUMBER)
+    }
     LLC_CACHE_SIZE = 64.0
     LLC_TO_SECOND = 10 ** 6
     LLID_COUNT = 4
@@ -105,8 +109,10 @@ class LlcModel(BaseModel, ABC):
         :return: None
         """
         self.drop_tab()
-        table_name = {DBNameConstant.TABLE_LLC_ORIGIN: None, DBNameConstant.TABLE_LLC_METRICS: None,
-                      DBNameConstant.TABLE_LLC_EVENTS: ["device_id", "l3tId", "timestamp"]}
+        table_name = {
+            DBNameConstant.TABLE_LLC_ORIGIN: None, DBNameConstant.TABLE_LLC_METRICS: None,
+            DBNameConstant.TABLE_LLC_EVENTS: ["device_id", "l3tId", "timestamp"]
+        }
         try:
             for name in table_name:
                 sql = DBManager.sql_create_table_with_key(

@@ -34,8 +34,12 @@ class InterSocViewer(BaseViewer, ABC):
         get timeline trace header
         :return: list
         """
-        soc_header = [["process_name", self.pid,
-                       InfoConfReader().get_json_tid_data(), self.params.get(self.DATA_TYPE)]]
+        soc_header = [
+            [
+                "process_name", self.pid,
+                InfoConfReader().get_json_tid_data(), self.params.get(self.DATA_TYPE)
+            ]
+        ]
         return soc_header
 
     def get_trace_timeline(self: any, datas: list) -> list:

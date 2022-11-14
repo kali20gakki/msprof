@@ -27,8 +27,10 @@ class QueryCommand:
     The class for handle query command.
     """
     FILE_NAME = os.path.basename(__file__)
-    SHOW_HEADERS = ['Job Info', 'Device ID', 'Dir Name', 'Collection Time',
-                    'Model ID', 'Iteration Number', 'Top Time Iteration', 'Rank ID']
+    SHOW_HEADERS = [
+        'Job Info', 'Device ID', 'Dir Name', 'Collection Time',
+        'Model ID', 'Iteration Number', 'Top Time Iteration', 'Rank ID'
+    ]
 
     def __init__(self: any, args: any) -> None:
         self.args = args

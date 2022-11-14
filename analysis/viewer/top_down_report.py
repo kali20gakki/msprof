@@ -67,6 +67,14 @@ class TopDownData:
             dispatch_result[top_down_data[1]].append(top_down_data)
         return dispatch_result
 
+    @staticmethod
+    def _check_sql_file(conn: any, curs: any, table_name: str) -> bool:
+        if not conn or not curs:
+            return False
+        if not DBManager.judge_table_exist(curs, table_name):
+            return False
+        return True
+
     @classmethod
     def get_max_iter_id(cls: any, project_path: str) -> int:
         """
@@ -113,16 +121,28 @@ class TopDownData:
         """
         result_data = []
         logging.info("Start to get top down tracing data.")
-        meta_data = [["process_name", InfoConfReader().get_json_pid_data(),
-                      InfoConfReader().get_json_tid_data(), TraceViewHeaderConstant.PROCESS_AI_STACK_TIME],
-                     ["thread_name", InfoConfReader().get_json_pid_data(),
-                      cls.ACL_TID, TraceViewHeaderConstant.PROCESS_ACL],
-                     ["thread_name", InfoConfReader().get_json_pid_data(),
-                      cls.GE_TID, TraceViewHeaderConstant.PROCESS_GE],
-                     ["thread_name", InfoConfReader().get_json_pid_data(),
-                      cls.RUNTIME_TID, TraceViewHeaderConstant.PROCESS_RUNTIME],
-                     ["thread_name", InfoConfReader().get_json_pid_data(),
-                      cls.TASK_TID, TraceViewHeaderConstant.PROCESS_TASK]]
+        meta_data = [
+            [
+                "process_name", InfoConfReader().get_json_pid_data(),
+                InfoConfReader().get_json_tid_data(), TraceViewHeaderConstant.PROCESS_AI_STACK_TIME
+            ],
+            [
+                "thread_name", InfoConfReader().get_json_pid_data(),
+                cls.ACL_TID, TraceViewHeaderConstant.PROCESS_ACL
+            ],
+            [
+                "thread_name", InfoConfReader().get_json_pid_data(),
+                cls.GE_TID, TraceViewHeaderConstant.PROCESS_GE
+            ],
+            [
+                "thread_name", InfoConfReader().get_json_pid_data(),
+                cls.RUNTIME_TID, TraceViewHeaderConstant.PROCESS_RUNTIME
+            ],
+            [
+                "thread_name", InfoConfReader().get_json_pid_data(),
+                cls.TASK_TID, TraceViewHeaderConstant.PROCESS_TASK
+            ]
+        ]
         result_data.extend(TraceViewManager.metadata_event(meta_data))
         try:
             cls._export_top_down_data_by_iter(project_path, device_id, result_data, iter_id)
@@ -165,7 +185,9 @@ class TopDownData:
     @classmethod
     def _get_ge_data(cls: any, project_path: str, iter_id: int, db_name: str) -> list:
         conn, cur = DBManager.check_connect_db(project_path, db_name)
-        if not (conn and cur and DBManager.judge_table_exist(cur, DBNameConstant.TABLE_GE_MODEL_TIME)):
+        if not (conn and cur):
+            return []
+        if not DBManager.judge_table_exist(cur, DBNameConstant.TABLE_GE_MODEL_TIME):
             return []
         try:
             ge_data = cur.execute(
@@ -188,7 +210,9 @@ class TopDownData:
     @classmethod
     def _get_runtime_data(cls: any, project_path: str, iter_id: int, db_name: str) -> list:
         conn, cur = DBManager.check_connect_db(project_path, db_name)
-        if not (conn and cur and DBManager.judge_table_exist(cur, DBNameConstant.TABLE_API_CALL)):
+        if not (conn and cur):
+            return []
+        if not DBManager.judge_table_exist(cur, DBNameConstant.TABLE_API_CALL):
             return []
         try:
             runtime_start = cur.execute(
@@ -207,10 +231,10 @@ class TopDownData:
             return []
         finally:
             DBManager.destroy_db_connect(conn, cur)
-        if runtime_start and runtime_end \
-                and runtime_start[0] is not None and runtime_end[0] is not None:
-            return [(iter_id, cls.MODULE_RUNTIME, Constant.NA, runtime_start[0],
-                     runtime_end[0] - runtime_start[0])]
+        if runtime_start and runtime_end:
+            if runtime_start[0] is not None and runtime_end[0] is not None:
+                return [(iter_id, cls.MODULE_RUNTIME, Constant.NA, runtime_start[0],
+                         runtime_end[0] - runtime_start[0])]
         return []
 
     @classmethod
@@ -265,10 +289,12 @@ class TopDownData:
                                            ])
             if len(top_down_data) == cls.TS_SCHEDULER_LENGTH:
                 trace_data_args[cls.JSON_TRACE_TOTAL_TIME] = top_down_data[5]
-            trace_data_pice = [top_down_data[2], top_down_data[-2], top_down_data[-1],
-                               int(top_down_data[3]) // cls.CONVERSION_TIME,
-                               int(top_down_data[4]) // cls.CONVERSION_TIME,
-                               trace_data_args]
+            trace_data_pice = [
+                top_down_data[2], top_down_data[-2], top_down_data[-1],
+                int(top_down_data[3]) // cls.CONVERSION_TIME,
+                int(top_down_data[4]) // cls.CONVERSION_TIME,
+                trace_data_args
+            ]
             trace_data.append(trace_data_pice)
         return trace_data
 
@@ -408,11 +434,3 @@ class TopDownData:
         if top_down_datas:
             cls._fill_top_down_trace_data(
                 project_path, device_id, result_data, top_down_datas)
-
-    @staticmethod
-    def _check_sql_file(conn: any, curs: any, table_name: str) -> bool:
-        if not conn or not curs:
-            return False
-        if not DBManager.judge_table_exist(curs, table_name):
-            return False
-        return True

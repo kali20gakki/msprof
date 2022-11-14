@@ -99,10 +99,6 @@ class HbmModel(BaseModel, ABC):
                 sys_counts = max((tmp_counts, 0))
                 item = (bw_data[i][0], bw_data[i][1], sys_counts, bw_data[i][3], bw_data[i][4])
             else:
-                item = (bw_data[i][0],
-                        bw_data[i][1],
-                        bw_data[i][2],
-                        bw_data[i][3],
-                        bw_data[i][4])
+                item = (bw_data[i][0], bw_data[i][1], bw_data[i][2], bw_data[i][3], bw_data[i][4])
             data.append(item)
         return data

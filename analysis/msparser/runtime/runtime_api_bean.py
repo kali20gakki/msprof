@@ -65,8 +65,8 @@ class RunTimeApiBean(StructDecoder):
         """
         stream_id = self._task_tag[0]
         task_num = self._task_tag[1]
-        task_id = list(map(str, self._task_tag[2:2 + 2*task_num:2]))
-        batch_id = list(map(str, self._task_tag[3:3 + 2*task_num:2]))
+        task_id = list(map(str, self._task_tag[2: 2 + 2 * task_num: 2]))
+        batch_id = list(map(str, self._task_tag[3: 3 + 2 * task_num: 2]))
         task_tag = (stream_id, task_num, ','.join(task_id), ','.join(batch_id))
         return task_tag
 

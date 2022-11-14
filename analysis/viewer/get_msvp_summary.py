@@ -172,11 +172,11 @@ def get_aicore_utilization(project_path: str, device_id: str, number: float, sta
     if result.get('status') == NumberConstant.ERROR:
         return json.dumps({"status": NumberConstant.ERROR, "info": result.get('msg')})
     conn, curs = DBManager.check_connect_db(project_path,
-                                            func_map['type_db_match'].get('ai_core_profiling'))
+                                            func_map.get('type_db_match', {}).get('ai_core_profiling'))
     if not (conn and curs):
         return json.dumps({'status': NumberConstant.ERROR, "info": "The db doesn't exist."})
     try:
-        if func_map['sample_config'].get("ai_core_profiling_mode") == "sample-based":
+        if func_map.get('sample_config', {}).get("ai_core_profiling_mode") == "sample-based":
             return _get_aicore_util(curs, number, start, end)
         return json.dumps({'status': NumberConstant.ERROR, 'data': "Unable to get aicore utilization."})
     except sqlite3.Error:
@@ -196,6 +196,7 @@ def get_aicore_position(*param: list) -> dict:
     end_sql = 'select count(*) from AICoreOriginalData where coreid=? ' \
               'and timestamp/{NS_TIME_RATE} - ? <= ?'.format(NS_TIME_RATE=NumberConstant.NS_TIME_RATE)
     end_param = (core, min_time, end)
-    pos_cores[str(core)] = [curs.execute(start_sql, start_param).fetchone()[0],
-                            curs.execute(end_sql, end_param).fetchone()[0]]
+    pos_cores[str(core)] = [
+        curs.execute(start_sql, start_param).fetchone()[0], curs.execute(end_sql, end_param).fetchone()[0]
+    ]
     return pos_cores

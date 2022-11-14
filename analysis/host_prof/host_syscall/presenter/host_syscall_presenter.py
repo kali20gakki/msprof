@@ -293,8 +293,10 @@ class HostSyscallPresenter(HostProfPresenterBase):
         result = []
         for data_item in runtime_api_data:
             # 'name', 'tid', 'ts', 'dur'
-            temp_data = [data_item[3], int(data_item[1]), int(data_item[2]), float(data_item[7]), \
-                         (float(data_item[8]) - float(data_item[7]))]
+            temp_data = [
+                data_item[3], int(data_item[1]), int(data_item[2]), float(data_item[7]),
+                (float(data_item[8]) - float(data_item[7]))
+            ]
             result.append(temp_data)
         return result
 
@@ -304,8 +306,7 @@ class HostSyscallPresenter(HostProfPresenterBase):
         :return: timeline headers
         """
         pid = InfoConfReader().get_json_pid_data()
-        result = [["process_name", pid,
-                   InfoConfReader().get_json_tid_data(), "OS Runtime API"]]
+        result = [["process_name", pid, InfoConfReader().get_json_tid_data(), "OS Runtime API"]]
         tid_list = self._get_tid_list()
         for tid in tid_list:
             thread_header = ["thread_name", pid, tid[0], "Thread " + str(tid[0])]
@@ -348,8 +349,10 @@ class HostSyscallPresenter(HostProfPresenterBase):
             if api_name == "pthread_once":
                 continue
             end_time = start_time + float(duration_sec) * NumberConstant.SEC_TO_US
-            write_list = ["", self.pid, command_tid, api_name,
-                          "", float(duration_sec) * NumberConstant.SEC_TO_US, "", start_time, end_time]
+            write_list = [
+                "", self.pid, command_tid, api_name, "", float(duration_sec) * NumberConstant.SEC_TO_US,
+                "", start_time, end_time
+            ]
             self.cur_model.insert_single_data(write_list)
 
     def _parse_syscall_api(self: any, file: any) -> None:
@@ -379,7 +382,8 @@ class HostSyscallPresenter(HostProfPresenterBase):
                 float(time_info.start_time_ms) + float(time_info.duration_ms))
             if float(end_time_ms) / NumberConstant.CONVERSION_TIME > start_handle_sec:
                 continue
-            call_api_info = [command_name, self.pid, command_tid, api_name,
-                             time_info.start_time_ms, tran_duration_us,
-                             end_time_ms, real_start_us, real_end_us]
+            call_api_info = [
+                command_name, self.pid, command_tid, api_name, time_info.start_time_ms,
+                tran_duration_us, end_time_ms, real_start_us, real_end_us
+            ]
             self.cur_model.insert_single_data(call_api_info)

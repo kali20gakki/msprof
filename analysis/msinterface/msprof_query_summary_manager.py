@@ -39,11 +39,13 @@ class MsprofQuerySummaryManager:
     CLUSTER_SCENE = '1'
     NOT_CLUSTER_SCENE = '0'
     FILE_NAME = os.path.basename(__file__)
-    QUERY_DATA_TYPE_PARSER = {QueryDataType.STEP_TRACE: StepTraceSummay,
-                              QueryDataType.FOPS_ANALYSE: FopsParser,
-                              QueryDataType.DATA_PREPARATION: ClusterDataPreparationParser,
-                              QueryDataType.PARALLEL_ANALYSIS: ClusterParallelParser,
-                              QueryDataType.COLLECTIVE_COMMUNICATION: ClusterCommunicationParser}
+    QUERY_DATA_TYPE_PARSER = {
+        QueryDataType.STEP_TRACE: StepTraceSummay,
+        QueryDataType.FOPS_ANALYSE: FopsParser,
+        QueryDataType.DATA_PREPARATION: ClusterDataPreparationParser,
+        QueryDataType.PARALLEL_ANALYSIS: ClusterParallelParser,
+        QueryDataType.COLLECTIVE_COMMUNICATION: ClusterCommunicationParser
+    }
 
     def __init__(self: any, args: any) -> None:
         self.collection_path = os.path.realpath(args.collection_path)

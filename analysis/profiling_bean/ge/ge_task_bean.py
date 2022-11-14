@@ -21,18 +21,18 @@ class GeTaskBean(StructDecoder):
     OP_TYPE_HASH_ENUM = 2
     NO_HASH_ENUM = 3
 
-    TASK_TYPE_DICT = {0: Constant.TASK_TYPE_AI_CORE,
-                      1: Constant.TASK_TYPE_AI_CPU,
-                      2: Constant.TASK_TYPE_AIV}
+    TASK_TYPE_DICT = {
+        0: Constant.TASK_TYPE_AI_CORE,
+        1: Constant.TASK_TYPE_AI_CPU,
+        2: Constant.TASK_TYPE_AIV
+    }
 
-    FMT_MAP = {NO_HASH_ENUM: {"fmt": "HHI8B120s8B56sQQ4IHHI16B",
-                              "function": "_update_task_data_by_no_hash"},
-               OP_TYPE_HASH_ENUM: {"fmt": "HHI8B120s8BQ48BQQ4IHHI16B",
-                                   "function": "_update_task_data_by_hash_type"},
-               OP_NAME_HASH_ENUM: {"fmt": "HHI8BQ112B8B56sQQ4IHHI16B",
-                                   "function": "_update_task_data_by_hash_name"},
-               ALL_HASH_ENUM: {"fmt": "HHI8BQ112B8BQ48BQQ4IHHI16B",
-                               "function": "_update_task_data_by_all_hash"}}
+    FMT_MAP = {
+        NO_HASH_ENUM: {"fmt": "HHI8B120s8B56sQQ4IHHI16B", "function": "_update_task_data_by_no_hash"},
+        OP_TYPE_HASH_ENUM: {"fmt": "HHI8B120s8BQ48BQQ4IHHI16B", "function": "_update_task_data_by_hash_type"},
+        OP_NAME_HASH_ENUM: {"fmt": "HHI8BQ112B8B56sQQ4IHHI16B", "function": "_update_task_data_by_hash_name"},
+        ALL_HASH_ENUM: {"fmt": "HHI8BQ112B8BQ48BQQ4IHHI16B", "function": "_update_task_data_by_all_hash"}
+    }
 
     def __init__(self: any) -> None:
         self._fusion_data = ()

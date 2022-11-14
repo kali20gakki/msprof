@@ -56,10 +56,12 @@ class OperatorMetric(MetaMetric):
                             "and a sample-based mode may have been set. "
                             "Please check the parameters you delivered.")
         elif operator_condition_mgr.cal_conditions(operator_data, rule.condition):
-            param = {CommonProfRule.RESULT_RULE_TYPE: rule.rule_type,
-                     CommonProfRule.RESULT_RULE_SUBTYPE: rule.rule_subtype,
-                     CommonProfRule.RESULT_RULE_SUGGESTION: rule.tips,
-                     CommonProfRule.RESULT_OP_LIST: [operator_data.get("op_name")]}
+            param = {
+                CommonProfRule.RESULT_RULE_TYPE: rule.rule_type,
+                CommonProfRule.RESULT_RULE_SUBTYPE: rule.rule_subtype,
+                CommonProfRule.RESULT_RULE_SUGGESTION: rule.tips,
+                CommonProfRule.RESULT_OP_LIST: [operator_data.get("op_name")]
+            }
         return param
 
 
@@ -84,8 +86,10 @@ class NetWorkMetric(MetaMetric):
             op_names = self.network_condition_mgr.cal_conditions(self.operator_mgr.op_list,
                                                                  rule.condition)
             if op_names:
-                param = {CommonProfRule.RESULT_RULE_TYPE: rule.rule_type,
-                         CommonProfRule.RESULT_RULE_SUBTYPE: rule.rule_subtype,
-                         CommonProfRule.RESULT_RULE_SUGGESTION: rule.tips,
-                         CommonProfRule.RESULT_OP_LIST: op_names}
+                param = {
+                    CommonProfRule.RESULT_RULE_TYPE: rule.rule_type,
+                    CommonProfRule.RESULT_RULE_SUBTYPE: rule.rule_subtype,
+                    CommonProfRule.RESULT_RULE_SUGGESTION: rule.tips,
+                    CommonProfRule.RESULT_OP_LIST: op_names
+                }
         return param
