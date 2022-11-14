@@ -125,7 +125,8 @@ class DataManager:
     def _get_base_data(cls: any, device_id: any, infer_id: any, project_path: str) -> tuple:
         if cls.is_network(project_path, device_id):
             configs = {
-                StrConstant.CONFIG_HEADERS: GetExportDataConfigs.get_data_headers(StrConstant.AI_CORE_OP_SUMMARY)}
+                StrConstant.CONFIG_HEADERS: GetExportDataConfigs.get_data_headers(StrConstant.AI_CORE_OP_SUMMARY)
+            }
             db_path = PathManager.get_db_path(project_path, DBNameConstant.DB_AICORE_OP_SUMMARY)
             headers, data, _ = AiCoreOpReport.get_ai_core_op_summary_data(project_path, db_path,
                                                                           infer_id, configs)

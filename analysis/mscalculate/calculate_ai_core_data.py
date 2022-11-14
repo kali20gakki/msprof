@@ -98,11 +98,11 @@ class CalculateAiCoreData:
         calculate vector fops index data
         :return:
         """
-        if "vec_fp16_128lane_ratio" in events_name_list and \
-                "vec_fp16_64lane_ratio" in events_name_list and \
-                "vec_fp32_ratio" in events_name_list and \
-                "vec_int32_ratio" in events_name_list and \
-                "vec_misc_ratio" in events_name_list:
+        names = [
+            "vec_fp16_128lane_ratio", "vec_fp16_64lane_ratio",
+            "vec_fp32_ratio", "vec_int32_ratio", "vec_misc_ratio"
+        ]
+        if all(map(lambda name: name in events_name_list, names)):
             vector_num = self.get_vector_num()
             vec_fp16_128lane_ratio = ai_core_profiling_events["vec_fp16_128lane_ratio"][-1] * task_cyc * 128
             vec_fp16_64lane_ratio = ai_core_profiling_events["vec_fp16_64lane_ratio"][-1] * task_cyc * 64
@@ -119,24 +119,24 @@ class CalculateAiCoreData:
         calculate additional ai core metrics
         :return:
         """
-        if "vec_fp16_128lane_ratio" in events_name_list \
-                and "vec_fp16_64lane_ratio" in events_name_list:
+        names = ["vec_fp16_128lane_ratio", "vec_fp16_64lane_ratio"]
+        if all(map(lambda name: name in events_name_list, names)):
             vec_fp16_ratio = ai_core_profiling_events["vec_fp16_128lane_ratio"][-1] + \
                              ai_core_profiling_events["vec_fp16_64lane_ratio"][-1]
             ai_core_profiling_events.setdefault("vec_fp16_ratio",
                                                 []).append(vec_fp16_ratio)
 
-        if "mac_fp16_ratio" in events_name_list and \
-                "mac_int8_ratio" in events_name_list:
+        names = ["mac_fp16_ratio", "mac_int8_ratio"]
+        if all(map(lambda name: name in events_name_list, names)):
             cube_fops = ai_core_profiling_events["mac_fp16_ratio"][-1] * task_cyc * 16 * 16 * 16 * 2 + \
                         ai_core_profiling_events["mac_int8_ratio"][-1] * task_cyc * 16 * 16 * 32 * 2
             ai_core_profiling_events.setdefault("cube_fops", []).append(cube_fops)
 
-        if "mte1_iq_full_ratio" in events_name_list and \
-                "mte2_iq_full_ratio" in events_name_list and \
-                "mte3_iq_full_ratio" in events_name_list and \
-                "cube_iq_full_ratio" in events_name_list and \
-                "vec_iq_full_ratio" in events_name_list:
+        names = [
+            "mte1_iq_full_ratio", "mte2_iq_full_ratio", "mte3_iq_full_ratio",
+            "cube_iq_full_ratio", "vec_iq_full_ratio"
+        ]
+        if all(map(lambda name: name in events_name_list, names)):
             iq_full_ratio = ai_core_profiling_events["mte1_iq_full_ratio"][-1] + \
                             ai_core_profiling_events["mte2_iq_full_ratio"][-1] + \
                             ai_core_profiling_events["mte3_iq_full_ratio"][-1] + \
@@ -144,8 +144,8 @@ class CalculateAiCoreData:
                             ai_core_profiling_events["vec_iq_full_ratio"][-1]
             ai_core_profiling_events.setdefault("iq_full_ratio", []).append(iq_full_ratio)
 
-        if "icache_miss_rate" in events_name_list and \
-                "icache_req_ratio" in events_name_list:
+        names = ["icache_miss_rate", "icache_req_ratio"]
+        if all(map(lambda name: name in events_name_list, names)):
             if ai_core_profiling_events["icache_req_ratio"][-1] != 0:
                 icache_miss_rate = ai_core_profiling_events["icache_miss_rate"][-1] \
                                    / ai_core_profiling_events["icache_req_ratio"][-1]

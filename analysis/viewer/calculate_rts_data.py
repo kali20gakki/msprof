@@ -141,13 +141,10 @@ def calculate_type_state_time(task_data: dict) -> dict:
     """
     type_state_time = {}
     for task in task_data["tasktime_data"]:
-        type_state_time[task[0]] = {'waiting': task[1],
-                                    'running': task[2],
-                                    'pending': task[3],
-                                    'count': task[-1],
-                                    'min': task[4],
-                                    'max': task[5],
-                                    'avg': task[6]}
+        type_state_time[task[0]] = {
+            'waiting': task[1], 'running': task[2], 'pending': task[3], 'count': task[-1],
+            'min': task[4], 'max': task[5], 'avg': task[6]
+        }
     return type_state_time
 
 
@@ -238,10 +235,12 @@ def handle_task_time(index: int, insert_data: list, timeline_data: list, status_
     """
     waiting_status_index, pending_status_index, running_status_index = status_index_list
     if timeline_data[index][-1] == CalculateRtsDataConst.COMPLETE:
-        tmp = {'waiting': calculate_time(timeline_data, waiting_status_index),
-               "pending": calculate_time(timeline_data, pending_status_index),
-               'running': calculate_time(timeline_data, running_status_index),
-               'complete': InfoConfReader().time_from_syscnt(timeline_data[index][-2])}
+        tmp = {
+            'waiting': calculate_time(timeline_data, waiting_status_index),
+            "pending": calculate_time(timeline_data, pending_status_index),
+            'running': calculate_time(timeline_data, running_status_index),
+            'complete': InfoConfReader().time_from_syscnt(timeline_data[index][-2])
+        }
         insert_data.append(
             timeline_data[index][0:7] +
             (tmp.get('waiting', 0), tmp.get('pending', 0), tmp.get('running', 0), tmp.get('complete', 0)))

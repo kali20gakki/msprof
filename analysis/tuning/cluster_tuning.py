@@ -57,5 +57,6 @@ class ClusterTuning(BaseTuningView):
         """
         for calculator, value in self.calculate_list.items():
             calculator_result = {
-                CommonProfRule.RESULT_RULE_TYPE: value, 'result': calculator(self.cluster_params).run()}
+                CommonProfRule.RESULT_RULE_TYPE: value, 'result': calculator(self.cluster_params).run()
+            }
             self.data.append(calculator_result)

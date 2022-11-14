@@ -22,6 +22,33 @@ class FileManager:
     """
     FILE_AUTHORITY = 0o640
 
+    @staticmethod
+    def remove_file(file_path: str) -> bool:
+        """
+        remove file
+        """
+        try:
+            if os.path.isfile(file_path):
+                os.remove(file_path)
+                return True
+            return False
+        except OSError as err:
+            error(os.path.basename(__file__), str(err))
+            return False
+
+    @staticmethod
+    def macth_process(pattern: str, file_name: str) -> any:
+        """
+        match files
+        :param pattern: check pattern
+        :param file_name: check files
+        :return:
+        """
+        matched_name = re.match(pattern, file_name)
+        if matched_name:
+            return matched_name
+        return EmptyClass("empty match name")
+
     @classmethod
     def is_info_json_file(cls: any, file_name: str) -> any:
         """
@@ -67,33 +94,6 @@ class FileManager:
                     os.chmod(os.path.join(file_path, file_name), cls.FILE_AUTHORITY)
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
             error(os.path.basename(__file__), err)
-
-    @staticmethod
-    def remove_file(file_path: str) -> bool:
-        """
-        remove file
-        """
-        try:
-            if os.path.isfile(file_path):
-                os.remove(file_path)
-                return True
-            return False
-        except OSError as err:
-            error(os.path.basename(__file__), str(err))
-            return False
-
-    @staticmethod
-    def macth_process(pattern: str, file_name: str) -> any:
-        """
-        match files
-        :param pattern: check pattern
-        :param file_name: check files
-        :return:
-        """
-        matched_name = re.match(pattern, file_name)
-        if matched_name:
-            return matched_name
-        return EmptyClass("empty match name")
 
 
 class FileOpen:

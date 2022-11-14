@@ -60,7 +60,7 @@ class ParsingRuntimeData(MsMultiProcess):
     AI_CORE_TYPE_BY_HWTS = "0x6bd3"  # ai core data by hwts, third and fouth byte is 6bd3
 
     def __init__(self: any, file_list: dict, sample_config: dict) -> None:
-        MsMultiProcess.__init__(self, sample_config)
+        super().__init__(sample_config)
         self.sample_config = sample_config
         self.file_list = file_list
         self.curs = None
