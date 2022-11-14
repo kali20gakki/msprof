@@ -25,8 +25,10 @@ class TaskOpViewer:
         @param message
         Rewrite gRPC task op method.
         """
-        headers = ["kernel_name", "kernel_type", "stream_id", "task_id",
-                   "task_time(us)", "task_start(ns)", "task_stop(ns)"]
+        headers = [
+            "kernel_name", "kernel_type", "stream_id", "task_id",
+            "task_time(us)", "task_start(ns)", "task_stop(ns)"
+        ]
         if not message:
             logging.error("get_task_op_summary message empty")
             return headers, [], 0

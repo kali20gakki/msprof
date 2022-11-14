@@ -12,8 +12,10 @@ class StarsChipTransModel(ParserModel):
     stars model class
     """
 
-    TYPE_TABLE_MAP = {StarsConstant.TYPE_STARS_PA: DBNameConstant.TABLE_STARS_PA_LINK,
-                      StarsConstant.TYPE_STARS_PCIE: DBNameConstant.TABLE_STARS_PCIE}
+    TYPE_TABLE_MAP = {
+        StarsConstant.TYPE_STARS_PA: DBNameConstant.TABLE_STARS_PA_LINK,
+        StarsConstant.TYPE_STARS_PCIE: DBNameConstant.TABLE_STARS_PCIE
+    }
 
     def __init__(self: any, result_dir: str, db: str, table_list: list) -> None:
         super().__init__(result_dir, db, table_list)

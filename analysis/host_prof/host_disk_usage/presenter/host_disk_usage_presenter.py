@@ -28,14 +28,6 @@ class HostDiskUsagePresenter(HostProfPresenterBase):
         super().__init__(result_dir, file_name)
         self.disk_usage_info = []
 
-    @classmethod
-    def get_timeline_header(cls: any) -> list:
-        """
-        get timeline header
-        """
-        return [["process_name", InfoConfReader().get_json_pid_data(),
-                 InfoConfReader().get_json_tid_data(), "Disk Usage"]]
-
     @staticmethod
     def _get_disk_usage_items(file: any) -> tuple:
         start_time = 0
@@ -65,6 +57,14 @@ class HostDiskUsagePresenter(HostProfPresenterBase):
                                 swap_in, io_percent))
 
         return start_time, usage_items
+
+    @classmethod
+    def get_timeline_header(cls: any) -> list:
+        """
+        get timeline header
+        """
+        return [["process_name", InfoConfReader().get_json_pid_data(),
+                 InfoConfReader().get_json_tid_data(), "Disk Usage"]]
 
     def init(self: any) -> None:
         """

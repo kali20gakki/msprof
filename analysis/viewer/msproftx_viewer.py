@@ -66,10 +66,12 @@ class MsprofTxViewer:
                 ("Message_type", top_down_data[7]),
                 ("event_type", top_down_data[9])
             ])
-            trace_data_msproftx = [top_down_data[8], top_down_data[1], top_down_data[2],
-                                   int(top_down_data[3]) / NumberConstant.CONVERSION_TIME,
-                                   int(top_down_data[4]) / NumberConstant.CONVERSION_TIME,
-                                   trace_data_args]
+            trace_data_msproftx = [
+                top_down_data[8], top_down_data[1], top_down_data[2],
+                int(top_down_data[3]) / NumberConstant.CONVERSION_TIME,
+                int(top_down_data[4]) / NumberConstant.CONVERSION_TIME,
+                trace_data_args
+            ]
             trace_data.append(trace_data_msproftx)
         return trace_data
 

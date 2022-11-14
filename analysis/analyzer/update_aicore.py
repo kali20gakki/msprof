@@ -252,8 +252,11 @@ class UpdateAICoreData:
         """
         core_num, freq = config_infos
         task_id_index, stream_id_index, cycle_index = self.__get_col_indexes_to_cal_total(headers)
-        if not ai_core_data or task_id_index == Constant.INVALID_INDEX or stream_id_index == Constant.INVALID_INDEX or \
-                cycle_index == Constant.INVALID_INDEX:
+        if not ai_core_data:
+            logging.error("unable to get AI Core data.")
+            return []
+        indexes = [task_id_index, stream_id_index, cycle_index]
+        if any(map(lambda index: index == Constant.INVALID_INDEX, indexes)):
             logging.error("unable to get AI Core data.")
             return []
         time_data = []

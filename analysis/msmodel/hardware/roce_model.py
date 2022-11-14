@@ -335,10 +335,12 @@ class RoceModel(BaseModel, ABC):
         return rx_data
 
     def _get_roce_tx_rate_data(self: any, device_id: str, func_id: str, rx_data: list) -> dict:
-        tx_rate_dic = {'rx_errors_rate': Constant.DEFAULT_COUNT,
-                       'rx_drop_rate': Constant.DEFAULT_COUNT,
-                       'tx_errors_rate': Constant.DEFAULT_COUNT,
-                       'tx_drop_rate': Constant.DEFAULT_COUNT}
+        tx_rate_dic = {
+            'rx_errors_rate': Constant.DEFAULT_COUNT,
+            'rx_drop_rate': Constant.DEFAULT_COUNT,
+            'tx_errors_rate': Constant.DEFAULT_COUNT,
+            'tx_drop_rate': Constant.DEFAULT_COUNT
+        }
         if rx_data[0] != Constant.DEFAULT_COUNT:
             tx_rate_dic['rx_errors_rate'] = round(rx_data[1] / rx_data[0], self.ROUND_NUMBER)
             tx_rate_dic['rx_drop_rate'] = round(rx_data[2] / rx_data[0], self.ROUND_NUMBER)
@@ -355,12 +357,14 @@ class RoceModel(BaseModel, ABC):
 
     def _insert_roce_data(self: any, *param: any) -> None:
         device_id, func_id, duration, bandwidth, packet_data, tx_rate_dic = param
-        item = [device_id, duration, bandwidth, Constant.DEFAULT_COUNT, Constant.DEFAULT_COUNT,
-                packet_data[0], tx_rate_dic.get('rx_errors_rate'),
-                tx_rate_dic.get('rx_drop_rate'), packet_data[1],
-                tx_rate_dic.get('tx_errors_rate'),
-                tx_rate_dic.get('tx_drop_rate'),
-                func_id]
+        item = [
+            device_id, duration, bandwidth, Constant.DEFAULT_COUNT, Constant.DEFAULT_COUNT,
+            packet_data[0], tx_rate_dic.get('rx_errors_rate'),
+            tx_rate_dic.get('rx_drop_rate'), packet_data[1],
+            tx_rate_dic.get('tx_errors_rate'),
+            tx_rate_dic.get('tx_drop_rate'),
+            func_id
+        ]
 
         _sql = "insert into {} values({})".format(DBNameConstant.TABLE_ROCE_REPORT,
                                                   '?,' * (len(item) - 1) + "?")
@@ -477,27 +481,31 @@ class RoceModel(BaseModel, ABC):
     def _insert_roce_report_data(self: any, *param: list) -> None:
         device_id, func_id, roce_info, rx_error_rate, rx_dropped_rate, \
         tx_packet_dic, tx_error_rate, tx_dropped_rate = param
-        item = (device_id, roce_info.get("duration"),
-                roce_info.get("bandwidth"),
-                roce_info.get("rx_bytes"),
-                roce_info.get("tx_bytes"),
-                roce_info.get("rx_packet_second"),
-                rx_error_rate,
-                rx_dropped_rate,
-                tx_packet_dic.get('tx_packet_second'),
-                tx_error_rate,
-                tx_dropped_rate,
-                func_id)
+        item = (
+            device_id, roce_info.get("duration"),
+            roce_info.get("bandwidth"),
+            roce_info.get("rx_bytes"),
+            roce_info.get("tx_bytes"),
+            roce_info.get("rx_packet_second"),
+            rx_error_rate,
+            rx_dropped_rate,
+            tx_packet_dic.get('tx_packet_second'),
+            tx_error_rate,
+            tx_dropped_rate,
+            func_id
+        )
         _sql = "insert into {} values({})".format(DBNameConstant.TABLE_ROCE_REPORT,
                                                   '?,' * (len(item) - 1) + "?")
         self.cur.executemany(_sql, [item])
         self.conn.commit()
 
     def _construct_roce_info(self: any, device_id: str, func_id: str) -> dict:
-        roce_info = {"duration": self._get_roce_duration(device_id, func_id),
-                     "bandwidth": self._get_roce_bandwidth(device_id, func_id), "tx_bytes": Constant.DEFAULT_COUNT,
-                     "rx_bytes": Constant.DEFAULT_COUNT, "rx_packet": Constant.DEFAULT_COUNT,
-                     "rx_packet_second": Constant.DEFAULT_COUNT}
+        roce_info = {
+            "duration": self._get_roce_duration(device_id, func_id),
+            "bandwidth": self._get_roce_bandwidth(device_id, func_id), "tx_bytes": Constant.DEFAULT_COUNT,
+            "rx_bytes": Constant.DEFAULT_COUNT, "rx_packet": Constant.DEFAULT_COUNT,
+            "rx_packet_second": Constant.DEFAULT_COUNT
+        }
         return roce_info
 
     def _init_roce_basic_info(self: any, roce_info: dict, tx_packet_dic: dict, device_id: str, func_id: str) -> None:

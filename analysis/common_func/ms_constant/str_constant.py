@@ -175,7 +175,8 @@ class StrConstant:
         "3": "JPEGE",
         "4": "VPC",
         "5": "VENC",
-        "6": "SCD"}
+        "6": "SCD"
+    }
 
     OPERATOR_PLUS = '+'
     OPERATOR_MINUS = '-'

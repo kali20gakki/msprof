@@ -307,19 +307,18 @@ class StepTraceViewer:
                 reduce_trace_data = []
                 trace_parm[StepTraceConstant.REDUCE_START] = reduce_data[0]
                 trace_parm[StepTraceConstant.REDUCE_END] = reduce_data[1]
-                grad_refresh_data = \
-                    ["Reduce_{}_{}".format(trace_parm[StepTraceConstant.ITER_ID], i),
-                     pid, tid,
-                     trace_parm[StepTraceConstant.REDUCE_START],
-                     (trace_parm[StepTraceConstant.REDUCE_END] -
-                      trace_parm[StepTraceConstant.REDUCE_START]),
-                     OrderedDict([
-                         ("Iteration ID", trace_parm[StepTraceConstant.ITER_ID]),
-                         ("Reduce Start {}".format(i),
-                          trace_parm[StepTraceConstant.REDUCE_START]),
-                         ("Reduce End {}".format(i),
-                          trace_parm[StepTraceConstant.REDUCE_END])]),
-                     "Reduce"]
+                grad_refresh_data = [
+                    "Reduce_{}_{}".format(trace_parm[StepTraceConstant.ITER_ID], i), pid, tid,
+                    trace_parm[StepTraceConstant.REDUCE_START],
+                    (trace_parm[StepTraceConstant.REDUCE_END] -
+                     trace_parm[StepTraceConstant.REDUCE_START]),
+                    OrderedDict([
+                        ("Iteration ID", trace_parm[StepTraceConstant.ITER_ID]),
+                        ("Reduce Start {}".format(i), trace_parm[StepTraceConstant.REDUCE_START]),
+                        ("Reduce End {}".format(i), trace_parm[StepTraceConstant.REDUCE_END])
+                    ]),
+                    "Reduce"
+                ]
                 reduce_trace_data.append(grad_refresh_data)
                 result_data.extend(TraceViewManager.time_graph_trace(
                     TraceViewHeaderConstant.GRPC_TIME_GRAPH_HEAD, reduce_trace_data))

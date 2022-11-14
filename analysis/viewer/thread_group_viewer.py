@@ -113,24 +113,27 @@ class ThreadGroupViewer:
         for _ge_time_data in ge_time_data:
             args = OrderedDict([("Model Name", _ge_time_data.model_name),
                                 ("Model ID", _ge_time_data.model_id)])
-            _input_data = [self.PREFIX_GE.format("Input"), self._pid,
-                           self.PREFIX_THREAD_ID.format(_ge_time_data.thread_id),
-                           _ge_time_data.input_start / NumberConstant.NS_TO_US,
-                           (_ge_time_data.input_end - _ge_time_data.input_start) / NumberConstant.NS_TO_US,
-                           args
-                           ]
-            _infer_data = [self.PREFIX_GE.format("Infer"), self._pid,
-                           self.PREFIX_THREAD_ID.format(_ge_time_data.thread_id),
-                           _ge_time_data.infer_start / NumberConstant.NS_TO_US,
-                           (_ge_time_data.infer_end - _ge_time_data.infer_start) / NumberConstant.NS_TO_US,
-                           args
-                           ]
-            _output_data = [self.PREFIX_GE.format("Output"), self._pid,
-                            self.PREFIX_THREAD_ID.format(_ge_time_data.thread_id),
-                            _ge_time_data.output_start / NumberConstant.NS_TO_US,
-                            (_ge_time_data.output_end - _ge_time_data.output_start) / NumberConstant.NS_TO_US,
-                            args
-                            ]
+            _input_data = [
+                self.PREFIX_GE.format("Input"), self._pid,
+                self.PREFIX_THREAD_ID.format(_ge_time_data.thread_id),
+                _ge_time_data.input_start / NumberConstant.NS_TO_US,
+                (_ge_time_data.input_end - _ge_time_data.input_start) / NumberConstant.NS_TO_US,
+                args
+            ]
+            _infer_data = [
+                self.PREFIX_GE.format("Infer"), self._pid,
+                self.PREFIX_THREAD_ID.format(_ge_time_data.thread_id),
+                _ge_time_data.infer_start / NumberConstant.NS_TO_US,
+                (_ge_time_data.infer_end - _ge_time_data.infer_start) / NumberConstant.NS_TO_US,
+                args
+            ]
+            _output_data = [
+                self.PREFIX_GE.format("Output"), self._pid,
+                self.PREFIX_THREAD_ID.format(_ge_time_data.thread_id),
+                _ge_time_data.output_start / NumberConstant.NS_TO_US,
+                (_ge_time_data.output_end - _ge_time_data.output_start) / NumberConstant.NS_TO_US,
+                args
+            ]
             _format_data.extend([_input_data, _infer_data, _output_data])
         return TraceViewManager.time_graph_trace(TraceViewHeaderConstant.TOP_DOWN_TIME_GRAPH_HEAD, _format_data)
 

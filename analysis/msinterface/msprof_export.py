@@ -424,11 +424,13 @@ class ExportCommand:
         device_lst = InfoConfReader().get_device_list()
         if device_lst:
             self.list_map.update({'devices_list': device_lst})
-            sample_json = {"result_dir": result_dir,
-                           "device_id": self.list_map.get('devices_list')[0],
-                           "iter_id": self.iteration_id, "job_id": MsProfCommonConstant.DEFAULT_JOB,
-                           "ip_address": MsProfCommonConstant.DEFAULT_IP,
-                           "model_id": self.list_map.get('model_id')}
+            sample_json = {
+                "result_dir": result_dir,
+                "device_id": self.list_map.get('devices_list')[0],
+                "iter_id": self.iteration_id, "job_id": MsProfCommonConstant.DEFAULT_JOB,
+                "ip_address": MsProfCommonConstant.DEFAULT_IP,
+                "model_id": self.list_map.get('model_id')
+            }
             file_dispatch = FileDispatch(sample_json)
             file_dispatch.dispatch_calculator()
             analysis_factory = DataAnalysisFactory(sample_json)
@@ -515,14 +517,16 @@ class ExportCommand:
             return
         print_info(self.FILE_NAME,
                    'Start to export %s %s data ...' % (export_data_type, self.command_type))
-        params = {StrConstant.PARAM_DATA_TYPE: export_data_type,
-                  StrConstant.PARAM_RESULT_DIR: result_dir,
-                  StrConstant.PARAM_DEVICE_ID: device_id,
-                  StrConstant.PARAM_JOB_ID: MsProfCommonConstant.DEFAULT_JOB,
-                  StrConstant.PARAM_EXPORT_TYPE: self.command_type,
-                  StrConstant.PARAM_ITER_ID: self.iteration_id,
-                  StrConstant.PARAM_EXPORT_FORMAT: self.export_format,
-                  StrConstant.PARAM_MODEL_ID: self.list_map.get("model_id")}
+        params = {
+            StrConstant.PARAM_DATA_TYPE: export_data_type,
+            StrConstant.PARAM_RESULT_DIR: result_dir,
+            StrConstant.PARAM_DEVICE_ID: device_id,
+            StrConstant.PARAM_JOB_ID: MsProfCommonConstant.DEFAULT_JOB,
+            StrConstant.PARAM_EXPORT_TYPE: self.command_type,
+            StrConstant.PARAM_ITER_ID: self.iteration_id,
+            StrConstant.PARAM_EXPORT_FORMAT: self.export_format,
+            StrConstant.PARAM_MODEL_ID: self.list_map.get("model_id")
+        }
 
         self._handle_export_data(params)
 

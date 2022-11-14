@@ -56,18 +56,26 @@ class TuningControl:
             json.dump({"status": NumberConstant.SUCCESS, "data": self.data}, f_write)
 
     def _init_tuning_data(self: any) -> None:
-        self.model_computation = {CommonProfRule.RESULT_RULE_TYPE: CommonProfRule.RESULT_MODEL_COMPUTATION,
-                                  CommonProfRule.RESULT_KEY: []}
-        self.model_memory = {CommonProfRule.RESULT_RULE_TYPE: CommonProfRule.RESULT_MODEL_MEMORY,
-                             CommonProfRule.RESULT_KEY: []}
-        self.operator_schedule = {CommonProfRule.RESULT_RULE_TYPE: CommonProfRule.RESULT_OPERATOR_SCHEDULE,
-                                  CommonProfRule.RESULT_KEY: []}
-        self.operator_processing = {CommonProfRule.RESULT_RULE_TYPE: CommonProfRule.RESULT_OPERATOR_PROCESSING,
-                                    CommonProfRule.RESULT_KEY: []}
-        self.operator_metrics = {CommonProfRule.RESULT_RULE_TYPE: CommonProfRule.RESULT_OPERATOR_METRICS,
-                                 CommonProfRule.RESULT_KEY: []}
-        self.data = [self.model_computation, self.model_memory, self.operator_schedule,
-                     self.operator_processing, self.operator_metrics]
+        self.model_computation = {
+            CommonProfRule.RESULT_RULE_TYPE: CommonProfRule.RESULT_MODEL_COMPUTATION, CommonProfRule.RESULT_KEY: []
+        }
+        self.model_memory = {
+            CommonProfRule.RESULT_RULE_TYPE: CommonProfRule.RESULT_MODEL_MEMORY, CommonProfRule.RESULT_KEY: []
+        }
+        self.operator_schedule = {
+            CommonProfRule.RESULT_RULE_TYPE: CommonProfRule.RESULT_OPERATOR_SCHEDULE, CommonProfRule.RESULT_KEY: []
+        }
+        self.operator_processing = {
+            CommonProfRule.RESULT_RULE_TYPE: CommonProfRule.RESULT_OPERATOR_PROCESSING, CommonProfRule.RESULT_KEY: []
+        }
+        self.operator_metrics = {
+            CommonProfRule.RESULT_RULE_TYPE: CommonProfRule.RESULT_OPERATOR_METRICS,
+            CommonProfRule.RESULT_KEY: []
+        }
+        self.data = [
+            self.model_computation, self.model_memory, self.operator_schedule,
+            self.operator_processing, self.operator_metrics
+        ]
 
     def _model_computation_tuning(self, result):
         return self.model_computation.get(CommonProfRule.RESULT_KEY).append(result)
