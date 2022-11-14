@@ -398,24 +398,6 @@ void PlatformAdapterInterface::SetParamsForDevicePower()
     }
 }
 
-void PlatformAdapterInterface::SetParamsForHostPidCpu()
-{
-    if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_SYS_HOST_ONE_PID_CPU) !=
-        supportSwitch_.end()) {
-        params_->host_cpu_profiling = MSPROF_SWITCH_ON;
-        params_->host_sys = MSPROF_SWITCH_ON;
-    }
-}
-
-void PlatformAdapterInterface::SetParamsForHostPidMem()
-{
-    if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_SYS_HOST_ONE_PID_MEM) !=
-        supportSwitch_.end()) {
-        params_->host_mem_profiling = MSPROF_SWITCH_ON;
-        params_->host_sys = MSPROF_SWITCH_ON;
-    }
-}
-
 void PlatformAdapterInterface::SetParamsForHostPidDisk()
 {
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_SYS_HOST_ONE_PID_DISK) !=
@@ -442,12 +424,64 @@ void PlatformAdapterInterface::SetParamsForHostNetwork()
     }
 }
 
-void PlatformAdapterInterface::SetParamsForHostSysAllPidCpuUsage()
+void PlatformAdapterInterface::SetParamsForHostSysCpu(int samplingInterval)
 {
+    if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_SYS_HOST_SYS_CPU) !=
+        supportSwitch_.end()) {
+        params_->host_sys_usage = MSPROF_SWITCH_ON;
+        params_->host_sys_cpu_profiling = MSPROF_SWITCH_ON;
+        params_->host_cpu_profiling_sampling_interval = samplingInterval;
+    }
 }
 
-void PlatformAdapterInterface::SetParamsForHostSysAllPidMemUsage()
+void PlatformAdapterInterface::SetParamsForHostSysMem(int samplingInterval)
 {
+    if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_SYS_HOST_SYS_MEM) !=
+        supportSwitch_.end()) {
+        params_->host_sys_usage = MSPROF_SWITCH_ON;
+        params_->host_sys_mem_profiling = MSPROF_SWITCH_ON;
+        params_->host_mem_profiling_sampling_interval = samplingInterval;
+    }
+}
+
+void PlatformAdapterInterface::SetParamsForHostOnePidCpu(int samplingInterval)
+{
+    if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_SYS_HOST_ONE_PID_CPU) !=
+        supportSwitch_.end()) {
+        params_->host_sys = MSPROF_SWITCH_ON;
+        params_->host_one_pid_cpu_profiling = MSPROF_SWITCH_ON;
+        params_->host_cpu_profiling_sampling_interval = samplingInterval;
+    }
+}
+
+void PlatformAdapterInterface::SetParamsForHostOnePidMem(int samplingInterval)
+{
+    if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_SYS_HOST_ONE_PID_MEM) !=
+        supportSwitch_.end()) {
+        params_->host_sys = MSPROF_SWITCH_ON;
+        params_->host_one_pid_mem_profiling = MSPROF_SWITCH_ON;
+        params_->host_mem_profiling_sampling_interval = samplingInterval;
+    }
+}
+
+void PlatformAdapterInterface::SetParamsForHostAllPidCpu(int samplingInterval)
+{
+    if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_SYS_HOST_ALL_PID_CPU) !=
+        supportSwitch_.end()) {
+        params_->host_sys_usage = MSPROF_SWITCH_ON;
+        params_->host_all_pid_cpu_profiling = MSPROF_SWITCH_ON;
+        params_->host_cpu_profiling_sampling_interval = samplingInterval;
+    }
+}
+
+void PlatformAdapterInterface::SetParamsForHostAllPidMem(int samplingInterval)
+{
+    if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_SYS_HOST_ALL_PID_MEM) !=
+        supportSwitch_.end()) {
+        params_->host_sys_usage = MSPROF_SWITCH_ON;
+        params_->host_all_pid_mem_profiling = MSPROF_SWITCH_ON;
+        params_->host_mem_profiling_sampling_interval = samplingInterval;
+    }
 }
 
 int PlatformAdapterInterface::Uninit()

@@ -4,7 +4,6 @@
 
 import logging
 import os
-import sqlite3
 
 from analyzer.scene_base.profiling_scene import ProfilingScene
 from common_func.constant import Constant
@@ -37,6 +36,7 @@ class UpdateAICoreData:
         self.device_id = None
         self.project_path = None
         self.sql_dir = None
+        self.warning_cnt = 0
 
     @staticmethod
     def __add_pipe_time(headers: list, ai_core_data: list) -> tuple:
@@ -107,6 +107,9 @@ class UpdateAICoreData:
             logging.warning("Unable to get required data to update ai core data.")
             return
         self.__update_ai_core_data()
+        if self.warning_cnt > 0:
+            logging.warning("Can not find the stream id and task id from ge data when getting block, "
+                            "maybe ge data has lost %d times", self.warning_cnt)
 
     def get_db_path(self: any, db_name: str) -> str:
         """
@@ -188,12 +191,12 @@ class UpdateAICoreData:
         ge_data = []
         index_id = self.sample_config.get("iter_id", NumberConstant.DEFAULT_ITER_ID)
         model_id = self.sample_config.get("model_id", NumberConstant.DEFAULT_MODEL_ID)
-        iter_dict = MsprofIteration(self.project_path).get_iter_dict_with_index_and_model(index_id, model_id)
+        iter_list = MsprofIteration(self.project_path).get_iter_list_with_index_and_model(index_id, model_id)
         sql = "select task_id, stream_id, block_dim from {0} " \
               "where model_id=? and (index_id=0 or index_id=?) " \
               "and task_type='{1}' order by timestamp".format(
             DBNameConstant.TABLE_GE_TASK, Constant.TASK_TYPE_AI_CORE)
-        for iter_id, model_id in iter_dict.values():
+        for iter_id, model_id in iter_list:
             ge_data.extend(DBManager.fetch_all_data(ge_curs, sql, (model_id, iter_id)))
 
         return ge_data
@@ -287,11 +290,8 @@ class UpdateAICoreData:
         """
         block = block_dims.get(self.STREAM_TASK_KEY_FMT.format(ai_core_data[task_id_index],
                                                                ai_core_data[stream_id_index]))
-        # todo 这个报错应该怎么消除？
         if not block:
-            logging.error("Can not find the stream id and task id from ge data, "
-                          "maybe ge data has lost: %s", self.STREAM_TASK_KEY_FMT.format(ai_core_data[task_id_index],
-                                                                                        ai_core_data[stream_id_index]))
+            self.warning_cnt += 1
             return 0
         return block.pop(0) if len(block) > 1 else block[0]
 

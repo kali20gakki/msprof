@@ -469,7 +469,6 @@ class ExportCommand:
         print_info(self.FILE_NAME, export_info)
 
     def _check_iteration_id_valid(self: any, result_dir: str) -> tuple:
-        return (True,)
         max_iter_id = TopDownData.get_max_iter_id(result_dir)
         if max_iter_id == NumberConstant.INVALID_ITER_ID:
             return (True,)

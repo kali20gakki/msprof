@@ -105,6 +105,14 @@ int MsprofManager::GenerateRunningMode()
         MSVP_MAKE_SHARED2_RET(rMode_, SystemMode, "host-sys", params_, PROFILING_FAILED);
         return PROFILING_SUCCESS;
     }
+    if (!params_->host_sys_usage.empty()) {
+        if (Platform::instance()->PlatformIsHelperHostSide()) {
+            CmdLog::instance()->CmdErrorLog("sys-host_sys_usage mode not support in helper");
+            return PROFILING_FAILED;
+        }
+        MSVP_MAKE_SHARED2_RET(rMode_, SystemMode, "host-sys-usage", params_, PROFILING_FAILED);
+        return PROFILING_SUCCESS;
+    }
     if (params_->parseSwitch == MSVP_PROF_ON) {
         MSVP_MAKE_SHARED2_RET(rMode_, ParseMode, "parse", params_, PROFILING_FAILED);
         return PROFILING_SUCCESS;
@@ -118,7 +126,7 @@ int MsprofManager::GenerateRunningMode()
         return PROFILING_SUCCESS;
     }
     CmdLog::instance()->CmdErrorLog("No valid argument found in --application "
-    "--sys-devices --host-sys --parse --query --export");
+    "--sys-devices --host-sys --host-sys-usage --parse --query --export");
     return PROFILING_FAILED;
 }
 

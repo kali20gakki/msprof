@@ -856,7 +856,7 @@ TEST_F(JOB_WRAPPER_PROF_ALLPIDS_JOB_TEST, Process) {
             new analysis::dvvp::transport::HDCTransport(session));
     auto uploader = std::make_shared<analysis::dvvp::transport::Uploader>(transport);
 
-    Analysis::Dvvp::JobWrapper::ProcAllPidsFileHandler allPidsHandler(PROF_ALL_PID, devId,
+    Analysis::Dvvp::JobWrapper::ProcAllPidsFileHandler allPidsHandler(PROF_SYS_ALL_PID, devId,
             sampleIntervalMs, params, jobCtx, uploader);
 
     MOCKER_CPP_VIRTUAL(&allPidsHandler, &Analysis::Dvvp::JobWrapper::ProcAllPidsFileHandler::Init)
@@ -885,7 +885,7 @@ TEST_F(JOB_WRAPPER_PROF_ALLPIDS_JOB_TEST, ProfTimerJobCommonInit) {
             new analysis::dvvp::transport::HDCTransport(session));
     auto uploader = std::make_shared<analysis::dvvp::transport::Uploader>(transport);
 
-    Analysis::Dvvp::JobWrapper::ProcAllPidsFileHandler allPidsHandler(PROF_ALL_PID, devId,
+    Analysis::Dvvp::JobWrapper::ProcAllPidsFileHandler allPidsHandler(PROF_SYS_ALL_PID, devId,
             sampleIntervalMs, params, jobCtx, uploader);
 
     MOCKER_CPP(&analysis::dvvp::transport::UploaderMgr::GetUploader)

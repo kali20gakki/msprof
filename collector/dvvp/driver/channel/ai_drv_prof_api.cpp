@@ -223,7 +223,7 @@ int DrvAicoreStart(const DrvPeripheralProfileCfg &peripheralCfg, const std::vect
     (void)memset_s(configP, configSize, 0, configSize);
     configP->type = (uint32_t)TS_PROF_TYPE_SAMPLE_BASE;
     configP->almost_full_threshold = AI_CORE_SAMPLE_FULL_THRESHOLD;
-    configP->period = (uint32_t)profSamplePeriod;
+    configP->period = static_cast<uint32_t>(profSamplePeriod);
     for (uint32_t i = 0; i < (uint32_t)profCores.size(); i++) {
         configP->core_mask |= ((uint32_t)1 << (uint32_t)profCores[i]);
     }

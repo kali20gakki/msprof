@@ -32,9 +32,13 @@ const char * const PROF_PROC_UPTIME = "/proc/uptime";
 enum TimerHandlerTag {
     PROF_SYS_STAT,
     PROF_SYS_MEM,
-    PROF_ALL_PID,
-    PROF_HOST_PROC_CPU,
-    PROF_HOST_PROC_MEM,
+    PROF_SYS_ALL_PID,
+    PROF_HOST_PID_CPU,
+    PROF_HOST_PID_MEM,
+    PROF_HOST_SYS_CPU,
+    PROF_HOST_SYS_MEM,
+    PROF_HOST_ALL_PID_CPU,
+    PROF_HOST_ALL_PID_MEM,
     PROF_HOST_SYS_NETWORK
 };
 
@@ -47,7 +51,7 @@ public:
     virtual int Init() = 0;
     virtual int Uinit() = 0;
     TimerHandlerTag GetTag();
-private:
+public:
     TimerHandlerTag tag_;
 };
 
@@ -235,7 +239,8 @@ private:
     void GetCurPids(std::vector<unsigned int> &curPids);
     void GetNewExitPids(std::vector<unsigned int> &curPids, std::vector<unsigned int> &prevPids,
             std::vector<unsigned int> &newPids, std::vector<unsigned int> &exitPids);
-    void HandleNewPids(std::vector<unsigned int> &newPids);
+    void HandleNewPidsCpu(std::vector<unsigned int> &newPids);
+    void HandleNewPidsMem(std::vector<unsigned int> &newPids);
     void HandleExitPids(std::vector<unsigned int> &exitPids);
 
 private:

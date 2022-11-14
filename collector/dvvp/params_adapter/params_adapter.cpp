@@ -68,7 +68,7 @@ void ParamsAdapter::SetMiniBlackSwitch()
         INPUT_CFG_COM_SYS_INTERCONNECTION, INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ,
         INPUT_CFG_COM_L2, INPUT_CFG_COM_AI_VECTOR, INPUT_CFG_COM_AIV_FREQ,
         INPUT_CFG_COM_AIV_MODE, INPUT_CFG_COM_AIV_METRICS, INPUT_CFG_COM_POWER,
-        INPUT_CFG_COM_BIU, INPUT_CFG_COM_BIU_FREQ, INPUT_HOST_SYS_USAGE
+        INPUT_CFG_COM_BIU, INPUT_CFG_COM_BIU_FREQ
     }).swap(blackSwitch_);
     return;
 }
@@ -78,7 +78,7 @@ void ParamsAdapter::SetCloudBlackSwitch()
     std::vector<InputCfg>({
         INPUT_CFG_COM_AI_VECTOR, INPUT_CFG_COM_AIV_FREQ, INPUT_CFG_COM_AIV_MODE,
         INPUT_CFG_COM_AIV_METRICS, INPUT_CFG_COM_POWER, INPUT_CFG_COM_BIU,
-        INPUT_CFG_COM_BIU_FREQ, INPUT_HOST_SYS_USAGE
+        INPUT_CFG_COM_BIU_FREQ
     }).swap(blackSwitch_);
     return;
 }
@@ -90,7 +90,7 @@ void ParamsAdapter::SetMdcBlackSwitch()
         INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ, INPUT_CFG_COM_AICPU, INPUT_CFG_PYTHON_PATH,
         INPUT_CFG_SUMMARY_FORMAT, INPUT_CFG_PARSE, INPUT_CFG_QUERY, INPUT_CFG_EXPORT,
         INPUT_CFG_ITERATION_ID, INPUT_CFG_MODEL_ID, INPUT_CFG_COM_POWER, INPUT_CFG_COM_BIU,
-        INPUT_CFG_COM_BIU_FREQ, INPUT_HOST_SYS_USAGE
+        INPUT_CFG_COM_BIU_FREQ
     }).swap(blackSwitch_);
     return;
 }
@@ -106,7 +106,7 @@ void ParamsAdapter::SetLhisiBlackSwitch()
         INPUT_CFG_COM_SYS_CPU, INPUT_CFG_COM_SYS_CPU_FREQ, INPUT_CFG_COM_L2,
         INPUT_CFG_PYTHON_PATH, INPUT_CFG_SUMMARY_FORMAT, INPUT_CFG_PARSE,
         INPUT_CFG_QUERY, INPUT_CFG_EXPORT, INPUT_CFG_ITERATION_ID, INPUT_CFG_MODEL_ID,
-        INPUT_CFG_COM_POWER, INPUT_CFG_COM_BIU, INPUT_CFG_COM_BIU_FREQ, INPUT_HOST_SYS_USAGE
+        INPUT_CFG_COM_POWER, INPUT_CFG_COM_BIU, INPUT_CFG_COM_BIU_FREQ
     }).swap(blackSwitch_);
     return;
 }
@@ -116,14 +116,14 @@ void ParamsAdapter::SetDcBlackSwitch()
     std::vector<InputCfg>({
         INPUT_CFG_COM_AI_VECTOR, INPUT_CFG_COM_AIV_FREQ, INPUT_CFG_COM_AIV_MODE,
         INPUT_CFG_COM_AIV_METRICS, INPUT_CFG_COM_SYS_IO, INPUT_CFG_COM_SYS_IO_FREQ,
-        INPUT_CFG_COM_POWER, INPUT_CFG_COM_BIU, INPUT_CFG_COM_BIU_FREQ, INPUT_HOST_SYS_USAGE
+        INPUT_CFG_COM_POWER, INPUT_CFG_COM_BIU, INPUT_CFG_COM_BIU_FREQ
     }).swap(blackSwitch_);
     return;
 }
 
 void ParamsAdapter::SetCloudV2BlackSwitch()
 {
-    std::vector<InputCfg>({INPUT_HOST_SYS_USAGE}).swap(blackSwitch_);
+    std::vector<InputCfg>({}).swap(blackSwitch_);
     return;
 }
 
@@ -135,7 +135,7 @@ void ParamsAdapter::SetCommonConfig()
         INPUT_CFG_COM_HCCL, INPUT_CFG_COM_L2, INPUT_CFG_COM_AICPU, INPUT_CFG_COM_SYS_USAGE_FREQ,
         INPUT_CFG_COM_SYS_PID_USAGE_FREQ, INPUT_CFG_COM_SYS_CPU_FREQ, INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ,
         INPUT_CFG_COM_LLC_MODE, INPUT_CFG_COM_SYS_IO_FREQ, INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ,
-        INPUT_CFG_COM_DVPP_FREQ, INPUT_HOST_SYS_USAGE
+        INPUT_CFG_COM_DVPP_FREQ, INPUT_CFG_HOST_SYS_USAGE, INPUT_CFG_HOST_SYS_USAGE_FREQ
     }).swap(commonConfig_);
     return;
 }
@@ -307,9 +307,9 @@ void ParamsAdapter::SetHostSysParams(std::array<std::string, INPUT_CFG_MAX> para
     std::vector<std::string> hostSysPidList = Utils::Split(paramContainer[INPUT_CFG_HOST_SYS], false, "", ",");
     for (auto entry : hostSysPidList) {
         if (entry.compare(HOST_SYS_CPU) == 0) {
-            platformAdapter_->SetParamsForHostPidCpu();
+            platformAdapter_->SetParamsForHostOnePidCpu(DEFAULT_PROFILING_INTERVAL_20MS);
         } else if (entry.compare(HOST_SYS_MEM) == 0) {
-            platformAdapter_->SetParamsForHostPidMem();
+            platformAdapter_->SetParamsForHostOnePidMem(DEFAULT_PROFILING_INTERVAL_20MS);
         } else if (entry.compare(HOST_SYS_DISK) == 0) {
             platformAdapter_->SetParamsForHostPidDisk();
         } else if (entry.compare(HOST_SYS_OSRT) == 0) {
@@ -323,15 +323,28 @@ void ParamsAdapter::SetHostSysParams(std::array<std::string, INPUT_CFG_MAX> para
 
 void ParamsAdapter::SetHostSysUsageParams(std::array<std::string, INPUT_CFG_MAX> paramContainer) const
 {
-    std::vector<std::string> hostSysList = Utils::Split(paramContainer[INPUT_HOST_SYS_USAGE], false, "", ",");
-    for (auto entry : hostSysList) {
-        if (entry.compare(HOST_SYS_CPU) == 0) {
-            platformAdapter_->SetParamsForHostSysAllPidCpuUsage();
-        } else if (entry.compare(HOST_SYS_MEM) == 0) {
-            platformAdapter_->SetParamsForHostSysAllPidMemUsage();
+    std::vector<std::string> hostSysUsageList = Utils::Split(paramContainer[INPUT_CFG_HOST_SYS_USAGE], false, "", ",");
+    int samplingInterval = paramContainer[INPUT_CFG_HOST_SYS_USAGE_FREQ].empty() ?
+            DEFAULT_PROFILING_INTERVAL_100MS : (THOUSAND / std::stoi(paramContainer[INPUT_CFG_HOST_SYS_USAGE_FREQ]));
+    if (paramContainer[INPUT_CFG_HOST_SYS_PID].empty()) {
+        for (auto entry : hostSysUsageList) {
+            if (entry.compare(HOST_SYS_CPU) == 0) {
+                platformAdapter_->SetParamsForHostAllPidCpu(samplingInterval);
+                platformAdapter_->SetParamsForHostSysCpu(samplingInterval);
+            } else if (entry.compare(HOST_SYS_MEM) == 0) {
+                platformAdapter_->SetParamsForHostAllPidMem(samplingInterval);
+                platformAdapter_->SetParamsForHostSysMem(samplingInterval);
+            }
+        }
+    } else {
+        for (auto entry : hostSysUsageList) {
+            if (entry.compare(HOST_SYS_CPU) == 0) {
+                platformAdapter_->SetParamsForHostOnePidCpu(samplingInterval);
+            } else if (entry.compare(HOST_SYS_MEM) == 0) {
+                platformAdapter_->SetParamsForHostOnePidMem(samplingInterval);
+            }
         }
     }
-    return;
 }
 
 int ParamsAdapter::ComCfgCheck(std::array<std::string, INPUT_CFG_MAX> paramContainer,
@@ -406,13 +419,14 @@ bool ParamsAdapter::ComCfgCheck2(const InputCfg inputCfg, const std::string &cfg
         case INPUT_CFG_COM_SYS_IO_FREQ:
         case INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ:
         case INPUT_CFG_COM_DVPP_FREQ:
+        case INPUT_CFG_HOST_SYS_USAGE_FREQ:
             ret = CheckFreqValid(cfgValue, inputCfg);
             break;
         case INPUT_CFG_COM_LLC_MODE:
             ret = ParamValidation::instance()->CheckLlcModeIsValid(cfgValue);
             break;
-        case INPUT_HOST_SYS_USAGE:
-            ret = ParamValidation::instance()->CheckHostSysUsageIsValid(cfgValue);
+        case INPUT_CFG_HOST_SYS_USAGE:
+            ret = ParamValidation::instance()->CheckHostSysUsageValid(cfgValue);
             break;
         default:
             ret = false;
@@ -433,6 +447,7 @@ bool ParamsAdapter::CheckFreqValid(const std::string &freq, const InputCfg freqO
         {INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ, {SYS_INTERCONNECTION_FREQ_MIN, ACC_PMU_MODE_THRED}},
         {INPUT_CFG_COM_DVPP_FREQ, {DVPP_FREQ_MIN, DVPP_FREQ_MAX}},
         {INPUT_CFG_COM_BIU_FREQ, {BIU_FREQ_MIN, BIU_FREQ_MAX}},
+        {INPUT_CFG_HOST_SYS_USAGE_FREQ, {HOST_SYS_USAGE_FREQ_MIN, HOST_SYS_USAGE_FREQ_MAX}},
     };
     std::map<InputCfg, std::string> freqCfgNameMap = {
         {INPUT_CFG_COM_AIC_FREQ, "aic-freq"},
@@ -445,6 +460,7 @@ bool ParamsAdapter::CheckFreqValid(const std::string &freq, const InputCfg freqO
         {INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ, "sys-interconnection-freq"},
         {INPUT_CFG_COM_DVPP_FREQ, "dvpp-freq"},
         {INPUT_CFG_COM_BIU_FREQ, "biu_freq"},
+        {INPUT_CFG_HOST_SYS_USAGE_FREQ, "host_sys_usage_freq"},
     };
     std::vector<int> checkFreqRange = freqRangeMap[freqOpt];
     return ParamValidation::instance()->CheckFreqIsValid(freqCfgNameMap[freqOpt], freq, checkFreqRange[0],

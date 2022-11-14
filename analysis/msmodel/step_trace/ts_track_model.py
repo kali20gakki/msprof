@@ -13,6 +13,7 @@ from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.path_manager import PathManager
 from msmodel.interface.base_model import BaseModel
+from profiling_bean.db_dto.step_trace_dto import StepTraceDto
 
 
 class TsTrackModel(BaseModel, ABC):
@@ -75,10 +76,29 @@ class TsTrackModel(BaseModel, ABC):
             # data index 2 is timestamp
             ai_cpu_with_state = list(filter(partial(self.__aicpu_in_time_range, min_timestamp=min_timestamp,
                                                     max_timestamp=max_timestamp), ai_cpu_with_state))
+
         return ai_cpu_with_state
 
-    def get_step_trace(self: any) -> None:
+    def check_parallel(self: any) -> list:
+        """
+        check parallel
+        """
+        if not self.check_table():
+            return []
+
+        # one item is enough for checking parallel, and limit 0, 1 can improve speed
+        sql = "select * from {0} t1 inner join " \
+              "(select * from {0}) t2 " \
+              "where t1.step_end > t2.step_start and t1.step_end < t2.step_end limit 0, 1".format(
+            DBNameConstant.TABLE_STEP_TRACE_DATA)
+        check_res = DBManager.fetch_all_data(self.cur, sql)
+        return check_res
+
+    def get_step_trace_data(self: any) -> list:
         """
         get step trace data
         """
-        sql = "select index_id, model_id, step_start, step_end, iter_id"
+        sql = "select model_id, index_id, iter_id, step_start, step_end from {0}".format(
+            DBNameConstant.TABLE_STEP_TRACE_DATA)
+        step_trace_data = DBManager.fetch_all_data(self.cur, sql, dto_class=StepTraceDto)
+        return step_trace_data

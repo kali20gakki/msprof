@@ -359,13 +359,17 @@ TEST_F(PROF_DEVICE_SOC_UTEST, ParseTsCpuConfig)
 
     MOCKER_CPP(&analysis::dvvp::common::validation::ParamValidation::CheckTsCpuEventIsValid)
         .stubs()
-        .will(returnValue(false));
+        .will(returnValue(false))
+        .then(returnValue(true));
     auto jobDeviceSoc = std::make_shared<Analysis::Dvvp::JobWrapper::JobDeviceSoc>(0);
     std::shared_ptr<PMUEventsConfig> cfg = std::make_shared<PMUEventsConfig>();
     auto tsCpuEvents = std::make_shared<std::vector<std::string>>();
     tsCpuEvents->push_back("0xa,0xb");
     cfg->tsCPUEvents = *tsCpuEvents;
     EXPECT_EQ(PROFILING_FAILED,jobDeviceSoc->ParseTsCpuConfig(cfg));
+    jobDeviceSoc->CollectionJobV_[TS_CPU_DRV_COLLECTION_JOB].jobCfg =
+        std::make_shared<Analysis::Dvvp::JobWrapper::CollectionJobCfg>();
+    EXPECT_EQ(PROFILING_SUCCESS, jobDeviceSoc->ParseTsCpuConfig(cfg));
 }
 
 TEST_F(PROF_DEVICE_SOC_UTEST, ParseHbmConfig)
@@ -374,13 +378,17 @@ TEST_F(PROF_DEVICE_SOC_UTEST, ParseHbmConfig)
 
     MOCKER_CPP(&analysis::dvvp::common::validation::ParamValidation::CheckHbmEventsIsValid)
         .stubs()
-        .will(returnValue(false));
+        .will(returnValue(false))
+        .then(returnValue(true));
     auto jobDeviceSoc = std::make_shared<Analysis::Dvvp::JobWrapper::JobDeviceSoc>(0);
     std::shared_ptr<PMUEventsConfig> cfg = std::make_shared<PMUEventsConfig>();
     auto tsCpuEvents = std::make_shared<std::vector<std::string>>();
     tsCpuEvents->push_back("0xa,0xb");
     cfg->hbmEvents = *tsCpuEvents;
     EXPECT_EQ(PROFILING_FAILED,jobDeviceSoc->ParseHbmConfig(cfg));
+    jobDeviceSoc->CollectionJobV_[HBM_DRV_COLLECTION_JOB].jobCfg =
+        std::make_shared<Analysis::Dvvp::JobWrapper::CollectionJobCfg>();
+    EXPECT_EQ(PROFILING_SUCCESS, jobDeviceSoc->ParseHbmConfig(cfg));
 }
 
 TEST_F(PROF_DEVICE_SOC_UTEST, ParseAivConfig)
@@ -411,13 +419,17 @@ TEST_F(PROF_DEVICE_SOC_UTEST, ParseControlCpuConfig)
 
     MOCKER_CPP(&analysis::dvvp::common::validation::ParamValidation::CheckCtrlCpuEventIsValid)
         .stubs()
-        .will(returnValue(false));
+        .will(returnValue(false))
+        .then(returnValue(true));
     auto jobDeviceSoc = std::make_shared<Analysis::Dvvp::JobWrapper::JobDeviceSoc>(0);
     std::shared_ptr<PMUEventsConfig> cfg = std::make_shared<PMUEventsConfig>();
     auto tsCpuEvents = std::make_shared<std::vector<std::string>>();
     tsCpuEvents->push_back("0xa,0xb");
     cfg->ctrlCPUEvents = *tsCpuEvents;
     EXPECT_EQ(PROFILING_FAILED,jobDeviceSoc->ParseControlCpuConfig(cfg));
+    jobDeviceSoc->CollectionJobV_[CTRLCPU_PERF_COLLECTION_JOB].jobCfg =
+        std::make_shared<Analysis::Dvvp::JobWrapper::CollectionJobCfg>();
+    EXPECT_EQ(PROFILING_SUCCESS, jobDeviceSoc->ParseControlCpuConfig(cfg));
 }
 
 TEST_F(PROF_DEVICE_SOC_UTEST, ParseDdrCpuConfig)
@@ -426,13 +438,17 @@ TEST_F(PROF_DEVICE_SOC_UTEST, ParseDdrCpuConfig)
 
     MOCKER_CPP(&analysis::dvvp::common::validation::ParamValidation::CheckDdrEventsIsValid)
         .stubs()
-        .will(returnValue(false));
+        .will(returnValue(false))
+        .then(returnValue(true));
     auto jobDeviceSoc = std::make_shared<Analysis::Dvvp::JobWrapper::JobDeviceSoc>(0);
     std::shared_ptr<PMUEventsConfig> cfg = std::make_shared<PMUEventsConfig>();
     auto tsCpuEvents = std::make_shared<std::vector<std::string>>();
     tsCpuEvents->push_back("0xa,0xb");
     cfg->ddrEvents = *tsCpuEvents;
     EXPECT_EQ(PROFILING_FAILED,jobDeviceSoc->ParseDdrCpuConfig(cfg));
+    jobDeviceSoc->CollectionJobV_[DDR_DRV_COLLECTION_JOB].jobCfg =
+        std::make_shared<Analysis::Dvvp::JobWrapper::CollectionJobCfg>();
+    EXPECT_EQ(PROFILING_SUCCESS, jobDeviceSoc->ParseDdrCpuConfig(cfg));
 }
 
 TEST_F(PROF_DEVICE_SOC_UTEST, ParseLlcConfig)
