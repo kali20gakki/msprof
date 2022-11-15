@@ -10,12 +10,19 @@
 #ifndef ANALYSIS_DVVP_COMMON_PLATFORM_H
 #define ANALYSIS_DVVP_COMMON_PLATFORM_H
 
+#include <pthread.h>
 #include "singleton/singleton.h"
 
 namespace Analysis {
 namespace Dvvp {
 namespace Common {
 namespace Platform {
+
+inline void PthreadOnce(pthread_once_t *flag, void (*func)(void))
+{
+    (void)pthread_once(flag, func);
+}
+
 enum SysPlatformType {
     DEVICE = 0,
     HOST = 1,
@@ -28,17 +35,21 @@ public:
     Platform();
     ~Platform();
 
-    int Init();
+    void Init();
     int Uninit();
     bool PlatformIsSocSide();
     bool PlatformIsRpcSide();
-    bool PlatformIsHelperHostSide() const;
+    bool PlatformIsHelperHostSide();
     bool RunSocSide();
+    bool DriverAvailable();
     void SetPlatformSoc();
     uint32_t GetPlatform(void);
     int PlatformInitByDriver();
 
 private:
+    pthread_once_t callFlags_;
+    bool isHelperHostSide_;
+    bool driverAvailable_;
     uint32_t platformType_;
     uint32_t runSide_;
 };

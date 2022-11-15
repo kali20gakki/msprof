@@ -346,7 +346,7 @@ bool ParamValidation::CheckExportSummaryFormatIsValid(const std::string &summary
 
 bool ParamValidation::CheckExportIdIsValid(const std::string &exportId, const std::string &exportIdType) const
 {
-    std::string errReason = exportIdType + "should be a valid integer number.";
+    std::string errReason = exportIdType + "should be a valid natural number.";
     if (exportId.empty()) {
         MSPROF_LOGE("Argument --%s: expected one argument", exportIdType.c_str());
         MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
@@ -355,9 +355,9 @@ bool ParamValidation::CheckExportIdIsValid(const std::string &exportId, const st
     }
     if (!Utils::CheckStringIsValidNatureNum(exportId)) {
         MSPROF_LOGE("Argument --%s=%s is invalid."
-            "Please input an integer value.", exportIdType.c_str(), exportId.c_str());
+            "Please input an natural number.", exportIdType.c_str(), exportId.c_str());
         CMD_LOGE("Argument --%s=%s is invalid."
-            "Please input an integer value.", exportIdType.c_str(), exportId.c_str());
+            "Please input an natural number.", exportIdType.c_str(), exportId.c_str());
         MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
             std::vector<std::string>({exportIdType, exportId, errReason}));
         return false;
