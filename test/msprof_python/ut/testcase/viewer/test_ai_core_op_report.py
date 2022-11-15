@@ -162,32 +162,18 @@ class TestAiCoreOpReport(unittest.TestCase):
 
     def test_get_two_table_union_sql(self):
         res_sql_1 = "select ge_summary.model_id, task_time.task_id, task_time.stream_id,  " \
-                    "op_name, ge_summary.op_type, ge_summary.task_type, start_time, " \
-                    "duration_time/1000.0, wait_time/1000.0, block_dim " \
-                    "from task_time inner join ge_summary " \
-                    "on task_time.task_id=ge_summary.task_id and task_time.stream_id = ge_summary.stream_id " \
-                    "and task_time.task_type = ge_summary.task_type " \
-                    "and ge_summary.task_type!=? " \
-                    "and task_time.batch_id=ge_summary.batch_id order by start_time"
+                    "op_name, ge_summary.op_type, ge_summary.task_type, start_time, duration_time/1000.0, " \
+                    "wait_time/1000.0, block_dim, (case when context_id=4294967295 then 0 else context_id end) " \
+                    "from task_time inner join ge_summary on task_time.task_id=ge_summary.task_id and " \
+                    "task_time.stream_id = ge_summary.stream_id and task_time.task_type = ge_summary.task_type " \
+                    "and ge_summary.task_type!=? and task_time.batch_id=ge_summary.batch_id and " \
+                    "(ge_summary.context_id=task_time.subtask_id or " \
+                    "(ge_summary.context_id=4294967295 and subtask_id=0)) order by start_time"
         with mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=False):
             ProfilingScene().init('')
             ProfilingScene()._scene = Constant.SINGLE_OP
             res = AiCoreOpReport._get_two_table_union_sql()
             self.assertEqual(res, res_sql_1)
-
-    def test_get_ai_cpu_sql(self):
-        res_sql = "select ge_summary.model_id, task_time.task_id, ge_summary.stream_id, task_time.index_id,  " \
-                  "op_name, ge_summary.op_type, ge_summary.task_type, task_time.start_time, " \
-                  "task_time.duration_time/1000.0, task_time.wait_time/1000.0, block_dim " \
-                  "from task_time inner join ge_summary " \
-                  "on task_time.task_id=ge_summary.task_id " \
-                  "and task_time.stream_id=ge_summary.stream_id " \
-                  "and ge_summary.task_type=? " \
-                  "and task_time.batch_id=ge_summary.batch_id"
-        ProfilingScene().init('')
-        ProfilingScene()._scene = Constant.STEP_INFO
-        res = AiCoreOpReport._get_ai_cpu_sql("")
-        self.assertEqual(res, res_sql)
 
     def test_get_sql_and_headers(self):
         judge_result = (False, False)
@@ -234,9 +220,9 @@ class TestAiCoreOpReport(unittest.TestCase):
             self.assertEqual(res, ([], []))
 
     def test_union_task_ge_ai_core_data(self):
-        expect_res = [[1, 2, 3, 10], [4, 5, 6, 40]]
-        data = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
-        ai_core_group_dict = {(3, 2): deque([[10]]), (6, 5): deque([[40]]), (10, 11): deque([[20]])}
+        expect_res = [(1, 2, 3, 4, 10), (4, 5, 6, 7, 40)]
+        data = [(1, 2, 3, 4), (4, 5, 6, 7), (7, 8, 9, 10)]
+        ai_core_group_dict = {(2, 3, 4): deque([(10,)]), (5, 6, 7): deque([(40,)]), (10, 11, 12): deque([(20,)])}
         res = AiCoreOpReport._union_task_ge_ai_core_data(data, ai_core_group_dict)
         self.assertEqual(res, expect_res)
 

@@ -62,7 +62,7 @@ class ConfigMgr:
         check scene of ai core sample-based
         """
         sample_config = ConfigMgr.read_sample_config(result_dir)
-        return sample_config.get(StrConstant.AICORE_PROFILING_MODE) == MsvpConstant.AI_CORE_PROFILING_MODE_LIST[1]
+        return sample_config.get(StrConstant.AICORE_PROFILING_MODE) == StrConstant.AIC_SAMPLE_BASED_MODE
 
     @staticmethod
     def is_ai_core_task_based(result_dir: str) -> bool:
@@ -70,7 +70,7 @@ class ConfigMgr:
         check scene of ai core task-based
         """
         sample_config = ConfigMgr.read_sample_config(result_dir)
-        return sample_config.get(StrConstant.AICORE_PROFILING_MODE) == MsvpConstant.AI_CORE_PROFILING_MODE_LIST[0]
+        return sample_config.get(StrConstant.AICORE_PROFILING_MODE) == StrConstant.AIC_TASK_BASED_MODE
 
     @staticmethod
     def is_aiv_sample_based(result_dir: str) -> bool:
@@ -78,7 +78,7 @@ class ConfigMgr:
         check scene of aiv sample-based
         """
         sample_config = ConfigMgr.read_sample_config(result_dir)
-        return sample_config.get(StrConstant.AIV_PROFILING_MODE) == MsvpConstant.AI_CORE_PROFILING_MODE_LIST[1]
+        return sample_config.get(StrConstant.AIV_PROFILING_MODE) == StrConstant.AIC_SAMPLE_BASED_MODE
 
     @staticmethod
     def get_disk_freq(result_dir: str) -> any:

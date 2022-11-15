@@ -51,6 +51,7 @@ class DBNameConstant(metaclass=ABCMeta):
     DB_GE_HASH = "ge_hash.db"
     DB_ACSQ = "acsq.db"
     DB_SOC_LOG = "soc_log.db"
+    DB_ACC_PMU = "acc_pmu.db"
     DB_STARS_SOC = "soc_profiler.db"
     DB_STARS_CHIP_TRANS = "chip_trans.db"
     DB_LOW_POWER = "lowpower.db"
@@ -122,6 +123,7 @@ class DBNameConstant(metaclass=ABCMeta):
     TABLE_HOST_RUNTIME_API = "Syscall"
     # stars
     TABLE_ACSQ_TASK = "AcsqTask"
+    TABLE_ACSQ_TASK_TIME = "AcsqTaskTime"
     TABLE_THREAD_TASK = "ThreadTime"
     TABLE_SUBTASK_TIME = "SubtaskTime"
     TABLE_L2CACHE_PARSE = 'L2CacheParse'

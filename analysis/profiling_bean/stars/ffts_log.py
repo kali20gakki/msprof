@@ -18,7 +18,7 @@ class FftsLogDecoder(StructDecoder):
         self._func_type = Utils.get_func_type(filed[0])
         # get the most significant six bits
         self._task_type = filed[0] >> 10
-        self._stars_common = StarsCommon(filed[3], filed[2], filed[4])
+        self._stars_common = StarsCommon(filed[3], Utils.get_stream_id(filed[2]), filed[4])
         self._subtask_id = filed[6]
         self._thread_id = filed[9]
         # get lower 4 bit
@@ -43,7 +43,7 @@ class FftsLogDecoder(StructDecoder):
         return self._task_type
 
     @property
-    def stars_common(self: any) -> int:
+    def stars_common(self: any) -> object:
         """
         get stars_common info
         :return: stars_common

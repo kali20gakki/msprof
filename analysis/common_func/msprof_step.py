@@ -39,9 +39,7 @@ class MsprofStep:
         """
         self.model.init()
         all_data_sql = "select * from {}".format(DBNameConstant.TABLE_STEP_TRACE_DATA)
-        self.model.cur.row_factory = ClassRowType.class_row(StepTraceDto)
-        self.data = DBManager.fetch_all_data(self.model.cur, all_data_sql)
-        self.model.cur.row_factory = None
+        self.data = DBManager.fetch_all_data(self.model.cur, all_data_sql, dto_class=StepTraceDto)
 
     def get_step_iteration_time(self: any, index_id: int, model_id: int) -> list:
         """

@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
-
+from common_func.utils import Utils
 from profiling_bean.struct_info.struct_decoder import StructDecoder
 
 
@@ -14,7 +14,7 @@ class HwtsLogBean(StructDecoder):
         # 3=0b00000011, keep 2 lower bits which represent log type
         args = args[0]
         self._task_type = args[1]
-        self._stream_id = args[6]
+        self._stream_id = Utils.get_stream_id(args[6])
         self._task_id = args[4]
         self._sys_cnt = args[5]
         self._sys_tag = args[0] & 7
