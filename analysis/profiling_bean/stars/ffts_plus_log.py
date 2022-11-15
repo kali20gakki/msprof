@@ -18,7 +18,7 @@ class FftsPlusLogDecoder(FftsLogDecoder):
         self._func_type = Utils.get_func_type(filed[0])
         # get the most significant six bits
         self._task_type = filed[0] >> 10
-        self._stars_common = StarsCommon(filed[3], filed[2], filed[4])
+        self._stars_common = StarsCommon(filed[3], Utils.get_stream_id(filed[2]), filed[4])
         self._subtask_id = filed[6]
         self._thread_id = filed[8]
         # get lower 8 bit

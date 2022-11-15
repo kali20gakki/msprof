@@ -6,18 +6,17 @@ import logging
 import os
 import sqlite3
 
-from common_func.msvp_common import MsvpCommonConst
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
+from common_func.ms_constant.number_constant import NumberConstant
+from common_func.msvp_common import MsvpCommonConst
 from common_func.path_manager import PathManager
 from common_func.platform.chip_manager import ChipManager
-from common_func.ms_constant.number_constant import NumberConstant
-from common_func.msprof_iteration import MsprofIteration
+from mscalculate.ts_task.ai_cpu.aicpu_from_ts_collector import AICpuFromTsCollector
 from viewer.calculate_rts_data import calculate_task_schedule_data
 from viewer.calculate_rts_data import multi_calculate_task_cost_time
-from mscalculate.ts_task.ai_cpu.aicpu_from_ts_collector import AICpuFromTsCollector
 
 
 class CalculateTaskScheduler:

@@ -38,6 +38,8 @@ class ParsingCoreSampleData(MsMultiProcess):
         self.model = None
         self._db_name = 'aicore_{}.db'.format(self.device_id)
         self._replayid = 0
+        self._core_type = 'aic'
+        self._metrics_type = StrConstant.AI_CORE_PROFILING_METRICS
         self._event = self.sample_config.get("ai_core_profiling_events", "").split(",")
         self._sample_metrics_key = self.sample_config.get(StrConstant.AI_CORE_PROFILING_METRICS)
 
@@ -53,7 +55,7 @@ class ParsingCoreSampleData(MsMultiProcess):
         ai core sample based parser
         :return:
         """
-        if not self.get_aicore_type() == 'sample-based':
+        if not self.get_aicore_type() == StrConstant.AIC_SAMPLE_BASED_MODE:
             return
         self.start_parsing_data_file()
         try:
@@ -81,13 +83,14 @@ class ParsingCoreSampleData(MsMultiProcess):
         save ai core / aiv sample based data to db
         :return:
         """
-        self.model = AiCoreSampleModel(self.result_dir, self._db_name, [DBNameConstant.TABLE_EVENT_COUNT])
+        self.model = AiCoreSampleModel(self.result_dir, self._db_name, [DBNameConstant.TABLE_EVENT_COUNT],
+                                       self._metrics_type)
         if self.model and self.ai_core_data:
             self.model.init()
             self.model.create_core_table(self._event, self.ai_core_data)
 
             self.model.insert_metric_value()
-            freq = InfoConfReader().get_freq(StrConstant.AIV)
+            freq = InfoConfReader().get_freq(self._core_type)
 
             self.model.insert_metric_summary_table(freq, self._sample_metrics_key)
             self.model.finalize()
@@ -154,7 +157,10 @@ class ParsingAIVectorCoreSampleData(ParsingCoreSampleData):
         self.file_list = sorted(file_list.get(DataTag.AIV, []), key=lambda x: int(x.split("_")[-1]))
         self._db_name = 'ai_vector_core_{}.db'.format(self.device_id)
         self._event = self.sample_config.get("aiv_profiling_events", "").split(",")
-        self._sample_metrics_key = self.sample_config.get(StrConstant.AI_VECTOR_CORE_PROFILING_METRICS)
+        self._sample_metrics_key = self.sample_config.get(StrConstant.AIV_PROFILING_METRICS)
+        self._core_type = 'aiv'
+        self._metrics_type = StrConstant.AIV_PROFILING_METRICS
+        self.calculate = OffsetCalculator(self.file_list, StructFmt.AICORE_SAMPLE_FMT_SIZE, self.result_dir)
 
     def get_aicore_type(self: any) -> str:
         """
@@ -172,3 +178,62 @@ class ParsingFftsAICoreSampleData(ParsingCoreSampleData):
     def __init__(self: any, file_list: dict, sample_config: dict) -> None:
         super().__init__(sample_config)
         self.file_list = sorted(file_list.get(DataTag.FFTS_PMU, []), key=lambda x: int(x.split("_")[-1]))
+        self.calculate = OffsetCalculator(self.file_list, StructFmt.AICORE_SAMPLE_FMT_SIZE, self.result_dir)
+        self.data_dict = {'aic':
+                              {'data_list': [], 'db_name': 'aicore_{}.db'.format(self.device_id),
+                               'event': self.sample_config.get("ai_core_profiling_events", "").split(","),
+                               'metrics_key': self.sample_config.get(StrConstant.AI_CORE_PROFILING_METRICS),
+                               'metric_type': StrConstant.AI_CORE_PROFILING_METRICS},
+                          'aiv':
+                              {'data_list': [], 'db_name': 'ai_vector_core_{}.db'.format(self.device_id),
+                               'event': self.sample_config.get("aiv_profiling_events", "").split(","),
+                               'metrics_key': self.sample_config.get(StrConstant.AIV_PROFILING_METRICS),
+                               'metric_type': StrConstant.AIV_PROFILING_METRICS}}
+
+    def save(self: any) -> None:
+        """
+        save ai core / aiv sample based data to db
+        :return:
+        """
+        for data_type, data_dict in self.data_dict.items():
+            db_name = data_dict.get('db_name')
+            data_list = data_dict.get('data_list')
+            event = data_dict.get('event')
+            metrics_key = data_dict.get('metrics_key')
+            metrics_type = data_dict.get('metric_type')
+            if not all([db_name, data_list, event, metrics_key]):
+                logging.info(f"No need to create db for {data_type} pmu_events")
+                continue
+            model = AiCoreSampleModel(self.result_dir, db_name, [DBNameConstant.TABLE_EVENT_COUNT], metrics_type)
+            if model and data_list:
+                model.init()
+                model.create_core_table(event, data_list)
+
+                model.insert_metric_value()
+                freq = InfoConfReader().get_freq(data_type)
+
+                model.insert_metric_summary_table(freq, metrics_key)
+                model.finalize()
+
+    def _insert_ai_core_data(self: any, file_size: int, ai_core_data: list) -> None:
+        delta_dev = InfoConfReader().get_delta_time()
+        for _index in range(file_size // StructFmt.AICORE_SAMPLE_FMT_SIZE):
+            binary_data = ai_core_data[_index * StructFmt.AICORE_SAMPLE_FMT_SIZE
+                                       :(_index + 1) * StructFmt.AICORE_SAMPLE_FMT_SIZE]
+
+            if not binary_data[0]:
+                break
+            aicore_data_bean = AicoreSample.decode(binary_data)
+
+            if aicore_data_bean is not None:
+                tmp = [aicore_data_bean.count_num, aicore_data_bean.mode, self._replayid,
+                       aicore_data_bean.timestamp + delta_dev * NumberConstant.NANO_SECOND,
+                       aicore_data_bean.core_id, aicore_data_bean.task_cyc]
+                tmp.extend(aicore_data_bean.event_count[:aicore_data_bean.count_num])
+            else:
+                break
+            # core id in [0, 24]:aic  in [25, +):aiv
+            if aicore_data_bean.core_id > NumberConstant.MAX_CORE_ID_OF_AIC:
+                self.data_dict.setdefault('aiv', {}).setdefault('data_list', []).append(tmp)
+            else:
+                self.data_dict.setdefault('aic', {}).setdefault('data_list', []).append(tmp)

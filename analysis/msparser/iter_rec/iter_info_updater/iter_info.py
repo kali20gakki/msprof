@@ -11,10 +11,10 @@ class IterInfo:
     """
 
     def __init__(self: any, model_id: int = -1,
-                             index_id: int = -1,
-                             iter_id: int = -1,
-                             start_time: int = -1,
-                             end_time: int = -1) -> None:
+                 index_id: int = -1,
+                 iter_id: int = -1,
+                 start_time: int = -1,
+                 end_time: int = -1) -> None:
         self.model_id = model_id
         self.index_id = index_id
         self.iter_id = iter_id

@@ -31,7 +31,5 @@ class HCCLModel(ParserModel):
         :return:
         """
         sql = "select * from {}".format(DBNameConstant.TABLE_HCCL_ALL_REDUCE)
-        self.cur.row_factory = ClassRowType.class_row(HcclDto)
-        data = DBManager.fetch_all_data(self.cur, sql)
-        self.cur.row_factory = None
+        data = DBManager.fetch_all_data(self.cur, sql, dto_class=HcclDto)
         return data

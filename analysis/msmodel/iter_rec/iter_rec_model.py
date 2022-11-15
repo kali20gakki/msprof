@@ -35,7 +35,8 @@ class HwtsIterModel(ParserModel):
         """
         Get the number of hwts tasks in all previous iterations and the number of tasks in this round of iteration
         :param data_type:
-        :param iter_id:
+        :param model_id:
+        :param index_id:
         :return: offset_count is the number of tasks in all previous iterations
         sum_count is the number of tasks in this round of iteration
         """

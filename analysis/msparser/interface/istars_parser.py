@@ -26,6 +26,7 @@ class IStarsParser:
         """
         if len(self._data_list) >= self.MAX_DATA_LEN:
             self.flush()
+            self._data_list = []
         self._data_list.append(self._decoder.decode(data))
 
     @abstractmethod
@@ -41,7 +42,9 @@ class IStarsParser:
         flush all buffer data to db
         :return: NA
         """
-        if self._data_list and self._model.init():
+        if not self._data_list:
+            return
+        if self._model.init():
             self.preprocess_data()
             self._model.flush(self._data_list)
             self._model.finalize()

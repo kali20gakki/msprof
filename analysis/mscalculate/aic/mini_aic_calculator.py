@@ -76,7 +76,7 @@ class MiniAicCalculator(ICalculator, MsMultiProcess):
         :return: None
         """
         config = generate_config(PathManager.get_sample_json_path(self._project_path))
-        if config.get('ai_core_profiling_mode') == 'sample-based':
+        if config.get('ai_core_profiling_mode') == StrConstant.AIC_SAMPLE_BASED_MODE:
             return
         self.calculate()
 

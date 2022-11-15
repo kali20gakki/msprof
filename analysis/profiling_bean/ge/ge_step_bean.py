@@ -5,6 +5,7 @@
 import struct
 
 from common_func.constant import Constant
+from common_func.utils import Utils
 from msparser.data_struct_size_constant import StructFmt
 from profiling_bean.struct_info.struct_decoder import StructDecoder
 
@@ -101,7 +102,7 @@ class GeStepBean(StructDecoder):
         self._fusion_data = args[0]
         self._data_tag = self._fusion_data[1]
         self._model_id = self._fusion_data[2]
-        self._stream_id = self._fusion_data[3]
+        self._stream_id = Utils.get_stream_id(self._fusion_data[3])
         self._task_id = self._fusion_data[4]
         self._batch_id = self._fusion_data[5]
         self._timestamp = self._fusion_data[6]
