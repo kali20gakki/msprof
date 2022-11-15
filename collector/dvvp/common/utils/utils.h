@@ -433,16 +433,16 @@ struct ExecCmdArgv {
     }
 };
 
-struct ProfIniBlock {
-    std::string key;
-    std::string value;
+enum class VolumeSize {
+    AVAIL_SIZE = 0,
+    FREE_SIZE,
+    TOTAL_SIZE
 };
 
 class Utils {
 public:
     static long long GetFileSize(const std::string &path);
-    static int GetFreeVolume(const std::string &path, unsigned long long &size);
-    static int GetTotalVolume(const std::string &path, unsigned long long &size);
+    static int GetVolumeSize(const std::string &path, unsigned long long &size, VolumeSize sizeType);
     static bool IsDir(const std::string &path);
     static bool IsAllDigit(const std::string &digitStr);
     static bool IsFileExist(const std::string &path);

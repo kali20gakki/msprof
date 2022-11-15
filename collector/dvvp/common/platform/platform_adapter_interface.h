@@ -93,6 +93,7 @@ public:
     virtual int Init(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params, PlatformType platformType);
     virtual int Uninit();
     virtual void SetParamsForGlobal(struct CommonParams &comParams);
+    virtual void SetParamsForStorageLimit(struct CommonParams &comParams);
     virtual void SetParamsForTaskTime();
     virtual void SetParamsForTaskTrace();
     virtual void SetParamsForTrainingTrace();
