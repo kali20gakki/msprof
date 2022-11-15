@@ -36,6 +36,7 @@ class TraceViewHeaderConstant:
     PROCESS_TRAINING_TRACE = "Training Trace"
     PROCESS_PCIE = "Pcie"
     PEOCESS_MSPROFTX = "MsprofTx"
+    PEOCESS_ACSQ = "ACSQ"
 
     def get_trace_view_header_constant_class_name(self: any) -> any:
         """

@@ -33,6 +33,7 @@ class TestGeHashCalculator(unittest.TestCase):
         ge_task_info.thread_id = 1000
         ge_task_info.timestamp = 123456
         ge_task_info.batch_id = 1
+        ge_task_info.context_id = 0
         return ge_task_info
 
     def test_get_ge_task_data(self):
@@ -47,7 +48,7 @@ class TestGeHashCalculator(unittest.TestCase):
         with mock.patch(NAMESPACE + '.get_ge_hash_dict', return_value={0: 'test'}):
             check = GeHashCalculator(self.file_list, CONFIG)
             check.update_data([self._construct_ge_task_dto()])
-            self.assertEqual(check._ge_data, [[1, 'test', 1, 1, 1, 0, 'AI_CORE', 'test', 1, 1000, 123456, 1]])
+            self.assertEqual(check._ge_data, [[1, 'test', 1, 1, 1, 0, 'AI_CORE', 'test', 1, 1000, 123456, 1, 0]])
 
     def test_calculate(self):
         with mock.patch(NAMESPACE + '.GeHashCalculator.get_ge_task_data'), \

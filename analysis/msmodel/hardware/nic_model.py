@@ -188,7 +188,6 @@ class NicModel(BaseModel, ABC):
         :param func_id: func id
         :return: None
         """
-        self.cur.row_factory = ClassRowType.class_row(NicDto)
         _sql = "select rxpacket/1 as rx_packet, " \
                "rxerrors/rxpackets as rx_error_rate, " \
                "rxdropped/rxpackets as rx_dropped_rate, " \
@@ -200,8 +199,7 @@ class NicModel(BaseModel, ABC):
                "rxbyte, " \
                "txbyte " \
                "from {} where replayId = 0 AND device_id = ? AND funcId = ?;".format(DBNameConstant.TABLE_NIC_ORIGIN)
-        nic_obj_list = DBManager.fetch_all_data(self.cur, _sql, (self.device_id, func_id))
-        self.cur.row_factory = None
+        nic_obj_list = DBManager.fetch_all_data(self.cur, _sql, (self.device_id, func_id), dto_class=NicDto)
         return nic_obj_list
 
     def create_receivesend_db(self: any, target_data: list) -> None:

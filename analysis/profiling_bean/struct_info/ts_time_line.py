@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
-
+from common_func.utils import Utils
 from profiling_bean.struct_info.struct_decoder import StructDecoder
 
 
@@ -14,7 +14,7 @@ class TimeLineData(StructDecoder):
         filed = args[0]
         self._task_type = filed[4]
         self._task_state = filed[5]
-        self._stream_id = filed[6]
+        self._stream_id = Utils.get_stream_id(filed[6])
         self._task_id = filed[7]
         self._time_stamp = filed[8]
         self._thread = filed[9]

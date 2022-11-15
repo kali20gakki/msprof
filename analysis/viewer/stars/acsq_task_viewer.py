@@ -43,7 +43,7 @@ class AcsqTaskViewer(BaseViewer, ABC):
         """
         summary_data_list = list(map(list, self.get_data_from_db()))
         for data in summary_data_list:
-            data[4:6] = list(map(InfoConfReader().time_from_syscnt, data[4:6]))
+            data[4:6] = list(map(lambda x: x / NumberConstant.NS_TO_US, data[4:6]))
             data[6] = data[5] - data[4]
         return self.configs.get(StrConstant.CONFIG_HEADERS), summary_data_list, len(summary_data_list)
 

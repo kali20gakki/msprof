@@ -5,7 +5,6 @@
 import logging
 import os
 import sqlite3
-import sys
 from collections import defaultdict
 
 from analyzer.get_op_table_task_time import GetOpTableTsTime
@@ -20,6 +19,7 @@ from common_func.msprof_iteration import MsprofIteration
 from common_func.msvp_constant import MsvpConstant
 from common_func.path_manager import PathManager
 from common_func.platform.chip_manager import ChipManager
+from profiling_bean.db_dto.ge_task_dto import GeTaskDto
 from viewer.ge_info_report import get_ge_model_name_dict
 
 
@@ -39,16 +39,22 @@ class MergeOPCounter:
         self.device_id = self.sample_config.get("device_id")
         self.project_path = self.sample_config.get("result_dir")
         self.sql_path = None
+        self.conn = None
+        self.curs = None
 
     @staticmethod
     def _get_op_report_sql() -> str:
+        # ge or subtask need modify the context_id or subtask_id so that it should be same.
         sql = "select op_type, {0}.task_type, count(op_type), sum(duration) as total_time, " \
               "min(duration) as min, sum(duration)/count(op_type) as avg, " \
               "max(duration) as max, {0}.model_id from {0}, {1} " \
               "where {0}.task_id={1}.task_id and {0}.stream_id={1}.stream_id " \
               "and {0}.batch_id={1}.batch_id " \
+              "and ({0}.context_id={1}.subtask_id or ({0}.context_id={context_id} and subtask_id={subtask_id})) " \
               "group by op_type,{0}.task_type" \
-            .format(CommonConstant.GE_TASK_MEGED_TABLE, CommonConstant.RTS_TASK_TABLE)
+            .format(CommonConstant.GE_TASK_MEGED_TABLE, CommonConstant.RTS_TASK_TABLE,
+                    context_id=NumberConstant.DEFAULT_GE_CONTEXT_ID,
+                    subtask_id=NumberConstant.DEFAULT_FFTS_SUBTASK_ID)
         return sql
 
     @staticmethod
@@ -65,31 +71,30 @@ class MergeOPCounter:
                 total_time[model] += ops.get("duration", 0)
         return total_time
 
-    def create_db(self: any, map_path: str) -> tuple:
+    def create_db(self: any, map_path: str) -> None:
         """
         analysis and create db for op statics
         :param map_path: table config file path
         :return: connection of op statics
         """
-        merge_conn, merge_curs = DBManager.create_connect_db(
+        self.conn, self.curs = DBManager.create_connect_db(
             os.path.join(self.sql_path, DBNameConstant.DB_OP_COUNTER))
-        if not merge_conn or not merge_curs:
+        if not self.conn or not self.curs:
             logging.error("unable to create op counter db connection")
             raise ProfException(ProfException.PROF_SYSTEM_EXIT)
         ge_create_sql = DBManager.sql_create_general_table("GeMergeMap", DBNameConstant.TABLE_OP_COUNTER_GE_MERGE,
                                                            map_path)
-        DBManager.execute_sql(merge_conn, ge_create_sql)
+        DBManager.execute_sql(self.conn, ge_create_sql)
 
         rts_task_create_sql = DBManager.sql_create_general_table("RtsTaskMap",
                                                                  DBNameConstant.TABLE_OP_COUNTER_RTS_TASK,
                                                                  map_path)
-        DBManager.execute_sql(merge_conn, rts_task_create_sql)
+        DBManager.execute_sql(self.conn, rts_task_create_sql)
 
         op_report_create_sql = DBManager.sql_create_general_table("OpReportMap",
                                                                   DBNameConstant.TABLE_OP_COUNTER_OP_REPORT,
                                                                   map_path)
-        DBManager.execute_sql(merge_conn, op_report_create_sql)
-        return merge_conn, merge_curs
+        DBManager.execute_sql(self.conn, op_report_create_sql)
 
     def create_and_insert_db(self: any) -> None:
         if not self._is_db_need_to_create():
@@ -98,11 +103,11 @@ class MergeOPCounter:
             return
         map_path = \
             self.TABLE_PATH if ProfilingScene().is_step_trace() else self.TRAIN_TABLE_PATH
-        merge_conn, merge_curs = self.create_db(map_path)
-        self._create_ge_merge(merge_conn)
-        self._create_task(merge_conn)
-        self._create_report(merge_conn)
-        DBManager.destroy_db_connect(merge_conn, merge_curs)
+        self.create_db(map_path)
+        self._create_ge_merge()
+        self._create_task()
+        self._create_report()
+        DBManager.destroy_db_connect(self.conn, self.curs)
 
     def run(self: any) -> None:
         """
@@ -143,7 +148,7 @@ class MergeOPCounter:
     def _get_ge_data(self: any, ge_curs: any) -> list:
         ge_data = []
         iter_list = MsprofIteration(self.project_path).get_iter_list_with_index_and_model(self.iter_id, self.model_id)
-        ge_sql = 'select model_id, op_name, op_type, task_type, task_id, stream_id, batch_id ' \
+        ge_sql = 'select model_id, op_name, op_type, task_type, task_id, stream_id, batch_id, context_id ' \
                  'from {0} where (index_id=? or index_id=0) ' \
                  'and model_id=?'.format(DBNameConstant.TABLE_GE_TASK)
         for index_and_model in iter_list:
@@ -151,10 +156,16 @@ class MergeOPCounter:
 
         return ge_data
 
-    def _create_ge_merge(self: any, merge_conn: any) -> None:
+    def _get_ge_data_from_merge_task(self) -> list:
+        if not DBManager.judge_table_exist(self.curs, DBNameConstant.TABLE_OP_COUNTER_GE_MERGE):
+            return []
+        ge_sql = "SELECT task_type, stream_id, task_id, batch_id, context_id from {0}".format(
+            DBNameConstant.TABLE_OP_COUNTER_GE_MERGE)
+        return DBManager.fetch_all_data(self.curs, ge_sql, dto_class=GeTaskDto)
+
+    def _create_ge_merge(self: any) -> None:
         """
         merge GE ge_task_data、ge_graph_data into merged db
-        :param merge_conn: cursor for GE table
         :return: None
         """
         ge_conn, ge_curs = DBManager.check_connect_db_path(
@@ -164,18 +175,18 @@ class MergeOPCounter:
             if ge_data:
                 insert_sql = "insert into {} values({value})".format(CommonConstant.GE_TASK_MEGED_TABLE,
                                                                      value='?,' * (len(ge_data[0]) - 1) + '?')
-                DBManager.executemany_sql(merge_conn, insert_sql, ge_data)
+                DBManager.executemany_sql(self.conn, insert_sql, ge_data)
         DBManager.destroy_db_connect(ge_conn, ge_curs)
 
-    def _create_task(self: any, merge_conn: any) -> None:
+    def _create_task(self: any) -> None:
         """
         insert data to task time table
-        :param merge_conn:
         :return:
         """
-        rts_data = GetOpTableTsTime(self.sample_config).get_task_time_data()
+        ge_data = self._get_ge_data_from_merge_task()
+        rts_data = GetOpTableTsTime(self.sample_config).get_task_time_data(ge_data)
         try:
-            DBManager.insert_data_into_table(merge_conn, CommonConstant.RTS_TASK_TABLE, rts_data)
+            DBManager.insert_data_into_table(self.conn, CommonConstant.RTS_TASK_TABLE, rts_data)
         except sqlite3.Error as err:
             logging.error(err, exc_info=Constant.TRACE_BACK_SWITCH)
         finally:
@@ -194,14 +205,13 @@ class MergeOPCounter:
             result_data[index] = _task_data
         return result_data
 
-    def _create_report(self: any, merge_conn: any) -> None:
+    def _create_report(self: any) -> None:
         """
         create report table
-        :param merge_conn:
         :return: None
         """
         sql = self._get_op_report_sql()
-        task_data = DBManager.fetch_all_data(merge_conn.cursor(), sql)
+        task_data = DBManager.fetch_all_data(self.curs, sql)
         if not task_data:
             return
         task_data = self._update_model_name(task_data)
@@ -235,4 +245,4 @@ class MergeOPCounter:
             sorted_total_data = sorted(total_data, key=lambda x: x[7], reverse=True)
             sql = 'insert into {} values({})'.format(CommonConstant.OP_REPORT_TABLE,
                                                      '?,' * (len(sorted_total_data[0]) - 1) + '?')
-            DBManager.executemany_sql(merge_conn, sql, sorted_total_data)
+            DBManager.executemany_sql(self.conn, sql, sorted_total_data)

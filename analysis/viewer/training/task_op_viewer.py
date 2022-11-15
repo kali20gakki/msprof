@@ -134,7 +134,7 @@ class TaskOpViewer:
     def _reformat_task_info(task_data: list, task_curs: any, ge_curs: any) -> list:
         ge_sql = "SELECT op_name, stream_id, task_id, batch_id from {0}".format(
             DBNameConstant.TABLE_GE_TASK)
-        track_sql = "SELECT tasktype as task_type, stream_id, task_id, batch_id from {0}".format(
+        track_sql = "SELECT task_type, stream_id, task_id, batch_id from {0}".format(
             DBNameConstant.TABLE_RUNTIME_TRACK)
 
         op_name_list = DBManager.fetch_all_data(ge_curs, ge_sql, dto_class=GeTaskDto)
@@ -169,6 +169,7 @@ class TaskOpViewer:
             ge_data_dict = {"{}-{}-{}".format(ge_datum[0], ge_datum[1],
                                               ge_datum[4]): (ge_datum[2], ge_datum[3])
                             for ge_datum in ge_data}
+        warning_status = False
         for task_datum in task_data:
             duration = str((task_datum[3] - task_datum[2]) / DBManager.NSTOUS)
             task_start = "".join(["\"", str(task_datum[2]), "\""])
@@ -176,9 +177,10 @@ class TaskOpViewer:
             name_type = ge_data_dict.get("{}-{}-{}".format(task_datum[0], task_datum[1],
                                                            task_datum[4]), (Constant.NA, Constant.NA))
             if name_type == (Constant.NA, Constant.NA):
-                logging.warning(
+                logging.debug(
                     "Can not find name and type for stream %d, "
                     "task %d", task_datum[0], task_datum[1])
+                warning_status = True
             task_info.append((name_type[0],  # op name
                               name_type[1],  # task type
                               task_datum[0],  # stream id
@@ -187,4 +189,7 @@ class TaskOpViewer:
                               task_start,  # task start
                               task_end,  # task end
                               ))
+        if warning_status:
+            logging.warning("Some task data are missing, set the log level to debug "
+                            "and run again to know which tasks are missing.")
         return task_info

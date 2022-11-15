@@ -57,6 +57,25 @@ class MsprofIteration:
             return self._generate_trace_result(self.get_step_iteration_time(index_id, model_id), time_fmt)
         return []
 
+    def get_iter_interval(self: any, iter_id: int, model_id: int) -> list:
+        trace_conn, trace_curs = DBManager.check_connect_db(self._result_dir, DBNameConstant.DB_STEP_TRACE)
+        if not trace_conn or not trace_curs \
+                or not DBManager.judge_table_exist(trace_curs, DBNameConstant.TABLE_STEP_TRACE_DATA):
+            return []
+        trace_sql = "select step_start, step_end from step_trace_data where model_id=? and index_id=?"
+        try:
+            trace_sql_data = DBManager().fetch_all_data(trace_curs, trace_sql, (model_id, iter_id))[0]
+        except sqlite3.Error as trace_err:
+            logging.error("Get step trace data failed, "
+                          "%s", str(trace_err), exc_info=Constant.TRACE_BACK_SWITCH)
+            return []
+        finally:
+            DBManager.destroy_db_connect(trace_conn, trace_curs)
+        if len(trace_sql_data) != 2:
+            return []
+        return [InfoConfReader().time_from_syscnt(trace_sql_data[0]),
+                InfoConfReader().time_from_syscnt(trace_sql_data[1])]
+
     def get_step_iteration_time(self: any, index_id: int, model_id: int) -> list:
         """
         get step iteration time

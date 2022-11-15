@@ -5,7 +5,7 @@
 
 class HwtsRecDto:
     """
-    hwts res dto
+    hwts rec dto
     """
 
     def __init__(self: any) -> None:

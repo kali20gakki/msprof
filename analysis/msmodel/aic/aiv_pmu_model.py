@@ -6,6 +6,7 @@ from abc import abstractmethod
 
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
+from common_func.ms_constant.str_constant import StrConstant
 from common_func.path_manager import PathManager
 from msmodel.interface.parser_model import ParserModel
 from mscalculate.aic.aic_utils import AicPmuUtils
@@ -27,7 +28,7 @@ class AivPmuModel(ParserModel):
         :return:
         """
         self.clear()
-        aic_profiling_events = get_metrics_from_sample_config(self.result_dir)
+        aic_profiling_events = get_metrics_from_sample_config(self.result_dir, StrConstant.AIV_PROFILING_METRICS)
         column_list = AicPmuUtils.remove_unused_column(aic_profiling_events)
         insert_metric_value(self.conn, column_list, DBNameConstant.TABLE_AIV_METRIC_SUMMARY)
 
