@@ -142,14 +142,19 @@ class TestMsprofDataStorage(unittest.TestCase):
                 mock.patch('os.remove'):
             MsprofDataStorage.clear_timeline_dir({'data_type': 'acl'})
 
-    def test_get_slice_times(self):
+    def test_get_slice_times1(self):
         with mock.patch(NAMESPACE + '.logging.warning'):
             key = MsprofDataStorage()
-            key.data_list = [{'test': 'test_test'}] * 1000000
-            key.tid_set = {i for i in range(2000)}
-            ret = key.get_slice_times(0, 1)
-            self.assertEqual(3, ret)
+            key.data_list = [{'test': 'test'} for _ in range(10000000)]
+            key.tid_set = {i for i in range(100)}
+            key.get_slice_times('a', 1)
 
+    def test_get_slice_times2(self):
+        with mock.patch(NAMESPACE + '.logging.warning'):
+            key = MsprofDataStorage()
+            key.data_list = []
+            key.tid_set = {i for i in range(10000000)}
+            key.get_slice_times('a', 1)
 
 if __name__ == '__main__':
     unittest.main()

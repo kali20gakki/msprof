@@ -18,6 +18,7 @@ from common_func.platform.chip_manager import ChipManager
 from common_func.utils import Utils
 from framework.offset_calculator import OffsetCalculator
 from msmodel.iter_rec.iter_rec_model import HwtsIterModel
+from msmodel.ge.ge_info_calculate_model import GeInfoModel
 from msparser.interface.iparser import IParser
 from msparser.iter_rec.iter_info_updater.iter_info import IterInfo
 from profiling_bean.prof_enum.data_tag import DataTag
@@ -83,17 +84,18 @@ class StarsIterRecParser(IParser, MsMultiProcess):
         save data into database
         :return: None
         """
+        iter_info_list = self.refactor_iter_info_dict()
         try:
-            if self._iter_info_dict:
-                with HwtsIterModel(self._project_path) as hwts_iter_model:
-                    hwts_iter_model.flush(Utils.obj_list_to_list(self._iter_info_dict.values()),
-                                          DBNameConstant.TABLE_HWTS_ITER_SYS)
+            with HwtsIterModel(self._project_path) as hwts_iter_model:
+                hwts_iter_model.flush(iter_info_list,
+                                      DBNameConstant.TABLE_HWTS_ITER_SYS)
         except sqlite3.Error as trace_err:
             logging.error("Save hwts iter failed, "
                           "%s", str(trace_err), exc_info=Constant.TRACE_BACK_SWITCH)
 
     def _parse_log_file_list(self):
         log_file_list = self._file_list.get(DataTag.STARS_LOG, [])
+        log_file_list.sort(key=lambda x: int(x.split("_")[-1]))
         _offset_calculator = OffsetCalculator(log_file_list, self.STARS_LOG_SIZE, self._project_path)
         for log_file in log_file_list:
             log_file = PathManager.get_data_file_path(self._project_path, log_file)
@@ -110,6 +112,7 @@ class StarsIterRecParser(IParser, MsMultiProcess):
 
     def _parse_pmu_data(self):
         pmu_file_list = self._file_list.get(DataTag.FFTS_PMU, [])
+        pmu_file_list.sort(key=lambda x: int(x.split("_")[-1]))
         _offset_calculator = OffsetCalculator(pmu_file_list, self.PMU_LOG_SIZE, self._project_path)
         for _ffts_profile_file in pmu_file_list:
             _ffts_profile_file = PathManager.get_data_file_path(self._project_path, _ffts_profile_file)
@@ -130,7 +133,7 @@ class StarsIterRecParser(IParser, MsMultiProcess):
 
     def _process_pmu_data(self: any, all_bytes: bytes) -> None:
         for chunk in Utils.chunks(all_bytes, self.PMU_LOG_SIZE):
-            pmu_data = self._get_pmu_decoder().decode(chunk)
+            pmu_data = FftsPmuBean.decode(chunk)
             self._set_current_iter_id(pmu_data.time_list[0])
             self._update_iter_info(pmu_data.time_list[0], self.PMU_LOG_TYPE)
 
@@ -146,7 +149,7 @@ class StarsIterRecParser(IParser, MsMultiProcess):
                                                     IterInfo(self._current_iter_id,
                                                              self._iter_end_dict.get(self._current_iter_id)))
         if log_type == self.STARS_LOG_TYPE:
-            iter_info.task_count += 1
+            iter_info.hwts_count += 1
         else:
             iter_info.aic_count += 1
 
@@ -156,3 +159,30 @@ class StarsIterRecParser(IParser, MsMultiProcess):
             logging.info("No need to calculate task count at op scene.")
             raise ProfException(ProfException.PROF_INVALID_DATA_ERROR)
         return iter_dict
+
+    def refactor_iter_info_dict(self: any) -> list:
+        """
+        refactor iter info dict
+        """
+        aic_offset = 0
+        hwts_offset = 0
+
+        step_trace_data = GeInfoModel(self._project_path).get_step_trace_data()
+        step_trace_data.sort(key=lambda dto: dto.step_end)
+
+        iter_info_list = []
+        for step_dto in step_trace_data:
+            if step_dto.iter_id not in self._iter_info_dict:
+                continue
+            iter_info = self._iter_info_dict.get(step_dto.iter_id)
+            iter_info_list.append([step_dto.iter_id,
+                                   step_dto.model_id,
+                                   step_dto.index_id,
+                                   iter_info.hwts_count,
+                                   hwts_offset,
+                                   iter_info.aic_count,
+                                   aic_offset,
+                                   step_dto.step_end])
+            aic_offset += iter_info.aic_count
+            hwts_offset += iter_info.hwts_count
+        return iter_info_list

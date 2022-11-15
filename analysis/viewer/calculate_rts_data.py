@@ -378,7 +378,7 @@ def insert_metric_value(conn: any, metrics: list, table_name: str) -> bool:
     sql = 'CREATE TABLE IF NOT EXISTS {name}({column})'.format(
         column=','.join(metric.replace('(ms)', '').replace('(GB/s)', '')
                         + ' numeric' for metric in metrics) + ', task_id INT, '
-                                                              'stream_id INT ', name=table_name)
+                                                              'stream_id INT, core_type INT ', name=table_name)
     return DBManager.execute_sql(conn, sql)
 
 
@@ -444,7 +444,7 @@ def get_metrics_from_sample_config(project_path: str,
             call_sys_exit(NumberConstant.ERROR)
     metrics.extend(sample_metrics)
     cal = CalculateAiCoreData(project_path)
-    cal.add_fops_header(StrConstant.AI_CORE_PROFILING_METRICS, metrics)
+    cal.add_fops_header(metrics_type, metrics)
     return metrics
 
 
@@ -529,9 +529,9 @@ def sql_insert_metric_summary_table(metrics: list, freq: float, have_step_info: 
         algos.append(algo)
     algo_lst = Utils.generator_to_list("cast(" + algo + " as decimal(8,2))" for algo in algos)
     sql = "SELECT " + ",".join(algo_lst) \
-          + ", task_id, stream_id FROM EventCount"
+          + ", task_id, stream_id, '0' FROM EventCount"
     if have_step_info:
         sql = "SELECT " + ",".join(algo_lst) \
-              + ", task_id, stream_id " \
+              + ", task_id, stream_id, '0' " \
                 "FROM EventCount limit ? offset ?"
     return sql

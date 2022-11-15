@@ -5,6 +5,7 @@
 import logging
 import os
 import sqlite3
+import struct
 
 from analyzer.scene_base.profiling_scene import ProfilingScene
 from common_func.common import generate_config
@@ -12,18 +13,20 @@ from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.file_manager import FileOpen
+from common_func.ms_constant.stars_constant import StarsConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
+from common_func.msprof_exception import ProfException
 from common_func.msprof_iteration import MsprofIteration
 from common_func.os_manager import check_file_readable
 from common_func.path_manager import PathManager
-from common_func.platform.chip_manager import ChipManager
 from common_func.utils import Utils
 from framework.offset_calculator import FileCalculator
 from framework.offset_calculator import OffsetCalculator
 from mscalculate.interface.icalculator import ICalculator
 from msmodel.iter_rec.iter_rec_model import HwtsIterModel
 from msmodel.stars.ffts_pmu_model import FftsPmuModel
+from msparser.data_struct_size_constant import StructFmt
 from profiling_bean.prof_enum.data_tag import DataTag
 from profiling_bean.stars.ffts_plus_pmu import FftsPlusPmuBean
 from profiling_bean.stars.ffts_pmu import FftsPmuBean
@@ -41,21 +44,15 @@ class FftsPmuCalculate(ICalculator, MsMultiProcess):
         self._result_dir = self._sample_config.get(StrConstant.SAMPLE_CONFIG_PROJECT_PATH)
         self._iter_model = HwtsIterModel(self._result_dir)
         self._model = FftsPmuModel(self._result_dir, DBNameConstant.DB_RUNTIME, [])
-        self._decoder = self._get_pmu_decoder()
-        self._data_list = []
+        self._data_list = {}
         self._file_list = file_list.get(DataTag.FFTS_PMU, [])
         self._file_list.sort(key=lambda x: int(x.split("_")[-1]))
-
-    @classmethod
-    def _get_pmu_decoder(cls: any) -> any:
-        if ChipManager().is_ffts_type():
-            return FftsPmuBean
-        return FftsPlusPmuBean
+        self._wrong_func_type_count = 0
 
     def ms_run(self: any) -> None:
         config = generate_config(PathManager.get_sample_json_path(self._result_dir))
-        if config.get(StrConstant.AICORE_PROFILING_MODE) == 'sample-based' \
-                or config.get(StrConstant.AIV_PROFILING_MODE) == 'sample-based':
+        if config.get(StrConstant.AICORE_PROFILING_MODE) == StrConstant.AIC_SAMPLE_BASED_MODE \
+                or config.get(StrConstant.AIV_PROFILING_MODE) == StrConstant.AIC_SAMPLE_BASED_MODE:
             return
         self.calculate()
         self.save()
@@ -71,9 +68,11 @@ class FftsPmuCalculate(ICalculator, MsMultiProcess):
         save parser data to db
         :return: None
         """
-        if not self._data_list:
+        if not self._data_list.get(StrConstant.CONTEXT_PMU_TYPE):
             logging.warning("No ai core pmu data found, data list is empty!")
             return
+        if self._wrong_func_type_count:
+            logging.warning("Some PMU data fails to be parsed, err count: %s", self._wrong_func_type_count)
 
         try:
             with self._model as _model:
@@ -111,14 +110,15 @@ class FftsPmuCalculate(ICalculator, MsMultiProcess):
             _iter_id = MsprofIteration(self._result_dir). \
                 get_iter_id_by_index_id(self._sample_config.get(StrConstant.PARAM_ITER_ID),
                                         self._sample_config.get(StrConstant.PARAM_MODEL_ID))
-            offset_count, total_count = self._get_offset_and_total(_iter_id[0] + 1)
+            offset_count, total_count = self._get_offset_and_total(self._sample_config.get(StrConstant.PARAM_ITER_ID),
+                                                                   self._sample_config.get(StrConstant.PARAM_MODEL_ID))
             if total_count <= 0:
                 logging.warning("The ffts pmu data that is not satisfied by the specified iteration!")
                 return
             _file_calculator = FileCalculator(self._file_list, self.FFTS_PMU_SIZE, self._result_dir,
                                               offset_count, total_count)
             for chunk in Utils.chunks(_file_calculator.prepare_process(), self.FFTS_PMU_SIZE):
-                self._data_list.append(self._decoder.decode(chunk))
+                self._get_pmu_decode_data(chunk)
 
     def _get_total_aic_count(self: any) -> int:
         sum_file_size = 0
@@ -126,16 +126,14 @@ class FftsPmuCalculate(ICalculator, MsMultiProcess):
             sum_file_size += os.path.getsize(PathManager.get_data_file_path(self._result_dir, file))
         return sum_file_size // self.FFTS_PMU_SIZE
 
-    def _get_offset_and_total(self: any, iter_id: int) -> (int, int):
+    def _get_offset_and_total(self: any, iter_id: int, model_id: int) -> (int, int):
         """
         :param iter_id:
         :return: offset count and total aic count
         """
-        offset_count, total_count = self._iter_model.get_task_offset_and_sum(iter_id, HwtsIterModel.AI_CORE_TYPE)
+        offset_count, total_count = self._iter_model.get_task_offset_and_sum(model_id, iter_id,
+                                                                             HwtsIterModel.AI_CORE_TYPE)
         _total_aic_count = self._get_total_aic_count()
-        _sql_aic_count = self._iter_model.get_aic_sum_count()
-        # get offset by all aic count and sql record count
-        offset_count = _total_aic_count - _sql_aic_count + offset_count
         if offset_count < 0:
             total_count += offset_count
             offset_count = 0
@@ -153,4 +151,18 @@ class FftsPmuCalculate(ICalculator, MsMultiProcess):
             _file_size = os.path.getsize(file_path)
             file_data = offset_calculator.pre_process(_pmu_file.file_reader, _file_size)
             for chunk in Utils.chunks(file_data, self.FFTS_PMU_SIZE):
-                self._data_list.append(self._decoder.decode(chunk))
+                self._get_pmu_decode_data(chunk)
+
+    def _get_pmu_decode_data(self: any, bin_data: bytes) -> any:
+        try:
+            func_type, _ = struct.unpack(StructFmt.STARS_HEADER_FMT, bin_data[:4])
+        except (IndexError, ValueError) as err:
+            logging.error(err, exc_info=Constant.TRACE_BACK_SWITCH)
+            raise ProfException(ProfException.PROF_INVALID_DATA_ERROR) from err
+        if Utils.get_func_type(func_type) == StarsConstant.FFTS_PMU_TAG:
+            self._data_list.setdefault(StrConstant.CONTEXT_PMU_TYPE, []).append(FftsPmuBean.decode(bin_data))
+        elif Utils.get_func_type(func_type) == StarsConstant.FFTS_BLOCK_PMU_TAG:
+            self._data_list.setdefault(StrConstant.BLOCK_PMU_TYPE, []).append(FftsPlusPmuBean.decode(bin_data))
+        else:
+            self._wrong_func_type_count += 1
+            logging.debug('Func type error, data may have been lost. Func type: %s', func_type)

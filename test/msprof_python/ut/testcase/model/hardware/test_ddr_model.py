@@ -4,6 +4,8 @@ from unittest import mock
 
 from common_func.info_conf_reader import InfoConfReader
 from constant.constant import INFO_JSON
+from constant.info_json_construct import InfoJson
+from constant.info_json_construct import InfoJsonReaderManager
 from msmodel.hardware.ddr_model import DdrModel
 from sqlite.db_manager import DBManager
 
@@ -14,7 +16,7 @@ sample_config = {"model_id": 1, 'iter_id': 'dasfsd', 'result_dir': 'jasdfjfjs'}
 class TestDdrModel(unittest.TestCase):
 
     def test_drop_tab(self):
-        InfoConfReader()._info_json = {'devices': '0'}
+        InfoJsonReaderManager(InfoJson(devices='0')).process()
         db_manager = DBManager()
         res = db_manager.create_table('ddr.db')
         key = DdrModel('test', 'ddr.db', ['DDRMetricData', 'DDROriginalData'])
@@ -28,7 +30,7 @@ class TestDdrModel(unittest.TestCase):
 
     def test_flush(self):
         with mock.patch(NAMESPACE + '.DdrModel.insert_data_to_db'):
-            InfoConfReader()._info_json = {'devices': '0'}
+            InfoJsonReaderManager(InfoJson(devices='0')).process()
             key = DdrModel('test', 'ddr.db', ['DDRMetricData', 'DDROriginalData'])
             key.flush([])
 

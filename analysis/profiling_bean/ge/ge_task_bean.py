@@ -24,14 +24,20 @@ class GeTaskBean(StructDecoder):
     TASK_TYPE_DICT = {
         0: Constant.TASK_TYPE_AI_CORE,
         1: Constant.TASK_TYPE_AI_CPU,
-        2: Constant.TASK_TYPE_AIV
+        2: Constant.TASK_TYPE_AIV,
+        3: Constant.TASK_TYPE_WRITE_BACK,
+        4: Constant.TASK_TYPE_MIX_AIC,
+        5: Constant.TASK_TYPE_MIX_AIV,
+        7: Constant.TASK_TYPE_DSA,
+        8: Constant.TASK_TYPE_DVPP,
+        9: Constant.TASK_TYPE_INVALID
     }
 
     FMT_MAP = {
-        NO_HASH_ENUM: {"fmt": "HHI8B120s8B56sQQ4IHHI16B", "function": "_update_task_data_by_no_hash"},
-        OP_TYPE_HASH_ENUM: {"fmt": "HHI8B120s8BQ48BQQ4IHHI16B", "function": "_update_task_data_by_hash_type"},
-        OP_NAME_HASH_ENUM: {"fmt": "HHI8BQ112B8B56sQQ4IHHI16B", "function": "_update_task_data_by_hash_name"},
-        ALL_HASH_ENUM: {"fmt": "HHI8BQ112B8BQ48BQQ4IHHI16B", "function": "_update_task_data_by_all_hash"}
+        NO_HASH_ENUM: {"fmt": "HHI8B120s8B56sQQ4IHHII12B", "function": "_update_task_data_by_no_hash"},
+        OP_TYPE_HASH_ENUM: {"fmt": "HHI8B120s8BQ48BQQ4IHHII12B", "function": "_update_task_data_by_hash_type"},
+        OP_NAME_HASH_ENUM: {"fmt": "HHI8BQ112B8B56sQQ4IHHII12B", "function": "_update_task_data_by_hash_name"},
+        ALL_HASH_ENUM: {"fmt": "HHI8BQ112B8BQ48BQQ4IHHII12B", "function": "_update_task_data_by_all_hash"}
     }
 
     def __init__(self: any) -> None:
@@ -136,6 +142,7 @@ class GeTaskBean(StructDecoder):
         """
         return self._batch_id
 
+    @property
     def context_id(self: any) -> int:
         """
         for context id
@@ -199,6 +206,7 @@ class GeTaskBean(StructDecoder):
         self._task_id = self._fusion_data[27]
         self._batch_id = self._fusion_data[28]
         self._thread_id = self._fusion_data[29]
+        self._context_id = self._fusion_data[30]
 
     def _update_task_data_by_hash_type(self: any) -> None:
         self._task_type = self._fusion_data[2]
@@ -213,6 +221,7 @@ class GeTaskBean(StructDecoder):
         self._task_id = self._fusion_data[75]
         self._batch_id = self._fusion_data[76]
         self._thread_id = self._fusion_data[77]
+        self._context_id = self._fusion_data[78]
 
     def _update_task_data_by_hash_name(self: any) -> None:
         self._task_type = self._fusion_data[2]
@@ -227,6 +236,7 @@ class GeTaskBean(StructDecoder):
         self._task_id = self._fusion_data[139]
         self._batch_id = self._fusion_data[140]
         self._thread_id = self._fusion_data[141]
+        self._context_id = self._fusion_data[142]
 
     def _update_task_data_by_all_hash(self: any) -> None:
         self._task_type = self._fusion_data[2]
@@ -241,3 +251,4 @@ class GeTaskBean(StructDecoder):
         self._task_id = self._fusion_data[187]
         self._batch_id = self._fusion_data[188]
         self._thread_id = self._fusion_data[189]
+        self._context_id = self._fusion_data[190]

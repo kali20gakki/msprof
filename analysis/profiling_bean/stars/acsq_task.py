@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2021-2022. All rights reserved.
-
+from common_func.info_conf_reader import InfoConfReader
 from common_func.utils import Utils
 from profiling_bean.struct_info.struct_decoder import StructDecoder
 
@@ -17,10 +17,10 @@ class AcsqTask(StructDecoder):
         self._func_type = Utils.get_func_type(args[0])
         # get high 6 bit
         self._task_type = args[0] >> 10
-        self._stream_id = args[2]
+        self._stream_id = Utils.get_stream_id(args[2])
         self._task_id = args[3]
         self._sys_cnt = args[4]
-        self._acc_id = args[6] >> 9
+        self._acc_id = args[6] >> 10
         self._acsq_id = args[6] & 127
 
     @property
@@ -56,12 +56,12 @@ class AcsqTask(StructDecoder):
         return self._task_id
 
     @property
-    def sys_cnt(self: any) -> int:
+    def sys_cnt(self: any) -> float:
         """
         get task sys cnt
         :return: sys cnt
         """
-        return self._sys_cnt
+        return InfoConfReader().time_from_syscnt(self._sys_cnt)
 
     @property
     def acc_id(self: any) -> int:

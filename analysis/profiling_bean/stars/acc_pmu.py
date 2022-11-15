@@ -15,7 +15,7 @@ class AccPmuDecoder(StructDecoder):
     def __init__(self: any, *args: tuple) -> None:
         filed = args[0]
         self._func_type = Utils.get_func_type(filed[0])
-        self._stars_common = StarsCommon(filed[3], filed[2], filed[4])
+        self._stars_common = StarsCommon(filed[3], Utils.get_stream_id(filed[2]), filed[4])
         self._block_id = filed[5]
         self._acc_id = filed[6]
         self._bandwidth = (filed[10], filed[11])

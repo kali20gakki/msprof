@@ -15,6 +15,7 @@ from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msvp_constant import MsvpConstant
 from common_func.path_manager import PathManager
 from common_func.platform.chip_manager import ChipManager
+from profiling_bean.db_dto.ge_task_dto import GeTaskDto
 
 
 class OpCounterOpScene:
@@ -27,11 +28,13 @@ class OpCounterOpScene:
         self.sample_config = sample_config
         self.project_path = sample_config.get("result_dir")
         self.iter_id = sample_config.get("iter_id")
+        self.conn = None
+        self.curs = None
 
     @staticmethod
     def _get_ge_sql() -> str:
         ge_sql = 'select model_id, op_name, op_type, task_type, ' \
-                 'task_id, stream_id, batch_id from {0}'.format(DBNameConstant.TABLE_GE_TASK)
+                 'task_id, stream_id, batch_id,context_id from {0}'.format(DBNameConstant.TABLE_GE_TASK)
         return ge_sql
 
     @staticmethod
@@ -69,50 +72,47 @@ class OpCounterOpScene:
                             "maybe the data of framework or task is not collected.")
             return
         db_path = PathManager.get_db_path(self.project_path, DBNameConstant.DB_OP_COUNTER)
-        merge_conn, merge_curs = DBManager.create_connect_db(db_path)
-        if not merge_conn or not merge_curs:
+        self.conn, self.curs = DBManager.create_connect_db(db_path)
+        if not self.conn or not self.curs:
             logging.warning("unable to create op counter db connection")
             return
-        self._create_db(merge_conn)
-        self.create_ge_merge(merge_conn)
-        self.create_task(merge_conn)
-        self.create_report(merge_conn, merge_curs)
-        DBManager.destroy_db_connect(merge_conn, merge_curs)
+        self._create_db()
+        self.create_ge_merge()
+        self.create_task()
+        self.create_report()
+        DBManager.destroy_db_connect(self.conn, self.curs)
 
-    def create_ge_merge(self: any, merge_conn: any) -> None:
+    def create_ge_merge(self: any) -> None:
         """
         merge GE ge_task_data ge_graph_data into merged db
-        :param merge_conn:
         :return: None
         """
         db_path = PathManager.get_db_path(self.project_path, DBNameConstant.DB_GE_INFO)
         ge_conn, ge_curs = DBManager.check_connect_db_path(db_path)
         if ge_conn and ge_curs and DBManager.judge_table_exist(ge_curs, DBNameConstant.TABLE_GE_TASK):
             ge_data = DBManager.fetch_all_data(ge_curs, self._get_ge_sql())
-            DBManager.insert_data_into_table(merge_conn, CommonConstant.GE_TASK_MEGED_TABLE, ge_data)
+            DBManager.insert_data_into_table(self.conn, CommonConstant.GE_TASK_MEGED_TABLE, ge_data)
         DBManager.destroy_db_connect(ge_conn, ge_curs)
 
-    def create_task(self: any, merge_conn: any) -> None:
+    def create_task(self: any) -> None:
         """
         insert data to task time table
-        :param merge_conn:
         :return:
         """
-        rts_data = GetOpTableTsTime(self.sample_config).get_task_time_data()
+        ge_data = self._get_ge_data_from_merge_task()
+        rts_data = GetOpTableTsTime(self.sample_config).get_task_time_data(ge_data)
         try:
-            DBManager.insert_data_into_table(merge_conn, CommonConstant.RTS_TASK_TABLE, rts_data)
+            DBManager.insert_data_into_table(self.conn, CommonConstant.RTS_TASK_TABLE, rts_data)
         except sqlite3.Error as err:
             logging.error(err, exc_info=Constant.TRACE_BACK_SWITCH)
 
-    def create_report(self: any, merge_conn: any, merge_curs: any) -> None:
+    def create_report(self: any) -> None:
         """
         create report table
-        :param merge_conn:
-        :param merge_curs:
         :return: None
         """
         sql = self._get_op_report_sql()
-        task_data = DBManager.fetch_all_data(merge_curs, sql)
+        task_data = DBManager.fetch_all_data(self.curs, sql)
         if not task_data:
             return
         total_time = self._cal_total(task_data)
@@ -130,7 +130,14 @@ class OpCounterOpScene:
                  ratio))
         if total_data:
             sorted_total_data = sorted(total_data, key=lambda x: x[7], reverse=True)
-            DBManager.insert_data_into_table(merge_conn, DBNameConstant.TABLE_OP_COUNTER_OP_REPORT, sorted_total_data)
+            DBManager.insert_data_into_table(self.conn, DBNameConstant.TABLE_OP_COUNTER_OP_REPORT, sorted_total_data)
+
+    def _get_ge_data_from_merge_task(self) -> list:
+        if not DBManager.judge_table_exist(self.curs, DBNameConstant.TABLE_OP_COUNTER_GE_MERGE):
+            return []
+        ge_sql = "SELECT task_type, stream_id, task_id, batch_id, context_id from {0}".format(
+            DBNameConstant.TABLE_OP_COUNTER_GE_MERGE)
+        return DBManager.fetch_all_data(self.curs, ge_sql, dto_class=GeTaskDto)
 
     def _is_db_need_to_create(self: any) -> bool:
         ge_db_path = PathManager.get_db_path(self.project_path, DBNameConstant.DB_GE_INFO)
@@ -142,18 +149,18 @@ class OpCounterOpScene:
         return DBManager.check_tables_in_db(PathManager.get_db_path(self.project_path, DBNameConstant.DB_HWTS),
                                             DBNameConstant.TABLE_HWTS_TASK_TIME)
 
-    def _create_db(self: any, merge_conn: any) -> None:
+    def _create_db(self: any) -> None:
 
         ge_create_sql = DBManager.sql_create_general_table("GeMergeMap", DBNameConstant.TABLE_OP_COUNTER_GE_MERGE,
                                                            self.OP_TABLE_PATH)
-        DBManager.execute_sql(merge_conn, ge_create_sql)
+        DBManager.execute_sql(self.conn, ge_create_sql)
 
         rts_task_create_sql = DBManager.sql_create_general_table("RtsTaskMap",
                                                                  DBNameConstant.TABLE_OP_COUNTER_RTS_TASK,
                                                                  self.OP_TABLE_PATH)
-        DBManager.execute_sql(merge_conn, rts_task_create_sql)
+        DBManager.execute_sql(self.conn, rts_task_create_sql)
 
         op_report_create_sql = DBManager.sql_create_general_table("OpReportMap",
                                                                   DBNameConstant.TABLE_OP_COUNTER_OP_REPORT,
                                                                   self.OP_TABLE_PATH)
-        DBManager.execute_sql(merge_conn, op_report_create_sql)
+        DBManager.execute_sql(self.conn, op_report_create_sql)

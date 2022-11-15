@@ -121,7 +121,7 @@ class ExportCommand:
         ],
         MsProfCommonConstant.SUMMARY: [
             {'export_type': ExportDataType.TASK_TIME,
-             'handler': AiStackDataCheckManager.contain_task_time_data},
+             'handler': AiStackDataCheckManager.contain_task_time_without_ffts_task},
             {'export_type': ExportDataType.L2_CACHE,
              'handler': AiStackDataCheckManager.contain_l2_cache_data},
             {'export_type': ExportDataType.STEP_TRACE,
@@ -321,7 +321,7 @@ class ExportCommand:
     def _add_export_type(self: any, result_dir: str) -> None:
         export_map = self.EXPORT_HANDLE_MAP.get(self.command_type, [])
         for item in export_map:
-            if item['handler'](result_dir):
+            if item['handler'](result_dir, self.sample_config.get('devices', 0)):
                 self.list_map.get('export_type_list').append(item)
 
     def _check_index_id(self: any, project_path: str) -> None:

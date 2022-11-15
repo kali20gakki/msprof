@@ -1,14 +1,13 @@
+import sqlite3
 import unittest
 from unittest import mock
-import sqlite3
 
-from common_func.platform.chip_manager import ChipManager
-from profiling_bean.prof_enum.chip_model import ChipModel
-
-from sqlite.db_manager import DBManager
-from common_func.info_conf_reader import InfoConfReader
-from constant.constant import CONFIG
 from analyzer.scene_base.op_counter_op_scene import OpCounterOpScene
+from common_func.info_conf_reader import InfoConfReader
+from common_func.platform.chip_manager import ChipManager
+from constant.constant import CONFIG
+from profiling_bean.prof_enum.chip_model import ChipModel
+from sqlite.db_manager import DBManager
 
 NAMESPACE = 'analyzer.scene_base.op_counter_op_scene'
 
@@ -38,49 +37,49 @@ class TestOpCounterOpScene(unittest.TestCase):
     def test_get_ge_sql(self):
         check = OpCounterOpScene(CONFIG)
         result = check._get_ge_sql()
-        sql = "select model_id, op_name, op_type, task_type, task_id, stream_id, batch_id from TaskInfo"
-        self.assertEqual(result, sql)
+        sql = "select model_id, op_name, op_type, task_type, task_id, stream_id, batch_id,context_id from TaskInfo"
+        self.assertEqual(sql, result)
 
-    # def test_create_ge_merge(self): XXX
-    #     create_sql = "CREATE TABLE IF NOT EXISTS ge_task_merge (model_name text,model_id INTEGER," \
-    #                  "op_name text,op_type text,task_id INTEGER,stream_id INTEGER,device_id INTEGER)"
-    #     insert_sql = "insert into {} values (?,?,?,?,?,?,?)".format('ge_task_merge')
-    #     data = (('resnet50', 1, 'trans_TransData_0', 'TransData', 3, 4, 5),)
-    #     db_manager = DBManager()
-    #     res = db_manager.create_table("op_counter.db", create_sql, insert_sql, data)
-    #     curs = res[1]
-    #     create_ge_sql = "create table if not exists ge_task_data (device_id INTEGER," \
-    #                     "model_name TEXT,model_id INTEGER,op_name TEXT,stream_id INTEGER," \
-    #                     "task_id INTEGER,block_dim INTEGER,op_state TEXT,task_type TEXT," \
-    #                     "op_type TEXT,iter_id INTEGER,input_count INTEGER,input_formats TEXT," \
-    #                     "input_data_types TEXT,input_shapes TEXT,output_count INTEGER," \
-    #                     "output_formats TEXT,output_data_types TEXT,output_shapes TEXT)"
-    #     insert_ge_sql = "insert into {} values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)".format('ge_task_data')
-    #     data = ((0, 'test', 1, 'model', 5, 3, 2, 'static', 'AI_CORE', 'trans_data',
-    #              1, 1, '12', '1750', '1752', 0, 'test', 'test2', 'test3'),)
-    #     db_manager_ge = DBManager()
-    #     ge_res = db_manager_ge.create_table("ge_info.db", create_ge_sql, insert_ge_sql, data)
-    #     sql = "select model_name, model_id, op_name, op_type, task_type, task_id, stream_id, " \
-    #           "device_id from ge_task_data where (iter_id=1 or iter_id=0) "
-    #     ge_data = [('resnet50', 1, 'trans_TransData_0', 'TransData', 'AI_CORE', 3, 5, 0, 1),
-    #                ('resnet50', 1, 'conv1conv1_relu', 'Conv2D', 'AI_CORE', 4, 5, 0, 1),
-    #                ('resnet50', 1, 'conv1conv1_relu', 'Conv2D', 'AI_CORE', 2, 5, 0, 2)]
-    #     with mock.patch(NAMESPACE + '.PathManager.get_db_path', return_value='db\\ge_info.db'), \
-    #             mock.patch(NAMESPACE + '.DBManager.check_connect_db_path', return_value=ge_res), \
-    #             mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True), \
-    #             mock.patch(NAMESPACE + '.OpCounterOpScene._get_ge_sql', return_value=sql), \
-    #             mock.patch(NAMESPACE + '.DBManager.destroy_db_connect'):
-    #         check = OpCounterOpScene(CONFIG)
-    #         check.create_ge_merge(res[0])
-    #     res[1].execute("drop table ge_task_merge")
-    #     ge_res[1].execute('drop table ge_task_data')
-    #     db_manager_ge.destroy(ge_res)
-    #     db_manager.destroy(res)
+    def test_create_ge_merge(self):
+        create_sql = "CREATE TABLE IF NOT EXISTS ge_task_merge (model_name text,model_id INTEGER," \
+                     "op_name text,op_type text,task_id INTEGER,stream_id INTEGER,device_id INTEGER)"
+        insert_sql = "insert into {} values (?,?,?,?,?,?,?)".format('ge_task_merge')
+        data = (('resnet50', 1, 'trans_TransData_0', 'TransData', 3, 4, 5),)
+        db_manager = DBManager()
+        res = db_manager.create_table("op_counter.db", create_sql, insert_sql, data)
+        curs = res[1]
+        create_ge_sql = "create table if not exists ge_task_data (device_id INTEGER," \
+                        "model_name TEXT,model_id INTEGER,op_name TEXT,stream_id INTEGER," \
+                        "task_id INTEGER,block_dim INTEGER,op_state TEXT,task_type TEXT," \
+                        "op_type TEXT,iter_id INTEGER,input_count INTEGER,input_formats TEXT," \
+                        "input_data_types TEXT,input_shapes TEXT,output_count INTEGER," \
+                        "output_formats TEXT,output_data_types TEXT,output_shapes TEXT)"
+        insert_ge_sql = "insert into {} values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)".format('ge_task_data')
+        data = ((0, 'test', 1, 'model', 5, 3, 2, 'static', 'AI_CORE', 'trans_data',
+                 1, 1, '12', '1750', '1752', 0, 'test', 'test2', 'test3'),)
+        db_manager_ge = DBManager()
+        ge_res = db_manager_ge.create_table("ge_info.db", create_ge_sql, insert_ge_sql, data)
+        sql = "select model_name, model_id, op_name, op_type, task_type, task_id, stream_id, " \
+              "device_id from ge_task_data where (iter_id=1 or iter_id=0) "
+        ge_data = [('resnet50', 1, 'trans_TransData_0', 'TransData', 'AI_CORE', 3, 5, 0, 1),
+                   ('resnet50', 1, 'conv1conv1_relu', 'Conv2D', 'AI_CORE', 4, 5, 0, 1),
+                   ('resnet50', 1, 'conv1conv1_relu', 'Conv2D', 'AI_CORE', 2, 5, 0, 2)]
+        with mock.patch(NAMESPACE + '.PathManager.get_db_path', return_value='db\\ge_info.db'), \
+                mock.patch(NAMESPACE + '.DBManager.check_connect_db_path', return_value=ge_res), \
+                mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True), \
+                mock.patch(NAMESPACE + '.OpCounterOpScene._get_ge_sql', return_value=sql), \
+                mock.patch(NAMESPACE + '.DBManager.destroy_db_connect'):
+            check = OpCounterOpScene(CONFIG)
+            check.conn, check.curs = res[0], res[1]
+            check.create_ge_merge()
+        res[1].execute("drop table ge_task_merge")
+        ge_res[1].execute('drop table ge_task_data')
+        db_manager_ge.destroy(ge_res)
+        db_manager.destroy(res)
 
     def test_create_db(self):
         db_manager = DBManager()
         res = db_manager.create_table("op_counter.db")
-        merge_conn, merge_curs = res[0], res[1]
         ge_create_sql = "CREATE TABLE IF NOT EXISTS ge_task_merge(model_id INTEGER," \
                         "op_name text,op_type text,task_type text,task_id INTEGER,stream_id INTEGER," \
                         "batch_id INTEGER)"
@@ -92,15 +91,18 @@ class TestOpCounterOpScene(unittest.TestCase):
         with mock.patch(NAMESPACE + '.DBManager.sql_create_general_table',
                         return_value=ge_create_sql):
             check = OpCounterOpScene(CONFIG)
-            check._create_db(merge_conn)
+            check.conn, check.curs = res[0], res[1]
+            check._create_db()
         with mock.patch(NAMESPACE + '.DBManager.sql_create_general_table',
                         return_value=rts_task_create_sql):
             check = OpCounterOpScene(CONFIG)
-            check._create_db(merge_conn)
+            check.conn, check.curs = res[0], res[1]
+            check._create_db()
         with mock.patch(NAMESPACE + '.DBManager.sql_create_general_table',
                         return_value=op_report_create_sql):
             check = OpCounterOpScene(CONFIG)
-            check._create_db(merge_conn)
+            check.conn, check.curs = res[0], res[1]
+            check._create_db()
         res[1].execute("drop table ge_task_merge")
         res[1].execute("drop table rts_task")
         res[1].execute("drop table op_report")
@@ -108,16 +110,15 @@ class TestOpCounterOpScene(unittest.TestCase):
 
     def test_create_task(self):
         InfoConfReader()._info_json = {'devices': '0'}
-        curs = None
         with mock.patch(NAMESPACE + '.GetOpTableTsTime.get_task_time_data', return_value=[]), \
                 mock.patch(NAMESPACE + '.DBManager.insert_data_into_table'):
             check = OpCounterOpScene(CONFIG)
-            check.create_task(curs)
+            check.create_task()
         with mock.patch(NAMESPACE + '.GetOpTableTsTime.get_task_time_data', return_value=[]), \
-             mock.patch(NAMESPACE + '.DBManager.insert_data_into_table', side_effect=sqlite3.Error), \
-             mock.patch(NAMESPACE + '.logging.error'):
+                mock.patch(NAMESPACE + '.DBManager.insert_data_into_table', side_effect=sqlite3.Error), \
+                mock.patch(NAMESPACE + '.logging.error'):
             check = OpCounterOpScene(CONFIG)
-            check.create_task(curs)
+            check.create_task()
 
     def test_get_op_report_sql(self):
         check = OpCounterOpScene(CONFIG)
@@ -151,14 +152,16 @@ class TestOpCounterOpScene(unittest.TestCase):
               "and ge_task_merge.batch_id=rts_task.batch_id group by op_type"
         with mock.patch(NAMESPACE + '.OpCounterOpScene._get_op_report_sql', return_value=sql):
             check = OpCounterOpScene(CONFIG)
-            check.create_report(res[0], merge_curs)
+            check.conn, check.curs = res[0], res[1]
+            check.create_report()
         merge_curs.execute("insert into ge_task_merge values (1,'pool1','Pooling',5,5,0,10)")
-        merge_curs.execute("insert into rts_task values (1,5,5,0,1,0,10)")
+        merge_curs.execute("insert into rts_task values (5,0,5,0,5,0,10)")
         res[0].commit()
         with mock.patch(NAMESPACE + '.OpCounterOpScene._get_op_report_sql', return_value=sql), \
                 mock.patch(NAMESPACE + '.OpCounterOpScene._cal_total', return_value=10000):
             check = OpCounterOpScene(CONFIG)
-            check.create_report(res[0], merge_curs)
+            check.conn, check.curs = res[0], res[1]
+            check.create_report()
         merge_curs.execute('drop table ge_task_merge')
         merge_curs.execute('drop table rts_task')
         merge_curs.execute('drop table op_report')

@@ -14,14 +14,14 @@ class FftsPlusPmuBean(StructDecoder):
     def __init__(self: any, *args: any) -> None:
         filed = args[0]
         self.func_type = Utils.get_func_type(filed[0])
-        self._stream_id = filed[2]
+        self._stream_id = Utils.get_stream_id(filed[2])
         self._task_id = filed[3]
         self._subtask_id = filed[6]
         self._ffts_type = filed[7] >> 13
         self._subtask_type = filed[5] & int(b'11111111')
-        self._total_cycle = filed[10]
-        self._pmu_list = filed[12:20]
-        self._time_list = filed[20:]
+        self._total_cycle = filed[12]
+        self._pmu_list = filed[14:22]
+        self._time_list = filed[22:]
 
     @property
     def stream_id(self: any) -> int:
@@ -91,4 +91,23 @@ class FftsPlusPmuBean(StructDecoder):
         """
         get if aic data
         """
-        return bool(self._ffts_type == 0 or (self._ffts_type == 4 and self.subtask_type == 0))
+        return self.is_ffts_aic() or self.is_ffts_mix_aic_data() or self.is_tradition_aic()
+
+    def is_ffts_aic(self):
+        """
+        get if ffts aic data
+        """
+        return bool(self._ffts_type == 4 and self.subtask_type == 0)
+
+    def is_ffts_mix_aic_data(self):
+        """
+        get if ffts mix aic
+        """
+        return bool(self._ffts_type == 4 and self.subtask_type == 6)
+
+    def is_tradition_aic(self):
+        """
+        get if tradition aic
+        """
+        return bool(self._ffts_type == 0)
+
