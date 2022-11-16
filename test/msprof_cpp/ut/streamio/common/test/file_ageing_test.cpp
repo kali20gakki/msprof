@@ -55,7 +55,7 @@ TEST_F(COMMON_FILE_AGEING_TEST, Init) {
         .stubs()
         .will(returnValue(Analysis::Dvvp::Common::Config::PlatformType::MINI_TYPE))
         .then(returnValue(Analysis::Dvvp::Common::Config::PlatformType::DC_TYPE));
-    MOCKER(analysis::dvvp::common::utils::Utils::GetTotalVolume)
+    MOCKER(analysis::dvvp::common::utils::Utils::GetVolumeSize)
         .stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));    
