@@ -46,7 +46,8 @@ class ParserDispatcher:
         for parser in self.cfg_parser.sections():
             fmts = self.cfg_parser.get(parser, StrConstant.CONFIG_FMT).split(",")
             db_name = self.cfg_parser.get(parser, StrConstant.CONFIG_DB)
-            if os.path.exists(PathManager.get_db_path(self.result_dir, db_name)):
+            change_status = self.cfg_parser.get(parser, 'level')
+            if os.path.exists(PathManager.get_db_path(self.result_dir, db_name)) and not change_status:
                 os.remove(PathManager.get_db_path(self.result_dir, db_name))
             table_list = self.cfg_parser.get(parser, StrConstant.CONFIG_TABLE).split(",")
             if hasattr(self.modules, parser):
