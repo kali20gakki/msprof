@@ -2,10 +2,8 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 
-import os
-
+from config.config_manager import ConfigManager
 from common_func.db_name_constant import DBNameConstant
-from common_func.msvp_common import MsvpCommonConst
 from msmodel.interface.base_model import BaseModel
 
 
@@ -13,7 +11,7 @@ class RtsModel(BaseModel):
     """
     db operator for acl parser
     """
-    TABLES_PATH = os.path.join(MsvpCommonConst.CONFIG_PATH, 'Tables.ini')
+    TABLES_PATH = ConfigManager.TABLES
 
     @staticmethod
     def class_name() -> str:

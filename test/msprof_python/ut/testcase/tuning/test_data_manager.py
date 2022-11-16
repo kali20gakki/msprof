@@ -39,8 +39,6 @@ class TestDataManager(unittest.TestCase):
         headers = ['device_id', 'infer_id', 'project_path']
         data = [[0, 0, 'home\\data_manager']]
         with mock.patch(NAMESPACE + '.DataManager.is_network', return_value=True), \
-             mock.patch(NAMESPACE + '.GetExportDataConfigs.get_data_headers',
-                        return_value=['device_id', 'infer_id']), \
              mock.patch(NAMESPACE + '.PathManager.get_db_path', return_value='data\\ai_core_op_summary'), \
              mock.patch(NAMESPACE + '.AiCoreOpReport.get_ai_core_op_summary_data', return_value=(headers, data, 0)):
             result = DataManager._get_base_data(device_id, infer_id, project_path)

@@ -2,12 +2,11 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 
-import os
 from abc import ABC
 
+from config.config_manager import ConfigManager
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
-from common_func.msvp_common import MsvpCommonConst
 from msmodel.interface.base_model import BaseModel
 
 
@@ -15,7 +14,7 @@ class PcieModel(BaseModel, ABC):
     """
     acsq task model class
     """
-    TABLES_PATH = os.path.join(MsvpCommonConst.CONFIG_PATH, 'Tables_training.ini')
+    TABLES_PATH = ConfigManager.TABLES_TRAINING
 
     def flush(self: any, data_list: list) -> None:
         """

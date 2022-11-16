@@ -43,10 +43,8 @@ class TestOperatorMetric(unittest.TestCase):
         os.rmdir(os.path.join(os.path.dirname(__file__), 'test'))
 
     def test_load_rules(self):
-        with mock.patch('builtins.open', side_effect=FileNotFoundError), \
-                mock.patch(NAMESPACE + '.logging.error'):
-            result = ProfilingTuning._load_rules()
-        self.assertEqual(result, {})
+        result = ProfilingTuning._load_rules()
+        self.assertEqual(len(result), 16)
 
     def test_tuning_network(self):
         operator_dicts = [

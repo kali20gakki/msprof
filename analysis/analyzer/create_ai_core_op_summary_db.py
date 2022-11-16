@@ -6,9 +6,9 @@ import logging
 import os
 import sqlite3
 
+from config.config_manager import ConfigManager
 from analyzer.get_op_table_task_time import GetOpTableTsTime
 from analyzer.op_common_function import OpCommonFunc
-from analyzer.scene_base.profiling_scene import ProfilingScene
 from common_func.ai_stack_data_check_manager import AiStackDataCheckManager
 from common_func.common import CommonConstant
 from common_func.constant import Constant
@@ -18,7 +18,6 @@ from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msprof_exception import ProfException
 from common_func.msprof_iteration import MsprofIteration
-from common_func.msvp_constant import MsvpConstant
 from common_func.path_manager import PathManager
 from common_func.platform.chip_manager import ChipManager
 from profiling_bean.db_dto.ge_task_dto import GeTaskDto
@@ -30,8 +29,8 @@ class ParseAiCoreOpSummary:
     """
     TASK_TIME_COL_NUM = 8
     TRAIN_TASK_TIME_COL_NUM = 7
-    TABLE_PATH = os.path.join(MsvpConstant.CONFIG_PATH, 'Tables.ini')
-    TABLES_PATH = os.path.join(MsvpConstant.CONFIG_PATH, 'Tables.ini')
+    TABLE_PATH = ConfigManager.TABLES
+    TABLES_PATH = ConfigManager.TABLES
 
     def __init__(self: any, sample_config: dict) -> None:
         self.sample_config = sample_config
