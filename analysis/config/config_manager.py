@@ -14,6 +14,12 @@ from config.tables_operator_config import TablesOperatorConfig
 from config.msprof_export_data_config import MsProfExportDataConfig
 from config.data_calculator_config import DataCalculatorConfig
 from config.tuning_rule_config import TuningRuleConfig
+from config.ai_core_config import AICoreConfig
+from config.ai_cpu_config import AICPUConfig
+from config.ctrl_cpu_config import CtrlCPUConfig
+from config.ts_cpu_config import TsCPUConfig
+from config.constant_config import ConstantConfig
+from config.l2_cache_config import L2CacheConfig
 
 
 class ConfigManager:
@@ -27,6 +33,12 @@ class ConfigManager:
     MSPROF_EXPORT_DATA = 'MsProfExportDataConfig'
     DATA_CALCULATOR = 'DataCalculatorConfig'
     TUNING_RULE = 'TuningRuleConfig'
+    AI_CORE = "AICoreConfig"
+    AI_CPU = "AICPUConfig"
+    CTRL_CPU = "CtrlCPUConfig"
+    TS_CPU = "TsCPUConfig"
+    CONSTANT = "ConstantConfig"
+    L2_CACHE = "L2CacheConfig"
 
     CONFIG_MAP = {
         PROF_CONDITION: ProfConditionConfig,
@@ -38,7 +50,13 @@ class ConfigManager:
         TABLES_OPERATOR: TablesOperatorConfig,
         MSPROF_EXPORT_DATA: MsProfExportDataConfig,
         DATA_CALCULATOR: DataCalculatorConfig,
-        TUNING_RULE: TuningRuleConfig
+        TUNING_RULE: TuningRuleConfig,
+        AI_CORE: AICoreConfig,
+        AI_CPU: AICPUConfig,
+        CTRL_CPU: CtrlCPUConfig,
+        TS_CPU: TsCPUConfig,
+        CONSTANT: ConstantConfig,
+        L2_CACHE: L2CacheConfig
     }
 
     @classmethod
