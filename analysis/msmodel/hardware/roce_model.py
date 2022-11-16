@@ -4,15 +4,14 @@
 
 import collections
 import logging
-import os
 import sqlite3
 from abc import ABC
 
+from config.config_manager import ConfigManager
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
-from common_func.msvp_common import MsvpCommonConst
 from common_func.path_manager import PathManager
 from msmodel.interface.base_model import BaseModel
 
@@ -26,7 +25,7 @@ class RoceModel(BaseModel, ABC):
     PERCENTAGE = 100
     BYTE = 8
     NETWORK_HEADER_TAG = 'rxPacket/s'
-    TABLES_PATH = os.path.join(MsvpCommonConst.CONFIG_PATH, 'Tables_training.ini')
+    TABLES_PATH = ConfigManager.TABLES_TRAINING
 
     def __init__(self: any, result_dir: str, db_name: str, table_list: list) -> None:
         super().__init__(result_dir, db_name, table_list)

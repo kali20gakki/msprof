@@ -2,14 +2,12 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2021-2022. All rights reserved.
 
-import configparser
 import importlib
 import logging
 import os
 
+from config.config_manager import ConfigManager
 from common_func.ms_constant.str_constant import StrConstant
-from common_func.msvp_common import MsvpCommonConst
-from common_func.os_manager import check_file_readable
 from common_func.path_manager import PathManager
 
 
@@ -32,10 +30,7 @@ class ParserDispatcher:
         load stars config info and build parser map
         :return:
         """
-        self.cfg_parser = configparser.ConfigParser(interpolation=None)
-        stars_config_file = os.path.join(MsvpCommonConst.CONFIG_PATH, "stars_config.ini")
-        check_file_readable(stars_config_file)
-        self.cfg_parser.read(stars_config_file)
+        self.cfg_parser = ConfigManager.get(ConfigManager.STARS)
         self.build_parser_map()
 
     def build_parser_map(self: any) -> None:

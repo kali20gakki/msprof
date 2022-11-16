@@ -7,18 +7,17 @@ import logging
 import os
 import sqlite3
 
+from config.config_manager import ConfigManager
 from common_func.ai_stack_data_check_manager import AiStackDataCheckManager
 from common_func.constant import Constant
 from common_func.db_name_constant import DBNameConstant
 from common_func.file_manager import FileManager
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.msprof_exception import ProfException
-from common_func.msvp_common import MsvpCommonConst
 from common_func.msvp_common import is_valid_original_data
 from common_func.path_manager import PathManager
 from common_func.batch_counter import BatchCounter
 from common_func.iter_recorder import IterRecorder
-from common_func.utils import Utils
 from framework.offset_calculator import OffsetCalculator
 from msmodel.ai_cpu.ai_cpu_model import AiCpuModel
 from msparser.data_struct_size_constant import StructFmt
@@ -33,7 +32,7 @@ class ParseAiCpuBinData(MsMultiProcess):
     """
     TAG_AICPU = "AICPU"
     LIMIT_AI_CPU_LEN = 5000
-    TABLES_PATH = os.path.join(MsvpCommonConst.CONFIG_PATH, 'Tables.ini')
+    TABLES_PATH = ConfigManager.TABLES
     AI_CPU_DATA_MAP = "AiCpuDataMap"
     # magic number: 5A5A
     AI_CPU_MAGIC_NUM = 23130

@@ -2,13 +2,9 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2021-2022. All rights reserved.
 
-import logging
-import os
-import sqlite3
-
+from config.config_manager import ConfigManager
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
-from common_func.msvp_constant import MsvpConstant
 from msmodel.interface.parser_model import ParserModel
 
 
@@ -19,7 +15,7 @@ class AccPmuModel(ParserModel):
 
     READ = 1
     WRITE = 0
-    TABLES_PATH = os.path.join(MsvpConstant.CONFIG_PATH, 'Tables.ini')
+    TABLES_PATH = ConfigManager.TABLES
 
     def __init__(self: any, result_dir: str, db_name: str, table_list: list) -> None:
         super().__init__(result_dir, db_name, table_list)
