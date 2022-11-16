@@ -66,10 +66,11 @@ class AicPmuUtils:
         :return:
         """
         remove_list = ["total_time(ms)", "icache_req_ratio", "vec_fp16_128lane_ratio", "vec_fp16_64lane_ratio"]
-        unused_list = [["ub_read_bw_mte(GB/s)", "ub_write_bw_mte(GB/s)", "l2_write_bw(GB/s)",
-                        "main_mem_write_bw(GB/s)"],
-                       ["ub_read_bw_mte(GB/s)", "ub_write_bw_mte(GB/s)"],
-                       ["l2_read_bw(GB/s)", "l2_write_bw(GB/s)"]]
+        unused_list = [
+            ["ub_read_bw_mte(GB/s)", "ub_write_bw_mte(GB/s)", "l2_write_bw(GB/s)", "main_mem_write_bw(GB/s)"],
+            ["ub_read_bw_mte(GB/s)", "ub_write_bw_mte(GB/s)"],
+            ["l2_read_bw(GB/s)", "l2_write_bw(GB/s)"]
+        ]
         for _unused_list in unused_list:
             if set(key_list) >= set(_unused_list):
                 remove_list.extend(_unused_list)

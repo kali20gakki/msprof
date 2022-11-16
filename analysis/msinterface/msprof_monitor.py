@@ -130,7 +130,8 @@ class JobMonitor:
     def _launch_parsing_job_data(result_dir: str, sample_config: dict, tag_id: str) -> None:
         job_sample_config = {
             "result_dir": result_dir, "tag_id": tag_id, "host_id": MsProfCommonConstant.DEFAULT_IP,
-            "sql_path": PathManager.get_sql_dir(result_dir)}
+            "sql_path": PathManager.get_sql_dir(result_dir)
+        }
         target_collection = AI(
             {**sample_config, **job_sample_config})
         target_collection.import_control_flow()

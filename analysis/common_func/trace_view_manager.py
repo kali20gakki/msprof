@@ -91,9 +91,11 @@ class TraceViewManager:
         end_time = start_time + float(data_dict.get('dur', '0'))
         while data_list:
             if start_time < float(int(data_list[0].get('timestamp', '0')) / DBManager.NSTOUS) < end_time:
-                connect_dict = {'name': 'connect', 'ph': 's',
-                                'id': '{}-{}'.format(data_list[0].get('stream_id'), data_list[0].get('task_id')),
-                                'pid': data_dict.get('pid'), 'tid': data_dict.get('tid'), 'ts': start_time}
+                connect_dict = {
+                    'name': 'connect', 'ph': 's',
+                    'id': '{}-{}'.format(data_list[0].get('stream_id'), data_list[0].get('task_id')),
+                    'pid': data_dict.get('pid'), 'tid': data_dict.get('tid'), 'ts': start_time
+                }
                 connect_list.append(connect_dict)
             elif float(int(data_list[0].get('timestamp', '0')) / DBManager.NSTOUS) > end_time:
                 break
@@ -112,9 +114,11 @@ class TraceViewManager:
                 args = data_dict.get('args', {})
                 if not args.get('Stream Id') or not args.get('Task Id'):
                     continue
-                connect_dict = {'name': 'connect', 'ph': 'f',
-                                'id': '{}-{}'.format(args.get('Stream Id'), args.get('Task Id')),
-                                'pid': data_dict.get('pid'), 'tid': data_dict.get('tid'), 'ts': data_dict.get('ts'),
-                                'bp': 'e'}
+                connect_dict = {
+                    'name': 'connect', 'ph': 'f',
+                    'id': '{}-{}'.format(args.get('Stream Id'), args.get('Task Id')),
+                    'pid': data_dict.get('pid'), 'tid': data_dict.get('tid'), 'ts': data_dict.get('ts'),
+                    'bp': 'e'
+                }
                 json_list.append(connect_dict)
         return json_list

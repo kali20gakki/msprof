@@ -40,8 +40,7 @@ class MsprofTimeline:
         """
         get timeline header
         """
-        header = [["process_sort_index", pid,
-                   InfoConfReader().get_json_tid_data(), pid_sort_index]]
+        header = [["process_sort_index", pid, InfoConfReader().get_json_tid_data(), pid_sort_index]]
         process_index = TraceViewManager.metadata_event(header)
         return process_index
 

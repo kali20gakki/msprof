@@ -22,7 +22,9 @@
 #include "params_adapter.h"
 #include "input_parser.h"
 #include "platform/platform.h"
+#include "env_manager.h"
 
+using namespace Analysis::Dvvp::App;
 using namespace analysis::dvvp::common::error;
 using namespace Analysis::Dvvp::Msprof;
 using namespace Collector::Dvvp::Common::PlatformAdapter;
@@ -35,7 +37,6 @@ protected:
 };
 
 extern int LltMain(int argc, const char **argv, const char **envp);
-extern void SetEnvList(const char **envp, std::vector<std::string> &envpList);
 
 TEST_F(MSPROF_BIN_UTEST, LltMain) {
     GlobalMockObject::verify();
@@ -46,8 +47,9 @@ TEST_F(MSPROF_BIN_UTEST, LltMain) {
     envp[0] = "test=a";
     envp[1] = "a=b";
     
-    MOCKER(&SetEnvList)
-        .stubs();
+    MOCKER(&EnvManager::SetEnvList)
+        .stubs()
+        .will(returnValue(false));
     EXPECT_EQ(PROFILING_FAILED, LltMain(1, (const char**)argv, (const char**)envp));
     EXPECT_EQ(PROFILING_FAILED, LltMain(2, (const char**)argv, (const char**)envp));
 
@@ -68,6 +70,8 @@ TEST_F(MSPROF_BIN_UTEST, LltMain) {
 
 TEST_F(MSPROF_BIN_UTEST, SetEnvList) {
     GlobalMockObject::verify();
+    std::shared_ptr<EnvManager> envManager;
+    MSVP_MAKE_SHARED0_BREAK(envManager, EnvManager);
     char* envp[4097];
     char str[] = "a=a";
     for (int i = 0; i < 4097; i++) {
@@ -75,5 +79,6 @@ TEST_F(MSPROF_BIN_UTEST, SetEnvList) {
     }
     envp[4096] = nullptr;
     std::vector<std::string> envpList;
-    SetEnvList((const char**)envp, envpList);
+    bool val = envManager->SetEnvList((const char**)envp, envpList);
+    EXPECT_EQ(true, val);
 }

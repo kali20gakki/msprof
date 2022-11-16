@@ -55,8 +55,12 @@ class LowPowerViewer(BaseViewer, ABC):
         get timeline trace header
         :return: list
         """
-        low_power_header = [["process_name", self.pid,
-                             InfoConfReader().get_json_tid_data(), self.params.get(self.DATA_TYPE)]]
+        low_power_header = [
+            [
+                "process_name", self.pid,
+                InfoConfReader().get_json_tid_data(), self.params.get(self.DATA_TYPE)
+            ]
+        ]
         return low_power_header
 
     def get_trace_timeline(self: any, datas: list) -> list:

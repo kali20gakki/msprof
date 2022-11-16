@@ -460,10 +460,10 @@ def is_valid_original_data(file_name: str, project_path: str, is_conf: bool = Fa
     :return: result of checking original data
     """
     file_parent_path = project_path if is_conf else PathManager.get_data_dir(project_path)
-    if file_name.endswith(Constant.COMPLETE_TAG) \
-            or file_name.endswith(Constant.DONE_TAG) \
-            or file_name.endswith(Constant.ZIP_TAG) \
-            or os.path.exists(os.path.join(file_parent_path, file_name + Constant.COMPLETE_TAG)):
+    if file_name.endswith(Constant.COMPLETE_TAG) or file_name.endswith(Constant.DONE_TAG) \
+            or file_name.endswith(Constant.ZIP_TAG):
+        return False
+    if os.path.exists(os.path.join(file_parent_path, file_name + Constant.COMPLETE_TAG)):
         return False
     return True
 
@@ -475,8 +475,10 @@ def float_calculate(input_list: list, operator: str = '+') -> str:
     :param operator: operator
     :return: result after calculated
     """
-    operator_dict = {StrConstant.OPERATOR_PLUS: add, StrConstant.OPERATOR_MINUS: sub,
-                     StrConstant.OPERATOR_MULTIPLY: mul, StrConstant.OPERATOR_DIVISOR: truediv}
+    operator_dict = {
+        StrConstant.OPERATOR_PLUS: add, StrConstant.OPERATOR_MINUS: sub,
+        StrConstant.OPERATOR_MULTIPLY: mul, StrConstant.OPERATOR_DIVISOR: truediv
+    }
     if operator not in operator_dict or not input_list or None in input_list:
         return str(0)
     if operator == StrConstant.OPERATOR_DIVISOR and str(input_list[1]) == "0":

@@ -141,13 +141,10 @@ def calculate_type_state_time(task_data: dict) -> dict:
     """
     type_state_time = {}
     for task in task_data["tasktime_data"]:
-        type_state_time[task[0]] = {'waiting': task[1],
-                                    'running': task[2],
-                                    'pending': task[3],
-                                    'count': task[-1],
-                                    'min': task[4],
-                                    'max': task[5],
-                                    'avg': task[6]}
+        type_state_time[task[0]] = {
+            'waiting': task[1], 'running': task[2], 'pending': task[3], 'count': task[-1],
+            'min': task[4], 'max': task[5], 'avg': task[6]
+        }
     return type_state_time
 
 
@@ -238,10 +235,12 @@ def handle_task_time(index: int, insert_data: list, timeline_data: list, status_
     """
     waiting_status_index, pending_status_index, running_status_index = status_index_list
     if timeline_data[index][-1] == CalculateRtsDataConst.COMPLETE:
-        tmp = {'waiting': calculate_time(timeline_data, waiting_status_index),
-               "pending": calculate_time(timeline_data, pending_status_index),
-               'running': calculate_time(timeline_data, running_status_index),
-               'complete': InfoConfReader().time_from_syscnt(timeline_data[index][-2])}
+        tmp = {
+            'waiting': calculate_time(timeline_data, waiting_status_index),
+            "pending": calculate_time(timeline_data, pending_status_index),
+            'running': calculate_time(timeline_data, running_status_index),
+            'complete': InfoConfReader().time_from_syscnt(timeline_data[index][-2])
+        }
         insert_data.append(
             timeline_data[index][0:7] +
             (tmp.get('waiting', 0), tmp.get('pending', 0), tmp.get('running', 0), tmp.get('complete', 0)))
@@ -379,7 +378,7 @@ def insert_metric_value(conn: any, metrics: list, table_name: str) -> bool:
     sql = 'CREATE TABLE IF NOT EXISTS {name}({column})'.format(
         column=','.join(metric.replace('(ms)', '').replace('(GB/s)', '')
                         + ' numeric' for metric in metrics) + ', task_id INT, '
-                                                              'stream_id INT ', name=table_name)
+                                                              'stream_id INT, core_type INT ', name=table_name)
     return DBManager.execute_sql(conn, sql)
 
 
@@ -445,7 +444,7 @@ def get_metrics_from_sample_config(project_path: str,
             call_sys_exit(NumberConstant.ERROR)
     metrics.extend(sample_metrics)
     cal = CalculateAiCoreData(project_path)
-    cal.add_fops_header(StrConstant.AI_CORE_PROFILING_METRICS, metrics)
+    cal.add_fops_header(metrics_type, metrics)
     return metrics
 
 
@@ -530,9 +529,9 @@ def sql_insert_metric_summary_table(metrics: list, freq: float, have_step_info: 
         algos.append(algo)
     algo_lst = Utils.generator_to_list("cast(" + algo + " as decimal(8,2))" for algo in algos)
     sql = "SELECT " + ",".join(algo_lst) \
-          + ", task_id, stream_id FROM EventCount"
+          + ", task_id, stream_id, '0' FROM EventCount"
     if have_step_info:
         sql = "SELECT " + ",".join(algo_lst) \
-              + ", task_id, stream_id " \
+              + ", task_id, stream_id, '0' " \
                 "FROM EventCount limit ? offset ?"
     return sql

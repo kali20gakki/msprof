@@ -80,10 +80,14 @@ class HCCLExport:
                                      ("Size(Byte)", _hccl_data[9]),
                                      ("Stage", _hccl_data[10]),
                                      ("Step", _hccl_data[11])])
-            _hccl_data_pice = [_hccl_data[0], self.pid_value, _hccl_data[1],
-                               _hccl_data[2], _hccl_data[3], hccl_args]
-            _hccl_stage_pice = ["Stage{}Step{}".format(_hccl_data[10], _hccl_data[11]), self.pid_value, _hccl_data[1],
-                                _hccl_data[2], _hccl_data[3], hccl_args]
+            _hccl_data_pice = [
+                _hccl_data[0], self.pid_value, _hccl_data[1],
+                _hccl_data[2], _hccl_data[3], hccl_args
+            ]
+            _hccl_stage_pice = [
+                "Stage{}Step{}".format(_hccl_data[10], _hccl_data[11]), self.pid_value, _hccl_data[1],
+                _hccl_data[2], _hccl_data[3], hccl_args
+            ]
             _hccl_format_data[index] = _hccl_data_pice
             _hccl_format_data[index + len(hccl_data)] = _hccl_stage_pice
         self.result.extend(TraceViewManager.time_graph_trace(
@@ -100,17 +104,21 @@ class HCCLExport:
         else:
             sql_datas = DBManager.fetch_all_data(cur, sql)
             if not sql_datas:
-                self.result = {'status': NumberConstant.WARN,
-                               "info": "get hccl data failed,"
-                                       " may be lack of hccl files containing iteration {}.".format(self.iter_id)}
+                self.result = {
+                    'status': NumberConstant.WARN,
+                    "info": "get hccl data failed,"
+                            " may be lack of hccl files containing iteration {}.".format(self.iter_id)
+                }
             return sql_datas
         finally:
             DBManager.destroy_db_connect(conn, cur)
 
     def _check_hccl_table(self: any, conn: any, curs: any) -> bool:
         if not (conn and curs) or not DBManager.judge_table_exist(curs, DBNameConstant.TABLE_HCCL_ALL_REDUCE):
-            self.result = {'status': NumberConstant.ERROR,
-                           "info": "get hccl data failed, may be the hccl file not completed or hccl parser failed."
-                                   " please check data file."}
+            self.result = {
+                'status': NumberConstant.ERROR,
+                "info": "get hccl data failed, may be the hccl file not completed or hccl parser failed."
+                        " please check data file."
+            }
             return False
         return True

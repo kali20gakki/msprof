@@ -339,7 +339,10 @@ class Constant:
                                  "vec_resc_cflt_ratio",
         "MemoryUB": "ub_read_bw_mte(GB/s),ub_write_bw_mte(GB/s),"
                     "ub_read_bw_vector(GB/s),ub_write_bw_vector(GB/s),"
-                    "ub_read_bw_scalar(GB/s),ub_write_bw_scalar(GB/s)"
+                    "ub_read_bw_scalar(GB/s),ub_write_bw_scalar(GB/s)",
+        "L2Cache": "write_cache_hit,write_cache_miss_allocate,"
+                   "r0_read_cache_hit,r0_read_cache_miss_allocate,"
+                   "r1_read_cache_hit,r1_read_cache_miss_allocate"
     }
 
     # add default limit for reader buffer size ->8196  * 1024 Byte
@@ -356,6 +359,7 @@ class Constant:
     CHIP_V3_2_0 = "3"
     CHIP_V3_3_0 = "4"
     CHIP_V4_1_0 = "5"
+    CHIP_V1_1_1 = "7"
 
     MIX_OP_AND_GRAPH = "mix_operator_and_graph"
     STEP_INFO = "step_info"
@@ -384,7 +388,13 @@ class Constant:
     TASK_TYPE_AI_CORE = "AI_CORE"
     TASK_TYPE_AI_CPU = "AI_CPU"
     TASK_TYPE_AIV = "AI_VECTOR_CORE"
+    TASK_TYPE_MIX_AIV = "MIX_AIV"
+    TASK_TYPE_MIX_AIC = "MIX_AIC"
     DATA_PROCESS_AI_CPU = "AICPU"
+    TASK_TYPE_WRITE_BACK = "WRITE_BACK"
+    TASK_TYPE_INVALID = "INVALID"
+    TASK_TYPE_DSA = "DSA_SQE"
+    TASK_TYPE_DVPP = "DVPP"
     DATA_PROCESS_DP = "DP"
     DATA_QUEUE = "AICPUMI"
     WRITE_MODES = stat.S_IWUSR | stat.S_IRUSR | stat.S_IRGRP

@@ -15,6 +15,8 @@ class GeTaskDto:
         self._task_id = None
         self._block_dim = None
         self._op_state = None
+        self._batch_id = None
+        self._context_id = None
         self._task_type = None
         self._op_type = None
         self._index_id = None
@@ -29,6 +31,14 @@ class GeTaskDto:
     @model_id.setter
     def model_id(self: any, value: any) -> None:
         self._model_id = value
+
+    @property
+    def context_id(self: any) -> any:
+        return self._context_id
+
+    @context_id.setter
+    def context_id(self: any, value: any) -> None:
+        self._context_id = value
 
     @property
     def op_name(self: any) -> any:

@@ -41,7 +41,7 @@ class ParseAiCpuBinData(MsMultiProcess):
     NONE_NODE_NAME = ''
 
     def __init__(self: any, file_list: dict, sample_config: dict) -> None:
-        MsMultiProcess.__init__(self, sample_config)
+        super().__init__(sample_config)
         self._file_list = file_list.get(DataTag.AI_CPU, [])
         self.sample_config = sample_config
         self.project_path = self.sample_config.get("result_dir")

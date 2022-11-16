@@ -39,6 +39,7 @@ class AicCalculator(ICalculator, MsMultiProcess):
         self._file_list = file_list.get(DataTag.AI_CORE, [])
         self._aic_data_list = []
         self._file_list.sort(key=lambda x: int(x.split("_")[-1]))
+        self.core_type = 0
 
     def calculate(self: any) -> None:
         """
@@ -65,7 +66,7 @@ class AicCalculator(ICalculator, MsMultiProcess):
         AicPmuUtils.remove_redundant(pmu_list)
         data_list.append(
             [data.total_cycle, *list(itertools.chain.from_iterable(pmu_list.values())), data.task_id, data.stream_id,
-             ])
+             self.core_type])
 
     def save(self: any) -> None:
         """
@@ -84,7 +85,7 @@ class AicCalculator(ICalculator, MsMultiProcess):
         :return: None
         """
         config = generate_config(PathManager.get_sample_json_path(self._project_path))
-        if config.get('ai_core_profiling_mode') == 'sample-based':
+        if config.get('ai_core_profiling_mode') == StrConstant.AIC_SAMPLE_BASED_MODE:
             return
 
         if not self._file_list:
@@ -100,7 +101,8 @@ class AicCalculator(ICalculator, MsMultiProcess):
 
     def _get_offset_and_total(self: any, model_id: int, index_id: int) -> (int, int):
         """
-        :param iter_id:
+        :param model_id:
+        :param index_id:
         :return: offset count and total aic count
         """
         offset_count, total_count = self._iter_model.get_task_offset_and_sum(

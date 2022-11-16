@@ -42,7 +42,7 @@ class ParseAiCpuData(MsMultiProcess):
     LEN_TIME_NAME = 5
 
     def __init__(self: any, file_list: dict, sample_config: dict) -> None:
-        MsMultiProcess.__init__(self, sample_config)
+        super().__init__(sample_config)
         self._file_list = file_list
         self.sample_config = sample_config
         self.project_path = self.sample_config.get(StrConstant.SAMPLE_CONFIG_PROJECT_PATH)

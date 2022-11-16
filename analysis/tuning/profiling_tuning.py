@@ -31,11 +31,13 @@ class ProfilingTuning:
 
     @staticmethod
     def _generate_rule_bean(rule: any) -> any:
-        rule_dic = {CommonProfRule.RULE_ID: rule.get(CommonProfRule.RULE_ID),
-                    CommonProfRule.RULE_CONDITION: rule.get(CommonProfRule.RULE_CONDITION),
-                    CommonProfRule.RULE_TYPE: rule.get(CommonProfRule.RULE_TYPE),
-                    CommonProfRule.RULE_SUBTYPE: rule.get(CommonProfRule.RULE_SUBTYPE),
-                    CommonProfRule.RULE_SUGGESTION: rule.get(CommonProfRule.RULE_SUGGESTION)}
+        rule_dic = {
+            CommonProfRule.RULE_ID: rule.get(CommonProfRule.RULE_ID),
+            CommonProfRule.RULE_CONDITION: rule.get(CommonProfRule.RULE_CONDITION),
+            CommonProfRule.RULE_TYPE: rule.get(CommonProfRule.RULE_TYPE),
+            CommonProfRule.RULE_SUBTYPE: rule.get(CommonProfRule.RULE_SUBTYPE),
+            CommonProfRule.RULE_SUGGESTION: rule.get(CommonProfRule.RULE_SUGGESTION)
+        }
         rule_bean = RuleBean(**rule_dic)
         return rule_bean
 

@@ -19,8 +19,8 @@ class StarsChipTransBean(StructDecoder):
         self._data_tag = self.filed[1]
         self._sys_cnt = self.filed[3]
         self._event_id = self.filed[8]
-        self._write_bandwidth = self.filed[8]
-        self._read_bandwidth = self.filed[8]
+        self._value_1 = self.filed[8]
+        self._value_2 = self.filed[8]
 
     @property
     def func_type(self: any) -> str:
@@ -69,7 +69,7 @@ class StarsChipTransBean(StructDecoder):
         mata bw level is the lower 6 bits of the byte.
         7 is 0b111 keep lower 3 bits which represent mata bw level
         """
-        return self._write_bandwidth
+        return self._value_1
 
     @property
     def pa_tx_or_pcie_read_bw(self: any) -> any:
@@ -78,4 +78,4 @@ class StarsChipTransBean(StructDecoder):
         l2 buffer bw level is the 4 - 11 bits of the byte.
         3040 is 0b11111111000 keep 7 - 10 bits which represent cnt
         """
-        return self._read_bandwidth
+        return self._value_2

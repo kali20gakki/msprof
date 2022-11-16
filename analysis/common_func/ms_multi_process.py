@@ -1,8 +1,9 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2018-2019. All rights reserved.
-
+import logging
 import multiprocessing
+import time
 from abc import abstractmethod
 
 from common_func.common import init_log
@@ -35,5 +36,8 @@ class MsMultiProcess(multiprocessing.Process):
         """
         implement run method
         """
+        start_time = time.time()
         self.process_init()
         self.ms_run()
+        logging.info(f'{self.__class__.__name__} process data finished, '
+                     f'execute time is {(time.time() - start_time):.3f}s')

@@ -69,8 +69,7 @@ class TraceViewer:
         :param tid: tid
         :return: result
         """
-        tmp_args_data = {"Tx": 0,
-                         "Rx": 0}
+        tmp_args_data = {"Tx": 0, "Rx": 0}
         if trace_name == "PCIe_post":
             tmp_args_data["Tx"] = data_item[4]
             tmp_args_data["Rx"] = data_item[-7]
@@ -103,8 +102,7 @@ class TraceViewer:
 def _get_hccs_result(hccs_data: list, trace_parser: any) -> list:
     delta_dev = InfoConfReader().get_delta_time()
     _trace = []
-    json_data = [InfoConfReader().get_json_pid_data(),
-                 InfoConfReader().get_json_tid_data()]
+    json_data = [InfoConfReader().get_json_pid_data(), InfoConfReader().get_json_tid_data()]
     _result = TraceViewManager.metadata_event(
         [["process_name", json_data[0], json_data[1], trace_parser.scope]])
     for _data_item in hccs_data:
@@ -238,21 +236,25 @@ def _process_dvpp_timeline_data(result: list, conn: any, dvpp_list: list, engine
             for _id in engine_ids[_type]:
                 slice_ = {}
                 _dump_data = {}
-                _param = {'project_path': params['project_path'],
-                          'start_time': params['start_time'],
-                          'end_time': params['end_time'],
-                          'device_id': params['device_id'],
-                          'dvppid': dvpp_id,
-                          'engine_type': Constant.DVPP_TYPE_NAME.index(_type),
-                          'engine_id': _id}
+                _param = {
+                    'project_path': params['project_path'],
+                    'start_time': params['start_time'],
+                    'end_time': params['end_time'],
+                    'device_id': params['device_id'],
+                    'dvppid': dvpp_id,
+                    'engine_type': Constant.DVPP_TYPE_NAME.index(_type),
+                    'engine_id': _id
+                }
                 slice_['_slice_time'], slice_['_slice_util'] = \
                     get_dvpp_total_data(_param, conn)
-                _dump_data["slice_data"] = \
-                    {"Engine_{}/frame".format(_id): slice_.get('_slice_time', 0),
-                     "Engine_{}/utilization".format(_id): slice_.get('_slice_util', 0)}
-                _dump_data["legend"] = \
-                    {"Engine_{}/frame".format(_id): get_dvpp_legend()[0],
-                     "Engine_{}/utilization".format(_id): get_dvpp_legend()[1]}
+                _dump_data["slice_data"] = {
+                    "Engine_{}/frame".format(_id): slice_.get('_slice_time', 0),
+                    "Engine_{}/utilization".format(_id): slice_.get('_slice_util', 0)
+                }
+                _dump_data["legend"] = {
+                    "Engine_{}/frame".format(_id): get_dvpp_legend()[0],
+                    "Engine_{}/utilization".format(_id): get_dvpp_legend()[1]
+                }
                 result.extend(trace_parser.multiple_name_dump(_dump_data.get("slice_data", {}),
                                                               _dump_data.get("legend", ""),
                                                               delta_dev,
@@ -302,8 +304,9 @@ def get_network_timeline(result_dir: str, devid: str, start: int, end: int, coll
             {"status": NumberConstant.ERROR, "info": "Failed to connect {0}.".format(table.get('_db'))})
 
     table['delta_dev'] = InfoConfReader().get_delta_time()
-    sql_ = {'sentence': "SELECT DISTINCT func_id FROM {} " \
-                        "WHERE device_id IS ?".format(table.get('_table', ''))}
+    sql_ = {
+        'sentence': "SELECT DISTINCT func_id FROM {} WHERE device_id IS ?".format(table.get('_table', ''))
+    }
     table['_func_list'] = DBManager.fetch_all_data(curs, sql_.get('sentence', ''), (devid,))
     trace_parser = TraceViewer(table.get('_header', ''))
     _result = []
@@ -405,10 +408,12 @@ def _format_single_data(top_down_datas: list) -> list:
             trace_data_args = OrderedDict([("Model Name", top_down_data[6]),
                                            ("Model Id", top_down_data[7])
                                            ])
-        trace_data_pice = [top_down_data[1], top_down_data[4], top_down_data[5],
-                           int(top_down_data[2]) / NumberConstant.CONVERSION_TIME,
-                           int(top_down_data[3]) / NumberConstant.CONVERSION_TIME,
-                           trace_data_args]
+        trace_data_pice = [
+            top_down_data[1], top_down_data[4], top_down_data[5],
+            int(top_down_data[2]) / NumberConstant.CONVERSION_TIME,
+            int(top_down_data[3]) / NumberConstant.CONVERSION_TIME,
+            trace_data_args
+        ]
         trace_data.append(trace_data_pice)
     return trace_data
 
@@ -416,15 +421,20 @@ def _format_single_data(top_down_datas: list) -> list:
 def _get_ge_data(ge_datas: list, pid: int) -> list:
     _ge_trace_data = []
     for ge_data in ge_datas:
-        ge_trace_data = [(TraceViewHeaderConstant.PROCESS_GE, "Input", ge_data[0], ge_data[1],
-                          pid,
-                          ge_data[8], ge_data[6], ge_data[7]),
-                         (TraceViewHeaderConstant.PROCESS_GE, "Infer", ge_data[2], ge_data[3],
-                          pid,
-                          ge_data[8], ge_data[6], ge_data[7]),
-                         (TraceViewHeaderConstant.PROCESS_GE, "Output", ge_data[4], ge_data[5],
-                          pid,
-                          ge_data[8], ge_data[6], ge_data[7])]
+        ge_trace_data = [
+            (
+                TraceViewHeaderConstant.PROCESS_GE, "Input", ge_data[0],
+                ge_data[1], pid, ge_data[8], ge_data[6], ge_data[7]
+            ),
+            (
+                TraceViewHeaderConstant.PROCESS_GE, "Infer", ge_data[2],
+                ge_data[3], pid, ge_data[8], ge_data[6], ge_data[7]
+            ),
+            (
+                TraceViewHeaderConstant.PROCESS_GE, "Output", ge_data[4],
+                ge_data[5], pid, ge_data[8], ge_data[6], ge_data[7]
+            )
+        ]
         ge_trace_data = _format_single_data(ge_trace_data)
         _ge_trace_data.extend(ge_trace_data)
     return _ge_trace_data

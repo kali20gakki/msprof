@@ -42,16 +42,18 @@ class BaseTuningView:
                 sub_rule_dict.setdefault(rule_sub_type, []).append(result)
             else:
                 print_msg("\t{0}){2}: [{1}]".format(result_index + 1,
-                                                ",".join(list(map(str, result.get(CommonProfRule.RESULT_OP_LIST, [])))),
-                                                result.get(CommonProfRule.RESULT_RULE_SUGGESTION, "")))
+                                                    ",".join(list(map(str,
+                                                                      result.get(CommonProfRule.RESULT_OP_LIST, [])))),
+                                                    result.get(CommonProfRule.RESULT_RULE_SUGGESTION, "")))
         if sub_rule_dict:
             for sub_key_index, sub_key in enumerate(sub_rule_dict.keys()):
                 print_msg("\t{0}){1}:".format(sub_key_index + 1, sub_key))
                 for value_index, value in enumerate(sub_rule_dict.get(sub_key)):
                     print_msg(
                         "\t\t{0}){2}: [{1}]".format(value_index + 1,
-                                                    ",".join(value.get(CommonProfRule.RESULT_OP_LIST, [])),
-                                                    value.get(CommonProfRule.RESULT_RULE_SUGGESTION)))
+                                                    ",".join(list(map(str,
+                                                                      value.get(CommonProfRule.RESULT_OP_LIST, [])))),
+                                                    value.get(CommonProfRule.RESULT_RULE_SUGGESTION, "")))
 
     def get_tuning_data(self: any) -> None:
         """
