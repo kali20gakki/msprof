@@ -11,6 +11,8 @@ class StarsConstant:
     ACSQ_END_FUNCTYPE = '000001'
     FFTS_LOG_START_TAG = '100010'
     FFTS_LOG_END_TAG = '100011'
+    FFTS_PMU_TAG = '101000'
+    FFTS_BLOCK_PMU_TAG = '101001'
 
     # chip trans type
     TYPE_STARS_PA = "100010"
@@ -29,8 +31,8 @@ class StarsConstant:
         3: "Notify Wait",
         4: "Notify Record",
         5: "Write Value",
-        6: "MIX AIC",
-        7: "MIX AIV",
+        6: "MIX_AIC",
+        7: "MIX_AIV",
         8: "SDMA",
         9: "Data Context",
         # Schedule the DMU descriptor to SDMA, and SDMA informs the L2 cache to
@@ -39,7 +41,7 @@ class StarsConstant:
         # FFTS schedules the DMU descriptor to SDMA,
         # and SDMA informs L2 cache to write back the corresponding cache line
         11: "Writeback Data Context",
-        12: "AICPU",
+        12: "AI_CPU",
         13: "Load Context"
     }
 

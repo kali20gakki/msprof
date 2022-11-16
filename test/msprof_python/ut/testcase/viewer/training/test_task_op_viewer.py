@@ -100,7 +100,7 @@ class TestTaskOpViewer(unittest.TestCase):
         test_hwts_sql = db_manager_hwts.create_table(DBNameConstant.DB_HWTS, create_hwts_sql, insert_hwts_sql, data)
 
         create_rts_sql = "CREATE TABLE IF NOT EXISTS " + DBNameConstant.TABLE_RUNTIME_TRACK + \
-                         "(device_id, timestamp, tasktype, stream_id, task_id, " \
+                         "(device_id, timestamp, task_type, stream_id, task_id, " \
                          "batch_id, thread)"
         data = ((0, 18870603856900, "TaskSubmited", 0, 3, 0, 3988),
                 (0, 18870603856900, "TaskSubmited", 1, 2, 0, 3988),)

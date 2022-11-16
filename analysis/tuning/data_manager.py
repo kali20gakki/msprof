@@ -136,20 +136,20 @@ class DataManager:
             sample_config = generate_config(os.path.join(project_path, CommonConstant.SAMPLE_JSON))
 
             param[StrConstant.DATA_TYPE] = StrConstant.AI_CORE_PMU_EVENTS
-            if sample_config.get(StrConstant.AICORE_PROFILING_MODE) == MsvpConstant.AI_CORE_PROFILING_MODE_LIST[0]:
+            if sample_config.get(StrConstant.AICORE_PROFILING_MODE) == StrConstant.AIC_TASK_BASED_MODE:
                 headers, data, _ = get_task_based_core_data(project_path, DBNameConstant.DB_RUNTIME,
                                                             param)
-            elif sample_config.get(StrConstant.AICORE_PROFILING_MODE) == MsvpConstant.AI_CORE_PROFILING_MODE_LIST[1]:
+            elif sample_config.get(StrConstant.AICORE_PROFILING_MODE) == StrConstant.AIC_SAMPLE_BASED_MODE:
                 param[StrConstant.CORE_DATA_TYPE] = StrConstant.AI_CORE_PMU_EVENTS
                 headers, data, _ = get_core_sample_data(project_path, "aicore_{}.db", device_id,
                                                         param)
 
             if not headers or not data:
                 param[StrConstant.DATA_TYPE] = StrConstant.AI_VECTOR_CORE_PMU_EVENTS
-                if sample_config.get(StrConstant.AIV_PROFILING_MODE) == MsvpConstant.AI_CORE_PROFILING_MODE_LIST[0]:
+                if sample_config.get(StrConstant.AIV_PROFILING_MODE) == StrConstant.AIC_TASK_BASED_MODE:
                     headers, data, _ = get_task_based_core_data(project_path, DBNameConstant.DB_RUNTIME,
                                                                 param)
-                elif sample_config.get(StrConstant.AIV_PROFILING_MODE) == MsvpConstant.AI_CORE_PROFILING_MODE_LIST[1]:
+                elif sample_config.get(StrConstant.AIV_PROFILING_MODE) == StrConstant.AIC_SAMPLE_BASED_MODE:
                     headers, data, _ = get_core_sample_data(project_path, "ai_vector_core_{}.db",
                                                             device_id, param)
         return headers, data

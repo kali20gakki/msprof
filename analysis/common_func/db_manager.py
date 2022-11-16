@@ -304,6 +304,18 @@ class DBManager:
         cls.execute_sql(conn, 'DROP TABLE IF EXISTS {}'.format(table))
 
     @classmethod
+    def clear_table(cls: any, conn: any, table_name: str):
+        """
+        delete all data in one table
+        :param conn: DB connection
+        :param table_name: ready to delete table data
+        :return:
+        """
+        if not isinstance(conn, sqlite3.Connection):
+            logging.error("%s table does not exist", table_name)
+        cls.execute_sql(conn, "Delete from {}".format(table_name))
+
+    @classmethod
     def check_tables_in_db(cls: any, db_path: str, *tables: any) -> bool:
         """
         check if tables in database
@@ -378,6 +390,7 @@ class DBManager:
                 curs.execute(sql)
         except sqlite3.Error as _err:
             logging.error(str(_err), exc_info=Constant.TRACE_BACK_SWITCH)
+            curs.row_factory = None
             return []
         try:
             while True:

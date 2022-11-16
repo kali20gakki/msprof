@@ -74,9 +74,6 @@ TEST_F(ParamsAdapterMsprofUtest, ParamsCheckMsprofV1)
         INPUT_CFG_COM_SYS_PERIOD,
         INPUT_CFG_HOST_SYS,
         INPUT_CFG_HOST_SYS_PID,
-        INPUT_CFG_PYTHON_PATH,
-        INPUT_CFG_SUMMARY_FORMAT,
-        INPUT_CFG_ITERATION_ID
     };
     MOCKER_CPP(&analysis::dvvp::common::validation::ParamValidation::MsprofCheckAiModeValid)
         .stubs()
@@ -96,15 +93,6 @@ TEST_F(ParamsAdapterMsprofUtest, ParamsCheckMsprofV1)
     MOCKER_CPP(&analysis::dvvp::common::validation::ParamValidation::CheckHostSysPidValid)
         .stubs()
         .will(returnValue(true));
-    MOCKER_CPP(&analysis::dvvp::common::validation::ParamValidation::CheckExportIdIsValid)
-        .stubs()
-        .will(returnValue(true));
-    MOCKER_CPP(&analysis::dvvp::common::validation::ParamValidation::CheckExportSummaryFormatIsValid)
-        .stubs()
-        .will(returnValue(true));
-    MOCKER_CPP(&analysis::dvvp::common::validation::ParamValidation::CheckPythonPathIsValid)
-        .stubs()
-        .will(returnValue(true));
     for (auto inputCfg : inputCfgList) {
         ret = MsprofParamAdapterMgr->ParamsCheckMsprofV1(inputCfg, " ");
         EXPECT_EQ(true, ret);
@@ -117,28 +105,6 @@ TEST_F(ParamsAdapterMsprofUtest, SetDefaultParamsApp)
     std::shared_ptr<ParamsAdapterMsprof> MsprofParamAdapterMgr;
     MSVP_MAKE_SHARED0_BREAK(MsprofParamAdapterMgr, ParamsAdapterMsprof);
     MsprofParamAdapterMgr->SetDefaultParamsApp();
-}
-
-TEST_F(ParamsAdapterMsprofUtest, SetMsprofMode)
-{
-    GlobalMockObject::verify();
-    std::shared_ptr<ParamsAdapterMsprof> MsprofParamAdapterMgr;
-    MSVP_MAKE_SHARED0_BREAK(MsprofParamAdapterMgr, ParamsAdapterMsprof);
-    int ret = MsprofParamAdapterMgr->SetMsprofMode();
-    EXPECT_EQ(PROFILING_FAILED, ret);
-    std::vector<InputCfg> cfgList = {
-        INPUT_CFG_MSPROF_APPLICATION,
-        INPUT_CFG_COM_SYS_DEVICES,
-        INPUT_CFG_HOST_SYS,
-        INPUT_CFG_PARSE,
-        INPUT_CFG_QUERY,
-        INPUT_CFG_EXPORT
-    };
-    for (auto cfg : cfgList) {
-        MsprofParamAdapterMgr->paramContainer_[cfg] = "on";
-        ret = MsprofParamAdapterMgr->SetMsprofMode();
-        EXPECT_EQ(PROFILING_SUCCESS, ret);
-    }
 }
 
 TEST_F(ParamsAdapterMsprofUtest, MsprofSetDefaultParams)
@@ -201,4 +167,26 @@ TEST_F(ParamsAdapterMsprofUtest, SetModeDefaultParams)
         ret = MsprofParamAdapterMgr->SetModeDefaultParams(modeType);
         EXPECT_EQ(PROFILING_SUCCESS, ret);
     }
+}
+
+TEST_F(ParamsAdapterMsprofUtest, AnalysisParamsAdapt)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<ParamsAdapterMsprof> MsprofParamAdapterMgr;
+    MSVP_MAKE_SHARED0_BREAK(MsprofParamAdapterMgr, ParamsAdapterMsprof);
+    struct MsprofCmdInfo cmdInfo = {{nullptr}};
+    cmdInfo.args[ARGS_EXPORT] = "on";
+    cmdInfo.args[ARGS_OUTPUT] = "./result";
+    cmdInfo.args[ARGS_EXPORT_ITERATION_ID] = "1";
+    cmdInfo.args[ARGS_SUMMARY_FORMAT] = "csv";
+    const std::unordered_map<int, std::pair<MsprofCmdInfo, std::string>> argsMap = {
+        {ARGS_EXPORT, std::make_pair(cmdInfo, "--export=on")},
+        {ARGS_OUTPUT, std::make_pair(cmdInfo, "--output=./result")},
+        {ARGS_EXPORT_ITERATION_ID, std::make_pair(cmdInfo, "--iteration-id=1")},
+        {ARGS_SUMMARY_FORMAT, std::make_pair(cmdInfo, "--summary-format=csv")}
+    };
+    SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params;
+    MSVP_MAKE_SHARED0_VOID(params, analysis::dvvp::message::ProfileParams);
+    MsprofParamAdapterMgr->params_ = params;
+    EXPECT_EQ(PROFILING_SUCCESS, MsprofParamAdapterMgr->AnalysisParamsAdapt(argsMap));
 }

@@ -5,6 +5,7 @@
 import re
 from collections import namedtuple
 
+
 from common_func.constant import Constant
 from common_func.empty_class import EmptyClass
 

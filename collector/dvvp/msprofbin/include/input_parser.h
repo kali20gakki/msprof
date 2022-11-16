@@ -194,6 +194,7 @@ public:
     void PrintHelp();
 
 private:
+    void Init();
     void AddHardWareMemArgs();
     void AddCpuArgs();
     void AddSysArgs();
@@ -208,6 +209,7 @@ private:
     void AddStarsArgs();
     void AddAnalysisArgs();
 private:
+    bool driverOnline_;
     std::vector<Args> argsList_;
 };
 }

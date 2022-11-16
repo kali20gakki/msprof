@@ -404,7 +404,7 @@ class ParsingRuntimeData(MsMultiProcess):
         check file with task based
         :return: match result
         """
-        if self.sample_config.get(core_profiling_mode) == "task-based":
+        if self.sample_config.get(core_profiling_mode) == StrConstant.AIC_TASK_BASED_MODE:
             return True, get_file_name_pattern_match(file_name, *core_patterns)
         return False, {}
 

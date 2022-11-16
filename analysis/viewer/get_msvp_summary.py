@@ -10,9 +10,9 @@ from common_func.common import CommonConstant
 from common_func.common import generate_config
 from common_func.db_manager import DBManager
 from common_func.info_conf_reader import InfoConfReader
-from common_func.msvp_common import path_check
-from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_constant.number_constant import NumberConstant
+from common_func.ms_constant.str_constant import StrConstant
+from common_func.msvp_common import path_check
 
 
 def get_type_db_correspondences(device_id: str, type_: str, sample_config: dict) -> dict:
@@ -21,7 +21,7 @@ def get_type_db_correspondences(device_id: str, type_: str, sample_config: dict)
     """
     try:
         if type_ == 'ai_core_profiling':
-            if sample_config.get("ai_core_profiling_mode") == "task-based":
+            if sample_config.get("ai_core_profiling_mode") == StrConstant.AIC_TASK_BASED_MODE:
                 return {"ai_core_profiling": "runtime_{}.db".format(device_id)}
             return {"ai_core_profiling": "aicore_%s" % device_id + ".db"}
         return {"ctrl_cpu_profiling": "ctrlcpu_%s" % device_id + ".db",
@@ -41,7 +41,7 @@ def _pre_check_pmu_events(project_path: str) -> tuple:
     if not sample_config:
         return NumberConstant.ERROR, "Failed to generate sample configuration table.", {}
     if sample_config.get('ai_core_profiling_mode', '') not in \
-            ['task-based', 'sample-based', '']:
+            [StrConstant.AIC_TASK_BASED_MODE, StrConstant.AIC_SAMPLE_BASED_MODE, '']:
         return NumberConstant.ERROR, "Failed to verify configuration file parameters.", {}
 
     return NumberConstant.SUCCESS, 'success', sample_config
@@ -176,7 +176,7 @@ def get_aicore_utilization(project_path: str, device_id: str, number: float, sta
     if not (conn and curs):
         return json.dumps({'status': NumberConstant.ERROR, "info": "The db doesn't exist."})
     try:
-        if func_map.get('sample_config', {}).get("ai_core_profiling_mode") == "sample-based":
+        if func_map['sample_config'].get("ai_core_profiling_mode") == StrConstant.AIC_SAMPLE_BASED_MODE:
             return _get_aicore_util(curs, number, start, end)
         return json.dumps({'status': NumberConstant.ERROR, 'data': "Unable to get aicore utilization."})
     except sqlite3.Error:

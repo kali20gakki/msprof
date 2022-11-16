@@ -3,16 +3,18 @@
 # Copyright (c) Huawei Technologies Co., Ltd. 2021-2022. All rights reserved.
 
 import logging
-import sqlite3
 
-from common_func.utils import Utils
-from msmodel.interface.view_model import ViewModel
 from analyzer.scene_base.profiling_scene import ProfilingScene
 from common_func.constant import Constant
+from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msprof_iteration import MsprofIteration
+from common_func.msvp_common import path_check
+from common_func.path_manager import PathManager
 from common_func.platform.chip_manager import ChipManager
+from common_func.utils import Utils
+from msmodel.interface.view_model import ViewModel
 
 
 class GetOpTableTsTime:
@@ -26,13 +28,23 @@ class GetOpTableTsTime:
         self.iter_id = self.sample_config.get("iter_id")
         self.model_id = self.sample_config.get("model_id")
         self.project_path = sample_config.get("result_dir")
-        self._task_time_table = self._get_task_time_table()
 
     @staticmethod
     def _get_aiv_task_sql() -> str:
-        sql = "select {1}.task_id, {1}.stream_id, {1}.running, {1}.complete - {1}.running, '{0}', " \
-              "{1}.index_id, batch_id from {1} order by running" \
-            .format(Constant.TASK_TYPE_AIV, DBNameConstant.TABLE_HWTS_TASK_TIME)
+        return "select {1}.task_id, {1}.stream_id, {1}.running, {1}.complete - {1}.running, '{0}', " \
+               "{1}.index_id, batch_id,{subtask_id} from {1} order by running" \
+            .format(Constant.TASK_TYPE_AI_CORE, DBNameConstant.TABLE_HWTS_TASK_TIME,
+                    subtask_id=NumberConstant.DEFAULT_FFTS_SUBTASK_ID)
+
+    @staticmethod
+    def _get_acsq_task_sql() -> str:
+        sql = "select task_id, stream_id, start_time, task_time,task_type,index_id,model_id,batch_id,{subtask_id} " \
+              "from {} order by start_time".format(DBNameConstant.TABLE_ACSQ_TASK_TIME,
+                                                   subtask_id=NumberConstant.DEFAULT_FFTS_SUBTASK_ID)
+        if ProfilingScene().is_operator():
+            sql = "select task_id, stream_id, start_time, task_time,task_type,index_id, batch_id,{subtask_id} " \
+                  "from {} order by start_time".format(DBNameConstant.TABLE_ACSQ_TASK_TIME,
+                                                       subtask_id=NumberConstant.DEFAULT_FFTS_SUBTASK_ID)
         return sql
 
     @staticmethod
@@ -51,21 +63,18 @@ class GetOpTableTsTime:
             return DBNameConstant.TABLE_RUNTIME_TASK_TIME
         return DBNameConstant.TABLE_HWTS_TASK_TIME
 
-    def get_task_time_data(self: any) -> list:
-        """
-        get op counter task time data
-        :return:
-        """
-        aicore_and_aicpu = self._get_aicore_and_aicpu()
-        aicpu_for_chip2 = self._get_aicpu_for_chip2()
-        aiv_data = self._get_aiv_task_time()
-        fetched_data = aicpu_for_chip2 + aicore_and_aicpu + aiv_data
-        if not fetched_data:
-            logging.warning("Unable to find TaskTime data")
-            return []
-        # sort fetched_data by start time
-        rts_data = sorted(fetched_data, key=lambda x: float(x[2]))
-        return rts_data
+    @staticmethod
+    def _is_tradition_task(data):
+        if data.context_id == Constant.GE_OP_MODEL_ID:
+            return True
+        return False
+
+    @staticmethod
+    def _is_mix_task(data):
+        if data.context_id == 0 and (
+                data.task_type == Constant.TASK_TYPE_MIX_AIC or data.task_type == Constant.TASK_TYPE_MIX_AIV):
+            return True
+        return False
 
     def get_op_ai_cpu_task_sql(self: any) -> str:
         """
@@ -78,17 +87,90 @@ class GetOpTableTsTime:
                     MS_TO_NS=NumberConstant.MS_TO_NS)
         return ai_cpu_sql
 
-    def _get_aicore_and_aicpu(self: any) -> list:
-        model_view = ViewModel(self.project_path, self._get_db_name(), [self._task_time_table])
+    def get_task_time_data(self: any, ge_data=None) -> list:
+        """
+        get op counter task time data
+        :return:
+        """
+        if ge_data is None:
+            ge_data = []
+        logging.info("Start to get ffts profile task data.")
+        task_data = self._get_task_time_data_by_ffts_profile(ge_data)
+        if not task_data:
+            logging.info("Start to get task data.")
+            task_data = self._get_task_time_data_by_hwts()
+            if not task_data:
+                logging.warning("Unable to find TaskTime data")
+                return []
+        # sort fetched_data by start time
+        return sorted(task_data, key=lambda x: float(x[2]))
+
+    def _get_task_time_data_by_ffts_profile(self, ge_data):
+        result_list = []
+        tradition_task, mix_task, subgraph_task = self._get_ge_data(ge_data)
+        result_list.extend(self._get_sub_task_time(subgraph_task))
+        result_list.extend(self._get_sub_task_time(mix_task))
+        result_list.extend(self._get_acsq_task_time(tradition_task))
+        return result_list
+
+    def _get_ge_data(self: any, ge_data) -> tuple:
+        tradition_task = []
+        subgraph_task = []
+        mix_task = []
+        for data in ge_data:
+            if self._is_tradition_task(data):
+                tradition_task.append(data)
+            elif self._is_mix_task(data):
+                mix_task.append(data)
+            else:
+                subgraph_task.append(data)
+        return tradition_task, mix_task, subgraph_task
+
+    def _get_task_time_data_by_hwts(self):
+        task_data = []
+        task_data.extend(self._get_aicore_and_aicpu())
+        task_data.extend(self._get_aicpu_for_chip2())
+        task_data.extend(self._get_aiv_task_time())
+        return task_data
+
+    def _get_task_time_data(self, db_name, table_list, sql):
+        model_view = ViewModel(self.project_path, db_name, table_list)
         if model_view.check_table():
-            return model_view.get_sql_data(self._get_ai_core_sql())
+            return model_view.get_sql_data(sql)
         return []
 
+    def _get_aicore_and_aicpu(self: any) -> list:
+        return self._get_task_time_data(self._get_db_name(), [self._get_task_time_table()],
+                                        self._get_ai_core_sql())
+
+    def _get_sub_task_time(self: any, ge_data) -> list:
+        if not ge_data:
+            return []
+        ge_data_set = set()
+        for data in ge_data:
+            task_key = "{}-{}-{}".format(data.stream_id, data.task_id, data.context_id)
+            ge_data_set.add(task_key)
+        subtask_data = self._get_task_time_data(DBNameConstant.DB_SOC_LOG, [DBNameConstant.TABLE_SUBTASK_TIME],
+                                                self._get_sub_task_sql())
+        return [data for data in subtask_data if "{}-{}-{}".format(data[1], data[0], data[8]) in ge_data_set]
+
+    def _get_acsq_task_time(self: any, ge_data) -> list:
+        if not ge_data:
+            return []
+        ge_data_set = set()
+        for data in ge_data:
+            task_key = "{}-{}".format(data.stream_id, data.task_id)
+            ge_data_set.add(task_key)
+        task_data = self._get_task_time_data(DBNameConstant.DB_ACSQ, [DBNameConstant.TABLE_ACSQ_TASK_TIME],
+                                             self._get_acsq_task_sql())
+        return [data for data in task_data if "{}-{}".format(data[1], data[0]) in ge_data_set]
+
+    def _get_ai_core_task_time(self: any) -> list:
+        return self._get_task_time_data(self._get_db_name(), [self._get_task_time_table()], self._get_ai_core_sql())
+
     def _get_aiv_task_time(self: any) -> list:
-        model_view = ViewModel(self.project_path, DBNameConstant.DB_HWTS_AIV, [DBNameConstant.TABLE_HWTS_TASK_TIME])
-        if model_view.check_table():
-            return model_view.get_sql_data(self._get_aiv_task_sql())
-        return []
+        return self._get_task_time_data(DBNameConstant.DB_HWTS_AIV, [DBNameConstant.TABLE_HWTS_TASK_TIME],
+                                        self._get_aiv_task_sql())
 
     def _get_aicpu_for_chip2(self: any) -> list:
         ai_cpu_time = []
@@ -100,35 +182,48 @@ class GetOpTableTsTime:
     def _get_ai_core_sql(self: any) -> str:
         if ProfilingScene().is_operator():
             return self._get_op_ai_core_task_time_sql()
-        return self._get_no_op_ai_core_task_time_sql()
+        return self._get_network_ai_core_task_time_sql()
 
     def _get_op_ai_core_task_time_sql(self: any) -> str:
         """
         get ai core task time sql without model id
         :return:
         """
-        sql = "select {1}.task_id, {1}.stream_id, {1}.running, {1}.complete - {1}.running, '{0}', " \
-              "{1}.index_id, {1}.batch_id from {1} group by running order by running" \
-            .format(Constant.TASK_TYPE_AI_CORE, self._task_time_table)
-        return sql
+        return "select {1}.task_id, {1}.stream_id, {1}.running, {1}.complete - {1}.running, '{0}', " \
+               "{1}.index_id, {1}.batch_id, {subtask_id} from {1} group by running order by running" \
+            .format(Constant.TASK_TYPE_AI_CORE, self._get_task_time_table(),
+                    subtask_id=NumberConstant.DEFAULT_FFTS_SUBTASK_ID)
 
-    def _get_no_op_ai_core_task_time_sql(self: any) -> str:
+    def _get_network_ai_core_task_time_sql(self: any) -> str:
         """
         get ai core task time sql with model id
         :return:
         """
         sql = "select {1}.task_id, {1}.stream_id, {1}.running, {1}.complete - {1}.running, '{0}'," \
-              " {1}.index_id, {1}.model_id, {1}.batch_id from {1} where " \
+              " {1}.index_id, {1}.model_id, {1}.batch_id, {subtask_id} from {1} where " \
               "{1}.index_id={2} and {1}.model_id={3} order by running " \
-            .format(Constant.TASK_TYPE_AI_CORE, self._task_time_table,
-                    self.iter_id, self.model_id)
+            .format(Constant.TASK_TYPE_AI_CORE, self._get_task_time_table(),
+                    self.iter_id, self.model_id,
+                    subtask_id=NumberConstant.DEFAULT_FFTS_SUBTASK_ID)
         if Utils.need_all_model_in_one_iter(self.project_path, self.model_id):
             # export all index data when pytorch graph no model_id set
             sql = "select {1}.task_id, {1}.stream_id, {1}.running, {1}.complete - {1}.running, '{0}'," \
-                  " {1}.index_id, {1}.model_id, {1}.batch_id from {1} " \
+                  " {1}.index_id, {1}.model_id, {1}.batch_id, {subtask_id} from {1} " \
                   "order by running " \
-                .format(Constant.TASK_TYPE_AI_CORE, self._task_time_table)
+                .format(Constant.TASK_TYPE_AI_CORE, self._get_task_time_table(),
+                        subtask_id=NumberConstant.DEFAULT_FFTS_SUBTASK_ID)
         return sql
+
+    def _get_op_ai_cpu_task_sql(self: any) -> str:
+        """
+        get ai cpu task time data for single op
+        :return:
+        """
+        return "select task_id, stream_id, sys_start*{MS_TO_NS}, (sys_end - sys_start)*{MS_TO_NS}, " \
+               "'{0}', {2}, batch_id,{subtask_id} from {1} " \
+            .format(Constant.TASK_TYPE_AI_CPU, DBNameConstant.TABLE_AI_CPU_FROM_TS, self.iter_id,
+                    MS_TO_NS=NumberConstant.MS_TO_NS,
+                    subtask_id=NumberConstant.DEFAULT_FFTS_SUBTASK_ID)
 
     def _get_ai_cpu_task_sql(self: any) -> str:
         """
@@ -136,19 +231,26 @@ class GetOpTableTsTime:
         :return: sqlite statement
         """
         if ProfilingScene().is_operator():
-            return self.get_op_ai_cpu_task_sql()
+            return self._get_op_ai_cpu_task_sql()
         iter_time = MsprofIteration(self.project_path).get_iteration_time(self.iter_id, self.model_id)
 
         ai_cpu_sql = ''
         try:
             ai_cpu_sql = "select task_id, stream_id, sys_start*{MS_TO_NS}, (sys_end - sys_start)*{MS_TO_NS}, " \
-                         "'{1}', {4}, {5}, batch_id from {0} where sys_start >= {2} and sys_end <= {3}" \
+                         "'{1}', {4}, {5}, batch_id, {subtask_id} from {0} where sys_start >= {2} and sys_end <= {3}" \
                 .format(DBNameConstant.TABLE_AI_CPU_FROM_TS, Constant.TASK_TYPE_AI_CPU,
                         iter_time[0][0] / NumberConstant.NS_TO_US,
                         iter_time[0][1] / NumberConstant.NS_TO_US,
                         self.iter_id, self.model_id,
-                        MS_TO_NS=NumberConstant.MS_TO_NS)
+                        MS_TO_NS=NumberConstant.MS_TO_NS,
+                        subtask_id=NumberConstant.DEFAULT_FFTS_SUBTASK_ID)
         except ZeroDivisionError as err:
             logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
-            return ai_cpu_sql
         return ai_cpu_sql
+
+    def _get_sub_task_sql(self):
+        # the subtask type of ai core or ai vector that can not be distinguish by GE.
+        return "select task_id, stream_id, start_time, dur_time, " \
+               "(case when subtask_type='AIC' or subtask_type='AIV' then 'AI_CORE' else subtask_type end), " \
+               "{1}, {2}, 0, subtask_id from {0} order by start_time" \
+            .format(DBNameConstant.TABLE_SUBTASK_TIME, self.iter_id, self.model_id)
