@@ -1,3 +1,7 @@
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
+
 import os
 import unittest
 from unittest import mock
@@ -8,6 +12,7 @@ from common_func.msprof_exception import ProfException
 from constant.constant import clear_dt_project
 from msmodel.parallel.cluster_hccl_model import ClusterHCCLViewModel
 from msparser.parallel.hccl_operator_parser import HCCLOperatiorParser
+from profiling_bean.db_dto.step_trace_ge_dto import StepTraceGeDto
 from profiling_bean.prof_enum.data_tag import DataTag
 
 NAMESPACE = "msparser.parallel.hccl_operator_parser"
@@ -16,7 +21,7 @@ NAMESPACE = "msparser.parallel.hccl_operator_parser"
 class TestHCCLOperatiorParser(unittest.TestCase):
     FILE_LIST_1 = {1: ["test"]}
     FILE_LIST_2 = {DataTag.PARALLEL_STRATEGY: ["test"]}
-    DIR_PATH = os.path.join(os.path.dirname(__file__), 'DT_ClusterParallelParser')
+    DIR_PATH = os.path.join(os.path.dirname(__file__), 'DT_HCCLOperatiorParser')
     SAMPLE_CONFIG = {"result_dir": DIR_PATH}
 
     def setUp(self) -> None:
@@ -33,8 +38,12 @@ class TestHCCLOperatiorParser(unittest.TestCase):
         self.assertEqual(ProfException.PROF_SYSTEM_EXIT, err.value.code)
 
     def test_ms_run(self):
+        hccl_data1 = StepTraceGeDto()
+        hccl_data1.tag = 0
+        hccl_data2 = StepTraceGeDto()
+        hccl_data2.tag = 1
         with mock.patch(NAMESPACE + ".TsTrackViewModel.get_hccl_operator_exe_data",
-                        return_value=[[1, 1, "1", "1", 1, 2]]):
+                        return_value=[hccl_data1, hccl_data2]):
             check = HCCLOperatiorParser(self.FILE_LIST_2, self.SAMPLE_CONFIG)
             check.ms_run()
         with ClusterHCCLViewModel(self.DIR_PATH) as _model:
