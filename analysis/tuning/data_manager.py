@@ -6,11 +6,11 @@ import logging
 import os
 import sqlite3
 
+from config.config_manager import ConfigManager
 from common_func.common import CommonConstant
 from common_func.common import generate_config
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
-from common_func.get_export_data_config import GetExportDataConfigs
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.msvp_constant import MsvpConstant
@@ -124,9 +124,8 @@ class DataManager:
     @classmethod
     def _get_base_data(cls: any, device_id: any, infer_id: any, project_path: str) -> tuple:
         if cls.is_network(project_path, device_id):
-            configs = {
-                StrConstant.CONFIG_HEADERS: GetExportDataConfigs.get_data_headers(StrConstant.AI_CORE_OP_SUMMARY)
-            }
+            headers = ConfigManager.get(ConfigManager.MSPROF_EXPORT_DATA).get('op_summary', 'headers').split(",")
+            configs = {StrConstant.CONFIG_HEADERS: headers}
             db_path = PathManager.get_db_path(project_path, DBNameConstant.DB_AICORE_OP_SUMMARY)
             headers, data, _ = AiCoreOpReport.get_ai_core_op_summary_data(project_path, db_path,
                                                                           infer_id, configs)

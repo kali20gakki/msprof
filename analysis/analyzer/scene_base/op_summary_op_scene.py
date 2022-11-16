@@ -5,12 +5,12 @@
 import logging
 import os
 
+from config.config_manager import ConfigManager
 from analyzer.get_op_table_task_time import GetOpTableTsTime
 from analyzer.op_common_function import OpCommonFunc
 from common_func.ai_stack_data_check_manager import AiStackDataCheckManager
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
-from common_func.msvp_constant import MsvpConstant
 from common_func.path_manager import PathManager
 from profiling_bean.db_dto.ge_task_dto import GeTaskDto
 
@@ -19,7 +19,6 @@ class OpSummaryOpScene:
     """
     op summary for single op
     """
-    OP_TABLE_PATH = os.path.join(MsvpConstant.CONFIG_PATH, 'tables_operator.ini')
     TASK_TIME_COL_NUM = 7
 
     def __init__(self: any, sample_config: dict) -> None:
@@ -56,7 +55,7 @@ class OpSummaryOpScene:
             return False
 
         create_ge_summary_sql = DBManager.sql_create_general_table("SummaryGeMap", DBNameConstant.TABLE_SUMMARY_GE,
-                                                                   self.OP_TABLE_PATH)
+                                                                   ConfigManager.TABLES_OPERATOR)
         DBManager.execute_sql(self.conn, create_ge_summary_sql)
 
         insert_sql = "insert into {0} " \
@@ -115,7 +114,7 @@ class OpSummaryOpScene:
         """
         create_table_sql = DBManager.sql_create_general_table("ModifiedTaskTimeMap",
                                                               DBNameConstant.TABLE_SUMMARY_TASK_TIME,
-                                                              self.OP_TABLE_PATH)
+                                                              ConfigManager.TABLES_OPERATOR)
         DBManager.execute_sql(self.conn, create_table_sql)
 
         data = self.get_task_time_data()
@@ -210,7 +209,7 @@ class OpSummaryOpScene:
     def _save_tensor_data(self: any, tensor_data: list) -> None:
         create_ge_tensor_sql = DBManager.sql_create_general_table("TensorGeMap",
                                                                   DBNameConstant.TABLE_SUMMARY_TENSOR,
-                                                                  self.OP_TABLE_PATH)
+                                                                  ConfigManager.TABLES_OPERATOR)
         DBManager.execute_sql(self.conn, create_ge_tensor_sql)
 
         insert_sql = "insert into {0} " \

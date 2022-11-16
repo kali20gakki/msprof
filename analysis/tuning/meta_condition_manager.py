@@ -12,24 +12,19 @@ from abc import abstractmethod
 from common_func.common_prof_rule import CommonProfRule
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msvp_common import is_number
-from common_func.file_manager import FileOpen
 from common_func.regex_manager import RegexManagerConstant
 
+from config.config_manager import ConfigManager
 
-def load_condition_files(condition_file_path: str) -> dict:
+
+def load_condition_files() -> dict:
     """
     load condition files
     """
     conditions = {}
-    try:
-        with FileOpen(condition_file_path, "r") as rule_reader:
-            json_conditions = json.load(rule_reader.file_reader)
-            for json_condition in json_conditions.get(CommonProfRule.CONDITIONS):
-                conditions[json_condition.get(CommonProfRule.CONDITION_ID)] = json_condition
-        return conditions
-    except FileNotFoundError:
-        logging.error("Read rule file failed: %s", os.path.basename(condition_file_path))
-        return {}
+    for json_condition in ConfigManager.get(ConfigManager.PROF_CONDITION).get_data():
+        conditions[json_condition.get(CommonProfRule.CONDITION_ID)] = json_condition
+    return conditions
 
 
 def compare_number(left: any, right: any, equal_operator: bool):
@@ -80,8 +75,8 @@ class MetaConditionManager:
         "||": lambda left, right: left | right if isinstance(left, set) and isinstance(right, set) else set()
     }
 
-    def __init__(self: any, condition_file_path: str) -> None:
-        self.conditions = load_condition_files(condition_file_path)
+    def __init__(self: any) -> None:
+        self.conditions = load_condition_files()
 
     @abstractmethod
     def cal_count_condition(self: any, operator_data_list: dict, condition: dict) -> list:
@@ -249,8 +244,8 @@ class OperatorConditionManager(MetaConditionManager):
     operator condition manager
     """
 
-    def __init__(self: any, condition_file_path: str) -> None:
-        MetaConditionManager.__init__(self, condition_file_path)
+    def __init__(self: any) -> None:
+        super().__init__()
 
     @staticmethod
     def cal_count_condition(operator_data_list: dict, condition: dict) -> list:
@@ -272,8 +267,8 @@ class NetConditionManager(MetaConditionManager):
     network condition manager
     """
 
-    def __init__(self: any, condition_file_path: str) -> None:
-        MetaConditionManager.__init__(self, condition_file_path)
+    def __init__(self: any) -> None:
+        super().__init__()
 
     @classmethod
     def cal_normal_condition(cls: any, operator_data: list, condition: dict) -> list:

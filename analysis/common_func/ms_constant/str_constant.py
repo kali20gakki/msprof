@@ -69,7 +69,6 @@ class StrConstant:
     FILE_SUFFIX_CSV = ".csv"
     DATA_TYPE = "data_type"
     CORE_DATA_TYPE = "core_data_type"
-    EXPORTDATA_INI = "ExportData.ini"
     CONFIG_HANDLER = "handler"
     CONFIG_HEADERS = "headers"
     CONFIG_DB = "db"

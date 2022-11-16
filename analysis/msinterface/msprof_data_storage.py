@@ -26,7 +26,6 @@ class MsprofDataStorage:
     """
     This class is used to slicing a timeline json file.
     """
-
     SLICE_CONFIG_PATH = os.path.join(MsvpConstant.CONFIG_PATH, 'msprof_slice.json')
     DATA_TO_FILE = 1024 * 1024
     DEFAULT_SETTING = ('on', 0, 0)
@@ -233,8 +232,19 @@ class MsprofDataStorage:
             logging.warning("Read slice config failed: %s", os.path.basename(self.SLICE_CONFIG_PATH))
             return self.DEFAULT_SETTING
         slice_switch = config_json.get('slice_switch', 'on')
+        switch_range = ['on', 'off']
+        if slice_switch not in switch_range:
+            logging.warning("slice_switch should be on/off")
+            return self.DEFAULT_SETTING
         limit_size = config_json.get('slice_file_size(MB)', 0)
+        if not isinstance(limit_size, int) or limit_size < 0:
+            logging.warning("limmt_size should be a number which is not smaller than 0")
+            return self.DEFAULT_SETTING
         method = config_json.get('strategy', 0)
+        method_range = [item.value for item in TimeLineSliceStrategy]
+        if not isinstance(method, int) or method not in method_range:
+            logging.warning("limmt_size should be 0/1")
+            return self.DEFAULT_SETTING
         return slice_switch, limit_size, method
 
     def get_slice_times(self: any, limit_size: int = 0, method: int = 0) -> int:
