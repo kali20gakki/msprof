@@ -1,9 +1,11 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
-
+from common_func.common import generate_config
 from common_func.config_mgr import ConfigMgr
+from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
+from common_func.path_manager import PathManager
 from common_func.utils import Utils
 from msmodel.aic.aiv_pmu_model import AivPmuModel
 from mscalculate.aic.aic_calculator import AicCalculator
@@ -23,6 +25,7 @@ class AivCalculator(AicCalculator, MsMultiProcess):
         self._file_list = file_list.get(DataTag.AIV, [])
         self._aiv_data_list = []
         self._file_list.sort(key=lambda x: int(x.split("_")[-1]))
+        self.core_type = 1
 
     def aiv_calculate(self: any) -> None:
         """
@@ -43,9 +46,11 @@ class AivCalculator(AicCalculator, MsMultiProcess):
 
     def ms_run(self: any) -> None:
         """
-
         :return:
         """
+        config = generate_config(PathManager.get_sample_json_path(self._project_path))
+        if config.get('aiv_profiling_mode') == StrConstant.AIC_SAMPLE_BASED_MODE:
+            return
         if self._file_list:
             self.aiv_calculate()
             self.save()

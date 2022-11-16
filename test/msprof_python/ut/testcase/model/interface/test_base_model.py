@@ -49,7 +49,7 @@ class TestBaseModel(unittest.TestCase):
             check.create_table()
 
     def test_insert_data_to_db(self):
-        with mock.patch(NAMESPACE + '.DBManager.executemany_sql'):
+        with mock.patch(NAMESPACE + '.DBManager.executemany_sql', return_value=False):
             check = BaseModel('test', 'test', 'test')
             check.conn = True
             check.insert_data_to_db('test', 'test')
@@ -73,3 +73,9 @@ class TestBaseModel(unittest.TestCase):
         check = BaseModel('test', 'test', 'test')
         with check:
             pass
+
+    def test_drop_table(self):
+        with mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True),\
+                mock.patch(NAMESPACE + '.DBManager.drop_table'):
+            check = BaseModel('test', 'test', 'test')
+            ret = check.drop_table('test')

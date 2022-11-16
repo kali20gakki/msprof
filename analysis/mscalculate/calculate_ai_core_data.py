@@ -74,10 +74,9 @@ class CalculateAiCoreData:
         :param metrics: metrics
         :return: None
         """
-        if metric_key == StrConstant.AI_CORE_PROFILING_METRICS:
-            sample_config = ConfigMgr.read_sample_config(self.project_path)
-            if sample_config.get(StrConstant.AI_CORE_PROFILING_METRICS) == "ArithmeticUtilization":
-                metrics.extend(["cube_fops", "vector_fops"])
+        sample_config = ConfigMgr.read_sample_config(self.project_path)
+        if sample_config.get(metric_key) == "ArithmeticUtilization":
+            metrics.extend(["cube_fops", "vector_fops"])
 
     def compute_ai_core_data(self: any, events_name_list: list, ai_core_profiling_events: dict, task_cyc: int,
                              pmu_data: list) -> tuple:

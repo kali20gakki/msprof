@@ -10,7 +10,6 @@ class MsvpConstant:
     msvp constant
     """
     CONFIG_PATH = os.path.join(os.path.dirname(__file__), "..", "config")
-    AI_CORE_PROFILING_MODE_LIST = ["task-based", "sample-based"]
     # msvp return empty info
     MSVP_EMPTY_DATA = ([], [], 0)
     EMPTY_DICT = {}

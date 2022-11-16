@@ -14,11 +14,14 @@ from common_func.common import CommonConstant
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
+from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msprof_exception import ProfException
 from common_func.msprof_iteration import MsprofIteration
 from common_func.msvp_constant import MsvpConstant
 from common_func.path_manager import PathManager
+from common_func.platform.chip_manager import ChipManager
+from profiling_bean.db_dto.ge_task_dto import GeTaskDto
 
 
 class ParseAiCoreOpSummary:
@@ -35,6 +38,8 @@ class ParseAiCoreOpSummary:
         self.project_path = self.sample_config.get("result_dir")
         self.iter_id = self.sample_config.get("iter_id")
         self.model_id = self.sample_config.get("model_id")
+        self.conn = None
+        self.curs = None
 
     def init_params(self: any) -> None:
         """
@@ -65,46 +70,43 @@ class ParseAiCoreOpSummary:
                 logging.warning("No need to create db for op summary, "
                                 "maybe the data of aicore is not collected.")
                 return
-        conn, curs = self.create_conn()
-        if not (conn and curs):
+        self.create_conn()
+        if not (self.conn and self.curs):
             return
-        self.create_ge_summary_table(conn)
-        self.create_ge_tensor_table(conn)
-        self.create_ai_core_metrics_table(conn)
-        self.create_task_time_table(conn)
-        DBManager.destroy_db_connect(conn, curs)
+        self.create_ge_summary_table()
+        self.create_ge_tensor_table()
+        self.create_ai_core_metrics_table()
+        self.create_task_time_table()
+        DBManager.destroy_db_connect(self.conn, self.curs)
 
-    def create_conn(self: any) -> tuple:
+    def create_conn(self: any) -> None:
         """
         create connection
         :return: connect and cursor
         """
         conn_path = self.get_db_path(DBNameConstant.DB_AICORE_OP_SUMMARY)
-        conn = sqlite3.connect(conn_path)
-        curs = conn.cursor()
+        self.conn, self.curs = DBManager.create_connect_db(conn_path)
         os.chmod(conn_path, NumberConstant.FILE_AUTHORITY)
-        return conn, curs
 
-    def create_ge_summary_table(self: any, conn: any) -> None:
+    def create_ge_summary_table(self: any) -> None:
         """
         create ge summary table
-        :param conn: sqlite curs
         :return: None
         """
         if not DBManager.check_tables_in_db(self.get_db_path(DBNameConstant.DB_GE_INFO), DBNameConstant.TABLE_GE_TASK):
             logging.warning("unable to create ge summary table, because table %s is not found.",
                             DBNameConstant.TABLE_GE_TASK)
             return
-        if not DBManager.attach_to_db(conn, self.project_path, DBNameConstant.DB_GE_INFO, "ge_info"):
+        if not DBManager.attach_to_db(self.conn, self.project_path, DBNameConstant.DB_GE_INFO, "ge_info"):
             logging.warning("unable to create ge summary table, because attach db of ge failed.")
             return
         ge_create_sql = DBManager.sql_create_general_table("GeSummaryMap",
                                                            DBNameConstant.TABLE_SUMMARY_GE, self.TABLES_PATH)
-        DBManager.execute_sql(conn, ge_create_sql)
-        ge_data = self._get_ge_data(conn)
-        DBManager.insert_data_into_table(conn, DBNameConstant.TABLE_SUMMARY_GE, ge_data)
+        DBManager.execute_sql(self.conn, ge_create_sql)
+        ge_data = self._get_ge_data()
+        DBManager.insert_data_into_table(self.conn, DBNameConstant.TABLE_SUMMARY_GE, ge_data)
 
-    def create_ge_tensor_table(self: any, conn: any) -> None:
+    def create_ge_tensor_table(self: any) -> None:
         """
         create ge tensor table
         """
@@ -115,25 +117,24 @@ class ParseAiCoreOpSummary:
             return
         ge_tensor_create_sql = DBManager.sql_create_general_table("GeTensorMap",
                                                                   DBNameConstant.TABLE_SUMMARY_TENSOR, self.TABLES_PATH)
-        DBManager.execute_sql(conn, ge_tensor_create_sql)
+        DBManager.execute_sql(self.conn, ge_tensor_create_sql)
         ge_data = []
         iter_list = MsprofIteration(self.project_path).get_iter_list_with_index_and_model(self.iter_id, self.model_id)
         ge_tensor_sql = "select * from {0} where " \
                         "(index_id=? or index_id=0) and model_id=?" \
             .format(DBNameConstant.TABLE_GE_TENSOR)
         for index_and_model in iter_list:
-            ge_data.extend(DBManager.fetch_all_data(conn.cursor(), ge_tensor_sql, index_and_model))
+            ge_data.extend(DBManager.fetch_all_data(self.curs, ge_tensor_sql, index_and_model))
 
-        DBManager.insert_data_into_table(conn, DBNameConstant.TABLE_SUMMARY_TENSOR, ge_data)
+        DBManager.insert_data_into_table(self.conn, DBNameConstant.TABLE_SUMMARY_TENSOR, ge_data)
 
-    def create_ai_core_metrics_table(self: any, conn: any) -> None:
+    def create_ai_core_metrics_table(self: any) -> None:
         """
         create ai core metrics table
-        :param conn: sqlite curs
         :return: None
         """
         db_name = os.path.splitext(DBNameConstant.DB_RUNTIME)[0]
-        if not DBManager.attach_to_db(conn, self.project_path, DBNameConstant.DB_RUNTIME, db_name):
+        if not DBManager.attach_to_db(self.conn, self.project_path, DBNameConstant.DB_RUNTIME, db_name):
             logging.warning("unable to create ai core metrics table, because attach db of runtime failed.")
             return
         if DBManager.check_tables_in_db(self.get_db_path(DBNameConstant.DB_RUNTIME),
@@ -141,6 +142,14 @@ class ParseAiCoreOpSummary:
             sql = "create table if not exists ai_core_metrics " \
                   "as select * from {0}.{1}".format(db_name,
                                                     CommonConstant.METRICS_SUMMARY_TABLE)
+            if ChipManager().is_chip_v4() and not ProfilingScene().is_operator():
+                iter_time = MsprofIteration(self.project_path).get_iteration_time(self.iter_id,
+                                                                                  self.model_id)[0]
+                sql = "create table if not exists ai_core_metrics " \
+                      "as select * from {0}.{1} where start_time>{2} and end_time<{3}" \
+                    .format(db_name, CommonConstant.METRICS_SUMMARY_TABLE,
+                            iter_time[0] * 1000.0,
+                            iter_time[1] * 1000.0)
         elif DBManager.check_tables_in_db(self.get_db_path(DBNameConstant.DB_RUNTIME),
                                           CommonConstant.AIV_METRICS_SUMMARY_TABLE):
             sql = "create table if not exists ai_core_metrics " \
@@ -149,12 +158,11 @@ class ParseAiCoreOpSummary:
         else:
             logging.warning("unable to create ai core metrics table, because table is not found.")
             return
-        DBManager.execute_sql(conn, sql)
+        DBManager.execute_sql(self.conn, sql)
 
-    def create_task_time_table(self: any, conn: any) -> None:
+    def create_task_time_table(self: any) -> None:
         """
         create task time table
-        :param conn: sqlite conn
         :return: true or false
         """
         create_table_sql = DBManager.sql_create_general_table("ModifiedTaskTimeMap", "task_time",
@@ -162,7 +170,7 @@ class ParseAiCoreOpSummary:
         if not create_table_sql:
             logging.error("unable to create task time table, generate sql statement failed!")
             return
-        DBManager.execute_sql(conn, create_table_sql)
+        DBManager.execute_sql(self.conn, create_table_sql)
         data = self.get_task_time_data()
         if not data:
             logging.warning("unable to create task time table, because no task data found.")
@@ -170,16 +178,17 @@ class ParseAiCoreOpSummary:
         insert_sql = 'insert or ignore into {0} ' \
                      'values ({value})'.format(DBNameConstant.TABLE_SUMMARY_TASK_TIME,
                                                value="?," * (len(data[0]) - 1) + "?")
-        DBManager.executemany_sql(conn, insert_sql, data)
+        DBManager.executemany_sql(self.conn, insert_sql, data)
 
     def get_task_time_data(self: any) -> list:
         """
         get task time data
         :return: task data list
         """
+        ge_data = self._get_ge_data_from_summary()
         project_path = self.sample_config.get("result_dir")
         if AiStackDataCheckManager.contain_task_time_data(project_path):
-            fetch_data = GetOpTableTsTime(self.sample_config).get_task_time_data()
+            fetch_data = GetOpTableTsTime(self.sample_config).get_task_time_data(ge_data)
             task_data = OpCommonFunc.calculate_task_time(fetch_data)
             return task_data
         return []
@@ -207,13 +216,20 @@ class ParseAiCoreOpSummary:
         except sqlite3.Error as err:
             logging.error(err, exc_info=Constant.TRACE_BACK_SWITCH)
 
-    def _get_ge_data(self: any, conn: any) -> list:
+    def _get_ge_data_from_summary(self: any) -> list:
+        if not DBManager.judge_table_exist(self.curs, DBNameConstant.TABLE_SUMMARY_GE):
+            return []
+        ge_sql = "SELECT task_type, stream_id, task_id, batch_id, context_id from {0}".format(
+            DBNameConstant.TABLE_SUMMARY_GE)
+        return DBManager.fetch_all_data(self.curs, ge_sql, dto_class=GeTaskDto)
+
+    def _get_ge_data(self: any) -> list:
         ge_data = []
         iter_list = MsprofIteration(self.project_path).get_iter_list_with_index_and_model(self.iter_id, self.model_id)
         ge_sql = "SELECT model_id, batch_id, task_id, stream_id, " \
-                 "op_name, op_type, block_dim, task_type, timestamp, index_id from {0} where " \
+                 "op_name, op_type, block_dim, task_type, timestamp, index_id,context_id from {0} where " \
                  "(index_id=? or index_id=0) and model_id=?" \
             .format(DBNameConstant.TABLE_GE_TASK)
         for index_and_model in iter_list:
-            ge_data.extend(DBManager.fetch_all_data(conn.cursor(), ge_sql, index_and_model))
+            ge_data.extend(DBManager.fetch_all_data(self.curs, ge_sql, index_and_model))
         return ge_data

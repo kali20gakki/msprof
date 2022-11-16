@@ -43,13 +43,21 @@ def create_trace_db():
     return db_manager
 
 
+class DtoData:
+
+    def __init__(self, *args):
+        filed = args[0]
+        self.iter_id = filed[0]
+        self.model_id = filed[1]
+        self.index_id = filed[2]
+
+
 class TestExportCommand(unittest.TestCase):
 
     def tearDown(self) -> None:
         _db_manager = DBManager()
         _db_manager.destroy(_db_manager.create_sql(DBNameConstant.DB_STEP_TRACE))
         _db_manager.destroy(_db_manager.create_sql(DBNameConstant.DB_TRACE))
-        _db_manager.destroy(_db_manager.create_sql(DBNameConstant.DB_GE_INFO))
 
     def test_check_argument_valid(self):
         args_dic = {"collection_path": "test", "iteration_id": -1, "model_id": None}
@@ -68,18 +76,20 @@ class TestExportCommand(unittest.TestCase):
         with mock.patch(NAMESPACE + ".DataCheckManager.check_data_exist", return_value=True), \
                 mock.patch(NAMESPACE + ".ConfigMgr.read_sample_config", return_value=sample_config):
             test = ExportCommand("timeline", args)
+            test.sample_config = {'devices': '0'}
             test._add_export_type("")
         with mock.patch(NAMESPACE + ".DataCheckManager.check_data_exist", return_value=True), \
                 mock.patch(NAMESPACE + ".ConfigMgr.read_sample_config", return_value=sample_config):
             test = ExportCommand("summary", args)
+            test.sample_config = {'devices': '0'}
             test._add_export_type("")
 
     def test_check_model_id_1(self):
         args_dic = {"collection_path": "test", "iteration_id": 2, "model_id": 1}
         args = Namespace(**args_dic)
         with mock.patch(NAMESPACE + ".ExportCommand.get_model_id_set", return_value={1}), \
-             mock.patch('analyzer.scene_base.profiling_scene.Utils.get_scene',
-                        return_value="step_info"):
+                mock.patch('analyzer.scene_base.profiling_scene.Utils.get_scene',
+                           return_value="step_info"):
             ProfilingScene().init('')
             test = ExportCommand("timeline", args)
             test._check_model_id("")
@@ -303,8 +313,8 @@ class TestExportCommand(unittest.TestCase):
         args = Namespace(**args_dic)
         json_data_result = (False, True)
         path_dir = (['device_0'], ['host'], ['device_1'])
-        with mock.patch(NAMESPACE + '.check_path_valid'),\
-                mock.patch(NAMESPACE + '.DataCheckManager.contain_info_json_data', side_effect=json_data_result),\
+        with mock.patch(NAMESPACE + '.check_path_valid'), \
+                mock.patch(NAMESPACE + '.DataCheckManager.contain_info_json_data', side_effect=json_data_result), \
                 mock.patch(NAMESPACE + '.MsprofJobSummary.export'):
             with mock.patch(NAMESPACE + '.get_path_dir', side_effect=path_dir), \
                     mock.patch('os.path.join', return_value='JOB/device_0'), \
@@ -316,7 +326,6 @@ class TestExportCommand(unittest.TestCase):
                     mock.patch(NAMESPACE + '.ExportCommand._show_tuning_result'), \
                     mock.patch(NAMESPACE + '.warn'), \
                     mock.patch(NAMESPACE + '.MsprofJobSummary.export'):
-
                 test = ExportCommand("summary", args)
                 test.list_map["devices_list"] = ["1"]
                 test.process()

@@ -37,8 +37,11 @@ class TestParserDispatcher(unittest.TestCase):
             key.flush_all_parser()
 
     def test_build_parser_map(self):
-        with mock.patch('configparser.ConfigParser.sections', return_value=['AsqTaskParser']),\
-                mock.patch('configparser.ConfigParser.get', return_value='1'):
+        with mock.patch('configparser.ConfigParser.sections', return_value=['AsqTaskParser']), \
+                mock.patch('configparser.ConfigParser.get', return_value='1'), \
+                mock.patch('os.path.exists', return_value=True), \
+                mock.patch('os.remove', return_value=True), \
+                mock.patch(NAMESPACE + '.PathManager.get_db_path', return_value='test'):
             check = ParserDispatcher('test')
             check.cfg_parser = configparser.ConfigParser(interpolation=None)
             check.build_parser_map()

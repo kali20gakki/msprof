@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
-
+from common_func.utils import Utils
 from profiling_bean.struct_info.struct_decoder import StructDecoder
 
 
@@ -13,7 +13,7 @@ class TaskTypeBean(StructDecoder):
     def __init__(self: any, *args: any) -> None:
         task_type_data = args[0]
         self._timestamp = task_type_data[4]
-        self._stream_id = task_type_data[5]
+        self._stream_id = Utils.get_stream_id(task_type_data[5])
         self._task_id = task_type_data[6]
         self._task_type = task_type_data[7]
         self._task_state = task_type_data[8]

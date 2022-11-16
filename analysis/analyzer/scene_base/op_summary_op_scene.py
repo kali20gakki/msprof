@@ -12,6 +12,7 @@ from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.msvp_constant import MsvpConstant
 from common_func.path_manager import PathManager
+from profiling_bean.db_dto.ge_task_dto import GeTaskDto
 
 
 class OpSummaryOpScene:
@@ -24,11 +25,13 @@ class OpSummaryOpScene:
     def __init__(self: any, sample_config: dict) -> None:
         self.sample_config = sample_config
         self.project_path = sample_config.get("result_dir")
+        self.conn = None
+        self.curs = None
 
     @staticmethod
     def _get_ge_sql() -> str:
         ge_sql = "SELECT model_id, task_id, stream_id, " \
-                 "op_name, op_type, block_dim, task_type, timestamp, batch_id from {0} " \
+                 "op_name, op_type, block_dim, task_type, timestamp, batch_id, context_id from {0}" \
             .format(DBNameConstant.TABLE_GE_TASK)
         return ge_sql
 
@@ -40,13 +43,7 @@ class OpSummaryOpScene:
             cols_infos.append("[{}] {}".format(col, col_type))
         return ",".join(cols_infos)
 
-    @staticmethod
-    def _get_tensor_data(conn: any) -> list:
-        ge_tensor_sql = "select * from {}".format(DBNameConstant.TABLE_GE_TENSOR)
-        tensor_data = DBManager.fetch_all_data(conn.cursor(), ge_tensor_sql)
-        return tensor_data
-
-    def create_ge_summary_table(self: any, conn: any) -> bool:
+    def create_ge_summary_table(self: any) -> bool:
         """
         create ge summary table
         """
@@ -60,43 +57,43 @@ class OpSummaryOpScene:
 
         create_ge_summary_sql = DBManager.sql_create_general_table("SummaryGeMap", DBNameConstant.TABLE_SUMMARY_GE,
                                                                    self.OP_TABLE_PATH)
-        DBManager.execute_sql(conn, create_ge_summary_sql)
+        DBManager.execute_sql(self.conn, create_ge_summary_sql)
 
         insert_sql = "insert into {0} " \
                      "values({value})".format(DBNameConstant.TABLE_SUMMARY_GE,
                                               value="?," * (len(ge_merge_data[0]) - 1) + "?")
-        DBManager.executemany_sql(conn, insert_sql, ge_merge_data)
+        DBManager.executemany_sql(self.conn, insert_sql, ge_merge_data)
         return True
 
-    def create_ge_tensor_table(self: any, conn: any) -> bool:
+    def create_ge_tensor_table(self: any) -> bool:
         """
         create ge tensor table
         """
-        if not self._check_tensor_table(conn):
+        if not self._check_tensor_table():
             return False
-        tensor_data = self._get_tensor_data(conn)
+        tensor_data = self._get_tensor_data()
 
         if not tensor_data:
             return False
-        self._save_tensor_data(conn, tensor_data)
+        self._save_tensor_data(tensor_data)
         return True
 
-    def create_ai_core_metrics_table(self: any, conn: any) -> bool:
+    def create_ai_core_metrics_table(self: any) -> bool:
         """
         create ai core metrics table
         """
         db_path = PathManager.get_db_path(self.project_path, DBNameConstant.DB_RUNTIME)
         if DBManager.check_tables_in_db(db_path, DBNameConstant.TABLE_AI_CORE_METRIC_SUMMARY):
-            core_merge_data = self._get_ai_core_metric(conn, DBNameConstant.TABLE_AI_CORE_METRIC_SUMMARY)
+            core_merge_data = self._get_ai_core_metric(DBNameConstant.TABLE_AI_CORE_METRIC_SUMMARY)
         elif DBManager.check_tables_in_db(db_path, DBNameConstant.TABLE_AIV_METRIC_SUMMARY):
-            core_merge_data = self._get_ai_core_metric(conn, DBNameConstant.TABLE_AIV_METRIC_SUMMARY)
+            core_merge_data = self._get_ai_core_metric(DBNameConstant.TABLE_AIV_METRIC_SUMMARY)
         else:
             return False
         if core_merge_data:
             insert_sql = "insert into {0} " \
                          "values({value})".format(DBNameConstant.TABLE_SUMMARY_METRICS,
                                                   value="?," * (len(core_merge_data[0]) - 1) + "?")
-            DBManager.executemany_sql(conn, insert_sql, core_merge_data)
+            DBManager.executemany_sql(self.conn, insert_sql, core_merge_data)
             return True
         return False
 
@@ -104,21 +101,22 @@ class OpSummaryOpScene:
         """
         get task time data
         """
+        ge_data = self._get_ge_data_from_summary()
         project_path = self.sample_config.get("result_dir")
         if AiStackDataCheckManager.contain_task_time_data(project_path):
-            fetch_data = GetOpTableTsTime(self.sample_config).get_task_time_data()
+            fetch_data = GetOpTableTsTime(self.sample_config).get_task_time_data(ge_data)
             task_data = OpCommonFunc.calculate_task_time(fetch_data)
             return task_data
         return []
 
-    def create_task_time_table(self: any, conn: any) -> bool:
+    def create_task_time_table(self: any) -> bool:
         """
         create task time table
         """
         create_table_sql = DBManager.sql_create_general_table("ModifiedTaskTimeMap",
                                                               DBNameConstant.TABLE_SUMMARY_TASK_TIME,
                                                               self.OP_TABLE_PATH)
-        DBManager.execute_sql(conn, create_table_sql)
+        DBManager.execute_sql(self.conn, create_table_sql)
 
         data = self.get_task_time_data()
         if not data:
@@ -126,7 +124,7 @@ class OpSummaryOpScene:
         insert_sql = 'insert or ignore into {0} ' \
                      'values ({value})'.format(DBNameConstant.TABLE_SUMMARY_TASK_TIME,
                                                value="?," * (len(data[0]) - 1) + "?")
-        DBManager.executemany_sql(conn, insert_sql, data)
+        DBManager.executemany_sql(self.conn, insert_sql, data)
         return True
 
     def create_summary_table(self: any) -> None:
@@ -148,11 +146,11 @@ class OpSummaryOpScene:
                                 "maybe the data of aicore is not collected.")
                 return
 
-        conn, curs = DBManager.create_connect_db(
+        self.conn, self.curs = DBManager.create_connect_db(
             PathManager.get_db_path(self.project_path, DBNameConstant.DB_AICORE_OP_SUMMARY))
-        if conn and curs:
-            self._create_summary_table_helper(conn)
-        DBManager.destroy_db_connect(conn, curs)
+        if self.conn and self.curs:
+            self._create_summary_table_helper()
+        DBManager.destroy_db_connect(self.conn, self.curs)
 
     def run(self: any) -> None:
         """
@@ -161,6 +159,18 @@ class OpSummaryOpScene:
         if os.path.exists(PathManager.get_db_path(self.project_path, DBNameConstant.DB_AICORE_OP_SUMMARY)):
             return
         self.create_summary_table()
+
+    def _get_ge_data_from_summary(self: any) -> list:
+        if not DBManager.judge_table_exist(self.curs, DBNameConstant.TABLE_SUMMARY_GE):
+            return []
+        ge_sql = "SELECT task_type, stream_id, task_id, batch_id, context_id from {0}".format(
+            DBNameConstant.TABLE_SUMMARY_GE)
+        return DBManager.fetch_all_data(self.curs, ge_sql, dto_class=GeTaskDto)
+
+    def _get_tensor_data(self) -> list:
+        ge_tensor_sql = "select * from {}".format(DBNameConstant.TABLE_GE_TENSOR)
+        tensor_data = DBManager.fetch_all_data(self.curs, ge_tensor_sql)
+        return tensor_data
 
     def _get_ge_merge_data(self: any) -> list:
         ge_result = []
@@ -173,7 +183,7 @@ class OpSummaryOpScene:
         DBManager.destroy_db_connect(ge_conn, ge_curs)
         return ge_result
 
-    def _get_ai_core_metric(self: any, conn: any, table_name: str) -> list:
+    def _get_ai_core_metric(self: any, table_name: str) -> list:
         core_data = []
         core_conn, core_curs = DBManager.check_connect_db(self.project_path, DBNameConstant.DB_RUNTIME)
         if not (core_conn and core_curs):
@@ -181,39 +191,39 @@ class OpSummaryOpScene:
             return core_data
         sql = "create table if not exists {0} (".format(DBNameConstant.TABLE_SUMMARY_METRICS) \
               + self._create_core_table(core_curs, table_name) + ")"
-        DBManager.execute_sql(conn, sql)
+        DBManager.execute_sql(self.conn, sql)
 
         sql = "select * from {0}".format(table_name)
         core_data = DBManager.fetch_all_data(core_curs, sql)
         DBManager.destroy_db_connect(core_conn, core_curs)
         return core_data
 
-    def _check_tensor_table(self: any, conn: any) -> bool:
+    def _check_tensor_table(self: any) -> bool:
         if not DBManager.check_tables_in_db(PathManager.get_db_path(self.project_path, DBNameConstant.DB_GE_INFO),
                                             DBNameConstant.TABLE_GE_TENSOR):
             return False
-        if not DBManager.attach_to_db(conn, self.project_path, DBNameConstant.DB_GE_INFO, "ge_info_attach"):
+        if not DBManager.attach_to_db(self.conn, self.project_path, DBNameConstant.DB_GE_INFO, "ge_info_attach"):
             logging.warning("unable to create ge tensor table, because attach db of ge failed.")
             return False
         return True
 
-    def _save_tensor_data(self: any, conn: any, tensor_data: list) -> None:
+    def _save_tensor_data(self: any, tensor_data: list) -> None:
         create_ge_tensor_sql = DBManager.sql_create_general_table("TensorGeMap",
                                                                   DBNameConstant.TABLE_SUMMARY_TENSOR,
                                                                   self.OP_TABLE_PATH)
-        DBManager.execute_sql(conn, create_ge_tensor_sql)
+        DBManager.execute_sql(self.conn, create_ge_tensor_sql)
 
         insert_sql = "insert into {0} " \
                      "values({value})".format(DBNameConstant.TABLE_SUMMARY_TENSOR,
                                               value="?," * (len(tensor_data[0]) - 1) + "?")
-        DBManager.executemany_sql(conn, insert_sql, tensor_data)
+        DBManager.executemany_sql(self.conn, insert_sql, tensor_data)
 
-    def _create_summary_table_helper(self: any, conn: any) -> None:
-        if not self.create_ge_summary_table(conn):
+    def _create_summary_table_helper(self: any) -> None:
+        if not self.create_ge_summary_table():
             logging.warning("unable to create ge summary table")
-        if not self.create_ge_tensor_table(conn):
+        if not self.create_ge_tensor_table():
             logging.warning("unable to create ge tensor table")
-        if not self.create_ai_core_metrics_table(conn):
+        if not self.create_ai_core_metrics_table():
             logging.warning("unable to create ai core metrics table")
-        if not self.create_task_time_table(conn):
+        if not self.create_task_time_table():
             logging.warning("unable to create task time table")

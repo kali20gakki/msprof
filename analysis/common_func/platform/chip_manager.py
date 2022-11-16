@@ -23,7 +23,8 @@ class ChipManager:
         Constant.CHIP_V3_1_0: ChipModel.CHIP_V3_1_0,
         Constant.CHIP_V3_2_0: ChipModel.CHIP_V3_2_0,
         Constant.CHIP_V3_3_0: ChipModel.CHIP_V3_3_0,
-        Constant.CHIP_V4_1_0: ChipModel.CHIP_V4_1_0
+        Constant.CHIP_V4_1_0: ChipModel.CHIP_V4_1_0,
+        Constant.CHIP_V1_1_1: ChipModel.CHIP_V1_1_1
     }
 
     FILE_NAME = os.path.basename(__file__)

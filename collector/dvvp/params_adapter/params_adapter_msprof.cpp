@@ -10,6 +10,7 @@
 #include "cmd_log.h"
 #include "errno/error_code.h"
 #include "param_validation.h"
+#include "platform/platform.h"
 #include "prof_params.h"
 #include "utils.h"
 
@@ -21,12 +22,20 @@ using namespace analysis::dvvp::common::validation;
 using namespace analysis::dvvp::common::config;
 using namespace analysis::dvvp::common::utils;
 using namespace Collector::Dvvp::Msprofbin;
+using namespace Analysis::Dvvp::Common::Platform;
 using namespace Analysis::Dvvp::Msprof;
 using namespace analysis::dvvp::message;
 int ParamsAdapterMsprof::Init()
 {
     paramContainer_.fill("");
-    int ret = CheckListInit();
+    int ret = Platform::instance()->PlatformInitByDriver();
+    if (ret != PROFILING_SUCCESS) {
+        CmdLog::instance()->CmdErrorLog("Running profiling failed."
+            " Please check the driver package is correctly installed.");
+        MSPROF_LOGE("Init platform by driver faild.");
+        return PROFILING_FAILED;
+    }
+    ret = CheckListInit();
     if (ret != PROFILING_SUCCESS) {
         MSPROF_LOGE("[Msprof]params adapter init failed.");
         return PROFILING_FAILED;
@@ -40,9 +49,7 @@ int ParamsAdapterMsprof::Init()
         INPUT_CFG_COM_SYS_CPU, INPUT_CFG_COM_SYS_HARDWARE_MEM, INPUT_CFG_COM_SYS_IO,
         INPUT_CFG_COM_SYS_INTERCONNECTION, INPUT_CFG_COM_DVPP, INPUT_CFG_COM_POWER,
         INPUT_CFG_COM_BIU, INPUT_CFG_COM_BIU_FREQ, INPUT_CFG_HOST_SYS, INPUT_CFG_HOST_SYS_PID,
-        INPUT_CFG_HOST_SYS_USAGE, INPUT_CFG_HOST_SYS_USAGE_FREQ,
-        INPUT_CFG_PYTHON_PATH, INPUT_CFG_SUMMARY_FORMAT, INPUT_CFG_PARSE, INPUT_CFG_QUERY,
-        INPUT_CFG_EXPORT, INPUT_CFG_ITERATION_ID, INPUT_CFG_MODEL_ID
+        INPUT_CFG_HOST_SYS_USAGE, INPUT_CFG_HOST_SYS_USAGE_FREQ
     }).swap(msprofConfig_);
     return PROFILING_SUCCESS;
 }
@@ -56,9 +63,7 @@ int ParamsAdapterMsprof::ParamsCheckMsprof()
         {INPUT_CFG_COM_SYS_PID_USAGE, "sys-pid-profiling"}, {INPUT_CFG_COM_SYS_CPU, "sys-cpu-profiling"},
         {INPUT_CFG_COM_SYS_HARDWARE_MEM, "sys-hardware-mem"}, {INPUT_CFG_COM_SYS_IO, "sys-io-profiling"},
         {INPUT_CFG_COM_SYS_INTERCONNECTION, "sys-interconnection-profiling"}, {INPUT_CFG_COM_DVPP, "dvpp-profiling"},
-        {INPUT_CFG_COM_POWER, "power"}, {INPUT_CFG_COM_BIU, "biu"},
-        {INPUT_CFG_PARSE, "parse"}, {INPUT_CFG_QUERY, "query"},
-        {INPUT_CFG_EXPORT, "export"}
+        {INPUT_CFG_COM_POWER, "power"}, {INPUT_CFG_COM_BIU, "biu"}
     };
     for (auto inputCfg : msprofConfig_) {
         if (setConfig_.find(inputCfg) == setConfig_.end()) {
@@ -84,9 +89,6 @@ int ParamsAdapterMsprof::ParamsCheckMsprof()
             case INPUT_CFG_COM_DVPP:
             case INPUT_CFG_COM_POWER:
             case INPUT_CFG_COM_BIU:
-            case INPUT_CFG_PARSE:
-            case INPUT_CFG_QUERY:
-            case INPUT_CFG_EXPORT:
                 ret = ParamValidation::instance()->IsValidInputCfgSwitch(switchNameMap[inputCfg], cfgValue);
                 break;
             default:
@@ -130,18 +132,6 @@ bool ParamsAdapterMsprof::ParamsCheckMsprofV1(InputCfg inputCfg, std::string cfg
         case INPUT_CFG_HOST_SYS_PID:
             ret = ParamValidation::instance()->CheckHostSysPidValid(cfgValue);
             break;
-        case INPUT_CFG_PYTHON_PATH:
-            ret = ParamValidation::instance()->CheckPythonPathIsValid(cfgValue);
-            break;
-        case INPUT_CFG_SUMMARY_FORMAT:
-            ret = ParamValidation::instance()->CheckExportSummaryFormatIsValid(cfgValue);
-            break;
-        case INPUT_CFG_ITERATION_ID:
-            ret = ParamValidation::instance()->CheckExportIdIsValid(cfgValue, "iteration-id");
-            break;
-        case INPUT_CFG_MODEL_ID:
-            ret = ParamValidation::instance()->CheckExportIdIsValid(cfgValue, "model-id");
-            break;
         default:
             break;
     }
@@ -181,36 +171,23 @@ void ParamsAdapterMsprof::SetDefaultParamsApp()
         PIPE_UTILIZATION : paramContainer_[INPUT_CFG_COM_AIV_METRICS];
 }
 
-int ParamsAdapterMsprof::SetMsprofMode()
+int ParamsAdapterMsprof::CheckMsprofMode(const std::unordered_map<int, std::pair<MsprofCmdInfo, std::string>> &argvMap)
 {
-    if (!paramContainer_[INPUT_CFG_MSPROF_APPLICATION].empty()) {
-        msprofMode_ = MsprofMode::MSPROF_MODE_APP;
-        SpliteAppPath(paramContainer_[INPUT_CFG_MSPROF_APPLICATION]);
-        return PROFILING_SUCCESS;
-    }
-    if (!paramContainer_[INPUT_CFG_COM_SYS_DEVICES].empty()) {
-        msprofMode_ = MsprofMode::MSPROF_MODE_SYSTEM;
-        return PROFILING_SUCCESS;
-    }
-    if (!paramContainer_[INPUT_CFG_HOST_SYS].empty()) {
-        msprofMode_ = MsprofMode::MSPROF_MODE_SYSTEM;
-        return PROFILING_SUCCESS;
-    }
-    if (!paramContainer_[INPUT_CFG_HOST_SYS_USAGE].empty()) {
-        msprofMode_ = MsprofMode::MSPROF_MODE_SYSTEM;
-        return PROFILING_SUCCESS;
-    }
-    if (!paramContainer_[INPUT_CFG_PARSE].empty()) {
-        msprofMode_ = MsprofMode::MSPROF_MODE_PARSE;
-        return PROFILING_SUCCESS;
-    }
-    if (!paramContainer_[INPUT_CFG_QUERY].empty()) {
-        msprofMode_ = MsprofMode::MSPROF_MODE_QUERY;
-        return PROFILING_SUCCESS;
-    }
-    if (!paramContainer_[INPUT_CFG_EXPORT].empty()) {
-        msprofMode_ = MsprofMode::MSPROF_MODE_EXPORT;
-        return PROFILING_SUCCESS;
+    std::vector<std::pair<int, MsprofMode>> modeAdjustVec = {
+        {ARGS_APPLICATION, MsprofMode::MSPROF_MODE_APP},
+        {ARGS_SYS_DEVICES, MsprofMode::MSPROF_MODE_SYSTEM},
+        {ARGS_HOST_SYS, MsprofMode::MSPROF_MODE_SYSTEM},
+        {ARGS_HOST_SYS_USAGE, MsprofMode::MSPROF_MODE_SYSTEM},
+        {ARGS_PARSE, MsprofMode::MSPROF_MODE_PARSE},
+        {ARGS_QUERY, MsprofMode::MSPROF_MODE_QUERY},
+        {ARGS_EXPORT, MsprofMode::MSPROF_MODE_EXPORT}
+    };
+
+    for (auto adjustArgs : modeAdjustVec) {
+        if (argvMap.find(adjustArgs.first) != argvMap.end()) {
+            msprofMode_ = adjustArgs.second;
+            return PROFILING_SUCCESS;
+        }
     }
     CmdLog::instance()->CmdErrorLog("No valid argument found in --application "
         "--sys-devices --host-sys --host-sys-usage --parse --query --export");
@@ -300,7 +277,8 @@ int ParamsAdapterMsprof::SystemToolsIsExist() const
     return PROFILING_SUCCESS;
 }
 
-int ParamsAdapterMsprof::GenMsprofContainer(std::unordered_map<int, std::pair<MsprofCmdInfo, std::string>> argvMap)
+int ParamsAdapterMsprof::GenMsprofContainer(
+    const std::unordered_map<int, std::pair<MsprofCmdInfo, std::string>> &argvMap)
 {
     for (const std::pair<int, std::pair<MsprofCmdInfo, std::string>> kv : argvMap) {
         MsprofArgsType argsType = static_cast<MsprofArgsType>(kv.first);
@@ -313,7 +291,8 @@ int ParamsAdapterMsprof::GenMsprofContainer(std::unordered_map<int, std::pair<Ms
             return PROFILING_FAILED;
         }
         if (kv.second.first.args[argsType] != nullptr && kv.second.first.args[argsType][0] == '\0') {
-            CmdLog::instance()->CmdErrorLog("Argument %s : expected one argument.", argvMap[argsType].second.c_str());
+            CmdLog::instance()->CmdErrorLog("Argument %s : expected one argument.",
+                argvMap.at(argsType).second.c_str());
             return PROFILING_FAILED;
         }
         paramContainer_[cfgType] = std::string(kv.second.first.args[argsType]);
@@ -322,7 +301,77 @@ int ParamsAdapterMsprof::GenMsprofContainer(std::unordered_map<int, std::pair<Ms
     return PROFILING_SUCCESS;
 }
 
-int ParamsAdapterMsprof::GetParamFromInputCfg(std::unordered_map<int, std::pair<MsprofCmdInfo, std::string>> argvMap,
+int ParamsAdapterMsprof::AnalysisParamsAdapt(
+    const std::unordered_map<int, std::pair<MsprofCmdInfo, std::string>> &argvMap)
+{
+    paramContainer_.fill("");
+    bool ret = false;
+    std::set<MsprofArgsType> analysisArgs = {
+        ARGS_OUTPUT, ARGS_PYTHON_PATH, ARGS_SUMMARY_FORMAT, ARGS_PARSE, ARGS_QUERY, ARGS_EXPORT,
+        ARGS_EXPORT_ITERATION_ID, ARGS_EXPORT_MODEL_ID};
+    std::unordered_map<int, InputCfg> argsTransMap = {
+        {ARGS_OUTPUT, INPUT_CFG_COM_OUTPUT}, {ARGS_PYTHON_PATH, INPUT_CFG_PYTHON_PATH},
+        {ARGS_SUMMARY_FORMAT, INPUT_CFG_SUMMARY_FORMAT}, {ARGS_PARSE, INPUT_CFG_PARSE},
+        {ARGS_QUERY, INPUT_CFG_QUERY}, {ARGS_EXPORT, INPUT_CFG_EXPORT},
+        {ARGS_EXPORT_ITERATION_ID, INPUT_CFG_ITERATION_ID}, {ARGS_EXPORT_MODEL_ID, INPUT_CFG_MODEL_ID}
+    };
+    for (auto arg : analysisArgs) {
+        if (argvMap.find(arg) == argvMap.end()) {
+            continue;
+        }
+        if (argvMap.at(arg).first.args[arg] != nullptr && argvMap.at(arg).first.args[arg][0] == '\0') {
+            CmdLog::instance()->CmdErrorLog("Argument %s : expected one argument.", argvMap.at(arg).second.c_str());
+            return PROFILING_FAILED;
+        }
+        std::string argsValue = std::string(argvMap.at(arg).first.args[arg]);
+        if (!CheckAnalysisConfig(arg, argsValue)) {
+            return PROFILING_FAILED;
+        }
+        paramContainer_[argsTransMap[arg]] = argsValue;
+    }
+    params_->result_dir = paramContainer_[INPUT_CFG_COM_OUTPUT].empty() ? params_->result_dir :
+        paramContainer_[INPUT_CFG_COM_OUTPUT];
+    SetParamsSelf();
+    return PROFILING_SUCCESS;
+}
+
+bool ParamsAdapterMsprof::CheckAnalysisConfig(MsprofArgsType arg, const std::string &argsValue) const
+{
+    bool ret = false;
+    switch (arg) {
+        case ARGS_OUTPUT:
+            ret = ParamValidation::instance()->CheckOutputIsValid(argsValue);
+            break;
+        case ARGS_PYTHON_PATH:
+            ret = ParamValidation::instance()->CheckPythonPathIsValid(argsValue);
+            break;
+        case ARGS_SUMMARY_FORMAT:
+            ret = ParamValidation::instance()->CheckExportSummaryFormatIsValid(argsValue);
+            break;
+        case ARGS_PARSE:
+            ret = ParamValidation::instance()->IsValidInputCfgSwitch("parse", argsValue);
+            break;
+        case ARGS_QUERY:
+            ret = ParamValidation::instance()->IsValidInputCfgSwitch("query", argsValue);
+            break;
+        case ARGS_EXPORT:
+            ret = ParamValidation::instance()->IsValidInputCfgSwitch("export", argsValue);
+            break;
+        case ARGS_EXPORT_ITERATION_ID:
+            ret = ParamValidation::instance()->CheckExportIdIsValid(argsValue, "iteration-id");
+            break;
+        case ARGS_EXPORT_MODEL_ID:
+            ret = ParamValidation::instance()->CheckExportIdIsValid(argsValue, "model-id");
+            break;
+        default:
+            ret = false;
+            break;
+    }
+    return ret;
+}
+
+int ParamsAdapterMsprof::GetParamFromInputCfg(
+    const std::unordered_map<int, std::pair<MsprofCmdInfo, std::string>> &argvMap,
     SHARED_PTR_ALIA<ProfileParams> params)
 {
     if (!params) {
@@ -330,8 +379,16 @@ int ParamsAdapterMsprof::GetParamFromInputCfg(std::unordered_map<int, std::pair<
         return PROFILING_FAILED;
     }
     params_ = params;
-    int ret = Init();
+    int ret = CheckMsprofMode(argvMap);
     if (ret != PROFILING_SUCCESS) {
+        MSPROF_LOGE("[GetParamFromInputCfg]Check msprof mode failed.");
+        return PROFILING_FAILED;
+    }
+    if (msprofMode_ == MsprofMode::MSPROF_MODE_PARSE || msprofMode_ == MsprofMode::MSPROF_MODE_QUERY ||
+        msprofMode_ == MsprofMode::MSPROF_MODE_EXPORT) {
+        return AnalysisParamsAdapt(argvMap);
+    }
+    if (Init() != PROFILING_SUCCESS) {
         MSPROF_LOGE("[GetParamFromInputCfg]msprof Init failed.");
         return PROFILING_FAILED;
     }
@@ -345,10 +402,8 @@ int ParamsAdapterMsprof::GetParamFromInputCfg(std::unordered_map<int, std::pair<
         MSPROF_LOGE("[GetParamFromInputCfg]msprof input param check failed.");
         return PROFILING_FAILED;
     }
-    ret = SetMsprofMode();
-    if (ret != PROFILING_SUCCESS) {
-        MSPROF_LOGE("[GetParamFromInputCfg]Set msprof mode failed.");
-        return PROFILING_FAILED;
+    if (msprofMode_ == MsprofMode::MSPROF_MODE_APP) {
+        SpliteAppPath(paramContainer_[INPUT_CFG_MSPROF_APPLICATION]);
     }
     ret = SetModeDefaultParams(msprofMode_);
     if (ret != PROFILING_SUCCESS) {

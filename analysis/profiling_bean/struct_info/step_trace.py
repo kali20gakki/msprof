@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2021-2022. All rights reserved.
-
+from common_func.utils import Utils
 from profiling_bean.struct_info.struct_decoder import StructDecoder
 
 
@@ -15,7 +15,7 @@ class StepTrace(StructDecoder):
         self._timestamp = step_trace[4]
         self._index_id = step_trace[5]
         self._model_id = step_trace[6]
-        self._stream_id = step_trace[7]
+        self._stream_id = Utils.get_stream_id(step_trace[7])
         self._task_id = step_trace[8]
         self._tag_id = step_trace[9]
 

@@ -47,7 +47,7 @@ class GeHashCalculator(ICalculator, MsMultiProcess):
             self._ge_data.append([_data.model_id, hash_dict.get(_data.op_name, _data.op_name),
                                   _data.stream_id, _data.task_id, _data.block_dim,
                                   _data.op_state, _data.task_type, hash_dict.get(_data.op_type, _data.op_type),
-                                  _data.index_id, _data.thread_id, _data.timestamp, _data.batch_id])
+                                  _data.index_id, _data.thread_id, _data.timestamp, _data.batch_id, _data.context_id])
 
     def calculate(self: any) -> None:
         """
