@@ -52,15 +52,17 @@ class MemcpyModel(BaseModel):
         :param table_name: TsMemcpyCalculation
         :return: list
         """
-        columns_name = ["sum(%s)" % self.DURATION,
-                        self.TYPE,
-                        self.TASK_ID,
-                        self.STREAM_ID,
-                        "sum(%s)" % self.START_TIME + " - " + self.RECEIVE_TIME,
-                        "avg(%s)" % self.DURATION,
-                        "min(%s)" % self.DURATION,
-                        "max(%s)" % self.DURATION,
-                        "count(*)"]
+        columns_name = [
+            "sum(%s)" % self.DURATION,
+            self.TYPE,
+            self.TASK_ID,
+            self.STREAM_ID,
+            "sum(%s)" % self.START_TIME + " - " + self.RECEIVE_TIME,
+            "avg(%s)" % self.DURATION,
+            "min(%s)" % self.DURATION,
+            "max(%s)" % self.DURATION,
+            "count(*)"
+        ]
         group_column = [self.STREAM_ID, self.TASK_ID]
 
         if DBManager.judge_table_exist(self.cur, table_name):
@@ -80,8 +82,9 @@ class MemcpyModel(BaseModel):
         :param table_name: TsMemcpyCalculation
         :return: list
         """
-        columns_name = [self.NAME, self.TYPE, self.STREAM_ID, self.TASK_ID, self.DURATION,
-                        self.START_TIME, self.END_TIME]
+        columns_name = [
+            self.NAME, self.TYPE, self.STREAM_ID, self.TASK_ID, self.DURATION, self.START_TIME, self.END_TIME
+        ]
         return self._get_export_data(columns_name, table_name)
 
     def return_task_scheduler_timeline(self: any, table_name: str) -> list:
@@ -90,8 +93,10 @@ class MemcpyModel(BaseModel):
         :param table_name: TsMemcpyCalculation
         :return: list
         """
-        columns_name = [self.NAME, self.TYPE, self.RECEIVE_TIME, self.START_TIME, self.END_TIME, self.DURATION,
-                        self.STREAM_ID, self.TASK_ID]
+        columns_name = [
+            self.NAME, self.TYPE, self.RECEIVE_TIME, self.START_TIME, self.END_TIME, self.DURATION,
+            self.STREAM_ID, self.TASK_ID
+        ]
         return self._get_export_data(columns_name, table_name)
 
     def _get_export_data(self: any, columns_name: list, table_name: str) -> list:

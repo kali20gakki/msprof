@@ -66,245 +66,6 @@ class DBManager:
     TENNSTONS = 10
     NSTOUS = 1000
 
-    @classmethod
-    def attach_to_db(cls: any, conn: any, project_path: str, db_name: str, attach_name: str) -> bool:
-        """
-        attach to other database
-        :param conn:
-        :param project_path:
-        :param db_name:
-        :param attach_name:
-        :return:
-        """
-        db_path = PathManager.get_db_path(project_path, db_name)
-        conn_check, curs_check = DBManager.check_connect_db_path(db_path)
-        if isinstance(conn_check, sqlite3.Connection):
-            cls.destroy_db_connect(conn_check, curs_check)
-            cls.execute_sql(conn, "attach database '{0}' as {1}".format(db_path, attach_name))
-            return True
-        return False
-
-    @classmethod
-    def sql_create_general_table(
-            cls: any,
-            map_name: str,
-            table_name: str,
-            map_file_path: str,
-            fields_filter_list: list = None) -> str:
-        """
-        use table.ini to generate sql table
-        :param map_name: map table name in table.ini
-        :param table_name: table name
-        :param map_file_path: map file path
-        :param fields_filter_list: filtered list
-        :return: success: sql sentence，otherwise return None
-        """
-
-        cfg_parser = configparser.ConfigParser()
-        if not map_file_path:
-            logging.error("Tables.ini path is None!")
-        else:
-            if not PathManager.check_map_file_path(map_file_path, cfg_parser):
-                return ""
-        if fields_filter_list is None:
-            fields_filter_list = []
-        try:
-            headers, type_names = DBManager._get_headers_and_type_names(cfg_parser, map_name, fields_filter_list,
-                                                                        map_file_path)
-        except (OSError, SystemError, ValueError, TypeError, RuntimeError) as error:
-            logging.exception(error)
-            return ""
-        hd_with_type_list_str = DBManager._get_hd_with_type_list_str(headers, type_names)
-        sql = "CREATE TABLE IF NOT EXISTS " + table_name + hd_with_type_list_str
-        return sql
-
-    @classmethod
-    def drop_table(cls: any, conn: any, table: str) -> None:
-        """
-        drop existing table
-        :param conn: DB connection
-        :param table: ready to drop table
-        :return:
-        """
-        if not isinstance(conn, sqlite3.Connection):
-            logging.error("%s table does not exist", table)
-        cls.execute_sql(conn, 'DROP TABLE IF EXISTS {}'.format(table))
-
-    @classmethod
-    def check_tables_in_db(cls: any, db_path: str, *tables: any) -> bool:
-        """
-        check if tables in database
-        """
-        conn, curs = cls.check_connect_db_path(db_path)
-        if not (conn and curs):
-            return False
-        res = True
-        for table in tables:
-            if not cls.judge_table_exist(curs, table):
-                res = False
-                break
-        cls.destroy_db_connect(conn, curs)
-        return res
-
-    @classmethod
-    def get_table_info(cls: any, curs: any, table_name: str) -> dict:
-        """
-        get table column name and type dictionary
-        """
-        table_info = cls.fetch_all_data(curs, "PRAGMA table_info({})".format(table_name))
-        return {col_info[1]: col_info[2] for col_info in table_info}
-
-    @classmethod
-    def get_table_headers(cls: any, curs: any, table_name: str) -> list:
-        """
-        get all headers for certain table
-        """
-        table_headers = []
-        for col_info in cls.fetch_all_data(curs, "PRAGMA table_info({})".format(table_name)):
-            table_headers.append(col_info[1])
-        return table_headers
-
-    @classmethod
-    def get_filtered_table_headers(cls: any, curs: any, table_name: str, *unused_headers: any) -> list:
-        """
-        get all headers for certain table
-        """
-        all_headers = cls.get_table_headers(curs, table_name)
-        filtered_table_headers = []
-        for sub in all_headers:
-            if sub not in unused_headers:
-                filtered_table_headers.append(sub)
-        return filtered_table_headers
-
-    @classmethod
-    def insert_data_into_table(cls: any, conn: any, table_name: str, data: any) -> None:
-        """
-        insert data into certain table
-        """
-        index = 0
-        while index < len(data):
-            sql = "insert into {table_name} values({value_form})" \
-                .format(table_name=table_name, value_form="?," * (len(data[0]) - 1) + "?")
-            cls.executemany_sql(conn, sql, data[index:index + cls.INSERT_SIZE])
-            index += cls.INSERT_SIZE
-
-    @classmethod
-    def fetch_all_data(cls: any, curs: any, sql: str, param: tuple = None, dto_class: any = None) -> list:
-        """
-        fetch 10000 num of data each time to get all data
-        """
-        if not isinstance(curs, sqlite3.Cursor):
-            return []
-        data = []
-        if dto_class:
-            curs.row_factory = ClassRowType.class_row(dto_class)
-        try:
-            if param:
-                curs.execute(sql, param)
-            else:
-                curs.execute(sql)
-        except sqlite3.Error as _err:
-            logging.error(str(_err), exc_info=Constant.TRACE_BACK_SWITCH)
-            return []
-        try:
-            while True:
-                res = curs.fetchmany(cls.FETCH_SIZE)
-                data += res
-                if len(res) < cls.FETCH_SIZE:
-                    break
-            return data
-        except sqlite3.Error as _err:
-            logging.error(str(_err), exc_info=Constant.TRACE_BACK_SWITCH)
-            return []
-        finally:
-            curs.row_factory = None
-
-    @classmethod
-    def fetchone(cls: any, curs: any, sql: str, param: tuple = None, dto_class: any = None) -> any:
-        """
-        fetch one data
-        """
-        if not isinstance(curs, sqlite3.Cursor):
-            return EmptyClass()
-        if dto_class:
-            curs.row_factory = ClassRowType.class_row(dto_class)
-        try:
-            if param:
-                data = curs.execute(sql, param).fetchone()
-            else:
-                data = curs.execute(sql).fetchone()
-            return data
-        except sqlite3.Error as _err:
-            logging.error(str(_err), exc_info=Constant.TRACE_BACK_SWITCH)
-            return EmptyClass()
-        finally:
-            curs.row_factory = None
-
-    @classmethod
-    def fetch_one_data(cls: any, curs: any, sql: str, param: tuple = None, dto_class: any = None) -> any:
-        """
-        fetch the next row query result set as a list
-        :return: one dto_class instance if dto_class, else one tuple
-        """
-        if not isinstance(curs, sqlite3.Cursor):
-            return tuple()
-        if dto_class:
-            curs.row_factory = ClassRowType.class_row(dto_class)
-        try:
-            if param:
-                curs.execute(sql, param)
-            else:
-                curs.execute(sql)
-        except sqlite3.Error as _err:
-            logging.error(str(_err), exc_info=Constant.TRACE_BACK_SWITCH)
-            return tuple()
-        try:
-            res = curs.fetchone()
-        except sqlite3.Error as _err:
-            logging.error(str(_err), exc_info=Constant.TRACE_BACK_SWITCH)
-            return tuple()
-        finally:
-            curs.row_factory = None
-        return res if res else tuple()
-
-    @classmethod
-    def add_new_column(cls: any, *args: str) -> None:
-        """
-        add a new column to certain table with default value
-        """
-        if len(args) < 5:
-            return
-        db_path = args[0]
-        table_name = args[1]
-        col_name = args[2]
-        col_type = args[3]
-        default_value = args[4]
-        conn, curs = DBManager.check_connect_db_path(db_path)
-        cls.execute_sql(conn, "alter table {table} add column {name} {type} default {default}"
-                        .format(table=table_name, name=col_name, type=col_type, default=default_value))
-
-    @classmethod
-    def check_connect_db(cls: any, project_path: str, db_name: str) -> tuple:
-        """
-        check whether we are able to connect to the desired DB
-        """
-        project_path = path_check(project_path)
-        if project_path:
-            db_path = path_check(os.path.join(project_path, 'sqlite', db_name))
-            if db_path:
-                return cls.check_connect_db_path(db_path)
-            return EmptyClass("empty conn"), EmptyClass("empty curs")
-        return EmptyClass("empty conn"), EmptyClass("empty curs")
-
-    @classmethod
-    def check_connect_db_path(cls: any, db_path: str) -> tuple:
-        """
-        check whether we are able to connect to the desired DB
-        """
-        if path_check(db_path):
-            return cls.create_connect_db(db_path)
-        return EmptyClass("empty conn"), EmptyClass("empty curs")
-
     @staticmethod
     def create_connect_db(db_path: str) -> tuple:
         """
@@ -477,3 +238,255 @@ class DBManager:
         hd_with_type_list_str += ','.join(hd_with_type_list)
         hd_with_type_list_str += ")"
         return hd_with_type_list_str
+
+    @classmethod
+    def attach_to_db(cls: any, conn: any, project_path: str, db_name: str, attach_name: str) -> bool:
+        """
+        attach to other database
+        :param conn:
+        :param project_path:
+        :param db_name:
+        :param attach_name:
+        :return:
+        """
+        db_path = PathManager.get_db_path(project_path, db_name)
+        conn_check, curs_check = DBManager.check_connect_db_path(db_path)
+        if isinstance(conn_check, sqlite3.Connection):
+            cls.destroy_db_connect(conn_check, curs_check)
+            cls.execute_sql(conn, "attach database '{0}' as {1}".format(db_path, attach_name))
+            return True
+        return False
+
+    @classmethod
+    def sql_create_general_table(
+            cls: any,
+            map_name: str,
+            table_name: str,
+            map_file_path: str,
+            fields_filter_list: list = None) -> str:
+        """
+        use table.ini to generate sql table
+        :param map_name: map table name in table.ini
+        :param table_name: table name
+        :param map_file_path: map file path
+        :param fields_filter_list: filtered list
+        :return: success: sql sentence，otherwise return None
+        """
+
+        cfg_parser = configparser.ConfigParser()
+        if not map_file_path:
+            logging.error("Tables.ini path is None!")
+        else:
+            if not PathManager.check_map_file_path(map_file_path, cfg_parser):
+                return ""
+        if fields_filter_list is None:
+            fields_filter_list = []
+        try:
+            headers, type_names = DBManager._get_headers_and_type_names(cfg_parser, map_name, fields_filter_list,
+                                                                        map_file_path)
+        except (OSError, SystemError, ValueError, TypeError, RuntimeError) as error:
+            logging.exception(error)
+            return ""
+        hd_with_type_list_str = DBManager._get_hd_with_type_list_str(headers, type_names)
+        sql = "CREATE TABLE IF NOT EXISTS " + table_name + hd_with_type_list_str
+        return sql
+
+    @classmethod
+    def drop_table(cls: any, conn: any, table: str) -> None:
+        """
+        drop existing table
+        :param conn: DB connection
+        :param table: ready to drop table
+        :return:
+        """
+        if not isinstance(conn, sqlite3.Connection):
+            logging.error("%s table does not exist", table)
+        cls.execute_sql(conn, 'DROP TABLE IF EXISTS {}'.format(table))
+
+    @classmethod
+    def clear_table(cls: any, conn: any, table_name: str):
+        """
+        delete all data in one table
+        :param conn: DB connection
+        :param table_name: ready to delete table data
+        :return:
+        """
+        if not isinstance(conn, sqlite3.Connection):
+            logging.error("%s table does not exist", table_name)
+        cls.execute_sql(conn, "Delete from {}".format(table_name))
+
+    @classmethod
+    def check_tables_in_db(cls: any, db_path: str, *tables: any) -> bool:
+        """
+        check if tables in database
+        """
+        conn, curs = cls.check_connect_db_path(db_path)
+        if not (conn and curs):
+            return False
+        res = True
+        for table in tables:
+            if not cls.judge_table_exist(curs, table):
+                res = False
+                break
+        cls.destroy_db_connect(conn, curs)
+        return res
+
+    @classmethod
+    def get_table_info(cls: any, curs: any, table_name: str) -> dict:
+        """
+        get table column name and type dictionary
+        """
+        table_info = cls.fetch_all_data(curs, "PRAGMA table_info({})".format(table_name))
+        return {col_info[1]: col_info[2] for col_info in table_info}
+
+    @classmethod
+    def get_table_headers(cls: any, curs: any, table_name: str) -> list:
+        """
+        get all headers for certain table
+        """
+        table_headers = []
+        for col_info in cls.fetch_all_data(curs, "PRAGMA table_info({})".format(table_name)):
+            table_headers.append(col_info[1])
+        return table_headers
+
+    @classmethod
+    def get_filtered_table_headers(cls: any, curs: any, table_name: str, *unused_headers: any) -> list:
+        """
+        get all headers for certain table
+        """
+        all_headers = cls.get_table_headers(curs, table_name)
+        filtered_table_headers = []
+        for sub in all_headers:
+            if sub not in unused_headers:
+                filtered_table_headers.append(sub)
+        return filtered_table_headers
+
+    @classmethod
+    def insert_data_into_table(cls: any, conn: any, table_name: str, data: any) -> None:
+        """
+        insert data into certain table
+        """
+        index = 0
+        while index < len(data):
+            sql = "insert into {table_name} values({value_form})" \
+                .format(table_name=table_name, value_form="?," * (len(data[0]) - 1) + "?")
+            cls.executemany_sql(conn, sql, data[index:index + cls.INSERT_SIZE])
+            index += cls.INSERT_SIZE
+
+    @classmethod
+    def fetch_all_data(cls: any, curs: any, sql: str, param: tuple = None, dto_class: any = None) -> list:
+        """
+        fetch 10000 num of data each time to get all data
+        """
+        if not isinstance(curs, sqlite3.Cursor):
+            return []
+        data = []
+        if dto_class:
+            curs.row_factory = ClassRowType.class_row(dto_class)
+        try:
+            if param:
+                curs.execute(sql, param)
+            else:
+                curs.execute(sql)
+        except sqlite3.Error as _err:
+            logging.error(str(_err), exc_info=Constant.TRACE_BACK_SWITCH)
+            curs.row_factory = None
+            return []
+        try:
+            while True:
+                res = curs.fetchmany(cls.FETCH_SIZE)
+                data += res
+                if len(res) < cls.FETCH_SIZE:
+                    break
+            return data
+        except sqlite3.Error as _err:
+            logging.error(str(_err), exc_info=Constant.TRACE_BACK_SWITCH)
+            return []
+        finally:
+            curs.row_factory = None
+
+    @classmethod
+    def fetchone(cls: any, curs: any, sql: str, param: tuple = None, dto_class: any = None) -> any:
+        """
+        fetch one data
+        """
+        if not isinstance(curs, sqlite3.Cursor):
+            return EmptyClass()
+        if dto_class:
+            curs.row_factory = ClassRowType.class_row(dto_class)
+        try:
+            if param:
+                data = curs.execute(sql, param).fetchone()
+            else:
+                data = curs.execute(sql).fetchone()
+            return data
+        except sqlite3.Error as _err:
+            logging.error(str(_err), exc_info=Constant.TRACE_BACK_SWITCH)
+            return EmptyClass()
+        finally:
+            curs.row_factory = None
+
+    @classmethod
+    def fetch_one_data(cls: any, curs: any, sql: str, param: tuple = None, dto_class: any = None) -> any:
+        """
+        fetch the next row query result set as a list
+        :return: one dto_class instance if dto_class, else one tuple
+        """
+        if not isinstance(curs, sqlite3.Cursor):
+            return tuple()
+        if dto_class:
+            curs.row_factory = ClassRowType.class_row(dto_class)
+        try:
+            if param:
+                curs.execute(sql, param)
+            else:
+                curs.execute(sql)
+        except sqlite3.Error as _err:
+            logging.error(str(_err), exc_info=Constant.TRACE_BACK_SWITCH)
+            return tuple()
+        try:
+            res = curs.fetchone()
+        except sqlite3.Error as _err:
+            logging.error(str(_err), exc_info=Constant.TRACE_BACK_SWITCH)
+            return tuple()
+        finally:
+            curs.row_factory = None
+        return res if res else tuple()
+
+    @classmethod
+    def add_new_column(cls: any, *args: str) -> None:
+        """
+        add a new column to certain table with default value
+        """
+        if len(args) < 5:
+            return
+        db_path = args[0]
+        table_name = args[1]
+        col_name = args[2]
+        col_type = args[3]
+        default_value = args[4]
+        conn, curs = DBManager.check_connect_db_path(db_path)
+        cls.execute_sql(conn, "alter table {table} add column {name} {type} default {default}"
+                        .format(table=table_name, name=col_name, type=col_type, default=default_value))
+
+    @classmethod
+    def check_connect_db(cls: any, project_path: str, db_name: str) -> tuple:
+        """
+        check whether we are able to connect to the desired DB
+        """
+        project_path = path_check(project_path)
+        if project_path:
+            db_path = path_check(os.path.join(project_path, 'sqlite', db_name))
+            if db_path:
+                return cls.check_connect_db_path(db_path)
+            return EmptyClass("empty conn"), EmptyClass("empty curs")
+        return EmptyClass("empty conn"), EmptyClass("empty curs")
+
+    @classmethod
+    def check_connect_db_path(cls: any, db_path: str) -> tuple:
+        """
+        check whether we are able to connect to the desired DB
+        """
+        if path_check(db_path):
+            return cls.create_connect_db(db_path)
+        return EmptyClass("empty conn"), EmptyClass("empty curs")

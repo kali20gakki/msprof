@@ -27,8 +27,10 @@ class StarsChipTransView:
     PA_ID = "PA Link ID"
     PCIE_ID = "PCIE ID"
 
-    TIMELINE_MAP = {StarsConstant.TYPE_STARS_PA: [PA_LINK_RX, PA_LINK_TX, PA_ID],
-                    StarsConstant.TYPE_STARS_PCIE: [PCIE_WRITE, PCIE_READ, PCIE_ID]}
+    TIMELINE_MAP = {
+        StarsConstant.TYPE_STARS_PA: [PA_LINK_RX, PA_LINK_TX, PA_ID],
+        StarsConstant.TYPE_STARS_PCIE: [PCIE_WRITE, PCIE_READ, PCIE_ID]
+    }
 
     def __init__(self: any, configs: dict, params: dict) -> None:
         self._configs = configs

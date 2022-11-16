@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2021-2022. All rights reserved.
 import struct
+
 from enum import IntEnum
 from enum import unique
 
@@ -44,22 +45,30 @@ class LowPowerBean(StructDecoder):
 
     @property
     def tem_of_ai_core(self: any) -> int:
-        """for tem_of_ai_core"""
+        """
+        for tem_of_ai_core
+        """
         return self._get_temp_info('tem_of_ai_core')
 
     @property
     def tem_of_hbm(self: any) -> float:
-        """for tem_of_hbm"""
+        """
+        for tem_of_hbm
+        """
         return self._get_temp_info('tem_of_hbm')
 
     @property
     def tem_of_hbm_granularity(self: any) -> float:
-        """for tem_of_hbm_granularity"""
+        """
+        for tem_of_hbm_granularity
+        """
         return self._get_temp_info('tem_of_hbm_granularity')
 
     @property
     def tem_of_3ds_ram(self: any) -> float:
-        """for tem_of_3ds_ram"""
+        """
+        for tem_of_3ds_ram
+        """
         return self._get_temp_info('tem_of_3ds_ram')
 
     @property
@@ -71,143 +80,197 @@ class LowPowerBean(StructDecoder):
 
     @property
     def tem_of_peripherals(self: any) -> float:
-        """for tem_of_peripherals"""
+        """
+        for tem_of_peripherals
+        """
         return self._get_temp_info('tem_of_peripherals')
 
     @property
     def tem_of_l2_buff(self: any) -> float:
-        """for tem_of_l2_buff"""
+        """
+        for tem_of_l2_buff
+        """
         return self._get_temp_info('tem_of_l2_buff')
 
     @property
     def aic_current_dpm(self: any) -> float:
-        """for aic_current_dpm"""
+        """
+        for aic_current_dpm
+        """
         return self._lp_info.get('aic_current_dpm', 0.0)
 
     @property
     def power_consumption_dpm(self: any) -> float:
-        """for power_consumption_dpm"""
+        """
+        for power_consumption_dpm
+        """
         return self._lp_info.get('power_consumption_dpm', 0.0)
 
     @property
     def aic_current_sd5003(self: any) -> int:
-        """for aic_current_sd5003"""
+        """
+        for aic_current_sd5003
+        """
         return self._lp_info.get('aic_current_sd5003', 0)
 
     @property
     def power_consumption_sd5003(self: any) -> float:
-        """for power_consumption_sd5003"""
+        """
+        for power_consumption_sd5003
+        """
         if not self._lp_info.get('pwr_samp_cnt'):
             return 0
         return self._lp_info.get('power_consumption_sd5003', 0.0) / self._lp_info.get('pwr_samp_cnt') / \
-               self.TEMP_SUM_WITH_FOUR_BITS
+            self.TEMP_SUM_WITH_FOUR_BITS
 
     @property
     def pwr2prof_dat_imon(self: any) -> float:
-        """for pwr2prof_dat_imon"""
+        """
+        for pwr2prof_dat_imon
+        """
         return self._lp_info.get('pwr2prof_dat_imon', 0.0)
 
     @property
     def pmc2prof_freq_prof(self: any) -> float:
-        """for pmc2prof_freq_prof"""
+        """
+        for pmc2prof_freq_prof
+        """
         if not self._lp_info.get('vf_samp_cnt'):
             return 0
         return self._lp_info.get('pmc2prof_freq_prof', 0.0) / self._lp_info.get('vf_samp_cnt') / \
-               self.TEMP_SUM_WITH_THREE_BITS
+            self.TEMP_SUM_WITH_THREE_BITS
 
     @property
     def tem_warn_cnt0(self: any) -> int:
-        """for tem_warn_cnt0"""
+        """
+        for tem_warn_cnt0
+        """
         return self._lp_info.get('tem_warn_cnt0', 0)
 
     @property
     def tem_warn_cnt1(self: any) -> int:
-        """for tem_warn_cnt1"""
+        """
+        for tem_warn_cnt1
+        """
         return self._lp_info.get('tem_warn_cnt1', 0)
 
     @property
     def tem_warn_cnt2(self: any) -> int:
-        """for tem_warn_cnt2"""
+        """
+        for tem_warn_cnt2
+        """
         return self._lp_info.get('tem_warn_cnt2', 0)
 
     @property
     def tem_warn_cnt3(self: any) -> int:
-        """for tem_warn_cnt3"""
+        """
+        for tem_warn_cnt3
+        """
         return self._lp_info.get('tem_warn_cnt3', 0)
 
     @property
     def cos_warn_cnt0(self: any) -> int:
-        """for cos_warn_cnt0"""
+        """
+        for cos_warn_cnt0
+        """
         return self._lp_info.get('cos_warn_cnt0', 0)
 
     @property
     def cos_warn_cnt1(self: any) -> int:
-        """for cos_warn_cnt1"""
+        """
+        for cos_warn_cnt1
+        """
         return self._lp_info.get('cos_warn_cnt1', 0)
 
     @property
     def cos_warn_cnt2(self: any) -> int:
-        """for cos_warn_cnt2"""
+        """
+        for cos_warn_cnt2
+        """
         return self._lp_info.get('cos_warn_cnt2', 0)
 
     @property
     def cos_warn_cnt3(self: any) -> int:
-        """for cos_warn_cnt3"""
+        """
+        for cos_warn_cnt3
+        """
         return self._lp_info.get('cos_warn_cnt3', 0)
 
     @property
     def io_warn_cnt0(self: any) -> int:
-        """for io_warn_cnt0"""
+        """
+        for io_warn_cnt0
+        """
         return self._lp_info.get('io_warn_cnt0', 0)
 
     @property
     def io_warn_cnt1(self: any) -> int:
-        """for io_warn_cnt1"""
+        """
+        for io_warn_cnt1
+        """
         return self._lp_info.get('io_warn_cnt1', 0)
 
     @property
     def io_warn_cnt2(self: any) -> int:
-        """for io_warn_cnt2"""
+        """
+        for io_warn_cnt2
+        """
         return self._lp_info.get('io_warn_cnt2', 0)
 
     @property
     def io_warn_cnt3(self: any) -> int:
-        """for io_warn_cnt3"""
+        """
+        for io_warn_cnt3
+        """
         return self._lp_info.get('io_warn_cnt3', 0)
 
     @property
     def epd_warn(self: any) -> int:
-        """for epd_warn"""
+        """
+        for epd_warn
+        """
         return self._lp_info.get('epd_warn', 0)
 
     @property
     def sft_samp_cfg(self: any) -> float:
-        """for sft_samp_cfg"""
+        """
+        for sft_samp_cfg
+        """
         return self._lp_info.get('sft_samp_cfg', 0.0)
 
     @property
     def vf_samp_cnt(self: any) -> int:
-        """for vf_samp_cnt"""
+        """
+        for vf_samp_cnt
+        """
         return self._lp_info.get('vf_samp_cnt', 0)
 
     @property
     def pwr_samp_cnt(self: any) -> int:
-        """for pwr_samp_cnt"""
+        """
+        for pwr_samp_cnt
+        """
         return self._lp_info.get('pwr_samp_cnt', 0)
 
     @property
     def temp_samp_cnt(self: any) -> int:
-        """for temp_samp_cnt"""
+        """
+        for temp_samp_cnt
+        """
         return self._lp_info.get('temp_samp_cnt', 0)
 
     @staticmethod
     def get_low_power_id(data) -> int:
-        """get temp_type 2-6 bits of 32bits"""
+        """
+        get temp_type 2-6 bits of 32bits
+        """
         return data >> 26 & 15
 
     @staticmethod
     def get_low_power_data_header(data: int) -> LowPowerType:
-        """get highest 2bits of 32bits"""
+        """
+        get highest 2bits of 32bits
+        """
         return LowPowerType(data >> 30)
 
     def decode(self: any, binary_data: bytes, additional_fmt: str = "") -> any:
@@ -230,7 +293,9 @@ class LowPowerBean(StructDecoder):
             header_handle_dict.get(header)(data)
 
     def update_lp_info(self, data, low_power_type):
-        """The last 26 bits of the 32-bit pwr are used."""
+        """
+        The last 26 bits of the 32-bit pwr are used.
+        """
         data_type = self.get_low_power_id(data)
         data_key = "{}-{}".format(low_power_type.value, data_type)
         if self.DATA_TYPE_DICT.get(data_key, '') in self._lp_info:

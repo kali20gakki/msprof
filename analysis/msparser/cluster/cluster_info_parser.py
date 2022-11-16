@@ -36,8 +36,10 @@ class ClusterInfoParser(IParser):
     def parse(self: any) -> None:
         logging.info("Start to parse cluster rank data!")
         for dir_name, cluster_basic_info in self.device_cluster_basic_info.items():
-            cluster_info = [cluster_basic_info.job_info, cluster_basic_info.device_id,
-                            cluster_basic_info.collection_time, cluster_basic_info.rank_id, dir_name]
+            cluster_info = [
+                cluster_basic_info.job_info, cluster_basic_info.device_id,
+                cluster_basic_info.collection_time, cluster_basic_info.rank_id, dir_name
+            ]
             self.cluster_info_list.append(cluster_info)
 
     def save(self: any) -> None:

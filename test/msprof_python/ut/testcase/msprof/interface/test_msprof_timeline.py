@@ -3,9 +3,7 @@ import unittest
 from unittest import mock
 
 from common_func.empty_class import EmptyClass
-
 from msinterface.msprof_timeline import MsprofTimeline
-from profiling_bean.prof_enum.export_data_type import ExportDataType
 
 NAMESPACE = 'msinterface.msprof_timeline'
 

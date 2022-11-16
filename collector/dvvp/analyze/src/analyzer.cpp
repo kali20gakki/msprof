@@ -5,6 +5,8 @@
  * Create: 2020-10-24
  */
 #include "analyzer.h"
+
+#include <utility>
 #include "analyzer_ge.h"
 #include "analyzer_hwts.h"
 #include "analyzer_ts.h"
@@ -30,12 +32,13 @@ Analyzer::Analyzer(SHARED_PTR_ALIA<analysis::dvvp::transport::Uploader> uploader
     : resultCount_(0),
       profileMode_(PROFILE_MODE_STEP_TRACE),
       flushedChannel_(false),
-      flushQueueLen_(0)
+      flushQueueLen_(0),
+      uploader_(uploader),
+      inited_(false)
 {
-    uploader_ = uploader;
 }
 
-Analyzer::~Analyzer() {}
+Analyzer::~Analyzer() = default;
 
 int Analyzer::Init()
 {

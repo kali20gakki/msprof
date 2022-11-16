@@ -6,6 +6,8 @@ from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.platform.chip_manager import ChipManager
+from constant.info_json_construct import InfoJson
+from constant.info_json_construct import InfoJsonReaderManager
 from profiling_bean.prof_enum.chip_model import ChipModel
 
 from sqlite.db_manager import DBManager
@@ -107,6 +109,18 @@ class TestLLCTimelineTrain(unittest.TestCase):
             self.assertEqual(len(json.loads(res)), 5)
             self.assertEqual(len(json.loads(res_1)), 2)
 
+            with mock.patch(NAMESPACE + '.get_bandwidth_value', return_value=[]), \
+                 mock.patch(NAMESPACE + '.DBManager.fetch_all_data', return_value=[]):
+                res_1 = get_llc_bandwidth(db_open.db_curs)
+            self.assertEqual(len(json.loads(res)), 5)
+            self.assertEqual(len(json.loads(res_1)), 2)
+
+            with mock.patch(NAMESPACE + '.get_bandwidth_value', return_value=[]), \
+                 mock.patch(NAMESPACE + '._format_llc_trace_data', return_value=[]):
+                res_1 = get_llc_bandwidth(db_open.db_curs)
+            self.assertEqual(len(json.loads(res)), 5)
+            self.assertEqual(len(json.loads(res_1)), 2)
+
     def test_get_llc_capacity_1(self):
         db_manager = DBManager()
         test_sql = db_manager.create_table(DBNameConstant.DB_LLC)
@@ -130,6 +144,11 @@ class TestLLCTimelineTrain(unittest.TestCase):
         self.assertEqual(len(json.loads(res)), 5)
         (test_sql[1]).execute("drop Table {}".format(DBNameConstant.TABLE_LLC_DSID))
         db_manager.destroy(test_sql)
+
+        with mock.patch(NAMESPACE + '._get_dsid_sql_data', return_value=[]):
+            InfoConfReader()._info_json = {'pid': "0"}
+            res = get_llc_capacity(param, test_sql[1])
+        self.assertEqual(len(json.loads(res)), 2)
 
     def test_get_llc_db_table(self):
         sample_config[StrConstant.LLC_PROF] = ""
@@ -264,7 +283,7 @@ class TestLLCTimelineTrain(unittest.TestCase):
         with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=test_sql), \
              mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True), \
              mock.patch(NAMESPACE + '._reformat_hbm_data', return_value=[]):
-            InfoConfReader()._info_json = {'pid': "0"}
+            InfoJsonReaderManager(InfoJson(pid="0")).process()
             res = get_hbm_timeline(param)
         self.assertEqual(len(json.loads(res)), 2)
 

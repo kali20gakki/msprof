@@ -187,7 +187,7 @@ class GeTensorBean(StructDecoder):
         self._data_tag = self._fusion_data[1]
         self._model_id = self._fusion_data[2]
         self._index_num = self._fusion_data[3]
-        self._stream_id = self._fusion_data[4]
+        self._stream_id = Utils.get_stream_id(self._fusion_data[4])
         self._task_id = self._fusion_data[5]
         self._batch_id = self._fusion_data[6]
         self._tensor_num = self._fusion_data[7]

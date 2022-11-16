@@ -92,8 +92,10 @@ class TrainingTraceSaver:
     @staticmethod
     def _check_all_reduce(items: dict) -> bool:
         for item in items["all_reduces"]:
-            check_int_item = [item["start"], item["start_stream"], item["start_task"],
-                              item["end"], item["end_stream"], item["end_task"]]
+            check_int_item = [
+                item["start"], item["start_stream"], item["start_task"],
+                item["end"], item["end_stream"], item["end_task"]
+            ]
             for check_item in check_int_item:
                 if not check_number_valid(check_item):
                     logging.error("reduce_cp message check integer value failed")
@@ -103,10 +105,12 @@ class TrainingTraceSaver:
     @staticmethod
     def _check_training_trace(message: dict) -> bool:
         for items in message["data"]:
-            check_int_item = [items["iteration_id"], items["job_stream"], items["job_task"],
-                              items["FP_start"], items["FP_stream"], items["FP_task"],
-                              items["BP_end"], items["BP_stream"], items["BP_task"],
-                              items["iteration_end"], items["iter_stream"], items["iter_task"]]
+            check_int_item = [
+                items["iteration_id"], items["job_stream"], items["job_task"],
+                items["FP_start"], items["FP_stream"], items["FP_task"],
+                items["BP_end"], items["BP_stream"], items["BP_task"],
+                items["iteration_end"], items["iter_stream"], items["iter_task"]
+            ]
             for item in check_int_item:
                 if not check_number_valid(item):
                     logging.error("data message check integer value failed")

@@ -19,7 +19,11 @@ namespace Platform {
 using namespace analysis::dvvp::common::error;
 
 Platform::Platform()
-    : platformType_(SysPlatformType::INVALID), runSide_(SysPlatformType::INVALID)
+    : platformType_(SysPlatformType::INVALID),
+      runSide_(SysPlatformType::INVALID),
+      callFlags_(0),
+      isHelperHostSide_(false),
+      driverAvailable_(false)
 {
 }
 
@@ -27,9 +31,11 @@ Platform::~Platform()
 {
 }
 
-int Platform::Init()
+void Platform::Init()
 {
-    return PROFILING_SUCCESS;
+    uint32_t platformType;
+    driverAvailable_ = (analysis::dvvp::driver::DrvGetPlatformInfo(platformType) == PROFILING_SUCCESS) ? true : false;
+    isHelperHostSide_ = analysis::dvvp::driver::DrvCheckIfHelperHost();
 }
 
 int Platform::Uninit()
@@ -53,9 +59,10 @@ bool Platform::PlatformIsRpcSide()
     return false;
 }
 
-bool Platform::PlatformIsHelperHostSide() const
+bool Platform::PlatformIsHelperHostSide()
 {
-    return analysis::dvvp::driver::DrvCheckIfHelperHost();
+    PthreadOnce(&callFlags_, []() {Platform::instance()->Init();});
+    return isHelperHostSide_;
 }
 
 bool Platform::RunSocSide()
@@ -64,6 +71,12 @@ bool Platform::RunSocSide()
         return true;
     }
     return false;
+}
+
+bool Platform::DriverAvailable()
+{
+    PthreadOnce(&callFlags_, []() {Platform::instance()->Init();});
+    return driverAvailable_;
 }
 
 void Platform::SetPlatformSoc()

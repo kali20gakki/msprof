@@ -125,7 +125,8 @@ class DataManager:
     def _get_base_data(cls: any, device_id: any, infer_id: any, project_path: str) -> tuple:
         if cls.is_network(project_path, device_id):
             configs = {
-                StrConstant.CONFIG_HEADERS: GetExportDataConfigs.get_data_headers(StrConstant.AI_CORE_OP_SUMMARY)}
+                StrConstant.CONFIG_HEADERS: GetExportDataConfigs.get_data_headers(StrConstant.AI_CORE_OP_SUMMARY)
+            }
             db_path = PathManager.get_db_path(project_path, DBNameConstant.DB_AICORE_OP_SUMMARY)
             headers, data, _ = AiCoreOpReport.get_ai_core_op_summary_data(project_path, db_path,
                                                                           infer_id, configs)
@@ -135,20 +136,20 @@ class DataManager:
             sample_config = generate_config(os.path.join(project_path, CommonConstant.SAMPLE_JSON))
 
             param[StrConstant.DATA_TYPE] = StrConstant.AI_CORE_PMU_EVENTS
-            if sample_config.get(StrConstant.AICORE_PROFILING_MODE) == MsvpConstant.AI_CORE_PROFILING_MODE_LIST[0]:
+            if sample_config.get(StrConstant.AICORE_PROFILING_MODE) == StrConstant.AIC_TASK_BASED_MODE:
                 headers, data, _ = get_task_based_core_data(project_path, DBNameConstant.DB_RUNTIME,
                                                             param)
-            elif sample_config.get(StrConstant.AICORE_PROFILING_MODE) == MsvpConstant.AI_CORE_PROFILING_MODE_LIST[1]:
+            elif sample_config.get(StrConstant.AICORE_PROFILING_MODE) == StrConstant.AIC_SAMPLE_BASED_MODE:
                 param[StrConstant.CORE_DATA_TYPE] = StrConstant.AI_CORE_PMU_EVENTS
                 headers, data, _ = get_core_sample_data(project_path, "aicore_{}.db", device_id,
                                                         param)
 
             if not headers or not data:
                 param[StrConstant.DATA_TYPE] = StrConstant.AI_VECTOR_CORE_PMU_EVENTS
-                if sample_config.get(StrConstant.AIV_PROFILING_MODE) == MsvpConstant.AI_CORE_PROFILING_MODE_LIST[0]:
+                if sample_config.get(StrConstant.AIV_PROFILING_MODE) == StrConstant.AIC_TASK_BASED_MODE:
                     headers, data, _ = get_task_based_core_data(project_path, DBNameConstant.DB_RUNTIME,
                                                                 param)
-                elif sample_config.get(StrConstant.AIV_PROFILING_MODE) == MsvpConstant.AI_CORE_PROFILING_MODE_LIST[1]:
+                elif sample_config.get(StrConstant.AIV_PROFILING_MODE) == StrConstant.AIC_SAMPLE_BASED_MODE:
                     headers, data, _ = get_core_sample_data(project_path, "ai_vector_core_{}.db",
                                                             device_id, param)
         return headers, data

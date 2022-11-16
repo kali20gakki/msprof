@@ -15,6 +15,7 @@ from common_func.ms_constant.str_constant import StrConstant
 from common_func.msvp_common import add_aicore_units
 from common_func.msvp_common import read_cpu_cfg
 from common_func.msvp_constant import MsvpConstant
+from common_func.platform.chip_manager import ChipManager
 from common_func.utils import Utils
 from viewer.ge_info_report import get_ge_hash_dict
 from viewer.ge_info_report import get_ge_model_name_dict
@@ -28,11 +29,26 @@ class AiCoreOpReport:
     TASK_TIME_TABLE = "task_time"
     GE_SUMMARY_TABLE = "ge_summary"
     AI_CORE_UNUSED_COLS = ["job_id", "host_id", "device_id", "task_id", "stream_id", "index_id",
-                           "model_id", "overflow", "overflowed_cycles", "device_id", "batch_id"]
-    TENSOR_HEADERS = ["Input Shapes", "Input Data Types", "Input Formats",
-                      "Output Shapes", "Output Data Types", "Output Formats"]
+                           "model_id", "overflow", "overflowed_cycles", "device_id", "batch_id",
+                           "task_type", "core_type", "subtask_id", "start_time", "end_time", "ffts_type"]
+    UNSUPPORTED_HEADER = ["aic_vec_ratio", "aiv_mac_ratio", "aiv_mte1_ratio", "aic_ub_read_bw",
+                          "aic_ub_write_bw", "aiv_l1_read_bw", "aiv_l1_write_bw",
+                          "aic_l0c_read_bw", "aic_l0c_write_bw", "aiv_l0a_read_bw",
+                          "aiv_l0a_write_bw", "aiv_l0b_read_bw", "aiv_l0b_write_bw",
+                          "aiv_l0c_read_bw_cube", "aiv_l0c_write_bw_cube",
+                          "aic_ub_read_bw_mte", "aic_ub_write_bw_mte", "aic_ub_read_bw_vector",
+                          "aic_ub_write_bw_vector", "aiv_mac_fp16_ratio", 'aiv_mac_int8_ratio',
+                          "aic_vec_fp32_ratio", "aic_vec_fp16_ratio", "aic_vec_int32_ratio",
+                          "aic_vec_misc_ratio", "aic_vec_fp16_128lane_ratio", "aic_vec_fp16_64lane_ratio",
+                          "aic_vec_bankgroup_cflt_ratio", "aic_vec_bank_cflt_ratio", "aic_vec_resc_cflt_ratio"]
+    GE_ADDITION_HEADER = "Context ID"
+    TENSOR_HEADERS = [
+        "Input Shapes", "Input Data Types", "Input Formats", "Output Shapes", "Output Data Types", "Output Formats"
+    ]
+
     OPERATOR_UNUSED_HEADERS = ["Model Name", "Infer ID"]
     HEADERS_WITH_NO_GE_DATA = ["Op Name", "OP Type", "Block Dim"]
+    HARDWARE_OP_LIST = ['AI_CPU', 'DSA', 'DVPP']
     START_TIME_INDEX = 8
     MODEL_NAME_INDEX = 0
     INFER_ID_INDEX = 4
@@ -46,16 +62,16 @@ class AiCoreOpReport:
         for datum in data:
             # 2 stream id; 1 task id of datum
 
-            ai_core_queue = ai_core_group_dict.get((datum[2], datum[1]), deque([]))
+            ai_core_queue = ai_core_group_dict.get(datum[1:3] + (datum[-1],), deque([]))
             if not ai_core_queue:
-                logging.warning("Losing ai core data of stream %d, task %d", datum[2], datum[1])
+                logging.debug("Losing ai core data of stream %d, task %d", datum[2], datum[1])
                 continue
             ai_core_datum = ai_core_queue.popleft()
             union_data.append(datum + ai_core_datum)
 
         for stream_task, data_queue in ai_core_group_dict.items():
             if data_queue:
-                logging.warning("Losing ge or task time data of stream %d, task %d", stream_task[0], stream_task[1])
+                logging.debug("Losing ge or task time data of stream %d, task %d", stream_task[0], stream_task[1])
 
         return union_data
 
@@ -82,9 +98,15 @@ class AiCoreOpReport:
         """
         get union sql statement from ai core tables
         """
+
+        for index, header in enumerate(ai_core_used_headers):
+            if header in AiCoreOpReport.UNSUPPORTED_HEADER:
+                ai_core_used_headers[index] = "\'N/A\'"
         used_headers = ",".join(ai_core_used_headers)
-        return "select {1}, task_id, stream_id from {0}".format(DBNameConstant.TABLE_SUMMARY_METRICS,
-                                                                used_headers)
+        subtask_id = ",subtask_id " if ChipManager().is_chip_v4() else ",0"
+        return "select {1}, task_id, stream_id {subtask_id} from {0}".format(DBNameConstant.TABLE_SUMMARY_METRICS,
+                                                                             used_headers,
+                                                                             subtask_id=subtask_id)
 
     @staticmethod
     def _get_ai_core_float_cols(columns: list) -> list:
@@ -161,22 +183,21 @@ class AiCoreOpReport:
         ai cpu metric value is N/A
         """
         iter_id, data, configs = args
-        union_sql = cls._get_ai_cpu_sql(curs)
-        ai_cpu_datas = DBManager.fetch_all_data(curs, union_sql, ('{0}'.format(Constant.TASK_TYPE_AI_CPU),))
-        if not ai_cpu_datas:
+        hardware_op_datas = cls._get_hardware_op_datas(curs)
+        if not hardware_op_datas:
             return data
         if not ProfilingScene().is_operator():
-            ai_cpu_datas = cls._update_model_name_and_infer_id(project_path, ai_cpu_datas)
+            hardware_op_datas = cls._update_model_name_and_infer_id(project_path, hardware_op_datas)
         if not data[1]:
-            headers = cls.get_op_header(configs)
-            return headers, ai_cpu_datas, len(ai_cpu_datas)
+            headers = cls.get_op_summary_header(configs)
+            return headers, hardware_op_datas, len(hardware_op_datas)
 
         op_data = data[1]
-        if len(op_data[0]) > len(ai_cpu_datas[0]):
-            for index, ai_cpu_data in enumerate(ai_cpu_datas):
+        if len(op_data[0]) > len(hardware_op_datas[0]):
+            for index, ai_cpu_data in enumerate(hardware_op_datas):
                 ai_cpu_data += (Constant.NA,) * (len(op_data[0]) - len(ai_cpu_data))
-                ai_cpu_datas[index] = list(ai_cpu_data)
-        op_data.extend(ai_cpu_datas)
+                hardware_op_datas[index] = list(ai_cpu_data)
+        op_data.extend(hardware_op_datas)
         task_start_index = cls.START_TIME_INDEX
         if StrConstant.TASK_START_TIME in data[0]:
             task_start_index = data[0].index(StrConstant.TASK_START_TIME)
@@ -184,7 +205,7 @@ class AiCoreOpReport:
         return data[0], op_data, len(op_data)
 
     @classmethod
-    def get_op_header(cls: any, configs: dict) -> list:
+    def get_op_summary_header(cls: any, configs: dict) -> list:
         """
         get op summary header
         :param configs: to get headers
@@ -220,7 +241,7 @@ class AiCoreOpReport:
         conn, curs = DBManager.check_connect_db_path(db_path)
         if not cls._check_op_summary_table_no_op_scene(conn, curs):
             return MsvpConstant.MSVP_EMPTY_DATA
-        headers = cls.get_op_header(configs)
+        headers = cls.get_op_summary_header(configs)
         try:
             data, headers = cls._get_op_summary_data(project_path, curs, headers, iter_id)
             return headers, data, len(data)
@@ -229,6 +250,18 @@ class AiCoreOpReport:
             return MsvpConstant.MSVP_EMPTY_DATA
         finally:
             DBManager.destroy_db_connect(conn, curs)
+
+    @classmethod
+    def _get_hardware_op_datas(cls: any, curs: any) -> list:
+        aicpu_data = cls._get_hardware_op_sql_data(curs,
+                                                   (Constant.TASK_TYPE_AI_CPU, ))
+        dvpp_data = cls._get_hardware_op_sql_data(curs, (Constant.TASK_TYPE_DVPP,))
+        dsa_data = cls._get_hardware_op_sql_data(curs, (Constant.TASK_TYPE_DSA, ))
+        res_list = [None] * (len(aicpu_data) + len(dsa_data) + len(dvpp_data))
+        res_list[:len(aicpu_data)] = aicpu_data
+        res_list[len(aicpu_data): len(aicpu_data) + len(dsa_data)] = dsa_data
+        res_list[len(aicpu_data) + len(dsa_data):] = dvpp_data
+        return res_list
 
     @classmethod
     def _check_ai_cpu_data(cls: any, conn: any, curs: any) -> bool:
@@ -253,6 +286,7 @@ class AiCoreOpReport:
     @classmethod
     def _get_op_summary_data(cls: any, project_path: str, curs: any, headers: list, iter_id: int) -> tuple:
         union_sql, headers = cls._get_sql_and_headers(curs, headers)
+        headers.append(cls.GE_ADDITION_HEADER)
         ai_core_group_dict, headers = cls._get_aicore_data(curs, headers)
         data = DBManager.fetch_all_data(curs, union_sql, ('{0}'.format(Constant.TASK_TYPE_AI_CPU),))
         if not data:
@@ -263,7 +297,20 @@ class AiCoreOpReport:
             data = cls._update_model_name_and_infer_id(project_path, data)
         cls._add_memory_bound(headers, data)
         headers = add_aicore_units(headers)
-        return data, headers
+        return cls._delete_context_id(headers, data)
+
+    @classmethod
+    def _delete_context_id(cls: any, headers: list, summary_data: list) -> tuple:
+        if ChipManager().is_chip_v4() or cls.GE_ADDITION_HEADER not in headers:
+            return summary_data, headers
+        index_id = headers.index(cls.GE_ADDITION_HEADER)
+        headers.remove(cls.GE_ADDITION_HEADER)
+        res_data = []
+        for data in summary_data:
+            tmp_data = list(data)
+            tmp_data.pop(index_id)
+            res_data.append(tmp_data)
+        return res_data, headers
 
     @classmethod
     def _update_model_name_and_infer_id(cls: any, project_path: str, ai_core_data: list) -> list:
@@ -292,9 +339,9 @@ class AiCoreOpReport:
     def _group_by_stream_task(cls: any, ai_core_data: list) -> dict:
         ai_core_group_dict = {}
         for ai_core_datum in ai_core_data:
-            # -1 stream id; -2 task id
-            ai_core_group_value = ai_core_group_dict.setdefault((ai_core_datum[-1], ai_core_datum[-2]), deque([]))
-            ai_core_group_value.append(ai_core_datum[:-2])
+            # the last three element is task id, stream id, subtask_id
+            ai_core_group_value = ai_core_group_dict.setdefault(ai_core_datum[-3:], deque([]))
+            ai_core_group_value.append(ai_core_datum[:-3])
         return ai_core_group_dict
 
     @classmethod
@@ -316,44 +363,39 @@ class AiCoreOpReport:
         """
         get union sql statement from task time and ge tables
         """
-        batch_limit = "and {0}.batch_id={1}.batch_id" \
-            .format(DBNameConstant.TABLE_SUMMARY_TASK_TIME, DBNameConstant.TABLE_SUMMARY_GE)
-        index_info = "{0}.index_id, ".format(DBNameConstant.TABLE_SUMMARY_TASK_TIME)
-        if ProfilingScene().is_operator():
-            index_info = ''
         return "select {1}.model_id, {0}.task_id, {0}.stream_id, {index_info} " \
                "op_name, {1}.op_type, {1}.task_type, start_time, duration_time/{NS_TO_US}, " \
-               "wait_time/{NS_TO_US}, block_dim from {0} " \
+               "wait_time/{NS_TO_US}, block_dim, " \
+               "(case when context_id={context_id} then 0 else context_id end) from {0} " \
                "inner join {1} on {0}.task_id={1}.task_id and {0}.stream_id = {1}.stream_id " \
                "and {0}.task_type = {1}.task_type " \
-               "and {1}.task_type!=? {BATCH_LIMIT} order by start_time" \
+               "and {1}.task_type!=? and {0}.batch_id={1}.batch_id " \
+               "and ({1}.context_id={0}.subtask_id or ({1}.context_id={context_id} and subtask_id={subtask_id})) " \
+               "order by start_time" \
             .format(DBNameConstant.TABLE_SUMMARY_TASK_TIME, DBNameConstant.TABLE_SUMMARY_GE,
-                    BATCH_LIMIT=batch_limit,
                     NS_TO_US=NumberConstant.NS_TO_US,
-                    index_info=index_info)
+                    context_id=NumberConstant.DEFAULT_GE_CONTEXT_ID,
+                    subtask_id=NumberConstant.DEFAULT_FFTS_SUBTASK_ID,
+                    index_info=cls._get_index_id_sql_condition())
 
     @classmethod
-    def _get_ai_cpu_sql(cls: any, curs: any) -> str:
+    def _get_hardware_op_sql_data(cls: any, curs: any, sql_param: tuple) -> list:
         """
         get sql to get ai cpu data
         Return: sql
         """
-        batch_limit = "and {0}.batch_id={1}.batch_id".format(
-            DBNameConstant.TABLE_SUMMARY_TASK_TIME, DBNameConstant.TABLE_SUMMARY_GE)
-        index_info = "{0}.index_id, ".format(DBNameConstant.TABLE_SUMMARY_TASK_TIME)
-        if ProfilingScene().is_operator():
-            index_info = ''
         union_sql = "select {1}.model_id, {0}.task_id, {1}.stream_id, {index_info} " \
                     "op_name, {1}.op_type, {1}.task_type, " \
                     "{0}.start_time, {0}.duration_time/{NS_TO_US}, " \
                     "{0}.wait_time/{NS_TO_US}, block_dim from {0} " \
                     "inner join {1} on {0}.task_id={1}.task_id " \
                     "and {0}.stream_id={1}.stream_id " \
-                    "and {1}.task_type=? {BATCH_LIMIT}" \
-            .format(DBNameConstant.TABLE_SUMMARY_TASK_TIME, DBNameConstant.TABLE_SUMMARY_GE,
-                    BATCH_LIMIT=batch_limit,
+                    "and {1}.task_type = ? " \
+                    "and {0}.batch_id={1}.batch_id" \
+            .format(DBNameConstant.TABLE_SUMMARY_TASK_TIME,
+                    DBNameConstant.TABLE_SUMMARY_GE,
                     NS_TO_US=NumberConstant.NS_TO_US,
-                    index_info=index_info)
+                    index_info=cls._get_index_id_sql_condition())
         if DBManager.judge_table_exist(curs, DBNameConstant.TABLE_SUMMARY_TENSOR):
             union_sql = "select {1}.model_id, {0}.task_id, {1}.stream_id, {index_info} " \
                         "op_name, {1}.op_type, {1}.task_type, " \
@@ -363,59 +405,67 @@ class AiCoreOpReport:
                         "output_shapes, output_data_types, output_formats " \
                         "from {0} inner join {1} on {0}.task_id={1}.task_id " \
                         "and {0}.stream_id={1}.stream_id " \
+                        "and {1}.task_type = ? " \
                         "inner join {2} on {0}.task_id={2}.task_id and {0}.stream_id={2}.stream_id " \
                         "and {1}.timestamp={2}.timestamp " \
-                        "and {1}.task_type=? {BATCH_LIMIT}" \
+                        "and {0}.batch_id={1}.batch_id" \
                 .format(DBNameConstant.TABLE_SUMMARY_TASK_TIME,
                         DBNameConstant.TABLE_SUMMARY_GE,
                         DBNameConstant.TABLE_SUMMARY_TENSOR,
-                        BATCH_LIMIT=batch_limit,
                         NS_TO_US=NumberConstant.NS_TO_US,
-                        index_info=index_info)
-        return union_sql
+                        index_info=cls._get_index_id_sql_condition())
+        return DBManager.fetch_all_data(curs, union_sql, sql_param)
 
     @classmethod
     def _get_tensor_table_sql_and_headers(cls: any, headers: list) -> tuple:
-        batch_limit = "and {0}.batch_id={1}.batch_id" \
-            .format(DBNameConstant.TABLE_SUMMARY_TASK_TIME,
-                    DBNameConstant.TABLE_SUMMARY_GE)
-        index_info = "{0}.index_id, ".format(DBNameConstant.TABLE_SUMMARY_TASK_TIME)
-        if ProfilingScene().is_operator():
-            index_info = ''
+        # ge or subtask need modify the context_id or subtask_id so that it should be same.
         sql = "select {1}.model_id, {0}.task_id, {0}.stream_id, {index_info}" \
               "{1}.op_name, {1}.op_type, {1}.task_type, " \
               "{0}.start_time, {0}.duration_time/{NS_TO_US}, {0}.wait_time/{NS_TO_US}, {1}.block_dim, " \
               "input_shapes, input_data_types, input_formats, " \
-              "output_shapes, output_data_types, output_formats " \
+              "output_shapes, output_data_types, output_formats, " \
+              "(case when context_id={context_id} then 0 else context_id end) " \
               "from {0} inner join {2} on " \
               "{0}.task_id={2}.task_id and {0}.stream_id={2}.stream_id " \
               "and {0}.task_type = {1}.task_type " \
               "inner join {1} on {0}.task_id={1}.task_id and {0}.stream_id={1}.stream_id " \
               "and {1}.timestamp={2}.timestamp " \
-              "and {1}.task_type!=? {BATCH_LIMIT} order by start_time" \
+              "and {1}.task_type!=? and {0}.batch_id={1}.batch_id " \
+              "and ({1}.context_id={0}.subtask_id or ({1}.context_id={context_id} and subtask_id={subtask_id})) " \
+              "order by start_time" \
             .format(DBNameConstant.TABLE_SUMMARY_TASK_TIME,
                     DBNameConstant.TABLE_SUMMARY_GE,
                     DBNameConstant.TABLE_SUMMARY_TENSOR,
-                    BATCH_LIMIT=batch_limit,
                     NS_TO_US=NumberConstant.NS_TO_US,
-                    index_info=index_info)
-
+                    index_info=cls._get_index_id_sql_condition(),
+                    context_id=NumberConstant.DEFAULT_GE_CONTEXT_ID,
+                    subtask_id=NumberConstant.DEFAULT_FFTS_SUBTASK_ID)
         headers += cls.TENSOR_HEADERS
         return sql, headers
 
     @classmethod
-    def _get_table_sql_and_headers_without_ge(cls: any, headers: list) -> tuple:
-        cls.clear_no_ge_data_headers(headers)
-        index_info = "{0}.index_id, ".format(DBNameConstant.TABLE_SUMMARY_TASK_TIME)
-        model_id = 'model_id, '
+    def _get_index_id_sql_condition(cls):
+        """
+        whether to append the condition for index id.
+        """
+        index_info = "{0}.index_id,".format(DBNameConstant.TABLE_SUMMARY_TASK_TIME)
         if ProfilingScene().is_operator():
             index_info = ''
-            model_id = "{0}, ".format(NumberConstant.DEFAULT_MODEL_ID)
+        return index_info
+
+    @classmethod
+    def _get_table_sql_and_headers_without_ge(cls: any, headers: list) -> tuple:
+        cls.clear_no_ge_data_headers(headers)
+        model_id = "{0}, ".format(NumberConstant.DEFAULT_MODEL_ID) if ProfilingScene().is_operator() else 'model_id, '
+        subtask_id = ",subtask_id " if ChipManager().is_chip_v4() else ",0"
         sql = "select {model_id} task_id, stream_id, {index_info} task_type, start_time, " \
-              "duration_time/{NS_TO_US}, wait_time/{NS_TO_US} from {0} where " \
+              "duration_time/{NS_TO_US}, wait_time/{NS_TO_US} {subtask_id} from {0} where " \
               "task_type!=? order by start_time" \
-            .format(DBNameConstant.TABLE_SUMMARY_TASK_TIME, NS_TO_US=NumberConstant.NS_TO_US,
-                    index_info=index_info, model_id=model_id)
+            .format(DBNameConstant.TABLE_SUMMARY_TASK_TIME,
+                    NS_TO_US=NumberConstant.NS_TO_US,
+                    index_info=cls._get_index_id_sql_condition(),
+                    subtask_id=subtask_id,
+                    model_id=model_id)
         return sql, headers
 
     @classmethod
@@ -451,7 +501,7 @@ class ReportOPCounter:
         return sql
 
     @staticmethod
-    def _get_op_report_sql_non_operator_scene() -> str:
+    def _get_op_report_sql_network_scene() -> str:
         sql = "select model_name, op_type, core_type, occurrences, total_time/{NS_TO_US}, " \
               "min/{NS_TO_US}, avg/{NS_TO_US}, max/{NS_TO_US}, ratio from {0} " \
               "order by model_name asc, " \
@@ -469,7 +519,7 @@ class ReportOPCounter:
         conn, curs = DBManager.check_connect_db_path(db_path)
         if not cls.check_param(conn, curs):
             return MsvpConstant.MSVP_EMPTY_DATA
-        sql = cls._get_op_report_sql_non_operator_scene()
+        sql = cls._get_op_report_sql_network_scene()
         if ProfilingScene().is_operator():
             sql = cls._get_op_report_sql_operator_scene()
             cls._clear_unused_headers(headers)

@@ -29,7 +29,7 @@ class ParsingRoceData(MsMultiProcess):
     NETWORK_HEADER_TAG = 'rxPacket/s'
 
     def __init__(self: any, file_list: dict, sample_config: dict) -> None:
-        MsMultiProcess.__init__(self, sample_config)
+        super().__init__(sample_config)
         self.project_path = sample_config.get("result_dir", "")
         self._file_list = file_list.get(DataTag.ROCE, [])
         self.roce_data = []

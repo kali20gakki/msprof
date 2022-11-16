@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2021-2022. All rights reserved.
-
+from common_func.utils import Utils
 from profiling_bean.struct_info.struct_decoder import StructDecoder
 
 
@@ -12,7 +12,7 @@ class AicPmuBean(StructDecoder):
 
     def __init__(self: any, *args: any) -> None:
         filed = args[0]
-        self._stream_id = filed[17]
+        self._stream_id = Utils.get_stream_id(filed[17])
         self._task_id = filed[4]
         self._total_cycle = filed[7]
         self._pmu_list = filed[9:17]

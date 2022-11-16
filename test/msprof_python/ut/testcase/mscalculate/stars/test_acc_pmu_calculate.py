@@ -50,12 +50,14 @@ class TestAccPmuCalculator(unittest.TestCase):
         file_list = {DataTag.STARS_LOG: ['stars_soc.data.0.slice_0', 'stars_soc.data.0.slice_1']}
         with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=(False, False)), \
              mock.patch(NAMESPACE + '.DBManager.fetch_all_data', return_value=[]), \
+             mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True), \
              mock.patch(NAMESPACE + '.DBManager.destroy_db_connect'):
             check = AccPmuCalculator(file_list, self.sample_config)
             check.get_task_time_form_acsq()
         with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=(True, True)), \
              mock.patch(NAMESPACE + '.DBManager.fetch_all_data', return_value=[[1, 2, 3]]), \
-             mock.patch(NAMESPACE + '.DBManager.destroy_db_connect'):
+                mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True), \
+                mock.patch(NAMESPACE + '.DBManager.destroy_db_connect'):
             check = AccPmuCalculator(file_list, self.sample_config)
             res = check.get_task_time_form_acsq()
             self.assertEqual(res, {1: (2, 3)})

@@ -21,6 +21,14 @@ class AcsqTaskModel(ParserModel):
         """
         self.insert_data_to_db(DBNameConstant.TABLE_ACSQ_TASK, data_list)
 
+    def flush_task_time(self: any, data_list: list) -> None:
+        """
+        flush acsq task data to db
+        :param data_list:acsq task data list
+        :return: None
+        """
+        self.insert_data_to_db(DBNameConstant.TABLE_ACSQ_TASK_TIME, data_list)
+
     def get_summary_data(self: any) -> list:
         """
         get op_summary data from table
@@ -47,5 +55,5 @@ class AcsqTaskModel(ParserModel):
         sql = "select 0, task_id, stream_id, start_time, task_time " \
               "from {0} " \
               "where task_type={task_type}".format(DBNameConstant.TABLE_ACSQ_TASK,
-                                                   task_type=SqeType.FFTS_SQE.name)
+                                                   task_type=SqeType.AI_CORE.name)
         return DBManager.fetch_all_data(self.cur, sql)

@@ -26,7 +26,7 @@ class ParsingPeripheralData(MsMultiProcess):
     DVPP_HEADER_TAG = 'engine_type'
 
     def __init__(self: any, file_list: dict, sample_config: dict) -> None:
-        MsMultiProcess.__init__(self, sample_config)
+        super().__init__(sample_config)
         self.replayid = 0
         self.device_id = self.sample_config.get("device_id", "0")
         self.has_dvpp_id = False
