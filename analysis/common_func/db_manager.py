@@ -2,11 +2,11 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
 
-import configparser
 import logging
 import os
 import sqlite3
 
+from config.config_manager import ConfigManager
 from common_func.constant import Constant
 from common_func.empty_class import EmptyClass
 from common_func.ms_constant.number_constant import NumberConstant
@@ -160,20 +160,11 @@ class DBManager:
         :return: success: table field number，otherwise return 0
         """
         num = NumberConstant.DEFAULT_TABLE_FIELD_NUM
-        if not map_file_path:
-            logging.error("Tables.ini path is None!")
-            return num
-        cfg_parser = configparser.ConfigParser()
-        try:
-            if os.path.realpath(map_file_path):
-                cfg_parser.read(os.path.realpath(map_file_path))
-                if cfg_parser.has_section(map_name):
-                    items = cfg_parser.items(map_name)
-                    num = len(items)
-            return num
-        except (OSError, SystemError, ValueError, TypeError, RuntimeError) as error:
-            logging.exception(error)
-            return num
+        cfg_parser = ConfigManager.get(map_file_path)
+        if cfg_parser.has_section(map_name):
+            items = cfg_parser.items(map_name)
+            num = len(items)
+        return num
 
     @staticmethod
     def execute_sql(conn: any, sql: str, param: any = None) -> bool:
@@ -262,28 +253,23 @@ class DBManager:
             cls: any,
             map_name: str,
             table_name: str,
-            map_file_path: str,
+            map_path: str,
             fields_filter_list: list = None) -> str:
         """
         use table.ini to generate sql table
         :param map_name: map table name in table.ini
         :param table_name: table name
-        :param map_file_path: map file path
+        :param map_path: map file
         :param fields_filter_list: filtered list
         :return: success: sql sentence，otherwise return None
         """
 
-        cfg_parser = configparser.ConfigParser()
-        if not map_file_path:
-            logging.error("Tables.ini path is None!")
-        else:
-            if not PathManager.check_map_file_path(map_file_path, cfg_parser):
-                return ""
+        cfg_parser = ConfigManager.get(map_path)
         if fields_filter_list is None:
             fields_filter_list = []
         try:
             headers, type_names = DBManager._get_headers_and_type_names(cfg_parser, map_name, fields_filter_list,
-                                                                        map_file_path)
+                                                                        map_path)
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as error:
             logging.exception(error)
             return ""

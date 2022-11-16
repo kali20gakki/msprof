@@ -6,6 +6,7 @@ import logging
 import os
 import re
 
+from config.config_manager import ConfigManager
 from common_func.ai_stack_data_check_manager import AiStackDataCheckManager
 from common_func.common import get_data_dir_sorted_files
 from common_func.constant import Constant
@@ -19,7 +20,6 @@ from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.msprof_exception import ProfException
-from common_func.msvp_common import MsvpCommonConst
 from common_func.msvp_common import is_valid_original_data
 from common_func.path_manager import PathManager
 from common_func.batch_counter import BatchCounter
@@ -36,7 +36,7 @@ class ParseAiCpuData(MsMultiProcess):
     AICPU_MARKS = "Run start"
     DISPATCH_MARKS = "dispatchTime"
     CONVERSION_TIME = 1000
-    TABLES_PATH = os.path.join(MsvpCommonConst.CONFIG_PATH, 'Tables.ini')
+    TABLES_PATH = ConfigManager.TABLES
     AI_CPU_DATA_MAP = "AiCpuDataMap"
     LEN_TABLE = 10
     LEN_TIME_NAME = 5

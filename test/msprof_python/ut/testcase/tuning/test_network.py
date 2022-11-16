@@ -13,11 +13,9 @@ from tuning.network import Network
 class TestNetwork(unittest.TestCase):
 
     def test_load_rules_json(self):
-        with mock.patch('builtins.open', side_effect=FileNotFoundError),\
-                mock.patch('tuning.network.logging.error'):
-            network_condition_mgr = NetConditionManager(os.path.join(MsvpConstant.CONFIG_PATH, CommonProfRule.PROF_CONDITION_JSON))
-            operator_mgr = OperatorManager()
-            net_rule_mgr = NetRuleManager()
-            net = Network(net_rule_mgr, network_condition_mgr, operator_mgr)
-            result = net._load_rules_json()
-        self.assertEqual(result, [])
+        network_condition_mgr = NetConditionManager()
+        operator_mgr = OperatorManager()
+        net_rule_mgr = NetRuleManager()
+        net = Network(net_rule_mgr, network_condition_mgr, operator_mgr)
+        result = net._load_rules_json()
+        self.assertEqual(len(result), 16)

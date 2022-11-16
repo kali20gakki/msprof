@@ -3,12 +3,11 @@
 # Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
 
 import logging
-import os
 from abc import abstractmethod
 
+from config.config_manager import ConfigManager
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
-from common_func.msvp_constant import MsvpConstant
 from common_func.path_manager import PathManager
 
 
@@ -16,7 +15,7 @@ class HostProfDataBase:
     """
     host prof data analysis base model
     """
-    TABLES_PATH = os.path.join(MsvpConstant.CONFIG_PATH, 'Tables.ini')
+    TABLES_PATH = ConfigManager.TABLES
     TABLE_CACHE_SIZE = 10000
 
     def __init__(self: any, result_dir: str, db_name: str, table_list: list) -> None:
