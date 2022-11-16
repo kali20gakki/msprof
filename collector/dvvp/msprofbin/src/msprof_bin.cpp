@@ -37,13 +37,6 @@ int main(int argc, const char **argv, const char **envp)
         CmdLog::instance()->CmdErrorLog("Truncate env params due to exceeding limit!");
     }
     EnvManager::instance()->SetGlobalEnv(envpList);
-    int ret = Platform::instance()->PlatformInitByDriver();
-    if (ret != PROFILING_SUCCESS) {
-        CmdLog::instance()->CmdErrorLog("Running profiling failed."
-            " Please check the driver package is correctly installed.");
-        MSPROF_LOGE("Init platform by driver faild.");
-        return PROFILING_FAILED;
-    }
     InputParser parser = InputParser();
     if (argc <= 1) {
         parser.MsprofCmdUsage("msprof needs input parameter.");
@@ -56,7 +49,7 @@ int main(int argc, const char **argv, const char **envp)
     if (parser.HasHelpParamOnly()) {
         return PROFILING_SUCCESS;
     }
-    ret = MsprofManager::instance()->Init(params);
+    int ret = MsprofManager::instance()->Init(params);
     if (ret != PROFILING_SUCCESS) {
         CmdLog::instance()->CmdErrorLog("Start profiling failed");
         return PROFILING_FAILED;

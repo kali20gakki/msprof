@@ -271,7 +271,7 @@ def check_aicore_events(events: list) -> None:
     if not events:
         error(CalculateRtsDataConst.FILE_NAME, 'Insert data error, aicore event list is empty. ')
         call_sys_exit(NumberConstant.ERROR)
-    ai_core_config = config_file_obj(file_name='AICore')
+    ai_core_config = config_file_obj(file_name='ai_core')
     formula_key = Utils.generator_to_list(item[0] for item in ai_core_config.items('events'))
     for event in events:
         if event not in formula_key:
@@ -439,7 +439,7 @@ def get_metrics_from_sample_config(project_path: str,
     sample_metrics = Constant.AICORE_METRICS_LIST.get(sample_config.get(metrics_type)).split(",")
     for tmp in sample_metrics:
         if tmp.lower() not in \
-                Utils.generator_to_list(item[0] for item in config_file_obj(file_name='AICore').items('metrics')):
+                Utils.generator_to_list(item[0] for item in config_file_obj(file_name='ai_core').items('metrics')):
             error(CalculateRtsDataConst.FILE_NAME, 'Invalid metric {} .'.format(tmp))
             call_sys_exit(NumberConstant.ERROR)
     metrics.extend(sample_metrics)
