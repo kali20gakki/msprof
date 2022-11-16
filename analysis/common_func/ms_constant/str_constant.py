@@ -169,10 +169,6 @@ class StrConstant:
         "": ""
     }
 
-    CPU_CONFIG_TYPE = {
-        "ts_cpu": "TsCPU.ini", "ai_cpu": "AICPU.ini", "ai_core": "AICore.ini", "ctrl_cpu": "CtrlCPU.ini"
-    }
-
     DVPP_ENGINE_TYPE = {
         "0": "VDEC",
         "1": "JPEGD",
