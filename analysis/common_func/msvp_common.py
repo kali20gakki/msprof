@@ -24,6 +24,7 @@ from common_func.ms_constant.str_constant import StrConstant
 from common_func.os_manager import check_file_readable
 from common_func.path_manager import PathManager
 from common_func.return_code_checker import ReturnCodeCheck
+from config.config_manager import ConfigManager
 
 
 class MsvpCommonConst:
@@ -32,6 +33,13 @@ class MsvpCommonConst:
     """
     CONFIG_PATH = os.path.join(os.path.realpath(os.path.dirname(__file__)), "..", "config")
     FILE_NAME = os.path.basename(__file__)
+    CPU_CONFIG_TYPE = {
+        "ts_cpu": ConfigManager.get("TsCPUConfig"),
+        "ai_cpu": ConfigManager.get("AICPUConfig"),
+        "ai_core": ConfigManager.get("AICoreConfig"),
+        "ctrl_cpu": ConfigManager.get("CtrlCPUConfig"),
+        "constant": ConfigManager.get("ConstantConfig")
+    }
 
     @staticmethod
     def class_name() -> str:
@@ -190,19 +198,13 @@ def get_delta_time(project_path: str, device_id: int, view_type: int = 0) -> tup
     return delta_host, delta_dev
 
 
-def config_file_obj(file_name: str = "Constant") -> any:
+def config_file_obj(file_name: str = "constant") -> any:
     """
-    get Constant.ini file obj
     :param file_name: config file name
     :return: config file object
     """
-    config = None
-    cfg_file = os.path.realpath(os.path.join(MsvpCommonConst.CONFIG_PATH, "{0}.ini".format(file_name)))
     try:
-        if os.path.exists(cfg_file) and os.path.isfile(cfg_file) \
-                and os.path.getsize(cfg_file) <= Constant.MAX_READ_FILE_BYTES:
-            config = configparser.ConfigParser()
-            config.read(cfg_file)
+        config = MsvpCommonConst.CPU_CONFIG_TYPE.get(file_name)
         return config
     except configparser.Error:
         return []
@@ -229,15 +231,12 @@ def read_cpu_cfg(cpu_type: str, sections: str) -> dict:
     :param sections: section for cpu
     :return:
     """
-    cpu_ini_path = os.path.join(MsvpCommonConst.CONFIG_PATH, StrConstant.CPU_CONFIG_TYPE.get(cpu_type))
-    cpu_cfg = configparser.ConfigParser()
+    cpu_cfg = MsvpCommonConst.CPU_CONFIG_TYPE.get(cpu_type)
     try:
-        if os.path.exists(cpu_ini_path) and os.path.getsize(cpu_ini_path) <= Constant.MAX_READ_FILE_BYTES:
-            cpu_cfg.read(cpu_ini_path)
-            if sections in ['events', 'event2metric']:
-                events_map = cpu_cfg.items(sections)
-                events = {int(k, Constant.HEX_NUMBER): v for k, v in events_map}
-                return events
+        if sections in ['events', 'event2metric']:
+            events_map = cpu_cfg.items(sections)
+            events = {int(k, Constant.HEX_NUMBER): v for k, v in events_map}
+            return events
         return _get_cpu_metrics(sections, cpu_cfg)
     except configparser.Error:
         return {}
