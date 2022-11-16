@@ -42,7 +42,9 @@ class ParallelViewModel(ViewModel):
         else:
             return Constant.NA
 
-    def get_parallel_index_data(self: any, tabel_name: str, rank_id: int, device_id: int) -> list:
+    def get_parallel_index_data(self: any, tabel_name: str, rank_id: any, device_id: int) -> list:
+        if rank_id == Constant.NA:
+            rank_id = "null"
         if tabel_name == DBNameConstant.TABLE_CLUSTER_DATA_PARALLEL:
             sql = "select {0} rank_id, {1} device_id, t1.model_id, t1.index_id, t2.step_time, t2.computation_time, " \
                   "t1.pure_communication_time, t1.communication_time, t1.interval_of_communication_time, " \
@@ -80,4 +82,8 @@ class ParallelViewModel(ViewModel):
                 rank_id, device_id,
                 DBNameConstant.TABLE_HCCL_OPERATOR_OVERLAP,
                 DBNameConstant.TABLE_COMPUTATION_TIME)
+        return DBManager.fetch_all_data(self.cur, sql)
+
+    def get_parallel_strategy_data(self: any) -> list:
+        sql = "select * from {}".format(DBNameConstant.TABLE_PARALLEL_STRATEGY)
         return DBManager.fetch_all_data(self.cur, sql)

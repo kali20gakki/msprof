@@ -15,6 +15,8 @@ from profiling_bean.prof_enum.data_tag import DataTag
 
 
 class HCCLOperatiorParser(IParser, MsMultiProcess):
+    END_TAG = 1
+
     def __init__(self: any, file_list: dict, sample_config: dict):
         super().__init__(sample_config)
         self._file_list = file_list
@@ -31,7 +33,17 @@ class HCCLOperatiorParser(IParser, MsMultiProcess):
             raise ProfException(ProfException.PROF_SYSTEM_EXIT)
         logging.info("Start to parse hccl operator data from ts_track!")
         with TsTrackViewModel(self._project_path) as _model:
-            self._hccl_operator_data = _model.get_hccl_operator_exe_data()
+            hccl_data_list = _model.get_hccl_operator_exe_data()
+        hccl_start_time = []
+        for hccl_data in hccl_data_list:
+            if hccl_data.tag == self.END_TAG:
+                if hccl_start_time:
+                    self._hccl_operator_data.append(
+                        [hccl_data.model_id, hccl_data.index_id, hccl_data.op_name, hccl_data.op_type,
+                         hccl_start_time[-1], hccl_data.timestamp])
+                    hccl_start_time = []
+            else:
+                hccl_start_time.append(hccl_data.timestamp)
 
     def save(self: any) -> None:
         if not self._hccl_operator_data:

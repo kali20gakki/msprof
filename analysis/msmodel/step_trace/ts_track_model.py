@@ -14,6 +14,7 @@ from common_func.ms_constant.number_constant import NumberConstant
 from common_func.path_manager import PathManager
 from msmodel.interface.base_model import BaseModel
 from msmodel.interface.view_model import ViewModel
+from profiling_bean.db_dto.step_trace_ge_dto import StepTraceGeDto
 from profiling_bean.db_dto.time_section_dto import TimeSectionDto
 from profiling_bean.db_dto.step_trace_dto import StepTraceDto
 
@@ -115,22 +116,16 @@ class TsTrackViewModel(ViewModel):
             return []
         if not self.attach_to_db(DBNameConstant.DB_GE_HASH):
             return []
-        sql = "select t1.model_id, t1.index_id, case when t3.hash_value is not null then t3.hash_value " \
-              "else t2.op_name end, t2.op_type, t1.start_time, t1.end_time from (" \
-              "select t.model_id, t.index_id, t.flag, sum(case when tag=0 then timestamp else 0 end) start_time, " \
-              "sum(case when tag=1 then timestamp else 0 end) end_time, " \
-              "sum(case when tag=1 then stream_id else 0 end) stream_id, " \
-              "sum(case when tag = 1 then task_id - 1 else 0 end) task_id " \
-              "from( select model_id, index_id, tag_id%2 AS tag, stream_id, task_id, timestamp, " \
-              "row_number() over(partition by model_id, index_id, tag_id%2 order by timestamp) as flag from {} " \
-              "where tag_id >= 10000) t group by t.model_id, t.index_id, t.flag)t1 LEFT JOIN (" \
-              "select model_id, index_id, stream_id, task_id, op_name, op_type from {} where task_type=4)t2 " \
-              "on t1.model_id=t2.model_id and (t1.index_id=t2.index_id or t2.index_id=0) and " \
-              "t1.stream_id=t2.stream_id and t1.task_id=t2.task_id " \
-              "left join (select hash_key, hash_value from {})t3 on t2.op_name=t3.hash_key order by start_time".format(
-                DBNameConstant.TABLE_STEP_TRACE,
-                DBNameConstant.TABLE_GE_TASK, DBNameConstant.TABLE_GE_HASH)
-        return DBManager.fetch_all_data(self.cur, sql)
+        sql = "SELECT t1.model_id, t1.index_id, t1.stream_id, t1.task_id, t1.tag, t1.timestamp, " \
+              "CASE WHEN t3.hash_value IS NOT NULL THEN t3.hash_value ELSE t2.op_name END AS op_name, t2.op_type " \
+              "FROM ( SELECT model_id, index_id, tag_id%2 AS tag, stream_id, " \
+              "CASE WHEN tag_id%2=1 THEN task_id-1 ELSE task_id END AS task_id, timestamp FROM {} WHERE tag_id>=10000" \
+              ") t1 LEFT JOIN ( SELECT model_id, index_id, stream_id, task_id, op_name, op_type FROM {} " \
+              "WHERE task_type=4 ) t2 ON t1.model_id=t2.model_id AND (t1.index_id=t2.index_id OR t2.index_id=0 ) " \
+              "AND t1.stream_id = t2.stream_id AND t1.task_id = t2.task_id LEFT JOIN ( " \
+              "SELECT hash_key, hash_value FROM {} ) t3 ON t2.op_name = t3.hash_key ORDER BY t1.timestamp".format(
+            DBNameConstant.TABLE_STEP_TRACE, DBNameConstant.TABLE_GE_TASK, DBNameConstant.TABLE_GE_HASH)
+        return DBManager.fetch_all_data(self.cur, sql, dto_class=StepTraceGeDto)
 
     def get_ai_cpu_op_data(self) -> list:
         sql = "select t1.stream_id, t1.task_id, t1.grp, " \
@@ -142,7 +137,7 @@ class TsTrackViewModel(ViewModel):
               "lag(task_state, 1, 2) over(partition by stream_id,task_id order by timestamp) state " \
               "from {} where task_type=1 and task_state <>0)t where t.task_state+t.state=3)t1 " \
               "group by t1.stream_id, t1.task_id, t1.grp order by start_time desc".format(
-                DBNameConstant.TABLE_TASK_TYPE)
+            DBNameConstant.TABLE_TASK_TYPE)
         return DBManager.fetch_all_data(self.cur, sql, dto_class=TimeSectionDto)
 
     def get_iter_time_data(self) -> list:
