@@ -15,8 +15,8 @@ class StarsConstant:
     FFTS_BLOCK_PMU_TAG = '101001'
 
     # chip trans type
-    TYPE_STARS_PA = "100010"
-    TYPE_STARS_PCIE = "111111"
+    TYPE_STARS_PA = "111111"
+    TYPE_STARS_PCIE = "100010"
 
     FFTS_TYPE = {
         0: "AIC only",
