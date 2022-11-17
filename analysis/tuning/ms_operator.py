@@ -7,9 +7,7 @@ import logging
 import os
 
 from common_func.empty_class import EmptyClass
-from common_func.msvp_common import MsvpCommonConst
-from common_func.file_manager import FileOpen
-from common_func.common_prof_rule import CommonProfRule
+from config.config_manager import ConfigManager
 from tuning.meta_metric_manager import OperatorMetricManager
 from tuning.metric_factory import OpMetricFactory
 from tuning.rule_bean import RuleBean
@@ -36,17 +34,7 @@ class Operator:
 
     @staticmethod
     def _load_rules_json() -> list:
-        rule_path = os.path.join(MsvpCommonConst.CONFIG_PATH, CommonProfRule.PROF_RULE_JSON)
-        rules = []
-        try:
-            with FileOpen(rule_path, "r") as rule_reader:
-                rule_json = json.load(rule_reader.file_reader)
-            return rule_json.get(CommonProfRule.RULE_PROF) if rule_json.get(CommonProfRule.RULE_PROF) else rules
-        except FileNotFoundError:
-            logging.error("Read rule file failed: %s", os.path.basename(rule_path))
-            return rules
-        finally:
-            pass
+        return ConfigManager.get(ConfigManager.PROF_RULE).get_data()
 
     def run(self: any) -> None:
         """

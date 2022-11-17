@@ -7,6 +7,7 @@ import os
 import sqlite3
 import struct
 
+from config.config_manager import ConfigManager
 from common_func.common import get_data_dir_sorted_files
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
@@ -21,7 +22,6 @@ from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
-from common_func.msvp_common import MsvpCommonConst
 from common_func.msvp_common import is_valid_original_data
 from common_func.path_manager import PathManager
 from common_func.platform.chip_manager import ChipManager
@@ -42,7 +42,7 @@ class ParsingRuntimeData(MsMultiProcess):
     """
 
     FILE_NAME = os.path.basename(__file__)
-    TABLE_PATH = os.path.join(MsvpCommonConst.CONFIG_PATH, 'Tables.ini')
+    TABLE_PATH = ConfigManager.TABLES
 
     # task state
     # tag

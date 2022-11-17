@@ -33,7 +33,7 @@ const char * const PROFILING_MODE_DEF = "def_mode";
 struct ProfileParams : BaseInfo {
     std::string job_id;
     std::string result_dir;
-    std::string storageLimit;
+    std::string storageLimit;   // 数据老化阈值
     std::string profiling_mode;
     std::string devices;
     int msprofBinPid;

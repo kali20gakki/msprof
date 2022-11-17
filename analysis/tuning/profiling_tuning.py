@@ -2,14 +2,10 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 
-import json
 import logging
-import os
 
 from common_func.common_prof_rule import CommonProfRule
 from common_func.info_conf_reader import InfoConfReader
-from common_func.msvp_common import MsvpCommonConst
-from common_func.os_manager import check_file_readable
 from tuning.data_manager import DataManager
 from tuning.meta_condition_manager import NetConditionManager
 from tuning.meta_condition_manager import OperatorConditionManager
@@ -22,6 +18,8 @@ from tuning.ms_operator import OperatorManager
 from tuning.network import Network
 from tuning.rule_bean import RuleBean
 from tuning.tuning_control import TuningControl
+
+from config.config_manager import ConfigManager
 
 
 class ProfilingTuning:
@@ -50,8 +48,7 @@ class ProfilingTuning:
         if not operator_dicts:
             logging.warning("The operator data is not found, no recommendation is necessary.")
             return
-        condition_path = os.path.join(MsvpCommonConst.CONFIG_PATH, CommonProfRule.PROF_CONDITION_JSON)
-        operator_condition_mgr = OperatorConditionManager(condition_path)
+        operator_condition_mgr = OperatorConditionManager()
         operator_mgr = OperatorManager()  # init op mgr
         operator_rule_mgr = OperatorRuleManager()  # init op rule mgr
         operator = Operator(operator_rule_mgr, operator_condition_mgr, operator_dicts[-1])
@@ -69,10 +66,8 @@ class ProfilingTuning:
         """
         operator_dicts = DataManager.get_data_by_infer_id(project, device_id, iter_id)
         operator_mgr = OperatorManager()  # init op mgr
-        network_condition_mgr = NetConditionManager(
-            os.path.join(MsvpCommonConst.CONFIG_PATH, CommonProfRule.PROF_CONDITION_JSON))
-        operator_condition_mgr = OperatorConditionManager(
-            os.path.join(MsvpCommonConst.CONFIG_PATH, CommonProfRule.PROF_CONDITION_JSON))
+        network_condition_mgr = NetConditionManager()
+        operator_condition_mgr = OperatorConditionManager()
         rule_json = cls._load_rules()
         net_rule_mgr = NetRuleManager()
         tuning_control = TuningControl()
@@ -102,19 +97,11 @@ class ProfilingTuning:
 
     @classmethod
     def _load_rules(cls: any) -> dict:
-        rule_path = os.path.join(MsvpCommonConst.CONFIG_PATH, CommonProfRule.PROF_RULE_JSON)
-        check_file_readable(rule_path)
-        try:
-            with open(rule_path, "r") as rule_reader:
-                rule_json = json.load(rule_reader)
-            return rule_json
-        except FileNotFoundError:
-            logging.error("Read rule file failed: %s", os.path.basename(rule_path))
-            return {}
+        return ConfigManager.get(ConfigManager.PROF_RULE).get_data()
 
     @classmethod
     def _register_network_rules(cls: any, net: any, net_rule_mgr: any, rule_json: dict, tuning_control: any) -> None:
-        for rule in rule_json.get(CommonProfRule.RULE_PROF):
+        for rule in rule_json:
             # init rule
             rule_bean = cls._generate_rule_bean(rule)
             net_rule = NetRule(net, rule_bean, tuning_control.tuning_callback)
@@ -123,7 +110,7 @@ class ProfilingTuning:
     @classmethod
     def _register_operator_rules(cls: any, operator: dict, operator_rule_mgr: any, rule_json: dict,
                                  tuning_control: any) -> None:
-        for rule in rule_json.get(CommonProfRule.RULE_PROF):
+        for rule in rule_json:
             rule_bean = cls._generate_rule_bean(rule)
             operator_rule = OperatorRule(operator, rule_bean, tuning_control.tuning_callback)
             operator_rule_mgr.register(operator_rule)

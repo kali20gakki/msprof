@@ -2,11 +2,11 @@ import os
 import unittest
 from unittest import mock
 
+from config.config_manager import ConfigManager
 from analyzer.scene_base.profiling_scene import ProfilingScene
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
-from common_func.msvp_common import MsvpCommonConst
 from constant.constant import clear_dt_project
 from constant.info_json_construct import DeviceInfo
 from constant.info_json_construct import InfoJson
@@ -46,7 +46,7 @@ def prepar_step_trace_data(conn, curs):
 
 def prepar_ts_memcpy_data(conn, curs):
     sql = DBManager.sql_create_general_table(DBNameConstant.TABLE_TS_MEMCPY + "Map", DBNameConstant.TABLE_TS_MEMCPY,
-                                             os.path.join(MsvpCommonConst.CONFIG_PATH, 'Tables.ini'))
+                                             ConfigManager.TABLES)
     curs.execute(sql)
     ts_memcpy_data = [(500, 1, 1, 0), (600, 1, 1, 1), (700, 1, 1, 2), (800, 1, 1, 3), (800, 1, 1, 1),
                       (2500, 1, 2, 0), (2600, 1, 2, 1), (2700, 1, 2, 2), (2800, 2, 1, 0)]

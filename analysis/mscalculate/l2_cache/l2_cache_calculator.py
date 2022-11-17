@@ -20,13 +20,13 @@ from mscalculate.interface.icalculator import ICalculator
 from mscalculate.l2_cache.l2_cache_metric import HitRateMetric
 from mscalculate.l2_cache.l2_cache_metric import VictimRateMetric
 from profiling_bean.prof_enum.data_tag import DataTag
+from config.config_manager import ConfigManager
 
 
 class L2CacheCalculator(ICalculator, MsMultiProcess):
     """
     calculator for l2 cache
     """
-    L2_CACHE_PLATFORM_EVENTS_MAP_FILE = "L2Cache.ini"
     REQUEST_EVENTS = "request_events"
     HIT_EVENTS = "hit_events"
     VICTIM_EVENTS = "victim_events"
@@ -164,10 +164,7 @@ class L2CacheCalculator(ICalculator, MsMultiProcess):
         self._platform_type = InfoConfReader().get_root_data(Constant.PLATFORM_VERSION)
 
         # get all maps between platforms and l2 cache events
-        l2_cache_ini_path = os.path.join(MsvpCommonConst.CONFIG_PATH, self.L2_CACHE_PLATFORM_EVENTS_MAP_FILE)
-        if os.path.getsize(l2_cache_ini_path) > Constant.MAX_READ_FILE_BYTES:
-            return False
-        self._cfg_parser.read(l2_cache_ini_path)
+        self._cfg_parser = ConfigManager.get("L2CacheConfig")
         if not self._cfg_parser.has_section(self._platform_type):
             logging.error("invalid platform %s for l2 cache profiling", self._platform_type)
             return False

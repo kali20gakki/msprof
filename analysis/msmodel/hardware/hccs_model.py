@@ -3,10 +3,9 @@
 # Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 
 import logging
-import os
 from abc import ABC
 
-from common_func.msvp_common import MsvpCommonConst
+from config.config_manager import ConfigManager
 from common_func.constant import Constant
 from common_func.db_name_constant import DBNameConstant
 from common_func.msvp_common import float_calculate
@@ -19,7 +18,7 @@ class HccsModel(BaseModel, ABC):
     acsq task model class
     """
     CACHE_SIZE = 2 ** 32 - 1
-    TABLES_PATH = os.path.join(MsvpCommonConst.CONFIG_PATH, 'Tables_training.ini')
+    TABLES_PATH = ConfigManager.TABLES_TRAINING
 
     def __init__(self: any, result_dir: str, db_name: str, table_list: list) -> None:
         super().__init__(result_dir, db_name, table_list)

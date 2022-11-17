@@ -5,6 +5,7 @@
 import configparser
 import importlib
 
+from config.config_manager import ConfigManager
 from common_func.os_manager import check_file_readable
 from common_func.utils import Utils
 
@@ -20,15 +21,15 @@ class ConfigDataParsers:
     DEFAULT_PARSER_LEVEL = "1"
 
     @classmethod
-    def get_parsers(cls: any, chip_model: str, config_file_path: str) -> dict:
+    def get_parsers(cls: any, config_name: str, chip_model: str) -> dict:
         """
         get parsers by chip model
-        :param config_file_path: config file path
+        :param config_name: DataParsersConfig, DataCalculatorConfig
         :param chip_model: 0,1,2
         :return: data parsers
         """
         parsers_dict = {}
-        conf_parser_read = cls.load_conf_file(config_file_path)
+        conf_parser_read = ConfigManager.get(config_name)
         parser_section = conf_parser_read.sections()
         for _section in parser_section:
             chip_model_list = cls._load_parser_chip_model(conf_parser_read, _section)
