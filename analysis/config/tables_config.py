@@ -578,7 +578,10 @@ class TablesConfig(MetaConfig):
             ('stream_id', 'INTEGER,null'),
             ('task_id', 'INTEGER,null'),
             ('batch_id', 'INTEGER,null'),
-            ('iter_id', 'INTEGER,null')
+            ('iter_id', 'INTEGER,null'),
+            ('start_time', 'TEXT,null'),
+            ('end_time', 'TEXT,null'),
+            ('is_ai_core', 'INTEGER,null')
         ]
         , 'GeMergeMap': [
             ('model_id', 'INTEGER,null'),
