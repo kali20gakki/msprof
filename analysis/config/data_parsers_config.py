@@ -171,4 +171,8 @@ class DataParsersConfig(MetaConfig):
             ('path', 'msparser.aicpu.data_preparation_parser'),
             ('chip_model', '0,1,2,3,4,5')
         ]
+        , 'L2CacheSampleParser': [
+            ('path', 'msparser.l2_cache.l2_cache_sample_parser'),
+            ('chip_model', '5')
+        ]
     }

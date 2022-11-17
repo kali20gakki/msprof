@@ -6,6 +6,7 @@ import logging
 import os
 
 from common_func.constant import Constant
+from common_func.db_name_constant import DBNameConstant
 from common_func.file_manager import FileManager
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
@@ -26,7 +27,7 @@ class L2CacheParser(IParser, MsMultiProcess):
         MsMultiProcess.__init__(self, sample_config)
         self._project_path = sample_config.get(StrConstant.SAMPLE_CONFIG_PROJECT_PATH)
         self._file_list = file_list
-        self._model = L2CacheParserModel(self._project_path)
+        self._model = L2CacheParserModel(self._project_path, [DBNameConstant.TABLE_L2CACHE_PARSE])
         self._l2_cache_events = []
         for event in self.sample_config.get("l2CacheTaskProfilingEvents", "").split(","):
             self._l2_cache_events.append(event.strip().lower())
