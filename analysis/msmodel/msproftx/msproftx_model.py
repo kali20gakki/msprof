@@ -2,11 +2,9 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 
-import os
-
+from config.config_manager import ConfigManager
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
-from common_func.msvp_common import MsvpCommonConst
 from msmodel.interface.parser_model import ParserModel
 
 
@@ -14,7 +12,7 @@ class MsprofTxModel(ParserModel):
     """
     db operator for msproftx parser
     """
-    TABLES_PATH = os.path.join(MsvpCommonConst.CONFIG_PATH, 'Tables.ini')
+    TABLES_PATH = ConfigManager.TABLES
 
     def flush(self: any, data_list: list) -> None:
         """

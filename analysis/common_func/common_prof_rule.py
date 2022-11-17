@@ -9,11 +9,11 @@ class CommonProfRule:
     """
     # rule json key and value
     RULE_PROF = "prof_rules"
-    RULE_ID = "rule_id"
-    RULE_CONDITION = "rule_condition"
-    RULE_TYPE = "rule_type"
-    RULE_SUBTYPE = "rule_subtype"
-    RULE_SUGGESTION = "rule_suggestion"
+    RULE_ID = "Rule Id"
+    RULE_CONDITION = "Rule Condition"
+    RULE_TYPE = "Rule Type"
+    RULE_SUBTYPE = "Rule Subtype"
+    RULE_SUGGESTION = "Rule Suggestion"
 
     # condition json key and value
     CONDITIONS = "conditions"
@@ -45,15 +45,7 @@ class CommonProfRule:
     RESULT_OPERATOR_PROCESSING = "Operator Processing"
     RESULT_OPERATOR_METRICS = "Operator Metrics"
 
-    # support rules
-    SUPPORT_RULE_CONF = "tuning_rule.ini"
-    PROF_RULES = "prof_rules"
-    OPERATOR_RULES = "operator_rules"
-    NETWORK_RULES = "network_rules"
-
     # prof rule and condition file name
-    PROF_CONDITION_JSON = "prof_condition.json"
-    PROF_RULE_JSON = "prof_rule.json"
     RESULT_PROF_JSON = "prof_rule_{}.json"
 
     def get_common_prof_rule_class_name(self: any) -> any:

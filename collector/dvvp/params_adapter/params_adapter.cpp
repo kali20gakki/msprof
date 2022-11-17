@@ -197,7 +197,7 @@ void ParamsAdapter::SetCommonParams(std::array<std::string, INPUT_CFG_MAX> param
     commonParams.profilingPeriod = (paramContainer[INPUT_CFG_COM_SYS_PERIOD].empty()) ?
         -1 : std::stoi(paramContainer[INPUT_CFG_COM_SYS_PERIOD]);
     platformAdapter_->SetParamsForGlobal(commonParams);
-    return;
+    platformAdapter_->SetParamsForStorageLimit(commonParams);
 }
 
 void ParamsAdapter::SetTaskParams(std::array<std::string, INPUT_CFG_MAX> paramContainer) const
