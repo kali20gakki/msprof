@@ -2,16 +2,10 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 
-import logging
-import configparser
-import os
 from abc import abstractmethod
 
 from common_func.empty_class import EmptyClass
-from common_func.msvp_common import MsvpCommonConst
-from common_func.file_manager import check_path_valid
-from common_func.common_prof_rule import CommonProfRule
-from common_func.constant import Constant
+from config.config_manager import ConfigManager
 from tuning.meta_metric import NetWorkMetric
 from tuning.meta_metric import OperatorMetric
 
@@ -25,21 +19,13 @@ class MetricFactory:
         pass
 
     @staticmethod
-    def get_support_rules(option: str) -> list:
+    def get_support_rules() -> list:
         """
         get rules to check
         :param option: option
         :return: rules
         """
-        rule_path = os.path.join(MsvpCommonConst.CONFIG_PATH, CommonProfRule.SUPPORT_RULE_CONF)
-        check_path_valid(rule_path, True)
-        rule_parser = configparser.ConfigParser()
-        try:
-            rule_parser.read(rule_path)
-            return rule_parser.get(CommonProfRule.PROF_RULES, option).split(",")
-        except configparser.Error as err:
-            logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
-            return []
+        return ConfigManager.get(ConfigManager.TUNING_RULE).get_data()
 
     @abstractmethod
     def generate_metric(self: any, metric_name: str) -> any:
@@ -58,7 +44,7 @@ class OpMetricFactory(MetricFactory):
     def __init__(self: any, operator: any) -> None:
         super().__init__()
         self.operator = operator
-        self.rule_support = self.get_support_rules(CommonProfRule.OPERATOR_RULES)
+        self.rule_support = self.get_support_rules()
 
     def generate_metric(self: any, metric_name: str) -> any:
         """
@@ -80,7 +66,7 @@ class NetMetricFactory(MetricFactory):
         super().__init__()
         self.operator_mgr = operator_mgr
         self.network_condition_mgr = network_condition_mgr
-        self.rule_support = self.get_support_rules(CommonProfRule.NETWORK_RULES)
+        self.rule_support = self.get_support_rules()
 
     def generate_metric(self: any, metric_name: str) -> any:
         """

@@ -23,7 +23,7 @@ protobuf_generate(profiler
     ${MSPROF_SOURCE_DIR}/dvvp/proto/profiler.proto
     ${MSPROF_SOURCE_DIR}/dvvp/proto/profiler_ext.proto
 )
-set(CMAKE_CXX_FLAGS " -Wno-unused-parameter")
+set(CMAKE_CXX_FLAGS " -Wno-unused")
 
 if ((NOT DEFINED PACKAGE) OR (PACKAGE STREQUAL "ut"))
     add_subdirectory(ut)

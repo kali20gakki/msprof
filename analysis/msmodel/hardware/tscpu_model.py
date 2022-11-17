@@ -2,19 +2,15 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 
-import logging
 import os
-import sqlite3
 from abc import ABC
 from functools import reduce
 from operator import add
 
-from common_func.constant import Constant
+from config.config_manager import ConfigManager
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
-from common_func.msvp_common import error
-from common_func.msvp_constant import MsvpConstant
 from common_func.path_manager import PathManager
 from msmodel.interface.base_model import BaseModel
 
@@ -28,7 +24,7 @@ class TscpuModel(BaseModel, ABC):
     PERCENTAGE = 100
     BYTE = 8
     NETWORK_HEADER_TAG = 'rxPacket/s'
-    TABLES_PATH = os.path.join(MsvpConstant.CONFIG_PATH, 'Tables_training.ini')
+    TABLES_PATH = ConfigManager.TABLES_TRAINING
     FILE_NAME = os.path.basename(__file__)
 
     def __init__(self: any, result_dir: str, db_name: str, table_list: list) -> None:

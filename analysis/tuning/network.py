@@ -2,14 +2,8 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 
-import json
-import logging
-import os
-
+from config.config_manager import ConfigManager
 from common_func.empty_class import EmptyClass
-from common_func.msvp_common import MsvpCommonConst
-from common_func.file_manager import FileOpen
-from common_func.common_prof_rule import CommonProfRule
 from tuning.meta_metric_manager import NetMetricManager
 from tuning.metric_factory import NetMetricFactory
 from tuning.rule_bean import RuleBean
@@ -36,17 +30,7 @@ class Network:
 
     @staticmethod
     def _load_rules_json() -> list:
-        rule_path = os.path.join(MsvpCommonConst.CONFIG_PATH, CommonProfRule.PROF_RULE_JSON)
-        net_rules = []
-        try:
-            with FileOpen(rule_path, "r") as rule_reader:
-                rule_json = json.load(rule_reader.file_reader)
-            return rule_json.get(CommonProfRule.RULE_PROF) if rule_json.get(CommonProfRule.RULE_PROF) else net_rules
-        except FileNotFoundError:
-            logging.error("Read rule file failed: %s", os.path.basename(rule_path))
-            return net_rules
-        finally:
-            pass
+        return ConfigManager.get(ConfigManager.PROF_RULE).get_data()
 
     def run(self: any) -> None:
         """

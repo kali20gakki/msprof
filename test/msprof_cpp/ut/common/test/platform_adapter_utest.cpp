@@ -75,6 +75,7 @@ TEST_F(PlatformAdapterUtest, PlatformAdapterInterfaceModule1)
     };
     struct CommonParams comParams;
     PlatformAdapterInterfaceMgr->SetParamsForGlobal(comParams);
+    PlatformAdapterInterfaceMgr->SetParamsForStorageLimit(comParams);
     PlatformAdapterInterfaceMgr->SetParamsForTaskTime();
     PlatformAdapterInterfaceMgr->SetParamsForTaskTrace();
     PlatformAdapterInterfaceMgr->SetParamsForTrainingTrace();

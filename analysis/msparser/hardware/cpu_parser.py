@@ -10,6 +10,7 @@ import traceback
 from functools import reduce
 from operator import add
 
+from config.config_manager import ConfigManager
 from common_func import multi_process_cb
 from common_func.common import CommonConstant
 from common_func.common import call_sys_exit
@@ -23,7 +24,6 @@ from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.msprof_exception import ProfException
-from common_func.msvp_common import MsvpCommonConst
 from common_func.msvp_common import error
 from common_func.msvp_common import get_cpu_event_chunk
 from common_func.msvp_common import is_valid_original_data
@@ -37,9 +37,7 @@ def create_originaldatatable(curs: any, table_name: str) -> int:
     :param table_name: table name
     :return: result of creating table
     """
-    sql = DBManager.sql_create_general_table(
-        table_name, 'OriginalData', os.path.join(
-            MsvpCommonConst.CONFIG_PATH, 'Tables.ini'))
+    sql = DBManager.sql_create_general_table(table_name, 'OriginalData', ConfigManager.TABLES)
     if not sql:
         return NumberConstant.ERROR
     try:
