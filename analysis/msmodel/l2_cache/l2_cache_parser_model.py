@@ -11,9 +11,9 @@ class L2CacheParserModel(ParserModel):
     db operator for l2 cache parser
     """
 
-    def __init__(self: any, result_dir: str) -> None:
+    def __init__(self: any, result_dir: str, tale_list: list) -> None:
         super(L2CacheParserModel, self).__init__(result_dir, DBNameConstant.DB_L2CACHE,
-                                                 [DBNameConstant.TABLE_L2CACHE_PARSE])
+                                                 tale_list)
 
     def flush(self: any, data_list: list) -> None:
         """
