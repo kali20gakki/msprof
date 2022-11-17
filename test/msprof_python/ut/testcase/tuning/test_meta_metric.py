@@ -21,9 +21,8 @@ class TestOperatorMetric(unittest.TestCase):
 
     def test_get_metric(self):
         with mock.patch(NAMESPACE + '.logging.warning'):
-            condition_path = os.path.join(MsvpConstant.CONFIG_PATH, CommonProfRule.PROF_CONDITION_JSON)
             operator_rule_mgr = OperatorRuleManager()
-            operator_condition_mgr = OperatorConditionManager(condition_path)
+            operator_condition_mgr = OperatorConditionManager()
             operator_dicts = {}
             operator = Operator(operator_rule_mgr, operator_condition_mgr, operator_dicts)
             check = OperatorMetric(operator)
@@ -34,7 +33,7 @@ class TestOperatorMetric(unittest.TestCase):
 class TestNetWorkMetric(unittest.TestCase):
     def test_get_metric(self):
         with mock.patch(NAMESPACE + '.logging.warning'):
-            network_condition_mgr = NetConditionManager(os.path.join(MsvpConstant.CONFIG_PATH, CommonProfRule.PROF_CONDITION_JSON))
+            network_condition_mgr = NetConditionManager()
             operator_mgr = OperatorManager()
             net_rule_mgr = NetRuleManager()
             net = Network(net_rule_mgr, network_condition_mgr, operator_mgr)

@@ -7,6 +7,7 @@ import os
 import sqlite3
 from collections import defaultdict
 
+from config.config_manager import ConfigManager
 from analyzer.get_op_table_task_time import GetOpTableTsTime
 from analyzer.scene_base.profiling_scene import ProfilingScene
 from common_func.common import CommonConstant
@@ -16,19 +17,17 @@ from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msprof_exception import ProfException
 from common_func.msprof_iteration import MsprofIteration
-from common_func.msvp_constant import MsvpConstant
 from common_func.path_manager import PathManager
 from common_func.platform.chip_manager import ChipManager
-from profiling_bean.db_dto.ge_task_dto import GeTaskDto
 from viewer.ge_info_report import get_ge_model_name_dict
+from profiling_bean.db_dto.ge_task_dto import GeTaskDto
 
 
 class MergeOPCounter:
     """
     class to merge GE DB and runtime tasktime data
     """
-    TABLE_PATH = os.path.join(MsvpConstant.CONFIG_PATH, 'Tables.ini')
-    TRAIN_TABLE_PATH = os.path.join(MsvpConstant.CONFIG_PATH, 'Tables_training.ini')
+    TABLE_PATH = ConfigManager.TABLES
     MODEL_NAME_INDEX = 8
     MODEL_ID_INDEX = 7
 
@@ -102,7 +101,7 @@ class MergeOPCounter:
                             "maybe the data of framework or task is not collected.")
             return
         map_path = \
-            self.TABLE_PATH if ProfilingScene().is_step_trace() else self.TRAIN_TABLE_PATH
+            self.TABLE_PATH if ProfilingScene().is_step_trace() else ConfigManager.TABLES_TRAINING
         self.create_db(map_path)
         self._create_ge_merge()
         self._create_task()

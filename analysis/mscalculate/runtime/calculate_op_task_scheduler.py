@@ -5,10 +5,10 @@
 import logging
 import os
 
+from config.config_manager import ConfigManager
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
-from common_func.msvp_constant import MsvpConstant
 from common_func.path_manager import PathManager
 from common_func.platform.chip_manager import ChipManager
 from common_func.ms_constant.number_constant import NumberConstant
@@ -23,7 +23,6 @@ class CalculateOpTaskScheduler:
     """
     STREAM_TASK_FMT = "{0}-{1}"
     COMPLETE_TIME_INDEX = 9
-    OPERATOR_TABLE_PATH = os.path.join(MsvpConstant.CONFIG_PATH, 'tables_operator.ini')
 
     def __init__(self: any, sample_config: dict) -> None:
         self.sample_config = sample_config
@@ -212,7 +211,7 @@ class CalculateOpTaskScheduler:
         if DBManager.judge_table_exist(runtime_curs, DBNameConstant.TABLE_RUNTIME_TASK_TIME):
             DBManager.drop_table(runtime_conn, DBNameConstant.TABLE_RUNTIME_TASK_TIME)
         sql = DBManager.sql_create_general_table('TaskTimeMap', DBNameConstant.TABLE_RUNTIME_TASK_TIME,
-                                                 self.OPERATOR_TABLE_PATH)
+                                                 ConfigManager.TABLES_OPERATOR)
         DBManager.execute_sql(runtime_conn, sql)
 
     def _create_report_task_table(self: any, runtime_conn: any) -> None:
@@ -220,5 +219,5 @@ class CalculateOpTaskScheduler:
                                         DBNameConstant.TABLE_RUNTIME_REPORT_TASK):
             DBManager.drop_table(runtime_conn, DBNameConstant.TABLE_RUNTIME_REPORT_TASK)
         sql = DBManager.sql_create_general_table('ReportTaskMap', DBNameConstant.TABLE_RUNTIME_REPORT_TASK,
-                                                 self.OPERATOR_TABLE_PATH)
+                                                 ConfigManager.TABLES_OPERATOR)
         DBManager.execute_sql(runtime_conn, sql)

@@ -2,20 +2,17 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 
-import configparser
 import json
-import os
 import threading
 
+from config.config_manager import ConfigManager
 from common_func.config_mgr import ConfigMgr
-from common_func.constant import Constant
 from common_func.data_manager import DataManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.empty_class import EmptyClass
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.msprof_common import MsProfCommonConstant
-from common_func.msvp_common import MsvpCommonConst
 from common_func.msvp_constant import MsvpConstant
 from common_func.path_manager import PathManager
 from common_func.platform.chip_manager import ChipManager
@@ -654,12 +651,8 @@ class MsProfExportDataUtils:
         load export configuration
         :return: None
         """
-        config_file_path = os.path.join(MsvpCommonConst.CONFIG_PATH, "msprof_export_data.ini")
-        if os.path.exists(config_file_path) and os.path.getsize(
-                config_file_path) <= Constant.MAX_READ_FILE_BYTES:
-            cls.cfg_parser = configparser.ConfigParser(interpolation=None)
-            cls.cfg_parser.read(config_file_path)
-            cls.init_cfg_finished = True
+        cls.cfg_parser = ConfigManager.get(ConfigManager.MSPROF_EXPORT_DATA)
+        cls.init_cfg_finished = True
 
     @classmethod
     def _get_configs_with_data_type(cls: any, data_type: str) -> dict:

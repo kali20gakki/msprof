@@ -6,13 +6,13 @@ import logging
 import os
 import sqlite3
 
+from config.config_manager import ConfigManager
 from analyzer.get_op_table_task_time import GetOpTableTsTime
 from common_func.common import CommonConstant
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.number_constant import NumberConstant
-from common_func.msvp_constant import MsvpConstant
 from common_func.path_manager import PathManager
 from common_func.platform.chip_manager import ChipManager
 from profiling_bean.db_dto.ge_task_dto import GeTaskDto
@@ -22,7 +22,6 @@ class OpCounterOpScene:
     """
     op counter for single op
     """
-    OP_TABLE_PATH = os.path.join(MsvpConstant.CONFIG_PATH, 'tables_operator.ini')
 
     def __init__(self: any, sample_config: dict) -> None:
         self.sample_config = sample_config
@@ -85,6 +84,7 @@ class OpCounterOpScene:
     def create_ge_merge(self: any) -> None:
         """
         merge GE ge_task_data ge_graph_data into merged db
+        :param merge_conn:
         :return: None
         """
         db_path = PathManager.get_db_path(self.project_path, DBNameConstant.DB_GE_INFO)
@@ -152,15 +152,15 @@ class OpCounterOpScene:
     def _create_db(self: any) -> None:
 
         ge_create_sql = DBManager.sql_create_general_table("GeMergeMap", DBNameConstant.TABLE_OP_COUNTER_GE_MERGE,
-                                                           self.OP_TABLE_PATH)
+                                                           ConfigManager.TABLES_OPERATOR)
         DBManager.execute_sql(self.conn, ge_create_sql)
 
         rts_task_create_sql = DBManager.sql_create_general_table("RtsTaskMap",
                                                                  DBNameConstant.TABLE_OP_COUNTER_RTS_TASK,
-                                                                 self.OP_TABLE_PATH)
+                                                                 ConfigManager.TABLES_OPERATOR)
         DBManager.execute_sql(self.conn, rts_task_create_sql)
 
         op_report_create_sql = DBManager.sql_create_general_table("OpReportMap",
                                                                   DBNameConstant.TABLE_OP_COUNTER_OP_REPORT,
-                                                                  self.OP_TABLE_PATH)
+                                                                  ConfigManager.TABLES_OPERATOR)
         DBManager.execute_sql(self.conn, op_report_create_sql)

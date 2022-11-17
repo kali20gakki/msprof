@@ -108,7 +108,22 @@ long long Utils::GetFileSize(const std::string &path)
     return static_cast<long long>(size);
 }
 
-int Utils::GetFreeVolume(const std::string &path, unsigned long long &size)
+/**
+ * @ingroup Utils
+ * @brief 获取path挂载节点的存储空间.
+ *
+ * @param  path [IN]  文件或者目录路径.
+ * @param  size [IN] 用于获取内存大小的外部引用.
+ * @param  sizeType [IN] 获取内存的类型.
+ *  TOTAL_SIZE为总的磁盘空间,AVAIL_SIZE为非特权用户的可用磁盘空间,FREE_SIZE为总的空闲磁盘空间.
+ *
+ * @warning 获取的内存大小以字节为单位;
+ *
+ * @retval 执行成功返回PROFILING_SUCCESS.
+ * @retval 执行失败返回PROFILING_FAILED.
+ *
+ */
+int Utils::GetVolumeSize(const std::string &path, unsigned long long &size, VolumeSize sizeType)
 {
     MmDiskSize diskSize;
 
@@ -116,22 +131,21 @@ int Utils::GetFreeVolume(const std::string &path, unsigned long long &size)
     if (ret < 0) {
         return PROFILING_FAILED;
     }
-    size = diskSize.freeSize;
-
-    return PROFILING_SUCCESS;
-}
-
-int Utils::GetTotalVolume(const std::string &path, unsigned long long &size)
-{
-    MmDiskSize diskSize;
-
-    int ret = MmGetDiskFreeSpace(path, &diskSize);
-    if (ret < 0) {
-        return PROFILING_FAILED;
+    switch (sizeType) {
+        case VolumeSize::AVAIL_SIZE:
+            size = diskSize.availSize;
+            break;
+        case VolumeSize::FREE_SIZE:
+            size = diskSize.freeSize;
+            break;
+        case VolumeSize::TOTAL_SIZE:
+            size = diskSize.totalSize;
+            break;
+        default:
+            ret = PROFILING_FAILED;
+            break;
     }
-    size = diskSize.totalSize;
-
-    return PROFILING_SUCCESS;
+    return ret;
 }
 
 bool Utils::IsDir(const std::string &path)

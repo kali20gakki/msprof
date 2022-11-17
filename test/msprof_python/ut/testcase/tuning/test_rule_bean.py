@@ -2,9 +2,9 @@ import unittest
 from unittest import mock
 from tuning.rule_bean import RuleBean
 
-args = {'rule_id': 'rule_memory_workspace_1', 'rule_description': 'check and count the number of memory workspace.',
-        'rule_condition': 'condition_memory_workspace_1', 'rule_type': 'Operator Metrics', 'rule_subtype': 'Memory',
-        'rule_suggestion': 'please check and reduce the memory workspace'}
+args = {'Rule Id': 'rule_memory_workspace_1', 'Rule Description': 'check and count the number of memory workspace.',
+        'Rule Condition': 'condition_memory_workspace_1', 'Rule Type': 'Operator Metrics', 'Rule Subtype': 'Memory',
+        'Rule Suggestion': 'please check and reduce the memory workspace'}
 
 
 class TestRuleBean(unittest.TestCase):
