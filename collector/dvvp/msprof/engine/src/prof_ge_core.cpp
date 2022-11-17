@@ -159,7 +159,7 @@ Status aclgrphProfInit(CONST_CHAR_PTR profilerPath, uint32_t length)
     }
     MSPROF_LOGI("Start to execute aclgrphProfInit");
     std::lock_guard<std::mutex> lock(g_aclgraphProfMutex);
-    if (profilerPath == nullptr || strlen(profilerPath) != length) {
+    if (profilerPath == nullptr || strnlen(profilerPath, length) != length) {
         MSPROF_LOGE("profilerPath is nullptr or its length does not equals given length");
         std::string valueStr = (profilerPath == nullptr) ? "nullptr" : std::string(profilerPath);
         std::string errorReason = "Profiler path can not be nullptr, and its length should equal to the given length";
