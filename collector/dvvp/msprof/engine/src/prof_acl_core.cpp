@@ -48,7 +48,7 @@ aclError aclprofInit(CONST_CHAR_PTR profilerResultPath, size_t length)
     MSPROF_LOGI("Start to execute aclprofInit");
     std::lock_guard<std::mutex> lock(g_aclprofMutex);
 
-    if (profilerResultPath == nullptr || strlen(profilerResultPath) != length) {
+    if (profilerResultPath == nullptr || strnlen(profilerResultPath, length) != length) {
         MSPROF_LOGE("profilerResultPath is nullptr or its length does not equals given length");
         std::string errorReason = "profilerResultPath is nullptr or its length does not equals given length";
         std::string valueStr = (profilerResultPath == nullptr) ? "nullptr" : std::string(profilerResultPath);
@@ -747,7 +747,7 @@ aclError aclprofSetConfig(aclprofConfigType configType, const char *val, uint32_
         MSPROF_LOGE("[aclprofSetConfig]");
         return ACL_ERROR_INVALID_PARAM;
     }
-    if (val == nullptr || strlen(val) != valLen) {
+    if (val == nullptr || strnlen(val, valLen) != valLen) {
         MSPROF_LOGE("[aclprofSetConfig]Input value is invalid.");
         return ACL_ERROR_INVALID_PARAM;
     }
