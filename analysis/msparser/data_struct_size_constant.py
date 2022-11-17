@@ -38,6 +38,7 @@ class StructFmt:
     RTS_TRACK_FMT = "HHIQ32sHHHHQ"
     RTS_TRACK_FMT_SIZE = 64
     L2_CACHE_STRUCT_FMT = "HHHH8Q"
+    L2_CACHE_SAMPLE_STRUCT_FMT = "BBH4B8Q"
     L2_CACHE_DATA_SIZE = 72
 
     # binary data struct fmt

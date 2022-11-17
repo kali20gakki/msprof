@@ -127,6 +127,7 @@ class DBNameConstant(metaclass=ABCMeta):
     TABLE_THREAD_TASK = "ThreadTime"
     TABLE_SUBTASK_TIME = "SubtaskTime"
     TABLE_L2CACHE_PARSE = 'L2CacheParse'
+    TABLE_L2CACHE_SAMPLE = 'L2CacheSample'
     TABLE_L2CACHE_SUMMARY = 'L2CacheSummary'
 
     # dvpp
