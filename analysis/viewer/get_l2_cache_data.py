@@ -27,6 +27,15 @@ def get_l2_cache_data(db_path: str, table_name: str, device_id: str, unused_cols
     return used_cols, data, len(data)
 
 
+def get_l2_cache_sample_data(db_path: str, table_name: str, header: list):
+    conn, cursor = DBManager.check_connect_db_path(db_path)
+    if not (conn and cursor) or not DBManager.judge_table_exist(cursor, table_name):
+        return MsvpConstant.MSVP_EMPTY_DATA
+    data = DBManager.fetch_all_data(cursor, "select * from {}".format(table_name))
+    DBManager.destroy_db_connect(conn, cursor)
+    return header, data, len(data)
+
+
 def modify_l2_cache_headers(headers: list) -> None:
     """
     modify l2 cache headers

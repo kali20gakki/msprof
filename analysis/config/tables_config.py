@@ -665,6 +665,12 @@ class TablesConfig(MetaConfig):
             ('hit_rate', 'REAL'),
             ('victim_rate', 'REAL')
         ]
+        , 'L2CacheSampleMap': [
+            ('read_count', 'INTEGER, null'),
+            ('write_count', 'INTEGER, null'),
+            ('allocate', 'INTEGER, null'),
+            ('victim', 'INTEGER, null'),
+        ]
         , 'HCCLAllReduceMap': [
             ('name', 'TEXT, null'),
             ('plane_id', 'INTEGER, null'),
