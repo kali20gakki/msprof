@@ -8,6 +8,7 @@
 
 #include <cstring>
 
+#include "mmpa_api.h"
 #include "analyzer.h"
 #include "errno/error_code.h"
 #include "op_desc_parser.h"
@@ -90,6 +91,16 @@ int PipeTransport::SendBuffer(CONST_VOID_PTR buffer, int length)
         MSPROF_LOGW("Model %u not subscribed, drop buffer, size %d", modelId, length);
         return length;
     }
+    MmStatT buf;
+    if (fstat(fd, &buf) < 0) {
+        MSPROF_LOGE("fstat failed");
+        return sent;
+    }
+    if (!S_ISFIFO(buf.st_mode)) {
+        MSPROF_LOGE("Check fifo failed.");
+        return sent;
+    }
+
     MSPROF_LOGD("Write %d bytes to fd %d", length, fd);
     int count = 0;
     while (true) {
