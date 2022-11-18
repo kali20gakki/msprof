@@ -16,6 +16,32 @@ class IterInfoUpdater:
         self.active_parallel_iter_id = set([])
         self.active_parallel_iter_info = set([])
 
+    @staticmethod
+    def judge_ai_core(task: any, iter_info_list: list, ai_core_task: set) -> bool:
+        """
+        judge ai core
+        """
+        # if there are ge data, ai_core_task is empty
+        if not ai_core_task:
+            return any([iter_info_bean.is_aicore(task) for iter_info_bean in iter_info_list])
+        return GeInfoModel.STREAM_TASK_KEY_FMT.format(task.stream_id, task.task_id) in ai_core_task
+
+    @staticmethod
+    def update_hwts(iter_info_list: list) -> None:
+        """
+        update hwts
+        """
+        for iter_info_bean in iter_info_list:
+            iter_info_bean.hwts_count += 1
+
+    @staticmethod
+    def update_aicore(iter_info_list: list) -> None:
+        """
+        update aicore
+        """
+        for iter_info_bean in iter_info_list:
+            iter_info_bean.aic_count += 1
+
     def update_parallel_iter_info_pool(self: any, iter_id: int) -> None:
         """
         update parallel iter info pool
