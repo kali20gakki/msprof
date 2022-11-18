@@ -19,7 +19,7 @@ class TestTuningView(unittest.TestCase):
         self.assertEqual(res, None)
 
     def test_tuning_report(self):
-        data = {"data": [{"result": [{'rule_subtype': 'test'}]}], "rule_type": 1}
+        data = {"data": [{"result": [{'rule_subtype': 'test'}]}], "Rule Type": 1}
         with mock.patch(NAMESPACE + '.PathManager.get_summary_dir', return_value='test'),\
                 mock.patch('os.path.exists', return_value=True),\
                 mock.patch('builtins.open', mock.mock_open(read_data=json.dumps(data))):
@@ -32,13 +32,13 @@ class TestTuningView(unittest.TestCase):
             TuningView("", {}, 0).tuning_report()
 
     def test_print_first_level(self):
-        data = {"rule_type": 1}
+        data = {"Rule Type": 1}
         TuningView("", {}, 0).print_first_level(0, data)
 
     def test_print_second_level(self):
-        data = [{"rule_type": "1", "op_list": "3", "rule_suggestion": "4"}]
-        data_sub = [{"rule_type": "1", "rule_subtype": "2", "op_list": "3", "rule_suggestion": "4"},
-                    {"rule_type": "1", "rule_subtype": "2", "op_list": "3", "rule_suggestion": "4"}]
+        data = [{"Rule Type": "1", "Op List": "3", "Rule Suggestion": "4"}]
+        data_sub = [{"Rule Type": "1", "Rule Subtype": "2", "Op List": "3", "Rule Suggestion": "4"},
+                    {"Rule Type": "1", "Rule Subtype": "2", "Op List": "3", "Rule Suggestion": "4"}]
         TuningView("", {}, 0).print_second_level(None)
         TuningView("", {}, 0).print_second_level(data)
         TuningView("", {}, 0).print_second_level(data_sub)

@@ -59,7 +59,7 @@ class ProfRuleConfig(MetaConfig):
           "Rule Id": "rule_memory_bound_1",
           "Rule Description": "check the memory bound",
           "Rule Condition": "condition_memory_bound_2",
-          "Rule Type": "Model/Operator Memory",
+          "Rule Type": "Memory",
           "Rule Subtype": "",
           "Rule Suggestion": "low data memory handling efficiency"
         }
@@ -67,7 +67,7 @@ class ProfRuleConfig(MetaConfig):
           "Rule Id": "rule_vector_bound_1",
           "Rule Description": "check the vector bound",
           "Rule Condition": "condition_vector_bound_1",
-          "Rule Type": "Model/Operator Memory",
+          "Rule Type": "Memory",
           "Rule Subtype": "",
           "Rule Suggestion": "please check repeat counts and vector mask"
         }
@@ -75,7 +75,7 @@ class ProfRuleConfig(MetaConfig):
           "Rule Id": "rule_vector_bound_2",
           "Rule Description": "cube operators reach vector bound",
           "Rule Condition": "condition_vector_ratio_2 && condition_cube_ratio_2 && condition_task_duration_1",
-          "Rule Type": "Model/Operator Computation",
+          "Rule Type": "Computation",
           "Rule Subtype": "Cube",
           "Rule Suggestion": "cube operators cost too much time on vector computing"
         }
@@ -83,7 +83,7 @@ class ProfRuleConfig(MetaConfig):
           "Rule Id": "rule_vector_ratio_1",
           "Rule Description": "check the vector compute utilization",
           "Rule Condition": "condition_vector_ratio_1",
-          "Rule Type": "Model/Operator Computation",
+          "Rule Type": "Computation",
           "Rule Subtype": "Vector",
           "Rule Suggestion": "low vector compute utilization"
         }
@@ -91,7 +91,7 @@ class ProfRuleConfig(MetaConfig):
           "Rule Id": "rule_cube_ratio_1",
           "Rule Description": "check the cube compute utilization",
           "Rule Condition": "condition_cube_ratio_1",
-          "Rule Type": "Model/Operator Computation",
+          "Rule Type": "Computation",
           "Rule Subtype": "Cube",
           "Rule Suggestion": "low cube compute utilization"
         }
@@ -99,7 +99,7 @@ class ProfRuleConfig(MetaConfig):
           "Rule Id": "rule_scalar_bound_1",
           "Rule Description": "check the scalar bound",
           "Rule Condition": "condition_scalar_ratio_1",
-          "Rule Type": "Model/Operator Computation",
+          "Rule Type": "Computation",
           "Rule Subtype": "Scalar",
           "Rule Suggestion": "high scalar compute utilization"
         }
@@ -107,7 +107,7 @@ class ProfRuleConfig(MetaConfig):
           "Rule Id": "rule_vec_bankgroup_cflt_ratio_1",
           "Rule Description": "check the vec_bankgroup_cflt_ratio",
           "Rule Condition": "condition_vec_bankgroup_cflt_ratio_1",
-          "Rule Type": "Model/Operator Computation",
+          "Rule Type": "Computation",
           "Rule Subtype": "Vector",
           "Rule Suggestion": "vector bank group conflict has reached the upper limit"
         }
@@ -115,7 +115,7 @@ class ProfRuleConfig(MetaConfig):
           "Rule Id": "rule_vec_bank_cflt_ratio_1",
           "Rule Description": "check the vec_bank_cflt_ratio",
           "Rule Condition": "condition_vec_bank_cflt_ratio_1",
-          "Rule Type": "Model/Operator Computation",
+          "Rule Type": "Computation",
           "Rule Subtype": "Vector",
           "Rule Suggestion": "vector bank conflict has reached the upper limit"
         }
