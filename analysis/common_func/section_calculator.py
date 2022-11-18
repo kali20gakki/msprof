@@ -5,9 +5,9 @@ class SectionCalculator:
 
     @classmethod
     def merge_continuous_intervals(cls: any, time_section_list: list) -> list:
-        if not time_section_list:
-            return
         result = []
+        if not time_section_list:
+            return result
         time_section_list = sorted(time_section_list, key=lambda x: x.start_time)
         current_section = time_section_list[0]
         for time_section in time_section_list:
