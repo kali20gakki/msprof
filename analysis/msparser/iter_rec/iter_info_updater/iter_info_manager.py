@@ -21,6 +21,24 @@ class IterInfoManager:
                                 [DBNameConstant.TABLE_STEP_TRACE_DATA])
         self._ge_model = GeInfoModel(self.project_path)
 
+    @classmethod
+    def check_parallel(cls: any, result_dir: str) -> bool:
+        """
+        check parallel by num of items satisifed condition
+        """
+        if not DBManager.check_tables_in_db(PathManager.get_db_path(result_dir, DBNameConstant.DB_STEP_TRACE),
+                                            DBNameConstant.TABLE_STEP_TRACE_DATA):
+            return False
+        ts_track_model = TsTrackModel(
+            result_dir, DBNameConstant.DB_STEP_TRACE, [DBNameConstant.TABLE_STEP_TRACE_DATA])
+
+        with ts_track_model:
+            check_res = ts_track_model.check_parallel()
+
+        if check_res:
+            return True
+        return False
+
     def initial_iter_to_info(self: any) -> None:
         """
         get behind parallel iter of each iter and aicore info, then regist them to each iter
@@ -73,21 +91,3 @@ class IterInfoManager:
                     iter_info_bean.model_id,
                     iter_info_bean.index_id),
                 set([]))
-
-    @classmethod
-    def check_parallel(cls: any, result_dir: str) -> bool:
-        """
-        check parallel by num of items satisifed condition
-        """
-        if not DBManager.check_tables_in_db(PathManager.get_db_path(result_dir, DBNameConstant.DB_STEP_TRACE),
-                                            DBNameConstant.TABLE_STEP_TRACE_DATA):
-            return False
-        ts_track_model = TsTrackModel(
-            result_dir, DBNameConstant.DB_STEP_TRACE, [DBNameConstant.TABLE_STEP_TRACE_DATA])
-
-        with ts_track_model:
-            check_res = ts_track_model.check_parallel()
-
-        if check_res:
-            return True
-        return False
