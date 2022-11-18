@@ -76,17 +76,18 @@ aclError aclprofInit(CONST_CHAR_PTR profilerResultPath, size_t length)
         return ACL_ERROR_PROFILING_FAILURE;
     }
     MSPROF_LOGI("Initialize profiling by using ProfInit");
-    std::string path(profilerResultPath, length);
-    ret = ProfAclMgr::instance()->ProfAclInit(path);
-    if (ret != ACL_SUCCESS) {
-        MSPROF_LOGE("AclProfiling init fail, profiling result = %d", ret);
-        return ret;
+    std::string absoPath = Utils::RelativePathToAbsolutePath(std::string(profilerResultPath, length));
+    if (absoPath.size() > aclProfPathMaxLen) {
+        MSPROF_LOGE("File path length check failed.");
+        return ACL_ERROR_INVALID_PARAM;
+    }
+    if (ProfAclMgr::instance()->ProfAclInit(absoPath) != ACL_SUCCESS) {
+        return ACL_ERROR_PROFILING_FAILURE;
     }
 
     ret = Analysis::Dvvp::ProfilerCommon::RegisterReporterCallback();
     RETURN_IF_NOT_SUCCESS(ret);
 
-    MSPROF_LOGI("Allocate config of profiling initialize to Acl");
     ret = Analysis::Dvvp::ProfilerCommon::CommandHandleProfInit();
     RETURN_IF_NOT_SUCCESS(ret);
 
