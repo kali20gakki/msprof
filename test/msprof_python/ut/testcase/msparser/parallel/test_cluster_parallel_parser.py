@@ -1,3 +1,7 @@
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
+
 import os
 import unittest
 from unittest import mock
@@ -32,15 +36,9 @@ class TestClusterParallelParser(unittest.TestCase):
     def tearDown(self) -> None:
         clear_dt_project(self.DIR_PATH)
 
-    def test_parse_should_raise_prof_exception_when_without_file(self):
-        with pytest.raises(ProfException) as err:
-            check = ClusterParallelParser(self.FILE_LIST_1, self.SAMPLE_CONFIG)
-            check.parse()
-        self.assertEqual(ProfException.PROF_SYSTEM_EXIT, err.value.code)
-
     def test_ms_run(self):
         with mock.patch(NAMESPACE + ".ClusterParallelParser._prepare_for_parse", return_value=True), \
-                mock.patch(NAMESPACE + ".ClusterParallelParser._compute_overlap_time", side_effect=self.SIDE_EFFECT):
+                mock.patch(NAMESPACE + ".SectionCalculator.compute_overlap_time", side_effect=self.SIDE_EFFECT):
             check = ClusterParallelParser(self.FILE_LIST_2, self.SAMPLE_CONFIG)
             check.ms_run()
         with ParallelViewModel(self.DIR_PATH) as _model:

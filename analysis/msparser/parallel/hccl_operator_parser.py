@@ -4,10 +4,11 @@
 
 import logging
 
+from common_func.constant import Constant
 from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
-from common_func.msprof_exception import ProfException
+from msmodel.ge.ge_hash_model import GeHashViewModel
 from msmodel.parallel.cluster_hccl_model import ClusterHCCLModel
 from msmodel.step_trace.ts_track_model import TsTrackViewModel
 from msparser.interface.iparser import IParser
@@ -24,26 +25,31 @@ class HCCLOperatiorParser(IParser, MsMultiProcess):
         self._hccl_operator_data = []
 
     def ms_run(self: any) -> None:
+        if not self._file_list.get(DataTag.PARALLEL_STRATEGY, []):
+            return
+        logging.info("Start to parse hccl operator data from ts_track!")
         self.parse()
         self.save()
 
     def parse(self: any) -> None:
-        parallel_files = self._file_list.get(DataTag.PARALLEL_STRATEGY, [])
-        if not parallel_files:
-            raise ProfException(ProfException.PROF_SYSTEM_EXIT)
-        logging.info("Start to parse hccl operator data from ts_track!")
         with TsTrackViewModel(self._project_path) as _model:
             hccl_data_list = _model.get_hccl_operator_exe_data()
-        hccl_start_time = []
+        with GeHashViewModel(self._project_path) as _model:
+            ge_hash_dict = _model.get_ge_hash_data()
+        hccl_start_time = Constant.DEFAULT_INVALID_VALUE
         for hccl_data in hccl_data_list:
-            if hccl_data.tag == self.END_TAG:
-                if hccl_start_time:
-                    self._hccl_operator_data.append(
-                        [hccl_data.model_id, hccl_data.index_id, hccl_data.op_name, hccl_data.op_type,
-                         hccl_start_time[-1], hccl_data.timestamp])
-                    hccl_start_time = []
+            if hccl_data.tag_id % 2 == self.END_TAG:
+                hash_value = ge_hash_dict.get(hccl_data.op_name, None)
+                op_name = hash_value if hash_value else hccl_data.op_name
+                self._hccl_operator_data.append(
+                    [hccl_data.model_id, hccl_data.index_id, op_name, hccl_data.op_type, hccl_start_time,
+                     hccl_data.timestamp])
+                hccl_start_time = Constant.DEFAULT_INVALID_VALUE
+            elif hccl_start_time == Constant.DEFAULT_INVALID_VALUE:
+                hccl_start_time = hccl_data.timestamp
             else:
-                hccl_start_time.append(hccl_data.timestamp)
+                self._hccl_operator_data.append(
+                    [hccl_data.model_id, hccl_data.index_id, "", "", hccl_start_time, Constant.DEFAULT_INVALID_VALUE])
 
     def save(self: any) -> None:
         if not self._hccl_operator_data:

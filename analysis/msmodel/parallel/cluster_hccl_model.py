@@ -29,5 +29,5 @@ class ClusterHCCLViewModel(ViewModel):
         super().__init__(result_dir, DBNameConstant.DB_CLUSTER_HCCL, [])
 
     def get_hccl_op_data(self: any) -> list:
-        sql = "select * from HcclOperatorExe order by start_time"
+        sql = "select * from HcclOperatorExe where start_time<>-1 and end_time<>-1 order by start_time"
         return DBManager.fetch_all_data(self.cur, sql, dto_class=HCCLOperatorDto)
