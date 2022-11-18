@@ -93,6 +93,33 @@ class StarsIterRecParser(IParser, MsMultiProcess):
             logging.error("Save hwts iter failed, "
                           "%s", str(trace_err), exc_info=Constant.TRACE_BACK_SWITCH)
 
+    def refactor_iter_info_dict(self: any) -> list:
+        """
+        refactor iter info dict
+        """
+        aic_offset = 0
+        hwts_offset = 0
+
+        step_trace_data = GeInfoModel(self._project_path).get_step_trace_data()
+        step_trace_data.sort(key=lambda dto: dto.step_end)
+
+        iter_info_list = []
+        for step_dto in step_trace_data:
+            if step_dto.iter_id not in self._iter_info_dict:
+                continue
+            iter_info = self._iter_info_dict.get(step_dto.iter_id)
+            iter_info_list.append([step_dto.iter_id,
+                                   step_dto.model_id,
+                                   step_dto.index_id,
+                                   iter_info.hwts_count,
+                                   hwts_offset,
+                                   iter_info.aic_count,
+                                   aic_offset,
+                                   step_dto.step_end])
+            aic_offset += iter_info.aic_count
+            hwts_offset += iter_info.hwts_count
+        return iter_info_list
+
     def _parse_log_file_list(self):
         log_file_list = self._file_list.get(DataTag.STARS_LOG, [])
         log_file_list.sort(key=lambda x: int(x.split("_")[-1]))
@@ -159,30 +186,3 @@ class StarsIterRecParser(IParser, MsMultiProcess):
             logging.info("No need to calculate task count at op scene.")
             raise ProfException(ProfException.PROF_INVALID_DATA_ERROR)
         return iter_dict
-
-    def refactor_iter_info_dict(self: any) -> list:
-        """
-        refactor iter info dict
-        """
-        aic_offset = 0
-        hwts_offset = 0
-
-        step_trace_data = GeInfoModel(self._project_path).get_step_trace_data()
-        step_trace_data.sort(key=lambda dto: dto.step_end)
-
-        iter_info_list = []
-        for step_dto in step_trace_data:
-            if step_dto.iter_id not in self._iter_info_dict:
-                continue
-            iter_info = self._iter_info_dict.get(step_dto.iter_id)
-            iter_info_list.append([step_dto.iter_id,
-                                   step_dto.model_id,
-                                   step_dto.index_id,
-                                   iter_info.hwts_count,
-                                   hwts_offset,
-                                   iter_info.aic_count,
-                                   aic_offset,
-                                   step_dto.step_end])
-            aic_offset += iter_info.aic_count
-            hwts_offset += iter_info.hwts_count
-        return iter_info_list
