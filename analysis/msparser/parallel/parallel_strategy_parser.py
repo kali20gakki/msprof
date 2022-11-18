@@ -14,6 +14,7 @@ from common_func.file_manager import FileOpen
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.msprof_exception import ProfException
+from common_func.os_manager import check_file_readable
 from common_func.path_manager import PathManager
 from msmodel.parallel.parallel_model import ParallelModel
 from msparser.interface.iparser import IParser
@@ -21,7 +22,6 @@ from profiling_bean.prof_enum.data_tag import DataTag
 
 
 class ParallelStrategyParser(IParser, MsMultiProcess):
-    FILE_MAX_SIZE = 9999999
     FILE_NAME = os.path.basename(__file__)
 
     def __init__(self: any, file_list: dict, sample_config: dict):
@@ -42,10 +42,7 @@ class ParallelStrategyParser(IParser, MsMultiProcess):
         parallel_data = ""
         for _parallel_file in parallel_files:
             parallel_file = PathManager.get_data_file_path(self._project_path, _parallel_file)
-            _file_size = os.path.getsize(parallel_file)
-            if _file_size < 0 or _file_size > self.FILE_MAX_SIZE:
-                error(self.FILE_NAME, "Parallel strategy file size exceeds the upper limit.")
-                return
+            check_file_readable(parallel_file)
             with FileOpen(parallel_file, 'rt') as _file:
                 parallel_data = parallel_data + _file.file_reader.read()
         try:
