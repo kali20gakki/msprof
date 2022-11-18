@@ -1,9 +1,10 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
-
+from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from msmodel.interface.parser_model import ParserModel
+from msmodel.interface.view_model import ViewModel
 
 
 class GeHashModel(ParserModel):
@@ -28,3 +29,12 @@ class GeHashModel(ParserModel):
         get ge hash model name
         """
         return self.__class__.__name__
+
+
+class GeHashViewModel(ViewModel):
+    def __init__(self: any, path: str) -> None:
+        super().__init__(path, DBNameConstant.DB_GE_HASH, [])
+
+    def get_ge_hash_data(self) -> dict:
+        sql = "SELECT hash_key, hash_value FROM {}".format(DBNameConstant.TABLE_GE_HASH)
+        return dict(DBManager.fetch_all_data(self.cur, sql))

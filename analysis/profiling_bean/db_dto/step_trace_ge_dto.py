@@ -9,7 +9,7 @@ class StepTraceGeDto:
         self._stream_id = Constant.DEFAULT_INVALID_VALUE
         self._task_id = Constant.DEFAULT_INVALID_VALUE
         self._timestamp = Constant.DEFAULT_INVALID_VALUE
-        self._tag = Constant.DEFAULT_INVALID_VALUE
+        self._tag_id = Constant.DEFAULT_INVALID_VALUE
         self._op_name = Constant.NA
         self._op_type = Constant.NA
 
@@ -69,15 +69,15 @@ class StepTraceGeDto:
         self._timestamp = value
 
     @property
-    def tag(self: any) -> any:
+    def tag_id(self: any) -> any:
         """
         for tag
         """
-        return self._tag
+        return self._tag_id
 
-    @tag.setter
-    def tag(self: any, value: any) -> None:
-        self._tag = value
+    @tag_id.setter
+    def tag_id(self: any, value: any) -> None:
+        self._tag_id = value
 
     @property
     def op_name(self: any) -> any:

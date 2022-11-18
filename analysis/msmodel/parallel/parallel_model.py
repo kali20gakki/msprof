@@ -5,6 +5,7 @@
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
+from common_func.ms_constant.str_constant import StrConstant
 from msmodel.interface.parser_model import ParserModel
 from msmodel.interface.view_model import ViewModel
 
@@ -33,14 +34,7 @@ class ParallelViewModel(ViewModel):
         parallel_mode = DBManager.fetch_all_data(self.cur, sql)[0]
         if not parallel_mode:
             return Constant.NA
-        elif parallel_mode[0] == "data-parallel":
-            return DBNameConstant.TABLE_CLUSTER_DATA_PARALLEL
-        elif parallel_mode[0] == "model-parallel":
-            return DBNameConstant.TABLE_CLUSTER_MODEL_PARALLEL
-        elif parallel_mode[0] == "pipeline-parallel":
-            return DBNameConstant.TABLE_CLUSTER_PIPELINE_PARALLEL
-        else:
-            return Constant.NA
+        return StrConstant.PARALLEL_TABLE_NAME_MAPPING.get(parallel_mode[0], Constant.NA)
 
     def get_parallel_index_data(self: any, tabel_name: str, rank_id: any, device_id: int) -> list:
         if rank_id == Constant.NA:

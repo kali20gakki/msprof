@@ -31,19 +31,16 @@ class TestHCCLOperatiorParser(unittest.TestCase):
     def tearDown(self) -> None:
         clear_dt_project(self.DIR_PATH)
 
-    def test_parse_should_raise_prof_exception_when_without_file(self):
-        with pytest.raises(ProfException) as err:
-            check = HCCLOperatiorParser(self.FILE_LIST_1, self.SAMPLE_CONFIG)
-            check.parse()
-        self.assertEqual(ProfException.PROF_SYSTEM_EXIT, err.value.code)
-
     def test_ms_run(self):
         hccl_data1 = StepTraceGeDto()
-        hccl_data1.tag = 0
+        hccl_data1.tag_id = 10000
+        hccl_data1.timestamp = 33
         hccl_data2 = StepTraceGeDto()
-        hccl_data2.tag = 1
+        hccl_data2.tag_id = 10001
+        hccl_data2.timestamp = 44
         with mock.patch(NAMESPACE + ".TsTrackViewModel.get_hccl_operator_exe_data",
-                        return_value=[hccl_data1, hccl_data2]):
+                        return_value=[hccl_data1, hccl_data2]), \
+                mock.patch(NAMESPACE + ".GeHashViewModel.get_ge_hash_data", return_value={}):
             check = HCCLOperatiorParser(self.FILE_LIST_2, self.SAMPLE_CONFIG)
             check.ms_run()
         with ClusterHCCLViewModel(self.DIR_PATH) as _model:

@@ -6,6 +6,7 @@ from abc import ABC
 from functools import partial
 from itertools import chain
 
+from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.msprof_iteration import MsprofIteration
@@ -114,17 +115,13 @@ class TsTrackViewModel(ViewModel):
     def get_hccl_operator_exe_data(self) -> list:
         if not self.attach_to_db(DBNameConstant.DB_GE_INFO):
             return []
-        if not self.attach_to_db(DBNameConstant.DB_GE_HASH):
-            return []
-        sql = "SELECT t1.model_id, t1.index_id, t1.stream_id, t1.task_id, t1.tag, t1.timestamp, " \
-              "CASE WHEN t3.hash_value IS NOT NULL THEN t3.hash_value ELSE t2.op_name END AS op_name, t2.op_type " \
-              "FROM ( SELECT model_id, index_id, tag_id%2 AS tag, stream_id, " \
-              "CASE WHEN tag_id%2=1 THEN task_id-1 ELSE task_id END AS task_id, timestamp FROM {} WHERE tag_id>=10000" \
-              ") t1 LEFT JOIN ( SELECT model_id, index_id, stream_id, task_id, op_name, op_type FROM {} " \
-              "WHERE task_type=4 ) t2 ON t1.model_id=t2.model_id AND (t1.index_id=t2.index_id OR t2.index_id=0 ) " \
-              "AND t1.stream_id = t2.stream_id AND t1.task_id = t2.task_id LEFT JOIN ( " \
-              "SELECT hash_key, hash_value FROM {} ) t3 ON t2.op_name = t3.hash_key ORDER BY t1.timestamp".format(
-            DBNameConstant.TABLE_STEP_TRACE, DBNameConstant.TABLE_GE_TASK, DBNameConstant.TABLE_GE_HASH)
+        sql = "SELECT t1.model_id, t1.index_id, t1.stream_id, t1.task_id, t1.tag_id, t1.timestamp, t2.op_name, " \
+              "t2.op_type FROM ( SELECT model_id, index_id, tag_id, stream_id, task_id-1 AS task_id, timestamp " \
+              "FROM {} WHERE tag_id>=10000 ) t1 LEFT JOIN ( " \
+              "SELECT model_id, index_id, stream_id, task_id, op_name, op_type FROM {} WHERE task_type='{}' ) t2 " \
+              "ON t1.model_id=t2.model_id AND (t1.index_id=t2.index_id OR t2.index_id=0 ) " \
+              "AND t1.stream_id = t2.stream_id AND t1.task_id = t2.task_id ORDER BY t1.timestamp".format(
+            DBNameConstant.TABLE_STEP_TRACE, DBNameConstant.TABLE_GE_TASK, Constant.TASK_TYPE_HCCL)
         return DBManager.fetch_all_data(self.cur, sql, dto_class=StepTraceGeDto)
 
     def get_ai_cpu_op_data(self) -> list:
