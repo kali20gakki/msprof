@@ -33,6 +33,14 @@ class CalculateOpTaskScheduler:
         self.cnt_miss = -1
 
     @staticmethod
+    def _create_task_time_table(runtime_conn: any, runtime_curs: any) -> None:
+        if DBManager.judge_table_exist(runtime_curs, DBNameConstant.TABLE_RUNTIME_TASK_TIME):
+            DBManager.drop_table(runtime_conn, DBNameConstant.TABLE_RUNTIME_TASK_TIME)
+        sql = DBManager.sql_create_general_table('TaskTimeMap', DBNameConstant.TABLE_RUNTIME_TASK_TIME,
+                                                 ConfigManager.TABLES_OPERATOR)
+        DBManager.execute_sql(runtime_conn, sql)
+
+    @staticmethod
     def _update(api_data: list) -> list:
         """
         api update data for op scene
@@ -206,13 +214,6 @@ class CalculateOpTaskScheduler:
         timeline_data = DBManager.fetch_all_data(runtime_curs, timeline_sql, (device,))
         cal_task_data = multi_calculate_task_cost_time(timeline_data, self.project_path)
         return cal_task_data
-
-    def _create_task_time_table(self: any, runtime_conn: any, runtime_curs: any) -> None:
-        if DBManager.judge_table_exist(runtime_curs, DBNameConstant.TABLE_RUNTIME_TASK_TIME):
-            DBManager.drop_table(runtime_conn, DBNameConstant.TABLE_RUNTIME_TASK_TIME)
-        sql = DBManager.sql_create_general_table('TaskTimeMap', DBNameConstant.TABLE_RUNTIME_TASK_TIME,
-                                                 ConfigManager.TABLES_OPERATOR)
-        DBManager.execute_sql(runtime_conn, sql)
 
     def _create_report_task_table(self: any, runtime_conn: any) -> None:
         if DBManager.check_tables_in_db(PathManager.get_db_path(self.project_path, DBNameConstant.DB_RUNTIME),
