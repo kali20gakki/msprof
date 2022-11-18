@@ -62,7 +62,7 @@ class TestIterInfoUpdater(unittest.TestCase):
         task.stream_id = 1
         task.task_id = 1
 
-        ai_core_task = {"1-1", "2-10"}
+        ai_core_task = ("1-1", "2-10")
 
         IterInfoUpdater("test").judge_ai_core(task, ai_core_task)
 
@@ -71,7 +71,7 @@ class TestIterInfoUpdater(unittest.TestCase):
         task.stream_id = 1
         task.task_id = 1
 
-        ai_core_task = {}
+        ai_core_task = ()
 
         IterInfoUpdater("test").judge_ai_core(task, ai_core_task)
 
