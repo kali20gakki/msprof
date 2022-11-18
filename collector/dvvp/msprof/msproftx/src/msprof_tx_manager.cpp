@@ -196,10 +196,10 @@ int MsprofTxManager::SetStampTraceMessage(ACL_PROF_STAMP_PTR stamp, CONST_CHAR_P
         MSPROF_LOGE("[SetStampTraceMessage]MsprofTxManager is not inited yet");
         return PROFILING_FAILED;
     }
-    if (stamp == nullptr) {
-        MSPROF_LOGE("[SetStampTraceMessage]aclprofStamp is nullptr");
+    if (stamp == nullptr || msg == nullptr) {
+        MSPROF_LOGE("[SetStampTraceMessage]aclprofStamp or msg is nullptr");
         MSPROF_INPUT_ERROR("EK0001", std::vector<std::string>({"value", "param", "reason"}),
-            std::vector<std::string>({"nullptr", "stamp", "stamp can not be nullptr when set traceMessage"}));
+            std::vector<std::string>({"nullptr", "stamp", "stamp and msg can not be nullptr when set traceMessage"}));
         return PROFILING_FAILED;
     }
 
@@ -216,7 +216,7 @@ int MsprofTxManager::SetStampTraceMessage(ACL_PROF_STAMP_PTR stamp, CONST_CHAR_P
         MSPROF_LOGE("[SetStampTraceMessage]memset_s message failed, ret is %u", ret);
         return PROFILING_FAILED;
     }
-    ret = strcpy_s(stamp->stampInfo.message, MAX_MSG_LEN - 1, msg);
+    ret = strncpy_s(stamp->stampInfo.message, MAX_MSG_LEN - 1, msg, msgLen);
     if (ret != EOK) {
         MSPROF_LOGE("[SetStampTraceMessage]strcpy_s message failed, ret is %u", ret);
         return PROFILING_FAILED;
