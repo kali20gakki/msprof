@@ -69,10 +69,6 @@ InputParser::~InputParser()
 
 void InputParser::MsprofCmdUsage(const std::string msg)
 {
-    if (params_ == nullptr) {
-        MSPROF_LOGE("params_ is null in InputParser.");
-        return;
-    }
     if (!msg.empty()) {
         CmdLog::instance()->CmdErrorLog("%s", msg.c_str());
     }
