@@ -1156,6 +1156,7 @@ int32_t ProfAclMgr::MsprofInitAclJson(VOID_PTR data, uint32_t len)
         return MSPROF_ERROR_CONFIG_INVALID;
     }
     params_->job_id = Utils::ProfCreateId(0);
+    params_->host_sys_pid = analysis::dvvp::common::utils::Utils::GetPid();
     MsprofSetMemberValue();
     ProfDataTypeConfigHandle(params_);
     SetModeToCmd();
@@ -1235,6 +1236,7 @@ int32_t ProfAclMgr::MsprofInitGeOptions(VOID_PTR data, uint32_t len)
     }
     params_->job_id = Utils::ProfCreateId(0);
     params_->jobInfo = jobInfo;
+    params_->host_sys_pid = analysis::dvvp::common::utils::Utils::GetPid();
     MsprofSetMemberValue();
     ProfDataTypeConfigHandle(params_);
     SetModeToCmd();
