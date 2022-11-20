@@ -22,6 +22,7 @@ from common_func.path_manager import PathManager
 from framework.load_info_manager import LoadInfoManager
 from msparser.cluster.cluster_info_parser import ClusterInfoParser, ClusterBasicInfo
 from msparser.cluster.cluster_step_trace_parser import ClusterStepTraceParser
+from msparser.parallel.cluster_parallel_collector import ClusterParallelCollector
 
 
 class ImportCommand:
@@ -70,6 +71,8 @@ class ImportCommand:
             cluster_info_parser.ms_run()
             cluster_step_trace_parser = ClusterStepTraceParser(self.collection_path)
             cluster_step_trace_parser.ms_run()
+            cluster_parallel_collector = ClusterParallelCollector(self.collection_path)
+            cluster_parallel_collector.ms_run()
             print_info(MsProfCommonConstant.COMMON_FILE_NAME,
                        'Cluster data parse finished!')
 
