@@ -98,7 +98,7 @@ class TestClusterDataPreparationParser(unittest.TestCase):
                     mock.patch(NAMESPACE + '.check_path_valid'), \
                     mock.patch(NAMESPACE + '.ClusterDataPreparationParser._query_host_queue'):
                 check = ClusterDataPreparationParserSubclass(self.params)
-                check.set_host_queue_mode(0)
+                check.set_host_queue_mode(DataPreparationParser.HOST_DATASET_NOT_SINK_MODE)
                 check.calculate()
         with mock.patch(NAMESPACE + '.check_path_valid'), \
                 mock.patch(NAMESPACE + '.ClusterDataPreparationParser._check_device_path_valid', return_value=False):
