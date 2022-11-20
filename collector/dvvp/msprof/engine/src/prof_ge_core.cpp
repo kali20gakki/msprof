@@ -186,19 +186,19 @@ Status aclgrphProfInit(CONST_CHAR_PTR profilerPath, uint32_t length)
         MSPROF_LOGE("Failed to init acl manager");
         return FAILED;
     }
-    MSPROF_LOGI("Initialize profiling by using ProfInit");
-    std::string path(profilerPath, length);
-    ret = ProfAclMgr::instance()->ProfAclInit(path);
+    std::string absoPath = Utils::RelativePathToAbsolutePath(std::string(profilerPath, length));
+    if (absoPath.size() > aclGrphProfPathMaxLen) {
+        MSPROF_LOGE("File path length check failed.");
+        return ACL_ERROR_INVALID_PARAM;
+    }
+    ret = ProfAclMgr::instance()->ProfAclInit(absoPath);
     if (ret != ACL_SUCCESS) {
-        MSPROF_LOGE("AclProfiling init fail, profiling result = %d", ret);
-        MSPROF_INNER_ERROR("EK9999", "AclProfiling init fail, profiling result = %d", ret);
         return FAILED;
     }
 
     Status geRegisterRet = static_cast<Status>(RegisterReporterCallback());
     RETURN_IF_NOT_SUCCESS(geRegisterRet);
 
-    MSPROF_LOGI("Allocate config of profiling initialize to Ge");
     Status geHandleInitRet = static_cast<Status>(CommandHandleProfInit());
     RETURN_IF_NOT_SUCCESS(geHandleInitRet);
 

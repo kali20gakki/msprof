@@ -269,7 +269,7 @@ int32_t ProfAclMgr::ProfAclInit(const std::string &profResultPath)
     }
 
     MSPROF_LOGI("Input profInitCfg: %s", Utils::BaseName(profResultPath).c_str());
-    std::string path = Utils::RelativePathToAbsolutePath(profResultPath);
+    std::string path = profResultPath;
     if (path.empty()) {
         MSPROF_LOGE("Input profResultPath is empty");
         MSPROF_INNER_ERROR("EK9999", "Input profResultPath is empty");
