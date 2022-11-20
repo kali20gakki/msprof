@@ -2,14 +2,14 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
 
-import os
 import logging
+import os
 from decimal import Decimal
 
 from common_func.constant import Constant
 from common_func.info_conf_reader import InfoConfReader
-from common_func.msvp_constant import MsvpConstant
 from common_func.ms_constant.number_constant import NumberConstant
+from common_func.msvp_constant import MsvpConstant
 from common_func.utils import Utils
 from host_prof.host_cpu_usage.model.cpu_time_info import CpuTimeInfo
 from host_prof.host_cpu_usage.model.host_cpu_usage import HostCpuUsage
@@ -73,8 +73,7 @@ class HostCpuUsagePresenter(HostProfPresenterBase):
         return cpu usage timeline header
         """
         pid = InfoConfReader().get_json_pid_data()
-        result = [["process_name", pid,
-                   InfoConfReader().get_json_tid_data(), "CPU Usage"]]
+        result = [["process_name", pid, InfoConfReader().get_json_tid_data(), "CPU Usage"]]
         cpu_list = self._get_cpu_list()
         for index, cpu_info in enumerate(cpu_list):
             cpu_no = " ".join(["CPU", cpu_info[0]])
@@ -92,7 +91,6 @@ class HostCpuUsagePresenter(HostProfPresenterBase):
             data.append(self.sort_map.get(data[0]))
         return result
 
-
     def _parse_cpu_info(self: any) -> None:
         """
         parse cpu info
@@ -105,17 +103,39 @@ class HostCpuUsagePresenter(HostProfPresenterBase):
         """"
         compute every cpu usage data
         """
-        curr_info_data = {"curr_timestamp": curr_info[0],
-                          "curr_jiffies": curr_info[1],
-                          "curr_data": curr_info[2]}
-        last_info_data = {"last_timestamp": last_info[0],
-                          "last_jiffies": last_info[1],
-                          "last_data": last_info[2]}
+        curr_info_data = {"curr_timestamp": curr_info[0], "curr_jiffies": curr_info[1], "curr_data": curr_info[2]}
+        last_info_data = {"last_timestamp": last_info[0], "last_jiffies": last_info[1], "last_data": last_info[2]}
 
         delta_jiffies = curr_info_data.get("curr_jiffies") - last_info_data.get("last_jiffies")
         if not self.cpu_info or delta_jiffies == 0:
             return
+        cpu_jiffies, total_delta = self._compute_process_usage(curr_info_data, delta_jiffies, last_info_data)
+        self._compute_cpu_usage(cpu_jiffies, curr_info_data, delta_jiffies, last_info_data)
+        self._compute_cpu_usage_average(curr_info_data, delta_jiffies, last_info_data, total_delta)
+
+    def _compute_cpu_usage_average(self, curr_info_data, delta_jiffies, last_info_data, total_delta):
+        usage = 0
         cpu_num = self.cpu_info[0]
+        if not NumberConstant.is_zero(cpu_num):
+            # compute cpu avg usage
+            usage = (total_delta * NumberConstant.PERCENTAGE / (delta_jiffies * cpu_num)) \
+                .quantize(NumberConstant.USAGE_PLACES)
+        self.cpu_usage_info.append([last_info_data.get("last_timestamp"),
+                                    curr_info_data.get("curr_timestamp"),
+                                    'Avg', float(usage)])
+
+    def _compute_cpu_usage(self, cpu_jiffies, curr_info_data, delta_jiffies, last_info_data):
+        # compute cpu usage,count multi process on same cpu
+        for cpu_no, cpu_jiffies in cpu_jiffies.items():
+            usage = (cpu_jiffies * NumberConstant.PERCENTAGE / delta_jiffies).quantize(NumberConstant.USAGE_PLACES)
+            # Shield the error value caused by cpu switching
+            if usage > 100:
+                continue
+            self.cpu_usage_info.append([last_info_data.get("last_timestamp"),
+                                        curr_info_data.get("curr_timestamp"),
+                                        str(cpu_no), float(usage)])
+
+    def _compute_process_usage(self, curr_info_data, delta_jiffies, last_info_data):
         total_delta = 0
         cpu_jiffies = {}
         for pid, cpu_times in curr_info_data.get("curr_data").items():
@@ -138,25 +158,7 @@ class HostCpuUsagePresenter(HostProfPresenterBase):
             else:
                 cpu_jiffies[cpu_times.cpu_no] = process_jiffies
             total_delta += process_jiffies
-
-        # compute cpu usage,count multi process on same cpu
-        for cpu_no, cpu_jiffies in cpu_jiffies.items():
-            usage = (cpu_jiffies * NumberConstant.PERCENTAGE / delta_jiffies).quantize(NumberConstant.USAGE_PLACES)
-            # Shield the error value caused by cpu switching
-            if usage > 100:
-                continue
-            self.cpu_usage_info.append([last_info_data.get("last_timestamp"),
-                                        curr_info_data.get("curr_timestamp"),
-                                        str(cpu_no), float(usage)])
-
-        usage = 0
-        if not NumberConstant.is_zero(cpu_num):
-            # compute cpu avg usage
-            usage = (total_delta * NumberConstant.PERCENTAGE / (delta_jiffies * cpu_num)) \
-                .quantize(NumberConstant.USAGE_PLACES)
-        self.cpu_usage_info.append([last_info_data.get("last_timestamp"),
-                                    curr_info_data.get("curr_timestamp"),
-                                    'Avg', float(usage)])
+        return cpu_jiffies, total_delta
 
     def _parse_cpu_usage(self: any, cpu_file: any) -> None:
         """

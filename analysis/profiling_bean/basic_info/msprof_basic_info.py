@@ -54,26 +54,27 @@ class MsProfBasicInfo:
     """
 
     # transform the json to be show for ide.
-    TRANSFORM_MAP = {"collection_start_time": "Collection start time",
-                     "collection_end_time": "Collection end time",
-                     "result_size": "Result Size",
-                     "device_id": "Device Id",
-                     "ai_cpu_num": "AI CPU Number",
-                     "ai_core_num": "AI Core Number",
-                     "control_cpu_num": "Control CPU Number",
-                     "control_cpu_type": "Control CPU Type",
-                     "ts_cpu_num": "TS CPU Number",
-                     "host_computer_name": "Host Computer Name",
-                     "host_operating_system": "Host Operating System",
-                     "_cpu_id": "CPU ID",
-                     "_frequency": "Frequency",
-                     "_logical_cpu_count": "Logical_CPU_Count",
-                     "_cpu_name": "Name",
-                     "_cpu_type": "Type",
-                     "_device_id": "Device Id",
-                     "_model_id": "Model Id",
-                     "_iteration_num": "Iteration Number"
-                     }
+    TRANSFORM_MAP = {
+        "collection_start_time": "Collection start time",
+        "collection_end_time": "Collection end time",
+        "result_size": "Result Size",
+        "device_id": "Device Id",
+        "ai_cpu_num": "AI CPU Number",
+        "ai_core_num": "AI Core Number",
+        "control_cpu_num": "Control CPU Number",
+        "control_cpu_type": "Control CPU Type",
+        "ts_cpu_num": "TS CPU Number",
+        "host_computer_name": "Host Computer Name",
+        "host_operating_system": "Host Operating System",
+        "_cpu_id": "CPU ID",
+        "_frequency": "Frequency",
+        "_logical_cpu_count": "Logical_CPU_Count",
+        "_cpu_name": "Name",
+        "_cpu_type": "Type",
+        "_device_id": "Device Id",
+        "_model_id": "Model Id",
+        "_iteration_num": "Iteration Number"
+    }
 
     def __init__(self: any, project_path: str) -> None:
         self.project_path = project_path

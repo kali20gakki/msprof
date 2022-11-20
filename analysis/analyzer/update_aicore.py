@@ -4,7 +4,6 @@
 
 import logging
 import os
-import sqlite3
 
 from analyzer.scene_base.profiling_scene import ProfilingScene
 from common_func.constant import Constant
@@ -12,8 +11,8 @@ from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.file_manager import FileManager
 from common_func.info_conf_reader import InfoConfReader
-from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_constant.number_constant import NumberConstant
+from common_func.ms_constant.str_constant import StrConstant
 from common_func.msprof_iteration import MsprofIteration
 from common_func.path_manager import PathManager
 
@@ -22,14 +21,15 @@ class UpdateAICoreData:
     """
     parsing Update ai core data class
     """
-    INVALID_CORE_NUM = 0
+    INVALID_CORE_NUM = {'aic': 0, 'aiv': 0}
     INVALID_FREQ = 0
-    TASK_ID_TRAIN_KEY = "task_id"
-    STREAM_ID_TRAIN_KEY = "stream_id"
-    TASK_ID_INFER_KEY = "task_id"
-    STREAM_ID_INFER_KEY = "stream_id"
+    TASK_ID_KEY = "task_id"
+    STREAM_ID_KEY = "stream_id"
     STREAM_TASK_KEY_FMT = "{0}-{1}"
     TOTAL_CYCLES_KEY = "total_cycles"
+    AIC_TOTAL_CYCLES_KEY = "aic_total_cycles"
+    AIV_TOTAL_CYCLES_KEY = "aiv_total_cycles"
+    CORE_TYPE = {1: "aiv", 0: 'aic'}
 
     def __init__(self: any, sample_config: dict) -> None:
         self.sample_config = sample_config
@@ -37,6 +37,7 @@ class UpdateAICoreData:
         self.device_id = None
         self.project_path = None
         self.sql_dir = None
+        self.warning_cnt = 0
 
     @staticmethod
     def __add_pipe_time(headers: list, ai_core_data: list) -> tuple:
@@ -107,6 +108,9 @@ class UpdateAICoreData:
             logging.warning("Unable to get required data to update ai core data.")
             return
         self.__update_ai_core_data()
+        if self.warning_cnt > 0:
+            logging.warning("Can not find the stream id and task id from ge data when getting block, "
+                            "maybe ge data has lost %d times", self.warning_cnt)
 
     def get_db_path(self: any, db_name: str) -> str:
         """
@@ -137,7 +141,9 @@ class UpdateAICoreData:
 
     def __check_ai_core_table_exist(self: any) -> bool:
         return DBManager.check_tables_in_db(PathManager.get_db_path(self.project_path, DBNameConstant.DB_RUNTIME),
-                                            DBNameConstant.TABLE_AI_CORE_METRIC_SUMMARY)
+                                            DBNameConstant.TABLE_AI_CORE_METRIC_SUMMARY) or \
+               DBManager.check_tables_in_db(PathManager.get_db_path(self.project_path, DBNameConstant.DB_RUNTIME),
+                                            DBNameConstant.TABLE_AIV_METRIC_SUMMARY)
 
     def __update_ai_core_data(self: any) -> None:
         """
@@ -188,12 +194,12 @@ class UpdateAICoreData:
         ge_data = []
         index_id = self.sample_config.get("iter_id", NumberConstant.DEFAULT_ITER_ID)
         model_id = self.sample_config.get("model_id", NumberConstant.DEFAULT_MODEL_ID)
-        iter_dict = MsprofIteration(self.project_path).get_iter_dict_with_index_and_model(index_id, model_id)
+        iter_list = MsprofIteration(self.project_path).get_iter_list_with_index_and_model(index_id, model_id)
         sql = "select task_id, stream_id, block_dim from {0} " \
               "where model_id=? and (index_id=0 or index_id=?) " \
               "and task_type='{1}' order by timestamp".format(
             DBNameConstant.TABLE_GE_TASK, Constant.TASK_TYPE_AI_CORE)
-        for iter_id, model_id in iter_dict.values():
+        for iter_id, model_id in iter_list:
             ge_data.extend(DBManager.fetch_all_data(ge_curs, sql, (model_id, iter_id)))
 
         return ge_data
@@ -202,16 +208,20 @@ class UpdateAICoreData:
         """
         get core num and ai core freq from config file
         """
+        core_num = {'aic': 0, 'aiv': 0}
         for file_name in os.listdir(self.project_path):
             matched_name = FileManager.is_info_json_file(file_name)
             if matched_name:
-                core_num = InfoConfReader().get_data_under_device("ai_core_num")
+                ai_core_num = InfoConfReader().get_data_under_device("ai_core_num")
+                aiv_num = InfoConfReader().get_data_under_device("aiv_num")
+                core_num['aic'] = ai_core_num if ai_core_num else 24
+                core_num['aiv'] = aiv_num if aiv_num else 48
                 if not core_num:
                     break
                 freq = InfoConfReader().get_freq(StrConstant.AIC)
                 return core_num, freq
         # set invalid core num and ai core freq to 0
-        return self.INVALID_CORE_NUM, self.INVALID_FREQ
+        return core_num, self.INVALID_FREQ
 
     def __update_ai_core_db(self: any, block_dims: any, core_num: any, freq: any) -> None:
         db_path = self.get_db_path(DBNameConstant.DB_RUNTIME)
@@ -224,6 +234,9 @@ class UpdateAICoreData:
             tables = list(map(lambda x: x[0], tables))
         if DBNameConstant.TABLE_AI_CORE_METRIC_SUMMARY in tables:
             self.__update_ai_core_table(conn, DBNameConstant.TABLE_AI_CORE_METRIC_SUMMARY, block_dims, core_num,
+                                        freq)
+        if DBNameConstant.TABLE_AIV_METRIC_SUMMARY in tables:
+            self.__update_ai_core_table(conn, DBNameConstant.TABLE_AIV_METRIC_SUMMARY, block_dims, core_num,
                                         freq)
         DBManager.destroy_db_connect(conn, curs)
 
@@ -247,15 +260,20 @@ class UpdateAICoreData:
         :param freq: ai core frequency
         :return:
         """
-        core_num, freq = config_infos
-        task_id_index, stream_id_index, cycle_index = self.__get_col_indexes_to_cal_total(headers)
-        if not ai_core_data or task_id_index == Constant.INVALID_INDEX or stream_id_index == Constant.INVALID_INDEX or \
-                cycle_index == Constant.INVALID_INDEX:
+        core_num_dict, freq = config_infos
+        task_id_index, stream_id_index, cycle_index, mix_cycle_index = self.__get_col_indexes_to_cal_total(headers)
+        if not ai_core_data:
+            logging.error("unable to get AI Core data.")
+            return []
+        indexes = [task_id_index, stream_id_index, cycle_index]
+        if any(map(lambda index: index == Constant.INVALID_INDEX, indexes)):
+
             logging.error("unable to get AI Core data.")
             return []
         time_data = []
         time_sum = 0
         for item in ai_core_data:
+            core_num = core_num_dict.get(self.CORE_TYPE.get(item[-1], 'aic'), 0)
             block = self._get_current_block(block_dims, item, task_id_index, stream_id_index)
             if block:
                 if int(freq) == 0 or core_num == 0:
@@ -265,6 +283,12 @@ class UpdateAICoreData:
                                  ((block + core_num - 1) // core_num)
                     total_time = round(total_time, NumberConstant.DECIMAL_ACCURACY)
                     time_sum += total_time
+                if mix_cycle_index:
+                    mix_total_time = item[mix_cycle_index] * 1000 / int(freq) / block * \
+                                     ((block + core_num - 1) // core_num)
+                    mix_total_time = round(mix_total_time, NumberConstant.DECIMAL_ACCURACY)
+                    total_time += mix_total_time
+                    time_sum += mix_total_time
             else:
                 total_time = 0
             time_data.append([total_time] + list(item))
@@ -288,23 +312,27 @@ class UpdateAICoreData:
         block = block_dims.get(self.STREAM_TASK_KEY_FMT.format(ai_core_data[task_id_index],
                                                                ai_core_data[stream_id_index]))
         if not block:
-            logging.error("Can not find the stream id and task id from ge data, "
+            logging.debug("Can not find the stream id and task id from ge data, "
                           "maybe ge data has lost: %s", self.STREAM_TASK_KEY_FMT.format(ai_core_data[task_id_index],
                                                                                         ai_core_data[stream_id_index]))
             return 0
         return block.pop(0) if len(block) > 1 else block[0]
 
     def __get_col_indexes_to_cal_total(self: any, headers: any) -> tuple:
-        infer_cols = {self.TASK_ID_INFER_KEY, self.STREAM_ID_INFER_KEY, self.TOTAL_CYCLES_KEY}
+        infer_cols = {self.TASK_ID_KEY, self.STREAM_ID_KEY, self.TOTAL_CYCLES_KEY}
         if infer_cols.issubset(headers):
-            return headers.index(self.TASK_ID_INFER_KEY), \
-                   headers.index(self.STREAM_ID_INFER_KEY), \
-                   headers.index(self.TOTAL_CYCLES_KEY)
-        train_cols = {self.TASK_ID_TRAIN_KEY, self.STREAM_ID_TRAIN_KEY, self.TOTAL_CYCLES_KEY}
-        if train_cols.issubset(headers):
-            return headers.index(self.TASK_ID_TRAIN_KEY), \
-                   headers.index(self.STREAM_ID_TRAIN_KEY), \
-                   headers.index(self.TOTAL_CYCLES_KEY)
+            res_tuple = headers.index(self.TASK_ID_KEY), \
+                        headers.index(self.STREAM_ID_KEY), \
+                        headers.index(self.TOTAL_CYCLES_KEY), \
+                        None
+            return res_tuple
+        mix_cols = {self.TASK_ID_KEY, self.STREAM_ID_KEY, self.AIC_TOTAL_CYCLES_KEY, self.AIV_TOTAL_CYCLES_KEY}
+        if mix_cols.issubset(headers):
+            res_tuple = headers.index(self.TASK_ID_KEY), \
+                        headers.index(self.STREAM_ID_KEY), \
+                        headers.index(self.AIC_TOTAL_CYCLES_KEY), \
+                        headers.index(self.AIV_TOTAL_CYCLES_KEY)
+            return res_tuple
         logging.error(
             "unable to find task id or stream id or total cycles in original ai core data.")
         return Constant.INVALID_INDEX, Constant.INVALID_INDEX, Constant.INVALID_INDEX

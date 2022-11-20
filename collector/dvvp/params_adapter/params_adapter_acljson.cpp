@@ -42,7 +42,9 @@ int ParamsAdapterAclJson::Init()
         INPUT_CFG_COM_RUNTIME_API,
         INPUT_CFG_COM_AIC_METRICS,
         INPUT_CFG_COM_AIV_METRICS,
-        INPUT_CFG_COM_BIU_FREQ
+        INPUT_CFG_COM_BIU_FREQ,
+        INPUT_CFG_HOST_SYS_USAGE,
+        INPUT_CFG_HOST_SYS_USAGE_FREQ
     }).swap(aclJsonWholeConfig_);
     std::map<InputCfg, std::string>({
         {INPUT_CFG_COM_OUTPUT, "output"},
@@ -57,6 +59,8 @@ int ParamsAdapterAclJson::Init()
         {INPUT_CFG_COM_AIC_METRICS, "aic_metrics"},
         {INPUT_CFG_COM_AIV_METRICS, "aiv_metrics"},
         {INPUT_CFG_COM_BIU_FREQ, "biu_freq"},
+        {INPUT_CFG_HOST_SYS_USAGE, "host_sys_usage"},
+        {INPUT_CFG_HOST_SYS_USAGE_FREQ, "host_sys_usage_freq"},
     }).swap(aclJsonPrintMap_);
     return PROFILING_SUCCESS;
 }
@@ -96,6 +100,8 @@ void ParamsAdapterAclJson::GenAclJsonContainer(SHARED_PTR_ALIA<ProfAclConfig> ac
     paramContainer_[INPUT_CFG_COM_RUNTIME_API] = aclCfg->runtime_api();
     paramContainer_[INPUT_CFG_COM_AIC_METRICS] = aclCfg->aic_metrics();
     paramContainer_[INPUT_CFG_COM_AIV_METRICS] = aclCfg->aiv_metrics();
+    paramContainer_[INPUT_CFG_HOST_SYS_USAGE] = aclCfg->host_sys_usage();
+    paramContainer_[INPUT_CFG_HOST_SYS_USAGE_FREQ] = aclCfg->host_sys_usage_freq();
     std::string biuFreqParam = std::to_string(aclCfg->biu_freq());
     if (biuFreqParam.compare("0") != 0) {
         paramContainer_[INPUT_CFG_COM_BIU_FREQ] = biuFreqParam;

@@ -38,7 +38,7 @@ class ParsingTSData(MsMultiProcess):
     MDC_DATA_LENGTH = 180
 
     def __init__(self: any, file_list: dict, sample_config: dict) -> None:
-        MsMultiProcess.__init__(self, sample_config)
+        super().__init__(sample_config)
         self.project_path = sample_config.get("result_dir")
         self._file_list = file_list.get(DataTag.TSCPU, [])
         self.device_id = self.sample_config.get("device_id", "0")
@@ -52,8 +52,10 @@ class ParsingTSData(MsMultiProcess):
 
     @staticmethod
     def _generate_ts_info(decoder: any) -> dict:
-        ts_info = {"perf_backtrace": decoder.perf_backtrace, "pc": decoder.pc, "timestamp": decoder.timestamp,
-                   "pmu_data": decoder.pmu_data}
+        ts_info = {
+            "perf_backtrace": decoder.perf_backtrace, "pc": decoder.pc, "timestamp": decoder.timestamp,
+            "pmu_data": decoder.pmu_data
+        }
         ts_info["perf_backtrace"] = Utils.generator_to_list(i for i in ts_info.get("perf_backtrace", []) if i != 0)
         lp_ = Utils.generator_to_list(hex(i) for i in ts_info.get("perf_backtrace", [])[1::2])
         lp_ = Utils.generator_to_list(str(i) for i in lp_)
@@ -66,8 +68,10 @@ class ParsingTSData(MsMultiProcess):
 
     @staticmethod
     def _generate_ts_info_in_mdc(decoder: any) -> dict:
-        ts_info = {"perf_backtrace": decoder.perf_backtrace, "pc": decoder.pc,
-                   "timestamp": decoder.timestamp, "pmu_data": decoder.pmu_data}
+        ts_info = {
+            "perf_backtrace": decoder.perf_backtrace, "pc": decoder.pc,
+            "timestamp": decoder.timestamp, "pmu_data": decoder.pmu_data
+        }
         ts_info["perf_backtrace"] = Utils.generator_to_list(i for i in ts_info.get("perf_backtrace", []) if i != 0)
         ts_info["perf_backtrace"] = Utils.generator_to_list(i for i in ts_info.get("perf_backtrace", []) if i != 0)
         perf_backtrace = Utils.generator_to_list(hex(i) for i in ts_info.get("perf_backtrace", [])[1::2])
@@ -191,7 +195,7 @@ class ParsingTSData(MsMultiProcess):
             logging.info(
                 "start parsing tscpu data file: %s", file_name)
             self.replayid = '0'  # replay id is 0
-            self.tools.get('devices', []).append(self.device_id)
+            self.tools.setdefault('devices', []).append(self.device_id)
             if self._open_mdc_binary_data(file_name):
                 self.calculate = OffsetCalculator(self._file_list, StructFmt.MDC_TSCPU_FMT_SIZE,
                                                   self.project_path)

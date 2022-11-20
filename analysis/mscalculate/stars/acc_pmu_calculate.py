@@ -22,7 +22,7 @@ class AccPmuCalculator(ICalculator, MsMultiProcess):
         self.sample_config = sample_config
         self.file_list = file_list
         self.result_dir = self.sample_config.get("result_dir")
-        self.model = AccPmuModel(self.result_dir, DBNameConstant.DB_SOC_LOG,
+        self.model = AccPmuModel(self.result_dir, DBNameConstant.DB_ACC_PMU,
                                  [DBNameConstant.TABLE_ACC_PMU_ORIGIN_DATA])
         self._data = []
 
@@ -33,7 +33,7 @@ class AccPmuCalculator(ICalculator, MsMultiProcess):
         """
         if not self.file_list.get(DataTag.STARS_LOG) and not self.file_list.get(DataTag.SOC_PROFILER):
             return
-        with AccPmuModel(self.result_dir, DBNameConstant.DB_SOC_LOG,
+        with AccPmuModel(self.result_dir, DBNameConstant.DB_ACC_PMU,
                          [DBNameConstant.TABLE_ACC_PMU_ORIGIN_DATA]) as self.model:
 
             if not self.model.check_table():
@@ -43,15 +43,13 @@ class AccPmuCalculator(ICalculator, MsMultiProcess):
 
     def calculate(self: any) -> None:
         task_time = self.get_task_time_form_acsq()
-        self.model.cur.row_factory = ClassRowType.class_row(AccPmuOriDto)
         all_data_sql = "select * from {}".format(DBNameConstant.TABLE_ACC_PMU_ORIGIN_DATA)
-        ori_data = DBManager.fetch_all_data(self.model.cur, all_data_sql)
+        ori_data = DBManager.fetch_all_data(self.model.cur, all_data_sql, dto_class=AccPmuOriDto)
         self._data = [(data.task_id, data.stream_id, data.acc_id, data.block_id,
                        data.read_bandwidth, data.write_bandwidth,
                        data.read_ost, data.write_ost, data.timestamp)
                       + task_time.get(data.task_id, (Constant.DEFAULT_VALUE, Constant.DEFAULT_VALUE))
                       for data in ori_data]
-        self.model.cur.row_factory = None
 
     def save(self: any) -> None:
         self.model.drop_table(DBNameConstant.TABLE_ACC_PMU_DATA)
@@ -69,6 +67,8 @@ class AccPmuCalculator(ICalculator, MsMultiProcess):
         if not (conn and curs):
             return task_time_dict
         sql = 'select task_id, start_time, task_time from {}'.format(DBNameConstant.TABLE_ACSQ_TASK)
+        if not DBManager.judge_table_exist(curs, DBNameConstant.TABLE_ACSQ_TASK):
+            return task_time_dict
         task_time = DBManager.fetch_all_data(curs, sql)
         DBManager.destroy_db_connect(conn, curs)
         if task_time and task_time[0]:

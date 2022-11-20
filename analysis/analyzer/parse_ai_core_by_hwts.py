@@ -206,7 +206,7 @@ class ParseAiVectorCoreByHwts(BaseParseDataByHwts):
     """
 
     def __init__(self: any, file_name: str, sample_config: dict, conn: any, freq: float) -> None:
-        BaseParseDataByHwts.__init__(self, file_name, sample_config, conn, freq)
+        super().__init__(file_name, sample_config, conn, freq)
 
     def process(self: any) -> None:
         """

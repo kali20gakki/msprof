@@ -62,9 +62,8 @@ class AICpuFromTsCalculator(MsMultiProcess):
         aicpu_timeline_list = self.state_to_timeline(ai_cpu_with_state)
 
         for aicpu_timeline in aicpu_timeline_list:
-            aicpu_feature = (aicpu_timeline.stream_id,
-                               aicpu_timeline.task_id,
-                               aicpu_timeline.start,
-                               aicpu_timeline.end,
-                               AICpuFromTsCollector.AI_CPU_TYPE)
+            aicpu_feature = (
+                aicpu_timeline.stream_id, aicpu_timeline.task_id, aicpu_timeline.start,
+                aicpu_timeline.end, AICpuFromTsCollector.AI_CPU_TYPE
+            )
             self._aicpu_collector.filter_aicpu(aicpu_feature)

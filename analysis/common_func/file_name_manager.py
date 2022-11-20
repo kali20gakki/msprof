@@ -20,6 +20,8 @@ class FileNameManagerConstant:
 
     INFO_JSON_PATTERN = r"^info\.json"
 
+    INFO_JSON_FOR_DEVICE_PATTERN = r"^info\.json\.\d+$"
+
     START_INFO_PATTERN = r"^start_info"
 
     END_INFO_PATTERN = r"^end_info"
@@ -48,6 +50,9 @@ class FileNameManagerConstant:
 
     DATA_PREPROCESS_FILE_PATTERN = r"^DATA_PREPROCESS\.{}\.(\d+)\.slice_\d+"
     DATA_PREPROCESS_TRAINING_FILE_PATTERN = r"^DATA_PREPROCESS\.dev\.{}\.(\d+)\.slice_\d+"
+
+    DATA_PREPARATION_DEVICE_QUEUE = r"^Framework\.device_queue\.(\d+)\.slice_\d+"
+    DATA_PREPARATION_DATASET_ITERATION = r"^Framework\.dataset_iterator\.(\d+)\.slice_\d+"
 
     DDR_FILE_PATTERN = r"^ddr\.data\.(\d+)\.slice_\d+"
     DDR_INFER_FILE_PATTERN = r"^ddr\.data\.\d+\.(\d+)\.\d+"
@@ -209,9 +214,13 @@ def get_file_name_pattern_match(file_name: str, *file_pattern_compiles: any) -> 
     """
     get file name pattern match
     """
-    if isinstance(file_name, str) and (file_name.endswith(Constant.DONE_TAG) or
-                                       file_name.endswith(Constant.COMPLETE_TAG) or
-                                       file_name.endswith(Constant.ZIP_TAG)):
+    if not isinstance(file_name, str):
+        return EmptyClass("not original data")
+    tags = [Constant.DONE_TAG, Constant.COMPLETE_TAG, Constant.ZIP_TAG]
+
+    def check_file_name(tag: str):
+        return file_name.endswith(tag)
+    if any(map(check_file_name, tags)):
         return EmptyClass("not original data")
     for file_pattern_compile in file_pattern_compiles:
         match_res = file_pattern_compile.match(file_name)
@@ -247,10 +256,12 @@ def get_end_info_compiles() -> tuple:
     return (re.compile(FileNameManagerConstant.END_INFO_PATTERN),)
 
 
-def get_info_json_compiles() -> tuple:
+def get_info_json_compiles(device_info_only: bool = False) -> tuple:
     """
     get info json regex compiles
     """
+    if device_info_only:
+        return (re.compile(FileNameManagerConstant.INFO_JSON_FOR_DEVICE_PATTERN),)
     return (re.compile(FileNameManagerConstant.INFO_JSON_PATTERN),)
 
 
@@ -344,6 +355,14 @@ def get_data_preprocess_compiles(tag: str) -> tuple:
         FileNameManagerConstant.DATA_PREPROCESS_TRAINING_FILE_PATTERN.format(tag))
 
 
+def get_host_queue_compiles() -> tuple:
+    """
+    get host queue compiles
+    """
+    return re.compile(FileNameManagerConstant.DATA_PREPARATION_DEVICE_QUEUE), re.compile(
+        FileNameManagerConstant.DATA_PREPARATION_DATASET_ITERATION)
+
+
 def get_dvpp_compiles() -> tuple:
     """
     get dvpp regex compiles
@@ -357,10 +376,12 @@ def get_ge_task_compiles() -> tuple:
     """
     get ge task regex compiles
     """
-    ge_task_compiles = (re.compile(FileNameManagerConstant.GE_TASK_FILE_PATTERN),
-                        re.compile(FileNameManagerConstant.GE_TASK_SINGLE_FILE_PATTERN),
-                        re.compile(FileNameManagerConstant.GE_TASK_INFER_FILE_PATTERN),
-                        re.compile(FileNameManagerConstant.GE_TASK_TRAINING_FILE_PATTERN))
+    ge_task_compiles = (
+        re.compile(FileNameManagerConstant.GE_TASK_FILE_PATTERN),
+        re.compile(FileNameManagerConstant.GE_TASK_SINGLE_FILE_PATTERN),
+        re.compile(FileNameManagerConstant.GE_TASK_INFER_FILE_PATTERN),
+        re.compile(FileNameManagerConstant.GE_TASK_TRAINING_FILE_PATTERN)
+    )
     return ge_task_compiles
 
 

@@ -64,6 +64,7 @@ const int MAX_ASCEND_INSTALL_INFO_FILE_SIZE = 1024; // 1024 Byte
 
 const int THOUSAND = 1000; // 1000 : 1k
 
+const int MS_TO_NS = 1000000; // 1ms = 1000000ns
 #if (defined(_WIN32) || defined(_WIN64) || defined(_MSC_VER))
 const int MSVP_MMPROCESS = NULL;
 const char * const MSVP_ENV_DELIMITER = ":";
@@ -116,10 +117,12 @@ const int32_t PERIPHERAL_INTERVAL_MS_MIN  = 20;
 const int32_t PERIPHERAL_INTERVAL_MS_MAX  = 1000;
 
 // prof job config
-const char * const PROF_SYS_CPU_USAGE_FILE = "SystemCpuUsage.data";
-const char * const PROF_SYS_MEM_FILE = "Memory.data";
-const char * const PROF_HOST_PROC_CPU_USAGE_FILE = "host_cpu.data";
-const char * const PROF_HOST_PROC_MEM_USAGE_FILE = "host_mem.data";
+const char * const PROF_DEVICE_SYS_CPU_USAGE_FILE = "SystemCpuUsage.data";
+const char * const PROF_DEVICE_SYS_MEM_USAGE_FILE = "Memory.data";
+const char * const PROF_HOST_PID_CPU_USAGE_FILE = "host_cpu.data";
+const char * const PROF_HOST_PID_MEM_USAGE_FILE = "host_mem.data";
+const char * const PROF_HOST_SYS_CPU_USAGE_FILE = "host_sys_cpu.data";
+const char * const PROF_HOST_SYS_MEM_USAGE_FILE = "host_sys_mem.data";
 const char * const PROF_HOST_SYS_NETWORK_USAGE_FILE = "host_network.data";
 const char * const MSVP_PROF_DATA_DIR = "/data";
 const char * const MSVP_PROF_PERF_DATA_FILE = "ai_ctrl_cpu.data.";
@@ -151,6 +154,7 @@ const size_t MAX_LOOP_TIMES = 1400; // the max send package nums of once Dump()
 const int SLEEP_INTEVAL_US = 1000; // the interval of Run()
 const size_t RING_BUFF_CAPACITY = 16384; // 16384:16K. Note:capacity value must be 2^n
 const size_t GE_RING_BUFF_CAPACITY = 262144; // 262144:256K. Note:capacity value must be 2^n
+const size_t MSPROF_RING_BUFF_CAPACITY = 262144; // 262144:256K. Note:capacity value must be 2^n
 
 // sender config
 const int SEND_BUFFER_LEN = 64 * 1024; // 64 * 1024 menas 64k

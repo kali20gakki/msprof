@@ -171,6 +171,7 @@ TEST_F(MSPROF_ACL_CORE_UTEST, ConstructAndUploadData)
     GlobalMockObject::verify();
 
     std::shared_ptr<Analyzer> analyzer(new Analyzer(nullptr));
+    EXPECT_EQ(PROFILING_SUCCESS, analyzer->Init());
     const uint64_t start = 1;
     const uint64_t end = 2;
     const uint64_t startAicore = 3;
@@ -1271,6 +1272,7 @@ TEST_F(MSPROF_ACL_CORE_UTEST, Analyzer_OnNewData) {
     SHARED_PTR_ALIA<Uploader> pipeUploader = std::make_shared<Uploader>(pipeTransport);
     pipeUploader->Init(100000);
     std::shared_ptr<Analyzer> analyzer(new Analyzer(pipeUploader));
+    EXPECT_EQ(PROFILING_SUCCESS, analyzer->Init());
 
     analyzer->inited_ = false;
     analyzer->OnNewData(nullptr, 0);
@@ -1289,6 +1291,7 @@ TEST_F(MSPROF_ACL_CORE_UTEST, Analyzer_TsDataPostProc) {
         .stubs();
 
     std::shared_ptr<Analyzer> analyzer(new Analyzer(nullptr));
+    EXPECT_EQ(PROFILING_SUCCESS, analyzer->Init());
     TsProfileKeypoint data;
     data.head.bufSize = sizeof(TsProfileKeypoint);
     data.taskId = 1;
@@ -1311,6 +1314,7 @@ TEST_F(MSPROF_ACL_CORE_UTEST, Analyzer_TsDataPostProc) {
 
 TEST_F(MSPROF_ACL_CORE_UTEST, Analyzer_HwtsDataPostProc) {
     std::shared_ptr<Analyzer> analyzer(new Analyzer(nullptr));
+    EXPECT_EQ(PROFILING_SUCCESS, analyzer->Init());
     HwtsProfileType01 data;
     data.taskId = 0;
     data.streamId = 0;
@@ -1351,6 +1355,7 @@ TEST_F(MSPROF_ACL_CORE_UTEST, Analyzer_HwtsDataPostProc) {
 
 TEST_F(MSPROF_ACL_CORE_UTEST, Analyzer_Ffts_PrintStats) {
     std::shared_ptr<Analyzer> analyzer(new Analyzer(nullptr));
+    EXPECT_EQ(PROFILING_SUCCESS, analyzer->Init());
     analyzer->analyzerFfts_->PrintStats();
 }
 
@@ -1358,56 +1363,43 @@ TEST_F(MSPROF_ACL_CORE_UTEST, Analyzer_UploadTsOp) {
     GlobalMockObject::verify();
     MOCKER_CPP(&Analysis::Dvvp::Analyze::Analyzer::ConstructAndUploadData)
         .stubs();
-
     MOCKER_CPP(&Analysis::Dvvp::Analyze::AnalyzerGe::IsOpInfoCompleted)
         .stubs()
         .will(returnValue(false))
         .then(returnValue(true));
-
     std::shared_ptr<Analyzer> analyzer(new Analyzer(nullptr));
+    EXPECT_EQ(PROFILING_SUCCESS, analyzer->Init());
+    uint16_t taskStateList[] = {TS_TIMELINE_START_TASK_STATE,
+                                TS_TIMELINE_AICORE_START_TASK_STATE,
+                                TS_TIMELINE_AICORE_END_TASK_STATE,
+                                TS_TIMELINE_END_TASK_STATE};
+    int listLen = sizeof(taskStateList) / sizeof(uint16_t);
     TsProfileTimeline data;
     data.taskId = 0;
     data.streamId = 0;
     data.timestamp = 1000000;
-    data.taskState = TS_TIMELINE_START_TASK_STATE;
-    analyzer->analyzerTs_->ParseTsTimelineData((CONST_CHAR_PTR)(&data), sizeof(data));
-    data.taskState = TS_TIMELINE_AICORE_START_TASK_STATE;
-    analyzer->analyzerTs_->ParseTsTimelineData((CONST_CHAR_PTR)(&data), sizeof(data));
-    data.taskState = TS_TIMELINE_AICORE_END_TASK_STATE;
-    analyzer->analyzerTs_->ParseTsTimelineData((CONST_CHAR_PTR)(&data), sizeof(data));
-    data.taskState = TS_TIMELINE_END_TASK_STATE;
-    analyzer->analyzerTs_->ParseTsTimelineData((CONST_CHAR_PTR)(&data), sizeof(data));
-
+    for (int idx = 0; idx < listLen; idx++) {
+        data.taskState = taskStateList[idx];
+        analyzer->analyzerTs_->ParseTsTimelineData((CONST_CHAR_PTR)(&data), sizeof(data));
+    }
     data.taskId = 1;
-    data.taskState = TS_TIMELINE_START_TASK_STATE;
-    analyzer->analyzerTs_->ParseTsTimelineData((CONST_CHAR_PTR)(&data), sizeof(data));
-    data.taskState = TS_TIMELINE_AICORE_START_TASK_STATE;
-    analyzer->analyzerTs_->ParseTsTimelineData((CONST_CHAR_PTR)(&data), sizeof(data));
-    data.taskState = TS_TIMELINE_AICORE_END_TASK_STATE;
-    analyzer->analyzerTs_->ParseTsTimelineData((CONST_CHAR_PTR)(&data), sizeof(data));
-    data.taskState = TS_TIMELINE_END_TASK_STATE;
-    analyzer->analyzerTs_->ParseTsTimelineData((CONST_CHAR_PTR)(&data), sizeof(data));
-
+    for (int idx = 0; idx < listLen; idx++) {
+        data.taskState = taskStateList[idx];
+        analyzer->analyzerTs_->ParseTsTimelineData((CONST_CHAR_PTR)(&data), sizeof(data));
+    }
     data.taskId = 2;
-    data.taskState = TS_TIMELINE_START_TASK_STATE;
-    analyzer->analyzerTs_->ParseTsTimelineData((CONST_CHAR_PTR)(&data), sizeof(data));
-    data.taskState = TS_TIMELINE_AICORE_START_TASK_STATE;
-    analyzer->analyzerTs_->ParseTsTimelineData((CONST_CHAR_PTR)(&data), sizeof(data));
-    data.taskState = TS_TIMELINE_AICORE_END_TASK_STATE;
-    analyzer->analyzerTs_->ParseTsTimelineData((CONST_CHAR_PTR)(&data), sizeof(data));
-    data.taskState = TS_TIMELINE_END_TASK_STATE;
-    analyzer->analyzerTs_->ParseTsTimelineData((CONST_CHAR_PTR)(&data), sizeof(data));
-
+    for (int idx = 0; idx < listLen; idx++) {
+        data.taskState = taskStateList[idx];
+        analyzer->analyzerTs_->ParseTsTimelineData((CONST_CHAR_PTR)(&data), sizeof(data));
+    }
     auto &tsOpTimes = analyzer->analyzerTs_->opTimes_;
     int ind = 0;
     for (auto iter = tsOpTimes.begin(); iter != tsOpTimes.end(); iter++) {
         iter->second.indexId = ind++;
     }
-
     analyzer->profileMode_ = PROFILE_MODE_STEP_TRACE;
     analyzer->UploadAppOp(tsOpTimes);
     EXPECT_EQ(1, analyzer->analyzerTs_->opTimes_.size());
-
     analyzer->profileMode_ = PROFILE_MODE_SINGLE_OP;
     analyzer->UploadAppOp(tsOpTimes);
     EXPECT_EQ(0, analyzer->analyzerTs_->opTimes_.size());
@@ -1425,6 +1417,7 @@ TEST_F(MSPROF_ACL_CORE_UTEST, Analyzer_UploadHwtsOp) {
         .then(returnValue(true));
 
     std::shared_ptr<Analyzer> analyzer(new Analyzer(nullptr));
+    EXPECT_EQ(PROFILING_SUCCESS, analyzer->Init());
     HwtsProfileType01 data;
     data.taskId = 0;
     data.streamId = 0;
@@ -1453,6 +1446,7 @@ TEST_F(MSPROF_ACL_CORE_UTEST, Analyzer_UploadHwtsOp) {
 
 TEST_F(MSPROF_ACL_CORE_UTEST, Analyzer_GetOpIndexId) {
     std::shared_ptr<Analyzer> analyzer(new Analyzer(nullptr));
+    EXPECT_EQ(PROFILING_SUCCESS, analyzer->Init());
     TsProfileKeypoint data;
     data.head.bufSize = sizeof(TsProfileKeypoint);
     data.indexId = 1234;
@@ -1483,6 +1477,7 @@ TEST_F(MSPROF_ACL_CORE_UTEST, Analyzer_GetOpIndexId) {
 
 TEST_F(MSPROF_ACL_CORE_UTEST, Analyzer_UpdateTsOpIndexId) {
     std::shared_ptr<Analyzer> analyzer(new Analyzer(nullptr));
+    EXPECT_EQ(PROFILING_SUCCESS, analyzer->Init());
     TsProfileKeypoint data;
     data.head.bufSize = sizeof(TsProfileKeypoint);
     data.taskId = 1;
@@ -1503,6 +1498,7 @@ TEST_F(MSPROF_ACL_CORE_UTEST, Analyzer_UpdateTsOpIndexId) {
 
 TEST_F(MSPROF_ACL_CORE_UTEST, Analyzer_DispatchData) {
     std::shared_ptr<Analyzer> analyzer(new Analyzer(nullptr));
+    EXPECT_EQ(PROFILING_SUCCESS, analyzer->Init());
 
     HwtsProfileType01 hwtsChunk;
     hwtsChunk.taskId = 30;
@@ -1529,6 +1525,7 @@ TEST_F(MSPROF_ACL_CORE_UTEST, AnalyzerTs_UploadKeypointOp) {
         .stubs();
 
     auto analyzer = std::make_shared<Analysis::Dvvp::Analyze::Analyzer>(nullptr);
+    EXPECT_EQ(PROFILING_SUCCESS, analyzer->Init());
 
     TsProfileKeypoint data;
     data.head.bufSize = sizeof(TsProfileKeypoint);
@@ -1567,6 +1564,7 @@ TEST_F(MSPROF_ACL_CORE_UTEST, Graph_aclgrphProfGraphSubscribe) {
         .stubs();
 
     std::shared_ptr<Analyzer> analyzer(new Analyzer(nullptr));
+    EXPECT_EQ(PROFILING_SUCCESS, analyzer->Init());
     TsProfileKeypoint data;
     data.head.bufSize = sizeof(TsProfileKeypoint);
     data.taskId = 1;

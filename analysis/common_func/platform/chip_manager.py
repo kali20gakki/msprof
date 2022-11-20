@@ -23,21 +23,14 @@ class ChipManager:
         Constant.CHIP_V3_1_0: ChipModel.CHIP_V3_1_0,
         Constant.CHIP_V3_2_0: ChipModel.CHIP_V3_2_0,
         Constant.CHIP_V3_3_0: ChipModel.CHIP_V3_3_0,
-        Constant.CHIP_V4_1_0: ChipModel.CHIP_V4_1_0
+        Constant.CHIP_V4_1_0: ChipModel.CHIP_V4_1_0,
+        Constant.CHIP_V1_1_1: ChipModel.CHIP_V1_1_1
     }
 
     FILE_NAME = os.path.basename(__file__)
 
     def __init__(self: any) -> None:
         self.chip_id = ChipModel.CHIP_V1_1_0
-
-    @classmethod
-    def get_chip_id(cls: any) -> any:
-        """
-        get chip id
-        :return: chip id
-        """
-        return cls.CHIP_RELATION_MAP.get(InfoConfReader().get_root_data(Constant.PLATFORM_VERSION))
 
     @staticmethod
     def is_ffts_type() -> bool:
@@ -54,6 +47,14 @@ class ChipManager:
         :return:
         """
         return True
+
+    @classmethod
+    def get_chip_id(cls: any) -> any:
+        """
+        get chip id
+        :return: chip id
+        """
+        return cls.CHIP_RELATION_MAP.get(InfoConfReader().get_root_data(Constant.PLATFORM_VERSION))
 
     def load_chip_info(self: any) -> None:
         """

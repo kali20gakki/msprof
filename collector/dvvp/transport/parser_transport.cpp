@@ -8,6 +8,7 @@
 
 #include <cstring>
 
+#include "mmpa_api.h"
 #include "analyzer.h"
 #include "errno/error_code.h"
 #include "op_desc_parser.h"
@@ -22,14 +23,19 @@ using namespace Msprofiler::Api;
 using namespace Collector::Dvvp::Plugin;
 using namespace Collector::Dvvp::Mmpa;
 
-ParserTransport::ParserTransport(SHARED_PTR_ALIA<Uploader> uploader)
-{
-    MSVP_MAKE_SHARED1_VOID(analyzer_, Analysis::Dvvp::Analyze::Analyzer, uploader);
-}
-
 ParserTransport::~ParserTransport()
 {
     CloseSession();
+}
+
+int ParserTransport::Init(SHARED_PTR_ALIA<Uploader> uploader)
+{
+    MSVP_MAKE_SHARED1_RET(analyzer_, Analysis::Dvvp::Analyze::Analyzer, uploader, PROFILING_FAILED);
+    if (analyzer_->Init() != PROFILING_SUCCESS) {
+        MSPROF_LOGE("Failed to init Analyzer for ParserTransport");
+        return PROFILING_FAILED;
+    }
+    return PROFILING_SUCCESS;
 }
 
 int ParserTransport::SendBuffer(CONST_VOID_PTR buffer, int length)
@@ -85,6 +91,16 @@ int PipeTransport::SendBuffer(CONST_VOID_PTR buffer, int length)
         MSPROF_LOGW("Model %u not subscribed, drop buffer, size %d", modelId, length);
         return length;
     }
+    MmStatT buf;
+    if (fstat(fd, &buf) < 0) {
+        MSPROF_LOGE("fstat failed");
+        return sent;
+    }
+    if (!S_ISFIFO(buf.st_mode)) {
+        MSPROF_LOGE("Check fifo failed.");
+        return sent;
+    }
+
     MSPROF_LOGD("Write %d bytes to fd %d", length, fd);
     int count = 0;
     while (true) {

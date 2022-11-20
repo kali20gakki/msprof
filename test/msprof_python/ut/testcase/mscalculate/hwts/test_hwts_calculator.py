@@ -8,10 +8,11 @@ import unittest
 from unittest import mock
 
 from analyzer.scene_base.profiling_scene import ProfilingScene
+from common_func.constant import Constant
 from common_func.info_conf_reader import InfoConfReader
 from constant.constant import CONFIG
-from common_func.constant import Constant
 from mscalculate.hwts.hwts_calculator import HwtsCalculator
+from msmodel.interface.base_model import BaseModel
 from profiling_bean.prof_enum.data_tag import DataTag
 from profiling_bean.struct_info.hwts_log import HwtsLogBean
 
@@ -24,7 +25,7 @@ class TestHwtsCalculator(unittest.TestCase):
     def test_ms_run(self):
         ProfilingScene()._scene = "single_op"
         with mock.patch(NAMESPACE + '.HwtsCalculator.calculate'), \
-             mock.patch(NAMESPACE + '.HwtsCalculator.save'):
+                mock.patch(NAMESPACE + '.HwtsCalculator.save'):
             check = HwtsCalculator(self.file_list, CONFIG)
             check.ms_run()
 
@@ -55,7 +56,7 @@ class TestHwtsCalculator(unittest.TestCase):
         InfoConfReader()._info_json = {"DeviceInfo": [{'aic_frequency': '1150', "hwts_frequency": "38.4"}]}
 
         with mock.patch(NAMESPACE + '.HwtsCalculator.calculate'), \
-             mock.patch(NAMESPACE + '.HwtsCalculator.save'):
+                mock.patch(NAMESPACE + '.HwtsCalculator.save'):
             check = HwtsCalculator(self.file_list, CONFIG)
             check._log_data.append(HwtsLogBean.decode(start_3_2))
             check._log_data.append(HwtsLogBean.decode(end_3_2))
@@ -73,23 +74,25 @@ class TestHwtsCalculator(unittest.TestCase):
         ProfilingScene().init("")
 
         with mock.patch(NAMESPACE + '.HwtsCalculator.calculate'), \
-             mock.patch('msmodel.iter_rec.iter_rec_model' + '.HwtsIterModel.get_batch_list',
-                        return_value=prep_data_res),\
-             mock.patch('msmodel.interface.base_model' + '.BaseModel.check_table', return_value=True), \
-             mock.patch('msmodel.interface.base_model' + '.BaseModel.finalize'), \
-             mock.patch('common_func.msprof_step' + '.MsprofStep.get_step_data'), \
-             mock.patch('common_func.msprof_step' + '.MsprofStep.get_model_and_index_id_by_iter_id',
-                        return_value=(1, 1)), \
-             mock.patch(NAMESPACE + '.IterRecorder.set_current_iter_id'), \
-             mock.patch('common_func.msprof_step' + '.MsprofStep.get_step_data'), \
-             mock.patch("common_func.msprof_iteration.MsprofIteration.get_iter_id_by_index_id", return_value=1):
+                mock.patch('msmodel.iter_rec.iter_rec_model' + '.HwtsIterModel.get_batch_list',
+                           return_value=prep_data_res), \
+                mock.patch('msmodel.interface.base_model' + '.BaseModel.check_table', return_value=True), \
+                mock.patch('msmodel.interface.base_model' + '.BaseModel.finalize'), \
+                mock.patch('common_func.msprof_step' + '.MsprofStep.get_step_data'), \
+                mock.patch('common_func.msprof_step' + '.MsprofStep.get_model_and_index_id_by_iter_id',
+                           return_value=(1, 1)), \
+                mock.patch('common_func.iter_recorder.IterRecorder.set_current_iter_id'), \
+                mock.patch('common_func.msprof_step' + '.MsprofStep.get_step_data'):
             check = HwtsCalculator(self.file_list, CONFIG)
 
             ProfilingScene()._scene = Constant.SINGLE_OP
             res = check._add_batch_id(prep_data_res)
             self.assertEqual(len(res), 2)
 
-            hwts_iter_model = mock.Mock()
+            model_mock = mock.Mock
+            model_mock.__enter__ = BaseModel.__enter__
+            model_mock.__exit__ = BaseModel.__exit__
+            hwts_iter_model = model_mock()
             hwts_iter_model.init = mock.Mock(return_value=None)
             hwts_iter_model.get_batch_list = mock.Mock(return_value=[[0], [0]])
             check._iter_model = hwts_iter_model

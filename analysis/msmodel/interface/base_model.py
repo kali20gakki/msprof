@@ -3,12 +3,11 @@
 # Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
 
 import logging
-import os
 from abc import ABCMeta
 
+from config.config_manager import ConfigManager
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
-from common_func.msvp_constant import MsvpConstant
 from common_func.path_manager import PathManager
 
 
@@ -16,7 +15,7 @@ class BaseModel(metaclass=ABCMeta):
     """
     stars base model class. Used to operate db.
     """
-    TABLES_PATH = os.path.join(MsvpConstant.CONFIG_PATH, 'Tables.ini')
+    TABLES_PATH = ConfigManager.TABLES
 
     def __init__(self: any, result_dir: str, db_name: str, table_list: list) -> None:
         self.result_dir = result_dir
@@ -99,13 +98,14 @@ class BaseModel(metaclass=ABCMeta):
         if DBManager.judge_table_exist(self.cur, table_name):
             DBManager.drop_table(self.conn, table_name)
 
-    def get_all_data(self: any, table_name: str) -> list:
+    def get_all_data(self: any, table_name: str, dto_class: any = None) -> list:
         """
         get all data from db
         :param table_name:
+        :param dto_class:
         :return:
         """
         if not DBManager.judge_table_exist(self.cur, table_name):
             return []
         all_data_sql = "select * from {}".format(table_name)
-        return DBManager.fetch_all_data(self.cur, all_data_sql)
+        return DBManager.fetch_all_data(self.cur, all_data_sql, dto_class=dto_class)

@@ -16,12 +16,12 @@ NAMESPACE = 'msmodel.l2_cache.l2_cache_parser_model'
 
 class TestL2CacheParserModel(unittest.TestCase):
     def test_construct(self):
-        check = L2CacheParserModel('test')
+        check = L2CacheParserModel('test', [DBNameConstant.TABLE_L2CACHE_PARSE])
         self.assertEqual(check.result_dir, 'test')
         self.assertEqual(check.db_name, DBNameConstant.DB_L2CACHE)
         self.assertEqual(check.table_list, [DBNameConstant.TABLE_L2CACHE_PARSE])
 
     def test_flush(self):
         with mock.patch(NAMESPACE + '.L2CacheParserModel.insert_data_to_db'):
-            check = L2CacheParserModel('test')
+            check = L2CacheParserModel('test', [DBNameConstant.TABLE_L2CACHE_PARSE])
             check.flush(1)

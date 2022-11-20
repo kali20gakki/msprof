@@ -24,10 +24,11 @@ class Uploader;
 // ParserTransport
 class ParserTransport : public ITransport {
 public:
-    explicit ParserTransport(SHARED_PTR_ALIA<Uploader> uploader);
+    ParserTransport() {};
     ~ParserTransport() override;
 
 public:
+    int Init(SHARED_PTR_ALIA<Uploader> uploader);
     int SendBuffer(CONST_VOID_PTR buffer, int length) override;
     int CloseSession() override;
     void WriteDone() override;

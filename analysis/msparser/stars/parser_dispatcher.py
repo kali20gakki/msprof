@@ -2,14 +2,13 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2021-2022. All rights reserved.
 
-import configparser
 import importlib
 import logging
 import os
 
-from common_func.msvp_common import MsvpCommonConst
+from config.config_manager import ConfigManager
 from common_func.ms_constant.str_constant import StrConstant
-from common_func.os_manager import check_file_readable
+from common_func.path_manager import PathManager
 
 
 class ParserDispatcher:
@@ -31,10 +30,7 @@ class ParserDispatcher:
         load stars config info and build parser map
         :return:
         """
-        self.cfg_parser = configparser.ConfigParser(interpolation=None)
-        stars_config_file = os.path.join(MsvpCommonConst.CONFIG_PATH, "stars_config.ini")
-        check_file_readable(stars_config_file)
-        self.cfg_parser.read(stars_config_file)
+        self.cfg_parser = ConfigManager.get(ConfigManager.STARS)
         self.build_parser_map()
 
     def build_parser_map(self: any) -> None:
@@ -45,6 +41,8 @@ class ParserDispatcher:
         for parser in self.cfg_parser.sections():
             fmts = self.cfg_parser.get(parser, StrConstant.CONFIG_FMT).split(",")
             db_name = self.cfg_parser.get(parser, StrConstant.CONFIG_DB)
+            if os.path.exists(PathManager.get_db_path(self.result_dir, db_name)):
+                os.remove(PathManager.get_db_path(self.result_dir, db_name))
             table_list = self.cfg_parser.get(parser, StrConstant.CONFIG_TABLE).split(",")
             if hasattr(self.modules, parser):
                 parser = getattr(self.modules, parser)(self.result_dir, db_name, table_list)

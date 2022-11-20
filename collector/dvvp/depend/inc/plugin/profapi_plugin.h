@@ -10,6 +10,7 @@
 #include "singleton/singleton.h"
 #include "prof_api.h"
 #include "plugin_handle.h"
+#include "utils.h"
 
 namespace Collector {
 namespace Dvvp {
@@ -22,7 +23,7 @@ using ProfSetProfCommandFunc = std::function<int32_t(PROFAPI_PROF_COMMAND_PTR, u
 using ProfSetStepInfoFunc = std::function<int32_t(uint64_t, uint16_t, void*)>;             // profSetStepInfo
 class ProfApiPlugin : public analysis::dvvp::common::singleton::Singleton<ProfApiPlugin> {
 public:
-    ProfApiPlugin() : soName_("libprofapi.so"), pluginHandle_(PluginHandle(soName_)), loadFlag_(0) {}
+    ProfApiPlugin() : soName_("libprofapi.so"), loadFlag_(0) {}
 
     bool IsFuncExist(const std::string &funcName) const;
 
@@ -46,7 +47,7 @@ public:
 
 private:
     std::string soName_;
-    PluginHandle pluginHandle_;
+    static SHARED_PTR_ALIA<PluginHandle> pluginHandle_;
     PTHREAD_ONCE_T loadFlag_;
     ProfRegReporterCallbackFunc profRegReporterCallback_ = nullptr;
     ProfRegCtrlCallbackFunc profRegCtrlCallback_ = nullptr;

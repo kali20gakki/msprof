@@ -107,8 +107,8 @@ class FopsParser:
             return
         fops_data = self.get_fops_data()
         if not fops_data:
-            error(self.FILE_NAME, "Query data failed, maybe export command has not run successfully yet, "
-                                  "please run export command first")
+            error(self.FILE_NAME, "Query data failed, maybe fops data does not exist or export command has not run "
+                                  "successfully yet, please check your data or run export command")
             return
         json_data = self.calculate_fops_data(fops_data)
         self.storage_data(json_data)
@@ -161,13 +161,19 @@ class FopsParser:
         if not all([total_fops, total_times, op_type_dict]):
             return []
         sorted_data = sorted(zip(op_type_dict.keys(), op_type_dict.values()), key=lambda x: sum(x[1]), reverse=True)
-        res_list = [{'total_fops_info': {
-            "total_fops": round(total_fops * self.BYT_TO_M, NumberConstant.DECIMAL_ACCURACY),
-            "total_time": round(total_times, NumberConstant.DECIMAL_ACCURACY),
-            "total_fops_speed": round(total_fops / total_times * self.BMS_TO_GS, NumberConstant.DECIMAL_ACCURACY),
-            "total_op_count": len(data_list),
-            "total_fops_avg": round(total_fops / len(data_list) * self.BYT_TO_M, NumberConstant.DECIMAL_ACCURACY)
-        }}]
+        res_list = [
+            {
+                'total_fops_info': {
+                    "total_fops": round(total_fops * self.BYT_TO_M, NumberConstant.DECIMAL_ACCURACY),
+                    "total_time": round(total_times, NumberConstant.DECIMAL_ACCURACY),
+                    "total_fops_speed": round(total_fops / total_times * self.BMS_TO_GS,
+                                              NumberConstant.DECIMAL_ACCURACY),
+                    "total_op_count": len(data_list),
+                    "total_fops_avg": round(total_fops / len(data_list) * self.BYT_TO_M,
+                                            NumberConstant.DECIMAL_ACCURACY)
+                }
+            }
+        ]
         other_fops_ratio, other_op_count, other_fops = 0, 0, 0
         detail_list = []
         for index, data in enumerate(sorted_data):

@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
-
+import logging
 import os
 from abc import abstractmethod
 
@@ -58,6 +58,7 @@ class DataParser(IParser):
         result_data = []
         for file_name in file_list:
             file_path = self.get_file_path_and_check(file_name)
+            logging.info("start to process file: %s", file_name)
             with FileOpen(file_path, "r") as hash_dict:
                 data_lines = hash_dict.file_reader.readlines(Constant.MAX_READ_FILE_BYTES)
                 result_data.extend(format_func(data_lines))
@@ -79,6 +80,7 @@ class DataParser(IParser):
                 continue
             FileManager.add_complete_file(self._project_path, file_name)
             file_path = self.get_file_path_and_check(file_name)
+            logging.info("start to process the file: %s", file_name)
             with FileOpen(file_path, "rb") as file:
                 all_log_bytes = _offset_calculator.pre_process(file.file_reader, os.path.getsize(file_path))
                 for bean_data in Utils.chunks(all_log_bytes, format_size):

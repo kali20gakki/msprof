@@ -7,6 +7,7 @@ import struct
 
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
+from common_func.utils import Utils
 from msparser.data_struct_size_constant import StructFmt
 from profiling_bean.struct_info.struct_decoder import StructDecoder
 
@@ -159,7 +160,7 @@ class AiCpuData(StructDecoder):
         _ai_cpu_data = args[0]
         _magic_num, _data_tag = _ai_cpu_data[:2]
         if _magic_num == self.AI_CPU_MAGIC_NUM and _data_tag == self.AI_CPU_DATA_TAG:
-            self._stream_id = _ai_cpu_data[2]
+            self._stream_id = Utils.get_stream_id(_ai_cpu_data[2])
             self._task_id = str(_ai_cpu_data[3])
             self._ai_cpu_time_consuming = AiCpuTimeConsuming(_ai_cpu_data[4:])
             return True

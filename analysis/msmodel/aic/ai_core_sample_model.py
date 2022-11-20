@@ -31,9 +31,10 @@ class AiCoreSampleModel(BaseModel):
     FILE_NAME = os.path.basename(__file__)
     TYPE = "ai_core"
 
-    def __init__(self: any, result_dir: str, db_name: str, table_list: list) -> None:
+    def __init__(self: any, result_dir: str, db_name: str, table_list: list, metric_type: str) -> None:
         super().__init__(result_dir, db_name, table_list)
         self.metrics_data = []
+        self.metrics_type = metric_type
         self.conn = None
         self.cur = None
 
@@ -97,7 +98,7 @@ class AiCoreSampleModel(BaseModel):
         finally:
             pass
 
-    def insert_metric_summary_table(self: any, freq: int, key: str) -> None:
+    def insert_metric_summary_table(self: any, freq: int or float, key: str) -> None:
         """
         insert metric summary table
         :param key: key of metric
@@ -131,7 +132,7 @@ class AiCoreSampleModel(BaseModel):
             return NumberConstant.SUCCESS
         return NumberConstant.ERROR
 
-    def sql_insert_metric_summary_table(self: any, metrics: list, freq: float, metric_key: str) -> str:
+    def sql_insert_metric_summary_table(self: any, metrics: list, freq: float) -> str:
         """
         generate sql statement for inserting metric from EventCount
         :param metrics: metrics to be calcualted
@@ -141,7 +142,7 @@ class AiCoreSampleModel(BaseModel):
         """
         algos = []
         cal = CalculateAiCoreData(self.result_dir)
-        cal.add_fops_header(metric_key, metrics)
+        cal.add_fops_header(self.metrics_type, metrics)
         field_dict = read_cpu_cfg(self.TYPE, 'formula')
         res = []
         for metric in metrics:
@@ -252,7 +253,7 @@ class AiCoreSampleModel(BaseModel):
     def _do_insert_metric_summary_table(self: any, freq: int, metrics: list) -> None:
         logging.info('start insert into MetricSummary')
         core_id = DBManager.fetch_all_data(self.cur, "select distinct(coreid) from EventCount;")
-        sql = self.sql_insert_metric_summary_table(metrics, freq, StrConstant.AI_CORE_PROFILING_METRICS)
+        sql = self.sql_insert_metric_summary_table(metrics, freq)
         for core in core_id:
             result = DBManager.fetch_all_data(self.cur, sql, (core[0],))
             for row in result:
@@ -273,7 +274,7 @@ class AiCoreSampleModel(BaseModel):
         sample_metrics_lst = sample_metrics.split(",")
         for _key in sample_metrics_lst:
             if _key.lower() not in \
-                    (item[0] for item in config_file_obj(file_name='AICore').items('formula')):
+                    (item[0] for item in config_file_obj(file_name='ai_core').items('formula')):
                 error(self.FILE_NAME, 'Invalid metric {} .'.format(_key))
                 raise ProfException(ProfException.PROF_SYSTEM_EXIT)
         metrics.extend(sample_metrics_lst)

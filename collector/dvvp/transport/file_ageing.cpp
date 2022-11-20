@@ -43,8 +43,8 @@ int FileAgeing::Init()
     }
 
     unsigned long long totalVolume = 0;
-    if (Utils::GetTotalVolume(storageDir_, totalVolume) == PROFILING_FAILED) {
-        MSPROF_LOGE("GetTotalVolume failed, storageDir_:%s, storage_limit:%s",
+    if (Utils::GetVolumeSize(storageDir_, totalVolume, VolumeSize::TOTAL_SIZE) == PROFILING_FAILED) {
+        MSPROF_LOGE("GetVolumeSize failed, storageDir_:%s, storage_limit:%s",
                     Utils::BaseName(storageDir_).c_str(), storageLimit_.c_str());
         return PROFILING_FAILED;
     }
@@ -104,8 +104,8 @@ bool FileAgeing::IsNeedAgeingFile()
     }
 
     unsigned long long dirFreeSize = 0;
-    if (Utils::GetFreeVolume(storageDir_, dirFreeSize) == PROFILING_FAILED) {
-        MSPROF_LOGE("GetFreeVolume failed");
+    if (Utils::GetVolumeSize(storageDir_, dirFreeSize, VolumeSize::FREE_SIZE) == PROFILING_FAILED) {
+        MSPROF_LOGE("GetVolumeSize failed");
         return false;
     }
     if (dirFreeSize < storageVolumeDownThd_) {

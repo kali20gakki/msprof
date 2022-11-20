@@ -35,6 +35,7 @@ public:
     ~Analyzer();
 
 public:
+    int Init();
     void OnNewData(CONST_VOID_PTR data, uint32_t len);
     void Flush();
     void SetDevId(const std::string &devIdStr);
@@ -49,7 +50,6 @@ private:
     void UploadKeypointOp();
     bool IsNeedUpdateIndexId();
     void UpdateOpIndexId(std::multimap<std::string, OpTime> &opTimes);
-    void UpdateHwtsLatestOpIndexId();
     uint64_t GetOpIndexId(uint64_t opTimeStamp);
     void FftsDataPostProc();
 

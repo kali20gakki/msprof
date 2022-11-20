@@ -16,6 +16,9 @@ class HwtsIterModel(ParserModel):
     class used to operate hwts iter db
     """
 
+    AI_CORE_TYPE = 'ai_core'
+    TASK_TYPE = "task"
+
     def __init__(self: any, result_dir: str) -> None:
         super().__init__(result_dir, DBNameConstant.DB_HWTS_REC, [DBNameConstant.TABLE_HWTS_ITER_SYS,
                                                                   DBNameConstant.TABLE_HWTS_BATCH])
@@ -28,15 +31,25 @@ class HwtsIterModel(ParserModel):
         """
         self.insert_data_to_db(table_name, data_list)
 
-    def get_task_offset_and_sum(self: any, iter_id: int, data_type: str) -> (int, int):
+    def get_task_offset_and_sum(self: any, model_id: int, index_id: int, data_type: str) -> (int, int):
         """
         Get the number of hwts tasks in all previous iterations and the number of tasks in this round of iteration
         :param data_type:
-        :param iter_id:
+        :param model_id:
+        :param index_id:
         :return: offset_count is the number of tasks in all previous iterations
         sum_count is the number of tasks in this round of iteration
         """
-        return self._get_task_offset(iter_id, data_type), self._get_task_count(iter_id, data_type)
+        offset_count_dict = {
+            self.AI_CORE_TYPE: "select ai_core_offset, ai_core_num from {0} "
+                               "where model_id=? and index_id=?".format(
+                DBNameConstant.TABLE_HWTS_ITER_SYS),
+            self.TASK_TYPE: "select task_offset, task_count from {0} "
+                            "where model_id=? and index_id=?".format(
+                DBNameConstant.TABLE_HWTS_ITER_SYS)
+        }
+
+        return self._get_task_num(model_id, index_id, offset_count_dict.get(data_type))
 
     def check_table(self: any) -> bool:
         """
@@ -54,43 +67,28 @@ class HwtsIterModel(ParserModel):
         :return: sum of aic count
         """
         try:
-            sql = "select sum(ai_core_num) from {0}".format(DBNameConstant.TABLE_HWTS_ITER_SYS)
+            sql = "select ai_core_num+ai_core_offset from {0} " \
+                  "order by iter_id desc".format(
+                DBNameConstant.TABLE_HWTS_ITER_SYS)
             return self.cur.execute(sql).fetchone()[0]
         except sqlite3.Error as err:
             logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
             return Constant.DEFAULT_COUNT
-        finally:
-            pass
 
-    def get_batch_list(self: any, iter_id: tuple, table_name) -> list:
+    def get_batch_list(self: any, table_name, iter_range: list) -> list:
         """
         get batch list from hwts batch table
         :return: batch list
         """
-        sql = "select batch_id from {0} where iter_id>? and iter_id<=?".format(table_name)
-        return DBManager.fetch_all_data(self.cur, sql, iter_id)
+        sql = "select batch_id from {0} where iter_id>=? and iter_id<=?".format(table_name)
+        return DBManager.fetch_all_data(self.cur, sql, iter_range)
 
-    def _get_task_count(self: any, iter_id: int, data_type: str) -> (int, int):
-        task_count = 0
-        sql = "select sum({1}) from {0} where iter_id=?" \
-            .format(DBNameConstant.TABLE_HWTS_ITER_SYS, data_type)
+    def _get_task_num(self: any, model_id: int, index_id: int, sql: str) -> (int, int):
         try:
-            curr_num = self.cur.execute(sql, (iter_id,)).fetchone()
+            task_num = self.cur.execute(sql, (model_id, index_id, )).fetchone()
         except sqlite3.Error as err:
             logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
-            return task_count
-        if curr_num and curr_num[0]:
-            task_count = curr_num[0]
-        return task_count
-
-    def _get_task_offset(self: any, iter_id: int, data_type: str) -> (int, int):
-        task_offset = 0
-        sql = "select sum({1}) from {0} where iter_id<?".format(DBNameConstant.TABLE_HWTS_ITER_SYS, data_type)
-        try:
-            cur_offset = self.cur.execute(sql, (iter_id,)).fetchone()
-        except sqlite3.Error as err:
-            logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
-            return task_offset
-        if cur_offset and cur_offset[0]:
-            task_offset = cur_offset[0]
-        return task_offset
+            return (0, 0)
+        if task_num and len(task_num) == 2:
+            return task_num
+        return (0, 0)

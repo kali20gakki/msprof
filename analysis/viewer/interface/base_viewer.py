@@ -47,7 +47,7 @@ class BaseViewer:
 
     def get_data_from_db(self: any) -> list:
         """
-        get data from model
+        get data from msmodel
         :return: []
         """
         model = self.get_model_instance()

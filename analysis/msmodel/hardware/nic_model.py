@@ -124,18 +124,20 @@ class NicModel(BaseModel, ABC):
         :return:
         """
         target_data = []
-        tx_rate_dic = {'rx_errors_rate': Constant.DEFAULT_COUNT,
-                       'rx_drop_rate': Constant.DEFAULT_COUNT,
-                       'tx_errors_rate': Constant.DEFAULT_COUNT,
-                       'tx_drop_rate': Constant.DEFAULT_COUNT}
+        tx_rate_dic = {
+            'rx_errors_rate': Constant.DEFAULT_COUNT,
+            'rx_drop_rate': Constant.DEFAULT_COUNT,
+            'tx_errors_rate': Constant.DEFAULT_COUNT,
+            'tx_drop_rate': Constant.DEFAULT_COUNT
+        }
         duration = self._duration_nic_report_sql_exec(device, func_id)
         bandwidth = self._bandwidth_nic_report_sql_exec(device, func_id)
         packet_data = self._packet_data_nic_report_sql_exec(device, func_id)
 
         rx_data = self._rx_data_nic_report_sql_exec(device, func_id)
         tx_data = self._tx_data_nic_report_sql_exec(device, func_id)
-        if isinstance(packet_data, EmptyClass) or isinstance(duration, EmptyClass) or isinstance(bandwidth, EmptyClass)\
-                or isinstance(rx_data, EmptyClass) or isinstance(tx_data, EmptyClass):
+        data_list = [packet_data, duration, bandwidth, rx_data, tx_data]
+        if any(map(lambda data: isinstance(data, EmptyClass), data_list)):
             return
         self._rx_rate_adapter(rx_data, tx_rate_dic)
         self._tx_rate_adapter(tx_data, tx_rate_dic)
@@ -186,7 +188,6 @@ class NicModel(BaseModel, ABC):
         :param func_id: func id
         :return: None
         """
-        self.cur.row_factory = ClassRowType.class_row(NicDto)
         _sql = "select rxpacket/1 as rx_packet, " \
                "rxerrors/rxpackets as rx_error_rate, " \
                "rxdropped/rxpackets as rx_dropped_rate, " \
@@ -198,8 +199,7 @@ class NicModel(BaseModel, ABC):
                "rxbyte, " \
                "txbyte " \
                "from {} where replayId = 0 AND device_id = ? AND funcId = ?;".format(DBNameConstant.TABLE_NIC_ORIGIN)
-        nic_obj_list = DBManager.fetch_all_data(self.cur, _sql, (self.device_id, func_id))
-        self.cur.row_factory = None
+        nic_obj_list = DBManager.fetch_all_data(self.cur, _sql, (self.device_id, func_id), dto_class=NicDto)
         return nic_obj_list
 
     def create_receivesend_db(self: any, target_data: list) -> None:

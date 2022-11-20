@@ -9,18 +9,17 @@ from enum import IntEnum
 from common_func.common import error, print_msg
 from common_func.constant import Constant
 from common_func.data_check_manager import DataCheckManager
-from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
-from common_func.msprof_common import get_path_dir, prepare_log, MsProfCommonConstant
+from common_func.msprof_common import get_path_dir, prepare_log
 from common_func.msprof_exception import ProfException
 from common_func.path_manager import PathManager
-from msmodel.cluster_info.cluster_info_model import ClusterInfoModel
-from msparser.cluster.cluster_parallel_parser import ClusterParallelParser
-from msparser.cluster.data_preprocess_parser import DataPreprocessParser
-from msparser.cluster.fops_parser import FopsParser
+from msmodel.cluster_info.cluster_info_model import ClusterInfoViewModel
 from msparser.cluster.cluster_communication_parser import ClusterCommunicationParser
+from msparser.cluster.cluster_parallel_parser import ClusterParallelParser
+from msparser.cluster.cluster_data_preparation_parser import ClusterDataPreparationParser
+from msparser.cluster.fops_parser import FopsParser
 from msparser.cluster.step_trace_summary import StepTraceSummay
 
 
@@ -40,11 +39,13 @@ class MsprofQuerySummaryManager:
     CLUSTER_SCENE = '1'
     NOT_CLUSTER_SCENE = '0'
     FILE_NAME = os.path.basename(__file__)
-    QUERY_DATA_TYPE_PARSER = {QueryDataType.STEP_TRACE: StepTraceSummay,
-                              QueryDataType.FOPS_ANALYSE: FopsParser,
-                              QueryDataType.DATA_PREPARATION: DataPreprocessParser,
-                              QueryDataType.PARALLEL_ANALYSIS: ClusterParallelParser,
-                              QueryDataType.COLLECTIVE_COMMUNICATION: ClusterCommunicationParser}
+    QUERY_DATA_TYPE_PARSER = {
+        QueryDataType.STEP_TRACE: StepTraceSummay,
+        QueryDataType.FOPS_ANALYSE: FopsParser,
+        QueryDataType.DATA_PREPARATION: ClusterDataPreparationParser,
+        QueryDataType.PARALLEL_ANALYSIS: ClusterParallelParser,
+        QueryDataType.COLLECTIVE_COMMUNICATION: ClusterCommunicationParser
+    }
 
     def __init__(self: any, args: any) -> None:
         self.collection_path = os.path.realpath(args.collection_path)
@@ -52,7 +53,6 @@ class MsprofQuerySummaryManager:
         self.npu_id = args.id
         self.model_id = args.model_id
         self.iteration_id = args.iteration_id
-        self.is_cluster_scene = False
 
     @staticmethod
     def check_rank_id(collection_path: str) -> bool:
@@ -64,11 +64,10 @@ class MsprofQuerySummaryManager:
             device_dirs = os.listdir(prof_path)
             for device_dir in device_dirs:
                 device_path = os.path.join(prof_path, device_dir)
-                if not DataCheckManager.contain_info_json_data(device_path):
+                if not DataCheckManager.contain_info_json_data(device_path, device_info_only=True):
                     continue
                 InfoConfReader().load_info(device_path)
-                if InfoConfReader().get_rank_id() != Constant.NA:
-                    return True
+                return InfoConfReader().get_rank_id() != Constant.NA
         return False
 
     @staticmethod
@@ -88,35 +87,22 @@ class MsprofQuerySummaryManager:
         if self.data_type == QueryDataType.CLUSTER_SCENE:
             MsprofQuerySummaryManager.check_cluster_scene(self.collection_path)
             return
-        params = self._check_cluster_scene()
-        self.QUERY_DATA_TYPE_PARSER.get(self.data_type)(params).process()
-
-    def _check_cluster_scene(self: any) -> dict:
-        if self._check_rank_id_valid():
-            self.is_cluster_scene = True
-            prepare_log(self.collection_path)
-        else:
-            if MsprofQuerySummaryManager.check_rank_id(self.collection_path):
-                error(MsprofQuerySummaryManager.FILE_NAME,
-                      "To query cluster data, please import cluster info data first.")
-                raise ProfException(ProfException.PROF_CLUSTER_DIR_ERROR)
-            self.is_cluster_scene = False
+        if not self._check_collection_dir_valid():
+            error(MsprofQuerySummaryManager.FILE_NAME,
+                  "To query cluster or summary data, please execute import --cluster first")
+            raise ProfException(ProfException.PROF_CLUSTER_DIR_ERROR)
+        prepare_log(self.collection_path)
         params = {"collection_path": self.collection_path,
-                  "is_cluster": self.is_cluster_scene,
                   "npu_id": self.npu_id,
                   "model_id": self.model_id,
                   "iteration_id": self.iteration_id}
-        return params
+        self.QUERY_DATA_TYPE_PARSER.get(self.data_type)(params).process()
 
-    def _check_rank_id_valid(self: any) -> bool:
-        db_path = PathManager.get_db_path(self.collection_path, DBNameConstant.DB_CLUSTER_RANK)
-        if not DBManager.check_tables_in_db(db_path, DBNameConstant.TABLE_CLUSTER_RANK):
+    def _check_collection_dir_valid(self: any) -> bool:
+        if not os.path.exists(PathManager.get_db_path(self.collection_path, DBNameConstant.DB_CLUSTER_RANK)):
             return False
-        with ClusterInfoModel(self.collection_path) as cluster_info_model:
-            rank_id_count = cluster_info_model.get_rank_id_count()
-        if not rank_id_count:
-            return False
-        return rank_id_count[0][0] != 0
+        with ClusterInfoViewModel(self.collection_path) as cluster_info_model:
+            return cluster_info_model.check_table()
 
     def _check_data_type_valid(self: any) -> None:
         if self.data_type is None or self.data_type not in QueryDataType.__members__.values():

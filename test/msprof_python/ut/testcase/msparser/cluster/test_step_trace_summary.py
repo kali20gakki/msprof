@@ -1,9 +1,7 @@
-#!/usr/bin/env python
-# coding=utf-8
-"""
-function:
-Copyright Huawei Technologies Co., Ltd. 2022. All rights reserved.
-"""
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
+
 import os
 import unittest
 from unittest import mock
@@ -50,19 +48,18 @@ class TestStepTraceSummary(unittest.TestCase):
             check.process()
         self.assertEqual(ProfException.PROF_INVALID_PARAM_ERROR, err.value.code)
 
-    def test_should_cover_cluster_scene_when_npu_id_is_export_all_cluster_db_no_exit(self):
+    def test_should_cover_cluster_scene_when_npu_id_is_export_all_cluster_db_not_exist(self):
         case_param = {}
         case_param.update(self.param)
         case_param.update({"npu_id": -1})
         check = StepTraceSummay(case_param)
         check.process()
 
-    def test_should_cover_cluster_scene_when_npu_id_is_export_all_cluster_db_connect_not_exist(self):
+    def test_should_cover_cluster_scene_when_npu_id_is_export_all_cluster_rank_db_not_exist(self):
         case_param = {}
         case_param.update(self.param)
         case_param.update({"npu_id": -1})
-        with mock.patch(NAMESPACE + '.StepTraceSummay._check_cluster_db_valid', return_value=True), \
-                mock.patch(NAMESPACE + '.DBManager.check_connect_db_path', return_value=(None, None)):
+        with mock.patch(NAMESPACE + '.StepTraceSummay._check_step_trace_db', return_value=True):
             check = StepTraceSummay(case_param)
             check.process()
 
@@ -70,22 +67,32 @@ class TestStepTraceSummary(unittest.TestCase):
         case_param = {}
         case_param.update(self.param)
         case_param.update({"npu_id": -1})
-        with mock.patch(NAMESPACE + '.StepTraceSummay._check_cluster_db_valid', return_value=True), \
-                mock.patch(NAMESPACE + '.DBManager.check_connect_db_path', return_value=(1, 1)), \
-                mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=False):
+        with mock.patch(NAMESPACE + '.StepTraceSummay._check_step_trace_db', return_value=True), \
+                mock.patch('os.path.exists', return_value=True), \
+                mock.patch(NAMESPACE + '.DBManager.check_tables_in_db', return_value=False):
             check = StepTraceSummay(case_param)
             check.process()
 
-    def test_should_cover_cluster_scene_when_npu_id_is_export_all_with_rank_ids(self):
+    def test_should_cover_cluster_scene_when_npu_id_is_export_all_cluster_get_device_and_rank_ids(self):
         case_param = {}
         case_param.update(self.param)
         case_param.update({"npu_id": -1})
-        with mock.patch(NAMESPACE + '.StepTraceSummay._check_cluster_db_valid', return_value=True), \
-                mock.patch(NAMESPACE + '.DBManager.check_connect_db_path', return_value=(1, 1)), \
-                mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True), \
-                mock.patch(NAMESPACE + '.DBManager.fetch_all_data', return_value=[(0,)]), \
-                mock.patch(NAMESPACE + '.DBManager.destroy_db_connect'), \
-                mock.patch(NAMESPACE + '.StepTraceSummay._query_in_cluster_scene'):
+        with mock.patch(NAMESPACE + '.StepTraceSummay._check_step_trace_db', return_value=True), \
+                mock.patch('os.path.exists', return_value=True), \
+                mock.patch(NAMESPACE + '.DBManager.check_tables_in_db', return_value=True), \
+                mock.patch(NAMESPACE + '.ClusterInfoViewModel.get_device_and_rank_ids',
+                           return_value=[(1, 11), (2, 12), (3, 13)]):
+            check = StepTraceSummay(case_param)
+            check.process()
+
+    def test_should_cover_cluster_scene_when_npu_id_is_export_all_cluster_get_no_device_and_rank_ids(self):
+        case_param = {}
+        case_param.update(self.param)
+        case_param.update({"npu_id": -1})
+        with mock.patch(NAMESPACE + '.StepTraceSummay._check_step_trace_db', return_value=True), \
+                mock.patch('os.path.exists', return_value=True), \
+                mock.patch(NAMESPACE + '.DBManager.check_tables_in_db', return_value=True), \
+                mock.patch(NAMESPACE + '.ClusterInfoViewModel.get_device_and_rank_ids', return_value=[]):
             check = StepTraceSummay(case_param)
             check.process()
 
@@ -94,9 +101,20 @@ class TestStepTraceSummary(unittest.TestCase):
         case_param.update(self.param)
         case_param.update({"npu_id": -1})
         with mock.patch(NAMESPACE + '.StepTraceSummay._check_iteration_id_valid'), \
-                mock.patch(NAMESPACE + '.StepTraceSummay._check_cluster_db_valid', return_value=True), \
-                mock.patch(NAMESPACE + '.StepTraceSummay._get_all_rank_ids', return_value=[1]), \
-                mock.patch(NAMESPACE + '.DBManager.check_connect_db_path', return_value=(None, None)):
+                mock.patch(NAMESPACE + '.StepTraceSummay._check_step_trace_db', return_value=True), \
+                mock.patch(NAMESPACE + '.StepTraceSummay._get_rank_or_device_ids', return_value=set([1])):
+            check = StepTraceSummay(case_param)
+            check.process()
+
+    def test_query_in_cluster_scene_should_cover_cluster_scene_when_npu_id_is_all_query_no_db_data(self):
+        case_param = {}
+        case_param.update(self.param)
+        case_param.update({"npu_id": -1})
+        with mock.patch(NAMESPACE + '.StepTraceSummay._check_iteration_id_valid'), \
+                mock.patch(NAMESPACE + '.StepTraceSummay._check_step_trace_db', return_value=True), \
+                mock.patch(NAMESPACE + '.StepTraceSummay._get_rank_or_device_ids', return_value=set([1])), \
+                mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True), \
+                mock.patch(NAMESPACE + '.DBManager.fetch_all_data', return_value=[]):
             check = StepTraceSummay(case_param)
             check.process()
 
@@ -105,89 +123,22 @@ class TestStepTraceSummary(unittest.TestCase):
         case_param.update(self.param)
         case_param.update({"npu_id": -1})
         with mock.patch(NAMESPACE + '.StepTraceSummay._check_iteration_id_valid'), \
-                mock.patch(NAMESPACE + '.StepTraceSummay._check_cluster_db_valid', return_value=True), \
-                mock.patch(NAMESPACE + '.StepTraceSummay._get_all_rank_ids', return_value=[1]), \
-                mock.patch(NAMESPACE + '.DBManager.check_connect_db_path', return_value=(1, 1)), \
-                mock.patch(NAMESPACE + '.DBManager.destroy_db_connect'), \
+                mock.patch(NAMESPACE + '.StepTraceSummay._check_step_trace_db', return_value=True), \
+                mock.patch(NAMESPACE + '.StepTraceSummay._get_rank_or_device_ids', return_value=set([1])), \
                 mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True), \
-                mock.patch(NAMESPACE + '.DBManager.fetch_all_data', return_value=[]):
+                mock.patch(NAMESPACE + '.ClusterStepTraceViewModel.get_sql_data', return_value=[[1]]), \
+                mock.patch(NAMESPACE + '.StepTraceSummay._storage_summary_data'):
             check = StepTraceSummay(case_param)
             check.process()
 
     def test_query_in_cluster_scene_should_cover_cluster_scene_when_iteration_id_is_all(self):
         case_param = {}
         case_param.update(self.param)
-        case_param.update({"iteration_id": -1})
+        case_param.update({"iteration_id": None})
         with mock.patch(NAMESPACE + '.StepTraceSummay._check_iteration_id_valid'), \
-                mock.patch(NAMESPACE + '.StepTraceSummay._check_cluster_db_valid', return_value=True), \
-                mock.patch(NAMESPACE + '.StepTraceSummay._get_all_rank_ids', return_value=[1]), \
-                mock.patch(NAMESPACE + '.DBManager.check_connect_db_path', return_value=(1, 1)), \
-                mock.patch(NAMESPACE + '.QueryArgumentCheck.check_arguments_valid'), \
-                mock.patch(NAMESPACE + '.DBManager.destroy_db_connect'), \
-                mock.patch(NAMESPACE + '.DBManager.fetch_all_data', return_value=[]):
-            check = StepTraceSummay(case_param)
-            check.process()
-
-    def test_process_in_non_cluster_scene_should_is_no_cluster_scene_when_npu_id_is_all_without_prof_dirs(self):
-        case_param = {}
-        case_param.update(self.param)
-        case_param.update({"npu_id": -1, "is_cluster": False})
-        with mock.patch(NAMESPACE + '.StepTraceSummay._check_iteration_id_valid'), \
-                mock.patch(NAMESPACE + '.get_path_dir', return_value=[]):
-            check = StepTraceSummay(case_param)
-            check.process()
-
-    def test_process_in_non_cluster_scene_should_is_no_cluster_scene_when_npu_id_is_all(self):
-        case_param = {}
-        case_param.update(self.param)
-        case_param.update({"npu_id": -1, "is_cluster": False})
-        with mock.patch(NAMESPACE + '.StepTraceSummay._check_iteration_id_valid'), \
-                mock.patch('os.path.isdir', return_value=True), \
-                mock.patch(NAMESPACE + '.get_path_dir',
-                           return_value=[os.path.join(self.DIR_PATH, 'PROF1')]), \
-                mock.patch('os.listdir',
-                           return_value=[os.path.join(self.DIR_PATH, 'PROF1', 'device_0')]), \
-                mock.patch(NAMESPACE + '.DataCheckManager.contain_info_json_data', return_value=True):
-            check = StepTraceSummay(case_param)
-            check.process()
-
-    def test_process_in_non_cluster_scene_should_is_no_cluster_scene_when_npu_id_is_all_db_trace_not_exist(self):
-        case_param = {}
-        case_param.update(self.param)
-        case_param.update({"npu_id": -1, "is_cluster": False})
-        with mock.patch(NAMESPACE + '.StepTraceSummay._check_iteration_id_valid'), \
-                mock.patch(NAMESPACE + '.StepTraceSummay._find_info_file_dir',
-                           return_value=self.DIR_PATH), \
-                mock.patch(NAMESPACE + '.prepare_log'), \
-                mock.patch(NAMESPACE + '.DBManager.check_connect_db_path', return_value=(None, None)):
-            check = StepTraceSummay(case_param)
-            check.process()
-
-    def test_process_in_non_cluster_scene_should_is_no_cluster_scene_when_npu_id_is_all_table_trace_not_exist(self):
-        case_param = {}
-        case_param.update(self.param)
-        case_param.update({"npu_id": -1, "is_cluster": False})
-        with mock.patch(NAMESPACE + '.StepTraceSummay._check_iteration_id_valid'), \
-                mock.patch(NAMESPACE + '.StepTraceSummay._find_info_file_dir',
-                           return_value=self.DIR_PATH), \
-                mock.patch(NAMESPACE + '.prepare_log'), \
-                mock.patch(NAMESPACE + '.DBManager.check_connect_db_path', return_value=(1, 1)), \
-                mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=False):
-            check = StepTraceSummay(case_param)
-            check.process()
-
-    def test_process_in_non_cluster_scene_should_is_no_cluster_scene_when_npu_id_is_all_2(self):
-        case_param = {}
-        case_param.update(self.param)
-        case_param.update({"npu_id": -1, "is_cluster": False})
-        with mock.patch(NAMESPACE + '.StepTraceSummay._check_iteration_id_valid'), \
-                mock.patch(NAMESPACE + '.StepTraceSummay._find_info_file_dir',
-                           return_value=self.DIR_PATH), \
-                mock.patch(NAMESPACE + '.prepare_log'), \
-                mock.patch(NAMESPACE + '.DBManager.check_connect_db_path', return_value=(1, 1)), \
+                mock.patch(NAMESPACE + '.StepTraceSummay._check_step_trace_db', return_value=True), \
+                mock.patch(NAMESPACE + '.StepTraceSummay._get_rank_or_device_ids', return_value=set([1])), \
                 mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True), \
-                mock.patch(NAMESPACE + '.DBManager.fetch_all_data', return_value=[]), \
-                mock.patch(NAMESPACE + '.DBManager.destroy_db_connect'), \
-                mock.patch(NAMESPACE + '.StepTraceConstant.syscnt_to_micro'):
+                mock.patch(NAMESPACE + '.DBManager.fetch_all_data', return_value=[]):
             check = StepTraceSummay(case_param)
             check.process()

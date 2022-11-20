@@ -32,6 +32,7 @@ using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::common::config;
 using namespace Collector::Dvvp::Plugin;
 using namespace Collector::Dvvp::Mmpa;
+using FuncIntPtr = int(*)(int);
 std::mutex g_envMtx;
 const unsigned long long CHANGE_FROM_S_TO_NS = 1000000000;
 
@@ -107,7 +108,22 @@ long long Utils::GetFileSize(const std::string &path)
     return static_cast<long long>(size);
 }
 
-int Utils::GetFreeVolume(const std::string &path, unsigned long long &size)
+/**
+ * @ingroup Utils
+ * @brief 获取path挂载节点的存储空间.
+ *
+ * @param  path [IN]  文件或者目录路径.
+ * @param  size [IN] 用于获取内存大小的外部引用.
+ * @param  sizeType [IN] 获取内存的类型.
+ *  TOTAL_SIZE为总的磁盘空间,AVAIL_SIZE为非特权用户的可用磁盘空间,FREE_SIZE为总的空闲磁盘空间.
+ *
+ * @warning 获取的内存大小以字节为单位;
+ *
+ * @retval 执行成功返回PROFILING_SUCCESS.
+ * @retval 执行失败返回PROFILING_FAILED.
+ *
+ */
+int Utils::GetVolumeSize(const std::string &path, unsigned long long &size, VolumeSize sizeType)
 {
     MmDiskSize diskSize;
 
@@ -115,22 +131,21 @@ int Utils::GetFreeVolume(const std::string &path, unsigned long long &size)
     if (ret < 0) {
         return PROFILING_FAILED;
     }
-    size = diskSize.freeSize;
-
-    return PROFILING_SUCCESS;
-}
-
-int Utils::GetTotalVolume(const std::string &path, unsigned long long &size)
-{
-    MmDiskSize diskSize;
-
-    int ret = MmGetDiskFreeSpace(path, &diskSize);
-    if (ret < 0) {
-        return PROFILING_FAILED;
+    switch (sizeType) {
+        case VolumeSize::AVAIL_SIZE:
+            size = diskSize.availSize;
+            break;
+        case VolumeSize::FREE_SIZE:
+            size = diskSize.freeSize;
+            break;
+        case VolumeSize::TOTAL_SIZE:
+            size = diskSize.totalSize;
+            break;
+        default:
+            ret = PROFILING_FAILED;
+            break;
     }
-    size = diskSize.totalSize;
-
-    return PROFILING_SUCCESS;
+    return ret;
 }
 
 bool Utils::IsDir(const std::string &path)
@@ -719,14 +734,14 @@ std::string Utils::JoinPath(const std::vector<std::string> &paths)
 std::string Utils::ToUpper(const std::string &value)
 {
     std::string result = value;
-    std::transform (result.begin(), result.end(), result.begin(), (int(*)(int))std::toupper);
+    std::transform (result.begin(), result.end(), result.begin(), static_cast<FuncIntPtr>(std::toupper));
     return result;
 }
 
 std::string Utils::ToLower(const std::string &value)
 {
     std::string result = value;
-    std::transform (result.begin(), result.end(), result.begin(), (int(*)(int))std::tolower);
+    std::transform (result.begin(), result.end(), result.begin(), static_cast<FuncIntPtr>(std::tolower));
     return result;
 }
 
@@ -839,8 +854,8 @@ void Utils::GetChildFilenames(const std::string &dir, std::vector<std::string> &
 
 std::string Utils::TimestampToTime(const std::string &timestamp, int unit /* = 1 */)
 {
-    if (timestamp.compare("") == 0 || timestamp.find_first_not_of("1234567890") != std::string::npos
-        || unit == 0) {
+    if (timestamp.empty() || (timestamp.find_first_not_of("1234567890") != std::string::npos) ||
+        (unit == 0)) {
         return "0";
     }
     time_t secTime;
@@ -1422,6 +1437,16 @@ int Utils::CloudAnalyze(const std::string &jobDir)
         return ret;
     }
     return PROFILING_SUCCESS;
+}
+
+std::string Utils::RealPath(const std::string &path)
+{
+    char realPath[MMPA_MAX_PATH] = { 0 };
+    int ret = MmRealPath(path.c_str(), realPath, MMPA_MAX_PATH);
+    if (ret != PROFILING_SUCCESS) {
+        return "";
+    }
+    return std::string(realPath);
 }
 
 int32_t WriteFile(const std::string &absolutePath, const std::string &recordFile, const std::string &profName)

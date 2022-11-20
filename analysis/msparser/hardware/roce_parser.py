@@ -5,13 +5,13 @@
 import logging
 import os
 
+from config.config_manager import ConfigManager
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.file_manager import FileManager
 from common_func.file_manager import FileOpen
 from common_func.ms_multi_process import MsMultiProcess
-from common_func.msvp_common import MsvpCommonConst
 from common_func.msvp_common import is_valid_original_data
 from common_func.path_manager import PathManager
 from common_func.utils import Utils
@@ -29,7 +29,7 @@ class ParsingRoceData(MsMultiProcess):
     NETWORK_HEADER_TAG = 'rxPacket/s'
 
     def __init__(self: any, file_list: dict, sample_config: dict) -> None:
-        MsMultiProcess.__init__(self, sample_config)
+        super().__init__(sample_config)
         self.project_path = sample_config.get("result_dir", "")
         self._file_list = file_list.get(DataTag.ROCE, [])
         self.roce_data = []
@@ -105,7 +105,7 @@ class ParsingRoceData(MsMultiProcess):
             logging.error(str(roce_err), exc_info=Constant.TRACE_BACK_SWITCH)
 
     def _generate_roce_data(self: any, network_data: list) -> None:
-        tables_path = os.path.join(MsvpCommonConst.CONFIG_PATH, 'Tables_training.ini')
+        tables_path = ConfigManager.TABLES_TRAINING
         nic_header_num = DBManager.get_table_field_num(DBNameConstant.TABLE_ROCE_ORIGIN + "Map", tables_path)
         self.roce_data = []
         # chip 0 nic diff, exclude device_id and replay_id

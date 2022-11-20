@@ -31,7 +31,7 @@ class ParamsAdapterMsprof : public ParamsAdapter {
 public:
     ParamsAdapterMsprof() : params_(nullptr), msprofMode_(MsprofMode::MSPROF_MODE_INVALID) {}
     ~ParamsAdapterMsprof() override {}
-    int GetParamFromInputCfg(std::unordered_map<int, std::pair<MsprofCmdInfo, std::string>> argvMap,
+    int GetParamFromInputCfg(const std::unordered_map<int, std::pair<MsprofCmdInfo, std::string>> &argvMap,
     SHARED_PTR_ALIA<ProfileParams> params);
 
 private:
@@ -45,10 +45,14 @@ private:
     void SetDefaultParamsParse() const;
     void SetDefaultParamsQuery() const;
     void SetDefaultParamsExport() const;
-    int SetMsprofMode();
+    int CheckMsprofMode(const std::unordered_map<int, std::pair<MsprofCmdInfo, std::string>> &argvMap);
     void SetParamsSelf();
     void SpliteAppPath(const std::string &appParams);
     int SetModeDefaultParams(MsprofMode modeType);
+    int SystemToolsIsExist() const;
+    int GenMsprofContainer(const std::unordered_map<int, std::pair<MsprofCmdInfo, std::string>> &argvMap);
+    int AnalysisParamsAdapt(const std::unordered_map<int, std::pair<MsprofCmdInfo, std::string>> &argvMap);
+    bool CheckAnalysisConfig(MsprofArgsType arg, const std::string &argsValue) const;
 
 private:
     std::string cmdPath_;
@@ -60,7 +64,7 @@ private:
     std::unordered_map<int, InputCfg> cfgMap_;
     std::unordered_map<int, MsprofArgsType> reCfgMap_;
     std::vector<InputCfg> msprofConfig_;
-    std::set<InputCfg>setConfig_;
+    std::set<InputCfg> setConfig_;
     MsprofMode msprofMode_;
 };
 } // ParamsAdapter

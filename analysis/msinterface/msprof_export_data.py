@@ -2,20 +2,17 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 
-import configparser
 import json
-import os
 import threading
 
+from config.config_manager import ConfigManager
 from common_func.config_mgr import ConfigMgr
-from common_func.constant import Constant
 from common_func.data_manager import DataManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.empty_class import EmptyClass
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.msprof_common import MsProfCommonConstant
-from common_func.msvp_common import MsvpCommonConst
 from common_func.msvp_constant import MsvpConstant
 from common_func.path_manager import PathManager
 from common_func.platform.chip_manager import ChipManager
@@ -40,7 +37,7 @@ from viewer.cpu_usage_report import get_sys_cpu_usage_data
 from viewer.ge.ge_op_execute_viewer import GeOpExecuteViewer
 from viewer.ge_info_report import get_ge_model_data
 from viewer.get_hccl_export_data import HCCLExport
-from viewer.get_l2_cache_data import add_op_name
+from viewer.get_l2_cache_data import add_op_name, get_l2_cache_sample_data
 from viewer.get_l2_cache_data import get_l2_cache_data
 from viewer.get_msvp_llc_timeline_training import get_ddr_timeline
 from viewer.get_msvp_llc_timeline_training import get_hbm_timeline
@@ -101,21 +98,26 @@ class MsProfExportDataUtils:
         get task scheduler data
         """
         if params.get(StrConstant.PARAM_EXPORT_TYPE) == MsProfCommonConstant.TIMELINE:
-            message = {"job_id": params.get(StrConstant.PARAM_JOB_ID),
-                       "host_id": MsProfCommonConstant.DEFAULT_IP,
-                       "device_id": params.get(StrConstant.PARAM_DEVICE_ID),
-                       "iter_id": params.get(StrConstant.PARAM_ITER_ID),
-                       "result_dir": params.get(StrConstant.PARAM_RESULT_DIR),
-                       "model_id": params.get(StrConstant.PARAM_MODEL_ID)}
+            message = {
+                "job_id": params.get(StrConstant.PARAM_JOB_ID),
+                "host_id": MsProfCommonConstant.DEFAULT_IP,
+                "device_id": params.get(StrConstant.PARAM_DEVICE_ID),
+                "iter_id": params.get(StrConstant.PARAM_ITER_ID),
+                "result_dir": params.get(StrConstant.PARAM_RESULT_DIR),
+                "model_id": params.get(StrConstant.PARAM_MODEL_ID)
+            }
             return CoreCpuReduceViewer.get_task_time_data(message)
         if ChipManager().is_chip_v1():
             db_path = PathManager.get_db_path(params.get(StrConstant.PARAM_RESULT_DIR),
                                               configs.get(StrConstant.CONFIG_DB))
             return get_task_scheduler_data(db_path, configs.get(StrConstant.CONFIG_TABLE), configs,
                                            params)
-        message = {"job_id": params.get(StrConstant.PARAM_JOB_ID), "host_id": MsProfCommonConstant.DEFAULT_IP,
-                   "device_id": params.get(StrConstant.PARAM_DEVICE_ID),
-                   'result_dir': params.get(StrConstant.PARAM_RESULT_DIR)}
+        message = {
+            'job_id': params.get(StrConstant.PARAM_JOB_ID),
+            'host_id': MsProfCommonConstant.DEFAULT_IP,
+            'device_id': params.get(StrConstant.PARAM_DEVICE_ID),
+            'result_dir': params.get(StrConstant.PARAM_RESULT_DIR)
+        }
         return TaskOpViewer.get_task_op_summary(message)
 
     @staticmethod
@@ -128,7 +130,8 @@ class MsProfExportDataUtils:
                 'project_path': params.get(StrConstant.PARAM_RESULT_DIR),
                 'device_id': params.get(StrConstant.PARAM_DEVICE_ID),
                 'start_time': NumberConstant.DEFAULT_START_TIME,
-                'end_time': NumberConstant.DEFAULT_END_TIME}
+                'end_time': NumberConstant.DEFAULT_END_TIME
+            }
             result = get_ddr_timeline(ddr_param)
             return result
 
@@ -249,6 +252,9 @@ class MsProfExportDataUtils:
         """
         db_name = configs.get(StrConstant.CONFIG_DB)
         db_path = PathManager.get_db_path(params.get(StrConstant.PARAM_RESULT_DIR), db_name)
+        if ChipManager().is_chip_v4():
+            return get_l2_cache_sample_data(
+                db_path, DBNameConstant.TABLE_L2CACHE_SAMPLE, configs.get(StrConstant.CONFIG_HEADERS))
         headers, data, count = get_l2_cache_data(
             db_path, configs.get(StrConstant.CONFIG_TABLE), params.get(StrConstant.PARAM_DEVICE_ID),
             configs.get(StrConstant.CONFIG_UNUSED_COLS))
@@ -264,10 +270,12 @@ class MsProfExportDataUtils:
         """
         get training trace data for desired job ID
         """
-        message = {"job_id": params.get(StrConstant.PARAM_JOB_ID),
-                   "device_id": params.get(StrConstant.PARAM_DEVICE_ID),
-                   'host_id': MsProfCommonConstant.DEFAULT_IP,
-                   'project_path': params.get(StrConstant.PARAM_RESULT_DIR)}
+        message = {
+            "job_id": params.get(StrConstant.PARAM_JOB_ID),
+            "device_id": params.get(StrConstant.PARAM_DEVICE_ID),
+            'host_id': MsProfCommonConstant.DEFAULT_IP,
+            'project_path': params.get(StrConstant.PARAM_RESULT_DIR)
+        }
         try:
             if params.get(StrConstant.PARAM_EXPORT_TYPE) == MsProfCommonConstant.TIMELINE:
                 return StepTraceViewer.get_step_trace_timeline(message)
@@ -278,8 +286,10 @@ class MsProfExportDataUtils:
                 return headers, data, count
         except (OSError, SystemError, ValueError, TypeError,
                 RuntimeError) as err:
-            return json.dumps({"data": "", "status": NumberConstant.ERROR,
-                               "info": "message error: {}".format(err)})
+            return json.dumps({
+                "data": "", "status": NumberConstant.ERROR,
+                "info": "message error: {}".format(err)
+            })
 
     @staticmethod
     def _get_op_statistic_data(configs: dict, params: dict) -> any:
@@ -301,7 +311,8 @@ class MsProfExportDataUtils:
                 'device_id': params.get(StrConstant.PARAM_DEVICE_ID),
                 'dvppid': 'all',
                 'start_time': NumberConstant.DEFAULT_START_TIME,
-                'end_time': NumberConstant.DEFAULT_END_TIME}
+                'end_time': NumberConstant.DEFAULT_END_TIME
+            }
             result = get_dvpp_timeline(dvpp_param)
             return result
 
@@ -396,9 +407,10 @@ class MsProfExportDataUtils:
             llc_header = ['Mode', 'Task', 'Hit Rate(%)', 'Throughput(MB/s)']
             llc_data = [[item[key] for key in llc_header] for item in llc_data]
             return llc_header, llc_data, len(llc_data)
-        return [], json.dumps(
-            {"status": NumberConstant.ERROR, "info": "Failed to get LLC data(%s) in non-mini scene." %
-                                                     (params.get(StrConstant.DATA_TYPE))}), 0
+        return [], json.dumps({
+            "status": NumberConstant.ERROR,
+            "info": "Failed to get LLC data(%s) in non-mini scene." % (params.get(StrConstant.DATA_TYPE))
+        }), 0
 
     @staticmethod
     def _get_llc_data(configs: dict, params: dict) -> any:
@@ -410,9 +422,10 @@ class MsProfExportDataUtils:
             if ChipManager().is_chip_v1():
                 return MsProfExportDataUtils.__get_mini_llc_data(sample_config, params)
             return MsProfExportDataUtils.__get_non_mini_llc_data(sample_config, params)
-        return [], json.dumps(
-            {"status": NumberConstant.ERROR, "info": "Failed to get LLC sample config data(%s)." %
-                                                     (params.get(StrConstant.DATA_TYPE))}), 0
+        return [], json.dumps({
+            "status": NumberConstant.ERROR,
+            "info": "Failed to get LLC sample config data(%s)." % (params.get(StrConstant.DATA_TYPE))
+        }), 0
 
     @staticmethod
     def _get_hbm_data(configs: dict, params: dict) -> any:
@@ -422,7 +435,8 @@ class MsProfExportDataUtils:
                 'device_id': params.get(StrConstant.PARAM_DEVICE_ID),
                 'hbm_id': 0,
                 'start_time': NumberConstant.DEFAULT_START_TIME,
-                'end_time': NumberConstant.DEFAULT_END_TIME}
+                'end_time': NumberConstant.DEFAULT_END_TIME
+            }
             result = get_hbm_timeline(hbm_param)
             return result
         data = get_hbm_summary_data(params.get(StrConstant.PARAM_RESULT_DIR),
@@ -441,7 +455,8 @@ class MsProfExportDataUtils:
                 'project_path': params.get(StrConstant.PARAM_RESULT_DIR),
                 'device_id': params.get(StrConstant.PARAM_DEVICE_ID),
                 'start_time': NumberConstant.DEFAULT_START_TIME,
-                'end_time': NumberConstant.DEFAULT_END_TIME}
+                'end_time': NumberConstant.DEFAULT_END_TIME
+            }
             result = get_pcie_timeline(pcie_param)
             return result
         return InterConnectionView(params.get(StrConstant.PARAM_RESULT_DIR),
@@ -507,9 +522,11 @@ class MsProfExportDataUtils:
         _ = configs
         if params.get(StrConstant.PARAM_EXPORT_TYPE) == MsProfCommonConstant.TIMELINE:
             return get_ge_timeline_data(params.get(StrConstant.PARAM_RESULT_DIR))
-        return json.dumps({"status": NumberConstant.WARN,
-                           "info": "Please check params, "
-                                   "Currently ge data does not support exporting files other than timeline."})
+        return json.dumps({
+            "status": NumberConstant.WARN,
+            "info": "Please check params, "
+                    "Currently ge data does not support exporting files other than timeline."
+        })
 
     @staticmethod
     def _get_ge_op_execute_data(configs: dict, params: dict) -> any:
@@ -522,9 +539,11 @@ class MsProfExportDataUtils:
         _ = configs
         if params.get(StrConstant.PARAM_EXPORT_TYPE) == MsProfCommonConstant.TIMELINE:
             return MsprofTimeline().export_all_data()
-        return json.dumps({"status": NumberConstant.WARN,
-                           "info": "Please check params, "
-                                   "Currently bulk data export params should be timeline."})
+        return json.dumps({
+            "status": NumberConstant.WARN,
+            "info": "Please check params, "
+                    "Currently bulk data export params should be timeline."
+        })
 
     @staticmethod
     def _get_acsq_task_statistic(configs: dict, params: dict) -> tuple:
@@ -548,9 +567,11 @@ class MsProfExportDataUtils:
         _ = configs
         if params.get(StrConstant.PARAM_EXPORT_TYPE) == MsProfCommonConstant.TIMELINE:
             return HCCLExport(params).get_hccl_timeline_data()
-        return json.dumps({"status": NumberConstant.WARN,
-                           "info": "Please check params, "
-                                   "Currently hccl data does not support exporting files other than timeline."})
+        return json.dumps({
+            "status": NumberConstant.WARN,
+            "info": "Please check params, "
+                    "Currently hccl data does not support exporting files other than timeline."
+        })
 
     @staticmethod
     def _get_msproftx_data(configs: dict, params: dict) -> any:
@@ -591,8 +612,7 @@ class MsProfExportDataUtils:
         :return: result of export
         """
         if params.get(StrConstant.DATA_TYPE) is None:
-            return json.dumps(
-                {"status": NumberConstant.ERROR, "info": "Parameter data_type is none."})
+            return json.dumps({"status": NumberConstant.ERROR, "info": "Parameter data_type is none."})
         if not cls.init_cfg_finished:
             cls.LOCK.acquire()
             if not cls.init_cfg_finished:
@@ -608,14 +628,13 @@ class MsProfExportDataUtils:
                                                                params)
             data = handler(configs, params)
             if isinstance(data, EmptyClass):
-                return json.dumps(
-                    {"status": NumberConstant.ERROR, "info": "Unable to get prof data."})
+                return json.dumps({"status": NumberConstant.ERROR, "info": "Unable to get prof data."})
             cls.add_timeline_data(params, data)
             return MsprofDataStorage().export_timeline_data_to_json(data, params)
-        return json.dumps(
-            {"status": NumberConstant.ERROR,
-             "info": "Unable to handler data type %s." % params.get(
-                 StrConstant.PARAM_DATA_TYPE)})
+        return json.dumps({
+            "status": NumberConstant.ERROR,
+            "info": "Unable to handler data type %s." % params.get(StrConstant.PARAM_DATA_TYPE)
+        })
 
     @classmethod
     def add_timeline_data(cls: any, params: dict, data: any) -> None:
@@ -635,12 +654,8 @@ class MsProfExportDataUtils:
         load export configuration
         :return: None
         """
-        config_file_path = os.path.join(MsvpCommonConst.CONFIG_PATH, "msprof_export_data.ini")
-        if os.path.exists(config_file_path) and os.path.getsize(
-                config_file_path) <= Constant.MAX_READ_FILE_BYTES:
-            cls.cfg_parser = configparser.ConfigParser(interpolation=None)
-            cls.cfg_parser.read(config_file_path)
-            cls.init_cfg_finished = True
+        cls.cfg_parser = ConfigManager.get(ConfigManager.MSPROF_EXPORT_DATA)
+        cls.init_cfg_finished = True
 
     @classmethod
     def _get_configs_with_data_type(cls: any, data_type: str) -> dict:
@@ -686,7 +701,8 @@ class MsProfExportDataUtils:
                 'project_path': params.get(StrConstant.PARAM_RESULT_DIR),
                 'device_id': params.get(StrConstant.PARAM_DEVICE_ID),
                 'start_time': NumberConstant.DEFAULT_START_TIME,
-                'end_time': NumberConstant.DEFAULT_END_TIME}
+                'end_time': NumberConstant.DEFAULT_END_TIME
+            }
             result = get_aicore_utilization_timeline(aicore_utilization_param)
             return result
         params[StrConstant.CORE_DATA_TYPE] = StrConstant.AI_CORE_PMU_EVENTS

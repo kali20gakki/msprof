@@ -12,24 +12,19 @@ from abc import abstractmethod
 from common_func.common_prof_rule import CommonProfRule
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msvp_common import is_number
-from common_func.file_manager import FileOpen
 from common_func.regex_manager import RegexManagerConstant
 
+from config.config_manager import ConfigManager
 
-def load_condition_files(condition_file_path: str) -> dict:
+
+def load_condition_files() -> dict:
     """
     load condition files
     """
     conditions = {}
-    try:
-        with FileOpen(condition_file_path, "r") as rule_reader:
-            json_conditions = json.load(rule_reader.file_reader)
-            for json_condition in json_conditions.get(CommonProfRule.CONDITIONS):
-                conditions[json_condition.get(CommonProfRule.CONDITION_ID)] = json_condition
-        return conditions
-    except FileNotFoundError:
-        logging.error("Read rule file failed: %s", os.path.basename(condition_file_path))
-        return {}
+    for json_condition in ConfigManager.get(ConfigManager.PROF_CONDITION).get_data():
+        conditions[json_condition.get(CommonProfRule.CONDITION_ID)] = json_condition
+    return conditions
 
 
 def compare_number(left: any, right: any, equal_operator: bool):
@@ -80,13 +75,19 @@ class MetaConditionManager:
         "||": lambda left, right: left | right if isinstance(left, set) and isinstance(right, set) else set()
     }
 
-    def __init__(self: any, condition_file_path: str) -> None:
-        self.conditions = load_condition_files(condition_file_path)
+    def __init__(self: any) -> None:
+        self.conditions = load_condition_files()
 
     @abstractmethod
-    def cal_count_condition(self: any, operator_data_list: dict, condition: dict) -> any:
+    def cal_count_condition(self: any, operator_data_list: dict, condition: dict) -> list:
         """
         calculate count condition
+        """
+
+    @abstractmethod
+    def cal_accumulate_condition(self: any, operator_data_list: dict, condition: dict) -> list:
+        """
+        calculate accumulate condition
         """
 
     @staticmethod
@@ -193,7 +194,7 @@ class MetaConditionManager:
             condition_id = condition_id.replace(cal_condition, stamp_condition, 1)
         return condition_id
 
-    def cal_conditions(self: any, operator_data: dict, condition_id: str) -> list:
+    def cal_conditions(self: any, operator_data: list, condition_id: str) -> list:
         """
         calculate conditions
         """
@@ -207,7 +208,7 @@ class MetaConditionManager:
             condition_id = condition_id.replace(sub_condition, cal_result, 1)
         return list(condition_id_dict.get(self.merge_set(condition_id, condition_id_dict)))
 
-    def cal_condition(self: any, operator_data: dict, condition_id: str) -> list:
+    def cal_condition(self: any, operator_data: list, condition_id: str) -> list:
         """
         calculate conditions
         """
@@ -221,6 +222,8 @@ class MetaConditionManager:
             return self.cal_formula_condition(operator_data, condition)
         if condition.get(CommonProfRule.CONDITION_TYPE) == CommonProfRule.COND_TYPE_COUNT:
             return self.cal_count_condition(operator_data, condition)
+        if condition.get(CommonProfRule.CONDITION_TYPE) == CommonProfRule.COND_TYPE_ACCUMULATE:
+            return self.cal_accumulate_condition(operator_data, condition)
         logging.error("Not support condition type: %s ", condition.get(CommonProfRule.CONDITION_TYPE))
         return []
 
@@ -241,13 +244,20 @@ class OperatorConditionManager(MetaConditionManager):
     operator condition manager
     """
 
-    def __init__(self: any, condition_file_path: str) -> None:
-        MetaConditionManager.__init__(self, condition_file_path)
+    def __init__(self: any) -> None:
+        super().__init__()
 
     @staticmethod
     def cal_count_condition(operator_data_list: dict, condition: dict) -> list:
         """
         calculate count condition
+        """
+        return []
+
+    @staticmethod
+    def cal_accumulate_condition(operator_data_list: dict, condition: dict) -> list:
+        """
+        calculate accumulate condition
         """
         return []
 
@@ -257,11 +267,11 @@ class NetConditionManager(MetaConditionManager):
     network condition manager
     """
 
-    def __init__(self: any, condition_file_path: str) -> None:
-        MetaConditionManager.__init__(self, condition_file_path)
+    def __init__(self: any) -> None:
+        super().__init__()
 
     @classmethod
-    def cal_normal_condition(cls: any, operator_data: dict, condition: dict) -> list:
+    def cal_normal_condition(cls: any, operator_data: list, condition: dict) -> list:
         """
         calculate normal condition
         """
@@ -273,7 +283,7 @@ class NetConditionManager(MetaConditionManager):
         return op_names
 
     @classmethod
-    def cal_formula_condition(cls: any, operator_data: dict, condition: dict) -> list:
+    def cal_formula_condition(cls: any, operator_data: list, condition: dict) -> list:
         """
         calculate formula condition
         """
@@ -284,13 +294,51 @@ class NetConditionManager(MetaConditionManager):
                 op_names.extend(ops)
         return op_names
 
-    def cal_count_condition(self: any, operator_data_list: dict, condition: dict) -> list:
+    def cal_count_condition(self: any, operator_data_list: list, condition: dict) -> list:
         """
         calculate count condition
         """
         op_names = self.cal_condition(operator_data_list, condition.get(CommonProfRule.CONDITION_DEPENDENCY))
-        if op_names and len(op_names) < int(condition.get(CommonProfRule.CONDITION_THRESHOLD)):
+        cmp_mode = condition.get(CommonProfRule.CONDITION_CMP, '>')
+        cpm_threshold = int(condition.get(CommonProfRule.CONDITION_THRESHOLD))
+        if not self.COMPARE_MAP.get(cmp_mode)(len(op_names), cpm_threshold):
             op_names.clear()
+        return op_names
+
+    def cal_accumulate_condition(self: any, operator_data_list: list, condition: dict) -> list:
+        """
+        calculate accumulate condition
+        """
+        dependency = condition.get(CommonProfRule.CONDITION_DEPENDENCY, "")
+        if dependency:
+            op_names = self.cal_condition(operator_data_list, dependency)
+        else:
+            op_names = [''] * len(operator_data_list)
+            for index, operator in enumerate(operator_data_list):
+                op_names[index] = operator.operator_data.get('op_name', '')
+        op_names_set = set(op_names)
+        compare_keys = condition.get(CommonProfRule.CONDITION_COMPARE, [])
+        base = 0
+        for operator in operator_data_list:
+            for key in compare_keys:
+                base += operator.operator_data.get(key, 0)
+        cmp_mode = condition.get(CommonProfRule.CONDITION_CMP, '>')
+        cpm_threshold = float(condition.get(CommonProfRule.CONDITION_THRESHOLD, 0))
+        keys = condition.get(CommonProfRule.CONDITION_ACCUMULATE)
+        result = 0
+        for operator in operator_data_list:
+            if operator.operator_data.get('op_name', '') not in op_names_set:
+                continue
+            for key in keys:
+                result += operator.operator_data.get(key, 0)
+        if NumberConstant.is_zero(base):
+            result = 0
+            logging.warning("The accumulated result of comparison fields is equal to 0.")
+        else:
+            result = result / base
+        if not self.COMPARE_MAP.get(cmp_mode)(result, cpm_threshold):
+            op_names_set.clear()
+        op_names = list(op_names_set)
         return op_names
 
 
