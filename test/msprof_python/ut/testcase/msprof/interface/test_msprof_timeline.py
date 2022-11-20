@@ -3,9 +3,7 @@ import unittest
 from unittest import mock
 
 from common_func.empty_class import EmptyClass
-
 from msinterface.msprof_timeline import MsprofTimeline
-from profiling_bean.prof_enum.export_data_type import ExportDataType
 
 NAMESPACE = 'msinterface.msprof_timeline'
 
@@ -61,8 +59,7 @@ class TestMsprofTimeline(unittest.TestCase):
         self.assertEqual(result, True)
 
     def test_set_iteration_info(self):
-        with mock.patch(NAMESPACE + '.MsprofIteration.get_iteration_time', return_value=0), \
-                mock.patch(NAMESPACE + '.MsprofIteration.get_iteration_id_by_index_id', return_value=0):
+        with mock.patch(NAMESPACE + '.MsprofIteration.get_iteration_time', return_value=0):
             key = MsprofTimeline()
             key._iteration_time = [[1, 2], [1, 2]]
             key.set_iteration_info('test', 0, 1)

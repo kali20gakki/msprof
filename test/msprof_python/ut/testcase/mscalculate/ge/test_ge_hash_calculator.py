@@ -9,6 +9,7 @@ from unittest import mock
 
 from constant.constant import CONFIG
 from mscalculate.ge.ge_hash_calculator import GeHashCalculator
+from profiling_bean.db_dto.ge_task_dto import GeTaskDto
 from profiling_bean.prof_enum.data_tag import DataTag
 
 NAMESPACE = 'mscalculate.ge.ge_hash_calculator'
@@ -17,20 +18,37 @@ NAMESPACE = 'mscalculate.ge.ge_hash_calculator'
 class TestGeHashCalculator(unittest.TestCase):
     file_list = {DataTag.GE_TASK: ['Framework.task_desc_info.0.slice_0']}
 
+    @staticmethod
+    def _construct_ge_task_dto():
+        ge_task_info = GeTaskDto()
+        ge_task_info.model_id = 1
+        ge_task_info.op_name = 0
+        ge_task_info.stream_id = 1
+        ge_task_info.task_id = 1
+        ge_task_info.block_dim = 1
+        ge_task_info.op_state = 0
+        ge_task_info.task_type = 'AI_CORE'
+        ge_task_info.op_type = 0
+        ge_task_info.index_id = 1
+        ge_task_info.thread_id = 1000
+        ge_task_info.timestamp = 123456
+        ge_task_info.batch_id = 1
+        ge_task_info.context_id = 0
+        return ge_task_info
+
     def test_get_ge_task_data(self):
         with mock.patch('msmodel.interface.view_model.ViewModel.check_table', return_value={0: 'test'}), \
-                mock.patch('msmodel.interface.view_model.ViewModel.get_all_data', return_value=[[1, 1, 0, 8, 1]]):
+                mock.patch('msmodel.interface.view_model.ViewModel.get_all_data',
+                           return_value=[self._construct_ge_task_dto()]):
             check = GeHashCalculator(self.file_list, CONFIG)
-            check._ge_data = [(1, 0, 1, 1, 8, 0)]
-            check.get_ge_task_data()
-            self.assertEqual(check._ge_data, [[1, 1, 0, 8, 1]])
+            ret = check.get_ge_task_data()
+            self.assertTrue(isinstance(ret[0], GeTaskDto))
 
     def test_update_data(self):
         with mock.patch(NAMESPACE + '.get_ge_hash_dict', return_value={0: 'test'}):
             check = GeHashCalculator(self.file_list, CONFIG)
-            check._ge_data = [(1, 0, 1, 1, 8, 0)]
-            check.update_data()
-            self.assertEqual(check._ge_data, [[1, 'test', 1, 1, 8, 0]])
+            check.update_data([self._construct_ge_task_dto()])
+            self.assertEqual(check._ge_data, [[1, 'test', 1, 1, 1, 0, 'AI_CORE', 'test', 1, 1000, 123456, 1, 0]])
 
     def test_calculate(self):
         with mock.patch(NAMESPACE + '.GeHashCalculator.get_ge_task_data'), \

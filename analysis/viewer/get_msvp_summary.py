@@ -9,9 +9,10 @@ import sqlite3
 from common_func.common import CommonConstant
 from common_func.common import generate_config
 from common_func.db_manager import DBManager
-from common_func.msvp_common import path_check
-from common_func.ms_constant.str_constant import StrConstant
+from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
+from common_func.ms_constant.str_constant import StrConstant
+from common_func.msvp_common import path_check
 
 
 def get_type_db_correspondences(device_id: str, type_: str, sample_config: dict) -> dict:
@@ -20,7 +21,7 @@ def get_type_db_correspondences(device_id: str, type_: str, sample_config: dict)
     """
     try:
         if type_ == 'ai_core_profiling':
-            if sample_config.get("ai_core_profiling_mode") == "task-based":
+            if sample_config.get("ai_core_profiling_mode") == StrConstant.AIC_TASK_BASED_MODE:
                 return {"ai_core_profiling": "runtime_{}.db".format(device_id)}
             return {"ai_core_profiling": "aicore_%s" % device_id + ".db"}
         return {"ctrl_cpu_profiling": "ctrlcpu_%s" % device_id + ".db",
@@ -40,7 +41,7 @@ def _pre_check_pmu_events(project_path: str) -> tuple:
     if not sample_config:
         return NumberConstant.ERROR, "Failed to generate sample configuration table.", {}
     if sample_config.get('ai_core_profiling_mode', '') not in \
-            ['task-based', 'sample-based', '']:
+            [StrConstant.AIC_TASK_BASED_MODE, StrConstant.AIC_SAMPLE_BASED_MODE, '']:
         return NumberConstant.ERROR, "Failed to verify configuration file parameters.", {}
 
     return NumberConstant.SUCCESS, 'success', sample_config
@@ -70,8 +71,9 @@ def calculate_utilization(tmp_data: list, result_data: dict) -> None:
     time_list = [1]
     for i in range(len(tmp_data) - 1):
         time_list.append(tmp_data[i + 1][1] - tmp_data[i][1])
+    freq = InfoConfReader().get_freq(StrConstant.AIC)
     for tmp in tmp_data:  # [timestamp, utilization, coreid]
-        interval = NumberConstant.CPU_FREQ * float(time_list[tmp_data.index(tmp)]) * 10 ** 3
+        interval = freq * float(time_list[tmp_data.index(tmp)])
         if not NumberConstant.is_zero(interval) and len(tmp) >= 3:  # length tmp should be longer than 3
             result_data['usage'].setdefault(str(tmp[2]), []).append(
                 [StrConstant.ACCURACY % float(tmp[1]),
@@ -170,11 +172,11 @@ def get_aicore_utilization(project_path: str, device_id: str, number: float, sta
     if result.get('status') == NumberConstant.ERROR:
         return json.dumps({"status": NumberConstant.ERROR, "info": result.get('msg')})
     conn, curs = DBManager.check_connect_db(project_path,
-                                            func_map['type_db_match'].get('ai_core_profiling'))
+                                            func_map.get('type_db_match', {}).get('ai_core_profiling'))
     if not (conn and curs):
         return json.dumps({'status': NumberConstant.ERROR, "info": "The db doesn't exist."})
     try:
-        if func_map['sample_config'].get("ai_core_profiling_mode") == "sample-based":
+        if func_map['sample_config'].get("ai_core_profiling_mode") == StrConstant.AIC_SAMPLE_BASED_MODE:
             return _get_aicore_util(curs, number, start, end)
         return json.dumps({'status': NumberConstant.ERROR, 'data': "Unable to get aicore utilization."})
     except sqlite3.Error:
@@ -194,6 +196,7 @@ def get_aicore_position(*param: list) -> dict:
     end_sql = 'select count(*) from AICoreOriginalData where coreid=? ' \
               'and timestamp/{NS_TIME_RATE} - ? <= ?'.format(NS_TIME_RATE=NumberConstant.NS_TIME_RATE)
     end_param = (core, min_time, end)
-    pos_cores[str(core)] = [curs.execute(start_sql, start_param).fetchone()[0],
-                            curs.execute(end_sql, end_param).fetchone()[0]]
+    pos_cores[str(core)] = [
+        curs.execute(start_sql, start_param).fetchone()[0], curs.execute(end_sql, end_param).fetchone()[0]
+    ]
     return pos_cores

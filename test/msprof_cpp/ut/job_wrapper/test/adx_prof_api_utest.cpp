@@ -35,15 +35,3 @@ TEST_F(ADX_PROF_API_UTEST, AdxIdeFreePacket) {
     IdeBuffT outPut = nullptr;
     AdxIdeFreePacket(outPut);
 }
-
-
-TEST_F(ADX_PROF_API_UTEST, IdeXmalloc)
-{
-    GlobalMockObject::verify();
-    EXPECT_EQ(nullptr, IdeXmalloc(0));
-    MOCKER(memset_s)
-        .stubs()
-		.will(returnValue(EOK - 1));
-    size_t num = 5;
-    EXPECT_EQ(nullptr, IdeXmalloc(num));
-}

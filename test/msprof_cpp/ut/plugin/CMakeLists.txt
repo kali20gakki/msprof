@@ -25,6 +25,7 @@ target_include_directories(plugin_utest PRIVATE
     ${MSPROF_SOURCE_DIR}/dvvp/common
     ${MSPROF_SOURCE_DIR}/dvvp/common/config
     ${MSPROF_SOURCE_DIR}/dvvp/common/mmpa
+    ${MSPROF_SOURCE_DIR}/dvvp/common/utils
     ${TOP_DIR}/platform/securec/include
     ${TOP_DIR}/test/msprof_cpp/ut/stub/common/log
 )

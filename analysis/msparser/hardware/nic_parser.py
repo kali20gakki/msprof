@@ -3,15 +3,14 @@
 # Copyright (c) Huawei Technologies Co., Ltd. 2018-2019. All rights reserved.
 
 import logging
-import os
 
+from config.config_manager import ConfigManager
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.file_manager import FileManager
 from common_func.file_manager import FileOpen
 from common_func.ms_multi_process import MsMultiProcess
-from common_func.msvp_common import MsvpCommonConst
 from common_func.msvp_common import is_valid_original_data
 from common_func.path_manager import PathManager
 from common_func.utils import Utils
@@ -25,11 +24,11 @@ class ParsingNicData(MsMultiProcess):
     """
 
     DEFAULT_NIC_FUNC_ID = 0
-    TABLE_PATH = os.path.join(MsvpCommonConst.CONFIG_PATH, 'Tables.ini')
+    TABLE_PATH = ConfigManager.TABLES
     NETWORK_HEADER_TAG = 'rxPacket/s'
 
     def __init__(self: any, file_list: dict, sample_config: dict) -> None:
-        MsMultiProcess.__init__(self, sample_config)
+        super().__init__(sample_config)
         self.project_path = sample_config.get("result_dir", "")
         self._file_list = file_list.get(DataTag.NIC, [])
         self.curr_file_name = ''

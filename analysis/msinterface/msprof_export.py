@@ -121,7 +121,7 @@ class ExportCommand:
         ],
         MsProfCommonConstant.SUMMARY: [
             {'export_type': ExportDataType.TASK_TIME,
-             'handler': AiStackDataCheckManager.contain_task_time_data},
+             'handler': AiStackDataCheckManager.contain_task_time_without_ffts_task},
             {'export_type': ExportDataType.L2_CACHE,
              'handler': AiStackDataCheckManager.contain_l2_cache_data},
             {'export_type': ExportDataType.STEP_TRACE,
@@ -207,10 +207,11 @@ class ExportCommand:
         self.iteration_id = args.iteration_id if args.iteration_id is not None else NumberConstant.DEFAULT_ITER_ID
         self.sample_config = None
         self.export_format = getattr(args, "export_format", None)
+        self.user_model_id = getattr(args, self.MODEL_ID)
         self.list_map = {
             'export_type_list': [],
             'devices_list': '',
-            'model_id': getattr(args, self.MODEL_ID),
+            'model_id': self.user_model_id,
             'input_model_id': args.model_id is not None
         }
         self._cluster_params = {'is_cluster_scene': False, 'cluster_path': []}
@@ -258,23 +259,6 @@ class ExportCommand:
         init_result = (init_success, sql, conn, curs)
         return init_result
 
-    def _set_default_model_id(self, result_dir, model_match_set, ge_data_set):
-        conn, curs = DBManager.check_connect_db(result_dir, DBNameConstant.DB_STEP_TRACE)
-        if not (conn and curs):
-            return min(model_match_set)
-        sql = "select model_id, max(index_id) from {} group by model_id".format(DBNameConstant.TABLE_STEP_TRACE_DATA)
-        model_and_index = list(filter(lambda x: x[0] in model_match_set, DBManager.fetch_all_data(curs, sql)))
-
-        if not ge_data_set:
-            trace_data = DBManager.fetch_all_data(
-                curs, "select model_id, iter_id from {}".format(DBNameConstant.TABLE_STEP_TRACE_DATA),
-                dto_class=StepTraceDto)
-            model_and_index = self._update_model_and_index(result_dir,
-                                                           {data.iter_id: data.model_id for data in trace_data})
-        model_and_index.sort(key=lambda x: x[1])
-        DBManager.destroy_db_connect(conn, curs)
-        return model_and_index.pop()[0] if model_and_index else min(model_match_set)
-
     @staticmethod
     def _update_model_and_index(result_dir: str, trace_data_dict: dict) -> list:
         conn, curs = DBManager.check_connect_db(result_dir, DBNameConstant.DB_HWTS_REC)
@@ -317,10 +301,27 @@ class ExportCommand:
             if self._cluster_params.get('is_cluster_scene', False):
                 self._show_cluster_tuning()
 
+    def _set_default_model_id(self, result_dir, model_match_set, ge_data_set):
+        conn, curs = DBManager.check_connect_db(result_dir, DBNameConstant.DB_STEP_TRACE)
+        if not (conn and curs):
+            return min(model_match_set)
+        sql = "select model_id, max(index_id) from {} group by model_id".format(DBNameConstant.TABLE_STEP_TRACE_DATA)
+        model_and_index = list(filter(lambda x: x[0] in model_match_set, DBManager.fetch_all_data(curs, sql)))
+
+        if not ge_data_set:
+            trace_data = DBManager.fetch_all_data(
+                curs, "select model_id, iter_id from {}".format(DBNameConstant.TABLE_STEP_TRACE_DATA),
+                dto_class=StepTraceDto)
+            model_and_index = self._update_model_and_index(result_dir,
+                                                           {data.iter_id: data.model_id for data in trace_data})
+        model_and_index.sort(key=lambda x: x[1])
+        DBManager.destroy_db_connect(conn, curs)
+        return model_and_index.pop()[0] if model_and_index else min(model_match_set)
+
     def _add_export_type(self: any, result_dir: str) -> None:
         export_map = self.EXPORT_HANDLE_MAP.get(self.command_type, [])
         for item in export_map:
-            if item['handler'](result_dir):
+            if item['handler'](result_dir, self.sample_config.get('devices', 0)):
                 self.list_map.get('export_type_list').append(item)
 
     def _check_index_id(self: any, project_path: str) -> None:
@@ -376,6 +377,7 @@ class ExportCommand:
         profiling_scene = ProfilingScene()
         profiling_scene.init(result_dir)
 
+        self.list_map[self.MODEL_ID] = self.user_model_id
         if not profiling_scene.is_step_trace():
             self.list_map[self.MODEL_ID] = Constant.GE_OP_MODEL_ID
             return
@@ -402,11 +404,10 @@ class ExportCommand:
                 self.list_map[self.MODEL_ID] = Constant.GE_OP_MODEL_ID
             return
 
-        model_id = self.list_map.get(self.MODEL_ID)
-        if model_id not in model_match_set:
+        if self.list_map.get(self.MODEL_ID) not in model_match_set:
             error(self.FILE_NAME, 'The model id {0} is invalid. Must select'
                                   ' from {1}. Please enter a'
-                                  ' valid model id.'.format(model_id, model_match_set))
+                                  ' valid model id.'.format(self.list_map.get(self.MODEL_ID), model_match_set))
             raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR)
 
     def _prepare_for_export(self: any, result_dir: str) -> None:
@@ -423,11 +424,13 @@ class ExportCommand:
         device_lst = InfoConfReader().get_device_list()
         if device_lst:
             self.list_map.update({'devices_list': device_lst})
-            sample_json = {"result_dir": result_dir,
-                           "device_id": self.list_map.get('devices_list')[0],
-                           "iter_id": self.iteration_id, "job_id": MsProfCommonConstant.DEFAULT_JOB,
-                           "ip_address": MsProfCommonConstant.DEFAULT_IP,
-                           "model_id": self.list_map.get('model_id')}
+            sample_json = {
+                "result_dir": result_dir,
+                "device_id": self.list_map.get('devices_list')[0],
+                "iter_id": self.iteration_id, "job_id": MsProfCommonConstant.DEFAULT_JOB,
+                "ip_address": MsProfCommonConstant.DEFAULT_IP,
+                "model_id": self.list_map.get('model_id')
+            }
             file_dispatch = FileDispatch(sample_json)
             file_dispatch.dispatch_calculator()
             analysis_factory = DataAnalysisFactory(sample_json)
@@ -514,14 +517,16 @@ class ExportCommand:
             return
         print_info(self.FILE_NAME,
                    'Start to export %s %s data ...' % (export_data_type, self.command_type))
-        params = {StrConstant.PARAM_DATA_TYPE: export_data_type,
-                  StrConstant.PARAM_RESULT_DIR: result_dir,
-                  StrConstant.PARAM_DEVICE_ID: device_id,
-                  StrConstant.PARAM_JOB_ID: MsProfCommonConstant.DEFAULT_JOB,
-                  StrConstant.PARAM_EXPORT_TYPE: self.command_type,
-                  StrConstant.PARAM_ITER_ID: self.iteration_id,
-                  StrConstant.PARAM_EXPORT_FORMAT: self.export_format,
-                  StrConstant.PARAM_MODEL_ID: self.list_map.get("model_id")}
+        params = {
+            StrConstant.PARAM_DATA_TYPE: export_data_type,
+            StrConstant.PARAM_RESULT_DIR: result_dir,
+            StrConstant.PARAM_DEVICE_ID: device_id,
+            StrConstant.PARAM_JOB_ID: MsProfCommonConstant.DEFAULT_JOB,
+            StrConstant.PARAM_EXPORT_TYPE: self.command_type,
+            StrConstant.PARAM_ITER_ID: self.iteration_id,
+            StrConstant.PARAM_EXPORT_FORMAT: self.export_format,
+            StrConstant.PARAM_MODEL_ID: self.list_map.get("model_id")
+        }
 
         self._handle_export_data(params)
 

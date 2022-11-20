@@ -22,10 +22,10 @@ class TestOpCommonFunc(unittest.TestCase):
         self.assertEqual(len(res), 4)
 
     def test_calculate_task_time(self):
-        data = [(2, 2, 10521325045461.166, 1223854.1655242443, 1, 0, 1),
-                (7, 2, 10521333413950.748, 1093229.167163372, 1, 0, 1)]
+        data = [(2, 2, 10521325045461.166, 1223854.1655242443, 1, 0, 1, 0),
+                (7, 2, 10521333413950.748, 1093229.167163372, 1, 0, 1, 0)]
         ProfilingScene().init(" ")
-        ProfilingScene()._scene = Constant.SINGLE_OP
+        ProfilingScene()._scene = Constant.TRAIN
         res = OpCommonFunc.calculate_task_time(data)
         self.assertEqual(len(res), 2)
 

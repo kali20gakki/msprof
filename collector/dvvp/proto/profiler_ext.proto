@@ -17,6 +17,8 @@ message ProfAclConfig {
     string aiv_metrics = 12;
     string ascendcl = 13;
     string runtime_api = 14;
+    string host_sys_usage = 15;
+    string host_sys_usage_freq = 16;
 }
 
 message ProfGeOptionsConfig {
@@ -36,6 +38,8 @@ message ProfGeOptionsConfig {
     string task_time = 18;
     string aiv_metrics = 19;
     string runtime_api = 20;
+    string host_sys_usage = 21;
+    string host_sys_usage_freq = 22;
 }
 
 message ProfAclInitConfig {

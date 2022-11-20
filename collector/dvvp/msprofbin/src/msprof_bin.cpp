@@ -26,20 +26,6 @@ using namespace Analysis::Dvvp::Common::Platform;
 using namespace Collector::Dvvp::Msprofbin;
 
 
-void SetEnvList(CONST_CHAR_PTR_PTR envp, std::vector<std::string> &envpList)
-{
-    uint32_t envpLen = 0;
-    constexpr uint32_t maxEnvpLen = 4096;
-    while (*envp) {
-        envpList.push_back(*envp++);
-        envpLen++;
-        if (envpLen >= maxEnvpLen) {
-            CmdLog::instance()->CmdErrorLog("Truncate env params due to exceeding limit!");
-            break;
-        }
-    }
-}
-
 #ifdef __PROF_UT
 int LltMain(int argc, const char **argv, const char **envp)
 #else
@@ -47,15 +33,10 @@ int main(int argc, const char **argv, const char **envp)
 #endif
 {
     std::vector<std::string> envpList;
-    SetEnvList(envp, envpList);
-    EnvManager::instance()->SetGlobalEnv(envpList);
-    int ret = Platform::instance()->PlatformInitByDriver();
-    if (ret != PROFILING_SUCCESS) {
-        CmdLog::instance()->CmdErrorLog("Running profiling failed."
-            " Please check the driver package is correctly installed.");
-        MSPROF_LOGE("Init platform by driver faild.");
-        return PROFILING_FAILED;
+    if (EnvManager::instance()->SetEnvList(envp, envpList)) {
+        CmdLog::instance()->CmdErrorLog("Truncate env params due to exceeding limit!");
     }
+    EnvManager::instance()->SetGlobalEnv(envpList);
     InputParser parser = InputParser();
     if (argc <= 1) {
         parser.MsprofCmdUsage("msprof needs input parameter.");
@@ -68,7 +49,7 @@ int main(int argc, const char **argv, const char **envp)
     if (parser.HasHelpParamOnly()) {
         return PROFILING_SUCCESS;
     }
-    ret = MsprofManager::instance()->Init(params);
+    int ret = MsprofManager::instance()->Init(params);
     if (ret != PROFILING_SUCCESS) {
         CmdLog::instance()->CmdErrorLog("Start profiling failed");
         return PROFILING_FAILED;

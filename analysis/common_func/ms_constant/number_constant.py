@@ -94,10 +94,15 @@ class NumberConstant:
 
     # the default batch id of chip v1
     DEFAULT_BATCH_ID = 0
+    DEFAULT_FFTS_SUBTASK_ID = 0
+    DEFAULT_GE_CONTEXT_ID = 4294967295
 
     # invalid id
     INVALID_STREAM_ID = -1
     INVALID_TASK_ID = -1
+
+    # core id edge
+    MAX_CORE_ID_OF_AIC = 24
 
     @property
     def conversion_time(self: any) -> float:

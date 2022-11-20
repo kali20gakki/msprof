@@ -23,6 +23,13 @@ MsprofStampPool::MsprofStampPool()
 
 MsprofStampPool::~MsprofStampPool()
 {
+    if (g_stampPoolHandle != nullptr) {
+        if (g_stampPoolHandle->memPool != nullptr) {
+            free(g_stampPoolHandle->memPool);
+        }
+        delete g_stampPoolHandle;
+        g_stampPoolHandle = nullptr;
+    }
 }
 
 int MsprofStampPool::Init(int size)

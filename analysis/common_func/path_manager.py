@@ -24,6 +24,27 @@ class PathManager:
     HCCL = "hccl"
     QUERY_CLUSTER = "query"
 
+    @staticmethod
+    def get_path_under_result_dir(result_dir: str, *paths: str) -> str:
+        """
+        get directory path
+        """
+        if result_dir is not None:
+            return os.path.join(result_dir, *paths)
+        return ""
+
+    @staticmethod
+    def check_map_file_path(map_file_path: str, cfg_parser: any) -> bool:
+        map_file_path = os.path.realpath(map_file_path)
+        try:
+            if os.path.getsize(map_file_path) <= Constant.MAX_READ_FILE_BYTES:
+                cfg_parser.read(map_file_path)
+                return True
+            return False
+        except (OSError, SystemError, ValueError, TypeError, RuntimeError) as error:
+            logging.error(str(error), exc_info=Constant.TRACE_BACK_SWITCH)
+            return False
+
     @classmethod
     def get_data_dir(cls: any, result_dir: str) -> str:
         """
@@ -110,24 +131,3 @@ class PathManager:
         get query result path in result directory
         """
         return cls.get_path_under_result_dir(result_dir, cls.QUERY_CLUSTER, file_name)
-
-    @staticmethod
-    def get_path_under_result_dir(result_dir: str, *paths: str) -> str:
-        """
-        get directory path
-        """
-        if result_dir is not None:
-            return os.path.join(result_dir, *paths)
-        return ""
-
-    @staticmethod
-    def check_map_file_path(map_file_path: str, cfg_parser: any) -> bool:
-        map_file_path = os.path.realpath(map_file_path)
-        try:
-            if os.path.getsize(map_file_path) <= Constant.MAX_READ_FILE_BYTES:
-                cfg_parser.read(map_file_path)
-                return True
-            return False
-        except (OSError, SystemError, ValueError, TypeError, RuntimeError) as error:
-            logging.error(str(error), exc_info=Constant.TRACE_BACK_SWITCH)
-            return False

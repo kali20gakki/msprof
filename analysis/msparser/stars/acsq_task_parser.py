@@ -34,11 +34,10 @@ class AcsqTaskParser(IStarsParser):
         Categorize data_list into start log and end log, and calculate the task time
         :return: result data list
         """
-        # task_map is {'task_id, stream_id', {'0': list, '1': list }} and 0 is task start and 1 is end
         task_map = {}
         # task id stream id func type
         for data in self._data_list:
-            task_key = "{0},{1}".format(str(data.task_id), str(data.stream_id))
+            task_key = "{0},{1},{2}".format(str(data.task_id), str(data.stream_id), str(data.acc_id))
             if task_key in task_map:
                 data_list = task_map.get(task_key).setdefault(data.func_type, [])
                 data_list.append(data)
@@ -46,11 +45,13 @@ class AcsqTaskParser(IStarsParser):
                 task_map[task_key] = {data.func_type: [data]}
 
         result_list = []
-        for data_dict in task_map.values():
+        warning_status = False
+        for data_key, data_dict in task_map.items():
             start_que = data_dict.get(StarsConstant.ACSQ_START_FUNCTYPE, [])
             end_que = data_dict.get(StarsConstant.ACSQ_END_FUNCTYPE, [])
             if len(start_que) != len(end_que):
-                logging.warning("start_que not eq end que")
+                logging.debug("start_que not eq end que, data key %s", data_key)
+                warning_status = True
             while start_que and end_que:
                 start_task = start_que.pop()
                 end_task = end_que.pop()
@@ -59,4 +60,7 @@ class AcsqTaskParser(IStarsParser):
                      # start timestamp end timestamp duration
                      start_task.sys_cnt, end_task.sys_cnt, end_task.sys_cnt - start_task.sys_cnt])
 
+        if warning_status:
+            logging.warning("Some task data are missing, set the log level to debug "
+                            "and run again to know which tasks are missing.")
         return sorted(result_list, key=lambda data: data[4])

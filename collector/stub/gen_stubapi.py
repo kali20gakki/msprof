@@ -5,6 +5,7 @@
 import os
 import re
 import sys
+import logging
 
 PATTERN_FUNCTION = re.compile(r'MSVP_PROF_API\s+\n+.+\w+\([^();]*\);|.+\w+\([^();]*\);')
 PATTERN_RETURN = re.compile(r'([^ ]+[ *])\w+\([^;]+;')
@@ -32,7 +33,7 @@ def log_info(info):
     """
     wrapper print
     """
-    print(info)
+    logging.info(info)
 
 
 def collect_header_files(path):

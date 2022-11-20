@@ -18,22 +18,9 @@ NAMESPACE = 'tuning.meta_condition_manager'
 class TestMetaConditionManager(unittest.TestCase):
 
     def test_load_condition_files(self):
-        condition_file_path = 'home\\mata_condition'
-        json_conditions = {"conditions": [{"id": "condition_common_1", "type": "formula", "left": ["channel"],
-                                           "right": 0, "formula": "{0}%16", "cmp": "!="}, ]}
-        with mock.patch('builtins.open', mock.mock_open(read_data=condition_file_path)), \
-                mock.patch('common_func.file_manager.check_path_valid'), \
-                mock.patch(NAMESPACE + '.json.load', return_value=json_conditions):
-            key = MetaConditionManager(CONFIG)
-            load_condition_files(condition_file_path)
-        self.assertEqual(key.conditions,
-                         {'condition_common_1': {'id': 'condition_common_1', 'type': 'formula',
-                                                 'left': ['channel'], 'right': 0, 'formula': '{0}%16',
-                                                 'cmp': '!='}})
-        with mock.patch('builtins.open', side_effect=FileNotFoundError), \
-                mock.patch('common_func.file_manager.check_path_valid'), \
-                mock.patch(NAMESPACE + '.logging.error'):
-            load_condition_files(condition_file_path)
+        key = MetaConditionManager()
+        load_condition_files()
+        self.assertEqual(len(key.conditions), 28)
 
     def test_format_operator(self):
         expression = r'\+-|\+\+|--|-\+'
@@ -83,7 +70,7 @@ class TestMetaConditionManager(unittest.TestCase):
         with mock.patch(NAMESPACE + '.re.sub', return_value='&&'), \
              mock.patch(NAMESPACE + '.load_condition_files'), \
              mock.patch(NAMESPACE + '.time.time', return_value=324):
-            key = MetaConditionManager('123')
+            key = MetaConditionManager()
             result = key.merge_set(condition_id, condition_id_dict)
         self.assertEqual(result, '324')
 
@@ -94,7 +81,7 @@ class TestMetaConditionManager(unittest.TestCase):
              mock.patch(NAMESPACE + '.MetaConditionManager.cal_formula_condition', return_value=[2]), \
              mock.patch(NAMESPACE + '.load_condition_files'), \
              mock.patch(NAMESPACE + '.MetaConditionManager.merge_set', return_value='+'):
-            key = MetaConditionManager('111')
+            key = MetaConditionManager()
             key.conditions = {'+': {'type': 'normal'}, '1': {'type': 'formula'}}
             result = key.cal_conditions(operator_data, condition_id)
         self.assertEqual(result, ['123'])
@@ -105,7 +92,7 @@ class TestMetaConditionManager(unittest.TestCase):
         condition_id_1 = '(1+2)'
         condition_id_2 = '(2+1)'
         with mock.patch(NAMESPACE + '.load_condition_files'):
-            key = MetaConditionManager('111')
+            key = MetaConditionManager()
             key.conditions = {'(+)': {'type': 'normal'}, '(1+2)': {'type': 'formula', 'left': [1, 2]},
                               '(2+1)': {'type': 'count'}}
             result = key.cal_condition(operator_data, condition_id)
@@ -120,7 +107,7 @@ class TestMetaConditionManager(unittest.TestCase):
         condition_id = '(+)'
         with mock.patch(NAMESPACE + '.logging.error'), \
                 mock.patch('common_func.file_manager.check_path_valid'):
-            key = MetaConditionManager('111')
+            key = MetaConditionManager()
             key.conditions = {'(+)': {'type': None}}
             result = key.cal_condition(operator_data, condition_id)
             self.assertEqual(result, [])
@@ -128,7 +115,7 @@ class TestMetaConditionManager(unittest.TestCase):
     def test_get_condition(self):
         condition_ids = ['1']
         with mock.patch(NAMESPACE + '.load_condition_files'):
-            key = MetaConditionManager('111')
+            key = MetaConditionManager()
             key.conditions = {'1': 'one'}
             result = key.get_condition(condition_ids)
         self.assertEqual(result, ['one'])
@@ -140,7 +127,7 @@ class TestOperatorConditionManager(unittest.TestCase):
         operator_data_list = ()
         condition = '123'
         with mock.patch(NAMESPACE + '.load_condition_files'):
-            key = OperatorConditionManager('111')
+            key = OperatorConditionManager()
             result = key.cal_count_condition(operator_data_list, condition)
         self.assertEqual(result, [])
 
@@ -148,11 +135,11 @@ class TestOperatorConditionManager(unittest.TestCase):
 class TestNetConditionManager(unittest.TestCase):
 
     def test_cal_count_condition(self):
-        operator_data_list = {}
-        condition = {"dependency": '(+)', "threshold": "1234"}
+        operator_data_list = []
+        condition = {'dependency': '(+)', 'threshold': '1234', 'cmp': '>'}
         with mock.patch(NAMESPACE + '.NetConditionManager.cal_condition', return_value=[123]), \
              mock.patch(NAMESPACE + '.load_condition_files'):
-            key = NetConditionManager('111')
+            key = NetConditionManager()
             key.conditions = {'(+)': {'type': 'normal'}}
             result = key.cal_count_condition(operator_data_list, condition)
         self.assertEqual(result, [])
@@ -162,7 +149,7 @@ class TestNetConditionManager(unittest.TestCase):
         condition = {}
         with mock.patch(NAMESPACE + '.MetaConditionManager.cal_normal_condition', return_value=[1]), \
              mock.patch(NAMESPACE + '.load_condition_files'):
-            key = NetConditionManager('111')
+            key = NetConditionManager()
             result = key.cal_normal_condition(operator_data, condition)
         self.assertEqual(result, [1])
 
@@ -171,9 +158,23 @@ class TestNetConditionManager(unittest.TestCase):
         condition = {}
         with mock.patch(NAMESPACE + '.MetaConditionManager.cal_formula_condition', return_value=[2]), \
              mock.patch(NAMESPACE + '.load_condition_files'):
-            key = NetConditionManager('111')
+            key = NetConditionManager()
             result = key.cal_formula_condition(operator_data, condition)
         self.assertEqual(result, [2])
+
+    def test_cal_accumulate_condition(self):
+        op1 = Operator('op1', 2, {'op_name': 'op1', 'task_wait_time': 1, 'task_duration': 2})
+        op2 = Operator('op2', 2, {'op_name': 'op2', 'task_wait_time': 1, 'task_duration': 2})
+        op3 = Operator('op3', 2, {'op_name': 'op3', 'task_wait_time': 1, 'task_duration': 2})
+        op4 = Operator('op4', 2, {'op_name': 'op4', 'task_wait_time': 1, 'task_duration': 2})
+        operator_data_list = [op1, op2, op3, op4]
+        condition = {'dependency': '', 'threshold': '0.1', 'cmp': '>', 'accumulate': ['task_wait_time'],
+                     'compare': ['task_duration', 'task_wait_time']}
+        with mock.patch(NAMESPACE + '.load_condition_files'):
+            key = NetConditionManager()
+            key.conditions = {'(+)': {'type': 'normal'}}
+            result = key.cal_accumulate_condition(operator_data_list, condition)
+        self.assertEqual(len(result), 4)
 
 
 def test_get_two_decimal():

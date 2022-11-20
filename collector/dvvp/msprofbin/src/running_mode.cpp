@@ -219,7 +219,7 @@ void RunningMode::StopRunningTasks() const
     int exitCode = INVALID_EXIT_CODE;
     MmProcess killProces = MSVP_MMPROCESS;
     int ret = analysis::dvvp::common::utils::Utils::ExecCmd(execCmdParams, argsV, envsV, exitCode, killProces);
-    MSPROF_LOGI("[%s mode] Stop %s Process：%d, ret=%d", modeName_.c_str(), taskName_.c_str(),
+    MSPROF_LOGI("[%s mode] Stop %s Process: %d, ret=%d", modeName_.c_str(), taskName_.c_str(),
         reinterpret_cast<int>(taskPid_), ret);
 }
 
@@ -482,7 +482,7 @@ AppMode::AppMode(std::string preCheckParams, SHARED_PTR_ALIA<ProfileParams> para
         ARGS_DVPP_PROFILING, ARGS_L2_PROFILING, ARGS_AIC_FREQ, ARGS_AIV_FREQ, ARGS_BIU_FREQ, ARGS_BIU, ARGS_HCCL,
         ARGS_SYS_SAMPLING_FREQ, ARGS_PID_SAMPLING_FREQ, ARGS_HARDWARE_MEM_SAMPLING_FREQ,
         ARGS_IO_SAMPLING_FREQ, ARGS_DVPP_FREQ,  ARGS_CPU_SAMPLING_FREQ, ARGS_INTERCONNECTION_FREQ,
-        ARGS_HOST_SYS, ARGS_PYTHON_PATH, ARGS_MSPROFTX
+        ARGS_HOST_SYS, ARGS_HOST_SYS_USAGE, ARGS_HOST_SYS_USAGE_FREQ, ARGS_PYTHON_PATH, ARGS_MSPROFTX
     };
 }
 
@@ -570,7 +570,8 @@ SystemMode::SystemMode(std::string preCheckParams, SHARED_PTR_ALIA<ProfileParams
         ARGS_DVPP_PROFILING, ARGS_L2_PROFILING, ARGS_AIC_FREQ, ARGS_AIV_FREQ, ARGS_BIU_FREQ, ARGS_BIU,
         ARGS_SYS_SAMPLING_FREQ, ARGS_PID_SAMPLING_FREQ, ARGS_HARDWARE_MEM_SAMPLING_FREQ,
         ARGS_IO_SAMPLING_FREQ, ARGS_DVPP_FREQ,  ARGS_CPU_SAMPLING_FREQ, ARGS_INTERCONNECTION_FREQ,
-        ARGS_HOST_SYS, ARGS_SYS_PERIOD, ARGS_HOST_SYS_PID, ARGS_PYTHON_PATH
+        ARGS_HOST_SYS, ARGS_HOST_SYS_USAGE, ARGS_HOST_SYS_USAGE_FREQ, ARGS_SYS_PERIOD,
+        ARGS_HOST_SYS_PID, ARGS_PYTHON_PATH
     };
     neccessarySet_ = {ARGS_OUTPUT, ARGS_SYS_PERIOD};
 }
@@ -628,12 +629,12 @@ int SystemMode::CheckIfDeviceOnline() const
 
 int SystemMode::CheckHostSysParams() const
 {
-    if (params_->host_sys.empty() && CheckIfDeviceOnline() != PROFILING_SUCCESS) {
+    if (params_->host_sys.empty() && params_->host_sys_usage.empty() && CheckIfDeviceOnline() != PROFILING_SUCCESS) {
         return PROFILING_FAILED;
     }
     if (!params_->host_sys.empty() && params_->host_sys_pid < 0) {
         CmdLog::instance()->CmdErrorLog("The argument --host-sys-pid"
-            " are required when app is empty and --host-sys is on.");
+            " are required when --application is empty and --host-sys is on.");
         return PROFILING_FAILED;
     }
     return PROFILING_SUCCESS;

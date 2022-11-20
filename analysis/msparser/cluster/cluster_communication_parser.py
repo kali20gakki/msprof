@@ -24,7 +24,6 @@ class ClusterCommunicationParser:
 
     def __init__(self: any, params: dict) -> None:
         self._collection_path = params["collection_path"]
-        self._is_cluster_scene = params["is_cluster"]
         self._npu_id = params["npu_id"]
         self._model_id = params["model_id"]
         self._iteration_id = params["iteration_id"]
@@ -34,11 +33,6 @@ class ClusterCommunicationParser:
 
     def process(self: any) -> None:
         QueryArgumentCheck.check_arguments_valid(self._npu_id, self._model_id, self._iteration_id)
-        if not self._is_cluster_scene:
-            print_msg(json.dumps(
-                {'status': NumberConstant.ERROR,
-                 'info': 'The collective communication data could be shown in the scene of cluster.', 'data': ''}))
-            return
         if not self._is_cluster_all_device_scene():
             print_msg(json.dumps(
                 {'status': NumberConstant.ERROR,
@@ -61,9 +55,11 @@ class ClusterCommunicationParser:
             with self._cluster_info_model as _c_model:
                 if not _c_model.check_db() or not _c_model.check_table():
                     return
-                rank_ids = _c_model.get_all_rank_id()
-            for rank_id in rank_ids:
-                communication_data = _model.get_cluster_communication(rank_id)
+                rank_or_device_ids = _c_model.get_rank_or_device_ids()
+            if not rank_or_device_ids:
+                return
+            for rank_or_device_id in rank_or_device_ids:
+                communication_data = _model.get_cluster_communication(rank_or_device_id)
                 if not communication_data:
                     continue
                 self._data_collection.extend(communication_data)

@@ -68,8 +68,8 @@ class TestRuntimeApiViewer(unittest.TestCase):
                 mock.patch(NAMESPACE + ".RuntimeApiViewModel.get_timeline_data", return_value=[]):
             check = RuntimeApiViewer(config, params)
             ret = check.get_timeline_data()
-            self.assertEqual('{"status": 1, '
-                             '"info": "Failed to connect acl_module.db."}', ret)
+            self.assertEqual('{"status": 2, '
+                             '"info": "Unable to get runtime api data."}', ret)
 
     def test_get_timeline_data_should_return_empty_when_data_exist(self):
         config = {"headers": ["Name", "Stream ID", "Time(%)", "Time(ns)", "Calls",

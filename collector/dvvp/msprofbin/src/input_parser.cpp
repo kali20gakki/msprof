@@ -70,20 +70,23 @@ InputParser::~InputParser()
 void InputParser::MsprofCmdUsage(const std::string msg)
 {
     if (!msg.empty()) {
-        std::cout << "err: " << const_cast<CHAR_PTR>(msg.c_str()) << std::endl;
+        CmdLog::instance()->CmdErrorLog("%s", msg.c_str());
     }
     ArgsManager::instance()->PrintHelp();
 }
 
 SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> InputParser::MsprofGetOpts(int argc, CONST_CHAR_PTR argv[])
 {
+    if (params_ == nullptr) {
+        MSPROF_LOGE("params_ is null in InputParser.");
+        return nullptr;
+    }
     const static int inputMaxLen = 512; // 512 : max length
     if (argc > inputMaxLen || argv == nullptr || strlen(*argv) > inputMaxLen) {
         CmdLog::instance()->CmdErrorLog("input data is invalid,"
             "please input argc less than 512 and argv is not null and the len of argv less than 512");
         return nullptr;
     }
-
     int opt = 0;
     int optionIndex = 0;
     MsprofString optString  = "";
@@ -92,9 +95,15 @@ SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> InputParser::MsprofGetOp
     std::string argvStr = "";
     while ((opt = MmGetOptLong(argc, const_cast<MsprofStrBufAddrT>(argv),
         optString, longOptions, &optionIndex)) != MSPROF_DAEMON_ERROR) {
-        if (opt <= ARGS_HELP || opt >= NR_ARGS) {
+        if (opt < ARGS_HELP || opt >= NR_ARGS) {
             MsprofCmdUsage("");
             return nullptr;
+        }
+        if (opt == ARGS_HELP) {
+            params_->usedParams.clear();
+            params_->usedParams.insert(opt);
+            MsprofCmdUsage("");
+            return params_;
         }
         cmdInfo.args[opt] = MmGetOptArg();
         argvStr = std::string(argv[MmGetOptInd() - 1]);
@@ -111,9 +120,8 @@ SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> InputParser::MsprofGetOp
         }
     }
     auto paramAdapter = ParamsAdapterMsprof();
-    int ret = paramAdapter.GetParamFromInputCfg(argvMap, params_);
-    if (ret != PROFILING_SUCCESS) {
-        MsprofCmdUsage("Running profiling failed with invalid commandline argument");
+    if (paramAdapter.GetParamFromInputCfg(argvMap, params_) != PROFILING_SUCCESS) {
+        MSPROF_LOGE("[MsprofGetOpts]get param from InputCfg failed.");
         return nullptr;
     }
     return params_;
@@ -164,37 +172,45 @@ void Args::SetDetail(const std::string &detail)
     detail_ = detail;
 }
 
-ArgsManager::ArgsManager()
+ArgsManager::ArgsManager() : driverOnline_(false)
 {
+}
+
+ArgsManager::~ArgsManager()
+{
+    argsList_.clear();
+}
+
+void ArgsManager::Init()
+{
+    driverOnline_ = Platform::instance()->DriverAvailable();
     argsList_ = {
-    {"output", "Specify the directory that is used for storing data results."},
-    {"storage-limit", "Specify the output directory volume. range 200MB ~ 4294967296MB"},
-    {"application", "Specify application path, considering the risk of privilege escalation, please pay attention to\n"
-        "\t\t\t\t\t\t   the group of the application and confirm whether it is the same as the user currently"},
-    {"ascendcl", "Show acl profiling data, the default value is on.", ON},
-    {"model-execution", "Show ge model execution profiling data, the default value is off.", OFF},
-    {"runtime-api", "Show runtime api profiling data, the default value is off.", OFF},
-    {"task-time", "Show task profiling data, the default value is on.", ON},
-    {"ai-core", "Turn on / off the ai core profiling, the default value is on when collecting app Profiling.", ON},
-    {"aic-mode", "Set the aic profiling mode to task-based or sample-based.\n"
-                  "\t\t\t\t\t\t   In task-based mode, profiling data will be collected by tasks.\n"
-                  "\t\t\t\t\t\t   In sample-based mode, profiling data will be collected in a specific interval.\n"
-                  "\t\t\t\t\t\t   The default value is task-based.", TASK_BASED},
-    {"aic-freq", "The aic sampling frequency in hertz, "
-                "the default value is 100 Hz, the range is 1 to 100 Hz.", "100"},
-    {"aic-metrics", "The aic metrics groups, "
-        "include ArithmeticUtilization, PipeUtilization, "
-        "Memory, MemoryL0, ResourceConflictRatio, MemoryUB.\n"
-        "\t\t\t\t\t\t   the default value is PipeUtilization.", "PipeUtilization"},
-    {"environment", "User app custom environment variable configuration."},
-    {"sys-period", "Set total sampling period of system profiling in seconds."},
-    {"sys-devices", "Specify the profiling scope by device ID when collect sys profiling."
-                     "The value is all or ID list (split with ',')."},
-    {"hccl", "Show hccl profiling data, the default value is off.", OFF},
-    {"biu", "Show biu profiling data, the default value is off.", OFF},
-    {"biu-freq", "The biu sampling period in clock-cycle, "
-                "the default value is 1000 cycle, the range is 300 to 30000 cycle.", "1000"},
-    {"msproftx", "Show msproftx data, the default value is off.", OFF}
+        {"output", "Specify the directory that is used for storing data results.(full-platform)"},
+        {"storage-limit", "Specify the output directory volume. range 200MB ~ 4294967296MB.(full-platform)"},
+        {"application", "Specify application path, considering the risk of privilege escalation,\n"
+            "\t\t\t\t\t\t   please pay attention to the group of the application and \n"
+            "\t\t\t\t\t\t   confirm whether it is the same as the user currently.(full-platform)"},
+        {"ascendcl", "Show acl profiling data, the default value is on.(full-platform)", ON},
+        {"model-execution", "Show ge model execution profiling data, the default value is off.(full-platform)", OFF},
+        {"runtime-api", "Show runtime api profiling data, the default value is off.(full-platform)", OFF},
+        {"task-time", "Show task profiling data, the default value is on.(full-platform)", ON},
+        {"ai-core", "Turn on / off the ai core profiling, the default value is on when collecting\n"
+            "\t\t\t\t\t\t   app Profiling.(full-platform)", ON},
+        {"aic-mode", "Set the aic profiling mode to task-based or sample-based.(full-platform)\n"
+            "\t\t\t\t\t\t   In task-based mode, profiling data will be collected by tasks.\n"
+            "\t\t\t\t\t\t   In sample-based mode, profiling data will be collected in a specific interval.\n"
+            "\t\t\t\t\t\t   The default value is task-based.", TASK_BASED},
+        {"aic-freq", "The aic sampling frequency in hertz, the default value is 100 Hz, the range is\n"
+            "\t\t\t\t\t\t   1 to 100 Hz.(full-platform)", "100"},
+        {"aic-metrics", "The aic metrics groups, include ArithmeticUtilization, PipeUtilization,\n"
+            "\t\t\t\t\t\t   Memory, MemoryL0, ResourceConflictRatio, MemoryUB. the default value is\n"
+            "\t\t\t\t\t\t   PipeUtilization.(full-platform)", "PipeUtilization"},
+        {"environment", "User app custom environment variable configuration.(full-platform)"},
+        {"sys-period", "Set total sampling period of system profiling in seconds.(full-platform)"},
+        {"sys-devices", "Specify the profiling scope by device ID when collect sys profiling.\n"
+            "\t\t\t\t\t\t   The value is all or ID list (split with ',').(full-platform)"},
+        {"hccl", "Show hccl profiling data, the default value is off.(full-platform)", OFF},
+        {"msproftx", "Show msproftx data, the default value is off.(full-platform)", OFF}
     };
     AddAnalysisArgs();
     AddAicpuArgs();
@@ -206,80 +222,99 @@ ArgsManager::ArgsManager()
     AddInterArgs();
     AddDvvpArgs();
     AddL2Args();
+    AddBiuArgs();
     AddHostArgs();
     AddStarsArgs();
-    Args help = {"help", "help message."};
+    Args help = {"help", "help message.(full-platform)"};
     argsList_.push_back(help);
-}
-
-ArgsManager::~ArgsManager()
-{
-    argsList_.clear();
 }
 
 void ArgsManager::AddAnalysisArgs()
 {
-    if (ConfigManager::instance()->GetPlatformType() == PlatformType::MDC_TYPE ||
-        ConfigManager::instance()->GetPlatformType() == PlatformType::LHISI_TYPE) {
+    if (driverOnline_ && (ConfigManager::instance()->GetPlatformType() == PlatformType::MDC_TYPE ||
+        ConfigManager::instance()->GetPlatformType() == PlatformType::LHISI_TYPE)) {
         return;
     }
     std::vector<Args> argsList;
     argsList = {
-    {"python-path", "Specify the python interpreter path that is used for analysis, please ensure the python version"
-                " is 3.7.5 or later."},
-    {"parse", "Switch for using msprof to parse collecting data, the default value is off.", OFF},
-    {"query", "Switch for using msprof to query collecting data, the default value is off.", OFF},
-    {"export", "Switch for using msprof to export collecting data, the default value is off.", OFF},
-    {"iteration-id", "The export iteration id, only uesd when argument export is on, the default value is 1", "1"},
-    {"model-id", "The export model id, only uesd when argument export is on, "
-        "msprof will export minium accessible model by default.",
-        "-1"},
-    {"summary-format", "The export summary file format, only uesd when argument export is on, "
-        "include csv, json, the default value is csv.", "csv"}
+        {"python-path", "Specify the python interpreter path that is used for analysis, please\n"
+            "\t\t\t\t\t\t   ensure the python version is 3.7.5 or later.(full-platform)"},
+        {"parse", "Switch for using msprof to parse collecting data, the default value\n"
+            "\t\t\t\t\t\t   is off.(full-platform)", OFF},
+        {"query", "Switch for using msprof to query collecting data, the default value\n"
+            "\t\t\t\t\t\t   is off.(full-platform)", OFF},
+        {"export", "Switch for using msprof to export collecting data, the default value\n"
+            "\t\t\t\t\t\t   is off.(full-platform)", OFF},
+        {"iteration-id", "The export iteration id, only uesd when argument export is on,\n"
+            "\t\t\t\t\t\t   the default value is 1", "1"},
+        {"model-id", "The export model id, only uesd when argument export is on, msprof will\n"
+            "\t\t\t\t\t\t   export minium accessible model by default.(full-platform)", "-1"},
+        {"summary-format", "The export summary file format, only uesd when argument export is on,\n"
+            "\t\t\t\t\t\t   include csv, json, the default value is csv.(full-platform)", "csv"}
     };
     argsList_.insert(argsList_.end(), argsList.begin(), argsList.end());
 }
 
 void ArgsManager::AddStarsArgs()
 {
-    if (ConfigManager::instance()->GetPlatformType() != PlatformType::CHIP_V4_1_0) {
+    if (true || driverOnline_ && ConfigManager::instance()->GetPlatformType() != PlatformType::CHIP_V4_1_0) {
         return;
     }
 
-    Args lowPowerArgs = {"power", "Show low power profiling data, the default value is off."};
+    Args lowPowerArgs = {"power", "Show low power profiling data, the default value is off.(future-platform)"};
     argsList_.push_back(lowPowerArgs);
+}
+
+void ArgsManager::AddBiuArgs()
+{
+    if (true || driverOnline_ && ConfigManager::instance()->GetPlatformType() != PlatformType::CHIP_V4_1_0) {
+        return;
+    }
+    Args biu = {"biu", "Show biu profiling data, the default value is off.(future-platform)", OFF};
+    Args biuFreq = {"biu-freq",
+                    "The biu sampling period in clock-cycle, the default value is 1000 cycle,\n"
+                        "\t\t\t\t\t\t   the range is 300 to 30000 cycle.(future-platform)",
+                    "1000"};
+    argsList_.push_back(biu);
+    argsList_.push_back(biuFreq);
 }
 
 void ArgsManager::AddAicpuArgs()
 {
-    if (ConfigManager::instance()->GetPlatformType() == PlatformType::MDC_TYPE ||
-        ConfigManager::instance()->GetPlatformType() == PlatformType::LHISI_TYPE) {
+    if (driverOnline_ && (ConfigManager::instance()->GetPlatformType() == PlatformType::MDC_TYPE ||
+        ConfigManager::instance()->GetPlatformType() == PlatformType::LHISI_TYPE)) {
         return;
     }
-    Args aicpu = {"aicpu", "Show aicpu profiling data, the default value is off.", OFF};
+    Args aicpu = {"aicpu", "Show aicpu profiling data, the default value is off.(full-platform)", OFF};
     argsList_.push_back(aicpu);
 }
 
 void ArgsManager::AddAivArgs()
 {
-    if (ConfigManager::instance()->GetPlatformType() != PlatformType::MDC_TYPE &&
-        ConfigManager::instance()->GetPlatformType() != PlatformType::CHIP_V4_1_0) {
+    if (true || driverOnline_ && (ConfigManager::instance()->GetPlatformType() != PlatformType::MDC_TYPE &&
+        ConfigManager::instance()->GetPlatformType() != PlatformType::CHIP_V4_1_0)) {
         return;
     }
-    Args aiv = {"ai-vector-core", "Turn on / off the ai vector core profiling, the default value is on.", ON};
-    Args aivMode = {"aiv-mode", "Set the aiv profiling mode to task-based or sample-based.\n"
-        "\t\t\t\t\t\t   In task-based mode, profiling data will be collected by tasks.\n"
-        "\t\t\t\t\t\t   In sample-based mode, profiling data will be collected in a specific interval.\n"
-        "\t\t\t\t\t\t   The default value is task-based.",
-        TASK_BASED};
-    Args aivFreq = {"aiv-freq", "The aiv sampling frequency in hertz, "
-        "the default value is 100 Hz, the range is 1 to 100 Hz.",
-        "100"};
-    Args aivMetrics = {"aiv-metrics", "The aiv metrics groups, "
-        "include ArithmeticUtilization, PipeUtilization, "
-        "Memory, MemoryL0, ResourceConflictRatio, MemoryUB.\n"
-        "\t\t\t\t\t\t   the default value is PipeUtilization.",
-        "PipeUtilization"};
+    Args aiv = {"ai-vector-core",
+                "Turn on / off the ai vector core profiling, the default value\n"
+                    "\t\t\t\t\t\t   is on.(future-platform)",
+                ON};
+    Args aivMode = {"aiv-mode",
+                    "Set the aiv profiling mode to task-based or sample-based.(future-platform)\n"
+                        "\t\t\t\t\t\t   In task-based mode, profiling data will be collected by tasks.\n"
+                        "\t\t\t\t\t\t   In sample-based mode, profiling data will be collected "
+                        "in a specific interval.\n"
+                        "\t\t\t\t\t\t   The default value is task-based.",
+                    TASK_BASED};
+    Args aivFreq = {"aiv-freq",
+                    "The aiv sampling frequency in hertz, the default value is 100 Hz,\n"
+                        "\t\t\t\t\t\t   the range is 1 to 100 Hz.(future-platform)",
+                    "100"};
+    Args aivMetrics = {"aiv-metrics",
+                       "The aiv metrics groups, include ArithmeticUtilization, PipeUtilization,\n"
+                            "\t\t\t\t\t\t   Memory, MemoryL0, ResourceConflictRatio, MemoryUB. the default value\n"
+                            "\t\t\t\t\t\t   is PipeUtilization.(future-platform)",
+                       "PipeUtilization"};
     argsList_.push_back(aiv);
     argsList_.push_back(aivMode);
     argsList_.push_back(aivFreq);
@@ -288,58 +323,58 @@ void ArgsManager::AddAivArgs()
 
 void ArgsManager::AddHardWareMemArgs()
 {
-    if (ConfigManager::instance()->GetPlatformType() == PlatformType::LHISI_TYPE) {
+    if (driverOnline_ && ConfigManager::instance()->GetPlatformType() == PlatformType::LHISI_TYPE) {
         return;
     }
     auto hardwareMem = Args("sys-hardware-mem", "", OFF);
     auto hardwareMemFreq = Args("sys-hardware-mem-freq", "", "50");
-    auto llcProfiling = Args("llc-profiling", "", "capacity");
-    if (ConfigManager::instance()->GetPlatformType() == PlatformType::MINI_TYPE) {
-        hardwareMem.SetDetail("LLC, DDR acquisition switch, optional on / off, the default value is off.");
-        hardwareMemFreq.SetDetail("LLC, DDR acquisition frequency, range 1 ~ 1000, "
-                               "the default value is 50, unit Hz.");
-        llcProfiling.SetDetail("The llc profiling groups, include capacity, bandwidth. the default value is capacity.");
-    } else {
-        hardwareMem.SetDetail("LLC, DDR, HBM acquisition switch.");
-        hardwareMemFreq.SetDetail("LLC, DDR,HBM acquisition frequency, range 1 ~ 1000, "
-                               "the default value is 50, unit Hz.");
-        llcProfiling.SetDetail("The llc profiling groups, include read, write. the default value is read.");
-    }
+    auto llcGroup = Args("llc-profiling", "", "capacity");
+    hardwareMem.SetDetail("LLC, DDR, HBM acquisition switch, optional on / off, the default value is off.\n"
+                              "\t\t\t\t\t\t   LLC, DDR(full-platform), HBM(Ascend310P, Ascend910)");
+    hardwareMemFreq.SetDetail("LLC, DDR, HBM acquisition frequency, range 1 ~ 1000, the default value is 50 Hz.\n"
+                                  "\t\t\t\t\t\t   LLC, DDR(full-platform), HBM(Ascend310P, Ascend910)");
+    llcGroup.SetDetail("The llc profiling groups.\n"
+                           "\t\t\t\t\t\t   include capacity, bandwidth. the default value is capacity.(Ascend310)\n"
+                           "\t\t\t\t\t\t   include read, write. the default value is read.(Ascend310P, Ascend910)");
     argsList_.push_back(hardwareMem);
     argsList_.push_back(hardwareMemFreq);
-    argsList_.push_back(llcProfiling);
+    argsList_.push_back(llcGroup);
 }
 
 void ArgsManager::AddCpuArgs()
 {
-    if (ConfigManager::instance()->GetPlatformType() == PlatformType::LHISI_TYPE) {
+    if (driverOnline_ && ConfigManager::instance()->GetPlatformType() == PlatformType::LHISI_TYPE) {
         return;
     }
-    Args cpu = Args("sys-cpu-profiling", "The CPU acquisition switch, optional on / off,"
-        "the default value is off.",
-        OFF);
-    Args cpuFreq =  {"sys-cpu-freq", "The cpu sampling frequency in hertz. "
-        "the default value is 50 Hz, the range is 1 to 50 Hz.",
-        "50"};
+    Args cpu = Args("sys-cpu-profiling",
+                    "The CPU acquisition switch, optional on / off, the default value\n"
+                        "\t\t\t\t\t\t   is off.(full-platform)", OFF);
+    Args cpuFreq = {"sys-cpu-freq",
+                    "The cpu sampling frequency in hertz. the default value\n"
+                        "\t\t\t\t\t\t   is 50 Hz, the range is 1 to 50 Hz.(full-platform)",
+                    "50"};
     argsList_.push_back(cpu);
     argsList_.push_back(cpuFreq);
 }
 
 void ArgsManager::AddSysArgs()
 {
-    Args sysProfiling = {"sys-profiling", "The System CPU usage and system memory acquisition switch,"
-        "the default value is off.",
-        OFF};
-    Args sysFreq = {"sys-sampling-freq", "The sys sampling frequency in hertz. "
-        "the default value is 10 Hz, the range is 1 to 10 Hz.",
-        "10"};
+    Args sysProfiling = {"sys-profiling",
+                         "The System CPU usage and system memory acquisition switch,\n"
+                             "\t\t\t\t\t\t   the default value is off.(full-platform)",
+                         OFF};
+    Args sysFreq = {"sys-sampling-freq",
+                    "The sys sampling frequency in hertz. the default value\n"
+                        "\t\t\t\t\t\t   is 10 Hz, the range is 1 to 10 Hz.(full-platform)",
+                    "10"};
     Args pidProfiling = {"sys-pid-profiling",
-        "The CPU usage of the process and the memory acquisition switch of the process,"
-        "the default value is off.",
-        OFF};
-    Args pidFreq = {"sys-pid-sampling-freq", "The pid sampling frequency in hertz. "
-        "the default value is 10 Hz, the range is 1 to 10 Hz.",
-        "10"};
+                         "The CPU usage of the process and the memory acquisition\n"
+                             "\t\t\t\t\t\t   switch of the process, the default value is off.(full-platform)",
+                         OFF};
+    Args pidFreq = {"sys-pid-sampling-freq",
+                    "The pid sampling frequency in hertz. the default value is 10 Hz,\n"
+                        "\t\t\t\t\t\t   the range is 1 to 10 Hz.(full-platform)",
+                    "10"};
     argsList_.push_back(sysProfiling);
     argsList_.push_back(sysFreq);
     argsList_.push_back(pidProfiling);
@@ -348,78 +383,68 @@ void ArgsManager::AddSysArgs()
 
 void ArgsManager::AddIoArgs()
 {
-    if (ConfigManager::instance()->GetPlatformType() == PlatformType::LHISI_TYPE ||
+    if (driverOnline_ && (ConfigManager::instance()->GetPlatformType() == PlatformType::LHISI_TYPE ||
         ConfigManager::instance()->GetPlatformType() == PlatformType::DC_TYPE ||
-        ConfigManager::instance()->GetPlatformType() == PlatformType::MDC_TYPE) {
+        ConfigManager::instance()->GetPlatformType() == PlatformType::MDC_TYPE)) {
         return;
     }
-    Args ioArgs = {"sys-io-profiling", "NIC acquisition switch, the default value is off.", OFF};
-    Args ioFreqArgs = {"sys-io-sampling-freq", "NIC acquisition frequency, range 1 ~ 100, "
-        "the default value is 100, unit Hz.",
-        "100"};
-
-    if (ConfigManager::instance()->GetPlatformType() == PlatformType::CLOUD_TYPE ||
-        ConfigManager::instance()->GetPlatformType() == PlatformType::CHIP_V4_1_0) {
-        ioArgs.SetDetail("NIC, ROCE acquisition switch, the default value is off.");
-        ioFreqArgs.SetDetail("NIC, ROCE acquisition frequency, range 1 ~ 100, "
-                               "the default value is 100, unit Hz.");
-    }
+    Args ioArgs = {"sys-io-profiling",
+                   "NIC ROCE acquisition switch, the default value is off.\n"
+                        "\t\t\t\t\t\t   NIC(Ascend310, Ascend910), ROCE(Ascend910)",
+                   OFF};
+    Args ioFreqArgs = {"sys-io-sampling-freq",
+                       "NIC ROCE acquisition frequency, range 1 ~ 100, the default value is 100 Hz.\n"
+                           "\t\t\t\t\t\t   NIC(Ascend310, Ascend910), ROCE(Ascend910)",
+                       "100"};
     argsList_.push_back(ioArgs);
     argsList_.push_back(ioFreqArgs);
 }
 
 void ArgsManager::AddInterArgs()
 {
-    if (ConfigManager::instance()->GetPlatformType() == PlatformType::LHISI_TYPE ||
+    if (driverOnline_ && (ConfigManager::instance()->GetPlatformType() == PlatformType::LHISI_TYPE ||
         ConfigManager::instance()->GetPlatformType() == PlatformType::MINI_TYPE ||
-        ConfigManager::instance()->GetPlatformType() == PlatformType::MDC_TYPE) {
+        ConfigManager::instance()->GetPlatformType() == PlatformType::MDC_TYPE)) {
         return;
     }
     Args interArgs = {"sys-interconnection-profiling",
-        "PCIE, HCCS acquisition switch, the default value is off.",
-        OFF};
-    Args interFreq = {"sys-interconnection-freq", "PCIE, HCCS acquisition frequency, range 1 ~ 50, "
-        "the default value is 50, unit Hz.",
-        "50"};
-    if (ConfigManager::instance()->GetPlatformType() != PlatformType::CLOUD_TYPE &&
-        ConfigManager::instance()->GetPlatformType() != PlatformType::CHIP_V4_1_0) {
-        interArgs = {"sys-interconnection-profiling",
-            "PCIE acquisition switch, the default value is off.",
-            OFF};
-        interFreq = {"sys-interconnection-freq", "PCIE acquisition frequency, range 1 ~ 50, "
-            "the default value is 50, unit Hz.", "50"};
-    }
+                      "PCIE, HCCS acquisition switch, the default value is off.\n"
+                          "\t\t\t\t\t\t   PCIE(Ascend310P, Ascend910), HCCS(Ascend910)",
+                      OFF};
+    Args interFreq = {"sys-interconnection-freq",
+                      "PCIE, HCCS acquisition frequency, range 1 ~ 50, the default value is 50 Hz.\n"
+                          "\t\t\t\t\t\t   PCIE(Ascend310P, Ascend910), HCCS(Ascend910)",
+                      "50"};
     argsList_.push_back(interArgs);
     argsList_.push_back(interFreq);
 }
 
 void ArgsManager::AddDvvpArgs()
 {
-    if (ConfigManager::instance()->GetPlatformType() == PlatformType::LHISI_TYPE) {
+    if (driverOnline_ && ConfigManager::instance()->GetPlatformType() == PlatformType::LHISI_TYPE) {
         return;
     }
-    Args dvpp = {"dvpp-profiling",
-        "DVPP acquisition switch, the default value is off.",
-        OFF};
-    Args dvppFreq = {"dvpp-freq", "DVPP acquisition frequency, range 1 ~ 100, "
-        "the default value is 50, unit Hz.",
-        "50"};
+    Args dvpp = {"dvpp-profiling", "DVPP acquisition switch, the default value is off.(full-platform)", OFF};
+    Args dvppFreq = {"dvpp-freq",
+                     "DVPP acquisition frequency, range 1 ~ 100, the default value is 50 Hz.(full-platform)",
+                     "50"};
     argsList_.push_back(dvpp);
     argsList_.push_back(dvppFreq);
 }
 
 void ArgsManager::AddL2Args()
 {
-    if (ConfigManager::instance()->GetPlatformType() == PlatformType::LHISI_TYPE ||
-        ConfigManager::instance()->GetPlatformType() == PlatformType::MINI_TYPE) {
+    if (driverOnline_ && (ConfigManager::instance()->GetPlatformType() == PlatformType::LHISI_TYPE ||
+        ConfigManager::instance()->GetPlatformType() == PlatformType::MINI_TYPE)) {
         return;
     }
-    Args l2 = {"l2", "L2 Cache acquisition switch. the default value is off.", OFF};
+    Args l2 = {"l2", "L2 Cache acquisition switch. the default value is off.(Ascend310P, Ascend910)", OFF};
     argsList_.push_back(l2);
 }
 
 void ArgsManager::PrintHelp()
 {
+    Init();
     std::cout << std::endl << "Usage:" << std::endl;
     std::cout << "      ./msprof [--options]" << std::endl << std::endl;
     std::cout << "Options:" << std::endl;
@@ -430,18 +455,28 @@ void ArgsManager::PrintHelp()
 
 void ArgsManager::AddHostArgs()
 {
-    if (Platform::instance()->RunSocSide()) {
+    if (driverOnline_ && Platform::instance()->RunSocSide()) {
         return;
     }
 #if (defined(_WIN32) || defined(_WIN64) || defined(_MSC_VER))
     return;
 #endif
-    Args hostSys = {"host-sys", "The host-sys data type, include cpu, mem, disk, network, osrt",
+    Args hostSys = {"host-sys", "The host-sys data type, include cpu, mem, disk, network, osrt.(full-platform)",
         HOST_SYS_CPU};
-    Args hostSysPid = {"host-sys-pid", "Set the PID of the app process for "
-        "which you want to collect performance data."};
+    Args hostSysPid = {"host-sys-pid",
+                       "Set the PID of the app process for which you want to collect\n"
+                           "\t\t\t\t\t\t   performance data.(full-platform)"};
+    Args hostSysUsage = {"host-sys-usage",
+                         "The host-sys-usage data type, include cpu, mem.(full-platform)",
+                         HOST_SYS_CPU};
+    Args hostSysUsageFreq = {"host-sys-usage-freq",
+                             "The sampling frequency in hertz. the default value\n"
+                                 "\t\t\t\t\t\t   is 50 Hz, the range is 1 to 50 Hz.(full-platform)",
+                             "50"};
     argsList_.push_back(hostSys);
     argsList_.push_back(hostSysPid);
+    argsList_.push_back(hostSysUsage);
+    argsList_.push_back(hostSysUsageFreq);
 }
 }
 }

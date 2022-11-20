@@ -90,6 +90,10 @@ std::string AnalyzerGe::GetOpType(const std::string &opId)
 void AnalyzerGe::ParseIdMap(CONST_CHAR_PTR data, uint32_t len)
 {
     auto idMapData = reinterpret_cast<const MsprofGeProfIdMapData *>(data);
+    if (idMapData == nullptr) {
+        MSPROF_LOGE("Failed to call reinterpret_cast.");
+        return;
+    }
     int32_t remaindLen = static_cast<int32_t>(len);
     for (; remaindLen >= GE_ID_MAP_SIZE; remaindLen -= GE_ID_MAP_SIZE, idMapData++) {
         if (idMapData->magicNumber != MSPROF_DATA_HEAD_MAGIC_NUM ||
@@ -163,6 +167,10 @@ void AnalyzerGe::ParseOpType(const MsprofGeProfTaskData &data, struct GeOpInfo &
 int32_t AnalyzerGe::ParseOpData(CONST_CHAR_PTR data)
 {
     auto geTaskData = reinterpret_cast<const MsprofGeProfTaskData *>(data);
+    if (geTaskData == nullptr) {
+        MSPROF_LOGE("Failed to call reinterpret_cast.");
+        return PROFILING_FAILED;
+    }
     if (geTaskData->magicNumber != MSPROF_DATA_HEAD_MAGIC_NUM ||
         geTaskData->dataTag != MSPROF_GE_DATA_TAG_TASK ||
         geTaskData->opName.type > MSPROF_MIX_DATA_STRING ||

@@ -45,25 +45,6 @@ class InfoConfReader:
         self._host_mon = 0
         self._dev_cnt = 0
 
-    @classmethod
-    def get_json_tid_data(cls: any) -> int:
-        """
-        get timeline json tid data
-        """
-        return TraceViewHeaderConstant.DEFAULT_TID_VALUE
-
-    @classmethod
-    def get_conf_file_path(cls: any, project_path: str, conf_patterns: tuple) -> str:
-        """
-        get the config file path with pattern
-        """
-        for _file in os.listdir(project_path):
-            for conf_pattern in conf_patterns:
-                if conf_pattern.match(_file) \
-                        and is_valid_original_data(_file, project_path, is_conf=True):
-                    return os.path.join(project_path, _file)
-        return ""
-
     @staticmethod
     def __get_json_data(info_json_path: str) -> dict:
         """
@@ -84,6 +65,25 @@ class InfoConfReader:
             logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
             logging.error("json data decode fail")
             return {}
+
+    @classmethod
+    def get_json_tid_data(cls: any) -> int:
+        """
+        get timeline json tid data
+        """
+        return TraceViewHeaderConstant.DEFAULT_TID_VALUE
+
+    @classmethod
+    def get_conf_file_path(cls: any, project_path: str, conf_patterns: tuple) -> str:
+        """
+        get the config file path with pattern
+        """
+        for _file in os.listdir(project_path):
+            for conf_pattern in conf_patterns:
+                if conf_pattern.match(_file) \
+                        and is_valid_original_data(_file, project_path, is_conf=True):
+                    return os.path.join(project_path, _file)
+        return ""
 
     def load_info(self: any, result_path: str) -> None:
         """
@@ -150,14 +150,13 @@ class InfoConfReader:
         """
         freq = str(self.get_data_under_device("{}_frequency".format(search_type)))
         try:
-            if not freq or (not freq.isdigit and freq != self.FREQ) or float(freq) <= 0:
-                print_msg("unable to get %s frequency.", search_type)
+            if not freq or float(freq) <= 0:
                 logging.error("unable to get %s frequency.", search_type)
                 raise ProfException(ProfException.PROF_SYSTEM_EXIT)
-            return float(freq) * 1000000.0
-        except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
+        except (ValueError, TypeError) as err:
             logging.error(err)
             raise ProfException(ProfException.PROF_SYSTEM_EXIT) from err
+        return float(freq) * 1000000.0
 
     def get_collect_time(self: any) -> tuple:
         """

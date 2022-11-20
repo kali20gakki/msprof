@@ -24,11 +24,13 @@ class ParsingMemoryData(MsMultiProcess):
     """
 
     PID_DATA_PATTERN = r'(\d+) (\d+) (\d+) (\d+) (\d+) (\d+) (\d+)'
-    SYS_DATA_METRIC = ('MemTotal', 'MemFree', 'Buffers', 'Cached', 'Shmem', 'CommitLimit',
-                       'Committed_AS', 'HugePages_Total', 'HugePages_Free')
+    SYS_DATA_METRIC = (
+        'MemTotal', 'MemFree', 'Buffers', 'Cached', 'Shmem', 'CommitLimit',
+        'Committed_AS', 'HugePages_Total', 'HugePages_Free'
+    )
 
     def __init__(self: any, file_list: dict, sample_config: dict) -> None:
-        MsMultiProcess.__init__(self, sample_config)
+        super().__init__(sample_config)
         self.project_path = sample_config.get("result_dir", "")
         self._file_list = file_list
         self.device_id = self.sample_config.get("device_id", "0")
@@ -61,7 +63,7 @@ class ParsingMemoryData(MsMultiProcess):
         elif re.match(r'{}:'.format(self.SYS_DATA_METRIC[8]), line):
             tmp_list[9] = line.split(':')[1].strip()
         elif line == '\n':
-            self.data_dict.get('sys_data_list', []).append(tmp_list)
+            self.data_dict.setdefault('sys_data_list', []).append(tmp_list)
             tmp_list = [None, None, None, None, None, None, None, None, None, None, None]
             match_flag = False
 
@@ -162,7 +164,7 @@ class ParsingMemoryData(MsMultiProcess):
                     tmp_list[2], tmp_list[3], tmp_list[4], _, _, _, _ = result.groups()
             if line == '\n':
                 tmp_list.append(pid)
-                self.data_dict.get('pid_data_list', []).append(tmp_list)
+                self.data_dict.setdefault('pid_data_list', []).append(tmp_list)
                 tmp_list = [None, None, None, None, None]
                 match_flag = False
             if not line:

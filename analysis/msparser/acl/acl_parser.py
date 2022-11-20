@@ -38,13 +38,10 @@ class AclParser(IParser, MsMultiProcess):
         Grouping Files
         :return: dict
         """
-        result_dict = {'acl_model': [],
-                       'acl_op': [],
-                       'acl_rts': [],
-                       'acl_others': []}
+        result_dict = {'acl_model': [], 'acl_op': [], 'acl_rts': [], 'acl_others': []}
         for file in file_list:
             if file.split('.')[1] in result_dict.keys():
-                result_dict.get(file.split('.')[1], []).append(file)
+                result_dict.setdefault(file.split('.')[1], []).append(file)
         return result_dict
 
     def parse(self: any) -> None:

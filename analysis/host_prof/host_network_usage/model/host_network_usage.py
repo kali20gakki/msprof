@@ -49,8 +49,7 @@ class HostNetworkUsage(HostProfDataBase):
 
         result = []
         for network_item in network_info_list:
-            time_network = {"start": network_item[0], "end": network_item[1],
-                            "usage": network_item[2]}
+            time_network = {"start": network_item[0], "end": network_item[1], "usage": network_item[2]}
             result.append(time_network)
 
         return {"data": result}

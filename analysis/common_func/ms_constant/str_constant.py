@@ -69,7 +69,6 @@ class StrConstant:
     FILE_SUFFIX_CSV = ".csv"
     DATA_TYPE = "data_type"
     CORE_DATA_TYPE = "core_data_type"
-    EXPORTDATA_INI = "ExportData.ini"
     CONFIG_HANDLER = "handler"
     CONFIG_HEADERS = "headers"
     CONFIG_DB = "db"
@@ -81,8 +80,8 @@ class StrConstant:
 
     AICORE_PROFILING_MODE = "ai_core_profiling_mode"
     AIV_PROFILING_MODE = "aiv_profiling_mode"
-    AI_CORE_PMU_EVENTS = "ai_core_pmu_events"
-    AI_VECTOR_CORE_PMU_EVENTS = "ai_vector_core_pmu_events"
+    AI_CORE_PMU_EVENTS = "ai_core_profiling_events"
+    AI_VECTOR_CORE_PMU_EVENTS = "aiv_profiling_events"
     AI_CORE_PROFILING_METRICS = "ai_core_metrics"
     AI_VECTOR_CORE_PROFILING_METRICS = "aiv_metrics"
     AIV_PROFILING_METRICS = "aiv_metrics"
@@ -91,7 +90,12 @@ class StrConstant:
     HOST_DISK_FREQ = "host_disk_freq"
     DATA_PATH = "data"
     TIMELINE_PATH = "timeline"
-    AI_CORE_ORG_TABLE = "RuntimeTrack"
+    AIC_TASK_BASED_MODE = "task-based"
+    AIC_SAMPLE_BASED_MODE = "sample-based"
+
+    # pmu task type
+    CONTEXT_PMU_TYPE = 'context_task'
+    BLOCK_PMU_TYPE = 'block_task'
 
     MAC_RATIO = "mac_ratio"
     VEC_RATIO = "vec_ratio"
@@ -164,10 +168,6 @@ class StrConstant:
         "": ""
     }
 
-    CPU_CONFIG_TYPE = {
-        "ts_cpu": "TsCPU.ini", "ai_cpu": "AICPU.ini", "ai_core": "AICore.ini", "ctrl_cpu": "CtrlCPU.ini"
-    }
-
     DVPP_ENGINE_TYPE = {
         "0": "VDEC",
         "1": "JPEGD",
@@ -175,7 +175,8 @@ class StrConstant:
         "3": "JPEGE",
         "4": "VPC",
         "5": "VENC",
-        "6": "SCD"}
+        "6": "SCD"
+    }
 
     OPERATOR_PLUS = '+'
     OPERATOR_MINUS = '-'

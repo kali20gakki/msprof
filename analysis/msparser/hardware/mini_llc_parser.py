@@ -27,7 +27,7 @@ class MiniLLCParser(MsMultiProcess):
     SPLIT_FMT = "/"
 
     def __init__(self: any, file_list: dict, sample_config: dict) -> None:
-        MsMultiProcess.__init__(self, sample_config)
+        super().__init__(sample_config)
         self._file_list = file_list.get(DataTag.LLC, [])
         self.sample_config = sample_config
         self.project_path = self.sample_config.get("result_dir")
@@ -104,8 +104,8 @@ class MiniLLCParser(MsMultiProcess):
             logging.error("%s: %s", file_name, err, exc_info=Constant.TRACE_BACK_SWITCH)
             return
 
-        self.llc_data.get('metric', []).append(list(self.metric_tmp.values()))
-        self.llc_data.get('dsid', []).append(list(self.dsid_tmp.values()))
+        self.llc_data.setdefault('metric', []).append(list(self.metric_tmp.values()))
+        self.llc_data.setdefault('dsid', []).append(list(self.dsid_tmp.values()))
 
     def start_parsing_data_file(self: any) -> None:
         """
@@ -147,7 +147,7 @@ class MiniLLCParser(MsMultiProcess):
 
     def _update_line(self: any, line: list, start_time: int, headers: list) -> None:
         line[0] = start_time + float(line[0])
-        self.llc_data.get('original_data', []).append(headers + line)
+        self.llc_data.setdefault('original_data', []).append(headers + line)
         if line[-1].startswith("dsid"):
             self.handle_llc_data(self.dsid_tmp, line, self.llc_data.get('dsid', []), headers[0],
                                  headers[1])

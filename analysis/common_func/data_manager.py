@@ -16,6 +16,23 @@ class DataManager:
     AI_CPU_TASK_TYPE = 1
     AI_VECTOR_CORE_TASK_TYPE = 66
 
+    @staticmethod
+    def get_op_dict(project_path: str) -> dict:
+        """
+        get operator dictionary with task id and stream id
+        """
+        model_view = ViewModel(project_path, DBNameConstant.DB_GE_INFO, [DBNameConstant.TABLE_GE_TASK])
+        model_view.check_table()
+        used_cols = "op_name, task_id, stream_id"
+        search_data_sql = "select {1} from {0} order by rowid" \
+            .format(DBNameConstant.TABLE_GE_TASK, used_cols)
+        data = model_view.get_sql_data(search_data_sql)
+        task_op_dict = {}
+        for sub in data:
+            key = "{}-{}".format(sub[1], sub[2])  # key is task_id-stream_id
+            task_op_dict[key] = sub[0]  # value is op_name
+        return task_op_dict
+
     @classmethod
     def add_memory_bound(cls: any, headers: list, data: list) -> None:
         """
@@ -56,20 +73,3 @@ class DataManager:
             data[row_num] = list(row)
             data[row_num].append(iter_id)
         return True
-
-    @staticmethod
-    def get_op_dict(project_path: str) -> dict:
-        """
-        get operator dictionary with task id and stream id
-        """
-        model_view = ViewModel(project_path, DBNameConstant.DB_GE_INFO, [DBNameConstant.TABLE_GE_TASK])
-        model_view.check_table()
-        used_cols = "op_name, task_id, stream_id"
-        search_data_sql = "select {1} from {0} order by rowid" \
-            .format(DBNameConstant.TABLE_GE_TASK, used_cols)
-        data = model_view.get_sql_data(search_data_sql)
-        task_op_dict = {}
-        for sub in data:
-            key = "{}-{}".format(sub[1], sub[2])  # key is task_id-stream_id
-            task_op_dict[key] = sub[0]  # value is op_name
-        return task_op_dict

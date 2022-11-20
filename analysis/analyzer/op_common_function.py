@@ -12,9 +12,58 @@ class OpCommonFunc:
     """
 
     TASK_TIME_COL_NUM = 8
-    TRAIN_OP_TASK_TIME_COL_NUM = 7
     TASK_ID = "task_id"
     BATCH_ID = "batch_id"
+
+    @staticmethod
+    def _is_valid_num(data: float) -> bool:
+        """check if a num is valid"""
+        if data is None or (not isinstance(data, (int, float)) and not data.isdigit()):
+            return False
+        return True
+
+    @staticmethod
+    def _get_wait_time(row_num: int, time_data: float, previous_complete_time: int) -> float:
+        """
+        get wait time
+        :param time_data:
+        :param per:
+        :return:
+        """
+        if row_num == 0 or (int(time_data) - previous_complete_time) < 0:
+            return 0
+        return int(time_data) - previous_complete_time
+
+    @classmethod
+    def calculate_task_time(cls: any, data: list) -> list:
+        """
+        calculate task time data
+        Return: task time data
+        """
+        res = Utils.generator_to_list(Utils.generator_to_list(0 for _ in range(cls.TASK_TIME_COL_NUM))
+                                      for _ in range(len(data)))
+        previous_complete_time = 0
+        for row_num, content in enumerate(data):
+            # each row contains task id, stream id, start time,
+            # duration time, wait time and device id
+            if not cls._is_valid_num(float(content[2])) or \
+                    not cls._is_valid_num(float(content[3])):
+                continue
+            res[row_num][0] = content[0]  # task id
+            res[row_num][1] = content[1]  # stream id
+            res[row_num][2] = float(content[2])  # start time
+            res[row_num][3] = float(content[3])  # duration time
+            # wait time
+            res[row_num][4] = cls._get_wait_time(row_num, float(content[2]), previous_complete_time)
+            res[row_num][5] = content[4]
+            res[row_num][6] = content[5]  # index_id
+            res[row_num][7] = content[6]  # model_id or batch_id
+            if not ProfilingScene().is_operator():
+                res[row_num].append(content[7])  # batch_id
+            # index -1 is subtask_id
+            res[row_num].append(content[-1])
+            previous_complete_time = float(content[2]) + float(content[3])
+        return res
 
     @classmethod
     def deal_batch_id(cls: any, stream_index: int, task_index: int, merge_data: list) -> list:
@@ -40,56 +89,3 @@ class OpCommonFunc:
                 stream_max_value.setdefault(stream_id, current_max_value)
             result[index] = list(ge_data) + [stream_max_value.get(stream_id).get(cls.BATCH_ID)]
         return result
-
-    @classmethod
-    def calculate_task_time(cls: any, data: list) -> list:
-        """
-        calculate task time data
-        Return: task time data
-        """
-        task_time_col_num = cls.TRAIN_OP_TASK_TIME_COL_NUM
-        if not ProfilingScene().is_operator():
-            task_time_col_num = cls.TASK_TIME_COL_NUM
-        res = Utils.generator_to_list(Utils.generator_to_list(0 for _ in range(task_time_col_num))
-                                      for _ in range(len(data)))
-        previous_complete_time = 0
-        for row_num, content in enumerate(data):
-            # each row contains task id, stream id, start time,
-            # duration time, wait time and device id
-            if not cls._is_valid_num(float(content[2])) or \
-                    not cls._is_valid_num(float(content[3])):
-                continue
-            res[row_num][0] = content[0]  # task id
-            res[row_num][1] = content[1]  # stream id
-            res[row_num][2] = float(content[2])  # start time
-            res[row_num][3] = float(content[3])  # duration time
-            # wait time
-            res[row_num][4] = cls._get_wait_time(row_num, float(content[2]), previous_complete_time)
-            res[row_num][5] = content[4]
-            res[row_num][6] = content[5]  # index_id
-            if not ProfilingScene().is_operator():
-                res[row_num][7] = content[6]  # model_id
-
-            # index -1 is batch_id
-            res[row_num].append(content[-1])
-            previous_complete_time = float(content[2]) + float(content[3])
-        return res
-
-    @staticmethod
-    def _is_valid_num(data: float) -> bool:
-        """check if a num is valid"""
-        if data is None or (not isinstance(data, (int, float)) and not data.isdigit()):
-            return False
-        return True
-
-    @staticmethod
-    def _get_wait_time(row_num: int, time_data: float, previous_complete_time: int) -> float:
-        """
-        get wait time
-        :param time_data:
-        :param per:
-        :return:
-        """
-        if row_num == 0 or (int(time_data) - previous_complete_time) < 0:
-            return 0
-        return int(time_data) - previous_complete_time

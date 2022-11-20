@@ -9,11 +9,11 @@ class CommonProfRule:
     """
     # rule json key and value
     RULE_PROF = "prof_rules"
-    RULE_ID = "rule_id"
-    RULE_CONDITION = "rule_condition"
-    RULE_TYPE = "rule_type"
-    RULE_SUBTYPE = "rule_subtype"
-    RULE_SUGGESTION = "rule_suggestion"
+    RULE_ID = "Rule Id"
+    RULE_CONDITION = "Rule Condition"
+    RULE_TYPE = "Rule Type"
+    RULE_SUBTYPE = "Rule Subtype"
+    RULE_SUGGESTION = "Rule Suggestion"
 
     # condition json key and value
     CONDITIONS = "conditions"
@@ -24,33 +24,28 @@ class CommonProfRule:
     CONDITION_CMP = "cmp"
     CONDITION_DEPENDENCY = "dependency"
     CONDITION_THRESHOLD = "threshold"
+    CONDITION_ACCUMULATE = "accumulate"
+    CONDITION_COMPARE = "compare"
 
     COND_TYPE_NORMAL = "normal"
     COND_TYPE_FORMULA = "formula"
     COND_TYPE_COUNT = "count"
+    COND_TYPE_ACCUMULATE = "accumulate"
 
     # return json key and value
-    RESULT_RULE_TYPE = "rule_type"
-    RESULT_RULE_SUBTYPE = "rule_subtype"
-    RESULT_RULE_SUGGESTION = "rule_suggestion"
-    RESULT_OP_LIST = "op_list"
+    RESULT_RULE_TYPE = "Rule Type"
+    RESULT_RULE_SUBTYPE = "Rule Subtype"
+    RESULT_RULE_SUGGESTION = "Rule Suggestion"
+    RESULT_OP_LIST = "Op List"
     RESULT_KEY = "result"
 
-    RESULT_MODEL_COMPUTATION = "Model/Operator Computation"
-    RESULT_MODEL_MEMORY = "Model/Operator Memory"
+    RESULT_MODEL_COMPUTATION = "Computation"
+    RESULT_MODEL_MEMORY = "Memory"
     RESULT_OPERATOR_SCHEDULE = "Operator Schedule"
     RESULT_OPERATOR_PROCESSING = "Operator Processing"
     RESULT_OPERATOR_METRICS = "Operator Metrics"
 
-    # support rules
-    SUPPORT_RULE_CONF = "tuning_rule.ini"
-    PROF_RULES = "prof_rules"
-    OPERATOR_RULES = "operator_rules"
-    NETWORK_RULES = "network_rules"
-
     # prof rule and condition file name
-    PROF_CONDITION_JSON = "prof_condition.json"
-    PROF_RULE_JSON = "prof_rule.json"
     RESULT_PROF_JSON = "prof_rule_{}.json"
 
     def get_common_prof_rule_class_name(self: any) -> any:

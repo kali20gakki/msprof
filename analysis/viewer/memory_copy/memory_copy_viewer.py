@@ -123,8 +123,10 @@ class MemoryCopyViewer:
                                     ("Start Time", datum[3]),
                                     ("End Time", datum[4])])
 
-                timeline_datum = [datum[0], NumberConstant.TASK_TIME_PID, datum[6],
-                                  datum[3], datum[5], args]
+                timeline_datum = [
+                    datum[0], NumberConstant.TASK_TIME_PID, datum[6],
+                    datum[3], datum[5], args
+                ]
                 timeline_data.append(timeline_datum)
 
         return TraceViewManager.time_graph_trace(

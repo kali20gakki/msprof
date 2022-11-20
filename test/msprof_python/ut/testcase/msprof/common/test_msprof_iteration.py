@@ -1,14 +1,13 @@
+import sqlite3
 import unittest
 from collections import OrderedDict
 from unittest import mock
 
+from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.msprof_iteration import MsprofIteration
-from common_func.db_name_constant import DBNameConstant
-
 from constant.constant import INFO_JSON
 from sqlite.db_manager import DBManager
-import sqlite3
 
 NAMESPACE = 'common_func.msprof_iteration'
 
@@ -43,14 +42,14 @@ class TestMsprofIteration(unittest.TestCase):
         db_manager = DBManager()
         res = db_manager.create_table("step_trace.db", create_sql, insert_sql, data)
         with mock.patch(NAMESPACE + '.PathManager.get_db_path', return_value="step_trace.db"), \
-             mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=res), \
-             mock.patch(NAMESPACE + '.DBManager.check_tables_in_db', return_value=True):
+                mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=res), \
+                mock.patch(NAMESPACE + '.DBManager.check_tables_in_db', return_value=True):
             key = MsprofIteration('123')
             InfoConfReader()._info_json = INFO_JSON
             result = key.get_step_iteration_time(index_id, model_id)
         self.assertEqual(len(result), 2)
         with mock.patch(NAMESPACE + '.MsprofIteration._get_iteration_time', side_effect=sqlite3.Error), \
-             mock.patch(NAMESPACE + '.logging.error'):
+                mock.patch(NAMESPACE + '.logging.error'):
             key = MsprofIteration('123')
             result = key.get_step_iteration_time(index_id, model_id)
         self.assertEqual(result, [])
@@ -76,8 +75,8 @@ class TestMsprofIteration(unittest.TestCase):
         res = db_manager.create_table("step_trace.db", create_sql, insert_sql, data)
         InfoConfReader()._info_json = {'pid': 1, "DeviceInfo": [{'hwts_frequency': 1000}]}
         with mock.patch(NAMESPACE + '.PathManager.get_db_path', return_value="step_trace.db"), \
-             mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=res), \
-             mock.patch(NAMESPACE + '.DBManager.check_tables_in_db', return_value=True):
+                mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=res), \
+                mock.patch(NAMESPACE + '.DBManager.check_tables_in_db', return_value=True):
             key = MsprofIteration('123')
             result = key._generate_trace_result(key.get_step_iteration_time(index_id, model_id))
         self.assertEqual(result, [(0.0, 118571743.67199999)])
@@ -100,7 +99,7 @@ class TestMsprofIteration(unittest.TestCase):
         db_manager = DBManager()
         res = db_manager.create_table("trace.db", create_sql, insert_sql, data)
         with mock.patch(NAMESPACE + '.PathManager.get_db_path', return_value="trace.db"), \
-             mock.patch(NAMESPACE + '.DBManager.check_connect_db_path', return_value=res):
+                mock.patch(NAMESPACE + '.DBManager.check_connect_db_path', return_value=res):
             key = MsprofIteration('123')
             InfoConfReader()._info_json = INFO_JSON
             result = key._generate_trace_result(key.get_train_iteration_time(iteration_id))
@@ -127,7 +126,7 @@ class TestMsprofIteration(unittest.TestCase):
         db_manager = DBManager()
         res = db_manager.create_table("trace.db", create_sql, insert_sql, trace_data)
         with mock.patch(NAMESPACE + '.PathManager.get_db_path', return_value="trace.db"), \
-             mock.patch(NAMESPACE + '.DBManager.check_connect_db_path', return_value=res):
+                mock.patch(NAMESPACE + '.DBManager.check_connect_db_path', return_value=res):
             key = MsprofIteration('123')
             InfoConfReader()._info_json = INFO_JSON
             result = key.get_train_iteration_time(iteration_id)
@@ -138,91 +137,36 @@ class TestMsprofIteration(unittest.TestCase):
         res[0].commit()
         db_manager.destroy(res)
 
-    def test_get_iteration_id_by_index_id_1(self):
-        index_id = 1
-        model_id = 1
-        create_sql = "create table IF NOT EXISTS step_trace_data (index_id INT,model_id INT," \
-                     "step_start,step_end,iter_id INT default 1, ai_core_num INT default 0)"
-        data = ((1, 1, 118562263836, 118571743672, 1, 60),)
-        insert_sql = "insert into {0} values ({value})".format("step_trace_data",
-                                                               value="?," * (len(data[0]) - 1) + "?")
-        db_manager = DBManager()
-        res = db_manager.create_table("step_trace.db", create_sql, insert_sql, data)
-        with mock.patch(NAMESPACE + '.Utils.is_step_scene', return_value=False), \
-             mock.patch(NAMESPACE + '.DBManager.destroy_db_connect'):
-            key = MsprofIteration('123')
-            result = key.get_iteration_id_by_index_id(index_id, model_id)
-        self.assertEqual(result, [0, 1])
-        with mock.patch(NAMESPACE + '.Utils.is_step_scene', return_value=True), \
-             mock.patch(NAMESPACE + '.PathManager.get_db_path', return_value="step_trace.db"):
-            with mock.patch(NAMESPACE + '.DBManager.check_connect_db_path', return_value=(None, None)), \
-                 mock.patch(NAMESPACE + '.DBManager.check_tables_in_db', return_value=False), \
-                 mock.patch(NAMESPACE + '.DBManager.destroy_db_connect'):
-                key = MsprofIteration('123')
-                result = key.get_iteration_id_by_index_id(index_id, model_id)
-            self.assertEqual(result, [0, 1])
-
-            with mock.patch(NAMESPACE + '.DBManager.check_connect_db_path', return_value=res), \
-                 mock.patch(NAMESPACE + '.DBManager.check_tables_in_db', return_value=True), \
-                 mock.patch(NAMESPACE + '.DBManager.destroy_db_connect'):
-                key = MsprofIteration('123')
-                result = key.get_iteration_id_by_index_id(index_id, model_id)
-            self.assertEqual(result, [0, 1])
-        db_manager.destroy(res)
-
-    def test_get_iteration_id_by_index_id_2(self):
-        index_id = 1
-        model_id = 923
-        create_sql = "create table IF NOT EXISTS step_trace_data (index_id INT,model_id INT," \
-                     "step_start,step_end,iter_id INT default 1, ai_core_num INT default 0)"
-        data = ((1, 1, 118562263836, 118571743672, 1, 60),)
-        insert_sql = "insert into {0} values ({value})".format("step_trace_data",
-                                                               value="?," * (len(data[0]) - 1) + "?")
-
-        db_manager = DBManager()
-        res = db_manager.create_table("step_trace.db", create_sql, insert_sql, data)
-        with mock.patch(NAMESPACE + '.Utils.is_step_scene', return_value=True), \
-             mock.patch(NAMESPACE + '.PathManager.get_db_path', return_value="step_trace.db"):
-            with mock.patch(NAMESPACE + '.DBManager.check_connect_db_path', return_value=res), \
-                 mock.patch(NAMESPACE + '.DBManager.check_tables_in_db', return_value=True), \
-                 mock.patch(NAMESPACE + '.DBManager.destroy_db_connect'):
-                key = MsprofIteration('123')
-                result = key.get_iteration_id_by_index_id(index_id, model_id)
-            self.assertEqual(result, [0, 1])
-        res[1].execute("drop table step_trace_data")
-        res[0].commit()
-        db_manager.destroy(res)
-
     def test_get_trace_iteration_end(self):
         with mock.patch(NAMESPACE + '.PathManager.get_db_path', return_value=True), \
-             mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=(True, True)), \
-             mock.patch(NAMESPACE + '.DBManager.check_tables_in_db', return_value=True), \
-             mock.patch(NAMESPACE + '.MsprofIteration._generate_trace_iter_end_result', return_value=1), \
-             mock.patch(NAMESPACE + '.DBManager.fetch_all_data', return_value=1), \
-             mock.patch(NAMESPACE + '.DBManager.destroy_db_connect'), \
-             mock.patch(NAMESPACE + '.PathManager.get_db_path', return_value="step_trace.db"):
+                mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=(True, True)), \
+                mock.patch(NAMESPACE + '.DBManager.check_tables_in_db', return_value=True), \
+                mock.patch(NAMESPACE + '.MsprofIteration._generate_trace_iter_end_result', return_value=1), \
+                mock.patch(NAMESPACE + '.DBManager.fetch_all_data', return_value=1), \
+                mock.patch(NAMESPACE + '.DBManager.destroy_db_connect'), \
+                mock.patch(NAMESPACE + '.PathManager.get_db_path', return_value="step_trace.db"):
             key = MsprofIteration('123')
             result = key._MsprofIteration__get_trace_iteration_end()
         self.assertEqual(result, 1)
 
         with mock.patch(NAMESPACE + '.PathManager.get_db_path', return_value=True), \
-             mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=(True, True)), \
-             mock.patch(NAMESPACE + '.DBManager.check_tables_in_db', return_value=False), \
-             mock.patch(NAMESPACE + '.MsprofIteration._generate_trace_iter_end_result', return_value=1), \
-             mock.patch(NAMESPACE + '.DBManager.fetch_all_data', return_value=1), \
-             mock.patch(NAMESPACE + '.DBManager.destroy_db_connect'), \
-             mock.patch(NAMESPACE + '.PathManager.get_db_path', return_value="step_trace.db"):
+                mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=(True, True)), \
+                mock.patch(NAMESPACE + '.DBManager.check_tables_in_db', return_value=False), \
+                mock.patch(NAMESPACE + '.MsprofIteration._generate_trace_iter_end_result', return_value=1), \
+                mock.patch(NAMESPACE + '.DBManager.fetch_all_data', return_value=1), \
+                mock.patch(NAMESPACE + '.DBManager.destroy_db_connect'), \
+                mock.patch(NAMESPACE + '.PathManager.get_db_path', return_value="step_trace.db"):
             key = MsprofIteration('123')
             result = key._MsprofIteration__get_trace_iteration_end()
         self.assertEqual(result, OrderedDict())
 
         with mock.patch(NAMESPACE + '.PathManager.get_db_path', return_value=True), \
-             mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=(True, True)), \
-             mock.patch(NAMESPACE + '.DBManager.check_tables_in_db', return_value=True), \
-             mock.patch(NAMESPACE + '.MsprofIteration._generate_trace_iter_end_result', return_value=1), \
-             mock.patch(NAMESPACE + '.DBManager.fetch_all_data', return_value=[]), \
-             mock.patch(NAMESPACE + '.DBManager.destroy_db_connect'), \
-             mock.patch(NAMESPACE + '.PathManager.get_db_path', return_value="step_trace.db"):
+                mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=(True, True)), \
+                mock.patch(NAMESPACE + '.DBManager.check_tables_in_db', return_value=True), \
+                mock.patch(NAMESPACE + '.MsprofIteration._generate_trace_iter_end_result', return_value=1), \
+                mock.patch(NAMESPACE + '.DBManager.fetch_all_data', return_value=[]), \
+                mock.patch(NAMESPACE + '.DBManager.destroy_db_connect'), \
+                mock.patch(NAMESPACE + '.PathManager.get_db_path', return_value="step_trace.db"):
             key = MsprofIteration('123')
             result = key._MsprofIteration__get_trace_iteration_end()
         self.assertEqual(result, OrderedDict())

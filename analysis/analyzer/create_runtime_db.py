@@ -7,6 +7,7 @@ import os
 import sqlite3
 import struct
 
+from config.config_manager import ConfigManager
 from common_func.common import get_data_dir_sorted_files
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
@@ -21,7 +22,6 @@ from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
-from common_func.msvp_common import MsvpCommonConst
 from common_func.msvp_common import is_valid_original_data
 from common_func.path_manager import PathManager
 from common_func.platform.chip_manager import ChipManager
@@ -42,7 +42,7 @@ class ParsingRuntimeData(MsMultiProcess):
     """
 
     FILE_NAME = os.path.basename(__file__)
-    TABLE_PATH = os.path.join(MsvpCommonConst.CONFIG_PATH, 'Tables.ini')
+    TABLE_PATH = ConfigManager.TABLES
 
     # task state
     # tag
@@ -60,7 +60,7 @@ class ParsingRuntimeData(MsMultiProcess):
     AI_CORE_TYPE_BY_HWTS = "0x6bd3"  # ai core data by hwts, third and fouth byte is 6bd3
 
     def __init__(self: any, file_list: dict, sample_config: dict) -> None:
-        MsMultiProcess.__init__(self, sample_config)
+        super().__init__(sample_config)
         self.sample_config = sample_config
         self.file_list = file_list
         self.curs = None
@@ -404,7 +404,7 @@ class ParsingRuntimeData(MsMultiProcess):
         check file with task based
         :return: match result
         """
-        if self.sample_config.get(core_profiling_mode) == "task-based":
+        if self.sample_config.get(core_profiling_mode) == StrConstant.AIC_TASK_BASED_MODE:
             return True, get_file_name_pattern_match(file_name, *core_patterns)
         return False, {}
 

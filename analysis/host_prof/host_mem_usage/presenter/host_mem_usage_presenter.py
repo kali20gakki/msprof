@@ -75,8 +75,10 @@ class HostMemUsagePresenter(HostProfPresenterBase):
             return result
         for data_item in mem_usage_data.get("data"):
             if is_number(data_item["start"]):
-                temp_data = ["Memory Usage", float(data_item["start"]) / NumberConstant.CONVERSION_TIME,
-                             {"Usage(%)": data_item["usage"]}]
+                temp_data = [
+                    "Memory Usage", float(data_item["start"]) / NumberConstant.CONVERSION_TIME,
+                    {"Usage(%)": data_item["usage"]}
+                ]
                 result.append(temp_data)
         return result
 

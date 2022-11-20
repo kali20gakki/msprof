@@ -3,6 +3,8 @@
 # Copyright (c) Huawei Technologies Co., Ltd. 2020-2022. All rights reserved.
 
 import os
+
+from common_func.utils import Utils
 from profiling_bean.struct_info.struct_decoder import StructDecoder
 
 
@@ -85,7 +87,7 @@ class AiCoreTaskInfo(StructDecoder):
     def __init__(self: any, *args: any) -> None:
         filed = args[0]
         self.task_type = filed[4]
-        self.stream_id = filed[5]
+        self.stream_id = Utils.get_stream_id(filed[5])
         self.task_id = filed[6]
         self.counter_info = CounterInfo(filed[7], filed[8], filed[9:17], filed[17], filed[18],
                                         filed[19])
