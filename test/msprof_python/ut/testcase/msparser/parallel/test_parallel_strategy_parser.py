@@ -37,31 +37,23 @@ class TestParallelStrategyParser(unittest.TestCase):
         with ParallelViewModel(self.DIR_PATH) as _model:
             self.assertEqual(_model.get_parallel_table_name(), Constant.NA)
 
-    def test_parse_should_raise_prof_exception_when_without_config(self):
-        with mock.patch(NAMESPACE + ".PathManager.get_data_file_path"), \
-                mock.patch(NAMESPACE + ".FileOpen"), \
-                mock.patch(NAMESPACE + ".FileOpen.file_reader.readline"), \
-                mock.patch(NAMESPACE + ".json.loads", return_value={}):
-            check = ParallelStrategyParser(self.FILE_LIST_2, self.SAMPLE_CONFIG)
-            check.parse(["test"])
-            with ParallelViewModel(self.DIR_PATH) as _model:
-                self.assertEqual(_model.get_parallel_table_name(), Constant.NA)
-
     def test_ms_run_should_be_data_parallel(self):
         with mock.patch(NAMESPACE + ".PathManager.get_data_file_path"), \
+                mock.patch(NAMESPACE + ".check_file_readable"), \
                 mock.patch(NAMESPACE + ".FileOpen"), \
-                mock.patch(NAMESPACE + ".FileOpen.file_reader.readline"), \
+                mock.patch(NAMESPACE + ".FileOpen.file_reader.read"), \
                 mock.patch(NAMESPACE + ".json.loads",
                            return_value={"config": {"parallelType": "data_parallel", "stage_num": 1}}):
             check = ParallelStrategyParser(self.FILE_LIST_2, self.SAMPLE_CONFIG)
-            check.parse(["test"])
+            check.ms_run()
             with ParallelViewModel(self.DIR_PATH) as _model:
-                self.assertEqual(_model.get_parallel_table_name(), Constant.NA)
+                self.assertEqual(_model.get_parallel_table_name(), "ClusterDataParallel")
 
     def test_ms_run_should_be_model_parallel(self):
         with mock.patch(NAMESPACE + ".PathManager.get_data_file_path"), \
+                mock.patch(NAMESPACE + ".check_file_readable"), \
                 mock.patch(NAMESPACE + ".FileOpen"), \
-                mock.patch(NAMESPACE + ".FileOpen.file_reader.readline"), \
+                mock.patch(NAMESPACE + ".FileOpen.file_reader.read"), \
                 mock.patch(NAMESPACE + ".json.loads",
                            return_value={"config": {"parallelType": "auto_parallel", "stage_num": 1}}):
             check = ParallelStrategyParser(self.FILE_LIST_2, self.SAMPLE_CONFIG)
@@ -71,8 +63,9 @@ class TestParallelStrategyParser(unittest.TestCase):
 
     def test_ms_run_should_be_pipeline_parallel(self):
         with mock.patch(NAMESPACE + ".PathManager.get_data_file_path"), \
+                mock.patch(NAMESPACE + ".check_file_readable"), \
                 mock.patch(NAMESPACE + ".FileOpen"), \
-                mock.patch(NAMESPACE + ".FileOpen.file_reader.readline"), \
+                mock.patch(NAMESPACE + ".FileOpen.file_reader.read"), \
                 mock.patch(NAMESPACE + ".json.loads", return_value={"config": {"stage_num": 2}}):
             check = ParallelStrategyParser(self.FILE_LIST_2, self.SAMPLE_CONFIG)
             check.ms_run()

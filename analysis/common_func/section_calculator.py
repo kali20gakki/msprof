@@ -11,7 +11,7 @@ class SectionCalculator:
         time_section_list = sorted(time_section_list, key=lambda x: x.start_time)
         current_section = time_section_list[0]
         for time_section in time_section_list:
-            if time_section.start_time <= current_section.start_time:
+            if time_section.start_time <= current_section.end_time:
                 current_section.end_time = max(current_section.end_time, time_section.end_time)
             else:
                 result.append(current_section)
