@@ -4,6 +4,8 @@
 
 import re
 
+from common_func.db_name_constant import DBNameConstant
+
 
 class StrConstant:
     """
@@ -110,6 +112,14 @@ class StrConstant:
     TRACE_HEADER_NAME = "name"
 
     TASK_START_TIME = 'Task Start Time'
+
+    # parallel mode
+    DATA_PARALLEL = "data_parallel"
+    MODEL_PARALLEL = "model_parallel"
+    PIPELINE_PARALLEL = "pipeline_parallel"
+    PARALLEL_TABLE_NAME_MAPPING = {DATA_PARALLEL: DBNameConstant.TABLE_CLUSTER_DATA_PARALLEL,
+                                   MODEL_PARALLEL: DBNameConstant.TABLE_CLUSTER_MODEL_PARALLEL,
+                                   PIPELINE_PARALLEL: DBNameConstant.TABLE_CLUSTER_PIPELINE_PARALLEL}
 
     TASK_TYPE_MAPPING = {
         "0": 'kernel AI core task',
