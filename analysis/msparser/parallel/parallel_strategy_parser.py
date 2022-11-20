@@ -13,7 +13,6 @@ from common_func.db_name_constant import DBNameConstant
 from common_func.file_manager import FileOpen
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
-from common_func.msprof_exception import ProfException
 from common_func.os_manager import check_file_readable
 from common_func.path_manager import PathManager
 from msmodel.parallel.parallel_model import ParallelModel
