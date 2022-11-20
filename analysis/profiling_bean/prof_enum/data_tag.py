@@ -58,6 +58,7 @@ class DataTag(Enum):
     BIU_PERF = 44
     DATA_QUEUE = 45
     HOST_QUEUE = 46
+    PARALLEL_STRATEGY = 47
 
 
 @unique

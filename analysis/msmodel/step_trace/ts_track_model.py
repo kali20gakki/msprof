@@ -6,6 +6,7 @@ from abc import ABC
 from functools import partial
 from itertools import chain
 
+from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.msprof_iteration import MsprofIteration
@@ -13,6 +14,9 @@ from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.path_manager import PathManager
 from msmodel.interface.base_model import BaseModel
+from msmodel.interface.view_model import ViewModel
+from profiling_bean.db_dto.step_trace_ge_dto import StepTraceGeDto
+from profiling_bean.db_dto.time_section_dto import TimeSectionDto
 from profiling_bean.db_dto.step_trace_dto import StepTraceDto
 
 
@@ -102,3 +106,38 @@ class TsTrackModel(BaseModel, ABC):
             DBNameConstant.TABLE_STEP_TRACE_DATA)
         step_trace_data = DBManager.fetch_all_data(self.cur, sql, dto_class=StepTraceDto)
         return step_trace_data
+
+
+class TsTrackViewModel(ViewModel):
+    def __init__(self: any, path: str) -> None:
+        super().__init__(path, DBNameConstant.DB_STEP_TRACE, [])
+
+    def get_hccl_operator_exe_data(self) -> list:
+        if not self.attach_to_db(DBNameConstant.DB_GE_INFO):
+            return []
+        sql = "SELECT t1.model_id, t1.index_id, t1.stream_id, t1.task_id, t1.tag_id, t1.timestamp, t2.op_name, " \
+              "t2.op_type FROM ( SELECT model_id, index_id, tag_id, stream_id, task_id-1 AS task_id, timestamp " \
+              "FROM {} WHERE tag_id>=10000 ) t1 LEFT JOIN ( " \
+              "SELECT model_id, index_id, stream_id, task_id, op_name, op_type FROM {} WHERE task_type='{}' ) t2 " \
+              "ON t1.model_id=t2.model_id AND (t1.index_id=t2.index_id OR t2.index_id=0 ) " \
+              "AND t1.stream_id = t2.stream_id AND t1.task_id = t2.task_id ORDER BY t1.timestamp".format(
+            DBNameConstant.TABLE_STEP_TRACE, DBNameConstant.TABLE_GE_TASK, Constant.TASK_TYPE_HCCL)
+        return DBManager.fetch_all_data(self.cur, sql, dto_class=StepTraceGeDto)
+
+    def get_ai_cpu_op_data(self) -> list:
+        sql = "select t1.stream_id, t1.task_id, t1.grp, " \
+              "sum(case when t1.task_state=1 then t1.timestamp else 0 end) as start_time, " \
+              "sum(case when t1.task_state=2 then t1.timestamp else 0 end) as end_time " \
+              "from (select t.timestamp, t.stream_id, t.task_id, t.task_state, " \
+              "row_number() over(partition by t.stream_id, t.task_id,t.task_state order by t.timestamp) as grp " \
+              "from (select timestamp,stream_id,task_id,task_state,  " \
+              "lag(task_state, 1, 2) over(partition by stream_id,task_id order by timestamp) state " \
+              "from {} where task_type=1 and task_state <>0)t where t.task_state+t.state=3)t1 " \
+              "group by t1.stream_id, t1.task_id, t1.grp order by start_time desc".format(
+            DBNameConstant.TABLE_TASK_TYPE)
+        return DBManager.fetch_all_data(self.cur, sql, dto_class=TimeSectionDto)
+
+    def get_iter_time_data(self) -> list:
+        sql = "select model_id, index_id ,step_start as start_time, step_end as end_time " \
+              "from {} order by end_time".format(DBNameConstant.TABLE_STEP_TRACE_DATA)
+        return DBManager.fetch_all_data(self.cur, sql, dto_class=TimeSectionDto)
