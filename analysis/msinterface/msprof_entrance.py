@@ -89,10 +89,8 @@ class MsprofEntrance:
         handler = command_handler.get(sys.argv[1])
         try:
             handler.get('handler')(handler.get('parser'), args)
-        except ProfException as ex:
-            call_sys_exit(ex.code)
-        finally:
-            pass
+        except Exception:
+            call_sys_exit(NumberConstant.ERROR)
         call_sys_exit(ProfException.PROF_NONE_ERROR)
 
     def construct_arg_parser(self: any) -> tuple:
