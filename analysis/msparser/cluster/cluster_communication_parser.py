@@ -23,10 +23,10 @@ class ClusterCommunicationParser:
     CLUSTER_ALL_DEVICE_SCENE = -1
 
     def __init__(self: any, params: dict) -> None:
-        self._collection_path = params["collection_path"]
-        self._npu_id = params["npu_id"]
-        self._model_id = params["model_id"]
-        self._iteration_id = params["iteration_id"]
+        self._collection_path = params.get("collection_path")
+        self._npu_id = params.get("npu_id")
+        self._model_id = params.get("model_id")
+        self._iteration_id = params.get("iteration_id")
         self._data_collection = []
         self._communication_model = ClusterCommunicationModel(params)
         self._cluster_info_model = ClusterInfoViewModel(self._collection_path)

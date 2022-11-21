@@ -3,6 +3,7 @@
 # Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
 
 import re
+from enum import Enum
 
 
 class StrConstant:
@@ -329,6 +330,25 @@ class StrConstant:
         re.compile("_sysctl")
     ]
 
+    # hccl str constant
+    SDMA_TRANSIT_ITEMS = ["Memcpy", "Reduce Inline"]
+    TRANSIT_TYPE = ["RDMA", "HCCS", "PCIE", "SDMA"]
+    TOTAL = 'Total HCCL Operators'
+    HCCS = "HCCS"
+    PCIE = "PCIE"
+    RDMA = "RDMA"
+    SDMA = "SDMA"
+    LOCAL = "LOCAL"
+    NOTIFY_WAIT = "Notify Wait"
+    REDUCE_TBE = "Reduce TBE"
+    RDMA_SEND = "RDMASend"
+    SDMA_TRANSIT_ITEMS = ["Memcpy", "Reduce Inline"]
+    COMMUNICATION_TIME_INFO = 'Communication Time Info'
+    COMMNUNICATION_BANDWIDTH_INFO = 'Communication Bandwidth Info'
+    SLOW_RANK_SUGGESTION = "Slow Rank Suggestion"
+    SLOW_LINK_SUGGESTION = "Slow Link Suggestion"
+    SUGGESTION = 'Suggestion'
+
     @property
     def accuracy(self: any) -> str:
         """
@@ -344,3 +364,21 @@ class StrConstant:
         :return: sign of bandwidth
         """
         return self.BANDWIDTH
+
+
+class OpAnalysisType():
+    ELAPSE_TIME = "Elapse Time(ms)"
+    TRANSIT_TIME = "Transit Time(ms)"
+    WAIT_TIME = "Wait Time(ms)"
+    SYNCHRONIZATION_TIME = "Synchronization Time(ms)"
+    WAIT_TIME_RATIO = "Wait Time Ratio"
+    SYNCHRONIZATION_TIME_RATIO = "Synchronization Time Ratio"
+
+
+class OpBandWidthType():
+    TRANSIT_SIZE_MB = "Transit Size(MB)"
+    TRANSIT_TIME_MS = "Transit Time(ms)"
+    BANDWIDTH_GB_S = "Bandwidth(GB/s)"
+    BANDWIDTH_UTILIZATION = "Bandwidth(Utilization)"
+    LARGE_PACKET_RATIO = "Large Packet Ratio"
+    SIZE_DISTRIBUTION = "Size Distribution"
