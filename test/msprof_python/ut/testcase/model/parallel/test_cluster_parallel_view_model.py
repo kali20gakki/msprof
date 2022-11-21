@@ -50,7 +50,7 @@ class TestClusterParallelViewModel(unittest.TestCase):
     def test_get_parallel_type_2(self):
         with mock.patch(NAMESPACE + ".DBManager.fetch_all_data", return_value=[['cluster']]):
             with ClusterParallelViewModel("test") as _model:
-                self.assertEqual(_model.get_parallel_type(), ['cluster'])
+                self.assertEqual(_model.get_parallel_type(), 'cluster')
 
     def test_get_first_field_name_1(self):
         params = {"npu_id": -1}
@@ -65,24 +65,26 @@ class TestClusterParallelViewModel(unittest.TestCase):
             self.assertEqual(_model.get_first_field_name(params)[1], "Iteration ID")
             self.assertEqual(_model.get_first_field_name(params)[0], "iteration_id")
 
-    def test_get_parallel_condition_1(self):
+    def test_get_parallel_condition_and_query_params_1(self):
         params = {"npu_id": -1, "model_id": 1, "iteration_id": 1}
         with mock.patch(NAMESPACE + ".DBManager.fetch_all_data", return_value=[[1, 2]]):
             with ClusterParallelViewModel("test") as _model:
-                self.assertEqual(_model.get_parallel_condition(params), "model_id=1 and iteration_id=1")
+                self.assertEqual(_model.get_parallel_condition_and_query_params(params),
+                                 ["model_id=? and iteration_id=?", (1, 1)])
 
-    def test_get_parallel_condition_2(self):
+    def test_get_parallel_condition_and_query_params_2(self):
         params = {"npu_id": 1, "model_id": 1, "iteration_id": -1}
         with mock.patch(NAMESPACE + ".ClusterParallelViewModel._get_npu_id_name", return_value="rank_id"):
             with ClusterParallelViewModel("test") as _model:
-                self.assertEqual(_model.get_parallel_condition(params), "rank_id=1 and model_id=1")
+                self.assertEqual(_model.get_parallel_condition_and_query_params(params),
+                                 ["rank_id=? and model_id=?", (1, 1)])
 
     def test_get_parallel_data(self):
         with mock.patch(NAMESPACE + ".DBManager.fetch_all_data", return_value=[[1, 2, 3]]):
             with ClusterParallelViewModel("test") as _model:
-                self.assertEqual(_model.get_data_parallel_data("rank", "test"), [[1, 2, 3]])
-                self.assertEqual(_model.get_model_parallel_data("rank", "test"), [[1, 2, 3]])
-                self.assertEqual(_model.get_pipeline_parallel_data("rank", "test"), [[1, 2, 3]])
+                self.assertEqual(_model.get_data_parallel_data("rank", "test", (1, 1)), [[1, 2, 3]])
+                self.assertEqual(_model.get_model_parallel_data("rank", "test", (1, 1)), [[1, 2, 3]])
+                self.assertEqual(_model.get_pipeline_parallel_data("rank", "test", (1, 1)), [[1, 2, 3]])
 
     def test_get_parallel_tuning_data(self):
         with mock.patch(NAMESPACE + ".DBManager.fetch_all_data", return_value=[[1, 2, 3]]):

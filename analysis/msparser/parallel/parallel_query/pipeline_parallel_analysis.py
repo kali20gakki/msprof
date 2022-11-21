@@ -1,3 +1,5 @@
+import logging
+
 from msmodel.parallel.cluster_parallel_model import ClusterParallelViewModel
 from msparser.parallel.parallel_query.suggestion_constant import SuggestionConstant
 
@@ -9,11 +11,12 @@ class PipelineParallelAnalysis:
     def get_parallel_data(self: any) -> dict:
         with ClusterParallelViewModel(self._params["collection_path"]) as _model:
             first_field_name, first_header_name = _model.get_first_field_name(self._params)
-            condition = _model.get_parallel_condition(self._params)
-            parallel_data = _model.get_pipeline_parallel_data(first_field_name, condition)
+            condition, query_params = _model.get_parallel_condition_and_query_params(self._params)
+            parallel_data = _model.get_pipeline_parallel_data(first_field_name, condition, query_params)
         return {"parallel_mode": "Pipeline Parallel",
-                "headers": [first_header_name, "Computation Time", "Pure Communication Time(Only Receice Op Contained)",
-                            'Pure Communication Time(Receice Op Not Contained)', 'Stage Time'],
+                "headers": [first_header_name, "Computation Time(us)",
+                            "Pure Communication Time(Only Receice Op Included)(us)",
+                            'Pure Communication Time(Receice Op Not Included)(us)', 'Stage Time(us)'],
                 "data": parallel_data}
 
     def get_tuning_suggestion(self: any) -> dict:
@@ -23,9 +26,14 @@ class PipelineParallelAnalysis:
                       "suggestion": []}
         if not tuning_data:
             return suggestion
+        if not tuning_data[0]:
+            return suggestion
+        if tuning_data[0][0] is None or tuning_data[0][1] is None or tuning_data[0][2] is None:
+            logging.error("Invalid tuning data from ClusterPipelineParallel table. {}".format(tuning_data[0]))
+            return suggestion
         if tuning_data[0][0] > 0.1:
             suggestion.get("suggestion").append(
-                SuggestionConstant.SUGGESTIONS.get("pipeline-parallel").get(1).format(
+                SuggestionConstant.SUGGESTIONS.get("pipeline-parallel").get("bad_operator_tiling").format(
                     '{:.1%}'.format(tuning_data[0][0])))
         index_desc = ""
         if tuning_data[0][1] > 0.1:
@@ -37,7 +45,8 @@ class PipelineParallelAnalysis:
                                       "average stage time should not exceed 20%"
         if index_desc:
             suggestion.get("suggestion").append(
-                SuggestionConstant.SUGGESTIONS.get("pipeline-parallel").get(2).format(index_desc))
+                SuggestionConstant.SUGGESTIONS.get("pipeline-parallel").get("bad_stage_division").format(index_desc))
         if not suggestion.get("suggestion"):
-            suggestion.get("suggestion").append(SuggestionConstant.SUGGESTIONS.get("pipeline-parallel").get(3))
+            suggestion.get("suggestion").append(
+                SuggestionConstant.SUGGESTIONS.get("pipeline-parallel").get("optimal_stage_division"))
         return suggestion

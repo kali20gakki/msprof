@@ -15,20 +15,20 @@ class TestParallelViewModel(unittest.TestCase):
     def test_get_parallel_index_data_when_data_parallel(self):
         with mock.patch(NAMESPACE + ".DBManager.fetch_all_data", return_value=[[1]]):
             with ParallelViewModel("test") as _model:
-                self.assertEqual(_model.get_parallel_index_data(DBNameConstant.TABLE_CLUSTER_DATA_PARALLEL, 1, 1),
+                self.assertEqual(_model.get_parallel_index_data(DBNameConstant.TABLE_CLUSTER_DATA_PARALLEL, 1, 1, 1),
                                  [[1]])
 
     def test_get_parallel_index_data_when_model_parallel(self):
         with mock.patch(NAMESPACE + ".DBManager.fetch_all_data", return_value=[[2]]):
             with ParallelViewModel("test") as _model:
-                self.assertEqual(_model.get_parallel_index_data(DBNameConstant.TABLE_CLUSTER_MODEL_PARALLEL, 1, 1),
+                self.assertEqual(_model.get_parallel_index_data(DBNameConstant.TABLE_CLUSTER_MODEL_PARALLEL, 1, 1, 1),
                                  [[2]])
 
     def test_get_parallel_index_data_when_pipeline_parallel(self):
         with mock.patch(NAMESPACE + ".DBManager.fetch_all_data", return_value=[[3]]):
             with ParallelViewModel("test") as _model:
-                self.assertEqual(_model.get_parallel_index_data(DBNameConstant.TABLE_CLUSTER_PIPELINE_PARALLEL, 1, 1),
-                                 [[3]])
+                self.assertEqual(
+                    _model.get_parallel_index_data(DBNameConstant.TABLE_CLUSTER_PIPELINE_PARALLEL, 1, 1, 1), [[3]])
 
     def test_get_parallel_strategy_data(self):
         with mock.patch(NAMESPACE + ".DBManager.fetch_all_data", return_value=[[4]]):

@@ -8,6 +8,7 @@ import os
 from common_func.common import error, print_info
 from common_func.constant import Constant
 from common_func.db_name_constant import DBNameConstant
+from common_func.file_manager import FileManager
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msprof_common import MsProfCommonConstant
 from common_func.msprof_exception import ProfException
@@ -29,7 +30,9 @@ class ClusterParallelAnalysisParser:
     def process(self: any) -> None:
         self._prepare_parallel_analysis()
         self.parallel_data_result = ClusterParallelAnalysis(self._parallel_table_name, self._params).get_parallel_data()
-        self._storage_parallel_analysis_result()
+        output_file_name = "cluster_parallel_analysis_{}_{}_{}.json".format(self._npu_id, self._model_id,
+                                                                            self._iteration_id)
+        FileManager.storage_query_result_json_file(self._collection_path, self.parallel_data_result, output_file_name)
 
     def _prepare_parallel_analysis(self: any) -> None:
         if not os.path.exists(PathManager.get_db_path(self._collection_path, DBNameConstant.DB_CLUSTER_PARALLEL)):
@@ -75,28 +78,3 @@ class ClusterParallelAnalysisParser:
         error(MsProfCommonConstant.COMMON_FILE_NAME,
               "Query arguments error! One of the arguments '--id' or '--model-id' must be -1.")
         raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR)
-
-    def _storage_parallel_analysis_result(self: any) -> None:
-        if not self.parallel_data_result:
-            return
-        output_file_name = "cluster_parallel_analysis_{}_{}_{}.json".format(self._npu_id, self._model_id,
-                                                                            self._iteration_id)
-        query_path = os.path.join(self._collection_path, PathManager.QUERY_CLUSTER)
-        if not os.path.exists(query_path):
-            try:
-                os.makedirs(query_path)
-            except OSError:
-                error(MsProfCommonConstant.COMMON_FILE_NAME,
-                      "Storing data failed, you may not have the permission to write files in the current path.")
-            os.chmod(query_path, NumberConstant.DIR_AUTHORITY)
-        output_file_path = PathManager.get_query_result_path(self._collection_path, output_file_name)
-        try:
-            with os.fdopen(os.open(output_file_path, Constant.WRITE_FLAGS,
-                                   Constant.WRITE_MODES), 'w') as file:
-                os.chmod(output_file_path, NumberConstant.FILE_AUTHORITY)
-                json.dump(self.parallel_data_result, file)
-        except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
-            error(MsProfCommonConstant.COMMON_FILE_NAME, err)
-        else:
-            print_info(MsProfCommonConstant.COMMON_FILE_NAME, "The data has stored successfully, "
-                                                              "file path: {}".format(output_file_path))
