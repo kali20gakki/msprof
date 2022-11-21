@@ -348,6 +348,7 @@ int ProfAclMgr::ProfAclStart(PROF_CONF_CONST_PTR profStartCfg)
         MSPROF_LOGE("[ProfAclStart]GetParamFromInputCfg fail.");
         return ACL_ERROR_PROFILING_FAILURE;
     }
+    params_->host_sys_pid = analysis::dvvp::common::utils::Utils::GetPid();
 
     for (uint32_t i = 0; i < profStartCfg->devNums; i++) {
         uint32_t devId = profStartCfg->devIdList[i];
