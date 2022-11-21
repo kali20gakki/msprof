@@ -133,7 +133,7 @@ class TsTrackViewModel(ViewModel):
               "from (select timestamp,stream_id,task_id,task_state,  " \
               "lag(task_state, 1, 2) over(partition by stream_id,task_id order by timestamp) state " \
               "from {} where task_type=1 and task_state <>0)t where t.task_state+t.state=3)t1 " \
-              "group by t1.stream_id, t1.task_id, t1.grp order by start_time desc".format(
+              "group by t1.stream_id, t1.task_id, t1.grp".format(
             DBNameConstant.TABLE_TASK_TYPE)
         return DBManager.fetch_all_data(self.cur, sql, dto_class=TimeSectionDto)
 

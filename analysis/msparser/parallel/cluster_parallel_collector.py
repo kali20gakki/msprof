@@ -8,6 +8,8 @@ import threading
 
 from common_func.constant import Constant
 from common_func.db_name_constant import DBNameConstant
+from common_func.info_conf_reader import InfoConfReader
+from common_func.ms_constant.str_constant import StrConstant
 from msmodel.cluster_info.cluster_info_model import ClusterInfoViewModel
 from msmodel.parallel.cluster_parallel_model import ClusterParallelModel
 from msmodel.parallel.parallel_model import ParallelViewModel
@@ -45,9 +47,6 @@ class ClusterParallelCollector(IParser):
         self.multithreading_get_parallel_data()
 
     def save(self: any) -> None:
-        if not self._cluster_parallel_temp_data:
-            logging.warning("Invalid cluster parallel data!")
-            return
         cluster_parallel_data = []
         for parallel_data in self._cluster_parallel_temp_data:
             if parallel_data:
@@ -56,6 +55,9 @@ class ClusterParallelCollector(IParser):
         for parallel_strategy_data in self._cluster_parallel_strategy_temp_data:
             if parallel_strategy_data:
                 cluster_parallel_strategy_data.extend(parallel_strategy_data)
+        if not cluster_parallel_data or not cluster_parallel_strategy_data:
+            logging.warning("Invalid cluster parallel data!")
+            return
         with ClusterParallelModel(self.collect_path) as _model:
             _model.create_table(self._parallel_table_name)
             _model.flush(self._parallel_table_name, cluster_parallel_data)
@@ -64,10 +66,12 @@ class ClusterParallelCollector(IParser):
 
     def get_device_parallel_data(self: any, cluster_info: ClusterRankDto, index: int):
         _project_path = os.path.join(self.collect_path, cluster_info.dir_name)
+        InfoConfReader().load_info(_project_path)
+        freq_to_us = 1000000 / InfoConfReader().get_freq(StrConstant.HWTS)
         with ParallelViewModel(_project_path) as _model:
             self._cluster_parallel_temp_data[index] = _model.get_parallel_index_data(self._parallel_table_name,
                                                                                      cluster_info.rank_id,
-                                                                                     cluster_info.device_id)
+                                                                                     cluster_info.device_id, freq_to_us)
             self._cluster_parallel_strategy_temp_data[index] = _model.get_parallel_strategy_data()
 
     def multithreading_get_parallel_data(self: any) -> None:

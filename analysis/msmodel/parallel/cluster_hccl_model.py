@@ -4,6 +4,7 @@
 
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
+from common_func.ms_constant.number_constant import NumberConstant
 from msmodel.interface.parser_model import ParserModel
 from msmodel.interface.view_model import ViewModel
 from profiling_bean.db_dto.hccl_operator_dto import HCCLOperatorDto
@@ -29,5 +30,6 @@ class ClusterHCCLViewModel(ViewModel):
         super().__init__(result_dir, DBNameConstant.DB_CLUSTER_HCCL, [])
 
     def get_hccl_op_data(self: any) -> list:
-        sql = "select * from HcclOperatorExe where start_time<>-1 and end_time<>-1 order by start_time"
+        sql = "select * from HcclOperatorExe where start_time<>{0} and end_time<>{0} order by start_time".format(
+            NumberConstant.INVALID_OP_EXE_TIME)
         return DBManager.fetch_all_data(self.cur, sql, dto_class=HCCLOperatorDto)

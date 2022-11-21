@@ -29,51 +29,65 @@ class ParallelViewModel(ViewModel):
 
     def get_parallel_table_name(self: any) -> str:
         sql = "select parallel_mode from {}".format(DBNameConstant.TABLE_PARALLEL_STRATEGY)
-        if not DBManager.fetch_all_data(self.cur, sql):
+        data_list = DBManager.fetch_all_data(self.cur, sql)
+        if not data_list:
             return Constant.NA
-        parallel_mode = DBManager.fetch_all_data(self.cur, sql)[0]
-        if not parallel_mode:
+        elif not data_list[0]:
             return Constant.NA
-        return StrConstant.PARALLEL_TABLE_NAME_MAPPING.get(parallel_mode[0], Constant.NA)
+        return StrConstant.PARALLEL_TABLE_NAME_MAPPING.get(data_list[0][0], Constant.NA)
 
-    def get_parallel_index_data(self: any, tabel_name: str, rank_id: any, device_id: int) -> list:
+    def get_parallel_index_data(self: any, tabel_name: str, rank_id: any, device_id: int, freq_to_us: int) -> list:
         if rank_id == Constant.NA:
             rank_id = "null"
         if tabel_name == DBNameConstant.TABLE_CLUSTER_DATA_PARALLEL:
-            sql = "select {0} rank_id, {1} device_id, t1.model_id, t1.index_id, t2.step_time, t2.computation_time, " \
-                  "t1.pure_communication_time, t1.communication_time, t1.interval_of_communication_time, " \
-                  "t1.hccl_op_num from (select t.model_id, t.index_id, sum(t.communication_time) communication_time, " \
+            sql = "select {0} rank_id, {1} device_id, t1.model_id, t1.index_id, " \
+                  "t2.step_time*{2}, " \
+                  "t2.computation_time*{2}, " \
+                  "t1.pure_communication_time*{2}, " \
+                  "t1.communication_time*{2}, " \
+                  "t1.interval_of_communication_time*{2}, " \
+                  "t1.hccl_op_num " \
+                  "from (select t.model_id, t.index_id, sum(t.communication_time) communication_time, " \
                   "sum(t.pure_communication_time) pure_communication_time, count(0) hccl_op_num, " \
                   "sum(t.start_time-t.last_time)interval_of_communication_time from (select model_id, index_id, " \
                   "lag(end_time,1,start_time) over(partition by model_id, index_id order by start_time) last_time, " \
                   "start_time, end_time, end_time-start_time communication_time, " \
-                  "end_time-start_time-overlap_time pure_communication_time from {2})t group by t.model_id, " \
-                  "t.index_id)t1 left join {3} t2 on t1.model_id=t2.model_id and t1.index_id=t2.index_id".format(
-                rank_id, device_id,
+                  "end_time-start_time-overlap_time pure_communication_time from {3})t group by t.model_id, " \
+                  "t.index_id)t1 left join {4} t2 on t1.model_id=t2.model_id and t1.index_id=t2.index_id".format(
+                rank_id, device_id, freq_to_us,
                 DBNameConstant.TABLE_HCCL_OPERATOR_OVERLAP,
                 DBNameConstant.TABLE_COMPUTATION_TIME)
         elif tabel_name == DBNameConstant.TABLE_CLUSTER_MODEL_PARALLEL:
-            sql = "select {0} rank_id, {1} device_id, t1.model_id, t1.index_id, t2.step_time, t2.computation_time, " \
-                  "t1.pure_communication_time, t1.communication_time from(select model_id, index_id, " \
+            sql = "select {0} rank_id, {1} device_id, t1.model_id, t1.index_id, " \
+                  "t2.step_time*{2}, " \
+                  "t2.computation_time*{2}, " \
+                  "t1.pure_communication_time*{2}, " \
+                  "t1.communication_time*{2} " \
+                  "from(select model_id, index_id, " \
                   "sum(end_time-start_time) communication_time, " \
-                  "sum(end_time-start_time-overlap_time) pure_communication_time FROM {2} group by " \
-                  "model_id, index_id ) t1 left join {3} t2 ON t1.model_id = t2.model_id and " \
+                  "sum(end_time-start_time-overlap_time) pure_communication_time FROM {3} group by " \
+                  "model_id, index_id ) t1 left join {4} t2 ON t1.model_id = t2.model_id and " \
                   "t1.index_id = t2.index_id".format(
-                rank_id, device_id,
+                rank_id, device_id, freq_to_us,
                 DBNameConstant.TABLE_HCCL_OPERATOR_OVERLAP,
                 DBNameConstant.TABLE_COMPUTATION_TIME)
         else:
-            sql = "select {0} rank_id, {1} device_id, t1.model_id, t1.index_id, t2.step_time, t2.computation_time, " \
-                  "t1.pure_communication_time, t1.communication_time, t1.pure_communication_time_only_revice, " \
-                  "t1.pure_communication_time_except_revice from(select model_id, index_id, " \
+            sql = "select {0} rank_id, {1} device_id, t1.model_id, t1.index_id, " \
+                  "t2.step_time*{2}, " \
+                  "t2.computation_time*{2}, " \
+                  "t1.pure_communication_time*{2}, " \
+                  "t1.communication_time*{2}, " \
+                  "t1.pure_communication_time_only_revice*{2}, " \
+                  "t1.pure_communication_time_except_revice*{2} " \
+                  "from(select model_id, index_id, " \
                   "sum(end_time-start_time) communication_time, " \
                   "sum(end_time-start_time-overlap_time) pure_communication_time, " \
                   "sum(case when op_type='Receive' then end_time-start_time-overlap_time else 0 end) " \
                   "pure_communication_time_only_revice, sum(case when op_type<>'Receive' then " \
-                  "end_time-start_time-overlap_time else 0 end) pure_communication_time_except_revice from {2} " \
-                  "group by model_id, index_id)t1 left join {3} t2 ON t1.model_id = t2.model_id " \
+                  "end_time-start_time-overlap_time else 0 end) pure_communication_time_except_revice from {3} " \
+                  "group by model_id, index_id)t1 left join {4} t2 ON t1.model_id = t2.model_id " \
                   "and t1.index_id = t2.index_id".format(
-                rank_id, device_id,
+                rank_id, device_id, freq_to_us,
                 DBNameConstant.TABLE_HCCL_OPERATOR_OVERLAP,
                 DBNameConstant.TABLE_COMPUTATION_TIME)
         return DBManager.fetch_all_data(self.cur, sql)

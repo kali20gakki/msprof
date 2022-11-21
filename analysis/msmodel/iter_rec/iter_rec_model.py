@@ -8,6 +8,7 @@ import sqlite3
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
+from common_func.ms_constant.number_constant import NumberConstant
 from msmodel.interface.parser_model import ParserModel
 from msmodel.interface.view_model import ViewModel
 from profiling_bean.db_dto.time_section_dto import TimeSectionDto
@@ -101,6 +102,6 @@ class HwtsIterViewModel(ViewModel):
         super().__init__(path, DBNameConstant.DB_HWTS_REC, [])
 
     def get_ai_core_op_data(self: any) -> list:
-        sql = "select start_time, end_time from {} where is_ai_core=1 and start_time<>-1 order by " \
-              "start_time desc".format(DBNameConstant.TABLE_HWTS_BATCH)
+        sql = "select start_time, end_time from {} where is_ai_core=1 and start_time<>{}".format(
+            DBNameConstant.TABLE_HWTS_BATCH, NumberConstant.INVALID_OP_EXE_TIME)
         return DBManager.fetch_all_data(self.cur, sql, dto_class=TimeSectionDto)

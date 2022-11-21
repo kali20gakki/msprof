@@ -9,6 +9,7 @@ import sqlite3
 from analyzer.scene_base.profiling_scene import ProfilingScene
 from common_func.constant import Constant
 from common_func.file_manager import FileOpen
+from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.path_manager import PathManager
@@ -115,7 +116,8 @@ class IterParser(IParser, MsMultiProcess):
 
     def _create_hwts_task_time_data(self: any, task_log: HwtsLogBean, stream_task_id: str) -> None:
         start_task_log = self._task_start_dict.get(stream_task_id)
-        setattr(task_log, "start_time", start_task_log.sys_cnt if start_task_log else -1)
+        setattr(task_log, "start_time",
+                start_task_log.sys_cnt if start_task_log else NumberConstant.INVALID_OP_EXE_TIME)
         self._task_start_dict.pop(stream_task_id, None)
 
         setattr(task_log, "is_ai_core", self._iter_info_updater.judge_ai_core(task_log, self.ai_core_task))

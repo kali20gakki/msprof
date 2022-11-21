@@ -24,7 +24,8 @@ class TestPipelineParallelAnalysis(unittest.TestCase):
 
     def test_get_parallel_data(self) -> None:
         with mock.patch(NAMESPACE + ".ClusterParallelViewModel.get_first_field_name", return_value=("rank_id", "R")), \
-                mock.patch(NAMESPACE + ".ClusterParallelViewModel.get_parallel_condition"), \
+                mock.patch(NAMESPACE + ".ClusterParallelViewModel.get_parallel_condition_and_query_params",
+                           return_value=[1, 2]), \
                 mock.patch(NAMESPACE + ".ClusterParallelViewModel.get_pipeline_parallel_data", return_value=[]):
             check = PipelineParallelAnalysis(self.PARAMS1)
             self.assertEqual(check.get_parallel_data().get("headers")[0], "R")

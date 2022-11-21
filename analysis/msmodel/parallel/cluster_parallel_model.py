@@ -78,38 +78,42 @@ class ClusterParallelViewModel(ViewModel):
 
     def get_parallel_type(self: any) -> str:
         sql = "select paralleltype from {} limit 1".format(DBNameConstant.TABLE_CLUSTER_PARALLEL_STRATEGY)
-        if not DBManager.fetch_all_data(self.cur, sql):
+        data_list = DBManager.fetch_all_data(self.cur, sql)
+        if not data_list:
             return Constant.NA
-        return DBManager.fetch_all_data(self.cur, sql)[0]
+        elif not data_list[0]:
+            return Constant.NA
+        return data_list[0][0]
 
-    def get_data_parallel_data(self: any, first_field_name: str, condition: str) -> dict:
+    def get_data_parallel_data(self: any, first_field_name: str, condition: str, query_params: tuple) -> dict:
         sql = "select {0}, computation_time, pure_communication_time, communication_time, " \
               "interval_of_communication_time from {1} where {2}".format(
             first_field_name, DBNameConstant.TABLE_CLUSTER_DATA_PARALLEL, condition)
-        return DBManager.fetch_all_data(self.cur, sql)
+        return DBManager.fetch_all_data(self.cur, sql, query_params)
 
-    def get_model_parallel_data(self: any, first_field_name: str, condition: str) -> dict:
+    def get_model_parallel_data(self: any, first_field_name: str, condition: str, query_params: tuple) -> dict:
         sql = "select {0}, computation_time, pure_communication_time from {1} where {2}".format(
             first_field_name, DBNameConstant.TABLE_CLUSTER_MODEL_PARALLEL, condition)
-        return DBManager.fetch_all_data(self.cur, sql)
+        return DBManager.fetch_all_data(self.cur, sql, query_params)
 
-    def get_pipeline_parallel_data(self: any, first_field_name: str, condition: str) -> dict:
+    def get_pipeline_parallel_data(self: any, first_field_name: str, condition: str, query_params: tuple) -> dict:
         sql = "select {0}, computation_time, pure_communication_time_only_revice, " \
               "pure_communication_time_except_revice, step_time-pure_communication_time stage_time " \
               "from {1} where {2}".format(first_field_name, DBNameConstant.TABLE_CLUSTER_PIPELINE_PARALLEL, condition)
-        return DBManager.fetch_all_data(self.cur, sql)
+        return DBManager.fetch_all_data(self.cur, sql, query_params)
 
-    def get_first_field_name(self: any, params: dict) -> str:
+    def get_first_field_name(self: any, params: dict) -> tuple:
         if params["npu_id"] == Constant.DEFAULT_INVALID_VALUE:
             return (self._get_npu_id_name(), "Rank ID")
         else:
             return ("iteration_id", "Iteration ID")
 
-    def get_parallel_condition(self: any, params: dict) -> str:
-        if params["npu_id"] == Constant.DEFAULT_INVALID_VALUE:
-            return "model_id={} and iteration_id={}".format(params["model_id"], params["iteration_id"])
+    def get_parallel_condition_and_query_params(self: any, params: dict) -> list:
+        if params.get("npu_id") == Constant.DEFAULT_INVALID_VALUE:
+            return ["model_id=? and iteration_id=?", (params.get("model_id"), params.get("iteration_id"))]
         else:
-            return "{}={} and model_id={}".format(self._get_npu_id_name(), params["npu_id"], params["model_id"])
+            return ["{}=? and model_id=?".format(self._get_npu_id_name()),
+                    (params.get("npu_id"), params.get("model_id"))]
 
     def get_data_parallel_tuning_data(self: any) -> list:
         sql = "select hccl_op_num, avg(pure_communication_ratio)pure_communication_ratio, " \
@@ -126,8 +130,8 @@ class ClusterParallelViewModel(ViewModel):
         return DBManager.fetch_all_data(self.cur, sql)
 
     def get_pipeline_parallel_tuning_data(self: any) -> list:
-        avg_stage_time = self._get_stage_time()
-        if not avg_stage_time:
+        avg_stage_time = self._get_avg_stage_time()
+        if avg_stage_time == Constant.DEFAULT_INVALID_VALUE:
             return
         sql = "SELECT avg( t.ratio ) avg_ratio, avg( t.ratio1 ) avg_ratio1, " \
               "sum(case when t.stage_time >= {0} * 0.8 AND t.stage_time <= {0} * 1.2 THEN 1 ELSE 0 END ) num " \
@@ -146,9 +150,13 @@ class ClusterParallelViewModel(ViewModel):
         else:
             return "device_id"
 
-    def _get_stage_time(self: any) -> float:
+    def _get_avg_stage_time(self: any) -> float:
         sql = "	SELECT avg( t.stage_time ) avg_stage_time FROM( SELECT rank_id, device_id, " \
               "sum(step_time - pure_communication_time) stage_time FROM {} GROUP BY rank_id, device_id)t".format(
             DBNameConstant.TABLE_CLUSTER_PIPELINE_PARALLEL)
-        if DBManager.fetch_all_data(self.cur, sql):
-            return DBManager.fetch_all_data(self.cur, sql)[0][0]
+        data_list = DBManager.fetch_all_data(self.cur, sql)
+        if not data_list:
+            return Constant.DEFAULT_INVALID_VALUE
+        elif not data_list[0]:
+            return Constant.DEFAULT_INVALID_VALUE
+        return data_list[0][0]

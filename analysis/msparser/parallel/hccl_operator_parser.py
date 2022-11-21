@@ -6,6 +6,7 @@ import logging
 
 from common_func.constant import Constant
 from common_func.db_name_constant import DBNameConstant
+from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
 from msmodel.ge.ge_hash_model import GeHashViewModel
@@ -36,20 +37,23 @@ class HCCLOperatiorParser(IParser, MsMultiProcess):
             hccl_data_list = _model.get_hccl_operator_exe_data()
         with GeHashViewModel(self._project_path) as _model:
             ge_hash_dict = _model.get_ge_hash_data()
-        hccl_start_time = Constant.DEFAULT_INVALID_VALUE
+        hccl_start_data = None
         for hccl_data in hccl_data_list:
             if hccl_data.tag_id % 2 == self.END_TAG:
                 hash_value = ge_hash_dict.get(hccl_data.op_name, None)
                 op_name = hash_value if hash_value else hccl_data.op_name
+                start_time = NumberConstant.INVALID_OP_EXE_TIME if not hccl_start_data else hccl_start_data.timestamp
                 self._hccl_operator_data.append(
-                    [hccl_data.model_id, hccl_data.index_id, op_name, hccl_data.op_type, hccl_start_time,
+                    [hccl_data.model_id, hccl_data.index_id, op_name, hccl_data.op_type, start_time,
                      hccl_data.timestamp])
-                hccl_start_time = Constant.DEFAULT_INVALID_VALUE
-            elif hccl_start_time == Constant.DEFAULT_INVALID_VALUE:
-                hccl_start_time = hccl_data.timestamp
+                hccl_start_data = None
+            elif not hccl_start_data:
+                hccl_start_data = hccl_data
             else:
                 self._hccl_operator_data.append(
-                    [hccl_data.model_id, hccl_data.index_id, "", "", hccl_start_time, Constant.DEFAULT_INVALID_VALUE])
+                    [hccl_start_data.model_id, hccl_start_data.index_id, "", "", hccl_start_data.timestamp,
+                     NumberConstant.INVALID_OP_EXE_TIME])
+                hccl_start_data = hccl_data
 
     def save(self: any) -> None:
         if not self._hccl_operator_data:
