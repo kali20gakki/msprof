@@ -22,6 +22,7 @@ from msparser.parallel.parallel_query.cluster_parallel_analysis_tuning import Cl
 from msparser.cluster.fops_parser import FopsParser
 from msparser.cluster.step_trace_summary import StepTraceSummay
 from msparser.cluster.host_sys_usage_parser import HostSysUsageParser
+from tuning.cluster.cluster_tuning_facade import ClusterTuningFacade
 
 
 class QueryDataType(IntEnum):
@@ -31,6 +32,8 @@ class QueryDataType(IntEnum):
     DATA_PREPARATION = 3
     PARALLEL_TUNING = 4
     PARALLEL_DATA = 5
+    CLUSTER_COMMUNICATION = 6
+    COMMUNICATION_MATRIX = 7
     HOST_SYS_USAGE = 8
 
 
@@ -46,6 +49,8 @@ class MsprofQuerySummaryManager:
                               QueryDataType.DATA_PREPARATION: ClusterDataPreparationParser,
                               QueryDataType.PARALLEL_TUNING: ClusterParallelAnalysisTuning,
                               QueryDataType.PARALLEL_DATA: ClusterParallelAnalysisParser,
+                              QueryDataType.CLUSTER_COMMUNICATION: ClusterTuningFacade,
+                              QueryDataType.COMMUNICATION_MATRIX: ClusterTuningFacade,
                               QueryDataType.HOST_SYS_USAGE: HostSysUsageParser}
 
     def __init__(self: any, args: any) -> None:
@@ -54,6 +59,11 @@ class MsprofQuerySummaryManager:
         self.npu_id = args.id
         self.model_id = args.model_id
         self.iteration_id = args.iteration_id
+        self.params = {"collection_path": self.collection_path,
+                       "npu_id": self.npu_id,
+                       "model_id": self.model_id,
+                       "iteration_id": self.iteration_id,
+                       "data_type": self.data_type}
 
     @staticmethod
     def check_rank_id(collection_path: str) -> bool:
@@ -93,11 +103,7 @@ class MsprofQuerySummaryManager:
                   "To query cluster or summary data, please execute import --cluster first")
             raise ProfException(ProfException.PROF_CLUSTER_DIR_ERROR)
         prepare_log(self.collection_path)
-        params = {"collection_path": self.collection_path,
-                  "npu_id": self.npu_id,
-                  "model_id": self.model_id,
-                  "iteration_id": self.iteration_id}
-        self.QUERY_DATA_TYPE_PARSER.get(self.data_type)(params).process()
+        self.QUERY_DATA_TYPE_PARSER.get(self.data_type)(self.params).process()
 
     def _check_collection_dir_valid(self: any) -> bool:
         if not os.path.exists(PathManager.get_db_path(self.collection_path, DBNameConstant.DB_CLUSTER_RANK)):

@@ -16,20 +16,20 @@ class HCCLData:
     def __init__(self: any, hccl_data: dict) -> None:
         self._hccl_data = hccl_data
         self._hccl_name = Constant.NA
-        self._plane_id = 0
-        self._timestamp = 0
-        self._duration = 0
+        self._plane_id = -1
+        self._timestamp = -1
+        self._duration = -1
         self._bandwidth = Constant.NA
-        self._stage = 0
-        self._step = 0
-        self._stream_id = 0
-        self._task_id = 0
+        self._stage = -1
+        self._step = -1
+        self._stream_id = -1
+        self._task_id = -1
         self._task_type = Constant.NA
-        self._src_rank = 0
-        self._dst_rank = 0
-        self._notify_id = 0
+        self._src_rank = -1
+        self._dst_rank = -1
+        self._notify_id = -1
         self._transport_type = Constant.NA
-        self._size = 0
+        self._size = -1
 
     @property
     def hccl_name(self: any) -> str:
@@ -71,7 +71,7 @@ class HCCLData:
         hccl bandwidth
         :return: hccl bandwidth
         """
-        return self._hccl_data.get("args").get('bandwidth', self._bandwidth)
+        return self._hccl_data.get("args", {}).get('bandwidth', self._bandwidth)
 
     @property
     def stream_id(self: any) -> int:
@@ -79,7 +79,7 @@ class HCCLData:
         hccl stream_id
         :return: hccl stream_id
         """
-        return self._hccl_data.get("args").get('stream id', self._stream_id)
+        return self._hccl_data.get("args", {}).get('stream id', self._stream_id)
 
     @property
     def task_id(self: any) -> int:
@@ -87,7 +87,7 @@ class HCCLData:
         hccl task_id
         :return: hccl task_id
         """
-        return self._hccl_data.get("args").get('task id', self._task_id)
+        return self._hccl_data.get("args", {}).get('task id', self._task_id)
 
     @property
     def task_type(self: any) -> int:
@@ -95,7 +95,7 @@ class HCCLData:
         hccl task type
         :return: hccl task_type
         """
-        return self._hccl_data.get("args").get('task type', self._task_type)
+        return self._hccl_data.get("args", {}).get('task type', self._task_type)
 
     @property
     def notify_id(self: any) -> int:
@@ -103,7 +103,7 @@ class HCCLData:
         hccl notify id
         :return: hccl task_type
         """
-        return self._hccl_data.get("args").get('notify id', self._notify_id)
+        return self._hccl_data.get("args", {}).get('notify id', self._notify_id)
 
     @property
     def stage(self: any) -> int:
@@ -111,7 +111,7 @@ class HCCLData:
         hccl stage
         :return: hccl task_type
         """
-        return self._hccl_data.get("args").get('stage0', self._stage)
+        return self._hccl_data.get("args", {}).get('stage', self._stage)
 
     @property
     def step(self: any) -> int:
@@ -119,7 +119,7 @@ class HCCLData:
         hccl step
         :return: hccl task_type
         """
-        return self._hccl_data.get("args").get('step', self._step)
+        return self._hccl_data.get("args", {}).get('step', self._step)
 
     @property
     def dst_rank(self: any) -> int:
@@ -127,7 +127,7 @@ class HCCLData:
         hccl dst rank
         :return: hccl task_type
         """
-        return self._hccl_data.get("args").get('dst rank', self._dst_rank)
+        return self._hccl_data.get("args", {}).get('dst rank', self._dst_rank)
 
     @property
     def src_rank(self: any) -> int:
@@ -135,7 +135,7 @@ class HCCLData:
         hccl src rank
         :return: hccl dst rank
         """
-        return self._hccl_data.get("args").get('src rank', self._src_rank)
+        return self._hccl_data.get("args", {}).get('src rank', self._src_rank)
 
     @property
     def transport_type(self: any) -> int:
@@ -143,7 +143,7 @@ class HCCLData:
         hccl transport type
         :return: hccl transport type
         """
-        return self._hccl_data.get("args").get('transport type', self._transport_type)
+        return self._hccl_data.get("args", {}).get('transport type', self._transport_type)
 
     @property
     def size(self: any) -> int:
@@ -151,4 +151,4 @@ class HCCLData:
         hccl size
         :return: hccl size
         """
-        return self._hccl_data.get("args").get('size', self._size)
+        return self._hccl_data.get("args", {}).get('size', self._size)
