@@ -53,9 +53,7 @@ class HCCLData:
         hccl timestamp
         :return: hccl timestamp
         """
-        return InfoConfReader().time_from_syscnt(
-            self._hccl_data.get('ts', self._timestamp) * InfoConfReader().get_freq(StrConstant.HWTS) / 1000000.0,
-            NumberConstant.MICRO_SECOND)
+        return self._hccl_data.get('ts', self._timestamp)
 
     @property
     def duration(self: any) -> int:

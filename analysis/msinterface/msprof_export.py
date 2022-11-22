@@ -545,8 +545,13 @@ class ExportCommand:
             return
         ClusterTuning(self._cluster_params.get('cluster_path')).run()
         params = {"collection_path": self.collection_path,
+                  "model_id": 0,
+                  "npu_id": -1,
                   "iteration_id": self.iteration_id}
-        ClusterTuningFacade(params).process()
+        try:
+            ClusterTuningFacade(params).process()
+        except ProfException:
+            warn(self.FILE_NAME, 'Cluster Tuning did not complete!')
 
     def _update_cluster_params(self: any, sub_path: str, is_cluster: bool) -> None:
         if is_cluster:

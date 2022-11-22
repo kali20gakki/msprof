@@ -360,6 +360,23 @@ def create_json(json_file: str, headers: list, data: list, save_old_file: bool =
         return json.dumps({'status': NumberConstant.ERROR, 'info': str(err), 'data': ''})
 
 
+def create_json_for_dict(json_file: str, dict_result: dict) -> str:
+    """
+    create json file for dict object
+    :param json_file: json file name
+    :param dict_result: dict
+    :return: result of creating json file
+    """
+    try:
+        with os.fdopen(os.open(json_file, Constant.WRITE_FLAGS,
+                               Constant.WRITE_MODES), 'w') as _json_file:
+            os.chmod(json_file, NumberConstant.FILE_AUTHORITY)
+            json.dump(dict_result, _json_file)
+        return json.dumps({'status': NumberConstant.SUCCESS, 'info': '', 'data': json_file})
+    except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
+        return json.dumps({'status': NumberConstant.ERROR, 'info': str(err), 'data': ''})
+
+
 def bak_and_make_dir(file: str, save_old_file: bool = True) -> bool:
     json_file_back = file + ".bak"
     try:
