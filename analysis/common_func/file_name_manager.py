@@ -125,10 +125,12 @@ class FileNameManagerConstant:
         r"^pcie\.data\.\d+\.(dev|host)\.profiler_default_tag\.(\d+)\.slice_\d+"
 
     PID_MEM_FILE_PATTERN = r"^(\d+)-Memory\.data\.(\d+)\.slice_\d+"
+    HOST_PID_MEM_FILE_PATTERN = r"^(\d+)-Memory\.data\.slice_\d+"
     PID_MEM_INFER_FILE_PATTERN = r"^(\d+)-Memory\.data\.(\d+)\.\d+"
     PID_MEM_TRAINING_FILE_PATTERN = r"^(\d+)-Memory\.data\.dev\.profiler_default_tag\.(\d+)\.slice_\d+"
 
     PID_CPU_USAGE_FILE_PATTERN = r"^(\d+)-CpuUsage\.data\.(\d+)\.slice_\d+"
+    HOST_PID_CPU_USAGE_FILE_PATTERN = r"^(\d+)-CpuUsage\.data\.slice_\d+"
     PID_CPU_USAGE_INFER_FILE_PATTERN = r"^(\d+)-CpuUsage\.data\.(\d+)\.\d+"
     PID_CPU_USAGE_TRAINING_FILE_PATTERN = \
         r"(\d+)-CpuUsage\.data\.dev\.profiler_default_tag\.(\d+)\.slice_\d+"
@@ -145,11 +147,13 @@ class FileNameManagerConstant:
     RUNTIME_API_INFER_FILE_PATTERN = r"^[r|R]untime\.runtime\.data\.(\d+)\.\d+"
 
     SYS_MEM_FILE_PATTERN = r"^Memory\.data\.(\d+)\.slice_\d+"
+    HOST_SYS_MEM_FILE_PATTERN = r"^host_sys_mem\.data\.slice_\d+"
     SYS_MEM_INFER_FILE_PATTERN = r"^Memory\.data\.(\d+)\.\d+"
     SYS_MEM_TRAINING_FILE_PATTERN = \
         r"^Memory\.data\.(dev|host)\.profiler_default_tag\.(\d+)\.slice_\d+"
 
     SYS_CPU_USAGE_FILE_PATTERN = r"^SystemCpuUsage\.data\.(\d+)\.slice_\d+"
+    HOST_SYS_CPU_USAGE_FILE_PATTERN = r"^host_sys_cpu\.data\.slice_\d+"
     SYS_CPU_USAGE_INFER_FILE_PATTERN = r"SystemCpuUsage\.data\.(\d+)\.\d+"
     SYS_CPU_USAGE_TRAINING_FILE_PATTERN = \
         r"^SystemCpuUsage\.data\.dev\.profiler_default_tag\.(\d+)\.slice_\d+"
@@ -530,16 +534,18 @@ def get_pid_mem_compiles() -> tuple:
     """
     return re.compile(FileNameManagerConstant.PID_MEM_FILE_PATTERN), re.compile(
         FileNameManagerConstant.PID_MEM_INFER_FILE_PATTERN), re.compile(
-        FileNameManagerConstant.PID_MEM_TRAINING_FILE_PATTERN)
+        FileNameManagerConstant.PID_MEM_TRAINING_FILE_PATTERN), re.compile(
+        FileNameManagerConstant.HOST_PID_MEM_FILE_PATTERN)
 
 
 def get_pid_cpu_usage_compiles() -> tuple:
     """
     get pid cpu usage regex compiles
     """
-    return re.compile(FileNameManagerConstant.PID_CPU_USAGE_FILE_PATTERN), re.compile(
-        FileNameManagerConstant.PID_CPU_USAGE_INFER_FILE_PATTERN), re.compile(
-        FileNameManagerConstant.PID_CPU_USAGE_TRAINING_FILE_PATTERN)
+    return re.compile(FileNameManagerConstant.PID_CPU_USAGE_FILE_PATTERN), \
+           re.compile(FileNameManagerConstant.PID_CPU_USAGE_INFER_FILE_PATTERN), \
+           re.compile(FileNameManagerConstant.PID_CPU_USAGE_TRAINING_FILE_PATTERN), \
+           re.compile(FileNameManagerConstant.HOST_PID_CPU_USAGE_FILE_PATTERN)
 
 
 def get_roce_compiles() -> tuple:
@@ -573,16 +579,18 @@ def get_sys_mem_compiles() -> tuple:
     """
     return re.compile(FileNameManagerConstant.SYS_MEM_FILE_PATTERN), re.compile(
         FileNameManagerConstant.SYS_MEM_INFER_FILE_PATTERN), re.compile(
-        FileNameManagerConstant.SYS_MEM_TRAINING_FILE_PATTERN)
+        FileNameManagerConstant.SYS_MEM_TRAINING_FILE_PATTERN), re.compile(
+        FileNameManagerConstant.HOST_SYS_MEM_FILE_PATTERN)
 
 
 def get_sys_cpu_usage_compiles() -> tuple:
     """
     get sys cpu usage compiles
     """
-    return re.compile(FileNameManagerConstant.SYS_CPU_USAGE_FILE_PATTERN), re.compile(
-        FileNameManagerConstant.SYS_CPU_USAGE_INFER_FILE_PATTERN), re.compile(
-        FileNameManagerConstant.SYS_CPU_USAGE_TRAINING_FILE_PATTERN)
+    return re.compile(FileNameManagerConstant.SYS_CPU_USAGE_FILE_PATTERN), \
+           re.compile(FileNameManagerConstant.SYS_CPU_USAGE_INFER_FILE_PATTERN), \
+           re.compile(FileNameManagerConstant.SYS_CPU_USAGE_TRAINING_FILE_PATTERN), \
+           re.compile(FileNameManagerConstant.HOST_SYS_CPU_USAGE_FILE_PATTERN),
 
 
 def get_ts_cpu_compiles() -> tuple:

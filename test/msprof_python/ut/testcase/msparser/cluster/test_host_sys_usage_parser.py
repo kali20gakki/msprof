@@ -1,0 +1,89 @@
+import os
+import pathlib
+import unittest
+from unittest import mock
+
+import pytest
+
+from constant.constant import clear_dt_project
+from msparser.cluster.host_sys_usage_parser import HostSysUsageParser
+
+NAMESPACE = 'msparser.cluster.host_sys_usage_parser'
+
+
+class TestHostSysUsageParser(unittest.TestCase):
+    DIR_PATH = os.path.join(os.path.dirname(__file__), 'DT_HostSysUsageParser')
+    params = {"collection_path": DIR_PATH, "npu_id": 0, "model_id": 0}
+
+    def setUp(self) -> None:
+        clear_dt_project(self.DIR_PATH)
+        os.makedirs(os.path.join(self.DIR_PATH, 'query'))
+
+    def tearDown(self) -> None:
+        clear_dt_project(self.DIR_PATH)
+
+    def test_process_should_generate_json_file(self):
+        common_info = (1, 192, 100, 100)
+        sys_cpu_data = [[100, 100, 100, 100, 123456789], [100, 100, 100, 100, 123458789]]
+        pid_cpu_data = [[100, 100, 123456789], [100, 100, 123458789]]
+        sys_mem_data = [[1024, 512, 123456789], [1024, 512, 123458789]]
+        pid_mem_data = [[1, 2, 3, 123456789], [1, 2, 3, 123458789]]
+        with mock.patch(NAMESPACE + '.HostSysUsageParser._get_host_dir_path', return_value=self.DIR_PATH), \
+            mock.patch(NAMESPACE + '.HostSysUsageParser._get_host_common_info', return_value=common_info), \
+            mock.patch(NAMESPACE + '.HostSysUsageParser._get_all_pid', return_value=([123], [456])), \
+            mock.patch('msmodel.hardware.sys_usage_model.SysUsageModel.init', return_value=True), \
+            mock.patch('msmodel.hardware.sys_mem_model.SysMemModel.init', return_value=True), \
+            mock.patch('msmodel.hardware.sys_usage_model.SysUsageModel.get_sys_cpu_data', return_value=sys_cpu_data), \
+            mock.patch('msmodel.hardware.sys_usage_model.SysUsageModel.get_pid_cpu_data', return_value=pid_cpu_data),\
+            mock.patch('msmodel.hardware.sys_mem_model.SysMemModel.get_sys_mem_data', return_value=sys_mem_data),\
+            mock.patch('msmodel.hardware.sys_mem_model.SysMemModel.get_pid_mem_data', return_value=pid_mem_data):
+            check = HostSysUsageParser(self.params)
+            check.process()
+
+            sys_cpu_data_file = os.path.join(self.DIR_PATH, "query", "host_sys_cpu_usage_{}_{}.json".format(
+                self.params["npu_id"], self.params["model_id"]))
+            self.assertEqual(True, os.path.exists(sys_cpu_data_file))
+            pid_cpu_data_file = os.path.join(self.DIR_PATH, "query", "host_pid_cpu_usage_{}_{}.json".format(
+                self.params["npu_id"], self.params["model_id"]))
+            self.assertEqual(True, os.path.exists(pid_cpu_data_file))
+            sys_mem_data_file = os.path.join(self.DIR_PATH, "query", "host_sys_mem_usage_{}_{}.json".format(
+                self.params["npu_id"], self.params["model_id"]))
+            self.assertEqual(True, os.path.exists(sys_mem_data_file))
+            pid_mem_data_file = os.path.join(self.DIR_PATH, "query", "host_pid_mem_usage_{}_{}.json".format(
+                self.params["npu_id"], self.params["model_id"]))
+            self.assertEqual(True, os.path.exists(pid_mem_data_file))
+
+    def test_process_should_not_generate_json_file_when_zeros_data(self):
+        common_info = (1, 192, 100, 100)
+        sys_cpu_data = [[100, 100, 100, 100, 123456789], [0, 0, 0, 0, 123458789]]
+        pid_cpu_data = [[0, 0, 123456789], [100, 100, 123458789]]
+        sys_mem_data = [[0, 512, 123456789], [1024, 512, 123458789]]
+        pid_mem_data = [[1, 2, 3, 123456789], [1, 2, 3, 123458789]]
+        with mock.patch(NAMESPACE + '.HostSysUsageParser._get_host_dir_path', return_value=self.DIR_PATH), \
+            mock.patch(NAMESPACE + '.HostSysUsageParser._get_host_common_info', return_value=common_info), \
+            mock.patch(NAMESPACE + '.HostSysUsageParser._get_all_pid', return_value=([123], [456])), \
+            mock.patch('msmodel.hardware.sys_usage_model.SysUsageModel.init', return_value=True), \
+            mock.patch('msmodel.hardware.sys_mem_model.SysMemModel.init', return_value=True), \
+            mock.patch('msmodel.hardware.sys_usage_model.SysUsageModel.get_sys_cpu_data', return_value=sys_cpu_data),\
+            mock.patch('msmodel.hardware.sys_usage_model.SysUsageModel.get_pid_cpu_data', return_value=pid_cpu_data),\
+            mock.patch('msmodel.hardware.sys_mem_model.SysMemModel.get_sys_mem_data', return_value=sys_mem_data),\
+            mock.patch('msmodel.hardware.sys_mem_model.SysMemModel.get_pid_mem_data', return_value=pid_mem_data):
+            check = HostSysUsageParser(self.params)
+            check.process()
+
+            sys_cpu_data_file = os.path.join(self.DIR_PATH, "query", "host_sys_cpu_usage_{}_{}.json".format(
+                self.params["npu_id"], self.params["model_id"]))
+            self.assertEqual(False, os.path.exists(sys_cpu_data_file))
+            pid_cpu_data_file = os.path.join(self.DIR_PATH, "query", "host_pid_cpu_usage_{}_{}.json".format(
+                self.params["npu_id"], self.params["model_id"]))
+            self.assertEqual(False, os.path.exists(pid_cpu_data_file))
+            sys_mem_data_file = os.path.join(self.DIR_PATH, "query", "host_sys_mem_usage_{}_{}.json".format(
+                self.params["npu_id"], self.params["model_id"]))
+            self.assertEqual(False, os.path.exists(sys_mem_data_file))
+            pid_mem_data_file = os.path.join(self.DIR_PATH, "query", "host_pid_mem_usage_{}_{}.json".format(
+                self.params["npu_id"], self.params["model_id"]))
+            self.assertEqual(True, os.path.exists(pid_mem_data_file))
+
+
+if __name__ == '__main__':
+    unittest.main()
