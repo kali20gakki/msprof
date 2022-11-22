@@ -4,7 +4,6 @@
 
 import os
 import logging
-import sqlite3
 
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
@@ -13,7 +12,6 @@ from common_func.ms_constant.number_constant import NumberConstant
 from common_func.path_manager import PathManager
 from common_func.utils import Utils
 from msmodel.interface.base_model import BaseModel
-from profiling_bean.db_dto.step_trace_dto import StepTraceDto
 from msmodel.step_trace.ts_track_model import TsTrackModel
 
 

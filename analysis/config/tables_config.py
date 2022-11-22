@@ -578,7 +578,10 @@ class TablesConfig(MetaConfig):
             ('stream_id', 'INTEGER,null'),
             ('task_id', 'INTEGER,null'),
             ('batch_id', 'INTEGER,null'),
-            ('iter_id', 'INTEGER,null')
+            ('iter_id', 'INTEGER,null'),
+            ('start_time', 'REAL,null'),
+            ('end_time', 'REAL,null'),
+            ('is_ai_core', 'INTEGER,null')
         ]
         , 'GeMergeMap': [
             ('model_id', 'INTEGER,null'),
@@ -913,5 +916,80 @@ class TablesConfig(MetaConfig):
             ('index_id', 'INTEGER,null'),
             ('value', 'INTEGER,null'),
             ('mode', 'INTEGER,null')
+        ]
+        , 'HcclOperatorExeMap': [
+            ('model_id', 'INTEGER,null'),
+            ('index_id', 'INTEGER,null'),
+            ('op_name', 'TEXT,null'),
+            ('op_type', 'TEXT,null'),
+            ('start_time', 'REAL,null'),
+            ('end_time', 'REAL,null')
+        ]
+        , 'ParallelStrategyMap': [
+            ('ai_frame_type', 'TEXT,null'),
+            ('stage_num', 'INTEGER,null'),
+            ('rankId', 'INTEGER,null'),
+            ('stageId', 'INTEGER,null'),
+            ('parallelType', 'TEXT,null'),
+            ('stageDevices', 'TEXT,null'),
+            ('parallel_mode', 'TEXT,null')
+        ]
+        , 'HcclOperatorOverlapMap': [
+            ('model_id', 'INTEGER,null'),
+            ('index_id', 'INTEGER,null'),
+            ('op_name', 'TEXT,null'),
+            ('op_type', 'TEXT,null'),
+            ('start_time', 'REAL,null'),
+            ('end_time', 'REAL,null'),
+            ('overlap_time', 'REAL,null')
+        ]
+        , 'ComputationTimeMap': [
+            ('model_id', 'INTEGER,null'),
+            ('index_id', 'INTEGER,null'),
+            ('step_time', 'REAL,null'),
+            ('computation_time', 'REAL,null')
+        ]
+        , 'ClusterDataParallelMap': [
+            ('rank_id', 'INTEGER,null'),
+            ('device_id', 'INTEGER,null'),
+            ('model_id', 'INTEGER,null'),
+            ('iteration_id', 'INTEGER,null'),
+            ('step_time', 'REAL,null'),
+            ('computation_time', 'REAL,null'),
+            ('pure_communication_time', 'REAL,null'),
+            ('communication_time', 'REAL,null'),
+            ('interval_of_communication_time', 'REAL,null'),
+            ('hccl_op_num', 'INTEGER,null')
+        ]
+        , 'ClusterModelParallelMap': [
+            ('rank_id', 'INTEGER,null'),
+            ('device_id', 'INTEGER,null'),
+            ('model_id', 'INTEGER,null'),
+            ('iteration_id', 'INTEGER,null'),
+            ('step_time', 'REAL,null'),
+            ('computation_time', 'REAL,null'),
+            ('pure_communication_time', 'REAL,null'),
+            ('communication_time', 'REAL,null')
+        ]
+        , 'ClusterPipelineParallelMap': [
+            ('rank_id', 'INTEGER,null'),
+            ('device_id', 'INTEGER,null'),
+            ('model_id', 'INTEGER,null'),
+            ('iteration_id', 'INTEGER,null'),
+            ('step_time', 'REAL,null'),
+            ('computation_time', 'REAL,null'),
+            ('pure_communication_time', 'REAL,null'),
+            ('communication_time', 'REAL,null'),
+            ('pure_communication_time_only_revice', 'REAL,null'),
+            ('pure_communication_time_except_revice', 'REAL,null')
+        ]
+        , 'ClusterParallelStrategyMap': [
+            ('ai_frame_type', 'TEXT,null'),
+            ('stage_num', 'INTEGER,null'),
+            ('rankId', 'INTEGER,null'),
+            ('stageId', 'INTEGER,null'),
+            ('parallelType', 'TEXT,null'),
+            ('stageDevices', 'TEXT,null'),
+            ('parallel_mode', 'TEXT,null')
         ]
     }

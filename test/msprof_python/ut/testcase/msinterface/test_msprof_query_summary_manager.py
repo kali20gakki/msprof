@@ -135,6 +135,6 @@ class TestMsprofQuerySummaryManager(unittest.TestCase):
                     "iteration_id": 1}
         args = Namespace(**args_dic)
         with mock.patch(NAMESPACE + ".MsprofQuerySummaryManager._check_collection_dir_valid", return_value=True),\
-                mock.patch(NAMESPACE + '.ClusterCommunicationParser.process'):
+                mock.patch(NAMESPACE + '.ClusterParallelAnalysisParser.process'):
             check = MsprofQuerySummaryManager(args)
             check.process()

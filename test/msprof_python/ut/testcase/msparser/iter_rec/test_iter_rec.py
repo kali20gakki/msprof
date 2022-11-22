@@ -22,7 +22,7 @@ class TestIterRecParser(unittest.TestCase):
         'job_id': 'job_default', 'ip_address': '127.0.0.1', 'model_id': -1
     }
     file_list = {DataTag.HWTS: ['hwts.data.0.slice_0']}
-    non_static_data = {1: ['1-1-0', '1-2-0', '1-3-0'], 2: ['2-1-0', '2-2-0', '2-3-0']}
+    dynamic_data = {1: ['1-1-0', '1-2-0', '1-3-0'], 2: ['2-1-0', '2-2-0', '2-3-0']}
 
     def setUp(self) -> None:
         os.makedirs(os.path.join(self.DIR_PATH, 'PROF1', 'device_0'))
