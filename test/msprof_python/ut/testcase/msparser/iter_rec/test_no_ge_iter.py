@@ -41,8 +41,11 @@ class TestNoGeIterRecParser(unittest.TestCase):
 
         with mock.patch("common_func.iter_recorder.IterRecorder.check_task_in_iteration", return_value=True), \
                 mock.patch("common_func.iter_recorder.IterRecorder.set_current_iter_id"), \
-        mock.patch("msparser.iter_rec.iter_info_updater.iter_info_updater.IterInfoUpdater.update_count_and_offset"), \
-        mock.patch("msparser.iter_rec.iter_info_updater.iter_info_updater.IterInfoUpdater.update_count_and_offset"):
+                mock.patch(NAMESPACE + ".IterParser._create_hwts_task_time_data"), \
+                mock.patch(
+                    "msparser.iter_rec.iter_info_updater.iter_info_updater.IterInfoUpdater.update_count_and_offset"), \
+                mock.patch(
+                    "msparser.iter_rec.iter_info_updater.iter_info_updater.IterInfoUpdater.update_count_and_offset"):
             check._read_hwts_data(bytes(data))
 
     def test_read_ai_core_data(self):

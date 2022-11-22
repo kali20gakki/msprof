@@ -171,6 +171,20 @@ class DataParsersConfig(MetaConfig):
             ('path', 'msparser.aicpu.data_preparation_parser'),
             ('chip_model', '0,1,2,3,4,5')
         ]
+        , 'HCCLOperatiorParser': [
+            ('path', 'msparser.parallel.hccl_operator_parser'),
+            ('chip_model', '1,2,3,4,5'),
+            ('level', '3')
+        ]
+        , 'ParallelStrategyParser': [
+            ('path', 'msparser.parallel.parallel_strategy_parser'),
+            ('chip_model', '1,2,3,4,5')
+        ]
+        , 'ClusterParallelParser': [
+            ('path', 'msparser.parallel.cluster_parallel_parser'),
+            ('chip_model', '1,2,3,4,5'),
+            ('level', '4')
+        ]
         , 'L2CacheSampleParser': [
             ('path', 'msparser.l2_cache.l2_cache_sample_parser'),
             ('chip_model', '5')
