@@ -66,14 +66,16 @@ class HwtsIterModel(ParserModel):
         get all aic count
         :return: sum of aic count
         """
+        sql = "select max(ai_core_num+ai_core_offset) from {0}".format(
+            DBNameConstant.TABLE_HWTS_ITER_SYS)
         try:
-            sql = "select ai_core_num+ai_core_offset from {0} " \
-                  "order by iter_id desc".format(
-                DBNameConstant.TABLE_HWTS_ITER_SYS)
-            return self.cur.execute(sql).fetchone()[0]
+            all_aic_num = self.cur.execute(sql).fetchone()[0]
         except sqlite3.Error as err:
             logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
             return Constant.DEFAULT_COUNT
+        if all_aic_num is None:
+            return Constant.DEFAULT_COUNT
+        return all_aic_num
 
     def get_batch_list(self: any, table_name, iter_range: list) -> list:
         """
