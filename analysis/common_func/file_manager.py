@@ -6,7 +6,7 @@ import json
 import os
 import re
 
-from common_func.common import CommonConstant
+from common_func.common import CommonConstant, print_info
 from common_func.common import error
 from common_func.constant import Constant
 from common_func.ms_constant.number_constant import NumberConstant
@@ -94,6 +94,31 @@ class FileManager:
                     os.chmod(os.path.join(file_path, file_name), cls.FILE_AUTHORITY)
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
             error(os.path.basename(__file__), err)
+
+    @classmethod
+    def storage_query_result_json_file(cls: any, collection_path: str, result_data: dict, file_name: str) -> None:
+        if not result_data:
+            return
+        query_path = os.path.join(collection_path, PathManager.QUERY_CLUSTER)
+        if not os.path.exists(query_path):
+            try:
+                os.makedirs(query_path)
+            except OSError:
+                error(os.path.basename(__file__),
+                      "Storing data failed, you may not have the permission to write files in the current path.")
+                return
+            os.chmod(query_path, NumberConstant.DIR_AUTHORITY)
+        output_file_path = PathManager.get_query_result_path(collection_path, file_name)
+        try:
+            with os.fdopen(os.open(output_file_path, Constant.WRITE_FLAGS,
+                                   Constant.WRITE_MODES), 'w') as file:
+                os.chmod(output_file_path, NumberConstant.FILE_AUTHORITY)
+                json.dump(result_data, file)
+        except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
+            error(os.path.basename(__file__), err)
+        else:
+            print_info(os.path.basename(__file__),
+                       "The data has stored successfully, file path: {}".format(output_file_path))
 
 
 class FileOpen:

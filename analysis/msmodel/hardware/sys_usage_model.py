@@ -35,3 +35,16 @@ class SysUsageModel(BaseModel, ABC):
             self.insert_data_to_db(DBNameConstant.TABLE_SYS_USAGE, data_list.get('sys_data_list'))
         if data_list.get('pid_data_list'):
             self.insert_data_to_db(DBNameConstant.TABLE_PID_USAGE, data_list.get('pid_data_list'))
+
+    def get_sys_cpu_data(self: any) -> list:
+        sql = "select user,sys,iowait,idle,timestamp from {} where cpun = 'cpu';".format(
+            DBNameConstant.TABLE_SYS_USAGE)
+        return DBManager.fetch_all_data(self.cur, sql)
+
+    def get_pid_cpu_data(self: any, pid: int) -> list:
+        sql = "select utime,stime,timestamp from {} where pid={};".format(DBNameConstant.TABLE_PID_USAGE, pid)
+        return DBManager.fetch_all_data(self.cur, sql)
+
+    def get_all_pid(self: any) -> list:
+        sql = "select pid from {};".format(DBNameConstant.TABLE_PID_USAGE)
+        return DBManager.fetch_all_data(self.cur, sql)
