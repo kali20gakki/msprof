@@ -73,7 +73,6 @@ class HCCLParser(MsMultiProcess):
         finally:
             if os.path.exists(self._hccl_dir):
                 shutil.rmtree(self._hccl_dir)
-            pass
 
     def _prepare_for_parse(self: any) -> None:
         if os.path.exists(self._hccl_dir):

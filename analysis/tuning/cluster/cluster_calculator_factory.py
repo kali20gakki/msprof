@@ -6,6 +6,8 @@
 import logging
 from abc import abstractmethod
 from common_func.ms_constant.str_constant import StrConstant
+from mscalculate.cluster.slow_rank_calculator import SlowRankCalculator
+from mscalculate.cluster.slow_link_calculator import SlowLinkCalculator
 
 
 class ClusterCalculatorFactory:
@@ -42,8 +44,9 @@ class SlowRankCalculatorFactory(ClusterCalculatorFactory):
             self.op_name_list.append(op_name)
             self.calculate_data.append(rank_dict)
 
-    def generate_calculator(self: any):
-        return
+    def generate_calculator(self: any) -> SlowRankCalculator:
+        self.data_dispatch()
+        return SlowRankCalculator(self.calculate_data, self.op_name_list)
 
 
 class SlowLinkCalculatorFactory(ClusterCalculatorFactory):
@@ -69,6 +72,7 @@ class SlowLinkCalculatorFactory(ClusterCalculatorFactory):
                     self.calculate_data.append(com_dict[StrConstant.COMMNUNICATION_BANDWIDTH_INFO])
 
     def generate_calculator(self):
-        return
+        self.data_dispatch()
+        return SlowLinkCalculator(self.calculate_data, self.op_rank_list)
 
 

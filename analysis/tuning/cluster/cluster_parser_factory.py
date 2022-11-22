@@ -8,6 +8,7 @@ from abc import abstractmethod
 from msmodel.step_trace.cluster_step_trace_model import ClusterStepTraceViewModel
 from msmodel.cluster_info.cluster_info_model import ClusterInfoViewModel
 from msmodel.cluster_info.communication_model import CommunicationModel
+from msparser.cluster.communication_parser import CommunicationParser
 from msparser.cluster.meta_parser import MetaParser
 from common_func.db_name_constant import DBNameConstant
 from common_func.msprof_exception import ProfException
@@ -47,8 +48,14 @@ class ClusterCommunicationParserFactory(ClusterParserFactory):
         self.cluster_step_trace_model = ClusterStepTraceViewModel(self.collection_path)
         self.rank_hccl_data_dict = {}
 
-    def generate_parser(self: any):
-        return
+    def generate_parser(self: any) -> CommunicationParser:
+        self.get_hccl_ops_by_iter()
+        if not self.rank_hccl_data_dict:
+            error(ClusterCommunicationParserFactory.FILE_NAME,
+                  "fail to get no.{} iteration hccl data".format(self.iteration_id))
+            logging.error("Can't get hccl events!")
+            raise ProfException(ProfException.PROF_INVALID_DATA_ERROR)
+        return CommunicationParser(self.rank_hccl_data_dict)
 
     def get_hccl_ops_by_iter(self):
         """
@@ -125,11 +132,7 @@ class ClusterCommunicationParserFactory(ClusterParserFactory):
                               'iter_end': iter_start_end[0][1]}
                 events_data = _model.get_hccl_data_by_conditions(conditions)
                 if not events_data:
-                    error(ClusterCommunicationParserFactory.FILE_NAME,
-                          "fail to get no.{} iteration hccl data".format(self.iteration_id))
-                    logging.error("Fail to get information from %s in %s iteration, communication parser is interrupted"
-                                  , str(self.iteration_id), DBNameConstant.DB_HCCL)
-                    raise ProfException(ProfException.PROF_CLUSTER_INVALID_DB)
+                    continue
                 # only get hccl data with first iter
                 events_data = [event for event in events_data if event.iteration == events_data[0].iteration]
                 if hccl_name.op_name not in self.rank_hccl_data_dict:

@@ -367,6 +367,8 @@ def create_json_for_dict(json_file: str, dict_result: dict) -> str:
     :param dict_result: dict
     :return: result of creating json file
     """
+    if not bak_and_make_dir(json_file, False):
+        return json.dumps({'status': NumberConstant.ERROR, 'info': str('bak or mkdir csv dir failed'), 'data': ''})
     try:
         with os.fdopen(os.open(json_file, Constant.WRITE_FLAGS,
                                Constant.WRITE_MODES), 'w') as _json_file:

@@ -9,6 +9,7 @@ from tuning.cluster.cluster_tuning_facade import ClusterTuningFacade
 from common_func.msprof_exception import ProfException
 from common_func.ms_constant.str_constant import StrConstant
 from constant.constant import clear_dt_project
+from msparser.cluster.communication_parser import CommunicationParser
 import pytest
 
 
@@ -115,4 +116,20 @@ class TestClusterTuningFacade(unittest.TestCase):
                       "data_type": 6}
             ClusterTuningFacade(params).process()
         self.assertEqual(ProfException.PROF_INVALID_PARAM_ERROR, err.value.code)
+
+    def test_cluster_communication(self):
+        outspace1 = 'msparser.cluster.communication_parser'
+        outspace2 = 'mscalculate.cluster.slow_rank_calculator'
+        outspace3 = 'mscalculate.cluster.slow_link_calculator'
+        dic = {StrConstant.TOTAL: {StrConstant.SLOW_RANK_SUGGESTION: 'RANK 1 is a slow rank.'}}
+        parser = CommunicationParser({})
+        with mock.patch(NAMESPACE + '.ClusterCommunicationParserFactory.generate_parser', return_value=parser), \
+                mock.patch(outspace1 + '.CommunicationParser.run', return_value=dic), \
+                mock.patch(NAMESPACE + '.SlowRankCalculatorFactory.generate_calculator'), \
+                mock.patch(outspace2 + '.SlowRankCalculator.run'), \
+                mock.patch(outspace2 + '.SlowRankCalculator.add_suggestions'), \
+                mock.patch(NAMESPACE + '.SlowLinkCalculatorFactory.generate_calculator'), \
+                mock.patch(outspace3 + '.SlowLinkCalculator.run'), \
+                mock.patch(outspace3 + '.SlowLinkCalculator.add_suggestions'):
+            ClusterTuningFacade(self.params).cluster_communication()
 
