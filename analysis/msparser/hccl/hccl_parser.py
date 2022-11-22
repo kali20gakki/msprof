@@ -71,8 +71,8 @@ class HCCLParser(MsMultiProcess):
             except sqlite3.Error as err:
                 logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
         finally:
-            # if os.path.exists(self._hccl_dir):
-            #     shutil.rmtree(self._hccl_dir)
+            if os.path.exists(self._hccl_dir):
+                shutil.rmtree(self._hccl_dir)
             pass
 
     def _prepare_for_parse(self: any) -> None:
