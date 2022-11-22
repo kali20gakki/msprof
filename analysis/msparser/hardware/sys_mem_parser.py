@@ -11,6 +11,7 @@ from common_func.file_manager import FileManager
 from common_func.file_manager import FileOpen
 from common_func.file_name_manager import get_file_name_pattern_match
 from common_func.file_name_manager import get_pid_mem_compiles
+from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.msvp_common import is_valid_original_data
 from common_func.path_manager import PathManager
@@ -34,7 +35,11 @@ class ParsingMemoryData(MsMultiProcess):
         self.project_path = sample_config.get("result_dir", "")
         self._file_list = file_list
         self.device_id = self.sample_config.get("device_id", "0")
-        self._model = SysMemModel(self.project_path, "memory_{}.db".format(str(self.device_id)),
+        if InfoConfReader().is_host_profiling():
+            db_file = DBNameConstant.DB_HOST_SYS_USAGE_MEM
+        else:
+            db_file = "memory_{}.db".format(str(self.device_id))
+        self._model = SysMemModel(self.project_path, db_file,
                                   [DBNameConstant.TABLE_SYS_MEM, DBNameConstant.TABLE_PID_MEM])
         self.data_dict = {'pid_data_list': [], 'sys_data_list': []}
 
