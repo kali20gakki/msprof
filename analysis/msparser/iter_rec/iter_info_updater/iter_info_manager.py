@@ -4,7 +4,6 @@
 
 from common_func.constant import Constant
 from common_func.db_name_constant import DBNameConstant
-from common_func.msvp_common import path_check
 from common_func.path_manager import PathManager
 from common_func.db_manager import DBManager
 from msmodel.ge.ge_info_calculate_model import GeInfoModel
@@ -56,7 +55,7 @@ class IterInfoManager:
             static_task_dict = self._ge_model.get_ge_task_data(
                 Constant.TASK_TYPE_AI_CORE, Constant.GE_STATIC_SHAPE)
             dynamic_task_dict = self._ge_model.get_ge_task_data(
-                Constant.TASK_TYPE_AI_CORE, Constant.GE_NON_STATIC_SHAPE)
+                Constant.TASK_TYPE_AI_CORE, Constant.GE_DYNAMIC_SHAPE)
         self.regist_aicore_set(static_task_dict, dynamic_task_dict)
 
     def regist_parallel_set(self: any, step_trace_data: list) -> None:
