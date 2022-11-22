@@ -93,13 +93,20 @@ class HCCLParser(MsMultiProcess):
             trace_path = os.path.realpath(os.path.join(self._hccl_dir, _reduce_dir))
             for _trace_file in os.listdir(trace_path):
                 _trace_file = os.path.realpath(os.path.join(trace_path, _trace_file))
-                with FileOpen(_trace_file, "r") as hccl_reader:
-                    json_data = hccl_reader.file_reader.readline(Constant.MAX_READ_LINE_BYTES)
-                    json_data = json.loads(json_data)
+                self._append_hccl_data(_trace_file, _reduce_dir)
 
-                for hccl_data in json_data.get("traceEvents"):
-                    hccl = HCCLData(hccl_data)
-                    self._hccl_data.append([hccl.hccl_name, hccl.plane_id, hccl.timestamp, hccl.duration,
-                                            hccl.notify_id, hccl.stage, hccl.step, hccl.bandwidth,
-                                            hccl.stream_id, hccl.task_id, hccl.task_type, hccl.src_rank,
-                                            hccl.dst_rank, hccl.transport_type, hccl.size])
+    def _append_hccl_data(self: any, trace_path: str,  op_name: str) -> None:
+        with FileOpen(trace_path, "r") as hccl_reader:
+            json_data = hccl_reader.file_reader.readline(Constant.MAX_READ_LINE_BYTES)
+            json_data = json.loads(json_data)
+        iteration = json_data.get("iteration", 0)
+        first_timestamp = 0
+        for hccl_data in json_data.get("traceEvents", []):
+            hccl = HCCLData(hccl_data)
+            if first_timestamp == 0:
+                first_timestamp = hccl.timestamp
+            self._hccl_data.append([op_name, iteration, hccl.hccl_name, first_timestamp, hccl.plane_id,
+                                    hccl.timestamp, hccl.duration, hccl.notify_id, hccl.stage, hccl.step,
+                                    hccl.bandwidth, hccl.stream_id, hccl.task_id, hccl.task_type,
+                                    hccl.src_rank, hccl.dst_rank, hccl.transport_type, hccl.size])
+
