@@ -85,7 +85,7 @@ class ClusterParallelCollector(IParser):
                 num = prof_num % self.THREAD_NUM
             if i == prof_num // self.THREAD_NUM and prof_num % self.THREAD_NUM == 0:
                 num = 0
-            for thread_id in range(num):
+            for _ in range(num):
                 thread_list.append(
                     threading.Thread(target=self.get_device_parallel_data, args=(self._cluster_info[index], index)))
                 index += 1

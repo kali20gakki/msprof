@@ -228,6 +228,90 @@ void RunningMode::SetEnvList(std::vector<std::string> &envsV)
     envsV = Analysis::Dvvp::App::EnvManager::instance()->GetGlobalEnv();
 }
 
+int RunningMode::CheckCurrentDataPathValid(const std::string &path) const
+{
+    static const std::string infoJson = "info.json";
+    std::vector<std::string> fileList;
+    Utils::GetChildFilenames(path, fileList);
+    std::string filePath;
+    std::vector<std::string> softLinkList;
+    bool isInfoJsonExist = false;
+    for (auto file : fileList) {
+        filePath = path + MSVP_SLASH + file;
+        if (Utils::IsSoftLink(filePath)) {
+            softLinkList.push_back(filePath);
+            continue;
+        }
+        if (!Utils::IsDir(filePath) && file.substr(0, infoJson.size()) == infoJson) {
+            isInfoJsonExist = true;
+        }
+    }
+    if (softLinkList.size()) {
+        for (auto softLink : softLinkList) {
+            MSPROF_LOGE("The path '%s' is soft link, not support.", filePath.c_str());
+        }
+        CmdLog::instance()->CmdErrorLog("Argument --output is invalid because of soft link file");
+        return PROFILING_INVALID_PARAM;
+    }
+    return isInfoJsonExist == true ? PROFILING_SUCCESS : PROFILING_FAILED;
+}
+
+int RunningMode::CheckParseDataPathValid(const std::string &parseDataPath) const
+{
+    std::vector<std::string> fileList;
+    Utils::GetChildFilenames(parseDataPath, fileList);
+    std::string filePath;
+    int ret = PROFILING_FAILED;
+    for (auto file : fileList) {
+        filePath = parseDataPath + MSVP_SLASH + file;
+        if (!Utils::IsDir(filePath)) {
+            continue;
+        }
+        ret = CheckCurrentDataPathValid(filePath);
+        if (ret == PROFILING_INVALID_PARAM || ret == PROFILING_SUCCESS) {
+            return ret;
+        }
+    }
+    return PROFILING_FAILED;
+}
+
+ParseDataType RunningMode::GetParseDataType(const std::string &parseDataPath) const
+{
+    int ret;
+    // cmd : msprof --parse=on --output=PROF_xxx/device_x/
+    ret = CheckCurrentDataPathValid(parseDataPath);
+    if (ret == PROFILING_INVALID_PARAM) {
+        return ParseDataType::DATA_PATH_INVALID;
+    } else if (ret == PROFILING_SUCCESS) {
+        return ParseDataType::DATA_PATH_NON_CLUSTER;
+    }
+    // cmd : msprof --parse=on --output=PROF_xxx/
+    ret = CheckParseDataPathValid(parseDataPath);
+    if (ret == PROFILING_INVALID_PARAM) {
+        return ParseDataType::DATA_PATH_INVALID;
+    } else if (ret == PROFILING_SUCCESS) {
+        return ParseDataType::DATA_PATH_NON_CLUSTER;
+    }
+
+    // cmd : msprof --parse=on --output=cluster_data/
+    std::vector<std::string> currentDirFileList;
+    Utils::GetChildFilenames(parseDataPath, currentDirFileList);
+    std::string currentDirFilePath;
+    for (auto currentDirFile : currentDirFileList) {
+        currentDirFilePath = parseDataPath + MSVP_SLASH + currentDirFile;
+        if (!Utils::IsDir(currentDirFilePath)) {
+            continue;
+        }
+        ret = CheckParseDataPathValid(currentDirFilePath);
+        if (ret == PROFILING_INVALID_PARAM) {
+            return ParseDataType::DATA_PATH_INVALID;
+        } else if (ret == PROFILING_SUCCESS) {
+            return ParseDataType::DATA_PATH_CLUSTER;
+        }
+    }
+    return ParseDataType::DATA_PATH_INVALID;
+}
+
 int RunningMode::StartParseTask()
 {
     if (isQuit_) {
@@ -251,11 +335,18 @@ int RunningMode::StartParseTask()
     std::vector<std::string> envsV;
     int exitCode = INVALID_EXIT_CODE;
     SetEnvList(envsV);
-    std::vector<std::string> argsV = {
-        analysisPath_,
-        "import",
-        "-dir=" + jobResultDir_
-    };
+    ParseDataType DataType = GetParseDataType(jobResultDir_);
+    if (DataType == ParseDataType::DATA_PATH_INVALID) {
+        MSPROF_LOGE("[parse mode]Parse invalid data in path %s.", Utils::BaseName(jobResultDir_).c_str());
+        return PROFILING_FAILED;
+    }
+    std::vector<std::string> argsV;
+    argsV.push_back(analysisPath_);
+    argsV.push_back("import");
+    if (DataType == ParseDataType::DATA_PATH_CLUSTER) {
+        argsV.push_back("--cluster");
+    }
+    argsV.push_back("-dir=" + jobResultDir_);
     int ret = analysis::dvvp::common::utils::Utils::ExecCmd(execCmdParams, argsV, envsV, exitCode, taskPid_);
     if (ret == PROFILING_FAILED) {
         MSPROF_LOGE("Failed to launch parse task, data path: %s", Utils::BaseName(jobResultDir_).c_str());
