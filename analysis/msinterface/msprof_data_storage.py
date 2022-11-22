@@ -29,6 +29,7 @@ class MsprofDataStorage:
     SLICE_CONFIG_PATH = os.path.join(MsvpConstant.CONFIG_PATH, 'msprof_slice.json')
     DATA_TO_FILE = 1024 * 1024
     DEFAULT_SETTING = ('on', 0, 0)
+    SETTING = None
 
     def __init__(self: any) -> None:
         self.tid_set = set()
@@ -197,7 +198,9 @@ class MsprofDataStorage:
         except (TypeError, ValueError) as err:
             logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
             return False, [self.timeline_head + data_list]
-        slice_switch, limit_size, method = self.read_slice_config()
+        if not MsprofDataStorage.SETTING:
+            MsprofDataStorage.SETTING = self.read_slice_config()
+        slice_switch, limit_size, method = MsprofDataStorage.SETTING
         if slice_switch == 'off':
             return False, [self.timeline_head + data_list]
         slice_count = self.get_slice_times(limit_size, method)
@@ -234,16 +237,16 @@ class MsprofDataStorage:
         slice_switch = config_json.get('slice_switch', 'on')
         switch_range = ['on', 'off']
         if slice_switch not in switch_range:
-            logging.warning("slice_switch should be on/off")
+            logging.warning("slice_switch should be on or off")
             return self.DEFAULT_SETTING
         limit_size = config_json.get('slice_file_size(MB)', 0)
         if not isinstance(limit_size, int) or limit_size < 0:
-            logging.warning("limmt_size should be a number which is not smaller than 0")
+            logging.warning("limit_size should be a number which is not smaller than 0")
             return self.DEFAULT_SETTING
         method = config_json.get('strategy', 0)
         method_range = [item.value for item in TimeLineSliceStrategy]
         if not isinstance(method, int) or method not in method_range:
-            logging.warning("limmt_size should be 0/1")
+            logging.warning("strategy should be 0 or 1")
             return self.DEFAULT_SETTING
         return slice_switch, limit_size, method
 
