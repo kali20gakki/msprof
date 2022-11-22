@@ -11,7 +11,6 @@ from common_func.common import warn, print_info
 from common_func.config_mgr import ConfigMgr
 from common_func.constant import Constant
 from common_func.data_check_manager import DataCheckManager
-from common_func.info_conf_reader import InfoConfReader
 from common_func.msprof_common import analyze_collect_data, prepare_for_parse
 from common_func.common import error
 from common_func.msprof_common import MsProfCommonConstant
@@ -22,6 +21,7 @@ from common_func.path_manager import PathManager
 from framework.load_info_manager import LoadInfoManager
 from msparser.cluster.cluster_info_parser import ClusterInfoParser, ClusterBasicInfo
 from msparser.cluster.cluster_step_trace_parser import ClusterStepTraceParser
+from msparser.parallel.cluster_parallel_collector import ClusterParallelCollector
 
 
 class ImportCommand:
@@ -70,6 +70,8 @@ class ImportCommand:
             cluster_info_parser.ms_run()
             cluster_step_trace_parser = ClusterStepTraceParser(self.collection_path)
             cluster_step_trace_parser.ms_run()
+            cluster_parallel_collector = ClusterParallelCollector(self.collection_path)
+            cluster_parallel_collector.ms_run()
             print_info(MsProfCommonConstant.COMMON_FILE_NAME,
                        'Cluster data parse finished!')
 
