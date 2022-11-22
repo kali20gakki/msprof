@@ -51,6 +51,8 @@ class ClusterCommunicationParserFactory(ClusterParserFactory):
     def generate_parser(self: any) -> CommunicationParser:
         self.get_hccl_ops_by_iter()
         if not self.rank_hccl_data_dict:
+            error(ClusterCommunicationParserFactory.FILE_NAME,
+                  "fail to get no.{} iteration hccl data".format(self.iteration_id))
             logging.error("Can't get hccl events!")
             raise ProfException(ProfException.PROF_INVALID_DATA_ERROR)
         return CommunicationParser(self.rank_hccl_data_dict)
@@ -130,11 +132,7 @@ class ClusterCommunicationParserFactory(ClusterParserFactory):
                               'iter_end': iter_start_end[0][1]}
                 events_data = _model.get_hccl_data_by_conditions(conditions)
                 if not events_data:
-                    error(ClusterCommunicationParserFactory.FILE_NAME,
-                          "fail to get no.{} iteration hccl data".format(self.iteration_id))
-                    logging.error("Fail to get information from %s in %s iteration, communication parser is interrupted"
-                                  , str(self.iteration_id), DBNameConstant.DB_HCCL)
-                    raise ProfException(ProfException.PROF_CLUSTER_INVALID_DB)
+                    continue
                 # only get hccl data with first iter
                 events_data = [event for event in events_data if event.iteration == events_data[0].iteration]
                 if hccl_name.op_name not in self.rank_hccl_data_dict:
