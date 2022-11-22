@@ -32,10 +32,10 @@ class StepTraceSummay:
     NUMBER_0F_DECIMAL_PLACE = 2
 
     def __init__(self: any, params: dict) -> None:
-        self.collection_path = params["collection_path"]
-        self.npu_id = params["npu_id"]
-        self.model_id = params["model_id"]
-        self.iteration_id = params["iteration_id"]
+        self.collection_path = params.get("collection_path")
+        self.npu_id = params.get("npu_id")
+        self.model_id = params.get("model_id")
+        self.iteration_id = params.get("iteration_id")
         self.all_devices = False
         self.cluster_info_model = ClusterInfoViewModel(self.collection_path)
         self.cluster_step_trace_model = ClusterStepTraceViewModel(self.collection_path)
