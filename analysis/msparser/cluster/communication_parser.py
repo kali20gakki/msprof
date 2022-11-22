@@ -73,9 +73,10 @@ class HcclAnalysisTool:
 
     @classmethod
     def get_transport_type(cls: any, src_id: int, dst_id: int):
-        if src_id == dst_id or src_id // 8 != dst_id // 8:
+        if src_id == dst_id or \
+                src_id // NumberConstant.RANK_NUM_PER_SERVER != dst_id // NumberConstant.RANK_NUM_PER_SERVER:
             return StrConstant.LOCAL
-        if src_id // 4 != dst_id // 4:
+        if src_id // NumberConstant.RANK_NUM_PER_OS != dst_id // NumberConstant.RANK_NUM_PER_OS:
             return StrConstant.PCIE
         return StrConstant.HCCS
 
