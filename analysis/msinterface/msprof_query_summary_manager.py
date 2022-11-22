@@ -21,6 +21,7 @@ from msparser.parallel.parallel_query.cluster_parallel_analysis_parser import Cl
 from msparser.parallel.parallel_query.cluster_parallel_analysis_tuning import ClusterParallelAnalysisTuning
 from msparser.cluster.fops_parser import FopsParser
 from msparser.cluster.step_trace_summary import StepTraceSummay
+from msparser.cluster.host_sys_usage_parser import HostSysUsageParser
 
 
 class QueryDataType(IntEnum):
@@ -30,6 +31,7 @@ class QueryDataType(IntEnum):
     DATA_PREPARATION = 3
     PARALLEL_TUNING = 4
     PARALLEL_DATA = 5
+    HOST_SYS_USAGE = 8
 
 
 class MsprofQuerySummaryManager:
@@ -43,7 +45,8 @@ class MsprofQuerySummaryManager:
                               QueryDataType.FOPS_ANALYSE: FopsParser,
                               QueryDataType.DATA_PREPARATION: ClusterDataPreparationParser,
                               QueryDataType.PARALLEL_TUNING: ClusterParallelAnalysisTuning,
-                              QueryDataType.PARALLEL_DATA: ClusterParallelAnalysisParser}
+                              QueryDataType.PARALLEL_DATA: ClusterParallelAnalysisParser,
+                              QueryDataType.HOST_SYS_USAGE: HostSysUsageParser}
 
     def __init__(self: any, args: any) -> None:
         self.collection_path = os.path.realpath(args.collection_path)
