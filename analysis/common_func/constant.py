@@ -348,6 +348,7 @@ class Constant:
     # add default limit for reader buffer size ->8196  * 1024 Byte
     MAX_READ_LINE_BYTES = 8196 * 1024
     MAX_READ_FILE_BYTES = 64 * 1024 * 1024
+    MAX_HWTS_FILE_PARSE_BYTES = 650 * 1024 * 1024
 
     DEFAULT_START = 1
 
@@ -392,6 +393,7 @@ class Constant:
     DATA_PROCESS_AI_CPU = "AICPU"
     TASK_TYPE_WRITE_BACK = "WRITE_BACK"
     TASK_TYPE_INVALID = "INVALID"
+    TASK_TYPE_HCCL = "HCCL"
     TASK_TYPE_DSA = "DSA_SQE"
     TASK_TYPE_DVPP = "DVPP"
     DATA_PROCESS_DP = "DP"
@@ -416,7 +418,7 @@ class Constant:
 
     GE_OP_MODEL_ID = 4294967295
     GE_STATIC_SHAPE = 1
-    GE_NON_STATIC_SHAPE = 0
+    GE_DYNAMIC_SHAPE = 0
 
     # hccl
     TYPE_RDMA = "RDMA"

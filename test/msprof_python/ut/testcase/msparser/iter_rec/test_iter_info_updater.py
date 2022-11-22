@@ -55,27 +55,25 @@ class TestIterInfoUpdater(unittest.TestCase):
 
         ai_core_task = set([])
 
-        IterInfoUpdater.update_count_and_offset(self_instance, task, ai_core_task)
+        IterInfoUpdater.update_count_and_offset(self_instance, task)
 
     def test_judge_ai_core_1(self: any) -> None:
         task = mock.Mock()
         task.stream_id = 1
         task.task_id = 1
 
-        iter_info_list = [mock.Mock(), mock.Mock()]
-        ai_core_task = {"1-1", "2-10"}
+        ai_core_task = ("1-1", "2-10")
 
-        IterInfoUpdater.judge_ai_core(task, iter_info_list, ai_core_task)
+        IterInfoUpdater("test").judge_ai_core(task, ai_core_task)
 
     def test_judge_ai_core_2(self: any) -> None:
         task = mock.Mock()
         task.stream_id = 1
         task.task_id = 1
 
-        iter_info_list = [mock.Mock(), mock.Mock()]
-        ai_core_task = {}
+        ai_core_task = ()
 
-        IterInfoUpdater.judge_ai_core(task, iter_info_list, ai_core_task)
+        IterInfoUpdater("test").judge_ai_core(task, ai_core_task)
 
     def test_update_hwts(self: any) -> None:
         iter_info_bean = mock.Mock()

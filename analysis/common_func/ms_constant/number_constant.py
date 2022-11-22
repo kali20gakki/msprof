@@ -100,6 +100,7 @@ class NumberConstant:
     # invalid id
     INVALID_STREAM_ID = -1
     INVALID_TASK_ID = -1
+    INVALID_OP_EXE_TIME = -1
 
     # core id edge
     MAX_CORE_ID_OF_AIC = 24
