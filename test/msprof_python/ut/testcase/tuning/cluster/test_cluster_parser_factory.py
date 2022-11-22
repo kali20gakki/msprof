@@ -113,16 +113,6 @@ class TestClusterCommunicationParserFactory(unittest.TestCase):
                 mock.patch(model_space + '.get_distinct_op_name', return_value=[]):
             ClusterCommunicationParserFactory(self.params).get_hccl_events_from_db(0, '', [(0, 100)])
 
-    def test_get_hccl_events_from_db_invalid_hccl_db(self):
-        hccl = Hccl()
-        model_space = 'msmodel.cluster_info.communication_model.CommunicationModel'
-        with mock.patch(model_space + '.check_db', return_value=True), \
-                mock.patch(model_space + '.get_distinct_op_name', return_value=[hccl]), \
-                mock.patch(model_space + '.get_hccl_data_by_conditions', return_value=[]), \
-                pytest.raises(ProfException) as err:
-            ClusterCommunicationParserFactory(self.params).get_hccl_events_from_db(0, '', [(0, 100)])
-            self.assertEqual(ProfException.PROF_CLUSTER_INVALID_DB, err.value.code)
-
     def test_get_hccl_events_from_db(self):
         hccl = Hccl()
         model_space = 'msmodel.cluster_info.communication_model.CommunicationModel'
