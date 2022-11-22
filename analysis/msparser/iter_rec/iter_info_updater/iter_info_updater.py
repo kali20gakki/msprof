@@ -37,24 +37,23 @@ class IterInfoUpdater:
         update parallel iter info pool
         """
         # when iter id is increased, iter info should be updated
-        if iter_id <= self.current_iter:
-            return
+        while self.current_iter < iter_id:
+            next_iter = self.current_iter + 1
+            # calculate iter info should be add
+            new_iter_info = self.iteration_manager.iter_to_iter_info.get(next_iter, IterInfo())
 
-        # calculate iter info should be add
-        new_iter_info = self.iteration_manager.iter_to_iter_info.get(iter_id, IterInfo())
+            new_add_parallel_id = []
+            for it_id in new_iter_info.behind_parallel_iter - self.active_parallel_iter_id:
+                new_add_parallel_id.append(self.iteration_manager.iter_to_iter_info.get(it_id))
 
-        new_add_parallel_id = []
-        for it_id in new_iter_info.behind_parallel_iter - self.active_parallel_iter_id:
-            new_add_parallel_id.append(self.iteration_manager.iter_to_iter_info.get(it_id))
+            self.update_new_add_iter_info(new_add_parallel_id)
 
-        self.update_new_add_iter_info(new_add_parallel_id)
-
-        # update current iter info
-        self.current_iter = iter_id
-        self.active_parallel_iter_id = new_iter_info.behind_parallel_iter
-        self.active_parallel_iter_info = {
-            self.iteration_manager.iter_to_iter_info.get(iter_id, IterInfo())
-            for iter_id in self.active_parallel_iter_id}
+            self.current_iter = next_iter
+            # update current iter info
+            self.active_parallel_iter_id = new_iter_info.behind_parallel_iter
+            self.active_parallel_iter_info = {
+                self.iteration_manager.iter_to_iter_info.get(parallel_iter_id, IterInfo())
+                for parallel_iter_id in self.active_parallel_iter_id}
 
     def update_new_add_iter_info(self: any, new_add_parallel_id: any) -> None:
         """
@@ -83,3 +82,13 @@ class IterInfoUpdater:
         if not ai_core_task:
             return any([iter_info_bean.is_aicore(task) for iter_info_bean in self.active_parallel_iter_info])
         return GeInfoModel.STREAM_TASK_KEY_FMT.format(task.stream_id, task.task_id) in ai_core_task
+
+    def update_iter_without_hwts(self: any) -> None:
+        """
+        update iter without hwts
+        """
+        if not self.iteration_manager.iter_to_iter_info:
+            return
+        max_iter_id = max(self.iteration_manager.iter_to_iter_info.keys())
+        self.update_parallel_iter_info_pool(max_iter_id)
+
