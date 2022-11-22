@@ -58,6 +58,7 @@ class IterParser(IParser, MsMultiProcess):
         multiprocess to parse hwts data
         :return: None
         """
+        self._iter_info_updater.update_iter_without_hwts()
         iter_to_iter_info = self._iter_info_updater.iteration_manager.iter_to_iter_info
         try:
             if iter_to_iter_info:
