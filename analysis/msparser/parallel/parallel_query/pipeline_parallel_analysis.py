@@ -35,15 +35,15 @@ class PipelineParallelAnalysis:
         if tuning_data[0][0] is None or tuning_data[0][1] is None or tuning_data[0][2] is None:
             logging.error("Invalid tuning data from ClusterPipelineParallel table. %s", tuning_data[0])
             return suggestion
-        if tuning_data[0][0] > 0.1:
+        if tuning_data[0][1] > 0.1:
             suggestion.get("suggestion").append(
                 SuggestionConstant.SUGGESTIONS.get("pipeline-parallel").get("bad_operator_tiling").format(
-                    '{:.1%}'.format(tuning_data[0][0])))
+                    '{:.1%}'.format(tuning_data[0][1])))
         index_desc = ""
-        if tuning_data[0][1] > 0.1:
+        if tuning_data[0][0] > 0.1:
             index_desc = index_desc + ", the proportion of the pure communication time (only receive op " \
                                       "contained) should be less than 10% (current value: {})".format(
-                '{:.1%}'.format(tuning_data[0][1]))
+                '{:.1%}'.format(tuning_data[0][0]))
         if tuning_data[0][2] > 0:
             index_desc = index_desc + ", the deviation between the stage time of all devices and the " \
                                       "average stage time should not exceed 20%"
