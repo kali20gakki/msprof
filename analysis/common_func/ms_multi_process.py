@@ -7,6 +7,7 @@ import time
 from abc import abstractmethod
 
 from common_func.common import init_log
+from common_func.constant import Constant
 from framework.load_info_manager import LoadInfoManager
 
 
@@ -38,6 +39,9 @@ class MsMultiProcess(multiprocessing.Process):
         """
         start_time = time.time()
         self.process_init()
-        self.ms_run()
+        try:
+            self.ms_run()
+        except Exception as err:
+            logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
         logging.info(f'{self.__class__.__name__} process data finished, '
                      f'execute time is {(time.time() - start_time):.3f}s')
