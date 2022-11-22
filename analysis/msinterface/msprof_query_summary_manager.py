@@ -16,9 +16,9 @@ from common_func.msprof_common import get_path_dir, prepare_log
 from common_func.msprof_exception import ProfException
 from common_func.path_manager import PathManager
 from msmodel.cluster_info.cluster_info_model import ClusterInfoViewModel
-from msparser.cluster.cluster_communication_parser import ClusterCommunicationParser
-from msparser.cluster.cluster_parallel_parser import ClusterParallelParser
 from msparser.cluster.cluster_data_preparation_parser import ClusterDataPreparationParser
+from msparser.parallel.parallel_query.cluster_parallel_analysis_parser import ClusterParallelAnalysisParser
+from msparser.parallel.parallel_query.cluster_parallel_analysis_tuning import ClusterParallelAnalysisTuning
 from msparser.cluster.fops_parser import FopsParser
 from msparser.cluster.step_trace_summary import StepTraceSummay
 
@@ -28,8 +28,8 @@ class QueryDataType(IntEnum):
     STEP_TRACE = 1
     FOPS_ANALYSE = 2
     DATA_PREPARATION = 3
-    PARALLEL_ANALYSIS = 4
-    COLLECTIVE_COMMUNICATION = 5
+    PARALLEL_TUNING = 4
+    PARALLEL_DATA = 5
 
 
 class MsprofQuerySummaryManager:
@@ -39,13 +39,11 @@ class MsprofQuerySummaryManager:
     CLUSTER_SCENE = '1'
     NOT_CLUSTER_SCENE = '0'
     FILE_NAME = os.path.basename(__file__)
-    QUERY_DATA_TYPE_PARSER = {
-        QueryDataType.STEP_TRACE: StepTraceSummay,
-        QueryDataType.FOPS_ANALYSE: FopsParser,
-        QueryDataType.DATA_PREPARATION: ClusterDataPreparationParser,
-        QueryDataType.PARALLEL_ANALYSIS: ClusterParallelParser,
-        QueryDataType.COLLECTIVE_COMMUNICATION: ClusterCommunicationParser
-    }
+    QUERY_DATA_TYPE_PARSER = {QueryDataType.STEP_TRACE: StepTraceSummay,
+                              QueryDataType.FOPS_ANALYSE: FopsParser,
+                              QueryDataType.DATA_PREPARATION: ClusterDataPreparationParser,
+                              QueryDataType.PARALLEL_TUNING: ClusterParallelAnalysisTuning,
+                              QueryDataType.PARALLEL_DATA: ClusterParallelAnalysisParser}
 
     def __init__(self: any, args: any) -> None:
         self.collection_path = os.path.realpath(args.collection_path)

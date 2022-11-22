@@ -17,16 +17,6 @@ class IterInfoUpdater:
         self.active_parallel_iter_info = set([])
 
     @staticmethod
-    def judge_ai_core(task: any, iter_info_list: list, ai_core_task: set) -> bool:
-        """
-        judge ai core
-        """
-        # if there are ge data, ai_core_task is empty
-        if not ai_core_task:
-            return any([iter_info_bean.is_aicore(task) for iter_info_bean in iter_info_list])
-        return GeInfoModel.STREAM_TASK_KEY_FMT.format(task.stream_id, task.task_id) in ai_core_task
-
-    @staticmethod
     def update_hwts(iter_info_list: list) -> None:
         """
         update hwts
@@ -75,15 +65,23 @@ class IterInfoUpdater:
             new_add_parallel_iter_info.hwts_offset = current_iter_info.hwts_offset + current_iter_info.hwts_count
             new_add_parallel_iter_info.aic_offset = current_iter_info.aic_offset + current_iter_info.aic_count
 
-    def update_count_and_offset(self: any, task: any, ai_core_task: set) -> None:
+    def update_count_and_offset(self: any, task: any) -> None:
         """
         update count and offset
         """
         self.update_hwts(self.active_parallel_iter_info)
 
-        if task.sys_tag == self.HWTS_TASK_END and \
-                self.judge_ai_core(task, self.active_parallel_iter_info, ai_core_task):
+        if task.sys_tag == self.HWTS_TASK_END and task.is_ai_core:
             self.update_aicore(self.active_parallel_iter_info)
+
+    def judge_ai_core(self: any, task: any, ai_core_task: set) -> bool:
+        """
+        judge ai core
+        """
+        # if there are ge data, ai_core_task is empty
+        if not ai_core_task:
+            return any([iter_info_bean.is_aicore(task) for iter_info_bean in self.active_parallel_iter_info])
+        return GeInfoModel.STREAM_TASK_KEY_FMT.format(task.stream_id, task.task_id) in ai_core_task
 
     def update_iter_without_hwts(self: any) -> None:
         """
@@ -93,3 +91,4 @@ class IterInfoUpdater:
             return
         max_iter_id = max(self.iteration_manager.iter_to_iter_info.keys())
         self.update_parallel_iter_info_pool(max_iter_id)
+
