@@ -24,11 +24,11 @@ class ClusterParallelParser:
     """
 
     def __init__(self, params: dict) -> None:
-        self.collection_path = params["collection_path"]
-        self._npu_id = params["npu_id"]
-        self._model_id = params["model_id"]
-        self._iteration_id = params["iteration_id"]
-        self._cluster_info_model = ClusterInfoViewModel(params["collection_path"])
+        self.collection_path = params.get("collection_path")
+        self._npu_id = params.get("npu_id")
+        self._model_id = params.get("model_id")
+        self._iteration_id = params.get("iteration_id")
+        self._cluster_info_model = ClusterInfoViewModel(params.get("collection_path"))
         self._cluster_communication_model = ClusterCommunicationModel(params)
         self.parallel_analysis_result = {}
 

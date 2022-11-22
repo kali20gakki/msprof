@@ -672,7 +672,10 @@ class TablesConfig(MetaConfig):
             ('victim', 'INTEGER, null'),
         ]
         , 'HCCLAllReduceMap': [
+            ('op_name', 'TEXT, null'),
+            ('iteration', 'INTEGER, null'),
             ('name', 'TEXT, null'),
+            ('first_timestamp', 'REAL, null'),
             ('plane_id', 'INTEGER, null'),
             ('timestamp', 'REAL, null'),
             ('duration', 'REAL, null'),
@@ -686,7 +689,7 @@ class TablesConfig(MetaConfig):
             ('src_rank', 'INTEGER, null'),
             ('dst_rank', 'INTEGER, null'),
             ('transport_type', 'TEXT, null'),
-            ('size', 'TEXT, null')
+            ('size', 'REAL, null')
         ]
         , 'MsprofTxMap': [
             ('pid', 'INTEGER, null'),
