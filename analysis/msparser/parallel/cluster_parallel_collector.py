@@ -66,7 +66,6 @@ class ClusterParallelCollector(IParser):
 
     def get_device_parallel_data(self: any, cluster_info: ClusterRankDto, index: int):
         _project_path = os.path.join(self.collect_path, cluster_info.dir_name)
-        InfoConfReader().load_info(_project_path)
         freq_to_us = 1000000 / InfoConfReader().get_freq(StrConstant.HWTS)
         with ParallelViewModel(_project_path) as _model:
             self._cluster_parallel_temp_data[index] = _model.get_parallel_index_data(self._parallel_table_name,

@@ -41,11 +41,11 @@ class ParallelViewModel(ViewModel):
             rank_id = "null"
         if tabel_name == DBNameConstant.TABLE_CLUSTER_DATA_PARALLEL:
             sql = "select {0} rank_id, {1} device_id, t1.model_id, t1.index_id, " \
-                  "t2.step_time*{2}, " \
-                  "t2.computation_time*{2}, " \
-                  "t1.pure_communication_time*{2}, " \
-                  "t1.communication_time*{2}, " \
-                  "t1.interval_of_communication_time*{2}, " \
+                  "round(t2.step_time*{2}, 0), " \
+                  "round(t2.computation_time*{2}, 0), " \
+                  "round(t1.pure_communication_time*{2}, 0), " \
+                  "round(t1.communication_time*{2}, 0), " \
+                  "round(t1.interval_of_communication_time*{2}, 0), " \
                   "t1.hccl_op_num " \
                   "from (select t.model_id, t.index_id, sum(t.communication_time) communication_time, " \
                   "sum(t.pure_communication_time) pure_communication_time, count(0) hccl_op_num, " \
@@ -59,10 +59,10 @@ class ParallelViewModel(ViewModel):
                 DBNameConstant.TABLE_COMPUTATION_TIME)
         elif tabel_name == DBNameConstant.TABLE_CLUSTER_MODEL_PARALLEL:
             sql = "select {0} rank_id, {1} device_id, t1.model_id, t1.index_id, " \
-                  "t2.step_time*{2}, " \
-                  "t2.computation_time*{2}, " \
-                  "t1.pure_communication_time*{2}, " \
-                  "t1.communication_time*{2} " \
+                  "round(t2.step_time*{2}, 0), " \
+                  "round(t2.computation_time*{2}, 0), " \
+                  "round(t1.pure_communication_time*{2}, 0), " \
+                  "round(t1.communication_time*{2}, 0) " \
                   "from(select model_id, index_id, " \
                   "sum(end_time-start_time) communication_time, " \
                   "sum(end_time-start_time-overlap_time) pure_communication_time FROM {3} group by " \
@@ -73,12 +73,12 @@ class ParallelViewModel(ViewModel):
                 DBNameConstant.TABLE_COMPUTATION_TIME)
         else:
             sql = "select {0} rank_id, {1} device_id, t1.model_id, t1.index_id, " \
-                  "t2.step_time*{2}, " \
-                  "t2.computation_time*{2}, " \
-                  "t1.pure_communication_time*{2}, " \
-                  "t1.communication_time*{2}, " \
-                  "t1.pure_communication_time_only_revice*{2}, " \
-                  "t1.pure_communication_time_except_revice*{2} " \
+                  "round(t2.step_time*{2}, 0), " \
+                  "round(t2.computation_time*{2}, 0), " \
+                  "round(t1.pure_communication_time*{2}, 0), " \
+                  "round(t1.communication_time*{2}, 0), " \
+                  "round(t1.pure_communication_time_only_revice*{2}, 0), " \
+                  "round(t1.pure_communication_time_except_revice*{2}, 0) " \
                   "from(select model_id, index_id, " \
                   "sum(end_time-start_time) communication_time, " \
                   "sum(end_time-start_time-overlap_time) pure_communication_time, " \

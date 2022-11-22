@@ -28,7 +28,7 @@ class ModelParallelAnalysis:
         if not tuning_data[0]:
             return suggestion
         if tuning_data[0][0] is None:
-            logging.error("Invalid tuning data from ClusterModelParallel table. {}".format(tuning_data[0]))
+            logging.error("Invalid tuning data from ClusterModelParallel table. %s", tuning_data[0])
             return suggestion
         if tuning_data[0][0] > 0.1 and parallel_type == 'auto_parallel':
             suggestion.get("suggestion").append(
