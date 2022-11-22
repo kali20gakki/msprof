@@ -6,7 +6,6 @@ import json
 import logging
 import os
 import sqlite3
-from operator import itemgetter
 
 from analyzer.data_analysis_factory import DataAnalysisFactory
 from analyzer.scene_base.profiling_scene import ProfilingScene
@@ -46,6 +45,7 @@ from tuning.cluster_tuning import ClusterTuning
 from tuning.profiling_tuning import ProfilingTuning
 from viewer.top_down_report import TopDownData
 from viewer.tuning_view import TuningView
+from tuning.cluster.cluster_tuning_facade import ClusterTuningFacade
 
 
 class ExportCommand:
@@ -544,6 +544,14 @@ class ExportCommand:
         if self.command_type != MsProfCommonConstant.SUMMARY:
             return
         ClusterTuning(self._cluster_params.get('cluster_path')).run()
+        params = {"collection_path": self.collection_path,
+                  "model_id": 0,
+                  "npu_id": -1,
+                  "iteration_id": self.iteration_id}
+        try:
+            ClusterTuningFacade(params).process()
+        except ProfException:
+            warn(self.FILE_NAME, 'Cluster Tuning did not complete!')
 
     def _update_cluster_params(self: any, sub_path: str, is_cluster: bool) -> None:
         if is_cluster:
