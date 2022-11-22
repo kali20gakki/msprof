@@ -28,7 +28,7 @@ class DataParallelAnalysis:
         if not tuning_data[0]:
             return suggestion
         if tuning_data[0][0] is None or tuning_data[0][1] is None or tuning_data[0][2] is None:
-            logging.error("Invalid tuning data from ClusterDataParallel table. {}".format(tuning_data[0]))
+            logging.error("Invalid tuning data from ClusterDataParallel table. %s", tuning_data[0])
             return suggestion
         if tuning_data[0][0] == 1:
             suggestion.get("suggestion").append(

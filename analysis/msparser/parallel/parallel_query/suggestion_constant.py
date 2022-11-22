@@ -7,8 +7,8 @@ class SuggestionConstant:
             "without_gradient_segmentation":
                 "Gradient segmentation is not performed on the model. You can apply a proper gradient segmentation "
                 "policy to improve the parallelism degree of computation and AllReduce operators, "
-                "thereby shortening the step tail time. For details, "
-                "see the all_reduce_fusion_config parameter settings in the MindSpore distributed parallelism tutorial.",
+                "thereby shortening the step tail time. For details, see the all_reduce_fusion_config "
+                "parameter settings in the MindSpore distributed parallelism tutorial.",
             "bad_gradient_segmentation":
                 "Gradient segmentation of the model has not achieved the optimal effect. In ideal situations{}. "
                 "You can adjust the gradient segmentation policy to improve the parallelism degree of computation "

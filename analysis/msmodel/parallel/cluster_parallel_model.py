@@ -13,6 +13,8 @@ from msmodel.interface.view_model import ViewModel
 class ClusterParallelModel(ParserModel):
     def __init__(self: any, result_dir: str) -> None:
         super().__init__(result_dir, DBNameConstant.DB_CLUSTER_PARALLEL, [])
+        self.conn = None
+        self.cur = None
 
     def flush(self: any, table_name: str, data_list: list) -> None:
         """
@@ -132,7 +134,7 @@ class ClusterParallelViewModel(ViewModel):
     def get_pipeline_parallel_tuning_data(self: any) -> list:
         avg_stage_time = self._get_avg_stage_time()
         if avg_stage_time == Constant.DEFAULT_INVALID_VALUE:
-            return
+            return []
         sql = "SELECT avg( t.ratio ) avg_ratio, avg( t.ratio1 ) avg_ratio1, " \
               "sum(case when t.stage_time >= {0} * 0.8 AND t.stage_time <= {0} * 1.2 THEN 1 ELSE 0 END ) num " \
               "FROM( SELECT rank_id, device_id, " \
