@@ -180,8 +180,8 @@ class DataParsersConfig(MetaConfig):
             ('path', 'msparser.parallel.parallel_strategy_parser'),
             ('chip_model', '1,2,3,4,5')
         ]
-        , 'ClusterParallelParser': [
-            ('path', 'msparser.cluster.cluster_parallel_parser'),
+        , 'ParallelParser': [
+            ('path', 'msparser.parallel.parallel_parser'),
             ('chip_model', '1,2,3,4,5'),
             ('level', '4')
         ]
