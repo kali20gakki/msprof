@@ -64,6 +64,10 @@ class StrConstant:
     MONOTONIC_TIME = "clock_monotonic_raw"
     ITER_ID = "iter_id"
 
+    # sample.json key
+    HOST_CPU_SAMPLING_INTV = "host_cpu_profiling_sampling_interval"
+    HOST_MEM_SAMPLING_INTV = "host_mem_profiling_sampling_interval"
+
     # msvp export type
     EXPORT_JSON = "json"
     EXPORT_CSV = "csv"

@@ -10,6 +10,7 @@ from common_func.config_mgr import ConfigMgr
 from common_func.data_manager import DataManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.empty_class import EmptyClass
+from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.msprof_common import MsProfCommonConstant
@@ -145,9 +146,10 @@ class MsProfExportDataUtils:
         """
         get system cpu usage data
         """
-        db_path = PathManager.get_db_path(params.get(StrConstant.PARAM_RESULT_DIR),
-                                          configs.get(StrConstant.CONFIG_DB).format(
-                                              params.get(StrConstant.PARAM_DEVICE_ID)))
+        db_name = configs.get(StrConstant.CONFIG_DB).format(params.get(StrConstant.PARAM_DEVICE_ID))
+        if InfoConfReader().is_host_profiling():
+            db_name = DBNameConstant.DB_HOST_SYS_USAGE_CPU
+        db_path = PathManager.get_db_path(params.get(StrConstant.PARAM_RESULT_DIR), db_name)
         if params.get(StrConstant.DATA_TYPE) == "cpu_usage":
             return get_sys_cpu_usage_data(db_path, configs.get(StrConstant.CONFIG_TABLE), configs)
         if params.get(StrConstant.DATA_TYPE) == "process_cpu_usage":
@@ -194,9 +196,10 @@ class MsProfExportDataUtils:
         """
         get memory data
         """
-        db_path = PathManager.get_db_path(params.get(StrConstant.PARAM_RESULT_DIR),
-                                          configs.get(StrConstant.CONFIG_DB).format(
-                                              params.get(StrConstant.PARAM_DEVICE_ID)))
+        db_name = configs.get(StrConstant.CONFIG_DB).format(params.get(StrConstant.PARAM_DEVICE_ID))
+        if InfoConfReader().is_host_profiling():
+            db_name = DBNameConstant.DB_HOST_SYS_USAGE_MEM
+        db_path = PathManager.get_db_path(params.get(StrConstant.PARAM_RESULT_DIR), db_name)
         if params.get(StrConstant.PARAM_DATA_TYPE) == "sys_mem":
             return get_sys_mem_data(db_path, configs.get(StrConstant.CONFIG_TABLE), configs)
         if params.get(StrConstant.PARAM_DATA_TYPE) == "process_mem":
