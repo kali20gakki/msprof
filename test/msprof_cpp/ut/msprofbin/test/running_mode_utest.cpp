@@ -217,6 +217,52 @@ TEST_F(RUNNING_MODE_UTEST, StopRunningTasks)
     rMode.StopRunningTasks();
 }
 
+TEST_F(RUNNING_MODE_UTEST, CheckCurrentDataPathValid)
+{
+    GlobalMockObject::verify();
+    Collector::Dvvp::Msprofbin::ParseMode rMode("parse", nullptr);
+    std::string path = "/tmp/parseData";
+    Utils::CreateDir(path);
+    EXPECT_EQ(PROFILING_FAILED, rMode.CheckCurrentDataPathValid(path));
+    system("touch /tmp/parseData/info.json");
+    EXPECT_EQ(PROFILING_SUCCESS, rMode.CheckCurrentDataPathValid(path));
+    system("ln -s /tmp/parseData/info.json /tmp/parseData/ln");
+    EXPECT_EQ(PROFILING_INVALID_PARAM, rMode.CheckCurrentDataPathValid(path));
+    Utils::RemoveDir(path);
+}
+
+TEST_F(RUNNING_MODE_UTEST, GetParseDataType)
+{
+    GlobalMockObject::verify();
+    Collector::Dvvp::Msprofbin::ParseMode rMode("parse", nullptr);
+    std::string path = "/tmp/parseData";
+    Utils::CreateDir(path);
+    system("touch /tmp/parseData/info.json");
+    EXPECT_EQ(ParseDataType::DATA_PATH_NON_CLUSTER, rMode.GetParseDataType(path));
+    system("ln -s /tmp/parseData/info.json /tmp/parseData/ln");
+    EXPECT_EQ(ParseDataType::DATA_PATH_INVALID, rMode.GetParseDataType(path));
+
+    system("rm -r /tmp/parseData/*");
+    Utils::CreateDir("/tmp/parseData/dir");
+    system("touch /tmp/parseData/xxx");
+    system("touch /tmp/parseData/dir/info.json");
+    EXPECT_EQ(ParseDataType::DATA_PATH_NON_CLUSTER, rMode.GetParseDataType(path));
+    system("ln -s /tmp/parseData/dir/info.json /tmp/parseData/dir/ln");
+    EXPECT_EQ(ParseDataType::DATA_PATH_INVALID, rMode.GetParseDataType(path));
+
+    system("rm -r /tmp/parseData/dir/*");
+    Utils::CreateDir("/tmp/parseData/dir/sonDir");
+    system("touch /tmp/parseData/dir/xxx");
+    system("touch /tmp/parseData/dir/sonDir/info.json");
+    EXPECT_EQ(ParseDataType::DATA_PATH_CLUSTER, rMode.GetParseDataType(path));
+    system("ln -s /tmp/parseData/dir/sonDir/info.json /tmp/parseData/dir/sonDir/ln");
+    EXPECT_EQ(ParseDataType::DATA_PATH_INVALID, rMode.GetParseDataType(path));
+
+    system("rm -r /tmp/parseData/*");
+    EXPECT_EQ(ParseDataType::DATA_PATH_INVALID, rMode.GetParseDataType(path));
+    Utils::RemoveDir(path);
+}
+
 TEST_F(RUNNING_MODE_UTEST, StartParseTask)
 {
     GlobalMockObject::verify();
@@ -232,6 +278,11 @@ TEST_F(RUNNING_MODE_UTEST, StartParseTask)
     EXPECT_EQ(PROFILING_FAILED, rMode.StartParseTask());
     rMode.jobResultDir_ = "123";
     rMode.analysisPath_ = "path_test";
+    MOCKER_CPP(&RunningMode::GetParseDataType)
+        .stubs()
+        .will(returnValue(ParseDataType::DATA_PATH_INVALID))
+        .then(returnValue(ParseDataType::DATA_PATH_CLUSTER));
+    EXPECT_EQ(PROFILING_FAILED, rMode.StartParseTask());
     MOCKER(Utils::ExecCmd)
         .stubs()
         .will(returnValue(PROFILING_FAILED))
