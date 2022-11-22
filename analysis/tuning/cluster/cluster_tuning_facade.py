@@ -74,6 +74,24 @@ class ClusterTuningFacade:
         """
         cluster communication parse and calculate
         """
+        logging.info('start to look for cluster communication suggestions!')
+        parser_factory = ClusterCommunicationParserFactory(self.args)
+        communication_parser = parser_factory.generate_parser()
+        logging.info('start to parse hccl events')
+        op_info = communication_parser.run()
+        logging.info('start to give suggestions according to rules')
+        slow_rank_calculator = SlowRankCalculatorFactory(op_info).generate_calculator()
+        slow_rank_calculator.run()
+        slow_rank_calculator.add_suggestions(op_info)
+        slow_link_calculator = SlowLinkCalculatorFactory(op_info).generate_calculator()
+        slow_link_calculator.run()
+        slow_link_calculator.add_suggestions(op_info)
+        output_file_name = "communication_{}_{}_{}.json".format(
+            self._npu_id, parser_factory.max_iters_model_id, self._iteration_id)
+        if print_flag:
+            print_msg(StrConstant.SUGGESTION + ': ' +
+                      op_info.get(StrConstant.TOTAL, {}).get(StrConstant.SLOW_RANK_SUGGESTION, ''))
+        self.dump_dict_to_json(output_file_name, op_info)
 
     def dump_dict_to_json(self: any, output_file_name: str, dict_result: dict):
         output_file_path = PathManager.get_query_result_path(self._collection_path, output_file_name)
