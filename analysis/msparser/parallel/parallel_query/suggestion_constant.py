@@ -1,4 +1,6 @@
-from common_func.db_name_constant import DBNameConstant
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
 
 
 class SuggestionConstant:
