@@ -6,18 +6,15 @@ import os
 import unittest
 from unittest import mock
 
-import pytest
-
 from common_func.db_manager import DBManager
-from common_func.msprof_exception import ProfException
 from constant.constant import clear_dt_project
 from msmodel.parallel.parallel_model import ParallelViewModel
-from msparser.parallel.cluster_parallel_parser import ClusterParallelParser
+from msparser.cluster.cluster_parallel_parser import ClusterParallelParser
 from profiling_bean.db_dto.hccl_operator_dto import HCCLOperatorDto
 from profiling_bean.db_dto.time_section_dto import TimeSectionDto
 from profiling_bean.prof_enum.data_tag import DataTag
 
-NAMESPACE = "msparser.parallel.cluster_parallel_parser"
+NAMESPACE = "msparser.cluster.cluster_parallel_parser"
 
 
 class TestClusterParallelParser(unittest.TestCase):
