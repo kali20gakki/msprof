@@ -13,9 +13,8 @@ class CommunicationModel(ViewModel):
     get hccl operators data from db
     """
 
-    def __init__(self, params):
-        self._collection_path = params.get("collection_path", '')
-        super().__init__(self._collection_path, DBNameConstant.DB_HCCL, [])
+    def __init__(self, collection_path):
+        super().__init__(collection_path, DBNameConstant.DB_HCCL, [])
 
     def get_hccl_data_by_conditions(self: any, conditions: dict) -> list:
         """

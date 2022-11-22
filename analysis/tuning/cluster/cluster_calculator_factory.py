@@ -5,6 +5,7 @@
 
 import logging
 from abc import abstractmethod
+from common_func.ms_constant.str_constant import StrConstant
 
 
 class ClusterCalculatorFactory:
@@ -28,17 +29,21 @@ class SlowRankCalculatorFactory(ClusterCalculatorFactory):
 
     def __init__(self: any, data: dict) -> None:
         super().__init__()
-        self.data = data
+        self.op_info = data
+        self.calculate_data = []
+        self.op_name_list = []
 
     def data_dispatch(self: any) -> None:
         """
         input data contains iteration and different ops data
         we need dispatch first then process
         """
-        pass
+        for op_name, rank_dict in self.op_info.items():
+            self.op_name_list.append(op_name)
+            self.calculate_data.append(rank_dict)
 
-    def generate_calculator(self):
-        logging.info('calculator1_generate_success')
+    def generate_calculator(self: any):
+        return
 
 
 class SlowLinkCalculatorFactory(ClusterCalculatorFactory):
@@ -48,15 +53,22 @@ class SlowLinkCalculatorFactory(ClusterCalculatorFactory):
 
     def __init__(self: any, data: dict) -> None:
         super().__init__()
-        self.data = data
+        self.op_rank_list = []
+        self.calculate_data = []
+        self.op_info = data
 
     def data_dispatch(self: any) -> None:
         """
         input data contains iteration and different ops data
         we need dispatch first then process
         """
-        pass
+        for op_name, rank_dict in self.op_info.items():
+            for rank_id, com_dict in rank_dict.items():
+                if StrConstant.SUGGESTION not in str(rank_id):
+                    self.op_rank_list.append((op_name, rank_id))
+                    self.calculate_data.append(com_dict[StrConstant.COMMNUNICATION_BANDWIDTH_INFO])
 
     def generate_calculator(self):
-        logging.info('calculator2_generate_success')
+        return
+
 
