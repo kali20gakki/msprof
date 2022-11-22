@@ -19,6 +19,12 @@ namespace Collector {
 namespace Dvvp {
 namespace Msprofbin {
 
+enum class ParseDataType {
+    DATA_PATH_INVALID = 0,
+    DATA_PATH_NON_CLUSTER,
+    DATA_PATH_CLUSTER
+};
+
 class RunningMode {
 public:
     // check params dependence in specific mode
@@ -71,6 +77,9 @@ protected:
 private:
     std::string ConvertParamsSetToString(std::set<int>& srcSet) const;
     void SetEnvList(std::vector<std::string> &envsV);
+    int CheckCurrentDataPathValid(const std::string &path) const;
+    int CheckParseDataPathValid(const std::string &parseDataPath) const;
+    ParseDataType GetParseDataType(const std::string &parseDataPath) const;
 
     std::string analysisPath_;
 };

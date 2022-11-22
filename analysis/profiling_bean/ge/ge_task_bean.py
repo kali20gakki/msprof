@@ -30,7 +30,8 @@ class GeTaskBean(StructDecoder):
         5: Constant.TASK_TYPE_MIX_AIV,
         7: Constant.TASK_TYPE_DSA,
         8: Constant.TASK_TYPE_DVPP,
-        9: Constant.TASK_TYPE_INVALID
+        9: Constant.TASK_TYPE_INVALID,
+        10: Constant.TASK_TYPE_HCCL
     }
 
     FMT_MAP = {

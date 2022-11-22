@@ -42,6 +42,33 @@ class ClusterDataPreparationParser:
         self._model = None
         self._data = {}
 
+    def process(self: any) -> None:
+        """
+        entrance for calculating data preparation
+        :return: None or dict
+        """
+        if self._rank_id is None:
+            error(self.FILE_NAME, "The query id is wrong. Please enter a valid value.")
+            print_msg({"status": NumberConstant.ERROR, "info": "To query data queue, id is required", "data": ''})
+            return
+        if not (self._model_id is None and self._iteration_id is None):
+            logging.warning("To query data queue, the parameters '--model-id' and '--iteration-id' are invalid.")
+        try:
+            self._calculate()
+        except ProfException:
+            print_msg({"status": NumberConstant.ERROR,
+                       "info": "Some error occurred, please check input parameters and "
+                               "ensure that necessary commands have been executed.",
+                       "data": ""})
+            return
+        try:
+            self._storage_data()
+        except ProfException:
+            print_msg({"status": NumberConstant.ERROR,
+                       "info": "Storing data failed,"
+                               "you may not have the permission to write files in the current path.",
+                       "data": ""})
+
     def _calculate_queue_data(self: any, queue_list: list) -> None:
         """
         calculate data queue
@@ -203,30 +230,3 @@ class ClusterDataPreparationParser:
                                       "you may not have the permission to write files in the current path.")
                 raise ProfException(ProfException.PROF_INVALID_PATH_ERROR) from err
         return os.path.realpath(os.path.join(query_path, file_name))
-
-    def process(self: any) -> None:
-        """
-        entrance for calculating data preparation
-        :return: None or dict
-        """
-        if self._rank_id is None:
-            error(self.FILE_NAME, "The query id is wrong. Please enter a valid value.")
-            print_msg({"status": NumberConstant.ERROR, "info": "To query data queue, id is required", "data": ''})
-            return
-        if not (self._model_id is None and self._iteration_id is None):
-            logging.warning("To query data queue, the parameters '--model-id' and '--iteration-id' are invalid.")
-        try:
-            self._calculate()
-        except ProfException:
-            print_msg({"status": NumberConstant.ERROR,
-                       "info": "Some error occurred, please check input parameters and "
-                               "ensure that necessary commands have been executed.",
-                       "data": ""})
-            return
-        try:
-            self._storage_data()
-        except ProfException:
-            print_msg({"status": NumberConstant.ERROR,
-                       "info": "Storing data failed,"
-                               "you may not have the permission to write files in the current path.",
-                       "data": ""})

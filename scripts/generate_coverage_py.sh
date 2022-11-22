@@ -15,7 +15,7 @@ rm -f .coverage
 coverage run --branch --source=${src_code} -m pytest -s "${test_code}" --junit-xml=./final.xml
 coverage xml -o coverage.xml
 coverage report > python_coverage_report.log
-# diff-cover coverage.xml --compare-branch="origin/master" --html-report inc_coverage_result.html
+diff-cover coverage.xml --compare-branch="origin/master" --html-report inc_coverage_result.html
 echo "report: ${output_dir}"
 find ${script_dir}/.. -name "__pycache__" | xargs rm -r
 

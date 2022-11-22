@@ -21,6 +21,8 @@ class DBNameConstant(metaclass=ABCMeta):
     DB_GE_INFO = "ge_info.db"
     DB_HASH = "hash_mapping.db"
     DB_HCCS = "hccs.db"
+    DB_HOST_SYS_USAGE_CPU = "cpu_usage.db"
+    DB_HOST_SYS_USAGE_MEM = "memory.db"
     DB_HOST_CPU_USAGE = "host_cpu_usage.db"
     DB_HOST_DISK_USAGE = "host_disk_usage.db"
     DB_HOST_MEM_USAGE = "host_mem_usage.db"
@@ -59,6 +61,9 @@ class DBNameConstant(metaclass=ABCMeta):
     DB_CLUSTER_RANK = "cluster_rank.db"
     DB_CLUSTER_STEP_TRACE = 'cluster_step_trace.db'
     DB_CLUSTER_DATA_PREPROCESS = 'data_preprocess.db'
+    DB_CLUSTER_HCCL = "cluster_hccl.db"
+    DB_PARALLEL = "parallel.db"
+    DB_CLUSTER_PARALLEL = "cluster_parallel.db"
 
     # DB tables
     TABLE_ACL_DATA = "acl_data"
@@ -216,7 +221,16 @@ class DBNameConstant(metaclass=ABCMeta):
     #cluster
     TABLE_CLUSTER_RANK = "ClusterRank"
     TABLE_DATA_QUEUE = "DataQueue"
+    TABLE_HCCL_OPERATOR_EXE = "HcclOperatorExe"
+    TABLE_PARALLEL_STRATEGY = "ParallelStrategy"
+    TABLE_HCCL_OPERATOR_OVERLAP = "HcclOperatorOverlap"
+    TABLE_COMPUTATION_TIME = "ComputationTime"
+    TABLE_CLUSTER_DATA_PARALLEL = "ClusterDataParallel"
+    TABLE_CLUSTER_MODEL_PARALLEL = "ClusterModelParallel"
+    TABLE_CLUSTER_PIPELINE_PARALLEL = "ClusterPipelineParallel"
+    TABLE_CLUSTER_PARALLEL_STRATEGY = "ClusterParallelStrategy"
     TABLE_HOST_QUEUE = "HostQueue"
+
 
     @abstractmethod
     def get_db_name(self: any) -> str:

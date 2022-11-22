@@ -5,6 +5,8 @@
 import re
 from enum import Enum
 
+from common_func.db_name_constant import DBNameConstant
+
 
 class StrConstant:
     """
@@ -63,6 +65,10 @@ class StrConstant:
     MONOTONIC_TIME = "clock_monotonic_raw"
     ITER_ID = "iter_id"
 
+    # sample.json key
+    HOST_CPU_SAMPLING_INTV = "host_cpu_profiling_sampling_interval"
+    HOST_MEM_SAMPLING_INTV = "host_mem_profiling_sampling_interval"
+
     # msvp export type
     EXPORT_JSON = "json"
     EXPORT_CSV = "csv"
@@ -111,6 +117,14 @@ class StrConstant:
     TRACE_HEADER_NAME = "name"
 
     TASK_START_TIME = 'Task Start Time'
+
+    # parallel mode
+    DATA_PARALLEL = "data_parallel"
+    MODEL_PARALLEL = "model_parallel"
+    PIPELINE_PARALLEL = "pipeline_parallel"
+    PARALLEL_TABLE_NAME_MAPPING = {DATA_PARALLEL: DBNameConstant.TABLE_CLUSTER_DATA_PARALLEL,
+                                   MODEL_PARALLEL: DBNameConstant.TABLE_CLUSTER_MODEL_PARALLEL,
+                                   PIPELINE_PARALLEL: DBNameConstant.TABLE_CLUSTER_PIPELINE_PARALLEL}
 
     TASK_TYPE_MAPPING = {
         "0": 'kernel AI core task',
