@@ -55,12 +55,14 @@ class TestHCCLParser(unittest.TestCase):
             HCCLParser(self.file_list, self.sample_config)._prepare_for_parse()
 
     def test_hccl_trace_data(self):
-        hccl_data = {"traceEvents": [{'tid': 2, 'pid': '1', 'ts': 496046552109.73, 'dur': 0.0, 'ph': 'X',
-                                      'name': 'Notify Wait',
-                                      'args': {'notify id': 4294967344, 'duration estimated': 0.0, 'stage': 4294967295,
-                                               'step': 4294967385, 'bandwidth': 'NULL', 'stream id': 1, 'task id': 1,
-                                               'task type': 'Notify Wait', 'src rank': 0, 'dst rank': 1,
-                                               'transport type': 'LOCAL', 'size': None}}]}
+        hccl_data = {"device id": "0", "iteration": 1, "traceEvents": [
+                        {'tid': 2, 'pid': '1', 'ts': 496046552109.73,
+                         'dur': 0.0, 'ph': 'X',
+                         'name': 'Notify Wait',
+                         'args': {'notify id': 4294967344, 'duration estimated': 0.0, 'stage': 4294967295,
+                                  'step': 4294967385, 'bandwidth': 'NULL', 'stream id': 1, 'task id': 1,
+                                  'task type': 'Notify Wait', 'src rank': 0, 'dst rank': 1,
+                                  'transport type': 'LOCAL', 'size': None}}]}
         json_data = json.dumps(hccl_data)
         with mock.patch('os.path.realpath', return_value="/hccl"), \
                 mock.patch('os.listdir', return_value=["a"]), \
