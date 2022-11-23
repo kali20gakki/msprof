@@ -226,8 +226,8 @@ class ParseAiCoreOpSummary:
         ge_data = []
         iter_list = MsprofIteration(self.project_path).get_iter_list_with_index_and_model(self.iter_id, self.model_id)
         ge_sql = "SELECT model_id, batch_id, task_id, stream_id, " \
-                 "op_name, op_type, block_dim, task_type, timestamp, index_id,context_id from {0} where " \
-                 "(index_id=? or index_id=0) and model_id=?" \
+                 "op_name, op_type, block_dim, mix_block_dim, task_type, timestamp, index_id, context_id " \
+                 "from {0} where (index_id=? or index_id=0) and model_id=?" \
             .format(DBNameConstant.TABLE_GE_TASK)
         for index_and_model in iter_list:
             ge_data.extend(DBManager.fetch_all_data(self.curs, ge_sql, index_and_model))

@@ -49,7 +49,8 @@ class GeTaskBean(StructDecoder):
         self._index_num = Constant.DEFAULT_VALUE
         self._timestamp = Constant.DEFAULT_VALUE
         self._shape_type = Constant.DEFAULT_VALUE
-        self._block_dims = Constant.DEFAULT_VALUE
+        self._block_dim = Constant.DEFAULT_VALUE
+        self._mix_block_dim = Constant.DEFAULT_VALUE
         self._model_id = Constant.DEFAULT_VALUE
         self._stream_id = Constant.DEFAULT_VALUE
         self._task_id = Constant.DEFAULT_VALUE
@@ -102,11 +103,20 @@ class GeTaskBean(StructDecoder):
         return self._shape_type
 
     @property
-    def block_dims(self: any) -> int:
+    def block_dim(self: any) -> int:
         """
         for block dims
+        get lower 16bit data of 32bit
         """
-        return self._block_dims
+        return self._block_dim & 65535
+
+    @property
+    def mix_block_dim(self: any) -> int:
+        """
+        for mix block dims
+        get the product of block dim and higher 16bit
+        """
+        return (self._block_dim & 65535) * (self._block_dim >> 16)
 
     @property
     def model_id(self: any) -> int:
@@ -201,7 +211,7 @@ class GeTaskBean(StructDecoder):
         self._index_num = self._fusion_data[21]
         self._timestamp = self._fusion_data[22]
         self._shape_type = self._fusion_data[23]
-        self._block_dims = self._fusion_data[24]
+        self._block_dim = self._fusion_data[24]
         self._model_id = self._fusion_data[25]
         self._stream_id = self._fusion_data[26]
         self._task_id = self._fusion_data[27]
@@ -216,7 +226,7 @@ class GeTaskBean(StructDecoder):
         self._index_num = self._fusion_data[69]
         self._timestamp = self._fusion_data[70]
         self._shape_type = self._fusion_data[71]
-        self._block_dims = self._fusion_data[72]
+        self._block_dim = self._fusion_data[72]
         self._model_id = self._fusion_data[72]
         self._stream_id = self._fusion_data[74]
         self._task_id = self._fusion_data[75]
@@ -231,7 +241,7 @@ class GeTaskBean(StructDecoder):
         self._index_num = self._fusion_data[133]
         self._timestamp = self._fusion_data[134]
         self._shape_type = self._fusion_data[135]
-        self._block_dims = self._fusion_data[136]
+        self._block_dim = self._fusion_data[136]
         self._model_id = self._fusion_data[137]
         self._stream_id = self._fusion_data[138]
         self._task_id = self._fusion_data[139]
@@ -246,7 +256,7 @@ class GeTaskBean(StructDecoder):
         self._index_num = self._fusion_data[181]
         self._timestamp = self._fusion_data[182]
         self._shape_type = self._fusion_data[183]
-        self._block_dims = self._fusion_data[184]
+        self._block_dim = self._fusion_data[184]
         self._model_id = self._fusion_data[185]
         self._stream_id = self._fusion_data[186]
         self._task_id = self._fusion_data[187]

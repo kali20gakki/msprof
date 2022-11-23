@@ -88,7 +88,7 @@ class FftsPmuManager:
                     *list(itertools.chain.from_iterable(aiv_pmu_value)),
                     data.task_id, data.stream_id, data.subtask_id, data.subtask_type,
                     InfoConfReader().time_from_syscnt(data.time_list[0]),
-                    InfoConfReader().time_from_syscnt(data.time_list[1]), task_type, data.ffts_type]
+                    InfoConfReader().time_from_syscnt(data.time_list[1]), data.ffts_type, task_type]
         pmu_data_list.append(pmu_data)
 
     def get_total_cycle_info(self, data: any, task_type: int) -> tuple:
@@ -230,8 +230,8 @@ class FftsPmuModel(ParserModel):
                                                                   'task_type INT, '
                                                                   'start_time INT,'
                                                                   'end_time INT, '
-                                                                  'core_type INT,'
-                                                                  'ffts_type INT', name=table_name)
+                                                                  'ffts_type INT,'
+                                                                  'core_type INT', name=table_name)
         try:
             DBManager.execute_sql(self.conn, sql)
         except sqlite3.Error as err:

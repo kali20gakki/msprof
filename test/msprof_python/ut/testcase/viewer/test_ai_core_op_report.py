@@ -163,7 +163,8 @@ class TestAiCoreOpReport(unittest.TestCase):
     def test_get_two_table_union_sql(self):
         res_sql_1 = "select ge_summary.model_id, task_time.task_id, task_time.stream_id,  " \
                     "op_name, ge_summary.op_type, ge_summary.task_type, start_time, duration_time/1000.0, " \
-                    "wait_time/1000.0, block_dim, (case when context_id=4294967295 then 0 else context_id end) " \
+                    "wait_time/1000.0, block_dim, mix_block_dim, " \
+                    "(case when context_id=4294967295 then 0 else context_id end) " \
                     "from task_time inner join ge_summary on task_time.task_id=ge_summary.task_id and " \
                     "task_time.stream_id = ge_summary.stream_id and task_time.task_type = ge_summary.task_type " \
                     "and ge_summary.task_type!=? and task_time.batch_id=ge_summary.batch_id and " \
