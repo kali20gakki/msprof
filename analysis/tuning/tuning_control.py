@@ -23,8 +23,8 @@ class TuningControl:
     def __init__(self: any) -> None:
         self._init_tuning_data()
         self.title_map = {
-            CommonProfRule.RESULT_MODEL_COMPUTATION: self._model_computation_tuning,
-            CommonProfRule.RESULT_MODEL_MEMORY: self._model_memory_tuning,
+            CommonProfRule.RESULT_COMPUTATION: self._model_computation_tuning,
+            CommonProfRule.RESULT_MEMORY: self._model_memory_tuning,
             CommonProfRule.RESULT_OPERATOR_SCHEDULE: self._operator_schedule_tuning,
             CommonProfRule.RESULT_OPERATOR_PROCESSING: self._operator_process_tuning,
             CommonProfRule.RESULT_OPERATOR_METRICS: self._operator_metrics_tuning
@@ -57,19 +57,28 @@ class TuningControl:
 
     def _init_tuning_data(self: any) -> None:
         self.model_computation = {
-            CommonProfRule.RESULT_RULE_TYPE: CommonProfRule.RESULT_MODEL_COMPUTATION, CommonProfRule.RESULT_KEY: []
+            CommonProfRule.RESULT_RULE_TYPE: CommonProfRule.RESULT_COMPUTATION,
+            CommonProfRule.RESULT_RULE_DESCRIPTION: CommonProfRule.RESULT_COMPUTATION_DESCRIPTION,
+            CommonProfRule.RESULT_KEY: []
         }
         self.model_memory = {
-            CommonProfRule.RESULT_RULE_TYPE: CommonProfRule.RESULT_MODEL_MEMORY, CommonProfRule.RESULT_KEY: []
+            CommonProfRule.RESULT_RULE_TYPE: CommonProfRule.RESULT_MEMORY,
+            CommonProfRule.RESULT_RULE_DESCRIPTION: CommonProfRule.RESULT_MEMORY_DESCRIPTION,
+            CommonProfRule.RESULT_KEY: []
         }
         self.operator_schedule = {
-            CommonProfRule.RESULT_RULE_TYPE: CommonProfRule.RESULT_OPERATOR_SCHEDULE, CommonProfRule.RESULT_KEY: []
+            CommonProfRule.RESULT_RULE_TYPE: CommonProfRule.RESULT_OPERATOR_SCHEDULE,
+            CommonProfRule.RESULT_RULE_DESCRIPTION: CommonProfRule.RESULT_SCHEDULE_DESCRIPTION,
+            CommonProfRule.RESULT_KEY: []
         }
         self.operator_processing = {
-            CommonProfRule.RESULT_RULE_TYPE: CommonProfRule.RESULT_OPERATOR_PROCESSING, CommonProfRule.RESULT_KEY: []
+            CommonProfRule.RESULT_RULE_TYPE: CommonProfRule.RESULT_OPERATOR_PROCESSING,
+            CommonProfRule.RESULT_RULE_DESCRIPTION: CommonProfRule.RESULT_PROCESSING_DESCRIPTION,
+            CommonProfRule.RESULT_KEY: []
         }
         self.operator_metrics = {
             CommonProfRule.RESULT_RULE_TYPE: CommonProfRule.RESULT_OPERATOR_METRICS,
+            CommonProfRule.RESULT_RULE_DESCRIPTION: CommonProfRule.RESULT_METRICS_DESCRIPTION,
             CommonProfRule.RESULT_KEY: []
         }
         self.data = [
