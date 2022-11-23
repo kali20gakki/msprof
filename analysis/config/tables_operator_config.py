@@ -87,6 +87,7 @@ class TablesOperatorConfig(MetaConfig):
             ('op_name', 'text,null'),
             ('op_type', 'text,null'),
             ('block_dim', 'INTEGER,null'),
+            ('mix_block_dim', 'INTEGER,null'),
             ('task_type', 'text,null'),
             ('timestamp', 'TEXT,null'),
             ('batch_id', 'INTEGER,null'),
