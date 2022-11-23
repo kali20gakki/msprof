@@ -14,7 +14,7 @@ class TestOpSummaryOpScene(unittest.TestCase):
     def test_get_ge_sql(self):
         check = OpSummaryOpScene(CONFIG)
         result = check._get_ge_sql()
-        sql = "SELECT model_id, task_id, stream_id, op_name, op_type, block_dim, " \
+        sql = "SELECT model_id, task_id, stream_id, op_name, op_type, block_dim, mix_block_dim, " \
               "task_type, timestamp, batch_id, context_id from TaskInfo"
         self.assertEqual(sql, result)
 

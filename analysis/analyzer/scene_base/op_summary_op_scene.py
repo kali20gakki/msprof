@@ -30,7 +30,7 @@ class OpSummaryOpScene:
     @staticmethod
     def _get_ge_sql() -> str:
         ge_sql = "SELECT model_id, task_id, stream_id, " \
-                 "op_name, op_type, block_dim, task_type, timestamp, batch_id, context_id from {0}" \
+                 "op_name, op_type, block_dim, mix_block_dim, task_type, timestamp, batch_id, context_id from {0}" \
             .format(DBNameConstant.TABLE_GE_TASK)
         return ge_sql
 

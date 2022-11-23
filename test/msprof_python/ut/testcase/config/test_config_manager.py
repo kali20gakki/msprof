@@ -22,7 +22,7 @@ class TestConfigManager(unittest.TestCase):
         config = ConfigManager.get(ConfigManager.TABLES_TRAINING)
         self.assertEqual(config.get('BiuCyclesMap', 'AA'), '')
         config = ConfigManager.get(ConfigManager.TABLES_OPERATOR)
-        self.assertEqual(len(config.items('SummaryGeMap')), 10)
+        self.assertEqual(len(config.items('SummaryGeMap')), 11)
         config = ConfigManager.get(ConfigManager.MSPROF_EXPORT_DATA)
         self.assertEqual(len(config.sections()), 55)
         config = ConfigManager.get(ConfigManager.DATA_CALCULATOR)
