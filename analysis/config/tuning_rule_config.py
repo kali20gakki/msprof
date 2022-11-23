@@ -21,7 +21,7 @@ class TuningRuleConfig(MetaConfig):
         "rule_aicpu_2",
         "rule_aicpu_3",
         "rule_wait_time_1",
-        r"ule_memory_workspace_1"
+        "rule_memory_workspace_1"
     ]
 
     def __init__(self):
