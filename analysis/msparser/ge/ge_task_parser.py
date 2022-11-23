@@ -76,6 +76,6 @@ class GeTaskParser(DataParser, MsMultiProcess):
         op_name = self._get_op_name(bean_data)
         op_type = self._get_op_type(bean_data)
         return [bean_data.model_id, op_name, bean_data.stream_id,
-                bean_data.task_id, bean_data.block_dims, bean_data.shape_type, bean_data.task_type,
-                op_type, bean_data.index_num,
+                bean_data.task_id, bean_data.block_dim, bean_data.mix_block_dim, bean_data.shape_type,
+                bean_data.task_type, op_type, bean_data.index_num,
                 bean_data.thread_id, bean_data.timestamp, bean_data.batch_id, bean_data.context_id]
