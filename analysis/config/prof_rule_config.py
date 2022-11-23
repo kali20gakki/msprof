@@ -13,7 +13,7 @@ class ProfRuleConfig(MetaConfig):
           "Rule Condition": "condition_block_dim_1 && condition_cube_ratio_2",
           "Rule Type": "Operator Processing",
           "Rule Subtype": "",
-          "Rule Suggestion": "please using multi-core"
+          "Rule Suggestion": "Use multi-core"
         }
         , {
           "Rule Id": "rule_block_dim_2",
@@ -21,7 +21,7 @@ class ProfRuleConfig(MetaConfig):
           "Rule Condition": "condition_block_dim_2 && condition_block_dim_3",
           "Rule Type": "Operator Processing",
           "Rule Subtype": "",
-          "Rule Suggestion": "please check tiling strategy"
+          "Rule Suggestion": "Check the tiling policy"
         }
         , {
           "Rule Id": "rule_transData_1",
@@ -29,7 +29,7 @@ class ProfRuleConfig(MetaConfig):
           "Rule Condition": "condition_transData_2",
           "Rule Type": "Operator Processing",
           "Rule Subtype": "",
-          "Rule Suggestion": "please check and reduce the transData"
+          "Rule Suggestion": "Check and reduce the transData"
         }
         , {
           "Rule Id": "rule_memory_workspace_1",
@@ -37,7 +37,7 @@ class ProfRuleConfig(MetaConfig):
           "Rule Condition": "condition_memory_workspace_1",
           "Rule Type": "Operator Metrics",
           "Rule Subtype": "Memory",
-          "Rule Suggestion": "please check and reduce the memory workspace"
+          "Rule Suggestion": "Check and reduce the memory workspace"
         }
         , {
           "Rule Id": "rule_wait_time_1",
@@ -45,7 +45,7 @@ class ProfRuleConfig(MetaConfig):
           "Rule Condition": "condition_wait_time_2",
           "Rule Type": "Operator Schedule",
           "Rule Subtype": "",
-          "Rule Suggestion": "task wait time has reached the upper limit"
+          "Rule Suggestion": "Task waiting time has reached the upper limit"
         }
         , {
           "Rule Id": "rule_aicpu_1",
@@ -53,7 +53,7 @@ class ProfRuleConfig(MetaConfig):
           "Rule Condition": "condition_aicpu_1",
           "Rule Type": "Operator Processing",
           "Rule Subtype": "",
-          "Rule Suggestion": "please check and reduce aicpu operator"
+          "Rule Suggestion": "Check and reduce AI CPU operators"
         }
         , {
           "Rule Id": "rule_memory_bound_1",
@@ -61,7 +61,7 @@ class ProfRuleConfig(MetaConfig):
           "Rule Condition": "condition_memory_bound_2",
           "Rule Type": "Memory",
           "Rule Subtype": "",
-          "Rule Suggestion": "low data memory handling efficiency"
+          "Rule Suggestion": "Low data memory handling efficiency"
         }
         , {
           "Rule Id": "rule_vector_bound_1",
@@ -69,7 +69,7 @@ class ProfRuleConfig(MetaConfig):
           "Rule Condition": "condition_vector_bound_1",
           "Rule Type": "Memory",
           "Rule Subtype": "",
-          "Rule Suggestion": "please check repeat counts and vector mask"
+          "Rule Suggestion": "Check repeat counts and vector mask"
         }
         , {
           "Rule Id": "rule_vector_bound_2",
@@ -77,7 +77,7 @@ class ProfRuleConfig(MetaConfig):
           "Rule Condition": "condition_vector_ratio_2 && condition_cube_ratio_2 && condition_task_duration_1",
           "Rule Type": "Computation",
           "Rule Subtype": "Cube",
-          "Rule Suggestion": "cube operators cost too much time on vector computing"
+          "Rule Suggestion": "Cube operators spend too much time on vector computing"
         }
         , {
           "Rule Id": "rule_vector_ratio_1",
@@ -85,7 +85,7 @@ class ProfRuleConfig(MetaConfig):
           "Rule Condition": "condition_vector_ratio_1",
           "Rule Type": "Computation",
           "Rule Subtype": "Vector",
-          "Rule Suggestion": "low vector compute utilization"
+          "Rule Suggestion": "Low vector computing usage"
         }
         , {
           "Rule Id": "rule_cube_ratio_1",
@@ -93,7 +93,7 @@ class ProfRuleConfig(MetaConfig):
           "Rule Condition": "condition_cube_ratio_1",
           "Rule Type": "Computation",
           "Rule Subtype": "Cube",
-          "Rule Suggestion": "low cube compute utilization"
+          "Rule Suggestion": "Low cube computing usage"
         }
         , {
           "Rule Id": "rule_scalar_bound_1",
@@ -101,7 +101,7 @@ class ProfRuleConfig(MetaConfig):
           "Rule Condition": "condition_scalar_ratio_1",
           "Rule Type": "Computation",
           "Rule Subtype": "Scalar",
-          "Rule Suggestion": "high scalar compute utilization"
+          "Rule Suggestion": "High scalar computing usage"
         }
         , {
           "Rule Id": "rule_vec_bankgroup_cflt_ratio_1",
@@ -109,7 +109,7 @@ class ProfRuleConfig(MetaConfig):
           "Rule Condition": "condition_vec_bankgroup_cflt_ratio_1",
           "Rule Type": "Computation",
           "Rule Subtype": "Vector",
-          "Rule Suggestion": "vector bank group conflict has reached the upper limit"
+          "Rule Suggestion": "The vector bank group conflict has reached the upper limit"
         }
         , {
           "Rule Id": "rule_vec_bank_cflt_ratio_1",
@@ -117,7 +117,7 @@ class ProfRuleConfig(MetaConfig):
           "Rule Condition": "condition_vec_bank_cflt_ratio_1",
           "Rule Type": "Computation",
           "Rule Subtype": "Vector",
-          "Rule Suggestion": "vector bank conflict has reached the upper limit"
+          "Rule Suggestion": "The vector bank conflict has reached the upper limit"
         }
         , {
           "Rule Id": "rule_aicpu_2",
@@ -125,7 +125,7 @@ class ProfRuleConfig(MetaConfig):
           "Rule Condition": "condition_task_duration_1 && condition_aicpu_1 && condition_int64_1",
           "Rule Type": "Operator Processing",
           "Rule Subtype": "",
-          "Rule Suggestion": "please try converting the type to int32 for aicore operators"
+          "Rule Suggestion": "Try to cast the data type to INT32 for AI Core operators"
         }
         , {
           "Rule Id": "rule_aicpu_3",
@@ -133,7 +133,7 @@ class ProfRuleConfig(MetaConfig):
           "Rule Condition": "condition_strided_slice_grad_1 && condition_aicpu_1 && condition_task_duration_1",
           "Rule Type": "Operator Processing",
           "Rule Subtype": "",
-          "Rule Suggestion": "please try StridedSliceGrad on aicore"
+          "Rule Suggestion": "Try StridedSliceGrad on AI Cores"
         }
       ]
 
