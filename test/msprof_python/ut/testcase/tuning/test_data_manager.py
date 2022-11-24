@@ -1,14 +1,14 @@
+#  Copyright (c) Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
+
 import unittest
 from unittest import mock
+import sqlite3
+from sqlite.db_manager import DBOpen
+from sqlite.db_manager import DBManager
 
 from common_func.db_name_constant import DBNameConstant
-from sqlite.db_manager import DBManager
-from common_func.info_conf_reader import InfoConfReader
-import sqlite3
-
-from sqlite.db_manager import DBOpen
+from tuning.data_manager import DataLoader
 from tuning.data_manager import DataManager
-from constant.constant import CONFIG, INFO_JSON
 
 sample_config = {"model_id": 1, 'iter_id': 'dasfsd', 'result_dir': 'jasdfjfjs',
                  "ai_core_profiling_mode": "task-based", "aiv_profiling_mode": "sample-based"}
@@ -16,81 +16,45 @@ NAMESPACE = 'tuning.data_manager'
 
 
 class TestDataManager(unittest.TestCase):
+    def test_get_data(self):
+        key = DataManager('', 0, 0)
+        key.data = {'type1': [1, 2]}
+        result1 = key.get_data('type1')
+        self.assertEqual(result1, [1, 2])
+        result2 = key.get_data('type2')
+        self.assertEqual(result2, [])
 
+
+class TestDataLoader(unittest.TestCase):
     def test_get_data_by_infer_id(self):
-        project_path = 'home\\data_manager'
+        project_path = 'home\\data_loader'
         device_id = 123
         infer_id = 456
         headers = ['device_id', 'infer_id', 'project_path']
         datas = [[0, 0, 'home\\data_manager']]
         check = [{'device_id': 0, 'infer_id': 0, 'project_path': 'home\\data_manager'}]
-        with mock.patch(NAMESPACE + '.DataManager.select_memory_workspace', return_value=[5, 4, 0]), \
-             mock.patch(NAMESPACE + '.DataManager._get_base_data', return_value=(headers, datas)), \
-             mock.patch(NAMESPACE + '.DataManager._get_extend_data'), \
-             mock.patch(NAMESPACE + '.DataManager.get_memory_workspace'):
-            key = DataManager()
+        with mock.patch(NAMESPACE + '.DataLoader.select_memory_workspace', return_value=[5, 4, 0]), \
+                mock.patch(NAMESPACE + '.DataLoader._get_base_data', return_value=(headers, datas)), \
+                mock.patch(NAMESPACE + '.DataLoader._get_extend_data'), \
+                mock.patch(NAMESPACE + '.DataLoader.get_memory_workspace'):
+            key = DataLoader()
             result = key.get_data_by_infer_id(project_path, device_id, infer_id)
         self.assertEqual(result, check)
-
-    def test_get_base_data_1(self):
-        device_id = 123
-        infer_id = 456
-        project_path = 'home\\data_manager'
-        headers = ['device_id', 'infer_id', 'project_path']
-        data = [[0, 0, 'home\\data_manager']]
-        with mock.patch(NAMESPACE + '.DataManager.is_network', return_value=True), \
-             mock.patch(NAMESPACE + '.PathManager.get_db_path', return_value='data\\ai_core_op_summary'), \
-             mock.patch(NAMESPACE + '.AiCoreOpReport.get_ai_core_op_summary_data', return_value=(headers, data, 0)):
-            result = DataManager._get_base_data(device_id, infer_id, project_path)
-        self.assertEqual(result, (headers, data))
-        with mock.patch(NAMESPACE + '.DataManager.is_network', return_value=False), \
-             mock.patch('os.path.join', return_value=True), \
-             mock.patch(NAMESPACE + '.generate_config', return_value=sample_config), \
-             mock.patch(NAMESPACE + '.get_task_based_core_data', return_value=(False, False, 0)), \
-             mock.patch(NAMESPACE + '.get_core_sample_data', return_value=(1, 2, 0)):
-            result = DataManager._get_base_data(device_id, infer_id, project_path)
-        self.assertEqual(result, (1, 2))
-
-    def test_get_base_data_2(self):
-        device_id = 123
-        infer_id = 456
-        project_path = 'home\\data_manager'
-        sample_config["ai_core_profiling_mode"] = "sample-based"
-        sample_config["aiv_profiling_mode"] = "task-based"
-        with mock.patch(NAMESPACE + '.DataManager.is_network', return_value=False), \
-             mock.patch('os.path.join', return_value=True), \
-             mock.patch(NAMESPACE + '.generate_config', return_value=sample_config), \
-             mock.patch(NAMESPACE + '.get_core_sample_data', return_value=(False, False, 0)), \
-             mock.patch(NAMESPACE + '.get_task_based_core_data', return_value=(1, 2, 0)):
-            result = DataManager._get_base_data(device_id, infer_id, project_path)
-        self.assertEqual(result, (1, 2))
-
-    def test_get_extend_data(self):
-        operator_dict = {}
-        with mock.patch(NAMESPACE + '.DataManager.get_core_number'), \
-             mock.patch(NAMESPACE + '.DataManager.get_vector_bound'):
-            result = DataManager._get_extend_data(operator_dict)
-        self.assertEqual(result, {})
 
     def test_get_vector_bound(self):
         extend_data_dict = {"vector_bound": 1, "mte2_ratio": 2, "mac_ratio": 3}
         operator_dict = {"vec_ratio": 4, "mte2_ratio": 5, "mac_ratio": 6}
-        DataManager.get_vector_bound(extend_data_dict, operator_dict)
-
-    def test_get_core_number(self):
-        extend_data_dict = {"core_num": None}
-        InfoConfReader()._info_json = INFO_JSON
-        DataManager.get_core_number(extend_data_dict)
+        DataLoader.get_vector_bound(extend_data_dict, operator_dict)
 
     def test_get_memory_workspace_1(self):
         memory_workspaces = [[1, '123', 3]]
         operator_dict = {"stream_id": 1, "task_id": '123', "memory_workspace": 2}
-        DataManager.get_memory_workspace(memory_workspaces, operator_dict)
+        DataLoader.get_memory_workspace(memory_workspaces, operator_dict)
 
     def test_get_memory_workspace_2(self):
         memory_workspaces = None
         operator_dict = {"memory_workspace": 2}
-        DataManager.get_memory_workspace(memory_workspaces, operator_dict)
+        DataLoader.get_memory_workspace(memory_workspaces, operator_dict)
 
     def test_select_memory_workspace(self):
         project = 123
@@ -105,20 +69,20 @@ class TestDataManager(unittest.TestCase):
         insert_sql = "insert into {0} values ({value})".format("GELoad", value="?," * (len(data[0]) - 1) + "?")
         db_manager = DBManager()
         res = db_manager.create_table("ge_model_info.db", create_sql, insert_sql, data)
-        with mock.patch(NAMESPACE + '.DataManager.is_network', return_value=False):
-            result = DataManager.select_memory_workspace(project, device_id)
+        with mock.patch(NAMESPACE + '.DataLoader.is_network', return_value=False):
+            result = DataLoader.select_memory_workspace(project, device_id)
         self.assertEqual(result, [])
         db_manager = DBManager()
         res = db_manager.create_table("ge_model_info.db", create_sql, insert_sql, data)
-        with mock.patch(NAMESPACE + '.DataManager.is_network', return_value=True), \
-             mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=(res[0], res[1])), \
-             mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True):
-            result = DataManager.select_memory_workspace(project, device_id)
+        with mock.patch(NAMESPACE + '.DataLoader.is_network', return_value=True), \
+                mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=(res[0], res[1])), \
+                mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True):
+            result = DataLoader.select_memory_workspace(project, device_id)
         self.assertEqual(result, [])
         db_manager = DBManager()
         res = db_manager.create_table("ge_model_info.db", create_sql, insert_sql, data)
         with mock.patch(NAMESPACE + '.DBManager.destroy_db_connect'):
-            DataManager.select_memory_workspace(project, device_id)
+            DataLoader.select_memory_workspace(project, device_id)
         res[1].execute("drop table GELoad")
         db_manager.destroy(res)
 
@@ -132,17 +96,17 @@ class TestDataManager(unittest.TestCase):
             db_open.create_table(create_sql)
             db_open.insert_data(DBNameConstant.TABLE_ACL_DATA, data)
             with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=(db_open.db_conn, db_open.db_curs)):
-                result = DataManager.is_network(project, device_id)
+                result = DataLoader.is_network(project, device_id)
             self.assertEqual(result, True)
 
             curs = mock.Mock()
             curs.execute.side_effect = sqlite3.Error
             with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=(curs, curs)), \
-                 mock.patch(NAMESPACE + '.logging.error'):
-                DataManager.is_network(project, device_id)
+                    mock.patch(NAMESPACE + '.logging.error'):
+                DataLoader.is_network(project, device_id)
 
             with mock.patch(NAMESPACE + '.DBManager.destroy_db_connect'):
-                DataManager.is_network(project, device_id)
+                DataLoader.is_network(project, device_id)
 
 
 if __name__ == '__main__':
