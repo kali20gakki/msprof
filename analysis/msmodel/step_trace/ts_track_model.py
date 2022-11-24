@@ -126,11 +126,10 @@ class TsTrackViewModel(ViewModel):
         return DBManager.fetch_all_data(self.cur, sql, dto_class=StepTraceGeDto)
 
     def get_ai_cpu_data(self) -> list:
-        sql = "SELECT stream_id, task_id, case when task_state=1 then timestamp else -1 end as start_time, " \
-              "case when task_state=2 then timestamp else -1 end as end_time FROM {} where " \
-              "task_type=1 and task_state <>0 order by timestamp".format(
+        sql = "SELECT stream_id, task_id, timestamp, task_state FROM {} where " \
+              "task_type=1 and (task_state=1 or task_state=2) order by timestamp".format(
             DBNameConstant.TABLE_TASK_TYPE)
-        return DBManager.fetch_all_data(self.cur, sql, dto_class=TimeSectionDto)
+        return DBManager.fetch_all_data(self.cur, sql)
 
     def get_iter_time_data(self) -> list:
         sql = "select model_id, index_id ,step_start as start_time, step_end as end_time " \
