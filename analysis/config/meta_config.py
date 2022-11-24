@@ -30,7 +30,7 @@ class MetaConfig:
 
     def has_option(self, section: str, option: str):
         if not self.support_parser:
-            False
+            return False
         options = self.options(section)
         return option in options
 

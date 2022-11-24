@@ -48,7 +48,7 @@ aclError aclprofInit(CONST_CHAR_PTR profilerResultPath, size_t length)
     MSPROF_LOGI("Start to execute aclprofInit");
     std::lock_guard<std::mutex> lock(g_aclprofMutex);
 
-    if (profilerResultPath == nullptr || strlen(profilerResultPath) != length) {
+    if (profilerResultPath == nullptr || strnlen(profilerResultPath, length) != length) {
         MSPROF_LOGE("profilerResultPath is nullptr or its length does not equals given length");
         std::string errorReason = "profilerResultPath is nullptr or its length does not equals given length";
         std::string valueStr = (profilerResultPath == nullptr) ? "nullptr" : std::string(profilerResultPath);
@@ -76,17 +76,18 @@ aclError aclprofInit(CONST_CHAR_PTR profilerResultPath, size_t length)
         return ACL_ERROR_PROFILING_FAILURE;
     }
     MSPROF_LOGI("Initialize profiling by using ProfInit");
-    std::string path(profilerResultPath, length);
-    ret = ProfAclMgr::instance()->ProfAclInit(path);
-    if (ret != ACL_SUCCESS) {
-        MSPROF_LOGE("AclProfiling init fail, profiling result = %d", ret);
-        return ret;
+    std::string absoPath = Utils::RelativePathToAbsolutePath(std::string(profilerResultPath, length));
+    if (absoPath.size() > aclProfPathMaxLen) {
+        MSPROF_LOGE("File path length check failed.");
+        return ACL_ERROR_INVALID_PARAM;
+    }
+    if (ProfAclMgr::instance()->ProfAclInit(absoPath) != ACL_SUCCESS) {
+        return ACL_ERROR_PROFILING_FAILURE;
     }
 
     ret = Analysis::Dvvp::ProfilerCommon::RegisterReporterCallback();
     RETURN_IF_NOT_SUCCESS(ret);
 
-    MSPROF_LOGI("Allocate config of profiling initialize to Acl");
     ret = Analysis::Dvvp::ProfilerCommon::CommandHandleProfInit();
     RETURN_IF_NOT_SUCCESS(ret);
 
@@ -747,7 +748,7 @@ aclError aclprofSetConfig(aclprofConfigType configType, const char *val, uint32_
         MSPROF_LOGE("[aclprofSetConfig]");
         return ACL_ERROR_INVALID_PARAM;
     }
-    if (val == nullptr || strlen(val) != valLen) {
+    if (val == nullptr || strnlen(val, valLen) != valLen) {
         MSPROF_LOGE("[aclprofSetConfig]Input value is invalid.");
         return ACL_ERROR_INVALID_PARAM;
     }

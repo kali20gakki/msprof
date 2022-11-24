@@ -4,7 +4,6 @@
 
 from common_func.constant import Constant
 from common_func.db_name_constant import DBNameConstant
-from common_func.msvp_common import path_check
 from common_func.path_manager import PathManager
 from common_func.db_manager import DBManager
 from msmodel.ge.ge_info_calculate_model import GeInfoModel
@@ -20,6 +19,24 @@ class IterInfoManager:
                                 DBNameConstant.DB_STEP_TRACE,
                                 [DBNameConstant.TABLE_STEP_TRACE_DATA])
         self._ge_model = GeInfoModel(self.project_path)
+
+    @classmethod
+    def check_parallel(cls: any, result_dir: str) -> bool:
+        """
+        check parallel by num of items satisifed condition
+        """
+        if not DBManager.check_tables_in_db(PathManager.get_db_path(result_dir, DBNameConstant.DB_STEP_TRACE),
+                                            DBNameConstant.TABLE_STEP_TRACE_DATA):
+            return False
+        ts_track_model = TsTrackModel(
+            result_dir, DBNameConstant.DB_STEP_TRACE, [DBNameConstant.TABLE_STEP_TRACE_DATA])
+
+        with ts_track_model:
+            check_res = ts_track_model.check_parallel()
+
+        if check_res:
+            return True
+        return False
 
     def initial_iter_to_info(self: any) -> None:
         """
@@ -38,7 +55,7 @@ class IterInfoManager:
             static_task_dict = self._ge_model.get_ge_task_data(
                 Constant.TASK_TYPE_AI_CORE, Constant.GE_STATIC_SHAPE)
             dynamic_task_dict = self._ge_model.get_ge_task_data(
-                Constant.TASK_TYPE_AI_CORE, Constant.GE_NON_STATIC_SHAPE)
+                Constant.TASK_TYPE_AI_CORE, Constant.GE_DYNAMIC_SHAPE)
         self.regist_aicore_set(static_task_dict, dynamic_task_dict)
 
     def regist_parallel_set(self: any, step_trace_data: list) -> None:
@@ -73,21 +90,3 @@ class IterInfoManager:
                     iter_info_bean.model_id,
                     iter_info_bean.index_id),
                 set([]))
-
-    @classmethod
-    def check_parallel(cls: any, result_dir: str) -> bool:
-        """
-        check parallel by num of items satisifed condition
-        """
-        if not DBManager.check_tables_in_db(PathManager.get_db_path(result_dir, DBNameConstant.DB_STEP_TRACE),
-                                            DBNameConstant.TABLE_STEP_TRACE_DATA):
-            return False
-        ts_track_model = TsTrackModel(
-            result_dir, DBNameConstant.DB_STEP_TRACE, [DBNameConstant.TABLE_STEP_TRACE_DATA])
-
-        with ts_track_model:
-            check_res = ts_track_model.check_parallel()
-
-        if check_res:
-            return True
-        return False

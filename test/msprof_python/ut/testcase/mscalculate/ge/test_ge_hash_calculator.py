@@ -48,7 +48,7 @@ class TestGeHashCalculator(unittest.TestCase):
         with mock.patch(NAMESPACE + '.get_ge_hash_dict', return_value={0: 'test'}):
             check = GeHashCalculator(self.file_list, CONFIG)
             check.update_data([self._construct_ge_task_dto()])
-            self.assertEqual(check._ge_data, [[1, 'test', 1, 1, 1, 0, 'AI_CORE', 'test', 1, 1000, 123456, 1, 0]])
+            self.assertEqual(check._ge_data, [[1, 'test', 1, 1, 1, None, 0, 'AI_CORE', 'test', 1, 1000, 123456, 1, 0]])
 
     def test_calculate(self):
         with mock.patch(NAMESPACE + '.GeHashCalculator.get_ge_task_data'), \

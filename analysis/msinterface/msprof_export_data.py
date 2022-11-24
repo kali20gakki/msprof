@@ -10,6 +10,7 @@ from common_func.config_mgr import ConfigMgr
 from common_func.data_manager import DataManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.empty_class import EmptyClass
+from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.msprof_common import MsProfCommonConstant
@@ -37,7 +38,7 @@ from viewer.cpu_usage_report import get_sys_cpu_usage_data
 from viewer.ge.ge_op_execute_viewer import GeOpExecuteViewer
 from viewer.ge_info_report import get_ge_model_data
 from viewer.get_hccl_export_data import HCCLExport
-from viewer.get_l2_cache_data import add_op_name
+from viewer.get_l2_cache_data import add_op_name, get_l2_cache_sample_data
 from viewer.get_l2_cache_data import get_l2_cache_data
 from viewer.get_msvp_llc_timeline_training import get_ddr_timeline
 from viewer.get_msvp_llc_timeline_training import get_hbm_timeline
@@ -145,9 +146,10 @@ class MsProfExportDataUtils:
         """
         get system cpu usage data
         """
-        db_path = PathManager.get_db_path(params.get(StrConstant.PARAM_RESULT_DIR),
-                                          configs.get(StrConstant.CONFIG_DB).format(
-                                              params.get(StrConstant.PARAM_DEVICE_ID)))
+        db_name = configs.get(StrConstant.CONFIG_DB).format(params.get(StrConstant.PARAM_DEVICE_ID))
+        if InfoConfReader().is_host_profiling():
+            db_name = DBNameConstant.DB_HOST_SYS_USAGE_CPU
+        db_path = PathManager.get_db_path(params.get(StrConstant.PARAM_RESULT_DIR), db_name)
         if params.get(StrConstant.DATA_TYPE) == "cpu_usage":
             return get_sys_cpu_usage_data(db_path, configs.get(StrConstant.CONFIG_TABLE), configs)
         if params.get(StrConstant.DATA_TYPE) == "process_cpu_usage":
@@ -194,9 +196,10 @@ class MsProfExportDataUtils:
         """
         get memory data
         """
-        db_path = PathManager.get_db_path(params.get(StrConstant.PARAM_RESULT_DIR),
-                                          configs.get(StrConstant.CONFIG_DB).format(
-                                              params.get(StrConstant.PARAM_DEVICE_ID)))
+        db_name = configs.get(StrConstant.CONFIG_DB).format(params.get(StrConstant.PARAM_DEVICE_ID))
+        if InfoConfReader().is_host_profiling():
+            db_name = DBNameConstant.DB_HOST_SYS_USAGE_MEM
+        db_path = PathManager.get_db_path(params.get(StrConstant.PARAM_RESULT_DIR), db_name)
         if params.get(StrConstant.PARAM_DATA_TYPE) == "sys_mem":
             return get_sys_mem_data(db_path, configs.get(StrConstant.CONFIG_TABLE), configs)
         if params.get(StrConstant.PARAM_DATA_TYPE) == "process_mem":
@@ -252,6 +255,9 @@ class MsProfExportDataUtils:
         """
         db_name = configs.get(StrConstant.CONFIG_DB)
         db_path = PathManager.get_db_path(params.get(StrConstant.PARAM_RESULT_DIR), db_name)
+        if ChipManager().is_chip_v4():
+            return get_l2_cache_sample_data(
+                db_path, DBNameConstant.TABLE_L2CACHE_SAMPLE, configs.get(StrConstant.CONFIG_HEADERS))
         headers, data, count = get_l2_cache_data(
             db_path, configs.get(StrConstant.CONFIG_TABLE), params.get(StrConstant.PARAM_DEVICE_ID),
             configs.get(StrConstant.CONFIG_UNUSED_COLS))

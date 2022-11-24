@@ -8,7 +8,10 @@ import sqlite3
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
+from common_func.ms_constant.number_constant import NumberConstant
 from msmodel.interface.parser_model import ParserModel
+from msmodel.interface.view_model import ViewModel
+from profiling_bean.db_dto.time_section_dto import TimeSectionDto
 
 
 class HwtsIterModel(ParserModel):
@@ -66,14 +69,16 @@ class HwtsIterModel(ParserModel):
         get all aic count
         :return: sum of aic count
         """
+        sql = "select max(ai_core_num+ai_core_offset) from {0}".format(
+            DBNameConstant.TABLE_HWTS_ITER_SYS)
         try:
-            sql = "select ai_core_num+ai_core_offset from {0} " \
-                  "order by iter_id desc".format(
-                DBNameConstant.TABLE_HWTS_ITER_SYS)
-            return self.cur.execute(sql).fetchone()[0]
+            all_aic_num = self.cur.execute(sql).fetchone()[0]
         except sqlite3.Error as err:
             logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
             return Constant.DEFAULT_COUNT
+        if all_aic_num is None:
+            return Constant.DEFAULT_COUNT
+        return all_aic_num
 
     def get_batch_list(self: any, table_name, iter_range: list) -> list:
         """
@@ -85,10 +90,20 @@ class HwtsIterModel(ParserModel):
 
     def _get_task_num(self: any, model_id: int, index_id: int, sql: str) -> (int, int):
         try:
-            task_num = self.cur.execute(sql, (model_id, index_id, )).fetchone()
+            task_num = self.cur.execute(sql, (model_id, index_id,)).fetchone()
         except sqlite3.Error as err:
             logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
             return (0, 0)
         if task_num and len(task_num) == 2:
             return task_num
         return (0, 0)
+
+
+class HwtsIterViewModel(ViewModel):
+    def __init__(self: any, path: str) -> None:
+        super().__init__(path, DBNameConstant.DB_HWTS_REC, [])
+
+    def get_ai_core_op_data(self: any) -> list:
+        sql = "select start_time, end_time from {} where is_ai_core=1 and start_time<>{}".format(
+            DBNameConstant.TABLE_HWTS_BATCH, NumberConstant.INVALID_OP_EXE_TIME)
+        return DBManager.fetch_all_data(self.cur, sql, dto_class=TimeSectionDto)

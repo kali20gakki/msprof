@@ -42,24 +42,50 @@ class ClusterDataPreparationParser:
         self._model = None
         self._data = {}
 
+    def process(self: any) -> None:
+        """
+        entrance for calculating data preparation
+        :return: None or dict
+        """
+        if self._rank_id is None:
+            error(self.FILE_NAME, "The query id is wrong. Please enter a valid value.")
+            print_msg({"status": NumberConstant.ERROR, "info": "To query data queue, id is required", "data": ''})
+            return
+        if not (self._model_id is None and self._iteration_id is None):
+            logging.warning("To query data queue, the parameters '--model-id' and '--iteration-id' are invalid.")
+        try:
+            self._calculate()
+        except ProfException:
+            print_msg({"status": NumberConstant.ERROR,
+                       "info": "Some error occurred, please check input parameters and "
+                               "ensure that necessary commands have been executed.",
+                       "data": ""})
+            return
+        try:
+            self._storage_data()
+        except ProfException:
+            print_msg({"status": NumberConstant.ERROR,
+                       "info": "Storing data failed,"
+                               "you may not have the permission to write files in the current path.",
+                       "data": ""})
+
     def _calculate_queue_data(self: any, queue_list: list) -> None:
         """
         calculate data queue
         :return: None
         """
-        if not self._host_queue_step_count:
-            return
+        queue_list_length = len(queue_list)
+        step_count = self._host_queue_step_count if self._host_queue_step_count else queue_list_length
         total_info = {
-            "step_count": self._host_queue_step_count,
+            "step_count": step_count,
             "empty_queue": 0,
             "total_time": 0,
             "avg_time": 0
         }
-        queue_list_length = len(queue_list)
-        if queue_list_length % self._host_queue_step_count != 0:
+        if queue_list_length % step_count != 0:
             logging.warning("The data queue total length is not an integer multiple of the host queue data,"
                             "maybe the collected data is incomplete.")
-        multiple = math.ceil(queue_list_length / self._host_queue_step_count)
+        multiple = math.ceil(queue_list_length / step_count)
         total_time = 0
         empty_queue = 0
         data_list = []
@@ -74,7 +100,7 @@ class ClusterDataPreparationParser:
             data_list.append({"step": step_index, "duration": duration, "queue_size": queue_size})
         total_info["empty_queue"] = empty_queue
         total_info["total_time"] = total_time
-        total_info["avg_time"] = round(total_time / self._host_queue_step_count,
+        total_info["avg_time"] = round(total_time / step_count,
                                        NumberConstant.ROUND_FOUR_DECIMAL)
         self._data.setdefault("total_info", total_info)
         self._data.setdefault("data_list", data_list)
@@ -96,9 +122,9 @@ class ClusterDataPreparationParser:
             self._model = DataPreparationViewModel(self._device_path)
             self._query_host_queue()
             if self._host_queue_mode == Constant.DEFAULT_INVALID_VALUE:
-                logging.error("Query host queue data failed.")
-                raise ProfException(ProfException.PROF_INVALID_PATH_ERROR)
+                logging.warning("Failed to query host queue data.")
             elif self._host_queue_mode == DataPreparationParser.HOST_DATASET_NOT_SINK_MODE:
+                # If mode is HOST_DATASET_NOT_SINK_MODE, data queue does not exist, no need to continue
                 return
             self._query_data_queue()
         else:
@@ -204,30 +230,3 @@ class ClusterDataPreparationParser:
                                       "you may not have the permission to write files in the current path.")
                 raise ProfException(ProfException.PROF_INVALID_PATH_ERROR) from err
         return os.path.realpath(os.path.join(query_path, file_name))
-
-    def process(self: any) -> None:
-        """
-        entrance for calculating data preparation
-        :return: None or dict
-        """
-        if self._rank_id is None:
-            error(self.FILE_NAME, "The query id is wrong. Please enter a valid value.")
-            print_msg({"status": NumberConstant.ERROR, "info": "To query data queue, id is required", "data": ''})
-            return
-        if not (self._model_id is None and self._iteration_id is None):
-            logging.warning("To query data queue, the parameters '--model-id' and '--iteration-id' are invalid.")
-        try:
-            self._calculate()
-        except ProfException:
-            print_msg({"status": NumberConstant.ERROR,
-                       "info": "Some error occurred, please check input parameters and "
-                               "ensure that necessary commands have been executed.",
-                       "data": ""})
-            return
-        try:
-            self._storage_data()
-        except ProfException:
-            print_msg({"status": NumberConstant.ERROR,
-                       "info": "Storing data failed,"
-                               "you may not have the permission to write files in the current path.",
-                       "data": ""})

@@ -3,6 +3,9 @@
 # Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
 
 import re
+from enum import Enum
+
+from common_func.db_name_constant import DBNameConstant
 
 
 class StrConstant:
@@ -62,6 +65,10 @@ class StrConstant:
     MONOTONIC_TIME = "clock_monotonic_raw"
     ITER_ID = "iter_id"
 
+    # sample.json key
+    HOST_CPU_SAMPLING_INTV = "host_cpu_profiling_sampling_interval"
+    HOST_MEM_SAMPLING_INTV = "host_mem_profiling_sampling_interval"
+
     # msvp export type
     EXPORT_JSON = "json"
     EXPORT_CSV = "csv"
@@ -110,6 +117,14 @@ class StrConstant:
     TRACE_HEADER_NAME = "name"
 
     TASK_START_TIME = 'Task Start Time'
+
+    # parallel mode
+    DATA_PARALLEL = "data_parallel"
+    MODEL_PARALLEL = "model_parallel"
+    PIPELINE_PARALLEL = "pipeline_parallel"
+    PARALLEL_TABLE_NAME_MAPPING = {DATA_PARALLEL: DBNameConstant.TABLE_CLUSTER_DATA_PARALLEL,
+                                   MODEL_PARALLEL: DBNameConstant.TABLE_CLUSTER_MODEL_PARALLEL,
+                                   PIPELINE_PARALLEL: DBNameConstant.TABLE_CLUSTER_PIPELINE_PARALLEL}
 
     TASK_TYPE_MAPPING = {
         "0": 'kernel AI core task',
@@ -329,6 +344,25 @@ class StrConstant:
         re.compile("_sysctl")
     ]
 
+    # hccl str constant
+    SDMA_TRANSIT_ITEMS = ["Memcpy", "Reduce Inline"]
+    TRANSIT_TYPE = ["RDMA", "HCCS", "PCIE", "SDMA"]
+    TOTAL = 'Total HCCL Operators'
+    HCCS = "HCCS"
+    PCIE = "PCIE"
+    RDMA = "RDMA"
+    SDMA = "SDMA"
+    LOCAL = "LOCAL"
+    NOTIFY_WAIT = "Notify Wait"
+    REDUCE_TBE = "Reduce TBE"
+    RDMA_SEND = "RDMASend"
+    SDMA_TRANSIT_ITEMS = ["Memcpy", "Reduce Inline"]
+    COMMUNICATION_TIME_INFO = 'Communication Time Info'
+    COMMNUNICATION_BANDWIDTH_INFO = 'Communication Bandwidth Info'
+    SLOW_RANK_SUGGESTION = "Slow Rank Suggestion"
+    SLOW_LINK_SUGGESTION = "Slow Link Suggestion"
+    SUGGESTION = 'Suggestion'
+
     @property
     def accuracy(self: any) -> str:
         """
@@ -344,3 +378,21 @@ class StrConstant:
         :return: sign of bandwidth
         """
         return self.BANDWIDTH
+
+
+class OpAnalysisType():
+    ELAPSE_TIME = "Elapse Time(ms)"
+    TRANSIT_TIME = "Transit Time(ms)"
+    WAIT_TIME = "Wait Time(ms)"
+    SYNCHRONIZATION_TIME = "Synchronization Time(ms)"
+    WAIT_TIME_RATIO = "Wait Time Ratio"
+    SYNCHRONIZATION_TIME_RATIO = "Synchronization Time Ratio"
+
+
+class OpBandWidthType():
+    TRANSIT_SIZE_MB = "Transit Size(MB)"
+    TRANSIT_TIME_MS = "Transit Time(ms)"
+    BANDWIDTH_GB_S = "Bandwidth(GB/s)"
+    BANDWIDTH_UTILIZATION = "Bandwidth(Utilization)"
+    LARGE_PACKET_RATIO = "Large Packet Ratio"
+    SIZE_DISTRIBUTION = "Size Distribution"

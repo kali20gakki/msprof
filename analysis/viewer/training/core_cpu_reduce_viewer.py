@@ -116,7 +116,6 @@ class CoreCpuReduceViewer:
         DBManager.destroy_db_connect(conn_ge, cur_ge)
         return total_cycle_data, total_time_data
 
-
     @staticmethod
     def _get_aicore_sql(sql_path: str) -> str:
         total_cycles = 'total_cycles'
