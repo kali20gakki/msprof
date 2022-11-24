@@ -41,7 +41,7 @@ class AiCoreOpReport:
                           "aic_vec_fp32_ratio", "aic_vec_fp16_ratio", "aic_vec_int32_ratio",
                           "aic_vec_misc_ratio", "aic_vec_fp16_128lane_ratio", "aic_vec_fp16_64lane_ratio",
                           "aic_vec_bankgroup_cflt_ratio", "aic_vec_bank_cflt_ratio", "aic_vec_resc_cflt_ratio"]
-    ADDITION_HEADER = ["Context ID", "MixBlock Dim", "aiv time(us)"]
+    ADDITION_HEADER = ["Context ID", "Mix Block Dim", "aiv_time(us)"]
     TENSOR_HEADERS = [
         "Input Shapes", "Input Data Types", "Input Formats", "Output Shapes", "Output Data Types", "Output Formats"
     ]
