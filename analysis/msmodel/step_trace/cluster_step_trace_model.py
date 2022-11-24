@@ -42,5 +42,16 @@ class ClusterStepTraceViewModel(ViewModel):
     def get_sql_data(self: any, sql: str, param: tuple = None, dto_class: any = None) -> list:
         return DBManager.fetch_all_data(self.cur, sql, param, dto_class)
 
+    def get_model_id_with_iterations(self: any, table_name: str) -> list:
+        sql = "select model_id, count(distinct iteration_id) " \
+                                   "from {} group by model_id".format(table_name)
+        return DBManager.fetch_all_data(self.cur, sql)
+
+    def get_iter_start_end(self: any, iteration_id: int, model_id: int, table_name: str) -> list:
+        sql = "select iteration_end - iteration_time, iteration_end from {} " \
+                                   "where iteration_id = ? and model_id = ?".format(table_name)
+        data = DBManager.fetch_all_data(self.cur, sql, (iteration_id, model_id))
+        return data
+
     def judge_table_exist(self: any, table_name: str) -> bool:
         return DBManager.judge_table_exist(self.cur, table_name)

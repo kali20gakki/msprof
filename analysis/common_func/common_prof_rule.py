@@ -33,17 +33,28 @@ class CommonProfRule:
     COND_TYPE_ACCUMULATE = "accumulate"
 
     # return json key and value
-    RESULT_RULE_TYPE = "rule_type"
-    RESULT_RULE_SUBTYPE = "rule_subtype"
-    RESULT_RULE_SUGGESTION = "rule_suggestion"
-    RESULT_OP_LIST = "op_list"
+    RESULT_RULE_TYPE = "Rule Type"
+    RESULT_RULE_SUBTYPE = "Rule Subtype"
+    RESULT_RULE_SUGGESTION = "Rule Suggestion"
+    RESULT_OP_LIST = "Op List"
     RESULT_KEY = "result"
 
-    RESULT_MODEL_COMPUTATION = "Model/Operator Computation"
-    RESULT_MODEL_MEMORY = "Model/Operator Memory"
+    RESULT_COMPUTATION = "Computation"
+    RESULT_MEMORY = "Memory"
     RESULT_OPERATOR_SCHEDULE = "Operator Schedule"
     RESULT_OPERATOR_PROCESSING = "Operator Processing"
     RESULT_OPERATOR_METRICS = "Operator Metrics"
+
+    RESULT_RULE_DESCRIPTION = "Rule Description"
+    RESULT_COMPUTATION_DESCRIPTION = "Prompt users of some improperly high or low vector/cube/scalar" \
+                                     " usages of operators on AI Cores."
+    RESULT_MEMORY_DESCRIPTION = "Display improper memory usages of operators."
+    RESULT_SCHEDULE_DESCRIPTION = "Display inefficient scheduling of operators."
+    RESULT_PROCESSING_DESCRIPTION = "Provide various processing suggestions based on operator processing policy, " \
+                                    "including multi-core processing, tiling policy, " \
+                                    "and reduced use of AI CPU operators."
+    RESULT_METRICS_DESCRIPTION = "Collect statistics on operator performance efficiency " \
+                                 "and prompt users of high resource consumption."
 
     # prof rule and condition file name
     RESULT_PROF_JSON = "prof_rule_{}.json"

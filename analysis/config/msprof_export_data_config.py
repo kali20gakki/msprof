@@ -68,7 +68,7 @@ class MsProfExportDataConfig(MetaConfig):
             ('handler', '_get_op_summary_data'),
             ('headers',
              'Model Name,Model ID,Task ID,Stream ID,Infer ID,Op Name,OP Type,Task Type,'
-             'Task Start Time,Task Duration(us),Task Wait Time(us),Block Dim'),
+             'Task Start Time,Task Duration(us),Task Wait Time(us),Block Dim,Mix Block Dim'),
             ('db', 'ai_core_op_summary.db')
         ]
         , 'ai_stack_time': [
@@ -79,7 +79,8 @@ class MsProfExportDataConfig(MetaConfig):
             ('handler', '_get_l2_cache_data'),
             ('db', 'l2cache.db'),
             ('table', 'L2CacheSummary'),
-            ('unused_cols', 'device_id,task_type')
+            ('unused_cols', 'device_id,task_type'),
+            ('headers', 'read, write, allocate, victim')
         ]
         , 'step_trace': [
             ('handler', '_get_step_trace_data'),

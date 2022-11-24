@@ -427,7 +427,7 @@ class DBManager:
                 curs.execute(sql, param)
             else:
                 curs.execute(sql)
-        except sqlite3.Error as _err:
+        except (sqlite3.Error, OverflowError) as _err:
             logging.error(str(_err), exc_info=Constant.TRACE_BACK_SWITCH)
             return tuple()
         try:

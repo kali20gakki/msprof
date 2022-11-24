@@ -100,9 +100,29 @@ class NumberConstant:
     # invalid id
     INVALID_STREAM_ID = -1
     INVALID_TASK_ID = -1
+    INVALID_OP_EXE_TIME = -1
 
     # core id edge
     MAX_CORE_ID_OF_AIC = 24
+
+    # HCCL info
+    RDMA_TRANSIT_OP_NUM = 5
+    MAIN_STREAM_THREAD_ID = 3
+    WAIT_TIME_THRESHOLD = 0.2
+    ANALYSIS_STEP_NUM = 1
+    RDMA_BANDWIDTH = 12.5
+    HCCS_BANDWIDTH = 18
+    PCIE_BANDWIDTH = 20
+    HCCS_MESSAGE_SIZE_THRESHOLD = 32
+    PCIE_MESSAGE_SIZE_THRESHOLD = 32
+    RDMA_MESSAGE_SIZE_THRESHOLD = 0.5
+    LARGE_MESSAGE_RATE = 0.8
+    BANDWIDTH_THRESHOLD = 0.8
+    DOMINATED_BOTTLENECK_THRESHOLD = 0.25
+
+    RANK_NUM_PER_SERVER = 8
+    RANK_NUM_PER_OS = 4
+    MAX_RANK_NUMS = 4096
 
     @property
     def conversion_time(self: any) -> float:

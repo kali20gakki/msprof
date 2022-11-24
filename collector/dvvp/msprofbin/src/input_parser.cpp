@@ -77,13 +77,16 @@ void InputParser::MsprofCmdUsage(const std::string msg)
 
 SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> InputParser::MsprofGetOpts(int argc, CONST_CHAR_PTR argv[])
 {
+    if (params_ == nullptr) {
+        MSPROF_LOGE("params_ is null in InputParser.");
+        return nullptr;
+    }
     const static int inputMaxLen = 512; // 512 : max length
     if (argc > inputMaxLen || argv == nullptr || strlen(*argv) > inputMaxLen) {
         CmdLog::instance()->CmdErrorLog("input data is invalid,"
             "please input argc less than 512 and argv is not null and the len of argv less than 512");
         return nullptr;
     }
-
     int opt = 0;
     int optionIndex = 0;
     MsprofString optString  = "";
@@ -117,8 +120,7 @@ SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> InputParser::MsprofGetOp
         }
     }
     auto paramAdapter = ParamsAdapterMsprof();
-    int ret = paramAdapter.GetParamFromInputCfg(argvMap, params_);
-    if (ret != PROFILING_SUCCESS) {
+    if (paramAdapter.GetParamFromInputCfg(argvMap, params_) != PROFILING_SUCCESS) {
         MSPROF_LOGE("[MsprofGetOpts]get param from InputCfg failed.");
         return nullptr;
     }

@@ -14,6 +14,7 @@ class GeTaskDto:
         self._stream_id = None
         self._task_id = None
         self._block_dim = None
+        self._mix_block_dim = None
         self._op_state = None
         self._batch_id = None
         self._context_id = None
@@ -71,6 +72,14 @@ class GeTaskDto:
     @block_dim.setter
     def block_dim(self: any, value: any) -> None:
         self._block_dim = value
+
+    @property
+    def mix_block_dim(self: any) -> any:
+        return self._mix_block_dim
+
+    @mix_block_dim.setter
+    def mix_block_dim(self: any, value: any) -> None:
+        self._mix_block_dim = value
 
     @property
     def op_state(self: any) -> any:

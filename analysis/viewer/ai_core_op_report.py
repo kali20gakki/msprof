@@ -41,13 +41,13 @@ class AiCoreOpReport:
                           "aic_vec_fp32_ratio", "aic_vec_fp16_ratio", "aic_vec_int32_ratio",
                           "aic_vec_misc_ratio", "aic_vec_fp16_128lane_ratio", "aic_vec_fp16_64lane_ratio",
                           "aic_vec_bankgroup_cflt_ratio", "aic_vec_bank_cflt_ratio", "aic_vec_resc_cflt_ratio"]
-    GE_ADDITION_HEADER = "Context ID"
+    ADDITION_HEADER = ["Context ID", "Mix Block Dim", "aiv_time(us)"]
     TENSOR_HEADERS = [
         "Input Shapes", "Input Data Types", "Input Formats", "Output Shapes", "Output Data Types", "Output Formats"
     ]
 
     OPERATOR_UNUSED_HEADERS = ["Model Name", "Infer ID"]
-    HEADERS_WITH_NO_GE_DATA = ["Op Name", "OP Type", "Block Dim"]
+    HEADERS_WITH_NO_GE_DATA = ["Op Name", "OP Type", "Block Dim", "Mix Block Dim"]
     HARDWARE_OP_LIST = ['AI_CPU', 'DSA', 'DVPP']
     START_TIME_INDEX = 8
     MODEL_NAME_INDEX = 0
@@ -286,7 +286,7 @@ class AiCoreOpReport:
     @classmethod
     def _get_op_summary_data(cls: any, project_path: str, curs: any, headers: list, iter_id: int) -> tuple:
         union_sql, headers = cls._get_sql_and_headers(curs, headers)
-        headers.append(cls.GE_ADDITION_HEADER)
+        headers.append(cls.ADDITION_HEADER[0])
         ai_core_group_dict, headers = cls._get_aicore_data(curs, headers)
         data = DBManager.fetch_all_data(curs, union_sql, ('{0}'.format(Constant.TASK_TYPE_AI_CPU),))
         if not data:
@@ -297,20 +297,22 @@ class AiCoreOpReport:
             data = cls._update_model_name_and_infer_id(project_path, data)
         cls._add_memory_bound(headers, data)
         headers = add_aicore_units(headers)
-        return cls._delete_context_id(headers, data)
+        return cls._delete_useless_cols(headers, data)
 
     @classmethod
-    def _delete_context_id(cls: any, headers: list, summary_data: list) -> tuple:
-        if ChipManager().is_chip_v4() or cls.GE_ADDITION_HEADER not in headers:
+    def _delete_useless_cols(cls: any, headers: list, summary_data: list) -> tuple:
+        if ChipManager().is_chip_v4():
             return summary_data, headers
-        index_id = headers.index(cls.GE_ADDITION_HEADER)
-        headers.remove(cls.GE_ADDITION_HEADER)
-        res_data = []
-        for data in summary_data:
-            tmp_data = list(data)
-            tmp_data.pop(index_id)
-            res_data.append(tmp_data)
-        return res_data, headers
+        for header in cls.ADDITION_HEADER:
+            if header not in headers:
+                continue
+            index_id = headers.index(header)
+            headers.remove(header)
+            for index, data in enumerate(summary_data):
+                tmp_data = list(data)
+                tmp_data.pop(index_id)
+                summary_data[index] = tmp_data
+        return summary_data, headers
 
     @classmethod
     def _update_model_name_and_infer_id(cls: any, project_path: str, ai_core_data: list) -> list:
@@ -365,7 +367,7 @@ class AiCoreOpReport:
         """
         return "select {1}.model_id, {0}.task_id, {0}.stream_id, {index_info} " \
                "op_name, {1}.op_type, {1}.task_type, start_time, duration_time/{NS_TO_US}, " \
-               "wait_time/{NS_TO_US}, block_dim, " \
+               "wait_time/{NS_TO_US}, block_dim, mix_block_dim, " \
                "(case when context_id={context_id} then 0 else context_id end) from {0} " \
                "inner join {1} on {0}.task_id={1}.task_id and {0}.stream_id = {1}.stream_id " \
                "and {0}.task_type = {1}.task_type " \
@@ -387,7 +389,7 @@ class AiCoreOpReport:
         union_sql = "select {1}.model_id, {0}.task_id, {1}.stream_id, {index_info} " \
                     "op_name, {1}.op_type, {1}.task_type, " \
                     "{0}.start_time, {0}.duration_time/{NS_TO_US}, " \
-                    "{0}.wait_time/{NS_TO_US}, block_dim from {0} " \
+                    "{0}.wait_time/{NS_TO_US}, block_dim, mix_block_dim from {0} " \
                     "inner join {1} on {0}.task_id={1}.task_id " \
                     "and {0}.stream_id={1}.stream_id " \
                     "and {1}.task_type = ? " \
@@ -400,7 +402,7 @@ class AiCoreOpReport:
             union_sql = "select {1}.model_id, {0}.task_id, {1}.stream_id, {index_info} " \
                         "op_name, {1}.op_type, {1}.task_type, " \
                         "{0}.start_time, {0}.duration_time/{NS_TO_US}, " \
-                        "{0}.wait_time/{NS_TO_US}, block_dim, " \
+                        "{0}.wait_time/{NS_TO_US}, block_dim, mix_block_dim, " \
                         "input_shapes, input_data_types, input_formats, " \
                         "output_shapes, output_data_types, output_formats " \
                         "from {0} inner join {1} on {0}.task_id={1}.task_id " \
@@ -422,7 +424,7 @@ class AiCoreOpReport:
         sql = "select {1}.model_id, {0}.task_id, {0}.stream_id, {index_info}" \
               "{1}.op_name, {1}.op_type, {1}.task_type, " \
               "{0}.start_time, {0}.duration_time/{NS_TO_US}, {0}.wait_time/{NS_TO_US}, {1}.block_dim, " \
-              "input_shapes, input_data_types, input_formats, " \
+              "{1}.mix_block_dim, input_shapes, input_data_types, input_formats, " \
               "output_shapes, output_data_types, output_formats, " \
               "(case when context_id={context_id} then 0 else context_id end) " \
               "from {0} inner join {2} on " \

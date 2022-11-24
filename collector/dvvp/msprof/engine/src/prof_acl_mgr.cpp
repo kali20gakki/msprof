@@ -269,7 +269,7 @@ int32_t ProfAclMgr::ProfAclInit(const std::string &profResultPath)
     }
 
     MSPROF_LOGI("Input profInitCfg: %s", Utils::BaseName(profResultPath).c_str());
-    std::string path = Utils::RelativePathToAbsolutePath(profResultPath);
+    std::string path = profResultPath;
     if (path.empty()) {
         MSPROF_LOGE("Input profResultPath is empty");
         MSPROF_INNER_ERROR("EK9999", "Input profResultPath is empty");
@@ -348,6 +348,7 @@ int ProfAclMgr::ProfAclStart(PROF_CONF_CONST_PTR profStartCfg)
         MSPROF_LOGE("[ProfAclStart]GetParamFromInputCfg fail.");
         return ACL_ERROR_PROFILING_FAILURE;
     }
+    params_->host_sys_pid = analysis::dvvp::common::utils::Utils::GetPid();
 
     for (uint32_t i = 0; i < profStartCfg->devNums; i++) {
         uint32_t devId = profStartCfg->devIdList[i];
@@ -1156,6 +1157,7 @@ int32_t ProfAclMgr::MsprofInitAclJson(VOID_PTR data, uint32_t len)
         return MSPROF_ERROR_CONFIG_INVALID;
     }
     params_->job_id = Utils::ProfCreateId(0);
+    params_->host_sys_pid = analysis::dvvp::common::utils::Utils::GetPid();
     MsprofSetMemberValue();
     ProfDataTypeConfigHandle(params_);
     SetModeToCmd();
@@ -1235,6 +1237,7 @@ int32_t ProfAclMgr::MsprofInitGeOptions(VOID_PTR data, uint32_t len)
     }
     params_->job_id = Utils::ProfCreateId(0);
     params_->jobInfo = jobInfo;
+    params_->host_sys_pid = analysis::dvvp::common::utils::Utils::GetPid();
     MsprofSetMemberValue();
     ProfDataTypeConfigHandle(params_);
     SetModeToCmd();

@@ -6,20 +6,20 @@ import logging
 import os
 import sqlite3
 
-from config.config_manager import ConfigManager
 from analyzer.get_op_table_task_time import GetOpTableTsTime
 from analyzer.op_common_function import OpCommonFunc
+from analyzer.scene_base.profiling_scene import ProfilingScene
 from common_func.ai_stack_data_check_manager import AiStackDataCheckManager
 from common_func.common import CommonConstant
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
-from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msprof_exception import ProfException
 from common_func.msprof_iteration import MsprofIteration
 from common_func.path_manager import PathManager
 from common_func.platform.chip_manager import ChipManager
+from config.config_manager import ConfigManager
 from profiling_bean.db_dto.ge_task_dto import GeTaskDto
 
 
@@ -226,8 +226,8 @@ class ParseAiCoreOpSummary:
         ge_data = []
         iter_list = MsprofIteration(self.project_path).get_iter_list_with_index_and_model(self.iter_id, self.model_id)
         ge_sql = "SELECT model_id, batch_id, task_id, stream_id, " \
-                 "op_name, op_type, block_dim, task_type, timestamp, index_id,context_id from {0} where " \
-                 "(index_id=? or index_id=0) and model_id=?" \
+                 "op_name, op_type, block_dim, mix_block_dim, task_type, timestamp, index_id, context_id " \
+                 "from {0} where (index_id=? or index_id=0) and model_id=?" \
             .format(DBNameConstant.TABLE_GE_TASK)
         for index_and_model in iter_list:
             ge_data.extend(DBManager.fetch_all_data(self.curs, ge_sql, index_and_model))
