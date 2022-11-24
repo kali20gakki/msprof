@@ -9,6 +9,7 @@ from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.section_calculator import SectionCalculator
+from mscalculate.ts_task.ai_cpu.aicpu_from_ts import AICpuFromTsCalculator
 from msmodel.iter_rec.iter_rec_model import HwtsIterViewModel
 from msmodel.parallel.cluster_hccl_model import ClusterHCCLViewModel
 from msmodel.parallel.parallel_model import ParallelModel
@@ -71,7 +72,7 @@ class ParallelParser(IParser, MsMultiProcess):
         with TsTrackViewModel(self._project_path) as _model:
             ai_cpu_data = _model.get_ai_cpu_data()
             self._iter_time_data = _model.get_iter_time_data()
-        ai_cpu_op_data = self._get_ai_cpu_op_data(ai_cpu_data)
+        ai_cpu_op_data = AICpuFromTsCalculator.state_to_timeline(ai_cpu_data)
         if not ai_core_op_data and not ai_cpu_op_data:
             logging.error("Invalid compute op data from hwts and ts_track!")
             return False
@@ -80,20 +81,3 @@ class ParallelParser(IParser, MsMultiProcess):
             return False
         self._merged_compute_op_data = SectionCalculator.merge_continuous_intervals(ai_core_op_data + ai_cpu_op_data)
         return True
-
-    def _get_ai_cpu_op_data(self: any, ai_cpu_data: list) -> list:
-        result = []
-        if not ai_cpu_data:
-            return result
-        start_stream_task_dict = {}
-        for data in ai_cpu_data:
-            stream_task_id = f'{data.stream_id}-{data.task_id}'
-            if data.start_time == Constant.DEFAULT_INVALID_VALUE:
-                start_data = start_stream_task_dict.get(stream_task_id)
-                if start_data:
-                    data.start_time = start_data.start_time
-                    result.append(data)
-                    start_stream_task_dict.pop(stream_task_id, None)
-            else:
-                start_stream_task_dict[stream_task_id] = data
-        return result
