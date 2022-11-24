@@ -87,13 +87,13 @@ class ParallelParser(IParser, MsMultiProcess):
             return result
         start_stream_task_dict = {}
         for data in ai_cpu_data:
-            stream_task_id = "{}-{}".format(data.stream_id, data.task_id)
+            stream_task_id = f'{data.stream_id}-{data.task_id}'
             if data.start_time == Constant.DEFAULT_INVALID_VALUE:
                 start_data = start_stream_task_dict.get(stream_task_id)
                 if start_data:
                     data.start_time = start_data.start_time
-                    result.append(start_data)
-                start_stream_task_dict.pop(stream_task_id)
+                    result.append(data)
+                    start_stream_task_dict.pop(stream_task_id, None)
             else:
                 start_stream_task_dict[stream_task_id] = data
         return result
