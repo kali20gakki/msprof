@@ -37,7 +37,7 @@ class TestClusterParallelParser(unittest.TestCase):
         with mock.patch(NAMESPACE + ".ClusterHCCLViewModel.get_hccl_op_data", return_value=[[1, 2]]), \
                 mock.patch(NAMESPACE + ".HwtsIterViewModel.get_ai_core_op_data", return_value=[[3, 4]]), \
                 mock.patch(NAMESPACE + ".TsTrackViewModel.get_ai_cpu_data", return_value=[[3, 4]]), \
-                mock.patch(NAMESPACE + ".ParallelParser._get_ai_cpu_op_data", return_value=[[3, 4]]), \
+                mock.patch(NAMESPACE + ".AICpuFromTsCalculator.state_to_timeline", return_value=[[3, 4]]), \
                 mock.patch(NAMESPACE + ".TsTrackViewModel.get_iter_time_data", return_value=[[5, 6]]), \
                 mock.patch(NAMESPACE + ".SectionCalculator.merge_continuous_intervals"), \
                 mock.patch(NAMESPACE + ".SectionCalculator.compute_overlap_time", side_effect=self.SIDE_EFFECT):
@@ -63,7 +63,7 @@ class TestClusterParallelParser(unittest.TestCase):
         with mock.patch(NAMESPACE + ".ClusterHCCLViewModel.get_hccl_op_data", return_value=[[1, 2]]), \
                 mock.patch(NAMESPACE + ".HwtsIterViewModel.get_ai_core_op_data", return_value=[]), \
                 mock.patch(NAMESPACE + ".TsTrackViewModel.get_ai_cpu_data", return_value=[]), \
-                mock.patch(NAMESPACE + ".ParallelParser._get_ai_cpu_op_data", return_value=[[3, 4]]):
+                mock.patch(NAMESPACE + ".AICpuFromTsCalculator.state_to_timeline", return_value=[[3, 4]]):
             check = ParallelParser(self.FILE_LIST_2, self.SAMPLE_CONFIG)
             check.ms_run()
         with ParallelViewModel(self.DIR_PATH) as _model:
@@ -76,7 +76,7 @@ class TestClusterParallelParser(unittest.TestCase):
         with mock.patch(NAMESPACE + ".ClusterHCCLViewModel.get_hccl_op_data", return_value=[[1, 2]]), \
                 mock.patch(NAMESPACE + ".HwtsIterViewModel.get_ai_core_op_data", return_value=[[3, 4]]), \
                 mock.patch(NAMESPACE + ".TsTrackViewModel.get_ai_cpu_data", return_value=[[3, 4]]), \
-                mock.patch(NAMESPACE + ".ParallelParser._get_ai_cpu_op_data", return_value=[[3, 4]]), \
+                mock.patch(NAMESPACE + ".AICpuFromTsCalculator.state_to_timeline", return_value=[[3, 4]]), \
                 mock.patch(NAMESPACE + ".TsTrackViewModel.get_iter_time_data", return_value=[]):
             check = ParallelParser(self.FILE_LIST_2, self.SAMPLE_CONFIG)
             check.ms_run()
