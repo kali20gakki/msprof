@@ -40,20 +40,18 @@ class ParallelViewModel(ViewModel):
         if rank_id == Constant.NA:
             rank_id = "null"
         if tabel_name == DBNameConstant.TABLE_CLUSTER_DATA_PARALLEL:
-            sql = "select {0} rank_id, {1} device_id, t1.model_id, t1.index_id, " \
-                  "round(t2.step_time*{2}, 0), " \
-                  "round(t2.computation_time*{2}, 0), " \
-                  "round(t1.pure_communication_time*{2}, 0), " \
-                  "round(t1.communication_time*{2}, 0), " \
-                  "round(t1.interval_of_communication_time*{2}, 0), " \
-                  "t1.hccl_op_num " \
-                  "from (select t.model_id, t.index_id, sum(t.communication_time) communication_time, " \
-                  "sum(t.pure_communication_time) pure_communication_time, count(0) hccl_op_num, " \
-                  "sum(t.start_time-t.last_time)interval_of_communication_time from (select model_id, index_id, " \
-                  "lag(end_time,1,start_time) over(partition by model_id, index_id order by start_time) last_time, " \
-                  "start_time, end_time, end_time-start_time communication_time, " \
-                  "end_time-start_time-overlap_time pure_communication_time from {3})t group by t.model_id, " \
-                  "t.index_id)t1 left join {4} t2 on t1.model_id=t2.model_id and t1.index_id=t2.index_id".format(
+            sql = "SELECT {0} rank_id, {1} device_id, t1.model_id, t1.index_id, " \
+                 "round( t2.step_time*{2}, 0 ), " \
+                 "round( t2.computation_time*{2}, 0 ), " \
+                 "round( t1.pure_communication_time*{2}, 0 )," \
+                 "round( t1.communication_time*{2}, 0 )," \
+                 "round( (t1.all_communication_time-t1.communication_time)*{2}, 0 )," \
+                 "t1.hccl_op_num FROM(" \
+                 "SELECT model_id, index_id, sum( end_time - start_time) communication_time, " \
+                 "sum( end_time - start_time - overlap_time) pure_communication_time, " \
+                 "max(end_time) - min(start_time) all_communication_time, count(0) hccl_op_num " \
+                 "FROM {3} GROUP BY model_id, index_id ) t1 LEFT JOIN {4} t2 " \
+                 "ON t1.model_id = t2.model_id AND t1.index_id = t2.index_id".format(
                 rank_id, device_id, freq_to_us,
                 DBNameConstant.TABLE_HCCL_OPERATOR_OVERLAP,
                 DBNameConstant.TABLE_COMPUTATION_TIME)

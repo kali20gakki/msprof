@@ -35,12 +35,12 @@ class AICpuFromTsCalculator(MsMultiProcess):
         for stream_id, task_id, timestamp, task_state in ai_cpu_with_state:
             task_state_handler = stream_task_group.setdefault(
                 (stream_id, task_id), TaskStateHandler(stream_id, task_id))
-            task_state_handler.process_record(timestamp, task_state)
+            task_state_handler.process_record(float(timestamp), task_state)
 
         aicpu_timeline_list = []
         for task_state_handler in stream_task_group.values():
             aicpu_timeline_list.extend(task_state_handler.task_timeline_list)
-        aicpu_timeline_list.sort(key=lambda task_timeline: task_timeline.end)
+        aicpu_timeline_list.sort(key=lambda task_timeline: task_timeline.end_time)
         return aicpu_timeline_list
 
     def ms_run(self: any) -> None:
@@ -63,7 +63,7 @@ class AICpuFromTsCalculator(MsMultiProcess):
 
         for aicpu_timeline in aicpu_timeline_list:
             aicpu_feature = (
-                aicpu_timeline.stream_id, aicpu_timeline.task_id, aicpu_timeline.start,
-                aicpu_timeline.end, AICpuFromTsCollector.AI_CPU_TYPE
+                aicpu_timeline.stream_id, aicpu_timeline.task_id, aicpu_timeline.start_time,
+                aicpu_timeline.end_time, AICpuFromTsCollector.AI_CPU_TYPE
             )
             self._aicpu_collector.filter_aicpu(aicpu_feature)

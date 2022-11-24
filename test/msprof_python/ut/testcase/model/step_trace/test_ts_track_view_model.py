@@ -22,10 +22,10 @@ class TestTsTrackViewModel(unittest.TestCase):
             with TsTrackViewModel("test") as _model:
                 self.assertEqual(_model.get_hccl_operator_exe_data(), [[1]])
 
-    def test_get_ai_cpu_op_data(self):
+    def test_get_ai_cpu_data(self):
         with mock.patch(NAMESPACE + ".DBManager.fetch_all_data", return_value=[[2]]):
             with TsTrackViewModel("test") as _model:
-                self.assertEqual(_model.get_ai_cpu_op_data(), [[2]])
+                self.assertEqual(_model.get_ai_cpu_data(), [[2]])
 
     def test_get_iter_time_data(self):
         with mock.patch(NAMESPACE + ".DBManager.fetch_all_data", return_value=[[3]]):

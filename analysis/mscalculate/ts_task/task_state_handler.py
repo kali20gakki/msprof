@@ -11,8 +11,8 @@ class TaskTimeline:
     def __init__(self: any, stream_id: int, task_id: int) -> None:
         self._stream_id = stream_id
         self._task_id = task_id
-        self.start = None
-        self.end = None
+        self.start_time = None
+        self.end_time = None
 
     @property
     def stream_id(self: any) -> int:
@@ -69,8 +69,8 @@ class TaskStateHandler:
         """
         if task_state == self.START_TAG:
             self.new_task = TaskTimeline(self.stream_id, self.task_id)
-            self.new_task.start = timestamp
+            self.new_task.start_time = timestamp
 
         if task_state == self.END_TAG and self.new_task:
-            self.new_task.end = timestamp
+            self.new_task.end_time = timestamp
             self.task_timeline_list.append(self.new_task)

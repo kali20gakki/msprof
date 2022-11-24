@@ -136,7 +136,7 @@ class ClusterParallelViewModel(ViewModel):
         if avg_stage_time == Constant.DEFAULT_INVALID_VALUE:
             return []
         sql = "SELECT avg( t.ratio ) avg_ratio, avg( t.ratio1 ) avg_ratio1, " \
-              "sum(case when t.stage_time >= {0} * 0.8 AND t.stage_time <= {0} * 1.2 THEN 1 ELSE 0 END ) num " \
+              "sum(case when t.stage_time >= {0} * 0.8 AND t.stage_time <= {0} * 1.2 THEN 0 ELSE 1 END ) num " \
               "FROM( SELECT rank_id, device_id, " \
               "sum(pure_communication_time_only_revice) / sum(pure_communication_time+computation_time) ratio, " \
               "sum(pure_communication_time_except_revice) / sum(pure_communication_time+computation_time) ratio1, " \

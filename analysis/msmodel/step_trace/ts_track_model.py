@@ -115,8 +115,9 @@ class TsTrackViewModel(ViewModel):
     def get_hccl_operator_exe_data(self) -> list:
         if not self.attach_to_db(DBNameConstant.DB_GE_INFO):
             return []
-        sql = "SELECT t1.model_id, t1.index_id, t1.stream_id, t1.task_id, t1.tag_id, t1.timestamp, t2.op_name, " \
-              "t2.op_type FROM ( SELECT model_id, index_id, tag_id, stream_id, task_id-1 AS task_id, timestamp " \
+        sql = "SELECT t1.model_id model_id, t1.index_id index_id, t1.stream_id stream_id, t1.task_id task_id, " \
+              "t1.tag_id tag_id, t1.timestamp timestamp, t2.op_name op_name, t2.op_type op_type " \
+              "FROM ( SELECT model_id, index_id, tag_id, stream_id, task_id-1 AS task_id, timestamp " \
               "FROM {} WHERE tag_id>=10000 ) t1 LEFT JOIN ( " \
               "SELECT model_id, index_id, stream_id, task_id, op_name, op_type FROM {} WHERE task_type='{}' ) t2 " \
               "ON t1.model_id=t2.model_id AND (t1.index_id=t2.index_id OR t2.index_id=0 ) " \
@@ -124,18 +125,11 @@ class TsTrackViewModel(ViewModel):
             DBNameConstant.TABLE_STEP_TRACE, DBNameConstant.TABLE_GE_TASK, Constant.TASK_TYPE_HCCL)
         return DBManager.fetch_all_data(self.cur, sql, dto_class=StepTraceGeDto)
 
-    def get_ai_cpu_op_data(self) -> list:
-        sql = "select t1.stream_id, t1.task_id, t1.grp, " \
-              "sum(case when t1.task_state=1 then t1.timestamp else 0 end) as start_time, " \
-              "sum(case when t1.task_state=2 then t1.timestamp else 0 end) as end_time " \
-              "from (select t.timestamp, t.stream_id, t.task_id, t.task_state, " \
-              "row_number() over(partition by t.stream_id, t.task_id,t.task_state order by t.timestamp) as grp " \
-              "from (select timestamp,stream_id,task_id,task_state,  " \
-              "lag(task_state, 1, 2) over(partition by stream_id,task_id order by timestamp) state " \
-              "from {} where task_type=1 and task_state <>0)t where t.task_state+t.state=3)t1 " \
-              "group by t1.stream_id, t1.task_id, t1.grp".format(
+    def get_ai_cpu_data(self) -> list:
+        sql = "SELECT stream_id, task_id, timestamp, task_state FROM {} where " \
+              "task_type=1 and (task_state=1 or task_state=2) order by timestamp".format(
             DBNameConstant.TABLE_TASK_TYPE)
-        return DBManager.fetch_all_data(self.cur, sql, dto_class=TimeSectionDto)
+        return DBManager.fetch_all_data(self.cur, sql)
 
     def get_iter_time_data(self) -> list:
         sql = "select model_id, index_id ,step_start as start_time, step_end as end_time " \

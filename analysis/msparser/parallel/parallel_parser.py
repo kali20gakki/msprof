@@ -4,10 +4,12 @@
 
 import logging
 
+from common_func.constant import Constant
 from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.section_calculator import SectionCalculator
+from mscalculate.ts_task.ai_cpu.aicpu_from_ts import AICpuFromTsCalculator
 from msmodel.iter_rec.iter_rec_model import HwtsIterViewModel
 from msmodel.parallel.cluster_hccl_model import ClusterHCCLViewModel
 from msmodel.parallel.parallel_model import ParallelModel
@@ -68,8 +70,9 @@ class ParallelParser(IParser, MsMultiProcess):
         with HwtsIterViewModel(self._project_path) as _model:
             ai_core_op_data = _model.get_ai_core_op_data()
         with TsTrackViewModel(self._project_path) as _model:
-            ai_cpu_op_data = _model.get_ai_cpu_op_data()
+            ai_cpu_data = _model.get_ai_cpu_data()
             self._iter_time_data = _model.get_iter_time_data()
+        ai_cpu_op_data = AICpuFromTsCalculator.state_to_timeline(ai_cpu_data)
         if not ai_core_op_data and not ai_cpu_op_data:
             logging.error("Invalid compute op data from hwts and ts_track!")
             return False
