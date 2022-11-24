@@ -40,7 +40,7 @@ class ParallelViewModel(ViewModel):
         if rank_id == Constant.NA:
             rank_id = "null"
         if tabel_name == DBNameConstant.TABLE_CLUSTER_DATA_PARALLEL:
-            sql ="SELECT {0} rank_id, {1} device_id, t1.model_id, t1.index_id, " \
+            sql = "SELECT {0} rank_id, {1} device_id, t1.model_id, t1.index_id, " \
                  "round( t2.step_time*{2}, 0 ), " \
                  "round( t2.computation_time*{2}, 0 ), " \
                  "round( t1.pure_communication_time*{2}, 0 )," \
