@@ -672,8 +672,8 @@ class TablesConfig(MetaConfig):
         , 'L2CacheSampleMap': [
             ('read_count', 'INTEGER, null'),
             ('write_count', 'INTEGER, null'),
-            ('allocate', 'INTEGER, null'),
             ('victim', 'INTEGER, null'),
+            ('allocate', 'INTEGER, null')
         ]
         , 'HCCLAllReduceMap': [
             ('op_name', 'TEXT, null'),
