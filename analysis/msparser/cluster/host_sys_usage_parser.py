@@ -13,6 +13,7 @@ from common_func.config_mgr import ConfigMgr
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
+from common_func.file_manager import FileManager
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
@@ -47,6 +48,7 @@ class HostSysUsageParser:
         cpu_sampling_interval = sample_config.get(StrConstant.HOST_CPU_SAMPLING_INTV, 0)
         mem_sampling_interval = sample_config.get(StrConstant.HOST_MEM_SAMPLING_INTV, 0)
         if cpu_sampling_interval == 0 or mem_sampling_interval == 0:
+            logging.error("Get sampling interval fail.")
             return ()
 
         InfoConfReader().load_info(host_path)
@@ -203,19 +205,6 @@ class HostSysUsageParser:
             detail_data.append(OrderedDict(zip(tags, _data)))
         return {"info": base_info, "data": detail_data}
 
-    def _save_to_json_file(self: any, datas: list, json_file_name: str) -> None:
-        json_file_path = PathManager.get_query_result_path(self.collection_path, json_file_name)
-        try:
-            with os.fdopen(os.open(json_file_path, Constant.WRITE_FLAGS, Constant.WRITE_MODES), "w") as _json_file:
-                os.chmod(json_file_path, NumberConstant.FILE_AUTHORITY)
-                json.dump(datas, _json_file)
-        except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
-            logging.error("Save query data to %s fail. error info: %s", json_file_name, str(err))
-            print_msg(json.dumps({"status": NumberConstant.ERROR,
-                                  "info": "Save query data to {} fail.".format(json_file_name), "data": ""}))
-        print_msg(json.dumps({"status": NumberConstant.SUCCESS,
-                              "info": "Save query data to {} success.".format(json_file_name), "data": ""}))
-
     def _get_all_pid(self: any) -> tuple:
         cpu_pids = self.cpu_usage_model.get_all_pid()
         cpu_pids = list(set({d[0] for d in cpu_pids}))
@@ -268,4 +257,4 @@ class HostSysUsageParser:
             if not handled_data:
                 logging.warning("Process data fail, not save %s.", params["save_file"])
                 continue
-            self._save_to_json_file(handled_data, params["save_file"])
+            FileManager.storage_query_result_json_file(self.collection_path, handled_data, params["save_file"])
