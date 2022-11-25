@@ -325,7 +325,7 @@ void ParamsAdapter::SetHostSysUsageParams(std::array<std::string, INPUT_CFG_MAX>
 {
     std::vector<std::string> hostSysUsageList = Utils::Split(paramContainer[INPUT_CFG_HOST_SYS_USAGE], false, "", ",");
     int samplingInterval = paramContainer[INPUT_CFG_HOST_SYS_USAGE_FREQ].empty() ?
-            DEFAULT_PROFILING_INTERVAL_100MS : (THOUSAND / std::stoi(paramContainer[INPUT_CFG_HOST_SYS_USAGE_FREQ]));
+            DEFAULT_PROFILING_INTERVAL_20MS : (THOUSAND / std::stoi(paramContainer[INPUT_CFG_HOST_SYS_USAGE_FREQ]));
     if (paramContainer[INPUT_CFG_HOST_SYS_PID].empty()) {
         for (auto entry : hostSysUsageList) {
             if (entry.compare(HOST_SYS_CPU) == 0) {
