@@ -222,7 +222,6 @@ using TsTsFwProfileConfigT = struct TagTsTsFwProfileConfig {
 };
 
 using StarsSocLogConfigT = struct TagStarsSocLogConfig {
-    uint32_t pid;
     uint32_t acsq_task;         // 1-enable,2-disable
     uint32_t acc_pmu;           // 1-enable,2-disable
     uint32_t cdqm_reg;          // 1-enable,2-disable
@@ -234,20 +233,12 @@ using StarsSocLogConfigT = struct TagStarsSocLogConfig {
     uint32_t sdma_dmu;          // 1-enable,2-disable
 };
 
-using StarsBlockLogConfigT = struct TagStarsBlockLogeConfig {
-    uint32_t pid;
-    uint32_t topic_block;       // 1-enable,2-disable
-    uint32_t cdqm_block;        // 1-enable,2-disable
-    uint32_t cpu_split_block;   // 1-enable,2-disable
-};
-
 using CommonSampleSwitchT = struct TagSocProfileConfig {
     uint32_t innerSwitch;   // 1-enable,2-disable
     uint32_t period;        // ms
 };
 
 using StarsSocProfileConfigT = struct TagStarsSocProfileConfig {
-    uint32_t pid;
     CommonSampleSwitchT acc_pmu;
     CommonSampleSwitchT on_chip;
     CommonSampleSwitchT inter_die;
@@ -266,12 +257,10 @@ using StarsAiCoreProfileConfigT = struct TagStarsAiCoreConfig {
 
 using FftsProfileConfigT = struct TagFftsProfileConfig {
     uint32_t cfgMode;      // 0-none, 1-aic, 2-aiv, 3-aic&aiv
-    uint32_t pid;          // host pid
     StarsAiCoreProfileConfigT aiEventCfg[FFTS_PROF_MODE_BULT];
 };
 
 using BiuProfileConfigT = struct TagBiuProfileConfig {
-    int32_t pid;          // host pid
     uint32_t period;
 };
 

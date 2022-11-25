@@ -169,6 +169,7 @@ void ParamsAdapterMsprof::SetDefaultParamsApp()
         PROFILING_MODE_TASK_BASED : paramContainer_[INPUT_CFG_COM_AIV_MODE];
     paramContainer_[INPUT_CFG_COM_AIV_METRICS] = (paramContainer_[INPUT_CFG_COM_AIV_METRICS].empty()) ?
         PIPE_UTILIZATION : paramContainer_[INPUT_CFG_COM_AIV_METRICS];
+    SetDefaultAivParams(paramContainer_);
 }
 
 int ParamsAdapterMsprof::CheckMsprofMode(const std::unordered_map<int, std::pair<MsprofCmdInfo, std::string>> &argvMap)

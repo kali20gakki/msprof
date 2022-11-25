@@ -291,8 +291,7 @@ void ArgsManager::AddAicpuArgs()
 
 void ArgsManager::AddAivArgs()
 {
-    if (true || driverOnline_ && (ConfigManager::instance()->GetPlatformType() != PlatformType::MDC_TYPE &&
-        ConfigManager::instance()->GetPlatformType() != PlatformType::CHIP_V4_1_0)) {
+    if (true || driverOnline_ && (ConfigManager::instance()->GetPlatformType() != PlatformType::MDC_TYPE)) {
         return;
     }
     Args aiv = {"ai-vector-core",
