@@ -56,18 +56,18 @@ class ClusterStepTraceParser(IParser):
         sql = "select device_id, " \
               "model_id, " \
               "iteration_id, " \
-              "(case when FP_start={1} then {1} else FP_start*{2} end), " \
-              "(case when BP_end={1} then {1} else BP_end*{2} end), " \
-              "(case when iteration_end={1} then {1} else iteration_end*{2} end), " \
+              "FP_start, " \
+              "BP_end, " \
+              "iteration_end, " \
               "(case when iteration_time={1} then {1} else iteration_time*{2} end), " \
               "(case when fp_bp_time={1} then {1} else fp_bp_time*{2} end), " \
               "(case when grad_refresh_bound={1} then {1} else grad_refresh_bound*{2} end), " \
               "(case when data_aug_bound={1} then {1} else data_aug_bound*{2} end) " \
               "from {3}".format(
-            NumberConstant.DEFAULT_MODEL_ID,
-            NumberConstant.NULL_NUMBER,
-            StepTraceConstant.syscnt_to_micro(),
-            DBNameConstant.TABLE_TRAINING_TRACE)
+               NumberConstant.DEFAULT_MODEL_ID,
+               NumberConstant.NULL_NUMBER,
+               StepTraceConstant.syscnt_to_micro(),
+               DBNameConstant.TABLE_TRAINING_TRACE)
         return sql
 
     @staticmethod
@@ -182,8 +182,25 @@ class ClusterStepTraceParser(IParser):
         sql_for_step_trace = self._sql_for_step_trace()
         step_trace_data = self._fetch_data_from_database(project_path, DBNameConstant.DB_TRACE,
                                                          DBNameConstant.TABLE_TRAINING_TRACE, sql_for_step_trace)
+        step_trace_data = self._syscnt_to_timestamp_for_step_trace_data(step_trace_data)
         if not step_trace_data:
             logging.error("Can't query step trace data.")
             return step_trace_data
         step_trace_data = self._append_ge_model_tag(step_trace_data, model_ids)
+        return step_trace_data
+
+    @staticmethod
+    def _syscnt_to_timestamp_for_step_trace_data(step_trace_data: list) -> list:
+        for idx, single_step_trace_data in enumerate(step_trace_data):
+            result_list = []
+            syscnt_index = list(range(3, 6))
+            for idy, item in enumerate(single_step_trace_data):
+                # id and duration or item is Null
+                if idy not in syscnt_index or item == NumberConstant.NULL_NUMBER:
+                    result_list.append(item)
+                # syscnt
+                else:
+                    # syscnt to timestamp
+                    result_list.append(InfoConfReader().time_from_syscnt(item, NumberConstant.MICRO_SECOND))
+            step_trace_data[idx] = tuple(result_list)
         return step_trace_data
