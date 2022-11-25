@@ -191,9 +191,9 @@ class ClusterStepTraceParser(IParser):
 
     @staticmethod
     def _syscnt_to_timestamp_for_step_trace_data(step_trace_data: list) -> list:
+        syscnt_index = list(range(3, 6))
         for idx, single_step_trace_data in enumerate(step_trace_data):
             result_list = []
-            syscnt_index = list(range(3, 6))
             for idy, item in enumerate(single_step_trace_data):
                 # id and duration or item is Null
                 if idy not in syscnt_index or item == NumberConstant.NULL_NUMBER:
