@@ -11,36 +11,32 @@ class StarsConfig(MetaConfig):
             ('fmt', '000000, 000001'),
             ('db', 'acsq.db'),
             ('table', 'AcsqTask'),
-            ('db_status', '')
+            ('is_db_needed_clear', '1')
         ]
         , 'FftsLogParser': [
             ('fmt', '100010, 100011'),
             ('db', 'soc_log.db'),
             ('table', 'FftsLog'),
-            ('db_status', '')
+            ('is_db_needed_clear', '1')
         ]
         , 'AccPmuParser': [
             ('fmt', '011010'),
             ('db', 'acc_pmu.db'),
-            ('table', 'AccPmuOrigin'),
-            ('db_status', '1')
+            ('table', 'AccPmuOrigin')
         ]
         , 'InterSocParser': [
             ('fmt', '011100'),
             ('db', 'soc_profiler.db'),
-            ('table', 'InterSoc'),
-            ('db_status', '1')
+            ('table', 'InterSoc')
         ]
         , 'StarsChipTransParser': [
             ('fmt', '011011'),
             ('db', 'chip_trans.db'),
-            ('table', 'PaLinkInfo,PcieInfo'),
-            ('db_status', '1')
+            ('table', 'PaLinkInfo,PcieInfo')
         ]
         , 'LowPowerParser': [
             ('fmt', '011101'),
             ('db', 'lowpower.db'),
-            ('table', 'LowPower'),
-            ('db_status', '1')
+            ('table', 'LowPower')
         ]
     }
