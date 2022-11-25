@@ -253,12 +253,12 @@ class CoreCpuReduceViewer:
     @classmethod
     def _get_acsq_opname(cls: any, sql_path: str) -> dict:
         op_names = {}
-        sql = "SELECT op_name, stream_id, task_id FROM {} ".format(DBNameConstant.TABLE_GE_TASK)
+        sql = "SELECT op_name, stream_id, task_id FROM {} ".format(DBNameConstant.TABLE_SUMMARY_GE)
         conn_ge, cur_ge = DBManager.check_connect_db_path(
-            os.path.join(sql_path, DBNameConstant.DB_GE_INFO))
+            os.path.join(sql_path, DBNameConstant.DB_AICORE_OP_SUMMARY))
         try:
             if conn_ge and cur_ge:
-                if not DBManager.judge_table_exist(cur_ge, DBNameConstant.TABLE_GE_TASK):
+                if not DBManager.judge_table_exist(cur_ge, DBNameConstant.TABLE_SUMMARY_GE):
                     return op_names
                 ge_datas = DBManager.fetch_all_data(cur_ge, sql)
                 if not ge_datas:

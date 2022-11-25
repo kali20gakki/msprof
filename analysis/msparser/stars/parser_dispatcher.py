@@ -18,6 +18,8 @@ class ParserDispatcher:
     The mapping relationship between processor, fmt, db and table is recorded in the stars configuration file.
     """
 
+    IS_DB_NEEDED_CLEAR = 'is_db_needed_clear'
+
     def __init__(self: any, result_dir: str) -> None:
         self.parser_map = {}
         self.parser_list = []
@@ -41,7 +43,10 @@ class ParserDispatcher:
         for parser in self.cfg_parser.sections():
             fmts = self.cfg_parser.get(parser, StrConstant.CONFIG_FMT).split(",")
             db_name = self.cfg_parser.get(parser, StrConstant.CONFIG_DB)
-            if os.path.exists(PathManager.get_db_path(self.result_dir, db_name)):
+            is_db_needed_clear = 0
+            if self.cfg_parser.has_option(parser, self.IS_DB_NEEDED_CLEAR):
+                is_db_needed_clear = self.cfg_parser.get(parser, self.IS_DB_NEEDED_CLEAR)
+            if os.path.exists(PathManager.get_db_path(self.result_dir, db_name)) and not is_db_needed_clear:
                 os.remove(PathManager.get_db_path(self.result_dir, db_name))
             table_list = self.cfg_parser.get(parser, StrConstant.CONFIG_TABLE).split(",")
             if hasattr(self.modules, parser):
