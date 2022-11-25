@@ -30,7 +30,7 @@ class TuningControl:
             CommonProfRule.RESULT_OPERATOR_METRICS: self._operator_metrics_tuning
         }
 
-    def tuning_callback(self: any, **param: dict) -> None:
+    def add_tuning_result(self: any, **param: dict) -> None:
         """
         entry of tuning callback
         """

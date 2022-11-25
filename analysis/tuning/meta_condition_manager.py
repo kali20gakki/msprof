@@ -277,7 +277,7 @@ class NetConditionManager(MetaConditionManager):
         """
         op_names = []
         for operator in operator_data:
-            ops = super().cal_normal_condition(operator.operator_data, condition)
+            ops = super().cal_normal_condition(operator, condition)
             if ops:
                 op_names.extend(ops)
         return op_names
@@ -289,7 +289,7 @@ class NetConditionManager(MetaConditionManager):
         """
         op_names = []
         for operator in operator_data:
-            ops = super().cal_formula_condition(operator.operator_data, condition)
+            ops = super().cal_formula_condition(operator, condition)
             if ops:
                 op_names.extend(ops)
         return op_names
@@ -315,22 +315,22 @@ class NetConditionManager(MetaConditionManager):
         else:
             op_names = [''] * len(operator_data_list)
             for index, operator in enumerate(operator_data_list):
-                op_names[index] = operator.operator_data.get('op_name', '')
+                op_names[index] = operator.get('op_name', '')
         op_names_set = set(op_names)
         compare_keys = condition.get(CommonProfRule.CONDITION_COMPARE, [])
         base = 0
         for operator in operator_data_list:
             for key in compare_keys:
-                base += operator.operator_data.get(key, 0)
+                base += operator.get(key, 0)
         cmp_mode = condition.get(CommonProfRule.CONDITION_CMP, '>')
         cpm_threshold = float(condition.get(CommonProfRule.CONDITION_THRESHOLD, 0))
         keys = condition.get(CommonProfRule.CONDITION_ACCUMULATE)
         result = 0
         for operator in operator_data_list:
-            if operator.operator_data.get('op_name', '') not in op_names_set:
+            if operator.get('op_name', '') not in op_names_set:
                 continue
             for key in keys:
-                result += operator.operator_data.get(key, 0)
+                result += operator.get(key, 0)
         if NumberConstant.is_zero(base):
             result = 0
             logging.warning("The accumulated result of comparison fields is equal to 0.")
