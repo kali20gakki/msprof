@@ -13,6 +13,7 @@ from tuning.tuning_control import TuningControl
 class RuleManager:
     """
     rule manager
+    rename the file in the future
     """
 
     def __init__(self: any, project: str, device_id: str, iter_id: str) -> None:
@@ -36,10 +37,7 @@ class RuleManager:
     def _load_rules(cls: any) -> list:
         rules_json = ConfigManager.get(ConfigManager.PROF_RULE).get_data()
         support_rules = set(cls._get_support_rules())
-        rules = []
-        for rule in rules_json:
-            if rule.get(CommonProfRule.RULE_ID, '') in support_rules:
-                rules.append(rule)
+        rules = [rule for rule in rules_json if rule.get(CommonProfRule.RULE_ID, '') in support_rules]
         return rules
 
     def run(self: any) -> None:

@@ -3,5 +3,8 @@
 # Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 
 class MetaMetric:
+    """
+    delete the file in the future
+    """
     def __init__(self: any) -> None:
         pass

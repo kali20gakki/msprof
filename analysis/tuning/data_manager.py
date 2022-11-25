@@ -40,6 +40,7 @@ class DataManager:
 
 class DataLoader:
     """
+    move to new file in the future
     get operator data by infer id
     """
 
