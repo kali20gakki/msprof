@@ -88,49 +88,24 @@ class HwtsCalculator(ICalculator, MsMultiProcess):
         prepare data for tasktime table
         :return:
         """
-        prep = {}
-        warning_status = False
+        prep = []
+        start_log_dict = {}
         for task in self._log_data:
-            index = ",".join(map(str, [task.stream_id, task.task_id]))
-            task_value = prep.get(index, {})
-            task_satrt_list = task_value.get(self.HWTS_TASK_START, [])
-            task_end_list = task_value.get(self.HWTS_TASK_END, [])
-            task_type_list = task_value.get(self.HWTS_TASK_TYPE, [])
-            if self.HWTS_TASK_START == task.sys_tag:
-                if len(task_satrt_list) > len(task_end_list):
-                    task_satrt_list.pop()
-                    logging.debug("stream id: %s, task id: %s is no end task, index of the stream and task is %s",
-                                  task.stream_id, task.task_id, str(len(task_satrt_list)))
-                    warning_status = True
-                task_satrt_list.append(task.sys_cnt)
-            elif self.HWTS_TASK_END == task.sys_tag:
-                if len(task_satrt_list) == len(task_end_list):
-                    continue
-                task_end_list.append(task.sys_cnt)
-                task_type_list.append(task.task_type)
+            stream_task_id = f'{str(task.stream_id)}-{str(task.task_id)}'
+            if task.sys_tag == self.HWTS_TASK_END:
+                start_log = start_log_dict.get(stream_task_id)
+                setattr(task, "start_time",
+                        start_log.sys_cnt if start_log else NumberConstant.INVALID_OP_EXE_TIME)
+                prep.append(task)
+                start_log_dict.pop(stream_task_id, None)
             else:
-                logging.error("invalid sys tag of hwts: %s", task.sys_tag)
-            task_value.update({self.HWTS_TASK_START: task_satrt_list,
-                               self.HWTS_TASK_END: task_end_list,
-                               self.HWTS_TASK_TYPE: task_type_list})
-            prep.update({index: task_value})
-        if warning_status:
-            logging.warning("Some hwts data are missing, set the log level to debug "
-                            "and run again to know which tasks are missing.")
+                start_log_dict[stream_task_id] = task
         train_data = []
-
-        for index in prep:
-            _index_value = prep.get(index)
-            while _index_value.get(self.HWTS_TASK_START) and _index_value.get(self.HWTS_TASK_END):
-                data_info = tuple(list(index.split(",")) + [
-                    _index_value[self.HWTS_TASK_START].pop(0),
-                    _index_value[self.HWTS_TASK_END].pop(0)])
-
-                train_data.append(data_info)
-
-                if not ChipManager().is_chip_v2():
-                    self._aicpu_collector.filter_aicpu(data_info + (_index_value[self.HWTS_TASK_TYPE].pop(0),))
-
+        for task in prep:
+            data_info = [task.stream_id, task.task_id, task.start_time, task.sys_cnt]
+            train_data.append(data_info)
+            if not ChipManager().is_chip_v2():
+                self._aicpu_collector.filter_aicpu(data_info + [task.task_type])
         if not ChipManager().is_chip_v2():
             self._aicpu_collector.save_aicpu()
         return sorted(train_data, key=lambda data: data[self.TASK_TIME_COMPLETE_INDEX])
@@ -193,18 +168,20 @@ class HwtsCalculator(ICalculator, MsMultiProcess):
                 index_id,
                 self._project_path)
 
+            result_data = []
             for index in range(min(len(batch_list), len(prep_data_res))):
                 batch = batch_list[index]
                 # type of batch is tuple
                 # 3 is end time
+                if prep_data_res[index][2] == NumberConstant.INVALID_OP_EXE_TIME:
+                    continue
+
                 model_id, index_id = task_dispatcher.dispatch(prep_data_res[index][3])
-                prep_data_res[index] = list(prep_data_res[index][:2]) + [
-                    InfoConfReader().time_from_syscnt(prep_data_res[index][2]),
-                    InfoConfReader().time_from_syscnt(prep_data_res[index][3]),
-                    index_id,
-                    model_id,
-                    batch[0]]
-        return prep_data_res
+                result_data.append(
+                    list(prep_data_res[index][:2]) + [InfoConfReader().time_from_syscnt(prep_data_res[index][2]),
+                                                      InfoConfReader().time_from_syscnt(prep_data_res[index][3]),
+                                                      index_id, model_id, batch[0]])
+        return result_data
 
     def _parse(self: any, all_log_bytes: bytes) -> None:
         for log_data in Utils.chunks(all_log_bytes, self.HWTS_LOG_SIZE):
