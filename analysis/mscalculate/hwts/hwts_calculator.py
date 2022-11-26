@@ -149,38 +149,39 @@ class HwtsCalculator(ICalculator, MsMultiProcess):
                     index_id,
                     model_id,
                     batch_id]
+            return prep_data_res
+
+        iter_range = MsprofIteration(self._project_path).get_parallel_iter_range(
+            index_id,
+            model_id)
+
+        if IterInfoManager.check_parallel(self._project_path):
+            batch_list = len(prep_data_res) * [[NumberConstant.DEFAULT_BATCH_ID]]
         else:
-            iter_range = MsprofIteration(self._project_path).get_parallel_iter_range(
-                index_id,
-                model_id)
+            with self._iter_model:
+                batch_list = self._iter_model.get_batch_list(
+                    DBNameConstant.TABLE_HWTS_BATCH, iter_range)
+        if len(batch_list) != len(prep_data_res):
+            logging.warning("hwts data can not match with batch id list.")
 
-            if IterInfoManager.check_parallel(self._project_path):
-                batch_list = len(prep_data_res) * [[NumberConstant.DEFAULT_BATCH_ID]]
-            else:
-                with self._iter_model:
-                    batch_list = self._iter_model.get_batch_list(
-                        DBNameConstant.TABLE_HWTS_BATCH, iter_range)
-            if len(batch_list) != len(prep_data_res):
-                logging.warning("hwts data can not match with batch id list.")
+        task_dispatcher = TaskDispatchModelIndex(
+            model_id,
+            index_id,
+            self._project_path)
 
-            task_dispatcher = TaskDispatchModelIndex(
-                model_id,
-                index_id,
-                self._project_path)
+        result_data = []
+        for index in range(min(len(batch_list), len(prep_data_res))):
+            batch = batch_list[index]
+            # type of batch is tuple
+            # 3 is end time
+            if prep_data_res[index][2] == NumberConstant.INVALID_OP_EXE_TIME:
+                continue
 
-            result_data = []
-            for index in range(min(len(batch_list), len(prep_data_res))):
-                batch = batch_list[index]
-                # type of batch is tuple
-                # 3 is end time
-                if prep_data_res[index][2] == NumberConstant.INVALID_OP_EXE_TIME:
-                    continue
-
-                model_id, index_id = task_dispatcher.dispatch(prep_data_res[index][3])
-                result_data.append(
-                    list(prep_data_res[index][:2]) + [InfoConfReader().time_from_syscnt(prep_data_res[index][2]),
-                                                      InfoConfReader().time_from_syscnt(prep_data_res[index][3]),
-                                                      index_id, model_id, batch[0]])
+            model_id, index_id = task_dispatcher.dispatch(prep_data_res[index][3])
+            result_data.append(
+                list(prep_data_res[index][:2]) + [InfoConfReader().time_from_syscnt(prep_data_res[index][2]),
+                                                  InfoConfReader().time_from_syscnt(prep_data_res[index][3]),
+                                                  index_id, model_id, batch[0]])
         return result_data
 
     def _parse(self: any, all_log_bytes: bytes) -> None:
