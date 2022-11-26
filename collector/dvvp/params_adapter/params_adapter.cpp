@@ -159,7 +159,7 @@ PlatformType ParamsAdapter::GetPlatform() const
 
 void ParamsAdapter::SetDefaultAivParams(std::array<std::string, INPUT_CFG_MAX> &paramContainer) const
 {
-    if (platformType_ == PlatformType::CHIP_V4_1_0) {
+    if (platformType_ == PlatformType::CHIP_V4_1_0 && paramContainer[INPUT_CFG_COM_AI_CORE].compare("on") == 0) {
         paramContainer[INPUT_CFG_COM_AI_VECTOR] = paramContainer[INPUT_CFG_COM_AI_CORE];
         paramContainer[INPUT_CFG_COM_AIV_FREQ] = paramContainer[INPUT_CFG_COM_AIC_FREQ];
         paramContainer[INPUT_CFG_COM_AIV_MODE] = paramContainer[INPUT_CFG_COM_AIC_MODE];
