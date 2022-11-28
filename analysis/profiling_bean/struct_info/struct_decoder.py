@@ -45,8 +45,8 @@ class StructDecoder:
         "StepTraceReader": StructFmt.STEP_TRACE_FMT,
         "StarsChipTransBean": StructFmt.CHIP_TRANS_FMT,
         "LowPowerBean": StructFmt.LOWPOWER_FMT,
-        "Monitor0Bean": StructFmt.MONITOR0_FMT,
-        "Monitor1Bean": StructFmt.MONITOR1_FMT,
+        "FlowBean": StructFmt.FLOW_FMT,
+        "CyclesBean": StructFmt.CYCLES_FMT,
         "TaskTypeBean": StructFmt.TS_TASK_TYPE_FMT
     }
 

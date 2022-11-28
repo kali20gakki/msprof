@@ -109,10 +109,10 @@ class BiuMonitorCalculator:
         self.save()
 
 
-class Monitor0Calculator(BiuMonitorCalculator):
+class MonitorFlowCalculator(BiuMonitorCalculator):
     def __init__(self: any, sample_config: dict) -> None:
         super().__init__(sample_config)
-        self.original_table_name = DBNameConstant.TABLE_MONITOR0
+        self.original_table_name = DBNameConstant.TABLE_FLOW_MONITOR
         self.table_name = DBNameConstant.TABLE_BIU_FLOW
         self.model = BiuPerfModel(self.project_path, [self.table_name])
 
@@ -137,10 +137,10 @@ class Monitor0Calculator(BiuMonitorCalculator):
                               flow_type_dict.get(flow_type), flow_type, unit_name, pid, tid, interval_start])
 
 
-class Monitor1Calculator(BiuMonitorCalculator):
+class MonitorCyclesCalculator(BiuMonitorCalculator):
     def __init__(self: any, sample_config: dict) -> None:
         super().__init__(sample_config)
-        self.original_table_name = DBNameConstant.TABLE_MONITOR1
+        self.original_table_name = DBNameConstant.TABLE_CYCLES_MONITOR
         self.table_name = DBNameConstant.TABLE_BIU_CYCLES
         self.model = BiuPerfModel(self.project_path, [self.table_name])
 
