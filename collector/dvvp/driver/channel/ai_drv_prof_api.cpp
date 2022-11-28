@@ -411,16 +411,15 @@ int DrvStarsSocLogStart(const DrvPeripheralProfileCfg &peripheralCfg,
     AI_DRV_CHANNEL profChannel = peripheralCfg.profChannel;
     StarsSocLogConfigT configP;
     (void)memset_s(&configP, sizeof(StarsSocLogConfigT), 0, sizeof(StarsSocLogConfigT));
-    configP.pid = static_cast<uint32_t>(MmGetPid());
 
     if (profileParams->stars_acsq_task.compare(analysis::dvvp::common::config::MSVP_PROF_ON) == 0) {
         configP.acsq_task = TS_PROFILE_COMMAND_TYPE_PROFILING_ENABLE;
         configP.ffts_thread_task = TS_PROFILE_COMMAND_TYPE_PROFILING_ENABLE;
         configP.acc_pmu = TS_PROFILE_COMMAND_TYPE_PROFILING_ENABLE;
     }
-    MSPROF_LOGI("DrvStarsSocLogStart pid:%u, profDeviceId=%d, profChannel=%d, acsq_task=%u, acc_pmu=%u, cdqm_reg=%u,"
+    MSPROF_LOGI("DrvStarsSocLogStart profDeviceId=%d, profChannel=%d, acsq_task=%u, acc_pmu=%u, cdqm_reg=%u,"
         "dvpp_vpc_block=%u, dvpp_jpegd_block=%u, dvpp_jpede_block=%u" "ffts_thread_task=%u, sdma_dmu=%u",
-        configP.pid, profDeviceId, static_cast<int>(profChannel), configP.acsq_task, configP.acc_pmu, configP.cdqm_reg,
+        profDeviceId, static_cast<int>(profChannel), configP.acsq_task, configP.acc_pmu, configP.cdqm_reg,
         configP.dvpp_vpc_block, configP.dvpp_jpegd_block, configP.dvpp_jpede_block,
         configP.ffts_thread_task, configP.sdma_dmu);
 
@@ -476,12 +475,11 @@ int DrvFftsProfileStart(const DrvPeripheralProfileCfg &peripheralCfg, const std:
     }
     (void)memset_s(configP, configSize, 0, configSize);
     configP->cfgMode = peripheralCfg.cfgMode; // 0-none,1-aic,2-aiv,3-aic&aiv
-    configP->pid = static_cast<uint32_t>(MmGetPid());
 
     DrvPackPmuParam(FFTS_PROF_MODE_AIC, *configP, peripheralCfg, aicCores, aicEvents);
     DrvPackPmuParam(FFTS_PROF_MODE_AIV, *configP, peripheralCfg, aivCores, aivEvents);
 
-    MSPROF_EVENT("DrvFftsProfileStart : cfgMode(%u), pid(%u)", configP->cfgMode, configP->pid);
+    MSPROF_EVENT("DrvFftsProfileStart : cfgMode(%u)", configP->cfgMode);
     struct prof_start_para profStartPara;
     profStartPara.channel_type = PROF_TS_TYPE;
     profStartPara.sample_period = 0;
@@ -504,10 +502,9 @@ int DrvFftsProfileStart(const DrvPeripheralProfileCfg &peripheralCfg, const std:
 int DrvBiuProfileStart(const uint32_t devId, const AI_DRV_CHANNEL channelId, const uint32_t sampleCycle)
 {
     BiuProfileConfigT config;
-    config.pid = Utils::GetPid();
     config.period = sampleCycle;
     MSPROF_EVENT("Begin to start profiling DrvBiuProfileStart: profDeviceId=%u, profChannel=%u, "
-        "period=%u, pid=%u", devId, static_cast<uint32_t>(channelId), config.period, config.pid);
+        "period=%u", devId, static_cast<uint32_t>(channelId), config.period);
 
     prof_start_para profStartPara;
     profStartPara.channel_type = PROF_TS_TYPE;
@@ -518,11 +515,11 @@ int DrvBiuProfileStart(const uint32_t devId, const AI_DRV_CHANNEL channelId, con
     int32_t ret = DriverPlugin::instance()->MsprofDrvStart(devId, channelId, &profStartPara);
     if (ret != PROF_OK) {
         MSPROF_LOGE("Failed to start profiling DrvBiuProfileStart, ret=%d, profDeviceId=%u, profChannel=%u, "
-            "period=%u, pid=%u", ret, devId, static_cast<uint32_t>(channelId), config.period, config.pid);
+            "period=%u", ret, devId, static_cast<uint32_t>(channelId), config.period);
         return PROFILING_FAILED;
     }
     MSPROF_EVENT("Succeeded to start profiling DrvBiuProfileStart, profDeviceId=%u, profChannel=%u, "
-        "period=%u, pid=%u", devId, static_cast<uint32_t>(channelId), config.period, config.pid);
+        "period=%u", devId, static_cast<uint32_t>(channelId), config.period);
     return PROFILING_SUCCESS;
 }
 

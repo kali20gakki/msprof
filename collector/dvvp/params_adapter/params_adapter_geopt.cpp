@@ -142,6 +142,7 @@ int ParamsAdapterGeOpt::SetGeOptionsContainerDefaultValue()
         paramContainer_[INPUT_CFG_COM_AI_VECTOR] = MSVP_PROF_ON;
         paramContainer_[INPUT_CFG_COM_AIV_MODE] = PROFILING_MODE_TASK_BASED;
     }
+    SetDefaultAivParams(paramContainer_);
     if (!paramContainer_[INPUT_CFG_COM_BIU_FREQ].empty()) {
         paramContainer_[INPUT_CFG_COM_BIU] = MSVP_PROF_ON;
     }

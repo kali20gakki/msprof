@@ -145,6 +145,7 @@ void ParamsAdapterAclApi::ProfMetricsCfgToContainer(const ProfAicoreMetrics aicM
         paramContainer_[INPUT_CFG_COM_AIV_MODE] = PROFILING_MODE_TASK_BASED;
         setConfig_.insert(INPUT_CFG_COM_AIV_MODE);
     }
+    SetDefaultAivParams(paramContainer_);
     return;
 }
 
