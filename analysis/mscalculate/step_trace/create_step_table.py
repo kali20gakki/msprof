@@ -294,7 +294,8 @@ class StepTableBuilder:
         """
         record_dict = {
             StepTraceConstant.INDEX_ID: record[0], StepTraceConstant.MODEL_ID: record[1],
-            StepTraceConstant.TIME_STAMP: record[2], StepTraceConstant.TAG_ID: record[3]
+            StepTraceConstant.TIME_STAMP: record[2], StepTraceConstant.TAG_ID: record[3],
+            StepTraceConstant.STREAM_ID: record[4]
         }
 
         return record_dict
@@ -339,13 +340,17 @@ class StepTableBuilder:
         cls.build_table(sample_config)
 
     @classmethod
-    def _get_step_data(cls: any, table_name: str) -> list:
+    def _get_step_data(cls: any, table_name: str, is_helper=False) -> list:
         if not DBManager.judge_table_exist(cls.step_curs, table_name):
             return []
 
         # iteration range table
-        select_sql = "select DISTINCT index_id, model_id, " \
-                     "timestamp, tag_id from {}".format(table_name)
+        if is_helper:
+            select_sql = "select DISTINCT index_id, model_id, " \
+                         "timestamp, tag_id, 0 from {}".format(table_name)
+        else:
+            select_sql = "select DISTINCT index_id, model_id, " \
+                         "timestamp, tag_id, stream_id from {}".format(table_name)
 
         return DBManager.fetch_all_data(cls.step_curs, select_sql)
 
@@ -359,7 +364,7 @@ class StepTableBuilder:
     @classmethod
     def _get_step_trace_data(cls: any) -> list:
         _step_data = cls._get_step_data(DBNameConstant.TABLE_STEP_TRACE)
-        _helper_data = cls._get_step_data(DBNameConstant.TABLE_MODEL_WITH_Q)
+        _helper_data = cls._get_step_data(DBNameConstant.TABLE_MODEL_WITH_Q, is_helper=True)
         step_trace_data = _step_data + _helper_data
         if not step_trace_data:
             return []
