@@ -103,8 +103,8 @@ class StructFmt:
     HELPER_MODEL_WITH_Q_FMT_SIZE = struct.calcsize(BYTE_ORDER_CHAR + HELPER_MODEL_WITH_Q_FMT)
 
     # biu perf
-    MONITOR0_FMT = "HHTTTTTTQH"
-    MONITOR1_FMT = "ttttttttttH"
+    FLOW_FMT = "HHTTTTTTQH"
+    CYCLES_FMT = "ttttttttttH"
 
     @staticmethod
     def class_name() -> str:

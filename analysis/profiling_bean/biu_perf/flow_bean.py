@@ -6,7 +6,7 @@ from common_func.decode_tool.decode_tool import DecodeTool
 from profiling_bean.struct_info.struct_decoder import StructDecoder
 
 
-class Monitor0Bean(StructDecoder):
+class FlowBean(StructDecoder):
     """
     class used to decode binary data
     """

@@ -10,8 +10,8 @@ from framework.offset_calculator import OffsetCalculator
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.path_manager import PathManager
 from common_func.utils import Utils
-from profiling_bean.biu_perf.monitor0_bean import Monitor0Bean
-from profiling_bean.biu_perf.monitor1_bean import Monitor1Bean
+from profiling_bean.biu_perf.flow_bean import FlowBean
+from profiling_bean.biu_perf.cycles_bean import CyclesBean
 from profiling_bean.biu_perf.core_info_bean import CoreInfo
 
 
@@ -24,19 +24,25 @@ class BiuCoreParser:
     CUBE_SIZE = 96
     VECTOR_SIZE = 64
 
-    # the location of monitor0 and monitor1
-    CUBE_MONITOR1_INDEX_RANGE = [[32, 40], [48, 56], [64, 72], [80, 88]]
-    CUBE_MONITOR0_INDEX_RANGE = [[40, 48], [56, 64], [72, 80], [88, 96]]
+    # the location of flow and cycles
+    CUBE_CYCLES_INDEX_RANGE = [[40, 48], [56, 64], [72, 80], [88, 96]]
+    CUBE_FLOW_INDEX_RANGE = [[32, 40], [48, 56], [64, 72], [80, 88]]
 
-    VECTOR_MONITOR1_INDEX_RANGE = [32, 64]
+    VECTOR_CYCLES_INDEX_RANGE = [32, 64]
+
+    MONITOR_LENGTH = 32
+
+    FLOW_MAX_CYCLES = 4096
 
     def __init__(self: any, sample_config: dict, core_info: any) -> None:
         self._file_list = core_info.file_list
         self._sample_config = sample_config
         self._project_path = self._sample_config.get(StrConstant.SAMPLE_CONFIG_PROJECT_PATH)
         self.core_info = core_info
-        self.monitor1_data = []
-        self.monitor0_data = []
+        self.cycles_data = []
+        self.flow_data = []
+        self.last_flow_datum = FlowBean.decode(b'\x00' * self.MONITOR_LENGTH)
+        self.last_cycles_datum = CyclesBean.decode(b'\x00' * self.MONITOR_LENGTH)
 
     def process_file(self: any) -> None:
         """
@@ -54,35 +60,52 @@ class BiuCoreParser:
         parse binary file
         """
 
-    def add_monitor1_data(self: any, monitor1_bean: any) -> None:
+    def add_cycles_data(self: any, cycles_bean: any) -> None:
         """
-        get list from monitor1 bean
+        get list from monitor cycles bean
         return: None
         """
+
         if self.core_info.core_type == CoreInfo.AI_CUBE:
-            vector_cycles = 0
-            cube_cycles = monitor1_bean.cube_cycles
+            delta_vector_cycles = 0
+            delta_cube_cycles = self.calculate_delta_cycles(
+            cycles_bean.cube_cycles, self.last_cycles_datum.cube_cycles)
         else:
-            vector_cycles = monitor1_bean.vector_cycles
-            cube_cycles = 0
+            delta_vector_cycles = self.calculate_delta_cycles(
+            cycles_bean.vector_cycles, self.last_cycles_datum.vector_cycles)
+            delta_cube_cycles = 0
 
-        self.monitor1_data.append([vector_cycles, monitor1_bean.scalar_cycles,
-                                   cube_cycles, monitor1_bean.lsu0_cycles,
-                                   monitor1_bean.lsu1_cycles, monitor1_bean.lsu2_cycles,
-                                   monitor1_bean.timestamp, self.core_info.core_id,
-                                   self.core_info.group_id, self.core_info.core_type])
+        self.cycles_data.append([delta_vector_cycles,
+                                 self.calculate_delta_cycles(
+                                       cycles_bean.scalar_cycles, self.last_cycles_datum.scalar_cycles),
+                                 delta_cube_cycles,
+                                 self.calculate_delta_cycles(
+                                       cycles_bean.lsu0_cycles, self.last_cycles_datum.lsu0_cycles),
+                                 self.calculate_delta_cycles(
+                                       cycles_bean.lsu1_cycles, self.last_cycles_datum.lsu1_cycles),
+                                 self.calculate_delta_cycles(
+                                       cycles_bean.lsu2_cycles, self.last_cycles_datum.lsu2_cycles),
+                                 cycles_bean.timestamp, self.core_info.core_id,
+                                 self.core_info.group_id, self.core_info.core_type])
+        self.last_cycles_datum = cycles_bean
 
-    def add_monitor0_data(self: any, monitor0_bean: any) -> None:
+    def calculate_delta_cycles(self: any, current_value: int, last_value: int) -> int:
+        # wrap_around
+        if current_value < last_value:
+            return current_value + self.FLOW_MAX_CYCLES - last_value
+        return current_value - last_value
+
+    def add_flow_data(self: any, flow_bean: any) -> None:
         """
-        get list from monitor0 bean
+        get list from monitor flow bean
         return: None
         """
-        self.monitor0_data.append([monitor0_bean.stat_rcmd_num, monitor0_bean.stat_wcmd_num,
-                                   monitor0_bean.stat_rlat_raw, monitor0_bean.stat_wlat_raw,
-                                   monitor0_bean.stat_flux_rd, monitor0_bean.stat_flux_wr,
-                                   monitor0_bean.stat_flux_rd_l2, monitor0_bean.stat_flux_wr_l2,
-                                   monitor0_bean.timestamp, monitor0_bean.l2_cache_hit, self.core_info.core_id,
-                                   self.core_info.group_id, self.core_info.core_type])
+        self.flow_data.append([flow_bean.stat_rcmd_num, flow_bean.stat_wcmd_num,
+                               flow_bean.stat_rlat_raw, flow_bean.stat_wlat_raw,
+                               flow_bean.stat_flux_rd, flow_bean.stat_flux_wr,
+                               flow_bean.stat_flux_rd_l2, flow_bean.stat_flux_wr_l2,
+                               flow_bean.timestamp, flow_bean.l2_cache_hit, self.core_info.core_id,
+                               self.core_info.group_id, self.core_info.core_type])
 
 
 class BiuCubeParser(BiuCoreParser):
@@ -98,42 +121,42 @@ class BiuCubeParser(BiuCoreParser):
             all_bytes = self._offset_calculator.pre_process(file_reader, os.path.getsize(file_path))
 
         for chunk in Utils.chunks(all_bytes, self.CUBE_SIZE):
-            monitor1_chunk, monitor0_chunk = self.split_monitor_data(chunk)
-            monitor1_bean = Monitor1Bean.decode(monitor1_chunk)
-            monitor0_bean = Monitor0Bean.decode(monitor0_chunk)
+            cycles_chunk, flow_chunk = self.split_monitor_data(chunk)
+            cycles_bean = CyclesBean.decode(cycles_chunk)
+            flow_bean = FlowBean.decode(flow_chunk)
 
             # timestamp of ai cube monitor 1 is invalid, so it is repalced by monitor 0
-            monitor1_bean.timestamp = monitor0_bean.timestamp
-            self.add_monitor1_data(monitor1_bean)
-            self.add_monitor0_data(monitor0_bean)
+            cycles_bean.timestamp = flow_bean.timestamp
+            self.add_cycles_data(cycles_bean)
+            self.add_flow_data(flow_bean)
 
     def split_monitor_data(self: any, chunk: any) -> tuple:
         """
         split monitor data
         params: chunk
-        return: tuple of monitor1_chunk and monitor0_chunk
+        return: tuple of monitor_cycles_chunk and monitor0_chunk
         """
         if len(chunk) != self.CUBE_SIZE:
             logging.error("The length of AI cube core chunk is not equal to %d", self.CUBE_SIZE)
             return [], []
 
-        monitor1_chunk = bytes()
-        for start_index, end_index in self.CUBE_MONITOR1_INDEX_RANGE:
-            monitor1_chunk += chunk[start_index:end_index]
+        flow_chunk = bytes()
+        for start_index, end_index in self.CUBE_CYCLES_INDEX_RANGE:
+            flow_chunk += chunk[start_index:end_index]
 
-        monitor0_chunk = bytes()
-        for start_index, end_index in self.CUBE_MONITOR0_INDEX_RANGE:
-            monitor0_chunk += chunk[start_index:end_index]
+        biucycles_chunk = bytes()
+        for start_index, end_index in self.CUBE_FLOW_INDEX_RANGE:
+            biucycles_chunk += chunk[start_index:end_index]
 
-        return monitor1_chunk, monitor0_chunk
+        return flow_chunk, biucycles_chunk
 
     def get_monitor_data(self: any) -> tuple:
         """
         get monitor data
-        return: tuple of monitor1_data and monitor0_data
+        return: tuple of monitor_cycles_data and monitor0_data
         """
         self.process_file()
-        return self.monitor1_data, self.monitor0_data
+        return self.cycles_data, self.flow_data
 
 
 class BiuVectorParser(BiuCoreParser):
@@ -149,13 +172,13 @@ class BiuVectorParser(BiuCoreParser):
             all_bytes = self._offset_calculator.pre_process(file_reader, os.path.getsize(file_path))
 
         for chunk in Utils.chunks(all_bytes, self.VECTOR_SIZE):
-            monitor1_chunk = chunk[self.VECTOR_MONITOR1_INDEX_RANGE[0]:self.VECTOR_MONITOR1_INDEX_RANGE[1]]
-            monitor1_bean = Monitor1Bean.decode(monitor1_chunk)
-            self.add_monitor1_data(monitor1_bean)
+            cycles_chunk = chunk[self.VECTOR_CYCLES_INDEX_RANGE[0]:self.VECTOR_CYCLES_INDEX_RANGE[1]]
+            cycles_bean = CyclesBean.decode(cycles_chunk)
+            self.add_cycles_data(cycles_bean)
 
     def get_monitor_data(self: any) -> list:
         """
         get monitor data
         """
         self.process_file()
-        return self.monitor1_data
+        return self.cycles_data
