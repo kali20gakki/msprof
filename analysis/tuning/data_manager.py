@@ -7,6 +7,7 @@ import os
 import sqlite3
 
 from config.config_manager import ConfigManager
+from common_func.common_prof_rule import CommonProfRule
 from common_func.common import CommonConstant
 from common_func.common import generate_config
 from common_func.db_manager import DBManager
@@ -22,6 +23,24 @@ from viewer.runtime_report import get_task_based_core_data
 
 class DataManager:
     """
+    manage different types of tuning data
+    """
+
+    def __init__(self: any, project: str, device_id: str, iter_id: str) -> None:
+        self.data = {}
+        self._load_operator_data(project, device_id, iter_id)
+
+    def get_data(self: any, data_type: str) -> list:
+        return self.data.get(data_type, [])
+
+    def _load_operator_data(self: any, project: str, device_id: str, iter_id: str):
+        data_type = CommonProfRule.TUNING_OPERATOR
+        self.data[data_type] = DataLoader.get_data_by_infer_id(project, device_id, iter_id)
+
+
+class DataLoader:
+    """
+    move to new file in the future
     get operator data by infer id
     """
 
@@ -73,8 +92,8 @@ class DataManager:
         """
         op_data = []
         memory_workspaces = cls.select_memory_workspace(project_path, device_id)
-        headers, datas = cls._get_base_data(device_id, infer_id, project_path)
-        headers = cls._process_headers(headers)
+        raw_headers, datas = cls._get_base_data(device_id, infer_id, project_path)
+        headers = cls._process_headers(raw_headers)
         for data in datas:
             operator_dict = {}
             for key, value in zip(headers, data):

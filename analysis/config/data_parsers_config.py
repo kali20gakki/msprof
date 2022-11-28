@@ -52,7 +52,7 @@ class DataParsersConfig(MetaConfig):
         ]
         , 'ParsingDDRData': [
             ('path', 'msparser.hardware.ddr_parser'),
-            ('chip_model', '0,1,2,3,4')
+            ('chip_model', '0,1,2,3,4,7')
         ]
         , 'ParsingPeripheralData': [
             ('path', 'msparser.hardware.dvpp_parser'),
@@ -96,7 +96,7 @@ class DataParsersConfig(MetaConfig):
         ]
         , 'NonMiniLLCParser': [
             ('path', 'msparser.hardware.llc_parser'),
-            ('chip_model', '1,2,3,4,5')
+            ('chip_model', '1,2,3,4,5,7')
         ]
         , 'MiniLLCParser': [
             ('path', 'msparser.hardware.mini_llc_parser'),

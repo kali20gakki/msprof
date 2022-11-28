@@ -16,6 +16,7 @@ from common_func.path_manager import PathManager
 from common_func.step_trace_constant import StepTraceConstant
 from msmodel.step_trace.cluster_step_trace_model import ClusterStepTraceModel
 from msparser.interface.iparser import IParser
+from profiling_bean.db_dto.step_trace_dto import TrainingTraceDto
 
 
 class ClusterStepTraceParser(IParser):
@@ -35,7 +36,8 @@ class ClusterStepTraceParser(IParser):
         self.cluster_model = None
 
     @staticmethod
-    def _fetch_data_from_database(db_dir: str, db_name: str, db_table: str, sql: str) -> list:
+    def _fetch_data_from_database(db_info: tuple, sql: str, dto_class=None) -> list:
+        db_dir, db_name, db_table = db_info[:]
         data = []
         db_path = PathManager.get_db_path(db_dir, db_name)
         conn, curs = DBManager.check_connect_db_path(db_path)
@@ -47,7 +49,7 @@ class ClusterStepTraceParser(IParser):
             DBManager.destroy_db_connect(conn, curs)
             logging.error("The %s table doesn't exist.", db_table)
             return data
-        data = DBManager.fetch_all_data(curs, sql)
+        data = DBManager.fetch_all_data(curs, sql, dto_class=dto_class)
         DBManager.destroy_db_connect(conn, curs)
         return data
 
@@ -56,18 +58,18 @@ class ClusterStepTraceParser(IParser):
         sql = "select device_id, " \
               "model_id, " \
               "iteration_id, " \
-              "(case when FP_start={1} then {1} else FP_start*{2} end), " \
-              "(case when BP_end={1} then {1} else BP_end*{2} end), " \
-              "(case when iteration_end={1} then {1} else iteration_end*{2} end), " \
-              "(case when iteration_time={1} then {1} else iteration_time*{2} end), " \
-              "(case when fp_bp_time={1} then {1} else fp_bp_time*{2} end), " \
-              "(case when grad_refresh_bound={1} then {1} else grad_refresh_bound*{2} end), " \
-              "(case when data_aug_bound={1} then {1} else data_aug_bound*{2} end) " \
+              "FP_start as fp_start, " \
+              "BP_end as bp_end, " \
+              "iteration_end, " \
+              "(case when iteration_time={1} then {1} else iteration_time*{2} end) as iteration_time, " \
+              "(case when fp_bp_time={1} then {1} else fp_bp_time*{2} end) as fp_bp_time, " \
+              "(case when grad_refresh_bound={1} then {1} else grad_refresh_bound*{2} end) as grad_refresh_bound, " \
+              "(case when data_aug_bound={1} then {1} else data_aug_bound*{2} end) as data_aug_bound " \
               "from {3}".format(
-            NumberConstant.DEFAULT_MODEL_ID,
-            NumberConstant.NULL_NUMBER,
-            StepTraceConstant.syscnt_to_micro(),
-            DBNameConstant.TABLE_TRAINING_TRACE)
+               NumberConstant.DEFAULT_MODEL_ID,
+               NumberConstant.NULL_NUMBER,
+               StepTraceConstant.syscnt_to_micro(),
+               DBNameConstant.TABLE_TRAINING_TRACE)
         return sql
 
     @staticmethod
@@ -171,19 +173,31 @@ class ClusterStepTraceParser(IParser):
         sql = "select device_id,model_id,index_id,iteration_end,start*{syscnt_to_micro},end*{syscnt_to_micro} " \
               "from {0}".format(DBNameConstant.TABLE_ALL_REDUCE,
                                 syscnt_to_micro=StepTraceConstant.syscnt_to_micro())
-        return self._fetch_data_from_database(project_path, DBNameConstant.DB_TRACE,
-                                              DBNameConstant.TABLE_ALL_REDUCE, sql)
+        return self._fetch_data_from_database((project_path, DBNameConstant.DB_TRACE, DBNameConstant.TABLE_ALL_REDUCE),
+                                              sql)
 
     def _collect_step_trace_data(self: any, project_path: str) -> list:
         sql_for_ge_model_ids = "select distinct model_id from {}".format(DBNameConstant.TABLE_GE_TASK)
-        model_ids = self._fetch_data_from_database(project_path, DBNameConstant.DB_GE_INFO,
-                                                   DBNameConstant.TABLE_GE_TASK, sql_for_ge_model_ids)
+        model_ids = self._fetch_data_from_database((project_path, DBNameConstant.DB_GE_INFO,
+                                                    DBNameConstant.TABLE_GE_TASK), sql_for_ge_model_ids)
         model_ids = list(chain.from_iterable(model_ids))
         sql_for_step_trace = self._sql_for_step_trace()
-        step_trace_data = self._fetch_data_from_database(project_path, DBNameConstant.DB_TRACE,
-                                                         DBNameConstant.TABLE_TRAINING_TRACE, sql_for_step_trace)
+        step_trace_data = self._fetch_data_from_database((project_path, DBNameConstant.DB_TRACE,
+                                                          DBNameConstant.TABLE_TRAINING_TRACE),
+                                                         sql_for_step_trace, dto_class=TrainingTraceDto)
+        step_trace_data = self._get_data_list_from_dto(step_trace_data)
         if not step_trace_data:
             logging.error("Can't query step trace data.")
             return step_trace_data
         step_trace_data = self._append_ge_model_tag(step_trace_data, model_ids)
+        return step_trace_data
+
+    @staticmethod
+    def _get_data_list_from_dto(step_trace_data: list) -> list:
+        for idx, single_dto in enumerate(step_trace_data):
+            step_trace_data[idx] = (
+                single_dto.device_id, single_dto.model_id, single_dto.iteration_id, single_dto.fp_start,
+                single_dto.bp_end, single_dto.iteration_end, single_dto.iteration_time,
+                single_dto.fp_bp_time, single_dto.grad_refresh_bound, single_dto.data_aug_bound
+            )
         return step_trace_data

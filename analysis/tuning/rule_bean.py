@@ -49,8 +49,8 @@ class RuleBean:
         return self.rule_suggestion
 
     def __init_param(self: any, **args: dict) -> None:
-        self.rule_id = args.get(CommonProfRule.RULE_ID)
-        self.rule_condition = args.get(CommonProfRule.RULE_CONDITION)
-        self.rule_type = args.get(CommonProfRule.RULE_TYPE)
-        self.rule_subtype = args.get(CommonProfRule.RULE_SUBTYPE)
-        self.rule_suggestion = args.get(CommonProfRule.RULE_SUGGESTION)
+        self.rule_id = args.get(CommonProfRule.RULE_ID, '')
+        self.rule_condition = args.get(CommonProfRule.RULE_CONDITION, '')
+        self.rule_type = args.get(CommonProfRule.RULE_TYPE, '')
+        self.rule_subtype = args.get(CommonProfRule.RULE_SUBTYPE, '')
+        self.rule_suggestion = args.get(CommonProfRule.RULE_SUGGESTION, '')

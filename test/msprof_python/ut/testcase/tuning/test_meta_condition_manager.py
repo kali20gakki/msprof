@@ -6,9 +6,6 @@ from tuning.meta_condition_manager import NetConditionManager
 from tuning.meta_condition_manager import OperatorConditionManager
 from tuning.meta_condition_manager import get_two_decimal
 from tuning.meta_condition_manager import load_condition_files
-from tuning.ms_operator import Operator
-
-from constant.constant import CONFIG
 
 sample_config = {"model_id": 1, 'iter_id': 'dasfsd', 'result_dir': 'jasdfjfjs',
                  "ai_core_profiling_mode": "task-based", "aiv_profiling_mode": "sample-based"}
@@ -145,7 +142,7 @@ class TestNetConditionManager(unittest.TestCase):
         self.assertEqual(result, [])
 
     def test_cal_normal_condition(self):
-        operator_data = [Operator('test', 1, 2)]
+        operator_data = [{}]
         condition = {}
         with mock.patch(NAMESPACE + '.MetaConditionManager.cal_normal_condition', return_value=[1]), \
              mock.patch(NAMESPACE + '.load_condition_files'):
@@ -154,7 +151,7 @@ class TestNetConditionManager(unittest.TestCase):
         self.assertEqual(result, [1])
 
     def test_cal_formula_condition(self):
-        operator_data = [Operator('test', 2, 1)]
+        operator_data = [{}]
         condition = {}
         with mock.patch(NAMESPACE + '.MetaConditionManager.cal_formula_condition', return_value=[2]), \
              mock.patch(NAMESPACE + '.load_condition_files'):
@@ -163,10 +160,10 @@ class TestNetConditionManager(unittest.TestCase):
         self.assertEqual(result, [2])
 
     def test_cal_accumulate_condition(self):
-        op1 = Operator('op1', 2, {'op_name': 'op1', 'task_wait_time': 1, 'task_duration': 2})
-        op2 = Operator('op2', 2, {'op_name': 'op2', 'task_wait_time': 1, 'task_duration': 2})
-        op3 = Operator('op3', 2, {'op_name': 'op3', 'task_wait_time': 1, 'task_duration': 2})
-        op4 = Operator('op4', 2, {'op_name': 'op4', 'task_wait_time': 1, 'task_duration': 2})
+        op1 = {'op_name': 'op1', 'task_wait_time': 1, 'task_duration': 2}
+        op2 = {'op_name': 'op2', 'task_wait_time': 1, 'task_duration': 2}
+        op3 = {'op_name': 'op3', 'task_wait_time': 1, 'task_duration': 2}
+        op4 = {'op_name': 'op4', 'task_wait_time': 1, 'task_duration': 2}
         operator_data_list = [op1, op2, op3, op4]
         condition = {'dependency': '', 'threshold': '0.1', 'cmp': '>', 'accumulate': ['task_wait_time'],
                      'compare': ['task_duration', 'task_wait_time']}
