@@ -123,7 +123,10 @@ void ParamsAdapter::SetDcBlackSwitch()
 
 void ParamsAdapter::SetCloudV2BlackSwitch()
 {
-    std::vector<InputCfg>({}).swap(blackSwitch_);
+    std::vector<InputCfg>({
+        INPUT_CFG_COM_AI_VECTOR, INPUT_CFG_COM_AIV_FREQ, INPUT_CFG_COM_AIV_MODE,
+        INPUT_CFG_COM_AIV_METRICS
+        }).swap(blackSwitch_);
     return;
 }
 
@@ -154,6 +157,15 @@ PlatformType ParamsAdapter::GetPlatform() const
     return platformType_;
 }
 
+void ParamsAdapter::SetDefaultAivParams(std::array<std::string, INPUT_CFG_MAX> &paramContainer) const
+{
+    if (platformType_ == PlatformType::CHIP_V4_1_0) {
+        paramContainer[INPUT_CFG_COM_AI_VECTOR] = paramContainer[INPUT_CFG_COM_AI_CORE];
+        paramContainer[INPUT_CFG_COM_AIV_FREQ] = paramContainer[INPUT_CFG_COM_AIC_FREQ];
+        paramContainer[INPUT_CFG_COM_AIV_MODE] = paramContainer[INPUT_CFG_COM_AIC_MODE];
+        paramContainer[INPUT_CFG_COM_AIV_METRICS] = paramContainer[INPUT_CFG_COM_AIC_METRICS];
+    }
+}
 
 int ParamsAdapter::TransToParam(std::array<std::string, INPUT_CFG_MAX> paramContainer,
     SHARED_PTR_ALIA<ProfileParams> params)

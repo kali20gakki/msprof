@@ -257,7 +257,7 @@ void ArgsManager::AddAnalysisArgs()
 
 void ArgsManager::AddStarsArgs()
 {
-    if (true || driverOnline_ && ConfigManager::instance()->GetPlatformType() != PlatformType::CHIP_V4_1_0) {
+    if (driverOnline_ && ConfigManager::instance()->GetPlatformType() != PlatformType::CHIP_V4_1_0) {
         return;
     }
 
@@ -267,7 +267,7 @@ void ArgsManager::AddStarsArgs()
 
 void ArgsManager::AddBiuArgs()
 {
-    if (true || driverOnline_ && ConfigManager::instance()->GetPlatformType() != PlatformType::CHIP_V4_1_0) {
+    if (driverOnline_ && ConfigManager::instance()->GetPlatformType() != PlatformType::CHIP_V4_1_0) {
         return;
     }
     Args biu = {"biu", "Show biu profiling data, the default value is off.(future-platform)", OFF};
@@ -291,8 +291,7 @@ void ArgsManager::AddAicpuArgs()
 
 void ArgsManager::AddAivArgs()
 {
-    if (true || driverOnline_ && (ConfigManager::instance()->GetPlatformType() != PlatformType::MDC_TYPE &&
-        ConfigManager::instance()->GetPlatformType() != PlatformType::CHIP_V4_1_0)) {
+    if (driverOnline_ && (ConfigManager::instance()->GetPlatformType() != PlatformType::MDC_TYPE)) {
         return;
     }
     Args aiv = {"ai-vector-core",

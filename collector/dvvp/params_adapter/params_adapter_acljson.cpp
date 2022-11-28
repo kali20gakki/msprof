@@ -135,7 +135,8 @@ void ParamsAdapterAclJson::SetAclJsonContainerDefaultValue()
     paramContainer_[INPUT_CFG_COM_AIV_MODE] = PROFILING_MODE_TASK_BASED;
     paramContainer_[INPUT_CFG_COM_AIV_METRICS] = paramContainer_[INPUT_CFG_COM_AIV_METRICS].empty() ?
         PIPE_UTILIZATION : paramContainer_[INPUT_CFG_COM_AIV_METRICS];
-
+    SetDefaultAivParams(paramContainer_);
+    
     if (!paramContainer_[INPUT_CFG_COM_BIU_FREQ].empty()) {
         paramContainer_[INPUT_CFG_COM_BIU] = MSVP_PROF_ON;
     }
