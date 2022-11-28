@@ -134,6 +134,9 @@ class FftsPmuCalculate(ICalculator, MsMultiProcess):
         offset_count, total_count = self._iter_model.get_task_offset_and_sum(model_id, iter_id,
                                                                              HwtsIterModel.AI_CORE_TYPE)
         _total_aic_count = self._get_total_aic_count()
+        _sql_aic_count = self._iter_model.get_aic_sum_count()
+        # get offset by all aic count and sql record count
+        offset_count = _total_aic_count - _sql_aic_count + offset_count
         if offset_count < 0:
             total_count += offset_count
             offset_count = 0
