@@ -27,6 +27,7 @@ from msmodel.task_time.hwts_log_model import HwtsLogModel
 from msparser.iter_rec.iter_info_updater.iter_info_manager import IterInfoManager
 from profiling_bean.prof_enum.data_tag import DataTag
 from profiling_bean.struct_info.hwts_log import HwtsLogBean
+from profiling_bean.struct_info.task_execute_bean import TaskExecuteBean
 
 
 class HwtsCalculator(ICalculator, MsMultiProcess):
@@ -94,15 +95,14 @@ class HwtsCalculator(ICalculator, MsMultiProcess):
             stream_task_id = f'{str(task.stream_id)}-{str(task.task_id)}'
             if task.sys_tag == self.HWTS_TASK_END:
                 start_log = start_log_dict.get(stream_task_id)
-                setattr(task, "start_time",
-                        start_log.sys_cnt if start_log else NumberConstant.INVALID_OP_EXE_TIME)
-                prep.append(task)
+                start_time = start_log.sys_cnt if start_log else NumberConstant.INVALID_OP_EXE_TIME
+                prep.append(TaskExecuteBean(task.stream_id, task.task_id, start_time, task.sys_cnt, task.task_type))
                 start_log_dict.pop(stream_task_id, None)
             else:
                 start_log_dict[stream_task_id] = task
         train_data = []
         for task in prep:
-            data_info = [task.stream_id, task.task_id, task.start_time, task.sys_cnt]
+            data_info = [task.stream_id, task.task_id, task.start_time, task.end_time]
             train_data.append(data_info)
             if not ChipManager().is_chip_v2():
                 self._aicpu_collector.filter_aicpu(data_info + [task.task_type])
