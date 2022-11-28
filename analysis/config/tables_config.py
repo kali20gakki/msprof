@@ -789,7 +789,7 @@ class TablesConfig(MetaConfig):
             ('sft_samp_cfg', 'INTEGER,null'),
             ('voltage', 'INTEGER,null')
         ]
-        , 'Monitor0Map': [
+        , 'MonitorFlowMap': [
             ('stat_rcmd_num', 'INTEGER, null'),
             ('stat_wcmd_num', 'INTEGER, null'),
             ('stat_rlat_raw', 'INTEGER, null'),
@@ -804,7 +804,7 @@ class TablesConfig(MetaConfig):
             ('group_id', 'INTEGER, null'),
             ('core_type', 'TEXT, null')
         ]
-        , 'Monitor1Map': [
+        , 'MonitorCyclesMap': [
             ('vector_cycles', 'INTEGER, null'),
             ('scalar_cycles', 'INTEGER, null'),
             ('cube_cycles', 'INTEGER, null'),

@@ -213,8 +213,8 @@ class DBNameConstant(metaclass=ABCMeta):
     TABLE_GE_MODEL_TIME = "GeModelTime"
 
     # biu perf
-    TABLE_MONITOR0 = "Monitor0"
-    TABLE_MONITOR1 = "Monitor1"
+    TABLE_FLOW_MONITOR = "MonitorFlow"
+    TABLE_CYCLES_MONITOR = "MonitorCycles"
     TABLE_BIU_FLOW = "BiuFlow"
     TABLE_BIU_CYCLES = "BiuCycles"
 
