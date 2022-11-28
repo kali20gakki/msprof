@@ -26,8 +26,8 @@ from msmodel.iter_rec.iter_rec_model import HwtsIterModel
 from msmodel.task_time.hwts_log_model import HwtsLogModel
 from msparser.iter_rec.iter_info_updater.iter_info_manager import IterInfoManager
 from profiling_bean.prof_enum.data_tag import DataTag
+from profiling_bean.struct_info.aicore_task import TaskExecuteBean
 from profiling_bean.struct_info.hwts_log import HwtsLogBean
-from profiling_bean.struct_info.task_execute_bean import TaskExecuteBean
 
 
 class HwtsCalculator(ICalculator, MsMultiProcess):
