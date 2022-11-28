@@ -23,10 +23,10 @@ class BiuPerfParser(IParser, MsMultiProcess):
         self._sample_config = sample_config
         self._project_path = self._sample_config.get(StrConstant.SAMPLE_CONFIG_PROJECT_PATH)
         self._model = BiuPerfModel(self._project_path,
-                                   [DBNameConstant.TABLE_MONITOR0,
-                                    DBNameConstant.TABLE_MONITOR1])
-        self._monitor0_data_list = []
-        self._monitor1_data_list = []
+                                   [DBNameConstant.TABLE_FLOW_MONITOR,
+                                    DBNameConstant.TABLE_CYCLES_MONITOR])
+        self._flow_data_list = []
+        self._cycles_data_list = []
 
     def ms_run(self: any) -> None:
         """
@@ -45,13 +45,13 @@ class BiuPerfParser(IParser, MsMultiProcess):
         biu_perf_file_dict = self._file_group_by_core()
         for core_info in biu_perf_file_dict.values():
             if core_info.core_type == CoreInfo.AI_CUBE:
-                monitor1_data, monitor0_data = \
+                biucycles_data, flow_data = \
                     BiuCubeParser(self._sample_config, core_info).get_monitor_data()
-                self._monitor1_data_list.extend(monitor1_data)
-                self._monitor0_data_list.extend(monitor0_data)
+                self._cycles_data_list.extend(biucycles_data)
+                self._flow_data_list.extend(flow_data)
             elif core_info.core_type in [CoreInfo.AI_VECTOR0, CoreInfo.AI_VECTOR1]:
-                monitor1_data = BiuVectorParser(self._sample_config, core_info).get_monitor_data()
-                self._monitor1_data_list.extend(monitor1_data)
+                biucycles_data = BiuVectorParser(self._sample_config, core_info).get_monitor_data()
+                self._cycles_data_list.extend(biucycles_data)
             else:
                 logging.error("Core type %d is unknown.", core_info.core_type)
 
@@ -60,14 +60,14 @@ class BiuPerfParser(IParser, MsMultiProcess):
         save parser data to db
         :return: None
         """
-        if not self._monitor0_data_list or not self._monitor1_data_list:
+        if not self._flow_data_list or not self._cycles_data_list:
             logging.warning("Monitor data list is empty!")
             return
 
         with self._model as _model:
             self._model.create_table()
-            _model.flush(DBNameConstant.TABLE_MONITOR0, self._monitor0_data_list)
-            _model.flush(DBNameConstant.TABLE_MONITOR1, self._monitor1_data_list)
+            _model.flush(DBNameConstant.TABLE_FLOW_MONITOR, self._flow_data_list)
+            _model.flush(DBNameConstant.TABLE_CYCLES_MONITOR, self._cycles_data_list)
 
     def _file_group_by_core(self: any) -> dict:
         """
