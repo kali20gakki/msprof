@@ -2,42 +2,61 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 
+from common_func.common_prof_rule import CommonProfRule
+from config.config_manager import ConfigManager
+from tuning.data_manager import DataManager
+from tuning.rule_bean import RuleBean
+from tuning.meta_condition_manager import NetConditionManager
+from tuning.tuning_control import TuningControl
 
-class MetaRuleManager:
+
+class RuleManager:
     """
-    metric rule manager
+    rule manager
+    rename the file in the future
     """
 
-    def __init__(self: any) -> None:
-        self.rules = {}
+    def __init__(self: any, project: str, device_id: str, iter_id: str) -> None:
+        self.rule_list = []
+        self.data_mgr = DataManager(project, device_id, iter_id)
+        self.condition_mgr = NetConditionManager()
+        self.rules = self._load_rules()
+        self.tuning_control = TuningControl()
+        self.project = project
+        self.device_id = device_id
 
-    def register(self: any, rule: any) -> None:
+    @staticmethod
+    def _get_support_rules() -> list:
         """
-        register rule
+        get rules to check
+        :return: rules
         """
-        self.rules[rule.metric_name] = rule
+        return ConfigManager.get(ConfigManager.TUNING_RULE).get_data()
+
+    @classmethod
+    def _load_rules(cls: any) -> list:
+        rules_json = ConfigManager.get(ConfigManager.PROF_RULE).get_data()
+        support_rules = set(cls._get_support_rules())
+        rules = [rule for rule in rules_json if rule.get(CommonProfRule.RULE_ID, '') in support_rules]
+        return rules
 
     def run(self: any) -> None:
         """
         run rules
         """
-        for rule in self.rules.values():
-            rule.run()
-
-
-class OperatorRuleManager(MetaRuleManager):
-    """
-    save all operator rule
-    """
-
-    def __init__(self: any) -> None:
-        super().__init__()
-
-
-class NetRuleManager(MetaRuleManager):
-    """
-    save all operator rule
-    """
-
-    def __init__(self: any) -> None:
-        super().__init__()
+        for rule in self.rules:
+            rule = RuleBean(**rule)
+            condition = rule.get_rule_condition()
+            tuning_type = CommonProfRule.TUNING_OPERATOR
+            tuning_data = self.data_mgr.get_data(tuning_type)
+            data_names = self.condition_mgr.cal_conditions(tuning_data, condition)
+            if not data_names:
+                continue
+            param = {
+                CommonProfRule.RESULT_RULE_TYPE: rule.rule_type,
+                CommonProfRule.RESULT_RULE_SUBTYPE: rule.rule_subtype,
+                CommonProfRule.RESULT_RULE_SUGGESTION: rule.rule_suggestion,
+                CommonProfRule.RESULT_OP_LIST: data_names
+            }
+            self.tuning_control.add_tuning_result(**param)
+        self.tuning_control.dump_to_file(self.project, self.device_id)

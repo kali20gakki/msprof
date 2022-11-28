@@ -18,9 +18,9 @@ class StarsChipTransBean(StructDecoder):
         self._cnt = Utils.get_cnt(self.filed[0])
         self._data_tag = self.filed[1]
         self._sys_cnt = self.filed[3]
-        self._event_id = self.filed[8]
-        self._value_1 = self.filed[8]
-        self._value_2 = self.filed[8]
+        self._event_id = self.filed[5]
+        self._value_1 = self.filed[9]
+        self._value_2 = self.filed[10]
 
     @property
     def func_type(self: any) -> str:
@@ -60,7 +60,7 @@ class StarsChipTransBean(StructDecoder):
         mata bw level is the lower 6 bits of the byte.
         63 is 0b111111 keep lower 6 bits which represent PA link ID/PCIE ID
         """
-        return int(bin(self._event_id & 63)[2:8].zfill(6), 2)
+        return self._event_id & 63
 
     @property
     def pa_rx_or_pcie_write_bw(self: any) -> int:

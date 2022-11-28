@@ -59,6 +59,9 @@ class CommonProfRule:
     # prof rule and condition file name
     RESULT_PROF_JSON = "prof_rule_{}.json"
 
+    # tuning type
+    TUNING_OPERATOR = 'operator'
+
     def get_common_prof_rule_class_name(self: any) -> any:
         """
         get common prof rule class name
