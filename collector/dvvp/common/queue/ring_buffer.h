@@ -16,18 +16,28 @@
 #include <unistd.h>
 #endif
 #include <vector>
+#include "config/config.h"
 #include "msprof_dlog.h"
+#include "prof_callback.h"
 #include "utils/utils.h"
-
 namespace analysis {
 namespace dvvp {
 namespace common {
 namespace queue {
+using namespace analysis::dvvp::common::config;
 static const size_t RING_BUFFER_DEFAULT_MAX_PUSH_CYCLES = 1024;
 enum class DataStatus {
     DATA_STATUS_NOT_READY = 0,
     DATA_STATUS_READY = 1
 };
+struct ReporterDataChunkTag {
+    char tag[MSPROF_ENGINE_MAX_TAG_LEN + 1];
+};
+struct ReporterDataChunkPayload {
+    uint8_t data[RECEIVE_CHUNK_SIZE];
+};
+using CONST_REPORT_DATA_PTR = const ReporterData *;
+using CONST_REPORT_CHUNK_TAG_PTR = const ReporterDataChunkTag *;
 // NOTE:
 // The ring buffer is only for multiple producers and single consumer model
 // The capacity must be a power of two
@@ -86,7 +96,7 @@ public:
         isQuit_ = true;
     }
 
-    bool TryPush(const T& data)
+    bool TryPush(CONST_REPORT_DATA_PTR data)
     {
         size_t currReadCusor = 0;
         size_t currWriteCusor = 0;
@@ -117,7 +127,16 @@ public:
         } while (!idleWriteIndex_.compare_exchange_weak(currWriteCusor, nextWriteCusor));
 
         size_t index = currWriteCusor & mask_;
-        dataQueue_[index] = data;
+        dataQueue_[index].deviceId = data->deviceId;
+        dataQueue_[index].reportTime = analysis::dvvp::common::utils::Utils::GetClockMonotonicRaw();
+        dataQueue_[index].dataLen = data->dataLen;
+        dataQueue_[index].tag = *(reinterpret_cast<CONST_REPORT_CHUNK_TAG_PTR>(data->tag));
+        errno_t err = memcpy_s(dataQueue_[index].data.data, RECEIVE_CHUNK_SIZE, data->data, data->dataLen);
+        if (err != EOK) {
+            MSPROF_LOGE("memcpy data failed, err:%d, deviceID:%d, tag:%s, dataLen:%llu",
+                        static_cast<int>(err), dataQueue_[index].deviceId, data->tag, dataQueue_[index].dataLen);
+            return false;
+        }
         writeIndex_++;
         dataAvails_[index] = static_cast<uint64_t>(DataStatus::DATA_STATUS_READY);
 
