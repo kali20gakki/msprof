@@ -1107,7 +1107,7 @@ int SystemMode::StartDeviceJobs(const std::string& device)
     if (IsDeviceJob() && (!Platform::instance()->PlatformIsSocSide())) {
         ret = StartDeviceTask(resultDir, device);
         if (ret != PROFILING_SUCCESS) {
-            MSPROF_LOGE("StartHostTask failed");
+            MSPROF_LOGE("StartDeviceTask failed");
             StopTask();
             return PROFILING_FAILED;
         }
