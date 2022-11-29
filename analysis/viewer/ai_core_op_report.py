@@ -121,6 +121,7 @@ class AiCoreOpReport:
                 all_float_cols.append(val.replace("(GB/s)", ""))
                 all_float_cols.append(val.replace("_ratio", "_time"))
             all_float_cols.append("total_time")
+            all_float_cols.append("aiv_time")
             for index, col in enumerate(columns):
                 if col in all_float_cols:
                     # keep six decimal places for ai core float data
