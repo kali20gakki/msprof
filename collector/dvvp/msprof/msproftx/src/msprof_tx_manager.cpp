@@ -6,6 +6,7 @@
  */
 
 #include "msprof_tx_manager.h"
+#include "msprof_stamp_pool.h"
 
 #include "config/config.h"
 #include "errno/error_code.h"
@@ -211,16 +212,12 @@ int MsprofTxManager::SetStampTraceMessage(ACL_PROF_STAMP_PTR stamp, CONST_CHAR_P
             std::vector<std::string>({std::to_string(msgLen), "stamp", errorReason}));
         return PROFILING_FAILED;
     }
-    auto ret = memset_s(stamp->stampInfo.message, MAX_MSG_LEN, 0, MAX_MSG_LEN);
-    if (ret != EOK) {
-        MSPROF_LOGE("[SetStampTraceMessage]memset_s message failed, ret is %u", ret);
-        return PROFILING_FAILED;
-    }
-    ret = strncpy_s(stamp->stampInfo.message, MAX_MSG_LEN - 1, msg, msgLen);
+    auto ret = strncpy_s(stamp->stampInfo.message, MAX_MSG_LEN - 1, msg, msgLen);
     if (ret != EOK) {
         MSPROF_LOGE("[SetStampTraceMessage]strcpy_s message failed, ret is %u", ret);
         return PROFILING_FAILED;
     }
+    stamp->stampInfo.message[msgLen] = 0;
     MSPROF_LOGD("[SetStampTraceMessage]stamp set trace message:%s success.", stamp->stampInfo.message);
     return PROFILING_SUCCESS;
 }
@@ -242,9 +239,8 @@ int MsprofTxManager::Mark(ACL_PROF_STAMP_PTR stamp) const
     stamp->stampInfo.startTime = static_cast<uint64_t>(Utils::GetClockMonotonicRaw());
     stamp->stampInfo.endTime = stamp->stampInfo.startTime;
     stamp->stampInfo.eventType = static_cast<uint32_t>(EventType::MARK);
-    return ReportStampData(stamp->stampInfo);
+    return ReportStampData(stamp);
 }
-
 
 // stamp stack manage
 int MsprofTxManager::Push(ACL_PROF_STAMP_PTR stamp) const
@@ -276,12 +272,10 @@ int MsprofTxManager::Pop() const
         MSPROF_LOGE("[Pop]stampPool pop failed ,stamp is null!");
         return PROFILING_FAILED;
     }
-    auto &stampInfo = stamp->stampInfo;
-    stampInfo.endTime = static_cast<uint64_t>(Utils::GetClockMonotonicRaw());
-    stampInfo.eventType = static_cast<uint32_t>(EventType::PUSH_OR_POP);
-    return ReportStampData(stampInfo);
+    stamp->stampInfo.endTime = static_cast<uint64_t>(Utils::GetClockMonotonicRaw());
+    stamp->stampInfo.eventType = static_cast<uint32_t>(EventType::PUSH_OR_POP);
+    return ReportStampData(stamp);
 }
-
 
 // stamp map manage
 int MsprofTxManager::RangeStart(ACL_PROF_STAMP_PTR stamp, uint32_t *rangeId) const
@@ -317,39 +311,15 @@ int MsprofTxManager::RangeStop(uint32_t rangeId) const
             std::vector<std::string>({std::to_string(rangeId), "rangeId", errorReason}));
         return PROFILING_FAILED;
     }
-    auto stampInfo = stamp->stampInfo;
-    stampInfo.endTime = static_cast<uint64_t>(Utils::GetClockMonotonicRaw());
-    stampInfo.eventType = static_cast<uint32_t>(EventType::START_OR_STOP);
-    return ReportStampData(stampInfo);
+    stamp->stampInfo.endTime = static_cast<uint64_t>(Utils::GetClockMonotonicRaw());
+    stamp->stampInfo.eventType = static_cast<uint32_t>(EventType::START_OR_STOP);
+    return ReportStampData(stamp);
 }
 
-int MsprofTxManager::ReportStampData(MsprofStampInfo &stamp) const
+int MsprofTxManager::ReportStampData(MsprofStampInstance *stamp) const
 {
-    if (!isInit_) {
-        MSPROF_LOGE("[ReportStampData]MsprofTxManager is not inited yet");
-        return PROFILING_FAILED;
-    }
-    static const std::string MSPROF_TX_REPORTER_TAG = "msproftx";
-
-    stamp.processId = static_cast<uint32_t>(MmGetPid());
-    stamp.threadId = static_cast<uint32_t>(MmGetTid());
-    stamp.dataTag = MSPROF_MSPROFTX_DATA_TAG;
-    stamp.magicNumber = static_cast<uint16_t>(MSPROF_DATA_HEAD_MAGIC_NUM);
-
-    ReporterData reporterData;
-    memset_s(&reporterData, sizeof(ReporterData), 0, sizeof(ReporterData));
-    reporterData.deviceId = DEFAULT_HOST_ID;
-    auto err = memcpy_s(reporterData.tag, static_cast<size_t>(MSPROF_ENGINE_MAX_TAG_LEN),
-        MSPROF_TX_REPORTER_TAG.c_str(), MSPROF_TX_REPORTER_TAG.size());
-    if (err != EOK) {
-        MSPROF_LOGE("[ReportStampData] memcpy tag failed. ret is %u", err);
-        return PROFILING_FAILED;
-    }
-
-    reporterData.data = reinterpret_cast<unsigned char *>(&stamp);
-    reporterData.dataLen = sizeof(stamp);
-
-    auto ret = reporter_->Report(reporterData);
+    stamp->stampInfo.threadId = static_cast<uint32_t>(MmGetTid());
+    auto ret = reporter_->Report(stamp->report);
     if (ret != PROFILING_SUCCESS) {
         MSPROF_LOGE("[ReportStampData] report profiling data failed.");
         return PROFILING_FAILED;
