@@ -182,7 +182,7 @@ struct ProfileParams : BaseInfo {
           hccsProfiling("off"), hccsInterval(DEFAULT_PROFILING_INTERVAL_20MS),
           pcieInterval(DEFAULT_PROFILING_INTERVAL_20MS),
           dvpp_profiling("off"), dvpp_sampling_interval(DEFAULT_PROFILING_INTERVAL_20MS),
-          biu_freq(DEFAULT_PROFILING_BIU_FREQ),
+          biu("off"), biu_freq(DEFAULT_PROFILING_BIU_FREQ),
           msprof("off"), msproftx("off"),
           host_sys(""), host_sys_pid(HOST_PID_DEFAULT), host_sys_usage(""),
           host_disk_profiling("off"), host_osrt_profiling("off"),
@@ -408,6 +408,7 @@ struct ProfileParams : BaseInfo {
         FROM_STRING_VALUE(object, interconnection_profiling);
         FROM_INT_VALUE(object, interconnection_sampling_interval, DEFAULT_PROFILING_INTERVAL_10MS);
         FROM_STRING_VALUE(object, dvpp_profiling);
+        FROM_STRING_VALUE(object, biu);
         FROM_STRING_VALUE(object, nicProfiling);
         FROM_STRING_VALUE(object, roceProfiling);
         FROM_INT_VALUE(object, dvpp_sampling_interval, DEFAULT_PROFILING_INTERVAL_10MS);
