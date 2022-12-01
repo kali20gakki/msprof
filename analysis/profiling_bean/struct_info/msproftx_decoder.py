@@ -17,7 +17,8 @@ class MsprofTxDecoder(StructDecoder):
         self._event_type = filed[5]
         self._mix_message = filed[6:10]
         self._message_type = filed[10]
-        self._message = bytes.decode(filed[11]).replace('\x00', '')
+        zero_ind = filed[11].find(b'\x00')
+        self._message = bytes.decode(filed[11][0:zero_ind])
 
     @property
     def id_data(self: any) -> tuple:

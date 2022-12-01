@@ -27,8 +27,6 @@ enum class EventType {
     START_OR_STOP,
 };
 
-constexpr int CURRENT_STAMP_SIZE = 100;
-
 class MsprofTxManager : public analysis::dvvp::common::singleton::Singleton<MsprofTxManager> {
 public:
 
@@ -67,7 +65,7 @@ public:
     void SetReporterCallback(const MsprofReporterCallback func);
 
 private:
-    int ReportStampData(MsprofStampInfo &stamp) const;
+    int ReportStampData(MsprofStampInstance *stamp) const;
 
 private:
     bool isInit_;

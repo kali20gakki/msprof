@@ -133,12 +133,9 @@ TEST_F(MsprofUtest, MsprofTxManager)
     std::shared_ptr<MsprofTxManager> manager;
     MSVP_MAKE_SHARED0_BREAK(manager, MsprofTxManager);
 
-    MsprofStampInfo stampTest;
+    MsprofStampInstance stampTest;
 
-    int ret = manager->ReportStampData(stampTest);
-    EXPECT_EQ(PROFILING_FAILED, ret);
-
-    ret = manager->Init();
+    int ret = manager->Init();
     EXPECT_EQ(PROFILING_FAILED, ret);
 
     ret = manager->SetCategoryName(1, "test");
