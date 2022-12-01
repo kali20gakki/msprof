@@ -108,6 +108,8 @@ class DataLoader:
         """
         get data for vector bound
         """
+        if operator_dict.get('task_type') != 'AI_CORE':
+            return
         if operator_dict.get("vec_ratio") and operator_dict.get("mte2_ratio") \
                 and operator_dict.get("mac_ratio"):
             extend_data_dict["vector_bound"] = 0
@@ -146,8 +148,7 @@ class DataLoader:
             headers = ConfigManager.get(ConfigManager.MSPROF_EXPORT_DATA).get('op_summary', 'headers').split(",")
             configs = {StrConstant.CONFIG_HEADERS: headers}
             db_path = PathManager.get_db_path(project_path, DBNameConstant.DB_AICORE_OP_SUMMARY)
-            headers, data, _ = AiCoreOpReport.get_ai_core_op_summary_data(project_path, db_path,
-                                                                          infer_id, configs)
+            headers, data, _ = AiCoreOpReport.get_op_summary_data(project_path, db_path, infer_id, configs)
         else:
             param = {}
             headers, data, _ = MsvpConstant.MSVP_EMPTY_DATA
