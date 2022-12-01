@@ -18,6 +18,7 @@
 namespace Msprof {
 namespace Engine {
 using namespace analysis::dvvp::common::error;
+using namespace analysis::dvvp::common::queue;
 using namespace analysis::dvvp::transport;
 
 // init map
@@ -37,10 +38,7 @@ int MsprofCallbackHandler::HandleMsprofRequest(uint32_t type, VOID_PTR data, uin
 {
     switch (type) {
         case MSPROF_REPORTER_REPORT:
-            if (data != nullptr) {
-                return ReportData(data, len);
-            }
-            break;
+            return ReportData(data, len);
         case MSPROF_REPORTER_INIT:
             return StartReporter();
         case MSPROF_REPORTER_UNINIT:
@@ -100,16 +98,7 @@ int MsprofCallbackHandler::ReportData(CONST_VOID_PTR data, uint32_t len /* = 0 *
         MSPROF_LOGE("reporter is not started, module: %s", module_.c_str());
         return PROFILING_FAILED;
     }
-    if (len < sizeof(uint32_t)) {
-        MSPROF_LOGE("[ReportData] len is invalid %u", len);
-        return PROFILING_FAILED;
-    }
-    auto dataToReport = reinterpret_cast<Msprof::Engine::CONST_REPORT_DATA_PTR>(data);
-    if (dataToReport == nullptr) {
-        MSPROF_LOGE("[ReportData]Failed to call reinterpret_cast.");
-        return PROFILING_FAILED;
-    }
-    return reporter_->Report(dataToReport);
+    return reporter_->Report(reinterpret_cast<CONST_REPORT_DATA_PTR>(data));
 }
 
 int MsprofCallbackHandler::FlushData()

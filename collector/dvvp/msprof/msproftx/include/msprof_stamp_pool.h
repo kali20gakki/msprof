@@ -11,17 +11,21 @@
 #include <mutex>
 #include <vector>
 #include "prof_common.h"
+#include "prof_callback.h"
 
 namespace Msprof {
 namespace MsprofTx {
 
 // Specification
 constexpr int MAX_STAMP_SIZE = 10000;
+constexpr int CURRENT_STAMP_SIZE = 100;
 
 struct MsprofStampInstance {
+    ReporterData report;
     MsprofStampInfo stampInfo;
     int id;
     struct MsprofStampInstance* next;
+    struct MsprofStampInstance* prev;
 };
 
 struct MsprofStampCtrlHandle {
@@ -47,7 +51,7 @@ public:
     // get stamp from memory pool
     MsprofStampInstance* CreateStamp();
     // destroy stamp
-    void DestroyStamp(const MsprofStampInstance* stamp);
+    void DestroyStamp(MsprofStampInstance* stamp);
 
     // push/pob
     int MsprofStampPush(MsprofStampInstance* stamp);

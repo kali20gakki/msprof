@@ -37,8 +37,7 @@ using namespace analysis::dvvp::proto;
 using namespace analysis::dvvp::message;
 using namespace analysis::dvvp::common::memory;
 using namespace analysis::dvvp::common::config;
-using CONST_REPORT_DATA_PTR = const ReporterData *;
-
+using namespace analysis::dvvp::common::queue;
 struct ModuleIdName {
     uint32_t id;
     std::string name;
@@ -52,12 +51,13 @@ const std::vector<ModuleIdName> MSPROF_MODULE_ID_NAME_MAP = {
     {MSPROF_MODULE_RUNTIME, "runtime", RING_BUFF_CAPACITY},
     {MSPROF_MODULE_MSPROF, "Msprof", MSPROF_RING_BUFF_CAPACITY},
 };
+
 struct ReporterDataChunk {
-    char tag[MSPROF_ENGINE_MAX_TAG_LEN + 1];
     int32_t deviceId;
+    uint32_t dataLen;
     uint64_t reportTime;
-    uint64_t dataLen;
-    uint8_t data[RECEIVE_CHUNK_SIZE];
+    ReporterDataChunkTag tag;
+    ReporterDataChunkPayload data;
 };
 
 class ReceiveData {
@@ -95,7 +95,7 @@ protected:
     std::set<std::string> devIds_;
 
 private:
-    int DoReportData(const ReporterDataChunk &dataChunk);
+    int DoReportData(CONST_REPORT_DATA_PTR rData);
 
 private:
     analysis::dvvp::common::queue::RingBuffer<ReporterDataChunk> dataChunkBuf_;

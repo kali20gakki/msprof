@@ -17,7 +17,7 @@ namespace Msprof {
 namespace Engine {
 using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::common::config;
-static const ReporterDataChunk DEFAULT_DATA_CHUNK = { { 0 }, 0, 0, 0, { 0 } };
+static const ReporterDataChunk DEFAULT_DATA_CHUNK = {0, 0, 0, {0}, {0}};
 
 ReceiveData::ReceiveData()
     : started_(false),
@@ -56,7 +56,7 @@ void ReceiveData::Run(std::vector<SHARED_PTR_ALIA<FileChunkReq>>& fileChunks)
         totalDataLengthFromRingBuff_ += data.dataLen;
         batchSizeMax += data.dataLen;
 
-        std::string tagWizSuffix = std::string(data.tag) + "." + std::to_string(data.deviceId);
+        std::string tagWizSuffix = std::string(data.tag.tag) + "." + std::to_string(data.deviceId);
         // classify data by tag.deviceId
         auto iter = dataMap.find(tagWizSuffix);
         if (iter == dataMap.end()) {
@@ -156,51 +156,21 @@ int ReceiveData::Init(size_t capacity)
 int ReceiveData::DoReport(CONST_REPORT_DATA_PTR rData)
 {
     int ret = PROFILING_FAILED;
-    ReporterDataChunk dataChunk;
-    auto retCheck = memset_s(&dataChunk, sizeof(dataChunk), 0, sizeof(dataChunk));
-    FUNRET_CHECK_FAIL_RET_VALUE(retCheck, EOK, PROFILING_FAILED);
 
-    uint64_t startRawTime = analysis::dvvp::common::utils::Utils::GetClockMonotonicRaw();
-    do {
-        if (!started_ || rData == nullptr) {
-            MSPROF_LOGE("report failed! started %llu", started_);
-            break;
-        }
-        if (rData->data == nullptr || rData->dataLen <= 0) {
-            MSPROF_LOGE("report failed! dataLen %llu", rData->dataLen);
-            break;
-        }
-        if (rData->dataLen > RECEIVE_CHUNK_SIZE) {
-            MSPROF_LOGE("module:%s, tag(%s) dataLen:%d exceeds %d", moduleName_.c_str(),
-                        rData->tag, rData->dataLen, RECEIVE_CHUNK_SIZE);
-            break;
-        }
-        if (moduleName_ == "runtime" && rData->deviceId >= 64) {  // module runtime, deviceid>=64, return
-            MSPROF_LOGW("module:%s, invalid device id:%d", moduleName_.c_str(), rData->deviceId);
-            return PROFILING_SUCCESS;
-        }
-        dataChunk.deviceId = rData->deviceId;
-        dataChunk.reportTime = startRawTime;
-        dataChunk.dataLen = rData->dataLen;
-        errno_t err = memcpy_s(dataChunk.tag, MSPROF_ENGINE_MAX_TAG_LEN + 1, rData->tag, MSPROF_ENGINE_MAX_TAG_LEN);
-        if (err != EOK) {
-            MSPROF_LOGE("memcpy tag failed, err:%d, deviceID:%d, tag:%s, dataLen:%llu",
-                        static_cast<int>(err), dataChunk.deviceId, rData->tag, dataChunk.dataLen);
-            break;
-        }
-        err = memcpy_s(dataChunk.data, RECEIVE_CHUNK_SIZE, rData->data, rData->dataLen);
-        if (err != EOK) {
-            MSPROF_LOGE("memcpy data failed, err:%d, deviceID:%d, tag:%s, dataLen:%llu",
-                        static_cast<int>(err), dataChunk.deviceId, rData->tag, dataChunk.dataLen);
-            break;
-        }
-        if (DoReportData(dataChunk) != PROFILING_SUCCESS) {
-            break;
-        }
-        ret = PROFILING_SUCCESS;
-    } while (0);
+    if (!started_ || rData == nullptr) {
+        MSPROF_LOGE("module:%s, report failed! started %llu", moduleName_.c_str(), started_);
+        return PROFILING_FAILED;
+    }
+    if (rData->data == nullptr || rData->dataLen <= 0 || rData->dataLen > RECEIVE_CHUNK_SIZE) {
+        MSPROF_LOGE("module:%s, report failed! dataLen %llu", moduleName_.c_str(), rData->dataLen);
+        return PROFILING_FAILED;
+    }
+    if (rData->deviceId >= 64 && moduleName_ == "runtime") {  // module runtime, deviceid>=64, return
+        MSPROF_LOGW("module:%s, invalid device id:%d", moduleName_.c_str(), rData->deviceId);
+        return PROFILING_SUCCESS;
+    }
 
-    return ret;
+    return DoReportData(rData);
 }
 
 void ReceiveData::DoReportRun()
@@ -239,25 +209,25 @@ void ReceiveData::DoReportRun()
 * @param [in] dataChunk: the data from user
 * @return : success return PROFILING_SUCCESS, failed return PROFIING_FAILED
 */
-int ReceiveData::DoReportData(const ReporterDataChunk& dataChunk)
+int ReceiveData::DoReportData(CONST_REPORT_DATA_PTR rData)
 {
     int retu = PROFILING_FAILED;
     totalPushCounter_++;
-    bool ret = dataChunkBuf_.TryPush(dataChunk);
+    bool ret = dataChunkBuf_.TryPush(rData);
     if (!ret) {
         totalPushCounterFailed_++;
-        totalDataLengthFailed_ += dataChunk.dataLen;
+        totalDataLengthFailed_ += rData->dataLen;
         uint64_t totalLengthFailed = totalDataLengthFailed_.load(std::memory_order_relaxed);
         uint64_t totalPushFailed = totalPushCounterFailed_.load(std::memory_order_relaxed);
         size_t buffUsedSize = dataChunkBuf_.GetUsedSize();
         MSPROF_LOGE("try push ring buff failed, deviceID:%d, module:%s, tag:%s, dataLen:%llu,"
             " totalPushCounterFailed_:%llu, totalDataLengthFailed_:%llu, buffUsedSize:%llu",
-            dataChunk.deviceId, moduleName_.c_str(), dataChunk.tag, dataChunk.dataLen,
+            rData->deviceId, moduleName_.c_str(), rData->tag, rData->dataLen,
             totalPushFailed, totalLengthFailed, buffUsedSize);
         retu = PROFILING_FAILED;
     } else {
         totalPushCounterSuccess_++;
-        totalDataLengthSuccess_ += dataChunk.dataLen;
+        totalDataLengthSuccess_ += rData->dataLen;
         retu = PROFILING_SUCCESS;
     }
     return retu;
@@ -289,20 +259,20 @@ int ReceiveData::DumpData(std::vector<ReporterDataChunk> &message, SHARED_PTR_AL
     bool isFirstMessage = true;
     for (size_t i = 0; i < message.size(); i++) {
         size_t messageLen = static_cast<size_t>(message[i].dataLen);
-        CHAR_PTR dataPtr = reinterpret_cast<CHAR_PTR>(&message[i].data[0]);
+        CHAR_PTR dataPtr = reinterpret_cast<CHAR_PTR>(&message[i].data.data[0]);
         if (dataPtr == nullptr) {
             return PROFILING_FAILED;
         }
         if (isFirstMessage) { // deal with the data only need to init once
             jobCtx->dev_id = std::to_string(message[i].deviceId);
-            jobCtx->tag = std::string(message[i].tag, strlen(message[i].tag));
+            jobCtx->tag = std::string(message[i].tag.tag, strlen(message[i].tag.tag));
             fileChunk->set_filename(moduleName_);
             fileChunk->set_offset(-1);
             chunkLen = messageLen;
             chunk = std::string(dataPtr, chunkLen);
             fileChunk->set_islastchunk(false);
             fileChunk->set_needack(false);
-            fileChunk->set_tag(std::string(message[i].tag, strlen(message[i].tag)));
+            fileChunk->set_tag(std::string(message[i].tag.tag, strlen(message[i].tag.tag)));
             fileChunk->set_tagsuffix(jobCtx->dev_id);
             fileChunk->set_chunkstarttime(message[i].reportTime);
             fileChunk->set_chunkendtime(message[i].reportTime);
