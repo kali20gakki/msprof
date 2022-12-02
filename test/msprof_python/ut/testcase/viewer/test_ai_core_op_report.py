@@ -100,33 +100,33 @@ class TestAiCoreOpReport(unittest.TestCase):
         with mock.patch(NAMESPACE + '.AiCoreOpReport._get_op_summary_data', return_value=[]):
             check = AiCoreOpReport()
             ProfilingScene()._scene = Constant.SINGLE_OP
-            res = check.get_ai_core_op_summary_data('', '', 1, {})
-        self.assertEqual(res[1], [])
+            res = check.get_ai_core_op_summary_data('', '', {})
+        self.assertEqual(res, [])
 
         with mock.patch(NAMESPACE + '.AiCoreOpReport._get_op_summary_data', return_value=[]):
             check = AiCoreOpReport()
             ProfilingScene().init('')
             ProfilingScene()._scene = Constant.STEP_INFO
-            res = check.get_ai_core_op_summary_data('', '', 1, {})
-        self.assertEqual(res[1], [])
+            res = check.get_ai_core_op_summary_data('', '', {})
+        self.assertEqual(res, [])
 
     def test_get_ai_core_op_summary_data_1(self):
         with mock.patch(NAMESPACE + '.AiCoreOpReport._get_op_summary_data', side_effect=TypeError):
-            res = AiCoreOpReport.get_ai_core_op_summary_data('', '', 1, {})
-        self.assertEqual(res, MsvpConstant.MSVP_EMPTY_DATA)
+            res = AiCoreOpReport.get_ai_core_op_summary_data('', '',  {})
+        self.assertEqual(res, [])
 
         with mock.patch(NAMESPACE + '.DBManager.check_connect_db_path', return_value=(None, None)), \
                 mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=False):
-            res = AiCoreOpReport.get_ai_core_op_summary_data('', '', 1, {})
-        self.assertEqual(res, MsvpConstant.MSVP_EMPTY_DATA)
+            res = AiCoreOpReport.get_ai_core_op_summary_data('', '', {})
+        self.assertEqual(res, [])
 
         with mock.patch(NAMESPACE + '.DBManager.check_connect_db_path', return_value=(1, 2)), \
-                mock.patch(NAMESPACE + '.AiCoreOpReport._get_op_summary_data', return_value=([], [])), \
+                mock.patch(NAMESPACE + '.AiCoreOpReport._get_op_summary_data', return_value=[]), \
                 mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True):
             ProfilingScene().init('')
             ProfilingScene()._scene = Constant.STEP_INFO
-            res = AiCoreOpReport.get_ai_core_op_summary_data('', '', 1, {})
-        self.assertEqual(res, MsvpConstant.MSVP_EMPTY_DATA)
+            res = AiCoreOpReport.get_ai_core_op_summary_data('', '',  {})
+        self.assertEqual(res, [])
 
     def test_update_model_name_and_infer_id(self):
         data = [[1, 2, 9, 'global_step/Assign', 'Assign', 'AI_CORE',
@@ -217,8 +217,8 @@ class TestAiCoreOpReport(unittest.TestCase):
                 headers = config.get("headers")
                 ProfilingScene().init('')
                 ProfilingScene()._scene = Constant.SINGLE_OP
-                res = AiCoreOpReport._get_op_summary_data('', db_open.db_curs, headers, 1)
-            self.assertEqual(res, ([], []))
+                res = AiCoreOpReport._get_op_summary_data('', db_open.db_curs, headers)
+            self.assertEqual(res, [])
 
     def test_union_task_ge_ai_core_data(self):
         expect_res = [(1, 2, 3, 4, 10), (4, 5, 6, 7, 40)]

@@ -16,9 +16,9 @@ class RuleManager:
     rename the file in the future
     """
 
-    def __init__(self: any, project: str, device_id: str, iter_id: str) -> None:
+    def __init__(self: any, project: str, device_id: str) -> None:
         self.rule_list = []
-        self.data_mgr = DataManager(project, device_id, iter_id)
+        self.data_mgr = DataManager(project, device_id)
         self.condition_mgr = NetConditionManager()
         self.rules = self._load_rules()
         self.tuning_control = TuningControl()

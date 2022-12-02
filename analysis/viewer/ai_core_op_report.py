@@ -41,7 +41,7 @@ class AiCoreOpReport:
                           "aic_vec_fp32_ratio", "aic_vec_fp16_ratio", "aic_vec_int32_ratio",
                           "aic_vec_misc_ratio", "aic_vec_fp16_128lane_ratio", "aic_vec_fp16_64lane_ratio",
                           "aic_vec_bankgroup_cflt_ratio", "aic_vec_bank_cflt_ratio", "aic_vec_resc_cflt_ratio"]
-    ADDITION_HEADER = ["Context ID", "Mix Block Dim", "aiv_time(us)"]
+    ADDITION_HEADER = ["Context ID", "Mix Block Dim", "aiv_time"]
     TENSOR_HEADERS = [
         "Input Shapes", "Input Data Types", "Input Formats", "Output Shapes", "Output Data Types", "Output Formats"
     ]
@@ -153,12 +153,14 @@ class AiCoreOpReport:
         :param configs: info config
         :return: headers and data
         """
-        ai_core_data = cls.get_ai_core_op_summary_data(project_path, db_path, iter_id, configs)
+        ai_core_data = cls.get_ai_core_op_summary_data(project_path, db_path, configs)
         data = cls.get_ai_cpu_op_summary_data(project_path, db_path, iter_id, ai_core_data, configs)
-        return data
+        cls.delete_useless_cols(configs.get('headers'), data)
+        add_aicore_units(configs.get('headers'))
+        return configs.get('headers'), data, len(data)
 
     @classmethod
-    def get_ai_cpu_op_summary_data(cls: any, project_path: str, db_path: str, *args: any) -> tuple:
+    def get_ai_cpu_op_summary_data(cls: any, project_path: str, db_path: str, *args: any) -> list:
         """
         get ai cpu op summary data
         :param project_path: project path
@@ -170,8 +172,7 @@ class AiCoreOpReport:
         if not cls._check_ai_cpu_data(conn, curs):
             return data
         try:
-            data = cls.get_ai_cpu_data(project_path, curs, iter_id, data, configs)
-            return data
+            return cls.get_ai_cpu_data(project_path, curs, iter_id, data, configs)
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as op_err:
             logging.error(str(op_err), exc_info=Constant.TRACE_BACK_SWITCH)
             return data
@@ -179,7 +180,7 @@ class AiCoreOpReport:
             DBManager.destroy_db_connect(conn, curs)
 
     @classmethod
-    def get_ai_cpu_data(cls: any, project_path: str, curs: any, *args: any) -> tuple:
+    def get_ai_cpu_data(cls: any, project_path: str, curs: any, *args: any) -> list:
         """
         ai cpu metric value is N/A
         """
@@ -189,21 +190,19 @@ class AiCoreOpReport:
             return data
         if not ProfilingScene().is_operator():
             hardware_op_datas = cls._update_model_name_and_infer_id(project_path, hardware_op_datas)
-        if not data[1]:
-            headers = cls.get_op_summary_header(configs)
-            return headers, hardware_op_datas, len(hardware_op_datas)
+        if not data:
+            return hardware_op_datas
 
-        op_data = data[1]
-        if len(op_data[0]) > len(hardware_op_datas[0]):
+        if len(data[0]) > len(hardware_op_datas[0]):
             for index, ai_cpu_data in enumerate(hardware_op_datas):
-                ai_cpu_data += (Constant.NA,) * (len(op_data[0]) - len(ai_cpu_data))
+                ai_cpu_data += (Constant.NA,) * (len(data[0]) - len(ai_cpu_data))
                 hardware_op_datas[index] = list(ai_cpu_data)
-        op_data.extend(hardware_op_datas)
+        data.extend(hardware_op_datas)
         task_start_index = cls.START_TIME_INDEX
         if StrConstant.TASK_START_TIME in data[0]:
             task_start_index = data[0].index(StrConstant.TASK_START_TIME)
-        op_data.sort(key=lambda x: x[task_start_index])
-        return data[0], op_data, len(op_data)
+        data.sort(key=lambda x: x[task_start_index])
+        return data
 
     @classmethod
     def get_op_summary_header(cls: any, configs: dict) -> list:
@@ -230,25 +229,23 @@ class AiCoreOpReport:
             i += 1
 
     @classmethod
-    def get_ai_core_op_summary_data(cls: any, project_path: str, db_path: str, iter_id: int, configs: dict) -> tuple:
+    def get_ai_core_op_summary_data(cls: any, project_path: str, db_path: str, configs: dict) -> list:
         """
         get ai core op summary data
         :param project_path:
         :param db_path:
-        :param iter_id:
         :param configs:
         :return:
         """
         conn, curs = DBManager.check_connect_db_path(db_path)
         if not cls._check_op_summary_table_no_op_scene(conn, curs):
-            return MsvpConstant.MSVP_EMPTY_DATA
+            return []
         headers = cls.get_op_summary_header(configs)
         try:
-            data, headers = cls._get_op_summary_data(project_path, curs, headers, iter_id)
-            return headers, data, len(data)
+            return cls._get_op_summary_data(project_path, curs, headers)
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as op_err:
             logging.error(str(op_err), exc_info=Constant.TRACE_BACK_SWITCH)
-            return MsvpConstant.MSVP_EMPTY_DATA
+            return []
         finally:
             DBManager.destroy_db_connect(conn, curs)
 
@@ -285,35 +282,36 @@ class AiCoreOpReport:
         return True
 
     @classmethod
-    def _get_op_summary_data(cls: any, project_path: str, curs: any, headers: list, iter_id: int) -> tuple:
+    def _get_op_summary_data(cls: any, project_path: str, curs: any, headers: list) -> list:
         union_sql, headers = cls._get_sql_and_headers(curs, headers)
         headers.append(cls.ADDITION_HEADER[0])
         ai_core_group_dict, headers = cls._get_aicore_data(curs, headers)
         data = DBManager.fetch_all_data(curs, union_sql, ('{0}'.format(Constant.TASK_TYPE_AI_CPU),))
         if not data:
-            return [], []
+            return []
         data = cls._union_task_ge_ai_core_data(data, ai_core_group_dict)
         data = cls._update_op_name_from_hash(project_path, data)
         if not ProfilingScene().is_operator():
             data = cls._update_model_name_and_infer_id(project_path, data)
         cls._add_memory_bound(headers, data)
-        headers = add_aicore_units(headers)
-        return cls._delete_useless_cols(headers, data)
+        return data
 
     @classmethod
-    def _delete_useless_cols(cls: any, headers: list, summary_data: list) -> tuple:
+    def delete_useless_cols(cls: any, headers: list, summary_data: list) -> list:
         if ChipManager().is_chip_v4():
-            return summary_data, headers
+            return summary_data
         for header in cls.ADDITION_HEADER:
             if header not in headers:
                 continue
             index_id = headers.index(header)
             headers.remove(header)
             for index, data in enumerate(summary_data):
+                if index_id >= len(data):
+                    continue
                 tmp_data = list(data)
                 tmp_data.pop(index_id)
                 summary_data[index] = tmp_data
-        return summary_data, headers
+        return summary_data
 
     @classmethod
     def _update_model_name_and_infer_id(cls: any, project_path: str, ai_core_data: list) -> list:
