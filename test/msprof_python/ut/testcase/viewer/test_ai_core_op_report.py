@@ -27,16 +27,16 @@ class TestAiCoreOpReport(unittest.TestCase):
         with mock.patch(NAMESPACE + '.AiCoreOpReport.get_ai_core_op_summary_data', return_value=["", [], []]), \
                 mock.patch(NAMESPACE + '.AiCoreOpReport.get_ai_cpu_op_summary_data', return_value=("", [], 0)):
             check = AiCoreOpReport()
-            res = check.get_op_summary_data("0", "", 1, {})
+            res = check.get_op_summary_data("0", "", {})
         self.assertEqual(res, ("", [], 0))
 
     def test_get_ai_cpu_op_summary_data_error(self):
         with mock.patch(NAMESPACE + '.AiCoreOpReport.get_ai_cpu_data', side_effect=TypeError):
-            res = AiCoreOpReport.get_ai_cpu_op_summary_data('', '', 1, [], {})
+            res = AiCoreOpReport.get_ai_cpu_op_summary_data('', '', [], {})
         self.assertEqual(res, [])
         with mock.patch(NAMESPACE + '.DBManager.check_connect_db_path', return_value=(None, None)), \
                 mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True):
-            res = AiCoreOpReport.get_ai_cpu_op_summary_data('', '', 1, [], {})
+            res = AiCoreOpReport.get_ai_cpu_op_summary_data('', '', [], {})
         self.assertEqual(res, [])
 
     def test_get_ai_cpu_op_summary_data_normal(self):
@@ -71,7 +71,7 @@ class TestAiCoreOpReport(unittest.TestCase):
                 mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True), \
                 mock.patch(NAMESPACE + '.DBManager.destroy_db_connect'):
             ProfilingScene()._scene = Constant.SINGLE_OP
-            res = AiCoreOpReport.get_ai_cpu_op_summary_data('', '', 1, MsvpConstant.MSVP_EMPTY_DATA, config)
+            res = AiCoreOpReport.get_ai_cpu_op_summary_data('', '', MsvpConstant.MSVP_EMPTY_DATA, config)
         self.assertEqual(len(res), 3)
 
         with mock.patch(NAMESPACE + '.DBManager.check_connect_db_path', return_value=test_sql), \
@@ -79,7 +79,7 @@ class TestAiCoreOpReport(unittest.TestCase):
                 mock.patch(NAMESPACE + '.DBManager.destroy_db_connect'):
             ProfilingScene().init("")
             ProfilingScene()._scene = Constant.TRAIN
-            res = AiCoreOpReport.get_ai_cpu_op_summary_data('', '', 1, MsvpConstant.MSVP_EMPTY_DATA, config)
+            res = AiCoreOpReport.get_ai_cpu_op_summary_data('', '', MsvpConstant.MSVP_EMPTY_DATA, config)
         self.assertEqual(len(res), 3)
 
         with mock.patch(NAMESPACE + '.DBManager.check_connect_db_path', return_value=test_sql), \
@@ -91,7 +91,7 @@ class TestAiCoreOpReport(unittest.TestCase):
                               2.991, 2692, 0.0, 0.0, 0.0)], 1)
             ProfilingScene().init("")
             ProfilingScene()._scene = Constant.TRAIN
-            res = AiCoreOpReport.get_ai_cpu_op_summary_data('', '', 1, ai_core_data, config)
+            res = AiCoreOpReport.get_ai_cpu_op_summary_data('', '', ai_core_data, config)
 
         db_manager.destroy(test_sql)
         self.assertEqual(len(res), 3)
