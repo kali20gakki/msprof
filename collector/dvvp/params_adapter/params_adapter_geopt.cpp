@@ -117,6 +117,10 @@ void ParamsAdapterGeOpt::GenGeOptionsContainer(SHARED_PTR_ALIA<ProfGeOptionsConf
     if (biuFreqParam.compare("0") != 0) {
         paramContainer_[INPUT_CFG_COM_BIU_FREQ] = biuFreqParam;
     }
+    std::string l2FreqParam = std::to_string(geCfg->l2_freq());
+    if (l2FreqParam.compare("0") != 0) {
+        paramContainer_[INPUT_CFG_COM_L2_SAMPLE_FREQ] = l2FreqParam;
+    }
     for (auto configOpt : geOptionsWholeConfig_) {
         if (!paramContainer_[configOpt].empty()) {
             setConfig_.insert(configOpt);

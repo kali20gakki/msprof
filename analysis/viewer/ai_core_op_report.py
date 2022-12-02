@@ -145,16 +145,16 @@ class AiCoreOpReport:
                 data[index] = add_mem_bound(list(row), vec_index, mac_index, mte2_index)
 
     @classmethod
-    def get_op_summary_data(cls: any, project_path: str, db_path: str, iter_id: int, configs: dict) -> tuple:
+    def get_op_summary_data(cls: any, project_path: str, db_path: str, configs: dict) -> tuple:
         """
         get op summary data
         :param project_path: sqlite file path
-        :param iter_id: iteration id
+        :param db_path: db path
         :param configs: info config
         :return: headers and data
         """
         ai_core_data = cls.get_ai_core_op_summary_data(project_path, db_path, configs)
-        data = cls.get_ai_cpu_op_summary_data(project_path, db_path, iter_id, ai_core_data, configs)
+        data = cls.get_ai_cpu_op_summary_data(project_path, db_path, ai_core_data, configs)
         cls.delete_useless_cols(configs.get('headers'), data)
         add_aicore_units(configs.get('headers'))
         return configs.get('headers'), data, len(data)
@@ -167,12 +167,12 @@ class AiCoreOpReport:
         :param db_path: database path
         :return: headers and data
         """
-        iter_id, data, configs = args
+        data, configs = args
         conn, curs = DBManager.check_connect_db_path(db_path)
         if not cls._check_ai_cpu_data(conn, curs):
             return data
         try:
-            return cls.get_ai_cpu_data(project_path, curs, iter_id, data, configs)
+            return cls.get_ai_cpu_data(project_path, curs, data, configs)
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as op_err:
             logging.error(str(op_err), exc_info=Constant.TRACE_BACK_SWITCH)
             return data
@@ -184,7 +184,7 @@ class AiCoreOpReport:
         """
         ai cpu metric value is N/A
         """
-        iter_id, data, configs = args
+        data, configs = args
         hardware_op_datas = cls._get_hardware_op_datas(curs)
         if not hardware_op_datas:
             return data

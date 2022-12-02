@@ -32,6 +32,7 @@ enum class PlatformType {
     LHISI_TYPE,
     DC_TYPE,
     CHIP_V4_1_0,
+    MINI_V3_TYPE = 7,
     END_TYPE
 };
 const std::map<PlatformType, std::string> FREQUENCY_TYPE = {
@@ -40,7 +41,8 @@ const std::map<PlatformType, std::string> FREQUENCY_TYPE = {
     {PlatformType::LHISI_TYPE, "24"},
     {PlatformType::DC_TYPE, "38.4"},
     {PlatformType::MDC_TYPE, "38.4"},
-    {PlatformType::CHIP_V4_1_0, "100"}
+    {PlatformType::CHIP_V4_1_0, "100"},
+    {PlatformType::MINI_V3_TYPE, "100"}
 };
 
 const std::map<PlatformType, std::string> AIC_TYPE = {
@@ -49,7 +51,8 @@ const std::map<PlatformType, std::string> AIC_TYPE = {
     {PlatformType::LHISI_TYPE, "300"},
     {PlatformType::DC_TYPE, "1150"},
     {PlatformType::MDC_TYPE, "960"},
-    {PlatformType::CHIP_V4_1_0, "800"}
+    {PlatformType::CHIP_V4_1_0, "800"},
+    {PlatformType::MINI_V3_TYPE, "800"}
 };
 
 const std::map<std::string, std::string> AICORE_METRICS_LIST = {
@@ -72,12 +75,15 @@ const std::map<std::string, std::string> AI_VECTOR_CORE_METRICS_LIST = {
 const std::map<PlatformType, std::string> L2_CACHE_PLATFORM_METRICS_MAP = {
     {PlatformType::CLOUD_TYPE, "HitRateAndVictimRateCloud"},
     {PlatformType::DC_TYPE, "HitRateAndVictimRate"},
-    {PlatformType::MDC_TYPE, "HitRateAndVictimRate"}
+    {PlatformType::MDC_TYPE, "HitRateAndVictimRate"},
+    {PlatformType::MINI_V3_TYPE, "HitRateAndVictimRateAllocate"},
+    {PlatformType::CHIP_V4_1_0, "HitRateAndVictimRateAllocate"}
 };
 
 const std::map<std::string, std::string> L2_CACHE_METRICS_EVENTS_MAP = {
     {"HitRateAndVictimRate", "0x78,0x79,0x77,0x71,0x6a,0x6c,0x74,0x62"},
-    {"HitRateAndVictimRateCloud", "0x5b,0x59,0x5c,0x7d,0x7e,0x71,0x79,0x7c"}
+    {"HitRateAndVictimRateCloud", "0x5b,0x59,0x5c,0x7d,0x7e,0x71,0x79,0x7c"},
+    {"HitRateAndVictimRateAllocate", "0xFB,0xFC,0x9A,0xF6"}
 };
 
 class ConfigManager : public analysis::dvvp::common::singleton::Singleton<ConfigManager> {

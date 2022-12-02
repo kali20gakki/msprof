@@ -19,6 +19,7 @@ message ProfAclConfig {
     string runtime_api = 14;
     string host_sys_usage = 15;
     string host_sys_usage_freq = 16;
+    uint32 l2_freq = 17;
 }
 
 message ProfGeOptionsConfig {
@@ -40,6 +41,7 @@ message ProfGeOptionsConfig {
     string runtime_api = 20;
     string host_sys_usage = 21;
     string host_sys_usage_freq = 22;
+    uint32 l2_freq = 23;
 }
 
 message ProfAclInitConfig {

@@ -17,7 +17,7 @@ class TestMetaConditionManager(unittest.TestCase):
     def test_load_condition_files(self):
         key = MetaConditionManager()
         load_condition_files()
-        self.assertEqual(len(key.conditions), 28)
+        self.assertEqual(len(key.conditions), 26)
 
     def test_format_operator(self):
         expression = r'\+-|\+\+|--|-\+'

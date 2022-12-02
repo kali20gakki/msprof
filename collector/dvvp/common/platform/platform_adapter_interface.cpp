@@ -209,12 +209,13 @@ void PlatformAdapterInterface::SetParamsForHCCL()
     }
 }
 
-void PlatformAdapterInterface::SetParamsForL2Cache()
+void PlatformAdapterInterface::SetParamsForL2Cache(const int &samplingInterval)
 {
     bool ret = false;
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_TASK_L2_CACHE) != supportSwitch_.end()) {
         params_->l2CacheTaskProfiling = MSPROF_SWITCH_ON;
         params_->l2CacheTaskProfilingEvents = l2CacheEvents_;
+        params_->l2Cache_sample_freq = samplingInterval;
         params_->dataTypeConfig |= PROF_L2CACHE;
         ret = true;
     }

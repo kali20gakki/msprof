@@ -102,6 +102,7 @@ struct ProfileParams : BaseInfo {
     int hbmInterval;
     std::string l2CacheTaskProfiling;
     std::string l2CacheTaskProfilingEvents;
+    int l2Cache_sample_freq;
 
     std::string io_profiling;
     int io_sampling_interval;
@@ -174,7 +175,7 @@ struct ProfileParams : BaseInfo {
           hardware_mem("off"), hardware_mem_sampling_interval(DEFAULT_PROFILING_INTERVAL_20MS),
           llc_interval(DEFAULT_PROFILING_INTERVAL_20MS),
           ddr_interval(DEFAULT_PROFILING_INTERVAL_20MS), ddr_master_id(0),
-          hbmInterval(DEFAULT_PROFILING_INTERVAL_20MS),
+          hbmInterval(DEFAULT_PROFILING_INTERVAL_20MS), l2Cache_sample_freq(DEFAULT_PROFILING_INTERVAL_10MS),
           io_profiling("off"), io_sampling_interval(DEFAULT_PROFILING_INTERVAL_10MS),
           nicProfiling("off"), nicInterval(DEFAULT_PROFILING_INTERVAL_10MS),
           roceProfiling("off"), roceInterval(DEFAULT_PROFILING_INTERVAL_10MS),
@@ -313,6 +314,7 @@ struct ProfileParams : BaseInfo {
         SET_VALUE(object, hwts_log1);
         SET_VALUE(object, l2CacheTaskProfiling);
         SET_VALUE(object, l2CacheTaskProfilingEvents);
+        SET_VALUE(object, l2Cache_sample_freq);
         SET_VALUE(object, hccsProfiling);
         SET_VALUE(object, hccsInterval);
         SET_VALUE(object, pcieProfiling);
@@ -438,6 +440,7 @@ struct ProfileParams : BaseInfo {
         FROM_STRING_VALUE(object, acc_pmu_mode);
         FROM_STRING_VALUE(object, l2CacheTaskProfiling);
         FROM_STRING_VALUE(object, l2CacheTaskProfilingEvents);
+        FROM_INT_VALUE(object, l2Cache_sample_freq, DEFAULT_PROFILING_INTERVAL_10MS);
         FROM_STRING_VALUE(object, hccsProfiling);
         FROM_INT_VALUE(object, hccsInterval, DEFAULT_PROFILING_INTERVAL_100MS);
         FROM_STRING_VALUE(object, pcieProfiling);
