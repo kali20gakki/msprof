@@ -10,6 +10,7 @@ from config.config_manager import ConfigManager
 from common_func.common_prof_rule import CommonProfRule
 from common_func.common import CommonConstant
 from common_func.common import generate_config
+from common_func.msvp_common import is_number
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
@@ -108,10 +109,8 @@ class DataLoader:
         """
         get data for vector bound
         """
-        if operator_dict.get('task_type') != 'AI_CORE':
-            return
-        if operator_dict.get("vec_ratio") and operator_dict.get("mte2_ratio") \
-                and operator_dict.get("mac_ratio"):
+        if is_number(operator_dict.get("vec_ratio")) and is_number(operator_dict.get("mte2_ratio")) \
+                and is_number(operator_dict.get("mac_ratio")):
             extend_data_dict["vector_bound"] = 0
             if max(operator_dict.get("mte2_ratio"), operator_dict.get("mac_ratio")):
                 extend_data_dict["vector_bound"] = \

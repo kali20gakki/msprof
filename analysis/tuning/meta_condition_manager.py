@@ -9,7 +9,7 @@ from abc import abstractmethod
 
 from common_func.common_prof_rule import CommonProfRule
 from common_func.ms_constant.number_constant import NumberConstant
-from common_func.msvp_common import is_number, check_division
+from common_func.msvp_common import is_number, is_nonzero_number
 from common_func.regex_manager import RegexManagerConstant
 
 from config.config_manager import ConfigManager
@@ -48,15 +48,15 @@ class MetaConditionManager:
         "<": lambda left, right: float(left) < float(right) if is_number(left) and is_number(right) else False,
         "==": lambda left, right: compare_number(left, right, equal_operator=True),
         "!=": lambda left, right: compare_number(left, right, equal_operator=False),
-        "in": lambda left, right: right in left if isinstance(left, str) and isinstance(right, str) else False
+        "contain": lambda left, right: right in left if isinstance(left, str) and isinstance(right, str) else False
     }
 
     CALCULATE_MAP = {
         "+": lambda left, right: float(left) + float(right) if is_number(left) and is_number(right) else 0,
         "-": lambda left, right: float(left) - float(right) if is_number(left) and is_number(right) else 0,
         "*": lambda left, right: float(left) * float(right) if is_number(left) and is_number(right) else 0,
-        "/": lambda left, right: float(left) / float(right) if is_number(left) and check_division(right) else 0,
-        "%": lambda left, right: float(left) % float(right) if is_number(left) and check_division(right) else 0,
+        "/": lambda left, right: float(left) / float(right) if is_number(left) and is_nonzero_number(right) else 0,
+        "%": lambda left, right: float(left) % float(right) if is_number(left) and is_nonzero_number(right) else 0,
         "&": lambda left, right: int(left) & int(float(right)) if is_number(left) and is_number(right) else 0
     }
 
@@ -197,7 +197,6 @@ class MetaConditionManager:
         """
         calculate conditions
         """
-        condition_id = condition_id.replace(" ", "")
         condition_ids = list(filter(None, re.split(RegexManagerConstant.REGEX_SPLIT_CONNECTED, condition_id)))
         condition_id_dict = {}
         for cond_id in condition_ids:
