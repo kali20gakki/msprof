@@ -255,6 +255,8 @@ constexpr int AIC_SAMPLING_FREQ_MIN_NUM = 1;
 constexpr int AIC_SAMPLING_FREQ_MAX_NUM = 100;
 constexpr int AIV_SAMPLING_FREQ_MIN_NUM = 1;
 constexpr int AIV_SAMPLING_FREQ_MAX_NUM = 100;
+constexpr int L2_SAMPLING_FREQ_MIN_NUM = 1;
+constexpr int L2_SAMPLING_FREQ_MAX_NUM = 100;
 }  // namespace config
 }  // namespace common
 }  // namespace dvvp

@@ -2,8 +2,6 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 
-import os
-import json
 import logging
 import re
 import time
@@ -11,7 +9,7 @@ from abc import abstractmethod
 
 from common_func.common_prof_rule import CommonProfRule
 from common_func.ms_constant.number_constant import NumberConstant
-from common_func.msvp_common import is_number
+from common_func.msvp_common import is_number, is_nonzero_number
 from common_func.regex_manager import RegexManagerConstant
 
 from config.config_manager import ConfigManager
@@ -49,16 +47,17 @@ class MetaConditionManager:
         ">": lambda left, right: float(left) > float(right) if is_number(left) and is_number(right) else False,
         "<": lambda left, right: float(left) < float(right) if is_number(left) and is_number(right) else False,
         "==": lambda left, right: compare_number(left, right, equal_operator=True),
-        "!=": lambda left, right: compare_number(left, right, equal_operator=False)
+        "!=": lambda left, right: compare_number(left, right, equal_operator=False),
+        "contain": lambda left, right: right in left if isinstance(left, str) and isinstance(right, str) else False
     }
 
     CALCULATE_MAP = {
-        "+": lambda left, right: float(left) + float(right) if left and right else False,
-        "-": lambda left, right: float(left) - float(right) if left and right else False,
-        "*": lambda left, right: float(left) * float(right) if left and right else False,
-        "/": lambda left, right: float(left) / float(right) if left and right else False,
-        "%": lambda left, right: float(left) % float(right) if left and right else False,
-        "&": lambda left, right: int(left) & int(float(right)) if is_number(left) and is_number(right) else False
+        "+": lambda left, right: float(left) + float(right) if is_number(left) and is_number(right) else 0,
+        "-": lambda left, right: float(left) - float(right) if is_number(left) and is_number(right) else 0,
+        "*": lambda left, right: float(left) * float(right) if is_number(left) and is_number(right) else 0,
+        "/": lambda left, right: float(left) / float(right) if is_number(left) and is_nonzero_number(right) else 0,
+        "%": lambda left, right: float(left) % float(right) if is_number(left) and is_nonzero_number(right) else 0,
+        "&": lambda left, right: int(left) & int(float(right)) if is_number(left) and is_number(right) else 0
     }
 
     REGEX_CALCULATE_MAP = {

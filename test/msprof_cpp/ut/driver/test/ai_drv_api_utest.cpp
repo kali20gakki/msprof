@@ -386,10 +386,10 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvFmkDataStart) {
 TEST_F(DRIVER_AI_DRV_API_TEST, DrvL2CacheTaskStart) {
     GlobalMockObject::verify();
 
-    int prof_device_id = 0;
+    int profDeviceId = 0;
     analysis::dvvp::driver::AI_DRV_CHANNEL prof_channel = analysis::dvvp::driver::PROF_CHANNEL_FMK;
-    int prof_sample_period = 10;
-    std::string prof_data_file_path = "/path/to/data";
+    int profSamplePeriod = 10;
+    std::string profDataFilePath = "/path/to/data";
     std::vector<std::string> prof_events;
 
     prof_events.push_back("0x5b");
@@ -401,10 +401,35 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvL2CacheTaskStart) {
         .then(returnValue(PROF_OK));
 
     EXPECT_EQ(PROFILING_FAILED, analysis::dvvp::driver::DrvL2CacheTaskStart(
-        prof_device_id, prof_channel, prof_events));
+        profDeviceId, prof_channel, prof_events));
 
     EXPECT_EQ(PROFILING_SUCCESS, analysis::dvvp::driver::DrvL2CacheTaskStart(
-        prof_device_id, prof_channel, prof_events));
+        profDeviceId, prof_channel, prof_events));
+}
+
+TEST_F(DRIVER_AI_DRV_API_TEST, DrvL2CacheSampleStart)
+{
+    GlobalMockObject::verify();
+    int prof_device_id = 0;
+    analysis::dvvp::driver::AI_DRV_CHANNEL prof_channel = analysis::dvvp::driver::PROF_CHANNEL_FMK;
+    int prof_sample_period = 10;
+    std::string prof_data_file_path = "/path/to/data";
+    std::vector<std::string> prof_events;
+
+    prof_events.push_back("0xfb");
+    int period = 100;
+    GlobalMockObject::verify();
+
+    MOCKER(&DriverPlugin::MsprofDrvStart)
+        .stubs()
+        .will(returnValue(PROF_ERROR))
+        .then(returnValue(PROF_OK));
+    
+    EXPECT_EQ(PROFILING_FAILED, analysis::dvvp::driver::DrvL2CacheSampleStart(
+        prof_device_id, prof_channel, prof_events, period));
+
+    EXPECT_EQ(PROFILING_SUCCESS, analysis::dvvp::driver::DrvL2CacheSampleStart(
+        prof_device_id, prof_channel, prof_events, period));
 }
 
 TEST_F(DRIVER_AI_DRV_API_TEST, DrvGetHostPhyIdByDeviceIndex) {

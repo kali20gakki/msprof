@@ -20,6 +20,7 @@ using namespace Collector::Dvvp::Plugin;
 using namespace Collector::Dvvp::Mmpa;
 // 32 * 1024 * 0.8  is the full threshold  of ai_core_sample
 constexpr uint32_t AI_CORE_SAMPLE_FULL_THRESHOLD = 32 * 1024 * 0.8;
+constexpr uint32_t VERSION_INFORMATION_0 = 0;
 
 std::map<std::string, AI_DRV_CHANNEL> g_channelMaps;
 
@@ -120,7 +121,7 @@ int DrvPeripheralStart(const DrvPeripheralProfileCfg &peripheralCfg)
     MSPROF_EVENT("Begin to start profiling DrvPeripheralStart, profDeviceId=%d,"
         " profChannel=%d, profSamplePeriod=%d",
         peripheralCfg.profDeviceId, static_cast<int>(peripheralCfg.profChannel), peripheralCfg.profSamplePeriod);
-    struct prof_start_para profStartPara;
+    prof_start_para_t profStartPara;
     profStartPara.channel_type = PROF_PERIPHERAL_TYPE;
     profStartPara.sample_period = (unsigned int)peripheralCfg.profSamplePeriod;
     profStartPara.real_time = PROFILE_REAL_TIME;
@@ -169,7 +170,7 @@ int DoProfTsCpuStart(const DrvPeripheralProfileCfg &peripheralCfg,
         profDeviceId, static_cast<int>(profChannel), profSamplePeriod);
     MSPROF_EVENT("DoProfTsCpuStart, period=%d, event_num=%d, events=%s", configP->period,
         configP->event_num, eventStr.c_str());
-    struct prof_start_para profStartPara;
+    prof_start_para_t profStartPara;
     profStartPara.channel_type = PROF_TS_TYPE;
     profStartPara.sample_period = (unsigned int)peripheralCfg.profSamplePeriod;
     profStartPara.real_time = PROFILE_REAL_TIME;
@@ -237,7 +238,7 @@ int DrvAicoreStart(const DrvPeripheralProfileCfg &peripheralCfg, const std::vect
         profDeviceId, static_cast<int>(profChannel), profSamplePeriod);
     MSPROF_EVENT("DrvAicoreStart, period=%d, event_num=%d, events=%s", configP->period,
         configP->event_num, eventStr.c_str());
-    struct prof_start_para profStartPara;
+    prof_start_para_t profStartPara;
     profStartPara.channel_type = PROF_TS_TYPE;
     profStartPara.sample_period = (unsigned int)peripheralCfg.profSamplePeriod;
     profStartPara.real_time = PROFILE_REAL_TIME;
@@ -278,7 +279,7 @@ int DrvAicoreTaskBasedStart(int profDeviceId, AI_DRV_CHANNEL profChannel, const 
     MSPROF_EVENT("Begin to start profiling DrvAicoreTaskBasedStart, profDeviceId=%d, profChannel=%d, configSize:%d",
         profDeviceId, static_cast<int>(profChannel), configSize);
     MSPROF_EVENT("DrvAicoreTaskBasedStart, event_num=%d, events=%s", configP->event_num, eventStr.c_str());
-    struct prof_start_para profStartPara;
+    prof_start_para_t profStartPara;
     profStartPara.channel_type = PROF_TS_TYPE;
     profStartPara.sample_period = 0;
     profStartPara.real_time = PROFILE_REAL_TIME;
@@ -322,7 +323,7 @@ int DrvL2CacheTaskStart(int profDeviceId, AI_DRV_CHANNEL profChannel, const std:
     MSPROF_EVENT("Begin to start profiling DrvL2CacheTaskStart, profDeviceId=%d, profChannel=%d",
         profDeviceId, static_cast<int>(profChannel));
     MSPROF_EVENT("DrvL2CacheTaskStart, eventNum=%d, events=%s", configP->eventNum, eventStr.c_str());
-    struct prof_start_para profStartPara;
+    prof_start_para_t profStartPara;
     profStartPara.sample_period = 0;
     profStartPara.real_time = PROFILE_REAL_TIME;
     profStartPara.user_data = configP;
@@ -339,6 +340,52 @@ int DrvL2CacheTaskStart(int profDeviceId, AI_DRV_CHANNEL profChannel, const std:
     }
 
     MSPROF_EVENT("Succeeded to start profiling DrvL2CacheTaskStart, profDeviceId=%d, profChannel=%d",
+                 profDeviceId, static_cast<int>(profChannel));
+
+    return PROFILING_SUCCESS;
+}
+
+int DrvL2CacheSampleStart(int profDeviceId, AI_DRV_CHANNEL profChannel, const std::vector<std::string> &profEvents,
+                          int period)
+{
+    uint32_t configSize =
+        static_cast<uint32_t>(sizeof(TagTsL2CacheSampleConfig) + profEvents.size() * sizeof(uint32_t));
+    auto configP = static_cast<TagTsL2CacheSampleConfig *>(malloc(configSize));
+    if (configP == nullptr) {
+        return PROFILING_FAILED;
+    }
+
+    (void)memset_s(configP, configSize, 0, configSize);
+    configP->version = VERSION_INFORMATION_0;
+    configP->period = period;
+    MSPROF_EVENT("Set sample-based DrvL2CacheTask period=%d, version=%u", configP->period, configP->version);
+    configP->eventNum = static_cast<uint32_t>(profEvents.size());
+    std::string eventStr;
+    for (uint32_t i = 0; i < static_cast<uint32_t>(profEvents.size()); i++) {
+        configP->event[i] = static_cast<uint32_t>(strtol(profEvents[i].c_str(), nullptr, STRING_TO_LONG_WEIGHT));
+        (void)eventStr.append(profEvents[i] + ",");
+        MSPROF_LOGI("Receice DrvL2CacheTaskEvent EventId=%d, EventCode=0x%x", i, configP->event[i]);
+    }
+    MSPROF_EVENT("Begin to start sample-based profiling DrvL2CacheTaskStart, profDeviceId=%d, profChannel=%d",
+        profDeviceId, static_cast<int>(profChannel));
+    MSPROF_EVENT("Sample-based DrvL2CacheTaskStart, eventNum=%d, events=%s", configP->eventNum, eventStr.c_str());
+    prof_start_para_t profStartPara;
+    profStartPara.sample_period = 0;
+    profStartPara.real_time = PROFILE_REAL_TIME;
+    profStartPara.user_data = configP;
+    profStartPara.user_data_size = configSize;
+    profStartPara.channel_type = PROF_TS_TYPE;
+    int ret = DriverPlugin::instance()->MsprofDrvStart((uint32_t)profDeviceId, profChannel, &profStartPara);
+    free(configP);
+    configP = nullptr;
+    if (ret != PROF_OK) {
+        MSPROF_LOGE("Failed to start sample-based profiling DrvL2CacheTaskStart, profDeviceId=%d,"
+            " profChannel=%d, ret=%d",
+            profDeviceId, static_cast<int>(profChannel), ret);
+        return PROFILING_FAILED;
+    }
+
+    MSPROF_EVENT("Succeeded to start sample-based profiling DrvL2CacheTaskStart, profDeviceId=%d, profChannel=%d",
                  profDeviceId, static_cast<int>(profChannel));
 
     return PROFILING_SUCCESS;
@@ -384,7 +431,7 @@ int DrvTsFwStart(const DrvPeripheralProfileCfg &peripheralCfg,
         " keyPoint=%u, memCpy=%u", profDeviceId, static_cast<int>(profChannel),
         configP.ts_timeline,
         configP.ts_keypoint, configP.ts_memcpy);
-    struct prof_start_para profStartPara;
+    prof_start_para_t profStartPara;
     profStartPara.channel_type = PROF_TS_TYPE;
     profStartPara.sample_period = (unsigned int)peripheralCfg.profSamplePeriod;
     profStartPara.real_time = PROFILE_REAL_TIME;
@@ -423,7 +470,7 @@ int DrvStarsSocLogStart(const DrvPeripheralProfileCfg &peripheralCfg,
         configP.dvpp_vpc_block, configP.dvpp_jpegd_block, configP.dvpp_jpede_block,
         configP.ffts_thread_task, configP.sdma_dmu);
 
-    struct prof_start_para profStartPara;
+    prof_start_para_t profStartPara;
     profStartPara.channel_type = PROF_TS_TYPE;
     profStartPara.sample_period = static_cast<unsigned int>(peripheralCfg.profSamplePeriod);
     profStartPara.real_time = PROFILE_REAL_TIME;
@@ -480,7 +527,7 @@ int DrvFftsProfileStart(const DrvPeripheralProfileCfg &peripheralCfg, const std:
     DrvPackPmuParam(FFTS_PROF_MODE_AIV, *configP, peripheralCfg, aivCores, aivEvents);
 
     MSPROF_EVENT("DrvFftsProfileStart : cfgMode(%u)", configP->cfgMode);
-    struct prof_start_para profStartPara;
+    prof_start_para_t profStartPara;
     profStartPara.channel_type = PROF_TS_TYPE;
     profStartPara.sample_period = 0;
     profStartPara.real_time = PROFILE_REAL_TIME;
@@ -530,7 +577,7 @@ int DrvHwtsLogStart(int profDeviceId, AI_DRV_CHANNEL profChannel)
     (void)memset_s(&configP, configSize, 0, configSize);
     MSPROF_EVENT("Begin to start profiling DrvHwtsLogStart, profDeviceId=%d, profChannel=%d",
         profDeviceId, static_cast<int>(profChannel));
-    struct prof_start_para profStartPara;
+    prof_start_para_t profStartPara;
     profStartPara.channel_type = PROF_TS_TYPE;
     profStartPara.sample_period = 0;
     profStartPara.real_time = PROFILE_REAL_TIME;
@@ -557,7 +604,7 @@ int DrvFmkDataStart(int devId, AI_DRV_CHANNEL profChannel)
     (void)memset_s(&configP, configSize, 0, configSize);
     MSPROF_EVENT("Begin to start profiling DrvFmkDataStart, devId=%d, profChannel=%d",
         devId, static_cast<int>(profChannel));
-    struct prof_start_para profStartPara;
+    prof_start_para_t profStartPara;
     profStartPara.channel_type = PROF_TS_TYPE;
     profStartPara.sample_period = 0;
     profStartPara.real_time = PROFILE_REAL_TIME;
