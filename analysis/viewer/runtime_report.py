@@ -154,7 +154,7 @@ def get_metric_header(cursor: any, table_name: str) -> list:
     # if name equal total_time, add ms suffix
     headers = ['Task ID', "Stream ID", "Op Name"]
     metrics = Utils.generator_to_list(item[0] for item in cursor.description)
-    metrics = add_aicore_units(metrics)
+    add_aicore_units(metrics)
     if len(metrics) > 2:
         headers = headers + metrics[:-3]  # task id pos 0， stream id pos 1
 

@@ -27,16 +27,16 @@ class DataManager:
     manage different types of tuning data
     """
 
-    def __init__(self: any, project: str, device_id: str, iter_id: str) -> None:
+    def __init__(self: any, project: str, device_id: str) -> None:
         self.data = {}
-        self._load_operator_data(project, device_id, iter_id)
+        self._load_operator_data(project, device_id)
 
     def get_data(self: any, data_type: str) -> list:
         return self.data.get(data_type, [])
 
-    def _load_operator_data(self: any, project: str, device_id: str, iter_id: str):
+    def _load_operator_data(self: any, project: str, device_id: str):
         data_type = CommonProfRule.TUNING_OPERATOR
-        self.data[data_type] = DataLoader.get_data_by_infer_id(project, device_id, iter_id)
+        self.data[data_type] = DataLoader.get_data_by_infer_id(project, device_id)
 
 
 class DataLoader:
@@ -87,13 +87,13 @@ class DataLoader:
         return result_headers
 
     @classmethod
-    def get_data_by_infer_id(cls: any, project_path: str, device_id: any, infer_id: any) -> list:
+    def get_data_by_infer_id(cls: any, project_path: str, device_id: any) -> list:
         """
         get data by iter id.
         """
         op_data = []
         memory_workspaces = cls.select_memory_workspace(project_path, device_id)
-        raw_headers, datas = cls._get_base_data(device_id, infer_id, project_path)
+        raw_headers, datas = cls._get_base_data(device_id, project_path)
         headers = cls._process_headers(raw_headers)
         for data in datas:
             operator_dict = {}
@@ -142,12 +142,12 @@ class DataLoader:
         return memory_workspaces
 
     @classmethod
-    def _get_base_data(cls: any, device_id: any, infer_id: any, project_path: str) -> tuple:
+    def _get_base_data(cls: any, device_id: any, project_path: str) -> tuple:
         if cls.is_network(project_path, device_id):
             headers = ConfigManager.get(ConfigManager.MSPROF_EXPORT_DATA).get('op_summary', 'headers').split(",")
             configs = {StrConstant.CONFIG_HEADERS: headers}
             db_path = PathManager.get_db_path(project_path, DBNameConstant.DB_AICORE_OP_SUMMARY)
-            headers, data, _ = AiCoreOpReport.get_op_summary_data(project_path, db_path, infer_id, configs)
+            headers, data, _ = AiCoreOpReport.get_op_summary_data(project_path, db_path, configs)
         else:
             param = {}
             headers, data, _ = MsvpConstant.MSVP_EMPTY_DATA

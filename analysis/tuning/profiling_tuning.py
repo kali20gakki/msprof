@@ -12,12 +12,12 @@ class ProfilingTuning:
     recommend for inference
     """
     @classmethod
-    def run(cls: any, result_dir: str, iter_id: int = 1) -> None:
+    def run(cls: any, result_dir: str) -> None:
         """
         run and recommend
         """
         devices = InfoConfReader().get_device_list()
         if devices and all(i.isdigit() for i in devices):
             for dev_id in devices:
-                rule_mgr = RuleManager(result_dir, dev_id, str(iter_id))
+                rule_mgr = RuleManager(result_dir, dev_id)
                 rule_mgr.run()
