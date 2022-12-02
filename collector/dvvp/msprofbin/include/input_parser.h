@@ -15,6 +15,7 @@
 #include "param_validation.h"
 #include "mmpa_api.h"
 #include "running_mode.h"
+#include "config/config_manager.h"
 
 
 namespace Analysis {
@@ -22,6 +23,7 @@ namespace Dvvp {
 namespace Msprof {
 using namespace analysis::dvvp::common::validation;
 using namespace analysis::dvvp::common::utils;
+using namespace Analysis::Dvvp::Common::Config;
 using MmStructOption = Collector::Dvvp::Mmpa::MmStructOption;
 
 
@@ -70,6 +72,7 @@ enum MsprofArgsType {
     // number
     ARGS_AIC_FREQ, // 10 10-1000
     ARGS_AIV_FREQ, // 10 10-1000
+    ARGS_L2_SAMPLE_FREQ, // 100 1-100
     ARGS_BIU_FREQ, // 1000 300-30000
     ARGS_SYS_PERIOD, // >0
     ARGS_SYS_SAMPLING_FREQ, // 10 1-10
@@ -135,6 +138,7 @@ const MmStructOption longOptions[] = {
     // number
     {"aic-freq", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_AIC_FREQ},
     {"aiv-freq", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_AIV_FREQ},
+    {"l2-freq", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_L2_SAMPLE_FREQ},
     {"biu-freq", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_BIU_FREQ},
     {"sys-period", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_SYS_PERIOD},
     {"sys-sampling-freq", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_SYS_SAMPLING_FREQ},
@@ -210,6 +214,7 @@ private:
     void AddAnalysisArgs();
 private:
     bool driverOnline_;
+    PlatformType platform_;
     std::vector<Args> argsList_;
 };
 }

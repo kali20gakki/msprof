@@ -295,6 +295,13 @@ struct TagTsL2CacheProfileConfig {
     uint32_t event[0];
 };
 
+struct TagTsL2CacheSampleConfig {
+    uint32_t version;
+    uint32_t period;
+    uint32_t eventNum;
+    uint32_t event[0];
+};
+
 struct DrvPeripheralProfileCfg {
     DrvPeripheralProfileCfg()
         : profDeviceId(-1),
@@ -340,6 +347,9 @@ int DrvAicoreTaskBasedStart(int profDeviceId,
 
 int DrvL2CacheTaskStart(int profDeviceId, AI_DRV_CHANNEL profChannel,
     const std::vector<std::string> &profEvents);
+
+int DrvL2CacheSampleStart(int profDeviceId, AI_DRV_CHANNEL profChannel,
+    const std::vector<std::string> &profEvents, int period);
 
 int DrvSetTsCommandType(TsTsFwProfileConfigT &configP,
     SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> profileParams);
