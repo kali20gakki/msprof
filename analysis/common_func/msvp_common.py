@@ -527,11 +527,8 @@ def is_number(float_num: any) -> bool:
         pass
 
 
-def check_division(float_num: any) -> bool:
-    if not is_number(float_num) or NumberConstant.is_zero(float_num):
-        return False
-    else:
-        return True
+def is_nonzero_number(float_num: any) -> bool:
+    return is_number(float_num) and not NumberConstant.is_zero(float_num)
 
 
 def clear_project_dirs(project_dir: str) -> None:

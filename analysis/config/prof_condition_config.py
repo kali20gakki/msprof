@@ -191,14 +191,14 @@ class ProfConditionConfig(MetaConfig):
             "type": "normal",
             "left": "input_data_types",
             "right": "INT64",
-            "cmp": "in"
+            "cmp": "contain"
         }
         , {
             "id": "condition_strided_slice_grad_1",
             "type": "normal",
             "left": "op_name",
             "right": "StridedSliceGrad",
-            "cmp": "in"
+            "cmp": "contain"
         }
     ]
 
