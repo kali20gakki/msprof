@@ -32,20 +32,6 @@ class ProfConditionConfig(MetaConfig):
             "cmp": "!="
         }
         , {
-            "id": "condition_common_4",
-            "type": "normal",
-            "left": "input_data_type",
-            "right": "FLOAT16",
-            "cmp": "=="
-        }
-        , {
-            "id": "condition_common_5",
-            "type": "normal",
-            "left": "input_data_type",
-            "right": "INT8",
-            "cmp": "=="
-        }
-        , {
             "id": "condition_common_6",
             "type": "formula",
             "left": ["batch"],
@@ -205,14 +191,14 @@ class ProfConditionConfig(MetaConfig):
             "type": "normal",
             "left": "input_data_types",
             "right": "INT64",
-            "cmp": "=="
+            "cmp": "contain"
         }
         , {
             "id": "condition_strided_slice_grad_1",
             "type": "normal",
             "left": "op_name",
             "right": "StridedSliceGrad",
-            "cmp": "=="
+            "cmp": "contain"
         }
     ]
 
