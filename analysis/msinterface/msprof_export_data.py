@@ -230,7 +230,7 @@ class MsProfExportDataUtils:
         db_name = DBNameConstant.DB_AICORE_OP_SUMMARY
         db_path = PathManager.get_db_path(params.get(StrConstant.PARAM_RESULT_DIR), db_name)
         return AiCoreOpReport.get_op_summary_data(params.get(StrConstant.PARAM_RESULT_DIR),
-                                                  db_path, params.get(StrConstant.PARAM_ITER_ID), configs)
+                                                  db_path, configs)
 
     @staticmethod
     def _get_ai_stack_time_data(configs: dict, params: dict) -> any:
