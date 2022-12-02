@@ -25,6 +25,7 @@
 #include "transport/hdc/hdc_transport.h"
 #include "prof_task.h"
 #include "mmpa_api.h"
+#include "config_manager.h"
 
 using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::message;
@@ -32,6 +33,7 @@ using namespace Analysis::Dvvp::JobWrapper;
 using namespace Analysis::Dvvp::MsprofErrMgr;
 using namespace Collector::Dvvp::Plugin;
 using namespace Collector::Dvvp::Mmpa;
+using namespace Analysis::Dvvp::Common::Config;
 
 class JOB_WRAPPER_PROF_TsCPu_JOB_TEST: public testing::Test {
 protected:
@@ -1147,6 +1149,11 @@ TEST_F(JOB_WRAPPER_PROF_L2_CACHE_JOB_TEST, Process) {
     EXPECT_EQ(PROFILING_FAILED, profL2CacheJob->Process());
     collectionJobCfg_->jobParams.events->push_back("0x5b");
     profL2CacheJob->Init(collectionJobCfg_);
+    MOCKER_CPP(&ConfigManager::GetPlatformType)
+        .stubs()
+        .will(returnValue(PlatformType::CHIP_V4_1_0))
+        .then(returnValue(PlatformType::MINI_TYPE));
+    EXPECT_EQ(PROFILING_SUCCESS, profL2CacheJob->Process());
     EXPECT_EQ(PROFILING_SUCCESS, profL2CacheJob->Process());
 }
 
