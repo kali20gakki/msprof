@@ -250,6 +250,23 @@ class AiCoreOpReport:
             DBManager.destroy_db_connect(conn, curs)
 
     @classmethod
+    def delete_useless_cols(cls: any, headers: list, summary_data: list) -> list:
+        if ChipManager().is_chip_v4():
+            return summary_data
+        for header in cls.ADDITION_HEADER:
+            if header not in headers:
+                continue
+            index_id = headers.index(header)
+            headers.remove(header)
+            for index, data in enumerate(summary_data):
+                if index_id >= len(data):
+                    continue
+                tmp_data = list(data)
+                tmp_data.pop(index_id)
+                summary_data[index] = tmp_data
+        return summary_data
+
+    @classmethod
     def _get_hardware_op_datas(cls: any, curs: any) -> list:
         aicpu_data = cls._get_hardware_op_sql_data(curs,
                                                    (Constant.TASK_TYPE_AI_CPU, ))
@@ -295,23 +312,6 @@ class AiCoreOpReport:
             data = cls._update_model_name_and_infer_id(project_path, data)
         cls._add_memory_bound(headers, data)
         return data
-
-    @classmethod
-    def delete_useless_cols(cls: any, headers: list, summary_data: list) -> list:
-        if ChipManager().is_chip_v4():
-            return summary_data
-        for header in cls.ADDITION_HEADER:
-            if header not in headers:
-                continue
-            index_id = headers.index(header)
-            headers.remove(header)
-            for index, data in enumerate(summary_data):
-                if index_id >= len(data):
-                    continue
-                tmp_data = list(data)
-                tmp_data.pop(index_id)
-                summary_data[index] = tmp_data
-        return summary_data
 
     @classmethod
     def _update_model_name_and_infer_id(cls: any, project_path: str, ai_core_data: list) -> list:
