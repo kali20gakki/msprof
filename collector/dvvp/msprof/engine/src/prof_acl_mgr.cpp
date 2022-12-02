@@ -1508,10 +1508,13 @@ int32_t ProfAclMgr::MsprofSetConfig(aclprofConfigType cfgType, std::string confi
     int ret = PROFILING_SUCCESS;
     std::string configStr;
     // param check
-    if (cfgType >= ACL_PROF_SYS_USAGE_FREQ && cfgType <= ACL_PROF_DVPP_FREQ) {
+    if (cfgType >= ACL_PROF_SYS_USAGE_FREQ && cfgType <= ACL_PROF_L2_SAMPLE_FREQ) {
         ret = MsprofSetDeviceSysConfig(cfgType, config);
     } else {
         switch (cfgType) {
+            case ACL_PROF_LLC_MODE:
+                ret = ParamValidation::instance()->CheckLlcModeIsValid(config) ? PROFILING_SUCCESS : PROFILING_FAILED;
+                break;
             case ACL_PROF_STORAGE_LIMIT:
                 ret = ParamValidation::instance()->CheckStorageLimit(config) ? PROFILING_SUCCESS : PROFILING_FAILED;
                 break;
@@ -1523,6 +1526,10 @@ int32_t ProfAclMgr::MsprofSetConfig(aclprofConfigType cfgType, std::string confi
                 break;
             case ACL_PROF_HOST_SYS:
                 ret = ParamValidation::instance()->CheckHostSysOptionsIsValid(config) ?
+                    PROFILING_SUCCESS : PROFILING_FAILED;
+                break;
+            case ACL_PROF_HOST_SYS_USAGE:
+                ret = ParamValidation::instance()->CheckHostSysUsageValid(config) ?
                     PROFILING_SUCCESS : PROFILING_FAILED;
                 break;
             default:
@@ -1541,43 +1548,30 @@ int32_t ProfAclMgr::MsprofSetDeviceSysConfig(aclprofConfigType cfgType, std::str
 {
     int ret = PROFILING_SUCCESS;
     std::string configStr;
-    switch (cfgType) {
-        case ACL_PROF_SYS_USAGE_FREQ:
-            ret = ParamValidation::instance()->CheckFreqIsValid("ACL_PROF_SYS_USAGE_FREQ", config,
-                SYS_SAMPLING_FREQ_MIN_NUM, SYS_SAMPLING_FREQ_MAX_NUM) ? PROFILING_SUCCESS : PROFILING_FAILED;
-            break;
-        case ACL_PROF_SYS_PID_USAGE_FREQ:
-            ret = ParamValidation::instance()->CheckFreqIsValid("ACL_PROF_SYS_PID_USAGE_FREQ", config,
-                PID_SAMPLING_FREQ_MIN_NUM, PID_SAMPLING_FREQ_MAX_NUM) ? PROFILING_SUCCESS : PROFILING_FAILED;
-            break;
-        case ACL_PROF_SYS_CPU_FREQ:
-            ret = ParamValidation::instance()->CheckFreqIsValid("ACL_PROF_SYS_CPU_FREQ", config,
-                CPU_SAMPLING_FREQ_MIN_NUM, CPU_SAMPLING_FREQ_MAX_NUM) ? PROFILING_SUCCESS : PROFILING_FAILED;
-            break;
-        case ACL_PROF_SYS_HARDWARE_MEM_FREQ:
-            ret = ParamValidation::instance()->CheckFreqIsValid("ACL_PROF_SYS_HARDWARE_MEM_FREQ", config,
-                HARDWARE_MEM_SAMPLING_FREQ_MIN_NUM, HARDWARE_MEM_SAMPLING_FREQ_MAX_NUM) ?
-                PROFILING_SUCCESS : PROFILING_FAILED;
-            break;
-        case ACL_PROF_LLC_MODE:
-            ret = ParamValidation::instance()->CheckLlcModeIsValid(config) ? PROFILING_SUCCESS : PROFILING_FAILED;
-            break;
-        case ACL_PROF_SYS_IO_FREQ:
-            ret = ParamValidation::instance()->CheckFreqIsValid("ACL_PROF_SYS_IO_FREQ", config,
-                IO_SAMPLING_FREQ_MIN_NUM, IO_SAMPLING_FREQ_MAX_NUM) ? PROFILING_SUCCESS : PROFILING_FAILED;
-            break;
-        case ACL_PROF_SYS_INTERCONNECTION_FREQ:
-            ret = ParamValidation::instance()->CheckFreqIsValid("ACL_PROF_SYS_INTERCONNECTION_FREQ", config,
-                INTERCONNECTION_SAMPLING_FREQ_MIN_NUM, INTERCONNECTION_SAMPLING_FREQ_MAX_NUM) ?
-                PROFILING_SUCCESS : PROFILING_FAILED;
-            break;
-        case ACL_PROF_DVPP_FREQ:
-            ret = ParamValidation::instance()->CheckFreqIsValid("ACL_PROF_DVPP_FREQ", config,
-                DVPP_SAMPLING_FREQ_MIN_NUM, DVPP_SAMPLING_FREQ_MAX_NUM) ? PROFILING_SUCCESS : PROFILING_FAILED;
-            break;
-        default:
-            ret = PROFILING_FAILED;
-    }
+    std::map<aclprofConfigType, std::vector<int>> freqRangeMap = {
+        {ACL_PROF_SYS_USAGE_FREQ, {SYS_SAMPLING_FREQ_MIN_NUM, SYS_SAMPLING_FREQ_MAX_NUM}},
+        {ACL_PROF_SYS_PID_USAGE_FREQ, {PID_SAMPLING_FREQ_MIN_NUM, PID_SAMPLING_FREQ_MAX_NUM}},
+        {ACL_PROF_SYS_CPU_FREQ, {CPU_SAMPLING_FREQ_MIN_NUM, CPU_SAMPLING_FREQ_MAX_NUM}},
+        {ACL_PROF_SYS_HARDWARE_MEM_FREQ, {HARDWARE_MEM_SAMPLING_FREQ_MIN_NUM, HARDWARE_MEM_SAMPLING_FREQ_MAX_NUM}},
+        {ACL_PROF_SYS_IO_FREQ, {IO_SAMPLING_FREQ_MIN_NUM, IO_SAMPLING_FREQ_MAX_NUM}},
+        {ACL_PROF_SYS_INTERCONNECTION_FREQ, {INTERCONNECTION_SAMPLING_FREQ_MIN_NUM,
+            INTERCONNECTION_SAMPLING_FREQ_MAX_NUM}},
+        {ACL_PROF_DVPP_FREQ, {DVPP_SAMPLING_FREQ_MIN_NUM, DVPP_SAMPLING_FREQ_MAX_NUM}},
+        {ACL_PROF_L2_SAMPLE_FREQ, {L2_SAMPLING_FREQ_MIN_NUM, L2_SAMPLING_FREQ_MAX_NUM}},
+    };
+    std::map<aclprofConfigType, std::string> freqCfgNameMap = {
+        {ACL_PROF_SYS_USAGE_FREQ, "ACL_PROF_SYS_USAGE_FREQ"},
+        {ACL_PROF_SYS_PID_USAGE_FREQ, "ACL_PROF_SYS_PID_USAGE_FREQ"},
+        {ACL_PROF_SYS_CPU_FREQ, "ACL_PROF_SYS_CPU_FREQ"},
+        {ACL_PROF_SYS_HARDWARE_MEM_FREQ, "ACL_PROF_SYS_HARDWARE_MEM_FREQ"},
+        {ACL_PROF_SYS_IO_FREQ, "ACL_PROF_SYS_IO_FREQ"},
+        {ACL_PROF_SYS_INTERCONNECTION_FREQ, "ACL_PROF_SYS_INTERCONNECTION_FREQ"},
+        {ACL_PROF_DVPP_FREQ, "ACL_PROF_DVPP_FREQ"},
+        {ACL_PROF_L2_SAMPLE_FREQ, "ACL_PROF_L2_SAMPLE_FREQ"},
+    };
+    std::vector<int> checkFreqRange = freqRangeMap[cfgType];
+    ret = ParamValidation::instance()->CheckFreqIsValid(freqCfgNameMap[cfgType], config, checkFreqRange[0],
+        checkFreqRange[1]);
     if (ret != PROFILING_SUCCESS) {
         MSPROF_LOGE("[MsprofSetConfig]profiling config check fail");
         return ret;

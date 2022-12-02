@@ -20,7 +20,6 @@
 #include "config/config_manager.h"
 #include "ai_drv_dev_api.h"
 #include "platform/platform.h"
-#include "config/config.h"
 #include "msprof_dlog.h"
 #include "mmpa_api.h"
 #include "params_adapter_msprof.h"
@@ -184,6 +183,9 @@ ArgsManager::~ArgsManager()
 void ArgsManager::Init()
 {
     driverOnline_ = Platform::instance()->DriverAvailable();
+    if (driverOnline_) {
+        platform_ = ConfigManager::instance()->GetPlatformType();
+    }
     argsList_ = {
         {"output", "Specify the directory that is used for storing data results.(full-platform)"},
         {"storage-limit", "Specify the output directory volume. range 200MB ~ 4294967296MB.(full-platform)"},
@@ -231,8 +233,7 @@ void ArgsManager::Init()
 
 void ArgsManager::AddAnalysisArgs()
 {
-    if (driverOnline_ && (ConfigManager::instance()->GetPlatformType() == PlatformType::MDC_TYPE ||
-        ConfigManager::instance()->GetPlatformType() == PlatformType::LHISI_TYPE)) {
+    if (driverOnline_ && (platform_ == PlatformType::MDC_TYPE || platform_ == PlatformType::LHISI_TYPE)) {
         return;
     }
     std::vector<Args> argsList;
@@ -257,7 +258,7 @@ void ArgsManager::AddAnalysisArgs()
 
 void ArgsManager::AddStarsArgs()
 {
-    if (driverOnline_ && ConfigManager::instance()->GetPlatformType() != PlatformType::CHIP_V4_1_0) {
+    if (driverOnline_ && platform_ != PlatformType::CHIP_V4_1_0) {
         return;
     }
 
@@ -267,7 +268,7 @@ void ArgsManager::AddStarsArgs()
 
 void ArgsManager::AddBiuArgs()
 {
-    if (driverOnline_ && ConfigManager::instance()->GetPlatformType() != PlatformType::CHIP_V4_1_0) {
+    if (driverOnline_ && platform_ != PlatformType::CHIP_V4_1_0) {
         return;
     }
     Args biu = {"biu", "Show biu profiling data, the default value is off.(future-platform)", OFF};
@@ -281,8 +282,7 @@ void ArgsManager::AddBiuArgs()
 
 void ArgsManager::AddAicpuArgs()
 {
-    if (driverOnline_ && (ConfigManager::instance()->GetPlatformType() == PlatformType::MDC_TYPE ||
-        ConfigManager::instance()->GetPlatformType() == PlatformType::LHISI_TYPE)) {
+    if (driverOnline_ && (platform_ == PlatformType::MDC_TYPE || platform_ == PlatformType::LHISI_TYPE)) {
         return;
     }
     Args aicpu = {"aicpu", "Show aicpu profiling data, the default value is off.(full-platform)", OFF};
@@ -291,7 +291,7 @@ void ArgsManager::AddAicpuArgs()
 
 void ArgsManager::AddAivArgs()
 {
-    if (driverOnline_ && (ConfigManager::instance()->GetPlatformType() != PlatformType::MDC_TYPE)) {
+    if (driverOnline_ && (platform_ != PlatformType::MDC_TYPE)) {
         return;
     }
     Args aiv = {"ai-vector-core",
@@ -322,7 +322,7 @@ void ArgsManager::AddAivArgs()
 
 void ArgsManager::AddHardWareMemArgs()
 {
-    if (driverOnline_ && ConfigManager::instance()->GetPlatformType() == PlatformType::LHISI_TYPE) {
+    if (driverOnline_ && platform_ == PlatformType::LHISI_TYPE) {
         return;
     }
     auto hardwareMem = Args("sys-hardware-mem", "", OFF);
@@ -342,7 +342,7 @@ void ArgsManager::AddHardWareMemArgs()
 
 void ArgsManager::AddCpuArgs()
 {
-    if (driverOnline_ && ConfigManager::instance()->GetPlatformType() == PlatformType::LHISI_TYPE) {
+    if (driverOnline_ && platform_ == PlatformType::LHISI_TYPE) {
         return;
     }
     Args cpu = Args("sys-cpu-profiling",
@@ -382,9 +382,8 @@ void ArgsManager::AddSysArgs()
 
 void ArgsManager::AddIoArgs()
 {
-    if (driverOnline_ && (ConfigManager::instance()->GetPlatformType() == PlatformType::LHISI_TYPE ||
-        ConfigManager::instance()->GetPlatformType() == PlatformType::DC_TYPE ||
-        ConfigManager::instance()->GetPlatformType() == PlatformType::MDC_TYPE)) {
+    if (driverOnline_ && (platform_ == PlatformType::LHISI_TYPE || platform_ == PlatformType::DC_TYPE ||
+        platform_ == PlatformType::MDC_TYPE)) {
         return;
     }
     Args ioArgs = {"sys-io-profiling",
@@ -401,9 +400,8 @@ void ArgsManager::AddIoArgs()
 
 void ArgsManager::AddInterArgs()
 {
-    if (driverOnline_ && (ConfigManager::instance()->GetPlatformType() == PlatformType::LHISI_TYPE ||
-        ConfigManager::instance()->GetPlatformType() == PlatformType::MINI_TYPE ||
-        ConfigManager::instance()->GetPlatformType() == PlatformType::MDC_TYPE)) {
+    if (driverOnline_ && (platform_ == PlatformType::LHISI_TYPE || platform_ == PlatformType::MINI_TYPE ||
+        platform_ == PlatformType::MDC_TYPE)) {
         return;
     }
     Args interArgs = {"sys-interconnection-profiling",
@@ -420,7 +418,7 @@ void ArgsManager::AddInterArgs()
 
 void ArgsManager::AddDvvpArgs()
 {
-    if (driverOnline_ && ConfigManager::instance()->GetPlatformType() == PlatformType::LHISI_TYPE) {
+    if (driverOnline_ && platform_ == PlatformType::LHISI_TYPE) {
         return;
     }
     Args dvpp = {"dvpp-profiling", "DVPP acquisition switch, the default value is off.(full-platform)", OFF};
@@ -433,12 +431,18 @@ void ArgsManager::AddDvvpArgs()
 
 void ArgsManager::AddL2Args()
 {
-    if (driverOnline_ && (ConfigManager::instance()->GetPlatformType() == PlatformType::LHISI_TYPE ||
-        ConfigManager::instance()->GetPlatformType() == PlatformType::MINI_TYPE)) {
+    if (driverOnline_ && (platform_ == PlatformType::LHISI_TYPE || platform_ == PlatformType::MINI_TYPE)) {
         return;
     }
     Args l2 = {"l2", "L2 Cache acquisition switch. the default value is off.(Ascend310P, Ascend910)", OFF};
     argsList_.push_back(l2);
+    if (driverOnline_ && platform_ != PlatformType::CHIP_V4_1_0 && platform_ != PlatformType::MINI_V3_TYPE) {
+        return;
+    }
+    Args l2freq = {"l2-freq",
+                   "L2 Cache acquisition frequency, range 1 ~ 100, the default value is 100 Hz.(future-platform)",
+                   "100"};
+    argsList_.push_back(l2freq);
 }
 
 void ArgsManager::PrintHelp()
