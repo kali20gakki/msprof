@@ -411,23 +411,20 @@ def path_check(path: str) -> str:
     return ""
 
 
-def add_aicore_units(header: list) -> list:
+def add_aicore_units(header: list):
     """
     add unit for ai core report headers and modify total_time to aicore_time
     :param header:
     :return: headers
     """
-    new_header = []
-    for item in header:
+    for index, item in enumerate(header):
         if item == "total_time":
             item = "aicore_time"
         if "time" in item:
             item += "(us)"
         if StrConstant.BANDWIDTH in item and "(GB/s)" not in item:
             item += "(GB/s)"
-        new_header.append(item)
-
-    return new_header
+        header[index] = item
 
 
 def check_file_writable(path: str) -> None:

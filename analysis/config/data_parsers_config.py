@@ -33,7 +33,7 @@ class DataParsersConfig(MetaConfig):
         ]
         , 'L2CacheParser': [
             ('path', 'msparser.l2_cache.l2_cache_parser'),
-            ('chip_model', '1,2,3,4,5')
+            ('chip_model', '1,2,3,4')
         ]
         , 'IterRecParser': [
             ('path', 'msparser.iter_rec.iter_rec_parser'),

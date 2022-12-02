@@ -17,7 +17,7 @@ NAMESPACE = 'tuning.data_manager'
 
 class TestDataManager(unittest.TestCase):
     def test_get_data(self):
-        key = DataManager('', 0, 0)
+        key = DataManager('', '0')
         key.data = {'type1': [1, 2]}
         result1 = key.get_data('type1')
         self.assertEqual(result1, [1, 2])
@@ -38,7 +38,7 @@ class TestDataLoader(unittest.TestCase):
                 mock.patch(NAMESPACE + '.DataLoader._get_extend_data'), \
                 mock.patch(NAMESPACE + '.DataLoader.get_memory_workspace'):
             key = DataLoader()
-            result = key.get_data_by_infer_id(project_path, device_id, infer_id)
+            result = key.get_data_by_infer_id(project_path, device_id)
         self.assertEqual(result, check)
 
     def test_get_vector_bound(self):
