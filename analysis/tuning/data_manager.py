@@ -10,6 +10,7 @@ from config.config_manager import ConfigManager
 from common_func.common_prof_rule import CommonProfRule
 from common_func.common import CommonConstant
 from common_func.common import generate_config
+from common_func.msvp_common import is_number
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
@@ -108,8 +109,8 @@ class DataLoader:
         """
         get data for vector bound
         """
-        if operator_dict.get("vec_ratio") and operator_dict.get("mte2_ratio") \
-                and operator_dict.get("mac_ratio"):
+        if is_number(operator_dict.get("vec_ratio")) and is_number(operator_dict.get("mte2_ratio")) \
+                and is_number(operator_dict.get("mac_ratio")):
             extend_data_dict["vector_bound"] = 0
             if max(operator_dict.get("mte2_ratio"), operator_dict.get("mac_ratio")):
                 extend_data_dict["vector_bound"] = \
@@ -146,8 +147,7 @@ class DataLoader:
             headers = ConfigManager.get(ConfigManager.MSPROF_EXPORT_DATA).get('op_summary', 'headers').split(",")
             configs = {StrConstant.CONFIG_HEADERS: headers}
             db_path = PathManager.get_db_path(project_path, DBNameConstant.DB_AICORE_OP_SUMMARY)
-            headers, data, _ = AiCoreOpReport.get_ai_core_op_summary_data(project_path, db_path,
-                                                                          infer_id, configs)
+            headers, data, _ = AiCoreOpReport.get_op_summary_data(project_path, db_path, infer_id, configs)
         else:
             param = {}
             headers, data, _ = MsvpConstant.MSVP_EMPTY_DATA

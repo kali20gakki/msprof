@@ -10,7 +10,7 @@ from config.config_manager import ConfigManager
 class TestConfigManager(unittest.TestCase):
     def test_get(self):
         config = ConfigManager.get(ConfigManager.PROF_CONDITION)
-        self.assertEqual(len(config.get_data()), 28)
+        self.assertEqual(len(config.get_data()), 26)
         config = ConfigManager.get(ConfigManager.PROF_RULE)
         self.assertEqual(len(config.get_data()), 16)
         config = ConfigManager.get(ConfigManager.DATA_PARSERS)
