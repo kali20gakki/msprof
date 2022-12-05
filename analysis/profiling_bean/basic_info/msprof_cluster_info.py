@@ -7,6 +7,7 @@ import os.path
 from collections import OrderedDict
 
 from common_func.common import print_msg
+from common_func.constant import Constant
 from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msvp_common import create_json
@@ -56,7 +57,8 @@ class MsProfClusterInfo:
             return
         with self.cluster_step_trace_model as model:
             for cluster_info in cluster_infos:
-                step_trace_table = DBNameConstant.TABLE_CLUSTER_STEP_TRACE.format(cluster_info.rank_id)
+                rank_id = cluster_info.device_id if cluster_info.rank_id == Constant.NA else cluster_info.rank_id
+                step_trace_table = DBNameConstant.TABLE_CLUSTER_STEP_TRACE.format(rank_id)
                 if not model.judge_table_exist(step_trace_table):
                     continue
                 sql_for_total_iterations = "select model_id, max(iteration_id) " \
