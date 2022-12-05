@@ -53,6 +53,12 @@ void ParamsAdapterGeOpt::InitWholeConfigMap()
         INPUT_CFG_COM_AIC_METRICS,
         INPUT_CFG_COM_AIV_METRICS,
         INPUT_CFG_COM_BIU_FREQ,
+        INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ,
+        INPUT_CFG_COM_LLC_MODE,
+        INPUT_CFG_COM_SYS_IO_FREQ,
+        INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ,
+        INPUT_CFG_COM_DVPP_FREQ,
+        INPUT_CFG_HOST_SYS,
         INPUT_CFG_HOST_SYS_USAGE,
         INPUT_CFG_HOST_SYS_USAGE_FREQ
     }).swap(geOptionsWholeConfig_);
@@ -74,6 +80,12 @@ void ParamsAdapterGeOpt::InitPrintMap()
         {INPUT_CFG_COM_AIC_METRICS, "aic_metrics"},
         {INPUT_CFG_COM_AIV_METRICS, "aiv_metrics"},
         {INPUT_CFG_COM_BIU_FREQ, "biu_freq"},
+        {INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ, "sys_hardware_mem_freq"},
+        {INPUT_CFG_COM_LLC_MODE, "llc_profiling"},
+        {INPUT_CFG_COM_SYS_IO_FREQ, "sys_io_sampling_freq"},
+        {INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ, "sys_interconnection_freq"},
+        {INPUT_CFG_COM_DVPP_FREQ, "dvpp_freq"},
+        {INPUT_CFG_HOST_SYS, "host_sys"},
         {INPUT_CFG_HOST_SYS_USAGE, "host_sys_usage"},
         {INPUT_CFG_HOST_SYS_USAGE_FREQ, "host_sys_usage_freq"},
     }).swap(geOptionsPrintMap_);
@@ -144,6 +156,7 @@ void ParamsAdapterGeOpt::GenGeOptionsContainer(SHARED_PTR_ALIA<ProfGeOptionsConf
     paramContainer_[INPUT_CFG_COM_POWER] = geCfg->power();
     paramContainer_[INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ] = (geCfg->sys_hardware_mem_freq() <= 0) ? "" :
         std::to_string(geCfg->sys_hardware_mem_freq());
+    paramContainer_[INPUT_CFG_COM_LLC_MODE] = geCfg->llc_profiling();
     paramContainer_[INPUT_CFG_COM_SYS_IO_FREQ] = (geCfg->sys_io_sampling_freq() <= 0) ? "" :
         std::to_string(geCfg->sys_io_sampling_freq());
     paramContainer_[INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ] = (geCfg->sys_interconnection_freq() <= 0) ? "" :

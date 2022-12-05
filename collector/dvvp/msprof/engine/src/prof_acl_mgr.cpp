@@ -1505,79 +1505,13 @@ void ProfAclMgr::CloseSubscribeFd(const uint32_t devId, const uint32_t modelId)
 
 int32_t ProfAclMgr::MsprofSetConfig(aclprofConfigType cfgType, std::string config)
 {
-    int ret = PROFILING_SUCCESS;
-    std::string configStr;
-    // param check
-    if (cfgType >= ACL_PROF_SYS_USAGE_FREQ && cfgType <= ACL_PROF_L2_SAMPLE_FREQ) {
-        ret = MsprofSetDeviceSysConfig(cfgType, config);
-    } else {
-        switch (cfgType) {
-            case ACL_PROF_LLC_MODE:
-                ret = ParamValidation::instance()->CheckLlcModeIsValid(config) ? PROFILING_SUCCESS : PROFILING_FAILED;
-                break;
-            case ACL_PROF_STORAGE_LIMIT:
-                ret = ParamValidation::instance()->CheckStorageLimit(config) ? PROFILING_SUCCESS : PROFILING_FAILED;
-                break;
-            case ACL_PROF_AIV_METRICS:
-                ConfigManager::instance()->AicoreMetricsEnumToName(static_cast<ProfAicoreMetrics>(std::stoi(config)),
-                                                                   configStr);
-                ret = ParamValidation::instance()->CheckProfilingMetricsIsValid("ACL_PROF_AIV_METRICS", configStr) ?
-                    PROFILING_SUCCESS : PROFILING_FAILED;
-                break;
-            case ACL_PROF_HOST_SYS:
-                ret = ParamValidation::instance()->CheckHostSysOptionsIsValid(config) ?
-                    PROFILING_SUCCESS : PROFILING_FAILED;
-                break;
-            case ACL_PROF_HOST_SYS_USAGE:
-                ret = ParamValidation::instance()->CheckHostSysUsageValid(config) ?
-                    PROFILING_SUCCESS : PROFILING_FAILED;
-                break;
-            default:
-                ret = PROFILING_FAILED;
-        }
-    }
-    if (ret != PROFILING_SUCCESS) {
-        MSPROF_LOGE("[MsprofSetConfig]profiling config check fail");
-        return ret;
-    }
-    argsArr_[cfgType] = (cfgType == ACL_PROF_AIV_METRICS) ? configStr : config;
-    return PROFILING_SUCCESS;
-}
-
-int32_t ProfAclMgr::MsprofSetDeviceSysConfig(aclprofConfigType cfgType, std::string config)
-{
-    int ret = PROFILING_SUCCESS;
-    std::string configStr;
-    std::map<aclprofConfigType, std::vector<int>> freqRangeMap = {
-        {ACL_PROF_SYS_USAGE_FREQ, {SYS_SAMPLING_FREQ_MIN_NUM, SYS_SAMPLING_FREQ_MAX_NUM}},
-        {ACL_PROF_SYS_PID_USAGE_FREQ, {PID_SAMPLING_FREQ_MIN_NUM, PID_SAMPLING_FREQ_MAX_NUM}},
-        {ACL_PROF_SYS_CPU_FREQ, {CPU_SAMPLING_FREQ_MIN_NUM, CPU_SAMPLING_FREQ_MAX_NUM}},
-        {ACL_PROF_SYS_HARDWARE_MEM_FREQ, {HARDWARE_MEM_SAMPLING_FREQ_MIN_NUM, HARDWARE_MEM_SAMPLING_FREQ_MAX_NUM}},
-        {ACL_PROF_SYS_IO_FREQ, {IO_SAMPLING_FREQ_MIN_NUM, IO_SAMPLING_FREQ_MAX_NUM}},
-        {ACL_PROF_SYS_INTERCONNECTION_FREQ, {INTERCONNECTION_SAMPLING_FREQ_MIN_NUM,
-            INTERCONNECTION_SAMPLING_FREQ_MAX_NUM}},
-        {ACL_PROF_DVPP_FREQ, {DVPP_SAMPLING_FREQ_MIN_NUM, DVPP_SAMPLING_FREQ_MAX_NUM}},
-        {ACL_PROF_L2_SAMPLE_FREQ, {L2_SAMPLING_FREQ_MIN_NUM, L2_SAMPLING_FREQ_MAX_NUM}},
-    };
-    std::map<aclprofConfigType, std::string> freqCfgNameMap = {
-        {ACL_PROF_SYS_USAGE_FREQ, "ACL_PROF_SYS_USAGE_FREQ"},
-        {ACL_PROF_SYS_PID_USAGE_FREQ, "ACL_PROF_SYS_PID_USAGE_FREQ"},
-        {ACL_PROF_SYS_CPU_FREQ, "ACL_PROF_SYS_CPU_FREQ"},
-        {ACL_PROF_SYS_HARDWARE_MEM_FREQ, "ACL_PROF_SYS_HARDWARE_MEM_FREQ"},
-        {ACL_PROF_SYS_IO_FREQ, "ACL_PROF_SYS_IO_FREQ"},
-        {ACL_PROF_SYS_INTERCONNECTION_FREQ, "ACL_PROF_SYS_INTERCONNECTION_FREQ"},
-        {ACL_PROF_DVPP_FREQ, "ACL_PROF_DVPP_FREQ"},
-        {ACL_PROF_L2_SAMPLE_FREQ, "ACL_PROF_L2_SAMPLE_FREQ"},
-    };
-    std::vector<int> checkFreqRange = freqRangeMap[cfgType];
-    ret = ParamValidation::instance()->CheckFreqIsValid(freqCfgNameMap[cfgType], config, checkFreqRange[0],
-        checkFreqRange[1]);
-    if (ret != PROFILING_SUCCESS) {
-        MSPROF_LOGE("[MsprofSetConfig]profiling config check fail");
-        return ret;
+    if (cfgType < 0 || cfgType >= ACL_PROF_ARGS_MAX) {
+        MSPROF_LOGE("[MsprofSetConfig]Config Type is out of range(%d, %d).", ACL_PROF_ARGS_MIN, ACL_PROF_ARGS_MAX);
+        return PROFILING_FAILED;
     }
     argsArr_[cfgType] = config;
     return PROFILING_SUCCESS;
 }
+
 }   // namespace Api
 }   // namespace Msprofiler

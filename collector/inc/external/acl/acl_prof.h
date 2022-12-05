@@ -54,6 +54,19 @@ typedef enum {
     ACL_STEP_END = 1   // step  end
 } aclprofStepTag;
 
+typedef enum {
+    ACL_PROF_ARGS_MIN = 0,
+    ACL_PROF_STORAGE_LIMIT,
+    ACL_PROF_AIV_METRICS,
+    ACL_PROF_SYS_HARDWARE_MEM_FREQ,
+    ACL_PROF_LLC_MODE,
+    ACL_PROF_SYS_IO_FREQ,
+    ACL_PROF_SYS_INTERCONNECTION_FREQ,
+    ACL_PROF_DVPP_FREQ,
+    ACL_PROF_L2_SAMPLE_FREQ,
+    ACL_PROF_ARGS_MAX
+} aclprofConfigType;
+
 typedef struct aclprofConfig aclprofConfig;
 typedef struct aclprofStopConfig aclprofStopConfig;
 typedef struct aclprofAicoreEvents aclprofAicoreEvents;
@@ -73,6 +86,21 @@ typedef struct aclprofStepInfo aclprofStepInfo;
  * @see aclprofFinalize
  */
 MSVP_PROF_API aclError aclprofInit(const char *profilerResultPath, size_t length);
+
+/**
+ * @ingroup AscendCL
+ * @brief set config value 
+ *
+ * @param  configType [IN]  config type
+ * @param  val [IN]  pointer to config
+ * @param  valLen [IN]  length of config
+ *
+ * @retval ACL_SUCCESS The function is successfully executed.
+ * @retval OtherValues Failure
+ *
+ * @see aclprofSetConfig
+ */
+MSVP_PROF_API aclError aclprofSetConfig(aclprofConfigType configType, const char *config, size_t configLength);
 
 /**
  * @ingroup AscendCL

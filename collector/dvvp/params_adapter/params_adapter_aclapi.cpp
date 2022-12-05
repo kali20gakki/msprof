@@ -32,7 +32,7 @@ int ParamsAdapterAclApi::Init()
         return PROFILING_FAILED;
     }
     std::vector<InputCfg>({
-        INPUT_CFG_COM_TRAINING_TRACE, INPUT_CFG_COM_SYS_DEVICES
+        INPUT_CFG_COM_TRAINING_TRACE, INPUT_CFG_COM_SYS_DEVICES, INPUT_CFG_HOST_SYS
     }).swap(aclApiConfig_);
     return ret;
 }
@@ -41,6 +41,9 @@ int ParamsAdapterAclApi::ParamsCheckAclApi() const
 {
     bool ret = true;
     for (auto inputCfg : aclApiConfig_) {
+        if (setConfig_.find(inputCfg) == setConfig_.end()) {
+            continue;
+        }
         std::string cfgValue = paramContainer_[inputCfg];
         switch (inputCfg) {
             case INPUT_CFG_COM_TRAINING_TRACE:
@@ -48,6 +51,9 @@ int ParamsAdapterAclApi::ParamsCheckAclApi() const
                 break;
             case INPUT_CFG_COM_SYS_DEVICES:
                 ret = ParamValidation::instance()->MsprofCheckSysDeviceValid(cfgValue);
+                break;
+            case INPUT_CFG_HOST_SYS:
+                ret = CheckHostSysAclApiValid(cfgValue);
                 break;
             default:
                 ret = false;
@@ -57,6 +63,24 @@ int ParamsAdapterAclApi::ParamsCheckAclApi() const
         }
     }
     return PROFILING_SUCCESS;
+}
+
+bool ParamsAdapterAclApi::CheckHostSysAclApiValid(const std::string &cfgStr) const
+{
+    if (cfgStr.empty()) {
+        MSPROF_LOGE("Config: ACL_PROF_HOST_SYS is empty. Please input in the range of "
+            "'cpu|mem'.");
+        return false;
+    }
+    std::vector<std::string> cfgStrVec = Utils::Split(cfgStr, false, "", ",");
+    for (auto cfg : cfgStrVec) {
+        if (cfg.compare(HOST_SYS_CPU) != 0 && cfg.compare(HOST_SYS_MEM) != 0) {
+            MSPROF_LOGE("The value: %s of ACL_PROF_HOST_SYS is not support. Please input in the range of "
+                "'cpu|mem'.", cfg.c_str());
+            return false;
+        }
+    }
+    return true;
 }
 
 std::string ParamsAdapterAclApi::DevIdToStr(uint32_t devNum, const uint32_t *devList) const
@@ -154,16 +178,10 @@ void ParamsAdapterAclApi::ProfSystemCfgToContainer(const ProfConfig * apiCfg,
 {
     std::map<aclprofConfigType, std::vector<InputCfg>> aclToInput = {
         {ACL_PROF_SYS_HARDWARE_MEM_FREQ, {INPUT_CFG_COM_SYS_HARDWARE_MEM, INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ}},
-        {ACL_PROF_SYS_CPU_FREQ, {INPUT_CFG_COM_SYS_CPU, INPUT_CFG_COM_SYS_CPU_FREQ}},
         {ACL_PROF_SYS_IO_FREQ, {INPUT_CFG_COM_SYS_IO, INPUT_CFG_COM_SYS_IO_FREQ}},
         {ACL_PROF_SYS_INTERCONNECTION_FREQ,
             {INPUT_CFG_COM_SYS_INTERCONNECTION, INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ}},
         {ACL_PROF_DVPP_FREQ, {INPUT_CFG_COM_DVPP, INPUT_CFG_COM_DVPP_FREQ}},
-        {ACL_PROF_SYS_USAGE_FREQ, {INPUT_CFG_COM_SYS_USAGE, INPUT_CFG_COM_SYS_USAGE_FREQ}},
-        {ACL_PROF_SYS_PID_USAGE_FREQ, {INPUT_CFG_COM_SYS_PID_USAGE, INPUT_CFG_COM_SYS_PID_USAGE_FREQ}},
-        {ACL_PROF_HOST_SYS, {INPUT_CFG_MAX, INPUT_CFG_HOST_SYS}},
-        {ACL_PROF_HOST_SYS_USAGE, {INPUT_CFG_MAX, INPUT_CFG_HOST_SYS_USAGE}},
-        {ACL_PROF_HOST_SYS_USAGE_FREQ, {INPUT_CFG_MAX, INPUT_CFG_HOST_SYS_USAGE_FREQ}},
     };
     for (auto iter : aclToInput) {
         if (!argsArr[iter.first].empty()) {

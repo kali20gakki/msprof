@@ -5,7 +5,6 @@
  * Create: 2022-02-10
  */
 #include "analyzer_ffts.h"
-#include "acl_prof.h"
 #include "data_struct.h"
 #include "errno/error_code.h"
 #include "message/codec.h"

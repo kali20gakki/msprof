@@ -215,6 +215,8 @@ bool ParamValidation::CheckLlcModeIsValid(const std::string &llcMode) const
     std::string errReason = "Argument --llc-profiling should be in range [" + llcModeWhiteList[0] + "," +
         llcModeWhiteList[1] + "].";
     CMD_LOGE("%s", errReason.c_str());
+    MSPROF_LOGE("llc_profiling should be in range [%s, %s].", llcModeWhiteList[0].c_str(),
+        llcModeWhiteList[1].c_str());
     MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
         std::vector<std::string>({"llc-mode", llcMode, errReason}));
     return false;

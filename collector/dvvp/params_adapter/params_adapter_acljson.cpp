@@ -51,6 +51,7 @@ void ParamsAdapterAclJson::InitWholeConfigMap()
         INPUT_CFG_COM_AIV_METRICS,
         INPUT_CFG_COM_BIU_FREQ,
         INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ,
+        INPUT_CFG_COM_LLC_MODE,
         INPUT_CFG_COM_SYS_IO_FREQ,
         INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ,
         INPUT_CFG_COM_DVPP_FREQ,
@@ -76,6 +77,7 @@ void ParamsAdapterAclJson::InitPrintMap()
         {INPUT_CFG_COM_AIV_METRICS, "aiv_metrics"},
         {INPUT_CFG_COM_BIU_FREQ, "biu_freq"},
         {INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ, "sys_hardware_mem_freq"},
+        {INPUT_CFG_COM_LLC_MODE, "llc_profiling"},
         {INPUT_CFG_COM_SYS_IO_FREQ, "sys_io_sampling_freq"},
         {INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ, "sys_interconnection_freq"},
         {INPUT_CFG_COM_DVPP_FREQ, "dvpp_freq"},
@@ -95,7 +97,7 @@ bool ParamsAdapterAclJson::CheckHostSysAclJsonValid(const std::string &cfgStr) c
     std::vector<std::string> cfgStrVec = Utils::Split(cfgStr, false, "", ",");
     for (auto cfg : cfgStrVec) {
         if (cfg.compare(HOST_SYS_CPU) != 0 && cfg.compare(HOST_SYS_MEM) != 0) {
-            MSPROF_LOGE("The value: %s of host_sys is not support. Please input in the range of "
+            MSPROF_LOGE("The value [%s] of host_sys is not support. Please input in the range of "
                 "'cpu|mem'.", cfg.c_str());
             return false;
         }
@@ -143,6 +145,7 @@ void ParamsAdapterAclJson::GenAclJsonContainer(SHARED_PTR_ALIA<ProfAclConfig> ac
     paramContainer_[INPUT_CFG_COM_AIV_METRICS] = aclCfg->aiv_metrics();
     paramContainer_[INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ] = (aclCfg->sys_hardware_mem_freq() <= 0) ? "" :
         std::to_string(aclCfg->sys_hardware_mem_freq());
+    paramContainer_[INPUT_CFG_COM_LLC_MODE] = aclCfg->llc_profiling();
     paramContainer_[INPUT_CFG_COM_SYS_IO_FREQ] = (aclCfg->sys_io_sampling_freq() <= 0) ? "" :
         std::to_string(aclCfg->sys_io_sampling_freq());
     paramContainer_[INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ] = (aclCfg->sys_interconnection_freq() <= 0) ? "" :
