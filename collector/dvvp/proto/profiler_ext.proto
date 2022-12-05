@@ -45,8 +45,13 @@ message ProfGeOptionsConfig {
     string aiv_metrics = 19;
     string runtime_api = 20;
     string host_sys_usage = 21;
-    string host_sys_usage_freq = 22;
+    uint32 host_sys_usage_freq = 22;
     uint32 l2_freq = 23;
+    uint32 sys_hardware_mem_freq = 24;
+    uint32 sys_io_sampling_freq = 25;
+    uint32 sys_interconnection_freq = 26;
+    uint32 dvpp_freq = 27;
+    string host_sys = 28;
 }
 
 message ProfAclInitConfig {
