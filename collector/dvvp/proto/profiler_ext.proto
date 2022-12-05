@@ -18,8 +18,13 @@ message ProfAclConfig {
     string ascendcl = 13;
     string runtime_api = 14;
     string host_sys_usage = 15;
-    string host_sys_usage_freq = 16;
+    uint32 host_sys_usage_freq = 16;
     uint32 l2_freq = 17;
+    uint32 sys_hardware_mem_freq = 18;
+    uint32 sys_io_sampling_freq = 19;
+    uint32 sys_interconnection_freq = 20;
+    uint32 dvpp_freq = 21;
+    string host_sys = 22;
 }
 
 message ProfGeOptionsConfig {

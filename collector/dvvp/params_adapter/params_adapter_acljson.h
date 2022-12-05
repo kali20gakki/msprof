@@ -21,10 +21,14 @@ public:
 
 private:
     int Init();
+    void InitWholeConfigMap();
+    void InitPrintMap();
     int ParamsCheckAclJson() const;
     void GenAclJsonContainer(SHARED_PTR_ALIA<ProfAclConfig> aclCfg);
     void SetAclJsonContainerDefaultValue();
+    void SetAclJsonContainerSysValue();
     std::string SetOutputDir(const std::string &outputDir) const;
+    bool CheckHostSysAclJsonValid(const std::string &cfgStr) const;
 
 private:
     SHARED_PTR_ALIA<ProfileParams> params_;
