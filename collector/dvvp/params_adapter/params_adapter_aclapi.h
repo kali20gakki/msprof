@@ -8,7 +8,7 @@
 #define COLLECTOR_DVVP_PARAMS_ADAPTER_ACLAPI_H
 #include "params_adapter.h"
 
-#include "acl_base.h"
+#include "acl_prof.h"
 
 namespace Collector {
 namespace Dvvp {
@@ -32,6 +32,7 @@ private:
         std::array<std::string, ACL_PROF_ARGS_MAX> argsArr);
     void ProfSystemCfgToContainer(const ProfConfig* apiCfg,
         std::array<std::string, ACL_PROF_ARGS_MAX> argsArr);
+    bool CheckHostSysAclApiValid(const std::string &cfgStr) const;
     std::string DevIdToStr(uint32_t devNum, const uint32_t* devList) const;
 
 private:

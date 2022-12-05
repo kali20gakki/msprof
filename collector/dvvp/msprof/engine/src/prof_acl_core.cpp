@@ -736,7 +736,7 @@ aclError aclprofRangeStop(uint32_t rangeId)
     return MsprofTxManager::instance()->RangeStop(rangeId);
 }
 
-aclError aclprofSetConfig(aclprofConfigType configType, const char *val, uint32_t valLen)
+aclError aclprofSetConfig(aclprofConfigType configType, const char *config, size_t configLength)
 {
     if (Platform::instance()->PlatformIsHelperHostSide()) {
         MSPROF_LOGE("acl api not support in helper");
@@ -744,16 +744,22 @@ aclError aclprofSetConfig(aclprofConfigType configType, const char *val, uint32_
             std::vector<std::string>({"aclprofSetConfig", "SocCloud"}));
         return ACL_ERROR_FEATURE_UNSUPPORTED;
     }
-    if (configType < ACL_PROF_STORAGE_LIMIT || configType >= ACL_PROF_ARGS_MAX) {
-        MSPROF_LOGE("[aclprofSetConfig]");
+    if (configType <= ACL_PROF_ARGS_MIN || configType >= ACL_PROF_ARGS_MAX) {
+        MSPROF_LOGE("[aclprofSetConfig]ConfigType is not support.");
         return ACL_ERROR_INVALID_PARAM;
     }
-    if (val == nullptr || strnlen(val, valLen) != valLen) {
-        MSPROF_LOGE("[aclprofSetConfig]Input value is invalid.");
+    if (config == nullptr || strnlen(config, configLength) != configLength) {
+        MSPROF_LOGE("[aclprofSetConfig]Input value is nullptr or its length does not equals given length.");
         return ACL_ERROR_INVALID_PARAM;
     }
-    std::string config(val, valLen);
-    int32_t ret = ProfAclMgr::instance()->MsprofSetConfig(configType, config);
+    const static size_t configMaxLength = 256;
+    if (configLength > configMaxLength) {
+        MSPROF_LOGE("length of config is illegal, the value is %zu, it should be in (0, %zu)",
+                    configLength, configMaxLength);
+        return ACL_ERROR_INVALID_PARAM;
+    }
+    std::string configStr(config, configLength);
+    int32_t ret = ProfAclMgr::instance()->MsprofSetConfig(configType, configStr);
     if (ret != PROFILING_SUCCESS) {
         MSPROF_LOGE("[aclprofSetConfig]Fail to set profiling config.");
         return ACL_ERROR_INVALID_PARAM;

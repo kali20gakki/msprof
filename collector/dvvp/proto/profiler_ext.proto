@@ -21,10 +21,11 @@ message ProfAclConfig {
     uint32 host_sys_usage_freq = 16;
     uint32 l2_freq = 17;
     uint32 sys_hardware_mem_freq = 18;
-    uint32 sys_io_sampling_freq = 19;
-    uint32 sys_interconnection_freq = 20;
-    uint32 dvpp_freq = 21;
-    string host_sys = 22;
+    string llc_profiling = 19;
+    uint32 sys_io_sampling_freq = 20;
+    uint32 sys_interconnection_freq = 21;
+    uint32 dvpp_freq = 22;
+    string host_sys = 23;
 }
 
 message ProfGeOptionsConfig {
@@ -48,10 +49,11 @@ message ProfGeOptionsConfig {
     uint32 host_sys_usage_freq = 22;
     uint32 l2_freq = 23;
     uint32 sys_hardware_mem_freq = 24;
-    uint32 sys_io_sampling_freq = 25;
-    uint32 sys_interconnection_freq = 26;
-    uint32 dvpp_freq = 27;
-    string host_sys = 28;
+    string llc_profiling = 25;
+    uint32 sys_io_sampling_freq = 26;
+    uint32 sys_interconnection_freq = 27;
+    uint32 dvpp_freq = 28;
+    string host_sys = 29;
 }
 
 message ProfAclInitConfig {
