@@ -10,6 +10,7 @@ from common_func.msprof_exception import ProfException
 from common_func.ms_constant.str_constant import StrConstant
 from constant.constant import clear_dt_project
 from msparser.cluster.communication_parser import CommunicationParser
+from msparser.cluster.communication_matrix_parser import CommunicationMatrixParser
 import pytest
 
 
@@ -133,3 +134,14 @@ class TestClusterTuningFacade(unittest.TestCase):
                 mock.patch(outspace3 + '.SlowLinkCalculator.add_suggestions'):
             ClusterTuningFacade(self.params).cluster_communication()
 
+    def test_communication_matrix(self):
+        outspace1 = 'msparser.cluster.communication_matrix_parser'
+        outspace2 = 'mscalculate.cluster.communication_matrix_calculator'
+        op_info = [{StrConstant.TOTAL: 'Communication Matrix Suggestions'}]
+        parser = CommunicationMatrixParser({})
+        with mock.patch(NAMESPACE + '.CommunicationMatrixParserFactory.generate_parser', return_value=parser), \
+                mock.patch(outspace1 + '.CommunicationMatrixParser.run', return_value=op_info), \
+                mock.patch(NAMESPACE + '.MatrixCalculatorFactory.generate_calculator'), \
+                mock.patch(outspace2 + '.CommunicationMatrixCalculator.run'), \
+                mock.patch(outspace2 + '.CommunicationMatrixCalculator.add_suggestions'):
+            ClusterTuningFacade(self.params).communication_matrix()

@@ -3,7 +3,7 @@
 # Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
 
 import re
-from enum import Enum
+from enum import IntEnum
 
 from common_func.db_name_constant import DBNameConstant
 
@@ -347,7 +347,7 @@ class StrConstant:
     # hccl str constant
     SDMA_TRANSIT_ITEMS = ["Memcpy", "Reduce Inline"]
     TRANSIT_TYPE = ["RDMA", "HCCS", "PCIE", "SDMA"]
-    TOTAL = 'Total HCCL Operators'
+    TOTAL = "Total HCCL Operators"
     HCCS = "HCCS"
     PCIE = "PCIE"
     RDMA = "RDMA"
@@ -357,11 +357,18 @@ class StrConstant:
     REDUCE_TBE = "Reduce TBE"
     RDMA_SEND = "RDMASend"
     SDMA_TRANSIT_ITEMS = ["Memcpy", "Reduce Inline"]
-    COMMUNICATION_TIME_INFO = 'Communication Time Info'
-    COMMNUNICATION_BANDWIDTH_INFO = 'Communication Bandwidth Info'
+    COMMUNICATION_TIME_INFO = "Communication Time Info"
+    COMMNUNICATION_BANDWIDTH_INFO = "Communication Bandwidth Info"
     SLOW_RANK_SUGGESTION = "Slow Rank Suggestion"
     SLOW_LINK_SUGGESTION = "Slow Link Suggestion"
-    SUGGESTION = 'Suggestion'
+    MATRIX_SUGGESTION = "Matrix Suggestion"
+    SUGGESTION = "Suggestion"
+    OP_NAME = "op_name"
+    LINK_INFO = "link_info"
+    TIME_RATIO = "Time Ratio"
+    TRANSPORT_TYPE_INFO = "Transport Type Info"
+    AVERAGE_INFO = "Average Info"
+    SLOWEST_LINK_INFO = "Slowest Link Info"
 
     @property
     def accuracy(self: any) -> str:
@@ -380,7 +387,7 @@ class StrConstant:
         return self.BANDWIDTH
 
 
-class OpAnalysisType():
+class OpAnalysisType:
     ELAPSE_TIME = "Elapse Time(ms)"
     TRANSIT_TIME = "Transit Time(ms)"
     WAIT_TIME = "Wait Time(ms)"
@@ -389,10 +396,27 @@ class OpAnalysisType():
     SYNCHRONIZATION_TIME_RATIO = "Synchronization Time Ratio"
 
 
-class OpBandWidthType():
+class OpBandWidthType:
     TRANSIT_SIZE_MB = "Transit Size(MB)"
     TRANSIT_TIME_MS = "Transit Time(ms)"
     BANDWIDTH_GB_S = "Bandwidth(GB/s)"
     BANDWIDTH_UTILIZATION = "Bandwidth(Utilization)"
     LARGE_PACKET_RATIO = "Large Packet Ratio"
     SIZE_DISTRIBUTION = "Size Distribution"
+
+
+class CommunicationMatrixInfo:
+    SRC_RANK = "Src Rank"
+    DST_RANK = "Dst Rank"
+    TRANSPORT_TYPE = "Transport Type"
+    TRANSIT_SIZE_MB = "Transit Size(MB)"
+    TRANSIT_TIME_MS = "Transit Time(ms)"
+    BANDWIDTH_GB_S = "Bandwidth(GB/s)"
+    BANDWIDTH_UTILIZATION = "Bandwidth(Utilization)"
+    LARGE_PACKET_RATIO = "Large Packet Ratio"
+
+
+class TransportType(IntEnum):
+    HCCS = 0
+    PCIE = 1
+    RDMA = 2

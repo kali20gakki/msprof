@@ -54,6 +54,7 @@ class NumberConstant:
     NS_TO_US = 1000.0
     TEN_NS_TO_US = 100.0
     MS_TO_US = 1000.0
+    US_TO_MS = 1000.0
     MS_TO_NS = 1000000.0
     LLC_BYTE = 64.0
     FLT_EPSILON = 1.0e-9
@@ -123,6 +124,7 @@ class NumberConstant:
     RANK_NUM_PER_SERVER = 8
     RANK_NUM_PER_OS = 4
     MAX_RANK_NUMS = 4096
+    B_to_MB = 1024 ** 2
 
     @property
     def conversion_time(self: any) -> float:

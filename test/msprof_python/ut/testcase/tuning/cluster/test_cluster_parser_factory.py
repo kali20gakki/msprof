@@ -120,3 +120,12 @@ class TestClusterCommunicationParserFactory(unittest.TestCase):
                 mock.patch(model_space + '.get_distinct_op_name', return_value=[hccl]), \
                 mock.patch(model_space + '.get_hccl_data_by_conditions', return_value=[hccl]):
             ClusterCommunicationParserFactory(self.params).get_hccl_events_from_db(0, '', [(0, 100)])
+
+
+class TestCommunicationMatrixParserFactory(unittest.TestCase):
+    DIR = os.path.join(os.path.dirname(__file__), 'DT_ClusterTuningFacade')
+    params = {"collection_path": os.path.join(os.path.dirname(__file__), 'DT_ClusterTuningFacade'),
+              "npu_id": -1,
+              "model_id": 0,
+              "iteration_id": 1,
+              "data_type": 7}
