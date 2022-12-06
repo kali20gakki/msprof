@@ -200,8 +200,16 @@ class ProfConditionConfig(MetaConfig):
             "right": "StridedSliceGrad",
             "cmp": "contain"
         }
+        , {
+            "id": "condition_ai_cpu_parallelism",
+            "type": "formula",
+            "left": ["AI CPU Execution Time(us)", "AI Core Execution Time(us)",
+                     "Concurrent AI Core and AI CPU Execution Time(us)"],
+            "right": 0.05,
+            "formula": "{0}/({0}+{1}+{2})",
+            "cmp": ">"
+        }
     ]
 
     def __init__(self):
         self.support_parser = False
-

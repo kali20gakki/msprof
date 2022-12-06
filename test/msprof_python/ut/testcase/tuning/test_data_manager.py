@@ -7,8 +7,7 @@ from sqlite.db_manager import DBOpen
 from sqlite.db_manager import DBManager
 
 from common_func.db_name_constant import DBNameConstant
-from tuning.data_manager import DataLoader
-from tuning.data_manager import DataManager
+from tuning.data_manager import DataManager, OpSummaryTuningDataHandle
 
 sample_config = {"model_id": 1, 'iter_id': 'dasfsd', 'result_dir': 'jasdfjfjs',
                  "ai_core_profiling_mode": "task-based", "aiv_profiling_mode": "sample-based"}
@@ -17,7 +16,11 @@ NAMESPACE = 'tuning.data_manager'
 
 class TestDataManager(unittest.TestCase):
     def test_get_data(self):
-        key = DataManager('', '0')
+        para = {
+            'project': '',
+            'device_id': '0',
+        }
+        key = DataManager(para)
         key.data = {'type1': [1, 2]}
         result1 = key.get_data('type1')
         self.assertEqual(result1, [1, 2])
@@ -29,32 +32,35 @@ class TestDataLoader(unittest.TestCase):
     def test_get_data_by_infer_id(self):
         project_path = 'home\\data_loader'
         device_id = 123
-        infer_id = 456
         headers = ['device_id', 'infer_id', 'project_path']
         datas = [[0, 0, 'home\\data_manager']]
         check = [{'device_id': 0, 'infer_id': 0, 'project_path': 'home\\data_manager'}]
-        with mock.patch(NAMESPACE + '.DataLoader.select_memory_workspace', return_value=[5, 4, 0]), \
-                mock.patch(NAMESPACE + '.DataLoader._get_base_data', return_value=(headers, datas)), \
-                mock.patch(NAMESPACE + '.DataLoader._get_extend_data'), \
-                mock.patch(NAMESPACE + '.DataLoader.get_memory_workspace'):
-            key = DataLoader()
-            result = key.get_data_by_infer_id(project_path, device_id)
+        with mock.patch(NAMESPACE + '.OpSummaryTuningDataHandle.select_memory_workspace', return_value=[5, 4, 0]), \
+                mock.patch(NAMESPACE + '.OpSummaryTuningDataHandle._get_base_data', return_value=(headers, datas)), \
+                mock.patch(NAMESPACE + '.OpSummaryTuningDataHandle._get_extend_data'), \
+                mock.patch(NAMESPACE + '.OpSummaryTuningDataHandle.get_memory_workspace'):
+            key = OpSummaryTuningDataHandle()
+            para = {
+                'project': project_path,
+                'device_id': device_id,
+            }
+            result = key.get_data_by_infer_id(para)
         self.assertEqual(result, check)
 
     def test_get_vector_bound(self):
         extend_data_dict = {"vector_bound": 1, "mte2_ratio": 2, "mac_ratio": 3}
         operator_dict = {"vec_ratio": 4, "mte2_ratio": 5, "mac_ratio": 6}
-        DataLoader.get_vector_bound(extend_data_dict, operator_dict)
+        OpSummaryTuningDataHandle.get_vector_bound(extend_data_dict, operator_dict)
 
     def test_get_memory_workspace_1(self):
         memory_workspaces = [[1, '123', 3]]
         operator_dict = {"stream_id": 1, "task_id": '123', "memory_workspace": 2}
-        DataLoader.get_memory_workspace(memory_workspaces, operator_dict)
+        OpSummaryTuningDataHandle.get_memory_workspace(memory_workspaces, operator_dict)
 
     def test_get_memory_workspace_2(self):
         memory_workspaces = None
         operator_dict = {"memory_workspace": 2}
-        DataLoader.get_memory_workspace(memory_workspaces, operator_dict)
+        OpSummaryTuningDataHandle.get_memory_workspace(memory_workspaces, operator_dict)
 
     def test_select_memory_workspace(self):
         project = 123
@@ -69,20 +75,20 @@ class TestDataLoader(unittest.TestCase):
         insert_sql = "insert into {0} values ({value})".format("GELoad", value="?," * (len(data[0]) - 1) + "?")
         db_manager = DBManager()
         res = db_manager.create_table("ge_model_info.db", create_sql, insert_sql, data)
-        with mock.patch(NAMESPACE + '.DataLoader.is_network', return_value=False):
-            result = DataLoader.select_memory_workspace(project, device_id)
+        with mock.patch(NAMESPACE + '.OpSummaryTuningDataHandle.is_network', return_value=False):
+            result = OpSummaryTuningDataHandle.select_memory_workspace(project, device_id)
         self.assertEqual(result, [])
         db_manager = DBManager()
         res = db_manager.create_table("ge_model_info.db", create_sql, insert_sql, data)
-        with mock.patch(NAMESPACE + '.DataLoader.is_network', return_value=True), \
+        with mock.patch(NAMESPACE + '.OpSummaryTuningDataHandle.is_network', return_value=True), \
                 mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=(res[0], res[1])), \
                 mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True):
-            result = DataLoader.select_memory_workspace(project, device_id)
+            result = OpSummaryTuningDataHandle.select_memory_workspace(project, device_id)
         self.assertEqual(result, [])
         db_manager = DBManager()
         res = db_manager.create_table("ge_model_info.db", create_sql, insert_sql, data)
         with mock.patch(NAMESPACE + '.DBManager.destroy_db_connect'):
-            DataLoader.select_memory_workspace(project, device_id)
+            OpSummaryTuningDataHandle.select_memory_workspace(project, device_id)
         res[1].execute("drop table GELoad")
         db_manager.destroy(res)
 
@@ -96,17 +102,17 @@ class TestDataLoader(unittest.TestCase):
             db_open.create_table(create_sql)
             db_open.insert_data(DBNameConstant.TABLE_ACL_DATA, data)
             with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=(db_open.db_conn, db_open.db_curs)):
-                result = DataLoader.is_network(project, device_id)
+                result = OpSummaryTuningDataHandle.is_network(project, device_id)
             self.assertEqual(result, True)
 
             curs = mock.Mock()
             curs.execute.side_effect = sqlite3.Error
             with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=(curs, curs)), \
                     mock.patch(NAMESPACE + '.logging.error'):
-                DataLoader.is_network(project, device_id)
+                OpSummaryTuningDataHandle.is_network(project, device_id)
 
             with mock.patch(NAMESPACE + '.DBManager.destroy_db_connect'):
-                DataLoader.is_network(project, device_id)
+                OpSummaryTuningDataHandle.is_network(project, device_id)
 
 
 if __name__ == '__main__':

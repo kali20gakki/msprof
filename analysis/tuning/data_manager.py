@@ -5,7 +5,10 @@
 import logging
 import os
 import sqlite3
+from abc import ABC, abstractmethod
 
+from common_func.constant import Constant
+from common_func.section_calculator import SectionCalculator
 from config.config_manager import ConfigManager
 from common_func.common_prof_rule import CommonProfRule
 from common_func.common import CommonConstant
@@ -17,33 +20,90 @@ from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.msvp_constant import MsvpConstant
 from common_func.path_manager import PathManager
+from msmodel.task_time.task_time import OpSummaryViewModel
 from viewer.ai_core_op_report import AiCoreOpReport
 from viewer.ai_core_report import get_core_sample_data
 from viewer.runtime_report import get_task_based_core_data
 
 
-class DataManager:
+class BaseTuningDataHandle(ABC):
     """
-    manage different types of tuning data
+        move to a new file in the future
     """
+    TAG_KEY = ""
 
-    def __init__(self: any, project: str, device_id: str) -> None:
-        self.data = {}
-        self._load_operator_data(project, device_id)
+    @staticmethod
+    @abstractmethod
+    def load_data(param: dict):
+        pass
 
-    def get_data(self: any, data_type: str) -> list:
-        return self.data.get(data_type, [])
+    @staticmethod
+    @abstractmethod
+    def get_result(ids: any, operator_data: list):
+        pass
 
-    def _load_operator_data(self: any, project: str, device_id: str):
-        data_type = CommonProfRule.TUNING_OPERATOR
-        self.data[data_type] = DataLoader.get_data_by_infer_id(project, device_id)
+    @staticmethod
+    @abstractmethod
+    def print_format(data: any):
+        pass
 
 
-class DataLoader:
+class OpParallelTuningDataHandle(BaseTuningDataHandle):
     """
-    move to new file in the future
-    get operator data by infer id
+            delete the file in the future
     """
+    TAG_KEY = "AI CPU Execution Time(us)"
+
+    @staticmethod
+    def load_data(param: dict) -> list:
+        op_parallel_data = []
+        project_path = param.get(StrConstant.PARAM_RESULT_DIR, '')
+        with OpSummaryViewModel(project_path) as _model:
+            ai_core_data = _model.get_operator_data_by_task_type(Constant.TASK_TYPE_AI_CORE)
+            ai_cpu_data = _model.get_operator_data_by_task_type(Constant.TASK_TYPE_AI_CPU)
+        if not ai_core_data or not ai_cpu_data:
+            return op_parallel_data
+        ai_core_data = SectionCalculator.merge_continuous_intervals(ai_core_data)
+        ai_cpu_data = SectionCalculator.merge_continuous_intervals(ai_cpu_data)
+        ai_core_overlap_data = SectionCalculator.compute_overlap_time(ai_core_data, ai_cpu_data)
+        ai_core_time, ai_cpu_time, overlap_time = Constant.DEFAULT_VALUE, Constant.DEFAULT_VALUE, Constant.DEFAULT_VALUE
+        for ai_core_task in ai_core_overlap_data:
+            overlap_time += ai_core_task.overlap_time
+            ai_core_time += (ai_core_task.end_time - ai_core_task.start_time)
+        for ai_cpu_task in ai_cpu_data:
+            ai_cpu_time += (ai_cpu_task.end_time - ai_cpu_task.start_time)
+        op_parallel_data.append(
+            {"AI Core Execution Time(us)": (ai_core_time - overlap_time) / 1000.0,
+             "AI CPU Execution Time(us)": (ai_cpu_time - overlap_time) / 1000.0,
+             "Concurrent AI Core and AI CPU Execution Time(us)": overlap_time / 1000.0})
+        return op_parallel_data
+
+    @staticmethod
+    def get_result(ids: any, operator_data: list):
+        if not ids:
+            return {}
+        return operator_data[0]
+
+    @staticmethod
+    def print_format(data: any):
+        ai_cpu_ratio = data.get("AI CPU Execution Time(us)", 0.0) / sum(data.values())
+        return f"Percentage of AI CPU Execution Time is {ai_cpu_ratio:.2%}, Exceed the experience threshold 5%."
+
+
+class OpSummaryTuningDataHandle(BaseTuningDataHandle):
+    TAG_KEY = "op_name"
+
+    @staticmethod
+    def load_data(param: dict) -> list:
+        return OpSummaryTuningDataHandle.get_data_by_infer_id(param)
+
+    @staticmethod
+    def get_result(ids: any, operator_data: list):
+        return ids
+
+    @staticmethod
+    def print_format(data: any):
+        return "[{0}]".format(",".join(list(map(str, data))))
 
     @staticmethod
     def get_memory_workspace(memory_workspaces: list, operator_dict: dict) -> None:
@@ -87,10 +147,12 @@ class DataLoader:
         return result_headers
 
     @classmethod
-    def get_data_by_infer_id(cls: any, project_path: str, device_id: any) -> list:
+    def get_data_by_infer_id(cls: any, para: dict) -> list:
         """
         get data by iter id.
         """
+        project_path = para.get(StrConstant.PARAM_RESULT_DIR, '')
+        device_id = para.get(StrConstant.PARAM_DEVICE_ID, '')
         op_data = []
         memory_workspaces = cls.select_memory_workspace(project_path, device_id)
         raw_headers, datas = cls._get_base_data(device_id, project_path)
@@ -159,8 +221,7 @@ class DataLoader:
                                                             param)
             elif sample_config.get(StrConstant.AICORE_PROFILING_MODE) == StrConstant.AIC_SAMPLE_BASED_MODE:
                 param[StrConstant.CORE_DATA_TYPE] = StrConstant.AI_CORE_PMU_EVENTS
-                headers, data, _ = get_core_sample_data(project_path, "aicore_{}.db", device_id,
-                                                        param)
+                headers, data, _ = get_core_sample_data(project_path, "aicore_{}.db", device_id, param)
 
             if not headers or not data:
                 param[StrConstant.DATA_TYPE] = StrConstant.AI_VECTOR_CORE_PMU_EVENTS
@@ -179,3 +240,24 @@ class DataLoader:
         cls.get_vector_bound(extend_data_dict, operator_dict)
         operator_dict.update(extend_data_dict)
         return extend_data_dict
+
+
+class DataManager:
+    """
+    manage different types of tuning data
+    """
+    HANDLE_MAP = {
+        CommonProfRule.TUNING_OPERATOR: OpSummaryTuningDataHandle,
+        CommonProfRule.TUNING_OP_PARALLEL: OpParallelTuningDataHandle
+    }
+
+    def __init__(self: any, param: dict) -> None:
+        self.data = {}
+        self._load_data(param)
+
+    def get_data(self: any, data_type: str) -> list:
+        return self.data.get(data_type, [])
+
+    def _load_data(self: any, param: dict):
+        for tuning_type, tuning_data_handle_class in self.HANDLE_MAP.items():
+            self.data[tuning_type] = tuning_data_handle_class.load_data(param)
