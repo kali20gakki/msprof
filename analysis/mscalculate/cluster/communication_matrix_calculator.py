@@ -55,6 +55,15 @@ class CommunicationMatrixCalculator(MetaCalculator):
                                             key=lambda x: x[CommunicationMatrixInfo.BANDWIDTH_GB_S])
         return
 
+    @staticmethod
+    def print_second_level_info(transport_dict: dict, msg_key: str) -> None:
+        info_list = ['\t\t' + sug for sug in transport_dict.get(msg_key, [])]
+        if not info_list:
+            return
+        print_msg('\t' + msg_key + '\n')
+        for info in info_list:
+            print_msg(info)
+
     def run(self):
         for link_info in self.data:
             self.suggestions.append(self.calculate(link_info))
@@ -152,12 +161,3 @@ class CommunicationMatrixCalculator(MetaCalculator):
             print_msg(transport_dict.get(StrConstant.TRANSPORT_TYPE_INFO, ''))
             self.print_second_level_info(transport_dict, StrConstant.AVERAGE_INFO)
             self.print_second_level_info(transport_dict, StrConstant.SLOWEST_LINK_INFO)
-
-    @staticmethod
-    def print_second_level_info(transport_dict: dict, msg_key: str) -> None:
-        info_list = ['\t\t' + sug for sug in transport_dict.get(msg_key, [])]
-        if not info_list:
-            return
-        print_msg('\t' + msg_key + '\n')
-        for info in info_list:
-            print_msg(info)
