@@ -4,27 +4,29 @@
 
 from abc import ABC
 
+from common_func.db_manager import DBManager
+from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.trace_view_header_constant import TraceViewHeaderConstant
 from common_func.trace_view_manager import TraceViewManager
+from msmodel.ge.ge_info_calculate_model import GeInfoModel
 from msmodel.sqe_type_map import SqeType
 from msmodel.stars.acsq_task_model import AcsqTaskModel
+from profiling_bean.db_dto.ge_task_dto import GeTaskDto
 from viewer.interface.base_viewer import BaseViewer
 
 
-class AcsqTaskViewer(BaseViewer, ABC):
+class AcsqTaskViewer:
     """
     class used to get acsq task timeline and op_summary data
     """
 
-    def __init__(self: any, configs: dict, params: dict) -> None:
-        super().__init__(configs, params)
-        self.model_list = {
-            'acsq_task_statistic': AcsqTaskModel,
-            'acsq_task_time': AcsqTaskModel,
-        }
+    def __init__(self: any, configs: dict) -> None:
+        self.configs = configs
+        self._model = AcsqTaskModel(configs.get('result_dir'), DBNameConstant.DB_ACSQ,
+                                    [])
 
     @staticmethod
     def get_timeline_header() -> list:
@@ -36,18 +38,32 @@ class AcsqTaskViewer(BaseViewer, ABC):
             result.append(thread_header)
         return result
 
-    def get_summary_data(self: any) -> tuple:
+    def get_summary_data(self: any, headers: list) -> tuple:
         """
         get acsq task op_summary data,
         :return: headers, data, count of data
         """
-        summary_data_list = list(map(list, self.get_data_from_db()))
-        for data in summary_data_list:
-            data[4:6] = list(map(lambda x: x / NumberConstant.NS_TO_US, data[4:6]))
-            data[6] = data[5] - data[4]
-        return self.configs.get(StrConstant.CONFIG_HEADERS), summary_data_list, len(summary_data_list)
+        with self._model as _model:
+            data_list = _model.get_summary_data()
+        self._update_kernel_name(data_list)
+        res_list = [[data.op_name, data.task_type, data.stream_id, data.task_id, data.task_time,
+                     data.start_time, data.end_time] for data in data_list]
+        return headers, res_list, len(res_list)
 
-    def get_trace_timeline(self: any, data_list: list) -> list:
+    def _update_kernel_name(self: any, data_list: list):
+        conn, cur = DBManager.check_connect_db(self.configs.get('result_dir'), DBNameConstant.DB_AICORE_OP_SUMMARY)
+        if not (cur and conn and DBManager.judge_table_exist(cur, DBNameConstant.TABLE_SUMMARY_GE)):
+            return
+        ge_sql = "select op_name, stream_id, task_id from {}".format(
+            DBNameConstant.TABLE_SUMMARY_GE)
+        ge_data = DBManager.fetch_all_data(cur, ge_sql, dto_class=GeTaskDto)
+        op_name_dict = {"{0}-{1}".format(data.stream_id, data.task_id): data.op_name for data in ge_data}
+        for data in data_list:
+            key = "{0}-{1}".format(data.stream_id, data.task_id)
+            data.op_name = op_name_dict.get(key, 'N/A')
+
+    @staticmethod
+    def get_trace_timeline(data_list: list) -> list:
         """
         get time timeline
         :return: timeline_trace data
@@ -63,4 +79,3 @@ class AcsqTaskViewer(BaseViewer, ABC):
         result = TraceViewManager.metadata_event(AcsqTaskViewer.get_timeline_header())
         result.extend(_trace)
         return result
-

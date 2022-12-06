@@ -142,12 +142,12 @@ class AiStackDataCheckManager(DataCheckManager):
                cls.contain_dp_aicpu_data(result_dir, device_id=device_id)
 
     @classmethod
-    def contain_task_time_without_ffts_task(cls: any, result_dir: str, device_id: any = None) -> bool:
+    def contain_task_time_task(cls: any, result_dir: str, device_id: any = None) -> bool:
         """
         The data path contain step_trace data or not
         """
-        return cls.contain_task_time_data(result_dir, device_id) and \
-               not AiStackDataCheckManager.contain_stars_soc_data(result_dir, device_id)
+        return cls.contain_task_time_data(result_dir, device_id) or \
+            AiStackDataCheckManager.contain_stars_soc_data(result_dir, device_id)
 
     @classmethod
     def contain_op_summary_data(cls: any, result_dir: str, device_id: any = None) -> bool:
@@ -283,7 +283,7 @@ class AiStackDataCheckManager(DataCheckManager):
         """
         return cls.check_data_exist(result_dir, file_name_manager.get_soc_profiler_compiles(),
                                     device_id=device_id) \
-            and path_check(PathManager.get_db_path(result_dir, DBNameConstant.DB_LOW_POWER))
+               and path_check(PathManager.get_db_path(result_dir, DBNameConstant.DB_LOW_POWER))
 
     @classmethod
     def contain_biu_perf_data(cls: any, result_dir: str, device_id: int = None) -> bool:
