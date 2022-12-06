@@ -48,13 +48,14 @@ class HCCLExport:
         :return: control statement
         """
         sql = "select name,plane_id,timestamp,duration,bandwidth,stream_id," \
-              "task_id, task_type,transport_type,size,stage,step from {0}".format(DBNameConstant.TABLE_HCCL_ALL_REDUCE)
+              "task_id, task_type,transport_type,size,stage,step,op_name from {0}".format(
+            DBNameConstant.TABLE_HCCL_ALL_REDUCE)
 
         if not ProfilingScene().is_operator():
             iter_time = MsprofIteration(self.project_path).get_iteration_time(self.iter_id, self.model_id)
             if iter_time:
                 sql = "select name,plane_id,timestamp,duration,bandwidth,stream_id," \
-                      "task_id, task_type,transport_type,size,stage,step from {0} where timestamp>={1} " \
+                      "task_id, task_type,transport_type,size,stage,step,op_name from {0} where timestamp>={1} " \
                       "and timestamp<{2}".format(DBNameConstant.TABLE_HCCL_ALL_REDUCE,
                                                  iter_time[0][0], iter_time[0][1])
         return sql
@@ -79,7 +80,8 @@ class HCCLExport:
                                      ("Transport Type", _hccl_data[8]),
                                      ("Size(Byte)", _hccl_data[9]),
                                      ("Stage", _hccl_data[10]),
-                                     ("Step", _hccl_data[11])])
+                                     ("Step", _hccl_data[11]),
+                                     ("Operator Name", _hccl_data[12])])
             _hccl_data_pice = [
                 _hccl_data[0], self.pid_value, _hccl_data[1],
                 _hccl_data[2], _hccl_data[3], hccl_args
