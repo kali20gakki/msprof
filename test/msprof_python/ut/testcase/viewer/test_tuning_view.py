@@ -1,6 +1,8 @@
 import json
 import unittest
 from unittest import mock
+
+from tuning.data_manager import OpSummaryTuningDataHandle
 from viewer.tuning_view import TuningView
 
 NAMESPACE = 'viewer.tuning_view'
@@ -19,7 +21,7 @@ class TestTuningView(unittest.TestCase):
         self.assertEqual(res, None)
 
     def test_tuning_report(self):
-        data = {"data": [{"result": [{'rule_subtype': 'test'}]}], "Rule Type": 1}
+        data = {"data": {"Op Summary": [{"result": [{'rule_subtype': 'test'}]}]}, "Rule Type": 1}
         with mock.patch(NAMESPACE + '.PathManager.get_summary_dir', return_value='test'),\
                 mock.patch('os.path.exists', return_value=True),\
                 mock.patch('builtins.open', mock.mock_open(read_data=json.dumps(data))):
@@ -39,9 +41,9 @@ class TestTuningView(unittest.TestCase):
         data = [{"Rule Type": "1", "Op List": "3", "Rule Suggestion": "4"}]
         data_sub = [{"Rule Type": "1", "Rule Subtype": "2", "Op List": "3", "Rule Suggestion": "4"},
                     {"Rule Type": "1", "Rule Subtype": "2", "Op List": "3", "Rule Suggestion": "4"}]
-        TuningView("", {}, 0).print_second_level(None)
-        TuningView("", {}, 0).print_second_level(data)
-        TuningView("", {}, 0).print_second_level(data_sub)
+        TuningView("", {}, 0).print_second_level(None, OpSummaryTuningDataHandle)
+        TuningView("", {}, 0).print_second_level(data, OpSummaryTuningDataHandle)
+        TuningView("", {}, 0).print_second_level(data_sub, OpSummaryTuningDataHandle)
 
 
 if __name__ == '__main__':
