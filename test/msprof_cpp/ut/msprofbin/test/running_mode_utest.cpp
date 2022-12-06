@@ -201,6 +201,10 @@ TEST_F(RUNNING_MODE_UTEST, HandleProfilingParams)
         .will(returnValue(PROFILING_SUCCESS))
         .then(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
+    MOCKER_CPP(&ConfigManager::GetPlatformType)
+        .stubs()
+        .will(returnValue(0))
+        .then(returnValue(2));
     
     EXPECT_EQ(PROFILING_FAILED, rMode.HandleProfilingParams());
     EXPECT_EQ(PROFILING_SUCCESS, rMode.HandleProfilingParams());

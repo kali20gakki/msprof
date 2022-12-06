@@ -190,8 +190,12 @@ int RunningMode::HandleProfilingParams() const
         return PROFILING_FAILED;
     }
     params_->ai_core_metrics = aicoreMetricsType;
-    std::string aivMetricsType =
-        params_->aiv_metrics.empty() ? PIPE_UTILIZATION : params_->aiv_metrics;
+    std::string aivMetricsType;
+    if (ConfigManager::instance()->GetPlatformType() == PlatformType::MDC_TYPE) {
+        aivMetricsType = params_->aiv_metrics.empty() ? PIPE_UTILIZATION : params_->aiv_metrics;
+    } else {
+        aivMetricsType = aicoreMetricsType;
+    }
     ret = ConfigManager::instance()->GetAicoreEvents(aivMetricsType, params_->aiv_profiling_events);
     if (ret != PROFILING_SUCCESS) {
         MSPROF_LOGE("The aiv_metrics (%s) is invalid.", aivMetricsType.c_str());
