@@ -94,25 +94,6 @@ class TestCommunicationMatrixCalculator(unittest.TestCase):
             sug = [MatrixProf.PROF_SLOWEST_LINK.format('0', '1', 1, 8, 10, 0.7, 0.8), '']
             self.assertEqual(ret, sug)
 
-    def test_slowest_rule2(self):
-        slowest_dict = {
-            CommunicationMatrixInfo.TRANSPORT_TYPE: TransportType.HCCS,
-            CommunicationMatrixInfo.SRC_RANK: '0',
-            CommunicationMatrixInfo.DST_RANK: '1',
-            CommunicationMatrixInfo.TRANSIT_TIME_MS: 8,
-            CommunicationMatrixInfo.TRANSIT_SIZE_MB: 1,
-            CommunicationMatrixInfo.LARGE_PACKET_RATIO: 0.8,
-            CommunicationMatrixInfo.BANDWIDTH_GB_S: 10,
-            CommunicationMatrixInfo.BANDWIDTH_UTILIZATION: 0.7
-        }
-        sum_link_dict = {
-            CommunicationMatrixInfo.BANDWIDTH_GB_S: 110,
-            'count': 10
-        }
-        with mock.patch(NAMESPACE + '.CommunicationMatrixCalculator.matrix_slow_link_rule', return_value=''):
-            ret = CommunicationMatrixCalculator([], []).slowest_rule(sum_link_dict, slowest_dict, TransportType.HCCS)
-            self.assertEqual(ret, [])
-
     def test_slow_link_rule1(self):
         ret = CommunicationMatrixCalculator([], []).matrix_slow_link_rule(0.7, 0.9, StrConstant.HCCS)
         suggestion_header = StrConstant.SUGGESTION + ": "
