@@ -48,7 +48,6 @@ class CommonConstant:
     MAX_LOG_BACKUPS = 1
     FILE_NAME = os.path.basename(__file__)
     FILE_NAME_DONE_LEN = 5  # filename example: Framework.host.task_desc_info.0.slice_0.done
-    KERNEL_LAUNCH = "KernelLaunch"
     LOG_LEVEL = logging.INFO
     MINIMUM_DISK_MEMORY = 512
     MEMORY_BUFFER_NUM = 3

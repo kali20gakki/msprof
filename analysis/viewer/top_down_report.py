@@ -55,6 +55,12 @@ class TopDownData:
     RUNTIME_TID = 2
     TASK_TID = 3
 
+    # api names in runtime data
+    API_NAMES = [
+        "KernelLaunch", "KernelLaunchWithHandleFlowCtrl",
+        "KernelLaunchFlowCtrl", "rtAicpuKernelLaunchExWithArgs"
+    ]
+
     @staticmethod
     def _dispatch_top_down_datas(top_down_datas: list) -> dict:
         dispatch_result = OrderedDict(
@@ -213,16 +219,16 @@ class TopDownData:
             return []
         try:
             runtime_start = cur.execute(
-                "select min(entry_time) from ApiCall where api='{}'".format(
-                    CommonConstant.KERNEL_LAUNCH)).fetchone()
+                "select min(entry_time) from ApiCall where api in ('{}')".format(
+                    '\', \''.join(cls.API_NAMES))).fetchone()
         except sqlite3.Error as err:
             DBManager.destroy_db_connect(conn, cur)
             logging.error(err, exc_info=Constant.TRACE_BACK_SWITCH)
             return []
         try:
             runtime_end = cur.execute(
-                "select max(exit_time) from ApiCall where api='{}'".format(
-                    CommonConstant.KERNEL_LAUNCH)).fetchone()
+                "select max(exit_time) from ApiCall where api in ('{}')".format(
+                    '\', \''.join(cls.API_NAMES))).fetchone()
         except sqlite3.Error as err:
             logging.error(err, exc_info=Constant.TRACE_BACK_SWITCH)
             return []
