@@ -231,12 +231,6 @@ class MsProfExportDataConfig(MetaConfig):
         , 'msprof': [
             ('handler', '_get_bulk_data')
         ]
-        , 'acsq_task_statistic': [
-            ('handler', '_get_acsq_task_statistic'),
-            ('db', 'acsq.db'),
-            ('table', 'AcsqTask'),
-            ('headers', 'Stream Id,Task Id,AccId,Task Type,Start Time(us),End Time(us),Task Duration(us)')
-        ]
         , 'ffts_sub_task_time': [
             ('handler', '_get_sub_task_time'),
             ('db', 'soc_log.db'),
