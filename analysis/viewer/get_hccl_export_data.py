@@ -81,7 +81,7 @@ class HCCLExport:
                                      ("Size(Byte)", _hccl_data[9]),
                                      ("Stage", _hccl_data[10]),
                                      ("Step", _hccl_data[11]),
-                                     ("Tag", _hccl_data[12])])
+                                     ("Operator Name", _hccl_data[12])])
             _hccl_data_pice = [
                 _hccl_data[0], self.pid_value, _hccl_data[1],
                 _hccl_data[2], _hccl_data[3], hccl_args
