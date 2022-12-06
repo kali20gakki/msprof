@@ -56,7 +56,7 @@ class SlowLinkCalculator(MetaCalculator):
             op_info[hccl_name][rank_id][StrConstant.SLOW_LINK_SUGGESTION] = self.suggestions[idx]
 
     def calculate(self: any, com_dict: dict) -> str:
-        suggestion_part1 = ''
+        suggestion_bottelnek = ''
         bottle_neck_list = []
         if com_dict[StrConstant.SDMA][OpBandWidthType.TRANSIT_TIME_MS] * NumberConstant.DOMINATED_BOTTLENECK_THRESHOLD \
                 > com_dict[StrConstant.RDMA][OpBandWidthType.TRANSIT_TIME_MS]:
@@ -65,23 +65,23 @@ class SlowLinkCalculator(MetaCalculator):
                 > com_dict[StrConstant.SDMA][OpBandWidthType.TRANSIT_TIME_MS]:
             bottle_neck_list.append(StrConstant.RDMA)
         for transport_type in bottle_neck_list:
-            suggestion_part1 += SlowLinkProf.PROF_TYPE_BOTTLENECK.format(transport_type)
+            suggestion_bottelnek += SlowLinkProf.PROF_TYPE_BOTTLENECK.format(transport_type)
         if not bottle_neck_list:
             bottle_neck_list = [StrConstant.RDMA, StrConstant.SDMA]
         if StrConstant.SDMA in bottle_neck_list:
             bottle_neck_list.remove(StrConstant.SDMA)
             bottle_neck_list.append(StrConstant.HCCS)
             bottle_neck_list.append(StrConstant.PCIE)
-        suggestion_part2 = ''
+        suggestion_slow_reason = ''
         for transport_type in bottle_neck_list:
             if com_dict[transport_type][OpBandWidthType.TRANSIT_SIZE_MB] <= 0:
                 continue
             utilization_ratio = com_dict[transport_type][OpBandWidthType.BANDWIDTH_UTILIZATION]
             large_packet_ratio = com_dict[transport_type][OpBandWidthType.LARGE_PACKET_RATIO]
-            suggestion_part2 += self.slow_link_rule(utilization_ratio, large_packet_ratio, transport_type)
-        if not suggestion_part2:
-            suggestion_part2 = SlowLinkProf.PROF_GOOD_STATE
-        return suggestion_part1 + suggestion_part2
+            suggestion_slow_reason += self.slow_link_rule(utilization_ratio, large_packet_ratio, transport_type)
+        if not suggestion_slow_reason:
+            suggestion_slow_reason = SlowLinkProf.PROF_GOOD_STATE
+        return suggestion_bottelnek + suggestion_slow_reason
 
 
 

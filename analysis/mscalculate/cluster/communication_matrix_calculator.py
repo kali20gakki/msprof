@@ -21,7 +21,7 @@ class MatrixProf:
     PROF_GOOD_STATE = "{} bandwidth is fully utilized."
     PROF_GENERAL_INFO = '{} general information and optimization suggestion: \n'
     PROF_AVERAGE_BANDWIDTH = "The average bandwidth is {:.2f}GB/S, and theoretical bandwidth is {:.2f}GB/S. \n"
-    PROF_AVERAGE_PACKET_RATIO = "The average Large packet ratio is {:.2f}. \n"
+    PROF_AVERAGE_PACKET_RATIO = "The average large packet ratio is {:.2f}. \n"
     PROF_SLOWEST_LINK = "The slowest link is from rank.{} to rank.{}, " \
                         "whose transit size is {:.2f}MB, transit time is {:.2f}ms, bandwidth is {:.2f}GB/S, " \
                         "bandwidth utilization is {:.2f} and large packet ratio is {:.2f}. \n"
@@ -36,7 +36,7 @@ class CommunicationMatrixCalculator(MetaCalculator):
 
     @staticmethod
     def matrix_slow_link_rule(utilization_ratio: float, large_packet_ratio: float, trans_type: str):
-        suggestion_header = StrConstant.SUGGESTION + ": "
+        suggestion_header = StrConstant.SUGGESTION_HAEDER
         suggestion = SlowLinkCalculator.slow_link_rule(utilization_ratio, large_packet_ratio, trans_type)
         if not suggestion:
             suggestion = MatrixProf.PROF_GOOD_STATE.format(trans_type)
@@ -110,8 +110,7 @@ class CommunicationMatrixCalculator(MetaCalculator):
             / HcclAnalysisTool.StandardBandWidth.get(trans_type, -1)
         large_packet_ratio = sum_link_dict[CommunicationMatrixInfo.LARGE_PACKET_RATIO] / sum_link_dict['count']
         self.total_time_dict[trans_data_type] = sum_link_dict[CommunicationMatrixInfo.TRANSIT_TIME_MS]
-        suggestion.append(MatrixProf.PROF_SUM_TIME.format(
-            sum_link_dict[CommunicationMatrixInfo.TRANSIT_TIME_MS]))
+        suggestion.append(MatrixProf.PROF_SUM_TIME.format(sum_link_dict[CommunicationMatrixInfo.TRANSIT_TIME_MS]))
         suggestion.append(MatrixProf.PROF_AVERAGE_BANDWIDTH.format(
             sum_link_dict[CommunicationMatrixInfo.BANDWIDTH_GB_S] / sum_link_dict['count'],
             HcclAnalysisTool.StandardBandWidth.get(trans_type, -1)))

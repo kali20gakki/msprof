@@ -363,6 +363,7 @@ class StrConstant:
     SLOW_LINK_SUGGESTION = "Slow Link Suggestion"
     MATRIX_SUGGESTION = "Matrix Suggestion"
     SUGGESTION = "Suggestion"
+    SUGGESTION_HAEDER = "Suggestion: "
     OP_NAME = "op_name"
     LINK_INFO = "link_info"
     TIME_RATIO = "Time Ratio"
