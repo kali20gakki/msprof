@@ -14,6 +14,7 @@ class CommonProfRule:
     RULE_TYPE = "Rule Type"
     RULE_SUBTYPE = "Rule Subtype"
     RULE_SUGGESTION = "Rule Suggestion"
+    RULE_TUNING_TYPE = "Tuning Type"
 
     # condition json key and value
     CONDITIONS = "conditions"
@@ -36,7 +37,7 @@ class CommonProfRule:
     RESULT_RULE_TYPE = "Rule Type"
     RESULT_RULE_SUBTYPE = "Rule Subtype"
     RESULT_RULE_SUGGESTION = "Rule Suggestion"
-    RESULT_OP_LIST = "Op List"
+    RESULT_TUNING_DATA = "Tuning Data"
     RESULT_KEY = "result"
 
     RESULT_COMPUTATION = "Computation"
@@ -44,6 +45,7 @@ class CommonProfRule:
     RESULT_OPERATOR_SCHEDULE = "Operator Schedule"
     RESULT_OPERATOR_PROCESSING = "Operator Processing"
     RESULT_OPERATOR_METRICS = "Operator Metrics"
+    RESULT_OPERATOR_PARALLELISM = "Operator Parallelism"
 
     RESULT_RULE_DESCRIPTION = "Rule Description"
     RESULT_COMPUTATION_DESCRIPTION = "Prompt users of some improperly high or low vector/cube/scalar" \
@@ -55,21 +57,11 @@ class CommonProfRule:
                                     "and reduced use of AI CPU operators."
     RESULT_METRICS_DESCRIPTION = "Collect statistics on operator performance efficiency " \
                                  "and prompt users of high resource consumption."
+    RESULT_PARALLEL_DESCRIPTION = "Identify the serial wait bottleneck between the AI CPU and AI Core."
 
     # prof rule and condition file name
     RESULT_PROF_JSON = "prof_rule_{}.json"
 
     # tuning type
-    TUNING_OPERATOR = 'operator'
-
-    def get_common_prof_rule_class_name(self: any) -> any:
-        """
-        get common prof rule class name
-        """
-        return self.__class__.__name__
-
-    def get_common_prof_rule_class_member(self: any) -> any:
-        """
-        get common prof rule class member num
-        """
-        return self.__dict__
+    TUNING_OPERATOR = 'Op Summary'
+    TUNING_OP_PARALLEL = 'Op Parallel'

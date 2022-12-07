@@ -27,7 +27,8 @@ class TuningControl:
             CommonProfRule.RESULT_MEMORY: self._model_memory_tuning,
             CommonProfRule.RESULT_OPERATOR_SCHEDULE: self._operator_schedule_tuning,
             CommonProfRule.RESULT_OPERATOR_PROCESSING: self._operator_process_tuning,
-            CommonProfRule.RESULT_OPERATOR_METRICS: self._operator_metrics_tuning
+            CommonProfRule.RESULT_OPERATOR_METRICS: self._operator_metrics_tuning,
+            CommonProfRule.RESULT_OPERATOR_PARALLELISM: self._operator_parallel_tuning
         }
 
     def add_tuning_result(self: any, **param: dict) -> None:
@@ -81,10 +82,16 @@ class TuningControl:
             CommonProfRule.RESULT_RULE_DESCRIPTION: CommonProfRule.RESULT_METRICS_DESCRIPTION,
             CommonProfRule.RESULT_KEY: []
         }
-        self.data = [
-            self.model_computation, self.model_memory, self.operator_schedule,
-            self.operator_processing, self.operator_metrics
-        ]
+        self.operator_parallelism = {
+            CommonProfRule.RESULT_RULE_TYPE: CommonProfRule.RESULT_OPERATOR_PARALLELISM,
+            CommonProfRule.RESULT_RULE_DESCRIPTION: CommonProfRule.RESULT_PARALLEL_DESCRIPTION,
+            CommonProfRule.RESULT_KEY: []
+        }
+        self.data = {
+            CommonProfRule.TUNING_OPERATOR: [self.model_computation, self.model_memory, self.operator_schedule,
+                                             self.operator_processing, self.operator_metrics],
+            CommonProfRule.TUNING_OP_PARALLEL: [self.operator_parallelism]
+        }
 
     def _model_computation_tuning(self, result):
         return self.model_computation.get(CommonProfRule.RESULT_KEY).append(result)
@@ -100,3 +107,6 @@ class TuningControl:
 
     def _operator_metrics_tuning(self, result):
         return self.operator_metrics.get(CommonProfRule.RESULT_KEY).append(result)
+
+    def _operator_parallel_tuning(self, result):
+        return self.operator_parallelism.get(CommonProfRule.RESULT_KEY).append(result)

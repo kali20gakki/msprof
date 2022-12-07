@@ -7,5 +7,7 @@ class Network:
     """
     delete the file in the future
     """
+
     def __init__(self: any) -> None:
         pass
+
