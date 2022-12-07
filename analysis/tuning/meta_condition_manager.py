@@ -11,8 +11,8 @@ from common_func.common_prof_rule import CommonProfRule
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msvp_common import is_number, is_nonzero_number
 from common_func.regex_manager import RegexManagerConstant
-
 from config.config_manager import ConfigManager
+from tuning.data_manager import DataManager
 
 
 def load_condition_files() -> dict:
@@ -78,13 +78,13 @@ class MetaConditionManager:
         self.conditions = load_condition_files()
 
     @abstractmethod
-    def cal_count_condition(self: any, operator_data_list: dict, condition: dict) -> list:
+    def cal_count_condition(self: any, operator_data_list: dict, condition: dict, tag_key: str) -> list:
         """
         calculate count condition
         """
 
     @abstractmethod
-    def cal_accumulate_condition(self: any, operator_data_list: dict, condition: dict) -> list:
+    def cal_accumulate_condition(self: any, operator_data_list: dict, condition: dict, tag_key: str) -> list:
         """
         calculate accumulate condition
         """
@@ -132,39 +132,39 @@ class MetaConditionManager:
         return sub_expression
 
     @classmethod
-    def cal_formula_condition(cls: any, operator_data: dict, condition: dict) -> list:
+    def cal_formula_condition(cls: any, operator_data: dict, condition: dict, tag_key: str) -> list:
         """
         calculate formula condition
         """
-        op_names = []
+        result_list = []
         format_value = []
         for key in condition.get(CommonProfRule.CONDITION_LEFT):
             if operator_data.get(key) is not None:
                 format_value.append(operator_data.get(key))
             else:
-                return op_names
+                return result_list
 
         expression = condition.get(CommonProfRule.COND_TYPE_FORMULA).format(*format_value)
         if condition.get(CommonProfRule.CONDITION_CMP) in cls.COMPARE_MAP:
             if cls.COMPARE_MAP.get(condition.get(
                     CommonProfRule.CONDITION_CMP))(cls.calculate_expression(expression),
                                                    condition.get(CommonProfRule.CONDITION_RIGHT)):
-                op_names.append(operator_data.get("op_name"))
-        return op_names
+                result_list.append(operator_data.get(tag_key))
+        return result_list
 
     @classmethod
-    def cal_normal_condition(cls: any, operator_data: dict, condition: dict) -> list:
+    def cal_normal_condition(cls: any, operator_data: dict, condition: dict, tag_key: str) -> list:
         """
         calculate normal condition
         """
-        op_names = []
+        result_list = []
         if condition.get(CommonProfRule.CONDITION_CMP) in cls.COMPARE_MAP \
                 and operator_data.get(condition.get(CommonProfRule.CONDITION_LEFT)) is not None:
             if cls.COMPARE_MAP.get(condition.get(CommonProfRule.CONDITION_CMP))(
                     operator_data.get(condition.get(CommonProfRule.CONDITION_LEFT)),
                     condition.get(CommonProfRule.CONDITION_RIGHT)):
-                op_names.append(operator_data.get("op_name"))
-        return op_names
+                result_list.append(operator_data.get(tag_key))
+        return result_list
 
     @classmethod
     def __calculate_with_operator(cls: any, operator: str, sub_expression: str) -> str:
@@ -193,21 +193,23 @@ class MetaConditionManager:
             condition_id = condition_id.replace(cal_condition, stamp_condition, 1)
         return condition_id
 
-    def cal_conditions(self: any, operator_data: list, condition_id: str) -> list:
+    def cal_conditions(self: any, operator_data: list, condition_id: str, tuning_type: str) -> list:
         """
         calculate conditions
         """
+        handle_class = DataManager.HANDLE_MAP.get(tuning_type)
         condition_ids = list(filter(None, re.split(RegexManagerConstant.REGEX_SPLIT_CONNECTED, condition_id)))
         condition_id_dict = {}
         for cond_id in condition_ids:
-            condition_id_dict[cond_id] = set(self.cal_condition(operator_data, cond_id))
+            condition_id_dict[cond_id] = set(self.cal_condition(operator_data, cond_id, handle_class.TAG_KEY))
         while re.search(RegexManagerConstant.REGEX_INNER_BRACKET, condition_id):
             sub_condition = re.search(RegexManagerConstant.REGEX_INNER_BRACKET, condition_id).group()
             cal_result = self.merge_set(sub_condition[1:-1], condition_id_dict)
             condition_id = condition_id.replace(sub_condition, cal_result, 1)
-        return list(condition_id_dict.get(self.merge_set(condition_id, condition_id_dict)))
+        result_ids = list(condition_id_dict.get(self.merge_set(condition_id, condition_id_dict)))
+        return handle_class.get_result(result_ids, operator_data)
 
-    def cal_condition(self: any, operator_data: list, condition_id: str) -> list:
+    def cal_condition(self: any, operator_data: list, condition_id: str, tag_key: str) -> list:
         """
         calculate conditions
         """
@@ -216,13 +218,13 @@ class MetaConditionManager:
             logging.error("The condition can not be found,condition id is: %s ", condition_id)
             return []
         if condition.get(CommonProfRule.CONDITION_TYPE) == CommonProfRule.COND_TYPE_NORMAL:
-            return self.cal_normal_condition(operator_data, condition)
+            return self.cal_normal_condition(operator_data, condition, tag_key)
         if condition.get(CommonProfRule.CONDITION_TYPE) == CommonProfRule.COND_TYPE_FORMULA:
-            return self.cal_formula_condition(operator_data, condition)
+            return self.cal_formula_condition(operator_data, condition, tag_key)
         if condition.get(CommonProfRule.CONDITION_TYPE) == CommonProfRule.COND_TYPE_COUNT:
-            return self.cal_count_condition(operator_data, condition)
+            return self.cal_count_condition(operator_data, condition, tag_key)
         if condition.get(CommonProfRule.CONDITION_TYPE) == CommonProfRule.COND_TYPE_ACCUMULATE:
-            return self.cal_accumulate_condition(operator_data, condition)
+            return self.cal_accumulate_condition(operator_data, condition, tag_key)
         logging.error("Not support condition type: %s ", condition.get(CommonProfRule.CONDITION_TYPE))
         return []
 
@@ -247,14 +249,14 @@ class OperatorConditionManager(MetaConditionManager):
         super().__init__()
 
     @staticmethod
-    def cal_count_condition(operator_data_list: dict, condition: dict) -> list:
+    def cal_count_condition(operator_data_list: dict, condition: dict, tag_key: str) -> list:
         """
         calculate count condition
         """
         return []
 
     @staticmethod
-    def cal_accumulate_condition(operator_data_list: dict, condition: dict) -> list:
+    def cal_accumulate_condition(operator_data_list: dict, condition: dict, tag_key: str) -> list:
         """
         calculate accumulate condition
         """
@@ -270,52 +272,53 @@ class NetConditionManager(MetaConditionManager):
         super().__init__()
 
     @classmethod
-    def cal_normal_condition(cls: any, operator_data: list, condition: dict) -> list:
+    def cal_normal_condition(cls: any, operator_data: list, condition: dict, tag_key: str) -> list:
         """
         calculate normal condition
         """
-        op_names = []
+        result_list = []
         for operator in operator_data:
-            ops = super().cal_normal_condition(operator, condition)
+            ops = super().cal_normal_condition(operator, condition, tag_key)
             if ops:
-                op_names.extend(ops)
-        return op_names
+                result_list.extend(ops)
+        return result_list
 
     @classmethod
-    def cal_formula_condition(cls: any, operator_data: list, condition: dict) -> list:
+    def cal_formula_condition(cls: any, operator_data: list, condition: dict, tag_key: str) -> list:
         """
         calculate formula condition
         """
-        op_names = []
+        result_list = []
         for operator in operator_data:
-            ops = super().cal_formula_condition(operator, condition)
+            ops = super().cal_formula_condition(operator, condition, tag_key)
             if ops:
-                op_names.extend(ops)
-        return op_names
+                result_list.extend(ops)
+        return result_list
 
-    def cal_count_condition(self: any, operator_data_list: list, condition: dict) -> list:
+    def cal_count_condition(self: any, operator_data_list: list, condition: dict, tag_key: str) -> list:
         """
         calculate count condition
         """
-        op_names = self.cal_condition(operator_data_list, condition.get(CommonProfRule.CONDITION_DEPENDENCY))
+        dependency = condition.get(CommonProfRule.CONDITION_DEPENDENCY)
+        result_list = self.cal_condition(operator_data_list, dependency, tag_key)
         cmp_mode = condition.get(CommonProfRule.CONDITION_CMP, '>')
         cpm_threshold = int(condition.get(CommonProfRule.CONDITION_THRESHOLD))
-        if not self.COMPARE_MAP.get(cmp_mode)(len(op_names), cpm_threshold):
-            op_names.clear()
-        return op_names
+        if not self.COMPARE_MAP.get(cmp_mode)(len(result_list), cpm_threshold):
+            result_list.clear()
+        return result_list
 
-    def cal_accumulate_condition(self: any, operator_data_list: list, condition: dict) -> list:
+    def cal_accumulate_condition(self: any, operator_data_list: list, condition: dict, tag_key: str) -> list:
         """
         calculate accumulate condition
         """
         dependency = condition.get(CommonProfRule.CONDITION_DEPENDENCY, "")
         if dependency:
-            op_names = self.cal_condition(operator_data_list, dependency)
+            result_list = self.cal_condition(operator_data_list, dependency, tag_key)
         else:
-            op_names = [''] * len(operator_data_list)
+            result_list = [''] * len(operator_data_list)
             for index, operator in enumerate(operator_data_list):
-                op_names[index] = operator.get('op_name', '')
-        op_names_set = set(op_names)
+                result_list[index] = operator.get(tag_key, '')
+        result_set = set(result_list)
         compare_keys = condition.get(CommonProfRule.CONDITION_COMPARE, [])
         base = 0
         for operator in operator_data_list:
@@ -326,7 +329,7 @@ class NetConditionManager(MetaConditionManager):
         keys = condition.get(CommonProfRule.CONDITION_ACCUMULATE)
         result = 0
         for operator in operator_data_list:
-            if operator.get('op_name', '') not in op_names_set:
+            if operator.get(tag_key, '') not in result_set:
                 continue
             for key in keys:
                 result += operator.get(key, 0)
@@ -336,9 +339,9 @@ class NetConditionManager(MetaConditionManager):
         else:
             result = result / base
         if not self.COMPARE_MAP.get(cmp_mode)(result, cpm_threshold):
-            op_names_set.clear()
-        op_names = list(op_names_set)
-        return op_names
+            result_set.clear()
+        result_list = list(result_set)
+        return result_list
 
 
 def get_two_decimal(num: any) -> any:

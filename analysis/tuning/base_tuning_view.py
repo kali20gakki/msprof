@@ -4,6 +4,7 @@
 
 from common_func.common import print_msg
 from common_func.common_prof_rule import CommonProfRule
+from tuning.data_manager import DataManager, BaseTuningDataHandle
 
 
 class BaseTuningView:
@@ -27,9 +28,10 @@ class BaseTuningView:
             print_msg("{0}. {1}:".format(index, data.get(CommonProfRule.RESULT_RULE_TYPE)))
 
     @staticmethod
-    def print_second_level(data: any) -> None:
+    def print_second_level(data: any, handle_class: BaseTuningDataHandle) -> None:
         """
         :param data: data
+        :param handle_class: print information
         :return: None
         """
         if not data:
@@ -41,19 +43,17 @@ class BaseTuningView:
             if rule_sub_type:
                 sub_rule_dict.setdefault(rule_sub_type, []).append(result)
             else:
-                print_msg("\t{0}){2}: [{1}]".format(result_index + 1,
-                                                    ",".join(list(map(str,
-                                                                      result.get(CommonProfRule.RESULT_OP_LIST, [])))),
-                                                    result.get(CommonProfRule.RESULT_RULE_SUGGESTION, "")))
+                message = handle_class.print_format(result.get(CommonProfRule.RESULT_TUNING_DATA, []))
+                print_msg("\t{0}){1}: {2}".format(result_index + 1,
+                                                  result.get(CommonProfRule.RESULT_RULE_SUGGESTION, ""), message))
         if sub_rule_dict:
             for sub_key_index, sub_key in enumerate(sub_rule_dict.keys()):
                 print_msg("\t{0}){1}:".format(sub_key_index + 1, sub_key))
                 for value_index, value in enumerate(sub_rule_dict.get(sub_key)):
+                    message = handle_class.print_format(result.get(CommonProfRule.RESULT_TUNING_DATA, []))
                     print_msg(
-                        "\t\t{0}){2}: [{1}]".format(value_index + 1,
-                                                    ",".join(list(map(str,
-                                                                      value.get(CommonProfRule.RESULT_OP_LIST, [])))),
-                                                    value.get(CommonProfRule.RESULT_RULE_SUGGESTION, "")))
+                        "\t\t{0}){1}: {2}".format(value_index + 1,
+                                                  value.get(CommonProfRule.RESULT_RULE_SUGGESTION, ""), message))
 
     def get_tuning_data(self: any) -> None:
         """
@@ -71,7 +71,10 @@ class BaseTuningView:
         if not self.data:
             return
         print_msg("\n{0}:".format(self.turing_start))
-        for index, every_data in enumerate(self.data):
-            self.print_first_level(index + 1, every_data)
-            self.print_second_level(every_data.get("result"))
+        global_index = 0
+        for tuning_type, tuning_data_handle_class in DataManager.HANDLE_MAP.items():
+            for every_data in self.data.get(tuning_type, []):
+                global_index += 1
+                self.print_first_level(global_index, every_data)
+                self.print_second_level(every_data.get(CommonProfRule.RESULT_KEY), tuning_data_handle_class)
         print_msg("\n")

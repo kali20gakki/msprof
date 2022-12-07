@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 
+from common_func.ms_constant.str_constant import StrConstant
 from common_func.common_prof_rule import CommonProfRule
 from config.config_manager import ConfigManager
 from tuning.data_manager import DataManager
@@ -16,14 +17,14 @@ class RuleManager:
     rename the file in the future
     """
 
-    def __init__(self: any, project: str, device_id: str) -> None:
+    def __init__(self: any, para: dict) -> None:
         self.rule_list = []
-        self.data_mgr = DataManager(project, device_id)
+        self.data_mgr = DataManager(para)
         self.condition_mgr = NetConditionManager()
         self.rules = self._load_rules()
         self.tuning_control = TuningControl()
-        self.project = project
-        self.device_id = device_id
+        self.project = para.get(StrConstant.PARAM_RESULT_DIR, '')
+        self.device_id = para.get(StrConstant.PARAM_DEVICE_ID, '')
 
     @staticmethod
     def _get_support_rules() -> list:
@@ -47,16 +48,16 @@ class RuleManager:
         for rule in self.rules:
             rule = RuleBean(**rule)
             condition = rule.get_rule_condition()
-            tuning_type = CommonProfRule.TUNING_OPERATOR
+            tuning_type = rule.get_tuning_type()
             tuning_data = self.data_mgr.get_data(tuning_type)
-            data_names = self.condition_mgr.cal_conditions(tuning_data, condition)
-            if not data_names:
+            result_tuning_data = self.condition_mgr.cal_conditions(tuning_data, condition, tuning_type)
+            if not result_tuning_data:
                 continue
             param = {
                 CommonProfRule.RESULT_RULE_TYPE: rule.rule_type,
                 CommonProfRule.RESULT_RULE_SUBTYPE: rule.rule_subtype,
                 CommonProfRule.RESULT_RULE_SUGGESTION: rule.rule_suggestion,
-                CommonProfRule.RESULT_OP_LIST: data_names
+                CommonProfRule.RESULT_TUNING_DATA: result_tuning_data
             }
             self.tuning_control.add_tuning_result(**param)
         self.tuning_control.dump_to_file(self.project, self.device_id)

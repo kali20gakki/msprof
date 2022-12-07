@@ -12,7 +12,7 @@ class TestProfilingTuning(unittest.TestCase):
     def test_run(self):
         operator_list = []
         InfoConfReader()._info_json = {'devices': '1'}
-        with mock.patch('tuning.data_manager.DataLoader.get_data_by_infer_id',
+        with mock.patch('tuning.data_manager.OpSummaryTuningDataHandle.get_data_by_infer_id',
                         return_value=operator_list), \
                 mock.patch('tuning.tuning_control.PathManager.get_summary_dir',
                            return_value=os.path.join(os.path.dirname(__file__), 'test', 'summary')):

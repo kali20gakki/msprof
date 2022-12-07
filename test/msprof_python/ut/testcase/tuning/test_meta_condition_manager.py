@@ -17,7 +17,7 @@ class TestMetaConditionManager(unittest.TestCase):
     def test_load_condition_files(self):
         key = MetaConditionManager()
         load_condition_files()
-        self.assertEqual(len(key.conditions), 26)
+        self.assertEqual(len(key.conditions), 27)
 
     def test_format_operator(self):
         expression = r'\+-|\+\+|--|-\+'
@@ -51,14 +51,14 @@ class TestMetaConditionManager(unittest.TestCase):
         condition = {"left": ("lefty",), "formula": ">", "right": 2, "cmp": "<"}
         with mock.patch(NAMESPACE + '.MetaConditionManager.calculate_expression', return_value=1), \
              mock.patch(NAMESPACE + '.load_condition_files'):
-            result = MetaConditionManager.cal_formula_condition(operator_data, condition)
+            result = MetaConditionManager.cal_formula_condition(operator_data, condition, 'op_name')
         self.assertEqual(result, [2])
 
     def test_cal_normal_condition(self):
         operator_data = {"lefty": 2, "righty": 1, "op_name": '123'}
         condition = {"cmp": ">", "left": "lefty", "right": 0}
         with mock.patch(NAMESPACE + '.load_condition_files'):
-            result = MetaConditionManager.cal_normal_condition(operator_data, condition)
+            result = MetaConditionManager.cal_normal_condition(operator_data, condition, 'op_name')
         self.assertEqual(result, ['123'])
 
     def test_merge_set(self):
@@ -80,7 +80,7 @@ class TestMetaConditionManager(unittest.TestCase):
              mock.patch(NAMESPACE + '.MetaConditionManager.merge_set', return_value='+'):
             key = MetaConditionManager()
             key.conditions = {'+': {'type': 'normal'}, '1': {'type': 'formula'}}
-            result = key.cal_conditions(operator_data, condition_id)
+            result = key.cal_conditions(operator_data, condition_id, 'Op Summary')
         self.assertEqual(result, ['123'])
 
     def test_cal_condition_1(self):
@@ -88,13 +88,14 @@ class TestMetaConditionManager(unittest.TestCase):
         condition_id = '(+)'
         condition_id_1 = '(1+2)'
         condition_id_2 = '(2+1)'
+        tag_key = 'op_name'
         with mock.patch(NAMESPACE + '.load_condition_files'):
             key = MetaConditionManager()
             key.conditions = {'(+)': {'type': 'normal'}, '(1+2)': {'type': 'formula', 'left': [1, 2]},
                               '(2+1)': {'type': 'count'}}
-            result = key.cal_condition(operator_data, condition_id)
-            result_1 = key.cal_condition(operator_data, condition_id_1)
-            result_2 = key.cal_condition(operator_data, condition_id_2)
+            result = key.cal_condition(operator_data, condition_id, tag_key)
+            result_1 = key.cal_condition(operator_data, condition_id_1, tag_key)
+            result_2 = key.cal_condition(operator_data, condition_id_2, tag_key)
         self.assertEqual(result, [])
         self.assertEqual(result_1, [])
         self.assertEqual(result_2, None)
@@ -106,7 +107,7 @@ class TestMetaConditionManager(unittest.TestCase):
                 mock.patch('common_func.file_manager.check_path_valid'):
             key = MetaConditionManager()
             key.conditions = {'(+)': {'type': None}}
-            result = key.cal_condition(operator_data, condition_id)
+            result = key.cal_condition(operator_data, condition_id, 'op_name')
             self.assertEqual(result, [])
 
     def test_get_condition(self):
@@ -125,7 +126,7 @@ class TestOperatorConditionManager(unittest.TestCase):
         condition = '123'
         with mock.patch(NAMESPACE + '.load_condition_files'):
             key = OperatorConditionManager()
-            result = key.cal_count_condition(operator_data_list, condition)
+            result = key.cal_count_condition(operator_data_list, condition, 'op_name')
         self.assertEqual(result, [])
 
 
@@ -138,7 +139,7 @@ class TestNetConditionManager(unittest.TestCase):
              mock.patch(NAMESPACE + '.load_condition_files'):
             key = NetConditionManager()
             key.conditions = {'(+)': {'type': 'normal'}}
-            result = key.cal_count_condition(operator_data_list, condition)
+            result = key.cal_count_condition(operator_data_list, condition, 'op_name')
         self.assertEqual(result, [])
 
     def test_cal_normal_condition(self):
@@ -147,7 +148,7 @@ class TestNetConditionManager(unittest.TestCase):
         with mock.patch(NAMESPACE + '.MetaConditionManager.cal_normal_condition', return_value=[1]), \
              mock.patch(NAMESPACE + '.load_condition_files'):
             key = NetConditionManager()
-            result = key.cal_normal_condition(operator_data, condition)
+            result = key.cal_normal_condition(operator_data, condition, 'op_name')
         self.assertEqual(result, [1])
 
     def test_cal_formula_condition(self):
@@ -156,7 +157,7 @@ class TestNetConditionManager(unittest.TestCase):
         with mock.patch(NAMESPACE + '.MetaConditionManager.cal_formula_condition', return_value=[2]), \
              mock.patch(NAMESPACE + '.load_condition_files'):
             key = NetConditionManager()
-            result = key.cal_formula_condition(operator_data, condition)
+            result = key.cal_formula_condition(operator_data, condition, 'op_name')
         self.assertEqual(result, [2])
 
     def test_cal_accumulate_condition(self):
@@ -170,7 +171,7 @@ class TestNetConditionManager(unittest.TestCase):
         with mock.patch(NAMESPACE + '.load_condition_files'):
             key = NetConditionManager()
             key.conditions = {'(+)': {'type': 'normal'}}
-            result = key.cal_accumulate_condition(operator_data_list, condition)
+            result = key.cal_accumulate_condition(operator_data_list, condition, 'op_name')
         self.assertEqual(len(result), 4)
 
 

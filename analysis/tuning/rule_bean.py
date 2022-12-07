@@ -48,9 +48,17 @@ class RuleBean:
         """
         return self.rule_suggestion
 
+    def get_tuning_type(self: any) -> any:
+        """
+        get tuning type
+        :return: tuning type
+        """
+        return self.tuning_type
+
     def __init_param(self: any, **args: dict) -> None:
         self.rule_id = args.get(CommonProfRule.RULE_ID, '')
         self.rule_condition = args.get(CommonProfRule.RULE_CONDITION, '')
         self.rule_type = args.get(CommonProfRule.RULE_TYPE, '')
         self.rule_subtype = args.get(CommonProfRule.RULE_SUBTYPE, '')
         self.rule_suggestion = args.get(CommonProfRule.RULE_SUGGESTION, '')
+        self.tuning_type = args.get(CommonProfRule.RULE_TUNING_TYPE, '')
