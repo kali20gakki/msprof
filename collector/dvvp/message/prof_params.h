@@ -70,7 +70,6 @@ struct ProfileParams : BaseInfo {
     std::string hwts_log1;
     std::string stars_acsq_task;
     std::string low_power;
-    std::string acc_pmu_mode;
 
     // system trace
     std::string cpu_profiling;
@@ -356,7 +355,6 @@ struct ProfileParams : BaseInfo {
     {
         SET_VALUE(object, stars_acsq_task);
         SET_VALUE(object, low_power);
-        SET_VALUE(object, acc_pmu_mode);
         SET_VALUE(object, msprofBinPid);
         SetUint64Value(object, MSG_STR(dataTypeConfig), dataTypeConfig);
     }
@@ -437,7 +435,6 @@ struct ProfileParams : BaseInfo {
         FROM_STRING_VALUE(object, hwts_log1);
         FROM_STRING_VALUE(object, stars_acsq_task);
         FROM_STRING_VALUE(object, low_power);
-        FROM_STRING_VALUE(object, acc_pmu_mode);
         FROM_STRING_VALUE(object, l2CacheTaskProfiling);
         FROM_STRING_VALUE(object, l2CacheTaskProfilingEvents);
         FROM_INT_VALUE(object, l2Cache_sample_freq, DEFAULT_PROFILING_INTERVAL_10MS);
