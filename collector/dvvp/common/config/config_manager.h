@@ -41,8 +41,7 @@ const std::map<PlatformType, std::string> FREQUENCY_TYPE = {
     {PlatformType::LHISI_TYPE, "24"},
     {PlatformType::DC_TYPE, "38.4"},
     {PlatformType::MDC_TYPE, "38.4"},
-    {PlatformType::CHIP_V4_1_0, "100"},
-    {PlatformType::MINI_V3_TYPE, "100"}
+    {PlatformType::CHIP_V4_1_0, "100"}
 };
 
 const std::map<PlatformType, std::string> AIC_TYPE = {
@@ -51,8 +50,7 @@ const std::map<PlatformType, std::string> AIC_TYPE = {
     {PlatformType::LHISI_TYPE, "300"},
     {PlatformType::DC_TYPE, "1150"},
     {PlatformType::MDC_TYPE, "960"},
-    {PlatformType::CHIP_V4_1_0, "800"},
-    {PlatformType::MINI_V3_TYPE, "800"}
+    {PlatformType::CHIP_V4_1_0, "800"}
 };
 
 const std::map<std::string, std::string> AICORE_METRICS_LIST = {
