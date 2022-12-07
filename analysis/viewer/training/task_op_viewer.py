@@ -10,8 +10,10 @@ from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_manager import ClassRowType
 from common_func.db_name_constant import DBNameConstant
+from common_func.platform.chip_manager import ChipManager
 from profiling_bean.db_dto.ge_task_dto import GeTaskDto
 from viewer.memory_copy.memory_copy_viewer import MemoryCopyViewer
+from viewer.stars.acsq_task_viewer import AcsqTaskViewer
 
 
 class TaskOpViewer:
@@ -32,6 +34,8 @@ class TaskOpViewer:
         if not message:
             logging.error("get_task_op_summary message empty")
             return headers, [], 0
+        if ChipManager().is_chip_v4():
+            return AcsqTaskViewer(message).get_summary_data(headers)
         hwts_conn, hwts_curs = DBManager.check_connect_db(message.get("result_dir"), DBNameConstant.DB_HWTS)
         task_conn, task_curs = DBManager.check_connect_db(message.get("result_dir"), DBNameConstant.DB_RTS_TRACK)
         ge_conn, ge_curs = DBManager.check_connect_db(message.get("result_dir"), DBNameConstant.DB_GE_INFO)

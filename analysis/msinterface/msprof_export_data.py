@@ -549,10 +549,6 @@ class MsProfExportDataUtils:
         })
 
     @staticmethod
-    def _get_acsq_task_statistic(configs: dict, params: dict) -> tuple:
-        return AcsqTaskViewer(configs, params).get_summary_data()
-
-    @staticmethod
     def _get_sub_task_time(configs: dict, params: dict) -> str:
         """
         get ffts task time data

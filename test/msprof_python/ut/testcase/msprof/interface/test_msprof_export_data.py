@@ -699,14 +699,6 @@ class TestMsProfExportDataUtils(unittest.TestCase):
         self.assertEqual(result, '{"status": 2, "info": "Please check params, '
                                  'Currently bulk data export params should be timeline."}')
 
-    def test_get_acsq_task_statistic(self):
-        sample_configs = {"test": 2}
-        params = {"export_type": "summary"}
-        with mock.patch(NAMESPACE + '.AcsqTaskViewer.get_summary_data', return_value=1):
-            key = MsProfExportDataUtils()
-            result = key._get_acsq_task_statistic(sample_configs, params)
-        self.assertEqual(result, 1)
-
     def test_get_task_time(self):
         sample_configs = {"test": 2}
         params = {"export_type": "summary"}

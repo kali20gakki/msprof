@@ -121,7 +121,7 @@ class ExportCommand:
         ],
         MsProfCommonConstant.SUMMARY: [
             {'export_type': ExportDataType.TASK_TIME,
-             'handler': AiStackDataCheckManager.contain_task_time_without_ffts_task},
+             'handler': AiStackDataCheckManager.contain_task_time_task},
             {'export_type': ExportDataType.L2_CACHE,
              'handler': AiStackDataCheckManager.contain_l2_cache_data},
             {'export_type': ExportDataType.STEP_TRACE,
@@ -191,8 +191,6 @@ class ExportCommand:
              'handler': AiStackDataCheckManager.contain_aiv_core_sample_based},
             {'export_type': ExportDataType.OS_RUNTIME_STATISTIC,
              'handler': HostDataCheckManager.contain_runtime_api_data},
-            {'export_type': ExportDataType.ACSQ_TASK_STATISTIC,
-             'handler': AiStackDataCheckManager.contain_stars_soc_data},
             {'export_type': ExportDataType.MSPROF_TX,
              'handler': AiStackDataCheckManager.contain_msproftx_data}
         ]

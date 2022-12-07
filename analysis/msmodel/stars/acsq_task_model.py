@@ -4,8 +4,11 @@
 
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
+from common_func.ms_constant.number_constant import NumberConstant
 from msmodel.interface.parser_model import ParserModel
 from msmodel.sqe_type_map import SqeType
+from profiling_bean.db_dto.ge_task_dto import GeTaskDto
+from profiling_bean.db_dto.task_time_dto import TaskTimeDto
 
 
 class AcsqTaskModel(ParserModel):
@@ -34,7 +37,13 @@ class AcsqTaskModel(ParserModel):
         get op_summary data from table
         :return: op_summary data list
         """
-        return self.get_all_data(DBNameConstant.TABLE_ACSQ_TASK)
+        if not DBManager.judge_table_exist(self.cur, DBNameConstant.TABLE_ACSQ_TASK):
+            return []
+        sql = "select 'N/A' as op_name, task_type, stream_id, task_id, task_time/{NS_TO_US} as task_time, " \
+              "start_time, end_time from {}".format(
+                DBNameConstant.TABLE_ACSQ_TASK, NS_TO_US=NumberConstant.NS_TO_US)
+        task_time_data = DBManager.fetch_all_data(self.cur, sql, dto_class=TaskTimeDto)
+        return task_time_data
 
     def get_timeline_data(self: any) -> list:
         """

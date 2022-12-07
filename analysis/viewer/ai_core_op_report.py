@@ -31,7 +31,8 @@ class AiCoreOpReport:
     AI_CORE_UNUSED_COLS = ["job_id", "host_id", "device_id", "task_id", "stream_id", "index_id",
                            "model_id", "overflow", "overflowed_cycles", "device_id", "batch_id",
                            "task_type", "core_type", "subtask_id", "start_time", "end_time", "ffts_type"]
-    UNSUPPORTED_HEADER = ["aic_vec_ratio", "aiv_mac_ratio", "aiv_mte1_ratio", "aic_ub_read_bw",
+    UNSUPPORTED_HEADER = ["aic_vec_ratio", "aic_vec_time", "aiv_mac_ratio", "aiv_mac_time", "aiv_mte1_ratio",
+                          "aic_ub_read_bw", "aiv_mte1_time",
                           "aic_ub_write_bw", "aiv_l1_read_bw", "aiv_l1_write_bw",
                           "aic_l0c_read_bw", "aic_l0c_write_bw", "aiv_l0a_read_bw",
                           "aiv_l0a_write_bw", "aiv_l0b_read_bw", "aiv_l0b_write_bw",
