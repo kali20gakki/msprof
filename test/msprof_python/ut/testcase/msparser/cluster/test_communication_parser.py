@@ -7,7 +7,7 @@ import os
 from unittest import mock
 import pytest
 from msparser.cluster.communication_parser import CommunicationParser
-from msparser.cluster.communication_parser import HcclAnalysisTool
+from msparser.cluster.meta_parser import HcclAnalysisTool
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.msprof_exception import ProfException
 

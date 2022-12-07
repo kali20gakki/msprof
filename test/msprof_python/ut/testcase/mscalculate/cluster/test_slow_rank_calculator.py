@@ -46,7 +46,6 @@ class TestSlowRankCalculator(unittest.TestCase):
         cal.run()
         cal.add_suggestions(self.op_info)
 
-
     def test_run_no_slow(self):
         op_info = {t: {} for t in self.op_name_info}
         self.data[0][0]["Communication Time Info"]["Wait Time Ratio"] = 0
