@@ -16,13 +16,16 @@ from common_func.msprof_query_data import QueryArgumentCheck
 from common_func.msvp_common import create_json_for_dict
 from common_func.ms_constant.str_constant import StrConstant
 from tuning.cluster.cluster_parser_factory import ClusterCommunicationParserFactory
+from tuning.cluster.cluster_parser_factory import CommunicationMatrixParserFactory
 from tuning.cluster.cluster_calculator_factory import SlowRankCalculatorFactory
 from tuning.cluster.cluster_calculator_factory import SlowLinkCalculatorFactory
+from tuning.cluster.cluster_calculator_factory import MatrixCalculatorFactory
 
 
 class QueryDataType(IntEnum):
     RUN_ALL_TUNING = -1
     CLUSTER_COMMUNICATION = 6
+    COMMUNICATION_MATRIX = 7
 
 
 class ClusterTuningFacade:
@@ -40,7 +43,8 @@ class ClusterTuningFacade:
         self._model_id = params.get("model_id", 0)
         self._iteration_id = params.get("iteration_id", -1)
         self.data_type = params.get("data_type", -1)
-        self.query_data_type_dispatcher = {QueryDataType.CLUSTER_COMMUNICATION: self.cluster_communication}
+        self.query_data_type_dispatcher = {QueryDataType.CLUSTER_COMMUNICATION: self.cluster_communication,
+                                           QueryDataType.COMMUNICATION_MATRIX: self.communication_matrix}
 
     def process(self: any) -> None:
         self._check_params_valid()
@@ -74,7 +78,7 @@ class ClusterTuningFacade:
         """
         cluster communication parse and calculate
         """
-        logging.info('start to look for cluster communication suggestions!')
+        logging.info('start to parse cluster communication information!')
         parser_factory = ClusterCommunicationParserFactory(self.args)
         communication_parser = parser_factory.generate_parser()
         logging.info('start to parse hccl events')
@@ -91,6 +95,25 @@ class ClusterTuningFacade:
         if print_flag:
             print_msg(StrConstant.SUGGESTION + ': ' +
                       op_info.get(StrConstant.TOTAL, {}).get(StrConstant.SLOW_RANK_SUGGESTION, ''))
+        self.dump_dict_to_json(output_file_name, op_info)
+
+    def communication_matrix(self: any, print_flag=True) -> None:
+        """
+        communication matrix parse and calculate
+        """
+        logging.info('start to parse communication matrix information!')
+        parser_factory = CommunicationMatrixParserFactory(self.args)
+        matrix_parser = parser_factory.generate_parser()
+        logging.info('start to parse hccl events')
+        op_info = matrix_parser.run()
+        logging.info('start to give suggestions according to rules')
+        matrix_calculator = MatrixCalculatorFactory(op_info).generate_calculator()
+        matrix_calculator.run()
+        matrix_calculator.add_suggestions(op_info)
+        output_file_name = "matrix_{}_{}_{}.json".format(
+            self._npu_id, parser_factory.max_iters_model_id, self._iteration_id)
+        if print_flag:
+            matrix_calculator.print_suggestion(op_info)
         self.dump_dict_to_json(output_file_name, op_info)
 
     def dump_dict_to_json(self: any, output_file_name: str, dict_result: dict):

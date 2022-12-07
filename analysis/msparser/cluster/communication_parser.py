@@ -3,137 +3,14 @@
 # Copyright (c) Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
 
 import logging
-from collections import defaultdict
-from common_func.constant import Constant
+
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_constant.str_constant import OpAnalysisType
 from common_func.ms_constant.str_constant import OpBandWidthType
 from common_func.msprof_exception import ProfException
 from msparser.cluster.meta_parser import MetaParser
-
-
-class HcclAnalysisTool:
-    """
-    support hccl parse
-    """
-    StandardBandWidth = {
-        StrConstant.RDMA: NumberConstant.RDMA_BANDWIDTH,
-        StrConstant.HCCS: NumberConstant.HCCS_BANDWIDTH,
-        StrConstant.PCIE: NumberConstant.PCIE_BANDWIDTH
-    }
-    MessageSizeThreshold = {
-        StrConstant.RDMA: NumberConstant.RDMA_MESSAGE_SIZE_THRESHOLD,
-        StrConstant.HCCS: NumberConstant.HCCS_MESSAGE_SIZE_THRESHOLD,
-        StrConstant.PCIE: NumberConstant.PCIE_MESSAGE_SIZE_THRESHOLD
-    }
-
-    @classmethod
-    def get_value(cls: any, value: any, value_msg: str) -> float:
-        if isinstance(value, int) or isinstance(value, float):
-            return value
-        if isinstance(value, str):
-            logging.warning('%s is a string, not a int or float, please check', value_msg)
-        if value is None:
-            logging.warning('%s is a None value, please check', value_msg)
-        return 0
-
-    @classmethod
-    def determine_rdma(cls: any, events: list, idx: int) -> bool:
-        if idx > len(events) - NumberConstant.RDMA_TRANSIT_OP_NUM:
-            return False
-        second_task_type = events[idx + 1].task_type
-        third_task_type = events[idx + 2].task_type
-        if second_task_type == StrConstant.RDMA_SEND and third_task_type == StrConstant.NOTIFY_WAIT:
-            return True
-        else:
-            return False
-
-    @classmethod
-    def get_rdma_time_info(cls: any, events: list, idx: int) -> list:
-        transit_size = HcclAnalysisTool.get_value(events[idx].size, 'size') / (1024 ** 2)
-        transit_time = 0
-        for event in events[idx: idx + NumberConstant.RDMA_TRANSIT_OP_NUM]:
-            transit_time += HcclAnalysisTool.get_value(event.duration, 'duration') / 1000
-        return [transit_time, transit_size]
-
-    @classmethod
-    def init_dict(cls: any, keys: list) -> dict:
-        return {key: 0 for key in keys}
-
-    @classmethod
-    def init_bandwidth_dict(cls) -> dict:
-        dic = dict()
-        # get public variables from OpAnalysisType
-        values = [value for key, value in OpBandWidthType.__dict__.items() if '__' not in key]
-        for trans_type in StrConstant.TRANSIT_TYPE:
-            dic[trans_type] = HcclAnalysisTool.init_dict(values)
-            dic[trans_type][OpBandWidthType.SIZE_DISTRIBUTION] = defaultdict(float)
-        return dic
-
-    @classmethod
-    def get_transport_type(cls: any, src_id: int, dst_id: int):
-        if src_id == dst_id or \
-                src_id // NumberConstant.RANK_NUM_PER_SERVER != dst_id // NumberConstant.RANK_NUM_PER_SERVER:
-            return StrConstant.LOCAL
-        if src_id // NumberConstant.RANK_NUM_PER_OS != dst_id // NumberConstant.RANK_NUM_PER_OS:
-            return StrConstant.PCIE
-        return StrConstant.HCCS
-
-    @classmethod
-    def update_time_ratio(cls: any, op_time_dict: dict) -> None:
-        try:
-            op_time_dict[OpAnalysisType.WAIT_TIME_RATIO] = \
-                float(format(op_time_dict.get(OpAnalysisType.WAIT_TIME) /
-                             (op_time_dict.get(OpAnalysisType.WAIT_TIME) +
-                              op_time_dict.get(OpAnalysisType.TRANSIT_TIME)), ".4f"))
-        except ZeroDivisionError as err:
-            logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
-        try:
-            op_time_dict[OpAnalysisType.SYNCHRONIZATION_TIME_RATIO] = \
-                float(format(op_time_dict.get(OpAnalysisType.SYNCHRONIZATION_TIME) /
-                             (op_time_dict.get(OpAnalysisType.SYNCHRONIZATION_TIME) +
-                              op_time_dict.get(OpAnalysisType.TRANSIT_TIME)), ".4f"))
-        except ZeroDivisionError as err:
-            logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
-
-    @classmethod
-    def update_bandwidth_record(cls: any, bandwidth_dict: dict, trans_type: str, size: float, dur: float) -> None:
-        bandwidth_dict[trans_type][OpBandWidthType.TRANSIT_SIZE_MB] += size
-        bandwidth_dict[trans_type][OpBandWidthType.TRANSIT_TIME_MS] += dur
-        bandwidth_dict[trans_type][OpBandWidthType.SIZE_DISTRIBUTION][size] += 1
-
-    @classmethod
-    def combine_sdma_info(cls: any, bandwidth_dict: dict) -> None:
-        bandwidth_dict[StrConstant.SDMA][OpBandWidthType.TRANSIT_SIZE_MB] = \
-            bandwidth_dict[StrConstant.HCCS][OpBandWidthType.TRANSIT_SIZE_MB] + \
-            bandwidth_dict[StrConstant.PCIE][OpBandWidthType.TRANSIT_SIZE_MB]
-        bandwidth_dict[StrConstant.SDMA][OpBandWidthType.TRANSIT_TIME_MS] = \
-            bandwidth_dict[StrConstant.HCCS][OpBandWidthType.TRANSIT_TIME_MS] + \
-            bandwidth_dict[StrConstant.PCIE][OpBandWidthType.TRANSIT_TIME_MS]
-        if bandwidth_dict[StrConstant.SDMA][OpBandWidthType.TRANSIT_TIME_MS] != 0:
-            bandwidth_dict[StrConstant.SDMA][OpBandWidthType.BANDWIDTH_GB_S] = float(
-                format(bandwidth_dict[StrConstant.SDMA][OpBandWidthType.TRANSIT_SIZE_MB] /
-                       bandwidth_dict[StrConstant.SDMA][OpBandWidthType.TRANSIT_TIME_MS], ".4f"))
-
-    @classmethod
-    def analyze_bandwidth_info(cls: any, bandwidth_dict: dict, transport_type: str) -> None:
-        if bandwidth_dict[transport_type][OpBandWidthType.TRANSIT_TIME_MS] != 0:
-            bandwidth_dict[transport_type][OpBandWidthType.BANDWIDTH_GB_S] = float(
-                format(bandwidth_dict[transport_type][OpBandWidthType.TRANSIT_SIZE_MB] /
-                       bandwidth_dict[transport_type][OpBandWidthType.TRANSIT_TIME_MS], ".4f"))
-        bandwidth_dict[transport_type][OpBandWidthType.BANDWIDTH_UTILIZATION] = float(
-                format(bandwidth_dict[transport_type][OpBandWidthType.BANDWIDTH_GB_S] /
-                       cls.StandardBandWidth.get(transport_type, -1), ".4f"))
-        packet_num = 0
-        large_packet_num = 0
-        for size, count in bandwidth_dict[transport_type][OpBandWidthType.SIZE_DISTRIBUTION].items():
-            if size > cls.MessageSizeThreshold.get(transport_type, 0):
-                large_packet_num += count
-            packet_num += count
-        if packet_num > 0:
-            bandwidth_dict[transport_type][OpBandWidthType.LARGE_PACKET_RATIO] = \
-                float(format(large_packet_num / packet_num, ".4f"))
+from msparser.cluster.meta_parser import HcclAnalysisTool
 
 
 class CommunicationParser(MetaParser):
@@ -150,8 +27,8 @@ class CommunicationParser(MetaParser):
         return self.op_info
 
     def parse(self):
-        for hccl_name in self.op_events_dict:
-            self.parse_ops(self.op_events_dict.get(hccl_name, {}), hccl_name)
+        for hccl_name, op_events in self.op_events_dict.items():
+            self.parse_ops(op_events, hccl_name)
         if not self.op_info:
             logging.error("Fail to get op_info in Communication Parser")
             raise ProfException(ProfException.PROF_INVALID_DATA_ERROR)
@@ -198,7 +75,7 @@ class CommunicationParser(MetaParser):
             if event.transport_type == StrConstant.SDMA and event.task_type in StrConstant.SDMA_TRANSIT_ITEMS:
                 wait_flag = False
                 op_time_dict[OpAnalysisType.TRANSIT_TIME] += \
-                    HcclAnalysisTool.get_value(event.duration, "duration") / 1000
+                    HcclAnalysisTool.get_value(event.duration, "duration") / NumberConstant.US_TO_MS
             if event.transport_type == StrConstant.RDMA and HcclAnalysisTool.determine_rdma(main_events, idx):
                 wait_flag = False
                 rdma_transit_result = HcclAnalysisTool.get_rdma_time_info(main_events, idx)
@@ -206,13 +83,13 @@ class CommunicationParser(MetaParser):
                 idx += NumberConstant.RDMA_TRANSIT_OP_NUM
                 continue
             if event.task_type == StrConstant.NOTIFY_WAIT:
-                wait_time = HcclAnalysisTool.get_value(event.duration, "duration") / 1000
+                wait_time = HcclAnalysisTool.get_value(event.duration, "duration") / NumberConstant.US_TO_MS
                 if wait_flag:
                     op_time_dict[OpAnalysisType.SYNCHRONIZATION_TIME] += wait_time
                 op_time_dict[OpAnalysisType.WAIT_TIME] += wait_time
             idx += 1
         op_time_dict[OpAnalysisType.ELAPSE_TIME] = \
-            (main_events[-1].timestamp + main_events[-1].duration - main_events[0].timestamp) / 1000
+            (main_events[-1].timestamp + main_events[-1].duration - main_events[0].timestamp) / NumberConstant.US_TO_MS
         HcclAnalysisTool.update_time_ratio(op_time_dict)
         return op_time_dict
 
@@ -231,9 +108,10 @@ class CommunicationParser(MetaParser):
                 if transport_type == StrConstant.LOCAL:
                     idx += 1
                     continue
-                HcclAnalysisTool.update_bandwidth_record(op_bandwidth_dict, transport_type,
-                                                         HcclAnalysisTool.get_value(event.size, "size") / (1024 ** 2),
-                                                         HcclAnalysisTool.get_value(event.duration, "duration") / 1000)
+                HcclAnalysisTool.update_bandwidth_record(
+                    op_bandwidth_dict, transport_type,
+                    HcclAnalysisTool.get_value(event.size, "size") / NumberConstant.B_to_MB,
+                    HcclAnalysisTool.get_value(event.duration, "duration") / NumberConstant.US_TO_MS)
             if event.transport_type == StrConstant.RDMA and HcclAnalysisTool.determine_rdma(events, idx):
                 rdma_transit_result = HcclAnalysisTool.get_rdma_time_info(events, idx)
                 HcclAnalysisTool.update_bandwidth_record(op_bandwidth_dict, event.transport_type,
