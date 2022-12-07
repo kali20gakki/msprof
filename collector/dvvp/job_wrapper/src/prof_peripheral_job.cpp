@@ -934,7 +934,15 @@ int ProfStarsSocProfileJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
         return PROFILING_FAILED;
     }
     collectionJobCfg_ = cfg;
-
+    if ((collectionJobCfg_->comParams->params->interconnection_profiling.compare(
+        analysis::dvvp::common::config::MSVP_PROF_ON) != 0) &&
+        (collectionJobCfg_->comParams->params->hardware_mem.compare(
+            analysis::dvvp::common::config::MSVP_PROF_ON) != 0) &&
+        (collectionJobCfg_->comParams->params->low_power.compare(
+            analysis::dvvp::common::config::MSVP_PROF_ON) != 0)) {
+        MSPROF_LOGI("StarsSocProfile Profiling not enabled");
+        return PROFILING_FAILED;
+    }
     return PROFILING_SUCCESS;
 }
 int ProfStarsSocProfileJob::SetPeripheralConfig()
@@ -959,16 +967,13 @@ int ProfStarsSocProfileJob::SetPeripheralConfig()
         period = collectionJobCfg_->comParams->params->hardware_mem_sampling_interval;
         configP->on_chip.innerSwitch = TS_PROFILE_COMMAND_TYPE_PROFILING_ENABLE;
         configP->on_chip.period = static_cast<uint32_t>(period > 0 ? period : DEFAULT_PROFILING_INTERVAL_20MS);
+        configP->acc_pmu.innerSwitch = TS_PROFILE_COMMAND_TYPE_PROFILING_ENABLE;
+        configP->acc_pmu.period = DEFAULT_PROFILING_INTERVAL_20MS;
     }
 
     if (collectionJobCfg_->comParams->params->low_power == analysis::dvvp::common::config::MSVP_PROF_ON) {
         configP->low_power.innerSwitch = TS_PROFILE_COMMAND_TYPE_PROFILING_ENABLE;
         configP->low_power.period = DEFAULT_PROFILING_INTERVAL_20MS;
-    }
-
-    if (collectionJobCfg_->comParams->params->acc_pmu_mode == "sample-based") {
-        configP->acc_pmu.innerSwitch = TS_PROFILE_COMMAND_TYPE_PROFILING_ENABLE;
-        configP->acc_pmu.period = DEFAULT_PROFILING_INTERVAL_20MS;
     }
 
     MSPROF_LOGI("SocProfileParam: acc_pmu:[%d, %d], on_chip:[%d, %d], inter_chip:[%d, %d], low_power:[%d, %d]",
