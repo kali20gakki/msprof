@@ -84,7 +84,6 @@ TEST_F(PROF_DEVICE_SOC_UTEST, StartProf1)
     params->aiv_profiling_events = "0x12";
     params->devices = "0";
     params->low_power = "on";
-    params->acc_pmu_mode = "sample-based";
 
     MOCKER_CPP(&Analysis::Dvvp::JobWrapper::ProfChannelManager::UnInit)
         .stubs()
