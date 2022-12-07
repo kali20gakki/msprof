@@ -9,23 +9,24 @@ class TestAcsqTaskModel(unittest.TestCase):
 
     def test_flush(self):
         with mock.patch(NAMESPACE + '.AcsqTaskModel.insert_data_to_db'):
-            check = AcsqTaskModel('test', 'test', 'test')
-            check.flush('test')
+            check = AcsqTaskModel('test', 'test', [])
+            check.flush([])
 
     def test_flush_task_data(self):
         with mock.patch(NAMESPACE + '.AcsqTaskModel.insert_data_to_db'):
-            check = AcsqTaskModel('test', 'test', 'test')
-            check.flush_task_time('test')
+            check = AcsqTaskModel('test', 'test', [])
+            check.flush_task_time([])
 
     def test_get_summary_data(self):
-        with mock.patch(NAMESPACE + '.AcsqTaskModel.get_all_data', return_value=1):
-            check = AcsqTaskModel('test', 'test', 'test')
+        with mock.patch(NAMESPACE + '.DBManager.fetch_all_data', return_value=[(1, 2)]),\
+                mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=1):
+            check = AcsqTaskModel('test', 'test', [])
             ret = check.get_summary_data()
-        self.assertEqual(ret, 1)
+        self.assertEqual(ret, [(1, 2)])
 
     def test_get_timeline_data(self):
         with mock.patch(NAMESPACE + '.AcsqTaskModel.get_all_data', return_value=1):
-            check = AcsqTaskModel('test', 'test', 'test')
+            check = AcsqTaskModel('test', 'test', [])
             ret = check.get_timeline_data()
         self.assertEqual(ret, 1)
 
@@ -33,6 +34,6 @@ class TestAcsqTaskModel(unittest.TestCase):
         with mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True), \
                 mock.patch(NAMESPACE + '.DBManager.fetch_all_data', return_value=True), \
                 mock.patch(NAMESPACE + '.AcsqTaskModel.get_all_data', return_value=1):
-            check = AcsqTaskModel('test', 'test', 'test')
+            check = AcsqTaskModel('test', 'test', [])
             ret = check.get_ffts_type_data()
         self.assertEqual(ret, 1)
