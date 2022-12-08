@@ -119,6 +119,7 @@ class StrConstant:
     TASK_START_TIME = 'Task Start Time'
 
     # parallel mode
+    STAND_ALONE = "stand_alone"
     DATA_PARALLEL = "data_parallel"
     MODEL_PARALLEL = "model_parallel"
     PIPELINE_PARALLEL = "pipeline_parallel"

@@ -29,6 +29,17 @@ class ParallelStrategyParser(IParser, MsMultiProcess):
         self._project_path = sample_config.get(StrConstant.SAMPLE_CONFIG_PROJECT_PATH)
         self._parallel_strategy_data = []
 
+    @classmethod
+    def _get_parallel_mode(cls: any, parallel_type: str, stage_num: int) -> str:
+        if parallel_type == StrConstant.STAND_ALONE:
+            return StrConstant.STAND_ALONE
+        stage_num = 1 if not stage_num else stage_num
+        if stage_num > 1:
+            return StrConstant.PIPELINE_PARALLEL
+        if not parallel_type or parallel_type == StrConstant.DATA_PARALLEL:
+            return StrConstant.DATA_PARALLEL
+        return StrConstant.MODEL_PARALLEL
+
     def ms_run(self) -> None:
         parallel_files = self._file_list.get(DataTag.PARALLEL_STRATEGY, [])
         if not parallel_files:
@@ -63,10 +74,3 @@ class ParallelStrategyParser(IParser, MsMultiProcess):
             return
         with ParallelModel(self._project_path) as _model:
             _model.flush(DBNameConstant.TABLE_PARALLEL_STRATEGY, self._parallel_strategy_data)
-
-    def _get_parallel_mode(self: any, parallel_type: str, stage_num: int) -> str:
-        parallel_type = StrConstant.DATA_PARALLEL if not parallel_type else parallel_type
-        stage_num = 1 if not stage_num else stage_num
-        if stage_num > 1:
-            return StrConstant.PIPELINE_PARALLEL
-        return StrConstant.MODEL_PARALLEL if parallel_type != StrConstant.DATA_PARALLEL else parallel_type
