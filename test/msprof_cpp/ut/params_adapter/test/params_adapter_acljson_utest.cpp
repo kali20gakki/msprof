@@ -69,6 +69,9 @@ TEST_F(ParamsAdapterAcljsonUtest, ParamsCheckAclJson)
     MOCKER_CPP(&Collector::Dvvp::ParamsAdapter::ParamsAdapter::CheckFreqValid)
         .stubs()
         .will(returnValue(true));
+    MOCKER_CPP(&Collector::Dvvp::ParamsAdapter::ParamsAdapterAclJson::CheckHostSysAclJsonValid)
+        .stubs()
+        .will(returnValue(true));
     std::vector<std::pair<InputCfg, std::string>> cfgList;
     for (auto cfg : AclJsonParamAdapterMgr->aclJsonConfig_) {
         AclJsonParamAdapterMgr->setConfig_.insert(cfg);

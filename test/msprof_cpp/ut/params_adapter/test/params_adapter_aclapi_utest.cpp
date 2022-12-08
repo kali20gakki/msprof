@@ -95,7 +95,6 @@ TEST_F(ParamsAdapterAclapiUtest, ProfTaskCfgToContainer)
     apiCfg.aicoreMetrics = PROF_AICORE_ARITHMETIC_UTILIZATION;
     std::array<std::string, ACL_PROF_ARGS_MAX> argsArr;
     argsArr[ACL_PROF_STORAGE_LIMIT] = "200MB";
-    argsArr[ACL_PROF_AIV_METRICS] = "ArithmeticUtilization";
     AclApiParamAdapterMgr->ProfTaskCfgToContainer(&apiCfg, argsArr);
 }
 
@@ -113,12 +112,8 @@ TEST_F(ParamsAdapterAclapiUtest, ProfSystemCfgToContainer)
                             PROF_HCCL_TRACE | PROF_AICORE_METRICS;
     apiCfg.aicoreMetrics = PROF_AICORE_ARITHMETIC_UTILIZATION;
     std::array<std::string, ACL_PROF_ARGS_MAX> argsArr;
-    argsArr[ACL_PROF_SYS_CPU_FREQ] = "10";
     argsArr[ACL_PROF_SYS_IO_FREQ] = "10";
     argsArr[ACL_PROF_SYS_INTERCONNECTION_FREQ] = "10";
     argsArr[ACL_PROF_DVPP_FREQ] = "10";
-    argsArr[ACL_PROF_SYS_USAGE_FREQ] = "10";
-    argsArr[ACL_PROF_SYS_PID_USAGE_FREQ] = "10";
-    argsArr[ACL_PROF_HOST_SYS] = "10";
     AclApiParamAdapterMgr->ProfSystemCfgToContainer(&apiCfg, argsArr);
 }

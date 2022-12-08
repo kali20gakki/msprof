@@ -22,9 +22,13 @@ public:
 
 private:
     int Init();
+    void InitWholeConfigMap();
+    void InitPrintMap();
     int ParamsCheckGeOpt() const;
+    bool CheckHostSysGeOptValid(const std::string &cfgStr) const;
     void GenGeOptionsContainer(SHARED_PTR_ALIA<ProfGeOptionsConfig> geCfg);
     int SetGeOptionsContainerDefaultValue();
+    void SetGeOptContainerSysValue();
     int SetOutputDir(std::string &outputDir) const;
 
 private:

@@ -55,6 +55,7 @@ set(include_path
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/driver
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/plugin
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/acl
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/profapi
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/metadef/error_manager/error_manager_stub
     ${MSPROF_SOURCE_DIR}/dvvp/driver/inc
@@ -65,7 +66,7 @@ set(include_path
     ${MSPROF_SOURCE_DIR}/dvvp/job_wrapper/include
     ${MSPROF_SOURCE_DIR}/dvvp/transport
     ${MSPROF_SOURCE_DIR}/inc/toolchain
-
+    ${MSPROF_SOURCE_DIR}/inc/external/acl
 )
 
 add_executable(params_adapter_utest
