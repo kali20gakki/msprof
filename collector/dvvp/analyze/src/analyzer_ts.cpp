@@ -6,7 +6,6 @@
  */
 #include "analyzer_ts.h"
 
-#include "acl_prof.h"
 #include "errno/error_code.h"
 #include "message/codec.h"
 #include "msprof_dlog.h"

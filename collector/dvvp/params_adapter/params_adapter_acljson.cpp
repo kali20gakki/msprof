@@ -28,8 +28,15 @@ int ParamsAdapterAclJson::Init()
         return PROFILING_FAILED;
     }
     std::vector<InputCfg>({
-        INPUT_CFG_COM_BIU_FREQ
+        INPUT_CFG_COM_BIU_FREQ, INPUT_CFG_HOST_SYS
     }).swap(aclJsonConfig_);
+    InitWholeConfigMap();
+    InitPrintMap();
+    return PROFILING_SUCCESS;
+}
+
+void ParamsAdapterAclJson::InitWholeConfigMap()
+{
     std::vector<InputCfg>({
         INPUT_CFG_COM_OUTPUT,
         INPUT_CFG_COM_STORAGE_LIMIT,
@@ -43,9 +50,19 @@ int ParamsAdapterAclJson::Init()
         INPUT_CFG_COM_AIC_METRICS,
         INPUT_CFG_COM_AIV_METRICS,
         INPUT_CFG_COM_BIU_FREQ,
+        INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ,
+        INPUT_CFG_COM_LLC_MODE,
+        INPUT_CFG_COM_SYS_IO_FREQ,
+        INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ,
+        INPUT_CFG_COM_DVPP_FREQ,
+        INPUT_CFG_HOST_SYS,
         INPUT_CFG_HOST_SYS_USAGE,
         INPUT_CFG_HOST_SYS_USAGE_FREQ
     }).swap(aclJsonWholeConfig_);
+}
+
+void ParamsAdapterAclJson::InitPrintMap()
+{
     std::map<InputCfg, std::string>({
         {INPUT_CFG_COM_OUTPUT, "output"},
         {INPUT_CFG_COM_STORAGE_LIMIT, "storage_limit"},
@@ -59,10 +76,33 @@ int ParamsAdapterAclJson::Init()
         {INPUT_CFG_COM_AIC_METRICS, "aic_metrics"},
         {INPUT_CFG_COM_AIV_METRICS, "aiv_metrics"},
         {INPUT_CFG_COM_BIU_FREQ, "biu_freq"},
+        {INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ, "sys_hardware_mem_freq"},
+        {INPUT_CFG_COM_LLC_MODE, "llc_profiling"},
+        {INPUT_CFG_COM_SYS_IO_FREQ, "sys_io_sampling_freq"},
+        {INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ, "sys_interconnection_freq"},
+        {INPUT_CFG_COM_DVPP_FREQ, "dvpp_freq"},
+        {INPUT_CFG_HOST_SYS, "host_sys"},
         {INPUT_CFG_HOST_SYS_USAGE, "host_sys_usage"},
         {INPUT_CFG_HOST_SYS_USAGE_FREQ, "host_sys_usage_freq"},
     }).swap(aclJsonPrintMap_);
-    return PROFILING_SUCCESS;
+}
+
+bool ParamsAdapterAclJson::CheckHostSysAclJsonValid(const std::string &cfgStr) const
+{
+    if (cfgStr.empty()) {
+        MSPROF_LOGE("Config: host_sys is empty. Please input in the range of "
+            "'cpu|mem'.");
+        return false;
+    }
+    std::vector<std::string> cfgStrVec = Utils::Split(cfgStr, false, "", ",");
+    for (auto cfg : cfgStrVec) {
+        if (cfg.compare(HOST_SYS_CPU) != 0 && cfg.compare(HOST_SYS_MEM) != 0) {
+            MSPROF_LOGE("The value [%s] of host_sys is not support. Please input in the range of "
+                "'cpu|mem'.", cfg.c_str());
+            return false;
+        }
+    }
+    return true;
 }
 
 int ParamsAdapterAclJson::ParamsCheckAclJson() const
@@ -76,6 +116,9 @@ int ParamsAdapterAclJson::ParamsCheckAclJson() const
         switch (inputCfg) {
             case INPUT_CFG_COM_BIU_FREQ:
                 ret = CheckFreqValid(cfgValue, inputCfg);
+                break;
+            case INPUT_CFG_HOST_SYS:
+                ret = CheckHostSysAclJsonValid(cfgValue);
                 break;
             default:
                 ret = false;
@@ -100,8 +143,19 @@ void ParamsAdapterAclJson::GenAclJsonContainer(SHARED_PTR_ALIA<ProfAclConfig> ac
     paramContainer_[INPUT_CFG_COM_RUNTIME_API] = aclCfg->runtime_api();
     paramContainer_[INPUT_CFG_COM_AIC_METRICS] = aclCfg->aic_metrics();
     paramContainer_[INPUT_CFG_COM_AIV_METRICS] = aclCfg->aiv_metrics();
+    paramContainer_[INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ] = (aclCfg->sys_hardware_mem_freq() <= 0) ? "" :
+        std::to_string(aclCfg->sys_hardware_mem_freq());
+    paramContainer_[INPUT_CFG_COM_LLC_MODE] = aclCfg->llc_profiling();
+    paramContainer_[INPUT_CFG_COM_SYS_IO_FREQ] = (aclCfg->sys_io_sampling_freq() <= 0) ? "" :
+        std::to_string(aclCfg->sys_io_sampling_freq());
+    paramContainer_[INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ] = (aclCfg->sys_interconnection_freq() <= 0) ? "" :
+        std::to_string(aclCfg->sys_interconnection_freq());
+    paramContainer_[INPUT_CFG_COM_DVPP_FREQ] = (aclCfg->dvpp_freq() <= 0) ? "" :
+        std::to_string(aclCfg->dvpp_freq());
+    paramContainer_[INPUT_CFG_HOST_SYS] = aclCfg->host_sys();
     paramContainer_[INPUT_CFG_HOST_SYS_USAGE] = aclCfg->host_sys_usage();
-    paramContainer_[INPUT_CFG_HOST_SYS_USAGE_FREQ] = aclCfg->host_sys_usage_freq();
+    paramContainer_[INPUT_CFG_HOST_SYS_USAGE_FREQ] = (aclCfg->host_sys_usage_freq() <= 0) ? "" :
+        std::to_string(aclCfg->host_sys_usage_freq());
     std::string biuFreqParam = std::to_string(aclCfg->biu_freq());
     if (biuFreqParam.compare("0") != 0) {
         paramContainer_[INPUT_CFG_COM_BIU_FREQ] = biuFreqParam;
@@ -113,6 +167,22 @@ void ParamsAdapterAclJson::GenAclJsonContainer(SHARED_PTR_ALIA<ProfAclConfig> ac
     for (auto configOpt : aclJsonWholeConfig_) {
         if (!paramContainer_[configOpt].empty()) {
             setConfig_.insert(configOpt);
+        }
+    }
+}
+
+void ParamsAdapterAclJson::SetAclJsonContainerSysValue()
+{
+    const std::unordered_map<int, InputCfg> sysConfigMap = {
+        {INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ, INPUT_CFG_COM_SYS_HARDWARE_MEM},
+        {INPUT_CFG_COM_SYS_IO_FREQ, INPUT_CFG_COM_SYS_IO},
+        {INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ, INPUT_CFG_COM_SYS_INTERCONNECTION},
+        {INPUT_CFG_COM_DVPP_FREQ, INPUT_CFG_COM_DVPP}
+    };
+    for (auto kv : sysConfigMap) {
+        std::string configStr = paramContainer_[kv.first];
+        if (!configStr.empty()) {
+            paramContainer_[kv.second] = MSVP_PROF_ON;
         }
     }
 }
@@ -144,6 +214,7 @@ void ParamsAdapterAclJson::SetAclJsonContainerDefaultValue()
     if (!paramContainer_[INPUT_CFG_COM_BIU_FREQ].empty()) {
         paramContainer_[INPUT_CFG_COM_BIU] = MSVP_PROF_ON;
     }
+    SetAclJsonContainerSysValue();
 }
 
 std::string ParamsAdapterAclJson::SetOutputDir(const std::string &outputDir) const
@@ -188,7 +259,7 @@ int ParamsAdapterAclJson::GetParamFromInputCfg(SHARED_PTR_ALIA<ProfAclConfig> ac
         MSPROF_LOGE("[GetParamFromInputCfg]acljson Init failed.");
         return PROFILING_FAILED;
     }
-    
+
     GenAclJsonContainer(aclCfg);
 
     ret = ParamsCheckAclJson();

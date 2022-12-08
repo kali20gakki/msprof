@@ -58,6 +58,9 @@ TEST_F(ParamsAdapterGeoptUtest, ParamsCheckGeOpt)
     MOCKER_CPP(&Collector::Dvvp::ParamsAdapter::ParamsAdapter::CheckFreqValid)
         .stubs()
         .will(returnValue(true));
+    MOCKER_CPP(&Collector::Dvvp::ParamsAdapter::ParamsAdapterGeOpt::CheckHostSysGeOptValid)
+        .stubs()
+        .will(returnValue(true));
     for (auto cfg : GeOptParamAdapterMgr->geOptConfig_) {
         GeOptParamAdapterMgr->setConfig_.insert(cfg);
         int ret = GeOptParamAdapterMgr->ParamsCheckGeOpt();
