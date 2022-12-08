@@ -73,17 +73,18 @@ class FftsLogViewer(BaseViewer):
         node_data = {'subtask_data_list': [], 'thread_data_list': []}
         node_name_dict = self.get_node_name()
         for data in data_dict.get('subtask_data_list', []):
-            node_key = "{0}-{1}-{2}".format(data[2], data[1], data[0])
+            node_key = "{0}-{1}-{2}".format(data[1], data[2], data[0])
             node_name = node_name_dict.get(node_key, 'NA')
             node_data.setdefault('subtask_data_list', []).append(data + (node_name,))
         return node_data
 
     def get_node_name(self: any) -> dict:
         node_dict = {}
-        view_model = ViewModel(self.params.get('project'), DBNameConstant.DB_GE_INFO, DBNameConstant.TABLE_GE_TASK)
+        view_model = ViewModel(self.params.get('project'), DBNameConstant.DB_AICORE_OP_SUMMARY,
+                               DBNameConstant.TABLE_GE_TASK)
         view_model.init()
-        ge_data = view_model.get_all_data(DBNameConstant.TABLE_GE_TASK)
+        ge_data = view_model.get_all_data(DBNameConstant.TABLE_SUMMARY_GE)
         for data in ge_data:
-            node_key = "{0}-{1}-{2}".format(data[2], data[3], data[12])
-            node_dict[node_key] = data[1]
+            node_key = "{0}-{1}-{2}".format(data[2], data[3], data[11])
+            node_dict[node_key] = data[4]
         return node_dict
