@@ -50,7 +50,7 @@ class ClusterTuning(BaseTuningView):
         """
         self.tuning_report()
 
-    def get_tuning_data(self: any) -> None:
+    def get_tuning_data(self: any):
         """
         get turing data
         :return:
@@ -60,3 +60,13 @@ class ClusterTuning(BaseTuningView):
                 CommonProfRule.RESULT_RULE_TYPE: value, 'result': calculator(self.cluster_params).run()
             }
             self.data.append(calculator_result)
+
+    def tuning_report(self: any):
+        self.get_tuning_data()
+        if not self.data:
+            return
+        print_msg(f'\n{self.turing_start}:')
+        for index, every_data in enumerate(self.data):
+            self.print_first_level(index + 1, every_data)
+            self.print_second_level(every_data.get("result"))
+        print_msg("\n")
