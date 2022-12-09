@@ -327,17 +327,26 @@ void ArgsManager::AddHardWareMemArgs()
     }
     auto hardwareMem = Args("sys-hardware-mem", "", OFF);
     auto hardwareMemFreq = Args("sys-hardware-mem-freq", "", "50");
-    auto llcGroup = Args("llc-profiling", "", "capacity");
+    auto llcMode = Args("llc-profiling", "", "capacity");
     hardwareMem.SetDetail("LLC, DDR, HBM acquisition switch, optional on / off, the default value is off.\n"
                               "\t\t\t\t\t\t   LLC, DDR(full-platform), HBM(Ascend310P, Ascend910)");
     hardwareMemFreq.SetDetail("LLC, DDR, HBM acquisition frequency, range 1 ~ 1000, the default value is 50 Hz.\n"
                                   "\t\t\t\t\t\t   LLC, DDR(full-platform), HBM(Ascend310P, Ascend910)");
-    llcGroup.SetDetail("The llc profiling groups.\n"
-                           "\t\t\t\t\t\t   include capacity, bandwidth. the default value is capacity.(Ascend310)\n"
-                           "\t\t\t\t\t\t   include read, write. the default value is read.(Ascend310P, Ascend910)");
+    if (driverOnline_ && platform_ == PlatformType::MINI_TYPE) {
+        llcMode.SetDetail("The llc profiling groups. Include capacity, bandwidth. "
+            "the default value is capacity.(Ascend310)");
+    } else if (driverOnline_ && (platform_ == PlatformType::DC_TYPE || platform_ == PlatformType::CLOUD_TYPE)) {
+        llcMode.SetDetail("The llc profiling groups. Include read, write. "
+            "the default value is read.(Ascend310P, Ascend910)");
+    } else {
+        llcMode.SetDetail("The llc profiling groups.\n"
+                              "\t\t\t\t\t\t   include capacity, bandwidth. the default value is capacity.(Ascend310)\n"
+                              "\t\t\t\t\t\t   include read, write. the default value is read.(Ascend310P, Ascend910)");
+    }
+    
     argsList_.push_back(hardwareMem);
     argsList_.push_back(hardwareMemFreq);
-    argsList_.push_back(llcGroup);
+    argsList_.push_back(llcMode);
 }
 
 void ArgsManager::AddCpuArgs()
