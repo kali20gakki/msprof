@@ -7,6 +7,7 @@ from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.stars_constant import StarsConstant
 from common_func.utils import Utils
 from msmodel.interface.parser_model import ParserModel
+from profiling_bean.db_dto.task_time_dto import TaskTimeDto
 
 
 class FftsLogModel(ParserModel):
@@ -65,7 +66,7 @@ class FftsLogModel(ParserModel):
         return DBManager.fetch_all_data(self.cur, sql)
 
     def _get_thread_time_data(self: any) -> list:
-        return self.get_all_data(DBNameConstant.TABLE_THREAD_TASK)
+        return self.get_all_data(DBNameConstant.TABLE_THREAD_TASK, dto_class=TaskTimeDto)
 
     def _get_subtask_time_data(self: any) -> list:
-        return self.get_all_data(DBNameConstant.TABLE_SUBTASK_TIME)
+        return self.get_all_data(DBNameConstant.TABLE_SUBTASK_TIME, dto_class=TaskTimeDto)

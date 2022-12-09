@@ -11,6 +11,7 @@ from common_func.trace_view_header_constant import TraceViewHeaderConstant
 from common_func.trace_view_manager import TraceViewManager
 from msmodel.interface.view_model import ViewModel
 from msmodel.stars.ffts_log_model import FftsLogModel
+from profiling_bean.db_dto.ge_task_dto import GeTaskDto
 from profiling_bean.prof_enum.export_data_type import ExportDataType
 from viewer.interface.base_viewer import BaseViewer
 
@@ -57,12 +58,13 @@ class FftsLogViewer(BaseViewer):
         result = []
         for data in data_list.get('subtask_data_list', []):
             result.append(
-                [data[7],
+                [data.op_name,
                  InfoConfReader().get_json_pid_data(),
-                 data[3],  # subtask type
-                 data[5] / DBManager.NSTOUS,  # start time
-                 data[6] / DBManager.NSTOUS if data[5] > 0 else 0,  # duration
-                 {'FFTS Type': data[4], 'Stream ID': data[2], 'Task ID': data[1], 'Subtask_id': data[0]}])
+                 data.subtask_type,  # subtask type
+                 data.start_time / DBManager.NSTOUS,  # start time
+                 data.dur_time / DBManager.NSTOUS if data.dur_time > 0 else 0,  # duration
+                 {'FFTS Type': data.ffts_type, 'Stream ID': data.stream_id, 'Task ID': data.task_id,
+                  'Subtask_id': data.subtask_id}])
         _trace = TraceViewManager.time_graph_trace(TraceViewHeaderConstant.TOP_DOWN_TIME_GRAPH_HEAD,
                                                    result)
         result = TraceViewManager.metadata_event(self.get_time_timeline_header(result))
@@ -70,20 +72,19 @@ class FftsLogViewer(BaseViewer):
         return result
 
     def add_node_name(self: any, data_dict: dict) -> dict:
-        node_data = {'subtask_data_list': [], 'thread_data_list': []}
         node_name_dict = self.get_node_name()
         for data in data_dict.get('subtask_data_list', []):
-            node_key = "{0}-{1}-{2}".format(data[2], data[1], data[0])
-            node_name = node_name_dict.get(node_key, 'NA')
-            node_data.setdefault('subtask_data_list', []).append(data + (node_name,))
-        return node_data
+            node_key = "{0}-{1}-{2}".format(data.task_id, data.stream_id, data.subtask_id)
+            data.op_name = node_name_dict.get(node_key, 'NA')
+        return data_dict
 
     def get_node_name(self: any) -> dict:
         node_dict = {}
-        view_model = ViewModel(self.params.get('project'), DBNameConstant.DB_GE_INFO, DBNameConstant.TABLE_GE_TASK)
+        view_model = ViewModel(self.params.get('project'), DBNameConstant.DB_AICORE_OP_SUMMARY,
+                               DBNameConstant.TABLE_GE_TASK)
         view_model.init()
-        ge_data = view_model.get_all_data(DBNameConstant.TABLE_GE_TASK)
+        ge_data = view_model.get_all_data(DBNameConstant.TABLE_SUMMARY_GE, dto_class=GeTaskDto)
         for data in ge_data:
-            node_key = "{0}-{1}-{2}".format(data[2], data[3], data[12])
-            node_dict[node_key] = data[1]
+            node_key = "{0}-{1}-{2}".format(data.task_id, data.stream_id, data.context_id)
+            node_dict[node_key] = data.op_name
         return node_dict
