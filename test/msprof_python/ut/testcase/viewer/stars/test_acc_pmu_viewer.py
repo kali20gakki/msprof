@@ -4,6 +4,17 @@ from collections import OrderedDict
 from viewer.stars.acc_pmu_viewer import AccPmuViewer
 
 
+class AccPmuTestData:
+
+    def __init__(self, *args):
+        self.timestamp = args[0]
+        self.read_bandwidth = args[1]
+        self.acc_id = args[2]
+        self.write_bandwidth = args[3]
+        self.read_ost = args[4]
+        self.write_ost = args[5]
+
+
 class TestAccPmuViewer(unittest.TestCase):
     def test_get_timeline_header(self):
         param = {"data_type": "acc_pmu"}
@@ -17,22 +28,7 @@ class TestAccPmuViewer(unittest.TestCase):
         self.assertEqual([], ret)
 
         param = {"data_type": "acc_pmu"}
-        datas = [[1, 2, 3, 4, 5, 6, 7, 8, 9, 123]]
+        datas = [AccPmuTestData(1, 2, 3, 4, 5, 6, 7, 8, 9, 123)]
         check = AccPmuViewer({}, param)
         ret = check.get_trace_timeline(datas)
-        expect_result = [OrderedDict([('name', 'process_name'),
-                                      ('pid', 0),
-                                      ('tid', 0),
-                                      ('args', OrderedDict([('name', 'acc_pmu')])),
-                                      ('ph', 'M')]),
-                         OrderedDict([('name', 'acc_id 3'),
-                                      ('ts', 123),
-                                      ('pid', 0),
-                                      ('tid', 0),
-                                      ('args',
-                                       {'read_bandwidth': 6,
-                                        'read_ost': 8,
-                                        'write_band_width': 7,
-                                        'write_ost': 9}),
-                                      ('ph', 'C')])]
-        self.assertEqual(expect_result, ret)
+        self.assertEqual(5, len(ret))

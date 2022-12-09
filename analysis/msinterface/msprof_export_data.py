@@ -63,7 +63,6 @@ from viewer.peripheral_report import get_peripheral_nic_data
 from viewer.runtime.runtime_api_viewer import RuntimeApiViewer
 from viewer.runtime_report import get_task_scheduler_data
 from viewer.stars.acc_pmu_viewer import AccPmuViewer
-from viewer.stars.acsq_task_viewer import AcsqTaskViewer
 from viewer.stars.ffts_log_viewer import FftsLogViewer
 from viewer.stars.low_power_viewer import LowPowerViewer
 from viewer.stars.stars_chip_trans_view import StarsChipTransView
