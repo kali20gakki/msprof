@@ -22,7 +22,7 @@ class StarsConfig(MetaConfig):
         , 'AccPmuParser': [
             ('fmt', '011010'),
             ('db', 'acc_pmu.db'),
-            ('table', 'AccPmuOrigin')
+            ('table', 'AccPmu')
         ]
         , 'InterSocParser': [
             ('fmt', '011100'),
