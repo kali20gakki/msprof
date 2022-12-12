@@ -143,7 +143,7 @@ class MetaConditionManager:
                 format_value.append(operator_data.get(key))
             else:
                 return result_list
-
+        format_value = [f"{number:f}" for number in format_value]
         expression = condition.get(CommonProfRule.COND_TYPE_FORMULA).format(*format_value)
         if condition.get(CommonProfRule.CONDITION_CMP) in cls.COMPARE_MAP:
             if cls.COMPARE_MAP.get(condition.get(
@@ -176,7 +176,8 @@ class MetaConditionManager:
         if match_expression:
             cal_result = cls.CALCULATE_MAP.get(operator)(match_expression.split(operator)[0],
                                                          match_expression.split(operator)[1])
-            sub_expression = sub_expression.replace(str(match_expression), str(cal_result))
+            cal_result = f"{cal_result:f}"
+            sub_expression = sub_expression.replace(str(match_expression), cal_result)
         return sub_expression
 
     def merge_set(self: any, condition_id: str, condition_id_dict: dict) -> str:

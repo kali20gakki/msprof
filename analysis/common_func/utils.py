@@ -13,6 +13,7 @@ from common_func.file_manager import check_path_valid
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msvp_common import is_number
 from common_func.path_manager import PathManager
+from common_func.ms_constant.str_constant import StrConstant
 from msmodel.interface.base_model import BaseModel
 
 
@@ -212,3 +213,11 @@ class Utils:
         :return: func_type.For example: 1111
         """
         return bin(header & 960)[2:].zfill(6)
+
+    @classmethod
+    def get_aicore_type(cls: any, sample_config: dict) -> str:
+        """
+        get ai core type
+        :return:
+        """
+        return sample_config.get(StrConstant.AICORE_PROFILING_MODE)
