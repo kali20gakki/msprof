@@ -7,6 +7,7 @@ from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.msprof_iteration import MsprofIteration
 from constant.constant import INFO_JSON
+from profiling_bean.db_dto.step_trace_dto import IterationRange
 from sqlite.db_manager import DBManager
 
 NAMESPACE = 'common_func.msprof_iteration'
@@ -28,7 +29,7 @@ class TestMsprofIteration(unittest.TestCase):
         model_id = 1
         with mock.patch(NAMESPACE + '.Utils.is_step_scene', return_value=True):
             key = MsprofIteration('123')
-            result = key.get_iteration_time(index_id, model_id)
+            result = key.get_iteration_time(IterationRange(model_id, index_id, 1))
         self.assertEqual(result, [])
 
     def test_get_step_iteration_time_1(self):
@@ -46,18 +47,18 @@ class TestMsprofIteration(unittest.TestCase):
                 mock.patch(NAMESPACE + '.DBManager.check_tables_in_db', return_value=True):
             key = MsprofIteration('123')
             InfoConfReader()._info_json = INFO_JSON
-            result = key.get_step_iteration_time(index_id, model_id)
-        self.assertEqual(len(result), 2)
+            result = key.get_step_iteration_time(IterationRange(model_id, index_id, 1))
+        self.assertEqual(len(result), 0)
         with mock.patch(NAMESPACE + '.MsprofIteration._get_iteration_time', side_effect=sqlite3.Error), \
                 mock.patch(NAMESPACE + '.logging.error'):
             key = MsprofIteration('123')
-            result = key.get_step_iteration_time(index_id, model_id)
+            result = key.get_step_iteration_time(IterationRange(model_id, index_id, 1))
         self.assertEqual(result, [])
         db_manager = DBManager()
         res = db_manager.create_table("step_trace.db")
         with mock.patch(NAMESPACE + '.DBManager.destroy_db_connect'):
             key = MsprofIteration('123')
-            key.get_step_iteration_time(index_id, model_id)
+            key.get_step_iteration_time(IterationRange(model_id, index_id, 1))
             res[1].execute("drop table step_trace_data")
             res[0].commit()
             db_manager.destroy(res)
@@ -78,62 +79,11 @@ class TestMsprofIteration(unittest.TestCase):
                 mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=res), \
                 mock.patch(NAMESPACE + '.DBManager.check_tables_in_db', return_value=True):
             key = MsprofIteration('123')
-            result = key._generate_trace_result(key.get_step_iteration_time(index_id, model_id))
-        self.assertEqual(result, [(0.0, 118571743.67199999)])
+            result = key._generate_trace_result(key.get_step_iteration_time(IterationRange(model_id, index_id, 1)))
+        self.assertEqual(result, [])
         db_manager = DBManager()
         res = db_manager.create_table("step_trace.db")
         res[1].execute("drop table step_trace_data")
-        res[0].commit()
-        db_manager.destroy(res)
-
-    def test_get_train_iteration_time_1(self):
-        iteration_id = 1
-        create_sql = "create table IF NOT EXISTS training_trace (host_id int, device_id int, iteration_id int, " \
-                     "job_stream int, job_task int, FP_start int, FP_stream int, FP_task int, BP_end int, " \
-                     "BP_stream int, BP_task int, iteration_end int, iter_stream int,iter_task int, " \
-                     "iteration_time int, fp_bp_time int, grad_refresh_bound int, data_aug_bound int default 0)"
-        data = ((0, 4, 1, 58, 140, 1695384646479, 58, 141, 1695386378943, 60, 205, 1695387952406,
-                 57, 5, 3305927, 1732464, 1573463, 0),)
-        insert_sql = "insert into {0} values ({value})".format("training_trace",
-                                                               value="?," * (len(data[0]) - 1) + "?")
-        db_manager = DBManager()
-        res = db_manager.create_table("trace.db", create_sql, insert_sql, data)
-        with mock.patch(NAMESPACE + '.PathManager.get_db_path', return_value="trace.db"), \
-                mock.patch(NAMESPACE + '.DBManager.check_connect_db_path', return_value=res):
-            key = MsprofIteration('123')
-            InfoConfReader()._info_json = INFO_JSON
-            result = key._generate_trace_result(key.get_train_iteration_time(iteration_id))
-        self.assertEqual(result, [(0.0, 44150727927.239586)])
-        db_manager = DBManager()
-        res = db_manager.create_table("trace.db")
-        with mock.patch(NAMESPACE + '.DBManager.destroy_db_connect'):
-            key = MsprofIteration('123')
-            key.get_train_iteration_time(iteration_id)
-        res[1].execute("drop table training_trace")
-        res[0].commit()
-        db_manager.destroy(res)
-
-    def test_get_train_iteration_time_2(self):
-        iteration_id = 902
-        create_sql = "create table IF NOT EXISTS training_trace (host_id int,device_id int, iteration_id int, " \
-                     "job_stream int, job_task int, FP_start int, FP_stream int, FP_task int, BP_end int, " \
-                     "BP_stream int, BP_task int, iteration_end int, iter_stream int,iter_task int, " \
-                     "iteration_time int, fp_bp_time int, grad_refresh_bound int, data_aug_bound int default 0)"
-        trace_data = ((0, 4, 1, 58, 140, 1695384646478, 58, 141, 1695386378943, 60, 205, 1695387952406,
-                       57, 5, 3305927, 1732464, 1573463, 0),)
-        insert_sql = "insert into {0} values ({value})".format("training_trace",
-                                                               value="?," * (len(trace_data[0]) - 1) + "?")
-        db_manager = DBManager()
-        res = db_manager.create_table("trace.db", create_sql, insert_sql, trace_data)
-        with mock.patch(NAMESPACE + '.PathManager.get_db_path', return_value="trace.db"), \
-                mock.patch(NAMESPACE + '.DBManager.check_connect_db_path', return_value=res):
-            key = MsprofIteration('123')
-            InfoConfReader()._info_json = INFO_JSON
-            result = key.get_train_iteration_time(iteration_id)
-        self.assertEqual(result, [])
-        db_manager = DBManager()
-        res = db_manager.create_table("trace.db")
-        res[1].execute("drop table training_trace")
         res[0].commit()
         db_manager.destroy(res)
 

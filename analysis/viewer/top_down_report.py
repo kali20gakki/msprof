@@ -19,6 +19,7 @@ from common_func.platform.chip_manager import ChipManager
 from common_func.trace_view_header_constant import TraceViewHeaderConstant
 from common_func.trace_view_manager import TraceViewManager
 from common_func.utils import Utils
+from profiling_bean.db_dto.step_trace_dto import IterationRange
 from viewer.training.core_cpu_reduce_viewer import CoreCpuReduceViewer
 
 
@@ -79,46 +80,21 @@ class TopDownData:
         return True
 
     @classmethod
-    def get_max_iter_id(cls: any, project_path: str) -> int:
-        """
-        get iteration count
-        """
-        if not Utils.is_step_scene(project_path):
-            return NumberConstant.INVALID_ITER_ID
-        if ChipManager().is_chip_v1():
-            db_name, table_name = (DBNameConstant.DB_RUNTIME, DBNameConstant.TABLE_RUNTIME_TASK_TIME)
-        else:
-            db_name, table_name = (DBNameConstant.DB_HWTS, DBNameConstant.TABLE_HWTS_TASK_TIME)
-        conn, cur = DBManager.check_connect_db(project_path, db_name)
-        if not cls._check_sql_file(conn, cur, table_name):
-            return NumberConstant.INVALID_ITER_ID
-        try:
-            max_iter_id = cur.execute(
-                "select max({0}) from {1} "
-                    .format(cls.COLUMN_RUNTIME_ITER_ID, table_name), ).fetchone()
-        except sqlite3.Error as err:
-            logging.error(err, exc_info=Constant.TRACE_BACK_SWITCH)
-            return NumberConstant.INVALID_ITER_ID
-        else:
-            if max_iter_id and max_iter_id[0]:
-                return int(max_iter_id[0])
-            return NumberConstant.INVALID_ITER_ID
-        finally:
-            DBManager.destroy_db_connect(conn, cur)
-
-    @classmethod
-    def get_top_down_data(cls: any, project_path: str, device_id: str, iter_id: int) -> tuple:
+    def get_top_down_data(cls: any, project_path: str, device_id: str, iter_range: IterationRange) -> tuple:
         """
         query and get top down data
         """
         logging.info("start to get top down data.")
         headers = ConfigManager.get(ConfigManager.MSPROF_EXPORT_DATA).get('ai_stack_time', 'headers').split(",")
-        top_down_data = cls._get_top_down_data_one_iter(project_path, device_id, iter_id)
+        top_down_data = []
+        for _index in range(iter_range.iteration_count):
+            top_down_data.extend(
+                cls._get_top_down_data_one_iter(project_path, device_id, iter_range.iteration_id + _index))
         logging.info("get top down data finish.")
         return headers, top_down_data, len(top_down_data)
 
     @classmethod
-    def get_top_down_timeline_data(cls: any, project_path: str, device_id: str, iter_id: int) -> str:
+    def get_top_down_timeline_data(cls: any, project_path: str, device_id: str, iter_range: IterationRange) -> str:
         """
         export top down tracing data
         """
@@ -148,7 +124,7 @@ class TopDownData:
         ]
         result_data.extend(TraceViewManager.metadata_event(meta_data))
         try:
-            cls._export_top_down_data_by_iter(project_path, device_id, result_data, iter_id)
+            cls._export_top_down_data_by_iter(project_path, device_id, result_data, iter_range.iteration_id)
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
             logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
             return ""

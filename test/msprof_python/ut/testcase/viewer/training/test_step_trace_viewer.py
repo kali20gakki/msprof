@@ -6,6 +6,7 @@ from analyzer.scene_base.profiling_scene import ProfilingScene
 from common_func.constant import Constant
 from common_func.db_name_constant import DBNameConstant
 from common_func.empty_class import EmptyClass
+from constant.constant import ITER_RANGE
 from sqlite.db_manager import DBManager
 from viewer.training.step_trace_viewer import StepTraceViewer
 from constant.info_json_construct import InfoJsonReaderManager
@@ -103,7 +104,7 @@ class TestStepTraceViewer(unittest.TestCase):
         ProfilingScene().init("")
         with mock.patch(NAMESPACE + '.PathManager.get_sql_dir', return_value=db_manager.db_path), \
                 mock.patch('common_func.utils.Utils.get_scene', return_value=Constant.STEP_INFO):
-            res = StepTraceViewer.get_one_iter_timeline_data("", 1, 0)
+            res = StepTraceViewer.get_one_iter_timeline_data("", ITER_RANGE)
 
         db_manager.conn.close()
 

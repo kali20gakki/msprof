@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
+from collections import namedtuple
 
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
@@ -64,6 +65,7 @@ class TrainingTraceDto:
     """
     Training trace dto
     """
+
     def __init__(self: any) -> None:
         self._device_id = None
         self._model_id = None
@@ -164,3 +166,32 @@ class TrainingTraceDto:
     @data_aug_bound.setter
     def data_aug_bound(self: any, value: any) -> None:
         self._data_aug_bound = value
+
+
+Iteration = namedtuple("Iteration", ["model_id", "iteration_id", "iteration_count"])
+
+
+class IterationRange(Iteration):
+    """
+    iteration range for model execute.
+    """
+    MAX_ITERATION_COUNT = 5
+
+    def __repr__(self):
+        if self._is_compatibility_required():
+            return f'{self.iteration_id}'
+        return f'{self.iteration_start}_{self.iteration_end}'
+
+    @property
+    def iteration_start(self):
+        return self.iteration_id
+
+    @property
+    def iteration_end(self):
+        return self.iteration_id + self.iteration_count - NumberConstant.DEFAULT_ITER_COUNT
+
+    def get_iteration_range(self):
+        return self.iteration_start, self.iteration_end
+
+    def _is_compatibility_required(self):
+        return NumberConstant.DEFAULT_ITER_COUNT == self.iteration_count

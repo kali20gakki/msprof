@@ -15,6 +15,7 @@ from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.number_constant import NumberConstant
+from common_func.ms_constant.str_constant import StrConstant
 from common_func.msprof_exception import ProfException
 from common_func.msprof_iteration import MsprofIteration
 from common_func.path_manager import PathManager
@@ -34,9 +35,8 @@ class ParseAiCoreOpSummary:
 
     def __init__(self: any, sample_config: dict) -> None:
         self.sample_config = sample_config
-        self.project_path = self.sample_config.get("result_dir")
-        self.iter_id = self.sample_config.get("iter_id")
-        self.model_id = self.sample_config.get("model_id")
+        self.project_path = self.sample_config.get(StrConstant.SAMPLE_CONFIG_PROJECT_PATH)
+        self.iter_range = self.sample_config.get(StrConstant.PARAM_ITER_ID)
         self.conn = None
         self.curs = None
 
@@ -118,13 +118,10 @@ class ParseAiCoreOpSummary:
                                                                   DBNameConstant.TABLE_SUMMARY_TENSOR, self.TABLES_PATH)
         DBManager.execute_sql(self.conn, ge_tensor_create_sql)
         ge_data = []
-        iter_list = MsprofIteration(self.project_path).get_iter_list_with_index_and_model(self.iter_id, self.model_id)
-        ge_tensor_sql = "select * from {0} where " \
-                        "(index_id=? or index_id=0) and model_id=?" \
-            .format(DBNameConstant.TABLE_GE_TENSOR)
+        iter_list = MsprofIteration(self.project_path).get_index_id_list_with_index_and_model(self.iter_range)
+        ge_tensor_sql = f"select * from {DBNameConstant.TABLE_GE_TENSOR} where index_id=? and model_id=?"
         for index_and_model in iter_list:
             ge_data.extend(DBManager.fetch_all_data(self.curs, ge_tensor_sql, index_and_model))
-
         DBManager.insert_data_into_table(self.conn, DBNameConstant.TABLE_SUMMARY_TENSOR, ge_data)
 
     def create_ai_core_metrics_table(self: any) -> None:
@@ -142,13 +139,10 @@ class ParseAiCoreOpSummary:
                   "as select * from {0}.{1}".format(db_name,
                                                     CommonConstant.METRICS_SUMMARY_TABLE)
             if ChipManager().is_chip_v4() and not ProfilingScene().is_operator():
-                iter_time = MsprofIteration(self.project_path).get_iteration_time(self.iter_id,
-                                                                                  self.model_id)[0]
+                iter_time = MsprofIteration(self.project_path).get_iter_interval(self.iter_range)
                 sql = "create table if not exists ai_core_metrics " \
                       "as select * from {0}.{1} where start_time>{2} and end_time<{3}" \
-                    .format(db_name, CommonConstant.METRICS_SUMMARY_TABLE,
-                            iter_time[0] * 1000.0,
-                            iter_time[1] * 1000.0)
+                    .format(db_name, CommonConstant.METRICS_SUMMARY_TABLE, iter_time[0], iter_time[1])
         elif DBManager.check_tables_in_db(self.get_db_path(DBNameConstant.DB_RUNTIME),
                                           CommonConstant.AIV_METRICS_SUMMARY_TABLE):
             sql = "create table if not exists ai_core_metrics " \
@@ -224,11 +218,10 @@ class ParseAiCoreOpSummary:
 
     def _get_ge_data(self: any) -> list:
         ge_data = []
-        iter_list = MsprofIteration(self.project_path).get_iter_list_with_index_and_model(self.iter_id, self.model_id)
-        ge_sql = "SELECT model_id, batch_id, task_id, stream_id, " \
-                 "op_name, op_type, block_dim, mix_block_dim, task_type, timestamp, index_id, context_id " \
-                 "from {0} where (index_id=? or index_id=0) and model_id=?" \
-            .format(DBNameConstant.TABLE_GE_TASK)
+        iter_list = MsprofIteration(self.project_path).get_index_id_list_with_index_and_model(self.iter_range)
+        ge_sql = f"SELECT model_id, batch_id, task_id, stream_id, " \
+                 f"op_name, op_type, block_dim, mix_block_dim, task_type, timestamp, index_id, context_id " \
+                 f"from {DBNameConstant.TABLE_GE_TASK} where index_id=? and model_id=?"
         for index_and_model in iter_list:
             ge_data.extend(DBManager.fetch_all_data(self.curs, ge_sql, index_and_model))
         return ge_data

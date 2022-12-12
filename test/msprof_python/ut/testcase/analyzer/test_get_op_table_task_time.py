@@ -52,17 +52,3 @@ class TestGetOpTableTsTime(unittest.TestCase):
             check = GetOpTableTsTime(CONFIG)
             ret = check.get_task_time_data()
             self.assertEqual([], ret)
-
-    def test_get_task_time_data(self):
-        ge_data = [GeData([0, 4294967295, None, 25, 0, 'AI_CORE']),
-                   GeData([0, 0, None, 25, 1, 'AI_CORE']),
-                   GeData([0, 0, None, 25, 0, 'MIX_AIC'])]
-        with mock.patch(NAMESPACE_BASEMODEL + '.init'), \
-                mock.patch(NAMESPACE_BASEMODEL + '.finalize'), \
-                mock.patch(NAMESPACE_BASEMODEL + '.check_table', return_value=True), \
-                mock.patch(NAMESPACE + '.ViewModel.get_sql_data', return_value=[]), \
-                mock.patch('common_func.utils.Utils.get_scene', return_value="single_op"), \
-                mock.patch(NAMESPACE + '.MsprofIteration.get_iteration_time', return_value=[(1, 2)]):
-            check = GetOpTableTsTime(CONFIG)
-            ret = check.get_task_time_data(ge_data)
-            self.assertEqual([], ret)

@@ -37,9 +37,10 @@ class UpdateAICoreData:
         self.sample_config = sample_config
         self.host_id = None
         self.device_id = None
-        self.project_path = None
+        self.project_path = self.sample_config.get(StrConstant.SAMPLE_CONFIG_PROJECT_PATH)
         self.sql_dir = None
         self.warning_cnt = 0
+        self._iter_range = sample_config.get(StrConstant.PARAM_ITER_ID)
         self._block_dims = {'block_dim': {}, 'mix_block_dim': {}}
 
     @staticmethod
@@ -130,7 +131,6 @@ class UpdateAICoreData:
         """
         initialize params
         """
-        self.project_path = self.sample_config.get("result_dir", "")
         if self.project_path is None or not os.path.exists(self.project_path):
             return False
         self.sql_dir = PathManager.get_sql_dir(self.project_path)
@@ -201,9 +201,7 @@ class UpdateAICoreData:
                   "order by timestamp".format(DBNameConstant.TABLE_GE_TASK)
             return DBManager.fetch_all_data(ge_curs, sql, dto_class=GeTaskDto)
         ge_data = []
-        index_id = self.sample_config.get("iter_id", NumberConstant.DEFAULT_ITER_ID)
-        model_id = self.sample_config.get("model_id", NumberConstant.DEFAULT_MODEL_ID)
-        iter_list = MsprofIteration(self.project_path).get_iter_list_with_index_and_model(index_id, model_id)
+        iter_list = MsprofIteration(self.project_path).get_index_id_list_with_index_and_model(self._iter_range)
         sql = "select task_id, stream_id, task_type, block_dim, mix_block_dim from {0} " \
               "where model_id=? and (index_id=0 or index_id=?) " \
               " order by timestamp".format(

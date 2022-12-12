@@ -7,6 +7,8 @@ class TraceViewHeaderConstant:
     """
     trace view header constant class
     """
+    TRACE_HEADER_TS = 'ts'
+    TRACE_HEADER_DURATION = 'dur'
     # column graph format
     COLUMN_GRAPH_HEAD_LEAST = ['name', 'ts', 'pid', 'tid', 'args']  # name, ts, pid, tid, args is required
     # timeline graph format

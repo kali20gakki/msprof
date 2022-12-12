@@ -1,6 +1,8 @@
 import os
 import stat
 
+from profiling_bean.db_dto.step_trace_dto import IterationRange
+
 INFO_JSON = {'DeviceInfo': [{'id': 0, 'env_type': 3, 'ctrl_cpu_id': 'ARMv8_Cortex_A55',
                              'ctrl_cpu_core_num': 1, 'ctrl_cpu_endian_little': 1,
                              'ts_cpu_core_num': 1,
@@ -9,9 +11,10 @@ INFO_JSON = {'DeviceInfo': [{'id': 0, 'env_type': 3, 'ctrl_cpu_id': 'ARMv8_Corte
                              'ai_cpu': '1, 2, 3, 4, 5, 6, 7', 'aiv_num': 0,
                              'hwts_frequency': '38.4',
                              'aic_frequency': '1150', 'aiv_frequency': '1000'}]}
+ITER_RANGE = IterationRange(0, 1, 1)
 CONFIG = {
-    'result_dir': 'test', 'device_id': '0', 'iter_id': 1,
-    'job_id': 'job_default', 'ip_address': '127.0.0.1', 'model_id': -1
+    'result_dir': 'test', 'device_id': '0', 'iter_id': ITER_RANGE,
+    'job_id': 'job_default', 'model_id': -1
 }
 UT_CONFIG_FILE_PATH = os.path.join(os.path.dirname(__file__), "..", "config")
 WRITE_MODES = stat.S_IWUSR | stat.S_IRUSR | stat.S_IRGRP

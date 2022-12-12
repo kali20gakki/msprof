@@ -25,6 +25,7 @@ from common_func.path_manager import PathManager
 from common_func.utils import Utils
 from framework.load_info_manager import LoadInfoManager
 from mscalculate.calculate_ai_core_data import CalculateAiCoreData
+from profiling_bean.db_dto.step_trace_dto import IterationRange
 
 
 class CalculateRtsDataConst:
@@ -382,32 +383,29 @@ def insert_metric_value(conn: any, metrics: list, table_name: str) -> bool:
     return DBManager.execute_sql(conn, sql)
 
 
-def _query_limit_and_offset(index_id: int, model_id: int, curs: any) -> list:
+def _query_limit_and_offset(iter_range: IterationRange, curs: any) -> list:
     result = []
-    sql = "select iter_id from {0} where index_id={1} " \
-          "and model_id={2}".format(DBNameConstant.TABLE_STEP_TRACE_DATA, index_id, model_id)
-    data = curs.execute(sql).fetchone()
+    sql = f"select min(iter_id), max(iter_id) from {DBNameConstant.TABLE_STEP_TRACE_DATA} " \
+          f"where index_id>=? and index_id<=? and model_id=?"
+    data = DBManager.fetchone(curs, sql, (*iter_range.get_iteration_range(), iter_range.model_id))
     if data:
-        iter_id = data[0]
-        sql = "select sum(ai_core_num) from {0} " \
-              "where iter_id <{1}".format(DBNameConstant.TABLE_STEP_TRACE_DATA, iter_id)
-        offset_result = curs.execute(sql).fetchone()
+        start_iter_id, end_iter_id = data
+        sql = f"select sum(ai_core_num) from {DBNameConstant.TABLE_STEP_TRACE_DATA} where iter_id < ?"
+        offset_result = DBManager.fetchone(curs, sql, (start_iter_id,))
         offset = 0 if offset_result[0] is None else offset_result[0]
 
-        sql = "select ai_core_num from {0} " \
-              "where iter_id={1}".format(DBNameConstant.TABLE_STEP_TRACE_DATA, iter_id)
-        limit_result = curs.execute(sql).fetchone()
+        sql = f"select sum(ai_core_num) from {DBNameConstant.TABLE_STEP_TRACE_DATA} where iter_id>=? and iter_id<=?"
+        limit_result = DBManager.fetchone(curs, sql, (start_iter_id, end_iter_id))
         limit = limit_result[0] if limit_result else 0
         result = [limit, offset]
     return result
 
 
-def get_limit_and_offset(result_dir: str, index_id: int, model_id: int) -> list:
+def get_limit_and_offset(result_dir: str, iter_range: IterationRange) -> list:
     """
     get limit and offset for ai core within the index id.
-    :param model_id: model id
     :param result_dir: project path
-    :param index_id: index id for the current step
+    :param iter_range: iteration range
     :return: limit and offset
     """
     result = []
@@ -418,7 +416,7 @@ def get_limit_and_offset(result_dir: str, index_id: int, model_id: int) -> list:
     if "ai_core_num" not in DBManager.get_table_headers(curs, DBNameConstant.TABLE_STEP_TRACE_DATA):
         return result
     try:
-        result = _query_limit_and_offset(index_id, model_id, curs)
+        result = _query_limit_and_offset(iter_range, curs)
         return result
     except sqlite3.Error as err:
         logging.error(err, exc_info=Constant.TRACE_BACK_SWITCH)
@@ -459,7 +457,7 @@ def _check_metric_summary_table(conn: any, curs: any) -> bool:
     return True
 
 
-def _get_metric_summary_sql(project_path: str, curs: any, conn: any, freq: float, have_step_info: bool) -> "":
+def _get_metric_summary_sql(project_path: str, conn: any, freq: float, have_step_info: bool) -> "":
     metrics = get_metrics_from_sample_config(project_path)
     if not metrics or not insert_metric_value(conn, metrics,
                                               DBNameConstant.TABLE_AI_CORE_METRIC_SUMMARY):
@@ -469,18 +467,17 @@ def _get_metric_summary_sql(project_path: str, curs: any, conn: any, freq: float
     return sql
 
 
-def _do_insert_metric_summary(*args: any, index_id: int, model_id: int,
-                              curs: any, conn: any) -> None:
+def _do_insert_metric_summary(*args: any, iter_range: IterationRange, curs: any, conn: any) -> None:
     project_path, have_step_info, sql = args
     if have_step_info:
-        limit_and_offset = get_limit_and_offset(project_path, index_id, model_id)
+        limit_and_offset = get_limit_and_offset(project_path, iter_range)
         if not limit_and_offset:
             return
-        metric_results = curs.execute(sql.format(index_id, model_id),
+        metric_results = curs.execute(sql,
                                       (limit_and_offset[0],
                                        limit_and_offset[1])).fetchall()
     else:
-        metric_results = curs.execute(sql.format(index_id)).fetchall()
+        metric_results = curs.execute(sql).fetchall()
     if not metric_results:
         return
     curs.executemany('insert into {0} '
@@ -490,8 +487,7 @@ def _do_insert_metric_summary(*args: any, index_id: int, model_id: int,
     conn.commit()
 
 
-def insert_metric_summary_table(*args: any, index_id: any = None, model_id: any = None,
-                                have_step_info: bool = False) -> None:
+def insert_metric_summary_table(*args: any, iter_range: IterationRange, have_step_info: bool = False) -> None:
     """
     insert metric summary table
     """
@@ -500,9 +496,8 @@ def insert_metric_summary_table(*args: any, index_id: any = None, model_id: any 
     conn, curs = DBManager.check_connect_db_path(db_path)
     if not _check_metric_summary_table(conn, curs):
         return
-    sql = _get_metric_summary_sql(project_path, curs, conn, freq, have_step_info)
-    _do_insert_metric_summary(project_path, have_step_info, sql, index_id=index_id,
-                              model_id=model_id, curs=curs, conn=conn)
+    sql = _get_metric_summary_sql(project_path, conn, freq, have_step_info)
+    _do_insert_metric_summary(project_path, have_step_info, sql, iter_range=iter_range, curs=curs, conn=conn)
     DBManager.destroy_db_connect(conn, curs)
 
 
