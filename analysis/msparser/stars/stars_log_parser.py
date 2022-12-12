@@ -33,6 +33,7 @@ class StarsLogCalCulator(ICalculator, MsMultiProcess):
     def __init__(self: any, file_list: dict, sample_config: dict) -> None:
         MsMultiProcess.__init__(self, sample_config)
         self._sample_config = sample_config
+        self._iter_range = sample_config.get(StrConstant.PARAM_ITER_ID)
         self._project_path = sample_config.get(StrConstant.SAMPLE_CONFIG_PROJECT_PATH)
         self._parser_dispatcher = None
         self._file_list = file_list.get(DataTag.STARS_LOG, [])
@@ -84,8 +85,7 @@ class StarsLogCalCulator(ICalculator, MsMultiProcess):
 
     def _parse_by_iter(self):
         with HwtsIterModel(self._project_path) as iter_model:
-            offset_count, total_count = iter_model.get_task_offset_and_sum(
-                self.sample_config.get('model_id'), self.sample_config.get("iter_id"), HwtsIterModel.TASK_TYPE)
+            offset_count, total_count = iter_model.get_task_offset_and_sum(self._iter_range, HwtsIterModel.TASK_TYPE)
             if not total_count:
                 return
             _file_calculator = FileCalculator(self._file_list, self.DEFAULT_FMT_SIZE, self._project_path,

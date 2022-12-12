@@ -10,7 +10,9 @@ from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.msprof_exception import ProfException
 from common_func.system_data_check_manager import SystemDataCheckManager
+from constant.constant import ITER_RANGE
 from msinterface.msprof_export import ExportCommand
+from profiling_bean.db_dto.step_trace_dto import StepTraceDto
 from profiling_bean.prof_enum.export_data_type import ExportDataType
 
 from sqlite.db_manager import DBManager
@@ -58,16 +60,6 @@ class TestExportCommand(unittest.TestCase):
         _db_manager = DBManager()
         _db_manager.destroy(_db_manager.create_sql(DBNameConstant.DB_STEP_TRACE))
         _db_manager.destroy(_db_manager.create_sql(DBNameConstant.DB_TRACE))
-
-    def test_check_argument_valid(self):
-        args_dic = {"collection_path": "test", "iteration_id": -1, "model_id": None}
-        args = Namespace(**args_dic)
-
-        with pytest.raises(ProfException) as err:
-            with mock.patch(NAMESPACE + ".error"):
-                test = ExportCommand("timeline", args)
-                test.check_argument_valid()
-        self.assertEqual(err.value.code, 1)
 
     def test_add_export_type(self):
         args_dic = {"collection_path": "test", "iteration_id": 1, "model_id": None}
@@ -126,46 +118,24 @@ class TestExportCommand(unittest.TestCase):
             test._analyse_data("")
 
     def test_check_index_id_range_1(self):
-        args_dic = {"collection_path": "test", "iteration_id": 2, "model_id": None}
+        args_dic = {"collection_path": "test", "iteration_id": 2, "model_id": None, "iteration_count": 1}
         args = Namespace(**args_dic)
         cur = mock.Mock()
         cur.execute.side_effect = sqlite3.Error
-        with mock.patch(NAMESPACE + ".ExportCommand._init_index_id_env", return_value=(True, "", mock.Mock(), cur)), \
-                mock.patch(NAMESPACE + ".DBManager.destroy_db_connect"):
+        with mock.patch(NAMESPACE + ".DBManager.destroy_db_connect"):
             test = ExportCommand("timeline", args)
             test._check_index_id("")
 
     def test__check_index_id_range_2(self):
-        args_dic = {"collection_path": "test", "iteration_id": 1, "model_id": None}
+        args_dic = {"collection_path": "test", "iteration_id": 1, "model_id": None, "iteration_count": 1}
         args = Namespace(**args_dic)
         with mock.patch(NAMESPACE + ".Utils.get_scene", return_value=Constant.SINGLE_OP):
             ProfilingScene()._scene = Constant.SINGLE_OP
             test = ExportCommand("timeline", args)
             test._check_index_id("")
 
-    def test__check_index_id_range_4(self):
-        args_dic = {"collection_path": "test", "iteration_id": 1, "model_id": None}
-        args = Namespace(**args_dic)
-        create_sql = "CREATE TABLE IF NOT EXISTS " + DBNameConstant.TABLE_STEP_TRACE_DATA + \
-                     "(device_id, model_id, index_id)"
-        data = ((0, 1, 1), (0, 3, 3))
-        insert_sql = "insert into {0} values ({value})".format(
-            DBNameConstant.TABLE_STEP_TRACE_DATA, value="?," * (len(data[0]) - 1) + "?")
-        db_manager = DBManager()
-        test_sql = db_manager.create_table(DBNameConstant.DB_STEP_TRACE, create_sql, insert_sql, data)
-        with mock.patch(NAMESPACE + ".Utils.is_step_scene", return_value=Constant.STEP_INFO), \
-                mock.patch(NAMESPACE + ".DBManager.check_connect_db", return_value=test_sql), \
-                mock.patch(NAMESPACE + ".DBManager.judge_table_exist", return_value=True), \
-                mock.patch(NAMESPACE + ".DBManager.destroy_db_connect"):
-            ProfilingScene()._scene = Constant.STEP_INFO
-            test = ExportCommand("timeline", args)
-            test._check_index_id("")
-
-        (test_sql[1]).execute("drop Table {}".format(DBNameConstant.TABLE_STEP_TRACE_DATA))
-        db_manager.destroy(test_sql)
-
     def test_prepare_for_export(self):
-        args_dic = {"collection_path": "test", "iteration_id": 3, "model_id": 3}
+        args_dic = {"collection_path": "test", "iteration_id": 3, "model_id": 3, "iteration_count": 1}
         args = Namespace(**args_dic)
         with mock.patch(NAMESPACE + ".ExportCommand._analyse_sample_config"), \
                 mock.patch(NAMESPACE + ".ExportCommand._analyse_data"), \
@@ -185,7 +155,7 @@ class TestExportCommand(unittest.TestCase):
                 test._prepare_for_export("")
 
     def test_handle_export_data(self):
-        args_dic = {"collection_path": "test", "iteration_id": 3, "model_id": 3}
+        args_dic = {"collection_path": "test", "iteration_id": 3, "model_id": 3, "iteration_count": 1}
         args = Namespace(**args_dic)
         result = {"status": 0, "data": [], "info": ""}
         with mock.patch(NAMESPACE + ".MsProfExportDataUtils.export_data"), \
@@ -209,36 +179,17 @@ class TestExportCommand(unittest.TestCase):
             test._handle_export_data("")
 
     def test_print_export_info(self):
-        args_dic = {"collection_path": "test", "iteration_id": 3, "model_id": 1}
+        args_dic = {"collection_path": "test", "iteration_id": 3, "model_id": 1, "iteration_count": 1}
         args = Namespace(**args_dic)
         params = {"data_type": "nic", "device_id": 0, "iter_id": 1}
         with mock.patch(NAMESPACE + '.print_info'):
             test = ExportCommand("timeline", args)
             test._print_export_info(params, [])
 
-    def test_check_iteration_id_valid(self):
-        args_dic = {"collection_path": "test", "iteration_id": 3, "model_id": 1}
-        args = Namespace(**args_dic)
-        with mock.patch(NAMESPACE + '.TopDownData.get_max_iter_id', return_value=-1):
-            test = ExportCommand("timeline", args)
-            res = test._check_iteration_id_valid("")
-        self.assertEqual(res, (True,))
-
-        with mock.patch(NAMESPACE + '.TopDownData.get_max_iter_id', return_value=2):
-            test = ExportCommand("timeline", args)
-            res = test._check_iteration_id_valid("")
-        self.assertEqual(res[0], False)
-
-        with mock.patch(NAMESPACE + '.TopDownData.get_max_iter_id', return_value=4):
-            test = ExportCommand("timeline", args)
-            res = test._check_iteration_id_valid("")
-        self.assertEqual(res[0], True)
-
     def test_handle_export(self):
         args_dic = {"collection_path": "test", "iteration_id": 3, "model_id": 1}
         args = Namespace(**args_dic)
-        with mock.patch(NAMESPACE + '.ExportCommand.check_argument_valid'), \
-                mock.patch(NAMESPACE + ".prepare_for_parse"), \
+        with mock.patch(NAMESPACE + ".prepare_for_parse"), \
                 mock.patch(NAMESPACE + ".check_collection_dir"), \
                 mock.patch(NAMESPACE + ".ExportCommand._export_data"), \
                 mock.patch(NAMESPACE + ".ExportCommand._prepare_for_export"):
@@ -247,38 +198,9 @@ class TestExportCommand(unittest.TestCase):
             test._handle_export("")
             test.list_map = {'export_type_list': ['acl'], 'devices_list': [1]}
             test._handle_export("")
-        with mock.patch(NAMESPACE + '.ExportCommand.check_argument_valid'):
-            test = ExportCommand("timeline", args)
-            test.list_map = {'export_type_list': ['acl'], 'devices_list': []}
-            test._handle_export("")
-            test.list_map = {'export_type_list': ['acl'], 'devices_list': [1]}
-            test._handle_export("")
-
-    def test_export_data(self):
-        args_dic = {"collection_path": "test", "iteration_id": 3, "model_id": 1}
-        args = Namespace(**args_dic)
-        event = {'export_type': ExportDataType.DDR, 'handler': SystemDataCheckManager.contain_ddr_data}
-        with mock.patch(NAMESPACE + '.ExportCommand._check_iteration_id_valid', return_value=(False, "")), \
-                mock.patch(NAMESPACE + ".error"):
-            test = ExportCommand("timeline", args)
-            test._export_data({}, 0, '')
-
-        with mock.patch(NAMESPACE + '.ExportCommand._check_iteration_id_valid', return_value=(True,)), \
-                mock.patch(NAMESPACE + ".prepare_for_parse"), \
-                mock.patch(NAMESPACE + ".SystemDataCheckManager.check_data_exist", return_value=False), \
-                mock.patch(NAMESPACE + ".warn"):
-            test = ExportCommand("timeline", args)
-            test._export_data(event, 0, '')
-
-        with mock.patch(NAMESPACE + '.ExportCommand._check_iteration_id_valid', return_value=(True,)), \
-                mock.patch(NAMESPACE + ".ExportCommand._handle_export_data"), \
-                mock.patch(NAMESPACE + ".SystemDataCheckManager.check_data_exist", return_value=True), \
-                mock.patch(NAMESPACE + ".print_info"):
-            test = ExportCommand("timeline", args)
-            test._export_data(event, 1, '')
 
     def test_show_tuning_result(self):
-        args_dic = {"collection_path": "test", "iteration_id": 3, "model_id": 1}
+        args_dic = {"collection_path": "test", "iteration_id": 3, "model_id": 1, "iteration_count": 1}
         args = Namespace(**args_dic)
         test = ExportCommand("timeline", args)
         test._show_tuning_result('')
@@ -290,7 +212,7 @@ class TestExportCommand(unittest.TestCase):
             test._show_tuning_result('')
 
     def test_process(self):
-        args_dic = {"collection_path": "test", "iteration_id": 3, "model_id": 1}
+        args_dic = {"collection_path": "test", "iteration_id": 3, "model_id": 1, "iteration_count": 1}
         args = Namespace(**args_dic)
         with mock.patch('os.path.join', return_value='JOB/device_0'), \
                 mock.patch('os.path.realpath', return_value='JOB/device_0'), \
@@ -309,7 +231,7 @@ class TestExportCommand(unittest.TestCase):
                 test.process()
 
     def test_process_1(self):
-        args_dic = {"collection_path": "test", "iteration_id": 3, "model_id": 1}
+        args_dic = {"collection_path": "test", "iteration_id": 3, "model_id": 1, "iteration_count": 1}
         args = Namespace(**args_dic)
         json_data_result = (False, True)
         path_dir = (['device_0'], ['host'], ['device_1'])

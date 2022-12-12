@@ -18,8 +18,7 @@ class GeOpExecuteViewModel(ViewModel, IAnalysisModel):
 
     def __init__(self, params: dict) -> None:
         self._result_dir = params.get(StrConstant.PARAM_RESULT_DIR)
-        self._model_id = params.get(StrConstant.PARAM_MODEL_ID)
-        self._index_id = params.get(StrConstant.PARAM_ITER_ID)
+        self._iter_range = params.get(StrConstant.PARAM_ITER_ID)
         super().__init__(self._result_dir, DBNameConstant.DB_GE_HOST_INFO,
                          [DBNameConstant.TABLE_GE_HOST])
 
@@ -44,7 +43,6 @@ class GeOpExecuteViewModel(ViewModel, IAnalysisModel):
         return self.get_summary_data()
 
     def _get_where_condition(self):
-        return MsprofIteration(self._result_dir).get_condition_within_iteration(self._index_id,
-                                                                                self._model_id,
+        return MsprofIteration(self._result_dir).get_condition_within_iteration(self._iter_range,
                                                                                 time_start_key='start_time',
                                                                                 time_end_key='end_time')

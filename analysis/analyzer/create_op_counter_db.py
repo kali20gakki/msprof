@@ -7,6 +7,7 @@ import os
 import sqlite3
 from collections import defaultdict
 
+from common_func.ms_constant.str_constant import StrConstant
 from config.config_manager import ConfigManager
 from analyzer.get_op_table_task_time import GetOpTableTsTime
 from analyzer.scene_base.profiling_scene import ProfilingScene
@@ -33,10 +34,9 @@ class MergeOPCounter:
 
     def __init__(self: any, sample_config: dict) -> None:
         self.sample_config = sample_config
-        self.iter_id = self.sample_config.get("iter_id")
-        self.model_id = self.sample_config.get("model_id")
-        self.device_id = self.sample_config.get("device_id")
-        self.project_path = self.sample_config.get("result_dir")
+        self.iter_range = self.sample_config.get(StrConstant.PARAM_ITER_ID)
+        self.device_id = self.sample_config.get(StrConstant.PARAM_DEVICE_ID)
+        self.project_path = self.sample_config.get(StrConstant.SAMPLE_CONFIG_PROJECT_PATH)
         self.sql_path = None
         self.conn = None
         self.curs = None
@@ -135,8 +135,6 @@ class MergeOPCounter:
         initial and check params
         :return: None
         """
-        if self.iter_id and str(self.iter_id).isdigit():
-            self.iter_id = int(self.iter_id)
         self.sql_path = self.sample_config.get('sql_path', self._get_sql_dir())
         if not os.path.exists(self.sql_path):
             logging.error("Failed to get sqlite path.")
@@ -146,10 +144,9 @@ class MergeOPCounter:
 
     def _get_ge_data(self: any, ge_curs: any) -> list:
         ge_data = []
-        iter_list = MsprofIteration(self.project_path).get_iter_list_with_index_and_model(self.iter_id, self.model_id)
-        ge_sql = 'select model_id, op_name, op_type, task_type, task_id, stream_id, batch_id, context_id ' \
-                 'from {0} where (index_id=? or index_id=0) ' \
-                 'and model_id=?'.format(DBNameConstant.TABLE_GE_TASK)
+        iter_list = MsprofIteration(self.project_path).get_index_id_list_with_index_and_model(self.iter_range)
+        ge_sql = f'select model_id, op_name, op_type, task_type, task_id, stream_id, batch_id, context_id ' \
+                 f'from {DBNameConstant.TABLE_GE_TASK} where index_id=? and model_id=?'
         for index_and_model in iter_list:
             ge_data.extend(DBManager.fetch_all_data(ge_curs, ge_sql, index_and_model))
 
@@ -217,8 +214,8 @@ class MergeOPCounter:
         type_time = defaultdict(dict)
         for task in task_data:
             type_time[task[self.MODEL_NAME_INDEX]]["{}_{}".format(task[0], task[1])] = {
-                    'op_type': task[0], 'task_type': task[1], 'count': task[2], 'duration': task[3],
-                    'min': task[4], 'avg': task[5], 'max': task[6]
+                'op_type': task[0], 'task_type': task[1], 'count': task[2], 'duration': task[3],
+                'min': task[4], 'avg': task[5], 'max': task[6]
             }
         total_time = self._cal_total(type_time)
         total_data = []
