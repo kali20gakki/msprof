@@ -64,7 +64,7 @@ class HwtsAivCalculator(HwtsCalculator):
             prep_data_res[index] = list(datum[:2]) + [
                 InfoConfReader().time_from_syscnt(datum[2]),
                 InfoConfReader().time_from_syscnt(datum[3]),
-                self._sample_config.get('iter_id'),
-                self._sample_config.get('model_id'),
+                self._iter_range.iteration_id,
+                self._iter_range.model_id,
                 batch_id]
         return prep_data_res

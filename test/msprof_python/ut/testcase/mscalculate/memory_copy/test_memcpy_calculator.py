@@ -12,6 +12,7 @@ from constant.info_json_construct import DeviceInfo
 from constant.info_json_construct import InfoJson
 from constant.info_json_construct import InfoJsonReaderManager
 from mscalculate.memory_copy.memcpy_calculator import MemcpyCalculator
+from profiling_bean.db_dto.step_trace_dto import IterationRange
 
 NAMESAPCE = "common_func.msprof_iteration"
 
@@ -71,7 +72,8 @@ class TestMemcpyModel(unittest.TestCase):
     def test_calculate_1(self):
         # stream_id, task_id, receive_time, start_time, end_time, duration, name, type
         expect_res = [(1, 2, 2.5, 2.6, 2.7, 0.10000000000000009, 'MemcopyAsync', 'other')]
-        memcpy_calculator = MemcpyCalculator({}, {"result_dir": self.DIR_PATH, "iter_id": 1, "model_id": 2})
+        memcpy_calculator = MemcpyCalculator({}, {"result_dir": self.DIR_PATH, "iter_id": IterationRange(2, 1, 1),
+                                                  "model_id": 2})
 
         with mock.patch('common_func.utils.Utils.get_scene', return_value=Constant.STEP_INFO):
             ProfilingScene().init("")
@@ -84,7 +86,8 @@ class TestMemcpyModel(unittest.TestCase):
         # stream_id, task_id, receive_time, start_time, end_time, duration, name, type
         expect_res = [(1, 1, 0.5, 0.6, 0.7, 0.09999999999999998, 'MemcopyAsync', 'other'),
                       (1, 2, 2.5, 2.6, 2.7, 0.10000000000000009, 'MemcopyAsync', 'other')]
-        memcpy_calculator = MemcpyCalculator({}, {"result_dir": self.DIR_PATH, "iter_id": 1, "model_id": 2})
+        memcpy_calculator = MemcpyCalculator({}, {"result_dir": self.DIR_PATH, "iter_id": IterationRange(2, 1, 1),
+                                                  "model_id": 2})
 
         with mock.patch('common_func.utils.Utils.get_scene', return_value=Constant.SINGLE_OP):
             ProfilingScene().init("")

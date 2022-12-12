@@ -47,6 +47,7 @@ class NumberConstant:
     METRICS_ITER_INDEX = -1
 
     DEFAULT_ITER_ID = 1
+    DEFAULT_ITER_COUNT = 1
     DEFAULT_MODEL_ID = -1
     STATIC_SHAPE_ITER_ID = 0
 

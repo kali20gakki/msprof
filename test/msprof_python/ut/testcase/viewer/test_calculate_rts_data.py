@@ -5,6 +5,7 @@ import logging
 import pytest
 from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
+from constant.constant import ITER_RANGE
 from constant.info_json_construct import DeviceInfo
 from constant.info_json_construct import InfoJson
 from constant.info_json_construct import InfoJsonReaderManager
@@ -127,13 +128,13 @@ class TestCalculateRts(unittest.TestCase):
     def test_get_limit_and_offset_1(self):
         with mock.patch(NAMESPACE + "._query_limit_and_offset", side_effect=sqlite3.OperationalError), \
                 mock.patch(NAMESPACE + '.logging.error'):
-            res = get_limit_and_offset('', 1, 0)
+            res = get_limit_and_offset('', ITER_RANGE)
         self.assertEqual(res, [])
 
         with mock.patch(NAMESPACE + ".PathManager.get_db_path", return_value=""), \
                 mock.patch(NAMESPACE + ".DBManager.judge_table_exist", return_value=""), \
                 mock.patch(NAMESPACE + ".DBManager.check_connect_db_path", return_value=(None, None)):
-            res = get_limit_and_offset('', 1, 0)
+            res = get_limit_and_offset('', ITER_RANGE)
         self.assertEqual(res, [])
 
         with mock.patch(NAMESPACE + ".PathManager.get_db_path", return_value=""), \
@@ -141,7 +142,7 @@ class TestCalculateRts(unittest.TestCase):
                 mock.patch(NAMESPACE + ".DBManager.check_connect_db_path", return_value=(True, True)), \
                 mock.patch(NAMESPACE + ".DBManager.destroy_db_connect"), \
                 mock.patch(NAMESPACE + ".DBManager.get_table_headers", return_value=["ai_core"]):
-            res = get_limit_and_offset('', 1, 0)
+            res = get_limit_and_offset('', ITER_RANGE)
         self.assertEqual(res, [])
 
     def test_get_limit_and_offset_2(self):
@@ -157,12 +158,10 @@ class TestCalculateRts(unittest.TestCase):
                 mock.patch(NAMESPACE + ".DBManager.check_connect_db_path", return_value=test_sql), \
                 mock.patch(NAMESPACE + ".DBManager.destroy_db_connect"), \
                 mock.patch(NAMESPACE + ".DBManager.get_table_headers", return_value=["ai_core_num"]):
-            res = get_limit_and_offset('', 1, 1)
-            res_1 = get_limit_and_offset('', 1, 0)
+            res = get_limit_and_offset('', ITER_RANGE)
         (test_sql[1]).execute("drop Table step_trace_data")
         db_manager.destroy(test_sql)
         self.assertEqual(res[1], 0)
-        self.assertEqual(res_1, [])
 
     def test_get_metrics_from_sample_config_1(self):
         with mock.patch(NAMESPACE + ".PathManager.get_sample_json_path", return_value=True), \
@@ -195,8 +194,8 @@ class TestCalculateRts(unittest.TestCase):
                 mock.patch(NAMESPACE + ".DBManager.check_connect_db_path", return_value=test_sql), \
                 mock.patch(NAMESPACE + ".DBManager.destroy_db_connect"), \
                 mock.patch(NAMESPACE + ".get_metrics_from_sample_config", return_value=metrics):
-            insert_metric_summary_table('', freq, index_id=1, model_id=1, have_step_info=False)
-            insert_metric_summary_table('', freq, index_id=1, model_id=1, have_step_info=True)
+            insert_metric_summary_table('', freq, iter_range=ITER_RANGE, have_step_info=False)
+            insert_metric_summary_table('', freq, iter_range=ITER_RANGE, have_step_info=True)
         (test_sql[1]).execute("drop Table EventCount")
         (test_sql[1]).execute("drop Table MetricSummary")
         test_sql[0].commit()
@@ -212,19 +211,19 @@ class TestCalculateRts(unittest.TestCase):
                     mock.patch(NAMESPACE + ".DBManager.drop_table"), \
                     mock.patch(NAMESPACE + ".get_metrics_from_sample_config", return_value=[]), \
                     mock.patch(NAMESPACE + ".insert_metric_value", return_value=True):
-                insert_metric_summary_table('', 6800000, index_id=1, model_id=1, have_step_info=False)
+                insert_metric_summary_table('', 6800000, iter_range=ITER_RANGE, have_step_info=False)
 
             with mock.patch(NAMESPACE + ".PathManager.get_db_path", return_value=""), \
                     mock.patch(NAMESPACE + ".DBManager.judge_table_exist", return_value=False), \
                     mock.patch(NAMESPACE + ".DBManager.check_connect_db_path", return_value=test_sql), \
                     mock.patch(NAMESPACE + ".DBManager.destroy_db_connect"):
-                insert_metric_summary_table('', 6800000, index_id=1, model_id=1, have_step_info=False)
+                insert_metric_summary_table('', 6800000, iter_range=ITER_RANGE, have_step_info=False)
 
             with mock.patch(NAMESPACE + ".PathManager.get_db_path", return_value=""), \
                     mock.patch(NAMESPACE + ".DBManager.judge_table_exist", return_value=False), \
                     mock.patch(NAMESPACE + ".DBManager.check_connect_db_path", return_value=test_sql), \
                     mock.patch(NAMESPACE + ".DBManager.destroy_db_connect"):
-                insert_metric_summary_table('', 6800000, index_id=1, model_id=1, have_step_info=False)
+                insert_metric_summary_table('', 6800000, iter_range=ITER_RANGE, have_step_info=False)
 
     def test_calculate_timeline_task_time(self):
         timeline_data = [[0] * 10] * 10

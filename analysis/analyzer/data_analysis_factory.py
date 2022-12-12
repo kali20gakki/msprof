@@ -20,7 +20,6 @@ class DataAnalysisFactory:
     EXPORT_CLASS_NEED_MAP = {
         Constant.STEP_INFO: [UpdateAICoreData, CalculateTaskScheduler, ParseAiCoreOpSummary, MergeOPCounter],
         Constant.MIX_OP_AND_GRAPH: [UpdateAICoreData, CalculateTaskScheduler, ParseAiCoreOpSummary, MergeOPCounter],
-        Constant.TRAIN: [UpdateAICoreData, ParseAiCoreOpSummary, MergeOPCounter],
         Constant.SINGLE_OP: [UpdateAICoreData, CalculateOpTaskScheduler, OpSummaryOpScene, OpCounterOpScene]
     }
 

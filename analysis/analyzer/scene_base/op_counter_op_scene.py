@@ -26,7 +26,6 @@ class OpCounterOpScene:
     def __init__(self: any, sample_config: dict) -> None:
         self.sample_config = sample_config
         self.project_path = sample_config.get("result_dir")
-        self.iter_id = sample_config.get("iter_id")
         self.conn = None
         self.curs = None
 

@@ -19,7 +19,7 @@ class TestIterRecParser(unittest.TestCase):
     DIR_PATH = os.path.join(os.path.dirname(__file__), 'DT_IterRecParser')
     sample_config = {
         'result_dir': DIR_PATH, 'device_id': '0', 'iter_id': 1,
-        'job_id': 'job_default', 'ip_address': '127.0.0.1', 'model_id': -1
+        'job_id': 'job_default', 'model_id': -1
     }
     file_list = {DataTag.HWTS: ['hwts.data.0.slice_0']}
     dynamic_data = {1: ['1-1-0', '1-2-0', '1-3-0'], 2: ['2-1-0', '2-2-0', '2-3-0']}

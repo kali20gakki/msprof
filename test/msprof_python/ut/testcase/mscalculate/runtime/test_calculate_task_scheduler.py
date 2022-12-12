@@ -9,6 +9,7 @@ from unittest import mock
 
 from common_func.info_conf_reader import InfoConfReader
 from common_func.platform.chip_manager import ChipManager
+from profiling_bean.db_dto.step_trace_dto import IterationRange
 from profiling_bean.prof_enum.chip_model import ChipModel
 from constant.constant import CONFIG
 from mscalculate.runtime.calculate_task_scheduler import CalculateTaskScheduler
@@ -19,36 +20,6 @@ NAMESPACE = 'mscalculate.runtime.calculate_task_scheduler'
 
 
 class TestCalculateTaskScheduler(unittest.TestCase):
-
-    def test_get_iter_time_range(self):
-        project_path = {"result_dir": 123}
-        create_sql = "create table IF NOT EXISTS step_trace_data (index_id INT, model_id INT, step_start, " \
-                     "step_end, iter_id INT default 1, ai_core_num INT default 0)"
-        data = ((1, 1, 173584174946, 173588523064, 1, 60),)
-        insert_sql = "insert into {0} values ({value})".format("step_trace_data", value="?," * (len(data[0]) - 1) + "?")
-        db_manager = DBManager()
-        res = db_manager.create_table("step_trace.db", create_sql, insert_sql, data)
-        with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=res), \
-                mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=False), \
-                mock.patch(NAMESPACE + '.DBManager.destroy_db_connect'):
-            key = CalculateTaskScheduler({"result_dir": 123})
-            result = key._CalculateTaskScheduler__get_iter_time_range(project_path)
-        self.assertEqual(result, [])
-        db_manager.destroy(res)
-        db_manager = DBManager()
-        res = db_manager.create_table("step_trace.db", create_sql, insert_sql, data)
-        with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=res), \
-                mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True), \
-                mock.patch(NAMESPACE + '.DBManager.destroy_db_connect'):
-            key = CalculateTaskScheduler({"result_dir": 123})
-            result = key._CalculateTaskScheduler__get_iter_time_range(project_path)
-        self.assertEqual(result, [])
-        db_manager.destroy(res)
-        db_manager = DBManager()
-        res = db_manager.create_table("step_trace.db", create_sql, insert_sql, data)
-        res[1].execute("drop table step_trace_data")
-        res[0].commit()
-        db_manager.destroy(res)
 
     def test_create_task_time(self):
         device = 123
@@ -79,8 +50,7 @@ class TestCalculateTaskScheduler(unittest.TestCase):
                            return_value=[(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11)]):
             key = CalculateTaskScheduler({"result_dir": ""})
             ProfilingScene().init("")
-            key.index_id = 0
-            key.model_id = 1
+            key.iter_range = IterationRange(1, 1, 1)
             key.create_task_time(runtime_conn, device, iter_time_range)
         db_manager.destroy(res)
         db_manager = DBManager()
@@ -212,11 +182,11 @@ class TestCalculateTaskScheduler(unittest.TestCase):
 
     def test_generate_report_data_1(self):
         InfoConfReader()._info_json = {"devices": '123'}
-        with mock.patch(NAMESPACE + '.CalculateTaskScheduler._CalculateTaskScheduler__get_iter_time_range',
+        with mock.patch(NAMESPACE + '.MsprofIteration.get_step_syscnt_range_by_iter_range',
                         return_value=False):
             key = CalculateTaskScheduler({"result_dir": 123})
             key.generate_report_data()
-        with mock.patch(NAMESPACE + '.CalculateTaskScheduler._CalculateTaskScheduler__get_iter_time_range',
+        with mock.patch(NAMESPACE + '.MsprofIteration.get_step_syscnt_range_by_iter_range',
                         return_value=True), \
                 mock.patch(NAMESPACE + '.CalculateTaskScheduler._CalculateTaskScheduler__pre_mini_task_data'), \
                 mock.patch(NAMESPACE + '.CalculateTaskScheduler.insert_report_data'):
@@ -240,7 +210,7 @@ class TestCalculateTaskScheduler(unittest.TestCase):
 
     def test_generate_report_data(self):
         InfoConfReader()._info_json = {'devices': '0'}
-        with mock.patch(NAMESPACE + '.CalculateTaskScheduler._CalculateTaskScheduler__get_iter_time_range',
+        with mock.patch(NAMESPACE + '.MsprofIteration.get_step_syscnt_range_by_iter_range',
                         return_value=1), \
                 mock.patch(NAMESPACE + '.CalculateTaskScheduler._CalculateTaskScheduler__pre_mini_task_data'), \
                 mock.patch(NAMESPACE + '.CalculateTaskScheduler.insert_report_data'):

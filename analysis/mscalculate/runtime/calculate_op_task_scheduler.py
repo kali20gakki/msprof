@@ -5,6 +5,7 @@
 import logging
 import os
 
+from common_func.ms_constant.str_constant import StrConstant
 from config.config_manager import ConfigManager
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
@@ -26,9 +27,9 @@ class CalculateOpTaskScheduler:
 
     def __init__(self: any, sample_config: dict) -> None:
         self.sample_config = sample_config
-        self.device_id = sample_config.get("device_id", 0)
-        self.index_id = sample_config.get("iter_id")
-        self.project_path = sample_config.get("result_dir")
+        self.device_id = sample_config.get(StrConstant.PARAM_DEVICE_ID, 0)
+        self.iter_range = sample_config.get(StrConstant.PARAM_ITER_ID)
+        self.project_path = sample_config.get(StrConstant.SAMPLE_CONFIG_PROJECT_PATH)
         self.task_data = []
         self.cnt_miss = -1
 
@@ -182,7 +183,7 @@ class CalculateOpTaskScheduler:
     def _add_info(self: any, cal_task_data: list) -> list:
         # 0 is default batch id
         task_time = [task_data + (
-            self.index_id, NumberConstant.DEFAULT_BATCH_ID) for task_data in cal_task_data]
+            self.iter_range.iteration_id, NumberConstant.DEFAULT_BATCH_ID) for task_data in cal_task_data]
         return task_time
 
     def _collect_aicpu(self: any, task_time: list) -> None:

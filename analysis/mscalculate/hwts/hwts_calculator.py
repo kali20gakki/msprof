@@ -51,6 +51,7 @@ class HwtsCalculator(ICalculator, MsMultiProcess):
         self._aicpu_collector = AICpuFromTsCollector(self._project_path)
         self._iter_model = HwtsIterModel(self._project_path)
         self._log_data = []
+        self._iter_range = self._sample_config.get(StrConstant.PARAM_ITER_ID)
         self._file_list.sort(key=lambda x: int(x.split("_")[-1]))
 
     def calculate(self: any) -> None:
@@ -116,10 +117,8 @@ class HwtsCalculator(ICalculator, MsMultiProcess):
         :return: None
         """
         if self._iter_model.check_db() and self._iter_model.check_table():
-            task_offset, task_count = self._iter_model.get_task_offset_and_sum(
-                self._sample_config.get("model_id"),
-                self._sample_config.get("iter_id"),
-                HwtsIterModel.TASK_TYPE)
+            task_offset, task_count = self._iter_model.get_task_offset_and_sum(self._iter_range,
+                                                                               HwtsIterModel.TASK_TYPE)
             if not task_count:
                 return
             _file_calculator = FileCalculator(self._file_list, self.HWTS_LOG_SIZE, self._project_path,
@@ -135,8 +134,6 @@ class HwtsCalculator(ICalculator, MsMultiProcess):
                 self._parse(_offset_calculator.pre_process(_hwts_log_reader, os.path.getsize(_file)))
 
     def _add_batch_id(self: any, prep_data_res: list) -> list:
-        model_id = self._sample_config.get('model_id')
-        index_id = self._sample_config.get('iter_id')
         if ProfilingScene().is_operator():
             batch_counter = BatchCounter(self._project_path)
             batch_counter.init(Constant.TASK_TYPE_AI_CORE)
@@ -146,28 +143,22 @@ class HwtsCalculator(ICalculator, MsMultiProcess):
                 prep_data_res[index] = list(datum[:2]) + [
                     InfoConfReader().time_from_syscnt(datum[2]),
                     InfoConfReader().time_from_syscnt(datum[3]),
-                    index_id,
-                    model_id,
+                    self._iter_range.iteration_id,
+                    self._iter_range.model_id,
                     batch_id]
             return prep_data_res
 
-        iter_range = MsprofIteration(self._project_path).get_parallel_iter_range(
-            index_id,
-            model_id)
+        iter_range = MsprofIteration(self._project_path).get_parallel_iter_range(self._iter_range)
 
         if IterInfoManager.check_parallel(self._project_path):
             batch_list = len(prep_data_res) * [[NumberConstant.DEFAULT_BATCH_ID]]
         else:
             with self._iter_model:
-                batch_list = self._iter_model.get_batch_list(
-                    DBNameConstant.TABLE_HWTS_BATCH, iter_range)
+                batch_list = self._iter_model.get_batch_list(DBNameConstant.TABLE_HWTS_BATCH, iter_range)
         if len(batch_list) != len(prep_data_res):
             logging.warning("hwts data can not match with batch id list.")
 
-        task_dispatcher = TaskDispatchModelIndex(
-            model_id,
-            index_id,
-            self._project_path)
+        task_dispatcher = TaskDispatchModelIndex(self._iter_range, self._project_path)
 
         result_data = []
         for index in range(min(len(batch_list), len(prep_data_res))):

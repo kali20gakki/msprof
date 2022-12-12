@@ -8,6 +8,7 @@ from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.stars_constant import StarsConstant
+from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.msprof_iteration import MsprofIteration
 from common_func.path_manager import PathManager
@@ -24,9 +25,9 @@ class SubTaskCalculator(MsMultiProcess):
         super().__init__(sample_config)
         self.sample_config = sample_config
         self.file_list = file_list
-        self.result_dir = self.sample_config.get("result_dir")
+        self.result_dir = self.sample_config.get(StrConstant.SAMPLE_CONFIG_PROJECT_PATH)
         self.iteration_time = MsprofIteration(self.result_dir).get_iter_interval(
-            self.sample_config.get("iter_id"), self.sample_config.get("model_id"))
+            self.sample_config.get(StrConstant.PARAM_ITER_ID))
         self.conn = None
         self.cur = None
 

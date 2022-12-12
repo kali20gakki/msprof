@@ -3,6 +3,7 @@ import unittest
 from unittest import mock
 
 from common_func.empty_class import EmptyClass
+from constant.constant import ITER_RANGE
 from msinterface.msprof_timeline import MsprofTimeline
 
 NAMESPACE = 'msinterface.msprof_timeline'
@@ -44,17 +45,17 @@ class TestMsprofTimeline(unittest.TestCase):
 
     def test_is_in_iteration_1(self):
         from msinterface.msprof_timeline import MsprofTimeline
-        time_stamp = 111
+        time_stamp = {'ts': 111, 'dur': 2}
         key = MsprofTimeline()
-        key._iteration_time = [[1, 2], [3, 4]]
+        key._iteration_time = [1, 4]
         result = key.is_in_iteration(time_stamp)
         self.assertEqual(result, False)
 
     def test_is_in_iteration_2(self):
         from msinterface.msprof_timeline import MsprofTimeline
-        time_stamp = 1
+        time_stamp = {'ts': 1, 'dur': 1}
         key = MsprofTimeline()
-        key._iteration_time = [[1, 2], [1, 2]]
+        key._iteration_time = [1, 3]
         result = key.is_in_iteration(time_stamp)
         self.assertEqual(result, True)
 
@@ -62,7 +63,7 @@ class TestMsprofTimeline(unittest.TestCase):
         with mock.patch(NAMESPACE + '.MsprofIteration.get_iteration_time', return_value=0):
             key = MsprofTimeline()
             key._iteration_time = [[1, 2], [1, 2]]
-            key.set_iteration_info('test', 0, 1)
+            key.set_iteration_info('test', ITER_RANGE)
 
 
 if __name__ == '__main__':

@@ -15,8 +15,7 @@ from msmodel.interface.view_model import ViewModel
 class RuntimeApiViewModel(ViewModel, IAnalysisModel):
     def __init__(self, params: dict) -> None:
         self._result_dir = params.get(StrConstant.PARAM_RESULT_DIR)
-        self._model_id = params.get(StrConstant.PARAM_MODEL_ID)
-        self._index_id = params.get(StrConstant.PARAM_ITER_ID)
+        self._iter_range = params.get(StrConstant.PARAM_ITER_ID)
         super().__init__(self._result_dir, DBNameConstant.DB_RUNTIME,
                          [DBNameConstant.TABLE_API_CALL])
 
@@ -52,7 +51,6 @@ class RuntimeApiViewModel(ViewModel, IAnalysisModel):
         return total_time[0] if total_time else []
 
     def _get_where_condition(self):
-        return MsprofIteration(self._result_dir).get_condition_within_iteration(self._index_id,
-                                                                                self._model_id,
+        return MsprofIteration(self._result_dir).get_condition_within_iteration(self._iter_range,
                                                                                 time_start_key='entry_time',
                                                                                 time_end_key='exit_time')

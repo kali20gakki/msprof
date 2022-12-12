@@ -11,6 +11,7 @@ from unittest import mock
 from analyzer.scene_base.profiling_scene import ProfilingScene
 from common_func.info_conf_reader import InfoConfReader
 from constant.constant import CONFIG
+from constant.constant import ITER_RANGE
 from mscalculate.aic.aic_calculator import AicCalculator
 from profiling_bean.prof_enum.data_tag import DataTag
 from profiling_bean.struct_info.aic_pmu import AicPmuBean
@@ -35,7 +36,7 @@ class TestAicCalculator(unittest.TestCase):
                 mock.patch('msmodel.iter_rec.iter_rec_model.HwtsIterModel.get_aic_sum_count',
                            return_value=8):
             check = AicCalculator(self.file_list, CONFIG)
-            result = check._get_offset_and_total(0, 1)
+            result = check._get_offset_and_total(ITER_RANGE)
             self.assertEqual(result, (0, -1))
 
     def test_parse_by_iter(self):
