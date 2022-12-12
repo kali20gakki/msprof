@@ -24,10 +24,6 @@ class SlowRankCalculator(MetaCalculator):
         self.data = data
         self.op_name_list = op_name_list
 
-    def run(self):
-        for rank_dict in self.data:
-            self.suggestions.append(self.calculate(rank_dict))
-
     @staticmethod
     def calculate(rank_dict: dict) -> str:
         max_item = max(rank_dict.items(),
@@ -49,6 +45,10 @@ class SlowRankCalculator(MetaCalculator):
         else:
             suggestion += SlowRankProf.PROF_NO_SLOW_RANK
         return suggestion
+
+    def run(self):
+        for rank_dict in self.data:
+            self.suggestions.append(self.calculate(rank_dict))
 
     def add_suggestions(self: any, op_info: dict) -> None:
         """

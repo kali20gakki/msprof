@@ -7,15 +7,12 @@ from abc import ABC
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
-from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.trace_view_header_constant import TraceViewHeaderConstant
 from common_func.trace_view_manager import TraceViewManager
-from msmodel.ge.ge_info_calculate_model import GeInfoModel
 from msmodel.sqe_type_map import SqeType
 from msmodel.stars.acsq_task_model import AcsqTaskModel
 from profiling_bean.db_dto.ge_task_dto import GeTaskDto
-from viewer.interface.base_viewer import BaseViewer
 
 
 class AcsqTaskViewer:
@@ -36,6 +33,24 @@ class AcsqTaskViewer:
         for sqe in SqeType:
             thread_header = ["thread_name", pid, sqe.value, sqe.name]
             result.append(thread_header)
+        return result
+
+    @staticmethod
+    def get_trace_timeline(data_list: list) -> list:
+        """
+        get time timeline
+        :return: timeline_trace data
+        """
+        result = []
+        pid = InfoConfReader().get_json_pid_data()
+        for data in data_list:
+            start_time = InfoConfReader().time_from_syscnt(data[4], NumberConstant.MICRO_SECOND)
+            task_dur = InfoConfReader().time_from_syscnt(data[5], NumberConstant.MICRO_SECOND) - start_time
+            task_name = "{} {}".format(str(data[1]), str(data[0]))
+            result.append([task_name, pid, SqeType[data[3]].value, start_time, task_dur])
+        _trace = TraceViewManager.time_graph_trace(TraceViewHeaderConstant.TASK_TIME_GRAPH_HEAD, result)
+        result = TraceViewManager.metadata_event(AcsqTaskViewer.get_timeline_header())
+        result.extend(_trace)
         return result
 
     def get_summary_data(self: any, headers: list) -> tuple:
@@ -61,21 +76,3 @@ class AcsqTaskViewer:
         for data in data_list:
             key = "{0}-{1}".format(data.stream_id, data.task_id)
             data.op_name = op_name_dict.get(key, 'N/A')
-
-    @staticmethod
-    def get_trace_timeline(data_list: list) -> list:
-        """
-        get time timeline
-        :return: timeline_trace data
-        """
-        result = []
-        pid = InfoConfReader().get_json_pid_data()
-        for data in data_list:
-            start_time = InfoConfReader().time_from_syscnt(data[4], NumberConstant.MICRO_SECOND)
-            task_dur = InfoConfReader().time_from_syscnt(data[5], NumberConstant.MICRO_SECOND) - start_time
-            task_name = "{} {}".format(str(data[1]), str(data[0]))
-            result.append([task_name, pid, SqeType[data[3]].value, start_time, task_dur])
-        _trace = TraceViewManager.time_graph_trace(TraceViewHeaderConstant.TASK_TIME_GRAPH_HEAD, result)
-        result = TraceViewManager.metadata_event(AcsqTaskViewer.get_timeline_header())
-        result.extend(_trace)
-        return result
