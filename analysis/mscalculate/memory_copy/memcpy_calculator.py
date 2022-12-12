@@ -6,6 +6,7 @@ from analyzer.scene_base.profiling_scene import ProfilingScene
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.memcpy_constant import MemoryCopyConstant
+from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.msprof_iteration import MsprofIteration
 from msmodel.memory_copy.memcpy_model import MemcpyModel
@@ -21,9 +22,8 @@ class MemcpyCalculator(ICalculator, MsMultiProcess):
     def __init__(self: any, _: dict, sample_config: dict) -> None:
         super().__init__(sample_config)
         self._sample_config = sample_config
-        self._project_path = sample_config.get("result_dir")
-        self._index_id = sample_config.get("iter_id")
-        self._model_id = sample_config.get("model_id")
+        self._project_path = sample_config.get(StrConstant.SAMPLE_CONFIG_PROJECT_PATH)
+        self._iter_range = sample_config.get(StrConstant.PARAM_ITER_ID)
 
         self._model = MemcpyModel(self._project_path,
                                   DBNameConstant.DB_MEMORY_COPY,
@@ -71,8 +71,7 @@ class MemcpyCalculator(ICalculator, MsMultiProcess):
                     DBNameConstant.TABLE_TS_MEMCPY)
                 self._curs.execute(sql)
             else:
-                time_range = MsprofIteration(
-                    self._project_path).get_step_iteration_time(self._index_id, self._model_id)
+                time_range = MsprofIteration(self._project_path).get_step_iteration_time(self._iter_range)
                 if not time_range:
                     return
 

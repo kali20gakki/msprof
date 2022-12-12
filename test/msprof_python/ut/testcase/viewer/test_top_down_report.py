@@ -6,6 +6,7 @@ from unittest import mock
 from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.platform.chip_manager import ChipManager
+from constant.constant import ITER_RANGE
 from constant.ut_db_name_constant import TABLE_ACL_DATA
 from constant.ut_db_name_constant import TABLE_SUMMARY_METRICS
 from constant.ut_db_name_constant import TABLE_SUMMARY_TASK_TIME
@@ -177,60 +178,6 @@ class TestTopDownData(unittest.TestCase):
         db_manager.destroy(test_sql)
         self.assertEqual(len(res), 1)
 
-    def test_get_max_iter_id_1(self):
-        with mock.patch(NAMESPACE + '.Utils.is_step_scene', return_value=False):
-            res = TopDownData.get_max_iter_id('')
-        self.assertEqual(res, -1)
-
-        cur = mock.Mock()
-        cur.execute.side_effect = sqlite3.Error
-        with mock.patch(NAMESPACE + '.Utils.is_step_scene', return_value=True), \
-             mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=(mock.Mock(), cur)), \
-             mock.patch(NAMESPACE + '.DBManager.destroy_db_connect'), \
-             mock.patch(NAMESPACE + '.logging.error'):
-            ChipManager().chip_id = ChipModel.CHIP_V1_1_0
-            res = TopDownData.get_max_iter_id('')
-        self.assertEqual(res, -1)
-
-        with mock.patch(NAMESPACE + '.Utils.is_step_scene', return_value=True), \
-             mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=(None, None)), \
-             mock.patch(NAMESPACE + '.DBManager.destroy_db_connect'):
-            ChipManager().chip_id = ChipModel.CHIP_V2_1_0
-            res = TopDownData.get_max_iter_id('')
-        self.assertEqual(res, -1)
-
-        with mock.patch(NAMESPACE + '.Utils.is_step_scene', return_value=True), \
-             mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=(True, True)), \
-             mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=False), \
-             mock.patch(NAMESPACE + '.DBManager.destroy_db_connect'):
-            ChipManager().chip_id = ChipModel.CHIP_V2_1_0
-            res = TopDownData.get_max_iter_id('')
-        self.assertEqual(res, -1)
-
-    def test_get_max_iter_id_2(self):
-        create_sql = "CREATE TABLE IF NOT EXISTS " + DBNameConstant.TABLE_RUNTIME_TASK_TIME + \
-                     " (replayid, device_id, api, apirowid, tasktype, task_id, stream_id, waittime, pendingtime, " \
-                     "runtime, completetime, index_id, model_id)"
-        data = ((0, 0, 4, 615, 4, 2, 5, 0, 0, 7702334459624.5, 7702334463270.33, 1, 1),)
-
-        with DBOpen(DBNameConstant.DB_RUNTIME) as db_open:
-            db_open.create_table(create_sql)
-            with mock.patch(NAMESPACE + '.Utils.is_step_scene', return_value=True), \
-                 mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=(db_open.db_conn, db_open.db_curs)), \
-                 mock.patch(NAMESPACE + '.TopDownData._check_sql_file', return_value=True), \
-                 mock.patch(NAMESPACE + '.DBManager.destroy_db_connect'):
-                ChipManager().chip_id = ChipModel.CHIP_V1_1_0
-                res = TopDownData.get_max_iter_id('')
-                self.assertEqual(-1, res)
-            db_open.insert_data(DBNameConstant.TABLE_RUNTIME_TASK_TIME, data)
-            with mock.patch(NAMESPACE + '.Utils.is_step_scene', return_value=True), \
-                 mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=(db_open.db_conn, db_open.db_curs)), \
-                 mock.patch(NAMESPACE + '.TopDownData._check_sql_file', return_value=True), \
-                 mock.patch(NAMESPACE + '.DBManager.destroy_db_connect'):
-                ChipManager().chip_id = ChipModel.CHIP_V1_1_0
-                res = TopDownData.get_max_iter_id('')
-                self.assertEqual(res, 1)
-
     def test_get_top_down_data_one_iter(self):
         with mock.patch(NAMESPACE + '.TopDownData._get_acl_data', return_value=[]), \
              mock.patch(NAMESPACE + '.TopDownData._get_ge_data', return_value=[]), \
@@ -382,22 +329,16 @@ class TestTopDownData(unittest.TestCase):
     #         self.assertEqual(res, {'1_1_0': 12.23, '1_2_0': 12.35})
 
     def test_get_top_down_data_1(self):
-        with mock.patch(NAMESPACE + '.TopDownData.get_max_iter_id', return_value=1), \
-             mock.patch(NAMESPACE + '.TopDownData._get_top_down_data_one_iter', return_value=[]):
-            res = TopDownData.get_top_down_data("", 0, 0)
-            res_1 = TopDownData.get_top_down_data("", 0, 1)
+        with mock.patch(NAMESPACE + '.TopDownData._get_top_down_data_one_iter', return_value=[]):
+            res = TopDownData.get_top_down_data("", '0', ITER_RANGE)
         self.assertEqual(res[2], 0)
-        self.assertEqual(res_1[2], 0)
 
     def test_get_top_down_timeline_data_1(self):
-        with mock.patch(NAMESPACE + '.TopDownData.get_max_iter_id', return_value=1), \
-             mock.patch(NAMESPACE + '.TopDownData._get_top_down_data_one_iter', return_value=[1]), \
+        with mock.patch(NAMESPACE + '.TopDownData._get_top_down_data_one_iter', return_value=[1]), \
              mock.patch(NAMESPACE + '.TopDownData._fill_top_down_trace_data', return_value=[1]):
             InfoConfReader()._info_json = {"pid": 1}
-            res = TopDownData.get_top_down_timeline_data("", 0, 0)
-            res_1 = TopDownData.get_top_down_timeline_data("", 0, 1)
+            res = TopDownData.get_top_down_timeline_data("", '0', ITER_RANGE)
         self.assertEqual(len(json.loads(res)), 5)
-        self.assertEqual(len(json.loads(res_1)), 5)
 
 
 if __name__ == '__main__':

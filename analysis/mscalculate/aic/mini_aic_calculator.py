@@ -27,7 +27,7 @@ class MiniAicCalculator(ICalculator, MsMultiProcess):
         self._sample_config = sample_config
         self._file_list = file_list
         self._project_path = sample_config.get(StrConstant.SAMPLE_CONFIG_PROJECT_PATH)
-        self.index_id = sample_config.get("iter_id", NumberConstant.DEFAULT_ITER_ID)
+        self._iter_range = sample_config.get(StrConstant.PARAM_ITER_ID)
         self.events_name_list = []
 
     def calculate(self: any) -> None:
@@ -54,9 +54,7 @@ class MiniAicCalculator(ICalculator, MsMultiProcess):
         """
         self._parse_ai_core_pmu_event()
         freq = InfoConfReader().get_freq(StrConstant.AIC)
-        model_id = self.sample_config.get("model_id")
-        insert_metric_summary_table(self._project_path, freq, index_id=self.index_id,
-                                    model_id=model_id, have_step_info=True)
+        insert_metric_summary_table(self._project_path, freq, iter_range=self._iter_range, have_step_info=True)
 
     def op_insert_metric_summary(self: any) -> None:
         """
@@ -68,7 +66,7 @@ class MiniAicCalculator(ICalculator, MsMultiProcess):
             return
         self._parse_ai_core_pmu_event()
         freq = InfoConfReader().get_freq(StrConstant.AIC)
-        insert_metric_summary_table(self._project_path, freq, index_id=self.index_id)
+        insert_metric_summary_table(self._project_path, freq, iter_range=self._iter_range)
 
     def ms_run(self: any) -> None:
         """

@@ -2,13 +2,13 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
 
-from common_func.ms_multi_process import MsMultiProcess
-from common_func.ms_constant.str_constant import StrConstant
 from common_func.db_name_constant import DBNameConstant
-from msmodel.step_trace.ts_track_model import TsTrackModel
-from mscalculate.ts_task.task_state_handler import TaskStateHandler
+from common_func.ms_constant.str_constant import StrConstant
+from common_func.ms_multi_process import MsMultiProcess
+from common_func.msprof_iteration import MsprofIteration
 from mscalculate.ts_task.ai_cpu.aicpu_from_ts_collector import AICpuFromTsCollector
-from common_func.step_trace_constant import StepTraceConstant
+from mscalculate.ts_task.task_state_handler import TaskStateHandler
+from msmodel.step_trace.ts_track_model import TsTrackModel
 
 
 class AICpuFromTsCalculator(MsMultiProcess):
@@ -19,6 +19,7 @@ class AICpuFromTsCalculator(MsMultiProcess):
         super().__init__(sample_config)
         self._file_list = file_list
         self._project_path = sample_config.get(StrConstant.SAMPLE_CONFIG_PROJECT_PATH)
+        self._iter_range = sample_config.get(StrConstant.PARAM_ITER_ID)
         self._ts_model = TsTrackModel(self._project_path,
                                    DBNameConstant.DB_STEP_TRACE,
                                    [DBNameConstant.TABLE_TASK_TYPE])
@@ -57,7 +58,7 @@ class AICpuFromTsCalculator(MsMultiProcess):
         """
         with self._ts_model:
             ai_cpu_with_state = self._ts_model.get_ai_cpu_data(
-                self.sample_config.get(StepTraceConstant.MODEL_ID), self.sample_config.get(StepTraceConstant.ITER_ID))
+                MsprofIteration(self._project_path).get_step_syscnt_range_by_iter_range(self._iter_range))
 
         aicpu_timeline_list = self.state_to_timeline(ai_cpu_with_state)
 

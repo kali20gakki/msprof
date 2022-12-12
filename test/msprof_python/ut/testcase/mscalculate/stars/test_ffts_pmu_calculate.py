@@ -59,7 +59,6 @@ class TestFftsPmuCalculate(TestCase):
                 mock.patch("msmodel.interface.base_model.BaseModel.create_table"), \
                 mock.patch(NAMESPACE + '.HwtsIterModel.check_db', return_value=True), \
                 mock.patch(NAMESPACE + '.HwtsIterModel.check_table', return_value=True), \
-                mock.patch(NAMESPACE + '.MsprofIteration.get_iter_id_by_index_id', return_value=[0, 1]), \
                 mock.patch(NAMESPACE + '.HwtsIterModel.get_task_offset_and_sum', return_value=[0, 100]), \
                 mock.patch(NAMESPACE + '.PathManager.get_data_file_path'), \
                 mock.patch('os.path.getsize', return_value=1280), \

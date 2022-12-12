@@ -11,16 +11,16 @@ from common_func.common import generate_config
 from common_func.config_mgr import ConfigMgr
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
-from common_func.msprof_iteration import MsprofIteration
 from common_func.path_manager import PathManager
 from common_func.utils import Utils
 from framework.offset_calculator import FileCalculator
 from framework.offset_calculator import OffsetCalculator
-from msmodel.aic.aic_pmu_model import AicPmuModel
-from msmodel.iter_rec.iter_rec_model import HwtsIterModel
 from mscalculate.aic.aic_utils import AicPmuUtils
 from mscalculate.calculate_ai_core_data import CalculateAiCoreData
 from mscalculate.interface.icalculator import ICalculator
+from msmodel.aic.aic_pmu_model import AicPmuModel
+from msmodel.iter_rec.iter_rec_model import HwtsIterModel
+from profiling_bean.db_dto.step_trace_dto import IterationRange
 from profiling_bean.prof_enum.data_tag import DataTag
 from profiling_bean.struct_info.aic_pmu import AicPmuBean
 
@@ -39,6 +39,7 @@ class AicCalculator(ICalculator, MsMultiProcess):
         self._file_list = file_list.get(DataTag.AI_CORE, [])
         self._aic_data_list = []
         self._file_list.sort(key=lambda x: int(x.split("_")[-1]))
+        self._iter_range = self._sample_config.get(StrConstant.PARAM_ITER_ID)
         self.core_type = 0
 
     def calculate(self: any) -> None:
@@ -99,14 +100,12 @@ class AicCalculator(ICalculator, MsMultiProcess):
             sum_file_size += os.path.getsize(PathManager.get_data_file_path(self._project_path, file))
         return sum_file_size // self.AICORE_LOG_SIZE
 
-    def _get_offset_and_total(self: any, model_id: int, index_id: int) -> (int, int):
+    def _get_offset_and_total(self: any, iteration: IterationRange) -> (int, int):
         """
-        :param model_id:
-        :param index_id:
+        :param iteration:
         :return: offset count and total aic count
         """
-        offset_count, total_count = self._iter_model.get_task_offset_and_sum(
-            model_id, index_id, HwtsIterModel.AI_CORE_TYPE)
+        offset_count, total_count = self._iter_model.get_task_offset_and_sum(iteration, HwtsIterModel.AI_CORE_TYPE)
         _total_aic_count = self._get_total_aic_count()
         _sql_aic_count = self._iter_model.get_aic_sum_count()
         # get offset by all aic count and sql record count
@@ -122,8 +121,7 @@ class AicCalculator(ICalculator, MsMultiProcess):
         :return: None
         """
         if self._iter_model.check_db() and self._iter_model.check_table():
-            offset_count, total_count = self._get_offset_and_total(self._sample_config.get("model_id"),
-                                                                   self._sample_config.get("iter_id"))
+            offset_count, total_count = self._get_offset_and_total(self._iter_range)
             if total_count <= 0:
                 logging.warning("The ai core data that is not satisfied by the specified iteration!")
                 return
