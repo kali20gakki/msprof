@@ -38,7 +38,7 @@ class StarsIterRecParser(IParser, MsMultiProcess):
 
     def __init__(self: any, file_list: dict, sample_config: dict) -> None:
         MsMultiProcess.__init__(self, sample_config)
-        self._sample_config = sample_config
+        self.sample_config = sample_config
         self._project_path = sample_config.get(StrConstant.SAMPLE_CONFIG_PROJECT_PATH)
         self._iter_info_dict = {}
         self._current_iter_id = 0
@@ -75,7 +75,8 @@ class StarsIterRecParser(IParser, MsMultiProcess):
         :return:
         """
         self._iter_end_dict = self._get_iter_end_dict()
-        self._parse_pmu_data()
+        if Utils.get_aicore_type(self.sample_config) != StrConstant.AIC_SAMPLE_BASED_MODE:
+            self._parse_pmu_data()
         self._current_iter_id = 0
         self._parse_log_file_list()
 
