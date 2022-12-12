@@ -38,13 +38,13 @@ class TestMetaConditionManager(unittest.TestCase):
         combination_0 = [['120*12', '*', '1440.0'], ['12/1', '/', '12.0'], ['1%1', '%', '0.0'], ['1&1', '&', '1']]
         for i in combination_0:
             result = MetaConditionManager.calculate_basic_expression(i[0])
-            self.assertEqual(result, i[2])
+            self.assertEqual(float(result), float(i[2]))
 
     def test_calculate_basic_expression_2(self):
         combination_1 = [['0+0', '+'], ['0-0', '-']]
         for j in combination_1:
             result = MetaConditionManager.calculate_basic_expression(j[0])
-            self.assertEqual(result, '0.0')
+            self.assertEqual(float(result), float('0.0'))
 
     def test_cal_formula_condition(self):
         operator_data = {"lefty": 1, "op_name": 2}
