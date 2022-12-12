@@ -97,6 +97,12 @@ class UpdateAICoreData:
                 cols_infos.append("[{}] {}".format(header, "numeric"))
         return ",".join(cols_infos)
 
+    @staticmethod
+    def _get_mix_core_type(ai_core_data: list) -> str:
+        mix_core_type = {'4-6': 'aiv', '4-7': 'aic'}
+        # data[-2]: ffts_type,  data[-5]: subtask_type
+        return mix_core_type.get('{}-{}'.format(ai_core_data[-2], ai_core_data[-5]))
+
     def run(self: any) -> None:
         """
         update ai core time entry.
@@ -174,9 +180,9 @@ class UpdateAICoreData:
                                       Constant.TASK_TYPE_MIX_AIC, Constant.TASK_TYPE_MIX_AIV]:
                 continue
             _key = self.STREAM_TASK_KEY_FMT.format(data.task_id, data.stream_id)
-            self._block_dims['block_dim'].setdefault(_key, []).append(int(data.block_dim))
+            self._block_dims.get('block_dim').setdefault(_key, []).append(int(data.block_dim))
             if data.task_type in [Constant.TASK_TYPE_MIX_AIV, Constant.TASK_TYPE_MIX_AIC]:
-                self._block_dims['mix_block_dim'].setdefault(_key, []).append(int(data.mix_block_dim))
+                self._block_dims.get('mix_block_dim').setdefault(_key, []).append(int(data.mix_block_dim))
 
     def __get_block_dim_from_ge(self: any) -> None:
         """
@@ -303,12 +309,6 @@ class UpdateAICoreData:
                 item[0] = time_sum
                 break
         return time_data
-
-    @staticmethod
-    def _get_mix_core_type(ai_core_data: list) -> str:
-        mix_core_type = {'4-6': 'aiv', '4-7': 'aic'}
-        # data[-2]: ffts_type,  data[-5]: subtask_type
-        return mix_core_type.get('{}-{}'.format(ai_core_data[-2], ai_core_data[-5]))
 
     def _get_current_block(self: any, block_type: str, ai_core_data: list, task_id_index: any,
                            stream_id_index: any) -> any:
