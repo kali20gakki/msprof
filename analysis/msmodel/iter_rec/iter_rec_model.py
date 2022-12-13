@@ -11,6 +11,7 @@ from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.number_constant import NumberConstant
 from msmodel.interface.parser_model import ParserModel
 from msmodel.interface.view_model import ViewModel
+from profiling_bean.db_dto.step_trace_dto import IterationRange
 from profiling_bean.db_dto.time_section_dto import TimeSectionDto
 
 
@@ -34,25 +35,26 @@ class HwtsIterModel(ParserModel):
         """
         self.insert_data_to_db(table_name, data_list)
 
-    def get_task_offset_and_sum(self: any, model_id: int, index_id: int, data_type: str) -> (int, int):
+    def get_task_offset_and_sum(self: any, iteration: IterationRange, data_type: str) -> (int, int):
         """
         Get the number of hwts tasks in all previous iterations and the number of tasks in this round of iteration
         :param data_type:
-        :param model_id:
-        :param index_id:
+        :param iteration:
         :return: offset_count is the number of tasks in all previous iterations
         sum_count is the number of tasks in this round of iteration
         """
         offset_count_dict = {
-            self.AI_CORE_TYPE: "select ai_core_offset, ai_core_num from {0} "
-                               "where model_id=? and index_id=?".format(
-                DBNameConstant.TABLE_HWTS_ITER_SYS),
-            self.TASK_TYPE: "select task_offset, task_count from {0} "
-                            "where model_id=? and index_id=?".format(
-                DBNameConstant.TABLE_HWTS_ITER_SYS)
+            self.AI_CORE_TYPE: f"select min(ai_core_offset) as ai_core_offset, "
+                               f"max(ai_core_offset + ai_core_num) - min(ai_core_offset) as ai_core_num "
+                               f"from {DBNameConstant.TABLE_HWTS_ITER_SYS} "
+                               f"where model_id=? and index_id>=? and index_id<=?",
+            self.TASK_TYPE: f"select min(task_offset) as task_offset, "
+                            f"max(task_offset + task_count) - min(task_offset) as task_count "
+                            f"from {DBNameConstant.TABLE_HWTS_ITER_SYS} "
+                            f"where model_id=? and index_id>=? and index_id<=?"
         }
 
-        return self._get_task_num(model_id, index_id, offset_count_dict.get(data_type))
+        return self._get_task_num(iteration, offset_count_dict.get(data_type))
 
     def check_table(self: any) -> bool:
         """
@@ -88,12 +90,8 @@ class HwtsIterModel(ParserModel):
         sql = "select batch_id from {0} where iter_id>=? and iter_id<=?".format(table_name)
         return DBManager.fetch_all_data(self.cur, sql, iter_range)
 
-    def _get_task_num(self: any, model_id: int, index_id: int, sql: str) -> (int, int):
-        try:
-            task_num = self.cur.execute(sql, (model_id, index_id,)).fetchone()
-        except sqlite3.Error as err:
-            logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
-            return (0, 0)
+    def _get_task_num(self: any, iteration: IterationRange, sql: str) -> (int, int):
+        task_num = DBManager.fetchone(self.cur, sql, (iteration.model_id, *iteration.get_iteration_range()))
         if task_num and len(task_num) == 2:
             return task_num
         return (0, 0)

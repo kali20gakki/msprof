@@ -109,13 +109,13 @@ class ParsingCoreSampleData(MsMultiProcess):
         try:
             with FileOpen(file_name, 'rb') as file_:
                 ai_core_data = calculate.pre_process(file_.file_reader, file_size)
-                self.__insert_ai_core_data(file_size, ai_core_data)
+                self._insert_ai_core_data(file_size, ai_core_data)
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
             logging.error("%s: %s", binary_data_path, err, exc_info=Constant.TRACE_BACK_SWITCH)
         finally:
             pass
 
-    def __insert_ai_core_data(self: any, file_size: int, ai_core_data: list) -> None:
+    def _insert_ai_core_data(self: any, file_size: int, ai_core_data: list) -> None:
         delta_dev = InfoConfReader().get_delta_time()
         for _index in range(file_size // StructFmt.AICORE_SAMPLE_FMT_SIZE):
             binary_data = ai_core_data[_index * StructFmt.AICORE_SAMPLE_FMT_SIZE
@@ -124,7 +124,6 @@ class ParsingCoreSampleData(MsMultiProcess):
             if not binary_data[0]:
                 break
             aicore_data_bean = AicoreSample.decode(binary_data)
-
             if aicore_data_bean is not None:
                 tmp = [
                     aicore_data_bean.count_num, aicore_data_bean.mode, self._replayid,

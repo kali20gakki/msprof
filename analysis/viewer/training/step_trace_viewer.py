@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 
-import os
 import json
 import logging
+import os
 import sqlite3
 from collections import OrderedDict
 from functools import wraps
@@ -14,14 +14,15 @@ from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.empty_class import EmptyClass
 from common_func.info_conf_reader import InfoConfReader
-from common_func.msvp_common import is_number
 from common_func.ms_constant.number_constant import NumberConstant
+from common_func.msvp_common import is_number
 from common_func.msvp_constant import MsvpConstant
 from common_func.path_manager import PathManager
+from common_func.step_trace_constant import StepTraceConstant
 from common_func.trace_view_header_constant import TraceViewHeaderConstant
 from common_func.trace_view_manager import TraceViewManager
 from common_func.utils import Utils
-from common_func.step_trace_constant import StepTraceConstant
+from profiling_bean.db_dto.step_trace_dto import IterationRange
 from saver.training.training_trace_saver import TrainingTraceSaver
 
 
@@ -374,12 +375,11 @@ class StepTraceViewer:
         return StepTraceViewer.get_trace_timeline_data(conn, data)
 
     @staticmethod
-    def get_one_iter_timeline_data(result_dir: str, index_id: int, model_id: int) -> str:
+    def get_one_iter_timeline_data(result_dir: str, iter_range: IterationRange) -> str:
         """
         get one iteration timeline data
         :param result_dir: data dir
-        :param index_id: step trace id
-        :param model_id: model id
+        :param iter_range: iter range
         :return: timeline json data
         """
         sql_path = PathManager.get_sql_dir(result_dir)
@@ -387,10 +387,8 @@ class StepTraceViewer:
 
         if not DBManager.check_tables_in_db(conn_path, DBNameConstant.TABLE_TRAINING_TRACE):
             return json.dumps(MsvpConstant.EMPTY_LIST)
-
         conn, curs = DBManager.check_connect_db_path(conn_path)
-        values = StepTraceViewer.__select_trace_one_iter(
-            curs, index_id, model_id)
+        values = StepTraceViewer.__select_trace_one_iter(curs, iter_range)
 
         return StepTraceViewer.get_trace_timeline_data(conn, values)
 
@@ -527,7 +525,7 @@ class StepTraceViewer:
         return result
 
     @staticmethod
-    def __select_trace_one_iter(curs: any, index_id: int, model_id: int) -> list:
+    def __select_trace_one_iter(curs: any, iter_range: IterationRange) -> list:
         """
         Select date from traing_trace limited by count and sort
         """
@@ -541,17 +539,12 @@ class StepTraceViewer:
               "(case when grad_refresh_bound={2} then 'N/A' else grad_refresh_bound*{0} end), " \
               "(case when data_aug_bound={2} then 'N/A' else data_aug_bound*{0} end), " \
               "(case when model_id={3} then 'N/A' else model_id end) " \
-              "from {1} where model_id={4} and iteration_id={5}".format(StepTraceConstant.syscnt_to_micro(),
-                                                                        DBNameConstant.TABLE_TRAINING_TRACE,
-                                                                        NumberConstant.NULL_NUMBER,
-                                                                        NumberConstant.DEFAULT_MODEL_ID,
-                                                                        model_id,
-                                                                        index_id)
-        curs.execute(sql)
-        result = curs.fetchall()
-        # index_id
-        curs.close()
-        return result
+              "from {1} " \
+              "where model_id=? and iteration_id>=? and iteration_id<=?".format(StepTraceConstant.syscnt_to_micro(),
+                                                                                DBNameConstant.TABLE_TRAINING_TRACE,
+                                                                                NumberConstant.NULL_NUMBER,
+                                                                                NumberConstant.DEFAULT_MODEL_ID)
+        return DBManager.fetch_all_data(curs, sql, (iter_range.model_id, *iter_range.get_iteration_range()))
 
     @staticmethod
     def __time_from_syscnt(cnt):

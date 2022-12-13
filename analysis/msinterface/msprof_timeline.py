@@ -14,6 +14,7 @@ from common_func.msprof_iteration import MsprofIteration
 from common_func.singleton import singleton
 from common_func.trace_view_header_constant import TraceViewHeaderConstant
 from common_func.trace_view_manager import TraceViewManager
+from profiling_bean.db_dto.step_trace_dto import IterationRange
 from profiling_bean.prof_enum.export_data_type import ExportDataType
 from viewer.association.acl_connect_hwts import AclToHwts
 from viewer.training.step_trace_viewer import StepTraceViewer
@@ -28,8 +29,7 @@ class MsprofTimeline:
     FILE_NAME = os.path.basename(__file__)
 
     def __init__(self: any) -> None:
-        self._iteration_id = 0
-        self._index_id = 0
+        self._iter_range = None
         self._model_id = NumberConstant.DEFAULT_MODEL_ID
         self._result_dir = None
         self._export_data_list = []
@@ -62,7 +62,7 @@ class MsprofTimeline:
                     self.add_sort_index(json_list, data_type)
                     self.add_connect_json_line(json_list, data_type)
                     json_list = filter(
-                        lambda value: value["ph"] == "M" or self.is_in_iteration(value["ts"]),
+                        lambda value: value["ph"] == "M" or self.is_in_iteration(value),
                         json_list)
                     self._export_data_list.extend(json_list)
             except (TypeError, ValueError) as err:
@@ -102,9 +102,7 @@ class MsprofTimeline:
         get bulk data
         :return: json for timeline
         """
-        data = StepTraceViewer.get_one_iter_timeline_data(self._result_dir,
-                                                          self._index_id,
-                                                          self._model_id)
+        data = StepTraceViewer.get_one_iter_timeline_data(self._result_dir, self._iter_range)
         if not isinstance(data, EmptyClass):
             data_list = json.loads(data)
             if isinstance(data_list, list) and data_list:
@@ -113,25 +111,25 @@ class MsprofTimeline:
                 return json.dumps(data_list)
         return json.dumps(self._export_data_list)
 
-    def is_in_iteration(self: any, time_stamp: int) -> bool:
+    def is_in_iteration(self: any, json_value: dict) -> bool:
         """
         check if in iteration
         """
         # Show all data without iteration time
         if not self._iteration_time:
             return True
-        for start_time, end_time in self._iteration_time:
-            if time_stamp < start_time or time_stamp >= end_time:
-                return False
-        return True
+        start_time, end_time = self._iteration_time
+        time_start = json_value.get(TraceViewHeaderConstant.TRACE_HEADER_TS, NumberConstant.DEFAULT_START_TIME)
+        time_end = time_start + json_value.get(TraceViewHeaderConstant.TRACE_HEADER_DURATION,
+                                               NumberConstant.DEFAULT_START_TIME)
+        return start_time <= time_start < end_time or time_start < start_time < time_end
 
-    def set_iteration_info(self: any, result_dir: str, index_id: int, model_id: int) -> None:
+    def set_iteration_info(self: any, result_dir: str, iter_range: IterationRange) -> None:
         """
         get iteration time
         """
-        iteration = MsprofIteration(result_dir)
         self._export_data_list = []
         self._result_dir = result_dir
-        self._index_id = index_id
-        self._model_id = model_id
-        self._iteration_time = iteration.get_iteration_time(index_id, model_id)
+        self._iter_range = iter_range
+        self._model_id = iter_range.model_id
+        self._iteration_time = MsprofIteration(result_dir).get_iter_interval(iter_range, NumberConstant.MICRO_SECOND)

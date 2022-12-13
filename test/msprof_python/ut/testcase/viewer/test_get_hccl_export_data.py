@@ -6,12 +6,13 @@ import unittest
 from unittest import mock
 
 from common_func.info_conf_reader import InfoConfReader
+from constant.constant import ITER_RANGE
 from viewer.get_hccl_export_data import HCCLExport
 
 NAMESPACE = 'viewer.get_hccl_export_data'
 PARAMS = {'data_type': 'hccl', 'project': '',
           'device_id': '1', 'job_id': 'job_default', 'export_type': 'timeline',
-          'iter_id': 1, 'export_format': None, 'model_id': -1}
+          'iter_id': ITER_RANGE, 'export_format': None, 'model_id': -1}
 
 
 class TestHCCLExport(unittest.TestCase):

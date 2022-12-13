@@ -17,7 +17,6 @@ from common_func.ms_constant.stars_constant import StarsConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.msprof_exception import ProfException
-from common_func.msprof_iteration import MsprofIteration
 from common_func.os_manager import check_file_readable
 from common_func.path_manager import PathManager
 from common_func.utils import Utils
@@ -27,6 +26,7 @@ from mscalculate.interface.icalculator import ICalculator
 from msmodel.iter_rec.iter_rec_model import HwtsIterModel
 from msmodel.stars.ffts_pmu_model import FftsPmuModel
 from msparser.data_struct_size_constant import StructFmt
+from profiling_bean.db_dto.step_trace_dto import IterationRange
 from profiling_bean.prof_enum.data_tag import DataTag
 from profiling_bean.stars.ffts_plus_pmu import FftsPlusPmuBean
 from profiling_bean.stars.ffts_pmu import FftsPmuBean
@@ -43,6 +43,7 @@ class FftsPmuCalculate(ICalculator, MsMultiProcess):
         self._sample_config = sample_config
         self._result_dir = self._sample_config.get(StrConstant.SAMPLE_CONFIG_PROJECT_PATH)
         self._iter_model = HwtsIterModel(self._result_dir)
+        self._iter_range = self._sample_config.get(StrConstant.PARAM_ITER_ID)
         self._model = FftsPmuModel(self._result_dir, DBNameConstant.DB_RUNTIME, [])
         self._data_list = {}
         self._file_list = file_list.get(DataTag.FFTS_PMU, [])
@@ -106,12 +107,7 @@ class FftsPmuCalculate(ICalculator, MsMultiProcess):
         with self._iter_model as iter_model:
             if not iter_model.check_db() or not iter_model.check_table():
                 return
-            # iter_id means [iter_id-1, iter_id]
-            _iter_id = MsprofIteration(self._result_dir). \
-                get_iter_id_by_index_id(self._sample_config.get(StrConstant.PARAM_ITER_ID),
-                                        self._sample_config.get(StrConstant.PARAM_MODEL_ID))
-            offset_count, total_count = self._get_offset_and_total(self._sample_config.get(StrConstant.PARAM_ITER_ID),
-                                                                   self._sample_config.get(StrConstant.PARAM_MODEL_ID))
+            offset_count, total_count = self._get_offset_and_total(self._iter_range)
             if total_count <= 0:
                 logging.warning("The ffts pmu data that is not satisfied by the specified iteration!")
                 return
@@ -126,13 +122,12 @@ class FftsPmuCalculate(ICalculator, MsMultiProcess):
             sum_file_size += os.path.getsize(PathManager.get_data_file_path(self._result_dir, file))
         return sum_file_size // self.FFTS_PMU_SIZE
 
-    def _get_offset_and_total(self: any, iter_id: int, model_id: int) -> (int, int):
+    def _get_offset_and_total(self: any, iteration: IterationRange) -> (int, int):
         """
-        :param iter_id:
+        :param iteration:
         :return: offset count and total aic count
         """
-        offset_count, total_count = self._iter_model.get_task_offset_and_sum(model_id, iter_id,
-                                                                             HwtsIterModel.AI_CORE_TYPE)
+        offset_count, total_count = self._iter_model.get_task_offset_and_sum(iteration, HwtsIterModel.AI_CORE_TYPE)
         _total_aic_count = self._get_total_aic_count()
         _sql_aic_count = self._iter_model.get_aic_sum_count()
         # get offset by all aic count and sql record count

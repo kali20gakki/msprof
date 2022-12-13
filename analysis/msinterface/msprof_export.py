@@ -5,7 +5,6 @@
 import json
 import logging
 import os
-import sqlite3
 
 from analyzer.data_analysis_factory import DataAnalysisFactory
 from analyzer.scene_base.profiling_scene import ProfilingScene
@@ -38,14 +37,15 @@ from framework.load_info_manager import LoadInfoManager
 from msinterface.msprof_export_data import MsProfExportDataUtils
 from msinterface.msprof_job_summary import MsprofJobSummary
 from msinterface.msprof_timeline import MsprofTimeline
+from profiling_bean.db_dto.step_trace_dto import IterationRange
+from msmodel.step_trace.ts_track_model import TsTrackModel
 from profiling_bean.db_dto.hwts_rec_dto import HwtsRecDto
 from profiling_bean.db_dto.step_trace_dto import StepTraceDto
 from profiling_bean.prof_enum.export_data_type import ExportDataType
+from tuning.cluster.cluster_tuning_facade import ClusterTuningFacade
 from tuning.cluster_tuning import ClusterTuning
 from tuning.profiling_tuning import ProfilingTuning
-from viewer.top_down_report import TopDownData
 from viewer.tuning_view import TuningView
-from tuning.cluster.cluster_tuning_facade import ClusterTuningFacade
 
 
 class ExportCommand:
@@ -200,18 +200,18 @@ class ExportCommand:
 
     def __init__(self: any, command_type: str, args: any) -> None:
         self.command_type = command_type
-        self.input_iteration = args.iteration_id is not None
         self.collection_path = os.path.realpath(args.collection_path)
-        self.iteration_id = args.iteration_id if args.iteration_id is not None else NumberConstant.DEFAULT_ITER_ID
+        self.iteration_id = getattr(args, "iteration_id", NumberConstant.DEFAULT_ITER_ID)
+        self.iteration_count = getattr(args, "iteration_count", NumberConstant.DEFAULT_ITER_COUNT)
         self.sample_config = None
         self.export_format = getattr(args, "export_format", None)
-        self.user_model_id = getattr(args, self.MODEL_ID)
         self.list_map = {
             'export_type_list': [],
             'devices_list': '',
-            'model_id': self.user_model_id,
+            'model_id': getattr(args, self.MODEL_ID),
             'input_model_id': args.model_id is not None
         }
+        self.iteration_range = None
         self._cluster_params = {'is_cluster_scene': False, 'cluster_path': []}
 
     @staticmethod
@@ -240,24 +240,6 @@ class ExportCommand:
         return model_ids_set
 
     @staticmethod
-    def _init_index_id_env(profiling_scene: any, project_path: str) -> tuple:
-        sql = ""
-        judge_table = None
-        init_success = True
-        conn, curs = None, None
-        if profiling_scene.is_step_trace():
-            sql = "select max(index_id) from {0} where model_id=?".format(
-                DBNameConstant.TABLE_STEP_TRACE_DATA)
-            conn, curs = DBManager.check_connect_db(project_path, DBNameConstant.DB_STEP_TRACE)
-            judge_table = DBManager.judge_table_exist(curs, DBNameConstant.TABLE_STEP_TRACE_DATA)
-        else:
-            init_success = False
-        if not conn or not curs or not judge_table:
-            init_success = False
-        init_result = (init_success, sql, conn, curs)
-        return init_result
-
-    @staticmethod
     def _update_model_and_index(result_dir: str, trace_data_dict: dict) -> list:
         conn, curs = DBManager.check_connect_db(result_dir, DBNameConstant.DB_HWTS_REC)
         if not (conn and curs):
@@ -271,18 +253,6 @@ class ExportCommand:
                 model_id_times = result.get(trace_data_dict.get(data.iter_id, 0), 0)
                 result[trace_data_dict.get(data.iter_id, 0)] = model_id_times + 1
         return list(zip(result.keys(), result.values()))
-
-    def check_argument_valid(self: any) -> None:
-        """
-        Check the argument valid
-        :return: None
-        """
-        if self.input_iteration:  # has args iteration
-            if self.iteration_id <= 0:  # invalid
-                error(self.FILE_NAME, 'The iteration id (%d) is invalid. Must be'
-                                      ' greater than 0. Please enter a'
-                                      ' valid iteration id.' % self.iteration_id)
-                raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR)
 
     def process(self: any) -> None:
         """
@@ -322,38 +292,48 @@ class ExportCommand:
             if item['handler'](result_dir, self.sample_config.get('devices', 0)):
                 self.list_map.get('export_type_list').append(item)
 
+    def _is_iteration_range_valid(self, max_index):
+        if self.iteration_id < NumberConstant.DEFAULT_ITER_ID:
+            error(self.FILE_NAME,
+                  f'The iteration id {self.iteration_id} is invalid for model id '
+                  f'{self.list_map.get(self.MODEL_ID)}. Must be greater than 0. Please enter a valid iteration id.')
+            return False
+
+        if self.iteration_count < NumberConstant.DEFAULT_ITER_ID \
+                or self.iteration_count > IterationRange.MAX_ITERATION_COUNT:
+            error(self.FILE_NAME, f'The iteration count {self.iteration_count} is invalid '
+                                  f'for model id {self.list_map.get(self.MODEL_ID)}. '
+                                  f'Must be greater than 0 and less than or equal to '
+                                  f'{IterationRange.MAX_ITERATION_COUNT}. Please enter a valid iteration count.')
+            return False
+
+        if self.iteration_id + self.iteration_count - 1 > max_index:
+            error(self.FILE_NAME,
+                  f'The current iteration id is {self.iteration_id}, '
+                  f'and you want to export {self.iteration_count} rounds of iterations, '
+                  f'but the current maximum iteration is {max_index} for model id {self.list_map.get(self.MODEL_ID)}. '
+                  f'Please enter a valid iteration id and iteration count.')
+            return False
+        return True
+
     def _check_index_id(self: any, project_path: str) -> None:
         """
         check index id
         :param project_path: path to get profiling scene
         :return: void
         """
-        profiling_scene = ProfilingScene()
-        profiling_scene.init(project_path)
-        model_id = self.list_map.get(self.MODEL_ID)
-        init_env, sql, conn, curs = self._init_index_id_env(profiling_scene, project_path)
-        if not init_env:
+        ProfilingScene().init(project_path)
+        if not ProfilingScene().is_step_trace() and self.iteration_count > NumberConstant.DEFAULT_ITER_COUNT:
+            warn(self.FILE_NAME, f'Param of "iteration-count" is {self.iteration_count}, '
+                                 f'but it is unnecessary without step trace data.')
+            self.iteration_count = NumberConstant.DEFAULT_ITER_COUNT
             return
-
-        try:
-            max_index = curs.execute(sql, (model_id,)).fetchone()[0]
-        except sqlite3.Error as model_err:
-            logging.error(model_err, exc_info=Constant.TRACE_BACK_SWITCH)
-        else:
-            if max_index is None:
-                return
-
-            if self.iteration_id < NumberConstant.DEFAULT_ITER_ID or self.iteration_id > max_index:
-                error(self.FILE_NAME, 'The iteration id {0} is invalid for model id {1}. '
-                                      'Must be less than or equal to {2}. '
-                                      'Please enter a valid '
-                                      'iteration id.'.format(self.iteration_id, model_id,
-                                                             max_index))
-                raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR)
-        finally:
-            logging.debug("The current model id of this job path is: %s",
-                          str(self.list_map.get(self.MODEL_ID)))
-            DBManager.destroy_db_connect(conn, curs)
+        with TsTrackModel(project_path, DBNameConstant.DB_STEP_TRACE, [DBNameConstant.TABLE_STEP_TRACE_DATA]) as _trace:
+            step_trace = _trace.get_max_index_id_with_model(self.list_map.get(self.MODEL_ID))
+        if not step_trace:
+            return
+        if not self._is_iteration_range_valid(step_trace.index_id):
+            raise ProfException(ProfException.PROF_INVALID_STEP_TRACE_ERROR)
 
     def _analyse_sample_config(self: any, result_dir: str) -> None:
         self.sample_config = ConfigMgr.read_sample_config(result_dir)
@@ -375,7 +355,6 @@ class ExportCommand:
         profiling_scene = ProfilingScene()
         profiling_scene.init(result_dir)
 
-        self.list_map[self.MODEL_ID] = self.user_model_id
         if not profiling_scene.is_step_trace():
             self.list_map[self.MODEL_ID] = Constant.GE_OP_MODEL_ID
             return
@@ -417,17 +396,18 @@ class ExportCommand:
         self._check_model_id(result_dir)
         self._check_index_id(result_dir)
 
-        MsprofTimeline().set_iteration_info(result_dir, self.iteration_id,
-                                            self.list_map.get('model_id'))
+        self.iteration_range = IterationRange(model_id=self.list_map.get('model_id'),
+                                              iteration_id=self.iteration_id,
+                                              iteration_count=self.iteration_count)
+        MsprofTimeline().set_iteration_info(result_dir, self.iteration_range)
         device_lst = InfoConfReader().get_device_list()
         if device_lst:
             self.list_map.update({'devices_list': device_lst})
             sample_json = {
-                "result_dir": result_dir,
-                "device_id": self.list_map.get('devices_list')[0],
-                "iter_id": self.iteration_id, "job_id": MsProfCommonConstant.DEFAULT_JOB,
-                "ip_address": MsProfCommonConstant.DEFAULT_IP,
-                "model_id": self.list_map.get('model_id')
+                StrConstant.SAMPLE_CONFIG_PROJECT_PATH: result_dir,
+                StrConstant.PARAM_DEVICE_ID: self.list_map.get('devices_list')[0],
+                StrConstant.PARAM_ITER_ID: self.iteration_range,
+                StrConstant.PARAM_JOB_ID: MsProfCommonConstant.DEFAULT_JOB,
             }
             file_dispatch = FileDispatch(sample_json)
             file_dispatch.dispatch_calculator()
@@ -468,17 +448,6 @@ class ExportCommand:
                                                       data)
         print_info(self.FILE_NAME, export_info)
 
-    def _check_iteration_id_valid(self: any, result_dir: str) -> tuple:
-        max_iter_id = TopDownData.get_max_iter_id(result_dir)
-        if max_iter_id == NumberConstant.INVALID_ITER_ID:
-            return (True,)
-        if max_iter_id > NumberConstant.DEFAULT_ITER_ID and \
-                (self.iteration_id > max_iter_id or self.iteration_id < NumberConstant.DEFAULT_ITER_ID):
-            return (False, "Iteration id is invalid, "
-                           "iteration id range is [%s, %s]" % (NumberConstant.DEFAULT_ITER_ID,
-                                                               max_iter_id))
-        return (True,)
-
     def _handle_export(self: any, result_dir: str) -> None:
         try:
             self._prepare_export(result_dir)
@@ -498,16 +467,11 @@ class ExportCommand:
                  'Analysis data in "%s" failed. Maybe the data is incomplete.' % result_dir)
 
     def _prepare_export(self: any, result_dir: str) -> None:
-        self.check_argument_valid()
         check_collection_dir(result_dir)
         prepare_for_parse(result_dir)
         self._prepare_for_export(result_dir)
 
     def _export_data(self: any, event: dict, device_id: str, result_dir: str) -> None:
-        ret = self._check_iteration_id_valid(result_dir)
-        if not ret[0]:
-            error(self.FILE_NAME, ret[1])
-            return
         export_data_type = event.get('export_type', ExportDataType.INVALID).name.lower()
         if not event['handler'](result_dir, device_id):
             warn(self.FILE_NAME, 'There is no %s data in device %s.'
@@ -521,7 +485,7 @@ class ExportCommand:
             StrConstant.PARAM_DEVICE_ID: device_id,
             StrConstant.PARAM_JOB_ID: MsProfCommonConstant.DEFAULT_JOB,
             StrConstant.PARAM_EXPORT_TYPE: self.command_type,
-            StrConstant.PARAM_ITER_ID: self.iteration_id,
+            StrConstant.PARAM_ITER_ID: self.iteration_range,
             StrConstant.PARAM_EXPORT_FORMAT: self.export_format,
             StrConstant.PARAM_MODEL_ID: self.list_map.get("model_id")
         }
@@ -545,7 +509,7 @@ class ExportCommand:
         params = {"collection_path": self.collection_path,
                   "model_id": 0,
                   "npu_id": -1,
-                  "iteration_id": self.iteration_id}
+                  "iteration_id": self.iteration_range.iteration_id}
         try:
             ClusterTuningFacade(params).process()
         except ProfException:

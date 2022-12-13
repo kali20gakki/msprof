@@ -6,12 +6,10 @@ import logging
 
 from analyzer.scene_base.profiling_scene import ProfilingScene
 from common_func.constant import Constant
-from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.number_constant import NumberConstant
+from common_func.ms_constant.str_constant import StrConstant
 from common_func.msprof_iteration import MsprofIteration
-from common_func.msvp_common import path_check
-from common_func.path_manager import PathManager
 from common_func.platform.chip_manager import ChipManager
 from common_func.utils import Utils
 from msmodel.interface.view_model import ViewModel
@@ -25,9 +23,8 @@ class GetOpTableTsTime:
     def __init__(self: any, sample_config: dict) -> None:
         """initialize function"""
         self.sample_config = sample_config
-        self.iter_id = self.sample_config.get("iter_id")
-        self.model_id = self.sample_config.get("model_id")
-        self.project_path = sample_config.get("result_dir")
+        self.iter_range = self.sample_config.get(StrConstant.PARAM_ITER_ID)
+        self.project_path = sample_config.get(StrConstant.SAMPLE_CONFIG_PROJECT_PATH)
 
     @staticmethod
     def _get_aiv_task_sql() -> str:
@@ -75,17 +72,6 @@ class GetOpTableTsTime:
                 data.task_type == Constant.TASK_TYPE_MIX_AIC or data.task_type == Constant.TASK_TYPE_MIX_AIV):
             return True
         return False
-
-    def get_op_ai_cpu_task_sql(self: any) -> str:
-        """
-        get ai cpu task time data for single op
-        :return:
-        """
-        ai_cpu_sql = "select task_id, stream_id, sys_start*{MS_TO_NS}, (sys_end - sys_start)*{MS_TO_NS}, " \
-                     "'{0}', {2}, batch_id from {1} " \
-            .format(Constant.TASK_TYPE_AI_CPU, DBNameConstant.TABLE_AI_CPU_FROM_TS, self.iter_id,
-                    MS_TO_NS=NumberConstant.MS_TO_NS)
-        return ai_cpu_sql
 
     def get_task_time_data(self: any, ge_data=None) -> list:
         """
@@ -201,11 +187,11 @@ class GetOpTableTsTime:
         """
         sql = "select {1}.task_id, {1}.stream_id, {1}.running, {1}.complete - {1}.running, '{0}'," \
               " {1}.index_id, {1}.model_id, {1}.batch_id, {subtask_id} from {1} where " \
-              "{1}.index_id={2} and {1}.model_id={3} order by running " \
+              "{1}.index_id>={2} and {1}.index_id<={3} and {1}.model_id={4} order by running " \
             .format(Constant.TASK_TYPE_AI_CORE, self._get_task_time_table(),
-                    self.iter_id, self.model_id,
+                    self.iter_range.iteration_start, self.iter_range.iteration_end, self.iter_range.model_id,
                     subtask_id=NumberConstant.DEFAULT_FFTS_SUBTASK_ID)
-        if Utils.need_all_model_in_one_iter(self.project_path, self.model_id):
+        if Utils.need_all_model_in_one_iter(self.project_path, self.iter_range.model_id):
             # export all index data when pytorch graph no model_id set
             sql = "select {1}.task_id, {1}.stream_id, {1}.running, {1}.complete - {1}.running, '{0}'," \
                   " {1}.index_id, {1}.model_id, {1}.batch_id, {subtask_id} from {1} " \
@@ -221,7 +207,7 @@ class GetOpTableTsTime:
         """
         return "select task_id, stream_id, sys_start*{MS_TO_NS}, (sys_end - sys_start)*{MS_TO_NS}, " \
                "'{0}', {2}, batch_id,{subtask_id} from {1} " \
-            .format(Constant.TASK_TYPE_AI_CPU, DBNameConstant.TABLE_AI_CPU_FROM_TS, self.iter_id,
+            .format(Constant.TASK_TYPE_AI_CPU, DBNameConstant.TABLE_AI_CPU_FROM_TS, self.iter_range.iteration_id,
                     MS_TO_NS=NumberConstant.MS_TO_NS,
                     subtask_id=NumberConstant.DEFAULT_FFTS_SUBTASK_ID)
 
@@ -232,16 +218,15 @@ class GetOpTableTsTime:
         """
         if ProfilingScene().is_operator():
             return self._get_op_ai_cpu_task_sql()
-        iter_time = MsprofIteration(self.project_path).get_iteration_time(self.iter_id, self.model_id)
+        iter_time = MsprofIteration(self.project_path).get_iter_interval(self.iter_range, NumberConstant.MILLI_SECOND)
 
         ai_cpu_sql = ''
         try:
             ai_cpu_sql = "select task_id, stream_id, sys_start*{MS_TO_NS}, (sys_end - sys_start)*{MS_TO_NS}, " \
                          "'{1}', {4}, {5}, batch_id, {subtask_id} from {0} where sys_start >= {2} and sys_end <= {3}" \
                 .format(DBNameConstant.TABLE_AI_CPU_FROM_TS, Constant.TASK_TYPE_AI_CPU,
-                        iter_time[0][0] / NumberConstant.NS_TO_US,
-                        iter_time[0][1] / NumberConstant.NS_TO_US,
-                        self.iter_id, self.model_id,
+                        iter_time[0], iter_time[1],
+                        self.iter_range.iteration_id, self.iter_range.model_id,
                         MS_TO_NS=NumberConstant.MS_TO_NS,
                         subtask_id=NumberConstant.DEFAULT_FFTS_SUBTASK_ID)
         except ZeroDivisionError as err:
@@ -253,4 +238,4 @@ class GetOpTableTsTime:
         return "select task_id, stream_id, start_time, dur_time, " \
                "(case when subtask_type='AIC' or subtask_type='AIV' then 'AI_CORE' else subtask_type end), " \
                "{1}, {2}, 0, subtask_id from {0} order by start_time" \
-            .format(DBNameConstant.TABLE_SUBTASK_TIME, self.iter_id, self.model_id)
+            .format(DBNameConstant.TABLE_SUBTASK_TIME, self.iter_range.iteration_id, self.iter_range.model_id)

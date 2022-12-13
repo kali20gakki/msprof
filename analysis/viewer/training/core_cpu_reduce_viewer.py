@@ -22,6 +22,7 @@ from common_func.platform.chip_manager import ChipManager
 from common_func.trace_view_header_constant import TraceViewHeaderConstant
 from common_func.trace_view_manager import TraceViewManager
 from msmodel.interface.view_model import ViewModel
+from profiling_bean.db_dto.step_trace_dto import IterationRange
 from viewer.aicpu_viewer import ParseAiCpuData
 from viewer.memory_copy.memory_copy_viewer import MemoryCopyViewer
 
@@ -129,13 +130,12 @@ class CoreCpuReduceViewer:
         return sql
 
     @staticmethod
-    def _get_trace_one_device(trace_curs: any, device_id: int, iter_id: int, model_id: int) -> list:
+    def _get_trace_one_device(trace_curs: any, device_id: int, iter_range: IterationRange) -> list:
         """
         Select date from traing trace limited by count and sort
         :param trace_curs: curs related to trace_db
         :param device_id: device id
-        :param iter_id: iter id
-        :param model_id: model id
+        :param iter_range: iter range
         :return: training trace data
         """
         result = []
@@ -143,8 +143,10 @@ class CoreCpuReduceViewer:
             if ProfilingScene().is_step_trace():
                 sql = "select iteration_id, FP_start, BP_end, iteration_end, iteration_time, " \
                       "fp_bp_time, grad_refresh_bound, data_aug_bound from {0} " \
-                      "where device_id=? and iteration_id=? and model_id=?".format(DBNameConstant.TABLE_TRAINING_TRACE)
-                result = DBManager.fetch_all_data(trace_curs, sql, (device_id, iter_id, model_id))
+                      "where device_id=? and iteration_id>=? and iteration_id<=? " \
+                      "and model_id=?".format(DBNameConstant.TABLE_TRAINING_TRACE)
+                result = DBManager.fetch_all_data(trace_curs, sql,
+                                                  (device_id, *iter_range.get_iteration_range(), iter_range.model_id))
         return result
 
     @staticmethod
@@ -186,10 +188,9 @@ class CoreCpuReduceViewer:
         """
 
         trace_data = []
-        device_id = params.get('device_id')
-        iter_id = params.get('iter_id')
-        result_dir = params.get('result_dir')
-        model_id = params.get('model_id')
+        device_id = params.get(StrConstant.PARAM_DEVICE_ID)
+        iter_range = params.get(StrConstant.PARAM_ITER_ID)
+        result_dir = params.get(StrConstant.SAMPLE_CONFIG_PROJECT_PATH)
 
         # add memory copy data
         memory_copy_viewer = MemoryCopyViewer(result_dir)
@@ -202,7 +203,7 @@ class CoreCpuReduceViewer:
             cls._get_ai_cpu_data(job_path=result_dir)
 
         trace_data_result = \
-            cls._get_all_reduce_data(device_id, iter_id, model_id, result_dir=result_dir)
+            cls._get_all_reduce_data(device_id, iter_range, result_dir=result_dir)
         trace_data.extend(trace_data_memcpy)
         trace_data.extend(trace_data_sql)
         trace_data.extend(trace_data_job)
@@ -361,8 +362,7 @@ class CoreCpuReduceViewer:
         return result_data
 
     @classmethod
-    def _get_all_reduce_data(cls: any, *args: dict, result_dir: str) -> list:
-        device_id, iter_id, model_id = args
+    def _get_all_reduce_data(cls: any, device_id: int, iter_range: IterationRange, result_dir: str) -> list:
         sql_path = PathManager.get_sql_dir(result_dir)
         result_data = []
         trace_conn, trace_curs = DBManager.check_connect_db_path(
@@ -375,26 +375,25 @@ class CoreCpuReduceViewer:
 
         result_data = cls.get_meta_trace_data(TraceViewHeaderConstant.PROCESS_ALL_REDUCE)
         all_reduce_datas = \
-            cls._format_all_reduce_data(trace_curs, device_id, iter_id, model_id)
+            cls._format_all_reduce_data(trace_curs, device_id, iter_range)
         result_data.extend(
             TraceViewManager.time_graph_trace(TraceViewHeaderConstant.TOP_DOWN_TIME_GRAPH_HEAD, all_reduce_datas))
         DBManager.destroy_db_connect(trace_conn, trace_curs)
         return result_data
 
     @classmethod
-    def _format_all_reduce_data(cls: any, trace_curs: any, device_id: int, iter_id: int, model_id: int) -> list:
+    def _format_all_reduce_data(cls: any, trace_curs: any, device_id: int, iter_range: IterationRange) -> list:
         """
         get all reduce trace data
         :param trace_curs: curs related to trace_db
         :param device_id: device id
-        :param iter_id: iter id
-        :param model_id: model id
+        :param iter_range: iter range
         :return: all_reduce_data
         """
         all_reduce_datas = []
         hwts_freq = InfoConfReader().get_freq(StrConstant.HWTS)
 
-        for training_trace_data in cls._get_trace_one_device(trace_curs, device_id, iter_id, model_id):
+        for training_trace_data in cls._get_trace_one_device(trace_curs, device_id, iter_range):
             if not training_trace_data:
                 continue
             all_reduces = cls._get_reduce(trace_curs, device_id, training_trace_data[3])
