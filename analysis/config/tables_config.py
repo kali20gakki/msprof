@@ -93,7 +93,8 @@ class TablesConfig(MetaConfig):
             ('op_type', 'TEXT,null'),
             ('event_type', 'TEXT,null'),
             ('start_time', 'INTEGER,null'),
-            ('end_time', 'INTEGER,null')
+            ('end_time', 'INTEGER,null'),
+            ('op_name', 'TEXT,null')
         ]
         , 'OriginalDataMap': [
             ('common', 'text,none'),

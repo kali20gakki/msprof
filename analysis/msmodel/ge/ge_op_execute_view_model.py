@@ -27,7 +27,7 @@ class GeOpExecuteViewModel(ViewModel, IAnalysisModel):
         get summary data of Ge op execute
         :return:
         """
-        sql = "select thread_id,op_type,event_type,start_time/{0}," \
+        sql = "select thread_id,op_name, op_type,event_type,start_time/{0}," \
               "(end_time-start_time)/{0} from {1} {where_condition}".format(NumberConstant.MILLI_SECOND,
                                                                             DBNameConstant.TABLE_GE_HOST,
                                                                             where_condition=self._get_where_condition())
