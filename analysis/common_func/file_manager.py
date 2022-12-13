@@ -37,7 +37,7 @@ class FileManager:
             return False
 
     @staticmethod
-    def macth_process(pattern: str, file_name: str) -> any:
+    def match_process(pattern: str, file_name: str) -> any:
         """
         match files
         :param pattern: check pattern
@@ -56,7 +56,7 @@ class FileManager:
         :param file_name: check files
         :return: matched groups
         """
-        return cls.macth_process(CommonConstant.INFO_JSON_PATTERN, file_name)
+        return cls.match_process(CommonConstant.INFO_JSON_PATTERN, file_name)
 
     @classmethod
     def is_valid_jobid(cls: any, check_string: str) -> any:
@@ -65,7 +65,7 @@ class FileManager:
         :param check_string: check strings
         :return: matched groups
         """
-        return cls.macth_process(CommonConstant.JOB_ID_PATTERN, check_string)
+        return cls.match_process(CommonConstant.JOB_ID_PATTERN, check_string)
 
     @classmethod
     def is_analyzed_data(cls: any, project_path: str) -> bool:
