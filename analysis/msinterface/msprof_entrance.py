@@ -89,7 +89,12 @@ class MsprofEntrance:
         handler = command_handler.get(sys.argv[1])
         try:
             handler.get('handler')(handler.get('parser'), args)
-        except Exception:
+        except ProfException as err:
+            if err.message:
+                error(self.FILE_NAME, err)
+            call_sys_exit(err.code)
+        except Exception as err:
+            error(self.FILE_NAME, err)
             call_sys_exit(NumberConstant.ERROR)
         call_sys_exit(ProfException.PROF_NONE_ERROR)
 

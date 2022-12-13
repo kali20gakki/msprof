@@ -25,7 +25,7 @@ def test_check_path_valid_error():
         path = ""
         is_output = True
         check_path_valid(path, is_output)
-    unittest.TestCase().assertEqual(err.value.args, (1,))
+    unittest.TestCase().assertEqual(err.value.args, (1, ''))
 
 
 def test_check_path_valid_1():
@@ -40,7 +40,7 @@ def test_check_path_valid_1():
                 mock.patch(NAMESPACE + '.error'), \
                 pytest.raises(ProfException) as err:
             check_path_valid(path, is_output)
-    unittest.TestCase().assertEqual(err.value.args, (2,))
+    unittest.TestCase().assertEqual(err.value.args, (2, ''))
 
 
 def test_prepare_for_parse():
@@ -122,7 +122,7 @@ def test_check_collection_dir():
             mock.patch(NAMESPACE + '.error'),\
             pytest.raises(ProfException) as err:
         check_collection_dir(collect_path)
-    unittest.TestCase().assertEqual(err.value.args, (4,))
+    unittest.TestCase().assertEqual(err.value.args, (4, ''))
     with mock.patch('os.path.exists', return_value=True), \
             mock.patch(NAMESPACE + '.check_dir_writable'), \
             mock.patch('common_func.common.get_data_file_memory', return_value=100), \
@@ -131,7 +131,7 @@ def test_check_collection_dir():
                 mock.patch(NAMESPACE + '.error'), \
                 pytest.raises(ProfException) as err:
             check_collection_dir(collect_path)
-            unittest.TestCase().assertEqual(err.value.args, (4,))
+            unittest.TestCase().assertEqual(err.value.args, (4, ''))
 
 
 if __name__ == '__main__':

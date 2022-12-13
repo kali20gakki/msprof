@@ -24,6 +24,10 @@ class ProfException(Exception):
     PROF_CLUSTER_DIR_ERROR = 11
     PROF_CLUSTER_INVALID_DB = 12
 
-    def __init__(self: any, code: int) -> None:
-        super().__init__(code)
+    def __init__(self: any, code: int, message: str = '') -> None:
+        super().__init__(code, message)
         self.code = code
+        self.message = message
+
+    def __str__(self):
+        return self.message
