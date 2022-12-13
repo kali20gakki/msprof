@@ -21,44 +21,21 @@ class CommunicationParser(MetaParser):
         self.op_events_dict = events_data
         self.op_info = {}
 
-    def run(self: any) -> dict:
-        self.parse()
-        self.combine()
-        return self.op_info
+    @staticmethod
+    def combine_size_distribution(part_dist_dict: dict, total_dist_dict: dict):
+        for size, cnt in part_dist_dict.items():
+            total_dist_dict[size] += cnt
 
-    def parse(self):
-        for hccl_name, op_events in self.op_events_dict.items():
-            self.parse_ops(op_events, hccl_name)
-        if not self.op_info:
-            logging.error("Fail to get op_info in Communication Parser")
-            raise ProfException(ProfException.PROF_INVALID_DATA_ERROR)
-
-    def parse_ops(self: any, op_events: dict, hccl_name: str) -> None:
-        """
-        time and link info parser for every hccl operators
-        """
-        self.op_info[hccl_name] = {}
-        for rank_id in op_events:
-            self.op_info[hccl_name][rank_id] = {}
-            if not op_events.get(rank_id):
-                logging.error("Fail to get no.%s rank events info, communication parser is interrupted", str(rank_id))
-                raise ProfException(ProfException.PROF_INVALID_DATA_ERROR)
-            events = op_events.get(rank_id)
-            # only choose main stream for op time analysis parser
-            main_events = [event for event in events if event.plane_id == NumberConstant.MAIN_STREAM_THREAD_ID]
-            if main_events:
-                self.op_info[hccl_name][rank_id][StrConstant.COMMUNICATION_TIME_INFO] = self.op_time_parser(main_events)
-            else:
-                logging.error("Fail to get no.%s rank main events info,"
-                              " communication parser is interrupted", str(rank_id))
-                raise ProfException(ProfException.PROF_INVALID_DATA_ERROR)
-            # choose all stream for Bandwidth analysis parser
-            if events:
-                self.op_info[hccl_name][rank_id][StrConstant.COMMNUNICATION_BANDWIDTH_INFO] \
-                    = self.op_bandwidth_parser(events)
-            else:
-                logging.error("Fail to get no.%s rank events info, communication parser is interrupted", str(rank_id))
-                raise ProfException(ProfException.PROF_INVALID_DATA_ERROR)
+    @staticmethod
+    def combine_ops_time_info(part_dict: dict, total_dict: dict) -> None:
+        ratio_list = [OpAnalysisType.WAIT_TIME_RATIO, OpAnalysisType.SYNCHRONIZATION_TIME_RATIO]
+        # first level combine
+        for key, value in part_dict.items():
+            if key not in ratio_list:
+                total_dict[key] += value
+        # second level combine
+        HcclAnalysisTool.update_time_ratio(total_dict)
+        return
 
     @staticmethod
     def op_time_parser(main_events: list) -> dict:
@@ -127,6 +104,45 @@ class CommunicationParser(MetaParser):
                 HcclAnalysisTool.analyze_bandwidth_info(op_bandwidth_dict, transport_type)
         return op_bandwidth_dict
 
+    def run(self: any) -> dict:
+        self.parse()
+        self.combine()
+        return self.op_info
+
+    def parse(self):
+        for hccl_name, op_events in self.op_events_dict.items():
+            self.parse_ops(op_events, hccl_name)
+        if not self.op_info:
+            logging.error("Fail to get op_info in Communication Parser")
+            raise ProfException(ProfException.PROF_INVALID_DATA_ERROR)
+
+    def parse_ops(self: any, op_events: dict, hccl_name: str) -> None:
+        """
+        time and link info parser for every hccl operators
+        """
+        self.op_info[hccl_name] = {}
+        for rank_id in op_events:
+            self.op_info.get(hccl_name).setdefault(rank_id, {})
+            if not op_events.get(rank_id):
+                logging.error("Fail to get no.%s rank events info, communication parser is interrupted", str(rank_id))
+                raise ProfException(ProfException.PROF_INVALID_DATA_ERROR)
+            events = op_events.get(rank_id)
+            # only choose main stream for op time analysis parser
+            main_events = [event for event in events if event.plane_id == NumberConstant.MAIN_STREAM_THREAD_ID]
+            if main_events:
+                self.op_info[hccl_name][rank_id][StrConstant.COMMUNICATION_TIME_INFO] = self.op_time_parser(main_events)
+            else:
+                logging.error("Fail to get no.%s rank main events info,"
+                              " communication parser is interrupted", str(rank_id))
+                raise ProfException(ProfException.PROF_INVALID_DATA_ERROR)
+            # choose all stream for Bandwidth analysis parser
+            if events:
+                self.op_info[hccl_name][rank_id][StrConstant.COMMNUNICATION_BANDWIDTH_INFO] \
+                    = self.op_bandwidth_parser(events)
+            else:
+                logging.error("Fail to get no.%s rank events info, communication parser is interrupted", str(rank_id))
+                raise ProfException(ProfException.PROF_INVALID_DATA_ERROR)
+
     def combine(self):
         """
         conclude all hccl ops to 'total ops'
@@ -147,22 +163,11 @@ class CommunicationParser(MetaParser):
                     # get public variables from OpAnalysisType
                     values = [value for key, value in OpAnalysisType.__dict__.items() if '__' not in key]
                     total_ops_dict[com_info] = HcclAnalysisTool.init_dict(values)
-                self.combine_ops_time_info(rank_dict[com_info], total_ops_dict[com_info])
+                self.combine_ops_time_info(com_info_dict, total_ops_dict[com_info])
             if com_info == StrConstant.COMMNUNICATION_BANDWIDTH_INFO:
                 if com_info not in total_ops_dict:
                     total_ops_dict[com_info] = HcclAnalysisTool.init_bandwidth_dict()
-                self.combine_ops_bandwidth_info(rank_dict[com_info], total_ops_dict[com_info])
-        return
-
-    @staticmethod
-    def combine_ops_time_info(part_dict: dict, total_dict: dict) -> None:
-        ratio_list = [OpAnalysisType.WAIT_TIME_RATIO, OpAnalysisType.SYNCHRONIZATION_TIME_RATIO]
-        # first level combine
-        for key, value in part_dict.items():
-            if key not in ratio_list:
-                total_dict[key] += value
-        # second level combine
-        HcclAnalysisTool.update_time_ratio(total_dict)
+                self.combine_ops_bandwidth_info(com_info_dict, total_ops_dict[com_info])
         return
 
     def combine_ops_bandwidth_info(self: any, part_dict: dict, total_dict: dict) -> None:
@@ -183,8 +188,3 @@ class CommunicationParser(MetaParser):
                 HcclAnalysisTool.combine_sdma_info(total_dict)
             else:
                 HcclAnalysisTool.analyze_bandwidth_info(total_dict, transport_type)
-
-    @staticmethod
-    def combine_size_distribution(part_dist_dict: dict, total_dist_dict: dict):
-        for size, cnt in part_dist_dict.items():
-            total_dist_dict[size] += cnt

@@ -3,15 +3,10 @@
 # Copyright (c) Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
 
 from collections import OrderedDict
-import json
 import logging
 import os
-import sqlite3
 
-from common_func.common import print_msg
 from common_func.config_mgr import ConfigMgr
-from common_func.constant import Constant
-from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.file_manager import FileManager
 from common_func.info_conf_reader import InfoConfReader
@@ -54,8 +49,13 @@ class HostSysUsageParser:
         InfoConfReader().load_info(host_path)
         pid = InfoConfReader().get_json_pid_data()
         cpu_nums, _ = InfoConfReader().get_cpu_info()
-
-        return pid, cpu_nums, cpu_sampling_interval, mem_sampling_interval
+        common_info = {
+            'pid': pid,
+            'cpu_nums': cpu_nums,
+            'cpu_sampling_interval': cpu_sampling_interval,
+            'mem_sampling_interval': mem_sampling_interval
+        }
+        return common_info
 
     def process(self: any) -> None:
         # get host dir path from cluster_rank.db
@@ -213,7 +213,10 @@ class HostSysUsageParser:
         return cpu_pids, mem_pids
 
     def _construct_data_proc_params(self, common_info):
-        pid, cpu_nums, cpu_sampling_interval, mem_sampling_interval = common_info
+        pid = common_info.get('pid')
+        cpu_nums = common_info.get('cpu_nums')
+        cpu_sampling_interval = common_info.get('cpu_sampling_interval')
+        mem_sampling_interval = common_info.get('mem_sampling_interval')
         cpu_pids, mem_pids = self._get_all_pid()
 
         data_proc_params = [

@@ -23,7 +23,12 @@ class TestHostSysUsageParser(unittest.TestCase):
         clear_dt_project(self.DIR_PATH)
 
     def test_process_should_generate_json_file(self):
-        common_info = (1, 192, 100, 100)
+        common_info = {
+            'pid': 1,
+            'cpu_nums': 192,
+            'cpu_sampling_interval': 100,
+            'mem_sampling_interval': 100
+        }
         sys_cpu_data = [[100, 100, 100, 100, 123456789], [100, 100, 100, 100, 123458789]]
         pid_cpu_data = [[100, 100, 123456789], [100, 100, 123458789]]
         sys_mem_data = [[1024, 512, 123456789], [1024, 512, 123458789]]
@@ -54,7 +59,12 @@ class TestHostSysUsageParser(unittest.TestCase):
             self.assertEqual(True, os.path.exists(pid_mem_data_file))
 
     def test_process_should_not_generate_json_file_when_zeros_data(self):
-        common_info = (1, 192, 100, 100)
+        common_info = {
+            'pid': 1,
+            'cpu_nums': 192,
+            'cpu_sampling_interval': 100,
+            'mem_sampling_interval': 100
+        }
         sys_cpu_data = [[100, 100, 100, 100, 123456789], [0, 0, 0, 0, 123458789]]
         pid_cpu_data = [[0, 0, 123456789], [100, 100, 123458789]]
         sys_mem_data = [[0, 512, 123456789], [1024, 512, 123458789]]

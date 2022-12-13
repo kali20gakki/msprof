@@ -50,21 +50,6 @@ class ClusterTuningFacade:
         self._check_params_valid()
         self.dispatch()
 
-    def _check_params_valid(self: any) -> None:
-        if not self._is_cluster_all_device_scene():
-            self._npu_id = -1
-            print_msg(json.dumps(
-                {'status': NumberConstant.WARN,
-                 'info': f"and the \'--id\' parameter has been set to (-1) automatically."
-                    f"The collective communication data only supports exporting data by all devices, ",
-                 'data': ''}))
-        self._check_data_type_valid()
-        QueryArgumentCheck.check_arguments_valid(self._npu_id, self._model_id, self._iteration_id)
-        if not self._check_collection_dir_valid():
-            error(ClusterTuningFacade.FILE_NAME,
-                  "To query cluster or summary data, please execute import --cluster first")
-            raise ProfException(ProfException.PROF_CLUSTER_DIR_ERROR)
-
     def dispatch(self: any) -> None:
         # export command entry
         if self.data_type == QueryDataType.RUN_ALL_TUNING:
@@ -129,6 +114,21 @@ class ClusterTuningFacade:
                          f'maybe you can check the directory({self._collection_path}) permissions.',
                  'data': ''}))
 
+    def _check_params_valid(self: any) -> None:
+        if not self._is_cluster_all_device_scene():
+            self._npu_id = -1
+            print_msg(json.dumps(
+                {'status': NumberConstant.WARN,
+                 'info': f"and the \'--id\' parameter has been set to (-1) automatically."
+                    f"The collective communication data only supports exporting data by all devices, ",
+                 'data': ''}))
+        self._check_data_type_valid()
+        QueryArgumentCheck.check_arguments_valid(self._npu_id, self._model_id, self._iteration_id)
+        if not self._check_collection_dir_valid():
+            error(ClusterTuningFacade.FILE_NAME,
+                  "To query cluster or summary data, please execute import --cluster first")
+            raise ProfException(ProfException.PROF_CLUSTER_DIR_ERROR)
+
     def _check_collection_dir_valid(self: any) -> bool:
         return os.path.exists(PathManager.get_db_path(self._collection_path, DBNameConstant.DB_CLUSTER_RANK))
 
@@ -140,4 +140,3 @@ class ClusterTuningFacade:
 
     def _is_cluster_all_device_scene(self: any) -> bool:
         return self._npu_id == self.CLUSTER_ALL_DEVICE_SCENE
-
