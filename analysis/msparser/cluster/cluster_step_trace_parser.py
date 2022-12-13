@@ -84,6 +84,16 @@ class ClusterStepTraceParser(IParser):
             result.append(item)
         return result
 
+    @staticmethod
+    def _get_data_list_from_dto(step_trace_data: list) -> list:
+        for idx, single_dto in enumerate(step_trace_data):
+            step_trace_data[idx] = (
+                single_dto.device_id, single_dto.model_id, single_dto.iteration_id, single_dto.fp_start,
+                single_dto.bp_end, single_dto.iteration_end, single_dto.iteration_time,
+                single_dto.fp_bp_time, single_dto.grad_refresh_bound, single_dto.data_aug_bound
+            )
+        return step_trace_data
+
     def ms_run(self: any) -> None:
         logging.info("Start to parse cluster step_trace data!")
         if not self._check_collection_path_valid():
@@ -190,14 +200,4 @@ class ClusterStepTraceParser(IParser):
             logging.error("Can't query step trace data.")
             return step_trace_data
         step_trace_data = self._append_ge_model_tag(step_trace_data, model_ids)
-        return step_trace_data
-
-    @staticmethod
-    def _get_data_list_from_dto(step_trace_data: list) -> list:
-        for idx, single_dto in enumerate(step_trace_data):
-            step_trace_data[idx] = (
-                single_dto.device_id, single_dto.model_id, single_dto.iteration_id, single_dto.fp_start,
-                single_dto.bp_end, single_dto.iteration_end, single_dto.iteration_time,
-                single_dto.fp_bp_time, single_dto.grad_refresh_bound, single_dto.data_aug_bound
-            )
         return step_trace_data

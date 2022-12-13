@@ -103,8 +103,7 @@ class MsProfExportDataUtils:
                 "host_id": MsProfCommonConstant.DEFAULT_IP,
                 "device_id": params.get(StrConstant.PARAM_DEVICE_ID),
                 "iter_id": params.get(StrConstant.PARAM_ITER_ID),
-                "result_dir": params.get(StrConstant.PARAM_RESULT_DIR),
-                "model_id": params.get(StrConstant.PARAM_MODEL_ID)
+                "result_dir": params.get(StrConstant.PARAM_RESULT_DIR)
             }
             return CoreCpuReduceViewer.get_task_time_data(message)
         if ChipManager().is_chip_v1():
@@ -238,14 +237,12 @@ class MsProfExportDataUtils:
         """
         _ = configs
         device_id = params.get(StrConstant.PARAM_DEVICE_ID)
-        index_id = params.get(StrConstant.PARAM_ITER_ID)
+        iter_range = params.get(StrConstant.PARAM_ITER_ID)
         result_dir = params.get(StrConstant.PARAM_RESULT_DIR)
 
         if params.get(StrConstant.PARAM_EXPORT_TYPE) == MsProfCommonConstant.TIMELINE:
-            return TopDownData.get_top_down_timeline_data(
-                result_dir, device_id, index_id)
-
-        return TopDownData.get_top_down_data(result_dir, device_id, index_id)
+            return TopDownData.get_top_down_timeline_data(result_dir, device_id, iter_range)
+        return TopDownData.get_top_down_data(result_dir, device_id, iter_range)
 
     @staticmethod
     def _get_l2_cache_data(configs: dict, params: dict) -> tuple:
@@ -468,8 +465,7 @@ class MsProfExportDataUtils:
     def _get_aicpu_data(configs: dict, params: dict) -> any:
         _ = configs
         aicpu_headers, aicpu_data = ParseAiCpuData.analysis_aicpu(params.get(StrConstant.PARAM_RESULT_DIR),
-                                                                  params.get(StrConstant.PARAM_ITER_ID),
-                                                                  params.get(StrConstant.PARAM_MODEL_ID))
+                                                                  params.get(StrConstant.PARAM_ITER_ID))
         return aicpu_headers, aicpu_data, len(aicpu_data)
 
     @staticmethod

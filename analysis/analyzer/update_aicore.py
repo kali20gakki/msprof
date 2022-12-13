@@ -37,9 +37,10 @@ class UpdateAICoreData:
         self.sample_config = sample_config
         self.host_id = None
         self.device_id = None
-        self.project_path = None
+        self.project_path = self.sample_config.get(StrConstant.SAMPLE_CONFIG_PROJECT_PATH)
         self.sql_dir = None
         self.warning_cnt = 0
+        self._iter_range = sample_config.get(StrConstant.PARAM_ITER_ID)
         self._block_dims = {'block_dim': {}, 'mix_block_dim': {}}
 
     @staticmethod
@@ -97,6 +98,12 @@ class UpdateAICoreData:
                 cols_infos.append("[{}] {}".format(header, "numeric"))
         return ",".join(cols_infos)
 
+    @staticmethod
+    def _get_mix_core_type(ai_core_data: list) -> str:
+        mix_core_type = {'4-6': 'aiv', '4-7': 'aic'}
+        # data[-2]: ffts_type,  data[-5]: subtask_type
+        return mix_core_type.get('{}-{}'.format(ai_core_data[-2], ai_core_data[-5]))
+
     def run(self: any) -> None:
         """
         update ai core time entry.
@@ -130,7 +137,6 @@ class UpdateAICoreData:
         """
         initialize params
         """
-        self.project_path = self.sample_config.get("result_dir", "")
         if self.project_path is None or not os.path.exists(self.project_path):
             return False
         self.sql_dir = PathManager.get_sql_dir(self.project_path)
@@ -174,9 +180,9 @@ class UpdateAICoreData:
                                       Constant.TASK_TYPE_MIX_AIC, Constant.TASK_TYPE_MIX_AIV]:
                 continue
             _key = self.STREAM_TASK_KEY_FMT.format(data.task_id, data.stream_id)
-            self._block_dims['block_dim'].setdefault(_key, []).append(int(data.block_dim))
+            self._block_dims.get('block_dim').setdefault(_key, []).append(int(data.block_dim))
             if data.task_type in [Constant.TASK_TYPE_MIX_AIV, Constant.TASK_TYPE_MIX_AIC]:
-                self._block_dims['mix_block_dim'].setdefault(_key, []).append(int(data.mix_block_dim))
+                self._block_dims.get('mix_block_dim').setdefault(_key, []).append(int(data.mix_block_dim))
 
     def __get_block_dim_from_ge(self: any) -> None:
         """
@@ -201,9 +207,7 @@ class UpdateAICoreData:
                   "order by timestamp".format(DBNameConstant.TABLE_GE_TASK)
             return DBManager.fetch_all_data(ge_curs, sql, dto_class=GeTaskDto)
         ge_data = []
-        index_id = self.sample_config.get("iter_id", NumberConstant.DEFAULT_ITER_ID)
-        model_id = self.sample_config.get("model_id", NumberConstant.DEFAULT_MODEL_ID)
-        iter_list = MsprofIteration(self.project_path).get_iter_list_with_index_and_model(index_id, model_id)
+        iter_list = MsprofIteration(self.project_path).get_index_id_list_with_index_and_model(self._iter_range)
         sql = "select task_id, stream_id, task_type, block_dim, mix_block_dim from {0} " \
               "where model_id=? and (index_id=0 or index_id=?) " \
               " order by timestamp".format(
@@ -303,12 +307,6 @@ class UpdateAICoreData:
                 item[0] = time_sum
                 break
         return time_data
-
-    @staticmethod
-    def _get_mix_core_type(ai_core_data: list) -> str:
-        mix_core_type = {'4-6': 'aiv', '4-7': 'aic'}
-        # data[-2]: ffts_type,  data[-5]: subtask_type
-        return mix_core_type.get('{}-{}'.format(ai_core_data[-2], ai_core_data[-5]))
 
     def _get_current_block(self: any, block_type: str, ai_core_data: list, task_id_index: any,
                            stream_id_index: any) -> any:

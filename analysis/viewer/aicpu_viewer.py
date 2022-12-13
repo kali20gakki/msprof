@@ -10,6 +10,7 @@ from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msprof_iteration import MsprofIteration
 from common_func.path_manager import PathManager
 from msmodel.ai_cpu.ai_cpu_model import AiCpuModel
+from profiling_bean.db_dto.step_trace_dto import IterationRange
 
 
 class ParseAiCpuData:
@@ -18,7 +19,7 @@ class ParseAiCpuData:
     """
 
     @staticmethod
-    def analysis_aicpu(project_path: str, iteration_id: int, model_id: int) -> tuple:
+    def analysis_aicpu(project_path: str, iter_range: IterationRange) -> tuple:
         """
         parse and analysis AI CPU related dp data
         :return: ai cpu data , headers
@@ -33,23 +34,22 @@ class ParseAiCpuData:
         if not ai_cpu_conn or not ai_cpu_curs:
             return headers, ai_cpu_results
 
-        ai_cpu_results = ParseAiCpuData.get_ai_cpu_data(project_path, model_id, iteration_id, ai_cpu_conn)
+        ai_cpu_results = ParseAiCpuData.get_ai_cpu_data(project_path, iter_range, ai_cpu_conn)
         DBManager.destroy_db_connect(ai_cpu_conn, ai_cpu_curs)
         return headers, ai_cpu_results
 
     @staticmethod
-    def get_ai_cpu_data(project_path: str, model_id: int, iteration_id: int, ai_cpu_conn: any) -> list:
+    def get_ai_cpu_data(project_path: str, iter_range: IterationRange, ai_cpu_conn: any) -> list:
         """
         get ai cpu query sql
         :return: control statement
         """
 
-        missing_ge_data = ParseAiCpuData._get_aicpu_data_missing_ge_data(ai_cpu_conn, iteration_id, model_id,
-                                                                         project_path)
+        missing_ge_data = ParseAiCpuData._get_aicpu_data_missing_ge_data(ai_cpu_conn, iter_range, project_path)
         if missing_ge_data:
             return missing_ge_data
 
-        with_ge_data = ParseAiCpuData._get_aicpu_data_with_ge_data(ai_cpu_conn, iteration_id, model_id, project_path)
+        with_ge_data = ParseAiCpuData._get_aicpu_data_with_ge_data(ai_cpu_conn, iter_range, project_path)
         if with_ge_data:
             return with_ge_data
         return []
@@ -66,7 +66,7 @@ class ParseAiCpuData:
         return aicpu_data
 
     @staticmethod
-    def _get_aicpu_data_missing_ge_data(ai_cpu_conn, iteration_id, model_id, project_path):
+    def _get_aicpu_data_missing_ge_data(ai_cpu_conn, iter_range, project_path):
         if not (DBManager.check_tables_in_db(PathManager.get_db_path(project_path, DBNameConstant.DB_GE_INFO),
                                              DBNameConstant.TABLE_GE_TASK)
                 and DBManager.attach_to_db(ai_cpu_conn, project_path, DBNameConstant.DB_GE_INFO,
@@ -74,19 +74,20 @@ class ParseAiCpuData:
             sql = "select sys_start,'{op_name}',compute_time,memcpy_time,task_time,dispatch_time," \
                   "total_time, stream_id, task_id from {0}".format(DBNameConstant.TABLE_AI_CPU, op_name=Constant.NA)
             if not ProfilingScene().is_operator():
-                iter_time = MsprofIteration(project_path).get_iteration_time(iteration_id, model_id)
+                iter_time = MsprofIteration(project_path).get_iter_interval(iter_range)
                 if iter_time:
                     sql = "select sys_start,'{op_name}'," \
                           "compute_time,memcpy_time,task_time,dispatch_time," \
                           "total_time, stream_id, task_id from {0} where sys_start>={1} " \
                           "and sys_end<={2}".format(DBNameConstant.TABLE_AI_CPU,
-                                                    iter_time[0][0] / NumberConstant.MS_TO_US,
-                                                    iter_time[0][1] / NumberConstant.MS_TO_US, op_name=Constant.NA)
+                                                    iter_time[0] / NumberConstant.MS_TO_NS,
+                                                    iter_time[1] / NumberConstant.MS_TO_NS,
+                                                    op_name=Constant.NA)
             return DBManager.fetch_all_data(ai_cpu_conn.cursor(), sql)
         return []
 
     @staticmethod
-    def _get_aicpu_data_with_ge_data(ai_cpu_conn, iteration_id, model_id, project_path):
+    def _get_aicpu_data_with_ge_data(ai_cpu_conn, iter_range, project_path):
         if ProfilingScene().is_operator():
             sql = "select sys_start,op_name,compute_time,memcpy_time,task_time,dispatch_time," \
                   "total_time, {0}.stream_id, {0}.task_id from {0} join {1} on " \
@@ -96,8 +97,8 @@ class ParseAiCpuData:
                         task_type=Constant.TASK_TYPE_AI_CPU)
             return DBManager.fetch_all_data(ai_cpu_conn.cursor(), sql)
 
-        iter_time = MsprofIteration(project_path).get_iteration_time(iteration_id, model_id)
-        iter_list = MsprofIteration(project_path).get_iter_list_with_index_and_model(iteration_id, model_id)
+        iter_time = MsprofIteration(project_path).get_iter_interval(iter_range)
+        iter_list = MsprofIteration(project_path).get_index_id_list_with_index_and_model(iter_range)
         ai_cpu_data = []
         if not iter_time:
             return ai_cpu_data
@@ -105,13 +106,11 @@ class ParseAiCpuData:
         sql = "select sys_start,op_name,compute_time,memcpy_time,task_time,dispatch_time, total_time, " \
               "{0}.stream_id, {0}.task_id from {0} join {3} on sys_start>={1} and sys_end<={2} " \
               "and {0}.stream_id={3}.stream_id and {0}.task_id={3}.task_id and {0}.batch_id={3}.batch_id " \
-              "and ({3}.index_id=? or {3}.index_id=0) and {3}.model_id=? " \
-              "and {3}.task_type='{task_type}'" \
+              "and {3}.index_id=? and {3}.model_id=? and {3}.task_type='{task_type}'" \
             .format(DBNameConstant.TABLE_AI_CPU,
-                    iter_time[0][0] / NumberConstant.MS_TO_US,
-                    iter_time[0][1] / NumberConstant.MS_TO_US,
-                    DBNameConstant.TABLE_GE_TASK,
-                    model_id=model_id, index_id=iteration_id, task_type=Constant.TASK_TYPE_AI_CPU)
+                    iter_time[0] / NumberConstant.MS_TO_NS,
+                    iter_time[1] / NumberConstant.MS_TO_NS,
+                    DBNameConstant.TABLE_GE_TASK, task_type=Constant.TASK_TYPE_AI_CPU)
 
         for iteration_id, model_id in iter_list:
             ai_cpu_data.extend(DBManager.fetch_all_data(ai_cpu_conn.cursor(), sql, (iteration_id, model_id)))

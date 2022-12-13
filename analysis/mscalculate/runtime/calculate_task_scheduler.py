@@ -4,19 +4,21 @@
 
 import logging
 import os
-import sqlite3
 
-from config.config_manager import ConfigManager
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
+from common_func.ms_constant.number_constant import NumberConstant
+from common_func.ms_constant.str_constant import StrConstant
+from common_func.msprof_iteration import MsprofIteration
 from common_func.path_manager import PathManager
 from common_func.platform.chip_manager import ChipManager
-from common_func.ms_constant.number_constant import NumberConstant
+from config.config_manager import ConfigManager
+from mscalculate.ts_task.ai_cpu.aicpu_from_ts_collector import AICpuFromTsCollector
+from msmodel.step_trace.ts_track_model import TsTrackModel
 from viewer.calculate_rts_data import calculate_task_schedule_data
 from viewer.calculate_rts_data import multi_calculate_task_cost_time
-from mscalculate.ts_task.ai_cpu.aicpu_from_ts_collector import AICpuFromTsCollector
 
 
 class CalculateTaskScheduler:
@@ -28,9 +30,8 @@ class CalculateTaskScheduler:
 
     def __init__(self: any, sample_config: dict) -> None:
         self.sample_config = sample_config
-        self.project_path = sample_config.get("result_dir")
-        self.index_id = sample_config.get("iter_id")
-        self.model_id = sample_config.get("model_id")
+        self.iter_range = sample_config.get(StrConstant.PARAM_ITER_ID)
+        self.project_path = sample_config.get(StrConstant.SAMPLE_CONFIG_PROJECT_PATH)
 
     @staticmethod
     def update(api_data: list) -> list:
@@ -61,6 +62,15 @@ class CalculateTaskScheduler:
             value='?,' * (len(report_data[0]) - 1) + '?')
         DBManager.executemany_sql(runtime_conn, sql, report_data)
 
+    @staticmethod
+    def _get_iter_id_within_iter_range(step_trace_data, timestamp):
+        while step_trace_data:
+            step_trace = step_trace_data[0]
+            if InfoConfReader().time_from_syscnt(step_trace.step_end) < timestamp:
+                step_trace_data.pop(0)
+                continue
+            return step_trace.index_id
+
     def create_task_time(self: any, runtime_conn: any, device: int, iter_time_range: list) -> None:
         """
         create task time table
@@ -81,9 +91,9 @@ class CalculateTaskScheduler:
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
             logging.error(err, exc_info=Constant.TRACE_BACK_SWITCH)
             return
-        task_time = self._add_info(cal_task_data)
+        task_time = self._add_info(sorted(cal_task_data, key=lambda x: x[-1]))
         self._collect_aicpu(task_time)
-        self._insert_task_time_data(task_time, runtime_conn, runtime_curs)
+        self._insert_task_time_data(task_time, runtime_conn)
         logging.info('create task time table end')
 
     def update_timeline_api(self: any, runtime_conn: any) -> None:
@@ -124,7 +134,7 @@ class CalculateTaskScheduler:
         if not runtime_conn or not runtime_curs \
                 or not DBManager.check_tables_in_db(db_path, DBNameConstant.TABLE_RUNTIME_TASK_TIME):
             return
-        self._create_report_task_table(runtime_conn, runtime_curs)
+        self._create_report_task_table(runtime_conn)
         self._insert_report_task_data(runtime_conn, runtime_curs, device_id)
 
         logging.info('Insert data into report table finished.')
@@ -139,7 +149,7 @@ class CalculateTaskScheduler:
         if not devices:
             logging.error("No device list found in info.json")
             return
-        iter_time_range = self.__get_iter_time_range(self.project_path)
+        iter_time_range = MsprofIteration(self.project_path).get_step_syscnt_range_by_iter_range(self.iter_range)
         if not iter_time_range:
             return
         self.__pre_mini_task_data(self.project_path, devices[0], iter_time_range)
@@ -158,26 +168,7 @@ class CalculateTaskScheduler:
         finally:
             pass
 
-    def __get_iter_time_range(self: any, project_path: str) -> list:
-        time_range_result = []
-        step_conn, step_curs = DBManager.check_connect_db(project_path, DBNameConstant.DB_STEP_TRACE)
-        if not step_conn or not step_curs \
-                or not DBManager.judge_table_exist(step_curs, DBNameConstant.TABLE_STEP_TRACE_DATA):
-            return time_range_result
-        sql = "select step_start, step_end from {0} " \
-              "where index_id=? and model_id=?".format(DBNameConstant.TABLE_STEP_TRACE_DATA)
-        try:
-            time_range = step_curs.execute(sql, (self.index_id, self.model_id)).fetchone()
-        except sqlite3.Error as step_err:
-            logging.error(step_err, exc_info=Constant.TRACE_BACK_SWITCH)
-            return time_range_result
-        finally:
-            DBManager.destroy_db_connect(step_conn, step_curs)
-        if time_range:
-            time_range_result = list(time_range)
-        return time_range_result
-
-    def _insert_task_time_data(self: any, task_time: list, runtime_conn: any, runtime_curs: any) -> None:
+    def _insert_task_time_data(self: any, task_time: list, runtime_conn: any) -> None:
         # sort by complete time
         task_time = sorted(task_time, key=lambda data: data[self.COMPLETE_TIME_INDEX])
         insert_sql = "insert into TaskTime " \
@@ -215,7 +206,7 @@ class CalculateTaskScheduler:
         finally:
             DBManager.destroy_db_connect(runtime_conn, runtime_curs)
 
-    def _create_report_task_table(self: any, runtime_conn: any, runtime_curs: any) -> None:
+    def _create_report_task_table(self: any, runtime_conn: any) -> None:
         if DBManager.check_tables_in_db(PathManager.get_db_path(self.project_path, DBNameConstant.DB_RUNTIME),
                                         DBNameConstant.TABLE_RUNTIME_REPORT_TASK):
             DBManager.drop_table(runtime_conn, DBNameConstant.TABLE_RUNTIME_REPORT_TASK)
@@ -224,8 +215,13 @@ class CalculateTaskScheduler:
 
     def _add_info(self: any, cal_task_data: list) -> list:
         # 0 is default batch id
-        task_time = [task_data + (
-            self.index_id, self.model_id, NumberConstant.DEFAULT_BATCH_ID) for task_data in cal_task_data]
+        with TsTrackModel(self.project_path, DBNameConstant.DB_STEP_TRACE,
+                          [DBNameConstant.TABLE_STEP_TRACE_DATA]) as _trace:
+            step_trace_data = _trace.get_step_end_list_with_iter_range(self.iter_range)
+        task_time = [task_data + (self._get_iter_id_within_iter_range(step_trace_data, task_data[-1]),
+                                  self.iter_range.model_id,
+                                  NumberConstant.DEFAULT_BATCH_ID)
+                     for task_data in cal_task_data]
         return task_time
 
     def _collect_aicpu(self: any, task_time: list) -> None:

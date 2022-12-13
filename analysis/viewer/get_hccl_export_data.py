@@ -28,8 +28,7 @@ class HCCLExport:
     def __init__(self: any, param: dict) -> None:
         self.project_path = param.get(StrConstant.PARAM_RESULT_DIR)
         self.result = []
-        self.model_id = param.get(StrConstant.PARAM_MODEL_ID)
-        self.iter_id = param.get(StrConstant.PARAM_ITER_ID)
+        self.iter_range = param.get(StrConstant.PARAM_ITER_ID)
         self.pid_value = InfoConfReader().get_json_pid_data()
 
     def get_hccl_timeline_data(self: any) -> str:
@@ -52,7 +51,7 @@ class HCCLExport:
             DBNameConstant.TABLE_HCCL_ALL_REDUCE)
 
         if not ProfilingScene().is_operator():
-            iter_time = MsprofIteration(self.project_path).get_iteration_time(self.iter_id, self.model_id)
+            iter_time = MsprofIteration(self.project_path).get_iteration_time(self.iter_range)
             if iter_time:
                 sql = "select name,plane_id,timestamp,duration,bandwidth,stream_id," \
                       "task_id, task_type,transport_type,size,stage,step,op_name from {0} where timestamp>={1} " \
@@ -109,7 +108,7 @@ class HCCLExport:
                 self.result = {
                     'status': NumberConstant.WARN,
                     "info": "get hccl data failed,"
-                            " may be lack of hccl files containing iteration {}.".format(self.iter_id)
+                            " may be lack of hccl files containing iteration {}.".format(self.iter_range.iteration_id)
                 }
             return sql_datas
         finally:

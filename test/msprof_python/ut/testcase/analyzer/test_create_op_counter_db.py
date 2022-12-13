@@ -94,7 +94,7 @@ class TestMergeOPCounter(unittest.TestCase):
         db_manager.destroy(res)
 
     def test_get_ge_data(self):
-        with mock.patch(NAMESPACE + '.MsprofIteration.get_iter_list_with_index_and_model',
+        with mock.patch(NAMESPACE + '.MsprofIteration.get_index_id_list_with_index_and_model',
                         return_value={}), \
                 mock.patch(NAMESPACE + '.DBManager.fetch_all_data', return_value=[1]):
             check = MergeOPCounter(CONFIG)

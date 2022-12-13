@@ -5,7 +5,6 @@
 import json
 from collections import OrderedDict
 
-from common_func.db_manager import ClassRowType
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
@@ -35,8 +34,7 @@ class ThreadGroupViewer:
     def __init__(self: any, configs: any, params: dict) -> None:
         self._configs = configs
         self._params = params
-        self._index_id = params.get(StrConstant.PARAM_ITER_ID)
-        self._model_id = params.get(StrConstant.PARAM_MODEL_ID)
+        self._iter_range = params.get(StrConstant.PARAM_ITER_ID)
         self._project_path = params.get(StrConstant.PARAM_RESULT_DIR)
         self._pid = InfoConfReader().get_json_pid_data()
         self._iteration = MsprofIteration(self._project_path)
@@ -73,7 +71,7 @@ class ThreadGroupViewer:
         return DBManager.fetch_all_data(curs, sql, dto_class=dto)
 
     def _get_acl_api_sql(self):
-        where_condition = self._iteration.get_condition_within_iteration(self._index_id, self._model_id,
+        where_condition = self._iteration.get_condition_within_iteration(self._iter_range,
                                                                          time_start_key='start_time',
                                                                          time_end_key='end_time')
         return f"select api_name,api_type,start_time,end_time,thread_id " \
@@ -97,7 +95,7 @@ class ThreadGroupViewer:
         return TraceViewManager.time_graph_trace(TraceViewHeaderConstant.TOP_DOWN_TIME_GRAPH_HEAD, _format_data)
 
     def _get_ge_time_sql(self):
-        where_condition = self._iteration.get_condition_within_iteration(self._index_id, self._model_id,
+        where_condition = self._iteration.get_condition_within_iteration(self._iter_range,
                                                                          time_start_key='infer_start',
                                                                          time_end_key='infer_end')
         return f"select model_name,model_id,thread_id,input_start,input_end,infer_start,infer_end,output_start," \
@@ -138,7 +136,7 @@ class ThreadGroupViewer:
         return TraceViewManager.time_graph_trace(TraceViewHeaderConstant.TOP_DOWN_TIME_GRAPH_HEAD, _format_data)
 
     def _get_ge_op_execute_sql(self):
-        where_condition = self._iteration.get_condition_within_iteration(self._index_id, self._model_id,
+        where_condition = self._iteration.get_condition_within_iteration(self._iter_range,
                                                                          time_start_key='start_time',
                                                                          time_end_key='end_time')
         return f"select thread_id,op_type,event_type,start_time,end_time " \
@@ -161,7 +159,7 @@ class ThreadGroupViewer:
         return TraceViewManager.time_graph_trace(TraceViewHeaderConstant.TASK_TIME_GRAPH_HEAD, _format_data)
 
     def _get_runtime_api_sql(self):
-        where_condition = self._iteration.get_condition_within_iteration(self._index_id, self._model_id,
+        where_condition = self._iteration.get_condition_within_iteration(self._iter_range,
                                                                          time_start_key='entry_time',
                                                                          time_end_key='exit_time')
         return f"select entry_time,exit_time,api,thread from {DBNameConstant.TABLE_API_CALL} {where_condition}"

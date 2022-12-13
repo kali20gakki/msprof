@@ -4,20 +4,20 @@
 
 from abc import ABC
 from functools import partial
-from itertools import chain
 
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
-from common_func.msprof_iteration import MsprofIteration
+from common_func.empty_class import EmptyClass
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.path_manager import PathManager
 from msmodel.interface.base_model import BaseModel
 from msmodel.interface.view_model import ViewModel
+from profiling_bean.db_dto.step_trace_dto import IterationRange
+from profiling_bean.db_dto.step_trace_dto import StepTraceDto
 from profiling_bean.db_dto.step_trace_ge_dto import StepTraceGeDto
 from profiling_bean.db_dto.time_section_dto import TimeSectionDto
-from profiling_bean.db_dto.step_trace_dto import StepTraceDto
 
 
 class TsTrackModel(BaseModel, ABC):
@@ -28,8 +28,7 @@ class TsTrackModel(BaseModel, ABC):
 
     @staticmethod
     def __aicpu_in_time_range(data, min_timestamp, max_timestamp):
-        return min_timestamp <= InfoConfReader().time_from_syscnt(data[2],
-                                                                  NumberConstant.MICRO_SECOND) <= max_timestamp
+        return min_timestamp <= data[2] <= max_timestamp
 
     def flush(self: any, table_name: str, data_list: list) -> None:
         """
@@ -49,23 +48,18 @@ class TsTrackModel(BaseModel, ABC):
         sql = DBManager.sql_create_general_table(table_map, table_name, self.TABLES_PATH)
         DBManager.execute_sql(self.conn, sql)
 
-    def get_ai_cpu_data(self: any, model_id: int, index_id: int) -> list:
+    def get_ai_cpu_data(self: any, iter_time_range) -> list:
         """
         get ai cpu data
-        :param model_id: model id
-        :param index_id: index id
+        :param iter_time_range: iteration time range
         :return: ai cpu with state
         """
         if not DBManager.check_tables_in_db(PathManager.get_db_path(self.result_dir, DBNameConstant.DB_STEP_TRACE),
                                             DBNameConstant.TABLE_TASK_TYPE):
             return []
 
-        iter_time_range = list(chain.from_iterable(
-            MsprofIteration(self.result_dir).get_iteration_time(index_id, model_id)))
-        sql = "select stream_id, task_id, timestamp, " \
-              "task_state from {0} where task_type={1} order by timestamp ".format(
-            DBNameConstant.TABLE_TASK_TYPE,
-            self.TS_AI_CPU_TYPE)
+        sql = "select stream_id, task_id, timestamp, task_state from {0} " \
+              "where task_type={1} order by timestamp ".format(DBNameConstant.TABLE_TASK_TYPE, self.TS_AI_CPU_TYPE)
         ai_cpu_with_state = DBManager.fetch_all_data(self.cur, sql)
 
         for index, datum in enumerate(ai_cpu_with_state):
@@ -106,6 +100,37 @@ class TsTrackModel(BaseModel, ABC):
             DBNameConstant.TABLE_STEP_TRACE_DATA)
         step_trace_data = DBManager.fetch_all_data(self.cur, sql, dto_class=StepTraceDto)
         return step_trace_data
+
+    def get_max_index_id_with_model(self, model_id):
+        """
+        get the max iteration id of the model id.
+        """
+        if not DBManager.judge_table_exist(self.cur, DBNameConstant.TABLE_STEP_TRACE_DATA):
+            return EmptyClass()
+        sql = f'select max(index_id) as index_id from {DBNameConstant.TABLE_STEP_TRACE_DATA} where model_id=?'
+        return DBManager.fetchone(self.cur, sql, (model_id,), dto_class=StepTraceDto)
+
+    def get_step_syscnt_range_by_iter_range(self, iteration: IterationRange):
+        """
+        get step time range by the iteration range.
+        """
+        if not DBManager.judge_table_exist(self.cur, DBNameConstant.TABLE_STEP_TRACE_DATA):
+            return EmptyClass()
+        sql = f"select min(step_start) as step_start, max(step_end) as step_end " \
+              f"from {DBNameConstant.TABLE_STEP_TRACE_DATA} where model_id=? and index_id>=? and index_id<=?"
+        return DBManager.fetchone(self.cur, sql, (iteration.model_id, *iteration.get_iteration_range()),
+                                  dto_class=StepTraceDto)
+
+    def get_step_end_list_with_iter_range(self, iteration: IterationRange):
+        """
+        get step trace within the range of iteration.
+        """
+        if not DBManager.judge_table_exist(self.cur, DBNameConstant.TABLE_STEP_TRACE_DATA):
+            return []
+        sql = f"select index_id, step_end from {DBNameConstant.TABLE_STEP_TRACE_DATA} " \
+              f"where model_id=? and index_id>=? and index_id<=? order by step_end"
+        return DBManager.fetch_all_data(self.cur, sql, (iteration.model_id, *iteration.get_iteration_range()),
+                                        dto_class=StepTraceDto)
 
 
 class TsTrackViewModel(ViewModel):

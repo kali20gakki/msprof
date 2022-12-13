@@ -89,7 +89,12 @@ class MsprofEntrance:
         handler = command_handler.get(sys.argv[1])
         try:
             handler.get('handler')(handler.get('parser'), args)
-        except Exception:
+        except ProfException as err:
+            if err.message:
+                error(self.FILE_NAME, err)
+            call_sys_exit(err.code)
+        except Exception as err:
+            error(self.FILE_NAME, err)
             call_sys_exit(NumberConstant.ERROR)
         call_sys_exit(ProfException.PROF_NONE_ERROR)
 
@@ -136,13 +141,17 @@ class MsprofEntrance:
     def _add_export_argument(self: any, parser: any) -> None:
         self._add_collect_path_argument(parser)
         parser.add_argument(
-            '--iteration-id', dest='iteration_id', default=None,
+            '--iteration-id', dest='iteration_id', default=1,
             metavar='<iteration_id>',
             type=int, help='<Optional> the iteration ID')
         parser.add_argument(
             '--model-id', dest='model_id', default=None,
             metavar='<model_id>',
             type=int, help='<Optional> the model ID')
+        parser.add_argument(
+            '--iteration-count', dest='iteration_count', default=1,
+            metavar='<iteration_count>',
+            type=int, help='<Optional> The number of iterations exported')
 
     def _export_parser(self: any, export_parser: any) -> None:
         subparsers = export_parser.add_subparsers()
