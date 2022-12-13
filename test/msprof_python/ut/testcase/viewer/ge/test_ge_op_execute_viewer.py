@@ -50,7 +50,7 @@ class TestGeOpExecuteViewer(unittest.TestCase):
         self.assertEqual(1, json.loads(result)[0].get("pid"))
         with mock.patch(NAMESPACE + '.GeOpExecuteViewModel.init', return_value=True), \
              mock.patch(NAMESPACE + '.GeOpExecuteViewModel.get_timeline_data',
-                        return_value=[[1, 'Cast', 'tiling', 0, 10]]):
+                        return_value=[[1, 'Cast', 'tiling', 0, 10, 'name']]):
             InfoConfReader()._info_json = {'devices': '0', "pid": "1"}
             obj = GeOpExecuteViewer({}, {"project": "test"})
             result = obj.get_timeline_data()
