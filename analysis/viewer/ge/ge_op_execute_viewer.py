@@ -57,8 +57,8 @@ class GeOpExecuteViewer:
         header = [["process_name", pid, InfoConfReader().get_json_tid_data(), "GeOPExecute"]]
         tid_set = set()
         for data in timeline_data:
-            _name = data[2] if not data[1] else "{}_{}".format(data[1], str(data[2]))
-            result.append([_name, pid, data[0], data[3], data[4]])
+            _name = data[3] if not data[2] else "{}_{}".format(data[2], str(data[3]))
+            result.append([_name, pid, data[0], data[4], data[5]])
             tid_set.add(data[0])
         _trace = TraceViewManager.time_graph_trace(TraceViewHeaderConstant.TASK_TIME_GRAPH_HEAD, result)
         for _tid in tid_set:
@@ -76,7 +76,8 @@ class GeOpExecuteViewer:
         hash_dict = get_ge_hash_dict(self._project_path)
         for _data in dynamic_data:
             _data = list(_data)
-            _data[1] = hash_dict.get(_data[1], _data[1])  # op type
-            _data[2] = hash_dict.get(_data[2], _data[2])  # event type
+            _data[1] = hash_dict.get(_data[1], _data[1])  # op name
+            _data[2] = hash_dict.get(_data[2], _data[2])  # op type
+            _data[3] = hash_dict.get(_data[3], _data[3])  # event type
             dynamic_data_list.append(_data)
         return dynamic_data_list

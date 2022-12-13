@@ -82,4 +82,5 @@ class GeHostParser(IParser, MsMultiProcess):
                 ge_host_data.op_type,
                 ge_host_data.event_type,
                 ge_host_data.start_time,
-                ge_host_data.end_time])
+                ge_host_data.end_time,
+                ge_host_data.op_name])

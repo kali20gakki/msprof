@@ -19,6 +19,7 @@ class GeHostBean(StructDecoder):
         self._event_type = str(_data[4])
         self._start_time = _data[5]
         self._end_time = _data[6]
+        self._op_name = str(_data[7])
 
     @property
     def thread_id(self: any) -> int:
@@ -59,6 +60,14 @@ class GeHostBean(StructDecoder):
         :return: end time
         """
         return self._end_time
+
+    @property
+    def op_name(self: any) -> str:
+        """
+        op name
+        :return: None
+        """
+        return self._op_name
 
     def check_data_complete(self: any) -> None:
         """
