@@ -206,7 +206,7 @@ class MsProfExportDataConfig(MetaConfig):
         ]
         , 'ge_op_execute': [
             ('handler', '_get_ge_op_execute_data'),
-            ('headers', 'Thread ID,OP Type,Event Type,Start Time,Duration(us)')
+            ('headers', 'Thread ID,OP Name,OP Type,Event Type,Start Time,Duration(us)')
         ]
         , 'os_runtime_api': [
             ('handler', '_get_host_runtime_api'),

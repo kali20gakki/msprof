@@ -95,7 +95,7 @@ class StructFmt:
     GE_MODEL_LOAD_SIZE = 256
     GE_MODEL_TIME_SIZE = 256
     GE_FUSION_OP_SIZE = 256
-    GE_HOST_FMT = 'HHL4Q24B'
+    GE_HOST_FMT = 'HHL4Q3Q'
     GE_HOST_FMT_SIZE = struct.calcsize(BYTE_ORDER_CHAR + GE_HOST_FMT)
 
     # helper
