@@ -56,11 +56,6 @@ class DataCalculatorConfig(MetaConfig):
             ('path', 'mscalculate.biu_perf.biu_perf_calculator'),
             ('chip_model', '5,7')
         ]
-        , 'AccPmuCalculator': [
-            ('path', 'mscalculate.stars.acc_pmu_calculate'),
-            ('chip_model', '5,7'),
-            ('level', '2')
-        ]
         , 'AcsqCalculator': [
             ('path', 'mscalculate.hwts.acsq_calculator'),
             ('chip_model', '5,7'),

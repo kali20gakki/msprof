@@ -115,3 +115,17 @@ class ChipManager:
         :return: True or False
         """
         return self.chip_id == ChipModel.CHIP_V4_1_0
+
+    def is_chip_v1_1(self: any) -> bool:
+        """
+        check the scene of chip.v1.1.1
+        :return: True or False
+        """
+        return self.chip_id == ChipModel.CHIP_V1_1_1
+
+    def is_stars_chip(self) -> bool:
+        """
+        check the scene of chip.v4.1.0 or chip.v1.1.1
+        :return: True or False
+        """
+        return self.is_chip_v1_1() or self.is_chip_v4()

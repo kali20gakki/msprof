@@ -6,6 +6,7 @@ from config.config_manager import ConfigManager
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from msmodel.interface.parser_model import ParserModel
+from profiling_bean.db_dto.acc_pmu_dto import AccPmuOriDto
 
 
 class AccPmuModel(ParserModel):
@@ -27,11 +28,10 @@ class AccPmuModel(ParserModel):
         insert acc_pmu data to db
         :return: None
         """
-        result = [(data.stars_common.task_id, data.stars_common.stream_id, data.acc_id, data.block_id,
-                   data.bandwidth[self.READ], data.bandwidth[self.WRITE], data.ost[self.READ], data.ost[self.WRITE],
-                   data.stars_common.timestamp) for data in datas]
+        result = [(data.acc_id, data.bandwidth[self.READ], data.bandwidth[self.WRITE],
+                   data.ost[self.READ], data.ost[self.WRITE], data.timestamp) for data in datas]
 
-        self.insert_data_to_db(DBNameConstant.TABLE_ACC_PMU_ORIGIN_DATA, result)
+        self.insert_data_to_db(DBNameConstant.TABLE_ACC_PMU_DATA, result)
 
     def flush(self: any, data: list) -> None:
         """
@@ -46,11 +46,9 @@ class AccPmuModel(ParserModel):
         """
         if not DBManager.judge_table_exist(self.cur, DBNameConstant.TABLE_ACC_PMU_DATA):
             return []
-        sql = "select task_id, stream_id, acc_id, block_id, " \
-              " read_bandwidth, write_bandwidth ,read_ost, write_ost, " \
-              "timestamp, start_time, dur_time from {}".format(DBNameConstant.TABLE_ACC_PMU_DATA)
-        data_list = DBManager.fetch_all_data(self.cur, sql)
-        return data_list
+        sql = "select acc_id, read_bandwidth, write_bandwidth ,read_ost, write_ost, " \
+              "timestamp from {}".format(DBNameConstant.TABLE_ACC_PMU_DATA)
+        return DBManager.fetch_all_data(self.cur, sql, dto_class=AccPmuOriDto)
 
     def get_summary_data(self: any) -> list:
         """

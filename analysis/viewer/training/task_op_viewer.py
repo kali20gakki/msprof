@@ -34,7 +34,7 @@ class TaskOpViewer:
         if not message:
             logging.error("get_task_op_summary message empty")
             return headers, [], 0
-        if ChipManager().is_chip_v4():
+        if ChipManager().is_stars_chip():
             return AcsqTaskViewer(message).get_summary_data(headers)
         hwts_conn, hwts_curs = DBManager.check_connect_db(message.get("result_dir"), DBNameConstant.DB_HWTS)
         task_conn, task_curs = DBManager.check_connect_db(message.get("result_dir"), DBNameConstant.DB_RTS_TRACK)

@@ -674,7 +674,8 @@ class TablesConfig(MetaConfig):
             ('read_count', 'INTEGER, null'),
             ('write_count', 'INTEGER, null'),
             ('victim', 'INTEGER, null'),
-            ('allocate', 'INTEGER, null')
+            ('allocate', 'INTEGER, null'),
+            ('timestamp', 'INTEGER, null')
         ]
         , 'HCCLAllReduceMap': [
             ('op_name', 'TEXT, null'),
@@ -714,23 +715,7 @@ class TablesConfig(MetaConfig):
             ('sys_time', 'REAL,null')
         ]
         , 'AccPmuMap': [
-            ('task_id', 'INTEGER, null'),
-            ('stream_id', 'INTEGER, null'),
             ('acc_id', 'INTEGER,null'),
-            ('block_id', 'INTEGER, null'),
-            ('read_bandwidth', 'INTEGER, null'),
-            ('write_bandwidth', 'INTEGER, null'),
-            ('read_ost', 'INTEGER, null'),
-            ('write_ost', 'INTEGER, null'),
-            ('timestamp', 'REAL, null'),
-            ('start_time', 'REAL, null'),
-            ('dur_time', 'INTEGER, null')
-        ]
-        , 'AccPmuOriginMap': [
-            ('task_id', 'INTEGER, null'),
-            ('stream_id', 'INTEGER, null'),
-            ('acc_id', 'INTEGER,null'),
-            ('block_id', 'INTEGER, null'),
             ('read_bandwidth', 'INTEGER, null'),
             ('write_bandwidth', 'INTEGER, null'),
             ('read_ost', 'INTEGER, null'),

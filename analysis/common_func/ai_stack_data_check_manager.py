@@ -147,7 +147,7 @@ class AiStackDataCheckManager(DataCheckManager):
         The data path contain step_trace data or not
         """
         return cls.contain_task_time_data(result_dir, device_id) or \
-            AiStackDataCheckManager.contain_stars_soc_data(result_dir, device_id)
+               AiStackDataCheckManager.contain_stars_soc_data(result_dir, device_id)
 
     @classmethod
     def contain_op_summary_data(cls: any, result_dir: str, device_id: any = None) -> bool:
@@ -244,8 +244,7 @@ class AiStackDataCheckManager(DataCheckManager):
         :param device_id: device id
         :return: if contained msproftx data, true or false
         """
-        return cls.check_data_exist(result_dir, file_name_manager.get_soc_profiler_compiles(),
-                                    device_id=device_id) \
+        return cls._contain_stars_profiler_data(result_dir, device_id=device_id) \
                and path_check(PathManager.get_db_path(result_dir, DBNameConstant.DB_STARS_SOC))
 
     @classmethod
@@ -256,9 +255,19 @@ class AiStackDataCheckManager(DataCheckManager):
         :param device_id: device id
         :return: if contained msproftx data, true or false
         """
-        return cls.check_data_exist(result_dir, file_name_manager.get_soc_profiler_compiles(),
-                                    device_id=device_id) \
+        return cls._contain_stars_profiler_data(result_dir, device_id=device_id) \
                and path_check(PathManager.get_db_path(result_dir, DBNameConstant.DB_STARS_CHIP_TRANS))
+
+    @classmethod
+    def contain_acc_pmu_data(cls: any, result_dir: str, device_id: int = None) -> bool:
+        """
+        The data path contain accpmu data
+        :param result_dir: data dir path
+        :param device_id: device id
+        :return: if contained accpmu data, true or false
+        """
+        return cls._contain_stars_profiler_data(result_dir, device_id=device_id) \
+               and bool(path_check(PathManager.get_db_path(result_dir, DBNameConstant.DB_ACC_PMU)))
 
     @classmethod
     def contain_thread_group_data(cls: any, result_dir: str, device_id: int = None) -> bool:
@@ -281,8 +290,7 @@ class AiStackDataCheckManager(DataCheckManager):
         :param device_id: device id
         :return: if contained lowpower sample data, true or false
         """
-        return cls.check_data_exist(result_dir, file_name_manager.get_soc_profiler_compiles(),
-                                    device_id=device_id) \
+        return cls._contain_stars_profiler_data(result_dir, device_id) \
                and path_check(PathManager.get_db_path(result_dir, DBNameConstant.DB_LOW_POWER))
 
     @classmethod
@@ -294,6 +302,14 @@ class AiStackDataCheckManager(DataCheckManager):
         :return: if contained biu data, true or false
         """
         return cls.check_data_exist(result_dir, file_name_manager.get_biu_compiles(),
+                                    device_id=device_id)
+
+    @classmethod
+    def _contain_stars_profiler_data(cls: any, result_dir: str, device_id: int = None) -> bool:
+        """
+        The data path contain stars_soc_profiler data or not
+        """
+        return cls.check_data_exist(result_dir, file_name_manager.get_soc_profiler_compiles(),
                                     device_id=device_id)
 
     @classmethod
