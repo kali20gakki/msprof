@@ -4,7 +4,7 @@
 
 from abc import ABC
 
-from config.config_manager import ConfigManager
+from msconfig.config_manager import ConfigManager
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from msmodel.interface.base_model import BaseModel

@@ -10,7 +10,7 @@ import traceback
 from functools import reduce
 from operator import add
 
-from config.config_manager import ConfigManager
+from msconfig.config_manager import ConfigManager
 from common_func import multi_process_cb
 from common_func.common import CommonConstant
 from common_func.common import call_sys_exit

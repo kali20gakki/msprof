@@ -8,7 +8,7 @@ import sqlite3
 from collections import defaultdict
 
 from common_func.ms_constant.str_constant import StrConstant
-from config.config_manager import ConfigManager
+from msconfig.config_manager import ConfigManager
 from analyzer.get_op_table_task_time import GetOpTableTsTime
 from analyzer.scene_base.profiling_scene import ProfilingScene
 from common_func.common import CommonConstant

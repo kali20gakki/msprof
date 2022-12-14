@@ -6,7 +6,7 @@ import logging
 import os
 import sqlite3
 
-from config.config_manager import ConfigManager
+from msconfig.config_manager import ConfigManager
 from common_func.constant import Constant
 from common_func.empty_class import EmptyClass
 from common_func.ms_constant.number_constant import NumberConstant

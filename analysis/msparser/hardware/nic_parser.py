@@ -4,7 +4,7 @@
 
 import logging
 
-from config.config_manager import ConfigManager
+from msconfig.config_manager import ConfigManager
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant

@@ -11,7 +11,7 @@ from common_func.common_prof_rule import CommonProfRule
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msvp_common import is_number, is_nonzero_number
 from common_func.regex_manager import RegexManagerConstant
-from config.config_manager import ConfigManager
+from msconfig.config_manager import ConfigManager
 from tuning.data_manager import DataManager
 
 
