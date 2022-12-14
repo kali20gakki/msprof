@@ -6,7 +6,7 @@ import logging
 import os
 import re
 
-from config.config_manager import ConfigManager
+from msconfig.config_manager import ConfigManager
 from common_func.ai_stack_data_check_manager import AiStackDataCheckManager
 from common_func.common import get_data_dir_sorted_files
 from common_func.constant import Constant

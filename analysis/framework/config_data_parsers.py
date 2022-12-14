@@ -5,7 +5,7 @@
 import configparser
 import importlib
 
-from config.config_manager import ConfigManager
+from msconfig.config_manager import ConfigManager
 from common_func.os_manager import check_file_readable
 from common_func.utils import Utils
 

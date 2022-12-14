@@ -5,7 +5,7 @@
 import json
 import threading
 
-from config.config_manager import ConfigManager
+from msconfig.config_manager import ConfigManager
 from common_func.config_mgr import ConfigMgr
 from common_func.data_manager import DataManager
 from common_func.db_name_constant import DBNameConstant

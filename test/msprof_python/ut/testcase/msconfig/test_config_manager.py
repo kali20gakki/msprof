@@ -4,7 +4,7 @@
 
 import unittest
 
-from config.config_manager import ConfigManager
+from msconfig.config_manager import ConfigManager
 
 
 class TestConfigManager(unittest.TestCase):

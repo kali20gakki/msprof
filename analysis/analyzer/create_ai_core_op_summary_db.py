@@ -20,7 +20,7 @@ from common_func.msprof_exception import ProfException
 from common_func.msprof_iteration import MsprofIteration
 from common_func.path_manager import PathManager
 from common_func.platform.chip_manager import ChipManager
-from config.config_manager import ConfigManager
+from msconfig.config_manager import ConfigManager
 from profiling_bean.db_dto.ge_task_dto import GeTaskDto
 
 

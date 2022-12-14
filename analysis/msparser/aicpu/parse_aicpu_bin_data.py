@@ -7,7 +7,7 @@ import logging
 import os
 import sqlite3
 
-from config.config_manager import ConfigManager
+from msconfig.config_manager import ConfigManager
 from common_func.ai_stack_data_check_manager import AiStackDataCheckManager
 from common_func.constant import Constant
 from common_func.db_name_constant import DBNameConstant

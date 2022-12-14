@@ -7,7 +7,7 @@ import os
 import sqlite3
 import struct
 
-from config.config_manager import ConfigManager
+from msconfig.config_manager import ConfigManager
 from common_func.common import get_data_dir_sorted_files
 from common_func.constant import Constant
 from common_func.db_manager import DBManager

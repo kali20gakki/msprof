@@ -6,7 +6,7 @@ import importlib
 import logging
 import os
 
-from config.config_manager import ConfigManager
+from msconfig.config_manager import ConfigManager
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.path_manager import PathManager
 

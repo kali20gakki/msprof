@@ -24,14 +24,14 @@ from common_func.ms_constant.str_constant import StrConstant
 from common_func.os_manager import check_file_readable
 from common_func.path_manager import PathManager
 from common_func.return_code_checker import ReturnCodeCheck
-from config.config_manager import ConfigManager
+from msconfig.config_manager import ConfigManager
 
 
 class MsvpCommonConst:
     """
     msvp common
     """
-    CONFIG_PATH = os.path.join(os.path.realpath(os.path.dirname(__file__)), "..", "config")
+    CONFIG_PATH = os.path.join(os.path.realpath(os.path.dirname(__file__)), "..", "msconfig")
     FILE_NAME = os.path.basename(__file__)
     CPU_CONFIG_TYPE = {
         "ts_cpu": ConfigManager.get("TsCPUConfig"),
