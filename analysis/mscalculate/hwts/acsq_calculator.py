@@ -5,6 +5,8 @@
 import logging
 
 from analyzer.scene_base.profiling_scene import ProfilingScene
+from common_func.batch_counter import BatchCounter
+from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
@@ -13,6 +15,7 @@ from common_func.ms_multi_process import MsMultiProcess
 from common_func.msprof_exception import ProfException
 from common_func.msprof_iteration import MsprofIteration
 from common_func.platform.chip_manager import ChipManager
+from common_func.ms_constant.number_constant import NumberConstant
 from mscalculate.interface.icalculator import ICalculator
 from msmodel.iter_rec.iter_rec_model import HwtsIterModel
 from msmodel.stars.acsq_task_model import AcsqTaskModel
@@ -24,6 +27,7 @@ class AcsqCalculator(ICalculator, MsMultiProcess):
     """
     class used to calculate stars acsq data and parse log by iter
     """
+    PREP_DATA_LENGTH = 7
 
     def __init__(self: any, file_list: dict, sample_config: dict) -> None:
         super().__init__(sample_config)
@@ -38,6 +42,9 @@ class AcsqCalculator(ICalculator, MsMultiProcess):
 
     @staticmethod
     def _get_iter_id_within_iter_range(step_trace_data, timestamp):
+        if ProfilingScene().is_operator():
+            return NumberConstant.DEFAULT_NUMBER
+
         while step_trace_data:
             step_trace = step_trace_data[0]
             if InfoConfReader().time_from_syscnt(step_trace.step_end) < timestamp:
@@ -128,9 +135,19 @@ class AcsqCalculator(ICalculator, MsMultiProcess):
         self._log_data.extend(cpu_sql)
 
     def _add_batch_id(self: any, prep_data_res: list) -> list:
-        res = []
-        for task_data in prep_data_res:
-            train_data = []
-            train_data.append(task_data + (0,))
-            res.extend(train_data)
-        return res
+        if ProfilingScene().is_operator():
+            current_iter_id = NumberConstant.INVALID_ITER_ID
+        else:
+            iter_range = MsprofIteration(self._project_path).get_parallel_iter_range(self._iter_range)
+            current_iter_id = min(iter_range)
+
+        batch_counter = BatchCounter(self._project_path)
+        batch_counter.init(Constant.TASK_TYPE_AI_CORE)
+        for index, datum in enumerate(prep_data_res):
+            if len(datum) != self.PREP_DATA_LENGTH:
+                return []
+            stream_id = datum[1]
+            task_id = datum[0]
+            batch_id = batch_counter.calculate_batch(stream_id, task_id, current_iter_id)
+            prep_data_res[index] = datum + (batch_id, )
+        return prep_data_res
