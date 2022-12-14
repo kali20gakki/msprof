@@ -12,6 +12,17 @@ namespace Dvvp {
 namespace Plugin {
 SHARED_PTR_ALIA<PluginHandle> ProfApiPlugin::pluginHandle_ = nullptr;
 
+void ProfApiPlugin::GetAllFunction()
+{
+    pluginHandle_->GetFunction<int32_t, ProfReportHandle>("profRegReporterCallback", profRegReporterCallback_);
+    pluginHandle_->GetFunction<int32_t, ProfCtrlHandle>("profRegCtrlCallback", profRegCtrlCallback_);
+    pluginHandle_->GetFunction<int32_t, ProfSetDeviceHandle>("profRegDeviceStateCallback", profRegDeviceStateCallback_);
+    pluginHandle_->GetFunction<int32_t, uint32_t, uint32_t *>(
+        "profGetDeviceIdByGeModelIdx", profGetDeviceIdByGeModelIdx_);
+    pluginHandle_->GetFunction<int32_t, PROFAPI_PROF_COMMAND_PTR, uint32_t>("profSetProfCommand", profSetProfCommand_);
+    pluginHandle_->GetFunction<int32_t, uint64_t, uint16_t, void*>("profSetStepInfo", profSetStepInfo_);
+}
+
 void ProfApiPlugin::LoadProfApiSo()
 {
     if (pluginHandle_ == nullptr) {
@@ -25,6 +36,7 @@ void ProfApiPlugin::LoadProfApiSo()
             return;
         }
     }
+    GetAllFunction();
 }
 
 bool ProfApiPlugin::IsFuncExist(const std::string &funcName) const
@@ -37,12 +49,8 @@ int32_t ProfApiPlugin::MsprofProfRegReporterCallback(ProfReportHandle reporter)
 {
     PthreadOnce(&loadFlag_, []()->void {ProfApiPlugin::instance()->LoadProfApiSo();});
     if (profRegReporterCallback_ == nullptr) {
-        int32_t ret = pluginHandle_->GetFunction<int32_t, ProfReportHandle>("profRegReporterCallback",
-            profRegReporterCallback_);
-        if (ret != PROFILING_SUCCESS) {
-            MSPROF_LOGE("MsprofProfRegReporterCallback get profRegReporterCallback failed");
-            return PROFILING_FAILED;
-        }
+        MSPROF_LOGE("ProfApiPlugin profRegReporterCallback function is null.");
+        return PROFILING_FAILED;
     }
     return profRegReporterCallback_(reporter);
 }
@@ -51,13 +59,9 @@ int32_t ProfApiPlugin::MsprofProfRegReporterCallback(ProfReportHandle reporter)
 int32_t ProfApiPlugin::MsprofProfRegCtrlCallback(ProfCtrlHandle handle)
 {
     PthreadOnce(&loadFlag_, []()->void {ProfApiPlugin::instance()->LoadProfApiSo();});
-    if (profRegCtrlCallback_  == nullptr) {
-        int32_t ret = pluginHandle_->GetFunction<int32_t, ProfCtrlHandle>("profRegCtrlCallback",
-            profRegCtrlCallback_);
-        if (ret != PROFILING_SUCCESS) {
-            MSPROF_LOGE("MsprofProfRegCtrlCallback get profRegCtrlCallback failed");
-            return PROFILING_FAILED;
-        }
+    if (profRegCtrlCallback_ == nullptr) {
+        MSPROF_LOGE("ProfApiPlugin profRegCtrlCallback function is null.");
+        return PROFILING_FAILED;
     }
     return profRegCtrlCallback_(handle);
 }
@@ -66,13 +70,9 @@ int32_t ProfApiPlugin::MsprofProfRegCtrlCallback(ProfCtrlHandle handle)
 int32_t ProfApiPlugin::MsprofProfRegDeviceStateCallback(ProfSetDeviceHandle handle)
 {
     PthreadOnce(&loadFlag_, []()->void {ProfApiPlugin::instance()->LoadProfApiSo();});
-    if (profRegDeviceStateCallback_  == nullptr) {
-        int32_t ret = pluginHandle_->GetFunction<int32_t, ProfSetDeviceHandle>("profRegDeviceStateCallback",
-            profRegDeviceStateCallback_);
-        if (ret != PROFILING_SUCCESS) {
-            MSPROF_LOGE("MsprofProfRegDeviceStateCallback get profRegDeviceStateCallback failed");
-            return PROFILING_FAILED;
-        }
+    if (profRegDeviceStateCallback_ == nullptr) {
+        MSPROF_LOGE("ProfApiPlugin profRegDeviceStateCallback function is null.");
+        return PROFILING_FAILED;
     }
     return profRegDeviceStateCallback_(handle);
 }
@@ -81,13 +81,9 @@ int32_t ProfApiPlugin::MsprofProfRegDeviceStateCallback(ProfSetDeviceHandle hand
 int32_t ProfApiPlugin::MsprofProfGetDeviceIdByGeModelIdx(const uint32_t modelIdx, uint32_t *deviceId)
 {
     PthreadOnce(&loadFlag_, []()->void {ProfApiPlugin::instance()->LoadProfApiSo();});
-    if (profGetDeviceIdByGeModelIdx_   == nullptr) {
-        int32_t ret = pluginHandle_->GetFunction<int32_t, uint32_t, uint32_t *>("profGetDeviceIdByGeModelIdx",
-            profGetDeviceIdByGeModelIdx_);
-        if (ret != PROFILING_SUCCESS) {
-            MSPROF_LOGE("MsprofProfGetDeviceIdByGeModelIdx get profGetDeviceIdByGeModelIdx failed");
-            return PROFILING_FAILED;
-        }
+    if (profGetDeviceIdByGeModelIdx_ == nullptr) {
+        MSPROF_LOGE("ProfApiPlugin profGetDeviceIdByGeModelIdx function is null.");
+        return PROFILING_FAILED;
     }
     return profGetDeviceIdByGeModelIdx_(modelIdx, deviceId);
 }
@@ -96,13 +92,9 @@ int32_t ProfApiPlugin::MsprofProfGetDeviceIdByGeModelIdx(const uint32_t modelIdx
 int32_t ProfApiPlugin::MsprofProfSetProfCommand(PROFAPI_PROF_COMMAND_PTR command, uint32_t len)
 {
     PthreadOnce(&loadFlag_, []()->void {ProfApiPlugin::instance()->LoadProfApiSo();});
-    if (profSetProfCommand_  == nullptr) {
-        int32_t ret = pluginHandle_->GetFunction<int32_t, PROFAPI_PROF_COMMAND_PTR, uint32_t>("profSetProfCommand",
-            profSetProfCommand_);
-        if (ret != PROFILING_SUCCESS) {
-            MSPROF_LOGE("MsprofProfSetProfCommand get profSetProfCommand failed");
-            return PROFILING_FAILED;
-        }
+    if (profSetProfCommand_ == nullptr) {
+        MSPROF_LOGE("ProfApiPlugin profSetProfCommand function is null.");
+        return PROFILING_FAILED;
     }
     return profSetProfCommand_(command, len);
 }
@@ -111,13 +103,9 @@ int32_t ProfApiPlugin::MsprofProfSetProfCommand(PROFAPI_PROF_COMMAND_PTR command
 int32_t ProfApiPlugin::MsprofProfSetStepInfo(const uint64_t indexId, const uint16_t tagId, void* const stream)
 {
     PthreadOnce(&loadFlag_, []()->void {ProfApiPlugin::instance()->LoadProfApiSo();});
-    if (profSetStepInfo_  == nullptr) {
-        int32_t ret = pluginHandle_->GetFunction<int32_t, uint64_t, uint16_t, void*>("profSetStepInfo",
-            profSetStepInfo_);
-        if (ret != PROFILING_SUCCESS) {
-            MSPROF_LOGE("MsprofProfSetStepInfo get profSetStepInfo failed");
-            return PROFILING_FAILED;
-        }
+    if (profSetStepInfo_ == nullptr) {
+        MSPROF_LOGE("ProfApiPlugin profSetStepInfo function is null.");
+        return PROFILING_FAILED;
     }
     return profSetStepInfo_(indexId, tagId, stream);
 }

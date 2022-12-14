@@ -23,6 +23,7 @@ void SlogPlugin::LoadSlogSo()
             return;
         }
     }
+    (void)pluginHandle_->GetFunction<int, int, int>("CheckLogLevelForC", checkLogLevelForC_);
 }
 
 bool SlogPlugin::IsFuncExist(const std::string &funcName) const
@@ -35,10 +36,7 @@ int SlogPlugin::MsprofCheckLogLevelForC(int moduleId, int logLevel)
 {
     PthreadOnce(&loadFlag_, []()->void {SlogPlugin::instance()->LoadSlogSo();});
     if (checkLogLevelForC_ == nullptr) {
-        int32_t ret = pluginHandle_->GetFunction<int, int, int>("CheckLogLevelForC", checkLogLevelForC_);
-        if (ret != PROFILING_SUCCESS) {
-            return -1;
-        }
+        return -1;
     }
     return checkLogLevelForC_(moduleId, logLevel);
 }

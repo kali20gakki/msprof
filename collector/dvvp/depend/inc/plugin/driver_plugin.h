@@ -143,6 +143,9 @@ public:
     // drvHdcGetCapacity
     drvError_t MsprofDrvHdcGetCapacity(struct drvHdcCapacity *capacity);
 
+    // get all function addresses at a time
+    void GetAllFunction();
+
 private:
     std::string soName_;
     static SHARED_PTR_ALIA<PluginHandle> pluginHandle_;
