@@ -187,6 +187,6 @@ class DataParsersConfig(MetaConfig):
         ]
         , 'L2CacheSampleParser': [
             ('path', 'msparser.l2_cache.l2_cache_sample_parser'),
-            ('chip_model', '5')
+            ('chip_model', '5,7')
         ]
     }

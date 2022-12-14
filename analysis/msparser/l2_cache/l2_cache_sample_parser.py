@@ -51,12 +51,12 @@ class L2CacheSampleParser(IParser, MsMultiProcess):
             _file_size = os.path.getsize(_file_path)
             with FileOpen(_file_path, 'rb') as _l2_cache_file:
                 _all_l2_cache_data = _l2_cache_file.file_reader.read(_file_size)
-                for _index in range(_file_size // StructFmt.L2_CACHE_DATA_SIZE):
+                for _index in range(_file_size // StructFmt.L2_CACHE_SAMPLE_SIZE):
                     l2_cache_data_bean = L2CacheSampleDataBean()
                     l2_cache_data_bean.decode(
                         _all_l2_cache_data[
-                        _index * StructFmt.L2_CACHE_DATA_SIZE:(_index + 1) * StructFmt.L2_CACHE_DATA_SIZE])
-                    self._l2_cache_data.append(l2_cache_data_bean.events_list)
+                        _index * StructFmt.L2_CACHE_SAMPLE_SIZE:(_index + 1) * StructFmt.L2_CACHE_SAMPLE_SIZE])
+                    self._l2_cache_data.append(l2_cache_data_bean.events_list + (l2_cache_data_bean.timestamp,))
             FileManager.add_complete_file(self._project_path, _file_path)
 
     def ms_run(self: any) -> None:

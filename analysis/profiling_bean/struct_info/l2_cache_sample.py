@@ -5,6 +5,7 @@
 import logging
 import struct
 
+from common_func.info_conf_reader import InfoConfReader
 from msparser.data_struct_size_constant import StructFmt
 from msparser.interface.idata_bean import IDataBean
 
@@ -15,10 +16,12 @@ class L2CacheSampleDataBean(IDataBean):
     """
     EVENT_NUM_INDEX = 3
     L2_CACHE_EVENT_START_INDEX = 7
-    L2_CACHE_DATA_NUM = 15
+    L2_CACHE_TIME_INDEX = 15
+    L2_CACHE_DATA_NUM = 16
 
     def __init__(self: any) -> None:
         self._events_list = []
+        self._timestamp = None
 
     @property
     def events_list(self: any) -> list:
@@ -26,6 +29,13 @@ class L2CacheSampleDataBean(IDataBean):
         l2 cache events list
         """
         return self._events_list
+
+    @property
+    def timestamp(self: any) -> float:
+        """
+        timestamp of l2 cache events
+        """
+        return InfoConfReader().time_from_syscnt(self._timestamp)
 
     def decode(self: any, bin_data: bytes) -> None:
         """
@@ -46,6 +56,7 @@ class L2CacheSampleDataBean(IDataBean):
         if len(l2_cache_data) != self.L2_CACHE_DATA_NUM:
             return False
         event_num = l2_cache_data[self.EVENT_NUM_INDEX]
+        self._timestamp = l2_cache_data[self.L2_CACHE_TIME_INDEX]
         self._events_list = l2_cache_data[
                             self.L2_CACHE_EVENT_START_INDEX:self.L2_CACHE_EVENT_START_INDEX + event_num]
         return True
