@@ -6,7 +6,7 @@ import logging
 import os
 import sqlite3
 
-from config.config_manager import ConfigManager
+from msconfig.config_manager import ConfigManager
 from analyzer.get_op_table_task_time import GetOpTableTsTime
 from common_func.common import CommonConstant
 from common_func.constant import Constant

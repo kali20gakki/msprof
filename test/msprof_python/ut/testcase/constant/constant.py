@@ -16,7 +16,7 @@ CONFIG = {
     'result_dir': 'test', 'device_id': '0', 'iter_id': ITER_RANGE,
     'job_id': 'job_default', 'model_id': -1
 }
-UT_CONFIG_FILE_PATH = os.path.join(os.path.dirname(__file__), "..", "config")
+UT_CONFIG_FILE_PATH = os.path.join(os.path.dirname(__file__), "..", "msconfig")
 WRITE_MODES = stat.S_IWUSR | stat.S_IRUSR | stat.S_IRGRP
 WRITE_FLAGS = os.O_WRONLY | os.O_CREAT | os.O_TRUNC
 

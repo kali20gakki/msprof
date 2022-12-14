@@ -14,7 +14,7 @@ from common_func.ms_constant.str_constant import StrConstant
 from common_func.msprof_iteration import MsprofIteration
 from common_func.path_manager import PathManager
 from common_func.platform.chip_manager import ChipManager
-from config.config_manager import ConfigManager
+from msconfig.config_manager import ConfigManager
 from mscalculate.ts_task.ai_cpu.aicpu_from_ts_collector import AICpuFromTsCollector
 from msmodel.step_trace.ts_track_model import TsTrackModel
 from viewer.calculate_rts_data import calculate_task_schedule_data

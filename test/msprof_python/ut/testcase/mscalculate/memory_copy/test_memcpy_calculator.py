@@ -2,7 +2,7 @@ import os
 import unittest
 from unittest import mock
 
-from config.config_manager import ConfigManager
+from msconfig.config_manager import ConfigManager
 from analyzer.scene_base.profiling_scene import ProfilingScene
 from common_func.constant import Constant
 from common_func.db_manager import DBManager

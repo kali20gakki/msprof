@@ -9,7 +9,7 @@ from abc import ABC, abstractmethod
 
 from common_func.constant import Constant
 from common_func.section_calculator import SectionCalculator
-from config.config_manager import ConfigManager
+from msconfig.config_manager import ConfigManager
 from common_func.common_prof_rule import CommonProfRule
 from common_func.common import CommonConstant
 from common_func.common import generate_config

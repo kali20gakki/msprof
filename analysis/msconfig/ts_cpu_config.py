@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
 
-from config.meta_config import MetaConfig
+from msconfig.meta_config import MetaConfig
 
 
-class AICPUConfig(MetaConfig):
+class TsCPUConfig(MetaConfig):
     DATA = {
         'events': [
             ('0x00', 'SW_INCR'),
@@ -30,24 +30,18 @@ class AICPUConfig(MetaConfig):
             ('0x13', 'MEM_ACCESS'),
             ('0x14', 'L1I_CACHE'),
             ('0x15', 'L1D_CACHE_WB'),
-            ('0x16', 'L2D_CACHE'),
-            ('0x17', 'L2D_CACHE_REFILL'),
-            ('0x18', 'L2D_CACHE_WB'),
             ('0x19', 'BUS_ACCESS'),
             ('0x1A', 'MEMORY_ERROR'),
             ('0x1B', 'INST_SPEC'),
             ('0x1C', 'TTBR_WRITE_RETIRED'),
             ('0x1D', 'BUS_CYCLES'),
             ('0x1E', 'CHAIN'),
-            ('0x20', 'L2D_CACHE_ALLOCATE'),
             ('0x21', 'BR_RETIRED'),
             ('0x22', 'BR__MIS_PRED_RETIRED'),
             ('0x23', 'STALL_FRONTEND'),
             ('0x24', 'STALL_BACKEND'),
             ('0x25', 'L1D_TLB'),
             ('0x26', 'L1I_TLB'),
-            ('0x2D', 'L2D_TLB_REFILL'),
-            ('0x2F', 'L2D_TLB'),
             ('0x34', 'DTLB_WALK'),
             ('0x35', 'ITLB_WALK'),
             ('0x36', 'LL_CACHE_RD'),
@@ -59,10 +53,6 @@ class AICPUConfig(MetaConfig):
             ('0x43', 'L1D_CACHE_REFILL_ST'),
             ('0x44', 'L1D_CACHE_REFILL_INNER'),
             ('0x45', 'L1D_CACHE_REFILL_OUTER'),
-            ('0x50', 'L2D_CACHE_LD'),
-            ('0x51', 'L2D_CACHE_ST'),
-            ('0x52', 'L2D_CACHE_REFILL_LD'),
-            ('0x53', 'L2D_CACHE_REFILL_ST'),
             ('0x60', 'BUS_ACCESS_LD'),
             ('0x61', 'BUS_ACCESS_ST'),
             ('0x66', 'MEM_ACCESS_LD'),
@@ -80,9 +70,7 @@ class AICPUConfig(MetaConfig):
             ('0x7A', 'BR_INDIRECT_SPEC'),
             ('0x86', 'EXC_IRQ'),
             ('0x87', 'EXC_FIQ'),
-            ('0xC1', 'L2D_CACHE_REFILL_PREFETCH'),
             ('0xC2', 'L1D_CACHE_REFILL_PREFETCH'),
-            ('0xC3', 'L2D_WS_MODE'),
             ('0xC4', 'L1D_WS_MODE_ENTRY'),
             ('0xC5', 'L1D_WS_MODE'),
             ('0xC6', 'PREDECODE_ERROR'),
@@ -93,13 +81,6 @@ class AICPUConfig(MetaConfig):
             ('0xCD', 'BR_INDIRECT_ADDR_PRED'),
             ('0xCE', 'BR_RETURN_ADDR_PRED'),
             ('0xCF', 'BR_RETURN_ADDR_MIS_PRED'),
-            ('0xD0', 'L2D_LLWALK_TLB'),
-            ('0xD1', 'L2D_LLWALK_TLB_REFILL'),
-            ('0xD2', 'L2D_L2WALK_TLB'),
-            ('0xD3', 'L2D_L2WALK_TLB_REFILL'),
-            ('0xD4', 'L2D_S2_TLB'),
-            ('0xD5', 'L2D_S2_TLB_REFILL'),
-            ('0xD6', 'L2D_CACHE_STASH_DROPPED'),
             ('0xE1', 'STALL_FRONTEND_CACHE'),
             ('0xE2', 'STALL_FRONTEND_TLB'),
             ('0xE3', 'STALL_FRONTEND_PDERR'),
@@ -112,10 +93,8 @@ class AICPUConfig(MetaConfig):
             ('0xEA', 'STALL_BACKEND_LD_TLB'),
             ('0xEB', 'STALL_BACKEND_ST_STB'),
             ('0xEC', 'STALL_BACKEND_ST_TLB')
-        ],
+        ]
     }
 
     def __init__(self):
         super().__init__()
-
-
