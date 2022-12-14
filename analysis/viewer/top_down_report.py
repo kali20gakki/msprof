@@ -7,7 +7,7 @@ import logging
 import sqlite3
 from collections import OrderedDict
 
-from config.config_manager import ConfigManager
+from msconfig.config_manager import ConfigManager
 from common_func.common import CommonConstant
 from common_func.constant import Constant
 from common_func.db_manager import DBManager

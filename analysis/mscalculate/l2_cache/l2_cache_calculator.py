@@ -20,7 +20,7 @@ from mscalculate.interface.icalculator import ICalculator
 from mscalculate.l2_cache.l2_cache_metric import HitRateMetric
 from mscalculate.l2_cache.l2_cache_metric import VictimRateMetric
 from profiling_bean.prof_enum.data_tag import DataTag
-from config.config_manager import ConfigManager
+from msconfig.config_manager import ConfigManager
 
 
 class L2CacheCalculator(ICalculator, MsMultiProcess):
