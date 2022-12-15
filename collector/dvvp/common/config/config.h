@@ -24,6 +24,8 @@ const std::string PROF_MSPROF_PY_NAME = "msprof.py";
 const std::string PROF_MSPROF_SO_NAME = "libmsprofiler.so";
 const std::string PROF_MSPROF_BIN_NAME = "msprof";
 
+const std::string CONTAINTER_NO_SUPPORT_MESSAGE = "MESSAGE_CONTAINER_NO_SUPPORT";
+
 const char * const HOST_TAG_KEY = "Host";
 const char * const DEVICE_TAG_KEY = "Device";
 const char * const CLOCK_REALTIME_KEY = "clock_realtime";
