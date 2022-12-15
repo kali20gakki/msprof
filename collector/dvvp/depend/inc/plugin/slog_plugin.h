@@ -40,14 +40,12 @@ public:
     void MsprofDlogInnerForC(int moduleId, int level, const char *fmt, T... args)
     {
         PthreadOnce(&loadFlag_, []()->void {SlogPlugin::instance()->LoadSlogSo();});
-        int32_t ret = PROFILING_SUCCESS;
         using DlogInnerForCFunc = std::function<void(int, int, const char *, T...)>;
         DlogInnerForCFunc func;
-        ret = pluginHandle_->GetFunction<void, int, int, const char *, T...>("DlogInnerForC", func);
-        if (ret != PROFILING_SUCCESS) {
-            return;
+        pluginHandle_->GetFunction<void, int, int, const char *, T...>("DlogInnerForC", func);
+        if (func != nullptr) {
+            func(moduleId, level, fmt, args...);
         }
-        func(moduleId, level, fmt, args...);
     }
 
 private:

@@ -45,6 +45,9 @@ public:
     // profSetStepInfo
     int32_t MsprofProfSetStepInfo(const uint64_t indexId, const uint16_t tagId, void* const stream);
 
+    // get all function addresses at a time
+    void GetAllFunction();
+
 private:
     std::string soName_;
     static SHARED_PTR_ALIA<PluginHandle> pluginHandle_;
