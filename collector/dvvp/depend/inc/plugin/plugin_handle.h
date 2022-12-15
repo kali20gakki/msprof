@@ -32,13 +32,9 @@ public:
     int32_t OpenPlugin(const std::string envValue);
     void CloseHandle();
     template <typename R, typename... Types>
-    int32_t GetFunction(const std::string& funcName, std::function<R(Types... args)>& func) const
+    void GetFunction(const std::string& funcName, std::function<R(Types... args)>& func) const
     {
         func = (R(*)(Types...))dlsym(handle_, funcName.c_str());
-        if (!func) {
-            return PROFILING_FAILED;
-        }
-        return PROFILING_SUCCESS;
     }
     bool HasLoad();
     bool IsFuncExist(const std::string funcName) const;
