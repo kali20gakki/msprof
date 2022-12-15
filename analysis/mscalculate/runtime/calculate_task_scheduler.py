@@ -14,8 +14,8 @@ from common_func.ms_constant.str_constant import StrConstant
 from common_func.msprof_iteration import MsprofIteration
 from common_func.path_manager import PathManager
 from common_func.platform.chip_manager import ChipManager
-from msconfig.config_manager import ConfigManager
 from mscalculate.ts_task.ai_cpu.aicpu_from_ts_collector import AICpuFromTsCollector
+from msconfig.config_manager import ConfigManager
 from msmodel.step_trace.ts_track_model import TsTrackModel
 from viewer.calculate_rts_data import calculate_task_schedule_data
 from viewer.calculate_rts_data import multi_calculate_task_cost_time
@@ -61,15 +61,6 @@ class CalculateTaskScheduler:
         sql = 'insert into ReportTask values({value})'.format(
             value='?,' * (len(report_data[0]) - 1) + '?')
         DBManager.executemany_sql(runtime_conn, sql, report_data)
-
-    @staticmethod
-    def _get_iter_id_within_iter_range(step_trace_data, timestamp):
-        while step_trace_data:
-            step_trace = step_trace_data[0]
-            if InfoConfReader().time_from_syscnt(step_trace.step_end) < timestamp:
-                step_trace_data.pop(0)
-                continue
-            return step_trace.index_id
 
     def create_task_time(self: any, runtime_conn: any, device: int, iter_time_range: list) -> None:
         """
@@ -218,10 +209,14 @@ class CalculateTaskScheduler:
         with TsTrackModel(self.project_path, DBNameConstant.DB_STEP_TRACE,
                           [DBNameConstant.TABLE_STEP_TRACE_DATA]) as _trace:
             step_trace_data = _trace.get_step_end_list_with_iter_range(self.iter_range)
-        task_time = [task_data + (self._get_iter_id_within_iter_range(step_trace_data, task_data[-1]),
-                                  self.iter_range.model_id,
-                                  NumberConstant.DEFAULT_BATCH_ID)
-                     for task_data in cal_task_data]
+        task_time = [
+            task_data +
+            (MsprofIteration(self.project_path).get_iter_id_within_iter_range(step_trace_data, task_data[-1],
+                                                                              self.iter_range),
+             self.iter_range.model_id,
+             NumberConstant.DEFAULT_BATCH_ID)
+            for task_data in cal_task_data
+        ]
         return task_time
 
     def _collect_aicpu(self: any, task_time: list) -> None:
