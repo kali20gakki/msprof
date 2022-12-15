@@ -125,7 +125,7 @@ class DataParsersConfig(MetaConfig):
         ]
         , 'HCCLParser': [
             ('path', 'msparser.hccl.hccl_parser'),
-            ('chip_model', '0,1,2,3,4'),
+            ('chip_model', '0,1,2,3,4,5'),
             ('level', '3')
         ]
         , 'MsprofTxParser': [

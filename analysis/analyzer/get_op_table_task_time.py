@@ -7,12 +7,14 @@ import logging
 from analyzer.scene_base.profiling_scene import ProfilingScene
 from common_func.constant import Constant
 from common_func.db_name_constant import DBNameConstant
+from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.msprof_iteration import MsprofIteration
 from common_func.platform.chip_manager import ChipManager
 from common_func.utils import Utils
 from msmodel.interface.view_model import ViewModel
+from msmodel.step_trace.ts_track_model import TsTrackModel
 
 
 class GetOpTableTsTime:
@@ -163,6 +165,20 @@ class GetOpTableTsTime:
         model_view = ViewModel(self.project_path, DBNameConstant.DB_AI_CPU, [DBNameConstant.TABLE_AI_CPU_FROM_TS])
         if model_view.check_table() and ChipManager().is_chip_v2():
             ai_cpu_time.extend(model_view.get_sql_data(self._get_ai_cpu_task_sql()))
+        return self._update_aicpu_task_index_id(ai_cpu_time)
+
+    def _update_aicpu_task_index_id(self, ai_cpu_time):
+        if ProfilingScene().is_operator():
+            return ai_cpu_time
+        with TsTrackModel(self.project_path, DBNameConstant.DB_STEP_TRACE,
+                          [DBNameConstant.TABLE_STEP_TRACE_DATA]) as _trace:
+            step_trace_data = _trace.get_step_end_list_with_iter_range(self.iter_range)
+        ai_cpu_time = [
+            ai_cpu[:5] +
+            (MsprofIteration(self.project_path).get_iter_id_within_iter_range(step_trace_data, ai_cpu[2],
+                                                                              self.iter_range),) + ai_cpu[6:]
+            for ai_cpu in ai_cpu_time
+        ]
         return ai_cpu_time
 
     def _get_ai_core_sql(self: any) -> str:
