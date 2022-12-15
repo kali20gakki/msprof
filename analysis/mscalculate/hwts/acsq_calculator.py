@@ -40,20 +40,6 @@ class AcsqCalculator(ICalculator, MsMultiProcess):
         self._iter_model = HwtsIterModel(self._project_path)
         self._log_data = []
 
-    @staticmethod
-    def _get_iter_id_within_iter_range(step_trace_data, timestamp):
-        if ProfilingScene().is_operator():
-            return NumberConstant.DEFAULT_NUMBER
-
-        while step_trace_data:
-            step_trace = step_trace_data[0]
-            if InfoConfReader().time_from_syscnt(step_trace.step_end) < timestamp:
-                step_trace_data.pop(0)
-                continue
-            return step_trace.index_id
-        logging.warning("Task exceeds the scope of iteration, there may be something wrong.")
-        raise ProfException(ProfException.PROF_INVALID_STEP_TRACE_ERROR)
-
     def calculate(self: any) -> None:
         """
         calculate stars acsq data
@@ -100,7 +86,9 @@ class AcsqCalculator(ICalculator, MsMultiProcess):
             tmp = []
             dur_time = task_data[3] - task_data[2]
             tmp.append(task_data[0:3] + (dur_time,) +
-                       (task_data[4], self._get_iter_id_within_iter_range(step_trace_data, task_data[3]),
+                       (task_data[4],
+                        MsprofIteration(self._project_path).get_iter_id_within_iter_range(step_trace_data, task_data[3],
+                                                                                          self._iter_range),
                         self._iter_range.model_id))
             train_data.extend(tmp)
         return train_data
@@ -149,5 +137,5 @@ class AcsqCalculator(ICalculator, MsMultiProcess):
             stream_id = datum[1]
             task_id = datum[0]
             batch_id = batch_counter.calculate_batch(stream_id, task_id, current_iter_id)
-            prep_data_res[index] = datum + (batch_id, )
+            prep_data_res[index] = datum + (batch_id,)
         return prep_data_res
