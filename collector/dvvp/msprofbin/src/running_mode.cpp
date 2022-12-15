@@ -790,9 +790,10 @@ int SystemMode::RunModeTasks()
         MSPROF_LOGE("[System Mode] Invalid params!");
         return PROFILING_FAILED;
     }
-    if (StartSysTask() != PROFILING_SUCCESS) {
+    int ret = StartSysTask();
+    if (ret != PROFILING_SUCCESS) {
         MSPROF_LOGE("[System Mode] Run system task failed.");
-        return PROFILING_FAILED;
+        return ret;
     }
     UpdateOutputDirInfo();
     if (CheckAnalysisEnv() != PROFILING_SUCCESS) {
@@ -898,7 +899,7 @@ int SystemMode::StartDeviceTask(const std::string resultDir, const std::string d
     ret = task->Init();
     if (ret != PROFILING_SUCCESS) {
         MSPROF_LOGE("[StartDeviceTask]DeviceTask init failed, deviceId:%s", device.c_str());
-        return PROFILING_FAILED;
+        return ret;
     }
     ret = task->Start();
     if (ret != PROFILING_SUCCESS) {
@@ -1113,7 +1114,7 @@ int SystemMode::StartDeviceJobs(const std::string& device)
         if (ret != PROFILING_SUCCESS) {
             MSPROF_LOGE("StartDeviceTask failed");
             StopTask();
-            return PROFILING_FAILED;
+            return ret;
         }
     }
     return PROFILING_SUCCESS;
@@ -1145,8 +1146,9 @@ int SystemMode::StartSysTask()
         MSPROF_LOGW("Failed to record output dir: %s", Utils::BaseName(baseDir_).c_str());
     }
     for (auto device : devices) {
-        if (StartDeviceJobs(device) != PROFILING_SUCCESS) {
-            return PROFILING_FAILED;
+        int ret = StartDeviceJobs(device);
+        if (ret != PROFILING_SUCCESS) {
+            return ret;
         }
     }
     if (params_->IsHostProfiling()) {

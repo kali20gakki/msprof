@@ -135,7 +135,10 @@ int DeviceTransport::HandleShake(SHARED_PTR_ALIA<google::protobuf::Message> mess
 
         TLV_REQ_PTR packet = nullptr;
         ret = tran->RecvPacket(&packet);
-        if (ret < 0 || packet == nullptr) {
+        if (ret == PROFILING_NOTSUPPORT) {
+            MSPROF_LOGW("Device(%s) disallow to handshake of container link.", devIndexIdStr_.c_str());
+            break;
+        } else if (ret < 0 || packet == nullptr) {
             ret = PROFILING_FAILED;
             MSPROF_LOGW("Device(%s) create channel recv handshake failed", devIndexIdStr_.c_str());
             continue;
@@ -150,7 +153,7 @@ int DeviceTransport::HandleShake(SHARED_PTR_ALIA<google::protobuf::Message> mess
         break;
     } while (handshakeCount < handshakeRetryTimes && ctrlShake);
 
-    if (ret != PROFILING_SUCCESS) {
+    if (ret != PROFILING_SUCCESS && ret != PROFILING_NOTSUPPORT) {
         MSPROF_LOGE("Failed to handshake with device %s, try times %d", devIndexIdStr_.c_str(), handshakeCount);
         MSPROF_INNER_ERROR("EK9999", "Failed to handshake with device %s, try times %d",
             devIndexIdStr_.c_str(), handshakeCount);
@@ -353,8 +356,10 @@ int DevTransMgr::Init(std::string jobId, int devId, std::string mode)
     if (!devTran->IsInitialized()) {
         ret = devTran->Init();
         if (ret != PROFILING_SUCCESS) {
-            MSPROF_LOGE("Init device(%d) trans failed", devId);
-            MSPROF_INNER_ERROR("EK9999", "Init device(%d) trans failed", devId);
+            if (ret != PROFILING_NOTSUPPORT) {
+                MSPROF_LOGE("Init device(%d) trans failed", devId);
+                MSPROF_INNER_ERROR("EK9999", "Init device(%d) trans failed", devId);
+            }
             return ret;
         }
 
