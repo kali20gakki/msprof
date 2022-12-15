@@ -48,7 +48,6 @@ const int HOST_SYS_USAGE_FREQ_MIN = 1;
 const int HOST_SYS_USAGE_FREQ_MAX = 50;
 const int L2_SAMPLE_FREQ_MIN = 1;
 const int L2_SAMPLE_FREQ_MAX = 100;
-const int ACC_PMU_MODE_THRED = 5000; // Check
 enum InputCfg {
     INPUT_CFG_MSPROF_APPLICATION = 0,
     INPUT_CFG_MSPROF_ENVIRONMENT = 1,

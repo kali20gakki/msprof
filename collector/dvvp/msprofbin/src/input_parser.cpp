@@ -329,9 +329,9 @@ void ArgsManager::AddHardWareMemArgs()
     auto hardwareMemFreq = Args("sys-hardware-mem-freq", "", "50");
     auto llcMode = Args("llc-profiling", "", "capacity");
     hardwareMem.SetDetail("LLC, DDR, HBM acquisition switch, optional on / off, the default value is off.\n"
-                              "\t\t\t\t\t\t   LLC, DDR(full-platform), HBM(Ascend310P, Ascend910)");
+                              "\t\t\t\t\t\t   LLC, DDR(full-platform), HBM(Ascend910)");
     hardwareMemFreq.SetDetail("LLC, DDR, HBM acquisition frequency, range 1 ~ 1000, the default value is 50 Hz.\n"
-                                  "\t\t\t\t\t\t   LLC, DDR(full-platform), HBM(Ascend310P, Ascend910)");
+                                  "\t\t\t\t\t\t   LLC, DDR(full-platform), HBM(Ascend910)");
     if (driverOnline_ && platform_ == PlatformType::MINI_TYPE) {
         llcMode.SetDetail("The llc profiling groups. Include capacity, bandwidth. "
             "the default value is capacity.(Ascend310)");
