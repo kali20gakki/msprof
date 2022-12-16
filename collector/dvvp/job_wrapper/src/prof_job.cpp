@@ -1529,7 +1529,7 @@ int ProfL2CacheTaskJob::Process()
         PROF_CHANNEL_L2_CACHE, filePath);
     int ret;
     PlatformType type = ConfigManager::instance()->GetPlatformType();
-    if (type == PlatformType::CHIP_V4_1_0 || type == PlatformType::MINI_V3_TYPE) {
+    if (type == PlatformType::CHIP_V4_1_0 || type == PlatformType::CHIP_V4_2_0) {
         ret = DrvL2CacheSampleStart(
             collectionJobCfg_->comParams->devId,
             PROF_CHANNEL_L2_CACHE,

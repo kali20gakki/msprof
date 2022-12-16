@@ -198,7 +198,8 @@ bool ConfigManager::IsDriverSupportLlc() const
 {
     PlatformType type = GetPlatformType();
     if (type == PlatformType::CLOUD_TYPE || type == PlatformType::DC_TYPE ||
-        type == PlatformType::MDC_TYPE || type == PlatformType::CHIP_V4_1_0) {
+        type == PlatformType::MDC_TYPE || type == PlatformType::CHIP_V4_1_0 ||
+        type == PlatformType::CHIP_V4_2_0) {
         return true;
     }
     return false;
