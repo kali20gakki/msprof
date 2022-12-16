@@ -59,5 +59,6 @@ class ClusterInfoViewModel(ViewModel):
         return DBManager.fetch_one_data(self.cur, sql, (rank_id, rank_id), ClusterRankDto)
 
     def get_all_rank_id_and_dirnames(self: any) -> list:
-        sql = "select rank_id, dir_name from {}".format(DBNameConstant.TABLE_CLUSTER_RANK)
+        sql = f"select case when rank_id='N/A' then device_id else rank_id end, dir_name " \
+              f"from {DBNameConstant.TABLE_CLUSTER_RANK}"
         return DBManager.fetch_all_data(self.cur, sql)
