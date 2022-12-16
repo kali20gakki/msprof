@@ -42,8 +42,7 @@ class ClusterParserFactory:
                           DBNameConstant.DB_CLUSTER_RANK)
             raise ProfException(ProfException.PROF_CLUSTER_INVALID_DB)
         if rank_id == Constant.NA:
-            print_msg(json.dumps({'status': NumberConstant.WARN, 'info': 'Not Cluster Scene'}))
-            logging.error('Not Cluster Scene!')
+            logging.error('Not Device id or rank id!')
             raise ProfException(ProfException.PROF_CLUSTER_INVALID_DB)
         if rank_id >= NumberConstant.MAX_RANK_NUMS:
             logging.error("Number of ranks is %s !, exceeds the limited upper bound:%s ",
