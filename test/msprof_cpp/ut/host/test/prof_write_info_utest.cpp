@@ -148,7 +148,13 @@ TEST_F(INFO_JSON_TEST, AddDeviceInfo) {
     // failed to get dev info
     EXPECT_EQ(PROFILING_FAILED, infoJson.AddDeviceInfo(infoMain));
 
+    MOCKER_CPP(&Analysis::Dvvp::Common::Config::ConfigManager::GetPlatformType)
+        .stubs()
+        .will(returnValue(Analysis::Dvvp::Common::Config::PlatformType::MINI_TYPE))
+        .then(returnValue(Analysis::Dvvp::Common::Config::PlatformType::CHIP_V4_1_0));
+
     // ok
+    EXPECT_EQ(PROFILING_SUCCESS, infoJson.AddDeviceInfo(infoMain));
     EXPECT_EQ(PROFILING_SUCCESS, infoJson.AddDeviceInfo(infoMain));
 }
 
@@ -171,7 +177,7 @@ TEST_F(INFO_JSON_TEST, SetPlatFormVersion) {
         .stubs()
         .will(returnValue(Analysis::Dvvp::Common::Config::PlatformType::MINI_TYPE))
         .then(returnValue(Analysis::Dvvp::Common::Config::PlatformType::CLOUD_TYPE))
-        .then(returnValue(Analysis::Dvvp::Common::Config::PlatformType::CLOUD_TYPE_V2))
+        .then(returnValue(Analysis::Dvvp::Common::Config::PlatformType::CHIP_V4_1_0))
         .then(returnValue(Analysis::Dvvp::Common::Config::PlatformType::LHISI_TYPE));
 
     InfoJson infoJson(start_time, end_time, devices);
