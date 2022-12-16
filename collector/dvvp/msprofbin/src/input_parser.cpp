@@ -258,7 +258,7 @@ void ArgsManager::AddAnalysisArgs()
 
 void ArgsManager::AddStarsArgs()
 {
-    if (driverOnline_ && platform_ != PlatformType::CHIP_V4_1_0) {
+    if (driverOnline_ && platform_ != PlatformType::CHIP_V4_1_0 && platform_ != PlatformType::CHIP_V4_2_0) {
         return;
     }
 
@@ -445,7 +445,7 @@ void ArgsManager::AddL2Args()
     }
     Args l2 = {"l2", "L2 Cache acquisition switch. the default value is off.(Ascend310P, Ascend910)", OFF};
     argsList_.push_back(l2);
-    if (driverOnline_ && platform_ != PlatformType::CHIP_V4_1_0 && platform_ != PlatformType::MINI_V3_TYPE) {
+    if (driverOnline_ && platform_ != PlatformType::CHIP_V4_1_0 && platform_ != PlatformType::CHIP_V4_2_0) {
         return;
     }
     Args l2freq = {"l2-freq",
