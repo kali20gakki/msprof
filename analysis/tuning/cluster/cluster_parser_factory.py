@@ -4,6 +4,7 @@
 
 import os
 import logging
+import json
 from collections import defaultdict
 from abc import abstractmethod
 from msmodel.step_trace.cluster_step_trace_model import ClusterStepTraceViewModel
@@ -15,7 +16,9 @@ from msparser.cluster.meta_parser import MetaParser
 from common_func.db_name_constant import DBNameConstant
 from common_func.msprof_exception import ProfException
 from common_func.common import error
+from common_func.common import print_msg
 from common_func.ms_constant.number_constant import NumberConstant
+from common_func.constant import Constant
 
 
 class ClusterParserFactory:
@@ -31,6 +34,20 @@ class ClusterParserFactory:
         generate_parse_method
         """
         return MetaParser()
+
+    @staticmethod
+    def _check_rank_info(rank_id: any, dirname: any) -> None:
+        if rank_id is None or dirname is None:
+            logging.error("no valid information in %s, hccl parser is interrupted",
+                          DBNameConstant.DB_CLUSTER_RANK)
+            raise ProfException(ProfException.PROF_CLUSTER_INVALID_DB)
+        if rank_id == Constant.NA:
+            logging.error('Not Device id or rank id!')
+            raise ProfException(ProfException.PROF_CLUSTER_INVALID_DB)
+        if rank_id >= NumberConstant.MAX_RANK_NUMS:
+            logging.error("Number of ranks is %s !, exceeds the limited upper bound:%s ",
+                          str(rank_id), NumberConstant.MAX_RANK_NUMS)
+            raise ProfException(ProfException.PROF_INVALID_DATA_ERROR)
 
     def get_hccl_ops_by_iter(self):
         """
@@ -58,14 +75,7 @@ class ClusterParserFactory:
                     raise ProfException(ProfException.PROF_CLUSTER_INVALID_DB)
                 rank_id = rank_dir[0]
                 dirname = rank_dir[1]
-                if rank_id is None or dirname is None:
-                    logging.error("no valid information in %s, hccl parser is interrupted",
-                                  DBNameConstant.DB_CLUSTER_RANK)
-                    raise ProfException(ProfException.PROF_CLUSTER_INVALID_DB)
-                if rank_id >= NumberConstant.MAX_RANK_NUMS:
-                    logging.error("Number of ranks is %s !, exceeds the limited upper bound:%s ",
-                                  str(rank_id), NumberConstant.MAX_RANK_NUMS)
-                    raise ProfException(ProfException.PROF_INVALID_DATA_ERROR)
+                self._check_rank_info(rank_id, dirname)
                 rank_path = os.path.join(self.collection_path, dirname)
                 step_trace_table = DBNameConstant.TABLE_CLUSTER_STEP_TRACE.format(rank_id)
                 if not model.judge_table_exist(step_trace_table):
