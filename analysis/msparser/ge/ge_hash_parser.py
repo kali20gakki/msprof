@@ -37,8 +37,6 @@ class GeHashParser(DataParser, MsMultiProcess):
             ge_hash_list = line.strip().split(":", 1)
             if ge_hash_list[0].isdigit():
                 result.append(ge_hash_list)
-            else:
-                logging.warning("Invalid ge hash value: %s", line)
         return result
 
     def parse(self: any) -> None:
