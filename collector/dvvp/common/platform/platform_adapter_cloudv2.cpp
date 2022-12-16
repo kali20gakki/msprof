@@ -42,7 +42,7 @@ int PlatformAdapterCloudV2::Init(SHARED_PTR_ALIA<analysis::dvvp::message::Profil
         PLATFORM_SYS_HOST_ALL_PID_CPU, PLATFORM_SYS_HOST_ALL_PID_MEM,
         PLATFORM_SYS_HOST_SYS_CPU, PLATFORM_SYS_HOST_SYS_MEM};
     aicRunningFreq_ = "800";
-    sysCountFreq_ = "100";
+    sysCountFreq_ = "50";
     l2CacheEvents_ = "0xFB,0xFC,0x9A,0xF6";
     platformType_ = platformType;
     return PROFILING_SUCCESS;

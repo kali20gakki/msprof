@@ -32,7 +32,7 @@ enum class PlatformType {
     LHISI_TYPE,
     DC_TYPE,
     CHIP_V4_1_0,
-    MINI_V3_TYPE = 7,
+    CHIP_V4_2_0 = 7, // 1911
     END_TYPE
 };
 const std::map<PlatformType, std::string> FREQUENCY_TYPE = {
@@ -41,7 +41,8 @@ const std::map<PlatformType, std::string> FREQUENCY_TYPE = {
     {PlatformType::LHISI_TYPE, "24"},
     {PlatformType::DC_TYPE, "38.4"},
     {PlatformType::MDC_TYPE, "38.4"},
-    {PlatformType::CHIP_V4_1_0, "100"}
+    {PlatformType::CHIP_V4_1_0, "50"},
+    {PlatformType::CHIP_V4_2_0, "50"}
 };
 
 const std::map<PlatformType, std::string> AIC_TYPE = {
@@ -50,7 +51,8 @@ const std::map<PlatformType, std::string> AIC_TYPE = {
     {PlatformType::LHISI_TYPE, "300"},
     {PlatformType::DC_TYPE, "1150"},
     {PlatformType::MDC_TYPE, "960"},
-    {PlatformType::CHIP_V4_1_0, "800"}
+    {PlatformType::CHIP_V4_1_0, "800"},
+    {PlatformType::CHIP_V4_2_0, "1250"}
 };
 
 const std::map<std::string, std::string> AICORE_METRICS_LIST = {
@@ -74,7 +76,7 @@ const std::map<PlatformType, std::string> L2_CACHE_PLATFORM_METRICS_MAP = {
     {PlatformType::CLOUD_TYPE, "HitRateAndVictimRateCloud"},
     {PlatformType::DC_TYPE, "HitRateAndVictimRate"},
     {PlatformType::MDC_TYPE, "HitRateAndVictimRate"},
-    {PlatformType::MINI_V3_TYPE, "HitRateAndVictimRateAllocate"},
+    {PlatformType::CHIP_V4_2_0, "HitRateAndVictimRateAllocate"},
     {PlatformType::CHIP_V4_1_0, "HitRateAndVictimRateAllocate"}
 };
 
