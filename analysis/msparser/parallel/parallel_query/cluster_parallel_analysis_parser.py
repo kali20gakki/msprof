@@ -36,16 +36,15 @@ class ClusterParallelAnalysisParser:
 
     def _prepare_parallel_analysis(self: any) -> None:
         if not os.path.exists(PathManager.get_db_path(self._collection_path, DBNameConstant.DB_CLUSTER_PARALLEL)):
-            error(MsProfCommonConstant.COMMON_FILE_NAME, "Cannot find the cluster_parallel.db or Permission denied!")
-            raise ProfException(ProfException.PROF_CLUSTER_INVALID_DB)
+            raise ProfException(ProfException.PROF_CLUSTER_INVALID_DB,
+                                "Cannot find the cluster_parallel.db or Permission denied!")
         npu_ids = []
         model_iteration_ids = {}
         with ClusterParallelViewModel(self._collection_path) as _model:
             self._parallel_table_name = _model.get_table_name()
             if self._parallel_table_name == Constant.NA:
-                error(MsProfCommonConstant.COMMON_FILE_NAME,
-                      "Cannot find the cluster parallel table or Permission denied!")
-                raise ProfException(ProfException.PROF_CLUSTER_INVALID_DB)
+                raise ProfException(ProfException.PROF_CLUSTER_INVALID_DB,
+                                    "Cannot find the cluster parallel table or Permission denied!")
             npu_ids = _model.get_npu_ids(self._parallel_table_name)
             model_iteration_ids = _model.get_model_iteration_ids(self._parallel_table_name)
         self._check_arguments_valid(npu_ids, model_iteration_ids)
@@ -53,28 +52,26 @@ class ClusterParallelAnalysisParser:
     def _check_arguments_valid(self: any, npu_ids: list, model_iteration_ids: dict) -> None:
         if self._npu_id == Constant.DEFAULT_INVALID_VALUE:
             if self._model_id not in model_iteration_ids.keys():
-                error(MsProfCommonConstant.COMMON_FILE_NAME,
-                      "Invalid arguments! The argument '--model-id' should be between {} and {}.".format(
-                          min(model_iteration_ids.keys()), max(model_iteration_ids.keys())))
-                raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR)
+                min_value = min(model_iteration_ids.keys())
+                max_value = max(model_iteration_ids.keys())
+                message = f"Invalid arguments! The argument '--model-id' should be between {min_value} and {max_value}."
+                raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR, message)
             if str(self._iteration_id) not in model_iteration_ids.get(self._model_id, []):
-                error(MsProfCommonConstant.COMMON_FILE_NAME,
-                      "Invalid arguments! The argument '--iteration-id' should be between {} and {}.".format(
-                          min(model_iteration_ids.get(self._model_id, [])),
-                          max(model_iteration_ids.get(self._model_id, []))))
-                raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR)
+                min_value = min(model_iteration_ids.get(self._model_id, []))
+                max_value = max(model_iteration_ids.get(self._model_id, []))
+                message = f"Invalid arguments! " \
+                          f"The argument '--iteration-id' should be between {min_value} and {max_value}."
+                raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR, message)
             return
         if self._iteration_id == Constant.DEFAULT_INVALID_VALUE:
             if self._npu_id not in npu_ids:
-                error(MsProfCommonConstant.COMMON_FILE_NAME,
-                      "Invalid arguments! The argument '--id' should be on the list {}.".format(str(npu_ids)))
-                raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR)
+                message = f"Invalid arguments! The argument '--id' should be on the list {str(npu_ids)}."
+                raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR, message)
             if self._model_id not in model_iteration_ids.keys():
-                error(MsProfCommonConstant.COMMON_FILE_NAME,
-                      "Invalid arguments! The argument '--model-id' should be between {} and {}.".format(
-                          min(model_iteration_ids.keys()), max(model_iteration_ids.keys())))
-                raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR)
+                min_value = min(model_iteration_ids.keys())
+                max_value = max(model_iteration_ids.keys())
+                message = f"Invalid arguments! The argument '--model-id' should be between {min_value} and {max_value}."
+                raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR, message)
             return
-        error(MsProfCommonConstant.COMMON_FILE_NAME,
-              "Query arguments error! One of the arguments '--id' or '--model-id' must be -1.")
-        raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR)
+        message = "Query arguments error! One of the arguments '--id' or '--model-id' must be -1."
+        raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR, message)

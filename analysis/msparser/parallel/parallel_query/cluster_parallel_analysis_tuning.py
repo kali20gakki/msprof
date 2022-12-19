@@ -31,22 +31,18 @@ class ClusterParallelAnalysisTuning:
         with ClusterParallelViewModel(self._collection_path) as _model:
             parallel_table_name = _model.get_table_name()
         if parallel_table_name == Constant.NA:
-            error(MsProfCommonConstant.COMMON_FILE_NAME, "Cannot find the cluster_parallel table!")
-            raise ProfException(ProfException.PROF_CLUSTER_INVALID_DB)
+            raise ProfException(ProfException.PROF_CLUSTER_INVALID_DB, "Cannot find the cluster_parallel table!")
         self._tuning_suggestion = ClusterParallelAnalysis(parallel_table_name, self._params).get_tuning_suggestion()
         output_file_name = "cluster_parallel_suggestion_-1_-1_-1.json"
         FileManager.storage_query_result_json_file(self._collection_path, self._tuning_suggestion, output_file_name)
 
     def _prepare_parallel_analysis(self: any) -> None:
         if not os.path.exists(PathManager.get_db_path(self._collection_path, DBNameConstant.DB_CLUSTER_PARALLEL)):
-            error(MsProfCommonConstant.COMMON_FILE_NAME, "Cannot find the cluster_parallel.db or Permission denied!")
-            raise ProfException(ProfException.PROF_CLUSTER_INVALID_DB)
+            raise ProfException(ProfException.PROF_CLUSTER_INVALID_DB,
+                                "Cannot find the cluster_parallel.db or Permission denied!")
         if self._npu_id != Constant.DEFAULT_INVALID_VALUE:
-            error(MsProfCommonConstant.COMMON_FILE_NAME, "Invalid params! --id must be -1.")
-            raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR)
+            raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR, "Invalid params! --id must be -1.")
         if self._model_id != Constant.DEFAULT_INVALID_VALUE:
-            error(MsProfCommonConstant.COMMON_FILE_NAME, "Invalid params! --model-id must be -1.")
-            raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR)
+            raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR, "Invalid params! --model-id must be -1.")
         if self._iteration_id != Constant.DEFAULT_INVALID_VALUE:
-            error(MsProfCommonConstant.COMMON_FILE_NAME, "Invalid params! --iteration-id must be -1.")
-            raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR)
+            raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR, "Invalid params! --iteration-id must be -1.")

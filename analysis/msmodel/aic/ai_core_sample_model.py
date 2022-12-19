@@ -275,7 +275,7 @@ class AiCoreSampleModel(BaseModel):
         for _key in sample_metrics_lst:
             if _key.lower() not in \
                     (item[0] for item in config_file_obj(file_name='ai_core').items('formula')):
-                error(self.FILE_NAME, 'Invalid metric {} .'.format(_key))
-                raise ProfException(ProfException.PROF_SYSTEM_EXIT)
+                message = f"Invalid metric {_key} ."
+                raise ProfException(ProfException.PROF_SYSTEM_EXIT, message)
         metrics.extend(sample_metrics_lst)
         return metrics

@@ -153,13 +153,13 @@ class QueryCommand:
         rank_db_path = os.path.join(cluster_sqlite_path, DBNameConstant.DB_CLUSTER_RANK)
         step_db_path = os.path.join(cluster_sqlite_path, DBNameConstant.DB_CLUSTER_STEP_TRACE)
         if not os.path.exists(rank_db_path):
-            warn(self.FILE_NAME, "cluster_rank.db not created in the dir(%s), "
-                                 "please import --cluster first!" % cluster_sqlite_path)
-            raise ProfException(ProfException.PROF_CLUSTER_INVALID_DB)
+            message = f"cluster_rank.db not created in the dir({cluster_sqlite_path}), " \
+                      f"please import --cluster first!"
+            raise ProfException(ProfException.PROF_CLUSTER_INVALID_DB, message)
         if not os.path.exists(step_db_path):
-            warn(self.FILE_NAME, "cluster_step_trace.db not created in the dir(%s), "
-                            "please import --cluster first!" % cluster_sqlite_path)
-            raise ProfException(ProfException.PROF_CLUSTER_INVALID_DB)
+            message = f"cluster_step_trace.db not created in the dir({cluster_sqlite_path}), " \
+                      f"please import --cluster first!"
+            raise ProfException(ProfException.PROF_CLUSTER_INVALID_DB, message)
         return True
     
     def _is_query_summary_data(self: any) -> bool:

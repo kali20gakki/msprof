@@ -99,9 +99,8 @@ class MsprofQuerySummaryManager:
             MsprofQuerySummaryManager.check_cluster_scene(self.collection_path)
             return
         if not self._check_collection_dir_valid():
-            error(MsprofQuerySummaryManager.FILE_NAME,
-                  "To query cluster or summary data, please execute import --cluster first")
-            raise ProfException(ProfException.PROF_CLUSTER_DIR_ERROR)
+            message = "To query cluster or summary data, please execute import --cluster first"
+            raise ProfException(ProfException.PROF_CLUSTER_DIR_ERROR, message)
         prepare_log(self.collection_path)
         self.QUERY_DATA_TYPE_PARSER.get(self.data_type)(self.params).process()
 
@@ -113,6 +112,5 @@ class MsprofQuerySummaryManager:
 
     def _check_data_type_valid(self: any) -> None:
         if self.data_type is None or self.data_type not in QueryDataType.__members__.values():
-            error(MsprofQuerySummaryManager.FILE_NAME,
-                  "The query data type is wrong. Please enter a valid value.")
-            raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR)
+            raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR,
+                                "The query data type is wrong. Please enter a valid value.")

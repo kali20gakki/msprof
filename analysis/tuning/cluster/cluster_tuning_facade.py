@@ -125,18 +125,16 @@ class ClusterTuningFacade:
         self._check_data_type_valid()
         QueryArgumentCheck.check_arguments_valid(self._npu_id, self._model_id, self._iteration_id)
         if not self._check_collection_dir_valid():
-            error(ClusterTuningFacade.FILE_NAME,
-                  "To query cluster or summary data, please execute import --cluster first")
-            raise ProfException(ProfException.PROF_CLUSTER_DIR_ERROR)
+            raise ProfException(ProfException.PROF_CLUSTER_DIR_ERROR,
+                                "To query cluster or summary data, please execute import --cluster first")
 
     def _check_collection_dir_valid(self: any) -> bool:
         return os.path.exists(PathManager.get_db_path(self._collection_path, DBNameConstant.DB_CLUSTER_RANK))
 
     def _check_data_type_valid(self: any) -> None:
         if self.data_type not in QueryDataType.__members__.values():
-            error(ClusterTuningFacade.FILE_NAME,
-                  "The query data type is wrong. Please enter a valid value.")
-            raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR)
+            raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR,
+                                "The query data type is wrong. Please enter a valid value.")
 
     def _is_cluster_all_device_scene(self: any) -> bool:
         return self._npu_id == self.CLUSTER_ALL_DEVICE_SCENE

@@ -112,8 +112,8 @@ class ClusterDataPreparationParser:
         """
         check_path_valid(self._collection_path, False)
         if not self._check_device_path_valid():
-            error(self.FILE_NAME, "Parameter settings are incorrect, please check input: --id. ")
-            raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR)
+            raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR,
+                                "Parameter settings are incorrect, please check input: --id.")
         if DataCheckManager.contain_info_json_data(self._device_path):
             if not os.path.exists(PathManager.get_db_path(self._device_path,
                                                           DBNameConstant.DB_CLUSTER_DATA_PREPROCESS)):
@@ -128,9 +128,8 @@ class ClusterDataPreparationParser:
                 return
             self._query_data_queue()
         else:
-            error(self.FILE_NAME,
-                  'Invalid parsing dir("%s"), there is no PROF file in this path.' % self._device_path)
-            raise ProfException(ProfException.PROF_INVALID_PATH_ERROR)
+            message = f"Invalid parsing dir(\"{self._device_path}\"), there is no PROF file in this path."
+            raise ProfException(ProfException.PROF_INVALID_PATH_ERROR, message)
 
     def _query_host_queue(self: any) -> None:
         with self._model as model:
@@ -186,9 +185,9 @@ class ClusterDataPreparationParser:
         """
         data_queue_data = self._get_data_queue_data()
         if not data_queue_data:
-            error(self.FILE_NAME, "Query data failed, maybe import command has not run successfully yet or "
-                                  "import data preparation has no data, please check and run import command first.")
-            raise ProfException(ProfException.PROF_INVALID_PATH_ERROR)
+            message = "Query data failed, maybe import command has not run successfully yet or " \
+                      "import data preparation has no data, please check and run import command first."
+            raise ProfException(ProfException.PROF_INVALID_PATH_ERROR, message)
         self._calculate_queue_data(data_queue_data)
 
     def _get_data_queue_data(self: any) -> list:
@@ -214,9 +213,8 @@ class ClusterDataPreparationParser:
                                    Constant.WRITE_MODES), 'w') as _file:
                 _file.write(json.dumps(self._data))
         except (OSError, SystemError, RuntimeError, TypeError) as err:
-            error(self.FILE_NAME,
-                  "Storing data failed, you may not have the permission to write files in the current path.")
-            raise ProfException(ProfException.PROF_INVALID_PATH_ERROR) from err
+            message = "Storing data failed, you may not have the permission to write files in the current path."
+            raise ProfException(ProfException.PROF_INVALID_PATH_ERROR, message) from err
         else:
             print_msg({"status": NumberConstant.SUCCESS, "info": "", "data": file_path})
 
@@ -226,7 +224,6 @@ class ClusterDataPreparationParser:
             try:
                 os.makedirs(query_path)
             except OSError as err:
-                error(self.FILE_NAME, "Storing data failed, "
-                                      "you may not have the permission to write files in the current path.")
-                raise ProfException(ProfException.PROF_INVALID_PATH_ERROR) from err
+                message = f"Storing data failed, you may not have the permission to write files in the current path."
+                raise ProfException(ProfException.PROF_INVALID_PATH_ERROR, message) from err
         return os.path.realpath(os.path.join(query_path, file_name))
