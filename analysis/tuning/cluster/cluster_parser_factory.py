@@ -90,16 +90,14 @@ class ClusterParserFactory:
                 self.max_iters_model_id = model_iteration[0][0]
                 # get iteration end and start
                 if self.iteration_id is None or self.iteration_id <= 0:
-                    error(self.FILE_NAME,
-                          "invalid iteration id!".format(self.iteration_id))
-                    logging.error("invalid iteration id!")
-                    raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR)
+                    message = "Invalid iteration id!"
+                    logging.error(message)
+                    raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR, message)
                 iter_start_end = model.get_iter_start_end(self.iteration_id, self.max_iters_model_id, step_trace_table)
                 if not iter_start_end:
-                    error(self.FILE_NAME,
-                          "fail to get no.{} iteration end and start time".format(self.iteration_id))
+                    message = f"Fail to get no.{self.iteration_id} iteration end and start time."
                     logging.error("%s doesn't have %s iteration information", step_trace_table, str(self.iteration_id))
-                    raise ProfException(ProfException.PROF_INVALID_STEP_TRACE_ERROR)
+                    raise ProfException(ProfException.PROF_INVALID_STEP_TRACE_ERROR, message)
                 self.get_hccl_events_from_db(rank_id, rank_path, iter_start_end)
 
     def get_hccl_events_from_db(self: any, rank_id: int, rank_path: str, iter_start_end: list) -> None:
@@ -147,10 +145,9 @@ class ClusterCommunicationParserFactory(ClusterParserFactory):
     def generate_parser(self: any) -> CommunicationParser:
         self.get_hccl_ops_by_iter()
         if not self.rank_hccl_data_dict:
-            error(self.FILE_NAME,
-                  "fail to get no.{} iteration hccl data".format(self.iteration_id))
+            message = f"fail to get no.{self.iteration_id} iteration hccl data"
             logging.error("Can't get hccl events!")
-            raise ProfException(ProfException.PROF_INVALID_DATA_ERROR)
+            raise ProfException(ProfException.PROF_INVALID_DATA_ERROR, message)
         return CommunicationParser(self.rank_hccl_data_dict)
 
     def update_data(self: any, hccl_name: str, rank_id: int, events_data: list) -> None:
@@ -182,10 +179,9 @@ class CommunicationMatrixParserFactory(ClusterParserFactory):
     def generate_parser(self: any) -> CommunicationMatrixParser:
         self.get_hccl_ops_by_iter()
         if not self.op_hccl_events:
-            error(self.FILE_NAME,
-                  "fail to get no.{} iteration hccl data".format(self.iteration_id))
+            message = f"Fail to get no.{self.iteration_id} iteration hccl data"
             logging.error("Can't get hccl events!")
-            raise ProfException(ProfException.PROF_INVALID_DATA_ERROR)
+            raise ProfException(ProfException.PROF_INVALID_DATA_ERROR, message)
         return CommunicationMatrixParser(self.op_hccl_events)
 
     def update_data(self: any, hccl_name: str, rank_id: int, events_data: list) -> None:

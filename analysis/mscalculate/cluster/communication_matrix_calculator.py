@@ -151,9 +151,9 @@ class CommunicationMatrixCalculator(MetaCalculator):
 
     def print_suggestion(self: any, op_info: list) -> None:
         if not op_info or op_info[-1].get(StrConstant.OP_NAME) != StrConstant.TOTAL:
-            print_msg("No Data for Total HCCL Operators in communication Matrix")
-            logging.error("No Data for Total HCCL Operators in communication Matrix")
-            raise ProfException(ProfException.PROF_INVALID_DATA_ERROR)
+            message = "No Data for Total HCCL Operators in communication Matrix"
+            logging.error(message)
+            raise ProfException(ProfException.PROF_INVALID_DATA_ERROR, message)
         total_dict = op_info[-1]
         print_msg(total_dict.get(StrConstant.TIME_RATIO, ''))
         for transport_dict in total_dict.get(StrConstant.MATRIX_SUGGESTION, []):
