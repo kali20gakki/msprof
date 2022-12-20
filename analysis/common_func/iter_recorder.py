@@ -4,7 +4,6 @@
 
 import logging
 
-from analyzer.scene_base.profiling_scene import ProfilingScene
 from common_func.msprof_exception import ProfException
 from common_func.msprof_iteration import MsprofIteration
 

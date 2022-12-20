@@ -79,7 +79,7 @@ def update_sample_json(sample_config: dict, collect_path: str) -> None:
             logging.error("Get device id failed, maybe data is incomplete, "
                           "please check the info.json under the directory: %s",
                           sample_config["tag_id"])
-            raise ProfException.PROF_INVALID_PARAM_ERROR
+            raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR)
     else:
         sample_config["device_id"] = device_list[0]
 
@@ -92,19 +92,16 @@ def check_path_valid(path: str, is_output: bool) -> None:
     :return: None
     """
     if path == "":
-        error(MsProfCommonConstant.COMMON_FILE_NAME,
-              "The path is empty. Please enter a valid path.")
-        raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR)
+        raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR,
+                            "The path is empty. Please enter a valid path.")
     try:
         if is_output and not os.path.exists(path):
             os.makedirs(path, mode=NumberConstant.DIR_AUTHORITY)
             os.chmod(path, NumberConstant.DIR_AUTHORITY)
     except (OSError, SystemError, ValueError, TypeError, RuntimeError) as ex:
-        error(MsProfCommonConstant.COMMON_FILE_NAME,
-              'Failed to create "%s". Please check that the path is '
-              'accessible or the disk space is enough. %s '
-              % (path, str(ex)))
-        raise ProfException(ProfException.PROF_INVALID_PATH_ERROR) from ex
+        message = f"Failed to create \"{path}\". " \
+                  f"Please check that the path is accessible or the disk space is enough. {str(ex)} "
+        raise ProfException(ProfException.PROF_INVALID_PATH_ERROR, message) from ex
     finally:
         pass
     check_dir_writable(path)
@@ -177,19 +174,16 @@ def check_collection_dir(collect_path: str) -> None:
     :param collect_path: the collect path
     """
     if not os.path.exists(PathManager.get_data_dir(collect_path)):
-        warn(MsProfCommonConstant.COMMON_FILE_NAME,
-             'There is no "data" directory in "%s". Collect data failed.'
-             ' More info could be found in the path of slog on your core.' % collect_path)
-        raise ProfException(ProfException.PROF_INVALID_EXECUTE_CMD_ERROR)
+        message = f"There is no \"data\" directory in \"{collect_path}\". Collect data failed. " \
+                  f"More info could be found in the path of slog on your core."
+        raise ProfException(ProfException.PROF_INVALID_EXECUTE_CMD_ERROR, message)
     check_dir_writable(collect_path)
     check_free_memory(collect_path)
     file_all = os.listdir(PathManager.get_data_dir(collect_path))
     if not file_all:
-        warn(MsProfCommonConstant.COMMON_FILE_NAME,
-             'There is no file in %s. Collect data failed. More info could '
-             'be found in the path of slog on your core.'
-             % PathManager.get_data_dir(collect_path))
-        raise ProfException(ProfException.PROF_INVALID_EXECUTE_CMD_ERROR)
+        message = f"There is no file in {PathManager.get_data_dir(collect_path)}. " \
+                  f"Collect data failed. More info could be found in the path of slog on your core."
+        raise ProfException(ProfException.PROF_INVALID_EXECUTE_CMD_ERROR, message)
 
 
 def get_info_by_key(path: str, key: any) -> str:
@@ -214,9 +208,8 @@ def get_path_dir(path: str) -> list:
     path_dir_filter = filter(partial(_path_dir_filter_func, root_dir=path), os.listdir(path))
     sub_dirs = list(path_dir_filter)
     if not sub_dirs:
-        error(MsProfCommonConstant.COMMON_FILE_NAME, 'The path "%s" does not have PROF dir.'
-                                                     ' Please check the path.' % path)
-        raise ProfException(ProfException.PROF_INVALID_PATH_ERROR)
+        message = f"The path \"{path}\" does not have PROF dir. Please check the path."
+        raise ProfException(ProfException.PROF_INVALID_PATH_ERROR, message)
     return sub_dirs
 
 

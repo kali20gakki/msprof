@@ -100,7 +100,7 @@ class ConfigMgr:
             with open(sample_file, "r") as json_file:
                 return json.load(json_file)
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
-            error(ConfigMgr.COMMON_FILE_NAME, "Failed to load %s. %s" % (sample_file, err))
-            raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR) from err
+            message = f"Failed to load {sample_file}. {err}"
+            raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR, message) from err
         finally:
             pass

@@ -210,17 +210,14 @@ class QueryArgumentCheck:
     @staticmethod
     def check_arguments_valid(npu_id: int, model_id: int, iteration_id: int) -> None:
         if not QueryArgumentCheck._check_integer_with_min_value(npu_id, min_value=-1):
-            error(MsProfCommonConstant.COMMON_FILE_NAME,
-                  "The query id is wrong. Please enter a valid value.")
-            raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR)
+            raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR,
+                                "The query id is wrong. Please enter a valid value.")
         if not QueryArgumentCheck._check_integer_with_min_value(model_id, min_value=0):
-            error(MsProfCommonConstant.COMMON_FILE_NAME,
-                  "The query model id is wrong. Please enter a valid value.")
-            raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR)
+            raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR,
+                                "The query model id is wrong. Please enter a valid value.")
         if not QueryArgumentCheck._check_integer_with_min_value(iteration_id, min_value=1, nullable=True):
-            error(MsProfCommonConstant.COMMON_FILE_NAME,
-                  "The query iteration id is wrong. Please enter a valid value.")
-            raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR)
+            raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR,
+                                "The query iteration id is wrong. Please enter a valid value.")
 
     @staticmethod
     def _check_integer_with_min_value(arg: any, min_value: int = None, nullable: bool = False) -> bool:

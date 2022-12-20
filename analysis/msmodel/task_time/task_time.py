@@ -80,7 +80,7 @@ class TaskTime:
     @staticmethod
     def _pre_check(*args: list) -> None:
         if len(args) != 7:
-            raise ProfException.PROF_INVALID_DATA_ERROR("Invalid task time data")
+            raise ProfException(ProfException.PROF_INVALID_DATA_ERROR, "Invalid task time data")
 
     def construct(self, *args: list) -> object:
         """
