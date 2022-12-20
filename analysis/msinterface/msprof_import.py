@@ -130,9 +130,9 @@ class ImportCommand:
                                                             'please check the dirs: %s' % (
                          prof_path, _invalid_prof_sub_dirs))
         if not self.device_cluster_basic_info:
-            error(MsProfCommonConstant.COMMON_FILE_NAME, 'None of device PROF dir find in the dir(%s), '
-                                                         'please check the -dir argument' % self.collection_path)
-            raise ProfException(ProfException.PROF_CLUSTER_DIR_ERROR)
+            message = f"None of device PROF dir find in the dir({self.collection_path}), " \
+                      f"please check the -dir argument"
+            raise ProfException(ProfException.PROF_CLUSTER_DIR_ERROR, message)
         return _unresolved_dirs
 
     def _get_prof_dirs(self: any) -> list:
@@ -144,9 +144,9 @@ class ImportCommand:
 
     def _dir_exception_check(self: any, path: str) -> None:
         if DataCheckManager.contain_info_json_data(path):
-            error(MsProfCommonConstant.COMMON_FILE_NAME, 'Incorrect parse dir(%s),'
-                                             '-dir argument must be cluster data root dir.' % self.collection_path)
-            raise ProfException(ProfException.PROF_CLUSTER_DIR_ERROR)
+            message = f"Incorrect parse dir({self.collection_path}), " \
+                      f"-dir argument must be cluster data root dir."
+            raise ProfException(ProfException.PROF_CLUSTER_DIR_ERROR, message)
 
     def _check_prof_sub_path(self: any, prof_sub_path: str) -> int:
         if not DataCheckManager.contain_info_json_data(prof_sub_path):
@@ -156,15 +156,14 @@ class ImportCommand:
         if not cluster_basic_info.is_host_profiling:
             _have_rank_id = cluster_basic_info.rank_id != Constant.NA
             if self.have_rank_id.setdefault("have_rank_id", _have_rank_id) != _have_rank_id:
-                error(MsProfCommonConstant.COMMON_FILE_NAME, 'The dir(%s) contains both cluster and '
-                         'non-cluster data! please check whether all devices hava rank ids.' % self.collection_path)
-                raise ProfException(ProfException.PROF_CLUSTER_DIR_ERROR)
+                message = f"The dir({self.collection_path}) contains both cluster and " \
+                          f"non-cluster data! please check whether all devices have rank ids."
+                raise ProfException(ProfException.PROF_CLUSTER_DIR_ERROR, message)
             _device_or_rank_id = int(cluster_basic_info.rank_id) if _have_rank_id else int(cluster_basic_info.device_id)
             if _device_or_rank_id in self.device_or_rank_ids:
-                error(MsProfCommonConstant.COMMON_FILE_NAME, 'There are same rank_id or device_id ( %s ) in '
-                                                             'the dir(%s). Please check the PROF dirs!' % (
-                          _device_or_rank_id, self.collection_path))
-                raise ProfException(ProfException.PROF_CLUSTER_DIR_ERROR)
+                message = f"There are same rank_id or device_id ( {_device_or_rank_id} ) in " \
+                          f"the dir({self.collection_path}). Please check the PROF dirs!"
+                raise ProfException(ProfException.PROF_CLUSTER_DIR_ERROR, message)
             self.device_or_rank_ids.add(_device_or_rank_id)
             dir_name = os.sep.join(prof_sub_path.split(os.sep)[-2:])
             self.device_cluster_basic_info[dir_name] = cluster_basic_info

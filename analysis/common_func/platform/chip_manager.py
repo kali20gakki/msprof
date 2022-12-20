@@ -62,9 +62,9 @@ class ChipManager:
         :return:
         """
         if InfoConfReader().get_root_data(Constant.PLATFORM_VERSION) not in self.CHIP_RELATION_MAP.keys():
-            error(self.FILE_NAME, "Can't get platform version or platform version isn't identified from info.json, "
-                                  "please check the file.")
-            raise ProfException(ProfException.PROF_SYSTEM_EXIT)
+            message = "Can't get platform version or platform version isn't identified from info.json, " \
+                      "please check the file."
+            raise ProfException(ProfException.PROF_SYSTEM_EXIT, message)
         self.chip_id = self.CHIP_RELATION_MAP.get(InfoConfReader().get_root_data(Constant.PLATFORM_VERSION))
 
     def is_chip_v1(self: any) -> bool:

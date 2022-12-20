@@ -382,10 +382,9 @@ class ExportCommand:
             return
 
         if self.list_map.get(self.MODEL_ID) not in model_match_set:
-            error(self.FILE_NAME, 'The model id {0} is invalid. Must select'
-                                  ' from {1}. Please enter a'
-                                  ' valid model id.'.format(self.list_map.get(self.MODEL_ID), model_match_set))
-            raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR)
+            message = f"The model id {self.list_map.get(self.MODEL_ID)} is invalid. "\
+                      f"Must select from {model_match_set}. Please enter a valid model id."
+            raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR, message)
 
     def _prepare_for_export(self: any, result_dir: str) -> None:
         LoadInfoManager.load_info(result_dir)
