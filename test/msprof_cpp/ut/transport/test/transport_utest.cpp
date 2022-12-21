@@ -189,9 +189,14 @@ TEST_F(TRANSPORT_TRANSPORT_HDCTRANSPORT_TEST, RecvPacket) {
 
     std::shared_ptr<HDCTransport> trans(new HDCTransport(session));
 
+    char containerNotSupport[] = "MESSAGE_CONTAINER_NO_SUPPORT";
+    CONST_CHAR_PTR containerPtr = &containerNotSupport[0];
+    char invalidMsg[sizeof(struct tlv_req)] = {0};
+    CONST_CHAR_PTR invalidMsgPtr = &invalidMsg[0];
+
     MOCKER(HdcRead)
         .stubs()
-        .with(any(), any(), outBoundP(&buf_len))
+        .with(any(), outBoundP((void **)&invalidMsgPtr), outBoundP(&buf_len))
         .will(returnValue(IDE_DAEMON_ERROR))
         .then(returnValue(IDE_DAEMON_OK));
 
