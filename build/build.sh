@@ -54,6 +54,13 @@ function bep_env_init() {
 bep_env_init
 
 cd ${TOP_DIR}/build
-cmake ../cmake/superbuild/ -DMSPROF_BUILD_TYPE=${BUILD_TYPE}
+
+# Hi Test
+HI_TEST="off"
+if [ ! -z ${TOOLKIT_HITEST} ] && [ ${TOOLKIT_HITEST} == "on" ]; then
+    HI_TEST=${TOOLKIT_HITEST}
+fi
+
+cmake ../cmake/superbuild/ -DMSPROF_BUILD_TYPE=${BUILD_TYPE} -DHITEST=${HI_TEST}
 make -j64
 bash ${TOP_DIR}/scripts/create_run_package_pack.sh ${VERSION} ${PACKAGE_TYPE}
