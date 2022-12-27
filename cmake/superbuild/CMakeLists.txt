@@ -57,6 +57,7 @@ ExternalProject_Add(msprof
                 -DCMAKE_BUILD_TYPE=${MSPROF_BUILD_TYPE}
                 -DCMAKE_EXPORT_COMPILE_COMMANDS=1
                 -DSECUREC_LIB_DIR=${CMAKE_INSTALL_PREFIX}/securec_shared
+                -DHITEST=${HITEST}
                 <SOURCE_DIR>
     BUILD_COMMAND $(MAKE)
     DEPENDS protoc_build ascend_protobuf_shared_build ascend_protobuf_static_build c_sec
