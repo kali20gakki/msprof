@@ -8,6 +8,7 @@
 
 #include "config/config.h"
 #include "cmd_log.h"
+#include "dyn_prof_client.h"
 #include "errno/error_code.h"
 #include "param_validation.h"
 #include "platform/platform.h"
@@ -25,6 +26,7 @@ using namespace Collector::Dvvp::Msprofbin;
 using namespace Analysis::Dvvp::Common::Platform;
 using namespace Analysis::Dvvp::Msprof;
 using namespace analysis::dvvp::message;
+using namespace Collector::Dvvp::DynProf;
 int ParamsAdapterMsprof::Init()
 {
     paramContainer_.fill("");
@@ -48,7 +50,8 @@ int ParamsAdapterMsprof::Init()
         INPUT_CFG_COM_SYS_PERIOD, INPUT_CFG_COM_SYS_USAGE, INPUT_CFG_COM_SYS_PID_USAGE,
         INPUT_CFG_COM_SYS_CPU, INPUT_CFG_COM_SYS_HARDWARE_MEM, INPUT_CFG_COM_SYS_IO,
         INPUT_CFG_COM_SYS_INTERCONNECTION, INPUT_CFG_COM_DVPP, INPUT_CFG_COM_POWER,
-        INPUT_CFG_COM_BIU, INPUT_CFG_COM_BIU_FREQ, INPUT_CFG_HOST_SYS, INPUT_CFG_HOST_SYS_PID
+        INPUT_CFG_COM_BIU, INPUT_CFG_COM_BIU_FREQ, INPUT_CFG_HOST_SYS, INPUT_CFG_HOST_SYS_PID,
+        INPUT_CFG_MSPROF_DYNAMIC, INPUT_CFG_MSPROF_DYNAMIC_PID
     }).swap(msprofConfig_);
     return PROFILING_SUCCESS;
 }
@@ -62,7 +65,7 @@ int ParamsAdapterMsprof::ParamsCheckMsprof()
         {INPUT_CFG_COM_SYS_PID_USAGE, "sys-pid-profiling"}, {INPUT_CFG_COM_SYS_CPU, "sys-cpu-profiling"},
         {INPUT_CFG_COM_SYS_HARDWARE_MEM, "sys-hardware-mem"}, {INPUT_CFG_COM_SYS_IO, "sys-io-profiling"},
         {INPUT_CFG_COM_SYS_INTERCONNECTION, "sys-interconnection-profiling"}, {INPUT_CFG_COM_DVPP, "dvpp-profiling"},
-        {INPUT_CFG_COM_POWER, "power"}, {INPUT_CFG_COM_BIU, "biu"}
+        {INPUT_CFG_COM_POWER, "power"}, {INPUT_CFG_COM_BIU, "biu"}, {INPUT_CFG_MSPROF_DYNAMIC, "dynamic"},
     };
     for (auto inputCfg : msprofConfig_) {
         if (setConfig_.find(inputCfg) == setConfig_.end()) {
@@ -88,6 +91,7 @@ int ParamsAdapterMsprof::ParamsCheckMsprof()
             case INPUT_CFG_COM_DVPP:
             case INPUT_CFG_COM_POWER:
             case INPUT_CFG_COM_BIU:
+            case INPUT_CFG_MSPROF_DYNAMIC:
                 ret = ParamValidation::instance()->IsValidInputCfgSwitch(switchNameMap[inputCfg], cfgValue);
                 break;
             default:
@@ -114,6 +118,7 @@ bool ParamsAdapterMsprof::ParamsCheckMsprofV1(InputCfg inputCfg, std::string cfg
         case INPUT_CFG_COM_AIV_FREQ:
         case INPUT_CFG_COM_BIU_FREQ:
         case INPUT_CFG_HOST_SYS_USAGE_FREQ:
+        case INPUT_CFG_MSPROF_DYNAMIC_PID:
             ret = CheckFreqValid(cfgValue, inputCfg);
             break;
         case INPUT_CFG_COM_SYS_DEVICES:
@@ -135,6 +140,35 @@ bool ParamsAdapterMsprof::ParamsCheckMsprofV1(InputCfg inputCfg, std::string cfg
             break;
     }
     return ret;
+}
+
+int ParamsAdapterMsprof::ParamsCheckDynProf()
+{
+    // --dynamic != on, no need check params
+    if (paramContainer_[INPUT_CFG_MSPROF_DYNAMIC] != MSPROF_SWITCH_ON) {
+        return PROFILING_SUCCESS;
+    }
+    // --pid and --application is both empty
+    if (paramContainer_[INPUT_CFG_MSPROF_DYNAMIC_PID].empty() &&
+        paramContainer_[INPUT_CFG_MSPROF_APPLICATION].empty()) {
+        CmdLog::instance()->CmdErrorLog("Argument --dynamic=on, but --application/--pid is all empty.");
+        MSPROF_LOGE("Argument --dynamic=on, but --application/--pid is all empty.");
+        return PROFILING_FAILED;
+    }
+    // --pid and --application is both non-empty
+    if (!paramContainer_[INPUT_CFG_MSPROF_DYNAMIC_PID].empty() &&
+        !paramContainer_[INPUT_CFG_MSPROF_APPLICATION].empty()) {
+        CmdLog::instance()->CmdErrorLog("Argument --dynamic=on, can not set --application/--pid at the same time.");
+        MSPROF_LOGE("Argument --dynamic=on, can not set --application/--pid at the same time.");
+        return PROFILING_FAILED;
+    }
+    // --pid is non-empty, save pid to DynProfMngCli
+    if (!paramContainer_[INPUT_CFG_MSPROF_DYNAMIC_PID].empty()) {
+        int32_t pid = std::stoi(paramContainer_[INPUT_CFG_MSPROF_DYNAMIC_PID]);
+        DynProfMngCli::instance()->SetAppPid(pid);
+    }
+    DynProfMngCli::instance()->EnableMode();
+    return PROFILING_SUCCESS;
 }
 
 void ParamsAdapterMsprof::SetDefaultParamsApp()
@@ -180,7 +214,8 @@ int ParamsAdapterMsprof::CheckMsprofMode(const std::unordered_map<int, std::pair
         {ARGS_HOST_SYS_USAGE, MsprofMode::MSPROF_MODE_SYSTEM},
         {ARGS_PARSE, MsprofMode::MSPROF_MODE_PARSE},
         {ARGS_QUERY, MsprofMode::MSPROF_MODE_QUERY},
-        {ARGS_EXPORT, MsprofMode::MSPROF_MODE_EXPORT}
+        {ARGS_EXPORT, MsprofMode::MSPROF_MODE_EXPORT},
+        {ARGS_DYNAMIC_PROF, MsprofMode::MSPROF_MODE_APP}
     };
 
     for (auto adjustArgs : modeAdjustVec) {
@@ -379,8 +414,7 @@ int ParamsAdapterMsprof::GetParamFromInputCfg(
         return PROFILING_FAILED;
     }
     params_ = params;
-    int ret = CheckMsprofMode(argvMap);
-    if (ret != PROFILING_SUCCESS) {
+    if (CheckMsprofMode(argvMap) != PROFILING_SUCCESS) {
         MSPROF_LOGE("[GetParamFromInputCfg]Check msprof mode failed.");
         return PROFILING_FAILED;
     }
@@ -392,31 +426,26 @@ int ParamsAdapterMsprof::GetParamFromInputCfg(
         MSPROF_LOGE("[GetParamFromInputCfg]msprof Init failed.");
         return PROFILING_FAILED;
     }
-    ret = GenMsprofContainer(argvMap);
-    if (ret != PROFILING_SUCCESS) {
+    if (GenMsprofContainer(argvMap) != PROFILING_SUCCESS) {
         MSPROF_LOGE("[GetParamFromInputCfg]generate container for msprof failed.");
         return PROFILING_FAILED;
     }
-    ret = ParamsCheck();
-    if (ret != PROFILING_SUCCESS) {
+    if (ParamsCheck() != PROFILING_SUCCESS) {
         MSPROF_LOGE("[GetParamFromInputCfg]msprof input param check failed.");
         return PROFILING_FAILED;
     }
     if (msprofMode_ == MsprofMode::MSPROF_MODE_APP) {
         SpliteAppPath(paramContainer_[INPUT_CFG_MSPROF_APPLICATION]);
     }
-    ret = SetModeDefaultParams(msprofMode_);
-    if (ret != PROFILING_SUCCESS) {
+    if (SetModeDefaultParams(msprofMode_) != PROFILING_SUCCESS) {
         MSPROF_LOGE("[GetParamFromInputCfg]msprof set default value failed.");
         return PROFILING_FAILED;
     }
-    ret = SystemToolsIsExist();
-    if (ret != PROFILING_SUCCESS) {
+    if (SystemToolsIsExist() != PROFILING_SUCCESS) {
         MSPROF_LOGE("[GetParamFromInputCfg]system tools check failed.");
         return PROFILING_FAILED;
     }
-    ret = TransToParam(paramContainer_, params_);
-    if (ret != PROFILING_SUCCESS) {
+    if (TransToParam(paramContainer_, params_) != PROFILING_SUCCESS) {
         MSPROF_LOGE("msprof trans to params fail.");
         return PROFILING_FAILED;
     }
@@ -436,6 +465,12 @@ int ParamsAdapterMsprof::ParamsCheck()
         MSPROF_LOGE("common param check fail.");
         return PROFILING_FAILED;
     }
+    ret = ParamsCheckDynProf();
+    if (ret != PROFILING_SUCCESS) {
+        MSPROF_LOGE("Dynamic profiling param check fail.");
+        return PROFILING_FAILED;
+    }
+
     return PROFILING_SUCCESS;
 }
 
@@ -497,6 +532,7 @@ void ParamsAdapterMsprof::CreateCfgMap()
         {ARGS_EXPORT_ITERATION_ID, INPUT_CFG_ITERATION_ID}, {ARGS_EXPORT_MODEL_ID, INPUT_CFG_MODEL_ID},
         {ARGS_HOST_SYS, INPUT_CFG_HOST_SYS}, {ARGS_HOST_SYS_PID, INPUT_CFG_HOST_SYS_PID},
         {ARGS_HOST_SYS_USAGE, INPUT_CFG_HOST_SYS_USAGE}, {ARGS_HOST_SYS_USAGE_FREQ, INPUT_CFG_HOST_SYS_USAGE_FREQ},
+        {ARGS_DYNAMIC_PROF, INPUT_CFG_MSPROF_DYNAMIC}, {ARGS_DYNAMIC_PROF_PID, INPUT_CFG_MSPROF_DYNAMIC_PID},
     }).swap(cfgMap_);
     for (auto index : cfgMap_) {
         reCfgMap_.insert({index.second, static_cast<MsprofArgsType>(index.first)});

@@ -71,8 +71,11 @@ set(profilerSrcList
 	${MSPROF_SOURCE_DIR}/dvvp/msprof/msproftx/src/msprof_tx_manager.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/msprof/msproftx/src/msprof_tx_reporter.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/msprof/msproftx/src/msprof_stamp_pool.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/msprof/dynamic_profiling/src/dyn_prof_client.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/msprof/dynamic_profiling/src/dyn_prof_server.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/msprof/engine/src/command_handle.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/msprof/engine/src/msprof_callback_impl.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/msprof/engine/src/prof_acl_mgr.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/task_handle/src/device.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/task_handle/src/info_json.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/task_handle/src/prof_manager.cpp
@@ -150,6 +153,7 @@ target_include_directories(msprofiler_utest PRIVATE
 	${MSPROF_SOURCE_DIR}/dvvp/msprof/drvprof/include
 	${MSPROF_SOURCE_DIR}/dvvp/msprof/platform/include
 	${MSPROF_SOURCE_DIR}/dvvp/msprof/msproftx/include
+	${MSPROF_SOURCE_DIR}/dvvp/msprof/dynamic_profiling/include
 	${MSPROF_SOURCE_DIR}/dvvp/msprof/include
 	${MSPROF_SOURCE_DIR}/dvvp/common
 	${MSPROF_SOURCE_DIR}/dvvp/common/errno
@@ -257,7 +261,6 @@ add_executable(msprof_utest
 	${MSPROF_SOURCE_DIR}/dvvp/common/mmpa/mmpa_api.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/validation/param_validation.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform.cpp
-    ${MSPROF_SOURCE_DIR}/dvvp/common/config/config_manager.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/driver/devmgmt/ai_drv_dev_api.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/depend/stub/error_manager/msprof_error_manager_stub.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/message/codec.cpp
@@ -302,7 +305,11 @@ target_include_directories(msprof_utest PRIVATE
 	${MSPROF_SOURCE_DIR}/dvvp/msprof/common/include
 	${MSPROF_SOURCE_DIR}/dvvp/msprof/platform/include
 	${MSPROF_SOURCE_DIR}/dvvp/msprof/msproftx/include
+	${MSPROF_SOURCE_DIR}/dvvp/msprof/dynamic_profiling/include
 	${MSPROF_SOURCE_DIR}/dvvp/common
+	${MSPROF_SOURCE_DIR}/dvvp/analyze/inc
+	${MSPROF_SOURCE_DIR}/dvvp/task_handle/include
+	${MSPROF_SOURCE_DIR}/dvvp/job_wrapper/include
 	${MSPROF_SOURCE_DIR}/dvvp/common/mmpa
 	${MSPROF_SOURCE_DIR}/dvvp/common/validation
 	${MSPROF_SOURCE_DIR}/dvvp/common/errno

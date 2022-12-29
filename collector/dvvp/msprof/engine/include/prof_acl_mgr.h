@@ -112,7 +112,6 @@ public:
     // task datatypeconfig add
 
 public:
-    int32_t MsprofInitForDynamic(VOID_PTR data, uint32_t len) const;
     int32_t MsprofInitAclJson(VOID_PTR data, uint32_t len);
     int32_t MsprofInitGeOptions(VOID_PTR data, uint32_t len);
     int32_t MsprofInitAclEnv(const std::string &envValue);

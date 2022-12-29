@@ -7,6 +7,7 @@
 #include "application.h"
 #include <fstream>
 #include "config/config.h"
+#include "dyn_prof_client.h"
 #include "errno/error_code.h"
 #include "mmpa_api.h"
 #include "msprof_dlog.h"
@@ -24,6 +25,7 @@ using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::common::config;
 using namespace analysis::dvvp::message;
 using namespace analysis::dvvp::common::validation;
+using namespace Collector::Dvvp::DynProf;
 
 int Application::PrepareLaunchAppCmd(std::stringstream &ssCmdApp,
                                      SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params)
@@ -180,6 +182,7 @@ void Application::SetAppEnv(SHARED_PTR_ALIA<analysis::dvvp::message::ProfilePara
     paramEnv.append("=");
     paramEnv.append(params->ToString());
     envsV.push_back(paramEnv);
+    envsV.push_back(DynProfMngCli::instance()->ConstructEnv());
 }
 }  // namespace app
 }  // namespace dvvp

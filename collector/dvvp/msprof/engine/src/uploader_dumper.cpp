@@ -6,6 +6,7 @@
  */
 #include "uploader_dumper.h"
 #include "config/config.h"
+#include "dyn_prof_server.h"
 #include "error_code.h"
 #include "prof_params.h"
 #include "msprof_dlog.h"
@@ -22,6 +23,7 @@ using namespace Analysis::Dvvp::Common::Statistics;
 using namespace analysis::dvvp::common::config;
 using namespace analysis::dvvp::transport;
 using namespace Analysis::Dvvp::MsprofErrMgr;
+using namespace Collector::Dvvp::DynProf;
 
 namespace Msprof {
 namespace Engine {
@@ -189,6 +191,24 @@ void UploaderDumper::DumpModelLoadData(const std::string &devId)
     }
 }
 
+void UploaderDumper::DumpDynProfCachedMsg(const std::string &devId)
+{
+    if (!needCache_) {
+        return;
+    }
+    std::lock_guard<std::mutex> lk(mtx_);
+    auto devCachedMsg = cachedMsg_.find(devId);
+    if (devCachedMsg == cachedMsg_.end()) {
+        return;
+    }
+    int startTimes = DynProfMngSrv::instance()->startTimes_;
+    for (auto &markMsg : devCachedMsg->second) {
+        if (markMsg.begin()->first < startTimes) {
+            AddToUploader(markMsg.begin()->second);
+        }
+    }
+}
+
 void UploaderDumper::TimedTask()
 {
 }
@@ -226,6 +246,7 @@ int UploaderDumper::Dump(std::vector<SHARED_PTR_ALIA<analysis::dvvp::proto::File
             continue;
         }
         SaveModelLoadData(messages[i]);
+        SaveDynProfCachedMsg(messages[i]);
         AddToUploader(messages[i]);
     }
     return PROFILING_SUCCESS;
@@ -275,6 +296,36 @@ void UploaderDumper::SaveModelLoadData(SHARED_PTR_ALIA<analysis::dvvp::proto::Fi
             if (iter->second.size() > MAX_CACHE_SIZE) {
                 iter->second.pop_front();
             }
+        }
+    }
+}
+
+void UploaderDumper::SaveDynProfCachedMsg(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message)
+{
+    if (!needCache_) {
+        return;
+    }
+    if (message->tag().find("model_load_info") == std::string::npos &&
+        message->tag().find("task_desc_info") == std::string::npos) {
+        return;
+    }
+    std::lock_guard<std::mutex> lk(mtx_);
+    int times = DynProfMngSrv::instance()->startTimes_;
+    std::map<int, SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq>> markMsg;
+    markMsg.insert(std::make_pair(times, message));
+
+    std::string deviceId = message->tagsuffix();
+    auto devCachedMsg = cachedMsg_.find(deviceId);
+    if (devCachedMsg == cachedMsg_.end()) {
+        std::list<std::map<int, SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq>>> messages;
+        messages.push_back(markMsg);
+        cachedMsg_.insert(std::make_pair(deviceId, messages));
+    } else {
+        devCachedMsg->second.push_back(markMsg);
+        if (devCachedMsg->second.size() > MAX_CACHE_SIZE) {
+            MSPROF_LOGD("Dynamic profiling cached message over %d, cur_size=%d",
+                MAX_CACHE_SIZE, devCachedMsg->second.size());
+            devCachedMsg->second.pop_front();
         }
     }
 }

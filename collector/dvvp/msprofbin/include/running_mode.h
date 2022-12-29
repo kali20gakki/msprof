@@ -92,6 +92,7 @@ public:
     int RunModeTasks() override;
 private:
     int StartAppTask(bool needWait = true);
+    int StartAppTaskForDynProf();
 };
 
 class SystemMode : public RunningMode {
