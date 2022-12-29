@@ -11,9 +11,11 @@
 #include "proto/profiler.pb.h"
 #include "uploader_mgr.h"
 #include "utils/utils.h"
+#include "dyn_prof_server.h"
 
 using namespace analysis::dvvp::common::error;
 using namespace Msprof::Engine;
+using namespace Collector::Dvvp::DynProf;
 
 class MSPROF_CALLBACK_HANDLER_UTEST : public testing::Test {
 protected:
@@ -142,4 +144,213 @@ TEST_F(MSPROF_CALLBACK_HANDLER_UTEST, OtherTest) {
     GlobalMockObject::verify();
     FlushModule("0");
     SendAiCpuData(nullptr);
+}
+
+class DYN_PROF_SERVER_UTEST : public testing::Test {
+protected:
+    virtual void SetUp() {
+    }
+    virtual void TearDown() {
+    }
+};
+ 
+TEST_F(DYN_PROF_SERVER_UTEST, DynProfMngSrv)
+{
+    int ret = DynProfMngSrv::instance()->StartDynProfSrv();
+    EXPECT_EQ(PROFILING_SUCCESS, ret);
+    DynProfMngSrv::instance()->StopDynProfSrv();
+    ProfSetDevPara oriData = {0, 1, true};
+    DynProfMngSrv::instance()->SetDeviceInfo(&oriData);
+    ProfSetDevPara *getData = DynProfMngSrv::instance()->GetDeviceInfo();
+    EXPECT_EQ(1, getData->deviceId);
+}
+ 
+TEST_F(DYN_PROF_SERVER_UTEST, DyncProfMsgProcSrvStart)
+{
+    SHARED_PTR_ALIA<DyncProfMsgProcSrv> dynProfSrv;
+    dynProfSrv = std::make_shared<DyncProfMsgProcSrv>();
+    dynProfSrv->srvStarted_ = true;
+    int ret = dynProfSrv->Start();
+    EXPECT_EQ(PROFILING_SUCCESS, ret);
+ 
+    GlobalMockObject::verify();
+    MOCKER_CPP(&DyncProfMsgProcSrv::DynProfServerCreateSock)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED))
+        .then(returnValue(PROFILING_SUCCESS));
+ 
+    dynProfSrv->srvStarted_ = false;
+    ret = dynProfSrv->Start();
+    EXPECT_EQ(PROFILING_FAILED, ret);
+ 
+    ret = dynProfSrv->Start();
+    EXPECT_EQ(PROFILING_SUCCESS, ret);
+    dynProfSrv->Stop();
+    dynProfSrv->Join();
+}
+ 
+TEST_F(DYN_PROF_SERVER_UTEST, DyncProfMsgProcSrvStop)
+{
+    SHARED_PTR_ALIA<DyncProfMsgProcSrv> dynProfSrv;
+    dynProfSrv = std::make_shared<DyncProfMsgProcSrv>();
+    dynProfSrv->srvStarted_ = false;
+    int ret = dynProfSrv->Stop();
+    EXPECT_EQ(PROFILING_SUCCESS, ret);
+    MOCKER(close)
+        .stubs();
+    dynProfSrv->srvStarted_ = true;
+    dynProfSrv->srvSockFd_ = 0;
+    dynProfSrv->cliSockFd_ = 0;
+    ret = dynProfSrv->Stop();
+    EXPECT_EQ(PROFILING_SUCCESS, ret);
+    EXPECT_EQ(false, dynProfSrv->srvStarted_);
+}
+ 
+TEST_F(DYN_PROF_SERVER_UTEST, DynProfServerCreateSock)
+{
+    SHARED_PTR_ALIA<DyncProfMsgProcSrv> dynProfSrv;
+    dynProfSrv = std::make_shared<DyncProfMsgProcSrv>();
+    GlobalMockObject::verify();
+    MOCKER(socket)
+        .stubs()
+        .will(returnValue(-1))
+        .then(returnValue(0));
+    MOCKER(memset_s)
+        .stubs()
+        .will(returnValue(-1))
+        .then(returnValue(-1))
+        .then(returnValue(0));
+    MOCKER(bind)
+        .stubs()
+        .will(returnValue(-1))
+        .then(returnValue(0));
+    MOCKER(listen)
+        .stubs()
+        .will(returnValue(-1))
+        .then(returnValue(0));
+    MOCKER(setsockopt)
+        .stubs()
+        .will(returnValue(-1))
+        .then(returnValue(0));
+ 
+    int ret = dynProfSrv->DynProfServerCreateSock();
+    EXPECT_EQ(PROFILING_FAILED, ret);
+    ret = dynProfSrv->DynProfServerCreateSock();
+    EXPECT_EQ(PROFILING_FAILED, ret);
+    ret = dynProfSrv->DynProfServerCreateSock();
+    EXPECT_EQ(PROFILING_FAILED, ret);
+    ret = dynProfSrv->DynProfServerCreateSock();
+    EXPECT_EQ(PROFILING_FAILED, ret);
+    ret = dynProfSrv->DynProfServerCreateSock();
+    EXPECT_EQ(PROFILING_FAILED, ret);
+    ret = dynProfSrv->DynProfServerCreateSock();
+    EXPECT_EQ(PROFILING_FAILED, ret);
+    ret = dynProfSrv->DynProfServerCreateSock();
+    EXPECT_EQ(PROFILING_SUCCESS, ret);
+}
+ 
+TEST_F(DYN_PROF_SERVER_UTEST, DynProfServerProcMsg)
+{
+    MOCKER(setsockopt)
+        .stubs()
+        .will(returnValue(-1))
+        .then(returnValue(0));
+    MOCKER(close)
+        .stubs();
+    SHARED_PTR_ALIA<DyncProfMsgProcSrv> dynProfSrv;
+    dynProfSrv = std::make_shared<DyncProfMsgProcSrv>();
+    dynProfSrv->srvStarted_ = true;
+    dynProfSrv->DynProfServerProcMsg();
+}
+ 
+TEST_F(DYN_PROF_SERVER_UTEST, DynProfSrvProcStart)
+{
+    SHARED_PTR_ALIA<DyncProfMsgProcSrv> dynProfSrv;
+    dynProfSrv = std::make_shared<DyncProfMsgProcSrv>();
+    dynProfSrv->profHasStarted_ = true;
+    dynProfSrv->cliSockFd_ = 0;
+    dynProfSrv->DynProfSrvProcStart();
+ 
+    GlobalMockObject::verify();
+    MOCKER_CPP(&DyncProfMsgProcSrv::DynProfServerRsqMsg)
+        .stubs();
+    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::MsprofInitAclEnv)
+        .stubs()
+        .will(returnValue(1))
+        .then(returnValue(0));
+    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::Init)
+        .stubs()
+        .will(returnValue(1))
+        .then(returnValue(0));
+    MOCKER(Analysis::Dvvp::ProfilerCommon::MsprofSetDeviceCallbackImpl)
+        .stubs()
+        .will(returnValue(1))
+        .then(returnValue(0));
+    
+    dynProfSrv->profHasStarted_ = false;
+    dynProfSrv->DynProfSrvProcStart();
+    EXPECT_EQ(false, dynProfSrv->profHasStarted_);
+ 
+    dynProfSrv->DynProfSrvProcStart();
+    EXPECT_EQ(false, dynProfSrv->profHasStarted_);
+ 
+    dynProfSrv->DynProfSrvProcStart();
+    EXPECT_EQ(false, dynProfSrv->profHasStarted_);
+ 
+    dynProfSrv->DynProfSrvProcStart();
+    EXPECT_EQ(true, dynProfSrv->profHasStarted_);
+    EXPECT_EQ(1, DynProfMngSrv::instance()->startTimes_);
+}
+ 
+TEST_F(DYN_PROF_SERVER_UTEST, DynProfSrvProcStop)
+{
+    SHARED_PTR_ALIA<DyncProfMsgProcSrv> dynProfSrv;
+    dynProfSrv = std::make_shared<DyncProfMsgProcSrv>();
+    dynProfSrv->profHasStarted_ = false;
+    dynProfSrv->cliSockFd_ = 1;
+    dynProfSrv->DynProfSrvProcStop();
+ 
+    GlobalMockObject::verify();
+    MOCKER_CPP(&DyncProfMsgProcSrv::DynProfServerRsqMsg)
+        .stubs();
+    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::MsprofFinalizeHandle)
+        .stubs()
+        .will(returnValue(1))
+        .then(returnValue(0));
+    
+    dynProfSrv->profHasStarted_ = true;
+    dynProfSrv->DynProfSrvProcStop();
+    EXPECT_EQ(true, dynProfSrv->profHasStarted_);
+ 
+    dynProfSrv->DynProfSrvProcStop();
+    EXPECT_EQ(false, dynProfSrv->profHasStarted_);
+}
+ 
+TEST_F(DYN_PROF_SERVER_UTEST, DynProfSrvProcQuit)
+{
+    SHARED_PTR_ALIA<DyncProfMsgProcSrv> dynProfSrv;
+    dynProfSrv = std::make_shared<DyncProfMsgProcSrv>();
+    dynProfSrv->profHasStarted_ = true;
+    dynProfSrv->cliSockFd_ = 1;
+    GlobalMockObject::verify();
+    MOCKER_CPP(&DyncProfMsgProcSrv::DynProfServerRsqMsg)
+        .stubs();
+    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::MsprofFinalizeHandle)
+        .stubs()
+        .will(returnValue(1))
+        .then(returnValue(0));
+    dynProfSrv->DynProfSrvProcQuit();
+    EXPECT_EQ(false, dynProfSrv->profHasStarted_);
+}
+ 
+TEST_F(DYN_PROF_SERVER_UTEST, DynProfServerRsqMsg)
+{
+    SHARED_PTR_ALIA<DyncProfMsgProcSrv> dynProfSrv;
+    dynProfSrv = std::make_shared<DyncProfMsgProcSrv>();
+    dynProfSrv->cliSockFd_ = 0;
+    GlobalMockObject::verify();
+    MOCKER(write)
+        .stubs()
+        .will(returnValue(-1));
+    dynProfSrv->DynProfServerRsqMsg(DynProfMsgType::START_RSQ, DynProfMsgRsqCode::RSQ_FAIL);
 }
