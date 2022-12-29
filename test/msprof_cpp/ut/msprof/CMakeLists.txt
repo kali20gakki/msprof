@@ -91,6 +91,7 @@ set(profilerSrcList
 	${MSPROF_SOURCE_DIR}/dvvp/transport/uploader_mgr.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/transport/hash_data.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/msprof/dynamic_profiling/src/dyn_prof_server.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/msprof/dynamic_profiling/src/dyn_prof_client.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/msprof/engine/src/prof_acl_mgr.cpp
 	${CppPath}
 )
