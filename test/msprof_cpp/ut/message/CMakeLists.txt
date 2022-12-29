@@ -11,6 +11,8 @@ set(profilerSrcFiles
     ${MSPROF_SOURCE_DIR}//dvvp/common/mmpa/mmpa_api.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/depend/stub/error_manager/msprof_error_manager_stub.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/depend/src/plugin_handle.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/src/driver_plugin.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/common/config/config_manager.cpp
     ${CppPath}
 )
 
@@ -48,6 +50,7 @@ target_include_directories(message_utest PRIVATE
     ${MSPROF_SOURCE_DIR}/dvvp/msprof/engine/include
     ${CMAKE_BINARY_DIR}/proto/profiler
     ${MSPROF_SOURCE_DIR}/dvvp/depend/include/stub
+    ${MSPROF_SOURCE_DIR}/dvvp/driver/inc
 )
 
 target_compile_options(message_utest PRIVATE

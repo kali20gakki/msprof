@@ -16,6 +16,7 @@
 #include "env_manager.h"
 #include "platform/platform.h"
 #include "config/config.h"
+#include "dyn_prof_client.h"
 
 using namespace Analysis::Dvvp::App;
 using namespace Analysis::Dvvp::Msprof;
@@ -24,7 +25,7 @@ using namespace analysis::dvvp::common::config;
 using namespace analysis::dvvp::common::error;
 using namespace Analysis::Dvvp::Common::Platform;
 using namespace Collector::Dvvp::Msprofbin;
-
+using namespace Collector::Dvvp::DynProf;
 
 #ifdef __PROF_UT
 int LltMain(int argc, const char **argv, const char **envp)
@@ -61,11 +62,12 @@ int main(int argc, const char **argv, const char **envp)
     ret = MsprofManager::instance()->MsProcessCmd();
     if (ret != PROFILING_SUCCESS) {
         CmdLog::instance()->CmdErrorLog("Running profiling failed.Please check slog for more info.");
-        return ret;
-    } else {
+        return PROFILING_FAILED;
+    }
+    // process the end of the msprofbin
+    if (!DynProfMngCli::instance()->IsEnableMode()) {
         CmdLog::instance()->CmdInfoLog("Profiling finished.");
-        if (MsprofManager::instance()->rMode_ != nullptr &&
-            !MsprofManager::instance()->rMode_->jobResultDir_.empty()) {
+        if (MsprofManager::instance()->rMode_ && !MsprofManager::instance()->rMode_->jobResultDir_.empty()) {
             CmdLog::instance()->CmdInfoLog("Process profiling data complete. Data is saved in %s",
                 MsprofManager::instance()->rMode_->jobResultDir_.c_str());
         }

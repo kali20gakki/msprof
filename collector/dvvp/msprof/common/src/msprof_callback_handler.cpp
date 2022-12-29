@@ -20,7 +20,6 @@ namespace Engine {
 using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::common::queue;
 using namespace analysis::dvvp::transport;
-
 // init map
 std::map<uint32_t, MsprofCallbackHandler> MsprofCallbackHandler::reporters_;
 
@@ -67,6 +66,15 @@ void MsprofCallbackHandler::ForceFlush(const std::string &devId)
         }
         profReport->Flush();
     }
+}
+
+void MsprofCallbackHandler::FlushDynProfCachedMsg(const std::string &devId)
+{
+    if (reporter_ == nullptr) {
+        return;
+    }
+    MSPROF_LOGI("FlushDynProfCachedMsg, module: %s", module_.c_str());
+    reporter_->DumpDynProfCachedMsg(devId);
 }
 
 int MsprofCallbackHandler::SendData(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> fileChunk)
@@ -127,7 +135,8 @@ int MsprofCallbackHandler::StartReporter()
         MSPROF_LOGW("ProfReporter is already started, module: %s", module_.c_str());
         return PROFILING_SUCCESS;
     }
-    if (!Msprofiler::Api::ProfAclMgr::instance()->IsInited()) {
+    // In dynamic profiling mode, initializing ge before initializing profiling.
+    if (!Msprofiler::Api::ProfAclMgr::instance()->IsInited() && !Utils::IsDynProfMode()) {
         MSPROF_LOGE("Profiling is not started, reporter can not be inited");
         return PROFILING_FAILED;
     }
@@ -159,6 +168,9 @@ int MsprofCallbackHandler::StopReporter()
         return PROFILING_FAILED;
     }
     profReport->Flush();
+    if (Utils::IsDynProfMode()) {
+        return PROFILING_SUCCESS;
+    }
     int ret = reporter_->Stop();
     if (ret != PROFILING_SUCCESS) {
         MSPROF_LOGE("Failed to stop reporter of %s", module_.c_str());
@@ -214,6 +226,16 @@ void FlushAllModule(const std::string &devId)
     auto iter = MsprofCallbackHandler::reporters_.begin();
     for (; iter != MsprofCallbackHandler::reporters_.end(); iter++) {
         iter->second.ForceFlush(devId);
+    }
+}
+
+void FlushAllModuleForDynProf(const std::string &devId)
+{
+    if (!Utils::IsDynProfMode()) {
+        return;
+    }
+    for (auto &iter : MsprofCallbackHandler::reporters_) {
+        iter.second.FlushDynProfCachedMsg(devId);
     }
 }
 

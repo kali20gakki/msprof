@@ -4,10 +4,10 @@
  * Author: ly
  * Create: 2020-12-10
  */
-
 #include "msprof_manager.h"
-#include "errno/error_code.h"
+#include "dyn_prof_client.h"
 #include "cmd_log.h"
+#include "errno/error_code.h"
 #include "message/prof_params.h"
 #include "platform/platform.h"
 
@@ -18,6 +18,7 @@ using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::message;
 using namespace Collector::Dvvp::Msprofbin;
 using namespace Analysis::Dvvp::Common::Platform;
+using namespace Collector::Dvvp::DynProf;
 
 MsprofManager::MsprofManager() {}
 
@@ -61,6 +62,7 @@ int MsprofManager::MsProcessCmd() const
 
 void MsprofManager::StopNoWait() const
 {
+    DynProfMngCli::instance()->StopDynProfCli();
     if (rMode_ == nullptr) {
         return;
     }
@@ -85,7 +87,7 @@ int MsprofManager::GenerateRunningMode()
         MSPROF_LOGE("[MsprocessCmd] Invalid params!");
         return PROFILING_FAILED;
     }
-    if (!params_->app.empty()) {
+    if (!params_->app.empty() || DynProfMngCli::instance()->IsEnableMode()) {
         MSVP_MAKE_SHARED2_RET(rMode_, AppMode, "application", params_, PROFILING_FAILED);
         return PROFILING_SUCCESS;
     }

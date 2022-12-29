@@ -23,6 +23,7 @@ public:
 public:
     int HandleMsprofRequest(uint32_t type, VOID_PTR data, uint32_t len);
     void ForceFlush(const std::string &devId);
+    void FlushDynProfCachedMsg(const std::string &devId);
     int SendData(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> fileChunk);
 
 public:
@@ -45,6 +46,7 @@ private:
 };
 
 void FlushAllModule(const std::string &devId = "");
+void FlushAllModuleForDynProf(const std::string &devId);
 void FlushModule(const std::string &devId);
 int SendAiCpuData(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> fileChunk);
 }  // namespace Engine

@@ -99,6 +99,28 @@ TEST_F(ParamsAdapterMsprofUtest, ParamsCheckMsprofV1)
     }
 }
 
+TEST_F(ParamsAdapterMsprofUtest, ParamsCheckDynProf)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<ParamsAdapterMsprof> MsprofParamAdapterMgr;
+    MSVP_MAKE_SHARED0_VOID(MsprofParamAdapterMgr, ParamsAdapterMsprof);
+    int ret = MsprofParamAdapterMgr->ParamsCheckDynProf();
+    EXPECT_EQ(PROFILING_SUCCESS, ret);
+
+    MsprofParamAdapterMgr->paramContainer_[INPUT_CFG_MSPROF_DYNAMIC] = "on";
+    ret = MsprofParamAdapterMgr->ParamsCheckDynProf();
+    EXPECT_EQ(PROFILING_FAILED, ret);
+
+    MsprofParamAdapterMgr->paramContainer_[INPUT_CFG_MSPROF_DYNAMIC_PID] = "1234";
+    MsprofParamAdapterMgr->paramContainer_[INPUT_CFG_MSPROF_APPLICATION] = "main";
+    ret = MsprofParamAdapterMgr->ParamsCheckDynProf();
+    EXPECT_EQ(PROFILING_FAILED, ret);
+
+    MsprofParamAdapterMgr->paramContainer_[INPUT_CFG_MSPROF_APPLICATION] = "";
+    ret = MsprofParamAdapterMgr->ParamsCheckDynProf();
+    EXPECT_EQ(PROFILING_SUCCESS, ret);
+}
+
 TEST_F(ParamsAdapterMsprofUtest, SetDefaultParamsApp)
 {
     GlobalMockObject::verify();

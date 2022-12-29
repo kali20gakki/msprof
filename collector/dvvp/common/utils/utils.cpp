@@ -16,6 +16,7 @@
 #include <string>
 #include <ctime>
 #include "config/config.h"
+#include "config/config_manager.h"
 #include "errno/error_code.h"
 #include "msprof_dlog.h"
 #include "securec.h"
@@ -30,6 +31,7 @@ namespace common {
 namespace utils {
 using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::common::config;
+using namespace Analysis::Dvvp::Common::Config;
 using namespace Collector::Dvvp::Plugin;
 using namespace Collector::Dvvp::Mmpa;
 using FuncIntPtr = int(*)(int);
@@ -1303,6 +1305,17 @@ bool Utils::IsAppName(const std::string paramsName)
     std::string pythonName = "python";
     if (paramBaseName.compare("bash") == 0 || paramBaseName.compare("sh") == 0 ||
         paramBaseName.substr(0, pythonName.size()) == pythonName) {
+        return false;
+    }
+    return true;
+}
+
+bool Utils::IsDynProfMode()
+{
+    if (ConfigManager::instance()->GetPlatformType() != PlatformType::CLOUD_TYPE) {
+        return false;
+    }
+    if (GetEnvString(PROFILING_MODE_ENV) != DAYNAMIC_PROFILING_VALUE) {
         return false;
     }
     return true;

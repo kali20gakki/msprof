@@ -39,6 +39,7 @@ private:
     void CreateCfgMap();
     int ParamsCheckMsprof();
     bool ParamsCheckMsprofV1(InputCfg inputCfg, std::string cfgValue) const;
+    int ParamsCheckDynProf();
     int ParamsCheck();
     void SetDefaultParamsApp();
     void SetDefaultParamsSystem() const;
