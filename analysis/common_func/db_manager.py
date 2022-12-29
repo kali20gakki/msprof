@@ -129,6 +129,16 @@ class DBManager:
         return 0
 
     @staticmethod
+    def judge_row_exist(cursor: any, table_name: str) -> int:
+        """
+        judge row exist
+        """
+        if isinstance(cursor, sqlite3.Cursor):
+            return cursor.execute(
+                "select count(*) from {}".format(table_name)).fetchone()[0]
+        return 0
+
+    @staticmethod
     def sql_create_table_with_key(
             map_name: str,
             table_name: str,
@@ -312,6 +322,22 @@ class DBManager:
         res = True
         for table in tables:
             if not cls.judge_table_exist(curs, table):
+                res = False
+                break
+        cls.destroy_db_connect(conn, curs)
+        return res
+
+    @classmethod
+    def check_no_empty_tables_in_db(cls: any, db_path: str, *tables: any) -> bool:
+        """
+        check if tables are not empty in database
+        """
+        conn, curs = cls.check_connect_db_path(db_path)
+        if not (conn and curs):
+            return False
+        res = True
+        for table in tables:
+            if not cls.judge_row_exist(curs, table):
                 res = False
                 break
         cls.destroy_db_connect(conn, curs)

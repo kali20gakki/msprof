@@ -7,6 +7,7 @@ import sqlite3
 
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
+from common_func.empty_class import EmptyClass
 from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.number_constant import NumberConstant
 from msmodel.interface.parser_model import ParserModel
@@ -56,13 +57,13 @@ class HwtsIterModel(ParserModel):
 
         return self._get_task_num(iteration, offset_count_dict.get(data_type))
 
-    def check_table(self: any) -> bool:
+    def check_table(self: any, table_name=DBNameConstant.TABLE_HWTS_ITER_SYS) -> bool:
         """
         check whether the table exists.
         :return: exits or not
         """
         if not self.conn or not self.cur \
-                or not DBManager.judge_table_exist(self.cur, DBNameConstant.TABLE_HWTS_ITER_SYS):
+                or not DBManager.judge_table_exist(self.cur, table_name):
             return False
         return True
 
@@ -81,6 +82,20 @@ class HwtsIterModel(ParserModel):
         if all_aic_num is None:
             return Constant.DEFAULT_COUNT
         return all_aic_num
+
+    def get_last_aic(self: any) -> tuple:
+        """
+        get all aic count
+        :return: sum of aic count
+        """
+        sql = f"select stream_id, task_id from {DBNameConstant.TABLE_HWTS_BATCH}" \
+              f" where is_ai_core = 1 order by end_time desc"
+        try:
+            aic_with_stream_task = DBManager.fetchone(self.cur, sql)
+        except sqlite3.Error as err:
+            logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
+            return EmptyClass()
+        return aic_with_stream_task
 
     def get_batch_list(self: any, table_name, iter_range: list) -> list:
         """
