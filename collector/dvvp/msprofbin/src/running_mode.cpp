@@ -6,6 +6,7 @@
  */
 
 #include "running_mode.h"
+#include "dyn_prof_client.h"
 #include "errno/error_code.h"
 #include "input_parser.h"
 #include "cmd_log.h"
@@ -34,6 +35,7 @@ using namespace Analysis::Dvvp::Common::Platform;
 using namespace analysis::dvvp::common::utils;
 using namespace Collector::Dvvp::Plugin;
 using namespace Collector::Dvvp::Mmpa;
+using namespace Collector::Dvvp::DynProf;
 
 RunningMode::RunningMode(std::string preCheckParams, std::string modeName, SHARED_PTR_ALIA<ProfileParams> params)
     : isQuit_(false), modeName_(modeName), taskPid_(MSVP_MMPROCESS), preCheckParams_(preCheckParams),
@@ -570,14 +572,14 @@ AppMode::AppMode(std::string preCheckParams, SHARED_PTR_ALIA<ProfileParams> para
 {
     whiteSet_ = {
         ARGS_OUTPUT, ARGS_STORAGE_LIMIT, ARGS_APPLICATION, ARGS_ENVIRONMENT, ARGS_AIC_MODE,
-        ARGS_AIC_METRICE, ARGS_AIV_MODE, ARGS_AIV_METRICS, ARGS_LLC_PROFILING,
+        ARGS_AIC_METRICE, ARGS_AIV_MODE, ARGS_AIV_METRICS, ARGS_LLC_PROFILING, ARGS_DYNAMIC_PROF, ARGS_DYNAMIC_PROF_PID,
         ARGS_ASCENDCL, ARGS_AI_CORE, ARGS_AIV, ARGS_MODEL_EXECUTION, ARGS_L2_SAMPLE_FREQ,
         ARGS_RUNTIME_API, ARGS_TASK_TIME, ARGS_AICPU, ARGS_CPU_PROFILING, ARGS_SYS_PROFILING,
         ARGS_PID_PROFILING, ARGS_HARDWARE_MEM, ARGS_IO_PROFILING, ARGS_INTERCONNECTION_PROFILING,
         ARGS_DVPP_PROFILING, ARGS_L2_PROFILING, ARGS_AIC_FREQ, ARGS_AIV_FREQ, ARGS_BIU_FREQ, ARGS_BIU, ARGS_HCCL,
         ARGS_SYS_SAMPLING_FREQ, ARGS_PID_SAMPLING_FREQ, ARGS_HARDWARE_MEM_SAMPLING_FREQ,
         ARGS_IO_SAMPLING_FREQ, ARGS_DVPP_FREQ,  ARGS_CPU_SAMPLING_FREQ, ARGS_INTERCONNECTION_FREQ,
-        ARGS_HOST_SYS, ARGS_HOST_SYS_USAGE, ARGS_HOST_SYS_USAGE_FREQ, ARGS_PYTHON_PATH, ARGS_MSPROFTX
+        ARGS_HOST_SYS, ARGS_HOST_SYS_USAGE, ARGS_HOST_SYS_USAGE_FREQ, ARGS_PYTHON_PATH, ARGS_MSPROFTX,
     };
 }
 
@@ -599,6 +601,11 @@ int AppMode::RunModeTasks()
         MSPROF_LOGE("[App Mode] Invalid params!");
         return PROFILING_FAILED;
     }
+
+    if (DynProfMngCli::instance()->IsEnableMode()) {
+        return StartAppTaskForDynProf();
+    }
+
     if (StartAppTask() != PROFILING_SUCCESS) {
         MSPROF_LOGE("[App Mode] Run application task failed.");
         return PROFILING_FAILED;
@@ -636,6 +643,7 @@ int AppMode::StartAppTask(bool needWait)
         MSPROF_LOGE("Failed to launch app, msprofbin has quited");
         return PROFILING_FAILED;
     }
+
     int ret = analysis::dvvp::app::Application::LaunchApp(params_, taskPid_);
     if (ret == PROFILING_FAILED) {
         MSPROF_LOGE("Failed to launch app");
@@ -651,6 +659,31 @@ int AppMode::StartAppTask(bool needWait)
         }
     }
     taskPid_ = MSVP_MMPROCESS;
+    return PROFILING_SUCCESS;
+}
+
+int AppMode::StartAppTaskForDynProf()
+{
+    if (!DynProfMngCli::instance()->GetAppPid()) {
+        if (analysis::dvvp::app::Application::LaunchApp(params_, taskPid_) != PROFILING_SUCCESS) {
+            MSPROF_LOGE("Dynamic profiling failed to launch application.");
+            return PROFILING_FAILED;
+        } else {
+            DynProfMngCli::instance()->SetAppPid(taskPid_);
+            const int sleepTimes = 20;
+            const int sleepUs = 1000 * 100; // 100ms
+            for (int i = 0; i < sleepTimes; i++) {
+                Utils::UsleepInterupt(sleepUs);
+            }
+        }
+    }
+
+    if (DynProfMngCli::instance()->StartDynProfCli(params_->ToString()) != PROFILING_SUCCESS) {
+        MSPROF_LOGE("Dynamic profiling start client thread fail.");
+        return PROFILING_FAILED;
+    }
+    MSPROF_LOGI("Dynamic profiling start client success.");
+    DynProfMngCli::instance()->WaitQuit();
     return PROFILING_SUCCESS;
 }
 

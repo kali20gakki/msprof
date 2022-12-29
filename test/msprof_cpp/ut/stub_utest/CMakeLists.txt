@@ -5,6 +5,7 @@ add_executable(stub_file_utest
     ${MSPROF_SOURCE_DIR}/dvvp/depend/src/plugin_handle.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/mmpa/mmpa_api.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/utils/utils.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/common/config/config_manager.cpp    
     test/main.cpp
     test/hdc_api_utest.cpp
     ../stub/profile_drv_user_stub.cpp
@@ -37,6 +38,7 @@ target_include_directories(stub_file_utest PRIVATE
     ${MSPROF_SOURCE_DIR}/dvvp/adx/inc
     ${MSPROF_SOURCE_DIR}/dvvp/depend/include/wrapper
     ${MSPROF_SOURCE_DIR}/dvvp/depend/include/profapi
+    ${MSPROF_SOURCE_DIR}/dvvp/driver/inc
     ${MSPROF_SOURCE_DIR}/dvvp
 )
 

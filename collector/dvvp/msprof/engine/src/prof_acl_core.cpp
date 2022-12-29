@@ -37,14 +37,28 @@ using namespace Collector::Dvvp::Plugin;
 static std::mutex g_aclprofMutex;
 static uint64_t g_indexId = 1;
 
-aclError aclprofInit(CONST_CHAR_PTR profilerResultPath, size_t length)
+static aclError aclprofInitPreCheck()
 {
+    if (Utils::IsDynProfMode()) {
+        MSPROF_LOGI("Start to execute aclprofInit not support in Dynamic profiling mode");
+        return ACL_ERROR_FEATURE_UNSUPPORTED;
+    }
     if (Platform::instance()->PlatformIsHelperHostSide()) {
         MSPROF_LOGE("acl api not support in helper");
         MSPROF_ENV_ERROR("EK0004", std::vector<std::string>({"intf", "platform"}),
             std::vector<std::string>({"aclprofInit", "SocCloud"}));
         return ACL_ERROR_FEATURE_UNSUPPORTED;
     }
+    return ACL_SUCCESS;
+}
+
+aclError aclprofInit(CONST_CHAR_PTR profilerResultPath, size_t length)
+{
+    int ret = aclprofInitPreCheck();
+    if (ret != ACL_SUCCESS) {
+        return ret;
+    }
+
     MSPROF_LOGI("Start to execute aclprofInit");
     std::lock_guard<std::mutex> lock(g_aclprofMutex);
 
@@ -66,7 +80,7 @@ aclError aclprofInit(CONST_CHAR_PTR profilerResultPath, size_t length)
         return ACL_ERROR_INVALID_PARAM;
     }
 
-    int32_t ret = ProfAclMgr::instance()->ProfInitPrecheck();
+    ret = ProfAclMgr::instance()->ProfInitPrecheck();
     if (ret != ACL_SUCCESS) {
         return ret;
     }
