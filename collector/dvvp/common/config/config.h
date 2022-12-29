@@ -100,6 +100,8 @@ const char * const MSVP_HEART_BEAT_THREAD_NAME = "MSVP_HeartBeat";
 const char * const MSVP_UPLOADER_DUMPER_THREAD_NAME = "MSVP_UploaderDumper";
 const char * const MSVP_HDC_DUMPER_THREAD_NAME = "MSVP_HdcDumper";
 const char * const MSVP_RPC_DUMPER_THREAD_NAME = "MSVP_RpcDumper";
+const char * const MSVP_DYN_PROF_SERVER_THREAD_NAME = "MSVP_DynProfServer";
+const char * const MSVP_DYN_PROF_CLIENT_THREAD_NAME = "MSVP_DynProfClient";
 
 // cloud prof config
 const std::string SAMPLE_KEY = "sample";
@@ -183,6 +185,8 @@ const std::string PROFILING_RESULT_PATH_ENV = "PROFILING_RESULT_PATH";
 const std::string PROFILING_AICPU_MODE_ENV = "AICPU_PROFILING_MODE";
 const std::string RANK_TABLE_FILE_ENV = "RANK_TABLE_FILE";
 const std::string RANK_ID_ENV = "RANK_ID";
+const std::string PROFILING_MODE_ENV = "PROFILING_MODE";
+const std::string DAYNAMIC_PROFILING_VALUE = "dynamic";
 
 // llc  profiling events type
 const std::string LLC_PROFILING_CAPACITY = "capacity";

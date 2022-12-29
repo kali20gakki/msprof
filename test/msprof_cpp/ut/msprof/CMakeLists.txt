@@ -90,6 +90,9 @@ set(profilerSrcList
 	${MSPROF_SOURCE_DIR}/dvvp/transport/uploader.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/transport/uploader_mgr.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/transport/hash_data.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/msprof/dynamic_profiling/src/dyn_prof_server.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/msprof/dynamic_profiling/src/dyn_prof_client.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/msprof/engine/src/prof_acl_mgr.cpp
 	${CppPath}
 )
 
@@ -114,6 +117,7 @@ add_executable(
 )
 
 target_include_directories(msprofiler_utest PRIVATE
+    ${MSPROF_SOURCE_DIR}/dvvp/msprof/dynamic_profiling/include
     ${MSPROF_SOURCE_DIR}/dvvp/msprof/engine/include
     ${MSPROF_SOURCE_DIR}/dvvp/common/utils 
     ${TOP_DIR}/abl/msprof/inc/toolchain
@@ -323,6 +327,10 @@ target_include_directories(msprof_utest PRIVATE
 	../stub
 	${CMAKE_BINARY_DIR}/proto/profiler
 	${MSPROF_SOURCE_DIR}/dvvp/depend/include/stub
+	${MSPROF_SOURCE_DIR}/dvvp/analyze/inc
+	${MSPROF_SOURCE_DIR}/dvvp/task_handle/include
+	${MSPROF_SOURCE_DIR}/dvvp/job_wrapper/include    
+	${MSPROF_SOURCE_DIR}/dvvp/msprof/dynamic_profiling/include
 )
 
 target_compile_options(msprof_utest PRIVATE
