@@ -47,6 +47,8 @@ class MsProfCommonConstant:
     ITERATION_ID = "iteration_id"
     TOP_TIME_ITERATION = "top_time_iteration"
     RANK_ID = "rank_id"
+    INDEX_ID = "index_id"
+    TAG = "tag"
 
     def get_msprof_common_class_name(self: any) -> any:
         """

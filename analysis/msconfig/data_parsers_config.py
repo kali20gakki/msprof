@@ -134,7 +134,7 @@ class DataParsersConfig(MetaConfig):
         ]
         , 'RunTimeApiParser': [
             ('path', 'msparser.runtime.runtime_api_parser'),
-            ('chip_model', '0,1,2,3,4,5'),
+            ('chip_model', '0,1,2,3,4,5,7'),
             ('level', '2')
         ]
         , 'ParseAiCpuDataAdapter': [
