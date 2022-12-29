@@ -23,6 +23,7 @@ set(msprofBinHeader
     ${TOP_DIR}/collector/dvvp/params_adapter
     ${TOP_DIR}/collector/inc/external
     ${TOP_DIR}/collector/dvvp/depend/inc/acl
+    ${TOP_DIR}/collector/dvvp/msprof/dynamic_profiling/include/
     ../common/utils
     ../msprof/engine/include
     ../host/include/
@@ -56,6 +57,7 @@ add_executable(msprofbin
     ${TOP_DIR}/collector/dvvp/params_adapter/params_adapter.cpp
     ${TOP_DIR}/collector/dvvp/params_adapter/params_adapter_msprof.cpp
     ${TOP_DIR}/collector/dvvp/common/logger/cmd_log.cpp
+    ${TOP_DIR}/collector/dvvp/msprof/dynamic_profiling/src/dyn_prof_client.cpp
     src/msprof_bin.cpp
     src/msprof_manager.cpp
     src/prof_task.cpp

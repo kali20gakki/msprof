@@ -87,10 +87,8 @@ enum {
     FFTS,
     INVLID_MOUDLE_ID
 };
-
 #define MSPROF_MODULE_NAME PROFILING
 #define FILENAME (strrchr("/" __FILE__, '/') + 1)
-
 using SlogPlugin = Collector::Dvvp::Plugin::SlogPlugin;
 
 #define MSPROF_LOGD(format, ...) do {                                                                           \
@@ -132,5 +130,4 @@ using SlogPlugin = Collector::Dvvp::Plugin::SlogPlugin;
         "[%s:%d]" " >>> (tid:%ld) " format "\n", FILENAME, __LINE__, syscall(SYS_gettid), ##__VA_ARGS__);       \
     }                                                                                                           \
 } while (0)
-
 #endif  // MSPROF_LOG_H

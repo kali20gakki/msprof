@@ -5,6 +5,7 @@ set(profilerSrcFiles
     ${MSPROF_SOURCE_DIR}/dvvp/depend/stub/error_manager/msprof_error_manager_stub.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/depend/src/plugin_handle.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/mmpa/mmpa_api.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/common/config/config_manager.cpp
 )
 
 set(localSrcFiles

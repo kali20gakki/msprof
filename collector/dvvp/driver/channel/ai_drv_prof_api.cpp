@@ -212,16 +212,21 @@ int DrvTscpuStart(const DrvPeripheralProfileCfg &peripheralCfg,
 int DrvAicoreStart(const DrvPeripheralProfileCfg &peripheralCfg, const std::vector<int> &profCores,
                    const std::vector<std::string> &profEvents)
 {
+    if (profEvents.size() > PMU_EVENT_MAX_NUM) {
+        MSPROF_LOGE("profiling events size over %d, event_num=%d", PMU_EVENT_MAX_NUM, profEvents.size());
+        return PROFILING_FAILED;
+    }
     uint32_t profDeviceId = (uint32_t)peripheralCfg.profDeviceId;
     AI_DRV_CHANNEL profChannel = peripheralCfg.profChannel;
     uint32_t profSamplePeriod = (uint32_t)peripheralCfg.profSamplePeriod;
-    uint32_t configSize = sizeof(TsAiCoreProfileConfigT) + profEvents.size() * sizeof(uint32_t);
+    uint32_t configSize = sizeof(TsAiCoreProfileConfigT);
 
     auto configP = static_cast<TsAiCoreProfileConfigT *>(malloc(configSize));
     if (configP == nullptr) {
         return PROFILING_FAILED;
     }
     (void)memset_s(configP, configSize, 0, configSize);
+    configP->tag = (Utils::IsDynProfMode()) ? (1) : (0);
     configP->type = (uint32_t)TS_PROF_TYPE_SAMPLE_BASE;
     configP->almost_full_threshold = AI_CORE_SAMPLE_FULL_THRESHOLD;
     configP->period = static_cast<uint32_t>(profSamplePeriod);
@@ -260,8 +265,11 @@ int DrvAicoreStart(const DrvPeripheralProfileCfg &peripheralCfg, const std::vect
 
 int DrvAicoreTaskBasedStart(int profDeviceId, AI_DRV_CHANNEL profChannel, const std::vector<std::string> &profEvents)
 {
-    uint32_t configSize =
-        sizeof(TsAiCoreProfileConfigT) + profEvents.size() * sizeof(uint32_t);
+    if (profEvents.size() > PMU_EVENT_MAX_NUM) {
+        MSPROF_LOGE("profiling events size over %d, event_num=%d", PMU_EVENT_MAX_NUM, profEvents.size());
+        return PROFILING_FAILED;
+    }
+    uint32_t configSize = sizeof(TsAiCoreProfileConfigT);
 
     auto configP = static_cast<TsAiCoreProfileConfigT *>(malloc(configSize));
     if (configP == nullptr) {
@@ -269,6 +277,7 @@ int DrvAicoreTaskBasedStart(int profDeviceId, AI_DRV_CHANNEL profChannel, const 
     }
 
     (void)memset_s(configP, configSize, 0, configSize);
+    configP->tag = (Utils::IsDynProfMode()) ? (1) : (0);
     configP->type = (uint32_t)TS_PROF_TYPE_TASK_BASE;
     configP->event_num = (uint32_t)profEvents.size();
     std::string eventStr;
@@ -575,6 +584,7 @@ int DrvHwtsLogStart(int profDeviceId, AI_DRV_CHANNEL profChannel)
     unsigned int configSize = sizeof(TsHwtsProfileConfigT);
     TsHwtsProfileConfigT configP;
     (void)memset_s(&configP, configSize, 0, configSize);
+    configP.tag = (Utils::IsDynProfMode()) ? (1) : (0);
     MSPROF_EVENT("Begin to start profiling DrvHwtsLogStart, profDeviceId=%d, profChannel=%d",
         profDeviceId, static_cast<int>(profChannel));
     prof_start_para_t profStartPara;

@@ -69,6 +69,7 @@ enum MsprofArgsType {
     ARGS_PARSE,
     ARGS_QUERY,
     ARGS_EXPORT,
+    ARGS_DYNAMIC_PROF,
     // number
     ARGS_AIC_FREQ, // 10 10-1000
     ARGS_AIV_FREQ, // 10 10-1000
@@ -84,6 +85,7 @@ enum MsprofArgsType {
     ARGS_INTERCONNECTION_FREQ, // 50 1-50
     ARGS_EXPORT_ITERATION_ID,
     ARGS_EXPORT_MODEL_ID,
+    ARGS_DYNAMIC_PROF_PID,  // 1-2147483647
     // host
     ARGS_HOST_SYS,
     ARGS_HOST_SYS_PID,
@@ -135,6 +137,7 @@ const MmStructOption longOptions[] = {
     {"parse", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_PARSE},
     {"query", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_QUERY},
     {"export", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_EXPORT},
+    {"dynamic", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_DYNAMIC_PROF},
     // number
     {"aic-freq", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_AIC_FREQ},
     {"aiv-freq", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_AIV_FREQ},
@@ -150,6 +153,7 @@ const MmStructOption longOptions[] = {
     {"sys-interconnection-freq", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_INTERCONNECTION_FREQ},
     {"iteration-id", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_EXPORT_ITERATION_ID},
     {"model-id", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_EXPORT_MODEL_ID},
+    {"pid", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_DYNAMIC_PROF_PID},
     // host
     {"host-sys", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_HOST_SYS},
     {"host-sys-pid", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_HOST_SYS_PID},
@@ -212,6 +216,7 @@ private:
     void AddHostArgs();
     void AddStarsArgs();
     void AddAnalysisArgs();
+    void AddDynProfArgs();
 private:
     bool driverOnline_;
     PlatformType platform_;

@@ -12,6 +12,8 @@ set(profilerSrcList
     ${MSPROF_SOURCE_DIR}/dvvp/driver/devmgmt/ai_drv_dev_api.cpp        
     ${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform.cpp    
     ${MSPROF_SOURCE_DIR}/dvvp/app/application.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/msprof/dynamic_profiling/src/dyn_prof_client.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/common/thread/thread.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/app/env_manager.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/utils/utils.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/mmpa/mmpa_api.cpp
@@ -66,6 +68,7 @@ target_include_directories(application_utest PRIVATE
     ${MSPROF_SOURCE_DIR}/dvvp/common/validation
     ${MSPROF_SOURCE_DIR}/dvvp/common/statistics
     ${MSPROF_SOURCE_DIR}/dvvp/msprof/engine/include
+    ${MSPROF_SOURCE_DIR}/dvvp/msprof/dynamic_profiling/include
     ${MSPROF_SOURCE_DIR}/dvvp/common/utils 
     ${TOP_DIR}/collector/inc/toolchain
     ${MSPROF_SOURCE_DIR}/dvvp/common/config

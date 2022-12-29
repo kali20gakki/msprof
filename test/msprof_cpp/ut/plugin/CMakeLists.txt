@@ -1,8 +1,15 @@
+protobuf_generate(profiler
+	CppPath
+	HeaderPath
+	${MSPROF_SOURCE_DIR}/dvvp/proto/profiler.proto
+	${MSPROF_SOURCE_DIR}/dvvp/proto/profiler_ext.proto
+)
 set(profilerSrcFiles
     ${MSPROF_SOURCE_DIR}/dvvp/depend/src/driver_plugin.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/depend/src/plugin_handle.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/mmpa/mmpa_api.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/utils/utils.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/common/config/config_manager.cpp
 )
 
 set(localSrcFiles
@@ -25,9 +32,17 @@ target_include_directories(plugin_utest PRIVATE
     ${MSPROF_SOURCE_DIR}/dvvp/common
     ${MSPROF_SOURCE_DIR}/dvvp/common/config
     ${MSPROF_SOURCE_DIR}/dvvp/common/mmpa
+    ${MSPROF_SOURCE_DIR}/dvvp/
+    ${MSPROF_SOURCE_DIR}/dvvp/message/
     ${MSPROF_SOURCE_DIR}/dvvp/common/utils
     ${TOP_DIR}/platform/securec/include
     ${TOP_DIR}/test/msprof_cpp/ut/stub/common/log
+    ${CMAKE_BINARY_DIR}/proto/profiler/
+	${TOP_DIR}/opensource/json/include
+    ${MSPROF_SOURCE_DIR}/dvvp/msprof/engine/include
+    ${MSPROF_SOURCE_DIR}/dvvp/driver/inc/
+    ${MSPROF_SOURCE_DIR}/inc/toolchain
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/metadef/error_manager/error_manager_stub
 )
 
 target_compile_options(plugin_utest PRIVATE

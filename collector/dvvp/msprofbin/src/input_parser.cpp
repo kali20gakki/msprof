@@ -214,6 +214,7 @@ void ArgsManager::Init()
         {"hccl", "Show hccl profiling data, the default value is off.(full-platform)", OFF},
         {"msproftx", "Show msproftx data, the default value is off.(full-platform)", OFF}
     };
+    AddDynProfArgs();
     AddAnalysisArgs();
     AddAicpuArgs();
     AddAivArgs();
@@ -229,6 +230,17 @@ void ArgsManager::Init()
     AddStarsArgs();
     Args help = {"help", "help message.(full-platform)"};
     argsList_.push_back(help);
+}
+
+void ArgsManager::AddDynProfArgs()
+{
+    if (driverOnline_ && platform_ != PlatformType::CLOUD_TYPE) {
+        return;
+    }
+    Args dynamic = {"dynamic", "Dynamic profiling switch, the default value is off.(future-platform)", OFF};
+    Args pid = {"pid", "Dynamic profiling pid of the target process", "0"};
+    argsList_.push_back(dynamic);
+    argsList_.push_back(pid);
 }
 
 void ArgsManager::AddAnalysisArgs()
