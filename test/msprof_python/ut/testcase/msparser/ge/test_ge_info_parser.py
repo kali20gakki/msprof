@@ -83,6 +83,29 @@ class TestGeInfoParser(unittest.TestCase):
         self.assertEqual(ret[-1][-1], 3)
         self.assertEqual(len(parser.ge_info_data[DBNameConstant.TABLE_GE_STEP]), 7)
 
+    def test_dynamic_scene_process_non_delete(self):
+        parser = GeInfoParser({}, {})
+        parser.ge_info_data = {
+            DBNameConstant.TABLE_GE_STEP: [
+                    [0, -1, -1, -1, -1, 3, '0'],
+                    [0, -1, -1, -1, -1, 3, '1'],
+                    [0, -1, -1, -1, -1, 4, '0'],
+                    [0, -1, -1, -1, -1, 4, '1'],
+                ],
+            DBNameConstant.TABLE_GE_TASK: [
+                [0, -1, -1, -1, -1, -1, -1, -1, -1, 3],
+                [0, -1, -1, -1, -1, -2, -1, -1, -1, 3],
+                [0, -1, -1, -1, -1, -3, -1, -1, -1, 3],
+                [0, -1, -1, -1, -1, -4, -1, -1, -1, 4],
+                [0, -1, -1, -1, -1, -5, -1, -1, -1, 4],
+                [0, -1, -1, -1, -1, -6, -1, -1, -1, 4]
+            ]
+        }
+        parser.dynamic_scene_process(DBNameConstant.TABLE_GE_TASK, parser.GE_TASK)
+        ret = parser.ge_info_data[DBNameConstant.TABLE_GE_TASK]
+        self.assertEqual(sum([ls[5] for ls in ret]), (-1 + -2 + -3 + -4 + -5 + -6))
+        self.assertEqual(ret[-1][-1], 2)
+
     def test_dynamic_scene_process_empty(self):
         parser = GeInfoParser({}, {})
         parser.ge_info_data = {
@@ -118,6 +141,18 @@ class TestGeInfoParser(unittest.TestCase):
         parser = GeInfoParser({}, {})
         parser.remove_incomplete_index(dynamic_model_dict, ge_step_data, parser.GE_TASK)
         self.assertEqual(len(dynamic_model_dict[0]), 3)
+
+    def test_remove_incomplete_index_tag_type_incorrect(self):
+        ge_step_data = [
+                [0, -1, -1, -1, -1, 4, 'ad']
+        ]
+        dynamic_model_dict = {
+            0: [
+                [0, -1, -1, -1, -1, -1, -4, -1, -1, 4]
+            ]
+        }
+        parser = GeInfoParser({}, {})
+        parser.remove_incomplete_index(dynamic_model_dict, ge_step_data, parser.GE_TASK)
 
     def test_is_complete_iter_exist_true_1(self):
         ge_step_data = [
