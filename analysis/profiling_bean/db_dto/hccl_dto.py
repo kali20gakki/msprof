@@ -12,7 +12,10 @@ class HcclDto:
     """
 
     def __init__(self: any) -> None:
+        self._op_name = Constant.NA
+        self._iteration = 0
         self._hccl_name = Constant.NA
+        self._first_timestamp = 0
         self._plane_id = 0
         self._timestamp = 0
         self._duration = 0
@@ -30,12 +33,36 @@ class HcclDto:
         self._size = -1
 
     @property
+    def op_name(self: any) -> str:
+        return self._op_name
+
+    @op_name.setter
+    def op_name(self: any, value: str) -> None:
+        self._op_name = value
+
+    @property
+    def iteration(self: any) -> int:
+        return self._iteration
+
+    @iteration.setter
+    def iteration(self: any, value: int) -> None:
+        self._iteration = value
+
+    @property
     def hccl_name(self: any) -> any:
         return self._hccl_name
 
     @hccl_name.setter
     def hccl_name(self: any, value: any) -> None:
         self._hccl_name = value
+
+    @property
+    def first_timestamp(self: any) -> float:
+        return self._first_timestamp
+
+    @first_timestamp.setter
+    def first_timestamp(self: any, value: float) -> None:
+        self._first_timestamp = value
 
     @property
     def plane_id(self: any) -> any:
