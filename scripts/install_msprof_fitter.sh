@@ -4,7 +4,7 @@
 
 CURRENT_DIR="$(dirname "$(readlink -e "$0")")"
 INSTALL_PROFILING_HIPROF="${CURRENT_DIR}/install_profiling_msprof.sh"
-INI_CONFIG_DIR="$(readlink -f "${CURRENT_DIR}/../tools/profiler/profiler_tool/analysis/config")"
+INI_CONFIG_DIR="$(readlink -f "${CURRENT_DIR}/../tools/profiler/profiler_tool/analysis/msconfig")"
 DEFAULT_USERNAME=HwHiAiUser
 DEFAULT_USERGROUP=HwHiAiUser
 INSTALL_INFO="$(readlink -f "${CURRENT_DIR}/../ascend_install.info")"
