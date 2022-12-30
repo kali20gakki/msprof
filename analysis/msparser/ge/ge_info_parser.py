@@ -102,7 +102,7 @@ class GeInfoParser(IParser, MsMultiProcess):
                                 f"dynamic profiling scene will miss ai core data")
             remove_iter_list = []
             # judge whether the smallest index has the tag 0, which means an iter start
-            min_index_datum = min(ge_step_dict[model_id],
+            min_index_datum = min(ge_step_dict.get(model_id),
                                   key=lambda x: (x[self.GE_STEP.get(MsProfCommonConstant.INDEX_ID)],
                                                  x[self.GE_STEP.get(MsProfCommonConstant.TAG)]))
             try:
