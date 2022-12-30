@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2019-2020. All rights reserved.
-
+import ast
 import json
 import logging
 import sqlite3
@@ -46,15 +46,13 @@ class HCCLExport:
         get hccl query sql
         :return: control statement
         """
-        sql = "select name,plane_id,timestamp,duration,bandwidth,stream_id," \
-              "task_id, task_type,transport_type,size,stage,step,op_name from {0}".format(
+        sql = "select name,plane_id,timestamp,duration,args from {0}".format(
             DBNameConstant.TABLE_HCCL_ALL_REDUCE)
 
         if not ProfilingScene().is_operator():
             iter_time = MsprofIteration(self.project_path).get_iteration_time(self.iter_range)
             if iter_time:
-                sql = "select name,plane_id,timestamp,duration,bandwidth,stream_id," \
-                      "task_id, task_type,transport_type,size,stage,step,op_name from {0} where timestamp>={1} " \
+                sql = "select name,plane_id,timestamp,duration,args from {0} where timestamp>={1} " \
                       "and timestamp<{2}".format(DBNameConstant.TABLE_HCCL_ALL_REDUCE,
                                                  iter_time[0][0], iter_time[0][1])
         return sql
@@ -72,21 +70,14 @@ class HCCLExport:
         self._get_meta_data(hccl_data)
         _hccl_format_data = [0] * 2 * len(hccl_data)
         for index, _hccl_data in enumerate(hccl_data):
-            hccl_args = OrderedDict([("Bandwidth(GB/s)", _hccl_data[4]),
-                                     ("Stream Id", _hccl_data[5]),
-                                     ("Task Id", _hccl_data[6]),
-                                     ("Task Type", _hccl_data[7]),
-                                     ("Transport Type", _hccl_data[8]),
-                                     ("Size(Byte)", _hccl_data[9]),
-                                     ("Stage", _hccl_data[10]),
-                                     ("Step", _hccl_data[11]),
-                                     ("Operator Name", _hccl_data[12])])
+            hccl_args = OrderedDict(ast.literal_eval(_hccl_data[4]))
             _hccl_data_pice = [
                 _hccl_data[0], self.pid_value, _hccl_data[1],
                 _hccl_data[2], _hccl_data[3], hccl_args
             ]
             _hccl_stage_pice = [
-                "Stage{}Step{}".format(_hccl_data[10], _hccl_data[11]), self.pid_value, _hccl_data[1],
+                "Stage{}Step{}".format(hccl_args.get('stage', -1), hccl_args.get('step', -1)), self.pid_value,
+                _hccl_data[1],
                 _hccl_data[2], _hccl_data[3], hccl_args
             ]
             _hccl_format_data[index] = _hccl_data_pice
