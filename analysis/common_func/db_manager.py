@@ -136,7 +136,8 @@ class DBManager:
         if isinstance(cursor, sqlite3.Cursor):
             if not DBManager.fetch_one_data(cursor, "select * from {}".format(table_name)):
                 return False
-        return True
+            return True
+        return False
 
     @staticmethod
     def sql_create_table_with_key(
