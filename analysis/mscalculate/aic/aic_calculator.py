@@ -12,14 +12,17 @@ from common_func.config_mgr import ConfigMgr
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.path_manager import PathManager
+from common_func.db_name_constant import DBNameConstant
 from common_func.utils import Utils
 from framework.offset_calculator import FileCalculator
 from framework.offset_calculator import OffsetCalculator
+from framework.offset_calculator import FileReverseCalculator
 from mscalculate.aic.aic_utils import AicPmuUtils
 from mscalculate.calculate_ai_core_data import CalculateAiCoreData
 from mscalculate.interface.icalculator import ICalculator
 from msmodel.aic.aic_pmu_model import AicPmuModel
 from msmodel.iter_rec.iter_rec_model import HwtsIterModel
+from msmodel.ge.ge_info_calculate_model import GeInfoModel
 from profiling_bean.db_dto.step_trace_dto import IterationRange
 from profiling_bean.prof_enum.data_tag import DataTag
 from profiling_bean.struct_info.aic_pmu import AicPmuBean
@@ -36,11 +39,14 @@ class AicCalculator(ICalculator, MsMultiProcess):
         self._sample_config = sample_config
         self._project_path = sample_config.get(StrConstant.SAMPLE_CONFIG_PROJECT_PATH)
         self._iter_model = HwtsIterModel(self._project_path)
+        self.ge_info_model = GeInfoModel(self._project_path)
         self._file_list = file_list.get(DataTag.AI_CORE, [])
         self._aic_data_list = []
         self._file_list.sort(key=lambda x: int(x.split("_")[-1]))
         self._iter_range = self._sample_config.get(StrConstant.PARAM_ITER_ID)
         self.core_type = 0
+        self.aic_discard_num_from_tail = 0
+        self.repeat_aic_times = 0
 
     def calculate(self: any) -> None:
         """
@@ -50,7 +56,54 @@ class AicCalculator(ICalculator, MsMultiProcess):
         if ProfilingScene().is_operator():
             self._parse_all_file()
         else:
+            self.pre_parse()
             self._parse_by_iter()
+
+    def pre_parse(self):
+        """
+        for dynamic scene: align tails of hwts and aicore
+        """
+        if self._iter_model.check_db() and self._iter_model.check_table(DBNameConstant.TABLE_HWTS_BATCH):
+            aic_with_stream_task = self._iter_model.get_last_aic()
+            if not aic_with_stream_task:
+                return
+            self.repeat_aic_times = self.get_aic_repeat_times_in_last_iter(aic_with_stream_task)
+            file_rev_calculator = FileReverseCalculator(
+                self._project_path, self._file_list, self.AICORE_LOG_SIZE, self.repeat_aic_times, aic_with_stream_task)
+            file_rev_calculator.read_file_from_tail()
+            if file_rev_calculator.is_find:
+                self.aic_discard_num_from_tail = file_rev_calculator.tail_aic_cnt
+                logging.info(f"aic_discard_num_from_tail is {self.aic_discard_num_from_tail}")
+            else:
+                logging.warning(f"Can not find any ai core log match stream and task id with hwts's last ai core task!"
+                                f"Probably lose some ai core task!")
+        else:
+            logging.warning(f"Can not connect table hwts batch!!")
+
+    def get_aic_repeat_times_in_last_iter(self: any, aic_with_stream_task: tuple) -> int:
+        """
+        for dynamic scene: get how many batch ids for the aicore with same task and stream id
+        """
+        repeat_times = 0
+        if self.ge_info_model.check_db() and self.ge_info_model.check_table(DBNameConstant.TABLE_GE_TASK) \
+                and self.ge_info_model.check_table(DBNameConstant.TABLE_GE_STEP):
+            model_ids_list = self.ge_info_model.get_model_ids()
+            for model_id_tuple in model_ids_list:
+                model_id = model_id_tuple[0]
+                # first check if it is dynamic scene
+                max_iter_tag_list = self.ge_info_model.get_max_iter_with_tag(model_id)
+                if not max_iter_tag_list:
+                    continue
+                # second check if it is dynamic profiling (only have one tag, incomplete)
+                if len(max_iter_tag_list) != 1:
+                    continue
+                max_index = max_iter_tag_list[0][0]
+                repeat_aic_info = self.ge_info_model.get_repeat_times_for_target_aic_in_target_index(
+                    model_id, max_index, aic_with_stream_task)
+                repeat_times += len(repeat_aic_info)
+        if repeat_times > 0:
+            logging.info(f'There exists {repeat_times} aicore datum having same task and stream id in last iteration!')
+        return repeat_times
 
     def calculate_pmu_list(self: any, data: any, profiling_events: list, data_list: list) -> None:
         """
@@ -106,7 +159,7 @@ class AicCalculator(ICalculator, MsMultiProcess):
         :return: offset count and total aic count
         """
         offset_count, total_count = self._iter_model.get_task_offset_and_sum(iteration, HwtsIterModel.AI_CORE_TYPE)
-        _total_aic_count = self._get_total_aic_count()
+        _total_aic_count = self._get_total_aic_count() - self.aic_discard_num_from_tail
         _sql_aic_count = self._iter_model.get_aic_sum_count()
         # get offset by all aic count and sql record count
         offset_count = _total_aic_count - _sql_aic_count + offset_count
