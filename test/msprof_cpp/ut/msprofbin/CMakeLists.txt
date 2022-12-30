@@ -72,7 +72,8 @@ set(common_file
 	${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter_interface.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter_lhisi.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter_mdc.cpp
-	${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter_mini.cpp   
+	${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter_mini.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/msprof/dynamic_profiling/src/dyn_prof_client.cpp    
 )
 
 
@@ -153,6 +154,7 @@ target_include_directories(msprof_bin_utest PRIVATE
     ${MSPROF_SOURCE_DIR}/dvvp/depend/include/stub
     ${MSPROF_SOURCE_DIR}/dvvp
     ${MSPROF_SOURCE_DIR}/dvvp/message
+    ${MSPROF_SOURCE_DIR}/dvvp/msprof/dynamic_profiling/include
 )
 
 

@@ -13,7 +13,7 @@
 
 namespace ge {
 using namespace analysis::dvvp::common::utils;
-void GeOpenDeviceHandle(const uint32_t devId);
+int32_t GeOpenDeviceHandle(const uint32_t devId);
 void GeFinalizeHandle();
 size_t aclprofGetGraphId(CONST_VOID_PTR opInfo, size_t opInfoLen, uint32_t index);
 }

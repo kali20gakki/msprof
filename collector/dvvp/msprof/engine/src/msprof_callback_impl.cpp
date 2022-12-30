@@ -5,6 +5,7 @@
  * Create: 2020-09-26
  */
 #include "msprof_callback_impl.h"
+#include "dyn_prof_server.h"
 #include "errno/error_code.h"
 #include "msprof_callback_handler.h"
 #include "prof_acl_mgr.h"
@@ -24,6 +25,7 @@ using namespace analysis::dvvp::common::config;
 using namespace Analysis::Dvvp::Common::Platform;
 using namespace analysis::dvvp::host;
 using namespace Collector::Dvvp::Plugin;
+using namespace Collector::Dvvp::DynProf;
 
 bool CheckMsprofBin(std::string &envValue)
 {
@@ -38,23 +40,22 @@ int32_t MsprofCtrlCallbackImplHandle(uint32_t type, VOID_PTR data, uint32_t len)
 {
     int32_t ret = MSPROF_ERROR;
     std::string envValue;
-    bool retCheck = CheckMsprofBin(envValue);
-    if (retCheck) {
+    if (CheckMsprofBin(envValue)) {
         ret = Msprofiler::Api::ProfAclMgr::instance()->MsprofInitAclEnv(envValue);
     } else {
-    switch (type) {
-        case MSPROF_CTRL_INIT_ACL_JSON:
-            ret = Msprofiler::Api::ProfAclMgr::instance()->MsprofInitAclJson(data, len);
-            break;
-        case MSPROF_CTRL_INIT_GE_OPTIONS:
-            ret = Msprofiler::Api::ProfAclMgr::instance()->MsprofInitGeOptions(data, len);
-            break;
-        case MSPROF_CTRL_INIT_HELPER:
-            ret = Msprofiler::Api::ProfAclMgr::instance()->MsprofInitHelper(data, len);
-            break;
-        default:
-            MSPROF_LOGE("Invalid MsprofCtrlCallback type: %u", type);
-    }
+        switch (type) {
+            case MSPROF_CTRL_INIT_ACL_JSON:
+                ret = Msprofiler::Api::ProfAclMgr::instance()->MsprofInitAclJson(data, len);
+                break;
+            case MSPROF_CTRL_INIT_GE_OPTIONS:
+                ret = Msprofiler::Api::ProfAclMgr::instance()->MsprofInitGeOptions(data, len);
+                break;
+            case MSPROF_CTRL_INIT_HELPER:
+                ret = Msprofiler::Api::ProfAclMgr::instance()->MsprofInitHelper(data, len);
+                break;
+            default:
+                MSPROF_LOGE("Invalid MsprofCtrlCallback type: %u", type);
+        }
     }
     if (ret == MSPROF_ERROR_ACL_JSON_OFF) {
         return MSPROF_ERROR_NONE;
@@ -76,13 +77,24 @@ int32_t MsprofCtrlCallbackImplHandle(uint32_t type, VOID_PTR data, uint32_t len)
 int32_t MsprofCtrlCallbackImpl(uint32_t type, VOID_PTR data, uint32_t len)
 {
     MSPROF_EVENT("MsprofCtrlCallback called, type: %u", type);
+
     if (type == MSPROF_CTRL_FINALIZE) {
+        DynProfMngSrv::instance()->StopDynProfSrv();
         return Msprofiler::Api::ProfAclMgr::instance()->MsprofFinalizeHandle();
+    }
+
+    if (Utils::IsDynProfMode() && !DynProfMngSrv::instance()->IsStarted()) {
+        if (ProfApiPlugin::instance()->MsprofProfRegDeviceStateCallback(MsprofSetDeviceCallbackForDynProf) != 0) {
+            MSPROF_LOGE("Dynamic profiling failed to register device state callback.");
+            return MSPROF_ERROR;
+        }
+        return DynProfMngSrv::instance()->StartDynProfSrv();
     }
     if ((type == MSPROF_CTRL_INIT_DYNA) &&
         (Utils::GetEnvString(PROFILER_SAMPLE_CONFIG_ENV).empty() ||
         !Msprofiler::Api::ProfAclMgr::instance()->IsModeOff())) {
-        return Msprofiler::Api::ProfAclMgr::instance()->MsprofInitForDynamic(data, len);
+        MSPROF_LOGI("Dynamic profiling environment not really set, so do nothing.");
+        return MSPROF_ERROR_NONE;
     }
     int32_t ret = MsprofCtrlCallbackImplHandle(type, data, len);
     if (ret != MSPROF_ERROR_NONE) {
@@ -103,7 +115,6 @@ int32_t MsprofCtrlCallbackImpl(uint32_t type, VOID_PTR data, uint32_t len)
         }
         return MSPROF_ERROR;
     }
-
     // register device state callback
     ret = ProfApiPlugin::instance()->MsprofProfRegDeviceStateCallback(MsprofSetDeviceCallbackImpl);
     if (ret != 0) {
@@ -139,8 +150,34 @@ int32_t MsprofSetDeviceCallbackImpl(VOID_PTR data, uint32_t len)
             return MSPROF_ERROR;
         }
 
-        ge::GeOpenDeviceHandle(setCfg->deviceId);
+        ret = ge::GeOpenDeviceHandle(setCfg->deviceId);
+        if (ret != PROFILING_SUCCESS) {
+            MSPROF_LOGE("MsprofSetDeviceCallbackImpl, GeOpenDeviceHandle failed");
+            MSPROF_INNER_ERROR("EK9999", "MsprofSetDeviceCallbackImpl, GeOpenDeviceHandle failed");
+            return MSPROF_ERROR;
+        }
     }
+    return MSPROF_ERROR_NONE;
+}
+
+// set device callback for dynamic profiling
+int32_t MsprofSetDeviceCallbackForDynProf(VOID_PTR data, uint32_t len)
+{
+    ProfSetDevPara *setCfg = reinterpret_cast<ProfSetDevPara *>(data);
+    DynProfMngSrv::instance()->SetDeviceInfo(setCfg);
+
+    int32_t ret = RegisterReporterCallback();
+    if (ret != PROFILING_SUCCESS) {
+        MSPROF_LOGE("MsprofSetDeviceCallbackImpl, RegisterReporterCallback failed, ret=%d", ret);
+        return MSPROF_ERROR;
+    }
+
+    ret = Analysis::Dvvp::ProfilerCommon::CommandHandleProfInit();
+    if (ret != PROFILING_SUCCESS) {
+        MSPROF_LOGE("Dynamic profiling CommandHandleProfInit failed, ret=%d", ret);
+        return MSPROF_ERROR;
+    }
+
     return MSPROF_ERROR_NONE;
 }
 

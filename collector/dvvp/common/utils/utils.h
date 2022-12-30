@@ -465,8 +465,7 @@ public:
     static int ChangeWorkDir(const std::string &fileName);
     static void SetArgEnv(CHAR_PTR_CONST argv[], const int argvCount, CHAR_PTR_CONST envp[],
                           const int envCount, MmArgvEnv &argvEnv);
-    static int DoCreateCmdProcess(const std::string &stdoutRedirectFile,
-                                  const std::string &fileName,
+    static int DoCreateCmdProcess(const std::string &stdoutRedirectFile, const std::string &fileName,
                                   MmArgvEnv &argvEnv, MmProcess &tid);
     static int WaitProcess(MmProcess process, bool &isExited, int &exitCode, bool hang = true);
     static bool ProcessIsRuning(MmProcess process);
@@ -522,6 +521,7 @@ public:
         return ret;
     }
     static bool IsAppName(const std::string paramsName);
+    static bool IsDynProfMode();
     static bool IsClusterRunEnv();
     static int32_t GetRankId();
     static std::vector<std::string> GenEnvPairVec(const std::vector<std::string> &envVec);
@@ -562,5 +562,4 @@ int32_t UnFileLock(FILE *file);
 }  // namespace common
 }  // namespace dvvp
 }  // namespace analysis
-
 #endif

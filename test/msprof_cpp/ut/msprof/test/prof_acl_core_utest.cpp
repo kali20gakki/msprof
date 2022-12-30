@@ -974,9 +974,6 @@ TEST_F(MSPROF_ACL_CORE_UTEST, MsprofCtrlCallbackImpl)
     MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::IsModeOff)
         .stubs()
         .will(returnValue(false));
-    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::MsprofInitForDynamic)
-        .stubs()
-        .will(returnValue((int)MSPROF_ERROR_NONE));
     ret = Analysis::Dvvp::ProfilerCommon::MsprofCtrlCallbackImpl(type, data, len);
     EXPECT_EQ(MSPROF_ERROR_NONE, ret);
     MOCKER_CPP(&Analysis::Dvvp::Common::Platform::Platform::PlatformIsHelperHostSide)
@@ -1233,8 +1230,8 @@ TEST_F(MSPROF_ACL_CORE_UTEST, ReporterData) {
 
 TEST_F(MSPROF_ACL_CORE_UTEST, UploaderDumperDumpModelLoadDataTest) {
     GlobalMockObject::verify();
-    std::shared_ptr<Msprof::Engine::UploaderDumper> dumper(new Msprof::Engine::UploaderDumper("Framework"));
-
+    std::shared_ptr<Msprof::Engine::UploaderDumper> dumper;
+    dumper = std::make_shared<Msprof::Engine::UploaderDumper>("Framework");
     MOCKER_CPP(&Msprof::Engine::UploaderDumper::AddToUploader)
         .stubs();
 
@@ -1244,6 +1241,28 @@ TEST_F(MSPROF_ACL_CORE_UTEST, UploaderDumperDumpModelLoadDataTest) {
     dumper->DumpModelLoadData("0");
     dumper->modelLoadData_["0"] = data;
     dumper->DumpModelLoadData("0");
+}
+
+TEST_F(MSPROF_ACL_CORE_UTEST, DumpDynProfCachedMsg)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<Msprof::Engine::UploaderDumper> dumper(new Msprof::Engine::UploaderDumper("Framework"));
+
+    MOCKER_CPP(&Msprof::Engine::UploaderDumper::AddToUploader)
+        .stubs();
+    dumper->needCache_ = false;
+    dumper->DumpDynProfCachedMsg("0");
+    dumper->SaveDynProfCachedMsg(nullptr);
+
+    std::map<int, SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq>> markMsg;
+    markMsg.insert(std::make_pair(1, nullptr));
+    std::list<std::map<int, SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq>>> data;
+    data.push_back(markMsg);
+    dumper->cachedMsg_["0"] = data;
+    
+    dumper->needCache_ = false;
+    dumper->DumpDynProfCachedMsg("1");
+    dumper->DumpDynProfCachedMsg("0");
 }
 
 TEST_F(MSPROF_ACL_CORE_UTEST, AddToUploaderGetUploaderFailed) {

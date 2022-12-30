@@ -72,6 +72,11 @@ public:
         MSPROF_LOGI("ReceiveData::DumpModelLoadData, devId is %s", devId.c_str());
     }
     virtual int SendData(SHARED_PTR_ALIA<FileChunkReq> fileChunk);
+    virtual void DumpDynProfCachedMsg(const std::string &devId)
+    {
+        UNUSED(devId);
+        MSPROF_LOGI("ReceiveData::DumpDynProfCachedMsg, devId is %s", devId.c_str());
+    }
 
 protected:
     virtual void StopReceiveData();

@@ -149,13 +149,27 @@ size_t aclprofGetGraphId(CONST_VOID_PTR opInfo, size_t opInfoLen, uint32_t index
 }
 
 namespace ge {
-Status aclgrphProfInit(CONST_CHAR_PTR profilerPath, uint32_t length)
+static Status aclgrphProfInitPreCheck()
 {
+    if (Utils::IsDynProfMode()) {
+        MSPROF_LOGI("Start to execute aclgrphProfInit not support in Dynamic profiling mode");
+        return ACL_ERROR_FEATURE_UNSUPPORTED;
+    }
+
     if (Platform::instance()->PlatformIsHelperHostSide()) {
         MSPROF_LOGE("aclgrph api not support in helper");
         MSPROF_ENV_ERROR("EK0004", std::vector<std::string>({"intf", "platform"}),
             std::vector<std::string>({"aclgrphProfInit", "SocCloud"}));
         return ACL_ERROR_FEATURE_UNSUPPORTED;
+    }
+    return ACL_SUCCESS;
+}
+
+Status aclgrphProfInit(CONST_CHAR_PTR profilerPath, uint32_t length)
+{
+    int ret = aclgrphProfInitPreCheck();
+    if (ret != ACL_SUCCESS) {
+        return ret;
     }
     MSPROF_LOGI("Start to execute aclgrphProfInit");
     std::lock_guard<std::mutex> lock(g_aclgraphProfMutex);
@@ -179,7 +193,7 @@ Status aclgrphProfInit(CONST_CHAR_PTR profilerPath, uint32_t length)
         return FAILED;
     }
 
-    int32_t ret = ProfAclMgr::instance()->ProfInitPrecheck();
+    ret = ProfAclMgr::instance()->ProfInitPrecheck();
     RETURN_IF_NOT_SUCCESS(ret);
 
     if (ProfAclMgr::instance()->Init() != PROFILING_SUCCESS) {
@@ -469,27 +483,32 @@ Status aclgrphProfStop(ACL_GRPH_PROF_CONFIG_PTR profilerConfig)
     return ACL_SUCCESS;
 }
 
-void GeOpenDeviceHandle(const uint32_t devId)
+int32_t GeOpenDeviceHandle(const uint32_t devId)
 {
-    if (ProfAclMgr::instance()->MsprofSetDeviceImpl(devId) == PROFILING_SUCCESS) {
+    if (ProfAclMgr::instance()->MsprofSetDeviceImpl(devId) != PROFILING_SUCCESS) {
+        MSPROF_LOGE("MsprofSetDeviceImpl failed, devId=%d", devId);
+        return PROFILING_FAILED;
+    }
+    if (!Utils::IsDynProfMode()) {
         MSPROF_LOGI("CommandHandleProfStart, Allocate config of profiling initialize");
         int32_t ret = Analysis::Dvvp::ProfilerCommon::CommandHandleProfInit();
         if (ret != SUCCESS) {
             MSPROF_LOGE("MsprofSetDeviceImpl, CommandHandleProfInit failed, devId:%u", devId);
             MSPROF_INNER_ERROR("EK9999", "MsprofSetDeviceImpl, CommandHandleProfInit failed, devId:%u", devId);
-            return;
-        }
-        MSPROF_LOGI("CommandHandleProfStart, Allocate start profiling config");
-        uint32_t devIdList[1] = {devId};
-        uint64_t dataTypeConfig = ProfAclMgr::instance()->GetCmdModeDataTypeConfig();
-        ret = Analysis::Dvvp::ProfilerCommon::CommandHandleProfStart(devIdList, 1,
-            dataTypeConfig | PROF_OP_DETAIL);
-        if (ret != SUCCESS) {
-            MSPROF_LOGE("MsprofSetDeviceImpl, CommandHandleProfStart failed, dataTypeConfig:0x%lx", dataTypeConfig);
-            MSPROF_INNER_ERROR("EK9999", "MsprofSetDeviceImpl, CommandHandleProfStart failed, dataTypeConfig:0x%lx",
-                dataTypeConfig);
+            return PROFILING_FAILED;
         }
     }
+    MSPROF_LOGI("CommandHandleProfStart, Allocate start profiling config");
+    uint32_t devIdList[1] = {devId};
+    uint64_t dataTypeConfig = ProfAclMgr::instance()->GetCmdModeDataTypeConfig();
+    int32_t ret = Analysis::Dvvp::ProfilerCommon::CommandHandleProfStart(devIdList, 1, dataTypeConfig | PROF_OP_DETAIL);
+    if (ret != SUCCESS) {
+        MSPROF_LOGE("MsprofSetDeviceImpl, CommandHandleProfStart failed, dataTypeConfig:0x%lx", dataTypeConfig);
+        MSPROF_INNER_ERROR("EK9999", "MsprofSetDeviceImpl, CommandHandleProfStart failed, dataTypeConfig:0x%lx",
+            dataTypeConfig);
+        return PROFILING_FAILED;
+    }
+    return PROFILING_SUCCESS;
 }
 
 void GeFinalizeHandle()
@@ -513,6 +532,9 @@ void GeFinalizeHandle()
     if (CommandHandleProfFinalize() != SUCCESS) {
         MSPROF_LOGE("Failed to CommandHandleProfFinalize");
         MSPROF_INNER_ERROR("EK9999", "Failed to CommandHandleProfFinalize");
+    }
+    for (uint32_t devId : devIds) {
+        Msprof::Engine::FlushAllModuleForDynProf(std::to_string(devId));
     }
     Msprof::Engine::FlushAllModule();
 }

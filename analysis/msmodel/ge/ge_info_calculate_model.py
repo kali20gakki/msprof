@@ -26,13 +26,13 @@ class GeInfoModel(BaseModel):
     def __init__(self: any, result_dir: str) -> None:
         super(GeInfoModel, self).__init__(result_dir, DBNameConstant.DB_GE_INFO, DBNameConstant.TABLE_GE_TASK)
 
-    def check_table(self: any) -> bool:
+    def check_table(self: any, table_name=DBNameConstant.TABLE_GE_TASK) -> bool:
         """
         check table of ge task
         :return:
         """
         if not self.conn or not self.cur \
-                or not DBManager.judge_table_exist(self.cur, DBNameConstant.TABLE_GE_TASK):
+                or not DBManager.judge_table_exist(self.cur, table_name):
             logging.warning("No ge data starting with framework is found, "
                             "please check the result_dir directory: %s",
                             os.path.join(os.path.basename(self.result_dir), 'data'))
@@ -135,3 +135,28 @@ class GeInfoModel(BaseModel):
             for task in task_data:
                 task_data_dict[task[0]] = set(task[1].split(','))
         return task_data_dict
+
+    def get_model_ids(self):
+        sql = f"select model_id from {DBNameConstant.TABLE_GE_STEP} group by model_id"
+        model_ids = DBManager.fetch_all_data(self.cur, sql)
+        return model_ids
+
+    def get_max_iter_with_tag(self: any, model_id: int) -> list:
+        """
+        get all aic count
+        :return: sum of aic count
+        """
+        sql = f"select cur_iter_num, tag from {DBNameConstant.TABLE_GE_STEP} " \
+              f"where model_id = ? and cur_iter_num = " \
+              f"(select MAX(cur_iter_num) from {DBNameConstant.TABLE_GE_STEP} where model_id = ?)"
+        model_ids = DBManager.fetch_all_data(self.cur, sql, (model_id, model_id))
+        return model_ids
+
+    def get_repeat_times_for_target_aic_in_target_index(self: any, model_id: int,
+                                                        max_index: int, aic_with_stream_task: list):
+        stream_id = aic_with_stream_task[0]
+        task_id = aic_with_stream_task[1]
+        sql = f"select * from {DBNameConstant.TABLE_GE_TASK} " \
+              f"where task_type = 'AI_CORE' and model_id = ? and stream_id = ? and task_id = ? and index_id = ? "
+        ge_data = DBManager.fetch_all_data(self.cur, sql, (model_id, stream_id, task_id, max_index))
+        return ge_data

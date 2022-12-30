@@ -7,6 +7,8 @@ import os
 
 from common_func.constant import Constant
 from common_func.path_manager import PathManager
+from common_func.file_manager import FileOpen
+from profiling_bean.struct_info.aic_pmu import AicPmuBean
 
 
 class OffsetCalculator:
@@ -114,3 +116,50 @@ class FileCalculator(OffsetCalculator):
         with open(_file, 'rb') as _file_reader:
             _file_reader.seek(left_offset)
             self._file_cache += _file_reader.read(right_offset - left_offset)
+
+
+class FileReverseCalculator:
+    """
+    find the last ai core task which match the stream and task id of last hwts ai core task
+    return the discard aicore count from tail
+    """
+    STREAM_TASK_KEY_FMT = "{0}-{1}"
+
+    def __init__(self: any, project_path, file_list, struct_size, repeat_times, aic_stream_task) -> None:
+        self._project_path = project_path
+        self._file_list = file_list
+        self._struct_size = struct_size
+        self._last_cache = bytes()
+        self.target_aic_str = self.STREAM_TASK_KEY_FMT.format(aic_stream_task[0], aic_stream_task[1])
+        self.tail_aic_cnt = 0
+        self.is_find = False
+        self.repeat_times = repeat_times
+
+    def read_file_from_tail(self: any):
+        for _file in self._file_list[::-1]:
+            _file = PathManager.get_data_file_path(self._project_path, _file)
+            with FileOpen(_file, 'rb') as _aic_reader:
+                _file_size = os.path.getsize(_file)
+                complete_file = _aic_reader.file_reader.read(_file_size) + self._last_cache
+                left_size = len(complete_file) % self._struct_size
+                if left_size:
+                    self._last_cache = complete_file[:left_size]
+                else:
+                    self._last_cache = bytes()
+                read_file = complete_file[left_size:]
+                self.read_chunk_from_tail(read_file)
+            if self.is_find:
+                break
+
+    def read_chunk_from_tail(self, read_file: bytes):
+        total_bytes_size = len(read_file)
+        for byte_end_pos in range(total_bytes_size, 0, -self._struct_size):
+            chunk = read_file[byte_end_pos - self._struct_size: byte_end_pos]
+            _aic_log = AicPmuBean.decode(chunk)
+            if self.target_aic_str == self.STREAM_TASK_KEY_FMT.format(_aic_log.stream_id, _aic_log.task_id):
+                if self.repeat_times == 0:
+                    self.is_find = True
+                    return
+                else:
+                    self.repeat_times -= 1
+            self.tail_aic_cnt += 1
