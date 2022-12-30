@@ -57,7 +57,6 @@ using namespace Msprof::MsprofTx;
 using namespace Collector::Dvvp::Plugin;
 using namespace Collector::Dvvp::Mmpa;
 using namespace Collector::Dvvp::ParamsAdapter;
-
 namespace Msprofiler {
 namespace Api {
 // callback of Device
@@ -1188,14 +1187,6 @@ int32_t ProfAclMgr::MsprofResultPathAdapter(const std::string &dir, std::string 
     MSPROF_LOGI("MsprofResultPathAdapter canonicalized path: %s", Utils::BaseName(result).c_str());
 
     return PROFILING_SUCCESS;
-}
-
-int32_t ProfAclMgr::MsprofInitForDynamic(VOID_PTR data /* = nullptr */, uint32_t len /* = 0 */) const
-{
-    UNUSED(data);
-    UNUSED(len);
-    MSPROF_EVENT("Init profiling for dynamic profiling");
-    return MSPROF_ERROR_NONE;
 }
 
 int32_t ProfAclMgr::MsprofInitGeOptions(VOID_PTR data, uint32_t len)

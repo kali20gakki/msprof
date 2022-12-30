@@ -71,8 +71,10 @@ void PlatformAdapterInterface::SetParamsForStorageLimit(struct CommonParams &com
             // 外部输入的storageLimit有效区间为200~4294967296(UINT32_MAX).
             // 若可用空间小于200M，仍然支持老化，不小于20M是为保证storageVolumeUpThd_不小于0
             dirAvailSize = 0;
+            params_->storageLimit = "";
+        } else {
+            params_->storageLimit = std::to_string(dirAvailSize) + STORAGE_LIMIT_UNIT;
         }
-        params_->storageLimit = std::to_string(dirAvailSize) + STORAGE_LIMIT_UNIT;
     } else {
         params_->storageLimit = (comParams.storageLimit == "0MB") ? "" : comParams.storageLimit;
     }

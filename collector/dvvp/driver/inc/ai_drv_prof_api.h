@@ -202,12 +202,13 @@ using TsAiCpuProfileConfigT = struct TagTsAiCpuProfileConfig {
 } ;
 
 using TsAiCoreProfileConfigT = struct TagTsAiCoreProfileConfig {
-    uint32_t type;                   // 0-task base, 1-sample base
-    uint32_t almost_full_threshold;  // sample base
-    uint32_t period;                 // sample base
-    uint32_t core_mask;              // sample base
-    uint32_t event_num;              // public
-    uint32_t event[0];               // public
+    uint32_t type;                      // 0-task base, 1-sample base
+    uint32_t almost_full_threshold;     // sample base
+    uint32_t period;                    // sample base
+    uint32_t core_mask;                 // sample base
+    uint32_t event_num;                 // public
+    uint32_t event[PMU_EVENT_MAX_NUM];  // public
+    uint32_t tag;                       // bit0=0 enable immediately; bit0=1 enable delay
 };
 
 using TsTsFwProfileConfigT = struct TagTsTsFwProfileConfig {
@@ -265,9 +266,7 @@ using BiuProfileConfigT = struct TagBiuProfileConfig {
 };
 
 using TsHwtsProfileConfigT = struct TagTsHwtsProfileConfig {
-    uint32_t period;
-    uint32_t event_num;
-    uint32_t event[0];
+    uint32_t tag;           // bit0=0 enable immediately; bit0=1 enable delay
 };
 
 struct TagDdrProfileConfig {

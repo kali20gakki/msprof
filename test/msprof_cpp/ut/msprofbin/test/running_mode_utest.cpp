@@ -2,6 +2,7 @@
 #include "mockcpp/mockcpp.hpp"
 #include "gtest/gtest.h"
 #include <iostream>
+#include "dyn_prof_client.h"
 #include "errno/error_code.h"
 #include "running_mode.h"
 #include "utils/utils.h"
@@ -557,6 +558,27 @@ TEST_F(RUNNING_MODE_UTEST, AppModeStartAppTask){
     EXPECT_EQ(PROFILING_FAILED, rMode.StartAppTask(true));
     EXPECT_EQ(PROFILING_FAILED, rMode.StartAppTask(true));
     EXPECT_EQ(PROFILING_SUCCESS, rMode.StartAppTask(true));
+}
+
+TEST_F(RUNNING_MODE_UTEST, StartAppTaskForDynProf)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<analysis::dvvp::message::ProfileParams> params;
+    params = std::make_shared<analysis::dvvp::message::ProfileParams>();
+    Collector::Dvvp::Msprofbin::AppMode rMode("app", params);
+
+    MOCKER(&analysis::dvvp::app::Application::LaunchApp)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED))
+        .then(returnValue(PROFILING_SUCCESS));
+    MOCKER(&Collector::Dvvp::DynProf::DynProfMngCli::StartDynProfCli)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED))
+        .then(returnValue(PROFILING_SUCCESS));
+
+    EXPECT_EQ(PROFILING_FAILED, rMode.StartAppTaskForDynProf());
+    EXPECT_EQ(PROFILING_FAILED, rMode.StartAppTaskForDynProf());
+    EXPECT_EQ(PROFILING_SUCCESS, rMode.StartAppTaskForDynProf());
 }
 
 static int _drv_get_dev_ids_rmu(int numDevices, std::vector<int> &devIds){

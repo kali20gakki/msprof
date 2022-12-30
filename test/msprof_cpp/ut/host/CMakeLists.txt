@@ -14,7 +14,8 @@ set(commonSrcFiles
     ${MSPROF_SOURCE_DIR}/dvvp/driver/devmgmt/ai_drv_dev_api.cpp        
     ${MSPROF_SOURCE_DIR}//dvvp/common/platform/platform.cpp    
     ${MSPROF_SOURCE_DIR}//dvvp/common/statistics/perf_count.cpp 
-    ${MSPROF_SOURCE_DIR}//dvvp/app/application.cpp 
+    ${MSPROF_SOURCE_DIR}//dvvp/app/application.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/msprof/dynamic_profiling/src/dyn_prof_client.cpp
     ${MSPROF_SOURCE_DIR}//dvvp/message/codec.cpp 
     ${MSPROF_SOURCE_DIR}//dvvp/message/dispatcher.cpp 
     ${MSPROF_SOURCE_DIR}//dvvp/transport/transport.cpp 
@@ -112,6 +113,7 @@ target_include_directories(host_utest PRIVATE
     ${MSPROF_SOURCE_DIR}/dvvp/streamio/common/include
     ${CMAKE_BINARY_DIR}/proto/profiler/
     ${MSPROF_SOURCE_DIR}/dvvp/depend/include/stub
+    ${MSPROF_SOURCE_DIR}/dvvp/msprof/dynamic_profiling/include
 )
 
 target_compile_options(host_utest PRIVATE

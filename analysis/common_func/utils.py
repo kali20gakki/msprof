@@ -33,7 +33,8 @@ class Utils:
         :return: True or False
         """
         db_path = PathManager.get_db_path(result_dir, DBNameConstant.DB_STEP_TRACE)
-        return DBManager.check_tables_in_db(db_path, DBNameConstant.TABLE_STEP_TRACE_DATA)
+        return DBManager.check_tables_in_db(db_path, DBNameConstant.TABLE_STEP_TRACE_DATA) and \
+            DBManager.check_no_empty_tables_in_db(db_path, DBNameConstant.TABLE_STEP_TRACE_DATA)
 
     @staticmethod
     def is_single_op_scene(result_dir: str) -> bool:

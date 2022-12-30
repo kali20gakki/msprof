@@ -466,6 +466,7 @@ bool ParamsAdapter::CheckFreqValid(const std::string &freq, const InputCfg freqO
         {INPUT_CFG_COM_BIU_FREQ, {BIU_FREQ_MIN, BIU_FREQ_MAX}},
         {INPUT_CFG_HOST_SYS_USAGE_FREQ, {HOST_SYS_USAGE_FREQ_MIN, HOST_SYS_USAGE_FREQ_MAX}},
         {INPUT_CFG_COM_L2_SAMPLE_FREQ, {L2_SAMPLE_FREQ_MIN, L2_SAMPLE_FREQ_MAX}},
+        {INPUT_CFG_MSPROF_DYNAMIC_PID, {APP_PID_MIN, APP_PID_MAX}},
     };
     std::map<InputCfg, std::string> freqCfgNameMap = {
         {INPUT_CFG_COM_AIC_FREQ, "aic-freq"},
@@ -480,6 +481,7 @@ bool ParamsAdapter::CheckFreqValid(const std::string &freq, const InputCfg freqO
         {INPUT_CFG_COM_BIU_FREQ, "biu_freq"},
         {INPUT_CFG_HOST_SYS_USAGE_FREQ, "host_sys_usage_freq"},
         {INPUT_CFG_COM_L2_SAMPLE_FREQ, "l2-freq"},
+        {INPUT_CFG_MSPROF_DYNAMIC_PID, "pid"},
     };
     std::vector<int> checkFreqRange = freqRangeMap[freqOpt];
     return ParamValidation::instance()->CheckFreqIsValid(freqCfgNameMap[freqOpt], freq, checkFreqRange[0],

@@ -32,7 +32,10 @@ set(src_file
     ${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter_lhisi.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter_mdc.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter_mini.cpp
-    
+    ${MSPROF_SOURCE_DIR}/dvvp/msprof/dynamic_profiling/src/dyn_prof_client.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/common/thread/thread.cpp 
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/stub/error_manager/msprof_error_manager_stub.cpp
+
 )
 
 set(include_path
@@ -57,10 +60,12 @@ set(include_path
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/plugin
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/acl
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/profapi
+    ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/metadef/error_manager
     ${MSPROF_SOURCE_DIR}/dvvp/depend/inc/metadef/error_manager/error_manager_stub
     ${MSPROF_SOURCE_DIR}/dvvp/driver/inc
     ${MSPROF_SOURCE_DIR}/dvvp/message
     ${MSPROF_SOURCE_DIR}/dvvp/msprof/engine/include
+    ${MSPROF_SOURCE_DIR}/dvvp/msprof/dynamic_profiling/include
     ${MSPROF_SOURCE_DIR}/dvvp/msprofbin/include
     ${MSPROF_SOURCE_DIR}/dvvp/params_adapter
     ${MSPROF_SOURCE_DIR}/dvvp/job_wrapper/include

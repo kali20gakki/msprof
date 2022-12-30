@@ -139,6 +139,7 @@ set(msprofilerCpp
     msprof/msproftx/src/msprof_tx_manager.cpp
     msprof/msproftx/src/msprof_tx_reporter.cpp
     msprof/msproftx/src/msprof_stamp_pool.cpp
+    msprof/dynamic_profiling/src/dyn_prof_server.cpp
     task_handle/src/device.cpp
     task_handle/src/info_json.cpp
     task_handle/src/prof_manager.cpp
@@ -156,6 +157,7 @@ set(msprofilerCpp
     transport/uploader.cpp
     transport/uploader_mgr.cpp
     transport/hash_data.cpp
+
     ${CppPath}
 )
 
@@ -178,6 +180,9 @@ set(msprofilerInc
     msprof/drvprof/include
     msprof/platform/include
     msprof/msproftx/include
+    msprof/msproftx/include
+    msprof/dynamic_profiling/include/
+    msprof/dynamic_profiling/include
     adx/inc
     analyze/inc
     common

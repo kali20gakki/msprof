@@ -71,6 +71,8 @@ public:
     */
     int SendData(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> fileChunk) override;
 
+    void DumpDynProfCachedMsg(const std::string &devId);
+
 protected:
     virtual void WriteDone();
     /**
@@ -87,6 +89,7 @@ private:
     virtual void TimedTask();
     void AddToUploader(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message);
     void SaveModelLoadData(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message);
+    void SaveDynProfCachedMsg(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message);
 
 private:
     std::string module_; // the module name
@@ -97,6 +100,8 @@ private:
     std::map<std::string, std::list<SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> > > modelLoadData_;
     // model load data cached
     std::map<std::string, std::list<SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> > > modelLoadDataCached_;
+    // dynamic profiling cached message {deviceId: [dynProf_1th:FileChunkReq1, ...]}}
+    std::map<std::string, std::list<std::map<int, SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq>>>> cachedMsg_;
 };
 }}
 #endif
