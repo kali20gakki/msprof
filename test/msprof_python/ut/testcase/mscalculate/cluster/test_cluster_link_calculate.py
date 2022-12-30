@@ -24,10 +24,11 @@ class TestClusterLinkCalculate(unittest.TestCase):
 
 
 def construct_hccl_dto():
-    data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, "RDMA", 15]
-    col = ["hccl_name", "plane_id", "timestamp", "duration", "bandwidth",
-           "stage", "step", "stream_id", "task_id", "task_type",
-           "src_rank", "dst_rank", "notify_id", "transport_type", "size"]
+    data = [1, 2, 3, 4,
+            "{'notify id': 4294967840, 'duration estimated': 0.8800048828125, 'stage': 4294967295, "
+            "'step': 4294967385, 'bandwidth': 'NULL', 'stream id': 8, 'task id': 34, 'task type': 'Notify Record', "
+            "'src rank': 2, 'dst rank': 1, 'transport type': 'SDMA', 'size': None, 'tag': 'all2allvc_1_5'}"]
+    col = ["hccl_name", "plane_id", "timestamp", "duration", "args"]
     hccl_dto = HcclDto()
     for index, i in enumerate(data):
         if hasattr(hccl_dto, col[index]):

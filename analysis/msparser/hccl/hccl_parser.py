@@ -106,7 +106,5 @@ class HCCLParser(MsMultiProcess):
             if first_timestamp == 0:
                 first_timestamp = hccl.timestamp
             self._hccl_data.append([op_name, iteration, hccl.hccl_name, first_timestamp, hccl.plane_id,
-                                    hccl.timestamp, hccl.duration, hccl.notify_id, hccl.stage, hccl.step,
-                                    hccl.bandwidth, hccl.stream_id, hccl.task_id, hccl.task_type,
-                                    hccl.src_rank, hccl.dst_rank, hccl.transport_type, hccl.size])
+                                    hccl.timestamp, hccl.duration, hccl.args])
 
