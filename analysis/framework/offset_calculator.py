@@ -7,6 +7,7 @@ import os
 
 from common_func.constant import Constant
 from common_func.path_manager import PathManager
+from common_func.file_manager import FileOpen
 from profiling_bean.struct_info.aic_pmu import AicPmuBean
 
 
@@ -137,9 +138,9 @@ class FileReverseCalculator:
     def read_file_from_tail(self: any):
         for _file in self._file_list[::-1]:
             _file = PathManager.get_data_file_path(self._project_path, _file)
-            with open(_file, 'rb') as _aic_reader:
+            with FileOpen(_file, 'rb') as _aic_reader:
                 _file_size = os.path.getsize(_file)
-                complete_file = _aic_reader.read(_file_size) + self._last_cache
+                complete_file = _aic_reader.file_reader.read(_file_size) + self._last_cache
                 left_size = len(complete_file) % self._struct_size
                 if left_size:
                     self._last_cache = complete_file[:left_size]

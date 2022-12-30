@@ -129,14 +129,14 @@ class DBManager:
         return 0
 
     @staticmethod
-    def judge_row_exist(cursor: any, table_name: str) -> int:
+    def judge_row_exist(cursor: any, table_name: str) -> bool:
         """
         judge row exist
         """
         if isinstance(cursor, sqlite3.Cursor):
-            return cursor.execute(
-                "select count(*) from {}".format(table_name)).fetchone()[0]
-        return 0
+            if not DBManager.fetch_one_data(cursor, "select * from {}".format(table_name)):
+                return False
+        return True
 
     @staticmethod
     def sql_create_table_with_key(

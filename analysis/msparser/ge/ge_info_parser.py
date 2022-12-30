@@ -105,9 +105,11 @@ class GeInfoParser(IParser, MsMultiProcess):
             min_index_datum = min(ge_step_dict[model_id],
                                   key=lambda x: (x[self.GE_STEP.get(MsProfCommonConstant.INDEX_ID)],
                                                  x[self.GE_STEP.get(MsProfCommonConstant.TAG)]))
-            if min_index_datum[self.GE_STEP.get(MsProfCommonConstant.TAG)] != 0:
-                remove_iter_list.append(min_index_datum[self.GE_STEP.get(MsProfCommonConstant.INDEX_ID)])
-
+            try:
+                if int(min_index_datum[self.GE_STEP.get(MsProfCommonConstant.TAG)]) != 0:
+                    remove_iter_list.append(min_index_datum[self.GE_STEP.get(MsProfCommonConstant.INDEX_ID)])
+            except ValueError:
+                logging.warning('ge step table has a wrong value type in column tag!')
             dynamic_model_dict[model_id] = \
                 [task for task in dynamic_model_dict.get(model_id)
                  if task[index_space.get(MsProfCommonConstant.INDEX_ID)] not in set(remove_iter_list)]

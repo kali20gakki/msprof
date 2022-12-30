@@ -77,7 +77,8 @@ class AicCalculator(ICalculator, MsMultiProcess):
             else:
                 logging.warning(f"Can not find any ai core log match stream and task id with hwts's last ai core task!"
                                 f"Probably lose some ai core task!")
-        logging.warning(f"Can not connect table hwts batch!!")
+        else:
+            logging.warning(f"Can not connect table hwts batch!!")
 
     def get_aic_repeat_times_in_last_iter(self: any, aic_with_stream_task: tuple) -> int:
         """
