@@ -11,7 +11,7 @@ from common_func.ms_constant.str_constant import OpAnalysisType
 from common_func.ms_constant.str_constant import OpBandWidthType
 from common_func.ms_constant.str_constant import TransportType
 from common_func.constant import Constant
-from profiling_bean.db_dto.hccl_op_dto import HcclOpDto
+from profiling_bean.db_dto.hccl_dto import HcclDto
 
 
 class MetaParser:
@@ -149,7 +149,7 @@ class HcclAnalysisTool:
                 round(large_packet_num / packet_num, 4)
 
     @classmethod
-    def is_valid_link(cls: any, event: HcclOpDto) -> bool:
+    def is_valid_link(cls: any, event: HcclDto) -> bool:
         src_rank_valid = event.src_rank is not None and event.src_rank != int("0xffffffff", 16)
         dst_rank_valid = event.dst_rank is not None and event.dst_rank != int("0xffffffff", 16)
         if src_rank_valid and dst_rank_valid:
