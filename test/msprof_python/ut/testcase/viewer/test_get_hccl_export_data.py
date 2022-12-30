@@ -26,8 +26,10 @@ class TestHCCLExport(unittest.TestCase):
 
     def test_format_hccl_data(self):
         hccl_data = [
-            ('Notify Wait', 2, 162191740576.88998, 25.76, 'NULL', 27, 2, 'Notify Wait', 'LOCAL', None, 0, 4294967385,
-             'allreduce')]
+            ('Notify Wait', 2, 162191740576.88998, 25.76,
+             "{'notify id': 4294967840, 'duration estimated': 0.8800048828125, 'stage': 4294967295, "
+             "'step': 4294967385, 'bandwidth': 'NULL', 'stream id': 8, 'task id': 34, 'task type': 'Notify Record', "
+             "'src rank': 2, 'dst rank': 1, 'transport type': 'SDMA', 'size': None, 'tag': 'all2allvc_1_5'}")]
         InfoConfReader()._info_json = {"pid": 1}
         hccl = HCCLExport(PARAMS)
         hccl._format_hccl_data(hccl_data)

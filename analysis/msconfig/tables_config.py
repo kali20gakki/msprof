@@ -685,17 +685,7 @@ class TablesConfig(MetaConfig):
             ('plane_id', 'INTEGER, null'),
             ('timestamp', 'REAL, null'),
             ('duration', 'REAL, null'),
-            ('notify_id', 'INTEGER, null'),
-            ('stage', 'INTEGER, null'),
-            ('step', 'INTEGER, null'),
-            ('bandwidth', 'REAL, null'),
-            ('stream_id', 'INTEGER, null'),
-            ('task_id', 'INTEGER, null'),
-            ('task_type', 'TEXT, null'),
-            ('src_rank', 'INTEGER, null'),
-            ('dst_rank', 'INTEGER, null'),
-            ('transport_type', 'TEXT, null'),
-            ('size', 'REAL, null')
+            ('args', 'TEXT, null')
         ]
         , 'MsprofTxMap': [
             ('pid', 'INTEGER, null'),

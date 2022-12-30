@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
+import ast
 
 from common_func.constant import Constant
 
@@ -15,17 +16,18 @@ class HcclDto:
         self._plane_id = 0
         self._timestamp = 0
         self._duration = 0
+        self._args = {}
         self._bandwidth = Constant.NA
-        self._stage = 0
-        self._step = 0
-        self._stream_id = 0
-        self._task_id = 0
+        self._stage = -1
+        self._step = -1
+        self._stream_id = -1
+        self._task_id = -1
         self._task_type = Constant.NA
-        self._src_rank = 0
-        self._dst_rank = 0
-        self._notify_id = 0
+        self._src_rank = -1
+        self._dst_rank = -1
+        self._notify_id = -1
         self._transport_type = Constant.NA
-        self._size = 0
+        self._size = -1
 
     @property
     def hccl_name(self: any) -> any:
@@ -60,89 +62,53 @@ class HcclDto:
         self._duration = value
 
     @property
-    def bandwidth(self: any) -> any:
-        return self._bandwidth
+    def args(self: any) -> any:
+        return self._args
 
-    @bandwidth.setter
-    def bandwidth(self: any, value: any) -> None:
-        self._bandwidth = value
+    @args.setter
+    def args(self: any, value: any) -> None:
+        self._args = ast.literal_eval(value)
+
+    @property
+    def bandwidth(self: any) -> any:
+        return self._args.get('bandwidth', self._bandwidth)
 
     @property
     def stream_id(self: any) -> any:
-        return self._stream_id
-
-    @stream_id.setter
-    def stream_id(self: any, value: any) -> None:
-        self._stream_id = value
+        return self._args.get('stream id', self._stream_id)
 
     @property
     def task_id(self: any) -> any:
-        return self._task_id
-
-    @task_id.setter
-    def task_id(self: any, value: any) -> None:
-        self._task_id = value
+        return self._args.get('task id', self._task_id)
 
     @property
     def task_type(self: any) -> any:
-        return self._task_type
-
-    @task_type.setter
-    def task_type(self: any, value: any) -> None:
-        self._task_type = value
+        return self._args.get('task type', self._task_type)
 
     @property
     def notify_id(self: any) -> any:
-        return self._notify_id
-
-    @notify_id.setter
-    def notify_id(self: any, value: any) -> None:
-        self._notify_id = value
+        return self._args.get('notify id', self._notify_id)
 
     @property
     def stage(self: any) -> any:
-        return self._stage
-
-    @stage.setter
-    def stage(self: any, value: any) -> None:
-        self._stage = value
+        return self._args.get('stage', self._stage)
 
     @property
     def step(self: any) -> any:
-        return self._step
-
-    @step.setter
-    def step(self: any, value: any) -> None:
-        self._step = value
+        return self._args.get('step', self._step)
 
     @property
     def dst_rank(self: any) -> any:
-        return self._dst_rank
-
-    @dst_rank.setter
-    def dst_rank(self: any, value: any) -> None:
-        self._dst_rank = value
+        return self._args.get('dst rank', self._dst_rank)
 
     @property
     def src_rank(self: any) -> any:
-        return self._src_rank
-
-    @src_rank.setter
-    def src_rank(self: any, value: any) -> None:
-        self._src_rank = value
+        return self._args.get('src rank', self._src_rank)
 
     @property
     def transport_type(self: any) -> any:
-        return self._transport_type
-
-    @transport_type.setter
-    def transport_type(self: any, value: any) -> None:
-        self._transport_type = value
+        return self._args.get('transport type', self._transport_type)
 
     @property
     def size(self: any) -> any:
-        return self._size
-
-    @size.setter
-    def size(self: any, value: any) -> None:
-        self._size = value
+        return self._args.get('size', self._size)
