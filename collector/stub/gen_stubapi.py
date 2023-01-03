@@ -1,5 +1,5 @@
-#!/usr/bin/python3
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python
+# coding=utf-8
 # Copyright (c) Huawei Technologies Co., Ltd. 2021-2022. All rights reserved.
 
 import os
