@@ -134,6 +134,16 @@ class TestExportCommand(unittest.TestCase):
             test = ExportCommand("timeline", args)
             test._check_index_id("")
 
+    def test_check_index_id_given_invalid_iter_id_when_iter_id_less_than_zero_then_raise_exception(self):
+        args_dic = {"collection_path": "test", "iteration_id": -1, "model_id": None, "iteration_count": 1}
+        args = Namespace(**args_dic)
+        with mock.patch(NAMESPACE + ".Utils.get_scene", return_value=Constant.SINGLE_OP):
+            with pytest.raises(ProfException) as err:
+                ProfilingScene()._scene = Constant.SINGLE_OP
+                test = ExportCommand("timeline", args)
+                test._check_index_id("")
+            self.assertEqual(ProfException.PROF_INVALID_STEP_TRACE_ERROR, err.value.code)
+
     def test_prepare_for_export(self):
         args_dic = {"collection_path": "test", "iteration_id": 3, "model_id": 3, "iteration_count": 1}
         args = Namespace(**args_dic)
