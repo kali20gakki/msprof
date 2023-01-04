@@ -53,7 +53,7 @@ class TestRuntimeApiViewer(unittest.TestCase):
         check = RuntimeApiViewer(config, params)
         ret = check.get_timeline_data()
         self.assertEqual('{"status": 1, '
-                         '"info": "Failed to connect acl_module.db"}', ret)
+                         '"info": "Failed to connect runtime.db"}', ret)
 
     def test_get_timeline_data_should_return_empty_when_model_init_ok(self):
         config = {"headers": ["Name", "Stream ID", "Time(%)", "Time(ns)", "Calls",
