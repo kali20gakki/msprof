@@ -513,8 +513,9 @@ int ProfDvppJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 
 int ProfDvppJob::Process()
 {
-    if (ConfigManager::instance()->GetPlatformType() == PlatformType::MDC_TYPE ||
-        ConfigManager::instance()->GetPlatformType() == PlatformType::DC_TYPE) {
+    PlatformType type = ConfigManager::instance()->GetPlatformType();
+    if (type == PlatformType::MDC_TYPE || type == PlatformType::DC_TYPE ||
+        type == PlatformType::CHIP_V4_1_0 || type == PlatformType::CHIP_V4_2_0) {
         if (CheckJobCommonParam(collectionJobCfg_) != PROFILING_SUCCESS) {
             return PROFILING_FAILED;
         }
@@ -555,8 +556,9 @@ int ProfDvppJob::Process()
 int ProfDvppJob::Uninit()
 {
     using namespace Analysis::Dvvp::Common::Config;
-    if (ConfigManager::instance()->GetPlatformType() == PlatformType::MDC_TYPE ||
-        ConfigManager::instance()->GetPlatformType() == PlatformType::DC_TYPE) {
+    PlatformType type = ConfigManager::instance()->GetPlatformType();
+    if (type == PlatformType::MDC_TYPE || type == PlatformType::DC_TYPE ||
+        type == PlatformType::CHIP_V4_1_0 || type == PlatformType::CHIP_V4_2_0) {
         if (CheckJobCommonParam(collectionJobCfg_) != PROFILING_SUCCESS) {
             return PROFILING_SUCCESS;
         }
