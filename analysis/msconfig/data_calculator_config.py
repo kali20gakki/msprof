@@ -9,7 +9,7 @@ class DataCalculatorConfig(MetaConfig):
     DATA = {
         'AclCalculator': [
             ('path', 'mscalculate.acl.acl_calculator'),
-            ('chip_model', '0,1,2,3,4,5')
+            ('chip_model', '0,1,2,3,4,5,7')
         ]
         , 'SubTaskCalculator': [
             ('path', 'mscalculate.stars.sub_task_calculate'),
