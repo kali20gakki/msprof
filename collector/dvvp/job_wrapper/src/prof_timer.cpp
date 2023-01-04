@@ -711,8 +711,7 @@ void ProcAllPidsFileHandler::GetProcessName(unsigned int pid, std::string &proce
 
     long long len = analysis::dvvp::common::utils::Utils::GetFileSize(fileName);
     if (len < 0 || len > MSVP_SMALL_FILE_MAX_LEN) {
-        MSPROF_LOGE("proc comm file size is invalid");
-        MSPROF_INNER_ERROR("EK9999", "proc comm file size is invalid");
+        MSPROF_LOGW("proc comm file size is invalid");
         return;
     }
 
