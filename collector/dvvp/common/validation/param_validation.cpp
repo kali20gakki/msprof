@@ -1277,6 +1277,7 @@ bool ParamValidation::MsprofCheckHostSysValid(const std::string &hostSysParam) c
     if (Platform::instance()->RunSocSide()) {
         MSPROF_LOGE("Not in host side, --host-sys is not supported");
         CMD_LOGE("Not in host side, --host-sys is not supported");
+        return false;
     }
     if (hostSysParam.empty()) {
         MSPROF_LOGE("Argument --host-sys is empty. Please input in the range of "
