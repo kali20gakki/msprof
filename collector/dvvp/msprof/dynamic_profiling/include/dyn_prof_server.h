@@ -12,31 +12,33 @@
 namespace Collector {
 namespace Dvvp {
 namespace DynProf {
- 
+
 class DyncProfMsgProcSrv : public analysis::dvvp::common::thread::Thread {
 public:
     DyncProfMsgProcSrv();
     ~DyncProfMsgProcSrv() override;
     int Start() override;
     int Stop() override;
- 
+    void NotifyClientDisconnet(const std::string &detailInfo);
+
 private:
     int DynProfServerCreateSock();
     void DynProfServerProcMsg();
     void DynProfSrvProcStart();
     void DynProfSrvProcStop();
     void DynProfSrvProcQuit();
-    void DynProfServerRsqMsg(DynProfMsgType msgType, DynProfMsgRsqCode rsqCode);
+    int DynProfServerRsqMsg(DynProfMsgType msgType, DynProfMsgProcRes rsqCode, const std::string &msgData);
     void Run(const struct error_message::Context &errorContext) override;
- 
+
 private:
     int srvSockFd_;
     int cliSockFd_;
     bool srvStarted_;
     bool profHasStarted_;
     std::string recvParams_;
+    std::string sockPath_;
 };
- 
+
 class DynProfMngSrv : public analysis::dvvp::common::singleton::Singleton<DynProfMngSrv> {
 public:
     DynProfMngSrv();
@@ -44,18 +46,18 @@ public:
     int StartDynProfSrv();
     void StopDynProfSrv();
     void SetDeviceInfo(ProfSetDevPara *data);
-    ProfSetDevPara *GetDeviceInfo();
+    std::vector<ProfSetDevPara> &GetDeviceInfo();
     bool IsStarted();
- 
+
 public:
-    int startTimes_;
- 
+    uint32_t startTimes_;
+
 private:
     bool started_;
-    ProfSetDevPara deviceInfo_;
+    std::vector<ProfSetDevPara> devicesInfo_;
     SHARED_PTR_ALIA<Collector::Dvvp::DynProf::DyncProfMsgProcSrv> dynProfSrv_;
 };
- 
+
 }
 }
 }

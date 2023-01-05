@@ -127,7 +127,7 @@ int MsprofManager::GenerateRunningMode()
         MSVP_MAKE_SHARED2_RET(rMode_, ExportMode, "export", params_, PROFILING_FAILED);
         return PROFILING_SUCCESS;
     }
-    CmdLog::instance()->CmdErrorLog("No valid argument found in --application "
+    CmdLog::instance()->CmdErrorLog("No valid argument found in --dynamic --application "
     "--sys-devices --host-sys --host-sys-usage --parse --query --export");
     return PROFILING_FAILED;
 }

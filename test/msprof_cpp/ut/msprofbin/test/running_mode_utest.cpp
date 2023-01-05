@@ -997,7 +997,6 @@ TEST_F(RUNNING_MODE_UTEST, StartSysTask) {
         .stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
-    // EXPECT_EQ(PROFILING_FAILED, rMode.StartSysTask()); XXX
     MOCKER_CPP(&SystemMode::IsDeviceJob)
         .stubs()
         .will(returnValue(true))
