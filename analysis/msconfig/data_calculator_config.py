@@ -18,7 +18,7 @@ class DataCalculatorConfig(MetaConfig):
         ]
         , 'L2CacheCalculator': [
             ('path', 'mscalculate.l2_cache.l2_cache_calculator'),
-            ('chip_model', '1,2,3,4')
+            ('chip_model', '1,2,3,4,5,7')
         ]
         , 'HwtsCalculator': [
             ('path', 'mscalculate.hwts.hwts_calculator'),

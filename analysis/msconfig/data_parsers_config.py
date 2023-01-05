@@ -33,7 +33,7 @@ class DataParsersConfig(MetaConfig):
         ]
         , 'L2CacheParser': [
             ('path', 'msparser.l2_cache.l2_cache_parser'),
-            ('chip_model', '1,2,3,4')
+            ('chip_model', '1,2,3,4,5,7')
         ]
         , 'IterRecParser': [
             ('path', 'msparser.iter_rec.iter_rec_parser'),
@@ -184,9 +184,5 @@ class DataParsersConfig(MetaConfig):
             ('path', 'msparser.parallel.parallel_parser'),
             ('chip_model', '1,2,3,4,5'),
             ('level', '4')
-        ]
-        , 'L2CacheSampleParser': [
-            ('path', 'msparser.l2_cache.l2_cache_sample_parser'),
-            ('chip_model', '5,7')
         ]
     }

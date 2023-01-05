@@ -72,7 +72,6 @@ class L2CacheParser(IParser, MsMultiProcess):
                         _all_l2_cache_data[
                         _index * StructFmt.L2_CACHE_DATA_SIZE:(_index + 1) * StructFmt.L2_CACHE_DATA_SIZE])
                     self._l2_cache_data.append([
-                        self._device_id,
                         l2_cache_data_bean.task_type,
                         l2_cache_data_bean.stream_id,
                         l2_cache_data_bean.task_id,

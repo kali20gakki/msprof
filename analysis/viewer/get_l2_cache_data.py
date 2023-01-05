@@ -11,7 +11,7 @@ from common_func.msvp_constant import MsvpConstant
 from common_func.utils import Utils
 
 
-def get_l2_cache_data(db_path: str, table_name: str, device_id: str, unused_cols: list) -> tuple:
+def get_l2_cache_data(db_path: str, table_name: str, unused_cols: list) -> tuple:
     """
     get l2 cache data
     """
@@ -19,8 +19,7 @@ def get_l2_cache_data(db_path: str, table_name: str, device_id: str, unused_cols
     if not (conn and cursor) or not DBManager.judge_table_exist(cursor, table_name):
         return MsvpConstant.MSVP_EMPTY_DATA
     used_cols = DBManager.get_filtered_table_headers(cursor, table_name, *unused_cols)
-    data = GetTableData.get_table_data_for_device(
-        cursor, table_name, device_id, ",".join(used_cols))
+    data = DBManager.fetch_all_data(cursor, "select {} from {}".format(",".join(used_cols), table_name))
     if isinstance(conn, sqlite3.Connection):
         conn.close()
     modify_l2_cache_headers(used_cols)
