@@ -82,6 +82,22 @@ class QueryCommand:
             print_msg(str(header).ljust(max_column_list[index], ' '), end="\t")
         print_msg("\n")
 
+    @classmethod
+    def _check_cluster_sqlite_db(cls: any, cluster_sqlite_path: str) -> bool:
+        if not os.path.exists(cluster_sqlite_path):
+            return False
+        rank_db_path = os.path.join(cluster_sqlite_path, DBNameConstant.DB_CLUSTER_RANK)
+        step_db_path = os.path.join(cluster_sqlite_path, DBNameConstant.DB_CLUSTER_STEP_TRACE)
+        if not os.path.exists(rank_db_path):
+            message = f"cluster_rank.db not created in the dir({cluster_sqlite_path}), " \
+                      f"please import --cluster first!"
+            raise ProfException(ProfException.PROF_CLUSTER_INVALID_DB, message)
+        if not os.path.exists(step_db_path):
+            message = f"cluster_step_trace.db not created in the dir({cluster_sqlite_path}), " \
+                      f"please import --cluster first!"
+            raise ProfException(ProfException.PROF_CLUSTER_INVALID_DB, message)
+        return True
+
     def check_argument_valid(self: any) -> None:
         """
         Check the argument valid
@@ -147,21 +163,6 @@ class QueryCommand:
             return []
         return MsprofQueryData.query_cluster_data(self.collection_path, cluster_info_list)
 
-    def _check_cluster_sqlite_db(self: any, cluster_sqlite_path: str) -> bool:
-        if not os.path.exists(cluster_sqlite_path):
-            return False
-        rank_db_path = os.path.join(cluster_sqlite_path, DBNameConstant.DB_CLUSTER_RANK)
-        step_db_path = os.path.join(cluster_sqlite_path, DBNameConstant.DB_CLUSTER_STEP_TRACE)
-        if not os.path.exists(rank_db_path):
-            message = f"cluster_rank.db not created in the dir({cluster_sqlite_path}), " \
-                      f"please import --cluster first!"
-            raise ProfException(ProfException.PROF_CLUSTER_INVALID_DB, message)
-        if not os.path.exists(step_db_path):
-            message = f"cluster_step_trace.db not created in the dir({cluster_sqlite_path}), " \
-                      f"please import --cluster first!"
-            raise ProfException(ProfException.PROF_CLUSTER_INVALID_DB, message)
-        return True
-    
     def _is_query_summary_data(self: any) -> bool:
         return self.args.id is not None or \
                self.args.data_type is not None or \

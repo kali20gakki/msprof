@@ -31,7 +31,7 @@ class TestMsProfExportDataUtils(unittest.TestCase):
              mock.patch(NAMESPACE + '.MsProfExportDataUtils.add_timeline_data'):
             key = MsProfExportDataUtils()
             result = key.export_data(params)
-        self.assertEqual(result, '{"status": 1, "info": "Failed to connect acl_module.db"}')
+        self.assertEqual(result, '{"status": 1, "info": "Failed to connect runtime.db"}')
 
     def test_export_data_4(self):
         params = {"data_type": 123, "export_type": "456"}
@@ -70,7 +70,7 @@ class TestMsProfExportDataUtils(unittest.TestCase):
         with mock.patch(NAMESPACE + '.PathManager.get_db_path', return_value='runtime.db'):
             key = MsProfExportDataUtils()
             result = key._get_runtime_api_data(configs, params)
-        self.assertEqual(result, '{"status": 1, "info": "Failed to connect acl_module.db"}')
+        self.assertEqual(result, '{"status": 1, "info": "Failed to connect runtime.db"}')
 
     def test_get_runtime_api_data_2(self):
         configs = {"db": '123', "table": '456'}

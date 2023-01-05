@@ -70,7 +70,7 @@ class RuntimeApiViewer:
         with self._model as _model:
             if not _model.check_db() or not _model.check_table():
                 return json.dumps(
-                    {"status": NumberConstant.ERROR, "info": f"Failed to connect {DBNameConstant.DB_ACL_MODULE}"})
+                    {"status": NumberConstant.ERROR, "info": f"Failed to connect {DBNameConstant.DB_RUNTIME}"})
 
             timeline_data = _model.get_timeline_data()
             if not timeline_data:

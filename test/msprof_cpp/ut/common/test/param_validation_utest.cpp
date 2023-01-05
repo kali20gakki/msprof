@@ -656,7 +656,12 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, MsprofCheckHostSysValid)
 {
     GlobalMockObject::verify();
     auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
+    MOCKER_CPP(&Analysis::Dvvp::Common::Platform::Platform::RunSocSide)
+        .stubs()
+        .will(returnValue(true))
+        .then(returnValue(false));
     std::string hostSys;
+    EXPECT_EQ(false, entry->MsprofCheckHostSysValid(hostSys));
     EXPECT_EQ(false, entry->MsprofCheckHostSysValid(hostSys));
     hostSys = "xxx";
     EXPECT_EQ(false, entry->MsprofCheckHostSysValid(hostSys));

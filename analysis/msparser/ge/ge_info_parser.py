@@ -87,7 +87,11 @@ class GeInfoParser(IParser, MsMultiProcess):
                     return
                 self.remove_incomplete_index(dynamic_model_dict, ge_step_data, index_space)
                 self.offset_index(dynamic_model_dict, index_space)
-                self.ge_info_data[db_name] = [task for task_list in dynamic_model_dict.values() for task in task_list]
+                self.ge_info_data[db_name] = [
+                    task
+                    for task_list in dynamic_model_dict.values()
+                    for task in task_list
+                ]
 
     def remove_incomplete_index(self: any, dynamic_model_dict: dict, ge_step_data: list, index_space: dict) -> None:
         """
@@ -110,9 +114,11 @@ class GeInfoParser(IParser, MsMultiProcess):
                     remove_iter_list.append(min_index_datum[self.GE_STEP.get(MsProfCommonConstant.INDEX_ID)])
             except ValueError:
                 logging.warning('ge step table has a wrong value type in column tag!')
-            dynamic_model_dict[model_id] = \
-                [task for task in dynamic_model_dict.get(model_id)
-                 if task[index_space.get(MsProfCommonConstant.INDEX_ID)] not in set(remove_iter_list)]
+            dynamic_model_dict[model_id] = [
+                task
+                for task in dynamic_model_dict.get(model_id)
+                if task[index_space.get(MsProfCommonConstant.INDEX_ID)] not in set(remove_iter_list)
+            ]
 
     def is_complete_iter_exist(self: any, ge_step_data: list) -> bool:
         """
