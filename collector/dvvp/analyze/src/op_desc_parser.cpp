@@ -205,6 +205,7 @@ int32_t OpDescParser::GetOpName(CONST_VOID_PTR data, uint32_t len, CHAR_PTR opNa
     }
     errno_t err = memcpy_s(opName, opNameLen, iter->second.c_str(), iter->second.size());
     if (err != EOK) {
+        MSPROF_LOGE("memcpy_s fail, err=%d opNameLen=%u opName=%s", err, opNameLen, iter->second.c_str());
         return ACL_ERROR_INVALID_PARAM;
     }
     *(opName + opNameLen - 1) = '\0';

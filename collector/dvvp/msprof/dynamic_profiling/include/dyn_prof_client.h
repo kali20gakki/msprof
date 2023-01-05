@@ -6,22 +6,16 @@
  */
 #ifndef COLLECTOR_DYNAMIC_PROFILING_CLIENT_H
 #define COLLECTOR_DYNAMIC_PROFILING_CLIENT_H
-#include "thread/thread.h"
+#include <functional>
 #include "dyn_prof_common.h"
- 
+#include "thread/thread.h"
+
 namespace Collector {
 namespace Dvvp {
 namespace DynProf {
- 
-enum class DynProfCliCmd {
-    CMD_START = 0,
-    CMD_STOP,
-    CMD_QUIT,
-    CMD_HELP,
-    CMD_EMPTY,
-    CMD_UNKNOW,
-};
- 
+
+using ProcFunc = std::function<std::string()>;
+
 class DyncProfMsgProcCli : public analysis::dvvp::common::thread::Thread {
 public:
     DyncProfMsgProcCli();
@@ -29,35 +23,36 @@ public:
     int Start() override;
     int Stop() override;
     int SetParams(const std::string &params);
- 
+
 private:
-    std::string DynProfCliProcStart();
-    std::string DynProfCliProcStop();
-    std::string DynProfCliProcQuit();
+    std::string DynProfCliProcHelp();
     int CreateDynProfClientSock();
-    int SendMsgToServer(DynProfMsgType reqMsgtype, DynProfMsgType rsqMsgtype, const std::string &reqMsgParams);
-    DynProfCliCmd ParserInputCmd(const std::string &inputCmd);
+    int SendMsgToServer(DynProfMsgType reqMsgtype, DynProfMsgType rsqMsgtype,
+        const std::string &reqMsgParams, std::string &echoTips);
+    int TryReadInputCmd(std::string &inputCmd);
+    bool IsServerDisconnect(std::string &echoTips);
     void Run(const struct error_message::Context &errorContext) override;
- 
+
 private:
     bool cliStarted_;
     int cliSockFd_;
     std::string sendParams_;
 };
- 
+
 class DynProfMngCli : public analysis::dvvp::common::singleton::Singleton<DynProfMngCli> {
 public:
     DynProfMngCli();
     ~DynProfMngCli();
     int StartDynProfCli(const std::string &params);
     void StopDynProfCli();
+    int GetRealAppPid(int pid);
     void SetAppPid(int pid);
     int GetAppPid();
     void EnableMode();
     bool IsEnableMode();
     std::string ConstructEnv();
     void WaitQuit();
- 
+
 private:
     bool enabled_;
     int appPid_;
