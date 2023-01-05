@@ -711,8 +711,7 @@ void ProcAllPidsFileHandler::GetProcessName(unsigned int pid, std::string &proce
 
     long long len = analysis::dvvp::common::utils::Utils::GetFileSize(fileName);
     if (len < 0 || len > MSVP_SMALL_FILE_MAX_LEN) {
-        MSPROF_LOGE("proc comm file size is invalid");
-        MSPROF_INNER_ERROR("EK9999", "proc comm file size is invalid");
+        MSPROF_LOGW("proc comm file size is invalid");
         return;
     }
 
@@ -795,8 +794,14 @@ void ProcAllPidsFileHandler::HandleNewPidsMem(std::vector<unsigned int> &newPids
         pidMemHandler = std::make_shared<ProcPidMemFileHandler>(GetTag(), devId_, procPidMemBufSize,
             sampleIntervalNs_, pidSrcMemFileName, pidRetMemFileName, param_, jobCtx_, upLoader_, newPids[i]);
         if (pidMemHandler->Init() == PROFILING_SUCCESS) {
-            pidFileHandler->memHandler_ = pidMemHandler;
-            pidsMap_.insert(std::pair<unsigned int, SHARED_PTR_ALIA<ProcPidFileHandler> >(newPids[i], pidFileHandler));
+            auto iter = pidsMap_.find(newPids[i]);
+            if (iter != pidsMap_.end()) {
+                iter->second->memHandler_ = pidMemHandler;
+            } else {
+                pidFileHandler->memHandler_ = pidMemHandler;
+                pidsMap_.insert(std::pair<unsigned int, SHARED_PTR_ALIA<ProcPidFileHandler> >(newPids[i],
+                    pidFileHandler));
+            }
         } else {
             MSPROF_LOGI("Init pid %d mem stat handler fail", newPids[i]);
         }
@@ -818,8 +823,14 @@ void ProcAllPidsFileHandler::HandleNewPidsCpu(std::vector<unsigned int> &newPids
         pidStatHandler = std::make_shared<ProcPidStatFileHandler>(GetTag(), devId_, procPidStatBufSize,
             sampleIntervalNs_, pidSrcStatFileName, pidStatFileName, param_, jobCtx_, upLoader_, newPids[i]);
         if (pidStatHandler->Init() == PROFILING_SUCCESS) {
-            pidFileHandler->statHandler_ = pidStatHandler;
-            pidsMap_.insert(std::pair<unsigned int, SHARED_PTR_ALIA<ProcPidFileHandler> >(newPids[i], pidFileHandler));
+            auto iter = pidsMap_.find(newPids[i]);
+            if (iter != pidsMap_.end()) {
+                iter->second->statHandler_ = pidStatHandler;
+            } else {
+                pidFileHandler->statHandler_ = pidStatHandler;
+                pidsMap_.insert(std::pair<unsigned int, SHARED_PTR_ALIA<ProcPidFileHandler> >(newPids[i],
+                    pidFileHandler));
+            }
         } else {
             MSPROF_LOGI("Init pid %d cpu stat handler fail", newPids[i]);
         }
