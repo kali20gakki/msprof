@@ -183,6 +183,8 @@ private:
     void PrintWorkMode(WorkMode mode);
     int32_t MsprofHelperParamConstruct(const std::string &msprofPath, const std::string &paramsJson);
     void MsprofSetMemberValue();
+    int LaunchHostAndDevTasks(const uint32_t devNums, CONST_UINT32_T_PTR devIdList);
+    int CancleHostAndDevTasks(const uint32_t devNums, CONST_UINT32_T_PTR devIdList);
 
 private:
     bool isReady_;
