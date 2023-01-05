@@ -38,7 +38,7 @@ from viewer.cpu_usage_report import get_sys_cpu_usage_data
 from viewer.ge.ge_op_execute_viewer import GeOpExecuteViewer
 from viewer.ge_info_report import get_ge_model_data
 from viewer.get_hccl_export_data import HCCLExport
-from viewer.get_l2_cache_data import add_op_name, get_l2_cache_sample_data
+from viewer.get_l2_cache_data import add_op_name
 from viewer.get_l2_cache_data import get_l2_cache_data
 from viewer.get_msvp_llc_timeline_training import get_ddr_timeline
 from viewer.get_msvp_llc_timeline_training import get_hbm_timeline
@@ -251,12 +251,8 @@ class MsProfExportDataUtils:
         """
         db_name = configs.get(StrConstant.CONFIG_DB)
         db_path = PathManager.get_db_path(params.get(StrConstant.PARAM_RESULT_DIR), db_name)
-        if ChipManager().is_stars_chip():
-            return get_l2_cache_sample_data(
-                db_path, DBNameConstant.TABLE_L2CACHE_SAMPLE, configs.get(StrConstant.CONFIG_HEADERS))
         headers, data, count = get_l2_cache_data(
-            db_path, configs.get(StrConstant.CONFIG_TABLE), params.get(StrConstant.PARAM_DEVICE_ID),
-            configs.get(StrConstant.CONFIG_UNUSED_COLS))
+            db_path, configs.get(StrConstant.CONFIG_TABLE), configs.get(StrConstant.CONFIG_UNUSED_COLS))
         if headers and data:
             op_dict = DataManager.get_op_dict(params.get(StrConstant.PARAM_RESULT_DIR))
             if op_dict:
