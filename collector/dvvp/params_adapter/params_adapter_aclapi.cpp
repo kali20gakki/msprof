@@ -199,6 +199,17 @@ void ParamsAdapterAclApi::ProfSystemCfgToContainer(const ProfConfig * apiCfg,
         paramContainer_[INPUT_CFG_COM_LLC_MODE] = argsArr[ACL_PROF_LLC_MODE];
         setConfig_.insert(INPUT_CFG_COM_LLC_MODE);
     }
+    std::vector<std::pair<aclprofConfigType, InputCfg>> hostSysConfigs = {
+        {ACL_PROF_HOST_SYS, INPUT_CFG_HOST_SYS},
+        {ACL_PROF_HOST_SYS_USAGE, INPUT_CFG_HOST_SYS_USAGE},
+        {ACL_PROF_HOST_SYS_USAGE_FREQ, INPUT_CFG_HOST_SYS_USAGE_FREQ}
+    };
+    for (auto hostStsConfig : hostSysConfigs) {
+        if (!argsArr[hostStsConfig.first].empty()) {
+            paramContainer_[hostStsConfig.second] = argsArr[hostStsConfig.first];
+            setConfig_.insert(hostStsConfig.second);
+        }
+    }
 }
 
 void ParamsAdapterAclApi::ProfCfgToContainer(const ProfConfig * apiCfg,
