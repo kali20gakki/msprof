@@ -349,8 +349,20 @@ int ProfAclMgr::ProfAclStart(PROF_CONF_CONST_PTR profStartCfg)
     }
     params_->host_sys_pid = analysis::dvvp::common::utils::Utils::GetPid();
 
-    for (uint32_t i = 0; i < profStartCfg->devNums; i++) {
-        uint32_t devId = profStartCfg->devIdList[i];
+    ret = LaunchHostAndDevTasks(profStartCfg->devNums, profStartCfg->devIdList);
+    if (ret != ACL_SUCCESS) {
+        MSPROF_LOGE("[ProfAclStart]Launch host and device tasks failed.");
+        return ret;
+    }
+    WaitAllDeviceResponse();
+    return ACL_SUCCESS;
+}
+
+int ProfAclMgr::LaunchHostAndDevTasks(const uint32_t devNums, CONST_UINT32_T_PTR devIdList)
+{
+    int ret = ACL_SUCCESS;
+    for (uint32_t i = 0; i < devNums; i++) {
+        uint32_t devId = devIdList[i];
         MSPROF_LOGI("Process ProfAclStart of device %u", devId);
         if (devId == DEFAULT_HOST_ID) {
             dataTypeConfig_ = params_->dataTypeConfig;
@@ -363,7 +375,17 @@ int ProfAclMgr::ProfAclStart(PROF_CONF_CONST_PTR profStartCfg)
         }
         devTasks_[devId].dataTypeConfig = params_->dataTypeConfig;
     }
-    WaitAllDeviceResponse();
+
+    if (params_->IsHostProfiling() && devTasks_.find(DEFAULT_HOST_ID) == devTasks_.end()) {
+        MSPROF_LOGI("Process ProfAclStart of Host");
+        params_->host_profiling = true;
+        ret = StartDeviceTask(DEFAULT_HOST_ID, params_);
+        if (ret != ACL_SUCCESS) {
+            return ret;
+        }
+        devTasks_[DEFAULT_HOST_ID].dataTypeConfig = params_->dataTypeConfig;
+        params_->host_profiling = false;
+    }
     return ACL_SUCCESS;
 }
 
@@ -398,9 +420,20 @@ int ProfAclMgr::ProfAclStop(PROF_CONF_CONST_PTR profStopCfg)
         }
     }
     // stop devices
+    int ret = CancleHostAndDevTasks(profStopCfg->devNums, profStopCfg->devIdList);
+    if (ret != ACL_SUCCESS) {
+        MSPROF_LOGE("[ProfAclStop]Cancle host and device tasks failed.");
+        return ret;
+    }
+
+    return ACL_SUCCESS;
+}
+
+int ProfAclMgr::CancleHostAndDevTasks(const uint32_t devNums, CONST_UINT32_T_PTR devIdList)
+{
     int ret = ACL_SUCCESS;
-    for (uint32_t i = 0; i < profStopCfg->devNums; i++) {
-        uint32_t devId = profStopCfg->devIdList[i];
+    for (uint32_t i = 0; i < devNums; i++) {
+        uint32_t devId = devIdList[i];
         MSPROF_LOGI("Processing ProfAclStop of device %u", devId);
         auto iter = devTasks_.find(devId);
         if (iter != devTasks_.end()) {
@@ -414,7 +447,16 @@ int ProfAclMgr::ProfAclStop(PROF_CONF_CONST_PTR profStopCfg)
             devTasks_.erase(iter);
         }
     }
-
+    if (params_->IsHostProfiling() && devTasks_.find(DEFAULT_HOST_ID) != devTasks_.end()) {
+        MSPROF_LOGI("Processing ProfAclStop of Host");
+        HashData::instance()->SaveHashData(DEFAULT_HOST_ID);
+        devTasks_[DEFAULT_HOST_ID].params->is_cancel = true;
+        if (ProfManager::instance()->IdeCloudProfileProcess(devTasks_[DEFAULT_HOST_ID].params) != PROFILING_SUCCESS) {
+            MSPROF_LOGE("Failed to stop profiling on Host");
+            ret = ACL_ERROR_PROFILING_FAILURE;
+        }
+        devTasks_.erase(DEFAULT_HOST_ID);
+    }
     return ret;
 }
 
