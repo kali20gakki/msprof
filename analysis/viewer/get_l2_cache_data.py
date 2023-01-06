@@ -20,19 +20,9 @@ def get_l2_cache_data(db_path: str, table_name: str, unused_cols: list) -> tuple
         return MsvpConstant.MSVP_EMPTY_DATA
     used_cols = DBManager.get_filtered_table_headers(cursor, table_name, *unused_cols)
     data = DBManager.fetch_all_data(cursor, "select {} from {}".format(",".join(used_cols), table_name))
-    if isinstance(conn, sqlite3.Connection):
-        conn.close()
     modify_l2_cache_headers(used_cols)
-    return used_cols, data, len(data)
-
-
-def get_l2_cache_sample_data(db_path: str, table_name: str, header: list):
-    conn, cursor = DBManager.check_connect_db_path(db_path)
-    if not (conn and cursor) or not DBManager.judge_table_exist(cursor, table_name):
-        return MsvpConstant.MSVP_EMPTY_DATA
-    data = DBManager.fetch_all_data(cursor, "select * from {}".format(table_name))
     DBManager.destroy_db_connect(conn, cursor)
-    return header, data, len(data)
+    return used_cols, data, len(data)
 
 
 def modify_l2_cache_headers(headers: list) -> None:

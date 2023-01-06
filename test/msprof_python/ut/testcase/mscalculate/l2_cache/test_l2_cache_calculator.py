@@ -25,11 +25,11 @@ class TestL2CacheCalculator(unittest.TestCase):
                      'result_dir': '/tmp/result',
                      'tag_id': 'JOBEJGBAHABDEEIJEDFHHFAAAAAAAAAA',
                      'host_id': '127.0.0.1'}
-    l2_cache_ps_data = [[0, 0, 3, 2, '640', '3136', '0', '0', '47', '3776', '0', '3159'],
-                        [0, 0, 3, 3, '5524', '3136', '0', '0', '5313', '8660', '0', '3151'],
-                        [0, 0, 3, 4, '3432', '784', '0', '0', '3425', '4216', '0', '791'],
-                        [0, 0, 3, 5, '896', '784', '0', '0', '870', '1680', '0', '794'],
-                        [0, 0, 3, 6, '1601', '784', '0', '0', '1436', '2385', '0', '805']]
+    l2_cache_ps_data = [[0, 3, 2, '640', '3136', '0', '0', '47', '3776', '0', '3159'],
+                        [0, 3, 3, '5524', '3136', '0', '0', '5313', '8660', '0', '3151'],
+                        [0, 3, 4, '3432', '784', '0', '0', '3425', '4216', '0', '791'],
+                        [0, 3, 5, '896', '784', '0', '0', '870', '1680', '0', '794'],
+                        [0, 3, 6, '1601', '784', '0', '0', '1436', '2385', '0', '805']]
     file_list = {DataTag.L2CACHE: ['l2cache.data.0.slice_0']}
 
     def test_is_valid_index(self: any):
@@ -126,11 +126,11 @@ class TestL2CacheCalculator(unittest.TestCase):
         check = L2CacheCalculator({}, self.sample_config)
         check._l2_cache_ps_data = self.l2_cache_ps_data
         check._l2_cache_events = ['0x78', '0x79', '0x77', '0x71', '0x6a', '0x6c', '0x74', '0x62']
-        except_data_result = [[0, 0, 3, 2, 0.012447, 0.0],
-                              [0, 0, 3, 3, 0.61351, 0.0],
-                              [0, 0, 3, 4, 0.812381, 0.0],
-                              [0, 0, 3, 5, 0.517857, 0.0],
-                              [0, 0, 3, 6, 0.602096, 0.0]]
+        except_data_result = [[0, 3, 2, 0.012447, 0.0],
+                              [0, 3, 3, 0.61351, 0.0],
+                              [0, 3, 4, 0.812381, 0.0],
+                              [0, 3, 5, 0.517857, 0.0],
+                              [0, 3, 6, 0.602096, 0.0]]
         check._event_indexes = {
             "request_events": [0, 1],
             "hit_events": [4],
@@ -186,3 +186,7 @@ class TestL2CacheCalculator(unittest.TestCase):
             check._l2_cache_ps_data = [[0, 0, 1, 1, '26', '4', '0', '0', '14', '30', '4', '9']]
             check._l2_cache_events = ['0x5b', '0x59', '0x5c', '0x7d', '0x7e', '0x71', '0x79', '0x7c']
             check.ms_run()
+
+
+if __name__ == '__main__':
+    unittest.main()
