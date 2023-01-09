@@ -14,7 +14,7 @@ def _check_path_valid(path: str, is_file: bool) -> None:
         raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR, "The path is empty. Please enter a valid path.")
     if not os.path.exists(path):
         raise ProfException(ProfException.PROF_INVALID_PATH_ERROR,
-                            f"The path \"{path}\" does not exist. Please check that the  path exists.")
+                            f"The path \"{path}\" does not exist. Please check that the path exists.")
     if is_file:
         if not os.path.isfile(path):
             raise ProfException(ProfException.PROF_INVALID_PATH_ERROR,
