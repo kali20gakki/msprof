@@ -57,7 +57,7 @@ cd ${TOP_DIR}/build
 
 # Hi Test
 HI_TEST="off"
-if [ ! -z ${TOOLKIT_HITEST} ] && [ ${TOOLKIT_HITEST} == "on" ]; then
+if [ ! -z "${TOOLKIT_HITEST}" ] && [ "${TOOLKIT_HITEST}" == "on" ]; then
     HI_TEST=${TOOLKIT_HITEST}
 fi
 

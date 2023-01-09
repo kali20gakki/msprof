@@ -10,7 +10,7 @@ CUR_DIR=$(dirname $(readlink -f $0))
 TOP_DIR=${CUR_DIR}/..
 OUT_DIR=${TOP_DIR}/..
 
-if [ -e ${CUR_DIR}/tmp ]
+if [ -e "${CUR_DIR}/tmp" ]
 then
     rm -rf ${CUR_DIR}/tmp
 fi
@@ -53,10 +53,10 @@ for DIR in ${OUT_DIR}/platform/Tuscany/*centos*;
     cp $CANN_TOOLKIT_DIR ${CUR_DIR}/tmp/cann_toolkit
     cp $CANN_RUNTIME_DIR ${CUR_DIR}/tmp/cann_runtime
     chmod -R +x ${CUR_DIR}/tmp
-    PACKAGE_NAME_TOOLKIT_suffix=$(ls ${CUR_DIR}/tmp/cann_toolkit)
-    PACKAGE_NAME_RUNTIME_suffix=$(ls ${CUR_DIR}/tmp/cann_runtime)
-    PACKAGE_NAME_TOOLKIT=$(basename $PACKAGE_NAME_TOOLKIT_suffix .run)
-    PACKAGE_NAME_RUNTIME=$(basename $PACKAGE_NAME_RUNTIME_suffix .run)
+    package_name_toolkit_suffix=$(ls ${CUR_DIR}/tmp/cann_toolkit)
+    package_name_runtime_suffix=$(ls ${CUR_DIR}/tmp/cann_runtime)
+    PACKAGE_NAME_TOOLKIT=$(basename $package_name_toolkit_suffix .run)
+    PACKAGE_NAME_RUNTIME=$(basename $package_name_runtime_suffix .run)
     
     ${CUR_DIR}/tmp/$MINDSTUDIO_TOOLKIT_NAME --noexec --extract=${CUR_DIR}/tmp/mindstudio
     ${CUR_DIR}/tmp/cann_toolkit/$CANN_TOOLKIT_NAME --noexec --extract=${CUR_DIR}/tmp/cann_toolkit/${PACKAGE_NAME_TOOLKIT}
@@ -92,10 +92,10 @@ for DIR in ${OUT_DIR}/platform/Tuscany/*centos*;
     --tar-extra \
     --numeric-owner \
     ${CUR_DIR}/tmp/cann_toolkit/${PACKAGE_NAME_TOOLKIT} \
-    ${CUR_DIR}/tmp/${PACKAGE_NAME_TOOLKIT_suffix} \
+    ${CUR_DIR}/tmp/${package_name_toolkit_suffix} \
     ${COMMENTS} \
     ./toolkit/scripts/install.sh
-    mv ${CUR_DIR}/tmp/${PACKAGE_NAME_TOOLKIT_suffix} ${RM_DIR}/$PACKAGE_NAME_TOOLKIT_suffix
+    mv ${CUR_DIR}/tmp/${package_name_toolkit_suffix} ${RM_DIR}/$package_name_toolkit_suffix
     
      ${CREATE_RUN_SCRIPT} \
     --header ${CONTROL_PARAM_SCRIPT}\
@@ -110,9 +110,9 @@ for DIR in ${OUT_DIR}/platform/Tuscany/*centos*;
     --tar-extra \
     --numeric-owner \
     ${CUR_DIR}/tmp/cann_runtime/${PACKAGE_NAME_RUNTIME} \
-    ${CUR_DIR}/tmp/${PACKAGE_NAME_RUNTIME_suffix} \
+    ${CUR_DIR}/tmp/${package_name_runtime_suffix} \
     ${COMMENTS} \
     ./runtime/scripts/install.sh
-    mv ${CUR_DIR}/tmp/${PACKAGE_NAME_RUNTIME_suffix} ${RM_DIR}/$PACKAGE_NAME_RUNTIME_suffix
+    mv ${CUR_DIR}/tmp/${package_name_runtime_suffix} ${RM_DIR}/$package_name_runtime_suffix
     rm -rf ${CUR_DIR}/tmp
   done
