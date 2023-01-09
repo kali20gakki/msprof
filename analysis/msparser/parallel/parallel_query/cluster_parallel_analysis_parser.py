@@ -73,5 +73,5 @@ class ClusterParallelAnalysisParser:
                 message = f"Invalid arguments! The argument '--model-id' should be between {min_value} and {max_value}."
                 raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR, message)
             return
-        message = "Query arguments error! One of the arguments '--id' or '--model-id' must be -1."
+        message = "Query arguments error! One of the arguments '--id' or '--iteration-id' must be -1."
         raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR, message)

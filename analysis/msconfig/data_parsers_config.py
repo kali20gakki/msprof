@@ -68,15 +68,15 @@ class DataParsersConfig(MetaConfig):
         ]
         , 'ParsingTSData': [
             ('path', 'msparser.hardware.tscpu_parser'),
-            ('chip_model', '0,1,2,3,4,5')
+            ('chip_model', '0,1,2,3,4,5,7')
         ]
         , 'ParsingAICPUData': [
             ('path', 'msparser.hardware.ai_cpu_parser'),
-            ('chip_model', '0,1,2,3,4,5')
+            ('chip_model', '0,1,2,3,4,5,7')
         ]
         , 'ParsingCtrlCPUData': [
             ('path', 'msparser.hardware.ctrl_cpu_parser'),
-            ('chip_model', '0,1,2,3,4,5')
+            ('chip_model', '0,1,2,3,4,5,7')
         ]
         , 'ParsingMemoryData': [
             ('path', 'msparser.hardware.sys_mem_parser'),
@@ -130,7 +130,7 @@ class DataParsersConfig(MetaConfig):
         ]
         , 'MsprofTxParser': [
             ('path', 'msparser.msproftx.msproftx_parser'),
-            ('chip_model', '0,1,2,3,4,5')
+            ('chip_model', '0,1,2,3,4,5,7')
         ]
         , 'RunTimeApiParser': [
             ('path', 'msparser.runtime.runtime_api_parser'),

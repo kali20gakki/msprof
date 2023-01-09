@@ -5,7 +5,6 @@
 import re
 from collections import namedtuple
 
-
 from common_func.constant import Constant
 from common_func.empty_class import EmptyClass
 
@@ -198,7 +197,7 @@ class FileNameManagerConstant:
     # biu perf
     BIU_PERF_FILE_PATTERN = r"^biu\.group_\d+_(aic|aiv0|aiv1).\d+.slice_\d+"
 
-    #parallel
+    # parallel
     PARALLEL_STRATEGY_FILE_PATTERN = r"^Framework\.parallel_strategy\.(\d+)\.slice_\d+"
 
     def get_file_name_manager_class_name(self: any) -> any:
@@ -227,6 +226,7 @@ def get_file_name_pattern_match(file_name: str, *file_pattern_compiles: any) -> 
 
     def check_file_name(tag: str):
         return file_name.endswith(tag)
+
     if any(map(check_file_name, tags)):
         return EmptyClass("not original data")
     for file_pattern_compile in file_pattern_compiles:
@@ -532,20 +532,22 @@ def get_pid_mem_compiles() -> tuple:
     """
     get pid memory regex compiles
     """
-    return re.compile(FileNameManagerConstant.PID_MEM_FILE_PATTERN), re.compile(
-        FileNameManagerConstant.PID_MEM_INFER_FILE_PATTERN), re.compile(
-        FileNameManagerConstant.PID_MEM_TRAINING_FILE_PATTERN), re.compile(
-        FileNameManagerConstant.HOST_PID_MEM_FILE_PATTERN)
+    pid_mem_compiles = (re.compile(FileNameManagerConstant.PID_MEM_FILE_PATTERN),
+                        re.compile(FileNameManagerConstant.PID_MEM_INFER_FILE_PATTERN),
+                        re.compile(FileNameManagerConstant.PID_MEM_TRAINING_FILE_PATTERN),
+                        re.compile(FileNameManagerConstant.HOST_PID_MEM_FILE_PATTERN))
+    return pid_mem_compiles
 
 
 def get_pid_cpu_usage_compiles() -> tuple:
     """
     get pid cpu usage regex compiles
     """
-    return re.compile(FileNameManagerConstant.PID_CPU_USAGE_FILE_PATTERN), \
-           re.compile(FileNameManagerConstant.PID_CPU_USAGE_INFER_FILE_PATTERN), \
-           re.compile(FileNameManagerConstant.PID_CPU_USAGE_TRAINING_FILE_PATTERN), \
-           re.compile(FileNameManagerConstant.HOST_PID_CPU_USAGE_FILE_PATTERN)
+    pid_cpu_usage_compiles = (re.compile(FileNameManagerConstant.PID_CPU_USAGE_FILE_PATTERN),
+                              re.compile(FileNameManagerConstant.PID_CPU_USAGE_INFER_FILE_PATTERN),
+                              re.compile(FileNameManagerConstant.PID_CPU_USAGE_TRAINING_FILE_PATTERN),
+                              re.compile(FileNameManagerConstant.HOST_PID_CPU_USAGE_FILE_PATTERN))
+    return pid_cpu_usage_compiles
 
 
 def get_roce_compiles() -> tuple:
@@ -577,20 +579,22 @@ def get_sys_mem_compiles() -> tuple:
     """
     get sys mem regex compiles
     """
-    return re.compile(FileNameManagerConstant.SYS_MEM_FILE_PATTERN), re.compile(
-        FileNameManagerConstant.SYS_MEM_INFER_FILE_PATTERN), re.compile(
-        FileNameManagerConstant.SYS_MEM_TRAINING_FILE_PATTERN), re.compile(
-        FileNameManagerConstant.HOST_SYS_MEM_FILE_PATTERN)
+    sys_mem_compiles = (re.compile(FileNameManagerConstant.SYS_MEM_FILE_PATTERN),
+                        re.compile(FileNameManagerConstant.SYS_MEM_INFER_FILE_PATTERN),
+                        re.compile(FileNameManagerConstant.SYS_MEM_TRAINING_FILE_PATTERN),
+                        re.compile(FileNameManagerConstant.HOST_SYS_MEM_FILE_PATTERN))
+    return sys_mem_compiles
 
 
 def get_sys_cpu_usage_compiles() -> tuple:
     """
     get sys cpu usage compiles
     """
-    return re.compile(FileNameManagerConstant.SYS_CPU_USAGE_FILE_PATTERN), \
-           re.compile(FileNameManagerConstant.SYS_CPU_USAGE_INFER_FILE_PATTERN), \
-           re.compile(FileNameManagerConstant.SYS_CPU_USAGE_TRAINING_FILE_PATTERN), \
-           re.compile(FileNameManagerConstant.HOST_SYS_CPU_USAGE_FILE_PATTERN),
+    sys_cpu_usage_compiles = (re.compile(FileNameManagerConstant.SYS_CPU_USAGE_FILE_PATTERN),
+                              re.compile(FileNameManagerConstant.SYS_CPU_USAGE_INFER_FILE_PATTERN),
+                              re.compile(FileNameManagerConstant.SYS_CPU_USAGE_TRAINING_FILE_PATTERN),
+                              re.compile(FileNameManagerConstant.HOST_SYS_CPU_USAGE_FILE_PATTERN),)
+    return sys_cpu_usage_compiles
 
 
 def get_ts_cpu_compiles() -> tuple:

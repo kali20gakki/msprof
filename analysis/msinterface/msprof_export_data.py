@@ -251,7 +251,7 @@ class MsProfExportDataUtils:
         """
         db_name = configs.get(StrConstant.CONFIG_DB)
         db_path = PathManager.get_db_path(params.get(StrConstant.PARAM_RESULT_DIR), db_name)
-        if ChipManager().is_chip_v4():
+        if ChipManager().is_stars_chip():
             return get_l2_cache_sample_data(
                 db_path, DBNameConstant.TABLE_L2CACHE_SAMPLE, configs.get(StrConstant.CONFIG_HEADERS))
         headers, data, count = get_l2_cache_data(

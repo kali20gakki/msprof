@@ -292,12 +292,9 @@ class ExportCommand:
             if item['handler'](result_dir, self.sample_config.get('devices', 0)):
                 self.list_map.get('export_type_list').append(item)
 
-    def _is_iteration_range_valid(self, max_index):
-        if self.iteration_id < NumberConstant.DEFAULT_ITER_ID:
-            error(self.FILE_NAME,
-                  f'The iteration id {self.iteration_id} is invalid for model id '
-                  f'{self.list_map.get(self.MODEL_ID)}. Must be greater than 0. Please enter a valid iteration id.')
-            return False
+    def _is_iteration_range_valid(self, project_path):
+        with TsTrackModel(project_path, DBNameConstant.DB_STEP_TRACE, [DBNameConstant.TABLE_STEP_TRACE_DATA]) as _trace:
+            step_trace = _trace.get_max_index_id_with_model(self.list_map.get(self.MODEL_ID))
 
         if self.iteration_count < NumberConstant.DEFAULT_ITER_ID \
                 or self.iteration_count > IterationRange.MAX_ITERATION_COUNT:
@@ -307,11 +304,12 @@ class ExportCommand:
                                   f'{IterationRange.MAX_ITERATION_COUNT}. Please enter a valid iteration count.')
             return False
 
-        if self.iteration_id + self.iteration_count - 1 > max_index:
+        if step_trace and self.iteration_id + self.iteration_count - 1 > step_trace.index_id:
             error(self.FILE_NAME,
                   f'The current iteration id is {self.iteration_id}, '
                   f'and you want to export {self.iteration_count} rounds of iterations, '
-                  f'but the current maximum iteration is {max_index} for model id {self.list_map.get(self.MODEL_ID)}. '
+                  f'but the current maximum iteration is {step_trace.index_id} for model id '
+                  f'{self.list_map.get(self.MODEL_ID)}. '
                   f'Please enter a valid iteration id and iteration count.')
             return False
         return True
@@ -328,11 +326,14 @@ class ExportCommand:
                                  f'but it is unnecessary without step trace data.')
             self.iteration_count = NumberConstant.DEFAULT_ITER_COUNT
             return
-        with TsTrackModel(project_path, DBNameConstant.DB_STEP_TRACE, [DBNameConstant.TABLE_STEP_TRACE_DATA]) as _trace:
-            step_trace = _trace.get_max_index_id_with_model(self.list_map.get(self.MODEL_ID))
-        if not step_trace:
-            return
-        if not self._is_iteration_range_valid(step_trace.index_id):
+
+        if self.iteration_id < NumberConstant.DEFAULT_ITER_ID:
+            error(self.FILE_NAME,
+                  f'The iteration id {self.iteration_id} is invalid for model id '
+                  f'{self.list_map.get(self.MODEL_ID)}. Must be greater than 0. Please enter a valid iteration id.')
+            raise ProfException(ProfException.PROF_INVALID_STEP_TRACE_ERROR)
+
+        if not self._is_iteration_range_valid(project_path):
             raise ProfException(ProfException.PROF_INVALID_STEP_TRACE_ERROR)
 
     def _analyse_sample_config(self: any, result_dir: str) -> None:
