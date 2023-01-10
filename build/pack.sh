@@ -47,9 +47,10 @@ for DIR in ${OUT_DIR}/platform/Tuscany/*centos*;
     CANN_RUNTIME_DIR=${RM_DIR}/$CANN_RUNTIME_NAME
     
     mkdir ${CUR_DIR}/tmp
+    cp $MINDSTUDIO_TOOLKIT_DIR ${CUR_DIR}/tmp
+    PACKAGE_NAME_MINDSTUDIO_SUFFIX=$(ls ${CUR_DIR}/tmp)
     mkdir ${CUR_DIR}/tmp/cann_toolkit
     mkdir ${CUR_DIR}/tmp/cann_runtime
-    cp $MINDSTUDIO_TOOLKIT_DIR ${CUR_DIR}/tmp
     cp $CANN_TOOLKIT_DIR ${CUR_DIR}/tmp/cann_toolkit
     cp $CANN_RUNTIME_DIR ${CUR_DIR}/tmp/cann_runtime
     chmod -R +x ${CUR_DIR}/tmp
@@ -77,6 +78,7 @@ for DIR in ${OUT_DIR}/platform/Tuscany/*centos*;
     CONTROL_PARAM_SCRIPT=${MAKESELF_DIR}/makeself-header.sh
     CANN_TOOLKIT=${CUR_DIR}/tmp/cann_toolkit/${PACKAGE_NAME_TOOLKIT}/toolkit
     CANN_RUNTIME=${CUR_DIR}/tmp/cann_runtime/${PACKAGE_NAME_RUNTIME}/runtime
+    MINDSTUDIO_TOOLKIT=${CUR_DIR}/tmp/mindstudio/mindstudio-toolkit
     COMMENTS=comments
 
     ${CREATE_RUN_SCRIPT} \
@@ -114,5 +116,24 @@ for DIR in ${OUT_DIR}/platform/Tuscany/*centos*;
     ${COMMENTS} \
     ./runtime/scripts/install.sh
     mv ${CUR_DIR}/tmp/${package_name_runtime_suffix} ${RM_DIR}/$package_name_runtime_suffix
+
+    filelist_csv=${MINDSTUDIO_TOOLKIT}/script/filelist.csv
+    file_interval=${MINDSTUDIO_TOOLKIT}/script/file_interval.csv
+    awk -F, '$4 !~ /msprof/ || $2 !~ /mkdir/' ${filelist_csv} > ${file_interval}
+    awk -F, '$1 !~ /msprof/' ${file_interval} > ${filelist_csv}
+    rm -f $file_interval
+
+    ${CREATE_RUN_SCRIPT} \
+    --header ${CONTROL_PARAM_SCRIPT}\
+    --help-header ${MINDSTUDIO_TOOLKIT}/script/help.info \
+    --complevel 4 \
+    --nomd5 \
+    --sha256 \
+    ${CUR_DIR}/tmp/mindstudio \
+    ${CUR_DIR}/tmp/${PACKAGE_NAME_MINDSTUDIO_SUFFIX} \
+    ${COMMENTS} \
+    ./mindstudio-toolkit/script/install.sh
+    mv ${CUR_DIR}/tmp/${PACKAGE_NAME_MINDSTUDIO_SUFFIX} ${RM_DIR}/${PACKAGE_NAME_MINDSTUDIO_SUFFIX}
+
     rm -rf ${CUR_DIR}/tmp
   done
