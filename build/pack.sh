@@ -126,15 +126,9 @@ for DIR in ${OUT_DIR}/platform/Tuscany/*centos*;
     ${CREATE_RUN_SCRIPT} \
     --header ${CONTROL_PARAM_SCRIPT}\
     --help-header ${MINDSTUDIO_TOOLKIT}/script/help.info \
-    --pigz \
     --complevel 4 \
     --nomd5 \
     --sha256 \
-    --nooverwrite \
-    --chown \
-    --tar-format gnu\
-    --tar-extra \
-    --numeric-owner \
     ${CUR_DIR}/tmp/mindstudio \
     ${CUR_DIR}/tmp/${PACKAGE_NAME_MINDSTUDIO_SUFFIX} \
     ${COMMENTS} \
