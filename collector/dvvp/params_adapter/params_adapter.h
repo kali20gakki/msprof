@@ -142,6 +142,7 @@ private:
     void SetLhisiBlackSwitch();
     void SetDcBlackSwitch();
     void SetCloudV2BlackSwitch();
+    void SetMiniV2BlackSwitch();
     void SetCommonConfig();
     void SetCommonParams(std::array<std::string, INPUT_CFG_MAX> paramContainer) const;
     void SetTaskParams(std::array<std::string, INPUT_CFG_MAX> paramContainer) const;

@@ -270,7 +270,7 @@ void ArgsManager::AddAnalysisArgs()
 
 void ArgsManager::AddStarsArgs()
 {
-    if (driverOnline_ && platform_ != PlatformType::CHIP_V4_1_0 && platform_ != PlatformType::CHIP_V4_2_0) {
+    if (driverOnline_) {
         return;
     }
 
@@ -422,7 +422,7 @@ void ArgsManager::AddIoArgs()
 void ArgsManager::AddInterArgs()
 {
     if (driverOnline_ && (platform_ == PlatformType::LHISI_TYPE || platform_ == PlatformType::MINI_TYPE ||
-        platform_ == PlatformType::MDC_TYPE)) {
+        platform_ == PlatformType::MDC_TYPE || platform_ == PlatformType::CHIP_V4_2_0)) {
         return;
     }
     Args interArgs = {"sys-interconnection-profiling",

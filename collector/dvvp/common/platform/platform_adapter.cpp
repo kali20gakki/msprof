@@ -20,6 +20,7 @@
 #include "platform_adapter_dc.h"
 #include "platform_adapter_cloud.h"
 #include "platform_adapter_cloudv2.h"
+#include "platform_adapter_miniv2.h"
 #include "utils.h"
 
 namespace Collector {
@@ -55,6 +56,8 @@ SHARED_PTR_ALIA<PlatformAdapterInterface> PlatformAdapter::Init(
         MSVP_MAKE_SHARED0_RET(platformAdapter, PlatformAdapterDc, nullptr);
     } else if (platformType == PlatformType::CHIP_V4_1_0) {
         MSVP_MAKE_SHARED0_RET(platformAdapter, PlatformAdapterCloudV2, nullptr);
+    } else if (platformType == PlatformType::CHIP_V4_2_0) {
+        MSVP_MAKE_SHARED0_RET(platformAdapter, PlatformAdapterMiniV2, nullptr);
     }
     if (platformAdapter != nullptr) {
         int ret = platformAdapter->Init(params, platformType);
