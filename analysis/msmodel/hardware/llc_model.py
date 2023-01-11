@@ -10,6 +10,7 @@ from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
+from common_func.platform.chip_manager import ChipManager
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msvp_common import float_calculate
 from common_func.utils import Utils
@@ -38,12 +39,21 @@ class LlcModel(BaseModel, ABC):
     }
     LLC_CACHE_SIZE = 64.0
     LLC_TO_SECOND = 10 ** 6
-    LLID_COUNT = 4
-    L3_LIST = list(range(LLID_COUNT))
 
     def __init__(self: any, result_dir: str, db_name: str, table_list: list) -> None:
         super().__init__(result_dir, db_name, table_list)
+        self.l3_list = self._init_l3_list_dispatch()
         self.metrics_data = []
+    
+    @staticmethod
+    def _init_l3_list_dispatch() -> list:
+        if ChipManager().is_chip_v1_1():
+            llid_count = 1
+        elif ChipManager().is_chip_v4():
+            llid_count = 2
+        else:
+            llid_count = 4
+        return list(range(llid_count))
 
     @staticmethod
     def calculate_hit_rate(item: list) -> int:
@@ -156,7 +166,7 @@ class LlcModel(BaseModel, ABC):
         :return:
         """
         try:
-            for llc_id in self.L3_LIST:
+            for llc_id in self.l3_list:
                 sql = "SELECT * FROM {0} WHERE l3tId is {1} ORDER BY device_id, timestamp ". \
                     format(DBNameConstant.TABLE_LLC_EVENTS, llc_id)
                 llc_event_data = DBManager.fetch_all_data(self.cur, sql)
