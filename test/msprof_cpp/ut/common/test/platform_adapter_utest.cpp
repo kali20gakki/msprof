@@ -19,6 +19,7 @@
 #include "platform/platform_adapter_lhisi.h"
 #include "platform/platform_adapter_mdc.h"
 #include "platform/platform_adapter_mini.h"
+#include "platform/platform_adapter_miniv2.h"
 #include "errno/error_code.h"
 
 using namespace Collector::Dvvp::Common::PlatformAdapter;
@@ -46,9 +47,20 @@ TEST_F(PlatformAdapterUtest, PlatformAdapterModule)
     SHARED_PTR_ALIA<PlatformAdapterInterface> ret = PlatformAdapterMgr->Init(params, PlatformType::END_TYPE);
     EXPECT_EQ(nullptr, ret);
     
-    ret = PlatformAdapterMgr->Init(params, PlatformType::MINI_TYPE);
-    int val = ret->Init(params, PlatformType::MINI_TYPE);
-    EXPECT_EQ(PROFILING_SUCCESS, val);
+    std::vector<PlatformType> typeList = {
+        PlatformType::MINI_TYPE,
+        PlatformType::CLOUD_TYPE,
+        PlatformType::MDC_TYPE,
+        PlatformType::LHISI_TYPE,
+        PlatformType::DC_TYPE,
+        PlatformType::CHIP_V4_1_0,
+        PlatformType::CHIP_V4_2_0
+    };
+    for (auto type : typeList) {
+        ret = PlatformAdapterMgr->Init(params, type);
+        int val = ret->Init(params, type);
+        EXPECT_EQ(PROFILING_SUCCESS, val);
+    }
 }
 
 TEST_F(PlatformAdapterUtest, PlatformAdapterInterfaceModule1)
@@ -254,6 +266,21 @@ TEST_F(PlatformAdapterUtest, PlatformAdapterMiniModule)
     params = nullptr;
 
     ret = PlatformAdapterMiniMgr->Uninit();
+    EXPECT_EQ(PROFILING_SUCCESS, ret);
+}
+
+TEST_F(PlatformAdapterUtest, PlatformAdapterMiniv2Module)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<PlatformAdapterMiniV2> PlatformAdapterMiniv2Mgr;
+    MSVP_MAKE_SHARED0_BREAK(PlatformAdapterMiniv2Mgr, PlatformAdapterMiniV2);
+
+    SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params;
+    int ret = PlatformAdapterMiniv2Mgr->Init(params, PlatformType::CHIP_V4_2_0);
+    EXPECT_EQ(PROFILING_SUCCESS, ret);
+    params = nullptr;
+
+    ret = PlatformAdapterMiniv2Mgr->Uninit();
     EXPECT_EQ(PROFILING_SUCCESS, ret);
 }
 

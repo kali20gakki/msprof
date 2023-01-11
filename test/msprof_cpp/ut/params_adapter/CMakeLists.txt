@@ -32,6 +32,7 @@ set(src_file
     ${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter_lhisi.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter_mdc.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter_mini.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter_miniv2.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/msprof/dynamic_profiling/src/dyn_prof_client.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/thread/thread.cpp 
     ${MSPROF_SOURCE_DIR}/dvvp/depend/stub/error_manager/msprof_error_manager_stub.cpp
