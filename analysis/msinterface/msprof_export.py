@@ -449,12 +449,7 @@ class ExportCommand:
         print_info(self.FILE_NAME, export_info)
 
     def _handle_export(self: any, result_dir: str) -> None:
-        try:
-            self._prepare_export(result_dir)
-        except ProfException:
-            warn(MsProfCommonConstant.COMMON_FILE_NAME,
-                 'Analysis data in "%s" failed. Maybe the data is incomplete.' % result_dir)
-            return
+        self._prepare_export(result_dir)
         try:
             for event in self.list_map.get('export_type_list', []):
                 if not self.list_map.get('devices_list', []):
