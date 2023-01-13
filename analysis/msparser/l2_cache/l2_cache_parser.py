@@ -85,7 +85,7 @@ class L2CacheParser(IParser, MsMultiProcess):
         if not self._file_list:
             return
         if self._file_list.get(DataTag.L2CACHE) and self._check_l2_cache_event_valid():
-            logging.info("start parsing l2 cache data, files: %s, device id: %s, l2 cache events: %s",
+            logging.info("start parsing l2 cache data, files: %s, l2 cache events: %s",
                          str(self._file_list.get(DataTag.L2CACHE)),
                          ",".join(self._l2_cache_events))
             self.parse()
