@@ -71,12 +71,15 @@ class GeInfoParser(IParser, MsMultiProcess):
         ge_data = self.ge_info_data.get(db_name, [])
         ge_step_data = self.ge_info_data.get(DBNameConstant.TABLE_GE_STEP, [])
         dynamic_model_dict = {}
+        static_model_list = []
         if ge_data:
             # check whether include dynamic shape model
             for datum in ge_data:
                 if datum[index_space.get(MsProfCommonConstant.INDEX_ID)] > 0:
                     dynamic_model_dict.setdefault(
                         datum[index_space.get(MsProfCommonConstant.MODEL_ID)], []).append(datum)
+                else:
+                    static_model_list.append(datum)
         # exist dynamic shape model
         if dynamic_model_dict:
             if not ge_step_data:
@@ -92,6 +95,7 @@ class GeInfoParser(IParser, MsMultiProcess):
                     for task_list in dynamic_model_dict.values()
                     for task in task_list
                 ]
+                self.ge_info_data[db_name].extend(static_model_list)
 
     def remove_incomplete_index(self: any, dynamic_model_dict: dict, ge_step_data: list, index_space: dict) -> None:
         """
@@ -124,12 +128,12 @@ class GeInfoParser(IParser, MsMultiProcess):
         """
         check whether ge step info have a complete iteration for any model
         """
-        record_dict = {}
+        record_set = set()
         for ge_step in ge_step_data:
             model_index_key = (ge_step[self.GE_STEP.get(MsProfCommonConstant.MODEL_ID)],
                                ge_step[self.GE_STEP.get(MsProfCommonConstant.INDEX_ID)])
-            if model_index_key not in record_dict:
-                record_dict[model_index_key] = 1
+            if model_index_key not in record_set:
+                record_set.add(model_index_key)
             else:
                 return True
         return False

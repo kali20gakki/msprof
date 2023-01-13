@@ -130,7 +130,7 @@ class DataParsersConfig(MetaConfig):
         ]
         , 'MsprofTxParser': [
             ('path', 'msparser.msproftx.msproftx_parser'),
-            ('chip_model', '0,1,2,3,4,5')
+            ('chip_model', '0,1,2,3,4,5,7')
         ]
         , 'RunTimeApiParser': [
             ('path', 'msparser.runtime.runtime_api_parser'),
