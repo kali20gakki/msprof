@@ -53,8 +53,10 @@ int ParamsAdapter::CheckListInit()
             SetDcBlackSwitch();
             break;
         case PlatformType::CHIP_V4_1_0:
-        case PlatformType::CHIP_V4_2_0:
             SetCloudV2BlackSwitch();
+            break;
+        case PlatformType::CHIP_V4_2_0:
+            SetMiniV2BlackSwitch();
             break;
         default:
             return PROFILING_FAILED;
@@ -127,6 +129,17 @@ void ParamsAdapter::SetCloudV2BlackSwitch()
     std::vector<InputCfg>({
         INPUT_CFG_COM_AI_VECTOR, INPUT_CFG_COM_AIV_FREQ, INPUT_CFG_COM_AIV_MODE,
         INPUT_CFG_COM_AIV_METRICS
+        }).swap(blackSwitch_);
+    return;
+}
+
+void ParamsAdapter::SetMiniV2BlackSwitch()
+{
+    std::vector<InputCfg>({
+        INPUT_CFG_COM_AI_VECTOR, INPUT_CFG_COM_AIV_FREQ, INPUT_CFG_COM_AIV_MODE,
+        INPUT_CFG_COM_SYS_INTERCONNECTION, INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ,
+        INPUT_CFG_COM_AIV_METRICS, INPUT_CFG_COM_POWER, INPUT_CFG_COM_BIU, INPUT_CFG_COM_BIU_FREQ,
+        INPUT_CFG_HOST_SYS, INPUT_CFG_HOST_SYS_PID, INPUT_CFG_HOST_SYS_USAGE, INPUT_CFG_HOST_SYS_USAGE_FREQ
         }).swap(blackSwitch_);
     return;
 }

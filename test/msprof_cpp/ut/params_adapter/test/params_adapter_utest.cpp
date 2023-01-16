@@ -44,7 +44,9 @@ TEST_F(ParamsAdapterUtest, CheckListInit)
         .then(returnValue(PlatformType::MDC_TYPE))
         .then(returnValue(PlatformType::LHISI_TYPE))
         .then(returnValue(PlatformType::DC_TYPE))
-        .then(returnValue(PlatformType::CHIP_V4_1_0));
+        .then(returnValue(PlatformType::CHIP_V4_1_0))
+        .then(returnValue(PlatformType::CHIP_V4_2_0));
+    EXPECT_EQ(PROFILING_SUCCESS, ret);
     EXPECT_EQ(PROFILING_SUCCESS, ret);
     EXPECT_EQ(PROFILING_SUCCESS, ret);
     EXPECT_EQ(PROFILING_SUCCESS, ret);
