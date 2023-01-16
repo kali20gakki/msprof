@@ -99,6 +99,7 @@ set(msprofilerCpp
     common/platform/platform.cpp
     common/platform/platform_adapter_interface.cpp
     common/platform/platform_adapter_mini.cpp
+    common/platform/platform_adapter_miniv2.cpp
     common/platform/platform_adapter_mdc.cpp
     common/platform/platform_adapter_lhisi.cpp
     common/platform/platform_adapter_dc.cpp

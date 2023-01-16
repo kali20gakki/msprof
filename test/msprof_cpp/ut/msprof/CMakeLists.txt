@@ -68,6 +68,7 @@ set(profilerSrcList
 	${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter_lhisi.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter_mdc.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter_mini.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter_miniv2.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/msprof/msproftx/src/msprof_tx_manager.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/msprof/msproftx/src/msprof_tx_reporter.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/msprof/msproftx/src/msprof_stamp_pool.cpp
