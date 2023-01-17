@@ -168,7 +168,7 @@ class TestCalculateRts(unittest.TestCase):
                 mock.patch(NAMESPACE + ".CalculateAiCoreData.add_fops_header"), \
                 mock.patch(NAMESPACE + ".generate_config", return_value=sample_config):
             res_1 = get_metrics_from_sample_config('')
-        self.assertEqual(len(res_1), 9)
+        self.assertEqual(len(res_1), 15)
 
     def test_get_metrics_from_sample_config_2(self):
         sample_config["ai_core_metrics"] = "a"

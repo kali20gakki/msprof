@@ -97,17 +97,23 @@ class FftsPlusPmuBean(StructDecoder):
         """
         get if ffts aic data
         """
-        return bool(self._ffts_type == 4 and self.subtask_type == 0)
+        return self.is_ffts_plus_type() and self.subtask_type == 0
 
     def is_ffts_mix_aic_data(self):
         """
         get if ffts mix aic
         """
-        return bool(self._ffts_type == 4 and self.subtask_type == 6) or bool(self._ffts_type == 5)
+        return (self.is_ffts_plus_type() and self.subtask_type == 6) or self._ffts_type == 5
 
     def is_tradition_aic(self):
         """
         get if tradition aic
         """
-        return bool(self._ffts_type == 0)
+        return self._ffts_type == 0
+
+    def is_ffts_plus_type(self):
+        """
+        get if ffts plus type
+        """
+        return self._ffts_type == 4
 

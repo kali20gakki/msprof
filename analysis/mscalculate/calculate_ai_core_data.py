@@ -7,6 +7,7 @@ import logging
 from common_func.config_mgr import ConfigMgr
 from common_func.constant import Constant
 from common_func.info_conf_reader import InfoConfReader
+from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.platform.chip_manager import ChipManager
 
@@ -30,6 +31,26 @@ class CalculateAiCoreData:
         else:
             vector_num = [64.0, 64.0, 32.0]
         return vector_num
+
+    @staticmethod
+    def add_pipe_time(pmu_dict: dict, total_time: float, metrics_type: str):
+        """
+        calculate pipe time data
+        :return: pmu dict
+        """
+        if metrics_type not in {Constant.PMU_PIPE, Constant.PMU_PIPE_EXCT}:
+            return pmu_dict
+        res_dict = {}
+        pipe_pmu_list = Constant.AICORE_METRICS_LIST.get(Constant.PMU_PIPE).split(",")[:-1]
+        pipe_exct_pmu_list = Constant.AICORE_METRICS_LIST.get(Constant.PMU_PIPE_EXCT).split(",")[:-1]
+        valid_metrics_set = set(pipe_pmu_list + pipe_exct_pmu_list)
+        for pmu_key, pmu_value in pmu_dict.items():
+            if pmu_key in valid_metrics_set and len(pmu_key) > NumberConstant.RATIO_NAME_LEN:
+                res_dict["{}time".format(pmu_key[:-NumberConstant.RATIO_NAME_LEN])] = [total_time * pmu_value[0]]
+                res_dict[pmu_key] = pmu_value
+            else:
+                res_dict[pmu_key] = pmu_value
+        return res_dict
 
     @staticmethod
     def update_fops_data(field: str, algo: str) -> str:
@@ -130,6 +151,14 @@ class CalculateAiCoreData:
             cube_fops = ai_core_profiling_events["mac_fp16_ratio"][-1] * task_cyc * 16 * 16 * 16 * 2 + \
                         ai_core_profiling_events["mac_int8_ratio"][-1] * task_cyc * 16 * 16 * 32 * 2
             ai_core_profiling_events.setdefault("cube_fops", []).append(cube_fops)
+
+        names = ["mac_fp16_ratio", "mac_int8_ratio", "fixpipe_ratio"]
+        if all(map(lambda name: name in events_name_list, names)):
+            mac_ratio = ai_core_profiling_events["mac_fp16_ratio"][-1] + ai_core_profiling_events["mac_int8_ratio"][-1]
+            ai_core_profiling_events.pop("cube_fops")
+            ai_core_profiling_events.pop("mac_fp16_ratio")
+            ai_core_profiling_events.pop("mac_int8_ratio")
+            ai_core_profiling_events.setdefault("mac_ratio", []).append(mac_ratio)
 
         names = [
             "mte1_iq_full_ratio", "mte2_iq_full_ratio", "mte3_iq_full_ratio",

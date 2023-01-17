@@ -27,6 +27,8 @@
     "mac_ratio",
     "scalar_time(us)",
     "scalar_ratio",
+    "fixpipe_time(us)",
+    "fixpipe_ratio",
     "mte1_time(us)",
     "mte1_ratio",
     "mte2_time(us)",
