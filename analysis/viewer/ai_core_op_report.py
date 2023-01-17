@@ -253,7 +253,7 @@ class AiCoreOpReport:
 
     @classmethod
     def delete_useless_cols(cls: any, headers: list, summary_data: list) -> list:
-        if ChipManager().is_chip_v4():
+        if ChipManager().is_stars_chip():
             return summary_data
         for header in cls.ADDITION_HEADER:
             if header not in headers:
