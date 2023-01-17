@@ -11,7 +11,7 @@ from common_func.msvp_constant import MsvpConstant
 from common_func.utils import Utils
 
 
-def get_l2_cache_data(db_path: str, table_name: str, device_id: str, unused_cols: list) -> tuple:
+def get_l2_cache_data(db_path: str, table_name: str, unused_cols: list) -> tuple:
     """
     get l2 cache data
     """
@@ -19,21 +19,10 @@ def get_l2_cache_data(db_path: str, table_name: str, device_id: str, unused_cols
     if not (conn and cursor) or not DBManager.judge_table_exist(cursor, table_name):
         return MsvpConstant.MSVP_EMPTY_DATA
     used_cols = DBManager.get_filtered_table_headers(cursor, table_name, *unused_cols)
-    data = GetTableData.get_table_data_for_device(
-        cursor, table_name, device_id, ",".join(used_cols))
-    if isinstance(conn, sqlite3.Connection):
-        conn.close()
+    data = DBManager.fetch_all_data(cursor, "select {} from {}".format(",".join(used_cols), table_name))
     modify_l2_cache_headers(used_cols)
-    return used_cols, data, len(data)
-
-
-def get_l2_cache_sample_data(db_path: str, table_name: str, header: list):
-    conn, cursor = DBManager.check_connect_db_path(db_path)
-    if not (conn and cursor) or not DBManager.judge_table_exist(cursor, table_name):
-        return MsvpConstant.MSVP_EMPTY_DATA
-    data = DBManager.fetch_all_data(cursor, "select * from {}".format(table_name))
     DBManager.destroy_db_connect(conn, cursor)
-    return header, data, len(data)
+    return used_cols, data, len(data)
 
 
 def modify_l2_cache_headers(headers: list) -> None:
