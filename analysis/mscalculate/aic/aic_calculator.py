@@ -7,28 +7,28 @@ import logging
 import os
 
 from analyzer.scene_base.profiling_scene import ProfilingScene
-from common_func.common import generate_config
 from common_func.config_mgr import ConfigMgr
+from common_func.db_name_constant import DBNameConstant
+from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.path_manager import PathManager
-from common_func.db_name_constant import DBNameConstant
 from common_func.utils import Utils
 from framework.offset_calculator import FileCalculator
-from framework.offset_calculator import OffsetCalculator
 from framework.offset_calculator import FileReverseCalculator
+from framework.offset_calculator import OffsetCalculator
 from mscalculate.aic.aic_utils import AicPmuUtils
+from mscalculate.aic.pmu_calculator import PmuCalculator
 from mscalculate.calculate_ai_core_data import CalculateAiCoreData
-from mscalculate.interface.icalculator import ICalculator
 from msmodel.aic.aic_pmu_model import AicPmuModel
-from msmodel.iter_rec.iter_rec_model import HwtsIterModel
 from msmodel.ge.ge_info_calculate_model import GeInfoModel
+from msmodel.iter_rec.iter_rec_model import HwtsIterModel
 from profiling_bean.db_dto.step_trace_dto import IterationRange
 from profiling_bean.prof_enum.data_tag import DataTag
 from profiling_bean.struct_info.aic_pmu import AicPmuBean
 
 
-class AicCalculator(ICalculator, MsMultiProcess):
+class AicCalculator(PmuCalculator, MsMultiProcess):
     """
     class used to parse aicore data by iter
     """
@@ -36,14 +36,14 @@ class AicCalculator(ICalculator, MsMultiProcess):
 
     def __init__(self: any, file_list: dict, sample_config: dict) -> None:
         super().__init__(sample_config)
-        self._sample_config = sample_config
         self._project_path = sample_config.get(StrConstant.SAMPLE_CONFIG_PROJECT_PATH)
         self._iter_model = HwtsIterModel(self._project_path)
         self.ge_info_model = GeInfoModel(self._project_path)
+        self._sample_json = ConfigMgr.read_sample_config(self._project_path)
         self._file_list = file_list.get(DataTag.AI_CORE, [])
         self._aic_data_list = []
         self._file_list.sort(key=lambda x: int(x.split("_")[-1]))
-        self._iter_range = self._sample_config.get(StrConstant.PARAM_ITER_ID)
+        self._iter_range = self.sample_config.get(StrConstant.PARAM_ITER_ID)
         self.core_type = 0
         self.aic_discard_num_from_tail = 0
         self.repeat_aic_times = 0
@@ -105,22 +105,35 @@ class AicCalculator(ICalculator, MsMultiProcess):
             logging.info(f'There exists {repeat_times} aicore datum having same task and stream id in last iteration!')
         return repeat_times
 
-    def calculate_pmu_list(self: any, data: any, profiling_events: list, data_list: list) -> None:
+    def calculate_pmu_list(self: any, data: any, profiling_events: list, data_list: list, total_time: float) -> None:
         """
         calculate pmu
-        :param data: pmu data
         :param profiling_events: pmu events list
+        :param data: pmu data
         :param data_list: out args
+        :param total_time: total time
         :return:
         """
         pmu_list = {}
-        _, pmu_list = CalculateAiCoreData(self._project_path).compute_ai_core_data(
+        aic_calculator = CalculateAiCoreData(self._project_path)
+        _, pmu_list = aic_calculator.compute_ai_core_data(
             Utils.generator_to_list(profiling_events), pmu_list, data.total_cycle, data.pmu_list)
 
+        pmu_list = aic_calculator.add_pipe_time(pmu_list, total_time, self._sample_json.get('ai_core_metrics'))
         AicPmuUtils.remove_redundant(pmu_list)
-        data_list.append(
-            [data.total_cycle, *list(itertools.chain.from_iterable(pmu_list.values())), data.task_id, data.stream_id,
-             self.core_type])
+        data_list.append([
+                total_time, data.total_cycle, *list(itertools.chain.from_iterable(pmu_list.values())), data.task_id,
+                data.stream_id, self.core_type
+            ])
+
+    def calculate_total_time(self: any, data: AicPmuBean, data_type: str = 'aic'):
+        total_time = 0
+        core_num = self._core_num_dict.get(data_type)
+        block_dim = self._get_current_block('block_dim', data)
+        if all([block_dim, core_num, int(self._freq)]):
+            total_time = data.total_cycle * 1000 / int(self._freq) / block_dim * \
+                         ((block_dim + core_num - 1) // core_num)
+        return round(total_time, NumberConstant.DECIMAL_ACCURACY)
 
     def save(self: any) -> None:
         """
@@ -138,12 +151,12 @@ class AicCalculator(ICalculator, MsMultiProcess):
         entrance or ai core calculator
         :return: None
         """
-        config = generate_config(PathManager.get_sample_json_path(self._project_path))
-        if config.get('ai_core_profiling_mode') == StrConstant.AIC_SAMPLE_BASED_MODE:
+        if self._sample_json.get('ai_core_profiling_mode') == StrConstant.AIC_SAMPLE_BASED_MODE:
             return
 
         if not self._file_list:
             return
+        self.init_params()
         self.calculate()
         self.save()
 
@@ -192,8 +205,8 @@ class AicCalculator(ICalculator, MsMultiProcess):
                 self._parse(_offset_calculator.pre_process(_aic_reader, os.path.getsize(_file)))
 
     def _parse(self: any, all_log_bytes: bytes) -> None:
-        aic_pmu_events = AicPmuUtils.get_pmu_events(
-            ConfigMgr.read_sample_config(self._project_path).get('ai_core_profiling_events'))
+        aic_pmu_events = AicPmuUtils.get_pmu_events(self._sample_json.get('ai_core_profiling_events'))
         for log_data in Utils.chunks(all_log_bytes, self.AICORE_LOG_SIZE):
             _aic_pmu_log = AicPmuBean.decode(log_data)
-            self.calculate_pmu_list(_aic_pmu_log, aic_pmu_events, self._aic_data_list)
+            total_time = self.calculate_total_time(_aic_pmu_log)
+            self.calculate_pmu_list(_aic_pmu_log, aic_pmu_events, self._aic_data_list, total_time)
