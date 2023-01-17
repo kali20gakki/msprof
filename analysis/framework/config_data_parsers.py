@@ -37,7 +37,7 @@ class ConfigDataParsers:
                 continue
             parser_level = cls._load_parser_level(conf_parser_read, _section)
             parsers_dict.setdefault(parser_level, []).append(cls._load_parser_module(conf_parser_read, _section))
-        parsers_dict = dict(sorted(parsers_dict.items()))
+        parsers_dict = dict(sorted(parsers_dict.items(), key=lambda x: int(x[0])))
         return parsers_dict
 
     @classmethod
