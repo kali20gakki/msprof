@@ -42,7 +42,7 @@ class AiCoreOpReport:
                           "aic_vec_fp32_ratio", "aic_vec_fp16_ratio", "aic_vec_int32_ratio",
                           "aic_vec_misc_ratio", "aic_vec_fp16_128lane_ratio", "aic_vec_fp16_64lane_ratio",
                           "aic_vec_bankgroup_cflt_ratio", "aic_vec_bank_cflt_ratio", "aic_vec_resc_cflt_ratio"]
-    ADDITION_HEADER = ["Context ID", "Mix Block Dim", "aiv_time"]
+    ADDITION_HEADER = ["Context ID", "Mix Block Dim", "aiv_time", "aiv_total_time"]
     TENSOR_HEADERS = [
         "Input Shapes", "Input Data Types", "Input Formats", "Output Shapes", "Output Data Types", "Output Formats"
     ]
@@ -122,7 +122,8 @@ class AiCoreOpReport:
                 all_float_cols.append(val.replace("(GB/s)", ""))
                 all_float_cols.append(val.replace("_ratio", "_time"))
             all_float_cols.append("total_time")
-            all_float_cols.append("aiv_time")
+            all_float_cols.append("aic_total_time")
+            all_float_cols.append("aiv_total_time")
             for index, col in enumerate(columns):
                 if col in all_float_cols:
                     # keep six decimal places for ai core float data
