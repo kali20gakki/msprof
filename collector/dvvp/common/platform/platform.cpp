@@ -33,7 +33,11 @@ Platform::~Platform()
 
 void Platform::Init()
 {
-    driverAvailable_ = (PlatformInitByDriver() == PROFILING_SUCCESS) ? true : false;
+    uint32_t platformType;
+    driverAvailable_ = (analysis::dvvp::driver::DrvGetPlatformInfo(platformType) == PROFILING_SUCCESS) ? true : false;
+    if (driverAvailable_) {
+        runSide_ = platformType;
+    }
     isHelperHostSide_ = analysis::dvvp::driver::DrvCheckIfHelperHost();
 }
 
