@@ -20,6 +20,20 @@ class TestCalculateAiCoreData(unittest.TestCase):
             key = CalculateAiCoreData('123')
             key.add_fops_header(metric_key, metrics)
 
+    def test_add_pipe_time_for(self):
+        key = CalculateAiCoreData('')
+        pmu_dict = {'vec_ratio': [0], 'mac_ratio': [0], 'scalar_ratio': [0], 'mte1_ratio': [0], 'mte2_ratio': [0],
+                    'mte3_ratio': [0], 'icache_req_ratio': [0], 'icache_miss_rate': [0]}
+        result = key.add_pipe_time(pmu_dict, 0, 'PipeUtilization')
+        self.assertEqual(len(result.values()), 14)
+
+    def test_add_pipe_time_if_not(self):
+        pmu_dict = {'vec_ratio': [0], 'mac_ratio': [0.8], 'scalar_ratio': [0.11], 'mte1_ratio': [0], 'mte2_ratio': [0],
+                    'mte3_ratio': [0.08], 'icache_req_ratio': [0], 'icache_miss_rate': [0]}
+        key = CalculateAiCoreData('')
+        result = key.add_pipe_time(pmu_dict, 1000, 'PipeUtilization')
+        self.assertEqual(len(result.values()), 14)
+
     def test_update_fops_data_1(self):
         field = "vector_fops"
         algo = "r4b_num, r4e_num, r4f_num"
@@ -60,7 +74,8 @@ class TestCalculateAiCoreData(unittest.TestCase):
                 mock.patch(NAMESPACE + '.CalculateAiCoreData._CalculateAiCoreData__cal_addition'), \
                 mock.patch(NAMESPACE + '.logging.error'):
             key = CalculateAiCoreData('123')
-            check = (['vec_ratio', 'ub_read_bw(GB/s)', 'abc'], {'bw': [], 'vec_ratio': [1.0], 'ub_read_bw(GB/s)': [0.0], 'abc': [1421]})
+            check = (['vec_ratio', 'ub_read_bw(GB/s)', 'abc'],
+                     {'bw': [], 'vec_ratio': [1.0], 'ub_read_bw(GB/s)': [0.0], 'abc': [1421]})
             result = key.compute_ai_core_data(events_name_list, ai_core_profiling_events, task_cyc, pmu_data)
         self.assertEqual(result, check)
 
@@ -87,12 +102,10 @@ class TestCalculateAiCoreData(unittest.TestCase):
 
         self.assertEqual(result, [64.0, 16.0, 16.0])
 
-
         ChipManager().chip_id = ChipModel.CHIP_V2_1_0
         key = CalculateAiCoreData('123')
         result = key.get_vector_num()
         self.assertEqual(result, [64.0, 64.0, 32.0])
-
 
     def test_add_vector_data(self):
         events_name_list = ["vec_fp16_128lane_ratio", "vec_fp16_64lane_ratio", "vec_fp32_ratio",

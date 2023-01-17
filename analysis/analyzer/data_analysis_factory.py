@@ -7,7 +7,6 @@ from analyzer.create_op_counter_db import MergeOPCounter
 from analyzer.scene_base.op_counter_op_scene import OpCounterOpScene
 from analyzer.scene_base.op_summary_op_scene import OpSummaryOpScene
 from analyzer.scene_base.profiling_scene import ProfilingScene
-from analyzer.update_aicore import UpdateAICoreData
 from common_func.constant import Constant
 from mscalculate.runtime.calculate_op_task_scheduler import CalculateOpTaskScheduler
 from mscalculate.runtime.calculate_task_scheduler import CalculateTaskScheduler
@@ -18,9 +17,9 @@ class DataAnalysisFactory:
     analysis profiling data with different scene
     """
     EXPORT_CLASS_NEED_MAP = {
-        Constant.STEP_INFO: [UpdateAICoreData, CalculateTaskScheduler, ParseAiCoreOpSummary, MergeOPCounter],
-        Constant.MIX_OP_AND_GRAPH: [UpdateAICoreData, CalculateTaskScheduler, ParseAiCoreOpSummary, MergeOPCounter],
-        Constant.SINGLE_OP: [UpdateAICoreData, CalculateOpTaskScheduler, OpSummaryOpScene, OpCounterOpScene]
+        Constant.STEP_INFO: [CalculateTaskScheduler, ParseAiCoreOpSummary, MergeOPCounter],
+        Constant.MIX_OP_AND_GRAPH: [CalculateTaskScheduler, ParseAiCoreOpSummary, MergeOPCounter],
+        Constant.SINGLE_OP: [CalculateOpTaskScheduler, OpSummaryOpScene, OpCounterOpScene]
     }
 
     def __init__(self: any, sample_json: dict) -> None:

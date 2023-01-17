@@ -65,7 +65,7 @@ class AicPmuUtils:
         :param key_list:
         :return:
         """
-        remove_list = ["total_time(ms)", "icache_req_ratio", "vec_fp16_128lane_ratio", "vec_fp16_64lane_ratio"]
+        remove_list = ["icache_req_ratio", "vec_fp16_128lane_ratio", "vec_fp16_64lane_ratio"]
         unused_list = [
             ["ub_read_bw_mte(GB/s)", "ub_write_bw_mte(GB/s)", "l2_write_bw(GB/s)", "main_mem_write_bw(GB/s)"],
             ["ub_read_bw_mte(GB/s)", "ub_write_bw_mte(GB/s)"],

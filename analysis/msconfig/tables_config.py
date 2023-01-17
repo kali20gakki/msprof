@@ -656,26 +656,17 @@ class TablesConfig(MetaConfig):
             ('task_type', 'INTEGER,null')
         ]
         , 'L2CacheParseMap': [
-            ('device_id', 'INTEGER,null'),
             ('task_type', 'INTEGER,null'),
             ('stream_id', 'INTEGER,null'),
             ('task_id', 'INTEGER,null'),
             ('event_lists', 'TEXT,null')
         ]
         , 'L2CacheSummaryMap': [
-            ('device_id', 'INTEGER,null'),
             ('task_type', 'INTEGER,null'),
             ('stream_id', 'INTEGER,null'),
             ('task_id', 'INTEGER,null'),
             ('hit_rate', 'REAL'),
             ('victim_rate', 'REAL')
-        ]
-        , 'L2CacheSampleMap': [
-            ('read_count', 'INTEGER, null'),
-            ('write_count', 'INTEGER, null'),
-            ('victim', 'INTEGER, null'),
-            ('allocate', 'INTEGER, null'),
-            ('timestamp', 'INTEGER, null')
         ]
         , 'HCCLAllReduceMap': [
             ('op_name', 'TEXT, null'),

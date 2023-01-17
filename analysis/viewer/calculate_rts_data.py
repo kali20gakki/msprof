@@ -440,6 +440,13 @@ def get_metrics_from_sample_config(project_path: str,
                 Utils.generator_to_list(item[0] for item in config_file_obj(file_name='ai_core').items('metrics')):
             error(CalculateRtsDataConst.FILE_NAME, 'Invalid metric {} .'.format(tmp))
             call_sys_exit(NumberConstant.ERROR)
+    new_metrics = []
+    if sample_config.get(metrics_type) in {Constant.PMU_PIPE, Constant.PMU_PIPE_EXCT}:
+        for metric in sample_metrics[:-1]:
+            new_metrics.append(metric[:-NumberConstant.RATIO_NAME_LEN] + "time")
+            new_metrics.append(metric)
+        new_metrics.append(sample_metrics[-1])
+    sample_metrics = new_metrics if new_metrics else sample_metrics
     metrics.extend(sample_metrics)
     cal = CalculateAiCoreData(project_path)
     cal.add_fops_header(metrics_type, metrics)
@@ -516,13 +523,13 @@ def sql_insert_metric_summary_table(metrics: list, freq: float, have_step_info: 
     metrics_res = []
     for metric in metrics:
         replaced_metric = metric.replace("(GB/s)", "(gb/s)")
-        replaced_field = field_dict[replaced_metric].replace("freq", str(freq))
+        replaced_field = field_dict.get(replaced_metric, '0').replace("freq", str(freq))
         metrics_res.append((metric, replaced_field))
     field_dict = OrderedDict(metrics_res)
     for field in field_dict:
         algo = field_dict[field]
         algos.append(algo)
-    algo_lst = Utils.generator_to_list("cast(" + algo + " as decimal(8,2))" for algo in algos)
+    algo_lst = Utils.generator_to_list("cast(" + algo + " as decimal(8,2)) " for algo in algos)
     sql = "SELECT " + ",".join(algo_lst) \
           + ", task_id, stream_id, '0' FROM EventCount"
     if have_step_info:

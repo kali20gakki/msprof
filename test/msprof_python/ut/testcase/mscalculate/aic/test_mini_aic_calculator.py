@@ -24,6 +24,7 @@ class TestMiniMiniAicCalculator(unittest.TestCase):
     def test_parse_ai_core_pmu_event(self):
         with mock.patch(NAMESPACE + '.generate_config',
                         return_value={'ai_core_profiling_events': '0x64,0x65,0x66'}), \
+                mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
                 mock.patch(NAMESPACE + '.AicPmuUtils.get_pmu_event_name'),\
                 mock.patch(NAMESPACE + '.PathManager.get_sample_json_path', return_value='test'):
             check = MiniAicCalculator(self.file_list, CONFIG)
@@ -32,17 +33,20 @@ class TestMiniMiniAicCalculator(unittest.TestCase):
     def test_insert_metric_summary(self):
         InfoConfReader()._info_json = {'DeviceInfo': [{'aic_frequency': 115}]}
         with mock.patch(NAMESPACE + '.MiniAicCalculator._parse_ai_core_pmu_event'), \
+                mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}),\
                 mock.patch(NAMESPACE + '.insert_metric_summary_table'):
             check = MiniAicCalculator(self.file_list, CONFIG)
             check.insert_metric_summary()
 
     def test_op_insert_metric_summary(self):
         with mock.patch(NAMESPACE + '.PathManager.get_db_path', return_value='test'), \
+                mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}),\
                 mock.patch(NAMESPACE + '.DBManager.check_tables_in_db', return_value=True):
             check = MiniAicCalculator(self.file_list, CONFIG)
             check.op_insert_metric_summary()
         InfoConfReader()._info_json = {'DeviceInfo': [{'aic_frequency': 115}]}
         with mock.patch(NAMESPACE + '.PathManager.get_db_path', return_value='test'), \
+                mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}),\
                 mock.patch(NAMESPACE + '.DBManager.check_tables_in_db', return_value=False), \
                 mock.patch(NAMESPACE + '.MiniAicCalculator._parse_ai_core_pmu_event'), \
                 mock.patch(NAMESPACE + '.insert_metric_summary_table'):
@@ -51,12 +55,14 @@ class TestMiniMiniAicCalculator(unittest.TestCase):
 
     def test_ms_run(self):
         with mock.patch(NAMESPACE + '.generate_config', return_value={'ai_core_profiling_mode': 'sample-based'}), \
+                mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}),\
                 mock.patch(NAMESPACE + '.PathManager.get_sample_json_path', return_value='test'):
             check = MiniAicCalculator(self.file_list, CONFIG)
             check.ms_run()
         ProfilingScene()._scene = "step_info"
         with mock.patch(NAMESPACE + '.generate_config', return_value={'ai_core_profiling_mode': 'task-based'}), \
                 mock.patch(NAMESPACE + '.PathManager.get_sample_json_path', return_value='test'), \
+                mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}),\
                 mock.patch(NAMESPACE + '.MiniAicCalculator.insert_metric_summary', return_value='test'):
             check = MiniAicCalculator(self.file_list, CONFIG)
             check.ms_run()
@@ -64,6 +70,7 @@ class TestMiniMiniAicCalculator(unittest.TestCase):
         ProfilingScene()._scene = "single_op"
         with mock.patch(NAMESPACE + '.generate_config', return_value={'ai_core_profiling_mode': 'task-based'}), \
                 mock.patch(NAMESPACE + '.PathManager.get_sample_json_path', return_value='test'), \
+                mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}),\
                 mock.patch(NAMESPACE + '.MiniAicCalculator.op_insert_metric_summary', return_value='test'):
             check = MiniAicCalculator(self.file_list, CONFIG)
             check.ms_run()

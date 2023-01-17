@@ -30,6 +30,7 @@ class L2CacheCalculator(ICalculator, MsMultiProcess):
     REQUEST_EVENTS = "request_events"
     HIT_EVENTS = "hit_events"
     VICTIM_EVENTS = "victim_events"
+    NO_EVENT_LENGTH = 3
 
     def __init__(self: any, file_list: dict, sample_config: dict) -> None:
         super().__init__(sample_config)
@@ -140,7 +141,7 @@ class L2CacheCalculator(ICalculator, MsMultiProcess):
         calculate hit rate and victim rate.
         """
         for _index, l2_cache_event_item in enumerate(self._l2_cache_ps_data):
-            l2_cache_event_item = l2_cache_event_item[len(l2_cache_event_item) - len(self._l2_cache_events):]
+            l2_cache_event_item = l2_cache_event_item[self.NO_EVENT_LENGTH:]
             request_event_value = sum(int(l2_cache_event_item[idx])
                                       for idx in self._event_indexes.get(self.REQUEST_EVENTS))
             hit_event_value = sum(int(l2_cache_event_item[idx])
@@ -151,7 +152,7 @@ class L2CacheCalculator(ICalculator, MsMultiProcess):
             hit_rate = HitRateMetric(hit_event_value, request_event_value).run_rules()
             victim_rate = VictimRateMetric(victim_event_value, request_event_value).run_rules()
 
-            tmp_list = self._l2_cache_ps_data[_index][: -len(self._l2_cache_events)]
+            tmp_list = self._l2_cache_ps_data[_index][: self.NO_EVENT_LENGTH]
             tmp_list.extend([hit_rate, victim_rate])
             self._l2_cache_cal_data.append(tmp_list)
 

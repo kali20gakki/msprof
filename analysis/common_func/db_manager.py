@@ -111,8 +111,9 @@ class DBManager:
         if not isinstance(cursor, sqlite3.Cursor):
             return False
         try:
-            return cursor.execute("select count(*) from sqlite_master where type='table' and "
-                                  "name='{}'".format(table_name)).fetchone()[0]
+            cursor.execute("select count(*) from sqlite_master where type='table' and "
+                           "name=?", (table_name,))
+            return cursor.fetchone()[0]
         except sqlite3.Error as err:
             logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
             return False

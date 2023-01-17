@@ -32,7 +32,6 @@ class L2CacheParser(IParser, MsMultiProcess):
         for event in self.sample_config.get("l2CacheTaskProfilingEvents", "").split(","):
             self._l2_cache_events.append(event.strip().lower())
         self._l2_cache_data = []
-        self._device_id = self.sample_config.get("device_id")
 
     @staticmethod
     def _check_file_complete(file_path: str) -> int:
@@ -72,7 +71,6 @@ class L2CacheParser(IParser, MsMultiProcess):
                         _all_l2_cache_data[
                         _index * StructFmt.L2_CACHE_DATA_SIZE:(_index + 1) * StructFmt.L2_CACHE_DATA_SIZE])
                     self._l2_cache_data.append([
-                        self._device_id,
                         l2_cache_data_bean.task_type,
                         l2_cache_data_bean.stream_id,
                         l2_cache_data_bean.task_id,
@@ -87,9 +85,8 @@ class L2CacheParser(IParser, MsMultiProcess):
         if not self._file_list:
             return
         if self._file_list.get(DataTag.L2CACHE) and self._check_l2_cache_event_valid():
-            logging.info("start parsing l2 cache data, files: %s, device id: %s, l2 cache events: %s",
+            logging.info("start parsing l2 cache data, files: %s, l2 cache events: %s",
                          str(self._file_list.get(DataTag.L2CACHE)),
-                         self._device_id,
                          ",".join(self._l2_cache_events))
             self.parse()
             self.save()
