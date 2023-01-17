@@ -418,8 +418,10 @@ def add_aicore_units(header: list):
     :return: headers
     """
     for index, item in enumerate(header):
-        if item == "total_time":
+        if item in {"total_time", "aic_total_time"}:
             item = "aicore_time"
+        if item == "aiv_total_time":
+            item = "aiv_time"
         if "time" in item:
             item += "(us)"
         if StrConstant.BANDWIDTH in item and "(GB/s)" not in item:
