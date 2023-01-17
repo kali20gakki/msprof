@@ -119,10 +119,10 @@ class CoreCpuReduceViewer:
 
     @staticmethod
     def _get_aicore_sql(sql_path: str) -> str:
-        total_cycles = 'total_cycles'
+        total_cycles = 'total_time, total_cycles'
         if ChipManager().is_stars_chip():
-            total_cycles = 'aic_total_cycles, aiv_total_cycles'
-        sql = "SELECT stream_id, task_id, total_time, {total_cycles} FROM {} ".format(
+            total_cycles = 'aic_total_time, aic_total_cycles, aiv_total_time, aiv_total_cycles'
+        sql = "SELECT stream_id, task_id, {total_cycles} FROM {} ".format(
             DBNameConstant.TABLE_METRICS_SUMMARY, total_cycles=total_cycles)
         if not os.path.exists(os.path.join(sql_path, DBNameConstant.DB_GE_INFO)):
             sql = "SELECT stream_id, task_id, {total_cycles} FROM {} ".format(

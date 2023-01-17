@@ -7,24 +7,22 @@ from common_func.common import generate_config
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
-from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.path_manager import PathManager
 from common_func.utils import Utils
 from mscalculate.aic.aic_utils import AicPmuUtils
-from mscalculate.interface.icalculator import ICalculator
+from mscalculate.aic.pmu_calculator import PmuCalculator
 from viewer.calculate_rts_data import insert_metric_summary_table
 
 
-class MiniAicCalculator(ICalculator, MsMultiProcess):
+class MiniAicCalculator(PmuCalculator, MsMultiProcess):
     """
     class used to calculator aic pmu of mini
     """
 
     def __init__(self: any, file_list: dict, sample_config: dict) -> None:
         super().__init__(sample_config)
-        self._sample_config = sample_config
         self._file_list = file_list
         self._project_path = sample_config.get(StrConstant.SAMPLE_CONFIG_PROJECT_PATH)
         self._iter_range = sample_config.get(StrConstant.PARAM_ITER_ID)

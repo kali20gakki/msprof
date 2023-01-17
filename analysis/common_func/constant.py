@@ -91,6 +91,10 @@ class PmuCalculateFunc:
         return PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc)
 
     @staticmethod
+    def fixpipe_ratio(pmu, task_cyc):
+        return PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc)
+
+    @staticmethod
     def mte1_ratio(pmu, task_cyc):
         return PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc)
 
@@ -266,6 +270,14 @@ class Constant:
         "0xf6", "0xfb", "0xfc", "0x90", "0x91", "0x9c", "0x9d",
         "0xbf"
     ]
+    PMU_PIPE = 'PipeUtilization'
+    PMU_PIPE_EXCT = 'PipeUtilizationExct'
+    PMU_ARITH = 'ArithmeticUtilization'
+    PMU_MEM = 'Memory'
+    PMU_MEM_L0 = 'MemoryL0'
+    PMU_RESOURCE = 'ResourceConflictRatio'
+    PMU_MEM_UB = 'MemoryUB'
+    PMU_L2_CACHE = 'L2Cache'
 
     INVALID_INDEX = -1
 
@@ -281,6 +293,7 @@ class Constant:
         "vec_ratio": PmuCalculateFunc.vec_ratio,
         "mac_ratio": PmuCalculateFunc.mac_ratio,
         "scalar_ratio": PmuCalculateFunc.scalar_ratio,
+        "fixpipe_ratio": PmuCalculateFunc.fixpipe_ratio,
         "mte1_ratio": PmuCalculateFunc.mte1_ratio,
         "mte2_ratio": PmuCalculateFunc.mte2_ratio,
         "mte3_ratio": PmuCalculateFunc.mte3_ratio,
@@ -327,24 +340,26 @@ class Constant:
     AICORE_PIPE_LIST = ["vec_time", "mac_time", "scalar_time", "mte1_time", "mte2_time", "mte3_time"]
 
     AICORE_METRICS_LIST = {
-        "ArithmeticUtilization": "mac_fp16_ratio,mac_int8_ratio,vec_fp32_ratio,"
-                                 "vec_fp16_ratio,vec_int32_ratio,vec_misc_ratio",
-        "PipeUtilization": "vec_ratio,mac_ratio,scalar_ratio,mte1_ratio,"
-                           "mte2_ratio,mte3_ratio,icache_miss_rate",
-        "Memory": "ub_read_bw(GB/s),ub_write_bw(GB/s),l1_read_bw(GB/s),"
-                  "l1_write_bw(GB/s),l2_read_bw(GB/s),l2_write_bw(GB/s),"
-                  "main_mem_read_bw(GB/s),main_mem_write_bw(GB/s)",
-        "MemoryL0": "l0a_read_bw(GB/s),l0a_write_bw(GB/s),l0b_read_bw(GB/s),"
+        PMU_PIPE_EXCT: "mac_ratio,scalar_ratio,fixpipe_ratio,mte1_ratio,"
+                       "mte2_ratio,icache_miss_rate",
+        PMU_ARITH: "mac_fp16_ratio,mac_int8_ratio,vec_fp32_ratio,"
+                   "vec_fp16_ratio,vec_int32_ratio,vec_misc_ratio",
+        PMU_PIPE: "vec_ratio,mac_ratio,scalar_ratio,mte1_ratio,"
+                  "mte2_ratio,mte3_ratio,icache_miss_rate",
+        PMU_MEM: "ub_read_bw(GB/s),ub_write_bw(GB/s),l1_read_bw(GB/s),"
+                 "l1_write_bw(GB/s),l2_read_bw(GB/s),l2_write_bw(GB/s),"
+                 "main_mem_read_bw(GB/s),main_mem_write_bw(GB/s)",
+        PMU_MEM_L0: "l0a_read_bw(GB/s),l0a_write_bw(GB/s),l0b_read_bw(GB/s),"
                     "l0b_write_bw(GB/s),l0c_read_bw(GB/s),l0c_write_bw(GB/s),"
                     "l0c_read_bw_cube(GB/s),l0c_write_bw_cube(GB/s)",
-        "ResourceConflictRatio": "vec_bankgroup_cflt_ratio,vec_bank_cflt_ratio,"
-                                 "vec_resc_cflt_ratio",
-        "MemoryUB": "ub_read_bw_mte(GB/s),ub_write_bw_mte(GB/s),"
+        PMU_RESOURCE: "vec_bankgroup_cflt_ratio,vec_bank_cflt_ratio,"
+                      "vec_resc_cflt_ratio",
+        PMU_MEM_UB: "ub_read_bw_mte(GB/s),ub_write_bw_mte(GB/s),"
                     "ub_read_bw_vector(GB/s),ub_write_bw_vector(GB/s),"
                     "ub_read_bw_scalar(GB/s),ub_write_bw_scalar(GB/s)",
-        "L2Cache": "write_cache_hit,write_cache_miss_allocate,"
-                   "r0_read_cache_hit,r0_read_cache_miss_allocate,"
-                   "r1_read_cache_hit,r1_read_cache_miss_allocate"
+        PMU_L2_CACHE: "write_cache_hit,write_cache_miss_allocate,"
+                      "r0_read_cache_hit,r0_read_cache_miss_allocate,"
+                      "r1_read_cache_hit,r1_read_cache_miss_allocate"
     }
 
     # add default limit for reader buffer size ->8196  * 1024 Byte

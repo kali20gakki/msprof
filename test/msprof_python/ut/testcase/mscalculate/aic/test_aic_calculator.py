@@ -24,6 +24,7 @@ class TestAicCalculator(unittest.TestCase):
 
     def test_get_total_aic_count(self):
         with mock.patch(NAMESPACE + '.PathManager.get_data_file_path', return_value='test'), \
+                mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
                 mock.patch("os.path.getsize", return_value=1000):
             check = AicCalculator(self.file_list, CONFIG)
             result = check._get_total_aic_count()
@@ -33,6 +34,7 @@ class TestAicCalculator(unittest.TestCase):
         with mock.patch(NAMESPACE + '.AicCalculator._get_total_aic_count', return_value=7), \
                 mock.patch('msmodel.iter_rec.iter_rec_model.HwtsIterModel.get_task_offset_and_sum',
                            return_value=(0, 0)), \
+                mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
                 mock.patch('msmodel.iter_rec.iter_rec_model.HwtsIterModel.get_aic_sum_count',
                            return_value=8):
             check = AicCalculator(self.file_list, CONFIG)
@@ -41,6 +43,7 @@ class TestAicCalculator(unittest.TestCase):
 
     def test_parse_by_iter(self):
         with mock.patch('msmodel.iter_rec.iter_rec_model.HwtsIterModel.check_db', return_value=True), \
+                mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
                 mock.patch('msmodel.iter_rec.iter_rec_model.HwtsIterModel.check_table', return_value=True):
             with mock.patch(NAMESPACE + '.AicCalculator._get_offset_and_total', return_value=(127, 1280)), \
                     mock.patch(NAMESPACE + '.AicCalculator._parse'), \
@@ -57,6 +60,7 @@ class TestAicCalculator(unittest.TestCase):
         aic_reader = struct.pack("=BBHHHII10Q8I", 1, 2, 3, 4, 5, 6, 78, 9, 1, 0, 1, 2, 3, 4, 6, 5, 2, 4, 5, 6, 7, 89, 9,
                                  7, 4)
         with mock.patch(NAMESPACE + '.PathManager.get_data_file_path', return_value='test'), \
+                mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
                 mock.patch(NAMESPACE + '.logging.info'), \
                 mock.patch(NAMESPACE + '.AicCalculator._parse'), \
                 mock.patch('builtins.open', mock.mock_open(read_data=aic_reader)), \
@@ -66,12 +70,14 @@ class TestAicCalculator(unittest.TestCase):
 
     def test_calculate(self):
         with mock.patch(NAMESPACE + '.AicCalculator._parse_all_file'), \
+                mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
                 mock.patch('common_func.utils.Utils.get_scene', return_value='single_op'), \
                 mock.patch(NAMESPACE + '.AicCalculator._parse_by_iter'):
             check = AicCalculator(self.file_list, CONFIG)
             check.calculate()
         ProfilingScene().init('test')
         with mock.patch(NAMESPACE + '.AicCalculator._parse_all_file'), \
+                mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
                 mock.patch('common_func.utils.Utils.get_scene', return_value='train'), \
                 mock.patch(NAMESPACE + '.AicCalculator._parse_by_iter'):
             check = AicCalculator(self.file_list, CONFIG)
@@ -81,10 +87,12 @@ class TestAicCalculator(unittest.TestCase):
         aic_reader = struct.pack("=BBHHHII10Q8I", 1, 2, 3, 4, 5, 6, 78, 9, 1, 0, 1, 2, 3, 4, 6, 5, 2, 4, 5, 6, 7, 89, 9,
                                  7, 4)
         with mock.patch(NAMESPACE + '.AicPmuUtils.get_pmu_events', return_value=['']), \
-                mock.patch(NAMESPACE + '.ConfigMgr.read_sample_config',
-                           return_value={'ai_core_profiling_events': 'task-based'}), \
+                mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
                 mock.patch(NAMESPACE + '.AicCalculator.calculate_pmu_list'):
             check = AicCalculator(self.file_list, CONFIG)
+            check._core_num_dict = {'aic': 30, 'aiv': 0}
+            check._block_dims = {'2-2': [22, 22]}
+            check._freq = 1500
             check._parse(aic_reader)
 
     def test_calculate_pmu_list(self):
@@ -92,12 +100,14 @@ class TestAicCalculator(unittest.TestCase):
                                  7, 4)
         _aic_pmu_log = AicPmuBean.decode(aic_reader)
         with mock.patch(NAMESPACE + '.CalculateAiCoreData.compute_ai_core_data', return_value=('', {})), \
+                mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
                 mock.patch(NAMESPACE + '.Utils.generator_to_list', return_value=[]):
             check = AicCalculator(self.file_list, CONFIG)
-            check.calculate_pmu_list(_aic_pmu_log, [], [])
+            check.calculate_pmu_list(_aic_pmu_log, [], [], 0)
 
     def test_save(self):
         with mock.patch('msmodel.aic.aic_pmu_model.AicPmuModel.init'), \
+                mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
                 mock.patch('msmodel.aic.aic_pmu_model.AicPmuModel.flush'), \
                 mock.patch('msmodel.aic.aic_pmu_model.AicPmuModel.finalize'):
             InfoConfReader()._info_json = {"devices": '0'}
@@ -106,12 +116,13 @@ class TestAicCalculator(unittest.TestCase):
             check.save()
 
     def test_ms_run(self):
-        with mock.patch(NAMESPACE + '.generate_config', return_value={'ai_core_profiling_mode': 'sample-based'}), \
+        with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
                 mock.patch(NAMESPACE + '.PathManager.get_sample_json_path', return_value='test'):
-            check = AicCalculator(self.file_list, CONFIG)
+            check = AicCalculator({}, CONFIG)
             check.ms_run()
-        with mock.patch(NAMESPACE + '.generate_config', return_value={'ai_core_profiling_mode': 'task-based'}), \
+        with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
                 mock.patch(NAMESPACE + '.PathManager.get_sample_json_path', return_value='test'), \
+                mock.patch(NAMESPACE + '.AicCalculator.init_params', return_value='test'), \
                 mock.patch(NAMESPACE + '.AicCalculator.calculate', return_value='test'), \
                 mock.patch(NAMESPACE + '.AicCalculator.save', return_value='test'):
             check = AicCalculator(self.file_list, CONFIG)
