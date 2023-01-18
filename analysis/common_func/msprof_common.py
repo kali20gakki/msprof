@@ -178,14 +178,14 @@ def check_collection_dir(collect_path: str) -> None:
     if not os.path.exists(PathManager.get_data_dir(collect_path)):
         message = f"There is no \"data\" directory in \"{collect_path}\". Collect data failed. " \
                   f"More info could be found in the path of slog on your core."
-        raise ProfException(ProfException.PROF_INVALID_EXECUTE_CMD_ERROR, message)
+        raise ProfException(ProfException.PROF_INVALID_EXECUTE_CMD_ERROR, message, warn)
     check_dir_writable(collect_path)
     check_free_memory(collect_path)
     file_all = os.listdir(PathManager.get_data_dir(collect_path))
     if not file_all:
         message = f"There is no file in {PathManager.get_data_dir(collect_path)}. " \
                   f"Collect data failed. More info could be found in the path of slog on your core."
-        raise ProfException(ProfException.PROF_INVALID_EXECUTE_CMD_ERROR, message)
+        raise ProfException(ProfException.PROF_INVALID_EXECUTE_CMD_ERROR, message, warn)
 
 
 def get_info_by_key(path: str, key: any) -> str:

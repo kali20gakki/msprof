@@ -5,6 +5,7 @@ from unittest import mock
 
 import pytest
 from analyzer.scene_base.profiling_scene import ProfilingScene
+from common_func.common import print_info, warn, error
 from common_func.constant import Constant
 from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
@@ -261,6 +262,52 @@ class TestExportCommand(unittest.TestCase):
                 test = ExportCommand("summary", args)
                 test.list_map["devices_list"] = ["1"]
                 test.process()
+
+    def test_handle_export_raise_profexception_0(self) -> None:
+        args_dic = {"collection_path": "test", "iteration_id": 3, "model_id": 1, "iteration_count": 1}
+        args = Namespace(**args_dic)
+        with mock.patch(NAMESPACE + '.ExportCommand._prepare_export', side_effect=ProfException(2, 'test', print_info)):
+            test = ExportCommand("summary", args)
+            test._handle_export('test')
+
+    def test_handle_export_raise_profexception_1(self) -> None:
+        args_dic = {"collection_path": "test", "iteration_id": 3, "model_id": 1, "iteration_count": 1}
+        args = Namespace(**args_dic)
+        with mock.patch(NAMESPACE + '.ExportCommand._prepare_export', side_effect=ProfException(2, 'test', warn)):
+            test = ExportCommand("summary", args)
+            test._handle_export('test')
+
+    def test_handle_export_raise_profexception_2(self) -> None:
+        args_dic = {"collection_path": "test", "iteration_id": 3, "model_id": 1, "iteration_count": 1}
+        args = Namespace(**args_dic)
+        with mock.patch(NAMESPACE + '.ExportCommand._prepare_export', side_effect=ProfException(2)):
+            test = ExportCommand("summary", args)
+            test._handle_export('test')
+
+    def test_handle_export_raise_profexception_3(self) -> None:
+        args_dic = {"collection_path": "test", "iteration_id": 3, "model_id": 1, "iteration_count": 1}
+        args = Namespace(**args_dic)
+        with mock.patch(NAMESPACE + '.ExportCommand._prepare_export'), \
+        mock.patch(NAMESPACE + '.ExportCommand._export_data', side_effect=ProfException(2, 'test', error)):
+            test = ExportCommand("summary", args)
+            test.list_map = {'export_type_list': [1]}
+            test._handle_export('test')
+
+    def test_handle_export_raise_profexception_4(self) -> None:
+        args_dic = {"collection_path": "test", "iteration_id": 3, "model_id": 1, "iteration_count": 1}
+        args = Namespace(**args_dic)
+        with mock.patch(NAMESPACE + '.ExportCommand._prepare_export'), \
+        mock.patch(NAMESPACE + '.ExportCommand._export_data', side_effect=ProfException(2)):
+            test = ExportCommand("summary", args)
+            test.list_map = {'export_type_list': [1]}
+            test._handle_export('test')
+
+    def test_handle_export_raise_profexception_5(self) -> None:
+        args_dic = {"collection_path": "test", "iteration_id": 3, "model_id": 1, "iteration_count": 1}
+        args = Namespace(**args_dic)
+        test = ExportCommand("summary", args)
+        test.list_map = {'export_type_list': [1]}
+        test._handle_export('test')
 
 
 if __name__ == '__main__':
