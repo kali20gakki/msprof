@@ -21,7 +21,7 @@ def _get_llc_result_data(llc_data: list, sample_config: dict, llc_data_list: lis
     result_data['mode'] = llc_profiling_mode
     result_data['rate'] = "MB/s"
     result_data['table'] = []
-    llc_data_one = Utils.generator_to_list(i[1] for i in llc_data)
+    llc_data_one = Utils.generator_to_list(i[1] * 100 for i in llc_data)
     llc_data_two = Utils.generator_to_list(i[2] for i in llc_data)
     llc_data.insert(0, ("Average",
                         float_calculate(
@@ -31,7 +31,7 @@ def _get_llc_result_data(llc_data: list, sample_config: dict, llc_data_list: lis
     for llc_slice in llc_data:
         result_data['table'].append(OrderedDict([("Mode", result_data.get("mode")),
                                                  ("Task", llc_slice[0]),
-                                                 ("Hit Rate(%)", llc_slice[1]),
+                                                 ("Hit Rate(%)", llc_slice[1] * 100),
                                                  ("Throughput(MB/s)", llc_slice[2])]))
     return result_data
 
