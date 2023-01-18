@@ -383,7 +383,7 @@ class ExportCommand:
             return
 
         if self.list_map.get(self.MODEL_ID) not in model_match_set:
-            message = f"The model id {self.list_map.get(self.MODEL_ID)} is invalid. "\
+            message = f"The model id {self.list_map.get(self.MODEL_ID)} is invalid. " \
                       f"Must select from {model_match_set}. Please enter a valid model id."
             raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR, message)
 
@@ -449,7 +449,15 @@ class ExportCommand:
         print_info(self.FILE_NAME, export_info)
 
     def _handle_export(self: any, result_dir: str) -> None:
-        self._prepare_export(result_dir)
+        try:
+            self._prepare_export(result_dir)
+        except ProfException as err:
+            if err.message:
+                err.callback(MsProfCommonConstant.COMMON_FILE_NAME, err.message)
+            else:
+                warn(MsProfCommonConstant.COMMON_FILE_NAME,
+                      'Analysis data in "%s" failed. Maybe the data is incomplete.' % result_dir)
+            return
         try:
             for event in self.list_map.get('export_type_list', []):
                 if not self.list_map.get('devices_list', []):
@@ -457,9 +465,12 @@ class ExportCommand:
                     continue
                 for device_id in self.list_map.get('devices_list', []):
                     self._export_data(event, device_id, result_dir)
-        except ProfException:
-            warn(MsProfCommonConstant.COMMON_FILE_NAME,
-                 'Analysis data in "%s" failed. Maybe the data is incomplete.' % result_dir)
+        except ProfException as err:
+            if err.message:
+                err.callback(MsProfCommonConstant.COMMON_FILE_NAME, err.message)
+            else:
+                warn(MsProfCommonConstant.COMMON_FILE_NAME,
+                      'Analysis data in "%s" failed. Maybe the data is incomplete.' % result_dir)
 
     def _prepare_export(self: any, result_dir: str) -> None:
         check_collection_dir(result_dir)
