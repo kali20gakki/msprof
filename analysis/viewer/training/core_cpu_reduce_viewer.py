@@ -282,7 +282,7 @@ class CoreCpuReduceViewer:
         if not conn or not curs or not DBManager.judge_table_exist(curs, DBNameConstant.TABLE_SUMMARY_TASK_TIME):
             return result_data
         sql = "SELECT stream_id, task_id, start_time, duration_time, task_type, index_id, batch_id " \
-              "FROM {table_name} WHERE start_time>=0 and duration_time>=0" \
+              "FROM {table_name} WHERE start_time>0 and duration_time>=0" \
             .format(table_name=DBNameConstant.TABLE_SUMMARY_TASK_TIME)
         task_scheduler_data = DBManager.fetch_all_data(curs, sql)
         DBManager.destroy_db_connect(conn, curs)
