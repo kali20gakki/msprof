@@ -479,6 +479,21 @@ bool Utils::IsSoftLink(const std::string &path)
 #endif
 }
 
+bool Utils::IsSocketFile(const std::string &path)
+{
+#if (defined(_WIN32) || defined(_WIN64) || defined(_MSC_VER))
+    return false;
+#else
+    struct stat statBuf;
+    int ret = stat(path.c_str(), &statBuf);
+    if (ret != 0) {
+        MSPROF_LOGE("stat %s fail, ret=%d errno=%u", path.c_str(), ret, errno);
+        return true;
+    }
+    return S_ISSOCK(statBuf.st_mode);
+#endif
+}
+
 std::string Utils::CanonicalizePath(const std::string &path)
 {
     std::string resolvedPath;
@@ -768,6 +783,17 @@ int Utils::UsleepInterupt(unsigned long usec)
     return PROFILING_SUCCESS;
 }
 
+int Utils::MsleepInterruptible(unsigned long msec)
+{
+    const unsigned long onecSleepTime = 50;
+    unsigned long sleepTimes = msec / onecSleepTime;
+    while (sleepTimes-- > 0) {
+        (void)MmSleep(onecSleepTime);
+    }
+    (void)MmSleep(msec % onecSleepTime);
+    return PROFILING_SUCCESS;
+}
+
 void Utils::GetFiles(const std::string &dir, bool isRecur, std::vector<std::string> &files)
 {
     if (dir.empty()) {
@@ -852,6 +878,32 @@ void Utils::GetChildFilenames(const std::string &dir, std::vector<std::string> &
     }
 
     MmScandirFree(dirNameList, count);
+}
+
+std::vector<int> Utils::GetChildPid(int pid)
+{
+    std::vector<int> allChildPids;
+
+    std::vector<std::string> threadDirs;
+    std::string taskDir = "/proc/" + std::to_string(pid) + "/task/";
+    Utils::GetChildDirs(taskDir, false, threadDirs);
+
+    CHAR_PTR end = nullptr;
+    constexpr int base = 10;
+    std::ifstream ifs;
+    for (auto &tdir : threadDirs) {
+        std::string lineBuf;
+        ifs.open(tdir + "/children", std::ifstream::in);
+        std::getline(ifs, lineBuf);
+        ifs.close();
+
+        std::vector<std::string> childPids = Utils::Split(lineBuf, true, "", " ");
+        for (auto &childPid : childPids) {
+            allChildPids.push_back(std::strtol(childPid.c_str(), &end, base));
+        }
+    }
+
+    return allChildPids;
 }
 
 std::string Utils::TimestampToTime(const std::string &timestamp, int unit /* = 1 */)

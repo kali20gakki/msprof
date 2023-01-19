@@ -101,7 +101,8 @@ private:
     // model load data cached
     std::map<std::string, std::list<SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> > > modelLoadDataCached_;
     // dynamic profiling cached message {deviceId: [dynProf_1th:FileChunkReq1, ...]}}
-    std::map<std::string, std::list<std::map<int, SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq>>>> cachedMsg_;
+    std::map<std::string, std::list<std::map<uint32_t,
+        SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq>>>> cachedMsg_;
 };
 }}
 #endif

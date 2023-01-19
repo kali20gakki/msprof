@@ -96,7 +96,6 @@ int mmWriteStub(int fd, void *buf, unsigned int bufLen) {
     EXPECT_EQ(true, OpDescParser::GetOpEnd(buf, bufLen, 0) > 0);
     EXPECT_EQ(true, OpDescParser::GetOpDuration(buf, bufLen, 0) > 0);
     //EXPECT_EQ(true, Msprofiler::Api::ProfGetOpExecutionTime(buf, bufLen, 0) >= 0);
-    // EXPECT_EQ(true, ProfGetOpExecutionTime(buf, bufLen, 0) >= 0); XXX
     EXPECT_EQ(true, OpDescParser::GetOpCubeFops(buf, bufLen, 0) >= 0);
     EXPECT_EQ(true, OpDescParser::GetOpVectorFops(buf, bufLen, 0) >= 0);
     EXPECT_EQ(0, OpDescParser::GetOpFlag(buf, bufLen, 0));
@@ -496,7 +495,6 @@ TEST_F(MSPROF_ACL_CORE_UTEST, prof_acl_api_helper) {
     EXPECT_EQ(ACL_ERROR_FEATURE_UNSUPPORTED, aclprofModelSubscribe(1, nullptr));
     EXPECT_EQ(ACL_ERROR_FEATURE_UNSUPPORTED, aclprofModelUnSubscribe(1));
     EXPECT_EQ((size_t)ACL_ERROR_FEATURE_UNSUPPORTED, aclprofGetModelId(nullptr, 0, 0));
-    // EXPECT_EQ(0, ProfGetOpExecutionTime(nullptr, 0, 0)); XXX
     aclrtStream stream;
     EXPECT_EQ(ACL_ERROR_FEATURE_UNSUPPORTED, aclprofGetStepTimestamp(nullptr, ACL_STEP_START, stream));
     EXPECT_EQ(nullptr, aclprofCreateStepInfo());
@@ -1254,9 +1252,9 @@ TEST_F(MSPROF_ACL_CORE_UTEST, DumpDynProfCachedMsg)
     dumper->DumpDynProfCachedMsg("0");
     dumper->SaveDynProfCachedMsg(nullptr);
 
-    std::map<int, SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq>> markMsg;
+    std::map<uint32_t, SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq>> markMsg;
     markMsg.insert(std::make_pair(1, nullptr));
-    std::list<std::map<int, SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq>>> data;
+    std::list<std::map<uint32_t, SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq>>> data;
     data.push_back(markMsg);
     dumper->cachedMsg_["0"] = data;
     

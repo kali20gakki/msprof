@@ -619,7 +619,6 @@ TEST_F(JOB_WRAPPER_PROF_CTRLCPU_JOB_TEST, PrepareDataDir) {
     profCtrlCpuBasedJob->collectionJobCfg_ = collectionJobCfg_;
     std::string dir;
     EXPECT_EQ(PROFILING_FAILED, profCtrlCpuBasedJob->PrepareDataDir(dir));
-    // EXPECT_EQ(PROFILING_FAILED, profCtrlCpuBasedJob->PrepareDataDir(dir));  XXX
 }
 
 

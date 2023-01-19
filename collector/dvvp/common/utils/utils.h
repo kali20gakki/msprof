@@ -456,9 +456,8 @@ public:
     static int CreateDir(const std::string &path);
     static void RemoveDir(const std::string &dir, bool rmTopDir = true);
     static std::string CanonicalizePath(const std::string &path);
-    static int ExecCmd(const ExecCmdParams &execCmdParams,
-        const std::vector<std::string> &argv, const std::vector<std::string> &envp,
-        int &exitCodeP, MmProcess &childProcess);
+    static int ExecCmd(const ExecCmdParams &execCmdParams, const std::vector<std::string> &argv,
+        const std::vector<std::string> &envp, int &exitCodeP, MmProcess &childProcess);
     static int ExecCmdC(const ExecCmdArgv &execCmdArgv, const ExecCmdParams &execCmdParams, int &exitCodeP);
     static int ExecCmdCAsync(const ExecCmdArgv &execCmdArgv, const ExecCmdParams &execCmdParams,
                              MmProcess &childProcess);
@@ -471,14 +470,13 @@ public:
     static bool ProcessIsRuning(MmProcess process);
     static std::string JoinPath(const std::vector<std::string> &paths);
     static std::string LeftTrim(const std::string &str, const std::string &trims);
-    static std::vector<std::string> Split(const std::string &input_str,
-                                          bool filter_out_enabled = false,
-                                          const std::string &filter_out = "",
-                                          const std::string &pattern = " ");
+    static std::vector<std::string> Split(const std::string &input_str, bool filter_out_enabled = false,
+                                          const std::string &filter_out = "", const std::string &pattern = " ");
     static std::string ToUpper(const std::string &value);
     static std::string ToLower(const std::string &value);
     static std::string Trim(const std::string &value);
     static int UsleepInterupt(unsigned long usec);
+    static int MsleepInterruptible(unsigned long msec);
     static unsigned long long GetClockRealtime();
     static unsigned long long GetClockMonotonicRaw();
     static unsigned long long GetCPUCycleCounter();
@@ -486,6 +484,7 @@ public:
     static std::string GenerateStartTime(const unsigned long long startRealtime, const unsigned long long startMono,
         const unsigned long long cntvct);
     static void GetChildDirs(const std::string &dir, bool isRecur, std::vector<std::string> &childDirs);
+    static std::vector<int> GetChildPid(int pid);
     static std::string TimestampToTime(const std::string &timestamp, int unit = 1);
     static int GetMac(std::string &macAddress);
     static std::string GetEnvString(const std::string &name);
@@ -511,6 +510,7 @@ public:
     static std::string GetCwdString(void);
     static std::string RelativePathToAbsolutePath(const std::string &path);
     static bool IsSoftLink(const std::string &path);
+    static bool IsSocketFile(const std::string &path);
     template<typename T>
     static std::string Int2HexStr(T number)
     {
