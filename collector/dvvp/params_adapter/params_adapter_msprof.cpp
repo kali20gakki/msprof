@@ -224,7 +224,7 @@ int ParamsAdapterMsprof::CheckMsprofMode(const std::unordered_map<int, std::pair
             return PROFILING_SUCCESS;
         }
     }
-    CmdLog::instance()->CmdErrorLog("No valid argument found in --application "
+    CmdLog::instance()->CmdErrorLog("No valid argument found in --dynamic --application "
         "--sys-devices --host-sys --host-sys-usage --parse --query --export");
     return PROFILING_FAILED;
 }

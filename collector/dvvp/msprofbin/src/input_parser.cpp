@@ -237,8 +237,8 @@ void ArgsManager::AddDynProfArgs()
     if (driverOnline_ && platform_ != PlatformType::CLOUD_TYPE) {
         return;
     }
-    Args dynamic = {"dynamic", "Dynamic profiling switch, the default value is off.(future-platform)", OFF};
-    Args pid = {"pid", "Dynamic profiling pid of the target process", "0"};
+    Args dynamic = {"dynamic", "Dynamic profiling switch, the default value is off.(Ascend910)", OFF};
+    Args pid = {"pid", "Dynamic profiling pid of the target process.(Ascend910)", "0"};
     argsList_.push_back(dynamic);
     argsList_.push_back(pid);
 }

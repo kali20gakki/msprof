@@ -1118,6 +1118,42 @@ int GetDiskFreeSpaceStub(const char *path, MmDiskSize *diskSize) {
     return PROFILING_SUCCESS;
 }
 
+TEST_F(COMMON_UTILS_UTILS_TEST, IsClusterRunEnv)
+{
+    GlobalMockObject::verify();
+    std::string s1;
+    std::string s2 = "/tmp";
+
+    MOCKER_CPP(&Utils::GetEnvString)
+        .stubs()
+        .will(returnValue(s1))
+        .then(returnValue(s2));
+    MOCKER(MmAccess)
+        .stubs()
+        .will(returnValue(-1))
+        .then(returnValue(0));
+    MOCKER(MmIsDir)
+        .stubs()
+        .will(returnValue(0))
+        .then(returnValue(-1));
+
+    bool ret = Utils::IsClusterRunEnv();
+    EXPECT_EQ(false, ret);
+    ret = Utils::IsClusterRunEnv();
+    EXPECT_EQ(false, ret);
+    ret = Utils::IsClusterRunEnv();
+    EXPECT_EQ(false, ret);
+    ret = Utils::IsClusterRunEnv();
+    EXPECT_EQ(true, ret);
+
+    Utils::PythonEnvReady();
+    Utils::CloudAnalyze("/tmp");
+    std::vector<std::string> envVec;
+    envVec.push_back("test123");
+    envVec.push_back("path");
+    Utils::GenEnvPairVec(envVec);
+}
+
 TEST_F(COMMON_UTILS_UTILS_TEST, CreateTaskId) {
     GlobalMockObject::verify();
     std::string dirName = Utils::CreateTaskId(0);

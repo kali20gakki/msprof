@@ -201,7 +201,7 @@ void UploaderDumper::DumpDynProfCachedMsg(const std::string &devId)
     if (devCachedMsg == cachedMsg_.end()) {
         return;
     }
-    int startTimes = DynProfMngSrv::instance()->startTimes_;
+    uint32_t startTimes = DynProfMngSrv::instance()->startTimes_;
     for (auto &markMsg : devCachedMsg->second) {
         if (markMsg.begin()->first < startTimes) {
             AddToUploader(markMsg.begin()->second);
@@ -310,14 +310,14 @@ void UploaderDumper::SaveDynProfCachedMsg(SHARED_PTR_ALIA<analysis::dvvp::proto:
         return;
     }
     std::lock_guard<std::mutex> lk(mtx_);
-    int times = DynProfMngSrv::instance()->startTimes_;
-    std::map<int, SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq>> markMsg;
+    uint32_t times = DynProfMngSrv::instance()->startTimes_;
+    std::map<uint32_t, SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq>> markMsg;
     markMsg.insert(std::make_pair(times, message));
 
     std::string deviceId = message->tagsuffix();
     auto devCachedMsg = cachedMsg_.find(deviceId);
     if (devCachedMsg == cachedMsg_.end()) {
-        std::list<std::map<int, SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq>>> messages;
+        std::list<std::map<uint32_t, SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq>>> messages;
         messages.push_back(markMsg);
         cachedMsg_.insert(std::make_pair(deviceId, messages));
     } else {

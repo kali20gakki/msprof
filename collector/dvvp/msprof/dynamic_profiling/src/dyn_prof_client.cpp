@@ -5,19 +5,19 @@
  * Create: 2022-12-10
  */
 #include "dyn_prof_client.h"
- 
+
 #include <algorithm>
 #include <iostream>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/un.h>
- 
+
 #include "config/config.h"
 #include "errno/error_code.h"
 #include "mmpa_api.h"
 #include "msprof_dlog.h"
 #include "utils/utils.h"
- 
+
 namespace Collector {
 namespace Dvvp {
 namespace DynProf {
@@ -26,15 +26,15 @@ using namespace Analysis::Dvvp::MsprofErrMgr;
 using namespace analysis::dvvp::common::utils;
 using namespace Collector::Dvvp::Mmpa;
 using namespace analysis::dvvp::common::config;
- 
+
 DyncProfMsgProcCli::DyncProfMsgProcCli() : cliStarted_(false), cliSockFd_(-1)
 {
 }
- 
+
 DyncProfMsgProcCli::~DyncProfMsgProcCli()
 {
 }
- 
+
 int DyncProfMsgProcCli::Start()
 {
     MSPROF_LOGI("Dynamic profiling begin to init client.");
@@ -57,7 +57,7 @@ int DyncProfMsgProcCli::Start()
     MSPROF_LOGI("Dynamic profiling init client success.");
     return PROFILING_SUCCESS;
 }
- 
+
 int DyncProfMsgProcCli::Stop()
 {
     MSPROF_LOGI("Dynamic profiling begin to stop client.");
@@ -73,198 +73,189 @@ int DyncProfMsgProcCli::Stop()
     MSPROF_LOGI("Dynamic profiling stop client success.");
     return PROFILING_SUCCESS;
 }
- 
+
 void DyncProfMsgProcCli::Run(const struct error_message::Context &errorContext)
 {
     MSPROF_LOGI("Dynamic profiling client run entry.");
     std::string inputCmd;
-    std::string echoCmd;
- 
+    std::string echoTips;
+
+    std::cout << INTERACTION_MODE_PREFIX << std::flush;
     while (cliStarted_) {
-        std::cout << "> ";
-        (void)getline(std::cin, inputCmd);
-        switch (ParserInputCmd(inputCmd)) {
-            case DynProfCliCmd::CMD_START:
-                echoCmd = DynProfCliProcStart();
-                break;
-            case DynProfCliCmd::CMD_STOP:
-                echoCmd = DynProfCliProcStop();
-                break;
-            case DynProfCliCmd::CMD_QUIT:
-                echoCmd = DynProfCliProcQuit();
-                break;
-            case DynProfCliCmd::CMD_HELP:
-                echoCmd = "start: Start a collection in interactive mode.\n"
-                    "stop: Stop a collection that was started in interactive mode.\n"
-                    "quit: Stop collection and quit interactive mode.";
-                break;
-            case DynProfCliCmd::CMD_UNKNOW:
-                echoCmd = "unknown command, input 'help' for more information.";
-                break;
-            case DynProfCliCmd::CMD_EMPTY:
-            default:
-                echoCmd = "";
-                break;
+        if (IsServerDisconnect(echoTips)) {
+            std::cout << std::endl << echoTips << std::endl;
+            break;
         }
-        if (!echoCmd.empty()) {
-            std::cout << echoCmd << std::endl;
+        if (TryReadInputCmd(inputCmd) < 0) {
+            continue;
         }
+        if (inputCmd.empty()) {
+            std::cout << INTERACTION_MODE_PREFIX << std::flush;
+            continue;
+        }
+        if (inputCmd == INTERACTION_MODE_CMD_START) {
+            (void)SendMsgToServer(DynProfMsgType::START_REQ, DynProfMsgType::START_RSP, sendParams_, echoTips);
+        } else if (inputCmd == INTERACTION_MODE_CMD_STOP) {
+            (void)SendMsgToServer(DynProfMsgType::STOP_REQ, DynProfMsgType::STOP_RSP, "", echoTips);
+        } else if (inputCmd == INTERACTION_MODE_CMD_QUIT) {
+            (void)SendMsgToServer(DynProfMsgType::QUIT_REQ, DynProfMsgType::QUIT_RSP, "", echoTips);
+        } else {
+            echoTips = DynProfCliProcHelp();
+        }
+        std::cout << echoTips << std::endl;
+        std::cout << INTERACTION_MODE_PREFIX  << std::flush;
     }
 }
- 
+
+int DyncProfMsgProcCli::TryReadInputCmd(std::string &inputCmd)
+{
+    timeval timeout = {DYN_PROF_READ_INPUT_CMD_WAIT_TIME, 0};
+    fd_set fdSet;
+    FD_ZERO(&fdSet);
+    FD_SET(0, &fdSet);
+    if (select(1, &fdSet, nullptr, nullptr, &timeout) == 0) {
+        return -1;
+    }
+    (void)getline(std::cin, inputCmd);
+    inputCmd = Utils::Trim(inputCmd);
+    return inputCmd.size();
+}
+
+bool DyncProfMsgProcCli::IsServerDisconnect(std::string &echoTips)
+{
+    DynProfRspMsg rspMsg;
+    ssize_t recvLen = recv(cliSockFd_, reinterpret_cast<VOID_PTR>(&rspMsg), sizeof(rspMsg), MSG_DONTWAIT);
+    if (recvLen == sizeof(rspMsg) &&
+        rspMsg.msgType == DynProfMsgType::DISCONN_RSP &&
+        rspMsg.msgDataLen < DYN_PROF_RSP_MSG_MAX_LEN) {
+        echoTips = "Server disconnected, " + std::string(rspMsg.msgData, rspMsg.msgDataLen);
+        MSPROF_LOGI("Dynamic profiling client receive disconnet from server.");
+        return true;
+    }
+    return false;
+}
+
 int DyncProfMsgProcCli::SetParams(const std::string &params)
 {
-    if (params.size() >= DYN_PROF_PARAMS_MAX_LEN || params.size() == 0) {
+    if (params.size() >= DYN_PROF_REQ_MSG_MAX_LEN || params.size() == 0) {
         MSPROF_LOGE("Dynamic profiling param length error, len=%d.", params.size());
         return PROFILING_FAILED;
     }
     sendParams_ = params;
     return PROFILING_SUCCESS;
 }
- 
-std::string DyncProfMsgProcCli::DynProfCliProcStart()
+
+std::string DyncProfMsgProcCli::DynProfCliProcHelp()
 {
-    std::string cmdLineEcho;
-    int ret = SendMsgToServer(DynProfMsgType::START_REQ, DynProfMsgType::START_RSQ, sendParams_);
-    if (ret == PROFILING_FAILED) {
-        cmdLineEcho = "Start collection failed.";
-        MSPROF_LOGE("Dynamic profiling client execute start cmd fail.");
-    } else {
-        MSPROF_LOGI("Dynamic profiling client execute start cmd success.");
-    }
-    return cmdLineEcho;
+    std::string helpInfo = "Usage:\n"
+        "\t" + INTERACTION_MODE_CMD_START + ":\tStart a collection in interactive mode.\n"
+        "\t" + INTERACTION_MODE_CMD_STOP + ":\tStop a collection that was started in interactive mode.\n"
+        "\t" + INTERACTION_MODE_CMD_QUIT + ":\tStop collection and quit interactive mode.";
+    return helpInfo;
 }
- 
-std::string DyncProfMsgProcCli::DynProfCliProcStop()
-{
-    std::string cmdLineEcho;
-    int ret = SendMsgToServer(DynProfMsgType::STOP_REQ, DynProfMsgType::STOP_RSQ, "");
-    if (ret == PROFILING_FAILED) {
-        cmdLineEcho = "Stop collection failed.";
-        MSPROF_LOGE("Dynamic profiling client execute stop cmd fail.");
-    } else {
-        MSPROF_LOGI("Dynamic profiling client execute stop cmd success.");
-    }
-    return cmdLineEcho;
-}
- 
-std::string DyncProfMsgProcCli::DynProfCliProcQuit()
-{
-    std::string cmdLineEcho;
-    int ret = SendMsgToServer(DynProfMsgType::QUIT_REQ, DynProfMsgType::QUIT_RSQ, "");
-    if (ret == PROFILING_FAILED) {
-        cmdLineEcho = "Quit failed.";
-        MSPROF_LOGE("Dynamic profiling client execute quit cmd fail.");
-    } else {
-        MSPROF_LOGI("Dynamic profiling client execute quit cmd success.");
-    }
-    cliStarted_ = false;
-    DynProfMngCli::instance()->StopDynProfCli();
-    return cmdLineEcho;
-}
- 
-DynProfCliCmd DyncProfMsgProcCli::ParserInputCmd(const std::string &inputCmd)
-{
-    std::string stripCmd = inputCmd;
-    if (stripCmd.empty()) {
-        return DynProfCliCmd::CMD_EMPTY;
-    } else if (stripCmd == "start") {
-        return DynProfCliCmd::CMD_START;
-    } else if (stripCmd == "stop") {
-        return DynProfCliCmd::CMD_STOP;
-    } else if (stripCmd == "quit") {
-        return DynProfCliCmd::CMD_QUIT;
-    } else if (stripCmd == "help") {
-        return DynProfCliCmd::CMD_HELP;
-    } else {
-        return DynProfCliCmd::CMD_UNKNOW;
-    }
-}
- 
+
 int DyncProfMsgProcCli::CreateDynProfClientSock()
 {
-    std::string sockPath = DYN_PROF_SOCK_UNIX_DOMAIN + std::to_string(DynProfMngCli::instance()->GetAppPid());
-    MSPROF_LOGI("Dynamic profiling client socket domain: %s.", sockPath.c_str());
- 
+    // create socket file
     int sockFd = socket(PF_LOCAL, SOCK_STREAM, 0);
     if (sockFd < 0) {
-        MSPROF_LOGE("Dynamic profiling create client socket fail, sockFd=%d errno=%d.", sockFd, errno);
+        MSPROF_LOGE("Dynamic profiling create client socket fail, sockFd=%d errno=%u.", sockFd, errno);
         return PROFILING_FAILED;
     }
- 
+
+    // socket address
+    std::string sockPath = Utils::IdeGetHomedir() + DYN_PROF_SOCK_UNIX_DOMAIN +
+        std::to_string(DynProfMngCli::instance()->GetAppPid());
+    MSPROF_LOGI("Dynamic profiling client socket domain: %s.", sockPath.c_str());
     sockaddr_un sockAddr;
-    (void)memset_s(&sockAddr, sizeof(sockAddr), 0, sizeof(sockAddr));
-    sockAddr.sun_family = AF_LOCAL;
-    errno_t err = strncpy_s(sockAddr.sun_path + 1, sizeof(sockAddr.sun_path) - 1,
-        sockPath.c_str(), sockPath.size());
-    if (err != EOK) {
-        MSPROF_LOGE("Dynamic profiling strncpy_s fail, err=%d.", err);
-        close(sockFd);
-        return PROFILING_FAILED;
-    }
- 
-    int ret = connect(sockFd, (struct sockaddr*)&sockAddr,
-        offsetof(struct sockaddr_un, sun_path) + 1 + sockPath.size());
+    sockAddr.sun_family = AF_UNIX;
+    (void)strncpy_s(sockAddr.sun_path, sizeof(sockAddr.sun_path) - 1, sockPath.c_str(), sockPath.size());
+
+    // connect socket
+    (void)fcntl(sockFd, F_SETFL, fcntl(sockFd, F_GETFL, 0) | O_NONBLOCK);
+    int ret = connect(sockFd, (struct sockaddr*)&sockAddr, sizeof(sockAddr));
     if (ret == PROFILING_FAILED) {
-        MSPROF_LOGE("Dynamic profiling client connect fail, ret=%d errno=%d.", ret, errno);
+        MSPROF_LOGE("Dynamic profiling client connect fail, ret=%d errno=%u.", ret, errno);
         close(sockFd);
         return PROFILING_FAILED;
     }
- 
-    timeval timeout = {1, 0};
-    ret = setsockopt(sockFd, SOL_SOCKET, SO_RCVTIMEO, reinterpret_cast<CHAR_PTR>(&timeout), sizeof(struct timeval));
-    if (ret != 0) {
-        MSPROF_LOGE("Dynamic profiling setsockopt fail, ret=%d errno=%d.", ret, errno);
+    (void)fcntl(sockFd, F_SETFL, fcntl(sockFd, F_GETFL, 0) & (~O_NONBLOCK));
+
+    // check receive/send
+    cliSockFd_ = sockFd;
+    std::string echoTips;
+    timeval timeout = {0, DYN_PROF_CLIENT_CONNECT_WAIT_TIME};
+    (void)setsockopt(sockFd, SOL_SOCKET, SO_RCVTIMEO, reinterpret_cast<CHAR_PTR>(&timeout), sizeof(struct timeval));
+    ret = SendMsgToServer(DynProfMsgType::TEST_REQ, DynProfMsgType::TEST_RSP, "", echoTips);
+    if (ret != PROFILING_SUCCESS) {
+        MSPROF_LOGE("Dynamic profiling client send message to server fail.");
         close(sockFd);
+        cliSockFd_ = -1;
         return PROFILING_FAILED;
     }
-    ret = setsockopt(sockFd, SOL_SOCKET, SO_SNDTIMEO, reinterpret_cast<CHAR_PTR>(&timeout), sizeof(struct timeval));
-    if (ret != 0) {
-        MSPROF_LOGE("Dynamic profiling setsockopt fail, ret=%d errno=%d.", ret, errno);
-        close(sockFd);
-        return PROFILING_FAILED;
-    }
- 
+
+    // set socket send/receive message wait time
+    timeval timeout1 = {DYN_PROF_CLIENT_SEND_WAIT_TIME, 0};
+    (void)setsockopt(sockFd, SOL_SOCKET, SO_SNDTIMEO, reinterpret_cast<CHAR_PTR>(&timeout1), sizeof(struct timeval));
+    timeval timeout2 = {DYN_PROF_CLIENT_RECV_WAIT_TIME, 0};
+    (void)setsockopt(sockFd, SOL_SOCKET, SO_RCVTIMEO, reinterpret_cast<CHAR_PTR>(&timeout2), sizeof(struct timeval));
+
+    // client socket create success
     MSPROF_LOGI("Dynamic profiling client connet server success.");
     cliSockFd_ = sockFd;
     return PROFILING_SUCCESS;
 }
- 
-int DyncProfMsgProcCli::SendMsgToServer(DynProfMsgType reqMsgtype, DynProfMsgType rsqMsgtype,
-    const std::string &reqMsgParams)
+
+int DyncProfMsgProcCli::SendMsgToServer(DynProfMsgType reqMsgtype, DynProfMsgType rspMsgtype,
+    const std::string &reqMsgParams, std::string &echoTips)
 {
-    DynProfMsg msg;
-    msg.msgType = reqMsgtype;
-    msg.msgDataLen = reqMsgParams.size();
-    (void)memcpy_s(msg.msgData, sizeof(msg.msgData) - 1, reqMsgParams.c_str(), reqMsgParams.size());
- 
-    ssize_t sendLen = write(cliSockFd_, reinterpret_cast<VOID_PTR>(&msg), sizeof(msg));
-    if (sendLen != sizeof(msg)) {
-        MSPROF_LOGE("cliSockFd_=%d write msg fail, magLen=%llu, sendLen=%d, errno=%d",
-            cliSockFd_, sizeof(msg), sendLen, errno);
+    echoTips = "Execution fail, Internal error.";
+
+    // send message
+    DynProfReqMsg reqMsg;
+    reqMsg.msgType = reqMsgtype;
+    reqMsg.msgDataLen = reqMsgParams.size();
+    (void)memcpy_s(reqMsg.msgData, sizeof(reqMsg.msgData) - 1, reqMsgParams.c_str(), reqMsgParams.size());
+    ssize_t sendLen = write(cliSockFd_, reinterpret_cast<VOID_PTR>(&reqMsg), sizeof(reqMsg));
+    if (sendLen != sizeof(reqMsg)) {
+        MSPROF_LOGE("cliSockFd_=%d write msg fail, sendLen=%d, errno=%u", cliSockFd_, sendLen, errno);
         return PROFILING_FAILED;
     }
-    ssize_t recvLen = read(cliSockFd_, reinterpret_cast<VOID_PTR>(&msg), sizeof(msg));
-    if (recvLen != sizeof(msg)) {
-        MSPROF_LOGE("cliSockFd_=%d read msg fail, magLen=%llu, recvLen=%d, errno=%d",
-            cliSockFd_, sizeof(msg), recvLen, errno);
+
+    // receive message
+    DynProfRspMsg rspMsg;
+    ssize_t recvLen = read(cliSockFd_, reinterpret_cast<VOID_PTR>(&rspMsg), sizeof(rspMsg));
+    if (recvLen != sizeof(rspMsg)) {
+        MSPROF_LOGE("cliSockFd_=%d read msg fail, recvLen=%d, errno=%u", cliSockFd_, recvLen, errno);
         return PROFILING_FAILED;
     }
-    if (msg.msgType != rsqMsgtype || msg.statusCode != DynProfMsgRsqCode::RSQ_SUCCESS) {
-        MSPROF_LOGE("server msg process fail, rsqMsgtype=%d statusCode=%d", msg.msgType, msg.statusCode);
+    if (rspMsg.msgType != rspMsgtype ||
+        rspMsg.statusCode > DynProfMsgProcRes::EXE_FAIL ||
+        rspMsg.msgDataLen >= DYN_PROF_RSP_MSG_MAX_LEN) {
+        MSPROF_LOGE("server msg error, rspMsgtype=%d statusCode=%d msgDataLen=%u",
+                    rspMsg.msgType, rspMsg.statusCode, rspMsg.msgDataLen);
         return PROFILING_FAILED;
     }
-    return PROFILING_SUCCESS;
+
+    // encapsulate tips.
+    std::string detail = (rspMsg.msgDataLen == 0) ? (".") : (", " + std::string(rspMsg.msgData, rspMsg.msgDataLen));
+    if (rspMsg.statusCode != DynProfMsgProcRes::EXE_SUCC) {
+        echoTips = "Execution fail" + detail;
+        return PROFILING_FAILED;
+    } else {
+        echoTips = "Execution success" + detail;
+        return PROFILING_SUCCESS;
+    }
 }
- 
+
 DynProfMngCli::DynProfMngCli() : enabled_(false), appPid_(0)
 {
 }
- 
+
 DynProfMngCli::~DynProfMngCli()
 {
 }
- 
+
 int DynProfMngCli::StartDynProfCli(const std::string &params)
 {
     MSVP_MAKE_SHARED0_RET(dynProfCli_, DyncProfMsgProcCli, PROFILING_FAILED);
@@ -279,7 +270,7 @@ int DynProfMngCli::StartDynProfCli(const std::string &params)
     MSPROF_LOGI("Dynamic profiling start client.");
     return PROFILING_SUCCESS;
 }
- 
+
 void DynProfMngCli::StopDynProfCli()
 {
     if (dynProfCli_ != nullptr) {
@@ -287,27 +278,70 @@ void DynProfMngCli::StopDynProfCli()
     }
     MSPROF_LOGI("Dynamic profiling stop client.");
 }
- 
+
+int DynProfMngCli::GetRealAppPid(int pid)
+{
+    // get all dynamic profiling server pid
+    CHAR_PTR end = nullptr;
+    constexpr int base = 10;
+    std::vector<int> sockPids;
+    std::vector<std::string> fileNameList;
+    std::string homeDir = Utils::IdeGetHomedir();
+    Utils::GetChildFilenames(homeDir, fileNameList);
+    for (auto fileName : fileNameList) {
+        std::string filePath = homeDir + MSVP_SLASH + fileName;
+        if (!Utils::IsSocketFile(filePath)) {
+            continue;
+        }
+        size_t pos = filePath.find(DYN_PROF_SOCK_UNIX_DOMAIN);
+        if (pos == std::string::npos) {
+            continue;
+        }
+        std::string pidStr = filePath.substr(pos + DYN_PROF_SOCK_UNIX_DOMAIN.size());
+        int pid = std::strtol(pidStr.c_str(), &end, base);
+        sockPids.push_back(pid);
+    }
+
+    // get current process child pid
+    std::vector<int> childPids = Utils::GetChildPid(pid);
+    childPids.insert(childPids.begin(), pid);
+
+    // get intersection pid
+    std::vector<int> appPids;
+    for (auto childPid : childPids) {
+        for (auto sockPid : sockPids) {
+            if (childPid == sockPid) {
+                appPids.push_back(childPid);
+            }
+        }
+    }
+    if (appPids.empty()) {
+        MSPROF_LOGE("Dynamic profiling get server socket pid fail.");
+        return 0;
+    }
+    return appPids[0];
+}
+
 void DynProfMngCli::SetAppPid(int pid)
 {
     appPid_ = pid;
 }
- 
+
 int DynProfMngCli::GetAppPid()
 {
     return appPid_;
 }
- 
+
 void DynProfMngCli::EnableMode()
 {
     enabled_ = true;
 }
- 
+
 bool DynProfMngCli::IsEnableMode()
 {
     return enabled_;
 }
- 
+
 std::string DynProfMngCli::ConstructEnv()
 {
     if (enabled_) {
@@ -316,7 +350,7 @@ std::string DynProfMngCli::ConstructEnv()
         return "";
     }
 }
- 
+
 void DynProfMngCli::WaitQuit()
 {
     if (dynProfCli_ != nullptr) {
