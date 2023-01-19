@@ -153,7 +153,6 @@ class TestExportCommand(unittest.TestCase):
                 mock.patch(NAMESPACE + ".ExportCommand._add_export_type"), \
                 mock.patch(NAMESPACE + ".ExportCommand._check_index_id"), \
                 mock.patch(NAMESPACE + ".ExportCommand._check_model_id"), \
-                mock.patch(NAMESPACE + ".DataAnalysisFactory.run"), \
                 mock.patch("msinterface.msprof_timeline" + ".MsprofIteration.get_iteration_time",
                            return_value=100), \
                 mock.patch(NAMESPACE + ".PathManager.get_summary_dir", return_value=""), \
