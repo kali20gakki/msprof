@@ -6,7 +6,6 @@ import json
 import logging
 import os
 
-from analyzer.data_analysis_factory import DataAnalysisFactory
 from analyzer.scene_base.profiling_scene import ProfilingScene
 from common_func.ai_stack_data_check_manager import AiStackDataCheckManager
 from common_func.common import error
@@ -411,8 +410,6 @@ class ExportCommand:
             }
             file_dispatch = FileDispatch(sample_json)
             file_dispatch.dispatch_calculator()
-            analysis_factory = DataAnalysisFactory(sample_json)
-            analysis_factory.run()
 
         if self.command_type == MsProfCommonConstant.SUMMARY:
             check_path_valid(PathManager.get_summary_dir(result_dir), True)
