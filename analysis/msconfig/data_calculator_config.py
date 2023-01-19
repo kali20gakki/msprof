@@ -70,4 +70,34 @@ class DataCalculatorConfig(MetaConfig):
             ('path', 'mscalculate.ts_task.ai_cpu.aicpu_from_ts'),
             ('chip_model', '1')
         ]
+        , 'TaskSchedulerCalculator': [
+            ('path', 'mscalculate.data_analysis.task_scheduler_calculator'),
+            ('chip_model', '0'),
+            ('level', '13')
+        ]
+        , 'OpTaskSchedulerCalculator': [
+            ('path', 'mscalculate.data_analysis.op_task_scheduler_calculator'),
+            ('chip_model', '0'),
+            ('level', '13')
+        ]
+        , 'ParseAiCoreOpSummaryCalculator': [
+            ('path', 'mscalculate.data_analysis.parse_aicore_op_summary_calculator'),
+            ('chip_model', '0,1,2,3,4,5,7'),
+            ('level', '14')
+        ]
+        , 'OpSummaryOpSceneCalculator': [
+            ('path', 'mscalculate.data_analysis.op_summary_op_scene_calculator'),
+            ('chip_model', '0,1,2,3,4,5,7'),
+            ('level', '14')
+        ]
+        , 'MergeOpCounterCalculator': [
+            ('path', 'mscalculate.data_analysis.merge_op_counter_calculator'),
+            ('chip_model', '0,1,2,3,4,5,7'),
+            ('level', '14')
+        ]
+        , 'OpCounterOpSceneCalculator': [
+            ('path', 'mscalculate.data_analysis.op_counter_op_scene_calculator'),
+            ('chip_model', '0,1,2,3,4,5,7'),
+            ('level', '14')
+        ]
     }
