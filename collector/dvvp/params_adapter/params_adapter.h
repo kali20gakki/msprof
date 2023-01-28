@@ -46,8 +46,6 @@ const int BIU_FREQ_MIN = 300;
 const int BIU_FREQ_MAX = 30000;
 const int HOST_SYS_USAGE_FREQ_MIN = 1;
 const int HOST_SYS_USAGE_FREQ_MAX = 50;
-const int L2_SAMPLE_FREQ_MIN = 1;
-const int L2_SAMPLE_FREQ_MAX = 100;
 const int APP_PID_MIN = 1;
 const int APP_PID_MAX = 2147483647;
 const int ACC_PMU_MODE_THRED = 5000; // Check
@@ -78,7 +76,6 @@ enum InputCfg {
     INPUT_CFG_COM_HCCL,
     INPUT_CFG_COM_L2,
     INPUT_CFG_COM_AICPU,
-    INPUT_CFG_COM_L2_SAMPLE_FREQ,
     // System-device
     INPUT_CFG_COM_SYS_DEVICES = 50,
     INPUT_CFG_COM_SYS_PERIOD,

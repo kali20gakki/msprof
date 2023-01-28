@@ -160,10 +160,6 @@ void ParamsAdapterAclJson::GenAclJsonContainer(SHARED_PTR_ALIA<ProfAclConfig> ac
     if (biuFreqParam.compare("0") != 0) {
         paramContainer_[INPUT_CFG_COM_BIU_FREQ] = biuFreqParam;
     }
-    std::string l2FreqParam = std::to_string(aclCfg->l2_freq());
-    if (l2FreqParam.compare("0") != 0) {
-        paramContainer_[INPUT_CFG_COM_L2_SAMPLE_FREQ] = l2FreqParam;
-    }
     for (auto configOpt : aclJsonWholeConfig_) {
         if (!paramContainer_[configOpt].empty()) {
             setConfig_.insert(configOpt);

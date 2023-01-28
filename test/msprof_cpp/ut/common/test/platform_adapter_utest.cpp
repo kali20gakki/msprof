@@ -96,8 +96,7 @@ TEST_F(PlatformAdapterUtest, PlatformAdapterInterfaceModule1)
     PlatformAdapterInterfaceMgr->SetParamsForRuntime();
     PlatformAdapterInterfaceMgr->SetParamsForAICPU();
     PlatformAdapterInterfaceMgr->SetParamsForHCCL();
-    int l2CacheSampleFreq = 100;
-    PlatformAdapterInterfaceMgr->SetParamsForL2Cache(l2CacheSampleFreq);
+    PlatformAdapterInterfaceMgr->SetParamsForL2Cache();
     std::string metricsType;
     std::string events;
     ret = PlatformAdapterInterfaceMgr->GetMetricsEvents(metricsType, events);
