@@ -58,7 +58,9 @@ int main(int argc, const char **argv, const char **envp)
     signal(SIGINT, [](int signum) {
         MsprofManager::instance()->StopNoWait();
     });
-    CmdLog::instance()->CmdInfoLog("Start profiling....");
+    if (!DynProfMngCli::instance()->IsEnableMode()) {
+        CmdLog::instance()->CmdInfoLog("Start profiling....");
+    }
     ret = MsprofManager::instance()->MsProcessCmd();
     if (ret != PROFILING_SUCCESS) {
         CmdLog::instance()->CmdErrorLog("Running profiling failed.Please check slog for more info.");
