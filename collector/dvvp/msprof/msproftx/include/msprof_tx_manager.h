@@ -43,6 +43,8 @@ public:
     // destroy stamp
     void DestroyStamp(ACL_PROF_STAMP_PTR stamp) const;
 
+    int SetStampTagName(ACL_PROF_STAMP_PTR stamp, const char *tagName, uint16_t len) const;
+
     //  save category and name relation
     int SetCategoryName(uint32_t category, std::string categoryName) const;
 

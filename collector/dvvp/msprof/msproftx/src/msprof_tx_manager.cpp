@@ -117,6 +117,31 @@ void MsprofTxManager::DestroyStamp(ACL_PROF_STAMP_PTR stamp) const
     stampPool_->DestroyStamp(stamp);
 }
 
+int MsprofTxManager::SetStampTagName(ACL_PROF_STAMP_PTR stamp, const char *tagName, uint16_t len) const
+{
+    if (!isInit_) {
+        MSPROF_LOGE("[SetStampName]MsprofTxManager is not inited yet");
+        return PROFILING_FAILED;
+    }
+    if (stamp == nullptr || tagName == nullptr) {
+        MSPROF_LOGE("aclprofStamp or name is nullptr");
+        MSPROF_INPUT_ERROR("EK0001", std::vector<std::string>({"value", "param", "reason"}),
+            std::vector<std::string>({"nullptr", "stamp", "stamp and tagName can not be nullptr when set TagName"}));
+        return PROFILING_FAILED;
+    }
+    if (len >= MSPROF_ENGINE_MAX_TAG_LEN) {
+        MSPROF_LOGE("[SetStampName]msg len(%u) is invalid, must less then %d", len, MSPROF_ENGINE_MAX_TAG_LEN);
+        return PROFILING_FAILED;
+    }
+    auto ret = strncpy_s(stamp->stampTagName, MSPROF_ENGINE_MAX_TAG_LEN, tagName, len);
+    if (ret != EOK) {
+        MSPROF_LOGE("[SetStampName]strcpy_s message failed, ret is %u", ret);
+        return PROFILING_FAILED;
+    }
+    MSPROF_LOGD("[SetStampName]stamp set tagName:%s success.", stamp->stampTagName);
+    return PROFILING_SUCCESS;
+}
+
 // save category and name relation
 int MsprofTxManager::SetCategoryName(uint32_t category, std::string categoryName) const
 {
@@ -319,6 +344,15 @@ int MsprofTxManager::RangeStop(uint32_t rangeId) const
 int MsprofTxManager::ReportStampData(MsprofStampInstance *stamp) const
 {
     stamp->stampInfo.threadId = static_cast<uint32_t>(MmGetTid());
+    uint32_t tagNameLen = strnlen(stamp->stampTagName, MSPROF_ENGINE_MAX_TAG_LEN);
+    if (tagNameLen > 0) {
+        auto ret = strncpy_s(stamp->report.tag, MSPROF_ENGINE_MAX_TAG_LEN, stamp->stampTagName, tagNameLen);
+        if (ret != EOK) {
+            MSPROF_LOGE("[ReportStampData]strncpy_s tag name failed, ret is %u", ret);
+            return PROFILING_FAILED;
+        }
+        stamp->report.tag[tagNameLen] = '\0';
+    }
     auto ret = reporter_->Report(stamp->report);
     if (ret != PROFILING_SUCCESS) {
         MSPROF_LOGE("[ReportStampData] report profiling data failed.");
