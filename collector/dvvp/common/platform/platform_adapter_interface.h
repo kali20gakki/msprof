@@ -102,7 +102,7 @@ public:
     virtual void SetParamsForRuntime();
     virtual void SetParamsForAICPU();
     virtual void SetParamsForHCCL();
-    virtual void SetParamsForL2Cache(const int &samplingInterval);
+    virtual void SetParamsForL2Cache();
     virtual void SetParamsForAicMetrics(const std::string &mode, const std::string &metrics, int samplingInterval);
     virtual void SetParamsForAivMetrics(const std::string &mode, const std::string &metrics, int samplingInterval);
     virtual void SetParamsForDeviceSysCpuMemUsage(int samplingInterval);
