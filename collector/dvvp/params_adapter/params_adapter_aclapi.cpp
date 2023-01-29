@@ -128,9 +128,7 @@ void ParamsAdapterAclApi::ProfTaskCfgToContainer(const ProfConfig * apiCfg,
     ProfMetricsCfgToContainer(aicMetrics, dataTypeConfig, argsArr);
     if (dataTypeConfig & PROF_L2CACHE_MASK) {
         paramContainer_[INPUT_CFG_COM_L2] = MSVP_PROF_ON;
-        paramContainer_[INPUT_CFG_COM_L2_SAMPLE_FREQ] = argsArr[ACL_PROF_L2_SAMPLE_FREQ];
         setConfig_.insert(INPUT_CFG_COM_L2);
-        setConfig_.insert(INPUT_CFG_COM_L2_SAMPLE_FREQ);
     }
     if (dataTypeConfig & PROF_ACL_API) {
         paramContainer_[INPUT_CFG_COM_ASCENDCL] = MSVP_PROF_ON;

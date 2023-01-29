@@ -20,7 +20,6 @@ using namespace Collector::Dvvp::Plugin;
 using namespace Collector::Dvvp::Mmpa;
 // 32 * 1024 * 0.8  is the full threshold  of ai_core_sample
 constexpr uint32_t AI_CORE_SAMPLE_FULL_THRESHOLD = 32 * 1024 * 0.8;
-constexpr uint32_t VERSION_INFORMATION_0 = 0;
 
 std::map<std::string, AI_DRV_CHANNEL> g_channelMaps;
 
@@ -349,52 +348,6 @@ int DrvL2CacheTaskStart(int profDeviceId, AI_DRV_CHANNEL profChannel, const std:
     }
 
     MSPROF_EVENT("Succeeded to start profiling DrvL2CacheTaskStart, profDeviceId=%d, profChannel=%d",
-                 profDeviceId, static_cast<int>(profChannel));
-
-    return PROFILING_SUCCESS;
-}
-
-int DrvL2CacheSampleStart(int profDeviceId, AI_DRV_CHANNEL profChannel, const std::vector<std::string> &profEvents,
-                          int period)
-{
-    uint32_t configSize =
-        static_cast<uint32_t>(sizeof(TagTsL2CacheSampleConfig) + profEvents.size() * sizeof(uint32_t));
-    auto configP = static_cast<TagTsL2CacheSampleConfig *>(malloc(configSize));
-    if (configP == nullptr) {
-        return PROFILING_FAILED;
-    }
-
-    (void)memset_s(configP, configSize, 0, configSize);
-    configP->version = VERSION_INFORMATION_0;
-    configP->period = period;
-    MSPROF_EVENT("Set sample-based DrvL2CacheTask period=%d, version=%u", configP->period, configP->version);
-    configP->eventNum = static_cast<uint32_t>(profEvents.size());
-    std::string eventStr;
-    for (uint32_t i = 0; i < static_cast<uint32_t>(profEvents.size()); i++) {
-        configP->event[i] = static_cast<uint32_t>(strtol(profEvents[i].c_str(), nullptr, STRING_TO_LONG_WEIGHT));
-        (void)eventStr.append(profEvents[i] + ",");
-        MSPROF_LOGI("Receice DrvL2CacheTaskEvent EventId=%d, EventCode=0x%x", i, configP->event[i]);
-    }
-    MSPROF_EVENT("Begin to start sample-based profiling DrvL2CacheTaskStart, profDeviceId=%d, profChannel=%d",
-        profDeviceId, static_cast<int>(profChannel));
-    MSPROF_EVENT("Sample-based DrvL2CacheTaskStart, eventNum=%d, events=%s", configP->eventNum, eventStr.c_str());
-    prof_start_para_t profStartPara;
-    profStartPara.sample_period = 0;
-    profStartPara.real_time = PROFILE_REAL_TIME;
-    profStartPara.user_data = configP;
-    profStartPara.user_data_size = configSize;
-    profStartPara.channel_type = PROF_TS_TYPE;
-    int ret = DriverPlugin::instance()->MsprofDrvStart((uint32_t)profDeviceId, profChannel, &profStartPara);
-    free(configP);
-    configP = nullptr;
-    if (ret != PROF_OK) {
-        MSPROF_LOGE("Failed to start sample-based profiling DrvL2CacheTaskStart, profDeviceId=%d,"
-            " profChannel=%d, ret=%d",
-            profDeviceId, static_cast<int>(profChannel), ret);
-        return PROFILING_FAILED;
-    }
-
-    MSPROF_EVENT("Succeeded to start sample-based profiling DrvL2CacheTaskStart, profDeviceId=%d, profChannel=%d",
                  profDeviceId, static_cast<int>(profChannel));
 
     return PROFILING_SUCCESS;

@@ -457,13 +457,6 @@ void ArgsManager::AddL2Args()
     }
     Args l2 = {"l2", "L2 Cache acquisition switch. the default value is off.(Ascend310P, Ascend910)", OFF};
     argsList_.push_back(l2);
-    if (driverOnline_ && platform_ != PlatformType::CHIP_V4_1_0 && platform_ != PlatformType::CHIP_V4_2_0) {
-        return;
-    }
-    Args l2freq = {"l2-freq",
-                   "L2 Cache acquisition frequency, range 1 ~ 100, the default value is 100 Hz.(future-platform)",
-                   "100"};
-    argsList_.push_back(l2freq);
 }
 
 void ArgsManager::PrintHelp()
