@@ -125,7 +125,7 @@ bool DyncProfMsgProcCli::IsServerDisconnect(std::string &echoTips)
 {
     DynProfRspMsg rspMsg;
     ssize_t recvLen = recv(cliSockFd_, reinterpret_cast<VOID_PTR>(&rspMsg), sizeof(rspMsg), MSG_DONTWAIT);
-    if (recvLen == sizeof(rspMsg) &&
+    if (static_cast<size_t>(recvLen) == sizeof(rspMsg) &&
         rspMsg.msgType == DynProfMsgType::DISCONN_RSP &&
         rspMsg.msgDataLen < DYN_PROF_RSP_MSG_MAX_LEN) {
         echoTips = "Server disconnected, " + std::string(rspMsg.msgData, rspMsg.msgDataLen);
@@ -169,11 +169,15 @@ int DyncProfMsgProcCli::CreateDynProfClientSock()
     MSPROF_LOGI("Dynamic profiling client socket domain: %s.", sockPath.c_str());
     sockaddr_un sockAddr;
     sockAddr.sun_family = AF_UNIX;
-    (void)strncpy_s(sockAddr.sun_path, sizeof(sockAddr.sun_path) - 1, sockPath.c_str(), sockPath.size());
+    errno_t err = strncpy_s(sockAddr.sun_path, sizeof(sockAddr.sun_path) - 1, sockPath.c_str(), sockPath.size());
+    if (err != EOK) {
+        MSPROF_LOGE("Dynamic profiling client sockPath copy failed, err: %d, sockPath: %s", err, sockPath.c_str());
+        return PROFILING_FAILED;
+    }
 
     // connect socket
     (void)fcntl(sockFd, F_SETFL, fcntl(sockFd, F_GETFL, 0) | O_NONBLOCK);
-    int ret = connect(sockFd, (struct sockaddr*)&sockAddr, sizeof(sockAddr));
+    int ret = connect(sockFd, reinterpret_cast<sockaddr *>(&sockAddr), sizeof(sockAddr));
     if (ret == PROFILING_FAILED) {
         MSPROF_LOGE("Dynamic profiling client connect fail, ret=%d errno=%u.", ret, errno);
         close(sockFd);
@@ -215,9 +219,13 @@ int DyncProfMsgProcCli::SendMsgToServer(DynProfMsgType reqMsgtype, DynProfMsgTyp
     DynProfReqMsg reqMsg;
     reqMsg.msgType = reqMsgtype;
     reqMsg.msgDataLen = reqMsgParams.size();
-    (void)memcpy_s(reqMsg.msgData, sizeof(reqMsg.msgData) - 1, reqMsgParams.c_str(), reqMsgParams.size());
+    errno_t err = memcpy_s(reqMsg.msgData, sizeof(reqMsg.msgData) - 1, reqMsgParams.c_str(), reqMsgParams.size());
+    if (err != EOK) {
+        MSPROF_LOGE("Dynamic profiling client copy reqMsg failed, err: %d, reqMsg: %s", err, reqMsgParams.c_str());
+        return PROFILING_FAILED;
+    }
     ssize_t sendLen = write(cliSockFd_, reinterpret_cast<VOID_PTR>(&reqMsg), sizeof(reqMsg));
-    if (sendLen != sizeof(reqMsg)) {
+    if (static_cast<size_t>(sendLen) != sizeof(reqMsg)) {
         MSPROF_LOGE("cliSockFd_=%d write msg fail, sendLen=%d, errno=%u", cliSockFd_, sendLen, errno);
         return PROFILING_FAILED;
     }
@@ -225,7 +233,7 @@ int DyncProfMsgProcCli::SendMsgToServer(DynProfMsgType reqMsgtype, DynProfMsgTyp
     // receive message
     DynProfRspMsg rspMsg;
     ssize_t recvLen = read(cliSockFd_, reinterpret_cast<VOID_PTR>(&rspMsg), sizeof(rspMsg));
-    if (recvLen != sizeof(rspMsg)) {
+    if (static_cast<size_t>(recvLen) != sizeof(rspMsg)) {
         MSPROF_LOGE("cliSockFd_=%d read msg fail, recvLen=%d, errno=%u", cliSockFd_, recvLen, errno);
         return PROFILING_FAILED;
     }

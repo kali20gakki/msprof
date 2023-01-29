@@ -67,7 +67,7 @@ void ParserTransport::WriteDone()
     }
 }
 
-void ParserTransport::SetDevIdToAnalyzer(const std::string &devIdStr)
+void ParserTransport::SetDevIdToAnalyzer(const std::string &devIdStr) const
 {
     MSPROF_LOGI("ParserTransport SetDeviceId");
     if (analyzer_ != nullptr) {

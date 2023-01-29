@@ -85,7 +85,7 @@ void DyncProfMsgProcSrv::Run(const struct error_message::Context &errorContext)
     sockaddr_un clt_addr;
     socklen_t clt_addr_len = sizeof(clt_addr);
     while (srvStarted_) {
-        cliSockFd_ = accept(srvSockFd_, (struct sockaddr*)&clt_addr, &clt_addr_len);
+        cliSockFd_ = accept(srvSockFd_, reinterpret_cast<sockaddr *>(&clt_addr), &clt_addr_len);
         if (cliSockFd_ < 0) {
             if (errno == EAGAIN) {
                 continue;   // timeout
@@ -113,7 +113,12 @@ int DyncProfMsgProcSrv::DynProfServerCreateSock()
     MSPROF_LOGI("Dynamic profiling server socket domain: %s.", sockPath_.c_str());
     sockaddr_un sockAddr;
     sockAddr.sun_family = AF_UNIX;
-    (void)strncpy_s(sockAddr.sun_path, sizeof(sockAddr.sun_path) - 1, sockPath_.c_str(), sockPath_.size());
+    errno_t err = strncpy_s(sockAddr.sun_path, sizeof(sockAddr.sun_path) - 1, sockPath_.c_str(), sockPath_.size());
+    if (err != EOK) {
+        MSPROF_LOGE("Dynamic profiling server sockPath copy failed, err: %d, sockPath: %s", err, sockPath_.c_str());
+        return PROFILING_FAILED;
+    }
+
     MmUnlink(sockPath_);
     int ret = bind(sockFd, reinterpret_cast<struct sockaddr*>(&sockAddr), sizeof(sockAddr));
     if (ret != 0) {
@@ -144,14 +149,14 @@ void DyncProfMsgProcSrv::DynProfServerProcMsg()
     while (srvStarted_) {
         disconnTips = "Internal error.";
         ssize_t readLen = read(cliSockFd_, &recvMsg, sizeof(recvMsg));
-        if (readLen != sizeof(recvMsg) && errno == EAGAIN) {
-            if (!profHasStarted_ && ++recvIdleTimes > DYN_PROF_IDLE_LINK_HOLD_TIME) {
+        if (static_cast<size_t>(readLen) != sizeof(recvMsg) && errno == EAGAIN) {
+            if (!profHasStarted_ && (++recvIdleTimes > DYN_PROF_IDLE_LINK_HOLD_TIME)) {
                 MSPROF_LOGW("Dynamic profiling disconnet client, recvIdleTimes=%u.", recvIdleTimes);
                 disconnTips = "Idle link too long time.";
                 break;
             }
             continue;
-        } else if (readLen != sizeof(recvMsg)) {
+        } else if (static_cast<size_t>(readLen) != sizeof(recvMsg)) {
             MSPROF_LOGE("Dynamic profiling process message read fail, readLen=%d errno=%u.", readLen, errno);
             break;
         }
@@ -287,10 +292,14 @@ int DyncProfMsgProcSrv::DynProfServerRsqMsg(DynProfMsgType msgType, DynProfMsgPr
     rsqMsg.msgType = msgType;
     rsqMsg.statusCode = rsqCode;
     rsqMsg.msgDataLen = msgData.size();
-    (void)memcpy_s(rsqMsg.msgData, sizeof(rsqMsg.msgData) - 1, msgData.c_str(), msgData.size());
+    errno_t err = memcpy_s(rsqMsg.msgData, sizeof(rsqMsg.msgData) - 1, msgData.c_str(), msgData.size());
+    if (err != EOK) {
+        MSPROF_LOGE("Dynamic profiling server copy rsqMsg failed, err: %d, rsqMsg: %s", err, msgData.c_str());
+        return PROFILING_FAILED;
+    }
 
     ssize_t writeLen = write(cliSockFd_, &rsqMsg, sizeof(rsqMsg));
-    if (writeLen != sizeof(rsqMsg)) {
+    if (static_cast<size_t>(writeLen) != sizeof(rsqMsg)) {
         MSPROF_LOGW("Dynamic profiling response message fail, msgType=%u statusCode=%d writeLen=%d errno=%u.",
             msgType, rsqCode, writeLen, errno);
         return PROFILING_FAILED;
@@ -303,7 +312,7 @@ void DyncProfMsgProcSrv::NotifyClientDisconnet(const std::string &detailInfo)
     (void)DynProfServerRsqMsg(DynProfMsgType::DISCONN_RSP, DynProfMsgProcRes::EXE_SUCC, detailInfo);
 }
 
-DynProfMngSrv::DynProfMngSrv() : startTimes_(0)
+DynProfMngSrv::DynProfMngSrv() : startTimes_(0), started_(false)
 {
 }
 
