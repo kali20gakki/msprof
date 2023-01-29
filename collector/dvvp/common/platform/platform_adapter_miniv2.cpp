@@ -38,7 +38,7 @@ int PlatformAdapterMiniV2::Init(SHARED_PTR_ALIA<analysis::dvvp::message::Profile
         PLATFORM_SYS_DEVICE_DDR, PLATFORM_SYS_DEVICE_NIC, PLATFORM_SYS_DEVICE_DVPP};
     aicRunningFreq_ = "1250";
     sysCountFreq_ = "50";
-    l2CacheEvents_ = "0xFB,0xFC,0x9A,0xF6";
+    l2CacheEvents_ = "0xF6,0xFB,0xFC,0xBF,0x90,0x91,0x9C,0x9D";
     platformType_ = platformType;
     return PROFILING_SUCCESS;
 }

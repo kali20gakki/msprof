@@ -83,7 +83,7 @@ const std::map<PlatformType, std::string> L2_CACHE_PLATFORM_METRICS_MAP = {
 const std::map<std::string, std::string> L2_CACHE_METRICS_EVENTS_MAP = {
     {"HitRateAndVictimRate", "0x78,0x79,0x77,0x71,0x6a,0x6c,0x74,0x62"},
     {"HitRateAndVictimRateCloud", "0x5b,0x59,0x5c,0x7d,0x7e,0x71,0x79,0x7c"},
-    {"HitRateAndVictimRateAllocate", "0xFB,0xFC,0x9A,0xF6"}
+    {"HitRateAndVictimRateAllocate", "0xF6,0xFB,0xFC,0xBF,0x90,0x91,0x9C,0x9D"}
 };
 
 class ConfigManager : public analysis::dvvp::common::singleton::Singleton<ConfigManager> {

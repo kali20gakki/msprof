@@ -1527,20 +1527,9 @@ int ProfL2CacheTaskJob::Process()
 
     AddReader(collectionJobCfg_->comParams->params->job_id, collectionJobCfg_->comParams->devId,
         PROF_CHANNEL_L2_CACHE, filePath);
-    int ret;
-    PlatformType type = ConfigManager::instance()->GetPlatformType();
-    if (type == PlatformType::CHIP_V4_1_0 || type == PlatformType::CHIP_V4_2_0) {
-        ret = DrvL2CacheSampleStart(
-            collectionJobCfg_->comParams->devId,
-            PROF_CHANNEL_L2_CACHE,
-            *collectionJobCfg_->jobParams.events,
-            collectionJobCfg_->comParams->params->l2Cache_sample_freq);
-    } else {
-        ret = DrvL2CacheTaskStart(
-            collectionJobCfg_->comParams->devId,
-            PROF_CHANNEL_L2_CACHE,
-            *collectionJobCfg_->jobParams.events);
-    }
+    int ret = DrvL2CacheTaskStart(collectionJobCfg_->comParams->devId,
+                                  PROF_CHANNEL_L2_CACHE,
+                                  *collectionJobCfg_->jobParams.events);
     MSPROF_LOGI("start profiling L2 Cache, events:%s, ret=%d", eventsStr.c_str(), ret);
 
     FUNRET_CHECK_RET_VALUE(ret, PROFILING_SUCCESS, PROFILING_SUCCESS, ret);
