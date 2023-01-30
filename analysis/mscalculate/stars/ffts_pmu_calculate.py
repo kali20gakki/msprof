@@ -166,9 +166,9 @@ class FftsPmuCalculate(PmuCalculator, MsMultiProcess):
         if self._is_not_mix_main_core(data, data_type):
             block_dim = mix_block_dim
         if all([block_dim, core_num, int(self._freq)]):
-            total_time = total_cycle * 1000 / int(self._freq) / block_dim * \
+            total_time = total_cycle * 1000 * NumberConstant.NS_TO_US / int(self._freq) / block_dim * \
                          ((block_dim + core_num - 1) // core_num)
-        return round(total_time, NumberConstant.DECIMAL_ACCURACY)
+        return round(total_time, NumberConstant.ROUND_TWO_DECIMAL)
 
     def get_total_cycle_info(self, data: any, task_type: int) -> tuple:
         """
