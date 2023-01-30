@@ -118,7 +118,7 @@ class TestAiCoreSampleModel(unittest.TestCase):
         metrics = ['total_time(ms)', "mac_fp16_ratio", "mac_int8_ratio"]
         freq = 100
         metric_key = 'ai_core_metrics'
-        sql = 'SELECT cast(SUM((task_cyc*1000/(100))) as decimal(8,2)),' \
+        sql = 'SELECT cast(SUM((task_cyc*1000000/(100))) as decimal(8,2)),' \
               'cast(1.0*SUM(r49)/SUM(task_cyc) as decimal(8,2)),' \
               'cast(1.0*SUM(r4a)/SUM(task_cyc) as decimal(8,2)) ' \
               'FROM EventCount where coreid = ?'
