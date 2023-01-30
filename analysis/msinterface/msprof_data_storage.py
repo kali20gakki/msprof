@@ -141,7 +141,7 @@ class MsprofDataStorage:
         And the number of data records is proportional to the slope.
         And the start value is proportional to the total number of records.
         """
-        return (7 * count_line_level / 36000000 + 5.1) * row_line_level / 1000 + 9 * count_line_level / 2000000 - 2.5
+        return (7 * count_line_level / 36000000 + 5.1) * row_line_level / 1000 + 9 * count_line_level / 2000000
 
     @staticmethod
     def _make_export_file_name(params: dict, slice_times: int = 0, slice_switch=False) -> str:
@@ -257,6 +257,7 @@ class MsprofDataStorage:
         """
         list_length = len(self.data_list)
         str_length = len(json.dumps(self.data_list))
+        coefficient = math.ceil(str_length / (list_length * 80)) if list_length else 0
         # If an exception occurs, continue the calculation logic.
         try:
             if isinstance(limit_size, int) and limit_size >= 200:
@@ -265,7 +266,7 @@ class MsprofDataStorage:
         except (TypeError, ValueError) as err:
             logging.warning(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
         row_line_level = len(self.tid_set)
-        formula = MsprofDataStorage._calculate_loading_time(row_line_level, list_length)
+        formula = MsprofDataStorage._calculate_loading_time(row_line_level, list_length * coefficient)
         time_level = self._get_time_level(formula)
         slice_time = 2
         slice_method = LoadingTimeLevel.BAD_LEVEL.value
@@ -276,7 +277,7 @@ class MsprofDataStorage:
                 if slice_time > list_length:
                     return 0
                 slice_length = math.ceil(list_length / slice_time)
-                formula = MsprofDataStorage._calculate_loading_time(row_line_level, slice_length)
+                formula = MsprofDataStorage._calculate_loading_time(row_line_level, slice_length * coefficient)
                 time_level = self._get_time_level(formula)
                 slice_time += 1
         except ZeroDivisionError as err:

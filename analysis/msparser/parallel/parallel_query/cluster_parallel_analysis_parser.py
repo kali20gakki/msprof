@@ -56,9 +56,10 @@ class ClusterParallelAnalysisParser:
                 max_value = max(model_iteration_ids.keys())
                 message = f"Invalid arguments! The argument '--model-id' should be between {min_value} and {max_value}."
                 raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR, message)
-            if str(self._iteration_id) not in model_iteration_ids.get(self._model_id, []):
-                min_value = min(model_iteration_ids.get(self._model_id, []))
-                max_value = max(model_iteration_ids.get(self._model_id, []))
+            iteration_ids = model_iteration_ids.get(self._model_id, [])
+            if self._iteration_id not in iteration_ids:
+                min_value = min(iteration_ids)
+                max_value = max(iteration_ids)
                 message = f"Invalid arguments! " \
                           f"The argument '--iteration-id' should be between {min_value} and {max_value}."
                 raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR, message)

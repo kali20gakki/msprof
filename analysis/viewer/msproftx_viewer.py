@@ -82,7 +82,7 @@ class MsprofTxViewer:
         """
         self.init_model()
         try:
-            msproftx_data = self.model.get_all_data(self.configs.get('table'))
+            msproftx_data = self.model.get_summary_data()
             return self.configs.get('headers'), msproftx_data, len(msproftx_data)
         except (ValueError, IOError, TypeError) as error:
             logging.error(error, exc_info=Constant.TRACE_BACK_SWITCH)
