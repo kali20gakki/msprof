@@ -233,7 +233,7 @@ class AiStackDataCheckManager(DataCheckManager):
         :param device_id: device id
         :return: if contained msproftx data, true or false
         """
-        return cls.check_data_exist(result_dir, file_name_manager.get_msproftx_compiles(),
+        return cls.check_data_exist(result_dir, file_name_manager.get_msproftx_all_compiles(),
                                     device_id=device_id)
 
     @classmethod

@@ -30,7 +30,7 @@ class TestClusterParallelViewModel(unittest.TestCase):
     def test_get_model_iteration_ids_2(self):
         with mock.patch(NAMESPACE + ".DBManager.fetch_all_data", return_value=[[5, '1,3,4']]):
             with ClusterParallelViewModel("test") as _model:
-                self.assertEqual(_model.get_model_iteration_ids("test"), {5: ['1', '3', '4']})
+                self.assertEqual(_model.get_model_iteration_ids("test"), {5: [1, 3, 4]})
 
     def test_get_table_name_1(self):
         with mock.patch(NAMESPACE + ".DBManager.fetch_all_data", return_value=[]):

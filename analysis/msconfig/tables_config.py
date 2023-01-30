@@ -688,7 +688,8 @@ class TablesConfig(MetaConfig):
             ('start_time', 'INTEGER, null'),
             ('end_time', 'INTEGER, null'),
             ('message_type', 'INTEGER, null'),
-            ('message', 'TEXT, null')
+            ('message', 'TEXT, null'),
+            ('file_tag', 'INTEGER, null')
         ]
         , 'InterSocMap': [
             ('l2_buffer_bw_level', 'INTEGER, null'),
