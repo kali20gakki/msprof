@@ -66,7 +66,7 @@ class ClusterParallelViewModel(ViewModel):
         if not data_list:
             result
         for data in data_list:
-            result[data[0]] = data[1].split(',')
+            result[data[0]] = [int(iteration_id) for iteration_id in data[1].split(',')]
         return result
 
     def get_table_name(self: any) -> str:

@@ -15,6 +15,7 @@ from common_func.msprof_common import MsProfCommonConstant
 from common_func.msprof_common import get_path_dir
 from common_func.utils import Utils
 from msinterface.msprof_data_storage import MsprofDataStorage
+from viewer.association.framework_connect_acl import FrameworkToAcl
 
 
 class MsprofJobSummary:
@@ -76,8 +77,10 @@ class MsprofJobSummary:
 
     def _generate_json_file(self: any, sub_path: str) -> None:
         json_data = self.get_msprof_json_file(sub_path)
+        framework_connect_acl_data = FrameworkToAcl(self._output, json_data).add_connect_line()
         if json_data:
             json_data.extend(self._host_data)
+            json_data.extend(framework_connect_acl_data)
             timeline_dir = os.path.join(self._output, self.MSPROF_TIMELINE_DIR)
             if not os.path.exists(timeline_dir):
                 os.makedirs(timeline_dir, Constant.FOLDER_MASK)

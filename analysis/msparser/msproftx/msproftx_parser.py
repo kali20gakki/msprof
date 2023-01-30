@@ -35,18 +35,21 @@ class MsprofTxParser(IParser, MsMultiProcess):
 
     def __init__(self: any, file_list: dict, sample_config: dict) -> None:
         MsMultiProcess.__init__(self, sample_config)
-        self._file_list = file_list.get(DataTag.MSPROFTX, [])
+        self._file_list = {DataTag.MSPROFTX: file_list.get(DataTag.MSPROFTX, []),
+                           DataTag.MSPROFTX_TORCH: file_list.get(DataTag.MSPROFTX_TORCH, []),
+                           DataTag.MSPROFTX_CANN: file_list.get(DataTag.MSPROFTX_CANN, [])}
         self._project_path = sample_config.get(StrConstant.SAMPLE_CONFIG_PROJECT_PATH, '')
         self._model = MsprofTxModel(self._project_path, DBNameConstant.DB_MSPROFTX,
                                     [DBNameConstant.TABLE_MSPROFTX])
+        self._file_tag = DataTag.MSPROFTX
+        self._cur_file_list = []
         self._msproftx_data = []
-        self._file_list.sort(key=lambda x: int(x.split("_")[-1]))
 
     def read_binary_data(self: any, file_name: str) -> int:
         """
         parsing msproftx data and insert into msproftx.db
         """
-        calculate = OffsetCalculator(self._file_list, StructFmt.MSPROFTX_FMT_SIZE,
+        calculate = OffsetCalculator(self._cur_file_list, StructFmt.MSPROFTX_FMT_SIZE,
                                      self._project_path)
         msproftx_file = PathManager.get_data_file_path(self._project_path, file_name)
         check_file_readable(msproftx_file)
@@ -58,7 +61,7 @@ class MsprofTxParser(IParser, MsMultiProcess):
                     data_object = MsprofTxDecoder.decode(chunk)
                     self._msproftx_data.append(
                         data_object.id_data + (data_object.category, self.EVENT_DICT.get(data_object.event_type, ''))
-                        + data_object.mix_message + (data_object.message_type, data_object.message))
+                        + data_object.mix_message + (data_object.message_type, data_object.message, self._file_tag))
                 return NumberConstant.SUCCESS
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
             logging.error("%s: %s", file_name, err, exc_info=Constant.TRACE_BACK_SWITCH)
@@ -69,7 +72,7 @@ class MsprofTxParser(IParser, MsMultiProcess):
         parsing data file
         """
         try:
-            for file_name in self._file_list:
+            for file_name in self._cur_file_list:
                 if is_valid_original_data(file_name, self._project_path):
                     self._original_data_handler(file_name)
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
@@ -90,10 +93,14 @@ class MsprofTxParser(IParser, MsMultiProcess):
         main
         :return: None
         """
-        try:
-            if self._file_list:
+
+        for file_tag, file_list in self._file_list.items():
+            if file_list:
+                self._file_tag = file_tag.value
+                self._cur_file_list = sorted(file_list, key=lambda x: int(x.split("_")[-1]))
                 self.parse()
-                self.save()
+        try:
+            self.save()
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
             logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
 
