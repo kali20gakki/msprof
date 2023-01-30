@@ -188,6 +188,8 @@ class FileNameManagerConstant:
     ALL_FILE_TAG = "all_file.complete"
 
     MSPROFTX_FILE_PATTERN = r"^Msprof\.msproftx\.slice_\d+"
+    MSPROFTX_TORCH_FILE_PATTERN = r"^Msprof\.torch_op\.slice_\d+"
+    MSPROFTX_CANN_FILE_PATTERN = r"^Msprof\.torch_cann_op\.slice_\d+"
     MSPROF_JSON_FILE_PATTERN = r"^msprof_?\d?_?\d?_?\d?_?(slice)?_?\d?.json"
     MSPROFTX_JSON_FILE_PATTERN = r"^msprof_tx_?\d?_?\d?.json"
 
@@ -751,3 +753,29 @@ def get_parallel_strategy_compiles() -> tuple:
     :return: parallel strategy files regex
     """
     return (re.compile(FileNameManagerConstant.PARALLEL_STRATEGY_FILE_PATTERN),)
+
+
+def get_msproftx_torch_compiles() -> tuple:
+    """
+    get msproftx torch files regex compiles
+    :return: msproftx torch files regex
+    """
+    return (re.compile(FileNameManagerConstant.MSPROFTX_TORCH_FILE_PATTERN),)
+
+
+def get_msproftx_cann_compiles() -> tuple:
+    """
+    get msproftx cann files regex compiles
+    :return: msproftx cann files regex
+    """
+    return (re.compile(FileNameManagerConstant.MSPROFTX_CANN_FILE_PATTERN),)
+
+
+def get_msproftx_all_compiles() -> tuple:
+    """
+    get msproftx files regex compiles
+    :return: msproftx files regex
+    """
+    return (re.compile(FileNameManagerConstant.MSPROFTX_FILE_PATTERN),
+            re.compile(FileNameManagerConstant.MSPROFTX_TORCH_FILE_PATTERN),
+            re.compile(FileNameManagerConstant.MSPROFTX_CANN_FILE_PATTERN))

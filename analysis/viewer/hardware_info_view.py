@@ -23,11 +23,12 @@ def _get_llc_result_data(llc_data: list, sample_config: dict, llc_data_list: lis
     result_data['table'] = []
     llc_data_one = Utils.generator_to_list(i[1] * 100 for i in llc_data)
     llc_data_two = Utils.generator_to_list(i[2] for i in llc_data)
-    llc_data.insert(0, ("Average",
-                        float_calculate(
-                            [float_calculate(llc_data_one), llc_data_list], '/'),
-                        float_calculate(
-                            [float_calculate(llc_data_two), llc_data_list], '/')))
+    result_data['table'].append(OrderedDict([("Mode", result_data.get("mode")),
+                                             ("Task", "Average"),
+                                             ("Hit Rate(%)", float_calculate(
+                                                 [float_calculate(llc_data_one), llc_data_list], '/')),
+                                             ("Throughput(MB/s)", float_calculate(
+                                                 [float_calculate(llc_data_two), llc_data_list], '/'))]))
     for llc_slice in llc_data:
         result_data['table'].append(OrderedDict([("Mode", result_data.get("mode")),
                                                  ("Task", llc_slice[0]),

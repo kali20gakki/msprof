@@ -59,6 +59,8 @@ class DataTag(Enum):
     DATA_QUEUE = 45
     HOST_QUEUE = 46
     PARALLEL_STRATEGY = 47
+    MSPROFTX_TORCH = 48
+    MSPROFTX_CANN = 49
 
 
 @unique
