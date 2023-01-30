@@ -242,7 +242,7 @@ class TestAiCoreOpReport(unittest.TestCase):
     def test_get_ai_core_float_cols(self):
         with mock.patch(NAMESPACE + ".read_cpu_cfg", return_value={1: "r1", 2: "r2_ratio"}):
             res = AiCoreOpReport._get_ai_core_float_cols(["r1", "r2_time"])
-        self.assertEqual(res, ['round(r1, 6)', 'round(r2_time*1000.0, 6)'])
+        self.assertEqual(res, ['round(r1, 6)', 'round(r2_time, 6)'])
 
     def test_add_memory_bound(self):
         headers = ["mac_ratio", "vec_ratio", "mte2_ratio"]

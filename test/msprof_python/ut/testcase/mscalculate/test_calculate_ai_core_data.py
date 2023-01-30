@@ -63,7 +63,10 @@ class TestCalculateAiCoreData(unittest.TestCase):
         task_cyc = 26194
         pmu_data = [26194, 0, 1421]
         InfoConfReader()._info_json = {"DeviceInfo": [{'aic_frequency': '1150'}]}
-        with mock.patch(NAMESPACE + '.CalculateAiCoreData._CalculateAiCoreData__cal_addition'):
+        with mock.patch(NAMESPACE + '.CalculateAiCoreData._CalculateAiCoreData__cal_addition',
+                        return_value={'abc': [1421],
+                                      'bw': [], 'ub_read_bw(GB/s)': [0.0],
+                                      'vec_ratio': [1.0]}):
             key = CalculateAiCoreData('123')
             result = key.compute_ai_core_data(events_name_list, ai_core_profiling_events, task_cyc, pmu_data)
         self.assertEqual(result, (['vec_ratio', 'ub_read_bw(GB/s)', 'abc'], {'abc': [1421],

@@ -128,9 +128,7 @@ class AiCoreOpReport:
                 if col in all_float_cols:
                     # keep six decimal places for ai core float data
                     ai_core_float_cols[index] = "round({0}, {1})".format(col, NumberConstant.DECIMAL_ACCURACY)
-                    if col.find("_time") != -1:
-                        ai_core_float_cols[index] = "round({0}*{1}, {2})".format(col, NumberConstant.NS_TO_US,
-                                                                                 NumberConstant.DECIMAL_ACCURACY)
+
         return ai_core_float_cols
 
     @staticmethod
@@ -157,9 +155,18 @@ class AiCoreOpReport:
         """
         ai_core_data = cls.get_ai_core_op_summary_data(project_path, db_path, configs)
         data = cls.get_ai_cpu_op_summary_data(project_path, db_path, ai_core_data, configs)
-        cls.delete_useless_cols(configs.get('headers'), data)
-        add_aicore_units(configs.get('headers'))
-        return configs.get('headers'), data, len(data)
+        headers = configs.get('headers')
+        cls.delete_useless_cols(headers, data)
+        cls.sort_summary_data(headers, data)
+        add_aicore_units(headers)
+        return headers, data, len(data)
+
+    @classmethod
+    def sort_summary_data(cls, headers, data):
+        task_start_index = cls.START_TIME_INDEX
+        if StrConstant.TASK_START_TIME in headers:
+            task_start_index = headers.index(StrConstant.TASK_START_TIME)
+        data.sort(key=lambda x: x[task_start_index])
 
     @classmethod
     def get_ai_cpu_op_summary_data(cls: any, project_path: str, db_path: str, *args: any) -> list:
@@ -200,10 +207,6 @@ class AiCoreOpReport:
                 ai_cpu_data += (Constant.NA,) * (len(data[0]) - len(ai_cpu_data))
                 hardware_op_datas[index] = list(ai_cpu_data)
         data.extend(hardware_op_datas)
-        task_start_index = cls.START_TIME_INDEX
-        if StrConstant.TASK_START_TIME in data[0]:
-            task_start_index = data[0].index(StrConstant.TASK_START_TIME)
-        data.sort(key=lambda x: x[task_start_index])
         return data
 
     @classmethod

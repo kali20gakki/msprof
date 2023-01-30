@@ -295,6 +295,7 @@ class Constant:
         "scalar_ratio": PmuCalculateFunc.scalar_ratio,
         "fixpipe_ratio": PmuCalculateFunc.fixpipe_ratio,
         "mte1_ratio": PmuCalculateFunc.mte1_ratio,
+        "mte1_active_ratio": PmuCalculateFunc.mte1_ratio,
         "mte2_ratio": PmuCalculateFunc.mte2_ratio,
         "mte3_ratio": PmuCalculateFunc.mte3_ratio,
         "icache_miss_rate": PmuCalculateFunc.icache_miss_rate,
@@ -340,7 +341,7 @@ class Constant:
     AICORE_PIPE_LIST = ["vec_time", "mac_time", "scalar_time", "mte1_time", "mte2_time", "mte3_time"]
 
     AICORE_METRICS_LIST = {
-        PMU_PIPE_EXCT: "mac_ratio,scalar_ratio,fixpipe_ratio,mte1_ratio,"
+        PMU_PIPE_EXCT: "cube_ratio,scalar_ratio,fixpipe_ratio,mte1_active_ratio,"
                        "mte2_ratio,icache_miss_rate",
         PMU_ARITH: "mac_fp16_ratio,mac_int8_ratio,vec_fp32_ratio,"
                    "vec_fp16_ratio,vec_int32_ratio,vec_misc_ratio",

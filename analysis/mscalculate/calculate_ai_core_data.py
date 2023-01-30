@@ -110,7 +110,7 @@ class CalculateAiCoreData:
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
             logging.error("%s", str(err), exc_info=Constant.TRACE_BACK_SWITCH)
             return events_name_list, ai_core_profiling_events
-        self.__cal_addition(events_name_list, ai_core_profiling_events, task_cyc)
+        ai_core_profiling_events = self.__cal_addition(events_name_list, ai_core_profiling_events, task_cyc)
         return events_name_list, ai_core_profiling_events
 
     def add_vector_data(self: any, events_name_list: list, ai_core_profiling_events: dict, task_cyc: int) -> None:
@@ -134,7 +134,7 @@ class CalculateAiCoreData:
             ai_core_profiling_events.setdefault("vector_fops",
                                                 []).append(vector_fops)
 
-    def __cal_addition(self: any, events_name_list: list, ai_core_profiling_events: dict, task_cyc: int) -> None:
+    def __cal_addition(self: any, events_name_list: list, ai_core_profiling_events: dict, task_cyc: int) -> dict:
         """
         calculate additional ai core metrics
         :return:
@@ -158,7 +158,7 @@ class CalculateAiCoreData:
             ai_core_profiling_events.pop("cube_fops")
             ai_core_profiling_events.pop("mac_fp16_ratio")
             ai_core_profiling_events.pop("mac_int8_ratio")
-            ai_core_profiling_events.setdefault("mac_ratio", []).append(mac_ratio)
+            ai_core_profiling_events = {"cube_ratio": [mac_ratio], **ai_core_profiling_events}
 
         names = [
             "mte1_iq_full_ratio", "mte2_iq_full_ratio", "mte3_iq_full_ratio",
@@ -182,3 +182,4 @@ class CalculateAiCoreData:
                 ai_core_profiling_events.setdefault("icache_miss_rate",
                                                     []).append(icache_miss_rate)
         self.add_vector_data(events_name_list, ai_core_profiling_events, task_cyc)
+        return ai_core_profiling_events
