@@ -301,6 +301,7 @@ int DyncProfMsgProcSrv::DynProfServerRsqMsg(DynProfMsgType msgType, DynProfMsgPr
 void DyncProfMsgProcSrv::NotifyClientDisconnet(const std::string &detailInfo)
 {
     (void)DynProfServerRsqMsg(DynProfMsgType::DISCONN_RSP, DynProfMsgProcRes::EXE_SUCC, detailInfo);
+    DynProfSrvProcQuit();
 }
 
 DynProfMngSrv::DynProfMngSrv() : startTimes_(0)
