@@ -131,9 +131,9 @@ class AicCalculator(PmuCalculator, MsMultiProcess):
         core_num = self._core_num_dict.get(data_type)
         block_dim = self._get_current_block('block_dim', data)
         if all([block_dim, core_num, int(self._freq)]):
-            total_time = data.total_cycle * 1000 / int(self._freq) / block_dim * \
+            total_time = data.total_cycle * 1000 * NumberConstant.NS_TO_US / int(self._freq) / block_dim * \
                          ((block_dim + core_num - 1) // core_num)
-        return round(total_time, NumberConstant.DECIMAL_ACCURACY)
+        return round(total_time, NumberConstant.ROUND_TWO_DECIMAL)
 
     def save(self: any) -> None:
         """
