@@ -403,13 +403,9 @@ int InfoJson::AddDeviceInfo(SHARED_PTR_ALIA<InfoMain> infoMain)
         }
         infoDevice->set_ai_cpu(aiCpu);
         SetHwtsFrequency(*infoDevice);
-        if (ConfigManager::instance()->GetPlatformType() == PlatformType::CHIP_V4_1_0) {
-            infoDevice->set_aic_frequency("1500");
-            infoDevice->set_aiv_frequency("1500");
-        } else {
-            infoDevice->set_aic_frequency(Analysis::Dvvp::Driver::DrvGeAicFrq(devIndexId));
-            infoDevice->set_aiv_frequency("1000");
-        }
+        std::string freq = Analysis::Dvvp::Driver::DrvGeAicFrq(devIndexId);
+        infoDevice->set_aic_frequency(freq);
+        infoDevice->set_aiv_frequency(freq);
     }
     infoMain->set_devices(hostIdSerial_);
     MSPROF_LOGI("End to AddDeviceInfo in info.json, hostIds: %s.", hostIdSerial_.c_str());
