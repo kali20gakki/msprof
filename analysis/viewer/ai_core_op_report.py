@@ -31,7 +31,7 @@ class AiCoreOpReport:
     AI_CORE_UNUSED_COLS = ["job_id", "host_id", "device_id", "task_id", "stream_id", "index_id",
                            "model_id", "overflow", "overflowed_cycles", "device_id", "batch_id",
                            "task_type", "core_type", "subtask_id", "start_time", "end_time", "ffts_type"]
-    UNSUPPORTED_HEADER = ["aic_vec_ratio", "aic_vec_time", "aiv_mac_ratio", "aiv_mac_time", "aiv_mte1_ratio",
+    UNSUPPORTED_HEADER = {"aic_vec_ratio", "aic_vec_time", "aiv_mac_ratio", "aiv_mac_time", "aiv_mte1_ratio",
                           "aic_ub_read_bw", "aiv_mte1_time",
                           "aic_ub_write_bw", "aiv_l1_read_bw", "aiv_l1_write_bw",
                           "aic_l0c_read_bw", "aic_l0c_write_bw", "aiv_l0a_read_bw",
@@ -41,11 +41,12 @@ class AiCoreOpReport:
                           "aic_ub_write_bw_vector", "aiv_mac_fp16_ratio", 'aiv_mac_int8_ratio',
                           "aic_vec_fp32_ratio", "aic_vec_fp16_ratio", "aic_vec_int32_ratio",
                           "aic_vec_misc_ratio", "aic_vec_fp16_128lane_ratio", "aic_vec_fp16_64lane_ratio",
-                          "aic_vec_bankgroup_cflt_ratio", "aic_vec_bank_cflt_ratio", "aic_vec_resc_cflt_ratio"]
+                          "aic_vec_bankgroup_cflt_ratio", "aic_vec_bank_cflt_ratio", "aic_vec_resc_cflt_ratio"}
     ADDITION_HEADER = ["Context ID", "Mix Block Dim", "aiv_time", "aiv_total_time"]
     TENSOR_HEADERS = [
         "Input Shapes", "Input Data Types", "Input Formats", "Output Shapes", "Output Data Types", "Output Formats"
     ]
+    SPECIAL_AI_CORE_HEAD = ("_extra",)
 
     OPERATOR_UNUSED_HEADERS = ["Model Name", "Infer ID"]
     HEADERS_WITH_NO_GE_DATA = ["Op Name", "OP Type", "Block Dim", "Mix Block Dim"]
@@ -91,7 +92,8 @@ class AiCoreOpReport:
         """
         all_headers = []
         for sub in DBManager.fetch_all_data(curs, "PRAGMA table_info({})".format(table_name)):
-            all_headers.append(sub[1])
+            if sub[1] not in AiCoreOpReport.UNSUPPORTED_HEADER:
+                all_headers.append(sub[1])
         return [sub for sub in all_headers if sub not in unused_headers]
 
     @staticmethod
@@ -272,6 +274,13 @@ class AiCoreOpReport:
         return summary_data
 
     @classmethod
+    def delete_special_tag(cls, ai_core_head_list: list) -> list:
+        for index, header in enumerate(ai_core_head_list):
+            for sp_header in AiCoreOpReport.SPECIAL_AI_CORE_HEAD:
+                ai_core_head_list[index] = header.replace(sp_header, "")
+        return ai_core_head_list
+
+    @classmethod
     def _get_hardware_op_datas(cls: any, curs: any) -> list:
         aicpu_data = cls._get_hardware_op_sql_data(curs,
                                                    (Constant.TASK_TYPE_AI_CPU, ))
@@ -360,7 +369,7 @@ class AiCoreOpReport:
             ai_core_used_cols = cls._get_ai_core_float_cols(ai_core_headers)
             ai_core_data = DBManager.fetch_all_data(curs, cls._get_ai_core_table_sql(ai_core_used_cols))
             ai_core_group_dict = cls._group_by_stream_task(ai_core_data)
-            headers += ai_core_headers
+            headers.extend(cls.delete_special_tag(ai_core_headers))
             return ai_core_group_dict, headers
         return {}, headers
 

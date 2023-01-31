@@ -341,8 +341,8 @@ class Constant:
     AICORE_PIPE_LIST = ["vec_time", "mac_time", "scalar_time", "mte1_time", "mte2_time", "mte3_time"]
 
     AICORE_METRICS_LIST = {
-        PMU_PIPE_EXCT: "cube_ratio,scalar_ratio,fixpipe_ratio,mte1_active_ratio,"
-                       "mte2_ratio,icache_miss_rate",
+        PMU_PIPE_EXCT: "mac_ratio_extra,scalar_ratio,mte1_ratio_extra,"
+                       "mte2_ratio,fixpipe_ratio,icache_miss_rate",
         PMU_ARITH: "mac_fp16_ratio,mac_int8_ratio,vec_fp32_ratio,"
                    "vec_fp16_ratio,vec_int32_ratio,vec_misc_ratio",
         PMU_PIPE: "vec_ratio,mac_ratio,scalar_ratio,mte1_ratio,"
