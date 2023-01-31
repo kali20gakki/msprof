@@ -13,24 +13,24 @@ class HcclDto:
 
     def __init__(self: any) -> None:
         self._op_name = Constant.NA
-        self._iteration = 0
+        self._iteration = Constant.DEFAULT_VALUE
         self._hccl_name = Constant.NA
-        self._first_timestamp = 0
-        self._plane_id = 0
-        self._timestamp = 0
-        self._duration = 0
+        self._first_timestamp = Constant.DEFAULT_VALUE
+        self._plane_id = Constant.DEFAULT_VALUE
+        self._timestamp = Constant.DEFAULT_VALUE
+        self._duration = Constant.DEFAULT_VALUE
         self._args = {}
         self._bandwidth = Constant.NA
-        self._stage = -1
-        self._step = -1
-        self._stream_id = -1
-        self._task_id = -1
+        self._stage = Constant.DEFAULT_INVALID_VALUE
+        self._step = Constant.DEFAULT_INVALID_VALUE
+        self._stream_id = Constant.DEFAULT_INVALID_VALUE
+        self._task_id = Constant.DEFAULT_INVALID_VALUE
         self._task_type = Constant.NA
-        self._src_rank = -1
-        self._dst_rank = -1
-        self._notify_id = -1
+        self._src_rank = Constant.DEFAULT_INVALID_VALUE
+        self._dst_rank = Constant.DEFAULT_INVALID_VALUE
+        self._notify_id = Constant.DEFAULT_INVALID_VALUE
         self._transport_type = Constant.NA
-        self._size = -1
+        self._size = Constant.DEFAULT_INVALID_VALUE
 
     @property
     def op_name(self: any) -> str:
@@ -98,6 +98,8 @@ class HcclDto:
 
     @property
     def bandwidth(self: any) -> any:
+        if self._args.get('bandwidth', self._bandwidth) == Constant.NA:
+            return self._args.get('bandwidth(Gbyte/s)', self._bandwidth)
         return self._args.get('bandwidth', self._bandwidth)
 
     @property
@@ -138,4 +140,6 @@ class HcclDto:
 
     @property
     def size(self: any) -> any:
+        if self._args.get('size', self._size) == Constant.DEFAULT_INVALID_VALUE:
+            return self._args.get('size(Byte)', self._size)
         return self._args.get('size', self._size)
