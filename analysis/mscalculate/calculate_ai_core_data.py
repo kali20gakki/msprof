@@ -158,7 +158,7 @@ class CalculateAiCoreData:
             ai_core_profiling_events.pop("cube_fops")
             ai_core_profiling_events.pop("mac_fp16_ratio")
             ai_core_profiling_events.pop("mac_int8_ratio")
-            ai_core_profiling_events = {"cube_ratio": [mac_ratio], **ai_core_profiling_events}
+            ai_core_profiling_events = {"mac_ratio_extra": [mac_ratio], **ai_core_profiling_events}
 
         names = [
             "mte1_iq_full_ratio", "mte2_iq_full_ratio", "mte3_iq_full_ratio",
