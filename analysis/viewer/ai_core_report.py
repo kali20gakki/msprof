@@ -11,6 +11,7 @@ from common_func.ms_constant.str_constant import StrConstant
 from common_func.msvp_constant import MsvpConstant
 from common_func.platform.chip_manager import ChipManager
 from common_func.utils import Utils
+from viewer.ai_core_op_report import AiCoreOpReport
 
 
 def get_core_sample_data(result_dir: str, db_name: str, device_id: str, params: dict) -> tuple:
@@ -38,6 +39,7 @@ def _get_output_event_counter(result: list, core_id: str) -> list:
             tmp[i[0]] = [float(StrConstant.ACCURACY % i[-1]) if is_number(str(i[-1])) else i[-1]]
     remove_redundant(tmp)
     headers = ["Core ID"] + list(tmp.keys())
+    headers = AiCoreOpReport.delete_special_tag(headers)
     result = [Utils.generator_to_list("Core{}".format(i[0]) for i in core_id) + ["Average"]]
     try:
         result.extend((value + [float(StrConstant.ACCURACY % (sum(value) / len(value)))]) for value in tmp.values())
