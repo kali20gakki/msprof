@@ -91,7 +91,7 @@ MSVP_PROF_API aclError aclprofInit(const char *profilerResultPath, size_t length
 
 /**
  * @ingroup AscendCL
- * @brief set config value 
+ * @brief set config value
  *
  * @param  configType [IN]  config type
  * @param  val [IN]  pointer to config

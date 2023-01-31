@@ -32,7 +32,7 @@ public:
     int SendBuffer(CONST_VOID_PTR buffer, int length) override;
     int CloseSession() override;
     void WriteDone() override;
-    void SetDevIdToAnalyzer(const std::string &devIdStr);
+    void SetDevIdToAnalyzer(const std::string &devIdStr) const;
 
 private:
     SHARED_PTR_ALIA<Analysis::Dvvp::Analyze::Analyzer> analyzer_;

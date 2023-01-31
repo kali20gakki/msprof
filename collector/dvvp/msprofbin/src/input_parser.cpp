@@ -171,7 +171,7 @@ void Args::SetDetail(const std::string &detail)
     detail_ = detail;
 }
 
-ArgsManager::ArgsManager() : driverOnline_(false)
+ArgsManager::ArgsManager() : driverOnline_(false), platform_(PlatformType::END_TYPE)
 {
 }
 

@@ -142,7 +142,7 @@ bool ParamsAdapterMsprof::ParamsCheckMsprofV1(InputCfg inputCfg, std::string cfg
     return ret;
 }
 
-int ParamsAdapterMsprof::ParamsCheckDynProf()
+int ParamsAdapterMsprof::ParamsCheckDynProf() const
 {
     // --dynamic != on, no need check params
     if (paramContainer_[INPUT_CFG_MSPROF_DYNAMIC] != MSPROF_SWITCH_ON) {
