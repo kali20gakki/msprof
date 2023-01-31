@@ -14,8 +14,7 @@ class TestDataAnalysisFactory(unittest.TestCase):
         check = DataAnalysisFactory(CONFIG)
         result = check.parse_data()
         self.assertEqual(result, None)
-        with mock.patch('analyzer.update_aicore.UpdateAICoreData.run'), \
-                mock.patch('analyzer.scene_base.op_summary_op_scene.OpSummaryOpScene.run'), \
+        with mock.patch('analyzer.scene_base.op_summary_op_scene.OpSummaryOpScene.run'), \
                 mock.patch('analyzer.scene_base.op_counter_op_scene.OpCounterOpScene.run'):
             check = DataAnalysisFactory(CONFIG)
             check.scene = 'single_op'

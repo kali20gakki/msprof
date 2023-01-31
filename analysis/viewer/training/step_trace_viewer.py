@@ -23,7 +23,6 @@ from common_func.trace_view_header_constant import TraceViewHeaderConstant
 from common_func.trace_view_manager import TraceViewManager
 from common_func.utils import Utils
 from profiling_bean.db_dto.step_trace_dto import IterationRange
-from saver.training.training_trace_saver import TrainingTraceSaver
 
 
 def catch_exception(fun: any) -> any:
@@ -204,37 +203,12 @@ class StepTraceViewer:
               "(case when data_aug_bound={2} then 'N/A' else data_aug_bound*{0} end), " \
               "(case when model_id={3} then 'N/A' else model_id end) " \
               " from {1} where device_id=?".format(
-            StepTraceConstant.syscnt_to_micro(),
-            DBNameConstant.TABLE_TRAINING_TRACE,
-            NumberConstant.NULL_NUMBER,
-            NumberConstant.DEFAULT_MODEL_ID)
+               StepTraceConstant.syscnt_to_micro(),
+               DBNameConstant.TABLE_TRAINING_TRACE,
+               NumberConstant.NULL_NUMBER,
+               NumberConstant.DEFAULT_MODEL_ID)
         data = DBManager.fetch_all_data(curs, sql, (message["device_id"],))
         return data
-
-    @staticmethod
-    def query_top_total(message: any) -> dict:
-        """
-        Rewrite gRPC QueryTopTotal method.
-        Return a QueryTopTotalResponse protobuf message for client's request
-        defined by QueryTopTotalResponse.
-        """
-        if not message:
-            logging.error("query_top_total GRPC message empty")
-            return {}
-        resp = {}
-        sql_path = message["sql_path"]
-        try:
-            conn = TrainingTraceSaver.create_trace_conn(sql_path)
-        except sqlite3.Error as err:
-            logging.error(err, exc_info=Constant.TRACE_BACK_SWITCH)
-            return resp
-        try:
-            values = StepTraceViewer.__count_trace(conn)
-        except sqlite3.Error as err:
-            logging.error(err, exc_info=Constant.TRACE_BACK_SWITCH)
-            return resp
-        resp["total_count"] = values
-        return resp
 
     @staticmethod
     def get_model_pid(data: list) -> int:
@@ -490,20 +464,6 @@ class StepTraceViewer:
             StepTraceViewer.format_reduce_json(data, trace_parm, pid, tid, result_data)
 
         return json.dumps(result_data)
-
-    @staticmethod
-    def __count_trace(conn: any) -> any:
-        """Select date from traing_trace limited by count and sort"""
-        curs = conn.cursor()
-        sql = "SELECT COUNT(*) FROM {0} group by device_id".format(DBNameConstant.TABLE_TRAINING_TRACE)
-        curs.execute(sql)
-        result = curs.fetchone()
-        if result:
-            result = result[0]
-        else:
-            result = 0
-        curs.close()
-        return result
 
     @staticmethod
     def __select_reduce(conn: any, trace: list) -> list:
