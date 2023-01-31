@@ -183,7 +183,7 @@ class FileNameManagerConstant:
     SOC_PROFILE_FILE_PATTERN = r"^stars_soc_profile\.data\.(\d+)\.slice_\d+"
     BLOCK_LOG_FILE_PATTERN = r"^stars_block\.data\.(\d+)\.slice_\d+"
     FFTS_PMU_FILE_PATTERN = r"^ffts_profile\.data\.(\d+)\.slice_\d+"
-    HCCL_HCOM_FILE_PATTERN = r"^HCCL\.hcom_allReduce_(\d+)_(\d+)_(\d+)\.(\d+)\.slice_\d+"
+    HCCL_HCOM_FILE_PATTERN = r"^HCCL\.hcom_([0-9a-zA-Z]+)_(\d+)_(\d+)_(\d+)\.(\d+)\.slice_\d+"
 
     ALL_FILE_TAG = "all_file.complete"
 
