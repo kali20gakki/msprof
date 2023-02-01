@@ -108,8 +108,8 @@ TEST_F(PARAMS_ADAPTER_TEST, HandleTaskTraceConf) {
     buffer = analysis::dvvp::message::EncodeJson(conf);
     MOCKER_CPP(&Analysis::Dvvp::Common::Config::ConfigManager::GetPlatformType)
             .stubs()
-            .will(returnValue(5))
-            .then(returnValue(1));
+            .will(returnValue(PlatformType::CHIP_V4_1_0))
+            .then(returnValue(PlatformType::MINI_TYPE));
     MOCKER_CPP(&Analysis::Dvvp::Host::Adapter::ProfParamsAdapter::GetaicoreEvents)
         .stubs()
         .will(returnValue("xx"));
@@ -208,8 +208,8 @@ TEST_F(PARAMS_ADAPTER_TEST, UpdateOpFeature) {
     feature->set_ai_core_events(PIPE_UTILIZATION);
     MOCKER_CPP(&Analysis::Dvvp::Common::Config::ConfigManager::GetPlatformType)
             .stubs()
-            .will(returnValue(5))
-            .then(returnValue(1));
+            .will(returnValue(PlatformType::CHIP_V4_1_0))
+            .then(returnValue(PlatformType::MINI_TYPE));
     MOCKER_CPP(&Analysis::Dvvp::Host::Adapter::ProfParamsAdapter::GetaicoreEvents)
         .stubs()
         .will(returnValue(aicEvents));
