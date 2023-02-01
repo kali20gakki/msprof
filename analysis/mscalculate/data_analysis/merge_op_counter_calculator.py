@@ -96,18 +96,6 @@ class MergeOpCounterCalculator(MsMultiProcess):
             return
         self.create_and_insert_db()
 
-    def _init_params(self: any) -> None:
-        """
-        initial and check params
-        :return: None
-        """
-        self.sql_path = self.sample_config.get('sql_path', self._get_sql_dir())
-        if not os.path.exists(self.sql_path):
-            logging.error("Failed to get sqlite path.")
-            raise ProfException(ProfException.PROF_SYSTEM_EXIT)
-        if os.path.exists(os.path.join(self.sql_path, DBNameConstant.DB_OP_COUNTER)):
-            os.remove(os.path.join(self.sql_path, DBNameConstant.DB_OP_COUNTER))
-
     def create_and_insert_db(self: any) -> None:
         if not self._is_db_need_to_create():
             logging.warning("No need to create db for op counter, "
@@ -146,7 +134,17 @@ class MergeOpCounterCalculator(MsMultiProcess):
                                                                   map_path)
         DBManager.execute_sql(self.conn, op_report_create_sql)
 
-
+    def _init_params(self: any) -> None:
+        """
+        initial and check params
+        :return: None
+        """
+        self.sql_path = self.sample_config.get('sql_path', self._get_sql_dir())
+        if not os.path.exists(self.sql_path):
+            logging.error("Failed to get sqlite path.")
+            raise ProfException(ProfException.PROF_SYSTEM_EXIT)
+        if os.path.exists(os.path.join(self.sql_path, DBNameConstant.DB_OP_COUNTER)):
+            os.remove(os.path.join(self.sql_path, DBNameConstant.DB_OP_COUNTER))
 
     def _is_db_need_to_create(self: any) -> bool:
         ge_db_path = PathManager.get_db_path(self.project_path, DBNameConstant.DB_GE_INFO)
