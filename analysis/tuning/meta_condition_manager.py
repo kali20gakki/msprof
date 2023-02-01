@@ -83,12 +83,6 @@ class MetaConditionManager:
         calculate count condition
         """
 
-    @abstractmethod
-    def cal_accumulate_condition(self: any, operator_data_list: dict, condition: dict, tag_key: str) -> list:
-        """
-        calculate accumulate condition
-        """
-
     @staticmethod
     def __format_operator(expression: str) -> str:
         """
@@ -239,6 +233,12 @@ class MetaConditionManager:
             if self.conditions.get(condition_id):
                 conditions.append(self.conditions.get(condition_id))
         return conditions
+
+    @abstractmethod
+    def cal_accumulate_condition(self: any, operator_data_list: dict, condition: dict, tag_key: str) -> list:
+        """
+        calculate accumulate condition
+        """
 
 
 class OperatorConditionManager(MetaConditionManager):

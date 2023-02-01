@@ -47,6 +47,16 @@ class MsprofIteration:
             iter_end_dict.setdefault(trace_data[0], trace_data[1])
         return iter_end_dict
 
+    @staticmethod
+    def get_iter_id_within_iter_range(step_trace_data: list, timestamp: int, iter_range: IterationRange):
+        while step_trace_data:
+            step_trace = step_trace_data[0]
+            if InfoConfReader().time_from_syscnt(step_trace.step_end) < timestamp:
+                step_trace_data.pop(0)
+                continue
+            return step_trace.index_id
+        return iter_range.iteration_end
+
     def get_step_syscnt_range_by_iter_range(self, iter_range: IterationRange):
         """
         the time range within the iteration range.
@@ -61,16 +71,6 @@ class MsprofIteration:
         """
         with self._track_model as _trace:
             return _trace.get_step_end_list_with_iter_range(iter_range)
-
-    @staticmethod
-    def get_iter_id_within_iter_range(step_trace_data: list, timestamp: int, iter_range: IterationRange):
-        while step_trace_data:
-            step_trace = step_trace_data[0]
-            if InfoConfReader().time_from_syscnt(step_trace.step_end) < timestamp:
-                step_trace_data.pop(0)
-                continue
-            return step_trace.index_id
-        return iter_range.iteration_end
 
     def get_iter_interval(self: any, iter_range: IterationRange, time_fmt: int = NumberConstant.NANO_SECOND) -> list:
         step_trace_range = self.get_step_syscnt_range_by_iter_range(iter_range)

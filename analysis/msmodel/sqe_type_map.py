@@ -27,7 +27,7 @@ class SqeType(Enum):
     JPEGE_SQE = 13
     JPEGD_SQE = 14
     DSA_SQE = 15
-    RoCCE_SQE = 16
+    ROCCE_SQE = 16
     PCIE_DMA_SQE = 17
     HOST_CPU_SQE = 18
     CDQM_SQE = 19

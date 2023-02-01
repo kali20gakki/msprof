@@ -43,7 +43,7 @@ class GeInfoParser(IParser, MsMultiProcess):
         """
         make dynamic shape model index start from 1
         """
-        for model_id, task_info_list in dynamic_model_dict.items():
+        for _, task_info_list in dynamic_model_dict.items():
             if not task_info_list:
                 continue
             min_index_task = min(task_info_list, key=lambda x: x[index_space.get(MsProfCommonConstant.INDEX_ID)])
@@ -110,9 +110,7 @@ class GeInfoParser(IParser, MsMultiProcess):
                                 f"dynamic profiling scene will miss ai core data")
             remove_iter_list = []
             # judge whether the smallest index has the tag 0, which means an iter start
-            min_index_datum = min(ge_step_dict.get(model_id),
-                                  key=lambda x: (x[self.GE_STEP.get(MsProfCommonConstant.INDEX_ID)],
-                                                 x[self.GE_STEP.get(MsProfCommonConstant.TAG)]))
+            min_index_datum = min(ge_step_dict.get(model_id), key=self.min_rule_combine_index_id_and_tag)
             try:
                 if int(min_index_datum[self.GE_STEP.get(MsProfCommonConstant.TAG)]) != 0:
                     remove_iter_list.append(min_index_datum[self.GE_STEP.get(MsProfCommonConstant.INDEX_ID)])
@@ -123,6 +121,13 @@ class GeInfoParser(IParser, MsMultiProcess):
                 for task in dynamic_model_dict.get(model_id)
                 if task[index_space.get(MsProfCommonConstant.INDEX_ID)] not in set(remove_iter_list)
             ]
+
+    def min_rule_combine_index_id_and_tag(self: any, ge_step_data: list):
+        """
+        A tuple is generated based on indexes index_id and tag in GE_STEP to obtain the minimum value
+        """
+        return (ge_step_data[self.GE_STEP.get(MsProfCommonConstant.INDEX_ID)],
+                ge_step_data[self.GE_STEP.get(MsProfCommonConstant.TAG)])
 
     def is_complete_iter_exist(self: any, ge_step_data: list) -> bool:
         """

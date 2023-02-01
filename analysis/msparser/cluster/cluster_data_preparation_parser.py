@@ -82,6 +82,8 @@ class ClusterDataPreparationParser:
             "total_time": 0,
             "avg_time": 0
         }
+        if not step_count:
+            return
         if queue_list_length % step_count != 0:
             logging.warning("The data queue total length is not an integer multiple of the host queue data,"
                             "maybe the collected data is incomplete.")
