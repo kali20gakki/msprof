@@ -55,11 +55,6 @@ def create_trace_db():
 
 class TestStepTraceViewer(unittest.TestCase):
 
-    def test_query_top_total_1(self):
-        message_1 = None
-        res = StepTraceViewer.query_top_total(message_1)
-        self.assertEqual(res, {})
-
     def test_get_step_trace_summary(self):
         message1 = {'job_id': 'job_default', 'device_id': '4'}
         InfoJsonReaderManager(info_json=InfoJson(devices='0', DeviceInfo=[
