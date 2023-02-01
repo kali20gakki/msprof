@@ -67,6 +67,11 @@ enum CollectorTypesForPlatform {
     PLATFORM_COLLECTOR_TYPES_MAX
 };
 
+enum class CoreType {
+    AI_CORE = 0,
+    AI_VECTOR_CORE
+};
+
 struct CommonParams {
     std::string output;
     std::string storageLimit;
@@ -127,6 +132,8 @@ public:
 protected:
     std::vector<CollectorTypesForPlatform> supportSwitch_;
     std::map<std::string, std::string> getLlcEvents_;
+    std::map<std::string, std::string> aicMetricsEventsList_;
+    std::map<std::string, std::string> aivMetricsEventsList_;
     std::string aicRunningFreq_;   // to calculate aic total time
     std::string sysCountFreq_;    // to calculate op start/end time
     std::string l2CacheEvents_;
@@ -134,7 +141,7 @@ protected:
     SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params_;
 
 private:
-    int GetMetricsEvents(const std::string &metricsType, std::string &events) const;
+    int GetMetricsEvents(const std::string &metricsType, std::string &events, const CoreType type) const;
 };
 }
 }

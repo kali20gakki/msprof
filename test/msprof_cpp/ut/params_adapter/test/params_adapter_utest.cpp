@@ -55,6 +55,28 @@ TEST_F(ParamsAdapterUtest, CheckListInit)
     EXPECT_EQ(PROFILING_SUCCESS, ret);
 }
 
+TEST_F(ParamsAdapterUtest, SetDefaultAivParams)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<ParamsAdapter> ParamsAdapterMgr;
+    MSVP_MAKE_SHARED0_BREAK(ParamsAdapterMgr, ParamsAdapter);
+    std::array<std::string, INPUT_CFG_MAX> paramContainer;
+    ParamsAdapterMgr->platformType_ = PlatformType::CHIP_V4_1_0;
+    ParamsAdapterMgr->SetDefaultAivParams(paramContainer);
+}
+
+TEST_F(ParamsAdapterUtest, SetDefaultLlcMode)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<ParamsAdapter> ParamsAdapterMgr;
+    MSVP_MAKE_SHARED0_BREAK(ParamsAdapterMgr, ParamsAdapter);
+    std::array<std::string, INPUT_CFG_MAX> paramContainer;
+    ParamsAdapterMgr->platformType_ = PlatformType::MINI_TYPE;
+    ParamsAdapterMgr->SetDefaultLlcMode(paramContainer);
+    ParamsAdapterMgr->platformType_ = PlatformType::CLOUD_TYPE;
+    ParamsAdapterMgr->SetDefaultLlcMode(paramContainer);
+}
+
 TEST_F(ParamsAdapterUtest, TransToParam)
 {
     GlobalMockObject::verify();

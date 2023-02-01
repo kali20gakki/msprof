@@ -168,7 +168,8 @@ bool ParamValidation::CheckProfilingMetricsIsValid(const std::string &metricsNam
         MEMORY_BANDWIDTH,
         L0B_AND_WIDTH,
         RESOURCE_CONFLICT_RATIO,
-        MEMORY_UB
+        MEMORY_UB,
+        L2Cache
     };
     std::string metricsRange = "";
     for (size_t i = 0; i < metricsWhiteList.size(); ++i) {
@@ -616,7 +617,7 @@ bool ParamValidation::CheckAiCoreEventsIsValid(const std::vector<std::string> &e
         return false;
     }
     const int minEvent = 1;  // min ai core event is 0x1
-    const int maxEvent = 135;  // max ai core event is 0x86
+    const int maxEvent = 1290;  // max ai core event is 0x50A
     for (unsigned int i = 0; i < events.size(); ++i) {
         int eventVal = strtol(events[i].c_str(), nullptr, BASE_HEX);
         if (eventVal < minEvent || eventVal > maxEvent) {

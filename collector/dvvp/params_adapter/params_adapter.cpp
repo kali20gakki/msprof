@@ -181,6 +181,17 @@ void ParamsAdapter::SetDefaultAivParams(std::array<std::string, INPUT_CFG_MAX> &
     }
 }
 
+void ParamsAdapter::SetDefaultLlcMode(std::array<std::string, INPUT_CFG_MAX> &paramContainer) const
+{
+    if (paramContainer[INPUT_CFG_COM_LLC_MODE].empty()) {
+        if (platformType_ == PlatformType::MINI_TYPE) {
+            paramContainer[INPUT_CFG_COM_LLC_MODE] = LLC_PROFILING_CAPACITY;
+        } else {
+            paramContainer[INPUT_CFG_COM_LLC_MODE] = LLC_PROFILING_READ;
+        }
+    }
+}
+
 int ParamsAdapter::TransToParam(std::array<std::string, INPUT_CFG_MAX> paramContainer,
     SHARED_PTR_ALIA<ProfileParams> params)
 {

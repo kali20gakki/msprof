@@ -108,12 +108,25 @@ int ProfParamsAdapter::HandleTaskTraceConf(const std::string &conf,
         return PROFILING_SUCCESS;
     }
     std::string aicoreEvents;
+    std::string aicoreMetrics = taskConf->aicoremetrics();
+    if (ConfigManager::instance()->GetPlatformType() == PlatformType::CHIP_V4_1_0 &&
+        aicoreMetrics == PIPE_UTILIZATION) {
+        aicoreMetrics = PIPE_UTILIZATION_EXCT;
+        aicoreEvents = "0x49,0x4a,0x9,0x302,0xc,0x303,0x54,0x55";
+    } else {
+        ConfigManager::instance()->GetAicoreEvents(aicoreMetrics, aicoreEvents);
+    }
+    std::string aiVectEvents;
     ConfigManager::instance()->GetAicoreEvents(taskConf->aicoremetrics(), aicoreEvents);
     if (!aicoreEvents.empty()) {
         params->ai_core_profiling = "on";
-        params->ai_core_metrics = taskConf->aicoremetrics();
+        params->ai_core_metrics = aicoreMetrics;
         params->ai_core_profiling_events = aicoreEvents;
         params->ai_core_profiling_mode = PROFILING_MODE_TASK_BASED;
+        params->aiv_profiling = "on";
+        params->aiv_profiling_events = aiVectEvents;
+        params->aiv_metrics = taskConf->aicoremetrics();
+        params->aiv_profiling_mode = PROFILING_MODE_TASK_BASED;
     } else {
         MSPROF_LOGW("Invalid aicore metrics, aicore data will not be collected");
         params->ai_core_profiling = "off";
@@ -332,18 +345,34 @@ void ProfParamsAdapter::UpdateOpFeature(SHARED_PTR_ALIA<analysis::dvvp::proto::M
 {
     using namespace analysis::dvvp::common::validation;
     std::string aiCoreEvents;
-    ConfigManager::instance()->GetAicoreEvents(feature->ai_core_events(), aiCoreEvents);
+    std::string aicoreMetrics = feature->ai_core_events();
+    if (ConfigManager::instance()->GetPlatformType() == PlatformType::CHIP_V4_1_0 &&
+        aicoreMetrics == PIPE_UTILIZATION) {
+        aicoreMetrics = PIPE_UTILIZATION_EXCT;
+        aiCoreEvents = "0x49,0x4a,0x9,0x302,0xc,0x303,0x54,0x55";
+    } else {
+        ConfigManager::instance()->GetAicoreEvents(aicoreMetrics, aiCoreEvents);
+    }
     MSPROF_LOGI("op_trace profiling ai_core_events: %s , feature ai_core_events: %s",
         aiCoreEvents.c_str(), feature->ai_core_events().c_str());
+    std::string aiVectEvents;
+    ConfigManager::instance()->GetAicoreEvents(feature->ai_core_events(), aiVectEvents);
+    MSPROF_LOGI("op_trace profiling ai_vector_core_events: %s , feature ai_vector_core_events: %s",
+        aiVectEvents.c_str(), feature->ai_core_events().c_str());
     const std::string l2CacheEvents = feature->l2_cache_events();
     if (ParamValidation::instance()->CheckEventsSize(aiCoreEvents) != PROFILING_SUCCESS ||
         ParamValidation::instance()->CheckEventsSize(l2CacheEvents) != PROFILING_SUCCESS) {
         return;
     }
     if (!aiCoreEvents.empty()) {
+        params->ai_core_metrics = aicoreMetrics;
         params->ai_core_profiling_events = aiCoreEvents;
         params->ai_core_profiling = "on";
-        params->ai_core_profiling_mode = "task-based";
+        params->ai_core_profiling_mode = PROFILING_MODE_TASK_BASED;
+        params->aiv_profiling = "on";
+        params->aiv_profiling_events = aiVectEvents;
+        params->aiv_metrics = feature->ai_core_events();
+        params->aiv_profiling_mode = PROFILING_MODE_TASK_BASED;
     }
     if (!l2CacheEvents.empty()) {
         params->l2CacheTaskProfilingEvents = l2CacheEvents;
