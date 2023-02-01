@@ -22,18 +22,6 @@ class OpCommonFunc:
             return False
         return True
 
-    @staticmethod
-    def _get_wait_time(row_num: int, time_data: float, previous_complete_time: int) -> float:
-        """
-        get wait time
-        :param time_data:
-        :param per:
-        :return:
-        """
-        if row_num == 0 or (int(time_data) - previous_complete_time) < 0:
-            return 0
-        return int(time_data) - previous_complete_time
-
     @classmethod
     def calculate_task_time(cls: any, data: list) -> list:
         """
@@ -89,3 +77,15 @@ class OpCommonFunc:
                 stream_max_value.setdefault(stream_id, current_max_value)
             result[index] = list(ge_data) + [stream_max_value.get(stream_id).get(cls.BATCH_ID)]
         return result
+
+    @staticmethod
+    def _get_wait_time(row_num: int, time_data: float, previous_complete_time: int) -> float:
+        """
+        get wait time
+        :param time_data:
+        :param per:
+        :return:
+        """
+        if row_num == 0 or (int(time_data) - previous_complete_time) < 0:
+            return 0
+        return int(time_data) - previous_complete_time

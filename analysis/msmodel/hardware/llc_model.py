@@ -45,15 +45,7 @@ class LlcModel(BaseModel, ABC):
         self.l3_list = self._init_l3_list_dispatch()
         self.metrics_data = []
     
-    @staticmethod
-    def _init_l3_list_dispatch() -> list:
-        if ChipManager().is_chip_v1_1():
-            llid_count = 1
-        elif ChipManager().is_chip_v4():
-            llid_count = 2
-        else:
-            llid_count = 4
-        return list(range(llid_count))
+
 
     @staticmethod
     def calculate_hit_rate(item: list) -> int:
@@ -195,6 +187,16 @@ class LlcModel(BaseModel, ABC):
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
             logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
             return NumberConstant.ERROR
+
+    @staticmethod
+    def _init_l3_list_dispatch() -> list:
+        if ChipManager().is_chip_v1_1():
+            llid_count = 1
+        elif ChipManager().is_chip_v4():
+            llid_count = 2
+        else:
+            llid_count = 4
+        return list(range(llid_count))
 
     def _insert_llc_data(self: any, llc_event_data: list) -> None:
         if llc_event_data:

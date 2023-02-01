@@ -45,27 +45,6 @@ class InfoConfReader:
         self._host_mon = 0
         self._dev_cnt = 0
 
-    @staticmethod
-    def __get_json_data(info_json_path: str) -> dict:
-        """
-        read json data from file
-        :param info_json_path:info json path
-        :return:
-        """
-        if not info_json_path or not os.path.exists(info_json_path) or not os.path.isfile(
-                info_json_path):
-            return {}
-        check_path_valid(info_json_path, is_file=True)
-        try:
-            with open(info_json_path, "r") as json_reader:
-                json_data = json_reader.readline(Constant.MAX_READ_LINE_BYTES)
-                json_data = json.loads(json_data)
-                return json_data
-        except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
-            logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
-            logging.error("json data decode fail")
-            return {}
-
     @classmethod
     def get_json_tid_data(cls: any) -> int:
         """
@@ -280,6 +259,27 @@ class InfoConfReader:
         if not collection_time:
             collection_time = Constant.NA
         return [job_info, device_id, collection_time, rank_id]
+
+    @staticmethod
+    def __get_json_data(info_json_path: str) -> dict:
+        """
+        read json data from file
+        :param info_json_path:info json path
+        :return:
+        """
+        if not info_json_path or not os.path.exists(info_json_path) or not os.path.isfile(
+                info_json_path):
+            return {}
+        check_path_valid(info_json_path, is_file=True)
+        try:
+            with open(info_json_path, "r") as json_reader:
+                json_data = json_reader.readline(Constant.MAX_READ_LINE_BYTES)
+                json_data = json.loads(json_data)
+                return json_data
+        except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
+            logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
+            logging.error("json data decode fail")
+            return {}
 
     def _load_json(self: any, result_path: str) -> None:
         """

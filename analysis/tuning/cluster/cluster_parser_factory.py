@@ -28,13 +28,6 @@ class ClusterParserFactory:
     def __init__(self: any) -> None:
         self.max_iters_model_id = 0
 
-    @abstractmethod
-    def generate_parser(self):
-        """
-        generate_parse_method
-        """
-        return MetaParser()
-
     @staticmethod
     def _check_rank_info(rank_id: any, dirname: any) -> None:
         if rank_id is None or dirname is None:
@@ -48,6 +41,13 @@ class ClusterParserFactory:
             logging.error("Number of ranks is %s !, exceeds the limited upper bound:%s ",
                           str(rank_id), NumberConstant.MAX_RANK_NUMS)
             raise ProfException(ProfException.PROF_INVALID_DATA_ERROR)
+
+    @abstractmethod
+    def generate_parser(self):
+        """
+        generate_parse_method
+        """
+        return MetaParser()
 
     def get_hccl_ops_by_iter(self):
         """

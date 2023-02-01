@@ -107,9 +107,9 @@ class PmuCalculator(ICalculator):
                                       Constant.TASK_TYPE_MIX_AIC, Constant.TASK_TYPE_MIX_AIV):
                 continue
             _key = self.STREAM_TASK_KEY_FMT.format(data.task_id, data.stream_id)
-            self._block_dims['block_dim'].setdefault(_key, []).append(int(data.block_dim))
+            self._block_dims.get('block_dim', {}).setdefault(_key, []).append(int(data.block_dim))
             if data.task_type in (Constant.TASK_TYPE_MIX_AIV, Constant.TASK_TYPE_MIX_AIC):
-                self._block_dims['mix_block_dim'].setdefault(_key, []).append(int(data.mix_block_dim))
+                self._block_dims.get('mix_block_dim', {}).setdefault(_key, []).append(int(data.mix_block_dim))
 
     def __get_block_dim_data(self: any, ge_curs: any) -> list:
         if ProfilingScene().is_operator():
