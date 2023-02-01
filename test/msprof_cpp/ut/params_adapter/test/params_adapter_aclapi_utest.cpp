@@ -115,7 +115,7 @@ TEST_F(ParamsAdapterAclapiUtest, ProfSystemCfgToContainer)
     argsArr[ACL_PROF_SYS_IO_FREQ] = "10";
     argsArr[ACL_PROF_SYS_INTERCONNECTION_FREQ] = "10";
     argsArr[ACL_PROF_DVPP_FREQ] = "10";
-    argsArr[ACL_PROF_SYS_HARDWARE_MEM_FREQ] = "10"; 
+    argsArr[ACL_PROF_SYS_HARDWARE_MEM_FREQ] = "10";
     AclApiParamAdapterMgr->ProfSystemCfgToContainer(&apiCfg, argsArr);
     argsArr[ACL_PROF_LLC_MODE] = "read";
     AclApiParamAdapterMgr->ProfSystemCfgToContainer(&apiCfg, argsArr);
