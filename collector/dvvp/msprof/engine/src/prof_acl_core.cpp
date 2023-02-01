@@ -680,6 +680,18 @@ aclError aclprofSetStampPayload(VOID_PTR stamp, const int32_t type, VOID_PTR val
     return MsprofTxManager::instance()->SetStampPayload(stampInstancePtr, type, value);
 }
 
+aclError aclprofSetStampTagName(void *stamp, const char *tagName, uint16_t len)
+{
+    if (Platform::instance()->PlatformIsHelperHostSide()) {
+        MSPROF_LOGE("acl api not support in helper");
+        MSPROF_ENV_ERROR("EK0004", std::vector<std::string>({"intf", "platform"}),
+            std::vector<std::string>({"aclprofSetStampTagName", "SocCloud"}));
+        return ACL_ERROR_FEATURE_UNSUPPORTED;
+    }
+    auto stampInstancePtr = static_cast<ACL_PROF_STAMP_PTR>(stamp);
+    return MsprofTxManager::instance()->SetStampTagName(stampInstancePtr, tagName, len);
+}
+
 aclError aclprofSetStampTraceMessage(VOID_PTR stamp, const char *msg, uint32_t msgLen)
 {
     if (Platform::instance()->PlatformIsHelperHostSide()) {
