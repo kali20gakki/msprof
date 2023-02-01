@@ -232,16 +232,6 @@ class DBManager:
             logging.error(msg)
         return headers, type_names
 
-    @staticmethod
-    def _get_hd_with_type_list_str(headers: list, type_names: list) -> str:
-        hd_with_type_list_str = "("
-        hd_with_type_list = []
-        for i, _ in enumerate(headers):
-            hd_with_type_list.append(headers[i] + " " + type_names[i])
-        hd_with_type_list_str += ','.join(hd_with_type_list)
-        hd_with_type_list_str += ")"
-        return hd_with_type_list_str
-
     @classmethod
     def attach_to_db(cls: any, conn: any, project_path: str, db_name: str, attach_name: str) -> bool:
         """
@@ -507,3 +497,13 @@ class DBManager:
         if path_check(db_path):
             return cls.create_connect_db(db_path)
         return EmptyClass("empty conn"), EmptyClass("empty curs")
+
+    @staticmethod
+    def _get_hd_with_type_list_str(headers: list, type_names: list) -> str:
+        hd_with_type_list_str = "("
+        hd_with_type_list = []
+        for i, _ in enumerate(headers):
+            hd_with_type_list.append(headers[i] + " " + type_names[i])
+        hd_with_type_list_str += ','.join(hd_with_type_list)
+        hd_with_type_list_str += ")"
+        return hd_with_type_list_str
