@@ -130,6 +130,7 @@ public:
     int ComCfgCheck(std::array<std::string, INPUT_CFG_MAX> paramContainer, std::set<InputCfg> &setArgs) const;
     int TransToParam(std::array<std::string, INPUT_CFG_MAX> paramContainer, SHARED_PTR_ALIA<ProfileParams> params);
     void SetDefaultAivParams(std::array<std::string, INPUT_CFG_MAX> &paramContainer) const;
+    void SetDefaultLlcMode(std::array<std::string, INPUT_CFG_MAX> &paramContainer) const;
 public:
     bool CheckFreqValid(const std::string &freq, const InputCfg freqOpt) const;
 private:

@@ -29,6 +29,8 @@ PlatformAdapterInterface::PlatformAdapterInterface()
     : params_(nullptr), platformType_(PlatformType::MINI_TYPE)
 {
     getLlcEvents_ = {{"read", "read"}, {"write", "write"}};
+    aicMetricsEventsList_ = AIC_AIV_METRICS_LIST;
+    aivMetricsEventsList_ = AIC_AIV_METRICS_LIST;
 }
 
 PlatformAdapterInterface::~PlatformAdapterInterface()
@@ -225,20 +227,27 @@ void PlatformAdapterInterface::SetParamsForL2Cache()
     }
 }
 
-int PlatformAdapterInterface::GetMetricsEvents(const std::string &metricsType, std::string &events) const
+int PlatformAdapterInterface::GetMetricsEvents(const std::string &metricsType,
+                                               std::string &events, const CoreType type) const
 {
     if (metricsType.empty()) {
         MSPROF_LOGE("metricsType is  empty");
         return PROFILING_FAILED;
     }
-    auto iter = AIC_AIV_METRICS_LIST.find(metricsType);
-    if (iter != AIC_AIV_METRICS_LIST.end()) {
+    std::map<std::string, std::string> metricsEventsList;
+    if (type == CoreType::AI_CORE) {
+        metricsEventsList = aicMetricsEventsList_;
+    } else {
+        metricsEventsList = aivMetricsEventsList_;
+    }
+    auto iter = metricsEventsList.find(metricsType);
+    if (iter != metricsEventsList.end()) {
         events = iter->second;
         return PROFILING_SUCCESS;
     }
     MSPROF_LOGE("Invalid metrics type %s", metricsType.c_str());
     std::string errReason = "metrics type should be in [";
-    for (auto type : AIC_AIV_METRICS_LIST) {
+    for (auto type : metricsEventsList) {
         errReason += type.first;
         errReason += "|";
     }
@@ -255,11 +264,15 @@ void PlatformAdapterInterface::SetParamsForAicMetrics(const std::string &mode, c
 {
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_TASK_AIC_METRICS) != supportSwitch_.end()) {
         params_->ai_core_profiling = MSPROF_SWITCH_ON;
-        int ret = GetMetricsEvents(metrics, params_->ai_core_profiling_events);
+        int ret = GetMetricsEvents(metrics, params_->ai_core_profiling_events, CoreType::AI_CORE);
         if (ret != PROFILING_SUCCESS) {
             return;
         }
-        params_->ai_core_metrics = metrics;
+        if (platformType_ == PlatformType::CHIP_V4_1_0 && metrics == PIPE_UTILIZATION) {
+            params_->ai_core_metrics = PIPE_UTILIZATION_EXCT;
+        } else {
+            params_->ai_core_metrics = metrics;
+        }
         params_->ai_core_profiling_mode = mode;
         if (mode == analysis::dvvp::message::PROFILING_MODE_SAMPLE_BASED) {
             params_->aicore_sampling_interval = samplingInterval;
@@ -275,7 +288,7 @@ void PlatformAdapterInterface::SetParamsForAivMetrics(const std::string &mode, c
     bool val = false;
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_TASK_AIV_METRICS) != supportSwitch_.end()) {
         params_->aiv_profiling = MSPROF_SWITCH_ON;
-        int ret = GetMetricsEvents(metrics, params_->aiv_profiling_events);
+        int ret = GetMetricsEvents(metrics, params_->aiv_profiling_events, CoreType::AI_VECTOR_CORE);
         if (ret != PROFILING_SUCCESS) {
             return;
         }
