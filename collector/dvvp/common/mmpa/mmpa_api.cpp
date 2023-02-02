@@ -821,27 +821,46 @@ static int32_t LocalLookup(char *buf, uint32_t bufLen, const char *pattern, char
     char *pBuf = nullptr;
     uint32_t len = strlen(pattern);
 
-    for (pBuf = buf; isspace(*pBuf) != 0; pBuf++) {}
+    for (pBuf = buf; isspace(*pBuf) != 0; pBuf++) {
+        if (pBuf == buf + bufLen) {
+            return PROFILING_FAILED;
+        }
+    }
 
     int32_t ret = strncmp(pBuf, pattern, len);
     if (ret != 0) {
         return PROFILING_FAILED;
     }
 
-    for (pBuf = pBuf + len; isspace(*pBuf) != 0; pBuf++) {}
+    for (pBuf = pBuf + len; isspace(*pBuf) != 0; pBuf++) {
+        if (pBuf == buf + bufLen) {
+            return PROFILING_FAILED;
+        }
+    }
 
     if (*pBuf == '\0') {
         return PROFILING_FAILED;
     }
 
-    for (pBuf = pBuf + 1; isspace(*pBuf) != 0; pBuf++) {}
+    for (pBuf = pBuf + 1; isspace(*pBuf) != 0; pBuf++) {
+        if (pBuf == buf + bufLen) {
+            return PROFILING_FAILED;
+        }
+    }
 
     pValue = pBuf;
-    for (pBuf = buf + bufLen; isspace(*(pBuf - 1)) != 0; pBuf--) {}
+    for (pBuf = buf + bufLen; isspace(*(pBuf - 1)) != 0; pBuf--) {
+        if (pBuf == buf) {
+            return PROFILING_FAILED;
+        }
+    }
 
     *pBuf = '\0';
-
-    ret = memcpy_s(value, valueLen, pValue, strlen(pValue) + 1U);
+    int pValueLen = strnlen(pValue, valueLen);
+    if (static_cast<uint32_t>(pValueLen) == valueLen) {
+        return PROFILING_FAILED;
+    }
+    ret = memcpy_s(value, valueLen, pValue, pValueLen + 1U);
     if (ret != PROFILING_SUCCESS) {
         return PROFILING_FAILED;
     }
@@ -1035,7 +1054,11 @@ int32_t MmGetCpuInfo(MmCpuDesc **cpuInfo, int32_t *count)
     (void)memset_s(pCpuDesc, needSize, 0, needSize); /* unsafe_function_ignore: memset */
 
     if (uname(&sysInfo) == PROFILING_SUCCESS) {
-        ret = memcpy_s(cpuDest.arch, sizeof(cpuDest.arch), sysInfo.machine, strlen(sysInfo.machine) + 1U);
+        int sysMachineLen = strnlen(sysInfo.machine, sizeof(cpuDest.arch));
+        if (static_cast<unsigned int>(sysMachineLen) == sizeof(cpuDest.arch)) {
+            return PROFILING_FAILED;
+        }
+        ret = memcpy_s(cpuDest.arch, sizeof(cpuDest.arch), sysInfo.machine, sysMachineLen + 1U);
         if (ret != PROFILING_SUCCESS) {
             free(pCpuDesc);
             return PROFILING_FAILED;
