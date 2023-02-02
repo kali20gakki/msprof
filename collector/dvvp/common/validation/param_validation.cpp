@@ -170,7 +170,7 @@ bool ParamValidation::CheckProfilingMetricsIsValid(const std::string &metricsNam
         L0B_AND_WIDTH,
         RESOURCE_CONFLICT_RATIO,
         MEMORY_UB,
-        L2Cache
+        L2CACHE
     };
     std::string metricsRange = "";
     for (size_t i = 0; i < metricsWhiteList.size(); ++i) {

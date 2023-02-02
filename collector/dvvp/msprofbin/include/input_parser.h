@@ -203,6 +203,7 @@ public:
 
 private:
     void Init();
+    void AddBasicArgs();
     void AddHardWareMemArgs();
     void AddCpuArgs();
     void AddSysArgs();
