@@ -140,6 +140,17 @@ int DyncProfMsgProcSrv::DynProfServerCreateSock()
     return PROFILING_SUCCESS;
 }
 
+bool DyncProfMsgProcSrv::IdleConnectOverTime(uint32_t &recvIdleTimes) const
+{
+    if (profHasStarted_) {
+        return false;
+    }
+    if (++recvIdleTimes <= DYN_PROF_IDLE_LINK_HOLD_TIME) {
+        return false;
+    }
+    return true;
+}
+
 void DyncProfMsgProcSrv::DynProfServerProcMsg()
 {
     std::string disconnTips;
@@ -150,7 +161,7 @@ void DyncProfMsgProcSrv::DynProfServerProcMsg()
         disconnTips = "Internal error.";
         ssize_t readLen = read(cliSockFd_, &recvMsg, sizeof(recvMsg));
         if (static_cast<size_t>(readLen) != sizeof(recvMsg) && errno == EAGAIN) {
-            if (!profHasStarted_ && (++recvIdleTimes > DYN_PROF_IDLE_LINK_HOLD_TIME)) {
+            if (IdleConnectOverTime(recvIdleTimes)) {
                 MSPROF_LOGW("Dynamic profiling disconnet client, recvIdleTimes=%u.", recvIdleTimes);
                 disconnTips = "Idle link too long time.";
                 break;

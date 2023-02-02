@@ -149,7 +149,7 @@ size_t aclprofGetGraphId(CONST_VOID_PTR opInfo, size_t opInfoLen, uint32_t index
 }
 
 namespace ge {
-static Status aclgrphProfInitPreCheck()
+static int AclGrphProfInitPreCheck()
 {
     if (Utils::IsDynProfMode()) {
         MSPROF_LOGI("Start to execute aclgrphProfInit not support in Dynamic profiling mode");
@@ -167,7 +167,7 @@ static Status aclgrphProfInitPreCheck()
 
 Status aclgrphProfInit(CONST_CHAR_PTR profilerPath, uint32_t length)
 {
-    int ret = aclgrphProfInitPreCheck();
+    int ret = AclGrphProfInitPreCheck();
     if (ret != ACL_SUCCESS) {
         return ret;
     }

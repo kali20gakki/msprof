@@ -680,7 +680,7 @@ aclError aclprofSetStampPayload(VOID_PTR stamp, const int32_t type, VOID_PTR val
     return MsprofTxManager::instance()->SetStampPayload(stampInstancePtr, type, value);
 }
 
-aclError aclprofSetStampTagName(void *stamp, const char *tagName, uint16_t len)
+aclError aclprofSetStampTagName(VOID_PTR stamp, const char *tagName, uint16_t len)
 {
     if (Platform::instance()->PlatformIsHelperHostSide()) {
         MSPROF_LOGE("acl api not support in helper");
