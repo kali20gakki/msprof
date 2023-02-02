@@ -102,8 +102,21 @@ TEST_F(PARAMS_ADAPTER_TEST, HandleTaskTraceConf) {
     paramsAdapter->aicoreEvents_["test"] = "0x00";
     std::shared_ptr<analysis::dvvp::proto::ProfilerConf> conf =
         std::make_shared<analysis::dvvp::proto::ProfilerConf>();
-    conf->set_aicoremetrics("test");
     std::string buffer = analysis::dvvp::message::EncodeJson(conf);
+    EXPECT_EQ(PROFILING_FAILED, paramsAdapter->HandleTaskTraceConf(buffer, params));
+    conf->set_aicoremetrics(PIPE_UTILIZATION);
+    buffer = analysis::dvvp::message::EncodeJson(conf);
+    MOCKER_CPP(&Analysis::Dvvp::Common::Config::ConfigManager::GetPlatformType)
+            .stubs()
+            .will(returnValue(PlatformType::CHIP_V4_1_0))
+            .then(returnValue(PlatformType::MINI_TYPE));
+    MOCKER_CPP(&Analysis::Dvvp::Host::Adapter::ProfParamsAdapter::GetaicoreEvents)
+        .stubs()
+        .will(returnValue("xx"));
+    EXPECT_EQ(PROFILING_SUCCESS, paramsAdapter->HandleTaskTraceConf(buffer, params));
+    MOCKER_CPP(&Analysis::Dvvp::Host::Adapter::ProfParamsAdapter::GetaicoreEvents)
+        .stubs()
+        .will(returnValue("xx"));
     EXPECT_EQ(PROFILING_SUCCESS, paramsAdapter->HandleTaskTraceConf(buffer, params));
     conf->set_aicoremetrics("invalid");
     buffer = analysis::dvvp::message::EncodeJson(conf);
@@ -192,9 +205,22 @@ TEST_F(PARAMS_ADAPTER_TEST, UpdateOpFeature) {
     std::shared_ptr<analysis::dvvp::message::ProfileParams> params(new analysis::dvvp::message::ProfileParams);
     std::shared_ptr<analysis::dvvp::proto::MsProfStartReq> feature(new analysis::dvvp::proto::MsProfStartReq);
     std::string aicEvents = "0x00";
+    feature->set_ai_core_events(PIPE_UTILIZATION);
+    MOCKER_CPP(&Analysis::Dvvp::Common::Config::ConfigManager::GetPlatformType)
+            .stubs()
+            .will(returnValue(PlatformType::CHIP_V4_1_0))
+            .then(returnValue(PlatformType::MINI_TYPE));
     MOCKER_CPP(&Analysis::Dvvp::Host::Adapter::ProfParamsAdapter::GetaicoreEvents)
         .stubs()
         .will(returnValue(aicEvents));
+    paramsAdapter->UpdateOpFeature(feature, params);
+    MOCKER_CPP(&Analysis::Dvvp::Host::Adapter::ProfParamsAdapter::GetaicoreEvents)
+        .stubs()
+        .will(returnValue(aicEvents));
+    MOCKER_CPP(&Analysis::Dvvp::Host::Adapter::ProfParamsAdapter::GetaicoreEvents)
+        .stubs()
+        .will(returnValue(aicEvents));
+    paramsAdapter->UpdateOpFeature(feature, params);
     // l2 events invalid
     feature->set_l2_cache_events(",,,,,,,,,,");
     paramsAdapter->UpdateOpFeature(feature, params);

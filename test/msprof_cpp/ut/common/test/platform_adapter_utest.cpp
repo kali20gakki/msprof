@@ -97,16 +97,16 @@ TEST_F(PlatformAdapterUtest, PlatformAdapterInterfaceModule1)
     PlatformAdapterInterfaceMgr->SetParamsForAICPU();
     PlatformAdapterInterfaceMgr->SetParamsForHCCL();
     PlatformAdapterInterfaceMgr->SetParamsForL2Cache();
-    std::string metricsType;
     std::string events;
-    ret = PlatformAdapterInterfaceMgr->GetMetricsEvents(metricsType, events);
-    EXPECT_EQ(PROFILING_FAILED, ret);
-    metricsType = "xxx";
-    ret = PlatformAdapterInterfaceMgr->GetMetricsEvents(metricsType, events);
-    EXPECT_EQ(PROFILING_FAILED, ret);
-    metricsType = "ArithmeticUtilization";
-    ret = PlatformAdapterInterfaceMgr->GetMetricsEvents(metricsType, events);
-    EXPECT_EQ(PROFILING_SUCCESS, ret);
+    EXPECT_EQ(PROFILING_FAILED, PlatformAdapterInterfaceMgr->GetMetricsEvents("", events, CoreType::AI_CORE));
+    EXPECT_EQ(PROFILING_FAILED, PlatformAdapterInterfaceMgr->GetMetricsEvents("xxx", events, CoreType::AI_CORE));
+    EXPECT_EQ(PROFILING_SUCCESS, PlatformAdapterInterfaceMgr->GetMetricsEvents("Memory", events, CoreType::AI_CORE));
+    EXPECT_EQ(PROFILING_SUCCESS, PlatformAdapterInterfaceMgr->GetMetricsEvents("Memory",
+                                                                               events,
+                                                                               CoreType::AI_VECTOR_CORE));
+    EXPECT_EQ(PROFILING_FAILED, PlatformAdapterInterfaceMgr->GetMetricsEvents("xxx",
+                                                                              events,
+                                                                              CoreType::AI_VECTOR_CORE));
     ret = PlatformAdapterInterfaceMgr->Uninit();
     EXPECT_EQ(PROFILING_SUCCESS, ret);
     params = nullptr;

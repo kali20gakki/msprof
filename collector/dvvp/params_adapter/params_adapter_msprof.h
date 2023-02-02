@@ -42,7 +42,7 @@ private:
     int ParamsCheckDynProf() const;
     int ParamsCheck();
     void SetDefaultParamsApp();
-    void SetDefaultParamsSystem() const;
+    void SetDefaultParamsSystem();
     void SetDefaultParamsParse() const;
     void SetDefaultParamsQuery() const;
     void SetDefaultParamsExport() const;

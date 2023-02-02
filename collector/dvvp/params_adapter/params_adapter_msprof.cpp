@@ -187,8 +187,6 @@ void ParamsAdapterMsprof::SetDefaultParamsApp()
     if (paramContainer_[INPUT_CFG_COM_AI_CORE].empty()) {
         paramContainer_[INPUT_CFG_COM_AI_CORE] = MSVP_PROF_ON;
     }
-    paramContainer_[INPUT_CFG_COM_AIC_FREQ] = paramContainer_[INPUT_CFG_COM_AIC_FREQ].empty() ?
-        std::to_string(THOUSAND / DEFAULT_PROFILING_INTERVAL_10MS) : paramContainer_[INPUT_CFG_COM_AIC_FREQ];
     paramContainer_[INPUT_CFG_COM_AIC_MODE] = (paramContainer_[INPUT_CFG_COM_AIC_MODE].empty()) ?
         PROFILING_MODE_TASK_BASED : paramContainer_[INPUT_CFG_COM_AIC_MODE];
     paramContainer_[INPUT_CFG_COM_AIC_METRICS] = (paramContainer_[INPUT_CFG_COM_AIC_METRICS].empty()) ?
@@ -196,13 +194,12 @@ void ParamsAdapterMsprof::SetDefaultParamsApp()
     if (paramContainer_[INPUT_CFG_COM_AI_VECTOR].empty()) {
         paramContainer_[INPUT_CFG_COM_AI_VECTOR] = MSVP_PROF_ON;
     }
-    paramContainer_[INPUT_CFG_COM_AIV_FREQ] = paramContainer_[INPUT_CFG_COM_AIV_FREQ].empty() ?
-        std::to_string(THOUSAND / DEFAULT_PROFILING_INTERVAL_10MS) : paramContainer_[INPUT_CFG_COM_AIV_FREQ];
     paramContainer_[INPUT_CFG_COM_AIV_MODE] = (paramContainer_[INPUT_CFG_COM_AIV_MODE].empty()) ?
         PROFILING_MODE_TASK_BASED : paramContainer_[INPUT_CFG_COM_AIV_MODE];
     paramContainer_[INPUT_CFG_COM_AIV_METRICS] = (paramContainer_[INPUT_CFG_COM_AIV_METRICS].empty()) ?
         PIPE_UTILIZATION : paramContainer_[INPUT_CFG_COM_AIV_METRICS];
     SetDefaultAivParams(paramContainer_);
+    SetDefaultLlcMode(paramContainer_);
 }
 
 int ParamsAdapterMsprof::CheckMsprofMode(const std::unordered_map<int, std::pair<MsprofCmdInfo, std::string>> &argvMap)
@@ -229,8 +226,18 @@ int ParamsAdapterMsprof::CheckMsprofMode(const std::unordered_map<int, std::pair
     return PROFILING_FAILED;
 }
 
-void ParamsAdapterMsprof::SetDefaultParamsSystem() const
+void ParamsAdapterMsprof::SetDefaultParamsSystem()
 {
+    paramContainer_[INPUT_CFG_COM_AIC_METRICS] = (paramContainer_[INPUT_CFG_COM_AIC_METRICS].empty()) ?
+        PIPE_UTILIZATION : paramContainer_[INPUT_CFG_COM_AIC_METRICS];
+    paramContainer_[INPUT_CFG_COM_AIC_MODE] = (paramContainer_[INPUT_CFG_COM_AIC_MODE].empty()) ?
+        PROFILING_MODE_SAMPLE_BASED : paramContainer_[INPUT_CFG_COM_AIC_MODE];
+    paramContainer_[INPUT_CFG_COM_AIV_METRICS] = (paramContainer_[INPUT_CFG_COM_AIV_METRICS].empty()) ?
+        PIPE_UTILIZATION : paramContainer_[INPUT_CFG_COM_AIV_METRICS];
+    paramContainer_[INPUT_CFG_COM_AIV_MODE] = (paramContainer_[INPUT_CFG_COM_AIV_MODE].empty()) ?
+        PROFILING_MODE_SAMPLE_BASED : paramContainer_[INPUT_CFG_COM_AIV_MODE];
+    SetDefaultAivParams(paramContainer_);
+    SetDefaultLlcMode(paramContainer_);
     return;
 }
 

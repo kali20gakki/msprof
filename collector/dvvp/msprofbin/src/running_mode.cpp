@@ -184,30 +184,8 @@ int RunningMode::HandleProfilingParams() const
     if (params_->devices.compare("all") == 0) {
         params_->devices = DrvGetDevIdsStr();
     }
-    std::string aicoreMetricsType =
-        params_->ai_core_metrics.empty() ? PIPE_UTILIZATION : params_->ai_core_metrics;
-    int ret = ConfigManager::instance()->GetAicoreEvents(aicoreMetricsType, params_->ai_core_profiling_events);
-    if (ret != PROFILING_SUCCESS) {
-        MSPROF_LOGE("The ai_core_metrics is invalid");
-        return PROFILING_FAILED;
-    }
-    params_->ai_core_metrics = aicoreMetricsType;
-    std::string aivMetricsType;
-    if (ConfigManager::instance()->GetPlatformType() == PlatformType::MDC_TYPE) {
-        aivMetricsType = params_->aiv_metrics.empty() ? PIPE_UTILIZATION : params_->aiv_metrics;
-    } else {
-        aivMetricsType = aicoreMetricsType;
-    }
-    ret = ConfigManager::instance()->GetAicoreEvents(aivMetricsType, params_->aiv_profiling_events);
-    if (ret != PROFILING_SUCCESS) {
-        MSPROF_LOGE("The aiv_metrics (%s) is invalid.", aivMetricsType.c_str());
-        return PROFILING_FAILED;
-    }
-    params_->aiv_metrics = aivMetricsType;
-    ConfigManager::instance()->MsprofL2CacheAdapter(params_);
-    Analysis::Dvvp::Msprof::ProfParamsAdapter::instance()->GenerateLlcEvents(params_);
     params_->msprofBinPid = Utils::GetPid();
-    return ProfParamsAdapter::instance()->UpdateParams(params_);
+    return PROFILING_SUCCESS;
 }
 
 void RunningMode::StopRunningTasks() const
@@ -1017,12 +995,8 @@ SHARED_PTR_ALIA<ProfileParams> SystemMode::GenerateHostParam(
     }
     uintptr_t addr = reinterpret_cast<uintptr_t>(dstParams.get());
     dstParams->job_id = Utils::ProfCreateId((uint64_t)addr);
-    if (dstParams->ai_core_profiling_mode.empty()) {
-        dstParams->ai_core_profiling_mode = PROFILING_MODE_SAMPLE_BASED;
-    }
-    if (dstParams->aiv_profiling_mode.empty()) {
-        dstParams->aiv_profiling_mode = PROFILING_MODE_SAMPLE_BASED;
-    }
+    dstParams->ai_core_profiling_mode = params->ai_core_profiling_mode;
+    dstParams->aiv_profiling_mode = params->aiv_profiling_mode;
     dstParams->msprof_llc_profiling = params->msprof_llc_profiling;
     dstParams->host_sys_pid = params->host_sys_pid;
     dstParams->profiling_period = params->profiling_period;
