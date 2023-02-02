@@ -154,6 +154,58 @@ std::string DyncProfMsgProcCli::DynProfCliProcHelp()
     return helpInfo;
 }
 
+int DyncProfMsgProcCli::ConnectSocket(int sockFd, struct sockaddr *serv_addr, int addrlen) const
+{
+    int ret = fcntl(sockFd, F_GETFL, 0);
+    if (ret < 0) {
+        MSPROF_LOGE("Dynamic profiling client get sockFd fail, ret=%d, errno=%u.", ret, errno);
+        close(sockFd);
+        return PROFILING_FAILED;
+    }
+    if (fcntl(sockFd, F_SETFL, static_cast<unsigned int>(ret) | O_NONBLOCK) < 0) {
+        MSPROF_LOGE("Dynamic profiling client set sockFd NONBLOCK fail, ret=%d, errno=%u.", ret, errno);
+        close(sockFd);
+        return PROFILING_FAILED;
+    }
+    ret = connect(sockFd, serv_addr, addrlen);
+    if (ret == -1) {
+        MSPROF_LOGE("Dynamic profiling client connect fail, ret=%d errno=%u.", ret, errno);
+        close(sockFd);
+        return PROFILING_FAILED;
+    }
+    ret = fcntl(sockFd, F_GETFL, 0);
+    if (ret < 0) {
+        MSPROF_LOGE("Dynamic profiling client get sockFd fail, ret=%d, errno=%u.", ret, errno);
+        close(sockFd);
+        return PROFILING_FAILED;
+    }
+    if (fcntl(sockFd, F_SETFL, static_cast<unsigned int>(ret) & (~O_NONBLOCK)) < 0) {
+        MSPROF_LOGE("Dynamic profiling client set sockFd BLOCK fail, ret=%d, errno=%u.", ret, errno);
+        close(sockFd);
+        return PROFILING_FAILED;
+    }
+    return PROFILING_SUCCESS;
+}
+
+int DyncProfMsgProcCli::SetSocketMsgTimeout(int sockFd) const
+{
+    timeval timeout1 = {DYN_PROF_CLIENT_SEND_WAIT_TIME, 0};
+    int ret = setsockopt(sockFd,
+                         SOL_SOCKET, SO_SNDTIMEO, reinterpret_cast<CHAR_PTR>(&timeout1), sizeof(struct timeval));
+    if (ret < 0) {
+        MSPROF_LOGE("Dynamic profiling client set sockFd send data timeout fail, ret=%d, errno=%u.", ret, errno);
+        return PROFILING_FAILED;
+    }
+    timeval timeout2 = {DYN_PROF_CLIENT_RECV_WAIT_TIME, 0};
+    ret = setsockopt(sockFd,
+                     SOL_SOCKET, SO_RCVTIMEO, reinterpret_cast<CHAR_PTR>(&timeout2), sizeof(struct timeval));
+    if (ret < 0) {
+        MSPROF_LOGE("Dynamic profiling client set sockFd receive data timeout fail, ret=%d, errno=%u.", ret, errno);
+        return PROFILING_FAILED;
+    }
+    return PROFILING_SUCCESS;
+}
+
 int DyncProfMsgProcCli::CreateDynProfClientSock()
 {
     // create socket file
@@ -162,7 +214,6 @@ int DyncProfMsgProcCli::CreateDynProfClientSock()
         MSPROF_LOGE("Dynamic profiling create client socket fail, sockFd=%d errno=%u.", sockFd, errno);
         return PROFILING_FAILED;
     }
-
     // socket address
     std::string sockPath = Utils::IdeGetHomedir() + DYN_PROF_SOCK_UNIX_DOMAIN +
         std::to_string(DynProfMngCli::instance()->GetAppPid());
@@ -174,22 +225,20 @@ int DyncProfMsgProcCli::CreateDynProfClientSock()
         MSPROF_LOGE("Dynamic profiling client sockPath copy failed, err: %d, sockPath: %s", err, sockPath.c_str());
         return PROFILING_FAILED;
     }
-
     // connect socket
-    (void)fcntl(sockFd, F_SETFL, fcntl(sockFd, F_GETFL, 0) | O_NONBLOCK);
-    int ret = connect(sockFd, reinterpret_cast<sockaddr *>(&sockAddr), sizeof(sockAddr));
-    if (ret == PROFILING_FAILED) {
-        MSPROF_LOGE("Dynamic profiling client connect fail, ret=%d errno=%u.", ret, errno);
-        close(sockFd);
+    if (ConnectSocket(sockFd, reinterpret_cast<sockaddr *>(&sockAddr), sizeof(sockAddr)) == PROFILING_FAILED) {
         return PROFILING_FAILED;
     }
-    (void)fcntl(sockFd, F_SETFL, fcntl(sockFd, F_GETFL, 0) & (~O_NONBLOCK));
-
     // check receive/send
     cliSockFd_ = sockFd;
     std::string echoTips;
     timeval timeout = {0, DYN_PROF_CLIENT_CONNECT_WAIT_TIME};
-    (void)setsockopt(sockFd, SOL_SOCKET, SO_RCVTIMEO, reinterpret_cast<CHAR_PTR>(&timeout), sizeof(struct timeval));
+    int ret = setsockopt(sockFd, SOL_SOCKET, SO_RCVTIMEO, reinterpret_cast<CHAR_PTR>(&timeout), sizeof(struct timeval));
+    if (ret < 0) {
+        MSPROF_LOGE("Dynamic profiling client set sockFd receive data timeout fail, ret=%d, errno=%u.", ret, errno);
+        close(sockFd);
+        return PROFILING_FAILED;
+    }
     ret = SendMsgToServer(DynProfMsgType::TEST_REQ, DynProfMsgType::TEST_RSP, "", echoTips);
     if (ret != PROFILING_SUCCESS) {
         MSPROF_LOGE("Dynamic profiling client send message to server fail.");
@@ -197,13 +246,12 @@ int DyncProfMsgProcCli::CreateDynProfClientSock()
         cliSockFd_ = -1;
         return PROFILING_FAILED;
     }
-
     // set socket send/receive message wait time
-    timeval timeout1 = {DYN_PROF_CLIENT_SEND_WAIT_TIME, 0};
-    (void)setsockopt(sockFd, SOL_SOCKET, SO_SNDTIMEO, reinterpret_cast<CHAR_PTR>(&timeout1), sizeof(struct timeval));
-    timeval timeout2 = {DYN_PROF_CLIENT_RECV_WAIT_TIME, 0};
-    (void)setsockopt(sockFd, SOL_SOCKET, SO_RCVTIMEO, reinterpret_cast<CHAR_PTR>(&timeout2), sizeof(struct timeval));
-
+    if (SetSocketMsgTimeout(sockFd) == PROFILING_FAILED) {
+        close(sockFd);
+        cliSockFd_ = -1;
+        return PROFILING_FAILED;
+    }
     // client socket create success
     MSPROF_LOGI("Dynamic profiling client connet server success.");
     cliSockFd_ = sockFd;

@@ -23,6 +23,7 @@ public:
 
 private:
     int DynProfServerCreateSock();
+    bool IdleConnectOverTime(uint32_t &recvIdleTimes) const;
     void DynProfServerProcMsg();
     void DynProfSrvProcStart();
     void DynProfSrvProcStop();
