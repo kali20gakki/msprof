@@ -12,6 +12,8 @@ from unittest import mock
 from common_func.info_conf_reader import InfoConfReader
 from constant.constant import CONFIG
 from msparser.msproftx.msproftx_parser import MsprofTxParser
+from profiling_bean.struct_info.msproftx_decoder import MsprofTxDecoder
+from msparser.data_struct_size_constant import StructFmt
 from profiling_bean.prof_enum.data_tag import DataTag
 
 NAMESPACE = 'msparser.msproftx.msproftx_parser'
@@ -49,6 +51,13 @@ class TestMsprofTxParser(unittest.TestCase):
             result = check.read_binary_data('msprotx.data.5.slice_0')
         self.assertEqual(result, 0)
 
+    def test_reshape_data(self):
+        msproftx_parser = mock.Mock()
+        end_time = 1
+        data_object = MsprofTxDecoder.decode(b'\x00' * StructFmt.MSPROFTX_FMT_SIZE)
+        setattr(msproftx_parser, "_msproftx_data_group_by_endtime", {end_time: data_object})
+        MsprofTxParser.reshape_data(msproftx_parser)
+        
     def test_original_data_handler(self):
         with mock.patch(NAMESPACE + '.logging.info'), \
                 mock.patch(NAMESPACE + '.MsprofTxParser.read_binary_data', return_value=1), \
