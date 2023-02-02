@@ -165,6 +165,7 @@ bool ParamValidation::CheckProfilingMetricsIsValid(const std::string &metricsNam
     const std::vector<std::string> metricsWhiteList = {
         ARITHMETIC_UTILIZATION,
         PIPE_UTILIZATION,
+        PIPE_UTILIZATION_EXCT,
         MEMORY_BANDWIDTH,
         L0B_AND_WIDTH,
         RESOURCE_CONFLICT_RATIO,

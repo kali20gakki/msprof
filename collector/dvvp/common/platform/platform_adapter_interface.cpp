@@ -269,7 +269,7 @@ void PlatformAdapterInterface::SetParamsForAicMetrics(const std::string &mode, c
             return;
         }
         if (platformType_ == PlatformType::CHIP_V4_1_0 && metrics == PIPE_UTILIZATION) {
-            params_->ai_core_metrics = PIPE_UTILIZATION_EXCT;
+            params_->ai_core_metrics = PIPE_UTILIZATION_EXCT; // 为适配解析，修改该平台和metrics类型对应的内部metrics字段
         } else {
             params_->ai_core_metrics = metrics;
         }
