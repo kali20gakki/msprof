@@ -41,13 +41,6 @@ class MsprofIteration:
         return result
 
     @staticmethod
-    def _generate_trace_iter_end_result(trace_datas: list) -> dict:
-        iter_end_dict = OrderedDict()
-        for trace_data in trace_datas:
-            iter_end_dict.setdefault(trace_data[0], trace_data[1])
-        return iter_end_dict
-
-    @staticmethod
     def get_iter_id_within_iter_range(step_trace_data: list, timestamp: int, iter_range: IterationRange):
         while step_trace_data:
             step_trace = step_trace_data[0]
@@ -56,6 +49,13 @@ class MsprofIteration:
                 continue
             return step_trace.index_id
         return iter_range.iteration_end
+
+    @staticmethod
+    def _generate_trace_iter_end_result(trace_datas: list) -> dict:
+        iter_end_dict = OrderedDict()
+        for trace_data in trace_datas:
+            iter_end_dict.setdefault(trace_data[0], trace_data[1])
+        return iter_end_dict
 
     def get_step_syscnt_range_by_iter_range(self, iter_range: IterationRange):
         """
