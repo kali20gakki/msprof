@@ -906,6 +906,21 @@ std::vector<int> Utils::GetChildPid(int pid)
     return allChildPids;
 }
 
+std::vector<int> Utils::GetChildPidRecursive(int pid, unsigned int recursiveLevel)
+{
+    std::vector<int> allPids;
+    const unsigned int maxRecursiveLevel = 4;
+    if (recursiveLevel >= maxRecursiveLevel) {
+        return allPids;
+    }
+    allPids = GetChildPid(pid);
+    for (auto childPid : allPids) {
+        std::vector<int> childPids = GetChildPidRecursive(childPid, recursiveLevel + 1);
+        allPids.insert(allPids.end(), childPids.begin(), childPids.end());
+    }
+    return allPids;
+}
+
 std::string Utils::TimestampToTime(const std::string &timestamp, int unit /* = 1 */)
 {
     if (timestamp.empty() || (timestamp.find_first_not_of("1234567890") != std::string::npos) ||

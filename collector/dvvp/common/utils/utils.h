@@ -379,7 +379,6 @@ namespace utils {
 
 using VOID_PTR = void *;
 using IDE_SESSION = void *;
-using VOID_PTR_PTR = void **;
 using CONST_VOID_PTR = const void *;
 using UNSIGNED_CHAR_PTR = unsigned char *;
 using CONST_UNSIGNED_CHAR_PTR = const unsigned char *;
@@ -485,6 +484,7 @@ public:
         const unsigned long long cntvct);
     static void GetChildDirs(const std::string &dir, bool isRecur, std::vector<std::string> &childDirs);
     static std::vector<int> GetChildPid(int pid);
+    static std::vector<int> GetChildPidRecursive(int pid, unsigned int recursiveLevel);
     static std::string TimestampToTime(const std::string &timestamp, int unit = 1);
     static int GetMac(std::string &macAddress);
     static std::string GetEnvString(const std::string &name);

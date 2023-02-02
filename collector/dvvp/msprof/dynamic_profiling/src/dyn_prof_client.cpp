@@ -311,7 +311,7 @@ int DynProfMngCli::GetRealAppPid(int pid)
     }
 
     // get current process child pid
-    std::vector<int> childPids = Utils::GetChildPid(pid);
+    std::vector<int> childPids = Utils::GetChildPidRecursive(pid, 0);
     childPids.insert(childPids.begin(), pid);
 
     // get intersection pid
@@ -324,10 +324,26 @@ int DynProfMngCli::GetRealAppPid(int pid)
         }
     }
     if (appPids.empty()) {
-        MSPROF_LOGE("Dynamic profiling get server socket pid fail.");
         return 0;
     }
     return appPids[0];
+}
+
+int DynProfMngCli::TryGetRealAppPid(int pid)
+{
+    static const int tryTimes = 20;
+    static const int waitTimeMs = 1000;
+    int readAppPid = 0;
+    for (int i = 0; i < tryTimes; i++) {
+        Utils::MsleepInterruptible(waitTimeMs);
+        readAppPid = GetRealAppPid(pid);
+        if (readAppPid > 0) {
+            return readAppPid;
+        }
+        MSPROF_LOGD("Dynamic profiling GetRealAppPid try %d times.", i + 1);
+    }
+    MSPROF_LOGW("Dynamic profiling get server socket pid fail.");
+    return 0;
 }
 
 void DynProfMngCli::SetAppPid(int pid)

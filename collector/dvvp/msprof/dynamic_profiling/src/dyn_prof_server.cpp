@@ -65,6 +65,7 @@ int DyncProfMsgProcSrv::Stop()
     }
     MmUnlink(sockPath_);
     srvStarted_ = false;
+    Utils::MsleepInterruptible(DYN_PROF_SERVER_RECV_WAIT_TIME * MMPA_SEC_TO_MSEC);
     if (srvSockFd_ > 0) {
         close(srvSockFd_);
         srvSockFd_ = -1;
@@ -161,7 +162,7 @@ void DyncProfMsgProcSrv::DynProfServerProcMsg()
             break;
         }
         if (recvMsg.msgDataLen >= DYN_PROF_REQ_MSG_MAX_LEN) {
-            MSPROF_LOGE("Dynamic profiling recv message error, type=%u len=%u.", recvMsg.msgType, recvMsg.msgDataLen);
+            MSPROF_LOGW("Dynamic profiling recv message error, type=%u len=%u.", recvMsg.msgType, recvMsg.msgDataLen);
             break;
         }
         MSPROF_LOGI("Dynamic profiling server receive new message, msgType=%u.", recvMsg.msgType);
@@ -177,7 +178,7 @@ void DyncProfMsgProcSrv::DynProfServerProcMsg()
             DynProfSrvProcStop();
         } else if (recvMsg.msgType == DynProfMsgType::QUIT_REQ) {
             DynProfSrvProcQuit();
-            disconnTips = "client request quit.";
+            disconnTips = "Client request quit.";
             break;
         } else {
             MSPROF_LOGE("Dynamic profiling process message receve unknow message, msgType=%u.", recvMsg.msgType);
@@ -185,7 +186,7 @@ void DyncProfMsgProcSrv::DynProfServerProcMsg()
         }
         if (++recvMsgNum > DYN_PROF_SERVER_PROC_MSG_MAX_NUM) {
             MSPROF_LOGW("Dynamic profiling receive message over %u.", recvMsgNum);
-            disconnTips = "receive too much requests from client.";
+            disconnTips = "Receive too much requests from client.";
             break;
         }
     }
