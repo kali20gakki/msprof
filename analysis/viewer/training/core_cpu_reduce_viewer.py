@@ -216,12 +216,12 @@ class CoreCpuReduceViewer:
         acsq_model_view = ViewModel(result_dir, DBNameConstant.DB_ACSQ, DBNameConstant.TABLE_ACSQ_TASK_TIME)
         acsq_model_view.init()
         acsq_data = acsq_model_view.get_all_data(DBNameConstant.TABLE_ACSQ_TASK_TIME)
-        acsq_data_set = {i[4] for i in acsq_data}
+        acsq_data_set = {i[1] for i in acsq_data}
         acsq_data_dict = {value: key for key, value in enumerate(list(acsq_data_set))}
         pid = cls.TRACE_PID_MAP.get(TraceViewHeaderConstant.PEOCESS_ACSQ)
         meta_data = [["process_name", pid, InfoConfReader().get_json_tid_data(), TraceViewHeaderConstant.PEOCESS_ACSQ]]
         for tid_value_index, tid_value in enumerate(list(acsq_data_set)):
-            meta_data.append(["thread_name", pid, tid_value_index, "{}".format(tid_value)])
+            meta_data.append(["thread_name", pid, tid_value_index, "Stream {}".format(tid_value)])
         result = TraceViewManager.metadata_event(meta_data)
         try:
             if acsq_data:
@@ -235,17 +235,24 @@ class CoreCpuReduceViewer:
     @classmethod
     def _add_acsq_opname(cls: any, data_list: list, result_dir: str, tid_dict: dict):
         task_trace_datas = []
-        op_name = cls._get_acsq_opname(PathManager.get_sql_dir(result_dir))
+        op_names = cls._get_acsq_opname(PathManager.get_sql_dir(result_dir))
         for data in data_list:
+            if data[2] <= 0 or data[3] < 0:
+                continue
+            op_name = cls._get_task_trace_value('{}_{}'.format(str(data[1]), str(data[0])), op_names)
             trace_data_args = OrderedDict(
                 [
+                    ("Task Type", data[4]),
+                    ("OP Name", op_name),
                     ("Stream Id", data[1]),
                     ("Task Id", data[0]),
-                    ("acc_id", data[2])
                 ])
-            task_trace_datas.append([cls._get_task_trace_value('{}_{}'.format(str(data[1]), str(data[0])), op_name),
+            task_type = str(data[4])
+            if Constant.NA != op_name:
+                task_type += '@' + op_name
+            task_trace_datas.append([task_type,
                                      cls.TRACE_PID_MAP.get(TraceViewHeaderConstant.PEOCESS_ACSQ),
-                                     tid_dict.get(data[4]),
+                                     tid_dict.get(data[1]),
                                      float(data[2]) / DBManager.NSTOUS,
                                      int(data[3]) / DBManager.NSTOUS if data[3] > 0 else 0,
                                      trace_data_args])
