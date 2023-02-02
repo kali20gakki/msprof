@@ -36,8 +36,8 @@ class MsprofTxViewer:
         pid_values = set()
         tid_values = set()
         for msproftx_data in data:
-            pid_values.add(msproftx_data[1])
-            tid_values.add(msproftx_data[2])
+            pid_values.add(msproftx_data.pid)
+            tid_values.add(msproftx_data.tid)
         meta_data = Utils.generator_to_list(["process_name", pid_value,
                                              InfoConfReader().get_json_tid_data(),
                                              TraceViewHeaderConstant.PEOCESS_MSPROFTX]
@@ -60,16 +60,17 @@ class MsprofTxViewer:
         trace_data = []
         for top_down_data in msproftx_data:
             trace_data_args = OrderedDict([
-                ("Category", str(top_down_data[0])),
-                ("Payload_type", top_down_data[5]),
-                ("Payload_value", top_down_data[6]),
-                ("Message_type", top_down_data[7]),
-                ("event_type", top_down_data[9])
+                ("Category", str(top_down_data.category)),
+                ("Payload_type", top_down_data.payload_type),
+                ("Payload_value", top_down_data.payload_value),
+                ("Message_type", top_down_data.message_type),
+                ("event_type", top_down_data.event_type),
+                ("call_trace", top_down_data.call_trace)
             ])
             trace_data_msproftx = [
-                top_down_data[8], top_down_data[1], top_down_data[2],
-                int(top_down_data[3]) / NumberConstant.CONVERSION_TIME,
-                int(top_down_data[4]) / NumberConstant.CONVERSION_TIME,
+                top_down_data.message, top_down_data.pid, top_down_data.tid,
+                int(top_down_data.start_time) / NumberConstant.CONVERSION_TIME,
+                int(top_down_data.dur_time) / NumberConstant.CONVERSION_TIME,
                 trace_data_args
             ]
             trace_data.append(trace_data_msproftx)
