@@ -116,7 +116,7 @@ class ParsingPeripheralData(MsMultiProcess):
         if not dvpp_data:
             logging.warning("No Dvpp Data Found!")
             return
-        self.has_dvpp_id = ChipManager().is_chip_v2()
+        self.has_dvpp_id = ChipManager().is_chip_v2() or ChipManager().is_stars_chip()
 
         dvpp_list = [x for x in dvpp_data if (x[1].isdigit() and len(x) == int(self.has_dvpp_id) + self.DATA_LENGTH)]
         dvpp_data = \
