@@ -56,7 +56,7 @@ class DataParsersConfig(MetaConfig):
         ]
         , 'ParsingPeripheralData': [
             ('path', 'msparser.hardware.dvpp_parser'),
-            ('chip_model', '0,1')
+            ('chip_model', '0,1,5,7')
         ]
         , 'ParsingNicData': [
             ('path', 'msparser.hardware.nic_parser'),
