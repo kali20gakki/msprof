@@ -1525,8 +1525,13 @@ int32_t WriteFile(const std::string &absolutePath, const std::string &recordFile
         MSPROF_LOGE("Failed to open %s", recordFile.c_str());
         return analysis::dvvp::common::error::PROFILING_FAILED;
     }
-
-    if (flock(fileno(file), LOCK_SH) != 0) {
+    int fd = fileno(file);
+    if (fd  < 0) {
+        fclose(file);
+        MSPROF_LOGE("Failed to get file description for %s", recordFile.c_str());
+        return analysis::dvvp::common::error::PROFILING_FAILED;
+    }
+    if (flock(fd, LOCK_SH) != 0) {
         fclose(file);
         MSPROF_LOGE("Failed to get file lock");
         return analysis::dvvp::common::error::PROFILING_FAILED;

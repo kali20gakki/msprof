@@ -7,6 +7,7 @@
 #ifndef COLLECTOR_DYNAMIC_PROFILING_CLIENT_H
 #define COLLECTOR_DYNAMIC_PROFILING_CLIENT_H
 #include <functional>
+#include <sys/socket.h>
 #include "dyn_prof_common.h"
 #include "thread/thread.h"
 
@@ -26,6 +27,8 @@ public:
 
 private:
     std::string DynProfCliProcHelp();
+    int ConnectSocket(int sockFd, struct sockaddr *serv_addr, int addrlen) const;
+    int SetSocketMsgTimeout(int sockFd) const;
     int CreateDynProfClientSock();
     int SendMsgToServer(DynProfMsgType reqMsgtype, DynProfMsgType rsqMsgtype,
         const std::string &reqMsgParams, std::string &echoTips);

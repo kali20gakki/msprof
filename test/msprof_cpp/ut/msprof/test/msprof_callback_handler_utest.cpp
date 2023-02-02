@@ -1,6 +1,11 @@
 #include "gtest/gtest.h"
 #include "mockcpp/mockcpp.hpp"
 #include <string.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <sys/un.h>
 #include <google/protobuf/util/json_util.h>
 #include "config/config_manager.h"
 #include "errno/error_code.h"
@@ -244,7 +249,20 @@ TEST_F(DYN_PROF_SERVER_UTEST, DynProfServerCreateSock)
     EXPECT_EQ(PROFILING_SUCCESS, ret);
     ret = dynProfSrv->DynProfServerCreateSock();
 }
- 
+
+TEST_F(DYN_PROF_SERVER_UTEST, IdleConnectOverTime)
+{
+    SHARED_PTR_ALIA<DyncProfMsgProcSrv> dynProfSrv;
+    dynProfSrv = std::make_shared<DyncProfMsgProcSrv>();
+    dynProfSrv->profHasStarted_ = true;
+    uint32_t time = 0;
+    EXPECT_EQ(false, dynProfSrv->IdleConnectOverTime(time));
+    dynProfSrv->profHasStarted_ = false;
+    EXPECT_EQ(false, dynProfSrv->IdleConnectOverTime(time));
+    time = DYN_PROF_IDLE_LINK_HOLD_TIME;
+    EXPECT_EQ(true, dynProfSrv->IdleConnectOverTime(time));
+}
+
 TEST_F(DYN_PROF_SERVER_UTEST, DynProfServerProcMsg)
 {
     MOCKER(close)
@@ -497,6 +515,28 @@ TEST_F(DYN_PROF_CLIENT_UTEST, SetParams)
     EXPECT_EQ(PROFILING_SUCCESS, ret);
 }
 
+TEST_F(DYN_PROF_CLIENT_UTEST, SetSocketMsgTimeout)
+{
+    SHARED_PTR_ALIA<DyncProfMsgProcCli> dynProfCli;
+    dynProfCli = std::make_shared<DyncProfMsgProcCli>();
+    GlobalMockObject::verify();
+    MOCKER(setsockopt)
+        .stubs()
+        .will(returnValue(-1))
+        .then(returnValue(0));
+    MOCKER(setsockopt)
+        .stubs()
+        .will(returnValue(-1))
+        .then(returnValue(0));
+    int fd = 0;
+    int ret = dynProfCli->SetSocketMsgTimeout(fd);
+    EXPECT_EQ(PROFILING_FAILED, ret);
+    ret = dynProfCli->SetSocketMsgTimeout(fd);
+    EXPECT_EQ(PROFILING_SUCCESS, ret);
+    ret = dynProfCli->SetSocketMsgTimeout(fd);
+    EXPECT_EQ(PROFILING_SUCCESS, ret);
+}
+
 TEST_F(DYN_PROF_CLIENT_UTEST, CreateDynProfClientSock)
 {
     SHARED_PTR_ALIA<DyncProfMsgProcCli> dynProfCli;
@@ -507,7 +547,11 @@ TEST_F(DYN_PROF_CLIENT_UTEST, CreateDynProfClientSock)
         .stubs()
         .will(returnValue(-1))
         .then(returnValue(0));
-    MOCKER(connect)
+    MOCKER(&DyncProfMsgProcCli::ConnectSocket)
+        .stubs()
+        .will(returnValue(-1))
+        .then(returnValue(0));
+    MOCKER(setsockopt)
         .stubs()
         .will(returnValue(-1))
         .then(returnValue(0));
@@ -515,8 +559,16 @@ TEST_F(DYN_PROF_CLIENT_UTEST, CreateDynProfClientSock)
         .stubs()
         .will(returnValue(-1))
         .then(returnValue(0));
+    MOCKER(&DyncProfMsgProcCli::SetSocketMsgTimeout)
+        .stubs()
+        .will(returnValue(-1))
+        .then(returnValue(0));
 
     int ret = dynProfCli->CreateDynProfClientSock();
+    EXPECT_EQ(PROFILING_FAILED, ret);
+    ret = dynProfCli->CreateDynProfClientSock();
+    EXPECT_EQ(PROFILING_FAILED, ret);
+    ret = dynProfCli->CreateDynProfClientSock();
     EXPECT_EQ(PROFILING_FAILED, ret);
     ret = dynProfCli->CreateDynProfClientSock();
     EXPECT_EQ(PROFILING_FAILED, ret);
@@ -532,6 +584,11 @@ TEST_F(DYN_PROF_CLIENT_UTEST, SendMsgToServer)
     dynProfCli = std::make_shared<DyncProfMsgProcCli>();
  
     GlobalMockObject::verify();
+    std::string invalidParams(DYN_PROF_REQ_MSG_MAX_LEN + 1, 'x');
+    std::string tips;
+    int ret = dynProfCli->SendMsgToServer(DynProfMsgType::START_REQ, DynProfMsgType::START_RSP, invalidParams, tips);
+    EXPECT_EQ(PROFILING_FAILED, ret);
+    
     MOCKER(write)
         .stubs()
         .will(returnValue(-1))
@@ -542,9 +599,7 @@ TEST_F(DYN_PROF_CLIENT_UTEST, SendMsgToServer)
         .then(returnValue(sizeof(DynProfRspMsg)));
 
     std::string params;
-    std::string tips;
-    int ret = dynProfCli->SendMsgToServer(DynProfMsgType::START_REQ,
-        DynProfMsgType::START_RSP, params, tips);
+    ret = dynProfCli->SendMsgToServer(DynProfMsgType::START_REQ, DynProfMsgType::START_RSP, params, tips);
     EXPECT_EQ(PROFILING_FAILED, ret);
     ret = dynProfCli->SendMsgToServer(DynProfMsgType::START_REQ, DynProfMsgType::START_RSP, params, tips);
     EXPECT_EQ(PROFILING_FAILED, ret);
