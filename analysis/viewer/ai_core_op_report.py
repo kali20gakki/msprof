@@ -92,7 +92,7 @@ class AiCoreOpReport:
         """
         all_headers = []
         for sub in DBManager.fetch_all_data(curs, "PRAGMA table_info({})".format(table_name)):
-            if sub[1] not in AiCoreOpReport.UNSUPPORTED_HEADER:
+            if sub[1] not in AiCoreOpReport.UNSUPPORTED_HEADER or ChipManager().is_chip_v1_1():
                 all_headers.append(sub[1])
         return [sub for sub in all_headers if sub not in unused_headers]
 
