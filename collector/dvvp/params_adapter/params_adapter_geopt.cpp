@@ -217,6 +217,7 @@ int ParamsAdapterGeOpt::SetGeOptionsContainerDefaultValue()
         paramContainer_[INPUT_CFG_COM_BIU] = MSVP_PROF_ON;
     }
     SetGeOptContainerSysValue();
+    SetDefaultLlcMode(paramContainer_);
     return PROFILING_SUCCESS;
 }
 

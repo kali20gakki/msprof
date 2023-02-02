@@ -36,7 +36,6 @@ TEST_F(ParamsAdapterUtest, CheckListInit)
     GlobalMockObject::verify();
     std::shared_ptr<ParamsAdapter> ParamsAdapterMgr;
     MSVP_MAKE_SHARED0_BREAK(ParamsAdapterMgr, ParamsAdapter);
-    int ret = ParamsAdapterMgr->CheckListInit();
     MOCKER_CPP(&Analysis::Dvvp::Common::Config::ConfigManager::GetPlatformType)
         .stubs()
         .will(returnValue(PlatformType::MINI_TYPE))
@@ -45,14 +44,38 @@ TEST_F(ParamsAdapterUtest, CheckListInit)
         .then(returnValue(PlatformType::LHISI_TYPE))
         .then(returnValue(PlatformType::DC_TYPE))
         .then(returnValue(PlatformType::CHIP_V4_1_0))
-        .then(returnValue(PlatformType::CHIP_V4_2_0));
-    EXPECT_EQ(PROFILING_SUCCESS, ret);
-    EXPECT_EQ(PROFILING_SUCCESS, ret);
-    EXPECT_EQ(PROFILING_SUCCESS, ret);
-    EXPECT_EQ(PROFILING_SUCCESS, ret);
-    EXPECT_EQ(PROFILING_SUCCESS, ret);
-    EXPECT_EQ(PROFILING_SUCCESS, ret);
-    EXPECT_EQ(PROFILING_SUCCESS, ret);
+        .then(returnValue(PlatformType::CHIP_V4_2_0))
+        .then(returnValue(PlatformType::END_TYPE));
+    EXPECT_EQ(PROFILING_SUCCESS, ParamsAdapterMgr->CheckListInit());
+    EXPECT_EQ(PROFILING_SUCCESS, ParamsAdapterMgr->CheckListInit());
+    EXPECT_EQ(PROFILING_SUCCESS, ParamsAdapterMgr->CheckListInit());
+    EXPECT_EQ(PROFILING_SUCCESS, ParamsAdapterMgr->CheckListInit());
+    EXPECT_EQ(PROFILING_SUCCESS, ParamsAdapterMgr->CheckListInit());
+    EXPECT_EQ(PROFILING_SUCCESS, ParamsAdapterMgr->CheckListInit());
+    EXPECT_EQ(PROFILING_SUCCESS, ParamsAdapterMgr->CheckListInit());
+    EXPECT_EQ(PROFILING_FAILED, ParamsAdapterMgr->CheckListInit());
+}
+
+TEST_F(ParamsAdapterUtest, SetDefaultAivParams)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<ParamsAdapter> ParamsAdapterMgr;
+    MSVP_MAKE_SHARED0_BREAK(ParamsAdapterMgr, ParamsAdapter);
+    std::array<std::string, INPUT_CFG_MAX> paramContainer;
+    ParamsAdapterMgr->platformType_ = PlatformType::CHIP_V4_1_0;
+    ParamsAdapterMgr->SetDefaultAivParams(paramContainer);
+}
+
+TEST_F(ParamsAdapterUtest, SetDefaultLlcMode)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<ParamsAdapter> ParamsAdapterMgr;
+    MSVP_MAKE_SHARED0_BREAK(ParamsAdapterMgr, ParamsAdapter);
+    std::array<std::string, INPUT_CFG_MAX> paramContainer;
+    ParamsAdapterMgr->platformType_ = PlatformType::MINI_TYPE;
+    ParamsAdapterMgr->SetDefaultLlcMode(paramContainer);
+    ParamsAdapterMgr->platformType_ = PlatformType::CLOUD_TYPE;
+    ParamsAdapterMgr->SetDefaultLlcMode(paramContainer);
 }
 
 TEST_F(ParamsAdapterUtest, TransToParam)
@@ -79,6 +102,16 @@ TEST_F(ParamsAdapterUtest, TransToParam)
     paramContainer[INPUT_CFG_HOST_SYS_USAGE] = "cpu,mem";
     int ret = ParamsAdapterMgr->TransToParam(paramContainer, params);
     EXPECT_EQ(PROFILING_SUCCESS, ret);
+}
+
+TEST_F(ParamsAdapterUtest, SetHostSysUsageParams)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<ParamsAdapter> ParamsAdapterMgr;
+    MSVP_MAKE_SHARED0_BREAK(ParamsAdapterMgr, ParamsAdapter);
+    std::array<std::string, INPUT_CFG_MAX> paramContainer;
+    paramContainer[INPUT_CFG_HOST_SYS_PID] = "0";
+    ParamsAdapterMgr->SetHostSysUsageParams(paramContainer);
 }
 
 TEST_F(ParamsAdapterUtest, ComCfgCheck2)

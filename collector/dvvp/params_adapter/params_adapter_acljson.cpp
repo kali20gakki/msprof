@@ -211,6 +211,7 @@ void ParamsAdapterAclJson::SetAclJsonContainerDefaultValue()
         paramContainer_[INPUT_CFG_COM_BIU] = MSVP_PROF_ON;
     }
     SetAclJsonContainerSysValue();
+    SetDefaultLlcMode(paramContainer_);
 }
 
 std::string ParamsAdapterAclJson::SetOutputDir(const std::string &outputDir) const
