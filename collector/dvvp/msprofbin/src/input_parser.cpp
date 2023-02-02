@@ -186,34 +186,7 @@ void ArgsManager::Init()
     if (driverOnline_) {
         platform_ = ConfigManager::instance()->GetPlatformType();
     }
-    argsList_ = {
-        {"output", "Specify the directory that is used for storing data results.(full-platform)"},
-        {"storage-limit", "Specify the output directory volume. range 200MB ~ 4294967296MB.(full-platform)"},
-        {"application", "Specify application path, considering the risk of privilege escalation,\n"
-            "\t\t\t\t\t\t   please pay attention to the group of the application and \n"
-            "\t\t\t\t\t\t   confirm whether it is the same as the user currently.(full-platform)"},
-        {"ascendcl", "Show acl profiling data, the default value is on.(full-platform)", ON},
-        {"model-execution", "Show ge model execution profiling data, the default value is off.(full-platform)", OFF},
-        {"runtime-api", "Show runtime api profiling data, the default value is off.(full-platform)", OFF},
-        {"task-time", "Show task profiling data, the default value is on.(full-platform)", ON},
-        {"ai-core", "Turn on / off the ai core profiling, the default value is on when collecting\n"
-            "\t\t\t\t\t\t   app Profiling.(full-platform)", ON},
-        {"aic-mode", "Set the aic profiling mode to task-based or sample-based.(full-platform)\n"
-            "\t\t\t\t\t\t   In task-based mode, profiling data will be collected by tasks.\n"
-            "\t\t\t\t\t\t   In sample-based mode, profiling data will be collected in a specific interval.\n"
-            "\t\t\t\t\t\t   The default value is task-based.", TASK_BASED},
-        {"aic-freq", "The aic sampling frequency in hertz, the default value is 100 Hz, the range is\n"
-            "\t\t\t\t\t\t   1 to 100 Hz.(full-platform)", "100"},
-        {"aic-metrics", "The aic metrics groups, include ArithmeticUtilization, PipeUtilization,\n"
-            "\t\t\t\t\t\t   Memory, MemoryL0, ResourceConflictRatio, MemoryUB. the default value is\n"
-            "\t\t\t\t\t\t   PipeUtilization.(full-platform)", "PipeUtilization"},
-        {"environment", "User app custom environment variable configuration.(full-platform)"},
-        {"sys-period", "Set total sampling period of system profiling in seconds.(full-platform)"},
-        {"sys-devices", "Specify the profiling scope by device ID when collect sys profiling.\n"
-            "\t\t\t\t\t\t   The value is all or ID list (split with ',').(full-platform)"},
-        {"hccl", "Show hccl profiling data, the default value is off.(full-platform)", OFF},
-        {"msproftx", "Show msproftx data, the default value is off.(full-platform)", OFF}
-    };
+    AddBasicArgs();
     AddDynProfArgs();
     AddAnalysisArgs();
     AddAicpuArgs();
@@ -230,6 +203,50 @@ void ArgsManager::Init()
     AddStarsArgs();
     Args help = {"help", "help message.(full-platform)"};
     argsList_.push_back(help);
+}
+
+void ArgsManager::AddBasicArgs()
+{
+    argsList_ = {
+        {"output", "Specify the directory that is used for storing data results.(full-platform)"},
+        {"storage-limit", "Specify the output directory volume. range 200MB ~ 4294967296MB.(full-platform)"},
+        {"application", "Specify application path, considering the risk of privilege escalation,\n"
+            "\t\t\t\t\t\t   please pay attention to the group of the application and \n"
+            "\t\t\t\t\t\t   confirm whether it is the same as the user currently.(full-platform)"},
+        {"ascendcl", "Show acl profiling data, the default value is on.(full-platform)", ON},
+        {"model-execution", "Show ge model execution profiling data, the default value is off.(full-platform)", OFF},
+        {"runtime-api", "Show runtime api profiling data, the default value is off.(full-platform)", OFF},
+        {"task-time", "Show task profiling data, the default value is on.(full-platform)", ON},
+        {"environment", "User app custom environment variable configuration.(full-platform)"},
+        {"sys-period", "Set total sampling period of system profiling in seconds.(full-platform)"},
+        {"sys-devices", "Specify the profiling scope by device ID when collect sys profiling.\n"
+            "\t\t\t\t\t\t   The value is all or ID list (split with ',').(full-platform)"},
+        {"hccl", "Show hccl profiling data, the default value is off.(full-platform)", OFF},
+        {"msproftx", "Show msproftx data, the default value is off.(full-platform)", OFF},
+        {"ai-core", "Turn on / off the ai core profiling, the default value is on when collecting\n"
+            "\t\t\t\t\t\t   app Profiling.(full-platform)", ON},
+        {"aic-mode", "Set the aic profiling mode to task-based or sample-based.(full-platform)\n"
+            "\t\t\t\t\t\t   In task-based mode, profiling data will be collected by tasks.\n"
+            "\t\t\t\t\t\t   In sample-based mode, profiling data will be collected in a specific interval.\n"
+            "\t\t\t\t\t\t   The default value is task-based.", TASK_BASED},
+        {"aic-freq", "The aic sampling frequency in hertz, the default value is 100 Hz, the range is\n"
+            "\t\t\t\t\t\t   1 to 100 Hz.(full-platform)", "100"}
+    };
+    if (!driverOnline_ || platform_ == PlatformType::CHIP_V4_1_0 || platform_ == PlatformType::CHIP_V4_2_0) {
+        Args aicMetrics = {"aic-metrics",
+                           "The aic metrics groups, include ArithmeticUtilization, PipeUtilization, Memory,\n"
+                               "\t\t\t\t\t\t   MemoryL0, ResourceConflictRatio, MemoryUB, L2Cache.\n"
+                               "\t\t\t\t\t\t   the default value is PipeUtilization.(full-platform)",
+                           "PipeUtilization"};
+        argsList_.push_back(aicMetrics);
+    } else {
+        Args aicMetrics = {"aic-metrics",
+                           "The aic metrics groups, include ArithmeticUtilization, PipeUtilization, Memory,\n"
+                               "\t\t\t\t\t\t   MemoryL0, ResourceConflictRatio, MemoryUB.\n"
+                               "\t\t\t\t\t\t   the default value is PipeUtilization.(full-platform)",
+                           "PipeUtilization"};
+        argsList_.push_back(aicMetrics);
+    }
 }
 
 void ArgsManager::AddDynProfArgs()
