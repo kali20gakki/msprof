@@ -32,15 +32,6 @@ class MsprofIteration:
                                          [DBNameConstant.TABLE_STEP_TRACE_DATA])
 
     @staticmethod
-    def _generate_trace_result(trace_datas: list, time_fmt: int = NumberConstant.MICRO_SECOND) -> list:
-        trace_datas = list(chain.from_iterable(trace_datas))
-        if not trace_datas:
-            return []
-        trace_datas = [InfoConfReader().time_from_syscnt(timestamp, time_fmt) for timestamp in trace_datas]
-        result = [(0, max(trace_datas))] if len(trace_datas) == 1 else [(min(trace_datas), max(trace_datas))]
-        return result
-
-    @staticmethod
     def get_iter_id_within_iter_range(step_trace_data: list, timestamp: int, iter_range: IterationRange):
         while step_trace_data:
             step_trace = step_trace_data[0]
@@ -49,6 +40,15 @@ class MsprofIteration:
                 continue
             return step_trace.index_id
         return iter_range.iteration_end
+
+    @staticmethod
+    def _generate_trace_result(trace_datas: list, time_fmt: int = NumberConstant.MICRO_SECOND) -> list:
+        trace_datas = list(chain.from_iterable(trace_datas))
+        if not trace_datas:
+            return []
+        trace_datas = [InfoConfReader().time_from_syscnt(timestamp, time_fmt) for timestamp in trace_datas]
+        result = [(0, max(trace_datas))] if len(trace_datas) == 1 else [(min(trace_datas), max(trace_datas))]
+        return result
 
     @staticmethod
     def _generate_trace_iter_end_result(trace_datas: list) -> dict:
