@@ -247,7 +247,7 @@ class MsProfExportDataConfig(MetaConfig):
             ('table', 'MsprofTx'),
             ('headers',
              'pid, tid, category, event_type, payload_type, payload_value, Start_time(ns), '
-             'End_time(ns), message_type, message')
+             'End_time(ns), message_type, message, call_trace')
         ]
         , 'inter_soc_transmission': [
             ('handler', '_get_inter_soc_summary'),
