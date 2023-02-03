@@ -41,6 +41,7 @@ class MsprofTxParser(IParser, MsMultiProcess):
         self._project_path = sample_config.get(StrConstant.SAMPLE_CONFIG_PROJECT_PATH, '')
         self._model = MsprofTxModel(self._project_path, DBNameConstant.DB_MSPROFTX,
                                     [DBNameConstant.TABLE_MSPROFTX])
+        self._msproftx_data_group_by_endtime = {}
         self._file_tag = DataTag.MSPROFTX
         self._cur_file_list = []
         self._msproftx_data = []
@@ -59,24 +60,50 @@ class MsprofTxParser(IParser, MsMultiProcess):
                 msproftx_data = calculate.pre_process(msproftx_f, _file_size)
                 for chunk in Utils.chunks(msproftx_data, StructFmt.MSPROFTX_FMT_SIZE):
                     data_object = MsprofTxDecoder.decode(chunk)
-                    self._msproftx_data.append(
-                        data_object.id_data + (data_object.category, self.EVENT_DICT.get(data_object.event_type, ''))
-                        + data_object.mix_message + (data_object.message_type, data_object.message, self._file_tag))
+                    self.dispatch_msproftx_data(data_object)
                 return NumberConstant.SUCCESS
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
             logging.error("%s: %s", file_name, err, exc_info=Constant.TRACE_BACK_SWITCH)
             return NumberConstant.ERROR
 
+    def dispatch_msproftx_data(self: any, data_object) -> None:
+        """
+        dispatch msproftx data
+        """
+        if data_object.end_time not in self._msproftx_data_group_by_endtime:
+            self._msproftx_data_group_by_endtime.setdefault(data_object.end_time, data_object)
+        else:
+            data_object_group_by_endtime = self._msproftx_data_group_by_endtime.get(data_object.end_time)
+            data_object_group_by_endtime.call_trace += data_object.call_trace
+
+    def reshape_data(self: any) -> None:
+        """
+        reshape data
+        """
+        # Semicolon splits different function stack. Semicolon should be replaced by line break for better presentation.
+        for data_object in self._msproftx_data_group_by_endtime.values():
+            self._msproftx_data.append((data_object.process_id, data_object.thread_id,
+                                        data_object.category, self.EVENT_DICT.get(data_object.event_type, ''),
+                                        data_object.payload_type, data_object.payload_value,
+                                        data_object.start_time, data_object.end_time,
+                                        data_object.message_type,
+                                        data_object.message,
+                                        data_object.call_trace.replace(";", "\n"),
+                                        self._file_tag))
+
     def parse(self: any) -> None:
         """
         parsing data file
         """
+        self._msproftx_data_group_by_endtime = {}
         try:
             for file_name in self._cur_file_list:
                 if is_valid_original_data(file_name, self._project_path):
                     self._original_data_handler(file_name)
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
             logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
+
+        self.reshape_data()
 
     def save(self: any) -> None:
         """

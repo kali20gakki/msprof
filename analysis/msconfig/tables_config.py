@@ -689,6 +689,7 @@ class TablesConfig(MetaConfig):
             ('end_time', 'INTEGER, null'),
             ('message_type', 'INTEGER, null'),
             ('message', 'TEXT, null'),
+            ('call_trace', 'TEXT, null'),
             ('file_tag', 'INTEGER, null')
         ]
         , 'InterSocMap': [
