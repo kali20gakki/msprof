@@ -856,8 +856,8 @@ static int32_t LocalLookup(char *buf, uint32_t bufLen, const char *pattern, char
     }
 
     *pBuf = '\0';
-    int pValueLen = strnlen(pValue, valueLen);
-    if (static_cast<uint32_t>(pValueLen) == valueLen) {
+    uint32_t pValueLen = strnlen(pValue, valueLen);
+    if (pValueLen == valueLen) {
         return PROFILING_FAILED;
     }
     ret = memcpy_s(value, valueLen, pValue, pValueLen + 1U);
@@ -1054,8 +1054,8 @@ int32_t MmGetCpuInfo(MmCpuDesc **cpuInfo, int32_t *count)
     (void)memset_s(pCpuDesc, needSize, 0, needSize); /* unsafe_function_ignore: memset */
 
     if (uname(&sysInfo) == PROFILING_SUCCESS) {
-        int sysMachineLen = strnlen(sysInfo.machine, sizeof(cpuDest.arch));
-        if (static_cast<unsigned int>(sysMachineLen) == sizeof(cpuDest.arch)) {
+        uint32_t sysMachineLen = strnlen(sysInfo.machine, sizeof(cpuDest.arch));
+        if (sysMachineLen == sizeof(cpuDest.arch)) {
             return PROFILING_FAILED;
         }
         ret = memcpy_s(cpuDest.arch, sizeof(cpuDest.arch), sysInfo.machine, sysMachineLen + 1U);
