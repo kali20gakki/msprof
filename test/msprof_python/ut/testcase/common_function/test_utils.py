@@ -22,3 +22,7 @@ class TestUtils(unittest.TestCase):
         expect_data = [['1', '2', '3.4447', '0.2539', "a"]]
         ret = Utils.data_processing_with_decimals(origin_data)
         self.assertEqual(expect_data, ret)
+
+    def test_is_valid_num(self):
+        res = Utils.is_valid_num(None)
+        self.assertEqual(res, 0)

@@ -168,6 +168,13 @@ class Utils:
         return processed_data
 
     @staticmethod
+    def is_valid_num(data: float) -> bool:
+        """check if a num is valid"""
+        if data is None or (not isinstance(data, (int, float)) and not data.isdigit()):
+            return False
+        return True
+
+    @staticmethod
     def __handle_invalid_zero(data, accuracy):
         return str(round(float(data), accuracy)).rstrip('0').rstrip('.') if is_number(data) else data
 
