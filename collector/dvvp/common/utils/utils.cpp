@@ -1533,6 +1533,7 @@ int32_t WriteFile(const std::string &absolutePath, const std::string &recordFile
     }
     if (flock(fd, LOCK_SH) != 0) {
         fclose(file);
+        MmClose(fd);
         MSPROF_LOGE("Failed to get file lock");
         return analysis::dvvp::common::error::PROFILING_FAILED;
     }
@@ -1540,16 +1541,19 @@ int32_t WriteFile(const std::string &absolutePath, const std::string &recordFile
     if ((fwrite(profName.c_str(), FILE_WRITE_SIZE, profName.length(), file)) != profName.length()) {
         UnFileLock(file);
         fclose(file);
+        MmClose(fd);
         MSPROF_LOGE("Failed to write prof dir");
         return analysis::dvvp::common::error::PROFILING_FAILED;
     }
 
     if (UnFileLock(file) != PROFILING_SUCCESS) {
         fclose(file);
+        MmClose(fd);
         return analysis::dvvp::common::error::PROFILING_FAILED;
     }
 
     fclose(file);
+    MmClose(fd);
     return analysis::dvvp::common::error::PROFILING_SUCCESS;
 #endif
 }

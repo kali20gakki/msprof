@@ -104,7 +104,7 @@ public:
     int GetAicoreEvents(const std::string &aicoreMetricsType, std::string &aicoreEvents) const;
     int GetL2cacheEvents(std::string &l2CacheEvents) const;
     void MsprofL2CacheAdapter(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params);
-    void AicoreMetricsEnumToName(ProfAicoreMetrics aicMetrics, std::string &name);
+    void AicoreMetricsEnumToName(const ProfAicoreMetrics aicMetrics, std::string &name) const;
 
 private:
     void InitFrequency();
