@@ -4,6 +4,7 @@
 
 from analyzer.scene_base.profiling_scene import ProfilingScene
 from common_func.utils import Utils
+from common_func.ms_constant.number_constant import NumberConstant
 
 
 class OpCommonFunc:
@@ -14,25 +15,7 @@ class OpCommonFunc:
     TASK_TIME_COL_NUM = 8
     TASK_ID = "task_id"
     BATCH_ID = "batch_id"
-
-    @staticmethod
-    def _is_valid_num(data: float) -> bool:
-        """check if a num is valid"""
-        if data is None or (not isinstance(data, (int, float)) and not data.isdigit()):
-            return False
-        return True
-
-    @staticmethod
-    def _get_wait_time(row_num: int, time_data: float, previous_complete_time: int) -> float:
-        """
-        get wait time
-        :param time_data:
-        :param per:
-        :return:
-        """
-        if row_num == 0 or (int(time_data) - previous_complete_time) < 0:
-            return 0
-        return int(time_data) - previous_complete_time
+    DEFAULT_NULL_NUMBER = NumberConstant.NULL_NUMBER
 
     @classmethod
     def calculate_task_time(cls: any, data: list) -> list:
@@ -46,8 +29,8 @@ class OpCommonFunc:
         for row_num, content in enumerate(data):
             # each row contains task id, stream id, start time,
             # duration time, wait time and device id
-            if not cls._is_valid_num(float(content[2])) or \
-                    not cls._is_valid_num(float(content[3])):
+            if not Utils.is_valid_num(float(content[2])) or \
+                    not Utils.is_valid_num(float(content[3])):
                 continue
             res[row_num][0] = content[0]  # task id
             res[row_num][1] = content[1]  # stream id
@@ -90,4 +73,14 @@ class OpCommonFunc:
             result[index] = list(ge_data) + [stream_max_value.get(stream_id).get(cls.BATCH_ID)]
         return result
 
-
+    @classmethod
+    def _get_wait_time(cls: any, row_num: int, time_data: float, previous_complete_time: int) -> float:
+        """
+        get wait time
+        :param time_data:
+        :param per:
+        :return:
+        """
+        if row_num == 0 or (int(time_data) - previous_complete_time) < 0:
+            return cls.DEFAULT_NULL_NUMBER
+        return int(time_data) - previous_complete_time

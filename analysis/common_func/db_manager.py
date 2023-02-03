@@ -232,6 +232,16 @@ class DBManager:
             logging.error(msg)
         return headers, type_names
 
+    @staticmethod
+    def _get_hd_with_type_list_str(headers: list, type_names: list) -> str:
+        hd_with_type_list_str = "("
+        hd_with_type_list = []
+        for i, _ in enumerate(headers):
+            hd_with_type_list.append(headers[i] + " " + type_names[i])
+        hd_with_type_list_str += ','.join(hd_with_type_list)
+        hd_with_type_list_str += ")"
+        return hd_with_type_list_str
+
     @classmethod
     def attach_to_db(cls: any, conn: any, project_path: str, db_name: str, attach_name: str) -> bool:
         """
@@ -243,7 +253,7 @@ class DBManager:
         :return:
         """
         db_path = PathManager.get_db_path(project_path, db_name)
-        conn_check, curs_check = DBManager.check_connect_db_path(db_path)
+        conn_check, curs_check = cls.check_connect_db_path(db_path)
         if isinstance(conn_check, sqlite3.Connection):
             cls.destroy_db_connect(conn_check, curs_check)
             cls.execute_sql(conn, "attach database '{0}' as {1}".format(db_path, attach_name))
@@ -270,12 +280,12 @@ class DBManager:
         if fields_filter_list is None:
             fields_filter_list = []
         try:
-            headers, type_names = DBManager._get_headers_and_type_names(cfg_parser, map_name, fields_filter_list,
+            headers, type_names = cls._get_headers_and_type_names(cfg_parser, map_name, fields_filter_list,
                                                                         map_path)
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as error:
             logging.exception(error)
             return ""
-        hd_with_type_list_str = DBManager._get_hd_with_type_list_str(headers, type_names)
+        hd_with_type_list_str = cls._get_hd_with_type_list_str(headers, type_names)
         sql = "CREATE TABLE IF NOT EXISTS " + table_name + hd_with_type_list_str
         return sql
 
@@ -472,7 +482,7 @@ class DBManager:
         col_name = args[2]
         col_type = args[3]
         default_value = args[4]
-        conn, curs = DBManager.check_connect_db_path(db_path)
+        conn, curs = cls.check_connect_db_path(db_path)
         cls.execute_sql(conn, "alter table {table} add column {name} {type} default {default}"
                         .format(table=table_name, name=col_name, type=col_type, default=default_value))
 
@@ -497,13 +507,3 @@ class DBManager:
         if path_check(db_path):
             return cls.create_connect_db(db_path)
         return EmptyClass("empty conn"), EmptyClass("empty curs")
-
-    @staticmethod
-    def _get_hd_with_type_list_str(headers: list, type_names: list) -> str:
-        hd_with_type_list_str = "("
-        hd_with_type_list = []
-        for i, _ in enumerate(headers):
-            hd_with_type_list.append(headers[i] + " " + type_names[i])
-        hd_with_type_list_str += ','.join(hd_with_type_list)
-        hd_with_type_list_str += ")"
-        return hd_with_type_list_str

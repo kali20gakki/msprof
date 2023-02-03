@@ -29,10 +29,6 @@ class TestOpCommonFunc(unittest.TestCase):
         res = OpCommonFunc.calculate_task_time(data)
         self.assertEqual(len(res), 2)
 
-    def test_is_valid_num(self):
-        result = OpCommonFunc._is_valid_num(None)
-        self.assertEqual(result, 0)
-
     def test_get_wait_time(self):
         result = OpCommonFunc._get_wait_time(10,20.0,30)
         self.assertEqual(result, 0)
