@@ -49,6 +49,7 @@ public:
     int StartDynProfCli(const std::string &params);
     void StopDynProfCli();
     int GetRealAppPid(int pid);
+    int TryGetRealAppPid(int pid);
     void SetAppPid(int pid);
     int GetAppPid();
     void EnableMode();
