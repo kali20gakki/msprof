@@ -17,7 +17,6 @@ const std::string INTERACTION_MODE_CMD_STOP  = "stop";
 const std::string INTERACTION_MODE_CMD_QUIT  = "quit";
 const uint32_t DYN_PROF_REQ_MSG_MAX_LEN = 4096;
 const uint32_t DYN_PROF_RSP_MSG_MAX_LEN = 128;
-const uint32_t DYN_PROF_CLIENT_START_DELAY_TIME = 5000;     // 3000ms, wait app inner started server socket
 const uint32_t DYN_PROF_CLIENT_CONNECT_WAIT_TIME = 100000;  // 100ms
 const uint32_t DYN_PROF_CLIENT_SEND_WAIT_TIME = 1;          // 30s, when stop profiling, flush data need some time
 const uint32_t DYN_PROF_CLIENT_RECV_WAIT_TIME = 30;         // 30s, when stop profiling, flush data need some time

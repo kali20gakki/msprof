@@ -647,8 +647,7 @@ int AppMode::StartAppTaskForDynProf()
             MSPROF_LOGE("Dynamic profiling failed to launch application.");
             return PROFILING_FAILED;
         } else {
-            Utils::MsleepInterruptible(DYN_PROF_CLIENT_START_DELAY_TIME);
-            int pid = DynProfMngCli::instance()->GetRealAppPid(taskPid_);
+            int pid = DynProfMngCli::instance()->TryGetRealAppPid(taskPid_);
             DynProfMngCli::instance()->SetAppPid(pid);
         }
     }
