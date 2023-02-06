@@ -113,6 +113,7 @@ void MsprofTxManager::DestroyStamp(ACL_PROF_STAMP_PTR stamp) const
         MSPROF_LOGE("[DestroyStamp]MsprofTxManager is not inited yet");
         return;
     }
+    (void)memset_s(stamp->stampTagName, MSPROF_ENGINE_MAX_TAG_LEN + 1, 0, MSPROF_ENGINE_MAX_TAG_LEN + 1);
 
     stampPool_->DestroyStamp(stamp);
 }
@@ -138,6 +139,7 @@ int MsprofTxManager::SetStampTagName(ACL_PROF_STAMP_PTR stamp, const char *tagNa
         MSPROF_LOGE("[SetStampName]strcpy_s message failed, ret is %u", ret);
         return PROFILING_FAILED;
     }
+    stamp->stampTagName[len] = '\0';
     MSPROF_LOGD("[SetStampName]stamp set tagName:%s success.", stamp->stampTagName);
     return PROFILING_SUCCESS;
 }
@@ -247,6 +249,35 @@ int MsprofTxManager::SetStampTraceMessage(ACL_PROF_STAMP_PTR stamp, CONST_CHAR_P
     return PROFILING_SUCCESS;
 }
 
+int MsprofTxManager::SetStampCallStack(ACL_PROF_STAMP_PTR stamp, const char *callStack, uint32_t len) const
+{
+    if (!isInit_) {
+        MSPROF_LOGE("[SetStampCallStack]MsprofTxManager is not inited yet");
+        return PROFILING_FAILED;
+    }
+    if (stamp == nullptr || callStack == nullptr) {
+        MSPROF_LOGE("aclprofStamp or callStack is nullptr");
+        MSPROF_INPUT_ERROR("EK0001", std::vector<std::string>({"value", "param", "reason"}),
+            std::vector<std::string>({"nullptr", "stamp", "stamp and callStack can not be nullptr."}));
+        return PROFILING_FAILED;
+    }
+ 
+    if (len >= MAX_CALL_STACK_LENGTH) {
+        MSPROF_LOGE("[SetStampCallStack]msg len(%u) is invalid, must less then %d", len, MAX_CALL_STACK_LENGTH);
+        return PROFILING_FAILED;
+    }
+ 
+    auto ret = strncpy_s(stamp->callStack, MAX_CALL_STACK_LENGTH, callStack, len);
+    if (ret != EOK) {
+        MSPROF_LOGE("[SetStampCallStack]strcpy_s callStack failed, ret is %u", ret);
+        return PROFILING_FAILED;
+    }
+    stamp->callStack[len] = '\0';
+    stamp->callStackLength = len;
+    MSPROF_LOGD("[SetStampCallStack]stamp set callStack:%s success.", stamp->callStack);
+    return PROFILING_SUCCESS;
+}
+
 // mark stamp
 int MsprofTxManager::Mark(ACL_PROF_STAMP_PTR stamp) const
 {
@@ -344,6 +375,14 @@ int MsprofTxManager::RangeStop(uint32_t rangeId) const
 int MsprofTxManager::ReportStampData(MsprofStampInstance *stamp) const
 {
     stamp->stampInfo.threadId = static_cast<uint32_t>(MmGetTid());
+    if (stamp->stampTagName[0] == '\0' && stamp->callStackLength == 0) {
+        auto ret = reporter_->Report(stamp->report);
+        if (ret != PROFILING_SUCCESS) {
+            MSPROF_LOGE("[ReportStampData] report profiling data failed.");
+            return PROFILING_FAILED;
+        }
+        return PROFILING_SUCCESS;
+    }
     uint32_t tagNameLen = strnlen(stamp->stampTagName, MSPROF_ENGINE_MAX_TAG_LEN);
     if (tagNameLen > 0) {
         auto ret = strncpy_s(stamp->report.tag, MSPROF_ENGINE_MAX_TAG_LEN, stamp->stampTagName, tagNameLen);
@@ -353,11 +392,28 @@ int MsprofTxManager::ReportStampData(MsprofStampInstance *stamp) const
         }
         stamp->report.tag[tagNameLen] = '\0';
     }
-    auto ret = reporter_->Report(stamp->report);
-    if (ret != PROFILING_SUCCESS) {
-        MSPROF_LOGE("[ReportStampData] report profiling data failed.");
-        return PROFILING_FAILED;
-    }
+    int32_t callStackLength = stamp->callStackLength;
+    constexpr int MAX_SPLIT_LENGTH = 75;
+    uint32_t pos = 0;
+
+    do {
+        int copyLen = (MAX_SPLIT_LENGTH < stamp->callStackLength) ? MAX_SPLIT_LENGTH : stamp->callStackLength;
+        if (copyLen > 0) {
+            auto err = strncpy_s(stamp->stampInfo.callStack, MAX_SPLIT_LENGTH + 1, stamp->callStack + pos, copyLen);
+            if (err != EOK) {
+                MSPROF_LOGE("[ReportStampData]strncpy_sp callStack failed");
+                return PROFILING_FAILED;
+            }
+            stamp->stampInfo.callStack[copyLen] = '\0';
+        }
+        pos += copyLen;
+        callStackLength = (callStackLength - copyLen > 0) ? (callStackLength - copyLen) : 0;
+        auto ret = reporter_->Report(stamp->report);
+        if (ret != PROFILING_SUCCESS) {
+            MSPROF_LOGE("[ReportStampData] report profiling data failed.");
+            return PROFILING_FAILED;
+        }
+    } while (callStackLength > 0);
     return PROFILING_SUCCESS;
 }
 }
