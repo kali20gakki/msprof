@@ -46,6 +46,7 @@ typedef enum {
     ACL_AICORE_L0B_AND_WIDTH = 3,
     ACL_AICORE_RESOURCE_CONFLICT_RATIO = 4,
     ACL_AICORE_MEMORY_UB = 5,
+    ACL_AICORE_L2_CACHE = 6,
     ACL_AICORE_NONE = 0xFF
 } aclprofAicoreMetrics;
 

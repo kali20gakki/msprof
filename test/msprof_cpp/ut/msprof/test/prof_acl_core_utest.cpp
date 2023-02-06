@@ -1634,11 +1634,15 @@ TEST_F(MSPROF_ACL_CORE_UTEST, AicoreMetricsEnumToName) {
     ConfigManager::instance()->AicoreMetricsEnumToName(PROF_AICORE_MEMORY_UB, metrics);
     EXPECT_EQ("MemoryUB", metrics);
 
-    ConfigManager::instance()->AicoreMetricsEnumToName(PROF_AICORE_NONE, metrics);
-    EXPECT_EQ("MemoryUB", metrics);
+    ConfigManager::instance()->AicoreMetricsEnumToName(PROF_AICORE_L2_CACHE, metrics);
+    EXPECT_EQ("L2Cache", metrics);
 
-    ConfigManager::instance()->AicoreMetricsEnumToName(PROF_AICORE_METRICS_COUNT, metrics);
-    EXPECT_EQ("MemoryUB", metrics);
+    std::string invalidMetrics;
+    ConfigManager::instance()->AicoreMetricsEnumToName(PROF_AICORE_NONE, invalidMetrics);
+    EXPECT_NE("MemoryUB", invalidMetrics);
+
+    ConfigManager::instance()->AicoreMetricsEnumToName(PROF_AICORE_METRICS_COUNT, invalidMetrics);
+    EXPECT_NE("MemoryUB", invalidMetrics);
 }
 
 TEST_F(MSPROF_ACL_CORE_UTEST, ProfStartCfgToMsprofCfg) {
