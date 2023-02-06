@@ -216,33 +216,25 @@ std::string ConfigManager::GetDefaultWorkDir() const
     return std::string(INOTIFY_CFG_PATH_STR);
 }
 
-void ConfigManager::AicoreMetricsEnumToName(ProfAicoreMetrics aicMetrics, std::string &name)
+void ConfigManager::AicoreMetricsEnumToName(const ProfAicoreMetrics aicMetrics, std::string &name) const
 {
-    switch (aicMetrics) {
-        case PROF_AICORE_ARITHMETIC_UTILIZATION:
-            name = ARITHMETIC_UTILIZATION;
-            break;
-        case PROF_AICORE_PIPE_UTILIZATION:
-            name = PIPE_UTILIZATION;
-            break;
-        case PROF_AICORE_MEMORY_BANDWIDTH:
-            name = MEMORY_BANDWIDTH;
-            break;
-        case PROF_AICORE_L0B_AND_WIDTH:
-            name = L0B_AND_WIDTH;
-            break;
-        case PROF_AICORE_RESOURCE_CONFLICT_RATIO:
-            name = RESOURCE_CONFLICT_RATIO;
-            break;
-        case PROF_AICORE_MEMORY_UB:
-            name = MEMORY_UB;
-            break;
-        case PROF_AICORE_NONE:
-            break;
-        default:
-            MSPROF_LOGE("Invalid aicore metrics enum: %u", aicMetrics);
-            MSPROF_INNER_ERROR("EK9999", "Invalid aicore metrics enum: %u", aicMetrics);
+    const std::map<ProfAicoreMetrics, std::string> metricsList = {
+        {PROF_AICORE_ARITHMETIC_UTILIZATION, ARITHMETIC_UTILIZATION},
+        {PROF_AICORE_PIPE_UTILIZATION, PIPE_UTILIZATION},
+        {PROF_AICORE_MEMORY_BANDWIDTH, MEMORY_BANDWIDTH},
+        {PROF_AICORE_L0B_AND_WIDTH, L0B_AND_WIDTH},
+        {PROF_AICORE_RESOURCE_CONFLICT_RATIO, RESOURCE_CONFLICT_RATIO},
+        {PROF_AICORE_MEMORY_UB, MEMORY_UB},
+        {PROF_AICORE_L2_CACHE, L2_CACHE},
+        {PROF_AICORE_NONE, ""}
+    };
+    auto iter = metricsList.find(aicMetrics);
+    if (iter != metricsList.end()) {
+        name = iter->second;
+        return;
     }
+    MSPROF_LOGE("Invalid aicore metrics enum: %u", aicMetrics);
+    MSPROF_INNER_ERROR("EK9999", "Invalid aicore metrics enum: %u", aicMetrics);
 }
 }
 }
