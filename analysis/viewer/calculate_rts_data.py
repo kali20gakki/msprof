@@ -443,7 +443,10 @@ def get_metrics_from_sample_config(project_path: str,
     new_metrics = []
     if sample_config.get(metrics_type) in {Constant.PMU_PIPE, Constant.PMU_PIPE_EXCT}:
         for metric in sample_metrics[:-1]:
-            new_metrics.append(metric[:-NumberConstant.RATIO_NAME_LEN] + "time")
+            if metric.endswith('extra'):
+                new_metrics.append(metric[:-NumberConstant.EXTRA_RATIO_NAME_LEN] + "time")
+            else:
+                new_metrics.append(metric[:-NumberConstant.RATIO_NAME_LEN] + "time")
             new_metrics.append(metric)
         new_metrics.append(sample_metrics[-1])
     sample_metrics = new_metrics if new_metrics else sample_metrics
