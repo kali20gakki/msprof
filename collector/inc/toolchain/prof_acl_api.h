@@ -34,6 +34,7 @@
                                      PROF_HCCL_TRACE | PROF_TASK_TIME)
 
 // System
+#define PROF_BIU                     0x000000800000ULL
 #define PROF_SYS_USAGE               0x000100000000ULL
 #define PROF_SYS_PID_USAGE           0x000200000000ULL
 #define PROF_SYS_CPU                 0x000400000000ULL
@@ -69,6 +70,7 @@
 #define PROF_OP_DETAIL_MASK              0x0000080000000ULL
 
 // System mask
+#define PROF_BIU_MASK                         0x000000800000ULL
 #define PROF_SYS_USAGE_MASK                   0x000100000000ULL
 #define PROF_SYS_PID_USAGE_MASK               0x000200000000ULL
 #define PROF_SYS_CPU_MASK                     0x000400000000ULL
