@@ -762,6 +762,15 @@ aclError aclprofRangeStop(uint32_t rangeId)
     return MsprofTxManager::instance()->RangeStop(rangeId);
 }
 
+aclError aclprofPytorchE2eRangeStart(int tagType, const char *msg, uint32_t msgLen, uint32_t *rangeId)
+{
+    return MsprofTxManager::instance()->PytorchE2eRangeStart(tagType, msg, msgLen, rangeId);
+}
+aclError aclprofPytorchE2eRangeStop(uint32_t rangeId)
+{
+    return MsprofTxManager::instance()->PytorchE2eRangeStop(rangeId);
+}
+
 aclError aclprofSetConfig(aclprofConfigType configType, const char *config, size_t configLength)
 {
     if (Platform::instance()->PlatformIsHelperHostSide()) {

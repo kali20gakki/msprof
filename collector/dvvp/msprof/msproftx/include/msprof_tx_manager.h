@@ -66,6 +66,9 @@ public:
 
     void SetReporterCallback(const MsprofReporterCallback func);
 
+    int PytorchE2eRangeStart(int tagType, const char *msg, uint32_t msgLen, uint32_t *rangeId);
+    int PytorchE2eRangeStop(uint32_t rangeId);
+
 private:
     int ReportStampData(MsprofStampInstance *stamp) const;
 
