@@ -175,6 +175,11 @@ MSVP_PROF_API int aclprofSetCategoryName(uint32_t category, const char *category
 */
 MSVP_PROF_API int aclprofSetStampCategory(void *stamp, uint32_t category);
 
+
+MSVP_PROF_API int aclprofPytorchE2eRangeStart(int tagType, const char *msg, uint32_t msgLen, uint32_t *rangeId);
+
+MSVP_PROF_API int aclprofPytorchE2eRangeStop(uint32_t rangeId);
+
 typedef enum {
     ACL_SUBSCRIBE_OP = 0,
     ACL_SUBSCRIBE_SUBGRAPH = 1,

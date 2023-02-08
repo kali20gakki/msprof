@@ -261,7 +261,7 @@ int MsprofTxManager::Mark(ACL_PROF_STAMP_PTR stamp) const
         return PROFILING_FAILED;
     }
 
-    stamp->stampInfo.startTime = static_cast<uint64_t>(Utils::GetClockMonotonicRaw());
+    stamp->stampInfo.startTime = static_cast<uint64_t>(Utils::GetCPUCycleCounter());
     stamp->stampInfo.endTime = stamp->stampInfo.startTime;
     stamp->stampInfo.eventType = static_cast<uint32_t>(EventType::MARK);
     return ReportStampData(stamp);
@@ -281,7 +281,7 @@ int MsprofTxManager::Push(ACL_PROF_STAMP_PTR stamp) const
         return PROFILING_FAILED;
     }
 
-    stamp->stampInfo.startTime = static_cast<uint64_t>(Utils::GetClockMonotonicRaw());
+    stamp->stampInfo.startTime = static_cast<uint64_t>(Utils::GetCPUCycleCounter());
     return stampPool_->MsprofStampPush(stamp);
 }
 
@@ -297,7 +297,7 @@ int MsprofTxManager::Pop() const
         MSPROF_LOGE("[Pop]stampPool pop failed ,stamp is null!");
         return PROFILING_FAILED;
     }
-    stamp->stampInfo.endTime = static_cast<uint64_t>(Utils::GetClockMonotonicRaw());
+    stamp->stampInfo.endTime = static_cast<uint64_t>(Utils::GetCPUCycleCounter());
     stamp->stampInfo.eventType = static_cast<uint32_t>(EventType::PUSH_OR_POP);
     return ReportStampData(stamp);
 }
@@ -316,7 +316,7 @@ int MsprofTxManager::RangeStart(ACL_PROF_STAMP_PTR stamp, uint32_t *rangeId) con
         return PROFILING_FAILED;
     }
     auto &stampInfo = stamp->stampInfo;
-    stampInfo.startTime = static_cast<uint64_t>(Utils::GetClockMonotonicRaw());
+    stampInfo.startTime = static_cast<uint64_t>(Utils::GetCPUCycleCounter());
     *rangeId = stampPool_->GetIdByStamp(stamp);
     MSPROF_LOGD("[RangeStart] save stamp success, rangeId is %u", *rangeId);
     return PROFILING_SUCCESS;
@@ -336,7 +336,7 @@ int MsprofTxManager::RangeStop(uint32_t rangeId) const
             std::vector<std::string>({std::to_string(rangeId), "rangeId", errorReason}));
         return PROFILING_FAILED;
     }
-    stamp->stampInfo.endTime = static_cast<uint64_t>(Utils::GetClockMonotonicRaw());
+    stamp->stampInfo.endTime = static_cast<uint64_t>(Utils::GetCPUCycleCounter());
     stamp->stampInfo.eventType = static_cast<uint32_t>(EventType::START_OR_STOP);
     return ReportStampData(stamp);
 }
@@ -359,6 +359,53 @@ int MsprofTxManager::ReportStampData(MsprofStampInstance *stamp) const
         return PROFILING_FAILED;
     }
     return PROFILING_SUCCESS;
+}
+
+
+int MsprofTxManager::PytorchE2eRangeStart(int tagType, const char *msg, uint32_t msgLen, uint32_t *rangeId)
+{
+    if (!isInit_) {
+        MSPROF_LOGE("[CreateStamp]MsprofTxManager is not inited yet");
+        return PROFILING_FAILED;
+    }
+    ACL_PROF_STAMP_PTR stamp = stampPool_->CreateStamp();
+
+    if (stamp == nullptr || msg==nullptr) {
+        MSPROF_LOGE("aclprofStamp or name is nullptr");
+        return PROFILING_FAILED;
+    }
+
+    static const int MAX_MSG_LEN = 128;
+    auto ret = strncpy_s(stamp->stampInfo.message, MAX_MSG_LEN - 1, msg, msgLen);
+    if (ret != EOK) {
+        MSPROF_LOGE("[SetStampTraceMessage]strcpy_s message failed, ret is %u", ret);
+        return PROFILING_FAILED;
+    }
+    stamp->stampInfo.message[msgLen] = 0;
+
+    auto &stampInfo = stamp->stampInfo;
+    stampInfo.startTime = static_cast<uint64_t>(Utils::GetCPUCycleCounter());
+    *rangeId = stampPool_->GetIdByStamp(stamp);
+
+    return PROFILING_SUCCESS;    
+}
+
+int MsprofTxManager::PytorchE2eRangeStop(uint32_t rangeId)
+{
+    if (!isInit_) {
+        MSPROF_LOGE("[RangeStop]MsprofTxManager is not inited yet");
+        return PROFILING_FAILED;
+    }
+    auto stamp = stampPool_->GetStampById(rangeId);
+    if (stamp == nullptr) {
+        MSPROF_LOGE("[RangeStop] Get stamp by rangeId failed, rangeId is %u!", rangeId);
+        return PROFILING_FAILED;
+    }
+    stamp->stampInfo.endTime = static_cast<uint64_t>(Utils::GetCPUCycleCounter());
+    stamp->stampInfo.eventType = static_cast<uint32_t>(EventType::START_OR_STOP);
+    ReportStampData(stamp);
+    stampPool_->DestroyStamp(stamp);
+    return PROFILING_SUCCESS;    
 }
 }
 }
