@@ -4,6 +4,7 @@ from unittest import mock
 from analyzer.get_op_table_task_time import GetOpTableTsTime
 from analyzer.scene_base.profiling_scene import ProfilingScene
 from common_func.constant import Constant
+from profiling_bean.db_dto.step_trace_dto import IterationRange
 
 NAMESPACE = 'analyzer.get_op_table_task_time'
 NAMESPACE_BASEMODEL = 'msmodel.interface.base_model.BaseModel'
@@ -52,3 +53,12 @@ class TestGetOpTableTsTime(unittest.TestCase):
             check = GetOpTableTsTime(CONFIG)
             ret = check.get_task_time_data()
             self.assertEqual([], ret)
+
+    def test_get_sub_task_sql(self):
+        check = GetOpTableTsTime({'iter_id': IterationRange(model_id=1,
+                                                            iteration_id=1,
+                                                            iteration_count=1), 'model_id': -1})
+        ret = check._get_sub_task_sql()
+        self.assertEqual("select task_id, stream_id, start_time, dur_time, "
+                         "(case when subtask_type='AIC' then 'AI_CORE' when subtask_type='AIV' then 'AI_VECTOR_CORE' "
+                         "else subtask_type end), 1, 1, 0, subtask_id from SubtaskTime order by start_time", ret)

@@ -252,6 +252,6 @@ class GetOpTableTsTime:
     def _get_sub_task_sql(self):
         # the subtask type of ai core or ai vector that can not be distinguish by GE.
         return "select task_id, stream_id, start_time, dur_time, " \
-               "(case when subtask_type='AIC' or subtask_type='AIV' then 'AI_CORE' else subtask_type end), " \
-               "{1}, {2}, 0, subtask_id from {0} order by start_time" \
+               "(case when subtask_type='AIC' then 'AI_CORE' when subtask_type='AIV' then 'AI_VECTOR_CORE' " \
+               "else subtask_type end), {1}, {2}, 0, subtask_id from {0} order by start_time" \
             .format(DBNameConstant.TABLE_SUBTASK_TIME, self.iter_range.iteration_id, self.iter_range.model_id)
