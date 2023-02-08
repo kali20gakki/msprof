@@ -20,7 +20,7 @@ from common_func.msprof_exception import ProfException
 
 NAMESPACE = 'viewer.calculate_rts_data'
 sample_config = {'ai_core_profiling_events': '0x8,0x9',
-                 "ai_core_metrics": "PipeUtilization"}
+                 "ai_core_metrics": "PipeUtilizationExct"}
 info_json = {"DeviceInfo": [{"id": 0, "env_type": 3, "ctrl_cpu_id": "ARMv8_Cortex_A55", "ctrl_cpu_core_num": 4,
                              "ctrl_cpu_endian_little": 1, "ts_cpu_core_num": 1, "ai_cpu_core_num": 4,
                              "ai_core_num": 2, "ai_cpu_core_id": 4,
@@ -168,7 +168,7 @@ class TestCalculateRts(unittest.TestCase):
                 mock.patch(NAMESPACE + ".CalculateAiCoreData.add_fops_header"), \
                 mock.patch(NAMESPACE + ".generate_config", return_value=sample_config):
             res_1 = get_metrics_from_sample_config('')
-        self.assertEqual(len(res_1), 15)
+        self.assertEqual(len(res_1), 13)
 
     def test_get_metrics_from_sample_config_2(self):
         sample_config["ai_core_metrics"] = "a"
