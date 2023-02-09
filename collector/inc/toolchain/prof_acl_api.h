@@ -150,15 +150,6 @@ MSVP_PROF_API int aclprofSetStampPayload(void *stamp, const int32_t type, void *
 
 /**
 * @ingroup AscendCL
-* @brief set stamp tag name
-*
-*
-* @retval void
-*/
-MSVP_PROF_API int aclprofSetStampTagName(void *stamp, const char *tagName, uint16_t len);
-
-/**
-* @ingroup AscendCL
 * @brief set category and name
 *
 *
@@ -175,10 +166,23 @@ MSVP_PROF_API int aclprofSetCategoryName(uint32_t category, const char *category
 */
 MSVP_PROF_API int aclprofSetStampCategory(void *stamp, uint32_t category);
 
+/**
+* @ingroup AscendCL
+* @brief set stamp call trace
+*
+*
+* @retval void
+*/
+MSVP_PROF_API int aclprofSetStampCallStack(void *stamp, const char *callStack, uint32_t len);
 
-MSVP_PROF_API int aclprofPytorchE2eRangeStart(int tagType, const char *msg, uint32_t msgLen, uint32_t *rangeId);
-
-MSVP_PROF_API int aclprofPytorchE2eRangeStop(uint32_t rangeId);
+/**
+* @ingroup AscendCL
+* @brief report stamp data
+*
+*
+* @retval void
+*/
+MSVP_PROF_API int aclprofReportStamp(const char *tag, uint32_t tagLen, unsigned char *data, uint32_t dataLen);
 
 typedef enum {
     ACL_SUBSCRIBE_OP = 0,

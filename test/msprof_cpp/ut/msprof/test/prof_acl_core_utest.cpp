@@ -374,6 +374,22 @@ TEST_F(MSPROF_ACL_CORE_UTEST, ProfAclInit_failed) {
     analysis::dvvp::common::utils::Utils::RemoveDir(result);
 }
 
+TEST_F(MSPROF_ACL_CORE_UTEST, aclprofSetConfig)
+{
+    GlobalMockObject::verify();
+    std::string value = "250MB";
+    EXPECT_EQ(ACL_ERROR_INVALID_PARAM, aclprofSetConfig(ACL_PROF_ARGS_MIN, value.c_str(), value.size()));
+    EXPECT_EQ(ACL_ERROR_INVALID_PARAM, aclprofSetConfig(ACL_PROF_STORAGE_LIMIT, nullptr, value.size()));
+    std::string largeValue = std::string(257, 'a');
+    EXPECT_EQ(ACL_ERROR_INVALID_PARAM, aclprofSetConfig(ACL_PROF_STORAGE_LIMIT, largeValue.c_str(), largeValue.size()));
+    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::MsprofSetConfig)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS))
+        .then(returnValue(PROFILING_FAILED));
+    EXPECT_EQ(ACL_SUCCESS, aclprofSetConfig(ACL_PROF_STORAGE_LIMIT, value.c_str(), value.size()));
+    EXPECT_EQ(ACL_ERROR_INVALID_PARAM, aclprofSetConfig(ACL_PROF_STORAGE_LIMIT, value.c_str(), value.size()));
+}
+
 TEST_F(MSPROF_ACL_CORE_UTEST, acl_prof_api) {
     GlobalMockObject::verify();
 
@@ -490,6 +506,7 @@ TEST_F(MSPROF_ACL_CORE_UTEST, prof_acl_api_helper) {
     config.dataTypeConfig = 0x7d7f001f;
     EXPECT_EQ(nullptr, aclprofCreateConfig(config.devIdList, config.devNums, (aclprofAicoreMetrics)config.aicoreMetrics, nullptr, config.dataTypeConfig));
     EXPECT_EQ(ACL_ERROR_FEATURE_UNSUPPORTED, aclprofDestroyConfig(nullptr));
+    EXPECT_EQ(ACL_ERROR_FEATURE_UNSUPPORTED, aclprofSetConfig(ACL_PROF_ARGS_MIN, nullptr, 0));
     EXPECT_EQ(ACL_ERROR_FEATURE_UNSUPPORTED, aclprofStart(nullptr));
     EXPECT_EQ(ACL_ERROR_FEATURE_UNSUPPORTED, aclprofStop(nullptr));
     EXPECT_EQ(ACL_ERROR_FEATURE_UNSUPPORTED, aclprofModelSubscribe(1, nullptr));
@@ -505,6 +522,7 @@ TEST_F(MSPROF_ACL_CORE_UTEST, prof_acl_api_helper) {
     EXPECT_EQ(ACL_ERROR_FEATURE_UNSUPPORTED, aclprofSetStampCategory(nullptr, 0));
     EXPECT_EQ(ACL_ERROR_FEATURE_UNSUPPORTED, aclprofSetStampPayload(nullptr, 0, nullptr));
     EXPECT_EQ(ACL_ERROR_FEATURE_UNSUPPORTED, aclprofSetStampTraceMessage(nullptr, nullptr, 0));
+    EXPECT_EQ(ACL_ERROR_FEATURE_UNSUPPORTED, aclprofSetStampCallStack(nullptr, nullptr, 0));
     EXPECT_EQ(ACL_ERROR_FEATURE_UNSUPPORTED, aclprofMark(nullptr));
     EXPECT_EQ(ACL_ERROR_FEATURE_UNSUPPORTED, aclprofPush(nullptr));
     EXPECT_EQ(ACL_ERROR_FEATURE_UNSUPPORTED, aclprofPop());
@@ -1865,7 +1883,8 @@ protected:
     }
 };
 
-TEST_F(MSPROF_API_MSPROFTX_UTEST, aclprofCreateStamp) {
+TEST_F(MSPROF_API_MSPROFTX_UTEST, aclprofCreateStamp)
+{
     GlobalMockObject::verify();
     Msprof::MsprofTx::MsprofTxManager::instance()->Init();
 
@@ -1923,6 +1942,16 @@ TEST_F(MSPROF_API_MSPROFTX_UTEST, aclprofSetStampTraceMessage) {
         .will(returnValue(ACL_SUCCESS));
 
     aclError ret = aclprofSetStampTraceMessage(nullptr, "nullptr", 0);
+    EXPECT_EQ(ACL_SUCCESS, ret);
+}
+
+TEST_F(MSPROF_API_MSPROFTX_UTEST, aclprofSetStampCallStack) {
+    GlobalMockObject::verify();
+    MOCKER_CPP(&Msprof::MsprofTx::MsprofTxManager::SetStampCallStack)
+        .stubs()
+        .will(returnValue(ACL_SUCCESS));
+
+    aclError ret = aclprofSetStampCallStack(nullptr, "nullptr", 0);
     EXPECT_EQ(ACL_SUCCESS, ret);
 }
 

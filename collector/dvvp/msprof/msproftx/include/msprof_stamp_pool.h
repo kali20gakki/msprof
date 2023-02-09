@@ -19,6 +19,7 @@ namespace MsprofTx {
 // Specification
 constexpr int MAX_STAMP_SIZE = 10000;
 constexpr int CURRENT_STAMP_SIZE = 100;
+constexpr int MAX_CALL_STACK_LENGTH = 4095;
 
 struct MsprofStampInstance {
     ReporterData report;
@@ -26,7 +27,8 @@ struct MsprofStampInstance {
     int id;
     struct MsprofStampInstance* next;
     struct MsprofStampInstance* prev;
-    char stampTagName[MSPROF_ENGINE_MAX_TAG_LEN + 1];
+    char callStack[MAX_CALL_STACK_LENGTH + 1];
+    uint32_t callStackLength;
 };
 
 struct MsprofStampCtrlHandle {

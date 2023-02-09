@@ -10,7 +10,6 @@
 #include "singleton/singleton.h"
 #include "prof_api.h"
 #include "plugin_handle.h"
-#include "utils.h"
 
 namespace Collector {
 namespace Dvvp {

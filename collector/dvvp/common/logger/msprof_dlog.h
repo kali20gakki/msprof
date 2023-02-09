@@ -90,12 +90,13 @@ enum {
 #define MSPROF_MODULE_NAME PROFILING
 #define FILENAME (strrchr("/" __FILE__, '/') + 1)
 using SlogPlugin = Collector::Dvvp::Plugin::SlogPlugin;
+static thread_local long threadId = syscall(SYS_gettid);
 
 #define MSPROF_LOGD(format, ...) do {                                                                           \
     if (SlogPlugin::instance()->MsprofCheckLogLevelForC(MSPROF_MODULE_NAME,                                     \
         Collector::Dvvp::Plugin::DLOG_DEBUG) == 1) {                                                            \
         SlogPlugin::instance()->MsprofDlogInnerForC(MSPROF_MODULE_NAME, Collector::Dvvp::Plugin::DLOG_DEBUG,    \
-        "[%s:%d]" " >>> (tid:%ld) " format "\n", FILENAME, __LINE__, syscall(SYS_gettid), ##__VA_ARGS__);       \
+        "[%s:%d]" " >>> (tid:%ld) " format "\n", FILENAME, __LINE__, threadId, ##__VA_ARGS__);       \
     }                                                                                                           \
 } while (0)
 
@@ -103,7 +104,7 @@ using SlogPlugin = Collector::Dvvp::Plugin::SlogPlugin;
     if (SlogPlugin::instance()->MsprofCheckLogLevelForC(MSPROF_MODULE_NAME,                                     \
         Collector::Dvvp::Plugin::DLOG_INFO) == 1) {                                                             \
         SlogPlugin::instance()->MsprofDlogInnerForC(MSPROF_MODULE_NAME, Collector::Dvvp::Plugin::DLOG_INFO,     \
-        "[%s:%d]" " >>> (tid:%ld) " format "\n", FILENAME, __LINE__, syscall(SYS_gettid), ##__VA_ARGS__);       \
+        "[%s:%d]" " >>> (tid:%ld) " format "\n", FILENAME, __LINE__, threadId, ##__VA_ARGS__);       \
     }                                                                                                           \
 } while (0)
 
@@ -111,7 +112,7 @@ using SlogPlugin = Collector::Dvvp::Plugin::SlogPlugin;
     if (SlogPlugin::instance()->MsprofCheckLogLevelForC(MSPROF_MODULE_NAME,                                     \
         Collector::Dvvp::Plugin::DLOG_WARN) == 1) {                                                             \
         SlogPlugin::instance()->MsprofDlogInnerForC(MSPROF_MODULE_NAME, Collector::Dvvp::Plugin::DLOG_WARN,     \
-        "[%s:%d]" " >>> (tid:%ld) " format "\n", FILENAME, __LINE__, syscall(SYS_gettid), ##__VA_ARGS__);       \
+        "[%s:%d]" " >>> (tid:%ld) " format "\n", FILENAME, __LINE__, threadId, ##__VA_ARGS__);       \
     }                                                                                                           \
 } while (0)
 
@@ -119,7 +120,7 @@ using SlogPlugin = Collector::Dvvp::Plugin::SlogPlugin;
     if (SlogPlugin::instance()->MsprofCheckLogLevelForC(MSPROF_MODULE_NAME,                                     \
         Collector::Dvvp::Plugin::DLOG_ERROR) == 1) {                                                            \
         SlogPlugin::instance()->MsprofDlogInnerForC(MSPROF_MODULE_NAME, Collector::Dvvp::Plugin::DLOG_ERROR,    \
-        "[%s:%d]" " >>> (tid:%ld) " format "\n", FILENAME, __LINE__, syscall(SYS_gettid), ##__VA_ARGS__);       \
+        "[%s:%d]" " >>> (tid:%ld) " format "\n", FILENAME, __LINE__, threadId, ##__VA_ARGS__);       \
     }                                                                                                           \
 } while (0)
 
@@ -127,7 +128,7 @@ using SlogPlugin = Collector::Dvvp::Plugin::SlogPlugin;
     if (SlogPlugin::instance()->MsprofCheckLogLevelForC(MSPROF_MODULE_NAME,                                     \
         Collector::Dvvp::Plugin::DLOG_EVENT) == 1) {                                                            \
         SlogPlugin::instance()->MsprofDlogInnerForC(MSPROF_MODULE_NAME, Collector::Dvvp::Plugin::DLOG_EVENT,    \
-        "[%s:%d]" " >>> (tid:%ld) " format "\n", FILENAME, __LINE__, syscall(SYS_gettid), ##__VA_ARGS__);       \
+        "[%s:%d]" " >>> (tid:%ld) " format "\n", FILENAME, __LINE__, threadId, ##__VA_ARGS__);       \
     }                                                                                                           \
 } while (0)
 #endif  // MSPROF_LOG_H

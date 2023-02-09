@@ -463,8 +463,7 @@ struct MsprofStampInfo {
     uint64_t endTime;
     int32_t messageType;
     char message[128];
-    uint8_t reserve0[4];
-    uint8_t reserve1[72];
+    char callStack[76];
 };
 
 #ifdef __cplusplus
