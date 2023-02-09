@@ -52,6 +52,7 @@ public:
     int SetStampCategory(ACL_PROF_STAMP_PTR stamp, uint32_t category) const;
     int SetStampPayload(ACL_PROF_STAMP_PTR stamp, const int32_t type, void *value) const;
     int SetStampTraceMessage(ACL_PROF_STAMP_PTR stamp, CONST_CHAR_PTR msg, uint32_t msgLen) const;
+    int SetStampCallStack(ACL_PROF_STAMP_PTR stamp, const char *callStack, uint32_t len) const;
 
     // mark stamp
     int Mark(ACL_PROF_STAMP_PTR stamp) const;
