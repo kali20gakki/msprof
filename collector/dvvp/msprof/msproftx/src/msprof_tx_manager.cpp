@@ -113,7 +113,6 @@ void MsprofTxManager::DestroyStamp(ACL_PROF_STAMP_PTR stamp) const
         MSPROF_LOGE("[DestroyStamp]MsprofTxManager is not inited yet");
         return;
     }
-
     stampPool_->DestroyStamp(stamp);
 }
 
@@ -129,16 +128,12 @@ int MsprofTxManager::SetStampTagName(ACL_PROF_STAMP_PTR stamp, const char *tagNa
             std::vector<std::string>({"nullptr", "stamp", "stamp and tagName can not be nullptr when set TagName"}));
         return PROFILING_FAILED;
     }
-    if (len >= MSPROF_ENGINE_MAX_TAG_LEN) {
-        MSPROF_LOGE("[SetStampName]msg len(%u) is invalid, must less then %d", len, MSPROF_ENGINE_MAX_TAG_LEN);
-        return PROFILING_FAILED;
-    }
-    auto ret = strncpy_s(stamp->stampTagName, MSPROF_ENGINE_MAX_TAG_LEN, tagName, len);
+    int ret = strncpy_s(stamp->report.tag, MSPROF_ENGINE_MAX_TAG_LEN, tagName, len);
     if (ret != EOK) {
-        MSPROF_LOGE("[SetStampName]strcpy_s message failed, ret is %u", ret);
+        MSPROF_LOGE("[SetStampName]strcpy_s message failed, ret=%u len=%u tagName=%s", ret, len, tagName);
         return PROFILING_FAILED;
     }
-    MSPROF_LOGD("[SetStampName]stamp set tagName:%s success.", stamp->stampTagName);
+    stamp->report.tag[len] = '\0';
     return PROFILING_SUCCESS;
 }
 
@@ -149,21 +144,19 @@ int MsprofTxManager::SetCategoryName(uint32_t category, std::string categoryName
         MSPROF_LOGE("[SetCategoryName]MsprofTxManager is not inited yet");
         return PROFILING_FAILED;
     }
-    MSPROF_LOGI("[SetCategoryName] category is %d, categoryName is %s", category, categoryName.c_str());
     static const std::string MSPROF_TX_CATEGORY_DICT = "category_dict";
+    static const uint32_t tagLen = MSPROF_TX_CATEGORY_DICT.size();
 
     std::string hashData = std::to_string(category) + HASH_DIC_DELIMITER + categoryName + "\n";
 
     ReporterData reporterData;
-    memset_s(&reporterData, sizeof(ReporterData), 0, sizeof(ReporterData));
     reporterData.deviceId = DEFAULT_HOST_ID;
-    auto err = memcpy_s(reporterData.tag, static_cast<size_t>(MSPROF_ENGINE_MAX_TAG_LEN),
-        MSPROF_TX_CATEGORY_DICT.c_str(), MSPROF_TX_CATEGORY_DICT.size());
+    auto err = memcpy_sp(reporterData.tag, MSPROF_ENGINE_MAX_TAG_LEN, MSPROF_TX_CATEGORY_DICT.c_str(), tagLen);
     if (err != EOK) {
-        MSPROF_LOGE("[SetCategoryName] memcpy tag failed. ret is %u", err);
+        MSPROF_LOGE("[SetCategoryName] memcpy tag failed. ret=%u len=%u", err, tagLen);
         return PROFILING_FAILED;
     }
-
+    reporterData.tag[tagLen] = '\0';
     reporterData.dataLen = hashData.size();
     reporterData.data = (unsigned char *)hashData.c_str();
 
@@ -228,22 +221,42 @@ int MsprofTxManager::SetStampTraceMessage(ACL_PROF_STAMP_PTR stamp, CONST_CHAR_P
             std::vector<std::string>({"nullptr", "stamp", "stamp and msg can not be nullptr when set traceMessage"}));
         return PROFILING_FAILED;
     }
-
-    static const int MAX_MSG_LEN = 128;
-    if (msgLen >= MAX_MSG_LEN) {
-        MSPROF_LOGE("[SetStampTraceMessage]msg len(%u) is invalid, must less then 128", msgLen);
-        std::string errorReason = "msg len should be less than" + std::to_string(MAX_MSG_LEN);
-        MSPROF_INPUT_ERROR("EK0001", std::vector<std::string>({"value", "param", "reason"}),
-            std::vector<std::string>({std::to_string(msgLen), "stamp", errorReason}));
-        return PROFILING_FAILED;
-    }
-    auto ret = strncpy_s(stamp->stampInfo.message, MAX_MSG_LEN - 1, msg, msgLen);
+    auto ret = strncpy_sp(stamp->stampInfo.message, sizeof(stamp->stampInfo.message) - 1, msg, msgLen);
     if (ret != EOK) {
-        MSPROF_LOGE("[SetStampTraceMessage]strcpy_s message failed, ret is %u", ret);
+        MSPROF_LOGE("[SetStampTraceMessage]strcpy_s message failed, ret=%u msgLen=%u", ret, msgLen);
         return PROFILING_FAILED;
     }
     stamp->stampInfo.message[msgLen] = 0;
     MSPROF_LOGD("[SetStampTraceMessage]stamp set trace message:%s success.", stamp->stampInfo.message);
+    return PROFILING_SUCCESS;
+}
+
+int MsprofTxManager::SetStampCallStack(ACL_PROF_STAMP_PTR stamp, const char *callStack, uint32_t len) const
+{
+    if (!isInit_) {
+        MSPROF_LOGE("[SetStampCallStack]MsprofTxManager is not inited yet");
+        return PROFILING_FAILED;
+    }
+    if (stamp == nullptr || callStack == nullptr) {
+        MSPROF_LOGE("aclprofStamp or callStack is nullptr");
+        MSPROF_INPUT_ERROR("EK0001", std::vector<std::string>({"value", "param", "reason"}),
+            std::vector<std::string>({"nullptr", "stamp", "stamp and callStack can not be nullptr."}));
+        return PROFILING_FAILED;
+    }
+ 
+    if (len >= MAX_CALL_STACK_LENGTH) {
+        MSPROF_LOGE("[SetStampCallStack]msg len(%u) is invalid, must less then %d", len, MAX_CALL_STACK_LENGTH);
+        return PROFILING_FAILED;
+    }
+ 
+    auto ret = strncpy_s(stamp->callStack, MAX_CALL_STACK_LENGTH, callStack, len);
+    if (ret != EOK) {
+        MSPROF_LOGE("[SetStampCallStack]strcpy_s callStack failed, ret is %u", ret);
+        return PROFILING_FAILED;
+    }
+    stamp->callStack[len] = '\0';
+    stamp->callStackLength = len;
+    MSPROF_LOGD("[SetStampCallStack]stamp set callStack:%s success.", stamp->callStack);
     return PROFILING_SUCCESS;
 }
 
@@ -261,7 +274,7 @@ int MsprofTxManager::Mark(ACL_PROF_STAMP_PTR stamp) const
         return PROFILING_FAILED;
     }
 
-    stamp->stampInfo.startTime = static_cast<uint64_t>(Utils::GetCPUCycleCounter());
+    stamp->stampInfo.startTime = static_cast<uint64_t>(Utils::GetClockMonotonicRaw());
     stamp->stampInfo.endTime = stamp->stampInfo.startTime;
     stamp->stampInfo.eventType = static_cast<uint32_t>(EventType::MARK);
     return ReportStampData(stamp);
@@ -281,7 +294,7 @@ int MsprofTxManager::Push(ACL_PROF_STAMP_PTR stamp) const
         return PROFILING_FAILED;
     }
 
-    stamp->stampInfo.startTime = static_cast<uint64_t>(Utils::GetCPUCycleCounter());
+    stamp->stampInfo.startTime = static_cast<uint64_t>(Utils::GetClockMonotonicRaw());
     return stampPool_->MsprofStampPush(stamp);
 }
 
@@ -297,7 +310,7 @@ int MsprofTxManager::Pop() const
         MSPROF_LOGE("[Pop]stampPool pop failed ,stamp is null!");
         return PROFILING_FAILED;
     }
-    stamp->stampInfo.endTime = static_cast<uint64_t>(Utils::GetCPUCycleCounter());
+    stamp->stampInfo.endTime = static_cast<uint64_t>(Utils::GetClockMonotonicRaw());
     stamp->stampInfo.eventType = static_cast<uint32_t>(EventType::PUSH_OR_POP);
     return ReportStampData(stamp);
 }
@@ -316,9 +329,8 @@ int MsprofTxManager::RangeStart(ACL_PROF_STAMP_PTR stamp, uint32_t *rangeId) con
         return PROFILING_FAILED;
     }
     auto &stampInfo = stamp->stampInfo;
-    stampInfo.startTime = static_cast<uint64_t>(Utils::GetCPUCycleCounter());
+    stampInfo.startTime = static_cast<uint64_t>(Utils::GetClockMonotonicRaw());
     *rangeId = stampPool_->GetIdByStamp(stamp);
-    MSPROF_LOGD("[RangeStart] save stamp success, rangeId is %u", *rangeId);
     return PROFILING_SUCCESS;
 }
 
@@ -336,76 +348,67 @@ int MsprofTxManager::RangeStop(uint32_t rangeId) const
             std::vector<std::string>({std::to_string(rangeId), "rangeId", errorReason}));
         return PROFILING_FAILED;
     }
-    stamp->stampInfo.endTime = static_cast<uint64_t>(Utils::GetCPUCycleCounter());
+    stamp->stampInfo.endTime = static_cast<uint64_t>(Utils::GetClockMonotonicRaw());
     stamp->stampInfo.eventType = static_cast<uint32_t>(EventType::START_OR_STOP);
     return ReportStampData(stamp);
 }
 
 int MsprofTxManager::ReportStampData(MsprofStampInstance *stamp) const
 {
-    stamp->stampInfo.threadId = static_cast<uint32_t>(MmGetTid());
-    uint32_t tagNameLen = strnlen(stamp->stampTagName, MSPROF_ENGINE_MAX_TAG_LEN);
-    if (tagNameLen > 0) {
-        auto ret = strncpy_s(stamp->report.tag, MSPROF_ENGINE_MAX_TAG_LEN, stamp->stampTagName, tagNameLen);
-        if (ret != EOK) {
-            MSPROF_LOGE("[ReportStampData]strncpy_s tag name failed, ret is %u", ret);
+    static thread_local uint32_t tid = static_cast<uint32_t>(MmGetTid());
+    stamp->stampInfo.threadId = tid;
+    if (stamp->callStackLength == 0) {
+        auto ret = reporter_->Report(stamp->report);
+        if (ret != PROFILING_SUCCESS) {
+            MSPROF_LOGE("[ReportStampData] report profiling data failed.");
             return PROFILING_FAILED;
         }
-        stamp->report.tag[tagNameLen] = '\0';
+        return PROFILING_SUCCESS;
     }
-    auto ret = reporter_->Report(stamp->report);
-    if (ret != PROFILING_SUCCESS) {
-        MSPROF_LOGE("[ReportStampData] report profiling data failed.");
-        return PROFILING_FAILED;
-    }
+
+    int32_t callStackLength = stamp->callStackLength;
+    constexpr int MAX_SPLIT_LENGTH = 75;
+    uint32_t pos = 0;
+    do {
+        int copyLen = (MAX_SPLIT_LENGTH < stamp->callStackLength) ? MAX_SPLIT_LENGTH : stamp->callStackLength;
+        if (copyLen > 0) {
+            auto err = strncpy_s(stamp->stampInfo.callStack, MAX_SPLIT_LENGTH + 1, stamp->callStack + pos, copyLen);
+            if (err != EOK) {
+                MSPROF_LOGE("[ReportStampData]strncpy_sp callStack failed");
+                return PROFILING_FAILED;
+            }
+            stamp->stampInfo.callStack[copyLen] = '\0';
+        }
+        pos += copyLen;
+        callStackLength = (callStackLength - copyLen > 0) ? (callStackLength - copyLen) : 0;
+        auto ret = reporter_->Report(stamp->report);
+        if (ret != PROFILING_SUCCESS) {
+            MSPROF_LOGE("[ReportStampData] report profiling data failed.");
+            return PROFILING_FAILED;
+        }
+    } while (callStackLength > 0);
     return PROFILING_SUCCESS;
 }
 
-
-int MsprofTxManager::PytorchE2eRangeStart(int tagType, const char *msg, uint32_t msgLen, uint32_t *rangeId)
+int MsprofTxManager::ReportStampDataV2(const char *tag, uint32_t tagLen, unsigned char *data, uint32_t dataLen) const
 {
-    if (!isInit_) {
-        MSPROF_LOGE("[CreateStamp]MsprofTxManager is not inited yet");
-        return PROFILING_FAILED;
-    }
-    ACL_PROF_STAMP_PTR stamp = stampPool_->CreateStamp();
+    struct ReporterData rptData;
 
-    if (stamp == nullptr || msg==nullptr) {
-        MSPROF_LOGE("aclprofStamp or name is nullptr");
-        return PROFILING_FAILED;
-    }
-
-    static const int MAX_MSG_LEN = 128;
-    auto ret = strncpy_s(stamp->stampInfo.message, MAX_MSG_LEN - 1, msg, msgLen);
+    rptData.deviceId = DEFAULT_HOST_ID;
+    rptData.data = data;
+    rptData.dataLen = dataLen;
+    int ret = strncpy_s(rptData.tag, MSPROF_ENGINE_MAX_TAG_LEN, tag, tagLen);
     if (ret != EOK) {
-        MSPROF_LOGE("[SetStampTraceMessage]strcpy_s message failed, ret is %u", ret);
+        MSPROF_LOGE("[ReportStampDataV2] strncpy_s failed, ret=%d tagLen=%u.", ret, tagLen);
         return PROFILING_FAILED;
     }
-    stamp->stampInfo.message[msgLen] = 0;
 
-    auto &stampInfo = stamp->stampInfo;
-    stampInfo.startTime = static_cast<uint64_t>(Utils::GetCPUCycleCounter());
-    *rangeId = stampPool_->GetIdByStamp(stamp);
-
-    return PROFILING_SUCCESS;    
-}
-
-int MsprofTxManager::PytorchE2eRangeStop(uint32_t rangeId)
-{
-    if (!isInit_) {
-        MSPROF_LOGE("[RangeStop]MsprofTxManager is not inited yet");
+    ret = reporter_->Report(rptData);
+    if (ret != PROFILING_SUCCESS) {
+        MSPROF_LOGE("[ReportStampDataV2] report data failed, ret=%d.", ret);
         return PROFILING_FAILED;
     }
-    auto stamp = stampPool_->GetStampById(rangeId);
-    if (stamp == nullptr) {
-        MSPROF_LOGE("[RangeStop] Get stamp by rangeId failed, rangeId is %u!", rangeId);
-        return PROFILING_FAILED;
-    }
-    stamp->stampInfo.endTime = static_cast<uint64_t>(Utils::GetCPUCycleCounter());
-    stamp->stampInfo.eventType = static_cast<uint32_t>(EventType::START_OR_STOP);
-    ReportStampData(stamp);
-    stampPool_->DestroyStamp(stamp);
-    return PROFILING_SUCCESS;    
+    return PROFILING_SUCCESS;
 }
 }
 }

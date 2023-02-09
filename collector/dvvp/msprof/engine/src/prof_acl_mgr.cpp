@@ -808,7 +808,7 @@ int ProfAclMgr::InitApiCtrlUploader(const std::string& devIdStr)
             MSPROF_INNER_ERROR("EK9999", "Failed to create transport for device %s", devIdStr.c_str());
             return ACL_ERROR_INVALID_FILE;
         }
-        static const size_t uploaderCapacity = 4096; // 4096 : need more uploader capacity
+        static const size_t uploaderCapacity = 4096 * 4; // 16384 : need more uploader capacity
         ret = UploaderMgr::instance()->CreateUploader(devIdStr, transport, uploaderCapacity);
         if (ret != PROFILING_SUCCESS) {
             MSPROF_LOGE("Failed to create uploader for device %s", devIdStr.c_str());
