@@ -514,71 +514,81 @@ int ProfDvppJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 int ProfDvppJob::Process()
 {
     PlatformType type = ConfigManager::instance()->GetPlatformType();
-    if (type == PlatformType::MDC_TYPE || type == PlatformType::DC_TYPE ||
-        type == PlatformType::CHIP_V4_1_0 || type == PlatformType::CHIP_V4_2_0) {
-        if (CheckJobCommonParam(collectionJobCfg_) != PROFILING_SUCCESS) {
-            return PROFILING_FAILED;
-        }
-        (void)SetPeripheralConfig();
-        for (auto channelId : channelList_) {
-            if (!DrvChannelsMgr::instance()->ChannelIsValid(collectionJobCfg_->comParams->devId, channelId)) {
-                MSPROF_LOGW("Channel is invalid, devId:%d, channelId:%d", collectionJobCfg_->comParams->devId,
-                    static_cast<int>(channelId));
-                continue;
-            }
-            std::string filePath =
-                collectionJobCfg_->comParams->tmpResultDir + MSVP_SLASH + fileNameList_[channelId];
-            AddReader(collectionJobCfg_->comParams->params->job_id, collectionJobCfg_->comParams->devId, channelId,
-                filePath);
-            MSPROF_LOGI("begin to start profiling Channel %d, devId :%d",
-                static_cast<int>(channelId), collectionJobCfg_->comParams->devIdOnHost);
-            peripheralCfg_.profDeviceId     = collectionJobCfg_->comParams->devId;
-            peripheralCfg_.profChannel      = channelId;
-            peripheralCfg_.profSamplePeriod = static_cast<int32_t>(samplePeriod_);
-            peripheralCfg_.profDataFile = "";
-            int ret = DrvPeripheralStart(peripheralCfg_);
-            MSPROF_LOGI("start profiling Channel %d, events:%s, ret=%d",
-                static_cast<int>(channelId), eventsStr_.c_str(), ret);
-
-            Utils::ProfFree(peripheralCfg_.configP);
-            peripheralCfg_.configP = nullptr;
-            if (ret != PROFILING_SUCCESS) {
-                MSPROF_LOGE("ProfDvppJob DrvPeripheralStart failed, channelId:%d", static_cast<int>(channelId));
-                continue;
-            }
-        }
-        return PROFILING_SUCCESS;
-    } else {
+    if (type == PlatformType::MINI_TYPE || type == PlatformType::LHISI_TYPE || type == PlatformType::CLOUD_TYPE) {
         return ProfPeripheralJob::Process();
     }
+    std::vector<AI_DRV_CHANNEL> profChannelList;
+    if (type == PlatformType::MDC_TYPE || type == PlatformType::DC_TYPE) {
+        profChannelList = channelList_;
+    } else if (type == PlatformType::CHIP_V4_1_0 || type == PlatformType::CHIP_V4_2_0) {
+        profChannelList = channelList_;
+        profChannelList.push_back(PROF_CHANNEL_DVPP);
+        fileNameList_.insert(std::make_pair(PROF_CHANNEL_DVPP, "data/dvpp.data"));
+    }
+    if (CheckJobCommonParam(collectionJobCfg_) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
+    (void)SetPeripheralConfig();
+    for (auto channelId : profChannelList) {
+        if (!DrvChannelsMgr::instance()->ChannelIsValid(collectionJobCfg_->comParams->devId, channelId)) {
+        MSPROF_LOGW("Channel is invalid, devId:%d, channelId:%d",
+                    collectionJobCfg_->comParams->devId, static_cast<int>(channelId));
+            continue;
+        }
+        std::string filePath = collectionJobCfg_->comParams->tmpResultDir + MSVP_SLASH + fileNameList_[channelId];
+        AddReader(collectionJobCfg_->comParams->params->job_id, collectionJobCfg_->comParams->devId, channelId,
+                  filePath);
+        MSPROF_LOGI("begin to start profiling Channel %d, devId :%d",
+                    static_cast<int>(channelId), collectionJobCfg_->comParams->devIdOnHost);
+        peripheralCfg_.profDeviceId     = collectionJobCfg_->comParams->devId;
+        peripheralCfg_.profChannel      = channelId;
+        peripheralCfg_.profSamplePeriod = static_cast<int32_t>(samplePeriod_);
+        peripheralCfg_.profDataFile = "";
+        int ret = DrvPeripheralStart(peripheralCfg_);
+        MSPROF_LOGI("start profiling Channel %d, events:%s, ret=%d",
+                    static_cast<int>(channelId), eventsStr_.c_str(), ret);
+		
+        Utils::ProfFree(peripheralCfg_.configP);
+        peripheralCfg_.configP = nullptr;
+        if (ret != PROFILING_SUCCESS) {
+            MSPROF_LOGE("ProfDvppJob DrvPeripheralStart failed, channelId:%d", static_cast<int>(channelId));
+            continue;
+        }
+    }
+    return PROFILING_SUCCESS;
 }
 
 int ProfDvppJob::Uninit()
 {
     using namespace Analysis::Dvvp::Common::Config;
     PlatformType type = ConfigManager::instance()->GetPlatformType();
-    if (type == PlatformType::MDC_TYPE || type == PlatformType::DC_TYPE ||
-        type == PlatformType::CHIP_V4_1_0 || type == PlatformType::CHIP_V4_2_0) {
-        if (CheckJobCommonParam(collectionJobCfg_) != PROFILING_SUCCESS) {
-            return PROFILING_SUCCESS;
-        }
-        for (auto channelId : channelList_) {
-            if (!DrvChannelsMgr::instance()->ChannelIsValid(collectionJobCfg_->comParams->devId, channelId)) {
-                MSPROF_LOGW("Channel is invalid, devId:%d, channelId:%d", collectionJobCfg_->comParams->devId,
-                    static_cast<int>(channelId));
-                continue;
-            }
-
-            MSPROF_LOGI("begin to stop profiling Channel %d data", static_cast<int>(channelId));
-
-            int ret = DrvStop(collectionJobCfg_->comParams->devId, channelId);
-            MSPROF_LOGI("stop profiling Channel %d data, ret=%d", static_cast<int>(channelId), ret);
-            RemoveReader(collectionJobCfg_->comParams->params->job_id, collectionJobCfg_->comParams->devId, channelId);
-        }
-        return PROFILING_SUCCESS;
-    } else {
+    if (type == PlatformType::MINI_TYPE || type == PlatformType::LHISI_TYPE || type == PlatformType::CLOUD_TYPE) {
         return ProfPeripheralJob::Uninit();
     }
+    std::vector<AI_DRV_CHANNEL> profChannelList;
+    if (type == PlatformType::MDC_TYPE || type == PlatformType::DC_TYPE) {
+        profChannelList = channelList_;
+    } else if (type == PlatformType::CHIP_V4_1_0 || type == PlatformType::CHIP_V4_2_0) {
+        profChannelList = channelList_;
+        profChannelList.push_back(PROF_CHANNEL_DVPP);
+    }
+    if (CheckJobCommonParam(collectionJobCfg_) != PROFILING_SUCCESS) {
+        return PROFILING_SUCCESS;
+    }
+    for (auto channelId : profChannelList) {
+        if (!DrvChannelsMgr::instance()->ChannelIsValid(collectionJobCfg_->comParams->devId, channelId)) {
+            MSPROF_LOGW("Channel is invalid, devId:%d, channelId:%d", collectionJobCfg_->comParams->devId,
+                        static_cast<int>(channelId));
+            continue;
+        }
+
+        MSPROF_LOGI("begin to stop profiling Channel %d data", static_cast<int>(channelId));
+
+        int ret = DrvStop(collectionJobCfg_->comParams->devId, channelId);
+        MSPROF_LOGI("stop profiling Channel %d data, ret=%d", static_cast<int>(channelId), ret);
+        RemoveReader(collectionJobCfg_->comParams->params->job_id, collectionJobCfg_->comParams->devId, channelId);
+    }
+    return PROFILING_SUCCESS;
 }
 
 /*
