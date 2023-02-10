@@ -20,7 +20,7 @@ class FftsLogViewer(BaseViewer):
     """
     class for get ffts_log data
     """
-    SUBTASK_TIME = 'subtask_time'
+    SUBTASK_TIME = 'Subtask Time'
 
     def __init__(self: any, configs: dict, params: dict) -> None:
         super().__init__(configs, params)

@@ -29,21 +29,19 @@ class AclModel(ViewModel, IAnalysisModel):
     def get_timeline_data(self: any) -> list:
         sql = "select api_name, start_time, (end_time-start_time) " \
               "as output_duration, process_id, thread_id, api_type " \
-              "from {0} {where_condition} order by start_time".format(DBNameConstant.TABLE_ACL_DATA,
-                                                                      where_condition=self._get_where_condition())
+              "from {0} order by start_time".format(DBNameConstant.TABLE_ACL_DATA)
         return DBManager.fetch_all_data(self.cur, sql)
 
     def get_summary_data(self: any) -> list:
         sql = "select api_name, api_type, start_time, (end_time-start_time)/{0} " \
               "as output_duration, process_id, thread_id " \
-              "from {1} {where_condition} order by start_time asc".format(NumberConstant.NS_TO_US,
-                                                                          DBNameConstant.TABLE_ACL_DATA,
-                                                                          where_condition=self._get_where_condition())
+              "from {1} order by start_time asc".format(NumberConstant.NS_TO_US,
+                                                        DBNameConstant.TABLE_ACL_DATA)
         return DBManager.fetch_all_data(self.cur, sql)
 
     def get_acl_total_time(self):
         search_data_sql = f"select sum(end_time-start_time) " \
-                          f"from {DBNameConstant.TABLE_ACL_DATA} {self._get_where_condition()}"
+                          f"from {DBNameConstant.TABLE_ACL_DATA}"
         return self.cur.execute(search_data_sql).fetchone()[0]
 
     def get_acl_statistic_data(self):
@@ -58,13 +56,11 @@ class AclModel(ViewModel, IAnalysisModel):
                           "min((end_time-start_time)/{1}), " \
                           "max((end_time-start_time)/{1}), " \
                           "process_id, thread_id from {0} " \
-                          "{where_condition} " \
                           "group by api_name".format(DBNameConstant.TABLE_ACL_DATA,
                                                      NumberConstant.NS_TO_US,
                                                      percent=CommonConstant.PERCENT,
                                                      total_time=total_time,
-                                                     accuracy=CommonConstant.ROUND_SIX,
-                                                     where_condition=self._get_where_condition())
+                                                     accuracy=CommonConstant.ROUND_SIX)
         return DBManager.fetch_all_data(self.cur, search_data_sql)
 
     def _get_where_condition(self):
