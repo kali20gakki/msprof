@@ -392,12 +392,12 @@ int MsprofTxManager::ReportStampData(MsprofStampInstance *stamp) const
         }
         stamp->report.tag[tagNameLen] = '\0';
     }
-    int32_t callStackLength = stamp->callStackLength;
+    uint32_t callStackLength = stamp->callStackLength;
     constexpr int MAX_SPLIT_LENGTH = 75;
     uint32_t pos = 0;
 
     do {
-        int copyLen = (MAX_SPLIT_LENGTH < stamp->callStackLength) ? MAX_SPLIT_LENGTH : stamp->callStackLength;
+        uint32_t copyLen = (MAX_SPLIT_LENGTH < stamp->callStackLength) ? MAX_SPLIT_LENGTH : stamp->callStackLength;
         if (copyLen > 0) {
             auto err = strncpy_s(stamp->stampInfo.callStack, MAX_SPLIT_LENGTH + 1, stamp->callStack + pos, copyLen);
             if (err != EOK) {
