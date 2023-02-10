@@ -295,7 +295,7 @@ class Constant:
         "scalar_ratio": PmuCalculateFunc.scalar_ratio,
         "fixpipe_ratio": PmuCalculateFunc.fixpipe_ratio,
         "mte1_ratio": PmuCalculateFunc.mte1_ratio,
-        "mte1_active_ratio": PmuCalculateFunc.mte1_ratio,
+        "mte1_ratio_extra": PmuCalculateFunc.mte1_ratio,
         "mte2_ratio": PmuCalculateFunc.mte2_ratio,
         "mte3_ratio": PmuCalculateFunc.mte3_ratio,
         "icache_miss_rate": PmuCalculateFunc.icache_miss_rate,
