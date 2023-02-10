@@ -73,7 +73,7 @@ public:
     int Uninit() override;
 
 private:
-    std::vector<analysis::dvvp::driver::AI_DRV_CHANNEL> channelList_;
+    std::vector<analysis::dvvp::driver::AI_DRV_CHANNEL> profChannelList_;
     std::map<analysis::dvvp::driver::AI_DRV_CHANNEL, std::string> fileNameList_;
 };
 
