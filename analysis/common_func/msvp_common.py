@@ -25,6 +25,7 @@ from common_func.os_manager import check_file_readable
 from common_func.path_manager import PathManager
 from common_func.return_code_checker import ReturnCodeCheck
 from msconfig.config_manager import ConfigManager
+from profiling_bean.basic_info.host_start import TimerBean
 
 
 class MsvpCommonConst:
@@ -137,8 +138,9 @@ def get_host_duration_delta_time(host_duration_file: str, host_wall: int, host_m
             get_time = config.items("Device" + str(device_id))
         else:
             get_time = config.items("Host")
-        host_wall = float(get_time[0][1]) / NumberConstant.NANO_SECOND
-        host_mon = float(get_time[1][1]) / NumberConstant.NANO_SECOND
+        timer = TimerBean(dict(get_time))
+        host_wall = float(timer.host_wall) / NumberConstant.NANO_SECOND
+        host_mon = float(timer.host_mon) / NumberConstant.NANO_SECOND
     return host_wall, host_mon
 
 
