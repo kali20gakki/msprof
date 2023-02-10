@@ -4,6 +4,7 @@
 
 import logging
 import sqlite3
+from collections import deque
 
 from common_func.ai_stack_data_check_manager import AiStackDataCheckManager
 from common_func.db_manager import DBManager
@@ -14,6 +15,7 @@ from common_func.path_manager import PathManager
 from common_func.step_trace_constant import StepTraceConstant
 from common_func.msprof_exception import ProfException
 from mscalculate.step_trace.tag_handler.tag_dispatch_handler import DispatchModelHandler
+from profiling_bean.db_dto.step_trace_dto import StepTraceOriginDto
 
 
 class CreateSubTable:
@@ -293,9 +295,9 @@ class StepTableBuilder:
         :return:
         """
         record_dict = {
-            StepTraceConstant.INDEX_ID: record[0], StepTraceConstant.MODEL_ID: record[1],
-            StepTraceConstant.TIME_STAMP: record[2], StepTraceConstant.TAG_ID: record[3],
-            StepTraceConstant.STREAM_ID: record[4]
+            StepTraceConstant.INDEX_ID: record.index_id, StepTraceConstant.MODEL_ID: record.model_id,
+            StepTraceConstant.TIME_STAMP: record.timestamp, StepTraceConstant.TAG_ID: record.tag_id,
+            StepTraceConstant.STREAM_ID: record.stream_id
         }
 
         return record_dict
@@ -307,7 +309,8 @@ class StepTableBuilder:
         :param step_trace: contain model_id, tag_id, timestamp
         :return: void
         """
-        step_trace.sort(key=lambda x: x[cls.TIMESTAMP_INDEX])
+        step_trace.sort(key=lambda x: (x.model_id, x.timestamp))
+        step_trace = StepTracePreProcess().reorder_step_trace_for_pipe_stage(step_trace)
         for record in step_trace:
             cls.model_handler.receive_record(cls.to_dict(record))
 
@@ -352,7 +355,7 @@ class StepTableBuilder:
             select_sql = "select DISTINCT index_id, model_id, " \
                          "timestamp, tag_id, stream_id from {}".format(table_name)
 
-        return DBManager.fetch_all_data(cls.step_curs, select_sql)
+        return DBManager.fetch_all_data(cls.step_curs, select_sql, dto_class=StepTraceOriginDto)
 
     @classmethod
     def _connect_step_db(cls: any, sample_config: dict) -> None:
@@ -368,6 +371,64 @@ class StepTableBuilder:
         step_trace_data = _step_data + _helper_data
         if not step_trace_data:
             return []
-        _step_trace = sorted(step_trace_data, key=lambda x: float(x[2]))
         DBManager.destroy_db_connect(cls.step_conn, cls.step_curs)
-        return _step_trace
+        return step_trace_data
+
+
+class StepTracePreProcess:
+    MODEL_START_TAG = 0
+    MODEL_END_TAG = 1
+    ITERATION_END_TAG = 4
+    HCCL_START_TAG = 10000
+
+    def __init__(self):
+        self.reordered_step_trace = []
+        self.current_model_id = None
+        self.current_step_trace_queue = deque()
+
+    def reorder_step_trace_for_pipe_stage(self: any, step_trace: list) -> list:
+        for record in step_trace:
+            if record.model_id != self.current_model_id:
+                for data in self.current_step_trace_queue:
+                    self.reordered_step_trace.extend(data["all_record"])
+                self.current_step_trace_queue = deque()
+                self.current_model_id = record.model_id
+            if record.tag_id == self.MODEL_START_TAG:
+                self.current_step_trace_queue.append({"tag": [record], "all_record": [record]})
+            elif record.tag_id == self.MODEL_END_TAG:
+                self.deal_model_end_tag(record)
+            elif record.tag_id >= self.HCCL_START_TAG:
+                self.deal_hccl_tag(record)
+            else:
+                self.deal_iteration_tag(record)
+        if self.current_step_trace_queue:
+            for data in self.current_step_trace_queue:
+                self.reordered_step_trace.extend(data.get("all_record", []))
+        return self.reordered_step_trace
+
+    def deal_model_end_tag(self, record: any):
+        model_start_tag_num = 0
+        while self.current_step_trace_queue:
+            if self.current_step_trace_queue[0]["tag"][0].tag_id == self.MODEL_START_TAG:
+                model_start_tag_num += 1
+                if model_start_tag_num == 2:
+                    break
+            self.reordered_step_trace.extend(self.current_step_trace_queue.popleft()["all_record"])
+        self.reordered_step_trace.append(record)
+
+    def deal_hccl_tag(self, record: any):
+        for data in self.current_step_trace_queue:
+            if data["tag"][-1].tag_id != self.ITERATION_END_TAG:
+                data["all_record"].append(record)
+                break
+
+    def deal_iteration_tag(self, record: any):
+        is_new_iteration = True
+        for data in self.current_step_trace_queue:
+            if data["tag"][-1].tag_id < record.tag_id:
+                data["tag"].append(record)
+                data["all_record"].append(record)
+                is_new_iteration = False
+                break
+        if is_new_iteration:
+            self.current_step_trace_queue.append({"tag": [record], "all_record": [record]})
