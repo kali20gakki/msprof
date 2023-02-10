@@ -184,11 +184,7 @@ int ProfDdrJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
  */
 int ProfDdrJob::SetPeripheralConfig()
 {
-    samplePeriod_ = PERIPHERAL_INTERVAL_MS_MIN;
-    if (collectionJobCfg_->comParams->params->ddr_interval >= PERIPHERAL_INTERVAL_MS_MIN &&
-        collectionJobCfg_->comParams->params->ddr_interval <= PERIPHERAL_INTERVAL_MS_MAX) {
-        samplePeriod_ = static_cast<uint32_t>(collectionJobCfg_->comParams->params->ddr_interval);
-    }
+    samplePeriod_ = static_cast<uint32_t>(collectionJobCfg_->comParams->params->ddr_interval);
 
     eventsStr_ = GetEventsStr(*(collectionJobCfg_->jobParams.events));
     uint32_t configSize = sizeof(TagDdrProfileConfig) +
@@ -342,14 +338,9 @@ int ProfHccsJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
     profDataFilePathV.push_back("data");
     profDataFilePathV.push_back("hccs.data");
     collectionJobCfg_->jobParams.dataPath = analysis::dvvp::common::utils::Utils::JoinPath(profDataFilePathV);
-    samplePeriod_ = PERIPHERAL_INTERVAL_MS_MIN;
-    if (collectionJobCfg_->comParams->params->hccsInterval >= PERIPHERAL_INTERVAL_MS_MIN &&
-        collectionJobCfg_->comParams->params->hccsInterval <= PERIPHERAL_INTERVAL_MS_MAX) {
-        samplePeriod_ = static_cast<uint32_t>(collectionJobCfg_->comParams->params->hccsInterval);
-    }
+    
+    samplePeriod_ = static_cast<uint32_t>(collectionJobCfg_->comParams->params->hccsInterval);
 
-    peripheralCfg_.configP = nullptr;
-    peripheralCfg_.configSize = 0;
     return PROFILING_SUCCESS;
 }
 
@@ -390,14 +381,8 @@ int ProfPcieJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
     profDataFilePathV.push_back("pcie.data");
     collectionJobCfg_->jobParams.dataPath = analysis::dvvp::common::utils::Utils::JoinPath(profDataFilePathV);
 
-    samplePeriod_ = PERIPHERAL_INTERVAL_MS_MIN;
-    if (collectionJobCfg_->comParams->params->pcieInterval >= PERIPHERAL_INTERVAL_MS_MIN &&
-        collectionJobCfg_->comParams->params->pcieInterval <= PERIPHERAL_INTERVAL_MS_MAX) {
-        samplePeriod_ = static_cast<uint32_t>(collectionJobCfg_->comParams->params->pcieInterval);
-    }
+    samplePeriod_ = static_cast<uint32_t>(collectionJobCfg_->comParams->params->pcieInterval);
 
-    peripheralCfg_.configP = nullptr;
-    peripheralCfg_.configSize = 0;
     return PROFILING_SUCCESS;
 }
 
@@ -437,14 +422,10 @@ int ProfNicJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
     profDataFilePathV.push_back("data");
     profDataFilePathV.push_back("nic.data");
     collectionJobCfg_->jobParams.dataPath = analysis::dvvp::common::utils::Utils::JoinPath(profDataFilePathV);
-    samplePeriod_ = PERIPHERAL_INTERVAL_MS_SMIN;
-    if (collectionJobCfg_->comParams->params->nicInterval > 0) {
-        samplePeriod_ = static_cast<uint32_t>(collectionJobCfg_->comParams->params->nicInterval);
-    }
+
+    samplePeriod_ = static_cast<uint32_t>(collectionJobCfg_->comParams->params->nicInterval);
     MSPROF_LOGI("NIC Profiling samplePeriod_:%d", samplePeriod_);
 
-    peripheralCfg_.configP = nullptr;
-    peripheralCfg_.configSize = 0;
     return PROFILING_SUCCESS;
 }
 
@@ -454,24 +435,10 @@ int ProfNicJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 ProfDvppJob::ProfDvppJob()
 {
     channelId_ = PROF_CHANNEL_DVPP;
-    channelList_ = {PROF_CHANNEL_DVPP_VENC,
-               PROF_CHANNEL_DVPP_JPEGE,
-               PROF_CHANNEL_DVPP_VDEC,
-               PROF_CHANNEL_DVPP_JPEGD,
-               PROF_CHANNEL_DVPP_VPC,
-               PROF_CHANNEL_DVPP_PNG,
-               PROF_CHANNEL_DVPP_SCD};
-    fileNameList_ = {{PROF_CHANNEL_DVPP_JPEGD, "data/dvpp.jpegd"},
-                {PROF_CHANNEL_DVPP_JPEGE, "data/dvpp.jpege"},
-                {PROF_CHANNEL_DVPP_PNG, "data/dvpp.png"},
-                {PROF_CHANNEL_DVPP_SCD, "data/dvpp.scd"},
-                {PROF_CHANNEL_DVPP_VENC, "data/dvpp.venc"},
-                {PROF_CHANNEL_DVPP_VPC, "data/dvpp.vpc"},
-                {PROF_CHANNEL_DVPP_VDEC, "data/dvpp.vdec"}};
 }
 ProfDvppJob::~ProfDvppJob()
 {
-    channelList_.clear();
+    profChannelList_.clear();
     fileNameList_.clear();
 }
 
@@ -495,41 +462,45 @@ int ProfDvppJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
         MSPROF_LOGI("DVPP Profiling not enabled");
         return PROFILING_FAILED;
     }
-
-    std::vector<std::string> profDataFilePathV;
-    profDataFilePathV.push_back(collectionJobCfg_->comParams->tmpResultDir);
-    profDataFilePathV.push_back("data");
-    profDataFilePathV.push_back("dvpp.data");
-    collectionJobCfg_->jobParams.dataPath = analysis::dvvp::common::utils::Utils::JoinPath(profDataFilePathV);
-    samplePeriod_ = PERIPHERAL_INTERVAL_MS_SMIN;
-    if (collectionJobCfg_->comParams->params->dvpp_sampling_interval > 0) {
-        samplePeriod_ = static_cast<uint32_t>(collectionJobCfg_->comParams->params->dvpp_sampling_interval);
+    samplePeriod_ = static_cast<uint32_t>(collectionJobCfg_->comParams->params->dvpp_sampling_interval);
+    PlatformType type = ConfigManager::instance()->GetPlatformType();
+    if (type == PlatformType::LHISI_TYPE) {
+        MSPROF_LOGI("DVPP Profiling not support for platform %d.", static_cast<int>(type));
+        return PROFILING_FAILED;
+    } else if (type == PlatformType::MINI_TYPE || type == PlatformType::CLOUD_TYPE) {
+        profChannelList_ = {PROF_CHANNEL_DVPP};
+        fileNameList_ = {{PROF_CHANNEL_DVPP, "data/dvpp.data"}};
+        return PROFILING_SUCCESS;
     }
-
-    peripheralCfg_.configP = nullptr;
-    peripheralCfg_.configSize = 0;
+    // MDC_TYPE/DC_TYPE
+    profChannelList_ = {PROF_CHANNEL_DVPP_VENC,
+                        PROF_CHANNEL_DVPP_JPEGE,
+                        PROF_CHANNEL_DVPP_VDEC,
+                        PROF_CHANNEL_DVPP_JPEGD,
+                        PROF_CHANNEL_DVPP_VPC,
+                        PROF_CHANNEL_DVPP_PNG,
+                        PROF_CHANNEL_DVPP_SCD};
+    fileNameList_ = {{PROF_CHANNEL_DVPP_JPEGD, "data/dvpp.jpegd"},
+                        {PROF_CHANNEL_DVPP_JPEGE, "data/dvpp.jpege"},
+                        {PROF_CHANNEL_DVPP_PNG, "data/dvpp.png"},
+                        {PROF_CHANNEL_DVPP_SCD, "data/dvpp.scd"},
+                        {PROF_CHANNEL_DVPP_VENC, "data/dvpp.venc"},
+                        {PROF_CHANNEL_DVPP_VPC, "data/dvpp.vpc"},
+                        {PROF_CHANNEL_DVPP_VDEC, "data/dvpp.vdec"}};
+    // CHIP_V4_1_0/CHIP_V4_2_0
+    if (type == PlatformType::CHIP_V4_1_0 || type == PlatformType::CHIP_V4_2_0) {
+        profChannelList_.push_back(PROF_CHANNEL_DVPP);
+        fileNameList_.insert(std::make_pair(PROF_CHANNEL_DVPP, "data/dvpp.data"));
+    }
     return PROFILING_SUCCESS;
 }
 
 int ProfDvppJob::Process()
 {
-    PlatformType type = ConfigManager::instance()->GetPlatformType();
-    if (type == PlatformType::MINI_TYPE || type == PlatformType::LHISI_TYPE || type == PlatformType::CLOUD_TYPE) {
-        return ProfPeripheralJob::Process();
-    }
-    std::vector<AI_DRV_CHANNEL> profChannelList;
-    if (type == PlatformType::MDC_TYPE || type == PlatformType::DC_TYPE) {
-        profChannelList = channelList_;
-    } else if (type == PlatformType::CHIP_V4_1_0 || type == PlatformType::CHIP_V4_2_0) {
-        profChannelList = channelList_;
-        profChannelList.push_back(PROF_CHANNEL_DVPP);
-        fileNameList_.insert(std::make_pair(PROF_CHANNEL_DVPP, "data/dvpp.data"));
-    }
     if (CheckJobCommonParam(collectionJobCfg_) != PROFILING_SUCCESS) {
         return PROFILING_FAILED;
     }
-    (void)SetPeripheralConfig();
-    for (auto channelId : profChannelList) {
+    for (auto channelId : profChannelList_) {
         if (!DrvChannelsMgr::instance()->ChannelIsValid(collectionJobCfg_->comParams->devId, channelId)) {
         MSPROF_LOGW("Channel is invalid, devId:%d, channelId:%d",
                     collectionJobCfg_->comParams->devId, static_cast<int>(channelId));
@@ -548,8 +519,6 @@ int ProfDvppJob::Process()
         MSPROF_LOGI("start profiling Channel %d, events:%s, ret=%d",
                     static_cast<int>(channelId), eventsStr_.c_str(), ret);
 		
-        Utils::ProfFree(peripheralCfg_.configP);
-        peripheralCfg_.configP = nullptr;
         if (ret != PROFILING_SUCCESS) {
             MSPROF_LOGE("ProfDvppJob DrvPeripheralStart failed, channelId:%d", static_cast<int>(channelId));
             continue;
@@ -561,21 +530,10 @@ int ProfDvppJob::Process()
 int ProfDvppJob::Uninit()
 {
     using namespace Analysis::Dvvp::Common::Config;
-    PlatformType type = ConfigManager::instance()->GetPlatformType();
-    if (type == PlatformType::MINI_TYPE || type == PlatformType::LHISI_TYPE || type == PlatformType::CLOUD_TYPE) {
-        return ProfPeripheralJob::Uninit();
-    }
-    std::vector<AI_DRV_CHANNEL> profChannelList;
-    if (type == PlatformType::MDC_TYPE || type == PlatformType::DC_TYPE) {
-        profChannelList = channelList_;
-    } else if (type == PlatformType::CHIP_V4_1_0 || type == PlatformType::CHIP_V4_2_0) {
-        profChannelList = channelList_;
-        profChannelList.push_back(PROF_CHANNEL_DVPP);
-    }
     if (CheckJobCommonParam(collectionJobCfg_) != PROFILING_SUCCESS) {
         return PROFILING_SUCCESS;
     }
-    for (auto channelId : profChannelList) {
+    for (auto channelId : profChannelList_) {
         if (!DrvChannelsMgr::instance()->ChannelIsValid(collectionJobCfg_->comParams->devId, channelId)) {
             MSPROF_LOGW("Channel is invalid, devId:%d, channelId:%d", collectionJobCfg_->comParams->devId,
                         static_cast<int>(channelId));
@@ -640,11 +598,7 @@ int ProfLlcJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
  */
 int ProfLlcJob::SetPeripheralConfig()
 {
-    samplePeriod_ = PERIPHERAL_INTERVAL_MS_MIN;
-    if (collectionJobCfg_->comParams->params->llc_interval >= PERIPHERAL_INTERVAL_MS_MIN &&
-        collectionJobCfg_->comParams->params->llc_interval <= PERIPHERAL_INTERVAL_MS_MAX) {
-        samplePeriod_ = static_cast<uint32_t>(collectionJobCfg_->comParams->params->llc_interval);
-    }
+    samplePeriod_ = static_cast<uint32_t>(collectionJobCfg_->comParams->params->llc_interval);
 
     eventsStr_ = GetEventsStr(*(collectionJobCfg_->jobParams.events));
     uint32_t configSize = sizeof(TagLlcProfileConfig);
@@ -920,13 +874,9 @@ int ProfRoceJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
     profDataFilePathV.push_back("data");
     profDataFilePathV.push_back("roce.data");
     collectionJobCfg_->jobParams.dataPath = analysis::dvvp::common::utils::Utils::JoinPath(profDataFilePathV);
-    samplePeriod_ = PERIPHERAL_INTERVAL_MS_SMIN;
-    if (collectionJobCfg_->comParams->params->roceInterval > 0) {
-        samplePeriod_ = static_cast<uint32_t>(collectionJobCfg_->comParams->params->roceInterval);
-    }
+    
+    samplePeriod_ = static_cast<uint32_t>(collectionJobCfg_->comParams->params->roceInterval);
 
-    peripheralCfg_.configP = nullptr;
-    peripheralCfg_.configSize = 0;
     return PROFILING_SUCCESS;
 }
 
