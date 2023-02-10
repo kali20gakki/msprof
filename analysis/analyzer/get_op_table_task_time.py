@@ -145,13 +145,18 @@ class GetOpTableTsTime:
     def _get_acsq_task_time(self: any, ge_data) -> list:
         if not ge_data:
             return []
-        ge_data_set = set()
+        ge_data_dict = dict()
         for data in ge_data:
             task_key = "{}-{}".format(data.stream_id, data.task_id)
-            ge_data_set.add(task_key)
+            ge_data_dict[task_key] = data.task_type
         task_data = self._get_task_time_data(DBNameConstant.DB_ACSQ, [DBNameConstant.TABLE_ACSQ_TASK_TIME],
                                              self._get_acsq_task_sql())
-        return [data for data in task_data if "{}-{}".format(data[1], data[0]) in ge_data_set]
+        res_data = []
+        for data in task_data:
+            task_type = ge_data_dict.get("{}-{}".format(data[1], data[0]))
+            if task_type is not None:
+                res_data.append(data[:4] + (task_type,) + data[5:])
+        return res_data
 
     def _get_ai_core_task_time(self: any) -> list:
         return self._get_task_time_data(self._get_db_name(), [self._get_task_time_table()], self._get_ai_core_sql())
