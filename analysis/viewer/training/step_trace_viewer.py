@@ -203,10 +203,10 @@ class StepTraceViewer:
               "(case when data_aug_bound={2} then 'N/A' else data_aug_bound*{0} end), " \
               "(case when model_id={3} then 'N/A' else model_id end) " \
               " from {1} where device_id=?".format(
-               StepTraceConstant.syscnt_to_micro(),
-               DBNameConstant.TABLE_TRAINING_TRACE,
-               NumberConstant.NULL_NUMBER,
-               NumberConstant.DEFAULT_MODEL_ID)
+            StepTraceConstant.syscnt_to_micro(),
+            DBNameConstant.TABLE_TRAINING_TRACE,
+            NumberConstant.NULL_NUMBER,
+            NumberConstant.DEFAULT_MODEL_ID)
         data = DBManager.fetch_all_data(curs, sql, (message["device_id"],))
         return data
 
@@ -412,11 +412,13 @@ class StepTraceViewer:
         merge_data = []
         for line in data:
             trace = list(line)
+            trace[3] = StepTraceViewer.__time_from_syscnt(trace[3])
             if len(trace) >= 4:  # trace[3] refers to iteration end
                 reduce_data = StepTraceViewer.__select_reduce(conn,
                                                               trace)
                 for item in reduce_data:
-                    trace += [item[0], (item[1] - item[0]) * StepTraceConstant.syscnt_to_micro()]
+                    trace += [StepTraceViewer.__time_from_syscnt(item[0]),
+                              (item[1] - item[0]) * StepTraceConstant.syscnt_to_micro()]
             merge_data.append(trace)
         return merge_data
 
