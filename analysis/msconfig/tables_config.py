@@ -529,15 +529,16 @@ class TablesConfig(MetaConfig):
         , 'DiskUsageMap': [
             ('start_time', 'numeric,null'),
             ('end_time', 'text,null'),
-            ('disk_read', 'text,null'),
-            ('disk_write', 'text,null'),
+            ('disk_read', 'REAL,null'),
+            ('disk_write', 'REAL,null'),
             ('swap_in', 'text,null'),
             ('usage', 'REAL,null')
         ]
         , 'NetworkUsageMap': [
             ('start_time', 'numeric,null'),
             ('end_time', 'text,null'),
-            ('usage', 'REAL,null')
+            ('usage', 'REAL,null'),
+            ('speed', 'REAL,null')
         ]
         , 'SyscallMap': [
             ('runtime_comm', 'text,null'),

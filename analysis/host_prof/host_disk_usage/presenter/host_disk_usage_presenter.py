@@ -10,6 +10,7 @@ from common_func.config_mgr import ConfigMgr
 from common_func.constant import Constant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
+from common_func.db_name_constant import DBNameConstant
 from common_func.msvp_common import is_number
 from common_func.msvp_constant import MsvpConstant
 from host_prof.host_disk_usage.model.host_disk_usage import HostDiskUsage
@@ -23,40 +24,16 @@ class HostDiskUsagePresenter(HostProfPresenterBase):
 
     FILE_NAME = os.path.basename(__file__)
     FREQ_TO_US = 10 ** 6
+    TYPE_CONVERSION_DICT = {
+        'B/s': 1.0 / NumberConstant.KILOBYTE,
+        'K/s': 1.0,
+        'M/s': NumberConstant.KILOBYTE,
+        'G/s': NumberConstant.KILOBYTE ** 2
+    }
 
     def __init__(self: any, result_dir: str, file_name: str = "") -> None:
         super().__init__(result_dir, file_name)
         self.disk_usage_info = []
-
-    @staticmethod
-    def _get_disk_usage_items(file: any) -> tuple:
-        start_time = 0
-        usage_items = []
-
-        for line in file:
-            fields = line.split()
-            if len(fields) < 2:  # invalid format
-                continue
-            if not fields[1].isdigit():  # invalid pid
-                continue
-            if fields[0] == 'start_time' and fields[1].isdigit():
-                start_time = float(fields[1]) / NumberConstant.CONVERSION_TIME
-                continue
-
-            pid = int(fields[1])
-            disk_read = fields[4] + fields[5]
-            disk_write = fields[6] + fields[7]
-            if line.find('unavailable') > 0 or len(fields) < 11:
-                swap_in = '0.00'
-                io_percent = '0.00'
-            else:
-                swap_in = fields[8]
-                io_percent = fields[10]
-
-            usage_items.append((pid, disk_read, disk_write,
-                                swap_in, io_percent))
-
-        return start_time, usage_items
 
     @classmethod
     def get_timeline_header(cls: any) -> list:
@@ -89,12 +66,11 @@ class HostDiskUsagePresenter(HostProfPresenterBase):
         """
         get disk usage data
         """
-        if not self.cur_model.check_db() or not self.cur_model.has_disk_usage_data():
-            self.cur_model.finalize()
-            return MsvpConstant.EMPTY_DICT
-        res = self.cur_model.get_disk_usage_data()
-        self.cur_model.finalize()
-        return res
+        with self.cur_model as model:
+            if model.has_disk_usage_data():
+                res = model.get_disk_usage_data()
+                return res
+        return MsvpConstant.EMPTY_DICT
 
     def get_timeline_data(self: any) -> list:
         """
@@ -111,6 +87,17 @@ class HostDiskUsagePresenter(HostProfPresenterBase):
             result.append(temp_data)
         return result
 
+    def get_summary_data(self: any) -> list:
+        """
+        get summary data
+        """
+        with self.cur_model as model:
+            if model.has_disk_usage_data():
+                res_read = model.get_recommend_value('disk_read', DBNameConstant.TABLE_HOST_DISK_USAGE)
+                res_write = model.get_recommend_value('disk_write', DBNameConstant.TABLE_HOST_DISK_USAGE)
+                return [tuple(res_read + res_write)]
+        return MsvpConstant.EMPTY_LIST
+
     def _parse_disk_data(self: any, start_time: float, interval: float, usage_items: any) -> None:
         end_time = start_time
         for item in usage_items:
@@ -125,7 +112,7 @@ class HostDiskUsagePresenter(HostProfPresenterBase):
         self.cur_model.insert_disk_usage_data(self.disk_usage_info)
 
     def _parse_disk_usage(self: any, file: any) -> None:
-        start_time, usage_items = HostDiskUsagePresenter._get_disk_usage_items(file)
+        start_time, usage_items = self._get_disk_usage_items(file)
         disk_freq = ConfigMgr.get_disk_freq(self.result_dir)
         if is_number(disk_freq) and disk_freq > 0:
             # convert freq to interval(us)
@@ -133,3 +120,50 @@ class HostDiskUsagePresenter(HostProfPresenterBase):
             self._parse_disk_data(start_time, interval, usage_items)
         else:
             error(self.FILE_NAME, "Host disk freq is invalid, please check sample.json file!")
+
+    def _convert_to_k(self: any, speed_type: str):
+        """
+        convert other speed type to KB/s
+        """
+        if speed_type in self.TYPE_CONVERSION_DICT:
+            return self.TYPE_CONVERSION_DICT.get(speed_type, 1.0)
+        else:
+            logging.warning(f'Unknown speed type appear! Unknown type: {speed_type}')
+            return 1.0
+
+    def _get_disk_usage_items(self: any, file: any) -> tuple:
+        start_time = 0
+        usage_items = []
+
+        for line in file:
+            fields = line.split()
+            if len(fields) < 2:  # invalid format
+                continue
+            if not fields[1].isdigit():  # invalid pid
+                continue
+            if fields[0] == 'start_time' and fields[1].isdigit():
+                start_time = float(fields[1]) / NumberConstant.CONVERSION_TIME
+                continue
+
+            pid = int(fields[1])
+            try:
+                disk_read = float(fields[4]) * self._convert_to_k(fields[5])
+            except ValueError:
+                logging.warning('host of disk read has a wrong data type!')
+                disk_read = 0
+            try:
+                disk_write = float(fields[6]) * self._convert_to_k(fields[7])
+            except ValueError:
+                logging.warning('host of disk write has a wrong data type!')
+                disk_write = 0
+            if line.find('unavailable') > 0 or len(fields) < 11:
+                swap_in = '0.00'
+                io_percent = '0.00'
+            else:
+                swap_in = fields[8]
+                io_percent = fields[10]
+
+            usage_items.append((pid, disk_read, disk_write,
+                                swap_in, io_percent))
+
+        return start_time, usage_items
