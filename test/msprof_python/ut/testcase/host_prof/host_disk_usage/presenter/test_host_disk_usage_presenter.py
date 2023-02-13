@@ -21,9 +21,9 @@ class TestHostDiskUsagePresenter(unittest.TestCase):
         data = '03:52:49 Total DISK READ :       0.00 B/s | Total DISK WRITE :       0.00 B/s\n' \
                '03:52:49 Actual DISK READ:       0.00 B/s | Actual DISK WRITE:       0.00 B/s\n' \
                'TIME  PID  PRIO  USER     DISK READ  DISK WRITE  SWAPIN      IO    COMMAND\n' \
-               '03:52:49 18070 be/4 root        0.00 B/s    0.00 B/s  ?unavailable?  ' \
+               '03:52:49 18070 be/4 root        1.00 KB/s    0.00 B/s  ?unavailable?  ' \
                './main 40 0x16 /home/ch/mnt/collect 0\n' \
-               '03:52:49 Total DISK READ :       0.00 B/s | Total DISK WRITE :       0.00 B/s\n' \
+               '03:52:49 Total DISK READ :       1.00 B/s | Total DISK WRITE :       0.00 B/s\n' \
                '03:52:49 Actual DISK READ:       0.00 B/s | Actual DISK WRITE:       0.00 B/s\n' \
                'len=1\n' \
                'a 12 b C d e f g h i j k l\n' \
@@ -40,8 +40,8 @@ class TestHostDiskUsagePresenter(unittest.TestCase):
             check.cur_model = HostDiskUsage('test')
             check.cur_model.conn = res[0]
             check.parse_prof_data()
-        self.assertEqual(check.disk_usage_info, [[191425757976.595, 191425777976.595, '0.00B/s',
-                                                  '0.00B/s', '0.00', 0.0]])
+        self.assertEqual(check.disk_usage_info, [[191425757976.595, 191425777976.595, 1,
+                                                  0, '0.00', 0.0]])
         with mock.patch('builtins.open', mock.mock_open(read_data=data)), \
                 mock.patch(NAMESPACE + '.ConfigMgr.get_disk_freq', return_value=0), \
                 mock.patch(NAMESPACE + '.error'):
@@ -98,6 +98,22 @@ class TestHostDiskUsagePresenter(unittest.TestCase):
         InfoConfReader()._info_json = {'pid': 1, 'tid': 0}
         result = check.get_timeline_header()
         self.assertEqual(result, [['process_name', 1, 0, 'Disk Usage']])
+
+    def test_get_summary_data(self):
+        with mock.patch('host_prof.host_disk_usage.model.host_disk_usage.HostDiskUsage.check_db', return_value=True), \
+             mock.patch('host_prof.host_disk_usage.model.host_disk_usage.HostDiskUsage.has_disk_usage_data',
+                        return_value=True), \
+             mock.patch('host_prof.host_disk_usage.model.host_disk_usage.HostDiskUsage.get_recommend_value',
+                        return_value=[10, 5]), \
+            mock.patch('host_prof.host_disk_usage.model.host_disk_usage.HostDiskUsage.get_recommend_value',
+                       return_value=[10, 5]):
+            check = HostDiskUsagePresenter(self.result_dir, self.file_name)
+            check.cur_model = HostDiskUsage('test')
+            result = check.get_summary_data()
+            self.assertEqual(result[0][0], 10)
+            self.assertEqual(result[0][1], 5)
+            self.assertEqual(result[0][2], 10)
+            self.assertEqual(result[0][3], 5)
 
 
 if __name__ == '__main__':

@@ -229,3 +229,20 @@ class Utils:
         :return:
         """
         return sample_config.get(StrConstant.AICORE_PROFILING_MODE)
+
+    @classmethod
+    def percentile(cls: any, data_list: list, percent: float, key=int) -> float:
+        """
+        Find the percentile of a list of values.
+        param data_list - is a list of values. Note data_list MUST BE already sorted ascending.
+        param percent - a float value from 0.0 to 1.0.
+        param key - optional key function to compute value from each element of N.
+
+        return - the percentile of the values
+        """
+        if not data_list:
+            return 0
+        if percent < 0 or percent > 1:
+            return 0
+        rank = (len(data_list) - 1) * percent
+        return data_list[key(rank)]

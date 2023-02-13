@@ -101,6 +101,21 @@ class HostCpuUsage(HostProfDataBase):
 
         return result
 
+    def get_num_of_used_cpus(self: any) -> list:
+        """
+        get occupied cpu numbers and used cpu numbers
+        """
+        cpu_used_sql = "SELECT cpu_no, MAX(usage) FROM {0} where cpu_no != 'Avg' group by cpu_no".format(
+            DBNameConstant.TABLE_HOST_CPU_USAGE)
+        cpu_used_data = DBManager.fetch_all_data(self.cur, cpu_used_sql)
+        num_of_occupied_cpus = len(cpu_used_data)
+        num_of_used_cpus = len([
+            cpu_no_data
+            for cpu_no_data in cpu_used_data
+            if cpu_no_data[1] > 0
+        ])
+        return [num_of_occupied_cpus, num_of_used_cpus]
+
     @abstractmethod
     def flush_data(self: any) -> any:
         """

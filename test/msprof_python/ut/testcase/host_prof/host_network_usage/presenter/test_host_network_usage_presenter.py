@@ -87,6 +87,39 @@ class TestHostNetworkUsage(unittest.TestCase):
         result = check.get_timeline_header()
         self.assertEqual(result, [['process_name', 1, 0, 'Network Usage']])
 
+    def test_compute_netcard1_speed(self):
+        netcard = [{'netCardName': 'enp2s0f0', 'speed': 1024}]
+        InfoConfReader()._info_json = {"netCardNums": 8, "netCard": netcard}
+        check = HostNetworkUsagePresenter(self.result_dir, self.file_name)
+        ret = check.compute_netcard_speed()
+        self.assertEqual(ret, 125000)
+
+    def test_compute_netcard2_speed(self):
+        netcard = [
+            {'netCardName': 'enp2s0f0', 'speed': 1024},
+            {'netCardName': 'enp2s0f1', 'speed': 100},
+            {'netCardName': 'enp2s0f1', 'speed': 10}
+        ]
+        InfoConfReader()._info_json = {"netCardNums": 8, "netCard": netcard}
+        check = HostNetworkUsagePresenter(self.result_dir, self.file_name)
+        ret = check.compute_netcard_speed()
+        self.assertEqual(ret, 1134 / 1024 * 125000)
+
+    def test_get_summary_data(self):
+        with mock.patch('host_prof.host_network_usage.model.host_network_usage.HostNetworkUsage.check_db',
+                        return_value=True), \
+             mock.patch('host_prof.host_network_usage.model.host_network_usage.HostNetworkUsage.has_network_usage_data',
+                        return_value=True), \
+             mock.patch('host_prof.host_network_usage.model.host_network_usage.HostNetworkUsage.get_recommend_value',
+                        return_value=[1233, 1444]), \
+             mock.patch(NAMESPACE + '.HostNetworkUsagePresenter.compute_netcard_speed',
+                        return_value=25000):
+            check = HostNetworkUsagePresenter(self.result_dir, self.file_name)
+            check.cur_model = HostNetworkUsage('test')
+            result = check.get_summary_data()
+            self.assertEqual(result[0][0], 25000)
+            self.assertEqual(result[0][1], 1233)
+            self.assertEqual(result[0][2], 1444)
 
 if __name__ == '__main__':
     unittest.main()

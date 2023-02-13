@@ -3,12 +3,14 @@
 # Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
 
 import logging
+import math
 from abc import abstractmethod
 
 from msconfig.config_manager import ConfigManager
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.path_manager import PathManager
+from common_func.utils import Utils
 
 
 class HostProfDataBase:
@@ -25,6 +27,27 @@ class HostProfDataBase:
         self.table_list = table_list
         self.db_name = db_name
         self.cache_data = []
+
+    def __enter__(self):
+        self.init()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.finalize()
+
+    @staticmethod
+    def recommend_value_for_data_list(data: list) -> float:
+        """
+        find 98th percent value for data list( >0)
+        :param data: a series data ordered asc
+        :return: recommend value
+        """
+        data = [
+            datum[0]
+            for datum in data
+            if datum[0] > 0
+        ]
+        return Utils.percentile(data, Constant.RECOMMEND_PERCENTILE, math.ceil) / Constant.RATIO_FOR_BEST_PERFORMANCE
 
     def init(self: any) -> bool:
         """
@@ -83,6 +106,20 @@ class HostProfDataBase:
                 logging.exception(error, exc_info=Constant.TRACE_BACK_SWITCH)
             finally:
                 self.cache_data.clear()
+
+    def get_recommend_value(self: any, value_name: str, table_name: str) -> list:
+        """
+        param: values's key, table name
+        get recommend value
+        :return: [peak value, recommend value]
+        """
+        value_info_sql = f"SELECT {value_name} from {table_name} order by {value_name} ASC"
+        value_list = DBManager.fetch_all_data(self.cur, value_info_sql)
+        if not value_list:
+            return [Constant.NA, Constant.NA]
+        peak_value = value_list[-1][0]
+        recommend_value = self.recommend_value_for_data_list(value_list)
+        return [peak_value, recommend_value]
 
     @abstractmethod
     def flush_data(self: any) -> any:

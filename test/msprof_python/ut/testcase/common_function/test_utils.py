@@ -26,3 +26,8 @@ class TestUtils(unittest.TestCase):
     def test_is_valid_num(self):
         res = Utils.is_valid_num(None)
         self.assertEqual(res, 0)
+
+    def test_percentile(self):
+        data = [1, 2, 3, 4, 5, 6, 7, 8]
+        ret = Utils.percentile(data, 0.33)
+        self.assertEqual(3, ret)

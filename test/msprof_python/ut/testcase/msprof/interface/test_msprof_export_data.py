@@ -9,6 +9,8 @@ from common_func.info_conf_reader import InfoConfReader
 from common_func.platform.chip_manager import ChipManager
 from msinterface.msprof_export_data import MsProfExportDataUtils
 from profiling_bean.prof_enum.chip_model import ChipModel
+from common_func.ms_constant.str_constant import StrConstant
+from common_func.msprof_common import MsProfCommonConstant
 from viewer.stars.stars_soc_view import StarsSocView
 
 NAMESPACE = 'msinterface.msprof_export_data'
@@ -605,7 +607,8 @@ class TestMsProfExportDataUtils(unittest.TestCase):
 
     def test_get_host_cpu_usage_data(self):
         configs = {"bd": 456}
-        params = {"project": "456"}
+        params = {"project": "456",
+                  StrConstant.PARAM_EXPORT_TYPE: MsProfCommonConstant.TIMELINE}
         with mock.patch(NAMESPACE + '.get_host_prof_timeline', return_value=111):
             InfoConfReader()._info_json = {"pid": 123}
             key = MsProfExportDataUtils()
@@ -614,7 +617,8 @@ class TestMsProfExportDataUtils(unittest.TestCase):
 
     def test_get_host_mem_usage_data(self):
         configs = {"rome": 456}
-        params = {"project": "654"}
+        params = {"project": "654",
+                  StrConstant.PARAM_EXPORT_TYPE: MsProfCommonConstant.TIMELINE}
         with mock.patch(NAMESPACE + '.get_host_prof_timeline', return_value=111):
             InfoConfReader()._info_json = {"pid": 123}
             key = MsProfExportDataUtils()
@@ -623,7 +627,8 @@ class TestMsProfExportDataUtils(unittest.TestCase):
 
     def test_get_host_network_usage_data(self):
         configs = {"eng": 456}
-        params = {"project": "789"}
+        params = {"project": "789",
+                  StrConstant.PARAM_EXPORT_TYPE: MsProfCommonConstant.TIMELINE}
         with mock.patch(NAMESPACE + '.get_host_prof_timeline', return_value=111):
             InfoConfReader()._info_json = {"pid": 123}
             key = MsProfExportDataUtils()
@@ -632,7 +637,8 @@ class TestMsProfExportDataUtils(unittest.TestCase):
 
     def test_get_host_disk_usage_data(self):
         configs = {"eng": 654}
-        params = {"project": "987"}
+        params = {"project": "987",
+                  StrConstant.PARAM_EXPORT_TYPE: MsProfCommonConstant.TIMELINE}
         with mock.patch(NAMESPACE + '.get_host_prof_timeline', return_value=111):
             InfoConfReader()._info_json = {"pid": 123}
             key = MsProfExportDataUtils()
