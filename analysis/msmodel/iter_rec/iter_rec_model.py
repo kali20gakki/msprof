@@ -102,7 +102,7 @@ class HwtsIterModel(ParserModel):
         get batch list from hwts batch table
         :return: batch list
         """
-        sql = "select batch_id from {0} where iter_id>=? and iter_id<=?".format(table_name)
+        sql = "select batch_id from {0} where iter_id>=? and iter_id<=? order by end_time".format(table_name)
         return DBManager.fetch_all_data(self.cur, sql, iter_range)
 
     def _get_task_num(self: any, iteration: IterationRange, sql: str) -> (int, int):
