@@ -29,7 +29,7 @@ class HostNetworkUsage(HostProfDataBase):
         :param network_usage_info: network usage info
         :return: None
         """
-        insert_sql = "INSERT INTO {} VALUES(?, ?, ?)".format(DBNameConstant.TABLE_HOST_NETWORK_USAGE)
+        insert_sql = "INSERT INTO {} VALUES(?, ?, ?, ?)".format(DBNameConstant.TABLE_HOST_NETWORK_USAGE)
         DBManager.executemany_sql(self.conn, insert_sql, network_usage_info)
 
     def has_network_usage_data(self: any) -> bool:

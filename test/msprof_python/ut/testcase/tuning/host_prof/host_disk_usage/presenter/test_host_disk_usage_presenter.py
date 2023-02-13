@@ -40,8 +40,8 @@ class TestHostDiskUsagePresenter(unittest.TestCase):
             check.cur_model = HostDiskUsage('test')
             check.cur_model.conn = res[0]
             check.parse_prof_data()
-        self.assertEqual(check.disk_usage_info, [[191425757976.595, 191425777976.595, '0.00B/s',
-                                                  '0.00B/s', '0.00', 0.0]])
+        self.assertEqual(check.disk_usage_info, [[191425757976.595, 191425777976.595, 0,
+                                                  0, '0.00', 0.0]])
         with mock.patch('builtins.open', mock.mock_open(read_data=data)), \
                 mock.patch(NAMESPACE + '.ConfigMgr.get_disk_freq', return_value=0), \
                 mock.patch(NAMESPACE + '.error'):

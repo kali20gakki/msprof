@@ -1,6 +1,7 @@
 import unittest
 from unittest import mock
 from host_prof.host_disk_usage.model.host_disk_usage import HostDiskUsage
+from common_func.constant import Constant
 
 NAMESPACE = 'host_prof.host_disk_usage.model.host_disk_usage'
 
