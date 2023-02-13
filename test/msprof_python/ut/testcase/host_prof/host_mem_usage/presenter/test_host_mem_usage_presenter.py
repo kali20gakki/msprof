@@ -92,6 +92,19 @@ class TestHostMemUsagePresenter(unittest.TestCase):
         result = check.get_timeline_header()
         self.assertEqual(result, [['process_name', 1, 0, 'Memory Usage']])
 
+    def test_get_summary_data(self):
+        with mock.patch('host_prof.host_mem_usage.model.host_mem_usage.HostMemUsage.check_db', return_value=True), \
+             mock.patch('host_prof.host_mem_usage.model.host_mem_usage.HostMemUsage.has_mem_usage_data',
+                        return_value=True), \
+             mock.patch('host_prof.host_mem_usage.model.host_mem_usage.HostMemUsage.get_recommend_value',
+                        return_value=[12, 15]):
+            check = HostMemUsagePresenter(self.result_dir, self.file_name)
+            check.cur_model = HostMemUsage('test')
+            InfoConfReader()._info_json = {"memoryTotal": 197510316}
+            result = check.get_summary_data()
+            self.assertEqual(result[0][0], 197510316)
+            self.assertEqual(result[0][1], 12 * 197510316 / 100)
+            self.assertEqual(result[0][2], 15 * 197510316 / 100)
 
 if __name__ == '__main__':
     unittest.main()

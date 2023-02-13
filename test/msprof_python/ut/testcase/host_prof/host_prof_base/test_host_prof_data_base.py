@@ -2,6 +2,7 @@ import unittest
 import numpy
 from unittest import mock
 from sqlite.db_manager import DBManager
+from common_func.constant import Constant
 from host_prof.host_prof_base.host_prof_data_base import HostProfDataBase
 
 NAMESPACE = 'host_prof.host_prof_base.host_prof_data_base'
@@ -54,6 +55,57 @@ class TsetHostProfDataBase(unittest.TestCase):
             check.insert_single_data(data)
         self.assertEqual(check.cache_data, [])
 
+    def test_recommend_value_for_data_list_normal1(self):
+        data = [(0,), (1,), (3,), (4,), (5,), (6,)]
+        check = HostProfDataBase(self.result_dir, 'host_cpu_usage.db', ['CpuInfo'])
+        ret = check.recommend_value_for_data_list(data)
+        self.assertEqual(ret, 6 / Constant.RATIO_FOR_BEST_PERFORMANCE)
+
+    def test_recommend_value_for_data_list_normal2(self):
+        data = [(0,), (1,), (2,), (2,), (2,), (2,)]
+        check = HostProfDataBase(self.result_dir, 'host_cpu_usage.db', ['CpuInfo'])
+        ret = check.recommend_value_for_data_list(data)
+        self.assertEqual(ret, 2 / Constant.RATIO_FOR_BEST_PERFORMANCE)
+
+    def test_recommend_value_for_data_list_big_data1(self):
+        data = [(i, ) for i in range(100)]
+        check = HostProfDataBase(self.result_dir, 'host_cpu_usage.db', ['CpuInfo'])
+        ret = check.recommend_value_for_data_list(data)
+        self.assertEqual(ret, 98 / Constant.RATIO_FOR_BEST_PERFORMANCE)
+
+    def test_recommend_value_for_data_list_big_data2(self):
+        data = [(i, ) for i in range(1000)]
+        check = HostProfDataBase(self.result_dir, 'host_cpu_usage.db', ['CpuInfo'])
+        ret = check.recommend_value_for_data_list(data)
+        self.assertEqual(ret, 980 / Constant.RATIO_FOR_BEST_PERFORMANCE)
+
+    def test_recommend_value_for_data_list_all_zero(self):
+        data = [(0, ) for i in range(100)]
+        check = HostProfDataBase(self.result_dir, 'host_cpu_usage.db', ['CpuInfo'])
+        ret = check.recommend_value_for_data_list(data)
+        self.assertEqual(ret, 0)
+
+    def test_recommend_value_for_data_list_no_data(self):
+        data = []
+        check = HostProfDataBase(self.result_dir, 'host_cpu_usage.db', ['CpuInfo'])
+        ret = check.recommend_value_for_data_list(data)
+        self.assertEqual(ret, 0)
+
+    def test_recommend_value_normal(self):
+        value_data = [(0,), (0.1,), (1,), (1000,)]
+        with mock.patch(NAMESPACE + '.DBManager.fetch_all_data', return_value=value_data), \
+             mock.patch(NAMESPACE + '.HostProfDataBase.recommend_value_for_data_list', return_value=0):
+            check = HostProfDataBase(self.result_dir, 'host_cpu_usage.db', ['CpuInfo'])
+            result_1 = check.get_recommend_value('value', 'table')
+        self.assertEqual(result_1[0], 1000)
+
+    def test_recommend_value_no_data(self):
+        value_data = []
+        with mock.patch(NAMESPACE + '.DBManager.fetch_all_data', return_value=value_data), \
+             mock.patch(NAMESPACE + '.HostProfDataBase.recommend_value_for_data_list', return_value=0):
+            check = HostProfDataBase(self.result_dir, 'host_cpu_usage.db', ['CpuInfo'])
+            result_1 = check.get_recommend_value('value', 'table')
+        self.assertEqual(result_1[0], Constant.NA)
 
 if __name__ == '__main__':
     unittest.main()

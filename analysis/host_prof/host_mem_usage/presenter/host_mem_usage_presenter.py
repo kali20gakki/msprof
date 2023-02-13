@@ -5,7 +5,7 @@
 import os
 import logging
 from decimal import Decimal
-
+from common_func.db_name_constant import DBNameConstant
 from common_func.constant import Constant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
@@ -57,16 +57,15 @@ class HostMemUsagePresenter(HostProfPresenterBase):
         """
         return mem usage data
         """
-        if not self.cur_model.check_db() or not self.cur_model.has_mem_usage_data():
-            self.cur_model.finalize()
-            return MsvpConstant.EMPTY_DICT
-        res = self.cur_model.get_mem_usage_data()
-        self.cur_model.finalize()
-        return res
+        with self.cur_model as model:
+            if model.has_mem_usage_data():
+                res = self.cur_model.get_mem_usage_data()
+                return res
+        return MsvpConstant.EMPTY_DICT
 
     def get_timeline_data(self: any) -> list:
         """
-        get timline data
+        get timeline data
         """
         mem_usage_data = self.get_mem_usage_data()
         result = []
@@ -81,6 +80,20 @@ class HostMemUsagePresenter(HostProfPresenterBase):
                 ]
                 result.append(temp_data)
         return result
+
+    def get_summary_data(self: any) -> tuple:
+        """
+        get summary data
+        """
+        with self.cur_model as model:
+            if model.has_mem_usage_data():
+                res = model.get_recommend_value('usage', DBNameConstant.TABLE_HOST_MEM_USAGE)
+                mem_total = InfoConfReader().get_mem_total()
+                if res and mem_total:
+                    res[0] = res[0] * mem_total / NumberConstant.PERCENTAGE
+                    res[1] = res[1] * mem_total / NumberConstant.PERCENTAGE
+                    return [tuple([mem_total, *res])]
+        return MsvpConstant.EMPTY_LIST
 
     def _parse_mem_data(self: any, file: any, mem_total: str) -> None:
         if not mem_total or not is_number(mem_total):

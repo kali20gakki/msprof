@@ -444,6 +444,10 @@ class Constant:
     ILLEGAL_RANK = 4294967295
     LINK_TYPE_LIST = [TYPE_SDMA, TYPE_RDMA]
 
+    # Host
+    RECOMMEND_PERCENTILE = 0.98
+    RATIO_FOR_BEST_PERFORMANCE = 0.8
+
     def get_constant_class_name(self: any) -> any:
         """
         get constant class name

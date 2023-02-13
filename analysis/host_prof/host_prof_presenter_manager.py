@@ -29,10 +29,7 @@ class HostExportType(Enum):
     HOST_RUNTIME_API = 5
 
 
-def get_host_prof_timeline(result_dir: str, export_type: any) -> str:
-    """
-    Return trace-viewer json format host prof data timeline
-    """
+def init_presenter(result_dir: str, export_type: int) -> any:
     host_presenter_dict = {
         HostExportType.CPU_USAGE: HostCpuUsagePresenter,
         HostExportType.MEM_USAGE: HostMemUsagePresenter,
@@ -42,6 +39,14 @@ def get_host_prof_timeline(result_dir: str, export_type: any) -> str:
     }
     presenter = host_presenter_dict.get(export_type)(result_dir)
     presenter.init()
+    return presenter
+
+
+def get_host_prof_timeline(result_dir: str, export_type: int) -> str:
+    """
+    Return trace-viewer json format host prof data timeline
+    """
+    presenter = init_presenter(result_dir, export_type)
     header = presenter.get_timeline_header()
     data_list = presenter.get_timeline_data()
     if not data_list:
@@ -51,6 +56,16 @@ def get_host_prof_timeline(result_dir: str, export_type: any) -> str:
     if export_type == HostExportType.HOST_RUNTIME_API:
         return get_time_data(data_list, header)
     return get_column_data(data_list, header)
+
+
+def get_host_prof_summary(result_dir: str, export_type: int, configs: dict) -> tuple:
+    """
+    Return csv format of host prof data (summary)
+    """
+    presenter = init_presenter(result_dir, export_type)
+    headers = configs.get('headers')
+    data = presenter.get_summary_data()
+    return headers, data, len(data)
 
 
 def get_time_data(data_list: list, header: list) -> str:

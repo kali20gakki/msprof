@@ -191,7 +191,15 @@ class ExportCommand:
             {'export_type': ExportDataType.OS_RUNTIME_STATISTIC,
              'handler': HostDataCheckManager.contain_runtime_api_data},
             {'export_type': ExportDataType.MSPROF_TX,
-             'handler': AiStackDataCheckManager.contain_msproftx_data}
+             'handler': AiStackDataCheckManager.contain_msproftx_data},
+            {'export_type': ExportDataType.HOST_CPU_USAGE,
+             'handler': HostDataCheckManager.contain_host_cpuusage_data},
+            {'export_type': ExportDataType.HOST_MEM_USAGE,
+             'handler': HostDataCheckManager.contain_host_mem_usage_data},
+            {'export_type': ExportDataType.HOST_NETWORK_USAGE,
+             'handler': HostDataCheckManager.contain_host_network_usage_data},
+            {'export_type': ExportDataType.HOST_DISK_USAGE,
+             'handler': HostDataCheckManager.contain_host_disk_usage_data}
         ]
     }
     MODEL_ID = "model_id"
