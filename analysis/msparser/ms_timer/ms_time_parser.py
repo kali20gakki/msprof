@@ -22,6 +22,7 @@ from common_func.utils import Utils
 from msmodel.ms_timer.ms_time_model import MsTimeModel
 from msparser.interface.iparser import IParser
 from common_func.info_conf_reader import InfoConfReader
+from profiling_bean.basic_info.host_start import TimerBean
 
 
 class MsTimeParser(IParser, MsMultiProcess):
@@ -47,14 +48,9 @@ class MsTimeParser(IParser, MsMultiProcess):
             return -1, -1
         if not config.has_section(f"Device{index}"):
             return -1, -1
-        times = config.items(f"Device{index}")
-        host_wall, host_mon = 0, 0
-        for clock in times:
-            if clock[0] == "clock_realtime":
-                host_wall = clock[1]
-            elif clock[0] == "clock_monotonic_raw":
-                host_mon = clock[1]
-        return host_wall, host_mon
+        times = dict(config.items(f"Device{index}"))
+        timer = TimerBean(times)
+        return str(timer.host_wall), str(timer.host_mon)
 
     @staticmethod
     def parse_dev_start(dev_: any) -> tuple:
@@ -152,12 +148,12 @@ class MsTimeParser(IParser, MsMultiProcess):
 
     def _pre_time_data(self, message: dict) -> list:
         message_list = Utils.generator_to_list([pb_time_mesg["device_id"],
-                                        pb_time_mesg["dev_mon"],
-                                        pb_time_mesg["dev_wall"],
-                                        pb_time_mesg["dev_cntvct"],
-                                        pb_time_mesg["host_mon"],
-                                        pb_time_mesg["host_wall"]]
-                                       for pb_time_mesg in message["data"])
+                                                pb_time_mesg["dev_mon"],
+                                                pb_time_mesg["dev_wall"],
+                                                pb_time_mesg["dev_cntvct"],
+                                                pb_time_mesg["host_mon"],
+                                                pb_time_mesg["host_wall"]]
+                                               for pb_time_mesg in message["data"])
         return message_list
 
     def __parse_time_data_helper(self: any, message: dict, index: int) -> None:
