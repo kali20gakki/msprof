@@ -397,7 +397,7 @@ int MsprofTxManager::ReportStampData(MsprofStampInstance *stamp) const
     uint32_t pos = 0;
 
     do {
-        uint32_t copyLen = (MAX_SPLIT_LENGTH < stamp->callStackLength) ? MAX_SPLIT_LENGTH : stamp->callStackLength;
+        uint32_t copyLen = (MAX_SPLIT_LENGTH < callStackLength) ? MAX_SPLIT_LENGTH : callStackLength;
         if (copyLen > 0) {
             auto err = strncpy_s(stamp->stampInfo.callStack, MAX_SPLIT_LENGTH + 1, stamp->callStack + pos, copyLen);
             if (err != EOK) {
