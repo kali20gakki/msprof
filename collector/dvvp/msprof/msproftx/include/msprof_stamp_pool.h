@@ -27,6 +27,7 @@ struct MsprofStampInstance {
     int id;
     struct MsprofStampInstance* next;
     struct MsprofStampInstance* prev;
+    char stampTagName[MSPROF_ENGINE_MAX_TAG_LEN + 1];
     char callStack[MAX_CALL_STACK_LENGTH + 1];
     uint32_t callStackLength;
 };

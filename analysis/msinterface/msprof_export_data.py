@@ -20,6 +20,7 @@ from common_func.platform.chip_manager import ChipManager
 from common_func.utils import Utils
 from host_prof.host_prof_presenter_manager import HostExportType
 from host_prof.host_prof_presenter_manager import get_host_prof_timeline
+from host_prof.host_prof_presenter_manager import get_host_prof_summary
 from host_prof.host_syscall.presenter.host_syscall_presenter import HostSyscallPresenter
 from msinterface.msprof_data_storage import MsprofDataStorage
 from msinterface.msprof_timeline import MsprofTimeline
@@ -483,23 +484,35 @@ class MsProfExportDataUtils:
 
     @staticmethod
     def _get_host_cpu_usage_data(configs: dict, params: dict) -> any:
-        _ = configs
-        return get_host_prof_timeline(params.get(StrConstant.PARAM_RESULT_DIR), HostExportType.CPU_USAGE)
+        result_dir = params.get(StrConstant.PARAM_RESULT_DIR)
+        if params.get(StrConstant.PARAM_EXPORT_TYPE) == MsProfCommonConstant.TIMELINE:
+            return get_host_prof_timeline(result_dir, HostExportType.CPU_USAGE)
+        else:
+            return get_host_prof_summary(result_dir, HostExportType.CPU_USAGE, configs)
 
     @staticmethod
     def _get_host_mem_usage_data(configs: dict, params: dict) -> any:
-        _ = configs
-        return get_host_prof_timeline(params.get(StrConstant.PARAM_RESULT_DIR), HostExportType.MEM_USAGE)
+        result_dir = params.get(StrConstant.PARAM_RESULT_DIR)
+        if params.get(StrConstant.PARAM_EXPORT_TYPE) == MsProfCommonConstant.TIMELINE:
+            return get_host_prof_timeline(result_dir, HostExportType.MEM_USAGE)
+        else:
+            return get_host_prof_summary(result_dir, HostExportType.MEM_USAGE, configs)
 
     @staticmethod
     def _get_host_network_usage_data(configs: dict, params: dict) -> any:
-        _ = configs
-        return get_host_prof_timeline(params.get(StrConstant.PARAM_RESULT_DIR), HostExportType.NETWORK_USAGE)
+        result_dir = params.get(StrConstant.PARAM_RESULT_DIR)
+        if params.get(StrConstant.PARAM_EXPORT_TYPE) == MsProfCommonConstant.TIMELINE:
+            return get_host_prof_timeline(result_dir, HostExportType.NETWORK_USAGE)
+        else:
+            return get_host_prof_summary(result_dir, HostExportType.NETWORK_USAGE, configs)
 
     @staticmethod
     def _get_host_disk_usage_data(configs: dict, params: dict) -> any:
-        _ = configs
-        return get_host_prof_timeline(params.get(StrConstant.PARAM_RESULT_DIR), HostExportType.DISK_USAGE)
+        result_dir = params.get(StrConstant.PARAM_RESULT_DIR)
+        if params.get(StrConstant.PARAM_EXPORT_TYPE) == MsProfCommonConstant.TIMELINE:
+            return get_host_prof_timeline(result_dir, HostExportType.DISK_USAGE)
+        else:
+            return get_host_prof_summary(result_dir, HostExportType.DISK_USAGE, configs)
 
     @staticmethod
     def _get_host_runtime_api(configs: dict, params: dict) -> any:

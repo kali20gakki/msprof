@@ -56,7 +56,7 @@ using namespace Collector::Dvvp::Plugin;
 using namespace Collector::Dvvp::Mmpa;
 using namespace Collector::Dvvp::Mmpa;
 
-const int RECEIVE_CHUNK_SIZE = 320; // chunk size:320
+const int RECEIVE_CHUNK_SIZE = 1024; // chunk size:1024
 
 class MSPROF_ACL_CORE_UTEST: public testing::Test {
 protected:
@@ -518,6 +518,7 @@ TEST_F(MSPROF_ACL_CORE_UTEST, prof_acl_api_helper) {
     aclprofDestroyStepInfo(nullptr);
     EXPECT_EQ(nullptr, aclprofCreateStamp());
     aclprofDestroyStamp(nullptr);
+    EXPECT_EQ(ACL_ERROR_FEATURE_UNSUPPORTED, aclprofSetStampTagName(nullptr, nullptr, 0));
     EXPECT_EQ(ACL_ERROR_FEATURE_UNSUPPORTED, aclprofSetCategoryName(0, nullptr));
     EXPECT_EQ(ACL_ERROR_FEATURE_UNSUPPORTED, aclprofSetStampCategory(nullptr, 0));
     EXPECT_EQ(ACL_ERROR_FEATURE_UNSUPPORTED, aclprofSetStampPayload(nullptr, 0, nullptr));
@@ -1891,6 +1892,16 @@ TEST_F(MSPROF_API_MSPROFTX_UTEST, aclprofCreateStamp)
     void * ret = nullptr;
     ret = aclprofCreateStamp();
     EXPECT_EQ((void *)nullptr, ret);
+}
+
+TEST_F(MSPROF_API_MSPROFTX_UTEST, aclprofSetStampTagName)
+{
+    GlobalMockObject::verify();
+    MOCKER_CPP(&Msprof::MsprofTx::MsprofTxManager::SetStampTagName)
+        .stubs()
+        .will(returnValue(ACL_SUCCESS));
+    aclError ret = aclprofSetStampTagName(nullptr, nullptr, 0);
+    EXPECT_EQ(ACL_SUCCESS, ret);
 }
 
 TEST_F(MSPROF_API_MSPROFTX_UTEST, aclprofDestroyStamp) {

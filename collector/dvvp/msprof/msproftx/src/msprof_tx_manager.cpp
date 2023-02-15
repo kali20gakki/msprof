@@ -113,6 +113,7 @@ void MsprofTxManager::DestroyStamp(ACL_PROF_STAMP_PTR stamp) const
         MSPROF_LOGE("[DestroyStamp]MsprofTxManager is not inited yet");
         return;
     }
+    (void)memset_s(stamp->stampTagName, MSPROF_ENGINE_MAX_TAG_LEN + 1, 0, MSPROF_ENGINE_MAX_TAG_LEN + 1);
     stampPool_->DestroyStamp(stamp);
 }
 
@@ -128,7 +129,7 @@ int MsprofTxManager::SetStampTagName(ACL_PROF_STAMP_PTR stamp, const char *tagNa
             std::vector<std::string>({"nullptr", "stamp", "stamp and tagName can not be nullptr when set TagName"}));
         return PROFILING_FAILED;
     }
-    int ret = strncpy_s(stamp->report.tag, MSPROF_ENGINE_MAX_TAG_LEN, tagName, len);
+    auto ret = memcpy_s(stamp->report.tag, MSPROF_ENGINE_MAX_TAG_LEN - 1, tagName, len);
     if (ret != EOK) {
         MSPROF_LOGE("[SetStampName]strcpy_s message failed, ret=%u len=%u tagName=%s", ret, len, tagName);
         return PROFILING_FAILED;
@@ -151,16 +152,16 @@ int MsprofTxManager::SetCategoryName(uint32_t category, std::string categoryName
 
     ReporterData reporterData;
     reporterData.deviceId = DEFAULT_HOST_ID;
-    auto err = memcpy_sp(reporterData.tag, MSPROF_ENGINE_MAX_TAG_LEN, MSPROF_TX_CATEGORY_DICT.c_str(), tagLen);
-    if (err != EOK) {
-        MSPROF_LOGE("[SetCategoryName] memcpy tag failed. ret=%u len=%u", err, tagLen);
+    auto ret = memcpy_s(reporterData.tag, MSPROF_ENGINE_MAX_TAG_LEN - 1, MSPROF_TX_CATEGORY_DICT.c_str(), tagLen);
+    if (ret != EOK) {
+        MSPROF_LOGE("[SetCategoryName] memcpy tag failed. ret=%u len=%u", ret, tagLen);
         return PROFILING_FAILED;
     }
     reporterData.tag[tagLen] = '\0';
     reporterData.dataLen = hashData.size();
     reporterData.data = (unsigned char *)hashData.c_str();
 
-    auto ret = reporter_->Report(reporterData);
+    ret = reporter_->Report(reporterData);
     if (ret != PROFILING_SUCCESS) {
         MSPROF_LOGE("[ReportStampData] report profiling data failed.");
         return PROFILING_FAILED;
@@ -221,13 +222,12 @@ int MsprofTxManager::SetStampTraceMessage(ACL_PROF_STAMP_PTR stamp, CONST_CHAR_P
             std::vector<std::string>({"nullptr", "stamp", "stamp and msg can not be nullptr when set traceMessage"}));
         return PROFILING_FAILED;
     }
-    auto ret = strncpy_sp(stamp->stampInfo.message, sizeof(stamp->stampInfo.message) - 1, msg, msgLen);
+    auto ret = memcpy_s(stamp->stampInfo.message, sizeof(stamp->stampInfo.message) - 1, msg, msgLen);
     if (ret != EOK) {
         MSPROF_LOGE("[SetStampTraceMessage]strcpy_s message failed, ret=%u msgLen=%u", ret, msgLen);
         return PROFILING_FAILED;
     }
     stamp->stampInfo.message[msgLen] = 0;
-    MSPROF_LOGD("[SetStampTraceMessage]stamp set trace message:%s success.", stamp->stampInfo.message);
     return PROFILING_SUCCESS;
 }
 
@@ -244,19 +244,13 @@ int MsprofTxManager::SetStampCallStack(ACL_PROF_STAMP_PTR stamp, const char *cal
         return PROFILING_FAILED;
     }
  
-    if (len >= MAX_CALL_STACK_LENGTH) {
-        MSPROF_LOGE("[SetStampCallStack]msg len(%u) is invalid, must less then %d", len, MAX_CALL_STACK_LENGTH);
-        return PROFILING_FAILED;
-    }
- 
-    auto ret = strncpy_s(stamp->callStack, MAX_CALL_STACK_LENGTH, callStack, len);
+    auto ret = memcpy_s(stamp->callStack, MAX_CALL_STACK_LENGTH - 1, callStack, len);
     if (ret != EOK) {
         MSPROF_LOGE("[SetStampCallStack]strcpy_s callStack failed, ret is %u", ret);
         return PROFILING_FAILED;
     }
     stamp->callStack[len] = '\0';
     stamp->callStackLength = len;
-    MSPROF_LOGD("[SetStampCallStack]stamp set callStack:%s success.", stamp->callStack);
     return PROFILING_SUCCESS;
 }
 
@@ -357,7 +351,7 @@ int MsprofTxManager::ReportStampData(MsprofStampInstance *stamp) const
 {
     static thread_local uint32_t tid = static_cast<uint32_t>(MmGetTid());
     stamp->stampInfo.threadId = tid;
-    if (stamp->callStackLength == 0) {
+    if (stamp->stampTagName[0] == '\0' && stamp->callStackLength == 0) {
         auto ret = reporter_->Report(stamp->report);
         if (ret != PROFILING_SUCCESS) {
             MSPROF_LOGE("[ReportStampData] report profiling data failed.");
@@ -365,12 +359,20 @@ int MsprofTxManager::ReportStampData(MsprofStampInstance *stamp) const
         }
         return PROFILING_SUCCESS;
     }
-
-    int32_t callStackLength = stamp->callStackLength;
+    uint32_t tagNameLen = strnlen(stamp->stampTagName, MSPROF_ENGINE_MAX_TAG_LEN);
+    if (tagNameLen > 0) {
+        auto ret = strncpy_s(stamp->report.tag, MSPROF_ENGINE_MAX_TAG_LEN, stamp->stampTagName, tagNameLen);
+        if (ret != EOK) {
+            MSPROF_LOGE("[ReportStampData]strncpy_s tag name failed, ret is %u", ret);
+            return PROFILING_FAILED;
+        }
+        stamp->report.tag[tagNameLen] = '\0';
+    }
+    uint32_t callStackLength = stamp->callStackLength;
     constexpr int MAX_SPLIT_LENGTH = 75;
     uint32_t pos = 0;
     do {
-        int copyLen = (MAX_SPLIT_LENGTH < stamp->callStackLength) ? MAX_SPLIT_LENGTH : stamp->callStackLength;
+        uint32_t copyLen = (MAX_SPLIT_LENGTH < callStackLength) ? MAX_SPLIT_LENGTH : callStackLength;
         if (copyLen > 0) {
             auto err = strncpy_s(stamp->stampInfo.callStack, MAX_SPLIT_LENGTH + 1, stamp->callStack + pos, copyLen);
             if (err != EOK) {
@@ -390,19 +392,20 @@ int MsprofTxManager::ReportStampData(MsprofStampInstance *stamp) const
     return PROFILING_SUCCESS;
 }
 
-int MsprofTxManager::ReportStampDataV2(const char *tag, uint32_t tagLen, unsigned char *data, uint32_t dataLen) const
+int MsprofTxManager::ReportStampDataV2(CONST_CHAR_PTR tag, uint32_t tagLen,
+    UNSIGNED_CHAR_PTR data, uint32_t dataLen) const
 {
     struct ReporterData rptData;
 
     rptData.deviceId = DEFAULT_HOST_ID;
     rptData.data = data;
     rptData.dataLen = dataLen;
-    int ret = strncpy_s(rptData.tag, MSPROF_ENGINE_MAX_TAG_LEN, tag, tagLen);
+    int ret = memcpy_s(rptData.tag, MSPROF_ENGINE_MAX_TAG_LEN - 1, tag, tagLen);
     if (ret != EOK) {
-        MSPROF_LOGE("[ReportStampDataV2] strncpy_s failed, ret=%d tagLen=%u.", ret, tagLen);
+        MSPROF_LOGE("[ReportStampDataV2] memcpy_s failed, ret=%d tagLen=%u.", ret, tagLen);
         return PROFILING_FAILED;
     }
-
+    rptData.tag[tagLen] = '\0';
     ret = reporter_->Report(rptData);
     if (ret != PROFILING_SUCCESS) {
         MSPROF_LOGE("[ReportStampDataV2] report data failed, ret=%d.", ret);

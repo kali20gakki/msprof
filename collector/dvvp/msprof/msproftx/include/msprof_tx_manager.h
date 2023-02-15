@@ -18,6 +18,7 @@
 
 namespace Msprof {
 namespace MsprofTx {
+using namespace analysis::dvvp::common::utils;
 using ACL_PROF_STAMP_PTR = MsprofStampInstance *;
 using CONST_CHAR_PTR = const char *;
 
@@ -67,7 +68,7 @@ public:
 
     void SetReporterCallback(const MsprofReporterCallback func);
 
-    int ReportStampDataV2(const char *tag, uint32_t tagLen, unsigned char *data, uint32_t dataLen) const;
+    int ReportStampDataV2(CONST_CHAR_PTR tag, uint32_t tagLen, UNSIGNED_CHAR_PTR data, uint32_t dataLen) const;
 
 private:
     int ReportStampData(MsprofStampInstance *stamp) const;

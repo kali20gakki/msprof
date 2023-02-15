@@ -136,6 +136,19 @@ class TestHostCpuUsagePresenter(unittest.TestCase):
             result = check.get_timeline_data()
             self.assertEqual(result, (['CPU Avg', 191442613124.606, {'Usage(%)': 0.0}, 1],))
 
+    def test_get_summary_data(self):
+        with mock.patch('host_prof.host_cpu_usage.model.host_cpu_usage.HostCpuUsage.check_db', return_value=True), \
+             mock.patch('host_prof.host_cpu_usage.model.host_cpu_usage.HostCpuUsage.has_cpu_usage_data',
+                        return_value=True), \
+             mock.patch('host_prof.host_cpu_usage.model.host_cpu_usage.HostCpuUsage.get_num_of_used_cpus',
+                        return_value=[10, 5]):
+            check = HostCpuUsagePresenter(self.result_dir, self.file_name)
+            check.cur_model = HostCpuUsage('test')
+            InfoConfReader()._info_json = {"cpuNums": 28, "sysClockFreq": 100}
+            result = check.get_summary_data()
+            self.assertEqual(result[0][0], 28)
+            self.assertEqual(result[0][1], 10)
+            self.assertEqual(result[0][2], 5)
 
 if __name__ == '__main__':
     unittest.main()

@@ -479,6 +479,7 @@ public:
     static unsigned long long GetClockRealtime();
     static unsigned long long GetClockMonotonicRaw();
     static unsigned long long GetCPUCycleCounter();
+    static double StatCpuRealFreq();
     static void GetTime(unsigned long long &startRealtime, unsigned long long &startMono, unsigned long long &cntvct);
     static std::string GenerateStartTime(const unsigned long long startRealtime, const unsigned long long startMono,
         const unsigned long long cntvct);

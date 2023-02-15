@@ -38,7 +38,7 @@ public:
     template<typename... T>
     void MsprofDlogInnerForC(int moduleId, int level, const char *fmt, T... args)
     {
-        if (dlogInnerForC_ != nullptr) {
+        if (dlogInnerForC_ == nullptr) {
             return;
         }
         using DlogInnerForCFunc = std::function<void(int, int, const char *, T...)>;

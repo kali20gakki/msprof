@@ -425,6 +425,7 @@ void PlatformAdapterInterface::SetParamsForDeviceBIU(int biuFreq)
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_SYS_DEVICE_BIU) != supportSwitch_.end()) {
         params_->biu = MSPROF_SWITCH_ON;
         params_->biu_freq = biuFreq;
+        params_->dataTypeConfig |= PROF_BIU;
         ret = true;
     }
     if (!ret) {
