@@ -583,6 +583,10 @@ class MsProfExportDataUtils:
         return MsprofTxViewer(configs, params).get_timeline_data()
 
     @staticmethod
+    def _get_pytorch_operator_data(configs: dict, params: dict) -> any:
+        return MsprofTxViewer(configs, params).get_pytorch_operator_data()
+
+    @staticmethod
     def _get_stars_soc_data(configs: dict, params: dict) -> any:
         return StarsSocView(configs, params).get_timeline_data()
 

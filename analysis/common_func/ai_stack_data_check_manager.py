@@ -351,3 +351,14 @@ class AiStackDataCheckManager(DataCheckManager):
         """
         return cls.check_data_exist(result_dir, file_name_manager.get_ts_track_compiles(),
                                     device_id=device_id)
+
+    @classmethod
+    def contain_pytorch_operator_profiler_data(cls: any, result_dir: str, device_id: int = None) -> bool:
+        """
+        The data path contain stars msproftx torch data
+        :param result_dir: data dir path
+        :param device_id: device id
+        :return: if contained msproftx torch data, true or false
+        """
+        return cls.check_data_exist(result_dir, file_name_manager.get_msproftx_torch_compiles(),
+                                    device_id=device_id)

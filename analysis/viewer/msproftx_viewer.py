@@ -65,7 +65,7 @@ class MsprofTxViewer:
                 ("Payload_value", top_down_data.payload_value),
                 ("Message_type", top_down_data.message_type),
                 ("event_type", top_down_data.event_type),
-                ("call_trace", top_down_data.call_trace)
+                ("call_stack", top_down_data.call_stack)
             ])
             trace_data_msproftx = [
                 top_down_data.message, top_down_data.pid, top_down_data.tid,
@@ -85,6 +85,21 @@ class MsprofTxViewer:
         try:
             msproftx_data = self.model.get_summary_data()
             return self.configs.get('headers'), msproftx_data, len(msproftx_data)
+        except (ValueError, IOError, TypeError) as error:
+            logging.error(error, exc_info=Constant.TRACE_BACK_SWITCH)
+            return MsvpConstant.MSVP_EMPTY_DATA
+        finally:
+            self.model.finalize()
+
+    def get_pytorch_operator_data(self: any) -> tuple:
+        """
+        to get pytorch operator data
+        :return:pytorch operator data
+        """
+        self.init_model()
+        try:
+            data = self.model.get_pytorch_operator_data()
+            return self.configs.get('headers'), data, len(data)
         except (ValueError, IOError, TypeError) as error:
             logging.error(error, exc_info=Constant.TRACE_BACK_SWITCH)
             return MsvpConstant.MSVP_EMPTY_DATA

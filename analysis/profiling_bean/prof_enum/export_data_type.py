@@ -65,4 +65,5 @@ class ExportDataType(Enum):
     LOW_POWER = 51
     BIU_PERF = 52
     ACC_PMU = 53
+    PYTORCH_OPERATOR_VIEW = 54
     MSPROF = 100
