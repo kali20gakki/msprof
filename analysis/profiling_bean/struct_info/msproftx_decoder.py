@@ -26,9 +26,9 @@ class MsprofTxDecoder(StructDecoder):
         self._end_time = filed[9]
         self._message_type = filed[10]
         self._message = self.decode_byte(filed[11])
-        self._call_trace = self.decode_byte(filed[12])
-        if not self._call_trace:
-            self._call_trace = Constant.NA
+        self._call_stack = self.decode_byte(filed[12])
+        if not self._call_stack:
+            self._call_stack = Constant.NA
 
     @property
     def magic(self: any) -> int:
@@ -79,12 +79,12 @@ class MsprofTxDecoder(StructDecoder):
         return self._message
 
     @property
-    def call_trace(self: any) -> str:
-        return self._call_trace
+    def call_stack(self: any) -> str:
+        return self._call_stack
 
-    @call_trace.setter
-    def call_trace(self: any , value: str) -> None:
-        self._call_trace = value
+    @call_stack.setter
+    def call_stack(self: any , value: str) -> None:
+        self._call_stack = value
 
     def decode_byte(self: any , value: str) -> str:
         zero_ind = value.find(b'\x00')

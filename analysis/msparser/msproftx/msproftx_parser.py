@@ -74,7 +74,7 @@ class MsprofTxParser(IParser, MsMultiProcess):
             self._msproftx_data_group_by_endtime.setdefault(data_object.end_time, data_object)
         else:
             data_object_group_by_endtime = self._msproftx_data_group_by_endtime.get(data_object.end_time)
-            data_object_group_by_endtime.call_trace += data_object.call_trace
+            data_object_group_by_endtime.call_stack += data_object.call_stack
 
     def reshape_data(self: any) -> None:
         """
@@ -88,7 +88,7 @@ class MsprofTxParser(IParser, MsMultiProcess):
                                         data_object.start_time, data_object.end_time,
                                         data_object.message_type,
                                         data_object.message,
-                                        data_object.call_trace.replace(";", "\n"),
+                                        data_object.call_stack.replace(";", "\n"),
                                         self._file_tag))
 
     def parse(self: any) -> None:

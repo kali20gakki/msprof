@@ -32,7 +32,7 @@ class TestMsprofTxViewer(unittest.TestCase):
         top_down_data.payload_value = 3
         top_down_data.message_type = 4
         top_down_data.event_type = 5
-        top_down_data.call_trace = 6
+        top_down_data.call_stack = 6
         top_down_data.message = 7
         top_down_data.pid = 8
         top_down_data.tid = 9
@@ -47,7 +47,7 @@ class TestMsprofTxViewer(unittest.TestCase):
             ("Payload_value", 3),
             ("Message_type", 4),
             ("event_type", 5),
-            ("call_trace", 6)
+            ("call_stack", 6)
         ])
 
         trace_data_msproftx = [[7, 8, 9, 0, 0, expect_res_dict]]

@@ -252,7 +252,13 @@ class MsProfExportDataConfig(MetaConfig):
             ('table', 'MsprofTx'),
             ('headers',
              'pid, tid, category, event_type, payload_type, payload_value, Start_time(ns), '
-             'End_time(ns), message_type, message, call_trace')
+             'End_time(ns), message_type, message')
+        ]
+        , 'pytorch_operator_view': [
+            ('handler', '_get_pytorch_operator_data'),
+            ('db', 'msproftx.db'),
+            ('table', 'MsprofTx'),
+            ('headers', 'pid,tid,operator_name,call_stack')
         ]
         , 'inter_soc_transmission': [
             ('handler', '_get_inter_soc_summary'),
