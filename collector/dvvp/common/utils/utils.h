@@ -480,8 +480,6 @@ public:
     static unsigned long long GetClockMonotonicRaw();
     static unsigned long long GetCPUCycleCounter();
     static void GetTime(unsigned long long &startRealtime, unsigned long long &startMono, unsigned long long &cntvct);
-    static std::string GenerateStartTime(const unsigned long long startRealtime, const unsigned long long startMono,
-        const unsigned long long cntvct);
     static void GetChildDirs(const std::string &dir, bool isRecur, std::vector<std::string> &childDirs);
     static std::vector<int> GetChildPid(int pid);
     static std::vector<int> GetChildPidRecursive(int pid, unsigned int recursiveLevel);

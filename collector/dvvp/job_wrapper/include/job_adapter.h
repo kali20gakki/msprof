@@ -11,7 +11,9 @@
 #define ANALYSIS_DVVP_JOB_ADAPTER_H
 
 #include <vector>
+#include <map>
 #include "message/prof_params.h"
+#include "config/config.h"
 #include "utils/utils.h"
 #include "errno/error_code.h"
 #include "ai_drv_dev_api.h"
@@ -22,6 +24,22 @@ namespace JobWrapper {
 using namespace analysis::dvvp::common::utils;
 using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::driver;
+using namespace analysis::dvvp::common::config;
+
+enum class HostTimeType {
+    START_REALTIME_BEGIN = 0,
+    START_REALTIME_END,
+    START_MONO_BEGIN,
+    START_MONO_END,
+    CNTVCT_BEGIN,
+    CNTVCT_END
+};
+
+enum class DevTimeType {
+    DEVICE_START_MONO = 0,
+    DEVICE_CNTVCT
+};
+
 struct PMUEventsConfig {
     std::vector<std::string> ctrlCPUEvents;
     std::vector<std::string> tsCPUEvents;
@@ -36,13 +54,12 @@ struct PMUEventsConfig {
 
 class JobAdapter {
 public:
-    JobAdapter()
-        : startMono_(0),
-          startRealtime_(0),
-          cntvct_(0),
-          deviceStartMono_(0),
-          deviceCntvct_(0) {}
-    virtual ~JobAdapter() {}
+    JobAdapter() {}
+    virtual ~JobAdapter()
+    {
+        hostTimeList_.clear();
+        devTimeList_.clear();
+    }
 
 public:
     virtual int StartProf(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params) = 0;
@@ -80,12 +97,73 @@ public:
         MSPROF_LOGI("CreatePmuEventConfig, aiCoreEventSize:%d, devId:%d", pmuEventsConfig->aiCoreEvents.size(), devId);
         return pmuEventsConfig;
     }
+
+    void GetHostAndDeviceTime(int devIndexId)
+    {
+        std::map<unsigned long long,
+                 std::pair<std::map<HostTimeType, unsigned long long>,
+                           std::map<DevTimeType, unsigned long long>>> timeMap;
+        const int getTimeCount = 3;
+        for (int i = 0; i < getTimeCount; i++) {
+            unsigned long long startMonoBegin;
+            unsigned long long startRealtimebegin;
+            unsigned long long cntvctbegin;
+            unsigned long long startMonoEnd;
+            unsigned long long startRealtimeEnd;
+            unsigned long long cntvctEnd;
+            unsigned long long deviceStartMono;
+            unsigned long long deviceCntvct;
+            Utils::GetTime(startRealtimebegin, startMonoBegin, cntvctbegin);
+            analysis::dvvp::driver::DrvGetDeviceTime(devIndexId, deviceStartMono, deviceCntvct);
+            Utils::GetTime(startRealtimeEnd, startMonoEnd, cntvctEnd);
+
+            std::map<HostTimeType, unsigned long long> hostTimeList = {
+                {HostTimeType::START_REALTIME_BEGIN, startRealtimebegin},
+                {HostTimeType::START_REALTIME_END, startRealtimeEnd},
+                {HostTimeType::START_MONO_BEGIN, startMonoBegin},
+                {HostTimeType::START_MONO_END, startMonoEnd},
+                {HostTimeType::CNTVCT_BEGIN, cntvctbegin},
+                {HostTimeType::CNTVCT_END, cntvctEnd}
+            };
+            std::map<DevTimeType, unsigned long long> deviceTimeList = {
+                {DevTimeType::DEVICE_START_MONO, deviceStartMono},
+                {DevTimeType::DEVICE_CNTVCT, deviceCntvct}
+            };
+            timeMap.insert(std::make_pair(startRealtimeEnd - startRealtimebegin,
+                std::make_pair(hostTimeList, deviceTimeList)));
+        }
+        hostTimeList_ = timeMap.begin()->second.first;
+        devTimeList_ = timeMap.begin()->second.second;
+    }
+
+    std::string GenerateDevStartTime()
+    {
+        std::stringstream devStartData;
+        devStartData << CLOCK_REALTIME_KEY << ": " << hostTimeList_.at(HostTimeType::START_REALTIME_BEGIN) << std::endl;
+        devStartData << CLOCK_MONOTONIC_RAW_KEY << ": " << devTimeList_.at(DevTimeType::DEVICE_START_MONO) << std::endl;
+        devStartData << CLOCK_CNTVCT_KEY << ": " << devTimeList_.at(DevTimeType::DEVICE_CNTVCT) << std::endl;
+        return devStartData.str();
+    }
+    
+    std::string GenerateHostStartTime()
+    {
+        std::stringstream devStartData;
+        devStartData << CLOCK_REALTIME_KEY_START << ": " << hostTimeList_.at(HostTimeType::START_REALTIME_BEGIN) <<
+                        std::endl;
+        devStartData << CLOCK_MONOTONIC_RAW_KEY_START << ": " << hostTimeList_.at(HostTimeType::START_MONO_BEGIN) <<
+                        std::endl;
+        devStartData << CLOCK_CNTVCT_KEY_START << ": " << hostTimeList_.at(HostTimeType::CNTVCT_BEGIN) << std::endl;
+        devStartData << CLOCK_REALTIME_KEY_END << ": " << hostTimeList_.at(HostTimeType::START_REALTIME_END) <<
+                        std::endl;
+        devStartData << CLOCK_MONOTONIC_RAW_KEY_END << ": " << hostTimeList_.at(HostTimeType::START_MONO_END) <<
+                        std::endl;
+        devStartData << CLOCK_CNTVCT_KEY_END << ": " << hostTimeList_.at(HostTimeType::CNTVCT_END) << std::endl;
+        return devStartData.str();
+    }
+
 protected:
-    unsigned long long startMono_;
-    unsigned long long startRealtime_;
-    unsigned long long cntvct_;
-    unsigned long long deviceStartMono_;
-    unsigned long long deviceCntvct_;
+    std::map<HostTimeType, unsigned long long> hostTimeList_;
+    std::map<DevTimeType, unsigned long long> devTimeList_;
     analysis::dvvp::message::StatusInfo status_;
 
 private:
