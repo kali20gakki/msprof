@@ -61,12 +61,11 @@ class HostCpuUsagePresenter(HostProfPresenterBase):
         """
         return cpu usage data
         """
-        if not self.cur_model.check_db() or not self.cur_model.has_cpu_usage_data():
-            self.cur_model.finalize()
-            return MsvpConstant.EMPTY_DICT
-        res = self.cur_model.get_cpu_usage_data()
-        self.cur_model.finalize()
-        return res
+        with self.cur_model as model:
+            if model.has_cpu_usage_data():
+                res = model.get_cpu_usage_data()
+                return res
+        return MsvpConstant.EMPTY_DICT
 
     def get_timeline_header(self: any) -> list:
         """
@@ -90,6 +89,18 @@ class HostCpuUsagePresenter(HostProfPresenterBase):
         for data in result:
             data.append(self.sort_map.get(data[0]))
         return result
+
+    def get_summary_data(self: any) -> tuple:
+        """
+        get summary data
+        """
+        with self.cur_model as model:
+            if model.has_cpu_usage_data():
+                res = model.get_num_of_used_cpus()
+                if res:
+                    total_cpu_nums = InfoConfReader().get_cpu_info()[0]
+                    return [tuple([total_cpu_nums, *res])]
+        return MsvpConstant.EMPTY_LIST
 
     def _parse_cpu_info(self: any) -> None:
         """
@@ -208,9 +219,8 @@ class HostCpuUsagePresenter(HostProfPresenterBase):
         """
         get cpu list from db
         """
-        if not self.cur_model.check_db() or not self.cur_model.has_cpu_usage_data():
-            self.cur_model.finalize()
-            return MsvpConstant.EMPTY_DICT
-        res = self.cur_model.get_cpu_list()
-        self.cur_model.finalize()
-        return res
+        with self.cur_model as model:
+            if model.has_cpu_usage_data():
+                res = model.get_cpu_list()
+                return res
+        return MsvpConstant.EMPTY_DICT

@@ -31,7 +31,7 @@ enum MsprofDataTag {
     MSPROF_AICPU_MODEL_TAG = 61,
     MSPROF_HCCL_DATA_TAG = 80,          // hccl data tag, range: 80~99
     MSPROF_DP_DATA_TAG = 100,           // dp data tag, range: 100~119
-    MSPROF_MSPROFTX_DATA_TAG = 120,     // hccl data tag, range: 120~139
+    MSPROF_MSPROFTX_DATA_TAG = 120,     // msproftx data tag, range: 120~139
     MSPROF_DATA_TAG_MAX = 65536,        // data tag value type is uint16_t
 };
 

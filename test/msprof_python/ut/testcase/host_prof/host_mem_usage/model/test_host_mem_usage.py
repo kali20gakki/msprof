@@ -1,7 +1,7 @@
 import unittest
 from unittest import mock
 from host_prof.host_mem_usage.model.host_mem_usage import HostMemUsage
-
+from common_func.constant import Constant
 NAMESPACE = 'host_prof.host_mem_usage.model.host_mem_usage'
 
 

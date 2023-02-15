@@ -52,3 +52,4 @@ class HostMemUsage(HostProfDataBase):
             result.append(time_mem)
 
         return {"data": result}
+

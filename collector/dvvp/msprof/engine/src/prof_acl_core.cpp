@@ -680,6 +680,18 @@ aclError aclprofSetStampPayload(VOID_PTR stamp, const int32_t type, VOID_PTR val
     return MsprofTxManager::instance()->SetStampPayload(stampInstancePtr, type, value);
 }
 
+aclError aclprofSetStampTagName(VOID_PTR stamp, const char *tagName, uint16_t len)
+{
+    if (Platform::instance()->PlatformIsHelperHostSide()) {
+        MSPROF_LOGE("acl api not support in helper");
+        MSPROF_ENV_ERROR("EK0004", std::vector<std::string>({"intf", "platform"}),
+            std::vector<std::string>({"aclprofSetStampTagName", "SocCloud"}));
+        return ACL_ERROR_FEATURE_UNSUPPORTED;
+    }
+    auto stampInstancePtr = static_cast<ACL_PROF_STAMP_PTR>(stamp);
+    return MsprofTxManager::instance()->SetStampTagName(stampInstancePtr, tagName, len);
+}
+
 aclError aclprofSetStampCallStack(VOID_PTR stamp, const char *callStack, uint32_t len)
 {
     if (Platform::instance()->PlatformIsHelperHostSide()) {
@@ -762,7 +774,7 @@ aclError aclprofRangeStop(uint32_t rangeId)
     return MsprofTxManager::instance()->RangeStop(rangeId);
 }
 
-aclError aclprofReportStamp(const char *tag, uint32_t tagLen, unsigned char *data, uint32_t dataLen)
+aclError aclprofReportStamp(CONST_CHAR_PTR tag, uint32_t tagLen, UNSIGNED_CHAR_PTR data, uint32_t dataLen)
 {
     return MsprofTxManager::instance()->ReportStampDataV2(tag, tagLen, data, dataLen);
 }

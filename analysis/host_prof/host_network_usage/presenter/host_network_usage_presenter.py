@@ -10,6 +10,7 @@ from decimal import Decimal
 from common_func.constant import Constant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
+from common_func.db_name_constant import DBNameConstant
 from common_func.msvp_common import is_number
 from common_func.msvp_constant import MsvpConstant
 from common_func.utils import Utils
@@ -70,6 +71,21 @@ class HostNetworkUsagePresenter(HostProfPresenterBase):
         return [["process_name", InfoConfReader().get_json_pid_data(),
                  InfoConfReader().get_json_tid_data(), "Network Usage"]]
 
+    @staticmethod
+    def compute_netcard_speed() -> float:
+        """
+        load speed and sum all network cards
+        return network speed (KB/s) for all network cards
+        """
+        _, net_card = InfoConfReader().get_net_info()
+        all_netcard_speed = 0
+        for net in net_card:
+            # Mbits/sec to KByte/sec
+            speed = net.get("speed")
+            if is_number(speed) and speed != -1:
+                all_netcard_speed += speed * 125000 / Constant.KILOBYTE
+        return all_netcard_speed
+
     def init(self: any) -> None:
         """
         init model
@@ -125,9 +141,10 @@ class HostNetworkUsagePresenter(HostProfPresenterBase):
 
         avg_bytes = Decimal(total_bytes) / intf_num
         speed = avg_bytes / Decimal(float(curr_timestamp) - float(last_timestamp))
-        usage = (speed * 100 / self.speeds.get(intf)).quantize(NumberConstant.USAGE_PLACES)
+        usage = (speed * NumberConstant.PERCENTAGE / self.speeds.get(intf)).quantize(NumberConstant.USAGE_PLACES)
+        transit_speed = float(speed) * intf_num / NumberConstant.KILOBYTE
         self.cur_model.insert_single_data(
-            [last_timestamp, curr_timestamp, str(usage)])
+            [last_timestamp, curr_timestamp, str(usage), transit_speed])
 
     def write_usage_items(self: any, file: any) -> None:
         """
@@ -164,12 +181,11 @@ class HostNetworkUsagePresenter(HostProfPresenterBase):
         """
         get network usage data
         """
-        if not self.cur_model.check_db() or not self.cur_model.has_network_usage_data():
-            self.cur_model.finalize()
-            return MsvpConstant.EMPTY_DICT
-        res = self.cur_model.get_network_usage_data()
-        self.cur_model.finalize()
-        return res
+        with self.cur_model as model:
+            if model.has_network_usage_data():
+                res = model.get_network_usage_data()
+                return res
+        return MsvpConstant.EMPTY_DICT
 
     def get_timeline_data(self: any) -> list:
         """
@@ -184,6 +200,18 @@ class HostNetworkUsagePresenter(HostProfPresenterBase):
             temp_data = ["Network Usage", float(data["start"]) * (10 ** 6), {"Usage(%)": data["usage"]}]
             result.append(temp_data)
         return result
+
+    def get_summary_data(self: any) -> list:
+        """
+        get summary data
+        """
+        with self.cur_model as model:
+            if model.has_network_usage_data():
+                res = model.get_recommend_value('speed', DBNameConstant.TABLE_HOST_NETWORK_USAGE)
+                if res:
+                    netcard_speed = self.compute_netcard_speed()
+                    return [tuple([netcard_speed, *res])]
+        return MsvpConstant.EMPTY_LIST
 
     def _parse_network_usage(self: any, file: any) -> None:
         # network intface info

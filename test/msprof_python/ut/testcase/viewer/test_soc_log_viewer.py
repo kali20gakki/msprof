@@ -38,7 +38,7 @@ class TestFftsLogViewer(unittest.TestCase):
             DeviceInfo(pid='1', tid='0').device_info])).process()
         check = FftsLogViewer(configs, params)
         ret = check.get_time_timeline_header(data)
-        self.assertEqual(ret, [['process_name', 1000, 0, 'subtask_time'],
+        self.assertEqual(ret, [['process_name', 1000, 0, 'Subtask Time'],
                                ['thread_name', 2, '3', '3']])
 
     def test_get_trace_timeline(self):

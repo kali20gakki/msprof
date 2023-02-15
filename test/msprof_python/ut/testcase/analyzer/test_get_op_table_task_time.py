@@ -62,3 +62,10 @@ class TestGetOpTableTsTime(unittest.TestCase):
         self.assertEqual("select task_id, stream_id, start_time, dur_time, "
                          "(case when subtask_type='AIC' then 'AI_CORE' when subtask_type='AIV' then 'AI_VECTOR_CORE' "
                          "else subtask_type end), 1, 1, 0, subtask_id from SubtaskTime order by start_time", ret)
+
+    def test_get_acsq_task_time(self):
+        with mock.patch(NAMESPACE + '.GetOpTableTsTime._get_task_time_data',
+                        return_value=[(1, 0, 3, 4, 8, 9, 7, 2, 1), (1, 2, 3, 4, 2, 4, 2, 3, 6)]):
+            check = GetOpTableTsTime(CONFIG)
+            ret = check._get_acsq_task_time([GeData([0, 0, 0, 1, 2, 'AI_CORE']), GeData([0, 0, 0, 1, 0, 'AI_CORE'])])
+            self.assertEqual([], ret)
