@@ -22,7 +22,7 @@ class MsprofTxDto:
         self._end_time = 0
         self._message_type = 0
         self._message = Constant.NA
-        self._call_trace = Constant.NA
+        self._call_stack = Constant.NA
         self._dur_time = 0
         self._file_tag = Constant.DEFAULT_INVALID_VALUE
 
@@ -107,12 +107,12 @@ class MsprofTxDto:
         self._message = value
 
     @property
-    def call_trace(self: any) -> str:
-        return self._call_trace
+    def call_stack(self: any) -> str:
+        return self._call_stack
 
-    @call_trace.setter
-    def call_trace(self: any, value: str) -> None:
-        self._call_trace = value
+    @call_stack.setter
+    def call_stack(self: any, value: str) -> None:
+        self._call_stack = value
 
     @property
     def dur_time(self: any) -> int:

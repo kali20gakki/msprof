@@ -16,7 +16,7 @@ class TestMsprofTxDto(unittest.TestCase):
         msproftx_dto.end_time = 0
         msproftx_dto.message_type = 0
         msproftx_dto.message = 0
-        msproftx_dto.call_trace = 0
+        msproftx_dto.call_stack = 0
         msproftx_dto.dur_time = 0
 
         self.assertEqual((msproftx_dto.pid,
@@ -28,6 +28,6 @@ class TestMsprofTxDto(unittest.TestCase):
               msproftx_dto.end_time,
               msproftx_dto.message_type,
               msproftx_dto.message,
-              msproftx_dto.call_trace,
+              msproftx_dto.call_stack,
               msproftx_dto.dur_time),
                          (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0))
