@@ -87,16 +87,6 @@ void Utils::GetTime(unsigned long long &startRealtime, unsigned long long &start
     startRealtime = analysis::dvvp::common::utils::Utils::GetClockRealtime();
 }
 
-std::string Utils::GenerateStartTime(const unsigned long long startRealtime, const unsigned long long startMono,
-    const unsigned long long cntvct)
-{
-    std::stringstream devStartData;
-    devStartData << CLOCK_REALTIME_KEY << ": " << startRealtime << std::endl;
-    devStartData << CLOCK_MONOTONIC_RAW_KEY << ": " << startMono << std::endl;
-    devStartData << CLOCK_CNTVCT_KEY << ": " << cntvct << std::endl;
-    return devStartData.str();
-}
-
 long long Utils::GetFileSize(const std::string &path)
 {
     unsigned long long size = 0;
