@@ -199,7 +199,9 @@ class ExportCommand:
             {'export_type': ExportDataType.HOST_NETWORK_USAGE,
              'handler': HostDataCheckManager.contain_host_network_usage_data},
             {'export_type': ExportDataType.HOST_DISK_USAGE,
-             'handler': HostDataCheckManager.contain_host_disk_usage_data}
+             'handler': HostDataCheckManager.contain_host_disk_usage_data},
+            {'export_type': ExportDataType.PYTORCH_OPERATOR_VIEW,
+             'handler': AiStackDataCheckManager.contain_pytorch_operator_profiler_data}
         ]
     }
     MODEL_ID = "model_id"

@@ -30,7 +30,7 @@ class MsprofTxModel(ParserModel):
         """
         all_data_sql = "select category, pid, tid, start_time, (end_time-start_time)" \
                        " as dur_time, payload_type, payload_value, message_type, " \
-                       "message, event_type, call_trace from {} where file_tag<>?".format(DBNameConstant.TABLE_MSPROFTX)
+                       "message, event_type, call_stack from {} where file_tag<>?".format(DBNameConstant.TABLE_MSPROFTX)
         return DBManager.fetch_all_data(self.cur, all_data_sql, (DataTag.MSPROFTX_CANN.value,), dto_class=MsprofTxDto)
 
     def get_msproftx_data_by_file_tag(self: any, file_tag: int):
@@ -40,6 +40,10 @@ class MsprofTxModel(ParserModel):
 
     def get_summary_data(self: any) -> list:
         all_data_sql = "select pid, tid, category, event_type, payload_type, payload_value, start_time, " \
-              "end_time, message_type, message, call_trace from {} where file_tag<>?".format(
-            DBNameConstant.TABLE_MSPROFTX)
+              "end_time, message_type, message from {} where file_tag<>?".format(DBNameConstant.TABLE_MSPROFTX)
+        return DBManager.fetch_all_data(self.cur, all_data_sql, (DataTag.MSPROFTX_CANN.value,))
+
+    def get_pytorch_operator_data(self: any) -> list:
+        all_data_sql = "select pid, tid, message, " \
+                       "call_stack from {} where file_tag<>?".format(DBNameConstant.TABLE_MSPROFTX)
         return DBManager.fetch_all_data(self.cur, all_data_sql, (DataTag.MSPROFTX_CANN.value,))

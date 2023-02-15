@@ -761,6 +761,14 @@ class TestMsProfExportDataUtils(unittest.TestCase):
             res = MsProfExportDataUtils._get_stars_chip_trans_data({}, {})
         self.assertEqual(res, {})
 
+    def test_get_pytorch_operator_data(self):
+        sample_configs = {"test": 2}
+        params = {"export_type": "summary"}
+        with mock.patch(NAMESPACE + '.MsprofTxViewer.get_pytorch_operator_data', return_value=('test', [1], 1)):
+            key = MsProfExportDataUtils()
+            result = key._get_pytorch_operator_data(sample_configs, params)
+        self.assertEqual(result, ('test', [1], 1))
+
 
 if __name__ == '__main__':
     unittest.main()
