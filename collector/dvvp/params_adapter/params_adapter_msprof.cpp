@@ -190,7 +190,7 @@ void ParamsAdapterMsprof::SetDefaultParamsApp()
     paramContainer_[INPUT_CFG_COM_AIC_MODE] = (paramContainer_[INPUT_CFG_COM_AIC_MODE].empty()) ?
         PROFILING_MODE_TASK_BASED : paramContainer_[INPUT_CFG_COM_AIC_MODE];
     paramContainer_[INPUT_CFG_COM_AIC_METRICS] = (paramContainer_[INPUT_CFG_COM_AIC_METRICS].empty()) ?
-        PIPE_UTILIZATION : paramContainer_[INPUT_CFG_COM_AIC_METRICS];
+        SetDefaultAicMetricsType() : paramContainer_[INPUT_CFG_COM_AIC_METRICS];
     if (paramContainer_[INPUT_CFG_COM_AI_VECTOR].empty()) {
         paramContainer_[INPUT_CFG_COM_AI_VECTOR] = MSVP_PROF_ON;
     }
@@ -229,7 +229,7 @@ int ParamsAdapterMsprof::CheckMsprofMode(const std::unordered_map<int, std::pair
 void ParamsAdapterMsprof::SetDefaultParamsSystem()
 {
     paramContainer_[INPUT_CFG_COM_AIC_METRICS] = (paramContainer_[INPUT_CFG_COM_AIC_METRICS].empty()) ?
-        PIPE_UTILIZATION : paramContainer_[INPUT_CFG_COM_AIC_METRICS];
+        SetDefaultAicMetricsType() : paramContainer_[INPUT_CFG_COM_AIC_METRICS];
     paramContainer_[INPUT_CFG_COM_AIC_MODE] = (paramContainer_[INPUT_CFG_COM_AIC_MODE].empty()) ?
         PROFILING_MODE_SAMPLE_BASED : paramContainer_[INPUT_CFG_COM_AIC_MODE];
     paramContainer_[INPUT_CFG_COM_AIV_METRICS] = (paramContainer_[INPUT_CFG_COM_AIV_METRICS].empty()) ?

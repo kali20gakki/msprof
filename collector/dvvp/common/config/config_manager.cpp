@@ -226,6 +226,7 @@ void ConfigManager::AicoreMetricsEnumToName(const ProfAicoreMetrics aicMetrics, 
         {PROF_AICORE_RESOURCE_CONFLICT_RATIO, RESOURCE_CONFLICT_RATIO},
         {PROF_AICORE_MEMORY_UB, MEMORY_UB},
         {PROF_AICORE_L2_CACHE, L2_CACHE},
+        {PROF_AICORE_PIPE_EXECUTE_UTILIZATION, PIPE_EXECUTION_UTILIZATION},
         {PROF_AICORE_NONE, ""}
     };
     auto iter = metricsList.find(aicMetrics);

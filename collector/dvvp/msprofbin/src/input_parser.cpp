@@ -232,21 +232,20 @@ void ArgsManager::AddBasicArgs()
         {"aic-freq", "The aic sampling frequency in hertz, the default value is 100 Hz, the range is\n"
             "\t\t\t\t\t\t   1 to 100 Hz.(full-platform)", "100"}
     };
-    if (!driverOnline_ || platform_ == PlatformType::CHIP_V4_1_0 || platform_ == PlatformType::CHIP_V4_2_0) {
-        Args aicMetrics = {"aic-metrics",
-                           "The aic metrics groups, include ArithmeticUtilization, PipeUtilization, Memory,\n"
-                               "\t\t\t\t\t\t   MemoryL0, ResourceConflictRatio, MemoryUB, L2Cache.\n"
-                               "\t\t\t\t\t\t   the default value is PipeUtilization.(full-platform)",
-                           "PipeUtilization"};
-        argsList_.push_back(aicMetrics);
-    } else {
-        Args aicMetrics = {"aic-metrics",
-                           "The aic metrics groups, include ArithmeticUtilization, PipeUtilization, Memory,\n"
-                               "\t\t\t\t\t\t   MemoryL0, ResourceConflictRatio, MemoryUB.\n"
-                               "\t\t\t\t\t\t   the default value is PipeUtilization.(full-platform)",
-                           "PipeUtilization"};
-        argsList_.push_back(aicMetrics);
+    std::string defaultOption = (platform_ == PlatformType::CHIP_V4_2_0) ? "PipelineExecuteUtilization" :
+                                "PipeUtilization";
+    std::string addOptions;
+    if (!driverOnline_ || platform_ == PlatformType::CHIP_V4_2_0) {
+        addOptions = ", L2Cache, PipelineExecuteUtilization";
+    } else if (platform_ == PlatformType::CHIP_V4_1_0) {
+        addOptions = ", L2Cache";
     }
+    Args aicMetrics = {"aic-metrics",
+                       "The aic metrics groups, include ArithmeticUtilization, PipeUtilization, Memory,\n"
+                           "\t\t\t\t\t\t   MemoryL0, ResourceConflictRatio, MemoryUB" + addOptions +".\n"
+                           "\t\t\t\t\t\t   the default value is " + defaultOption + ".(full-platform)",
+                       defaultOption};
+    argsList_.push_back(aicMetrics);
 }
 
 void ArgsManager::AddDynProfArgs()
