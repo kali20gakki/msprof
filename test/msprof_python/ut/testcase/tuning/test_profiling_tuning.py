@@ -16,7 +16,7 @@ class TestProfilingTuning(unittest.TestCase):
                         return_value=operator_list), \
                 mock.patch('tuning.tuning_control.PathManager.get_summary_dir',
                            return_value=os.path.join(os.path.dirname(__file__), 'test', 'summary')):
-            ProfilingTuning.run('test')
+            ProfilingTuning.run('test', {})
         for root, dirs, files in os.walk(os.path.join(os.path.dirname(__file__), 'test'), topdown=False):
             for name in files:
                 print(name)

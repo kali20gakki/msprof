@@ -201,13 +201,29 @@ class ProfConditionConfig(MetaConfig):
             "cmp": "contain"
         }
         , {
-            "id": "condition_ai_cpu_parallelism",
+            "id": "condition_ai_cpu_parallelism_1",
             "type": "formula",
             "left": ["AI CPU Execution Time(us)", "AI Core Execution Time(us)",
                      "Concurrent AI Core and AI CPU Execution Time(us)"],
             "right": 0.05,
             "formula": "{0}/({0}+{1}+{2})",
             "cmp": ">"
+        }
+        , {
+            "id": "condition_cube_affinity_1",
+            "type": "formula",
+            "left": ["Cube Utilization", "Vector Utilization", "Scalar Utilization", "MTE Utilization"],
+            "right": 0.5,
+            "formula": "{0}/({0}+{1}+{2}+{3})",
+            "cmp": ">="
+        }
+        , {
+            "id": "condition_cube_affinity_2",
+            "type": "formula",
+            "left": ["Cube Utilization", "Vector Utilization", "Scalar Utilization", "MTE Utilization"],
+            "right": 0.5,
+            "formula": "{0}/({0}+{1}+{2}+{3})",
+            "cmp": "<"
         }
     ]
 

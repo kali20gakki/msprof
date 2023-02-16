@@ -5,6 +5,7 @@
 import logging
 import os
 import sqlite3
+from collections import defaultdict
 from abc import ABC, abstractmethod
 
 from common_func.constant import Constant
@@ -94,10 +95,6 @@ class OpSummaryTuningDataHandle(BaseTuningDataHandle):
     TAG_KEY = "op_name"
 
     @staticmethod
-    def load_data(param: dict) -> list:
-        return OpSummaryTuningDataHandle.get_data_by_infer_id(param)
-
-    @staticmethod
     def get_result(ids: any, operator_data: list):
         return ids
 
@@ -145,6 +142,10 @@ class OpSummaryTuningDataHandle(BaseTuningDataHandle):
         for header in headers:
             result_headers.append(header.replace(" ", "_").split("(")[0].lower())
         return result_headers
+
+    @classmethod
+    def load_data(cls: any, param: dict) -> list:
+        return cls.get_data_by_infer_id(param)
 
     @classmethod
     def get_data_by_infer_id(cls: any, para: dict) -> list:
@@ -242,13 +243,109 @@ class OpSummaryTuningDataHandle(BaseTuningDataHandle):
         return extend_data_dict
 
 
+class ModelSummaryTuningDataHandle(OpSummaryTuningDataHandle):
+    TAG_KEY = StrConstant.CUBE_UTILIZATION
+    BOUND_TYPE = {
+        StrConstant.CUBE_UTILIZATION: [
+            StrConstant.MAC_RATIO,
+            StrConstant.AIC_MAC_RATIO
+        ],
+        StrConstant.VECTOR_UTILIZATION: [
+            StrConstant.VEC_RATIO,
+            StrConstant.AIV_VEC_RATIO
+        ],
+        StrConstant.SCALAR_UTILIZATION: [
+            StrConstant.SCALAR_RATIO,
+            StrConstant.AIC_SCALAR_RATIO,
+            StrConstant.AIV_SCALAR_RATIO
+        ],
+        StrConstant.MTE_UTILIZATION: [
+            StrConstant.MTE1_RATIO,
+            StrConstant.MTE2_RATIO,
+            StrConstant.MTE3_RATIO,
+            StrConstant.AIC_MTE1_RATIO,
+            StrConstant.AIC_MTE2_RATIO,
+            StrConstant.AIC_MTE3_RATIO,
+            StrConstant.AIV_MTE1_RATIO,
+            StrConstant.AIV_MTE2_RATIO,
+            StrConstant.AIV_MTE3_RATIO
+        ]
+    }
+
+    @staticmethod
+    def get_result(ids: any, operator_data: list):
+        if not ids:
+            return {}
+        return operator_data[0]
+
+    @staticmethod
+    def print_format(data: any):
+        total_duration = sum(data.values())
+        if not total_duration:
+            return f"Total Duration Time equals to 0. Please check Aicore operators."
+        model_cube_ratio = round(data.get(StrConstant.CUBE_UTILIZATION, 0) / total_duration, 3)
+        model_vec_ratio = round(data.get(StrConstant.VECTOR_UTILIZATION, 0) / total_duration, 3)
+        model_scalar_ratio = round(data.get(StrConstant.SCALAR_UTILIZATION, 0) / total_duration, 3)
+        model_mte_ratio = round(data.get(StrConstant.MTE_UTILIZATION, 0) / total_duration, 3)
+
+        return f"\n\t\ta. Cube utilization rate in the model is {model_cube_ratio}. \n" \
+               f"\t\tb. Vector utilization rate in the model is {model_vec_ratio}. \n" \
+               f"\t\tc. Scalar utilization rate in the model is {model_scalar_ratio}. \n" \
+               f"\t\td. MTE utilization rate in the model is {model_mte_ratio}. \n"
+
+    @classmethod
+    def load_data(cls: any, param: dict) -> list:
+        """
+        first load data as opSummaryDataHandle does
+        then process every op_dict, finding bound type for every opR
+        then summary task duration time by different bound type
+        """
+        ai_core_metrics_set = {Constant.PMU_PIPE, Constant.PMU_PIPE_EXCT}
+        sample_config = param.get(StrConstant.SAMPLE_CONFIG, {})
+        if sample_config.get(StrConstant.AI_CORE_PROFILING_METRICS, '') not in ai_core_metrics_set:
+            return []
+        op_data = cls.get_data_by_infer_id(param)
+        bound_dur_dict = defaultdict(float)
+        for operator_dict in op_data:
+            bound_type = cls.get_operator_bound_type(operator_dict)
+            if bound_type == Constant.NA:
+                continue
+            task_duration = operator_dict.get(StrConstant.TASK_DURATION, 0)
+            if is_number(task_duration):
+                bound_dur_dict[bound_type] += task_duration
+        for bound_type in cls.BOUND_TYPE:
+            bound_dur_dict[bound_type] = round(bound_dur_dict[bound_type], 3)
+        return [bound_dur_dict]
+
+    @classmethod
+    def get_operator_bound_type(cls: any, operator_dict: dict) -> str:
+        """
+        for each operator, compute vector ratio, cube ratio, scalar ratio and mte ratio
+        then return bound type with the max ratio
+        """
+        if operator_dict.get(Constant.TASK_TYPE, None) == Constant.TASK_TYPE_AI_CPU:
+            return Constant.NA
+        bound_dict = defaultdict(float)
+        for bound_type, ratio_type_list in cls.BOUND_TYPE.items():
+            for ratio_type in ratio_type_list:
+                ratio_tmp = operator_dict.get(ratio_type, 0)
+                if is_number(ratio_tmp):
+                    bound_dict[bound_type] = max(bound_dict.get(bound_type, 0), ratio_tmp)
+        bound = max(bound_dict, key=bound_dict.get)
+        if bound_dict[bound] <= 0:
+            logging.debug("There exists an operator has no pmu info!")
+            return Constant.NA
+        return bound
+
+
 class DataManager:
     """
     manage different types of tuning data
     """
     HANDLE_MAP = {
         CommonProfRule.TUNING_OPERATOR: OpSummaryTuningDataHandle,
-        CommonProfRule.TUNING_OP_PARALLEL: OpParallelTuningDataHandle
+        CommonProfRule.TUNING_OP_PARALLEL: OpParallelTuningDataHandle,
+        CommonProfRule.TUNING_MODEL: ModelSummaryTuningDataHandle
     }
 
     def __init__(self: any, param: dict) -> None:

@@ -46,6 +46,7 @@ class StrConstant:
     # constant within sample config
     SAMPLE_CONFIG_PROJECT_PATH = "result_dir"
     TIME_PATTERN = r'\d+\.\d+'
+    SAMPLE_CONFIG = "sample_config"
 
     # info.json key
     CPU_NUMS = "cpuNums"
@@ -105,8 +106,22 @@ class StrConstant:
     BLOCK_PMU_TYPE = 'block_task'
 
     MAC_RATIO = "mac_ratio"
+    AIC_MAC_RATIO = "aic_mac_ratio"
     VEC_RATIO = "vec_ratio"
+    AIV_VEC_RATIO = "aiv_vec_ratio"
+    MTE1_RATIO = "mte1_ratio"
     MTE2_RATIO = "mte2_ratio"
+    MTE3_RATIO = "mte3_ratio"
+    SCALAR_RATIO = "scalar_ratio"
+    AIC_SCALAR_RATIO = "aic_scalar_ratio"
+    AIV_SCALAR_RATIO = "aiv_scalar_ratio"
+    AIC_MTE1_RATIO = "aic_mte1_ratio"
+    AIC_MTE2_RATIO = "aic_mte2_ratio"
+    AIC_MTE3_RATIO = "aic_mte3_ratio"
+    AIV_MTE1_RATIO = "aiv_mte1_ratio"
+    AIV_MTE2_RATIO = "aiv_mte2_ratio"
+    AIV_MTE3_RATIO = "aiv_mte3_ratio"
+    TASK_DURATION = 'task_duration'
 
     BANDWIDTH = "bw"
     ACCURACY = "%.6f"
@@ -371,6 +386,12 @@ class StrConstant:
     TRANSPORT_TYPE_INFO = "Transport Type Info"
     AVERAGE_INFO = "Average Info"
     SLOWEST_LINK_INFO = "Slowest Link Info"
+
+    # Bound constant
+    CUBE_UTILIZATION = "Cube Utilization"
+    VECTOR_UTILIZATION = "Vector Utilization"
+    SCALAR_UTILIZATION = "Scalar Utilization"
+    MTE_UTILIZATION = "MTE Utilization"
 
     @property
     def accuracy(self: any) -> str:
