@@ -45,16 +45,23 @@ void JobDeviceRpc::GetAndStoreStartTime(bool hostProfiling)
     if (hostProfiling) {
         return;
     }
-    analysis::dvvp::common::utils::Utils::GetTime(startRealtime_, startMono_, cntvct_);
-    DrvGetDeviceTime(indexId_, deviceStartMono_, deviceCntvct_);
-    MSPROF_LOGI("devId:%d, startRealtime=%llu ns, startMono=%llu ns, cntvct=%llu, deviceStartMono=%llu ns,"
-        " deviceCntvct=%llu", indexId_, startRealtime_, startMono_, cntvct_, deviceStartMono_, deviceCntvct_);
+    GetHostAndDeviceTime(indexId_);
+    if (hostTimeList_.empty() || devTimeList_.empty()) {
+        MSPROF_LOGE("[JobDeviceRpc]Failed to get host and device start time.");
+        return;
+    }
+    MSPROF_LOGI("devId:%d, startRealtimeBegin=%llu ns, startRealtimeEnd=%llu ns, cntvctBegin=%llu,"
+                "startRealtimeEnd=%llu ns, cntvctBegin=%llu ns, cntvctEnd=%llu, deviceStartMono=%llu ns,"
+                " deviceCntvct=%llu", indexId_, hostTimeList_.at(HostTimeType::START_REALTIME_BEGIN),
+                hostTimeList_.at(HostTimeType::START_REALTIME_END), hostTimeList_.at(HostTimeType::START_MONO_BEGIN),
+                hostTimeList_.at(HostTimeType::START_MONO_END), hostTimeList_.at(HostTimeType::CNTVCT_BEGIN),
+                hostTimeList_.at(HostTimeType::CNTVCT_END), devTimeList_.at(DevTimeType::DEVICE_START_MONO),
+                devTimeList_.at(DevTimeType::DEVICE_CNTVCT));
     std::string deviceId = std::to_string(
         TaskRelationshipMgr::instance()->GetFlushSuffixDevId(params_->job_id, indexId_));
     std::stringstream timeData;
     timeData << "[" << std::string(DEVICE_TAG_KEY) << deviceId << "]" << std::endl;
-    std::string startTime = analysis::dvvp::common::utils::Utils::GenerateStartTime(startRealtime_,
-        startMono_, cntvct_);
+    std::string startTime = GenerateHostStartTime();
     timeData << startTime;
     std::string fileName = "host_start.log." + deviceId;
     int ret = StoreTime(fileName, timeData.str());
@@ -63,8 +70,7 @@ void JobDeviceRpc::GetAndStoreStartTime(bool hostProfiling)
         return;
     }
     fileName = "dev_start.log." + deviceId;
-    startTime = analysis::dvvp::common::utils::Utils::GenerateStartTime(startRealtime_,
-        deviceStartMono_, deviceCntvct_);
+    startTime = GenerateDevStartTime();
     ret = StoreTime(fileName, startTime);
     if (ret != PROFILING_SUCCESS) {
         MSPROF_LOGE("Failed to upload data for %s", fileName.c_str());
