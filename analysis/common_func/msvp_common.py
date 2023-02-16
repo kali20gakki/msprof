@@ -529,7 +529,12 @@ def is_number(float_num: any) -> bool:
 
 
 def is_nonzero_number(float_num: any) -> bool:
-    return is_number(float_num) and not NumberConstant.is_zero(float_num)
+    """
+    check whether s is zero number or not
+    :param float_num: number to check
+    :return: is zero number or not
+    """
+    return is_number(float_num) and not NumberConstant.is_zero(float(float_num))
 
 
 def clear_project_dirs(project_dir: str) -> None:

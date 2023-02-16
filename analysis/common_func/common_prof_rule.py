@@ -46,6 +46,7 @@ class CommonProfRule:
     RESULT_OPERATOR_PROCESSING = "Operator Processing"
     RESULT_OPERATOR_METRICS = "Operator Metrics"
     RESULT_OPERATOR_PARALLELISM = "Operator Parallelism"
+    RESULT_MODEL_BOTTLENECK = "Model Bottleneck Analysis"
 
     RESULT_RULE_DESCRIPTION = "Rule Description"
     RESULT_COMPUTATION_DESCRIPTION = "Prompt users of some improperly high or low vector/cube/scalar" \
@@ -58,6 +59,8 @@ class CommonProfRule:
     RESULT_METRICS_DESCRIPTION = "Collect statistics on operator performance efficiency " \
                                  "and prompt users of high resource consumption."
     RESULT_PARALLEL_DESCRIPTION = "Identify the serial wait bottleneck between the AI CPU and AI Core."
+    RESULT_BOTTLENECK_DESCRIPTION = "Identify model bottleneck distribution indicated by cube, vector, scalar and " \
+                                    "mte utilization."
 
     # prof rule and condition file name
     RESULT_PROF_JSON = "prof_rule_{}.json"
@@ -65,3 +68,5 @@ class CommonProfRule:
     # tuning type
     TUNING_OPERATOR = 'Op Summary'
     TUNING_OP_PARALLEL = 'Op Parallel'
+    TUNING_MODEL = 'Model Summary'
+

@@ -153,16 +153,36 @@ class ProfRuleConfig(MetaConfig):
             "Tuning Type": CommonProfRule.TUNING_OPERATOR
         }
         , {
-            "Rule Id": "rule_ai_core_and_ai_cpu_parallelism",
+            "Rule Id": "rule_ai_core_and_ai_cpu_parallelism_1",
             "Rule Description": "Calculate the percentage of the AI CPU execution time to identify the "
                                 "serial wait bottleneck between the AI CPU and AI Core.",
-            "Rule Condition": "condition_ai_cpu_parallelism",
+            "Rule Condition": "condition_ai_cpu_parallelism_1",
             "Rule Type": "Operator Parallelism",
             "Rule Subtype": "",
             "Rule Suggestion": "View the Timeline View to find the AI CPU operators serially executed "
                                "with the AI Core and place them in the AI Core to execute by using methods "
                                "such as operator replacement, data type modification, and fusion. ",
             "Tuning Type": CommonProfRule.TUNING_OP_PARALLEL
+        }
+        , {
+            "Rule Id": "rule_model_bottleneck_1",
+            "Rule Description": "Calculate the percentage of cube utilization rate to identify "
+                                "whether the model is cube affinity.",
+            "Rule Condition": "condition_cube_affinity_1",
+            "Rule Type": "Model Bottleneck Analysis",
+            "Rule Subtype": "",
+            "Rule Suggestion": "The Model is Cube Affinity, as the cube utilization rate is high enough",
+            "Tuning Type": CommonProfRule.TUNING_MODEL
+        }
+        , {
+            "Rule Id": "rule_model_bottleneck_2",
+            "Rule Description": "Calculate the percentage of cube utilization rate to identify "
+                                "whether the model is cube affinity.",
+            "Rule Condition": "condition_cube_affinity_2",
+            "Rule Type": "Model Bottleneck Analysis",
+            "Rule Subtype": "",
+            "Rule Suggestion": "The Model is not Cube Affinity, as the cube utilization rate is not so high",
+            "Tuning Type": CommonProfRule.TUNING_MODEL
         }
     ]
 

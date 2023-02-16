@@ -46,6 +46,8 @@ class MetaConditionManager:
     COMPARE_MAP = {
         ">": lambda left, right: float(left) > float(right) if is_number(left) and is_number(right) else False,
         "<": lambda left, right: float(left) < float(right) if is_number(left) and is_number(right) else False,
+        ">=": lambda left, right: float(left) >= float(right) if is_number(left) and is_number(right) else False,
+        "<=": lambda left, right: float(left) <= float(right) if is_number(left) and is_number(right) else False,
         "==": lambda left, right: compare_number(left, right, equal_operator=True),
         "!=": lambda left, right: compare_number(left, right, equal_operator=False),
         "contain": lambda left, right: right in left if isinstance(left, str) and isinstance(right, str) else False
@@ -165,7 +167,7 @@ class MetaConditionManager:
             cal_result = cls.CALCULATE_MAP.get(operator)(match_expression.split(operator)[0],
                                                          match_expression.split(operator)[1])
             cal_result = f"{cal_result:f}"
-            sub_expression = sub_expression.replace(str(match_expression), cal_result)
+            sub_expression = sub_expression.replace(str(match_expression), cal_result, 1)
         return sub_expression
 
     def merge_set(self: any, condition_id: str, condition_id_dict: dict) -> str:
@@ -202,18 +204,18 @@ class MetaConditionManager:
         """
         calculate conditions
         """
+        condition_map = {
+            CommonProfRule.COND_TYPE_NORMAL: self.cal_normal_condition,
+            CommonProfRule.COND_TYPE_FORMULA: self.cal_formula_condition,
+            CommonProfRule.COND_TYPE_COUNT: self.cal_count_condition,
+            CommonProfRule.COND_TYPE_ACCUMULATE: self.cal_accumulate_condition
+        }
         condition = self.conditions.get(condition_id)
         if condition is None:
             logging.error("The condition can not be found,condition id is: %s ", condition_id)
             return []
-        if condition.get(CommonProfRule.CONDITION_TYPE) == CommonProfRule.COND_TYPE_NORMAL:
-            return self.cal_normal_condition(operator_data, condition, tag_key)
-        if condition.get(CommonProfRule.CONDITION_TYPE) == CommonProfRule.COND_TYPE_FORMULA:
-            return self.cal_formula_condition(operator_data, condition, tag_key)
-        if condition.get(CommonProfRule.CONDITION_TYPE) == CommonProfRule.COND_TYPE_COUNT:
-            return self.cal_count_condition(operator_data, condition, tag_key)
-        if condition.get(CommonProfRule.CONDITION_TYPE) == CommonProfRule.COND_TYPE_ACCUMULATE:
-            return self.cal_accumulate_condition(operator_data, condition, tag_key)
+        if condition.get(CommonProfRule.CONDITION_TYPE) in condition_map:
+            return condition_map.get(condition.get(CommonProfRule.CONDITION_TYPE))(operator_data, condition, tag_key)
         logging.error("Not support condition type: %s ", condition.get(CommonProfRule.CONDITION_TYPE))
         return []
 

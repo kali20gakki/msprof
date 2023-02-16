@@ -152,6 +152,6 @@ class NumberConstant:
         if isinstance(number, int):
             return number == 0
         elif isinstance(number, float):
-            return number < NumberConstant.FLOAT_ZERO_BOUND
+            return abs(number) < NumberConstant.FLOAT_ZERO_BOUND
         else:
             return False

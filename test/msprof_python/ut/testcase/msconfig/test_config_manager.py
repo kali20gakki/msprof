@@ -10,9 +10,9 @@ from msconfig.config_manager import ConfigManager
 class TestConfigManager(unittest.TestCase):
     def test_get(self):
         config = ConfigManager.get(ConfigManager.PROF_CONDITION)
-        self.assertEqual(len(config.get_data()), 27)
+        self.assertEqual(len(config.get_data()), 29)
         config = ConfigManager.get(ConfigManager.PROF_RULE)
-        self.assertEqual(len(config.get_data()), 17)
+        self.assertEqual(len(config.get_data()), 19)
         config = ConfigManager.get(ConfigManager.DATA_PARSERS)
         self.assertEqual(len(config.sections()), 42)
         config = ConfigManager.get(ConfigManager.STARS)
@@ -28,4 +28,4 @@ class TestConfigManager(unittest.TestCase):
         config = ConfigManager.get(ConfigManager.DATA_CALCULATOR)
         self.assertEqual(len(config.sections()), 21)
         config = ConfigManager.get(ConfigManager.TUNING_RULE)
-        self.assertEqual(len(config.get_data()), 16)
+        self.assertEqual(len(config.get_data()), 18)

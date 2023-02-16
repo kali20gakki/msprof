@@ -13,7 +13,7 @@ class ProfilingTuning:
     recommend for inference
     """
     @classmethod
-    def run(cls: any, result_dir: str) -> None:
+    def run(cls: any, result_dir: str, sample_config: dict) -> None:
         """
         run and recommend
         """
@@ -22,7 +22,8 @@ class ProfilingTuning:
             for dev_id in devices:
                 para = {
                     StrConstant.PARAM_RESULT_DIR: result_dir,
-                    StrConstant.PARAM_DEVICE_ID: dev_id
+                    StrConstant.PARAM_DEVICE_ID: dev_id,
+                    StrConstant.SAMPLE_CONFIG: sample_config
                 }
                 rule_mgr = RuleManager(para)
                 rule_mgr.run()
