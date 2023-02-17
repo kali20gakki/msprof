@@ -42,11 +42,15 @@ class FftsLogModel(ParserModel):
         to get timeline data from database
         :return: result list
         """
-        if not DBManager.judge_table_exist(self.cur, DBNameConstant.TABLE_FFTS_LOG):
+        acsq_task_list, thread_data_list, subtask_data_list = [], [], []
+        if not DBManager.judge_table_exist(self.cur, DBNameConstant.TABLE_ACSQ_TASK_TIME):
             return {}
-        thread_data_list = self._get_thread_time_data()
-        subtask_data_list = self._get_subtask_time_data()
-        return {'thread_data_list': thread_data_list, 'subtask_data_list': subtask_data_list}
+        acsq_task_list = self._get_task_time_data()
+        if DBManager.judge_table_exist(self.cur, DBNameConstant.TABLE_FFTS_LOG):
+            thread_data_list = self._get_thread_time_data()
+            subtask_data_list = self._get_subtask_time_data()
+        return {'acsq_task_list': acsq_task_list, 'thread_data_list': thread_data_list,
+                'subtask_data_list': subtask_data_list}
 
     def get_summary_data(self: any) -> list:
         """
@@ -64,6 +68,9 @@ class FftsLogModel(ParserModel):
               "from {0} " \
               "order by start_time ".format(DBNameConstant.TABLE_SUBTASK_TIME)
         return DBManager.fetch_all_data(self.cur, sql)
+
+    def _get_task_time_data(self: any) -> list:
+        return self.get_all_data(DBNameConstant.TABLE_ACSQ_TASK_TIME, dto_class=TaskTimeDto)
 
     def _get_thread_time_data(self: any) -> list:
         return self.get_all_data(DBNameConstant.TABLE_THREAD_TASK, dto_class=TaskTimeDto)

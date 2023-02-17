@@ -99,7 +99,7 @@ class TestCoreCpuReduceViewer(unittest.TestCase):
                 mock.patch(NAMESPACE + '.CoreCpuReduceViewer._get_ai_cpu_data', return_value=[]), \
                 mock.patch(NAMESPACE + '.CoreCpuReduceViewer._get_all_reduce_data', return_value=[]):
             res = CoreCpuReduceViewer.get_task_time_data(params)
-        self.assertEqual(res, '[{"name": "process_name", "pid": 3, "tid": 0, "args": {"name": "ACSQ"}, "ph": "M"}]')
+        self.assertEqual(res, '[]')
 
     def test_get_task_time_data_1(self):
         params = {"device_id": 0,
@@ -109,15 +109,7 @@ class TestCoreCpuReduceViewer(unittest.TestCase):
                 (0, 22, 17038931496665, 1267120, 'AI_CPU', 1, 10, 0))
         with mock.patch("msmodel.interface.view_model.ViewModel.get_all_data", return_value=data):
             res = CoreCpuReduceViewer.get_task_time_data(params)
-        self.assertEqual(res, '[{"name": "process_name", "pid": 3, "tid": 0, "args": {"name": "ACSQ"}, '
-                              '"ph": "M"}, {"name": "thread_name", "pid": 3, "tid": 0, "args": {"name": '
-                              '"Stream 22"}, "ph": "M"}, {"name": "thread_name", "pid": 3, "tid": 1, '
-                              '"args": {"name": "Stream 31"}, "ph": "M"}, {"name": "PLACE_HOLDER_SQE", '
-                              '"pid": 3, "tid": 1, "ts": 17038931452.445, "dur": 0, "args": {"Task Type": '
-                              '"PLACE_HOLDER_SQE", "OP Name": "N/A", "Stream Id": 31, "Task Id": 0}, "ph": '
-                              '"X"}, {"name": "AI_CPU", "pid": 3, "tid": 0, "ts": 17038931496.665, "dur": '
-                              '1267.12, "args": {"Task Type": "AI_CPU", "OP Name": "N/A", "Stream Id": 22, '
-                              '"Task Id": 0}, "ph": "X"}]')
+        self.assertEqual(res, '[]')
 
 
 if __name__ == '__main__':
