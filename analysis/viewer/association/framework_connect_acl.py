@@ -45,23 +45,17 @@ class FrameworkToAcl:
 
     def _get_connect_start_point(self) -> list:
         start_point_list = []
-        self._msproftx_torch_data.reverse()
-        empty_torch_num = 0
+        cann_mark_data_dict = {}
         for cann_mark_data in self._msproftx_cann_data:
-            matched_torch_data = None
-            while self._msproftx_torch_data:
-                if cann_mark_data.start_time <= self._msproftx_torch_data[-1].start_time:
-                    break
-                torch_data = self._msproftx_torch_data.pop()
-                if cann_mark_data.message == torch_data.message:
-                    matched_torch_data = torch_data
-            if matched_torch_data:
+            cann_mark_data_dict.setdefault(cann_mark_data.message, []).append(cann_mark_data)
+        for torch_data in self._msproftx_torch_data:
+            if cann_mark_data_dict.get(torch_data.message, []):
+                matched_cann_mark_data = cann_mark_data_dict.get(torch_data.message).pop(0)
                 start_point_list.append(
-                    {'name': 'connect', 'ph': 's', 'id': cann_mark_data.start_time,
-                     'pid': f'0_{matched_torch_data.pid}',
-                     'tid': matched_torch_data.tid, 'ts': matched_torch_data.start_time / DBManager.NSTOUS})
-            else:
-                empty_torch_num += 1
+                    {'name': 'connect', 'ph': 's', 'id': matched_cann_mark_data.start_time,
+                     'pid': f'0_{torch_data.pid}',
+                     'tid': torch_data.tid, 'ts': torch_data.start_time / DBManager.NSTOUS})
+        empty_torch_num = sum(len(x) for x in cann_mark_data_dict.values())
         if empty_torch_num:
             print_info(CommonConstant.FILE_NAME,
                        f'The execution of {empty_torch_num}/{len(self._msproftx_cann_data)} operators '
