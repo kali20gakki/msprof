@@ -60,7 +60,7 @@ class DataParsersConfig(MetaConfig):
         ]
         , 'ParsingNicData': [
             ('path', 'msparser.hardware.nic_parser'),
-            ('chip_model', '0,1,2,3,4,5')
+            ('chip_model', '0,1,2,3,4,5,7')
         ]
         , 'ParsingRoceData': [
             ('path', 'msparser.hardware.roce_parser'),
