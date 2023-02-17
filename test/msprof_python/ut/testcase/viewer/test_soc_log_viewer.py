@@ -38,12 +38,27 @@ class TestFftsLogViewer(unittest.TestCase):
             DeviceInfo(pid='1', tid='0').device_info])).process()
         check = FftsLogViewer(configs, params)
         ret = check.get_time_timeline_header(data)
-        self.assertEqual(ret, [['process_name', 1000, 0, 'Subtask Time'],
-                               ['thread_name', 2, '3', '3']])
+        self.assertEqual(ret, [['process_name', 1000, 0, 'Task Scheduler'], ['thread_name', 2, '3', '3']])
 
     def test_get_trace_timeline(self):
         configs, params = {}, {}
-        data = {"thread_data_list": [TestData(105, 2, 30, 1, 'FFTS+', 949987561536, 3580, 'NA', 8, 9, 1, 2, 3, 1)],
+        data = {"acsq_task_list": [TestData(105, 2, 30, 1, 'FFTS+', 949987561536, 3580, 'NA', 8, 9, 1, 2, 3, 1)],
+                "thread_data_list": [TestData(105, 2, 30, 1, 'FFTS+', 949987561536, 3580, 'NA', 8, 9, 1, 2, 3, 1)],
+                "subtask_data_list": [TestData(105, 2, 30, 1, 'FFTS+', 949987561536, 3580, 'NA', 8, 9, 1, 2, 3, 1)]}
+        with mock.patch('common_func.trace_view_manager.TraceViewManager.time_graph_trace', return_value=[]), \
+                mock.patch('common_func.trace_view_manager.TraceViewManager.metadata_event', return_value=[]), \
+                mock.patch(NAMESPACE + '.FftsLogViewer.add_node_name', return_value=data), \
+                mock.patch(NAMESPACE + '.FftsLogViewer.get_time_timeline_header', return_value=()):
+            check = FftsLogViewer(configs, params)
+            InfoJsonReaderManager(info_json=InfoJson(devices='0', DeviceInfo=[
+                DeviceInfo().device_info])).process()
+            ret = check.get_trace_timeline(data)
+            self.assertEqual(ret, [])
+
+    def test_format_task_type_data(self):
+        configs, params = {}, {'data_type': 'ffts_sub_task_time'}
+        data = {"acsq_task_list": [TestData(105, 2, 30, 1, 'FFTS+', 949987561536, 3580, 'NA', 8, 9, 1, 2, 3, 1)],
+                "thread_data_list": [TestData(105, 2, 30, 1, 'FFTS+', 949987561536, 3580, 'NA', 8, 9, 1, 2, 3, 1)],
                 "subtask_data_list": [TestData(105, 2, 30, 1, 'FFTS+', 949987561536, 3580, 'NA', 8, 9, 1, 2, 3, 1)]}
         with mock.patch('common_func.trace_view_manager.TraceViewManager.time_graph_trace', return_value=[]), \
                 mock.patch('common_func.trace_view_manager.TraceViewManager.metadata_event', return_value=[]), \
@@ -61,18 +76,19 @@ class TestFftsLogViewer(unittest.TestCase):
         with mock.patch(NAMESPACE + '.ViewModel.init'), \
                 mock.patch(NAMESPACE + '.ViewModel.get_all_data', return_value=data):
             check = FftsLogViewer(configs, params)
-            ret = check.get_node_name()
-            self.assertEqual(ret, {'0-1-3': 4})
+            ret = check.get_ge_data_dict()
+            self.assertEqual(ret, ({'0-1-3': 4}, {}))
 
     def test_add_node_name(self):
         configs, params = {}, {}
         node_dict = {'1-2-3': 'translate'}
         data = {"thread_data_list": [TestData(3, 2, 1, 1, 'FFTS+', 949987561536, 3580, 7, 8, 9, 1, 2, 3, 1)],
+                "acsq_task_list": [TestData(0, 2, 1, 1, 'FFTS+', 949987561536, 3580, 7, 8, 9, 1, 2, 3, 1)],
                 "subtask_data_list": [TestData(3, 2, 1, 1, 'FFTS+', 949987561536, 3580, 7, 8, 9, 1, 2, 3, 1)]}
-        with mock.patch(NAMESPACE + '.FftsLogViewer.get_node_name', return_value=node_dict):
+        with mock.patch(NAMESPACE + '.FftsLogViewer.get_ge_data_dict', return_value=(node_dict, {})):
             check = FftsLogViewer(configs, params)
-            ret = check.add_node_name(data)
-            self.assertTrue(isinstance(ret.get('subtask_data_list', [])[0], TestData))
+            check.add_node_name(data)
+            self.assertTrue(isinstance(data.get('subtask_data_list', [])[0], TestData))
 
 
 if __name__ == '__main__':

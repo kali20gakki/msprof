@@ -106,6 +106,8 @@ class MsProfExportDataUtils:
                 "iter_id": params.get(StrConstant.PARAM_ITER_ID),
                 "result_dir": params.get(StrConstant.PARAM_RESULT_DIR)
             }
+            if ChipManager().is_stars_chip():
+                return MsProfExportDataUtils._get_sub_task_time(configs, params)
             return CoreCpuReduceViewer.get_task_time_data(message)
         if ChipManager().is_chip_v1():
             db_path = PathManager.get_db_path(params.get(StrConstant.PARAM_RESULT_DIR),
@@ -651,7 +653,7 @@ class MsProfExportDataUtils:
         :param data:
         :return:
         """
-        filter_list = ["msprof", "ai_stack_time", "step_trace", "thread_group"]
+        filter_list = ["msprof", "ai_stack_time", "step_trace", "thread_group", "ffts_sub_task_time"]
         if params.get(StrConstant.PARAM_DATA_TYPE) not in filter_list:
             MsprofTimeline().add_export_data(data, params.get(StrConstant.PARAM_DATA_TYPE))
 

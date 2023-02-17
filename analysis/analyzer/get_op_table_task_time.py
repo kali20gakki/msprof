@@ -149,7 +149,7 @@ class GetOpTableTsTime:
         for data in ge_data:
             task_key = "{}-{}".format(data.stream_id, data.task_id)
             ge_data_dict[task_key] = data.task_type
-        task_data = self._get_task_time_data(DBNameConstant.DB_ACSQ, [DBNameConstant.TABLE_ACSQ_TASK_TIME],
+        task_data = self._get_task_time_data(DBNameConstant.DB_SOC_LOG, [DBNameConstant.TABLE_ACSQ_TASK_TIME],
                                              self._get_acsq_task_sql())
         res_data = []
         for data in task_data:

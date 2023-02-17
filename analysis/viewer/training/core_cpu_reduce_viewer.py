@@ -195,7 +195,6 @@ class CoreCpuReduceViewer:
         # add memory copy data
         memory_copy_viewer = MemoryCopyViewer(result_dir)
         trace_data_memcpy = memory_copy_viewer.get_memory_copy_timeline()
-        acsq_data = cls._get_acsq_time_data(result_dir)
 
         trace_data_sql = \
             cls._get_task_scheduler_data(sql_path=PathManager.get_sql_dir(result_dir))
@@ -208,12 +207,11 @@ class CoreCpuReduceViewer:
         trace_data.extend(trace_data_sql)
         trace_data.extend(trace_data_job)
         trace_data.extend(trace_data_result)
-        trace_data.extend(acsq_data)
         return json.dumps(trace_data)
 
     @classmethod
     def _get_acsq_time_data(cls: any, result_dir: str):
-        acsq_model_view = ViewModel(result_dir, DBNameConstant.DB_ACSQ, DBNameConstant.TABLE_ACSQ_TASK_TIME)
+        acsq_model_view = ViewModel(result_dir, DBNameConstant.DB_SOC_LOG, DBNameConstant.TABLE_ACSQ_TASK_TIME)
         acsq_model_view.init()
         acsq_data = acsq_model_view.get_all_data(DBNameConstant.TABLE_ACSQ_TASK_TIME)
         acsq_data_set = {i[1] for i in acsq_data}
