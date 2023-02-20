@@ -16,7 +16,6 @@ class StepTraceConstant:
     FP_TAG = 2
     BP_TAG = 3
     ITER_END_TAG = 4
-    GE_FP_TAG = 5
     ALL_REDUCE_START = 10000
 
     STEP_START = "step_start"

@@ -9,7 +9,8 @@ import unittest
 from unittest import mock
 
 from common_func.db_name_constant import DBNameConstant
-from mscalculate.step_trace.create_step_table import StepTableBuilder
+from mscalculate.step_trace.create_step_table import StepTableBuilder, StepTracePreProcess
+from profiling_bean.db_dto.step_trace_dto import StepTraceOriginDto
 from sqlite.db_manager import DBManager
 
 NAMESPACE = 'mscalculate.step_trace.create_step_table'
@@ -59,15 +60,47 @@ def get_data():
 
 
 class TestCreateStepTable(unittest.TestCase):
+    record_1 = StepTraceOriginDto()
+    record_1.model_id = 1
+    record_1.timestamp = 1
+    record_1.tag_id = 0
+    record_2 = StepTraceOriginDto()
+    record_2.model_id = 1
+    record_2.timestamp = 2
+    record_2.tag_id = 0
+    record_3 = StepTraceOriginDto()
+    record_3.model_id = 1
+    record_3.timestamp = 3
+    record_3.tag_id = 2
+    record_4 = StepTraceOriginDto()
+    record_4.model_id = 1
+    record_4.timestamp = 4
+    record_4.tag_id = 3
+    record_5 = StepTraceOriginDto()
+    record_5.model_id = 1
+    record_5.timestamp = 5
+    record_5.tag_id = 4
+    record_6 = StepTraceOriginDto()
+    record_6.model_id = 1
+    record_6.timestamp = 6
+    record_6.tag_id = 1
+    record_7 = StepTraceOriginDto()
+    record_7.model_id = 1
+    record_7.timestamp = 7
+    record_7.tag_id = 1
+    step_trace = [record_1, record_2, record_3, record_4, record_5, record_6, record_7]
+    ordered_step_trace = [record_1, record_3, record_4, record_5, record_6, record_2, record_7]
 
     def test_process_step_trace(self):
-        step_trace = [(1, 2, 436149063616.0, 18, 2, 0), (1, 2, 436178135677.0, 18, 314, 1)]
-
         with mock.patch(NAMESPACE + '.StepTableBuilder.build_table'):
-            StepTableBuilder.process_step_trace(step_trace)
+            StepTableBuilder.process_step_trace(self.step_trace)
 
         collect_data = get_data()
         self.assertEqual(collect_data[1][2].get('step_start'), 7)
+
+    def test_reorder_step_trace_for_pipe_stage(self):
+        result = StepTracePreProcess().reorder_step_trace_for_pipe_stage(self.step_trace)
+        self.assertEqual(result, self.ordered_step_trace)
 
     def test_build_table(self):
         sample_config = {"result_dir": ""}
