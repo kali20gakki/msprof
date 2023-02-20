@@ -83,7 +83,7 @@ class HostNetworkUsagePresenter(HostProfPresenterBase):
             # Mbits/sec to KByte/sec
             speed = net.get("speed")
             if is_number(speed) and speed != -1:
-                all_netcard_speed += speed * 125000 / Constant.KILOBYTE
+                all_netcard_speed += speed * Constant.MBPS_TO_BYTES / Constant.KILOBYTE
         return all_netcard_speed
 
     def init(self: any) -> None:
@@ -116,7 +116,7 @@ class HostNetworkUsagePresenter(HostProfPresenterBase):
             # Mbits/sec to Byte/sec
             speed = net.get("speed")
             if is_number(speed) and speed != -1:
-                self.speeds[net.get("netCardName")] = net.get("speed") * 125000
+                self.speeds[net.get("netCardName")] = net.get("speed") * Constant.MBPS_TO_BYTES
 
     def write_per_usage(self: any, curr_timestamp: float, curr_data: dict,
                         last_timestamp: float, last_data: dict) -> None:

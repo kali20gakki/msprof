@@ -7,7 +7,10 @@ from sqlite.db_manager import DBOpen
 from sqlite.db_manager import DBManager
 
 from common_func.db_name_constant import DBNameConstant
+from common_func.ms_constant.str_constant import StrConstant
+from common_func.constant import Constant
 from tuning.data_manager import DataManager, OpSummaryTuningDataHandle
+from tuning.data_manager import ModelSummaryTuningDataHandle
 
 sample_config = {"model_id": 1, 'iter_id': 'dasfsd', 'result_dir': 'jasdfjfjs',
                  "ai_core_profiling_mode": "task-based", "aiv_profiling_mode": "sample-based"}
@@ -113,6 +116,143 @@ class TestDataLoader(unittest.TestCase):
 
             with mock.patch(NAMESPACE + '.DBManager.destroy_db_connect'):
                 OpSummaryTuningDataHandle.is_network(project, device_id)
+
+
+class TestModelSummaryTuningDataHandle(unittest.TestCase):
+    def test_load_data_incorrect_metrics(self):
+        param = {
+            StrConstant.SAMPLE_CONFIG:
+                {
+                    StrConstant.AI_CORE_PROFILING_METRICS: 'xxx'
+                }
+            }
+        handler = ModelSummaryTuningDataHandle()
+        ret = handler.load_data(param)
+        self.assertEqual(ret, [])
+
+    def test_load_data_correct_metrics_no_ops(self):
+        param = {
+            StrConstant.SAMPLE_CONFIG:
+                {
+                    StrConstant.AI_CORE_PROFILING_METRICS: Constant.PMU_PIPE
+                }
+            }
+        handler = ModelSummaryTuningDataHandle()
+        with mock.patch(NAMESPACE + '.ModelSummaryTuningDataHandle.get_data_by_infer_id', return_value=[]):
+            ret = handler.load_data(param)[0]
+            self.assertEqual(ret.get(StrConstant.CUBE_UTILIZATION), 0)
+            self.assertEqual(ret.get(StrConstant.VECTOR_UTILIZATION), 0)
+            self.assertEqual(ret.get(StrConstant.MTE_UTILIZATION), 0)
+            self.assertEqual(ret.get(StrConstant.SCALAR_UTILIZATION), 0)
+
+    def test_load_data_correct_metrics_with_ops(self):
+        param = {
+            StrConstant.SAMPLE_CONFIG:
+                {
+                    StrConstant.AI_CORE_PROFILING_METRICS: Constant.PMU_PIPE
+                }
+            }
+        op1 = {
+            StrConstant.MAC_RATIO: 0.3,
+            StrConstant.VEC_RATIO: 0.24,
+            StrConstant.MTE1_RATIO: 0.1,
+            StrConstant.SCALAR_RATIO: 0.01,
+            StrConstant.TASK_DURATION: 30,
+            Constant.TASK_TYPE: Constant.TASK_TYPE_AI_CORE
+        }
+        op2 = {
+            StrConstant.MAC_RATIO: 0.2,
+            StrConstant.VEC_RATIO: 0.24,
+            StrConstant.MTE1_RATIO: 0.12,
+            StrConstant.SCALAR_RATIO: 0.11,
+            StrConstant.TASK_DURATION: 10,
+            Constant.TASK_TYPE: Constant.TASK_TYPE_AI_CORE
+        }
+        handler = ModelSummaryTuningDataHandle()
+        with mock.patch(NAMESPACE + '.ModelSummaryTuningDataHandle.get_data_by_infer_id', return_value=[op1, op2]):
+            ret = handler.load_data(param)[0]
+            self.assertEqual(ret.get(StrConstant.CUBE_UTILIZATION), 30)
+            self.assertEqual(ret.get(StrConstant.VECTOR_UTILIZATION), 10)
+            self.assertEqual(ret.get(StrConstant.MTE_UTILIZATION), 0)
+            self.assertEqual(ret.get(StrConstant.SCALAR_UTILIZATION), 0)
+
+    def test_get_operator_bound_type_cube(self):
+        op_dict = {
+            StrConstant.MAC_RATIO: 0.3,
+            StrConstant.VEC_RATIO: 0.24,
+            StrConstant.MTE1_RATIO: 0.1,
+            StrConstant.SCALAR_RATIO: 0.01,
+            StrConstant.TASK_DURATION: 30,
+            Constant.TASK_TYPE: Constant.TASK_TYPE_AI_CORE
+        }
+        handler = ModelSummaryTuningDataHandle()
+        bound_type = handler.get_operator_bound_type(op_dict)
+        self.assertEqual(bound_type, StrConstant.CUBE_UTILIZATION)
+
+    def test_get_operator_bound_type_vector(self):
+        op_dict = {
+            StrConstant.MAC_RATIO: 0.3,
+            StrConstant.VEC_RATIO: 0.54,
+            StrConstant.MTE1_RATIO: 0.1,
+            StrConstant.SCALAR_RATIO: 0.01,
+            StrConstant.TASK_DURATION: 30,
+            Constant.TASK_TYPE: Constant.TASK_TYPE_AI_CORE
+        }
+        handler = ModelSummaryTuningDataHandle()
+        bound_type = handler.get_operator_bound_type(op_dict)
+        self.assertEqual(bound_type, StrConstant.VECTOR_UTILIZATION)
+
+    def test_get_operator_bound_type_mte(self):
+        op_dict = {
+            StrConstant.MAC_RATIO: 0.3,
+            StrConstant.VEC_RATIO: 0.24,
+            StrConstant.MTE1_RATIO: 0.5,
+            StrConstant.SCALAR_RATIO: 0.01,
+            StrConstant.TASK_DURATION: 30,
+            Constant.TASK_TYPE: Constant.TASK_TYPE_AI_CORE
+        }
+        handler = ModelSummaryTuningDataHandle()
+        bound_type = handler.get_operator_bound_type(op_dict)
+        self.assertEqual(bound_type, StrConstant.MTE_UTILIZATION)
+
+    def test_get_operator_bound_type_scalar(self):
+        op_dict = {
+            StrConstant.MAC_RATIO: 0.3,
+            StrConstant.VEC_RATIO: 0.24,
+            StrConstant.MTE1_RATIO: 0.1,
+            StrConstant.SCALAR_RATIO: 0.41,
+            StrConstant.TASK_DURATION: 30,
+            Constant.TASK_TYPE: Constant.TASK_TYPE_AI_CORE
+        }
+        handler = ModelSummaryTuningDataHandle()
+        bound_type = handler.get_operator_bound_type(op_dict)
+        self.assertEqual(bound_type, StrConstant.SCALAR_UTILIZATION)
+
+    def test_get_operator_bound_type_op_ratio_all_0(self):
+        op_dict = {
+            StrConstant.MAC_RATIO: 0,
+            StrConstant.VEC_RATIO: 0,
+            StrConstant.MTE1_RATIO: 0,
+            StrConstant.SCALAR_RATIO: 0,
+            StrConstant.TASK_DURATION: 0,
+            Constant.TASK_TYPE: Constant.TASK_TYPE_AI_CORE
+        }
+        handler = ModelSummaryTuningDataHandle()
+        bound_type = handler.get_operator_bound_type(op_dict)
+        self.assertEqual(bound_type, Constant.NA)
+
+    def test_get_operator_bound_type_op_aicpu(self):
+        op_dict = {
+            StrConstant.MAC_RATIO: 0.3,
+            StrConstant.VEC_RATIO: 0.24,
+            StrConstant.MTE1_RATIO: 0.1,
+            StrConstant.SCALAR_RATIO: 0.41,
+            StrConstant.TASK_DURATION: 30,
+            Constant.TASK_TYPE: Constant.TASK_TYPE_AI_CPU
+        }
+        handler = ModelSummaryTuningDataHandle()
+        bound_type = handler.get_operator_bound_type(op_dict)
+        self.assertEqual(bound_type, Constant.NA)
 
 
 if __name__ == '__main__':

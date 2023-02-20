@@ -5,6 +5,7 @@ from common_func.info_conf_reader import InfoConfReader
 from host_prof.host_network_usage.presenter.host_network_usage_presenter import HostNetworkUsagePresenter, \
     parse_net_stats
 from host_prof.host_network_usage.model.host_network_usage import HostNetworkUsage
+from common_func.constant import Constant
 
 NAMESPACE = 'host_prof.host_network_usage.presenter.host_network_usage_presenter'
 
@@ -92,7 +93,7 @@ class TestHostNetworkUsage(unittest.TestCase):
         InfoConfReader()._info_json = {"netCardNums": 8, "netCard": netcard}
         check = HostNetworkUsagePresenter(self.result_dir, self.file_name)
         ret = check.compute_netcard_speed()
-        self.assertEqual(ret, 125000)
+        self.assertEqual(ret, Constant.MBPS_TO_BYTES)
 
     def test_compute_netcard2_speed(self):
         netcard = [
@@ -103,7 +104,7 @@ class TestHostNetworkUsage(unittest.TestCase):
         InfoConfReader()._info_json = {"netCardNums": 8, "netCard": netcard}
         check = HostNetworkUsagePresenter(self.result_dir, self.file_name)
         ret = check.compute_netcard_speed()
-        self.assertEqual(ret, 1134 / 1024 * 125000)
+        self.assertEqual(ret, 1134 / 1024 * Constant.MBPS_TO_BYTES)
 
     def test_get_summary_data(self):
         with mock.patch('host_prof.host_network_usage.model.host_network_usage.HostNetworkUsage.check_db',
