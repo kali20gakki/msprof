@@ -510,9 +510,8 @@ class ExportCommand:
                 or not all(Utils.generator_to_list(device_id.isdigit()
                                                    for device_id in self.list_map.get("devices_list", []))):
             return
-        ProfilingTuning.run(result_dir)
-        sample_config = {}
-        tuning_view = TuningView(result_dir, sample_config, self.list_map.get("devices_list")[0])
+        ProfilingTuning.run(result_dir, self.sample_config)
+        tuning_view = TuningView(result_dir, self.sample_config, self.list_map.get("devices_list")[0])
         tuning_view.show_by_dev_id()
 
     def _show_cluster_tuning(self) -> None:

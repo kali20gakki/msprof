@@ -7,6 +7,7 @@ import sqlite3
 
 from common_func.constant import Constant
 from common_func.ms_constant.str_constant import StrConstant
+from common_func.ms_constant.number_constant import NumberConstant
 from common_func.db_name_constant import DBNameConstant
 from common_func.msprof_common import MsProfCommonConstant
 from common_func.ms_multi_process import MsMultiProcess
@@ -75,7 +76,9 @@ class GeInfoParser(IParser, MsMultiProcess):
         if ge_data:
             # check whether include dynamic shape model
             for datum in ge_data:
-                if datum[index_space.get(MsProfCommonConstant.INDEX_ID)] > 0:
+                index_id = datum[index_space.get(MsProfCommonConstant.INDEX_ID)]
+                # ignore single operator scene
+                if index_id > 0 and index_id != NumberConstant.DEFAULT_NUMBER:
                     dynamic_model_dict.setdefault(
                         datum[index_space.get(MsProfCommonConstant.MODEL_ID)], []).append(datum)
                 else:
