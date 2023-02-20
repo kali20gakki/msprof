@@ -131,6 +131,7 @@ public:
     int TransToParam(std::array<std::string, INPUT_CFG_MAX> paramContainer, SHARED_PTR_ALIA<ProfileParams> params);
     void SetDefaultAivParams(std::array<std::string, INPUT_CFG_MAX> &paramContainer) const;
     void SetDefaultLlcMode(std::array<std::string, INPUT_CFG_MAX> &paramContainer) const;
+    std::string SetDefaultAicMetricsType() const;
 public:
     bool CheckFreqValid(const std::string &freq, const InputCfg freqOpt) const;
 private:

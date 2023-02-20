@@ -40,7 +40,8 @@ enum ProfilingAicoreMetrics {
     kAicoreMemoryL0 = 3,
     kAicoreResourceConflictRatio = 4,
     kAicoreMemoryUB = 5,
-    kAicoreL2Cache = 6
+    kAicoreL2Cache = 6,
+    kAicorePipelineExecuteUtilization = 7
 };
 
 using ProfAicoreEvents = struct ProfAicoreEvents;

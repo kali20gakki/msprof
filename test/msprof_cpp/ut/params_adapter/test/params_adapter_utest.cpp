@@ -66,6 +66,18 @@ TEST_F(ParamsAdapterUtest, SetDefaultAivParams)
     ParamsAdapterMgr->SetDefaultAivParams(paramContainer);
 }
 
+TEST_F(ParamsAdapterUtest, SetDefaultAicMetricsType)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<ParamsAdapter> ParamsAdapterMgr;
+    MSVP_MAKE_SHARED0_BREAK(ParamsAdapterMgr, ParamsAdapter);
+    std::array<std::string, INPUT_CFG_MAX> paramContainer;
+    ParamsAdapterMgr->platformType_ = PlatformType::CHIP_V4_2_0;
+    EXPECT_EQ("PipelineExecuteUtilization", ParamsAdapterMgr->SetDefaultAicMetricsType());
+    ParamsAdapterMgr->platformType_ = PlatformType::CLOUD_TYPE;
+    EXPECT_EQ("PipeUtilization", ParamsAdapterMgr->SetDefaultAicMetricsType());
+}
+
 TEST_F(ParamsAdapterUtest, SetDefaultLlcMode)
 {
     GlobalMockObject::verify();
