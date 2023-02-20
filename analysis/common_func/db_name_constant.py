@@ -51,7 +51,6 @@ class DBNameConstant(metaclass=ABCMeta):
     DB_HCCL = "hccl.db"
     DB_MSPROFTX = 'msproftx.db'
     DB_GE_HASH = "ge_hash.db"
-    DB_ACSQ = "acsq.db"
     DB_SOC_LOG = "soc_log.db"
     DB_ACC_PMU = "acc_pmu.db"
     DB_STARS_SOC = "soc_profiler.db"

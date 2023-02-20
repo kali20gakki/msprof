@@ -135,13 +135,11 @@ class OpSummaryModel(ViewModel, IAnalysisModel):
 
     def _get_acsq_task_data(self: any) -> list:
         try:
-            with AcsqTaskModel(self.result_dir, DBNameConstant.DB_ACSQ, []) as acsq_task_model:
+            with AcsqTaskModel(self.result_dir, DBNameConstant.DB_SOC_LOG, []) as acsq_task_model:
                 return acsq_task_model.get_ffts_type_data()
         except sqlite3.Error as err:
             logging.error("Get acsq task data failed! %s", err)
             return []
-        finally:
-            pass
 
     def _get_ffts_task_data(self: any) -> list:
         try:

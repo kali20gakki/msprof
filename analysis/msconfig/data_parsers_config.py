@@ -139,7 +139,7 @@ class DataParsersConfig(MetaConfig):
         ]
         , 'ParseAiCpuDataAdapter': [
             ('path', 'msparser.aicpu.parse_aicpu_data_adapter'),
-            ('chip_model', '0,1,2,3,4,5'),
+            ('chip_model', '0,1,2,3,4,5,7'),
             ('level', '3')
         ]
         , 'GeHostParser': [

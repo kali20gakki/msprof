@@ -63,7 +63,7 @@ class AccPmuCalculator(ICalculator, MsMultiProcess):
         :return: dict
         """
         task_time_dict = {}
-        conn, curs = DBManager.check_connect_db(self.result_dir, DBNameConstant.DB_ACSQ)
+        conn, curs = DBManager.check_connect_db(self.result_dir, DBNameConstant.DB_SOC_LOG)
         if not (conn and curs):
             return task_time_dict
         sql = 'select task_id, start_time, task_time from {}'.format(DBNameConstant.TABLE_ACSQ_TASK)

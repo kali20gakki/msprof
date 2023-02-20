@@ -22,7 +22,7 @@ class AcsqTaskViewer:
 
     def __init__(self: any, configs: dict) -> None:
         self.configs = configs
-        self._model = AcsqTaskModel(configs.get('result_dir'), DBNameConstant.DB_ACSQ,
+        self._model = AcsqTaskModel(configs.get('result_dir'), DBNameConstant.DB_SOC_LOG,
                                     [])
 
     @staticmethod

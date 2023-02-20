@@ -9,7 +9,7 @@ class StarsConfig(MetaConfig):
     DATA = {
         'AcsqTaskParser': [
             ('fmt', '000000, 000001'),
-            ('db', 'acsq.db'),
+            ('db', 'soc_log.db'),
             ('table', 'AcsqTask'),
             ('is_db_needed_clear', '1')
         ]
