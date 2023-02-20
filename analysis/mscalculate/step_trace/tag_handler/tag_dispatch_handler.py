@@ -147,7 +147,7 @@ class DispatchIterInfoHandler(StepTraceTagHandler):
             self.next_handler = self.next_handler_group.get(StepTraceConstant.ALL_REDUCE)
             return True
 
-        if tag_id in (StepTraceConstant.FP_TAG, StepTraceConstant.BP_TAG, StepTraceConstant.GE_FP_TAG):
+        if tag_id in (StepTraceConstant.FP_TAG, StepTraceConstant.BP_TAG):
             self.next_handler = self.next_handler_group.get(StepTraceConstant.TRAINING_TRACE)
             return True
 

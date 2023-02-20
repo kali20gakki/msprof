@@ -119,9 +119,6 @@ class TrainingTraceTagHandler(StepTraceTagHandler):
             user_set_flag = True
             self.collect_data[StepTraceConstant.FORWARD_PROPAGATION] = record.get(StepTraceConstant.TIME_STAMP)
 
-        if record[StepTraceConstant.TAG_ID] == StepTraceConstant.GE_FP_TAG and not user_set_flag:
-            self.collect_data[StepTraceConstant.FORWARD_PROPAGATION] = record.get(StepTraceConstant.TIME_STAMP)
-
         if record[StepTraceConstant.TAG_ID] == StepTraceConstant.BP_TAG:
             self.collect_data[StepTraceConstant.BACK_PROPAGATION] = record.get(StepTraceConstant.TIME_STAMP)
 

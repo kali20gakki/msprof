@@ -7,6 +7,68 @@ from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 
 
+class StepTraceOriginDto:
+    """
+    step trace origin DATA dto
+    """
+
+    def __init__(self: any) -> None:
+        self._index_id = None
+        self._model_id = None
+        self._timestamp = None
+        self._tag_id = None
+        self._stream_id = None
+        self._task_id = None
+
+    @property
+    def index_id(self: any) -> any:
+        return self._index_id
+
+    @index_id.setter
+    def index_id(self: any, value: any) -> None:
+        self._index_id = value
+
+    @property
+    def model_id(self: any) -> any:
+        return self._model_id
+
+    @model_id.setter
+    def model_id(self: any, value: any) -> None:
+        self._model_id = value
+
+    @property
+    def timestamp(self: any) -> any:
+        return self._timestamp
+
+    @timestamp.setter
+    def timestamp(self: any, value: any) -> None:
+        self._timestamp = value
+
+    @property
+    def tag_id(self: any) -> any:
+        return self._tag_id
+
+    @tag_id.setter
+    def tag_id(self: any, value: any) -> None:
+        self._tag_id = value
+
+    @property
+    def stream_id(self: any) -> any:
+        return self._stream_id
+
+    @stream_id.setter
+    def stream_id(self: any, value: any) -> None:
+        self._stream_id = value
+
+    @property
+    def task_id(self: any) -> any:
+        return self._task_id
+
+    @task_id.setter
+    def task_id(self: any, value: any) -> None:
+        self._task_id = value
+
+
 class StepTraceDto:
     """
     step trace dto
@@ -195,3 +257,5 @@ class IterationRange(Iteration):
 
     def _is_compatibility_required(self):
         return NumberConstant.DEFAULT_ITER_COUNT == self.iteration_count
+
+
