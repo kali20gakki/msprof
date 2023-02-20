@@ -6,7 +6,9 @@
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
+from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.stars_constant import StarsConstant
+from common_func.ms_constant.str_constant import StrConstant
 from common_func.trace_view_header_constant import TraceViewHeaderConstant
 from common_func.trace_view_manager import TraceViewManager
 from msmodel.interface.view_model import ViewModel
@@ -24,11 +26,15 @@ class FftsLogViewer(BaseViewer):
 
     def __init__(self: any, configs: dict, params: dict) -> None:
         super().__init__(configs, params)
-        self.model_list = {
-            ExportDataType.FFTS_SUB_TASK_TIME.name.lower(): FftsLogModel,
-        }
 
-    def get_time_timeline_header(self: any, data: list) -> list:
+    def get_model_instance(self: any) -> any:
+        """
+        get model instance from list
+        """
+        return FftsLogModel(self.params.get(StrConstant.PARAM_RESULT_DIR), DBNameConstant.DB_SOC_LOG, [])
+
+    @staticmethod
+    def get_time_timeline_header(data: list, pid_header=TraceViewHeaderConstant.PROCESS_TASK) -> list:
         """
         to get sequence chrome trace json header
         :return: header of trace data list
@@ -36,7 +42,7 @@ class FftsLogViewer(BaseViewer):
         header = [
             [
                 "process_name", InfoConfReader().get_json_pid_data(),
-                InfoConfReader().get_json_tid_data(), self.SUBTASK_TIME
+                InfoConfReader().get_json_tid_data(), pid_header
             ]
         ]
         subtask = []
@@ -52,12 +58,18 @@ class FftsLogViewer(BaseViewer):
         to format data to chrome trace json
         :return: timeline_trace list
         """
-        if not data_list:
+        if not any(data_list.values()):
             return []
-        data_list = self.add_node_name(data_list)
+        self.add_node_name(data_list)
         result = []
+        if self.params.get('data_type') == ExportDataType.FFTS_SUB_TASK_TIME.name.lower():
+            return self.format_task_type_data(data_list, result)
+        else:
+            return self.format_task_scheduler(data_list, result)
+
+    def format_task_type_data(self, data_list, result_list):
         for data in data_list.get('subtask_data_list', []):
-            result.append(
+            result_list.append(
                 [data.op_name,
                  InfoConfReader().get_json_pid_data(),
                  data.subtask_type,  # subtask type
@@ -66,20 +78,55 @@ class FftsLogViewer(BaseViewer):
                  {'FFTS Type': data.ffts_type, 'Stream ID': data.stream_id, 'Task ID': data.task_id,
                   'Subtask_id': data.subtask_id}])
         _trace = TraceViewManager.time_graph_trace(TraceViewHeaderConstant.TOP_DOWN_TIME_GRAPH_HEAD,
-                                                   result)
-        result = TraceViewManager.metadata_event(self.get_time_timeline_header(result))
+                                                   result_list)
+        result = TraceViewManager.metadata_event(
+            self.get_time_timeline_header(result_list, pid_header=self.SUBTASK_TIME))
         result.extend(_trace)
         return result
 
-    def add_node_name(self: any, data_dict: dict) -> dict:
-        node_name_dict = self.get_node_name()
+    def format_task_scheduler(self, data_list, result_list):
+        for data in data_list.get('subtask_data_list', []):
+            result_list.append(
+                [data.op_name,
+                 InfoConfReader().get_json_pid_data(),
+                 "Stream {}".format(str(data.stream_id)),
+                 data.start_time / DBManager.NSTOUS,  # start time
+                 data.dur_time / DBManager.NSTOUS if data.dur_time > 0 else 0,  # duration
+                 {'FFTS Type': data.ffts_type, 'Task Type': data.subtask_type, 'Stream ID': data.stream_id,
+                  'Task ID': data.task_id, 'Subtask_id': data.subtask_id}])
+        for data in data_list.get('acsq_task_list', []):
+            result_list.append(
+                [data.op_name,
+                 InfoConfReader().get_json_pid_data(),
+                 "Stream {}".format(str(data.stream_id)),
+                 data.start_time / DBManager.NSTOUS,  # start time
+                 data.task_time / DBManager.NSTOUS if data.task_time > 0 else 0,  # duration
+                 {"Task Type": data.task_type, 'Stream ID': data.stream_id,
+                  'Task ID': data.task_id, 'Subtask_id': data.subtask_id}])
+        _trace = TraceViewManager.time_graph_trace(TraceViewHeaderConstant.TOP_DOWN_TIME_GRAPH_HEAD,
+                                                   result_list)
+        result = TraceViewManager.metadata_event(self.get_time_timeline_header(result_list))
+        result.extend(_trace)
+        return result
+
+    def add_node_name(self: any, data_dict: dict) -> None:
+        node_name_dict, task_type_dict = self.get_ge_data_dict()
+        ffts_plus_set = set()
         for data in data_dict.get('subtask_data_list', []):
+            ffts_plus_set.add("{0}-{1}-{2}".format(data.task_id, data.stream_id, NumberConstant.DEFAULT_GE_CONTEXT_ID))
             node_key = "{0}-{1}-{2}".format(data.task_id, data.stream_id, data.subtask_id)
             data.op_name = node_name_dict.get(node_key, 'NA')
-        return data_dict
+        tradition_list = []
+        for data in data_dict.get('acsq_task_list', []):
+            node_key = "{0}-{1}-{2}".format(data.task_id, data.stream_id, NumberConstant.DEFAULT_GE_CONTEXT_ID)
+            if node_key not in ffts_plus_set:
+                data.op_name = node_name_dict.get(node_key, 'NA')
+                data.task_type = task_type_dict.get(node_key, data.task_type)
+                tradition_list.append(data)
+        data_dict['acsq_task_list'] = tradition_list
 
-    def get_node_name(self: any) -> dict:
-        node_dict = {}
+    def get_ge_data_dict(self: any) -> tuple:
+        node_dict, task_type_dict = {}, {}
         view_model = ViewModel(self.params.get('project'), DBNameConstant.DB_AICORE_OP_SUMMARY,
                                DBNameConstant.TABLE_GE_TASK)
         view_model.init()
@@ -87,4 +134,6 @@ class FftsLogViewer(BaseViewer):
         for data in ge_data:
             node_key = "{0}-{1}-{2}".format(data.task_id, data.stream_id, data.context_id)
             node_dict[node_key] = data.op_name
-        return node_dict
+            if data.context_id == NumberConstant.DEFAULT_GE_CONTEXT_ID:
+                task_type_dict[node_key] = data.task_type
+        return node_dict, task_type_dict

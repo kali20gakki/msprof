@@ -35,7 +35,7 @@ class AcsqCalculator(ICalculator, MsMultiProcess):
         self._iter_range = sample_config.get(StrConstant.PARAM_ITER_ID)
         self._project_path = sample_config.get(StrConstant.SAMPLE_CONFIG_PROJECT_PATH)
         self._file_list = file_list
-        self._acsq_model = AcsqTaskModel(self._project_path, DBNameConstant.DB_ACSQ,
+        self._acsq_model = AcsqTaskModel(self._project_path, DBNameConstant.DB_SOC_LOG,
                                          [DBNameConstant.TABLE_ACSQ_TASK_TIME])
         self._iter_model = HwtsIterModel(self._project_path)
         self._log_data = []

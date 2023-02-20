@@ -89,7 +89,7 @@ class TestMsProfExportDataUtils(unittest.TestCase):
         InfoConfReader()._info_json = {"devices": 123}
         key = MsProfExportDataUtils()
         result = key._get_task_time_data(configs, params)
-        self.assertEqual(result, '[{"name": "process_name", "pid": 3, "tid": 0, "args": {"name": "ACSQ"}, "ph": "M"}]')
+        self.assertEqual(result, '[]')
 
     def test_get_task_time_data_2(self):
         configs = {"db": 'runtime.db', "table": '123'}
