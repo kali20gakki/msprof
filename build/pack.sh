@@ -34,25 +34,47 @@ function bep_env_init() {
     fi
 }
 
+function create_run_package() {
+  	local cann_component_dir=${1}
+	  local cann_component_name=${2}
+	  local package_name_suffix=${3}
+
+	  ${CREATE_RUN_SCRIPT} \
+    --header ${CONTROL_PARAM_SCRIPT} --help-header ${cann_component_dir}/${cann_component_name}/scripts/help.info --pigz --complevel 4 --nomd5 --sha256 \
+    --nooverwrite --chown --tar-format gnu --tar-extra --numeric-owner \
+    ${cann_component_dir} \
+    ${CUR_DIR}/tmp/${package_name_suffix} \
+    ${COMMENTS} \
+    ./${cann_component_name}/scripts/install.sh
+    mv ${CUR_DIR}/tmp/${package_name_suffix} ${RM_DIR}/${package_name_suffix}
+}
+
 bep_env_init
+
 MINDSTUDIO_TOOLKIT_NAME=Ascend-mindstudio-toolkit*.run
 CANN_TOOLKIT_NAME=CANN-toolkit-*.run
 CANN_RUNTIME_NAME=CANN-runtime-*linux*.run
+
+# makeself is tool for compiling run package
+MAKESELF_DIR=${TOP_DIR}/opensource/makeself
+# footnote for creating run package
+CREATE_RUN_SCRIPT=${MAKESELF_DIR}/makeself.sh
+# footnote for controling params
+CONTROL_PARAM_SCRIPT=${MAKESELF_DIR}/makeself-header.sh
+COMMENTS=comments
+
 # only find x86 or ARM
 for DIR in ${OUT_DIR}/platform/Tuscany/*centos*;
   do
     RM_DIR=${DIR}
-    MINDSTUDIO_TOOLKIT_DIR=${RM_DIR}/$MINDSTUDIO_TOOLKIT_NAME
-    CANN_TOOLKIT_DIR=${RM_DIR}/$CANN_TOOLKIT_NAME
-    CANN_RUNTIME_DIR=${RM_DIR}/$CANN_RUNTIME_NAME
-    
     mkdir ${CUR_DIR}/tmp
-    cp $MINDSTUDIO_TOOLKIT_DIR ${CUR_DIR}/tmp
+
+    cp ${RM_DIR}/${MINDSTUDIO_TOOLKIT_NAME} ${CUR_DIR}/tmp
     PACKAGE_NAME_MINDSTUDIO_SUFFIX=$(ls ${CUR_DIR}/tmp)
     mkdir ${CUR_DIR}/tmp/cann_toolkit
     mkdir ${CUR_DIR}/tmp/cann_runtime
-    cp $CANN_TOOLKIT_DIR ${CUR_DIR}/tmp/cann_toolkit
-    cp $CANN_RUNTIME_DIR ${CUR_DIR}/tmp/cann_runtime
+    cp ${RM_DIR}/${CANN_TOOLKIT_NAME} ${CUR_DIR}/tmp/cann_toolkit
+    cp ${RM_DIR}/${CANN_RUNTIME_NAME} ${CUR_DIR}/tmp/cann_runtime
     chmod -R +x ${CUR_DIR}/tmp
     package_name_toolkit_suffix=$(ls ${CUR_DIR}/tmp/cann_toolkit)
     package_name_runtime_suffix=$(ls ${CUR_DIR}/tmp/cann_runtime)
@@ -69,53 +91,11 @@ for DIR in ${OUT_DIR}/platform/Tuscany/*centos*;
     rm -rf ${CUR_DIR}/tmp/cann_toolkit/${PACKAGE_NAME_TOOLKIT}/toolkit/tools/profiler/profiler_tool/analysis
     cp -r ${CUR_DIR}/tmp/mindstudio/mindstudio-toolkit/tools/msprof/analysis ${CUR_DIR}/tmp/cann_toolkit/${PACKAGE_NAME_TOOLKIT}/toolkit/tools/profiler/profiler_tool/analysis
     cp -f ${CUR_DIR}/tmp/mindstudio/mindstudio-toolkit/tools/msprof/acl_prof.h ${CUR_DIR}/tmp/cann_runtime/${PACKAGE_NAME_RUNTIME}/runtime/include/acl/acl_prof.h
-    
-    # makeself is tool for compiling run package
-    MAKESELF_DIR=${TOP_DIR}/opensource/makeself
-    # footnote for creating run package
-    CREATE_RUN_SCRIPT=${MAKESELF_DIR}/makeself.sh
-    # footnote for controling params
-    CONTROL_PARAM_SCRIPT=${MAKESELF_DIR}/makeself-header.sh
-    CANN_TOOLKIT=${CUR_DIR}/tmp/cann_toolkit/${PACKAGE_NAME_TOOLKIT}/toolkit
-    CANN_RUNTIME=${CUR_DIR}/tmp/cann_runtime/${PACKAGE_NAME_RUNTIME}/runtime
-    MINDSTUDIO_TOOLKIT=${CUR_DIR}/tmp/mindstudio/mindstudio-toolkit
-    COMMENTS=comments
 
-    ${CREATE_RUN_SCRIPT} \
-    --header ${CONTROL_PARAM_SCRIPT}\
-    --help-header ${CANN_TOOLKIT}/scripts/help.info \
-    --pigz \
-    --complevel 4 \
-    --nomd5 \
-    --sha256 \
-    --nooverwrite \
-    --chown \
-    --tar-format gnu\
-    --tar-extra \
-    --numeric-owner \
-    ${CUR_DIR}/tmp/cann_toolkit/${PACKAGE_NAME_TOOLKIT} \
-    ${CUR_DIR}/tmp/${package_name_toolkit_suffix} \
-    ${COMMENTS} \
-    ./toolkit/scripts/install.sh
-    mv ${CUR_DIR}/tmp/${package_name_toolkit_suffix} ${RM_DIR}/$package_name_toolkit_suffix
-    
-     ${CREATE_RUN_SCRIPT} \
-    --header ${CONTROL_PARAM_SCRIPT}\
-    --help-header ${CANN_RUNTIME}/scripts/help.info \
-    --pigz \
-    --complevel 4 \
-    --nomd5 \
-    --sha256 \
-    --nooverwrite \
-    --chown \
-    --tar-format gnu\
-    --tar-extra \
-    --numeric-owner \
-    ${CUR_DIR}/tmp/cann_runtime/${PACKAGE_NAME_RUNTIME} \
-    ${CUR_DIR}/tmp/${package_name_runtime_suffix} \
-    ${COMMENTS} \
-    ./runtime/scripts/install.sh
-    mv ${CUR_DIR}/tmp/${package_name_runtime_suffix} ${RM_DIR}/$package_name_runtime_suffix
+    create_run_package ${CUR_DIR}/tmp/cann_toolkit/${PACKAGE_NAME_TOOLKIT} toolkit ${package_name_toolkit_suffix}
+    create_run_package ${CUR_DIR}/tmp/cann_runtime/${PACKAGE_NAME_RUNTIME} runtime ${package_name_runtime_suffix}
+
+    MINDSTUDIO_TOOLKIT=${CUR_DIR}/tmp/mindstudio/mindstudio-toolkit
 
     filelist_csv=${MINDSTUDIO_TOOLKIT}/script/filelist.csv
     file_interval=${MINDSTUDIO_TOOLKIT}/script/file_interval.csv
