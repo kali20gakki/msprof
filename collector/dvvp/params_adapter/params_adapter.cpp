@@ -192,6 +192,11 @@ void ParamsAdapter::SetDefaultLlcMode(std::array<std::string, INPUT_CFG_MAX> &pa
     }
 }
 
+std::string ParamsAdapter::SetDefaultAicMetricsType() const
+{
+    return (platformType_ == PlatformType::CHIP_V4_2_0) ? PIPE_EXECUTION_UTILIZATION : PIPE_UTILIZATION;
+}
+
 int ParamsAdapter::TransToParam(std::array<std::string, INPUT_CFG_MAX> paramContainer,
     SHARED_PTR_ALIA<ProfileParams> params)
 {

@@ -199,7 +199,7 @@ void ParamsAdapterAclJson::SetAclJsonContainerDefaultValue()
     paramContainer_[INPUT_CFG_COM_AI_CORE] = MSVP_PROF_ON;
     paramContainer_[INPUT_CFG_COM_AIC_MODE] = PROFILING_MODE_TASK_BASED;
     paramContainer_[INPUT_CFG_COM_AIC_METRICS] = paramContainer_[INPUT_CFG_COM_AIC_METRICS].empty() ?
-        PIPE_UTILIZATION : paramContainer_[INPUT_CFG_COM_AIC_METRICS];
+        SetDefaultAicMetricsType() : paramContainer_[INPUT_CFG_COM_AIC_METRICS];
 
     paramContainer_[INPUT_CFG_COM_AI_VECTOR] = MSVP_PROF_ON;
     paramContainer_[INPUT_CFG_COM_AIV_MODE] = PROFILING_MODE_TASK_BASED;
