@@ -272,6 +272,7 @@ class Constant:
     ]
     PMU_PIPE = 'PipeUtilization'
     PMU_PIPE_EXCT = 'PipeUtilizationExct'
+    PMU_PIPE_EXECUT = 'PipelineExecuteUtilization'
     PMU_ARITH = 'ArithmeticUtilization'
     PMU_MEM = 'Memory'
     PMU_MEM_L0 = 'MemoryL0'
@@ -291,13 +292,21 @@ class Constant:
         "vec_int32_ratio": PmuCalculateFunc.vec_int32_ratio,
         "vec_misc_ratio": PmuCalculateFunc.vec_misc_ratio,
         "vec_ratio": PmuCalculateFunc.vec_ratio,
+        "vec_exe_ratio": PmuCalculateFunc.vec_ratio,
         "mac_ratio": PmuCalculateFunc.mac_ratio,
+        "mac_ratio_extra": PmuCalculateFunc.mac_ratio,
+        "mac_exe_ratio": PmuCalculateFunc.mac_ratio,
         "scalar_ratio": PmuCalculateFunc.scalar_ratio,
+        "scalar_exe_ratio": PmuCalculateFunc.scalar_ratio,
         "fixpipe_ratio": PmuCalculateFunc.fixpipe_ratio,
+        "fixpipe_exe_ratio": PmuCalculateFunc.fixpipe_ratio,
         "mte1_ratio": PmuCalculateFunc.mte1_ratio,
+        "mte1_exe_ratio": PmuCalculateFunc.mte1_ratio,
         "mte1_ratio_extra": PmuCalculateFunc.mte1_ratio,
         "mte2_ratio": PmuCalculateFunc.mte2_ratio,
+        "mte2_exe_ratio": PmuCalculateFunc.mte2_ratio,
         "mte3_ratio": PmuCalculateFunc.mte3_ratio,
+        "mte3_exe_ratio": PmuCalculateFunc.mte3_ratio,
         "icache_miss_rate": PmuCalculateFunc.icache_miss_rate,
         "icache_req_ratio": PmuCalculateFunc.icache_req_ratio,
         "scalar_waitflag_ratio": PmuCalculateFunc.scalar_waitflag_ratio,
@@ -343,6 +352,8 @@ class Constant:
     AICORE_METRICS_LIST = {
         PMU_PIPE_EXCT: "mac_ratio_extra,scalar_ratio,mte1_ratio_extra,"
                        "mte2_ratio,fixpipe_ratio,icache_miss_rate",
+        PMU_PIPE_EXECUT: "vec_exe_ratio,mac_exe_ratio,scalar_exe_ratio,mte1_exe_ratio,"
+                         "mte2_exe_ratio,mte3_exe_ratio,fixpipe_exe_ratio",
         PMU_ARITH: "mac_fp16_ratio,mac_int8_ratio,vec_fp32_ratio,"
                    "vec_fp16_ratio,vec_int32_ratio,vec_misc_ratio",
         PMU_PIPE: "vec_ratio,mac_ratio,scalar_ratio,mte1_ratio,"

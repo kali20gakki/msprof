@@ -86,11 +86,12 @@ class TestCalculateAiCoreData(unittest.TestCase):
         events_name_list = ["vec_fp16_128lane_ratio", "vec_fp16_64lane_ratio", "mac_fp16_ratio",
                             "mac_int8_ratio", "mte1_iq_full_ratio", "mte2_iq_full_ratio",
                             "mte3_iq_full_ratio", "cube_iq_full_ratio", "vec_iq_full_ratio",
-                            "icache_miss_rate", "icache_req_ratio"]
+                            "icache_miss_rate", "icache_req_ratio", "fixpipe_ratio", 'vec_exe_ratio']
         ai_core_profiling_events = {"vec_fp16_128lane_ratio": [1], "vec_fp16_64lane_ratio": [1], "mac_fp16_ratio": [1],
                                     "mac_int8_ratio": [1], "mte1_iq_full_ratio": [1], "mte2_iq_full_ratio": [1],
                                     "mte3_iq_full_ratio": [1], "cube_iq_full_ratio": [1], "vec_iq_full_ratio": [1],
-                                    "icache_req_ratio": [1], "icache_miss_rate": [1]}
+                                    "icache_req_ratio": [1], "icache_miss_rate": [1], "fixpipe_ratio": [0],
+                                    "vec_exe_ratio": [0]}
         task_cyc = 1
         with mock.patch(NAMESPACE + '.CalculateAiCoreData.add_vector_data'):
             key = CalculateAiCoreData('123')
