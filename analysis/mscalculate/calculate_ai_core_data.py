@@ -38,12 +38,13 @@ class CalculateAiCoreData:
         calculate pipe time data
         :return: pmu dict
         """
-        if metrics_type not in {Constant.PMU_PIPE, Constant.PMU_PIPE_EXCT}:
+        if metrics_type not in {Constant.PMU_PIPE, Constant.PMU_PIPE_EXCT, Constant.PMU_PIPE_EXECUT}:
             return pmu_dict
         res_dict = {}
         pipe_pmu_list = Constant.AICORE_METRICS_LIST.get(Constant.PMU_PIPE).split(",")[:-1]
+        pipe_execut_pmu_list = Constant.AICORE_METRICS_LIST.get(Constant.PMU_PIPE_EXECUT).split(",")
         pipe_exct_pmu_list = Constant.AICORE_METRICS_LIST.get(Constant.PMU_PIPE_EXCT).split(",")[:-1]
-        valid_metrics_set = set(pipe_pmu_list + pipe_exct_pmu_list)
+        valid_metrics_set = set(pipe_pmu_list + pipe_exct_pmu_list + pipe_execut_pmu_list)
         for pmu_key, pmu_value in pmu_dict.items():
             if pmu_key in valid_metrics_set and len(pmu_key) > NumberConstant.RATIO_NAME_LEN:
                 res_dict["{}time".format(pmu_key[:-NumberConstant.RATIO_NAME_LEN])] = [total_time * pmu_value[0]]
@@ -158,7 +159,12 @@ class CalculateAiCoreData:
             ai_core_profiling_events.pop("cube_fops")
             ai_core_profiling_events.pop("mac_fp16_ratio")
             ai_core_profiling_events.pop("mac_int8_ratio")
-            ai_core_profiling_events = {"mac_ratio_extra": [mac_ratio], **ai_core_profiling_events}
+            if "vec_exe_ratio" in events_name_list:
+                vec_exe_ratio = ai_core_profiling_events.pop("vec_exe_ratio")
+                ai_core_profiling_events = {"vec_exe_ratio": vec_exe_ratio, "mac_ratio_extra": [mac_ratio],
+                                            **ai_core_profiling_events}
+            else:
+                ai_core_profiling_events = {"mac_ratio_extra": [mac_ratio], **ai_core_profiling_events}
 
         names = [
             "mte1_iq_full_ratio", "mte2_iq_full_ratio", "mte3_iq_full_ratio",

@@ -16,6 +16,7 @@ from common_func.ms_multi_process import MsMultiProcess
 from common_func.msprof_exception import ProfException
 from common_func.msvp_common import is_valid_original_data
 from common_func.path_manager import PathManager
+from common_func.platform.chip_manager import ChipManager
 from framework.offset_calculator import OffsetCalculator
 from msmodel.aic.ai_core_sample_model import AiCoreSampleModel
 from msparser.data_struct_size_constant import StructFmt
@@ -232,7 +233,8 @@ class ParsingFftsAICoreSampleData(ParsingCoreSampleData):
             else:
                 break
             # core id in [0, 24]:aic  in [25, +):aiv
-            if aicore_data_bean.core_id > NumberConstant.MAX_CORE_ID_OF_AIC:
+            core_id_edge = ChipManager().get_max_core_id()
+            if aicore_data_bean.core_id > core_id_edge:
                 self.data_dict.setdefault('aiv', {}).setdefault('data_list', []).append(tmp)
             else:
                 self.data_dict.setdefault('aic', {}).setdefault('data_list', []).append(tmp)

@@ -2,6 +2,7 @@ import struct
 import unittest
 from unittest import mock
 
+from common_func.platform.chip_manager import ChipManager
 from constant.constant import CONFIG
 from constant.info_json_construct import DeviceInfo
 from constant.info_json_construct import InfoJson
@@ -10,6 +11,7 @@ from msparser.aic_sample.ai_core_sample_parser import ParsingAICoreSampleData
 from msparser.aic_sample.ai_core_sample_parser import ParsingAIVectorCoreSampleData
 from msparser.aic_sample.ai_core_sample_parser import ParsingCoreSampleData
 from msparser.aic_sample.ai_core_sample_parser import ParsingFftsAICoreSampleData
+from profiling_bean.prof_enum.chip_model import ChipModel
 from profiling_bean.prof_enum.data_tag import DataTag
 
 NAMESPACE = 'msparser.aic_sample.ai_core_sample_parser'
@@ -30,7 +32,7 @@ class TestParsingFftsAICoreSampleData(unittest.TestCase):
         ParsingFftsAICoreSampleData(self.file_list, CONFIG).ms_run()
 
     def test_read_binary_data(self):
-        InfoJsonReaderManager(info_json=InfoJson(devices='0')).process()
+        InfoJsonReaderManager(info_json=InfoJson(devices='0', platform_version='5')).process()
         binary_data_path = 'test.slice_0'
         data = struct.pack("=BBHHH8QQQBBHHHBBHHH8QQQBBHHH",
                            1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 22, 33, 44, 55, 66, 49, 88, 99, 100,
@@ -44,6 +46,7 @@ class TestParsingFftsAICoreSampleData(unittest.TestCase):
                 mock.patch('builtins.open', mock.mock_open(
                     read_data=data)):
             check = ParsingFftsAICoreSampleData(self.file_list, CONFIG)
+            ChipManager().chip_id = ChipModel.CHIP_V1_1_1
             check.read_binary_data(binary_data_path)
 
     def test_save(self):

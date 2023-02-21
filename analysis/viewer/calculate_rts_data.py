@@ -441,13 +441,15 @@ def get_metrics_from_sample_config(project_path: str,
             error(CalculateRtsDataConst.FILE_NAME, 'Invalid metric {} .'.format(tmp))
             call_sys_exit(NumberConstant.ERROR)
     new_metrics = []
-    if sample_config.get(metrics_type) in {Constant.PMU_PIPE, Constant.PMU_PIPE_EXCT}:
+    if sample_config.get(metrics_type) in {Constant.PMU_PIPE, Constant.PMU_PIPE_EXCT, Constant.PMU_PIPE_EXECUT}:
         for metric in sample_metrics[:-1]:
             if metric.endswith('extra'):
                 new_metrics.append(metric[:-NumberConstant.EXTRA_RATIO_NAME_LEN] + "time")
             else:
                 new_metrics.append(metric[:-NumberConstant.RATIO_NAME_LEN] + "time")
             new_metrics.append(metric)
+        if sample_config.get(metrics_type) == Constant.PMU_PIPE_EXECUT:
+            new_metrics.append(sample_metrics[-1][:-NumberConstant.RATIO_NAME_LEN] + "time")
         new_metrics.append(sample_metrics[-1])
     sample_metrics = new_metrics if new_metrics else sample_metrics
     metrics.extend(sample_metrics)
