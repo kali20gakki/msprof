@@ -9,7 +9,7 @@ from common_func.constant import Constant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.msprof_exception import ProfException
 from common_func.singleton import singleton
-from profiling_bean.prof_enum.chip_model import ChipModel
+from profiling_bean.prof_enum.chip_model import ChipModel, ChipCoreNum
 
 
 @singleton
@@ -25,6 +25,10 @@ class ChipManager:
         Constant.CHIP_V3_3_0: ChipModel.CHIP_V3_3_0,
         Constant.CHIP_V4_1_0: ChipModel.CHIP_V4_1_0,
         Constant.CHIP_V1_1_1: ChipModel.CHIP_V1_1_1
+    }
+    CHIP_CORE_NUM_MAP = {
+        ChipModel.CHIP_V4_1_0: ChipCoreNum.CHIP_V4_1_0,
+        ChipModel.CHIP_V1_1_1: ChipCoreNum.CHIP_V1_1_1
     }
 
     FILE_NAME = os.path.basename(__file__)
@@ -129,3 +133,10 @@ class ChipManager:
         :return: True or False
         """
         return self.is_chip_v1_1() or self.is_chip_v4()
+
+    def get_max_core_id(self) -> ChipCoreNum:
+        if self.chip_id not in self.CHIP_CORE_NUM_MAP:
+            message = "Can't get ai core num or platform version isn't identified from info.json, " \
+                      "please check the file."
+            raise ProfException(ProfException.PROF_SYSTEM_EXIT, message)
+        return self.CHIP_CORE_NUM_MAP.get(self.chip_id).value

@@ -94,8 +94,6 @@ class Utils:
         except(TypeError,) as err:
             logging.error("Failed to convert generator to list. %s", err, exc_info=Constant.TRACE_BACK_SWITCH)
             return result
-        finally:
-            pass
 
     @staticmethod
     def chunks(all_log_bytes: bytes, struct_size: int) -> any:
