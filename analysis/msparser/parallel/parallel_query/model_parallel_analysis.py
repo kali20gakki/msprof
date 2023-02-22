@@ -25,8 +25,10 @@ class ModelParallelAnalysis:
         with ClusterParallelViewModel(self._params["collection_path"]) as _model:
             tuning_data = _model.get_model_parallel_tuning_data()
             parallel_type = _model.get_parallel_type()
-        suggestion = {"parallel_mode": "Model Parallel",
-                      "suggestion": []}
+        suggestion = {
+            "parallel_mode": "Model Parallel",
+            "suggestion": []
+        }
         if not tuning_data:
             return suggestion
         if not tuning_data[0]:

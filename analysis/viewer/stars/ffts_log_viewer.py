@@ -27,12 +27,6 @@ class FftsLogViewer(BaseViewer):
     def __init__(self: any, configs: dict, params: dict) -> None:
         super().__init__(configs, params)
 
-    def get_model_instance(self: any) -> any:
-        """
-        get model instance from list
-        """
-        return FftsLogModel(self.params.get(StrConstant.PARAM_RESULT_DIR), DBNameConstant.DB_SOC_LOG, [])
-
     @staticmethod
     def get_time_timeline_header(data: list, pid_header=TraceViewHeaderConstant.PROCESS_TASK) -> list:
         """
@@ -52,6 +46,12 @@ class FftsLogViewer(BaseViewer):
                  StarsConstant.SUBTASK_TYPE.get(item[2], item[2])])
         header.extend(subtask)
         return header
+
+    def get_model_instance(self: any) -> any:
+        """
+        get model instance from list
+        """
+        return FftsLogModel(self.params.get(StrConstant.PARAM_RESULT_DIR), DBNameConstant.DB_SOC_LOG, [])
 
     def get_trace_timeline(self: any, data_list: dict) -> list:
         """

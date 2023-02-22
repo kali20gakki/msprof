@@ -19,8 +19,8 @@ class TablesTrainingConfig(MetaConfig):
             ('pendingtime', 'Text,null'),
             ('runtime', 'TEXT,null'),
             ('complete', 'TEXT,null')
-        ]
-        , 'TsOriginalDataMap': [
+        ],
+        'TsOriginalDataMap': [
             ('replayid', 'INTEGER,null'),
             ('timestamp', 'numeric,null'),
             ('pc', 'TEXT,null'),
@@ -28,8 +28,8 @@ class TablesTrainingConfig(MetaConfig):
             ('event', 'TEXT,null'),
             ('count', 'INTEGER,null'),
             ('function', 'TEXT,null')
-        ]
-        , 'RoceOriginalDataMap': [
+        ],
+        'RoceOriginalDataMap': [
             ('device_id', 'INTEGER,null'),
             ('replayid', 'INTEGER,null'),
             ('timestamp', 'REAL,null'),
@@ -47,8 +47,8 @@ class TablesTrainingConfig(MetaConfig):
             ('txerrors', 'REAL,null'),
             ('txdropped', 'REAL,null'),
             ('funcid', 'INTEGER,null')
-        ]
-        , 'RoceReportDataMap': [
+        ],
+        'RoceReportDataMap': [
             ('device_id', 'INTEGER,null'),
             ('duration', 'TEXT,null'),
             ('bandwidth', 'TEXT,null'),
@@ -61,8 +61,8 @@ class TablesTrainingConfig(MetaConfig):
             ('txerrorrate', 'TEXT,null'),
             ('txdroppedrate', 'TEXT,null'),
             ('funcid', 'INTEGER,null')
-        ]
-        , 'StreamMap': [
+        ],
+        'StreamMap': [
             ('replayid', 'INTEGER, null'),
             ('device_id', 'INTEGER, null'),
             ('stream_id', 'INTEGER, null'),
@@ -76,15 +76,15 @@ class TablesTrainingConfig(MetaConfig):
             ('apirowid', 'INTEGER, null'),
             ('eventid', 'INTEGER, null'),
             ('streamname', 'TEXT, null')
-        ]
-        , 'LLCOriginalDataMap': [
+        ],
+        'LLCOriginalDataMap': [
             ('device_id', 'INT,null'),
             ('timestamp', 'REAL,null'),
             ('counts', 'INT,null'),
             ('event', 'INT,null'),
             ('l3tid', 'INT,null')
-        ]
-        , 'LLCEventsMap': [
+        ],
+        'LLCEventsMap': [
             ('device_id', 'INT,null'),
             ('l3tid', 'INT,null'),
             ('timestamp', 'REAL,null'),
@@ -96,50 +96,50 @@ class TablesTrainingConfig(MetaConfig):
             ('event5', 'INT,null'),
             ('event6', 'INT,null'),
             ('event7', 'INT,null')
-        ]
-        , 'LLCMetricsMap': [
+        ],
+        'LLCMetricsMap': [
             ('device_id', 'INT,null'),
             ('l3tid', 'INT,null'),
             ('timestamp', 'REAL,null'),
             ('hitrate', 'REAL,null'),
             ('throughput', 'REAL,null')
-        ]
-        , 'HBMOriginalDataMap': [
+        ],
+        'HBMOriginalDataMap': [
             ('device_id', 'INT,null'),
             ('replayid', 'INT,null'),
             ('timestamp', 'REAL,null'),
             ('counts', 'INT,null'),
             ('event_type', 'TEXT,null'),
             ('hbmid', 'INT,null')
-        ]
-        , 'HBMbwDataMap': [
+        ],
+        'HBMbwDataMap': [
             ('device_id', 'INT,null'),
             ('timestamp', 'REAL,null'),
             ('bandwidth', 'REAL,null'),
             ('hbmid', 'INT,null'),
             ('event_type', 'TEXT,null')
-        ]
-        , 'HCCSOriginalDataMap': [
+        ],
+        'HCCSOriginalDataMap': [
             ('device_id', 'INT,null'),
             ('timestamp', 'REAL,null'),
             ('txamount', 'INT,null'),
             ('rxamount', 'INT,null')
-        ]
-        , 'HCCSEventsDataMap': [
+        ],
+        'HCCSEventsDataMap': [
             ('device_id', 'INT,null'),
             ('timestamp', 'REAL,null'),
             ('txthroughput', 'INT,null'),
             ('rxthroughput', 'INT,null')
-        ]
-        , 'HWTSTaskTimeMap': [
+        ],
+        'HWTSTaskTimeMap': [
             ('device_id', 'INTEGER,null'),
             ('stream_id', 'INTEGER,null'),
             ('task_id', 'INTEGER,null'),
             ('running', 'INTEGER,null'),
             ('complete', 'INTEGER,null'),
             ('index_id', 'INTEGER,null')
-        ]
-        , 'PCIeDataMap': [
+        ],
+        'PCIeDataMap': [
             ('timestamp', 'INT,null'),
             ('device_id', 'INT,null'),
             ('tx_p_bandwidth_min', 'REAL,null'),
@@ -163,8 +163,8 @@ class TablesTrainingConfig(MetaConfig):
             ('rx_cpl_bandwidth_min', 'REAL,null'),
             ('rx_cpl_bandwidth_max', 'REAL,null'),
             ('rx_cpl_bandwidth_avg', 'REAL,null')
-        ]
-        , 'ModifiedTaskTimeMap': [
+        ],
+        'ModifiedTaskTimeMap': [
             ('task_id', 'INTEGER, null'),
             ('stream_id', 'INTEGER, null'),
             ('start_time', 'INTEGER,null'),
@@ -173,8 +173,8 @@ class TablesTrainingConfig(MetaConfig):
             ('task_type', 'INTEGER,null'),
             ('index_id', 'INTEGER,null'),
             ('batch_id', 'INTEGER,null')
-        ]
-        , 'GeMergeMap': [
+        ],
+        'GeMergeMap': [
             ('model_id', 'INTEGER,null'),
             ('op_name', 'text,null'),
             ('op_type', 'text,null'),
@@ -183,8 +183,8 @@ class TablesTrainingConfig(MetaConfig):
             ('stream_id', 'INTEGER,null'),
             ('device_id', 'INTEGER,null'),
             ('batch_id', 'INTEGER,null')
-        ]
-        , 'RtsTaskMap': [
+        ],
+        'RtsTaskMap': [
             ('task_id', 'INTEGER,null'),
             ('stream_id', 'INTEGER,null'),
             ('start_time', 'INTEGER,null'),
@@ -192,8 +192,8 @@ class TablesTrainingConfig(MetaConfig):
             ('task_type', 'text,null'),
             ('index_id', 'INTEGER,null'),
             ('batch_id', 'INTEGER,null')
-        ]
-        , 'OpReportMap': [
+        ],
+        'OpReportMap': [
             ('op_type', 'text,null'),
             ('core_type', 'text,null'),
             ('occurrences', 'text,null'),

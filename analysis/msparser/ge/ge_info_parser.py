@@ -30,7 +30,7 @@ class GeInfoParser(IParser, MsMultiProcess):
     GE_STEP = {MsProfCommonConstant.MODEL_ID: 0, MsProfCommonConstant.INDEX_ID: 5, MsProfCommonConstant.TAG: 6}
 
     def __init__(self: any, file_list: dict, sample_config: dict) -> None:
-        MsMultiProcess.__init__(self, sample_config)
+        super().__init__(sample_config)
         self._file_list = file_list
         self._sample_config = sample_config
         self._project_path = sample_config.get(StrConstant.SAMPLE_CONFIG_PROJECT_PATH)
@@ -60,8 +60,10 @@ class GeInfoParser(IParser, MsMultiProcess):
             ge_info_data = parse_class(self._file_list, self._sample_config).ms_run()
             self.ge_info_data.update(ge_info_data)
             self._table_list.extend(list(ge_info_data.keys()))
-        dynamic_data_db_name = [(DBNameConstant.TABLE_GE_TASK, self.GE_TASK),
-                                (DBNameConstant.TABLE_GE_TENSOR, self.GE_TENSOR)]
+        dynamic_data_db_name = [
+            (DBNameConstant.TABLE_GE_TASK, self.GE_TASK),
+            (DBNameConstant.TABLE_GE_TENSOR, self.GE_TENSOR)
+        ]
         for db_name, index_space in dynamic_data_db_name:
             self.dynamic_scene_process(db_name, index_space)
 
@@ -138,8 +140,10 @@ class GeInfoParser(IParser, MsMultiProcess):
         """
         record_set = set()
         for ge_step in ge_step_data:
-            model_index_key = (ge_step[self.GE_STEP.get(MsProfCommonConstant.MODEL_ID)],
-                               ge_step[self.GE_STEP.get(MsProfCommonConstant.INDEX_ID)])
+            model_index_key = (
+                ge_step[self.GE_STEP.get(MsProfCommonConstant.MODEL_ID)],
+                ge_step[self.GE_STEP.get(MsProfCommonConstant.INDEX_ID)]
+            )
             if model_index_key not in record_set:
                 record_set.add(model_index_key)
             else:

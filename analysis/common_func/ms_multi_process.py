@@ -17,7 +17,7 @@ class MsMultiProcess(multiprocessing.Process):
     """
 
     def __init__(self: any, sample_config: dict) -> None:
-        multiprocessing.Process.__init__(self)
+        super().__init__()
         self.sample_config = sample_config
 
     def process_init(self: any) -> None:

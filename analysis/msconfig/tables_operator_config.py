@@ -21,8 +21,8 @@ class TablesOperatorConfig(MetaConfig):
             ('complete', 'TEXT,null'),
             ('index_id', 'INTEGER,null'),
             ('batch_id', 'INTEGER,null')
-        ]
-        , 'ReportTaskMap': [
+        ],
+        'ReportTaskMap': [
             ('timeratio', 'REAL,null'),
             ('time', 'REAL,null'),
             ('count', 'INTEGER,null'),
@@ -38,8 +38,8 @@ class TablesOperatorConfig(MetaConfig):
             ('stream_id', 'INTEGER,null'),
             ('device_id', 'INTEGER,null'),
             ('batch_id', 'INTEGER,null')
-        ]
-        , 'ModifiedTaskTimeMap': [
+        ],
+        'ModifiedTaskTimeMap': [
             ('task_id', 'INTEGER, null'),
             ('stream_id', 'INTEGER, null'),
             ('start_time', 'INTEGER,null'),
@@ -49,8 +49,8 @@ class TablesOperatorConfig(MetaConfig):
             ('index_id', 'INTEGER,null'),
             ('batch_id', 'INTEGER,null'),
             ('subtask_id', 'INTEGER,null')
-        ]
-        , 'GeMergeMap': [
+        ],
+        'GeMergeMap': [
             ('model_id', 'INTEGER,null'),
             ('op_name', 'text,null'),
             ('op_type', 'text,null'),
@@ -59,8 +59,8 @@ class TablesOperatorConfig(MetaConfig):
             ('stream_id', 'INTEGER,null'),
             ('batch_id', 'INTEGER,null'),
             ('context_id', 'INTEGER,null')
-        ]
-        , 'RtsTaskMap': [
+        ],
+        'RtsTaskMap': [
             ('task_id', 'INTEGER,null'),
             ('stream_id', 'INTEGER,null'),
             ('start_time', 'INTEGER,null'),
@@ -69,8 +69,8 @@ class TablesOperatorConfig(MetaConfig):
             ('index_id', 'INTEGER,null'),
             ('batch_id', 'INTEGER,null'),
             ('subtask_id', 'INTEGER,null')
-        ]
-        , 'OpReportMap': [
+        ],
+        'OpReportMap': [
             ('op_type', 'text,null'),
             ('core_type', 'text,null'),
             ('occurrences', 'text,null'),
@@ -79,8 +79,8 @@ class TablesOperatorConfig(MetaConfig):
             ('avg', 'REAL,null'),
             ('max', 'REAL,null'),
             ('ratio', 'text,null')
-        ]
-        , 'SummaryGeMap': [
+        ],
+        'SummaryGeMap': [
             ('model_id', 'INTEGER,null'),
             ('task_id', 'INTEGER,null'),
             ('stream_id', 'INTEGER,null'),
@@ -92,8 +92,8 @@ class TablesOperatorConfig(MetaConfig):
             ('timestamp', 'TEXT,null'),
             ('batch_id', 'INTEGER,null'),
             ('context_id', 'INTEGER,null')
-        ]
-        , 'TensorGeMap': [
+        ],
+        'TensorGeMap': [
             ('model_id', 'INTEGER,null'),
             ('stream_id', 'INTEGER,null'),
             ('task_id', 'INTEGER,null'),

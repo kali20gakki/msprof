@@ -138,9 +138,11 @@ class StrConstant:
     DATA_PARALLEL = "data_parallel"
     MODEL_PARALLEL = "model_parallel"
     PIPELINE_PARALLEL = "pipeline_parallel"
-    PARALLEL_TABLE_NAME_MAPPING = {DATA_PARALLEL: DBNameConstant.TABLE_CLUSTER_DATA_PARALLEL,
-                                   MODEL_PARALLEL: DBNameConstant.TABLE_CLUSTER_MODEL_PARALLEL,
-                                   PIPELINE_PARALLEL: DBNameConstant.TABLE_CLUSTER_PIPELINE_PARALLEL}
+    PARALLEL_TABLE_NAME_MAPPING = {
+        DATA_PARALLEL: DBNameConstant.TABLE_CLUSTER_DATA_PARALLEL,
+        MODEL_PARALLEL: DBNameConstant.TABLE_CLUSTER_MODEL_PARALLEL,
+        PIPELINE_PARALLEL: DBNameConstant.TABLE_CLUSTER_PIPELINE_PARALLEL
+    }
 
     TASK_TYPE_MAPPING = {
         "0": 'kernel AI core task',

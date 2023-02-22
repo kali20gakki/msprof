@@ -63,14 +63,6 @@ class HostNetworkUsagePresenter(HostProfPresenterBase):
         self.network_usage_info = []
         self.speeds = {}
 
-    @classmethod
-    def get_timeline_header(cls: any) -> list:
-        """
-        get timeline header
-        """
-        return [["process_name", InfoConfReader().get_json_pid_data(),
-                 InfoConfReader().get_json_tid_data(), "Network Usage"]]
-
     @staticmethod
     def compute_netcard_speed() -> float:
         """
@@ -85,6 +77,14 @@ class HostNetworkUsagePresenter(HostProfPresenterBase):
             if is_number(speed) and speed != -1:
                 all_netcard_speed += speed * Constant.MBPS_TO_BYTES / Constant.KILOBYTE
         return all_netcard_speed
+
+    @classmethod
+    def get_timeline_header(cls: any) -> list:
+        """
+        get timeline header
+        """
+        return [["process_name", InfoConfReader().get_json_pid_data(),
+                 InfoConfReader().get_json_tid_data(), "Network Usage"]]
 
     def init(self: any) -> None:
         """

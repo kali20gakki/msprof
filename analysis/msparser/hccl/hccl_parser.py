@@ -95,7 +95,7 @@ class HCCLParser(MsMultiProcess):
                 _trace_file = os.path.realpath(os.path.join(trace_path, _trace_file))
                 self._append_hccl_data(_trace_file, _reduce_dir)
 
-    def _append_hccl_data(self: any, trace_path: str,  op_name: str) -> None:
+    def _append_hccl_data(self: any, trace_path: str, op_name: str) -> None:
         with FileOpen(trace_path, "r") as hccl_reader:
             json_data = hccl_reader.file_reader.readline(Constant.MAX_READ_LINE_BYTES)
             json_data = json.loads(json_data)
@@ -107,4 +107,3 @@ class HCCLParser(MsMultiProcess):
                 first_timestamp = hccl.timestamp
             self._hccl_data.append([op_name, iteration, hccl.hccl_name, first_timestamp, hccl.plane_id,
                                     hccl.timestamp, hccl.duration, hccl.args])
-

@@ -44,14 +44,16 @@ class MsprofQuerySummaryManager:
     CLUSTER_SCENE = '1'
     NOT_CLUSTER_SCENE = '0'
     FILE_NAME = os.path.basename(__file__)
-    QUERY_DATA_TYPE_PARSER = {QueryDataType.STEP_TRACE: StepTraceSummay,
-                              QueryDataType.FOPS_ANALYSE: FopsParser,
-                              QueryDataType.DATA_PREPARATION: ClusterDataPreparationParser,
-                              QueryDataType.PARALLEL_TUNING: ClusterParallelAnalysisTuning,
-                              QueryDataType.PARALLEL_DATA: ClusterParallelAnalysisParser,
-                              QueryDataType.CLUSTER_COMMUNICATION: ClusterTuningFacade,
-                              QueryDataType.COMMUNICATION_MATRIX: ClusterTuningFacade,
-                              QueryDataType.HOST_SYS_USAGE: HostSysUsageParser}
+    QUERY_DATA_TYPE_PARSER = {
+        QueryDataType.STEP_TRACE: StepTraceSummay,
+        QueryDataType.FOPS_ANALYSE: FopsParser,
+        QueryDataType.DATA_PREPARATION: ClusterDataPreparationParser,
+        QueryDataType.PARALLEL_TUNING: ClusterParallelAnalysisTuning,
+        QueryDataType.PARALLEL_DATA: ClusterParallelAnalysisParser,
+        QueryDataType.CLUSTER_COMMUNICATION: ClusterTuningFacade,
+        QueryDataType.COMMUNICATION_MATRIX: ClusterTuningFacade,
+        QueryDataType.HOST_SYS_USAGE: HostSysUsageParser
+    }
 
     def __init__(self: any, args: any) -> None:
         self.collection_path = os.path.realpath(args.collection_path)
@@ -59,11 +61,13 @@ class MsprofQuerySummaryManager:
         self.npu_id = args.id
         self.model_id = args.model_id
         self.iteration_id = args.iteration_id
-        self.params = {"collection_path": self.collection_path,
-                       "npu_id": self.npu_id,
-                       "model_id": self.model_id,
-                       "iteration_id": self.iteration_id,
-                       "data_type": self.data_type}
+        self.params = {
+            "collection_path": self.collection_path,
+            "npu_id": self.npu_id,
+            "model_id": self.model_id,
+            "iteration_id": self.iteration_id,
+            "data_type": self.data_type
+        }
 
     @staticmethod
     def check_rank_id(collection_path: str) -> bool:
