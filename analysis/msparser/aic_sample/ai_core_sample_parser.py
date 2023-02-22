@@ -179,16 +179,20 @@ class ParsingFftsAICoreSampleData(ParsingCoreSampleData):
         super().__init__(sample_config)
         self.file_list = sorted(file_list.get(DataTag.FFTS_PMU, []), key=lambda x: int(x.split("_")[-1]))
         self.calculate = OffsetCalculator(self.file_list, StructFmt.AICORE_SAMPLE_FMT_SIZE, self.result_dir)
-        self.data_dict = {'aic':
-                              {'data_list': [], 'db_name': 'aicore_{}.db'.format(self.device_id),
-                               'event': self.sample_config.get("ai_core_profiling_events", "").split(","),
-                               'metrics_key': self.sample_config.get(StrConstant.AI_CORE_PROFILING_METRICS),
-                               'metric_type': StrConstant.AI_CORE_PROFILING_METRICS},
-                          'aiv':
-                              {'data_list': [], 'db_name': 'ai_vector_core_{}.db'.format(self.device_id),
-                               'event': self.sample_config.get("aiv_profiling_events", "").split(","),
-                               'metrics_key': self.sample_config.get(StrConstant.AIV_PROFILING_METRICS),
-                               'metric_type': StrConstant.AIV_PROFILING_METRICS}}
+        self.data_dict = {
+            'aic': {
+                'data_list': [], 'db_name': 'aicore_{}.db'.format(self.device_id),
+                'event': self.sample_config.get("ai_core_profiling_events", "").split(","),
+                'metrics_key': self.sample_config.get(StrConstant.AI_CORE_PROFILING_METRICS),
+                'metric_type': StrConstant.AI_CORE_PROFILING_METRICS
+            },
+            'aiv': {
+                'data_list': [], 'db_name': 'ai_vector_core_{}.db'.format(self.device_id),
+                'event': self.sample_config.get("aiv_profiling_events", "").split(","),
+                'metrics_key': self.sample_config.get(StrConstant.AIV_PROFILING_METRICS),
+                'metric_type': StrConstant.AIV_PROFILING_METRICS
+            }
+        }
 
     def save(self: any) -> None:
         """
@@ -226,9 +230,11 @@ class ParsingFftsAICoreSampleData(ParsingCoreSampleData):
             aicore_data_bean = AicoreSample.decode(binary_data)
 
             if aicore_data_bean is not None:
-                tmp = [aicore_data_bean.count_num, aicore_data_bean.mode, self._replayid,
-                       aicore_data_bean.timestamp + delta_dev * NumberConstant.NANO_SECOND,
-                       aicore_data_bean.core_id, aicore_data_bean.task_cyc]
+                tmp = [
+                    aicore_data_bean.count_num, aicore_data_bean.mode, self._replayid,
+                    aicore_data_bean.timestamp + delta_dev * NumberConstant.NANO_SECOND,
+                    aicore_data_bean.core_id, aicore_data_bean.task_cyc
+                ]
                 tmp.extend(aicore_data_bean.event_count[:aicore_data_bean.count_num])
             else:
                 break

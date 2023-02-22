@@ -10,177 +10,177 @@ class DataParsersConfig(MetaConfig):
         'GeInfoParser': [
             ('path', 'msparser.ge.ge_info_parser'),
             ('chip_model', '0,1,2,3,4,5,7')
-        ]
-        , 'GeModelInfoParser': [
+        ],
+        'GeModelInfoParser': [
             ('path', 'msparser.ge.ge_model_parser'),
             ('chip_model', '0,1,2,3,4,5,7')
-        ]
-        , 'GeModelTimeParser': [
+        ],
+        'GeModelTimeParser': [
             ('path', 'msparser.ge.ge_model_time_parser'),
             ('chip_model', '0,1,2,3,4,5,7')
-        ]
-        , 'GeHashParser': [
+        ],
+        'GeHashParser': [
             ('path', 'msparser.ge.ge_hash_parser'),
             ('chip_model', '0,1,2,3,4,5,7')
-        ]
-        , 'ParsingRuntimeData': [
+        ],
+        'ParsingRuntimeData': [
             ('path', 'analyzer.create_runtime_db'),
             ('chip_model', '0,1,2,3,4,5,7')
-        ]
-        , 'AclParser': [
+        ],
+        'AclParser': [
             ('path', 'msparser.acl.acl_parser'),
             ('chip_model', '0,1,2,3,4,5,7')
-        ]
-        , 'L2CacheParser': [
+        ],
+        'L2CacheParser': [
             ('path', 'msparser.l2_cache.l2_cache_parser'),
             ('chip_model', '1,2,3,4,5,7')
-        ]
-        , 'IterRecParser': [
+        ],
+        'IterRecParser': [
             ('path', 'msparser.iter_rec.iter_rec_parser'),
             ('chip_model', '1,2,3,4'),
             ('level', '3')
-        ]
-        , 'NoGeIterRecParser': [
+        ],
+        'NoGeIterRecParser': [
             ('path', 'msparser.iter_rec.iter_rec_parser'),
             ('chip_model', '1,2,3,4'),
             ('level', '3')
-        ]
-        , 'TsTimelineRecParser': [
+        ],
+        'TsTimelineRecParser': [
             ('path', 'msparser.iter_rec.ts_timeline_parser'),
             ('chip_model', '0'),
             ('level', '3')
-        ]
-        , 'ParsingDDRData': [
+        ],
+        'ParsingDDRData': [
             ('path', 'msparser.hardware.ddr_parser'),
             ('chip_model', '0,1,2,3,4,7')
-        ]
-        , 'ParsingPeripheralData': [
+        ],
+        'ParsingPeripheralData': [
             ('path', 'msparser.hardware.dvpp_parser'),
             ('chip_model', '0,1,5,7')
-        ]
-        , 'ParsingNicData': [
+        ],
+        'ParsingNicData': [
             ('path', 'msparser.hardware.nic_parser'),
             ('chip_model', '0,1,2,3,4,5,7')
-        ]
-        , 'ParsingRoceData': [
+        ],
+        'ParsingRoceData': [
             ('path', 'msparser.hardware.roce_parser'),
             ('chip_model', '0,1,2,3,4,5')
-        ]
-        , 'ParsingTSData': [
+        ],
+        'ParsingTSData': [
             ('path', 'msparser.hardware.tscpu_parser'),
             ('chip_model', '0,1,2,3,4,5,7')
-        ]
-        , 'ParsingAICPUData': [
+        ],
+        'ParsingAICPUData': [
             ('path', 'msparser.hardware.ai_cpu_parser'),
             ('chip_model', '0,1,2,3,4,5,7')
-        ]
-        , 'ParsingCtrlCPUData': [
+        ],
+        'ParsingCtrlCPUData': [
             ('path', 'msparser.hardware.ctrl_cpu_parser'),
             ('chip_model', '0,1,2,3,4,5,7')
-        ]
-        , 'ParsingMemoryData': [
+        ],
+        'ParsingMemoryData': [
             ('path', 'msparser.hardware.sys_mem_parser'),
             ('chip_model', '0,1,2,3,4,5,7')
-        ]
-        , 'ParsingCpuUsageData': [
+        ],
+        'ParsingCpuUsageData': [
             ('path', 'msparser.hardware.sys_usage_parser'),
             ('chip_model', '0,1,2,3,4,5,7')
-        ]
-        , 'ParsingPcieData': [
+        ],
+        'ParsingPcieData': [
             ('path', 'msparser.hardware.pcie_parser'),
             ('chip_model', '0,1,2,3,4,5')
-        ]
-        , 'ParsingHBMData': [
+        ],
+        'ParsingHBMData': [
             ('path', 'msparser.hardware.hbm_parser'),
             ('chip_model', '0,1,2,3,4,5,7')
-        ]
-        , 'NonMiniLLCParser': [
+        ],
+        'NonMiniLLCParser': [
             ('path', 'msparser.hardware.llc_parser'),
             ('chip_model', '1,2,3,4,5,7')
-        ]
-        , 'MiniLLCParser': [
+        ],
+        'MiniLLCParser': [
             ('path', 'msparser.hardware.mini_llc_parser'),
             ('chip_model', '0')
-        ]
-        , 'ParsingHCCSData': [
+        ],
+        'ParsingHCCSData': [
             ('path', 'msparser.hardware.hccs_parser'),
             ('chip_model', '0,1,2,3,4,5')
-        ]
-        , 'TstrackParser': [
+        ],
+        'TstrackParser': [
             ('path', 'msparser.step_trace.ts_track_parser'),
             ('chip_model', '1,2,3,4,5,7'),
             ('level', '2')
-        ]
-        , 'RtsTrackParser': [
+        ],
+        'RtsTrackParser': [
             ('path', 'msparser.runtime.rts_parser'),
             ('chip_model', '0,1,2,3,4')
-        ]
-        , 'ParsingAICoreSampleData': [
+        ],
+        'ParsingAICoreSampleData': [
             ('path', 'msparser.aic_sample.ai_core_sample_parser'),
             ('chip_model', '0,1,2,3,4')
-        ]
-        , 'ParsingAIVectorCoreSampleData': [
+        ],
+        'ParsingAIVectorCoreSampleData': [
             ('path', 'msparser.aic_sample.ai_core_sample_parser'),
             ('chip_model', '2,3,4')
-        ]
-        , 'HCCLParser': [
+        ],
+        'HCCLParser': [
             ('path', 'msparser.hccl.hccl_parser'),
             ('chip_model', '0,1,2,3,4,5'),
             ('level', '3')
-        ]
-        , 'MsprofTxParser': [
+        ],
+        'MsprofTxParser': [
             ('path', 'msparser.msproftx.msproftx_parser'),
             ('chip_model', '0,1,2,3,4,5,7')
-        ]
-        , 'RunTimeApiParser': [
+        ],
+        'RunTimeApiParser': [
             ('path', 'msparser.runtime.runtime_api_parser'),
             ('chip_model', '0,1,2,3,4,5,7'),
             ('level', '2')
-        ]
-        , 'ParseAiCpuDataAdapter': [
+        ],
+        'ParseAiCpuDataAdapter': [
             ('path', 'msparser.aicpu.parse_aicpu_data_adapter'),
             ('chip_model', '0,1,2,3,4,5,7'),
             ('level', '3')
-        ]
-        , 'GeHostParser': [
+        ],
+        'GeHostParser': [
             ('path', 'msparser.ge.ge_host_parser'),
             ('chip_model', '0,1,2,3,4,5')
-        ]
-        , 'StarsIterRecParser': [
+        ],
+        'StarsIterRecParser': [
             ('path', 'msparser.iter_rec.stars_iter_rec_parser'),
             ('chip_model', '5,7'),
             ('level', '3')
-        ]
-        , 'ParsingFftsAICoreSampleData': [
+        ],
+        'ParsingFftsAICoreSampleData': [
             ('path', 'msparser.aic_sample.ai_core_sample_parser'),
             ('chip_model', '5,7')
-        ]
-        , 'BiuPerfParser': [
+        ],
+        'BiuPerfParser': [
             ('path', 'msparser.biu_perf.biu_perf_parser'),
             ('chip_model', '5,7')
-        ]
-        , 'SocProfilerParser': [
+        ],
+        'SocProfilerParser': [
             ('path', 'msparser.stars.soc_profiler_parser'),
             ('chip_model', '5,7')
-        ]
-        , 'MsTimeParser': [
+        ],
+        'MsTimeParser': [
             ('path', 'msparser.ms_timer.ms_time_parser'),
             ('chip_model', '0,1,2,3,4,5')
-        ]
-        , 'DataPreparationParser': [
+        ],
+        'DataPreparationParser': [
             ('path', 'msparser.aicpu.data_preparation_parser'),
             ('chip_model', '0,1,2,3,4,5')
-        ]
-        , 'HCCLOperatiorParser': [
+        ],
+        'HCCLOperatiorParser': [
             ('path', 'msparser.parallel.hccl_operator_parser'),
             ('chip_model', '1,2,3,4,5'),
             ('level', '3')
-        ]
-        , 'ParallelStrategyParser': [
+        ],
+        'ParallelStrategyParser': [
             ('path', 'msparser.parallel.parallel_strategy_parser'),
             ('chip_model', '1,2,3,4,5')
-        ]
-        , 'ParallelParser': [
+        ],
+        'ParallelParser': [
             ('path', 'msparser.parallel.parallel_parser'),
             ('chip_model', '1,2,3,4,5'),
             ('level', '4')

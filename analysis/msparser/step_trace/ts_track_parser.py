@@ -33,8 +33,8 @@ class TstrackParser(DataParser, MsMultiProcess):
     """
 
     def __init__(self: any, file_list: dict, sample_config: dict) -> None:
-        MsMultiProcess.__init__(self, sample_config)
-        DataParser.__init__(self, sample_config)
+        super().__init__(sample_config)
+        super(DataParser, self).__init__(sample_config)
         self.sample_config = sample_config
         self.project_path = sample_config.get(StrConstant.SAMPLE_CONFIG_PROJECT_PATH, [])
         self._file_list = file_list

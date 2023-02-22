@@ -34,10 +34,12 @@ class MsprofTxParser(IParser, MsMultiProcess):
     }
 
     def __init__(self: any, file_list: dict, sample_config: dict) -> None:
-        MsMultiProcess.__init__(self, sample_config)
-        self._file_list = {DataTag.MSPROFTX: file_list.get(DataTag.MSPROFTX, []),
-                           DataTag.MSPROFTX_TORCH: file_list.get(DataTag.MSPROFTX_TORCH, []),
-                           DataTag.MSPROFTX_CANN: file_list.get(DataTag.MSPROFTX_CANN, [])}
+        super().__init__(sample_config)
+        self._file_list = {
+            DataTag.MSPROFTX: file_list.get(DataTag.MSPROFTX, []),
+            DataTag.MSPROFTX_TORCH: file_list.get(DataTag.MSPROFTX_TORCH, []),
+            DataTag.MSPROFTX_CANN: file_list.get(DataTag.MSPROFTX_CANN, [])
+        }
         self._project_path = sample_config.get(StrConstant.SAMPLE_CONFIG_PROJECT_PATH, '')
         self._model = MsprofTxModel(self._project_path, DBNameConstant.DB_MSPROFTX,
                                     [DBNameConstant.TABLE_MSPROFTX])

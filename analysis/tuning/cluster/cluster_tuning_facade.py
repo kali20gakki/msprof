@@ -43,8 +43,10 @@ class ClusterTuningFacade:
         self._model_id = params.get("model_id", 0)
         self._iteration_id = params.get("iteration_id", -1)
         self.data_type = params.get("data_type", -1)
-        self.query_data_type_dispatcher = {QueryDataType.CLUSTER_COMMUNICATION: self.cluster_communication,
-                                           QueryDataType.COMMUNICATION_MATRIX: self.communication_matrix}
+        self.query_data_type_dispatcher = {
+            QueryDataType.CLUSTER_COMMUNICATION: self.cluster_communication,
+            QueryDataType.COMMUNICATION_MATRIX: self.communication_matrix
+        }
 
     def process(self: any) -> None:
         self._check_params_valid()
@@ -120,7 +122,7 @@ class ClusterTuningFacade:
             print_msg(json.dumps(
                 {'status': NumberConstant.WARN,
                  'info': f"and the \'--id\' parameter has been set to (-1) automatically."
-                    f"The collective communication data only supports exporting data by all devices, ",
+                         f"The collective communication data only supports exporting data by all devices, ",
                  'data': ''}))
         self._check_data_type_valid()
         QueryArgumentCheck.check_arguments_valid(self._npu_id, self._model_id, self._iteration_id)
