@@ -19,37 +19,37 @@ class AclDto:
     def api_name(self: any) -> any:
         return self._api_name
 
-    @api_name.setter
-    def api_name(self: any, value: any) -> None:
-        self._api_name = value
-
     @property
     def api_type(self: any) -> any:
         return self._api_type
-
-    @api_type.setter
-    def api_type(self: any, value: any) -> None:
-        self._api_type = value
 
     @property
     def start_time(self: any) -> any:
         return self._start_time
 
-    @start_time.setter
-    def start_time(self: any, value: any) -> None:
-        self._start_time = value
-
     @property
     def end_time(self: any) -> any:
         return self._end_time
 
-    @end_time.setter
-    def end_time(self: any, value: any) -> None:
-        self._end_time = value
-
     @property
     def thread_id(self: any) -> any:
         return self._thread_id
+
+    @api_name.setter
+    def api_name(self: any, value: any) -> None:
+        self._api_name = value
+
+    @api_type.setter
+    def api_type(self: any, value: any) -> None:
+        self._api_type = value
+
+    @start_time.setter
+    def start_time(self: any, value: any) -> None:
+        self._start_time = value
+
+    @end_time.setter
+    def end_time(self: any, value: any) -> None:
+        self._end_time = value
 
     @thread_id.setter
     def thread_id(self: any, value: any) -> None:

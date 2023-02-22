@@ -83,10 +83,10 @@ class MsprofTxDecoder(StructDecoder):
         return self._call_stack
 
     @call_stack.setter
-    def call_stack(self: any , value: str) -> None:
+    def call_stack(self: any, value: str) -> None:
         self._call_stack = value
 
-    def decode_byte(self: any , value: str) -> str:
+    def decode_byte(self: any, value: str) -> str:
         zero_ind = value.find(b'\x00')
         str_value = bytes.decode(value[0:zero_ind])
         return str_value
