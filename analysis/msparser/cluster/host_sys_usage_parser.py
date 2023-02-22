@@ -70,9 +70,9 @@ class HostSysUsageParser:
             return
 
         self.cpu_usage_model = SysUsageModel(host_path, DBNameConstant.DB_HOST_SYS_USAGE_CPU,
-            [DBNameConstant.TABLE_SYS_USAGE, DBNameConstant.TABLE_PID_USAGE])
+                                             [DBNameConstant.TABLE_SYS_USAGE, DBNameConstant.TABLE_PID_USAGE])
         self.mem_usage_model = SysMemModel(host_path, DBNameConstant.DB_HOST_SYS_USAGE_MEM,
-            [DBNameConstant.DB_HOST_SYS_USAGE_MEM, DBNameConstant.DB_HOST_SYS_USAGE_MEM])
+                                           [DBNameConstant.DB_HOST_SYS_USAGE_MEM, DBNameConstant.DB_HOST_SYS_USAGE_MEM])
         if not (self.cpu_usage_model.init() and self.mem_usage_model.init()):
             logging.error("SysUsageModel or SysMemModel init() failed.")
             return
@@ -199,7 +199,7 @@ class HostSysUsageParser:
         detail_data = []
         start_time = datas[0][-1]
         for data in datas:
-            _data = [int(d / 256) for d in data[:-1]]    # 1page = 4KB = 1/256MB
+            _data = [int(d / 256) for d in data[:-1]]  # 1page = 4KB = 1/256MB
             relative_time = round((data[-1] - start_time) / self.NS_TO_S, NumberConstant.ROUND_TWO_DECIMAL)
             _data.append(relative_time)
             detail_data.append(OrderedDict(zip(tags, _data)))
@@ -236,7 +236,7 @@ class HostSysUsageParser:
             {"original_data": self.mem_usage_model.get_sys_mem_data(),
              "save_file": "host_sys_mem_usage_{}_{}.json".format(self.npu_id, self.model_id),
              "data_tags": ["mem_usage", "timestamp"],
-             "base_info":{"sampling_interval": mem_sampling_interval},
+             "base_info": {"sampling_interval": mem_sampling_interval},
              "proc_data_func": self._host_sys_mem_proc},
             # host pid mem proc params
             {"original_data": self.mem_usage_model.get_pid_mem_data(pid),
@@ -253,11 +253,12 @@ class HostSysUsageParser:
 
         # start handle data and save data
         for params in data_proc_params:
-            if not params["original_data"]:
+            if not params.get("original_data"):
                 logging.warning("Get data from database fail.")
                 continue
-            handled_data = params["proc_data_func"](params["original_data"], params["data_tags"], params["base_info"])
+            handled_data = params.get("proc_data_func")(params.get("original_data"), params.get("data_tags"),
+                                                        params.get("base_info"))
             if not handled_data:
-                logging.warning("Process data fail, not save %s.", params["save_file"])
+                logging.warning("Process data fail, not save %s.", params.get("save_file"))
                 continue
-            FileManager.storage_query_result_json_file(self.collection_path, handled_data, params["save_file"])
+            FileManager.storage_query_result_json_file(self.collection_path, handled_data, params.get("save_file"))

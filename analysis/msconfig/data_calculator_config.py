@@ -10,92 +10,92 @@ class DataCalculatorConfig(MetaConfig):
         'AclCalculator': [
             ('path', 'mscalculate.acl.acl_calculator'),
             ('chip_model', '0,1,2,3,4,5,7')
-        ]
-        , 'SubTaskCalculator': [
+        ],
+        'SubTaskCalculator': [
             ('path', 'mscalculate.stars.sub_task_calculate'),
             ('chip_model', '5'),
             ('level', '2')
-        ]
-        , 'L2CacheCalculator': [
+        ],
+        'L2CacheCalculator': [
             ('path', 'mscalculate.l2_cache.l2_cache_calculator'),
             ('chip_model', '1,2,3,4,5,7')
-        ]
-        , 'HwtsCalculator': [
+        ],
+        'HwtsCalculator': [
             ('path', 'mscalculate.hwts.hwts_calculator'),
             ('chip_model', '1,2,3,4')
-        ]
-        , 'HwtsAivCalculator': [
+        ],
+        'HwtsAivCalculator': [
             ('path', 'mscalculate.hwts.hwts_aiv_calculator'),
             ('chip_model', '2,3,4')
-        ]
-        , 'AicCalculator': [
+        ],
+        'AicCalculator': [
             ('path', 'mscalculate.aic.aic_calculator'),
             ('chip_model', '1,2,3,4')
-        ]
-        , 'MiniAicCalculator': [
+        ],
+        'MiniAicCalculator': [
             ('path', 'mscalculate.aic.mini_aic_calculator'),
             ('chip_model', '0')
-        ]
-        , 'AivCalculator': [
+        ],
+        'AivCalculator': [
             ('path', 'mscalculate.aic.aiv_calculator'),
             ('chip_model', '2,3,4')
-        ]
-        , 'MemcpyCalculator': [
+        ],
+        'MemcpyCalculator': [
             ('path', 'mscalculate.memory_copy.memcpy_calculator'),
             ('chip_model', '0,1,2,3,4,5')
-        ]
-        , 'GeHashCalculator': [
+        ],
+        'GeHashCalculator': [
             ('path', 'mscalculate.ge.ge_hash_calculator'),
             ('chip_model', '0,1,2,3,4,5,7')
-        ]
-        , 'StarsLogCalCulator': [
+        ],
+        'StarsLogCalCulator': [
             ('path', 'msparser.stars.stars_log_parser'),
             ('chip_model', '5,7')
-        ]
-        , 'BiuPerfCalculator': [
+        ],
+        'BiuPerfCalculator': [
             ('path', 'mscalculate.biu_perf.biu_perf_calculator'),
             ('chip_model', '5,7')
-        ]
-        , 'AcsqCalculator': [
+        ],
+        'AcsqCalculator': [
             ('path', 'mscalculate.hwts.acsq_calculator'),
             ('chip_model', '5,7'),
             ('level', '2')
-        ]
-        , 'FftsPmuCalculate': [
+        ],
+        'FftsPmuCalculate': [
             ('path', 'mscalculate.stars.ffts_pmu_calculate'),
             ('chip_model', '5,7'),
             ('level', '2')
-        ]
-        , 'AICpuFromTsCalculator': [
+        ],
+        'AICpuFromTsCalculator': [
             ('path', 'mscalculate.ts_task.ai_cpu.aicpu_from_ts'),
             ('chip_model', '1')
-        ]
-        , 'TaskSchedulerCalculator': [
+        ],
+        'TaskSchedulerCalculator': [
             ('path', 'mscalculate.data_analysis.task_scheduler_calculator'),
             ('chip_model', '0'),
             ('level', '13')
-        ]
-        , 'OpTaskSchedulerCalculator': [
+        ],
+        'OpTaskSchedulerCalculator': [
             ('path', 'mscalculate.data_analysis.op_task_scheduler_calculator'),
             ('chip_model', '0'),
             ('level', '13')
-        ]
-        , 'ParseAiCoreOpSummaryCalculator': [
+        ],
+        'ParseAiCoreOpSummaryCalculator': [
             ('path', 'mscalculate.data_analysis.parse_aicore_op_summary_calculator'),
             ('chip_model', '0,1,2,3,4,5,7'),
             ('level', '14')
-        ]
-        , 'OpSummaryOpSceneCalculator': [
+        ],
+        'OpSummaryOpSceneCalculator': [
             ('path', 'mscalculate.data_analysis.op_summary_op_scene_calculator'),
             ('chip_model', '0,1,2,3,4,5,7'),
             ('level', '14')
-        ]
-        , 'MergeOpCounterCalculator': [
+        ],
+        'MergeOpCounterCalculator': [
             ('path', 'mscalculate.data_analysis.merge_op_counter_calculator'),
             ('chip_model', '0,1,2,3,4,5,7'),
             ('level', '14')
-        ]
-        , 'OpCounterOpSceneCalculator': [
+        ],
+        'OpCounterOpSceneCalculator': [
             ('path', 'mscalculate.data_analysis.op_counter_op_scene_calculator'),
             ('chip_model', '0,1,2,3,4,5,7'),
             ('level', '14')

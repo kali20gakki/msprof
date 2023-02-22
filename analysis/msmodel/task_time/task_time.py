@@ -55,6 +55,11 @@ class TaskTime:
         """
         return self._model_id
 
+    @staticmethod
+    def _pre_check(*args: list) -> None:
+        if len(args) != 7:
+            raise ProfException(ProfException.PROF_INVALID_DATA_ERROR, "Invalid task time data")
+
     @model_id.setter
     def model_id(self, model_id: int) -> None:
         """
@@ -76,11 +81,6 @@ class TaskTime:
             self._wait_time = 0
         else:
             self._wait_time = self._start_time - last_complete_time
-
-    @staticmethod
-    def _pre_check(*args: list) -> None:
-        if len(args) != 7:
-            raise ProfException(ProfException.PROF_INVALID_DATA_ERROR, "Invalid task time data")
 
     def construct(self, *args: list) -> object:
         """

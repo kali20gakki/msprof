@@ -28,20 +28,24 @@ class AiCoreOpReport:
     """
     TASK_TIME_TABLE = "task_time"
     GE_SUMMARY_TABLE = "ge_summary"
-    AI_CORE_UNUSED_COLS = ["job_id", "host_id", "device_id", "task_id", "stream_id", "index_id",
-                           "model_id", "overflow", "overflowed_cycles", "device_id", "batch_id",
-                           "task_type", "core_type", "subtask_id", "start_time", "end_time", "ffts_type"]
-    UNSUPPORTED_HEADER = {"aic_vec_ratio", "aic_vec_time", "aiv_mac_ratio", "aiv_mac_time", "aiv_mte1_ratio",
-                          "aic_ub_read_bw", "aiv_mte1_time",
-                          "aic_ub_write_bw", "aiv_l1_read_bw", "aiv_l1_write_bw",
-                          "aic_l0c_read_bw", "aic_l0c_write_bw", "aiv_l0a_read_bw",
-                          "aiv_l0a_write_bw", "aiv_l0b_read_bw", "aiv_l0b_write_bw",
-                          "aiv_l0c_read_bw_cube", "aiv_l0c_write_bw_cube",
-                          "aic_ub_read_bw_mte", "aic_ub_write_bw_mte", "aic_ub_read_bw_vector",
-                          "aic_ub_write_bw_vector", "aiv_mac_fp16_ratio", 'aiv_mac_int8_ratio',
-                          "aic_vec_fp32_ratio", "aic_vec_fp16_ratio", "aic_vec_int32_ratio",
-                          "aic_vec_misc_ratio", "aic_vec_fp16_128lane_ratio", "aic_vec_fp16_64lane_ratio",
-                          "aic_vec_bankgroup_cflt_ratio", "aic_vec_bank_cflt_ratio", "aic_vec_resc_cflt_ratio"}
+    AI_CORE_UNUSED_COLS = [
+        "job_id", "host_id", "device_id", "task_id", "stream_id", "index_id",
+        "model_id", "overflow", "overflowed_cycles", "device_id", "batch_id",
+        "task_type", "core_type", "subtask_id", "start_time", "end_time", "ffts_type"
+    ]
+    UNSUPPORTED_HEADER = {
+        "aic_vec_ratio", "aic_vec_time", "aiv_mac_ratio", "aiv_mac_time", "aiv_mte1_ratio",
+        "aic_ub_read_bw", "aiv_mte1_time",
+        "aic_ub_write_bw", "aiv_l1_read_bw", "aiv_l1_write_bw",
+        "aic_l0c_read_bw", "aic_l0c_write_bw", "aiv_l0a_read_bw",
+        "aiv_l0a_write_bw", "aiv_l0b_read_bw", "aiv_l0b_write_bw",
+        "aiv_l0c_read_bw_cube", "aiv_l0c_write_bw_cube",
+        "aic_ub_read_bw_mte", "aic_ub_write_bw_mte", "aic_ub_read_bw_vector",
+        "aic_ub_write_bw_vector", "aiv_mac_fp16_ratio", 'aiv_mac_int8_ratio',
+        "aic_vec_fp32_ratio", "aic_vec_fp16_ratio", "aic_vec_int32_ratio",
+        "aic_vec_misc_ratio", "aic_vec_fp16_128lane_ratio", "aic_vec_fp16_64lane_ratio",
+        "aic_vec_bankgroup_cflt_ratio", "aic_vec_bank_cflt_ratio", "aic_vec_resc_cflt_ratio"
+    }
     ADDITION_HEADER = ["Context ID", "Mix Block Dim", "aiv_time", "aiv_total_time"]
     TENSOR_HEADERS = [
         "Input Shapes", "Input Data Types", "Input Formats", "Output Shapes", "Output Data Types", "Output Formats"
@@ -283,9 +287,9 @@ class AiCoreOpReport:
     @classmethod
     def _get_hardware_op_datas(cls: any, curs: any) -> list:
         aicpu_data = cls._get_hardware_op_sql_data(curs,
-                                                   (Constant.TASK_TYPE_AI_CPU, ))
+                                                   (Constant.TASK_TYPE_AI_CPU,))
         dvpp_data = cls._get_hardware_op_sql_data(curs, (Constant.TASK_TYPE_DVPP,))
-        dsa_data = cls._get_hardware_op_sql_data(curs, (Constant.TASK_TYPE_DSA, ))
+        dsa_data = cls._get_hardware_op_sql_data(curs, (Constant.TASK_TYPE_DSA,))
         res_list = [None] * (len(aicpu_data) + len(dsa_data) + len(dvpp_data))
         res_list[:len(aicpu_data)] = aicpu_data
         res_list[len(aicpu_data): len(aicpu_data) + len(dsa_data)] = dsa_data

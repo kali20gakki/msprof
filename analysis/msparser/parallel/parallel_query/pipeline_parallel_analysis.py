@@ -26,8 +26,10 @@ class PipelineParallelAnalysis:
     def get_tuning_suggestion(self: any) -> dict:
         with ClusterParallelViewModel(self._params["collection_path"]) as _model:
             tuning_data = _model.get_pipeline_parallel_tuning_data()
-        suggestion = {"parallel_mode": "Pipeline Parallel",
-                      "suggestion": []}
+        suggestion = {
+            "parallel_mode": "Pipeline Parallel",
+            "suggestion": []
+        }
         if not tuning_data:
             return suggestion
         if not tuning_data[0]:

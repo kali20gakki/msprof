@@ -66,10 +66,10 @@ class ClusterStepTraceParser(IParser):
               "(case when grad_refresh_bound={1} then {1} else grad_refresh_bound*{2} end) as grad_refresh_bound, " \
               "(case when data_aug_bound={1} then {1} else data_aug_bound*{2} end) as data_aug_bound " \
               "from {3}".format(
-               NumberConstant.DEFAULT_MODEL_ID,
-               NumberConstant.NULL_NUMBER,
-               StepTraceConstant.syscnt_to_micro(),
-               DBNameConstant.TABLE_TRAINING_TRACE)
+            NumberConstant.DEFAULT_MODEL_ID,
+            NumberConstant.NULL_NUMBER,
+            StepTraceConstant.syscnt_to_micro(),
+            DBNameConstant.TABLE_TRAINING_TRACE)
         return sql
 
     @staticmethod
@@ -123,12 +123,12 @@ class ClusterStepTraceParser(IParser):
     def _check_collection_path_valid(self: any) -> bool:
         db_path = PathManager.get_db_path(self.collection_path, DBNameConstant.DB_CLUSTER_RANK)
         return os.path.exists(db_path)
-            
+
     def _generate_cluster_table_name(self: any) -> list:
         for rank_id in list(self.id_with_project_path_map.keys()):
             path = self.id_with_project_path_map.get(rank_id)
             device_path = os.path.join(self.collection_path, path)
-            trace_db_path =  PathManager.get_db_path(device_path, DBNameConstant.DB_TRACE)
+            trace_db_path = PathManager.get_db_path(device_path, DBNameConstant.DB_TRACE)
             if not DBManager.check_tables_in_db(trace_db_path, DBNameConstant.TABLE_TRAINING_TRACE):
                 self.id_with_project_path_map.pop(rank_id)
                 continue

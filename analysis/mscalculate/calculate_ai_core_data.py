@@ -161,8 +161,9 @@ class CalculateAiCoreData:
             ai_core_profiling_events.pop("mac_int8_ratio")
             if "vec_exe_ratio" in events_name_list:
                 vec_exe_ratio = ai_core_profiling_events.pop("vec_exe_ratio")
-                ai_core_profiling_events = {"vec_exe_ratio": vec_exe_ratio, "mac_ratio_extra": [mac_ratio],
-                                            **ai_core_profiling_events}
+                ai_core_profiling_events = {
+                    "vec_exe_ratio": vec_exe_ratio, "mac_ratio_extra": [mac_ratio], **ai_core_profiling_events
+                }
             else:
                 ai_core_profiling_events = {"mac_ratio_extra": [mac_ratio], **ai_core_profiling_events}
 
