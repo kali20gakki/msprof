@@ -80,6 +80,26 @@ unsigned long long Utils::GetCPUCycleCounter()
     return cycles;
 }
 
+double Utils::StatCpuRealFreq()
+{
+    const int sampleTimes = 500;    // sample 500 copies of data
+    const int sampleIntv = 1000;    // sample a copy of data every 1000us
+
+    std::vector<unsigned long long> cycleCnts;
+    std::vector<unsigned long long> monotonicRaws;
+    for (int i = 0; i <= sampleTimes; i++) {
+        cycleCnts.push_back(Utils::GetCPUCycleCounter());
+        monotonicRaws.push_back(Utils::GetClockMonotonicRaw());
+        usleep(sampleIntv);
+    }
+
+    double freqSum = 0;
+    for (int i = 0; i < sampleTimes; i++) {
+        freqSum += static_cast<double>(cycleCnts[i + 1] - cycleCnts[i]) / (monotonicRaws[i + 1] - monotonicRaws[i]);
+    }
+    return freqSum / sampleTimes;
+}
+
 void Utils::GetTime(unsigned long long &startRealtime, unsigned long long &startMono, unsigned long long &cntvct)
 {
     cntvct = analysis::dvvp::common::utils::Utils::GetCPUCycleCounter();

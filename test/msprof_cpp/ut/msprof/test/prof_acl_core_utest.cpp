@@ -56,7 +56,7 @@ using namespace Collector::Dvvp::Plugin;
 using namespace Collector::Dvvp::Mmpa;
 using namespace Collector::Dvvp::Mmpa;
 
-const int RECEIVE_CHUNK_SIZE = 320; // chunk size:320
+const int RECEIVE_CHUNK_SIZE = 1024; // chunk size:1024
 
 class MSPROF_ACL_CORE_UTEST: public testing::Test {
 protected:

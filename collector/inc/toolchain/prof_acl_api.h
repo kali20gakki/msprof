@@ -186,6 +186,15 @@ MSVP_PROF_API int aclprofSetStampCategory(void *stamp, uint32_t category);
 */
 MSVP_PROF_API int aclprofSetStampCallStack(void *stamp, const char *callStack, uint32_t len);
 
+/**
+* @ingroup AscendCL
+* @brief report stamp data
+*
+*
+* @retval void
+*/
+MSVP_PROF_API int aclprofReportStamp(const char *tag, uint32_t tagLen, unsigned char *data, uint32_t dataLen);
+
 typedef enum {
     ACL_SUBSCRIBE_OP = 0,
     ACL_SUBSCRIBE_SUBGRAPH = 1,

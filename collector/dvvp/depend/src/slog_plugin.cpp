@@ -23,7 +23,8 @@ void SlogPlugin::LoadSlogSo()
             return;
         }
     }
-    (void)pluginHandle_->GetFunction<int, int, int>("CheckLogLevelForC", checkLogLevelForC_);
+    pluginHandle_->GetFunction<int, int, int>("CheckLogLevelForC", checkLogLevelForC_);
+    dlogInnerForC_ = pluginHandle_->GetFunctionForC("DlogInnerForC");
 }
 
 bool SlogPlugin::IsFuncExist(const std::string &funcName) const

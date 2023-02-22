@@ -128,7 +128,7 @@ public:
 
         size_t index = currWriteCusor & mask_;
         dataQueue_[index].deviceId = data->deviceId;
-        dataQueue_[index].reportTime = analysis::dvvp::common::utils::Utils::GetClockMonotonicRaw();
+        dataQueue_[index].reportTime = 0;
         dataQueue_[index].dataLen = data->dataLen;
         dataQueue_[index].tag = *(reinterpret_cast<CONST_REPORT_CHUNK_TAG_PTR>(data->tag));
         errno_t err = memcpy_s(dataQueue_[index].data.data, RECEIVE_CHUNK_SIZE, data->data, data->dataLen);
