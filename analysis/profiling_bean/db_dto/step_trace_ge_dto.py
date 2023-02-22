@@ -24,20 +24,12 @@ class StepTraceGeDto:
         """
         return self._model_id
 
-    @model_id.setter
-    def model_id(self: any, value: any) -> None:
-        self._model_id = value
-
     @property
     def index_id(self: any) -> any:
         """
         for index id
         """
         return self._index_id
-
-    @index_id.setter
-    def index_id(self: any, value: any) -> None:
-        self._index_id = value
 
     @property
     def stream_id(self: any) -> any:
@@ -46,20 +38,12 @@ class StepTraceGeDto:
         """
         return self._stream_id
 
-    @stream_id.setter
-    def stream_id(self: any, value: any) -> None:
-        self._stream_id = value
-
     @property
     def task_id(self: any) -> any:
         """
         for task id
         """
         return self._task_id
-
-    @task_id.setter
-    def task_id(self: any, value: any) -> None:
-        self._task_id = value
 
     @property
     def timestamp(self: any) -> any:
@@ -68,20 +52,12 @@ class StepTraceGeDto:
         """
         return self._timestamp
 
-    @timestamp.setter
-    def timestamp(self: any, value: any) -> None:
-        self._timestamp = value
-
     @property
     def tag_id(self: any) -> any:
         """
         for tag
         """
         return self._tag_id
-
-    @tag_id.setter
-    def tag_id(self: any, value: any) -> None:
-        self._tag_id = value
 
     @property
     def op_name(self: any) -> any:
@@ -90,16 +66,40 @@ class StepTraceGeDto:
         """
         return self._op_name
 
-    @op_name.setter
-    def op_name(self: any, value: any) -> None:
-        self._op_name = value
-
     @property
     def op_type(self: any) -> any:
         """
         for op type
         """
         return self._op_type
+
+    @model_id.setter
+    def model_id(self: any, value: any) -> None:
+        self._model_id = value
+
+    @index_id.setter
+    def index_id(self: any, value: any) -> None:
+        self._index_id = value
+
+    @stream_id.setter
+    def stream_id(self: any, value: any) -> None:
+        self._stream_id = value
+
+    @task_id.setter
+    def task_id(self: any, value: any) -> None:
+        self._task_id = value
+
+    @timestamp.setter
+    def timestamp(self: any, value: any) -> None:
+        self._timestamp = value
+
+    @tag_id.setter
+    def tag_id(self: any, value: any) -> None:
+        self._tag_id = value
+
+    @op_name.setter
+    def op_name(self: any, value: any) -> None:
+        self._op_name = value
 
     @op_type.setter
     def op_type(self: any, value: any) -> None:

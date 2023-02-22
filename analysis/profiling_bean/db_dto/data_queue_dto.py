@@ -15,33 +15,17 @@ class DataQueueDto:
     def node_name(self: any) -> any:
         return self._node_name
 
-    @node_name.setter
-    def node_name(self: any, value: any) -> None:
-        self._node_name = value
-
     @property
     def queue_size(self: any) -> any:
         return self._queue_size
-
-    @queue_size.setter
-    def queue_size(self: any, value: any) -> None:
-        self._queue_size = value
 
     @property
     def start_time(self: any) -> any:
         return self._start_time
 
-    @start_time.setter
-    def start_time(self: any, value: any) -> None:
-        self._start_time = value
-
     @property
     def end_time(self: any) -> any:
         return self._end_time
-
-    @end_time.setter
-    def end_time(self: any, value: any) -> None:
-        self._end_time = value
 
     @property
     def duration(self: any) -> any:
@@ -50,3 +34,19 @@ class DataQueueDto:
     @duration.setter
     def duration(self: any, value: any) -> None:
         self._duration = value
+
+    @node_name.setter
+    def node_name(self: any, value: any) -> None:
+        self._node_name = value
+
+    @queue_size.setter
+    def queue_size(self: any, value: any) -> None:
+        self._queue_size = value
+
+    @end_time.setter
+    def end_time(self: any, value: any) -> None:
+        self._end_time = value
+
+    @start_time.setter
+    def start_time(self: any, value: any) -> None:
+        self._start_time = value

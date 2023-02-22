@@ -19,53 +19,53 @@ class TimeSectionDto:
     def model_id(self: any) -> any:
         return float(self._model_id)
 
-    @model_id.setter
-    def model_id(self: any, value: any) -> None:
-        self._model_id = value
-
     @property
     def index_id(self: any) -> any:
         return float(self._index_id)
-
-    @index_id.setter
-    def index_id(self: any, value: any) -> None:
-        self._index_id = value
 
     @property
     def stream_id(self: any) -> any:
         return float(self._stream_id)
 
-    @stream_id.setter
-    def stream_id(self: any, value: any) -> None:
-        self._stream_id = value
-
     @property
     def task_id(self: any) -> any:
         return float(self._task_id)
-
-    @task_id.setter
-    def task_id(self: any, value: any) -> None:
-        self._task_id = value
 
     @property
     def start_time(self: any) -> any:
         return float(self._start_time)
 
-    @start_time.setter
-    def start_time(self: any, value: any) -> None:
-        self._start_time = value
-
     @property
     def end_time(self: any) -> any:
         return float(self._end_time)
 
-    @end_time.setter
-    def end_time(self: any, value: any) -> None:
-        self._end_time = value
-
     @property
     def overlap_time(self: any) -> any:
         return float(self._overlap_time)
+
+    @model_id.setter
+    def model_id(self: any, value: any) -> None:
+        self._model_id = value
+
+    @index_id.setter
+    def index_id(self: any, value: any) -> None:
+        self._index_id = value
+
+    @stream_id.setter
+    def stream_id(self: any, value: any) -> None:
+        self._stream_id = value
+
+    @task_id.setter
+    def task_id(self: any, value: any) -> None:
+        self._task_id = value
+
+    @start_time.setter
+    def start_time(self: any, value: any) -> None:
+        self._start_time = value
+
+    @end_time.setter
+    def end_time(self: any, value: any) -> None:
+        self._end_time = value
 
     @overlap_time.setter
     def overlap_time(self: any, value: any) -> None:
