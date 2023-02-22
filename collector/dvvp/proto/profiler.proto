@@ -235,6 +235,10 @@ message NetCardInfo {
     string netCardName = 1;
     int32 speed = 2;
 }
+message CycleToTimeInfo {
+    double realCpuFreq = 1;
+    uint64 calibration = 2;
+}
 
 message InfoMain {
     string jobInfo = 1;
@@ -256,6 +260,7 @@ message InfoMain {
     uint32 netCardNums = 18;
     repeated NetCardInfo netCard = 19;
     int32 rank_id = 20;
+    repeated CycleToTimeInfo cycleToTime = 21;
 }
 // for generating info.json _________END
 

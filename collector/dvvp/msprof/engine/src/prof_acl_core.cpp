@@ -774,6 +774,11 @@ aclError aclprofRangeStop(uint32_t rangeId)
     return MsprofTxManager::instance()->RangeStop(rangeId);
 }
 
+aclError aclprofReportStamp(CONST_CHAR_PTR tag, uint32_t tagLen, UNSIGNED_CHAR_PTR data, uint32_t dataLen)
+{
+    return MsprofTxManager::instance()->ReportStampDataV2(tag, tagLen, data, dataLen);
+}
+
 aclError aclprofSetConfig(aclprofConfigType configType, const char *config, size_t configLength)
 {
     if (Platform::instance()->PlatformIsHelperHostSide()) {

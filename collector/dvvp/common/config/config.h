@@ -46,7 +46,7 @@ const int PROFILING_PACKET_MAX_LEN = (3 * 1024 * 1024);  // 3 * 1024 *1024 means
 
 const int MSVP_BATCH_MAX_LEN = 2621440;  // 2621440 : 2.5 * 1024 *1024 means 2.5MB
 
-const int RECEIVE_CHUNK_SIZE = 320; // chunk size:320
+const int RECEIVE_CHUNK_SIZE = 1024; // chunk size:1024
 
 const int HASH_DATA_MAX_LEN = 1024; // hash data max len:1024
 

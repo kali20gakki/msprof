@@ -9,7 +9,6 @@
 
 #include "singleton/singleton.h"
 #include "plugin_handle.h"
-#include "utils.h"
 
 namespace Collector {
 namespace Dvvp {
@@ -39,10 +38,11 @@ public:
     template<typename... T>
     void MsprofDlogInnerForC(int moduleId, int level, const char *fmt, T... args)
     {
-        PthreadOnce(&loadFlag_, []()->void {SlogPlugin::instance()->LoadSlogSo();});
+        if (dlogInnerForC_ == nullptr) {
+            return;
+        }
         using DlogInnerForCFunc = std::function<void(int, int, const char *, T...)>;
-        DlogInnerForCFunc func;
-        pluginHandle_->GetFunction<void, int, int, const char *, T...>("DlogInnerForC", func);
+        static DlogInnerForCFunc func = (void(*)(int, int, const char *, T...))dlogInnerForC_;
         if (func != nullptr) {
             func(moduleId, level, fmt, args...);
         }
@@ -53,6 +53,7 @@ private:
     static SHARED_PTR_ALIA<PluginHandle> pluginHandle_;
     PTHREAD_ONCE_T loadFlag_;
     CheckLogLevelForCFunc checkLogLevelForC_ = nullptr;
+    HandleType dlogInnerForC_ = nullptr;
 
 private:
     void LoadSlogSo();

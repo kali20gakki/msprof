@@ -12,6 +12,7 @@
 #include <functional>
 #include <dlfcn.h>
 #include "errno/error_code.h"
+#include "utils.h"
 
 #define PTHREAD_ONCE_T pthread_once_t
 namespace Collector {
@@ -35,6 +36,10 @@ public:
     void GetFunction(const std::string& funcName, std::function<R(Types... args)>& func) const
     {
         func = (R(*)(Types...))dlsym(handle_, funcName.c_str());
+    }
+    HandleType GetFunctionForC(const std::string& funcName) const
+    {
+        return dlsym(handle_, funcName.c_str());
     }
     bool HasLoad();
     bool IsFuncExist(const std::string funcName) const;
