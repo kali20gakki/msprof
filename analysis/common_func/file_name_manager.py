@@ -534,10 +534,12 @@ def get_pid_mem_compiles() -> tuple:
     """
     get pid memory regex compiles
     """
-    pid_mem_compiles = (re.compile(FileNameManagerConstant.PID_MEM_FILE_PATTERN),
-                        re.compile(FileNameManagerConstant.PID_MEM_INFER_FILE_PATTERN),
-                        re.compile(FileNameManagerConstant.PID_MEM_TRAINING_FILE_PATTERN),
-                        re.compile(FileNameManagerConstant.HOST_PID_MEM_FILE_PATTERN))
+    pid_mem_compiles = (
+        re.compile(FileNameManagerConstant.PID_MEM_FILE_PATTERN),
+        re.compile(FileNameManagerConstant.PID_MEM_INFER_FILE_PATTERN),
+        re.compile(FileNameManagerConstant.PID_MEM_TRAINING_FILE_PATTERN),
+        re.compile(FileNameManagerConstant.HOST_PID_MEM_FILE_PATTERN)
+    )
     return pid_mem_compiles
 
 
@@ -545,10 +547,12 @@ def get_pid_cpu_usage_compiles() -> tuple:
     """
     get pid cpu usage regex compiles
     """
-    pid_cpu_usage_compiles = (re.compile(FileNameManagerConstant.PID_CPU_USAGE_FILE_PATTERN),
-                              re.compile(FileNameManagerConstant.PID_CPU_USAGE_INFER_FILE_PATTERN),
-                              re.compile(FileNameManagerConstant.PID_CPU_USAGE_TRAINING_FILE_PATTERN),
-                              re.compile(FileNameManagerConstant.HOST_PID_CPU_USAGE_FILE_PATTERN))
+    pid_cpu_usage_compiles = (
+        re.compile(FileNameManagerConstant.PID_CPU_USAGE_FILE_PATTERN),
+        re.compile(FileNameManagerConstant.PID_CPU_USAGE_INFER_FILE_PATTERN),
+        re.compile(FileNameManagerConstant.PID_CPU_USAGE_TRAINING_FILE_PATTERN),
+        re.compile(FileNameManagerConstant.HOST_PID_CPU_USAGE_FILE_PATTERN)
+    )
     return pid_cpu_usage_compiles
 
 
@@ -581,10 +585,12 @@ def get_sys_mem_compiles() -> tuple:
     """
     get sys mem regex compiles
     """
-    sys_mem_compiles = (re.compile(FileNameManagerConstant.SYS_MEM_FILE_PATTERN),
-                        re.compile(FileNameManagerConstant.SYS_MEM_INFER_FILE_PATTERN),
-                        re.compile(FileNameManagerConstant.SYS_MEM_TRAINING_FILE_PATTERN),
-                        re.compile(FileNameManagerConstant.HOST_SYS_MEM_FILE_PATTERN))
+    sys_mem_compiles = (
+        re.compile(FileNameManagerConstant.SYS_MEM_FILE_PATTERN),
+        re.compile(FileNameManagerConstant.SYS_MEM_INFER_FILE_PATTERN),
+        re.compile(FileNameManagerConstant.SYS_MEM_TRAINING_FILE_PATTERN),
+        re.compile(FileNameManagerConstant.HOST_SYS_MEM_FILE_PATTERN)
+    )
     return sys_mem_compiles
 
 
@@ -592,10 +598,12 @@ def get_sys_cpu_usage_compiles() -> tuple:
     """
     get sys cpu usage compiles
     """
-    sys_cpu_usage_compiles = (re.compile(FileNameManagerConstant.SYS_CPU_USAGE_FILE_PATTERN),
-                              re.compile(FileNameManagerConstant.SYS_CPU_USAGE_INFER_FILE_PATTERN),
-                              re.compile(FileNameManagerConstant.SYS_CPU_USAGE_TRAINING_FILE_PATTERN),
-                              re.compile(FileNameManagerConstant.HOST_SYS_CPU_USAGE_FILE_PATTERN),)
+    sys_cpu_usage_compiles = (
+        re.compile(FileNameManagerConstant.SYS_CPU_USAGE_FILE_PATTERN),
+        re.compile(FileNameManagerConstant.SYS_CPU_USAGE_INFER_FILE_PATTERN),
+        re.compile(FileNameManagerConstant.SYS_CPU_USAGE_TRAINING_FILE_PATTERN),
+        re.compile(FileNameManagerConstant.HOST_SYS_CPU_USAGE_FILE_PATTERN),
+    )
     return sys_cpu_usage_compiles
 
 

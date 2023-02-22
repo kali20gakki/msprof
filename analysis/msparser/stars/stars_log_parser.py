@@ -31,7 +31,7 @@ class StarsLogCalCulator(ICalculator, MsMultiProcess):
     }
 
     def __init__(self: any, file_list: dict, sample_config: dict) -> None:
-        MsMultiProcess.__init__(self, sample_config)
+        super().__init__(sample_config)
         self._sample_config = sample_config
         self._iter_range = sample_config.get(StrConstant.PARAM_ITER_ID)
         self._project_path = sample_config.get(StrConstant.SAMPLE_CONFIG_PROJECT_PATH)

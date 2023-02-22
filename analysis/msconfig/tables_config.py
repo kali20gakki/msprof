@@ -22,12 +22,12 @@ class TablesConfig(MetaConfig):
             ('timestamp', 'INTEGER,null'),
             ('batch_id', 'INTEGER,null'),
             ('context_id', 'INTEGER,null')
-        ]
-        , 'HashInfoMap': [
+        ],
+        'HashInfoMap': [
             ('hash_key', 'TEXT,null'),
             ('hash_value', 'TEXT,null')
-        ]
-        , 'TensorInfoMap': [
+        ],
+        'TensorInfoMap': [
             ('model_id', 'INTEGER,null'),
             ('stream_id', 'INTEGER,null'),
             ('task_id', 'INTEGER,null'),
@@ -41,8 +41,23 @@ class TablesConfig(MetaConfig):
             ('index_id', 'INTEGER,null'),
             ('timestamp', 'TEXT,null'),
             ('batch_id', 'INTEGER,null')
-        ]
-        , 'StepInfoMap': [
+        ],
+        'GeTensorMap': [
+            ('model_id', 'INTEGER,null'),
+            ('stream_id', 'INTEGER,null'),
+            ('task_id', 'INTEGER,null'),
+            ('tensor_num', 'INTEGER,null'),
+            ('input_formats', 'TEXT,null'),
+            ('input_data_types', 'TEXT,null'),
+            ('input_shapes', 'TEXT,null'),
+            ('output_formats', 'TEXT,null'),
+            ('output_data_types', 'TEXT,null'),
+            ('output_shapes', 'TEXT,null'),
+            ('index_id', 'INTEGER,null'),
+            ('timestamp', 'TEXT,null'),
+            ('batch_id', 'INTEGER,null')
+        ],
+        'StepInfoMap': [
             ('model_id', 'INTEGER,null'),
             ('stream_id', 'INTEGER,null'),
             ('task_id', 'INTEGER,null'),
@@ -51,21 +66,21 @@ class TablesConfig(MetaConfig):
             ('cur_iter_num', 'INTEGER,null'),
             ('tag', 'TEXT,null'),
             ('batch_id', 'INTEGER,null')
-        ]
-        , 'SessionInfoMap': [
+        ],
+        'SessionInfoMap': [
             ('model_id', 'INTEGER,null'),
             ('graph_id', 'INTEGER,null'),
             ('session_id', 'INTEGER,null'),
             ('mod', 'INTEGER,null'),
             ('timestamp', 'REAL,null')
-        ]
-        , 'GeModelLoadMap': [
+        ],
+        'GeModelLoadMap': [
             ('model_id', 'INTEGER,null'),
             ('model_name', 'TEXT,null'),
             ('start_time', 'REAL,null'),
             ('end_time', 'REAL,null')
-        ]
-        , 'GeFusionOpInfoMap': [
+        ],
+        'GeFusionOpInfoMap': [
             ('model_id', 'INTEGER,null'),
             ('fusion_name', 'TEXT,null'),
             ('fusion_op_nums', 'INTEGER,null'),
@@ -75,8 +90,8 @@ class TablesConfig(MetaConfig):
             ('memory_weight', 'TEXT,null'),
             ('memory_workspace', 'TEXT,null'),
             ('memory_total', 'TEXT,null')
-        ]
-        , 'GeModelTimeMap': [
+        ],
+        'GeModelTimeMap': [
             ('model_name', 'TEXT,null'),
             ('model_id', 'INTEGER,null'),
             ('request_id', 'INTEGER,null'),
@@ -87,16 +102,16 @@ class TablesConfig(MetaConfig):
             ('infer_end', 'REAL,null'),
             ('output_start', 'REAL,null'),
             ('output_end', 'REAL,null')
-        ]
-        , 'GEHostInfoMap': [
+        ],
+        'GEHostInfoMap': [
             ('thread_id', 'INTEGER,null'),
             ('op_type', 'TEXT,null'),
             ('event_type', 'TEXT,null'),
             ('start_time', 'INTEGER,null'),
             ('end_time', 'INTEGER,null'),
             ('op_name', 'TEXT,null')
-        ]
-        , 'OriginalDataMap': [
+        ],
+        'OriginalDataMap': [
             ('common', 'text,none'),
             ('pid', 'int,none'),
             ('tid', 'int,none'),
@@ -110,8 +125,8 @@ class TablesConfig(MetaConfig):
             ('module', 'text,none'),
             ('callstack', 'text,none'),
             ('replayid', 'int,none')
-        ]
-        , 'ApiCallMap': [
+        ],
+        'ApiCallMap': [
             ('entry_time', 'INTEGER,null'),
             ('exit_time', 'INTEGER,null'),
             ('api', 'TEXT,null'),
@@ -123,8 +138,8 @@ class TablesConfig(MetaConfig):
             ('batch_id', 'TEXT,null'),
             ('data_size', 'INTEGER,null'),
             ('memcpy_direction', 'TEXT,null')
-        ]
-        , 'TimeLineMap': [
+        ],
+        'TimeLineMap': [
             ('replayid', 'INTEGER,null'),
             ('tasktype', 'INTEGER,null'),
             ('task_id', 'INTEGER,null'),
@@ -134,8 +149,8 @@ class TablesConfig(MetaConfig):
             ('thread', 'INTEGER,null'),
             ('device_id', 'INTEGER,null'),
             ('mode', 'INTEGER,null')
-        ]
-        , 'EventCounterMap': [
+        ],
+        'EventCounterMap': [
             ('replayid', 'INTEGER,null'),
             ('tasktype', 'INTEGER,null'),
             ('task_id', 'INTEGER,null'),
@@ -156,22 +171,22 @@ class TablesConfig(MetaConfig):
             ('thread', 'INTEGER,null'),
             ('device_id', 'INTEGER,null'),
             ('mode', 'INTEGER,null')
-        ]
-        , 'StepTraceMap': [
+        ],
+        'StepTraceMap': [
             ('index_id', 'INTEGER,null'),
             ('model_id', 'INTEGER,null'),
             ('timestamp', 'REAL, null'),
             ('stream_id', 'INTEGER,null'),
             ('task_id', 'INTEGER,null'),
             ('tag_id', 'INTEGER,null')
-        ]
-        , 'TsMemcpyMap': [
+        ],
+        'TsMemcpyMap': [
             ('timestamp', 'REAL, null'),
             ('stream_id', 'INTEGER,null'),
             ('task_id', 'INTEGER,null'),
             ('task_state', 'INTEGER,null')
-        ]
-        , 'TsMemcpyCalculationMap': [
+        ],
+        'TsMemcpyCalculationMap': [
             ('stream_id', 'INTEGER,null'),
             ('task_id', 'INTEGER,null'),
             ('receive_time', 'INTEGER,null'),
@@ -180,8 +195,8 @@ class TablesConfig(MetaConfig):
             ('duration', 'INTEGER,null'),
             ('name', 'TEXT,null'),
             ('type', 'TEXT,null')
-        ]
-        , 'ReportTaskMap': [
+        ],
+        'ReportTaskMap': [
             ('timeratio', 'REAL,null'),
             ('time', 'REAL,null'),
             ('count', 'INTEGER,null'),
@@ -197,8 +212,8 @@ class TablesConfig(MetaConfig):
             ('stream_id', 'INTEGER,null'),
             ('device_id', 'INTEGER,null'),
             ('batch_id', 'INTEGER,null')
-        ]
-        , 'TaskTimeMap': [
+        ],
+        'TaskTimeMap': [
             ('replayid', 'INTEGER,null'),
             ('device_id', 'INTEGER,null'),
             ('api', 'INTEGER,null'),
@@ -213,8 +228,8 @@ class TablesConfig(MetaConfig):
             ('index_id', 'INTEGER,null'),
             ('model_id', 'INTEGER,null'),
             ('batch_id', 'INTEGER,null')
-        ]
-        , 'TsOriginalDataMap': [
+        ],
+        'TsOriginalDataMap': [
             ('replayid', 'INTEGER,null'),
             ('timestamp', 'numeric,null'),
             ('pc', 'TEXT,null'),
@@ -222,8 +237,8 @@ class TablesConfig(MetaConfig):
             ('event', 'TEXT,null'),
             ('count', 'INTEGER,null'),
             ('function', 'TEXT,null')
-        ]
-        , 'AICoreOriginalDataMap': [
+        ],
+        'AICoreOriginalDataMap': [
             ('mode', 'INTEGER,null'),
             ('replayid', 'INTEGER,null'),
             ('timestamp', 'numeric,null'),
@@ -237,8 +252,8 @@ class TablesConfig(MetaConfig):
             ('event6', 'Text,null'),
             ('event7', 'Text,null'),
             ('event8', 'Text,null')
-        ]
-        , 'NicOriginalDataMap': [
+        ],
+        'NicOriginalDataMap': [
             ('device_id', 'INTEGER,null'),
             ('replayid', 'INTEGER,null'),
             ('timestamp', 'REAL,null'),
@@ -256,8 +271,8 @@ class TablesConfig(MetaConfig):
             ('txerrors', 'REAL,null'),
             ('txdropped', 'REAL,null'),
             ('funcid', 'INTEGER,null')
-        ]
-        , 'NicReportDataMap': [
+        ],
+        'NicReportDataMap': [
             ('device_id', 'INTEGER,null'),
             ('duration', 'TEXT,null'),
             ('bandwidth', 'TEXT,null'),
@@ -270,8 +285,8 @@ class TablesConfig(MetaConfig):
             ('txerrorrate', 'TEXT,null'),
             ('txdroppedrate', 'TEXT,null'),
             ('funcid', 'INTEGER,null')
-        ]
-        , 'DvppOriginalDataMap': [
+        ],
+        'DvppOriginalDataMap': [
             ('device_id', 'TEXT,null'),
             ('replayid', 'TEXT,null'),
             ('timestamp', 'REAL,null'),
@@ -286,8 +301,8 @@ class TablesConfig(MetaConfig):
             ('procutilization', 'TEXT,null'),
             ('lasttime', 'REAL,null'),
             ('lastframe', 'REAL,null')
-        ]
-        , 'DvppReportDataMap': [
+        ],
+        'DvppReportDataMap': [
             ('dvppid', 'TEXT,null'),
             ('device_id', 'TEXT,null'),
             ('enginetype', 'TEXT,null'),
@@ -295,8 +310,8 @@ class TablesConfig(MetaConfig):
             ('alltime', 'TEXT,null'),
             ('allframe', 'TEXT,null'),
             ('allutilization', 'TEXT,null')
-        ]
-        , 'StreamMap': [
+        ],
+        'StreamMap': [
             ('replayid', 'INTEGER, null'),
             ('device_id', 'INTEGER, null'),
             ('stream_id', 'INTEGER, null'),
@@ -310,16 +325,16 @@ class TablesConfig(MetaConfig):
             ('apirowid', 'INTEGER, null'),
             ('eventid', 'INTEGER, null'),
             ('streamname', 'TEXT, null')
-        ]
-        , 'LLCOriginalDataMap': [
+        ],
+        'LLCOriginalDataMap': [
             ('device_id', 'INT,null'),
             ('replayid', 'INT,null'),
             ('timestamp', 'REAL,null'),
             ('counts', 'INT,null'),
             ('unit', 'VARCHAR,null'),
             ('event', 'VARCHAR,null')
-        ]
-        , 'LLCMetricDataMap': [
+        ],
+        'LLCMetricDataMap': [
             ('device_id', 'INT,null'),
             ('replayid', 'INT,null'),
             ('timestamp', 'REAL,null'),
@@ -329,8 +344,8 @@ class TablesConfig(MetaConfig):
             ('write_allocate', 'REAL,null'),
             ('write_noallocate', 'REAL,null'),
             ('write_hit', 'REAL,null')
-        ]
-        , 'LLCDsidDataMap': [
+        ],
+        'LLCDsidDataMap': [
             ('device_id', 'INT,null'),
             ('replayid', 'INT,null'),
             ('timestamp', 'REAL,null'),
@@ -342,24 +357,24 @@ class TablesConfig(MetaConfig):
             ('dsid5', 'REAL,null'),
             ('dsid6', 'REAL,null'),
             ('dsid7', 'REAL,null')
-        ]
-        , 'ai_core_statusMap': [
+        ],
+        'ai_core_statusMap': [
             ('mode', 'INTEGER,null'),
             ('replayid', 'INTEGER,null'),
             ('device_id', 'INTEGER,null'),
             ('timestamp', 'REAL,null'),
             ('aicorenumber', 'INTEGER,null'),
             ('aicorestate', 'TEXT,null')
-        ]
-        , 'ai_vector_statusMap': [
+        ],
+        'ai_vector_statusMap': [
             ('mode', 'INTEGER,null'),
             ('replayid', 'INTEGER,null'),
             ('device_id', 'INTEGER,null'),
             ('timestamp', 'REAL,null'),
             ('aivnumber', 'INTEGER,null'),
             ('aivstate', 'TEXT,null')
-        ]
-        , 'RuntimeTrackMap': [
+        ],
+        'RuntimeTrackMap': [
             ('device_id', 'INTEGER,null'),
             ('timestamp', 'REAL,null'),
             ('task_type', 'INTEGER,null'),
@@ -367,8 +382,8 @@ class TablesConfig(MetaConfig):
             ('task_id', 'INTEGER,null'),
             ('thread', 'INTEGER,null'),
             ('batch_id', 'INTEGER,null')
-        ]
-        , 'TsTrackMap': [
+        ],
+        'TsTrackMap': [
             ('mode', 'INTEGER,null'),
             ('replayid', 'INTEGER,null'),
             ('device_id', 'INTEGER,null'),
@@ -377,16 +392,16 @@ class TablesConfig(MetaConfig):
             ('tasktype', 'INTEGER,null'),
             ('stream_id', 'INTEGER,null'),
             ('task_id', 'INTEGER,null')
-        ]
-        , 'DDROriginalDataMap': [
+        ],
+        'DDROriginalDataMap': [
             ('device_id', 'INT,null'),
             ('replayid', 'INT,null'),
             ('timestamp', 'REAL,null'),
             ('counts', 'INT,null'),
             ('unit', 'VARCHAR,null'),
             ('event', 'VARCHAR,null')
-        ]
-        , 'DDRMetricDataMap': [
+        ],
+        'DDRMetricDataMap': [
             ('device_id', 'INT,null'),
             ('replayid', 'INT,null'),
             ('timestamp', 'REAL,null'),
@@ -394,8 +409,8 @@ class TablesConfig(MetaConfig):
             ('flux_write', 'REAL,null'),
             ('fluxid_read', 'REAL,null'),
             ('fluxid_write', 'REAL,null')
-        ]
-        , 'LLCBandwidthMap': [
+        ],
+        'LLCBandwidthMap': [
             ('device_id', 'INT,null'),
             ('timestamp', 'REAL,null'),
             ('read_hit_rate', 'REAL,null'),
@@ -404,14 +419,14 @@ class TablesConfig(MetaConfig):
             ('write_hit_rate', 'REAL,null'),
             ('write_total', 'REAL,null'),
             ('write_hit', 'REAL,null')
-        ]
-        , 'LLCCapacityMap': [
+        ],
+        'LLCCapacityMap': [
             ('device_id', 'INT,null'),
             ('timestamp', 'REAL,null'),
             ('ctrlcpu', 'REAL,null'),
             ('aicpu', 'REAL,null')
-        ]
-        , 'sysmemMap': [
+        ],
+        'sysmemMap': [
             ('timestamp', 'INT,null'),
             ('memtotal', 'INTEGER,null'),
             ('memfree', 'INTEGER,null'),
@@ -423,16 +438,16 @@ class TablesConfig(MetaConfig):
             ('hugepages_total', 'INTEGER,null'),
             ('hugepages_free', 'INTEGER,null'),
             ('unit', 'text,null')
-        ]
-        , 'pidmemMap': [
+        ],
+        'pidmemMap': [
             ('timestamp', 'INT,null'),
             ('name', 'text,null'),
             ('size', 'INTEGER,null'),
             ('resident', 'INTEGER,null'),
             ('shared', 'INTEGER,null'),
             ('pid', 'INTEGER,null')
-        ]
-        , 'SysCpuUsageDataMap': [
+        ],
+        'SysCpuUsageDataMap': [
             ('timestamp', 'REAL,null'),
             ('cpun', 'TEXT,null'),
             ('user', 'REAL,null'),
@@ -446,8 +461,8 @@ class TablesConfig(MetaConfig):
             ('guest', 'REAL,null'),
             ('gnice', 'REAL,null'),
             ('cputype', 'TEXT,null')
-        ]
-        , 'ProCpuUsageDataMap': [
+        ],
+        'ProCpuUsageDataMap': [
             ('pid', 'int,null'),
             ('process_name', 'VARCHAR,null'),
             ('utime', 'REAL,null'),
@@ -456,8 +471,8 @@ class TablesConfig(MetaConfig):
             ('cstime', 'REAL,null'),
             ('timestamp', 'REAL,null'),
             ('sys_usage', 'REAL,null')
-        ]
-        , 'AclDataMap': [
+        ],
+        'AclDataMap': [
             ('api_name', 'text,null'),
             ('api_type', 'text,null'),
             ('start_time', 'INTEGER,null'),
@@ -465,12 +480,12 @@ class TablesConfig(MetaConfig):
             ('process_id', 'INTEGER,null'),
             ('thread_id', 'INTEGER,null'),
             ('device_id', 'INTEGER,null')
-        ]
-        , 'AclHashMap': [
+        ],
+        'AclHashMap': [
             ('acl_hash', 'text,null'),
             ('api_name', 'text,null')
-        ]
-        , 'ModifiedTaskTimeMap': [
+        ],
+        'ModifiedTaskTimeMap': [
             ('task_id', 'INTEGER, null'),
             ('stream_id', 'INTEGER, null'),
             ('start_time', 'INTEGER,null'),
@@ -481,8 +496,8 @@ class TablesConfig(MetaConfig):
             ('model_id', 'INTEGER, null'),
             ('batch_id', 'INTEGER,null'),
             ('subtask_id', 'INTEGER,null')
-        ]
-        , 'AiCpuDataMap': [
+        ],
+        'AiCpuDataMap': [
             ('stream_id', 'INTEGER,null'),
             ('task_id', 'INTEGER,null'),
             ('sys_start', 'INTEGER, null'),
@@ -494,19 +509,19 @@ class TablesConfig(MetaConfig):
             ('dispatch_time', 'REAL, null'),
             ('total_time', 'REAL, null'),
             ('batch_id', 'INTEGER,null')
-        ]
-        , 'AiCpuFromTsMap': [
+        ],
+        'AiCpuFromTsMap': [
             ('stream_id', 'INTEGER,null'),
             ('task_id', 'INTEGER,null'),
             ('sys_start', 'INTEGER, null'),
             ('sys_end', 'INTEGER, null'),
             ('batch_id', 'INTEGER,null')
-        ]
-        , 'CpuInfoMap': [
+        ],
+        'CpuInfoMap': [
             ('cpu_num', 'INTEGER, null'),
             ('clk_jiffies', 'INTEGER, null')
-        ]
-        , 'ProcessUsageMap': [
+        ],
+        'ProcessUsageMap': [
             ('timestamp', 'text,null'),
             ('uptime', 'text,null'),
             ('pid', 'INTEGER, null'),
@@ -514,33 +529,33 @@ class TablesConfig(MetaConfig):
             ('jiffies', 'INTEGER, null'),
             ('cpu_no', 'text,null'),
             ('usage', 'REAL,null')
-        ]
-        , 'CpuUsageMap': [
+        ],
+        'CpuUsageMap': [
             ('start_time', 'numeric,null'),
             ('end_time', 'text,null'),
             ('cpu_no', 'text,null'),
             ('usage', 'REAL,null')
-        ]
-        , 'MemUsageMap': [
+        ],
+        'MemUsageMap': [
             ('start_time', 'numeric,null'),
             ('end_time', 'text,null'),
             ('usage', 'REAL,null')
-        ]
-        , 'DiskUsageMap': [
+        ],
+        'DiskUsageMap': [
             ('start_time', 'numeric,null'),
             ('end_time', 'text,null'),
             ('disk_read', 'REAL,null'),
             ('disk_write', 'REAL,null'),
             ('swap_in', 'text,null'),
             ('usage', 'REAL,null')
-        ]
-        , 'NetworkUsageMap': [
+        ],
+        'NetworkUsageMap': [
             ('start_time', 'numeric,null'),
             ('end_time', 'text,null'),
             ('usage', 'REAL,null'),
             ('speed', 'REAL,null')
-        ]
-        , 'SyscallMap': [
+        ],
+        'SyscallMap': [
             ('runtime_comm', 'text,null'),
             ('runtime_pid', 'INTEGER,null'),
             ('runtime_tid', 'INTEGER,null'),
@@ -550,15 +565,15 @@ class TablesConfig(MetaConfig):
             ('runtime_end_time', 'REAL,null'),
             ('runtime_trans_start', 'REAL,null'),
             ('runtime_trans_end', 'REAL,null')
-        ]
-        , 'HwtsTaskMap': [
+        ],
+        'HwtsTaskMap': [
             ('task_type', 'INTEGER,null'),
             ('stream_id', 'INTEGER,null'),
             ('task_id', 'INTEGER,null'),
             ('sys_counter', 'INTEGER,null'),
             ('log_type', 'INTEGER,null')
-        ]
-        , 'HwtsTaskTimeMap': [
+        ],
+        'HwtsTaskTimeMap': [
             ('stream_id', 'INTEGER,null'),
             ('task_id', 'INTEGER,null'),
             ('running', 'INTEGER,null'),
@@ -566,8 +581,8 @@ class TablesConfig(MetaConfig):
             ('index_id', 'INTEGER,null'),
             ('model_id', 'INTEGER,null'),
             ('batch_id', 'INTEGER,null')
-        ]
-        , 'HwtsIterMap': [
+        ],
+        'HwtsIterMap': [
             ('iter_id', 'INTEGER,null'),
             ('model_id', 'INTEGER,null'),
             ('index_id', 'INTEGER,null'),
@@ -576,8 +591,8 @@ class TablesConfig(MetaConfig):
             ('ai_core_num', 'INTEGER,null'),
             ('ai_core_offset', 'INTEGER,null'),
             ('sys_cnt', 'INTEGER,null')
-        ]
-        , 'HwtsBatchMap': [
+        ],
+        'HwtsBatchMap': [
             ('stream_id', 'INTEGER,null'),
             ('task_id', 'INTEGER,null'),
             ('batch_id', 'INTEGER,null'),
@@ -585,8 +600,8 @@ class TablesConfig(MetaConfig):
             ('start_time', 'REAL,null'),
             ('end_time', 'REAL,null'),
             ('is_ai_core', 'INTEGER,null')
-        ]
-        , 'GeMergeMap': [
+        ],
+        'GeMergeMap': [
             ('model_id', 'INTEGER,null'),
             ('op_name', 'text,null'),
             ('op_type', 'text,null'),
@@ -595,8 +610,8 @@ class TablesConfig(MetaConfig):
             ('stream_id', 'INTEGER,null'),
             ('batch_id', 'INTEGER,null'),
             ('context_id', 'INTEGER,null')
-        ]
-        , 'RtsTaskMap': [
+        ],
+        'RtsTaskMap': [
             ('task_id', 'INTEGER,null'),
             ('stream_id', 'INTEGER,null'),
             ('start_time', 'INTEGER,null'),
@@ -606,8 +621,8 @@ class TablesConfig(MetaConfig):
             ('model_id', 'INTEGER,null'),
             ('batch_id', 'INTEGER,null'),
             ('subtask_id', 'INTEGER,null')
-        ]
-        , 'OpReportMap': [
+        ],
+        'OpReportMap': [
             ('model_name', 'text,null'),
             ('op_type', 'text,null'),
             ('core_type', 'text,null'),
@@ -617,8 +632,8 @@ class TablesConfig(MetaConfig):
             ('avg', 'REAL,null'),
             ('max', 'REAL,null'),
             ('ratio', 'text,null')
-        ]
-        , 'AcsqTaskMap': [
+        ],
+        'AcsqTaskMap': [
             ('stream_id', 'INTEGER,null'),
             ('task_id', 'INTEGER,null'),
             ('acc_id', 'INTEGER,null'),
@@ -626,8 +641,8 @@ class TablesConfig(MetaConfig):
             ('start_time', 'INTEGER,null'),
             ('end_time', 'INTEGER,null'),
             ('task_time', 'INTEGER,null')
-        ]
-        , 'AcsqTaskTimeMap': [
+        ],
+        'AcsqTaskTimeMap': [
             ('task_id', 'INTEGER,null'),
             ('stream_id', 'INTEGER,null'),
             ('start_time', 'INTEGER,null'),
@@ -636,8 +651,8 @@ class TablesConfig(MetaConfig):
             ('index_id', 'INTEGER,null'),
             ('model_id', 'INTEGER,null'),
             ('batch_id', 'INTEGER,null')
-        ]
-        , 'FftsLogMap': [
+        ],
+        'FftsLogMap': [
             ('stream_id', 'INTEGER,null'),
             ('task_id', 'INTEGER,null'),
             ('subtask_id', 'INTEGER,null'),
@@ -646,8 +661,8 @@ class TablesConfig(MetaConfig):
             ('ffts_type', 'INTEGER,null'),
             ('task_type', 'TEXT,null'),
             ('task_time', 'INTEGER,null')
-        ]
-        , 'StarsTaskTimeMap': [
+        ],
+        'StarsTaskTimeMap': [
             ('context_id', 'INTEGER, null'),
             ('task_id', 'INTEGER, null'),
             ('stream_id', 'INTEGER, null'),
@@ -655,21 +670,21 @@ class TablesConfig(MetaConfig):
             ('duration_time', 'INTEGER, null'),
             ('wait_time', 'INTEGER, null'),
             ('task_type', 'INTEGER,null')
-        ]
-        , 'L2CacheParseMap': [
+        ],
+        'L2CacheParseMap': [
             ('task_type', 'INTEGER,null'),
             ('stream_id', 'INTEGER,null'),
             ('task_id', 'INTEGER,null'),
             ('event_lists', 'TEXT,null')
-        ]
-        , 'L2CacheSummaryMap': [
+        ],
+        'L2CacheSummaryMap': [
             ('task_type', 'INTEGER,null'),
             ('stream_id', 'INTEGER,null'),
             ('task_id', 'INTEGER,null'),
             ('hit_rate', 'REAL'),
             ('victim_rate', 'REAL')
-        ]
-        , 'HCCLAllReduceMap': [
+        ],
+        'HCCLAllReduceMap': [
             ('op_name', 'TEXT, null'),
             ('iteration', 'INTEGER, null'),
             ('name', 'TEXT, null'),
@@ -678,8 +693,8 @@ class TablesConfig(MetaConfig):
             ('timestamp', 'REAL, null'),
             ('duration', 'REAL, null'),
             ('args', 'TEXT, null')
-        ]
-        , 'MsprofTxMap': [
+        ],
+        'MsprofTxMap': [
             ('pid', 'INTEGER, null'),
             ('tid', 'INTEGER, null'),
             ('category', 'INTEGER, null'),
@@ -692,40 +707,40 @@ class TablesConfig(MetaConfig):
             ('message', 'TEXT, null'),
             ('call_stack', 'TEXT, null'),
             ('file_tag', 'INTEGER, null')
-        ]
-        , 'InterSocMap': [
+        ],
+        'InterSocMap': [
             ('l2_buffer_bw_level', 'INTEGER, null'),
             ('mata_bw_level', 'INTEGER, null'),
             ('sys_time', 'REAL,null')
-        ]
-        , 'AccPmuMap': [
+        ],
+        'AccPmuMap': [
             ('acc_id', 'INTEGER,null'),
             ('read_bandwidth', 'INTEGER, null'),
             ('write_bandwidth', 'INTEGER, null'),
             ('read_ost', 'INTEGER, null'),
             ('write_ost', 'INTEGER, null'),
             ('timestamp', 'REAL, null')
-        ]
-        , 'ModelWithQMap': [
+        ],
+        'ModelWithQMap': [
             ('index_id', 'INTEGER, null'),
             ('model_id', 'INTEGER, null'),
             ('timestamp', 'REAL, null'),
             ('tag_id', 'INTEGER, null'),
             ('event_id', 'INTEGER, null')
-        ]
-        , 'PaLinkInfoMap': [
+        ],
+        'PaLinkInfoMap': [
             ('pa_link_id', 'INTEGER, null'),
             ('pa_link_traffic_monit_rx', 'INTEGER, null'),
             ('pa_link_traffic_monit_tx', 'INTEGER,null'),
             ('sys_time', 'INTEGER,null')
-        ]
-        , 'PcieInfoMap': [
+        ],
+        'PcieInfoMap': [
             ('pcie_id', 'INTEGER, null'),
             ('pcie_write_bandwidth', 'INTEGER, null'),
             ('pcie_read_bandwidth', 'INTEGER, null'),
             ('sys_time', 'INTEGER,null')
-        ]
-        , 'LowPowerMap': [
+        ],
+        'LowPowerMap': [
             ('sys_time', 'INTEGER,null'),
             ('vf_samp_cnt', 'INTEGER,null'),
             ('pwr_samp_cnt', 'INTEGER,null'),
@@ -758,8 +773,8 @@ class TablesConfig(MetaConfig):
             ('epd_warn', 'INTEGER,null'),
             ('sft_samp_cfg', 'INTEGER,null'),
             ('voltage', 'INTEGER,null')
-        ]
-        , 'MonitorFlowMap': [
+        ],
+        'MonitorFlowMap': [
             ('stat_rcmd_num', 'INTEGER, null'),
             ('stat_wcmd_num', 'INTEGER, null'),
             ('stat_rlat_raw', 'INTEGER, null'),
@@ -773,8 +788,8 @@ class TablesConfig(MetaConfig):
             ('core_id', 'INTEGER, null'),
             ('group_id', 'INTEGER, null'),
             ('core_type', 'TEXT, null')
-        ]
-        , 'MonitorCyclesMap': [
+        ],
+        'MonitorCyclesMap': [
             ('vector_cycles', 'INTEGER, null'),
             ('scalar_cycles', 'INTEGER, null'),
             ('cube_cycles', 'INTEGER, null'),
@@ -785,8 +800,8 @@ class TablesConfig(MetaConfig):
             ('core_id', 'INTEGER, null'),
             ('group_id', 'INTEGER, null'),
             ('core_type', 'TEXT, null')
-        ]
-        , 'BiuFlowMap': [
+        ],
+        'BiuFlowMap': [
             ('timestamp', 'TEXT, null'),
             ('flow', 'INTEGER, null'),
             ('flow_type', 'TEXT, null'),
@@ -794,8 +809,8 @@ class TablesConfig(MetaConfig):
             ('pid', 'INTEGER, null'),
             ('tid', 'INTEGER, null'),
             ('interval_start', 'INTEGER, null')
-        ]
-        , 'BiuCyclesMap': [
+        ],
+        'BiuCyclesMap': [
             ('timestamp', 'TEXT, null'),
             ('duration', 'INTEGER, null'),
             ('cycle_type', 'TEXT, null'),
@@ -805,15 +820,15 @@ class TablesConfig(MetaConfig):
             ('pid', 'INTEGER, null'),
             ('tid', 'INTEGER, null'),
             ('interval_start', 'INTEGER, null')
-        ]
-        , 'TaskTypeMap': [
+        ],
+        'TaskTypeMap': [
             ('timestamp', 'TEXT, null'),
             ('stream_id', 'INTEGER, null'),
             ('task_id', 'INTEGER, null'),
             ('task_type', 'TEXT, null'),
             ('task_state', 'INTEGER, null')
-        ]
-        , 'GeSummaryMap': [
+        ],
+        'GeSummaryMap': [
             ('model_id', 'INTEGER,null'),
             ('batch_id', 'INTEGER,null'),
             ('task_id', 'INTEGER,null'),
@@ -826,38 +841,23 @@ class TablesConfig(MetaConfig):
             ('timestamp', 'INTEGER,null'),
             ('index_id', 'INTEGER,null'),
             ('context_id', 'INTEGER,null')
-        ]
-        , 'GeTensorMap': [
-            ('model_id', 'INTEGER,null'),
-            ('stream_id', 'INTEGER,null'),
-            ('task_id', 'INTEGER,null'),
-            ('tensor_num', 'INTEGER,null'),
-            ('input_formats', 'TEXT,null'),
-            ('input_data_types', 'TEXT,null'),
-            ('input_shapes', 'TEXT,null'),
-            ('output_formats', 'TEXT,null'),
-            ('output_data_types', 'TEXT,null'),
-            ('output_shapes', 'TEXT,null'),
-            ('index_id', 'INTEGER,null'),
-            ('timestamp', 'TEXT,null'),
-            ('batch_id', 'INTEGER,null')
-        ]
-        , 'TimeMap': [
+        ],
+        'TimeMap': [
             ('device_id', 'INTEGER,null'),
             ('dev_mon', 'INTEGER,null'),
             ('dev_wall', 'INTEGER,null'),
             ('dev_cntvct', 'INTEGER,null'),
             ('host_mon', 'INTEGER,null'),
             ('host_wall', 'INTEGER,null')
-        ]
-        , 'ClusterRankMap': [
+        ],
+        'ClusterRankMap': [
             ('job_info', 'TEXT,null'),
             ('device_id', 'INTEGER,null'),
             ('collection_time', 'TEXT,null'),
             ('rank_id', 'INTEGER,null'),
             ('dir_name', 'TEXT,null')
-        ]
-        , 'ClusterStepTraceMap': [
+        ],
+        'ClusterStepTraceMap': [
             ('device_id', 'INTEGER,null'),
             ('model_id', 'INTEGER,null'),
             ('iteration_id', 'INTEGER,null'),
@@ -869,38 +869,38 @@ class TablesConfig(MetaConfig):
             ('grad_refresh_bound', 'REAL,null'),
             ('data_aug_bound', 'REAL,null'),
             ('ge_tag', 'INTEGER,null')
-        ]
-        , 'DataQueueMap': [
+        ],
+        'DataQueueMap': [
             ('node_name', 'TEXT,null'),
             ('queue_size', 'INTEGER,null'),
             ('start_time', 'REAL,null'),
             ('end_time', 'REAL,null'),
             ('duration', 'REAL,null')
-        ]
-        , 'AllReduceMap': [
+        ],
+        'AllReduceMap': [
             ('device_id', 'INTEGER,null'),
             ('model_id', 'INTEGER,null'),
             ('index_id', 'INTEGER,null'),
             ('iteration_end', 'INTEGER,null'),
             ('all_reduce_start', 'INTEGER,null'),
             ('all_reduce_end', 'INTEGER,null')
-        ]
-        , 'HostQueueMap': [
+        ],
+        'HostQueueMap': [
             ('type', 'INTEGER,null'),
             ('extra_info', 'INTEGER,null'),
             ('index_id', 'INTEGER,null'),
             ('value', 'INTEGER,null'),
             ('mode', 'INTEGER,null')
-        ]
-        , 'HcclOperatorExeMap': [
+        ],
+        'HcclOperatorExeMap': [
             ('model_id', 'INTEGER,null'),
             ('index_id', 'INTEGER,null'),
             ('op_name', 'TEXT,null'),
             ('op_type', 'TEXT,null'),
             ('start_time', 'REAL,null'),
             ('end_time', 'REAL,null')
-        ]
-        , 'ParallelStrategyMap': [
+        ],
+        'ParallelStrategyMap': [
             ('ai_frame_type', 'TEXT,null'),
             ('stage_num', 'INTEGER,null'),
             ('rankId', 'INTEGER,null'),
@@ -908,8 +908,8 @@ class TablesConfig(MetaConfig):
             ('parallelType', 'TEXT,null'),
             ('stageDevices', 'TEXT,null'),
             ('parallel_mode', 'TEXT,null')
-        ]
-        , 'HcclOperatorOverlapMap': [
+        ],
+        'HcclOperatorOverlapMap': [
             ('model_id', 'INTEGER,null'),
             ('index_id', 'INTEGER,null'),
             ('op_name', 'TEXT,null'),
@@ -917,14 +917,14 @@ class TablesConfig(MetaConfig):
             ('start_time', 'REAL,null'),
             ('end_time', 'REAL,null'),
             ('overlap_time', 'REAL,null')
-        ]
-        , 'ComputationTimeMap': [
+        ],
+        'ComputationTimeMap': [
             ('model_id', 'INTEGER,null'),
             ('index_id', 'INTEGER,null'),
             ('step_time', 'REAL,null'),
             ('computation_time', 'REAL,null')
-        ]
-        , 'ClusterDataParallelMap': [
+        ],
+        'ClusterDataParallelMap': [
             ('rank_id', 'INTEGER,null'),
             ('device_id', 'INTEGER,null'),
             ('model_id', 'INTEGER,null'),
@@ -935,8 +935,8 @@ class TablesConfig(MetaConfig):
             ('communication_time', 'REAL,null'),
             ('interval_of_communication_time', 'REAL,null'),
             ('hccl_op_num', 'INTEGER,null')
-        ]
-        , 'ClusterModelParallelMap': [
+        ],
+        'ClusterModelParallelMap': [
             ('rank_id', 'INTEGER,null'),
             ('device_id', 'INTEGER,null'),
             ('model_id', 'INTEGER,null'),
@@ -945,8 +945,8 @@ class TablesConfig(MetaConfig):
             ('computation_time', 'REAL,null'),
             ('pure_communication_time', 'REAL,null'),
             ('communication_time', 'REAL,null')
-        ]
-        , 'ClusterPipelineParallelMap': [
+        ],
+        'ClusterPipelineParallelMap': [
             ('rank_id', 'INTEGER,null'),
             ('device_id', 'INTEGER,null'),
             ('model_id', 'INTEGER,null'),
@@ -957,8 +957,8 @@ class TablesConfig(MetaConfig):
             ('communication_time', 'REAL,null'),
             ('pure_communication_time_only_revice', 'REAL,null'),
             ('pure_communication_time_except_revice', 'REAL,null')
-        ]
-        , 'ClusterParallelStrategyMap': [
+        ],
+        'ClusterParallelStrategyMap': [
             ('ai_frame_type', 'TEXT,null'),
             ('stage_num', 'INTEGER,null'),
             ('rankId', 'INTEGER,null'),

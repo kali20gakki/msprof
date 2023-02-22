@@ -25,6 +25,7 @@ class ClusterParserFactory:
     """
     parser factory interface for cluster scene
     """
+
     def __init__(self: any) -> None:
         self.max_iters_model_id = 0
 
@@ -110,9 +111,11 @@ class ClusterParserFactory:
                 raise ProfException(ProfException.PROF_INVALID_CONNECT_ERROR)
             hccl_names = _model.get_distinct_op_name()
             for hccl_name in hccl_names:
-                conditions = {'op_name': hccl_name.op_name,
-                              'iter_start': iter_start_end[0][0],
-                              'iter_end': iter_start_end[0][1]}
+                conditions = {
+                    'op_name': hccl_name.op_name,
+                    'iter_start': iter_start_end[0][0],
+                    'iter_end': iter_start_end[0][1]
+                }
                 events_data = _model.get_hccl_data_by_conditions(conditions)
                 if not events_data:
                     continue

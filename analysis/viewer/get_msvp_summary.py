@@ -176,7 +176,7 @@ def get_aicore_utilization(project_path: str, device_id: str, number: float, sta
     if not (conn and curs):
         return json.dumps({'status': NumberConstant.ERROR, "info": "The db doesn't exist."})
     try:
-        if func_map['sample_config'].get("ai_core_profiling_mode") == StrConstant.AIC_SAMPLE_BASED_MODE:
+        if func_map.get('sample_config', {}).get("ai_core_profiling_mode") == StrConstant.AIC_SAMPLE_BASED_MODE:
             return _get_aicore_util(curs, number, start, end)
         return json.dumps({'status': NumberConstant.ERROR, 'data': "Unable to get aicore utilization."})
     except sqlite3.Error:

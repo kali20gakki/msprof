@@ -150,12 +150,14 @@ class FftsPmuCalculate(PmuCalculator, MsMultiProcess):
         aic_pmu_value_list = list(
             itertools.chain.from_iterable(PmuMetrics(aic_pmu_value).get_pmu_by_event_name(aic_pmu_value)))
         aiv_pmu_value_list = list(
-                        itertools.chain.from_iterable(PmuMetrics(aiv_pmu_value).get_pmu_by_event_name(aiv_pmu_value)))
-        pmu_data = [aic_total_time, aic_total_cycle, *aic_pmu_value_list,
-                    aiv_total_time, aiv_total_cycle, *aiv_pmu_value_list,
-                    data.task_id, data.stream_id, data.subtask_id, data.subtask_type,
-                    InfoConfReader().time_from_syscnt(data.time_list[0]),
-                    InfoConfReader().time_from_syscnt(data.time_list[1]), data.ffts_type, task_type]
+            itertools.chain.from_iterable(PmuMetrics(aiv_pmu_value).get_pmu_by_event_name(aiv_pmu_value)))
+        pmu_data = [
+            aic_total_time, aic_total_cycle, *aic_pmu_value_list,
+            aiv_total_time, aiv_total_cycle, *aiv_pmu_value_list,
+            data.task_id, data.stream_id, data.subtask_id, data.subtask_type,
+            InfoConfReader().time_from_syscnt(data.time_list[0]),
+            InfoConfReader().time_from_syscnt(data.time_list[1]), data.ffts_type, task_type
+        ]
         pmu_data_list.append(pmu_data)
 
     def calculate_total_time(self: any, total_cycle: int, data: any, data_type: str = 'aic') -> float:

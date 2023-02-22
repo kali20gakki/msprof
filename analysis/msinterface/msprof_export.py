@@ -463,7 +463,7 @@ class ExportCommand:
                 err.callback(MsProfCommonConstant.COMMON_FILE_NAME, err.message)
             else:
                 warn(MsProfCommonConstant.COMMON_FILE_NAME,
-                      'Analysis data in "%s" failed. Maybe the data is incomplete.' % result_dir)
+                     'Analysis data in "%s" failed. Maybe the data is incomplete.' % result_dir)
             return
         try:
             for event in self.list_map.get('export_type_list', []):
@@ -477,7 +477,7 @@ class ExportCommand:
                 err.callback(MsProfCommonConstant.COMMON_FILE_NAME, err.message)
             else:
                 warn(MsProfCommonConstant.COMMON_FILE_NAME,
-                      'Analysis data in "%s" failed. Maybe the data is incomplete.' % result_dir)
+                     'Analysis data in "%s" failed. Maybe the data is incomplete.' % result_dir)
 
     def _prepare_export(self: any, result_dir: str) -> None:
         check_collection_dir(result_dir)
@@ -518,10 +518,12 @@ class ExportCommand:
         if self.command_type != MsProfCommonConstant.SUMMARY:
             return
         ClusterTuning(self._cluster_params.get('cluster_path')).run()
-        params = {"collection_path": self.collection_path,
-                  "model_id": 0,
-                  "npu_id": -1,
-                  "iteration_id": self.iteration_range.iteration_id}
+        params = {
+            "collection_path": self.collection_path,
+            "model_id": 0,
+            "npu_id": -1,
+            "iteration_id": self.iteration_range.iteration_id
+        }
         try:
             ClusterTuningFacade(params).process()
         except ProfException:

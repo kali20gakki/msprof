@@ -326,14 +326,16 @@ class CoreCpuReduceViewer:
                  ("Total Cycle", cls._get_task_trace_value(_key_for_ops, total_cycle))
                  ])
 
-            trace_data_pice = [cls._get_task_trace_value(_key_for_ops, op_names,
-                                                         cls._get_task_trace_value(_key_for_ops, rts_task_type,
-                                                                                   Constant.TASK_TYPE_OTHER)),
-                               NumberConstant.TASK_TIME_PID,
-                               sql_data[0],
-                               float(sql_data[2]) / DBManager.NSTOUS,
-                               int(sql_data[3]) / DBManager.NSTOUS if sql_data[3] > 0 else 0,
-                               trace_data_args]
+            trace_data_pice = [
+                cls._get_task_trace_value(
+                    _key_for_ops, op_names, cls._get_task_trace_value(
+                        _key_for_ops, rts_task_type, Constant.TASK_TYPE_OTHER)),
+                NumberConstant.TASK_TIME_PID,
+                sql_data[0],
+                float(sql_data[2]) / DBManager.NSTOUS,
+                int(sql_data[3]) / DBManager.NSTOUS if sql_data[3] > 0 else 0,
+                trace_data_args
+            ]
 
             trace_data.append(trace_data_pice)
         return trace_data

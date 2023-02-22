@@ -29,8 +29,10 @@ class DataPreparationParser(DataParser, MsMultiProcess):
     DTAT_QUEUE_END_TIME_INDEX = 3
     DATA_QUEUE_TABLE_ELEMENTS = 5
     HOST_QUEUE_TABLE_ELEMENTS = 5
-    DATA_PREPARATION_TAG_TO_TABLE = {DataTag.DATA_QUEUE: DBNameConstant.TABLE_DATA_QUEUE,
-                                     DataTag.HOST_QUEUE: DBNameConstant.TABLE_HOST_QUEUE}
+    DATA_PREPARATION_TAG_TO_TABLE = {
+        DataTag.DATA_QUEUE: DBNameConstant.TABLE_DATA_QUEUE,
+        DataTag.HOST_QUEUE: DBNameConstant.TABLE_HOST_QUEUE
+    }
     HOST_DATASET_NOT_SINK_MODE = 0
     HOST_DATASET_SINK_MODE = 1
 
@@ -42,8 +44,10 @@ class DataPreparationParser(DataParser, MsMultiProcess):
         self._project_path = self._sample_config.get(StrConstant.SAMPLE_CONFIG_PROJECT_PATH)
         self._data = {}
         self._host_queue_mode = Constant.DEFAULT_INVALID_VALUE
-        self._tag_to_parser = {DataTag.DATA_QUEUE: self._parse_data_queue,
-                               DataTag.HOST_QUEUE: self._parse_host_queue}
+        self._tag_to_parser = {
+            DataTag.DATA_QUEUE: self._parse_data_queue,
+            DataTag.HOST_QUEUE: self._parse_host_queue
+        }
 
     @staticmethod
     def format_host_queue_raw_data(mode: int, data_lines: list) -> list:
