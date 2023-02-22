@@ -19,31 +19,30 @@ class FopsDto:
     def cube_fops(self: any) -> any:
         return self._cube_fops
 
-    @cube_fops.setter
-    def cube_fops(self: any, value: any) -> None:
-        self._cube_fops = value
-
     @property
     def total_fops(self: any) -> any:
         return self._total_fops
-
-    @total_fops.setter
-    def total_fops(self: any, value: any) -> None:
-        self._total_fops = value
 
     @property
     def op_type(self: any) -> any:
         return self._op_type
 
-    @op_type.setter
-    def op_type(self: any, value: any) -> None:
-        self._op_type = value
-
     @property
     def total_time(self: any) -> any:
         return self._total_time
 
+    @cube_fops.setter
+    def cube_fops(self: any, value: any) -> None:
+        self._cube_fops = value
+
+    @total_fops.setter
+    def total_fops(self: any, value: any) -> None:
+        self._total_fops = value
+
+    @op_type.setter
+    def op_type(self: any, value: any) -> None:
+        self._op_type = value
+
     @total_time.setter
     def total_time(self: any, value: any) -> None:
         self._total_time = value
-

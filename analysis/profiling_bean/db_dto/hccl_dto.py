@@ -36,65 +36,33 @@ class HcclDto:
     def op_name(self: any) -> str:
         return self._op_name
 
-    @op_name.setter
-    def op_name(self: any, value: str) -> None:
-        self._op_name = value
-
     @property
     def iteration(self: any) -> int:
         return self._iteration
-
-    @iteration.setter
-    def iteration(self: any, value: int) -> None:
-        self._iteration = value
 
     @property
     def hccl_name(self: any) -> any:
         return self._hccl_name
 
-    @hccl_name.setter
-    def hccl_name(self: any, value: any) -> None:
-        self._hccl_name = value
-
     @property
     def first_timestamp(self: any) -> float:
         return self._first_timestamp
-
-    @first_timestamp.setter
-    def first_timestamp(self: any, value: float) -> None:
-        self._first_timestamp = value
 
     @property
     def plane_id(self: any) -> any:
         return self._plane_id
 
-    @plane_id.setter
-    def plane_id(self: any, value: any) -> None:
-        self._plane_id = value
-
     @property
     def timestamp(self: any) -> any:
         return self._timestamp
-
-    @timestamp.setter
-    def timestamp(self: any, value: any) -> None:
-        self._timestamp = value
 
     @property
     def duration(self: any) -> any:
         return self._duration
 
-    @duration.setter
-    def duration(self: any, value: any) -> None:
-        self._duration = value
-
     @property
     def args(self: any) -> any:
         return self._args
-
-    @args.setter
-    def args(self: any, value: any) -> None:
-        self._args = ast.literal_eval(value)
 
     @property
     def bandwidth(self: any) -> any:
@@ -143,3 +111,35 @@ class HcclDto:
         if self._args.get('size', self._size) == Constant.DEFAULT_INVALID_VALUE:
             return self._args.get('size(Byte)', self._size)
         return self._args.get('size', self._size)
+
+    @op_name.setter
+    def op_name(self: any, value: str) -> None:
+        self._op_name = value
+
+    @iteration.setter
+    def iteration(self: any, value: int) -> None:
+        self._iteration = value
+
+    @hccl_name.setter
+    def hccl_name(self: any, value: any) -> None:
+        self._hccl_name = value
+
+    @first_timestamp.setter
+    def first_timestamp(self: any, value: float) -> None:
+        self._first_timestamp = value
+
+    @plane_id.setter
+    def plane_id(self: any, value: any) -> None:
+        self._plane_id = value
+
+    @timestamp.setter
+    def timestamp(self: any, value: any) -> None:
+        self._timestamp = value
+
+    @duration.setter
+    def duration(self: any, value: any) -> None:
+        self._duration = value
+
+    @args.setter
+    def args(self: any, value: any) -> None:
+        self._args = ast.literal_eval(value)

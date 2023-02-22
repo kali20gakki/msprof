@@ -18,31 +18,30 @@ class ClusterRankDto:
     def job_info(self: any) -> any:
         return self._job_info
 
-    @job_info.setter
-    def job_info(self: any, value: any) -> None:
-        self._job_info = value
-
     @property
     def device_id(self: any) -> any:
         return self._device_id
-
-    @device_id.setter
-    def device_id(self: any, value: any) -> None:
-        self._device_id = value
 
     @property
     def rank_id(self: any) -> any:
         return self._rank_id
 
-    @rank_id.setter
-    def rank_id(self: any, value: any) -> None:
-        self._rank_id = value
-
     @property
     def dir_name(self: any) -> any:
         return self._dir_name
 
+    @job_info.setter
+    def job_info(self: any, value: any) -> None:
+        self._job_info = value
+
+    @device_id.setter
+    def device_id(self: any, value: any) -> None:
+        self._device_id = value
+
+    @rank_id.setter
+    def rank_id(self: any, value: any) -> None:
+        self._rank_id = value
+
     @dir_name.setter
     def dir_name(self: any, value: any) -> None:
         self._dir_name = value
-

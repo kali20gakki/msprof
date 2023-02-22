@@ -23,20 +23,12 @@ class HCCLOperatorDto:
         """
         return self._model_id
 
-    @model_id.setter
-    def model_id(self: any, value: any) -> None:
-        self._model_id = value
-
     @property
     def index_id(self: any) -> any:
         """
         for index id
         """
         return self._index_id
-
-    @index_id.setter
-    def index_id(self: any, value: any) -> None:
-        self._index_id = value
 
     @property
     def op_name(self: any) -> any:
@@ -45,20 +37,12 @@ class HCCLOperatorDto:
         """
         return self._op_name
 
-    @op_name.setter
-    def op_name(self: any, value: any) -> None:
-        self._op_name = value
-
     @property
     def op_type(self: any) -> any:
         """
         for op type
         """
         return self._op_type
-
-    @op_type.setter
-    def op_type(self: any, value: any) -> None:
-        self._op_type = value
 
     @property
     def start_time(self: any) -> any:
@@ -67,10 +51,6 @@ class HCCLOperatorDto:
         """
         return self._start_time
 
-    @start_time.setter
-    def start_time(self: any, value: any) -> None:
-        self._start_time = value
-
     @property
     def end_time(self: any) -> any:
         """
@@ -78,9 +58,6 @@ class HCCLOperatorDto:
         """
         return self._end_time
 
-    @end_time.setter
-    def end_time(self: any, value: any) -> None:
-        self._end_time = value
 
     @property
     def overlap_time(self: any) -> any:
@@ -88,6 +65,30 @@ class HCCLOperatorDto:
         for overlap time
         """
         return self._overlap_time
+
+    @model_id.setter
+    def model_id(self: any, value: any) -> None:
+        self._model_id = value
+
+    @index_id.setter
+    def index_id(self: any, value: any) -> None:
+        self._index_id = value
+
+    @op_name.setter
+    def op_name(self: any, value: any) -> None:
+        self._op_name = value
+
+    @op_type.setter
+    def op_type(self: any, value: any) -> None:
+        self._op_type = value
+
+    @start_time.setter
+    def start_time(self: any, value: any) -> None:
+        self._start_time = value
+
+    @end_time.setter
+    def end_time(self: any, value: any) -> None:
+        self._end_time = value
 
     @overlap_time.setter
     def overlap_time(self: any, value: any) -> None:
