@@ -23,69 +23,69 @@ class GeTimeDto:
     def model_name(self: any) -> any:
         return self._model_name
 
-    @model_name.setter
-    def model_name(self: any, value: any) -> None:
-        self._model_name = value
-
     @property
     def model_id(self: any) -> any:
         return self._model_id
-
-    @model_id.setter
-    def model_id(self: any, value: any) -> None:
-        self._model_id = value
 
     @property
     def thread_id(self: any) -> any:
         return self._thread_id
 
-    @thread_id.setter
-    def thread_id(self: any, value: any) -> None:
-        self._thread_id = value
-
     @property
     def input_start(self: any) -> any:
         return self._input_start
-
-    @input_start.setter
-    def input_start(self: any, value: any) -> None:
-        self._input_start = value
 
     @property
     def input_end(self: any) -> any:
         return self._input_end
 
-    @input_end.setter
-    def input_end(self: any, value: any) -> None:
-        self._input_end = value
-
     @property
     def infer_start(self: any) -> any:
         return self._infer_start
-
-    @infer_start.setter
-    def infer_start(self: any, value: any) -> None:
-        self._infer_start = value
 
     @property
     def infer_end(self: any) -> any:
         return self._infer_end
 
-    @infer_end.setter
-    def infer_end(self: any, value: any) -> None:
-        self._infer_end = value
-
     @property
     def output_start(self: any) -> any:
         return self._output_start
 
-    @output_start.setter
-    def output_start(self: any, value: any) -> None:
-        self._output_start = value
-
     @property
     def output_end(self: any) -> any:
         return self._output_end
+
+    @model_name.setter
+    def model_name(self: any, value: any) -> None:
+        self._model_name = value
+
+    @model_id.setter
+    def model_id(self: any, value: any) -> None:
+        self._model_id = value
+
+    @thread_id.setter
+    def thread_id(self: any, value: any) -> None:
+        self._thread_id = value
+
+    @input_start.setter
+    def input_start(self: any, value: any) -> None:
+        self._input_start = value
+
+    @input_end.setter
+    def input_end(self: any, value: any) -> None:
+        self._input_end = value
+
+    @infer_start.setter
+    def infer_start(self: any, value: any) -> None:
+        self._infer_start = value
+
+    @infer_end.setter
+    def infer_end(self: any, value: any) -> None:
+        self._infer_end = value
+
+    @output_start.setter
+    def output_start(self: any, value: any) -> None:
+        self._output_start = value
 
     @output_end.setter
     def output_end(self: any, value: any) -> None:

@@ -18,29 +18,29 @@ class RuntimeApiDto:
     def thread(self: any) -> any:
         return self._thread
 
-    @thread.setter
-    def thread(self: any, value: any) -> None:
-        self._thread = value
-
     @property
     def entry_time(self: any) -> any:
         return self._entry_time
 
-    @entry_time.setter
-    def entry_time(self: any, value: any) -> None:
-        self._entry_time = value
+    @property
+    def api(self: any) -> any:
+        return self._api
 
     @property
     def exit_time(self: any) -> any:
         return self._exit_time
 
+    @thread.setter
+    def thread(self: any, value: any) -> None:
+        self._thread = value
+
+    @entry_time.setter
+    def entry_time(self: any, value: any) -> None:
+        self._entry_time = value
+
     @exit_time.setter
     def exit_time(self: any, value: any) -> None:
         self._exit_time = value
-
-    @property
-    def api(self: any) -> any:
-        return self._api
 
     @api.setter
     def api(self: any, value: any) -> None:

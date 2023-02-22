@@ -24,45 +24,45 @@ class StepTraceOriginDto:
     def index_id(self: any) -> any:
         return self._index_id
 
-    @index_id.setter
-    def index_id(self: any, value: any) -> None:
-        self._index_id = value
-
     @property
     def model_id(self: any) -> any:
         return self._model_id
-
-    @model_id.setter
-    def model_id(self: any, value: any) -> None:
-        self._model_id = value
 
     @property
     def timestamp(self: any) -> any:
         return self._timestamp
 
-    @timestamp.setter
-    def timestamp(self: any, value: any) -> None:
-        self._timestamp = value
-
     @property
     def tag_id(self: any) -> any:
         return self._tag_id
 
-    @tag_id.setter
-    def tag_id(self: any, value: any) -> None:
-        self._tag_id = value
+    @property
+    def task_id(self: any) -> any:
+        return self._task_id
 
     @property
     def stream_id(self: any) -> any:
         return self._stream_id
 
+    @index_id.setter
+    def index_id(self: any, value: any) -> None:
+        self._index_id = value
+
+    @model_id.setter
+    def model_id(self: any, value: any) -> None:
+        self._model_id = value
+
+    @timestamp.setter
+    def timestamp(self: any, value: any) -> None:
+        self._timestamp = value
+
+    @tag_id.setter
+    def tag_id(self: any, value: any) -> None:
+        self._tag_id = value
+
     @stream_id.setter
     def stream_id(self: any, value: any) -> None:
         self._stream_id = value
-
-    @property
-    def task_id(self: any) -> any:
-        return self._task_id
 
     @task_id.setter
     def task_id(self: any, value: any) -> None:
@@ -86,37 +86,37 @@ class StepTraceDto:
     def index_id(self: any) -> any:
         return self._index_id
 
-    @index_id.setter
-    def index_id(self: any, value: any) -> None:
-        self._index_id = value
-
     @property
     def model_id(self: any) -> any:
         return self._model_id
-
-    @model_id.setter
-    def model_id(self: any, value: any) -> None:
-        self._model_id = value
 
     @property
     def step_start(self: any) -> any:
         return self._step_start
 
-    @step_start.setter
-    def step_start(self: any, value: any) -> None:
-        self._step_start = value
-
     @property
     def step_end(self: any) -> any:
         return self._step_end
 
-    @step_end.setter
-    def step_end(self: any, value: any) -> None:
-        self._step_end = value
-
     @property
     def iter_id(self: any) -> any:
         return self._iter_id
+
+    @index_id.setter
+    def index_id(self: any, value: any) -> None:
+        self._index_id = value
+
+    @model_id.setter
+    def model_id(self: any, value: any) -> None:
+        self._model_id = value
+
+    @step_start.setter
+    def step_start(self: any, value: any) -> None:
+        self._step_start = value
+
+    @step_end.setter
+    def step_end(self: any, value: any) -> None:
+        self._step_end = value
 
     @iter_id.setter
     def iter_id(self: any, value: any) -> None:
@@ -144,29 +144,53 @@ class TrainingTraceDto:
     def device_id(self: any) -> any:
         return self._device_id
 
-    @device_id.setter
-    def device_id(self: any, value: any) -> None:
-        self._device_id = value
-
     @property
     def model_id(self: any) -> any:
         return self._model_id
-
-    @model_id.setter
-    def model_id(self: any, value: any) -> None:
-        self._model_id = value
 
     @property
     def iteration_id(self: any) -> any:
         return self._iteration_id
 
-    @iteration_id.setter
-    def iteration_id(self: any, value: any) -> None:
-        self._iteration_id = value
-
     @property
     def fp_start(self: any) -> any:
         return self._fp_start
+
+    @property
+    def bp_end(self: any) -> any:
+        return self._bp_end
+
+    @property
+    def iteration_end(self: any) -> any:
+        return self._iteration_end
+
+    @property
+    def iteration_time(self: any) -> any:
+        return self._iteration_time
+
+    @property
+    def fp_bp_time(self: any) -> any:
+        return self._fp_bp_time
+
+    @property
+    def grad_refresh_bound(self: any) -> any:
+        return self._grad_refresh_bound
+
+    @property
+    def data_aug_bound(self: any) -> any:
+        return self._data_aug_bound
+
+    @device_id.setter
+    def device_id(self: any, value: any) -> None:
+        self._device_id = value
+
+    @model_id.setter
+    def model_id(self: any, value: any) -> None:
+        self._model_id = value
+
+    @iteration_id.setter
+    def iteration_id(self: any, value: any) -> None:
+        self._iteration_id = value
 
     @fp_start.setter
     def fp_start(self: any, value: any) -> None:
@@ -175,20 +199,12 @@ class TrainingTraceDto:
         else:
             self._fp_start = InfoConfReader().time_from_syscnt(value, NumberConstant.MICRO_SECOND)
 
-    @property
-    def bp_end(self: any) -> any:
-        return self._bp_end
-
     @bp_end.setter
     def bp_end(self: any, value: any) -> None:
         if value == NumberConstant.NULL_NUMBER:
             self._bp_end = value
         else:
             self._bp_end = InfoConfReader().time_from_syscnt(value, NumberConstant.MICRO_SECOND)
-
-    @property
-    def iteration_end(self: any) -> any:
-        return self._iteration_end
 
     @iteration_end.setter
     def iteration_end(self: any, value: any) -> None:
@@ -197,33 +213,17 @@ class TrainingTraceDto:
         else:
             self._iteration_end = InfoConfReader().time_from_syscnt(value, NumberConstant.MICRO_SECOND)
 
-    @property
-    def iteration_time(self: any) -> any:
-        return self._iteration_time
-
     @iteration_time.setter
     def iteration_time(self: any, value: any) -> None:
         self._iteration_time = value
-
-    @property
-    def fp_bp_time(self: any) -> any:
-        return self._fp_bp_time
 
     @fp_bp_time.setter
     def fp_bp_time(self: any, value: any) -> None:
         self._fp_bp_time = value
 
-    @property
-    def grad_refresh_bound(self: any) -> any:
-        return self._grad_refresh_bound
-
     @grad_refresh_bound.setter
     def grad_refresh_bound(self: any, value: any) -> None:
         self._grad_refresh_bound = value
-
-    @property
-    def data_aug_bound(self: any) -> any:
-        return self._data_aug_bound
 
     @data_aug_bound.setter
     def data_aug_bound(self: any, value: any) -> None:
@@ -257,5 +257,3 @@ class IterationRange(Iteration):
 
     def _is_compatibility_required(self):
         return NumberConstant.DEFAULT_ITER_COUNT == self.iteration_count
-
-
