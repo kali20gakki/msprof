@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2018-2019. All rights reserved.
-
+import configparser
 import json
 import logging
 import os
@@ -16,13 +16,13 @@ from common_func.file_name_manager import get_info_json_compiles
 from common_func.file_name_manager import get_start_info_compiles
 from common_func.file_manager import check_path_valid
 from common_func.msprof_exception import ProfException
-from common_func.msvp_common import get_host_device_time
 from common_func.msvp_common import is_number
 from common_func.msvp_common import is_valid_original_data
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.singleton import singleton
 from common_func.trace_view_header_constant import TraceViewHeaderConstant
+from profiling_bean.basic_info.host_start import TimerBean
 
 
 @singleton
@@ -35,6 +35,7 @@ class InfoConfReader:
     FREQ = "38.4"
     NPU_PROFILING_TYPE = "npu_profiling"
     HOST_PROFILING_TYPE = "host_profiling"
+    HOST_DEFAULT_FREQ = 0
 
     def __init__(self: any) -> None:
         self._info_json = None
@@ -92,7 +93,7 @@ class InfoConfReader:
         self._load_json(result_path)
         if not self.is_host_profiling():
             self._load_dev_start_time(result_path)
-            self._load_dev_cnt(result_path)
+            self._load_host_start_time(result_path)
 
     def get_start_timestamp(self: any) -> int:
         """
@@ -281,7 +282,6 @@ class InfoConfReader:
             collection_time = Constant.NA
         return [job_info, device_id, collection_time, rank_id]
 
-
     def _load_json(self: any, result_path: str) -> None:
         """
         load info.json once
@@ -298,12 +298,17 @@ class InfoConfReader:
     def _load_dev_start_path_line_by_line(self: any, log_file: any) -> None:
         while True:
             line = log_file.readline(Constant.MAX_READ_LINE_BYTES)
-            if line:
-                line = line.strip()
-                if line.startswith(StrConstant.MONOTONIC_TIME):
-                    _, value = line.split(":")
-                    self._start_log_time = int(value.strip())
-                    break
+            if not line:
+                break
+            split_str = line.strip().split(":")
+            if len(split_str) != 2 or not is_number(split_str[1]):
+                continue
+            if split_str[0] == StrConstant.MONOTONIC_TIME:
+                self._start_log_time = int(split_str[1])
+            elif split_str[0] == StrConstant.DEVICE_SYSCNT:
+                self._dev_cnt = float(split_str[1]) / NumberConstant.NANO_SECOND
+            elif self._start_log_time and self._dev_cnt:
+                break
 
     def _load_dev_start_time(self: any, result_path: str) -> None:
         """
@@ -318,15 +323,33 @@ class InfoConfReader:
         finally:
             pass
 
-    def _load_dev_cnt(self: any, project_path: str) -> None:
+    def _load_host_start_time(self: any, project_path: str) -> None:
         """
-        load dev cnt
+        load host start time
         :return: None
         """
-        dev_start_file = self.get_conf_file_path(project_path, get_dev_start_compiles())
         host_start_file = self.get_conf_file_path(project_path, get_host_start_compiles())
-        _, self._host_mon, _, _, self._dev_cnt = \
-            get_host_device_time(host_start_file, dev_start_file, self.get_device_list()[0])
+        try:
+            if os.path.exists(host_start_file):
+                check_path_valid(host_start_file, True)
+                config = configparser.ConfigParser()
+                config.read(host_start_file)
+                sections = config.sections()
+                if not sections:
+                    return
+                time = dict(config.items(sections[0]))
+                timer = TimerBean(time, self.get_host_freq())
+                self._host_mon = float(timer.host_mon) / NumberConstant.NANO_SECOND
+        except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
+            logging.error('Parse time sync data error: %s', str(err), exc_info=Constant.TRACE_BACK_SWITCH)
         if self._host_mon <= 0 or self._dev_cnt <= 0:
             logging.error("The monotonic time %s or cntvct %s is unusual, "
                           "maybe get data from driver failed", self._host_mon, self._dev_cnt)
+
+    def get_host_freq(self: any) -> float:
+        sycle_to_time = self._info_json.get('cycleToTime', [])
+        if sycle_to_time:
+            freq = sycle_to_time[0].get('realCpuFreq', self.HOST_DEFAULT_FREQ)
+            if is_number(freq):
+                return freq
+        return self.HOST_DEFAULT_FREQ

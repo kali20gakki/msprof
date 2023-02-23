@@ -14,6 +14,7 @@ from common_func.file_manager import FileOpen
 from common_func.file_manager import check_path_valid
 from common_func.file_name_manager import get_file_name_pattern_match
 from common_func.file_name_manager import get_host_start_compiles
+from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.msprof_exception import ProfException
@@ -21,7 +22,6 @@ from common_func.msvp_common import is_valid_original_data
 from common_func.utils import Utils
 from msmodel.ms_timer.ms_time_model import MsTimeModel
 from msparser.interface.iparser import IParser
-from common_func.info_conf_reader import InfoConfReader
 from profiling_bean.basic_info.host_start import TimerBean
 
 
@@ -49,7 +49,7 @@ class MsTimeParser(IParser, MsMultiProcess):
         if not config.has_section(f"Device{index}"):
             return -1, -1
         times = dict(config.items(f"Device{index}"))
-        timer = TimerBean(times)
+        timer = TimerBean(times, InfoConfReader().get_host_freq())
         return str(timer.host_wall), str(timer.host_mon)
 
     @staticmethod

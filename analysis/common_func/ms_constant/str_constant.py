@@ -64,6 +64,7 @@ class StrConstant:
     COLLECT_RAW_TIME_BEGIN = "clockMonotonicRaw"
     COLLECT_RAW_TIME_END = "clockMonotonicRaw"
     MONOTONIC_TIME = "clock_monotonic_raw"
+    DEVICE_SYSCNT = "cntvct"
     ITER_ID = "iter_id"
 
     # sample.json key
