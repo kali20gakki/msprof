@@ -42,8 +42,6 @@ private:
     int ParseHbmConfig(SHARED_PTR_ALIA<PMUEventsConfig> cfg);
     std::string GenerateFileName(const std::string &fileName);
     std::string GenerateDurationdata();
-    void GetAndStoreStartTime(int hostProfiling);
-    int StoreTime(const std::string &fileName, const std::string &startTime);
     int StartProfHandle(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params);
 
 private:
