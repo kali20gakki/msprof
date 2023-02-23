@@ -282,15 +282,15 @@ TEST_F(PROF_DEVICE_SOC_UTEST, GetAndStoreStartTime) {
 
     auto jobDeviceSoc = std::make_shared<Analysis::Dvvp::JobWrapper::JobDeviceSoc>(0);
     MSVP_MAKE_SHARED0_VOID(jobDeviceSoc->collectionjobComnCfg_, CollectionJobCommonParams);
-    jobDeviceSoc->GetAndStoreStartTime(true);
+    jobDeviceSoc->GetAndStoreStartTime(true, "1", 1, "Type");
 
     MOCKER_CPP(&Analysis::Dvvp::JobWrapper::JobDeviceSoc::StoreTime)
         .stubs()
         .will(returnValue(PROFILING_SUCCESS))
         .then(returnValue(PROFILING_FAILED));
-    jobDeviceSoc->GetAndStoreStartTime(false);
-    jobDeviceSoc->GetAndStoreStartTime(false);
-    jobDeviceSoc->GetAndStoreStartTime(false);
+    jobDeviceSoc->GetAndStoreStartTime(false, "1", 1, "Type");
+    jobDeviceSoc->GetAndStoreStartTime(false, "1", 1, "Type");
+    jobDeviceSoc->GetAndStoreStartTime(false, "1", 1, "Type");
 }
 
 TEST_F(PROF_DEVICE_SOC_UTEST, StoreTime) {

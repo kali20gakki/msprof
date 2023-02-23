@@ -40,62 +40,6 @@ JobDeviceRpc::~JobDeviceRpc()
 {
 }
 
-void JobDeviceRpc::GetAndStoreStartTime(bool hostProfiling)
-{
-    if (hostProfiling) {
-        return;
-    }
-    GetHostAndDeviceTime(indexId_);
-    if (hostTimeList_.empty() || devTimeList_.empty()) {
-        MSPROF_LOGE("[JobDeviceRpc]Failed to get host and device start time.");
-        return;
-    }
-    MSPROF_LOGI("devId:%d, startRealtimeBegin=%llu ns, startRealtimeEnd=%llu ns, cntvctBegin=%llu,"
-                "startRealtimeEnd=%llu ns, cntvctBegin=%llu ns, cntvctEnd=%llu, deviceStartMono=%llu ns,"
-                " deviceCntvct=%llu", indexId_, hostTimeList_.at(HostTimeType::START_REALTIME_BEGIN),
-                hostTimeList_.at(HostTimeType::START_REALTIME_END), hostTimeList_.at(HostTimeType::START_MONO_BEGIN),
-                hostTimeList_.at(HostTimeType::START_MONO_END), hostTimeList_.at(HostTimeType::CNTVCT_BEGIN),
-                hostTimeList_.at(HostTimeType::CNTVCT_END), devTimeList_.at(DevTimeType::DEVICE_START_MONO),
-                devTimeList_.at(DevTimeType::DEVICE_CNTVCT));
-    std::string deviceId = std::to_string(
-        TaskRelationshipMgr::instance()->GetFlushSuffixDevId(params_->job_id, indexId_));
-    std::stringstream timeData;
-    timeData << "[" << std::string(DEVICE_TAG_KEY) << deviceId << "]" << std::endl;
-    std::string startTime = GenerateHostStartTime();
-    timeData << startTime;
-    std::string fileName = "host_start.log." + deviceId;
-    int ret = StoreTime(fileName, timeData.str());
-    if (ret != PROFILING_SUCCESS) {
-        MSPROF_LOGE("Failed to upload data for %s", fileName.c_str());
-        return;
-    }
-    fileName = "dev_start.log." + deviceId;
-    startTime = GenerateDevStartTime();
-    ret = StoreTime(fileName, startTime);
-    if (ret != PROFILING_SUCCESS) {
-        MSPROF_LOGE("Failed to upload data for %s", fileName.c_str());
-        return;
-    }
-}
-
-int JobDeviceRpc::StoreTime(const std::string &fileName, const std::string &startTime)
-{
-    SHARED_PTR_ALIA<analysis::dvvp::message::JobContext> jobCtx = nullptr;
-    MSVP_MAKE_SHARED0_RET(jobCtx, analysis::dvvp::message::JobContext, PROFILING_FAILED);
-    jobCtx->dev_id = std::to_string(indexId_);
-    jobCtx->job_id = params_->job_id;
-    analysis::dvvp::transport::FileDataParams fileDataParams(fileName, true,
-        analysis::dvvp::common::config::FileChunkDataModule::PROFILING_IS_CTRL_DATA);
-
-    MSPROF_LOGI("storeTime.id: %s,fileName: %s", params_->job_id.c_str(), fileName.c_str());
-    int ret = analysis::dvvp::transport::UploaderMgr::instance()->UploadFileData(params_->job_id,
-        startTime, fileDataParams, jobCtx);
-    if (ret != PROFILING_SUCCESS) {
-        MSPROF_LOGE("Failed to upload data for %s", fileName.c_str());
-    }
-    return ret;
-}
-
 int JobDeviceRpc::StartProf(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params)
 {
     int ret = PROFILING_FAILED;
@@ -112,7 +56,7 @@ int JobDeviceRpc::StartProf(SHARED_PTR_ALIA<analysis::dvvp::message::ProfilePara
         // set job params
         startJobMessage->mutable_hdr()->set_job_ctx(jobCtx_.ToString());
         startJobMessage->set_sampleconfig(params_->ToString());
-        GetAndStoreStartTime(params->host_profiling);
+        GetAndStoreStartTime(params->host_profiling, params->job_id, indexId_, "JobDeviceRpc");
         ret = SendMsgAndHandleResponse(startJobMessage);
         if (ret != PROFILING_SUCCESS) {
             MSPROF_LOGE("Failed to start job, devId:%d", indexId_);

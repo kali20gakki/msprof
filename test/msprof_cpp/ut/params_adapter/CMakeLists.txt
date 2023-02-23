@@ -36,7 +36,7 @@ set(src_file
     ${MSPROF_SOURCE_DIR}/dvvp/msprof/dynamic_profiling/src/dyn_prof_client.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/thread/thread.cpp 
     ${MSPROF_SOURCE_DIR}/dvvp/depend/stub/error_manager/msprof_error_manager_stub.cpp
-
+    ${MSPROF_SOURCE_DIR}/dvvp/task_handle/src/task_relationship_mgr.cpp
 )
 
 set(include_path
@@ -73,6 +73,7 @@ set(include_path
     ${MSPROF_SOURCE_DIR}/dvvp/transport
     ${MSPROF_SOURCE_DIR}/inc/toolchain
     ${MSPROF_SOURCE_DIR}/inc/external/acl
+    ${MSPROF_SOURCE_DIR}/dvvp/task_handle/include
 )
 
 add_executable(params_adapter_utest

@@ -44,8 +44,6 @@ private:
                                 SHARED_PTR_ALIA<analysis::dvvp::proto::ReplayStartReq> startReplayMessage);
     void BuildDdrEventMessage(SHARED_PTR_ALIA<PMUEventsConfig> cfg,
                                 SHARED_PTR_ALIA<analysis::dvvp::proto::ReplayStartReq> startReplayMessage);
-    void GetAndStoreStartTime(bool hostProfiling);
-    int StoreTime(const std::string &fileName, const std::string &startTime);
 
 private:
     int indexId_;

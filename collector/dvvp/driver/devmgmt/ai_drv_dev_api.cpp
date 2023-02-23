@@ -246,7 +246,6 @@ int DrvGetDeviceTime(uint32_t deviceId, unsigned long long &startMono, unsigned 
         return PROFILING_FAILED;
     }
     startMono = static_cast<unsigned long long>(time);
-
     ret = DriverPlugin::instance()->MsprofHalGetDeviceInfo(deviceId, MODULE_TYPE_SYSTEM, INFO_TYPE_SYS_COUNT, &time);
     if (ret != DRV_ERROR_NONE) {
         MSPROF_LOGE("Failed to DrvGetDeviceTime cntvct, deviceId=%d, ret=%d", deviceId, static_cast<int>(ret));
@@ -255,9 +254,6 @@ int DrvGetDeviceTime(uint32_t deviceId, unsigned long long &startMono, unsigned 
         return PROFILING_FAILED;
     }
     cntvct = static_cast<unsigned long long>(time);
-
-    MSPROF_LOGI("Succeeded to DrvGetDeviceTime, devId=%d, startMono=%llu ns, cntvct=%llu",
-        deviceId, startMono, cntvct);
     return PROFILING_SUCCESS;
 }
 
