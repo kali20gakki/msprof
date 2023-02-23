@@ -72,7 +72,7 @@ void ParamsAdapter::SetMiniBlackSwitch()
         INPUT_CFG_COM_L2, INPUT_CFG_COM_AI_VECTOR, INPUT_CFG_COM_AIV_FREQ,
         INPUT_CFG_COM_AIV_MODE, INPUT_CFG_COM_AIV_METRICS, INPUT_CFG_COM_POWER,
         INPUT_CFG_COM_BIU, INPUT_CFG_COM_BIU_FREQ
-    }).swap(blackSwitch_);
+        }).swap(blackSwitch_);
     return;
 }
 
@@ -82,7 +82,7 @@ void ParamsAdapter::SetCloudBlackSwitch()
         INPUT_CFG_COM_AI_VECTOR, INPUT_CFG_COM_AIV_FREQ, INPUT_CFG_COM_AIV_MODE,
         INPUT_CFG_COM_AIV_METRICS, INPUT_CFG_COM_POWER, INPUT_CFG_COM_BIU,
         INPUT_CFG_COM_BIU_FREQ
-    }).swap(blackSwitch_);
+        }).swap(blackSwitch_);
     return;
 }
 
@@ -94,7 +94,7 @@ void ParamsAdapter::SetMdcBlackSwitch()
         INPUT_CFG_SUMMARY_FORMAT, INPUT_CFG_PARSE, INPUT_CFG_QUERY, INPUT_CFG_EXPORT,
         INPUT_CFG_ITERATION_ID, INPUT_CFG_MODEL_ID, INPUT_CFG_COM_POWER, INPUT_CFG_COM_BIU,
         INPUT_CFG_COM_BIU_FREQ
-    }).swap(blackSwitch_);
+        }).swap(blackSwitch_);
     return;
 }
 
@@ -110,7 +110,7 @@ void ParamsAdapter::SetLhisiBlackSwitch()
         INPUT_CFG_PYTHON_PATH, INPUT_CFG_SUMMARY_FORMAT, INPUT_CFG_PARSE,
         INPUT_CFG_QUERY, INPUT_CFG_EXPORT, INPUT_CFG_ITERATION_ID, INPUT_CFG_MODEL_ID,
         INPUT_CFG_COM_POWER, INPUT_CFG_COM_BIU, INPUT_CFG_COM_BIU_FREQ
-    }).swap(blackSwitch_);
+        }).swap(blackSwitch_);
     return;
 }
 
@@ -120,7 +120,7 @@ void ParamsAdapter::SetDcBlackSwitch()
         INPUT_CFG_COM_AI_VECTOR, INPUT_CFG_COM_AIV_FREQ, INPUT_CFG_COM_AIV_MODE,
         INPUT_CFG_COM_AIV_METRICS, INPUT_CFG_COM_SYS_IO, INPUT_CFG_COM_SYS_IO_FREQ,
         INPUT_CFG_COM_POWER, INPUT_CFG_COM_BIU, INPUT_CFG_COM_BIU_FREQ
-    }).swap(blackSwitch_);
+        }).swap(blackSwitch_);
     return;
 }
 
@@ -153,7 +153,7 @@ void ParamsAdapter::SetCommonConfig()
         INPUT_CFG_COM_SYS_PID_USAGE_FREQ, INPUT_CFG_COM_SYS_CPU_FREQ, INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ,
         INPUT_CFG_COM_LLC_MODE, INPUT_CFG_COM_SYS_IO_FREQ, INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ,
         INPUT_CFG_COM_DVPP_FREQ, INPUT_CFG_HOST_SYS_USAGE, INPUT_CFG_HOST_SYS_USAGE_FREQ
-    }).swap(commonConfig_);
+        }).swap(commonConfig_);
     return;
 }
 

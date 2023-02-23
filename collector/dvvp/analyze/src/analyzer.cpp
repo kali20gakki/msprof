@@ -6,7 +6,6 @@
  */
 #include "analyzer.h"
 
-#include <utility>
 #include "analyzer_ge.h"
 #include "analyzer_hwts.h"
 #include "analyzer_ts.h"

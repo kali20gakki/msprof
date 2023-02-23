@@ -37,10 +37,10 @@ int ITransport::SendFile(const std::string &jobCtx,
                          const std::string &destDir /* = "" */)
 {
     UNUSED(destDir);
-    static const int fileBufLen = 1 * 1024 * 1024; // 1 * 1024 * 1024 means 1mb
+    static const int FILE_BUF_LEN = 1 * 1024 * 1024; // 1 * 1024 * 1024 means 1mb
 
     SHARED_PTR_ALIA<char> buffer;
-    MSVP_MAKE_SHARED_ARRAY_RET(buffer, char, fileBufLen, PROFILING_FAILED);
+    MSVP_MAKE_SHARED_ARRAY_RET(buffer, char, FILE_BUF_LEN, PROFILING_FAILED);
 
     long long len = analysis::dvvp::common::utils::Utils::GetFileSize(file);
     if (len < 0 || len > MSVP_LARGE_FILE_MAX_LEN) {
@@ -59,7 +59,7 @@ int ITransport::SendFile(const std::string &jobCtx,
     long long offset = 0;
     int ret = PROFILING_SUCCESS;
     do {
-        sizeRead = (long long)MmRead(fd, buffer.get(), fileBufLen);
+        sizeRead = (long long)MmRead(fd, buffer.get(), FILE_BUF_LEN);
         if (sizeRead > 0) {
             FileChunk chunk;
             chunk.relativeFileName = relativePath;

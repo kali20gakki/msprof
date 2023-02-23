@@ -35,8 +35,8 @@ FileSlice::~FileSlice() {}
 
 int FileSlice::Init(bool needSlice)
 {
-    static const std::string writePerfcountModuleName = std::string("FileSlice");
-    MSVP_MAKE_SHARED1_RET(writeFilePerfCount_, PerfCount, writePerfcountModuleName, PROFILING_FAILED);
+    static const std::string WRITE_PERFCOUNT_MODULE_NAME = std::string("FileSlice");
+    MSVP_MAKE_SHARED1_RET(writeFilePerfCount_, PerfCount, WRITE_PERFCOUNT_MODULE_NAME, PROFILING_FAILED);
     bool isPathValid = analysis::dvvp::common::utils::Utils::IsDirAccessible(storageDir_);
     if (!isPathValid) {
         MSPROF_LOGE("para err, storageDir_:%s, storageDirLen:%d",

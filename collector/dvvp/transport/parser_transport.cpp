@@ -78,7 +78,7 @@ void ParserTransport::SetDevIdToAnalyzer(const std::string &devIdStr) const
 int PipeTransport::SendBuffer(CONST_VOID_PTR buffer, int length)
 {
     int sent = 0;
-    static const unsigned long pipeFullSleepUs = 1000;  // sleep 1ms and retry
+    static const unsigned long PIPE_FULL_SLEEP_US = 1000;  // sleep 1ms and retry
     uint32_t modelId = 0;
     int32_t ret = Analysis::Dvvp::Analyze::OpDescParser::GetModelId(buffer, length, 0, &modelId);
     if (ret != ACL_SUCCESS) {
@@ -112,7 +112,7 @@ int PipeTransport::SendBuffer(CONST_VOID_PTR buffer, int length)
             if (count++ % 1000 == 0) {  // record log every 1000 times
                 MSPROF_LOGW("Pipe is full, count: %d", count);
             }
-            analysis::dvvp::common::utils::Utils::UsleepInterupt(pipeFullSleepUs);
+            analysis::dvvp::common::utils::Utils::UsleepInterupt(PIPE_FULL_SLEEP_US);
         } else {
             analysis::dvvp::common::utils::Utils::PrintSysErrorMsg();
             break;

@@ -1072,9 +1072,9 @@ static unsigned long long ProfTimerJobCommonInit(const SHARED_PTR_ALIA<Collectio
     if (CheckJobContextParam(cfg) != PROFILING_SUCCESS) {
         return PROFILING_FAILED;
     }
-    static const unsigned int profStatMemIntervalHundredMs = 100;  // 100 MS
-    static const unsigned int profMsToNs = 1000000;  // 1000000 NS
-    int sampleIntervalMs = profStatMemIntervalHundredMs;
+    static const unsigned int PROF_STAT_MEM_INTERVAL_HUNDRED_MS = 100;  // 100 MS
+    static const unsigned int PROF_MS_TO_NS = 1000000;  // 1000000 NS
+    int sampleIntervalMs = PROF_STAT_MEM_INTERVAL_HUNDRED_MS;
     int profilingInterval = cfg->comParams->params->cpu_sampling_interval;
 
     if (timerTag == PROF_SYS_MEM) {
@@ -1098,7 +1098,7 @@ static unsigned long long ProfTimerJobCommonInit(const SHARED_PTR_ALIA<Collectio
     MSPROF_LOGI("[ProfTimerJobCommonInit]devId:%d, devIdOnHost:%d, timerTag:%d, sampleIntervalMs:%d",
         cfg->comParams->devId, cfg->comParams->devIdOnHost, timerTag, sampleIntervalMs);
 
-    return (static_cast<unsigned long long>(sampleIntervalMs) * profMsToNs);
+    return (static_cast<unsigned long long>(sampleIntervalMs) * PROF_MS_TO_NS);
 }
 
 ProfSysStatJob::ProfSysStatJob() : ProfSysInfoBase()

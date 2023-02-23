@@ -31,7 +31,7 @@ int ParamsAdapterGeOpt::Init()
     }
     std::vector<InputCfg>({
         INPUT_CFG_COM_TASK_TRACE, INPUT_CFG_COM_TRAINING_TRACE, INPUT_CFG_COM_BIU_FREQ, INPUT_CFG_HOST_SYS
-    }).swap(geOptConfig_);
+        }).swap(geOptConfig_);
     InitWholeConfigMap();
     InitPrintMap();
     return PROFILING_SUCCESS;
@@ -61,7 +61,7 @@ void ParamsAdapterGeOpt::InitWholeConfigMap()
         INPUT_CFG_HOST_SYS,
         INPUT_CFG_HOST_SYS_USAGE,
         INPUT_CFG_HOST_SYS_USAGE_FREQ
-    }).swap(geOptionsWholeConfig_);
+        }).swap(geOptionsWholeConfig_);
 }
 
 void ParamsAdapterGeOpt::InitPrintMap()
@@ -88,7 +88,7 @@ void ParamsAdapterGeOpt::InitPrintMap()
         {INPUT_CFG_HOST_SYS, "host_sys"},
         {INPUT_CFG_HOST_SYS_USAGE, "host_sys_usage"},
         {INPUT_CFG_HOST_SYS_USAGE_FREQ, "host_sys_usage_freq"},
-    }).swap(geOptionsPrintMap_);
+        }).swap(geOptionsPrintMap_);
 }
 
 bool ParamsAdapterGeOpt::CheckHostSysGeOptValid(const std::string &cfgStr) const

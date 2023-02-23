@@ -33,7 +33,7 @@ int ParamsAdapterAclApi::Init()
     }
     std::vector<InputCfg>({
         INPUT_CFG_COM_TRAINING_TRACE, INPUT_CFG_COM_SYS_DEVICES, INPUT_CFG_HOST_SYS
-    }).swap(aclApiConfig_);
+        }).swap(aclApiConfig_);
     return ret;
 }
 

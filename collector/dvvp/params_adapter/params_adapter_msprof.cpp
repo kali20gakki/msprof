@@ -52,7 +52,7 @@ int ParamsAdapterMsprof::Init()
         INPUT_CFG_COM_SYS_INTERCONNECTION, INPUT_CFG_COM_DVPP, INPUT_CFG_COM_POWER,
         INPUT_CFG_COM_BIU, INPUT_CFG_COM_BIU_FREQ, INPUT_CFG_HOST_SYS, INPUT_CFG_HOST_SYS_PID,
         INPUT_CFG_MSPROF_DYNAMIC, INPUT_CFG_MSPROF_DYNAMIC_PID
-    }).swap(msprofConfig_);
+        }).swap(msprofConfig_);
     return PROFILING_SUCCESS;
 }
 
@@ -540,7 +540,7 @@ void ParamsAdapterMsprof::CreateCfgMap()
         {ARGS_HOST_SYS, INPUT_CFG_HOST_SYS}, {ARGS_HOST_SYS_PID, INPUT_CFG_HOST_SYS_PID},
         {ARGS_HOST_SYS_USAGE, INPUT_CFG_HOST_SYS_USAGE}, {ARGS_HOST_SYS_USAGE_FREQ, INPUT_CFG_HOST_SYS_USAGE_FREQ},
         {ARGS_DYNAMIC_PROF, INPUT_CFG_MSPROF_DYNAMIC}, {ARGS_DYNAMIC_PROF_PID, INPUT_CFG_MSPROF_DYNAMIC_PID},
-    }).swap(cfgMap_);
+        }).swap(cfgMap_);
     for (auto index : cfgMap_) {
         reCfgMap_.insert({index.second, static_cast<MsprofArgsType>(index.first)});
     }
