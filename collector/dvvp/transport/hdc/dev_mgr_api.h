@@ -13,7 +13,13 @@
 namespace analysis {
 namespace dvvp {
 namespace transport {
-class IDeviceTransport;
+class IDeviceTransport {
+public:
+    virtual ~IDeviceTransport() {}
+public:
+    virtual int SendMsgAndRecvResponse(const std::string &msg, TLV_REQ_2PTR packet) = 0;
+    virtual int HandlePacket(TLV_REQ_PTR packet, analysis::dvvp::message::StatusInfo &status) = 0;
+};
 
 using PFDevMgrInit = int (*)(const std::string jobId, int devId, const std::string mode);
 using PFDevMgrUnInit = int (*)();
@@ -37,13 +43,6 @@ public:
 
 extern void LoadDevMgrAPI(DevMgrAPI &devMgrAPI);
 
-class IDeviceTransport {
-public:
-    virtual ~IDeviceTransport() {}
-public:
-    virtual int SendMsgAndRecvResponse(const std::string &msg, TLV_REQ_2PTR packet) = 0;
-    virtual int HandlePacket(TLV_REQ_PTR packet, analysis::dvvp::message::StatusInfo &status) = 0;
-};
 }}}
 
 #endif
