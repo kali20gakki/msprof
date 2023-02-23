@@ -31,12 +31,7 @@ const char * const DEVICE_TAG_KEY = "Device";
 const char * const CLOCK_REALTIME_KEY = "clock_realtime";
 const char * const CLOCK_MONOTONIC_RAW_KEY = "clock_monotonic_raw";
 const char * const CLOCK_CNTVCT_KEY = "cntvct";
-const char * const CLOCK_REALTIME_KEY_START = "clock_realtime_start";
-const char * const CLOCK_MONOTONIC_RAW_KEY_START = "clock_monotonic_raw_start";
-const char * const CLOCK_CNTVCT_KEY_START = "cntvct_start";
-const char * const CLOCK_REALTIME_KEY_END = "clock_realtime_end";
-const char * const CLOCK_MONOTONIC_RAW_KEY_END = "clock_monotonic_raw_end";
-const char * const CLOCK_CNTVCT_KEY_END = "cntvct_end";
+const char * const CLOCK_CNTVCT_KEY_DIFF = "cntvct_diff";
 
 const std::string HOST_APP_DIR = "~/profiler-app";
 
