@@ -109,12 +109,12 @@ int DeviceTransport::HandleShake(SHARED_PTR_ALIA<google::protobuf::Message> mess
     int ret = PROFILING_FAILED;
     std::string encoded = analysis::dvvp::message::EncodeMessage(message);
     int handshakeCount = 0;
-    static const int handshakeRetryTimes = 5;    // try 5 times to handshake
-    static const unsigned long handshakeRetryInterval = 100000;   // sleep 100000us before retry
+    static const int HANDSHAKE_RETRY_TIMES = 5;    // try 5 times to handshake
+    static const unsigned long HANDSHAKE_RETRY_INTERVAL = 100000;   // sleep 100000us before retry
     SHARED_PTR_ALIA<analysis::dvvp::transport::AdxTransport> tran;
     do {
         if (handshakeCount > 0) {   // no sleep at first time
-            analysis::dvvp::common::utils::Utils::UsleepInterupt(handshakeRetryInterval);
+            analysis::dvvp::common::utils::Utils::UsleepInterupt(HANDSHAKE_RETRY_INTERVAL);
         }
         handshakeCount++;
 
@@ -151,7 +151,7 @@ int DeviceTransport::HandleShake(SHARED_PTR_ALIA<google::protobuf::Message> mess
             continue;
         }
         break;
-    } while (handshakeCount < handshakeRetryTimes && ctrlShake);
+    } while (handshakeCount < HANDSHAKE_RETRY_TIMES && ctrlShake);
 
     if (ret != PROFILING_SUCCESS && ret != PROFILING_NOTSUPPORT) {
         MSPROF_LOGE("Failed to handshake with device %s, try times %d", devIndexIdStr_.c_str(), handshakeCount);

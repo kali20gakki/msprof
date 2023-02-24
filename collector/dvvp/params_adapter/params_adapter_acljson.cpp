@@ -29,7 +29,7 @@ int ParamsAdapterAclJson::Init()
     }
     std::vector<InputCfg>({
         INPUT_CFG_COM_BIU_FREQ, INPUT_CFG_HOST_SYS
-    }).swap(aclJsonConfig_);
+        }).swap(aclJsonConfig_);
     InitWholeConfigMap();
     InitPrintMap();
     return PROFILING_SUCCESS;
@@ -58,7 +58,7 @@ void ParamsAdapterAclJson::InitWholeConfigMap()
         INPUT_CFG_HOST_SYS,
         INPUT_CFG_HOST_SYS_USAGE,
         INPUT_CFG_HOST_SYS_USAGE_FREQ
-    }).swap(aclJsonWholeConfig_);
+        }).swap(aclJsonWholeConfig_);
 }
 
 void ParamsAdapterAclJson::InitPrintMap()
@@ -84,7 +84,7 @@ void ParamsAdapterAclJson::InitPrintMap()
         {INPUT_CFG_HOST_SYS, "host_sys"},
         {INPUT_CFG_HOST_SYS_USAGE, "host_sys_usage"},
         {INPUT_CFG_HOST_SYS_USAGE_FREQ, "host_sys_usage_freq"},
-    }).swap(aclJsonPrintMap_);
+        }).swap(aclJsonPrintMap_);
 }
 
 bool ParamsAdapterAclJson::CheckHostSysAclJsonValid(const std::string &cfgStr) const

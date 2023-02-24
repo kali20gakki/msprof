@@ -127,19 +127,6 @@ struct CollectionJobCfg {
     SHARED_PTR_ALIA<CollectionJobCommonParams> comParams;
 };
 
-class ICollectionJob;
-struct CollectionJobT {
-    CollectionJobT()
-        : jobTag(NR_MAX_COLLECTION_JOB),
-          jobCfg(nullptr),
-          collectionJob(nullptr)
-    {
-    }
-    Analysis::Dvvp::JobWrapper::ProfCollectionJobE jobTag;
-    SHARED_PTR_ALIA<Analysis::Dvvp::JobWrapper::CollectionJobCfg> jobCfg;
-    SHARED_PTR_ALIA<Analysis::Dvvp::JobWrapper::ICollectionJob> collectionJob;
-};
-
 class ICollectionJob {
 public:
     virtual ~ICollectionJob();
@@ -150,6 +137,18 @@ public:
     {
         return false;
     };
+};
+
+struct CollectionJobT {
+    CollectionJobT()
+        : jobTag(NR_MAX_COLLECTION_JOB),
+          jobCfg(nullptr),
+          collectionJob(nullptr)
+    {
+    }
+    Analysis::Dvvp::JobWrapper::ProfCollectionJobE jobTag;
+    SHARED_PTR_ALIA<Analysis::Dvvp::JobWrapper::CollectionJobCfg> jobCfg;
+    SHARED_PTR_ALIA<Analysis::Dvvp::JobWrapper::ICollectionJob> collectionJob;
 };
 
 class CollectionRegisterMgr : public analysis::dvvp::common::singleton::Singleton<CollectionRegisterMgr> {

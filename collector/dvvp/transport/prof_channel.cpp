@@ -111,8 +111,8 @@ int ChannelReader::Execute()
 {
     int totalLen = 0;
     int currLen = 0;
-    static const int maxReadLen = 1024 * 1024 * 32;
-    static const int maxThresholdSize = static_cast<int>(MAX_BUFFER_SIZE * 0.8);
+    static const int MAX_READ_LEN = 1024 * 1024 * 32;
+    static const int MAX_THRESHOLD_SIZE = static_cast<int>(MAX_BUFFER_SIZE * 0.8);
     SetSchedulingStatus(false);
     std::lock_guard<std::mutex> lk(mtx_);
     std::unique_lock<std::mutex> guard(flushMutex_, std::defer_lock);
@@ -121,7 +121,7 @@ int ChannelReader::Execute()
         if (!isInited_ || isChannelStopped_) {
             break;
         }
-        if ((dataSize_ > maxThresholdSize)) {
+        if ((dataSize_ > MAX_THRESHOLD_SIZE)) {
             UploadData();
         }
 
@@ -155,7 +155,7 @@ int ChannelReader::Execute()
         totalSize_ += static_cast<long long>(currLen);
 
         dataSize_ += static_cast<uint32_t>(currLen);
-    } while (static_cast<unsigned int>(currLen) == (spaceSize_) && (totalLen < maxReadLen));
+    } while (static_cast<unsigned int>(currLen) == (spaceSize_) && (totalLen < MAX_READ_LEN));
 
     return PROFILING_SUCCESS;
 }
@@ -401,19 +401,19 @@ int ChannelPoll::Stop()
 void ChannelPoll::Run(const struct error_message::Context &errorContext)
 {
     MsprofErrorManager::instance()->SetErrorContext(errorContext);
-    static const unsigned int channelNum = 6; // at most get 6 channels to read once loop
-    static const int defaultTimeoutSec = 1; // at most wait for 1 seconds
-    static const uint64_t defaultFlushTimeoutNsec = 10000000000; // flush data every 10 seconds
+    static const unsigned int CHANNEL_POOL_NUM = 6; // at most get 6 channels to read once loop
+    static const int DEFAULT_TIMEOUT_SEC = 1; // at most wait for 1 seconds
+    static const uint64_t DEFAULT_FLUSH_TIMEOUT_NSEC = 10000000000; // flush data every 10 seconds
 
-    struct prof_poll_info channels[channelNum];
-    (void)memset_s(channels, channelNum * sizeof(struct prof_poll_info), 0,
-                   channelNum * sizeof(struct prof_poll_info));
+    struct prof_poll_info channels[CHANNEL_POOL_NUM];
+    (void)memset_s(channels, CHANNEL_POOL_NUM * sizeof(struct prof_poll_info), 0,
+                   CHANNEL_POOL_NUM * sizeof(struct prof_poll_info));
 
     uint64_t start = analysis::dvvp::common::utils::Utils::GetClockMonotonicRaw();
     while (isStarted_) {
         int ret = DrvChannelPoll(channels,
-                                 channelNum,
-                                 defaultTimeoutSec);
+                                 CHANNEL_POOL_NUM,
+                                 DEFAULT_TIMEOUT_SEC);
         if (ret == PROF_ERROR) {
             MSPROF_LOGE("Failed to poll channel");
             MSPROF_INNER_ERROR("EK9999", "Failed to poll channel");
@@ -432,7 +432,7 @@ void ChannelPoll::Run(const struct error_message::Context &errorContext)
         }
 
         uint64_t end = analysis::dvvp::common::utils::Utils::GetClockMonotonicRaw();
-        if ((end - start) >= defaultFlushTimeoutNsec) {
+        if ((end - start) >= DEFAULT_FLUSH_TIMEOUT_NSEC) {
             start = end;
             FlushAllChannels();
         }

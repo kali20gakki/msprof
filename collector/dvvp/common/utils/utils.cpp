@@ -1274,7 +1274,7 @@ std::string Utils::CreateTaskId(uint64_t index)
     srand(time(nullptr));
     taskId.str("");
     for (int idx = 0; idx < taskIdLen; idx++) {
-        taskId << static_cast<char>('A' + rand() % letterNum);
+        taskId << static_cast<unsigned char>(65 + rand() % letterNum); // 65 - 'A'
     }
     auto timeSinceEpoch = std::chrono::steady_clock::now().time_since_epoch();
     size_t hashId = std::hash<std::string>()(
@@ -1285,7 +1285,7 @@ std::string Utils::CreateTaskId(uint64_t index)
     taskIdLen = 16; // 16 : the lenght of the task id
     const int hashMod = 18; // change hashId to [A-R]
     for (int idx = 0; idx < taskIdLen; idx++) {
-        taskId << static_cast<char>('A' + hashId % hashMod);
+        taskId << static_cast<unsigned char>(65 + hashId % hashMod); // 65 - 'A'
         hashId = hashId / hashMod;
     }
     result = result + taskId.str();
@@ -1313,8 +1313,8 @@ uint32_t Utils::GenerateSignature(CONST_UINT8_PTR data, uint64_t len)
         return signature;
     }
 
-    static const int tableSize = 256;
-    static const uint32_t signatureTable[tableSize] = {
+    static const int TABLE_SIZE = 256;
+    static const uint32_t SIGNATURE_TABLE[TABLE_SIZE] = {
         0x00000000, 0xF26B8303, 0xE13B70F7, 0x1350F3F4, 0xC79A971F, 0x35F1141C, 0x26A1E7E8, 0xD4CA64EB,
         0x8AD958CF, 0x78B2DBCC, 0x6BE22838, 0x9989AB3B, 0x4D43CFD0, 0xBF284CD3, 0xAC78BF27, 0x5E133C24,
         0x105EC76F, 0xE235446C, 0xF165B798, 0x030E349B, 0xD7C45070, 0x25AFD373, 0x36FF2087, 0xC494A384,
@@ -1349,9 +1349,9 @@ uint32_t Utils::GenerateSignature(CONST_UINT8_PTR data, uint64_t len)
         0x79B737BA, 0x8BDCB4B9, 0x988C474D, 0x6AE7C44E, 0xBE2DA0A5, 0x4C4623A6, 0x5F16D052, 0xAD7D5351
     };
 
-    static const int offset = 8;
+    static const int OFFSET = 8;
     for (uint32_t i = 0; i < len; ++i) {
-        signature = signatureTable[(signature ^ *data++) & 0xff] ^ (signature >> offset);
+        signature = SIGNATURE_TABLE[(signature ^ *data++) & 0xff] ^ (signature >> OFFSET);
     }
     return signature;
 }

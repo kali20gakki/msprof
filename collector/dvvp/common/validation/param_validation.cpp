@@ -1390,9 +1390,9 @@ int ParamValidation::CheckHostSysToolsIsExist(const std::string toolName, const 
     } else if (!appDir.empty()) {
         tmpDir = appDir;
     }
-    static const std::string envPath = "PATH=/usr/bin/:/usr/sbin:/var";
+    static const std::string ENV_PATH = "PATH=/usr/bin/:/usr/sbin:/var";
     std::vector<std::string> envV;
-    envV.push_back(envPath);
+    envV.push_back(ENV_PATH);
     std::vector<std::string> argsV;
     argsV.push_back(PROF_SCRIPT_FILE_PATH);
     argsV.push_back("get-version");
@@ -1400,9 +1400,9 @@ int ParamValidation::CheckHostSysToolsIsExist(const std::string toolName, const 
     unsigned long long startRealtime = analysis::dvvp::common::utils::Utils::GetClockRealtime();
     tmpDir += "/tmpPrint" + std::to_string(startRealtime);
     int exitCode = analysis::dvvp::common::utils::INVALID_EXIT_CODE;
-    static const std::string cmd = "sudo";
+    static const std::string CMD = "sudo";
     MmProcess tmpProcess = MSVP_MMPROCESS;
-    ExecCmdParams execCmdParams(cmd, true, tmpDir);
+    ExecCmdParams execCmdParams(CMD, true, tmpDir);
     int ret = analysis::dvvp::common::utils::Utils::ExecCmd(execCmdParams,
                                                             argsV,
                                                             envV,
@@ -1477,17 +1477,17 @@ int ParamValidation::UninitCheckHostSysCmd(const MmProcess checkProcess) const
         MSPROF_LOGI("Process:%d is not exist", reinterpret_cast<int>(checkProcess));
         return PROFILING_SUCCESS;
     }
-    static const std::string envPath = "PATH=/usr/bin/:/usr/sbin:/var:/bin";
+    static const std::string ENV_PATH = "PATH=/usr/bin/:/usr/sbin:/var:/bin";
     std::vector<std::string> envV;
-    envV.push_back(envPath);
+    envV.push_back(ENV_PATH);
     std::vector<std::string> argsV;
     std::string killCmd = "kill -2 " + std::to_string(reinterpret_cast<int>(checkProcess));
     argsV.push_back("-c");
     argsV.push_back(killCmd);
     int exitCode = analysis::dvvp::common::utils::VALID_EXIT_CODE;
-    static const std::string cmd = "sh";
+    static const std::string CMD = "sh";
     MmProcess tmpProcess = MSVP_MMPROCESS;
-    ExecCmdParams execCmdParams(cmd, true, "");
+    ExecCmdParams execCmdParams(CMD, true, "");
     int ret = PROFILING_SUCCESS;
     for (int i = 0; i < FILE_FIND_REPLAY; i++) {
         if (ParamValidation::instance()->CheckHostSysPidIsValid(reinterpret_cast<int>(checkProcess))) {
