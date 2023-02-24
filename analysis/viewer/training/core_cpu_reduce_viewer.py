@@ -157,7 +157,7 @@ class CoreCpuReduceViewer:
         result = []
         if trace_curs:
             sql = "select start, end-start from {0} " \
-                  "where device_id=? and iteration_end=?" \
+                  "where device_id=? and iteration_end=? and start is not null and end is not null" \
                 .format(DBNameConstant.TABLE_ALL_REDUCE)
             result = DBManager.fetch_all_data(trace_curs, sql, (device_id, iteration_end))
         return result
