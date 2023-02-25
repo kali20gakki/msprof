@@ -25,8 +25,8 @@ class TestMsprofQuerySummaryManager(unittest.TestCase):
     def tearDown(self) -> None:
         clear_dt_project(self.DIR_PATH)
 
-    def test_check_rank_id_should_return_false_when_prof_path_invalid(self):
-        ret = MsprofQuerySummaryManager.check_rank_id(self.DIR_PATH)
+    def test_check_rank_device_id_should_return_false_when_prof_path_invalid(self):
+        ret = MsprofQuerySummaryManager.check_rank_device_id(self.DIR_PATH)
         self.assertFalse(ret)
 
     def test_process_should_return_empty_when_data_type_invalid(self):

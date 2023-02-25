@@ -70,7 +70,7 @@ class MsProfClusterInfo:
                 for each in iteration_data:
                     model_list.append(OrderedDict(list(zip(MsProfClusterInfo.OUTPUT_MODELS_HEADERS, each))))
                 prof_dir, device_dir = cluster_info.dir_name.split(os.sep)
-                self.info_collection.append([cluster_info.rank_id,
+                self.info_collection.append([rank_id,
                                              cluster_info.device_id,
                                              prof_dir,
                                              device_dir,
