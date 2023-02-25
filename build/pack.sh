@@ -56,11 +56,10 @@ CANN_TOOLKIT_NAME=CANN-toolkit-*.run
 CANN_RUNTIME_NAME=CANN-runtime-*linux*.run
 
 # makeself is tool for compiling run package
-MAKESELF_DIR=${TOP_DIR}/opensource/makeself
 # footnote for creating run package
-CREATE_RUN_SCRIPT=${MAKESELF_DIR}/makeself.sh
+CREATE_RUN_SCRIPT=${TOP_DIR}/opensource/makeself/makeself.sh
 # footnote for controling params
-CONTROL_PARAM_SCRIPT=${MAKESELF_DIR}/makeself-header.sh
+CONTROL_PARAM_SCRIPT=${TOP_DIR}/opensource/makeself/makeself-header.sh
 COMMENTS=comments
 
 # only find x86 or ARM
