@@ -323,7 +323,7 @@ class ModelSummaryTuningDataHandle(OpSummaryTuningDataHandle):
         for each operator, compute vector ratio, cube ratio, scalar ratio and mte ratio
         then return bound type with the max ratio
         """
-        if operator_dict.get(Constant.TASK_TYPE, None) == Constant.TASK_TYPE_AI_CPU:
+        if operator_dict.get(Constant.TASK_TYPE) == Constant.TASK_TYPE_AI_CPU:
             return Constant.NA
         bound_dict = defaultdict(float)
         for bound_type, ratio_type_list in cls.BOUND_TYPE.items():
