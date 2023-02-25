@@ -113,7 +113,7 @@ class TestQueryCommand(unittest.TestCase):
         args = Namespace(**args_dic)
         with mock.patch(NAMESPACE + '.QueryCommand.check_argument_valid'), \
              mock.patch(NAMESPACE + '.QueryCommand._is_query_summary_data', return_value=True), \
-             mock.patch('msinterface.msprof_query_summary_manager.MsprofQuerySummaryManager.check_rank_id',
+             mock.patch('msinterface.msprof_query_summary_manager.MsprofQuerySummaryManager.check_rank_device_id',
                         return_value=True):
             key = QueryCommand(args)
             key.process()
