@@ -70,8 +70,28 @@ class MsprofQuerySummaryManager:
         }
 
     @staticmethod
-    def check_rank_id(collection_path: str) -> bool:
+    def check_every_id_differs_and_no_na(ids: list) -> bool:
+        return ids and len(ids) == len(set(ids)) and Constant.NA not in ids
+
+    @staticmethod
+    def check_cluster_scene(collection_path: str) -> None:
+        if MsprofQuerySummaryManager.check_rank_device_id(collection_path):
+            print_msg(json.dumps({'status': NumberConstant.SUCCESS, 'info': '', 'data':
+                MsprofQuerySummaryManager.CLUSTER_SCENE}))
+        else:
+            print_msg(json.dumps({'status': NumberConstant.SUCCESS, 'info': '', 'data':
+                MsprofQuerySummaryManager.NOT_CLUSTER_SCENE}))
+
+    @classmethod
+    def check_rank_device_id(cls: any, collection_path: str) -> bool:
+        """
+        check rank id: if all rank ids are not N/A and different from each other, return True
+        check device id: if rank id are all N/A, check device id,
+        if all device ids are different from each other and count of devices more than 1, return True
+        """
         prof_dirs = get_path_dir(collection_path)
+        rank_id_list = []
+        device_id_list = []
         for prof_dir in prof_dirs:
             prof_path = os.path.join(collection_path, prof_dir)
             if not os.path.isdir(prof_path):
@@ -82,17 +102,11 @@ class MsprofQuerySummaryManager:
                 if not DataCheckManager.contain_info_json_data(device_path, device_info_only=True):
                     continue
                 InfoConfReader().load_info(device_path)
-                return InfoConfReader().get_rank_id() != Constant.NA
-        return False
-
-    @staticmethod
-    def check_cluster_scene(collection_path: str) -> None:
-        if MsprofQuerySummaryManager.check_rank_id(collection_path):
-            print_msg(json.dumps({'status': NumberConstant.SUCCESS, 'info': '', 'data':
-                MsprofQuerySummaryManager.CLUSTER_SCENE}))
-        else:
-            print_msg(json.dumps({'status': NumberConstant.SUCCESS, 'info': '', 'data':
-                MsprofQuerySummaryManager.NOT_CLUSTER_SCENE}))
+                rank_id_list.append(InfoConfReader().get_rank_id())
+                device_id_list.append(InfoConfReader().get_device_id())
+        rank_id_na_check = rank_id_list.count(Constant.NA) == len(rank_id_list)
+        return cls.check_every_id_differs_and_no_na(rank_id_list) or \
+            (rank_id_na_check and cls.check_every_id_differs_and_no_na(device_id_list) and len(device_id_list) > 1)
 
     def process(self: any) -> None:
         self._check_data_type_valid()
