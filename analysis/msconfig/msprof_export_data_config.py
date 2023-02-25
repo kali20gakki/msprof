@@ -291,7 +291,7 @@ class MsProfExportDataConfig(MetaConfig):
             ('db', 'lowpower.db'),
             ('table', 'LowPower')
         ],
-        'biu_perf': [
+        'instr': [
             ('handler', '_get_biu_perf_timeline')
         ]
     }

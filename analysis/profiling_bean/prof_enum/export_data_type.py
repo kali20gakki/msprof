@@ -63,7 +63,7 @@ class ExportDataType(Enum):
     STARS_CHIP_TRANS = 49
     THREAD_GROUP = 50
     LOW_POWER = 51
-    BIU_PERF = 52
+    INSTR = 52
     ACC_PMU = 53
     PYTORCH_OPERATOR_VIEW = 54
     MSPROF = 100
