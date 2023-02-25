@@ -197,7 +197,7 @@ class FileNameManagerConstant:
     MODEL_WITH_Q_FILE_PATTERN = r"^DATA_PREPROCESS\.AICPU_MODEL\.(\d+)\.slice_\d+"
 
     # biu perf
-    BIU_PERF_FILE_PATTERN = r"^biu\.group_\d+_(aic|aiv0|aiv1).\d+.slice_\d+"
+    BIU_PERF_FILE_PATTERN = r"^instr\.group_\d+_(aic|aiv0|aiv1).\d+.slice_\d+"
 
     # parallel
     PARALLEL_STRATEGY_FILE_PATTERN = r"^Framework\.parallel_strategy\.(\d+)\.slice_\d+"
