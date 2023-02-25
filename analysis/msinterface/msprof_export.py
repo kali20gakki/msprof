@@ -111,7 +111,7 @@ class ExportCommand:
              'handler': AiStackDataCheckManager.contain_thread_group_data},
             {'export_type': ExportDataType.LOW_POWER,
              'handler': AiStackDataCheckManager.contain_stars_low_power_data},
-            {'export_type': ExportDataType.BIU_PERF,
+            {'export_type': ExportDataType.INSTR,
              'handler': AiStackDataCheckManager.contain_biu_perf_data},
             {'export_type': ExportDataType.ACC_PMU,
              'handler': AiStackDataCheckManager.contain_acc_pmu_data},
