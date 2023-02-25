@@ -333,12 +333,12 @@ public:
     int Uninit() override;
 };
 
-constexpr int BIU_GROUP_MAX_NUM = 25;       // biu group id 0 ~ 24
-constexpr int BIU_GROUP_CHANNEL_NUM = 3;    // biu group contains 3 channel
-class ProfBiuPerfJob : public ProfDrvJob {
+constexpr int INSTR_GROUP_MAX_NUM = 25;       // instr profiling group id 0 ~ 24
+constexpr int INSTR_GROUP_CHANNEL_NUM = 3;    // instr profiling group contains 3 channel
+class ProfInstrPerfJob : public ProfDrvJob {
 public:
-    ProfBiuPerfJob();
-    ~ProfBiuPerfJob() override;
+    ProfInstrPerfJob();
+    ~ProfInstrPerfJob() override;
     int Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg) override;
     int Process() override;
     int Uninit() override;
@@ -346,7 +346,7 @@ public:
 protected:
     uint32_t sampleCycle_;
     std::vector<uint32_t> groupIds_;
-    analysis::dvvp::driver::AI_DRV_CHANNEL groupChannelIdMap_[BIU_GROUP_MAX_NUM][BIU_GROUP_CHANNEL_NUM];
+    analysis::dvvp::driver::AI_DRV_CHANNEL groupChannelIdMap_[INSTR_GROUP_MAX_NUM][INSTR_GROUP_CHANNEL_NUM];
 };
 }}}
 #endif

@@ -64,7 +64,7 @@ enum MsprofArgsType {
     ARGS_DVPP_PROFILING,
     ARGS_POWER,
     ARGS_HCCL,
-    ARGS_BIU,
+    ARGS_INSTR_PROFILING,
     ARGS_L2_PROFILING,
     ARGS_PARSE,
     ARGS_QUERY,
@@ -74,7 +74,7 @@ enum MsprofArgsType {
     ARGS_AIC_FREQ, // 10 10-1000
     ARGS_AIV_FREQ, // 10 10-1000
     ARGS_L2_SAMPLE_FREQ, // 100 1-100
-    ARGS_BIU_FREQ, // 1000 300-30000
+    ARGS_INSTR_PROFILING_FREQ, // 1000 300-30000
     ARGS_SYS_PERIOD, // >0
     ARGS_SYS_SAMPLING_FREQ, // 10 1-10
     ARGS_PID_SAMPLING_FREQ, // 10 1-10
@@ -132,7 +132,7 @@ const MmStructOption longOptions[] = {
     {"dvpp-profiling", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_DVPP_PROFILING},
     {"power", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_POWER},
     {"hccl", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_HCCL},  // the default value is off
-    {"biu", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_BIU},
+    {"instr-profiling", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_INSTR_PROFILING},
     {"l2", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_L2_PROFILING},
     {"parse", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_PARSE},
     {"query", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_QUERY},
@@ -142,7 +142,7 @@ const MmStructOption longOptions[] = {
     {"aic-freq", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_AIC_FREQ},
     {"aiv-freq", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_AIV_FREQ},
     {"l2-freq", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_L2_SAMPLE_FREQ},
-    {"biu-freq", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_BIU_FREQ},
+    {"instr-profiling-freq", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_INSTR_PROFILING_FREQ},
     {"sys-period", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_SYS_PERIOD},
     {"sys-sampling-freq", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_SYS_SAMPLING_FREQ},
     {"sys-pid-sampling-freq", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_PID_SAMPLING_FREQ},
@@ -212,7 +212,7 @@ private:
     void AddDvvpArgs();
     void AddL2Args();
     void AddAivArgs();
-    void AddBiuArgs();
+    void AddInstrArgs();
     void AddAicpuArgs();
     void AddHostArgs();
     void AddStarsArgs();

@@ -30,7 +30,7 @@ int ParamsAdapterGeOpt::Init()
         return PROFILING_FAILED;
     }
     std::vector<InputCfg>({
-        INPUT_CFG_COM_TASK_TRACE, INPUT_CFG_COM_TRAINING_TRACE, INPUT_CFG_COM_BIU_FREQ, INPUT_CFG_HOST_SYS
+        INPUT_CFG_COM_TASK_TRACE, INPUT_CFG_COM_TRAINING_TRACE, INPUT_CFG_COM_INSTR_PROFILING_FREQ, INPUT_CFG_HOST_SYS
         }).swap(geOptConfig_);
     InitWholeConfigMap();
     InitPrintMap();
@@ -52,7 +52,7 @@ void ParamsAdapterGeOpt::InitWholeConfigMap()
         INPUT_CFG_COM_RUNTIME_API,
         INPUT_CFG_COM_AIC_METRICS,
         INPUT_CFG_COM_AIV_METRICS,
-        INPUT_CFG_COM_BIU_FREQ,
+        INPUT_CFG_COM_INSTR_PROFILING_FREQ,
         INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ,
         INPUT_CFG_COM_LLC_MODE,
         INPUT_CFG_COM_SYS_IO_FREQ,
@@ -79,7 +79,7 @@ void ParamsAdapterGeOpt::InitPrintMap()
         {INPUT_CFG_COM_RUNTIME_API, "runtime_api"},
         {INPUT_CFG_COM_AIC_METRICS, "aic_metrics"},
         {INPUT_CFG_COM_AIV_METRICS, "aiv_metrics"},
-        {INPUT_CFG_COM_BIU_FREQ, "biu_freq"},
+        {INPUT_CFG_COM_INSTR_PROFILING_FREQ, "instr_profiling_freq"},
         {INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ, "sys_hardware_mem_freq"},
         {INPUT_CFG_COM_LLC_MODE, "llc_profiling"},
         {INPUT_CFG_COM_SYS_IO_FREQ, "sys_io_sampling_freq"},
@@ -122,7 +122,7 @@ int ParamsAdapterGeOpt::ParamsCheckGeOpt() const
             case INPUT_CFG_COM_TRAINING_TRACE:
                 ret = ParamValidation::instance()->IsValidSwitch(cfgValue);
                 break;
-            case INPUT_CFG_COM_BIU_FREQ:
+            case INPUT_CFG_COM_INSTR_PROFILING_FREQ:
                 ret = CheckFreqValid(cfgValue, inputCfg);
                 break;
             case INPUT_CFG_HOST_SYS:
@@ -167,9 +167,9 @@ void ParamsAdapterGeOpt::GenGeOptionsContainer(SHARED_PTR_ALIA<ProfGeOptionsConf
     paramContainer_[INPUT_CFG_HOST_SYS_USAGE] = geCfg->host_sys_usage();
     paramContainer_[INPUT_CFG_HOST_SYS_USAGE_FREQ] = (geCfg->host_sys_usage_freq() <= 0) ? "" :
         std::to_string(geCfg->host_sys_usage_freq());
-    std::string biuFreqParam = std::to_string(geCfg->biu_freq());
-    if (biuFreqParam.compare("0") != 0) {
-        paramContainer_[INPUT_CFG_COM_BIU_FREQ] = biuFreqParam;
+    std::string instrFreqParam = std::to_string(geCfg->instr_profiling_freq());
+    if (instrFreqParam.compare("0") != 0) {
+        paramContainer_[INPUT_CFG_COM_INSTR_PROFILING_FREQ] = instrFreqParam;
     }
     for (auto configOpt : geOptionsWholeConfig_) {
         if (!paramContainer_[configOpt].empty()) {
@@ -213,8 +213,8 @@ int ParamsAdapterGeOpt::SetGeOptionsContainerDefaultValue()
         paramContainer_[INPUT_CFG_COM_AIV_MODE] = PROFILING_MODE_TASK_BASED;
     }
     SetDefaultAivParams(paramContainer_);
-    if (!paramContainer_[INPUT_CFG_COM_BIU_FREQ].empty()) {
-        paramContainer_[INPUT_CFG_COM_BIU] = MSVP_PROF_ON;
+    if (!paramContainer_[INPUT_CFG_COM_INSTR_PROFILING_FREQ].empty()) {
+        paramContainer_[INPUT_CFG_COM_INSTR_PROFILING] = MSVP_PROF_ON;
     }
     SetGeOptContainerSysValue();
     SetDefaultLlcMode(paramContainer_);
