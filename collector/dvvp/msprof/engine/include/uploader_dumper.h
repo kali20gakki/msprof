@@ -14,12 +14,7 @@
 #include <memory>
 #include "prof_reporter.h"
 #include "data_dumper.h"
-
-namespace analysis {
-namespace dvvp {
-namespace proto {
-class FileChunkReq;
-}}}
+#include "proto/profiler.pb.h"
 
 namespace Msprof {
 namespace Engine {

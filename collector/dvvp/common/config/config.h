@@ -231,7 +231,7 @@ constexpr int DEFAULT_PROFILING_INTERVAL_10MS  = 10;
 constexpr int DEFAULT_PROFILING_INTERVAL_20MS  = 20;
 constexpr int DEFAULT_PROFILING_INTERVAL_50MS  = 50;
 constexpr int DEFAULT_PROFILING_INTERVAL_100MS = 100;
-constexpr int DEFAULT_PROFILING_BIU_FREQ = 1000;    // 1000 cycle
+constexpr int DEFAULT_PROFILING_INSTR_PROFILING_FREQ = 1000;    // 1000 cycle
 
 enum FileChunkDataModule {
     PROFILING_DEFAULT_DATA_MODULE = 0,
@@ -241,10 +241,6 @@ enum FileChunkDataModule {
     PROFILING_IS_FROM_MSPROF_DEVICE,
     PROFILING_IS_FROM_MSPROF_HOST
 };
-
-// biu perf
-constexpr int BIU_SAMPLE_FREQ_MIN = 300;    // biu sampling frequency min value
-constexpr int BIU_SAMPLE_FREQ_MAX = 30000;  // biu sampling frequency max value
 
 // device-sys
 constexpr int SYS_SAMPLING_FREQ_MIN_NUM = 1;

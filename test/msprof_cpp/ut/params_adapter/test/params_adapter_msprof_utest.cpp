@@ -69,7 +69,7 @@ TEST_F(ParamsAdapterMsprofUtest, ParamsCheckMsprofV1)
     std::vector<InputCfg> inputCfgList = {
         INPUT_CFG_COM_AIV_MODE,
         INPUT_CFG_COM_AIC_MODE,
-        INPUT_CFG_COM_BIU_FREQ,
+        INPUT_CFG_COM_INSTR_PROFILING_FREQ,
         INPUT_CFG_COM_SYS_DEVICES,
         INPUT_CFG_COM_SYS_PERIOD,
         INPUT_CFG_HOST_SYS,

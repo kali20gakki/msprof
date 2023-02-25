@@ -345,18 +345,6 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckHostSysPidValid)
     EXPECT_EQ(false, entry->CheckHostSysPidValid(hostSysPid));
 }
 
-TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckBiuFreqValid)
-{
-    GlobalMockObject::verify();
-    uint32_t biuFreq = 0;
-    auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
-    EXPECT_EQ(false, entry->CheckBiuFreqValid(biuFreq));
-    biuFreq = 300000; // 300000 larger than max biu freq
-    EXPECT_EQ(false, entry->CheckBiuFreqValid(biuFreq));
-    biuFreq = 500; // 500 in biu freq range
-    EXPECT_EQ(true, entry->CheckBiuFreqValid(biuFreq));
-}
-
 TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, MsprofCheckEnvValid)
 {
     GlobalMockObject::verify();
