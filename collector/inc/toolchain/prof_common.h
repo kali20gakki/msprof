@@ -443,6 +443,7 @@ struct MsprofHcclProfData {
  * @name  MsprofStampInfo
  * @brief struct of data reported by msproftx
  */
+#define CALLSTACK_MAX_LENGTH 75
 struct MsprofStampInfo {
     uint16_t magicNumber;
     uint16_t dataTag;
@@ -463,7 +464,7 @@ struct MsprofStampInfo {
     uint64_t endTime;
     int32_t messageType;
     char message[128];
-    char callStack[76];
+    char callStack[CALLSTACK_MAX_LENGTH + 1];
 };
 
 #ifdef __cplusplus

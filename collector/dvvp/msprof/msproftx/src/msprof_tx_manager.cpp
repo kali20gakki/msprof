@@ -113,7 +113,10 @@ void MsprofTxManager::DestroyStamp(ACL_PROF_STAMP_PTR stamp) const
         MSPROF_LOGE("[DestroyStamp]MsprofTxManager is not inited yet");
         return;
     }
-    (void)memset_s(stamp->stampTagName, MSPROF_ENGINE_MAX_TAG_LEN + 1, 0, MSPROF_ENGINE_MAX_TAG_LEN + 1);
+    stamp->stampTagName[0] = '\0';
+    stamp->stampInfo.callStack[0] = '\0';
+    stamp->callStackLength = 0;
+
     stampPool_->DestroyStamp(stamp);
 }
 
@@ -369,12 +372,11 @@ int MsprofTxManager::ReportStampData(MsprofStampInstance *stamp) const
         stamp->report.tag[tagNameLen] = '\0';
     }
     uint32_t callStackLength = stamp->callStackLength;
-    constexpr int MAX_SPLIT_LENGTH = 75;
     uint32_t pos = 0;
     do {
-        uint32_t copyLen = (MAX_SPLIT_LENGTH < callStackLength) ? MAX_SPLIT_LENGTH : callStackLength;
+        uint32_t copyLen = (CALLSTACK_MAX_LENGTH < callStackLength) ? CALLSTACK_MAX_LENGTH : callStackLength;
         if (copyLen > 0) {
-            auto err = strncpy_s(stamp->stampInfo.callStack, MAX_SPLIT_LENGTH + 1, stamp->callStack + pos, copyLen);
+            auto err = strncpy_s(stamp->stampInfo.callStack, CALLSTACK_MAX_LENGTH + 1, stamp->callStack + pos, copyLen);
             if (err != EOK) {
                 MSPROF_LOGE("[ReportStampData]strncpy_sp callStack failed");
                 return PROFILING_FAILED;
