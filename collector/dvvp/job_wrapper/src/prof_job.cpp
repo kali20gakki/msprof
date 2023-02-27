@@ -478,66 +478,67 @@ int ProfFftsProfileJob::Uninit()
     return PROFILING_SUCCESS;
 }
 
-ProfBiuPerfJob::ProfBiuPerfJob() : sampleCycle_(DEFAULT_PROFILING_BIU_FREQ)
+ProfInstrPerfJob::ProfInstrPerfJob() : sampleCycle_(DEFAULT_PROFILING_INSTR_PROFILING_FREQ)
 {
 }
 
-ProfBiuPerfJob::~ProfBiuPerfJob()
+ProfInstrPerfJob::~ProfInstrPerfJob()
 {
 }
 
-int ProfBiuPerfJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
+int ProfInstrPerfJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
 {
     if (CheckJobContextParam(cfg) != PROFILING_SUCCESS) {
         return PROFILING_FAILED;
     }
     collectionJobCfg_ = cfg;
-    sampleCycle_ = static_cast<uint32_t>(cfg->comParams->params->biu_freq);
+    sampleCycle_ = static_cast<uint32_t>(cfg->comParams->params->instr_profiling_freq);
     if (cfg->comParams->params->host_profiling) {
         return PROFILING_FAILED;
     }
-    if (cfg->comParams->params->biu.compare(MSVP_PROF_ON) != 0) {
+    if (cfg->comParams->params->instr_profiling.compare(MSVP_PROF_ON) != 0) {
         return PROFILING_FAILED;
     }
-    analysis::dvvp::driver::AI_DRV_CHANNEL channelIdMap[BIU_GROUP_MAX_NUM][BIU_GROUP_CHANNEL_NUM] = {
-        {PROF_CHANNEL_BIU_GROUP0_AIC, PROF_CHANNEL_BIU_GROUP0_AIV0, PROF_CHANNEL_BIU_GROUP0_AIV1},
-        {PROF_CHANNEL_BIU_GROUP1_AIC, PROF_CHANNEL_BIU_GROUP1_AIV0, PROF_CHANNEL_BIU_GROUP1_AIV1},
-        {PROF_CHANNEL_BIU_GROUP2_AIC, PROF_CHANNEL_BIU_GROUP2_AIV0, PROF_CHANNEL_BIU_GROUP2_AIV1},
-        {PROF_CHANNEL_BIU_GROUP3_AIC, PROF_CHANNEL_BIU_GROUP3_AIV0, PROF_CHANNEL_BIU_GROUP3_AIV1},
-        {PROF_CHANNEL_BIU_GROUP4_AIC, PROF_CHANNEL_BIU_GROUP4_AIV0, PROF_CHANNEL_BIU_GROUP4_AIV1},
-        {PROF_CHANNEL_BIU_GROUP5_AIC, PROF_CHANNEL_BIU_GROUP5_AIV0, PROF_CHANNEL_BIU_GROUP5_AIV1},
-        {PROF_CHANNEL_BIU_GROUP6_AIC, PROF_CHANNEL_BIU_GROUP6_AIV0, PROF_CHANNEL_BIU_GROUP6_AIV1},
-        {PROF_CHANNEL_BIU_GROUP7_AIC, PROF_CHANNEL_BIU_GROUP7_AIV0, PROF_CHANNEL_BIU_GROUP7_AIV1},
-        {PROF_CHANNEL_BIU_GROUP8_AIC, PROF_CHANNEL_BIU_GROUP8_AIV0, PROF_CHANNEL_BIU_GROUP8_AIV1},
-        {PROF_CHANNEL_BIU_GROUP9_AIC, PROF_CHANNEL_BIU_GROUP9_AIV0, PROF_CHANNEL_BIU_GROUP9_AIV1},
-        {PROF_CHANNEL_BIU_GROUP10_AIC, PROF_CHANNEL_BIU_GROUP10_AIV0, PROF_CHANNEL_BIU_GROUP10_AIV1},
-        {PROF_CHANNEL_BIU_GROUP11_AIC, PROF_CHANNEL_BIU_GROUP11_AIV0, PROF_CHANNEL_BIU_GROUP11_AIV1},
-        {PROF_CHANNEL_BIU_GROUP12_AIC, PROF_CHANNEL_BIU_GROUP12_AIV0, PROF_CHANNEL_BIU_GROUP12_AIV1},
-        {PROF_CHANNEL_BIU_GROUP13_AIC, PROF_CHANNEL_BIU_GROUP13_AIV0, PROF_CHANNEL_BIU_GROUP13_AIV1},
-        {PROF_CHANNEL_BIU_GROUP14_AIC, PROF_CHANNEL_BIU_GROUP14_AIV0, PROF_CHANNEL_BIU_GROUP14_AIV1},
-        {PROF_CHANNEL_BIU_GROUP15_AIC, PROF_CHANNEL_BIU_GROUP15_AIV0, PROF_CHANNEL_BIU_GROUP15_AIV1},
-        {PROF_CHANNEL_BIU_GROUP16_AIC, PROF_CHANNEL_BIU_GROUP16_AIV0, PROF_CHANNEL_BIU_GROUP16_AIV1},
-        {PROF_CHANNEL_BIU_GROUP17_AIC, PROF_CHANNEL_BIU_GROUP17_AIV0, PROF_CHANNEL_BIU_GROUP17_AIV1},
-        {PROF_CHANNEL_BIU_GROUP18_AIC, PROF_CHANNEL_BIU_GROUP18_AIV0, PROF_CHANNEL_BIU_GROUP18_AIV1},
-        {PROF_CHANNEL_BIU_GROUP19_AIC, PROF_CHANNEL_BIU_GROUP19_AIV0, PROF_CHANNEL_BIU_GROUP19_AIV1},
-        {PROF_CHANNEL_BIU_GROUP20_AIC, PROF_CHANNEL_BIU_GROUP20_AIV0, PROF_CHANNEL_BIU_GROUP20_AIV1},
-        {PROF_CHANNEL_BIU_GROUP21_AIC, PROF_CHANNEL_BIU_GROUP21_AIV0, PROF_CHANNEL_BIU_GROUP21_AIV1},
-        {PROF_CHANNEL_BIU_GROUP22_AIC, PROF_CHANNEL_BIU_GROUP22_AIV0, PROF_CHANNEL_BIU_GROUP22_AIV1},
-        {PROF_CHANNEL_BIU_GROUP23_AIC, PROF_CHANNEL_BIU_GROUP23_AIV0, PROF_CHANNEL_BIU_GROUP23_AIV1},
-        {PROF_CHANNEL_BIU_GROUP24_AIC, PROF_CHANNEL_BIU_GROUP24_AIV0, PROF_CHANNEL_BIU_GROUP24_AIV1}
+    analysis::dvvp::driver::AI_DRV_CHANNEL channelIdMap[INSTR_GROUP_MAX_NUM][INSTR_GROUP_CHANNEL_NUM] = {
+        {PROF_CHANNEL_INSTR_GROUP0_AIC, PROF_CHANNEL_INSTR_GROUP0_AIV0, PROF_CHANNEL_INSTR_GROUP0_AIV1},
+        {PROF_CHANNEL_INSTR_GROUP1_AIC, PROF_CHANNEL_INSTR_GROUP1_AIV0, PROF_CHANNEL_INSTR_GROUP1_AIV1},
+        {PROF_CHANNEL_INSTR_GROUP2_AIC, PROF_CHANNEL_INSTR_GROUP2_AIV0, PROF_CHANNEL_INSTR_GROUP2_AIV1},
+        {PROF_CHANNEL_INSTR_GROUP3_AIC, PROF_CHANNEL_INSTR_GROUP3_AIV0, PROF_CHANNEL_INSTR_GROUP3_AIV1},
+        {PROF_CHANNEL_INSTR_GROUP4_AIC, PROF_CHANNEL_INSTR_GROUP4_AIV0, PROF_CHANNEL_INSTR_GROUP4_AIV1},
+        {PROF_CHANNEL_INSTR_GROUP5_AIC, PROF_CHANNEL_INSTR_GROUP5_AIV0, PROF_CHANNEL_INSTR_GROUP5_AIV1},
+        {PROF_CHANNEL_INSTR_GROUP6_AIC, PROF_CHANNEL_INSTR_GROUP6_AIV0, PROF_CHANNEL_INSTR_GROUP6_AIV1},
+        {PROF_CHANNEL_INSTR_GROUP7_AIC, PROF_CHANNEL_INSTR_GROUP7_AIV0, PROF_CHANNEL_INSTR_GROUP7_AIV1},
+        {PROF_CHANNEL_INSTR_GROUP8_AIC, PROF_CHANNEL_INSTR_GROUP8_AIV0, PROF_CHANNEL_INSTR_GROUP8_AIV1},
+        {PROF_CHANNEL_INSTR_GROUP9_AIC, PROF_CHANNEL_INSTR_GROUP9_AIV0, PROF_CHANNEL_INSTR_GROUP9_AIV1},
+        {PROF_CHANNEL_INSTR_GROUP10_AIC, PROF_CHANNEL_INSTR_GROUP10_AIV0, PROF_CHANNEL_INSTR_GROUP10_AIV1},
+        {PROF_CHANNEL_INSTR_GROUP11_AIC, PROF_CHANNEL_INSTR_GROUP11_AIV0, PROF_CHANNEL_INSTR_GROUP11_AIV1},
+        {PROF_CHANNEL_INSTR_GROUP12_AIC, PROF_CHANNEL_INSTR_GROUP12_AIV0, PROF_CHANNEL_INSTR_GROUP12_AIV1},
+        {PROF_CHANNEL_INSTR_GROUP13_AIC, PROF_CHANNEL_INSTR_GROUP13_AIV0, PROF_CHANNEL_INSTR_GROUP13_AIV1},
+        {PROF_CHANNEL_INSTR_GROUP14_AIC, PROF_CHANNEL_INSTR_GROUP14_AIV0, PROF_CHANNEL_INSTR_GROUP14_AIV1},
+        {PROF_CHANNEL_INSTR_GROUP15_AIC, PROF_CHANNEL_INSTR_GROUP15_AIV0, PROF_CHANNEL_INSTR_GROUP15_AIV1},
+        {PROF_CHANNEL_INSTR_GROUP16_AIC, PROF_CHANNEL_INSTR_GROUP16_AIV0, PROF_CHANNEL_INSTR_GROUP16_AIV1},
+        {PROF_CHANNEL_INSTR_GROUP17_AIC, PROF_CHANNEL_INSTR_GROUP17_AIV0, PROF_CHANNEL_INSTR_GROUP17_AIV1},
+        {PROF_CHANNEL_INSTR_GROUP18_AIC, PROF_CHANNEL_INSTR_GROUP18_AIV0, PROF_CHANNEL_INSTR_GROUP18_AIV1},
+        {PROF_CHANNEL_INSTR_GROUP19_AIC, PROF_CHANNEL_INSTR_GROUP19_AIV0, PROF_CHANNEL_INSTR_GROUP19_AIV1},
+        {PROF_CHANNEL_INSTR_GROUP20_AIC, PROF_CHANNEL_INSTR_GROUP20_AIV0, PROF_CHANNEL_INSTR_GROUP20_AIV1},
+        {PROF_CHANNEL_INSTR_GROUP21_AIC, PROF_CHANNEL_INSTR_GROUP21_AIV0, PROF_CHANNEL_INSTR_GROUP21_AIV1},
+        {PROF_CHANNEL_INSTR_GROUP22_AIC, PROF_CHANNEL_INSTR_GROUP22_AIV0, PROF_CHANNEL_INSTR_GROUP22_AIV1},
+        {PROF_CHANNEL_INSTR_GROUP23_AIC, PROF_CHANNEL_INSTR_GROUP23_AIV0, PROF_CHANNEL_INSTR_GROUP23_AIV1},
+        {PROF_CHANNEL_INSTR_GROUP24_AIC, PROF_CHANNEL_INSTR_GROUP24_AIV0, PROF_CHANNEL_INSTR_GROUP24_AIV1}
     };
     if (memcpy_s(groupChannelIdMap_, sizeof(groupChannelIdMap_), channelIdMap, sizeof(channelIdMap)) != EOK) {
         return PROFILING_FAILED;
     }
-    // currently get all biu group id, group id can be configured in the future.
-    for (uint32_t groupId = 0; groupId < BIU_GROUP_MAX_NUM; ++groupId) {
+    // currently get all instr profiling group id, group id can be configured in the future.
+    for (uint32_t groupId = 0; groupId < INSTR_GROUP_MAX_NUM; ++groupId) {
         groupIds_.push_back(groupId);
     }
-    MSPROF_LOGI("biu profile init success, biu groupId: %s.", cfg->comParams->params->biu.c_str());
+    MSPROF_LOGI("instr profiling profile init success, instr profiling groupId: %s.",
+                cfg->comParams->params->instr_profiling.c_str());
     return PROFILING_SUCCESS;
 }
 
-int ProfBiuPerfJob::Process()
+int ProfInstrPerfJob::Process()
 {
     if (CheckJobContextParam(collectionJobCfg_) != PROFILING_SUCCESS) {
         return PROFILING_FAILED;
@@ -547,7 +548,7 @@ int ProfBiuPerfJob::Process()
     std::vector<std::string> coreName = {"aic", "aiv0", "aiv1"};
 
     for (auto groupId : groupIds_) {
-        for (size_t i = 0; i < BIU_GROUP_CHANNEL_NUM; ++i) {
+        for (size_t i = 0; i < INSTR_GROUP_CHANNEL_NUM; ++i) {
             auto channelId = groupChannelIdMap_[groupId][i];
             if (!DrvChannelsMgr::instance()->ChannelIsValid(devId, channelId)) {
                 MSPROF_LOGW("Channel is invalid, devId:%d, channelId:%d", devId, channelId);
@@ -557,11 +558,11 @@ int ProfBiuPerfJob::Process()
             std::string filePath = collectionJobCfg_->jobParams.dataPath +
                                 ".group_" + std::to_string(groupId) + "_" + coreName[i];
             AddReader(collectionJobCfg_->comParams->params->job_id, devId, channelId, filePath);
-            ret = DrvBiuProfileStart(devId, channelId, sampleCycle_);
-            MSPROF_LOGI("start biu profile buffer, ret=%d, devId:%d, channelId:%d", ret, devId, channelId);
+            ret = DrvInstrProfileStart(devId, channelId, sampleCycle_);
+            MSPROF_LOGI("start instr profiling profile buffer, ret=%d, devId:%d, channelId:%d", ret, devId, channelId);
             if (ret != PROFILING_SUCCESS) {
                 RemoveReader(collectionJobCfg_->comParams->params->job_id, devId, channelId);
-                MSPROF_LOGE("[ProfBiuPerfJob]Process, DrvBiuProfileStart failed. devId:%d, channelId:%d",
+                MSPROF_LOGE("[ProfInstrPerfJob]Process, DrvInstrProfileStart failed. devId:%d, channelId:%d",
                             devId, channelId);
             }
         }
@@ -570,7 +571,7 @@ int ProfBiuPerfJob::Process()
     return ret;
 }
 
-int ProfBiuPerfJob::Uninit()
+int ProfInstrPerfJob::Uninit()
 {
     if (CheckJobContextParam(collectionJobCfg_) != PROFILING_SUCCESS) {
         return PROFILING_FAILED;
@@ -579,7 +580,7 @@ int ProfBiuPerfJob::Uninit()
     int32_t devId = collectionJobCfg_->comParams->devId;
 
     for (auto groupId : groupIds_) {
-        for (size_t i = 0; i < BIU_GROUP_CHANNEL_NUM; ++i) {
+        for (size_t i = 0; i < INSTR_GROUP_CHANNEL_NUM; ++i) {
             auto channelId = groupChannelIdMap_[groupId][i];
             if (!DrvChannelsMgr::instance()->ChannelIsValid(devId, channelId)) {
                 MSPROF_LOGW("Channel is invalid, devId:%d, channelId:%d", devId, channelId);
@@ -587,7 +588,7 @@ int ProfBiuPerfJob::Uninit()
             }
             ret = DrvStop(devId, channelId);
             if (ret != PROFILING_SUCCESS) {
-                MSPROF_LOGE("[ProfBiuPerfJob]DrvStop failed, ret:%d, devId:%d, channelId:%d", ret, devId, channelId);
+                MSPROF_LOGE("[ProfInstrPerfJob]DrvStop failed, ret:%d, devId:%d, channelId:%d", ret, devId, channelId);
             }
             RemoveReader(collectionJobCfg_->comParams->params->job_id, devId, channelId);
             collectionJobCfg_->jobParams.events.reset();

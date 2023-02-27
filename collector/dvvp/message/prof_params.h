@@ -119,8 +119,8 @@ struct ProfileParams : BaseInfo {
     std::string dvpp_profiling;
     int dvpp_sampling_interval;
 
-    std::string biu;
-    int biu_freq;
+    std::string instr_profiling;
+    int instr_profiling_freq;
 
     // for msprof
     std::string modelLoad;
@@ -181,7 +181,7 @@ struct ProfileParams : BaseInfo {
           hccsProfiling("off"), hccsInterval(DEFAULT_PROFILING_INTERVAL_20MS),
           pcieInterval(DEFAULT_PROFILING_INTERVAL_20MS),
           dvpp_profiling("off"), dvpp_sampling_interval(DEFAULT_PROFILING_INTERVAL_20MS),
-          biu("off"), biu_freq(DEFAULT_PROFILING_BIU_FREQ),
+          instr_profiling("off"), instr_profiling_freq(DEFAULT_PROFILING_INSTR_PROFILING_FREQ),
           msprof("off"), msproftx("off"),
           host_sys(""), host_sys_pid(HOST_PID_DEFAULT), host_sys_usage(""),
           host_disk_profiling("off"), host_osrt_profiling("off"),
@@ -323,9 +323,9 @@ struct ProfileParams : BaseInfo {
         SET_VALUE(object, msprof_llc_profiling); // for msprof self use, on or off
         SET_VALUE(object, llc_profiling_events);
         SET_VALUE(object, llc_interval);
-        // biu
-        SET_VALUE(object, biu);
-        SET_VALUE(object, biu_freq);
+        // instr profiling
+        SET_VALUE(object, instr_profiling);
+        SET_VALUE(object, instr_profiling_freq);
         // ddr
         SET_VALUE(object, ddr_profiling);
         SET_VALUE(object, ddr_profiling_events);
@@ -406,12 +406,12 @@ struct ProfileParams : BaseInfo {
         FROM_STRING_VALUE(object, interconnection_profiling);
         FROM_INT_VALUE(object, interconnection_sampling_interval, DEFAULT_PROFILING_INTERVAL_10MS);
         FROM_STRING_VALUE(object, dvpp_profiling);
-        FROM_STRING_VALUE(object, biu);
+        FROM_STRING_VALUE(object, instr_profiling);
         FROM_STRING_VALUE(object, nicProfiling);
         FROM_STRING_VALUE(object, roceProfiling);
         FROM_INT_VALUE(object, dvpp_sampling_interval, DEFAULT_PROFILING_INTERVAL_10MS);
         FROM_INT_VALUE(object, aicore_sampling_interval, DEFAULT_PROFILING_INTERVAL_10MS);
-        FROM_INT_VALUE(object, biu_freq, DEFAULT_PROFILING_BIU_FREQ);
+        FROM_INT_VALUE(object, instr_profiling_freq, DEFAULT_PROFILING_INSTR_PROFILING_FREQ);
         // host system
         FROM_BOOL_VALUE(object, host_profiling);
         FROM_STRING_VALUE(object, host_one_pid_cpu_profiling);
