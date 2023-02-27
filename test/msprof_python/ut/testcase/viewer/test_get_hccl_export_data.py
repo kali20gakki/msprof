@@ -22,7 +22,7 @@ class TestHCCLExport(unittest.TestCase):
         with mock.patch(NAMESPACE + '.HCCLExport.get_hccl_sql', return_value=" "), \
                 mock.patch(NAMESPACE + '.HCCLExport._get_hccl_sql_data', return_value=[]):
             res = HCCLExport(PARAMS).get_hccl_timeline_data()
-        self.assertEqual(res, json.dumps([]))
+        self.assertEqual(res, json.dumps({}))
 
     def test_format_hccl_data(self):
         hccl_data = [

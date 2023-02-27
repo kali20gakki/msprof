@@ -58,4 +58,5 @@ class LowPowerParser(IStarsParser):
                  low_power_data.io_warn_cnt1, low_power_data.io_warn_cnt2, low_power_data.io_warn_cnt3,
                  low_power_data.epd_warn, low_power_data.sft_samp_cfg, voltage])
 
-        self._data_list = data_list
+        self._data_list.clear()
+        self._data_list['data_list'] = data_list
