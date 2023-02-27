@@ -49,7 +49,8 @@ public:
           hostCntvctStart_(0),
           hostCntvctDiff_(0),
           devMonotonic_(0),
-          devCntvct_(0) {}
+          devCntvct_(0),
+          devIndexId_(MSVP_MAX_DEV_NUM + 1) {}
     virtual ~JobAdapter() {}
 
 public:

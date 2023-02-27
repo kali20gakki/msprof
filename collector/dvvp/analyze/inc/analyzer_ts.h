@@ -12,13 +12,6 @@
 #include "utils/utils.h"
 #include "data_struct.h"
 
-namespace analysis {
-namespace dvvp {
-namespace proto {
-class FileChunkReq;
-}
-}
-}
 namespace Analysis {
 namespace Dvvp {
 namespace Analyze {
@@ -38,7 +31,6 @@ private:
     void ParseTsTimelineData(CONST_CHAR_PTR data, uint32_t len);
     void ParseTsKeypointData(CONST_CHAR_PTR data, uint32_t len);
     uint8_t GetRptType(CONST_CHAR_PTR data, uint32_t len);
-
     void PrintStats();
 
 private:

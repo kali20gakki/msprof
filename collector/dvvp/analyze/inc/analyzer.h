@@ -11,23 +11,16 @@
 
 #include "data_struct.h"
 #include "utils/utils.h"
-
-namespace analysis {
-namespace dvvp {
-namespace proto {
-class FileChunkReq;
-}
-namespace transport {
-class Uploader;
-}}}
+#include "transport/uploader.h"
+#include "analyzer_ge.h"
+#include "analyzer_hwts.h"
+#include "analyzer_ffts.h"
+#include "analyzer_ts.h"
+#include "analyzer_base.h"
 
 namespace Analysis {
 namespace Dvvp {
 namespace Analyze {
-class AnalyzerGe;
-class AnalyzerHwts;
-class AnalyzerTs;
-class AnalyzerFfts;
 using namespace analysis::dvvp::common::utils;
 class Analyzer {
 public:
