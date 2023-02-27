@@ -262,7 +262,7 @@ class InfoConfReader:
         calculate biu sample cycle
         """
         try:
-            biu_sample_cycle = int(self._sample_json.get("biu_freq"))
+            biu_sample_cycle = int(self._sample_json.get("instr_profiling_freq"))
         except TypeError as err:
             logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
             raise ProfException(ProfException.PROF_INVALID_DATA_ERROR) from err
