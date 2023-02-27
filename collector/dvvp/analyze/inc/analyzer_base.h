@@ -8,12 +8,7 @@
 #define ANALYSIS_DVVP_ANALYZE_ANALYZER_BASE_H
 
 #include "utils/utils.h"
-
-namespace analysis {
-namespace dvvp {
-namespace proto {
-class FileChunkReq;
-}}}
+#include "proto/profiler.pb.h"
 
 namespace Analysis {
 namespace Dvvp {

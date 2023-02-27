@@ -10,17 +10,11 @@
 #include "prof_acl_mgr.h"
 #include "transport.h"
 #include "utils/utils.h"
-
-namespace Analysis {
-namespace Dvvp {
-namespace Analyze {
-class Analyzer;
-}}}
+#include "analyzer.h"
 
 namespace analysis {
 namespace dvvp {
 namespace transport {
-class Uploader;
 // ParserTransport
 class ParserTransport : public ITransport {
 public:
