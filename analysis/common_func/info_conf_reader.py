@@ -296,6 +296,8 @@ class InfoConfReader:
             self.get_conf_file_path(result_path, get_sample_json_compiles()))
 
     def _load_dev_start_path_line_by_line(self: any, log_file: any) -> None:
+        self._dev_cnt = 0
+        self._start_log_time = 0
         while True:
             line = log_file.readline(Constant.MAX_READ_LINE_BYTES)
             if not line:
