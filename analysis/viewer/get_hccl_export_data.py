@@ -28,6 +28,7 @@ class HCCLExport:
     def __init__(self: any, param: dict) -> None:
         self.project_path = param.get(StrConstant.PARAM_RESULT_DIR)
         self.result = []
+        self.err_message = {}
         self.iter_range = param.get(StrConstant.PARAM_ITER_ID)
         self.pid_value = InfoConfReader().get_json_pid_data()
 
@@ -39,7 +40,8 @@ class HCCLExport:
         hccl_data = self._get_hccl_sql_data(sql)
         if hccl_data:
             self._format_hccl_data(hccl_data)
-        return json.dumps(self.result)
+            return json.dumps(self.result)
+        return json.dumps(self.err_message)
 
     def get_hccl_sql(self: any) -> str:
         """
@@ -96,7 +98,7 @@ class HCCLExport:
         else:
             sql_datas = DBManager.fetch_all_data(cur, sql)
             if not sql_datas:
-                self.result = {
+                self.err_message = {
                     'status': NumberConstant.WARN,
                     "info": "get hccl data failed,"
                             " may be lack of hccl files containing iteration {}.".format(self.iter_range.iteration_id)
@@ -106,8 +108,8 @@ class HCCLExport:
             DBManager.destroy_db_connect(conn, cur)
 
     def _check_hccl_table(self: any, conn: any, curs: any) -> bool:
-        if not (conn and curs) or not DBManager.judge_table_exist(curs, DBNameConstant.TABLE_HCCL_ALL_REDUCE):
-            self.result = {
+        if not (conn and curs and DBManager.judge_table_exist(curs, DBNameConstant.TABLE_HCCL_ALL_REDUCE)):
+            self.err_message = {
                 'status': NumberConstant.ERROR,
                 "info": "get hccl data failed, may be the hccl file not completed or hccl parser failed."
                         " please check data file."

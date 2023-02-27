@@ -14,11 +14,11 @@ class LowPowerModel(ParserModel):
     def __init__(self: any, result_dir: str, db: str, table_list: list) -> None:
         super().__init__(result_dir, db, table_list)
 
-    def flush(self: any, data_dict: list) -> None:
+    def flush(self: any, data_dict: dict) -> None:
         """
         insert lowpower sample data into database
         """
-        self.insert_data_to_db(DBNameConstant.TABLE_LOWPOWER, data_dict)
+        self.insert_data_to_db(DBNameConstant.TABLE_LOWPOWER, data_dict.get('data_list', []))
 
     def get_timeline_data(self):
         """

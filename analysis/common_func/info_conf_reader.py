@@ -6,20 +6,19 @@ import json
 import logging
 import os
 
-from common_func.common import print_msg
 from common_func.constant import Constant
+from common_func.file_manager import check_path_valid
 from common_func.file_name_manager import get_dev_start_compiles
-from common_func.file_name_manager import get_sample_json_compiles
 from common_func.file_name_manager import get_end_info_compiles
 from common_func.file_name_manager import get_host_start_compiles
 from common_func.file_name_manager import get_info_json_compiles
+from common_func.file_name_manager import get_sample_json_compiles
 from common_func.file_name_manager import get_start_info_compiles
-from common_func.file_manager import check_path_valid
+from common_func.ms_constant.number_constant import NumberConstant
+from common_func.ms_constant.str_constant import StrConstant
 from common_func.msprof_exception import ProfException
 from common_func.msvp_common import is_number
 from common_func.msvp_common import is_valid_original_data
-from common_func.ms_constant.number_constant import NumberConstant
-from common_func.ms_constant.str_constant import StrConstant
 from common_func.singleton import singleton
 from common_func.trace_view_header_constant import TraceViewHeaderConstant
 from profiling_bean.basic_info.host_start import TimerBean
@@ -282,6 +281,14 @@ class InfoConfReader:
             collection_time = Constant.NA
         return [job_info, device_id, collection_time, rank_id]
 
+    def get_host_freq(self: any) -> float:
+        sycle_to_time = self._info_json.get('cycleToTime', [])
+        if sycle_to_time:
+            freq = sycle_to_time[0].get('realCpuFreq', self.HOST_DEFAULT_FREQ)
+            if is_number(freq):
+                return freq
+        return self.HOST_DEFAULT_FREQ
+
     def _load_json(self: any, result_path: str) -> None:
         """
         load info.json once
@@ -345,11 +352,3 @@ class InfoConfReader:
         if self._host_mon <= 0 or self._dev_cnt <= 0:
             logging.error("The monotonic time %s or cntvct %s is unusual, "
                           "maybe get data from driver failed", self._host_mon, self._dev_cnt)
-
-    def get_host_freq(self: any) -> float:
-        sycle_to_time = self._info_json.get('cycleToTime', [])
-        if sycle_to_time:
-            freq = sycle_to_time[0].get('realCpuFreq', self.HOST_DEFAULT_FREQ)
-            if is_number(freq):
-                return freq
-        return self.HOST_DEFAULT_FREQ
