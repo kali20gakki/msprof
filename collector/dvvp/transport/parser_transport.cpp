@@ -9,7 +9,6 @@
 #include <cstring>
 
 #include "mmpa_api.h"
-#include "analyzer.h"
 #include "errno/error_code.h"
 #include "op_desc_parser.h"
 #include "msprof_dlog.h"

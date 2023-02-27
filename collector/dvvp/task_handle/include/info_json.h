@@ -13,12 +13,9 @@
 #include "ai_drv_dsmi_api.h"
 #include "ai_drv_dev_api.h"
 #include "mmpa_api.h"
+#include "proto/profiler.pb.h"
 namespace analysis {
 namespace dvvp {
-namespace proto {
-    class InfoMain;
-    class InfoDeviceInfo;
-}
 namespace host {
 const char * const PLATFORM_CLOUD = "cloud";
 

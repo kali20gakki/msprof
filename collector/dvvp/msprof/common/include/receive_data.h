@@ -24,12 +24,7 @@
 #include "prof_reporter.h"
 #include "queue/ring_buffer.h"
 #include "config/config.h"
-
-namespace analysis {
-namespace dvvp {
-namespace proto {
-class FileChunkReq;
-}}}
+#include "proto/profiler.pb.h"
 
 namespace Msprof {
 namespace Engine {
