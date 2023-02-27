@@ -508,11 +508,11 @@ int DrvFftsProfileStart(const DrvPeripheralProfileCfg &peripheralCfg, const std:
     return PROFILING_SUCCESS;
 }
 
-int DrvBiuProfileStart(const uint32_t devId, const AI_DRV_CHANNEL channelId, const uint32_t sampleCycle)
+int DrvInstrProfileStart(const uint32_t devId, const AI_DRV_CHANNEL channelId, const uint32_t sampleCycle)
 {
-    BiuProfileConfigT config;
+    InstrProfileConfigT config;
     config.period = sampleCycle;
-    MSPROF_EVENT("Begin to start profiling DrvBiuProfileStart: profDeviceId=%u, profChannel=%u, "
+    MSPROF_EVENT("Begin to start profiling DrvInstrProfileStart: profDeviceId=%u, profChannel=%u, "
         "period=%u", devId, static_cast<uint32_t>(channelId), config.period);
 
     prof_start_para profStartPara;
@@ -523,11 +523,11 @@ int DrvBiuProfileStart(const uint32_t devId, const AI_DRV_CHANNEL channelId, con
     profStartPara.user_data_size = sizeof(config);
     int32_t ret = DriverPlugin::instance()->MsprofDrvStart(devId, channelId, &profStartPara);
     if (ret != PROF_OK) {
-        MSPROF_LOGE("Failed to start profiling DrvBiuProfileStart, ret=%d, profDeviceId=%u, profChannel=%u, "
+        MSPROF_LOGE("Failed to start profiling DrvInstrProfileStart, ret=%d, profDeviceId=%u, profChannel=%u, "
             "period=%u", ret, devId, static_cast<uint32_t>(channelId), config.period);
         return PROFILING_FAILED;
     }
-    MSPROF_EVENT("Succeeded to start profiling DrvBiuProfileStart, profDeviceId=%u, profChannel=%u, "
+    MSPROF_EVENT("Succeeded to start profiling DrvInstrProfileStart, profDeviceId=%u, profChannel=%u, "
         "period=%u", devId, static_cast<uint32_t>(channelId), config.period);
     return PROFILING_SUCCESS;
 }

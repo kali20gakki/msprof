@@ -198,7 +198,7 @@ void ArgsManager::Init()
     AddInterArgs();
     AddDvvpArgs();
     AddL2Args();
-    AddBiuArgs();
+    AddInstrArgs();
     AddHostArgs();
     AddStarsArgs();
     Args help = {"help", "help message.(full-platform)"};
@@ -294,18 +294,18 @@ void ArgsManager::AddStarsArgs()
     argsList_.push_back(lowPowerArgs);
 }
 
-void ArgsManager::AddBiuArgs()
+void ArgsManager::AddInstrArgs()
 {
     if (driverOnline_ && platform_ != PlatformType::CHIP_V4_1_0) {
         return;
     }
-    Args biu = {"biu", "Show biu profiling data, the default value is off.(future-platform)", OFF};
-    Args biuFreq = {"biu-freq",
-                    "The biu sampling period in clock-cycle, the default value is 1000 cycle,\n"
-                        "\t\t\t\t\t\t   the range is 300 to 30000 cycle.(future-platform)",
-                    "1000"};
-    argsList_.push_back(biu);
-    argsList_.push_back(biuFreq);
+    Args instr = {"instr-profiling", "Show instr profiling data, the default value is off.(future-platform)", OFF};
+    Args instrFreq = {"instr-profiling-freq",
+                      "The instr sampling period in clock-cycle, the default value is 1000 cycle,\n"
+                          "\t\t\t\t\t\t   the range is 300 to 30000 cycle.(future-platform)",
+                      "1000"};
+    argsList_.push_back(instr);
+    argsList_.push_back(instrFreq);
 }
 
 void ArgsManager::AddAicpuArgs()

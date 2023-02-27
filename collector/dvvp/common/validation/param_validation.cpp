@@ -1039,21 +1039,6 @@ bool ParamValidation::CheckStorageLimit(const std::string &storageLimit) const
     return true;
 }
 
-bool ParamValidation::CheckBiuFreqValid(const uint32_t biuFreq) const
-{
-    if ((biuFreq < BIU_SAMPLE_FREQ_MIN) || (biuFreq > BIU_SAMPLE_FREQ_MAX)) {
-        MSPROF_LOGE("biu_freq %u is invalid (%u~%u).", biuFreq, BIU_SAMPLE_FREQ_MIN, BIU_SAMPLE_FREQ_MAX);
-        CMD_LOGE("Argument --biu_freq=%u is invalid. Freq range (%u~%u).", biuFreq, BIU_SAMPLE_FREQ_MIN,
-            BIU_SAMPLE_FREQ_MAX);
-        std::string errReason = "biu_freq should be in range [" + std::to_string(BIU_SAMPLE_FREQ_MIN) +
-            "," + std::to_string(BIU_SAMPLE_FREQ_MAX) + "]";
-        MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
-            std::vector<std::string>({"biu_freq", std::to_string(biuFreq), errReason}));
-        return false;
-    }
-    return true;
-}
-
 bool ParamValidation::MsprofCheckAppValid(std::string &appParam) const
 {
     if (appParam.empty()) {

@@ -51,7 +51,7 @@ enum CollectorTypesForPlatform {
     PLATFORM_SYS_DEVICE_HCCS,
     PLATFORM_SYS_DEVICE_PCIE,
     PLATFORM_SYS_DEVICE_DVPP,
-    PLATFORM_SYS_DEVICE_BIU,
+    PLATFORM_SYS_DEVICE_INSTR_PROFILING,
     PLATFORM_SYS_DEVICE_POWER,
     // System-host
     PLATFORM_SYS_HOST_ONE_PID_CPU,
@@ -117,7 +117,7 @@ public:
     virtual void SetParamsForDeviceIO(int samplingInterval);
     virtual void SetParamsForDeviceIntercommection(int samplingInterval);
     virtual void SetParamsForDeviceDVPP(int samplingInterval);
-    virtual void SetParamsForDeviceBIU(int biuFreq);
+    virtual void SetParamsForDeviceInstr(int instrFreq);
     virtual void SetParamsForDevicePower();
     virtual void SetParamsForHostPidDisk();
     virtual void SetParamsForHostPidOSRT();

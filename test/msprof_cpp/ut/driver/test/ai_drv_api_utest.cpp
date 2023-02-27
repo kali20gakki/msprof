@@ -126,7 +126,7 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvAicoreStart) {
     EXPECT_EQ(PROFILING_SUCCESS, analysis::dvvp::driver::DrvAicoreStart(peripheralCfg, prof_cores, prof_events));
 }
 
-TEST_F(DRIVER_AI_DRV_API_TEST, DrvBiuProfileStart)
+TEST_F(DRIVER_AI_DRV_API_TEST, DrvInstrProfileStart)
 {
     GlobalMockObject::verify();
     MOCKER(&DriverPlugin::MsprofDrvStart)
@@ -139,8 +139,8 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvBiuProfileStart)
     peripheralCfg.profChannel = analysis::dvvp::driver::PROF_CHANNEL_AI_CORE;
     peripheralCfg.profSamplePeriod = 1;
     peripheralCfg.profDataFilePath = "/path/to/data";
-    EXPECT_EQ(PROFILING_FAILED, analysis::dvvp::driver::DrvBiuProfileStart(0, peripheralCfg.profChannel, 1));
-    EXPECT_EQ(PROFILING_SUCCESS, analysis::dvvp::driver::DrvBiuProfileStart(0, peripheralCfg.profChannel, 1));
+    EXPECT_EQ(PROFILING_FAILED, analysis::dvvp::driver::DrvInstrProfileStart(0, peripheralCfg.profChannel, 1));
+    EXPECT_EQ(PROFILING_SUCCESS, analysis::dvvp::driver::DrvInstrProfileStart(0, peripheralCfg.profChannel, 1));
 }
 TEST_F(DRIVER_AI_DRV_API_TEST, DrvAicoreTaskBasedStart) {
     GlobalMockObject::verify();

@@ -71,7 +71,7 @@ void ParamsAdapter::SetMiniBlackSwitch()
         INPUT_CFG_COM_SYS_INTERCONNECTION, INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ,
         INPUT_CFG_COM_L2, INPUT_CFG_COM_AI_VECTOR, INPUT_CFG_COM_AIV_FREQ,
         INPUT_CFG_COM_AIV_MODE, INPUT_CFG_COM_AIV_METRICS, INPUT_CFG_COM_POWER,
-        INPUT_CFG_COM_BIU, INPUT_CFG_COM_BIU_FREQ
+        INPUT_CFG_COM_INSTR_PROFILING, INPUT_CFG_COM_INSTR_PROFILING_FREQ
         }).swap(blackSwitch_);
     return;
 }
@@ -80,8 +80,8 @@ void ParamsAdapter::SetCloudBlackSwitch()
 {
     std::vector<InputCfg>({
         INPUT_CFG_COM_AI_VECTOR, INPUT_CFG_COM_AIV_FREQ, INPUT_CFG_COM_AIV_MODE,
-        INPUT_CFG_COM_AIV_METRICS, INPUT_CFG_COM_POWER, INPUT_CFG_COM_BIU,
-        INPUT_CFG_COM_BIU_FREQ
+        INPUT_CFG_COM_AIV_METRICS, INPUT_CFG_COM_POWER, INPUT_CFG_COM_INSTR_PROFILING,
+        INPUT_CFG_COM_INSTR_PROFILING_FREQ
         }).swap(blackSwitch_);
     return;
 }
@@ -92,8 +92,8 @@ void ParamsAdapter::SetMdcBlackSwitch()
         INPUT_CFG_COM_SYS_IO, INPUT_CFG_COM_SYS_IO_FREQ, INPUT_CFG_COM_SYS_INTERCONNECTION,
         INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ, INPUT_CFG_COM_AICPU, INPUT_CFG_PYTHON_PATH,
         INPUT_CFG_SUMMARY_FORMAT, INPUT_CFG_PARSE, INPUT_CFG_QUERY, INPUT_CFG_EXPORT,
-        INPUT_CFG_ITERATION_ID, INPUT_CFG_MODEL_ID, INPUT_CFG_COM_POWER, INPUT_CFG_COM_BIU,
-        INPUT_CFG_COM_BIU_FREQ
+        INPUT_CFG_ITERATION_ID, INPUT_CFG_MODEL_ID, INPUT_CFG_COM_POWER, INPUT_CFG_COM_INSTR_PROFILING,
+        INPUT_CFG_COM_INSTR_PROFILING_FREQ
         }).swap(blackSwitch_);
     return;
 }
@@ -109,7 +109,7 @@ void ParamsAdapter::SetLhisiBlackSwitch()
         INPUT_CFG_COM_SYS_CPU, INPUT_CFG_COM_SYS_CPU_FREQ, INPUT_CFG_COM_L2,
         INPUT_CFG_PYTHON_PATH, INPUT_CFG_SUMMARY_FORMAT, INPUT_CFG_PARSE,
         INPUT_CFG_QUERY, INPUT_CFG_EXPORT, INPUT_CFG_ITERATION_ID, INPUT_CFG_MODEL_ID,
-        INPUT_CFG_COM_POWER, INPUT_CFG_COM_BIU, INPUT_CFG_COM_BIU_FREQ
+        INPUT_CFG_COM_POWER, INPUT_CFG_COM_INSTR_PROFILING, INPUT_CFG_COM_INSTR_PROFILING_FREQ
         }).swap(blackSwitch_);
     return;
 }
@@ -119,7 +119,7 @@ void ParamsAdapter::SetDcBlackSwitch()
     std::vector<InputCfg>({
         INPUT_CFG_COM_AI_VECTOR, INPUT_CFG_COM_AIV_FREQ, INPUT_CFG_COM_AIV_MODE,
         INPUT_CFG_COM_AIV_METRICS, INPUT_CFG_COM_SYS_IO, INPUT_CFG_COM_SYS_IO_FREQ,
-        INPUT_CFG_COM_POWER, INPUT_CFG_COM_BIU, INPUT_CFG_COM_BIU_FREQ
+        INPUT_CFG_COM_POWER, INPUT_CFG_COM_INSTR_PROFILING, INPUT_CFG_COM_INSTR_PROFILING_FREQ
         }).swap(blackSwitch_);
     return;
 }
@@ -138,8 +138,9 @@ void ParamsAdapter::SetMiniV2BlackSwitch()
     std::vector<InputCfg>({
         INPUT_CFG_COM_AI_VECTOR, INPUT_CFG_COM_AIV_FREQ, INPUT_CFG_COM_AIV_MODE,
         INPUT_CFG_COM_SYS_INTERCONNECTION, INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ,
-        INPUT_CFG_COM_AIV_METRICS, INPUT_CFG_COM_POWER, INPUT_CFG_COM_BIU, INPUT_CFG_COM_BIU_FREQ,
-        INPUT_CFG_HOST_SYS, INPUT_CFG_HOST_SYS_PID, INPUT_CFG_HOST_SYS_USAGE, INPUT_CFG_HOST_SYS_USAGE_FREQ
+        INPUT_CFG_COM_AIV_METRICS, INPUT_CFG_COM_POWER, INPUT_CFG_COM_INSTR_PROFILING,
+        INPUT_CFG_COM_INSTR_PROFILING_FREQ, INPUT_CFG_HOST_SYS, INPUT_CFG_HOST_SYS_PID,
+        INPUT_CFG_HOST_SYS_USAGE, INPUT_CFG_HOST_SYS_USAGE_FREQ
         }).swap(blackSwitch_);
     return;
 }
@@ -335,10 +336,10 @@ void ParamsAdapter::SetDeviceSysParams(std::array<std::string, INPUT_CFG_MAX> pa
     if (paramContainer[INPUT_CFG_COM_POWER].compare(MSVP_PROF_ON) == 0) {
         platformAdapter_->SetParamsForDevicePower();
     }
-    if (paramContainer[INPUT_CFG_COM_BIU].compare(MSVP_PROF_ON) == 0) {
-        int biuFreq = paramContainer[INPUT_CFG_COM_BIU_FREQ].empty() ?
-            DEFAULT_PROFILING_BIU_FREQ : std::stoi(paramContainer[INPUT_CFG_COM_BIU_FREQ]);
-        platformAdapter_->SetParamsForDeviceBIU(biuFreq);
+    if (paramContainer[INPUT_CFG_COM_INSTR_PROFILING].compare(MSVP_PROF_ON) == 0) {
+        int instrFreq = paramContainer[INPUT_CFG_COM_INSTR_PROFILING_FREQ].empty() ?
+            DEFAULT_PROFILING_INSTR_PROFILING_FREQ : std::stoi(paramContainer[INPUT_CFG_COM_INSTR_PROFILING_FREQ]);
+        platformAdapter_->SetParamsForDeviceInstr(instrFreq);
     }
 
     return;
@@ -488,7 +489,7 @@ bool ParamsAdapter::CheckFreqValid(const std::string &freq, const InputCfg freqO
         {INPUT_CFG_COM_SYS_IO_FREQ, {SYS_IO_FREQ_MIN, SYS_IO_FREQ_MAX}},
         {INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ, {SYS_INTERCONNECTION_FREQ_MIN, SYS_INTERCONNECTION_FREQ_MAX}},
         {INPUT_CFG_COM_DVPP_FREQ, {DVPP_FREQ_MIN, DVPP_FREQ_MAX}},
-        {INPUT_CFG_COM_BIU_FREQ, {BIU_FREQ_MIN, BIU_FREQ_MAX}},
+        {INPUT_CFG_COM_INSTR_PROFILING_FREQ, {INSTR_PROFILING_FREQ_MIN, INSTR_PROFILING_FREQ_MAX}},
         {INPUT_CFG_HOST_SYS_USAGE_FREQ, {HOST_SYS_USAGE_FREQ_MIN, HOST_SYS_USAGE_FREQ_MAX}},
         {INPUT_CFG_MSPROF_DYNAMIC_PID, {APP_PID_MIN, APP_PID_MAX}},
     };
@@ -502,8 +503,8 @@ bool ParamsAdapter::CheckFreqValid(const std::string &freq, const InputCfg freqO
         {INPUT_CFG_COM_SYS_IO_FREQ, "sys-io-sampling-freq"},
         {INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ, "sys-interconnection-freq"},
         {INPUT_CFG_COM_DVPP_FREQ, "dvpp-freq"},
-        {INPUT_CFG_COM_BIU_FREQ, "biu_freq"},
-        {INPUT_CFG_HOST_SYS_USAGE_FREQ, "host_sys_usage_freq"},
+        {INPUT_CFG_COM_INSTR_PROFILING_FREQ, "instr-profiling-freq"},
+        {INPUT_CFG_HOST_SYS_USAGE_FREQ, "host-sys-usage-freq"},
         {INPUT_CFG_MSPROF_DYNAMIC_PID, "pid"},
     };
     std::vector<int> checkFreqRange = freqRangeMap[freqOpt];

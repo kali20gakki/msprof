@@ -400,7 +400,7 @@ void JobDeviceSoc::CreateCollectionJobArray()
     MSVP_MAKE_SHARED0_VOID(CollectionJobV_[HWTS_LOG_COLLECTION_JOB].collectionJob, ProfHwtsLogJob);
     MSVP_MAKE_SHARED0_VOID(CollectionJobV_[STARS_SOC_PROFILE_COLLECTION_JOB].collectionJob, ProfStarsSocProfileJob);
     MSVP_MAKE_SHARED0_VOID(CollectionJobV_[FFTS_PROFILE_COLLECTION_JOB].collectionJob, ProfFftsProfileJob);
-    MSVP_MAKE_SHARED0_VOID(CollectionJobV_[BIU_COLLECTION_JOB].collectionJob, ProfBiuPerfJob);
+    MSVP_MAKE_SHARED0_VOID(CollectionJobV_[INSTR_PROFILING_COLLECTION_JOB].collectionJob, ProfInstrPerfJob);
     // for system
     MSVP_MAKE_SHARED0_VOID(CollectionJobV_[CTRLCPU_PERF_COLLECTION_JOB].collectionJob, ProfCtrlcpuJob);
     MSVP_MAKE_SHARED0_VOID(CollectionJobV_[SYSSTAT_PROC_COLLECTION_JOB].collectionJob, ProfSysStatJob);

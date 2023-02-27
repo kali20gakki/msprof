@@ -419,17 +419,18 @@ void PlatformAdapterInterface::SetParamsForDeviceDVPP(int samplingInterval)
     }
 }
 
-void PlatformAdapterInterface::SetParamsForDeviceBIU(int biuFreq)
+void PlatformAdapterInterface::SetParamsForDeviceInstr(int instrFreq)
 {
     bool ret = false;
-    if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_SYS_DEVICE_BIU) != supportSwitch_.end()) {
-        params_->biu = MSPROF_SWITCH_ON;
-        params_->biu_freq = biuFreq;
-        params_->dataTypeConfig |= PROF_BIU;
+    if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_SYS_DEVICE_INSTR_PROFILING) !=
+        supportSwitch_.end()) {
+        params_->instr_profiling = MSPROF_SWITCH_ON;
+        params_->instr_profiling_freq = instrFreq;
+        params_->dataTypeConfig |= PROF_INSTR_PROFILING;
         ret = true;
     }
     if (!ret) {
-        MSPROF_LOGW("Unrecognized option:biu for PlatformType:%d", static_cast<uint8_t>(platformType_));
+        MSPROF_LOGW("Unrecognized option:instr profiling for PlatformType:%d", static_cast<uint8_t>(platformType_));
     }
 }
 
