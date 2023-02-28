@@ -10,7 +10,7 @@ class TestInterSocModel(unittest.TestCase):
     def test_flush(self):
         with mock.patch(NAMESPACE + '.LowPowerModel.insert_data_to_db'):
             check = LowPowerModel('test', 'test', [])
-            check.flush([])
+            check.flush({})
 
     def test_get_timeline_data(self):
         with mock.patch('msmodel.interface.base_model.DBManager.judge_table_exist', return_value=True), \
