@@ -950,6 +950,7 @@ void ProfHostService::Run(const struct error_message::Context &errorContext)
     }
     do {
         std::string fileName = profHostOutDir_ + std::to_string(outDataNumber_);
+        MSPROF_LOGI("file %s", fileName.c_str());
         long long len = analysis::dvvp::common::utils::Utils::GetFileSize(fileName);
         if (len > MSVP_SMALL_FILE_MAX_LEN) {
             Handler();
