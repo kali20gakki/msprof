@@ -42,7 +42,8 @@ class StarsConstant:
         # and SDMA informs L2 cache to write back the corresponding cache line
         11: "Writeback Data Context",
         12: "AI_CPU",
-        13: "Load Context"
+        13: "Load Context",
+        15: "DSA"
     }
 
     def get_subtask_type(self: any) -> dict:
