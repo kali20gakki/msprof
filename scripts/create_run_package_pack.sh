@@ -79,15 +79,16 @@ function create_temp_dir() {
 			cp ${TEMP_OUTPUT}/lib/libmsprofiler.so ${temp_dir}
 			cp -r ${TEMP_OUTPUT}/stub ${temp_dir}
 			cp ${TEMP_OUTPUT}/bin/msprof ${temp_dir}
-			cp -r ${TOP_DIR}/analysis ${temp_dir}
+      cp ${TOP_DIR}/build/dist/msprof-0.0.1-py3-none-any.whl ${temp_dir}
       cp ${TOP_DIR}/collector/inc/external/acl/acl_prof.h ${temp_dir}
 		else
 			cp ${TEMP_OUTPUT}/lib/libmsprofiler.so ${temp_dir}
 			cp -r ${TEMP_OUTPUT}/stub ${temp_dir}
 			cp ${TEMP_OUTPUT}/bin/msprof ${temp_dir}
-			cp -r ${TOP_DIR}/analysis ${temp_dir}
+      cp ${TOP_DIR}/build/dist/msprof-0.0.1-py3-none-any.whl ${temp_dir}
       cp ${TOP_DIR}/collector/inc/external/acl/acl_prof.h ${temp_dir}
 	fi
+	rm -rf ${TOP_DIR}/build/dist
 	copy_script ${INSTALL_SCRIPT} ${temp_dir}
 	copy_script ${UTILS_SCRIPT} ${temp_dir}
 }
@@ -99,6 +100,13 @@ function copy_script() {
 
 	cp ${RUN_SCRIPT_DIR}/${script_name} ${temp_dir}/${script_name}
 	chmod 500 ${temp_dir}/${script_name}
+}
+
+# build python whl
+function build_python_whl() {
+  rm -rf ${TOP_DIR}/build/build ${TOP_DIR}/*.egg-info ${TOP_DIR}/build/dist
+  python3  ${TOP_DIR}/build/setup.py bdist_wheel --python-tag=py3 --py-limited-api=cp37
+  rm -rf ${TOP_DIR}/build/build ${TOP_DIR}/*.egg-info
 }
 
 function version() {
@@ -160,6 +168,7 @@ function sed_main_param() {
 	local main_script=${1}
 	local filer=${2}
 	sed_param ${main_script}
+	build_python_whl
 	create_temp_dir ${MSPROF_TEMP_DIR}
 	#create_run_package ${MSPROF_RUN_NAME} ${MSPROF_TEMP_DIR} ${main_script} ${filer}
 	delete_sed_param ${main_script}
