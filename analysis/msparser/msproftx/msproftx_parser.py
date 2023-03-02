@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
-
+import re
 import logging
 import os
 
@@ -33,6 +33,8 @@ class MsprofTxParser(IParser, MsMultiProcess):
         NumberConstant.START_AND_END: 'start/end'
     }
 
+    PATTERN = "seq=(\d+)"
+
     def __init__(self: any, file_list: dict, sample_config: dict) -> None:
         super().__init__(sample_config)
         self._file_list = {
@@ -47,6 +49,7 @@ class MsprofTxParser(IParser, MsMultiProcess):
         self._file_tag = DataTag.MSPROFTX
         self._cur_file_list = []
         self._msproftx_data = []
+        self._seq_id_dict = {}
 
     def read_binary_data(self: any, file_name: str) -> int:
         """
@@ -78,19 +81,38 @@ class MsprofTxParser(IParser, MsMultiProcess):
             data_object_group_by_endtime = self._msproftx_data_group_by_endtime.get(data_object.end_time)
             data_object_group_by_endtime.call_stack += data_object.call_stack
 
+    def correlate_forward(self: any, callstack: str) -> str:
+        """
+        correlate forward
+        """
+        seq_num_list = re.search(self.PATTERN, callstack)
+        # find not seq
+        if not seq_num_list:
+            return callstack
+
+        try:
+            seq_num = int(seq_num_list[1])
+        except (TypeError, ValueError, IndexError) as err:
+            return callstack
+
+        return self._seq_id_dict.setdefault(seq_num, callstack)
+
     def reshape_data(self: any) -> None:
         """
         reshape data
         """
         # Semicolon splits different function stack. Semicolon should be replaced by line break for better presentation.
         for data_object in self._msproftx_data_group_by_endtime.values():
+            callstack = data_object.call_stack.replace(";", "\n")
+            callstack = self.correlate_forward(callstack)
+
             self._msproftx_data.append((data_object.process_id, data_object.thread_id,
                                         data_object.category, self.EVENT_DICT.get(data_object.event_type, ''),
                                         data_object.payload_type, data_object.payload_value,
                                         data_object.start_time, data_object.end_time,
                                         data_object.message_type,
                                         data_object.message,
-                                        data_object.call_stack.replace(";", "\n"),
+                                        callstack,
                                         self._file_tag))
 
     def parse(self: any) -> None:

@@ -90,6 +90,24 @@ class TestMsprofTxParser(unittest.TestCase):
             check.msproftx_data = [123]
             check.save()
 
+    def test_correlate_forward_1(self):
+        obj = mock.Mock()
+        obj.PATTERN = "seq=(\d+)"
+        setattr(obj, "_seq_id_dict", {})
+
+        callstack_1 = "kkk, seq=1"
+        MsprofTxParser.correlate_forward(obj, callstack_1)
+
+        callstack_2 = "qqq, seq=1"
+        MsprofTxParser.correlate_forward(obj, callstack_2)
+
+    def test_correlate_forward_2(self):
+        obj = mock.Mock()
+        obj.PATTERN = "seq=(\d+)"
+        callstack = "kkk"
+        setattr(obj, "_seq_id_dict", {})
+        MsprofTxParser.correlate_forward(obj, callstack)
+
     def test_ms_run(self):
         with mock.patch(NAMESPACE + '.MsprofTxParser.parse'), \
                 mock.patch(NAMESPACE + '.MsprofTxParser.save', side_effect=OSError), \
