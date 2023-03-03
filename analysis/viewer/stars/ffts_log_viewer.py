@@ -15,6 +15,7 @@ from msmodel.interface.view_model import ViewModel
 from msmodel.stars.ffts_log_model import FftsLogModel
 from profiling_bean.db_dto.ge_task_dto import GeTaskDto
 from profiling_bean.prof_enum.export_data_type import ExportDataType
+from viewer.get_trace_timeline import TraceViewer
 from viewer.interface.base_viewer import BaseViewer
 
 
@@ -46,6 +47,20 @@ class FftsLogViewer(BaseViewer):
                  StarsConstant.SUBTASK_TYPE.get(item[2], item[2])])
         header.extend(subtask)
         return header
+
+    def get_timeline_data(self: any) -> str:
+        """
+        get model list timeline data
+        @return:timeline trace data
+        """
+        timeline_data = self.get_data_from_db()
+        result = self.get_trace_timeline(timeline_data)
+        if not result:
+            result = {
+                'status': NumberConstant.WARN,
+                "info": "Can not export ffts sub task time data, the ffts switch may be set to OFF."
+            }
+        return TraceViewer("StarsViewer").format_trace_events(result)
 
     def get_model_instance(self: any) -> any:
         """
@@ -79,6 +94,8 @@ class FftsLogViewer(BaseViewer):
                   'Subtask_id': data.subtask_id}])
         _trace = TraceViewManager.time_graph_trace(TraceViewHeaderConstant.TOP_DOWN_TIME_GRAPH_HEAD,
                                                    result_list)
+        if not result_list:
+            return []
         result = TraceViewManager.metadata_event(
             self.get_time_timeline_header(result_list, pid_header=self.SUBTASK_TIME))
         result.extend(_trace)
@@ -92,8 +109,8 @@ class FftsLogViewer(BaseViewer):
                  "Stream {}".format(str(data.stream_id)),
                  data.start_time / DBManager.NSTOUS,  # start time
                  data.dur_time / DBManager.NSTOUS if data.dur_time > 0 else 0,  # duration
-                 {'FFTS Type': data.ffts_type, 'Task Type': data.subtask_type, 'Stream ID': data.stream_id,
-                  'Task ID': data.task_id, 'Subtask_id': data.subtask_id}])
+                 {'FFTS Type': data.ffts_type, 'Task Type': data.subtask_type, 'Stream Id': data.stream_id,
+                  'Task Id': data.task_id, 'Subtask Id': data.subtask_id}])
         for data in data_list.get('acsq_task_list', []):
             result_list.append(
                 [data.op_name,
@@ -101,8 +118,8 @@ class FftsLogViewer(BaseViewer):
                  "Stream {}".format(str(data.stream_id)),
                  data.start_time / DBManager.NSTOUS,  # start time
                  data.task_time / DBManager.NSTOUS if data.task_time > 0 else 0,  # duration
-                 {"Task Type": data.task_type, 'Stream ID': data.stream_id,
-                  'Task ID': data.task_id, 'Subtask_id': data.subtask_id}])
+                 {"Task Type": data.task_type, 'Stream Id': data.stream_id,
+                  'Task Id': data.task_id, 'Subtask Id': data.subtask_id}])
         _trace = TraceViewManager.time_graph_trace(TraceViewHeaderConstant.TOP_DOWN_TIME_GRAPH_HEAD,
                                                    result_list)
         result = TraceViewManager.metadata_event(self.get_time_timeline_header(result_list))
