@@ -1,10 +1,11 @@
+import json
 import unittest
 from unittest import mock
 
-from constant.info_json_construct import InfoJsonReaderManager
+from common_func.info_conf_reader import InfoConfReader
 from constant.info_json_construct import DeviceInfo
 from constant.info_json_construct import InfoJson
-from common_func.info_conf_reader import InfoConfReader
+from constant.info_json_construct import InfoJsonReaderManager
 from viewer.stars.ffts_log_viewer import FftsLogViewer
 
 NAMESPACE = 'viewer.stars.ffts_log_viewer'
@@ -39,6 +40,15 @@ class TestFftsLogViewer(unittest.TestCase):
         check = FftsLogViewer(configs, params)
         ret = check.get_time_timeline_header(data)
         self.assertEqual(ret, [['process_name', 1000, 0, 'Task Scheduler'], ['thread_name', 2, '3', '3']])
+
+    def test_get_timeline_data(self):
+        configs, params = {}, {}
+        with mock.patch(NAMESPACE + '.FftsLogViewer.get_data_from_db', return_value=[]), \
+                mock.patch(NAMESPACE + '.FftsLogViewer.get_trace_timeline', return_value=[]):
+            check = FftsLogViewer(configs, params)
+            ret = check.get_timeline_data()
+            self.assertEqual(ret, json.dumps(
+                {"status": 2, "info": "Can not export ffts sub task time data, the ffts switch may be set to OFF."}))
 
     def test_get_trace_timeline(self):
         configs, params = {}, {}
