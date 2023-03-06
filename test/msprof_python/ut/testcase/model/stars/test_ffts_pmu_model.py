@@ -7,7 +7,7 @@ from constant.info_json_construct import InfoJsonReaderManager
 from constant.ut_db_name_constant import DB_FFTS_PMU
 from constant.ut_db_name_constant import TABLE_FFTS_PMU
 from msmodel.stars.ffts_pmu_model import FftsPmuModel
-from profiling_bean.stars.ffts_plus_pmu import FftsPlusPmuBean
+from profiling_bean.stars.ffts_block_pmu import FftsBlockPmuBean
 from profiling_bean.stars.ffts_pmu import FftsPmuBean
 from sqlite.db_manager import DBOpen
 

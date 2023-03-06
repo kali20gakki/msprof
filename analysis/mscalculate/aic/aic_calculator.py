@@ -41,8 +41,8 @@ class AicCalculator(PmuCalculator, MsMultiProcess):
         self.ge_info_model = GeInfoModel(self._project_path)
         self._sample_json = ConfigMgr.read_sample_config(self._project_path)
         self._file_list = file_list.get(DataTag.AI_CORE, [])
-        self._aic_data_list = []
         self._file_list.sort(key=lambda x: int(x.split("_")[-1]))
+        self._aic_data_list = []
         self._iter_range = self.sample_config.get(StrConstant.PARAM_ITER_ID)
         self.core_type = 0
         self.aic_discard_num_from_tail = 0
@@ -122,9 +122,9 @@ class AicCalculator(PmuCalculator, MsMultiProcess):
         pmu_list = aic_calculator.add_pipe_time(pmu_list, total_time, self._sample_json.get('ai_core_metrics'))
         AicPmuUtils.remove_redundant(pmu_list)
         data_list.append([
-                total_time, data.total_cycle, *list(itertools.chain.from_iterable(pmu_list.values())), data.task_id,
-                data.stream_id, self.core_type
-            ])
+            total_time, data.total_cycle, *list(itertools.chain.from_iterable(pmu_list.values())), data.task_id,
+            data.stream_id, self.core_type
+        ])
 
     def calculate_total_time(self: any, data: AicPmuBean, data_type: str = 'aic'):
         total_time = 0
