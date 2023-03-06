@@ -25,7 +25,7 @@ class StructDecoder:
         "LpeDecoder": StructFmt.LPE_FMT,
         "LpsDecoder": StructFmt.LPS_FMT,
         "FftsPmuBean": StructFmt.FFTS_PMU_FMT,
-        "FftsPlusPmuBean": StructFmt.FFTS_PLUS_PMU_FMT,
+        "FftsBlockPmuBean": StructFmt.FFTS_BLOCK_PMU_FMT,
         "FftsLogDecoder": StructFmt.FFTS_LOG_FMT,
         "FftsPlusLogDecoder": StructFmt.FFTS_PLUS_LOG_FMT,
         "AicoreSample": StructFmt.AICORE_SAMPLE_FMT,
