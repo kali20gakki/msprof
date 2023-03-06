@@ -6,7 +6,7 @@ from common_func.utils import Utils
 from profiling_bean.struct_info.struct_decoder import StructDecoder
 
 
-class FftsPlusPmuBean(StructDecoder):
+class FftsBlockPmuBean(StructDecoder):
     """
     class used to decode ffts pmu data
     """

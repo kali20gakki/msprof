@@ -23,19 +23,20 @@ from common_func.ms_multi_process import MsMultiProcess
 from common_func.msprof_exception import ProfException
 from common_func.os_manager import check_file_readable
 from common_func.path_manager import PathManager
+from common_func.platform.chip_manager import ChipManager
 from common_func.utils import Utils
 from framework.offset_calculator import FileCalculator
 from framework.offset_calculator import OffsetCalculator
 from mscalculate.aic.aic_utils import AicPmuUtils
 from mscalculate.aic.pmu_calculator import PmuCalculator
 from mscalculate.calculate_ai_core_data import CalculateAiCoreData
-from mscalculate.interface.icalculator import ICalculator
+from msmodel.aic.aic_pmu_model import AicPmuModel
 from msmodel.iter_rec.iter_rec_model import HwtsIterModel
 from msmodel.stars.ffts_pmu_model import FftsPmuModel
 from msparser.data_struct_size_constant import StructFmt
 from profiling_bean.db_dto.step_trace_dto import IterationRange
 from profiling_bean.prof_enum.data_tag import DataTag
-from profiling_bean.stars.ffts_plus_pmu import FftsPlusPmuBean
+from profiling_bean.stars.ffts_block_pmu import FftsBlockPmuBean
 from profiling_bean.stars.ffts_pmu import FftsPmuBean
 
 
@@ -61,6 +62,7 @@ class FftsPmuCalculate(PmuCalculator, MsMultiProcess):
         self._aic_pmu_events = AicPmuUtils.get_pmu_events(self._sample_json.get(StrConstant.AI_CORE_PMU_EVENTS))
         self._aiv_pmu_events = AicPmuUtils.get_pmu_events(
             self._sample_json.get(StrConstant.AI_VECTOR_CORE_PMU_EVENTS))
+        self._is_mix_needed = ChipManager().is_chip_v4()
         self.block_dict = {}
         self.mix_pmu_dict = {}
 
@@ -119,8 +121,10 @@ class FftsPmuCalculate(PmuCalculator, MsMultiProcess):
         for data in self._data_list.get(StrConstant.BLOCK_PMU_TYPE, []):
             self.calculate_block_pmu_list(data)
         self.add_block_pmu_list()
-        for data in self._data_list.get(StrConstant.CONTEXT_PMU_TYPE, []):
-            self.calculate_pmu_list(data, pmu_data)
+        if self._is_mix_needed:
+            self.calculate_mix_pmu_list(pmu_data)
+        else:
+            self.calculate_pmu_list(pmu_data)
         pmu_data.sort(key=lambda x: x[-3])
         try:
             with self._model as _model:
@@ -128,37 +132,60 @@ class FftsPmuCalculate(PmuCalculator, MsMultiProcess):
         except sqlite3.Error as err:
             logging.error("Save ffts pmu data failed! %s", err)
 
-    def calculate_pmu_list(self: any, data: any, pmu_data_list: list) -> None:
+    def calculate_mix_pmu_list(self: any, pmu_data_list: list) -> None:
         """
         calculate pmu
-        :param data: pmu data
         :param pmu_data_list: out args
         :return:
         """
-        task_type = 0 if data.is_aic_data() else 1
+        for data in self._data_list.get(StrConstant.CONTEXT_PMU_TYPE, []):
+            task_type = 0 if data.is_aic_data() else 1
 
-        aic_pmu_value, aiv_pmu_value, aic_total_cycle, aiv_total_cycle = self.get_total_cycle_info(data, task_type)
+            aic_pmu_value, aiv_pmu_value, aic_total_cycle, aiv_total_cycle = self.get_total_cycle_info(data, task_type)
 
-        aic_total_time = self.calculate_total_time(aic_total_cycle, data)
-        aiv_total_time = self.calculate_total_time(aiv_total_cycle, data, data_type='aiv')
-        aic_calculator = CalculateAiCoreData(self._project_path)
-        aic_pmu_value = aic_calculator.add_pipe_time(
-            aic_pmu_value, aic_total_time, self._sample_json.get('ai_core_metrics'))
-        aiv_pmu_value = aic_calculator.add_pipe_time(
-            aiv_pmu_value, aiv_total_time, self._sample_json.get('ai_core_metrics'))
+            aic_total_time = self.calculate_total_time(aic_total_cycle, data)
+            aiv_total_time = self.calculate_total_time(aiv_total_cycle, data, data_type='aiv')
+            aic_calculator = CalculateAiCoreData(self._project_path)
+            aic_pmu_value = aic_calculator.add_pipe_time(
+                aic_pmu_value, aic_total_time, self._sample_json.get('ai_core_metrics'))
+            aiv_pmu_value = aic_calculator.add_pipe_time(
+                aiv_pmu_value, aiv_total_time, self._sample_json.get('ai_core_metrics'))
 
-        aic_pmu_value_list = list(
-            itertools.chain.from_iterable(PmuMetrics(aic_pmu_value).get_pmu_by_event_name(aic_pmu_value)))
-        aiv_pmu_value_list = list(
-            itertools.chain.from_iterable(PmuMetrics(aiv_pmu_value).get_pmu_by_event_name(aiv_pmu_value)))
-        pmu_data = [
-            aic_total_time, aic_total_cycle, *aic_pmu_value_list,
-            aiv_total_time, aiv_total_cycle, *aiv_pmu_value_list,
-            data.task_id, data.stream_id, data.subtask_id, data.subtask_type,
-            InfoConfReader().time_from_syscnt(data.time_list[0]),
-            InfoConfReader().time_from_syscnt(data.time_list[1]), data.ffts_type, task_type
-        ]
-        pmu_data_list.append(pmu_data)
+            aic_pmu_value_list = list(
+                itertools.chain.from_iterable(PmuMetrics(aic_pmu_value).get_pmu_by_event_name(aic_pmu_value)))
+            aiv_pmu_value_list = list(
+                itertools.chain.from_iterable(PmuMetrics(aiv_pmu_value).get_pmu_by_event_name(aiv_pmu_value)))
+            pmu_data = [
+                aic_total_time, aic_total_cycle, *aic_pmu_value_list,
+                aiv_total_time, aiv_total_cycle, *aiv_pmu_value_list,
+                data.task_id, data.stream_id, data.subtask_id, data.subtask_type,
+                InfoConfReader().time_from_syscnt(data.time_list[0]),
+                InfoConfReader().time_from_syscnt(data.time_list[1]), data.ffts_type, task_type
+            ]
+            pmu_data_list.append(pmu_data)
+
+    def calculate_pmu_list(self: any, pmu_data_list: list) -> None:
+        """
+        calculate pmu
+        :param pmu_data_list: pmu events list
+        :return:
+        """
+        self.__update_model_instance()
+        for data in self._data_list.get(StrConstant.CONTEXT_PMU_TYPE, []):
+            task_type = 0 if data.is_aic_data() else 1
+            pmu_list = {}
+            pmu_events = AicPmuUtils.get_pmu_events(self._sample_json.get('ai_core_profiling_events'))
+            total_time = self.calculate_total_time(data.total_cycle, data)
+            aic_calculator = CalculateAiCoreData(self._project_path)
+            _, pmu_list = aic_calculator.compute_ai_core_data(
+                Utils.generator_to_list(pmu_events), pmu_list, data.total_cycle, data.pmu_list)
+            pmu_list = aic_calculator.add_pipe_time(pmu_list, total_time, self._sample_json.get('ai_core_metrics'))
+            AicPmuUtils.remove_redundant(pmu_list)
+            pmu_data = [
+                total_time, data.total_cycle, *list(itertools.chain.from_iterable(pmu_list.values())), data.task_id,
+                data.stream_id, task_type
+            ]
+            pmu_data_list.append(pmu_data)
 
     def calculate_total_time(self: any, total_cycle: int, data: any, data_type: str = 'aic') -> float:
         total_time = 0
@@ -314,7 +341,7 @@ class FftsPmuCalculate(PmuCalculator, MsMultiProcess):
         if Utils.get_func_type(func_type) == StarsConstant.FFTS_PMU_TAG:
             self._data_list.setdefault(StrConstant.CONTEXT_PMU_TYPE, []).append(FftsPmuBean.decode(bin_data))
         elif Utils.get_func_type(func_type) == StarsConstant.FFTS_BLOCK_PMU_TAG:
-            self._data_list.setdefault(StrConstant.BLOCK_PMU_TYPE, []).append(FftsPlusPmuBean.decode(bin_data))
+            self._data_list.setdefault(StrConstant.BLOCK_PMU_TYPE, []).append(FftsBlockPmuBean.decode(bin_data))
         else:
             self._wrong_func_type_count += 1
             logging.debug('Func type error, data may have been lost. Func type: %s', func_type)
@@ -357,6 +384,9 @@ class FftsPmuCalculate(PmuCalculator, MsMultiProcess):
             self._block_dims['block_dim'].setdefault(_key, []).append(int(data.block_dim))
             if data.task_type in [Constant.TASK_TYPE_MIX_AIV, Constant.TASK_TYPE_MIX_AIC]:
                 self._block_dims['mix_block_dim'].setdefault(_key, []).append(int(data.mix_block_dim))
+
+    def __update_model_instance(self):
+        self._model = AicPmuModel(self._project_path)
 
 
 class PmuMetrics:

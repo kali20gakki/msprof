@@ -23,7 +23,7 @@ from msparser.interface.iparser import IParser
 from msparser.iter_rec.iter_info_updater.iter_info import IterInfo
 from profiling_bean.prof_enum.data_tag import DataTag
 from profiling_bean.stars.ffts_pmu import FftsPmuBean
-from profiling_bean.stars.ffts_plus_pmu import FftsPlusPmuBean
+from profiling_bean.stars.ffts_block_pmu import FftsBlockPmuBean
 
 
 class StarsIterRecParser(IParser, MsMultiProcess):
@@ -53,7 +53,7 @@ class StarsIterRecParser(IParser, MsMultiProcess):
     @classmethod
     def _get_pmu_decoder(cls: any) -> any:
         if ChipManager().is_ffts_plus_type():
-            return FftsPlusPmuBean
+            return FftsBlockPmuBean
         return FftsPmuBean
 
     def ms_run(self: any) -> None:

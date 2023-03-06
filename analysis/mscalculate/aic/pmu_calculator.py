@@ -5,7 +5,6 @@
 import os
 
 from analyzer.scene_base.profiling_scene import ProfilingScene
-from common_func.config_mgr import ConfigMgr
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
@@ -121,7 +120,7 @@ class PmuCalculator(ICalculator):
         sql = "select task_id, stream_id, context_id, task_type, block_dim, mix_block_dim from {0} " \
               "where model_id=? and (index_id=0 or index_id=?) " \
               " order by timestamp".format(
-               DBNameConstant.TABLE_GE_TASK)
+            DBNameConstant.TABLE_GE_TASK)
         for iter_id, model_id in iter_list:
             ge_data.extend(DBManager.fetch_all_data(ge_curs, sql, (model_id, iter_id), dto_class=GeTaskDto))
         return ge_data
