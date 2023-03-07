@@ -1417,6 +1417,11 @@ bool Utils::IsClusterRunEnv()
 int32_t Utils::GetRankId()
 {
     constexpr int32_t invalidRankId = -1;
+    std::string rankStr = Utils::GetEnvString(RANK_ENV);
+    if (!rankStr.empty() && CheckStringIsValidNatureNum(rankStr)) {
+        MSPROF_LOGI("Environment variable RANK = %s", rankStr.c_str());
+        return std::stoi(rankStr);
+    }
     if (!IsClusterRunEnv()) {
         return invalidRankId;
     }
