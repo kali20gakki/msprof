@@ -138,8 +138,7 @@ class AiStackDataCheckManager(DataCheckManager):
                cls._contain_hwts_data(result_dir, device_id=device_id) or \
                cls.contain_stars_soc_data(result_dir, device_id=device_id) or \
                (cls._contain_hwts_aiv_data(result_dir, device_id=device_id) or
-                cls._contain_ts_track_aiv_data(result_dir, device_id=device_id)) or \
-               cls.contain_dp_aicpu_data(result_dir, device_id=device_id)
+                cls._contain_ts_track_aiv_data(result_dir, device_id=device_id))
 
     @classmethod
     def contain_task_time_task(cls: any, result_dir: str, device_id: any = None) -> bool:
@@ -189,9 +188,7 @@ class AiStackDataCheckManager(DataCheckManager):
         The data path contain step_trace data or not
         """
         return cls.contain_task_time_data(result_dir, device_id=device_id) or \
-               cls.contain_training_trace_data(result_dir) or \
-               cls.check_data_exist(result_dir,
-                                    file_name_manager.get_data_preprocess_compiles('AICPU'))
+               cls.contain_training_trace_data(result_dir)
 
     @classmethod
     def contain_stars_soc_data(cls: any, result_dir: str, device_id: int = None) -> bool:
