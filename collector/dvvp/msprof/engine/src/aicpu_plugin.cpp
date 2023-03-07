@@ -138,7 +138,10 @@ void AicpuPlugin::Run(const struct error_message::Context &errorContext)
         while (!IsQuit()) {
             packet = nullptr;
             ret = dataTran_->RecvPacket(&packet);
-            if (ret < 0 || packet == nullptr) {
+            if (ret == IDE_DAEMON_SOCK_CLOSE) {
+                MSPROF_EVENT("Device(%d) AicpuPlugin session closed, exits", logicDevId_);
+                return;
+            } else if (ret < 0 || packet == nullptr) {
                 MSPROF_EVENT("Device(%d) AicpuPlugin recv data ends, exits", logicDevId_);
                 break;
             }

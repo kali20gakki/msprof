@@ -53,7 +53,9 @@ int HDCTransport::RecvPacket(TLV_REQ_2PTR packet)
     int bufLen = 0;
 
     int ret = Analysis::Dvvp::Adx::AdxHdcRead(session_, &buffer, &bufLen);
-    if ((ret != IDE_DAEMON_OK) || (bufLen < static_cast<int>(sizeof(struct tlv_req)))) {
+    if (ret == IDE_DAEMON_SOCK_CLOSE) {
+        return ret;
+    } else if ((ret != IDE_DAEMON_OK) || (bufLen < static_cast<int>(sizeof(struct tlv_req)))) {
         MSPROF_LOGW("hdc read failed: ret=%d; bufLen=%d", ret, bufLen);
         return PROFILING_FAILED;
     }
