@@ -135,11 +135,10 @@ void AicpuPlugin::Run(const struct error_message::Context &errorContext)
         MSPROF_LOGI("Device(%d) AicpuPlugin CreateHdcServerTransport success", logicDevId_);
         TLV_REQ_PTR packet = nullptr;
         int ret = PROFILING_SUCCESS;
-        const int TRANSPORT_SESSION_CLOSED = 1;
         while (!IsQuit()) {
             packet = nullptr;
             ret = dataTran_->RecvPacket(&packet);
-            if (ret == TRANSPORT_SESSION_CLOSED) {
+            if (ret == IDE_DAEMON_SOCK_CLOSE) {
                 MSPROF_EVENT("Device(%d) AicpuPlugin session closed, exits", logicDevId_);
                 return;
             } else if (ret < 0 || packet == nullptr) {
