@@ -52,9 +52,8 @@ int HDCTransport::RecvPacket(TLV_REQ_2PTR packet)
     void *buffer = nullptr;
     int bufLen = 0;
 
-    const int transportSeessionClosed = 1;
     int ret = Analysis::Dvvp::Adx::AdxHdcRead(session_, &buffer, &bufLen);
-    if (ret == transportSeessionClosed) {
+    if (ret == IDE_DAEMON_SOCK_CLOSE) {
         return ret;
     } else if ((ret != IDE_DAEMON_OK) || (bufLen < static_cast<int>(sizeof(struct tlv_req)))) {
         MSPROF_LOGW("hdc read failed: ret=%d; bufLen=%d", ret, bufLen);
