@@ -3,7 +3,7 @@
 # Copyright (c) Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
 
 import logging
-
+from profiling_bean.db_dto.hccl_dto import HcclDto
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_constant.str_constant import OpAnalysisType
@@ -38,6 +38,14 @@ class CommunicationParser(MetaParser):
         return
 
     @staticmethod
+    def is_transit_sdma_event(event: HcclDto) -> bool:
+        if event.transport_type == StrConstant.SDMA and event.task_type in StrConstant.SDMA_TRANSIT_ITEMS and \
+                HcclAnalysisTool.get_transport_type(event.src_rank, event.dst_rank) != StrConstant.LOCAL:
+            return True
+        else:
+            return False
+
+    @staticmethod
     def op_time_parser(main_events: list) -> dict:
         """
         time info parser
@@ -49,7 +57,7 @@ class CommunicationParser(MetaParser):
         idx = 0
         while idx < len(main_events):
             event = main_events[idx]
-            if event.transport_type == StrConstant.SDMA and event.task_type in StrConstant.SDMA_TRANSIT_ITEMS:
+            if CommunicationParser.is_transit_sdma_event(event):
                 wait_flag = False
                 op_time_dict[OpAnalysisType.TRANSIT_TIME] += \
                     HcclAnalysisTool.get_value(event.duration, "duration") / NumberConstant.US_TO_MS

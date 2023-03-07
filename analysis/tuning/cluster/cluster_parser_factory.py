@@ -80,8 +80,10 @@ class ClusterParserFactory:
                 rank_path = os.path.join(self.collection_path, dirname)
                 step_trace_table = DBNameConstant.TABLE_CLUSTER_STEP_TRACE.format(rank_id)
                 if not model.judge_table_exist(step_trace_table):
-                    logging.error("%s doesn't exist!", step_trace_table)
-                    raise ProfException(ProfException.PROF_INVALID_STEP_TRACE_ERROR)
+                    logging.debug("%s doesn't exist!", step_trace_table)
+                    iter_start_end = [[NumberConstant.DEFAULT_START_TIME, NumberConstant.DEFAULT_END_TIME]]
+                    self.get_hccl_events_from_db(rank_id, rank_path, iter_start_end)
+                    continue
                 # find model id that has most iterations
                 model_iteration = model.get_model_id_with_iterations(step_trace_table)
                 if not model_iteration:
