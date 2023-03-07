@@ -135,10 +135,14 @@ void AicpuPlugin::Run(const struct error_message::Context &errorContext)
         MSPROF_LOGI("Device(%d) AicpuPlugin CreateHdcServerTransport success", logicDevId_);
         TLV_REQ_PTR packet = nullptr;
         int ret = PROFILING_SUCCESS;
+        const int TRANSPORT_SESSION_CLOSED = 1;
         while (!IsQuit()) {
             packet = nullptr;
             ret = dataTran_->RecvPacket(&packet);
-            if (ret < 0 || packet == nullptr) {
+            if (ret == TRANSPORT_SESSION_CLOSED) {
+                MSPROF_EVENT("Device(%d) AicpuPlugin session closed, exits", logicDevId_);
+                return;
+            } else if (ret < 0 || packet == nullptr) {
                 MSPROF_EVENT("Device(%d) AicpuPlugin recv data ends, exits", logicDevId_);
                 break;
             }
