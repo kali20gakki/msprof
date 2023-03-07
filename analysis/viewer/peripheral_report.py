@@ -39,14 +39,7 @@ def get_dvpp_data(curs: any, devid: str) -> list:
         item = [rd[0], StrConstant.DVPP_ENGINE_TYPE.get(rd[2])]
         item.extend(rd[3:])
         new_report_data.append(item)
-    res = []
-    for _, items in enumerate(new_report_data):
-        result_list_data = list(items)
-        data = result_list_data[-1].split("%")
-        if data and is_number(str(data[0])):
-            result_list_data[-1] = str(StrConstant.ACCURACY % round(float(data[0]), NumberConstant.DECIMAL_ACCURACY))
-        res.append(tuple(result_list_data))
-    return res
+    return new_report_data
 
 
 def get_peripheral_nic_data(db_path: str, table_name: str, device_id: str, configs: dict) -> tuple:
