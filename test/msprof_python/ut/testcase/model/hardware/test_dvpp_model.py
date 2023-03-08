@@ -118,13 +118,13 @@ class TestDvppModel(unittest.TestCase):
         check.conn, check.cur = res[0], res[1]
         check._DvppModel__get_dvpp_data_by_dvpp_id(('5',), ('9',), target_data)
         self.assertEqual(target_data, [('8', '5', '0', '3', 0.0, 0.0, '0.0%'),
-                                       ('9', '5', '0', '3', 0.0, 0.0, '0%')])
+                                       ('9', '5', '0', '3', 0.0, 0.0, '0')])
         res[1].execute("insert into DvppOriginalData values "
                        "(5, 0, 180000, 9, 0, 3, 0, 0, 0 % 100, 0, 0, 0 % 100, 0, 0)")
         check._DvppModel__get_dvpp_data_by_dvpp_id(('5',), ('9',), target_data)
         self.assertEqual(target_data, [('8', '5', '0', '3', 0.0, 0.0, '0.0%'),
-                                       ('9', '5', '0', '3', 0.0, 0.0, '0%'),
-                                       ('9', '5', '0', '3', 0.0, 0.0, '0.0%')])
+                                       ('9', '5', '0', '3', 0.0, 0.0, '0'),
+                                       ('9', '5', '0', '3', 0.0, 0.0, '0')])
         res[1].execute("drop table DvppOriginalData")
         res[0].commit()
         db_manager.destroy(res)
