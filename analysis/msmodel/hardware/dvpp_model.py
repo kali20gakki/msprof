@@ -87,7 +87,7 @@ class DvppModel(BaseModel, ABC):
             DBManager.execute_sql(self.conn, create_sql)
 
         total_device_id_sql = "SELECT DISTINCT(device_id) FROM DvppOriginalData WHERE " \
-                     "replayid IS 0;"
+                              "replayid IS 0;"
         total_device_id = DBManager.fetch_all_data(self.cur, total_device_id_sql)
 
         enginetype_sql = "SELECT DISTINCT(enginetype) FROM DvppOriginalData WHERE " \
@@ -153,17 +153,13 @@ class DvppModel(BaseModel, ABC):
                 all_frame = DBManager.fetch_all_data(self.cur, all_frame_sql,
                                                      (engine_type[0], engine_id[0], device_id[0], dvpp_id[0]))[0][0]
 
-                duration_sql = 'select max(timestamp)-min(timestamp) from ' \
-                               'DvppOriginalData where engineType = ? and ' \
-                               'engineId = ? and device_id = ?  and dvppId = ? order by rowid;'
-                duration = DBManager.fetch_all_data(self.cur, duration_sql,
-                                                    (engine_type[0], engine_id[0], device_id[0], dvpp_id[0]))[0][0]
-                if duration:
-                    utilization = round(float(all_time / self.TIME_RATE) / duration,
-                                        self.ROUND_NUMBER) * self.PERCENTAGE
-                    all_utilization = str(utilization) + "%"
-                else:
-                    all_utilization = '0%'
+                utilization_sql = 'select allutilization from ' \
+                                  'DvppOriginalData where engineType = ? and ' \
+                                  'engineId = ? and device_id = ?  and dvppId = ? order by rowid desc limit 1;'
+                utilization = DBManager.fetchone(self.cur, utilization_sql,
+                                                 (engine_type[0], engine_id[0], device_id[0], dvpp_id[0]))
+
+                all_utilization = str(utilization[0]) if utilization else '0'
                 target_data.append(
                     (dvpp_id[0],
                      device_id[0],
