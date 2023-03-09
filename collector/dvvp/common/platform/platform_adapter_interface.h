@@ -15,6 +15,7 @@
 #include "utils/utils.h"
 #include "message/prof_params.h"
 #include "config/config_manager.h"
+#include "singleton/singleton.h"
 
 namespace Collector {
 namespace Dvvp {
@@ -128,6 +129,7 @@ public:
     virtual void SetParamsForHostAllPidMem(int samplingInterval);
     virtual void SetParamsForHostSysMem(int samplingInterval);
     virtual void SetParamsForHostSysCpu(int samplingInterval);
+    virtual std::vector<std::string> GetMetricsList();
 
 protected:
     std::vector<CollectorTypesForPlatform> supportSwitch_;

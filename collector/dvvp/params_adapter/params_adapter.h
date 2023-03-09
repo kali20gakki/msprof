@@ -15,6 +15,7 @@
 #include "config/config_manager.h"
 #include "mmpa_api.h"
 #include "platform_adapter_interface.h"
+#include "platform/platform_adapter.h"
 
 namespace Collector {
 namespace Dvvp {
@@ -132,6 +133,7 @@ public:
     void SetDefaultAivParams(std::array<std::string, INPUT_CFG_MAX> &paramContainer) const;
     void SetDefaultLlcMode(std::array<std::string, INPUT_CFG_MAX> &paramContainer) const;
     std::string SetDefaultAicMetricsType() const;
+    int PlatformAdapterInit(SHARED_PTR_ALIA<ProfileParams> params);
 public:
     bool CheckFreqValid(const std::string &freq, const InputCfg freqOpt) const;
 private:
@@ -157,7 +159,7 @@ private:
     std::vector<InputCfg> blackSwitch_;
     StatusInfo statusInfo_;
     PlatformType platformType_;
-    SHARED_PTR_ALIA<PlatformAdapterInterface> platformAdapter_;
+    PlatformAdapterInterface* platformAdapter_;
 };
 } // ParamsAdapter
 } // Dvpp

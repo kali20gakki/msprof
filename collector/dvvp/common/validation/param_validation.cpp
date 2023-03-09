@@ -17,7 +17,7 @@
 #include "msprof_error_manager.h"
 #include "config/config_manager.h"
 #include "cmd_log.h"
-#include "params_adapter.h"
+#include "platform/platform_adapter.h"
 
 #ifndef MSPROF_BIN
 #undef CMD_LOGE
@@ -29,6 +29,7 @@ namespace dvvp {
 namespace common {
 namespace validation {
 using namespace Analysis::Dvvp::Common::Platform;
+using namespace Collector::Dvvp::Common::PlatformAdapter;
 using namespace Analysis::Dvvp::Common::Config;
 using namespace analysis::dvvp::common::config;
 using namespace analysis::dvvp::common::error;
@@ -37,7 +38,6 @@ using namespace analysis::dvvp::common::utils;
 using namespace Collector::Dvvp::Plugin;
 using namespace Collector::Dvvp::Mmpa;
 using namespace Collector::Dvvp::Msprofbin;
-using namespace Collector::Dvvp::ParamsAdapter;
 
 const int MIN_INTERVAL = 1;
 const int MAX_INTERVAL = 15 * 24 * 3600 * 1000; // 15 * 24 * 3600 * 1000 = 15day's micro seconds
@@ -162,17 +162,13 @@ bool ParamValidation::CheckProfilingMetricsIsValid(const std::string &metricsNam
         return true;
     }
 
-    const std::vector<std::string> metricsWhiteList = {
-        ARITHMETIC_UTILIZATION,
-        PIPE_UTILIZATION,
-        PIPE_UTILIZATION_EXCT,
-        MEMORY_BANDWIDTH,
-        L0B_AND_WIDTH,
-        RESOURCE_CONFLICT_RATIO,
-        MEMORY_UB,
-        L2_CACHE,
-        PIPE_EXECUTION_UTILIZATION
-    };
+    PlatformAdapterInterface* adapter = PlatformAdapter::instance()->GetAdapter();
+    if (adapter == nullptr) {
+        MSPROF_LOGE("platform adapter uninited.");
+        return false;
+    }
+    std::vector<std::string> metricsWhiteList = adapter->GetMetricsList();
+
     std::string metricsRange = "";
     for (size_t i = 0; i < metricsWhiteList.size(); ++i) {
         metricsRange += metricsWhiteList[i];

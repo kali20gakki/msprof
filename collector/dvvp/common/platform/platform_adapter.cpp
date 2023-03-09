@@ -14,13 +14,6 @@
 #include "config/config.h"
 #include "msprof_dlog.h"
 #include "msprof_error_manager.h"
-#include "platform_adapter_mini.h"
-#include "platform_adapter_mdc.h"
-#include "platform_adapter_lhisi.h"
-#include "platform_adapter_dc.h"
-#include "platform_adapter_cloud.h"
-#include "platform_adapter_cloudv2.h"
-#include "platform_adapter_miniv2.h"
 #include "utils.h"
 
 namespace Collector {
@@ -32,7 +25,7 @@ using namespace Collector::Dvvp::Common::PlatformAdapter;
 using namespace analysis::dvvp::common::config;
 using namespace Analysis::Dvvp::Common::Config;
 
-PlatformAdapter::PlatformAdapter()
+PlatformAdapter::PlatformAdapter() : platformAdapter_(nullptr)
 {
 }
 
@@ -40,37 +33,36 @@ PlatformAdapter::~PlatformAdapter()
 {
 }
 
-SHARED_PTR_ALIA<PlatformAdapterInterface> PlatformAdapter::Init(
-    SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params, PlatformType platformType)
+int PlatformAdapter::Init(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params, PlatformType platformType)
 {
-    SHARED_PTR_ALIA<PlatformAdapterInterface> platformAdapter = nullptr;
-    if (platformType == PlatformType::MINI_TYPE) {
-        MSVP_MAKE_SHARED0_RET(platformAdapter, PlatformAdapterMini, nullptr);
-    } else if (platformType == PlatformType::CLOUD_TYPE) {
-        MSVP_MAKE_SHARED0_RET(platformAdapter, PlatformAdapterCloud, nullptr);
-    } else if (platformType == PlatformType::MDC_TYPE) {
-        MSVP_MAKE_SHARED0_RET(platformAdapter, PlatformAdapterMdc, nullptr);
-    } else if (platformType == PlatformType::LHISI_TYPE) {
-        MSVP_MAKE_SHARED0_RET(platformAdapter, PlatformAdapterLhisi, nullptr);
-    } else if (platformType == PlatformType::DC_TYPE) {
-        MSVP_MAKE_SHARED0_RET(platformAdapter, PlatformAdapterDc, nullptr);
-    } else if (platformType == PlatformType::CHIP_V4_1_0) {
-        MSVP_MAKE_SHARED0_RET(platformAdapter, PlatformAdapterCloudV2, nullptr);
-    } else if (platformType == PlatformType::CHIP_V4_2_0) {
-        MSVP_MAKE_SHARED0_RET(platformAdapter, PlatformAdapterMiniV2, nullptr);
+    const std::map<PlatformType, PlatformAdapterInterface*> ADAPTER_LIST = {
+        {PlatformType::MINI_TYPE, PlatformAdapterMini::instance()},
+        {PlatformType::CLOUD_TYPE, PlatformAdapterCloud::instance()},
+        {PlatformType::MDC_TYPE, PlatformAdapterMdc::instance()},
+        {PlatformType::LHISI_TYPE, PlatformAdapterLhisi::instance()},
+        {PlatformType::DC_TYPE, PlatformAdapterDc::instance()},
+        {PlatformType::CHIP_V4_1_0, PlatformAdapterCloudV2::instance()},
+        {PlatformType::CHIP_V4_2_0, PlatformAdapterMiniV2::instance()},
+    };
+    auto iter = ADAPTER_LIST.find(platformType);
+    if (iter == ADAPTER_LIST.end()) {
+        return PROFILING_FAILED;
     }
-    if (platformAdapter != nullptr) {
-        int ret = platformAdapter->Init(params, platformType);
-        if (ret != PROFILING_SUCCESS) {
-            platformAdapter = nullptr;
-        }
+    if (iter->second->Init(params, platformType) == PROFILING_SUCCESS) {
+        platformAdapter_ = iter->second;
+        return PROFILING_SUCCESS;
     }
-    return platformAdapter;
+    return PROFILING_FAILED;
 }
 
 int PlatformAdapter::Uninit()
 {
     return PROFILING_SUCCESS;
+}
+
+PlatformAdapterInterface* PlatformAdapter::GetAdapter() const
+{
+    return platformAdapter_;
 }
 
 }

@@ -13,10 +13,12 @@
 #include "utils/utils.h"
 #include "config/config_manager.h"
 #include "mmpa_api.h"
+#include "platform/platform_adapter.h"
 using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::common::utils;
 using namespace Collector::Dvvp::Mmpa;
 using namespace Analysis::Dvvp::Common::Config;
+using namespace Collector::Dvvp::Common::PlatformAdapter;
 class COMMON_VALIDATION_PARAM_VALIDATION_TEST: public testing::Test {
 protected:
     virtual void SetUp() {
@@ -297,6 +299,9 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckProfilingMetricsIsValid) {
 
     std::string aicoreMetrics;
     auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
+    SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params;
+    int ret = PlatformAdapter::instance()->Init(params, PlatformType::CHIP_V4_2_0);
+    EXPECT_EQ(PROFILING_SUCCESS, ret);
     EXPECT_EQ(1, entry->CheckProfilingMetricsIsValid("aic-metrics", aicoreMetrics));
     aicoreMetrics = "/$$}";
     EXPECT_EQ(0, entry->CheckProfilingMetricsIsValid("aic-metrics", aicoreMetrics));
