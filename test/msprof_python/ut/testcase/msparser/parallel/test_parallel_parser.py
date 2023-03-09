@@ -40,6 +40,7 @@ class TestClusterParallelParser(unittest.TestCase):
                 mock.patch(NAMESPACE + ".AICpuFromTsCalculator.state_to_timeline", return_value=[[3, 4]]), \
                 mock.patch(NAMESPACE + ".TsTrackViewModel.get_iter_time_data", return_value=[[5, 6]]), \
                 mock.patch(NAMESPACE + ".SectionCalculator.merge_continuous_intervals"), \
+                mock.patch(NAMESPACE + ".ParallelViewModel.get_parallel_table_name", return_value="cluster"), \
                 mock.patch(NAMESPACE + ".SectionCalculator.compute_overlap_time", side_effect=self.SIDE_EFFECT):
             check = ParallelParser(self.FILE_LIST_2, self.SAMPLE_CONFIG)
             check.ms_run()

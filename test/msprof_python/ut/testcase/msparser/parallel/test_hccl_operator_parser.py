@@ -40,6 +40,7 @@ class TestHCCLOperatiorParser(unittest.TestCase):
         hccl_data2.timestamp = 44
         with mock.patch(NAMESPACE + ".TsTrackViewModel.get_hccl_operator_exe_data",
                         return_value=[hccl_data1, hccl_data2]), \
+            mock.patch(NAMESPACE + ".ParallelViewModel.get_parallel_table_name", return_value="cluster"), \
                 mock.patch(NAMESPACE + ".GeHashViewModel.get_ge_hash_data", return_value={}):
             check = HCCLOperatiorParser(self.FILE_LIST_2, self.SAMPLE_CONFIG)
             check.ms_run()
