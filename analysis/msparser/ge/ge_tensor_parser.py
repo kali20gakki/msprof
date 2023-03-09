@@ -114,8 +114,8 @@ class GeTensorParser(DataParser, MsMultiProcess):
             timestamp = str(key.split("_")[4])
             batch_id = str(key.split("_")[5])
             self.data.append(
-                [model_id, stream_id, task_id, value['tensor_num'], value['input_format'].strip(';'),
-                 value['input_data_type'].strip(';'), "\"" + value['input_shape'].strip(';') + "\"",
-                 value['output_format'].strip(';'), value['output_data_type'].strip(';'),
-                 "\"" + value['output_shape'].strip(';') + "\"", index_id, timestamp, batch_id]
+                [model_id, stream_id, task_id, value['tensor_num'], value['input_format'],
+                 value['input_data_type'], "\"" + value['input_shape'] + "\"",
+                 value['output_format'], value['output_data_type'],
+                 "\"" + value['output_shape'] + "\"", index_id, timestamp, batch_id]
             )
