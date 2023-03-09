@@ -261,6 +261,10 @@ int ParamsAdapterGeOpt::GetParamFromInputCfg(SHARED_PTR_ALIA<ProfGeOptionsConfig
 
     GenGeOptionsContainer(geCfg);
 
+    ret = PlatformAdapterInit(params_);
+    if (ret != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
     ret = ParamsCheckGeOpt();
     if (ret == PROFILING_FAILED) {
         MSPROF_LOGE("private param check fail.");

@@ -237,6 +237,11 @@ int ParamsAdapterAclApi::GetParamFromInputCfg(const ProfConfig *apiCfg,
     }
     ProfCfgToContainer(apiCfg, argsArr);
 
+    ret = PlatformAdapterInit(params_);
+    if (ret != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
+
     ret = ParamsCheckAclApi();
     if (ret != PROFILING_SUCCESS) {
         MSPROF_LOGE("private param check fail.");

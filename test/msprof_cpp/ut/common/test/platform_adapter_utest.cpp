@@ -40,12 +40,8 @@ protected:
 TEST_F(PlatformAdapterUtest, PlatformAdapterModule)
 {
     GlobalMockObject::verify();
-    std::shared_ptr<PlatformAdapter> PlatformAdapterMgr;
-    MSVP_MAKE_SHARED0_BREAK(PlatformAdapterMgr, PlatformAdapter);
     SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params;
     MSVP_MAKE_SHARED0_VOID(params, analysis::dvvp::message::ProfileParams);
-    SHARED_PTR_ALIA<PlatformAdapterInterface> ret = PlatformAdapterMgr->Init(params, PlatformType::END_TYPE);
-    EXPECT_EQ(nullptr, ret);
     
     std::vector<PlatformType> typeList = {
         PlatformType::MINI_TYPE,
@@ -57,9 +53,8 @@ TEST_F(PlatformAdapterUtest, PlatformAdapterModule)
         PlatformType::CHIP_V4_2_0
     };
     for (auto type : typeList) {
-        ret = PlatformAdapterMgr->Init(params, type);
-        int val = ret->Init(params, type);
-        EXPECT_EQ(PROFILING_SUCCESS, val);
+        int ret = PlatformAdapter::instance()->Init(params, type);
+        EXPECT_EQ(PROFILING_SUCCESS, ret);
     }
 }
 

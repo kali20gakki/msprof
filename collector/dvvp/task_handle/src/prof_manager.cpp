@@ -8,10 +8,12 @@
 
 #include "ai_drv_dev_api.h"
 #include "config/config.h"
+#include "config/config_manager.h"
 #include "errno/error_code.h"
 #include "message/codec.h"
 #include "msprof_dlog.h"
 #include "platform/platform.h"
+#include "platform/platform_adapter.h"
 #include "prof_acl_mgr.h"
 #include "prof_params_adapter.h"
 #include "proto/profiler.pb.h"
@@ -25,7 +27,9 @@ namespace host {
 using namespace analysis::dvvp::driver;
 using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::common::config;
+using namespace Analysis::Dvvp::Common::Config;
 using namespace Analysis::Dvvp::Common::Platform;
+using namespace Collector::Dvvp::Common::PlatformAdapter;
 using namespace analysis::dvvp::common::utils;
 using namespace analysis::dvvp::common::validation;
 using namespace Analysis::Dvvp::JobWrapper;
@@ -349,6 +353,11 @@ SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> ProfManager::HandleProfi
     if (!(params->FromString(sampleConfig))) {
         MSPROF_LOGE("[ProfManager::HandleProfilingParams]Failed to parse sample config.");
         MSPROF_INNER_ERROR("EK9999", "Failed to parse sample config.");
+        return nullptr;
+    }
+    MSPROF_LOGI("init platform adapter");
+    if (PlatformAdapter::instance()->Init(params, ConfigManager::instance()->GetPlatformType()) != PROFILING_SUCCESS) {
+        MSPROF_LOGE("platform adapter init fail.");
         return nullptr;
     }
     MSPROF_LOGI("HandleProfilingParams checking params");

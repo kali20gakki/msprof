@@ -18,7 +18,8 @@ namespace Common {
 namespace PlatformAdapter {
 
 const int MAX_LLC_EVENTS = 8; // llc events list size
-class PlatformAdapterMini : public Collector::Dvvp::Common::PlatformAdapter::PlatformAdapterInterface {
+class PlatformAdapterMini : public Collector::Dvvp::Common::PlatformAdapter::PlatformAdapterInterface,
+                            public analysis::dvvp::common::singleton::Singleton<PlatformAdapterMini> {
 public:
     PlatformAdapterMini();
     ~PlatformAdapterMini() override;
