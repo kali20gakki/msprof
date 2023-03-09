@@ -12,7 +12,7 @@ from common_func.section_calculator import SectionCalculator
 from mscalculate.ts_task.ai_cpu.aicpu_from_ts import AICpuFromTsCalculator
 from msmodel.iter_rec.iter_rec_model import HwtsIterViewModel
 from msmodel.parallel.cluster_hccl_model import ClusterHCCLViewModel
-from msmodel.parallel.parallel_model import ParallelModel
+from msmodel.parallel.parallel_model import ParallelModel, ParallelViewModel
 from msmodel.step_trace.ts_track_model import TsTrackViewModel
 from msparser.interface.iparser import IParser
 from profiling_bean.prof_enum.data_tag import DataTag
@@ -34,6 +34,9 @@ class ParallelParser(IParser, MsMultiProcess):
     def ms_run(self: any) -> None:
         if not self._file_list.get(DataTag.PARALLEL_STRATEGY, []):
             return
+        with ParallelViewModel(self._project_path) as _model:
+            if _model.get_parallel_table_name() == Constant.NA:
+                return
         logging.info("Start to parse parallel index related data.")
         self.parse()
         self.save()

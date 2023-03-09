@@ -11,6 +11,7 @@ from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
 from msmodel.ge.ge_hash_model import GeHashViewModel
 from msmodel.parallel.cluster_hccl_model import ClusterHCCLModel
+from msmodel.parallel.parallel_model import ParallelViewModel
 from msmodel.step_trace.ts_track_model import TsTrackViewModel
 from msparser.interface.iparser import IParser
 from profiling_bean.prof_enum.data_tag import DataTag
@@ -28,6 +29,9 @@ class HCCLOperatiorParser(IParser, MsMultiProcess):
     def ms_run(self: any) -> None:
         if not self._file_list.get(DataTag.PARALLEL_STRATEGY, []):
             return
+        with ParallelViewModel(self._project_path) as _model:
+            if _model.get_parallel_table_name() == Constant.NA:
+                return
         logging.info("Start to parse hccl operator data from ts_track!")
         self.parse()
         self.save()
