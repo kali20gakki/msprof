@@ -167,7 +167,8 @@ class TestAiCoreOpReport(unittest.TestCase):
                     "(case when context_id=4294967295 then 0 else context_id end) " \
                     "from task_time inner join ge_summary on task_time.task_id=ge_summary.task_id and " \
                     "task_time.stream_id = ge_summary.stream_id and task_time.task_type = ge_summary.task_type " \
-                    "and ge_summary.task_type!=? and task_time.batch_id=ge_summary.batch_id and " \
+                    "and ge_summary.task_type!=? and ge_summary.task_type!=? and ge_summary.task_type!=?" \
+                    " and task_time.batch_id=ge_summary.batch_id and " \
                     "(ge_summary.context_id=task_time.subtask_id or " \
                     "(ge_summary.context_id=4294967295 and subtask_id=0)) order by start_time"
         with mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=False):

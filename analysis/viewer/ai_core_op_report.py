@@ -205,12 +205,11 @@ class AiCoreOpReport:
             return data
         if not ProfilingScene().is_operator():
             hardware_op_datas = cls._update_model_name_and_infer_id(project_path, hardware_op_datas)
-        if not data:
-            return hardware_op_datas
-
-        if len(data[0]) > len(hardware_op_datas[0]):
+        header_length = len(configs.get('headers', []))
+        na_tag = (Constant.NA,) * (header_length - len(hardware_op_datas[0]))
+        if header_length > len(hardware_op_datas[0]):
             for index, ai_cpu_data in enumerate(hardware_op_datas):
-                ai_cpu_data += (Constant.NA,) * (len(data[0]) - len(ai_cpu_data))
+                ai_cpu_data += na_tag
                 hardware_op_datas[index] = list(ai_cpu_data)
         data.extend(hardware_op_datas)
         return data
@@ -321,7 +320,11 @@ class AiCoreOpReport:
         union_sql, headers = cls._get_sql_and_headers(curs, headers)
         headers.append(cls.ADDITION_HEADER[0])
         ai_core_group_dict, headers = cls._get_aicore_data(curs, headers)
-        data = DBManager.fetch_all_data(curs, union_sql, ('{0}'.format(Constant.TASK_TYPE_AI_CPU),))
+        hardware_params = (
+            Constant.TASK_TYPE_DVPP, Constant.TASK_TYPE_DSA,
+            Constant.TASK_TYPE_AI_CPU
+        )
+        data = DBManager.fetch_all_data(curs, union_sql, hardware_params)
         if not data:
             return []
         data = cls._union_task_ge_ai_core_data(data, ai_core_group_dict)
@@ -388,7 +391,8 @@ class AiCoreOpReport:
                "(case when context_id={context_id} then 0 else context_id end) from {0} " \
                "inner join {1} on {0}.task_id={1}.task_id and {0}.stream_id = {1}.stream_id " \
                "and {0}.task_type = {1}.task_type " \
-               "and {1}.task_type!=? and {0}.batch_id={1}.batch_id " \
+               "and {1}.task_type!=? and {1}.task_type!=? and {1}.task_type!=? " \
+               "and {0}.batch_id={1}.batch_id " \
                "and ({1}.context_id={0}.subtask_id or ({1}.context_id={context_id} and subtask_id={subtask_id})) " \
                "order by start_time" \
             .format(DBNameConstant.TABLE_SUMMARY_TASK_TIME, DBNameConstant.TABLE_SUMMARY_GE,
@@ -449,7 +453,8 @@ class AiCoreOpReport:
               "and {0}.task_type = {1}.task_type " \
               "inner join {1} on {0}.task_id={1}.task_id and {0}.stream_id={1}.stream_id " \
               "and {1}.timestamp={2}.timestamp " \
-              "and {1}.task_type!=? and {0}.batch_id={1}.batch_id " \
+              "and {1}.task_type != ? and {1}.task_type != ? and {1}.task_type != ? " \
+              "and {0}.batch_id={1}.batch_id " \
               "and ({1}.context_id={0}.subtask_id or ({1}.context_id={context_id} and subtask_id={subtask_id})) " \
               "order by start_time" \
             .format(DBNameConstant.TABLE_SUMMARY_TASK_TIME,
@@ -479,7 +484,7 @@ class AiCoreOpReport:
         subtask_id = ",subtask_id " if ChipManager().is_chip_v4() else ",0"
         sql = "select {model_id} task_id, stream_id, {index_info} task_type, start_time, " \
               "duration_time/{NS_TO_US}, wait_time/{NS_TO_US} {subtask_id} from {0} where " \
-              "task_type!=? order by start_time" \
+              "task_type!=? and task_type!=? and task_type!=? order by start_time" \
             .format(DBNameConstant.TABLE_SUMMARY_TASK_TIME,
                     NS_TO_US=NumberConstant.NS_TO_US,
                     index_info=cls._get_index_id_sql_condition(),
