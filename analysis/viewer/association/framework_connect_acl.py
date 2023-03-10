@@ -53,7 +53,7 @@ class FrameworkToAcl:
                 matched_cann_mark_data = cann_mark_data_dict.get(torch_data.message).pop(0)
                 start_point_list.append(
                     {'name': 'connect', 'ph': 's', 'id': matched_cann_mark_data.start_time,
-                     'pid': f'0_{torch_data.pid}',
+                     'pid': f'0_{torch_data.pid}', 'cat': 'async_acL_npu',
                      'tid': torch_data.tid, 'ts': torch_data.start_time / DBManager.NSTOUS})
         empty_torch_num = sum(len(x) for x in cann_mark_data_dict.values())
         if empty_torch_num:
@@ -76,7 +76,8 @@ class FrameworkToAcl:
             if matched_acl_data:
                 end_point_list.append(
                     {'name': 'connect', 'ph': 'f', 'id': cann_mark_data.start_time, 'pid': matched_acl_data.get('pid'),
-                     'tid': matched_acl_data.get('tid'), 'ts': matched_acl_data.get('ts'), 'bp': 'e'})
+                     'tid': matched_acl_data.get('tid'), 'ts': matched_acl_data.get('ts'), 'cat': 'async_acL_npu',
+                     'bp': 'e'})
             else:
                 empty_acl_execute_num += 1
         if empty_acl_execute_num:
