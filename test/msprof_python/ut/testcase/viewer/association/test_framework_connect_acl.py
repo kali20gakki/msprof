@@ -61,7 +61,8 @@ class TestFrameworkToAcl(unittest.TestCase):
             check = FrameworkToAcl('test', self.JSON_DATA)
             check._load_data()
             self.assertEqual(check._get_connect_start_point(),
-                             [{'name': 'connect', 'ph': 's', 'id': 11, 'pid': '0_1', 'tid': 2, 'ts': 10 / 1000}])
+                             [{'name': 'connect', 'ph': 's', 'id': 11, 'pid': '0_1', 'tid': 2, 'cat': 'async_acL_npu',
+                               'ts': 10 / 1000}])
 
     def test_get_connect_end_point(self) -> None:
         with mock.patch(NAMESPACE + '.MsprofTxModel.check_db', return_value=True), \
@@ -72,7 +73,7 @@ class TestFrameworkToAcl(unittest.TestCase):
             check._load_data()
             self.assertEqual(check._get_connect_end_point(),
                              [{'name': 'connect', 'ph': 'f', 'id': 15, 'pid': "2_998314", 'tid': 998314, 'ts': 0.016,
-                               'bp': 'e'}])
+                               'bp': 'e', 'cat': 'async_acL_npu'}])
 
     def test_add_connect_line(self) -> None:
         with mock.patch(NAMESPACE + '.MsprofTxModel.check_db', return_value=True), \
