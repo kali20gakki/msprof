@@ -11,6 +11,8 @@ from mock_tools import ClassMock
 from msmodel.ge.ge_info_calculate_model import GeInfoModel
 from msparser.iter_rec.iter_info_updater.iter_info_manager import IterInfoManager
 
+NAMESPACE = "msparser.iter_rec.iter_info_updater.iter_info_manager"
+
 
 class TestIterInfoUpdater(unittest.TestCase):
     def test_initial_iter_to_info_1(self: any) -> None:
@@ -50,3 +52,35 @@ class TestIterInfoUpdater(unittest.TestCase):
         instance.iter_to_iter_info = {1: iter_info_bean}
 
         IterInfoManager.regist_aicore_set(instance, {}, {})
+
+    def test_check_parallel_1(self: any) -> None:
+        with mock.patch(NAMESPACE + ".DBManager.check_tables_in_db", return_value=True), \
+                mock.patch(NAMESPACE + ".TsTrackModel.get_step_trace_data", return_value=[]):
+            check = IterInfoManager("")
+            self.assertEqual(False, check.check_parallel(""))
+
+    def test_check_parallel_2(self: any) -> None:
+        step_trace_data1 = mock.Mock()
+        step_trace_data1.step_start = 1
+        step_trace_data1.step_end = 3
+        step_trace_data2 = mock.Mock()
+        step_trace_data2.step_start = 2
+        step_trace_data2.step_end = 4
+        with mock.patch(NAMESPACE + ".DBManager.check_tables_in_db", return_value=True), \
+                mock.patch(NAMESPACE + ".TsTrackModel.get_step_trace_data",
+                           return_value=[step_trace_data1, step_trace_data2]):
+            check = IterInfoManager("")
+            self.assertEqual(True, check.check_parallel(""))
+
+    def test_check_parallel_3(self: any) -> None:
+        step_trace_data1 = mock.Mock()
+        step_trace_data1.step_start = 1
+        step_trace_data1.step_end = 3
+        step_trace_data3 = mock.Mock()
+        step_trace_data3.step_start = 5
+        step_trace_data3.step_end = 9
+        with mock.patch(NAMESPACE + ".DBManager.check_tables_in_db", return_value=True), \
+                mock.patch(NAMESPACE + ".TsTrackModel.get_step_trace_data",
+                           return_value=[step_trace_data1, step_trace_data3]):
+            check = IterInfoManager("")
+            self.assertEqual(False, check.check_parallel(""))

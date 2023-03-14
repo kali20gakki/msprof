@@ -183,7 +183,7 @@ class IterRecParser(IterParser):
         :return: None
         """
         try:
-            if self._file_list and not ProfilingScene().is_operator():
+            if self._file_list.get(DataTag.HWTS, []) and not ProfilingScene().is_operator():
                 self.parse()
                 self.save()
         except ProfException as rec_error:

@@ -16,8 +16,8 @@ class IterInfoManager:
         self.project_path = project_path
         self.iter_to_iter_info = {}
         self._ts_track_model = TsTrackModel(self.project_path,
-                                DBNameConstant.DB_STEP_TRACE,
-                                [DBNameConstant.TABLE_STEP_TRACE_DATA])
+                                            DBNameConstant.DB_STEP_TRACE,
+                                            [DBNameConstant.TABLE_STEP_TRACE_DATA])
         self._ge_model = GeInfoModel(self.project_path)
 
     @classmethod
@@ -28,14 +28,18 @@ class IterInfoManager:
         if not DBManager.check_tables_in_db(PathManager.get_db_path(result_dir, DBNameConstant.DB_STEP_TRACE),
                                             DBNameConstant.TABLE_STEP_TRACE_DATA):
             return False
-        ts_track_model = TsTrackModel(
-            result_dir, DBNameConstant.DB_STEP_TRACE, [DBNameConstant.TABLE_STEP_TRACE_DATA])
 
-        with ts_track_model:
-            check_res = ts_track_model.check_parallel()
-
-        if check_res:
-            return True
+        with TsTrackModel(result_dir, DBNameConstant.DB_STEP_TRACE,
+                          [DBNameConstant.TABLE_STEP_TRACE_DATA]) as ts_track_model:
+            step_trace_data = ts_track_model.get_step_trace_data()
+        if not step_trace_data:
+            return False
+        step_trace_data = sorted(step_trace_data, key=lambda x: x.step_start)
+        last_timestamp = -1
+        for data in step_trace_data:
+            if data.step_start < last_timestamp:
+                return True
+            last_timestamp = data.step_end
         return False
 
     def initial_iter_to_info(self: any) -> None:
@@ -62,6 +66,7 @@ class IterInfoManager:
         """
         get behind parallel iter of each iter by two for loops
         """
+        is_parallel = self.check_parallel(self.project_path)
         for index, step_trace_datum in enumerate(step_trace_data):
             iter_info = self.iter_to_iter_info.setdefault(step_trace_datum.iter_id,
                                                           IterInfo(step_trace_datum.model_id,
@@ -69,6 +74,9 @@ class IterInfoManager:
                                                                    step_trace_datum.iter_id,
                                                                    step_trace_datum.step_start,
                                                                    step_trace_datum.step_end))
+            if not is_parallel:
+                iter_info.behind_parallel_iter.add(step_trace_datum.iter_id)
+                continue
             for behind_datum in step_trace_data[index:]:
                 behind_iter_info = self.iter_to_iter_info.setdefault(behind_datum.iter_id,
                                                                      IterInfo(behind_datum.model_id,
