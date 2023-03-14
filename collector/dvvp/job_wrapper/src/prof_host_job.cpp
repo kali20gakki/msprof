@@ -769,7 +769,6 @@ int ProfHostService::KillToolAndWaitHostProcess() const
             toolName_.c_str(), ret, exitCode);
         return ret;
     }
-    MSPROF_LOGI("kill done;%d", hostProcess_);
     if (hostProcess_ > 0) {
         bool isExited = false;
         ret = analysis::dvvp::common::utils::Utils::WaitProcess(hostProcess_, isExited, exitCode, true);
@@ -952,7 +951,6 @@ void ProfHostService::Run(const struct error_message::Context &errorContext)
     do {
         std::string fileName = profHostOutDir_ + std::to_string(outDataNumber_);
         long long len = analysis::dvvp::common::utils::Utils::GetFileSize(fileName);
-        MSPROF_LOGI("file %s, len %lld", fileName.c_str(), len);
         if (len > MSVP_SMALL_FILE_MAX_LEN) {
             Handler();
             MSPROF_LOGI("The file:%s data is too large, and the file is fragmented.",
