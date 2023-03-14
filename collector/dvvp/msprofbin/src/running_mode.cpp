@@ -643,6 +643,12 @@ int AppMode::StartAppTask(bool needWait)
 
 int AppMode::StartAppTaskForDynProf()
 {
+    bool dynProfLaunchMode = false;
+
+    // In attach mode, app_dir is empty, so result_dir is empty too when not set --output params.
+    if (params_->result_dir.empty()) {
+        params_->result_dir = Utils::GetCwdString() + MSVP_SLASH;
+    }
     if (!DynProfMngCli::instance()->GetAppPid()) {
         if (analysis::dvvp::app::Application::LaunchApp(params_, taskPid_) != PROFILING_SUCCESS) {
             MSPROF_LOGE("Dynamic profiling failed to launch application.");
@@ -651,14 +657,17 @@ int AppMode::StartAppTaskForDynProf()
             int pid = DynProfMngCli::instance()->TryGetRealAppPid(taskPid_);
             DynProfMngCli::instance()->SetAppPid(pid);
         }
+        dynProfLaunchMode = true;
     }
-
     if (DynProfMngCli::instance()->StartDynProfCli(params_->ToString()) != PROFILING_SUCCESS) {
         MSPROF_LOGE("Dynamic profiling start client thread fail.");
         return PROFILING_FAILED;
     }
     MSPROF_LOGI("Dynamic profiling start client success.");
     DynProfMngCli::instance()->WaitQuit();
+    if (dynProfLaunchMode) {
+        UpdateOutputDirInfo();
+    }
     return PROFILING_SUCCESS;
 }
 
