@@ -1118,31 +1118,27 @@ TEST_F(MSPROF_ACL_CORE_UTEST, MsprofInitAclJson) {
     GlobalMockObject::verify();
     using namespace Msprofiler::Api;
     std::string aclJson = "";
+    EXPECT_EQ(3, ProfAclMgr::instance()->MsprofInitAclJson((void *)aclJson.c_str(), aclJson.size()));
     MOCKER_CPP(&ProfAclMgr::CallbackInitPrecheck)
         .stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
-    MOCKER_CPP(&Collector::Dvvp::ParamsAdapter::ParamsAdapter::BlackSwitchCheck)
-        .stubs()
-        .will(returnValue(true));
     std::string result = "/tmp/MsprofInitAclJson";
     analysis::dvvp::common::utils::Utils::RemoveDir(result);
     analysis::dvvp::common::utils::Utils::CreateDir(result);
     EXPECT_EQ(0, ProfAclMgr::instance()->MsprofInitAclJson((void *)aclJson.c_str(), aclJson.size()));
-    EXPECT_EQ(3, ProfAclMgr::instance()->MsprofInitAclJson((void *)aclJson.c_str(), aclJson.size()));
-    aclJson = "{\"switch\": \"on\", \"output\": \"output\",\"aic_metrics\": \"ArithmeticUtilization\",\"aicpu\": \"on\",\"l2\": \"on\"}";
-    EXPECT_EQ(0, ProfAclMgr::instance()->MsprofInitAclJson((void *)aclJson.c_str(), aclJson.size()));
-
-    MOCKER_CPP(&Analysis::Dvvp::Common::Config::ConfigManager::GetL2cacheEvents)
+    EXPECT_EQ(MSPROF_ERROR_CONFIG_INVALID,
+              ProfAclMgr::instance()->MsprofInitAclJson((void *)aclJson.c_str(), aclJson.size()));
+    MOCKER_CPP(&ProfAclMgr::CallbackInitPrecheck)
         .stubs()
-        .will(returnValue(PROFILING_SUCCESS))
-        .then(returnValue(PROFILING_FAILED));
-    EXPECT_EQ(0, ProfAclMgr::instance()->MsprofInitAclJson((void *)aclJson.c_str(), aclJson.size()));
+        .will(returnValue(PROFILING_SUCCESS));
+    aclJson = "{\"switch\": \"off\", \"output\": \"output\",\"aic_metrics\": \"Memory\",\"aicpu\": \"on\"}";
+    EXPECT_EQ(MSPROF_ERROR_ACL_JSON_OFF,
+              ProfAclMgr::instance()->MsprofInitAclJson((void *)aclJson.c_str(), aclJson.size()));
+    aclJson = "{\"switch\": \"on\", \"output\": \"/tmp/MsprofInitAclJson\",\"aic_metrics\": \"Memory\"}";
     EXPECT_EQ(0, ProfAclMgr::instance()->MsprofInitAclJson((void *)aclJson.c_str(), aclJson.size()));
 
-    aclJson = "{\"switch\": \"on\", \"output\": \"output\",\"aic_metrics\": \"ArithmeticUtilization\",\"aicpu\": \"xx\",\"l2\": \"on\"}";
-    EXPECT_EQ(3, ProfAclMgr::instance()->MsprofInitAclJson((void *)aclJson.c_str(), aclJson.size()));
-    aclJson = "{\"switch\": \"on\", \"output\": \"output\",\"aic_metrics\": \"ArithmeticUtilization\",\"aicpu\": \"on\",\"l2\": \"off\"}";
+    aclJson = "{\"switch\": \"on\", \"output\": \"/tmp/MsprofInitAclJson\",\"aic_metrics\": \"Memory\"}";
     EXPECT_EQ(0, ProfAclMgr::instance()->MsprofInitAclJson((void *)aclJson.c_str(), aclJson.size()));
 
     analysis::dvvp::common::utils::Utils::RemoveDir(result);
@@ -1187,7 +1183,6 @@ TEST_F(MSPROF_ACL_CORE_UTEST, MsprofInitGeOptions) {
     MOCKER_CPP(&ProfAclMgr::CallbackInitPrecheck)
         .stubs()
         .will(returnValue(PROFILING_SUCCESS));
-
     struct MsprofGeOptions options;
     std::string result = "/tmp/MsprofInitGeOptions";
     analysis::dvvp::common::utils::Utils::RemoveDir(result);

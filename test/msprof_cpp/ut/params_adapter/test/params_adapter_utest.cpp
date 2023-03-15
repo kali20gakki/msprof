@@ -99,6 +99,7 @@ TEST_F(ParamsAdapterUtest, TransToParam)
     std::array<std::string, INPUT_CFG_MAX> paramContainer;
     SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params;
     MSVP_MAKE_SHARED0_VOID(params, analysis::dvvp::message::ProfileParams);
+    ParamsAdapterMgr->PlatformAdapterInit(params);
     paramContainer[INPUT_CFG_COM_TASK_TRACE] = "on";
     paramContainer[INPUT_CFG_COM_TRAINING_TRACE] = "on";
     paramContainer[INPUT_CFG_COM_HCCL] = "on";

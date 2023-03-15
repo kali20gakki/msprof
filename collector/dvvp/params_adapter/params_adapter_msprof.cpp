@@ -438,6 +438,9 @@ int ParamsAdapterMsprof::GetParamFromInputCfg(
         MSPROF_LOGE("[GetParamFromInputCfg]generate container for msprof failed.");
         return PROFILING_FAILED;
     }
+    if (PlatformAdapterInit(params_) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
     if (ParamsCheck() != PROFILING_SUCCESS) {
         MSPROF_LOGE("[GetParamFromInputCfg]msprof input param check failed.");
         return PROFILING_FAILED;

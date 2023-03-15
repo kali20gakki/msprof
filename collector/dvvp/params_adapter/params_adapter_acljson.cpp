@@ -259,6 +259,10 @@ int ParamsAdapterAclJson::GetParamFromInputCfg(SHARED_PTR_ALIA<ProfAclConfig> ac
 
     GenAclJsonContainer(aclCfg);
 
+    ret = PlatformAdapterInit(params_);
+    if (ret != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
     ret = ParamsCheckAclJson();
     if (ret == PROFILING_FAILED) {
         MSPROF_LOGE("private param check fail.");
