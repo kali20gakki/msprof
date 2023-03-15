@@ -16,7 +16,8 @@ namespace Collector {
 namespace Dvvp {
 namespace Common {
 namespace PlatformAdapter {
-class PlatformAdapterMiniV2 : public Collector::Dvvp::Common::PlatformAdapter::PlatformAdapterInterface {
+class PlatformAdapterMiniV2 : public Collector::Dvvp::Common::PlatformAdapter::PlatformAdapterInterface,
+                              public analysis::dvvp::common::singleton::Singleton<PlatformAdapterMiniV2> {
 public:
     PlatformAdapterMiniV2();
     ~PlatformAdapterMiniV2() override;

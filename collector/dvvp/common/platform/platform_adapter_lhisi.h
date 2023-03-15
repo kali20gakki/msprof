@@ -16,7 +16,8 @@ namespace Collector {
 namespace Dvvp {
 namespace Common {
 namespace PlatformAdapter {
-class PlatformAdapterLhisi : public Collector::Dvvp::Common::PlatformAdapter::PlatformAdapterInterface {
+class PlatformAdapterLhisi : public Collector::Dvvp::Common::PlatformAdapter::PlatformAdapterInterface,
+                             public analysis::dvvp::common::singleton::Singleton<PlatformAdapterLhisi> {
 public:
     PlatformAdapterLhisi();
     ~PlatformAdapterLhisi() override;

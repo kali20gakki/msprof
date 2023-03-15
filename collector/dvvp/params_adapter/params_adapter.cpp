@@ -10,7 +10,6 @@
 #include "param_validation.h"
 #include "errno/error_code.h"
 #include "platform/platform.h"
-#include "platform/platform_adapter.h"
 #include "ai_drv_dev_api.h"
 
 namespace Collector {
@@ -198,17 +197,31 @@ std::string ParamsAdapter::SetDefaultAicMetricsType() const
     return (platformType_ == PlatformType::CHIP_V4_2_0) ? PIPE_EXECUTION_UTILIZATION : PIPE_UTILIZATION;
 }
 
+int ParamsAdapter::PlatformAdapterInit(SHARED_PTR_ALIA<ProfileParams> params)
+{
+    if (params == nullptr) {
+        MSPROF_LOGE("params to init platform adapter is nullptr.");
+        return PROFILING_FAILED;
+    }
+    int ret = PlatformAdapter::instance()->Init(params, platformType_);
+    if (ret != PROFILING_SUCCESS) {
+        MSPROF_LOGE("platformadapter init fail.");
+        return PROFILING_FAILED;
+    }
+    platformAdapter_ = PlatformAdapter::instance()->GetAdapter();
+    if (platformAdapter_ == nullptr) {
+        MSPROF_LOGE("platformadapter null.");
+        return PROFILING_FAILED;
+    }
+    MSPROF_LOGI("platformadapter init done.");
+    return PROFILING_SUCCESS;
+}
+
 int ParamsAdapter::TransToParam(std::array<std::string, INPUT_CFG_MAX> paramContainer,
     SHARED_PTR_ALIA<ProfileParams> params)
 {
     if (params == nullptr) {
         MSPROF_LOGE("params to trans is nullptr.");
-        return PROFILING_FAILED;
-    }
-    auto platformAdapter = PlatformAdapter();
-    platformAdapter_  = platformAdapter.Init(params, platformType_);
-    if (platformAdapter_ == nullptr) {
-        MSPROF_LOGE("platformadapter init fail.");
         return PROFILING_FAILED;
     }
 
