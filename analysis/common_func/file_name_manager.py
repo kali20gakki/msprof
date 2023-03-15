@@ -202,6 +202,10 @@ class FileNameManagerConstant:
     # parallel
     PARALLEL_STRATEGY_FILE_PATTERN = r"^Framework\.parallel_strategy\.(\d+)\.slice_\d+"
 
+    # npu mem
+    NPU_MEM_FILE_PATTERN = r"^npu_mem\.data\.(\d+)\.slice_\d+"
+    NPU_APP_MEM_FILE_PATTERN = r"^npu_mem\.app\.(\d+)\.slice_\d+"
+
     def get_file_name_manager_class_name(self: any) -> any:
         """
         get file name manager class name
@@ -787,3 +791,12 @@ def get_msproftx_all_compiles() -> tuple:
     return (re.compile(FileNameManagerConstant.MSPROFTX_FILE_PATTERN),
             re.compile(FileNameManagerConstant.MSPROFTX_TORCH_FILE_PATTERN),
             re.compile(FileNameManagerConstant.MSPROFTX_CANN_FILE_PATTERN))
+
+
+def get_npu_mem_compiles() -> tuple:
+    """
+    get npu mem files regex compiles
+    :return: npu mem files regex
+    """
+    return (re.compile(FileNameManagerConstant.NPU_MEM_FILE_PATTERN),
+            re.compile(FileNameManagerConstant.NPU_APP_MEM_FILE_PATTERN))

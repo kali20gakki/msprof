@@ -107,6 +107,10 @@ class StructFmt:
     FLOW_FMT = "HHTTTTTTQH"
     CYCLES_FMT = "ttttttttttH"
 
+    # npu mem
+    NPU_MEM_FMT = "IIQQQ"
+    NPU_MEM_DATA_SIZE = 32
+
     @staticmethod
     def class_name() -> str:
         """

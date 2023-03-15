@@ -63,6 +63,7 @@ class DBNameConstant(metaclass=ABCMeta):
     DB_CLUSTER_HCCL = "cluster_hccl.db"
     DB_PARALLEL = "parallel.db"
     DB_CLUSTER_PARALLEL = "cluster_parallel.db"
+    DB_NPU_MEM = "npu_mem.db"
 
     # DB tables
     TABLE_ACL_DATA = "acl_data"
@@ -229,6 +230,10 @@ class DBNameConstant(metaclass=ABCMeta):
     TABLE_CLUSTER_PIPELINE_PARALLEL = "ClusterPipelineParallel"
     TABLE_CLUSTER_PARALLEL_STRATEGY = "ClusterParallelStrategy"
     TABLE_HOST_QUEUE = "HostQueue"
+
+    # npu mem of process and device
+    TABLE_NPU_MEM = "NpuMem"
+
 
 
     @abstractmethod

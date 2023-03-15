@@ -88,6 +88,14 @@ class SystemDataCheckManager(DataCheckManager):
                                                                                 device_id=device_id)
 
     @classmethod
+    def contain_npu_mem_data(cls: any, result_dir: str, device_id: any = None) -> bool:
+        """
+        The data path contain npu mem data or not
+        """
+        return cls.check_data_exist(result_dir, file_name_manager.get_npu_mem_compiles(),
+                                    device_id=device_id)
+
+    @classmethod
     def contain_pcie_data(cls: any, result_dir: str, device_id: any = None) -> bool:
         """
         The data path contain pcie data or not
