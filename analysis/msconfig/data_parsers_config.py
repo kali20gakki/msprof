@@ -184,5 +184,9 @@ class DataParsersConfig(MetaConfig):
             ('path', 'msparser.parallel.parallel_parser'),
             ('chip_model', '1,2,3,4,5'),
             ('level', '4')
+        ],
+        'NpuMemParser': [
+            ('path', 'msparser.npu_mem.npu_mem_parser'),
+            ('chip_model', '0,1,3,4,5,7')
         ]
     }

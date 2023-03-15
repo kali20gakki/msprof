@@ -293,5 +293,11 @@ class MsProfExportDataConfig(MetaConfig):
         ],
         'instr': [
             ('handler', '_get_biu_perf_timeline')
+        ],
+        'npu_mem': [
+            ('handler', '_get_npu_mem_data'),
+            ('headers', 'event,ddr(KB),hbm(KB),memory(KB),timestamp(us)'),
+            ('db', 'npu_mem.db'),
+            ('table', 'NpuMem')
         ]
     }

@@ -66,4 +66,5 @@ class ExportDataType(Enum):
     INSTR = 52
     ACC_PMU = 53
     PYTORCH_OPERATOR_VIEW = 54
+    NPU_MEM = 55
     MSPROF = 100

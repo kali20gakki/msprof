@@ -54,6 +54,7 @@ from common_func.file_name_manager import get_sys_mem_compiles
 from common_func.file_name_manager import get_ts_cpu_compiles
 from common_func.file_name_manager import get_ts_track_aiv_compiles
 from common_func.file_name_manager import get_ts_track_compiles
+from common_func.file_name_manager import get_npu_mem_compiles
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.path_manager import PathManager
 from framework.prof_factory_maker import ProfFactoryMaker
@@ -114,7 +115,8 @@ class FileDispatch:
         DataTag.HOST_QUEUE: get_host_queue_compiles(),
         DataTag.PARALLEL_STRATEGY: get_parallel_strategy_compiles(),
         DataTag.MSPROFTX_TORCH: get_msproftx_torch_compiles(),
-        DataTag.MSPROFTX_CANN: get_msproftx_cann_compiles()
+        DataTag.MSPROFTX_CANN: get_msproftx_cann_compiles(),
+        DataTag.NPU_MEM: get_npu_mem_compiles()
     }
 
     def __init__(self: any, sample_config: dict) -> None:
