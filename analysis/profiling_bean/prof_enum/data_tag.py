@@ -61,6 +61,7 @@ class DataTag(Enum):
     PARALLEL_STRATEGY = 47
     MSPROFTX_TORCH = 48
     MSPROFTX_CANN = 49
+    NPU_MEM = 50
 
 
 @unique

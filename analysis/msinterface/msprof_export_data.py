@@ -74,6 +74,7 @@ from viewer.training.core_cpu_reduce_viewer import CoreCpuReduceViewer
 from viewer.training.step_trace_viewer import StepTraceViewer
 from viewer.training.task_op_viewer import TaskOpViewer
 from viewer.ts_cpu_report import TsCpuReport
+from viewer.npu_mem.npu_mem_viewer import NpuMemViewer
 
 
 class MsProfExportDataUtils:
@@ -612,6 +613,12 @@ class MsProfExportDataUtils:
     @staticmethod
     def _get_acc_pmu(configs: dict, params: dict) -> any:
         return AccPmuViewer(configs, params).get_timeline_data()
+
+    @staticmethod
+    def _get_npu_mem_data(configs: dict, params: dict) -> any:
+        if params.get(StrConstant.PARAM_EXPORT_TYPE) == MsProfCommonConstant.TIMELINE:
+            return NpuMemViewer(configs, params).get_timeline_data()
+        return NpuMemViewer(configs, params).get_summary_data()
 
     @classmethod
     def export_data(cls: any, params: dict) -> str:

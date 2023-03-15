@@ -966,5 +966,12 @@ class TablesConfig(MetaConfig):
             ('parallelType', 'TEXT,null'),
             ('stageDevices', 'TEXT,null'),
             ('parallel_mode', 'TEXT,null')
+        ],
+        'NpuMemMap': [
+            ('event', 'TEXT,null'),
+            ('ddr', 'INTEGER,null'),
+            ('hbm', 'INTEGER,null'),
+            ('timestamp', 'INTEGER,null'),
+            ('memory', 'INTEGER,null')
         ]
     }
