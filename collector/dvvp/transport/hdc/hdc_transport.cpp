@@ -62,14 +62,10 @@ int HDCTransport::RecvPacket(TLV_REQ_2PTR packet)
 
     *packet = (TLV_REQ_PTR)buffer;
 
-    const int containerNoSupportProfiling = 0x544E4F43; // receive "MESSAGE_CONTAINER_NO_SUPPORT" : len = 0x544E4F43
-    if ((*packet)->len == containerNoSupportProfiling) {
-        std::string receiveBuffer(static_cast<CONST_CHAR_PTR>(buffer), CONTAINTER_NO_SUPPORT_MESSAGE.size());
-        if (CONTAINTER_NO_SUPPORT_MESSAGE.compare(receiveBuffer) == 0) {
+    if ((*packet)->len == CONTAINER_NO_SUPPORT_MESSAGE.size()) {
+        std::string rcvBuffer((*packet)->value, CONTAINER_NO_SUPPORT_MESSAGE.size());
+        if (rcvBuffer.compare(CONTAINER_NO_SUPPORT_MESSAGE) == 0) {
             return PROFILING_NOTSUPPORT;
-        } else {
-            MSPROF_LOGE("hdc read TLV data is invalid : dataLen=%d", containerNoSupportProfiling);
-            return PROFILING_FAILED;
         }
     }
     return bufLen;
