@@ -589,11 +589,11 @@ TEST_F(DYN_PROF_CLIENT_UTEST, SendMsgToServer)
     int ret = dynProfCli->SendMsgToServer(DynProfMsgType::START_REQ, DynProfMsgType::START_RSP, invalidParams, tips);
     EXPECT_EQ(PROFILING_FAILED, ret);
     
-    MOCKER(write)
+    MOCKER(send)
         .stubs()
         .will(returnValue(-1))
         .then(returnValue(sizeof(DynProfReqMsg)));
-    MOCKER(read)
+    MOCKER(recv)
         .stubs()
         .will(returnValue(-1))
         .then(returnValue(sizeof(DynProfRspMsg)));

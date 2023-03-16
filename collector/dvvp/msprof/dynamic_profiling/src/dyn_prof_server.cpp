@@ -160,16 +160,16 @@ void DyncProfMsgProcSrv::DynProfServerProcMsg()
     uint32_t recvMsgNum = 0;
     while (srvStarted_) {
         disconnTips = "Internal error.";
-        ssize_t readLen = read(cliSockFd_, &recvMsg, sizeof(recvMsg));
-        if (static_cast<size_t>(readLen) != sizeof(recvMsg) && errno == EAGAIN) {
+        ssize_t recvLen = recv(cliSockFd_, &recvMsg, sizeof(recvMsg), 0);
+        if (static_cast<size_t>(recvLen) != sizeof(recvMsg) && errno == EAGAIN) {
             if (IdleConnectOverTime(recvIdleTimes)) {
                 MSPROF_LOGW("Dynamic profiling disconnet client, recvIdleTimes=%u.", recvIdleTimes);
                 disconnTips = "Idle link too long time.";
                 break;
             }
             continue;
-        } else if (static_cast<size_t>(readLen) != sizeof(recvMsg)) {
-            MSPROF_LOGE("Dynamic profiling process message read fail, readLen=%d errno=%u.", readLen, errno);
+        } else if (static_cast<size_t>(recvLen) != sizeof(recvMsg)) {
+            MSPROF_LOGE("Dynamic profiling process message recv fail, recvLen=%d errno=%u.", recvLen, errno);
             break;
         }
         if (recvMsg.msgDataLen >= DYN_PROF_REQ_MSG_MAX_LEN) {
@@ -309,11 +309,10 @@ int DyncProfMsgProcSrv::DynProfServerRsqMsg(DynProfMsgType msgType, DynProfMsgPr
         MSPROF_LOGE("Dynamic profiling server copy rsqMsg failed, err: %d, rsqMsg: %s", err, msgData.c_str());
         return PROFILING_FAILED;
     }
-
-    ssize_t writeLen = write(cliSockFd_, &rsqMsg, sizeof(rsqMsg));
-    if (static_cast<size_t>(writeLen) != sizeof(rsqMsg)) {
-        MSPROF_LOGW("Dynamic profiling response message fail, msgType=%u statusCode=%d writeLen=%d errno=%u.",
-            msgType, rsqCode, writeLen, errno);
+    ssize_t sendLen = send(cliSockFd_, &rsqMsg, sizeof(rsqMsg), MSG_NOSIGNAL);
+    if (static_cast<size_t>(sendLen) != sizeof(rsqMsg)) {
+        MSPROF_LOGW("Dynamic profiling response message fail, msgType=%u statusCode=%d sendLen=%d errno=%u.",
+            msgType, rsqCode, sendLen, errno);
         return PROFILING_FAILED;
     }
     return PROFILING_SUCCESS;
