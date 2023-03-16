@@ -272,17 +272,16 @@ int DyncProfMsgProcCli::SendMsgToServer(DynProfMsgType reqMsgtype, DynProfMsgTyp
         MSPROF_LOGE("Dynamic profiling client copy reqMsg failed, err: %d, reqMsg: %s", err, reqMsgParams.c_str());
         return PROFILING_FAILED;
     }
-    ssize_t sendLen = write(cliSockFd_, reinterpret_cast<VOID_PTR>(&reqMsg), sizeof(reqMsg));
+    ssize_t sendLen = send(cliSockFd_, reinterpret_cast<VOID_PTR>(&reqMsg), sizeof(reqMsg), MSG_NOSIGNAL);
     if (static_cast<size_t>(sendLen) != sizeof(reqMsg)) {
-        MSPROF_LOGE("cliSockFd_=%d write msg fail, sendLen=%d, errno=%u", cliSockFd_, sendLen, errno);
+        MSPROF_LOGE("cliSockFd_=%d send msg fail, sendLen=%d, errno=%u", cliSockFd_, sendLen, errno);
         return PROFILING_FAILED;
     }
-
     // receive message
     DynProfRspMsg rspMsg;
-    ssize_t recvLen = read(cliSockFd_, reinterpret_cast<VOID_PTR>(&rspMsg), sizeof(rspMsg));
+    ssize_t recvLen = recv(cliSockFd_, reinterpret_cast<VOID_PTR>(&rspMsg), sizeof(rspMsg), 0);
     if (static_cast<size_t>(recvLen) != sizeof(rspMsg)) {
-        MSPROF_LOGE("cliSockFd_=%d read msg fail, recvLen=%d, errno=%u", cliSockFd_, recvLen, errno);
+        MSPROF_LOGE("cliSockFd_=%d recv msg fail, recvLen=%d, errno=%u", cliSockFd_, recvLen, errno);
         return PROFILING_FAILED;
     }
     if (rspMsg.msgType != rspMsgtype ||
