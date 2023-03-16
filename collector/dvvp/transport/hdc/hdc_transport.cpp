@@ -62,7 +62,7 @@ int HDCTransport::RecvPacket(TLV_REQ_2PTR packet)
 
     *packet = (TLV_REQ_PTR)buffer;
 
-    if ((*packet)->len == CONTAINER_NO_SUPPORT_MESSAGE.size()) {
+    if ((*packet)->len == static_cast<int>(CONTAINER_NO_SUPPORT_MESSAGE.size())) {
         std::string rcvBuffer((*packet)->value, CONTAINER_NO_SUPPORT_MESSAGE.size());
         if (rcvBuffer.compare(CONTAINER_NO_SUPPORT_MESSAGE) == 0) {
             return PROFILING_NOTSUPPORT;
