@@ -555,6 +555,11 @@ TEST_F(RUNNING_MODE_UTEST, StartAppTaskForDynProf)
         .stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
+    MOCKER(&Collector::Dvvp::Msprofbin::RunningMode::WaitRunningProcess)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED))
+        .then(returnValue(PROFILING_SUCCESS));
+    EXPECT_EQ(PROFILING_FAILED, rMode.StartAppTaskForDynProf());
     EXPECT_EQ(PROFILING_FAILED, rMode.StartAppTaskForDynProf());
     EXPECT_EQ(PROFILING_FAILED, rMode.StartAppTaskForDynProf());
     EXPECT_EQ(PROFILING_SUCCESS, rMode.StartAppTaskForDynProf());
