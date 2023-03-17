@@ -244,7 +244,7 @@ void DyncProfMsgProcSrv::DynProfSrvProcStart()
         startSuccDevId += std::to_string(devInfo.deviceId) + " ";
     }
     std::string detailInfo = "Started device Id: " + startSuccDevId;
-    if (startDevId != startSuccDevId) {
+    if (startDevId != startSuccDevId || startDevId.empty()) {
         MSPROF_LOGE("Dynamic profiling start device failed, allDevId=%s, succDevId=%s.",
             startDevId.c_str(), startSuccDevId.c_str());
         DynProfServerRsqMsg(DynProfMsgType::START_RSP, DynProfMsgProcRes::EXE_FAIL, detailInfo);
