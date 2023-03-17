@@ -668,6 +668,12 @@ int AppMode::StartAppTaskForDynProf()
     if (dynProfLaunchMode) {
         UpdateOutputDirInfo();
     }
+    int ret = WaitRunningProcess("App");
+    if (ret != PROFILING_SUCCESS) {
+        MSPROF_LOGE("Dynamic profiling wait process %d failed, ret=%d", taskPid_, ret);
+        return PROFILING_FAILED;
+    }
+    taskPid_ = MSVP_MMPROCESS;
     return PROFILING_SUCCESS;
 }
 
