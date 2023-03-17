@@ -14,6 +14,7 @@ from common_func.msvp_common import create_json
 from common_func.path_manager import PathManager
 from msmodel.cluster_info.cluster_info_model import ClusterInfoViewModel
 from msmodel.step_trace.cluster_step_trace_model import ClusterStepTraceViewModel
+from profiling_bean.db_dto.cluster_rank_dto import ClusterRankDto
 
 
 class MsProfClusterInfo:
@@ -23,6 +24,7 @@ class MsProfClusterInfo:
     OUTPUT_FILE_NAME = "cluster_info.json"
     OUTPUT_CLUSTER_INFO_HEADERS = ["Rank Id", "Device Id", "Prof Dir", "Device Dir", "Models"]
     OUTPUT_MODELS_HEADERS = ["Model Id", "Iterations"]
+    SINGLE_OP_MODE = ['N/A', 'N/A']
 
     def __init__(self: any, project_path: str) -> None:
         self.project_path = os.path.realpath(project_path)
@@ -57,21 +59,31 @@ class MsProfClusterInfo:
             return
         with self.cluster_step_trace_model as model:
             for cluster_info in cluster_infos:
-                rank_id = cluster_info.device_id if cluster_info.rank_id == Constant.NA else cluster_info.rank_id
-                step_trace_table = DBNameConstant.TABLE_CLUSTER_STEP_TRACE.format(rank_id)
-                if not model.judge_table_exist(step_trace_table):
-                    continue
-                sql_for_total_iterations = "select model_id, max(iteration_id) " \
-                                           "from {} group by model_id".format(step_trace_table)
-                iteration_data = model.get_sql_data(sql_for_total_iterations)
-                if not iteration_data:
-                    continue
-                model_list = []
-                for each in iteration_data:
-                    model_list.append(OrderedDict(list(zip(MsProfClusterInfo.OUTPUT_MODELS_HEADERS, each))))
-                prof_dir, device_dir = cluster_info.dir_name.split(os.sep)
-                self.info_collection.append([rank_id,
-                                             cluster_info.device_id,
-                                             prof_dir,
-                                             device_dir,
-                                             model_list])
+                self._collect_info_for_each_rank(cluster_info, model)
+
+    def _collect_info_for_each_rank(self: any, cluster_info: ClusterRankDto, model: ClusterStepTraceViewModel):
+        rank_id = cluster_info.device_id if cluster_info.rank_id == Constant.NA else cluster_info.rank_id
+        step_trace_table = DBNameConstant.TABLE_CLUSTER_STEP_TRACE.format(rank_id)
+        prof_dir, device_dir = cluster_info.dir_name.split(os.sep)
+        model_list = []
+        if model.judge_table_exist(step_trace_table):
+            sql_for_total_iterations = "select model_id, max(iteration_id) " \
+                                       "from {} group by model_id".format(step_trace_table)
+            iteration_data = model.get_sql_data(sql_for_total_iterations)
+            if not iteration_data:
+                return
+            for each in iteration_data:
+                model_list.append(OrderedDict(list(zip(MsProfClusterInfo.OUTPUT_MODELS_HEADERS, each))))
+            self.info_collection.append([rank_id,
+                                         cluster_info.device_id,
+                                         prof_dir,
+                                         device_dir,
+                                         model_list])
+        else:
+            model_list.append(OrderedDict(list(
+                zip(MsProfClusterInfo.OUTPUT_MODELS_HEADERS, MsProfClusterInfo.SINGLE_OP_MODE))))
+            self.info_collection.append([rank_id,
+                                         cluster_info.device_id,
+                                         prof_dir,
+                                         device_dir,
+                                         model_list])
