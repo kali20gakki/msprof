@@ -36,8 +36,7 @@ class MsprofInfoConstruct:
         from common_func.db_name_constant import DBNameConstant
         from common_func.path_manager import PathManager
         path = os.path.realpath(path)
-        return os.path.exists(PathManager.get_db_path(path, DBNameConstant.DB_CLUSTER_RANK)) \
-               and os.path.exists(PathManager.get_db_path(path, DBNameConstant.DB_CLUSTER_STEP_TRACE))
+        return os.path.exists(PathManager.get_db_path(path, DBNameConstant.DB_CLUSTER_RANK))
 
     def load_basic_info_model(self: any, args: any) -> None:
         """
