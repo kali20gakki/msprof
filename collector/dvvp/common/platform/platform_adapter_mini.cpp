@@ -45,7 +45,6 @@ int PlatformAdapterMini::Init(SHARED_PTR_ALIA<analysis::dvvp::message::ProfilePa
     aicRunningFreq_ = "680";
     sysCountFreq_ = "19.2";
     platformType_ = platformType;
-    MSPROF_LOGI("mini");
     return PROFILING_SUCCESS;
 }
 

@@ -89,6 +89,14 @@ TEST_F(PARAMS_ADAPTER_TEST, HandleSystemTraceConf) {
     EXPECT_EQ(PROFILING_SUCCESS, paramsAdapter->HandleSystemTraceConf(buffer, params));
 }
 
+TEST_F(PARAMS_ADAPTER_TEST, Init)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<Analysis::Dvvp::Host::Adapter::ProfParamsAdapter> paramsAdapter(
+        new Analysis::Dvvp::Host::Adapter::ProfParamsAdapter);
+    EXPECT_EQ(PROFILING_SUCCESS, paramsAdapter->Init());
+}
+
 TEST_F(PARAMS_ADAPTER_TEST, HandleTaskTraceConf) {
     GlobalMockObject::verify();
     std::shared_ptr<Analysis::Dvvp::Host::Adapter::ProfParamsAdapter> paramsAdapter(

@@ -112,7 +112,7 @@ int ProfParamsAdapter::HandleTaskTraceConf(const std::string &conf,
     if (ConfigManager::instance()->GetPlatformType() == PlatformType::CHIP_V4_1_0 &&
         aicoreMetrics == PIPE_UTILIZATION) {
         aicoreMetrics = PIPE_UTILIZATION_EXCT;
-        aicoreEvents = "0x49,0x4a,0x9,0x302,0xc,0x303,0x54,0x55";
+        aicoreEvents = "0x416,0x417,0x9,0x302,0xc,0x303,0x54,0x55";
     } else {
         ConfigManager::instance()->GetAicoreEvents(aicoreMetrics, aicoreEvents);
     }

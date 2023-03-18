@@ -177,6 +177,9 @@ bool ParamValidation::CheckProfilingMetricsIsValid(const std::string &metricsNam
             continue;
         }
     }
+    if (ConfigManager::instance()->GetPlatformType() == PlatformType::CHIP_V4_1_0) {
+        metricsWhiteList.push_back(PIPE_UTILIZATION_EXCT);
+    }
 
     for (size_t j = 0; j < metricsWhiteList.size(); j++) {
         if (metricsVal.compare(metricsWhiteList[j]) == 0) {
