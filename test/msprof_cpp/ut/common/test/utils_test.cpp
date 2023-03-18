@@ -25,11 +25,13 @@
 #include "utils/utils.h"
 #include "stub/common-utils-stub.h"
 #include "config/config.h"
+#include "config/config_manager.h"
 #include <sys/file.h>
 #include "mmpa_api.h"
 #include "errno/error_code.h"
 
 using namespace analysis::dvvp::common::utils;
+using namespace analysis::dvvp::common::config;
 using namespace analysis::dvvp::common::error;
 using namespace Collector::Dvvp::Mmpa;
 
@@ -1317,4 +1319,64 @@ TEST_F(COMMON_UTILS_UTILS_TEST, UnFileLock1) {
         .will(returnValue(1)); //failed
 
     EXPECT_EQ(PROFILING_FAILED, analysis::dvvp::common::utils::UnFileLock(file));
+}
+
+TEST_F(COMMON_UTILS_UTILS_TEST, GetTime)
+{
+    GlobalMockObject::verify();
+    unsigned long long time = 0;
+    unsigned long long mono = 0;
+    unsigned long long cnt = 0;
+    analysis::dvvp::common::utils::Utils::GetTime(time, mono, cnt);
+}
+
+TEST_F(COMMON_UTILS_UTILS_TEST, GetVolumeSize)
+{
+    GlobalMockObject::verify();
+    std::string path = "/tmp";
+    unsigned long long size = 0;
+    VolumeSize type = VolumeSize::AVAIL_SIZE;
+    analysis::dvvp::common::utils::Utils::GetVolumeSize(path, size, type);
+    type = VolumeSize::FREE_SIZE;
+    analysis::dvvp::common::utils::Utils::GetVolumeSize(path, size, type);
+    type = VolumeSize::TOTAL_SIZE;
+    analysis::dvvp::common::utils::Utils::GetVolumeSize(path, size, type);
+}
+
+TEST_F(COMMON_UTILS_UTILS_TEST, IsDynProfMode)
+{
+    GlobalMockObject::verify();
+    MOCKER_CPP(&Analysis::Dvvp::Common::Config::ConfigManager::GetPlatformType)
+        .stubs()
+        .will(returnValue(Analysis::Dvvp::Common::Config::PlatformType::MINI_TYPE))
+        .then(returnValue(Analysis::Dvvp::Common::Config::PlatformType::CLOUD_TYPE));
+    EXPECT_EQ(false, analysis::dvvp::common::utils::Utils::IsDynProfMode());
+    std::string dynamic = "dynamic";
+    std::string invalid = "";
+    MOCKER_CPP(&Utils::GetEnvString)
+        .stubs()
+        .will(returnValue(dynamic))
+        .then(returnValue(invalid));
+    EXPECT_EQ(true, analysis::dvvp::common::utils::Utils::IsDynProfMode());
+    EXPECT_EQ(false, analysis::dvvp::common::utils::Utils::IsDynProfMode());
+}
+
+TEST_F(COMMON_UTILS_UTILS_TEST, IsDeviceMapping)
+{
+    GlobalMockObject::verify();
+    analysis::dvvp::common::utils::Utils::IsDeviceMapping();
+}
+
+TEST_F(COMMON_UTILS_UTILS_TEST, ProfFree)
+{
+    GlobalMockObject::verify();
+    VOID_PTR test = nullptr;
+    analysis::dvvp::common::utils::Utils::ProfFree(test);
+}
+
+TEST_F(COMMON_UTILS_UTILS_TEST, CheckStringIsNonNegativeIntNum)
+{
+    GlobalMockObject::verify();
+    std::string num1 = "";
+    analysis::dvvp::common::utils::Utils::CheckStringIsNonNegativeIntNum(num1);
 }
