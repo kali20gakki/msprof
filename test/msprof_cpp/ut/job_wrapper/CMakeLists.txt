@@ -182,6 +182,7 @@ target_include_directories(job_wrapper_utest PRIVATE
     ${MSPROF_SOURCE_DIR}/dvvp/common/config
     ${MSPROF_SOURCE_DIR}/dvvp/message
     ${MSPROF_SOURCE_DIR}/dvvp/transport
+    ${MSPROF_SOURCE_DIR}/dvvp/transport/hdc
     ${MSPROF_SOURCE_DIR}/dvvp/common/memory/
     ${MSPROF_SOURCE_DIR}/dvvp/streamio/client/include
     ${MSPROF_SOURCE_DIR}/dvvp/streamio/common/include

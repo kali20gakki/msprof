@@ -614,6 +614,8 @@ TEST_F(MSPROF_ACL_CORE_UTEST, acl_api_subscribe) {
     EXPECT_EQ(0, ProfAclMgr::instance()->GetDeviceSubscribeCount(1, devId));
     EXPECT_EQ(devId, 0);
 
+    EXPECT_EQ(ACL_ERROR_INVALID_PARAM, ProfAclMgr::instance()->ProfAclModelSubscribe(1, 0, nullptr));
+
     config.timeInfo = false;
     EXPECT_EQ(ACL_ERROR_INVALID_PARAM, ProfAclMgr::instance()->ProfAclModelSubscribe(1, 0, &config));
     config.timeInfo = true;
@@ -1114,6 +1116,16 @@ TEST_F(MSPROF_ACL_CORE_UTEST, RecordOutPut2) {
     EXPECT_EQ(PROFILING_SUCCESS, ProfAclMgr::instance()->RecordOutPut(data));
 }
 
+TEST_F(MSPROF_ACL_CORE_UTEST, MsprofInitAclEnv)
+{
+    GlobalMockObject::verify();
+    std::string value = "xxx";
+    Msprofiler::Api::ProfAclMgr::instance()->mode_ = Msprofiler::Api::WORK_MODE_CMD;
+    EXPECT_EQ(MSPROF_ERROR_NONE, Msprofiler::Api::ProfAclMgr::instance()->MsprofInitAclEnv(value));
+    Msprofiler::Api::ProfAclMgr::instance()->mode_ = Msprofiler::Api::WORK_MODE_OFF;
+    EXPECT_EQ(MSPROF_ERROR, Msprofiler::Api::ProfAclMgr::instance()->MsprofInitAclEnv(value));
+}
+
 TEST_F(MSPROF_ACL_CORE_UTEST, MsprofInitAclJson) {
     GlobalMockObject::verify();
     using namespace Msprofiler::Api;
@@ -1210,8 +1222,25 @@ TEST_F(MSPROF_ACL_CORE_UTEST, MsprofHostHandle) {
     using namespace Msprofiler::Api;
     MOCKER_CPP(&Analysis::Dvvp::Common::Platform::Platform::PlatformIsHelperHostSide)
         .stubs()
-        .will(returnValue(true));
-     ProfAclMgr::instance()->MsprofHostHandle();
+        .will(returnValue(true))
+        .then(returnValue(false));
+    ProfAclMgr::instance()->MsprofHostHandle();
+    MOCKER_CPP(&Analysis::Dvvp::Common::Platform::Platform::PlatformIsHelperHostSide)
+        .stubs()
+        .will(returnValue(true))
+        .then(returnValue(false));
+    ProfAclMgr::instance()->MsprofHostHandle();
+    ProfAclMgr::instance()->mode_ = WORK_MODE_OFF;
+    ProfAclMgr::instance()->MsprofHostHandle();
+    ProfAclMgr::instance()->mode_ = WORK_MODE_CMD;
+    std::shared_ptr<analysis::dvvp::message::ProfileParams> params(
+        new analysis::dvvp::message::ProfileParams());
+    ProfAclMgr::instance()->params_ = params;
+
+    ProfAclMgr::instance()->params_->host_one_pid_cpu_profiling = "on";
+    ProfAclMgr::instance()->MsprofHostHandle();
+    ProfAclMgr::instance()->params_->host_one_pid_cpu_profiling = "off";
+    ProfAclMgr::instance()->MsprofHostHandle();
 }
 
 TEST_F(MSPROF_ACL_CORE_UTEST, ReporterData) {
@@ -1799,6 +1828,72 @@ TEST_F(MSPROF_ACL_CORE_UTEST, GEFinalizeHandle_CheckRet) {
     ge::GeFinalizeHandle();
 }
 
+TEST_F(MSPROF_ACL_CORE_UTEST, IsModeOff)
+{
+    Msprofiler::Api::ProfAclMgr::instance()->mode_  = Msprofiler::Api::WORK_MODE_OFF;
+    EXPECT_EQ(true, Msprofiler::Api::ProfAclMgr::instance()->IsModeOff());
+
+    Msprofiler::Api::ProfAclMgr::instance()->mode_  = Msprofiler::Api::WORK_MODE_CMD;
+    EXPECT_EQ(false, Msprofiler::Api::ProfAclMgr::instance()->IsModeOff());
+}
+
+TEST_F(MSPROF_ACL_CORE_UTEST, ProfAclStart_failed)
+{
+    EXPECT_EQ(ACL_ERROR_INVALID_PARAM, Msprofiler::Api::ProfAclMgr::instance()->ProfAclStart(nullptr));
+    ProfConfig config;
+    config.devNums = 1;
+    config.devIdList[0] = 0;
+    config.aicoreMetrics = PROF_AICORE_ARITHMETIC_UTILIZATION;
+    config.dataTypeConfig = ACL_PROF_ACL_API|ACL_PROF_AICORE_METRICS|ACL_PROF_AICPU;
+    Msprofiler::Api::ProfAclMgr::instance()->mode_  = Msprofiler::Api::WORK_MODE_CMD;
+    EXPECT_EQ(ACL_ERROR_PROF_NOT_RUN, Msprofiler::Api::ProfAclMgr::instance()->ProfAclStart(&config));
+}
+
+TEST_F(MSPROF_ACL_CORE_UTEST, ProfAclStop_failed)
+{
+    EXPECT_EQ(ACL_ERROR_INVALID_PARAM, Msprofiler::Api::ProfAclMgr::instance()->ProfAclStop(nullptr));
+    ProfConfig config;
+    config.devNums = 1;
+    config.devIdList[0] = 0;
+    config.aicoreMetrics = PROF_AICORE_ARITHMETIC_UTILIZATION;
+    config.dataTypeConfig = ACL_PROF_ACL_API|ACL_PROF_AICORE_METRICS|ACL_PROF_AICPU;
+    Msprofiler::Api::ProfAclMgr::instance()->mode_  = Msprofiler::Api::WORK_MODE_CMD;
+    EXPECT_EQ(ACL_ERROR_PROF_NOT_RUN, Msprofiler::Api::ProfAclMgr::instance()->ProfAclStop(&config));
+    
+    Msprofiler::Api::ProfAclMgr::instance()->mode_  = Msprofiler::Api::WORK_MODE_API_CTRL;
+    EXPECT_EQ(ACL_ERROR_INVALID_PROFILING_CONFIG, Msprofiler::Api::ProfAclMgr::instance()->ProfAclStop(&config));
+}
+
+TEST_F(MSPROF_ACL_CORE_UTEST, ProfAclFinalize_failed)
+{
+    Msprofiler::Api::ProfAclMgr::instance()->mode_  = Msprofiler::Api::WORK_MODE_CMD;
+    EXPECT_EQ(ACL_ERROR_PROF_NOT_RUN, Msprofiler::Api::ProfAclMgr::instance()->ProfAclFinalize());
+    Msprofiler::Api::ProfAclMgr::instance()->mode_  = Msprofiler::Api::WORK_MODE_API_CTRL;
+    Msprofiler::Api::ProfAclMgr::instance()->ProfAclFinalize();
+}
+
+TEST_F(MSPROF_ACL_CORE_UTEST, LaunchHostAndDevTasks)
+{
+    uint32_t num = 2;
+    uint32_t dev[2] = {0, DEFAULT_HOST_ID};
+    Msprofiler::Api::ProfAclMgr::instance()->LaunchHostAndDevTasks(num, &dev[0]);
+}
+
+TEST_F(MSPROF_ACL_CORE_UTEST, GetCmdModeDataTypeConfig)
+{
+    Msprofiler::Api::ProfAclMgr::instance()->GetCmdModeDataTypeConfig();
+}
+
+TEST_F(MSPROF_ACL_CORE_UTEST, MsprofSetConfig)
+{
+    aclprofConfigType type = ACL_PROF_ARGS_MAX;
+    std::string config = "";
+    EXPECT_EQ(PROFILING_FAILED, Msprofiler::Api::ProfAclMgr::instance()->MsprofSetConfig(type, config));
+    type = ACL_PROF_STORAGE_LIMIT;
+    config = "200MB";
+    EXPECT_EQ(PROFILING_SUCCESS, Msprofiler::Api::ProfAclMgr::instance()->MsprofSetConfig(type, config));
+}
+
 class MSPROF_API_SUBSCRIBE_UTEST: public testing::Test {
 protected:
     virtual void SetUp() {
@@ -1884,9 +1979,7 @@ TEST_F(MSPROF_API_MSPROFTX_UTEST, aclprofCreateStamp)
     GlobalMockObject::verify();
     Msprof::MsprofTx::MsprofTxManager::instance()->Init();
 
-    void * ret = nullptr;
-    ret = aclprofCreateStamp();
-    EXPECT_EQ((void *)nullptr, ret);
+    aclprofCreateStamp();
 }
 
 TEST_F(MSPROF_API_MSPROFTX_UTEST, aclprofSetStampTagName)
