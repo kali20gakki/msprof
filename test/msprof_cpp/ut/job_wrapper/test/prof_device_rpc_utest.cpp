@@ -78,7 +78,7 @@ TEST_F(PROF_DEVICE_RPC_UTEST, StartProf1) {
     EXPECT_EQ(PROFILING_SUCCESS, jobDeviceRpc->StartProf(params));
 }
 
-TEST_F(PROF_DEVICE_RPC_UTEST, StopProf) {
+TEST_F(PROF_DEVICE_RPC_UTEST, StopProf_1) {
     GlobalMockObject::verify();
     auto jobDeviceRpc = std::make_shared<Analysis::Dvvp::JobWrapper::JobDeviceRpc>(0);
     EXPECT_EQ(PROFILING_FAILED, jobDeviceRpc->StopProf());
@@ -92,7 +92,7 @@ TEST_F(PROF_DEVICE_RPC_UTEST, StopProf) {
 }
 
 
-TEST_F(PROF_DEVICE_RPC_UTEST, StopProf) {
+TEST_F(PROF_DEVICE_RPC_UTEST, StopProf_2) {
     GlobalMockObject::verify();
     auto jobDeviceRpc = std::make_shared<Analysis::Dvvp::JobWrapper::JobDeviceRpc>(0);\
         std::shared_ptr<analysis::dvvp::message::ProfileParams> params(new analysis::dvvp::message::ProfileParams());

@@ -534,10 +534,8 @@ int PlatformAdapterInterface::Uninit()
 
 std::vector<std::string> PlatformAdapterInterface::GetMetricsList()
 {
-    MSPROF_LOGI("new");
     std::vector<std::string> metricsList;
     for (auto iter : aicMetricsEventsList_) {
-        MSPROF_LOGI("new %s", iter.first.c_str());
         metricsList.push_back(iter.first);
     }
     return metricsList;
