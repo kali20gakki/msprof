@@ -40,7 +40,8 @@ class MsprofTxParser(IParser, MsMultiProcess):
         self._file_list = {
             DataTag.MSPROFTX: file_list.get(DataTag.MSPROFTX, []),
             DataTag.MSPROFTX_TORCH: file_list.get(DataTag.MSPROFTX_TORCH, []),
-            DataTag.MSPROFTX_CANN: file_list.get(DataTag.MSPROFTX_CANN, [])
+            DataTag.MSPROFTX_CANN: file_list.get(DataTag.MSPROFTX_CANN, []),
+            DataTag.MSPROFTX_PIPELINE: file_list.get(DataTag.MSPROFTX_PIPELINE, [])
         }
         self._project_path = sample_config.get(StrConstant.SAMPLE_CONFIG_PROJECT_PATH, '')
         self._model = MsprofTxModel(self._project_path, DBNameConstant.DB_MSPROFTX,

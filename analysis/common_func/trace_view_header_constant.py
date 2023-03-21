@@ -40,6 +40,10 @@ class TraceViewHeaderConstant:
     PEOCESS_MSPROFTX = "MsprofTx"
     PROCESS_SUBTASK = 'Subtask Time'
     PROCESS_THREAD_TASK = 'Thread Task Time'
+    PROCESS_PTA = "PTA"
+
+    # process label
+    PROCESS_CPU = "CPU"
 
     def get_trace_view_header_constant_class_name(self: any) -> any:
         """
