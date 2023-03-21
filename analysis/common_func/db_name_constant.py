@@ -64,6 +64,7 @@ class DBNameConstant(metaclass=ABCMeta):
     DB_PARALLEL = "parallel.db"
     DB_CLUSTER_PARALLEL = "cluster_parallel.db"
     DB_NPU_MEM = "npu_mem.db"
+    DB_SYNC_ACL_NPU = "sync_acl_npu.db"
 
     # DB tables
     TABLE_ACL_DATA = "acl_data"
@@ -234,6 +235,9 @@ class DBNameConstant(metaclass=ABCMeta):
     # npu mem of process and device
     TABLE_NPU_MEM = "NpuMem"
 
+    #sync_acl_npu
+    TABLE_TORCH_TO_ACL = "TorchAclRelation"
+    TABLE_TORCH_TO_NPU = "TorchNpuRelation"
 
 
     @abstractmethod
