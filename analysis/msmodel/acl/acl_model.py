@@ -13,6 +13,7 @@ from common_func.ms_constant.str_constant import StrConstant
 from common_func.msprof_iteration import MsprofIteration
 from msmodel.interface.ianalysis_model import IAnalysisModel
 from msmodel.interface.view_model import ViewModel
+from profiling_bean.db_dto.acl_dto import AclDto
 
 
 class AclModel(ViewModel, IAnalysisModel):
@@ -63,7 +64,18 @@ class AclModel(ViewModel, IAnalysisModel):
                                                      accuracy=CommonConstant.ROUND_SIX)
         return DBManager.fetch_all_data(self.cur, search_data_sql)
 
+    def get_acl_op_execute_data(self):
+        sql = f"select start_time, end_time, thread_id from {DBNameConstant.TABLE_ACL_DATA} where " \
+              f"api_name='aclopCompileAndExecute' or api_name='aclopCompileAndExecuteV2' order by start_time"
+        return DBManager.fetch_all_data(self.cur, sql, dto_class=AclDto)
+
+    def get_acl_op_compile_data(self):
+        sql = f"select start_time, end_time, thread_id from {DBNameConstant.TABLE_ACL_DATA} where " \
+              f"api_name='OpCompile' order by start_time"
+        return DBManager.fetch_all_data(self.cur, sql, dto_class=AclDto)
+
     def _get_where_condition(self):
         return MsprofIteration(self._result_dir).get_condition_within_iteration(self._iter_range,
                                                                                 time_start_key='start_time',
                                                                                 time_end_key='end_time')
+

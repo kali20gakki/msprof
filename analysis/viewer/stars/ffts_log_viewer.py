@@ -95,7 +95,7 @@ class FftsLogViewer(BaseViewer):
                  data.start_time / DBManager.NSTOUS,
                  data.dur_time / DBManager.NSTOUS if data.dur_time > 0 else 0,
                  {"FFTS Type": data.ffts_type, "Stream Id": data.stream_id, "Task Id": data.task_id,
-                  "Subtask Id": data.subtask_id}])
+                  'Batch Id': data.batch_id, "Subtask Id": data.subtask_id}])
         if not result_list:
             return []
         _trace = TraceViewManager.time_graph_trace(TraceViewHeaderConstant.TOP_DOWN_TIME_GRAPH_HEAD,
@@ -115,7 +115,7 @@ class FftsLogViewer(BaseViewer):
                  data.task_time / DBManager.NSTOUS,
                  data.dur_time / DBManager.NSTOUS if data.dur_time > 0 else 0,
                  {"FFTS Type": data.ffts_type, "Stream Id": data.stream_id, "Task Id": data.task_id,
-                  "Subtask Id": data.subtask_id, "Subtask Type": data.subtask_type}])
+                  'Batch Id': data.batch_id, "Subtask Id": data.subtask_id, "Subtask Type": data.subtask_type}])
         if not result_list:
             return []
         _trace = TraceViewManager.time_graph_trace(TraceViewHeaderConstant.TOP_DOWN_TIME_GRAPH_HEAD,
@@ -135,7 +135,7 @@ class FftsLogViewer(BaseViewer):
                  data.start_time / DBManager.NSTOUS,
                  data.dur_time / DBManager.NSTOUS if data.dur_time > 0 else 0,
                  {"FFTS Type": data.ffts_type, "Task Type": data.subtask_type, "Stream Id": data.stream_id,
-                  "Task Id": data.task_id, "Subtask Id": data.subtask_id}])
+                  "Task Id": data.task_id, 'Batch Id': data.batch_id, "Subtask Id": data.subtask_id}])
         for data in data_list.get("acsq_task_list", []):
             result_list.append(
                 [data.op_name,
@@ -144,7 +144,7 @@ class FftsLogViewer(BaseViewer):
                  data.start_time / DBManager.NSTOUS,
                  data.task_time / DBManager.NSTOUS if data.task_time > 0 else 0,
                  {"Task Type": data.task_type, "Stream Id": data.stream_id,
-                  "Task Id": data.task_id, "Subtask Id": data.subtask_id}])
+                  "Task Id": data.task_id, 'Batch Id': data.batch_id, "Subtask Id": data.subtask_id}])
         if not result_list:
             return []
         _trace = TraceViewManager.time_graph_trace(TraceViewHeaderConstant.TOP_DOWN_TIME_GRAPH_HEAD,

@@ -12,6 +12,7 @@ class TaskTimeDto:
         self._op_name = None
         self._stream_id = None
         self._task_id = None
+        self._batch_id = None
         self._subtask_id = None
         self._task_type = None
         self._subtask_type = None
@@ -33,6 +34,10 @@ class TaskTimeDto:
     @property
     def task_id(self: any) -> any:
         return self._task_id
+
+    @property
+    def batch_id(self: any) -> any:
+        return self._batch_id
 
     @property
     def subtask_id(self: any) -> any:
@@ -81,6 +86,10 @@ class TaskTimeDto:
     @task_id.setter
     def task_id(self: any, value: any) -> None:
         self._task_id = value
+
+    @batch_id.setter
+    def batch_id(self: any, value: any) -> None:
+        self._batch_id = value
 
     @subtask_id.setter
     def subtask_id(self: any, value: any) -> None:

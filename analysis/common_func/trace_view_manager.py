@@ -5,6 +5,7 @@
 from collections import OrderedDict
 
 from common_func.db_manager import DBManager
+from common_func.ms_constant.str_constant import StrConstant
 from common_func.trace_view_header_constant import TraceViewHeaderConstant
 
 
@@ -92,8 +93,9 @@ class TraceViewManager:
         while data_list:
             if start_time < float(int(data_list[0].get('timestamp', '0')) / DBManager.NSTOUS) < end_time:
                 connect_dict = {
-                    'name': 'connect', 'ph': 's', 'cat': 'async_acL_npu',
-                    'id': '{}-{}'.format(data_list[0].get('stream_id'), data_list[0].get('task_id')),
+                    'name': 'connect', 'ph': 's', 'cat': StrConstant.ASYNC_ACL_NPU,
+                    'id': '{}-{}-{}'.format(data_list[0].get('stream_id'), data_list[0].get('task_id'),
+                                            data_list[0].get('batch_id')),
                     'pid': data_dict.get('pid'), 'tid': data_dict.get('tid'), 'ts': start_time
                 }
                 connect_list.append(connect_dict)
@@ -116,9 +118,9 @@ class TraceViewManager:
                     continue
                 connect_dict = {
                     'name': 'connect', 'ph': 'f',
-                    'id': '{}-{}'.format(args.get('Stream Id'), args.get('Task Id')), 'cat': 'async_acL_npu',
-                    'pid': data_dict.get('pid'), 'tid': data_dict.get('tid'), 'ts': data_dict.get('ts'),
-                    'bp': 'e'
+                    'id': '{}-{}-{}'.format(args.get('Stream Id'), args.get('Task Id'), args.get('Batch Id')),
+                    'cat': StrConstant.ASYNC_ACL_NPU, 'pid': data_dict.get('pid'), 'tid': data_dict.get('tid'),
+                    'ts': data_dict.get('ts'), 'bp': 'e'
                 }
                 json_list.append(connect_dict)
         return json_list
