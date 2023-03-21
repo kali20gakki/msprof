@@ -55,6 +55,14 @@ class PmuCalculateFunc:
         return PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc)
 
     @staticmethod
+    def mac_fp_ratio(pmu, task_cyc):
+        return PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc)
+
+    @staticmethod
+    def mac_int_ratio(pmu, task_cyc):
+        return PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc)
+
+    @staticmethod
     def vec_fp32_ratio(pmu, task_cyc):
         return PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc)
 
@@ -296,6 +304,8 @@ class Constant:
         "mac_ratio": PmuCalculateFunc.mac_ratio,
         "mac_ratio_extra": PmuCalculateFunc.mac_ratio,
         "mac_exe_ratio": PmuCalculateFunc.mac_ratio,
+        "mac_fp_ratio": PmuCalculateFunc.mac_fp_ratio,
+        "mac_int_ratio": PmuCalculateFunc.mac_int_ratio,
         "scalar_ratio": PmuCalculateFunc.scalar_ratio,
         "scalar_exe_ratio": PmuCalculateFunc.scalar_ratio,
         "fixpipe_ratio": PmuCalculateFunc.fixpipe_ratio,

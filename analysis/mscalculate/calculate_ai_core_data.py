@@ -167,6 +167,13 @@ class CalculateAiCoreData:
             else:
                 ai_core_profiling_events = {"mac_ratio_extra": [mac_ratio], **ai_core_profiling_events}
 
+        names = ["mac_fp_ratio", "mac_int_ratio"]
+        if all(map(lambda name: name in events_name_list, names)):
+            mac_ratio = ai_core_profiling_events["mac_fp_ratio"][-1] + ai_core_profiling_events["mac_int_ratio"][-1]
+            ai_core_profiling_events.pop("mac_fp_ratio")
+            ai_core_profiling_events.pop("mac_int_ratio")
+            ai_core_profiling_events = {"mac_ratio_extra": [mac_ratio], **ai_core_profiling_events}
+
         names = [
             "mte1_iq_full_ratio", "mte2_iq_full_ratio", "mte3_iq_full_ratio",
             "cube_iq_full_ratio", "vec_iq_full_ratio"

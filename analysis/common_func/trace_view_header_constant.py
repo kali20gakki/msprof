@@ -38,7 +38,8 @@ class TraceViewHeaderConstant:
     PROCESS_TRAINING_TRACE = "Training Trace"
     PROCESS_PCIE = "Pcie"
     PEOCESS_MSPROFTX = "MsprofTx"
-    PEOCESS_ACSQ = "ACSQ"
+    PROCESS_SUBTASK = 'Subtask Time'
+    PROCESS_THREAD_TASK = 'Thread Task Time'
 
     def get_trace_view_header_constant_class_name(self: any) -> any:
         """

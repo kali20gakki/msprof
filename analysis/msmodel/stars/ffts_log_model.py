@@ -7,6 +7,7 @@ from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.stars_constant import StarsConstant
 from common_func.utils import Utils
 from msmodel.interface.parser_model import ParserModel
+from msmodel.sqe_type_map import SqeType
 from profiling_bean.db_dto.task_time_dto import TaskTimeDto
 
 
@@ -70,7 +71,9 @@ class FftsLogModel(ParserModel):
         return DBManager.fetch_all_data(self.cur, sql)
 
     def _get_task_time_data(self: any) -> list:
-        return self.get_all_data(DBNameConstant.TABLE_ACSQ_TASK_TIME, dto_class=TaskTimeDto)
+        task_data = self.get_all_data(DBNameConstant.TABLE_ACSQ_TASK_TIME, dto_class=TaskTimeDto)
+        # task_type: place_holder is an invalid type
+        return [task for task in task_data if task.task_type != SqeType.PLACE_HOLDER_SQE.name]
 
     def _get_thread_time_data(self: any) -> list:
         return self.get_all_data(DBNameConstant.TABLE_THREAD_TASK, dto_class=TaskTimeDto)

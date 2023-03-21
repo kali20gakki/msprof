@@ -137,7 +137,6 @@ class AiCoreSampleModel(BaseModel):
         generate sql statement for inserting metric from EventCount
         :param metrics: metrics to be calcualted
         :param freq: running frequecy, which can be used to calculate aic metrics
-        :param metric_key: metric key
         :return: merged sql sentence
         """
         algos = []

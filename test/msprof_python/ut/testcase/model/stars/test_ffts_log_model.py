@@ -92,7 +92,6 @@ class TestSubTaskCalculator(unittest.TestCase):
               "and end_log.subtask_id=start_log.subtask_id and end_log.stream_id=start_log.stream_id " \
               "and end_log.task_id=start_log.task_id " \
               "where end_log.task_type='100011' and start_log.task_type='100010' " \
-              "and start_log.task_time > 1 and end_log.task_time < 2 " \
               "group by end_log.subtask_id,end_log.thread_id, end_log.task_id " \
               "order by end_log.subtask_id"
         with mock.patch(NAMESPACE + '.MsprofIteration.get_iter_interval', return_value=(1, 2)):
@@ -107,8 +106,7 @@ class TestSubTaskCalculator(unittest.TestCase):
               " as dur_time from FftsLog end_log join FftsLog start_log " \
               "on end_log.subtask_id=start_log.subtask_id and end_log.stream_id=start_log.stream_id " \
               "and end_log.task_id=start_log.task_id where end_log.task_type='100011' " \
-              "and start_log.task_type='100010' and start_log.task_time > 1 " \
-              "and end_log.task_time < 2 group by end_log.subtask_id, end_log.task_id order by start_time"
+               "and start_log.task_type='100010' group by end_log.subtask_id, end_log.task_id order by start_time"
         with mock.patch(NAMESPACE + '.MsprofIteration.get_iter_interval', return_value=(1, 2)):
             check = SubTaskCalculator(file_list, self.sample_config)
             ret = check._get_subtask_time_sql()
