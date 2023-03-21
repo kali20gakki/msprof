@@ -973,5 +973,33 @@ class TablesConfig(MetaConfig):
             ('hbm', 'INTEGER,null'),
             ('timestamp', 'INTEGER,null'),
             ('memory', 'INTEGER,null')
+        ],
+        'TorchAclRelationMap': [
+            ('op_name', 'TEXT,null'),
+            ('mark_time', 'INTEGER,null'),
+            ('acl_start_time', 'INTEGER,null'),
+            ('acl_end_time', 'INTEGER,null'),
+            ('acl_tid', 'INTEGER,null'),
+            ('acl_compile_time', 'INTEGER,null'),
+            ('torch_op_start_time', 'INTEGER,null'),
+            ('torch_op_tid', 'INTEGER,null'),
+            ('torch_op_pid', 'INTEGER,null')
+        ],
+        'TorchNpuRelationMap': [
+            ('torch_op_start_time', 'INTEGER,null'),
+            ('torch_op_tid', 'INTEGER,null'),
+            ('torch_op_pid', 'INTEGER,null'),
+            ('op_name', 'TEXT,null'),
+            ('acl_start_time', 'INTEGER,null'),
+            ('acl_end_time', 'INTEGER,null'),
+            ('acl_tid', 'INTEGER,null'),
+            ('acl_compile_time', 'INTEGER,null'),
+            ('stream_id', 'INTEGER,null'),
+            ('task_id', 'INTEGER,null'),
+            ('batch_id', 'INTEGER,null'),
+            ('context_id', 'INTEGER,null'),
+            ('kernel_name', 'TEXT,null'),
+            ('kernel_type', 'TEXT,null'),
+            ('is_main_kernel', 'INTEGER,null')
         ]
     }

@@ -99,5 +99,14 @@ class DataCalculatorConfig(MetaConfig):
             ('path', 'mscalculate.data_analysis.op_counter_op_scene_calculator'),
             ('chip_model', '0,1,2,3,4,5,7'),
             ('level', '14')
+        ],
+        'TorchAclRelationCalculator': [
+            ('path', 'mscalculate.sync_acl_npu.torch_acl_relation'),
+            ('chip_model', '0,1,2,3,4,5,7')
+        ],
+        'TorchNpuRelationCalculator': [
+            ('path', 'mscalculate.sync_acl_npu.torch_npu_relation'),
+            ('chip_model', '0,1,2,3,4,5,7'),
+            ('level', '2')
         ]
     }

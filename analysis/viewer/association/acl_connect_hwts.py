@@ -79,9 +79,10 @@ class AclToHwts:
             return []
         ge_model = ViewModel(self._result_dir, DBNameConstant.DB_GE_INFO, [DBNameConstant.TABLE_GE_TASK])
         ge_model.init()
-        ge_sql = 'select stream_id, task_id, timestamp from TaskInfo order by timestamp'
+        ge_sql = 'select stream_id, task_id, timestamp, batch_id from TaskInfo order by timestamp'
         ge_data_list = ge_model.get_sql_data(ge_sql)
         result_list = []
         for ge_data in ge_data_list:
-            result_list.append({'timestamp': ge_data[2], 'stream_id': ge_data[0], 'task_id': ge_data[1]})
+            result_list.append(
+                {'timestamp': ge_data[2], 'stream_id': ge_data[0], 'task_id': ge_data[1], 'batch_id': ge_data[3]})
         return result_list
