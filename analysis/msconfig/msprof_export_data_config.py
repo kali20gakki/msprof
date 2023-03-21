@@ -299,5 +299,8 @@ class MsProfExportDataConfig(MetaConfig):
             ('headers', 'event,ddr(KB),hbm(KB),memory(KB),timestamp(us)'),
             ('db', 'npu_mem.db'),
             ('table', 'NpuMem')
+        ],
+        'task_queue': [
+            ('handler', '_get_task_queue_timeline')
         ]
     }

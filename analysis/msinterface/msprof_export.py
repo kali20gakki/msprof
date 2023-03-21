@@ -117,6 +117,8 @@ class ExportCommand:
              'handler': AiStackDataCheckManager.contain_biu_perf_data},
             {'export_type': ExportDataType.ACC_PMU,
              'handler': AiStackDataCheckManager.contain_acc_pmu_data},
+            {'export_type': ExportDataType.TASK_QUEUE,
+             'handler': AiStackDataCheckManager.contain_task_queue_data},
             {'export_type': ExportDataType.MSPROF,
              'handler': lambda result_dir, device_id=None: True}
         ],
