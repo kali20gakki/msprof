@@ -208,7 +208,7 @@ void DyncProfMsgProcSrv::DynProfSrvProcStart()
 {
     if (profHasStarted_) {
         MSPROF_LOGW("Dynamic profiling repeat start.");
-        DynProfServerRsqMsg(DynProfMsgType::START_RSP, DynProfMsgProcRes::EXE_FAIL, "No need start repeatedly.");
+        DynProfServerRsqMsg(DynProfMsgType::START_RSP, DynProfMsgProcRes::EXE_FAIL, "Collection has been started.");
         return;
     }
 
@@ -261,7 +261,7 @@ void DyncProfMsgProcSrv::DynProfSrvProcStop()
 {
     if (!profHasStarted_) {
         MSPROF_LOGW("Dynamic profiling repeat stop.");
-        DynProfServerRsqMsg(DynProfMsgType::STOP_RSP, DynProfMsgProcRes::EXE_FAIL, "No need stop repeatedly.");
+        DynProfServerRsqMsg(DynProfMsgType::STOP_RSP, DynProfMsgProcRes::EXE_FAIL, "Collection is not started.");
         return;
     }
 
