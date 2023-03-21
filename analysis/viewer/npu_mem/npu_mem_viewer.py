@@ -43,7 +43,9 @@ class NpuMemViewer:
             summary_data = self._model.get_summary_data()
             if summary_data:
                 summary_data = [[self._npu_mem_events.get(datum.event),
-                                 datum.ddr, datum.hbm, datum.memory, datum.timestamp]
+                                 datum.ddr / NumberConstant.KILOBYTE,
+                                 datum.hbm / NumberConstant.KILOBYTE,
+                                 datum.memory / NumberConstant.KILOBYTE, datum.timestamp]
                                 for datum in summary_data]
                 return self._configs.get(StrConstant.CONFIG_HEADERS), summary_data, len(summary_data)
             return MsvpConstant.MSVP_EMPTY_DATA
@@ -65,12 +67,13 @@ class NpuMemViewer:
             _result = TraceViewManager.metadata_event(meta_data)
             column_trace_data = []
             for datum in timeline_data:
+                datum.timestamp = InfoConfReader().get_host_time_by_sampling_timestamp(datum.timestamp)
                 column_trace_data.append(['{}/DDR'.format(self._npu_mem_events.get(datum.event)), datum.timestamp,
-                                          pid, tid, OrderedDict([("KB", datum.ddr)])])
+                                          pid, tid, OrderedDict([("KB", datum.ddr / NumberConstant.KILOBYTE)])])
                 column_trace_data.append(['{}/HBM'.format(self._npu_mem_events.get(datum.event)), datum.timestamp,
-                                          pid, tid, OrderedDict([("KB", datum.hbm)])])
+                                          pid, tid, OrderedDict([("KB", datum.hbm / NumberConstant.KILOBYTE)])])
                 column_trace_data.append(['{}/Memory'.format(self._npu_mem_events.get(datum.event)), datum.timestamp,
-                                          pid, tid, OrderedDict([("KB", datum.memory)])])
+                                          pid, tid, OrderedDict([("KB", datum.memory / NumberConstant.KILOBYTE)])])
             _result += \
                 TraceViewManager.column_graph_trace(TraceViewHeaderConstant.COLUMN_GRAPH_HEAD_LEAST,
                                                     column_trace_data)
