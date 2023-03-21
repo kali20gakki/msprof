@@ -230,7 +230,7 @@ class AiStackDataCheckManager(DataCheckManager):
         :param device_id: device id
         :return: if contained msproftx data, true or false
         """
-        return cls.check_data_exist(result_dir, file_name_manager.get_msproftx_all_compiles(),
+        return cls.check_data_exist(result_dir, file_name_manager.get_msproftx_summary_timeline_compiles(),
                                     device_id=device_id)
 
     @classmethod
@@ -358,4 +358,15 @@ class AiStackDataCheckManager(DataCheckManager):
         :return: if contained msproftx torch data, true or false
         """
         return cls.check_data_exist(result_dir, file_name_manager.get_msproftx_torch_compiles(),
+                                    device_id=device_id)
+
+    @classmethod
+    def contain_task_queue_data(cls: any, result_dir: str, device_id: int = None) -> bool:
+        """
+        The data path contain msproftx pipeline data
+        :param result_dir: data dir path
+        :param device_id: device id
+        :return: if contained msproftx pipeline data, true or false
+        """
+        return cls.check_data_exist(result_dir, file_name_manager.get_msproftx_pipeline_compiles(),
                                     device_id=device_id)

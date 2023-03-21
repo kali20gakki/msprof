@@ -31,7 +31,7 @@ class MsprofTxDto:
         return self._pid
 
     @property
-    def tid(self: any) -> int:
+    def tid(self: any) -> any:
         return self._tid
 
     @property
@@ -73,6 +73,10 @@ class MsprofTxDto:
     @property
     def dur_time(self: any) -> int:
         return self._dur_time
+
+    @property
+    def is_enqueue_category(self: any) -> bool:
+        return self._category == 0
 
     @pid.setter
     def pid(self: any, value: int) -> None:

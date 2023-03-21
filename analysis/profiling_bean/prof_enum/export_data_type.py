@@ -67,4 +67,5 @@ class ExportDataType(Enum):
     ACC_PMU = 53
     PYTORCH_OPERATOR_VIEW = 54
     NPU_MEM = 55
+    TASK_QUEUE = 56
     MSPROF = 100

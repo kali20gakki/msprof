@@ -190,6 +190,7 @@ class FileNameManagerConstant:
     MSPROFTX_FILE_PATTERN = r"^Msprof\.msproftx\.slice_\d+"
     MSPROFTX_TORCH_FILE_PATTERN = r"^Msprof\.torch_op\.slice_\d+"
     MSPROFTX_CANN_FILE_PATTERN = r"^Msprof\.torch_cann_op\.slice_\d+"
+    MSPROFTX_PIPELINE_FILE_PATTERN = f"^Msprof\.torch_pipeline\.slice_\d+"
     MSPROF_JSON_FILE_PATTERN = r"^msprof(_\d+)?(_\d+)?(_\d+)?(_slice_\d+)?.json"
     MSPROFTX_JSON_FILE_PATTERN = r"^msprof_tx_?\d?_?\d?.json"
 
@@ -783,14 +784,35 @@ def get_msproftx_cann_compiles() -> tuple:
     return (re.compile(FileNameManagerConstant.MSPROFTX_CANN_FILE_PATTERN),)
 
 
+def get_msproftx_pipeline_compiles() -> tuple:
+    """
+    get msproftx cann files regex compiles
+    :return: msproftx cann files regex
+    """
+    return (re.compile(FileNameManagerConstant.MSPROFTX_PIPELINE_FILE_PATTERN),)
+
+
 def get_msproftx_all_compiles() -> tuple:
     """
     get msproftx files regex compiles
     :return: msproftx files regex
     """
+    msproftx_all_compiles = (
+        re.compile(FileNameManagerConstant.MSPROFTX_FILE_PATTERN),
+        re.compile(FileNameManagerConstant.MSPROFTX_TORCH_FILE_PATTERN),
+        re.compile(FileNameManagerConstant.MSPROFTX_CANN_FILE_PATTERN),
+        re.compile(FileNameManagerConstant.MSPROFTX_PIPELINE_FILE_PATTERN)
+    )
+    return msproftx_all_compiles
+
+
+def get_msproftx_summary_timeline_compiles() -> tuple:
+    """
+        get export summary and timeline msproftx files regex compiles
+        :return: msproftx files regex
+    """
     return (re.compile(FileNameManagerConstant.MSPROFTX_FILE_PATTERN),
-            re.compile(FileNameManagerConstant.MSPROFTX_TORCH_FILE_PATTERN),
-            re.compile(FileNameManagerConstant.MSPROFTX_CANN_FILE_PATTERN))
+            re.compile(FileNameManagerConstant.MSPROFTX_TORCH_FILE_PATTERN))
 
 
 def get_npu_mem_compiles() -> tuple:

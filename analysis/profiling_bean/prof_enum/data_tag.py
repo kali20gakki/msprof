@@ -62,6 +62,7 @@ class DataTag(Enum):
     MSPROFTX_TORCH = 48
     MSPROFTX_CANN = 49
     NPU_MEM = 50
+    MSPROFTX_PIPELINE = 51
 
 
 @unique

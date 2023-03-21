@@ -68,6 +68,7 @@ from viewer.stars.ffts_log_viewer import FftsLogViewer
 from viewer.stars.low_power_viewer import LowPowerViewer
 from viewer.stars.stars_chip_trans_view import StarsChipTransView
 from viewer.stars.stars_soc_view import StarsSocView
+from viewer.task_queue_viewer import TaskQueueViewer
 from viewer.thread_group_viewer import ThreadGroupViewer
 from viewer.top_down_report import TopDownData
 from viewer.training.core_cpu_reduce_viewer import CoreCpuReduceViewer
@@ -732,3 +733,7 @@ class MsProfExportDataUtils:
         return get_core_sample_data(params.get(StrConstant.PARAM_RESULT_DIR),
                                     configs.get(StrConstant.CONFIG_DB),
                                     params.get(StrConstant.PARAM_DEVICE_ID), params)
+
+    @classmethod
+    def _get_task_queue_timeline(cls: any, configs: dict, params: dict) -> any:
+        return TaskQueueViewer(params).get_task_queue_data()
