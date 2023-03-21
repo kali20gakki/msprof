@@ -251,6 +251,7 @@ class CoreCpuReduceViewer:
                                                                                    Constant.TASK_TYPE_OTHER))),
                  ("Stream Id", sql_data[0]),
                  ("Task Id", sql_data[1]),
+                 ("Batch Id", sql_data[6]),
                  ("Aicore Time(ms)", total_time_value),
                  ("Total Cycle", cls._get_task_trace_value(_key_for_ops, total_cycle))
                  ])
