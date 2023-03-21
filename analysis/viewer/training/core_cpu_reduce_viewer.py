@@ -36,7 +36,6 @@ class CoreCpuReduceViewer:
         TraceViewHeaderConstant.PROCESS_TASK: 0,
         TraceViewHeaderConstant.PROCESS_AI_CPU: 1,
         TraceViewHeaderConstant.PROCESS_ALL_REDUCE: 2,
-        TraceViewHeaderConstant.PEOCESS_ACSQ: 3
     }
 
     @staticmethod
@@ -208,76 +207,6 @@ class CoreCpuReduceViewer:
         trace_data.extend(trace_data_job)
         trace_data.extend(trace_data_result)
         return json.dumps(trace_data)
-
-    @classmethod
-    def _get_acsq_time_data(cls: any, result_dir: str):
-        acsq_model_view = ViewModel(result_dir, DBNameConstant.DB_SOC_LOG, DBNameConstant.TABLE_ACSQ_TASK_TIME)
-        acsq_model_view.init()
-        acsq_data = acsq_model_view.get_all_data(DBNameConstant.TABLE_ACSQ_TASK_TIME)
-        acsq_data_set = {i[1] for i in acsq_data}
-        acsq_data_dict = {value: key for key, value in enumerate(list(acsq_data_set))}
-        pid = cls.TRACE_PID_MAP.get(TraceViewHeaderConstant.PEOCESS_ACSQ)
-        meta_data = [["process_name", pid, InfoConfReader().get_json_tid_data(), TraceViewHeaderConstant.PEOCESS_ACSQ]]
-        for tid_value_index, tid_value in enumerate(list(acsq_data_set)):
-            meta_data.append(["thread_name", pid, tid_value_index, "Stream {}".format(tid_value)])
-        result = TraceViewManager.metadata_event(meta_data)
-        try:
-            if acsq_data:
-                task_trace_datas = cls._add_acsq_opname(acsq_data, result_dir, acsq_data_dict)
-                result.extend(TraceViewManager.time_graph_trace(
-                    TraceViewHeaderConstant.TOP_DOWN_TIME_GRAPH_HEAD, task_trace_datas))
-        except (TypeError, IndexError, ValueError) as err:
-            logging.error(err, exc_info=Constant.TRACE_BACK_SWITCH)
-        return result
-
-    @classmethod
-    def _add_acsq_opname(cls: any, data_list: list, result_dir: str, tid_dict: dict):
-        task_trace_datas = []
-        op_names = cls._get_acsq_opname(PathManager.get_sql_dir(result_dir))
-        for data in data_list:
-            if data[2] <= 0 or data[3] < 0:
-                continue
-            op_name = cls._get_task_trace_value('{}_{}'.format(str(data[1]), str(data[0])), op_names)
-            trace_data_args = OrderedDict(
-                [
-                    ("Task Type", data[4]),
-                    ("OP Name", op_name),
-                    ("Stream Id", data[1]),
-                    ("Task Id", data[0]),
-                ])
-            task_type = str(data[4])
-            if Constant.NA != op_name:
-                task_type += '@' + op_name
-            task_trace_datas.append([task_type,
-                                     cls.TRACE_PID_MAP.get(TraceViewHeaderConstant.PEOCESS_ACSQ),
-                                     tid_dict.get(data[1]),
-                                     float(data[2]) / DBManager.NSTOUS,
-                                     int(data[3]) / DBManager.NSTOUS if data[3] > 0 else 0,
-                                     trace_data_args])
-        return task_trace_datas
-
-    @classmethod
-    def _get_acsq_opname(cls: any, sql_path: str) -> dict:
-        op_names = {}
-        sql = "SELECT op_name, stream_id, task_id FROM {} ".format(DBNameConstant.TABLE_SUMMARY_GE)
-        conn_ge, cur_ge = DBManager.check_connect_db_path(
-            os.path.join(sql_path, DBNameConstant.DB_AICORE_OP_SUMMARY))
-        try:
-            if conn_ge and cur_ge:
-                if not DBManager.judge_table_exist(cur_ge, DBNameConstant.TABLE_SUMMARY_GE):
-                    return op_names
-                ge_datas = DBManager.fetch_all_data(cur_ge, sql)
-                if not ge_datas:
-                    return op_names
-                for ge_data in ge_datas:
-                    ge_data_key = "_".join(list(map(str, [ge_data[1], ge_data[2]])))
-                    op_names[ge_data_key] = ge_data[0]
-            return op_names
-        except ValueError as err:
-            logging.error(str(err))
-            return op_names
-        finally:
-            DBManager.destroy_db_connect(conn_ge, cur_ge)
 
     @classmethod
     def _get_task_scheduler_data(cls: any, sql_path: str) -> list:

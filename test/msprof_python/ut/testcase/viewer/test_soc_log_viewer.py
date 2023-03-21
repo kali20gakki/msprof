@@ -39,7 +39,7 @@ class TestFftsLogViewer(unittest.TestCase):
             DeviceInfo(pid='1', tid='0').device_info])).process()
         check = FftsLogViewer(configs, params)
         ret = check.get_time_timeline_header(data)
-        self.assertEqual(ret, [['process_name', 1000, 0, 'Task Scheduler'], ['thread_name', 2, '3', '3']])
+        self.assertEqual(ret, [['process_name', 0, 0, 'Task Scheduler'], ['thread_name', 2, '3', '3']])
 
     def test_get_timeline_data(self):
         configs, params = {}, {}

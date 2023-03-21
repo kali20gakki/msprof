@@ -26,10 +26,53 @@ class SubTaskCalculator(MsMultiProcess):
         self.sample_config = sample_config
         self.file_list = file_list
         self.result_dir = self.sample_config.get(StrConstant.SAMPLE_CONFIG_PROJECT_PATH)
-        self.iteration_time = MsprofIteration(self.result_dir).get_iter_interval(
-            self.sample_config.get(StrConstant.PARAM_ITER_ID))
         self.conn = None
         self.cur = None
+
+    @staticmethod
+    def _get_thread_task_time_sql() -> str:
+        """
+        table ffts_log have both thread start logs and end logs
+        Timestamps of logs with the same subtask_ID and task_id and stream_id
+        are subtracted to obtain the dur_time.
+        """
+        thread_base_sql = "Select end_log.subtask_id, end_log.task_id,end_log.stream_id," \
+                          "end_log.subtask_type, end_log.ffts_type,end_log.thread_id,start_log.task_time," \
+                          "(end_log.task_time-start_log.task_time) as dur_time " \
+                          "from {0} end_log " \
+                          "join {0} start_log on end_log.thread_id=start_log.thread_id " \
+                          "and end_log.subtask_id=start_log.subtask_id " \
+                          "and end_log.stream_id=start_log.stream_id " \
+                          "and end_log.task_id=start_log.task_id " \
+                          "where end_log.task_type='{1}' and start_log.task_type='{2}' " \
+                          "group by end_log.subtask_id,end_log.thread_id, end_log.task_id " \
+                          "order by end_log.subtask_id".format(DBNameConstant.TABLE_FFTS_LOG,
+                                                               StarsConstant.FFTS_LOG_END_TAG,
+                                                               StarsConstant.FFTS_LOG_START_TAG)
+
+        return thread_base_sql
+
+    @staticmethod
+    def _get_subtask_time_sql() -> str:
+        """
+        table ffts thread_log have both thread strat logs and end logs.
+        A subtask has multiple thread.
+        Subtract the start time with the minimum time from the end time with the maximum time.
+        """
+        subtask_base_sql = "Select end_log.subtask_id, end_log.task_id,end_log.stream_id,end_log.subtask_type," \
+                           "end_log.ffts_type,start_log.task_time as start_time, " \
+                           "(end_log.task_time-start_log.task_time) as dur_time " \
+                           "from {0} end_log join {0} start_log " \
+                           "on end_log.subtask_id=start_log.subtask_id " \
+                           "and end_log.stream_id=start_log.stream_id " \
+                           "and end_log.task_id=start_log.task_id " \
+                           "where end_log.task_type='{1}' and start_log.task_type='{2}' " \
+                           "group by end_log.subtask_id, " \
+                           "end_log.task_id order by start_time".format(DBNameConstant.TABLE_FFTS_LOG,
+                                                                        StarsConstant.FFTS_LOG_END_TAG,
+                                                                        StarsConstant.FFTS_LOG_START_TAG)
+
+        return subtask_base_sql
 
     def ms_run(self: any) -> None:
         """
@@ -63,55 +106,6 @@ class SubTaskCalculator(MsMultiProcess):
     def save(self: any) -> None:
         self.__create_log_table(DBNameConstant.TABLE_THREAD_TASK, self._get_thread_task_time_sql())
         self.__create_log_table(DBNameConstant.TABLE_SUBTASK_TIME, self._get_subtask_time_sql())
-
-    def _get_thread_task_time_sql(self: any) -> str:
-        """
-        table ffts_log have both thread start logs and end logs
-        Timestamps of logs with the same subtask_ID and task_id and stream_id
-        are subtracted to obtain the dur_time.
-        """
-        thread_base_sql = "Select end_log.subtask_id, end_log.task_id,end_log.stream_id," \
-                          "end_log.subtask_type, end_log.ffts_type,end_log.thread_id,start_log.task_time," \
-                          "(end_log.task_time-start_log.task_time) as dur_time " \
-                          "from {0} end_log " \
-                          "join {0} start_log on end_log.thread_id=start_log.thread_id " \
-                          "and end_log.subtask_id=start_log.subtask_id " \
-                          "and end_log.stream_id=start_log.stream_id " \
-                          "and end_log.task_id=start_log.task_id " \
-                          "where end_log.task_type='{1}' and start_log.task_type='{2}' " \
-                          "and start_log.task_time > {3} and end_log.task_time < {4} " \
-                          "group by end_log.subtask_id,end_log.thread_id, end_log.task_id " \
-                          "order by end_log.subtask_id".format(DBNameConstant.TABLE_FFTS_LOG,
-                                                               StarsConstant.FFTS_LOG_END_TAG,
-                                                               StarsConstant.FFTS_LOG_START_TAG,
-                                                               self.iteration_time[0],
-                                                               self.iteration_time[1])
-
-        return thread_base_sql
-
-    def _get_subtask_time_sql(self: any) -> str:
-        """
-        table ffts thread_log have both thread strat logs and end logs.
-        A subtask has multiple thread.
-        Subtract the start time with the minimum time from the end time with the maximum time.
-        """
-        subtask_base_sql = "Select end_log.subtask_id, end_log.task_id,end_log.stream_id,end_log.subtask_type," \
-                           "end_log.ffts_type,start_log.task_time as start_time, " \
-                           "(end_log.task_time-start_log.task_time) as dur_time " \
-                           "from {0} end_log join {0} start_log " \
-                           "on end_log.subtask_id=start_log.subtask_id " \
-                           "and end_log.stream_id=start_log.stream_id " \
-                           "and end_log.task_id=start_log.task_id " \
-                           "where end_log.task_type='{1}' and start_log.task_type='{2}' " \
-                           "and start_log.task_time > {3} and end_log.task_time < {4} " \
-                           "group by end_log.subtask_id, " \
-                           "end_log.task_id order by start_time".format(DBNameConstant.TABLE_FFTS_LOG,
-                                                                        StarsConstant.FFTS_LOG_END_TAG,
-                                                                        StarsConstant.FFTS_LOG_START_TAG,
-                                                                        self.iteration_time[0],
-                                                                        self.iteration_time[1])
-
-        return subtask_base_sql
 
     def __create_log_table(self: any, table_name: str, sql: str) -> None:
         if DBManager.judge_table_exist(self.cur, table_name):
