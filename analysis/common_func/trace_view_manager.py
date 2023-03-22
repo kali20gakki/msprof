@@ -68,6 +68,8 @@ class TraceViewManager:
                 # name, pid, tid, args is required
                 if item_data_list[0] in ["process_sort_index", "thread_sort_index"]:
                     item_data_list[3] = OrderedDict([("sort_index", item_data_list[3])])
+                elif item_data_list[0] in ["process_labels"]:
+                    item_data_list[3] = OrderedDict([("labels", item_data_list[3])])
                 else:
                     item_data_list[3] = OrderedDict([("name", str(item_data_list[3]))])
                 result_data_part = OrderedDict(list(zip(TraceViewHeaderConstant.METADATA_HEAD, item_data_list)))
@@ -114,7 +116,7 @@ class TraceViewManager:
         if isinstance(json_list, list):
             for data_dict in json_list:
                 args = data_dict.get('args', {})
-                if not args.get('Stream Id') or not args.get('Task Id'):
+                if not all(str(args.get(id, '')) for id in ('Stream Id', 'Task Id', 'Batch Id')):
                     continue
                 connect_dict = {
                     'name': 'connect', 'ph': 'f',

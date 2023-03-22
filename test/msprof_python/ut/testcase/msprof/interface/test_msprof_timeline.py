@@ -12,7 +12,9 @@ NAMESPACE = 'msinterface.msprof_timeline'
 class TestMsprofTimeline(unittest.TestCase):
     def test_add_export_data(self):
         data = json.dumps(
-            [{'name': 'process_name', 'pid': 0, 'ph': 'X', 'ts': 1210122, 'args': {'Stream Id': 1, 'Task Id': 1}}])
+            [{'name': 'process_name', 'pid': 0, 'tid': 0, 'args': {'name': 'Task Scheduler'}, 'ph': 'M'},
+             {'name': 'trans_TransData_7', 'pid': 0, 'tid': '0', 'ts': 1210122,
+              'args': {'Stream Id': 1, 'Task Id': 1}, 'ph': 'X'}])
 
         with mock.patch('common_func.ai_stack_data_check_manager.AiStackDataCheckManager.contain_acl_data',
                         return_value=True), \
@@ -24,9 +26,10 @@ class TestMsprofTimeline(unittest.TestCase):
             with mock.patch('common_func.db_manager.DBManager.fetch_all_data',
                             return_value=(
                                     (4294967295, 'Add', 1, 1, 32, 0, 'AI_CORE', 'Add', 0, 10621, 620199010400, 0),)):
-                data = json.dumps([{'name': 'process_name', 'pid': 0, 'ph': 'X', 'ts': 1210122},
-                                   {'name': 'aclopExecuteV2', 'pid': 0, 'ph': 'X', 'ts': 620199010.277, 'dur': 569.359,
-                                    'args': {'Mode': 'ACL_OP'}}])
+                data = json.dumps(
+                    [{'name': 'process_name', 'pid': 0, 'tid': 0, 'args': {'name': 'AscendCL'}, 'ph': 'M'},
+                     {'name': 'aclopExecuteV2', 'pid': 0, 'tid': 0, 'ts': 620199010.277, 'dur': 569.359,
+                      'args': {'Mode': 'ACL_OP'}, 'ph': 'X'}])
                 key = MsprofTimeline()
                 key.add_export_data(data, 'acl')
 
@@ -37,7 +40,9 @@ class TestMsprofTimeline(unittest.TestCase):
             key.export_all_data()
 
     def test_export_all_data_1(self):
-        data = json.dumps([{'name': 'process_name', 'pid': 0, 'ph': 'X', 'ts': 1210122}])
+        data = json.dumps([
+            {'name': 'process_name', 'pid': 0, 'tid': 0, 'args': {'name': 'Step Trace'}, 'ph': 'M'},
+            {'name': 'Reduce', 'pid': 0, 'ph': 'X', 'ts': 1210122}])
         with mock.patch(NAMESPACE + '.StepTraceViewer.get_one_iter_timeline_data',
                         return_value=data):
             key = MsprofTimeline()

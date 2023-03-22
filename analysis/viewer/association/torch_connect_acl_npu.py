@@ -5,18 +5,20 @@ import os
 
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
-from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.path_manager import PathManager
+from common_func.trace_view_header_constant import TraceViewHeaderConstant
 from msmodel.sync_acl_npu.sync_acl_npu_model import SyncAclNpuViewModel
-from profiling_bean.prof_enum.export_data_type import ExportDataType
 
 
 class TorchToAclNpu:
-    ACL_OP_NAME = ['aclopCompileAndExecute', 'aclopCompileAndExecuteV2']
+    ACL_OP_NAME = (
+        f'{TraceViewHeaderConstant.PROCESS_ACL}@aclopCompileAndExecute',
+        f'{TraceViewHeaderConstant.PROCESS_ACL}@aclopCompileAndExecuteV2'
+    )
     MSPROF_HOST_DIR = "host"
-    TORCH_PID = ExportDataType.MSPROF_TX.value
-    NPU_PID = f"{ExportDataType.TASK_TIME.value}_0"
+    TORCH_PID = TraceViewHeaderConstant.LAYER_SORT_MAP.get(TraceViewHeaderConstant.COMPONENT_LAYER_PID)
+    NPU_PID = f"{TraceViewHeaderConstant.LAYER_SORT_MAP.get(TraceViewHeaderConstant.COMPONENT_LAYER_ASCEND_HW)}_0"
 
     def __init__(self, result_dir: str):
         self._result_dir = result_dir
@@ -72,13 +74,11 @@ class TorchToAclNpu:
         for data in json_data:
             if data.get('pid', '') == self.NPU_PID:
                 args = data.get('args', {})
-                stream_id = args.get('Stream Id')
-                task_id = args.get('Task Id')
-                batch_id = args.get('Batch Id')
-                if not stream_id or not task_id:
+                if not all(str(args.get(id, '')) for id in ('Stream Id', 'Task Id', 'Batch Id')):
                     continue
                 end_point = {
-                    'name': 'torch_to_npu', 'ph': 'f', 'id': f'{stream_id}_{task_id}_{batch_id}',
+                    'name': 'torch_to_npu', 'ph': 'f',
+                    'id': '{}_{}_{}'.format(args.get('Stream Id'), args.get('Task Id'), args.get('Batch Id')),
                     'pid': data.get('pid'), 'tid': data.get('tid'), 'ts': data.get('ts'), 'bp': 'e',
                     'cat': StrConstant.ASYNC_NPU
                 }
