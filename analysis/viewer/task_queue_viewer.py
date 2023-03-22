@@ -57,8 +57,4 @@ class TaskQueueViewer:
             else:
                 meta_data.append(["thread_name", self._pid, tid_data.tid, f"Tread {tid_data.tid} (Dequeue)"])
             meta_data.append(["thread_sort_index", self._pid, tid_data.tid, tid_data.category])
-        meta_data = TraceViewManager.metadata_event(meta_data)
-        meta_data.append(
-            {"name": "process_labels", "ph": "M", "pid": self._pid, "tid": InfoConfReader().get_json_tid_data(),
-             "args": {"labels": TraceViewHeaderConstant.PROCESS_CPU}})
-        return meta_data
+        return TraceViewManager.metadata_event(meta_data)

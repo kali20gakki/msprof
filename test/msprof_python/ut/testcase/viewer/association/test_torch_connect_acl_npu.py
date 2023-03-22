@@ -21,21 +21,21 @@ class TestTorchToAclNpu(unittest.TestCase):
     data1.task_id = 3
     data1.batch_id = 0
     json_data = [
-        {"name": "aclopCompileAndExecute", "pid": "2_1071532", "tid": 1071819, "ts": 1.5, "dur": 5, "ph": "X"},
-        {"name": "Mul", "pid": "7_0", "tid": 5, "ts": 3, "dur": 3.4,
+        {"name": "AscendCL@aclopCompileAndExecute", "pid": "2_1071532", "tid": 1071819, "ts": 1.5, "dur": 5, "ph": "X"},
+        {"name": "Mul", "pid": "3_0", "tid": 5, "ts": 3, "dur": 3.4,
          "args": {"Task Type": "AI_CORE", "Stream Id": 5, "Task Id": 3, "Batch Id": 0, "Aicore Time(ms)": 2681},
          "ph": "X"}
     ]
     check_data = [
-        {'name': 'aclopCompileAndExecute', 'pid': '2_1071532', 'tid': 1071819, 'ts': 1.5, 'dur': 5, 'ph': 'X'},
-        {'name': 'Mul', 'pid': '7_0', 'tid': 5, 'ts': 3, 'dur': 3.4,
+        {'name': 'AscendCL@aclopCompileAndExecute', 'pid': '2_1071532', 'tid': 1071819, 'ts': 1.5, 'dur': 5, 'ph': 'X'},
+        {'name': 'Mul', 'pid': '3_0', 'tid': 5, 'ts': 3, 'dur': 3.4,
          'args': {'Task Type': 'AI_CORE', 'Stream Id': 5, 'Task Id': 3, "Batch Id": 0, 'Aicore Time(ms)': 2681},
          'ph': 'X'},
         {'name': 'torch_to_acl', 'ph': 's', 'id': 1.5, 'pid': '0_1', 'tid': 1, 'ts': 1.0, 'cat': 'async_acl_npu'},
         {'name': 'torch_to_acl', 'ph': 'f', 'id': 1.5, 'pid': '2_1071532', 'tid': 1071819, 'ts': 1.5, 'bp': 'e',
          'cat': 'async_acl_npu'},
         {'name': 'torch_to_npu', 'ph': 's', 'id': '5_3_0', 'pid': '0_1', 'tid': 1, 'ts': 1.0, 'cat': 'async_npu'},
-        {'name': 'torch_to_npu', 'ph': 'f', 'id': '5_3_0', 'pid': '7_0', 'tid': 5, 'ts': 3, 'bp': 'e',
+        {'name': 'torch_to_npu', 'ph': 'f', 'id': '5_3_0', 'pid': '3_0', 'tid': 5, 'ts': 3, 'bp': 'e',
          'cat': 'async_npu'}
     ]
 

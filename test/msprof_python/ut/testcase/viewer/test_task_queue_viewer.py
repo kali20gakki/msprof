@@ -50,8 +50,7 @@ class TestTaskQueueViewer(unittest.TestCase):
              ' "args": {"name": "Tread 11 (Enqueue)"}, "ph": "M"}, {"name": "thread_sort_index", "pid": 1, "tid": 11,' \
              ' "args": {"sort_index": 0}, "ph": "M"}, {"name": "thread_name", "pid": 1, "tid": 12, "args": {"name":' \
              ' "Tread 12 (Dequeue)"}, "ph": "M"}, {"name": "thread_sort_index", "pid": 1, "tid": 12, "args": ' \
-             '{"sort_index": 1}, "ph": "M"}, {"name": "process_labels", "ph": "M", "pid": 1, "tid": 0, "args":' \
-             ' {"labels": "CPU"}}]'
+             '{"sort_index": 1}, "ph": "M"}]'
 
     def test_get_task_queue_data(self):
         with mock.patch(NAMESPACE + '.MsprofTxModel.check_db', return_value=True), \
