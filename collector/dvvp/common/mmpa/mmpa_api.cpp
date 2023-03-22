@@ -1056,6 +1056,7 @@ int32_t MmGetCpuInfo(MmCpuDesc **cpuInfo, int32_t *count)
     if (uname(&sysInfo) == PROFILING_SUCCESS) {
         uint32_t sysMachineLen = strnlen(sysInfo.machine, sizeof(cpuDest.arch));
         if (sysMachineLen == sizeof(cpuDest.arch)) {
+            free(pCpuDesc);
             return PROFILING_FAILED;
         }
         ret = memcpy_s(cpuDest.arch, sizeof(cpuDest.arch), sysInfo.machine, sysMachineLen + 1U);
