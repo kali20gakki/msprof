@@ -924,7 +924,8 @@ std::vector<int> Utils::GetChildPidRecursive(int pid, unsigned int recursiveLeve
         return allPids;
     }
     allPids = GetChildPid(pid);
-    for (auto childPid : allPids) {
+    std::vector<int> currChildPids = allPids;
+    for (auto childPid : currChildPids) {
         std::vector<int> childPids = GetChildPidRecursive(childPid, recursiveLevel + 1);
         allPids.insert(allPids.end(), childPids.begin(), childPids.end());
     }
