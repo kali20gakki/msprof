@@ -15,7 +15,6 @@ from common_func.singleton import singleton
 from common_func.trace_view_header_constant import TraceViewHeaderConstant
 from common_func.trace_view_manager import TraceViewManager
 from profiling_bean.db_dto.step_trace_dto import IterationRange
-from profiling_bean.prof_enum.export_data_type import ExportDataType
 from viewer.association.acl_connect_hwts import AclToHwts
 from viewer.training.step_trace_viewer import StepTraceViewer
 
@@ -34,6 +33,7 @@ class MsprofTimeline:
         self._result_dir = None
         self._export_data_list = []
         self._iteration_time = []
+        self._default_sort_index = NumberConstant.DEFAULT_LAYER_SORT_START
 
     @classmethod
     def get_timeline_header(cls: any, pid: str, pid_sort_index: int) -> list:
@@ -43,6 +43,64 @@ class MsprofTimeline:
         header = [["process_sort_index", pid, InfoConfReader().get_json_tid_data(), pid_sort_index]]
         process_index = TraceViewManager.metadata_event(header)
         return process_index
+
+    @classmethod
+    def filter_msprof_timeline(cls: any, json_list: list) -> list:
+        """
+        filter msprof timeline data, and partition data by pid.
+        """
+        pid_process_name = dict()
+        pid_json_data = dict()
+        filtered_data_list = []
+        for data_dict in json_list:
+            pid = data_dict.get(StrConstant.TRACE_HEADER_PID, TraceViewHeaderConstant.DEFAULT_PID_VALUE)
+            if data_dict.get(StrConstant.TRACE_HEADER_NAME) == "process_name":
+                pid_process_name[pid] = data_dict.get(StrConstant.TRACE_HEADER_ARGS, {})\
+                    .get(StrConstant.TRACE_HEADER_NAME, "")
+            if pid_process_name.get(pid) not in TraceViewHeaderConstant.MSPROF_TIMELINE_FILTER_LIST:
+                pid_json_data.setdefault(pid, []).append(data_dict)
+        for key in pid_process_name.keys():
+            if pid_process_name.get(key) not in TraceViewHeaderConstant.MSPROF_TIMELINE_FILTER_LIST:
+                filtered_data_list.append([key, pid_process_name.get(key), pid_json_data.get(key)])
+        return filtered_data_list
+
+    @classmethod
+    def modify_timeline_info(cls: any, process_name: str, layer_info: TraceViewHeaderConstant.LayerInfo,
+                             format_pid: str, value: dict) -> None:
+        """
+        modify timeline info based on layer_info
+        """
+        value[StrConstant.TRACE_HEADER_PID] = format_pid
+        if value.get(StrConstant.TRACE_HEADER_NAME) == "process_name":
+            value.setdefault(StrConstant.TRACE_HEADER_ARGS, {})[StrConstant.TRACE_HEADER_NAME] =\
+                layer_info.component_layer
+
+        if value.get(StrConstant.TRACE_HEADER_NAME) == "thread_name" and \
+                process_name == TraceViewHeaderConstant.PROCESS_STEP_TRACE:
+            value.setdefault(StrConstant.TRACE_HEADER_ARGS, {})[StrConstant.TRACE_HEADER_NAME] = \
+                f'{process_name}({value.get(StrConstant.TRACE_HEADER_ARGS, {}).get(StrConstant.TRACE_HEADER_NAME, "")})'
+
+        if cls.is_cann_ai_stack_data(layer_info, value):
+            value[StrConstant.TRACE_HEADER_NAME] = f'{process_name}@{value.get(StrConstant.TRACE_HEADER_NAME, "")}'
+
+    @classmethod
+    def get_layer_label_and_sort(cls: any, pid: str, layer_info: TraceViewHeaderConstant.LayerInfo) -> list:
+        """
+        get layer_label layer_sort headers
+        """
+        label_header = [["process_labels", pid, InfoConfReader().get_json_tid_data(), layer_info.general_layer]]
+        sort_header = [["process_sort_index", pid, InfoConfReader().get_json_tid_data(), layer_info.sort_index]]
+        process_label = TraceViewManager.metadata_event(label_header)
+        process_sort = TraceViewManager.metadata_event(sort_header)
+        return process_label + process_sort
+
+    @classmethod
+    def is_cann_ai_stack_data(cls: any, layer_info: TraceViewHeaderConstant.LayerInfo, value: dict) -> bool:
+        """
+        return whether the data is cann ai stack data
+        """
+        return value.get("ph") == "X" and \
+               layer_info.component_layer == TraceViewHeaderConstant.COMPONENT_LAYER_CANN
 
     def add_export_data(self: any, data: str, data_type: str) -> None:
         """
@@ -59,7 +117,7 @@ class MsprofTimeline:
         else:
             try:
                 if isinstance(json_list, list) and json_list:
-                    self.add_sort_index(json_list, data_type)
+                    self.add_sort_index(json_list)
                     self.add_connect_json_line(json_list, data_type)
                     json_list = filter(
                         lambda value: value["ph"] == "M" or self.is_in_iteration(value),
@@ -77,25 +135,28 @@ class MsprofTimeline:
         for connect_obj in self.CONNECT_LIST:
             connect_obj(self._result_dir).add_connect_line(json_list, data_type)
 
-    def add_sort_index(self: any, json_list: list, data_type: str) -> None:
+    def add_sort_index(self: any, json_list: list) -> None:
         """
         add sort index and header
-        :param data_type: data type
         :param json_list: json list
         """
         if isinstance(json_list, list):
-            pid_list = set()
-            for value in json_list:
-                # json_list contains different type data
-                format_pid = "{}_{}".format(getattr(ExportDataType, data_type.upper()).value,
-                                            value.get(StrConstant.TRACE_HEADER_PID,
-                                                      TraceViewHeaderConstant.DEFAULT_PID_VALUE))
-                if value.get(StrConstant.TRACE_HEADER_NAME, "") == "process_name":
-                    pid_list.add(format_pid)
-                value[StrConstant.TRACE_HEADER_PID] = format_pid
-            for pid in pid_list:
-                json_list.extend(
-                    self.get_timeline_header(pid, getattr(ExportDataType, data_type.upper()).value))
+            filtered_data_list = self.filter_msprof_timeline(json_list)
+            json_list.clear()
+            for filtered_data in filtered_data_list:
+                process_name = filtered_data[1]
+                json_data = filtered_data[2]
+                if process_name in (TraceViewHeaderConstant.PROCESS_TASK, TraceViewHeaderConstant.PROCESS_STEP_TRACE):
+                    pid = TraceViewHeaderConstant.DEFAULT_PID_VALUE
+                else:
+                    pid = filtered_data[0]
+                # get the msprof timeline layer info
+                layer_info = self.get_layer_info(process_name)
+                format_pid = "{}_{}".format(layer_info.sort_index, pid)
+                for value in json_data:
+                    self.modify_timeline_info(process_name, layer_info, format_pid, value)
+                json_list.extend(json_data)
+                json_list.extend(self.get_layer_label_and_sort(format_pid, layer_info))
 
     def export_all_data(self: any) -> str:
         """
@@ -106,7 +167,7 @@ class MsprofTimeline:
         if not isinstance(data, EmptyClass):
             data_list = json.loads(data)
             if isinstance(data_list, list) and data_list:
-                self.add_sort_index(data_list, ExportDataType.STEP_TRACE.name.lower())
+                self.add_sort_index(data_list)
                 data_list.extend(self._export_data_list)
                 return json.dumps(data_list)
         return json.dumps(self._export_data_list)
@@ -133,3 +194,16 @@ class MsprofTimeline:
         self._iter_range = iter_range
         self._model_id = iter_range.model_id
         self._iteration_time = MsprofIteration(result_dir).get_iter_interval(iter_range, NumberConstant.MICRO_SECOND)
+
+    def get_layer_info(self: any, process_name: str) -> TraceViewHeaderConstant.LayerInfo:
+        """
+        get msprof timeline layer info based on map
+        """
+        layer_info = TraceViewHeaderConstant.LAYER_INFO_MAP.get(process_name, "")
+        if layer_info:
+            return layer_info
+        else:
+            self._default_sort_index += 1
+            return TraceViewHeaderConstant.LayerInfo(process_name, TraceViewHeaderConstant.GENERAL_LAYER_NPU,
+                                                     self._default_sort_index)
+

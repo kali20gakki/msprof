@@ -8,6 +8,7 @@ from common_func.ai_stack_data_check_manager import AiStackDataCheckManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.msvp_common import path_check
 from common_func.path_manager import PathManager
+from common_func.trace_view_header_constant import TraceViewHeaderConstant
 from common_func.trace_view_manager import TraceViewManager
 from msmodel.interface.view_model import ViewModel
 
@@ -15,7 +16,12 @@ from msmodel.interface.view_model import ViewModel
 class AclToHwts:
     MODULE_ACL = 'acl'
     MODULE_TASK_TIME = 'task_time'
-    ACL_OP_NAME = ['aclopExecute', 'aclopExecuteV2', 'aclopCompileAndExecute', 'aclopCompileAndExecuteV2']
+    ACL_OP_NAME = (
+        f'{TraceViewHeaderConstant.PROCESS_ACL}@aclopExecute',
+        f'{TraceViewHeaderConstant.PROCESS_ACL}@aclopExecuteV2',
+        f'{TraceViewHeaderConstant.PROCESS_ACL}@aclopCompileAndExecute',
+        f'{TraceViewHeaderConstant.PROCESS_ACL}@aclopCompileAndExecuteV2',
+    )
     ACL_OP_TYPE = 'ACL_OP'
 
     def __init__(self: any, result_dir: str) -> None:

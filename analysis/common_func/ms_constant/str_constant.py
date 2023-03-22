@@ -135,6 +135,7 @@ class StrConstant:
     TRACE_HEADER_PID = "pid"
     TRACE_HEADER_TID = "tid"
     TRACE_HEADER_NAME = "name"
+    TRACE_HEADER_ARGS = "args"
 
     TASK_START_TIME = 'Task Start Time'
 

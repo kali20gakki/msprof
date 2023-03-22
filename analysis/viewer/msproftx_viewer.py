@@ -40,7 +40,7 @@ class MsprofTxViewer:
             tid_values.add(msproftx_data.tid)
         meta_data = Utils.generator_to_list(["process_name", pid_value,
                                              InfoConfReader().get_json_tid_data(),
-                                             TraceViewHeaderConstant.PEOCESS_MSPROFTX]
+                                             TraceViewHeaderConstant.PROCESS_MSPROFTX]
                                             for pid_value in pid_values)
         meta_data.extend(Utils.generator_to_list(["thread_name", pid_value, tid_value,
                                                   "Thread {}".format(tid_value)] for tid_value in tid_values

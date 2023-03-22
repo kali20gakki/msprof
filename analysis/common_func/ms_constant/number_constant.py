@@ -128,6 +128,8 @@ class NumberConstant:
     MAX_RANK_NUMS = 4096
     B_to_MB = 1024 ** 2
 
+    DEFAULT_LAYER_SORT_START = 10
+
     @property
     def conversion_time(self: any) -> float:
         """
