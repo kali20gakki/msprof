@@ -35,9 +35,9 @@ class TestNpuMemViewer(unittest.TestCase):
         }
         npu_mem_dto = NpuMemDto()
         npu_mem_dto.event = '1'
-        npu_mem_dto.hbm = 2
-        npu_mem_dto.ddr = 3
-        npu_mem_dto.memory = 4
+        npu_mem_dto.hbm = 0
+        npu_mem_dto.ddr = 0
+        npu_mem_dto.memory = 0
         npu_mem_dto.timestamp = 5
         with mock.patch(NAMESPACE + '.NpuMemModel.check_db', return_value=True), \
                 mock.patch(NAMESPACE + '.NpuMemModel.check_table', return_value=True), \
@@ -45,7 +45,7 @@ class TestNpuMemViewer(unittest.TestCase):
             check = NpuMemViewer(config, params)
             ret = check.get_summary_data()
             self.assertEqual((["event", "ddr", "hbm", "timestamp", "memory"],
-                              [['Device', 3, 2, 4, 5]],
+                              [['Device', 0.0, 0.0, 0.0, 5]],
                               1), ret)
 
     def test_get_timeline_data_should_return_empty_when_db_check_fail(self):
@@ -86,8 +86,8 @@ class TestNpuMemViewer(unittest.TestCase):
         npu_mem_dto = NpuMemDto()
         npu_mem_dto.event = '0'
         npu_mem_dto.hbm = 0
-        npu_mem_dto.ddr = 8
-        npu_mem_dto.memory = 8
+        npu_mem_dto.ddr = 0
+        npu_mem_dto.memory = 0
         npu_mem_dto.timestamp = 6
         with mock.patch(NAMESPACE + '.NpuMemModel.check_db', return_value=True), \
                 mock.patch(NAMESPACE + '.NpuMemModel.check_table', return_value=True), \
@@ -95,7 +95,7 @@ class TestNpuMemViewer(unittest.TestCase):
             check = NpuMemViewer(config, params)
             ret = check.get_timeline_data()
             self.assertEqual('[{"name": "process_name", "pid": 0, "tid": 0, "args": {"name": "NPU_MEM"}, '
-                             '"ph": "M"}, {"name": "APP/DDR", "ts": 6, "pid": 0, "tid": 0, "args": {"KB": '
-                             '8}, "ph": "C"}, {"name": "APP/HBM", "ts": 6, "pid": 0, "tid": 0, "args": '
-                             '{"KB": 0}, "ph": "C"}, {"name": "APP/Memory", "ts": 6, "pid": 0, "tid": 0, '
-                             '"args": {"KB": 8}, "ph": "C"}]', ret)
+                             '"ph": "M"}, {"name": "APP/DDR", "ts": 6.0, "pid": 0, "tid": 0, "args": '
+                             '{"KB": 0.0}, "ph": "C"}, {"name": "APP/HBM", "ts": 6.0, "pid": 0, "tid": 0, '
+                             '"args": {"KB": 0.0}, "ph": "C"}, {"name": "APP/Memory", "ts": 6.0, "pid": 0, '
+                             '"tid": 0, "args": {"KB": 0.0}, "ph": "C"}]', ret)

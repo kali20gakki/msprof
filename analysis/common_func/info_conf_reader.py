@@ -289,6 +289,14 @@ class InfoConfReader:
                 return freq
         return self.HOST_DEFAULT_FREQ
 
+    def get_host_time_by_sampling_timestamp(self: any, timestamp: any) -> int:
+        """
+        Obtain the actual time based on the sampling timestamp (us).
+        :return: int
+        """
+        return int(timestamp * NumberConstant.USTONS + self.get_start_timestamp() +
+                   self.get_delta_time() * NumberConstant.NANO_SECOND) / NumberConstant.USTONS
+
     def _load_json(self: any, result_path: str) -> None:
         """
         load info.json once
@@ -354,3 +362,4 @@ class InfoConfReader:
         if self._host_mon <= 0 or self._dev_cnt <= 0:
             logging.error("The monotonic time %s or cntvct %s is unusual, "
                           "maybe get data from driver failed", self._host_mon, self._dev_cnt)
+
