@@ -63,7 +63,7 @@ int main(int argc, const char **argv, const char **envp)
     }
     ret = MsprofManager::instance()->MsProcessCmd();
     if (ret != PROFILING_SUCCESS) {
-        CmdLog::instance()->CmdErrorLog("Running profiling failed.Please check slog for more info.");
+        CmdLog::instance()->CmdErrorLog("Running profiling failed.Please check log for more info.");
         return PROFILING_FAILED;
     }
     // process the end of the msprofbin
