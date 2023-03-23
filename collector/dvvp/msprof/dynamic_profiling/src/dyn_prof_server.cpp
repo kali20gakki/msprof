@@ -172,7 +172,7 @@ void DyncProfMsgProcSrv::DynProfServerProcMsg()
             MSPROF_LOGE("Dynamic profiling process message recv fail, recvLen=%d errno=%u.", recvLen, errno);
             break;
         }
-        if (recvMsg.msgDataLen >= DYN_PROF_REQ_MSG_MAX_LEN) {
+        if (recvMsg.msgDataLen != strnlen(recvMsg.msgData, DYN_PROF_REQ_MSG_MAX_LEN)) {
             MSPROF_LOGW("Dynamic profiling recv message error, type=%u len=%u.", recvMsg.msgType, recvMsg.msgDataLen);
             break;
         }

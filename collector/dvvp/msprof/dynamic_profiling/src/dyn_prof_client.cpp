@@ -267,7 +267,12 @@ int DyncProfMsgProcCli::SendMsgToServer(DynProfMsgType reqMsgtype, DynProfMsgTyp
     DynProfReqMsg reqMsg;
     reqMsg.msgType = reqMsgtype;
     reqMsg.msgDataLen = reqMsgParams.size();
-    errno_t err = memcpy_s(reqMsg.msgData, sizeof(reqMsg.msgData) - 1, reqMsgParams.c_str(), reqMsgParams.size());
+    errno_t err = memset_s(reqMsg.msgData, sizeof(reqMsg.msgData), 0, sizeof(reqMsg.msgData));
+    if (err != EOK) {
+        MSPROF_LOGE("Dynamic profiling client clear reqMsg failed, err: %d", err);
+        return PROFILING_FAILED;
+    }
+    err = memcpy_s(reqMsg.msgData, sizeof(reqMsg.msgData) - 1, reqMsgParams.c_str(), reqMsgParams.size());
     if (err != EOK) {
         MSPROF_LOGE("Dynamic profiling client copy reqMsg failed, err: %d, reqMsg: %s", err, reqMsgParams.c_str());
         return PROFILING_FAILED;
