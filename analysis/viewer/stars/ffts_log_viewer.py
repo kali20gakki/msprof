@@ -63,7 +63,8 @@ class FftsLogViewer(BaseViewer):
         if not result:
             result = {
                 "status": NumberConstant.WARN,
-                "info": "Can not export ffts sub task time data, the ffts switch may be set to OFF."
+                "info": "Can not export ffts sub task time data, the current chip does not support "
+                        "exporting this data or the data may be not collected."
             }
         return TraceViewer("StarsViewer").format_trace_events(result)
 
