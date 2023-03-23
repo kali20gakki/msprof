@@ -71,7 +71,7 @@ std::string PluginHandle::GetAscendHalPath() const
         return "";
     }
     std::ifstream infoFile(ascendInstallInfoPath);
-    if (!infoFile) {
+    if (!infoFile.is_open()) {
         return "";
     }
     std::string line;
@@ -84,6 +84,7 @@ std::string PluginHandle::GetAscendHalPath() const
             break;
         }
     }
+    infoFile.close();
     if (installPath.empty()) {
         return "";
     }
