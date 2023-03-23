@@ -83,9 +83,10 @@ void DyncProfMsgProcSrv::Run(const struct error_message::Context &errorContext)
     timeval timeout = {DYN_PROF_SERVER_ACCEPT_WAIT_TIME, 0};
     (void)setsockopt(srvSockFd_, SOL_SOCKET, SO_RCVTIMEO, reinterpret_cast<CHAR_PTR>(&timeout), sizeof(struct timeval));
 
+    uint32_t acceptTimes = 0;
     sockaddr_un clt_addr;
     socklen_t clt_addr_len = sizeof(clt_addr);
-    while (srvStarted_) {
+    while (srvStarted_ && (acceptTimes < DYN_PROF_MAX_ACCEPT_TIMES)) {
         cliSockFd_ = accept(srvSockFd_, reinterpret_cast<sockaddr *>(&clt_addr), &clt_addr_len);
         if (cliSockFd_ < 0) {
             if (errno == EAGAIN) {
@@ -95,10 +96,17 @@ void DyncProfMsgProcSrv::Run(const struct error_message::Context &errorContext)
                 break;
             }
         }
+        acceptTimes++;
         timeval timeout2 = {DYN_PROF_SERVER_RECV_WAIT_TIME, 0};
         (void)setsockopt(cliSockFd_, SOL_SOCKET, SO_RCVTIMEO, reinterpret_cast<CHAR_PTR>(&timeout2),
             sizeof(struct timeval));
         DynProfServerProcMsg();
+        close(cliSockFd_);
+        cliSockFd_ = -1;
+    }
+    if (acceptTimes >= DYN_PROF_MAX_ACCEPT_TIMES) {
+        MSPROF_LOGW("Dynamic profiling accept times over %u, stop dynamic profiling.", DYN_PROF_MAX_ACCEPT_TIMES);
+        Stop();
     }
 }
 
