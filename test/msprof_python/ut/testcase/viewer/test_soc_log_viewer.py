@@ -49,7 +49,8 @@ class TestFftsLogViewer(unittest.TestCase):
             check = FftsLogViewer(configs, params)
             ret = check.get_timeline_data()
             self.assertEqual(ret, json.dumps(
-                {"status": 2, "info": "Can not export ffts sub task time data, the ffts switch may be set to OFF."}))
+                {"status": 2, "info": "Can not export ffts sub task time data, the current chip does not support "
+                                      "exporting this data or the data may be not collected."}))
 
     def test_get_trace_timeline(self):
         configs, params = {}, {}
