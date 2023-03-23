@@ -100,10 +100,14 @@ void MsprofCallbackHandler::InitReporters()
     }
 }
 
-int MsprofCallbackHandler::ReportData(CONST_VOID_PTR data, uint32_t len /* = 0 */) const
+int MsprofCallbackHandler::ReportData(CONST_VOID_PTR data, uint32_t len) const
 {
     if (reporter_ == nullptr) {
         MSPROF_LOGE("reporter is not started, module: %s", module_.c_str());
+        return PROFILING_FAILED;
+    }
+    if (len != sizeof(struct ReporterData)) {
+        MSPROF_LOGE("report data len is invalid %u", len);
         return PROFILING_FAILED;
     }
     return reporter_->Report(reinterpret_cast<CONST_REPORT_DATA_PTR>(data));
