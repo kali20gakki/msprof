@@ -519,7 +519,7 @@ public:
         ioss >> ret;
         return ret;
     }
-    static bool IsAppName(const std::string paramsName);
+    static bool IsPythonOrBash(const std::string paramsName);
     static bool IsDynProfMode();
     static bool IsClusterRunEnv();
     static int32_t GetRankId();

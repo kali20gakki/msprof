@@ -1047,7 +1047,7 @@ bool ParamValidation::MsprofCheckAppValid(std::string &appParam) const
     std::string resultAppParam;
     std::vector<std::string> AppParamsList = Utils::Split(appParam, false, "", " ");
     std::string cmdParam = AppParamsList[0];
-    if (!Utils::IsAppName(cmdParam)) {
+    if (Utils::IsPythonOrBash(cmdParam)) {
         // bash xxx.sh args... or python xxx/main.py args...
         if (MsprofCheckNotAppValid(AppParamsList, resultAppParam) == PROFILING_SUCCESS) {
             appParam = resultAppParam;
@@ -1099,45 +1099,11 @@ int ParamValidation::MsprofCheckNotAppValid(const std::vector<std::string> &AppP
     } else {
         resultAppParam = cmdParam + " ";
     }
-    if (MsprofCheckAppScriptValid(AppParamsList) != PROFILING_SUCCESS) {
-        return PROFILING_FAILED;
-    }
     for (size_t i = 1; i < AppParamsList.size(); i++) {
-        std::string tmpStr = Utils::CanonicalizePath(AppParamsList[i]);
-        if (!tmpStr.empty()) {
-            resultAppParam += tmpStr;
-        } else {
             resultAppParam += AppParamsList[i];
-        }
         if (i < (AppParamsList.size() - 1)) {
             resultAppParam += " ";
         }
-    }
-    return PROFILING_SUCCESS;
-}
- 
-int ParamValidation::MsprofCheckAppScriptValid(const std::vector<std::string> &appParams) const
-{
-    if (appParams.size() < MIN_APP_LENTH_WITH_SCRIPT) {
-        MSPROF_LOGE("No input script to run.");
-        return PROFILING_FAILED;
-    }
-    std::string absoluteScriptPath = Utils::RelativePathToAbsolutePath(appParams[1]);
-    std::string scriptParam = Utils::CanonicalizePath(absoluteScriptPath);
-    if (Utils::CanonicalizePath(absoluteScriptPath).empty()) {
-        MSPROF_LOGE("Input script (%s) is not exist or permission denied.", absoluteScriptPath.c_str());
-        CMD_LOGE("Input script (%s) is not exist or permission denied.", absoluteScriptPath.c_str());
-        return PROFILING_FAILED;
-    }
-    if (Utils::IsSoftLink(absoluteScriptPath)) {
-        MSPROF_LOGE("Input script (%s) is soft link, not support", absoluteScriptPath.c_str());
-        CMD_LOGE("Input script (%s) is soft link, not support", absoluteScriptPath.c_str());
-        return PROFILING_FAILED;
-    }
-    if (Utils::IsDir(absoluteScriptPath)) {
-        MSPROF_LOGE("Input script (%s) is a directory, not support", absoluteScriptPath.c_str());
-        CMD_LOGE("Input script (%s) is a directory, not support", absoluteScriptPath.c_str());
-        return PROFILING_FAILED;
     }
     return PROFILING_SUCCESS;
 }

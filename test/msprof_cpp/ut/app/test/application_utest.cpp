@@ -136,6 +136,7 @@ TEST_F(PROF_APPLICATION_TEST, LaunchApp) {
 		.stubs()
 		.will(returnValue(PROFILING_FAILED))
 		.then(returnValue(PROFILING_SUCCESS));
+        params->cmdPath = "bash";
 	FILE *fp = (FILE *)0x12345;
 
 	MOCKER(analysis::dvvp::common::utils::Utils::CanonicalizePath)
