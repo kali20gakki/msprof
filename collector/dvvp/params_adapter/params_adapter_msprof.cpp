@@ -268,22 +268,17 @@ void ParamsAdapterMsprof::SpliteAppPath(const std::string &appParams)
         tmpAppParamers = appParams.substr(index + 1);
     }
     cmdPath_ = appParams.substr(0, index);
-    if (!Utils::IsAppName(cmdPath_)) {
+    if (Utils::IsPythonOrBash(cmdPath_)) {
         // bash xxx.sh args...
         if (cmdPath_.find('/') != std::string::npos) {
             cmdPath_ = Utils::RelativePathToAbsolutePath(cmdPath_);
         }
-        index = tmpAppParamers.find_first_of(" ");
-        if (index != std::string::npos) {
-            appParameters_ = tmpAppParamers.substr(index + 1);
-        }
-        Utils::SplitPath(tmpAppParamers.substr(0, index), appDir_, app_);
     } else {
         // ./main args...
         cmdPath_ = Utils::RelativePathToAbsolutePath(cmdPath_);
-        appParameters_ = tmpAppParamers;
-        Utils::SplitPath(cmdPath_, appDir_, app_);
     }
+    appParameters_ = tmpAppParamers;
+    Utils::SplitPath(cmdPath_, appDir_, app_);
 }
 
 void ParamsAdapterMsprof::SetParamsSelf()
