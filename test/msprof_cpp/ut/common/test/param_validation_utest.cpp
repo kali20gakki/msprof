@@ -432,7 +432,7 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, MsprofCheckAppValid)
     auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
     EXPECT_EQ(false, entry->MsprofCheckAppValid(app));
     app = "bash";
-    EXPECT_EQ(false, entry->MsprofCheckAppValid(app));
+    EXPECT_EQ(true, entry->MsprofCheckAppValid(app));
     app = "main";
     EXPECT_EQ(false, entry->MsprofCheckAppValid(app));
 }

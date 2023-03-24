@@ -43,13 +43,6 @@ int Application::PrepareLaunchAppCmd(std::stringstream &ssCmdApp,
         return PROFILING_FAILED;
     }
     ssCmdApp << params->cmdPath;
-    ssCmdApp << " ";
-
-    if (!analysis::dvvp::common::utils::Utils::IsAppName(params->cmdPath)) {
-        ssCmdApp << params->app_dir;
-        ssCmdApp << MSVP_SLASH;
-        ssCmdApp << params->app;
-    }
 
     if (!params->app_parameters.empty()) {
         ssCmdApp << " ";
@@ -87,7 +80,7 @@ std::string Application::GetCmdString(const std::string paramsName)
     if (paramsName.empty()) {
         return "";
     }
-    if (analysis::dvvp::common::utils::Utils::IsAppName(paramsName)) {
+    if (!analysis::dvvp::common::utils::Utils::IsPythonOrBash(paramsName)) {
         return analysis::dvvp::common::utils::Utils::CanonicalizePath(paramsName);
     } else {
         return paramsName;
@@ -136,7 +129,6 @@ int Application::LaunchApp(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParam
         MSPROF_LOGE("app params are not valid");
         return PROFILING_FAILED;
     }
-    std::string workDirPath = params->app_dir + MSVP_SLASH + params->app;
     std::vector<std::string> argsVec;
     std::vector<std::string> envsVec;
     PrepareAppArgs(paramsCmd, argsVec);  // args
@@ -146,8 +138,10 @@ int Application::LaunchApp(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParam
         return PROFILING_FAILED;
     }
     appProcess = MSVP_MMPROCESS;  // run
-    if (analysis::dvvp::common::utils::Utils::ChangeWorkDir(workDirPath) == PROFILING_FAILED) {
-        return PROFILING_FAILED;
+    if (!analysis::dvvp::common::utils::Utils::IsPythonOrBash(params->cmdPath)) {
+        if (analysis::dvvp::common::utils::Utils::ChangeWorkDir(params->cmdPath) == PROFILING_FAILED) {
+            return PROFILING_FAILED;
+        }
     }
     int exitCode = analysis::dvvp::common::utils::INVALID_EXIT_CODE;
     ExecCmdParams execCmdParams(cmd, true, "");

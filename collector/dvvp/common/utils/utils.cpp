@@ -1377,15 +1377,15 @@ void Utils::RemoveEndCharacter(std::string &input, const char end)
     input.resize(input.size() - 1);
 }
 
-bool Utils::IsAppName(const std::string paramsName)
+bool Utils::IsPythonOrBash(const std::string paramsName)
 {
     std::string paramBaseName = BaseName(paramsName);
     std::string pythonName = "python";
     if (paramBaseName.compare("bash") == 0 || paramBaseName.compare("sh") == 0 ||
         paramBaseName.substr(0, pythonName.size()) == pythonName) {
-        return false;
+        return true;
     }
-    return true;
+    return false;
 }
 
 bool Utils::IsDynProfMode()
