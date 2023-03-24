@@ -26,6 +26,7 @@ const uint32_t DYN_PROF_MAX_STARTABLE_TIMES = 10000;
 const uint32_t DYN_PROF_IDLE_LINK_HOLD_TIME = 1800 / DYN_PROF_SERVER_RECV_WAIT_TIME; // hold idle link 1800 seconds
 const uint32_t DYN_PROF_SERVER_PROC_MSG_MAX_NUM = 100;
 const uint32_t DYN_PROF_READ_INPUT_CMD_WAIT_TIME = 1;
+const uint32_t DYN_PROF_MAX_ACCEPT_TIMES = 128;
 
 enum class DynProfMsgType {
     START_REQ = 0,
