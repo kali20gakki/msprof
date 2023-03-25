@@ -846,6 +846,19 @@ TEST_F(COMMON_UTILS_UTILS_TEST, get_child_dirs_scan_dir_fail) {
 
 }
 
+TEST_F(COMMON_UTILS_UTILS_TEST, get_child_dirs_scan_dir_exceeds_maximum_depth)
+{
+    GlobalMockObject::verify();
+    std::string dir1("/tmp/2/3/4/5/6/7/8/9/10/11/12/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28");
+    std::string dir2("/tmp/2");
+    std::string dir("/tmp");
+    int ret = Utils::CreateDir(dir1);
+    bool isRecur = true;
+    std::vector<std::string> childDir;
+    Utils::GetChildDirs(dir, isRecur, childDir);
+    Utils::RemoveDir(dir2);
+}
+
 TEST_F(COMMON_UTILS_UTILS_TEST, get_child_dirs_recur) {
     GlobalMockObject::verify();
 
