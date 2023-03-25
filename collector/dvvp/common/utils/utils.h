@@ -481,7 +481,8 @@ public:
     static unsigned long long GetCPUCycleCounter();
     static double StatCpuRealFreq();
     static void GetTime(unsigned long long &startRealtime, unsigned long long &startMono, unsigned long long &cntvct);
-    static void GetChildDirs(const std::string &dir, bool isRecur, std::vector<std::string> &childDirs);
+    static void GetChildDirs(const std::string &dir, bool isRecur, std::vector<std::string> &childDirs,
+                             unsigned int depthCnt = 1);
     static std::vector<int> GetChildPid(int pid);
     static std::vector<int> GetChildPidRecursive(int pid, unsigned int recursiveLevel);
     static std::string TimestampToTime(const std::string &timestamp, int unit = 1);
