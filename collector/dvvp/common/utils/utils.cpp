@@ -37,6 +37,7 @@ using namespace Collector::Dvvp::Mmpa;
 using FuncIntPtr = int(*)(int);
 std::mutex g_envMtx;
 const unsigned long long CHANGE_FROM_S_TO_NS = 1000000000;
+const unsigned int MAX_FUNC_DEPTH = 20;
 
 unsigned long long Utils::GetClockRealtime()
 {
@@ -838,9 +839,14 @@ void Utils::GetFiles(const std::string &dir, bool isRecur, std::vector<std::stri
     MmScandirFree(dirNameList, count);
 }
 
-void Utils::GetChildDirs(const std::string &dir, bool isRecur, std::vector<std::string> &childDirs)
+void Utils::GetChildDirs(const std::string &dir, bool isRecur, std::vector<std::string> &childDirs,
+                         unsigned int depthCnt)
 {
     if (dir.empty()) {
+        return;
+    }
+    if (depthCnt > MAX_FUNC_DEPTH) {
+        MSPROF_LOGW("Directory hierarchy exceeds maximum value: %d", depthCnt);
         return;
     }
 
@@ -862,7 +868,7 @@ void Utils::GetChildDirs(const std::string &dir, bool isRecur, std::vector<std::
             if (!isRecur) {
                 continue;
             }
-            GetChildDirs(childPath, isRecur, childDirs);
+            GetChildDirs(childPath, isRecur, childDirs, depthCnt + 1);
         }
     }
 
