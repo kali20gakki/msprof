@@ -4,6 +4,7 @@
 
 import argparse
 import importlib
+import logging
 import os
 import sys
 
@@ -71,7 +72,10 @@ class MsprofInfoConstruct:
             return
 
         args = parser.parse_args(sys.argv[1:])
-        self.load_basic_info_model(args)
+        try:
+            self.load_basic_info_model(args)
+        except Exception as err:
+            logging.error(err)
 
 
 if __name__ == '__main__':
