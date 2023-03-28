@@ -332,13 +332,13 @@ class InfoConfReader:
         load start log
         """
         dev_start_path = self.get_conf_file_path(result_path, get_dev_start_compiles())
+        if not os.path.exists(dev_start_path):
+            return
         try:
             with open(dev_start_path, "r") as log_file:
                 self._load_dev_start_path_line_by_line(log_file)
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
             logging.error(err, exc_info=Constant.TRACE_BACK_SWITCH)
-        finally:
-            pass
 
     def _load_host_start_time(self: any, project_path: str) -> None:
         """
