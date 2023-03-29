@@ -479,12 +479,12 @@ void InfoJson::SetPidInfo(SHARED_PTR_ALIA<InfoMain> infoMain, int pid)
         pidtmp = std::to_string(pid);
         processInfoPath = "/proc/" + pidtmp + "/status";
         std::ifstream processInfo(processInfoPath);
-        if(processInfo.is_open()) {
+        if (processInfo.is_open()) {
             std::getline(processInfo, pidNameTmp);
         }
         std::regex searchPidName("Name:\\s+(\\S+)");
         std::smatch searchPidNameResult;
-        if(std::regex_search(pidNameTmp, searchPidNameResult, searchPidName)) {
+        if (std::regex_search(pidNameTmp, searchPidNameResult, searchPidName)) {
             pidNameTmp = searchPidNameResult[1];
         } else {
             MSPROF_LOGE("Set pid_name failed, pid=%d", pid);
