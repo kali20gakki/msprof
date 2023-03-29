@@ -4,6 +4,7 @@
 
 from common_func.db_name_constant import DBNameConstant
 from msmodel.interface.view_model import ViewModel
+from viewer.runtime_report import add_mem_bound
 
 
 class DataManager:
@@ -38,16 +39,21 @@ class DataManager:
         """
         add memory bound data
         """
-        if "mac_ratio" in headers and "vec_ratio" in headers and "mte2_ratio" in headers:
+        if all(header in headers for header in ("mac_ratio", "vec_ratio", "mte2_ratio")):
             mte2_index = headers.index("mte2_ratio")
             vec_index = headers.index("vec_ratio")
             mac_index = headers.index("mac_ratio")
             headers.append("memory_bound")
             for index, row in enumerate(data):
-                memory_bound = 0
-                if max(row[vec_index], row[mac_index]):
-                    memory_bound = cls.ACCURACY % float(row[mte2_index] / max(row[vec_index], row[mac_index]))
-                data[index] = list(row) + [memory_bound]
+                data[index] = add_mem_bound(list(row), vec_index, mac_index, mte2_index)
+
+        elif all(header in headers for header in ("mac_exe_ratio", "vec_exe_ratio", "mte2_exe_ratio")):
+            mte2_index = headers.index("mte2_exe_ratio")
+            vec_index = headers.index("vec_exe_ratio")
+            mac_index = headers.index("mac_exe_ratio")
+            headers.append("memory_bound")
+            for index, row in enumerate(data):
+                data[index] = add_mem_bound(list(row), vec_index, mac_index, mte2_index)
 
     @classmethod
     def add_iter_id(cls: any, *args: any, task_type_index: int = None, iter_id: int = 1) -> bool:

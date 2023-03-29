@@ -8,6 +8,7 @@ from collections import deque
 from analyzer.scene_base.profiling_scene import ProfilingScene
 from common_func.common import CommonConstant
 from common_func.constant import Constant
+from common_func.data_manager import DataManager
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.number_constant import NumberConstant
@@ -19,7 +20,6 @@ from common_func.platform.chip_manager import ChipManager
 from common_func.utils import Utils
 from viewer.ge_info_report import get_ge_hash_dict
 from viewer.ge_info_report import get_ge_model_name_dict
-from viewer.runtime_report import add_mem_bound
 
 
 class AiCoreOpReport:
@@ -136,19 +136,6 @@ class AiCoreOpReport:
                     ai_core_float_cols[index] = "round({0}, {1})".format(col, NumberConstant.DECIMAL_ACCURACY)
 
         return ai_core_float_cols
-
-    @staticmethod
-    def _add_memory_bound(headers: list, data: list) -> None:
-        """
-        add memory bound data
-        """
-        if "mac_ratio" in headers and "vec_ratio" in headers and "mte2_ratio" in headers:
-            mte2_index = headers.index("mte2_ratio")
-            vec_index = headers.index("vec_ratio")
-            mac_index = headers.index("mac_ratio")
-            headers.append("memory_bound")
-            for index, row in enumerate(data):
-                data[index] = add_mem_bound(list(row), vec_index, mac_index, mte2_index)
 
     @classmethod
     def get_op_summary_data(cls: any, project_path: str, db_path: str, configs: dict) -> tuple:
@@ -331,7 +318,7 @@ class AiCoreOpReport:
         data = cls._update_op_name_from_hash(project_path, data)
         if not ProfilingScene().is_operator():
             data = cls._update_model_name_and_infer_id(project_path, data)
-        cls._add_memory_bound(headers, data)
+        DataManager.add_memory_bound(headers, data)
         return data
 
     @classmethod
