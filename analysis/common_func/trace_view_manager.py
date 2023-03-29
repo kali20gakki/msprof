@@ -95,7 +95,7 @@ class TraceViewManager:
         while data_list:
             if start_time < float(int(data_list[0].get('timestamp', '0')) / DBManager.NSTOUS) < end_time:
                 connect_dict = {
-                    'name': 'connect', 'ph': 's', 'cat': StrConstant.ASYNC_ACL_NPU,
+                    'name': 'acl_to_npu', 'ph': 's', 'cat': StrConstant.ASYNC_ACL_NPU,
                     'id': '{}-{}-{}'.format(data_list[0].get('stream_id'), data_list[0].get('task_id'),
                                             data_list[0].get('batch_id')),
                     'pid': data_dict.get('pid'), 'tid': data_dict.get('tid'), 'ts': start_time
@@ -119,7 +119,7 @@ class TraceViewManager:
                 if not all(str(args.get(id, '')) for id in ('Stream Id', 'Task Id', 'Batch Id')):
                     continue
                 connect_dict = {
-                    'name': 'connect', 'ph': 'f',
+                    'name': 'acl_to_npu', 'ph': 'f',
                     'id': '{}-{}-{}'.format(args.get('Stream Id'), args.get('Task Id'), args.get('Batch Id')),
                     'cat': StrConstant.ASYNC_ACL_NPU, 'pid': data_dict.get('pid'), 'tid': data_dict.get('tid'),
                     'ts': data_dict.get('ts'), 'bp': 'e'
