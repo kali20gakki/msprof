@@ -261,6 +261,7 @@ message InfoMain {
     repeated NetCardInfo netCard = 19;
     int32 rank_id = 20;
     repeated CycleToTimeInfo cycleToTime = 21;
+    string pid_name = 22;
 }
 // for generating info.json _________END
 

@@ -10,6 +10,7 @@
 #if (defined(linux) || defined(__linux__))
 #include <unistd.h>
 #endif
+#include <regex>
 #include "ai_drv_dev_api.h"
 #include "proto/profiler.pb.h"
 #include "config/config.h"
@@ -469,12 +470,28 @@ int InfoJson::AddOtherInfo(SHARED_PTR_ALIA<InfoMain> infoMain)
 void InfoJson::SetPidInfo(SHARED_PTR_ALIA<InfoMain> infoMain, int pid)
 {
     std::string pidtmp;
+    std::string pidNameTmp;
+    std::string processInfoPath;
     if (pid == HOST_PID_DEFAULT) {
         pidtmp = "NA";
+        pidNameTmp = "NA";
     } else {
         pidtmp = std::to_string(pid);
+        processInfoPath = "/proc/" + pidtmp + "/status";
+        std::ifstream processInfo(processInfoPath);
+        if(processInfo.is_open()) {
+            std::getline(processInfo, pidNameTmp);
+        }
+        std::regex searchPidName("Name:\\s+(\\S+)");
+        std::smatch searchPidNameResult;
+        if(std::regex_search(pidNameTmp, searchPidNameResult, searchPidName)) {
+            pidNameTmp = searchPidNameResult[1];
+        } else {
+            MSPROF_LOGE("Set pid_name failed, pid=%d", pid);
+        }
     }
     infoMain->set_pid(pidtmp);
+    infoMain->set_pid_name(pidNameTmp);
     return;
 }
 
