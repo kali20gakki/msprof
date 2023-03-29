@@ -47,9 +47,9 @@ class TestTaskQueueViewer(unittest.TestCase):
     result = '[{"name": "Add", "pid": 1, "tid": 11, "ts": 0.001, "ph": "X", "args": {}, "dur": 0.002}, {"name": ' \
              '"Add", "pid": 1, "tid": 12, "ts": 0.005, "ph": "X", "args": {}, "dur": 0.005}, {"name": "process_name",' \
              ' "pid": 1, "tid": 0, "args": {"name": "PTA"}, "ph": "M"}, {"name": "thread_name", "pid": 1, "tid": 11,' \
-             ' "args": {"name": "Tread 11 (Enqueue)"}, "ph": "M"}, {"name": "thread_sort_index", "pid": 1, "tid": 11,' \
+             ' "args": {"name": "Thread 11 (Enqueue)"}, "ph": "M"}, {"name": "thread_sort_index", "pid": 1, "tid": 11,'\
              ' "args": {"sort_index": 0}, "ph": "M"}, {"name": "thread_name", "pid": 1, "tid": 12, "args": {"name":' \
-             ' "Tread 12 (Dequeue)"}, "ph": "M"}, {"name": "thread_sort_index", "pid": 1, "tid": 12, "args": ' \
+             ' "Thread 12 (Dequeue)"}, "ph": "M"}, {"name": "thread_sort_index", "pid": 1, "tid": 12, "args": ' \
              '{"sort_index": 1}, "ph": "M"}]'
 
     def test_get_task_queue_data(self):
