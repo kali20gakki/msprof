@@ -4,6 +4,7 @@ from unittest import mock
 
 from analyzer.scene_base.profiling_scene import ProfilingScene
 from common_func.constant import Constant
+from common_func.data_manager import DataManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.msvp_constant import MsvpConstant
 from constant.ut_db_name_constant import DB_AICORE_OP_SUMMARY
@@ -112,7 +113,7 @@ class TestAiCoreOpReport(unittest.TestCase):
 
     def test_get_ai_core_op_summary_data_1(self):
         with mock.patch(NAMESPACE + '.AiCoreOpReport._get_op_summary_data', side_effect=TypeError):
-            res = AiCoreOpReport.get_ai_core_op_summary_data('', '',  {})
+            res = AiCoreOpReport.get_ai_core_op_summary_data('', '', {})
         self.assertEqual(res, [])
 
         with mock.patch(NAMESPACE + '.DBManager.check_connect_db_path', return_value=(None, None)), \
@@ -125,7 +126,7 @@ class TestAiCoreOpReport(unittest.TestCase):
                 mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True):
             ProfilingScene().init('')
             ProfilingScene()._scene = Constant.STEP_INFO
-            res = AiCoreOpReport.get_ai_core_op_summary_data('', '',  {})
+            res = AiCoreOpReport.get_ai_core_op_summary_data('', '', {})
         self.assertEqual(res, [])
 
     def test_update_model_name_and_infer_id(self):
@@ -213,7 +214,6 @@ class TestAiCoreOpReport(unittest.TestCase):
                     mock.patch(NAMESPACE + '.AiCoreOpReport._union_task_ge_ai_core_data', return_value=[]), \
                     mock.patch(NAMESPACE + '.AiCoreOpReport._update_model_name_and_infer_id', return_value=[]), \
                     mock.patch(NAMESPACE + '.AiCoreOpReport._update_op_name_from_hash', return_value=[]), \
-                    mock.patch(NAMESPACE + '.AiCoreOpReport._add_memory_bound'), \
                     mock.patch(NAMESPACE + '.add_aicore_units', return_value=[]):
                 headers = config.get("headers")
                 ProfilingScene().init('')
@@ -236,7 +236,8 @@ class TestAiCoreOpReport(unittest.TestCase):
         self.assertEqual(res, 0)
 
     def test_get_used_headers(self):
-        with mock.patch(NAMESPACE + ".DBManager.fetch_all_data", return_value=[[None, "r1"], [None, "r2"], [None, "1"], [None, "2"]]):
+        with mock.patch(NAMESPACE + ".DBManager.fetch_all_data",
+                        return_value=[[None, "r1"], [None, "r2"], [None, "1"], [None, "2"]]):
             res = AiCoreOpReport._get_used_headers(mock.Mock(), "test", ["1", "2"])
         self.assertEqual(res, ["r1", "r2"])
 
@@ -247,8 +248,11 @@ class TestAiCoreOpReport(unittest.TestCase):
 
     def test_add_memory_bound(self):
         headers = ["mac_ratio", "vec_ratio", "mte2_ratio"]
-        with mock.patch(NAMESPACE + ".add_mem_bound", return_value=20):
-            res = AiCoreOpReport._add_memory_bound(headers, [[0]])
+        data = [[1, 2, 3], [5, 6, 2]]
+        DataManager.add_memory_bound(headers, data)
+        headers = ["mac_exe_ratio", "vec_exe_ratio", "mte2_exe_ratio"]
+        data = [[1, 2, 3], [5, 6, 2]]
+        DataManager.add_memory_bound(headers, data)
 
 
 class TestReportOPCounter(unittest.TestCase):
