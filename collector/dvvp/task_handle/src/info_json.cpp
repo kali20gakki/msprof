@@ -481,6 +481,8 @@ void InfoJson::SetPidInfo(SHARED_PTR_ALIA<InfoMain> infoMain, int pid)
         std::ifstream processInfo(processInfoPath);
         if (processInfo.is_open()) {
             std::getline(processInfo, pidName);
+        } else {
+            MSPROF_LOGE("Set pid_name failed(failed to open the file for pid_name info), pid=%d", pid);
         }
         std::regex searchPidName("Name:\\s+(\\S+)");
         std::smatch searchPidNameResult;
