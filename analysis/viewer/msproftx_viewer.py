@@ -112,6 +112,7 @@ class MsprofTxViewer:
         :return:timeline data
         """
         self.init_model()
+        TraceViewHeaderConstant.update_layer_info_map(InfoConfReader().get_json_pid_name())
         msproftx_data = self.model.get_timeline_data()
         try:
             trace_data = self.format_data(msproftx_data)

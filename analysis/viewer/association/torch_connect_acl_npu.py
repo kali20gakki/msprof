@@ -17,8 +17,8 @@ class TorchToAclNpu:
         f'{TraceViewHeaderConstant.PROCESS_ACL}@aclopCompileAndExecuteV2'
     )
     MSPROF_HOST_DIR = "host"
-    TORCH_PID = TraceViewHeaderConstant.LAYER_SORT_MAP.get(TraceViewHeaderConstant.COMPONENT_LAYER_PID)
-    NPU_PID = f"{TraceViewHeaderConstant.LAYER_SORT_MAP.get(TraceViewHeaderConstant.COMPONENT_LAYER_ASCEND_HW)}_0"
+    TORCH_PID = TraceViewHeaderConstant.LAYER_FRAMEWORK_SORT
+    NPU_PID = f"{TraceViewHeaderConstant.LAYER_ASCEND_HW_SORT}_0"
 
     def __init__(self, result_dir: str):
         self._result_dir = result_dir
