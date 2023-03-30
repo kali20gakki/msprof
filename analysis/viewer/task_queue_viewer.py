@@ -53,8 +53,8 @@ class TaskQueueViewer:
         ]
         for tid_data in tid_meta_data:
             if tid_data.is_enqueue_category:
-                meta_data.append(["thread_name", self._pid, tid_data.tid, f"Tread {tid_data.tid} (Enqueue)"])
+                meta_data.append(["thread_name", self._pid, tid_data.tid, f"Thread {tid_data.tid} (Enqueue)"])
             else:
-                meta_data.append(["thread_name", self._pid, tid_data.tid, f"Tread {tid_data.tid} (Dequeue)"])
+                meta_data.append(["thread_name", self._pid, tid_data.tid, f"Thread {tid_data.tid} (Dequeue)"])
             meta_data.append(["thread_sort_index", self._pid, tid_data.tid, tid_data.category])
         return TraceViewManager.metadata_event(meta_data)
