@@ -486,7 +486,7 @@ void InfoJson::SetPidInfo(SHARED_PTR_ALIA<InfoMain> infoMain, int pid)
         }
         int pidNamePos = pidName.find_first_not_of("Name:\t");
         if (pidNamePos != std::npos) {
-            pidName = pidName.substr(pidstr, pidName.size()-pidNamePos);
+            pidName = pidName.substr(pidNamePos, pidName.size()-pidNamePos);
         } else {
             MSPROF_LOGE("Set pid_name failed, pid=%d", pid);
         }
