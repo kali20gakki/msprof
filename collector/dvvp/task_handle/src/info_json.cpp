@@ -470,7 +470,7 @@ int InfoJson::AddOtherInfo(SHARED_PTR_ALIA<InfoMain> infoMain)
 void InfoJson::SetPidInfo(SHARED_PTR_ALIA<InfoMain> infoMain, int pid)
 {
     std::string pidtmp;
-    std::string pidNameTmp = "NA";
+    std::string pidName = "NA";
     std::string processInfoPath;
     if (pid == HOST_PID_DEFAULT) {
         pidtmp = "NA";
@@ -480,19 +480,19 @@ void InfoJson::SetPidInfo(SHARED_PTR_ALIA<InfoMain> infoMain, int pid)
         processInfoPath = "/proc/" + pidtmp + "/status";
         std::ifstream processInfo(processInfoPath);
         if (processInfo.is_open()) {
-            std::getline(processInfo, pidNameTmp);
+            std::getline(processInfo, pidName);
         }
         std::regex searchPidName("Name:\\s+(\\S+)");
         std::smatch searchPidNameResult;
-        if (std::regex_search(pidNameTmp, searchPidNameResult, searchPidName)) {
-            pidNameTmp = searchPidNameResult[1];
+        if (std::regex_search(pidName, searchPidNameResult, searchPidName)) {
+            pidName = searchPidNameResult[1];
         } else {
             MSPROF_LOGE("Set pid_name failed, pid=%d", pid);
         }
 #endif
     }
     infoMain->set_pid(pidtmp);
-    infoMain->set_pid_name(pidNameTmp);
+    infoMain->set_pid_name(pidName);
     return;
 }
 
