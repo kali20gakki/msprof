@@ -10,7 +10,7 @@
 #if (defined(linux) || defined(__linux__))
 #include <unistd.h>
 #endif
-#include <regex>
+#include <string>
 #include "ai_drv_dev_api.h"
 #include "proto/profiler.pb.h"
 #include "config/config.h"
@@ -484,10 +484,9 @@ void InfoJson::SetPidInfo(SHARED_PTR_ALIA<InfoMain> infoMain, int pid)
         } else {
             MSPROF_LOGE("Set pid_name failed(failed to open the file for pid_name info), pid=%d", pid);
         }
-        std::regex searchPidName("Name:\\s+(\\S+)");
-        std::smatch searchPidNameResult;
-        if (std::regex_search(pidName, searchPidNameResult, searchPidName)) {
-            pidName = searchPidNameResult[1];
+        int pidNamePos = pidName.find_first_not_of("Name:\t");
+        if (pidNamePos != std::npos) {
+            pidName = pidName.substr(pidstr, pidName.size()-pidNamePos);
         } else {
             MSPROF_LOGE("Set pid_name failed, pid=%d", pid);
         }
