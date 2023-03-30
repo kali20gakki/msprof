@@ -51,7 +51,7 @@ class TraceViewHeaderConstant:
     GENERAL_LAYER_NPU = "NPU"
 
     # trace component layer
-    COMPONENT_LAYER_PID = "PID Name"
+    COMPONENT_LAYER_FRAMEWORK = "PID Name"
     COMPONENT_LAYER_PTA = "PTA"
     COMPONENT_LAYER_CANN = "CANN"
     COMPONENT_LAYER_ASCEND_HW = "Ascend Hardware"
@@ -59,31 +59,40 @@ class TraceViewHeaderConstant:
     # filtering msprof timeline trace
     MSPROF_TIMELINE_FILTER_LIST = (PROCESS_ALL_REDUCE, PROCESS_AI_CPU)
 
-    # component_layer_sort_map
-    LAYER_SORT_MAP = {
-        COMPONENT_LAYER_PID: 0,
-        COMPONENT_LAYER_PTA: 1,
-        COMPONENT_LAYER_CANN: 2,
-        COMPONENT_LAYER_ASCEND_HW: 3,
-    }
+    # component_layer_sort
+    LAYER_FRAMEWORK_SORT = 0
+    LAYER_PTA_SORT = 1
+    LAYER_CANN_SORT = 2
+    LAYER_ASCEND_HW_SORT = 3
 
     # namedtuple configuration of LayerInfo
-    LayerInfo = namedtuple('LayerInfo', 'component_layer, general_layer, sort_index')
+    LayerInfo = namedtuple('LayerInfo', ['component_layer', 'general_layer', 'sort_index'])
 
     # 【msprof.json】 timeline layer info map
     LAYER_INFO_MAP = {
-        PROCESS_MSPROFTX: LayerInfo(COMPONENT_LAYER_PID, GENERAL_LAYER_CPU, LAYER_SORT_MAP.get(COMPONENT_LAYER_PID)),
-        PROCESS_PTA: LayerInfo(COMPONENT_LAYER_PTA, GENERAL_LAYER_CPU, LAYER_SORT_MAP.get(COMPONENT_LAYER_PTA)),
-        PROCESS_ACL: LayerInfo(COMPONENT_LAYER_CANN, GENERAL_LAYER_CPU, LAYER_SORT_MAP.get(COMPONENT_LAYER_CANN)),
-        PROCESS_GE: LayerInfo(COMPONENT_LAYER_CANN, GENERAL_LAYER_CPU, LAYER_SORT_MAP.get(COMPONENT_LAYER_CANN)),
+        PROCESS_MSPROFTX: LayerInfo(COMPONENT_LAYER_FRAMEWORK, GENERAL_LAYER_CPU, LAYER_FRAMEWORK_SORT),
+        PROCESS_PTA: LayerInfo(COMPONENT_LAYER_PTA, GENERAL_LAYER_CPU, LAYER_PTA_SORT),
+        PROCESS_ACL: LayerInfo(COMPONENT_LAYER_CANN, GENERAL_LAYER_CPU, LAYER_CANN_SORT),
+        PROCESS_GE: LayerInfo(COMPONENT_LAYER_CANN, GENERAL_LAYER_CPU, LAYER_CANN_SORT),
         PROCESS_GE_OP_EXECUTE: LayerInfo(COMPONENT_LAYER_CANN, GENERAL_LAYER_CPU,
-                                         LAYER_SORT_MAP.get(COMPONENT_LAYER_CANN)),
-        PROCESS_RUNTIME: LayerInfo(COMPONENT_LAYER_CANN, GENERAL_LAYER_CPU, LAYER_SORT_MAP.get(COMPONENT_LAYER_CANN)),
+                                         LAYER_CANN_SORT),
+        PROCESS_RUNTIME: LayerInfo(COMPONENT_LAYER_CANN, GENERAL_LAYER_CPU, LAYER_CANN_SORT),
         PROCESS_TASK: LayerInfo(COMPONENT_LAYER_ASCEND_HW, GENERAL_LAYER_NPU,
-                                LAYER_SORT_MAP.get(COMPONENT_LAYER_ASCEND_HW)),
+                                LAYER_ASCEND_HW_SORT),
         PROCESS_STEP_TRACE: LayerInfo(COMPONENT_LAYER_ASCEND_HW, GENERAL_LAYER_NPU,
-                                      LAYER_SORT_MAP.get(COMPONENT_LAYER_ASCEND_HW)),
+                                      LAYER_ASCEND_HW_SORT),
     }
+
+    @classmethod
+    def update_layer_info_map(cls: any, process_name: str) -> None:
+        """
+        update LAYER_INFO_MAP based on process_name
+        """
+        if process_name is not None and process_name != "":
+            cls.COMPONENT_LAYER_FRAMEWORK = process_name
+            cls.LAYER_INFO_MAP.update(
+                {cls.PROCESS_MSPROFTX: cls.LayerInfo(cls.COMPONENT_LAYER_FRAMEWORK,
+                                                     cls.GENERAL_LAYER_CPU, cls.LAYER_FRAMEWORK_SORT)})
 
     def get_trace_view_header_constant_class_name(self: any) -> any:
         """

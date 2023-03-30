@@ -204,6 +204,12 @@ class InfoConfReader:
         process_id = self._info_json.get("pid")
         return int(process_id) if is_number(process_id) else TraceViewHeaderConstant.DEFAULT_PID_VALUE
 
+    def get_json_pid_name(self: any) -> str:
+        """
+        get profiling pid name
+        """
+        return self._info_json.get("pid_name")
+
     def get_cpu_info(self: any) -> list:
         """
         get cpu info
