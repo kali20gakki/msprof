@@ -10,6 +10,7 @@
 #if (defined(linux) || defined(__linux__))
 #include <unistd.h>
 #endif
+#include <string>
 #include "ai_drv_dev_api.h"
 #include "proto/profiler.pb.h"
 #include "config/config.h"
@@ -469,12 +470,30 @@ int InfoJson::AddOtherInfo(SHARED_PTR_ALIA<InfoMain> infoMain)
 void InfoJson::SetPidInfo(SHARED_PTR_ALIA<InfoMain> infoMain, int pid)
 {
     std::string pidtmp;
+    std::string pidName = "NA";
+    std::string processInfoPath;
     if (pid == HOST_PID_DEFAULT) {
         pidtmp = "NA";
     } else {
         pidtmp = std::to_string(pid);
+#if (defined(linux) || defined(__linux__))
+        processInfoPath = "/proc/" + pidtmp + "/status";
+        std::ifstream processInfo(processInfoPath);
+        if (processInfo.is_open()) {
+            std::getline(processInfo, pidName);
+        } else {
+            MSPROF_LOGE("Set pid_name failed(failed to open the file for pid_name info), pid=%d", pid);
+        }
+        int pidNamePos = pidName.find_first_not_of("Name:\t");
+        if (pidNamePos != std::string::npos) {
+            pidName = pidName.substr(pidNamePos, pidName.size()-pidNamePos);
+        } else {
+            MSPROF_LOGE("Set pid_name failed, pid=%d", pid);
+        }
+#endif
     }
     infoMain->set_pid(pidtmp);
+    infoMain->set_pid_name(pidName);
     return;
 }
 
