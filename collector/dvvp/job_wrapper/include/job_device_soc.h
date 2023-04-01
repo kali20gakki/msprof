@@ -27,7 +27,10 @@ public:
     int StopProf(void) override;
 
 private:
-    void CreateCollectionJobArray();
+    int CreateCollectionJobArray();
+    int SetCollectionJobCfg();
+    int CreateDeviceCollectionJobArray();
+    int CreateHostCollectionJobArray();
     int RegisterCollectionJobs() const;
     void UnRegisterCollectionJobs();
     void StoreData(const std::string &path, const std::string &fileName);

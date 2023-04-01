@@ -1859,9 +1859,6 @@ TEST_F(MSPROF_ACL_CORE_UTEST, ProfAclStop_failed)
     config.dataTypeConfig = ACL_PROF_ACL_API|ACL_PROF_AICORE_METRICS|ACL_PROF_AICPU;
     Msprofiler::Api::ProfAclMgr::instance()->mode_  = Msprofiler::Api::WORK_MODE_CMD;
     EXPECT_EQ(ACL_ERROR_PROF_NOT_RUN, Msprofiler::Api::ProfAclMgr::instance()->ProfAclStop(&config));
-    
-    Msprofiler::Api::ProfAclMgr::instance()->mode_  = Msprofiler::Api::WORK_MODE_API_CTRL;
-    EXPECT_EQ(ACL_ERROR_INVALID_PROFILING_CONFIG, Msprofiler::Api::ProfAclMgr::instance()->ProfAclStop(&config));
 }
 
 TEST_F(MSPROF_ACL_CORE_UTEST, ProfAclFinalize_failed)

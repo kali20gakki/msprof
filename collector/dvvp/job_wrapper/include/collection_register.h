@@ -29,6 +29,8 @@ enum ProfCollectionJobE {
     PCIE_DRV_COLLECTION_JOB,
     HCCS_DRV_COLLECTION_JOB,
     ROCE_DRV_COLLECTION_JOB,
+    NPU_APP_MEM_COLLECTION_JOB,
+    NPU_MEM_COLLECTION_JOB,
     // ts
     TS_CPU_DRV_COLLECTION_JOB,
     TS_TRACK_DRV_COLLECTION_JOB,
@@ -75,6 +77,8 @@ static const std::string COLLECTION_JOB_FILENAME[NR_MAX_COLLECTION_JOB] = {
     "data/pcie.data",
     "data/hccs.data",
     "data/roce.data",
+    "data/npu_mem.app",
+    "data/npu_mem.data",
     "data/tscpu.data",
     "data/ts_track.data",
     "data/ts_track.aiv_data",

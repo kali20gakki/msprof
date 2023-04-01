@@ -125,6 +125,8 @@ enum AI_DRV_CHANNEL {
     PROF_CHANNEL_INSTR_GROUP24_AIV0 = CHANNEL_INSTR_GROUP24_AIV0,
     PROF_CHANNEL_INSTR_GROUP24_AIV1 = CHANNEL_INSTR_GROUP24_AIV1,   // 106
     PROF_CHANNEL_ROCE     = CHANNEL_ROCE, // 129
+    PROF_CHANNEL_NPU_APP_MEM = CHANNEL_NPU_APP_MEM, // 130
+    PROF_CHANNEL_NPU_MEM = CHANNEL_NPU_MEM, // 131
     PROF_CHANNEL_DVPP_VENC = CHANNEL_DVPP_VENC, // 135
     PROF_CHANNEL_DVPP_JPEGE = CHANNEL_DVPP_JPEGE, // 136
     PROF_CHANNEL_DVPP_VDEC = CHANNEL_DVPP_VDEC, // 137
@@ -281,6 +283,13 @@ struct TagTsHbmProfileConfig {
     uint32_t masterId;
     uint32_t eventNum;
     uint32_t event[0];
+};
+
+struct TagMemProfileConfig {
+    uint32_t period;
+    uint32_t res1;
+    uint32_t event;
+    uint32_t res2;
 };
 
 /* LLC profile cfg data */
