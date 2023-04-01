@@ -25,7 +25,7 @@ using namespace Collector::Dvvp::Common::PlatformAdapter;
 using namespace analysis::dvvp::common::config;
 using namespace Analysis::Dvvp::Common::Config;
 
-PlatformAdapter::PlatformAdapter() : platformAdapter_(nullptr), inited_(false)
+PlatformAdapter::PlatformAdapter() : platformAdapter_(nullptr)
 {
 }
 
@@ -35,10 +35,6 @@ PlatformAdapter::~PlatformAdapter()
 
 int PlatformAdapter::Init(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params, PlatformType platformType)
 {
-    if (inited_) {
-        MSPROF_LOGI("platform adapter has been inited.");
-        return PROFILING_SUCCESS;
-    }
     const std::map<PlatformType, PlatformAdapterInterface*> ADAPTER_LIST = {
         {PlatformType::MINI_TYPE, PlatformAdapterMini::instance()},
         {PlatformType::CLOUD_TYPE, PlatformAdapterCloud::instance()},
@@ -54,7 +50,6 @@ int PlatformAdapter::Init(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams
     }
     if (iter->second->Init(params, platformType) == PROFILING_SUCCESS) {
         platformAdapter_ = iter->second;
-        inited_ = true;
         return PROFILING_SUCCESS;
     }
     return PROFILING_FAILED;
@@ -62,11 +57,6 @@ int PlatformAdapter::Init(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams
 
 int PlatformAdapter::Uninit()
 {
-    if (!inited_) {
-        MSPROF_LOGE("platform adapter has not been inited.");
-        return PROFILING_FAILED;
-    }
-    inited_ = false;
     return PROFILING_SUCCESS;
 }
 
