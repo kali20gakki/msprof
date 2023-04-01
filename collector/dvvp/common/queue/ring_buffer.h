@@ -16,6 +16,7 @@
 #include <unistd.h>
 #endif
 #include <vector>
+#include <queue>
 #include "config/config.h"
 #include "msprof_dlog.h"
 #include "prof_callback.h"
@@ -53,7 +54,8 @@ public:
           writeIndex_(0),
           idleWriteIndex_(0),
           isQuit_(false),
-          isInited_(false)
+          isInited_(false),
+          useExtdDataQueue_(false)
     {
         static const std::string RING_BUFFER_DEFAULT_NAME = "RingBuffer";
         name_ = RING_BUFFER_DEFAULT_NAME;
@@ -74,6 +76,8 @@ public:
         std::vector<uint64_t> dataAail(capacity_, static_cast<uint64_t>(DataStatus::DATA_STATUS_NOT_READY));
         dataAvails_.swap(dataAail);
         isInited_ = true;
+        std::queue<T> empty;
+        std::swap(extdDataQueue_, empty);
     }
 
     void UnInit()
@@ -98,6 +102,11 @@ public:
 
     bool TryPush(CONST_REPORT_DATA_PTR data)
     {
+        bool useExtdDataQueue = useExtdDataQueue_.load(std::memory_order_relaxed);
+        if (useExtdDataQueue && isInited_ && !isQuit_) {
+            return TryPushExtdDataQueue(data);
+        }
+        
         size_t currReadCusor = 0;
         size_t currWriteCusor = 0;
         size_t nextWriteCusor = 0;
@@ -122,7 +131,8 @@ public:
             if ((nextWriteCusor & mask_) == (currReadCusor & mask_)) {
                 MSPROF_LOGW("IsFull, QueueName:%s, QueueCapacity:%llu, Read:%llu, Write:%lld, Used:%llu",
                             name_.c_str(), capacity_, currReadCusor, currWriteCusor, GetUsedSize());
-                return false;
+                useExtdDataQueue_.store(true);
+                return TryPushExtdDataQueue(data);
             }
         } while (!idleWriteIndex_.compare_exchange_weak(currWriteCusor, nextWriteCusor));
 
@@ -152,7 +162,10 @@ public:
         size_t currReadCusor = readIndex_.load(std::memory_order_relaxed);
         size_t currWriteCusor = writeIndex_.load(std::memory_order_relaxed);
         if ((currReadCusor & mask_) == (currWriteCusor & mask_)) {
-            return false;
+            bool useExtdDataQueue = useExtdDataQueue_.load(std::memory_order_relaxed);
+            if (useExtdDataQueue && !isQuit_) {
+                return TryPopExtdDataQueue(data);
+            }
         }
 
         size_t index = currReadCusor & mask_;
@@ -171,10 +184,46 @@ public:
         size_t readIndex = readIndex_.load(std::memory_order_relaxed);
         size_t writeIndex = writeIndex_.load(std::memory_order_relaxed);
         if (readIndex > writeIndex) {
-            return capacity_ - ((readIndex & mask_) - (writeIndex & mask_));
+            return capacity_ - ((readIndex & mask_) - (writeIndex & mask_)) + GetExtdDataQueueSize();
         }
 
-        return writeIndex - readIndex;
+        return writeIndex - readIndex + GetExtdDataQueueSize();
+    }
+
+private:
+    bool TryPushExtdDataQueue(CONST_REPORT_DATA_PTR data)
+    {
+        T dataChunk;
+        dataChunk.deviceId = data->deviceId;
+        dataChunk.reportTime = 0;
+        dataChunk.dataLen = data->dataLen;
+        dataChunk.tag = *(reinterpret_cast<CONST_REPORT_CHUNK_TAG_PTR>(data->tag));
+        errno_t err = memcpy_s(dataChunk.data.data, RECEIVE_CHUNK_SIZE, data->data, data->dataLen);
+        if (err != EOK) {
+            MSPROF_LOGE("memcpy data failed, err:%d, deviceID:%d, tag:%s, dataLen:%llu",
+                        static_cast<int>(err), dataChunk.deviceId, data->tag, dataChunk.dataLen);
+            return false;
+        }
+        std::lock_guard<std::mutex> lk(mtx_);
+        extdDataQueue_.push(dataChunk);
+        return true;
+    }
+ 
+    bool TryPopExtdDataQueue(T& data)
+    {
+        std::lock_guard<std::mutex> lk(mtx_);
+        if (extdDataQueue_.empty()) {
+            return false;
+        }
+        data = extdDataQueue_.front();
+        extdDataQueue_.pop();
+        return true;
+    }
+
+    size_t GetExtdDataQueueSize()
+    {
+        std::lock_guard<std::mutex> lk(mtx_);
+        return extdDataQueue_.size();
     }
 
 private:
@@ -190,6 +239,9 @@ private:
     std::string name_;
     std::vector<T> dataQueue_;
     std::vector<uint64_t> dataAvails_;
+    std::atomic<bool> useExtdDataQueue_;
+    std::queue<T> extdDataQueue_;
+    std::mutex mtx_;
 };
 }  // namespace queue
 }  // namespace common
