@@ -61,7 +61,10 @@ int JobDeviceSoc::StartProfHandle(SHARED_PTR_ALIA<analysis::dvvp::message::Profi
             analysis::dvvp::common::utils::Utils::PrintSysErrorMsg();
         }
     }
-    CreateCollectionJobArray();
+    if (CreateCollectionJobArray() != PROFILING_SUCCESS) {
+        MSPROF_LOGE("Create soc collection job failed.");
+        return PROFILING_FAILED;
+    }
     GetAndStoreStartTime(params_->host_profiling, params_->job_id, devIndexId_, "JobDeviceSoc");
     return PROFILING_SUCCESS;
 }
@@ -374,52 +377,10 @@ void JobDeviceSoc::UnRegisterCollectionJobs()
     } while (0);
 }
 
-void JobDeviceSoc::CreateCollectionJobArray()
+int JobDeviceSoc::SetCollectionJobCfg()
 {
-    MSVP_MAKE_SHARED0_VOID(CollectionJobV_[DDR_DRV_COLLECTION_JOB].collectionJob, ProfDdrJob);
-    MSVP_MAKE_SHARED0_VOID(CollectionJobV_[HBM_DRV_COLLECTION_JOB].collectionJob, ProfHbmJob);
-    MSVP_MAKE_SHARED0_VOID(CollectionJobV_[DVPP_COLLECTION_JOB].collectionJob, ProfDvppJob);
-    MSVP_MAKE_SHARED0_VOID(CollectionJobV_[PCIE_DRV_COLLECTION_JOB].collectionJob, ProfPcieJob);
-    MSVP_MAKE_SHARED0_VOID(CollectionJobV_[NIC_COLLECTION_JOB].collectionJob, ProfNicJob);
-    MSVP_MAKE_SHARED0_VOID(CollectionJobV_[HCCS_DRV_COLLECTION_JOB].collectionJob, ProfHccsJob);
-    MSVP_MAKE_SHARED0_VOID(CollectionJobV_[LLC_DRV_COLLECTION_JOB].collectionJob, ProfLlcJob);
-    MSVP_MAKE_SHARED0_VOID(CollectionJobV_[ROCE_DRV_COLLECTION_JOB].collectionJob, ProfRoceJob);
-    // for ts
-    MSVP_MAKE_SHARED0_VOID(CollectionJobV_[TS_CPU_DRV_COLLECTION_JOB].collectionJob, ProfTscpuJob);
-    MSVP_MAKE_SHARED0_VOID(CollectionJobV_[AIV_TS_TRACK_DRV_COLLECTION_JOB].collectionJob, ProfAivTsTrackJob);
-    MSVP_MAKE_SHARED0_VOID(CollectionJobV_[AI_CORE_SAMPLE_DRV_COLLECTION_JOB].collectionJob, ProfAicoreJob);
-    MSVP_MAKE_SHARED0_VOID(CollectionJobV_[AI_CORE_TASK_DRV_COLLECTION_JOB].collectionJob, ProfAicoreTaskBasedJob);
-    MSVP_MAKE_SHARED0_VOID(CollectionJobV_[AIV_SAMPLE_DRV_COLLECTION_JOB].collectionJob, ProfAivJob);
-    MSVP_MAKE_SHARED0_VOID(CollectionJobV_[TS_TRACK_DRV_COLLECTION_JOB].collectionJob, ProfTsTrackJob);
-    MSVP_MAKE_SHARED0_VOID(CollectionJobV_[AIV_TASK_DRV_COLLECTION_JOB].collectionJob, ProfAivTaskBasedJob);
-    MSVP_MAKE_SHARED0_VOID(CollectionJobV_[AIV_HWTS_LOG_COLLECTION_JOB].collectionJob, ProfAivHwtsLogJob);
-    MSVP_MAKE_SHARED0_VOID(CollectionJobV_[FMK_COLLECTION_JOB].collectionJob, ProfFmkJob);
-    MSVP_MAKE_SHARED0_VOID(CollectionJobV_[L2_CACHE_TASK_COLLECTION_JOB].collectionJob, ProfL2CacheTaskJob);
-    MSVP_MAKE_SHARED0_VOID(CollectionJobV_[STARS_SOC_LOG_COLLECTION_JOB].collectionJob, ProfStarsSocLogJob);
-    MSVP_MAKE_SHARED0_VOID(CollectionJobV_[STARS_BLOCK_LOG_COLLECTION_JOB].collectionJob, ProfStarsBlockLogJob);
-    MSVP_MAKE_SHARED0_VOID(CollectionJobV_[HWTS_LOG_COLLECTION_JOB].collectionJob, ProfHwtsLogJob);
-    MSVP_MAKE_SHARED0_VOID(CollectionJobV_[STARS_SOC_PROFILE_COLLECTION_JOB].collectionJob, ProfStarsSocProfileJob);
-    MSVP_MAKE_SHARED0_VOID(CollectionJobV_[FFTS_PROFILE_COLLECTION_JOB].collectionJob, ProfFftsProfileJob);
-    MSVP_MAKE_SHARED0_VOID(CollectionJobV_[INSTR_PROFILING_COLLECTION_JOB].collectionJob, ProfInstrPerfJob);
-    // for system
-    MSVP_MAKE_SHARED0_VOID(CollectionJobV_[CTRLCPU_PERF_COLLECTION_JOB].collectionJob, ProfCtrlcpuJob);
-    MSVP_MAKE_SHARED0_VOID(CollectionJobV_[SYSSTAT_PROC_COLLECTION_JOB].collectionJob, ProfSysStatJob);
-    MSVP_MAKE_SHARED0_VOID(CollectionJobV_[SYSMEM_PROC_COLLECTION_JOB].collectionJob, ProfSysMemJob);
-    MSVP_MAKE_SHARED0_VOID(CollectionJobV_[ALLPID_PROC_COLLECTION_JOB].collectionJob, ProfAllPidsJob);
-    // for host system
-    MSVP_MAKE_SHARED0_VOID(CollectionJobV_[HOST_SYSCALLS_COLLECTION_JOB].collectionJob, ProfHostSysCallsJob);
-    MSVP_MAKE_SHARED0_VOID(CollectionJobV_[HOST_PTHREAD_COLLECTION_JOB].collectionJob, ProfHostPthreadJob);
-    MSVP_MAKE_SHARED0_VOID(CollectionJobV_[HOST_DISKIO_COLLECTION_JOB].collectionJob, ProfHostDiskJob);
-    MSVP_MAKE_SHARED0_VOID(CollectionJobV_[HOST_PID_CPU_COLLECTION_JOB].collectionJob, ProfHostPidCpuJob);
-    MSVP_MAKE_SHARED0_VOID(CollectionJobV_[HOST_PID_MEM_COLLECTION_JOB].collectionJob, ProfHostPidMemJob);
-    MSVP_MAKE_SHARED0_VOID(CollectionJobV_[HOST_ALL_PID_CPU_COLLECTION_JOB].collectionJob, ProfHostAllPidCpuJob);
-    MSVP_MAKE_SHARED0_VOID(CollectionJobV_[HOST_ALL_PID_MEM_COLLECTION_JOB].collectionJob, ProfHostAllPidMemJob);
-    MSVP_MAKE_SHARED0_VOID(CollectionJobV_[HOST_SYS_CPU_COLLECTION_JOB].collectionJob, ProfHostSysCpuJob);
-    MSVP_MAKE_SHARED0_VOID(CollectionJobV_[HOST_SYS_MEM_COLLECTION_JOB].collectionJob, ProfHostSysMemJob);
-    MSVP_MAKE_SHARED0_VOID(CollectionJobV_[HOST_NETWORK_COLLECTION_JOB].collectionJob, ProfHostNetworkJob);
-
     for (int cnt = 0; cnt < NR_MAX_COLLECTION_JOB; cnt++) {
-        MSVP_MAKE_SHARED0_VOID(CollectionJobV_[cnt].jobCfg, CollectionJobCfg);
+        MSVP_MAKE_SHARED0_RET(CollectionJobV_[cnt].jobCfg, CollectionJobCfg, PROFILING_FAILED);
         CollectionJobV_[cnt].jobTag = static_cast<ProfCollectionJobE>(cnt);
         CollectionJobV_[cnt].jobCfg->jobParams.jobTag = static_cast<ProfCollectionJobE>(cnt);
         if (COLLECTION_JOB_FILENAME[cnt].size() > 0) {
@@ -427,6 +388,95 @@ void JobDeviceSoc::CreateCollectionJobArray()
         }
         CollectionJobV_[cnt].jobCfg->comParams = collectionjobComnCfg_;
     }
+    return PROFILING_SUCCESS;
+}
+
+int JobDeviceSoc::CreateDeviceCollectionJobArray()
+{
+    MSVP_MAKE_SHARED0_RET(CollectionJobV_[DDR_DRV_COLLECTION_JOB].collectionJob, ProfDdrJob, PROFILING_FAILED);
+    MSVP_MAKE_SHARED0_RET(CollectionJobV_[HBM_DRV_COLLECTION_JOB].collectionJob, ProfHbmJob, PROFILING_FAILED);
+    MSVP_MAKE_SHARED0_RET(CollectionJobV_[DVPP_COLLECTION_JOB].collectionJob, ProfDvppJob, PROFILING_FAILED);
+    MSVP_MAKE_SHARED0_RET(CollectionJobV_[PCIE_DRV_COLLECTION_JOB].collectionJob, ProfPcieJob, PROFILING_FAILED);
+    MSVP_MAKE_SHARED0_RET(CollectionJobV_[NIC_COLLECTION_JOB].collectionJob, ProfNicJob, PROFILING_FAILED);
+    MSVP_MAKE_SHARED0_RET(CollectionJobV_[HCCS_DRV_COLLECTION_JOB].collectionJob, ProfHccsJob, PROFILING_FAILED);
+    MSVP_MAKE_SHARED0_RET(CollectionJobV_[LLC_DRV_COLLECTION_JOB].collectionJob, ProfLlcJob, PROFILING_FAILED);
+    MSVP_MAKE_SHARED0_RET(CollectionJobV_[ROCE_DRV_COLLECTION_JOB].collectionJob, ProfRoceJob, PROFILING_FAILED);
+    MSVP_MAKE_SHARED0_RET(CollectionJobV_[NPU_APP_MEM_COLLECTION_JOB].collectionJob, ProfNpuAppMemJob,
+                          PROFILING_FAILED);
+    MSVP_MAKE_SHARED0_RET(CollectionJobV_[NPU_MEM_COLLECTION_JOB].collectionJob, ProfNpuMemJob, PROFILING_FAILED);
+    // for ts
+    MSVP_MAKE_SHARED0_RET(CollectionJobV_[TS_CPU_DRV_COLLECTION_JOB].collectionJob, ProfTscpuJob, PROFILING_FAILED);
+    MSVP_MAKE_SHARED0_RET(CollectionJobV_[AIV_TS_TRACK_DRV_COLLECTION_JOB].collectionJob, ProfAivTsTrackJob,
+                          PROFILING_FAILED);
+    MSVP_MAKE_SHARED0_RET(CollectionJobV_[AI_CORE_SAMPLE_DRV_COLLECTION_JOB].collectionJob, ProfAicoreJob,
+                          PROFILING_FAILED);
+    MSVP_MAKE_SHARED0_RET(CollectionJobV_[AI_CORE_TASK_DRV_COLLECTION_JOB].collectionJob, ProfAicoreTaskBasedJob,
+                          PROFILING_FAILED);
+    MSVP_MAKE_SHARED0_RET(CollectionJobV_[AIV_SAMPLE_DRV_COLLECTION_JOB].collectionJob, ProfAivJob, PROFILING_FAILED);
+    MSVP_MAKE_SHARED0_RET(CollectionJobV_[TS_TRACK_DRV_COLLECTION_JOB].collectionJob, ProfTsTrackJob, PROFILING_FAILED);
+    MSVP_MAKE_SHARED0_RET(CollectionJobV_[AIV_TASK_DRV_COLLECTION_JOB].collectionJob, ProfAivTaskBasedJob,
+                          PROFILING_FAILED);
+    MSVP_MAKE_SHARED0_RET(CollectionJobV_[AIV_HWTS_LOG_COLLECTION_JOB].collectionJob, ProfAivHwtsLogJob,
+                          PROFILING_FAILED);
+    MSVP_MAKE_SHARED0_RET(CollectionJobV_[FMK_COLLECTION_JOB].collectionJob, ProfFmkJob, PROFILING_FAILED);
+    MSVP_MAKE_SHARED0_RET(CollectionJobV_[L2_CACHE_TASK_COLLECTION_JOB].collectionJob, ProfL2CacheTaskJob,
+                          PROFILING_FAILED);
+    MSVP_MAKE_SHARED0_RET(CollectionJobV_[STARS_SOC_LOG_COLLECTION_JOB].collectionJob, ProfStarsSocLogJob,
+                          PROFILING_FAILED);
+    MSVP_MAKE_SHARED0_RET(CollectionJobV_[STARS_BLOCK_LOG_COLLECTION_JOB].collectionJob, ProfStarsBlockLogJob,
+                          PROFILING_FAILED);
+    MSVP_MAKE_SHARED0_RET(CollectionJobV_[HWTS_LOG_COLLECTION_JOB].collectionJob, ProfHwtsLogJob, PROFILING_FAILED);
+    MSVP_MAKE_SHARED0_RET(CollectionJobV_[STARS_SOC_PROFILE_COLLECTION_JOB].collectionJob, ProfStarsSocProfileJob,
+                          PROFILING_FAILED);
+    MSVP_MAKE_SHARED0_RET(CollectionJobV_[FFTS_PROFILE_COLLECTION_JOB].collectionJob, ProfFftsProfileJob,
+                          PROFILING_FAILED);
+    MSVP_MAKE_SHARED0_RET(CollectionJobV_[INSTR_PROFILING_COLLECTION_JOB].collectionJob, ProfInstrPerfJob,
+                          PROFILING_FAILED);
+    // for system
+    MSVP_MAKE_SHARED0_RET(CollectionJobV_[CTRLCPU_PERF_COLLECTION_JOB].collectionJob, ProfCtrlcpuJob, PROFILING_FAILED);
+    MSVP_MAKE_SHARED0_RET(CollectionJobV_[SYSSTAT_PROC_COLLECTION_JOB].collectionJob, ProfSysStatJob, PROFILING_FAILED);
+    MSVP_MAKE_SHARED0_RET(CollectionJobV_[SYSMEM_PROC_COLLECTION_JOB].collectionJob, ProfSysMemJob, PROFILING_FAILED);
+    MSVP_MAKE_SHARED0_RET(CollectionJobV_[ALLPID_PROC_COLLECTION_JOB].collectionJob, ProfAllPidsJob, PROFILING_FAILED);
+    return PROFILING_SUCCESS;
+}
+
+int JobDeviceSoc::CreateHostCollectionJobArray()
+{
+    // for host system
+    MSVP_MAKE_SHARED0_RET(CollectionJobV_[HOST_SYSCALLS_COLLECTION_JOB].collectionJob, ProfHostSysCallsJob,
+                          PROFILING_FAILED);
+    MSVP_MAKE_SHARED0_RET(CollectionJobV_[HOST_PTHREAD_COLLECTION_JOB].collectionJob, ProfHostPthreadJob,
+                          PROFILING_FAILED);
+    MSVP_MAKE_SHARED0_RET(CollectionJobV_[HOST_DISKIO_COLLECTION_JOB].collectionJob, ProfHostDiskJob, PROFILING_FAILED);
+    MSVP_MAKE_SHARED0_RET(CollectionJobV_[HOST_PID_CPU_COLLECTION_JOB].collectionJob, ProfHostPidCpuJob,
+                          PROFILING_FAILED);
+    MSVP_MAKE_SHARED0_RET(CollectionJobV_[HOST_PID_MEM_COLLECTION_JOB].collectionJob, ProfHostPidMemJob,
+                          PROFILING_FAILED);
+    MSVP_MAKE_SHARED0_RET(CollectionJobV_[HOST_ALL_PID_CPU_COLLECTION_JOB].collectionJob, ProfHostAllPidCpuJob,
+                          PROFILING_FAILED);
+    MSVP_MAKE_SHARED0_RET(CollectionJobV_[HOST_ALL_PID_MEM_COLLECTION_JOB].collectionJob, ProfHostAllPidMemJob,
+                          PROFILING_FAILED);
+    MSVP_MAKE_SHARED0_RET(CollectionJobV_[HOST_SYS_CPU_COLLECTION_JOB].collectionJob, ProfHostSysCpuJob,
+                          PROFILING_FAILED);
+    MSVP_MAKE_SHARED0_RET(CollectionJobV_[HOST_SYS_MEM_COLLECTION_JOB].collectionJob, ProfHostSysMemJob,
+                          PROFILING_FAILED);
+    MSVP_MAKE_SHARED0_RET(CollectionJobV_[HOST_NETWORK_COLLECTION_JOB].collectionJob, ProfHostNetworkJob,
+                          PROFILING_FAILED);
+    return PROFILING_SUCCESS;
+}
+
+int JobDeviceSoc::CreateCollectionJobArray()
+{
+    if (CreateDeviceCollectionJobArray() != PROFILING_SUCCESS) {
+        MSPROF_LOGE("Create device collection job array failed.");
+        return PROFILING_FAILED;
+    }
+    if (CreateHostCollectionJobArray() != PROFILING_SUCCESS) {
+        MSPROF_LOGE("Create host collection job array failed.");
+        return PROFILING_FAILED;
+    }
+    
+    return SetCollectionJobCfg();
 }
 
 int JobDeviceSoc::SendData(const std::string &fileName, const std::string &data)

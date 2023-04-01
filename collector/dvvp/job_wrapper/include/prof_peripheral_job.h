@@ -43,6 +43,22 @@ public:
     int SetPeripheralConfig() override;
 };
 
+class ProfNpuAppMemJob : public ProfPeripheralJob {
+public:
+    ProfNpuAppMemJob();
+    ~ProfNpuAppMemJob() override;
+    int Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg) override;
+    int SetPeripheralConfig() override;
+};
+ 
+class ProfNpuMemJob : public ProfPeripheralJob {
+public:
+    ProfNpuMemJob();
+    ~ProfNpuMemJob() override;
+    int Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg) override;
+    int SetPeripheralConfig() override;
+};
+
 class ProfHccsJob : public ProfPeripheralJob {
 public:
     ProfHccsJob();

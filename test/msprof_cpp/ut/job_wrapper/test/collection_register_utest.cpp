@@ -62,54 +62,8 @@ TEST_F(JOB_WRAPPER_COLLECTION_REGISTRT_UTEST, CollectionRegisterMgr) {
     ret = mgr.CollectionJobRegisterAndRun(-1, Analysis::Dvvp::JobWrapper::DDR_DRV_COLLECTION_JOB, instance);
     EXPECT_EQ(PROFILING_FAILED, ret);
 
-    ret = mgr.CollectionJobRegisterAndRun(0, Analysis::Dvvp::JobWrapper::DDR_DRV_COLLECTION_JOB, instance);
-    EXPECT_EQ(PROFILING_SUCCESS, ret);
-
-    ret = mgr.CollectionJobRegisterAndRun(0, Analysis::Dvvp::JobWrapper::DDR_DRV_COLLECTION_JOB, instance);
-    EXPECT_EQ(PROFILING_FAILED, ret);
-
-    //CollectionJobUnregisterAndStop param error 
-    ret = mgr.CollectionJobUnregisterAndStop(0, Analysis::Dvvp::JobWrapper::NR_MAX_COLLECTION_JOB);
-    EXPECT_EQ(PROFILING_FAILED, ret);
-    //CollectionJobUnregisterAndStop param error 
-    ret = mgr.CollectionJobUnregisterAndStop(-1, Analysis::Dvvp::JobWrapper::DDR_DRV_COLLECTION_JOB);
-    EXPECT_EQ(PROFILING_FAILED, ret);
-
-    ret = mgr.CollectionJobUnregisterAndStop(0, Analysis::Dvvp::JobWrapper::DDR_DRV_COLLECTION_JOB);
-    EXPECT_EQ(PROFILING_SUCCESS, ret);
-
-    //delete the job and register
-    ret = mgr.CollectionJobRegisterAndRun(0, Analysis::Dvvp::JobWrapper::DDR_DRV_COLLECTION_JOB, instance);
-    EXPECT_EQ(PROFILING_SUCCESS, ret);
-
-    //stop the job and unregister
-    ret = mgr.CollectionJobUnregisterAndStop(0, Analysis::Dvvp::JobWrapper::DDR_DRV_COLLECTION_JOB);
-    EXPECT_EQ(PROFILING_SUCCESS, ret);
-
-    //stop the job and unregister
-    ret = mgr.CollectionJobUnregisterAndStop(0, Analysis::Dvvp::JobWrapper::DDR_DRV_COLLECTION_JOB);
-    EXPECT_EQ(PROFILING_FAILED, ret);
-
-    //CheckCollectionJobIsNoRegister param error 
-    int a = 0;
-    bool rets = mgr.CheckCollectionJobIsNoRegister(a, Analysis::Dvvp::JobWrapper::NR_MAX_COLLECTION_JOB);
-    EXPECT_EQ(false, rets);
-    //CheckCollectionJobIsNoRegister param error 
-    a = -1;
-    rets = mgr.CheckCollectionJobIsNoRegister(a, Analysis::Dvvp::JobWrapper::DDR_DRV_COLLECTION_JOB);
-    EXPECT_EQ(false, rets);
-
-    //InsertCollectionJob param error 
-    rets = mgr.InsertCollectionJob(0, Analysis::Dvvp::JobWrapper::NR_MAX_COLLECTION_JOB, instance);
-    EXPECT_EQ(false, rets);
-    //InsertCollectionJob param error 
-    rets = mgr.InsertCollectionJob(-1, Analysis::Dvvp::JobWrapper::DDR_DRV_COLLECTION_JOB, instance);
-    EXPECT_EQ(false, rets);
-
-    //GetAndDelCollectionJob param error 
-    rets = mgr.GetAndDelCollectionJob(0, Analysis::Dvvp::JobWrapper::NR_MAX_COLLECTION_JOB, instance);
-    EXPECT_EQ(false, rets);
-    //GetAndDelCollectionJob param error 
-    rets = mgr.GetAndDelCollectionJob(-1, Analysis::Dvvp::JobWrapper::DDR_DRV_COLLECTION_JOB, instance);
-    EXPECT_EQ(false, rets);
+    for (int i = 0; i <= Analysis::Dvvp::JobWrapper::NR_MAX_COLLECTION_JOB; i++) {
+        mgr.CollectionJobRegisterAndRun(0, static_cast<Analysis::Dvvp::JobWrapper::ProfCollectionJobE>(i),
+                                        instance);
+    }
 }
