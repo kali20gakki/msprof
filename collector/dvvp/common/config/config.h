@@ -161,7 +161,7 @@ const size_t MAX_LOOP_TIMES = 1400; // the max send package nums of once Dump()
 const int SLEEP_INTEVAL_US = 1000; // the interval of Run()
 const size_t RING_BUFF_CAPACITY = 16384; // 16384:16K. Note:capacity value must be 2^n
 const size_t GE_RING_BUFF_CAPACITY = 262144; // 262144:256K. Note:capacity value must be 2^n
-const size_t MSPROF_RING_BUFF_CAPACITY = 262144 * 32; // 8388608:8192K. Note:capacity value must be 2^n
+const size_t MSPROF_RING_BUFF_CAPACITY = 16384; // 16384:16K. Note:capacity value must be 2^n
 
 // sender config
 const int SEND_BUFFER_LEN = 64 * 1024; // 64 * 1024 menas 64k

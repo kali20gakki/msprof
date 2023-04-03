@@ -1266,7 +1266,7 @@ TEST_F(MSPROF_ACL_CORE_UTEST, ReporterData) {
     for (int i = 0; i < RING_BUFF_CAPACITY; i++) {
         ret = recData.DoReport(&reporterData);
     }
-    EXPECT_EQ(PROFILING_FAILED, ret);
+    EXPECT_EQ(PROFILING_SUCCESS, ret);
 }
 
 TEST_F(MSPROF_ACL_CORE_UTEST, UploaderDumperDumpModelLoadDataTest) {

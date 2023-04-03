@@ -77,8 +77,8 @@ TEST_F(COMMON_QUEUE_RING_BUFFER_TEST, RingBuffer_TryPush) {
     bq->maxCycles_ = 1024;
     EXPECT_EQ(true, bq->TryPush(&data));
 
-    //queue is full
-    EXPECT_EQ(false, bq->TryPush(&data));
+    //queue is full, will use Queue Level2
+    EXPECT_EQ(true, bq->TryPush(&data));
 
     //queue quits
     bq->SetQuit();
@@ -126,73 +126,96 @@ TEST_F(COMMON_QUEUE_RING_BUFFER_TEST, RingBuffer_GetUsedSize) {
     data.deviceId = 0;
     data.dataLen = sizeof(ReporterData);
     data.data = reinterpret_cast<UNSIGNED_CHAR_PTR>(&data);
-
+ 
     bq->Init(4);
-    EXPECT_EQ(0, bq->GetUsedSize());
-
-    bq->TryPush(&data);
-    EXPECT_EQ(1, bq->GetUsedSize());
-
-    bq->TryPush(&data);
-    EXPECT_EQ(2, bq->GetUsedSize());
-
-    bq->TryPush(&data);
-    EXPECT_EQ(3, bq->GetUsedSize());
-
-    EXPECT_EQ(false, bq->TryPush(&data));
-    EXPECT_EQ(3, bq->GetUsedSize());
-
-    EXPECT_EQ(0, bq->readIndex_.load());
-    EXPECT_EQ(3, bq->writeIndex_.load());
-
+    int value = 0;
+    EXPECT_EQ(value, bq->GetUsedSize());
+ 
+    EXPECT_EQ(true, bq->TryPush(&data));
+    value = 1;
+    EXPECT_EQ(value, bq->GetUsedSize());
+ 
+    EXPECT_EQ(true, bq->TryPush(&data));
+    value = 2;
+    EXPECT_EQ(value, bq->GetUsedSize());
+ 
+    EXPECT_EQ(true, bq->TryPush(&data));
+    value = 3;
+    EXPECT_EQ(value, bq->GetUsedSize());
+ 
+    EXPECT_EQ(true, bq->TryPush(&data));
+    value = 4;
+    EXPECT_EQ(value, bq->GetUsedSize());
+ 
+    int readValue = 0;
+    int writeValue = 3;
+    EXPECT_EQ(readValue, bq->readIndex_.load());
+    EXPECT_EQ(writeValue, bq->writeIndex_.load());
+ 
     ReporterDataChunk data2;
     EXPECT_EQ(true, bq->TryPop(data2));
     EXPECT_EQ(sizeof(ReporterData), data2.dataLen);
-    EXPECT_EQ(2, bq->GetUsedSize());
-
-    EXPECT_EQ(1, bq->readIndex_.load());
-    EXPECT_EQ(3, bq->writeIndex_.load());
-
+    value = 3;
+    EXPECT_EQ(value, bq->GetUsedSize());
+ 
+    readValue = 1;
+    EXPECT_EQ(readValue, bq->readIndex_.load());
+    EXPECT_EQ(writeValue, bq->writeIndex_.load());
+ 
     EXPECT_EQ(true, bq->TryPop(data2));
     EXPECT_EQ(sizeof(ReporterData), data2.dataLen);
-    EXPECT_EQ(1, bq->GetUsedSize());
-
-    EXPECT_EQ(2, bq->readIndex_.load());
-    EXPECT_EQ(3, bq->writeIndex_.load());
-
+    value = 2;
+    EXPECT_EQ(value, bq->GetUsedSize());
+ 
+    readValue = 2;
+    writeValue = 3;
+    EXPECT_EQ(readValue, bq->readIndex_.load());
+    EXPECT_EQ(writeValue, bq->writeIndex_.load());
+ 
     EXPECT_EQ(true, bq->TryPop(data2));
     EXPECT_EQ(sizeof(ReporterData), data2.dataLen);
-    EXPECT_EQ(0, bq->GetUsedSize());
-
-    EXPECT_EQ(3, bq->readIndex_.load());
-    EXPECT_EQ(3, bq->writeIndex_.load());
-
+    value = 1;
+    EXPECT_EQ(value, bq->GetUsedSize());
+ 
+    readValue = 3;
+    writeValue = 3;
+    EXPECT_EQ(readValue, bq->readIndex_.load());
+    EXPECT_EQ(writeValue, bq->writeIndex_.load());
+ 
     bq->TryPush(&data);
-    EXPECT_EQ(1, bq->GetUsedSize());
-
-    EXPECT_EQ(3, bq->readIndex_.load());
-    EXPECT_EQ(4, bq->writeIndex_.load());
-
+    value = 2;
+    EXPECT_EQ(value, bq->GetUsedSize());
+ 
+    EXPECT_EQ(readValue, bq->readIndex_.load());
+    EXPECT_EQ(writeValue, bq->writeIndex_.load());
+ 
     bq->TryPush(&data);
-    EXPECT_EQ(2, bq->GetUsedSize());
-
-    EXPECT_EQ(3, bq->readIndex_.load());
-    EXPECT_EQ(5, bq->writeIndex_.load());
-
+    value = 3;
+    EXPECT_EQ(value, bq->GetUsedSize());
+ 
+    EXPECT_EQ(readValue, bq->readIndex_.load());
+    EXPECT_EQ(writeValue, bq->writeIndex_.load());
+ 
     EXPECT_EQ(true, bq->TryPop(data2));
     EXPECT_EQ(sizeof(ReporterData), data2.dataLen);
-    EXPECT_EQ(1, bq->GetUsedSize());
-
-    EXPECT_EQ(4, bq->readIndex_.load());
-    EXPECT_EQ(5, bq->writeIndex_.load());
-
+    value = 2;
+    EXPECT_EQ(value, bq->GetUsedSize());
+ 
+    EXPECT_EQ(readValue, bq->readIndex_.load());
+    EXPECT_EQ(writeValue, bq->writeIndex_.load());
+ 
     EXPECT_EQ(true, bq->TryPop(data2));
     EXPECT_EQ(sizeof(ReporterData), data2.dataLen);
-    EXPECT_EQ(0, bq->GetUsedSize());
-
-    EXPECT_EQ(5, bq->readIndex_.load());
-    EXPECT_EQ(5, bq->writeIndex_.load());
-
+    value = 1;
+    EXPECT_EQ(value, bq->GetUsedSize());
+ 
+    EXPECT_EQ(readValue, bq->readIndex_.load());
+    EXPECT_EQ(writeValue, bq->writeIndex_.load());
+ 
+    EXPECT_EQ(true, bq->TryPop(data2));
+    value = 0;
+    EXPECT_EQ(value, bq->GetUsedSize());
+ 
     EXPECT_EQ(false, bq->TryPop(data2));
 
     bq->readIndex_ = ((size_t)0xFFFFFFFFFFFFFFFF) - 2;
