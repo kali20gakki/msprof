@@ -36,7 +36,6 @@ public:
     PlatformAdapterInterface* GetAdapter() const;
 private:
     PlatformAdapterInterface* platformAdapter_;
-    bool inited_;
 };
 }
 }
