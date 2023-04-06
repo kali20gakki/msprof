@@ -484,7 +484,8 @@ void InfoJson::SetPidInfo(SHARED_PTR_ALIA<InfoMain> infoMain, int pid)
         } else {
             MSPROF_LOGE("Set pid_name failed(failed to open the file for pid_name info), pid=%d", pid);
         }
-        auto pidNamePos = pidName.find_first_not_of("Name:\t");
+        constexpr size_t searchTagLength = 6; // 搜索字段“Name:\t"的长度为6，此常量用于定位pid_name在读取得到字段中的位置
+        size_t pidNamePos = pidName.find("Name:\t") + searchTagLength;
         if (pidNamePos != std::string::npos) {
             pidName = pidName.substr(pidNamePos, pidName.size() - pidNamePos);
         } else {
