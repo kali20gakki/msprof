@@ -83,7 +83,10 @@ int32_t MsprofCtrlCallbackImpl(uint32_t type, VOID_PTR data, uint32_t len)
         return Msprofiler::Api::ProfAclMgr::instance()->MsprofFinalizeHandle();
     }
 
-    if (Utils::IsDynProfMode() && !DynProfMngSrv::instance()->IsStarted()) {
+    if (Utils::IsDynProfMode()) {
+        if (DynProfMngSrv::instance()->IsStarted()) {
+            return MSPROF_ERROR_NONE;
+        }
         if (ProfApiPlugin::instance()->MsprofProfRegDeviceStateCallback(MsprofSetDeviceCallbackForDynProf) != 0) {
             MSPROF_LOGE("Dynamic profiling failed to register device state callback.");
             return MSPROF_ERROR;
