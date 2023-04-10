@@ -484,9 +484,11 @@ void InfoJson::SetPidInfo(SHARED_PTR_ALIA<InfoMain> infoMain, int pid)
         } else {
             MSPROF_LOGE("Set pid_name failed(failed to open the file for pid_name info), pid=%d", pid);
         }
-        int pidNamePos = pidName.find_first_not_of("Name:\t");
-        if (pidNamePos != std::string::npos) {
-            pidName = pidName.substr(pidNamePos, pidName.size()-pidNamePos);
+        // The length of searching tag "Name:\t" is 6. This constant is used to locate the position of pid_name.
+        constexpr size_t searchTagLength = 6;
+        size_t pidNamePos = pidName.find("Name:\t") + searchTagLength;
+        if ((pidNamePos - searchTagLength) != std::string::npos) {
+            pidName = pidName.substr(pidNamePos, pidName.size() - pidNamePos);
         } else {
             MSPROF_LOGE("Set pid_name failed, pid=%d", pid);
         }

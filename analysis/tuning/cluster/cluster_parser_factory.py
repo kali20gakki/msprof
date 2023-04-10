@@ -111,19 +111,19 @@ class ClusterParserFactory:
             if not _model.check_db():
                 logging.error("Fail to connect %s, hccl parser is interrupted", DBNameConstant.DB_HCCL)
                 raise ProfException(ProfException.PROF_INVALID_CONNECT_ERROR)
-            hccl_names = _model.get_distinct_op_name()
-            for hccl_name in hccl_names:
-                conditions = {
-                    'op_name': hccl_name.op_name,
-                    'iter_start': iter_start_end[0][0],
-                    'iter_end': iter_start_end[0][1]
-                }
-                events_data = _model.get_hccl_data_by_conditions(conditions)
-                if not events_data:
-                    continue
-                # only get hccl data with first iter
-                events_data = [event for event in events_data if event.iteration == events_data[0].iteration]
-                self.update_data(hccl_name, rank_id, events_data)
+            conditions = {
+                'iter_start': iter_start_end[0][0],
+                'iter_end': iter_start_end[0][1]
+            }
+            events_all = _model.get_all_events_from_db(conditions)
+            if not events_all:
+                logging.warning(f"Fail to get no.{rank_id}'s hccl events, please check hccl.db")
+                print_msg(f"Fail to get no.{rank_id}'s hccl events, please check hccl.db from {rank_path}")
+
+            op_name_dict = defaultdict(list)
+            for event in events_all:
+                op_name_dict[event.op_name].append(event)
+            self.update_data(op_name_dict, rank_id)
 
     def update_data(self):
         """implemented by subclass"""
@@ -155,13 +155,17 @@ class ClusterCommunicationParserFactory(ClusterParserFactory):
             raise ProfException(ProfException.PROF_INVALID_DATA_ERROR, message)
         return CommunicationParser(self.rank_hccl_data_dict)
 
-    def update_data(self: any, hccl_name: str, rank_id: int, events_data: list) -> None:
+    def update_data(self: any, op_name_dict: dict, rank_id: int) -> None:
         """
         update self data
         """
-        if hccl_name.op_name not in self.rank_hccl_data_dict:
-            self.rank_hccl_data_dict[hccl_name.op_name] = {}
-        self.rank_hccl_data_dict[hccl_name.op_name][rank_id] = events_data
+        for hccl_name in op_name_dict:
+            if hccl_name not in self.rank_hccl_data_dict:
+                self.rank_hccl_data_dict[hccl_name] = {}
+            # only get hccl data with first iter
+            events_data = op_name_dict.get(hccl_name, [])
+            events_data = [event for event in events_data if event.iteration == events_data[0].iteration]
+            self.rank_hccl_data_dict[hccl_name][rank_id] = events_data
 
 
 class CommunicationMatrixParserFactory(ClusterParserFactory):
@@ -189,8 +193,9 @@ class CommunicationMatrixParserFactory(ClusterParserFactory):
             raise ProfException(ProfException.PROF_INVALID_DATA_ERROR, message)
         return CommunicationMatrixParser(self.op_hccl_events)
 
-    def update_data(self: any, hccl_name: str, rank_id: int, events_data: list) -> None:
+    def update_data(self: any, op_name_dict: dict, rank_id: int) -> None:
         """
         update self data
         """
-        self.op_hccl_events[hccl_name.op_name].extend(events_data)
+        for hccl_name in op_name_dict:
+            self.op_hccl_events[hccl_name].extend(op_name_dict.get(hccl_name, []))
