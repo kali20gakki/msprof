@@ -110,7 +110,10 @@ class AiCoreOpReport:
             if header in AiCoreOpReport.UNSUPPORTED_HEADER:
                 ai_core_used_headers[index] = "\'N/A\'"
         used_headers = ",".join(ai_core_used_headers)
-        subtask_id = ",subtask_id " if ChipManager().is_chip_v4() else ",0"
+        subtask_id = ",(case when subtask_id={} then 'N/A' else subtask_id end) ". \
+            format(NumberConstant.DEFAULT_GE_CONTEXT_ID)
+        if not ChipManager().is_chip_v4():
+            subtask_id = ",'N/A'"
         return "select {1}, task_id, stream_id {subtask_id} from {0}".format(DBNameConstant.TABLE_SUMMARY_METRICS,
                                                                              used_headers,
                                                                              subtask_id=subtask_id)
@@ -375,17 +378,16 @@ class AiCoreOpReport:
         return "select {1}.model_id, {0}.task_id, {0}.stream_id, {index_info} " \
                "op_name, {1}.op_type, {1}.task_type, start_time, duration_time/{NS_TO_US}, " \
                "wait_time/{NS_TO_US}, block_dim, mix_block_dim, " \
-               "(case when context_id={context_id} then 0 else context_id end) from {0} " \
+               "(case when context_id={context_id} then 'N/A' else context_id end) from {0} " \
                "inner join {1} on {0}.task_id={1}.task_id and {0}.stream_id = {1}.stream_id " \
                "and {0}.task_type = {1}.task_type " \
                "and {1}.task_type!=? and {1}.task_type!=? and {1}.task_type!=? " \
                "and {0}.batch_id={1}.batch_id " \
-               "and ({1}.context_id={0}.subtask_id or ({1}.context_id={context_id} and subtask_id={subtask_id})) " \
+               "and {1}.context_id={0}.subtask_id " \
                "order by start_time" \
             .format(DBNameConstant.TABLE_SUMMARY_TASK_TIME, DBNameConstant.TABLE_SUMMARY_GE,
                     NS_TO_US=NumberConstant.NS_TO_US,
                     context_id=NumberConstant.DEFAULT_GE_CONTEXT_ID,
-                    subtask_id=NumberConstant.DEFAULT_FFTS_SUBTASK_ID,
                     index_info=cls._get_index_id_sql_condition())
 
     @classmethod
@@ -434,7 +436,7 @@ class AiCoreOpReport:
               "{0}.start_time, {0}.duration_time/{NS_TO_US}, {0}.wait_time/{NS_TO_US}, {1}.block_dim, " \
               "{1}.mix_block_dim, input_shapes, input_data_types, input_formats, " \
               "output_shapes, output_data_types, output_formats, " \
-              "(case when context_id={context_id} then 0 else context_id end) " \
+              "(case when context_id={context_id} then 'N/A' else context_id end) " \
               "from {0} inner join {2} on " \
               "{0}.task_id={2}.task_id and {0}.stream_id={2}.stream_id " \
               "and {0}.task_type = {1}.task_type " \
@@ -442,15 +444,14 @@ class AiCoreOpReport:
               "and {1}.timestamp={2}.timestamp " \
               "and {1}.task_type != ? and {1}.task_type != ? and {1}.task_type != ? " \
               "and {0}.batch_id={1}.batch_id " \
-              "and ({1}.context_id={0}.subtask_id or ({1}.context_id={context_id} and subtask_id={subtask_id})) " \
+              "and {1}.context_id={0}.subtask_id " \
               "order by start_time" \
             .format(DBNameConstant.TABLE_SUMMARY_TASK_TIME,
                     DBNameConstant.TABLE_SUMMARY_GE,
                     DBNameConstant.TABLE_SUMMARY_TENSOR,
                     NS_TO_US=NumberConstant.NS_TO_US,
-                    index_info=cls._get_index_id_sql_condition(),
                     context_id=NumberConstant.DEFAULT_GE_CONTEXT_ID,
-                    subtask_id=NumberConstant.DEFAULT_FFTS_SUBTASK_ID)
+                    index_info=cls._get_index_id_sql_condition())
         headers += cls.TENSOR_HEADERS
         return sql, headers
 
@@ -468,7 +469,7 @@ class AiCoreOpReport:
     def _get_table_sql_and_headers_without_ge(cls: any, headers: list) -> tuple:
         cls.clear_no_ge_data_headers(headers)
         model_id = "{0}, ".format(NumberConstant.DEFAULT_MODEL_ID) if ProfilingScene().is_operator() else 'model_id, '
-        subtask_id = ",subtask_id " if ChipManager().is_chip_v4() else ",0"
+        subtask_id = ",subtask_id " if ChipManager().is_chip_v4() else ",'N/A'"
         sql = "select {model_id} task_id, stream_id, {index_info} task_type, start_time, " \
               "duration_time/{NS_TO_US}, wait_time/{NS_TO_US} {subtask_id} from {0} where " \
               "task_type!=? and task_type!=? and task_type!=? order by start_time" \

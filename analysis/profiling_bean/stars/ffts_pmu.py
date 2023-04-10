@@ -3,6 +3,7 @@
 # Copyright (c) Huawei Technologies Co., Ltd. 2021-2022. All rights reserved.
 from common_func.utils import Utils
 from profiling_bean.struct_info.struct_decoder import StructDecoder
+from common_func.ms_constant.number_constant import NumberConstant
 
 
 class FftsPmuBean(StructDecoder):
@@ -43,7 +44,9 @@ class FftsPmuBean(StructDecoder):
         get subtask_id
         :return: subtask_id
         """
-        return self._subtask_id
+        if self.is_ffts_plus_type():
+            return self._subtask_id
+        return NumberConstant.DEFAULT_GE_CONTEXT_ID  # Traditional mode set _subtask_id = 4294967295
 
     @property
     def ffts_type(self: any) -> int:
