@@ -33,17 +33,17 @@ class GetOpTableTsTime:
         return "select {1}.task_id, {1}.stream_id, {1}.running, {1}.complete - {1}.running, '{0}', " \
                "{1}.index_id, batch_id,{subtask_id} from {1} order by running" \
             .format(Constant.TASK_TYPE_AI_CORE, DBNameConstant.TABLE_HWTS_TASK_TIME,
-                    subtask_id=NumberConstant.DEFAULT_FFTS_SUBTASK_ID)
+                    subtask_id=NumberConstant.DEFAULT_GE_CONTEXT_ID)
 
     @staticmethod
     def _get_acsq_task_sql() -> str:
         sql = "select task_id, stream_id, start_time, task_time,task_type,index_id,model_id,batch_id,{subtask_id} " \
               "from {} order by start_time".format(DBNameConstant.TABLE_ACSQ_TASK_TIME,
-                                                   subtask_id=NumberConstant.DEFAULT_FFTS_SUBTASK_ID)
+                                                   subtask_id=NumberConstant.DEFAULT_GE_CONTEXT_ID)
         if ProfilingScene().is_operator():
             sql = "select task_id, stream_id, start_time, task_time,task_type,index_id, batch_id,{subtask_id} " \
                   "from {} order by start_time".format(DBNameConstant.TABLE_ACSQ_TASK_TIME,
-                                                       subtask_id=NumberConstant.DEFAULT_FFTS_SUBTASK_ID)
+                                                       subtask_id=NumberConstant.DEFAULT_GE_CONTEXT_ID)
         return sql
 
     @staticmethod
@@ -199,7 +199,7 @@ class GetOpTableTsTime:
         return "select {1}.task_id, {1}.stream_id, {1}.running, {1}.complete - {1}.running, '{0}', " \
                "{1}.index_id, {1}.batch_id, {subtask_id} from {1} group by running order by running" \
             .format(Constant.TASK_TYPE_AI_CORE, self._get_task_time_table(),
-                    subtask_id=NumberConstant.DEFAULT_FFTS_SUBTASK_ID)
+                    subtask_id=NumberConstant.DEFAULT_GE_CONTEXT_ID)
 
     def _get_network_ai_core_task_time_sql(self: any) -> str:
         """
@@ -211,14 +211,14 @@ class GetOpTableTsTime:
               "{1}.index_id>={2} and {1}.index_id<={3} and {1}.model_id={4} order by running " \
             .format(Constant.TASK_TYPE_AI_CORE, self._get_task_time_table(),
                     self.iter_range.iteration_start, self.iter_range.iteration_end, self.iter_range.model_id,
-                    subtask_id=NumberConstant.DEFAULT_FFTS_SUBTASK_ID)
+                    subtask_id=NumberConstant.DEFAULT_GE_CONTEXT_ID)
         if Utils.need_all_model_in_one_iter(self.project_path, self.iter_range.model_id):
             # export all index data when pytorch graph no model_id set
             sql = "select {1}.task_id, {1}.stream_id, {1}.running, {1}.complete - {1}.running, '{0}'," \
                   " {1}.index_id, {1}.model_id, {1}.batch_id, {subtask_id} from {1} " \
                   "order by running " \
                 .format(Constant.TASK_TYPE_AI_CORE, self._get_task_time_table(),
-                        subtask_id=NumberConstant.DEFAULT_FFTS_SUBTASK_ID)
+                        subtask_id=NumberConstant.DEFAULT_GE_CONTEXT_ID)
         return sql
 
     def _get_op_ai_cpu_task_sql(self: any) -> str:
@@ -230,7 +230,7 @@ class GetOpTableTsTime:
                "'{0}', {2}, batch_id,{subtask_id} from {1} " \
             .format(Constant.TASK_TYPE_AI_CPU, DBNameConstant.TABLE_AI_CPU_FROM_TS, self.iter_range.iteration_id,
                     MS_TO_NS=NumberConstant.MS_TO_NS,
-                    subtask_id=NumberConstant.DEFAULT_FFTS_SUBTASK_ID)
+                    subtask_id=NumberConstant.DEFAULT_GE_CONTEXT_ID)
 
     def _get_ai_cpu_task_sql(self: any) -> str:
         """
@@ -249,7 +249,7 @@ class GetOpTableTsTime:
                         iter_time[0], iter_time[1],
                         self.iter_range.iteration_id, self.iter_range.model_id,
                         MS_TO_NS=NumberConstant.MS_TO_NS,
-                        subtask_id=NumberConstant.DEFAULT_FFTS_SUBTASK_ID)
+                        subtask_id=NumberConstant.DEFAULT_GE_CONTEXT_ID)
         except ZeroDivisionError as err:
             logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
         return ai_cpu_sql
