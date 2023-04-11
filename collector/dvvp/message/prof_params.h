@@ -101,6 +101,7 @@ struct ProfileParams : BaseInfo {
     int hbmInterval;
     std::string l2CacheTaskProfiling;
     std::string l2CacheTaskProfilingEvents;
+    std::string npuAppMemProfiling;
 
     std::string io_profiling;
     int io_sampling_interval;
@@ -193,7 +194,7 @@ struct ProfileParams : BaseInfo {
           host_mem_profiling_sampling_interval(DEFAULT_PROFILING_INTERVAL_20MS),
           pythonPath(""), parseSwitch("off"), querySwitch("off"), exportSwitch("off"),
           exportSummaryFormat(PROFILING_SUMMARY_FORMAT), exportIterationId(DEFAULT_INTERATION_ID),
-          exportModelId(DEFAULT_MODEL_ID), usedParams(), dataTypeConfig(0)
+          exportModelId(DEFAULT_MODEL_ID), usedParams(), dataTypeConfig(0), npuAppMemProfiling("on")
     {
     }
 
@@ -335,6 +336,9 @@ struct ProfileParams : BaseInfo {
         SET_VALUE(object, hbmProfiling);
         SET_VALUE(object, hbm_profiling_events);
         SET_VALUE(object, hbmInterval);
+        // npu mem
+        SET_VALUE(object, npuAppMemProfiling);
+
         // for debug purpose
         SET_VALUE(object, stream_enabled);
         SET_VALUE(object, profiling_period);
@@ -460,6 +464,8 @@ struct ProfileParams : BaseInfo {
         FROM_STRING_VALUE(object, hbmProfiling);
         FROM_STRING_VALUE(object, hbm_profiling_events);
         FROM_INT_VALUE(object, hbmInterval, DEFAULT_PROFILING_INTERVAL_100MS);
+        // npu mem
+        FROM_STRING_VALUE(object, npuAppMemProfiling);
         // for debug purpose
         FROM_STRING_VALUE(object, stream_enabled);
         FROM_INT_VALUE(object, profiling_period, DEFAULT_PROFILING_INTERVAL_5MS);

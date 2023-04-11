@@ -264,7 +264,7 @@ int ProfHbmJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
  */
 int ProfHbmJob::SetPeripheralConfig()
 {
-    samplePeriod_ = PERIPHERAL_INTERVAL_MS_MIN;
+    samplePeriod_ = static_cast<uint32_t>(PERIPHERAL_INTERVAL_MS_MIN);
     if (collectionJobCfg_->comParams->params->hbmInterval >= PERIPHERAL_INTERVAL_MS_MIN &&
         collectionJobCfg_->comParams->params->hbmInterval <= PERIPHERAL_INTERVAL_MS_MAX) {
         samplePeriod_ = static_cast<uint32_t>(collectionJobCfg_->comParams->params->hbmInterval);
@@ -296,6 +296,126 @@ int ProfHbmJob::SetPeripheralConfig()
         }
     }
 
+    peripheralCfg_.configP = configP;
+    peripheralCfg_.configSize = configSize;
+    return PROFILING_SUCCESS;
+}
+
+/*
+ * @berif  : Collect Npu Application Memory profiling data
+ */
+ProfNpuAppMemJob::ProfNpuAppMemJob()
+{
+    channelId_ = PROF_CHANNEL_NPU_APP_MEM;
+}
+ 
+ProfNpuAppMemJob::~ProfNpuAppMemJob() {}
+ 
+/*
+ * @berif  : Npu Application Memory Peripheral Init profiling
+ * @param  : cfg : Collect data config infomation
+ * @return : PROFILING_FAILED(-1) :failed
+ *       : PROFILING_SUCCESS(0) : success
+ */
+int ProfNpuAppMemJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
+{
+    if (CheckJobCommonParam(cfg) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
+    if (cfg->comParams->params->host_profiling) {
+        return PROFILING_FAILED;
+    }
+    collectionJobCfg_ = cfg;
+    if (collectionJobCfg_->comParams->params->npuAppMemProfiling.compare(MSVP_PROF_ON) != 0 ||
+        collectionJobCfg_->comParams->params->hardware_mem.compare(MSVP_PROF_ON) != 0) {
+        MSPROF_LOGI("Npu Application Memory not enabled.");
+        return PROFILING_FAILED;
+    }
+    return PROFILING_SUCCESS;
+}
+ 
+/*
+ * @berif  : Npu Application Memory Peripheral Set Config to Driver
+ * @param  : None
+ * @return : PROFILING_FAILED(-1) : failed
+ *         : PROFILING_SUCCESS(0) : success
+ */
+int32_t ProfNpuAppMemJob::SetPeripheralConfig()
+{
+    samplePeriod_ = static_cast<uint32_t>(collectionJobCfg_->comParams->params->hardware_mem_sampling_interval);
+    uint32_t configSize = sizeof(TagMemProfileConfig);
+    TagMemProfileConfig *configP = reinterpret_cast<TagMemProfileConfig *>(Utils::ProfMalloc(configSize));
+    if (configP == nullptr) {
+        MSPROF_LOGE("ProfNpuAppMemJob ProfMalloc TagMemProfileConfig failed");
+        return PROFILING_FAILED;
+    }
+ 
+    configP->period = samplePeriod_;
+    configP->res1 = 0;
+    configP->res2 = 0;
+    configP->event = PERIPHERAL_EVENT_NPU_APP_MEM;
+ 
+    peripheralCfg_.configP = configP;
+    peripheralCfg_.configSize = configSize;
+    return PROFILING_SUCCESS;
+}
+ 
+/*
+ * @berif  : Collect Npu Memory profiling data
+ */
+ProfNpuMemJob::ProfNpuMemJob()
+{
+    channelId_ = PROF_CHANNEL_NPU_MEM;
+}
+ 
+ProfNpuMemJob::~ProfNpuMemJob() {}
+ 
+/*
+ * @berif  : Npu Memory Peripheral Init profiling
+ * @param  : cfg : Collect data config information
+ * @return : PROFILING_FAILED(-1) : failed
+ *         : PROFILING_SUCCESS(0) : success
+ */
+int32_t ProfNpuMemJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
+{
+    if (CheckJobCommonParam(cfg) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
+    if (cfg->comParams->params->host_profiling) {
+        return PROFILING_FAILED;
+    }
+ 
+    collectionJobCfg_ = cfg;
+    if (collectionJobCfg_->comParams->params->hardware_mem.compare(
+        analysis::dvvp::common::config::MSVP_PROF_ON) != 0) {
+        MSPROF_LOGI("Device Memory not enabled");
+        return PROFILING_FAILED;
+    }
+ 
+    return PROFILING_SUCCESS;
+}
+ 
+/*
+ * @berif  : Npu Memory Peripheral Set Config to Driver
+ * @param  : None
+ * @return : PROFILING_FAILED(-1) : failed
+ *         : PROFILING_SUCCESS(0) : success
+ */
+int32_t ProfNpuMemJob::SetPeripheralConfig()
+{
+    samplePeriod_ = static_cast<uint32_t>(collectionJobCfg_->comParams->params->hardware_mem_sampling_interval);
+    uint32_t configSize = sizeof(TagMemProfileConfig);
+    TagMemProfileConfig *configP = reinterpret_cast<TagMemProfileConfig *>(Utils::ProfMalloc(configSize));
+    if (configP == nullptr) {
+        MSPROF_LOGE("ProfDevMemJob ProfMalloc TagMemProfileConfig failed");
+        return PROFILING_FAILED;
+    }
+ 
+    configP->period = samplePeriod_;
+    configP->res1 = 0;
+    configP->res2 = 0;
+    configP->event = PERIPHERAL_EVENT_NPU_MEM;
+ 
     peripheralCfg_.configP = configP;
     peripheralCfg_.configSize = configSize;
     return PROFILING_SUCCESS;
