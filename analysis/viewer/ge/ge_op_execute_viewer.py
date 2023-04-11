@@ -54,7 +54,7 @@ class GeOpExecuteViewer:
 
         result = []
         pid = InfoConfReader().get_json_pid_data()
-        header = [["process_name", pid, InfoConfReader().get_json_tid_data(), "GeOPExecute"]]
+        header = [["process_name", pid, InfoConfReader().get_json_tid_data(), TraceViewHeaderConstant.PROCESS_GE]]
         tid_set = set()
         for data in timeline_data:
             _name = data[3] if not data[2] else "{}_{}".format(data[2], str(data[3]))
