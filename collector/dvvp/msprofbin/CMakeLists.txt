@@ -138,6 +138,10 @@ target_compile_options(msprofbin PRIVATE
     -fno-common
     -fstack-protector-all
     -DMSPROF_BIN
+    -D_FORTIFY_SOURCE=2
+    $<$<NOT:$<STREQUAL:${CMAKE_BUILD_TYPE},Debug>>:-O2>
+    -fstack-check
+    -ftrapv
 )
 
 target_compile_definitions(msprofbin PRIVATE
