@@ -148,6 +148,8 @@ extern "C" {
 
 #define CHANNEL_TSCPU_MAX (128)
 #define CHANNEL_ROCE (129)
+#define CHANNEL_NPU_APP_MEM (130) /* HBM and DDR used on app level */
+#define CHANNEL_NPU_MEM (131)     /* HBM and DDR used on device level */
 #define CHANNEL_DVPP_VENC (135)  /* add for ascend610 */
 #define CHANNEL_DVPP_JPEGE (136) /* add for ascend610 */
 #define CHANNEL_DVPP_VDEC (137)  /* add for ascend610 */

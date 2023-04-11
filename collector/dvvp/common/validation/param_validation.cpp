@@ -673,7 +673,7 @@ bool ParamValidation::CheckDdrEventsIsValid(const std::vector<std::string> &even
     return CheckHbmEventsIsValid(events);  // same with hbm event
 }
 
-bool ParamValidation::ParamValidation::CheckHbmEventsIsValid(const std::vector<std::string> &events)
+bool ParamValidation::CheckHbmEventsIsValid(const std::vector<std::string> &events)
 {
     if (!CheckPmuEventSizeIsValid(events.size())) {
         MSPROF_LOGE("hbm events size(%u) is bigger than %d", events.size(), MAX_EVENT_SIZE);
