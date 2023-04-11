@@ -1085,7 +1085,8 @@ int ProfAclMgr::StartDeviceSubscribeTask(const uint32_t modelId, const uint32_t 
     ProfParamsAdapter::instance()->UpdateSampleConfig(feature, params);
     ProfParamsAdapter::instance()->ProfStartCfgToParamsCfg(dataTypeConfig, params);
     params->ts_keypoint = MSVP_PROF_ON;
-    if (ConfigManager::instance()->GetPlatformType() == PlatformType::CHIP_V4_1_0) {
+    PlatformType type = ConfigManager::instance()->GetPlatformType();
+    if (type == PlatformType::CHIP_V4_1_0 || type == PlatformType::CHIP_V4_2_0) {
         params->stars_acsq_task = MSVP_PROF_ON;
     }
 
