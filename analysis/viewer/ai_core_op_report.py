@@ -393,30 +393,36 @@ class AiCoreOpReport:
     @classmethod
     def _get_hardware_op_sql_data(cls: any, curs: any, sql_param: tuple) -> list:
         """
-        get sql to get ai cpu data
-        Return: sql
+        get sql to get hardware op sql data
+        Return: hardware op sql data
         """
         union_sql = "select {1}.model_id, {0}.task_id, {1}.stream_id, {index_info} " \
                     "op_name, {1}.op_type, {1}.task_type, " \
                     "{0}.start_time, {0}.duration_time/{NS_TO_US}, " \
-                    "{0}.wait_time/{NS_TO_US}, block_dim, mix_block_dim from {0} " \
+                    "{0}.wait_time/{NS_TO_US}, block_dim, mix_block_dim, " \
+                    "(case when context_id={context_id} then 'N/A' else context_id end) " \
+                    " from {0} " \
                     "inner join {1} on {0}.task_id={1}.task_id " \
                     "and {0}.stream_id={1}.stream_id " \
+                    "and {0}.subtask_id={1}.context_id " \
                     "and {1}.task_type = ? " \
                     "and {0}.batch_id={1}.batch_id" \
             .format(DBNameConstant.TABLE_SUMMARY_TASK_TIME,
                     DBNameConstant.TABLE_SUMMARY_GE,
                     NS_TO_US=NumberConstant.NS_TO_US,
-                    index_info=cls._get_index_id_sql_condition())
+                    index_info=cls._get_index_id_sql_condition(),
+                    context_id=NumberConstant.DEFAULT_GE_CONTEXT_ID)
         if DBManager.judge_table_exist(curs, DBNameConstant.TABLE_SUMMARY_TENSOR):
             union_sql = "select {1}.model_id, {0}.task_id, {1}.stream_id, {index_info} " \
                         "op_name, {1}.op_type, {1}.task_type, " \
                         "{0}.start_time, {0}.duration_time/{NS_TO_US}, " \
                         "{0}.wait_time/{NS_TO_US}, block_dim, mix_block_dim, " \
                         "input_shapes, input_data_types, input_formats, " \
-                        "output_shapes, output_data_types, output_formats " \
+                        "output_shapes, output_data_types, output_formats,  " \
+                        "(case when context_id={context_id} then 'N/A' else context_id end) " \
                         "from {0} inner join {1} on {0}.task_id={1}.task_id " \
                         "and {0}.stream_id={1}.stream_id " \
+                        "and {0}.subtask_id={1}.context_id " \
                         "and {1}.task_type = ? " \
                         "inner join {2} on {0}.task_id={2}.task_id and {0}.stream_id={2}.stream_id " \
                         "and {1}.timestamp={2}.timestamp " \
@@ -425,7 +431,8 @@ class AiCoreOpReport:
                         DBNameConstant.TABLE_SUMMARY_GE,
                         DBNameConstant.TABLE_SUMMARY_TENSOR,
                         NS_TO_US=NumberConstant.NS_TO_US,
-                        index_info=cls._get_index_id_sql_condition())
+                        index_info=cls._get_index_id_sql_condition(),
+                        context_id=NumberConstant.DEFAULT_GE_CONTEXT_ID)
         return DBManager.fetch_all_data(curs, union_sql, sql_param)
 
     @classmethod
