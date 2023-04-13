@@ -30,7 +30,7 @@ git clone ssh://git@codehub-dg-y.huawei.com:2222/OpenSourceCenter/nlohmann/json.
 git clone  --branch 2.4.5-h0.computing.cann.r3 ssh://git@codehub-dg-y.huawei.com:2222/OpenSourceCenter/makeself.git
 
 mkdir -p ${LLT_DIR} && cd ${LLT_DIR}
-git clone ssh://git@codehub-dg-y.huawei.com:2222/OpenSourceCenter/googletest.git googletest -b release-1.8.1
+git clone ssh://git@szv-open.codehub.huawei.com:2222/OpenSourceCenter/google/googletest.git -b release-1.12.1
 git clone ssh://git@szv-y.codehub.huawei.com:2222/d00437232/mock_cpp.git mockcpp -b msprof
 
 mkdir -p ${PLATFORM_DIR} && cd ${PLATFORM_DIR}
