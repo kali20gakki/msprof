@@ -166,6 +166,7 @@ public:
             if (useExtdDataQueue && !isQuit_) {
                 return TryPopExtdDataQueue(data);
             }
+            return false;
         }
 
         size_t index = currReadCusor & mask_;
