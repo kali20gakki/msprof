@@ -111,6 +111,11 @@ class StructFmt:
     NPU_MEM_FMT = "IIQQQ"
     NPU_MEM_DATA_SIZE = 32
 
+    # freq
+    FREQ_LPM_DATA_COUNT = 25
+    FREQ_FMT = "II" + "QII" * FREQ_LPM_DATA_COUNT
+    FREQ_DATA_SIZE = 408
+
     @staticmethod
     def class_name() -> str:
         """

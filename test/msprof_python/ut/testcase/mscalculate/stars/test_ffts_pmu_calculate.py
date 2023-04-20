@@ -140,3 +140,18 @@ class TestFftsPmuCalculate(TestCase):
             check = FftsPmuCalculate(self.file_list, CONFIG)
             check.block_dict = block_dict
             check.add_block_pmu_list()
+
+    def test_get_current_freq(self):
+        with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}):
+            check = FftsPmuCalculate(self.file_list, CONFIG)
+            check._freq = 1850000000
+            check.freq_data = []
+            self.assertEqual(check._get_current_freq(1500), 1850000000)
+            check.freq_data = [[1000, 0], [2000, 0], [4000, 0]]
+
+            self.assertEqual(check._get_current_freq(1500), 1850000000)
+            check.freq_data = [[1000, 1600], [2000, 1500], [4000, 800]]
+
+            self.assertEqual(check._get_current_freq(1500), 1600000000)
+            self.assertEqual(check._get_current_freq(2200), 1500000000)
+            self.assertEqual(check._get_current_freq(4600), 800000000)

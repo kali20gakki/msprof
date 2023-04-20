@@ -65,6 +65,7 @@ class DBNameConstant(metaclass=ABCMeta):
     DB_CLUSTER_PARALLEL = "cluster_parallel.db"
     DB_NPU_MEM = "npu_mem.db"
     DB_SYNC_ACL_NPU = "sync_acl_npu.db"
+    DB_FREQ = "freq.db"
 
     # DB tables
     TABLE_ACL_DATA = "acl_data"
@@ -238,6 +239,9 @@ class DBNameConstant(metaclass=ABCMeta):
     #sync_acl_npu
     TABLE_TORCH_TO_ACL = "TorchAclRelation"
     TABLE_TORCH_TO_NPU = "TorchNpuRelation"
+
+    # freq
+    TABLE_FREQ_PARSE = "FreqParse"
 
 
     @abstractmethod

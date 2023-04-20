@@ -207,6 +207,9 @@ class FileNameManagerConstant:
     NPU_MEM_FILE_PATTERN = r"^npu_mem\.data\.(\d+)\.slice_\d+"
     NPU_APP_MEM_FILE_PATTERN = r"^npu_mem\.app\.(\d+)\.slice_\d+"
 
+    # freq
+    FREQ_FILE_PATTERN = r"lpmFreqConv\.data\.(\d+)\.slice_\d+"
+
     def get_file_name_manager_class_name(self: any) -> any:
         """
         get file name manager class name
@@ -822,3 +825,12 @@ def get_npu_mem_compiles() -> tuple:
     """
     return (re.compile(FileNameManagerConstant.NPU_MEM_FILE_PATTERN),
             re.compile(FileNameManagerConstant.NPU_APP_MEM_FILE_PATTERN))
+
+
+def get_freq_compiles() -> tuple:
+    """
+    get freq files regex compiles
+    :return: freq files regex
+    """
+    return (re.compile(FileNameManagerConstant.FREQ_FILE_PATTERN),
+            )
