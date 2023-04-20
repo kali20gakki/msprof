@@ -7,11 +7,15 @@
 
 #include "params_adapter_geopt.h"
 
+#include <utility>
+#include <vector>
+#include <algorithm>
 #include "errno/error_code.h"
 #include "param_validation.h"
 #include "prof_params.h"
 #include "config/config.h"
 #include "platform/platform.h"
+
 
 namespace Collector {
 namespace Dvvp {
@@ -241,6 +245,41 @@ int ParamsAdapterGeOpt::SetOutputDir(std::string &outputDir) const
     return PROFILING_SUCCESS;
 }
 
+bool ParamsAdapterGeOpt::CheckInstrAndTaskParamBothSet(SHARED_PTR_ALIA<ProfGeOptionsConfig> geCfg)
+{
+    std::string instrFreqParam = std::to_string(geCfg->instr_profiling_freq());
+    if (instrFreqParam.compare("0") == 0) {
+        return false;
+    }
+    const std::vector<std::pair<bool, std::string>> ARG_VEC {
+        { geCfg->task_time() == "on", " task_time " },
+        { geCfg->task_trace() == "on", " task_trace " },
+        { geCfg->training_trace() == "on", " training_trace " },
+        { geCfg->aicpu() == "on", " aicpu " },
+        { geCfg->l2() == "on", " l2 " },
+        { geCfg->hccl() == "on", " hccl " },
+        { geCfg->runtime_api() == "on", " runtime_api " },
+        { !geCfg->aic_metrics().empty(), " aic_metrics " },
+        { !geCfg->aiv_metrics().empty(), " aiv_metrics " }
+    };
+    bool anyComflict = std::any_of(ARG_VEC.begin(), ARG_VEC.end(), [](std::pair<bool, std::string> arg) {
+        return arg.first;
+    });
+    if (anyComflict) {
+        std::string comflictStr = "";
+        for (auto arg : ARG_VEC) {
+            if (arg.first) {
+                comflictStr.append(arg.second);
+            }
+        }
+        MSPROF_LOGE("[Ge opt] Profiling fails to start because instr_profiling_freq is set,",
+            "Params %s not allowed to set in single operator model if instr_profiling_freq is set.",
+            comflictStr.c_str());
+        return true;
+    }
+    return false;
+}
+
 int ParamsAdapterGeOpt::GetParamFromInputCfg(SHARED_PTR_ALIA<ProfGeOptionsConfig> geCfg,
     SHARED_PTR_ALIA<ProfileParams> params)
 {
@@ -258,9 +297,10 @@ int ParamsAdapterGeOpt::GetParamFromInputCfg(SHARED_PTR_ALIA<ProfGeOptionsConfig
         MSPROF_LOGE("[GetParamFromInputCfg]ge options Init failed.");
         return PROFILING_FAILED;
     }
-
+    if (CheckInstrAndTaskParamBothSet(geCfg)) {
+        return PROFILING_FAILED;
+    }
     GenGeOptionsContainer(geCfg);
-
     ret = PlatformAdapterInit(params_);
     if (ret != PROFILING_SUCCESS) {
         return PROFILING_FAILED;
@@ -270,18 +310,15 @@ int ParamsAdapterGeOpt::GetParamFromInputCfg(SHARED_PTR_ALIA<ProfGeOptionsConfig
         MSPROF_LOGE("private param check fail.");
         return PROFILING_FAILED;
     }
-
     ret = ComCfgCheck(paramContainer_, setConfig_);
     if (ret != PROFILING_SUCCESS) {
         MSPROF_LOGE("common param check fail.");
         return PROFILING_FAILED;
     }
-
     ret = SetGeOptionsContainerDefaultValue();
     if (ret != PROFILING_SUCCESS) {
         return PROFILING_FAILED;
     }
-
     ret = TransToParam(paramContainer_, params_);
     if (ret != PROFILING_SUCCESS) {
         MSPROF_LOGE("ge opt set params fail.");
