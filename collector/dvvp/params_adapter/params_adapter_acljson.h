@@ -29,6 +29,7 @@ private:
     void SetAclJsonContainerSysValue();
     std::string SetOutputDir(const std::string &outputDir) const;
     bool CheckHostSysAclJsonValid(const std::string &cfgStr) const;
+    bool CheckInstrAndTaskParamBothSet(SHARED_PTR_ALIA<ProfAclConfig> aclCfg);
 
 private:
     SHARED_PTR_ALIA<ProfileParams> params_;

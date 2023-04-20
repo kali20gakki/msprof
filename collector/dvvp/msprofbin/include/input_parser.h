@@ -171,6 +171,8 @@ public:
     void MsprofCmdUsage(const std::string msg);
     SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> MsprofGetOpts(int argc, MsprofString argv[]);
     bool HasHelpParamOnly();
+private:
+    bool CheckInstrAndTaskParamBothSet(std::unordered_map<int, std::pair<MsprofCmdInfo, std::string>> &argvMap);
 
 private:
     SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params_;
