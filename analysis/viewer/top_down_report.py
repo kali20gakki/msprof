@@ -388,7 +388,7 @@ class TopDownData:
     def _fill_ts_trace_data(cls: any, project_path: str, result_data: list, top_down_datas: list) -> None:
         conn, cur = DBManager.check_connect_db(project_path, DBNameConstant.DB_AICORE_OP_SUMMARY)
         if conn and cur and top_down_datas:
-            if not DBManager.judge_table_exist(cur, cls.OP_SUMMARY_METRICS):
+            if not DBManager.judge_table_exist(cur, cls.OP_SUMMARY_TASK_TIME_TABLE):
                 return
 
             acl_query_sql = "select start_time,duration_time,stream_id,task_id,task_type,batch_id from {0} " \
