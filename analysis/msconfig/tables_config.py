@@ -1001,5 +1001,9 @@ class TablesConfig(MetaConfig):
             ('kernel_name', 'TEXT,null'),
             ('kernel_type', 'TEXT,null'),
             ('is_main_kernel', 'INTEGER,null')
+        ],
+        'FreqParseMap': [
+            ('syscnt', 'INTEGER,null'),
+            ('freq', 'INTEGER,null'),
         ]
     }
