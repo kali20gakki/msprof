@@ -33,6 +33,7 @@ from mscalculate.calculate_ai_core_data import CalculateAiCoreData
 from msmodel.aic.aic_pmu_model import AicPmuModel
 from msmodel.iter_rec.iter_rec_model import HwtsIterModel
 from msmodel.stars.ffts_pmu_model import FftsPmuModel
+from msmodel.freq.freq_parser_model import FreqParserModel
 from msparser.data_struct_size_constant import StructFmt
 from profiling_bean.db_dto.step_trace_dto import IterationRange
 from profiling_bean.prof_enum.data_tag import DataTag
@@ -65,6 +66,7 @@ class FftsPmuCalculate(PmuCalculator, MsMultiProcess):
         self._is_mix_needed = ChipManager().is_chip_v4()
         self.block_dict = {}
         self.mix_pmu_dict = {}
+        self.freq_data = []
 
     @staticmethod
     def _get_total_cycle_and_pmu_data(data: any, is_true: bool) -> tuple:
@@ -121,6 +123,9 @@ class FftsPmuCalculate(PmuCalculator, MsMultiProcess):
         for data in self._data_list.get(StrConstant.BLOCK_PMU_TYPE, []):
             self.calculate_block_pmu_list(data)
         self.add_block_pmu_list()
+        self.freq_data = FreqParserModel.get_freq_data(self._project_path)
+        if any(freq == 0 for _, freq in self.freq_data):
+            logging.error("The sampled frequency is 0Hz, using default frequency %sHz.", self._freq)
         if self._is_mix_needed:
             self.calculate_mix_pmu_list(pmu_data)
         else:
@@ -188,16 +193,16 @@ class FftsPmuCalculate(PmuCalculator, MsMultiProcess):
             pmu_data_list.append(pmu_data)
 
     def calculate_total_time(self: any, total_cycle: int, data: any, data_type: str = 'aic') -> float:
-        total_time = 0
         core_num = self._core_num_dict.get(data_type)
         block_dim = self._get_current_block('block_dim', data)
         mix_block_dim = self._get_current_block('mix_block_dim', data)
         if self._is_not_mix_main_core(data, data_type):
             block_dim = mix_block_dim
-        if all([block_dim, core_num, int(self._freq)]):
-            total_time = total_cycle * 1000 * NumberConstant.NS_TO_US / int(self._freq) / block_dim * \
-                         ((block_dim + core_num - 1) // core_num)
-        return round(total_time, NumberConstant.ROUND_TWO_DECIMAL)
+        freq = self._freq
+        if self.freq_data and len(data.time_list) >= 2:
+            freq = self._get_current_freq(data.time_list[1])
+        total_time = Utils.cal_total_time(total_cycle, int(freq), block_dim, core_num)
+        return total_time
 
     def get_total_cycle_info(self, data: any, task_type: int) -> tuple:
         """
@@ -387,6 +392,14 @@ class FftsPmuCalculate(PmuCalculator, MsMultiProcess):
 
     def __update_model_instance(self):
         self._model = AicPmuModel(self._project_path)
+
+    def _get_current_freq(self, task_time: int) -> int:
+        freq_curr = self._freq
+        for syscnt, freq in self.freq_data:
+            if task_time < syscnt:
+                break
+            freq_curr = freq * 1000000  # 1000000：convert MHz to Hz
+        return freq_curr if freq_curr != 0 else self._freq
 
 
 class PmuMetrics:
