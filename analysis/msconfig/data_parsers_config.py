@@ -188,5 +188,9 @@ class DataParsersConfig(MetaConfig):
         'NpuMemParser': [
             ('path', 'msparser.npu_mem.npu_mem_parser'),
             ('chip_model', '0,1,3,4,5,7')
-        ]
+        ],
+        'FreqParser': [
+            ('path', 'msparser.freq.freq_parser'),
+            ('chip_model', '5')
+        ],
     }

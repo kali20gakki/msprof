@@ -173,6 +173,14 @@ class Utils:
         return True
 
     @staticmethod
+    def cal_total_time(total_cycle: int, freq: int, block_dim: int, core_num: int) -> float:
+        if not all([block_dim, core_num, freq]):
+            return 0
+        total_time = total_cycle * 1000 * NumberConstant.NS_TO_US / freq / block_dim * \
+                     ((block_dim + core_num - 1) // core_num)
+        return round(total_time, NumberConstant.ROUND_TWO_DECIMAL)
+
+    @staticmethod
     def __handle_invalid_zero(data, accuracy):
         return str(round(float(data), accuracy)).rstrip('0').rstrip('.') if is_number(data) else data
 
