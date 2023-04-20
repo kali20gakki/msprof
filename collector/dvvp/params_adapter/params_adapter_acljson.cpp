@@ -5,7 +5,9 @@
  * Create: 2022-09-13
  */
 #include "params_adapter_acljson.h"
-
+#include <utility>
+#include <vector>
+#include <algorithm>
 #include "errno/error_code.h"
 #include "param_validation.h"
 #include "config/config.h"
@@ -239,6 +241,40 @@ std::string ParamsAdapterAclJson::SetOutputDir(const std::string &outputDir) con
     return result;
 }
 
+bool ParamsAdapterAclJson::CheckInstrAndTaskParamBothSet(SHARED_PTR_ALIA<ProfAclConfig> aclCfg)
+{
+    std::string instrFreqParam = std::to_string(aclCfg->instr_profiling_freq());
+    if (instrFreqParam.compare("0") == 0) {
+        return false;
+    }
+    const std::vector<std::pair<bool, std::string>> ARG_VEC {
+        { aclCfg->task_time() == "on", " task_time " },
+        { aclCfg->aicpu() == "on", " aicpu " },
+        { aclCfg->l2() == "on", " l2 " },
+        { aclCfg->hccl() == "on", " hccl " },
+        { aclCfg->ascendcl() == "on", " acsendcl " },
+        { aclCfg->runtime_api() == "on", " runtime_api " },
+        { !aclCfg->aic_metrics().empty(), " aic_metrics " },
+        { !aclCfg->aiv_metrics().empty(), " aiv_metrics " }
+    };
+    bool anyComflict = std::any_of(ARG_VEC.begin(), ARG_VEC.end(), [](std::pair<bool, std::string> arg) {
+        return arg.first;
+    });
+    if (anyComflict) {
+        std::string comflictStr = "";
+        for (auto arg : ARG_VEC) {
+            if (arg.first) {
+                comflictStr.append(arg.second);
+            }
+        }
+        MSPROF_LOGE("[Acl json] Profiling fails to start because instr_profiling_freq is set,",
+            "Params %s not allowed to set in single operator model if instr_profiling_freq is set.",
+            comflictStr.c_str());
+        return true;
+    }
+    return false;
+}
+
 int ParamsAdapterAclJson::GetParamFromInputCfg(SHARED_PTR_ALIA<ProfAclConfig> aclCfg,
     SHARED_PTR_ALIA<ProfileParams> params)
 {
@@ -256,9 +292,10 @@ int ParamsAdapterAclJson::GetParamFromInputCfg(SHARED_PTR_ALIA<ProfAclConfig> ac
         MSPROF_LOGE("[GetParamFromInputCfg]acljson Init failed.");
         return PROFILING_FAILED;
     }
-
+    if (CheckInstrAndTaskParamBothSet(aclCfg)) {
+        return PROFILING_FAILED;
+    }
     GenAclJsonContainer(aclCfg);
-
     ret = PlatformAdapterInit(params_);
     if (ret != PROFILING_SUCCESS) {
         return PROFILING_FAILED;
