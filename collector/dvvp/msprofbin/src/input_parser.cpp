@@ -39,6 +39,7 @@ using namespace Collector::Dvvp::Plugin;
 using namespace Collector::Dvvp::Mmpa;
 using namespace Collector::Dvvp::ParamsAdapter;
 
+const int INPUT_MAX_LENTH           = 512; // 512 : max length
 const int MSPROF_DAEMON_ERROR       = -1;
 const int MSPROF_DAEMON_OK          = 0;
 const int FILE_FIND_REPLAY          = 100;
@@ -74,14 +75,56 @@ void InputParser::MsprofCmdUsage(const std::string msg)
     ArgsManager::instance()->PrintHelp();
 }
 
+bool InputParser::CheckInstrAndTaskParamBothSet(std::unordered_map<int, std::pair<MsprofCmdInfo, std::string>> &argvMap)
+{
+    std::string comflictStr = "";
+    const std::map<int, std::string> INSTR_LIST = {
+        {ARGS_AI_CORE, "ai-core"},
+        {ARGS_TASK_TIME, "task-time"},
+        {ARGS_ASCENDCL, "ascendcl"},
+        {ARGS_MODEL_EXECUTION, "model-execution"},
+        {ARGS_RUNTIME_API, "runtime-api"},
+        {ARGS_AICPU, "aicpu"},
+        {ARGS_HCCL, "hccl"},
+        {ARGS_L2_PROFILING, "l2"},
+    };
+
+    if (argvMap.count(ARGS_INSTR_PROFILING) != 0 &&
+        std::string(argvMap[ARGS_INSTR_PROFILING].first.args[ARGS_INSTR_PROFILING], ON.size()) == "on") {
+        for (auto &cfg : INSTR_LIST) {
+            if (argvMap.count(cfg.first) != 0 && std::string(argvMap[cfg.first].first.args[cfg.first],
+                ON.size()) == "on") {
+                comflictStr += " ";
+                comflictStr += cfg.second;
+            }
+        }
+        if (argvMap.count(ARGS_AIC_FREQ) != 0) {
+            comflictStr += " aic-freq";
+        }
+        if (argvMap.count(ARGS_AIC_MODE) != 0) {
+            comflictStr += " aic-mode";
+        }
+        if (argvMap.count(ARGS_AIC_METRICE) != 0) {
+            comflictStr += " aic-metrics";
+        }
+    }
+    
+    if (!comflictStr.empty()) {
+        CmdLog::instance()->CmdErrorLog(" Profiling fails to start because instr_profiling is on,"
+            " Params %s not allowed to set in single operator model if instr_profiling is on.",
+            comflictStr.c_str());
+        return true;
+    }
+    return false;
+}
+
 SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> InputParser::MsprofGetOpts(int argc, CONST_CHAR_PTR argv[])
 {
     if (params_ == nullptr) {
         MSPROF_LOGE("params_ is null in InputParser.");
         return nullptr;
     }
-    const static int inputMaxLen = 512; // 512 : max length
-    if (argc > inputMaxLen || argv == nullptr || strlen(*argv) > inputMaxLen) {
+    if (argc > INPUT_MAX_LENTH || argv == nullptr || strnlen(*argv, INPUT_MAX_LENTH) >= INPUT_MAX_LENTH) {
         CmdLog::instance()->CmdErrorLog("input data is invalid,"
             "please input argc less than 512 and argv is not null and the len of argv less than 512");
         return nullptr;
@@ -117,6 +160,9 @@ SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> InputParser::MsprofGetOp
         } else {
             argvMap[opt] = std::pair<MsprofCmdInfo, std::string>(cmdInfo, argvStr);
         }
+    }
+    if (CheckInstrAndTaskParamBothSet(argvMap)) {
+        return nullptr;
     }
     auto paramAdapter = ParamsAdapterMsprof();
     if (paramAdapter.GetParamFromInputCfg(argvMap, params_) != PROFILING_SUCCESS) {

@@ -30,6 +30,7 @@ private:
     int SetGeOptionsContainerDefaultValue();
     void SetGeOptContainerSysValue();
     int SetOutputDir(std::string &outputDir) const;
+    bool CheckInstrAndTaskParamBothSet(SHARED_PTR_ALIA<ProfGeOptionsConfig> geCfg);
 
 private:
     SHARED_PTR_ALIA<ProfileParams> params_;
