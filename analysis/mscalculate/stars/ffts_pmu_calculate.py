@@ -126,6 +126,7 @@ class FftsPmuCalculate(PmuCalculator, MsMultiProcess):
         self.freq_data = FreqParserModel.get_freq_data(self._project_path)
         if any(freq == 0 for _, freq in self.freq_data):
             logging.error("The sampled frequency is 0Hz, using default frequency %sHz.", self._freq)
+            self.freq_data = []
         if self._is_mix_needed:
             self.calculate_mix_pmu_list(pmu_data)
         else:
