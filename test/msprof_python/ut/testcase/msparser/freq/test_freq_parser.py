@@ -22,7 +22,7 @@ class TestFreqParser(unittest.TestCase):
     def test_parse(self):
         with mock.patch(NAMESPACE + '.PathManager.get_data_file_path', return_value='test'), \
                 mock.patch(NAMESPACE + '.FreqParser._read_file'), \
-                mock.patch('os.path.getsize', return_value=408), \
+                mock.patch('os.path.getsize', return_value=StructFmt.FREQ_DATA_SIZE), \
                 mock.patch(NAMESPACE + '.FileManager.add_complete_file'):
             check = FreqParser(self.file_list, CONFIG)
             check.parse()
@@ -34,15 +34,14 @@ class TestFreqParser(unittest.TestCase):
             check.parse()
 
     def test_read_file(self):
-        data = struct.pack(StructFmt.FREQ_FMT, 2, 0, 100, 10, 0, 120, 30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                           0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                           0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+        origin_data = [2, 0, 100, 10, 0, 120, 30, 0] + [0] * (len(StructFmt.FREQ_FMT) - 8)
+        data = struct.pack(StructFmt.FREQ_FMT, *origin_data)
         offset_calculator = OffsetCalculator(self.file_list.get(DataTag.FREQ), StructFmt.FREQ_DATA_SIZE, 'test')
         with mock.patch('builtins.open', mock.mock_open(read_data=data)),\
                 mock.patch(NAMESPACE + '.OffsetCalculator.pre_process', return_value=data),\
                 mock.patch(NAMESPACE + '.FileManager.add_complete_file'):
             check = FreqParser(self.file_list, CONFIG)
-            check._read_file('test', 408, offset_calculator)
+            check._read_file('test', StructFmt.FREQ_DATA_SIZE, offset_calculator)
 
     def test_save(self):
         with mock.patch('msmodel.freq.freq_parser_model.FreqParserModel.init'), \

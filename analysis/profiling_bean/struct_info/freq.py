@@ -40,7 +40,7 @@ class FreqLpmConvBean(IDataBean):
     SYSCNT_BEGIN_INDEX = 2
     FREQ_BEGIN_INDEX = 3
     INTERVAL = 3
-    FREQ_DATA_NUM = 77
+    FREQ_DATA_NUM = len(StructFmt.FREQ_FMT)
 
     def __init__(self: any) -> None:
         self._count = 0
@@ -66,7 +66,7 @@ class FreqLpmConvBean(IDataBean):
         :param bin_data: freq bin data
         :return: instance of freq
         """
-        if not self.construct_bean(struct.unpack(StructFmt.FREQ_FMT, bin_data)):
+        if not self.construct_bean(struct.unpack(StructFmt.BYTE_ORDER_CHAR + StructFmt.FREQ_FMT, bin_data)):
             logging.error("freq data struct is incomplete, please check the freq file.")
 
     def construct_bean(self: any, *args: any) -> bool:
