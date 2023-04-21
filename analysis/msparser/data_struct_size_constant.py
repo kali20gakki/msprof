@@ -112,9 +112,9 @@ class StructFmt:
     NPU_MEM_DATA_SIZE = 32
 
     # freq
-    FREQ_LPM_DATA_COUNT = 25
+    FREQ_LPM_DATA_COUNT = 55
     FREQ_FMT = "II" + "QII" * FREQ_LPM_DATA_COUNT
-    FREQ_DATA_SIZE = 408
+    FREQ_DATA_SIZE = struct.calcsize(FREQ_FMT)
 
     @staticmethod
     def class_name() -> str:
