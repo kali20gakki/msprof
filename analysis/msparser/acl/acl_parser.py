@@ -106,6 +106,5 @@ class AclParser(IParser, MsMultiProcess):
                         acl_data_bean.api_start,
                         acl_data_bean.api_end,
                         acl_data_bean.process_id,
-                        acl_data_bean.thread_id,
-                        self._device_id
+                        acl_data_bean.thread_id
                     ])

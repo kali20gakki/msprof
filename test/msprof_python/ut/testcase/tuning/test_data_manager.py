@@ -98,7 +98,7 @@ class TestDataLoader(unittest.TestCase):
     def test_is_network(self):
         project = 123
         device_id = 0
-        create_sql = "create table IF NOT EXISTS acl_data (api_name text,api_type text,start_time INTEGER," \
+        create_sql = "create table IF NOT EXISTS AclData (api_name text,api_type text,start_time INTEGER," \
                      "end_time INTEGER,process_id INTEGER,thread_id INTEGER,device_id INTEGER)"
         data = [(None, None, 117962568517, 118405906350, 2244, 2246, None)]
         with DBOpen(DBNameConstant.DB_ACL_MODULE) as db_open:

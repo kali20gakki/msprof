@@ -8,6 +8,7 @@ import struct
 
 from common_func.constant import Constant
 from common_func.empty_class import EmptyClass
+from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.path_manager import PathManager
@@ -25,8 +26,6 @@ class ParseAiCpuDataAdapter(MsMultiProcess):
     BYTE_ORDER_CHAR = '='
     READ_BINARY_HEADER_FMT = 'HH'
     # The min bytes for ai cpu: 2 bytes for magic number, and 2 bytes for data tag.
-    # magic number: 5A5A
-    AI_CPU_MAGIC_NUM = 23130
     AI_CPU_TAG = 60
 
     def __init__(self: any, file_list: dict, sample_config: dict) -> None:
@@ -51,7 +50,7 @@ class ParseAiCpuDataAdapter(MsMultiProcess):
                 _ = cpu_f.read(file_size + offset - StructFmt.AI_CPU_FMT_SIZE)
                 magic_num, data_tag = struct.unpack(self.BYTE_ORDER_CHAR + self.READ_BINARY_HEADER_FMT, cpu_f.read(
                     struct.calcsize(self.BYTE_ORDER_CHAR + self.READ_BINARY_HEADER_FMT)))
-                if magic_num == self.AI_CPU_MAGIC_NUM and data_tag == self.AI_CPU_TAG:
+                if magic_num == NumberConstant.MAGIC_NUM and data_tag == self.AI_CPU_TAG:
                     return ParseAiCpuBinData(self._file_list, self.sample_config)
                 return ParseAiCpuData(self._file_list, self.sample_config)
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:

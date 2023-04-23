@@ -109,7 +109,6 @@ class AiCpuData(StructDecoder):
     struct for ai cpu
     """
 
-    AI_CPU_MAGIC_NUM = 23130
     AI_CPU_DATA_TAG = 60
 
     def __init__(self: any) -> None:
@@ -159,7 +158,7 @@ class AiCpuData(StructDecoder):
         """
         _ai_cpu_data = args[0]
         _magic_num, _data_tag = _ai_cpu_data[:2]
-        if _magic_num == self.AI_CPU_MAGIC_NUM and _data_tag == self.AI_CPU_DATA_TAG:
+        if _magic_num == NumberConstant.MAGIC_NUM and _data_tag == self.AI_CPU_DATA_TAG:
             self._stream_id = Utils.get_stream_id(_ai_cpu_data[2])
             self._task_id = str(_ai_cpu_data[3])
             self._ai_cpu_time_consuming = AiCpuTimeConsuming(_ai_cpu_data[4:])

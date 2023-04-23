@@ -73,9 +73,3 @@ class AclModel(ViewModel, IAnalysisModel):
         sql = f"select start_time, end_time, thread_id from {DBNameConstant.TABLE_ACL_DATA} where " \
               f"api_name='OpCompile' order by start_time"
         return DBManager.fetch_all_data(self.cur, sql, dto_class=AclDto)
-
-    def _get_where_condition(self):
-        return MsprofIteration(self._result_dir).get_condition_within_iteration(self._iter_range,
-                                                                                time_start_key='start_time',
-                                                                                time_end_key='end_time')
-

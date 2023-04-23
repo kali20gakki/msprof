@@ -210,6 +210,11 @@ class FileNameManagerConstant:
     # freq
     FREQ_FILE_PATTERN = r"lpmFreqConv\.data\.(\d+)\.slice_\d+"
 
+    # new data struct
+    API_FILE_PATTERN = r"^(aging|unaging)\.api\.data\.slice_\d+"
+    EVENT_DATA_FILE_PATTERN = r"^(aging|unaging)\.event\.data\.slice_\d+"
+    HASH_DATA_FILE_PATTERN = r"^(aging|unaging)\.additional\.(hash_dic|type_info_dic)\.slice_\d+"
+
     def get_file_name_manager_class_name(self: any) -> any:
         """
         get file name manager class name
@@ -834,3 +839,27 @@ def get_freq_compiles() -> tuple:
     """
     return (re.compile(FileNameManagerConstant.FREQ_FILE_PATTERN),
             )
+
+
+def get_api_data_compiles() -> tuple:
+    """
+    get api data files regex compiles
+    :return: api data files regex
+    """
+    return (re.compile(FileNameManagerConstant.API_FILE_PATTERN),)
+
+
+def get_event_data_compiles() -> tuple:
+    """
+    get event data files regex compiles
+    :return: event data files regex
+    """
+    return (re.compile(FileNameManagerConstant.EVENT_DATA_FILE_PATTERN),)
+
+
+def get_hash_data_compiles() -> tuple:
+    """
+    get hash data  files regex compiles
+    :return: hash data files regex
+    """
+    return (re.compile(FileNameManagerConstant.HASH_DATA_FILE_PATTERN),)
