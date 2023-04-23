@@ -26,16 +26,6 @@ class AclSqlParser:
                           CommonConstant.ACL_TABLE_MAP)
 
     @classmethod
-    def create_acl_hash_table(cls: any, project_path: str) -> None:
-        """
-        create db and table of acl hash.
-        :param project_path: project path
-        :return: None
-        """
-        cls._create_table(project_path, DBNameConstant.DB_HASH, DBNameConstant.TABLE_HASH_ACL,
-                          CommonConstant.ACL_HASH_TABLE_MAP)
-
-    @classmethod
     def insert_acl_data_to_db(cls: any, project_path: str, data: list) -> None:
         """
         insert data into the table of acl.
@@ -44,16 +34,6 @@ class AclSqlParser:
         :return: None
         """
         cls._insert_db(project_path, data, DBNameConstant.DB_ACL_MODULE, DBNameConstant.TABLE_ACL_DATA)
-
-    @classmethod
-    def insert_acl_hash_to_db(cls: any, project_path: str, data: list) -> None:
-        """
-        insert data into the table of acl.
-        :param data: acl data
-        :param project_path:project path
-        :return: None
-        """
-        cls._insert_db(project_path, data, DBNameConstant.DB_HASH, DBNameConstant.TABLE_HASH_ACL)
 
     @classmethod
     def _create_table(cls: any, project_path: str, db_name: str, table_name: str, table_map: str) -> None:

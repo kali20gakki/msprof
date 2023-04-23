@@ -3,11 +3,14 @@
 # Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
 import logging
 import os
+import struct
 from abc import abstractmethod
 
 from common_func.constant import Constant
 from common_func.file_manager import FileManager
 from common_func.file_manager import FileOpen
+from common_func.ms_constant.level_type_constant import LevelDataType
+from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.msvp_common import is_valid_original_data
 from common_func.os_manager import check_file_readable
@@ -35,6 +38,26 @@ class DataParser(IParser):
         :return:
         """
         return bean_class.decode(bean_data)
+
+    @staticmethod
+    def group_aging_file(api_file_list: list) -> dict:
+        file_dict = {}
+        for file in api_file_list:
+            if file.startswith('aging'):
+                file_dict.setdefault('aging_file', []).append(file)
+            elif file.startswith('unaging'):
+                file_dict.setdefault('unaging_file', []).append(file)
+            else:
+                logging.warning('Invalid file name: %s', format(file))
+        for data_list in file_dict.values():
+            data_list.sort(key=lambda x: int(x.split("_")[-1]))
+        return file_dict
+
+    @staticmethod
+    def check_magic_num(data: bytes):
+        magic_num, level = struct.unpack("=HH", data[:4])
+        if magic_num != NumberConstant.MAGIC_NUM or not LevelDataType(level):
+            raise ValueError("An exception occurred when parsing the format data. Some data may be lost.")
 
     @abstractmethod
     def parse(self: any) -> None:

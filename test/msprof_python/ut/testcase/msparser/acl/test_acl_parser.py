@@ -50,7 +50,7 @@ class TestAclParser(unittest.TestCase):
                 mock.patch(NAMESPACE + '.OffsetCalculator.pre_process', return_value=acl_data_new):
             check = AclParser(self.file_list, CONFIG)
             check._insert_acl_data('test', 128, [])
-        self.assertEqual(check._acl_data, [['test', 3, 46, 6, 8, 989, '0']])
+        self.assertEqual(check._acl_data, [['test', 3, 46, 6, 8, 989]])
 
     def test_parse(self):
         _acl_data = (23130, 0, '3074377499921637268', '3', 102026687320964, 102026687968135, 15489, 15489, 0)

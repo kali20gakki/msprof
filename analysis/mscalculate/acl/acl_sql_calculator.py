@@ -23,7 +23,7 @@ class AclSqlCalculator:
         :return: list of acl data
         """
         sql = "select api_name, api_type, start_time, end_time, " \
-              "process_id, thread_id, device_id from {0}".format(table_name)
+              "process_id, thread_id from {0}".format(table_name)
         return cls._select_data(db_path, table_name, sql)
 
     @classmethod

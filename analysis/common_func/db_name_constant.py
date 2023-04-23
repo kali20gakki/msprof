@@ -66,9 +66,11 @@ class DBNameConstant(metaclass=ABCMeta):
     DB_NPU_MEM = "npu_mem.db"
     DB_SYNC_ACL_NPU = "sync_acl_npu.db"
     DB_FREQ = "freq.db"
+    DB_API_DATA = "api.db"
+    DB_EVENT_DATA = "event.db"
 
     # DB tables
-    TABLE_ACL_DATA = "acl_data"
+    TABLE_ACL_DATA = "AclData"
     TABLE_AI_CORE_METRIC_SUMMARY = "MetricSummary"
     TABLE_AIV_METRIC_SUMMARY = "AivMetricSummary"
     TABLE_AI_CORE_REC = "AiCoreRec"
@@ -205,7 +207,8 @@ class DBNameConstant(metaclass=ABCMeta):
     TABLE_GE_TENSOR = "TensorInfo"
     TABLE_GE_STEP = "StepInfo"
     TABLE_GE_SESSION = "SessionInfo"
-    TABLE_GE_HASH = "HashInfo"
+    TABLE_GE_HASH = "GeHashInfo"
+    TABLE_TYPE_HASH = "TypeHashInfo"
 
     # ge model
     TABLE_GE_MODEL_LOAD = "GeModelLoad"
@@ -243,6 +246,9 @@ class DBNameConstant(metaclass=ABCMeta):
     # freq
     TABLE_FREQ_PARSE = "FreqParse"
 
+    # new struct
+    TABLE_API_DATA = 'ApiData'
+    TABLE_EVENT_DATA = 'EventData'
 
     @abstractmethod
     def get_db_name(self: any) -> str:
