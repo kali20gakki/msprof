@@ -14,7 +14,7 @@ class TestConfigManager(unittest.TestCase):
         config = ConfigManager.get(ConfigManager.PROF_RULE)
         self.assertEqual(len(config.get_data()), 19)
         config = ConfigManager.get(ConfigManager.DATA_PARSERS)
-        self.assertEqual(len(config.sections()), 47)
+        self.assertEqual(len(config.sections()), 49)
         config = ConfigManager.get(ConfigManager.STARS)
         self.assertEqual(config.has_section('AA'), False)
         config = ConfigManager.get(ConfigManager.TABLES)

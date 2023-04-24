@@ -120,6 +120,15 @@ class StructFmt:
     API_FMT = "HHIIIQQQ"
     EVENT_FMT = "HHIIIQQQ"
 
+    # compact runtime
+    TASK_TRACK_RESIDUAL_SIZE = 28
+    TASK_TRACK_FMT = "HHIIIQHHHHI" + "B" * TASK_TRACK_RESIDUAL_SIZE
+    TASK_TRACK_DATA_SIZE = struct.calcsize(TASK_TRACK_FMT)
+
+    MEMCPY_INFO_RESIDUAL_SIZE = 30
+    MEMCPY_INFO_FMT = "HHIIIQQH" + "B" * MEMCPY_INFO_RESIDUAL_SIZE
+    MEMCPY_INFO_DATA_SIZE = struct.calcsize(MEMCPY_INFO_FMT)
+
     @staticmethod
     def class_name() -> str:
         """
