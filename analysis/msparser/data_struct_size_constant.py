@@ -116,6 +116,10 @@ class StructFmt:
     FREQ_FMT = "II" + "QII" * FREQ_LPM_DATA_COUNT
     FREQ_DATA_SIZE = struct.calcsize(FREQ_FMT)
 
+    # new struct
+    API_FMT = "HHIIIQQQ"
+    EVENT_FMT = "HHIIIQQQ"
+
     @staticmethod
     def class_name() -> str:
         """

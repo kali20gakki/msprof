@@ -47,7 +47,9 @@ class StructDecoder:
         "LowPowerBean": StructFmt.LOWPOWER_FMT,
         "FlowBean": StructFmt.FLOW_FMT,
         "CyclesBean": StructFmt.CYCLES_FMT,
-        "TaskTypeBean": StructFmt.TS_TASK_TYPE_FMT
+        "TaskTypeBean": StructFmt.TS_TASK_TYPE_FMT,
+        "ApiDataBean": StructFmt.API_FMT,
+        "EventDataBean": StructFmt.EVENT_FMT
     }
 
     @classmethod

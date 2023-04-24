@@ -140,18 +140,18 @@ class TopDownData:
                 # get acl data for app.
                 acl_net_data = \
                     cur.execute("select api_name, start_time, (end_time-start_time) "
-                                "as output_duration from acl_data "
-                                "where api_name=? and device_id=? limit ?,?",
-                                (cls.ACL_MODEL_EXECUTE, device_id, iter_id - 1, 1)).fetchone()
+                                "as output_duration from {} "
+                                "where api_name=? limit ?,?".format(DBNameConstant.TABLE_ACL_DATA),
+                                (cls.ACL_MODEL_EXECUTE, iter_id - 1, 1)).fetchone()
                 if acl_net_data:
                     return [(iter_id, cls.MODULE_ACL) + acl_net_data]
 
                 # get acl data for op.
                 acl_op_data = \
                     cur.execute("select api_name, start_time, (end_time-start_time) "
-                                "as output_duration from acl_data "
-                                "where api_name=? and device_id=? limit ?,?",
-                                (cls.ACL_OP_EXECUTE, device_id, iter_id - 1, 1)).fetchone()
+                                "as output_duration from {} "
+                                "where api_name=? limit ?,?".format(DBNameConstant.TABLE_ACL_DATA),
+                                (cls.ACL_OP_EXECUTE, iter_id - 1, 1)).fetchone()
                 if acl_op_data:
                     return [(iter_id, cls.MODULE_ACL) + acl_op_data]
             return []
@@ -308,9 +308,9 @@ class TopDownData:
             if not conn or not cur:
                 return
             sql = "select api_name, start_time, (end_time-start_time) " \
-                  "as output_duration from acl_data where device_id=? " \
-                  "and start_time >=? and start_time<=?"
-            acl_iter_datas = DBManager.fetch_all_data(cur, sql, (device_id, acl_data[0][-2],
+                  "as output_duration from {} " \
+                  "where start_time >=? and start_time<=?".format(DBNameConstant.TABLE_ACL_DATA)
+            acl_iter_datas = DBManager.fetch_all_data(cur, sql, (acl_data[0][-2],
                                                                  ts_datas[0][-2] + ts_datas[0][-1]))
             if acl_iter_datas:
                 top_down_datas = Utils.generator_to_list(cls._reformat_acl_trace_data(acl_data, acl_iter_data)

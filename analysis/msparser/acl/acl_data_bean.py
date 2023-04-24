@@ -5,6 +5,7 @@
 import logging
 import struct
 
+from common_func.ms_constant.number_constant import NumberConstant
 from profiling_bean.struct_info.struct_decoder import StructDecoder
 
 
@@ -13,7 +14,6 @@ class AclDataBean(StructDecoder):
     ACL bean data for the data parsing by acl parser.
     """
     ACL_FMT = "HHIQQII64s4Q"
-    ACL_MAGIC_NUM = 23130
     ACL_DATA_TAG = 0
 
     def __init__(self: any) -> None:
@@ -90,7 +90,7 @@ class AclDataBean(StructDecoder):
         """
         _acl_data = args[0]
         _magic_num, _data_tag = _acl_data[:2]
-        if _magic_num == self.ACL_MAGIC_NUM and _data_tag == self.ACL_DATA_TAG:
+        if _magic_num == NumberConstant.MAGIC_NUM and _data_tag == self.ACL_DATA_TAG:
             self._api_type = _acl_data[2]
             self._api = bytes.decode(_acl_data[7]).replace('\x00', '')
             self._api_start = _acl_data[3]

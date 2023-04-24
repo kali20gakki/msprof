@@ -34,8 +34,6 @@ class ParseAiCpuBinData(MsMultiProcess):
     LIMIT_AI_CPU_LEN = 5000
     TABLES_PATH = ConfigManager.TABLES
     AI_CPU_DATA_MAP = "AiCpuDataMap"
-    # magic number: 5A5A
-    AI_CPU_MAGIC_NUM = 23130
     AI_CPU_TAG = 9
     NONE_NODE_NAME = ''
 

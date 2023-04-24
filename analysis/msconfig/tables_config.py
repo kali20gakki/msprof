@@ -23,9 +23,14 @@ class TablesConfig(MetaConfig):
             ('batch_id', 'INTEGER,null'),
             ('context_id', 'INTEGER,null')
         ],
-        'HashInfoMap': [
+        'GeHashInfoMap': [
             ('hash_key', 'TEXT,null'),
             ('hash_value', 'TEXT,null')
+        ],
+        'TypeHashInfoMap': [
+            ('hash_key', 'TEXT,null'),
+            ('hash_value', 'TEXT,null'),
+            ('level', 'TEXT,null')
         ],
         'TensorInfoMap': [
             ('model_id', 'INTEGER,null'),
@@ -478,12 +483,7 @@ class TablesConfig(MetaConfig):
             ('start_time', 'INTEGER,null'),
             ('end_time', 'INTEGER,null'),
             ('process_id', 'INTEGER,null'),
-            ('thread_id', 'INTEGER,null'),
-            ('device_id', 'INTEGER,null')
-        ],
-        'AclHashMap': [
-            ('acl_hash', 'text,null'),
-            ('api_name', 'text,null')
+            ('thread_id', 'INTEGER,null')
         ],
         'ModifiedTaskTimeMap': [
             ('task_id', 'INTEGER, null'),
@@ -1005,5 +1005,22 @@ class TablesConfig(MetaConfig):
         'FreqParseMap': [
             ('syscnt', 'INTEGER,null'),
             ('freq', 'INTEGER,null'),
+        ],
+        'ApiDataMap': [
+            ('type', 'TEXT,null'),
+            ('id', 'TEXT,null'),
+            ('level', 'TEXT,null'),
+            ('thread_id', 'INTEGER,null'),
+            ('item_id', 'INTEGER,null'),
+            ('start', 'INTEGER,null'),
+            ('end', 'INTEGER,null')
+        ],
+        'EventDataMap': [
+            ('type', 'TEXT,null'),
+            ('level', 'TEXT,null'),
+            ('thread_id', 'INTEGER,null'),
+            ('item_id', 'INTEGER,null'),
+            ('request_id', 'INTEGER,null'),
+            ('timestamp', 'INTEGER,null')
         ]
     }
