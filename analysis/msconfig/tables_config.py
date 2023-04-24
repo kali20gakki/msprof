@@ -386,7 +386,7 @@ class TablesConfig(MetaConfig):
             ('stream_id', 'INTEGER,null'),
             ('task_id', 'INTEGER,null'),
             ('thread', 'INTEGER,null'),
-            ('batch_id', 'INTEGER,null')
+            ('batch_id', 'INTEGER,null'),
         ],
         'TsTrackMap': [
             ('mode', 'INTEGER,null'),
@@ -1022,5 +1022,26 @@ class TablesConfig(MetaConfig):
             ('item_id', 'INTEGER,null'),
             ('request_id', 'INTEGER,null'),
             ('timestamp', 'INTEGER,null')
-        ]
+        ],
+        'TaskTrackMap': [
+            ('device_id', 'INTEGER,null'),
+            ('timestamp', 'REAL,null'),
+            ('task_type', 'TEXT,null'),
+            ('stream_id', 'INTEGER,null'),
+            ('task_id', 'INTEGER,null'),
+            ('thread', 'INTEGER,null'),
+            ('batch_id', 'INTEGER,null'),
+            ('type', 'TEXT,null'),
+            ('level', 'TEXT,null'),
+            ('data_len', 'INTEGER,null'),
+        ],
+        'MemcpyInfoMap': [
+            ('type', 'TEXT,null'),
+            ('level', 'TEXT,null'),
+            ('thread_id', 'INTEGER,null'),
+            ('data_len', 'INTEGER,null'),
+            ('timestamp', 'INTEGER,null'),
+            ('data_size', 'INTEGER,null'),
+            ('memcpy_direction', 'INTEGER,null'),
+        ],
     }
