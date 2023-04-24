@@ -129,6 +129,8 @@ class NumberConstant:
     B_to_MB = 1024 ** 2
 
     DEFAULT_LAYER_SORT_START = 10
+    # magic number: 5A5A
+    MAGIC_NUM = 23130
 
     @property
     def conversion_time(self: any) -> float:

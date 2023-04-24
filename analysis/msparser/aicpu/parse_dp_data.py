@@ -11,6 +11,7 @@ from common_func.constant import Constant
 from common_func.empty_class import EmptyClass
 from common_func.file_name_manager import get_data_preprocess_compiles
 from common_func.file_name_manager import get_file_name_pattern_match
+from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msvp_common import is_valid_original_data
 
 
@@ -22,7 +23,6 @@ class ParseDpData:
     TAG_DP = "DP"
     DEFAULT_BATCH = 32
     BIN_DP_HEADER_FMT = "=HH"
-    BIN_DP_MAGIC_NUM = 23130
     BIN_DP_DATA_TAG = 100
     DP_FILE_STR_TYPE = 'str_or_bytes'
     DP_FILE_BIN_TYPE = 'bin'
@@ -141,7 +141,7 @@ class ParseDpData:
                 _ = dp_f.read(file_size + offset - ParseDpData.DP_DATA_FMT_SIZE)
                 magic_num, data_tag = struct.unpack(cls.BIN_DP_HEADER_FMT,
                                                     dp_f.read(struct.calcsize(cls.BIN_DP_HEADER_FMT)))
-                if magic_num == cls.BIN_DP_MAGIC_NUM and data_tag == cls.BIN_DP_DATA_TAG:
+                if magic_num == NumberConstant.MAGIC_NUM and data_tag == cls.BIN_DP_DATA_TAG:
                     return cls.DP_FILE_BIN_TYPE
                 return cls.DP_FILE_STR_TYPE
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:

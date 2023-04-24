@@ -193,4 +193,18 @@ class DataParsersConfig(MetaConfig):
             ('path', 'msparser.freq.freq_parser'),
             ('chip_model', '5')
         ],
+        'ApiDataParser': [
+            ('path', 'msparser.api.api_data_parser'),
+            ('chip_model', '0,1,2,3,4,5,7'),
+            ('level', '2')
+        ],
+        'EventDataParser': [
+            ('path', 'msparser.event.event_data_parser'),
+            ('chip_model', '0,1,2,3,4,5,7'),
+            ('level', '2')
+        ],
+        'HashDicParser': [
+            ('path', 'msparser.hash_dic.hash_dic_parser'),
+            ('chip_model', '0,1,2,3,4,5,7')
+        ]
     }

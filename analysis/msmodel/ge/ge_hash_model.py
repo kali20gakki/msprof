@@ -5,6 +5,7 @@ from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from msmodel.interface.parser_model import ParserModel
 from msmodel.interface.view_model import ViewModel
+from profiling_bean.db_dto.ge_hash_dto import GeHashDto
 
 
 class GeHashModel(ParserModel):
@@ -38,3 +39,11 @@ class GeHashViewModel(ViewModel):
     def get_ge_hash_data(self) -> dict:
         sql = "SELECT hash_key, hash_value FROM {}".format(DBNameConstant.TABLE_GE_HASH)
         return dict(DBManager.fetch_all_data(self.cur, sql))
+
+    def get_type_hash_data(self) -> dict:
+        sql = "SELECT hash_key, hash_value, level FROM {}".format(DBNameConstant.TABLE_TYPE_HASH)
+        hash_data = DBManager.fetch_all_data(self.cur, sql, dto_class=GeHashDto)
+        res_data = {}
+        for data in hash_data:
+            res_data.setdefault(data.level, {}).update({data.hash_key: data.hash_value})
+        return res_data

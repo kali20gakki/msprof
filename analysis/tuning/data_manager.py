@@ -124,9 +124,9 @@ class OpSummaryTuningDataHandle(BaseTuningDataHandle):
         conn, cur = DBManager.check_connect_db(project, DBNameConstant.DB_ACL_MODULE)
         try:
             if conn and cur:
-                acl_op_data = cur.execute("select count(api_name) from acl_data where api_name=? "
-                                          "and device_id=?",
-                                          ("aclopExecute", device_id)).fetchone()
+                acl_op_data = cur.execute(
+                    "select count(api_name) from {} where api_name=?".format(DBNameConstant.TABLE_ACL_DATA),
+                    ("aclopExecute",)).fetchone()
                 if acl_op_data[0]:
                     run_for_network = False
             return run_for_network

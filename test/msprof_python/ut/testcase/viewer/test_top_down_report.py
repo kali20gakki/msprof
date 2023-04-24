@@ -34,22 +34,22 @@ class TestTopDownData(unittest.TestCase):
             TopDownData._get_acl_data('', 0, 0, DBNameConstant.DB_ACL_MODULE)
 
     def test_get_acl_data_2(self):
-        create_sql = "CREATE TABLE IF NOT EXISTS acl_data" \
+        create_sql = "CREATE TABLE IF NOT EXISTS AclData" \
                      " (api_name, api_type, start_time, end_time, process_id, thread_id, device_id)"
         data = (("aclmdlExecute", "model", 7702333934113, 7702338089193, 3251, 3251, 0),)
         db_manager = DBManager()
-        insert_sql = db_manager.insert_sql("acl_data", data)
+        insert_sql = db_manager.insert_sql("AclData", data)
         test_sql = db_manager.create_table(DBNameConstant.DB_ACL_MODULE, create_sql, insert_sql, data)
         with mock.patch(NAMESPACE + '.logging.error'), \
              mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=test_sql), \
              mock.patch(NAMESPACE + '.DBManager.destroy_db_connect'):
             res = TopDownData._get_acl_data('', 0, 1, DBNameConstant.DB_ACL_MODULE)
-        (test_sql[1]).execute("drop Table acl_data")
+        (test_sql[1]).execute("drop Table AclData")
         db_manager.destroy(test_sql)
         self.assertEqual(len(res), 1)
 
     def test_get_acl_data_3(self):
-        create_sql = "CREATE TABLE IF NOT EXISTS acl_data" \
+        create_sql = "CREATE TABLE IF NOT EXISTS AclData" \
                      " (api_name, api_type, start_time, end_time, process_id, thread_id, device_id)"
         data = (("aclopExecute", "model", 7702333934113, 7702338089193, 3251, 3251, 0),)
         db_manager = DBManager()
@@ -58,7 +58,7 @@ class TestTopDownData(unittest.TestCase):
         with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=test_sql), \
              mock.patch(NAMESPACE + '.DBManager.destroy_db_connect'):
             res = TopDownData._get_acl_data('', 0, 1, DBNameConstant.DB_ACL_MODULE)
-        (test_sql[1]).execute("drop Table acl_data")
+        (test_sql[1]).execute("drop Table AclData")
         db_manager.destroy(test_sql)
         self.assertEqual(len(res), 1)
 
@@ -209,23 +209,23 @@ class TestTopDownData(unittest.TestCase):
                           "Task Scheduler": [(1, 'Task Scheduler', 'Infer', 7702334498763, 3555770)],
                           "Runtime": [(1, 'Runtime', 'N/A', 7702311524052, 13106532)]}
 
-        create_sql = "CREATE TABLE IF NOT EXISTS acl_data" \
+        create_sql = "CREATE TABLE IF NOT EXISTS AclData" \
                      " (api_name, api_type, start_time, end_time, process_id, thread_id, device_id)"
         data = (("aclmdlQuerySize", "model", 7702334428334, 7703334428334, 3251, 3251, 0),)
         db_manager = DBManager()
-        insert_sql = db_manager.insert_sql("acl_data", data)
+        insert_sql = db_manager.insert_sql("AclData", data)
         test_sql = db_manager.create_table(DBNameConstant.DB_ACL_MODULE, create_sql, insert_sql, data)
         with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=test_sql), \
              mock.patch(NAMESPACE + '.DBManager.destroy_db_connect'):
             InfoConfReader()._info_json = {"pid": 1}
             TopDownData._fill_acl_trace_data('', 0, [], top_down_datas)
 
-        (test_sql[1]).execute("DELETE from acl_data")
+        (test_sql[1]).execute("DELETE from AclData")
         with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=test_sql), \
              mock.patch(NAMESPACE + '.DBManager.destroy_db_connect'):
             InfoConfReader()._info_json = {"pid": 1}
             TopDownData._fill_acl_trace_data('', 0, [], top_down_datas)
-        (test_sql[1]).execute("drop Table acl_data")
+        (test_sql[1]).execute("drop Table AclData")
         db_manager.destroy(test_sql)
 
     def test_fill_ge_trace_data(self):
