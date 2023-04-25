@@ -141,9 +141,11 @@ class FileNameManagerConstant:
     RUNTIME_TASK_TRACK_FILE_PATTERN = r"^[r|R]untime\.task_track\.(\d+)\.slice_\d+"
     RUNTIME_TASK_TRACK_INFER_FILE_PATTERN = r"[r|R]untime\.runtime\.(\d+)\.\d+"
     RUNTIME_TASK_TRACK_TRAINING_FILE_PATTERN = r"^[r|R]untime\.host\.runtime\.(\d+)\.slice_\d+"
+    TASK_TRACK_COMPACT_FILE_PATTERN = r"^(aging|unaging)\.compact\.task_track\.slice_\d+"
 
     RUNTIME_API_FILE_PATTERN = r"^[r|R]untime\.api\.(\d+)\.slice_\d+"
     RUNTIME_API_INFER_FILE_PATTERN = r"^[r|R]untime\.runtime\.data\.(\d+)\.\d+"
+    MEMCPY_INFO_COMPACT_FILE_PATTERN = r"^(aging|unaging)\.compact\.memcpy_info\.slice_\d+"
 
     SYS_MEM_FILE_PATTERN = r"^Memory\.data\.(\d+)\.slice_\d+"
     HOST_SYS_MEM_FILE_PATTERN = r"^host_sys_mem\.data\.slice_\d+"
@@ -863,3 +865,21 @@ def get_hash_data_compiles() -> tuple:
     :return: hash data files regex
     """
     return (re.compile(FileNameManagerConstant.HASH_DATA_FILE_PATTERN),)
+
+
+def get_task_track_compact_compiles() -> tuple:
+    """
+    get runtime task track regex compiles
+    """
+    return (
+        re.compile(FileNameManagerConstant.TASK_TRACK_COMPACT_FILE_PATTERN),
+    )
+
+
+def get_memcpy_info_compact_compiles() -> tuple:
+    """
+    get runtime memcpy info regex compiles
+    """
+    return (
+        re.compile(FileNameManagerConstant.MEMCPY_INFO_COMPACT_FILE_PATTERN),
+    )

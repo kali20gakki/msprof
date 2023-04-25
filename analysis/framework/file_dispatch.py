@@ -60,6 +60,7 @@ from common_func.file_name_manager import get_sys_mem_compiles
 from common_func.file_name_manager import get_ts_cpu_compiles
 from common_func.file_name_manager import get_ts_track_aiv_compiles
 from common_func.file_name_manager import get_ts_track_compiles
+from common_func.file_name_manager import get_task_track_compact_compiles, get_memcpy_info_compact_compiles
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.path_manager import PathManager
 from framework.prof_factory_maker import ProfFactoryMaker
@@ -127,6 +128,8 @@ class FileDispatch:
         DataTag.API: get_api_data_compiles(),
         DataTag.EVENT: get_event_data_compiles(),
         DataTag.HASH_DICT: get_hash_data_compiles(),
+        DataTag.TASK_TRACK: get_task_track_compact_compiles(),
+        DataTag.MEMCPY_INFO: get_memcpy_info_compact_compiles(),
     }
 
     def __init__(self: any, sample_config: dict) -> None:

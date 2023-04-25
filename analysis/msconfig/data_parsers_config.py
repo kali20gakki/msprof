@@ -206,5 +206,15 @@ class DataParsersConfig(MetaConfig):
         'HashDicParser': [
             ('path', 'msparser.hash_dic.hash_dic_parser'),
             ('chip_model', '0,1,2,3,4,5,7')
-        ]
+        ],
+        'TaskTrackParser': [
+            ('path', 'msparser.compact_info.task_track_parser'),
+            ('chip_model', '0,1,2,3,4,5,7'),
+            ('level', '2'),
+        ],
+        'MemcpyInfoParser': [
+            ('path', 'msparser.compact_info.memcpy_info_parser'),
+            ('chip_model', '0,1,2,3,4,5,7'),
+            ('level', '2'),
+        ],
     }
