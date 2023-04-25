@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-#  Copyright (c) Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
+#  Copyright (c) Huawei Technologies Co., Ltd. 2022-2023. All rights reserved.
 
 import unittest
 
@@ -14,7 +14,7 @@ class TestConfigManager(unittest.TestCase):
         config = ConfigManager.get(ConfigManager.PROF_RULE)
         self.assertEqual(len(config.get_data()), 19)
         config = ConfigManager.get(ConfigManager.DATA_PARSERS)
-        self.assertEqual(len(config.sections()), 49)
+        self.assertEqual(len(config.sections()), 51)
         config = ConfigManager.get(ConfigManager.STARS)
         self.assertEqual(config.has_section('AA'), False)
         config = ConfigManager.get(ConfigManager.TABLES)

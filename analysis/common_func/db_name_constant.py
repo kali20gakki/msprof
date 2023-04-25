@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-# Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
+# Copyright (c) Huawei Technologies Co., Ltd. 2020-2023. All rights reserved.
 
 from abc import ABCMeta
 from abc import abstractmethod
@@ -68,6 +68,10 @@ class DBNameConstant(metaclass=ABCMeta):
     DB_FREQ = "freq.db"
     DB_API_DATA = "api.db"
     DB_EVENT_DATA = "event.db"
+    DB_TENSOR_ADD_INFO = "tensor_info.db"
+    DB_BASIC_ADD_INFO = "node_basic_info.db"
+    DB_FUSION_ADD_INFO = "fusion_op_info.db"
+    DB_GRAPH_ADD_INFO = "graph_info.db"
 
     # DB tables
     TABLE_ACL_DATA = "AclData"
@@ -251,6 +255,10 @@ class DBNameConstant(metaclass=ABCMeta):
     # new struct
     TABLE_API_DATA = 'ApiData'
     TABLE_EVENT_DATA = 'EventData'
+    TABLE_TENSOR_ADD_INFO = "TensorInfoV2"
+    TABLE_BASIC_ADD_INFO = "NodeBasicInfo"
+    TABLE_FUSION_ADD_INFO = "FusionOPInfo"
+    TABLE_GRAPH_ADD_INFO = "GraphInfo"
 
     @abstractmethod
     def get_db_name(self: any) -> str:
