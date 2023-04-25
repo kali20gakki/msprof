@@ -71,7 +71,7 @@ class DataTag(Enum):
     MEMCPY_INFO = 57
     GRAPH_ADD_INFO = 60
     TENSOR_ADD_INFO = 61
-    BASIC_ADD_INFO = 62
+    NODE_BASIC_INFO = 62
     FUSION_ADD_INFO = 63
 
 

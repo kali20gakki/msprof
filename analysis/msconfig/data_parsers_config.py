@@ -227,4 +227,14 @@ class DataParsersConfig(MetaConfig):
             ('chip_model', '0,1,2,3,4,5,7'),
             ('level', '2'),
         ],
+        'GraphAddInfoParser': [
+            ('path', 'msparser.add_info.graph_add_info_parser'),
+            ('chip_model', '0,1,2,3,4,5,7'),
+            ('level', '2'),
+        ],
+        'NodeBasicInfoParser': [
+            ('path', 'msparser.compact_info.node_basic_info_parser'),
+            ('chip_model', '0,1,2,3,4,5,7'),
+            ('level', '2'),
+        ],
     }
