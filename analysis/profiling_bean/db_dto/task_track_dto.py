@@ -20,71 +20,70 @@ class TaskTrackDto:
     def type(self):
         return self._type
 
-    @type.setter
-    def type(self, value):
-        self._type = value
-
     @property
     def level(self):
         return self._level
-
-    @level.setter
-    def level(self, value):
-        self._level = value
 
     @property
     def thread_id(self):
         return self._thread_id
 
-    @thread_id.setter
-    def thread_id(self, value):
-        self._thread_id = value
-
     @property
     def data_len(self):
         return self._data_len
-
-    @data_len.setter
-    def data_len(self, value):
-        self._data_len = value
 
     @property
     def timestamp(self):
         return self._timestamp
 
-    @timestamp.setter
-    def timestamp(self, value):
-        self._timestamp = value
-
     @property
     def stream_id(self):
         return self._stream_id
-
-    @stream_id.setter
-    def stream_id(self, value):
-        self._stream_id = value
 
     @property
     def device_id(self):
         return self._device_id
 
-    @device_id.setter
-    def device_id(self, value):
-        self._device_id = value
-
     @property
     def task_id(self):
         return self._task_id
-
-    @task_id.setter
-    def task_id(self, value):
-        self._task_id = value
 
     @property
     def batch_id(self):
         return self._batch_id
 
+    @type.setter
+    def type(self, value):
+        self._type = value
+
+    @level.setter
+    def level(self, value):
+        self._level = value
+
+    @thread_id.setter
+    def thread_id(self, value):
+        self._thread_id = value
+
+    @data_len.setter
+    def data_len(self, value):
+        self._data_len = value
+
+    @timestamp.setter
+    def timestamp(self, value):
+        self._timestamp = value
+
+    @stream_id.setter
+    def stream_id(self, value):
+        self._stream_id = value
+
+    @device_id.setter
+    def device_id(self, value):
+        self._device_id = value
+
+    @task_id.setter
+    def task_id(self, value):
+        self._task_id = value
+
     @batch_id.setter
     def batch_id(self, value):
         self._batch_id = value
-
