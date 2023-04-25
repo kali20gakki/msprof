@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-# Copyright (c) Huawei Technologies Co., Ltd. 2021-2022. All rights reserved.
+# Copyright (c) Huawei Technologies Co., Ltd. 2021-2023. All rights reserved.
 
 from enum import Enum
 from enum import unique
@@ -69,6 +69,10 @@ class DataTag(Enum):
     EVENT = 54
     TASK_TRACK = 56
     MEMCPY_INFO = 57
+    GRAPH_ADD_INFO = 60
+    TENSOR_ADD_INFO = 61
+    BASIC_ADD_INFO = 62
+    FUSION_ADD_INFO = 63
 
 
 @unique

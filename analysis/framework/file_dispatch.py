@@ -1,12 +1,16 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-# Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
+# Copyright (c) Huawei Technologies Co., Ltd. 2020-2023. All rights reserved.
 
 import itertools
 import os
 
 from common_func.constant import Constant
 from common_func.file_name_manager import get_acl_compiles
+from common_func.file_name_manager import get_ge_graph_add_info_compiles
+from common_func.file_name_manager import get_ge_tensor_add_info_compiles
+from common_func.file_name_manager import get_ge_basic_add_info_compiles
+from common_func.file_name_manager import get_ge_fusion_add_info_compiles
 from common_func.file_name_manager import get_acl_hash_compiles
 from common_func.file_name_manager import get_ai_core_compiles
 from common_func.file_name_manager import get_ai_cpu_compiles
@@ -130,6 +134,10 @@ class FileDispatch:
         DataTag.HASH_DICT: get_hash_data_compiles(),
         DataTag.TASK_TRACK: get_task_track_compact_compiles(),
         DataTag.MEMCPY_INFO: get_memcpy_info_compact_compiles(),
+        DataTag.GRAPH_ADD_INFO: get_ge_graph_add_info_compiles(),
+        DataTag.TENSOR_ADD_INFO: get_ge_tensor_add_info_compiles(),
+        DataTag.BASIC_ADD_INFO: get_ge_basic_add_info_compiles(),
+        DataTag.FUSION_ADD_INFO: get_ge_fusion_add_info_compiles(),
     }
 
     def __init__(self: any, sample_config: dict) -> None:

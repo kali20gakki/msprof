@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-# Copyright (c) Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
+# Copyright (c) Huawei Technologies Co., Ltd. 2022-2023. All rights reserved.
 
 from msconfig.meta_config import MetaConfig
 
@@ -1043,5 +1043,53 @@ class TablesConfig(MetaConfig):
             ('timestamp', 'INTEGER,null'),
             ('data_size', 'INTEGER,null'),
             ('memcpy_direction', 'INTEGER,null'),
+        ],
+        'TensorInfoV2Map': [
+            ('level', 'TEXT,null'),
+            ('type', 'TEXT,null'),
+            ('thread_id', 'TEXT,null'),
+            ('timestamp', 'TEXT,null'),
+            ('op_name', 'TEXT,null'),
+            ('tensor_num', 'TEXT,null'),
+            ('input_formats', 'TEXT,null'),
+            ('input_data_types', 'TEXT,null'),
+            ('input_shapes', 'TEXT,null'),
+            ('output_formats', 'TEXT,null'),
+            ('output_data_types', 'TEXT,null'),
+            ('output_shapes', 'TEXT,null'),
+        ],
+        'NodeBasicInfoMap': [
+            ('level', 'TEXT,null'),
+            ('type', 'TEXT,null'),
+            ('thread_id', 'TEXT,null'),
+            ('timestamp', 'TEXT,null'),
+            ('op_name', 'TEXT,null'),
+            ('task_type', 'TEXT,null'),
+            ('op_type', 'TEXT,null'),
+            ('block_dim', 'TEXT,null'),
+            ('mix_block_dim', 'TEXT,null'),
+            ('op_flag', 'TEXT,null'),
+        ],
+        'GraphInfoMap': [
+            ('level', 'TEXT,null'),
+            ('type', 'TEXT,null'),
+            ('thread_id', 'TEXT,null'),
+            ('timestamp', 'TEXT,null'),
+            ('graph_id', 'TEXT,null'),
+            ('model_name', 'TEXT,null'),
+        ],
+        'FusionOPInfoMap': [
+            ('level', 'TEXT,null'),
+            ('type', 'TEXT,null'),
+            ('thread_id', 'TEXT,null'),
+            ('timestamp', 'TEXT,null'),
+            ('op_name', 'TEXT,null'),
+            ('fusion_op_num', 'TEXT,null'),
+            ('memory_input', 'TEXT,null'),
+            ('memory_output', 'TEXT,null'),
+            ('memory_weight', 'TEXT,null'),
+            ('memory_workspace', 'TEXT,null'),
+            ('memory_total', 'TEXT,null'),
+            ('fusion_op_names', 'TEXT,null'),
         ],
     }
