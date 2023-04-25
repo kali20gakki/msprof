@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-# Copyright (c) Huawei Technologies Co., Ltd. 2021-2022. All rights reserved.
+# Copyright (c) Huawei Technologies Co., Ltd. 2021-2023. All rights reserved.
 
 import struct
 
@@ -119,6 +119,14 @@ class StructFmt:
     # new struct
     API_FMT = "HHIIIQQQ"
     EVENT_FMT = "HHIIIQQQ"
+    GRAPH_ADD_INFO_FMT = "HHIIIQIQ"
+    GRAPH_ADD_INFO_SIZE = struct.calcsize(BYTE_ORDER_CHAR + GRAPH_ADD_INFO_FMT)
+    TENSOR_ADD_INFO_FMT = "HHIIIQQI55I"
+    TENSOR_ADD_INFO_SIZE = struct.calcsize(BYTE_ORDER_CHAR + TENSOR_ADD_INFO_FMT)
+    BASIC_ADD_INFO_FMT = "HHIIIQQIQIIQI"
+    BASIC_ADD_INFO_SIZE = struct.calcsize(BYTE_ORDER_CHAR + BASIC_ADD_INFO_FMT)
+    FUSION_ADD_INFO_FMT = "HHIIIQQI13Q29I"
+    FUSION_ADD_INFO_SIZE = struct.calcsize(BYTE_ORDER_CHAR + FUSION_ADD_INFO_FMT)
 
     # compact runtime
     TASK_TRACK_RESIDUAL_SIZE = 28

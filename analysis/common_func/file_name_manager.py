@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-# Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
+# Copyright (c) Huawei Technologies Co., Ltd. 2020-2023. All rights reserved.
 
 import re
 from collections import namedtuple
@@ -216,6 +216,10 @@ class FileNameManagerConstant:
     API_FILE_PATTERN = r"^(aging|unaging)\.api\.data\.slice_\d+"
     EVENT_DATA_FILE_PATTERN = r"^(aging|unaging)\.event\.data\.slice_\d+"
     HASH_DATA_FILE_PATTERN = r"^(aging|unaging)\.additional\.(hash_dic|type_info_dic)\.slice_\d+"
+    TENSOR_ADD_INFO_FILE_PATTERN = r"^(unaging|aging)\.additional\.tensor_info\.slice_\d+"
+    BASIC_ADD_INFO_FILE_PATTERN = r"^(unaging|aging)\.compact\.node_basic_info\.slice_\d+"
+    GRAPH_ADD_INFO_FILE_PATTERN = r"^(unaging|aging)\.ge\.graph_info\.(\d+)\.slice_\d+"
+    FUSION_ADD_INFO_PATTERN = r"^(unaging|aging)\.additional\.fusion_op_info\.slice_\d+"
 
     def get_file_name_manager_class_name(self: any) -> any:
         """
@@ -883,3 +887,35 @@ def get_memcpy_info_compact_compiles() -> tuple:
     return (
         re.compile(FileNameManagerConstant.MEMCPY_INFO_COMPACT_FILE_PATTERN),
     )
+
+
+def get_ge_graph_add_info_compiles() -> tuple:
+    """
+    get ge graph add info compiles
+    :return: aging ge graph add info files regex
+    """
+    return (re.compile(FileNameManagerConstant.GRAPH_ADD_INFO_FILE_PATTERN),)
+
+
+def get_ge_tensor_add_info_compiles() -> tuple:
+    """
+    get aging ge tensor add info files regex compiles
+    :return: aging ge tensor add info files regex
+    """
+    return (re.compile(FileNameManagerConstant.TENSOR_ADD_INFO_FILE_PATTERN),)
+
+
+def get_ge_basic_add_info_compiles() -> tuple:
+    """
+    get aging ge basic add info files regex compiles
+    :return: aging ge basic add info files regex
+    """
+    return (re.compile(FileNameManagerConstant.BASIC_ADD_INFO_FILE_PATTERN),)
+
+
+def get_ge_fusion_add_info_compiles() -> tuple:
+    """
+    get aging ge fusion add info files regex compiles
+    :return: aging ge fusion add info files regex
+    """
+    return (re.compile(FileNameManagerConstant.FUSION_ADD_INFO_PATTERN),)
