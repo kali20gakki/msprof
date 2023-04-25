@@ -17,7 +17,7 @@ class TaskTrackDto:
         self._batch_id = None
 
     @property
-    def type(self):
+    def data_type(self):
         return self._type
 
     @property
@@ -52,8 +52,8 @@ class TaskTrackDto:
     def batch_id(self):
         return self._batch_id
 
-    @type.setter
-    def type(self, value):
+    @data_type.setter
+    def data_type(self, value):
         self._type = value
 
     @level.setter

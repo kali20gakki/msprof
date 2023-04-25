@@ -15,7 +15,7 @@ class ApiDataDto:
         self._request_id = end_event_data_dto.request_id
 
     @property
-    def type(self: any) -> str:
+    def data_type(self: any) -> str:
         return str(self._type)
 
     @property
@@ -42,8 +42,8 @@ class ApiDataDto:
     def request_id(self: any) -> str:
         return str(self._request_id)
 
-    @type.setter
-    def type(self: any, value: any) -> None:
+    @data_type.setter
+    def data_type(self: any, value: any) -> None:
         self._type = value
 
     @start.setter
