@@ -67,6 +67,8 @@ class DataTag(Enum):
     API = 55
     HASH_DICT = 53
     EVENT = 54
+    TASK_TRACK = 56
+    MEMCPY_INFO = 57
 
 
 @unique
