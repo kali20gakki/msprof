@@ -30,10 +30,6 @@ class CtxIdDto:
     def data_len(self):
         return self._data_len
 
-    @level.setter
-    def level(self: any, value: any) -> None:
-        self._level = value
-
     @property
     def timestamp(self):
         return self._timestamp
@@ -49,6 +45,10 @@ class CtxIdDto:
     @property
     def ctx_id(self):
         return self._ctx_id
+
+    @level.setter
+    def level(self: any, value: any) -> None:
+        self._level = value
 
     @type.setter
     def type(self: any, value: any) -> None:

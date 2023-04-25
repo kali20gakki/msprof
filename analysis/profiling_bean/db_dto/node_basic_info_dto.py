@@ -57,6 +57,10 @@ class NodeBasicInfoDto:
     def op_flag(self: any) -> int:
         return self._op_flag
 
+    @property
+    def mix_block_dim(self):
+        return self._mix_block_dim
+
     @level.setter
     def level(self: any, value: any) -> None:
         self._level = value
@@ -96,10 +100,6 @@ class NodeBasicInfoDto:
     @op_flag.setter
     def op_flag(self: any, value: any) -> None:
         self._op_flag = value
-
-    @property
-    def mix_block_dim(self):
-        return self._mix_block_dim
 
     @mix_block_dim.setter
     def mix_block_dim(self, value):
