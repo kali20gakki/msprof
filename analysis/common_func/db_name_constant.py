@@ -69,7 +69,7 @@ class DBNameConstant(metaclass=ABCMeta):
     DB_API_DATA = "api.db"
     DB_EVENT_DATA = "event.db"
     DB_TENSOR_ADD_INFO = "tensor_info.db"
-    DB_BASIC_ADD_INFO = "node_basic_info.db"
+    DB_NODE_BASIC_INFO = "node_basic_info.db"
     DB_FUSION_ADD_INFO = "fusion_op_info.db"
     DB_GRAPH_ADD_INFO = "graph_info.db"
 
@@ -256,7 +256,7 @@ class DBNameConstant(metaclass=ABCMeta):
     TABLE_API_DATA = 'ApiData'
     TABLE_EVENT_DATA = 'EventData'
     TABLE_TENSOR_ADD_INFO = "TensorInfoV2"
-    TABLE_BASIC_ADD_INFO = "NodeBasicInfo"
+    TABLE_NODE_BASIC_INFO = "NodeBasicInfo"
     TABLE_FUSION_ADD_INFO = "FusionOPInfo"
     TABLE_GRAPH_ADD_INFO = "GraphInfo"
 

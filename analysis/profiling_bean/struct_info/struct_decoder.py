@@ -53,7 +53,7 @@ class StructDecoder:
         "TaskTrackBean": StructFmt.TASK_TRACK_FMT,
         "MemcpyInfoBean": StructFmt.MEMCPY_INFO_FMT,
         "GraphAddInfoBean": StructFmt.GRAPH_ADD_INFO_FMT,
-        "BasicAddInfoBean": StructFmt.BASIC_ADD_INFO_FMT,
+        "NodeBasicInfoBean": StructFmt.NODE_BASIC_INFO_FMT,
         "TensorAddInfoBean": StructFmt.TENSOR_ADD_INFO_FMT,
         "FusionAddInfoBean": StructFmt.FUSION_ADD_INFO_FMT,
     }
