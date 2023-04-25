@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-# Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
+# Copyright (c) Huawei Technologies Co., Ltd. 2020-2023. All rights reserved.
 
 import struct
 
@@ -52,6 +52,10 @@ class StructDecoder:
         "EventDataBean": StructFmt.EVENT_FMT,
         "TaskTrackBean": StructFmt.TASK_TRACK_FMT,
         "MemcpyInfoBean": StructFmt.MEMCPY_INFO_FMT,
+        "GraphAddInfoBean": StructFmt.GRAPH_ADD_INFO_FMT,
+        "BasicAddInfoBean": StructFmt.BASIC_ADD_INFO_FMT,
+        "TensorAddInfoBean": StructFmt.TENSOR_ADD_INFO_FMT,
+        "FusionAddInfoBean": StructFmt.FUSION_ADD_INFO_FMT,
     }
 
     @classmethod

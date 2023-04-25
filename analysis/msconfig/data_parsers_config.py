@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-#  Copyright (c) Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
+#  Copyright (c) Huawei Technologies Co., Ltd. 2022-2023. All rights reserved.
 
 from msconfig.meta_config import MetaConfig
 
@@ -214,6 +214,16 @@ class DataParsersConfig(MetaConfig):
         ],
         'MemcpyInfoParser': [
             ('path', 'msparser.compact_info.memcpy_info_parser'),
+            ('chip_model', '0,1,2,3,4,5,7'),
+            ('level', '2'),
+        ],
+        'TensorAddInfoParser': [
+            ('path', 'msparser.add_info.tensor_add_info_parser'),
+            ('chip_model', '0,1,2,3,4,5,7'),
+            ('level', '2'),
+        ],
+        'FusionAddInfoParser': [
+            ('path', 'msparser.add_info.fusion_add_info_parser'),
             ('chip_model', '0,1,2,3,4,5,7'),
             ('level', '2'),
         ],
