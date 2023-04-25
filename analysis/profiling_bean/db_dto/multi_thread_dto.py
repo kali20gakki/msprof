@@ -18,7 +18,7 @@ class MultiThreadDto:
         return self._level
 
     @property
-    def type(self: any) -> str:
+    def data_type(self: any) -> str:
         return str(self._type)
 
     @property
@@ -45,8 +45,8 @@ class MultiThreadDto:
     def level(self: any, value: any) -> None:
         self._level = value
 
-    @type.setter
-    def type(self: any, value: any) -> None:
+    @data_type.setter
+    def data_type(self: any, value: any) -> None:
         self._type = value
 
     @thread_id.setter

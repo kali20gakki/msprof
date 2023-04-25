@@ -24,7 +24,7 @@ class TensorInfoDto:
         return self._level
 
     @property
-    def type(self):
+    def data_type(self):
         return self._type
 
     @property
@@ -75,8 +75,8 @@ class TensorInfoDto:
     def level(self, value):
         self._level = value
 
-    @type.setter
-    def type(self, value):
+    @data_type.setter
+    def data_type(self, value):
         self._type = value
 
     @thread_id.setter
