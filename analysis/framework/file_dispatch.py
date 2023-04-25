@@ -9,7 +9,7 @@ from common_func.constant import Constant
 from common_func.file_name_manager import get_acl_compiles
 from common_func.file_name_manager import get_ge_graph_add_info_compiles
 from common_func.file_name_manager import get_ge_tensor_add_info_compiles
-from common_func.file_name_manager import get_ge_basic_add_info_compiles
+from common_func.file_name_manager import get_ge_node_basic_info_compiles
 from common_func.file_name_manager import get_ge_fusion_add_info_compiles
 from common_func.file_name_manager import get_acl_hash_compiles
 from common_func.file_name_manager import get_ai_core_compiles
@@ -136,7 +136,7 @@ class FileDispatch:
         DataTag.MEMCPY_INFO: get_memcpy_info_compact_compiles(),
         DataTag.GRAPH_ADD_INFO: get_ge_graph_add_info_compiles(),
         DataTag.TENSOR_ADD_INFO: get_ge_tensor_add_info_compiles(),
-        DataTag.BASIC_ADD_INFO: get_ge_basic_add_info_compiles(),
+        DataTag.NODE_BASIC_INFO: get_ge_node_basic_info_compiles(),
         DataTag.FUSION_ADD_INFO: get_ge_fusion_add_info_compiles(),
     }
 

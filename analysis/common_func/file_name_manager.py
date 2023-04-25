@@ -217,8 +217,8 @@ class FileNameManagerConstant:
     EVENT_DATA_FILE_PATTERN = r"^(aging|unaging)\.event\.data\.slice_\d+"
     HASH_DATA_FILE_PATTERN = r"^(aging|unaging)\.additional\.(hash_dic|type_info_dic)\.slice_\d+"
     TENSOR_ADD_INFO_FILE_PATTERN = r"^(unaging|aging)\.additional\.tensor_info\.slice_\d+"
-    BASIC_ADD_INFO_FILE_PATTERN = r"^(unaging|aging)\.compact\.node_basic_info\.slice_\d+"
-    GRAPH_ADD_INFO_FILE_PATTERN = r"^(unaging|aging)\.ge\.graph_info\.(\d+)\.slice_\d+"
+    NODE_BASIC_INFO_FILE_PATTERN = r"^(unaging|aging)\.compact\.node_basic_info\.slice_\d+"
+    GRAPH_ADD_INFO_FILE_PATTERN = r"^(unaging|aging)\.additional\.graph_info\.(\d+)\.slice_\d+"
     FUSION_ADD_INFO_PATTERN = r"^(unaging|aging)\.additional\.fusion_op_info\.slice_\d+"
 
     def get_file_name_manager_class_name(self: any) -> any:
@@ -905,12 +905,12 @@ def get_ge_tensor_add_info_compiles() -> tuple:
     return (re.compile(FileNameManagerConstant.TENSOR_ADD_INFO_FILE_PATTERN),)
 
 
-def get_ge_basic_add_info_compiles() -> tuple:
+def get_ge_node_basic_info_compiles() -> tuple:
     """
-    get aging ge basic add info files regex compiles
-    :return: aging ge basic add info files regex
+    get ge node basic info files regex compiles
+    :return: ge node basic info files regex
     """
-    return (re.compile(FileNameManagerConstant.BASIC_ADD_INFO_FILE_PATTERN),)
+    return (re.compile(FileNameManagerConstant.NODE_BASIC_INFO_FILE_PATTERN),)
 
 
 def get_ge_fusion_add_info_compiles() -> tuple:
