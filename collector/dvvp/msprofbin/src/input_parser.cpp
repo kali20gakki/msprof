@@ -403,25 +403,18 @@ void ArgsManager::AddHardWareMemArgs()
     auto hardwareMemFreq = Args("sys-hardware-mem-freq", "", "50");
     auto llcMode = Args("llc-profiling", "", "capacity");
     hardwareMem.SetDetail("LLC, DDR, HBM acquisition switch, optional on / off, the default value is off.\n"
-                              "\t\t\t\t\t\t   LLC(full-platform), DDR(Ascend310, Ascend910, Ascend310B, Ascend310P).\n"
-                              "\t\t\t\t\t\t   HBM(Ascend910, Ascend910B)");
-    hardwareMemFreq.SetDetail("LLC, DDR, HBM acquisition frequency, range 1 ~ 100, the default value is 50 Hz.\n"
-                              "\t\t\t\t\t\t   LLC(full-platform), DDR(Ascend310, Ascend910, Ascend310B, Ascend310P).\n"
-                              "\t\t\t\t\t\t   HBM(Ascend910, Ascend910B)");
-    if (driverOnline_ && platform_ == PlatformType::MINI_TYPE) {
-        llcMode.SetDetail("The llc profiling groups. Include capacity, bandwidth. "
-            "the default value is capacity.(Ascend310)");
-    } else if (driverOnline_ && (platform_ == PlatformType::DC_TYPE || platform_ == PlatformType::CLOUD_TYPE)) {
-        llcMode.SetDetail("The llc profiling groups. Include read, write.\n"
-                              "\t\t\t\t\t\t   the default value is read."
-                              "(Ascend310P, Ascend910, Ascend310B, Ascend910B)");
-    } else {
-        llcMode.SetDetail("The llc profiling groups.\n"
-                              "\t\t\t\t\t\t   include capacity, bandwidth. the default value is capacity.(Ascend310)\n"
-                              "\t\t\t\t\t\t   include read, write. the default value is read."
-                              "(Ascend310P, Ascend910, Ascend310B, Ascend910B)");
-    }
-    
+                              "\t\t\t\t\t\t   LLC bandwidth(Ascend310 while set llc-profiling to bandwidth).\n"
+                              "\t\t\t\t\t\t   LLC usage by aicpu and control cpu(Ascend310 while set llc-profiling to"
+                              " capacity).\n"
+                              "\t\t\t\t\t\t   LLC read/write speed(Ascend310P, Ascend910, Ascend310B, Ascend910B).\n"
+                              "\t\t\t\t\t\t   DDR read/write speed(Ascend310, Ascend310P, Ascend910, Ascend310B).\n"
+                              "\t\t\t\t\t\t   HBM read/write speed(Ascend910, Ascend910B).\n"
+                              "\t\t\t\t\t\t   Processes-level and system-level device memory usage(full-platform)");
+    hardwareMemFreq.SetDetail("LLC, DDR, HBM acquisition frequency, range 1 ~ 100, the default value is 50 Hz");
+    llcMode.SetDetail("The llc profiling groups.\n"
+                            "\t\t\t\t\t\t   include capacity, bandwidth. the default value is capacity.(Ascend310)\n"
+                            "\t\t\t\t\t\t   include read, write. the default value is read."
+                            "(Ascend310P, Ascend910, Ascend310B, Ascend910B)");
     argsList_.push_back(hardwareMem);
     argsList_.push_back(hardwareMemFreq);
     argsList_.push_back(llcMode);
