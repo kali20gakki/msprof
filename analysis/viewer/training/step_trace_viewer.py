@@ -184,6 +184,7 @@ class StepTraceViewer:
     viewer of training trace data
     """
     model_to_pid = {}
+    SORT_INDEX_OFFSET = 70000
 
     @staticmethod
     def get_step_trace_data(curs: any, message: dict) -> list:
@@ -229,11 +230,11 @@ class StepTraceViewer:
         """
         if not trace_data:
             return
-        if trace_data[0][8] == "N/A":
-            model_ids = ["N/A"]
-        else:
-            model_ids_set = set(map(lambda trace_datum: trace_datum[8], trace_data))
-            model_ids = sorted(model_ids_set)
+        model_ids_set = set(map(lambda trace_datum: trace_datum[8], trace_data))
+        if Constant.NA in model_ids_set:
+            # if model_id is -1,it has been set "N/A"
+            model_ids_set.remove(Constant.NA)
+        model_ids = sorted(model_ids_set)
         result_data.extend(TraceViewManager.metadata_event(
             [["process_name", InfoConfReader().get_json_pid_data(),
               InfoConfReader().get_json_tid_data(), "Step Trace"]]))
@@ -243,7 +244,7 @@ class StepTraceViewer:
                 [["thread_name", InfoConfReader().get_json_pid_data(),
                   StepTraceViewer.model_to_pid.get(model_id), "Model ID:{}".format(model_id)],
                  ["thread_sort_index", InfoConfReader().get_json_pid_data(),
-                  StepTraceViewer.model_to_pid.get(model_id), model_id]
+                  StepTraceViewer.model_to_pid.get(model_id), int(model_id) + StepTraceViewer.SORT_INDEX_OFFSET]
                  ]))
 
     @staticmethod
