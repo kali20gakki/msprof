@@ -1069,14 +1069,15 @@ class TablesConfig(MetaConfig):
             ('block_dim', 'TEXT,null'),
             ('mix_block_dim', 'TEXT,null'),
             ('op_flag', 'TEXT,null'),
+            ('is_dynamic', 'INTEGER,null'),
         ],
-        'GraphInfoMap': [
+        'GraphIdMapMap': [
             ('level', 'TEXT,null'),
             ('type', 'TEXT,null'),
             ('thread_id', 'TEXT,null'),
             ('timestamp', 'TEXT,null'),
-            ('graph_id', 'TEXT,null'),
             ('model_name', 'TEXT,null'),
+            ('graph_id', 'TEXT,null'),
         ],
         'FusionOPInfoMap': [
             ('level', 'TEXT,null'),

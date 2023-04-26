@@ -218,7 +218,7 @@ class FileNameManagerConstant:
     HASH_DATA_FILE_PATTERN = r"^(aging|unaging)\.additional\.(hash_dic|type_info_dic)\.slice_\d+"
     TENSOR_ADD_INFO_FILE_PATTERN = r"^(unaging|aging)\.additional\.tensor_info\.slice_\d+"
     NODE_BASIC_INFO_FILE_PATTERN = r"^(unaging|aging)\.compact\.node_basic_info\.slice_\d+"
-    GRAPH_ADD_INFO_FILE_PATTERN = r"^(unaging|aging)\.additional\.graph_info\.(\d+)\.slice_\d+"
+    GRAPH_ADD_INFO_FILE_PATTERN = r"^(unaging|aging)\.additional\.graph_id_map\.slice_\d+"
     FUSION_ADD_INFO_PATTERN = r"^(unaging|aging)\.additional\.fusion_op_info\.slice_\d+"
 
     def get_file_name_manager_class_name(self: any) -> any:

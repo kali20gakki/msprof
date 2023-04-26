@@ -30,18 +30,11 @@ class GraphAddInfoParser(DataParser, MsMultiProcess):
         self._project_path = sample_config.get(StrConstant.SAMPLE_CONFIG_PROJECT_PATH)
 
     @staticmethod
-    def read_binary_data(bean_class: any, bean_data: any) -> any:
-        """
-        read binary data
-        """
-        return bean_class().fusion_decode(bean_data)
-
-    @staticmethod
     def _get_graph_info_data(bean_data: any) -> list:
         if not bean_data:
             return []
-        return [bean_data.level, bean_data.add_info_type, bean_data.thread_id,
-                bean_data.timestamp, bean_data.graph_id, bean_data.model_name]
+        return [bean_data.level, bean_data.data_type, bean_data.thread_id,
+                bean_data.timestamp, bean_data.model_name, bean_data.graph_id]
 
     def parse(self: any) -> None:
         """
@@ -83,7 +76,9 @@ class GraphAddInfoParser(DataParser, MsMultiProcess):
     def _transform_graph_info_data(self: any, data_list: list) -> list:
         hash_dict_data = HashDictData(self._project_path)
         type_hash_dict = hash_dict_data.get_type_hash_dict()
+        ge_hash_dict = hash_dict_data.get_ge_hash_dict()
         for data in data_list:
-            # 1 type hash
-            data[1] = type_hash_dict.get('model', {}).get(data[1], 'unmatched')
+            # 1 type hash 4 model name hash
+            data[1] = type_hash_dict.get('model', {}).get(data[1], data[1])
+            data[4] = ge_hash_dict.get(data[4], data[4])
         return data_list
