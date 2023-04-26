@@ -67,6 +67,9 @@ class HCCLExport:
         self.result.extend(TraceViewManager.metadata_event(
             Utils.generator_to_list(["thread_name", self.pid_value, tid_value, "Plane {}".format(tid_value)]
                                     for tid_value in tid_list)))
+        self.result.extend(TraceViewManager.metadata_event(
+            Utils.generator_to_list(["thread_sort_index", self.pid_value, tid_value, tid_value]
+                                    for tid_value in tid_list)))
 
     def _format_hccl_data(self: any, hccl_data: list) -> None:
         self._get_meta_data(hccl_data)
