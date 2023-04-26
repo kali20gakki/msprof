@@ -30,17 +30,10 @@ class TensorAddInfoParser(DataParser, MsMultiProcess):
         self._project_path = sample_config.get(StrConstant.SAMPLE_CONFIG_PROJECT_PATH)
 
     @staticmethod
-    def read_binary_data(bean_class: any, bean_data: any) -> any:
-        """
-        read binary data
-        """
-        return bean_class().fusion_decode(bean_data)
-
-    @staticmethod
     def _get_tensor_info_data(bean_data: any) -> list:
         if not bean_data:
             return []
-        return [bean_data.level, bean_data.add_info_type, bean_data.thread_id, bean_data.timestamp,
+        return [bean_data.level, bean_data.data_type, bean_data.thread_id, bean_data.timestamp,
                 bean_data.node_id, bean_data.tensor_num,
                 bean_data.input_format, bean_data.input_data_type, bean_data.input_shape,
                 bean_data.output_format, bean_data.output_data_type, bean_data.output_shape]
@@ -144,7 +137,6 @@ class TensorAddInfoParser(DataParser, MsMultiProcess):
         ge_hash_dict = hash_dict_data.get_ge_hash_dict()
         for data in data_list:
             # 1 type hash, 4 node hash
-            data[1] = type_hash_dict.get('node', {}).get(data[1], 'unmatched')
-            data[4] = ge_hash_dict.get(data[4], 'unmatched')
+            data[1] = type_hash_dict.get('node', {}).get(data[1], data[1])
+            data[4] = ge_hash_dict.get(data[4], data[4])
         return data_list
-
