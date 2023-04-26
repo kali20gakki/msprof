@@ -30,17 +30,10 @@ class FusionAddInfoParser(DataParser, MsMultiProcess):
         self._project_path = sample_config.get(StrConstant.SAMPLE_CONFIG_PROJECT_PATH)
 
     @staticmethod
-    def read_binary_data(bean_class: any, bean_data: any) -> any:
-        """
-        read binary data
-        """
-        return bean_class().fusion_decode(bean_data)
-
-    @staticmethod
     def _get_fusion_info_data(bean_data: any) -> list:
         if not bean_data:
             return []
-        return [bean_data.level, bean_data.add_info_type, bean_data.thread_id, bean_data.timestamp,
+        return [bean_data.level, bean_data.data_type, bean_data.thread_id, bean_data.timestamp,
                 bean_data.node_id, bean_data.fusion_op_num, bean_data.input_mem_size,
                 bean_data.output_mem_size, bean_data.weight_mem_size, bean_data.workspace_mem_size,
                 bean_data.total_mem_size, bean_data.fusion_op_id]
@@ -50,7 +43,7 @@ class FusionAddInfoParser(DataParser, MsMultiProcess):
         fusion_op_name_list = []
         fusion_op_id_list = fusion_op_id.split(',')
         for op_id in fusion_op_id_list:
-            fusion_op_name_list.append(hash_dict.get(op_id, 'unmatched'))
+            fusion_op_name_list.append(hash_dict.get(op_id, op_id))
         return ','.join(fusion_op_name_list)
 
     def parse(self: any) -> None:
@@ -97,7 +90,7 @@ class FusionAddInfoParser(DataParser, MsMultiProcess):
         ge_hash_dict = hash_dict_data.get_ge_hash_dict()
         for data in data_list:
             # 1 type hash, 4 node hash, 11 fusion_op_ids
-            data[1] = type_hash_dict.get('node', {}).get(data[1], 'unmatched')
-            data[4] = ge_hash_dict.get(data[4], 'unmatched')
+            data[1] = type_hash_dict.get('node', {}).get(data[1], data[1])
+            data[4] = ge_hash_dict.get(data[4], data[4])
             data[11] = self.transform_fusion_op_id(ge_hash_dict, data[11])
         return data_list
