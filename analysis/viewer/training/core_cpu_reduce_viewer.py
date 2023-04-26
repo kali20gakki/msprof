@@ -176,6 +176,8 @@ class CoreCpuReduceViewer:
         if name == TraceViewHeaderConstant.PROCESS_TASK:
             meta_data.extend(["thread_name", pid, tid_value,
                               "Stream {}".format(tid_value)] for tid_value in tid)
+            meta_data.extend(["thread_sort_index", pid, tid_value,
+                              tid_value] for tid_value in tid)
         result = TraceViewManager.metadata_event(meta_data)
         return result
 
