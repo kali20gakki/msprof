@@ -33,7 +33,7 @@ class TestHCCLExport(unittest.TestCase):
         InfoConfReader()._info_json = {"pid": 1}
         hccl = HCCLExport(PARAMS)
         hccl._format_hccl_data(hccl_data)
-        self.assertEqual(len(hccl.result), 4)
+        self.assertEqual(len(hccl.result), 5)
 
     def test_get_hccl_sql(self):
         sql = "select name,plane_id,timestamp,duration,bandwidth,stream_id," \
