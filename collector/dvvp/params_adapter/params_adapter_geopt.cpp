@@ -272,8 +272,8 @@ bool ParamsAdapterGeOpt::CheckInstrAndTaskParamBothSet(SHARED_PTR_ALIA<ProfGeOpt
                 comflictStr.append(arg.second);
             }
         }
-        MSPROF_LOGE("[Ge opt] Profiling fails to start because instr_profiling_freq is set,",
-            "Params %s not allowed to set in single operator model if instr_profiling_freq is set.",
+        MSPROF_LOGE("[Ge opt] Profiling fails to start because instr_profiling_freq is set,"
+            " Params %s not allowed to set in single operator model if instr_profiling_freq is set.",
             comflictStr.c_str());
         return true;
     }
