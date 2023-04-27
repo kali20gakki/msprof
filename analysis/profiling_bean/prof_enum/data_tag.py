@@ -73,6 +73,8 @@ class DataTag(Enum):
     TENSOR_ADD_INFO = 61
     NODE_BASIC_INFO = 62
     FUSION_ADD_INFO = 63
+    MEMORY_APPLICATION = 64
+    CTX_ID = 65
 
 
 @unique
