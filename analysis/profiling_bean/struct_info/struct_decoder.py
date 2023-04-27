@@ -56,6 +56,8 @@ class StructDecoder:
         "NodeBasicInfoBean": StructFmt.NODE_BASIC_INFO_FMT,
         "TensorAddInfoBean": StructFmt.TENSOR_ADD_INFO_FMT,
         "FusionAddInfoBean": StructFmt.FUSION_ADD_INFO_FMT,
+        "CtxIdBean": StructFmt.CTX_ID_FMT,
+        "MemoryApplicationBean": StructFmt.MEMORY_APPLICATION_FMT,
     }
 
     @classmethod
