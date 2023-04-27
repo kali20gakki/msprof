@@ -267,8 +267,8 @@ bool ParamsAdapterAclJson::CheckInstrAndTaskParamBothSet(SHARED_PTR_ALIA<ProfAcl
                 comflictStr.append(arg.second);
             }
         }
-        MSPROF_LOGE("[Acl json] Profiling fails to start because instr_profiling_freq is set,",
-            "Params %s not allowed to set in single operator model if instr_profiling_freq is set.",
+        MSPROF_LOGE("[Acl json] Profiling fails to start because instr_profiling_freq is set,"
+            " Params %s not allowed to set in single operator model if instr_profiling_freq is set.",
             comflictStr.c_str());
         return true;
     }
