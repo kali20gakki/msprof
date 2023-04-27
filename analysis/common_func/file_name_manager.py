@@ -220,6 +220,8 @@ class FileNameManagerConstant:
     NODE_BASIC_INFO_FILE_PATTERN = r"^(unaging|aging)\.compact\.node_basic_info\.slice_\d+"
     GRAPH_ADD_INFO_FILE_PATTERN = r"^(unaging|aging)\.additional\.graph_id_map\.slice_\d+"
     FUSION_ADD_INFO_PATTERN = r"^(unaging|aging)\.additional\.fusion_op_info\.slice_\d+"
+    MEMORY_APPLICATION_FILE_PATTERN = r"^(unaging|aging)\.additional\.memory_application\.slice_\d+"
+    CTX_ID_FILE_PATTERN = r"^(unaging|aging)\.additional\.ctx_id\.slice_\d+"
 
     def get_file_name_manager_class_name(self: any) -> any:
         """
@@ -919,3 +921,19 @@ def get_ge_fusion_add_info_compiles() -> tuple:
     :return: aging ge fusion add info files regex
     """
     return (re.compile(FileNameManagerConstant.FUSION_ADD_INFO_PATTERN),)
+
+
+def get_ge_memory_application_info_compiles() -> tuple:
+    """
+    get ge memory application info files regex compiles
+    :return: ge memory application info files regex
+    """
+    return (re.compile(FileNameManagerConstant.MEMORY_APPLICATION_FILE_PATTERN),)
+
+
+def get_ge_ctx_id_info_compiles() -> tuple:
+    """
+    get ge ctx id info files regex compiles
+    :return: ge ctx id info files regex
+    """
+    return (re.compile(FileNameManagerConstant.CTX_ID_FILE_PATTERN),)

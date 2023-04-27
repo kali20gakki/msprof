@@ -7,6 +7,8 @@ import os
 
 from common_func.constant import Constant
 from common_func.file_name_manager import get_acl_compiles
+from common_func.file_name_manager import get_ge_memory_application_info_compiles
+from common_func.file_name_manager import get_ge_ctx_id_info_compiles
 from common_func.file_name_manager import get_ge_graph_add_info_compiles
 from common_func.file_name_manager import get_ge_tensor_add_info_compiles
 from common_func.file_name_manager import get_ge_node_basic_info_compiles
@@ -138,6 +140,8 @@ class FileDispatch:
         DataTag.TENSOR_ADD_INFO: get_ge_tensor_add_info_compiles(),
         DataTag.NODE_BASIC_INFO: get_ge_node_basic_info_compiles(),
         DataTag.FUSION_ADD_INFO: get_ge_fusion_add_info_compiles(),
+        DataTag.MEMORY_APPLICATION: get_ge_memory_application_info_compiles(),
+        DataTag.CTX_ID: get_ge_ctx_id_info_compiles(),
     }
 
     def __init__(self: any, sample_config: dict) -> None:

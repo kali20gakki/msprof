@@ -72,6 +72,8 @@ class DBNameConstant(metaclass=ABCMeta):
     DB_NODE_BASIC_INFO = "node_basic_info.db"
     DB_FUSION_ADD_INFO = "fusion_op_info.db"
     DB_GRAPH_ADD_INFO = "graph_id_map.db"
+    DB_CTX_ID = "ctx_id.db"
+    DB_MEMORY_APPLICATION = "memory_application.db"
 
     # DB tables
     TABLE_ACL_DATA = "AclData"
@@ -259,6 +261,8 @@ class DBNameConstant(metaclass=ABCMeta):
     TABLE_NODE_BASIC_INFO = "NodeBasicInfo"
     TABLE_FUSION_ADD_INFO = "FusionOPInfo"
     TABLE_GRAPH_ADD_INFO = "GraphIdMap"
+    TABLE_CTX_ID = "CtxId"
+    TABLE_MEMORY_APPLICATION = "MemoryApplication"
 
     @abstractmethod
     def get_db_name(self: any) -> str:

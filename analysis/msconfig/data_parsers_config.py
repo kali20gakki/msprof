@@ -237,4 +237,14 @@ class DataParsersConfig(MetaConfig):
             ('chip_model', '0,1,2,3,4,5,7'),
             ('level', '2'),
         ],
+        'MemoryApplicationParser': [
+            ('path', 'msparser.add_info.memory_application_parser'),
+            ('chip_model', '0,1,2,3,4,5,7'),
+            ('level', '2'),
+        ],
+        'CtxIdParser': [
+            ('path', 'msparser.add_info.ctx_id_parser'),
+            ('chip_model', '5,7'),
+            ('level', '2'),
+        ],
     }
