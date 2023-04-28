@@ -100,6 +100,11 @@ class TopDownData:
         """
         result_data = []
         logging.info("Start to get top down tracing data.")
+        try:
+            cls._export_top_down_data_by_iter(project_path, device_id, result_data, iter_range.iteration_id)
+        except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
+            logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
+            return ""
         meta_data = [
             [
                 "process_name", InfoConfReader().get_json_pid_data(),
@@ -122,13 +127,8 @@ class TopDownData:
                 cls.TASK_TID, TraceViewHeaderConstant.PROCESS_TASK
             ]
         ]
-        result_data.extend(TraceViewManager.metadata_event(meta_data))
-        try:
-            cls._export_top_down_data_by_iter(project_path, device_id, result_data, iter_range.iteration_id)
-        except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
-            logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
-            return ""
         if result_data:
+            result_data.extend(TraceViewManager.metadata_event(meta_data))
             return json.dumps(result_data)
         return ""
 
@@ -326,6 +326,13 @@ class TopDownData:
                 result_data.extend(TraceViewManager.time_graph_trace(
                     TraceViewHeaderConstant.TOP_DOWN_TIME_GRAPH_HEAD, trace_data))
             DBManager.destroy_db_connect(conn, cur)
+        elif acl_data:
+            acl_data = Utils.generator_to_list(acl_item + (InfoConfReader().get_json_pid_data(),
+                                                           cls.ACL_TID)
+                                               for acl_item in acl_data)
+            trace_data = cls._format_data(acl_data)
+            result_data.extend(TraceViewManager.time_graph_trace(
+                TraceViewHeaderConstant.TOP_DOWN_TIME_GRAPH_HEAD, trace_data))
 
     @classmethod
     def _reformat_ge_trace_data(cls: any, ge_item: any) -> list:

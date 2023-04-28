@@ -110,6 +110,8 @@ class MsprofTimeline:
         :param data_type: data_type
         :return: None
         """
+        if not data:
+            return
         try:
             json_list = json.loads(data)
         except (TypeError, ValueError) as err:

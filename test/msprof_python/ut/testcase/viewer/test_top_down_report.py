@@ -228,6 +228,10 @@ class TestTopDownData(unittest.TestCase):
         (test_sql[1]).execute("drop Table AclData")
         db_manager.destroy(test_sql)
 
+    def test_fill_acl_trace_data_2(self):
+        top_down_datas = {"ACL": [(1, 'ACL', 'aclmdlExecute', 7702333934113, 4155080)]}
+        TopDownData._fill_acl_trace_data('', 0, [], top_down_datas)
+
     def test_fill_ge_trace_data(self):
         top_down_datas = [(1, 'GE', 'Input', 7702334428334, 41990),
                           (1, 'GE', 'Infer', 7702334498763, 3555770),
@@ -338,7 +342,11 @@ class TestTopDownData(unittest.TestCase):
              mock.patch(NAMESPACE + '.TopDownData._fill_top_down_trace_data', return_value=[1]):
             InfoConfReader()._info_json = {"pid": 1}
             res = TopDownData.get_top_down_timeline_data("", '0', ITER_RANGE)
-        self.assertEqual(len(json.loads(res)), 5)
+        self.assertEqual(res, "")
+
+        with mock.patch(NAMESPACE + '.TopDownData._get_top_down_data_one_iter', return_value=ValueError):
+            res = TopDownData.get_top_down_timeline_data("", '0', ITER_RANGE)
+        self.assertEqual(res, "")
 
 
 if __name__ == '__main__':
