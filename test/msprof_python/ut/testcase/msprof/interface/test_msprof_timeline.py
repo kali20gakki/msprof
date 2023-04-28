@@ -11,7 +11,11 @@ NAMESPACE = 'msinterface.msprof_timeline'
 
 class TestMsprofTimeline(unittest.TestCase):
     def test_add_export_data(self):
-        data = json.dumps(
+        key = MsprofTimeline()
+
+        self.assertEqual(key.add_export_data("", 'acl'), None)
+
+        data1 = json.dumps(
             [{'name': 'process_name', 'pid': 0, 'tid': 0, 'args': {'name': 'Task Scheduler'}, 'ph': 'M'},
              {'name': 'trans_TransData_7', 'pid': 0, 'tid': '0', 'ts': 1210122,
               'args': {'Stream Id': 1, 'Task Id': 1}, 'ph': 'X'}])
@@ -21,17 +25,17 @@ class TestMsprofTimeline(unittest.TestCase):
                 mock.patch(
                     'common_func.ai_stack_data_check_manager.AiStackDataCheckManager.contain_core_cpu_reduce_data',
                     return_value=True):
-            key = MsprofTimeline()
-            key.add_export_data(data, 'task_time')
+
+            key.add_export_data(data1, 'task_time')
             with mock.patch('common_func.db_manager.DBManager.fetch_all_data',
                             return_value=(
                                     (4294967295, 'Add', 1, 1, 32, 0, 'AI_CORE', 'Add', 0, 10621, 620199010400, 0),)):
-                data = json.dumps(
+                data2 = json.dumps(
                     [{'name': 'process_name', 'pid': 0, 'tid': 0, 'args': {'name': 'AscendCL'}, 'ph': 'M'},
                      {'name': 'aclopExecuteV2', 'pid': 0, 'tid': 0, 'ts': 620199010.277, 'dur': 569.359,
                       'args': {'Mode': 'ACL_OP'}, 'ph': 'X'}])
                 key = MsprofTimeline()
-                key.add_export_data(data, 'acl')
+                key.add_export_data(data2, 'acl')
 
     def test_export_all_data(self):
         with mock.patch(NAMESPACE + '.StepTraceViewer.get_one_iter_timeline_data',
