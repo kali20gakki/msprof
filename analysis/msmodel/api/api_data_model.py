@@ -19,12 +19,12 @@ class ApiDataModel(ParserModel):
     @staticmethod
     def update_type_hash_value(data: ApiDataBean, hash_dict: dict) -> tuple:
         if data.level not in hash_dict:
-            return data.api_data_type, 0
+            return data.struct_type, 0
         # acl and hccl have two hash values, other type set default second value：0
         if data.level == 'acl':
             return hash_dict[data.level].get(data.acl_type, data.acl_type), \
                    hash_dict[data.level].get(data.acl_id, data.acl_id)
-        return hash_dict[data.level].get(data.api_data_type, data.api_data_type), 0
+        return hash_dict[data.level].get(data.struct_type, data.struct_type), 0
 
     def flush(self: any, data_list: list, table_name: str = DBNameConstant.TABLE_API_DATA) -> None:
         """

@@ -33,7 +33,7 @@ class NodeBasicInfoParser(DataParser, MsMultiProcess):
     def _get_node_basic_data(bean_data: any) -> list:
         if not bean_data:
             return []
-        return [bean_data.level, bean_data.data_type, bean_data.thread_id, bean_data.timestamp,
+        return [bean_data.level, bean_data.struct_type, bean_data.thread_id, bean_data.timestamp,
                 bean_data.node_id, bean_data.task_type, bean_data.op_type, bean_data.block_dim,
                 bean_data.mix_block_dim, bean_data.op_flag]
 
@@ -45,8 +45,8 @@ class NodeBasicInfoParser(DataParser, MsMultiProcess):
         basic_info_files = self.group_aging_file(basic_info_files)
         for mode, file_list in basic_info_files.items():
             self._node_basic_info_data[mode] = self.parse_bean_data(file_list, StructFmt.NODE_BASIC_INFO_SIZE,
-                                                                            NodeBasicInfoBean,
-                                                                            self._get_node_basic_data)
+                                                                    NodeBasicInfoBean,
+                                                                    self._get_node_basic_data)
 
     def save(self: any) -> None:
         """

@@ -264,6 +264,9 @@ class DBNameConstant(metaclass=ABCMeta):
     TABLE_CTX_ID = "CtxId"
     TABLE_MEMORY_APPLICATION = "MemoryApplication"
 
+    TABLE_HCCL_OP = "HCCLOp"
+    TABLE_HCCL_TASK = "HCCLTask"
+
     @abstractmethod
     def get_db_name(self: any) -> str:
         """
