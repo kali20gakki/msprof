@@ -95,7 +95,7 @@ class FftsPmuCalculate(PmuCalculator, MsMultiProcess):
 
     def ms_run(self: any) -> None:
         config = generate_config(PathManager.get_sample_json_path(self._result_dir))
-        if config.get(StrConstant.AICORE_PROFILING_MODE) == StrConstant.AIC_SAMPLE_BASED_MODE \
+        if not self._file_list or config.get(StrConstant.AICORE_PROFILING_MODE) == StrConstant.AIC_SAMPLE_BASED_MODE \
                 or config.get(StrConstant.AIV_PROFILING_MODE) == StrConstant.AIC_SAMPLE_BASED_MODE:
             return
         self.init_params()

@@ -62,7 +62,8 @@ class AcsqTaskViewer:
             data_list = _model.get_summary_data()
         self._update_kernel_name(data_list)
         res_list = [[data.op_name, data.task_type, data.stream_id, data.task_id, data.task_time,
-                     data.start_time, data.end_time] for data in data_list]
+                     "\"" + str(data.start_time) + "\"", "\"" + str(data.end_time) + "\"",
+                     ] for data in data_list]
         return headers, res_list, len(res_list)
 
     def _update_kernel_name(self: any, data_list: list):
