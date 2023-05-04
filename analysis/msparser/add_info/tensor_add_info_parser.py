@@ -33,7 +33,7 @@ class TensorAddInfoParser(DataParser, MsMultiProcess):
     def _get_tensor_info_data(bean_data: any) -> list:
         if not bean_data:
             return []
-        return [bean_data.level, bean_data.data_type, bean_data.thread_id, bean_data.timestamp,
+        return [bean_data.level, bean_data.struct_type, bean_data.thread_id, bean_data.timestamp,
                 bean_data.node_id, bean_data.tensor_num,
                 bean_data.input_format, bean_data.input_data_type, bean_data.input_shape,
                 bean_data.output_format, bean_data.output_data_type, bean_data.output_shape]

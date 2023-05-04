@@ -492,10 +492,6 @@ class ExportCommand:
 
     def _export_data(self: any, event: dict, device_id: str, result_dir: str) -> None:
         export_data_type = event.get('export_type', ExportDataType.INVALID).name.lower()
-        if not event['handler'](result_dir, device_id):
-            warn(self.FILE_NAME, 'There is no %s data in device %s.'
-                 % (export_data_type, device_id))
-            return
         print_info(self.FILE_NAME,
                    'Start to export %s %s data ...' % (export_data_type, self.command_type))
         params = {

@@ -19,8 +19,8 @@ class EventDataModel(ParserModel):
     @staticmethod
     def update_hash_value(data: EventDataBean, hash_dict: dict):
         if data.level not in hash_dict:
-            return data.type
-        return hash_dict[data.level].get(data.type, data.type)
+            return data.struct_type
+        return hash_dict[data.level].get(data.struct_type, data.struct_type)
 
     def flush(self: any, data_list: list, table_name: str = DBNameConstant.TABLE_EVENT_DATA) -> None:
         """

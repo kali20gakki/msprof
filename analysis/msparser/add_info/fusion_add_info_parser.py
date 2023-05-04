@@ -33,7 +33,7 @@ class FusionAddInfoParser(DataParser, MsMultiProcess):
     def _get_fusion_info_data(bean_data: any) -> list:
         if not bean_data:
             return []
-        return [bean_data.level, bean_data.data_type, bean_data.thread_id, bean_data.timestamp,
+        return [bean_data.level, bean_data.struct_type, bean_data.thread_id, bean_data.timestamp,
                 bean_data.node_id, bean_data.fusion_op_num, bean_data.input_mem_size,
                 bean_data.output_mem_size, bean_data.weight_mem_size, bean_data.workspace_mem_size,
                 bean_data.total_mem_size, bean_data.fusion_op_id]
