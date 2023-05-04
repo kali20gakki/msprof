@@ -1011,7 +1011,7 @@ class TablesConfig(MetaConfig):
             ('id', 'TEXT,null'),
             ('level', 'TEXT,null'),
             ('thread_id', 'INTEGER,null'),
-            ('item_id', 'INTEGER,null'),
+            ('item_id', 'TEXT,null'),
             ('start', 'INTEGER,null'),
             ('end', 'INTEGER,null')
         ],

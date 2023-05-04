@@ -52,12 +52,12 @@ class ApiDataBean(StructDecoder):
         return self._thread_id
 
     @property
-    def item_id(self: any) -> int:
+    def item_id(self: any) -> str:
         """
         api data item id
         :return: api item id
         """
-        return self._item_id
+        return str(self._item_id)
 
     @property
     def level(self: any) -> str:
