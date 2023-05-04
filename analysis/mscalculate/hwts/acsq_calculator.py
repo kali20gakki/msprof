@@ -9,14 +9,13 @@ from common_func.batch_counter import BatchCounter
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
-from common_func.info_conf_reader import InfoConfReader
+from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
-from common_func.msprof_exception import ProfException
 from common_func.msprof_iteration import MsprofIteration
-from common_func.platform.chip_manager import ChipManager
-from common_func.ms_constant.number_constant import NumberConstant
+from common_func.path_manager import PathManager
 from mscalculate.interface.icalculator import ICalculator
+from mscalculate.ts_task.ai_cpu.aicpu_from_ts_collector import AICpuFromTsCollector
 from msmodel.iter_rec.iter_rec_model import HwtsIterModel
 from msmodel.stars.acsq_task_model import AcsqTaskModel
 from msmodel.step_trace.ts_track_model import TsTrackModel
@@ -35,8 +34,9 @@ class AcsqCalculator(ICalculator, MsMultiProcess):
         self._iter_range = sample_config.get(StrConstant.PARAM_ITER_ID)
         self._project_path = sample_config.get(StrConstant.SAMPLE_CONFIG_PROJECT_PATH)
         self._file_list = file_list
+        self._aicpu_collector = AICpuFromTsCollector(self._project_path)
         self._acsq_model = AcsqTaskModel(self._project_path, DBNameConstant.DB_SOC_LOG,
-                                         [DBNameConstant.TABLE_ACSQ_TASK_TIME])
+                                         [DBNameConstant.TABLE_ACSQ_TASK_TIME, DBNameConstant.TABLE_ACSQ_TASK])
         self._iter_model = HwtsIterModel(self._project_path)
         self._log_data = []
 
@@ -45,10 +45,7 @@ class AcsqCalculator(ICalculator, MsMultiProcess):
         calculate stars acsq data
         :return: None
         """
-        if ProfilingScene().is_operator():
-            self._parse_all_file()
-        else:
-            self._parse_by_iter()
+        self._get_data_from_task_table()
 
     def save(self: any) -> None:
         """
@@ -65,12 +62,9 @@ class AcsqCalculator(ICalculator, MsMultiProcess):
         entrance for calculating acsq
         :return: None
         """
-        try:
-            if ChipManager().is_ffts_type() and self._file_list.get(DataTag.STARS_LOG):
-                self.calculate()
-                self.save()
-        except RuntimeError as err:
-            logging.error(err)
+        if self._file_list.get(DataTag.STARS_LOG):
+            self.calculate()
+            self.save()
 
     def _prep_data(self: any) -> list:
         """
@@ -93,34 +87,17 @@ class AcsqCalculator(ICalculator, MsMultiProcess):
             train_data.extend(tmp)
         return train_data
 
-    def _parse_by_iter(self: any) -> None:
-        """
-        Parse the specified iteration data
-        :return: None
-        """
-        _iter_time = MsprofIteration(self._project_path).get_iter_interval(self._iter_range)
-        if not _iter_time:
+    def _get_data_from_task_table(self: any) -> None:
+        if not DBManager.check_tables_in_db(PathManager.get_db_path(self._project_path, DBNameConstant.DB_SOC_LOG),
+                                            DBNameConstant.TABLE_ACSQ_TASK):
+            logging.warning("No task data collected, the data may be missing or the current iteration has no task.")
             return
-
-        sql = "select task_id, stream_id, start_time, end_time, task_type" \
-              " from {} where start_time >= ? and end_time <= ?".format(DBNameConstant.TABLE_ACSQ_TASK)
-        cpu_sql = []
-        with self._acsq_model as model:
-            if self._acsq_model.check_table():
-                model.drop_table(DBNameConstant.TABLE_ACSQ_TASK_TIME)
-                cpu_sql = DBManager.fetch_all_data(model.cur, sql, _iter_time)
-        self._log_data.extend(cpu_sql)
-
-    def _parse_all_file(self: any) -> None:
         sql = "select task_id, stream_id, start_time, end_time, task_type" \
               " from {}".format(DBNameConstant.TABLE_ACSQ_TASK)
 
-        cpu_sql = []
         with self._acsq_model as model:
-            if model.check_table():
-                model.drop_table(DBNameConstant.TABLE_ACSQ_TASK_TIME)
-                cpu_sql = DBManager.fetch_all_data(model.cur, sql)
-        self._log_data.extend(cpu_sql)
+            acsq_data = DBManager.fetch_all_data(model.cur, sql)
+        self._log_data.extend(acsq_data)
 
     def _add_batch_id(self: any, prep_data_res: list) -> list:
         if ProfilingScene().is_operator():
@@ -131,11 +108,15 @@ class AcsqCalculator(ICalculator, MsMultiProcess):
 
         batch_counter = BatchCounter(self._project_path)
         batch_counter.init(Constant.TASK_TYPE_AI_CORE)
-        for index, datum in enumerate(prep_data_res):
+        res_data = []
+        for datum in prep_data_res:
             if len(datum) != self.PREP_DATA_LENGTH:
                 return []
             stream_id = datum[1]
             task_id = datum[0]
+            if datum[4] == Constant.TASK_TYPE_AI_CPU:
+                self._aicpu_collector.filter_aicpu_for_stars(datum, current_iter_id)
+                continue
             batch_id = batch_counter.calculate_batch(stream_id, task_id, current_iter_id)
-            prep_data_res[index] = datum + (batch_id,)
-        return prep_data_res
+            res_data.append(datum + (batch_id,))
+        return res_data + self._aicpu_collector.aicpu_list
