@@ -33,7 +33,7 @@ class GraphAddInfoParser(DataParser, MsMultiProcess):
     def _get_graph_info_data(bean_data: any) -> list:
         if not bean_data:
             return []
-        return [bean_data.level, bean_data.data_type, bean_data.thread_id,
+        return [bean_data.level, bean_data.struct_type, bean_data.thread_id,
                 bean_data.timestamp, bean_data.model_name, bean_data.graph_id]
 
     def parse(self: any) -> None:

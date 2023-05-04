@@ -6,20 +6,20 @@
 class MemCopyInfoDto:
     def __init__(self: any) -> None:
         self._level = None
-        self._type = None
+        self._struct_type = None
         self._thread_id = None
         self._data_len = None
         self._timestamp = None
         self._data_size = None
-        self._direction = None
+        self._memcpy_direction = None
 
     @property
     def level(self: any) -> str:
         return self._level
 
     @property
-    def data_type(self: any) -> str:
-        return str(self._type)
+    def struct_type(self: any) -> str:
+        return str(self._struct_type)
 
     @property
     def thread_id(self: any) -> int:
@@ -38,16 +38,16 @@ class MemCopyInfoDto:
         return self._data_size
 
     @property
-    def direction(self):
-        return self._direction
+    def memcpy_direction(self):
+        return self._memcpy_direction
 
     @level.setter
     def level(self: any, value: any) -> None:
         self._level = value
 
-    @data_type.setter
-    def data_type(self: any, value: any) -> None:
-        self._type = value
+    @struct_type.setter
+    def struct_type(self: any, value: any) -> None:
+        self._struct_type = value
 
     @thread_id.setter
     def thread_id(self: any, value: any) -> None:
@@ -65,6 +65,6 @@ class MemCopyInfoDto:
     def data_size(self, value):
         self._data_size = value
 
-    @direction.setter
-    def direction(self, value):
-        self._direction = value
+    @memcpy_direction.setter
+    def memcpy_direction(self, value):
+        self._memcpy_direction = value

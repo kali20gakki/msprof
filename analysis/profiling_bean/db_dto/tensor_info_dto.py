@@ -6,11 +6,11 @@
 class TensorInfoDto:
     def __init__(self: any) -> None:
         self._level = None
-        self._type = None
+        self._struct_type = None
         self._thread_id = None
         self._data_len = None
         self._timestamp = None
-        self._node_id = None
+        self._op_name = None
         self._tensor_num = None
         self._input_formats = None
         self._input_data_types = None
@@ -24,8 +24,8 @@ class TensorInfoDto:
         return self._level
 
     @property
-    def data_type(self):
-        return self._type
+    def struct_type(self):
+        return self._struct_type
 
     @property
     def thread_id(self):
@@ -40,8 +40,8 @@ class TensorInfoDto:
         return self._timestamp
 
     @property
-    def node_id(self):
-        return self._node_id
+    def op_name(self):
+        return self._op_name
 
     @property
     def tensor_num(self):
@@ -75,9 +75,9 @@ class TensorInfoDto:
     def level(self, value):
         self._level = value
 
-    @data_type.setter
-    def data_type(self, value):
-        self._type = value
+    @struct_type.setter
+    def struct_type(self, value):
+        self._struct_type = value
 
     @thread_id.setter
     def thread_id(self, value):
@@ -91,9 +91,9 @@ class TensorInfoDto:
     def timestamp(self, value):
         self._timestamp = value
 
-    @node_id.setter
-    def node_id(self, value):
-        self._node_id = value
+    @op_name.setter
+    def op_name(self, value):
+        self._op_name = value
 
     @tensor_num.setter
     def tensor_num(self, value):

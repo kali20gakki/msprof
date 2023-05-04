@@ -6,7 +6,7 @@
 class GraphIdMapDto:
     def __init__(self: any) -> None:
         self._level = None
-        self._type = None
+        self._struct_type = None
         self._thread_id = None
         self._data_len = None
         self._timestamp = None
@@ -18,8 +18,8 @@ class GraphIdMapDto:
         return self._level
 
     @property
-    def data_type(self: any) -> str:
-        return str(self._type)
+    def struct_type(self: any) -> str:
+        return str(self._struct_type)
 
     @property
     def thread_id(self: any) -> int:
@@ -45,9 +45,9 @@ class GraphIdMapDto:
     def level(self: any, value: any) -> None:
         self._level = value
 
-    @data_type.setter
-    def data_type(self: any, value: any) -> None:
-        self._type = value
+    @struct_type.setter
+    def struct_type(self: any, value: any) -> None:
+        self._struct_type = value
 
     @thread_id.setter
     def thread_id(self: any, value: any) -> None:

@@ -5,8 +5,11 @@ from profiling_bean.db_dto.event_data_dto import EventDataDto
 
 
 class ApiDataDto:
+    INVALID_LEVEL = -1
+    INVALID_THREAD = -1
+
     def __init__(self: any, begin_time=None, end_event_data_dto: EventDataDto = EventDataDto()) -> None:
-        self._type = end_event_data_dto.type
+        self.struct_type = end_event_data_dto.struct_type
         self._level = end_event_data_dto.level
         self._thread_id = end_event_data_dto.thread_id
         self._start = begin_time
@@ -15,8 +18,8 @@ class ApiDataDto:
         self._request_id = end_event_data_dto.request_id
 
     @property
-    def data_type(self: any) -> str:
-        return str(self._type)
+    def struct_type(self: any) -> str:
+        return str(self._struct_type)
 
     @property
     def start(self: any) -> int:
@@ -42,9 +45,19 @@ class ApiDataDto:
     def request_id(self: any) -> str:
         return str(self._request_id)
 
-    @data_type.setter
-    def data_type(self: any, value: any) -> None:
-        self._type = value
+    @staticmethod
+    def invalid_dto(level=INVALID_LEVEL, thread=INVALID_THREAD, start=-1, end=-1, struct_type=""):
+        dto = ApiDataDto()
+        dto.level = level
+        dto.thread_id = thread
+        dto.struct_type = struct_type
+        dto.start = start
+        dto.end = end
+        return dto
+
+    @struct_type.setter
+    def struct_type(self: any, value: any) -> None:
+        self._struct_type = value
 
     @start.setter
     def start(self: any, value: any) -> None:
