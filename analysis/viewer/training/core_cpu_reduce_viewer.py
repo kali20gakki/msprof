@@ -208,6 +208,8 @@ class CoreCpuReduceViewer:
         trace_data.extend(trace_data_sql)
         trace_data.extend(trace_data_job)
         trace_data.extend(trace_data_result)
+        if not trace_data:
+            return ""
         return json.dumps(trace_data)
 
     @classmethod
@@ -223,7 +225,6 @@ class CoreCpuReduceViewer:
         task_scheduler_data = DBManager.fetch_all_data(curs, sql)
         DBManager.destroy_db_connect(conn, curs)
         tid_values = {hwts_task_data[0] for hwts_task_data in task_scheduler_data}
-        result_data = cls.get_meta_trace_data(TraceViewHeaderConstant.PROCESS_TASK, tid_values)
         try:
             if task_scheduler_data:
                 task_trace_datas = \
@@ -233,6 +234,8 @@ class CoreCpuReduceViewer:
         except (TypeError, IndexError, ValueError) as err:
             logging.error(err, exc_info=Constant.TRACE_BACK_SWITCH)
             return result_data
+        if result_data:
+            result_data.extend(cls.get_meta_trace_data(TraceViewHeaderConstant.PROCESS_TASK, tid_values))
         return result_data
 
     @classmethod
@@ -284,7 +287,6 @@ class CoreCpuReduceViewer:
         op_names, _ = cls.get_op_names_and_task_type(PathManager.get_sql_dir(dir_path))
         result_data = []
         if ai_cpu_data:
-            result_data.extend(cls.get_meta_trace_data(TraceViewHeaderConstant.PROCESS_AI_CPU))
             for stream_id, task_id, sys_start, sys_end, batch_id in ai_cpu_data:
                 _key_for_ops = "_".join([str(stream_id), str(task_id), str(batch_id)])
                 duration = (float(sys_end) - float(sys_start)) * NumberConstant.MS_TO_US
@@ -298,6 +300,8 @@ class CoreCpuReduceViewer:
                                   ("Task Time(us)", duration)])))
             result_data.extend(
                 TraceViewManager.time_graph_trace(TraceViewHeaderConstant.TOP_DOWN_TIME_GRAPH_HEAD, ai_cpu_datas))
+            if result_data:
+                result_data.extend(cls.get_meta_trace_data(TraceViewHeaderConstant.PROCESS_AI_CPU))
         return result_data
 
     @classmethod
@@ -312,12 +316,13 @@ class CoreCpuReduceViewer:
                 not DBManager.judge_table_exist(trace_curs, DBNameConstant.TABLE_ALL_REDUCE):
             return result_data
 
-        result_data = cls.get_meta_trace_data(TraceViewHeaderConstant.PROCESS_ALL_REDUCE)
         all_reduce_datas = \
             cls._format_all_reduce_data(trace_curs, device_id, iter_range)
         result_data.extend(
             TraceViewManager.time_graph_trace(TraceViewHeaderConstant.TOP_DOWN_TIME_GRAPH_HEAD, all_reduce_datas))
         DBManager.destroy_db_connect(trace_conn, trace_curs)
+        if result_data:
+            result_data.extend(cls.get_meta_trace_data(TraceViewHeaderConstant.PROCESS_ALL_REDUCE))
         return result_data
 
     @classmethod
