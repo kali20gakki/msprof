@@ -2,9 +2,8 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2023-2023. All rights reserved.
 
-from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
-from msmodel.ge.ge_hash_model import GeHashViewModel
+from common_func.hash_dict_constant import HashDictData
 from msmodel.interface.parser_model import ParserModel
 from profiling_bean.struct_info.api_data_bean import ApiDataBean
 
@@ -18,7 +17,7 @@ class ApiDataModel(ParserModel):
         super().__init__(result_dir, DBNameConstant.DB_API_DATA, [DBNameConstant.TABLE_API_DATA])
 
     @staticmethod
-    def update_hash_value(data: ApiDataBean, hash_dict: dict) -> tuple:
+    def update_type_hash_value(data: ApiDataBean, hash_dict: dict) -> tuple:
         if data.level not in hash_dict:
             return data.api_data_type, 0
         # acl and hccl have two hash values, other type set default second value：0
@@ -38,8 +37,10 @@ class ApiDataModel(ParserModel):
         self.insert_data_to_db(table_name, data_list)
 
     def reformat_data(self: any, data_list: list) -> list:
-        with GeHashViewModel(self.result_dir) as _model:
-            hash_dict = _model.get_type_hash_data()
+        hash_dict_data = HashDictData(self.result_dir)
+        type_dict = hash_dict_data.get_type_hash_dict()
+        ge_dict = hash_dict_data.get_ge_hash_dict()
         return [
-            [*self.update_hash_value(data, hash_dict), data.level, data.thread_id, data.item_id, data.start, data.end]
+            [*self.update_type_hash_value(data, type_dict), data.level, data.thread_id,
+             ge_dict.get(data.item_id, data.item_id), data.start, data.end]
             for data in data_list]
