@@ -12,7 +12,7 @@ class EventDataBean(StructDecoder):
 
     def __init__(self: any, *args) -> None:
         filed = args[0]
-        self._type = filed[2]
+        self._struct_type = filed[2]
         self._level = filed[1]
         self._thread_id = filed[3]
         self._request_id = filed[4]
@@ -20,12 +20,12 @@ class EventDataBean(StructDecoder):
         self._item_id = filed[7]
 
     @property
-    def type(self: any) -> str:
+    def struct_type(self: any) -> str:
         """
         event data type
         :return: event type
         """
-        return str(self._type)
+        return str(self._struct_type)
 
     @property
     def request_id(self: any) -> int:

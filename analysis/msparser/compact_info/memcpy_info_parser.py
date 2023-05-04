@@ -34,7 +34,7 @@ class MemcpyInfoParser(DataParser, MsMultiProcess):
             hash_dict = _model.get_type_hash_data()
         return [
             [
-                hash_dict.get(bean.level, {}).get(bean.data_type, bean.data_type),  # memcpy info type
+                hash_dict.get(bean.level, {}).get(bean.struct_type, bean.struct_type),  # memcpy info type
                 bean.level,
                 bean.thread_id,
                 bean.data_len,

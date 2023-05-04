@@ -6,11 +6,11 @@
 class HCCLInfoDto:
     def __init__(self: any) -> None:
         self._level = None
-        self._type = None
+        self._struct_type = None
         self._thread_id = None
         self._data_len = None
         self._timestamp = None
-        self._item_id = None
+        self._op_name = None
         self._ccl_tag = None
         self._group_name = None
         self._local_rank = None
@@ -37,8 +37,8 @@ class HCCLInfoDto:
         return self._level
 
     @property
-    def data_type(self: any) -> str:
-        return str(self._type)
+    def struct_type(self: any) -> str:
+        return str(self._struct_type)
 
     @property
     def thread_id(self: any) -> int:
@@ -53,8 +53,8 @@ class HCCLInfoDto:
         return self._timestamp
 
     @property
-    def item_id(self):
-        return self._item_id
+    def op_name(self):
+        return self._op_name
 
     @property
     def ccl_tag(self):
@@ -136,9 +136,9 @@ class HCCLInfoDto:
     def level(self: any, value: any) -> None:
         self._level = value
 
-    @data_type.setter
-    def data_type(self: any, value: any) -> None:
-        self._type = value
+    @struct_type.setter
+    def struct_type(self: any, value: any) -> None:
+        self._struct_type = value
 
     @thread_id.setter
     def thread_id(self: any, value: any) -> None:
@@ -152,9 +152,9 @@ class HCCLInfoDto:
     def timestamp(self, value):
         self._timestamp = value
 
-    @item_id.setter
-    def item_id(self, value):
-        self._item_id = value
+    @op_name.setter
+    def op_name(self, value):
+        self._op_name = value
 
     @ccl_tag.setter
     def ccl_tag(self, value):
@@ -231,3 +231,18 @@ class HCCLInfoDto:
     @rdma_type.setter
     def rdma_type(self, value):
         self._rdma_type = value
+
+    def to_args_json(self):
+        return {
+            "notify_id": self.notify_id,
+            "duration_estimated": self.duration_estimated,
+            "stage": self.stage,
+            # 确认后修改
+            "step": self.stage,
+            "bandwidth": self.stage,
+            "task_type": self.op_name,
+            "src_rank": self.src_addr,
+            "dst_rank": self.dst_addr,
+            "transport_type": self.transport_type,
+            "size": self.size,
+        }

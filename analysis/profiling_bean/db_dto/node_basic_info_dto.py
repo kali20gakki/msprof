@@ -6,24 +6,25 @@
 class NodeBasicInfoDto:
     def __init__(self: any) -> None:
         self._level = None
-        self._type = None
+        self._struct_type = None
         self._thread_id = None
         self._data_len = None
         self._timestamp = None
-        self._node_id = None
+        self._op_name = None
         self._task_type = None
         self._op_type = None
         self._block_dim = None
         self._mix_block_dim = None
         self._op_flag = None
+        self._is_dynamic = None
 
     @property
     def level(self: any) -> str:
         return str(self._level)
 
     @property
-    def data_type(self: any) -> str:
-        return str(self._type)
+    def struct_type(self: any) -> str:
+        return str(self._struct_type)
 
     @property
     def thread_id(self: any) -> int:
@@ -38,8 +39,8 @@ class NodeBasicInfoDto:
         return self._timestamp
 
     @property
-    def node_id(self: any) -> int:
-        return self._node_id
+    def op_name(self: any) -> int:
+        return self._op_name
 
     @property
     def task_type(self: any) -> int:
@@ -61,13 +62,17 @@ class NodeBasicInfoDto:
     def mix_block_dim(self):
         return self._mix_block_dim
 
+    @property
+    def is_dynamic(self):
+        return self._is_dynamic
+
     @level.setter
     def level(self: any, value: any) -> None:
         self._level = value
 
-    @data_type.setter
-    def data_type(self: any, value: any) -> None:
-        self._type = value
+    @struct_type.setter
+    def struct_type(self: any, value: any) -> None:
+        self._struct_type = value
 
     @thread_id.setter
     def thread_id(self: any, value: any) -> None:
@@ -81,9 +86,9 @@ class NodeBasicInfoDto:
     def timestamp(self: any, value: any) -> None:
         self._timestamp = value
 
-    @node_id.setter
-    def node_id(self: any, value: any) -> None:
-        self._node_id = value
+    @op_name.setter
+    def op_name(self: any, value: any) -> None:
+        self._op_name = value
 
     @task_type.setter
     def task_type(self: any, value: any) -> None:
@@ -104,3 +109,7 @@ class NodeBasicInfoDto:
     @mix_block_dim.setter
     def mix_block_dim(self, value):
         self._mix_block_dim = value
+
+    @is_dynamic.setter
+    def is_dynamic(self, value):
+        self._is_dynamic = value

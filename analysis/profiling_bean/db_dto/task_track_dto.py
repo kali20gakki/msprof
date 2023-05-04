@@ -6,7 +6,7 @@ from profiling_bean.db_dto.event_data_dto import EventDataDto
 
 class TaskTrackDto:
     def __init__(self: any):
-        self._type = None
+        self._struct_type = None
         self._level = None
         self._thread_id = None
         self._data_len = None
@@ -17,8 +17,8 @@ class TaskTrackDto:
         self._batch_id = None
 
     @property
-    def data_type(self):
-        return self._type
+    def struct_type(self):
+        return self._struct_type
 
     @property
     def level(self):
@@ -52,9 +52,9 @@ class TaskTrackDto:
     def batch_id(self):
         return self._batch_id
 
-    @data_type.setter
-    def data_type(self, value):
-        self._type = value
+    @struct_type.setter
+    def struct_type(self, value):
+        self._struct_type = value
 
     @level.setter
     def level(self, value):

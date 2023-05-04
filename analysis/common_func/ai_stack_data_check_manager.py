@@ -8,6 +8,7 @@ from common_func.data_check_manager import DataCheckManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.msvp_common import path_check
 from common_func.path_manager import PathManager
+from common_func.db_manager import DBManager
 
 
 class AiStackDataCheckManager(DataCheckManager):
@@ -28,8 +29,9 @@ class AiStackDataCheckManager(DataCheckManager):
         """
         The data path contain runtime.api. data or not
         """
-        return cls.check_data_exist(result_dir, file_name_manager.get_runtime_api_compiles(),
-                                    device_id=device_id)
+        return cls.check_data_exist(result_dir, file_name_manager.get_runtime_api_compiles(), device_id=device_id) or \
+               DBManager.check_tables_in_db(
+                   PathManager.get_db_path(result_dir, DBNameConstant.DB_RUNTIME), DBNameConstant.TABLE_API_CALL)
 
     @classmethod
     def contain_ge_model_load_data(cls: any, result_dir: str, device_id: any = None) -> bool:

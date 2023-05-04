@@ -41,7 +41,7 @@ class TaskTrackParser(DataParser, MsMultiProcess):
                 bean.task_id,
                 bean.thread_id,
                 bean.batch_id,
-                hash_dict.get(bean.level, {}).get(bean.data_type, bean.data_type),  # task track type
+                hash_dict.get(bean.level, {}).get(bean.struct_type, bean.struct_type),  # task track type
                 bean.level,
                 bean.data_len,
             ] for bean in bean_data

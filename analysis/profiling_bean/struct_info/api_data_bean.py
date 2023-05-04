@@ -12,7 +12,7 @@ class ApiDataBean(StructDecoder):
 
     def __init__(self: any, *args) -> None:
         filed = args[0]
-        self._type = filed[2]
+        self._struct_type = filed[2]
         self._level = filed[1]
         self._thread_id = filed[3]
         self._start = filed[5]
@@ -20,12 +20,12 @@ class ApiDataBean(StructDecoder):
         self._item_id = filed[7]
 
     @property
-    def api_data_type(self: any) -> str:
+    def struct_type(self: any) -> str:
         """
         api data type
         :return: api type
         """
-        return str(self._type)
+        return str(self._struct_type)
 
     @property
     def start(self: any) -> int:
@@ -73,7 +73,7 @@ class ApiDataBean(StructDecoder):
         api data acl id
         :return: api acl id
         """
-        return str(self._type & 65535)
+        return str(self._struct_type & 65535)
 
     @property
     def acl_type(self: any) -> str:
@@ -81,4 +81,4 @@ class ApiDataBean(StructDecoder):
         api data acl type
         :return: api acl type
         """
-        return str(self._type >> 16)
+        return str(self._struct_type >> 16)

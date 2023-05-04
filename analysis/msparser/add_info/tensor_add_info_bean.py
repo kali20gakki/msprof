@@ -18,7 +18,7 @@ class TensorAddInfoBean(GeTensorBaseBean):
         super().__init__()
         data = args[0]
         self._level = data[1]
-        self._data_type = data[2]
+        self._struct_type = data[2]
         self._thread_id = data[3]
         self._data_len = data[4]
         self._timestamp = data[5]
@@ -48,11 +48,11 @@ class TensorAddInfoBean(GeTensorBaseBean):
         return LevelDataType(self._level).name.lower()
 
     @property
-    def data_type(self: any) -> str:
+    def struct_type(self: any) -> str:
         """
         type
         """
-        return str(self._data_type)
+        return str(self._struct_type)
 
     @property
     def thread_id(self: any) -> int:
