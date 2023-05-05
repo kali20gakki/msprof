@@ -64,10 +64,13 @@ class TablesConfig(MetaConfig):
         ],
         'StepInfoMap': [
             ('model_id', 'INTEGER,null'),
+            ('stream_id', 'INTEGER,null'),
+            ('task_id', 'INTEGER,null'),
             ('thread_id', 'INTEGER,null'),
             ('timestamp', 'REAL,null'),
             ('cur_iter_num', 'INTEGER,null'),
             ('tag', 'TEXT,null'),
+            ('batch_id', 'INTEGER,null')
         ],
         'SessionInfoMap': [
             ('model_id', 'INTEGER,null'),
@@ -132,8 +135,10 @@ class TablesConfig(MetaConfig):
             ('entry_time', 'INTEGER,null'),
             ('exit_time', 'INTEGER,null'),
             ('api', 'TEXT,null'),
+            ('retcode', 'INTEGER,null'),
             ('thread', 'INTEGER,null'),
             ('stream_id', 'INTEGER,null'),
+            ('tasknum', 'INTEGER,null'),
             ('task_id', 'TEXT,null'),
             ('batch_id', 'TEXT,null'),
             ('data_size', 'INTEGER,null'),
@@ -1120,7 +1125,7 @@ class TablesConfig(MetaConfig):
         ],
         'CtxIdMap': [
             ('level', 'TEXT,null'),
-            ('type', 'TEXT,null'),
+            ('struct_type', 'TEXT,null'),
             ('thread_id', 'INTEGER,null'),
             ('timestamp', 'TEXT,null'),
             ('op_name', 'TEXT,null'),
