@@ -30,10 +30,10 @@ class CtxIdParser(DataParser, MsMultiProcess):
         self._project_path = sample_config.get(StrConstant.SAMPLE_CONFIG_PROJECT_PATH)
 
     @staticmethod
-    def _get_ctx_id_data(bean_data: any) -> list:
+    def _get_ctx_id_data(bean_data: CtxIdBean) -> list:
         if not bean_data:
             return []
-        return [bean_data.level, bean_data.add_type, bean_data.thread_id, bean_data.timestamp, bean_data.node_id,
+        return [bean_data.level, bean_data.struct_type, bean_data.thread_id, bean_data.timestamp, bean_data.node_id,
                 bean_data.ctx_id_num, bean_data.ctx_id]
 
     def parse(self: any) -> None:
