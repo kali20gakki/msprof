@@ -28,8 +28,8 @@ class TestAcsqTaskViewer(unittest.TestCase):
             check = AcsqTaskViewer(config)
             InfoConfReader()._info_json = {"DeviceInfo": [{'hwts_frequency': 1000}]}
             ret = check.get_summary_data([1])
-        self.assertEqual(ret, ([1], [[1, 5, 6, 4, 6, 8, 0], [2, 3, 4, 5, 6, 7, 0]], 2))
-
+        self.assertEqual(ret, ([1], [[1, 5, 6, 4, 6, '"8"', '"0"'], [2, 3, 4, 5, 6, '"7"', '"0"']], 2))
+    
     def test_get_trace_timeline(self):
         acsq_data_list = [[1000, 2, 3, 'EVENT_RECORD_SQE', 66, 7, 8, 9, 54]]
         config = {}

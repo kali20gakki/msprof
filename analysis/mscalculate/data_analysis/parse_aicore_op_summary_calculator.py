@@ -6,7 +6,6 @@ import logging
 import os
 import sqlite3
 
-from common_func.ms_multi_process import MsMultiProcess
 from analyzer.get_op_table_task_time import GetOpTableTsTime
 from analyzer.op_common_function import OpCommonFunc
 from analyzer.scene_base.profiling_scene import ProfilingScene
@@ -17,13 +16,13 @@ from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
+from common_func.ms_multi_process import MsMultiProcess
 from common_func.msprof_exception import ProfException
 from common_func.msprof_iteration import MsprofIteration
 from common_func.path_manager import PathManager
 from common_func.platform.chip_manager import ChipManager
 from msconfig.config_manager import ConfigManager
 from profiling_bean.db_dto.ge_task_dto import GeTaskDto
-
 
 
 class ParseAiCoreOpSummaryCalculator(MsMultiProcess):
@@ -43,7 +42,6 @@ class ParseAiCoreOpSummaryCalculator(MsMultiProcess):
         self.iter_range = self.sample_config.get(StrConstant.PARAM_ITER_ID)
         self.conn = None
         self.curs = None
-
 
     def ms_run(self: any) -> None:
         """
@@ -166,11 +164,6 @@ class ParseAiCoreOpSummaryCalculator(MsMultiProcess):
             sql = "create table if not exists ai_core_metrics " \
                   "as select * from {0}.{1}".format(db_name,
                                                     CommonConstant.METRICS_SUMMARY_TABLE)
-            if ChipManager().is_chip_v4() and not ProfilingScene().is_operator():
-                iter_time = MsprofIteration(self.project_path).get_iter_interval(self.iter_range)
-                sql = "create table if not exists ai_core_metrics " \
-                      "as select * from {0}.{1} where start_time>{2} and end_time<{3}" \
-                    .format(db_name, CommonConstant.METRICS_SUMMARY_TABLE, iter_time[0], iter_time[1])
         elif DBManager.check_tables_in_db(self.get_db_path(DBNameConstant.DB_RUNTIME),
                                           CommonConstant.AIV_METRICS_SUMMARY_TABLE):
             sql = "create table if not exists ai_core_metrics " \
@@ -221,8 +214,6 @@ class ParseAiCoreOpSummaryCalculator(MsMultiProcess):
         :return: path of db
         """
         return PathManager.get_db_path(self.project_path, db_name)
-
-
 
     def _get_ge_data_from_summary(self: any) -> list:
         if not DBManager.judge_table_exist(self.curs, DBNameConstant.TABLE_SUMMARY_GE):
