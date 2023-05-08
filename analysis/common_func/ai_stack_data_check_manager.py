@@ -70,7 +70,8 @@ class AiStackDataCheckManager(DataCheckManager):
         """
         The data path contain Framework.dynamic_op_execute data or not
         """
-        return cls.check_data_exist(result_dir, file_name_manager.get_ge_host_compiles(), device_id=device_id)
+        return cls.check_data_exist(result_dir, file_name_manager.get_ge_host_compiles(),
+                                    device_id=device_id)
 
     @classmethod
     def contain_ge_step_info_data(cls: any, result_dir: str, device_id: any = None) -> bool:

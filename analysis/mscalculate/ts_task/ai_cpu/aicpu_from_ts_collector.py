@@ -50,6 +50,16 @@ class AICpuFromTsCollector:
                                     end_ms,
                                     batch_id])
 
+    def filter_aicpu_for_stars(self: any, aicpu_feature: tuple, iter_id: int = NumberConstant.INVALID_ITER_ID) -> None:
+        """
+        filter ai cpu for stars chip
+        :param aicpu_feature: aicpu feature
+        :param iter_id: current iter id
+        """
+        task_id, stream_id, *args = aicpu_feature
+        batch_id = self._batch_counter.calculate_batch(stream_id, task_id, iter_id)
+        self.aicpu_list.append(aicpu_feature + (batch_id,))
+
     def save_aicpu(self: any) -> None:
         """
         save ai cpu data
