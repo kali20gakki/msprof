@@ -86,3 +86,4 @@ class AclApiTag(Enum):
     ACL_MODEL = 2
     ACL_RTS = 3
     ACL_OTHERS = 4
+    HOST_HCCL = 7
