@@ -76,9 +76,9 @@ class ApiDataBean(StructDecoder):
         return str(self._struct_type & 65535)
 
     @property
-    def acl_type(self: any) -> str:
+    def acl_type(self: any) -> int:
         """
         api data acl type
         :return: api acl type
         """
-        return str(self._struct_type >> 16)
+        return self._struct_type >> 16
