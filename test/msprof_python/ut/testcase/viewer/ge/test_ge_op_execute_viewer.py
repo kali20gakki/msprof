@@ -54,4 +54,4 @@ class TestGeOpExecuteViewer(unittest.TestCase):
             InfoConfReader()._info_json = {'devices': '0', "pid": "1"}
             obj = GeOpExecuteViewer({}, {"project": "test"})
             result = obj.get_timeline_data()
-        self.assertEqual(3, len(json.loads(result)))
+        self.assertEqual(4, len(json.loads(result)))

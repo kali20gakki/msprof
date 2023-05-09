@@ -49,7 +49,10 @@ class FftsLogViewer(BaseViewer):
         for item in tid_set:
             subtask.append(
                 ["thread_name", item[0], item[1],
-                 StarsConstant.SUBTASK_TYPE.get(item[1], item[1])])
+                 f'Stream {item[1]}'])
+            subtask.append(
+                ["thread_sort_index", item[0], item[1],
+                 item[1]])
         header.extend(subtask)
         return header
 
@@ -132,7 +135,7 @@ class FftsLogViewer(BaseViewer):
             result_list.append(
                 [data.op_name,
                  self.TRACE_PID_MAP.get("Task Scheduler", 0),
-                 "Stream {}".format(str(data.stream_id)),
+                 data.stream_id,
                  data.start_time / DBManager.NSTOUS,
                  data.dur_time / DBManager.NSTOUS if data.dur_time > 0 else 0,
                  {"FFTS Type": data.ffts_type, "Task Type": data.subtask_type, "Stream Id": data.stream_id,
@@ -141,7 +144,7 @@ class FftsLogViewer(BaseViewer):
             result_list.append(
                 [data.op_name,
                  self.TRACE_PID_MAP.get("Task Scheduler", 0),
-                 "Stream {}".format(str(data.stream_id)),
+                 data.stream_id,
                  data.start_time / DBManager.NSTOUS,
                  data.task_time / DBManager.NSTOUS if data.task_time > 0 else 0,
                  {"Task Type": data.task_type, "Stream Id": data.stream_id,
