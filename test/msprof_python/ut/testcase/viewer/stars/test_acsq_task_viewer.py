@@ -40,14 +40,14 @@ class TestAcsqTaskViewer(unittest.TestCase):
             check = AcsqTaskViewer(config)
             InfoConfReader()._info_json = {'pid': 1, "DeviceInfo": [{'hwts_frequency': 1000}]}
             ret = check.get_trace_timeline(acsq_data_list)
-            self.assertEqual(len(ret), 22)
+            self.assertEqual(len(ret), 43)
 
     def test_get_timeline_header(self):
         config = {}
         check = AcsqTaskViewer(config)
         InfoConfReader()._info_json = {'pid': 1, "DeviceInfo": [{'hwts_frequency': 1000}]}
         ret = check.get_timeline_header()
-        self.assertEqual(len(ret), 22)
+        self.assertEqual(len(ret), 43)
 
 
 if __name__ == '__main__':

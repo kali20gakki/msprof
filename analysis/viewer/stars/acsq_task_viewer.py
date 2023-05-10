@@ -31,8 +31,8 @@ class AcsqTaskViewer:
         result = [["process_name", pid, InfoConfReader().get_json_tid_data(), "AcsqTask"]]
 
         for sqe in SqeType:
-            thread_header = ["thread_name", pid, sqe.value, sqe.name]
-            result.append(thread_header)
+            result.append(["thread_name", pid, sqe.value, sqe.name])
+            result.append(["thread_sort_index", pid, sqe.value, sqe.value])
         return result
 
     @staticmethod

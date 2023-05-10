@@ -309,8 +309,8 @@ class HostSyscallPresenter(HostProfPresenterBase):
         result = [["process_name", pid, InfoConfReader().get_json_tid_data(), "OS Runtime API"]]
         tid_list = self._get_tid_list()
         for tid in tid_list:
-            thread_header = ["thread_name", pid, tid[0], "Thread " + str(tid[0])]
-            result.append(thread_header)
+            result.append(["thread_name", pid, tid[0], "Thread " + str(tid[0])])
+            result.append(["thread_sort_index", pid, tid[0], tid[0]])
         return result
 
     def _get_tid_list(self: any) -> list:
