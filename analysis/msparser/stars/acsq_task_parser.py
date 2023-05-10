@@ -37,12 +37,8 @@ class AcsqTaskParser(IStarsParser):
         task_map = {}
         # task id stream id func type
         for data in self._data_list:
-            task_key = "{0},{1},{2}".format(str(data.task_id), str(data.stream_id), str(data.acc_id))
-            if task_key in task_map:
-                data_list = task_map.get(task_key).setdefault(data.func_type, [])
-                data_list.append(data)
-            else:
-                task_map[task_key] = {data.func_type: [data]}
+            task_key = "{0},{1}".format(str(data.task_id), str(data.stream_id))
+            task_map.setdefault(task_key, {}).setdefault(data.func_type, []).append(data)
 
         result_list = []
         warning_status = False
