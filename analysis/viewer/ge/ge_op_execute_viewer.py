@@ -63,6 +63,7 @@ class GeOpExecuteViewer:
         _trace = TraceViewManager.time_graph_trace(TraceViewHeaderConstant.TASK_TIME_GRAPH_HEAD, result)
         for _tid in tid_set:
             header.append(["thread_name", pid, _tid, "Thread {}".format(_tid)])
+            header.append(["thread_sort_index", pid, _tid, _tid])
         header = TraceViewManager.metadata_event(header)
         header.extend(_trace)
         return json.dumps(header)

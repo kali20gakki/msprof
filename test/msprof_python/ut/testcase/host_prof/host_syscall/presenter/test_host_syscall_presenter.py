@@ -154,8 +154,10 @@ class TestHostSyscallPresenter(unittest.TestCase):
             check = HostSyscallPresenter(self.result_dir, self.file_name)
             result = check.get_timeline_header()
         self.assertEqual(result, [['process_name', 1, 0, 'OS Runtime API'],
-                                  ['thread_name', 1, 18072, 'Thread 18072'],
-                                  ['thread_name', 1, 18070, 'Thread 18070']])
+                                 ['thread_name', 1, 18072, 'Thread 18072'],
+                                 ['thread_sort_index', 1, 18072, 18072],
+                                 ['thread_name', 1, 18070, 'Thread 18070'],
+                                 ['thread_sort_index', 1, 18070, 18070]])
 
     def test_get_tid_list(self):
         with mock.patch('host_prof.host_syscall.model.host_syscall.'
