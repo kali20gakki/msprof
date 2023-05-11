@@ -404,6 +404,7 @@ int JobDeviceSoc::CreateDeviceCollectionJobArray()
     MSVP_MAKE_SHARED0_RET(CollectionJobV_[NPU_APP_MEM_COLLECTION_JOB].collectionJob, ProfNpuAppMemJob,
                           PROFILING_FAILED);
     MSVP_MAKE_SHARED0_RET(CollectionJobV_[NPU_MEM_COLLECTION_JOB].collectionJob, ProfNpuMemJob, PROFILING_FAILED);
+    MSVP_MAKE_SHARED0_RET(CollectionJobV_[LPM_FREQ_COLLECTION_JOB].collectionJob, ProfLpmFreqConvJob, PROFILING_FAILED);
     // for ts
     MSVP_MAKE_SHARED0_RET(CollectionJobV_[TS_CPU_DRV_COLLECTION_JOB].collectionJob, ProfTscpuJob, PROFILING_FAILED);
     MSVP_MAKE_SHARED0_RET(CollectionJobV_[AIV_TS_TRACK_DRV_COLLECTION_JOB].collectionJob, ProfAivTsTrackJob,

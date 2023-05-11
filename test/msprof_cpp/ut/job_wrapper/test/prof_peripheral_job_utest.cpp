@@ -273,6 +273,67 @@ TEST_F(JOB_WRAPPER_PROF_HBM_JOB_TEST, Uninit) {
     EXPECT_EQ(PROFILING_SUCCESS, proHbmJob->Uninit());
 }
 
+class JOB_WRAPPER_PROF_LPM_FREQ_CONV_TEST : public testing::Test {
+protected:
+    virtual void SetUp() {
+        collectionJobCfg_ = std::make_shared<Analysis::Dvvp::JobWrapper::CollectionJobCfg>();
+        auto params = std::make_shared<analysis::dvvp::message::ProfileParams>();
+        auto jobCtx = std::make_shared<analysis::dvvp::message::JobContext>();
+        auto comParams = std::make_shared<Analysis::Dvvp::JobWrapper::CollectionJobCommonParams>();
+        comParams->params = params;
+        comParams->jobCtx = jobCtx;
+        collectionJobCfg_->comParams = comParams;
+        collectionJobCfg_->jobParams.events = std::make_shared<std::vector<std::string> >(0);
+    }
+    virtual void TearDown() {
+        collectionJobCfg_.reset();
+    }
+public:
+    std::shared_ptr<Analysis::Dvvp::JobWrapper::CollectionJobCfg> collectionJobCfg_;
+};
+
+TEST_F(JOB_WRAPPER_PROF_LPM_FREQ_CONV_TEST, Init)
+{
+    GlobalMockObject::verify();
+
+    auto profFreqConvJob = std::make_shared<Analysis::Dvvp::JobWrapper::ProfLpmFreqConvJob>();
+    // receive nullptr
+    EXPECT_EQ(PROFILING_FAILED, profFreqConvJob->Init(nullptr));
+    // is host profiling
+    collectionJobCfg_->comParams->params->host_profiling = true;
+    EXPECT_EQ(PROFILING_FAILED, profFreqConvJob->Init(collectionJobCfg_));
+    // init failed
+    collectionJobCfg_->comParams->params->host_profiling = false;
+    MOCKER_CPP(&Analysis::Dvvp::Common::Config::ConfigManager::GetPlatformType)
+            .stubs()
+            .will(returnValue(Analysis::Dvvp::Common::Config::PlatformType::DC_TYPE))
+            .then(returnValue(Analysis::Dvvp::Common::Config::PlatformType::CHIP_V4_1_0));
+    EXPECT_EQ(PROFILING_FAILED, profFreqConvJob->Init(collectionJobCfg_));
+    collectionJobCfg_->comParams->params->ai_core_profiling_mode = "sampled-based";
+    EXPECT_EQ(PROFILING_FAILED, profFreqConvJob->Init(collectionJobCfg_));
+    // init success
+    collectionJobCfg_->comParams->params->ai_core_profiling_mode = "task-based";
+    collectionJobCfg_->comParams->params->ai_core_profiling = "on";
+    EXPECT_EQ(PROFILING_SUCCESS, profFreqConvJob->Init(collectionJobCfg_));
+}
+
+TEST_F(JOB_WRAPPER_PROF_LPM_FREQ_CONV_TEST, SetPeripheralConfig)
+{
+    GlobalMockObject::verify();
+    unsigned char tmp[100] = {0};
+    auto profFreqConvJob = std::make_shared<Analysis::Dvvp::JobWrapper::ProfLpmFreqConvJob>();
+    MOCKER(analysis::dvvp::common::utils::Utils::ProfMalloc)
+            .stubs()
+            .will(returnValue((void*)tmp))
+            .then(returnValue((void*)nullptr));
+
+    profFreqConvJob->Init(collectionJobCfg_);
+    // running success
+    EXPECT_EQ(PROFILING_SUCCESS, profFreqConvJob->SetPeripheralConfig());
+    // configP is nullptr
+    EXPECT_EQ(PROFILING_FAILED, profFreqConvJob->SetPeripheralConfig());
+}
+
 class JOB_WRAPPER_PROF_NPU_APP_MEM_JOB_TEST : public testing::Test {
 protected:
     virtual void SetUp() {
@@ -496,6 +557,9 @@ TEST_F(JOB_WRAPPER_PROF_LLC_JOB_TEST, Uninit) {
 }
 
 class JOB_WRAPPER_PROF_HCCS_JOB_TEST : public testing::Test {
+public:
+    std::shared_ptr<Analysis::Dvvp::JobWrapper::CollectionJobCfg> collectionJobCfg_;
+
 protected:
     virtual void SetUp() {
         collectionJobCfg_ = std::make_shared<Analysis::Dvvp::JobWrapper::CollectionJobCfg>();\
@@ -515,8 +579,6 @@ protected:
     virtual void TearDown() {
         collectionJobCfg_.reset();
     }
-public:
-    std::shared_ptr<Analysis::Dvvp::JobWrapper::CollectionJobCfg> collectionJobCfg_;
 };
 
 TEST_F(JOB_WRAPPER_PROF_HCCS_JOB_TEST, Init) {
@@ -614,7 +676,8 @@ TEST_F(JOB_WRAPPER_PROF_PCIE_JOB_TEST, Uninit) {
 
 class JOB_WRAPPER_PROF_NIC_JOB_TEST : public testing::Test {
 protected:
-    virtual void SetUp() {
+    virtual void SetUp()
+    {
         collectionJobCfg_ = std::make_shared<Analysis::Dvvp::JobWrapper::CollectionJobCfg>();\
         std::shared_ptr<analysis::dvvp::message::ProfileParams> params(
             new analysis::dvvp::message::ProfileParams);
@@ -629,7 +692,8 @@ protected:
         collectionJobCfg_->jobParams.events->push_back("write");
         collectionJobCfg_->jobParams.events->push_back("read");
     }
-    virtual void TearDown() {
+    virtual void TearDown()
+    {
         collectionJobCfg_.reset();
     }
 public:

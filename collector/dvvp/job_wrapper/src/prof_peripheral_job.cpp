@@ -422,6 +422,62 @@ int32_t ProfNpuMemJob::SetPeripheralConfig()
 }
 
 /*
+ * @berif  : Collect milan frequency conversion data
+ */
+ProfLpmFreqConvJob::ProfLpmFreqConvJob()
+{
+    channelId_ = PROF_CHANNEL_LP;
+}
+
+ProfLpmFreqConvJob::~ProfLpmFreqConvJob() {}
+
+/*
+ * @berif  : Frequency Peripheral Init profiling
+ * @param  : cfg : Collect data config information
+ * @return : PROFILING_FAILED(-1) : failed
+ *         : PROFILING_SUCCESS(0) : success
+ */
+int32_t ProfLpmFreqConvJob::Init(const SHARED_PTR_ALIA<CollectionJobCfg> cfg)
+{
+    if (CheckJobCommonParam(cfg) != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
+    if (cfg->comParams->params->host_profiling) {
+        return PROFILING_FAILED;
+    }
+
+    collectionJobCfg_ = cfg;
+    if (ConfigManager::instance()->GetPlatformType() != PlatformType::CHIP_V4_1_0 ||
+        collectionJobCfg_->comParams->params->ai_core_profiling_mode.compare("sample-based") == 0 ||
+        collectionJobCfg_->comParams->params->ai_core_profiling.compare("on") != 0) {
+        MSPROF_LOGI("Frequency conversion is not enabled");
+        return PROFILING_FAILED;
+    }
+    return PROFILING_SUCCESS;
+}
+
+/*
+ * @berif  : Frequency Peripheral Set Config
+ * @param  : None
+ * @return : PROFILING_FAILED(-1) : failed
+ *         : PROFILING_SUCCESS(0) : success
+ */
+int32_t ProfLpmFreqConvJob::SetPeripheralConfig()
+{
+    size_t configSize = sizeof(LpmConvProfileConfig);
+    LpmConvProfileConfig *configP = reinterpret_cast<LpmConvProfileConfig *>(Utils::ProfMalloc(configSize));
+    if (configP == nullptr) {
+        MSPROF_LOGE("ProfLpmFreqConvJob ProfMalloc LpmConvProfileConfig failed");
+        return PROFILING_FAILED;
+    }
+    configP->period = DEFAULT_INTERVAL;
+    configP->res = 0;
+    peripheralCfg_.configP = configP;
+    peripheralCfg_.configSize = configSize;
+    return PROFILING_SUCCESS;
+}
+
+/*
  * @berif  : Collect HCCS profiling data
  */
 ProfHccsJob::ProfHccsJob()

@@ -127,6 +127,7 @@ enum AI_DRV_CHANNEL {
     PROF_CHANNEL_ROCE     = CHANNEL_ROCE, // 129
     PROF_CHANNEL_NPU_APP_MEM = CHANNEL_NPU_APP_MEM, // 130
     PROF_CHANNEL_NPU_MEM = CHANNEL_NPU_MEM, // 131
+    PROF_CHANNEL_LP = CHANNEL_LP, // 132
     PROF_CHANNEL_DVPP_VENC = CHANNEL_DVPP_VENC, // 135
     PROF_CHANNEL_DVPP_JPEGE = CHANNEL_DVPP_JPEGE, // 136
     PROF_CHANNEL_DVPP_VDEC = CHANNEL_DVPP_VDEC, // 137
@@ -292,11 +293,16 @@ struct TagMemProfileConfig {
     uint32_t res2;
 };
 
+struct LpmConvProfileConfig {
+    uint32_t period;
+    uint32_t res;
+};
+
 /* LLC profile cfg data */
 struct TagLlcProfileConfig {
-    uint32_t period;   //  sample period
+    uint32_t period;   // sample period
     uint32_t sampleType;  // sample data type, 0 read hit rate, 1 write hit rate
-} ;
+};
 
 struct TagTsL2CacheProfileConfig {
     uint32_t eventNum;
