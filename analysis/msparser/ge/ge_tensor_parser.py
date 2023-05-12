@@ -53,12 +53,13 @@ class GeTensorParser(DataParser, MsMultiProcess):
     def _update_hash_dict_data(cls: any, hash_dict: dict, key: any, data: list) -> None:
         value = hash_dict.get(key, {})
         value['tensor_num'] += data[3]
-        value['input_format'] += (";" + str(data[4])) if data[4] else ''
-        value['input_data_type'] += (";" + str(data[5])) if data[5] else ''
-        value['input_shape'] += (";" + str(data[6])) if data[6] else ''
-        value['output_format'] += (";" + str(data[7])) if data[7] else ''
-        value['output_data_type'] += (";" + str(data[8])) if data[8] else ''
-        value['output_shape'] += (";" + str(data[9])) if data[9] else ''
+        # ';'   to avoid filtering the empty data
+        value['input_format'] += (";" + str(data[4])) if data[4] else ';'
+        value['input_data_type'] += (";" + str(data[5])) if data[5] else ';'
+        value['input_shape'] += (";" + str(data[6])) if data[6] else ';'
+        value['output_format'] += (";" + str(data[7])) if data[7] else ';'
+        value['output_data_type'] += (";" + str(data[8])) if data[8] else ';'
+        value['output_shape'] += (";" + str(data[9])) if data[9] else ';'
         hash_dict[key] = value
 
     def parse(self: any) -> None:
