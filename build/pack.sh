@@ -63,7 +63,7 @@ CONTROL_PARAM_SCRIPT=${TOP_DIR}/opensource/makeself/makeself-header.sh
 COMMENTS=comments
 
 # only find x86 or ARM
-for DIR in ${OUT_DIR}/platform/Tuscany/*centos*;
+for DIR in ${OUT_DIR}/platform/Tuscany/*$(lsb_release -i | awk '{print $3}' | tr 'A-Z' 'a-z')*;
   do
     RM_DIR=${DIR}
     mkdir ${CUR_DIR}/tmp
