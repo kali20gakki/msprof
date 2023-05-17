@@ -143,6 +143,11 @@ int32_t ProfApiPlugin::MsprofProfRegReporterCallback(ProfReportHandle reporter)
 {
     return 0;
 }
+ 
+int32_t ProfApiPlugin::MsprofProfRegProfilerCallback(int32_t callbackType, VOID_PTR callback, uint32_t len)
+{
+    return 0;
+}
 
 int32_t ProfApiPlugin::MsprofProfRegCtrlCallback(ProfCtrlHandle handle)
 {

@@ -18,7 +18,7 @@ namespace analysis {
 namespace dvvp {
 namespace host {
 const char * const PLATFORM_CLOUD = "cloud";
-
+const std::string PROF_VERSION_INFO = "1.0";
 const std::string INFO_FILE_NAME = "info.json";
 
 struct DeviceInfo {
@@ -63,6 +63,7 @@ private:
     void AddNetCardInfo(SHARED_PTR_ALIA<analysis::dvvp::proto::InfoMain> infoMain);
     void AddCycleToTimeInfo(SHARED_PTR_ALIA<analysis::dvvp::proto::InfoMain> infoMain);
     void SetRankId(SHARED_PTR_ALIA<analysis::dvvp::proto::InfoMain> infoMain);
+    void SetVersionInfo(SHARED_PTR_ALIA<analysis::dvvp::proto::InfoMain> infoMain) const;
 
 private:
     std::string jobInfo_;
