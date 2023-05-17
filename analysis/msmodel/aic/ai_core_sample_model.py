@@ -4,24 +4,23 @@
 
 import logging
 import os
-import sqlite3
-import sys
 from collections import OrderedDict
 
+from common_func.config_mgr import ConfigMgr
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.number_constant import NumberConstant
-from common_func.ms_constant.str_constant import StrConstant
 from common_func.msprof_exception import ProfException
 from common_func.msvp_common import config_file_obj
 from common_func.msvp_common import error
 from common_func.msvp_common import read_cpu_cfg
 from common_func.path_manager import PathManager
 from common_func.utils import Utils
-from msmodel.interface.base_model import BaseModel
+from mscalculate.aic.aic_utils import AicPmuUtils
 from mscalculate.calculate_ai_core_data import CalculateAiCoreData
-from viewer.calculate_rts_data import check_aicore_events
+from msmodel.interface.base_model import BaseModel
+from viewer.calculate_rts_data import judge_custom_pmu_scene
 
 
 class AiCoreSampleModel(BaseModel):
@@ -34,6 +33,7 @@ class AiCoreSampleModel(BaseModel):
     def __init__(self: any, result_dir: str, db_name: str, table_list: list, metric_type: str) -> None:
         super().__init__(result_dir, db_name, table_list)
         self.metrics_data = []
+        self.sample_config = ConfigMgr.read_sample_config(result_dir)
         self.metrics_type = metric_type
         self.conn = None
         self.cur = None
@@ -45,9 +45,17 @@ class AiCoreSampleModel(BaseModel):
         :param event: ai core event
         :return:
         """
-        check_aicore_events(event)
         ai_core_events = Utils.generator_to_list(event[i:i + 8] for i in range(0, len(event), 8))
         return ai_core_events
+
+    @staticmethod
+    def get_custom_pmu_metrics(custom_metric: str, metrics_list: list) -> list:
+        """
+        get custom pmu name list from sample json
+        :param custom_metric: "Custom:0x10,0x20" for example
+        :param metrics_list: metrics list
+        """
+        return metrics_list + AicPmuUtils.get_custom_pmu_events(custom_metric[7:])
 
     def init(self: any) -> bool:
         """
@@ -95,8 +103,6 @@ class AiCoreSampleModel(BaseModel):
                 logging.info('create event tables finished')
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
             logging.error(str(err))
-        finally:
-            pass
 
     def insert_metric_summary_table(self: any, freq: int or float, key: str) -> None:
         """
@@ -120,17 +126,22 @@ class AiCoreSampleModel(BaseModel):
         :return:
         """
         metrics_config = read_cpu_cfg(self.TYPE, "formula")
+        if judge_custom_pmu_scene(self.sample_config, metrics_type=self.metrics_type):
+            pmu_list = self.get_custom_pmu_metrics(self.sample_config.get(self.metrics_type), [])
+            custom_pmu = {custom_pmu: None for custom_pmu in pmu_list}
+            metrics_config.update(custom_pmu)
         data = []
-        if metrics_config:
-            sql = "CREATE TABLE IF NOT EXISTS MetricSummary (metric text, " \
-                  "value numeric, coreid INT)"
-            DBManager.execute_sql(self.conn, sql)
-            core_id = DBManager.fetch_all_data(self.cur, "select distinct(coreid) from EventCount;")
-            for core in core_id:
-                data.extend([key.replace("(gb/s)", "(GB/s)"), None, core[0]] for key in list(metrics_config.keys()))
-            DBManager.insert_data_into_table(self.conn, "MetricSummary", data)
-            return NumberConstant.SUCCESS
-        return NumberConstant.ERROR
+        if not metrics_config:
+            return NumberConstant.ERROR
+        sql = "CREATE TABLE IF NOT EXISTS MetricSummary (metric text, " \
+              "value numeric, coreid INT)"
+        DBManager.execute_sql(self.conn, sql)
+        core_id = DBManager.fetch_all_data(self.cur, "select distinct(coreid) from EventCount;")
+        for core in core_id:
+            data.extend([key.replace("(gb/s)", "(GB/s)"), None, core[0]] for key in list(metrics_config.keys()))
+
+        DBManager.insert_data_into_table(self.conn, "MetricSummary", data)
+        return NumberConstant.SUCCESS
 
     def sql_insert_metric_summary_table(self: any, metrics: list, freq: float) -> str:
         """
@@ -146,7 +157,8 @@ class AiCoreSampleModel(BaseModel):
         res = []
         for metric in metrics:
             replaced_metric = metric.replace("(GB/s)", "(gb/s)")
-            field_val = field_dict[replaced_metric].replace('/block_num*((block_num+core_num-1)/core_num)', '')
+            field_val = field_dict.get(replaced_metric, replaced_metric).replace(
+                '/block_num*((block_num+core_num-1)/core_num)', '')
             res.append((replaced_metric, field_val))
         field_dict = OrderedDict(res)
         for field in field_dict:
@@ -189,9 +201,7 @@ class AiCoreSampleModel(BaseModel):
         self.conn.commit()
 
     def _init_ai_core_events_table(self: any, events: list) -> bool:
-        check_aicore_events(events)
         self._create_event_count_table(events)
-
         ai_core_events = self.get_ai_core_event_chunk(events)
         if not ai_core_events:
             logging.error('get ai core pmu events failed!')
@@ -264,7 +274,9 @@ class AiCoreSampleModel(BaseModel):
                     index += 1
 
     def _get_metrics(self: any, key: str) -> list:
-        metrics = ['total_time(ms)']
+        metrics = ["total_time(ms)"]
+        if key.startswith("Custom"):
+            return self.get_custom_pmu_metrics(key, metrics)
         if key not in Constant.AICORE_METRICS_LIST:
             return []
         sample_metrics = Constant.AICORE_METRICS_LIST.get(key)

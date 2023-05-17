@@ -52,7 +52,9 @@ class TestParsingFftsAICoreSampleData(unittest.TestCase):
     def test_save(self):
         InfoJsonReaderManager(info_json=InfoJson(devices='0', DeviceInfo=[
             DeviceInfo(aic_frequency='1150', aiv_frequency='1000').device_info])).process()
-        with mock.patch('msmodel.aic.ai_core_sample_model.AiCoreSampleModel.init'), \
+        with mock.patch(NAMESPACE + '.check_aicore_events'), \
+                mock.patch('msmodel.aic.ai_core_sample_model.AiCoreSampleModel.init'), \
+                mock.patch('msmodel.aic.ai_core_sample_model.ConfigMgr.read_sample_config'), \
                 mock.patch('msmodel.aic.ai_core_sample_model.AiCoreSampleModel.insert_metric_summary_table'), \
                 mock.patch('msmodel.aic.ai_core_sample_model.AiCoreSampleModel.insert_metric_value'), \
                 mock.patch('msmodel.aic.ai_core_sample_model.AiCoreSampleModel.create_core_table'), \
@@ -110,6 +112,7 @@ class TestParsingAICoreSampleData(unittest.TestCase):
             DeviceInfo(aic_frequency='1150', aiv_frequency='1000').device_info])).process()
         with mock.patch('msmodel.aic.ai_core_sample_model.AiCoreSampleModel.init'), \
                 mock.patch('msmodel.aic.ai_core_sample_model.AiCoreSampleModel.insert_metric_summary_table'), \
+                mock.patch('msmodel.aic.ai_core_sample_model.ConfigMgr.read_sample_config'), \
                 mock.patch('msmodel.aic.ai_core_sample_model.AiCoreSampleModel.insert_metric_value'), \
                 mock.patch('msmodel.aic.ai_core_sample_model.AiCoreSampleModel.create_core_table'), \
                 mock.patch('msmodel.aic.ai_core_sample_model.AiCoreSampleModel.finalize'):
@@ -149,6 +152,7 @@ class TestParsingAIVectorCoreSampleData(unittest.TestCase):
             DeviceInfo(aic_frequency='1150', aiv_frequency='1000').device_info])).process()
         with mock.patch('msmodel.aic.ai_core_sample_model.AiCoreSampleModel.init'), \
                 mock.patch('msmodel.aic.ai_core_sample_model.AiCoreSampleModel.insert_metric_summary_table'), \
+                mock.patch('msmodel.aic.ai_core_sample_model.ConfigMgr.read_sample_config'), \
                 mock.patch('msmodel.aic.ai_core_sample_model.AiCoreSampleModel.create_core_table'), \
                 mock.patch('msmodel.aic.ai_core_sample_model.AiCoreSampleModel.insert_metric_value'), \
                 mock.patch('msmodel.aic.ai_core_sample_model.AiCoreSampleModel.finalize'):
