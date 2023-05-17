@@ -65,7 +65,7 @@ public:
     bool CheckCoreIdSizeIsValid(const int eventSize) const;
     bool CheckNameContainsDangerCharacter(const std::string &cmd) const;
     bool CheckDeviceIdIsValid(const std::string &devId) const;
-    bool CheckProfilingMetricsIsValid(const std::string &metricsName, const std::string &metricsVal) const;
+    bool CheckProfilingMetricsIsValid(const std::string &metricsName, const std::string &metricsVal);
     int CheckEventsSize(const std::string &events) const;
     bool IsValidSleepPeriod(const int period) const;
     bool CheckHostSysOptionsIsValid(const std::string &hostSysOptions) const;
@@ -84,6 +84,7 @@ public:
     bool CheckHostSysUsageValid(const std::string &hostSysUsageParam) const;
     bool CheckHostSysToolsExit(const std::string &hostSysParam, const std::string &resultDir,
         const std::string &appDir) const;
+    int CustomHexCharConfig(std::string &aicoreEvents, const std::string &pattern);
 
 private:
     bool CheckTsSwitchProfiling(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params);
@@ -101,6 +102,7 @@ private:
     int CheckHostOutString(const std::string tmpStr, const std::string toolName) const;
     int UninitCheckHostSysCmd(const MmProcess checkProcess) const;
     bool CheckHostSysUsageOptionsIsValid(const std::string &hostSysUsageOptions) const;
+    bool CovertMetricToHex(std::string &events, const size_t mode) const;
 };
 }
 }
