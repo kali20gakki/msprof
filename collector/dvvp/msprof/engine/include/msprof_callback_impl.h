@@ -12,6 +12,7 @@
 #include "data_dumper.h"
 #include "prof_callback.h"
 #include "utils/utils.h"
+#include "msprof_reporter_mgr.h"
 
 namespace Analysis {
 namespace Dvvp {
@@ -29,9 +30,28 @@ int32_t MsprofSetDeviceCallbackForDynProf(VOID_PTR data, uint32_t len);
 // defination of MsprofReporterCallback, see prof_callback.h
 int32_t MsprofReporterCallbackImpl(uint32_t moduleId, uint32_t type, VOID_PTR data, uint32_t len);
 
+// api data reporter call back
+int32_t MsprofApiReporterCallbackImpl(uint32_t agingFlag, const MsprofApi &api);
+
+// event data reporter call back
+int32_t MsprofEventReporterCallbackImpl(uint32_t agingFlag, const MsprofEvent &event);
+
+// compact info data reporter call back
+int32_t MsprofCompactInfoReporterCallbackImpl(uint32_t agingFlag, CONST_VOID_PTR data, uint32_t length);
+
+// additional info data reporter call back
+int32_t MsprofAddiInfoReporterCallbackImpl(uint32_t agingFlag, CONST_VOID_PTR data, uint32_t length);
+
+// register type info call back
+int32_t MsprofRegReportTypeInfoImpl(uint16_t level, uint32_t typeId, const std::string &typeName);
+
+// get hash id call back
+int32_t MsprofGetHashIdImpl(const std::string &hashInfo);
+
 int32_t GetRegisterResult();
 
 int32_t RegisterReporterCallback();
+int32_t RegisterNewReporterCallback();
 void RegisterMsprofTxReporterCallback();
 }  // namespace ProfilerCommon
 }  // namespace Dvvp

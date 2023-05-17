@@ -55,6 +55,28 @@ struct ReporterDataChunk {
     ReporterDataChunkPayload data;
 };
 
+enum MsprofReporterId {
+    AGING_API                 = 0,
+    UNAGING_API               = 1,
+    AGING_EVENT               = 2,
+    UNAGING_EVENT             = 3,
+    AGING_COMPACT_INFO        = 4,
+    UNAGING_COMPACT_INFO      = 5,
+    AGING_ADDITIONAL_INFO     = 6,
+    UNAGING_ADDITIONAL_INFO   = 7
+};
+ 
+const std::vector<ModuleIdName> MSPROF_MODULE_REPORT_TABLE = {
+    {AGING_API,                 "aging.api",             RING_BUFF_CAPACITY},
+    {UNAGING_API,               "unaging.api",           RING_BUFF_CAPACITY},
+    {AGING_EVENT,               "aging.event",           RING_BUFF_CAPACITY},
+    {UNAGING_EVENT,             "unaging.event",         RING_BUFF_CAPACITY},
+    {AGING_COMPACT_INFO,        "aging.compact",         RING_BUFF_CAPACITY},
+    {UNAGING_COMPACT_INFO,      "unaging.compact",       RING_BUFF_CAPACITY},
+    {AGING_ADDITIONAL_INFO,     "aging.additional",      RING_BUFF_CAPACITY},
+    {UNAGING_ADDITIONAL_INFO,   "unaging.additional",    RING_BUFF_CAPACITY},
+};
+
 class ReceiveData {
 public:
     ReceiveData();

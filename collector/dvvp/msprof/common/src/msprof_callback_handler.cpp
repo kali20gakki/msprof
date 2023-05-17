@@ -10,7 +10,6 @@
 #include "prof_acl_mgr.h"
 #include "prof_reporter.h"
 #include "receive_data.h"
-#include "prof_common.h"
 #include "prof_api_common.h"
 #include "uploader_dumper.h"
 #include "transport/hash_data.h"
@@ -252,5 +251,16 @@ int SendAiCpuData(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> fileChunk
 {
     return MsprofCallbackHandler::reporters_[MSPROF_MODULE_DATA_PREPROCESS].SendData(fileChunk);
 }
+
+template <typename T>
+int MsprofCallbackHandler::ReportData(const T &data) const
+{
+    return PROFILING_SUCCESS;
+}
+ 
+template int MsprofCallbackHandler::ReportData(const MsprofApi &data) const;
+template int MsprofCallbackHandler::ReportData(const MsprofEvent &data) const;
+template int MsprofCallbackHandler::ReportData(const MsprofCompactInfo &data) const;
+template int MsprofCallbackHandler::ReportData(const MsprofAdditionalInfo &data) const;
 }  // namespace Engine
 }  // namespace Msprof

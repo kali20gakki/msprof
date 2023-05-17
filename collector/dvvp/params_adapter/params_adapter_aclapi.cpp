@@ -146,6 +146,10 @@ void ParamsAdapterAclApi::ProfTaskCfgToContainer(const ProfConfig * apiCfg,
         paramContainer_[INPUT_CFG_COM_HCCL] = MSVP_PROF_ON;
         setConfig_.insert(INPUT_CFG_COM_HCCL);
     }
+    if (dataTypeConfig & PROF_MSPROFTX) {
+        paramContainer_[INPUT_CFG_COM_MSPROFTX] = MSVP_PROF_ON;
+        setConfig_.insert(INPUT_CFG_COM_MSPROFTX);
+    }
 }
 
 void ParamsAdapterAclApi::ProfMetricsCfgToContainer(const ProfAicoreMetrics aicMetrics,
