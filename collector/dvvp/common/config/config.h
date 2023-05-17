@@ -63,6 +63,11 @@ const int MSVP_CLN_SENDER_POOL_THREAD_NUM = 2;
 
 const int STORAGE_LIMIT_DOWN_THD = 200; // 200MB
 
+const int MAX_CUSTOM_METRICS_LEN = 70;
+const int HEX_MODE = 16;
+const int DEC_MODE = 10;
+const std::string CUSTOM_METRICS_VALID_HEADER = "Custom:";
+
 const int MAX_ASCEND_INSTALL_INFO_FILE_SIZE = 1024; // 1024 Byte
 
 const int THOUSAND = 1000; // 1000 : 1k
