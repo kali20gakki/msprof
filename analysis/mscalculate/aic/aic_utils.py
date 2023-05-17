@@ -1,7 +1,9 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
+import logging
 
+from common_func.msprof_exception import ProfException
 from common_func.msvp_common import read_cpu_cfg
 from common_func.utils import Utils
 
@@ -36,6 +38,20 @@ class AicPmuUtils:
             return []
         return Utils.generator_to_list(AicPmuUtils.get_pmu_event_name(pmu_event)
                                        for pmu_event in aic_pmu_events.split(","))
+
+    @staticmethod
+    def get_custom_pmu_events(aic_pmu_events: str) -> list:
+        """
+        get pmu events
+        :param aic_pmu_events:
+        :return:
+        """
+        events_list = aic_pmu_events.split(",")
+        aicore_events_map = read_cpu_cfg("ai_core", "custom")
+        if set(events_list).issubset(set(aicore_events_map.keys())):
+            return list(map(lambda x: x.replace('0x', 'r'), events_list))
+        raise ProfException(ProfException.PROF_INVALID_CONFIG_ERROR,
+                            "invalid pmu event id settings, event id: {}".format(aic_pmu_events))
 
     @classmethod
     def remove_unused_column(cls: any, ai_core_profiling_events: list) -> list:
