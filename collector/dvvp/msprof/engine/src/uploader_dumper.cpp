@@ -76,13 +76,13 @@ int UploaderDumper::Start()
     if (iter != std::end(MSPROF_MODULE_ID_NAME_MAP)) {
         buffSize = iter->ringBufSize;
     }
+    ReceiveData::moduleName_ = module_;
     ret = ReceiveData::Init(buffSize);
     if (ret != PROFILING_SUCCESS) {
         MSPROF_LOGE("ReceiveData Init failed");
         MSPROF_INNER_ERROR("EK9999", "ReceiveData Init failed");
         return PROFILING_FAILED;
     }
-    ReceiveData::moduleName_ = module_;
     started_ = true;
     MSPROF_LOGI("start reporter success. module:%s, capacity:%llu", module_.c_str(), buffSize);
     return PROFILING_SUCCESS;

@@ -819,7 +819,7 @@ bool ParamValidation::CheckDataTagIsValid(const std::string &tag) const
         return false;
     }
     for (auto ch : tag) {
-        if (ch == '_') {
+        if (ch == '_' || ch == '.') {
             continue;
         } else if ((ch <= 'z' && ch >= 'a') || (ch <= 'Z' && ch >= 'A')) {
             continue;

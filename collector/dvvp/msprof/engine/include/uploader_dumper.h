@@ -33,29 +33,29 @@ public:
     * @param [in] rData: the data from user
     * @return : success return PROFILING_SUCCESS, failed return PROFIING_FAILED
     */
-    virtual int Report(CONST_REPORT_DATA_PTR rData);
+    int Report(CONST_REPORT_DATA_PTR rData) override;
 
     /**
     * @brief Start: create a TCP collection to PROFILING SERVER
     *               start a new thread to deal with data from user
     * @return : success return PROFILING_SUCCESS, failed return PROFIING_FAILED
     */
-    int Start();
+    int Start() override;
 
     /**
     * @brief Stop: stop the thread to deal with data
     *              disconnect the TCP to PROFILING SERVER
     */
-    int Stop();
+    int Stop() override;
 
     /**
     * @brief Flush: wait all datas to be send to remove host
     *               then send a FileChunkFlushReq data to remote host tell it data report finished
     * @return : success return PROFILING_SUCCESS, failed return PROFIING_FAILED
     */
-    int Flush();
+    int Flush() override;
 
-    uint32_t GetReportDataMaxLen();
+    uint32_t GetReportDataMaxLen() override;
 
     /**
     * @brief DumpModelLoadData: dump cached model load data
@@ -69,7 +69,7 @@ public:
     void DumpDynProfCachedMsg(const std::string &devId);
 
 protected:
-    virtual void WriteDone();
+    void WriteDone() override;
     /**
      * @brief Run: the thread function for deal with user data
      */
@@ -81,7 +81,7 @@ private:
     * @return : success return PROFILING_SUCCESS, failed return PROFIING_FAILED
     */
     virtual int Dump(std::vector<SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq>> &message);
-    virtual void TimedTask();
+    void TimedTask() override;
     void AddToUploader(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message);
     void SaveModelLoadData(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message);
     void SaveDynProfCachedMsg(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message);

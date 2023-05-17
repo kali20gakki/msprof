@@ -15,6 +15,8 @@ namespace Collector {
 namespace Dvvp {
 namespace Plugin {
 using ProfRegReporterCallbackFunc = std::function<int32_t(ProfReportHandle)>;              // profRegReporterCallback
+using ProfRegProfilerCallbachFunc = std::function<int32_t(ProfilerCallbackType,
+                                                          VOID_PTR, uint32_t)>;  // profRegProfilerCallback
 using ProfRegCtrlCallbackFunc = std::function<int32_t(ProfCtrlHandle)>;                    // profRegCtrlCallback
 using ProfRegDeviceStateCallbackFunc = std::function<int32_t(ProfSetDeviceHandle)>;   // profRegDeviceStateCallback
 using ProfGetDeviceIdByGeModelIdxFunc = std::function<int32_t(uint32_t, uint32_t *)>; // profGetDeviceIdByGeModelIdx
@@ -28,6 +30,9 @@ public:
 
     // profRegReporterCallback
     int32_t MsprofProfRegReporterCallback(ProfReportHandle reporter);
+
+    // profRegProfilerCallback
+    int32_t MsprofProfRegProfilerCallback(int32_t callbackType, VOID_PTR callback, uint32_t len);
 
     // profRegCtrlCallback
     int32_t MsprofProfRegCtrlCallback(ProfCtrlHandle handle);
@@ -52,6 +57,7 @@ private:
     static SHARED_PTR_ALIA<PluginHandle> pluginHandle_;
     PTHREAD_ONCE_T loadFlag_;
     ProfRegReporterCallbackFunc profRegReporterCallback_ = nullptr;
+    ProfRegProfilerCallbachFunc profRegProfilerCallback_ = nullptr;
     ProfRegCtrlCallbackFunc profRegCtrlCallback_ = nullptr;
     ProfRegDeviceStateCallbackFunc profRegDeviceStateCallback_ = nullptr;
     ProfGetDeviceIdByGeModelIdxFunc profGetDeviceIdByGeModelIdx_ = nullptr;

@@ -33,6 +33,17 @@ enum ProfCtrlCallbackType {
     PROF_CTRL_INIT_DYNA = 0xFF,           // start profiling for dynamic profiling
 };
 
+enum class ProfilerCallbackType {
+    PROFILE_CTRL_CALLBACK = 0,
+    PROFILE_DEVICES_STATE_CALLBACK,
+    PROFILE_REPORT_API_CALLBACK,
+    PROFILE_REPORT_EVENT_CALLBACK,
+    PROFILE_REPORT_COMPACT_INFO_CALLBACK,
+    PROFILE_REPORT_ADDITIONAL_INFO_CALLBACK,
+    PROFILE_REPORT_REG_TYPE_INFO_CALLBACK,
+    PROFILE_REPORT_GET_HASH_ID_CALLBACK,
+};
+
 struct ProfSetDevPara {
     uint32_t chipId;
     uint32_t deviceId;
@@ -58,10 +69,12 @@ using VOID_PTR = void *;
  */
 using ProfCommandHandle = int32_t (*)(uint32_t type, void *data, uint32_t len);
 using ProfReportHandle = int32_t (*)(uint32_t moduleId, uint32_t type, VOID_PTR data, uint32_t len);
+using ProfProfilerHandle = int32_t (*)(ProfilerCallbackType callbackType, VOID_PTR callback, uint32_t len);
 using ProfCtrlHandle = int32_t (*)(uint32_t type, VOID_PTR data, uint32_t len);
 using ProfSetDeviceHandle = int32_t (*)(VOID_PTR data, uint32_t len);
 
 MSVP_PROF_API int32_t profRegReporterCallback(ProfReportHandle reporter);
+MSVP_PROF_API int32_t profRegProfilerCallback(uint32_t callbackType, VOID_PTR callback, uint32_t len);
 MSVP_PROF_API int32_t profRegCtrlCallback(ProfCtrlHandle hanle);
 MSVP_PROF_API int32_t profRegDeviceStateCallback(ProfSetDeviceHandle hanle);
 MSVP_PROF_API int32_t profGetDeviceIdByGeModelIdx(const uint32_t modelIdx, uint32_t *deviceId);

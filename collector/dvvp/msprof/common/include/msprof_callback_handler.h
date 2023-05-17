@@ -11,6 +11,7 @@
 #include "data_dumper.h"
 #include "prof_callback.h"
 #include "utils/utils.h"
+#include "prof_common.h"
 
 namespace Msprof {
 namespace Engine {
@@ -25,6 +26,7 @@ public:
     void ForceFlush(const std::string &devId);
     void FlushDynProfCachedMsg(const std::string &devId);
     int SendData(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> fileChunk);
+    template <typename T> int ReportData(const T &data) const;
 
 public:
     static void InitReporters();

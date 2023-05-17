@@ -57,6 +57,8 @@ int32_t HashData::Uninit()
     hashDataKeyMap_.clear();
     hashIdKeyMap_.clear();
     hashMapMutex_.clear();
+    hashInfoMap_.clear();
+    hashIdMap_.clear();
     inited_ = false;
     MSPROF_LOGI("HashData uninitialize success");
     return PROFILING_SUCCESS;
@@ -125,6 +127,39 @@ std::string &HashData::GetHashData(const std::string &module, uint64_t hashId)
     } else {
         MSPROF_LOGW("HashData not find hashId:%llu, module:%s", hashId, module.c_str());
         return nullData;
+    }
+}
+
+uint64_t HashData::GenHashId(const std::string &hashInfo)
+{
+    std::lock_guard<std::mutex> lock(hashMutex_);
+    const auto iter = hashInfoMap_.find(hashInfo);
+    if (iter != hashInfoMap_.end()) {
+        return iter->second;
+    } else {
+        uint64_t hashId = DoubleHash(hashInfo);
+        hashInfoMap_[hashInfo] = hashId;
+        if (hashIdMap_.find(hashId) != hashIdMap_.end()) {
+            MSPROF_LOGW("HashData GenHashId conflict, hashId:%llu oldStr:%s newStr:%s",
+                        hashId, hashIdMap_[hashId].c_str(), hashInfo.c_str());
+        } else {
+            hashIdMap_[hashId] = hashInfo;
+        }
+        MSPROF_LOGD("HashData GenHashId id:%llu data:%s", hashId, hashInfo.c_str());
+        return hashId;
+    }
+}
+
+std::string &HashData::GetHashInfo(uint64_t hashId)
+{
+    static std::string nullInfo;
+    std::lock_guard<std::mutex> lock(hashMutex_);
+    const auto iter = hashIdMap_.find(hashId);
+    if (iter != hashIdMap_.end()) {
+        return iter->second;
+    } else {
+        MSPROF_LOGW("HashData not find hashId:%llu", hashId);
+        return nullInfo;
     }
 }
 
