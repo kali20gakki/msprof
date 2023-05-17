@@ -79,6 +79,8 @@ def _get_cpu_metrics(sections: str, cpu_cfg: any) -> dict:
         return OrderedDict(cpu_cfg.items("formula"))
     if sections == 'formula_l2':
         return OrderedDict(cpu_cfg.items("formula_l2"))
+    if sections == 'custom':
+        return OrderedDict(cpu_cfg.items("custom"))
     return {}
 
 

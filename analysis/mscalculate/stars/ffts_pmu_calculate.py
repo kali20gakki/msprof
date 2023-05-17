@@ -31,14 +31,15 @@ from mscalculate.aic.aic_utils import AicPmuUtils
 from mscalculate.aic.pmu_calculator import PmuCalculator
 from mscalculate.calculate_ai_core_data import CalculateAiCoreData
 from msmodel.aic.aic_pmu_model import AicPmuModel
+from msmodel.freq.freq_parser_model import FreqParserModel
 from msmodel.iter_rec.iter_rec_model import HwtsIterModel
 from msmodel.stars.ffts_pmu_model import FftsPmuModel
-from msmodel.freq.freq_parser_model import FreqParserModel
 from msparser.data_struct_size_constant import StructFmt
 from profiling_bean.db_dto.step_trace_dto import IterationRange
 from profiling_bean.prof_enum.data_tag import DataTag
 from profiling_bean.stars.ffts_block_pmu import FftsBlockPmuBean
 from profiling_bean.stars.ffts_pmu import FftsPmuBean
+from viewer.calculate_rts_data import judge_custom_pmu_scene
 
 
 class FftsPmuCalculate(PmuCalculator, MsMultiProcess):
@@ -60,9 +61,15 @@ class FftsPmuCalculate(PmuCalculator, MsMultiProcess):
         self._file_list = file_list.get(DataTag.FFTS_PMU, [])
         self._file_list.sort(key=lambda x: int(x.split("_")[-1]))
         self._wrong_func_type_count = 0
-        self._aic_pmu_events = AicPmuUtils.get_pmu_events(self._sample_json.get(StrConstant.AI_CORE_PMU_EVENTS))
-        self._aiv_pmu_events = AicPmuUtils.get_pmu_events(
-            self._sample_json.get(StrConstant.AI_VECTOR_CORE_PMU_EVENTS))
+        if judge_custom_pmu_scene(self._sample_json):
+            self._aic_pmu_events = AicPmuUtils.get_custom_pmu_events(
+                self._sample_json.get(StrConstant.AI_CORE_PMU_EVENTS))
+            self._aiv_pmu_events = AicPmuUtils.get_custom_pmu_events(
+                self._sample_json.get(StrConstant.AI_VECTOR_CORE_PMU_EVENTS))
+        else:
+            self._aic_pmu_events = AicPmuUtils.get_pmu_events(self._sample_json.get(StrConstant.AI_CORE_PMU_EVENTS))
+            self._aiv_pmu_events = AicPmuUtils.get_pmu_events(
+                self._sample_json.get(StrConstant.AI_VECTOR_CORE_PMU_EVENTS))
         self._is_mix_needed = ChipManager().is_chip_v4()
         self.block_dict = {}
         self.mix_pmu_dict = {}
@@ -180,7 +187,10 @@ class FftsPmuCalculate(PmuCalculator, MsMultiProcess):
         for data in self._data_list.get(StrConstant.CONTEXT_PMU_TYPE, []):
             task_type = 0 if data.is_aic_data() else 1
             pmu_list = {}
-            pmu_events = AicPmuUtils.get_pmu_events(self._sample_json.get('ai_core_profiling_events'))
+            if judge_custom_pmu_scene(self._sample_json):
+                pmu_events = AicPmuUtils.get_custom_pmu_events(self._sample_json.get('ai_core_profiling_events'))
+            else:
+                pmu_events = AicPmuUtils.get_pmu_events(self._sample_json.get('ai_core_profiling_events'))
             total_time = self.calculate_total_time(data.total_cycle, data)
             aic_calculator = CalculateAiCoreData(self._project_path)
             _, pmu_list = aic_calculator.compute_ai_core_data(

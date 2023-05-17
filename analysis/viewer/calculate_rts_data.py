@@ -265,7 +265,7 @@ def calculate_time(timeline_data: list, index: int) -> int:
     return InfoConfReader().time_from_syscnt(timeline_data[index][-2]) if index >= 0 else 0
 
 
-def check_aicore_events(events: list) -> None:
+def check_aicore_events(events: list, is_custom: bool = False) -> None:
     """
     check aicore events
     """
@@ -274,6 +274,8 @@ def check_aicore_events(events: list) -> None:
         call_sys_exit(NumberConstant.ERROR)
     ai_core_config = config_file_obj(file_name='ai_core')
     formula_key = Utils.generator_to_list(item[0] for item in ai_core_config.items('events'))
+    if is_custom:
+        formula_key = Utils.generator_to_list(item[0] for item in ai_core_config.items('custom'))
     for event in events:
         if event not in formula_key:
             error(CalculateRtsDataConst.FILE_NAME, 'Invalid event {} . '.format(event))
@@ -285,7 +287,7 @@ def create_ai_event_tables(sample_config: dict, curs: any, device: str) -> None:
     """
     logging.info('start create ai core events tables')
     ai_core_events = sample_config.get("ai_core_profiling_events", "").split(",")
-    check_aicore_events(ai_core_events)
+    check_aicore_events(ai_core_events, is_custom=judge_custom_pmu_scene(sample_config))
     pmu_event_lst = Utils.generator_to_list(pmu_event.replace('0x', 'r') + " numeric" for pmu_event in ai_core_events)
     sql = "CREATE TABLE IF NOT EXISTS EventCount (" + \
           ",".join(pmu_event_lst) + \
@@ -310,6 +312,14 @@ def create_ai_event_tables(sample_config: dict, curs: any, device: str) -> None:
           "device_id from EventCounter where device_id = ?"
     curs.execute(sql, (device,))
     logging.info('create event tables finished')
+
+
+def judge_custom_pmu_scene(sample_config: dict, metrics_type: str = "ai_core_metrics") -> bool:
+    """
+    Check whether the current PMU setting is customized.
+    """
+    metrics = sample_config.get(metrics_type)
+    return metrics.startswith("Custom") if metrics else False
 
 
 def _get_pmu_data(res: list, col_name_list: list, device: str, curs: any) -> None:
@@ -432,6 +442,9 @@ def get_metrics_from_sample_config(project_path: str,
     """
     sample_config = generate_config(PathManager.get_sample_json_path(project_path))
     metrics = ['total_time(ms)', 'total_cycles']
+    if judge_custom_pmu_scene(sample_config, metrics_type=metrics_type):
+        metrics.extend(sample_config.get('ai_core_profiling_events').replace('0x', 'r').split(','))
+        return metrics
     if sample_config.get(metrics_type) not in Constant.AICORE_METRICS_LIST:
         return []
     sample_metrics = Constant.AICORE_METRICS_LIST.get(sample_config.get(metrics_type)).split(",")
@@ -528,7 +541,7 @@ def sql_insert_metric_summary_table(metrics: list, freq: float, have_step_info: 
     metrics_res = []
     for metric in metrics:
         replaced_metric = metric.replace("(GB/s)", "(gb/s)")
-        replaced_field = field_dict.get(replaced_metric, '0').replace("freq", str(freq))
+        replaced_field = field_dict.get(replaced_metric, replaced_metric).replace("freq", str(freq))
         metrics_res.append((metric, replaced_field))
     field_dict = OrderedDict(metrics_res)
     for field in field_dict:

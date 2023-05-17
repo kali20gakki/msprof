@@ -9,7 +9,6 @@ import os
 from analyzer.scene_base.profiling_scene import ProfilingScene
 from common_func.config_mgr import ConfigMgr
 from common_func.db_name_constant import DBNameConstant
-from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.path_manager import PathManager
@@ -26,6 +25,7 @@ from msmodel.iter_rec.iter_rec_model import HwtsIterModel
 from profiling_bean.db_dto.step_trace_dto import IterationRange
 from profiling_bean.prof_enum.data_tag import DataTag
 from profiling_bean.struct_info.aic_pmu import AicPmuBean
+from viewer.calculate_rts_data import judge_custom_pmu_scene
 
 
 class AicCalculator(PmuCalculator, MsMultiProcess):
@@ -202,7 +202,10 @@ class AicCalculator(PmuCalculator, MsMultiProcess):
                 self._parse(_offset_calculator.pre_process(_aic_reader, os.path.getsize(_file)))
 
     def _parse(self: any, all_log_bytes: bytes) -> None:
-        aic_pmu_events = AicPmuUtils.get_pmu_events(self._sample_json.get('ai_core_profiling_events'))
+        if judge_custom_pmu_scene(self._sample_json):
+            aic_pmu_events = AicPmuUtils.get_custom_pmu_events(self._sample_json.get("ai_core_profiling_events"))
+        else:
+            aic_pmu_events = AicPmuUtils.get_pmu_events(self._sample_json.get("ai_core_profiling_events"))
         for log_data in Utils.chunks(all_log_bytes, self.AICORE_LOG_SIZE):
             _aic_pmu_log = AicPmuBean.decode(log_data)
             total_time = self.calculate_total_time(_aic_pmu_log)
