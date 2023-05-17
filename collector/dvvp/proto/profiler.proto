@@ -242,6 +242,7 @@ message CycleToTimeInfo {
 
 message InfoMain {
     string jobInfo = 1;
+    string version = 2;
     string mac = 3;
     string OS = 4;
     uint32 cpuCores = 5;

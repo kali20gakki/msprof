@@ -464,6 +464,7 @@ int InfoJson::AddOtherInfo(SHARED_PTR_ALIA<InfoMain> infoMain)
     }
     infoMain->set_mac(mac);
     SetPlatFormVersion(infoMain);
+    SetVersionInfo(infoMain);
     return PROFILING_SUCCESS;
 }
 
@@ -503,6 +504,11 @@ void InfoJson::SetPlatFormVersion(SHARED_PTR_ALIA<InfoMain> infoMain)
 {
     std::string chipId = Analysis::Dvvp::Common::Config::ConfigManager::instance()->GetChipIdStr();
     infoMain->set_platform_version(chipId);
+}
+
+void InfoJson::SetVersionInfo(SHARED_PTR_ALIA<InfoMain> infoMain) const
+{
+    infoMain->set_version(PROF_VERSION_INFO);
 }
 
 InfoJson::~InfoJson()

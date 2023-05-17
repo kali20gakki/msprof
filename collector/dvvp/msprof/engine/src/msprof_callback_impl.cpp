@@ -26,6 +26,7 @@ using namespace Analysis::Dvvp::Common::Platform;
 using namespace analysis::dvvp::host;
 using namespace Collector::Dvvp::Plugin;
 using namespace Collector::Dvvp::DynProf;
+using namespace Msprof::Engine;
 
 bool CheckMsprofBin(std::string &envValue)
 {
@@ -208,6 +209,36 @@ int32_t MsprofReporterCallbackImpl(uint32_t moduleId, uint32_t type, VOID_PTR da
     return ACL_ERROR_PROFILING_FAILURE;
 }
 
+int32_t MsprofApiReporterCallbackImpl(uint32_t agingFlag, const MsprofApi &api)
+{
+    return MSPROF_ERROR_NONE;
+}
+ 
+int32_t MsprofEventReporterCallbackImpl(uint32_t agingFlag, const MsprofEvent &event)
+{
+    return MSPROF_ERROR_NONE;
+}
+ 
+int32_t MsprofCompactInfoReporterCallbackImpl(uint32_t agingFlag, CONST_VOID_PTR data, uint32_t length)
+{
+    return MSPROF_ERROR_NONE;
+}
+ 
+int32_t MsprofAddiInfoReporterCallbackImpl(uint32_t agingFlag, CONST_VOID_PTR data, uint32_t length)
+{
+    return MSPROF_ERROR_NONE;
+}
+ 
+int32_t MsprofRegReportTypeInfoImpl(uint16_t level, uint32_t typeId, const std::string &typeName)
+{
+    return MSPROF_ERROR_NONE;
+}
+ 
+int32_t MsprofGetHashIdImpl(const std::string &hashInfo)
+{
+    return MSPROF_ERROR_NONE;
+}
+
 int32_t RegisterReporterCallback()
 {
     if (Msprof::Engine::MsprofCallbackHandler::reporters_.empty()) {
@@ -221,6 +252,12 @@ int32_t RegisterReporterCallback()
         MSPROF_CALL_ERROR("EK9999", "Failed to register reporter callback");
         return ret;
     }
+    return RegisterNewReporterCallback();
+}
+
+int32_t RegisterNewReporterCallback()
+{
+    MSPROF_LOGI("Call profRegProfilerCallback");
     return PROFILING_SUCCESS;
 }
 

@@ -88,17 +88,6 @@ enum MsprofAclApiType {
     MSPROF_ACL_API_TYPE_RUNTIME,
     MSPROF_ACL_API_TYPE_OTHERS,
 };
-struct MsprofAclProfData {
-    uint16_t magicNumber = MSPROF_DATA_HEAD_MAGIC_NUM;
-    uint16_t dataTag = MSPROF_ACL_DATA_TAG;
-    uint32_t apiType;       // enum MsprofAclApiType
-    uint64_t beginTime;
-    uint64_t endTime;
-    uint32_t processId;
-    uint32_t threadId;
-    char apiName[MSPROF_ACL_API_NAME_LEN];
-    uint8_t  reserve[MSPROF_ACL_DATA_RESERVE_BYTES];
-};
 
 /**
  * @brief struct of data reported by GE
@@ -112,23 +101,6 @@ struct MsprofGeProfModelLoadData {
     uint64_t startTime;
     uint64_t endTime;
     uint8_t  reserve[MSPROF_GE_MODELLOAD_DATA_RESERVE_BYTES];
-};
-
-#define MSPROF_GE_FUSION_DATA_RESERVE_BYTES 8
-#define MSPROF_GE_FUSION_OP_NUM 8
-struct MsprofGeProfFusionData {
-    uint16_t magicNumber = MSPROF_DATA_HEAD_MAGIC_NUM;
-    uint16_t dataTag = MSPROF_GE_DATA_TAG_FUSION;
-    uint32_t modelId;
-    MsprofMixData fusionName;
-    uint64_t inputMemSize;
-    uint64_t outputMemSize;
-    uint64_t weightMemSize;
-    uint64_t workspaceMemSize;
-    uint64_t totalMemSize;
-    uint64_t fusionOpNum;
-    uint64_t fusionOp[MSPROF_GE_FUSION_OP_NUM];
-    uint8_t  reserve[MSPROF_GE_FUSION_DATA_RESERVE_BYTES];
 };
 
 #define MSPROF_GE_INFER_DATA_RESERVE_BYTES 64
@@ -251,6 +223,14 @@ struct MsprofGeProfHostSchData {
     uint64_t startTime;     // record in start event
     uint64_t endTime;       // record in end event
     uint8_t  reserve[MSPROF_GE_HOST_SCH_DATA_RESERVE_BYTES];
+};
+
+struct MsprofNodeBasicInfo {
+    uint64_t opName;
+    uint32_t taskType;
+    uint64_t opType;
+    uint32_t blockDim;
+    uint32_t opFlag;
 };
 
 /**
@@ -437,6 +417,37 @@ struct MsprofHcclProfData {
         MsprofHcclProfFlag flag;
     } args;
 };
+
+struct MsprofHcclInfo {
+    uint64_t itemId;
+    uint64_t cclTag;
+    uint64_t groupName;
+    uint32_t localRank;
+    uint32_t remoteRank;
+    uint32_t rankSize;
+    uint32_t workFlowMode;
+    uint32_t planeID;
+    uint32_t reserve1;
+    uint64_t notifyID;
+    uint32_t stage;
+    uint32_t role; // role {0: dst, 1:src}
+    double durationEstimated;
+    uint64_t srcAddr;
+    uint64_t dstAddr;
+    uint64_t dataSize; // bytes
+    uint32_t opType; // {0: sum, 1: mul, 2: max, 3: min}
+    uint32_t dataType; // data type {0: INT8, 1: INT16, 2: INT32, 3: FP16, 4:FP32, 5:INT64, 6:UINT64}
+    uint32_t linkType; // link type {0: 'OnChip', 1: 'HCCS', 2: 'PCIe', 3: 'RoCE'}
+    uint32_t transportType; // transport type {0: SDMA, 1: RDMA, 2:LOCAL}
+    uint32_t rdmaType; // RDMA type {0: RDMASendNotify, 1:RDMASendPayload}
+    uint32_t reserve2;
+};
+ 
+const uint16_t MSPROF_MULTI_THREAD_MAX_NUM = 25;
+struct MsprofMultiThread {
+    uint32_t threadNum;
+    uint32_t threadId[MSPROF_MULTI_THREAD_MAX_NUM];
+};
 #pragma pack()
 
 /**
@@ -465,6 +476,108 @@ struct MsprofStampInfo {
     int32_t messageType;
     char message[128];
     char callStack[CALLSTACK_MAX_LENGTH + 1];
+};
+
+/* Msprof report level */
+const uint16_t MSPROF_REPORT_PYTORCH_LEVEL = 30000;
+const uint16_t MSPROF_REPORT_PTA_LEVEL = 25000;
+const uint16_t MSPROF_REPORT_ACL_LEVEL = 20000;
+const uint16_t MSPROF_REPORT_MODEL_LEVEL = 15000;
+const uint16_t MSPROF_REPORT_NODE_LEVEL = 10000;
+const uint16_t MSPROF_REPORT_HCCL_NODE_LEVEL = 5500;
+const uint16_t MSPROF_REPORT_RUNTIME_LEVEL = 5000;
+ 
+/* Msprof report type of pytorch(30000) level(proftx), offset: 0 */
+const uint32_t MSPROF_REPORT_PYTORCH_PROFTX_TYPE          = 0;
+const uint32_t MSPROF_REPORT_PYTORCH_CATEGORY_DIC_TYPE    = 1;
+const uint32_t MSPROF_REPORT_PYTORCH_CALLSTACK_TYPE       = 2;
+const uint32_t MSPROF_REPORT_PYTORCH_CANN_OP_TYPE         = 3;
+const uint32_t MSPROF_REPORT_PYTORCH_TORCH_OP_TYPE        = 4;
+const uint32_t MSPROF_REPORT_PYTORCH_PIPELINE_TYPE        = 5;
+ 
+/* Msprof report type of acl(20000) level(acl), offset: 0x020000 */
+const uint32_t MSPROF_REPORT_ACL_OP_BASE_TYPE            = 0x010000;
+const uint32_t MSPROF_REPORT_ACL_MODEL_BASE_TYPE         = 0x020000;
+const uint32_t MSPROF_REPORT_ACL_RUNTIME_BASE_TYPE       = 0x030000;
+const uint32_t MSPROF_REPORT_ACL_OTHERS_BASE_TYPE        = 0x040000;
+ 
+/* Msprof report type of acl(20000) level(host api hccl), offset: 0x070000 */
+const uint32_t MSPROF_REPORT_ACL_HOST_HCCL_BASE_TYPE     = 0x070000;
+ 
+/* Msprof report type of model(15000) level, offset: 0x000000 */
+const uint32_t MSPROF_REPORT_MODEL_GRAPH_ID_MAP_TYPE    = 0;  /* type info: graph_id_map */
+ 
+/* Msprof report type of node(10000) level, offset: 0x000000 */
+const uint32_t MSPROF_REPORT_NODE_BASIC_INFO_TYPE       = 0;  /* type info: node_basic_info */
+const uint32_t MSPROF_REPORT_NODE_TENSOR_INFO_TYPE      = 1;  /* type info: tensor_info */
+const uint32_t MSPROF_REPORT_NODE_FUSION_OP_INFO_TYPE   = 2;  /* type info: funsion_op_info */
+const uint32_t MSPROF_REPORT_NODE_CONTEXT_ID_INFO_TYPE  = 4;  /* type info: context_id_info */
+const uint32_t MSPROF_REPORT_NODE_LAUNCH_TYPE           = 5;  /* type info: launch */
+const uint32_t MSPROF_REPORT_NODE_LAUNCH_GE_TYPE        = 11;
+ 
+/* Msprof report type of node(10000) level(ge api), offset: 0x010000 */
+const uint32_t MSPROF_REPORT_NODE_GE_API_BASE_TYPE      = 0x010000;
+ 
+/* Msprof report type of node(10000) level(hccl api), offset: 0x020000 */
+const uint32_t MSPROF_REPORT_NODE_HCCL_BASE_TYPE        = 0x020000;
+ 
+/* Msprof report type of hccl(5500) level(op api), offset: 0x010000 */
+const uint32_t MSPROF_REPORT_HCCL_MASTER_TYPE       = 0x010001;
+const uint32_t MSPROF_REPORT_HCCL_SLAVE_TYPE        = 0x010002;
+ 
+struct MsprofApi { // for MsprofReportApi
+    uint16_t magicNumber = MSPROF_DATA_HEAD_MAGIC_NUM;
+    uint16_t level;
+    uint32_t type;
+    uint32_t threadId;
+    uint32_t reserve;
+    uint64_t beginTime;
+    uint64_t endTime;
+    uint64_t itemId;
+};
+ 
+struct MsprofEvent {  // for MsprofReportEvent
+    uint16_t magicNumber = MSPROF_DATA_HEAD_MAGIC_NUM;
+    uint16_t level;
+    uint32_t type;
+    uint32_t threadId;
+    uint32_t requestId; // 0xFFFF means single event
+    uint64_t timeStamp;
+    uint64_t reserve;
+    uint64_t itemId;
+};
+ 
+struct MsprofRuntimeTrack {  // for MsprofReportCompactInfo buffer data
+    uint16_t deviceId;
+    uint16_t streamId;
+    uint32_t taskId;
+    uint64_t taskType;
+};
+ 
+const uint16_t MSPROF_COMPACT_INFO_DATA_LENGTH = 40;
+struct MsprofCompactInfo {  // for MsprofReportCompactInfo buffer data
+    uint16_t magicNumber = MSPROF_DATA_HEAD_MAGIC_NUM;
+    uint16_t level;
+    uint32_t type;
+    uint32_t threadId;
+    uint32_t dataLen;
+    uint64_t timeStamp;
+    union {
+        uint8_t info[MSPROF_COMPACT_INFO_DATA_LENGTH];
+        MsprofRuntimeTrack runtimeTrack;
+        MsprofNodeBasicInfo nodeBasicInfo;
+    } data;
+};
+ 
+const uint16_t MSPROF_ADDTIONAL_INFO_DATA_LENGTH = 232;
+struct MsprofAdditionalInfo {  // for MsprofReportAdditionalInfo buffer data
+    uint16_t magicNumber = MSPROF_DATA_HEAD_MAGIC_NUM;
+    uint16_t level;
+    uint32_t type;
+    uint32_t threadId;
+    uint32_t dataLen;
+    uint64_t timeStamp;
+    uint8_t  data[MSPROF_ADDTIONAL_INFO_DATA_LENGTH];
 };
 
 #ifdef __cplusplus

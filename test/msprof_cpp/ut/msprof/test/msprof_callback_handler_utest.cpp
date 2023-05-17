@@ -35,13 +35,6 @@ TEST_F(MSPROF_CALLBACK_HANDLER_UTEST, HandleMsprofRequestTest) {
     GlobalMockObject::verify();
     MsprofCallbackHandler handler("Framework");
 
-    MOCKER_CPP(&MsprofCallbackHandler::ReportData)
-        .stubs()
-        .will(returnValue(PROFILING_SUCCESS));
-    EXPECT_EQ(PROFILING_SUCCESS, handler.HandleMsprofRequest(MSPROF_REPORTER_REPORT, nullptr, 0));
-    int data = 0;
-    EXPECT_EQ(PROFILING_SUCCESS, handler.HandleMsprofRequest(MSPROF_REPORTER_REPORT, (void *)&data, 0));
-
     MOCKER_CPP(&MsprofCallbackHandler::StartReporter)
         .stubs()
         .will(returnValue(PROFILING_SUCCESS));

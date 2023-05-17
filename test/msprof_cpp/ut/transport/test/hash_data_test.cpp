@@ -118,3 +118,20 @@ TEST_F(COMMON_HASH_DATA_TEST, SaveHashData) {
     HashData::instance()->SaveHashData(-1);
     HashData::instance()->Uninit();
 }
+
+TEST_F(COMMON_HASH_DATA_TEST, GetHashInfo)
+{
+    GlobalMockObject::verify();
+    EXPECT_EQ("", HashData::instance()->GetHashInfo(0));
+    
+    uint64_t hashId = HashData::instance()->GenHashId("Test");
+    EXPECT_EQ("Test", HashData::instance()->GetHashInfo(hashId));
+}
+ 
+TEST_F(COMMON_HASH_DATA_TEST, GenHashId_NewDataStruct)
+{
+    GlobalMockObject::verify();
+    uint64_t hashId1 = HashData::instance()->GenHashId("Test");
+    uint64_t hashId2 = HashData::instance()->GenHashId("Test");
+    EXPECT_EQ(hashId1, hashId2);
+}
