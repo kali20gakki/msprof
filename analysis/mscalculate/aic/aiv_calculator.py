@@ -9,6 +9,7 @@ from mscalculate.aic.aic_utils import AicPmuUtils
 from msmodel.aic.aiv_pmu_model import AivPmuModel
 from profiling_bean.prof_enum.data_tag import DataTag
 from profiling_bean.struct_info.aiv_pmu import AivPmuBean
+from viewer.calculate_rts_data import judge_custom_pmu_scene
 
 
 class AivCalculator(AicCalculator, MsMultiProcess):
@@ -53,8 +54,12 @@ class AivCalculator(AicCalculator, MsMultiProcess):
             self.save()
 
     def _parse(self: any, all_log_bytes: bytes) -> None:
-        aic_pmu_events = AicPmuUtils.get_pmu_events(
-            self._sample_json.get('aiv_profiling_events'))
+        if judge_custom_pmu_scene(self.sample_config, metrics_type='aiv_metrics'):
+            aic_pmu_events = AicPmuUtils.get_custom_pmu_events(
+                self._sample_json.get('aiv_profiling_events'))
+        else:
+            aic_pmu_events = AicPmuUtils.get_pmu_events(
+                self._sample_json.get('aiv_profiling_events'))
         for log_data in Utils.chunks(all_log_bytes, self.AICORE_LOG_SIZE):
             _aic_pmu_log = AivPmuBean.decode(log_data)
             total_time = self.calculate_total_time(_aic_pmu_log, data_type='aiv')

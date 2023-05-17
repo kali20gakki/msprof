@@ -21,11 +21,13 @@ class TestAiCoreSampleModel(unittest.TestCase):
         db_manager = DBManager()
         res = db_manager.create_table('aicore.db')
         with mock.patch(NAMESPACE + '.PathManager.get_db_path', return_value=None), \
+                mock.patch(NAMESPACE + '.ConfigMgr.read_sample_config', return_value={}),\
                 mock.patch(NAMESPACE + '.DBManager.create_connect_db', return_value=(None, None)):
             check = AiCoreSampleModel('test', 'aicore.db', ['EventCount'], 'ai_core_metrics')
             ret = check.init()
         self.assertFalse(ret)
         with mock.patch(NAMESPACE + '.PathManager.get_db_path', return_value=None), \
+                mock.patch(NAMESPACE + '.ConfigMgr.read_sample_config', return_value={}), \
                 mock.patch(NAMESPACE + '.DBManager.create_connect_db', return_value=res), \
                 mock.patch(NAMESPACE + '.BaseModel.create_table'):
             check = AiCoreSampleModel('test', 'aicore.db', ['EventCount'], 'ai_core_metrics')
@@ -39,10 +41,12 @@ class TestAiCoreSampleModel(unittest.TestCase):
               "timestamp integer, coreid integer, task_cyc integer, event1 integer, event2 integer," \
               " event3 integer, event4 integer)"
 
-        with DBOpen("aicore.db") as db_open:
+        with mock.patch(NAMESPACE + '.ConfigMgr.read_sample_config', return_value={}),\
+                DBOpen("aicore.db") as db_open:
             db_open.create_table(sql)
             with mock.patch(NAMESPACE + '.DBManager.sql_create_general_table',
                             return_value=None), \
+                    mock.patch(NAMESPACE + '.ConfigMgr.read_sample_config', return_value={}), \
                     mock.patch(NAMESPACE + '.logging.error'), \
                     mock.patch(NAMESPACE + '.error'), \
                     pytest.raises(ProfException) as err:
@@ -75,10 +79,12 @@ class TestAiCoreSampleModel(unittest.TestCase):
         res = db_manager.create_table("aicore.db", create_metric_sql, insert_metric_sql, metric_data)
         freq = 1150000000
         metric_key = 'test'
-        check = AiCoreSampleModel('test', 'aicore.db', ['EventCount'], 'ai_core_metrics')
-        result = check.insert_metric_summary_table(freq, metric_key)
-        self.assertEqual(result, None)
-        with mock.patch(NAMESPACE + '.logging.info'), \
+        with mock.patch(NAMESPACE + '.ConfigMgr.read_sample_config', return_value={}):
+            check = AiCoreSampleModel('test', 'aicore.db', ['EventCount'], 'ai_core_metrics')
+            result = check.insert_metric_summary_table(freq, metric_key)
+            self.assertEqual(result, None)
+        with mock.patch(NAMESPACE + '.ConfigMgr.read_sample_config', return_value={}), \
+                mock.patch(NAMESPACE + '.logging.info'), \
                 mock.patch(NAMESPACE + '.AiCoreSampleModel.sql_insert_metric_summary_table',
                            return_value=sql):
             check = AiCoreSampleModel('test', 'aicore.db', ['EventCount'], 'ai_core_metrics')
@@ -87,7 +93,8 @@ class TestAiCoreSampleModel(unittest.TestCase):
             check.insert_metric_summary_table(freq, 'ArithmeticUtilization')
         res[0].commit()
         db_manager.destroy(res)
-        with mock.patch(NAMESPACE + '.AiCoreSampleModel._get_metrics', side_effect=OSError), \
+        with mock.patch(NAMESPACE + '.ConfigMgr.read_sample_config', return_value={}),\
+                mock.patch(NAMESPACE + '.AiCoreSampleModel._get_metrics', side_effect=OSError), \
                 mock.patch(NAMESPACE + '.logging.error'), \
                 mock.patch(NAMESPACE + '.error'):
             check = AiCoreSampleModel('test', 'aicore.db', ['EventCount'], 'ai_core_metrics')
@@ -101,11 +108,13 @@ class TestAiCoreSampleModel(unittest.TestCase):
         data = ((1, 1),)
         db_manager = DBManager()
         res = db_manager.create_table("aicore.db", create_sql, insert_sql, data)
-        with mock.patch(NAMESPACE + '.read_cpu_cfg', return_value=False):
+        with mock.patch(NAMESPACE + '.ConfigMgr.read_sample_config', return_value={}), \
+                mock.patch(NAMESPACE + '.read_cpu_cfg', return_value=False):
             check = AiCoreSampleModel('test', 'aicore.db', ['EventCount'], 'ai_core_metrics')
             result = check.insert_metric_value()
         self.assertEqual(result, 1)
-        with mock.patch(NAMESPACE + '.read_cpu_cfg', return_value=metrics_config):
+        with mock.patch(NAMESPACE + '.ConfigMgr.read_sample_config', return_value={}),\
+                mock.patch(NAMESPACE + '.read_cpu_cfg', return_value=metrics_config):
             check = AiCoreSampleModel('test', 'aicore.db', ['EventCount'], 'ai_core_metrics')
             check.conn = res[0]
             check.cur = res[1]
@@ -122,14 +131,15 @@ class TestAiCoreSampleModel(unittest.TestCase):
               'cast(1.0*SUM(r49)/SUM(task_cyc) as decimal(8,2)),' \
               'cast(1.0*SUM(r4a)/SUM(task_cyc) as decimal(8,2)) ' \
               'FROM EventCount where coreid = ?'
-        with mock.patch(NAMESPACE + '.CalculateAiCoreData.add_fops_header'):
+        with mock.patch(NAMESPACE + '.ConfigMgr.read_sample_config', return_value={}), \
+                mock.patch(NAMESPACE + '.CalculateAiCoreData.add_fops_header'):
             check = AiCoreSampleModel('test', 'aicore.db', ['EventCount'], 'ai_core_metrics')
             result = check.sql_insert_metric_summary_table(metrics, freq)
         self.assertEqual(result, sql)
 
     def test_get_ai_core_event_chunk(self):
         event = [1, 1, 1, 1, 1, 1, 1, 1]
-        with mock.patch(NAMESPACE + '.check_aicore_events'):
+        with mock.patch(NAMESPACE + '.ConfigMgr.read_sample_config', return_value={}):
             check = AiCoreSampleModel('test', 'aicore.db', ['EventCount'], 'ai_core_metrics')
             result = check.get_ai_core_event_chunk(event)
         self.assertEqual(result, [[1, 1, 1, 1, 1, 1, 1, 1]])
@@ -138,7 +148,8 @@ class TestAiCoreSampleModel(unittest.TestCase):
         sql = "CREATE TABLE IF NOT EXISTS AICoreOriginalData(mode integer, replayid integer," \
               "timestamp integer, coreid integer, task_cyc integer, event1 integer, event2 integer," \
               " event3 integer, event4 integer)"
-        with DBOpen('aicore.db') as db_open:
+        with mock.patch(NAMESPACE + '.ConfigMgr.read_sample_config', return_value={}), \
+                DBOpen('aicore.db') as db_open:
             db_open.create_table(sql)
             InfoJsonReaderManager(info_json=InfoJson(devices='0')).process()
             check = AiCoreSampleModel('test', 'aicore.db', ['AICoreOriginalData'], 'ai_core_metrics')
@@ -147,8 +158,13 @@ class TestAiCoreSampleModel(unittest.TestCase):
 
     def test_clear(self):
         with mock.patch(NAMESPACE + '.PathManager.get_db_path'), \
+                mock.patch(NAMESPACE + '.ConfigMgr.read_sample_config', return_value={}), \
                 mock.patch(NAMESPACE + '.DBManager.check_tables_in_db', return_value=True), \
                 mock.patch(NAMESPACE + '.DBManager.drop_table'):
             InfoConfReader()._info_json = {'devices': '0'}
             check = AiCoreSampleModel('test', 'nic.db', ['NicOriginalData'], 'ai_core_metrics')
             check.clear()
+
+
+if __name__ == '__main__':
+    unittest.main()

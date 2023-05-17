@@ -22,6 +22,7 @@ from msmodel.aic.ai_core_sample_model import AiCoreSampleModel
 from msparser.data_struct_size_constant import StructFmt
 from profiling_bean.prof_enum.data_tag import DataTag
 from profiling_bean.struct_info.aicore_sample import AicoreSample
+from viewer.calculate_rts_data import check_aicore_events, judge_custom_pmu_scene
 
 
 class ParsingCoreSampleData(MsMultiProcess):
@@ -86,6 +87,8 @@ class ParsingCoreSampleData(MsMultiProcess):
         """
         self.model = AiCoreSampleModel(self.result_dir, self._db_name, [DBNameConstant.TABLE_EVENT_COUNT],
                                        self._metrics_type)
+        check_aicore_events(self._event,
+                            is_custom=judge_custom_pmu_scene(self.sample_config, metrics_type=self._metrics_type))
         if self.model and self.ai_core_data:
             self.model.init()
             self.model.create_core_table(self._event, self.ai_core_data)
@@ -205,6 +208,7 @@ class ParsingFftsAICoreSampleData(ParsingCoreSampleData):
             event = data_dict.get('event')
             metrics_key = data_dict.get('metrics_key')
             metrics_type = data_dict.get('metric_type')
+            check_aicore_events(event, is_custom=judge_custom_pmu_scene(self.sample_config, metrics_type=metrics_type))
             if not all([db_name, data_list, event, metrics_key]):
                 logging.info(f"No need to create db for {data_type} pmu_events")
                 continue
