@@ -9,6 +9,8 @@
 */
 #include "param_validation.h"
 
+#include <sstream>
+#include <cctype>
 #include "config/config.h"
 #include "errno/error_code.h"
 #include "message/prof_params.h"
@@ -155,20 +157,92 @@ bool ParamValidation::CheckLlcEventsIsValid(const std::string &events) const
     return true;
 }
 
-bool ParamValidation::CheckProfilingMetricsIsValid(const std::string &metricsName, const std::string &metricsVal) const
+bool ParamValidation::CovertMetricToHex(std::string &events, const size_t mode) const
+{
+    if (events.empty()) {
+        return false;
+    }
+    events = analysis::dvvp::common::utils::Utils::Trim(events);
+
+    const std::string pattern = "0x";
+    if (mode == HEX_MODE && events.length() > pattern.length()) {
+        if (events[0] == '0' && events[1] == 'x') {
+            events = events.substr(pattern.length());
+        } else {
+            return false;
+        }
+    } else if (mode == HEX_MODE) {
+        return false;
+    }
+
+    for (auto ch : events) {
+        if (mode == HEX_MODE && ch >= 'a' && ch <= 'f') {
+            continue;
+        } else if ((ch >= '0' && ch <= '9')) {
+            continue;
+        } else {
+            return false;
+        }
+    }
+
+    if (mode == DEC_MODE) {
+        if (!analysis::dvvp::common::utils::Utils::CheckStringIsNonNegativeIntNum(events)) {
+            return false;
+        }
+        std::stringstream hexStream;
+        hexStream << std::hex << std::stoi(events);
+        hexStream >> events;
+    }
+    events = pattern + events;
+    return true;
+}
+
+int ParamValidation::CustomHexCharConfig(std::string &aicoreEvents, const std::string &pattern)
+{
+    if (aicoreEvents.empty()) {
+        MSPROF_LOGE("Custom PMU event is empty.");
+        return PROFILING_FAILED;
+    }
+    std::vector<std::string> eventsList =
+        analysis::dvvp::common::utils::Utils::Split(aicoreEvents, false, "", pattern);
+    aicoreEvents = "";
+    if (!CheckPmuEventSizeIsValid(eventsList.size())) {
+        MSPROF_LOGE("ai core events size(%u) is bigger than %d", eventsList.size(), MAX_EVENT_SIZE);
+        return PROFILING_FAILED;
+    }
+    for (size_t i = 0; i < eventsList.size(); ++i) {
+        std::string event = eventsList[i];
+        if (!CovertMetricToHex(event, HEX_MODE) && !CovertMetricToHex(event, DEC_MODE)) {
+                MSPROF_LOGE("Custom event(%s) is invalid, only hexadecimal or decimal parameters are allowed.",
+                    event.c_str());
+                return PROFILING_FAILED;
+        }
+        const int minEvent = 1;  // min Custom event is 0x1
+        const int maxEvent = 110;  // max Custom event is 0x6E
+        int eventVal = std::strtol(event.c_str(), nullptr, BASE_HEX);
+        if (eventVal < minEvent || eventVal > maxEvent) {
+            MSPROF_LOGE("Custom event(%s) is not valid, valid event range is [0x%x, 0x%x].",
+                event.c_str(), minEvent, maxEvent);
+            return PROFILING_FAILED;
+        }
+        aicoreEvents += event + pattern;
+    }
+    aicoreEvents.pop_back();
+    return PROFILING_SUCCESS;
+}
+
+bool ParamValidation::CheckProfilingMetricsIsValid(const std::string &metricsName, const std::string &metricsVal)
 {
     if (metricsVal.empty()) {
         MSPROF_LOGI("%s is empty", metricsName.c_str());
         return true;
     }
-
     PlatformAdapterInterface* adapter = PlatformAdapter::instance()->GetAdapter();
     if (adapter == nullptr) {
         MSPROF_LOGE("platform adapter uninited.");
         return false;
     }
     std::vector<std::string> metricsWhiteList = adapter->GetMetricsList();
-
     std::string metricsRange = "";
     for (size_t i = 0; i < metricsWhiteList.size(); ++i) {
         metricsRange += metricsWhiteList[i];
@@ -177,17 +251,31 @@ bool ParamValidation::CheckProfilingMetricsIsValid(const std::string &metricsNam
             continue;
         }
     }
+    metricsRange += "|Custom:xx,xx";
     if (ConfigManager::instance()->GetPlatformType() == PlatformType::CHIP_V4_1_0) {
         metricsWhiteList.push_back(PIPE_UTILIZATION_EXCT);
     }
-
+    if (metricsVal.length() > MAX_CUSTOM_METRICS_LEN) {
+        MSPROF_LOGE("The Custom metric parameter length exceeds max length value of %d.", MAX_CUSTOM_METRICS_LEN);
+        return false;
+    }
+    if (metricsVal.compare(0, CUSTOM_METRICS_VALID_HEADER.length(), CUSTOM_METRICS_VALID_HEADER) == 0) {
+        std::string aicoreEvent = metricsVal.substr(CUSTOM_METRICS_VALID_HEADER.length());
+        transform(aicoreEvent.begin(), aicoreEvent.end(), aicoreEvent.begin(), ::tolower);
+        int ret = CustomHexCharConfig(aicoreEvent, ",");
+        if (ret == PROFILING_FAILED) {
+            MSPROF_LOGE("%s[%s] is invalid, please set metrics in range [%s].", metricsName.c_str(),
+                metricsVal.c_str(), metricsRange.c_str());
+            return false;
+        }
+        return true;
+    }
     for (size_t j = 0; j < metricsWhiteList.size(); j++) {
         if (metricsVal.compare(metricsWhiteList[j]) == 0) {
             MSPROF_LOGD("%s is %s", metricsName.c_str(), metricsVal.c_str());
             return true;
         }
     }
-
     MSPROF_LOGE("%s[%s] is invalid, please set metrics in range [%s].", metricsName.c_str(), metricsVal.c_str(),
         metricsRange.c_str());
     CMD_LOGE("Argument --%s=%s is invalid, please set metrics in range [%s].", metricsName.c_str(),

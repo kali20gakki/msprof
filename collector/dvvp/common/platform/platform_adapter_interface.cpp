@@ -12,6 +12,7 @@
 #include "prof_acl_api.h"
 #include "errno/error_code.h"
 #include "config/config.h"
+#include "validation/param_validation.h"
 #include "msprof_dlog.h"
 #include "msprof_error_manager.h"
 #include "utils/utils.h"
@@ -24,6 +25,7 @@ using namespace analysis::dvvp::common::error;
 using namespace Collector::Dvvp::Common::PlatformAdapter;
 using namespace analysis::dvvp::common::config;
 using namespace analysis::dvvp::common::utils;
+using namespace analysis::dvvp::common::validation;
 
 PlatformAdapterInterface::PlatformAdapterInterface()
     : params_(nullptr), platformType_(PlatformType::MINI_TYPE)
@@ -239,6 +241,16 @@ int PlatformAdapterInterface::GetMetricsEvents(const std::string &metricsType,
         metricsEventsList = aicMetricsEventsList_;
     } else {
         metricsEventsList = aivMetricsEventsList_;
+    }
+    if (metricsType.compare(0, CUSTOM_METRICS_VALID_HEADER.length(), CUSTOM_METRICS_VALID_HEADER) == 0) {
+        events = metricsType.substr(CUSTOM_METRICS_VALID_HEADER.length());
+        transform(events.begin(), events.end(), events.begin(), ::tolower);
+        int ret = ParamValidation::instance()->CustomHexCharConfig(events, ",");
+        if (ret == PROFILING_FAILED) {
+            return PROFILING_FAILED;
+        }
+        MSPROF_EVENT("Custom metrics values is %s", events.c_str());
+        return PROFILING_SUCCESS;
     }
     auto iter = metricsEventsList.find(metricsType);
     if (iter != metricsEventsList.end()) {
