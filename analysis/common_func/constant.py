@@ -473,6 +473,13 @@ class Constant:
     RECOMMEND_PERCENTILE = 0.98
     RATIO_FOR_BEST_PERFORMANCE = 0.8
 
+    ROOT_LEVEL = 0
+    ACL_LEVEL = 1
+    MODEL_LEVEL = 2
+    NODE_LEVEL = 3
+    HCCL_LEVEL = 4  # ge node sub level
+    TASK_LEVEL = 5
+
     def get_constant_class_name(self: any) -> any:
         """
         get constant class name
