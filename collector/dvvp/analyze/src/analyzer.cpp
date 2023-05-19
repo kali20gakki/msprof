@@ -5,11 +5,6 @@
  * Create: 2020-10-24
  */
 #include "analyzer.h"
-
-#include "analyzer_ge.h"
-#include "analyzer_hwts.h"
-#include "analyzer_ts.h"
-#include "analyzer_ffts.h"
 #include "config/config.h"
 #include "data_struct.h"
 #include "errno/error_code.h"
@@ -20,12 +15,14 @@
 #include "uploader.h"
 #include "uploader_mgr.h"
 #include "toolchain/prof_acl_api.h"
+#include "transport/hash_data.h"
 
 namespace Analysis {
 namespace Dvvp {
 namespace Analyze {
 using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::common::config;
+using namespace analysis::dvvp::transport;
 
 Analyzer::Analyzer(SHARED_PTR_ALIA<analysis::dvvp::transport::Uploader> uploader)
     : resultCount_(0),
@@ -45,6 +42,7 @@ int Analyzer::Init()
     MSVP_MAKE_SHARED0_RET(analyzerHwts_, AnalyzerHwts, PROFILING_FAILED);
     MSVP_MAKE_SHARED0_RET(analyzerTs_, AnalyzerTs, PROFILING_FAILED);
     MSVP_MAKE_SHARED0_RET(analyzerFfts_, AnalyzerFfts, PROFILING_FAILED);
+    MSVP_MAKE_SHARED0_RET(analyzerRt_, AnalyzerRt, PROFILING_FAILED);
 
     inited_ = true;
     if ((analyzerHwts_->InitFrequency() != PROFILING_SUCCESS) ||
@@ -77,9 +75,7 @@ void Analyzer::OnNewData(CONST_VOID_PTR data, uint32_t len)
         MSPROF_LOGW("Analyzer OnNewData is not data for analyzing");
         return;
     }
-    MSPROF_LOGD("Analyzer OnNewData enter");
     DispatchData(message);
-    MSPROF_LOGD("Analyzer OnNewData exit");
 }
 
 void Analyzer::Flush()
@@ -95,6 +91,19 @@ void Analyzer::PrintStats()
     analyzerGe_->PrintStats();
     analyzerTs_->PrintStats();
     analyzerHwts_->PrintStats();
+}
+
+void Analyzer::PrintDeviceStats()
+{
+    analyzerHwts_->PrintStats();
+    analyzerFfts_->PrintStats();
+    analyzerTs_->PrintStats();
+}
+
+void Analyzer::PrintHostStats()
+{
+    analyzerGe_->PrintStats();
+    analyzerRt_->PrintStats();
 }
 
 void Analyzer::DispatchData(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message)
@@ -362,9 +371,21 @@ void Analyzer::ConstructAndUploadData(const std::string &opId, OpTime &opTime)
         MSPROF_LOGE("Analyzer::uploader_ is nullptr");
         return;
     }
+    MSPROF_LOGD("Upload old data. modelId: %u, threadId: %u, opName: %s, opType: %s, start: %llu, "
+        "end: %llu, duration: %llu, startAicore: %llu, endAicore: %llu, flag: %u", opDesc.modelId,
+        opDesc.threadId, opName.c_str(), opType.c_str(), opDesc.start, opDesc.end, opDesc.duration,
+        opTime.startAicore, opTime.endAicore, opDesc.flag);
     auto opDescCharPtr = reinterpret_cast<CHAR_PTR>(&opDesc);
     uploader_->UploadData(opDescCharPtr, sizeof(ProfOpDesc));
     resultCount_++;
+}
+
+void Analyzer::DispatchOptimizeData(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message)
+{
+}
+
+void Analyzer::UploadProfOpDescProc()
+{
 }
 
 void Analyzer::SetDevId(const std::string &devIdStr)

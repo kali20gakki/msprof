@@ -19,7 +19,7 @@ class Analyzer;
 class AnalyzerTs : public AnalyzerBase {
 friend class Analyzer;
 public:
-    AnalyzerTs() : opTimeCount_(0) {}
+    AnalyzerTs() : opTimeCount_(0), totalTsMerges_(0) {}
     ~AnalyzerTs() {}
 
 public:
@@ -35,6 +35,7 @@ private:
 
 private:
     uint64_t opTimeCount_;
+    int32_t totalTsMerges_;
     std::map<std::string, OpTime> opTimeDrafts_;      // stores incomplete data
     std::multimap<std::string, OpTime> opTimes_;      // key is taskId-streamId-contextId
     std::vector<KeypointOp> keypointOpInfo_;
