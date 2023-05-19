@@ -22,11 +22,51 @@ using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::transport;
 static const uint32_t GE_TASK_DATA_SIZE = sizeof(struct MsprofGeProfTaskData);
 static const int32_t GE_ID_MAP_SIZE = sizeof(struct MsprofGeProfIdMapData);
+static const int32_t GE_COMPACT_INFO_SIZE = sizeof(MsprofCompactInfo);
+static const int32_t ADDITIONAL_INFO_SIZE = sizeof(MsprofAdditionalInfo);
+static const int32_t GE_EVENT_SIZE = sizeof(MsprofEvent);
+static const int32_t GE_API_SIZE = sizeof(MsprofApi);
 
 bool AnalyzerGe::IsGeData(const std::string &fileName)
 {
     // Ge data starts with "Framework"
     if (fileName.find("Framework") != std::string::npos) {
+        return true;
+    }
+    return false;
+}
+
+bool AnalyzerGe::IsGeApiData(const std::string &fileName)
+{
+    // Ge api data
+    if (fileName.find("api") != std::string::npos) {
+        return true;
+    }
+    return false;
+}
+ 
+bool AnalyzerGe::IsGeEventData(const std::string &fileName)
+{
+    // Ge event data
+    if (fileName.find("event") != std::string::npos) {
+        return true;
+    }
+    return false;
+}
+ 
+bool AnalyzerGe::IsGeCompactData(const std::string &tag)
+{
+    // Ge compact data
+    if (tag.find("node_basic_info") != std::string::npos) {
+        return true;
+    }
+    return false;
+}
+ 
+bool AnalyzerGe::IsGeGraphIdMapData(const std::string &tag)
+{
+    // Ge compact data
+    if (tag.find("graph_id_map") != std::string::npos) {
         return true;
     }
     return false;
@@ -200,6 +240,56 @@ void AnalyzerGe::PrintStats()
 {
     MSPROF_EVENT("total_size_analyze, module: GE, analyzed %llu, total %llu, op info %u, idMap %u",
                  analyzedBytes_, totalBytes_, opInfos_.size(), idMap_.size());
+}
+
+void AnalyzerGe::GeApiParse(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message)
+{
+}
+
+void AnalyzerGe::ParseApiInfo(CONST_CHAR_PTR data, uint32_t len, bool ageFlag)
+{
+}
+
+void AnalyzerGe::HandleApiInfo(CONST_CHAR_PTR data, bool ageFlag)
+{
+}
+
+void AnalyzerGe::GeEventParse(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message)
+{
+}
+
+void AnalyzerGe::ParseModelInfo(CONST_CHAR_PTR data, uint32_t len, bool ageFlag)
+{
+}
+
+void AnalyzerGe::HandleModelInfo(CONST_CHAR_PTR data, bool ageFlag)
+{
+}
+
+void AnalyzerGe::GeCompactParse(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message)
+{
+}
+
+void AnalyzerGe::ParseNodeBasicInfo(CONST_CHAR_PTR data, uint32_t len)
+{
+}
+
+void AnalyzerGe::HandleNodeBasicInfo(CONST_CHAR_PTR data)
+{
+}
+
+void AnalyzerGe::GeGraphIdMapParse(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message)
+{
+}
+
+void AnalyzerGe::ParseGraphIdMap(CONST_CHAR_PTR data, uint32_t len)
+{
+}
+
+void AnalyzerGe::MatchApiInfo(std::multimap<std::string, GeOpFlagInfo> &apiInfo,
+    std::multimap<std::string, GeOpFlagInfo> &modelInfo,
+    std::multimap<std::string, GeOpFlagInfo> &nodeInfo)
+{
 }
 }  // namespace Analyze
 }  // namespace Dvvp

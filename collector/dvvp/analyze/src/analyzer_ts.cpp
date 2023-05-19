@@ -182,8 +182,7 @@ void AnalyzerTs::PrintStats()
     }
     MSPROF_EVENT("total_size_analyze, module: TS, analyzed %llu, total %llu, op time total %llu, "
                  "remain %u, draft %u. remain keypoint op %llu, last step find op %llu",
-                 analyzedBytes_, totalBytes_,
-                 opTimeCount_, opTimes_.size(), opTimeDrafts_.size(),
+                 analyzedBytes_, totalBytes_, opTimeCount_, opTimes_.size(), opTimeDrafts_.size(),
                  keypointOpInfo_.size(), times);
 }
 }  // namespace Analyze

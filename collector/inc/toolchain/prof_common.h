@@ -225,6 +225,9 @@ struct MsprofGeProfHostSchData {
     uint8_t  reserve[MSPROF_GE_HOST_SCH_DATA_RESERVE_BYTES];
 };
 
+#define MSPROF_GE_FUSION_OP_NUM 8
+#define MSPROF_CTX_ID_MAX_NUM 55
+#pragma pack(1)
 struct MsprofNodeBasicInfo {
     uint64_t opName;
     uint32_t taskType;
@@ -232,6 +235,43 @@ struct MsprofNodeBasicInfo {
     uint32_t blockDim;
     uint32_t opFlag;
 };
+
+struct MsrofTensorData {
+    uint32_t tensorType;
+    uint32_t format;
+    uint32_t dataType;
+    uint32_t shape[MSPROF_GE_TENSOR_DATA_SHAPE_LEN];
+};
+
+struct MsprofTensorInfo {
+    uint64_t opName;
+    uint32_t tensorNum;
+    MsrofTensorData tensorData[MSPROF_GE_TENSOR_DATA_NUM];
+};
+
+struct ProfFusionOpInfo {
+uint64_t opName;
+uint32_t fusionOpNum;
+uint64_t inputMemsize;
+uint64_t outputMemsize;
+uint64_t weightMemSize;
+uint64_t workspaceMemSize;
+uint64_t totalMemSize;
+uint64_t fusionOpId[MSPROF_GE_FUSION_OP_NUM];
+};
+
+struct MsprofContextIdInfo {
+    uint64_t opName;
+    uint32_t ctxIdNum;
+    uint32_t ctxIds[MSPROF_CTX_ID_MAX_NUM];
+};
+
+struct MsprofGraphIdInfo {
+    uint64_t modelName;
+    uint32_t graphId;
+    uint32_t modelId;
+};
+#pragma pack()
 
 /**
  * @brief struct of data reported by RunTime
@@ -333,91 +373,6 @@ struct MsprofDpProfData {
  * @brief struct of data reported by HCCL
  */
 #pragma pack(4)
-struct MsprofHcclProfNotify {
-    uint32_t taskID;
-    uint64_t notifyID;
-    uint32_t stage;
-    uint32_t remoteRank;
-    uint32_t transportType;
-    uint32_t role; // role {0: dst, 1:src}
-    double durationEstimated;
-};
-
-struct MsprofHcclProfReduce {
-    uint32_t taskID;
-    uint64_t src;
-    uint64_t dst;
-    uint64_t size;
-    uint32_t op;       // {0: sum, 1: mul, 2: max, 3: min}
-    uint32_t dataType; // data type {0: INT8, 1: INT16, 2: INT32, 3: FP16, 4:FP32, 5:INT64, 6:UINT64}
-    uint32_t linkType; // link type {0: 'OnChip', 1: 'HCCS', 2: 'PCIe', 3: 'RoCE'}
-    uint32_t remoteRank;
-    uint32_t transportType; //  transport type {0: SDMA, 1: RDMA, 2:LOCAL}
-    uint32_t role;          // role {0: dst, 1:src}
-    double durationEstimated;
-};
-
-struct MsprofHcclProfRDMA {
-    uint32_t taskID;
-    uint64_t src;
-    uint64_t dst;
-    uint64_t size;
-    uint64_t notifyID;
-    uint32_t linkType; // link type {0: 'OnChip', 1: 'HCCS', 2: 'PCIe', 3: 'RoCE'}
-    uint32_t remoteRank;
-    uint32_t transportType; //  transport type {0: RDMA, 1:SDMA, 2:LOCAL}
-    uint32_t role;          // role {0: dst, 1:src}
-    uint32_t type;          // RDMA type {0: RDMASendNotify, 1:RDMASendPayload}
-    double durationEstimated;
-};
-
-struct MsprofHcclProfMemcpy {
-    uint32_t taskID;
-    uint64_t src;
-    uint64_t dst;
-    uint64_t size;
-    uint64_t notifyID;
-    uint32_t linkType; // link type {0: 'OnChip', 1: 'HCCS', 2: 'PCIe', 3: 'RoCE'}
-    uint32_t remoteRank;
-    uint32_t transportType; // transport type {0: RDMA, 1:SDMA, 2:LOCAL}
-    uint32_t role;          // role {0: dst, 1:src}
-    double durationEstimated;
-};
-
-struct MsprofHcclProfStageStep {
-    uint32_t rank;
-    uint32_t rankSize;
-};
-
-struct MsprofHcclProfFlag {
-    uint64_t cclTag;
-    uint64_t groupName;
-    uint32_t localRank;
-    uint32_t workFlowMode;
-};
-
-/**
- * @name MsprofHcclProfData
- * @brief struct of data reported by hccl
- */
-struct MsprofHcclProfData {
-    uint16_t magicNumber = MSPROF_DATA_HEAD_MAGIC_NUM;
-    uint16_t dataTag = MSPROF_HCCL_DATA_TAG;
-    uint32_t planeID;
-    uint32_t deviceID;
-    uint32_t streamID;
-    double ts;
-    char name[16];
-    union {
-        MsprofHcclProfNotify notify;
-        MsprofHcclProfReduce reduce;
-        MsprofHcclProfStageStep stageStep;
-        MsprofHcclProfMemcpy forMemcpy;
-        MsprofHcclProfRDMA RDMA;
-        MsprofHcclProfFlag flag;
-    } args;
-};
-
 struct MsprofHcclInfo {
     uint64_t itemId;
     uint64_t cclTag;
@@ -506,6 +461,8 @@ const uint32_t MSPROF_REPORT_ACL_HOST_HCCL_BASE_TYPE     = 0x070000;
  
 /* Msprof report type of model(15000) level, offset: 0x000000 */
 const uint32_t MSPROF_REPORT_MODEL_GRAPH_ID_MAP_TYPE    = 0;  /* type info: graph_id_map */
+const uint32_t MSPROF_REPORT_MODEL_EXECUTE_TYPE         = 1;  /* type info: execute */
+const uint32_t MSPROF_REPORT_MODEL_LOAD_TYPE            = 2;  /* type info: load */
  
 /* Msprof report type of node(10000) level, offset: 0x000000 */
 const uint32_t MSPROF_REPORT_NODE_BASIC_INFO_TYPE       = 0;  /* type info: node_basic_info */
@@ -522,6 +479,7 @@ const uint32_t MSPROF_REPORT_NODE_GE_API_BASE_TYPE      = 0x010000;
 const uint32_t MSPROF_REPORT_NODE_HCCL_BASE_TYPE        = 0x020000;
  
 /* Msprof report type of hccl(5500) level(op api), offset: 0x010000 */
+const uint32_t MSPROF_REPORT_HCCL_NODE_BASE_TYPE    = 0x010000;
 const uint32_t MSPROF_REPORT_HCCL_MASTER_TYPE       = 0x010001;
 const uint32_t MSPROF_REPORT_HCCL_SLAVE_TYPE        = 0x010002;
  
