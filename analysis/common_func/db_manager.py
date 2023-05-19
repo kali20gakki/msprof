@@ -281,7 +281,7 @@ class DBManager:
             fields_filter_list = []
         try:
             headers, type_names = cls._get_headers_and_type_names(cfg_parser, map_name, fields_filter_list,
-                                                                        map_path)
+                                                                  map_path)
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as error:
             logging.exception(error)
             return ""
@@ -328,6 +328,49 @@ class DBManager:
                 break
         cls.destroy_db_connect(conn, curs)
         return res
+
+    @classmethod
+    def check_item_in_table(cls: any, db_path: str, table_name: str, col: str, item: any):
+        """
+        check if item is in table
+        """
+        conn, curs = cls.check_connect_db_path(db_path)
+        if not (conn and curs):
+            return False
+
+        sql = "select * from {table_name} where {col}='{item}'".format(table_name=table_name,
+                                                                       col=col,
+                                                                       item=item)
+        try:
+            data = cls.fetch_all_data(curs, sql)
+        except sqlite3.Error as _err:
+            logging.error(str(_err), exc_info=Constant.TRACE_BACK_SWITCH)
+            return False
+        finally:
+            cls.destroy_db_connect(conn, curs)
+        return len(data) != 0
+
+    @classmethod
+    def get_table_data_count(cls: any, db_path: str, table_name: str):
+        """
+        get data count in datable
+        """
+        conn, curs = cls.check_connect_db_path(db_path)
+        if not (conn and curs):
+            return 0
+
+        sql = "select count(*) from {table_name}".format(table_name=table_name)
+        data = []
+        try:
+            data = cls.fetch_all_data(curs, sql)
+        except sqlite3.Error as _err:
+            logging.error(str(_err), exc_info=Constant.TRACE_BACK_SWITCH)
+            return 0
+        finally:
+            cls.destroy_db_connect(conn, curs)
+        if len(data) == 0 or len(data[0]) == 0:
+            return 0
+        return data[0][0]
 
     @classmethod
     def check_no_empty_tables_in_db(cls: any, db_path: str, *tables: any) -> bool:
@@ -493,7 +536,7 @@ class DBManager:
         """
         project_path = path_check(project_path)
         if project_path:
-            db_path = path_check(os.path.join(project_path, 'sqlite', db_name))
+            db_path = path_check(PathManager.get_db_path(project_path, db_name))
             if db_path:
                 return cls.check_connect_db_path(db_path)
             return EmptyClass("empty conn"), EmptyClass("empty curs")
