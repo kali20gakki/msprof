@@ -32,7 +32,7 @@ class RtsTrackParser(IParser, MsMultiProcess):
         self._rts_data = []
         self._device_id = self._sample_config.get("device_id", "0")
         self._model = RtsModel(self._project_path, DBNameConstant.DB_RTS_TRACK,
-                               [DBNameConstant.TABLE_RUNTIME_TRACK])
+                               [DBNameConstant.TABLE_TASK_TRACK])
 
     def parse(self: any) -> None:
         """

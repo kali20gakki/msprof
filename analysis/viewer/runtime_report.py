@@ -15,6 +15,7 @@ from common_func.msvp_common import is_number
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msvp_constant import MsvpConstant
 from common_func.ms_constant.str_constant import StrConstant
+from common_func.path_manager import PathManager
 from common_func.utils import Utils
 from viewer.memory_copy.memory_copy_viewer import MemoryCopyViewer
 
@@ -202,11 +203,11 @@ def _get_opname(task: list, result_dir: str, curs_ge: any) -> str:
     db_name = DBNameConstant.DB_GE_INFO
     sql_to_get_opname = "select op_name from {} where " \
                         "task_id=? and stream_id=? and batch_id=?".format(DBNameConstant.TABLE_GE_TASK)
-    if not os.path.exists(os.path.join(result_dir, "sqlite", db_name)):
+    if not os.path.exists(PathManager.get_db_path(result_dir, db_name)):
         db_name = DBNameConstant.DB_RTS_TRACK
         sql_to_get_opname = "select kernelname from {} where " \
-                            "task_id=? and stream_id=? and batch_id=?".format(DBNameConstant.TABLE_RUNTIME_TRACK)
-        if not os.path.exists(os.path.join(result_dir, "sqlite", db_name)):
+                            "task_id=? and stream_id=? and batch_id=?".format(DBNameConstant.TABLE_TASK_TRACK)
+        if not os.path.exists(PathManager.get_db_path(result_dir, db_name)):
             return op_name
 
     if len(task) >= 4:

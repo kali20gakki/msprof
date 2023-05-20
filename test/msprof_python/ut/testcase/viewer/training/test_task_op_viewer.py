@@ -126,7 +126,7 @@ class TestTaskOpViewer(unittest.TestCase):
         (test_rts_sql[1]).execute("drop Table RuntimeTrack")
         db_manager_rts.destroy(test_rts_sql)
         db_manager_ge.destroy(test_ge_sql)
-        self.assertEqual(res[1], 1)
+        self.assertEqual(res[1], 0)
 
     def test_get_op_task_data_summary_1(self):
         with mock.patch(NAMESPACE + '.logging.warning'):

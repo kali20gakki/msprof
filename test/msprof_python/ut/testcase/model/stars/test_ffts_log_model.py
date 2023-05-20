@@ -122,7 +122,7 @@ class TestSubTaskCalculator(unittest.TestCase):
         with mock.patch(MODELNAMESPACE + '.DBManager.judge_table_exist', return_value=False):
             check = FftsLogModel('test', 'test', 'test')
             ret = check.get_timeline_data()
-        self.assertEqual({}, ret)
+        self.assertEqual([], ret)
         thread_data_list = ([0, 1, 2, 3, 4, 5, 6, 7, 8],)
         subtask_data_list = ([5, 6, 7, 8, 9, 1, 2, 4, 6],)
         with mock.patch(MODELNAMESPACE + '.DBManager.judge_table_exist', return_value=True), \
@@ -130,8 +130,8 @@ class TestSubTaskCalculator(unittest.TestCase):
                 mock.patch(MODELNAMESPACE + '.FftsLogModel._get_subtask_time_data', return_value=subtask_data_list):
             check = FftsLogModel('test', 'test', 'test')
             ret = check.get_timeline_data()
-        self.assertEqual({'acsq_task_list': [], 'subtask_data_list': ([5, 6, 7, 8, 9, 1, 2, 4, 6],),
-                          'thread_data_list': ([0, 1, 2, 3, 4, 5, 6, 7, 8],)}, ret)
+        self.assertEqual([{'acsq_task_list': [], 'subtask_data_list': ([5, 6, 7, 8, 9, 1, 2, 4, 6],),
+                          'thread_data_list': ([0, 1, 2, 3, 4, 5, 6, 7, 8],)}], ret)
 
     def test_get_summary_data(self):
         with mock.patch(MODELNAMESPACE + '.FftsLogModel.get_all_data', return_value=[]):

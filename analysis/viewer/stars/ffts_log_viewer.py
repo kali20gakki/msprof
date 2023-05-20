@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2021-2022. All rights reserved.
-
+import json
 
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
@@ -47,12 +47,8 @@ class FftsLogViewer(BaseViewer):
         subtask = []
         tid_set = set((item[1], item[2]) for item in data)
         for item in tid_set:
-            subtask.append(
-                ["thread_name", item[0], item[1],
-                 f'Stream {item[1]}'])
-            subtask.append(
-                ["thread_sort_index", item[0], item[1],
-                 item[1]])
+            subtask.append(["thread_name", item[0], item[1], f'Stream {item[1]}'])
+            subtask.append(["thread_sort_index", item[0], item[1], item[1]])
         header.extend(subtask)
         return header
 
@@ -62,13 +58,15 @@ class FftsLogViewer(BaseViewer):
         @return:timeline trace data
         """
         timeline_data = self.get_data_from_db()
-        result = self.get_trace_timeline(timeline_data)
+        result = []
+        if timeline_data:
+            result.extend(self.get_trace_timeline(timeline_data[0]))
         if not result:
-            result = {
+            return json.dumps({
                 "status": NumberConstant.WARN,
                 "info": "Can not export ffts sub task time data, the current chip does not support "
                         "exporting this data or the data may be not collected."
-            }
+            })
         return TraceViewer("StarsViewer").format_trace_events(result)
 
     def get_model_instance(self: any) -> any:
@@ -82,7 +80,7 @@ class FftsLogViewer(BaseViewer):
         to format data to chrome trace json
         :return: timeline_trace list
         """
-        if not any(data_list.values()):
+        if not data_list or not any(data_list.values()):
             return []
         self.add_node_name(data_list)
         if self.params.get("data_type") == ExportDataType.FFTS_SUB_TASK_TIME.name.lower():
