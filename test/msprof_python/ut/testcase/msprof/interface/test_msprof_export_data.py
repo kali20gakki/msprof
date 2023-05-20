@@ -694,7 +694,7 @@ class TestMsProfExportDataUtils(unittest.TestCase):
             InfoConfReader()._info_json = {"pid": 123}
             key = MsProfExportDataUtils()
             result = key._get_bulk_data(sample_configs, params)
-        self.assertEqual(result, '[]')
+        self.assertEqual(result, '')
 
     def test_get_bulk_data_2(self):
         sample_configs = {"test": 2}

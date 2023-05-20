@@ -35,16 +35,6 @@ class DataParsersConfig(MetaConfig):
             ('path', 'msparser.l2_cache.l2_cache_parser'),
             ('chip_model', '1,2,3,4,5,7')
         ],
-        'IterRecParser': [
-            ('path', 'msparser.iter_rec.iter_rec_parser'),
-            ('chip_model', '1,2,3,4'),
-            ('level', '3')
-        ],
-        'NoGeIterRecParser': [
-            ('path', 'msparser.iter_rec.iter_rec_parser'),
-            ('chip_model', '1,2,3,4'),
-            ('level', '3')
-        ],
         'TsTimelineRecParser': [
             ('path', 'msparser.iter_rec.ts_timeline_parser'),
             ('chip_model', '0'),
@@ -142,15 +132,6 @@ class DataParsersConfig(MetaConfig):
             ('chip_model', '0,1,2,3,4,5,7'),
             ('level', '3')
         ],
-        'GeHostParser': [
-            ('path', 'msparser.ge.ge_host_parser'),
-            ('chip_model', '0,1,2,3,4,5')
-        ],
-        'StarsIterRecParser': [
-            ('path', 'msparser.iter_rec.stars_iter_rec_parser'),
-            ('chip_model', '5,7'),
-            ('level', '3')
-        ],
         'ParsingFftsAICoreSampleData': [
             ('path', 'msparser.aic_sample.ai_core_sample_parser'),
             ('chip_model', '5,7')
@@ -216,6 +197,16 @@ class DataParsersConfig(MetaConfig):
             ('path', 'msparser.compact_info.memcpy_info_parser'),
             ('chip_model', '0,1,2,3,4,5,7'),
             ('level', '2'),
+        ],
+        'HcclInfoParser': [
+            ('path', 'msparser.add_info.hccl_info_parser'),
+            ('chip_model', '0,1,2,3,4,5,7'),
+            ('level', '2')
+        ],
+        'MultiThreadParser': [
+            ('path', 'msparser.add_info.multi_thread_parser'),
+            ('chip_model', '0,1,2,3,4,5,7'),
+            ('level', '2')
         ],
         'TensorAddInfoParser': [
             ('path', 'msparser.add_info.tensor_add_info_parser'),

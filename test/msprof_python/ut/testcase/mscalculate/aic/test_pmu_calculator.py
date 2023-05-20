@@ -30,7 +30,7 @@ class TestPmuCalculator(unittest.TestCase):
     def test_get_block_dim_from_ge(self):
         with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
                 mock.patch(NAMESPACE + '.DBManager.check_tables_in_db', return_value=True), \
-                mock.patch(NAMESPACE + '.PmuCalculator.get_db_path', return_value=''), \
+                mock.patch(NAMESPACE + '.PathManager.get_db_path', return_value=''), \
                 mock.patch(NAMESPACE + '.DBManager.fetch_all_data', return_value=[]), \
                 mock.patch('common_func.utils.Utils.get_scene', return_value="single_op"), \
                 mock.patch(NAMESPACE + '.DBManager.check_connect_db_path', return_value=(1, 1)):
@@ -42,7 +42,7 @@ class TestPmuCalculator(unittest.TestCase):
         ProfilingScene().init('test')
         with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
                 mock.patch(NAMESPACE + '.DBManager.check_tables_in_db', return_value=True), \
-                mock.patch(NAMESPACE + '.PmuCalculator.get_db_path', return_value=''), \
+                mock.patch(NAMESPACE + '.PathManager.get_db_path', return_value=''), \
                 mock.patch(NAMESPACE + '.DBManager.fetch_all_data',
                            return_value=[self.GeDataBean('', 0, 0, 0, 0), self.GeDataBean("AI_CORE", 0, 0, 20, 40),
                                          self.GeDataBean('MIX_AIC', 0, 0, 20, 40)]), \
@@ -55,14 +55,6 @@ class TestPmuCalculator(unittest.TestCase):
             key._core_num_dict = {'aic': 30, 'aiv': 0}
             key._freq = 1500
             key.get_block_dim_from_ge()
-
-    def test_get_db_path(self):
-        db_name = '111.db'
-        with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \
-                mock.patch('os.path.join', return_value='test\\test.text'):
-            key = PmuCalculator()
-            result = key.get_db_path(db_name)
-        self.assertEqual(result, 'test\\test.text')
 
     def test_get_current_block(self):
         with mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}), \

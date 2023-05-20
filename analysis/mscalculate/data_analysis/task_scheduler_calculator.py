@@ -3,9 +3,7 @@
 # Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
 
 import logging
-import os
 
-from common_func.ms_multi_process import MsMultiProcess
 from analyzer.scene_base.profiling_scene import ProfilingScene
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
@@ -13,9 +11,9 @@ from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
+from common_func.ms_multi_process import MsMultiProcess
 from common_func.msprof_iteration import MsprofIteration
 from common_func.path_manager import PathManager
-from common_func.platform.chip_manager import ChipManager
 from mscalculate.ts_task.ai_cpu.aicpu_from_ts_collector import AICpuFromTsCollector
 from msconfig.config_manager import ConfigManager
 from msmodel.step_trace.ts_track_model import TsTrackModel
@@ -36,7 +34,6 @@ class TaskSchedulerCalculator(MsMultiProcess):
         self.sample_config = sample_config
         self.project_path = sample_config.get(StrConstant.SAMPLE_CONFIG_PROJECT_PATH)
         self.iter_range = sample_config.get(StrConstant.PARAM_ITER_ID)
-        
 
     @staticmethod
     def update(api_data: list) -> list:
@@ -86,8 +83,7 @@ class TaskSchedulerCalculator(MsMultiProcess):
             logging.error(str(err))
         finally:
             pass
-    
-    
+
     def create_task_time(self: any, runtime_conn: any, device: int, iter_time_range: list) -> None:
         """
         create task time table
@@ -127,7 +123,7 @@ class TaskSchedulerCalculator(MsMultiProcess):
                             "api data or ts timeline data had not been collected.")
             return
         select_api_sql = 'select api,rowid,stream_id,task_id,batch_id from ApiCall ' \
-                         'where tasknum != 0 order by entry_time;'
+                         'order by entry_time;'
         api_thread = DBManager.fetch_all_data(runtime_curs, select_api_sql)
         try:
             api_down_data = self.update(api_thread)
@@ -146,7 +142,7 @@ class TaskSchedulerCalculator(MsMultiProcess):
         :return:
         """
         logging.info('start insert data into report table')
-        db_path = os.path.join(PathManager.get_sql_dir(project_path), DBNameConstant.DB_RUNTIME)
+        db_path = PathManager.get_db_path(project_path, DBNameConstant.DB_RUNTIME)
         runtime_conn, runtime_curs = DBManager.check_connect_db_path(db_path)
         if not runtime_conn or not runtime_curs \
                 or not DBManager.check_tables_in_db(db_path, DBNameConstant.TABLE_RUNTIME_TASK_TIME):
@@ -156,11 +152,6 @@ class TaskSchedulerCalculator(MsMultiProcess):
 
         logging.info('Insert data into report table finished.')
         DBManager.destroy_db_connect(runtime_conn, runtime_curs)
-
-
-
-
-
 
     def generate_report_data(self: any) -> None:
         """
