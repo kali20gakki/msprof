@@ -12,6 +12,9 @@ class HcclDto:
     """
 
     def __init__(self: any) -> None:
+        self._index_id = Constant.DEFAULT_INVALID_VALUE
+        self._model_id = Constant.DEFAULT_INVALID_VALUE
+        self._is_dynamic = Constant.DEFAULT_INVALID_VALUE
         self._op_name = Constant.NA
         self._iteration = Constant.DEFAULT_VALUE
         self._hccl_name = Constant.NA
@@ -26,6 +29,7 @@ class HcclDto:
         self._stream_id = Constant.DEFAULT_INVALID_VALUE
         self._task_id = Constant.DEFAULT_INVALID_VALUE
         self._task_type = Constant.NA
+        self._op_type = Constant.NA
         self._src_rank = Constant.DEFAULT_INVALID_VALUE
         self._dst_rank = Constant.DEFAULT_INVALID_VALUE
         self._notify_id = Constant.DEFAULT_INVALID_VALUE
@@ -80,7 +84,7 @@ class HcclDto:
 
     @property
     def task_type(self: any) -> any:
-        return self._args.get('task type', self._task_type)
+        return self._task_type
 
     @property
     def notify_id(self: any) -> any:
@@ -111,6 +115,22 @@ class HcclDto:
         if self._args.get('size', self._size) == Constant.DEFAULT_INVALID_VALUE:
             return self._args.get('size(Byte)', self._size)
         return self._args.get('size', self._size)
+
+    @property
+    def is_dynamic(self) -> int:
+        return self._is_dynamic
+
+    @property
+    def model_id(self) -> int:
+        return self._model_id
+
+    @property
+    def index_id(self) -> int:
+        return self._index_id
+
+    @property
+    def op_type(self) -> int:
+        return self._op_type
 
     @op_name.setter
     def op_name(self: any, value: str) -> None:
@@ -143,3 +163,23 @@ class HcclDto:
     @args.setter
     def args(self: any, value: any) -> None:
         self._args = ast.literal_eval(value)
+
+    @is_dynamic.setter
+    def is_dynamic(self, value: str) -> None:
+        self._is_dynamic = value
+
+    @model_id.setter
+    def model_id(self, value: str):
+        self._model_id = value
+
+    @index_id.setter
+    def index_id(self, value: str):
+        self._index_id = value
+
+    @task_type.setter
+    def task_type(self, value: str):
+        self._task_type = value
+
+    @op_type.setter
+    def op_type(self, value: str):
+        self._op_type = value
