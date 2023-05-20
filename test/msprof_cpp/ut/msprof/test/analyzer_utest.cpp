@@ -62,6 +62,7 @@ TEST_F(AnalyzerUtest, DispatchOptimizeUnagingApiData)
     std::shared_ptr<Analyzer> analyzer;
     MSVP_MAKE_SHARED1_BREAK(analyzer, Analyzer, nullptr);
     
+    analyzer->Init();
     // ge api unaging
     struct MsprofApi geUnAgingTaskDescChunk;
     geUnAgingTaskDescChunk.type = MSPROF_REPORT_NODE_LAUNCH_TYPE;
@@ -82,6 +83,8 @@ TEST_F(AnalyzerUtest, DispatchOptimizeAgingApiData)
     GlobalMockObject::verify();
     std::shared_ptr<Analyzer> analyzer;
     MSVP_MAKE_SHARED1_BREAK(analyzer, Analyzer, nullptr);
+    
+    analyzer->Init();
     // ge api aging
     struct MsprofApi geAgingTaskDescChunk;
     geAgingTaskDescChunk.type = MSPROF_REPORT_NODE_LAUNCH_TYPE;
@@ -99,6 +102,8 @@ TEST_F(AnalyzerUtest, DispatchOptimizeNodeBasicInfoData)
     GlobalMockObject::verify();
     std::shared_ptr<Analyzer> analyzer;
     MSVP_MAKE_SHARED1_BREAK(analyzer, Analyzer, nullptr);
+    
+    analyzer->Init();
     // ge node basic info
     struct MsprofNodeBasicInfo nodeData;
     struct MsprofCompactInfo geTaskDescChunk;
@@ -124,6 +129,7 @@ TEST_F(AnalyzerUtest, DispatchOptimizeGraphIdInfoData)
     std::shared_ptr<Analyzer> analyzer;
     MSVP_MAKE_SHARED1_BREAK(analyzer, Analyzer, nullptr);
 
+    analyzer->Init();
     // graph id info
     struct MsprofGraphIdInfo graphData;
     struct MsprofAdditionalInfo geAddChunk;
@@ -144,6 +150,7 @@ TEST_F(AnalyzerUtest, DispatchOptimizeModelInfoData)
     std::shared_ptr<Analyzer> analyzer;
     MSVP_MAKE_SHARED1_BREAK(analyzer, Analyzer, nullptr);
 
+    analyzer->Init();
     // ge model info
     struct MsprofEvent geUnAgingEventChunk;
     geUnAgingEventChunk.level = MSPROF_REPORT_MODEL_LEVEL;
@@ -176,6 +183,8 @@ TEST_F(AnalyzerUtest, UploadProfOpDescProc_nullUploader)
     std::shared_ptr<AnalyzerBase> analyzerBase;
     MSVP_MAKE_SHARED0_BREAK(analyzerBase, AnalyzerBase);
 
+    analyzer->Init();
+    
     ProfOpDesc opDescData;
     analyzerBase->opDescInfos_.push_back(opDescData);
     analyzer->UploadProfOpDescProc();
@@ -190,6 +199,8 @@ TEST_F(AnalyzerUtest, UploadProfOpDescProc_validUploader)
     std::shared_ptr<Analyzer> analyzer;
     MSVP_MAKE_SHARED1_BREAK(analyzer, Analyzer, pipeUploader);
 
+    analyzer->Init();
+    
     std::shared_ptr<AnalyzerBase> analyzerBase;
     MSVP_MAKE_SHARED0_BREAK(analyzerBase, AnalyzerBase);
     ProfOpDesc opDescData;
@@ -208,6 +219,50 @@ protected:
 };
 TEST_F(AnalyzerBaseUtest, HandleDeviceData)
 {
+    GlobalMockObject::verify();
+    std::shared_ptr<AnalyzerBase> analyzerBase;
+    MSVP_MAKE_SHARED0_BREAK(analyzerBase, AnalyzerBase);
+
+    uint32_t threadId = 1;
+    // rtOpInfo_ cannot find key
+    std::string key1 = "0-0";
+    struct RtOpInfo devData;
+    devData.start = 0;
+    devData.end = 0;
+    uint32_t taskId = 0;
+    uint16_t streamId = 0;
+    uint32_t time;
+    analyzerBase->HandleDeviceData(key1, devData, taskId, streamId, time);
+
+    // rtOpInfo_ find key with invalid devData
+    struct RtOpInfo opInfo = {1, 0, 0, threadId, 0, 0, 0, ACL_SUBSCRIBE_OP};
+    analyzerBase->rtOpInfo_.insert(std::make_pair(key1, opInfo));
+    analyzerBase->HandleDeviceData(key1, devData, taskId, streamId, time);
+
+    // rtOpInfo_ find key with valid devData
+    devData.start = 1; // 1 data start
+    devData.end = 2; // 2 data end
+    analyzerBase->tsOpInfo_.insert(std::make_pair(key1, opInfo));
+    std::string key2 = "1-1";
+    analyzerBase->tsOpInfo_.insert(std::make_pair(key1, opInfo));
+    analyzerBase->HandleDeviceData(key1, devData, taskId, streamId, time);
+
+    // rtOpInfo_ find key with valid devData and valid geOpFlagInfo
+    uint64_t opNameHash = HashData::instance()->GenHashId("opName");
+    uint64_t opTypeHash = HashData::instance()->GenHashId("opType");
+    analyzerBase->tsOpInfo_.insert(std::make_pair(key1, opInfo));
+    uint64_t modelId = 0;
+    struct GeOpFlagInfo geInfo1 = {opNameHash, opTypeHash, modelId, 0, 2, 0, 0, ACL_SUBSCRIBE_OP};
+    struct GeOpFlagInfo geInfo2 = {opNameHash, opTypeHash, modelId, 3, 4, 0, 0,
+                                   ACL_SUBSCRIBE_OP}; // 3 4 invalid ge info
+    analyzerBase->geOpInfo_.insert(std::make_pair(std::to_string(threadId), geInfo1));
+    analyzerBase->geOpInfo_.insert(std::make_pair(std::to_string(threadId), geInfo2));
+    analyzerBase->HandleDeviceData(key1, devData, taskId, streamId, time);
+
+    analyzerBase->tsOpInfo_.insert(std::make_pair(key1, opInfo));
+    uint32_t graphId = 0;
+    analyzerBase->SetGraphModelId(modelId, graphId);
+    analyzerBase->HandleDeviceData(key1, devData, taskId, streamId, time);
 }
 
 class AnalyzerFftsUtest : public testing::Test {
@@ -219,6 +274,44 @@ protected:
     {
     }
 };
+
+TEST_F(AnalyzerFftsUtest, FftsParse)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<AnalyzerFfts> analyzerFfts;
+    MSVP_MAKE_SHARED0_BREAK(analyzerFfts, AnalyzerFfts);
+    FftsCxtLog fftsCxtLog;
+    fftsCxtLog.head.logType = FFTS_SUBTASK_THREAD_START_FUNC_TYPE;
+    fftsCxtLog.streamId = 0;
+    fftsCxtLog.taskId = 0;
+    fftsCxtLog.sysCountLow = 1000; // 1000 count low
+    fftsCxtLog.sysCountHigh = 0;
+    fftsCxtLog.cxtId = 0;
+    fftsCxtLog.threadId = 0;
+    std::shared_ptr<analysis::dvvp::proto::FileChunkReq> ffts;
+    MSVP_MAKE_SHARED0_BREAK(ffts, analysis::dvvp::proto::FileChunkReq);
+    ffts->set_filename("stars_soc.data");
+    ffts->set_chunk(reinterpret_cast<CHAR_PTR>(&fftsCxtLog), sizeof(fftsCxtLog));
+    ffts->set_chunksizeinbytes(sizeof(fftsCxtLog));
+    analyzerFfts->FftsParse(ffts);
+    fftsCxtLog.head.logType = FFTS_SUBTASK_THREAD_END_FUNC_TYPE;
+    fftsCxtLog.sysCountLow = 2000; // 2000 count high
+    fftsCxtLog.sysCountHigh = 0;
+    ffts->set_chunk(reinterpret_cast<CHAR_PTR>(&fftsCxtLog), sizeof(fftsCxtLog));
+    analyzerFfts->FftsParse(ffts);
+
+    FftsAcsqLog fftsAcsqLog;
+    fftsAcsqLog.head.logType = ACSQ_TASK_START_FUNC_TYPE;
+    fftsAcsqLog.streamId = 1;
+    fftsAcsqLog.taskId = 1;
+    fftsAcsqLog.sysCountLow = 10000; // 10000 count low
+    ffts->set_chunk(reinterpret_cast<CHAR_PTR>(&fftsAcsqLog), sizeof(fftsAcsqLog));
+    analyzerFfts->FftsParse(ffts);
+    fftsAcsqLog.head.logType = ACSQ_TASK_END_FUNC_TYPE;
+    fftsAcsqLog.sysCountLow = 20000; // 20000 count high
+    ffts->set_chunk(reinterpret_cast<CHAR_PTR>(&fftsAcsqLog), sizeof(fftsAcsqLog));
+    analyzerFfts->FftsParse(ffts);
+}
 
 TEST_F(AnalyzerFftsUtest, ParseOptimizeAcsqTaskData)
 {
@@ -382,7 +475,7 @@ TEST_F(AnalyzerRtUtest, IsRtCompactData)
     EXPECT_EQ(false, analyzerRt->IsRtCompactData("aging.compact"));
 }
 
-TEST_F(AnalyzerRtUtest, ParseRuntimeTrackData)
+TEST_F(AnalyzerRtUtest, RtCompactParse)
 {
     GlobalMockObject::verify();
     std::shared_ptr<AnalyzerRt> analyzerRt;
@@ -404,8 +497,7 @@ TEST_F(AnalyzerRtUtest, ParseRuntimeTrackData)
     rtTaskDesc->set_tag("task_track");
     rtTaskDesc->set_chunk(rtData);
     rtTaskDesc->set_chunksizeinbytes(sizeof(rtDataChunk));
-    std::string data = analysis::dvvp::message::EncodeMessage(rtTaskDesc);
-    analyzerRt->ParseRuntimeTrackData(data.c_str(), static_cast<uint32_t>(data.size()), false);
+    analyzerRt->RtCompactParse(rtTaskDesc);
 
     // rt aging
     struct MsprofCompactInfo rtDataAgingChunk;
@@ -423,7 +515,6 @@ TEST_F(AnalyzerRtUtest, ParseRuntimeTrackData)
     rtAgingTaskDesc->set_tag("task_track");
     rtAgingTaskDesc->set_chunk(rtAgingData);
     rtAgingTaskDesc->set_chunksizeinbytes(sizeof(rtDataAgingChunk));
-    data = analysis::dvvp::message::EncodeMessage(rtAgingTaskDesc);
-    analyzerRt->ParseRuntimeTrackData(data.c_str(), static_cast<uint32_t>(data.size()), false);
+    analyzerRt->RtCompactParse(rtAgingTaskDesc);
 }
 

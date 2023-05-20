@@ -239,7 +239,7 @@ void DyncProfMsgProcSrv::DynProfSrvProcStart()
         Msprofiler::Api::ProfAclMgr::instance()->SetModeToOff();
         return ;
     }
-
+    Msprofiler::Api::ProfAclMgr::instance()->MsprofHostHandle();
     std::string startDevId;
     std::string startSuccDevId;
     DynProfMngSrv::instance()->startTimes_ += 1;

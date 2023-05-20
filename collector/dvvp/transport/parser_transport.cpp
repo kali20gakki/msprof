@@ -40,7 +40,7 @@ int ParserTransport::Init(SHARED_PTR_ALIA<Uploader> uploader)
 int ParserTransport::SendBuffer(CONST_VOID_PTR buffer, int length)
 {
     if (analyzer_ != nullptr) {
-        analyzer_->OnNewData(buffer, length);
+        analyzer_->OnOptimizeData(buffer, length);
         return length;
     }
     MSPROF_LOGE("Analyzer is already closed");

@@ -46,7 +46,7 @@ int32_t MsprofAddiInfoReporterCallbackImpl(uint32_t agingFlag, CONST_VOID_PTR da
 int32_t MsprofRegReportTypeInfoImpl(uint16_t level, uint32_t typeId, const std::string &typeName);
 
 // get hash id call back
-int32_t MsprofGetHashIdImpl(const std::string &hashInfo);
+uint64_t MsprofGetHashIdImpl(const std::string &hashInfo);
 
 int32_t GetRegisterResult();
 

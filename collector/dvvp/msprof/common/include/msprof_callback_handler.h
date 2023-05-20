@@ -8,6 +8,7 @@
 #define ANALYSIS_DVVP_PROFILER_MSPROF_CALLBACK_HANDLER_H
 
 #include <cstdint>
+#include <unordered_map>
 #include "data_dumper.h"
 #include "prof_callback.h"
 #include "utils/utils.h"
@@ -18,7 +19,7 @@ namespace Engine {
 class MsprofCallbackHandler {
 public:
     MsprofCallbackHandler();
-    explicit MsprofCallbackHandler(const std::string module);
+    explicit MsprofCallbackHandler(const std::string &module);
     ~MsprofCallbackHandler();
 
 public:
@@ -30,15 +31,15 @@ public:
 
 public:
     static void InitReporters();
+    int StartReporter();
+    int StopReporter();
 
 public:
-    static std::map<uint32_t, MsprofCallbackHandler> reporters_;
+    static std::unordered_map<uint32_t, MsprofCallbackHandler> reporters_;
 
 private:
     int ReportData(CONST_VOID_PTR data, uint32_t len) const;
     int FlushData();
-    int StartReporter();
-    int StopReporter();
     int GetDataMaxLen(VOID_PTR data, uint32_t len);
     int GetHashId(VOID_PTR data, uint32_t len) const;
 

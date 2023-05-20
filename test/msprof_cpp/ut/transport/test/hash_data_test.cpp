@@ -135,3 +135,19 @@ TEST_F(COMMON_HASH_DATA_TEST, GenHashId_NewDataStruct)
     uint64_t hashId2 = HashData::instance()->GenHashId("Test");
     EXPECT_EQ(hashId1, hashId2);
 }
+
+TEST_F(COMMON_HASH_DATA_TEST, SaveNewHashData)
+{
+    GlobalMockObject::verify();
+    HashData::instance()->SaveNewHashData();
+ 
+    HashData::instance()->Init();
+    HashData::instance()->GenHashId("Test1");
+    HashData::instance()->GenHashId("Test2");
+    MOCKER_CPP(&analysis::dvvp::transport::UploaderMgr::UploadData)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED))
+        .then(returnValue(PROFILING_SUCCESS));
+    HashData::instance()->SaveNewHashData();
+    HashData::instance()->SaveNewHashData();
+}

@@ -35,7 +35,6 @@ test_obj=(
     application_utest
     message_utest
     msprofiler_utest
-    msprof_utest
     transport_utest
     params_adapter_utest
 )
