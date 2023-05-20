@@ -61,14 +61,8 @@ int ProfParamsAdapter::UpdateSampleConfig(SHARED_PTR_ALIA<analysis::dvvp::proto:
     if (!feature->ts_timeline().empty()) {
         params->ts_timeline = feature->ts_timeline();
     }
-    if (!feature->system_trace_conf().empty()) {
-        HandleSystemTraceConf(feature->system_trace_conf(), params);
-    }
     if (!feature->task_trace_conf().empty()) {
         HandleTaskTraceConf(feature->task_trace_conf(), params);
-    }
-    if (feature->feature_name().find("op_trace") != std::string::npos) {
-        UpdateOpFeature(feature, params);
     }
     if (feature->feature_name().compare("system_trace") == 0) { // mdc scene only use system_trace
         params->hwts_log1 = "off";
@@ -83,7 +77,12 @@ void ProfParamsAdapter::ProfStartCfgToParamsCfg(const uint64_t dataTypeConfig,
 {
     // ts_memcpy
     if (dataTypeConfig & PROF_TASK_TIME_MASK) {
-            params->ts_memcpy = MSVP_PROF_ON;
+        params->ts_memcpy = MSVP_PROF_ON;
+    }
+    params->ts_keypoint = MSVP_PROF_ON;
+    PlatformType type = ConfigManager::instance()->GetPlatformType();
+    if (type == PlatformType::CHIP_V4_1_0 || type == PlatformType::CHIP_V4_2_0) {
+        params->stars_acsq_task = MSVP_PROF_ON;
     }
 }
 
@@ -136,70 +135,6 @@ int ProfParamsAdapter::HandleTaskTraceConf(const std::string &conf,
     return PROFILING_SUCCESS;
 }
 
-int ProfParamsAdapter::HandleSystemTraceConf(const std::string &conf,
-    SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params)
-{
-    const int CFG_BUFFER_MAX_LEN = 1024 * 1024;  // 1024 *1024 means 1mb
-    if (params == nullptr || conf.size() > CFG_BUFFER_MAX_LEN) {  // job context size bigger than 1mb
-        return PROFILING_FAILED;
-    }
-    SHARED_PTR_ALIA<analysis::dvvp::proto::ProfilerConf> sysConf = nullptr;
-    MSVP_MAKE_SHARED0_RET(sysConf, analysis::dvvp::proto::ProfilerConf, PROFILING_FAILED);
-    bool ok = google::protobuf::util::JsonStringToMessage(conf, sysConf.get()).ok();
-    MSPROF_LOGI("HandleSystemTraceConf config info: %s", conf.c_str());
-    if (!ok) {
-        MSPROF_LOGE("HandleSystemTraceConf ProfilerConf format error, please check it!");
-        return PROFILING_FAILED;
-    }
-    UpdateSysConf(sysConf, params);
-    return PROFILING_SUCCESS;
-}
-
-void ProfParamsAdapter::UpdateSysConf(SHARED_PTR_ALIA<analysis::dvvp::proto::ProfilerConf> sysConf,
-    SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params)
-{
-    if (sysConf == nullptr || params == nullptr) {
-        return;
-    }
-    if (sysConf->cpusamplinginterval() > 0) {
-        params->cpu_profiling = "on";
-        params->cpu_sampling_interval = static_cast<int32_t>(sysConf->cpusamplinginterval());
-    }
-    if (sysConf->syssamplinginterval() > 0) {
-        params->sys_profiling = "on";
-        params->sys_sampling_interval = static_cast<int32_t>(sysConf->syssamplinginterval());
-    }
-    if (sysConf->appsamplinginterval() > 0) {
-        params->pid_profiling = "on";
-        params->pid_sampling_interval = static_cast<int32_t>(sysConf->appsamplinginterval());
-    }
-    if (sysConf->hardwarememsamplinginterval() > 0) {
-        params->hardware_mem = "on";
-        params->hardware_mem_sampling_interval = static_cast<int32_t>(sysConf->hardwarememsamplinginterval());
-    }
-    if (sysConf->iosamplinginterval() > 0) {
-        params->io_profiling = "on";
-        params->io_sampling_interval = static_cast<int32_t>(sysConf->iosamplinginterval());
-    }
-    if (sysConf->interconnectionsamplinginterval() > 0) {
-        params->interconnection_profiling = "on";
-        params->interconnection_sampling_interval = static_cast<int32_t>(sysConf->interconnectionsamplinginterval());
-    }
-    if (sysConf->dvppsamplinginterval() > 0) {
-        params->dvpp_profiling = "on";
-        params->dvpp_sampling_interval = static_cast<int32_t>(sysConf->dvppsamplinginterval());
-    }
-    if (sysConf->aicoresamplinginterval() > 0 && !sysConf->aicoremetrics().empty()) {
-        params->ai_core_profiling = "on";
-        params->aicore_sampling_interval = static_cast<int32_t>(sysConf->aicoresamplinginterval());
-        params->ai_core_metrics = sysConf->aicoremetrics();
-    }
-    if (sysConf->aivsamplinginterval() > 0 && !sysConf->aivmetrics().empty()) {
-        params->aiv_profiling = "on";
-        params->aiv_sampling_interval = static_cast<int32_t>(sysConf->aivsamplinginterval());
-        params->aiv_metrics = sysConf->aivmetrics();
-    }
-}
 
 void ProfParamsAdapter::UpdateHardwareMemParams(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> dstParams,
     SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> srcParams)
@@ -338,50 +273,6 @@ std::string ProfParamsAdapter::GenerateBandwidthEvents()
 
     UtilsStringBuilder<std::string> builder;
     return builder.Join(llcProfilingEvents, ",");
-}
-
-void ProfParamsAdapter::UpdateOpFeature(SHARED_PTR_ALIA<analysis::dvvp::proto::MsProfStartReq> feature,
-                                        SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params)
-{
-    using namespace analysis::dvvp::common::validation;
-    std::string aiCoreEvents;
-    std::string aicoreMetrics = feature->ai_core_events();
-    if (ConfigManager::instance()->GetPlatformType() == PlatformType::CHIP_V4_1_0 &&
-        aicoreMetrics == PIPE_UTILIZATION) {
-        aicoreMetrics = PIPE_UTILIZATION_EXCT;
-        aiCoreEvents = "0x49,0x4a,0x9,0x302,0xc,0x303,0x54,0x55";
-    } else {
-        ConfigManager::instance()->GetAicoreEvents(aicoreMetrics, aiCoreEvents);
-    }
-    MSPROF_LOGI("op_trace profiling ai_core_events: %s , feature ai_core_events: %s",
-        aiCoreEvents.c_str(), feature->ai_core_events().c_str());
-    std::string aiVectEvents;
-    ConfigManager::instance()->GetAicoreEvents(feature->ai_core_events(), aiVectEvents);
-    MSPROF_LOGI("op_trace profiling ai_vector_core_events: %s , feature ai_vector_core_events: %s",
-        aiVectEvents.c_str(), feature->ai_core_events().c_str());
-    const std::string l2CacheEvents = feature->l2_cache_events();
-    if (ParamValidation::instance()->CheckEventsSize(aiCoreEvents) != PROFILING_SUCCESS ||
-        ParamValidation::instance()->CheckEventsSize(l2CacheEvents) != PROFILING_SUCCESS) {
-        return;
-    }
-    if (!aiCoreEvents.empty()) {
-        params->ai_core_metrics = aicoreMetrics;
-        params->ai_core_profiling_events = aiCoreEvents;
-        params->ai_core_profiling = "on";
-        params->ai_core_profiling_mode = PROFILING_MODE_TASK_BASED;
-        params->aiv_profiling = "on";
-        params->aiv_profiling_events = aiVectEvents;
-        params->aiv_metrics = feature->ai_core_events();
-        params->aiv_profiling_mode = PROFILING_MODE_TASK_BASED;
-    }
-    if (!l2CacheEvents.empty()) {
-        params->l2CacheTaskProfilingEvents = l2CacheEvents;
-        params->l2CacheTaskProfiling = "on";
-    }
-
-    MSPROF_LOGI("start op_trace job.ai_core_events: %s , l2_cache_events: %s",
-                params->ai_core_profiling_events.c_str(),
-                params->l2CacheTaskProfilingEvents.c_str());
 }
 }   // Adaptor
 }   // Host
