@@ -104,7 +104,7 @@ void AnalyzerHwts::ParseTaskStartEndData(CONST_CHAR_PTR data, uint32_t len, uint
             KEY_SEPARATOR + std::to_string(UINT32_MAX);
         auto iter = opTimeDrafts_.find(key);
         if (iter == opTimeDrafts_.end()) {
-        OpTime opTime = {0, 0, 0, 0, 0, 0, ACL_SUBSCRIBE_OP};
+            OpTime opTime = {0, 0, 0, 0, 0, 0, ACL_SUBSCRIBE_OP};
             iter = opTimeDrafts_.insert(std::make_pair(key, opTime)).first;
         }
         uint64_t sysTime = static_cast<uint64_t>(hwtsData->syscnt / frequency_);  // ns
@@ -139,6 +139,58 @@ void AnalyzerHwts::PrintStats()
                  "op time total %llu, remain %u, draft %u, op repeat cnt %llu",
                  analyzedBytes_, totalBytes_, opTimeCount_, opTimes_.size(),
                  opTimeDrafts_.size(), opRepeatCount_);
+}
+
+void AnalyzerHwts::ParseOptimizeHwtsData(CONST_CHAR_PTR data, uint32_t len)
+{
+    AppendToBufferedData(data, len);
+    uint32_t offset = 0;
+    while (dataPtr_ != nullptr && offset < dataLen_) {
+        uint32_t remainingLen = dataLen_ - offset;
+        if (remainingLen < HWTS_DATA_SIZE) {
+            MSPROF_LOGI("Hwts remains %u bytes unparsed, which is incomplete data", remainingLen);
+            break;
+        }
+ 
+        uint8_t rptType = GetRptType(dataPtr_ + offset, remainingLen);
+        if (rptType == HWTS_TASK_START_TYPE || rptType == HWTS_TASK_END_TYPE) {
+            ParseTaskStartEndData(dataPtr_ + offset, dataLen_ - offset, rptType);
+            ParseOptimizeStartEndData(dataPtr_ + offset, rptType);
+            analyzedBytes_ += HWTS_DATA_SIZE;
+            totalHwtsTimes_++;
+        }
+        offset += HWTS_DATA_SIZE;
+    }
+    BufferRemainingData(offset);
+}
+
+void AnalyzerHwts::ParseOptimizeStartEndData(CONST_CHAR_PTR data, uint8_t rptType)
+{
+    auto hwtsData = reinterpret_cast<const HwtsProfileType01 *>(data);
+    std::string key = std::to_string(hwtsData->taskId) + KEY_SEPARATOR + std::to_string(hwtsData->streamId);
+    auto iter = AnalyzerBase::tsOpInfo_.find(key);
+    if (iter == AnalyzerBase::tsOpInfo_.end()) {
+        RtOpInfo opInfo = {0, 0, 0, 0, true, 0, 0, ACL_SUBSCRIBE_OP};
+        iter = AnalyzerBase::tsOpInfo_.insert(std::make_pair(key, opInfo)).first;
+    }
+ 
+    uint64_t sysTime = static_cast<uint64_t>(hwtsData->syscnt / frequency_);
+    switch (rptType) {
+        case HWTS_TASK_START_TYPE:
+            iter->second.start = sysTime;
+            break;
+        case HWTS_TASK_END_TYPE:
+            iter->second.end = sysTime;
+            break;
+        default:
+            MSPROF_LOGW("invalid rptType:%u, key:%s, cntRes0Type:0x%x, hex6bd3:0x%x",
+                        rptType, key.c_str(), hwtsData->cntRes0Type, hwtsData->hex6bd3);
+            break;
+    }
+ 
+    if (AnalyzerBase::rtOpInfo_.find(key) != AnalyzerBase::rtOpInfo_.end()) {
+        HandleDeviceData(key, iter->second, hwtsData->taskId, hwtsData->streamId, totalHwtsMerges_);
+    }
 }
 }  // namespace Analyze
 }  // namespace Dvvp

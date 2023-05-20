@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
+ * Copyright (c) Huawei Technologies Co., Ltd. 2020-2023. All rights reserved.
  * Description: handle profiling data
  * Author: Huawei Technologies Co., Ltd.
  * Create: 2020-10-24
@@ -16,6 +16,7 @@
 #include "analyzer_hwts.h"
 #include "analyzer_ffts.h"
 #include "analyzer_ts.h"
+#include "analyzer_rt.h"
 #include "analyzer_base.h"
 
 namespace Analysis {
@@ -36,6 +37,7 @@ public:
 
 private:
     void DispatchData(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message);
+    void DispatchOptimizeData(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message);
     void ConstructAndUploadData(const std::string &opId, OpTime &opTime);
     void TsDataPostProc();
     void HwtsDataPostProc();
@@ -45,6 +47,10 @@ private:
     void UpdateOpIndexId(std::multimap<std::string, OpTime> &opTimes);
     uint64_t GetOpIndexId(uint64_t opTimeStamp);
     void FftsDataPostProc();
+
+    void PrintDeviceStats();
+    void PrintHostStats();
+    void UploadProfOpDescProc();
 
 private:
     bool inited_;
@@ -57,6 +63,7 @@ private:
     SHARED_PTR_ALIA<AnalyzerHwts> analyzerHwts_;
     SHARED_PTR_ALIA<AnalyzerTs> analyzerTs_;
     SHARED_PTR_ALIA<AnalyzerFfts> analyzerFfts_;
+    SHARED_PTR_ALIA<AnalyzerRt> analyzerRt_;
     SHARED_PTR_ALIA<analysis::dvvp::transport::Uploader> uploader_;
 };
 }  // namespace Analyze

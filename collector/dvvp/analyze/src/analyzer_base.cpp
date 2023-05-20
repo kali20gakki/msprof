@@ -6,11 +6,23 @@
  */
 #include "analyzer_base.h"
 #include "config/config_manager.h"
+#include "transport/hash_data.h"
 
 namespace Analysis {
 namespace Dvvp {
 namespace Analyze {
 using namespace analysis::dvvp::common::error;
+using namespace analysis::dvvp::transport;
+std::map<std::string, RtOpInfo> AnalyzerBase::rtOpInfo_;
+std::map<std::string, RtOpInfo> AnalyzerBase::tsOpInfo_;
+std::multimap<std::string, GeOpFlagInfo> AnalyzerBase::geNodeInfo_;
+std::multimap<std::string, GeOpFlagInfo> AnalyzerBase::geApiInfo_;
+std::multimap<std::string, GeOpFlagInfo> AnalyzerBase::geModelInfo_;
+std::multimap<std::string, GeOpFlagInfo> AnalyzerBase::geOpInfo_;
+std::map<uint32_t, uint32_t> AnalyzerBase::graphIdMap_;
+std::vector<ProfOpDesc> AnalyzerBase::opDescInfos_;
+std::mutex AnalyzerBase::opDescInfoMtx_;
+std::mutex AnalyzerBase::graphIdMtx_;
 
 void AnalyzerBase::AppendToBufferedData(CONST_CHAR_PTR data, uint32_t len)
 {
@@ -49,6 +61,31 @@ int32_t AnalyzerBase::InitFrequency()
         MSPROF_EVENT("InitFrequency success. freqency: %f", frequency_);
         return PROFILING_SUCCESS;
     }
+}
+
+void AnalyzerBase::EraseRtMapByTaskId(uint32_t taskId, uint16_t streamId, std::map<std::string, RtOpInfo> &rtOpInfo)
+{
+}
+ 
+void AnalyzerBase::EraseRtMapByStreamId(uint16_t streamId, std::map<std::string, RtOpInfo> &rtOpInfo)
+{
+}
+ 
+void AnalyzerBase::HandleDeviceData(const std::string &key, const RtOpInfo &devData, uint32_t taskId,
+    uint16_t streamId, uint32_t &time)
+{
+}
+ 
+void AnalyzerBase::ConstructAndUploadOptimizeData(GeOpFlagInfo &opFlagData, RtOpInfo &rtTsOpdata)
+{
+}
+ 
+uint32_t AnalyzerBase::GetGraphModelId(uint32_t modelId)
+{
+}
+ 
+void AnalyzerBase::SetGraphModelId(uint32_t modelId, uint32_t graphId)
+{
 }
 }  // namespace Analyze
 }  // namespace Dvvp

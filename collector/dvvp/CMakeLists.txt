@@ -92,6 +92,7 @@ set(msprofilerCpp
     analyze/src/analyzer_hwts.cpp
     analyze/src/analyzer_ffts.cpp
     analyze/src/analyzer_ts.cpp
+    analyze/src/analyzer_rt.cpp
     analyze/src/op_desc_parser.cpp
     common/config/config_manager.cpp
     common/memory/chunk_pool.cpp

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
+ * Copyright (c) Huawei Technologies Co., Ltd. 2020-2023. All rights reserved.
  * Description: parse ge data
  * Author: Huawei Technologies Co., Ltd.
  * Create: 2020-10-24
@@ -20,12 +20,21 @@ class Analyzer;
 class AnalyzerGe : public AnalyzerBase {
 friend class Analyzer;
 public:
-    AnalyzerGe() {}
+    AnalyzerGe() : totalEventTimes_(0), totalApiTimes_(0), totalNodeTimes_(0), totalGeMerges_(0) {}
     ~AnalyzerGe() {}
 
 public:
     bool IsGeData(const std::string &fileName);
+    bool IsGeApiData(const std::string &fileName);
+    bool IsGeEventData(const std::string &fileName);
+    bool IsGeCompactData(const std::string &tag);
+    bool IsGeGraphIdMapData(const std::string &tag);
+
     void Parse(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message);
+    void GeCompactParse(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message);
+    void GeEventParse(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message);
+    void GeApiParse(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message);
+    void GeGraphIdMapParse(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message);
 
     bool IsOpInfoCompleted(const std::string &opId);
     uint32_t GetModelId(const std::string &opId) const;
@@ -49,9 +58,24 @@ private:
     void ParseOpType(const MsprofGeProfTaskData &data, struct GeOpInfo &opInfo) const;
     void PrintStats();
 
+    void ParseNodeBasicInfo(CONST_CHAR_PTR data, uint32_t len);
+    void HandleNodeBasicInfo(CONST_CHAR_PTR data);
+    void ParseGraphIdMap(CONST_CHAR_PTR data, uint32_t len);
+    void ParseModelInfo(CONST_CHAR_PTR data, uint32_t len, bool ageFlag);
+    void HandleModelInfo(CONST_CHAR_PTR data, bool ageFlag);
+    void ParseApiInfo(CONST_CHAR_PTR data, uint32_t len, bool ageFlag);
+    void HandleApiInfo(CONST_CHAR_PTR data, bool ageFlag);
+    void MatchApiInfo(std::multimap<std::string, GeOpFlagInfo> &apiInfo,
+        std::multimap<std::string, GeOpFlagInfo> &modelInfo,
+        std::multimap<std::string, GeOpFlagInfo> &nodeInfo);
+
 private:
     std::map<std::string, GeOpInfo> opInfos_;       // <taskId-streamId, GeOpInfo>
     std::map<uint32_t, uint32_t> idMap_;            // <graphId, modeId>
+    uint32_t totalEventTimes_;
+    uint32_t totalApiTimes_;
+    uint32_t totalNodeTimes_;
+    uint32_t totalGeMerges_;
 };
 }  // namespace Analyze
 }  // namespace Dvvp
