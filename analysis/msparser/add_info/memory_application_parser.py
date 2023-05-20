@@ -33,7 +33,7 @@ class MemoryApplicationParser(DataParser, MsMultiProcess):
     def _get_memory_application_data(bean_data: any) -> list:
         if not bean_data:
             return []
-        return [bean_data.level, bean_data.data_type, bean_data.thread_id, bean_data.timestamp, bean_data.node_id,
+        return [bean_data.level, bean_data.struct_type, bean_data.thread_id, bean_data.timestamp, bean_data.node_id,
                 bean_data.ptr, bean_data.memory_size, bean_data.total_memory_size, bean_data.used_memory_size,
                 bean_data.device_type, bean_data.device_id]
 

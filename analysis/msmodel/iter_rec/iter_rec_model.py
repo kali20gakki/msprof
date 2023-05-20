@@ -36,6 +36,13 @@ class HwtsIterModel(ParserModel):
         """
         self.insert_data_to_db(table_name, data_list)
 
+    def clear_table(self: any):
+        """
+        clear tables
+        """
+        for table in self.table_list:
+            DBManager.clear_table(self.conn, table)
+
     def get_task_offset_and_sum(self: any, iteration: IterationRange, data_type: str) -> (int, int):
         """
         Get the number of hwts tasks in all previous iterations and the number of tasks in this round of iteration
@@ -64,6 +71,13 @@ class HwtsIterModel(ParserModel):
         """
         if not self.conn or not self.cur \
                 or not DBManager.judge_table_exist(self.cur, table_name):
+            return False
+        return True
+
+    def check_iter_data_in_db(self, table_name: str):
+        conn, cur = DBManager.check_connect_db(self.result_dir, self.db_name)
+        if not all([conn, cur, DBManager.judge_table_exist(cur, table_name),
+                    DBManager.judge_row_exist(cur, table_name)]):
             return False
         return True
 

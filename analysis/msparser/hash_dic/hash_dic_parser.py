@@ -88,5 +88,5 @@ class HashDicParser(IParser, MsMultiProcess):
         for line in data_lines:
             key, value = line.strip().split(":", 1)
             level, key = key.split('_')
-            if key.isdigit() and level.isdigit() and LevelDataType(int(level)):
+            if key.isdigit() and level.isdigit() and int(level) in LevelDataType.member_map():
                 self._hash_data['type_hash'].append([key, value, LevelDataType(int(level)).name.lower()])

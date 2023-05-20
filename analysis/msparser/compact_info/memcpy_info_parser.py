@@ -7,11 +7,11 @@ from typing import List
 
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
+from common_func.hash_dict_constant import HashDictData
 from msparser.data_struct_size_constant import StructFmt
 from msparser.interface.data_parser import DataParser
 from msparser.compact_info.memcpy_info_bean import MemcpyInfoBean
 from msmodel.compact_info.memcpy_info_model import MemcpyInfoModel
-from msmodel.ge.ge_hash_model import GeHashViewModel
 from profiling_bean.prof_enum.data_tag import DataTag
 
 
@@ -30,11 +30,11 @@ class MemcpyInfoParser(DataParser, MsMultiProcess):
         """
         transform bean to data
         """
-        with GeHashViewModel(self._project_path) as _model:
-            hash_dict = _model.get_type_hash_data()
+        hash_dict_data = HashDictData(self._project_path)
+        type_hash_dict = hash_dict_data.get_type_hash_dict()
         return [
             [
-                hash_dict.get(bean.level, {}).get(bean.struct_type, bean.struct_type),  # memcpy info type
+                type_hash_dict.get(bean.level, {}).get(bean.struct_type, bean.struct_type),  # memcpy info type
                 bean.level,
                 bean.thread_id,
                 bean.data_len,
