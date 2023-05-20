@@ -30,7 +30,6 @@ class HCCLInfoDto:
         self._link_type = None
         self._transport_type = None
         self._rdma_type = None
-        self._reserve = None
 
     @property
     def level(self: any) -> str:
@@ -233,16 +232,8 @@ class HCCLInfoDto:
         self._rdma_type = value
 
     def to_args_json(self):
-        return {
-            "notify_id": self.notify_id,
-            "duration_estimated": self.duration_estimated,
-            "stage": self.stage,
-            # 确认后修改
-            "step": self.stage,
-            "bandwidth": self.stage,
-            "task_type": self.op_name,
-            "src_rank": self.src_addr,
-            "dst_rank": self.dst_addr,
-            "transport_type": self.transport_type,
-            "size": self.size,
-        }
+        bandwidth = self.size / self.duration_estimated / 1000 if self.size is not None else None  # 1000 scale(GB/s)
+        members = self.__dict__
+        json = {key: members.get(key) for key in members if "__" not in key}
+        json['bandwidth'] = bandwidth
+        return str(json)

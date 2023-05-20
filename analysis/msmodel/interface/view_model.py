@@ -34,15 +34,13 @@ class ViewModel(BaseModel):
             return False
         return True
 
-    def get_sql_data(self: any, sql: str) -> list:
+    def get_sql_data(self: any, sql: str, dto_class: any = None) -> list:
         """
         get data from db
         :param sql:
         :return:
         """
-        data = DBManager.fetch_all_data(self.cur, sql)
-        self.finalize()
-        return data
+        return DBManager.fetch_all_data(self.cur, sql, dto_class=dto_class)
 
     def attach_to_db(self: any, db_name: str) -> bool:
         """
