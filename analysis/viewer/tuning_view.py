@@ -8,6 +8,7 @@ import os
 
 from common_func.common_prof_rule import CommonProfRule
 from common_func.path_manager import PathManager
+from common_func.ms_constant.number_constant import NumberConstant
 from tuning.base_tuning_view import BaseTuningView
 
 
@@ -38,8 +39,10 @@ class TuningView(BaseTuningView):
         self.data = self._load_result_file(self.dev_id).get("data", {})
 
     def _load_result_file(self: any, dev_id: any) -> dict:
-        prof_rule_path = os.path.join(PathManager.get_summary_dir(self.result_dir),
-                                      CommonProfRule.RESULT_PROF_JSON.format(dev_id))
+        file_name = CommonProfRule.RESULT_PROF_JSON.format(dev_id)
+        if dev_id == str(NumberConstant.HOST_ID):
+            file_name = CommonProfRule.RESULT_PROF_JSON_HOST
+        prof_rule_path = os.path.join(PathManager.get_summary_dir(self.result_dir), file_name)
         try:
             if os.path.exists(prof_rule_path):
                 with open(prof_rule_path, "r") as rule_reader:

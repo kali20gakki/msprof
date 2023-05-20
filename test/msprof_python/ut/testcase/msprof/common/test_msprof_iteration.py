@@ -2,6 +2,7 @@ import sqlite3
 import unittest
 from collections import OrderedDict
 from unittest import mock
+from collections import namedtuple
 
 from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
@@ -120,6 +121,18 @@ class TestMsprofIteration(unittest.TestCase):
             key = MsprofIteration('123')
             result = key._MsprofIteration__get_trace_iteration_end()
         self.assertEqual(result, OrderedDict())
+
+    def test_get_iter_id_within_iter_range(self):
+        InfoConfReader()._info_json = {"DeviceInfo": [{'hwts_frequency': 100}]}
+        step_trace = namedtuple('data', ['step_end', 'index_id'])
+        iter_range = namedtuple('iter_range', ['iteration_end', 'iteration_start'])
+        step_trace_data = step_trace(100, 1)
+        iter_range_data = iter_range('100', '99')
+        result = MsprofIteration.get_iter_id_within_iter_range([step_trace_data], 90, iter_range_data)
+        result_1 = MsprofIteration.get_iter_id_within_iter_range([], 90, iter_range_data)
+
+        self.assertEqual(result, 1)
+        self.assertEqual(result_1, '100')
 
 
 if __name__ == '__main__':

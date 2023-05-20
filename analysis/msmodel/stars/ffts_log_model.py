@@ -38,20 +38,20 @@ class FftsLogModel(ParserModel):
         """
         self.insert_log_data(data_list)
 
-    def get_timeline_data(self: any) -> dict:
+    def get_timeline_data(self: any) -> list:
         """
         to get timeline data from database
         :return: result list
         """
         acsq_task_list, thread_data_list, subtask_data_list = [], [], []
         if not DBManager.judge_table_exist(self.cur, DBNameConstant.TABLE_ACSQ_TASK_TIME):
-            return {}
+            return []
         acsq_task_list = self._get_task_time_data()
         if DBManager.judge_table_exist(self.cur, DBNameConstant.TABLE_FFTS_LOG):
             thread_data_list = self._get_thread_time_data()
             subtask_data_list = self._get_subtask_time_data()
-        return {'acsq_task_list': acsq_task_list, 'thread_data_list': thread_data_list,
-                'subtask_data_list': subtask_data_list}
+        return [{'acsq_task_list': acsq_task_list, 'thread_data_list': thread_data_list,
+                'subtask_data_list': subtask_data_list}]
 
     def get_summary_data(self: any) -> list:
         """
