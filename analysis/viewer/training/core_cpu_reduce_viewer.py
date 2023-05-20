@@ -39,7 +39,7 @@ class CoreCpuReduceViewer:
     }
 
     @staticmethod
-    def get_op_names_and_task_type(sql_path: str) -> tuple:
+    def get_op_names_and_task_type(result_dir: str) -> tuple:
         """
         get op_name and task_type value
         """
@@ -48,7 +48,7 @@ class CoreCpuReduceViewer:
         sql = "SELECT op_name, stream_id, task_id, " \
               "task_type, batch_id FROM {} ".format(DBNameConstant.TABLE_SUMMARY_GE)
         conn_ge, cur_ge = DBManager.check_connect_db_path(
-            os.path.join(sql_path, DBNameConstant.DB_AICORE_OP_SUMMARY))
+            PathManager.get_db_path(result_dir, DBNameConstant.DB_AICORE_OP_SUMMARY))
         if conn_ge and cur_ge:
             if not DBManager.judge_table_exist(cur_ge, DBNameConstant.TABLE_SUMMARY_GE):
                 return op_names, task_types
@@ -61,15 +61,16 @@ class CoreCpuReduceViewer:
         return op_names, task_types
 
     @staticmethod
-    def get_task_type_from_rts(sql_path: str) -> dict:
+    def get_task_type_from_rts(result_dir: str) -> dict:
         """
         get task type for other tasks
         """
         task_types = {}
-        sql = f"select task_type,stream_id,task_id,batch_id from {DBNameConstant.TABLE_RUNTIME_TRACK}"
+        sql = f"select task_type,stream_id,task_id,batch_id from {DBNameConstant.TABLE_TASK_TRACK}"
 
-        conn_rts, cur_rts = DBManager.check_connect_db_path(os.path.join(sql_path, DBNameConstant.DB_RTS_TRACK))
-        if conn_rts and cur_rts and DBManager.judge_table_exist(cur_rts, DBNameConstant.TABLE_RUNTIME_TRACK):
+        conn_rts, cur_rts = DBManager.check_connect_db_path(
+            PathManager.get_db_path(result_dir, DBNameConstant.DB_RTS_TRACK))
+        if conn_rts and cur_rts and DBManager.judge_table_exist(cur_rts, DBNameConstant.TABLE_TASK_TRACK):
             rts_data = DBManager.fetch_all_data(cur_rts, sql)
             for _rts_data in rts_data:
                 rts_data_key = "_".join(list(map(str, _rts_data[1:])))
@@ -78,14 +79,15 @@ class CoreCpuReduceViewer:
         return task_types
 
     @staticmethod
-    def get_task_type_from_stars(sql_path: str) -> dict:
+    def get_task_type_from_stars(result_dir: str) -> dict:
         """
         get task type for other tasks
         """
         task_types = {}
         sql = f"select task_type,stream_id,task_id,batch_id from {DBNameConstant.TABLE_SUMMARY_TASK_TIME}"
 
-        conn, cur = DBManager.check_connect_db_path(os.path.join(sql_path, DBNameConstant.DB_AICORE_OP_SUMMARY))
+        conn, cur = DBManager.check_connect_db_path(
+            PathManager.get_db_path(result_dir, DBNameConstant.DB_AICORE_OP_SUMMARY))
         if conn and cur and DBManager.judge_table_exist(cur, DBNameConstant.TABLE_SUMMARY_TASK_TIME):
             data = DBManager.fetch_all_data(cur, sql)
             for _rts_data in data:
@@ -95,18 +97,18 @@ class CoreCpuReduceViewer:
         return task_types
 
     @staticmethod
-    def get_total_cycle(sql_path: str) -> tuple:
+    def get_total_cycle(result_dir: str) -> tuple:
         """
         get total_cycle value
         """
         total_cycle_data = {}
         total_time_data = {}
         conn_ge, cur_ge = DBManager.check_connect_db_path(
-            os.path.join(sql_path, DBNameConstant.DB_RUNTIME))
+            PathManager.get_db_path(result_dir, DBNameConstant.DB_RUNTIME))
         if conn_ge and cur_ge:
             if not DBManager.judge_table_exist(cur_ge, DBNameConstant.TABLE_METRICS_SUMMARY):
                 return total_cycle_data, total_time_data
-            total_cycles = DBManager.fetch_all_data(cur_ge, CoreCpuReduceViewer._get_aicore_sql(sql_path))
+            total_cycles = DBManager.fetch_all_data(cur_ge, CoreCpuReduceViewer._get_aicore_sql(result_dir))
             total_cycles = OpCommonFunc.deal_batch_id(stream_index=0, task_index=1, merge_data=total_cycles)
             for total_cycle in total_cycles:
                 total_data_key = "_".join(
@@ -117,13 +119,13 @@ class CoreCpuReduceViewer:
         return total_cycle_data, total_time_data
 
     @staticmethod
-    def _get_aicore_sql(sql_path: str) -> str:
+    def _get_aicore_sql(result_dir: str) -> str:
         total_cycles = 'total_time, total_cycles'
         if ChipManager().is_chip_v4():
             total_cycles = 'aic_total_time, aic_total_cycles, aiv_total_time, aiv_total_cycles'
         sql = "SELECT stream_id, task_id, {total_cycles} FROM {} ".format(
             DBNameConstant.TABLE_METRICS_SUMMARY, total_cycles=total_cycles)
-        if not os.path.exists(os.path.join(sql_path, DBNameConstant.DB_GE_INFO)):
+        if not os.path.exists(PathManager.get_db_path(result_dir, DBNameConstant.DB_GE_INFO)):
             sql = "SELECT stream_id, task_id, {total_cycles} FROM {} ".format(
                 DBNameConstant.TABLE_METRICS_SUMMARY, total_cycles=total_cycles)
         return sql
@@ -162,9 +164,9 @@ class CoreCpuReduceViewer:
         return result
 
     @classmethod
-    def get_rts_track_task_type(cls: any, sql_path: str) -> dict:
-        rts_task_type = cls.get_task_type_from_rts(sql_path)
-        return rts_task_type if rts_task_type else cls.get_task_type_from_stars(sql_path)
+    def get_rts_track_task_type(cls: any, result_dir: str) -> dict:
+        rts_task_type = cls.get_task_type_from_rts(result_dir)
+        return rts_task_type if rts_task_type else cls.get_task_type_from_stars(result_dir)
 
     @classmethod
     def get_meta_trace_data(cls: any, name: str, tid: any = None) -> list:
@@ -198,7 +200,7 @@ class CoreCpuReduceViewer:
         trace_data_memcpy = memory_copy_viewer.get_memory_copy_timeline()
 
         trace_data_sql = \
-            cls._get_task_scheduler_data(sql_path=PathManager.get_sql_dir(result_dir))
+            cls._get_task_scheduler_data(result_dir)
         trace_data_job = \
             cls._get_ai_cpu_data(job_path=result_dir)
 
@@ -213,9 +215,9 @@ class CoreCpuReduceViewer:
         return json.dumps(trace_data)
 
     @classmethod
-    def _get_task_scheduler_data(cls: any, sql_path: str) -> list:
+    def _get_task_scheduler_data(cls: any, result_dir: str) -> list:
         result_data = []
-        db_path = os.path.join(sql_path, DBNameConstant.DB_AICORE_OP_SUMMARY)
+        db_path = PathManager.get_db_path(result_dir, DBNameConstant.DB_AICORE_OP_SUMMARY)
         conn, curs = DBManager.check_connect_db_path(db_path)
         if not conn or not curs or not DBManager.judge_table_exist(curs, DBNameConstant.TABLE_SUMMARY_TASK_TIME):
             return result_data
@@ -228,7 +230,7 @@ class CoreCpuReduceViewer:
         try:
             if task_scheduler_data:
                 task_trace_datas = \
-                    cls._format_task_trace_data(task_scheduler_data, sql_path)
+                    cls._format_task_trace_data(task_scheduler_data, result_dir)
                 result_data.extend(TraceViewManager.time_graph_trace(
                     TraceViewHeaderConstant.TOP_DOWN_TIME_GRAPH_HEAD, task_trace_datas))
         except (TypeError, IndexError, ValueError) as err:
@@ -239,11 +241,11 @@ class CoreCpuReduceViewer:
         return result_data
 
     @classmethod
-    def _format_task_trace_data(cls: any, sql_datas: list, sql_path: str) -> list:
+    def _format_task_trace_data(cls: any, sql_datas: list, result_dir: str) -> list:
         trace_data = []
-        op_names, task_types = cls.get_op_names_and_task_type(sql_path)
-        rts_task_type = cls.get_rts_track_task_type(sql_path)
-        total_cycle, total_time = cls.get_total_cycle(sql_path)
+        op_names, task_types = cls.get_op_names_and_task_type(result_dir)
+        rts_task_type = cls.get_rts_track_task_type(result_dir)
+        total_cycle, total_time = cls.get_total_cycle(result_dir)
         for sql_data in sql_datas:
             # key: stream_id task_id task_type batch_id
             _key_for_ops = "_".join([str(sql_data[0]), str(sql_data[1]), str(sql_data[-1])])
@@ -284,7 +286,7 @@ class CoreCpuReduceViewer:
         ai_cpu_datas = []
         dir_path = job_path
         ai_cpu_data = ParseAiCpuData.get_ai_cpu_from_ts(dir_path)
-        op_names, _ = cls.get_op_names_and_task_type(PathManager.get_sql_dir(dir_path))
+        op_names, _ = cls.get_op_names_and_task_type(dir_path)
         result_data = []
         if ai_cpu_data:
             for stream_id, task_id, sys_start, sys_end, batch_id in ai_cpu_data:
@@ -306,10 +308,9 @@ class CoreCpuReduceViewer:
 
     @classmethod
     def _get_all_reduce_data(cls: any, device_id: int, iter_range: IterationRange, result_dir: str) -> list:
-        sql_path = PathManager.get_sql_dir(result_dir)
         result_data = []
         trace_conn, trace_curs = DBManager.check_connect_db_path(
-            os.path.join(sql_path, DBNameConstant.DB_TRACE))
+            PathManager.get_db_path(result_dir, DBNameConstant.DB_TRACE))
         if not trace_conn or not trace_curs:
             return result_data
         if not DBManager.judge_table_exist(trace_curs, DBNameConstant.TABLE_TRAINING_TRACE) or \

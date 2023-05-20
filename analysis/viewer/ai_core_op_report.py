@@ -3,6 +3,7 @@
 # Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 
 import logging
+import os
 from collections import deque
 
 from analyzer.scene_base.profiling_scene import ProfilingScene
@@ -16,8 +17,10 @@ from common_func.ms_constant.str_constant import StrConstant
 from common_func.msvp_common import add_aicore_units
 from common_func.msvp_common import read_cpu_cfg
 from common_func.msvp_constant import MsvpConstant
+from common_func.path_manager import PathManager
 from common_func.platform.chip_manager import ChipManager
 from common_func.utils import Utils
+from msmodel.hccl.hccl_model import HcclViewModel
 from viewer.ge_info_report import get_ge_hash_dict
 from viewer.ge_info_report import get_ge_model_name_dict
 
@@ -151,6 +154,7 @@ class AiCoreOpReport:
         """
         ai_core_data = cls.get_ai_core_op_summary_data(project_path, db_path, configs)
         data = cls.get_ai_cpu_op_summary_data(project_path, db_path, ai_core_data, configs)
+        data.extend(cls.get_hccl_op_data(project_path, configs))
         headers = configs.get('headers')
         cls.delete_useless_cols(headers, data)
         cls.sort_summary_data(headers, data)
@@ -163,6 +167,37 @@ class AiCoreOpReport:
         if StrConstant.TASK_START_TIME in headers:
             task_start_index = headers.index(StrConstant.TASK_START_TIME)
         data.sort(key=lambda x: x[task_start_index])
+
+    @classmethod
+    def get_hccl_op_data(cls, project_path: str, configs: dict) -> list:
+        """
+        get hccl op summary data
+        """
+        if not os.path.exists(PathManager.get_db_path(project_path, DBNameConstant.DB_HCCL)):
+            return []
+        with HcclViewModel(project_path, DBNameConstant.DB_HCCL, [DBNameConstant.TABLE_HCCL_ALL_REDUCE]) as hccl_model:
+            if not hccl_model.check_table():
+                return []
+            hccl_comunication_data = hccl_model.get_hccl_op_data()
+        if not hccl_comunication_data:
+            return []
+
+        model_name = []
+        header_length = len(configs.get('headers', []))
+        model_name_and_id_dict = get_ge_model_name_dict(project_path)
+        hccl_data = [0] * len(hccl_comunication_data)
+        # hccl data for op summary
+        for index, _hccl_op in enumerate(hccl_comunication_data):
+            if not ProfilingScene().is_operator():
+                model_name = [model_name_and_id_dict.get(_hccl_op.model_id, Constant.NA)]
+            hccl_data[index] = model_name + [
+                _hccl_op.model_id, Constant.NA, Constant.NA, _hccl_op.index_id,
+                _hccl_op.op_name, _hccl_op.op_type, _hccl_op.task_type,
+                _hccl_op.first_timestamp, _hccl_op.duration / NumberConstant.NS_TO_US,
+                Constant.DEFAULT_VALUE, Constant.DEFAULT_VALUE
+            ]
+            hccl_data[index].extend([Constant.NA] * (header_length - len(hccl_data[index])))
+        return hccl_data
 
     @classmethod
     def get_ai_cpu_op_summary_data(cls: any, project_path: str, db_path: str, *args: any) -> list:

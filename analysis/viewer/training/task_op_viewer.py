@@ -61,7 +61,7 @@ class TaskOpViewer:
         if not DBManager.judge_table_exist(ge_curs, DBNameConstant.TABLE_GE_TASK):
             logging.warning(
                 "No ge data collected, maybe the TaskInfo table is not created, try to export data with no ge data")
-        if not DBManager.judge_table_exist(task_curs, DBNameConstant.TABLE_RUNTIME_TRACK):
+        if not DBManager.judge_table_exist(task_curs, DBNameConstant.TABLE_TASK_TRACK):
             logging.warning("No need to export task time data, maybe the RuntimeTrack table is not created.")
             return [], 0
         if not DBManager.judge_table_exist(hwts_curs, DBNameConstant.TABLE_HWTS_TASK_TIME) \
@@ -124,7 +124,7 @@ class TaskOpViewer:
     @staticmethod
     def _is_operator_scene_without_runtime_track(task_curs):
         return ProfilingScene().is_operator() \
-               and (not task_curs or not DBManager.judge_table_exist(task_curs, DBNameConstant.TABLE_RUNTIME_TRACK))
+               and (not task_curs or not DBManager.judge_table_exist(task_curs, DBNameConstant.TABLE_TASK_TRACK))
 
     @staticmethod
     def _add_memcpy_data(result_dir: str, data: list) -> list:
@@ -139,7 +139,7 @@ class TaskOpViewer:
         ge_sql = "SELECT op_name, stream_id, task_id, batch_id from {0}".format(
             DBNameConstant.TABLE_GE_TASK)
         track_sql = "SELECT task_type, stream_id, task_id, batch_id from {0}".format(
-            DBNameConstant.TABLE_RUNTIME_TRACK)
+            DBNameConstant.TABLE_TASK_TRACK)
 
         op_name_list = DBManager.fetch_all_data(ge_curs, ge_sql, dto_class=GeTaskDto)
         track_data_list = DBManager.fetch_all_data(task_curs, track_sql, dto_class=GeTaskDto)

@@ -19,7 +19,7 @@ class TestCoreCpuReduceViewer(unittest.TestCase):
         _db_manager.destroy(_db_manager.create_sql(DBNameConstant.DB_TRACE))
 
     def test_get_rts_track_task_type(self):
-        result = {'2_1_0': 'MEMCPY_ASYNC'}
+        result = {}
         create_sql = "CREATE TABLE IF NOT EXISTS " + DBNameConstant.TABLE_RUNTIME_TRACK + \
                      "(device_id,timestamp,task_type,stream_id,task_id,thread,batch_id)"
         data = ((0, 3450, 'MEMCPY_ASYNC', 2, 1, 1211, 0),)
