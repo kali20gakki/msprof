@@ -7,12 +7,6 @@ import os
 
 from common_func.constant import Constant
 from common_func.file_name_manager import get_acl_compiles
-from common_func.file_name_manager import get_ge_memory_application_info_compiles
-from common_func.file_name_manager import get_ge_ctx_id_info_compiles
-from common_func.file_name_manager import get_ge_graph_add_info_compiles
-from common_func.file_name_manager import get_ge_tensor_add_info_compiles
-from common_func.file_name_manager import get_ge_node_basic_info_compiles
-from common_func.file_name_manager import get_ge_fusion_add_info_compiles
 from common_func.file_name_manager import get_acl_hash_compiles
 from common_func.file_name_manager import get_ai_core_compiles
 from common_func.file_name_manager import get_ai_cpu_compiles
@@ -27,18 +21,25 @@ from common_func.file_name_manager import get_event_data_compiles
 from common_func.file_name_manager import get_ffts_pmu_compiles
 from common_func.file_name_manager import get_file_name_pattern_match
 from common_func.file_name_manager import get_freq_compiles
+from common_func.file_name_manager import get_ge_ctx_id_info_compiles
+from common_func.file_name_manager import get_ge_fusion_add_info_compiles
 from common_func.file_name_manager import get_ge_fusion_op_compiles
+from common_func.file_name_manager import get_ge_graph_add_info_compiles
 from common_func.file_name_manager import get_ge_hash_compiles
 from common_func.file_name_manager import get_ge_host_compiles
+from common_func.file_name_manager import get_ge_memory_application_info_compiles
 from common_func.file_name_manager import get_ge_model_load_compiles
 from common_func.file_name_manager import get_ge_model_time_compiles
+from common_func.file_name_manager import get_ge_node_basic_info_compiles
 from common_func.file_name_manager import get_ge_session_info_compiles
 from common_func.file_name_manager import get_ge_step_info_compiles
 from common_func.file_name_manager import get_ge_task_compiles
+from common_func.file_name_manager import get_ge_tensor_add_info_compiles
 from common_func.file_name_manager import get_ge_tensor_info_compiles
 from common_func.file_name_manager import get_hash_data_compiles
 from common_func.file_name_manager import get_hbm_compiles
 from common_func.file_name_manager import get_hccl_hcom_compiles
+from common_func.file_name_manager import get_hccl_info_compiles
 from common_func.file_name_manager import get_hccs_compiles
 from common_func.file_name_manager import get_helper_model_with_q_compiles
 from common_func.file_name_manager import get_host_queue_compiles
@@ -46,10 +47,12 @@ from common_func.file_name_manager import get_hwts_compiles
 from common_func.file_name_manager import get_hwts_vector_compiles
 from common_func.file_name_manager import get_l2_cache_compiles
 from common_func.file_name_manager import get_llc_compiles
+from common_func.file_name_manager import get_memcpy_info_compact_compiles
 from common_func.file_name_manager import get_msproftx_cann_compiles
 from common_func.file_name_manager import get_msproftx_compiles
 from common_func.file_name_manager import get_msproftx_pipeline_compiles
 from common_func.file_name_manager import get_msproftx_torch_compiles
+from common_func.file_name_manager import get_multi_thread_compiles
 from common_func.file_name_manager import get_nic_compiles
 from common_func.file_name_manager import get_npu_mem_compiles
 from common_func.file_name_manager import get_parallel_strategy_compiles
@@ -63,10 +66,10 @@ from common_func.file_name_manager import get_soc_log_compiles
 from common_func.file_name_manager import get_soc_profiler_compiles
 from common_func.file_name_manager import get_sys_cpu_usage_compiles
 from common_func.file_name_manager import get_sys_mem_compiles
+from common_func.file_name_manager import get_task_track_compact_compiles
 from common_func.file_name_manager import get_ts_cpu_compiles
 from common_func.file_name_manager import get_ts_track_aiv_compiles
 from common_func.file_name_manager import get_ts_track_compiles
-from common_func.file_name_manager import get_task_track_compact_compiles, get_memcpy_info_compact_compiles
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.path_manager import PathManager
 from framework.prof_factory_maker import ProfFactoryMaker
@@ -136,6 +139,8 @@ class FileDispatch:
         DataTag.HASH_DICT: get_hash_data_compiles(),
         DataTag.TASK_TRACK: get_task_track_compact_compiles(),
         DataTag.MEMCPY_INFO: get_memcpy_info_compact_compiles(),
+        DataTag.HCCL_INFO: get_hccl_info_compiles(),
+        DataTag.MULTI_THREAD: get_multi_thread_compiles(),
         DataTag.GRAPH_ADD_INFO: get_ge_graph_add_info_compiles(),
         DataTag.TENSOR_ADD_INFO: get_ge_tensor_add_info_compiles(),
         DataTag.NODE_BASIC_INFO: get_ge_node_basic_info_compiles(),

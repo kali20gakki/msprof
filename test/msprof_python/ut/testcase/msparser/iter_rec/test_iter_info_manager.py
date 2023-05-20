@@ -22,7 +22,7 @@ class TestIterInfoUpdater(unittest.TestCase):
 
     def test_initial_iter_to_info_2(self: any) -> None:
         with mock.patch("common_func.msvp_common.path_check", return_value=True), \
-                mock.patch("common_func.path_manager.PathManager.get_db_path"):
+                mock.patch("common_func.path_manager.PathManager.get_db_path", return_value='test'):
             ge_mock = mock.Mock
             ge_mock.__enter__ = GeInfoModel.__enter__
             ge_mock.__exit__ = GeInfoModel.__exit__

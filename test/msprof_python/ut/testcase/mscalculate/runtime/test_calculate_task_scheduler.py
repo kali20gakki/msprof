@@ -22,6 +22,7 @@ NAMESPACE = 'mscalculate.runtime.calculate_task_scheduler'
 class TestCalculateTaskScheduler(unittest.TestCase):
 
     def test_create_task_time(self):
+        InfoConfReader()._sample_json = {'devices': '0'}
         device = 123
         iter_time_range = [1, 1]
         create_sql = "create table IF NOT EXISTS TimeLine (replayid INTEGER,tasktype INTEGER," \
@@ -195,7 +196,10 @@ class TestCalculateTaskScheduler(unittest.TestCase):
 
     def test_generate_report_data_2(self):
         InfoConfReader()._info_json = {"devices": None}
-        with mock.patch(NAMESPACE + '.logging.error'):
+        InfoConfReader()._sample_json = {'devices': '0'}
+        with mock.patch('common_func.msprof_iteration.MsprofIteration.get_step_syscnt_range_by_iter_range',
+                        return_value=[]), \
+                mock.patch(NAMESPACE + '.logging.error'):
             key = CalculateTaskScheduler({"result_dir": 123})
             key.generate_report_data()
 

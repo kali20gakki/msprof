@@ -30,7 +30,7 @@ class TestTorchNpuRelationCalculator(unittest.TestCase):
     def test_ms_run(self):
         with mock.patch(NAMESPACE + ".SyncAclNpuViewModel.get_torch_acl_relation_data",
                         return_value=[self.torch_acl_data1]), \
-                mock.patch(NAMESPACE + ".PathManager.get_db_path"), \
+                mock.patch(NAMESPACE + ".PathManager.get_db_path", return_value='test'), \
                 mock.patch(NAMESPACE + ".SyncAclNpuViewModel.check_table", return_value=True), \
                 mock.patch(NAMESPACE + ".ViewModel.check_table", return_value=True), \
                 mock.patch(NAMESPACE + ".DBManager.fetch_all_data", return_value=[self.ge_data]), \

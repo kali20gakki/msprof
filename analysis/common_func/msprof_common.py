@@ -133,7 +133,8 @@ def analyze_collect_data(collect_path: str, sample_config: dict) -> None:
     :param collect_path: the collect path
     :param sample_config: the sample config
     """
-    check_collection_dir(collect_path)
+    if not check_collection_dir(collect_path):
+        return
     prepare_for_parse(collect_path)
     print_info(MsProfCommonConstant.COMMON_FILE_NAME,
                'Start analyzing data in "%s" ...' % collect_path)
@@ -170,7 +171,7 @@ def add_all_file_complete(collect_path: str) -> None:
         pass
 
 
-def check_collection_dir(collect_path: str) -> None:
+def check_collection_dir(collect_path: str) -> bool:
     """
     check whether the file is valid.
     :param collect_path: the collect path
@@ -185,7 +186,14 @@ def check_collection_dir(collect_path: str) -> None:
     if not file_all:
         message = f"There is no file in {PathManager.get_data_dir(collect_path)}. " \
                   f"Collect data failed. More info could be found in the path of slog on your core."
-        raise ProfException(ProfException.PROF_INVALID_EXECUTE_CMD_ERROR, message, warn)
+        warn(MsProfCommonConstant.COMMON_FILE_NAME, message)
+        return False
+    if not InfoConfReader().is_version_matched():
+        warn(MsProfCommonConstant.COMMON_FILE_NAME, f'The version package of data collection '
+                                                    f'does not match the package of data analyzing, '
+                                                    f'and some data may not be analyzed.')
+        return True
+    return True
 
 
 def get_info_by_key(path: str, key: any) -> str:

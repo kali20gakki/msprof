@@ -64,6 +64,7 @@ class CommonProfRule:
 
     # prof rule and condition file name
     RESULT_PROF_JSON = "prof_rule_{}.json"
+    RESULT_PROF_JSON_HOST = "prof_rule.json"
 
     # tuning type
     TUNING_OPERATOR = 'Op Summary'

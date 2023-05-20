@@ -35,6 +35,7 @@ class InfoConfReader:
     NPU_PROFILING_TYPE = "npu_profiling"
     HOST_PROFILING_TYPE = "host_profiling"
     HOST_DEFAULT_FREQ = 0
+    ANALYSIS_VERSION = "1.0"
 
     def __init__(self: any) -> None:
         self._info_json = None
@@ -113,7 +114,7 @@ class InfoConfReader:
         get device list from project path
         :return: devices list in the format: "0,1,2,3"
         """
-        device_reader = self._info_json.get("devices")
+        device_reader = self._sample_json.get("devices")
         devices = ""
         if device_reader:
             devices += str(device_reader) + ","
@@ -128,6 +129,12 @@ class InfoConfReader:
         if rank_id == Constant.DEFAULT_INVALID_VALUE or len(str(rank_id)) == 0:
             return Constant.NA
         return rank_id
+
+    def is_version_matched(self):
+        """
+        check the version between data-collection and the data-analysis
+        """
+        return self._info_json.get("version", Constant.NA) == self.ANALYSIS_VERSION
 
     def get_device_id(self: any) -> str:
         """
@@ -288,9 +295,9 @@ class InfoConfReader:
         return [job_info, device_id, collection_time, rank_id]
 
     def get_host_freq(self: any) -> float:
-        sycle_to_time = self._info_json.get('cycleToTime', [])
-        if sycle_to_time:
-            freq = sycle_to_time[0].get('realCpuFreq', self.HOST_DEFAULT_FREQ)
+        host_cpu_info = self._info_json.get('CPU', [])
+        if host_cpu_info:
+            freq = host_cpu_info[0].get('Frequency', self.HOST_DEFAULT_FREQ)
             if is_number(freq):
                 return freq
         return self.HOST_DEFAULT_FREQ
@@ -302,6 +309,9 @@ class InfoConfReader:
         """
         return int(timestamp * NumberConstant.USTONS + self.get_start_timestamp() +
                    self.get_delta_time() * NumberConstant.NANO_SECOND) / NumberConstant.USTONS
+
+    def get_ai_core_profiling_mode(self):
+        return self._sample_json.get("ai_core_profiling_mode")
 
     def _load_json(self: any, result_path: str) -> None:
         """

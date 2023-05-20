@@ -6,6 +6,7 @@ import logging
 import os
 
 from common_func.constant import Constant
+from common_func.db_name_constant import DBNameConstant
 
 
 class PathManager:
@@ -15,6 +16,7 @@ class PathManager:
     DATA = "data"
     LOG = "log"
     SQLITE = "sqlite"
+    HOST = "host"
     COLLECTION_LOG = "collection.log"
     DISPATCH = "dispatch"
     TIMELINE = 'timeline'
@@ -74,11 +76,30 @@ class PathManager:
         return cls.get_path_under_result_dir(result_dir, cls.SQLITE)
 
     @classmethod
+    def get_host_result_dir(cls, result_dir: str):
+        """
+        get host directory
+        """
+        return os.path.realpath(cls.get_path_under_result_dir(result_dir, "..", cls.HOST))
+
+    @classmethod
     def get_db_path(cls: any, result_dir: str, db_name: str) -> str:
         """
         get db name path in result directory
         """
-        return cls.get_path_under_result_dir(result_dir, cls.SQLITE, db_name)
+        db_filter = {
+            DBNameConstant.DB_ACL_MODULE, DBNameConstant.DB_RUNTIME, DBNameConstant.DB_GE_MODEL_INFO,
+            DBNameConstant.DB_GE_MODEL_TIME, DBNameConstant.DB_GE_HOST_INFO, DBNameConstant.DB_GE_INFO,
+            DBNameConstant.DB_RTS_TRACK, DBNameConstant.DB_HCCL, DBNameConstant.DB_MSPROFTX,
+            DBNameConstant.DB_GE_HASH, DBNameConstant.DB_API_DATA, DBNameConstant.DB_EVENT_DATA,
+            DBNameConstant.DB_HCCL_INFO, DBNameConstant.DB_MULTI_THREAD, DBNameConstant.DB_TENSOR_ADD_INFO,
+            DBNameConstant.DB_NODE_BASIC_INFO, DBNameConstant.DB_FUSION_ADD_INFO, DBNameConstant.DB_GRAPH_ADD_INFO,
+            DBNameConstant.DB_CTX_ID
+        }
+        base_result_dir = result_dir
+        if db_name in db_filter:
+            base_result_dir = cls.get_host_result_dir(result_dir)
+        return cls.get_path_under_result_dir(base_result_dir, cls.SQLITE, db_name)
 
     @classmethod
     def get_collection_log_path(cls: any, result_dir: str) -> str:
