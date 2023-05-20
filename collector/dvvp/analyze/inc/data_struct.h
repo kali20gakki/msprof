@@ -180,6 +180,29 @@ struct ProfOpDesc {
     uint64_t cubeFops;
     uint64_t vectorFops;    // total size: 64 bytes
 };
+
+struct RtOpInfo {
+    uint64_t tsTrackTimeStamp;
+    uint64_t start;
+    uint64_t end;
+    uint32_t threadId;
+    bool ageFlag;
+    uint64_t startAicore;
+    uint64_t endAicore;
+    uint32_t flag;
+};
+ 
+// ge op info
+struct GeOpFlagInfo {
+    uint64_t opNameHash;
+    uint64_t opTypeHash;
+    uint64_t modelId;
+    uint64_t start;
+    uint64_t end;
+    bool modelFlag;
+    bool nodeFlag;
+    bool ageFlag;
+};
 }  // namespace Analyze
 }  // namespace Dvvp
 }  // namespace Analysis

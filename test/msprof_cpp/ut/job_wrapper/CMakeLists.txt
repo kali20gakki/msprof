@@ -14,6 +14,7 @@ set(profilerSrcFiles
     ${MSPROF_SOURCE_DIR}/dvvp/analyze/src/analyzer_ffts.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/analyze/src/analyzer_hwts.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/analyze/src/analyzer_ts.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/analyze/src/analyzer_rt.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/analyze/src/op_desc_parser.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/config/config_manager.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/logger/cmd_log.cpp
