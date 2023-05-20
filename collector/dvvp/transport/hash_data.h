@@ -31,6 +31,7 @@ public:
     int32_t Uninit();
     bool IsInit() const;
     void SaveHashData(int32_t devId);
+    void SaveNewHashData();
     std::string &GetHashData(const std::string &module, uint64_t hashId);
     uint64_t GenHashId(const std::string &module, CONST_CHAR_PTR data, uint32_t dataLen);
 

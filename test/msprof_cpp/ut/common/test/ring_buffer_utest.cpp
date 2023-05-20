@@ -59,30 +59,26 @@ TEST_F(COMMON_QUEUE_RING_BUFFER_TEST, RingBuffer_SetQuit) {
 TEST_F(COMMON_QUEUE_RING_BUFFER_TEST, RingBuffer_TryPush) {
     ReporterDataChunk defaultData;
     std::shared_ptr<RingBuffer<ReporterDataChunk> > bq(new RingBuffer<ReporterDataChunk>(defaultData));
-    ReporterData data;
-    data.deviceId = 0;
-    data.dataLen = sizeof(ReporterData);
-    data.data = reinterpret_cast<UNSIGNED_CHAR_PTR>(&data);
-
+    ReporterDataChunk data;
     //not inited
-    EXPECT_EQ(false, bq->TryPush(&data));
+    EXPECT_EQ(false, bq->TryPush(data));
 
     bq->Init(2);
 
     //exceeded max cycles
     bq->maxCycles_ = 0;
-    EXPECT_EQ(false, bq->TryPush(&data));
+    EXPECT_EQ(false, bq->TryPush(data));
 
     //not exceed max cycles
     bq->maxCycles_ = 1024;
-    EXPECT_EQ(true, bq->TryPush(&data));
+    EXPECT_EQ(true, bq->TryPush(data));
 
     //queue is full, will use Queue Level2
-    EXPECT_EQ(true, bq->TryPush(&data));
+    EXPECT_EQ(true, bq->TryPush(data));
 
     //queue quits
     bq->SetQuit();
-    EXPECT_EQ(false, bq->TryPush(&data));
+    EXPECT_EQ(false, bq->TryPush(data));
 
     bq.reset();
 }
@@ -90,11 +86,8 @@ TEST_F(COMMON_QUEUE_RING_BUFFER_TEST, RingBuffer_TryPush) {
 TEST_F(COMMON_QUEUE_RING_BUFFER_TEST, RingBuffer_TryPop) {
     ReporterDataChunk defaultData;
     std::shared_ptr<RingBuffer<ReporterDataChunk> > bq(new RingBuffer<ReporterDataChunk>(defaultData));
-    ReporterData data;
-    data.deviceId = 0;
-    data.dataLen = sizeof(ReporterData);
-    data.data = reinterpret_cast<UNSIGNED_CHAR_PTR>(&data);
-    
+    ReporterDataChunk data;
+
     // std::shared_ptr<RingBuffer<int> > bq(new RingBuffer<int>(-1));
     ReporterDataChunk data2;
     //not inited
@@ -105,8 +98,7 @@ TEST_F(COMMON_QUEUE_RING_BUFFER_TEST, RingBuffer_TryPop) {
     //queue is empty
     EXPECT_EQ(false, bq->TryPop(data2));
 
-
-    bq->TryPush(&data);
+    bq->TryPush(data);
     //not ready
     // bq->dataAvails_[0] = RingBuffer<int>::DATA_STATUS_NOT_READY;
     bq->dataAvails_[0] = static_cast<int>(DataStatus::DATA_STATUS_NOT_READY);
@@ -114,7 +106,6 @@ TEST_F(COMMON_QUEUE_RING_BUFFER_TEST, RingBuffer_TryPop) {
 
     bq->dataAvails_[0] = static_cast<int>(DataStatus::DATA_STATUS_READY);
     EXPECT_EQ(true, bq->TryPop(data2));
-    EXPECT_EQ(sizeof(ReporterData), data2.dataLen);
 
     bq.reset();
 }
@@ -122,28 +113,25 @@ TEST_F(COMMON_QUEUE_RING_BUFFER_TEST, RingBuffer_TryPop) {
 TEST_F(COMMON_QUEUE_RING_BUFFER_TEST, RingBuffer_GetUsedSize) {
     ReporterDataChunk defaultData;
     std::shared_ptr<RingBuffer<ReporterDataChunk> > bq(new RingBuffer<ReporterDataChunk>(defaultData));
-    ReporterData data;
-    data.deviceId = 0;
-    data.dataLen = sizeof(ReporterData);
-    data.data = reinterpret_cast<UNSIGNED_CHAR_PTR>(&data);
- 
+    ReporterDataChunk data;
+
     bq->Init(4);
     int value = 0;
     EXPECT_EQ(value, bq->GetUsedSize());
- 
-    EXPECT_EQ(true, bq->TryPush(&data));
+
+    EXPECT_EQ(true, bq->TryPush(data));
     value = 1;
     EXPECT_EQ(value, bq->GetUsedSize());
- 
-    EXPECT_EQ(true, bq->TryPush(&data));
+
+    EXPECT_EQ(true, bq->TryPush(data));
     value = 2;
     EXPECT_EQ(value, bq->GetUsedSize());
- 
-    EXPECT_EQ(true, bq->TryPush(&data));
+
+    EXPECT_EQ(true, bq->TryPush(data));
     value = 3;
     EXPECT_EQ(value, bq->GetUsedSize());
- 
-    EXPECT_EQ(true, bq->TryPush(&data));
+
+    EXPECT_EQ(true, bq->TryPush(data));
     value = 4;
     EXPECT_EQ(value, bq->GetUsedSize());
  
@@ -154,7 +142,6 @@ TEST_F(COMMON_QUEUE_RING_BUFFER_TEST, RingBuffer_GetUsedSize) {
  
     ReporterDataChunk data2;
     EXPECT_EQ(true, bq->TryPop(data2));
-    EXPECT_EQ(sizeof(ReporterData), data2.dataLen);
     value = 3;
     EXPECT_EQ(value, bq->GetUsedSize());
  
@@ -163,7 +150,6 @@ TEST_F(COMMON_QUEUE_RING_BUFFER_TEST, RingBuffer_GetUsedSize) {
     EXPECT_EQ(writeValue, bq->writeIndex_.load());
  
     EXPECT_EQ(true, bq->TryPop(data2));
-    EXPECT_EQ(sizeof(ReporterData), data2.dataLen);
     value = 2;
     EXPECT_EQ(value, bq->GetUsedSize());
  
@@ -173,7 +159,6 @@ TEST_F(COMMON_QUEUE_RING_BUFFER_TEST, RingBuffer_GetUsedSize) {
     EXPECT_EQ(writeValue, bq->writeIndex_.load());
  
     EXPECT_EQ(true, bq->TryPop(data2));
-    EXPECT_EQ(sizeof(ReporterData), data2.dataLen);
     value = 1;
     EXPECT_EQ(value, bq->GetUsedSize());
  
@@ -182,14 +167,14 @@ TEST_F(COMMON_QUEUE_RING_BUFFER_TEST, RingBuffer_GetUsedSize) {
     EXPECT_EQ(readValue, bq->readIndex_.load());
     EXPECT_EQ(writeValue, bq->writeIndex_.load());
  
-    bq->TryPush(&data);
+    bq->TryPush(data);
     value = 2;
     EXPECT_EQ(value, bq->GetUsedSize());
  
     EXPECT_EQ(readValue, bq->readIndex_.load());
     EXPECT_EQ(writeValue, bq->writeIndex_.load());
  
-    bq->TryPush(&data);
+    bq->TryPush(data);
     value = 3;
     EXPECT_EQ(value, bq->GetUsedSize());
  
@@ -197,7 +182,6 @@ TEST_F(COMMON_QUEUE_RING_BUFFER_TEST, RingBuffer_GetUsedSize) {
     EXPECT_EQ(writeValue, bq->writeIndex_.load());
  
     EXPECT_EQ(true, bq->TryPop(data2));
-    EXPECT_EQ(sizeof(ReporterData), data2.dataLen);
     value = 2;
     EXPECT_EQ(value, bq->GetUsedSize());
  
@@ -205,7 +189,6 @@ TEST_F(COMMON_QUEUE_RING_BUFFER_TEST, RingBuffer_GetUsedSize) {
     EXPECT_EQ(writeValue, bq->writeIndex_.load());
  
     EXPECT_EQ(true, bq->TryPop(data2));
-    EXPECT_EQ(sizeof(ReporterData), data2.dataLen);
     value = 1;
     EXPECT_EQ(value, bq->GetUsedSize());
  

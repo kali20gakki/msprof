@@ -182,6 +182,9 @@ private:
     int StartSubscribeDeviceTask(const uint32_t devId, const uint32_t modelId,
         PROF_SUB_CONF_CONST_PTR profSubscribeConfig);
     int CancleSubscribeDeviceTask(const uint32_t devId, const uint32_t modelId);
+    int CancleSubScribeDevTask(const uint32_t devId, const uint32_t modelId);
+    int LaunchSubscribeDevTask(const uint32_t devId, const uint32_t modelId,
+                               PROF_SUB_CONF_CONST_PTR profSubscribeConfig);
 
 private:
     bool isReady_;

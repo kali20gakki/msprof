@@ -33,7 +33,7 @@ enum ProfCtrlCallbackType {
     PROF_CTRL_INIT_DYNA = 0xFF,           // start profiling for dynamic profiling
 };
 
-enum class ProfilerCallbackType {
+enum ProfilerCallbackType {
     PROFILE_CTRL_CALLBACK = 0,
     PROFILE_DEVICES_STATE_CALLBACK,
     PROFILE_REPORT_API_CALLBACK,
@@ -69,7 +69,7 @@ using VOID_PTR = void *;
  */
 using ProfCommandHandle = int32_t (*)(uint32_t type, void *data, uint32_t len);
 using ProfReportHandle = int32_t (*)(uint32_t moduleId, uint32_t type, VOID_PTR data, uint32_t len);
-using ProfProfilerHandle = int32_t (*)(ProfilerCallbackType callbackType, VOID_PTR callback, uint32_t len);
+using ProfProfilerHandle = int32_t (*)(int32_t callbackType, VOID_PTR callback, uint32_t len);
 using ProfCtrlHandle = int32_t (*)(uint32_t type, VOID_PTR data, uint32_t len);
 using ProfSetDeviceHandle = int32_t (*)(VOID_PTR data, uint32_t len);
 

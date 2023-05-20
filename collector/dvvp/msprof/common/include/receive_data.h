@@ -17,6 +17,8 @@
 #include <map>
 #include <memory>
 #include <thread>
+#include <functional>
+#include "prof_common.h"
 #include "bound_queue.h"
 #include "codec.h"
 #include "memory/chunk_pool.h"
@@ -55,6 +57,14 @@ struct ReporterDataChunk {
     ReporterDataChunkPayload data;
 };
 
+enum MsprofProfileDataType {
+    MSPROF_DEFAULT_PROFILE_DATA_TYPE = 0,
+    MSPROF_API_PROFILE_DATA_TYPE,
+    MSPROF_EVENT_PROFILE_DATA_TYPE,
+    MSPROF_COMPACT_PROFILE_DATA_TYPE,
+    MSPROF_ADDITIONAL_PROFILE_DATA_TYPE
+};
+
 enum MsprofReporterId {
     AGING_API                 = 0,
     UNAGING_API               = 1,
@@ -65,7 +75,7 @@ enum MsprofReporterId {
     AGING_ADDITIONAL_INFO     = 6,
     UNAGING_ADDITIONAL_INFO   = 7
 };
- 
+
 const std::vector<ModuleIdName> MSPROF_MODULE_REPORT_TABLE = {
     {AGING_API,                 "aging.api",             RING_BUFF_CAPACITY},
     {UNAGING_API,               "unaging.api",           RING_BUFF_CAPACITY},
@@ -94,6 +104,10 @@ public:
         UNUSED(devId);
         MSPROF_LOGI("ReceiveData::DumpDynProfCachedMsg, devId is %s", devId.c_str());
     }
+    int32_t DoReportData(const MsprofApi &dataChunk);
+    int32_t DoReportData(const MsprofEvent &dataChunk);
+    int32_t DoReportData(const MsprofCompactInfo &dataChunk);
+    int32_t DoReportData(const MsprofAdditionalInfo &dataChunk);
 
 protected:
     virtual void StopReceiveData();
@@ -117,10 +131,25 @@ protected:
     std::set<std::string> devIds_;
 
 private:
-    int DoReportData(CONST_REPORT_DATA_PTR rData);
+    int DoReportData(const ReporterDataChunk& dataChunk);
+    bool IsNewDataStructModule(const std::string &module) const;
+    template<typename T> int DumpData(std::vector<T> &message, SHARED_PTR_ALIA<FileChunkReq> fileChunk);
+    void RunProfileData(std::vector<SHARED_PTR_ALIA<FileChunkReq>>& fileChunks);
+    template<typename T>
+    void RunNoTagData(analysis::dvvp::common::queue::RingBuffer<T> &dataBuffer,
+        std::vector<SHARED_PTR_ALIA<FileChunkReq>>& fileChunks);
+    template<typename T>
+    void RunTagData(analysis::dvvp::common::queue::RingBuffer<T> &dataBuffer,
+        std::vector<SHARED_PTR_ALIA<FileChunkReq>>& fileChunks);
+    void SetDataChunkTag(uint16_t level, uint32_t typeId, std::string &tag) const;
 
 private:
     analysis::dvvp::common::queue::RingBuffer<ReporterDataChunk> dataChunkBuf_;
+    analysis::dvvp::common::queue::RingBuffer<MsprofApi> dataBufApi_;
+    analysis::dvvp::common::queue::RingBuffer<MsprofEvent> dataBufEvent_;
+    analysis::dvvp::common::queue::RingBuffer<MsprofCompactInfo> dataBufCompactInfo_;
+    analysis::dvvp::common::queue::RingBuffer<MsprofAdditionalInfo> dataBufAdditionalInfo_;
+    int32_t profileDataType_;
     std::condition_variable cvBufferEmpty_;
     std::mutex cvBufferEmptyMtx_;
     std::atomic<uint64_t> totalPushCounter_;
@@ -131,6 +160,7 @@ private:
     uint64_t totalCountFromRingBuff_;
     uint64_t totalDataLengthFromRingBuff_;
     unsigned long long timeStamp_;
+    std::function<void(std::vector<SHARED_PTR_ALIA<FileChunkReq>>&)> runUploader_;
 };
 }}
 #endif

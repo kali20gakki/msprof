@@ -11,10 +11,9 @@
 #define MSPROF_ENGINE_MSPROF_REPORTER_MGR_H
 #include <mutex>
 #include "message.h"
-#include "prof_common.h"
 #include "singleton/singleton.h"
 #include "msprof_callback_handler.h"
- 
+
 namespace Msprof {
 namespace Engine {
 using namespace analysis::dvvp::proto;
@@ -34,7 +33,7 @@ const std::map<uint16_t, std::map<uint32_t, std::string>> DEFAULT_TYPE_INFO = {
         {MSPROF_REPORT_HCCL_SLAVE_TYPE, "slave"}
     }}
 };
- 
+
 class MsprofReporterMgr : public analysis::dvvp::common::singleton::Singleton<MsprofReporterMgr> {
 public:
     MsprofReporterMgr();
@@ -42,7 +41,7 @@ public:
 public:
     int32_t StartReporters();
     int32_t StopReporters();
-    void FlushAllReporter(const std::string &devId);
+    void FlushAllReporter(const std::string &devId = "");
     int32_t ReportData(uint32_t agingFlag, const MsprofApi &data);
     int32_t ReportData(uint32_t agingFlag, const MsprofEvent &data);
     int32_t ReportData(uint32_t agingFlag, const MsprofCompactInfo &data);
@@ -52,11 +51,11 @@ public:
     std::string& GetRegReportTypeInfo(uint16_t level, uint32_t typeId);
     uint64_t GetHashId(const std::string &info);
     int32_t SendAdditionalInfo(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> fileChunk);
- 
+
 private:
     void FillFileChunkData(const std::string &saveHashData, SHARED_PTR_ALIA<FileChunkReq> fileChunk) const;
     void SaveTypeInfo();
- 
+
 private:
     std::unordered_map<uint16_t, std::unordered_map<uint32_t, std::string>> reportTypeInfoMap_;
     std::vector<MsprofCallbackHandler> reporters_;

@@ -305,12 +305,18 @@ int InfoJson::AddHostInfo(SHARED_PTR_ALIA<InfoMain> infoMain)
         infoCpu->set_id(i);
         infoCpu->set_name(cpuInfo[i].manufacturer);
         infoCpu->set_type(cpuInfo[i].version);
-        infoCpu->set_frequency(cpuInfo[i].maxFrequency);
+        infoCpu->set_frequency(GetCpuFrequency());
         infoCpu->set_logical_cpu_count(cpuInfo[i].nthreads == 0 ? cpuInfo[i].ncounts : cpuInfo[i].nthreads);
     }
     MmCpuInfoFree(cpuInfo, cpuNum);
     MSPROF_LOGI("End to AddHostInfo in info.json, devices: %s.", devices_.c_str());
     return PROFILING_SUCCESS;
+}
+
+uint32_t InfoJson::GetCpuFrequency() const
+{
+    const uint32_t FREQUENCY_GHZ_TO_MHZ = 1000;
+    return FREQUENCY_GHZ_TO_MHZ;
 }
 
 int InfoJson::GetCtrlCpuInfo(uint32_t devId, struct DeviceInfo &devInfo)

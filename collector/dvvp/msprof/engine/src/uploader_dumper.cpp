@@ -254,13 +254,13 @@ int UploaderDumper::Dump(std::vector<SHARED_PTR_ALIA<analysis::dvvp::proto::File
 
 void UploaderDumper::AddToUploader(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message)
 {
-    if (message->filename() == "Msprof") {
+    std::string devId = message->tagsuffix();
+    if (devId == std::to_string(DEFAULT_HOST_ID)) {
         message->set_datamodule(FileChunkDataModule::PROFILING_IS_FROM_MSPROF_HOST);
     } else {
         message->set_datamodule(FileChunkDataModule::PROFILING_IS_FROM_MSPROF);
     }
 
-    std::string devId = message->tagsuffix();
     std::string encoded = analysis::dvvp::message::EncodeMessage(message);
     SHARED_PTR_ALIA<Uploader> uploader = nullptr;
     analysis::dvvp::transport::UploaderMgr::instance()->GetUploader(devId, uploader);

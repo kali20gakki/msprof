@@ -20,6 +20,7 @@
 #include "msprof_stamp_pool.h"
 #define private public
 #include "msprof_tx_manager.h"
+#include "msprof_reporter_mgr.h"
 
 static uint8_t g_device_id = 0;
 static bool createPluginTrue = true;

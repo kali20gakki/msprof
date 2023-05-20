@@ -131,6 +131,7 @@ set(msprofilerCpp
     message/codec.cpp
     msprof/common/src/receive_data.cpp
     msprof/common/src/msprof_callback_handler.cpp
+    msprof/common/src/msprof_reporter_mgr.cpp
     msprof/engine/src/aicpu_plugin.cpp
     msprof/engine/src/prof_api_common.cpp
     msprof/engine/src/prof_acl_mgr.cpp

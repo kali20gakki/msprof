@@ -15,7 +15,7 @@
 #include "uploader_mgr.h"
 #include "msprof_reporter_mgr.h"
 #include "prof_acl_mgr.h"
- 
+
 using namespace analysis::dvvp::proto;
 using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::common::utils;
@@ -32,7 +32,6 @@ protected:
     }
 };
  
- 
 TEST_F(MsprofReporterMgrUtest, StartReporters)
 {
     GlobalMockObject::verify();
@@ -43,7 +42,7 @@ TEST_F(MsprofReporterMgrUtest, StartReporters)
     EXPECT_EQ(PROFILING_FAILED, MsprofReporterMgr::instance()->StartReporters());
  
     EXPECT_EQ(PROFILING_SUCCESS, MsprofReporterMgr::instance()->StartReporters());
-    
+
     // repeat start reporters
     EXPECT_EQ(PROFILING_SUCCESS, MsprofReporterMgr::instance()->StartReporters());
 }
@@ -61,7 +60,7 @@ TEST_F(MsprofReporterMgrUtest, ReportApiData)
         .stubs()
         .will(returnValue(true));
     EXPECT_EQ(PROFILING_SUCCESS, MsprofReporterMgr::instance()->StartReporters());
-    
+
     MsprofApi data;
     EXPECT_EQ(PROFILING_SUCCESS, MsprofReporterMgr::instance()->ReportData(true, data));
 }
@@ -73,7 +72,7 @@ TEST_F(MsprofReporterMgrUtest, ReportEventData)
         .stubs()
         .will(returnValue(true));
     EXPECT_EQ(PROFILING_SUCCESS, MsprofReporterMgr::instance()->StartReporters());
-    
+
     MsprofEvent data;
     EXPECT_EQ(PROFILING_SUCCESS, MsprofReporterMgr::instance()->ReportData(true, data));
 }
@@ -85,7 +84,7 @@ TEST_F(MsprofReporterMgrUtest, ReportCompactData)
         .stubs()
         .will(returnValue(true));
     EXPECT_EQ(PROFILING_SUCCESS, MsprofReporterMgr::instance()->StartReporters());
-    
+
     MsprofCompactInfo data;
     EXPECT_EQ(PROFILING_SUCCESS, MsprofReporterMgr::instance()->ReportData(true, data));
 }
@@ -97,7 +96,7 @@ TEST_F(MsprofReporterMgrUtest, ReportAdditionalData)
         .stubs()
         .will(returnValue(true));
     EXPECT_EQ(PROFILING_SUCCESS, MsprofReporterMgr::instance()->StartReporters());
-    
+
     MsprofAdditionalInfo data;
     EXPECT_EQ(PROFILING_SUCCESS, MsprofReporterMgr::instance()->ReportData(true, data));
 }
@@ -110,7 +109,7 @@ TEST_F(MsprofReporterMgrUtest, RegReportTypeInfo)
     std::string typeName = "test";
     MsprofReporterMgr::instance()->RegReportTypeInfo(level, typeId, typeName);
     EXPECT_EQ(typeName, MsprofReporterMgr::instance()->reportTypeInfoMap_[level][typeId]);
-    
+
     // reg typeinfo for same level and type id
     MsprofReporterMgr::instance()->RegReportTypeInfo(level, typeId, typeName);
 }
@@ -125,14 +124,13 @@ TEST_F(MsprofReporterMgrUtest, GetRegReportTypeInfo)
     MsprofReporterMgr::instance()->RegReportTypeInfo(level, typeId, typeName);
     EXPECT_EQ(typeName, MsprofReporterMgr::instance()->GetRegReportTypeInfo(level, typeId));
 }
- 
- 
+
 TEST_F(MsprofReporterMgrUtest, StopReporters)
 {
     GlobalMockObject::verify();
     // stop before start
     EXPECT_EQ(PROFILING_SUCCESS, MsprofReporterMgr::instance()->StopReporters());
- 
+
     // stop after start
     MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::IsInited)
         .stubs()
@@ -152,6 +150,3 @@ TEST_F(MsprofReporterMgrUtest, StopReporters)
     EXPECT_EQ(PROFILING_SUCCESS, MsprofReporterMgr::instance()->StopReporters());
     EXPECT_EQ(PROFILING_SUCCESS, MsprofReporterMgr::instance()->StopReporters());
 }
-test/msprof_cpp/ut/msprof/test/msprof_utest.cpp
-1
-0

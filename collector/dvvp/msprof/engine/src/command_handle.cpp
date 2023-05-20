@@ -12,6 +12,7 @@
 #include "prof_common.h"
 #include "prof_acl_mgr.h"
 #include "platform/platform.h"
+#include "msprof_reporter_mgr.h"
 
 namespace Analysis {
 namespace Dvvp {
@@ -21,6 +22,7 @@ using namespace analysis::dvvp::common::utils;
 using namespace Analysis::Dvvp::Common::Platform;
 using namespace Collector::Dvvp::Plugin;
 using ProfCommand = MsprofCommandHandle;
+using namespace Msprof::Engine;
 
 int32_t SetCommandHandleProf(ProfCommand &command)
 {
@@ -87,6 +89,9 @@ int32_t CommandHandleProfStart(const uint32_t devIdList[], uint32_t devNums, uin
     }
     MSPROF_LOGI("CommandHandleProfStart, profSwitch:0x%lx, profSwitchHi:0x%lx, device[0]:%u, devNums:%u",
         command.profSwitch, command.profSwitchHi, command.devIdList[0], command.devNums);
+    if (MsprofReporterMgr::instance()->StartReporters() != PROFILING_SUCCESS) {
+        return ACL_ERROR;
+    }
     return ProfApiPlugin::instance()->MsprofProfSetProfCommand(static_cast<VOID_PTR>(&command), sizeof(ProfCommand));
 }
 
@@ -112,7 +117,11 @@ int32_t CommandHandleProfStop(const uint32_t devIdList[], uint32_t devNums, uint
     }
     MSPROF_LOGI("CommandHandleProfStop, profSwitch:0x%lx, profSwitchHi:0x%lx, device[0]:%u, devNums:%u",
         command.profSwitch, command.profSwitchHi, command.devIdList[0], command.devNums);
-    return ProfApiPlugin::instance()->MsprofProfSetProfCommand(static_cast<VOID_PTR>(&command), sizeof(ProfCommand));
+    ret = ProfApiPlugin::instance()->MsprofProfSetProfCommand(static_cast<VOID_PTR>(&command), sizeof(ProfCommand));
+    if (ret != ACL_SUCCESS) {
+        return ret;
+    }
+    return (MsprofReporterMgr::instance()->StopReporters() == PROFILING_SUCCESS) ?  ACL_SUCCESS : ACL_ERROR;
 }
 
 int32_t CommandHandleProfFinalize()
