@@ -65,13 +65,14 @@ private:
     void HandleModelInfo(CONST_CHAR_PTR data, bool ageFlag);
     void ParseApiInfo(CONST_CHAR_PTR data, uint32_t len, bool ageFlag);
     void HandleApiInfo(CONST_CHAR_PTR data, bool ageFlag);
+    void MatchApiInfoByModelInfo(const std::string &threadId, struct GeOpFlagInfo &info,
+        std::multimap<std::string, GeOpFlagInfo> &modelInfo);
     void MatchApiInfo(std::multimap<std::string, GeOpFlagInfo> &apiInfo,
         std::multimap<std::string, GeOpFlagInfo> &modelInfo,
         std::multimap<std::string, GeOpFlagInfo> &nodeInfo);
 
 private:
     std::map<std::string, GeOpInfo> opInfos_;       // <taskId-streamId, GeOpInfo>
-    std::map<uint32_t, uint32_t> idMap_;            // <graphId, modeId>
     uint32_t totalEventTimes_;
     uint32_t totalApiTimes_;
     uint32_t totalNodeTimes_;

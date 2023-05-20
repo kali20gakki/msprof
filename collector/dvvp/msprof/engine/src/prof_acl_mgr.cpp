@@ -1084,11 +1084,6 @@ int ProfAclMgr::StartDeviceSubscribeTask(const uint32_t modelId, const uint32_t 
     ProfStartCfgToMsprofCfg(dataTypeConfig, profSubscribeConfig->aicoreMetrics, feature);
     ProfParamsAdapter::instance()->UpdateSampleConfig(feature, params);
     ProfParamsAdapter::instance()->ProfStartCfgToParamsCfg(dataTypeConfig, params);
-    params->ts_keypoint = MSVP_PROF_ON;
-    PlatformType type = ConfigManager::instance()->GetPlatformType();
-    if (type == PlatformType::CHIP_V4_1_0 || type == PlatformType::CHIP_V4_2_0) {
-        params->stars_acsq_task = MSVP_PROF_ON;
-    }
 
     std::string devIdStr = std::to_string(devId);
     params->job_id = devIdStr;
@@ -1113,7 +1108,6 @@ int ProfAclMgr::StartDeviceSubscribeTask(const uint32_t modelId, const uint32_t 
         HandleResponse(devId);
         return ACL_ERROR_PROFILING_FAILURE;
     }
-
     // add taskInfo
     ProfAclTaskInfo taskInfo = {1, dataTypeConfig, paramsHandled};
     devTasks_[devId] = taskInfo;
