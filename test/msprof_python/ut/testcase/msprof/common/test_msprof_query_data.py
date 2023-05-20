@@ -43,7 +43,7 @@ class TestMsprofQueryData(unittest.TestCase):
         # res = db_manager.create_table("step_trace.db")
         key = MsprofQueryData(db_manager.db_path + "/../")
         result = key.get_job_iteration_info()
-        self.assertEqual(result, [[1, 1, '1']])
+        self.assertEqual(result, [])
 
         with mock.patch(NAMESPACE + '.PathManager.get_db_path', return_value="step_trace.db"):
             with mock.patch(NAMESPACE + '.DBManager.check_connect_db_path', return_value=(None, None)):

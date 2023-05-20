@@ -44,6 +44,7 @@ class TraceViewHeaderConstant:
     PROCESS_SUBTASK = 'Subtask Time'
     PROCESS_THREAD_TASK = 'Thread Task Time'
     PROCESS_PTA = "PTA"
+    PROCESS_OVERLAP_ANALYSE = "Overlap Analysis"
 
     # trace general layer
     GENERAL_LAYER_CPU = "CPU"

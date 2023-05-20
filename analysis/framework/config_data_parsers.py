@@ -5,6 +5,8 @@
 import configparser
 import importlib
 
+from common_func.info_conf_reader import InfoConfReader
+from common_func.ms_constant.number_constant import NumberConstant
 from msconfig.config_manager import ConfigManager
 from common_func.os_manager import check_file_readable
 from common_func.utils import Utils
@@ -18,6 +20,9 @@ class ConfigDataParsers:
     KEY_PATH = "path"
     KEY_CHIP_MODEL = "chip_model"
     KEY_LEVEL = "level"
+    KEY_POSITION = "position"
+    POSITION_OF_HOST = "H"
+    POSITION_OF_DEVICE = "D"
     DEFAULT_PARSER_LEVEL = "1"
 
     @classmethod
@@ -29,11 +34,16 @@ class ConfigDataParsers:
         :return: data parsers
         """
         parsers_dict = {}
+        position = cls.POSITION_OF_DEVICE
+        if int(InfoConfReader().get_device_list()[0]) == NumberConstant.HOST_ID:
+            position = cls.POSITION_OF_HOST
         conf_parser_read = ConfigManager.get(config_name)
         parser_section = conf_parser_read.sections()
         for _section in parser_section:
             chip_model_list = cls._load_parser_chip_model(conf_parser_read, _section)
             if chip_model not in chip_model_list:
+                continue
+            if position not in cls._load_parser_position(conf_parser_read, _section):
                 continue
             parser_level = cls._load_parser_level(conf_parser_read, _section)
             parsers_dict.setdefault(parser_level, []).append(cls._load_parser_module(conf_parser_read, _section))
@@ -94,3 +104,16 @@ class ConfigDataParsers:
                 parser_obj = getattr(parser_module, section)
                 return parser_obj
         return []
+
+    @classmethod
+    def _load_parser_position(cls, conf_parser_read, section):
+        """
+        load data position
+        :param conf_parser_read: config parser object
+        :param section: parser name config in the config file
+        :return: positions for host or device
+        """
+        positions = [cls.POSITION_OF_HOST, cls.POSITION_OF_DEVICE]
+        if conf_parser_read.has_option(section, cls.KEY_POSITION):
+            positions = conf_parser_read.get(section, cls.KEY_POSITION)
+        return positions

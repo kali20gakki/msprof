@@ -15,6 +15,8 @@ from common_func.msprof_common import check_collection_dir
 from common_func.msprof_exception import ProfException
 
 from constant.constant import INFO_JSON
+from constant.info_json_construct import InfoJson
+from constant.info_json_construct import InfoJsonReaderManager
 
 NAMESPACE = 'common_func.msprof_common'
 
@@ -118,20 +120,20 @@ def test_get_path_dir():
 
 def test_check_collection_dir():
     collect_path = './'
+    InfoJsonReaderManager(InfoJson(version='1.0')).process()
     with mock.patch('os.path.exists', return_value=False), \
             mock.patch(NAMESPACE + '.error'),\
             pytest.raises(ProfException) as err:
         check_collection_dir(collect_path)
-    unittest.TestCase().assertEqual(err.value.args[0], 4)
+    unittest.TestCase().assertEqual(err.value.code, 4)
     with mock.patch('os.path.exists', return_value=True), \
             mock.patch(NAMESPACE + '.check_dir_writable'), \
             mock.patch('common_func.common.get_data_file_memory', return_value=100), \
             mock.patch(NAMESPACE + '.PathManager.get_data_dir', return_value=["1"]):
         with mock.patch('os.listdir', return_value=False), \
-                mock.patch(NAMESPACE + '.error'), \
-                pytest.raises(ProfException) as err:
-            check_collection_dir(collect_path)
-            unittest.TestCase().assertEqual(err.value.args[0], 4)
+                mock.patch(NAMESPACE + '.error'):
+            ret = check_collection_dir(collect_path)
+            unittest.TestCase().assertFalse(ret)
 
 
 if __name__ == '__main__':
