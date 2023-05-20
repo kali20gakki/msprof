@@ -32,7 +32,7 @@ class TestTaskTrackParser(unittest.TestCase):
             data = check.reformat_data([bean_data])
             self.assertEqual(len(data), 1)
             self.assertEqual(len(data[0]), 10)
-            self.assertEqual(data[0][7], 'task_track')
+            self.assertEqual(data[0][7], '1000')
             data = check.reformat_data([])
             self.assertEqual(data, [])
 

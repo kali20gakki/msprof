@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
+from common_func.constant import Constant
 
 
 class GeTimeDto:
@@ -10,14 +11,16 @@ class GeTimeDto:
 
     def __init__(self: any) -> None:
         self._model_name = None
-        self._model_id = None
-        self._thread_id = None
-        self._input_start = None
-        self._input_end = None
-        self._infer_start = None
-        self._infer_end = None
-        self._output_start = None
-        self._output_end = None
+        self._model_id = Constant.DEFAULT_VALUE
+        self._request_id = Constant.DEFAULT_VALUE
+        self._thread_id = Constant.DEFAULT_VALUE
+        self._input_start = Constant.DEFAULT_VALUE
+        self._input_end = Constant.DEFAULT_VALUE
+        self._infer_start = Constant.DEFAULT_VALUE
+        self._infer_end = Constant.DEFAULT_VALUE
+        self._output_start = Constant.DEFAULT_VALUE
+        self._output_end = Constant.DEFAULT_VALUE
+        self.stage_num = 0
 
     @property
     def model_name(self: any) -> any:
@@ -26,6 +29,10 @@ class GeTimeDto:
     @property
     def model_id(self: any) -> any:
         return self._model_id
+
+    @property
+    def request_id(self: any) -> any:
+        return self._request_id
 
     @property
     def thread_id(self: any) -> any:
@@ -62,6 +69,10 @@ class GeTimeDto:
     @model_id.setter
     def model_id(self: any, value: any) -> None:
         self._model_id = value
+
+    @request_id.setter
+    def request_id(self: any, value: any) -> None:
+        self._request_id = value
 
     @thread_id.setter
     def thread_id(self: any, value: any) -> None:

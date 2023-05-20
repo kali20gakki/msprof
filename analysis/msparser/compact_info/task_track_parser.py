@@ -7,11 +7,11 @@ from typing import List
 
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
+from common_func.hash_dict_constant import HashDictData
 from msparser.data_struct_size_constant import StructFmt
 from msparser.interface.data_parser import DataParser
 from msparser.compact_info.task_track_bean import TaskTrackBean
 from msmodel.compact_info.task_track_model import TaskTrackModel
-from msmodel.ge.ge_hash_model import GeHashViewModel
 from profiling_bean.prof_enum.data_tag import DataTag
 
 
@@ -30,18 +30,18 @@ class TaskTrackParser(DataParser, MsMultiProcess):
         """
         transform bean to data
         """
-        with GeHashViewModel(self._project_path) as _model:
-            hash_dict = _model.get_type_hash_data()
+        hash_dict_data = HashDictData(self._project_path)
+        type_hash_dict = hash_dict_data.get_type_hash_dict()
         return [
             [
                 bean.device_id,
                 bean.timestamp,
-                hash_dict.get(bean.level, {}).get(bean.task_type, bean.task_type),  # task type
+                type_hash_dict.get(bean.level, {}).get(bean.task_type, bean.task_type),  # task type
                 bean.stream_id,
                 bean.task_id,
                 bean.thread_id,
                 bean.batch_id,
-                hash_dict.get(bean.level, {}).get(bean.struct_type, bean.struct_type),  # task track type
+                type_hash_dict.get(bean.level, {}).get(bean.struct_type, bean.struct_type),  # task track type
                 bean.level,
                 bean.data_len,
             ] for bean in bean_data
