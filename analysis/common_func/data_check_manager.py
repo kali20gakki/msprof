@@ -59,13 +59,13 @@ class DataCheckManager:
         return file_size > 0
 
     @classmethod
-    def _check_device_id_and_file_name(cls: any, device_id: any, file_name: str) -> bool:
+    def _check_device_id_and_file_name(cls: any, device_id: int, file_name: str) -> bool:
         if device_id is None:
             return True
         split_list = file_name.split('.')
         if len(split_list) == cls.HOST_DATA_NAME_LENGTH:
             return True
         if len(split_list) == cls.DATA_NAME_LENGTH and \
-                split_list[cls.DEVICE_ID_INDEX] == device_id:
+                int(split_list[cls.DEVICE_ID_INDEX]) == device_id:
             return True
         return False

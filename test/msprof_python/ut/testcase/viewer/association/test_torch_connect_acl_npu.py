@@ -41,7 +41,7 @@ class TestTorchToAclNpu(unittest.TestCase):
 
     def test_add_connect_line_1(self):
         with mock.patch(NAMESPACE + '.SyncAclNpuViewModel.get_torch_acl_relation_data', return_value=[self.data1]), \
-                mock.patch(NAMESPACE + '.PathManager.get_db_path'), \
+                mock.patch(NAMESPACE + ".PathManager.get_db_path", return_value='test'), \
                 mock.patch(NAMESPACE + '.SyncAclNpuViewModel.check_table', return_value=True), \
                 mock.patch(NAMESPACE + '.SyncAclNpuViewModel.get_torch_npu_relation_data', return_value=[self.data1]):
             check = TorchToAclNpu("")

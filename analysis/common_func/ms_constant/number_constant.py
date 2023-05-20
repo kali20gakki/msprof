@@ -132,6 +132,8 @@ class NumberConstant:
     # magic number: 5A5A
     MAGIC_NUM = 23130
 
+    HOST_ID = 64
+
     @property
     def conversion_time(self: any) -> float:
         """

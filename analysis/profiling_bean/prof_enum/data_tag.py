@@ -69,6 +69,8 @@ class DataTag(Enum):
     EVENT = 54
     TASK_TRACK = 56
     MEMCPY_INFO = 57
+    HCCL_INFO = 58
+    MULTI_THREAD = 59
     GRAPH_ADD_INFO = 60
     TENSOR_ADD_INFO = 61
     NODE_BASIC_INFO = 62
@@ -86,4 +88,5 @@ class AclApiTag(Enum):
     ACL_MODEL = 2
     ACL_RTS = 3
     ACL_OTHERS = 4
+    ACL_NN = 5
     HOST_HCCL = 7

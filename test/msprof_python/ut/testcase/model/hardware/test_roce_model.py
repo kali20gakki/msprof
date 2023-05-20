@@ -15,6 +15,7 @@ class TestParsingMemoryData(unittest.TestCase):
 
     def test_flush(self):
         with mock.patch(NAMESPACE + '.RoceModel.insert_data_to_db'):
+            InfoConfReader()._sample_json = {'devices': '0'}
             InfoConfReader()._info_json = {'devices': '0'}
             check = RoceModel('test', 'roce.db', ['RoceOriginalData'])
             check.flush([])
@@ -24,6 +25,7 @@ class TestParsingMemoryData(unittest.TestCase):
         db_manager = DBManager()
         res = db_manager.create_table('roce.db')
         InfoConfReader()._info_json = {'devices': '0'}
+        InfoConfReader()._sample_json = {'devices': '0'}
         with mock.patch(NAMESPACE + '.DBManager.judge_table_exist',
                         return_value=True), \
              mock.patch(NAMESPACE + '.RoceModel.create_roce_data_report'), \
@@ -59,6 +61,7 @@ class TestParsingMemoryData(unittest.TestCase):
                      "rxerrorrate TEXT,rxdroppedrate TEXT,txpacket TEXT,txerrorrate TEXT," \
                      "txdroppedrate TEXT,funcid INTEGER)"
         InfoConfReader()._info_json = {'devices': '0'}
+        InfoConfReader()._sample_json = {'devices': '0'}
         with mock.patch(NAMESPACE + '.DBManager.judge_table_exist',
                         return_value=False), \
              mock.patch(NAMESPACE + '.DBManager.sql_create_general_table',
@@ -92,6 +95,7 @@ class TestParsingMemoryData(unittest.TestCase):
         db_manager = DBManager()
         res = db_manager.create_table('roce.db')
         InfoConfReader()._info_json = {'devices': '0'}
+        InfoConfReader()._sample_json = {'devices': '0'}
         check = RoceModel('test', 'roce.db', ['RoceOriginalData'])
         check.curr_file_name = 'abc'
         with mock.patch(NAMESPACE + '.logging.error'):
@@ -111,6 +115,7 @@ class TestParsingMemoryData(unittest.TestCase):
 
     def test_get_func_list(self):
         InfoConfReader()._info_json = {'devices': '0'}
+        InfoConfReader()._sample_json = {'devices': '0'}
         create_roce_sql = "CREATE TABLE IF NOT EXISTS RoceOriginalData(device_id INTEGER,replayid INTEGER," \
                           "timestamp REAL,bandwidth INTEGER,rxpacket REAL,rxbyte REAL,rxpackets REAL," \
                           "rxbytes REAL,rxerrors REAL,rxdropped REAL,txpacket REAL,txbyte REAL," \
@@ -131,6 +136,7 @@ class TestParsingMemoryData(unittest.TestCase):
         db_manager.destroy(res)
 
     def test_get_roce_report_data(self):
+        InfoConfReader()._sample_json = {'devices': '0'}
         InfoConfReader()._info_json = {'devices': '0'}
         create_roce_sql = "CREATE TABLE IF NOT EXISTS RoceOriginalData(device_id INTEGER,replayid INTEGER," \
                           "timestamp REAL,bandwidth INTEGER,rxpacket REAL,rxbyte REAL,rxpackets REAL," \
@@ -153,6 +159,7 @@ class TestParsingMemoryData(unittest.TestCase):
         db_manager.destroy(res)
 
     def test_calculate_roce_report_data(self):
+        InfoConfReader()._sample_json = {'devices': '0'}
         InfoConfReader()._info_json = {'devices': '0'}
         create_roce_sql = "CREATE TABLE IF NOT EXISTS RoceOriginalData(device_id INTEGER,replayid INTEGER," \
                           "timestamp REAL,bandwidth INTEGER,rxpacket REAL,rxbyte REAL,rxpackets REAL," \
@@ -175,6 +182,7 @@ class TestParsingMemoryData(unittest.TestCase):
         db_manager.destroy(res)
 
     def test_create_receivesend_db(self):
+        InfoConfReader()._sample_json = {'devices': '0'}
         InfoConfReader()._info_json = {'devices': '0'}
         target_data = [('5', 176168008028160.0, 0.0, 0.0, 0, 0, 0.0, 0, 0, 0, 0),
                        ('5', 176168112015020.0, 0.0, 0.0, 0, 0, 0.0, 0, 0, 0, 0)]
@@ -192,6 +200,7 @@ class TestParsingMemoryData(unittest.TestCase):
                 self.assertEqual(result, None)
 
     def test_create_rocereceivesend_data(self):
+        InfoConfReader()._sample_json = {'devices': '0'}
         InfoConfReader()._info_json = {'devices': '0'}
         create_sql = "CREATE TABLE IF NOT EXISTS RoceOriginalData(device_id INTEGER,replayid INTEGER," \
                      "timestamp REAL,bandwidth INTEGER,rxpacket REAL,rxbyte REAL,rxpackets REAL," \
@@ -217,6 +226,7 @@ class TestParsingMemoryData(unittest.TestCase):
                           OrderedDict([('txPacket/s', []), ('txError rate', []), ('txDropped rate', [])])))
 
     def test_create_rocereceivesend_table(self):
+        InfoConfReader()._sample_json = {'devices': '0'}
         InfoConfReader()._info_json = {'devices': '0'}
         create_sql = "CREATE TABLE IF NOT EXISTS RoceOriginalData(device_id INTEGER,replayid INTEGER," \
                      "timestamp REAL,bandwidth INTEGER,rxpacket REAL,rxbyte REAL,rxpackets REAL," \
@@ -237,3 +247,7 @@ class TestParsingMemoryData(unittest.TestCase):
             self.assertEqual(result, None)
         res[1].execute("drop table RoceOriginalData")
         db_manager.destroy(res)
+
+
+if __name__ == '__main__':
+    unittest.main()
