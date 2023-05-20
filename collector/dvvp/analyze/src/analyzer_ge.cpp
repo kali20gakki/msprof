@@ -108,11 +108,7 @@ uint32_t AnalyzerGe::GetModelId(const std::string &opId) const
 
 uint32_t AnalyzerGe::GetModelId(uint32_t modelId)
 {
-    if (idMap_.find(modelId) == idMap_.end()) {
-        return modelId;
-    } else {
-        return idMap_[modelId];
-    }
+    return GetGraphModelId(modelId);
 }
 
 std::string AnalyzerGe::GetOpName(const std::string &opId)
@@ -142,7 +138,7 @@ void AnalyzerGe::ParseIdMap(CONST_CHAR_PTR data, uint32_t len)
                         len, idMapData->magicNumber, idMapData->dataTag);
             continue;
         }
-        idMap_[idMapData->modelId] = idMapData->graphId;
+        SetGraphModelId(idMapData->modelId, idMapData->graphId);
         analyzedBytes_ += GE_ID_MAP_SIZE;
     }
     if (remaindLen != 0) {
@@ -185,7 +181,7 @@ void AnalyzerGe::ParseOpName(const MsprofGeProfTaskData &data, struct GeOpInfo &
         }
         opInfo.opName = opName->data.dataStr;
     } else {
-        opInfo.opName = HashData::instance()->GetHashData("Framework", opName->data.hashId);
+        opInfo.opName = HashData::instance()->GetHashInfo(opName->data.hashId);
     }
 }
 
@@ -200,7 +196,7 @@ void AnalyzerGe::ParseOpType(const MsprofGeProfTaskData &data, struct GeOpInfo &
         }
         opInfo.opType = opType->data.dataStr;
     } else {
-        opInfo.opType = HashData::instance()->GetHashData("Framework", opType->data.hashId);
+        opInfo.opType = HashData::instance()->GetHashInfo(opType->data.hashId);
     }
 }
 
@@ -238,58 +234,292 @@ int32_t AnalyzerGe::ParseOpData(CONST_CHAR_PTR data)
 
 void AnalyzerGe::PrintStats()
 {
-    MSPROF_EVENT("total_size_analyze, module: GE, analyzed %llu, total %llu, op info %u, idMap %u",
-                 analyzedBytes_, totalBytes_, opInfos_.size(), idMap_.size());
+    MSPROF_EVENT("total_size_analyze, module: GE, analyzed %llu, total %llu, api time %u, node time %u, "
+                 "event time %u, merge %u",
+                 analyzedBytes_, totalBytes_, totalApiTimes_, totalNodeTimes_, totalEventTimes_, totalGeMerges_);
 }
 
 void AnalyzerGe::GeApiParse(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message)
 {
+    if (message == nullptr) {
+        MSPROF_LOGE("ge api parse message is null");
+        return;
+    }
+
+    if (message->filename().find("unaging") != std::string::npos) {
+        totalBytes_ += message->chunksizeinbytes();
+        ParseApiInfo(message->chunk().c_str(), message->chunksizeinbytes(), false);
+        return;
+    }
+
+    MSPROF_LOGD("Dropped ge data, tag: %s", message->tag().c_str());
 }
 
 void AnalyzerGe::ParseApiInfo(CONST_CHAR_PTR data, uint32_t len, bool ageFlag)
 {
+    AppendToBufferedData(data, len);
+    uint32_t offset = 0;
+    while (dataPtr_ != nullptr && offset < dataLen_) {
+        uint32_t remainLen = dataLen_ - offset;
+        if (remainLen < GE_API_SIZE) {
+            MSPROF_LOGW("ModelApiInfo remains %u bytes unparsed, which is incomplete data", remainLen);
+            break;
+        }
+
+        auto mlApiData = reinterpret_cast<const MsprofApi *>(dataPtr_ + offset);
+        MSPROF_LOGD("ParseModelApi level: %hu, type %u.", mlApiData->level, mlApiData->type);
+        if (mlApiData->type == MSPROF_REPORT_NODE_LAUNCH_TYPE ||
+            mlApiData->type == MSPROF_REPORT_NODE_LAUNCH_GE_TYPE) {
+            HandleApiInfo(dataPtr_ + offset, ageFlag);
+            analyzedBytes_ += GE_API_SIZE;
+            totalApiTimes_++;
+        }
+
+        offset += GE_API_SIZE;
+    }
+    BufferRemainingData(offset);
+    MatchApiInfo(AnalyzerBase::geApiInfo_, AnalyzerBase::geModelInfo_, AnalyzerBase::geNodeInfo_);
 }
 
 void AnalyzerGe::HandleApiInfo(CONST_CHAR_PTR data, bool ageFlag)
 {
+    auto klData = reinterpret_cast<const MsprofApi *>(data);
+    std::string key = std::to_string(klData->threadId);
+    GeOpFlagInfo opInfo{0, 0, 0, klData->beginTime, klData->endTime, false, false, ageFlag};
+    AnalyzerBase::geApiInfo_.insert(std::pair<std::string, GeOpFlagInfo>(key, opInfo));
+    MSPROF_LOGD("Insert to GeApiInfo, key: %s, beginTime: %llu, endTime: %llu.",
+        key.c_str(), klData->beginTime, klData->endTime);
 }
 
 void AnalyzerGe::GeEventParse(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message)
 {
+    if (message == nullptr) {
+        MSPROF_LOGE("ge event parse message is null");
+        return;
+    }
+
+    if (message->filename().find("unaging") != std::string::npos) {
+        totalBytes_ += message->chunksizeinbytes();
+        ParseModelInfo(message->chunk().c_str(), message->chunksizeinbytes(), false);
+        return;
+    }
+
+    MSPROF_LOGD("Dropped ge data, tag: %s", message->tag().c_str());
 }
 
 void AnalyzerGe::ParseModelInfo(CONST_CHAR_PTR data, uint32_t len, bool ageFlag)
 {
+    AppendToBufferedData(data, len);
+    uint32_t offset = 0;
+    while (dataPtr_ != nullptr && offset < dataLen_) {
+        uint32_t remainLen = dataLen_ - offset;
+        if (remainLen < GE_EVENT_SIZE) {
+            MSPROF_LOGW("ModelLoadInfo remains %u bytes unparsed, which is incomplete data", remainLen);
+            break;
+        }
+
+        auto mlData = reinterpret_cast<const MsprofEvent *>(dataPtr_ + offset);
+        MSPROF_LOGD("ParseModelLoadInfo level: %hu, type: %u", mlData->level, mlData->type);
+        if (mlData->level == MSPROF_REPORT_MODEL_LEVEL &&
+            mlData->type == MSPROF_REPORT_MODEL_LOAD_TYPE) {
+            HandleModelInfo(dataPtr_ + offset, ageFlag);
+            analyzedBytes_ += GE_EVENT_SIZE;
+            totalEventTimes_++;
+        }
+
+        offset += GE_EVENT_SIZE;
+    }
+    BufferRemainingData(offset);
+    MatchApiInfo(AnalyzerBase::geApiInfo_, AnalyzerBase::geModelInfo_, AnalyzerBase::geNodeInfo_);
 }
 
 void AnalyzerGe::HandleModelInfo(CONST_CHAR_PTR data, bool ageFlag)
 {
+    auto mlData = reinterpret_cast<const MsprofEvent *>(data);
+    std::string key = std::to_string(mlData->threadId);
+    if (AnalyzerBase::geModelInfo_.count(key) == 0) {
+        GeOpFlagInfo opInfo = {0, 0, mlData->itemId, mlData->timeStamp, 0, false, false, ageFlag};
+        AnalyzerBase::geModelInfo_.insert(std::pair<std::string, GeOpFlagInfo>(key, opInfo));
+        MSPROF_LOGD("Insert start: %llu, modelId: %llu to geModelInfo map cause no same key.",
+            mlData->timeStamp, mlData->itemId);
+        return;
+    }
+
+    bool modelIdExist = false;
+    for (auto iter = AnalyzerBase::geModelInfo_.begin(); iter != AnalyzerBase::geModelInfo_.end(); iter++) {
+        if (iter->second.modelId != mlData->itemId || iter->first != key) { // same modelId and same threadId
+            continue;
+        }
+        if (iter->second.end != 0) {
+            iter->second.end = 0;
+            iter->second.start = mlData->timeStamp; // repeat modelId and threadId
+            MSPROF_LOGD("Repeat Insert start: %llu, modelId: %llu to geModelInfo map.", mlData->timeStamp,
+                mlData->itemId);
+            return;
+        }
+        if (iter->second.start >= mlData->timeStamp) { // start end error
+            MSPROF_LOGE("Model info: op start latter than op end.");
+            return;
+        }
+        iter->second.end = mlData->timeStamp;
+        MSPROF_LOGD("Insert end: %llu, modelId: %llu to geModelInfo map.", mlData->timeStamp, mlData->itemId);
+        modelIdExist = true;
+    }
+
+    if (!modelIdExist) { // same threadId different modelid
+        GeOpFlagInfo opInfo{0, 0, mlData->itemId, mlData->timeStamp, 0, false, false, ageFlag};
+        AnalyzerBase::geModelInfo_.insert(std::pair<std::string, GeOpFlagInfo>(key, opInfo));
+        MSPROF_LOGD("Insert start: %llu, modelId: %llu to geModelInfo_ cause no same modelId.", mlData->timeStamp,
+            mlData->itemId);
+    }
 }
 
 void AnalyzerGe::GeCompactParse(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message)
 {
+    if (message == nullptr) {
+        MSPROF_LOGE("ge compact parse message is null");
+        return;
+    }
+
+    if (message->tag().find("node_basic_info") != std::string::npos) {
+        totalBytes_ += message->chunksizeinbytes();
+        ParseNodeBasicInfo(message->chunk().c_str(), message->chunksizeinbytes());
+        return;
+    }
+
+    MSPROF_LOGD("Dropped ge data, tag: %s", message->tag().c_str());
 }
 
 void AnalyzerGe::ParseNodeBasicInfo(CONST_CHAR_PTR data, uint32_t len)
 {
+    AppendToBufferedData(data, len);
+    uint32_t offset = 0;
+    while (dataPtr_ != nullptr && offset < dataLen_) {
+        uint32_t remainLen = dataLen_ - offset;
+        if (remainLen < GE_COMPACT_INFO_SIZE) {
+            MSPROF_LOGW("NodeBasicInfo remains %u bytes unparsed, which is incomplete data", remainLen);
+            break;
+        }
+
+        auto nodeData = reinterpret_cast<const MsprofCompactInfo *>(dataPtr_ + offset);
+        MSPROF_LOGD("ParseNodeBasicInfo level: %hu.", nodeData->level);
+        if (nodeData->level == MSPROF_REPORT_NODE_LEVEL) {
+            HandleNodeBasicInfo(dataPtr_ + offset);
+            analyzedBytes_ += GE_COMPACT_INFO_SIZE;
+            totalNodeTimes_++;
+        }
+
+        offset += GE_COMPACT_INFO_SIZE;
+    }
+    BufferRemainingData(offset);
+    MatchApiInfo(AnalyzerBase::geApiInfo_, AnalyzerBase::geModelInfo_, AnalyzerBase::geNodeInfo_);
 }
 
 void AnalyzerGe::HandleNodeBasicInfo(CONST_CHAR_PTR data)
 {
+    auto compactData = reinterpret_cast<const MsprofCompactInfo *>(data);
+    auto nodeData = compactData->data.nodeBasicInfo;
+    std::string key = std::to_string(compactData->threadId);
+    uint64_t opNameHash = nodeData.opName;
+    uint64_t opTypeHash = nodeData.opType;
+    uint64_t timeStamp = compactData->timeStamp;
+    GeOpFlagInfo opInfo{opNameHash, opTypeHash, 0, timeStamp, 0, false, false, false};
+    AnalyzerBase::geNodeInfo_.insert(std::pair<std::string, GeOpFlagInfo>(key, opInfo));
+    MSPROF_LOGD("insert NodeInfo timeStamp: %llu.", timeStamp);
 }
 
 void AnalyzerGe::GeGraphIdMapParse(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message)
 {
+    if (message == nullptr) {
+        MSPROF_LOGE("ge compact parse message is null");
+        return;
+    }
+
+    totalBytes_ += message->chunksizeinbytes();
+    ParseGraphIdMap(message->chunk().c_str(), message->chunksizeinbytes());
 }
 
 void AnalyzerGe::ParseGraphIdMap(CONST_CHAR_PTR data, uint32_t len)
 {
+    AppendToBufferedData(data, len);
+    uint32_t offset = 0;
+    while (dataPtr_ != nullptr && offset < dataLen_) {
+        uint32_t remainLen = dataLen_ - offset;
+        if (remainLen < ADDITIONAL_INFO_SIZE) {
+            MSPROF_LOGW("ParseGraphIdMap remains %u bytes unparsed, which is incomplete data", remainLen);
+            break;
+        }
+
+        auto graphIdMapData = reinterpret_cast<const MsprofAdditionalInfo *>(dataPtr_ + offset);
+        auto graphIdInfo = reinterpret_cast<const MsprofGraphIdInfo *>(graphIdMapData->data);
+        if (graphIdMapData->level == MSPROF_REPORT_MODEL_LEVEL &&
+            graphIdInfo->graphId != std::numeric_limits<uint32_t>::max()) {
+            SetGraphModelId(graphIdInfo->modelId, graphIdInfo->graphId);
+            MSPROF_LOGD("ParseGraphIdMap graph id %u, model id: %u.", graphIdInfo->graphId, graphIdInfo->modelId);
+        }
+        offset += ADDITIONAL_INFO_SIZE;
+    }
+    BufferRemainingData(offset);
+}
+
+void AnalyzerGe::MatchApiInfoByModelInfo(const std::string &threadId, struct GeOpFlagInfo &info,
+    std::multimap<std::string, GeOpFlagInfo> &modelInfo)
+{
+    for (auto model = modelInfo.begin(); model != modelInfo.end(); model++) {
+        if (model->first == threadId &&
+            info.start > model->second.start &&
+            info.end < model->second.end &&
+            info.ageFlag == model->second.ageFlag) { // match modelid
+            info.modelId = model->second.modelId;
+            info.modelFlag = true;
+            MSPROF_LOGD("model match threadId: %s, modelId: %llu", model->first.c_str(), model->second.modelId);
+            break;
+        }
+    }
+    return;
 }
 
 void AnalyzerGe::MatchApiInfo(std::multimap<std::string, GeOpFlagInfo> &apiInfo,
     std::multimap<std::string, GeOpFlagInfo> &modelInfo,
     std::multimap<std::string, GeOpFlagInfo> &nodeInfo)
 {
+    if (apiInfo.empty() || nodeInfo.empty() || modelInfo.empty()) {
+        return;
+    }
+
+    for (auto api = apiInfo.begin(); api != apiInfo.end();) {
+        MSPROF_LOGD("api match threadId: %s", api->first.c_str());
+        if (!api->second.modelFlag) {
+            MatchApiInfoByModelInfo(api->first, api->second, modelInfo);
+        }
+
+        if (!api->second.modelFlag) {
+            api++;
+            continue;
+        }
+        for (auto node = nodeInfo.begin(); node != nodeInfo.end(); node++) {
+            if (node->first == api->first &&
+                node->second.start >= api->second.start &&
+                node->second.start <= api->second.end) { // match node
+                api->second.opNameHash = node->second.opNameHash;
+                api->second.opTypeHash = node->second.opTypeHash;
+                api->second.nodeFlag = true;
+                MSPROF_LOGD("node match threadId: %s", node->first.c_str());
+                nodeInfo.erase(node++);
+                break;
+            }
+        }
+        if (api->second.nodeFlag && api->second.modelFlag) {
+            MSPROF_LOGD("Success to match ge opinfo data and insert in map."
+                "Key: %s, start: %llu, end: %llu, name: %llu.", api->first.c_str(),
+                api->second.start, api->second.end, api->second.opNameHash);
+            AnalyzerBase::geOpInfo_.insert(std::pair<std::string, GeOpFlagInfo>(api->first, api->second));
+            totalGeMerges_++;
+            apiInfo.erase(api++);
+        } else {
+            api++;
+        }
+    }
 }
 }  // namespace Analyze
 }  // namespace Dvvp

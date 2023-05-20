@@ -87,10 +87,9 @@ void Analyzer::Flush()
 
 void Analyzer::PrintStats()
 {
-    MSPROF_EVENT("total_size_analyze, op time: %llu", resultCount_);
-    analyzerGe_->PrintStats();
-    analyzerTs_->PrintStats();
-    analyzerHwts_->PrintStats();
+    MSPROF_EVENT("total_size_analyze, upload time: %llu", resultCount_);
+    PrintDeviceStats();
+    PrintHostStats();
 }
 
 void Analyzer::PrintDeviceStats()
@@ -380,12 +379,66 @@ void Analyzer::ConstructAndUploadData(const std::string &opId, OpTime &opTime)
     resultCount_++;
 }
 
+void Analyzer::OnOptimizeData(CONST_VOID_PTR data, uint32_t len)
+{
+    if (!inited_) {
+        MSPROF_LOGE("Analyzer is not been inited!");
+        return;
+    }
+
+    auto decoded = analysis::dvvp::message::DecodeMessage2(data, len);
+    auto message = std::dynamic_pointer_cast<analysis::dvvp::proto::FileChunkReq>(decoded);
+    if (message == nullptr || message->filename().empty() ||
+        message->datamodule() == FileChunkDataModule::PROFILING_IS_CTRL_DATA) {
+        MSPROF_LOGW("Analyzer OnOptimizeData is not data for analyzing.");
+        return;
+    }
+
+    DispatchOptimizeData(message);
+}
+
 void Analyzer::DispatchOptimizeData(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message)
 {
+    MSPROF_LOGI("Start to analyze file: %s, tag: %s", message->filename().c_str(), message->tag().c_str());
+    if (analyzerGe_->IsGeEventData(message->filename())) {
+        analyzerGe_->GeEventParse(message);
+    } else if (analyzerGe_->IsGeCompactData(message->tag())) {
+        analyzerGe_->GeCompactParse(message);
+    } else if (analyzerGe_->IsGeApiData(message->filename())) {
+        analyzerGe_->GeApiParse(message);
+    } else if (analyzerGe_->IsGeGraphIdMapData(message->tag())) {
+        analyzerGe_->GeGraphIdMapParse(message);
+    } else if (analyzerRt_->IsRtCompactData(message->tag())) {
+        analyzerRt_->RtCompactParse(message);
+    } else if (analyzerHwts_->IsHwtsData(message->filename())) {
+        analyzerHwts_->HwtsParse(message);
+    } else if (analyzerFfts_->IsFftsData(message->filename())) {
+        analyzerFfts_->FftsParse(message);
+    } else if (analyzerTs_->IsTsData(message->filename())) {
+        analyzerTs_->Parse(message);
+        TsDataPostProc();
+    } else {
+        MSPROF_LOGI("Analyzer drop data, fileName: %s.", message->filename().c_str());
+        return;
+    }
+    UploadProfOpDescProc();
 }
 
 void Analyzer::UploadProfOpDescProc()
 {
+    std::unique_lock<std::mutex> lk(AnalyzerBase::opDescInfoMtx_);
+    for (auto &it : AnalyzerBase::opDescInfos_) {
+        if (uploader_ == nullptr) {
+            MSPROF_LOGE("uploader is nullptr in upload optimize data");
+            return;
+        }
+        MSPROF_LOGD("Upload opt data pop from vector. modelId: %u, threadId: %u, start: %llu, end: %llu"
+            " duration: %llu, flag: %u, exetime: %llu", it.modelId, it.threadId, it.start, it.end, it.duration,
+            it.flag, it.executionTime);
+        uploader_->UploadData(reinterpret_cast<CHAR_PTR>(&it), sizeof(ProfOpDesc));
+        resultCount_++;
+    }
+    AnalyzerBase::opDescInfos_.clear();
 }
 
 void Analyzer::SetDevId(const std::string &devIdStr)

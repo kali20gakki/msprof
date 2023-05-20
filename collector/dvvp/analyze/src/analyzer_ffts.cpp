@@ -62,6 +62,7 @@ void AnalyzerFfts::ParseData(CONST_CHAR_PTR data, uint32_t len)
         }
         parsedOpNum += 1;
         parsedLen += FFTS_DATA_SIZE;
+        totalFftsTimes_++;
     }
     MSPROF_LOGI("Finish parsing ffts data, BuffLen:%u NewDataLen:%u parsedLen:%u TotalOpNum:%u ParsedOp:%u, "
                 "unknownOpNum:%u", dataLen_, len, parsedLen, opTimes_.size(), parsedOpNum, unknownOpNum);
@@ -138,10 +139,47 @@ void AnalyzerFfts::ParseSubTaskThreadData(const FftsLogHead *data, uint32_t logT
 
 void AnalyzerFfts::PrintStats()
 {
-    MSPROF_EVENT("total_size_analyze, module: FFTS, analyzed %llu, total %llu, "
-                 "op time total %llu, remain %u, draft %u, op repeat cnt %llu",
-                 analyzedBytes_, totalBytes_, opTimeCount_, opTimes_.size(),
-                 opDrafts_.size(), opRepeatCount_);
+    MSPROF_EVENT("total_size_analyze, module: FFTS, analyzed %llu, total %llu, ffts time total %llu, merge %u",
+                 analyzedBytes_, totalBytes_, totalFftsTimes_, totalFftsMerges_);
+}
+
+void AnalyzerFfts::FftsParse(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message)
+{
+    if (message == nullptr) {
+        return;
+    }
+    totalBytes_ += message->chunksizeinbytes();
+    ParseOptimizeFftsData(message->chunk().c_str(), message->chunksizeinbytes());
+}
+
+void AnalyzerFfts::ParseOptimizeFftsData(CONST_CHAR_PTR data, uint32_t len)
+{
+    AppendToBufferedData(data, len);
+    uint32_t opNum = 0;
+    uint32_t curLen = 0;
+    uint32_t unknownOpNum = 0;
+    while (dataPtr_ != nullptr && curLen < dataLen_) {
+        uint32_t remainLen = dataLen_ - curLen;
+        if (remainLen < FFTS_DATA_SIZE) {
+            MSPROF_LOGW("Ffts remains %u bytes unparsed, which is incomplete data", remainLen);
+            break;
+        }
+        auto fftsLogOptHead = reinterpret_cast<const FftsLogHead *>(dataPtr_ + curLen);
+        uint32_t logType = fftsLogOptHead->logType;
+        if (logType == ACSQ_TASK_START_FUNC_TYPE || logType == ACSQ_TASK_END_FUNC_TYPE) {
+            ParseOptimizeAcsqTaskData(fftsLogOptHead, logType);
+        } else if (logType == FFTS_SUBTASK_THREAD_START_FUNC_TYPE || logType == FFTS_SUBTASK_THREAD_END_FUNC_TYPE) {
+            ParseOptimizeSubTaskThreadData(fftsLogOptHead, logType);
+        } else {
+            MSPROF_LOGD("unknownOp ffts op. logType:%u", logType);
+            unknownOpNum++;
+        }
+        opNum += 1;
+        curLen += FFTS_DATA_SIZE;
+        analyzedBytes_ += FFTS_DATA_SIZE;
+        totalFftsTimes_++;
+    }
+    BufferRemainingData(curLen);
 }
 
 /*

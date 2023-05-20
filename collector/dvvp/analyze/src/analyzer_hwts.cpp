@@ -135,10 +135,17 @@ void AnalyzerHwts::ParseTaskStartEndData(CONST_CHAR_PTR data, uint32_t len, uint
 
 void AnalyzerHwts::PrintStats()
 {
-    MSPROF_EVENT("total_size_analyze, module: HWTS, analyzed %llu, total %llu, "
-                 "op time total %llu, remain %u, draft %u, op repeat cnt %llu",
-                 analyzedBytes_, totalBytes_, opTimeCount_, opTimes_.size(),
-                 opTimeDrafts_.size(), opRepeatCount_);
+    MSPROF_EVENT("total_size_analyze, module: HWTS, analyzed %llu, total %llu, hwts time %u, merge %u",
+                 analyzedBytes_, totalBytes_, totalHwtsTimes_, totalHwtsMerges_);
+}
+
+void AnalyzerHwts::HwtsParse(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message)
+{
+    if (message == nullptr) {
+        return;
+    }
+    totalBytes_ += message->chunksizeinbytes();
+    ParseOptimizeHwtsData(message->chunk().c_str(), message->chunksizeinbytes());
 }
 
 void AnalyzerHwts::ParseOptimizeHwtsData(CONST_CHAR_PTR data, uint32_t len)

@@ -49,9 +49,6 @@ private:
     std::string GenerateCapacityEvents();
     std::string GenerateBandwidthEvents();
     void GenerateLlcDefEvents(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params);
-
-    void UpdateOpFeature(SHARED_PTR_ALIA<analysis::dvvp::proto::MsProfStartReq> feature,
-                         SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params);
 private:
     std::map<std::string, std::string> aicoreEvents_;
 };
