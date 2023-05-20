@@ -126,9 +126,9 @@ class TensorAddInfoParser(DataParser, MsMultiProcess):
             thread_id = str(key.split("_")[1])
             self._ge_tensor_info_data.append(
                 [value['level'], value['add_info_type'], thread_id, timestamp, value['node_id'], value['tensor_num'],
-                 value['input_format'].strip(';'), value['input_data_type'].strip(';'), "\"" +
-                 value['input_shape'].strip(';') + "\"", value['output_format'].strip(';'),
-                 value['output_data_type'].strip(';'), "\"" + value['output_shape'].strip(';') + "\""]
+                 value['input_format'], value['input_data_type'], "\"" +
+                 value['input_shape'] + "\"", value['output_format'],
+                 value['output_data_type'], "\"" + value['output_shape'] + "\""]
             )
 
     def _transform_tensor_info_data(self: any, data_list: list) -> list:

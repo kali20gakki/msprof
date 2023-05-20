@@ -44,6 +44,8 @@ class TuningControl:
         write tuning result to file
         """
         file_name = CommonProfRule.RESULT_PROF_JSON.format(device_id)
+        if device_id == str(NumberConstant.HOST_ID):
+            file_name = CommonProfRule.RESULT_PROF_JSON_HOST
         output_dir = PathManager.get_summary_dir(result_dir)
         result_file = os.path.join(output_dir, file_name)
         try:

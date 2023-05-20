@@ -52,6 +52,8 @@ class StructDecoder:
         "EventDataBean": StructFmt.EVENT_FMT,
         "TaskTrackBean": StructFmt.TASK_TRACK_FMT,
         "MemcpyInfoBean": StructFmt.MEMCPY_INFO_FMT,
+        "HcclInfoBean": StructFmt.HCCL_INFO_FMT,
+        "MultiThreadBean": StructFmt.MULTI_THREAD_FMT,
         "GraphAddInfoBean": StructFmt.GRAPH_ADD_INFO_FMT,
         "NodeBasicInfoBean": StructFmt.NODE_BASIC_INFO_FMT,
         "TensorAddInfoBean": StructFmt.TENSOR_ADD_INFO_FMT,

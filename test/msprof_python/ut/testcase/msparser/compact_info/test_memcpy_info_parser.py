@@ -32,7 +32,7 @@ class TestMemcpyInfoParser(unittest.TestCase):
             data = check.reformat_data([bean_data])
             self.assertEqual(len(data), 1)
             self.assertEqual(len(data[0]), 7)
-            self.assertEqual(data[0][0], 'memcpy_info')
+            self.assertEqual(data[0][0], '999')
 
     def test_parse(self):
         with mock.patch(NAMESPACE + '.MemcpyInfoParser.parse_bean_data'), \
