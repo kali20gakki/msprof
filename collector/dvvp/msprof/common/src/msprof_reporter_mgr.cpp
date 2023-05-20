@@ -26,7 +26,7 @@ MsprofReporterMgr::~MsprofReporterMgr()
     reportTypeInfoMap_.clear();
     reporters_.clear();
 }
- 
+
 int32_t MsprofReporterMgr::StartReporters()
 {
     std::lock_guard<std::mutex> lk(startMtx_);
@@ -56,13 +56,11 @@ int32_t MsprofReporterMgr::StartReporters()
     isStarted_ = true;
     return PROFILING_SUCCESS;
 }
- 
+
 void MsprofReporterMgr::FlushAllReporter(const std::string &devId)
 {
     for (auto &report : reporters_) {
-        if (!devId.empty()) {
-            (void)report.ForceFlush(devId);
-        }
+        report.ForceFlush(devId);
     }
 }
  
@@ -70,35 +68,35 @@ int32_t MsprofReporterMgr::ReportData(uint32_t agingFlag, const MsprofApi &data)
 {
     return reporters_[agingFlag ? AGING_API : UNAGING_API].ReportData(data);
 }
- 
+
 int32_t MsprofReporterMgr::ReportData(uint32_t agingFlag, const MsprofEvent &data)
 {
     return reporters_[agingFlag ?  AGING_EVENT : UNAGING_EVENT].ReportData(data);
 }
- 
+
 int32_t MsprofReporterMgr::ReportData(uint32_t agingFlag, const MsprofCompactInfo &data)
 {
     return reporters_[agingFlag ?  AGING_COMPACT_INFO : UNAGING_COMPACT_INFO].ReportData(data);
 }
- 
+
 int32_t MsprofReporterMgr::ReportData(uint32_t agingFlag, const MsprofAdditionalInfo &data)
 {
     return reporters_[agingFlag ?  AGING_ADDITIONAL_INFO : UNAGING_ADDITIONAL_INFO].ReportData(data);
 }
- 
+
 int32_t MsprofReporterMgr::SendAdditionalInfo(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> fileChunk)
 {
     return reporters_[AGING_ADDITIONAL_INFO].SendData(fileChunk);
 }
- 
+
 uint64_t MsprofReporterMgr::GetHashId(const std::string &info)
 {
     return HashData::instance()->GenHashId(info);
 }
- 
+
 int32_t MsprofReporterMgr::RegReportTypeInfo(uint16_t level, uint32_t typeId, const std::string &typeName)
 {
-    MSPROF_LOGI("Register type info of reporter level[%u], type id %u, type name %s", level, typeId, typeName.c_str());
+    MSPROF_LOGD("Register type info of reporter level[%u], type id %u, type name %s", level, typeId, typeName.c_str());
     std::lock_guard<std::mutex> lk(regTypeInfoMtx_);
     if (reportTypeInfoMap_.find(level) != reportTypeInfoMap_.end() &&
         reportTypeInfoMap_[level].find(typeId) != reportTypeInfoMap_[level].end()) {
@@ -108,7 +106,7 @@ int32_t MsprofReporterMgr::RegReportTypeInfo(uint16_t level, uint32_t typeId, co
     reportTypeInfoMap_[level][typeId] = typeName;
     return PROFILING_SUCCESS;
 }
- 
+
 std::string& MsprofReporterMgr::GetRegReportTypeInfo(uint16_t level, uint32_t typeId)
 {
     static std::string nullInfo;
@@ -120,7 +118,7 @@ std::string& MsprofReporterMgr::GetRegReportTypeInfo(uint16_t level, uint32_t ty
     MSPROF_LOGW("Get type info failed, level %u, type id %u", level, typeId);
     return nullInfo;
 }
- 
+
 void MsprofReporterMgr::FillFileChunkData(const std::string &saveHashData,
     SHARED_PTR_ALIA<FileChunkReq> fileChunk) const
 {
@@ -141,7 +139,7 @@ void MsprofReporterMgr::FillFileChunkData(const std::string &saveHashData,
     fileChunk->set_chunkstarttime(reportTime);
     fileChunk->set_chunkendtime(reportTime);
 }
- 
+
 void MsprofReporterMgr::SaveTypeInfo()
 {
     std::lock_guard<std::mutex> lk(regTypeInfoMtx_);
@@ -172,7 +170,7 @@ void MsprofReporterMgr::SaveTypeInfo()
             level.first, saveHashData.size(), level.second.size());
     }
 }
- 
+
 int32_t MsprofReporterMgr::StopReporters()
 {
     std::lock_guard<std::mutex> lk(startMtx_);

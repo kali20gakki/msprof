@@ -258,10 +258,8 @@ ACL_PROF_CONFIG_PTR aclprofCreateConfig(UINT32_T_PTR deviceIdList, uint32_t devi
             return nullptr;
         }
     }
-    if (profConfig->config.dataTypeConfig & PROF_MSPROFTX_MASK) {
-        profConfig->config.devIdList[profConfig->config.devNums] = DEFAULT_HOST_ID;
-        profConfig->config.devNums++;
-    }
+    profConfig->config.devIdList[profConfig->config.devNums] = DEFAULT_HOST_ID;
+    profConfig->config.devNums++;
     MSPROF_LOGI("Successfully create prof config");
     return profConfig;
 }

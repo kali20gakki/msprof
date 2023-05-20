@@ -55,11 +55,8 @@ public:
           idleWriteIndex_(0),
           isQuit_(false),
           isInited_(false),
-          useExtdDataQueue_(false)
-    {
-        static const std::string RING_BUFFER_DEFAULT_NAME = "RingBuffer";
-        name_ = RING_BUFFER_DEFAULT_NAME;
-    }
+          name_("RingBuffer"),
+          useExtdDataQueue_(false) {}
 
     virtual ~RingBuffer()
     {
@@ -100,7 +97,7 @@ public:
         isQuit_ = true;
     }
 
-    bool TryPush(CONST_REPORT_DATA_PTR data)
+    bool TryPush(const T& data)
     {
         bool useExtdDataQueue = useExtdDataQueue_.load(std::memory_order_relaxed);
         if (useExtdDataQueue && isInited_ && !isQuit_) {
@@ -137,16 +134,7 @@ public:
         } while (!idleWriteIndex_.compare_exchange_weak(currWriteCusor, nextWriteCusor));
 
         size_t index = currWriteCusor & mask_;
-        dataQueue_[index].deviceId = data->deviceId;
-        dataQueue_[index].reportTime = 0;
-        dataQueue_[index].dataLen = data->dataLen;
-        dataQueue_[index].tag = *(reinterpret_cast<CONST_REPORT_CHUNK_TAG_PTR>(data->tag));
-        errno_t err = memcpy_s(dataQueue_[index].data.data, RECEIVE_CHUNK_SIZE, data->data, data->dataLen);
-        if (err != EOK) {
-            MSPROF_LOGE("memcpy data failed, err:%d, deviceID:%d, tag:%s, dataLen:%llu",
-                        static_cast<int>(err), dataQueue_[index].deviceId, data->tag, dataQueue_[index].dataLen);
-            return false;
-        }
+        dataQueue_[index] = data;
         writeIndex_++;
         dataAvails_[index] = static_cast<uint64_t>(DataStatus::DATA_STATUS_READY);
 
@@ -192,21 +180,10 @@ public:
     }
 
 private:
-    bool TryPushExtdDataQueue(CONST_REPORT_DATA_PTR data)
+    bool TryPushExtdDataQueue(const T& data)
     {
-        T dataChunk;
-        dataChunk.deviceId = data->deviceId;
-        dataChunk.reportTime = 0;
-        dataChunk.dataLen = data->dataLen;
-        dataChunk.tag = *(reinterpret_cast<CONST_REPORT_CHUNK_TAG_PTR>(data->tag));
-        errno_t err = memcpy_s(dataChunk.data.data, RECEIVE_CHUNK_SIZE, data->data, data->dataLen);
-        if (err != EOK) {
-            MSPROF_LOGE("memcpy data failed, err:%d, deviceID:%d, tag:%s, dataLen:%llu",
-                        static_cast<int>(err), dataChunk.deviceId, data->tag, dataChunk.dataLen);
-            return false;
-        }
         std::lock_guard<std::mutex> lk(mtx_);
-        extdDataQueue_.push(dataChunk);
+        extdDataQueue_.push(data);
         return true;
     }
  

@@ -7,7 +7,6 @@
 #include "msprof_callback_impl.h"
 #include "dyn_prof_server.h"
 #include "errno/error_code.h"
-#include "msprof_callback_handler.h"
 #include "prof_acl_mgr.h"
 #include "prof_manager.h"
 #include "prof_acl_core.h"
@@ -209,36 +208,6 @@ int32_t MsprofReporterCallbackImpl(uint32_t moduleId, uint32_t type, VOID_PTR da
     return ACL_ERROR_PROFILING_FAILURE;
 }
 
-int32_t MsprofApiReporterCallbackImpl(uint32_t agingFlag, const MsprofApi &api)
-{
-    return MSPROF_ERROR_NONE;
-}
- 
-int32_t MsprofEventReporterCallbackImpl(uint32_t agingFlag, const MsprofEvent &event)
-{
-    return MSPROF_ERROR_NONE;
-}
- 
-int32_t MsprofCompactInfoReporterCallbackImpl(uint32_t agingFlag, CONST_VOID_PTR data, uint32_t length)
-{
-    return MSPROF_ERROR_NONE;
-}
- 
-int32_t MsprofAddiInfoReporterCallbackImpl(uint32_t agingFlag, CONST_VOID_PTR data, uint32_t length)
-{
-    return MSPROF_ERROR_NONE;
-}
- 
-int32_t MsprofRegReportTypeInfoImpl(uint16_t level, uint32_t typeId, const std::string &typeName)
-{
-    return MSPROF_ERROR_NONE;
-}
- 
-int32_t MsprofGetHashIdImpl(const std::string &hashInfo)
-{
-    return MSPROF_ERROR_NONE;
-}
-
 int32_t RegisterReporterCallback()
 {
     if (Msprof::Engine::MsprofCallbackHandler::reporters_.empty()) {
@@ -258,7 +227,66 @@ int32_t RegisterReporterCallback()
 int32_t RegisterNewReporterCallback()
 {
     MSPROF_LOGI("Call profRegProfilerCallback");
-    return PROFILING_SUCCESS;
+    const std::vector<std::pair<int, VOID_PTR>> CALLBACK_FUNC_LIST = {
+        {PROFILE_REPORT_API_CALLBACK, reinterpret_cast<VOID_PTR>(MsprofApiReporterCallbackImpl)},
+        {PROFILE_REPORT_EVENT_CALLBACK, reinterpret_cast<VOID_PTR>(MsprofEventReporterCallbackImpl)},
+        {PROFILE_REPORT_COMPACT_INFO_CALLBACK, reinterpret_cast<VOID_PTR>(MsprofCompactInfoReporterCallbackImpl)},
+        {PROFILE_REPORT_ADDITIONAL_INFO_CALLBACK, reinterpret_cast<VOID_PTR>(MsprofAddiInfoReporterCallbackImpl)},
+        {PROFILE_REPORT_REG_TYPE_INFO_CALLBACK, reinterpret_cast<VOID_PTR>(MsprofRegReportTypeInfoImpl)},
+        {PROFILE_REPORT_GET_HASH_ID_CALLBACK, reinterpret_cast<VOID_PTR>(MsprofGetHashIdImpl)}
+    };
+    for (auto iter : CALLBACK_FUNC_LIST) {
+        aclError ret = ProfApiPlugin::instance()->MsprofProfRegProfilerCallback(iter.first, iter.second,
+                                                                                sizeof(VOID_PTR));
+        if (ret != ACL_SUCCESS) {
+            MSPROF_LOGE("Failed to register reporter callback");
+            MSPROF_CALL_ERROR("EK9999", "Failed to register reporter callback");
+            return ret;
+        }
+    }
+    return ACL_SUCCESS;
+}
+
+int32_t MsprofApiReporterCallbackImpl(uint32_t agingFlag, const MsprofApi &api)
+{
+    return InternalErrorCodeToExternal(MsprofReporterMgr::instance()->ReportData(agingFlag, api));
+}
+ 
+int32_t MsprofEventReporterCallbackImpl(uint32_t agingFlag, const MsprofEvent &event)
+{
+    return InternalErrorCodeToExternal(MsprofReporterMgr::instance()->ReportData(agingFlag, event));
+}
+ 
+int32_t MsprofCompactInfoReporterCallbackImpl(uint32_t agingFlag, CONST_VOID_PTR data, uint32_t length)
+{
+    if (data == nullptr || length != sizeof(struct MsprofCompactInfo)) {
+        MSPROF_LOGE("data is null or report data length (%u) is invalid.", length);
+        MSPROF_CALL_ERROR("EK9999", "Failed to register info reporter callback");
+        return MSPROF_ERROR;
+    }
+    return InternalErrorCodeToExternal(MsprofReporterMgr::instance()->ReportData(agingFlag,
+        *(reinterpret_cast<const MsprofCompactInfo *>(data))));
+}
+ 
+int32_t MsprofAddiInfoReporterCallbackImpl(uint32_t agingFlag, CONST_VOID_PTR data, uint32_t length)
+{
+    if (data == nullptr || length != sizeof(struct MsprofAdditionalInfo)) {
+        MSPROF_LOGE("data is null or report data length (%u) is invalid.", length);
+        MSPROF_CALL_ERROR("EK9999", "Failed to register info reporter callback");
+        return MSPROF_ERROR;
+    }
+    return InternalErrorCodeToExternal(MsprofReporterMgr::instance()->ReportData(agingFlag,
+        *(reinterpret_cast<const MsprofAdditionalInfo *>(data))));
+}
+ 
+int32_t MsprofRegReportTypeInfoImpl(uint16_t level, uint32_t typeId, const std::string &typeName)
+{
+    return InternalErrorCodeToExternal(MsprofReporterMgr::instance()->RegReportTypeInfo(level, typeId, typeName));
+}
+ 
+uint64_t MsprofGetHashIdImpl(const std::string &hashInfo)
+{
+    return MsprofReporterMgr::instance()->GetHashId(hashInfo);
 }
 
 void RegisterMsprofTxReporterCallback()

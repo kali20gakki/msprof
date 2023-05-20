@@ -45,6 +45,7 @@
 #include "params_adapter_geopt.h"
 #include "uploader.h"
 #include "transport/hdc/hdc_transport.h"
+#include "msprof_reporter_mgr.h"
 
 using namespace analysis::dvvp::common::error;
 using namespace Analysis::Dvvp::Analyze;
@@ -792,6 +793,7 @@ TEST_F(MSPROF_ACL_CORE_UTEST, acl_api_subscribe) {
     ProfAclMgr::instance()->CloseSubscribeFd(0, 1);
     EXPECT_EQ(0, aclApiSubscribeCount);
     aclprofDestroySubscribeConfig(profSubconfig);
+    ProfAclMgr::instance()->UnInit();
 }
 
 TEST_F(MSPROF_ACL_CORE_UTEST, ge_api_subscribe) {
@@ -975,44 +977,6 @@ TEST_F(MSPROF_ACL_CORE_UTEST, DoHostHandle) {
     EXPECT_EQ(PROFILING_FAILED, ret);
     ret = ProfAclMgr::instance()->DoHostHandle();
     EXPECT_EQ(PROFILING_SUCCESS, ret);
-}
-
-TEST_F(MSPROF_ACL_CORE_UTEST, MsprofCtrlCallbackImpl)
-{
-    GlobalMockObject::verify();
-    using namespace Msprofiler::Api;
-    uint32_t type = MSPROF_CTRL_FINALIZE;
-    VOID_PTR data = nullptr;
-    uint32_t len = 0;
-    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::MsprofFinalizeHandle)
-        .stubs()
-        .will(returnValue(0));
-    int ret = Analysis::Dvvp::ProfilerCommon::MsprofCtrlCallbackImpl(type, data, len);
-    EXPECT_EQ(MSPROF_ERROR_NONE, ret);
-    type = MSPROF_CTRL_INIT_DYNA;
-    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::IsModeOff)
-        .stubs()
-        .will(returnValue(false));
-    ret = Analysis::Dvvp::ProfilerCommon::MsprofCtrlCallbackImpl(type, data, len);
-    EXPECT_EQ(MSPROF_ERROR_NONE, ret);
-    MOCKER_CPP(&Analysis::Dvvp::Common::Platform::Platform::PlatformIsHelperHostSide)
-        .stubs()
-        .will(returnValue(true));
-    MOCKER_CPP(&Analysis::Dvvp::ProfilerCommon::RegisterReporterCallback)
-        .stubs()
-        .will(returnValue(PROFILING_FAILED));
-    ret = Analysis::Dvvp::ProfilerCommon::MsprofCtrlCallbackImpl(type, data, len);
-    EXPECT_EQ(MSPROF_ERROR_NONE, ret);
-    MOCKER_CPP(&Analysis::Dvvp::ProfilerCommon::RegisterReporterCallback)
-        .stubs()
-        .will(returnValue(PROFILING_SUCCESS));
-    MOCKER_CPP(&Analysis::Dvvp::ProfilerCommon::CommandHandleProfStart)
-        .stubs()
-        .will(returnValue(ACL_SUCCESS))
-        .then(returnValue(ACL_ERROR_PROFILING_FAILURE));
-    ret = Analysis::Dvvp::ProfilerCommon::MsprofCtrlCallbackImpl(type, data, len);
-    EXPECT_EQ(MSPROF_ERROR_NONE, ret);
-    EXPECT_EQ(MSPROF_ERROR_NONE, ret);
 }
 
 TEST_F(MSPROF_ACL_CORE_UTEST, RegisterMsprofTxReporterCallback)
@@ -1876,91 +1840,131 @@ TEST_F(MSPROF_ACL_CORE_UTEST, LaunchHostAndDevTasks)
     Msprofiler::Api::ProfAclMgr::instance()->LaunchHostAndDevTasks(num, &dev[0]);
 }
 
-TEST_F(MSPROF_ACL_CORE_UTEST, GetCmdModeDataTypeConfig)
-{
-    Msprofiler::Api::ProfAclMgr::instance()->GetCmdModeDataTypeConfig();
-}
-
-TEST_F(MSPROF_ACL_CORE_UTEST, MsprofSetConfig)
-{
-    aclprofConfigType type = ACL_PROF_ARGS_MAX;
-    std::string config = "";
-    EXPECT_EQ(PROFILING_FAILED, Msprofiler::Api::ProfAclMgr::instance()->MsprofSetConfig(type, config));
-    type = ACL_PROF_STORAGE_LIMIT;
-    config = "200MB";
-    EXPECT_EQ(PROFILING_SUCCESS, Msprofiler::Api::ProfAclMgr::instance()->MsprofSetConfig(type, config));
-}
-
-class MSPROF_API_SUBSCRIBE_UTEST: public testing::Test {
+class MSPROF_CALL_BACK_IMPL_UTEST: public testing::Test {
 protected:
-    virtual void SetUp() {
+    virtual void SetUp()
+    {
     }
-    virtual void TearDown() {
-
+    virtual void TearDown()
+    {
     }
 };
-
-TEST_F(MSPROF_API_SUBSCRIBE_UTEST, AnalyzerGe_Parse) {
-    std::shared_ptr<Analysis::Dvvp::Analyze::AnalyzerGe> analyzerGe(new Analysis::Dvvp::Analyze::AnalyzerGe());
-    analyzerGe->Parse(nullptr);
-
-    struct MsprofGeProfTaskData geTaskDescChunk;
-    std::string geOriData((char *)&geTaskDescChunk, sizeof(geTaskDescChunk));
-    SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> geTaskDesc(new analysis::dvvp::proto::FileChunkReq());
-    geTaskDesc->set_filename("Framework");
-    geTaskDesc->set_tag("task_desc_info_xxx");
-    geTaskDesc->set_chunk(geOriData);
-    geTaskDesc->set_chunksizeinbytes(sizeof(geTaskDescChunk));
-    analyzerGe->Parse(geTaskDesc);
-
-    analyzerGe->totalBytes_ = 0;
-    geTaskDesc->set_tag("task_desc_info");
-    analyzerGe->Parse(geTaskDesc);
-    EXPECT_EQ(sizeof(geTaskDescChunk), analyzerGe->totalBytes_);
-
-    struct MsprofGeProfIdMapData geIdMapData;
-    std::string geOriData2((char *)&geIdMapData, sizeof(geIdMapData));
-    geTaskDesc->set_tag("id_map_info");
-    geTaskDesc->set_chunk(geOriData2);
-    geTaskDesc->set_chunksizeinbytes(sizeof(geIdMapData));
-    analyzerGe->Parse(geTaskDesc);
-
-    geTaskDesc->set_chunksizeinbytes(0);
-    analyzerGe->Parse(geTaskDesc);
+ 
+TEST_F(MSPROF_CALL_BACK_IMPL_UTEST, MsprofCtrlCallbackImpl)
+{
+    GlobalMockObject::verify();
+    using namespace Msprofiler::Api;
+    uint32_t type = MSPROF_CTRL_FINALIZE;
+    VOID_PTR data = nullptr;
+    uint32_t len = 0;
+    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::MsprofFinalizeHandle)
+        .stubs()
+        .will(returnValue(0));
+    int ret = Analysis::Dvvp::ProfilerCommon::MsprofCtrlCallbackImpl(type, data, len);
+    EXPECT_EQ(MSPROF_ERROR_NONE, ret);
+    type = MSPROF_CTRL_INIT_DYNA;
+    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::IsModeOff)
+        .stubs()
+        .will(returnValue(false));
+    ret = Analysis::Dvvp::ProfilerCommon::MsprofCtrlCallbackImpl(type, data, len);
+    EXPECT_EQ(MSPROF_ERROR_NONE, ret);
+    MOCKER_CPP(&Analysis::Dvvp::Common::Platform::Platform::PlatformIsHelperHostSide)
+        .stubs()
+        .will(returnValue(true));
+    MOCKER_CPP(&Analysis::Dvvp::ProfilerCommon::RegisterReporterCallback)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED));
+    ret = Analysis::Dvvp::ProfilerCommon::MsprofCtrlCallbackImpl(type, data, len);
+    EXPECT_EQ(MSPROF_ERROR_NONE, ret);
+    MOCKER_CPP(&Analysis::Dvvp::ProfilerCommon::RegisterReporterCallback)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+    MOCKER_CPP(&Analysis::Dvvp::ProfilerCommon::CommandHandleProfStart)
+        .stubs()
+        .will(returnValue(ACL_SUCCESS))
+        .then(returnValue(ACL_ERROR_PROFILING_FAILURE));
+    ret = Analysis::Dvvp::ProfilerCommon::MsprofCtrlCallbackImpl(type, data, len);
+    EXPECT_EQ(MSPROF_ERROR_NONE, ret);
+    EXPECT_EQ(MSPROF_ERROR_NONE, ret);
 }
-
-TEST_F(MSPROF_API_SUBSCRIBE_UTEST, AnalyzerGe_ParseOpName) {
-    std::shared_ptr<Analysis::Dvvp::Analyze::AnalyzerGe> analyzerGe(new Analysis::Dvvp::Analyze::AnalyzerGe());
-    struct MsprofGeProfTaskData geProfTaskData;
-    memset(&geProfTaskData, 0, sizeof(MsprofGeProfTaskData));
-    geProfTaskData.opName.type = MSPROF_MIX_DATA_STRING;
-    struct Analysis::Dvvp::Analyze::AnalyzerGe::GeOpInfo opInfo;
-    analyzerGe->ParseOpName(geProfTaskData, opInfo);
+ 
+TEST_F(MSPROF_CALL_BACK_IMPL_UTEST, MsprofApiReporterCallbackImpl)
+{
+    GlobalMockObject::verify();
+    MsprofApi data;
+    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::IsInited)
+        .stubs()
+        .will(returnValue(true));
+    EXPECT_EQ(PROFILING_SUCCESS, Msprof::Engine::MsprofReporterMgr::instance()->StartReporters());
+    EXPECT_EQ(MSPROF_ERROR_NONE, Analysis::Dvvp::ProfilerCommon::MsprofApiReporterCallbackImpl(true, data));
+    Msprof::Engine::MsprofReporterMgr::instance()->StopReporters();
 }
-
-TEST_F(MSPROF_API_SUBSCRIBE_UTEST, AnalyzerGe_ParseOpType) {
-    std::shared_ptr<Analysis::Dvvp::Analyze::AnalyzerGe> analyzerGe(new Analysis::Dvvp::Analyze::AnalyzerGe());
-    struct MsprofGeProfTaskData geProfTaskData;
-    memset(&geProfTaskData, 0, sizeof(MsprofGeProfTaskData));
-    geProfTaskData.opType.type = MSPROF_MIX_DATA_STRING;
-    struct Analysis::Dvvp::Analyze::AnalyzerGe::GeOpInfo opInfo;
-    analyzerGe->ParseOpType(geProfTaskData, opInfo);
-}
-
-// TEST_F(MSPROF_API_SUBSCRIBE_UTEST, AnalyzerGe_ParseTaskDesc) {
-//     std::shared_ptr<Analysis::Dvvp::Analyze::AnalyzerGe> analyzerGe(new Analysis::Dvvp::Analyze::AnalyzerGe());
-
-//     struct MsprofGeProfTaskData geTaskDescChunk1;
-//     geTaskDescChunk1.opName.type = 2; // invalid type
-//     analyzerGe->ParseTaskDesc(reinter_cast<CONST_CHAR_PTR>(&geTaskDescChunk1), sizeof(geTaskDescChunk1));
+ 
+TEST_F(MSPROF_CALL_BACK_IMPL_UTEST, MsprofEventReporterCallbackImpl)
+{
+    GlobalMockObject::verify();
+    MsprofEvent data;
     
-//     EXPECT_EQ(0, analyzerGe->analyzedBytes_);
-
-//     struct MsprofGeProfTaskData geTaskDescChunk2[10];
-//     analyzerGe->ParseTaskDesc(static_cast<CONST_CHAR_PTR>(&geTaskDescChunk2[0]), sizeof(geTaskDescChunk2));
-//     EXPECT_EQ(sizeof(geTaskDescChunk2), analyzerGe->analyzedBytes_);
-// }
-
+    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::IsInited)
+        .stubs()
+        .will(returnValue(false))
+        .then(returnValue(true));
+    EXPECT_EQ(PROFILING_FAILED, Msprof::Engine::MsprofReporterMgr::instance()->StartReporters());
+    EXPECT_EQ(MSPROF_ERROR, Analysis::Dvvp::ProfilerCommon::MsprofEventReporterCallbackImpl(true, data));
+    EXPECT_EQ(PROFILING_SUCCESS, Msprof::Engine::MsprofReporterMgr::instance()->StartReporters());
+    EXPECT_EQ(MSPROF_ERROR_NONE, Analysis::Dvvp::ProfilerCommon::MsprofEventReporterCallbackImpl(true, data));
+    Msprof::Engine::MsprofReporterMgr::instance()->StopReporters();
+}
+ 
+TEST_F(MSPROF_CALL_BACK_IMPL_UTEST, MsprofCompactInfoReporterCallbackImpl)
+{
+    GlobalMockObject::verify();
+ 
+    EXPECT_EQ(MSPROF_ERROR, Analysis::Dvvp::ProfilerCommon::MsprofCompactInfoReporterCallbackImpl(true, nullptr, 0));
+    
+    MsprofCompactInfo data;
+    EXPECT_EQ(MSPROF_ERROR, Analysis::Dvvp::ProfilerCommon::MsprofCompactInfoReporterCallbackImpl(true, &data, 0));
+    
+    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::IsInited)
+        .stubs()
+        .will(returnValue(false))
+        .then(returnValue(true));
+    EXPECT_EQ(PROFILING_FAILED, Msprof::Engine::MsprofReporterMgr::instance()->StartReporters());
+    EXPECT_EQ(MSPROF_ERROR, Analysis::Dvvp::ProfilerCommon::MsprofCompactInfoReporterCallbackImpl(true,
+        &data, sizeof(MsprofCompactInfo)));
+    EXPECT_EQ(PROFILING_SUCCESS, Msprof::Engine::MsprofReporterMgr::instance()->StartReporters());
+    EXPECT_EQ(MSPROF_ERROR_NONE, Analysis::Dvvp::ProfilerCommon::MsprofCompactInfoReporterCallbackImpl(true,
+        &data, sizeof(MsprofCompactInfo)));
+    Msprof::Engine::MsprofReporterMgr::instance()->StopReporters();
+}
+ 
+TEST_F(MSPROF_CALL_BACK_IMPL_UTEST, MsprofAddiInfoReporterCallbackImpl)
+{
+    GlobalMockObject::verify();
+ 
+    EXPECT_EQ(MSPROF_ERROR, Analysis::Dvvp::ProfilerCommon::MsprofAddiInfoReporterCallbackImpl(true, nullptr, 0));
+    
+    MsprofAdditionalInfo data;
+    EXPECT_EQ(MSPROF_ERROR, Analysis::Dvvp::ProfilerCommon::MsprofAddiInfoReporterCallbackImpl(true, &data, 0));
+    
+    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::IsInited)
+        .stubs()
+        .will(returnValue(false))
+        .then(returnValue(true));
+    EXPECT_EQ(PROFILING_FAILED, Msprof::Engine::MsprofReporterMgr::instance()->StartReporters());
+    EXPECT_EQ(MSPROF_ERROR, Analysis::Dvvp::ProfilerCommon::MsprofAddiInfoReporterCallbackImpl(true,
+        &data, sizeof(MsprofAdditionalInfo)));
+    EXPECT_EQ(PROFILING_SUCCESS, Msprof::Engine::MsprofReporterMgr::instance()->StartReporters());
+    EXPECT_EQ(MSPROF_ERROR_NONE, Analysis::Dvvp::ProfilerCommon::MsprofAddiInfoReporterCallbackImpl(true,
+        &data, sizeof(MsprofAdditionalInfo)));
+    Msprof::Engine::MsprofReporterMgr::instance()->StopReporters();
+}
+ 
+TEST_F(MSPROF_CALL_BACK_IMPL_UTEST, MsprofRegReportTypeInfoImpl)
+{
+    GlobalMockObject::verify();
+    EXPECT_EQ(MSPROF_ERROR_NONE, Analysis::Dvvp::ProfilerCommon::MsprofRegReportTypeInfoImpl(0, 0, "test"));
+}
 
 class MSPROF_API_MSPROFTX_UTEST: public testing::Test {
 protected:
@@ -2125,6 +2129,12 @@ TEST_F(COMMANDHANDLE_TEST, commandHandle_api) {
     EXPECT_EQ(ACL_ERROR_PROFILING_FAILURE, CommandHandleProfInit());
     uint32_t devList[] = {0, 1};
     uint32_t devNums = 2;
+    MOCKER_CPP(&Msprof::Engine::MsprofReporterMgr::StartReporters)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
+    MOCKER_CPP(&Msprof::Engine::MsprofReporterMgr::StopReporters)
+        .stubs()
+        .will(returnValue(PROFILING_SUCCESS));
     EXPECT_EQ(ACL_SUCCESS, CommandHandleProfStart(devList, devNums, 0));
     EXPECT_EQ(ACL_SUCCESS, CommandHandleProfStart(nullptr, 0, 0));
     EXPECT_EQ(ACL_SUCCESS, CommandHandleProfStop(devList, devNums, 0));

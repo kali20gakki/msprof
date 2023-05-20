@@ -174,7 +174,7 @@ void HashData::FillPbData(const std::string &module, int32_t upDevId,
     fileChunk->set_tagsuffix(std::to_string(upDevId));
     fileChunk->set_chunk(saveHashData);
     fileChunk->set_chunksizeinbytes(saveHashData.size());
-    fileChunk->set_datamodule(FileChunkDataModule::PROFILING_IS_FROM_MSPROF);
+    fileChunk->set_datamodule(FileChunkDataModule::PROFILING_IS_FROM_MSPROF_HOST);
     analysis::dvvp::message::JobContext jobCtx;
     jobCtx.dev_id = std::to_string(upDevId);
     jobCtx.job_id = std::to_string(upDevId);
@@ -209,11 +209,11 @@ void HashData::SaveHashData(int32_t devId)
         // construct FileChunkReq data
         SHARED_PTR_ALIA<FileChunkReq> fileChunk = nullptr;
         MSVP_MAKE_SHARED0_BREAK(fileChunk, FileChunkReq);
-        FillPbData(module.name, devId, saveHashData, fileChunk);
+        FillPbData(module.name, DEFAULT_HOST_ID, saveHashData, fileChunk);
         // upload FileChunkReq data
         std::string encoded = analysis::dvvp::message::EncodeMessage(fileChunk);
         int ret = analysis::dvvp::transport::UploaderMgr::instance()->UploadData(
-            std::to_string(devId), encoded.c_str(), encoded.size());
+            std::to_string(DEFAULT_HOST_ID), encoded.c_str(), encoded.size());
         if (ret != PROFILING_SUCCESS) {
             MSPROF_LOGE("HashData upload data failed, module:%s, dataLen:%u",
                         module.name.c_str(), saveHashData.size());
@@ -223,6 +223,35 @@ void HashData::SaveHashData(int32_t devId)
             module.name.c_str(), saveHashData.size(),
             hashDataKeyMap_[module.name].size(), hashIdKeyMap_[module.name].size());
     }
+    SaveNewHashData();
+}
+
+void HashData::SaveNewHashData()
+{
+    if (!inited_) {
+        MSPROF_LOGW("HashData not inited");
+        return;
+    }
+    std::unique_lock<std::mutex> lock(hashMutex_);
+    // combined hash map data
+    std::string saveHashData;
+    for (auto &data : hashIdMap_) {
+        saveHashData.append(std::to_string(data.first) + HASH_DIC_DELIMITER + data.second + "\n");
+    }
+    lock.unlock();
+    // construct FileChunkReq data
+    SHARED_PTR_ALIA<FileChunkReq> fileChunk = nullptr;
+    MSVP_MAKE_SHARED0_VOID(fileChunk, FileChunkReq);
+    FillPbData("unaging.additional", DEFAULT_HOST_ID, saveHashData, fileChunk);
+    // upload FileChunkReq data
+    std::string encoded = analysis::dvvp::message::EncodeMessage(fileChunk);
+    int ret = analysis::dvvp::transport::UploaderMgr::instance()->UploadData(
+        std::to_string(DEFAULT_HOST_ID), encoded.c_str(), encoded.size());
+    if (ret != PROFILING_SUCCESS) {
+        MSPROF_LOGE("HashData upload data failed, dataLen:%u", saveHashData.size());
+    }
+    MSPROF_EVENT("total_size_HashData, saveLen:%llu, hashIdMap size:%llu, hashInfoMap size:%llu",
+        saveHashData.size(), hashIdMap_.size(), hashInfoMap_.size());
 }
 }
 }

@@ -64,6 +64,7 @@ private:
     void AddCycleToTimeInfo(SHARED_PTR_ALIA<analysis::dvvp::proto::InfoMain> infoMain);
     void SetRankId(SHARED_PTR_ALIA<analysis::dvvp::proto::InfoMain> infoMain);
     void SetVersionInfo(SHARED_PTR_ALIA<analysis::dvvp::proto::InfoMain> infoMain) const;
+    uint32_t GetCpuFrequency() const;
 
 private:
     std::string jobInfo_;
