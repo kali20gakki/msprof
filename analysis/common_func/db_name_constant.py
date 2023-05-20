@@ -68,6 +68,8 @@ class DBNameConstant(metaclass=ABCMeta):
     DB_FREQ = "freq.db"
     DB_API_DATA = "api.db"
     DB_EVENT_DATA = "event.db"
+    DB_HCCL_INFO = "hccl_info.db"
+    DB_MULTI_THREAD = "multi_thread.db"
     DB_TENSOR_ADD_INFO = "tensor_info.db"
     DB_NODE_BASIC_INFO = "node_basic_info.db"
     DB_FUSION_ADD_INFO = "fusion_op_info.db"
@@ -231,7 +233,7 @@ class DBNameConstant(metaclass=ABCMeta):
     TABLE_BIU_FLOW = "BiuFlow"
     TABLE_BIU_CYCLES = "BiuCycles"
 
-    #cluster
+    # cluster
     TABLE_CLUSTER_RANK = "ClusterRank"
     TABLE_DATA_QUEUE = "DataQueue"
     TABLE_HCCL_OPERATOR_EXE = "HcclOperatorExe"
@@ -247,7 +249,7 @@ class DBNameConstant(metaclass=ABCMeta):
     # npu mem of process and device
     TABLE_NPU_MEM = "NpuMem"
 
-    #sync_acl_npu
+    # sync_acl_npu
     TABLE_TORCH_TO_ACL = "TorchAclRelation"
     TABLE_TORCH_TO_NPU = "TorchNpuRelation"
 
@@ -257,14 +259,16 @@ class DBNameConstant(metaclass=ABCMeta):
     # new struct
     TABLE_API_DATA = 'ApiData'
     TABLE_EVENT_DATA = 'EventData'
+    TABLE_HCCL_INFO_DATA = 'HcclInfoData'
+    TABLE_MULTI_THREAD_DATA = 'MultiThreadData'
     TABLE_TENSOR_ADD_INFO = "TensorInfoV2"
     TABLE_NODE_BASIC_INFO = "NodeBasicInfo"
     TABLE_FUSION_ADD_INFO = "FusionOPInfo"
     TABLE_GRAPH_ADD_INFO = "GraphIdMap"
+    TABLE_CTX_ID_ADD_INFO = "CtxId"
     TABLE_CTX_ID = "CtxId"
     TABLE_MEMORY_APPLICATION = "MemoryApplication"
-
-    TABLE_HCCL_OP = "HCCLOp"
+    TABLE_HCCL_OP = "HCCLOP"
     TABLE_HCCL_TASK = "HCCLTask"
 
     @abstractmethod
