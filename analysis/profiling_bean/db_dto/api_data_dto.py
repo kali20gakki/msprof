@@ -10,6 +10,7 @@ class ApiDataDto:
 
     def __init__(self: any, begin_time=None, end_event_data_dto: EventDataDto = EventDataDto()) -> None:
         self.struct_type = end_event_data_dto.struct_type
+        self._id = None
         self._level = end_event_data_dto.level
         self._thread_id = end_event_data_dto.thread_id
         self._start = begin_time
@@ -20,6 +21,10 @@ class ApiDataDto:
     @property
     def struct_type(self: any) -> str:
         return str(self._struct_type)
+
+    @property
+    def id(self: any) -> str:
+        return str(self._id)
 
     @property
     def start(self: any) -> int:
@@ -42,8 +47,8 @@ class ApiDataDto:
         return self._level
 
     @property
-    def request_id(self: any) -> str:
-        return str(self._request_id)
+    def request_id(self: any) -> int:
+        return self._request_id
 
     @staticmethod
     def invalid_dto(level=INVALID_LEVEL, thread=INVALID_THREAD, start=-1, end=-1, struct_type=""):
@@ -58,6 +63,10 @@ class ApiDataDto:
     @struct_type.setter
     def struct_type(self: any, value: any) -> None:
         self._struct_type = value
+
+    @id.setter
+    def id(self: any, value: any) -> None:
+        self._id = value
 
     @start.setter
     def start(self: any, value: any) -> None:
@@ -78,3 +87,7 @@ class ApiDataDto:
     @level.setter
     def level(self: any, value: any) -> None:
         self._level = value
+
+    @request_id.setter
+    def request_id(self: any, value: any) -> None:
+        self._request_id = value
