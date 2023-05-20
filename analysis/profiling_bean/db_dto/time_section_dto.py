@@ -15,6 +15,9 @@ class TimeSectionDto:
         self._end_time = Constant.DEFAULT_INVALID_VALUE
         self._overlap_time = Constant.DEFAULT_INVALID_VALUE
 
+    def __lt__(self, other):
+        return self.start_time < other.start_time
+
     @property
     def model_id(self: any) -> any:
         return float(self._model_id)
@@ -70,3 +73,8 @@ class TimeSectionDto:
     @overlap_time.setter
     def overlap_time(self: any, value: any) -> None:
         self._overlap_time = value
+
+
+class CommunicationTimeSection(TimeSectionDto):
+    def __init__(self):
+        super().__init__()
