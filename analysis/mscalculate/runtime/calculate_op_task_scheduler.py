@@ -134,7 +134,7 @@ class CalculateOpTaskScheduler:
         :return: None
         """
         logging.info('start insert op data into report table')
-        db_path = os.path.join(PathManager.get_sql_dir(project_path), DBNameConstant.DB_RUNTIME)
+        db_path = PathManager.get_db_path(project_path, DBNameConstant.DB_RUNTIME)
         runtime_conn, runtime_curs = DBManager.check_connect_db_path(db_path)
         if not runtime_conn or not runtime_curs \
                 or not DBManager.check_tables_in_db(db_path, DBNameConstant.TABLE_RUNTIME_TASK_TIME):
@@ -168,7 +168,7 @@ class CalculateOpTaskScheduler:
             logging.warning("No need to update task time data, runtime "
                             "api data or ts timeline data had not been collected.")
             return
-        select_api_sql = 'select api,rowid,stream_id,task_id,batch_id from {0} where tasknum != 0 ' \
+        select_api_sql = 'select api,rowid,stream_id,task_id,batch_id from {0} ' \
                          'order by entry_time;'.format(DBNameConstant.TABLE_API_CALL)
         api_thread = DBManager.fetch_all_data(runtime_curs, select_api_sql)
         try:

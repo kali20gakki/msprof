@@ -120,7 +120,7 @@ class CalculateTaskScheduler:
         :return:
         """
         logging.info('start insert data into report table')
-        db_path = os.path.join(PathManager.get_sql_dir(project_path), DBNameConstant.DB_RUNTIME)
+        db_path = PathManager.get_db_path(project_path, DBNameConstant.DB_RUNTIME)
         runtime_conn, runtime_curs = DBManager.check_connect_db_path(db_path)
         if not runtime_conn or not runtime_curs \
                 or not DBManager.check_tables_in_db(db_path, DBNameConstant.TABLE_RUNTIME_TASK_TIME):
