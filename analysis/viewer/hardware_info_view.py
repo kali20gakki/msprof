@@ -12,6 +12,7 @@ from common_func.db_name_constant import DBNameConstant
 from common_func.msvp_common import float_calculate
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_constant.number_constant import NumberConstant
+from common_func.path_manager import PathManager
 from common_func.utils import Utils
 
 
@@ -58,7 +59,7 @@ def get_llc_train_summary(result_dir: str, sample_config: dict, device_id: str) 
     """
     report llc data summary
     """
-    db_path = os.path.join(result_dir, "sqlite", DBNameConstant.DB_LLC)
+    db_path = PathManager.get_db_path(result_dir, DBNameConstant.DB_LLC)
     conn, curs = DBManager.check_connect_db_path(db_path)
     res = _check_llc_db(conn, curs)
     if res:

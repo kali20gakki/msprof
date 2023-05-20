@@ -402,8 +402,8 @@ class TopDownData:
                             "order by start_time".format(cls.OP_SUMMARY_TASK_TIME_TABLE)
             ts_traces = DBManager.fetch_all_data(cur, acl_query_sql)
             if ts_traces:
-                op_names, _ = CoreCpuReduceViewer.get_op_names_and_task_type(PathManager.get_sql_dir(project_path))
-                _, total_time = CoreCpuReduceViewer.get_total_cycle(PathManager.get_sql_dir(project_path))
+                op_names, _ = CoreCpuReduceViewer.get_op_names_and_task_type(project_path)
+                _, total_time = CoreCpuReduceViewer.get_total_cycle(project_path)
                 ts_trace_data = Utils.generator_to_list(
                     cls._reformat_ts_trace_data(top_down_datas, op_names, total_time, ts_trace)
                     for ts_trace in ts_traces)

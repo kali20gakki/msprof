@@ -9,6 +9,7 @@ import sqlite3
 from analyzer.scene_base.profiling_scene import ProfilingScene
 from common_func.constant import Constant
 from common_func.db_name_constant import DBNameConstant
+from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.msprof_exception import ProfException
@@ -40,6 +41,7 @@ class StarsIterRecParser(IParser, MsMultiProcess):
         super().__init__(sample_config)
         self.sample_config = sample_config
         self._project_path = sample_config.get(StrConstant.SAMPLE_CONFIG_PROJECT_PATH)
+        self.hwts_iter_model = HwtsIterModel(self._project_path)
         self._iter_info_dict = {}
         self._current_iter_id = 0
         self._iter_end_dict = {}
@@ -61,8 +63,12 @@ class StarsIterRecParser(IParser, MsMultiProcess):
         multiprocess to parse hwts data
         :return: None
         """
+        if (ChipManager().is_chip_v1_1() or ChipManager().is_chip_v4()) and \
+                InfoConfReader().get_ai_core_profiling_mode() == 'sample-based':
+            logging.warning("Stars parse is not supported in this chip with sample-based scene")
+            return
         try:
-            if self._file_list and not ProfilingScene().is_operator():
+            if self._file_list and not ProfilingScene().is_operator() and self._is_need_to_calculate():
                 self.parse()
                 self.save()
         except ProfException as rec_error:
@@ -87,7 +93,8 @@ class StarsIterRecParser(IParser, MsMultiProcess):
         """
         iter_info_list = self.refactor_iter_info_dict()
         try:
-            with HwtsIterModel(self._project_path) as hwts_iter_model:
+            with self.hwts_iter_model as hwts_iter_model:
+                hwts_iter_model.clear_table()
                 hwts_iter_model.flush(iter_info_list,
                                       DBNameConstant.TABLE_HWTS_ITER_SYS)
         except sqlite3.Error as trace_err:
@@ -120,6 +127,11 @@ class StarsIterRecParser(IParser, MsMultiProcess):
             aic_offset += iter_info.aic_count
             hwts_offset += iter_info.hwts_count
         return iter_info_list
+
+    def _is_need_to_calculate(self):
+        return not (self.hwts_iter_model.check_iter_data_in_db(
+            DBNameConstant.TABLE_HWTS_ITER_SYS) or self.hwts_iter_model.check_iter_data_in_db(
+            DBNameConstant.TABLE_HWTS_BATCH))
 
     def _parse_log_file_list(self):
         log_file_list = self._file_list.get(DataTag.STARS_LOG, [])

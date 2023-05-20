@@ -7,26 +7,26 @@ import os
 import sqlite3
 
 from analyzer.scene_base.profiling_scene import ProfilingScene
+from common_func.batch_counter import BatchCounter
 from common_func.constant import Constant
+from common_func.db_manager import DBManager
+from common_func.db_name_constant import DBNameConstant
 from common_func.file_manager import FileOpen
+from common_func.iter_recorder import IterRecorder
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
+from common_func.msprof_exception import ProfException
 from common_func.path_manager import PathManager
 from common_func.utils import Utils
-from common_func.db_name_constant import DBNameConstant
-from common_func.batch_counter import BatchCounter
-from common_func.iter_recorder import IterRecorder
-from common_func.msprof_exception import ProfException
-from common_func.db_manager import DBManager
 from framework.offset_calculator import OffsetCalculator
 from msmodel.ge.ge_info_calculate_model import GeInfoModel
 from msmodel.iter_rec.iter_rec_model import HwtsIterModel
 from msparser.interface.iparser import IParser
+from msparser.iter_rec.iter_info_updater.iter_info_updater import IterInfoUpdater
 from profiling_bean.prof_enum.data_tag import DataTag
 from profiling_bean.struct_info.aic_pmu import AicPmuBean
 from profiling_bean.struct_info.hwts_log import HwtsLogBean
-from msparser.iter_rec.iter_info_updater.iter_info_updater import IterInfoUpdater
 
 
 class IterParser(IParser, MsMultiProcess):
@@ -48,7 +48,7 @@ class IterParser(IParser, MsMultiProcess):
         self._iter_recorder = IterRecorder(self._project_path)
         self._iter_info_updater = IterInfoUpdater(self._project_path)
         self._hwts_task_time_data = [None] * self.DEFAULT_TASK_TIME_SIZE
-        self.ge_info_model = GeInfoModel(self._project_path)
+        self.ge_info_model = GeInfoModel(PathManager.get_host_result_dir(self._project_path))
         self._task_start_dict = {}
         self._overstep_task_cnt = 0
         self.default_index = 0
@@ -92,6 +92,11 @@ class IterParser(IParser, MsMultiProcess):
         :return:
         """
         pass
+
+    def is_need_to_calculate(self):
+        return not (self.hwts_iter_model.check_iter_data_in_db(
+            DBNameConstant.TABLE_HWTS_ITER_SYS) or self.hwts_iter_model.check_iter_data_in_db(
+            DBNameConstant.TABLE_HWTS_BATCH))
 
     def _read_hwts_data(self: any, all_bytes: bytes) -> None:
         for _chunk in Utils.chunks(all_bytes, self.HWTS_LOG_SIZE):
@@ -138,6 +143,7 @@ class IterParser(IParser, MsMultiProcess):
         hwts_files.sort(key=lambda x: int(x.split("_")[-1]))
         _offset_calculator = OffsetCalculator(hwts_files, self.HWTS_LOG_SIZE, self._project_path)
         self.hwts_iter_model.init()
+        self.hwts_iter_model.clear_table()
         for _hwts_file in hwts_files:
             _hwts_file = PathManager.get_data_file_path(self._project_path, _hwts_file)
             logging.info("Begin to process hwts data file: %s", os.path.basename(_hwts_file))
@@ -183,7 +189,8 @@ class IterRecParser(IterParser):
         :return: None
         """
         try:
-            if self._file_list.get(DataTag.HWTS, []) and not ProfilingScene().is_operator():
+            if self._file_list.get(DataTag.HWTS,
+                                   []) and not ProfilingScene().is_operator() and self.is_need_to_calculate():
                 self.parse()
                 self.save()
         except ProfException as rec_error:
@@ -201,10 +208,14 @@ class NoGeIterRecParser(IterParser):
         super(NoGeIterRecParser, self).__init__(file_list, sample_config)
         self._file_list = file_list
 
-    @staticmethod
-    def judge_file_scene(file_dict: dict) -> bool:
+    def judge_file_scene(self: any, file_dict: dict) -> bool:
         return bool(
-            file_dict.get(DataTag.HWTS) and file_dict.get(DataTag.AI_CORE) and not file_dict.get(DataTag.GE_TASK))
+            file_dict.get(DataTag.HWTS) and file_dict.get(DataTag.AI_CORE) and not DBManager.check_tables_in_db(
+                PathManager.get_db_path(
+                    self._project_path, DBNameConstant.DB_GE_INFO), DBNameConstant.TABLE_GE_TASK) and
+            not self.hwts_iter_model.check_iter_data_in_db(
+                DBNameConstant.TABLE_HWTS_ITER_SYS) and self.hwts_iter_model.check_iter_data_in_db(
+                DBNameConstant.TABLE_HWTS_BATCH))
 
     def parse(self: any) -> None:
         """
@@ -223,7 +234,8 @@ class NoGeIterRecParser(IterParser):
         :return: None
         """
         try:
-            if NoGeIterRecParser.judge_file_scene(self._file_list) and not ProfilingScene().is_operator():
+            if self.judge_file_scene(
+                    self._file_list) and not ProfilingScene().is_operator() and self.is_need_to_calculate():
                 self.parse()
                 self.save()
         except ProfException as rec_error:

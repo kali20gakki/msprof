@@ -3,10 +3,13 @@
 import json
 import sqlite3
 import unittest
+from collections import namedtuple
 from unittest import mock
 
 from common_func.info_conf_reader import InfoConfReader
 from constant.constant import ITER_RANGE
+from profiling_bean.db_dto.hccl_dto import HcclDto
+from sqlite.db_manager import DBManager
 from viewer.get_hccl_export_data import HCCLExport
 
 NAMESPACE = 'viewer.get_hccl_export_data'
@@ -19,53 +22,43 @@ class TestHCCLExport(unittest.TestCase):
 
     def test_get_hccl_timeline_data(self):
         InfoConfReader()._info_json = {"pid": 1}
-        with mock.patch(NAMESPACE + '.HCCLExport.get_hccl_sql', return_value=" "), \
-                mock.patch(NAMESPACE + '.HCCLExport._get_hccl_sql_data', return_value=[]):
+        db_manager = DBManager()
+        table_name = 'HCCLAllReduce'
+        create_sql = "CREATE TABLE IF NOT EXISTS {0} (model_id int, index_id int, _iteration int)".format(table_name)
+
+        data = ((1, 1, 1),)
+        insert_sql = "insert into {0} values ({1})".format(table_name, "?," * (len(data[0]) - 1) + "?")
+        conn, curs = db_manager.create_table('hccl.db', create_sql, insert_sql, data)
+        with mock.patch('msmodel.hccl.hccl_model.HcclViewModel.get_hccl_op_data', return_value=[]):
             res = HCCLExport(PARAMS).get_hccl_timeline_data()
-        self.assertEqual(res, json.dumps({}))
+        self.assertEqual(json.loads(res).get('status'), 1)
+        with mock.patch('msmodel.hccl.hccl_model.HcclViewModel.get_all_data', return_value=[]),\
+                mock.patch('msmodel.interface.view_model.DBManager.create_connect_db', return_value=(conn, curs)),\
+                mock.patch('msmodel.hccl.hccl_model.HcclViewModel.check_table', return_value=True):
+            res = HCCLExport(PARAMS).get_hccl_timeline_data()
+        self.assertEqual(json.loads(res).get('status'), 2)
+        conn, curs = db_manager.create_table('hccl.db')
+        with mock.patch(NAMESPACE + '.HCCLExport._format_hccl_data'),\
+                mock.patch('msmodel.interface.view_model.DBManager.create_connect_db', return_value=(conn, curs)),\
+                mock.patch('msmodel.hccl.hccl_model.HcclViewModel.check_table', return_value=True):
+            res = HCCLExport(PARAMS).get_hccl_timeline_data()
+        self.assertEqual(json.loads(res), [])
+        conn, curs = db_manager.create_table('hccl.db')
+        db_manager.destroy((conn, curs))
 
     def test_format_hccl_data(self):
-        hccl_data = [
-            ('Notify Wait', 2, 162191740576.88998, 25.76,
-             "{'notify id': 4294967840, 'duration estimated': 0.8800048828125, 'stage': 4294967295, "
-             "'step': 4294967385, 'bandwidth': 'NULL', 'stream id': 8, 'task id': 34, 'task type': 'Notify Record', "
-             "'src rank': 2, 'dst rank': 1, 'transport type': 'SDMA', 'size': None, 'tag': 'all2allvc_1_5'}")]
-        InfoConfReader()._info_json = {"pid": 1}
-        hccl = HCCLExport(PARAMS)
-        hccl._format_hccl_data(hccl_data)
-        self.assertEqual(len(hccl.result), 5)
+        hccl_data = namedtuple('hccl', ['plane_id', 'task_id', 'stream_id', 'hccl_name', 'step', 'stage', 'duration',
+                                        'timestamp', 'args'])
+        hccl_data = [hccl_data(1, 2, 3, 0, 0, 0, 0, 0, {}), hccl_data(2, 3, 4, 0, 0, 0, 0, 0, {})]
 
-    def test_get_hccl_sql(self):
-        sql = "select name,plane_id,timestamp,duration,bandwidth,stream_id," \
-              "task_id, task_type,transport_type,size,stage,step from HCCLAllReduce where timestamp>=0.0 " \
-              "and timestamp<10.0"
+        model_data = namedtuple('model', ['op_name', 'first_timestamp', 'args', 'duration'])
+        model_data = [model_data('test_1', 0, [1, 2, 3], 0)]
         InfoConfReader()._info_json = {"pid": 1}
-        with mock.patch(NAMESPACE + '.Utils.get_scene', return_value="step_info"), \
-                mock.patch(NAMESPACE + '.MsprofIteration.get_iteration_time', return_value=[[0, 10000]]):
-            res = HCCLExport(PARAMS).get_hccl_sql()
+        with mock.patch('msmodel.hccl.hccl_model.HcclViewModel.get_hccl_op_data', return_value=model_data):
+            hccl = HCCLExport(PARAMS)
+            hccl._format_hccl_data(hccl_data)
+            self.assertEqual(len(hccl.result), 10)
 
-    def test_get_hccl_sql_data_1(self):
-        InfoConfReader()._info_json = {"pid": 1}
-        sql = ""
-        with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=[None, None]), \
-                mock.patch(NAMESPACE + '.Utils.get_scene', return_value="train"), \
-                mock.patch(NAMESPACE + '.MsprofIteration.get_iteration_time', return_value=[]):
-            res = HCCLExport(PARAMS)._get_hccl_sql_data(sql)
-        self.assertEqual(res, [])
 
-    def test_get_hccl_sql_data_2(self):
-        sql = ""
-        InfoConfReader()._info_json = {"pid": 1}
-        with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=[None, None]), \
-                mock.patch(NAMESPACE + '.HCCLExport._check_hccl_table', return_value=True), \
-                mock.patch(NAMESPACE + '.DBManager.fetch_all_data', return_value=[]):
-            res = HCCLExport(PARAMS)._get_hccl_sql_data(sql)
-        self.assertEqual(res, [])
-
-    def test_get_hccl_sql_data_3(self):
-        sql = ""
-        InfoConfReader()._info_json = {"pid": 1}
-        with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=(True, True)), \
-                mock.patch(NAMESPACE + '.DBManager.judge_table_exist', side_effect=sqlite3.Error):
-            res = HCCLExport(PARAMS)._get_hccl_sql_data(sql)
-        self.assertEqual(res, [])
+if __name__ == '__main__':
+    unittest.main()

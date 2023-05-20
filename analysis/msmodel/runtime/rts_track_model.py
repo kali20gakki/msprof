@@ -29,5 +29,5 @@ class RtsModel(BaseModel):
         self.init()
         self.check_db()
         self.create_table()
-        self.insert_data_to_db(DBNameConstant.TABLE_RUNTIME_TRACK, data)
+        self.insert_data_to_db(DBNameConstant.TABLE_TASK_TRACK, data)
         self.finalize()

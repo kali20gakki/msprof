@@ -310,8 +310,7 @@ class StepTraceViewer:
         """
         headers = []
 
-        sql_path = PathManager.get_sql_dir(message.get("project_path"))
-        conn_path = os.path.join(sql_path, DBNameConstant.DB_TRACE)
+        conn_path = PathManager.get_db_path(message.get("project_path"), DBNameConstant.DB_TRACE)
 
         if not DBManager.check_tables_in_db(conn_path, DBNameConstant.TABLE_TRAINING_TRACE):
             return MsvpConstant.MSVP_EMPTY_DATA
@@ -337,8 +336,7 @@ class StepTraceViewer:
         Return a GetTraceResponse protobuf message for client's request
         defined by GetTraceRequest.
         """
-        sql_path = PathManager.get_sql_dir(message.get("project_path"))
-        conn_path = os.path.join(sql_path, DBNameConstant.DB_TRACE)
+        conn_path = PathManager.get_db_path(message.get("project_path"), DBNameConstant.DB_TRACE)
 
         if not DBManager.check_tables_in_db(conn_path, DBNameConstant.TABLE_TRAINING_TRACE):
             return json.dumps(MsvpConstant.EMPTY_LIST)
@@ -357,8 +355,7 @@ class StepTraceViewer:
         :param iter_range: iter range
         :return: timeline json data
         """
-        sql_path = PathManager.get_sql_dir(result_dir)
-        conn_path = os.path.join(sql_path, DBNameConstant.DB_TRACE)
+        conn_path = PathManager.get_db_path(result_dir, DBNameConstant.DB_TRACE)
 
         if not DBManager.check_tables_in_db(conn_path, DBNameConstant.TABLE_TRAINING_TRACE):
             return json.dumps(MsvpConstant.EMPTY_LIST)
