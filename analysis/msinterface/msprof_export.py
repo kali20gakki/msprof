@@ -23,7 +23,6 @@ from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.msprof_common import MsProfCommonConstant
 from common_func.msprof_common import analyze_collect_data
-from common_func.msprof_common import check_collection_dir
 from common_func.msprof_common import check_path_valid
 from common_func.msprof_common import get_path_dir
 from common_func.msprof_common import prepare_for_parse
@@ -230,6 +229,10 @@ class ExportCommand:
         self._cluster_params = {'is_cluster_scene': False, 'cluster_path': []}
 
     @staticmethod
+    def _is_host_export(result_dir: str) -> bool:
+        return result_dir.endswith("host")
+
+    @staticmethod
     def get_model_id_set(result_dir: str, db_name: str, table_name: str) -> any:
         """
         get model id set
@@ -302,9 +305,12 @@ class ExportCommand:
         return model_and_index.pop()[0] if model_and_index else min(model_match_set)
 
     def _add_export_type(self: any, result_dir: str) -> None:
+        self.list_map['export_type_list'] = []
         export_map = self.EXPORT_HANDLE_MAP.get(self.command_type, [])
+        devices = InfoConfReader().get_device_list()
+        device = int(devices[0]) if devices else 0
         for item in export_map:
-            if item['handler'](result_dir, self.sample_config.get('devices', 0)):
+            if item['handler'](result_dir, device):
                 self.list_map.get('export_type_list').append(item)
 
     def _is_iteration_range_valid(self, project_path):
@@ -402,39 +408,62 @@ class ExportCommand:
                       f"Must select from {model_match_set}. Please enter a valid model id."
             raise ProfException(ProfException.PROF_INVALID_PARAM_ERROR, message)
 
-    def _prepare_for_export(self: any, result_dir: str) -> None:
-        LoadInfoManager.load_info(result_dir)
-        self.list_map['export_type_list'] = []
-        self._analyse_sample_config(result_dir)
-        self._analyse_data(result_dir)
-        self._add_export_type(result_dir)
-        self._check_model_id(result_dir)
-        self._check_index_id(result_dir)
-
+    def _set_iteration_info(self, result_dir):
         self.iteration_range = IterationRange(model_id=self.list_map.get('model_id'),
                                               iteration_id=self.iteration_id,
                                               iteration_count=self.iteration_count)
         MsprofTimeline().set_iteration_info(result_dir, self.iteration_range)
+
+    def _update_device_list(self):
         device_lst = InfoConfReader().get_device_list()
-        if device_lst:
-            self.list_map.update({'devices_list': device_lst})
+        self.list_map.update({'devices_list': device_lst})
+
+    def _get_sample_json(self, result_dir) -> dict:
+        if not self._is_host_export(result_dir):
+            device_lst = self.list_map.get('devices_list')
+            device = device_lst[0] if device_lst else None
             sample_json = {
                 StrConstant.SAMPLE_CONFIG_PROJECT_PATH: result_dir,
-                StrConstant.PARAM_DEVICE_ID: self.list_map.get('devices_list')[0],
+                StrConstant.PARAM_DEVICE_ID: device,
                 StrConstant.PARAM_ITER_ID: self.iteration_range,
                 StrConstant.PARAM_JOB_ID: MsProfCommonConstant.DEFAULT_JOB,
             }
-            file_dispatch = FileDispatch(sample_json)
-            file_dispatch.dispatch_calculator()
+        else:
+            sample_json = {
+                StrConstant.SAMPLE_CONFIG_PROJECT_PATH: result_dir,
+            }
+        return sample_json
+
+    def _has_data_to_export(self):
+        if len(self.list_map.get('export_type_list')) == 0:
+            return False
+        # msprof will always be exported
+        if self.command_type == MsProfCommonConstant.TIMELINE and len(self.list_map.get('export_type_list')) == 1:
+            return False
+        return True
+
+    def _prepare_for_export(self: any, result_dir: str) -> None:
+        LoadInfoManager.load_info(result_dir)
+        self._analyse_sample_config(result_dir)
+        self._analyse_data(result_dir)
+        if not self._is_host_export(result_dir):
+            self._check_model_id(result_dir)
+            self._check_index_id(result_dir)
+            self._set_iteration_info(result_dir)
+            self._update_device_list()
+        sample_json = self._get_sample_json(result_dir)
+        file_dispatch = FileDispatch(sample_json)
+        file_dispatch.dispatch_calculator()
+
+        self._add_export_type(result_dir)
+        if not self._has_data_to_export():
+            print_info(self.FILE_NAME, 'There is no %s data to export for "%s"' % (self.command_type, result_dir))
+            return
 
         if self.command_type == MsProfCommonConstant.SUMMARY:
             check_path_valid(PathManager.get_summary_dir(result_dir), True)
         else:
             check_path_valid(PathManager.get_timeline_dir(result_dir), True)
-
-        if len(self.list_map.get('export_type_list')) == 0:
-            print_info(self.FILE_NAME, 'There is no %s data to export for "%s". Please '
-                                       'check the path.' % (self.command_type, result_dir))
 
     def _handle_export_data(self: any, params: dict) -> None:
         result = json.loads(MsProfExportDataUtils.export_data(params))
@@ -453,12 +482,19 @@ class ExportCommand:
                                                   data)
 
         if params.get(StrConstant.PARAM_DEVICE_ID) is not None:
-            export_info = 'The {0} {1} data of device {2} for iteration {3} has been ' \
-                          'exported to "{4}".'.format(params.get(StrConstant.PARAM_DATA_TYPE),
-                                                      self.command_type,
-                                                      params.get(StrConstant.PARAM_DEVICE_ID),
-                                                      params.get(StrConstant.PARAM_ITER_ID),
-                                                      data)
+            if params.get(StrConstant.PARAM_DEVICE_ID) == str(NumberConstant.HOST_ID):
+                export_info = 'The {0} {1} data of device {2} for iteration {3} has been ' \
+                              'exported to "{4}".'.format(params.get(StrConstant.PARAM_DATA_TYPE),
+                                                          self.command_type,
+                                                          params.get(StrConstant.PARAM_DEVICE_ID),
+                                                          params.get(StrConstant.PARAM_ITER_ID),
+                                                          data)
+            else:
+                export_info = 'The {0} {1} data of host for iteration {2} has been ' \
+                              'exported to "{3}".'.format(params.get(StrConstant.PARAM_DATA_TYPE),
+                                                          self.command_type,
+                                                          params.get(StrConstant.PARAM_ITER_ID),
+                                                          data)
         print_info(self.FILE_NAME, export_info)
 
     def _handle_export(self: any, result_dir: str) -> None:
@@ -477,7 +513,7 @@ class ExportCommand:
                     self._export_data(event, None, result_dir)
                     continue
                 for device_id in self.list_map.get('devices_list', []):
-                    self._export_data(event, device_id, result_dir)
+                    self._export_data(event, int(device_id), result_dir)
         except ProfException as err:
             if err.message:
                 err.callback(MsProfCommonConstant.COMMON_FILE_NAME, err.message)
@@ -486,7 +522,6 @@ class ExportCommand:
                      'Analysis data in "%s" failed. Maybe the data is incomplete.' % result_dir)
 
     def _prepare_export(self: any, result_dir: str) -> None:
-        check_collection_dir(result_dir)
         prepare_for_parse(result_dir)
         self._prepare_for_export(result_dir)
 
@@ -540,7 +575,7 @@ class ExportCommand:
         collect_path = self.collection_path
         if sub_path:
             collect_path = os.path.join(self.collection_path, sub_path)
-        sub_dirs = get_path_dir(collect_path)
+        sub_dirs = sorted(get_path_dir(collect_path), reverse=True)
         for sub_dir in sub_dirs:  # result_dir
             if sub_dir != StrConstant.TIMELINE_PATH:
                 sub_path = os.path.realpath(

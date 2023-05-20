@@ -26,7 +26,6 @@ from profiling_bean.db_dto.ge_task_dto import GeTaskDto
 
 
 class MergeOpCounterCalculator(MsMultiProcess):
-
     """
     class to merge GE DB and runtime tasktime data
     """
@@ -45,7 +44,6 @@ class MergeOpCounterCalculator(MsMultiProcess):
         self.sql_path = None
         self.conn = None
         self.curs = None
-
 
     @staticmethod
     def _get_op_report_sql() -> str:
@@ -116,7 +114,7 @@ class MergeOpCounterCalculator(MsMultiProcess):
         :return: connection of op statics
         """
         self.conn, self.curs = DBManager.create_connect_db(
-            os.path.join(self.sql_path, DBNameConstant.DB_OP_COUNTER))
+            PathManager.get_db_path(self.project_path, DBNameConstant.DB_OP_COUNTER))
         if not self.conn or not self.curs:
             logging.error("unable to create op counter db connection")
             raise ProfException(ProfException.PROF_SYSTEM_EXIT)
@@ -143,8 +141,8 @@ class MergeOpCounterCalculator(MsMultiProcess):
         if not os.path.exists(self.sql_path):
             logging.error("Failed to get sqlite path.")
             raise ProfException(ProfException.PROF_SYSTEM_EXIT)
-        if os.path.exists(os.path.join(self.sql_path, DBNameConstant.DB_OP_COUNTER)):
-            os.remove(os.path.join(self.sql_path, DBNameConstant.DB_OP_COUNTER))
+        if os.path.exists(PathManager.get_db_path(self.project_path, DBNameConstant.DB_OP_COUNTER)):
+            os.remove(PathManager.get_db_path(self.project_path, DBNameConstant.DB_OP_COUNTER))
 
     def _is_db_need_to_create(self: any) -> bool:
         ge_db_path = PathManager.get_db_path(self.project_path, DBNameConstant.DB_GE_INFO)
@@ -155,8 +153,6 @@ class MergeOpCounterCalculator(MsMultiProcess):
                                                 DBNameConstant.TABLE_RUNTIME_TASK_TIME)
         return DBManager.check_tables_in_db(PathManager.get_db_path(self.project_path, DBNameConstant.DB_HWTS),
                                             DBNameConstant.TABLE_HWTS_TASK_TIME)
-
-
 
     def _get_ge_data(self: any, ge_curs: any) -> list:
         ge_data = []
@@ -181,7 +177,7 @@ class MergeOpCounterCalculator(MsMultiProcess):
         :return: None
         """
         ge_conn, ge_curs = DBManager.check_connect_db_path(
-            os.path.join(self.sql_path, DBNameConstant.DB_GE_INFO))
+            PathManager.get_db_path(self.project_path, DBNameConstant.DB_GE_INFO))
         if ge_conn and ge_curs and DBManager.judge_table_exist(ge_curs, DBNameConstant.TABLE_GE_TASK):
             ge_data = self._get_ge_data(ge_curs)
             if ge_data:

@@ -19,6 +19,7 @@ from common_func.msvp_common import create_json
 from common_func.msvp_constant import MsvpConstant
 from common_func.os_manager import check_file_writable, check_file_readable
 from common_func.path_manager import PathManager
+from common_func.utils import Utils
 from profiling_bean.prof_enum.timeline_slice_strategy import LoadingTimeLevel, TimeLineSliceStrategy
 
 
@@ -146,7 +147,8 @@ class MsprofDataStorage:
     @staticmethod
     def _make_export_file_name(params: dict, slice_times: int = 0, slice_switch=False) -> str:
         file_name = params.get(StrConstant.PARAM_DATA_TYPE)
-        if params.get(StrConstant.PARAM_DEVICE_ID) is not None:
+        if params.get(StrConstant.PARAM_DEVICE_ID) is not None and \
+                params.get(StrConstant.PARAM_DEVICE_ID) != NumberConstant.HOST_ID:
             file_name += "_" + str(params.get(StrConstant.PARAM_DEVICE_ID))
             if ProfilingScene().is_step_trace():
                 file_name += "_" + str(params.get(StrConstant.PARAM_MODEL_ID))

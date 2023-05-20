@@ -172,6 +172,8 @@ class MsprofTimeline:
                 self.add_sort_index(data_list)
                 data_list.extend(self._export_data_list)
                 return json.dumps(data_list)
+        if not self._export_data_list:
+            return ""
         return json.dumps(self._export_data_list)
 
     def is_in_iteration(self: any, json_value: dict) -> bool:
