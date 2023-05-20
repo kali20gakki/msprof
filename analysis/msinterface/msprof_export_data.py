@@ -5,7 +5,6 @@
 import json
 import threading
 
-from msconfig.config_manager import ConfigManager
 from common_func.config_mgr import ConfigMgr
 from common_func.data_manager import DataManager
 from common_func.db_name_constant import DBNameConstant
@@ -19,9 +18,10 @@ from common_func.path_manager import PathManager
 from common_func.platform.chip_manager import ChipManager
 from common_func.utils import Utils
 from host_prof.host_prof_presenter_manager import HostExportType
-from host_prof.host_prof_presenter_manager import get_host_prof_timeline
 from host_prof.host_prof_presenter_manager import get_host_prof_summary
+from host_prof.host_prof_presenter_manager import get_host_prof_timeline
 from host_prof.host_syscall.presenter.host_syscall_presenter import HostSyscallPresenter
+from msconfig.config_manager import ConfigManager
 from msinterface.msprof_data_storage import MsprofDataStorage
 from msinterface.msprof_timeline import MsprofTimeline
 from msparser.aicpu.parse_dp_data import ParseDpData
@@ -59,8 +59,10 @@ from viewer.hardware_info_report import llc_capacity_data
 from viewer.hardware_info_view import get_llc_train_summary
 from viewer.interconnection_view import InterConnectionView
 from viewer.msproftx_viewer import MsprofTxViewer
+from viewer.npu_mem.npu_mem_viewer import NpuMemViewer
 from viewer.peripheral_report import get_peripheral_dvpp_data
 from viewer.peripheral_report import get_peripheral_nic_data
+from viewer.pipeline_overlap_viewer import PipelineOverlapViewer
 from viewer.runtime.runtime_api_viewer import RuntimeApiViewer
 from viewer.runtime_report import get_task_scheduler_data
 from viewer.stars.acc_pmu_viewer import AccPmuViewer
@@ -75,7 +77,6 @@ from viewer.training.core_cpu_reduce_viewer import CoreCpuReduceViewer
 from viewer.training.step_trace_viewer import StepTraceViewer
 from viewer.training.task_op_viewer import TaskOpViewer
 from viewer.ts_cpu_report import TsCpuReport
-from viewer.npu_mem.npu_mem_viewer import NpuMemViewer
 
 
 class MsProfExportDataUtils:
@@ -547,8 +548,9 @@ class MsProfExportDataUtils:
 
     @staticmethod
     def _get_bulk_data(configs: dict, params: dict) -> any:
-        _ = configs
         if params.get(StrConstant.PARAM_EXPORT_TYPE) == MsProfCommonConstant.TIMELINE:
+            MsprofTimeline().add_export_data(PipelineOverlapViewer(configs, params).get_timeline_data(),
+                                             params.get(StrConstant.PARAM_DATA_TYPE))
             return MsprofTimeline().export_all_data()
         return json.dumps({
             "status": NumberConstant.WARN,
@@ -644,8 +646,6 @@ class MsProfExportDataUtils:
                 return MsprofDataStorage().export_summary_data(headers, Utils.data_processing_with_decimals(data),
                                                                params)
             data = handler(configs, params)
-            if isinstance(data, EmptyClass):
-                return json.dumps({"status": NumberConstant.ERROR, "info": "Unable to get prof data."})
             cls.add_timeline_data(params, data)
             return MsprofDataStorage().export_timeline_data_to_json(data, params)
         return json.dumps({

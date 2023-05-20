@@ -86,7 +86,7 @@ class ImportCommand:
         collect_path = self.collection_path
         if subdir:
             collect_path = os.path.join(self.collection_path, subdir)
-        sub_dirs = get_path_dir(collect_path)
+        sub_dirs = sorted(get_path_dir(collect_path), reverse=True)
         for sub_dir in sub_dirs:  # result_dir
             sub_path = os.path.realpath(
                 os.path.join(collect_path, sub_dir))

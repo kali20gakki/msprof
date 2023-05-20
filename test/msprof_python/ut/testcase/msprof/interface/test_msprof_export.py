@@ -10,12 +10,7 @@ from common_func.constant import Constant
 from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.msprof_exception import ProfException
-from common_func.system_data_check_manager import SystemDataCheckManager
-from constant.constant import ITER_RANGE
 from msinterface.msprof_export import ExportCommand
-from profiling_bean.db_dto.step_trace_dto import StepTraceDto
-from profiling_bean.prof_enum.export_data_type import ExportDataType
-
 from sqlite.db_manager import DBManager
 
 NAMESPACE = 'msinterface.msprof_export'
@@ -200,7 +195,6 @@ class TestExportCommand(unittest.TestCase):
         args_dic = {"collection_path": "test", "iteration_id": 3, "model_id": 1}
         args = Namespace(**args_dic)
         with mock.patch(NAMESPACE + ".prepare_for_parse"), \
-                mock.patch(NAMESPACE + ".check_collection_dir"), \
                 mock.patch(NAMESPACE + ".ExportCommand._export_data"), \
                 mock.patch(NAMESPACE + ".ExportCommand._prepare_for_export"):
             test = ExportCommand("timeline", args)
@@ -287,7 +281,7 @@ class TestExportCommand(unittest.TestCase):
         args_dic = {"collection_path": "test", "iteration_id": 3, "model_id": 1, "iteration_count": 1}
         args = Namespace(**args_dic)
         with mock.patch(NAMESPACE + '.ExportCommand._prepare_export'), \
-        mock.patch(NAMESPACE + '.ExportCommand._export_data', side_effect=ProfException(2, 'test', error)):
+                mock.patch(NAMESPACE + '.ExportCommand._export_data', side_effect=ProfException(2, 'test', error)):
             test = ExportCommand("summary", args)
             test.list_map = {'export_type_list': [1]}
             test._handle_export('test')
@@ -296,7 +290,7 @@ class TestExportCommand(unittest.TestCase):
         args_dic = {"collection_path": "test", "iteration_id": 3, "model_id": 1, "iteration_count": 1}
         args = Namespace(**args_dic)
         with mock.patch(NAMESPACE + '.ExportCommand._prepare_export'), \
-        mock.patch(NAMESPACE + '.ExportCommand._export_data', side_effect=ProfException(2)):
+                mock.patch(NAMESPACE + '.ExportCommand._export_data', side_effect=ProfException(2)):
             test = ExportCommand("summary", args)
             test.list_map = {'export_type_list': [1]}
             test._handle_export('test')
@@ -307,6 +301,18 @@ class TestExportCommand(unittest.TestCase):
         test = ExportCommand("summary", args)
         test.list_map = {'export_type_list': [1]}
         test._handle_export('test')
+
+    def test_handle_export_raise_profexception_6(self) -> None:
+        InfoConfReader()._info_json = {}
+        args_dic = {"collection_path": "test", "iteration_id": 3, "model_id": 1, "iteration_count": 1}
+        args = Namespace(**args_dic)
+        with mock.patch('os.path.exists', return_value=True), \
+                mock.patch('common_func.msprof_common.check_dir_writable'), \
+                mock.patch('common_func.msprof_common.check_free_memory'), \
+                mock.patch('os.listdir', return_value=['test']):
+            test = ExportCommand("summary", args)
+            test.list_map = {'export_type_list': [1]}
+            test._handle_export('test')
 
 
 if __name__ == '__main__':

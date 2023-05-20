@@ -58,7 +58,7 @@ class PmuCalculator(ICalculator):
         get ge data from ge info in the format of [task_id, stream_id, blockid]
         :return: {"task_id-stream_id":blockdim}
         """
-        db_path = self.get_db_path(DBNameConstant.DB_GE_INFO)
+        db_path = PathManager.get_db_path(self._project_path, DBNameConstant.DB_GE_INFO)
         if not DBManager.check_tables_in_db(db_path, DBNameConstant.TABLE_GE_TASK):
             return
         ge_conn, ge_curs = DBManager.check_connect_db_path(db_path)
@@ -79,14 +79,6 @@ class PmuCalculator(ICalculator):
                 self._core_num_dict['aic'] = InfoConfReader().get_data_under_device('ai_core_num')
                 self._core_num_dict['aiv'] = InfoConfReader().get_data_under_device('aiv_num')
                 self._freq = InfoConfReader().get_freq(StrConstant.AIC)
-
-    def get_db_path(self: any, db_name: str) -> str:
-        """
-        get database path
-        :param db_name: database name
-        :return: DB path
-        """
-        return os.path.join(PathManager.get_sql_dir(self._project_path), db_name)
 
     def _get_current_block(self: any, block_type: str, ai_core_data: any) -> int:
         """

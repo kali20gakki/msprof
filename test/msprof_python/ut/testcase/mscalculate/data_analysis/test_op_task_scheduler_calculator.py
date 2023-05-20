@@ -146,7 +146,7 @@ class TestCalculateOpTaskScheduler(unittest.TestCase):
                 mock.patch(NAMESPACE + '.DBManager.sql_create_general_table', return_value=""), \
                 mock.patch(NAMESPACE + '.DBManager.execute_sql'), \
                 mock.patch(NAMESPACE + '.PathManager.get_sql_dir'), \
-                mock.patch('os.path.join'), \
+                mock.patch('os.path.join', return_value='test'), \
                 mock.patch(NAMESPACE + '.DBManager.destroy_db_connect'):
             with mock.patch(NAMESPACE + '.DBManager.check_connect_db_path',
                             return_value=(False, False)):
