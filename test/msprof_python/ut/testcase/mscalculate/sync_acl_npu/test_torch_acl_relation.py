@@ -58,7 +58,8 @@ class TestTorchAclRelationCalculator(unittest.TestCase):
                            return_value=[self.torch_op1, self.torch_op2]), \
                 mock.patch(NAMESPACE + ".MsprofTxModel.get_mark_data",
                            return_value=[self.mark2, self.mark1]), \
-                mock.patch(NAMESPACE + ".PathManager.get_db_path"), \
+                mock.patch("os.path.exists", return_value=True), \
+                mock.patch(NAMESPACE + ".PathManager.get_db_path", return_value='test'), \
                 mock.patch(NAMESPACE + ".MsprofTxModel.check_table", return_value=True), \
                 mock.patch(NAMESPACE + ".AclModel.get_acl_op_execute_data",
                            return_value=[self.acl_op_exe1, self.acl_op_exe2]), \

@@ -216,6 +216,8 @@ class FileNameManagerConstant:
     API_FILE_PATTERN = r"^(aging|unaging)\.api\.data\.slice_\d+"
     EVENT_DATA_FILE_PATTERN = r"^(aging|unaging)\.event\.data\.slice_\d+"
     HASH_DATA_FILE_PATTERN = r"^(aging|unaging)\.additional\.(hash_dic|type_info_dic)\.slice_\d+"
+    HCCL_INFO_FILE_PATTERN = r"^(unaging|aging)\.additional\.hccl_info\.slice_\d+"
+    MULTI_THREAD_FILE_PATTERN = r"^(unaging|aging)\.additional\.Multi_Thread\.slice_\d+"
     TENSOR_ADD_INFO_FILE_PATTERN = r"^(unaging|aging)\.additional\.tensor_info\.slice_\d+"
     NODE_BASIC_INFO_FILE_PATTERN = r"^(unaging|aging)\.compact\.node_basic_info\.slice_\d+"
     GRAPH_ADD_INFO_FILE_PATTERN = r"^(unaging|aging)\.additional\.graph_id_map\.slice_\d+"
@@ -889,6 +891,22 @@ def get_memcpy_info_compact_compiles() -> tuple:
     return (
         re.compile(FileNameManagerConstant.MEMCPY_INFO_COMPACT_FILE_PATTERN),
     )
+
+
+def get_hccl_info_compiles() -> tuple:
+    """
+    get hccl info data files regex compiles
+    :return: hccl info data files regex
+    """
+    return re.compile(FileNameManagerConstant.HCCL_INFO_FILE_PATTERN),
+
+
+def get_multi_thread_compiles() -> tuple:
+    """
+    get multiple thread files regex compiles
+    :return: multiple thread files regex
+    """
+    return re.compile(FileNameManagerConstant.MULTI_THREAD_FILE_PATTERN),
 
 
 def get_ge_graph_add_info_compiles() -> tuple:

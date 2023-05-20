@@ -25,6 +25,8 @@ class MsprofIteration:
     """
     mainly process iteration
     """
+    HOST_START_TAG = 0
+    HOST_END_TAG = 1
 
     def __init__(self: any, result_dir: str) -> None:
         self._result_dir = result_dir
@@ -56,6 +58,27 @@ class MsprofIteration:
         for trace_data in trace_datas:
             iter_end_dict.setdefault(trace_data[0], trace_data[1])
         return iter_end_dict
+
+    @staticmethod
+    def _get_host_iter_range_cnts(all_iter_end_cnts, iter_range: IterationRange):
+        """
+        return cnt range for iter_range
+        :param all_iter_end_cnts: [(iter_id, end_cnt), (iter_id, end_cnt)]
+        :param iter_range:
+        :return: [lower_bound, end_bound]
+        """
+        start_iter = iter_range.iteration_start
+        end_iter = iter_range.iteration_end
+        min_iter = all_iter_end_cnts[0][0]
+        max_iter = all_iter_end_cnts[-1][0]
+        lower_bound = 0.0
+        upper_bound = float("inf")
+        for i, (iter_id, cnt) in enumerate(all_iter_end_cnts):
+            if iter_id > min_iter and iter_id == start_iter:
+                lower_bound = all_iter_end_cnts[i - 1][1]
+            if iter_id < max_iter and iter_id == end_iter:
+                upper_bound = cnt
+        return [lower_bound, upper_bound]
 
     def get_step_syscnt_range_by_iter_range(self, iter_range: IterationRange):
         """
@@ -141,7 +164,7 @@ class MsprofIteration:
         :return: {iter_id: [index_id, model_id]} in mix single op and graph
         """
         iter_set = {(iter_range.iteration_id + _count, iter_range.model_id)
-                     for _count in range(iter_range.iteration_count)}
+                    for _count in range(iter_range.iteration_count)}
         iter_set.add((NumberConstant.STATIC_SHAPE_ITER_ID, iter_range.model_id))
         if not (ProfilingScene().is_mix_operator_and_graph() and iter_range.model_id == Constant.GE_OP_MODEL_ID):
             return iter_set
