@@ -84,10 +84,11 @@ void AnalyzerTs::ParseTsTimelineData(CONST_CHAR_PTR data, uint32_t len)
             return;
         }
         std::string key = std::to_string(tsData->taskId) + KEY_SEPARATOR + std::to_string(tsData->streamId) +
-            KEY_SEPARATOR + std::to_string(UINT32_MAX);
+                          KEY_SEPARATOR + std::to_string(UINT32_MAX);
+        std::string optKey = std::to_string(tsData->taskId) + KEY_SEPARATOR + std::to_string(tsData->streamId);
         auto iter = opTimeDrafts_.find(key);
         if (iter == opTimeDrafts_.end()) {
-        OpTime opTime = {0, 0, 0, 0, 0, 0, ACL_SUBSCRIBE_OP};
+            OpTime opTime = {0, 0, 0, 0, 0, 0, ACL_SUBSCRIBE_OP};
             iter = opTimeDrafts_.insert(std::make_pair(key, opTime)).first;
         }
         switch (tsData->taskState) {
@@ -110,6 +111,12 @@ void AnalyzerTs::ParseTsTimelineData(CONST_CHAR_PTR data, uint32_t len)
             iter->second.startAicore > 0 &&
             iter->second.endAicore > 0 &&
             iter->second.end > 0) {
+            if (AnalyzerBase::rtOpInfo_.find(optKey) != AnalyzerBase::rtOpInfo_.end()) {
+                RtOpInfo devOpInfo = {0, iter->second.start, iter->second.end, 0, true, iter->second.startAicore,
+                    iter->second.endAicore, ACL_SUBSCRIBE_OP};
+                HandleDeviceData(optKey, devOpInfo, static_cast<uint32_t>(tsData->taskId), tsData->streamId,
+                    totalTsMerges_);
+            }
             MSPROF_LOGD("Ts op time collected, key %s, start %llu, end %llu",
                         key.c_str(), iter->second.start, iter->second.end);
             opTimes_.insert(std::make_pair(iter->first, iter->second));
@@ -181,9 +188,9 @@ void AnalyzerTs::PrintStats()
         times = keypointOpInfo_.back().findSuccTimes;
     }
     MSPROF_EVENT("total_size_analyze, module: TS, analyzed %llu, total %llu, op time total %llu, "
-                 "remain %u, draft %u. remain keypoint op %llu, last step find op %llu",
+                 "remain %u, draft %u. remain keypoint op %llu, last step find op %llu, merge time %u",
                  analyzedBytes_, totalBytes_, opTimeCount_, opTimes_.size(), opTimeDrafts_.size(),
-                 keypointOpInfo_.size(), times);
+                 keypointOpInfo_.size(), times, totalTsMerges_);
 }
 }  // namespace Analyze
 }  // namespace Dvvp

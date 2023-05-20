@@ -20,11 +20,11 @@ using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::common::queue;
 using namespace analysis::dvvp::transport;
 // init map
-std::map<uint32_t, MsprofCallbackHandler> MsprofCallbackHandler::reporters_;
+std::unordered_map<uint32_t, MsprofCallbackHandler> MsprofCallbackHandler::reporters_;
 
 MsprofCallbackHandler::MsprofCallbackHandler() {}
 
-MsprofCallbackHandler::MsprofCallbackHandler(const std::string module) : module_(module)
+MsprofCallbackHandler::MsprofCallbackHandler(const std::string &module) : module_(module)
 {
 }
 
@@ -111,6 +111,21 @@ int MsprofCallbackHandler::ReportData(CONST_VOID_PTR data, uint32_t len) const
     }
     return reporter_->Report(reinterpret_cast<CONST_REPORT_DATA_PTR>(data));
 }
+
+template <typename T>
+int MsprofCallbackHandler::ReportData(const T &data) const
+{
+    if (reporter_ == nullptr) {
+        MSPROF_LOGE("reporter is not started, module: %s", module_.c_str());
+        return PROFILING_FAILED;
+    }
+    return reporter_->DoReportData(data);
+}
+ 
+template int MsprofCallbackHandler::ReportData(const MsprofApi &data) const;
+template int MsprofCallbackHandler::ReportData(const MsprofEvent &data) const;
+template int MsprofCallbackHandler::ReportData(const MsprofCompactInfo &data) const;
+template int MsprofCallbackHandler::ReportData(const MsprofAdditionalInfo &data) const;
 
 int MsprofCallbackHandler::FlushData()
 {
@@ -251,16 +266,5 @@ int SendAiCpuData(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> fileChunk
 {
     return MsprofCallbackHandler::reporters_[MSPROF_MODULE_DATA_PREPROCESS].SendData(fileChunk);
 }
-
-template <typename T>
-int MsprofCallbackHandler::ReportData(const T &data) const
-{
-    return PROFILING_SUCCESS;
-}
- 
-template int MsprofCallbackHandler::ReportData(const MsprofApi &data) const;
-template int MsprofCallbackHandler::ReportData(const MsprofEvent &data) const;
-template int MsprofCallbackHandler::ReportData(const MsprofCompactInfo &data) const;
-template int MsprofCallbackHandler::ReportData(const MsprofAdditionalInfo &data) const;
 }  // namespace Engine
 }  // namespace Msprof

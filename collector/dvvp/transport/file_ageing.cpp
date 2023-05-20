@@ -71,7 +71,8 @@ int FileAgeing::Init()
                      std::string("fusion_op_info"), std::string("tensor_data_info"),
                      std::string("ts_track"), std::string("training_trace"), std::string("info.json"),
                      std::string("hash_dic"), std::string("start_info"), std::string("end_info"),
-                     std::string("host_start"), std::string("dev_start"), std::string("sample.json")};
+                     std::string("host_start"), std::string("dev_start"), std::string("sample.json"),
+                     std::string("unaging")};
     inited_ = true;
     return PROFILING_SUCCESS;
 }

@@ -15,6 +15,8 @@ SHARED_PTR_ALIA<PluginHandle> ProfApiPlugin::pluginHandle_ = nullptr;
 void ProfApiPlugin::GetAllFunction()
 {
     pluginHandle_->GetFunction<int32_t, ProfReportHandle>("profRegReporterCallback", profRegReporterCallback_);
+    pluginHandle_->GetFunction<int32_t, int32_t, VOID_PTR, uint32_t>("MsprofRegisterProfileCallback",
+        profRegProfilerCallback_);
     pluginHandle_->GetFunction<int32_t, ProfCtrlHandle>("profRegCtrlCallback", profRegCtrlCallback_);
     pluginHandle_->GetFunction<int32_t, ProfSetDeviceHandle>("profRegDeviceStateCallback", profRegDeviceStateCallback_);
     pluginHandle_->GetFunction<int32_t, uint32_t, uint32_t *>(
@@ -53,6 +55,17 @@ int32_t ProfApiPlugin::MsprofProfRegReporterCallback(ProfReportHandle reporter)
         return PROFILING_FAILED;
     }
     return profRegReporterCallback_(reporter);
+}
+
+// profRegProfilerCallback
+int32_t ProfApiPlugin::MsprofProfRegProfilerCallback(int32_t callbackType, VOID_PTR callback, uint32_t len)
+{
+    PthreadOnce(&loadFlag_, []()->void {ProfApiPlugin::instance()->LoadProfApiSo();});
+    if (profRegProfilerCallback_ == nullptr) {
+        MSPROF_LOGE("ProfApiPlugin profRegProfilerCallback function is null.");
+        return PROFILING_FAILED;
+    }
+    return profRegProfilerCallback_(callbackType, callback, len);
 }
 
 // profRegCtrlCallback

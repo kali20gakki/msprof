@@ -35,7 +35,7 @@ private:
 
 private:
     uint64_t opTimeCount_;
-    int32_t totalTsMerges_;
+    uint32_t  totalTsMerges_;
     std::map<std::string, OpTime> opTimeDrafts_;      // stores incomplete data
     std::multimap<std::string, OpTime> opTimes_;      // key is taskId-streamId-contextId
     std::vector<KeypointOp> keypointOpInfo_;

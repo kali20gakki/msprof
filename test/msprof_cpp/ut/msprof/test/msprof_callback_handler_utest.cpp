@@ -86,6 +86,66 @@ TEST_F(MSPROF_CALLBACK_HANDLER_UTEST, ReportDataTest) {
     EXPECT_EQ(PROFILING_FAILED, handler.ReportData(nullptr, 0));
 }
 
+TEST_F(MSPROF_CALLBACK_HANDLER_UTEST, ReportApiDataTest)
+{
+    GlobalMockObject::verify();
+    MsprofCallbackHandler handler("unaging.api");
+ 
+    MsprofApi data;
+    EXPECT_EQ(PROFILING_FAILED, handler.ReportData(data));
+    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::IsInited)
+        .stubs()
+        .will(returnValue(true));
+    handler.StartReporter();
+    EXPECT_EQ(PROFILING_SUCCESS, handler.ReportData(data));
+    handler.StopReporter();
+}
+ 
+TEST_F(MSPROF_CALLBACK_HANDLER_UTEST, ReportEventDataTest)
+{
+    GlobalMockObject::verify();
+    MsprofCallbackHandler handler("unaging.event");
+ 
+    MsprofEvent data;
+    EXPECT_EQ(PROFILING_FAILED, handler.ReportData(data));
+    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::IsInited)
+        .stubs()
+        .will(returnValue(true));
+    handler.StartReporter();
+    EXPECT_EQ(PROFILING_SUCCESS, handler.ReportData(data));
+    handler.StopReporter();
+}
+ 
+TEST_F(MSPROF_CALLBACK_HANDLER_UTEST, ReportCompactDataTest)
+{
+    GlobalMockObject::verify();
+    MsprofCallbackHandler handler("unaging.compact");
+ 
+    MsprofCompactInfo data;
+    EXPECT_EQ(PROFILING_FAILED, handler.ReportData(data));
+    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::IsInited)
+        .stubs()
+        .will(returnValue(true));
+    handler.StartReporter();
+    EXPECT_EQ(PROFILING_SUCCESS, handler.ReportData(data));
+    handler.StopReporter();
+}
+ 
+TEST_F(MSPROF_CALLBACK_HANDLER_UTEST, ReportAdditonalDataTest)
+{
+    GlobalMockObject::verify();
+    MsprofCallbackHandler handler("unaging.additional");
+ 
+    MsprofAdditionalInfo data;
+    EXPECT_EQ(PROFILING_FAILED, handler.ReportData(data));
+    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::IsInited)
+        .stubs()
+        .will(returnValue(true));
+    handler.StartReporter();
+    EXPECT_EQ(PROFILING_SUCCESS, handler.ReportData(data));
+    handler.StopReporter();
+}
+
 TEST_F(MSPROF_CALLBACK_HANDLER_UTEST, GetHashIdTest) {
     GlobalMockObject::verify();
     MsprofCallbackHandler handler("Framework");

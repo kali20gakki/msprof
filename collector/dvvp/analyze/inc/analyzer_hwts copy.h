@@ -1,8 +1,8 @@
 /*
  * Copyright (c) Huawei Technologies Co., Ltd. 2020-2023. All rights reserved.
  * Description: parse hwts data
- * Author: zcj
- * Create: 2020-10-24
+ * Author: mfy
+ * Create: 2023-5-19
  */
 #ifndef ANALYSIS_DVVP_ANALYZE_ANALYZER_HWTS_H
 #define ANALYSIS_DVVP_ANALYZE_ANALYZER_HWTS_H
@@ -36,7 +36,7 @@ private:
     void CheckData(const struct OpTime &draftsOp, std::string key, uint8_t rptType, uint64_t sysTime);
     void PrintStats();
 
-    void ParseOptimizeStartEndData(CONST_CHAR_PTR data, uint8_t rptType);
+    void HandleOptimizeStartEndData(CONST_CHAR_PTR data, uint8_t rptType);
 
 private:
     uint64_t opTimeCount_;

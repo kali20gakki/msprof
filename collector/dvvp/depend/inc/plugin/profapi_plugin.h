@@ -15,8 +15,7 @@ namespace Collector {
 namespace Dvvp {
 namespace Plugin {
 using ProfRegReporterCallbackFunc = std::function<int32_t(ProfReportHandle)>;              // profRegReporterCallback
-using ProfRegProfilerCallbachFunc = std::function<int32_t(ProfilerCallbackType,
-                                                          VOID_PTR, uint32_t)>;  // profRegProfilerCallback
+using ProfRegProfilerCallbachFunc = std::function<int32_t(int32_t, VOID_PTR, uint32_t)>;  // profRegProfilerCallback
 using ProfRegCtrlCallbackFunc = std::function<int32_t(ProfCtrlHandle)>;                    // profRegCtrlCallback
 using ProfRegDeviceStateCallbackFunc = std::function<int32_t(ProfSetDeviceHandle)>;   // profRegDeviceStateCallback
 using ProfGetDeviceIdByGeModelIdxFunc = std::function<int32_t(uint32_t, uint32_t *)>; // profGetDeviceIdByGeModelIdx

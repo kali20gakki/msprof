@@ -23,7 +23,7 @@ namespace Analysis {
 namespace Dvvp {
 namespace Analyze {
 using namespace analysis::dvvp::common::utils;
-class Analyzer {
+class Analyzer : AnalyzerBase {
 public:
     explicit Analyzer(SHARED_PTR_ALIA<analysis::dvvp::transport::Uploader> uploader);
     ~Analyzer();
@@ -31,6 +31,7 @@ public:
 public:
     int Init();
     void OnNewData(CONST_VOID_PTR data, uint32_t len);
+    void OnOptimizeData(CONST_VOID_PTR data, uint32_t len);
     void Flush();
     void SetDevId(const std::string &devIdStr);
     void PrintStats();

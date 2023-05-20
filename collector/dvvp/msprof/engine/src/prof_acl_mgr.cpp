@@ -376,16 +376,6 @@ int ProfAclMgr::LaunchHostAndDevTasks(const uint32_t devNums, CONST_UINT32_T_PTR
         devTasks_[devId].dataTypeConfig = params_->dataTypeConfig;
     }
 
-    if (params_->IsHostProfiling() && devTasks_.find(DEFAULT_HOST_ID) == devTasks_.end()) {
-        MSPROF_LOGI("Process ProfAclStart of Host");
-        params_->host_profiling = true;
-        ret = StartDeviceTask(DEFAULT_HOST_ID, params_);
-        if (ret != ACL_SUCCESS) {
-            return ret;
-        }
-        devTasks_[DEFAULT_HOST_ID].dataTypeConfig = params_->dataTypeConfig;
-        params_->host_profiling = false;
-    }
     return ACL_SUCCESS;
 }
 
@@ -446,16 +436,6 @@ int ProfAclMgr::CancleHostAndDevTasks(const uint32_t devNums, CONST_UINT32_T_PTR
             }
             devTasks_.erase(iter);
         }
-    }
-    if (params_->IsHostProfiling() && devTasks_.find(DEFAULT_HOST_ID) != devTasks_.end()) {
-        MSPROF_LOGI("Processing ProfAclStop of Host");
-        HashData::instance()->SaveHashData(DEFAULT_HOST_ID);
-        devTasks_[DEFAULT_HOST_ID].params->is_cancel = true;
-        if (ProfManager::instance()->IdeCloudProfileProcess(devTasks_[DEFAULT_HOST_ID].params) != PROFILING_SUCCESS) {
-            MSPROF_LOGE("Failed to stop profiling on Host");
-            ret = ACL_ERROR_PROFILING_FAILURE;
-        }
-        devTasks_.erase(DEFAULT_HOST_ID);
     }
     return ret;
 }
@@ -539,7 +519,7 @@ uint64_t ProfAclMgr::ProfAclGetDataTypeConfig(PROF_SUB_CONF_CONST_PTR profSubscr
     }
     uint64_t dataTypeConfig = 0;
     if (profSubscribeConfig->timeInfo) {
-        dataTypeConfig |= PROF_TASK_TIME;
+        dataTypeConfig |= PROF_TASK_TIME | PROF_TASK_TIME_L1;
     }
     if (profSubscribeConfig->aicoreMetrics != PROF_AICORE_NONE) {
         dataTypeConfig |= PROF_AICORE_METRICS;
@@ -550,6 +530,18 @@ uint64_t ProfAclMgr::ProfAclGetDataTypeConfig(PROF_SUB_CONF_CONST_PTR profSubscr
 void ProfAclMgr::AddModelLoadConf(uint64_t &dataTypeConfig) const
 {
     dataTypeConfig |= PROF_MODEL_LOAD;
+}
+
+int ProfAclMgr::LaunchSubscribeDevTask(const uint32_t devId, const uint32_t modelId,
+                                       PROF_SUB_CONF_CONST_PTR profSubscribeConfig)
+{
+    int ret = StartDeviceSubscribeTask(modelId, devId, profSubscribeConfig);
+    if (ret != ACL_SUCCESS) {
+        MSPROF_LOGE("StartDeviceSubscribeTask failed, Model:%u", modelId);
+        MSPROF_INNER_ERROR("EK9999", "StartDeviceSubscribeTask failed, Model:%u", modelId);
+        return ACL_ERROR_PROFILING_FAILURE;
+    }
+    return ret;
 }
 
 int ProfAclMgr::ProfAclModelSubscribe(const uint32_t modelId, const uint32_t devId,
@@ -584,25 +576,65 @@ int ProfAclMgr::ProfAclModelSubscribe(const uint32_t modelId, const uint32_t dev
         MSPROF_INNER_ERROR("EK9999", "Model %u has been subscribed", modelId);
         return ACL_ERROR_PROF_REPEAT_SUBSCRIBE;
     }
-    if (devTasks_.find(devId) != devTasks_.end()) {
-        // device already started, check cfg and add fd to subscribe list
-        return UpdateSubscribeInfo(modelId, devId, profSubscribeConfig);
-    }
-    // start device
-    if (StartDeviceSubscribeTask(modelId, devId, profSubscribeConfig) != ACL_SUCCESS) {
-        MSPROF_LOGE("StartDeviceSubscribeTask failed, Model:%u", modelId);
-        MSPROF_INNER_ERROR("EK9999", "StartDeviceSubscribeTask failed, Model:%u", modelId);
-        return ACL_ERROR_PROFILING_FAILURE;
+    std::vector<uint32_t> devIdList = {devId, DEFAULT_HOST_ID};
+    for (auto id : devIdList) {
+        MSPROF_LOGI("Start device subscribe task Model:%u, devId %u", modelId, id);
+        if (devTasks_.find(id) != devTasks_.end()) {
+            // device already started, check cfg and add fd to subscribe list
+            MSPROF_LOGI("Update subscription config Model:%u, devId %u", modelId, id);
+            return UpdateSubscribeInfo(modelId, id, profSubscribeConfig);
+        }
+ 
+        // start device
+        if (LaunchSubscribeDevTask(id, modelId, profSubscribeConfig) != ACL_SUCCESS) {
+            return ACL_ERROR_PROFILING_FAILURE;
+        }
     }
     if (Analysis::Dvvp::ProfilerCommon::RegisterReporterCallback() != ACL_SUCCESS) {
         MSPROF_LOGE("RegisterReporterCallback failed, Model:%u", modelId);
         MSPROF_INNER_ERROR("EK9999", "RegisterReporterCallback failed, Model:%u", modelId);
         return ACL_ERROR_PROFILING_FAILURE;
     }
-    uint32_t devIdList[1] = {devId};
     uint64_t dataTypeConfig = ProfAclGetDataTypeConfig(profSubscribeConfig);
-    MSPROF_LOGI("Allocate subscription config to Runtime, dataTypeConfig 0x%lx", dataTypeConfig);
-    return Analysis::Dvvp::ProfilerCommon::CommandHandleProfStart(devIdList, 1, dataTypeConfig);
+    dataTypeConfig |= PROF_RUNTIME_TRACE;
+    MSPROF_LOGI("Allocate subscription config to Runtime, dataTypeConfig 0x%lx", dataTypeConfig | PROF_RUNTIME_TRACE);
+    return Analysis::Dvvp::ProfilerCommon::CommandHandleProfStart(devIdList.data(),
+                                                                  1, dataTypeConfig | PROF_RUNTIME_TRACE);
+}
+
+int ProfAclMgr::CancleSubScribeDevTask(const uint32_t devId, const uint32_t modelId)
+{
+    int ret = ACL_SUCCESS;
+    auto iterDev = devTasks_.find(devId);
+    if (iterDev != devTasks_.end()) {
+        if (devId != DEFAULT_HOST_ID) {
+            subscribeInfos_[modelId].subscribed = false;
+        }
+        iterDev->second.count--;
+        MSPROF_LOGI("Model %u unsubscribed, device %u count: %u", modelId, devId, iterDev->second.count);
+        if (iterDev->second.count == 0) {
+            uint32_t devIdList[1] = {devId};
+            uint64_t dataTypeConfig = iterDev->second.dataTypeConfig | PROF_RUNTIME_TRACE;
+            MSPROF_LOGI("Allocate Unsubscription config to Runtime, dataTypeConfig 0x%lx", dataTypeConfig);
+            ret = Analysis::Dvvp::ProfilerCommon::CommandHandleProfStop(devIdList, 1, dataTypeConfig);
+            RETURN_IF_NOT_SUCCESS(ret);
+            iterDev->second.params->is_cancel = true;
+            if (ProfManager::instance()->IdeCloudProfileProcess(iterDev->second.params) != PROFILING_SUCCESS) {
+                MSPROF_LOGE("Failed to stop profiling on device %u", iterDev->first);
+                ret = ACL_ERROR_PROFILING_FAILURE;
+            }
+            CloseSubscribeFd(iterDev->first);
+            devTasks_.erase(iterDev);
+        } else {
+#if (defined(linux) || defined(__linux__))
+            if (halProfDataFlush) {
+                FlushAllData(std::to_string(devId));
+                CloseSubscribeFd(iterDev->first, modelId);
+            }
+#endif
+        }
+    }
+    return ret;
 }
 
 int ProfAclMgr::ProfAclModelUnSubscribe(const uint32_t modelId)
@@ -622,31 +654,12 @@ int ProfAclMgr::ProfAclModelUnSubscribe(const uint32_t modelId)
         return ACL_ERROR_INVALID_MODEL_ID;
     }
     int ret = ACL_SUCCESS;
-    auto iterDev = devTasks_.find(iter->second.devId);
-    if (iterDev != devTasks_.end()) {
-        iter->second.subscribed = false;
-        iterDev->second.count--;
-        MSPROF_LOGI("Model %u unsubscribed, device %u count: %u", modelId, iter->second.devId, iterDev->second.count);
-        if (iterDev->second.count == 0) {
-            uint32_t devIdList[1] = {iter->second.devId};
-            uint64_t dataTypeConfig = iterDev->second.dataTypeConfig;
-            MSPROF_LOGI("Allocate Unsubscription config to Runtime, dataTypeConfig 0x%lx", dataTypeConfig);
-            ret = Analysis::Dvvp::ProfilerCommon::CommandHandleProfStop(devIdList, 1, dataTypeConfig);
-            RETURN_IF_NOT_SUCCESS(ret);
-            iterDev->second.params->is_cancel = true;
-            if (ProfManager::instance()->IdeCloudProfileProcess(iterDev->second.params) != PROFILING_SUCCESS) {
-                MSPROF_LOGE("Failed to stop profiling on device %u", iterDev->first);
-                ret = ACL_ERROR_PROFILING_FAILURE;
-            }
-            CloseSubscribeFd(iterDev->first);
-            devTasks_.erase(iterDev);
-        } else {
-#if (defined(linux) || defined(__linux__))
-            if (halProfDataFlush) {
-                FlushAllData(std::to_string(iter->second.devId));
-                CloseSubscribeFd(iterDev->first, modelId);
-            }
-#endif
+    std::vector<uint32_t> devIdList = {iter->second.devId, DEFAULT_HOST_ID};
+    for (auto id : devIdList) {
+        ret = CancleSubScribeDevTask(id, modelId);
+        if (ret != ACL_SUCCESS) {
+            MSPROF_LOGE("Failed to stop device %u task for model %u", id, modelId);
+            return ret;
         }
     }
     if (devTasks_.empty()) {
@@ -662,6 +675,7 @@ void ProfAclMgr::FlushAllData(const std::string &devId)
 {
     // flush ai stack data
     Msprof::Engine::FlushAllModule();
+    Msprof::Engine::MsprofReporterMgr::instance()->FlushAllReporter(devId);
     // flush drv data
     ProfChannelManager::instance()->FlushChannel();
     // flush parserTransport
@@ -1063,7 +1077,7 @@ int ProfAclMgr::UpdateSubscribeInfo(const uint32_t modelId, const uint32_t devId
         iter->second.subscribed = true;
         iter->second.devId = devId;
         iter->second.fd = static_cast<int *>(profSubscribeConfig->fd);
-    } else {
+    } else if (devId != DEFAULT_HOST_ID) {
         // new subscribe
         ProfSubscribeInfo subscribeInfo = {true, devId, static_cast<int *>(profSubscribeConfig->fd)};
         subscribeInfos_.insert(std::make_pair(modelId, subscribeInfo));
@@ -1084,12 +1098,9 @@ int ProfAclMgr::StartDeviceSubscribeTask(const uint32_t modelId, const uint32_t 
     ProfStartCfgToMsprofCfg(dataTypeConfig, profSubscribeConfig->aicoreMetrics, feature);
     ProfParamsAdapter::instance()->UpdateSampleConfig(feature, params);
     ProfParamsAdapter::instance()->ProfStartCfgToParamsCfg(dataTypeConfig, params);
-    params->ts_keypoint = MSVP_PROF_ON;
-    PlatformType type = ConfigManager::instance()->GetPlatformType();
-    if (type == PlatformType::CHIP_V4_1_0 || type == PlatformType::CHIP_V4_2_0) {
-        params->stars_acsq_task = MSVP_PROF_ON;
+    if (devId == DEFAULT_HOST_ID) {
+        params->host_profiling = true;
     }
-
     std::string devIdStr = std::to_string(devId);
     params->job_id = devIdStr;
     params->devices = devIdStr;
@@ -1113,20 +1124,24 @@ int ProfAclMgr::StartDeviceSubscribeTask(const uint32_t modelId, const uint32_t 
         HandleResponse(devId);
         return ACL_ERROR_PROFILING_FAILURE;
     }
-
     // add taskInfo
     ProfAclTaskInfo taskInfo = {1, dataTypeConfig, paramsHandled};
     devTasks_[devId] = taskInfo;
 
-    mtxSubscribe_.lock();
-    ProfSubscribeInfo subscribeInfo = {true, devId, static_cast<int *>(profSubscribeConfig->fd)};
-    subscribeInfos_.insert(std::make_pair(modelId, subscribeInfo));
-    mtxSubscribe_.unlock();
+    if (devId != DEFAULT_HOST_ID) {
+        mtxSubscribe_.lock();
+        ProfSubscribeInfo subscribeInfo = {true, devId, static_cast<int *>(profSubscribeConfig->fd)};
+        subscribeInfos_.insert(std::make_pair(modelId, subscribeInfo));
+        mtxSubscribe_.unlock();
+    }
 
     WaitAllDeviceResponse();
     MSPROF_LOGI("Finished starting subscribe task on device %u", devId);
     if (mode_ == WORK_MODE_OFF) {
         mode_ = WORK_MODE_SUBSCRIBE;
+    }
+    if (devId == DEFAULT_HOST_ID) {
+        params->host_profiling = false;
     }
     return ACL_SUCCESS;
 }
@@ -1386,7 +1401,6 @@ int32_t ProfAclMgr::MsprofTxHandle(void)
     if (ret != PROFILING_SUCCESS) {
         return MSPROF_ERROR_NONE;
     }
-    params_->msproftx = "on";
     return DoHostHandle();
 }
 
@@ -1407,10 +1421,6 @@ void ProfAclMgr::MsprofHostHandle(void)
         return;
     }
 
-    if (!params_->IsHostProfiling()) {
-        MSPROF_LOGI("MsprofHostHandle, host profiling disabled");
-        return;
-    }
     auto ret = DoHostHandle();
     if (ret == PROFILING_FAILED) {
         MSPROF_LOGE("[MsprofHostHandle] host profiling handle failed, ret is %d", ret);

@@ -96,22 +96,22 @@ void PlatformAdapterInterface::SetParamsForTaskTime()
     }
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_TASK_TS_TIMELINE) != supportSwitch_.end()) {
         params_->ts_timeline = MSPROF_SWITCH_ON;
-        params_->dataTypeConfig |= PROF_SCHEDULE_TIMELINE | PROF_TASK_TIME;
+        params_->dataTypeConfig |= PROF_SCHEDULE_TIMELINE | PROF_TASK_TIME | PROF_TASK_TIME_L1;
         ret = true;
     }
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_TASK_AIC_HWTS) != supportSwitch_.end()) {
         params_->hwts_log = MSPROF_SWITCH_ON;
-        params_->dataTypeConfig |= PROF_TASK_TIME;
+        params_->dataTypeConfig |= PROF_TASK_TIME | PROF_TASK_TIME_L1;
         ret = true;
     }
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_TASK_AIV_HWTS) != supportSwitch_.end()) {
         params_->hwts_log1 = MSPROF_SWITCH_ON;
-        params_->dataTypeConfig |= PROF_TASK_TIME;
+        params_->dataTypeConfig |= PROF_TASK_TIME | PROF_TASK_TIME_L1;
         ret = true;
     }
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_TASK_STARS_ACSQ) != supportSwitch_.end()) {
         params_->stars_acsq_task = MSPROF_SWITCH_ON;
-        params_->dataTypeConfig |= PROF_TASK_TIME;
+        params_->dataTypeConfig |= PROF_TASK_TIME | PROF_TASK_TIME_L1;
         ret = true;
     }
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_TASK_RUNTIME) != supportSwitch_.end()) {
@@ -120,7 +120,7 @@ void PlatformAdapterInterface::SetParamsForTaskTime()
     }
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_TASK_TS_MEMCPY) != supportSwitch_.end()) {
         params_->ts_memcpy = MSPROF_SWITCH_ON;
-        params_->dataTypeConfig |= PROF_TASK_TIME;
+        params_->dataTypeConfig |= PROF_TASK_TIME | PROF_TASK_TIME_L1;
         ret = true;
     }
     SetParamsForGE();
