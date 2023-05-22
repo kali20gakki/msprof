@@ -79,7 +79,7 @@ class HashDicParser(IParser, MsMultiProcess):
             data_lines = _file.file_reader.readlines(Constant.MAX_READ_FILE_BYTES)
         for line in data_lines:
             key, value = line.strip().split(":", 1)
-            if key.isdigit():
+            if key.isdigit() and key != '0':
                 self._hash_data['ge_hash'].append([key, value])
 
     def _read_type_hash_data(self: any, file_path: str) -> None:
