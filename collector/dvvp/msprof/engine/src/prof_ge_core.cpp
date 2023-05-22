@@ -341,6 +341,8 @@ ACL_GRPH_PROF_CONFIG_PTR aclgrphProfCreateConfig(UINT32_T_PTR deviceidList, uint
         return nullptr;
     }
 
+    config->config.devIdList[config->config.devNums] = DEFAULT_HOST_ID;
+    config->config.devNums++;
     config->config.aicoreMetrics = static_cast<ProfAicoreMetrics>(aicoreMetrics);
     config->config.dataTypeConfig = dataTypeConfig;
     MSPROF_LOGI("Successfully create prof config");
