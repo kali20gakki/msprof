@@ -136,33 +136,10 @@ class DataCalculatorConfig(MetaConfig):
             ('chip_model', '0,1,2,3,4,5,7'),
             ('level', '2')
         ],
-        'CANNCalculator': [
-            ('path', 'mscalculate.cann.cann_calculator'),
-            ('chip_model', '0,1,2,3,4,5,7'),
-            ('position', 'H')
-        ],
         'HcclCalculator': [
             ('path', 'mscalculate.hccl_calculator'),
             ('chip_model', '0,1,2,3,4,5,7'),
             ('level', '4'),
-            ('position', 'D')
-        ],
-        'IterRecParser': [
-            ('path', 'msparser.iter_rec.iter_rec_parser'),
-            ('chip_model', '1,2,3,4'),
-            ('level', '2'),
-            ('position', 'D')
-        ],
-        'NoGeIterRecParser': [
-            ('path', 'msparser.iter_rec.iter_rec_parser'),
-            ('chip_model', '1,2,3,4'),
-            ('level', '2'),
-            ('position', 'D')
-        ],
-        'StarsIterRecParser': [
-            ('path', 'msparser.iter_rec.stars_iter_rec_parser'),
-            ('chip_model', '5,7'),
-            ('level', '2'),
             ('position', 'D')
         ],
     }
