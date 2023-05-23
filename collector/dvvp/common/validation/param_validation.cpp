@@ -201,19 +201,23 @@ int ParamValidation::CustomHexCharConfig(std::string &aicoreEvents, const std::s
 {
     if (aicoreEvents.empty()) {
         MSPROF_LOGE("Custom PMU event is empty.");
+        CMD_LOGE("Custom PMU event is empty.");
         return PROFILING_FAILED;
     }
     std::vector<std::string> eventsList =
         analysis::dvvp::common::utils::Utils::Split(aicoreEvents, false, "", pattern);
     aicoreEvents = "";
     if (!CheckPmuEventSizeIsValid(eventsList.size())) {
-        MSPROF_LOGE("ai core events size(%u) is bigger than %d", eventsList.size(), MAX_EVENT_SIZE);
+        MSPROF_LOGE("Custom PMU events size(%u) is bigger than %d", eventsList.size(), MAX_EVENT_SIZE);
+        CMD_LOGE("Custom PMU events size(%u) is bigger than %d", eventsList.size(), MAX_EVENT_SIZE);
         return PROFILING_FAILED;
     }
     for (size_t i = 0; i < eventsList.size(); ++i) {
         std::string event = eventsList[i];
         if (!CovertMetricToHex(event, HEX_MODE) && !CovertMetricToHex(event, DEC_MODE)) {
                 MSPROF_LOGE("Custom event(%s) is invalid, only hexadecimal or decimal parameters are allowed.",
+                    event.c_str());
+                CMD_LOGE("Custom event(%s) is invalid, only hexadecimal or decimal parameters are allowed.",
                     event.c_str());
                 return PROFILING_FAILED;
         }
@@ -222,6 +226,8 @@ int ParamValidation::CustomHexCharConfig(std::string &aicoreEvents, const std::s
         int eventVal = std::strtol(event.c_str(), nullptr, BASE_HEX);
         if (eventVal < minEvent || eventVal > maxEvent) {
             MSPROF_LOGE("Custom event(%s) is not valid, valid event range is [0x%x, 0x%x].",
+                event.c_str(), minEvent, maxEvent);
+            CMD_LOGE("Custom event(%s) is not valid, valid event range is [0x%x, 0x%x].",
                 event.c_str(), minEvent, maxEvent);
             return PROFILING_FAILED;
         }
@@ -257,6 +263,7 @@ bool ParamValidation::CheckProfilingMetricsIsValid(const std::string &metricsNam
     }
     if (metricsVal.length() > MAX_CUSTOM_METRICS_LEN) {
         MSPROF_LOGE("The Custom metric parameter length exceeds max length value of %d.", MAX_CUSTOM_METRICS_LEN);
+        CMD_LOGE("The Custom metric parameter length exceeds max length value of %d.", MAX_CUSTOM_METRICS_LEN);
         return false;
     }
     if (metricsVal.compare(0, CUSTOM_METRICS_VALID_HEADER.length(), CUSTOM_METRICS_VALID_HEADER) == 0) {
