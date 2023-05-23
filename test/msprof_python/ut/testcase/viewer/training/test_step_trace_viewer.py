@@ -104,6 +104,19 @@ class TestStepTraceViewer(unittest.TestCase):
         db_manager.conn.close()
 
         self.assertEqual(len(res), 73)
+        
+    def test_reformat_step_trace_data(self):
+        data_list = [
+            (1, 4223700155120, 4223701928137, 4223701928704, 35557.520000000004, 35460.340000000004, 11.34, 'N/A', 1)
+        ]
+        with mock.patch(NAMESPACE + '.StepTraceViewer._StepTraceViewer__select_reduce',
+                        return_value=[(4248168266400, 4248177564931)]), \
+                mock.patch(NAMESPACE + '.StepTraceViewer._StepTraceViewer__time_from_syscnt',
+                           return_value=0), \
+                mock.patch(NAMESPACE + '.StepTraceConstant.syscnt_to_micro',
+                           return_value=0):
+            res = StepTraceViewer._reformat_step_trace_data(data_list, ITER_RANGE)
+            self.assertEqual(res, [[1, 0, 0, 0, 35557.520000000004, 35460.340000000004, 11.34, 'N/A', 1, 0, 0]])
 
 
 if __name__ == '__main__':

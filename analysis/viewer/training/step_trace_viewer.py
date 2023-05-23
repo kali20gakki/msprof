@@ -410,13 +410,13 @@ class StepTraceViewer:
         merge_data = []
         for line in data:
             trace = list(line)
-            trace[3] = StepTraceViewer.__time_from_syscnt(trace[3])
             if len(trace) >= 4:  # trace[3] refers to iteration end
                 reduce_data = StepTraceViewer.__select_reduce(conn,
                                                               trace)
                 for item in reduce_data:
                     trace += [StepTraceViewer.__time_from_syscnt(item[0]),
                               (item[1] - item[0]) * StepTraceConstant.syscnt_to_micro()]
+            trace[1:4] = map(lambda x: StepTraceViewer.__time_from_syscnt(x), trace[1:4])
             merge_data.append(trace)
         return merge_data
 
@@ -508,4 +508,6 @@ class StepTraceViewer:
 
     @staticmethod
     def __time_from_syscnt(cnt):
+        if not is_number(cnt):
+            return cnt
         return InfoConfReader().time_from_syscnt(cnt, NumberConstant.MICRO_SECOND)
