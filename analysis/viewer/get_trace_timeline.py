@@ -421,20 +421,28 @@ def _format_single_data(top_down_datas: list) -> list:
 def _get_ge_data(ge_datas: list, pid: int) -> list:
     _ge_trace_data = []
     for ge_data in ge_datas:
-        ge_trace_data = [
-            (
-                TraceViewHeaderConstant.PROCESS_GE, "Input", ge_data[0],
-                ge_data[1], pid, ge_data[8], ge_data[6], ge_data[7]
-            ),
-            (
-                TraceViewHeaderConstant.PROCESS_GE, "Infer", ge_data[2],
-                ge_data[3], pid, ge_data[8], ge_data[6], ge_data[7]
-            ),
-            (
-                TraceViewHeaderConstant.PROCESS_GE, "Output", ge_data[4],
-                ge_data[5], pid, ge_data[8], ge_data[6], ge_data[7]
+        ge_trace_data = []
+        if ge_data[0] != 0:
+            ge_trace_data.append(
+                (
+                    TraceViewHeaderConstant.PROCESS_GE, "Input", ge_data[0],
+                    ge_data[1], pid, ge_data[8], ge_data[6], ge_data[7]
+                )
             )
-        ]
+        if ge_data[2] != 0:
+            ge_trace_data.append(
+                (
+                    TraceViewHeaderConstant.PROCESS_GE, "Infer", ge_data[2],
+                    ge_data[3], pid, ge_data[8], ge_data[6], ge_data[7]
+                ),
+            )
+        if ge_data[4] != 0:
+            ge_trace_data.append(
+                (
+                    TraceViewHeaderConstant.PROCESS_GE, "Output", ge_data[4],
+                    ge_data[5], pid, ge_data[8], ge_data[6], ge_data[7]
+                )
+            )
         ge_trace_data = _format_single_data(ge_trace_data)
         _ge_trace_data.extend(ge_trace_data)
     return _ge_trace_data
