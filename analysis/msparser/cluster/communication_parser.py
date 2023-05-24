@@ -39,7 +39,7 @@ class CommunicationParser(MetaParser):
 
     @staticmethod
     def is_transit_sdma_event(event: HcclDto) -> bool:
-        if event.transport_type == StrConstant.SDMA and event.task_type in StrConstant.SDMA_TRANSIT_ITEMS and \
+        if event.transport_type == StrConstant.SDMA and event.hccl_name in StrConstant.SDMA_TRANSIT_ITEMS and \
                 HcclAnalysisTool.get_transport_type(event.src_rank, event.dst_rank) != StrConstant.LOCAL:
             return True
         else:
@@ -67,7 +67,7 @@ class CommunicationParser(MetaParser):
                 op_time_dict[OpAnalysisType.TRANSIT_TIME] += rdma_transit_result[0]
                 idx += NumberConstant.RDMA_TRANSIT_OP_NUM
                 continue
-            if event.task_type == StrConstant.NOTIFY_WAIT:
+            if event.hccl_name == StrConstant.NOTIFY_WAIT:
                 wait_time = HcclAnalysisTool.get_value(event.duration, "duration") / NumberConstant.US_TO_MS
                 if wait_flag:
                     op_time_dict[OpAnalysisType.SYNCHRONIZATION_TIME] += wait_time
@@ -87,7 +87,7 @@ class CommunicationParser(MetaParser):
         idx = 0
         while idx < len(events):
             event = events[idx]
-            if event.transport_type == StrConstant.SDMA and event.task_type in StrConstant.SDMA_TRANSIT_ITEMS:
+            if event.transport_type == StrConstant.SDMA and event.hccl_name in StrConstant.SDMA_TRANSIT_ITEMS:
                 transport_type = HcclAnalysisTool.get_transport_type(event.src_rank, event.dst_rank)
                 # do not consider local copy
                 if transport_type == StrConstant.LOCAL:

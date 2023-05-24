@@ -56,8 +56,8 @@ class HcclAnalysisTool:
     def determine_rdma(cls: any, events: list, idx: int) -> bool:
         if idx > len(events) - NumberConstant.RDMA_TRANSIT_OP_NUM:
             return False
-        second_task_type = events[idx + 1].task_type
-        third_task_type = events[idx + 2].task_type
+        second_task_type = events[idx + 1].hccl_name
+        third_task_type = events[idx + 2].hccl_name
         if second_task_type == StrConstant.RDMA_SEND and third_task_type == StrConstant.NOTIFY_WAIT:
             return True
         else:
@@ -125,19 +125,22 @@ class HcclAnalysisTool:
             bandwidth_dict[StrConstant.HCCS][OpBandWidthType.TRANSIT_TIME_MS] + \
             bandwidth_dict[StrConstant.PCIE][OpBandWidthType.TRANSIT_TIME_MS]
         if bandwidth_dict[StrConstant.SDMA][OpBandWidthType.TRANSIT_TIME_MS] != 0:
-            bandwidth_dict[StrConstant.SDMA][OpBandWidthType.BANDWIDTH_GB_S] = float(
-                format(bandwidth_dict[StrConstant.SDMA][OpBandWidthType.TRANSIT_SIZE_MB] /
-                       bandwidth_dict[StrConstant.SDMA][OpBandWidthType.TRANSIT_TIME_MS], ".4f"))
+            bandwidth_dict[StrConstant.SDMA][OpBandWidthType.BANDWIDTH_GB_S] = round(
+                (bandwidth_dict[StrConstant.SDMA][OpBandWidthType.TRANSIT_SIZE_MB] / NumberConstant.MB_to_GB) /
+                (bandwidth_dict[StrConstant.SDMA][OpBandWidthType.TRANSIT_TIME_MS] / NumberConstant.CONVERSION_TIME), 4
+            )
 
     @classmethod
     def analyze_bandwidth_info(cls: any, bandwidth_dict: dict, transport_type: str) -> None:
         if bandwidth_dict[transport_type][OpBandWidthType.TRANSIT_TIME_MS] != 0:
-            bandwidth_dict[transport_type][OpBandWidthType.BANDWIDTH_GB_S] = float(
-                format(bandwidth_dict[transport_type][OpBandWidthType.TRANSIT_SIZE_MB] /
-                       bandwidth_dict[transport_type][OpBandWidthType.TRANSIT_TIME_MS], ".4f"))
-        bandwidth_dict[transport_type][OpBandWidthType.BANDWIDTH_UTILIZATION] = float(
-                format(bandwidth_dict[transport_type][OpBandWidthType.BANDWIDTH_GB_S] /
-                       cls.StandardBandWidth.get(transport_type, -1), ".4f"))
+            bandwidth_dict[transport_type][OpBandWidthType.BANDWIDTH_GB_S] = round(
+                (bandwidth_dict[transport_type][OpBandWidthType.TRANSIT_SIZE_MB] / NumberConstant.MB_to_GB) /
+                (bandwidth_dict[transport_type][OpBandWidthType.TRANSIT_TIME_MS] / NumberConstant.CONVERSION_TIME), 4
+            )
+        bandwidth_dict[transport_type][OpBandWidthType.BANDWIDTH_UTILIZATION] = round(
+            bandwidth_dict[transport_type][OpBandWidthType.BANDWIDTH_GB_S] /
+            cls.StandardBandWidth.get(transport_type, -1), 4
+        )
         packet_num = 0
         large_packet_num = 0
         for size, count in bandwidth_dict[transport_type][OpBandWidthType.SIZE_DISTRIBUTION].items():

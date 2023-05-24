@@ -65,7 +65,7 @@ class NumberConstant:
     DEFAULT_TASK_ID = 65535
     PROF_PATH_MAX_LEN = 300
 
-    # time conversion ns to us
+    # time conversion ns to us / ms to s
     CONVERSION_TIME = 1000.0
 
     # string max length, no more than 8 MB
@@ -104,6 +104,7 @@ class NumberConstant:
     INVALID_STREAM_ID = -1
     INVALID_TASK_ID = -1
     INVALID_OP_EXE_TIME = -1
+    INVALID_MODEL_ID = 4294967295
 
     # core id edge
     MAX_CORE_ID_OF_AIC = 24
@@ -127,6 +128,7 @@ class NumberConstant:
     RANK_NUM_PER_OS = 4
     MAX_RANK_NUMS = 4096
     B_to_MB = 1024 ** 2
+    MB_to_GB = 1024
 
     DEFAULT_LAYER_SORT_START = 10
     # magic number: 5A5A
