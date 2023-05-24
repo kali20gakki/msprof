@@ -141,7 +141,7 @@ class ClusterCommunicationParserFactory(ClusterParserFactory):
     def __init__(self: any, params: dict) -> None:
         super().__init__()
         self.iteration_id = params.get("iteration_id", -1)
-        self.max_iters_model_id = -1
+        self.max_iters_model_id = NumberConstant.INVALID_MODEL_ID
         self.collection_path = os.path.realpath(params.get("collection_path"))
         self._cluster_info_model = ClusterInfoViewModel(self.collection_path)
         self.cluster_step_trace_model = ClusterStepTraceViewModel(self.collection_path)
@@ -179,7 +179,7 @@ class CommunicationMatrixParserFactory(ClusterParserFactory):
     def __init__(self: any, params: dict) -> None:
         super().__init__()
         self.iteration_id = params.get("iteration_id", -1)
-        self.max_iters_model_id = -1
+        self.max_iters_model_id = NumberConstant.INVALID_MODEL_ID
         self.collection_path = os.path.realpath(params.get("collection_path"))
         self._cluster_info_model = ClusterInfoViewModel(self.collection_path)
         self.cluster_step_trace_model = ClusterStepTraceViewModel(self.collection_path)

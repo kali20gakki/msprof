@@ -46,7 +46,7 @@ class HcclDto:
 
     @property
     def hccl_name(self: any) -> any:
-        return self._hccl_name
+        return self._args.get('task type', self._hccl_name)
 
     @property
     def first_timestamp(self: any) -> float:
