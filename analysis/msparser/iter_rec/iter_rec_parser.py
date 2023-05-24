@@ -17,6 +17,7 @@ from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.msprof_exception import ProfException
+from common_func.msprof_iteration import MsprofIteration
 from common_func.path_manager import PathManager
 from common_func.utils import Utils
 from framework.offset_calculator import OffsetCalculator
@@ -46,6 +47,7 @@ class IterParser(IParser, MsMultiProcess):
         self._project_path = sample_config.get(StrConstant.SAMPLE_CONFIG_PROJECT_PATH)
         self._batch_counter = BatchCounter(self._project_path)
         self._iter_recorder = IterRecorder(self._project_path)
+        self._iter_op_set = MsprofIteration(self._project_path).get_step_trace_op()
         self._iter_info_updater = IterInfoUpdater(self._project_path)
         self._hwts_task_time_data = [None] * self.DEFAULT_TASK_TIME_SIZE
         self.ge_info_model = GeInfoModel(PathManager.get_host_result_dir(self._project_path))
@@ -104,8 +106,9 @@ class IterParser(IParser, MsMultiProcess):
             if not _task_log.is_log_type():
                 continue
             if self._iter_recorder.check_task_in_iteration(_task_log.sys_cnt):
-                self._iter_recorder.set_current_iter_id(_task_log.sys_cnt)
                 stream_task_id = self.STREAM_TASK_KEY_FMT.format(_task_log.stream_id, _task_log.task_id)
+                if stream_task_id not in self._iter_op_set:
+                    self._iter_recorder.set_current_iter_id(_task_log.sys_cnt)
                 if _task_log.sys_tag == self.HWTS_TASK_END:
                     self._calculate_batch_list(_task_log)
                     self._create_hwts_task_time_data(_task_log, stream_task_id)
