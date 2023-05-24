@@ -877,6 +877,10 @@ int SystemMode::RecordOutPut() const
 int SystemMode::StartHostTask(const std::string resultDir, const std::string device)
 {
     auto params = GenerateHostParam(params_);
+    if (params == nullptr) {
+        MSPROF_LOGE("GenerateDeviceParam failed");
+        return PROFILING_FAILED;
+    }
     params->devices = device;
     if (std::stoi(device) == DEFAULT_HOST_ID) {
         params->host_profiling = TRUE;
@@ -911,6 +915,10 @@ int SystemMode::StartHostTask(const std::string resultDir, const std::string dev
 int SystemMode::StartDeviceTask(const std::string resultDir, const std::string device)
 {
     auto params = GenerateDeviceParam(params_);
+    if (params == nullptr) {
+        MSPROF_LOGE("GenerateDeviceParam failed");
+        return PROFILING_FAILED;
+    }
     params->devices = device;
     int ret = CreateUploader(params->job_id, resultDir);
     if (ret != PROFILING_SUCCESS) {
