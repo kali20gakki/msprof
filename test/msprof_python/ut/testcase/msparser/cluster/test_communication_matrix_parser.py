@@ -17,10 +17,10 @@ NAMESPACE = 'msparser.cluster.communication_matrix_parser'
 
 
 class Event:
-    def __init__(self, transport_type: str, task_type: str):
+    def __init__(self, transport_type: str, hccl_name: str):
         self.src_rank = 0
         self.dst_rank = 1
-        self.task_type = task_type
+        self.hccl_name = hccl_name
         self.size = 1024 ** 2
         self.duration = 1000
         self.transport_type = transport_type

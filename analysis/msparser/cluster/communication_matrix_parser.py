@@ -84,7 +84,7 @@ class CommunicationMatrixParser(MetaParser):
                 idx += 1
                 continue
             link_key = "{}-{}".format(event.src_rank, event.dst_rank)
-            if event.transport_type == StrConstant.SDMA and event.task_type in StrConstant.SDMA_TRANSIT_ITEMS:
+            if event.transport_type == StrConstant.SDMA and event.hccl_name in StrConstant.SDMA_TRANSIT_ITEMS:
                 if link_key not in link_info:
                     link_info[link_key] = [0] * len(MatrixDataType.__members__)
                 trans_type = HcclAnalysisTool.get_transport_type(event.src_rank, event.dst_rank)
