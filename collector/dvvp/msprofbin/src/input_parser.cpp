@@ -289,7 +289,8 @@ void ArgsManager::AddBasicArgs()
     Args aicMetrics = {"aic-metrics",
                        "The aic metrics groups, include ArithmeticUtilization, PipeUtilization, Memory,\n"
                            "\t\t\t\t\t\t   MemoryL0, ResourceConflictRatio, MemoryUB" + addOptions +".\n"
-                           "\t\t\t\t\t\t   the default value is " + defaultOption + ".(full-platform)",
+                           "\t\t\t\t\t\t   You can also customize registers in the format of Custom:xx,xx.\n"
+                           "\t\t\t\t\t\t   The default value is " + defaultOption + ".(full-platform)",
                        defaultOption};
     argsList_.push_back(aicMetrics);
 }
