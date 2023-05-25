@@ -96,13 +96,14 @@ TEST_F(PlatformAdapterUtest, PlatformAdapterInterfaceModule1)
     std::string events;
     EXPECT_EQ(PROFILING_FAILED, PlatformAdapterInterfaceMgr->GetMetricsEvents("", events, CoreType::AI_CORE));
     EXPECT_EQ(PROFILING_FAILED, PlatformAdapterInterfaceMgr->GetMetricsEvents("xxx", events, CoreType::AI_CORE));
+    EXPECT_EQ(PROFILING_FAILED, PlatformAdapterInterfaceMgr->GetMetricsEvents("Custom:0x1,0x2,0x3,0x4,0x5,0xFF",
+        events, CoreType::AI_CORE));
+    EXPECT_EQ(PROFILING_SUCCESS, PlatformAdapterInterfaceMgr->GetMetricsEvents("Custom:0x1,0x2,0x3,0x4,0x5,0x6",
+        events, CoreType::AI_CORE));
     EXPECT_EQ(PROFILING_SUCCESS, PlatformAdapterInterfaceMgr->GetMetricsEvents("Memory", events, CoreType::AI_CORE));
     EXPECT_EQ(PROFILING_SUCCESS, PlatformAdapterInterfaceMgr->GetMetricsEvents("Memory",
-                                                                               events,
-                                                                               CoreType::AI_VECTOR_CORE));
-    EXPECT_EQ(PROFILING_FAILED, PlatformAdapterInterfaceMgr->GetMetricsEvents("xxx",
-                                                                              events,
-                                                                              CoreType::AI_VECTOR_CORE));
+        events, CoreType::AI_VECTOR_CORE));
+    EXPECT_EQ(PROFILING_FAILED, PlatformAdapterInterfaceMgr->GetMetricsEvents("xxx", events, CoreType::AI_VECTOR_CORE));
     ret = PlatformAdapterInterfaceMgr->Uninit();
     EXPECT_EQ(PROFILING_SUCCESS, ret);
     params = nullptr;
