@@ -111,8 +111,8 @@ class TensorAddInfoParser(DataParser, MsMultiProcess):
         for data in self._ge_tensor_info_data:
             if len(data) < 12:
                 continue
-            # 3 timestamp 2 thread_id
-            key = "{}_{}".format(str(data[3]), str(data[2]))
+            # 3 timestamp 2 thread_id 4 node_id
+            key = "{}_{}_{}".format(str(data[3]), str(data[2]), str(data[4]))
             if key not in hash_dict.keys():
                 self._generate_new_hash_dict_data(hash_dict, key, data)
             else:
@@ -124,11 +124,14 @@ class TensorAddInfoParser(DataParser, MsMultiProcess):
         for key, value in hash_dict.items():
             timestamp = str(key.split("_")[0])
             thread_id = str(key.split("_")[1])
+            node_id = str(key.split("_")[2])
             self._ge_tensor_info_data.append(
-                [value['level'], value['add_info_type'], thread_id, timestamp, value['node_id'], value['tensor_num'],
-                 value['input_format'], value['input_data_type'], "\"" +
-                 value['input_shape'] + "\"", value['output_format'],
-                 value['output_data_type'], "\"" + value['output_shape'] + "\""]
+                [
+                    value['level'], value['add_info_type'], thread_id, timestamp, node_id, value['tensor_num'],
+                    value['input_format'], value['input_data_type'], "\"" + value['input_shape'] + "\"",
+                    value['output_format'],
+                    value['output_data_type'], "\"" + value['output_shape'] + "\""
+                ]
             )
 
     def _transform_tensor_info_data(self: any, data_list: list) -> list:

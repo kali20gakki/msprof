@@ -35,7 +35,7 @@ class Event:
         return hash(self.id)
 
     def __eq__(self, other):
-        return self.id == self.id
+        return self.id == other.id
 
     def __str__(self):
         return self.struct_type + "-" + str(self.id)

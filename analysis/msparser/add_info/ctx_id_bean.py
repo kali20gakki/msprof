@@ -10,7 +10,7 @@ class CtxIdBean(AddInfoBean):
     """
     ctx id bean
     """
-    PRE_LEN = 7
+    PRE_LEN = 8
 
     def __init__(self: any, *args) -> None:
         super().__init__(*args)
