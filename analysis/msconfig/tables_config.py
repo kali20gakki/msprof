@@ -1166,7 +1166,7 @@ class TablesConfig(MetaConfig):
             ('level', 'TEXT,null'),
             ('struct_type', 'TEXT,null'),
             ('thread_id', 'INTEGER,null'),
-            ('timestamp', 'TEXT,null'),
+            ('timestamp', 'REAL,null'),
             ('op_name', 'TEXT,null'),
             ('ctx_id_num', 'INTEGER,null'),
             ('ctx_id', 'TEXT,null'),

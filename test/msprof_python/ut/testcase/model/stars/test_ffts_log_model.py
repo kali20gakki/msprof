@@ -84,8 +84,10 @@ class TestSubTaskCalculator(unittest.TestCase):
 
     def test_get_thread_task_time_sql(self):
         file_list = {DataTag.STARS_LOG: ['stars_soc.data.0.slice_0', 'stars_soc.data.0.slice_1']}
-        sql = "Select end_log.subtask_id, end_log.task_id,end_log.stream_id,end_log.subtask_type, " \
-              "end_log.ffts_type,end_log.thread_id,start_log.task_time," \
+        sql = "Select end_log.subtask_id as subtask_id, end_log.task_id as task_id," \
+              "end_log.stream_id as stream_id,end_log.subtask_type as subtask_type, " \
+              "end_log.ffts_type as ffts_type,end_log.thread_id as thread_id," \
+              "start_log.task_time as task_time," \
               "(end_log.task_time-start_log.task_time) as dur_time " \
               "from FftsLog end_log " \
               "join FftsLog start_log on end_log.thread_id=start_log.thread_id " \
@@ -101,12 +103,13 @@ class TestSubTaskCalculator(unittest.TestCase):
 
     def test_get_subtask_time_sql(self):
         file_list = {DataTag.STARS_LOG: ['stars_soc.data.0.slice_0', 'stars_soc.data.0.slice_1']}
-        sql = "Select end_log.subtask_id, end_log.task_id,end_log.stream_id,end_log.subtask_type," \
-              "end_log.ffts_type,start_log.task_time as start_time, (end_log.task_time-start_log.task_time)" \
-              " as dur_time from FftsLog end_log join FftsLog start_log " \
+        sql = "Select end_log.subtask_id as subtask_id, end_log.task_id as task_id," \
+              "end_log.stream_id as stream_id,end_log.subtask_type as subtask_type," \
+              "end_log.ffts_type as ffts_type,start_log.task_time as start_time, " \
+              "(end_log.task_time-start_log.task_time) as dur_time from FftsLog end_log join FftsLog start_log " \
               "on end_log.subtask_id=start_log.subtask_id and end_log.stream_id=start_log.stream_id " \
               "and end_log.task_id=start_log.task_id where end_log.task_type='100011' " \
-               "and start_log.task_type='100010' group by end_log.subtask_id, end_log.task_id order by start_time"
+              "and start_log.task_type='100010' group by end_log.subtask_id, end_log.task_id order by start_time"
         with mock.patch(NAMESPACE + '.MsprofIteration.get_iter_interval', return_value=(1, 2)):
             check = SubTaskCalculator(file_list, self.sample_config)
             ret = check._get_subtask_time_sql()
@@ -131,7 +134,7 @@ class TestSubTaskCalculator(unittest.TestCase):
             check = FftsLogModel('test', 'test', 'test')
             ret = check.get_timeline_data()
         self.assertEqual([{'acsq_task_list': [], 'subtask_data_list': ([5, 6, 7, 8, 9, 1, 2, 4, 6],),
-                          'thread_data_list': ([0, 1, 2, 3, 4, 5, 6, 7, 8],)}], ret)
+                           'thread_data_list': ([0, 1, 2, 3, 4, 5, 6, 7, 8],)}], ret)
 
     def test_get_summary_data(self):
         with mock.patch(MODELNAMESPACE + '.FftsLogModel.get_all_data', return_value=[]):

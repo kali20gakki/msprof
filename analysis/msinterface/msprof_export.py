@@ -23,6 +23,7 @@ from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.msprof_common import MsProfCommonConstant
 from common_func.msprof_common import analyze_collect_data
+from common_func.msprof_common import check_collection_dir
 from common_func.msprof_common import check_path_valid
 from common_func.msprof_common import get_path_dir
 from common_func.msprof_common import prepare_for_parse
@@ -522,6 +523,8 @@ class ExportCommand:
                      'Analysis data in "%s" failed. Maybe the data is incomplete.' % result_dir)
 
     def _prepare_export(self: any, result_dir: str) -> None:
+        if not check_collection_dir(result_dir):
+            return
         prepare_for_parse(result_dir)
         self._prepare_for_export(result_dir)
 

@@ -39,7 +39,7 @@ class NodeBasicInfoDto:
         return self._timestamp
 
     @property
-    def op_name(self: any) -> int:
+    def op_name(self: any) -> str:
         return self._op_name
 
     @property
