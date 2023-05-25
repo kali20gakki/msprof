@@ -1,35 +1,36 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2023-2023. All rights reserved.
+from common_func.constant import Constant
 
 
 class HCCLInfoDto:
     def __init__(self: any) -> None:
-        self._level = None
-        self._struct_type = None
-        self._thread_id = None
-        self._data_len = None
-        self._timestamp = None
-        self._op_name = None
-        self._ccl_tag = None
-        self._group_name = None
-        self._local_rank = None
-        self._remote_rank = None
-        self._rank_size = None
-        self._work_flow_mode = None
-        self._plane_id = None
-        self._notify_id = None
-        self._stage = None
-        self._role = None
-        self._duration_estimated = None
-        self._src_addr = None
-        self._dst_addr = None
-        self._size = None
-        self._op_type = None
-        self._data_type = None
-        self._link_type = None
-        self._transport_type = None
-        self._rdma_type = None
+        self._level = Constant.NA
+        self._struct_type = Constant.NA
+        self._thread_id = Constant.DEFAULT_INVALID_VALUE
+        self._data_len = Constant.DEFAULT_INVALID_VALUE
+        self._timestamp = Constant.DEFAULT_INVALID_VALUE
+        self._op_name = Constant.NA
+        self._ccl_tag = Constant.NA
+        self._group_name = Constant.NA
+        self._local_rank = Constant.DEFAULT_INVALID_VALUE
+        self._remote_rank = Constant.DEFAULT_INVALID_VALUE
+        self._rank_size = Constant.DEFAULT_INVALID_VALUE
+        self._work_flow_mode = Constant.NA
+        self._plane_id = Constant.DEFAULT_INVALID_VALUE
+        self._notify_id = Constant.DEFAULT_INVALID_VALUE
+        self._stage = Constant.DEFAULT_INVALID_VALUE
+        self._role = Constant.NA
+        self._duration_estimated = Constant.DEFAULT_INVALID_VALUE
+        self._src_addr = Constant.DEFAULT_INVALID_VALUE
+        self._dst_addr = Constant.DEFAULT_INVALID_VALUE
+        self._size = Constant.DEFAULT_INVALID_VALUE
+        self._op_type = Constant.NA
+        self._data_type = Constant.NA
+        self._link_type = Constant.NA
+        self._transport_type = Constant.NA
+        self._rdma_type = Constant.NA
 
     @property
     def level(self: any) -> str:
@@ -231,9 +232,26 @@ class HCCLInfoDto:
     def rdma_type(self, value):
         self._rdma_type = value
 
-    def to_args_json(self):
-        bandwidth = self.size / self.duration_estimated / 1000 if self.size is not None else None  # 1000 scale(GB/s)
-        members = self.__dict__
-        json = {key: members.get(key) for key in members if "__" not in key}
-        json['bandwidth'] = bandwidth
+    def get_bandwidth(self):
+        if self.duration_estimated == Constant.DEFAULT_INVALID_VALUE or self.size == Constant.DEFAULT_INVALID_VALUE or \
+                self.duration_estimated == 0:
+            return 0
+        return self.size / self.duration_estimated / 1000  # 1000 scale(GB/s)
+
+    def to_args_json(self, stream_id, task_id):
+        bandwidth = self.get_bandwidth()
+        json = {
+            'notify_id': self.notify_id,
+            'duration estimated(us)': self.duration_estimated,
+            'bandwidth(GB/s)': bandwidth,
+            'stream id': stream_id,
+            'task id': task_id,
+            'task type': self.op_name,
+            'src rank': self.local_rank,
+            'dst rank': self.remote_rank,
+            'transport type': self.transport_type,
+            'size(Byte)': self.size,
+            'data type': self.data_type,
+            'link type': self.link_type
+        }
         return str(json)
