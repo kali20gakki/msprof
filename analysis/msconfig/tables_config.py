@@ -712,6 +712,7 @@ class TablesConfig(MetaConfig):
             ('duration', 'REAL, null'),
             ('stream_id', 'INTEGER, null'),
             ('task_id', 'INTEGER, null'),
+            ('batch_id', 'INTEGER, null'),
             ('args', 'TEXT, null')
         ],
         'MsprofTxMap': [

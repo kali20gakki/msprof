@@ -139,7 +139,7 @@ class DataCalculatorConfig(MetaConfig):
         'HcclCalculator': [
             ('path', 'mscalculate.hccl_calculator'),
             ('chip_model', '0,1,2,3,4,5,7'),
-            ('level', '4'),
+            ('level', '5'),
             ('position', 'D')
         ],
     }
