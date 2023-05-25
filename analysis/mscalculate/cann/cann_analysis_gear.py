@@ -442,7 +442,8 @@ class TaskGear(CANNGear):
             hccl_info_dto = self.get_hccl_info_dto(hccl_event)
             self.hccl_task_info.append(
                 [hccl_dto.item_id, hccl_info_dto.plane_id, hccl_info_dto.timestamp,
-                 hccl_info_dto.duration_estimated, add_dto.stream_id, add_dto.task_id, hccl_info_dto.to_args_json()])
+                 hccl_info_dto.duration_estimated, add_dto.stream_id, add_dto.task_id,
+                 hccl_info_dto.to_args_json(add_dto.stream_id, add_dto.task_id)])
 
     def run(self, event: Event, call_stack: dict):
         dto: ApiDataDto = ApiDataDatabase().get(event)

@@ -313,6 +313,9 @@ class ExportCommand:
         for item in export_map:
             if item['handler'](result_dir, device):
                 self.list_map.get('export_type_list').append(item)
+        # msprof will always be exported
+        if self.command_type == MsProfCommonConstant.TIMELINE and len(self.list_map.get('export_type_list')) == 1:
+            self.list_map.get('export_type_list').pop()
 
     def _is_iteration_range_valid(self, project_path):
         with TsTrackModel(project_path, DBNameConstant.DB_STEP_TRACE, [DBNameConstant.TABLE_STEP_TRACE_DATA]) as _trace:
@@ -437,9 +440,6 @@ class ExportCommand:
 
     def _has_data_to_export(self):
         if len(self.list_map.get('export_type_list')) == 0:
-            return False
-        # msprof will always be exported
-        if self.command_type == MsProfCommonConstant.TIMELINE and len(self.list_map.get('export_type_list')) == 1:
             return False
         return True
 
