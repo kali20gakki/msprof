@@ -9,6 +9,7 @@ from typing import List
 from common_func.constant import Constant
 from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
+from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.platform.chip_manager import ChipManager
 from mscalculate.cann.additional_record import AdditionalRecord
@@ -262,7 +263,8 @@ class NodeGear(CANNGear):
                     model_event: Event = call_stack.get(Constant.MODEL_LEVEL)
                     model_dto: ApiDataDto = ApiDataDatabase().get(model_event)
                     request_id = model_dto.request_id if model_dto.request_id is not None else -1
-                    self.hccl_op_info.append([model_dto.item_id, request_id, dto.thread_id, dto.item_id,
+                    model_id = NumberConstant.INVALID_MODEL_ID if model_dto.item_id is None else model_dto.item_id
+                    self.hccl_op_info.append([model_id, request_id, dto.thread_id, dto.item_id,
                                               record.dto.task_type, record.dto.op_type, dto.start, dto.end,
                                               record.dto.is_dynamic])
 
@@ -442,7 +444,7 @@ class TaskGear(CANNGear):
             hccl_info_dto = self.get_hccl_info_dto(hccl_event)
             self.hccl_task_info.append(
                 [hccl_dto.item_id, hccl_info_dto.plane_id, hccl_info_dto.timestamp,
-                 hccl_info_dto.duration_estimated, add_dto.stream_id, add_dto.task_id,
+                 hccl_info_dto.duration_estimated, add_dto.stream_id, add_dto.task_id, add_dto.batch_id,
                  hccl_info_dto.to_args_json(add_dto.stream_id, add_dto.task_id)])
 
     def run(self, event: Event, call_stack: dict):

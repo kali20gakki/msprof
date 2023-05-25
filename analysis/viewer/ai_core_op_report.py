@@ -183,6 +183,7 @@ class AiCoreOpReport:
             return []
 
         model_name = []
+        index_id = []
         header_length = len(configs.get('headers', []))
         model_name_and_id_dict = get_ge_model_name_dict(project_path)
         hccl_data = [0] * len(hccl_comunication_data)
@@ -190,12 +191,13 @@ class AiCoreOpReport:
         for index, _hccl_op in enumerate(hccl_comunication_data):
             if not ProfilingScene().is_operator():
                 model_name = [model_name_and_id_dict.get(_hccl_op.model_id, Constant.NA)]
-            hccl_data[index] = model_name + [
-                _hccl_op.model_id, Constant.NA, Constant.NA, _hccl_op.index_id,
-                _hccl_op.op_name, _hccl_op.op_type, _hccl_op.task_type,
-                _hccl_op.first_timestamp, _hccl_op.duration / NumberConstant.NS_TO_US,
-                Constant.DEFAULT_VALUE, Constant.DEFAULT_VALUE
-            ]
+                index_id = [_hccl_op.index_id]
+            hccl_data[index] = model_name + [_hccl_op.model_id, Constant.NA, Constant.NA] + index_id + \
+                               [
+                                   _hccl_op.op_name, _hccl_op.op_type, _hccl_op.task_type,
+                                   _hccl_op.timestamp, _hccl_op.duration / NumberConstant.NS_TO_US,
+                                   Constant.DEFAULT_VALUE, Constant.DEFAULT_VALUE
+                               ]
             hccl_data[index].extend([Constant.NA] * (header_length - len(hccl_data[index])))
         return hccl_data
 
