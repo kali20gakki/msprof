@@ -223,7 +223,7 @@ class FileNameManagerConstant:
     GRAPH_ADD_INFO_FILE_PATTERN = r"^(unaging|aging)\.additional\.graph_id_map\.slice_\d+"
     FUSION_ADD_INFO_PATTERN = r"^(unaging|aging)\.additional\.fusion_op_info\.slice_\d+"
     MEMORY_APPLICATION_FILE_PATTERN = r"^(unaging|aging)\.additional\.memory_application\.slice_\d+"
-    CTX_ID_FILE_PATTERN = r"^(unaging|aging)\.additional\.ctx_id\.slice_\d+"
+    CTX_ID_FILE_PATTERN = r"^(unaging|aging)\.additional\.context_id_info\.slice_\d+"
 
     def get_file_name_manager_class_name(self: any) -> any:
         """

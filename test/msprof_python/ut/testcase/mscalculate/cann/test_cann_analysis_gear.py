@@ -24,6 +24,7 @@ from mscalculate.cann.cann_database import AdditionalRecordDatabase
 from mscalculate.cann.cann_database import ApiDataDatabase
 from mscalculate.cann.event import Event
 from profiling_bean.db_dto.api_data_dto import ApiDataDto
+from profiling_bean.db_dto.ctx_id_dto import CtxIdDto
 from profiling_bean.db_dto.fusion_op_info_dto import FusionOpInfoDto
 from profiling_bean.db_dto.hccl_info_dto import HCCLInfoDto
 from profiling_bean.db_dto.mem_copy_info_dto import MemCopyInfoDto
@@ -172,9 +173,20 @@ class TestCANNAnalysisGear(unittest.TestCase):
         event6: Event = self.create_api_event(self.event_col(Constant.NODE_LEVEL, 1, 310, 360, "launch", "conv"))
         node_basic_info_dto = NodeBasicInfoDto()
         node_basic_info_dto.op_type = "1"
+        node_basic_info_dto.op_name = "1"
+        node_basic_info_dto.timestamp = 360
+        tensor_info_dto = TensorInfoDto()
+        tensor_info_dto.op_name = "1"
+        tensor_info_dto.timestamp = 360
+        tensor_info_dto.struct_type = '1'
+        ctx_id_dto = CtxIdDto()
+        ctx_id_dto.ctx_id = 8
+        ctx_id_dto.op_name = "1"
+        ctx_id_dto.timestamp = 360
         event6.additional_record = [
             self.create_addition_record(node_basic_info_dto, 360),
-            self.create_addition_record(TensorInfoDto(), 360)
+            self.create_addition_record(tensor_info_dto, 360),
+            self.create_addition_record(ctx_id_dto, 360)
         ]
         event7 = self.create_api_event(self.event_col(Constant.TASK_LEVEL, 1, 320, 350, "api4", 0))
         task_dto3 = TaskTrackDto()
@@ -201,6 +213,10 @@ class TestCANNAnalysisGear(unittest.TestCase):
         self.assertTrue(
             DBManager.check_item_in_table(PathManager.get_db_path(self.PROF_HOST_DIR, DBNameConstant.DB_GE_INFO),
                                           DBNameConstant.TABLE_GE_TASK, 'op_type', "1"))
+
+        self.assertTrue(
+            DBManager.check_item_in_table(PathManager.get_db_path(self.PROF_HOST_DIR, DBNameConstant.DB_GE_INFO),
+                                          DBNameConstant.TABLE_GE_TASK, 'context_id', 8))
 
         self.assertEqual(
             DBManager.get_table_data_count(PathManager.get_db_path(self.PROF_HOST_DIR, DBNameConstant.DB_GE_INFO),

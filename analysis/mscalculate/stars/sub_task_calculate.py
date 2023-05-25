@@ -36,8 +36,10 @@ class SubTaskCalculator(MsMultiProcess):
         Timestamps of logs with the same subtask_ID and task_id and stream_id
         are subtracted to obtain the dur_time.
         """
-        thread_base_sql = "Select end_log.subtask_id, end_log.task_id,end_log.stream_id," \
-                          "end_log.subtask_type, end_log.ffts_type,end_log.thread_id,start_log.task_time," \
+        thread_base_sql = "Select end_log.subtask_id as subtask_id, end_log.task_id as task_id," \
+                          "end_log.stream_id as stream_id,end_log.subtask_type as subtask_type, " \
+                          "end_log.ffts_type as ffts_type,end_log.thread_id as thread_id," \
+                          "start_log.task_time as task_time," \
                           "(end_log.task_time-start_log.task_time) as dur_time " \
                           "from {0} end_log " \
                           "join {0} start_log on end_log.thread_id=start_log.thread_id " \
@@ -59,8 +61,9 @@ class SubTaskCalculator(MsMultiProcess):
         A subtask has multiple thread.
         Subtract the start time with the minimum time from the end time with the maximum time.
         """
-        subtask_base_sql = "Select end_log.subtask_id, end_log.task_id,end_log.stream_id,end_log.subtask_type," \
-                           "end_log.ffts_type,start_log.task_time as start_time, " \
+        subtask_base_sql = "Select end_log.subtask_id as subtask_id, end_log.task_id as task_id," \
+                           "end_log.stream_id as stream_id,end_log.subtask_type as subtask_type," \
+                           "end_log.ffts_type as ffts_type,start_log.task_time as start_time, " \
                            "(end_log.task_time-start_log.task_time) as dur_time " \
                            "from {0} end_log join {0} start_log " \
                            "on end_log.subtask_id=start_log.subtask_id " \

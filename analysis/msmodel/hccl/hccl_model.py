@@ -51,7 +51,8 @@ class HcclViewModel(ViewModel):
             return []
         sql = "SELECT t1.model_id as model_id, t1.index_id as index_id, t1.op_name as op_name, t1.name as hccl_name, " \
               "t1.plane_id as plane_id, t1.args as args, t2.running as timestamp, " \
-              "t2.complete-t2.running as duration, t1.is_dynamic, t1.task_type, t1.op_type " \
+              "t2.complete-t2.running as duration, t1.is_dynamic as is_dynamic, t1.task_type as task_type," \
+              " t1.op_type as op_type " \
               "from (select op_name, task_type, op_type, model_id, index_id, name, plane_id, args, " \
               "stream_id, task_id, is_dynamic from {0} " \
               "inner join {1} where timestamp >=begin and timestamp <= end ) t1 " \

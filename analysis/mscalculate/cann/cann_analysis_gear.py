@@ -347,6 +347,19 @@ class TaskGear(CANNGear):
             return [self.start, self.end, self.api, self.thread, self.stream_id,
                     self.task_id, self.batch_id, self.data_size, self.memcpy_direction]
 
+    class NodeDesc:
+        def __init__(self, node_basic_info=NodeBasicInfoDto(), tensor_info=TensorInfoDto(), ctx_info=CtxIdDto()):
+            self.node_basic_info = node_basic_info
+            self.tensor_info = tensor_info
+            self.ctx_info = ctx_info
+
+        @staticmethod
+        def get_hash(dto: any):
+            return dto.op_name + "-" + str(int(dto.timestamp))
+
+        def is_invalid(self):
+            return self.node_basic_info is not None and self.tensor_info is not None
+
     def __init__(self, project_path):
         super().__init__(project_path)
         self.cann_level = Constant.TASK_LEVEL
@@ -354,20 +367,6 @@ class TaskGear(CANNGear):
         self.task_info = []
         self.tensor_info = []
         self.hccl_task_info = []
-
-    @staticmethod
-    def get_node_basic_info_dto(event: Event) -> NodeBasicInfoDto:
-        for record in event.additional_record:
-            if isinstance(record.dto, NodeBasicInfoDto):
-                return record.dto
-        return NodeBasicInfoDto()
-
-    @staticmethod
-    def get_tensor_info_dto(event: Event) -> TensorInfoDto:
-        for record in event.additional_record:
-            if isinstance(record.dto, TensorInfoDto):
-                return record.dto
-        return TensorInfoDto()
 
     @staticmethod
     def get_hccl_info_dto(event: Event) -> HCCLInfoDto:
@@ -388,11 +387,19 @@ class TaskGear(CANNGear):
                 task_track_dto = record.dto
         return mem_cpy_info_dto, task_track_dto
 
-    def get_ctx_id(self, event: Event) -> int:
+    def get_node_descs(self, event: Event) -> dict:
+        node_descs = dict()
         for record in event.additional_record:
-            if isinstance(record.dto, CtxIdDto):
-                return record.dto.ctx_id
-        return self.INVALID_CONTEXT_ID
+            if isinstance(record.dto, NodeBasicInfoDto):
+                node_desc = node_descs.setdefault(self.NodeDesc.get_hash(record.dto), self.NodeDesc())
+                node_desc.node_basic_info = record.dto
+            elif isinstance(record.dto, TensorInfoDto):
+                node_desc = node_descs.setdefault(self.NodeDesc.get_hash(record.dto), self.NodeDesc())
+                node_desc.tensor_info = record.dto
+            elif isinstance(record.dto, CtxIdDto):
+                node_desc = node_descs.setdefault(self.NodeDesc.get_hash(record.dto), self.NodeDesc())
+                node_desc.ctx_info = record.dto
+        return node_descs
 
     def add_task_detail(self, call_stack: dict, add_dto: TaskTrackDto, dto: ApiDataDto):
         model_event: Event = call_stack.get(Constant.MODEL_LEVEL)
@@ -402,30 +409,34 @@ class TaskGear(CANNGear):
 
         hccl_event: Event = call_stack.get(Constant.HCCL_LEVEL)
         if hccl_event.is_invalid():
-            node_basic_info_dto = self.get_node_basic_info_dto(node_event)
-            if node_basic_info_dto.op_type is None:
+            node_descs = self.get_node_descs(node_event)
+            if not node_descs:
                 # this happen when runtime task is not respond to a op
                 return
-            tensor_info_dto = self.get_tensor_info_dto(node_event)
-
-            ctx_id = self.INVALID_CONTEXT_ID
-            if ChipManager().is_chip_v4():
-                ctx_id = self.get_ctx_id(node_event)
 
             model_id = model_dto.item_id if model_dto.item_id is not None else self.INVALID_MODEL_ID
             request_id = model_dto.request_id if model_dto.request_id is not None else -1
+            for node_desc in node_descs.values():
+                node_basic_info_dto: NodeBasicInfoDto = node_desc.node_basic_info
+                tensor_info_dto: TensorInfoDto = node_desc.tensor_info
+                ctx_id_dto = node_desc.ctx_info
 
-            self.task_info.append([model_id, node_dto.item_id, add_dto.stream_id, add_dto.task_id,
-                                   node_basic_info_dto.block_dim, node_basic_info_dto.mix_block_dim,
-                                   node_basic_info_dto.is_dynamic, node_basic_info_dto.task_type,
-                                   node_basic_info_dto.op_type, request_id,
-                                   dto.thread_id, node_basic_info_dto.timestamp, add_dto.batch_id, ctx_id])
+                if node_basic_info_dto.op_type is None or node_basic_info_dto.op_type == "FFTS_PLUS":
+                    continue
+                self.task_info.append([model_id, node_basic_info_dto.op_name, add_dto.stream_id, add_dto.task_id,
+                                       node_basic_info_dto.block_dim, node_basic_info_dto.mix_block_dim,
+                                       node_basic_info_dto.is_dynamic, node_basic_info_dto.task_type,
+                                       node_basic_info_dto.op_type, request_id, dto.thread_id,
+                                       node_basic_info_dto.timestamp, add_dto.batch_id, ctx_id_dto.ctx_id])
 
-            self.tensor_info.append([model_id, add_dto.stream_id, add_dto.task_id, tensor_info_dto.tensor_num,
-                                     tensor_info_dto.input_formats, tensor_info_dto.input_data_types,
-                                     tensor_info_dto.input_shapes, tensor_info_dto.output_formats,
-                                     tensor_info_dto.output_data_types, tensor_info_dto.output_shapes,
-                                     request_id, tensor_info_dto.timestamp, add_dto.batch_id])
+                if tensor_info_dto.struct_type is None:
+                    continue
+                self.tensor_info.append([model_id, add_dto.stream_id, add_dto.task_id, tensor_info_dto.tensor_num,
+                                         tensor_info_dto.input_formats, tensor_info_dto.input_data_types,
+                                         tensor_info_dto.input_shapes, tensor_info_dto.output_formats,
+                                         tensor_info_dto.output_data_types, tensor_info_dto.output_shapes,
+                                         request_id, tensor_info_dto.timestamp, add_dto.batch_id])
+
         else:
             hccl_dto: ApiDataDto = ApiDataDatabase().get(hccl_event)
             hccl_info_dto = self.get_hccl_info_dto(hccl_event)

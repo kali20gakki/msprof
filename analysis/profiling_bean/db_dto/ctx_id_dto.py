@@ -4,15 +4,17 @@
 
 
 class CtxIdDto:
+    INVALID_CONTEXT_ID = 4294967295
+
     def __init__(self: any) -> None:
         self._level = None
         self._struct_type = None
         self._thread_id = None
         self._data_len = None
         self._timestamp = None
-        self._node_id = None
+        self._op_name = None
         self._ctx_id_num = None
-        self._ctx_id = None
+        self._ctx_id = self.INVALID_CONTEXT_ID
 
     @property
     def level(self: any) -> str:
@@ -35,8 +37,8 @@ class CtxIdDto:
         return self._timestamp
 
     @property
-    def node_id(self):
-        return self._node_id
+    def op_name(self):
+        return self._op_name
 
     @property
     def ctx_id_num(self):
@@ -66,9 +68,9 @@ class CtxIdDto:
     def timestamp(self, value):
         self._timestamp = value
 
-    @node_id.setter
-    def node_id(self, value):
-        self._node_id = value
+    @op_name.setter
+    def op_name(self, value):
+        self._op_name = value
 
     @ctx_id_num.setter
     def ctx_id_num(self, value):
