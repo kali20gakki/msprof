@@ -212,6 +212,7 @@ int ParamValidation::CustomHexCharConfig(std::string &aicoreEvents, const std::s
         CMD_LOGE("Custom PMU events size(%u) is bigger than %d", eventsList.size(), MAX_EVENT_SIZE);
         return PROFILING_FAILED;
     }
+    std::set<std::string> eventMaps;
     for (size_t i = 0; i < eventsList.size(); ++i) {
         std::string event = eventsList[i];
         if (!CovertMetricToHex(event, HEX_MODE) && !CovertMetricToHex(event, DEC_MODE)) {
@@ -231,7 +232,13 @@ int ParamValidation::CustomHexCharConfig(std::string &aicoreEvents, const std::s
                 event.c_str(), minEvent, maxEvent);
             return PROFILING_FAILED;
         }
-        aicoreEvents += event + pattern;
+        if (eventMaps.insert(event).second) {
+            aicoreEvents += event + pattern;
+        } else {
+            MSPROF_LOGE("Custom event(%s) is invalid, it is set twice.", event.c_str());
+            CMD_LOGE("Custom event(%s) is invalid, it is set twice.", event.c_str());
+            return PROFILING_FAILED;
+        }
     }
     aicoreEvents.pop_back();
     return PROFILING_SUCCESS;
