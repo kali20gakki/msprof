@@ -158,23 +158,12 @@ class OpSummaryOpSceneCalculator(MsMultiProcess):
                                             DBNameConstant.TABLE_GE_TASK):
             logging.warning("Try to export op summary without ge data, "
                             "maybe the data of framework is not collected.")
-            if not DBManager.check_tables_in_db(
-                    PathManager.get_db_path(self.project_path, DBNameConstant.DB_RUNTIME),
-                    DBNameConstant.TABLE_METRICS_SUMMARY) and \
-                not DBManager.check_tables_in_db(
-                    PathManager.get_db_path(self.project_path, DBNameConstant.DB_RUNTIME),
-                    DBNameConstant.TABLE_AIV_METRIC_SUMMARY):
-                logging.warning("No need to create db for op summary, "
-                                "maybe the data of aicore is not collected.")
-                return
 
         self.conn, self.curs = DBManager.create_connect_db(
             PathManager.get_db_path(self.project_path, DBNameConstant.DB_AICORE_OP_SUMMARY))
         if self.conn and self.curs:
             self._create_summary_table_helper()
         DBManager.destroy_db_connect(self.conn, self.curs)
-
-
 
     def _get_ge_data_from_summary(self: any) -> list:
         if not DBManager.judge_table_exist(self.curs, DBNameConstant.TABLE_SUMMARY_GE):
