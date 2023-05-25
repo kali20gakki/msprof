@@ -294,6 +294,52 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckEventsSize)
     EXPECT_EQ(PROFILING_FAILED, entry->CheckEventsSize("0x1,0x2,0x3,0x4,0x5,0x6,0x7,0x8,0x9"));
 }
 
+TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CovertMetricToHex)
+{
+    GlobalMockObject::verify();
+    auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
+    std::string event;
+    const int HEX_MODE = 16;
+    const int DEC_MODE = 10;
+    EXPECT_EQ(false, entry->CovertMetricToHex(event, HEX_MODE));
+    event = "$";
+    EXPECT_EQ(false, entry->CovertMetricToHex(event, HEX_MODE));
+    event = "/$";
+    EXPECT_EQ(false, entry->CovertMetricToHex(event, HEX_MODE));
+    event = "0x/$";
+    EXPECT_EQ(false, entry->CovertMetricToHex(event, HEX_MODE));
+    event = "0x2f";
+    EXPECT_EQ(true, entry->CovertMetricToHex(event, HEX_MODE));
+    event = "/$";
+    EXPECT_EQ(false, entry->CovertMetricToHex(event, DEC_MODE));
+    event = "2147483648";
+    EXPECT_EQ(false, entry->CovertMetricToHex(event, DEC_MODE));
+    event = "2147483647";
+    EXPECT_EQ(true, entry->CovertMetricToHex(event, DEC_MODE));
+    event = "20";
+    EXPECT_EQ(true, entry->CovertMetricToHex(event, DEC_MODE));
+    EXPECT_EQ("0x14", event);
+}
+
+
+TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CustomHexCharConfig)
+{
+    GlobalMockObject::verify();
+    auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
+    std::string aicoreEvent;
+    EXPECT_EQ(PROFILING_FAILED, entry->CustomHexCharConfig(aicoreEvent, ","));
+    aicoreEvent = "0x1,0x2,0x3,0x4,0x5,0x6,0x7,0x8,0x9";
+    EXPECT_EQ(PROFILING_FAILED, entry->CustomHexCharConfig(aicoreEvent, ","));
+    aicoreEvent = "0xw,0x2,0x3,0x4,0x5,0x6,0x7,0x8";
+    EXPECT_EQ(PROFILING_FAILED, entry->CustomHexCharConfig(aicoreEvent, ","));
+    aicoreEvent = "0x1,0x2,0x3,0x4,0x5,0x6,0x7,0xFF";
+    EXPECT_EQ(PROFILING_FAILED, entry->CustomHexCharConfig(aicoreEvent, ","));
+    aicoreEvent = "0x1,0x2,0x3,0x4,0x5,0x6,0x7,0x7";
+    EXPECT_EQ(PROFILING_FAILED, entry->CustomHexCharConfig(aicoreEvent, ","));
+    aicoreEvent = "0x1,0x2,0x3,0x4,0x5,0x6,0x7,0x8";
+    EXPECT_EQ(PROFILING_SUCCESS, entry->CustomHexCharConfig(aicoreEvent, ","));
+}
+
 TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckProfilingMetricsIsValid) {
     GlobalMockObject::verify();
 
@@ -304,6 +350,12 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckProfilingMetricsIsValid) {
     EXPECT_EQ(PROFILING_SUCCESS, ret);
     EXPECT_EQ(1, entry->CheckProfilingMetricsIsValid("aic-metrics", aicoreMetrics));
     aicoreMetrics = "/$$}";
+    EXPECT_EQ(0, entry->CheckProfilingMetricsIsValid("aic-metrics", aicoreMetrics));
+    aicoreMetrics = "/$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$";
+    EXPECT_EQ(0, entry->CheckProfilingMetricsIsValid("aic-metrics", aicoreMetrics));
+    aicoreMetrics = "Custom:0x2,0x3,0x4,0xF";
+    EXPECT_EQ(1, entry->CheckProfilingMetricsIsValid("aic-metrics", aicoreMetrics));
+    aicoreMetrics = "Custom:";
     EXPECT_EQ(0, entry->CheckProfilingMetricsIsValid("aic-metrics", aicoreMetrics));
     aicoreMetrics = "PipeUtilization";
     EXPECT_EQ(1, entry->CheckProfilingMetricsIsValid("aic-metrics", aicoreMetrics));
