@@ -1,6 +1,7 @@
 import unittest
 from unittest import mock
 
+from analyzer.scene_base.profiling_scene import ProfilingScene
 from mscalculate.data_analysis.op_summary_op_scene_calculator import OpSummaryOpSceneCalculator
 from common_func.info_conf_reader import InfoConfReader
 from constant.constant import CONFIG
@@ -13,9 +14,14 @@ NAMESPACE = 'mscalculate.data_analysis.op_summary_op_scene_calculator'
 class TestOpSummaryOpSceneCalculator(unittest.TestCase):
 
     def test_ms_run(self):
+        profiling_scene = ProfilingScene()
+        is_operator_func = profiling_scene.is_operator
+        profiling_scene.is_operator = mock.Mock()
+        profiling_scene.is_operator.return_value = True
         with mock.patch(NAMESPACE + '.OpSummaryOpSceneCalculator.process'):
             key = OpSummaryOpSceneCalculator(file_list, CONFIG)
             key.ms_run()
+        profiling_scene.is_operator = is_operator_func
 
     def test_process(self):
         with mock.patch(NAMESPACE + '.PathManager.get_db_path', return_value='test.text'), \
@@ -182,12 +188,6 @@ class TestOpSummaryOpSceneCalculator(unittest.TestCase):
         db_manager = DBManager()
         res = db_manager.create_table("ge_info.db", create_sql, insert_sql, data)
         with mock.patch(NAMESPACE + '.PathManager.get_db_path', return_value='test\\test.text'):
-            with mock.patch(NAMESPACE + '.DBManager.check_tables_in_db', return_value=False), \
-                    mock.patch(NAMESPACE + '.logging.warning'), \
-                    mock.patch(NAMESPACE + ".DBManager.destroy_db_connect"):
-                check = OpSummaryOpSceneCalculator(file_list, CONFIG)
-                check.create_summary_table()
-
             with mock.patch(NAMESPACE + '.DBManager.check_tables_in_db', return_value=True), \
                     mock.patch(NAMESPACE + '.DBManager.create_connect_db', return_value=res):
                 with mock.patch(NAMESPACE + '.OpSummaryOpSceneCalculator.create_ge_summary_table',
