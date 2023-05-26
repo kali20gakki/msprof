@@ -849,21 +849,22 @@ static int32_t LocalLookup(char *buf, uint32_t bufLen, const char *pattern, char
     }
 
     pValue = pBuf;
-    for (pBuf = buf + bufLen; isspace(*(pBuf - 1)) != 0; pBuf--) {
+    for (pBuf = buf + bufLen; isspace(*pBuf) != 0; pBuf--) {
         if (pBuf == buf) {
             return PROFILING_FAILED;
         }
     }
 
-    *pBuf = '\0';
+    *(pBuf - 1) = '\0';
     uint32_t pValueLen = strnlen(pValue, valueLen);
     if (pValueLen == valueLen) {
         return PROFILING_FAILED;
     }
-    ret = memcpy_s(value, valueLen, pValue, pValueLen + 1U);
+    ret = memcpy_s(value, valueLen, pValue, pValueLen);
     if (ret != PROFILING_SUCCESS) {
         return PROFILING_FAILED;
     }
+    *(value + pValueLen) = '\0';
     return PROFILING_SUCCESS;
 }
 
