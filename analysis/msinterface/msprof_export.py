@@ -523,8 +523,6 @@ class ExportCommand:
                      'Analysis data in "%s" failed. Maybe the data is incomplete.' % result_dir)
 
     def _prepare_export(self: any, result_dir: str) -> None:
-        if not check_collection_dir(result_dir):
-            return
         prepare_for_parse(result_dir)
         self._prepare_for_export(result_dir)
 
