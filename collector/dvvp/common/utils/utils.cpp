@@ -438,8 +438,13 @@ void Utils::RemoveDir(const std::string &dir, bool rmTopDir)
                 MmGetErrorCode());
             return;
         }
-
+        if (nameList == nullptr) {
+            return;
+        }
         for (int i = 0; i < count; i++) {
+            if (nameList[i] == nullptr) {
+                continue;
+            }
             std::string fileName = nameList[i]->d_name;
             std::string childPath = dir + MSVP_SLASH + fileName;
 
@@ -816,8 +821,14 @@ void Utils::GetFiles(const std::string &dir, bool isRecur, std::vector<std::stri
     if (count == PROFILING_FAILED || count == PROFILING_INVALID_PARAM) {
         return;
     }
+    if (dirNameList == nullptr) {
+        return;
+    }
 
     for (int j = 0; j < count; j++) {
+        if (dirNameList[j] == nullptr) {
+            continue;
+        }
         std::string fileName = dirNameList[j]->d_name;
         std::string childPath = dir + MSVP_SLASH + fileName;
 
@@ -855,8 +866,13 @@ void Utils::GetChildDirs(const std::string &dir, bool isRecur, std::vector<std::
     if (count == PROFILING_FAILED || count == PROFILING_INVALID_PARAM) {
         return;
     }
-
+    if (nameList == nullptr) {
+        return;
+    }
     for (int i = 0; i < count; i++) {
+        if (nameList[i] == nullptr) {
+            continue;
+        }
         std::string fileName = nameList[i]->d_name;
         std::string childPath = dir + MSVP_SLASH + fileName;
 
@@ -885,7 +901,13 @@ void Utils::GetChildFilenames(const std::string &dir, std::vector<std::string> &
     if (count == PROFILING_INVALID_PARAM || count == PROFILING_FAILED) {
         return;
     }
+    if (dirNameList == nullptr) {
+        return;
+    }
     for (int j = 0; j < count; j++) {
+        if (dirNameList[j] == nullptr) {
+            continue;
+        }
         std::string fileName = dirNameList[j]->d_name;
         if ((fileName.compare(".") == 0) || (fileName.compare("..") == 0)) {
             continue;
