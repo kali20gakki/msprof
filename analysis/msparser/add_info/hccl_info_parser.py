@@ -28,12 +28,14 @@ class HcclInfoParser(DataParser, MsMultiProcess):
     class RoleType(Enum):
         DST = 0
         SRC = 1
+        INVALID_TYPE = 4294967295
 
     class OpType(Enum):
         SUM = 0
         MUL = 1
         MAX = 2
         MIN = 3
+        INVALID_TYPE = 4294967295
 
     class DataType(Enum):
         INT8 = 0
@@ -43,21 +45,25 @@ class HcclInfoParser(DataParser, MsMultiProcess):
         FP32 = 4
         INT64 = 5
         UINT64 = 6
+        INVALID_TYPE = 4294967295
 
     class LinkType(Enum):
         ON_CHIP = 0
         HCCS = 1
         PCIE = 2
         ROCE = 3
+        INVALID_TYPE = 4294967295
 
     class TransPortType(Enum):
         SDMA = 0
         RDMA = 1
         LOCAL = 2
+        INVALID_TYPE = 4294967295
 
     class RdmaType(Enum):
         RDMA_SEND_NOTIFY = 0
         RDMA_SEND_PAYLOAD = 1
+        INVALID_TYPE = 4294967295
 
     def __init__(self: any, file_list: dict, sample_config: dict) -> None:
         super().__init__(sample_config)
