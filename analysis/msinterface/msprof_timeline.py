@@ -154,7 +154,7 @@ class MsprofTimeline:
                     pid = filtered_data[0]
                 # get the msprof timeline layer info
                 layer_info = self.get_layer_info(process_name)
-                format_pid = "{}_{}".format(layer_info.sort_index, pid)
+                format_pid = "{}".format(layer_info.sort_index)
                 for value in json_data:
                     self.modify_timeline_info(process_name, layer_info, format_pid, value)
                 json_list.extend(json_data)
