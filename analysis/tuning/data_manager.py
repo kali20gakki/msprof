@@ -305,6 +305,8 @@ class ModelSummaryTuningDataHandle(OpSummaryTuningDataHandle):
         if sample_config.get(StrConstant.AI_CORE_PROFILING_METRICS, '') not in ai_core_metrics_set:
             return []
         op_data = cls.get_data_by_infer_id(param)
+        if not op_data:
+            return []
         bound_dur_dict = defaultdict(float)
         for operator_dict in op_data:
             bound_type = cls.get_operator_bound_type(operator_dict)
