@@ -84,9 +84,11 @@ class HCCLExport:
                            DBNameConstant.TABLE_HCCL_ALL_REDUCE) as hccl_model:
             hccl_op_data = hccl_model.get_hccl_op_data()
             _hccl_format_op_data = [
-                [hccl_op.op_name, self.pid_value, self.HCCL_SORTED_OFFSET,
-                 hccl_op.first_timestamp / NumberConstant.NS_TO_US, hccl_op.duration / NumberConstant.NS_TO_US,
-                 hccl_op.args]
+                [
+                    hccl_op.op_name, self.pid_value, self.HCCL_SORTED_OFFSET,
+                    hccl_op.timestamp / NumberConstant.NS_TO_US, hccl_op.duration / NumberConstant.NS_TO_US,
+                    hccl_op.args
+                ]
                 for hccl_op in hccl_op_data
             ]
         return _hccl_format_op_data
