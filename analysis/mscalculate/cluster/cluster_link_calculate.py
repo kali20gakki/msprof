@@ -1,12 +1,14 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
+import os
 
 from common_func.constant import Constant
 from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.msvp_common import is_number
+from common_func.path_manager import PathManager
 from msmodel.hccl.hccl_model import HCCLModel
 
 
@@ -142,6 +144,8 @@ class ClusterSingleLinkCalculator(MsMultiProcess):
         calculate hccl data
         :return: None
         """
+        if not os.path.exists(PathManager.get_db_path(self._project_path, DBNameConstant.DB_HCCL)):
+            return
         with HCCLModel(self._project_path, [DBNameConstant.TABLE_HCCL_ALL_REDUCE]) as self.model:
             if not self.model.check_table():
                 return
