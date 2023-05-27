@@ -221,6 +221,21 @@ class MsprofIteration:
         return f'where ({time_start_key}>={iter_start} and {time_start_key}<={iter_end}) ' \
                f'or ({time_start_key}<={iter_start} and {iter_start}<={time_end_key})'
 
+    def get_step_trace_op(self: any) -> set:
+        """
+        get step trace task set
+        """
+        db_path = PathManager.get_db_path(self._result_dir, DBNameConstant.DB_STEP_TRACE)
+        trace_conn, trace_curs = DBManager.check_connect_db(self._result_dir, DBNameConstant.DB_STEP_TRACE)
+        if not trace_conn or not trace_curs \
+                or not DBManager.check_tables_in_db(db_path, DBNameConstant.TABLE_STEP_TRACE):
+            return set()
+        sql = "select stream_id, task_id from {0} where tag_id=1 or tag_id=4 " \
+              "order by timestamp".format(DBNameConstant.TABLE_STEP_TRACE)
+        trace_datas = DBManager.fetch_all_data(trace_curs, sql)
+        DBManager.destroy_db_connect(trace_conn, trace_curs)
+        return set(["{0}-{1}".format(task_id, stream_id) for task_id, stream_id in trace_datas])
+
     def _get_iteration_time(self: any, trace_curs: any, iter_range: IterationRange) -> list:
         step_syscnt_end = []
         for _iter in iter_range.get_iteration_range():
