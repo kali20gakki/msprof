@@ -5,6 +5,7 @@
 import logging
 from abc import abstractmethod
 from collections import defaultdict
+from common_func.platform.chip_manager import ChipManager
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_constant.str_constant import OpAnalysisType
@@ -90,7 +91,8 @@ class HcclAnalysisTool:
         if src_id == dst_id or \
                 src_id // NumberConstant.RANK_NUM_PER_SERVER != dst_id // NumberConstant.RANK_NUM_PER_SERVER:
             return StrConstant.LOCAL
-        if src_id // NumberConstant.RANK_NUM_PER_OS != dst_id // NumberConstant.RANK_NUM_PER_OS:
+        if not ChipManager().is_chip_v4() and \
+                src_id // NumberConstant.RANK_NUM_PER_OS != dst_id // NumberConstant.RANK_NUM_PER_OS:
             return StrConstant.PCIE
         return StrConstant.HCCS
 
