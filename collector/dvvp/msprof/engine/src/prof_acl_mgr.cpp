@@ -1376,10 +1376,6 @@ void ProfAclMgr::MsprofHostHandle(void)
         return;
     }
     std::lock_guard<std::mutex> lk(mtx_);
-    if (Platform::instance()->RunSocSide()) {
-        MSPROF_LOGI("MsprofHostHandle, not on host side");
-        return;
-    }
 
     if (!IsCmdMode()) {
         MSPROF_LOGI("MsprofHostHandle, not on cmd mode");
