@@ -10,6 +10,8 @@ from msparser.cluster.communication_parser import CommunicationParser
 from msparser.cluster.meta_parser import HcclAnalysisTool
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.msprof_exception import ProfException
+from common_func.platform.chip_manager import ChipManager
+from profiling_bean.prof_enum.chip_model import ChipModel
 
 NAMESPACE = 'msparser.cluster.communication_parser'
 
@@ -60,6 +62,12 @@ class TestHcclAnalysisTool(unittest.TestCase):
     def test_get_transport_type_pcie(self):
         ret = HcclAnalysisTool.get_transport_type(5, 0)
         self.assertEqual(ret, StrConstant.PCIE)
+
+    def test_get_transport_type_hccs_chip_v4(self):
+        ChipManager().chip_id = ChipModel.CHIP_V4_1_0
+        ret = HcclAnalysisTool.get_transport_type(5, 0)
+        self.assertEqual(ret, StrConstant.HCCS)
+        ChipManager().chip_id = ChipModel.CHIP_V1_1_0
 
     def test_get_transport_type_local1(self):
         ret = HcclAnalysisTool.get_transport_type(0, 0)
