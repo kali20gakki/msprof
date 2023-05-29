@@ -268,8 +268,7 @@ void AnalyzerGe::ParseApiInfo(CONST_CHAR_PTR data, uint32_t len, bool ageFlag)
 
         auto mlApiData = reinterpret_cast<const MsprofApi *>(dataPtr_ + offset);
         MSPROF_LOGD("ParseModelApi level: %hu, type %u.", mlApiData->level, mlApiData->type);
-        if (mlApiData->type == MSPROF_REPORT_NODE_LAUNCH_TYPE ||
-            mlApiData->type == MSPROF_REPORT_NODE_LAUNCH_GE_TYPE) {
+        if (mlApiData->type == MSPROF_REPORT_NODE_LAUNCH_TYPE) {
             HandleApiInfo(dataPtr_ + offset, ageFlag);
             analyzedBytes_ += GE_API_SIZE;
             totalApiTimes_++;
