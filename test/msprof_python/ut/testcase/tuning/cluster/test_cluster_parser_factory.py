@@ -29,7 +29,8 @@ class TestClusterCommunicationParserFactory(unittest.TestCase):
         with mock.patch('msmodel.cluster_info.cluster_info_model.ClusterInfoViewModel.check_db', return_value=True), \
              mock.patch('msmodel.cluster_info.cluster_info_model.ClusterInfoViewModel.get_all_rank_id_and_dirnames',
                    return_value=[(0, 'hccldb_dir')]), \
-             mock.patch(NAMESPACE + '.ClusterCommunicationParserFactory.get_conditions_from_db'):
+             mock.patch(NAMESPACE + '.ClusterCommunicationParserFactory.get_conditions_from_db'), \
+                mock.patch(NAMESPACE + '.LoadInfoManager.load_info'):
             ClusterCommunicationParserFactory(self.params).get_hccl_ops_by_iter()
 
     def test_get_hccl_ops_by_iter_prof(self):
