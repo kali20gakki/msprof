@@ -148,10 +148,6 @@ class MsprofTimeline:
             for filtered_data in filtered_data_list:
                 process_name = filtered_data[1]
                 json_data = filtered_data[2]
-                if process_name in (TraceViewHeaderConstant.PROCESS_TASK, TraceViewHeaderConstant.PROCESS_STEP_TRACE):
-                    pid = TraceViewHeaderConstant.DEFAULT_PID_VALUE
-                else:
-                    pid = filtered_data[0]
                 # get the msprof timeline layer info
                 layer_info = self.get_layer_info(process_name)
                 format_pid = layer_info.sort_index
