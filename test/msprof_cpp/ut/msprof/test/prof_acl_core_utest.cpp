@@ -43,6 +43,7 @@
 #include "params_adapter_acljson.h"
 #include "params_adapter_aclapi.h"
 #include "params_adapter_geopt.h"
+#include "params_adapter_aclsubscribe.h"
 #include "uploader.h"
 #include "transport/hdc/hdc_transport.h"
 #include "msprof_reporter_mgr.h"
@@ -1652,20 +1653,6 @@ TEST_F(MSPROF_ACL_CORE_UTEST, AicoreMetricsEnumToName) {
     EXPECT_NE("MemoryUB", invalidMetrics);
 }
 
-TEST_F(MSPROF_ACL_CORE_UTEST, ProfStartCfgToMsprofCfg) {
-    std::string metrics;
-    MOCKER_CPP(&Analysis::Dvvp::Common::Config::ConfigManager::GetPlatformType)
-        .stubs()
-        .will(returnValue(Analysis::Dvvp::Common::Config::PlatformType::DC_TYPE));
-
-    SHARED_PTR_ALIA<analysis::dvvp::proto::MsProfStartReq> feature = nullptr;
-    feature = std::make_shared<analysis::dvvp::proto::MsProfStartReq>();
-
-    Msprofiler::Api::ProfAclMgr::instance()->ProfStartCfgToMsprofCfg(
-        PROF_TASK_TIME_MASK, PROF_AICORE_ARITHMETIC_UTILIZATION, feature);
-    EXPECT_EQ(2, feature->hwts_log().size());
-}
-
 TEST_F(MSPROF_ACL_CORE_UTEST, acl_api_subscribe_fail) {
     GlobalMockObject::verify();
 
@@ -1710,10 +1697,6 @@ TEST_F(MSPROF_ACL_CORE_UTEST, ProfAclStop) {
         .will(returnValue(ACL_SUCCESS));
 
     MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::ProfStartAiCpuTrace)
-        .stubs()
-        .will(returnValue(PROFILING_SUCCESS));
-
-    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::ProfStartCfgToMsprofCfg)
         .stubs()
         .will(returnValue(PROFILING_SUCCESS));
 

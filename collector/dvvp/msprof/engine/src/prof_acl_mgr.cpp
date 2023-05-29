@@ -40,6 +40,7 @@
 #include "params_adapter_aclapi.h"
 #include "params_adapter_geopt.h"
 #include "params_adapter_acljson.h"
+#include "params_adapter_aclsubscribe.h"
 
 using namespace analysis::dvvp::common::config;
 using namespace analysis::dvvp::common::error;
@@ -935,47 +936,6 @@ int ProfAclMgr::ProfStartAiCpuTrace(const uint64_t dataTypeConfig, const uint32_
 }
 
 /**
- * Transfer dataTypeConfig and aicoreMetrics to MsProfStartReq
- */
-void ProfAclMgr::ProfStartCfgToMsprofCfg(const uint64_t dataTypeConfig, ProfAicoreMetrics aicMetrics,
-                                         SHARED_PTR_ALIA<analysis::dvvp::proto::MsProfStartReq> feature)
-{
-    feature->set_feature_name(PROF_FEATURE_TASK);
-    // ts_timeline & hwts
-    if (ConfigManager::instance()->GetPlatformType() == PlatformType::MINI_TYPE) {
-        if (dataTypeConfig & PROF_TASK_TIME_MASK) {
-            feature->set_ts_timeline("on");
-        }
-    } else if (dataTypeConfig & PROF_TASK_TIME_MASK) {
-            feature->set_hwts_log("on");
-    }
-    // training trace
-    if (dataTypeConfig & PROF_KEYPOINT_TRACE_MASK) {
-        feature->set_ts_fw_training("on");
-    }
-    SHARED_PTR_ALIA<analysis::dvvp::proto::ProfilerConf> conf = nullptr;
-    MSVP_MAKE_SHARED0_VOID(conf, analysis::dvvp::proto::ProfilerConf);
-    std::string metrics;
-    ConfigManager::instance()->AicoreMetricsEnumToName(aicMetrics, metrics);
-    // ai_core
-    if ((dataTypeConfig & PROF_AICORE_METRICS_MASK) && !metrics.empty()) {
-        conf->set_aicoremetrics(metrics);
-    }
-    // aiv
-    if ((dataTypeConfig & PROF_AIV_METRICS_MASK) && !metrics.empty()) {
-        conf->set_aivmetrics(metrics);
-    }
-    // l2cache
-    if (dataTypeConfig & PROF_L2CACHE_MASK) {
-        conf->set_l2(MSVP_PROF_ON);
-    }
-    if (!conf->aicoremetrics().empty() || !conf->aivmetrics().empty() || !conf->l2().empty()) {
-        feature->set_task_trace_conf(analysis::dvvp::message::EncodeJson(conf));
-    }
-    MSPROF_LOGI("Transformed msporf cfg result: %s", feature->DebugString().c_str());
-}
-
-/**
  * Start device acl-api task
  */
 int ProfAclMgr::StartDeviceTask(const uint32_t devId, SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params)
@@ -1092,20 +1052,24 @@ int ProfAclMgr::StartDeviceSubscribeTask(const uint32_t modelId, const uint32_t 
     // generate params
     SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params = nullptr;
     MSVP_MAKE_SHARED0_RET(params, analysis::dvvp::message::ProfileParams, ACL_ERROR_PROFILING_FAILURE);
-    params->profiling_mode = analysis::dvvp::message::PROFILING_MODE_DEF;
-    SHARED_PTR_ALIA<analysis::dvvp::proto::MsProfStartReq> feature = nullptr;
-    MSVP_MAKE_SHARED0_RET(feature, analysis::dvvp::proto::MsProfStartReq, ACL_ERROR_PROFILING_FAILURE);
-    ProfStartCfgToMsprofCfg(dataTypeConfig, profSubscribeConfig->aicoreMetrics, feature);
-    ProfParamsAdapter::instance()->UpdateSampleConfig(feature, params);
-    ProfParamsAdapter::instance()->ProfStartCfgToParamsCfg(dataTypeConfig, params);
-    if (devId == DEFAULT_HOST_ID) {
-        params->host_profiling = true;
+
+    auto paramAdapter = ParamsAdapterAclSubscribe();
+    int ret = paramAdapter.GetParamFromInputCfg(profSubscribeConfig, dataTypeConfig, params);
+    if (ret != PROFILING_SUCCESS) {
+        MSPROF_LOGE("[ParamsAdapterAclSubscribe]GetParamFromInputCfg fail.");
+        return ACL_ERROR_PROFILING_FAILURE;
     }
+
     std::string devIdStr = std::to_string(devId);
     params->job_id = devIdStr;
     params->devices = devIdStr;
 
-    int ret = InitSubscribeUploader(devIdStr);
+    params->profiling_mode = PROFILING_MODE_DEF;
+    params->profiling_options = PROF_FEATURE_TASK;
+    // open host_profiling
+    params->host_profiling = (devId == DEFAULT_HOST_ID) ? true : false;
+
+    ret = InitSubscribeUploader(devIdStr);
     if (ret != ACL_SUCCESS) {
         return ret;
     }
@@ -1140,6 +1104,7 @@ int ProfAclMgr::StartDeviceSubscribeTask(const uint32_t modelId, const uint32_t 
     if (mode_ == WORK_MODE_OFF) {
         mode_ = WORK_MODE_SUBSCRIBE;
     }
+    // close host_profiling
     if (devId == DEFAULT_HOST_ID) {
         params->host_profiling = false;
     }
