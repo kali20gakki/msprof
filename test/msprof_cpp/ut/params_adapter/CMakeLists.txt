@@ -20,6 +20,7 @@ set(common_src_file
 set(src_file
     ${MSPROF_SOURCE_DIR}/dvvp/params_adapter/params_adapter_msprof.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/params_adapter/params_adapter_aclapi.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/params_adapter/params_adapter_aclsubscribe.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/params_adapter/params_adapter_acljson.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/params_adapter/params_adapter_geopt.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/params_adapter/params_adapter.cpp
@@ -82,6 +83,7 @@ add_executable(params_adapter_utest
     test/main.cpp
     test/params_adapter_utest.cpp
     test/params_adapter_aclapi_utest.cpp
+    test/params_adapter_aclsubscribe_utest.cpp
     test/params_adapter_acljson_utest.cpp
     test/params_adapter_geopt_utest.cpp
     test/params_adapter_msprof_utest.cpp
