@@ -1,8 +1,9 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-# Copyright (c) Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
+# Copyright (c) Huawei Technologies Co., Ltd. 2022-2023. All rights reserved.
 import logging
 import os
+import time
 from enum import IntEnum
 import json
 
@@ -26,6 +27,8 @@ class QueryDataType(IntEnum):
     RUN_ALL_TUNING = -1
     CLUSTER_COMMUNICATION = 6
     COMMUNICATION_MATRIX = 7
+    CLUSTER_COMMUNICATION_CPA = 9
+    COMMUNICATION_MATRIX_CPA = 10
 
 
 class ClusterTuningFacade:
@@ -45,7 +48,12 @@ class ClusterTuningFacade:
         self.data_type = params.get("data_type", -1)
         self.query_data_type_dispatcher = {
             QueryDataType.CLUSTER_COMMUNICATION: self.cluster_communication,
-            QueryDataType.COMMUNICATION_MATRIX: self.communication_matrix
+            QueryDataType.COMMUNICATION_MATRIX: self.communication_matrix,
+        }
+        self.query_data_type_dispatcher_cpa = {
+            # Enabling Critical Path Analysis
+            QueryDataType.CLUSTER_COMMUNICATION_CPA: self.cluster_communication,
+            QueryDataType.COMMUNICATION_MATRIX_CPA: self.communication_matrix
         }
 
     def process(self: any) -> None:
@@ -58,16 +66,21 @@ class ClusterTuningFacade:
             for every_data_type in self.query_data_type_dispatcher:
                 self.query_data_type_dispatcher.get(every_data_type)()
         # query command entry
-        else:
+        elif self.data_type == QueryDataType.CLUSTER_COMMUNICATION or \
+                self.data_type == QueryDataType.COMMUNICATION_MATRIX:
             self.query_data_type_dispatcher.get(self.data_type)(print_flag=False)
+        # Enabling Critical Path Analysis
+        else:
+            self.query_data_type_dispatcher_cpa.get(self.data_type)(print_flag=False, enable_cpa=True)
 
-    def cluster_communication(self: any, print_flag=True) -> None:
+    def cluster_communication(self: any, print_flag=True, enable_cpa=False) -> None:
         """
         cluster communication parse and calculate
         """
+        cluster_communication_start = time.time()
         logging.info('start to parse cluster communication information!')
         parser_factory = ClusterCommunicationParserFactory(self.args)
-        communication_parser = parser_factory.generate_parser()
+        communication_parser = parser_factory.generate_parser(enable_cpa)
         logging.info('start to parse hccl events')
         op_info = communication_parser.run()
         logging.info('start to give suggestions according to rules')
@@ -77,27 +90,30 @@ class ClusterTuningFacade:
         slow_link_calculator = SlowLinkCalculatorFactory(op_info).generate_calculator()
         slow_link_calculator.run()
         slow_link_calculator.add_suggestions(op_info)
-        output_file_name = "communication_{}_{}_{}.json".format(
+        out_file_name = "communication_cpa_{}_{}_{}.json" if enable_cpa else "communication_{}_{}_{}.json"
+        output_file_name = out_file_name.format(
             self._npu_id, parser_factory.max_iters_model_id, self._iteration_id)
         if print_flag:
             print_msg(StrConstant.SUGGESTION + ': ' +
                       op_info.get(StrConstant.TOTAL, {}).get(StrConstant.SLOW_RANK_SUGGESTION, ''))
         self.dump_dict_to_json(output_file_name, op_info)
+        print(" ============= debug cluster_communication time: ", time.time() - cluster_communication_start)
 
-    def communication_matrix(self: any, print_flag=True) -> None:
+    def communication_matrix(self: any, print_flag=True, enable_cpa=False) -> None:
         """
         communication matrix parse and calculate
         """
         logging.info('start to parse communication matrix information!')
         parser_factory = CommunicationMatrixParserFactory(self.args)
-        matrix_parser = parser_factory.generate_parser()
+        matrix_parser = parser_factory.generate_parser(enable_cpa)
         logging.info('start to parse hccl events')
         op_info = matrix_parser.run()
         logging.info('start to give suggestions according to rules')
         matrix_calculator = MatrixCalculatorFactory(op_info).generate_calculator()
         matrix_calculator.run()
         matrix_calculator.add_suggestions(op_info)
-        output_file_name = "matrix_{}_{}_{}.json".format(
+        out_file_name = "matrix_cpa_{}_{}_{}.json" if enable_cpa else "matrix_{}_{}_{}.json"
+        output_file_name = out_file_name.format(
             self._npu_id, parser_factory.max_iters_model_id, self._iteration_id)
         if print_flag:
             matrix_calculator.print_suggestion(op_info)
@@ -117,7 +133,7 @@ class ClusterTuningFacade:
                  'data': ''}))
 
     def _check_params_valid(self: any) -> None:
-        if not self._is_cluster_all_device_scene():
+        if not self._is_cluster_all_device_scene() and self.data_type not in self.query_data_type_dispatcher_cpa.keys():
             self._npu_id = -1
             print_msg(json.dumps(
                 {'status': NumberConstant.WARN,

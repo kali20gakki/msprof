@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-# Copyright (c) Huawei Technologies Co., Ltd. 2018-2019. All rights reserved.
+# Copyright (c) Huawei Technologies Co., Ltd. 2018-2023. All rights reserved.
 
 import os
 import stat
@@ -468,6 +468,13 @@ class Constant:
     TYPE_SDMA = "SDMA"
     ILLEGAL_RANK = 4294967295
     LINK_TYPE_LIST = [TYPE_SDMA, TYPE_RDMA]
+
+    # Critical Path Analysis
+    TS = 'ts'
+    ES = 'es'
+    DUR = 'dur'
+    TID = 'tid'
+    NAME = 'op_name'
 
     # Host
     RECOMMEND_PERCENTILE = 0.98
