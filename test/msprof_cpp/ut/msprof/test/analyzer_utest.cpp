@@ -144,6 +144,28 @@ TEST_F(AnalyzerUtest, DispatchOptimizeGraphIdInfoData)
     analyzer->DispatchOptimizeData(geAddDesc);
 }
 
+TEST_F(AnalyzerUtest, DispatchOptimizeContextIdInfoData)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<Analyzer> analyzer;
+    MSVP_MAKE_SHARED1_BREAK(analyzer, Analyzer, nullptr);
+
+    analyzer->Init();
+    // context id info
+    struct MsprofContextIdInfo contxtIdData;
+    struct MsprofAdditionalInfo geAddChunk;
+    geAddChunk.level = MSPROF_REPORT_NODE_LEVEL;
+    geAddChunk.type = MSPROF_REPORT_NODE_CONTEXT_ID_INFO_TYPE;
+    std::string geAddData((CHAR_PTR)&geAddChunk, sizeof(geAddChunk));
+    std::shared_ptr<analysis::dvvp::proto::FileChunkReq> geAddDesc;
+    MSVP_MAKE_SHARED0_BREAK(geAddDesc, analysis::dvvp::proto::FileChunkReq);
+    geAddDesc->set_filename("Additional");
+    geAddDesc->set_tag("context_id_info");
+    geAddDesc->set_chunk(geAddData);
+    geAddDesc->set_chunksizeinbytes(sizeof(geAddChunk));
+    analyzer->DispatchOptimizeData(geAddDesc);
+}
+
 TEST_F(AnalyzerUtest, DispatchOptimizeModelInfoData)
 {
     GlobalMockObject::verify();
@@ -232,12 +254,12 @@ TEST_F(AnalyzerBaseUtest, HandleDeviceData)
     uint32_t taskId = 0;
     uint16_t streamId = 0;
     uint32_t time;
-    analyzerBase->HandleDeviceData(key1, devData, taskId, streamId, time);
+    analyzerBase->HandleDeviceData(key1, devData, time);
 
     // rtOpInfo_ find key with invalid devData
     struct RtOpInfo opInfo = {1, 0, 0, threadId, 0, 0, 0, ACL_SUBSCRIBE_OP};
     analyzerBase->rtOpInfo_.insert(std::make_pair(key1, opInfo));
-    analyzerBase->HandleDeviceData(key1, devData, taskId, streamId, time);
+    analyzerBase->HandleDeviceData(key1, devData, time);
 
     // rtOpInfo_ find key with valid devData
     devData.start = 1; // 1 data start
@@ -245,24 +267,24 @@ TEST_F(AnalyzerBaseUtest, HandleDeviceData)
     analyzerBase->tsOpInfo_.insert(std::make_pair(key1, opInfo));
     std::string key2 = "1-1";
     analyzerBase->tsOpInfo_.insert(std::make_pair(key1, opInfo));
-    analyzerBase->HandleDeviceData(key1, devData, taskId, streamId, time);
+    analyzerBase->HandleDeviceData(key1, devData, time);
 
     // rtOpInfo_ find key with valid devData and valid geOpFlagInfo
     uint64_t opNameHash = HashData::instance()->GenHashId("opName");
     uint64_t opTypeHash = HashData::instance()->GenHashId("opType");
     analyzerBase->tsOpInfo_.insert(std::make_pair(key1, opInfo));
     uint64_t modelId = 0;
-    struct GeOpFlagInfo geInfo1 = {opNameHash, opTypeHash, modelId, 0, 2, 0, 0, ACL_SUBSCRIBE_OP};
+    struct GeOpFlagInfo geInfo1 = {opNameHash, opTypeHash, modelId, 0, 2, 0, 0, ACL_SUBSCRIBE_OP, UINT16_MAX};
     struct GeOpFlagInfo geInfo2 = {opNameHash, opTypeHash, modelId, 3, 4, 0, 0,
-                                   ACL_SUBSCRIBE_OP}; // 3 4 invalid ge info
-    analyzerBase->geOpInfo_.insert(std::make_pair(std::to_string(threadId), geInfo1));
-    analyzerBase->geOpInfo_.insert(std::make_pair(std::to_string(threadId), geInfo2));
-    analyzerBase->HandleDeviceData(key1, devData, taskId, streamId, time);
+                                   ACL_SUBSCRIBE_OP, UINT16_MAX}; // 3 4 invalid ge info
+    analyzerBase->geOpInfo_.insert(std::make_pair(threadId, geInfo1));
+    analyzerBase->geOpInfo_.insert(std::make_pair(threadId, geInfo2));
+    analyzerBase->HandleDeviceData(key1, devData, time);
 
     analyzerBase->tsOpInfo_.insert(std::make_pair(key1, opInfo));
     uint32_t graphId = 0;
     analyzerBase->SetGraphModelId(modelId, graphId);
-    analyzerBase->HandleDeviceData(key1, devData, taskId, streamId, time);
+    analyzerBase->HandleDeviceData(key1, devData, time);
 }
 
 class AnalyzerFftsUtest : public testing::Test {
@@ -417,6 +439,16 @@ TEST_F(AnalyzerGeUtest, IsGeGraphIdMapData)
 
     EXPECT_EQ(false, analyzerGe->IsGeGraphIdMapData("aging.compact.node_basic_info"));
     EXPECT_EQ(true, analyzerGe->IsGeGraphIdMapData("aging.compact.graph_id_map"));
+}
+
+TEST_F(AnalyzerGeUtest, IsGeContextData)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<AnalyzerGe> analyzerGe;
+    MSVP_MAKE_SHARED0_BREAK(analyzerGe, AnalyzerGe);
+
+    EXPECT_EQ(true, analyzerGe->IsGeContextData("aging.additional.context_id_info"));
+    EXPECT_EQ(false, analyzerGe->IsGeContextData("aging.additional.context_info"));
 }
 
 class AnalyzerHwtsUtest : public testing::Test {

@@ -137,7 +137,7 @@ void AnalyzerFfts::ParseSubTaskThreadData(const FftsLogHead *data, uint32_t logT
     }
 }
 
-void AnalyzerFfts::PrintStats()
+void AnalyzerFfts::PrintStats() const
 {
     MSPROF_EVENT("total_size_analyze, module: FFTS, analyzed %llu, total %llu, ffts time total %llu, merge %u",
                  analyzedBytes_, totalBytes_, totalFftsTimes_, totalFftsMerges_);
@@ -197,7 +197,7 @@ void AnalyzerFfts::ParseOptimizeAcsqTaskData(const FftsLogHead *data, uint32_t l
     std::string key = std::to_string(acsqLog->taskId) + KEY_SEPARATOR + std::to_string(acsqLog->streamId);
     auto iter = AnalyzerBase::tsOpInfo_.find(key);
     if (iter == AnalyzerBase::tsOpInfo_.end()) {
-        RtOpInfo opInfo = {0, 0, 0, 0, true, 0, ACL_SUBSCRIBE_OP};  // default flag is OP not SUBGRAPH
+        RtOpInfo opInfo = {0, 0, 0, 0, true, 0, ACL_SUBSCRIBE_OP, UINT16_MAX};
         iter = AnalyzerBase::tsOpInfo_.insert(std::make_pair(key, opInfo)).first;
     }
     constexpr uint32_t offsetBit = 32;
@@ -208,8 +208,8 @@ void AnalyzerFfts::ParseOptimizeAcsqTaskData(const FftsLogHead *data, uint32_t l
         iter->second.end = static_cast<uint64_t>(sysTime / frequency_);
     }
     analyzedBytes_ += FFTS_DATA_SIZE;
-    if (AnalyzerBase::rtOpInfo_.find(key) != AnalyzerBase::rtOpInfo_.end()) {
-        HandleDeviceData(key, iter->second, acsqLog->taskId, acsqLog->streamId, totalFftsMerges_);
+    if (iter->second.start > 0 && iter->second.end > 0) {
+        HandleDeviceData(key, iter->second, totalFftsMerges_);
     }
 }
 
@@ -227,8 +227,8 @@ void AnalyzerFfts::ParseOptimizeSubTaskThreadData(const FftsLogHead *data, uint3
     auto cxtLog = reinterpret_cast<const FftsCxtLog *>(data);
     std::string key = std::to_string(cxtLog->taskId) + KEY_SEPARATOR + std::to_string(cxtLog->streamId);
     auto iter = AnalyzerBase::tsOpInfo_.find(key);
-    if (iter == AnalyzerBase::tsOpInfo_.end()) { // trust no repeat device data
-        RtOpInfo opInfo = {0, 0, 0, 0, true, 0, 0, ACL_SUBSCRIBE_OP_THREAD};
+    if (iter == AnalyzerBase::tsOpInfo_.end()) {
+        RtOpInfo opInfo = {0, 0, 0, 0, true, 0, 0, ACL_SUBSCRIBE_OP_THREAD, UINT16_MAX};
         iter = AnalyzerBase::tsOpInfo_.insert(std::make_pair(key, opInfo)).first;
     }
  
@@ -240,8 +240,8 @@ void AnalyzerFfts::ParseOptimizeSubTaskThreadData(const FftsLogHead *data, uint3
         iter->second.end = static_cast<uint64_t>(sysTime / frequency_);
     }
     analyzedBytes_ += FFTS_DATA_SIZE;
-    if (AnalyzerBase::rtOpInfo_.find(key) != AnalyzerBase::rtOpInfo_.end()) {
-        HandleDeviceData(key, iter->second, cxtLog->taskId, cxtLog->streamId, totalFftsMerges_);
+    if (iter->second.start > 0 && iter->second.end > 0) {
+        HandleDeviceData(key, iter->second, totalFftsMerges_);
     }
 }
 }  // namespace Analyze
