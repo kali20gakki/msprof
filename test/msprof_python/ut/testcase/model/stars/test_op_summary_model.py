@@ -112,7 +112,3 @@ class TestOpSummaryModel(unittest.TestCase):
             res = check.get_db_path("test")
         self.assertEqual(res, "test")
 
-    def test_get_compute_op_data(self):
-        with mock.patch(NAMESPACE + '.DBManager.fetch_all_data', return_value=[[1]]):
-            with OpSummaryModel(SAMPLE_CONFIG) as _model:
-                self.assertEqual(_model.get_compute_op_data(), [[1]])

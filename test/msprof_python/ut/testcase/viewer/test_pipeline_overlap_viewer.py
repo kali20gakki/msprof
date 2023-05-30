@@ -43,7 +43,7 @@ class TestPipelineOverlapViewer(unittest.TestCase):
     def test_get_timeline_data_with_data(self):
         InfoJsonReaderManager(info_json=InfoJson(pid=1000)).process()
         with mock.patch('os.path.exists', return_value=True), \
-                mock.patch(NAMESPACE + '.OpSummaryViewModel.get_operator_data_by_task_type',
+                mock.patch(NAMESPACE + '.OpSummaryModel.get_operator_data_by_task_type',
                            return_value=[self.construct_time_section(1000, 1100),
                                          self.construct_time_section(1080, 1200),
                                          self.construct_time_section(1280, 1300)]), \

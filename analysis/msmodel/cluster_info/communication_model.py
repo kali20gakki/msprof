@@ -15,12 +15,12 @@ class CommunicationModel(ViewModel):
     def __init__(self, collection_path):
         super().__init__(collection_path, DBNameConstant.DB_HCCL, [])
 
-    def get_all_events_from_db(self: any, conditions: dict, top_hccl_ops=None) -> list:
+    def get_all_events_from_db(self: any, conditions: dict, top_hccl_ops: tuple = None) -> list:
         """
         get hccl op names
         :return:
         """
-        if top_hccl_ops:
+        if top_hccl_ops is not None:
             sql = "select * from {0} where first_timestamp < ? and first_timestamp >= ? " \
                   "and op_name IN {top_hccl_ops}"\
                 .format(DBNameConstant.TABLE_HCCL_ALL_REDUCE, top_hccl_ops=top_hccl_ops)

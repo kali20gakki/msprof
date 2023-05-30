@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-# Copyright (c) Huawei Technologies Co., Ltd. 2020-2023. All rights reserved.
+# Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
 
 from decimal import Decimal
 
@@ -123,9 +123,6 @@ class NumberConstant:
     LARGE_MESSAGE_RATE = 0.8
     BANDWIDTH_THRESHOLD = 0.8
     DOMINATED_BOTTLENECK_THRESHOLD = 0.25
-
-    # Critical Path Analysis
-    TIME_INTERVAL = 1
 
     RANK_NUM_PER_SERVER = 8
     RANK_NUM_PER_OS = 4

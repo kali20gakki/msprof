@@ -9,12 +9,11 @@ from common_func.common import CommonConstant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.path_manager import PathManager
-from common_func.ms_constant.number_constant import NumberConstant
 from msmodel.interface.ianalysis_model import IAnalysisModel
 from msmodel.interface.view_model import ViewModel
 from msmodel.stars.acsq_task_model import AcsqTaskModel
 from msmodel.stars.ffts_log_model import FftsLogModel
-from profiling_bean.db_dto.ge_op_info_dto import GeOpInfoDto
+from profiling_bean.db_dto.time_section_dto import TimeSectionDto
 
 
 class OpSummaryModel(ViewModel, IAnalysisModel):
@@ -126,6 +125,25 @@ class OpSummaryModel(ViewModel, IAnalysisModel):
     def get_timeline_data(self: any) -> str:
         return self.__module__
 
+    def get_operator_data_by_task_type(self: any, task_type: str) -> list:
+        db_path = PathManager.get_db_path(self.result_dir, DBNameConstant.DB_AICORE_OP_SUMMARY)
+        if not DBManager.check_tables_in_db(db_path, DBNameConstant.TABLE_SUMMARY_TASK_TIME,
+                                            DBNameConstant.TABLE_SUMMARY_GE):
+            return []
+        ge_summary_headers = DBManager.get_table_headers(self.cur, DBNameConstant.TABLE_SUMMARY_GE)
+        task_time_headers = DBManager.get_table_headers(self.cur, DBNameConstant.TABLE_SUMMARY_TASK_TIME)
+        inner_join_condition = ""
+        if "model_id" in ge_summary_headers and "model_id" in task_time_headers:
+            inner_join_condition += " and a.model_id=b.model_id"
+        if "index_id" in ge_summary_headers and "index_id" in task_time_headers:
+            inner_join_condition += " and (a.index_id=b.index_id or b.index_id=0)"
+        sql = "SELECT a.stream_id, op_name, b.task_type, start_time, duration_time, " \
+              "start_time+duration_time as end_time FROM {0} a INNER JOIN {1} b " \
+              "on a.stream_id=b.stream_id and a.task_id=b.task_id and a.batch_id=b.batch_id {2} " \
+              "and b.task_type=?".format(DBNameConstant.TABLE_SUMMARY_TASK_TIME, DBNameConstant.TABLE_SUMMARY_GE,
+                                         inner_join_condition)
+        return DBManager.fetch_all_data(self.cur, sql, (task_type,), dto_class=TimeSectionDto)
+
     def _get_ge_sql(self: any) -> tuple:
         ge_sql = "SELECT model_id, task_id, stream_id, " \
                  "op_name, op_type, block_dim, task_type, timestamp " \
@@ -152,17 +170,3 @@ class OpSummaryModel(ViewModel, IAnalysisModel):
             return []
         finally:
             pass
-
-    def get_compute_op_data(self: any) -> list:
-        """Get compute ops info for critical path analysis"""
-        sql = "select {1}.model_id, {0}.task_id, {0}.stream_id, op_name, {1}.op_type, {1}.task_type, " \
-              "start_time, duration_time " \
-              "from {0} inner join {1} on {0}.task_id={1}.task_id and {0}.stream_id = {1}.stream_id " \
-              "and {0}.task_type = {1}.task_type and {0}.batch_id={1}.batch_id " \
-              "and ({1}.context_id={0}.subtask_id or ({1}.context_id={context_id} and subtask_id={subtask_id})) " \
-              "order by start_time" \
-            .format(DBNameConstant.TABLE_SUMMARY_TASK_TIME, DBNameConstant.TABLE_SUMMARY_GE,
-                    NS_TO_US=NumberConstant.NS_TO_US,
-                    context_id=NumberConstant.DEFAULT_GE_CONTEXT_ID,
-                    subtask_id=NumberConstant.DEFAULT_FFTS_SUBTASK_ID, )
-        return DBManager.fetch_all_data(self.cur, sql, dto_class=GeOpInfoDto)
