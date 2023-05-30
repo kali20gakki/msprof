@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-# Copyright (c) Huawei Technologies Co., Ltd. 2021-2022. All rights reserved.
+# Copyright (c) Huawei Technologies Co., Ltd. 2021-2023. All rights reserved.
 
 import logging
 import sqlite3
@@ -9,10 +9,12 @@ from common_func.common import CommonConstant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.path_manager import PathManager
+from common_func.ms_constant.number_constant import NumberConstant
 from msmodel.interface.ianalysis_model import IAnalysisModel
 from msmodel.interface.view_model import ViewModel
 from msmodel.stars.acsq_task_model import AcsqTaskModel
 from msmodel.stars.ffts_log_model import FftsLogModel
+from profiling_bean.db_dto.ge_op_info_dto import GeOpInfoDto
 
 
 class OpSummaryModel(ViewModel, IAnalysisModel):
@@ -150,3 +152,17 @@ class OpSummaryModel(ViewModel, IAnalysisModel):
             return []
         finally:
             pass
+
+    def get_compute_op_data(self: any) -> list:
+        """Get compute ops info for critical path analysis"""
+        sql = "select {1}.model_id, {0}.task_id, {0}.stream_id, op_name, {1}.op_type, {1}.task_type, " \
+              "start_time, duration_time " \
+              "from {0} inner join {1} on {0}.task_id={1}.task_id and {0}.stream_id = {1}.stream_id " \
+              "and {0}.task_type = {1}.task_type and {0}.batch_id={1}.batch_id " \
+              "and ({1}.context_id={0}.subtask_id or ({1}.context_id={context_id} and subtask_id={subtask_id})) " \
+              "order by start_time" \
+            .format(DBNameConstant.TABLE_SUMMARY_TASK_TIME, DBNameConstant.TABLE_SUMMARY_GE,
+                    NS_TO_US=NumberConstant.NS_TO_US,
+                    context_id=NumberConstant.DEFAULT_GE_CONTEXT_ID,
+                    subtask_id=NumberConstant.DEFAULT_FFTS_SUBTASK_ID, )
+        return DBManager.fetch_all_data(self.cur, sql, dto_class=GeOpInfoDto)
