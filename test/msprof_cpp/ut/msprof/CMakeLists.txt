@@ -55,6 +55,7 @@ set(profilerSrcList
 	${MSPROF_SOURCE_DIR}/dvvp/params_adapter/params_adapter_acljson.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/params_adapter/params_adapter_geopt.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/params_adapter/params_adapter_aclapi.cpp
+	${MSPROF_SOURCE_DIR}/dvvp/params_adapter/params_adapter_aclsubscribe.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/params_adapter/params_adapter.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/msprof/engine/src/prof_acl_core.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/msprof/engine/src/prof_api_common.cpp

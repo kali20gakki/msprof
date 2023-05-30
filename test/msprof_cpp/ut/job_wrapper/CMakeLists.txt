@@ -60,6 +60,7 @@ set(profilerSrcFiles
     ${MSPROF_SOURCE_DIR}/dvvp/msprof/engine/src/prof_ge_core.cpp
 	${MSPROF_SOURCE_DIR}/dvvp/params_adapter/params_adapter_acljson.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/params_adapter/params_adapter_aclapi.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/params_adapter/params_adapter_aclsubscribe.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/params_adapter/params_adapter_geopt.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/msprof/engine/src/uploader_dumper.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/msprof/platform/mini/data_dumper.cpp

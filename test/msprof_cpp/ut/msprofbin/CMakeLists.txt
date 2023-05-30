@@ -62,6 +62,7 @@ set(common_file
     ${MSPROF_SOURCE_DIR}/dvvp/depend/src/plugin_handle.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/params_adapter/params_adapter_msprof.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/params_adapter/params_adapter_aclapi.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/params_adapter/params_adapter_aclsubscribe.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/params_adapter/params_adapter_acljson.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/params_adapter/params_adapter_geopt.cpp
     ${TOP_DIR}/collector/dvvp/params_adapter/params_adapter.cpp

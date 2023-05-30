@@ -43,7 +43,11 @@ class TestClusterSingleLinkCalculator(unittest.TestCase):
             self.assertEqual(0, len(ret))
 
     def test_calculate(self):
-        with mock.patch(NAMESPACE + '.HCCLModel.check_table', return_value=True), \
+        with mock.patch('os.path.exists', return_value=True), \
+                mock.patch(NAMESPACE + '.HCCLModel.check_table', return_value=True), \
                 mock.patch(NAMESPACE + '.HCCLModel.get_hccl_data',
                            return_value=[construct_hccl_dto(), construct_hccl_dto()]):
+            ClusterSingleLinkCalculator("test").calculate()
+
+        with mock.patch('os.path.exists', return_value=False):
             ClusterSingleLinkCalculator("test").calculate()
