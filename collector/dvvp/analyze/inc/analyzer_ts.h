@@ -31,7 +31,7 @@ private:
     void ParseTsTimelineData(CONST_CHAR_PTR data, uint32_t len);
     void ParseTsKeypointData(CONST_CHAR_PTR data, uint32_t len);
     uint8_t GetRptType(CONST_CHAR_PTR data, uint32_t len);
-    void PrintStats();
+    void PrintStats() const;
 
 private:
     uint64_t opTimeCount_;

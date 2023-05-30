@@ -28,7 +28,7 @@ public:
  
 public:
     bool IsRtCompactData(const std::string &tag) const;
-    void PrintStats();
+    void PrintStats() const;
     void RtCompactParse(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message);
  
 private:

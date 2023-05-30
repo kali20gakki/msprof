@@ -388,9 +388,14 @@ void Analyzer::OnOptimizeData(CONST_VOID_PTR data, uint32_t len)
 
     auto decoded = analysis::dvvp::message::DecodeMessage2(data, len);
     auto message = std::dynamic_pointer_cast<analysis::dvvp::proto::FileChunkReq>(decoded);
-    if (message == nullptr || message->filename().empty() ||
-        message->datamodule() == FileChunkDataModule::PROFILING_IS_CTRL_DATA) {
+    if (message == nullptr || message->filename().empty()) {
         MSPROF_LOGW("Analyzer OnOptimizeData is not data for analyzing.");
+        return;
+    }
+    if (message->datamodule() == FileChunkDataModule::PROFILING_IS_CTRL_DATA) {
+        if (message->filename() == "end_info") {
+            ClearAnalyzerData();
+        }
         return;
     }
 
@@ -399,7 +404,7 @@ void Analyzer::OnOptimizeData(CONST_VOID_PTR data, uint32_t len)
 
 void Analyzer::DispatchOptimizeData(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message)
 {
-    MSPROF_LOGI("Start to analyze file: %s, tag: %s", message->filename().c_str(), message->tag().c_str());
+    MSPROF_LOGD("Start to analyze file: %s, tag: %s", message->filename().c_str(), message->tag().c_str());
     if (analyzerGe_->IsGeEventData(message->filename())) {
         analyzerGe_->GeEventParse(message);
     } else if (analyzerGe_->IsGeCompactData(message->tag())) {
@@ -408,6 +413,8 @@ void Analyzer::DispatchOptimizeData(SHARED_PTR_ALIA<analysis::dvvp::proto::FileC
         analyzerGe_->GeApiParse(message);
     } else if (analyzerGe_->IsGeGraphIdMapData(message->tag())) {
         analyzerGe_->GeGraphIdMapParse(message);
+    } else if (analyzerGe_->IsGeContextData(message->tag())) {
+        analyzerGe_->GeContextParse(message);
     } else if (analyzerRt_->IsRtCompactData(message->tag())) {
         analyzerRt_->RtCompactParse(message);
     } else if (analyzerHwts_->IsHwtsData(message->filename())) {
@@ -418,7 +425,7 @@ void Analyzer::DispatchOptimizeData(SHARED_PTR_ALIA<analysis::dvvp::proto::FileC
         analyzerTs_->Parse(message);
         TsDataPostProc();
     } else {
-        MSPROF_LOGI("Analyzer drop data, fileName: %s.", message->filename().c_str());
+        MSPROF_LOGD("Analyzer drop data, fileName: %s.", message->filename().c_str());
         return;
     }
     UploadProfOpDescProc();

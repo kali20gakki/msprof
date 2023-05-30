@@ -190,6 +190,7 @@ struct RtOpInfo {
     uint64_t startAicore;
     uint64_t endAicore;
     uint32_t flag;
+    uint16_t contextId;
 };
  
 // ge op info
@@ -202,6 +203,7 @@ struct GeOpFlagInfo {
     bool modelFlag;
     bool nodeFlag;
     bool ageFlag;
+    uint16_t contextId;
 };
 }  // namespace Analyze
 }  // namespace Dvvp
