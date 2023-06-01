@@ -452,6 +452,7 @@ class ExportCommand:
             self._check_index_id(result_dir)
             self._set_iteration_info(result_dir)
             self._update_device_list()
+        MsprofTimeline().init_export_data()
         sample_json = self._get_sample_json(result_dir)
         file_dispatch = FileDispatch(sample_json)
         file_dispatch.dispatch_calculator()
