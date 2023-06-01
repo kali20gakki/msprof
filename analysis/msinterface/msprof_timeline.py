@@ -66,7 +66,7 @@ class MsprofTimeline:
 
     @classmethod
     def modify_timeline_info(cls: any, process_name: str, layer_info: TraceViewHeaderConstant.LayerInfo,
-                             format_pid: str, value: dict) -> None:
+                             format_pid: int, value: dict) -> None:
         """
         modify timeline info based on layer_info
         """
@@ -84,7 +84,7 @@ class MsprofTimeline:
             value[StrConstant.TRACE_HEADER_NAME] = f'{process_name}@{value.get(StrConstant.TRACE_HEADER_NAME, "")}'
 
     @classmethod
-    def get_layer_label_and_sort(cls: any, pid: str, layer_info: TraceViewHeaderConstant.LayerInfo) -> list:
+    def get_layer_label_and_sort(cls: any, pid: int, layer_info: TraceViewHeaderConstant.LayerInfo) -> list:
         """
         get layer_label layer_sort headers
         """
@@ -151,13 +151,9 @@ class MsprofTimeline:
             for filtered_data in filtered_data_list:
                 process_name = filtered_data[1]
                 json_data = filtered_data[2]
-                if process_name in (TraceViewHeaderConstant.PROCESS_TASK, TraceViewHeaderConstant.PROCESS_STEP_TRACE):
-                    pid = TraceViewHeaderConstant.DEFAULT_PID_VALUE
-                else:
-                    pid = filtered_data[0]
                 # get the msprof timeline layer info
                 layer_info = self.get_layer_info(process_name)
-                format_pid = "{}_{}".format(layer_info.sort_index, pid)
+                format_pid = layer_info.sort_index
                 for value in json_data:
                     self.modify_timeline_info(process_name, layer_info, format_pid, value)
                 json_list.extend(json_data)
