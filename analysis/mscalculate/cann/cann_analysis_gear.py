@@ -332,6 +332,7 @@ class TaskGear(CANNGear):
     INVALID_DIRECT = -1
     INVALID_CONTEXT_ID = 4294967295
     INVALID_MODEL_ID = 4294967295
+    TASK_INFO_BLACKLIST = [None, "FFTS_PLUS", 'HCCL']
 
     class RuntimeApi:
         def __init__(self, start, end, struct_type, thread_id):
@@ -423,7 +424,7 @@ class TaskGear(CANNGear):
                 tensor_info_dto: TensorInfoDto = node_desc.tensor_info
                 ctx_id_dto = node_desc.ctx_info
 
-                if node_basic_info_dto.op_type is None or node_basic_info_dto.op_type == "FFTS_PLUS":
+                if node_basic_info_dto.task_type in self.TASK_INFO_BLACKLIST:
                     continue
                 self.task_info.append([model_id, node_basic_info_dto.op_name, add_dto.stream_id, add_dto.task_id,
                                        node_basic_info_dto.block_dim, node_basic_info_dto.mix_block_dim,
