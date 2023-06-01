@@ -85,13 +85,14 @@ void AnalyzerRt::HandleRuntimeTrackData(CONST_CHAR_PTR data, bool ageFlag)
             rtData.taskId, rtData.streamId);
     }
  
-    RtOpInfo opInfo = {compactData->timeStamp, 0, 0, compactData->threadId, ageFlag, 0, 0, ACL_SUBSCRIBE_OP};
+    RtOpInfo opInfo = {compactData->timeStamp, 0, 0, compactData->threadId, ageFlag, 0, 0,
+        ACL_SUBSCRIBE_OP, UINT16_MAX};
     AnalyzerBase::rtOpInfo_[key] = opInfo;
     MSPROF_LOGD("host aging data not found, insert runtime track data in rtOpInfo map"
         ", key: %s, timeStamp: %llu, age: %d", key.c_str(), compactData->timeStamp, ageFlag);
 }
  
-void AnalyzerRt::PrintStats()
+void AnalyzerRt::PrintStats() const
 {
     MSPROF_EVENT("total_size_analyze, module: RT, analyzed %llu, total %llu, rt time %u, merge %u",
         analyzedBytes_, totalBytes_, totalRtTimes_, totalRtMerges_);

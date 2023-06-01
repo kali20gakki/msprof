@@ -24,17 +24,19 @@ public:
     ~AnalyzerGe() {}
 
 public:
-    bool IsGeData(const std::string &fileName);
-    bool IsGeApiData(const std::string &fileName);
-    bool IsGeEventData(const std::string &fileName);
-    bool IsGeCompactData(const std::string &tag);
-    bool IsGeGraphIdMapData(const std::string &tag);
+    bool IsGeData(const std::string &fileName) const;
+    bool IsGeApiData(const std::string &fileName) const;
+    bool IsGeEventData(const std::string &fileName) const;
+    bool IsGeCompactData(const std::string &tag) const;
+    bool IsGeGraphIdMapData(const std::string &tag) const;
+    bool IsGeContextData(const std::string &tag) const;
 
     void Parse(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message);
     void GeCompactParse(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message);
     void GeEventParse(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message);
     void GeApiParse(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message);
     void GeGraphIdMapParse(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message);
+    void GeContextParse(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message);
 
     bool IsOpInfoCompleted(const std::string &opId);
     uint32_t GetModelId(const std::string &opId) const;
@@ -56,20 +58,28 @@ private:
     int32_t ParseOpData(CONST_CHAR_PTR data);
     void ParseOpName(const MsprofGeProfTaskData &data, struct GeOpInfo &opInfo) const;
     void ParseOpType(const MsprofGeProfTaskData &data, struct GeOpInfo &opInfo) const;
-    void PrintStats();
+    void PrintStats() const;
 
     void ParseNodeBasicInfo(CONST_CHAR_PTR data, uint32_t len);
-    void HandleNodeBasicInfo(CONST_CHAR_PTR data);
+    void HandleNodeBasicInfo(CONST_CHAR_PTR data) const;
     void ParseGraphIdMap(CONST_CHAR_PTR data, uint32_t len);
     void ParseModelInfo(CONST_CHAR_PTR data, uint32_t len, bool ageFlag);
-    void HandleModelInfo(CONST_CHAR_PTR data, bool ageFlag);
+    void HandleModelInfo(CONST_CHAR_PTR data, bool ageFlag) const;
     void ParseApiInfo(CONST_CHAR_PTR data, uint32_t len, bool ageFlag);
-    void HandleApiInfo(CONST_CHAR_PTR data, bool ageFlag);
-    void MatchApiInfoByModelInfo(const std::string &threadId, struct GeOpFlagInfo &info,
-        std::multimap<std::string, GeOpFlagInfo> &modelInfo);
-    void MatchApiInfo(std::multimap<std::string, GeOpFlagInfo> &apiInfo,
-        std::multimap<std::string, GeOpFlagInfo> &modelInfo,
-        std::multimap<std::string, GeOpFlagInfo> &nodeInfo);
+    void HandleApiInfo(CONST_CHAR_PTR data, bool ageFlag) const;
+    void ParseContextIdInfo(CONST_CHAR_PTR data, uint32_t len);
+    void HandleContextIdInfo(CONST_CHAR_PTR data) const;
+    bool HandleContextWithNode(std::multimap<uint32_t, GeOpFlagInfo> &nodeInfo,
+        std::multimap<uint32_t, GeOpFlagInfo> &contextInfo) const;
+
+    void MatchApiInfoByModelInfo(const uint32_t &threadId, struct GeOpFlagInfo &info,
+        std::multimap<uint32_t, GeOpFlagInfo> &modelInfo) const;
+    void MatchApiInfoByNodeInfo(const uint32_t &threadId, struct GeOpFlagInfo &info,
+        std::multimap<uint32_t, GeOpFlagInfo> &nodeInfo);
+    void MatchApiInfo(std::multimap<uint32_t, GeOpFlagInfo> &apiInfo,
+        std::multimap<uint32_t, GeOpFlagInfo> &modelInfo,
+        std::multimap<uint32_t, GeOpFlagInfo> &nodeInfo,
+        std::multimap<uint32_t, GeOpFlagInfo> &contextInfo);
 
 private:
     std::map<std::string, GeOpInfo> opInfos_;       // <taskId-streamId, GeOpInfo>
