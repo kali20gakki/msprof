@@ -133,7 +133,7 @@ void AnalyzerHwts::ParseTaskStartEndData(CONST_CHAR_PTR data, uint32_t len, uint
     }
 }
 
-void AnalyzerHwts::PrintStats()
+void AnalyzerHwts::PrintStats() const
 {
     MSPROF_EVENT("total_size_analyze, module: HWTS, analyzed %llu, total %llu, hwts time %u, merge %u",
                  analyzedBytes_, totalBytes_, totalHwtsTimes_, totalHwtsMerges_);
@@ -161,7 +161,6 @@ void AnalyzerHwts::ParseOptimizeHwtsData(CONST_CHAR_PTR data, uint32_t len)
  
         uint8_t rptType = GetRptType(dataPtr_ + offset, remainingLen);
         if (rptType == HWTS_TASK_START_TYPE || rptType == HWTS_TASK_END_TYPE) {
-            ParseTaskStartEndData(dataPtr_ + offset, dataLen_ - offset, rptType);
             ParseOptimizeStartEndData(dataPtr_ + offset, rptType);
             analyzedBytes_ += HWTS_DATA_SIZE;
             totalHwtsTimes_++;
@@ -177,7 +176,7 @@ void AnalyzerHwts::ParseOptimizeStartEndData(CONST_CHAR_PTR data, uint8_t rptTyp
     std::string key = std::to_string(hwtsData->taskId) + KEY_SEPARATOR + std::to_string(hwtsData->streamId);
     auto iter = AnalyzerBase::tsOpInfo_.find(key);
     if (iter == AnalyzerBase::tsOpInfo_.end()) {
-        RtOpInfo opInfo = {0, 0, 0, 0, true, 0, 0, ACL_SUBSCRIBE_OP};
+        RtOpInfo opInfo = {0, 0, 0, 0, true, 0, 0, ACL_SUBSCRIBE_OP, UINT16_MAX};
         iter = AnalyzerBase::tsOpInfo_.insert(std::make_pair(key, opInfo)).first;
     }
  
@@ -195,8 +194,8 @@ void AnalyzerHwts::ParseOptimizeStartEndData(CONST_CHAR_PTR data, uint8_t rptTyp
             break;
     }
  
-    if (AnalyzerBase::rtOpInfo_.find(key) != AnalyzerBase::rtOpInfo_.end()) {
-        HandleDeviceData(key, iter->second, hwtsData->taskId, hwtsData->streamId, totalHwtsMerges_);
+    if (iter->second.start > 0 && iter->second.end > 0) {
+        HandleDeviceData(key, iter->second, totalHwtsMerges_);
     }
 }
 }  // namespace Analyze
