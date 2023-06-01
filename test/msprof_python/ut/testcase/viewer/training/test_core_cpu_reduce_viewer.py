@@ -77,7 +77,7 @@ class TestCoreCpuReduceViewer(unittest.TestCase):
         self.assertEqual(res[0], dict())
 
     def test_get_total_cycle_2(self):
-        result = {'12_2_0': 12}
+        result = {'12_2_0': 3450}
         create_sql = "CREATE TABLE IF NOT EXISTS " + DBNameConstant.TABLE_AI_CORE_METRIC_SUMMARY + \
                      "(total_cycles, stream_id, task_id, index_id, total_time)"
         data = ((3450, 12, 2, 1, 0.00345),)
