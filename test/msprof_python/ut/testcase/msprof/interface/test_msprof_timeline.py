@@ -74,6 +74,10 @@ class TestMsprofTimeline(unittest.TestCase):
             key._iteration_time = [[1, 2], [1, 2]]
             key.set_iteration_info('test', ITER_RANGE)
 
+    def test_init_export_data(self):
+        MsprofTimeline().init_export_data()
+        self.assertEqual(MsprofTimeline()._export_data_list, [])
+
 
 if __name__ == '__main__':
     unittest.main()
