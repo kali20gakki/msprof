@@ -36,6 +36,7 @@ from common_func.file_name_manager import get_ge_step_info_compiles
 from common_func.file_name_manager import get_ge_task_compiles
 from common_func.file_name_manager import get_ge_tensor_add_info_compiles
 from common_func.file_name_manager import get_ge_tensor_info_compiles
+from common_func.file_name_manager import get_ge_logic_stream_info_compiles
 from common_func.file_name_manager import get_hash_data_compiles
 from common_func.file_name_manager import get_hbm_compiles
 from common_func.file_name_manager import get_hccl_hcom_compiles
@@ -93,6 +94,7 @@ class FileDispatch:
         DataTag.GE_MODEL_LOAD: get_ge_model_load_compiles(),
         DataTag.GE_HASH: get_ge_hash_compiles(),
         DataTag.GE_HOST: get_ge_host_compiles(),
+        DataTag.GE_LOGIC_STREAM_INFO: get_ge_logic_stream_info_compiles(),
         DataTag.RUNTIME_API: get_runtime_api_compiles(),
         DataTag.RUNTIME_TRACK: get_runtime_task_track_compiles(),
         DataTag.TS_TRACK: get_ts_track_compiles(),
