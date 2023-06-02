@@ -23,6 +23,10 @@ class DataParsersConfig(MetaConfig):
             ('path', 'msparser.ge.ge_hash_parser'),
             ('chip_model', '0,1,2,3,4,5,7')
         ],
+        'GeLogicStreamParser': [
+            ('path', 'msparser.ge.ge_logic_stream_parser'),
+            ('chip_model', '0,1,2,3,4,5,7')
+        ],
         'ParsingRuntimeData': [
             ('path', 'analyzer.create_runtime_db'),
             ('chip_model', '0,1,2,3,4,5,7')

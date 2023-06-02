@@ -113,6 +113,10 @@ class TablesConfig(MetaConfig):
             ('end_time', 'INTEGER,null'),
             ('op_name', 'TEXT,null')
         ],
+        'GeLogicStreamInfoMap' : [
+            ('logic_stream', 'TEXT,null'),
+            ('physic_stream', 'TEXT,null')
+        ],
         'OriginalDataMap': [
             ('common', 'text,none'),
             ('pid', 'int,none'),

@@ -89,6 +89,8 @@ class FileNameManagerConstant:
     GE_FUSION_OP_PATTERN = r"^Framework\.fusion_op_info_(\d+)\.(\d+)\.slice_\d+"
     GE_HOST_SCH_FILE_PATTERN = r"^Framework\.dynamic_op_execute\.(\d+)\.slice_\d+"
 
+    GE_LOGIC_STREAM_INFO_PATTERN = r"^ge_logic_stream_info\.(\d+)\.slice_\d+"
+
     HBM_FILE_PATTERN = r"^hbm\.data\.(\d+)\.slice_\d+"
     HBM_TRAINING_FILE_PATTERN = r"hbm\.data\.\d+\.dev\.profiler_default_tag\.(\d+)\.slice_\d+"
 
@@ -476,6 +478,14 @@ def get_ge_host_compiles() -> tuple:
     get ge host compiles
     """
     return (re.compile(FileNameManagerConstant.GE_HOST_SCH_FILE_PATTERN),)
+
+
+def get_ge_logic_stream_info_compiles() -> tuple:
+    """
+    get ge logic stream info files regex compiles
+    :return: api data files regex
+    """
+    return (re.compile(FileNameManagerConstant.GE_LOGIC_STREAM_INFO_PATTERN),)
 
 
 def get_hbm_compiles() -> tuple:
