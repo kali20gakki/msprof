@@ -48,8 +48,6 @@ class TorchNpuRelationCalculator(ICalculator, MsMultiProcess):
         return result
 
     def ms_run(self: any) -> None:
-        if self._result_dir.split("\\")[-1] == self.MSPROF_HOST_DIR:
-            return
         self.calculate()
         self.save()
 

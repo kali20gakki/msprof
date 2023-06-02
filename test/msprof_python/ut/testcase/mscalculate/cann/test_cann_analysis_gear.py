@@ -173,6 +173,7 @@ class TestCANNAnalysisGear(unittest.TestCase):
         event6: Event = self.create_api_event(self.event_col(Constant.NODE_LEVEL, 1, 310, 360, "launch", "conv"))
         node_basic_info_dto = NodeBasicInfoDto()
         node_basic_info_dto.op_type = "1"
+        node_basic_info_dto.task_type = 'AI_CORE'
         node_basic_info_dto.op_name = "1"
         node_basic_info_dto.timestamp = 360
         tensor_info_dto = TensorInfoDto()

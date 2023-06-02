@@ -113,9 +113,8 @@ void AnalyzerTs::ParseTsTimelineData(CONST_CHAR_PTR data, uint32_t len)
             iter->second.end > 0) {
             if (AnalyzerBase::rtOpInfo_.find(optKey) != AnalyzerBase::rtOpInfo_.end()) {
                 RtOpInfo devOpInfo = {0, iter->second.start, iter->second.end, 0, true, iter->second.startAicore,
-                    iter->second.endAicore, ACL_SUBSCRIBE_OP};
-                HandleDeviceData(optKey, devOpInfo, static_cast<uint32_t>(tsData->taskId), tsData->streamId,
-                    totalTsMerges_);
+                    iter->second.endAicore, ACL_SUBSCRIBE_OP, UINT16_MAX};
+                HandleDeviceData(optKey, devOpInfo, totalTsMerges_);
             }
             MSPROF_LOGD("Ts op time collected, key %s, start %llu, end %llu",
                         key.c_str(), iter->second.start, iter->second.end);
@@ -181,7 +180,7 @@ void AnalyzerTs::ParseTsKeypointData(CONST_CHAR_PTR data, uint32_t len)
     analyzedBytes_ += sizeof(TsProfileKeypoint);
 }
 
-void AnalyzerTs::PrintStats()
+void AnalyzerTs::PrintStats() const
 {
     uint64_t times = 0;
     if (!keypointOpInfo_.empty()) {

@@ -76,11 +76,8 @@ class ImportCommand:
                        'Cluster data parse finished!')
 
     def _process_parse(self: any) -> None:
-        if DataCheckManager.contain_info_json_data(self.collection_path):  # find prof data dir
-            LoadInfoManager.load_info(self.collection_path)
-            self.do_import(os.path.realpath(self.collection_path))
-        else:
-            self._process_sub_dirs()
+        check_path_valid(self.collection_path, False)
+        self._process_sub_dirs()
 
     def _process_sub_dirs(self: any, subdir: str = '', is_cluster: bool = False) -> None:
         collect_path = self.collection_path

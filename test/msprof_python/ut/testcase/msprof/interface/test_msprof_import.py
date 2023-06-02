@@ -25,14 +25,7 @@ class TestImportCommand(unittest.TestCase):
         with mock.patch(NAMESPACE + '.check_path_valid'):
             args_dic = {"collection_path": "test", "cluster_flag": False}
             args = Namespace(**args_dic)
-            with mock.patch(NAMESPACE + '.DataCheckManager.contain_info_json_data', return_value=True), \
-                    mock.patch(NAMESPACE + '.ImportCommand.do_import'), \
-                    mock.patch(NAMESPACE + '.LoadInfoManager.load_info'), \
-                    mock.patch('os.listdir', return_value=['123']):
-                key = ImportCommand(args)
-                key.process()
-            with mock.patch(NAMESPACE + '.DataCheckManager.contain_info_json_data', return_value=False), \
-                    mock.patch(NAMESPACE + '.LoadInfoManager.load_info'), \
+            with mock.patch(NAMESPACE + '.LoadInfoManager.load_info'), \
                     mock.patch(NAMESPACE + '.get_path_dir', return_value=[1, 2, 3]), \
                     mock.patch('os.path.join', return_value=True), \
                     mock.patch('os.path.realpath', return_value='home\\process'), \

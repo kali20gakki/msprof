@@ -159,8 +159,6 @@ private:
     int InitApiCtrlUploader(const std::string& devIdStr);
     int InitSubscribeUploader(const std::string& devIdStr);
     int CheckDeviceTask(PROF_CONF_CONST_PTR profStartCfg);
-    void ProfStartCfgToMsprofCfg(const uint64_t dataTypeConfig, ProfAicoreMetrics aicMetrics,
-                                 SHARED_PTR_ALIA<analysis::dvvp::proto::MsProfStartReq> feature);
     int StartDeviceTask(const uint32_t devId, SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params);
     void WaitAllDeviceResponse();
     void WaitDeviceResponse(const uint32_t devId);

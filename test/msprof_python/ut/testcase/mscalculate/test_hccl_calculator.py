@@ -30,26 +30,6 @@ class TestHcclCalculator(unittest.TestCase):
     def tearDown(self) -> None:
         clear_dt_project(self.DIR_PATH)
 
-    def test_is_next_hccl_op_should_return_True_when_op_is_new_data(self):
-        cur_op_name = "hccl_cur_op"
-        hccl_dto = self.construct_hccl_dto(op_name="hccl_new_op")
-        first_timestamp_record = {"hccl_cur_op": 123455}
-        check = HcclCalculator([], {})
-        self.assertTrue(check._is_next_hccl_op(cur_op_name, hccl_dto, first_timestamp_record))
-
-    def test_is_next_hccl_op_should_return_True_when_op_is_cur_op(self):
-        cur_op_name = "hccl_cur_op"
-        hccl_dto = self.construct_hccl_dto(op_name="hccl_cur_op")
-        first_timestamp_record = {"hccl_cur_op": 123455}
-        check = HcclCalculator([], {})
-        self.assertFalse(check._is_next_hccl_op(cur_op_name, hccl_dto, first_timestamp_record))
-
-    def test_is_next_hccl_op_should_return_True_when_op_not_in_record(self):
-        cur_op_name = "hccl_cur_op"
-        hccl_dto = self.construct_hccl_dto(op_name="hccl_new_op")
-        check = HcclCalculator([], {})
-        self.assertFalse(check._is_next_hccl_op(cur_op_name, hccl_dto, {}))
-
     def test_calculate(self):
         with mock.patch(NAMESPACE + ".HcclCalculator._get_hccl_data",
                         return_value=[self.construct_hccl_dto("hccl_op")]), \

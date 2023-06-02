@@ -51,7 +51,7 @@ class TestHCCLExport(unittest.TestCase):
                                         'timestamp', 'args'])
         hccl_data = [hccl_data(1, 2, 3, 0, 0, 0, 0, 0, {}), hccl_data(2, 3, 4, 0, 0, 0, 0, 0, {})]
 
-        model_data = namedtuple('model', ['op_name', 'first_timestamp', 'args', 'duration'])
+        model_data = namedtuple('model', ['op_name', 'timestamp', 'args', 'duration'])
         model_data = [model_data('test_1', 0, [1, 2, 3], 0)]
         InfoConfReader()._info_json = {"pid": 1}
         with mock.patch('msmodel.hccl.hccl_model.HcclViewModel.get_hccl_op_data', return_value=model_data):

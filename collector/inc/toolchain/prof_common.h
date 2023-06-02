@@ -271,6 +271,16 @@ struct MsprofGraphIdInfo {
     uint32_t graphId;
     uint32_t modelId;
 };
+
+struct MsprofMemoryInfo {
+    uint64_t addr;
+    int64_t size;
+    uint64_t nodeId;
+    uint64_t totalAllocateMemory;
+    uint64_t totalReserveMemory;
+    uint32_t deviceId;
+    uint32_t deviceType;
+};
 #pragma pack()
 
 /**
@@ -470,7 +480,7 @@ const uint32_t MSPROF_REPORT_NODE_TENSOR_INFO_TYPE      = 1;  /* type info: tens
 const uint32_t MSPROF_REPORT_NODE_FUSION_OP_INFO_TYPE   = 2;  /* type info: funsion_op_info */
 const uint32_t MSPROF_REPORT_NODE_CONTEXT_ID_INFO_TYPE  = 4;  /* type info: context_id_info */
 const uint32_t MSPROF_REPORT_NODE_LAUNCH_TYPE           = 5;  /* type info: launch */
-const uint32_t MSPROF_REPORT_NODE_LAUNCH_GE_TYPE        = 11;
+const uint32_t MSPROF_REPORT_NODE_TASK_MEMORY_TYPE      = 6;  /* type info: task_memory */
 
 /* Msprof report type of node(10000) level(ge api), offset: 0x010000 */
 const uint32_t MSPROF_REPORT_NODE_GE_API_BASE_TYPE      = 0x010000;

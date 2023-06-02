@@ -113,8 +113,8 @@ class CoreCpuReduceViewer:
             for total_cycle in total_cycles:
                 total_data_key = "_".join(
                     [str(total_cycle[0]), str(total_cycle[1]), str(total_cycle[-1])])
-                total_cycle_data[total_data_key] = total_cycle[0]
-                total_time_data[total_data_key] = total_cycle[3]
+                total_time_data[total_data_key] = total_cycle[2]
+                total_cycle_data[total_data_key] = total_cycle[3]
         DBManager.destroy_db_connect(conn_ge, cur_ge)
         return total_cycle_data, total_time_data
 
