@@ -102,6 +102,9 @@ class MsprofTimeline:
         return value.get("ph") == "X" and \
                layer_info.component_layer == TraceViewHeaderConstant.COMPONENT_LAYER_CANN
 
+    def init_export_data(self: any) -> None:
+        self._export_data_list = []
+
     def add_export_data(self: any, data: str, data_type: str) -> None:
         """
         index events in bulk json
@@ -189,7 +192,6 @@ class MsprofTimeline:
         """
         get iteration time
         """
-        self._export_data_list = []
         self._result_dir = result_dir
         self._iter_range = iter_range
         self._model_id = iter_range.model_id

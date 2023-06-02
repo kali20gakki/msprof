@@ -19,6 +19,7 @@ from common_func.common import error
 from common_func.common import print_msg
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.constant import Constant
+from framework.load_info_manager import LoadInfoManager
 
 
 class ClusterParserFactory:
@@ -62,6 +63,8 @@ class ClusterParserFactory:
         if not rank_dirnames:
             logging.error("no info useful in %s, hccl parser is interrupted", DBNameConstant.DB_CLUSTER_RANK)
             raise ProfException(ProfException.PROF_CLUSTER_INVALID_DB)
+        # Load the info.json to obtain chip_Id
+        LoadInfoManager.load_info(os.path.join(self.collection_path, rank_dirnames[0][1]))
         self.get_conditions_from_db(rank_dirnames)
 
     def get_conditions_from_db(self, rank_dirnames) -> None:

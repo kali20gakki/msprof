@@ -24,10 +24,6 @@ class HcclCalculator(ICalculator, MsMultiProcess):
                                     [DBNameConstant.TABLE_HCCL_OP, DBNameConstant.TABLE_HCCL_TASK])
         self._hccl_data = []
 
-    @staticmethod
-    def _is_next_hccl_op(cur_op_name, data, first_timestamp_record):
-        return cur_op_name != data.op_name and cur_op_name in first_timestamp_record
-
     def calculate(self: any) -> None:
         hccl_data = self._get_hccl_data()
         if hccl_data:
@@ -45,14 +41,7 @@ class HcclCalculator(ICalculator, MsMultiProcess):
         self.save()
 
     def _generate_hccl_op_info(self, hccl_data: List[HcclDto]):
-        first_timestamp_record = {}
-        cur_op_name = hccl_data[0].op_name
         for data in hccl_data:
-            data.first_timestamp = first_timestamp_record.setdefault(data.op_name, data.timestamp)
-
-            if self._is_next_hccl_op(cur_op_name, data, first_timestamp_record):
-                first_timestamp_record.pop(cur_op_name)
-                cur_op_name = data.op_name
             self._hccl_data.append([data.model_id, data.index_id, data.op_name, data.iteration,
                                     data.hccl_name, data.first_timestamp, data.plane_id, data.timestamp,
                                     data.duration, data.is_dynamic, data.task_type, data.op_type, str(data.args)])

@@ -130,16 +130,18 @@ class DataCalculatorConfig(MetaConfig):
             ('path', 'mscalculate.sync_acl_npu.torch_acl_relation'),
             ('chip_model', '0,1,2,3,4,5,7'),
             ('level', '2'),
+            ('position', 'H')
         ],
         'TorchNpuRelationCalculator': [
             ('path', 'mscalculate.sync_acl_npu.torch_npu_relation'),
             ('chip_model', '0,1,2,3,4,5,7'),
-            ('level', '2')
+            ('level', '3'),
+            ('position', 'H')
         ],
         'HcclCalculator': [
             ('path', 'mscalculate.hccl_calculator'),
             ('chip_model', '0,1,2,3,4,5,7'),
-            ('level', '4'),
+            ('level', '5'),
             ('position', 'D')
         ],
     }

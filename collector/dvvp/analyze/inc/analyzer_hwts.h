@@ -34,7 +34,7 @@ private:
     uint8_t GetRptType(CONST_CHAR_PTR data, uint32_t len);
     void ParseTaskStartEndData(CONST_CHAR_PTR data, uint32_t len, uint8_t rptType);
     void CheckData(const struct OpTime &draftsOp, std::string key, uint8_t rptType, uint64_t sysTime);
-    void PrintStats();
+    void PrintStats() const;
 
     void ParseOptimizeStartEndData(CONST_CHAR_PTR data, uint8_t rptType);
 

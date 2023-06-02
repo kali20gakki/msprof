@@ -279,14 +279,9 @@ class ExportCommand:
         :return: None
         """
         check_path_valid(self.collection_path, False)
-        if DataCheckManager.contain_info_json_data(self.collection_path):  # find profiling data dir
-            InfoConfReader().load_info(self.collection_path)
-            self._handle_export(os.path.realpath(self.collection_path))
-            self._show_tuning_result(os.path.realpath(self.collection_path))
-        else:
-            self._process_sub_dirs()
-            if self._cluster_params.get('is_cluster_scene', False):
-                self._show_cluster_tuning()
+        self._process_sub_dirs()
+        if self._cluster_params.get('is_cluster_scene', False):
+            self._show_cluster_tuning()
 
     def _set_default_model_id(self, result_dir, model_match_set, ge_data_set):
         conn, curs = DBManager.check_connect_db(result_dir, DBNameConstant.DB_STEP_TRACE)
@@ -452,6 +447,7 @@ class ExportCommand:
             self._check_index_id(result_dir)
             self._set_iteration_info(result_dir)
             self._update_device_list()
+        MsprofTimeline().init_export_data()
         sample_json = self._get_sample_json(result_dir)
         file_dispatch = FileDispatch(sample_json)
         file_dispatch.dispatch_calculator()

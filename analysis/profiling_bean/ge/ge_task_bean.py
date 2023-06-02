@@ -28,6 +28,7 @@ class GeTaskBean(StructDecoder):
         3: Constant.TASK_TYPE_WRITE_BACK,
         4: Constant.TASK_TYPE_MIX_AIC,
         5: Constant.TASK_TYPE_MIX_AIV,
+        6: Constant.TASK_TYPE_FFTS_PLUS,
         7: Constant.TASK_TYPE_DSA,
         8: Constant.TASK_TYPE_DVPP,
         9: Constant.TASK_TYPE_HCCL,

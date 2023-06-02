@@ -34,8 +34,6 @@ class TorchAclRelationCalculator(ICalculator, MsMultiProcess):
         self._matched_torch_acl_data = []
 
     def ms_run(self):
-        if self._result_dir.split("\\")[-1] == self.MSPROF_HOST_DIR:
-            return
         self._load_data()
         if not self._torch_op_data or not self._mark_data or not self._acl_op_execute_data:
             return
