@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-# Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
+# Copyright (c) Huawei Technologies Co., Ltd. 2021-2023. All rights reserved.
 
 import logging
 import os
@@ -54,12 +54,16 @@ class HwtsCalculator(ICalculator, MsMultiProcess):
         self._iter_range = self._sample_config.get(StrConstant.PARAM_ITER_ID)
         self._file_list.sort(key=lambda x: int(x.split("_")[-1]))
 
+    def is_need_parse_all_file(self):
+        return ProfilingScene().is_operator() or not \
+                os.path.exists(PathManager.get_db_path(self._project_path, DBNameConstant.DB_HWTS_REC))
+
     def calculate(self: any) -> None:
         """
         calculate hwts data
         :return: None
         """
-        if ProfilingScene().is_operator():
+        if self.is_need_parse_all_file():
             self._parse_all_file()
         else:
             self._parse_by_iter()
@@ -134,7 +138,7 @@ class HwtsCalculator(ICalculator, MsMultiProcess):
                 self._parse(_offset_calculator.pre_process(_hwts_log_reader, os.path.getsize(_file)))
 
     def _add_batch_id(self: any, prep_data_res: list) -> list:
-        if ProfilingScene().is_operator():
+        if self.is_need_parse_all_file():
             batch_counter = BatchCounter(self._project_path)
             batch_counter.init(Constant.TASK_TYPE_AI_CORE)
             for index, datum in enumerate(prep_data_res):
