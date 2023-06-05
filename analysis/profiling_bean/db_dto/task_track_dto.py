@@ -15,6 +15,7 @@ class TaskTrackDto:
         self._device_id = None
         self._task_id = None
         self._batch_id = None
+        self._task_type = None
 
     @property
     def struct_type(self):
@@ -52,6 +53,10 @@ class TaskTrackDto:
     def batch_id(self):
         return self._batch_id
 
+    @property
+    def task_type(self):
+        return self._task_type
+
     @struct_type.setter
     def struct_type(self, value):
         self._struct_type = value
@@ -87,3 +92,7 @@ class TaskTrackDto:
     @batch_id.setter
     def batch_id(self, value):
         self._batch_id = value
+
+    @task_type.setter
+    def task_type(self, value):
+        self._task_type = value

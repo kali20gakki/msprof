@@ -154,6 +154,7 @@ class TestCANNAnalysisGear(unittest.TestCase):
         task_dto = TaskTrackDto()
         task_dto.struct_type = "1"
         task_dto.task_id = 10
+        task_dto.task_type = "KERNEL_AICORE"
         event2.additional_record = [
             self.create_addition_record(mem_dto, 210),
             self.create_addition_record(task_dto, 220)
@@ -168,6 +169,7 @@ class TestCANNAnalysisGear(unittest.TestCase):
         task_dto2 = TaskTrackDto()
         task_dto2.task_id = 11
         task_dto2.struct_type = "1"
+        task_dto2.task_type = "NOTIFY_RECORD"
         event5.additional_record = [self.create_addition_record(task_dto2, 266)]
 
         event6: Event = self.create_api_event(self.event_col(Constant.NODE_LEVEL, 1, 310, 360, "launch", "conv"))
@@ -193,7 +195,26 @@ class TestCANNAnalysisGear(unittest.TestCase):
         task_dto3 = TaskTrackDto()
         task_dto3.task_id = 12
         task_dto3.struct_type = "1"
+        task_dto3.task_type = "KERNEL_AICORE"
         event7.additional_record = [self.create_addition_record(task_dto3, 333)]
+
+        event8: Event = self.create_api_event(self.event_col(Constant.NODE_LEVEL, 1, 370, 400, "launch", "reduceTBE"))
+        node_basic_info_dto = NodeBasicInfoDto()
+        node_basic_info_dto.op_type = "1"
+        node_basic_info_dto.task_type = 'HCCL'
+        node_basic_info_dto.op_name = "1"
+        node_basic_info_dto.timestamp = 400
+        event8.additional_record = [self.create_addition_record(node_basic_info_dto, 400)]
+        event9 = self.create_api_event(self.event_col(Constant.HCCL_LEVEL, 1, 372, 390, "hccl tbe", 0))
+        hccl_info_dto = HCCLInfoDto()
+        hccl_info_dto.plane_id = 9
+        event9.additional_record = [self.create_addition_record(hccl_info_dto, 380)]
+        event10 = self.create_api_event(self.event_col(Constant.TASK_LEVEL, 1, 375, 380, "api5", 0))
+        task_dto4 = TaskTrackDto()
+        task_dto4.task_id = 15
+        task_dto4.struct_type = "1"
+        task_dto4.task_type = "KERNEL_AICORE"
+        event10.additional_record = [self.create_addition_record(task_dto4, 377)]
 
         gear.run(event1, {})
         gear.run(event2, {Constant.MODEL_LEVEL: Event.invalid_event(), Constant.NODE_LEVEL: Event.invalid_event(),
@@ -202,15 +223,17 @@ class TestCANNAnalysisGear(unittest.TestCase):
                           Constant.HCCL_LEVEL: event4})
         gear.run(event7, {Constant.MODEL_LEVEL: Event.invalid_event(), Constant.NODE_LEVEL: event6,
                           Constant.HCCL_LEVEL: Event.invalid_event()})
+        gear.run(event10, {Constant.MODEL_LEVEL: Event.invalid_event(), Constant.NODE_LEVEL: event8,
+                           Constant.HCCL_LEVEL: event9})
         gear.flush_data()
 
         self.assertEqual(
             DBManager.get_table_data_count(PathManager.get_db_path(self.PROF_HOST_DIR, DBNameConstant.DB_RUNTIME),
-                                           DBNameConstant.TABLE_API_CALL), 4)
+                                           DBNameConstant.TABLE_API_CALL), 5)
 
         self.assertEqual(
             DBManager.get_table_data_count(PathManager.get_db_path(self.PROF_HOST_DIR, DBNameConstant.DB_GE_INFO),
-                                           DBNameConstant.TABLE_GE_TASK), 1)
+                                           DBNameConstant.TABLE_GE_TASK), 2)
         self.assertTrue(
             DBManager.check_item_in_table(PathManager.get_db_path(self.PROF_HOST_DIR, DBNameConstant.DB_GE_INFO),
                                           DBNameConstant.TABLE_GE_TASK, 'op_type', "1"))
@@ -225,7 +248,7 @@ class TestCANNAnalysisGear(unittest.TestCase):
 
         self.assertEqual(
             DBManager.get_table_data_count(PathManager.get_db_path(self.PROF_HOST_DIR, DBNameConstant.DB_HCCL),
-                                           DBNameConstant.TABLE_HCCL_TASK), 1)
+                                           DBNameConstant.TABLE_HCCL_TASK), 2)
 
         self.assertTrue(
             DBManager.check_item_in_table(PathManager.get_db_path(self.PROF_HOST_DIR, DBNameConstant.DB_HCCL),
