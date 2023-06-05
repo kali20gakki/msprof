@@ -256,13 +256,14 @@ class TestAiCoreOpReport(unittest.TestCase):
 
     def test_get_table_sql_and_headers_without_ge(self):
         res_data = (
-            "select -1,  task_id, stream_id,  task_type, start_time, duration_time/1000.0, wait_time/1000.0 ,"
-            "'N/A' from task_time where task_type!=? and task_type!=? and task_type!=? order by start_time",
-            ['stream_id']
+            "select -1,  task_id, stream_id,  'N/A', 'N/A', task_type, start_time, duration_time/1000.0, "
+            "wait_time/1000.0 ,'N/A' "
+            "from task_time where task_type!=? and task_type!=? and task_type!=? order by start_time",
+            ['Op Name', 'stream_id']
         )
         ProfilingScene().init('')
         ProfilingScene()._scene = Constant.SINGLE_OP
-        res = AiCoreOpReport._get_table_sql_and_headers_without_ge(["Op Name", "stream_id"])
+        res = AiCoreOpReport._get_table_sql_and_headers_without_ge(["Op Name", "stream_id", "Block Dim"])
         self.assertEqual(res, res_data)
 
 

@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-# Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
+# Copyright (c) Huawei Technologies Co., Ltd. 2020-2023. All rights reserved.
 
 import logging
 import os
@@ -56,7 +56,7 @@ class AiCoreOpReport:
     SPECIAL_AI_CORE_HEAD = ("_extra",)
 
     OPERATOR_UNUSED_HEADERS = ["Model Name", "Infer ID"]
-    HEADERS_WITH_NO_GE_DATA = ["Op Name", "OP Type", "Block Dim", "Mix Block Dim"]
+    HEADERS_WITH_NO_GE_DATA = ["Block Dim", "Mix Block Dim"]
     HARDWARE_OP_LIST = ['AI_CPU', 'DSA', 'DVPP']
     START_TIME_INDEX = 8
     MODEL_NAME_INDEX = 0
@@ -514,7 +514,7 @@ class AiCoreOpReport:
         cls.clear_no_ge_data_headers(headers)
         model_id = "{0}, ".format(NumberConstant.DEFAULT_MODEL_ID) if ProfilingScene().is_operator() else 'model_id, '
         subtask_id = ",subtask_id " if ChipManager().is_chip_v4() else ",'N/A'"
-        sql = "select {model_id} task_id, stream_id, {index_info} task_type, start_time, " \
+        sql = "select {model_id} task_id, stream_id, {index_info} 'N/A', 'N/A', task_type, start_time, " \
               "duration_time/{NS_TO_US}, wait_time/{NS_TO_US} {subtask_id} from {0} where " \
               "task_type!=? and task_type!=? and task_type!=? order by start_time" \
             .format(DBNameConstant.TABLE_SUMMARY_TASK_TIME,
