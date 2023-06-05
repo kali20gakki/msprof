@@ -230,7 +230,11 @@ class StepTraceViewer:
         """
         if not trace_data:
             return
-        model_ids_set = set(map(lambda trace_datum: trace_datum[8], trace_data))
+        model_id_index = 8  # 8 是model_id的index
+        model_ids_set = set()
+        for trace_datum in trace_data:
+            if len(trace_datum.get('training_trace', [])) > model_id_index:
+                model_ids_set.add(trace_datum.get('training_trace', [])[model_id_index])
         if Constant.NA in model_ids_set:
             # if model_id is -1,it has been set "N/A"
             model_ids_set.remove(Constant.NA)
@@ -276,29 +280,29 @@ class StepTraceViewer:
         :param result_data: result data
         :return: void
         """
-        reduce_index = 9
-        if len(data) > reduce_index:
-            i = 0
-            for reduce_data in data[reduce_index:]:
-                reduce_trace_data = []
-                trace_parm[StepTraceConstant.REDUCE_START] = reduce_data[0]
-                trace_parm[StepTraceConstant.REDUCE_END] = reduce_data[1]
-                grad_refresh_data = [
-                    "Reduce_{}_{}".format(trace_parm[StepTraceConstant.ITER_ID], i), pid, tid,
-                    trace_parm[StepTraceConstant.REDUCE_START],
-                    (trace_parm[StepTraceConstant.REDUCE_END] -
-                     trace_parm[StepTraceConstant.REDUCE_START]),
-                    OrderedDict([
-                        ("Iteration ID", trace_parm[StepTraceConstant.ITER_ID]),
-                        ("Reduce Start {}".format(i), trace_parm[StepTraceConstant.REDUCE_START]),
-                        ("Reduce End {}".format(i), trace_parm[StepTraceConstant.REDUCE_END])
-                    ]),
-                    "Reduce"
-                ]
-                reduce_trace_data.append(grad_refresh_data)
-                result_data.extend(TraceViewManager.time_graph_trace(
-                    TraceViewHeaderConstant.GRPC_TIME_GRAPH_HEAD, reduce_trace_data))
-                i = i + 1
+        i = 0
+        for reduce_data in data:
+            if len(reduce_data) != 2:  # length of reduce_data is 2 containing start time and end time
+                continue
+            reduce_trace_data = []
+            trace_parm[StepTraceConstant.REDUCE_START] = reduce_data[0]
+            trace_parm[StepTraceConstant.REDUCE_END] = reduce_data[1]
+            grad_refresh_data = [
+                "Reduce_{}_{}".format(trace_parm[StepTraceConstant.ITER_ID], i), pid, tid,
+                trace_parm[StepTraceConstant.REDUCE_START],
+                (trace_parm[StepTraceConstant.REDUCE_END] -
+                 trace_parm[StepTraceConstant.REDUCE_START]),
+                OrderedDict([
+                    ("Iteration ID", trace_parm[StepTraceConstant.ITER_ID]),
+                    ("Reduce Start {}".format(i), trace_parm[StepTraceConstant.REDUCE_START]),
+                    ("Reduce End {}".format(i), trace_parm[StepTraceConstant.REDUCE_END])
+                ]),
+                "Reduce"
+            ]
+            reduce_trace_data.append(grad_refresh_data)
+            result_data.extend(TraceViewManager.time_graph_trace(
+                TraceViewHeaderConstant.GRPC_TIME_GRAPH_HEAD, reduce_trace_data))
+            i = i + 1
 
     @staticmethod
     def get_step_trace_summary(message: dict) -> tuple:
@@ -387,13 +391,20 @@ class StepTraceViewer:
         data = list(range(len(values)))
         try:
             for line in values:
-                trace = list(line)
-                all_reduce = StepTraceViewer.__select_reduce(cnn, trace)
+                trace = {
+                    'training_trace': list(line),
+                }
+                getnext = StepTraceViewer.__select_getnext(cnn, trace.get('training_trace', []))
+                getnext = Utils.generator_to_list(list(map(StepTraceViewer.__time_from_syscnt, data))
+                                                  for data in getnext)
+                trace['get_next'] = getnext
+
+                all_reduce = StepTraceViewer.__select_reduce(cnn, trace.get('training_trace', []))
                 all_reduce = Utils.generator_to_list(list(map(StepTraceViewer.__time_from_syscnt, data))
                                                      for data in all_reduce)
-                trace.extend(all_reduce)
-                StepTraceViewer.transfer_trace_unit(trace)
-                data[step] = tuple(trace)
+                trace['all_reduce'] = all_reduce
+                StepTraceViewer.transfer_trace_unit(trace.get('training_trace', []))  # syscnt to time
+                data[step] = trace
                 # Cursor step moved 1 step
                 step = step + 1
             return StepTraceViewer.__format_trace_json(data)
@@ -435,7 +446,8 @@ class StepTraceViewer:
         result_dict = {}
         StepTraceViewer.make_model_meta(result_data, trace_data)
         pid = InfoConfReader().get_json_pid_data()
-        for _, data in enumerate(trace_data):
+        for _, trace_item in enumerate(trace_data):
+            data = trace_item.get('training_trace', [])
             trace_view_data = []
             TimeLineJsonMaker.create_trace_parm(trace_parm, data)
 
@@ -461,9 +473,73 @@ class StepTraceViewer:
                     TraceViewManager.time_graph_trace(TraceViewHeaderConstant.GRPC_TIME_GRAPH_HEAD, trace_view_data))
                 result_data.extend([result_dict.get("data_aug_dict0", {}), result_dict.get("data_aug_dict1", {})])
 
-            StepTraceViewer.format_reduce_json(data, trace_parm, pid, tid, result_data)
+            StepTraceViewer.format_reduce_json(trace_item.get("all_reduce", []), trace_parm, pid, tid, result_data)
+            StepTraceViewer.format_get_next_json(trace_item.get("get_next", []), trace_parm, pid, tid, result_data)
 
         return json.dumps(result_data)
+
+    @staticmethod
+    def format_get_next_json(data: list, trace_parm: dict, pid: int, tid: int, result_data: list) -> None:
+        get_next_trace_data = []
+        for i, get_next_data in enumerate(data):
+            # length of get_next_data is 2 containing start time and end time
+            if len(get_next_data) != 2 or get_next_data[0] == "N/A" or get_next_data[1] == "N/A":
+                continue
+            get_next_start = get_next_data[0]
+            get_next_end = get_next_data[1]
+            refresh_data = [
+                "GetNext_{}_{}".format(trace_parm[StepTraceConstant.ITER_ID], i),
+                pid,
+                tid,
+                get_next_start,
+                get_next_end - get_next_start,
+                OrderedDict([
+                    ("Iteration ID", trace_parm[StepTraceConstant.ITER_ID]),
+                    ("GetNext Start {}".format(i), get_next_start),
+                    ("GetNext End {}".format(i), get_next_end),
+                    ("GetNext Time(ns)",
+                     round((get_next_end - get_next_start) * NumberConstant.USTONS, NumberConstant.ROUND_TWO_DECIMAL)
+                     ),
+                ]),
+                "GetNext Time"
+            ]
+            get_next_trace_data.append(refresh_data)
+        result_data.extend(TraceViewManager.time_graph_trace(
+            TraceViewHeaderConstant.GRPC_TIME_GRAPH_HEAD, get_next_trace_data))
+        flow_points = StepTraceViewer.get_flow_points("getnext_to_fp", data, trace_parm, pid, tid)
+        result_data.extend(flow_points)
+
+    @staticmethod
+    def get_flow_points(cat: str, data: list, trace_parm: dict, pid: int, tid: int) -> list:
+        if trace_parm.get(StepTraceConstant.FORWARD_PROPAGATION, "N/A") == "N/A" \
+                or trace_parm.get(StepTraceConstant.BACK_PROPAGATION, "N/A") == "N/A":
+            return []
+        flow_points = []
+        for i, get_next_data in enumerate(data):
+            # length of get_next_data is 2 containing start time and end time
+            if len(get_next_data) != 2 or get_next_data[0] == "N/A" or get_next_data[1] == "N/A":
+                continue
+            start_point = OrderedDict({
+                "name": "{}_{}_{}".format(cat, trace_parm[StepTraceConstant.ITER_ID], i),
+                "ph": "s",
+                "pid": pid,
+                "tid": tid,
+                "id": "{}_{}_{}".format(tid, trace_parm[StepTraceConstant.ITER_ID], i),
+                "cat": cat,
+                "ts": get_next_data[0],  # GetNext start time
+            })
+            end_point = OrderedDict({
+                "name": "{}_{}_{}".format(cat, trace_parm[StepTraceConstant.ITER_ID], i),
+                "ph": "f",
+                "pid": pid,
+                "tid": tid,
+                "id": "{}_{}_{}".format(tid, trace_parm[StepTraceConstant.ITER_ID], i),
+                "cat": cat,
+                "ts": trace_parm[StepTraceConstant.FORWARD_PROPAGATION],  # FP start time
+                "bp": "e",
+            })
+            flow_points.extend([start_point, end_point])
+        return flow_points
 
     @staticmethod
     def __select_reduce(conn: any, trace: list) -> list:
@@ -481,6 +557,29 @@ class StepTraceViewer:
               "where iteration_end=? and model_id=?" \
             .format(DBNameConstant.TABLE_ALL_REDUCE)
         result = DBManager.fetch_all_data(curs, sql, (iteration_end, model_id))
+        curs.close()
+        return result
+
+    @staticmethod
+    def __select_getnext(conn: any, trace: list) -> list:
+        """
+        Select date from getnext table with specific ids.
+        :param conn: connect to database
+        :param trace: trace data
+        :return: result
+        """
+        curs = conn.cursor()
+        iteration_id = trace[0]
+        model_id = NumberConstant.DEFAULT_MODEL_ID if trace[-1] == "N/A" else trace[-1]
+
+        sql = "select " \
+              "(case when start_time={1} then 'N/A' else start_time end), " \
+              "(case when end_time={1} then 'N/A' else end_time end) " \
+              "from {0} where index_id=? and model_id=?" \
+            .format(DBNameConstant.TABLE_GET_NEXT,
+                    NumberConstant.NULL_NUMBER,
+                    )
+        result = DBManager.fetch_all_data(curs, sql, (iteration_id, model_id))
         curs.close()
         return result
 
