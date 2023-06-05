@@ -1,11 +1,13 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-# Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
+# Copyright (c) Huawei Technologies Co., Ltd. 2021-2023. All rights reserved.
+import os
 
 from analyzer.scene_base.profiling_scene import ProfilingScene
 from analyzer.op_common_function import OpCommonFunc
 from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
+from common_func.path_manager import PathManager
 from common_func.utils import Utils
 from common_func.constant import Constant
 from common_func.batch_counter import BatchCounter
@@ -39,7 +41,7 @@ class HwtsAivCalculator(HwtsCalculator):
         entrance for aiv calculator
         :return: None
         """
-        if self._file_list and ProfilingScene().is_operator():
+        if self.is_need_parse_all_file():
             self._parse_all_file()
             self.save()
 
