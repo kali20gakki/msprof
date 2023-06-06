@@ -10,7 +10,7 @@
 
 #include "uploader_mgr.h"
 #include "errno/error_code.h"
-#include "proto/profiler.pb.h"
+#include "proto/msprofiler.pb.h"
 
 namespace analysis {
 namespace dvvp {

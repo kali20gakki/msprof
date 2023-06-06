@@ -2,7 +2,7 @@
 #include "mockcpp/mockcpp.hpp"
 #include "hdc-log-stub.h"
 #include "hdc-api-stub.h"
-#include "proto/profiler.pb.h"
+#include "proto/msprofiler.pb.h"
 #include "errno/error_code.h"
 #include "message/codec.h"
 #include "prof_host_core.h"

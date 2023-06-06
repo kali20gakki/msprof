@@ -10,7 +10,7 @@
 #include <string>
 #include <utils/utils.h>
 #include <cstdlib>
-#include "proto/profiler.pb.h"
+#include "proto/msprofiler.pb.h"
 #include "message/prof_params.h"
 #include "param_validation.h"
 #include "mmpa_api.h"
