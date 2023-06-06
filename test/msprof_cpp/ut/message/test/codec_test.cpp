@@ -2,7 +2,7 @@
 #include <memory>
 #include "gtest/gtest.h"
 #include "mockcpp/mockcpp.hpp"
-#include "proto/profiler.pb.h"
+#include "proto/msprofiler.pb.h"
 #include "message/codec.h"
 
 class MESSAGE_CODEC_TEST: public testing::Test {

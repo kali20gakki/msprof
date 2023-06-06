@@ -11,7 +11,7 @@
 #include "file_ageing.h"
 #include "mmpa_api.h"
 #include "msprof_dlog.h"
-#include "proto/profiler.pb.h"
+#include "proto/msprofiler.pb.h"
 #include "utils/utils.h"
 
 using namespace Analysis::Dvvp::Common::Statistics;

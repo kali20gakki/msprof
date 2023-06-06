@@ -12,7 +12,7 @@
 #include "securec.h"
 #include "utils/utils.h"
 #include "platform/platform.h"
-#include "proto/profiler.pb.h"
+#include "proto/msprofiler.pb.h"
 #include "uploader_mgr.h"
 
 namespace Analysis {

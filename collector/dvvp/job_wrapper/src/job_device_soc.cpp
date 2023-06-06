@@ -17,7 +17,7 @@
 #include "prof_channel_manager.h"
 #include "prof_peripheral_job.h"
 #include "prof_host_job.h"
-#include "proto/profiler.pb.h"
+#include "proto/msprofiler.pb.h"
 #include "utils/utils.h"
 
 namespace Analysis {

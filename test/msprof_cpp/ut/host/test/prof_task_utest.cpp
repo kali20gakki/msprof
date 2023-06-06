@@ -9,7 +9,7 @@
 #include "utils/utils.h"
 #include "transport/transport.h"
 #include "prof_manager.h"
-#include "proto/profiler.pb.h"
+#include "proto/msprofiler.pb.h"
 #include "message/codec.h"
 #include "ai_drv_dev_api.h"
 #include "errno/error_code.h"
