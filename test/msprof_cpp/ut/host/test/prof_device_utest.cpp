@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
 #include "mockcpp/mockcpp.hpp"
 #include "hdc-log-stub.h"
-#include "proto/profiler.pb.h"
+#include "proto/msprofiler.pb.h"
 #include "ai_drv_dev_api.h"
 #include "errno/error_code.h"
 #include "message/codec.h"

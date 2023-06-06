@@ -26,7 +26,7 @@
 #include "prof_reporter.h"
 #include "queue/ring_buffer.h"
 #include "config/config.h"
-#include "proto/profiler.pb.h"
+#include "proto/msprofiler.pb.h"
 
 namespace Msprof {
 namespace Engine {

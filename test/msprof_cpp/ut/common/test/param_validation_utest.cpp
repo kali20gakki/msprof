@@ -3,7 +3,7 @@
 #include <string>
 #include <memory>
 #include "message/prof_params.h"
-#include "proto/profiler.pb.h"
+#include "proto/msprofiler.pb.h"
 #include "message/codec.h"
 #include "param_validation.h"
 #include "platform/platform.h"

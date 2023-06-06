@@ -9,7 +9,7 @@
 #include "error_code.h"
 #include "prof_params.h"
 #include "msprof_dlog.h"
-#include "proto/profiler.pb.h"
+#include "proto/msprofiler.pb.h"
 #include "queue/ring_buffer.h"
 #include "utils.h"
 #include "msprof_reporter_mgr.h"

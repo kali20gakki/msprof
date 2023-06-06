@@ -8,7 +8,7 @@
 #define ANALYSIS_DVVP_ANALYZE_ANALYZER_BASE_H
 
 #include "utils/utils.h"
-#include "proto/profiler.pb.h"
+#include "proto/msprofiler.pb.h"
 #include "data_struct.h"
 #include "op_desc_parser.h"
 

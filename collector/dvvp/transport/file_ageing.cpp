@@ -12,7 +12,7 @@
 #include "config/config.h"
 #include "config/config_manager.h"
 #include "msprof_dlog.h"
-#include "proto/profiler.pb.h"
+#include "proto/msprofiler.pb.h"
 #include "utils/utils.h"
 
 namespace analysis {
