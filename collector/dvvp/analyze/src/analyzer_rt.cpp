@@ -12,7 +12,7 @@
 #include "acl_prof.h"
 #include "message/codec.h"
 #include "msprof_dlog.h"
-#include "proto/profiler.pb.h"
+#include "proto/msprofiler.pb.h"
 #include "prof_common.h"
 #include "prof_api.h"
  

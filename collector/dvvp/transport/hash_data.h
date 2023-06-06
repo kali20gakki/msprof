@@ -12,7 +12,7 @@
 #include <unordered_map>
 #include "singleton/singleton.h"
 #include "utils/utils.h"
-#include "proto/profiler.pb.h"
+#include "proto/msprofiler.pb.h"
 #include "prof_callback.h"
 
 namespace analysis {

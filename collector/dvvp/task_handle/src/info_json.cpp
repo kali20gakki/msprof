@@ -12,7 +12,7 @@
 #endif
 #include <string>
 #include "ai_drv_dev_api.h"
-#include "proto/profiler.pb.h"
+#include "proto/msprofiler.pb.h"
 #include "config/config.h"
 #include "config/config_manager.h"
 #include "errno/error_code.h"

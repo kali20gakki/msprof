@@ -20,8 +20,8 @@ include(${TOP_DIR}/test/cmake/depend.cmake)
 protobuf_generate(profiler
     CppPath
     HeaderPath
-    ${MSPROF_SOURCE_DIR}/dvvp/proto/profiler.proto
-    ${MSPROF_SOURCE_DIR}/dvvp/proto/profiler_ext.proto
+    ${MSPROF_SOURCE_DIR}/dvvp/proto/msprofiler.proto
+    ${MSPROF_SOURCE_DIR}/dvvp/proto/msprofiler_ext.proto
 )
 set(CMAKE_CXX_FLAGS " -Wno-unused")
 

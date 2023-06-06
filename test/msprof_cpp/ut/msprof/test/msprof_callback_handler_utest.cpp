@@ -13,7 +13,7 @@
 #include "msprof_callback_handler.h"
 #include "msprof_callback_impl.h"
 #include "prof_acl_mgr.h"
-#include "proto/profiler.pb.h"
+#include "proto/msprofiler.pb.h"
 #include "uploader_mgr.h"
 #include "utils/utils.h"
 #include "dyn_prof_server.h"

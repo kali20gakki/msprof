@@ -20,8 +20,8 @@
 #include "aicpu_plugin.h"
 #include "utils/utils.h"
 #include "prof_api_common.h"
-#include "proto/profiler.pb.h"
-#include "proto/profiler_ext.pb.h"
+#include "proto/msprofiler.pb.h"
+#include "proto/msprofiler_ext.pb.h"
 #include "profapi_plugin.h"
 
 namespace Msprofiler {

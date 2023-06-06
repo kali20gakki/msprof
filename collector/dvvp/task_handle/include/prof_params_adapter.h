@@ -14,7 +14,7 @@
 #include <memory>
 #include "singleton/singleton.h"
 #include "message/prof_params.h"
-#include "proto/profiler.pb.h"
+#include "proto/msprofiler.pb.h"
 #include "utils/utils.h"
 
 namespace Analysis {

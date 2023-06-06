@@ -10,7 +10,7 @@
 #include <map>
 #include "file_ageing.h"
 #include "message/prof_params.h"
-#include "proto/profiler.pb.h"
+#include "proto/msprofiler.pb.h"
 #include "queue/bound_queue.h"
 #include "statistics/perf_count.h"
 #include "thread/thread.h"

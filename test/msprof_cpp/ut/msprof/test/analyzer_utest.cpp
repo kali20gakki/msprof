@@ -14,7 +14,7 @@
 #include "op_desc_parser.h"
 #include "message/codec.h"
 #include "prof_channel_manager.h"
-#include "proto/profiler.pb.h"
+#include "proto/msprofiler.pb.h"
 #include "uploader.h"
 #include "uploader_mgr.h"
 #include "toolchain/prof_acl_api.h"

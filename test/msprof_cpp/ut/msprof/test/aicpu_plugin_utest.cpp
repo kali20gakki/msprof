@@ -5,7 +5,7 @@
 #include "aicpu_plugin.h"
 #include "message/codec.h"
 #include "message/prof_params.h"
-#include "proto/profiler.pb.h"
+#include "proto/msprofiler.pb.h"
 #include "msprof_callback_handler.h"
 
 using namespace Msprof::Engine;
