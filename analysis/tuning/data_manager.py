@@ -21,7 +21,7 @@ from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.msvp_constant import MsvpConstant
 from common_func.path_manager import PathManager
-from msmodel.task_time.task_time import OpSummaryViewModel
+from msmodel.stars.op_summary_model import OpSummaryModel
 from viewer.ai_core_op_report import AiCoreOpReport
 from viewer.ai_core_report import get_core_sample_data
 from viewer.runtime_report import get_task_based_core_data
@@ -59,7 +59,12 @@ class OpParallelTuningDataHandle(BaseTuningDataHandle):
     def load_data(param: dict) -> list:
         op_parallel_data = []
         project_path = param.get(StrConstant.PARAM_RESULT_DIR, '')
-        with OpSummaryViewModel(project_path) as _model:
+        sample_config = {
+            'result_dir': project_path,
+            'iter_id': Constant.DEFAULT_INVALID_VALUE,
+            'model_id': Constant.DEFAULT_INVALID_VALUE
+        }
+        with OpSummaryModel(sample_config) as _model:
             ai_core_data = _model.get_operator_data_by_task_type(Constant.TASK_TYPE_AI_CORE)
             ai_cpu_data = _model.get_operator_data_by_task_type(Constant.TASK_TYPE_AI_CPU)
         if not ai_core_data or not ai_cpu_data:
