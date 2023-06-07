@@ -64,9 +64,8 @@ class DataTag(Enum):
     NPU_MEM = 50
     MSPROFTX_PIPELINE = 51
     FREQ = 52
-    API = 55
     HASH_DICT = 53
-    EVENT = 54
+    API_EVENT = 54
     TASK_TRACK = 56
     MEMCPY_INFO = 57
     HCCL_INFO = 58

@@ -17,7 +17,7 @@ class ApiDataModel(ParserModel):
     """
 
     def __init__(self: any, result_dir: str) -> None:
-        super().__init__(result_dir, DBNameConstant.DB_API_DATA, [DBNameConstant.TABLE_API_DATA])
+        super().__init__(result_dir, DBNameConstant.DB_API_EVENT_DATA, [DBNameConstant.TABLE_API_DATA])
 
     @staticmethod
     def update_type_hash_value(data: ApiDataBean, hash_dict: dict) -> tuple:
@@ -50,4 +50,5 @@ class ApiDataModel(ParserModel):
         return [
             [*self.update_type_hash_value(data, type_dict), data.level, data.thread_id,
              ge_dict.get(data.item_id, data.item_id), data.start, data.end]
-            for data in data_list]
+            for data in data_list
+        ]

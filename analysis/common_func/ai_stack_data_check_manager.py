@@ -23,7 +23,7 @@ class AiStackDataCheckManager(DataCheckManager):
         The data path contain acl data or not
         """
         return device_id != NumberConstant.HOST_ID and \
-               DBManager.check_item_in_table(PathManager.get_db_path(result_dir, DBNameConstant.DB_API_DATA),
+               DBManager.check_item_in_table(PathManager.get_db_path(result_dir, DBNameConstant.DB_API_EVENT_DATA),
                                              DBNameConstant.TABLE_API_DATA, 'level', 'acl')
 
     @classmethod
@@ -32,7 +32,7 @@ class AiStackDataCheckManager(DataCheckManager):
         The data path contain runtime.api. data or not
         """
         return device_id != NumberConstant.HOST_ID and \
-               DBManager.check_item_in_table(PathManager.get_db_path(result_dir, DBNameConstant.DB_API_DATA),
+               DBManager.check_item_in_table(PathManager.get_db_path(result_dir, DBNameConstant.DB_API_EVENT_DATA),
                                              DBNameConstant.TABLE_API_DATA, 'level', 'runtime')
 
     @classmethod
