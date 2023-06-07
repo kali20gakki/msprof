@@ -405,12 +405,10 @@ void Analyzer::OnOptimizeData(CONST_VOID_PTR data, uint32_t len)
 void Analyzer::DispatchOptimizeData(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message)
 {
     MSPROF_LOGD("Start to analyze file: %s, tag: %s", message->filename().c_str(), message->tag().c_str());
-    if (analyzerGe_->IsGeEventData(message->filename())) {
-        analyzerGe_->GeEventParse(message);
+    if (analyzerGe_->IsGeApiOrEventData(message->filename())) {
+        analyzerGe_->GeApiAndEventParse(message);
     } else if (analyzerGe_->IsGeCompactData(message->tag())) {
         analyzerGe_->GeCompactParse(message);
-    } else if (analyzerGe_->IsGeApiData(message->filename())) {
-        analyzerGe_->GeApiParse(message);
     } else if (analyzerGe_->IsGeGraphIdMapData(message->tag())) {
         analyzerGe_->GeGraphIdMapParse(message);
     } else if (analyzerGe_->IsGeContextData(message->tag())) {

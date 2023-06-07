@@ -77,8 +77,8 @@ enum MsprofReporterId {
 };
 
 const std::vector<ModuleIdName> MSPROF_MODULE_REPORT_TABLE = {
-    {AGING_API,                 "aging.api",             RING_BUFF_CAPACITY},
-    {UNAGING_API,               "unaging.api",           RING_BUFF_CAPACITY},
+    {AGING_API,                 "aging.api_event",       RING_BUFF_CAPACITY},
+    {UNAGING_API,               "unaging.api_event",     RING_BUFF_CAPACITY},
     {AGING_EVENT,               "aging.event",           RING_BUFF_CAPACITY},
     {UNAGING_EVENT,             "unaging.event",         RING_BUFF_CAPACITY},
     {AGING_COMPACT_INFO,        "aging.compact",         RING_BUFF_CAPACITY},

@@ -14,6 +14,7 @@ extern "C" {
 #endif // __cplusplus
 
 #define MSPROF_DATA_HEAD_MAGIC_NUM  0x5a5a
+#define MSPROF_EVENT_FLAG 0xFFFFFFFFFFFFFFFFULL
 
 enum MsprofDataTag {
     MSPROF_ACL_DATA_TAG = 0,            // acl data tag, range: 0~19
@@ -511,7 +512,7 @@ struct MsprofEvent {  // for MsprofReportEvent
     uint32_t threadId;
     uint32_t requestId; // 0xFFFF means single event
     uint64_t timeStamp;
-    uint64_t reserve;
+    uint64_t reserve = MSPROF_EVENT_FLAG;
     uint64_t itemId;
 };
 
