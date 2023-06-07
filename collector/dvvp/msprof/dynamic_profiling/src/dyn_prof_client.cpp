@@ -362,6 +362,9 @@ int DynProfMngCli::GetRealAppPid(int pid)
         sockPids.push_back(pid);
     }
 
+    if (sockPids.empty())
+        MSPROF_LOGI("sockPids is empty");
+
     // get current process child pid
     std::vector<int> childPids = Utils::GetChildPidRecursive(pid, 0);
     childPids.insert(childPids.begin(), pid);
@@ -376,8 +379,10 @@ int DynProfMngCli::GetRealAppPid(int pid)
         }
     }
     if (appPids.empty()) {
+        MSPROF_LOGI("appPids is empty");
         return 0;
     }
+    MSPROF_LOGI("appPids is %d", appPids[0]);
     return appPids[0];
 }
 

@@ -937,6 +937,7 @@ std::vector<int> Utils::GetChildPid(int pid)
 
         std::vector<std::string> childPids = Utils::Split(lineBuf, true, "", " ");
         for (auto &childPid : childPids) {
+            MSPROF_LOGI("childPids = ", childPid.c_str());
             allChildPids.push_back(std::strtol(childPid.c_str(), &end, base));
         }
     }
@@ -1418,7 +1419,14 @@ bool Utils::IsPythonOrBash(const std::string paramsName)
 
 bool Utils::IsDynProfMode()
 {
-    if (ConfigManager::instance()->GetPlatformType() != PlatformType::CLOUD_TYPE) {
+    // if (ConfigManager::instance()->GetPlatformType() != PlatformType::CLOUD_TYPE) {
+    //     return false;
+    // }
+
+    if (ConfigManager::instance()->GetPlatformType() != PlatformType::CLOUD_TYPE ||
+        ConfigManager::instance()->GetPlatformType() != PlatformType::DC_TYPE ||
+        ConfigManager::instance()->GetPlatformType() != PlatformType::CHIP_V4_1_0 ||
+        ConfigManager::instance()->GetPlatformType() != PlatformType::CHIP_V4_2_0) {
         return false;
     }
     if (GetEnvString(PROFILING_MODE_ENV) != DAYNAMIC_PROFILING_VALUE) {
