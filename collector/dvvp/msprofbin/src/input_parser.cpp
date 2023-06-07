@@ -297,7 +297,9 @@ void ArgsManager::AddBasicArgs()
 
 void ArgsManager::AddDynProfArgs()
 {
-    if (driverOnline_ && platform_ != PlatformType::CLOUD_TYPE) {
+    if (driverOnline_ &&
+        (platform_ != PlatformType::CLOUD_TYPE || platform_ != PlatformType::DC_TYPE ||
+         platform_ != PlatformType::CHIP_V4_1_0 || platform_ != PlatformType::CHIP_V4_2_0)) {
         return;
     }
     Args dynamic = {"dynamic", "Dynamic profiling switch, the default value is off.(Ascend910)", OFF};
