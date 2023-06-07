@@ -72,7 +72,7 @@ TEST_F(AnalyzerUtest, DispatchOptimizeUnagingApiData)
     std::string geUnAgingOriData((CHAR_PTR)&geUnAgingTaskDescChunk, sizeof(geUnAgingTaskDescChunk));
     std::shared_ptr<analysis::dvvp::proto::FileChunkReq> geUnAgingTaskDesc;
     MSVP_MAKE_SHARED0_BREAK(geUnAgingTaskDesc, analysis::dvvp::proto::FileChunkReq);
-    geUnAgingTaskDesc->set_filename("unaging.api");
+    geUnAgingTaskDesc->set_filename("unaging.api_event");
     geUnAgingTaskDesc->set_chunk(geUnAgingOriData);
     geUnAgingTaskDesc->set_chunksizeinbytes(sizeof(geUnAgingTaskDescChunk));
     analyzer->DispatchOptimizeData(geUnAgingTaskDesc);
@@ -91,7 +91,7 @@ TEST_F(AnalyzerUtest, DispatchOptimizeAgingApiData)
     std::string geUnAgingOriData((CHAR_PTR)&geAgingTaskDescChunk, sizeof(geAgingTaskDescChunk));
     std::shared_ptr<analysis::dvvp::proto::FileChunkReq> geAgingTaskDesc;
     MSVP_MAKE_SHARED0_BREAK(geAgingTaskDesc, analysis::dvvp::proto::FileChunkReq);
-    geAgingTaskDesc->set_filename("aging.api");
+    geAgingTaskDesc->set_filename("aging.api_event");
     geAgingTaskDesc->set_chunk(geUnAgingOriData);
     geAgingTaskDesc->set_chunksizeinbytes(sizeof(geAgingTaskDescChunk));
     analyzer->DispatchOptimizeData(geAgingTaskDesc);
@@ -183,14 +183,14 @@ TEST_F(AnalyzerUtest, DispatchOptimizeModelInfoData)
     std::string geUnAgingStartOriData((CHAR_PTR)&geUnAgingEventChunk, sizeof(geUnAgingEventChunk));
     std::shared_ptr<analysis::dvvp::proto::FileChunkReq> geModelLoad;
     MSVP_MAKE_SHARED0_BREAK(geModelLoad, analysis::dvvp::proto::FileChunkReq);
-    geModelLoad->set_filename("unaging.event");
+    geModelLoad->set_filename("unaging.api_event");
     geModelLoad->set_chunk(geUnAgingStartOriData);
     geModelLoad->set_chunksizeinbytes(sizeof(geUnAgingEventChunk));
     analyzer->DispatchOptimizeData(geModelLoad);
 
     geUnAgingEventChunk.timeStamp = 1;
     std::string geUnAgingEndOriData((CHAR_PTR)&geUnAgingEventChunk, sizeof(geUnAgingEventChunk));
-    geModelLoad->set_filename("unaging.event");
+    geModelLoad->set_filename("unaging.api_event");
     geModelLoad->set_chunk(geUnAgingEndOriData);
     geModelLoad->set_chunksizeinbytes(sizeof(geUnAgingEventChunk));
     analyzer->DispatchOptimizeData(geModelLoad);
@@ -401,24 +401,14 @@ protected:
     }
 };
 
-TEST_F(AnalyzerGeUtest, IsGeApiData)
+TEST_F(AnalyzerGeUtest, IsGeApiOrEventData)
 {
     GlobalMockObject::verify();
     std::shared_ptr<AnalyzerGe> analyzerGe;
     MSVP_MAKE_SHARED0_BREAK(analyzerGe, AnalyzerGe);
 
-    EXPECT_EQ(true, analyzerGe->IsGeApiData("aging.api"));
-    EXPECT_EQ(false, analyzerGe->IsGeApiData("aging.event"));
-}
-
-TEST_F(AnalyzerGeUtest, IsGeEventData)
-{
-    GlobalMockObject::verify();
-    std::shared_ptr<AnalyzerGe> analyzerGe;
-    MSVP_MAKE_SHARED0_BREAK(analyzerGe, AnalyzerGe);
-
-    EXPECT_EQ(false, analyzerGe->IsGeEventData("aging.api"));
-    EXPECT_EQ(true, analyzerGe->IsGeEventData("aging.event"));
+    EXPECT_EQ(false, analyzerGe->IsGeApiOrEventData("aging.api"));
+    EXPECT_EQ(true, analyzerGe->IsGeApiOrEventData("aging.api_event"));
 }
 
 TEST_F(AnalyzerGeUtest, IsGeCompactData)

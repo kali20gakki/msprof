@@ -215,8 +215,7 @@ class FileNameManagerConstant:
     FREQ_FILE_PATTERN = r"lpmFreqConv\.data\.(\d+)\.slice_\d+"
 
     # new data struct
-    API_FILE_PATTERN = r"^(aging|unaging)\.api\.data\.slice_\d+"
-    EVENT_DATA_FILE_PATTERN = r"^(aging|unaging)\.event\.data\.slice_\d+"
+    API_EVENT_FILE_PATTERN = r"^(aging|unaging)\.api_event\.data\.slice_\d+"
     HASH_DATA_FILE_PATTERN = r"^(aging|unaging)\.additional\.(hash_dic|type_info_dic)\.slice_\d+"
     HCCL_INFO_FILE_PATTERN = r"^(unaging|aging)\.additional\.hccl_info\.slice_\d+"
     MULTI_THREAD_FILE_PATTERN = r"^(unaging|aging)\.additional\.Multi_Thread\.slice_\d+"
@@ -861,20 +860,12 @@ def get_freq_compiles() -> tuple:
             )
 
 
-def get_api_data_compiles() -> tuple:
+def get_api_event_compiles() -> tuple:
     """
-    get api data files regex compiles
-    :return: api data files regex
+    get api and event data files regex compiles
+    :return: api and event data files regex
     """
-    return (re.compile(FileNameManagerConstant.API_FILE_PATTERN),)
-
-
-def get_event_data_compiles() -> tuple:
-    """
-    get event data files regex compiles
-    :return: event data files regex
-    """
-    return (re.compile(FileNameManagerConstant.EVENT_DATA_FILE_PATTERN),)
+    return (re.compile(FileNameManagerConstant.API_EVENT_FILE_PATTERN),)
 
 
 def get_hash_data_compiles() -> tuple:

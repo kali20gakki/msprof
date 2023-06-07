@@ -25,16 +25,14 @@ public:
 
 public:
     bool IsGeData(const std::string &fileName) const;
-    bool IsGeApiData(const std::string &fileName) const;
-    bool IsGeEventData(const std::string &fileName) const;
+    bool IsGeApiOrEventData(const std::string &fileName) const;
     bool IsGeCompactData(const std::string &tag) const;
     bool IsGeGraphIdMapData(const std::string &tag) const;
     bool IsGeContextData(const std::string &tag) const;
 
     void Parse(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message);
     void GeCompactParse(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message);
-    void GeEventParse(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message);
-    void GeApiParse(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message);
+    void GeApiAndEventParse(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message);
     void GeGraphIdMapParse(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message);
     void GeContextParse(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message);
 
@@ -63,9 +61,8 @@ private:
     void ParseNodeBasicInfo(CONST_CHAR_PTR data, uint32_t len);
     void HandleNodeBasicInfo(CONST_CHAR_PTR data) const;
     void ParseGraphIdMap(CONST_CHAR_PTR data, uint32_t len);
-    void ParseModelInfo(CONST_CHAR_PTR data, uint32_t len, bool ageFlag);
     void HandleModelInfo(CONST_CHAR_PTR data, bool ageFlag) const;
-    void ParseApiInfo(CONST_CHAR_PTR data, uint32_t len, bool ageFlag);
+    void ParseApiAndEventInfo(CONST_CHAR_PTR data, uint32_t len, bool ageFlag);
     void HandleApiInfo(CONST_CHAR_PTR data, bool ageFlag) const;
     void ParseContextIdInfo(CONST_CHAR_PTR data, uint32_t len);
     void HandleContextIdInfo(CONST_CHAR_PTR data) const;
