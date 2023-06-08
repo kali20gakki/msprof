@@ -26,7 +26,7 @@ void ParamsAdapterAclSubscribe::GenAclSubscribeContainer(const ProfAicoreMetrics
                                                          const uint64_t dataTypeConfig)
 {
     if (dataTypeConfig & PROF_TASK_TIME_MASK) {
-        paramContainer_[INPUT_CFG_COM_TASK_TIME] = MSVP_PROF_ON;
+        paramContainer_[INPUT_CFG_COM_TASK_TIME_L1] = MSVP_PROF_ON;
     }
 
     if (dataTypeConfig & PROF_KEYPOINT_TRACE_MASK) {

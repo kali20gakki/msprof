@@ -86,7 +86,7 @@ void PlatformAdapterInterface::SetParamsForStorageLimit(struct CommonParams &com
         dirAvailSize, params_->storageLimit.c_str());
 }
 
-void PlatformAdapterInterface::SetParamsForTaskTime()
+void PlatformAdapterInterface::SetParamsForTaskTimeL0()
 {
     bool ret = false;
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_TASK_TS_KEYPOINT) != supportSwitch_.end()) {
@@ -96,22 +96,22 @@ void PlatformAdapterInterface::SetParamsForTaskTime()
     }
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_TASK_TS_TIMELINE) != supportSwitch_.end()) {
         params_->ts_timeline = MSPROF_SWITCH_ON;
-        params_->dataTypeConfig |= PROF_SCHEDULE_TIMELINE | PROF_TASK_TIME | PROF_TASK_TIME_L1;
+        params_->dataTypeConfig |= PROF_SCHEDULE_TIMELINE | PROF_TASK_TIME;
         ret = true;
     }
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_TASK_AIC_HWTS) != supportSwitch_.end()) {
         params_->hwts_log = MSPROF_SWITCH_ON;
-        params_->dataTypeConfig |= PROF_TASK_TIME | PROF_TASK_TIME_L1;
+        params_->dataTypeConfig |= PROF_TASK_TIME;
         ret = true;
     }
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_TASK_AIV_HWTS) != supportSwitch_.end()) {
         params_->hwts_log1 = MSPROF_SWITCH_ON;
-        params_->dataTypeConfig |= PROF_TASK_TIME | PROF_TASK_TIME_L1;
+        params_->dataTypeConfig |= PROF_TASK_TIME;
         ret = true;
     }
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_TASK_STARS_ACSQ) != supportSwitch_.end()) {
         params_->stars_acsq_task = MSPROF_SWITCH_ON;
-        params_->dataTypeConfig |= PROF_TASK_TIME | PROF_TASK_TIME_L1;
+        params_->dataTypeConfig |= PROF_TASK_TIME;
         ret = true;
     }
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_TASK_RUNTIME) != supportSwitch_.end()) {
@@ -120,10 +120,22 @@ void PlatformAdapterInterface::SetParamsForTaskTime()
     }
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_TASK_TS_MEMCPY) != supportSwitch_.end()) {
         params_->ts_memcpy = MSPROF_SWITCH_ON;
-        params_->dataTypeConfig |= PROF_TASK_TIME | PROF_TASK_TIME_L1;
+        params_->dataTypeConfig |= PROF_TASK_TIME;
         ret = true;
     }
-    SetParamsForGE();
+    SetParamsForGEL0();
+    if (!ret) {
+        MSPROF_LOGW("Unrecognized option:task_time_l0 for PlatformType:%d", static_cast<uint8_t>(platformType_));
+    }
+}
+
+void PlatformAdapterInterface::SetParamsForTaskTimeL1()
+{
+    bool ret = false;
+    SetParamsForTaskTimeL0();
+    params_->dataTypeConfig |= PROF_TASK_TIME_L1;
+    SetParamsForGEL0();
+    SetParamsForGEL1();
     if (!ret) {
         MSPROF_LOGW("Unrecognized option:task_time for PlatformType:%d", static_cast<uint8_t>(platformType_));
     }
@@ -136,7 +148,7 @@ void PlatformAdapterInterface::SetParamsForTaskTrace()
         params_->dataTypeConfig |= PROF_HCCL_TRACE;
         ret = true;
     }
-    SetParamsForTaskTime();
+    SetParamsForTaskTimeL1();
     if (!ret) {
         MSPROF_LOGW("Unrecognized option:task_trace for PlatformType:%d", static_cast<uint8_t>(platformType_));
     }
@@ -169,13 +181,19 @@ void PlatformAdapterInterface::SetParamsForAscendCL()
     }
 }
 
-void PlatformAdapterInterface::SetParamsForGE()
+void PlatformAdapterInterface::SetParamsForGEL0()
 {
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_TASK_GRAPH_ENGINE) != supportSwitch_.end()) {
-        params_->dataTypeConfig |= PROF_MODEL_EXECUTE; // model_time_info data
         params_->dataTypeConfig |= PROF_MODEL_LOAD;
-        params_->dataTypeConfig |= PROF_OP_DETAIL;  // dynamic_op_execute data
-        params_->dataTypeConfig |= PROF_GE_DYNAMIC_OP_EXECUTE;
+        params_->dataTypeConfig |= PROF_OP_DETAIL;
+    }
+}
+
+void PlatformAdapterInterface::SetParamsForGEL1()
+{
+    if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_TASK_GRAPH_ENGINE) != supportSwitch_.end()) {
+        params_->dataTypeConfig |= PROF_FRAMEWORK_SCHEDULE_L1; // ge profiling data
+        params_->dataTypeConfig |= PROF_FRAMEWORK_SCHEDULE_L0; // ge infershape data
     }
 }
 
