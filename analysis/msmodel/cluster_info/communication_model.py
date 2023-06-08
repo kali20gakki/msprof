@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2022-2023. All rights reserved.
+from common_func.ms_constant.number_constant import NumberConstant
 from profiling_bean.db_dto.hccl_dto import HcclDto
 from msmodel.interface.view_model import ViewModel
 from common_func.db_name_constant import DBNameConstant
@@ -21,13 +22,15 @@ class CommunicationModel(ViewModel):
         :return:
         """
         if top_hccl_ops is not None:
-            sql = "select * from {0} where first_timestamp < ? and first_timestamp >= ? " \
-                  "and op_name IN {top_hccl_ops}"\
+            sql = "select * from {0} where timestamp < ? and timestamp >= ? " \
+                  "and op_name IN {top_hccl_ops}" \
                 .format(DBNameConstant.TABLE_HCCL_ALL_REDUCE, top_hccl_ops=top_hccl_ops)
         else:
-            sql = "select * from {0} where first_timestamp < ? and first_timestamp >= ?"\
+            sql = "select * from {0} where timestamp < ? and timestamp >= ?" \
                 .format(DBNameConstant.TABLE_HCCL_ALL_REDUCE)
 
-        data = DBManager.fetch_all_data(self.cur, sql, (conditions.get('iter_end', 0),
-                                                        conditions.get('iter_start', float('inf'))), dto_class=HcclDto)
+        data = DBManager.fetch_all_data(self.cur, sql,
+                                        (conditions.get('iter_end', 0) * NumberConstant.NS_TO_US,
+                                         conditions.get('iter_start', float('inf')) * NumberConstant.NS_TO_US),
+                                        dto_class=HcclDto)
         return data
