@@ -147,12 +147,12 @@ void ParamsAdapter::SetMiniV2BlackSwitch()
 void ParamsAdapter::SetCommonConfig()
 {
     std::vector<InputCfg>({
-        INPUT_CFG_COM_OUTPUT, INPUT_CFG_COM_STORAGE_LIMIT, INPUT_CFG_COM_MSPROFTX, INPUT_CFG_COM_TASK_TIME,
+        INPUT_CFG_COM_OUTPUT, INPUT_CFG_COM_STORAGE_LIMIT, INPUT_CFG_COM_MSPROFTX, INPUT_CFG_COM_TASK_TIME_L1,
         INPUT_CFG_COM_AIC_METRICS, INPUT_CFG_COM_AIV_METRICS, INPUT_CFG_COM_ASCENDCL, INPUT_CFG_COM_RUNTIME_API,
         INPUT_CFG_COM_HCCL, INPUT_CFG_COM_L2, INPUT_CFG_COM_AICPU, INPUT_CFG_COM_SYS_USAGE_FREQ,
         INPUT_CFG_COM_SYS_PID_USAGE_FREQ, INPUT_CFG_COM_SYS_CPU_FREQ, INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ,
         INPUT_CFG_COM_LLC_MODE, INPUT_CFG_COM_SYS_IO_FREQ, INPUT_CFG_COM_SYS_INTERCONNECTION_FREQ,
-        INPUT_CFG_COM_DVPP_FREQ, INPUT_CFG_HOST_SYS_USAGE, INPUT_CFG_HOST_SYS_USAGE_FREQ
+        INPUT_CFG_COM_DVPP_FREQ, INPUT_CFG_HOST_SYS_USAGE, INPUT_CFG_HOST_SYS_USAGE_FREQ, INPUT_CFG_COM_TASK_TIME_L0
         }).swap(commonConfig_);
     return;
 }
@@ -258,8 +258,11 @@ void ParamsAdapter::SetCommonParams(std::array<std::string, INPUT_CFG_MAX> param
 
 void ParamsAdapter::SetTaskParams(std::array<std::string, INPUT_CFG_MAX> paramContainer) const
 {
-    if (paramContainer[INPUT_CFG_COM_TASK_TIME].compare(MSVP_PROF_ON) == 0) {
-        platformAdapter_->SetParamsForTaskTime();
+    if (paramContainer[INPUT_CFG_COM_TASK_TIME_L0].compare(MSVP_PROF_ON) == 0) {
+        platformAdapter_->SetParamsForTaskTimeL0();
+    }
+    if (paramContainer[INPUT_CFG_COM_TASK_TIME_L1].compare(MSVP_PROF_ON) == 0) {
+        platformAdapter_->SetParamsForTaskTimeL1();
     }
     if (paramContainer[INPUT_CFG_COM_TASK_TRACE].compare(MSVP_PROF_ON) == 0) {
         platformAdapter_->SetParamsForTaskTrace();
@@ -271,7 +274,8 @@ void ParamsAdapter::SetTaskParams(std::array<std::string, INPUT_CFG_MAX> paramCo
         platformAdapter_->SetParamsForAscendCL();
     }
     if (paramContainer[INPUT_CFG_COM_MODEL_EXECUTION].compare(MSVP_PROF_ON) == 0) {
-        platformAdapter_->SetParamsForGE();
+        platformAdapter_->SetParamsForGEL0();
+        platformAdapter_->SetParamsForGEL1();
     }
     if (paramContainer[INPUT_CFG_COM_RUNTIME_API].compare(MSVP_PROF_ON) == 0) {
         platformAdapter_->SetParamsForRuntime();
@@ -429,10 +433,10 @@ bool ParamsAdapter::ComCfgCheck1(const InputCfg inputCfg, const std::string &cfg
 {
     bool ret = true;
     std::map<int, std::string> switchNameMap = {
-        {INPUT_CFG_COM_MSPROFTX, "msproftx"}, {INPUT_CFG_COM_TASK_TIME, "task-time"},
+        {INPUT_CFG_COM_MSPROFTX, "msproftx"}, {INPUT_CFG_COM_TASK_TIME_L1, "task-time"},
         {INPUT_CFG_COM_ASCENDCL, "ascendcl"}, {INPUT_CFG_COM_RUNTIME_API, "runtime-api"},
         {INPUT_CFG_COM_HCCL, "hccl"}, {INPUT_CFG_COM_L2, "l2"},
-        {INPUT_CFG_COM_AICPU, "aicpu"}
+        {INPUT_CFG_COM_AICPU, "aicpu"}, {INPUT_CFG_COM_TASK_TIME_L0, "task-time"},
     };
     std::map<int, std::string> metricsNameMap = {
         {INPUT_CFG_COM_AIC_METRICS, "aic-metrics"},
@@ -446,7 +450,8 @@ bool ParamsAdapter::ComCfgCheck1(const InputCfg inputCfg, const std::string &cfg
             ret = ParamValidation::instance()->CheckStorageLimit(cfgValue);
             break;
         case INPUT_CFG_COM_MSPROFTX:
-        case INPUT_CFG_COM_TASK_TIME:
+        case INPUT_CFG_COM_TASK_TIME_L1:
+        case INPUT_CFG_COM_TASK_TIME_L0:
         case INPUT_CFG_COM_ASCENDCL:
         case INPUT_CFG_COM_RUNTIME_API:
         case INPUT_CFG_COM_HCCL:
