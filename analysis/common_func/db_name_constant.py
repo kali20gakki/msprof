@@ -76,6 +76,7 @@ class DBNameConstant(metaclass=ABCMeta):
     DB_GRAPH_ADD_INFO = "graph_id_map.db"
     DB_CTX_ID = "ctx_id.db"
     DB_MEMORY_APPLICATION = "memory_application.db"
+    DB_MEMORY_OP = "task_memory.db"
 
     # DB tables
     TABLE_ACL_DATA = "AclData"
@@ -250,6 +251,11 @@ class DBNameConstant(metaclass=ABCMeta):
 
     # npu mem of process and device
     TABLE_NPU_MEM = "NpuMem"
+
+    # npu operator mem
+    TABLE_NPU_OP_MEM_RAW = "NpuOpMemRaw"
+    TABLE_NPU_OP_MEM = "NpuOpMem"
+    TABLE_NPU_OP_MEM_REC = "NpuOpMemRec"
 
     # sync_acl_npu
     TABLE_TORCH_TO_ACL = "TorchAclRelation"
