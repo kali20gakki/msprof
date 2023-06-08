@@ -289,6 +289,9 @@ void ParamsAdapter::SetTaskParams(std::array<std::string, INPUT_CFG_MAX> paramCo
     if (paramContainer[INPUT_CFG_COM_L2].compare(MSVP_PROF_ON) == 0) {
         platformAdapter_->SetParamsForL2Cache();
     }
+    if (paramContainer[INPUT_CFG_COM_TASK_MEMORY].compare(MSVP_PROF_ON) == 0) {
+        platformAdapter_->SetParamsForTaskMemory();
+    }
     return;
 }
 
@@ -453,6 +456,7 @@ bool ParamsAdapter::ComCfgCheck1(const InputCfg inputCfg, const std::string &cfg
         case INPUT_CFG_COM_TASK_TIME_L1:
         case INPUT_CFG_COM_TASK_TIME_L0:
         case INPUT_CFG_COM_ASCENDCL:
+        case INPUT_CFG_COM_TASK_MEMORY:
         case INPUT_CFG_COM_RUNTIME_API:
         case INPUT_CFG_COM_HCCL:
         case INPUT_CFG_COM_L2:
