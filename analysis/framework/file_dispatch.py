@@ -55,6 +55,7 @@ from common_func.file_name_manager import get_msproftx_torch_compiles
 from common_func.file_name_manager import get_multi_thread_compiles
 from common_func.file_name_manager import get_nic_compiles
 from common_func.file_name_manager import get_npu_mem_compiles
+from common_func.file_name_manager import get_npu_op_mem_compiles
 from common_func.file_name_manager import get_parallel_strategy_compiles
 from common_func.file_name_manager import get_pcie_compiles
 from common_func.file_name_manager import get_pid_cpu_usage_compiles
@@ -133,6 +134,7 @@ class FileDispatch:
         DataTag.MSPROFTX_TORCH: get_msproftx_torch_compiles(),
         DataTag.MSPROFTX_CANN: get_msproftx_cann_compiles(),
         DataTag.NPU_MEM: get_npu_mem_compiles(),
+        DataTag.MEMORY_OP: get_npu_op_mem_compiles(),
         DataTag.MSPROFTX_PIPELINE: get_msproftx_pipeline_compiles(),
         DataTag.FREQ: get_freq_compiles(),
         DataTag.API_EVENT: get_api_event_compiles(),

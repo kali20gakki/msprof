@@ -372,3 +372,21 @@ class AiStackDataCheckManager(DataCheckManager):
         """
         return cls.check_data_exist(result_dir, file_name_manager.get_msproftx_pipeline_compiles(),
                                     device_id=device_id)
+
+    @classmethod
+    def contain_npu_op_mem_data(cls: any, result_dir: str, device_id: int = None) -> bool:
+        """
+        The data path contain npu op mem data or not
+        """
+        return device_id != NumberConstant.HOST_ID and \
+               DBManager.check_tables_in_db(PathManager.get_db_path(result_dir, DBNameConstant.DB_MEMORY_OP),
+                                            DBNameConstant.TABLE_NPU_OP_MEM)
+
+    @classmethod
+    def contain_npu_op_mem_rec_data(cls: any, result_dir: str, device_id: int = None) -> bool:
+        """
+        The data path contain npu op mem data or not
+        """
+        return device_id != NumberConstant.HOST_ID and \
+               DBManager.check_tables_in_db(PathManager.get_db_path(result_dir, DBNameConstant.DB_MEMORY_OP),
+                                            DBNameConstant.TABLE_NPU_OP_MEM_REC)
