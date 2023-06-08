@@ -100,11 +100,13 @@ public:
     virtual int Uninit();
     virtual void SetParamsForGlobal(struct CommonParams &comParams);
     virtual void SetParamsForStorageLimit(struct CommonParams &comParams);
-    virtual void SetParamsForTaskTime();
+    virtual void SetParamsForTaskTimeL0();
+    virtual void SetParamsForTaskTimeL1();
     virtual void SetParamsForTaskTrace();
     virtual void SetParamsForTrainingTrace();
     virtual void SetParamsForAscendCL();
-    virtual void SetParamsForGE();
+    virtual void SetParamsForGEL0();
+    virtual void SetParamsForGEL1();
     virtual void SetParamsForRuntime();
     virtual void SetParamsForAICPU();
     virtual void SetParamsForHCCL();
