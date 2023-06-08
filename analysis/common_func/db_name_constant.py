@@ -123,6 +123,7 @@ class DBNameConstant(metaclass=ABCMeta):
     TABLE_TIME = 'Time'
     TABLE_TRACE_FILES = 'files'
     TABLE_TRAINING_TRACE = 'training_trace'
+    TABLE_GET_NEXT = 'get_next'
     # step trace
     TABLE_STEP_TRACE = "StepTrace"
     TABLE_TS_MEMCPY = "TsMemcpy"
