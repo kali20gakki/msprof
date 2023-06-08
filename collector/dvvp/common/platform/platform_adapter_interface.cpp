@@ -181,6 +181,18 @@ void PlatformAdapterInterface::SetParamsForAscendCL()
     }
 }
 
+
+void PlatformAdapterInterface::SetParamsForTaskMemory()
+{
+    bool ret = false;
+    if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_TASK_MEMORY) != supportSwitch_.end()) {
+        params_->dataTypeConfig |= PROF_TASK_MEMORY;
+        ret = true;
+    }
+    if (!ret) {
+        MSPROF_LOGW("Unrecognized option:task_memory for PlatformType:%d", static_cast<uint8_t>(platformType_));
+    }
+}
 void PlatformAdapterInterface::SetParamsForGEL0()
 {
     if (std::find(supportSwitch_.begin(), supportSwitch_.end(), PLATFORM_TASK_GRAPH_ENGINE) != supportSwitch_.end()) {
