@@ -39,6 +39,7 @@ enum CollectorTypesForPlatform {
     PLATFORM_TASK_AIC_METRICS,
     PLATFORM_TASK_AIV_METRICS,
     PLATFORM_TASK_STARS_ACSQ,
+    PLATFORM_TASK_MEMORY,
     // System-device
     PLATFORM_SYS_DEVICE_SYS_CPU_MEM_USAGE,
     PLATFORM_SYS_DEVICE_ALL_PID_CPU_MEM_USAGE,
@@ -105,6 +106,7 @@ public:
     virtual void SetParamsForTaskTrace();
     virtual void SetParamsForTrainingTrace();
     virtual void SetParamsForAscendCL();
+    virtual void SetParamsForTaskMemory();
     virtual void SetParamsForGEL0();
     virtual void SetParamsForGEL1();
     virtual void SetParamsForRuntime();

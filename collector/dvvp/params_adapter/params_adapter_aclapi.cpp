@@ -132,6 +132,10 @@ void ParamsAdapterAclApi::ProfTaskCfgToContainer(const ProfConfig * apiCfg,
             setConfig_.insert(cfg.second);
         }
     }
+    if (apiCfg->dataTypeConfig & PROF_TASK_MEMORY) {
+        paramContainer_[INPUT_CFG_COM_TASK_MEMORY] = MSVP_PROF_ON;
+        setConfig_.insert(INPUT_CFG_COM_TASK_MEMORY);
+    }
 }
 
 void ParamsAdapterAclApi::ProfMetricsCfgToContainer(const ProfAicoreMetrics aicMetrics,
