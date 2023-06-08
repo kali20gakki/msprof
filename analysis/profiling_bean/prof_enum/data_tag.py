@@ -77,6 +77,7 @@ class DataTag(Enum):
     MEMORY_APPLICATION = 64
     CTX_ID = 65
     GE_LOGIC_STREAM_INFO = 66
+    MEMORY_OP = 67
 
 
 @unique
