@@ -11,7 +11,7 @@
 #include "message/prof_params.h"
 #include "mmpa_api.h"
 #include "msprof_dlog.h"
-#include "proto/profiler.pb.h"
+#include "proto/msprofiler.pb.h"
 #include "securec.h"
 #include "param_validation.h"
 

@@ -18,7 +18,7 @@
 #include "config/config.h"
 #include "errno/error_code.h"
 #include "msprof_dlog.h"
-#include "proto/profiler.pb.h"
+#include "proto/msprofiler.pb.h"
 #include "utils/utils.h"
 
 namespace Analysis {

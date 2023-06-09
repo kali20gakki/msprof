@@ -9,7 +9,7 @@
 #define ANALYSIS_DVVP_MSPROFBIN_PARAMS_ADAPTER_H
 #include "singleton/singleton.h"
 #include "message/prof_params.h"
-#include "proto/profiler.pb.h"
+#include "proto/msprofiler.pb.h"
 #include "utils/utils.h"
 namespace Analysis {
 namespace Dvvp {

@@ -1,8 +1,8 @@
 protobuf_generate(profiler
     CppPath
     HeaderPath
-    ${CMAKE_CURRENT_SOURCE_DIR}/../proto/profiler.proto
-    ${CMAKE_CURRENT_SOURCE_DIR}/../proto/profiler_ext.proto
+    ${CMAKE_CURRENT_SOURCE_DIR}/../proto/msprofiler.proto
+    ${CMAKE_CURRENT_SOURCE_DIR}/../proto/msprofiler_ext.proto
 )
 
 set(msprofBinHeader

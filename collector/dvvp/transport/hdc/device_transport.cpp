@@ -14,7 +14,7 @@
 #include "msprof_dlog.h"
 #include "param_validation.h"
 #include "prof_manager.h"
-#include "proto/profiler.pb.h"
+#include "proto/msprofiler.pb.h"
 #include "uploader_mgr.h"
 #include "adx_prof_api.h"
 

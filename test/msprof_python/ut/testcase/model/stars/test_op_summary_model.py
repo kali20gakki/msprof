@@ -111,3 +111,4 @@ class TestOpSummaryModel(unittest.TestCase):
             check = OpSummaryModel(SAMPLE_CONFIG)
             res = check.get_db_path("test")
         self.assertEqual(res, "test")
+

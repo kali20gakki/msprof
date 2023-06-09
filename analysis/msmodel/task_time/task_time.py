@@ -94,30 +94,3 @@ class TaskTime:
         self._start_time = int(float(args[2]))
         self._duration_time = int(float(args[3])) - int(float(args[2]))
         self._index_id = args[5]
-
-
-class OpSummaryViewModel(ViewModel):
-    """
-                delete the file in the future
-    """
-
-    def __init__(self: any, result_dir: str) -> None:
-        super().__init__(result_dir, DBNameConstant.DB_AICORE_OP_SUMMARY, [])
-
-    def get_operator_data_by_task_type(self: any, task_type: str) -> list:
-        db_path = PathManager.get_db_path(self.result_dir, DBNameConstant.DB_AICORE_OP_SUMMARY)
-        if not DBManager.check_tables_in_db(db_path, DBNameConstant.TABLE_SUMMARY_TASK_TIME,
-                                            DBNameConstant.TABLE_SUMMARY_GE):
-            return []
-        ge_summary_headers = DBManager.get_table_headers(self.cur, DBNameConstant.TABLE_SUMMARY_GE)
-        task_time_headers = DBManager.get_table_headers(self.cur, DBNameConstant.TABLE_SUMMARY_TASK_TIME)
-        inner_join_condition = ""
-        if "model_id" in ge_summary_headers and "model_id" in task_time_headers:
-            inner_join_condition += " and a.model_id=b.model_id"
-        if "index_id" in ge_summary_headers and "index_id" in task_time_headers:
-            inner_join_condition += " and (a.index_id=b.index_id or b.index_id=0)"
-        sql = "SELECT start_time, start_time+duration_time as end_time FROM {0} a INNER JOIN {1} b " \
-              "on a.stream_id=b.stream_id and a.task_id=b.task_id and a.batch_id=b.batch_id {2} " \
-              "and b.task_type=?".format(DBNameConstant.TABLE_SUMMARY_TASK_TIME, DBNameConstant.TABLE_SUMMARY_GE,
-                                         inner_join_condition)
-        return DBManager.fetch_all_data(self.cur, sql, (task_type,), dto_class=TimeSectionDto)

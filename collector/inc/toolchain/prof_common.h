@@ -14,6 +14,7 @@ extern "C" {
 #endif // __cplusplus
 
 #define MSPROF_DATA_HEAD_MAGIC_NUM  0x5a5a
+#define MSPROF_EVENT_FLAG 0xFFFFFFFFFFFFFFFFULL
 
 enum MsprofDataTag {
     MSPROF_ACL_DATA_TAG = 0,            // acl data tag, range: 0~19
@@ -480,10 +481,10 @@ const uint32_t MSPROF_REPORT_NODE_TENSOR_INFO_TYPE      = 1;  /* type info: tens
 const uint32_t MSPROF_REPORT_NODE_FUSION_OP_INFO_TYPE   = 2;  /* type info: funsion_op_info */
 const uint32_t MSPROF_REPORT_NODE_CONTEXT_ID_INFO_TYPE  = 4;  /* type info: context_id_info */
 const uint32_t MSPROF_REPORT_NODE_LAUNCH_TYPE           = 5;  /* type info: launch */
-const uint32_t MSPROF_REPORT_NODE_TASK_MEMORY_TYPE      = 6;  /* type info: task_memory */
 
 /* Msprof report type of node(10000) level(ge api), offset: 0x010000 */
 const uint32_t MSPROF_REPORT_NODE_GE_API_BASE_TYPE      = 0x010000;
+const uint32_t MSPROF_REPORT_NODE_TASK_MEMORY_TYPE      = 0x010007;  /* type info: task_memory */
 
 /* Msprof report type of node(10000) level(hccl api), offset: 0x020000 */
 const uint32_t MSPROF_REPORT_NODE_HCCL_BASE_TYPE        = 0x020000;
@@ -511,7 +512,7 @@ struct MsprofEvent {  // for MsprofReportEvent
     uint32_t threadId;
     uint32_t requestId; // 0xFFFF means single event
     uint64_t timeStamp;
-    uint64_t reserve;
+    uint64_t reserve = MSPROF_EVENT_FLAG;
     uint64_t itemId;
 };
 

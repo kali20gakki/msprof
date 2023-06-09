@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-# Copyright (c) Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
+# Copyright (c) Huawei Technologies Co., Ltd. 2022-2023. All rights reserved.
 import logging
 import os
 from enum import IntEnum
@@ -17,6 +17,7 @@ from common_func.msvp_common import create_json_for_dict
 from common_func.ms_constant.str_constant import StrConstant
 from tuning.cluster.cluster_parser_factory import ClusterCommunicationParserFactory
 from tuning.cluster.cluster_parser_factory import CommunicationMatrixParserFactory
+from tuning.cluster.cluster_parser_factory import CriticalPathAnalysisParserFactory
 from tuning.cluster.cluster_calculator_factory import SlowRankCalculatorFactory
 from tuning.cluster.cluster_calculator_factory import SlowLinkCalculatorFactory
 from tuning.cluster.cluster_calculator_factory import MatrixCalculatorFactory
@@ -26,6 +27,8 @@ class QueryDataType(IntEnum):
     RUN_ALL_TUNING = -1
     CLUSTER_COMMUNICATION = 6
     COMMUNICATION_MATRIX = 7
+    CLUSTER_COMMUNICATION_CRITICAL_PATH = 9
+    COMMUNICATION_MATRIX_CRITICAL_PATH = 10
 
 
 class ClusterTuningFacade:
@@ -43,31 +46,34 @@ class ClusterTuningFacade:
         self._model_id = params.get("model_id", 0)
         self._iteration_id = params.get("iteration_id", -1)
         self.data_type = params.get("data_type", -1)
-        self.query_data_type_dispatcher = {
-            QueryDataType.CLUSTER_COMMUNICATION: self.cluster_communication,
-            QueryDataType.COMMUNICATION_MATRIX: self.communication_matrix
-        }
 
     def process(self: any) -> None:
         self._check_params_valid()
-        self.dispatch()
+        self.run()
 
-    def dispatch(self: any) -> None:
+    def run(self: any) -> None:
         # export command entry
         if self.data_type == QueryDataType.RUN_ALL_TUNING:
-            for every_data_type in self.query_data_type_dispatcher:
-                self.query_data_type_dispatcher.get(every_data_type)()
+            self.cluster_communication()
+            self.communication_matrix()
         # query command entry
+        elif self.data_type == QueryDataType.CLUSTER_COMMUNICATION or \
+                self.data_type == QueryDataType.CLUSTER_COMMUNICATION_CRITICAL_PATH:
+            enable_critical_path = self.data_type == QueryDataType.CLUSTER_COMMUNICATION_CRITICAL_PATH
+            self.cluster_communication(print_flag=False, enable_critical_path=enable_critical_path)
         else:
-            self.query_data_type_dispatcher.get(self.data_type)(print_flag=False)
+            enable_critical_path = self.data_type == QueryDataType.COMMUNICATION_MATRIX_CRITICAL_PATH
+            self.communication_matrix(print_flag=False, enable_critical_path=enable_critical_path)
 
-    def cluster_communication(self: any, print_flag=True) -> None:
+    def cluster_communication(self: any, print_flag=True, enable_critical_path=False) -> None:
         """
         cluster communication parse and calculate
         """
         logging.info('start to parse cluster communication information!')
+        # Enabling Critical Path Analysis
+        top_hccl_ops = self.critical_path_analysis() if enable_critical_path else None
         parser_factory = ClusterCommunicationParserFactory(self.args)
-        communication_parser = parser_factory.generate_parser()
+        communication_parser = parser_factory.generate_parser(top_hccl_ops)
         logging.info('start to parse hccl events')
         op_info = communication_parser.run()
         logging.info('start to give suggestions according to rules')
@@ -77,31 +83,41 @@ class ClusterTuningFacade:
         slow_link_calculator = SlowLinkCalculatorFactory(op_info).generate_calculator()
         slow_link_calculator.run()
         slow_link_calculator.add_suggestions(op_info)
-        output_file_name = "communication_{}_{}_{}.json".format(
+        out_file_name = "communication_cpa_{}_{}_{}.json" if enable_critical_path else "communication_{}_{}_{}.json"
+        output_file_name = out_file_name.format(
             self._npu_id, parser_factory.max_iters_model_id, self._iteration_id)
         if print_flag:
             print_msg(StrConstant.SUGGESTION + ': ' +
                       op_info.get(StrConstant.TOTAL, {}).get(StrConstant.SLOW_RANK_SUGGESTION, ''))
         self.dump_dict_to_json(output_file_name, op_info)
 
-    def communication_matrix(self: any, print_flag=True) -> None:
+    def communication_matrix(self: any, print_flag=True, enable_critical_path=False) -> None:
         """
         communication matrix parse and calculate
         """
         logging.info('start to parse communication matrix information!')
+        top_hccl_ops = self.critical_path_analysis() if enable_critical_path else None
         parser_factory = CommunicationMatrixParserFactory(self.args)
-        matrix_parser = parser_factory.generate_parser()
+        matrix_parser = parser_factory.generate_parser(top_hccl_ops)
         logging.info('start to parse hccl events')
         op_info = matrix_parser.run()
         logging.info('start to give suggestions according to rules')
         matrix_calculator = MatrixCalculatorFactory(op_info).generate_calculator()
         matrix_calculator.run()
         matrix_calculator.add_suggestions(op_info)
-        output_file_name = "matrix_{}_{}_{}.json".format(
+        out_file_name = "matrix_cpa_{}_{}_{}.json" if enable_critical_path else "matrix_{}_{}_{}.json"
+        output_file_name = out_file_name.format(
             self._npu_id, parser_factory.max_iters_model_id, self._iteration_id)
         if print_flag:
             matrix_calculator.print_suggestion(op_info)
         self.dump_dict_to_json(output_file_name, op_info)
+
+    def critical_path_analysis(self):
+        logging.info("Enabling Critical Path Analysis in CommunicationMatrixParserFactory!")
+        critical_path_parser_factory = CriticalPathAnalysisParserFactory(self.args)
+        critical_path_parser = critical_path_parser_factory.generate_parser()
+        top_hccl_ops = critical_path_parser.run()
+        return top_hccl_ops
 
     def dump_dict_to_json(self: any, output_file_name: str, dict_result: dict):
         output_file_path = PathManager.get_query_result_path(self._collection_path, output_file_name)
@@ -117,7 +133,9 @@ class ClusterTuningFacade:
                  'data': ''}))
 
     def _check_params_valid(self: any) -> None:
-        if not self._is_cluster_all_device_scene():
+        enable_critical_path = self.data_type == QueryDataType.COMMUNICATION_MATRIX_CRITICAL_PATH or \
+                               self.data_type == QueryDataType.CLUSTER_COMMUNICATION_CRITICAL_PATH
+        if not self._is_cluster_all_device_scene() and not enable_critical_path:
             self._npu_id = -1
             print_msg(json.dumps(
                 {'status': NumberConstant.WARN,

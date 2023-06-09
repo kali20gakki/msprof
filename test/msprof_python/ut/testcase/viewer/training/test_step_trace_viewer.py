@@ -6,6 +6,7 @@ from analyzer.scene_base.profiling_scene import ProfilingScene
 from common_func.constant import Constant
 from common_func.db_name_constant import DBNameConstant
 from common_func.empty_class import EmptyClass
+from common_func.info_conf_reader import InfoConfReader
 from constant.constant import ITER_RANGE
 from sqlite.db_manager import DBManager
 from viewer.training.step_trace_viewer import StepTraceViewer
@@ -117,6 +118,29 @@ class TestStepTraceViewer(unittest.TestCase):
                            return_value=0):
             res = StepTraceViewer._reformat_step_trace_data(data_list, ITER_RANGE)
             self.assertEqual(res, [[1, 0, 0, 0, 35557.520000000004, 35460.340000000004, 11.34, 'N/A', 1, 0, 0]])
+
+    def test_get_trace_timeline_data(self):
+        values = [
+            (1, 189746302368077, 0, 189746320443000, 19802989, 0, 0, 2422963027, 9)
+        ]
+        get_next_value = [
+            (189746300646091, 189746300646091),
+            (189746300646091, ),
+        ]
+        all_reduce_value = [
+            (189746300646091, 189746300646091),
+            (189746300646091, ),
+        ]
+        InfoConfReader()._info_json = {"pid": 0}
+        with mock.patch(NAMESPACE + '.StepTraceViewer._StepTraceViewer__select_getnext', return_value=get_next_value), \
+                mock.patch(NAMESPACE + '.StepTraceViewer._StepTraceViewer__select_reduce',
+                           return_value=all_reduce_value), \
+                mock.patch(NAMESPACE + '.StepTraceViewer._StepTraceViewer__time_from_syscnt',
+                           return_value=189746300646091), \
+                mock.patch(NAMESPACE + '.StepTraceViewer.transfer_trace_unit'), \
+                mock.patch(NAMESPACE + '.StepTraceConstant.syscnt_to_micro', return_value=1):
+            res = StepTraceViewer.get_trace_timeline_data(EmptyClass(""), values)
+            self.assertEqual(len(res), 2022)
 
 
 if __name__ == '__main__':

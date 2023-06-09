@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-# Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
+# Copyright (c) Huawei Technologies Co., Ltd. 2020-2023. All rights reserved.
 
 import json
 import os
@@ -35,6 +35,8 @@ class QueryDataType(IntEnum):
     CLUSTER_COMMUNICATION = 6
     COMMUNICATION_MATRIX = 7
     HOST_SYS_USAGE = 8
+    CLUSTER_COMMUNICATION_CRITICAL_PATH = 9
+    COMMUNICATION_MATRIX_CRITICAL_PATH = 10
 
 
 class MsprofQuerySummaryManager:
@@ -52,7 +54,9 @@ class MsprofQuerySummaryManager:
         QueryDataType.PARALLEL_DATA: ClusterParallelAnalysisParser,
         QueryDataType.CLUSTER_COMMUNICATION: ClusterTuningFacade,
         QueryDataType.COMMUNICATION_MATRIX: ClusterTuningFacade,
-        QueryDataType.HOST_SYS_USAGE: HostSysUsageParser
+        QueryDataType.HOST_SYS_USAGE: HostSysUsageParser,
+        QueryDataType.CLUSTER_COMMUNICATION_CRITICAL_PATH: ClusterTuningFacade,
+        QueryDataType.COMMUNICATION_MATRIX_CRITICAL_PATH: ClusterTuningFacade,
     }
 
     def __init__(self: any, args: any) -> None:
