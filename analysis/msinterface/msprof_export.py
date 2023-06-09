@@ -207,7 +207,11 @@ class ExportCommand:
             {'export_type': ExportDataType.HOST_DISK_USAGE,
              'handler': HostDataCheckManager.contain_host_disk_usage_data},
             {'export_type': ExportDataType.PYTORCH_OPERATOR_VIEW,
-             'handler': AiStackDataCheckManager.contain_pytorch_operator_profiler_data}
+             'handler': AiStackDataCheckManager.contain_pytorch_operator_profiler_data},
+            {'export_type': ExportDataType.GE_OPERATOR_MEMORY,
+             'handler': AiStackDataCheckManager.contain_npu_op_mem_data},
+            {'export_type': ExportDataType.GE_MEMORY_RECORD,
+             'handler': AiStackDataCheckManager.contain_npu_op_mem_rec_data},
         ]
     }
     MODEL_ID = "model_id"
