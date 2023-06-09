@@ -70,4 +70,6 @@ class ExportDataType(Enum):
     TASK_QUEUE = 56
     GE_OPERATOR_MEMORY = 57
     GE_MEMORY_RECORD = 58
+    EVENT = 59
+    API = 60
     MSPROF = 100
