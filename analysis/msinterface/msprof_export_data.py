@@ -78,6 +78,8 @@ from viewer.training.step_trace_viewer import StepTraceViewer
 from viewer.training.task_op_viewer import TaskOpViewer
 from viewer.ts_cpu_report import TsCpuReport
 from viewer.npu_mem.npu_op_mem_viewer import NpuOpMemViewer
+from viewer.api_viewer import ApiViewer
+from viewer.event_viewer import EventViewer
 
 
 class MsProfExportDataUtils:
@@ -632,6 +634,14 @@ class MsProfExportDataUtils:
     def _get_npu_op_mem_record(configs: dict, params: dict) -> any:
         return NpuOpMemViewer(configs, params, DBNameConstant.TABLE_NPU_OP_MEM_REC).get_summary_data()
 
+    @staticmethod
+    def _get_event_data(configs: dict, params: dict) -> any:
+        return EventViewer(configs, params).get_timeline_data()
+
+    @staticmethod
+    def _get_api_data(configs: dict, params: dict) -> any:
+        return ApiViewer(configs, params).get_timeline_data()
+
     @classmethod
     def export_data(cls: any, params: dict) -> str:
         """
@@ -656,6 +666,9 @@ class MsProfExportDataUtils:
                                                                params)
             data = handler(configs, params)
             cls.add_timeline_data(params, data)
+            skip_list = ["event", "api"]
+            if params.get(StrConstant.PARAM_DATA_TYPE) in skip_list:
+                return json.dumps({"status": NumberConstant.SKIP})
             return MsprofDataStorage().export_timeline_data_to_json(data, params)
         return json.dumps({
             "status": NumberConstant.ERROR,
@@ -670,7 +683,10 @@ class MsProfExportDataUtils:
         :param data:
         :return:
         """
-        filter_list = ["msprof", "ai_stack_time", "step_trace", "thread_group", "ffts_sub_task_time"]
+        filter_list = [
+            "msprof", "ai_stack_time", "step_trace", "thread_group",
+            "ffts_sub_task_time", "acl", "runtime_api", "ge_op_execute"
+        ]
         if params.get(StrConstant.PARAM_DATA_TYPE) not in filter_list:
             MsprofTimeline().add_export_data(data, params.get(StrConstant.PARAM_DATA_TYPE))
 
