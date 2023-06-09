@@ -115,7 +115,8 @@ class TestCreateStepTable(unittest.TestCase):
         with mock.patch(NAMESPACE + '.StepTableBuilder._connect_step_db', return_value=None), \
                 mock.patch(NAMESPACE + '.StepTableBuilder.process_step_trace'), \
                 mock.patch(NAMESPACE + '.StepTableBuilder._get_step_trace_data'), \
-                mock.patch(NAMESPACE + '.StepTableBuilder.build_table'):
+                mock.patch(NAMESPACE + '.StepTableBuilder.build_table'), \
+                mock.patch(NAMESPACE + '.GetNextCreator.run'):
             StepTableBuilder.run({})
 
     def test_get_step_trace_data(self):

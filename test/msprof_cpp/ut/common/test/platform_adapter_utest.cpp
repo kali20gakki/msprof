@@ -84,11 +84,12 @@ TEST_F(PlatformAdapterUtest, PlatformAdapterInterfaceModule1)
     struct CommonParams comParams;
     PlatformAdapterInterfaceMgr->SetParamsForGlobal(comParams);
     PlatformAdapterInterfaceMgr->SetParamsForStorageLimit(comParams);
-    PlatformAdapterInterfaceMgr->SetParamsForTaskTime();
+    PlatformAdapterInterfaceMgr->SetParamsForTaskTimeL1();
     PlatformAdapterInterfaceMgr->SetParamsForTaskTrace();
     PlatformAdapterInterfaceMgr->SetParamsForTrainingTrace();
     PlatformAdapterInterfaceMgr->SetParamsForAscendCL();
-    PlatformAdapterInterfaceMgr->SetParamsForGE();
+    PlatformAdapterInterfaceMgr->SetParamsForGEL0();
+    PlatformAdapterInterfaceMgr->SetParamsForGEL1();
     PlatformAdapterInterfaceMgr->SetParamsForRuntime();
     PlatformAdapterInterfaceMgr->SetParamsForAICPU();
     PlatformAdapterInterfaceMgr->SetParamsForHCCL();
@@ -159,7 +160,7 @@ TEST_F(PlatformAdapterUtest, PlatformAdapterInterfaceModule3)
     PlatformAdapterInterfaceMgr->supportSwitch_ = {
         PLATFORM_TASK_ASCENDCL, PLATFORM_TASK_GRAPH_ENGINE, PLATFORM_TASK_RUNTIME, PLATFORM_TASK_AICPU,
         PLATFORM_TASK_HCCL, PLATFORM_TASK_TS_KEYPOINT, PLATFORM_TASK_TS_KEYPOINT_TRAINING, PLATFORM_TASK_TS_MEMCPY,
-        PLATFORM_TASK_AIC_METRICS, PLATFORM_TASK_AIV_METRICS, PLATFORM_TASK_STARS_ACSQ,
+        PLATFORM_TASK_AIC_METRICS, PLATFORM_TASK_AIV_METRICS, PLATFORM_TASK_STARS_ACSQ, PLATFORM_TASK_MEMORY,
         PLATFORM_SYS_DEVICE_SYS_CPU_MEM_USAGE, PLATFORM_SYS_DEVICE_ALL_PID_CPU_MEM_USAGE,
         PLATFORM_SYS_DEVICE_TS_CPU_HOT_FUNC_PMU, PLATFORM_SYS_DEVICE_AI_CTRL_CPU_HOT_FUNC_PMU, PLATFORM_SYS_DEVICE_LLC,
         PLATFORM_SYS_DEVICE_DDR, PLATFORM_SYS_DEVICE_HBM, PLATFORM_SYS_DEVICE_NIC, PLATFORM_SYS_DEVICE_ROCE,
@@ -189,6 +190,7 @@ TEST_F(PlatformAdapterUtest, PlatformAdapterInterfaceModule3)
     PlatformAdapterInterfaceMgr->SetParamsForHostNetwork();
     PlatformAdapterInterfaceMgr->SetParamsForHostAllPidCpu(samplingInterval);
     PlatformAdapterInterfaceMgr->SetParamsForHostAllPidMem(samplingInterval);
+    PlatformAdapterInterfaceMgr->SetParamsForTaskMemory();
     params = nullptr;
 }
 

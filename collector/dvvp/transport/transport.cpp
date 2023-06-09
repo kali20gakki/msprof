@@ -18,7 +18,7 @@
 #include "securec.h"
 #include "param_validation.h"
 #include "adx_prof_api.h"
-#include "proto/profiler.pb.h"
+#include "proto/msprofiler.pb.h"
 
 namespace analysis {
 namespace dvvp {

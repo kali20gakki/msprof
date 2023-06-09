@@ -16,7 +16,7 @@ from common_func.section_calculator import SectionCalculator
 from common_func.trace_view_header_constant import TraceViewHeaderConstant
 from common_func.trace_view_manager import TraceViewManager
 from msmodel.hccl.hccl_model import HcclViewModel
-from msmodel.task_time.task_time import OpSummaryViewModel
+from msmodel.stars.op_summary_model import OpSummaryModel
 
 
 class OverlapType(Enum):
@@ -39,7 +39,12 @@ class PipelineOverlapViewer:
         if not os.path.exists(PathManager.get_db_path(self._project_path, DBNameConstant.DB_AICORE_OP_SUMMARY)):
             logging.warning("Op summary data not found, no need to calculate the overlap.")
             return ""
-        with OpSummaryViewModel(self._project_path) as _model:
+        sample_config = {
+            'result_dir': self._project_path,
+            'iter_id': Constant.DEFAULT_INVALID_VALUE,
+            'model_id': Constant.DEFAULT_INVALID_VALUE
+        }
+        with OpSummaryModel(sample_config) as _model:
             ai_core_data = _model.get_operator_data_by_task_type(Constant.TASK_TYPE_AI_CORE)
             ai_cpu_data = _model.get_operator_data_by_task_type(Constant.TASK_TYPE_AI_CPU)
         compute_data = SectionCalculator.merge_continuous_intervals(ai_core_data + ai_cpu_data)

@@ -1,7 +1,7 @@
 #include <iostream>
 #include "gtest/gtest.h"
 #include "mockcpp/mockcpp.hpp"
-#include "proto/profiler.pb.h"
+#include "proto/msprofiler.pb.h"
 #include "message/dispatcher.h"
 
 class MESSAGE_DISPATCHER_TEST: public testing::Test {

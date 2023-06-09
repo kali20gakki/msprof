@@ -37,12 +37,12 @@ class TestClusterTuningFacade(unittest.TestCase):
     def test_run(self):
         with mock.patch(NAMESPACE + '.ClusterTuningFacade._check_data_type_valid'), \
                 mock.patch(NAMESPACE + '.ClusterTuningFacade._check_collection_dir_valid'), \
-                mock.patch(NAMESPACE + '.ClusterTuningFacade.dispatch'):
+                mock.patch(NAMESPACE + '.ClusterTuningFacade.run'):
             ClusterTuningFacade(self.params).process()
 
     def test_run_invalid_collection_prof1(self):
         with mock.patch(NAMESPACE + '.ClusterTuningFacade._check_data_type_valid'), \
-             mock.patch(NAMESPACE + '.ClusterTuningFacade.dispatch'), \
+             mock.patch(NAMESPACE + '.ClusterTuningFacade.run'), \
              pytest.raises(ProfException) as err:
             ClusterTuningFacade(self.params).process()
             self.assertEqual(ProfException.PROF_CLUSTER_DIR_ERROR, err.value.code)
@@ -50,7 +50,7 @@ class TestClusterTuningFacade(unittest.TestCase):
     def test_run_invalid_model_id_prof(self):
         with mock.patch(NAMESPACE + '.ClusterTuningFacade._check_data_type_valid'), \
                 mock.patch(NAMESPACE + '.ClusterTuningFacade._check_collection_dir_valid'), \
-                mock.patch(NAMESPACE + '.ClusterTuningFacade.dispatch'), \
+                mock.patch(NAMESPACE + '.ClusterTuningFacade.run'), \
                 pytest.raises(ProfException) as err:
             params = {"collection_path": self.DIR,
                       "npu_id": 1,
@@ -63,7 +63,7 @@ class TestClusterTuningFacade(unittest.TestCase):
     def test_run_model_id_is_none(self):
         with mock.patch(NAMESPACE + '.ClusterTuningFacade._check_data_type_valid'), \
                 mock.patch(NAMESPACE + '.ClusterTuningFacade._check_collection_dir_valid'), \
-                mock.patch(NAMESPACE + '.ClusterTuningFacade.dispatch'):
+                mock.patch(NAMESPACE + '.ClusterTuningFacade.run'):
             params = {"collection_path": self.DIR,
                       "npu_id": 1,
                       "iteration_id": 1,
@@ -73,7 +73,7 @@ class TestClusterTuningFacade(unittest.TestCase):
     def test_run_invalid_data_type_prof(self):
         with mock.patch(NAMESPACE + '.QueryArgumentCheck.check_arguments_valid'), \
                 mock.patch(NAMESPACE + '.ClusterTuningFacade._check_collection_dir_valid'), \
-                mock.patch(NAMESPACE + '.ClusterTuningFacade.dispatch'), \
+                mock.patch(NAMESPACE + '.ClusterTuningFacade.run'), \
                 pytest.raises(ProfException) as err:
             params = {"collection_path": self.DIR,
                       "npu_id": 1,
@@ -86,7 +86,7 @@ class TestClusterTuningFacade(unittest.TestCase):
     def test_run_data_type_is_none(self):
         with mock.patch(NAMESPACE + '.QueryArgumentCheck.check_arguments_valid'), \
                 mock.patch(NAMESPACE + '.ClusterTuningFacade._check_collection_dir_valid'), \
-                mock.patch(NAMESPACE + '.ClusterTuningFacade.dispatch'):
+                mock.patch(NAMESPACE + '.ClusterTuningFacade.run'):
             params = {"collection_path": self.DIR,
                       "npu_id": 1,
                       "iteration_id": 1,
@@ -95,7 +95,7 @@ class TestClusterTuningFacade(unittest.TestCase):
 
     def test_run_invalid_iteration_prof(self):
         with mock.patch(NAMESPACE + '.ClusterTuningFacade._check_collection_dir_valid'), \
-                mock.patch(NAMESPACE + '.ClusterTuningFacade.dispatch'), \
+                mock.patch(NAMESPACE + '.ClusterTuningFacade.run'), \
                 mock.patch(NAMESPACE + '.ClusterTuningFacade._check_data_type_valid'), \
                 pytest.raises(ProfException) as err:
             params = {"collection_path": self.DIR,
@@ -108,7 +108,7 @@ class TestClusterTuningFacade(unittest.TestCase):
 
     def test_run_invalid_iteration2_prof(self):
         with mock.patch(NAMESPACE + '.ClusterTuningFacade._check_collection_dir_valid'), \
-                mock.patch(NAMESPACE + '.ClusterTuningFacade.dispatch'), \
+                mock.patch(NAMESPACE + '.ClusterTuningFacade.run'), \
                 mock.patch(NAMESPACE + '.ClusterTuningFacade._check_data_type_valid'), \
                 pytest.raises(ProfException) as err:
             params = {"collection_path": self.DIR,

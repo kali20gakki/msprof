@@ -67,8 +67,7 @@ class DBNameConstant(metaclass=ABCMeta):
     DB_NPU_MEM = "npu_mem.db"
     DB_SYNC_ACL_NPU = "sync_acl_npu.db"
     DB_FREQ = "freq.db"
-    DB_API_DATA = "api.db"
-    DB_EVENT_DATA = "event.db"
+    DB_API_EVENT_DATA = "api_event.db"
     DB_HCCL_INFO = "hccl_info.db"
     DB_MULTI_THREAD = "multi_thread.db"
     DB_TENSOR_ADD_INFO = "tensor_info.db"
@@ -77,6 +76,7 @@ class DBNameConstant(metaclass=ABCMeta):
     DB_GRAPH_ADD_INFO = "graph_id_map.db"
     DB_CTX_ID = "ctx_id.db"
     DB_MEMORY_APPLICATION = "memory_application.db"
+    DB_MEMORY_OP = "task_memory.db"
 
     # DB tables
     TABLE_ACL_DATA = "AclData"
@@ -124,6 +124,7 @@ class DBNameConstant(metaclass=ABCMeta):
     TABLE_TIME = 'Time'
     TABLE_TRACE_FILES = 'files'
     TABLE_TRAINING_TRACE = 'training_trace'
+    TABLE_GET_NEXT = 'get_next'
     # step trace
     TABLE_STEP_TRACE = "StepTrace"
     TABLE_TS_MEMCPY = "TsMemcpy"
@@ -250,6 +251,11 @@ class DBNameConstant(metaclass=ABCMeta):
 
     # npu mem of process and device
     TABLE_NPU_MEM = "NpuMem"
+
+    # npu operator mem
+    TABLE_NPU_OP_MEM_RAW = "NpuOpMemRaw"
+    TABLE_NPU_OP_MEM = "NpuOpMem"
+    TABLE_NPU_OP_MEM_REC = "NpuOpMemRec"
 
     # sync_acl_npu
     TABLE_TORCH_TO_ACL = "TorchAclRelation"

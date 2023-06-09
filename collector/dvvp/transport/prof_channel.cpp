@@ -13,7 +13,7 @@
 #include "message/codec.h"
 #include "msprof_dlog.h"
 #include "ascend_hal.h"
-#include "proto/profiler.pb.h"
+#include "proto/msprofiler.pb.h"
 #include "securec.h"
 #include "uploader_mgr.h"
 

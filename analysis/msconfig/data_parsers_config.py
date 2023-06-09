@@ -174,17 +174,16 @@ class DataParsersConfig(MetaConfig):
             ('path', 'msparser.npu_mem.npu_mem_parser'),
             ('chip_model', '0,1,3,4,5,7')
         ],
+        'NpuOpMemParser': [
+            ('path', 'msparser.npu_mem.npu_op_mem_parser'),
+            ('chip_model', '0,1,2,3,4,5,7')
+        ],
         'FreqParser': [
             ('path', 'msparser.freq.freq_parser'),
             ('chip_model', '5')
         ],
-        'ApiDataParser': [
-            ('path', 'msparser.api.api_data_parser'),
-            ('chip_model', '0,1,2,3,4,5,7'),
-            ('level', '2')
-        ],
-        'EventDataParser': [
-            ('path', 'msparser.event.event_data_parser'),
+        'ApiEventParser': [
+            ('path', 'msparser.api_event.api_event_parser'),
             ('chip_model', '0,1,2,3,4,5,7'),
             ('level', '2')
         ],

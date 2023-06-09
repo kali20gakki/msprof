@@ -114,41 +114,27 @@ void ParamsAdapterAclApi::ProfTaskCfgToContainer(const ProfConfig * apiCfg,
         paramContainer_[INPUT_CFG_COM_STORAGE_LIMIT] = argsArr[ACL_PROF_STORAGE_LIMIT];
         setConfig_.insert(INPUT_CFG_COM_STORAGE_LIMIT);
     }
-    uint64_t dataTypeConfig = apiCfg->dataTypeConfig;
-    ProfAicoreMetrics aicMetrics = apiCfg->aicoreMetrics;
-    if (dataTypeConfig & PROF_TASK_TIME_MASK) {
-        paramContainer_[INPUT_CFG_COM_TASK_TIME] = MSVP_PROF_ON;
-        setConfig_.insert(INPUT_CFG_COM_TASK_TIME);
+    ProfMetricsCfgToContainer(apiCfg->aicoreMetrics, apiCfg->dataTypeConfig, argsArr);
+    const std::map<uint64_t, InputCfg> profCfgList = {
+        {PROF_TASK_TIME_MASK, INPUT_CFG_COM_TASK_TIME_L1},
+        {PROF_TASK_TIME_L0_MASK, INPUT_CFG_COM_TASK_TIME_L0},
+        {PROF_KEYPOINT_TRACE_MASK, INPUT_CFG_COM_TRAINING_TRACE},
+        {PROF_L2CACHE_MASK, INPUT_CFG_COM_L2},
+        {PROF_ACL_API_MASK, INPUT_CFG_COM_ASCENDCL},
+        {PROF_AICPU_TRACE_MASK, INPUT_CFG_COM_AICPU},
+        {PROF_RUNTIME_API_MASK, INPUT_CFG_COM_RUNTIME_API},
+        {PROF_HCCL_TRACE_MASK, INPUT_CFG_COM_HCCL},
+        {PROF_MSPROFTX_MASK, INPUT_CFG_COM_MSPROFTX},
+    };
+    for (auto cfg : profCfgList) {
+        if (apiCfg->dataTypeConfig & cfg.first) {
+            paramContainer_[cfg.second] = MSVP_PROF_ON;
+            setConfig_.insert(cfg.second);
+        }
     }
-    // training trace
-    if (dataTypeConfig & PROF_KEYPOINT_TRACE_MASK) {
-        paramContainer_[INPUT_CFG_COM_TRAINING_TRACE] = MSVP_PROF_ON;
-        setConfig_.insert(INPUT_CFG_COM_TRAINING_TRACE);
-    }
-    ProfMetricsCfgToContainer(aicMetrics, dataTypeConfig, argsArr);
-    if (dataTypeConfig & PROF_L2CACHE_MASK) {
-        paramContainer_[INPUT_CFG_COM_L2] = MSVP_PROF_ON;
-        setConfig_.insert(INPUT_CFG_COM_L2);
-    }
-    if (dataTypeConfig & PROF_ACL_API) {
-        paramContainer_[INPUT_CFG_COM_ASCENDCL] = MSVP_PROF_ON;
-        setConfig_.insert(INPUT_CFG_COM_ASCENDCL);
-    }
-    if (dataTypeConfig & PROF_AICPU_TRACE) {
-        paramContainer_[INPUT_CFG_COM_AICPU] = MSVP_PROF_ON;
-        setConfig_.insert(INPUT_CFG_COM_AICPU);
-    }
-    if (dataTypeConfig & PROF_RUNTIME_API) {
-        paramContainer_[INPUT_CFG_COM_RUNTIME_API] = MSVP_PROF_ON;
-        setConfig_.insert(INPUT_CFG_COM_RUNTIME_API);
-    }
-    if (dataTypeConfig & PROF_HCCL_TRACE) {
-        paramContainer_[INPUT_CFG_COM_HCCL] = MSVP_PROF_ON;
-        setConfig_.insert(INPUT_CFG_COM_HCCL);
-    }
-    if (dataTypeConfig & PROF_MSPROFTX) {
-        paramContainer_[INPUT_CFG_COM_MSPROFTX] = MSVP_PROF_ON;
-        setConfig_.insert(INPUT_CFG_COM_MSPROFTX);
+    if (apiCfg->dataTypeConfig & PROF_TASK_MEMORY) {
+        paramContainer_[INPUT_CFG_COM_TASK_MEMORY] = MSVP_PROF_ON;
+        setConfig_.insert(INPUT_CFG_COM_TASK_MEMORY);
     }
 }
 

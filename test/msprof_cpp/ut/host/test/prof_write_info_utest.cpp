@@ -7,7 +7,7 @@
 #include "info_json.h"
 #include "mmpa_api.h"
 #include "platform/platform.h"
-#include "proto/profiler.pb.h"
+#include "proto/msprofiler.pb.h"
 #include "common-utils-stub.h"
 
 using namespace analysis::dvvp::proto;

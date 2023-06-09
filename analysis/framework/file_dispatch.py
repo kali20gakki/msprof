@@ -11,13 +11,12 @@ from common_func.file_name_manager import get_acl_hash_compiles
 from common_func.file_name_manager import get_ai_core_compiles
 from common_func.file_name_manager import get_ai_cpu_compiles
 from common_func.file_name_manager import get_aiv_compiles
-from common_func.file_name_manager import get_api_data_compiles
 from common_func.file_name_manager import get_biu_compiles
 from common_func.file_name_manager import get_ctrl_cpu_compiles
 from common_func.file_name_manager import get_data_preprocess_compiles
 from common_func.file_name_manager import get_ddr_compiles
 from common_func.file_name_manager import get_dvpp_compiles
-from common_func.file_name_manager import get_event_data_compiles
+from common_func.file_name_manager import get_api_event_compiles
 from common_func.file_name_manager import get_ffts_pmu_compiles
 from common_func.file_name_manager import get_file_name_pattern_match
 from common_func.file_name_manager import get_freq_compiles
@@ -56,6 +55,7 @@ from common_func.file_name_manager import get_msproftx_torch_compiles
 from common_func.file_name_manager import get_multi_thread_compiles
 from common_func.file_name_manager import get_nic_compiles
 from common_func.file_name_manager import get_npu_mem_compiles
+from common_func.file_name_manager import get_npu_op_mem_compiles
 from common_func.file_name_manager import get_parallel_strategy_compiles
 from common_func.file_name_manager import get_pcie_compiles
 from common_func.file_name_manager import get_pid_cpu_usage_compiles
@@ -134,10 +134,10 @@ class FileDispatch:
         DataTag.MSPROFTX_TORCH: get_msproftx_torch_compiles(),
         DataTag.MSPROFTX_CANN: get_msproftx_cann_compiles(),
         DataTag.NPU_MEM: get_npu_mem_compiles(),
+        DataTag.MEMORY_OP: get_npu_op_mem_compiles(),
         DataTag.MSPROFTX_PIPELINE: get_msproftx_pipeline_compiles(),
         DataTag.FREQ: get_freq_compiles(),
-        DataTag.API: get_api_data_compiles(),
-        DataTag.EVENT: get_event_data_compiles(),
+        DataTag.API_EVENT: get_api_event_compiles(),
         DataTag.HASH_DICT: get_hash_data_compiles(),
         DataTag.TASK_TRACK: get_task_track_compact_compiles(),
         DataTag.MEMCPY_INFO: get_memcpy_info_compact_compiles(),

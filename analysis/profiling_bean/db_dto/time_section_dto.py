@@ -7,6 +7,9 @@ from common_func.constant import Constant
 
 class TimeSectionDto:
     def __init__(self: any):
+        self._op_name = None
+        self._task_type = None
+        self._duration_time = Constant.DEFAULT_INVALID_VALUE
         self._model_id = Constant.DEFAULT_INVALID_VALUE
         self._index_id = Constant.DEFAULT_INVALID_VALUE
         self._stream_id = Constant.DEFAULT_INVALID_VALUE
@@ -17,6 +20,18 @@ class TimeSectionDto:
 
     def __lt__(self, other):
         return self.start_time < other.start_time
+
+    @property
+    def op_name(self: any) -> any:
+        return self._op_name
+
+    @property
+    def task_type(self: any) -> any:
+        return self._task_type
+
+    @property
+    def duration_time(self: any) -> any:
+        return float(self._duration_time)
 
     @property
     def model_id(self: any) -> any:
@@ -46,9 +61,21 @@ class TimeSectionDto:
     def overlap_time(self: any) -> any:
         return float(self._overlap_time)
 
+    @op_name.setter
+    def op_name(self: any, value: any) -> None:
+        self._op_name = value
+
+    @task_type.setter
+    def task_type(self: any, value: any) -> None:
+        self._task_type = value
+
     @model_id.setter
     def model_id(self: any, value: any) -> None:
         self._model_id = value
+
+    @duration_time.setter
+    def duration_time(self: any, value: any) -> None:
+        self._duration_time = value
 
     @index_id.setter
     def index_id(self: any, value: any) -> None:

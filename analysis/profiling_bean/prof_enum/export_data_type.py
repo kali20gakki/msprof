@@ -68,4 +68,6 @@ class ExportDataType(Enum):
     PYTORCH_OPERATOR_VIEW = 54
     NPU_MEM = 55
     TASK_QUEUE = 56
+    GE_OPERATOR_MEMORY = 57
+    GE_MEMORY_RECORD = 58
     MSPROF = 100

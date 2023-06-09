@@ -10,7 +10,7 @@
 #include <map>
 #include <list>
 #include "message/prof_params.h"
-#include "proto/profiler.pb.h"
+#include "proto/msprofiler.pb.h"
 #include "queue/bound_queue.h"
 #include "singleton/singleton.h"
 #include "thread/thread.h"
