@@ -316,5 +316,15 @@ class MsProfExportDataConfig(MetaConfig):
         ],
         'task_queue': [
             ('handler', '_get_task_queue_timeline')
+        ],
+        'event': [
+            ('handler', '_get_event_data'),
+            ('db', 'api_event.db'),
+            ('table', 'EventData')
+        ],
+        'api': [
+            ('handler', '_get_api_data'),
+            ('db', 'api_event.db'),
+            ('table', 'ApiData')
         ]
     }
