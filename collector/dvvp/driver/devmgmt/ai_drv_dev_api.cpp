@@ -9,12 +9,14 @@
 #include "driver_plugin.h"
 #include "msprof_dlog.h"
 #include "msprof_error_manager.h"
+#include "config/config_manager.h"
 
 namespace analysis {
 namespace dvvp {
 namespace driver {
 using namespace analysis::dvvp::common::error;
 using namespace Collector::Dvvp::Plugin;
+using namespace Analysis::Dvvp::Common::Config;
 
 int DrvGetDevNum(void)
 {
@@ -229,8 +231,27 @@ int DrvGetAiCoreNum(uint32_t deviceId, int64_t &aiCoreNum)
 
 int DrvGetAivNum(uint32_t deviceId, int64_t &aivNum)
 {
-    aivNum = 8; // 8: aiv core num have to wait drv ready,just pass 8 at now
-    MSPROF_LOGI("Succeeded to DrvGetAivNum, deviceId=%d", deviceId);
+    const std::set<PlatformType> unSupportPlatformList = {
+        PlatformType::MINI_TYPE, PlatformType::CLOUD_TYPE, PlatformType::DC_TYPE
+    };
+    PlatformType platform = ConfigManager::instance()->GetPlatformType();
+    if (unSupportPlatformList.find(platform) != unSupportPlatformList.end()) {
+        aivNum = 0;
+        MSPROF_LOGI("Driver doesn't support DrvGetAivNum by halGetDeviceInfo interface");
+        return PROFILING_SUCCESS;
+    }
+    drvError_t ret = DriverPlugin::instance()->MsprofHalGetDeviceInfo(deviceId,
+        MODULE_TYPE_VECTOR_CORE, INFO_TYPE_CORE_NUM, &aivNum);
+    if (ret == DRV_ERROR_NOT_SUPPORT) {
+        MSPROF_LOGW("Driver doesn't support DrvGetAivNum by halGetDeviceInfo interface, "
+            "deviceId=%u, ret=%d", deviceId, static_cast<int32_t>(ret));
+        return PROFILING_SUCCESS;
+    } else if (ret != DRV_ERROR_NONE) {
+        MSPROF_LOGE("Failed to DrvGetAivNum, deviceId=%d, ret=%d", deviceId, static_cast<int>(ret));
+        MSPROF_CALL_ERROR("EK9999", "Failed to DrvGetAivNum, deviceId=%d, ret=%d", deviceId, static_cast<int>(ret));
+        return PROFILING_FAILED;
+    }
+    MSPROF_LOGI("Succeeded to DrvGetAivNum, deviceId=%u, aivNum=%lld", deviceId, aivNum);
     return PROFILING_SUCCESS;
 }
 

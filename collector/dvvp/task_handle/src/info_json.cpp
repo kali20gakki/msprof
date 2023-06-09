@@ -357,6 +357,11 @@ int InfoJson::GetDevInfo(int deviceId, struct DeviceInfo &devInfo)
         MSPROF_LOGE("Failed to DrvGetAiCpuCoreNum, deviceId=%d", deviceId);
         return PROFILING_FAILED;
     }
+    ret = analysis::dvvp::driver::DrvGetAivNum(devId, devInfo.ai_vector_num);
+    if (ret != PROFILING_SUCCESS) {
+        MSPROF_LOGE("Failed to DrvGetAivNum, deviceId=%d", deviceId);
+        return PROFILING_FAILED;
+    }
     ret = analysis::dvvp::driver::DrvGetAiCpuCoreId(devId, devInfo.ai_cpu_core_id);
     if (ret != PROFILING_SUCCESS) {
         MSPROF_LOGE("Failed to DrvGetAiCpuCoreId, deviceId=%d", deviceId);
@@ -407,6 +412,7 @@ int InfoJson::AddDeviceInfo(SHARED_PTR_ALIA<InfoMain> infoMain)
         infoDevice->set_ts_cpu_core_num(devInfo.ts_cpu_core_num);
         infoDevice->set_ai_cpu_core_num(devInfo.ai_cpu_core_num);
         infoDevice->set_ai_core_num(devInfo.ai_core_num);
+        infoDevice->set_aiv_num(devInfo.ai_vector_num);
         infoDevice->set_ai_cpu_core_id(devInfo.ai_cpu_core_id);
         infoDevice->set_ai_core_id(devInfo.ai_core_id);
         infoDevice->set_aicpu_occupy_bitmap(devInfo.aicpu_occupy_bitmap);
