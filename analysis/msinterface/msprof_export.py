@@ -119,6 +119,10 @@ class ExportCommand:
              'handler': AiStackDataCheckManager.contain_acc_pmu_data},
             {'export_type': ExportDataType.TASK_QUEUE,
              'handler': AiStackDataCheckManager.contain_task_queue_data},
+            {'export_type': ExportDataType.EVENT,
+             'handler': AiStackDataCheckManager.contain_event_data},
+            {'export_type': ExportDataType.API,
+             'handler': AiStackDataCheckManager.contain_api_data},
             {'export_type': ExportDataType.MSPROF,
              'handler': lambda result_dir, device_id=None: True}
         ],
@@ -468,6 +472,8 @@ class ExportCommand:
 
     def _handle_export_data(self: any, params: dict) -> None:
         result = json.loads(MsProfExportDataUtils.export_data(params))
+        if result.get('status', NumberConstant.EXCEPTION) == NumberConstant.SKIP:
+            return
         if result.get('status', NumberConstant.EXCEPTION) == NumberConstant.SUCCESS:
             self._print_export_info(params, result.get('data', []))
         else:

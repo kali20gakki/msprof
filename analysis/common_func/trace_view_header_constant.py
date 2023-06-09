@@ -45,6 +45,8 @@ class TraceViewHeaderConstant:
     PROCESS_THREAD_TASK = 'Thread Task Time'
     PROCESS_PTA = "PTA"
     PROCESS_OVERLAP_ANALYSE = "Overlap Analysis"
+    PROCESS_API = "Api"
+    PROCESS_EVENT = "Event"
 
     # trace general layer
     GENERAL_LAYER_CPU = "CPU"
@@ -79,6 +81,8 @@ class TraceViewHeaderConstant:
                                 LAYER_ASCEND_HW_SORT),
         PROCESS_STEP_TRACE: LayerInfo(COMPONENT_LAYER_ASCEND_HW, GENERAL_LAYER_NPU,
                                       LAYER_ASCEND_HW_SORT),
+        PROCESS_API: LayerInfo(COMPONENT_LAYER_CANN, GENERAL_LAYER_CPU, LAYER_CANN_SORT),
+        PROCESS_EVENT: LayerInfo(COMPONENT_LAYER_CANN, GENERAL_LAYER_CPU, LAYER_CANN_SORT),
     }
 
     @classmethod

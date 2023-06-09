@@ -23,7 +23,7 @@ class AiStackDataCheckManager(DataCheckManager):
         The data path contain acl data or not
         """
         return device_id != NumberConstant.HOST_ID and \
-               DBManager.check_item_in_table(PathManager.get_db_path(result_dir, DBNameConstant.DB_API_EVENT_DATA),
+               DBManager.check_item_in_table(PathManager.get_db_path(result_dir, DBNameConstant.DB_API_EVENT),
                                              DBNameConstant.TABLE_API_DATA, 'level', 'acl')
 
     @classmethod
@@ -32,7 +32,7 @@ class AiStackDataCheckManager(DataCheckManager):
         The data path contain runtime.api. data or not
         """
         return device_id != NumberConstant.HOST_ID and \
-               DBManager.check_item_in_table(PathManager.get_db_path(result_dir, DBNameConstant.DB_API_EVENT_DATA),
+               DBManager.check_item_in_table(PathManager.get_db_path(result_dir, DBNameConstant.DB_API_EVENT),
                                              DBNameConstant.TABLE_API_DATA, 'level', 'runtime')
 
     @classmethod
@@ -390,3 +390,19 @@ class AiStackDataCheckManager(DataCheckManager):
         return device_id != NumberConstant.HOST_ID and \
                DBManager.check_tables_in_db(PathManager.get_db_path(result_dir, DBNameConstant.DB_MEMORY_OP),
                                             DBNameConstant.TABLE_NPU_OP_MEM_REC)
+
+    @classmethod
+    def contain_event_data(cls: any, result_dir: str, device_id: int = None) -> bool:
+        """
+        The data path contain event data or not
+        """
+        return device_id != NumberConstant.HOST_ID and DBManager.check_tables_in_db(
+            PathManager.get_db_path(result_dir, DBNameConstant.DB_API_EVENT), DBNameConstant.TABLE_EVENT_DATA)
+
+    @classmethod
+    def contain_api_data(cls: any, result_dir: str, device_id: int = None) -> bool:
+        """
+        The data path contain api data or not
+        """
+        return device_id != NumberConstant.HOST_ID and DBManager.check_tables_in_db(
+            PathManager.get_db_path(result_dir, DBNameConstant.DB_API_EVENT), DBNameConstant.TABLE_API_DATA)
