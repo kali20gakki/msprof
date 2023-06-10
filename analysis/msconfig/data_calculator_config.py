@@ -147,6 +147,6 @@ class DataCalculatorConfig(MetaConfig):
         'NpuOpMemCalculator': [
             ('path', 'mscalculate.npu_mem.npu_op_mem_calculator'),
             ('chip_model', '0,1,2,3,4,5,7'),
-            ('position', 'D')
+            ('position', 'H')
         ],
     }
