@@ -27,9 +27,9 @@ NAMESPACE = 'mscalculate.npu_mem.npu_op_mem_calculator'
 
 class TestNpuOpMemCalculator(unittest.TestCase):
 
-    def test_calculator_connect_db(self):
+    def test_connect_db(self):
         check = NpuOpMemCalculator({}, CONFIG)
-        check.calculator_connect_db()
+        check._connect_db()
 
     def test_calculate(self):
         with mock.patch(NAMESPACE + '.NpuOpMemCalculator._calc_memory_record'), \
@@ -54,7 +54,7 @@ class TestNpuOpMemCalculator(unittest.TestCase):
             result = check.save()
 
     def test_ms_run(self):
-        with mock.patch(NAMESPACE + '.NpuOpMemCalculator.calculator_connect_db'), \
+        with mock.patch(NAMESPACE + '.NpuOpMemCalculator._connect_db'), \
                 mock.patch(NAMESPACE + '.NpuOpMemCalculator.calculate'), \
                 mock.patch(NAMESPACE + '.NpuOpMemCalculator.save'):
             check = NpuOpMemCalculator({}, CONFIG)
