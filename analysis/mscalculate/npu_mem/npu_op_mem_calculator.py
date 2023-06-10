@@ -5,6 +5,7 @@ import logging
 from collections import namedtuple
 
 from common_func.db_manager import DBManager
+from common_func.ms_constant.number_constant import NumberConstant
 from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
@@ -33,10 +34,6 @@ class NpuOpMemCalculator(ICalculator, MsMultiProcess):
         self._memory_record = []
         self._opeartor_memory = []
 
-    def calculator_connect_db(self: any) -> None:
-        self._model_raw.init()
-        self._model_mem.init()
-        self._model_rec.init()
 
     def calculate(self: any) -> None:
         self._op_data = self._model_raw.get_table_data(DBNameConstant.TABLE_NPU_OP_MEM_RAW)
@@ -63,9 +60,14 @@ class NpuOpMemCalculator(ICalculator, MsMultiProcess):
         calculate for task scheduler
         :return:
         """
-        self.calculator_connect_db()
+        self._connect_db()
         self.calculate()
         self.save()
+
+    def _connect_db(self: any) -> None:
+        self._model_raw.init()
+        self._model_mem.init()
+        self._model_rec.init()
 
     def _calc_operator_memory(self: any) -> None:
         allocated_data = {}
@@ -75,8 +77,8 @@ class NpuOpMemCalculator(ICalculator, MsMultiProcess):
                                    ['size', 'timestamp', 'total_allocate_memory',
                                     'total_reserve_memory', 'allocated_size'])
         for item in self._op_data:
+            allocated_size += item.size
             if item.size > 0:
-                allocated_size += item.size
                 item_key = OperatorKey(operator=item.operator, addr=item.addr, device_type=item.device_type)
                 item_value = OperatorValue(size=item.size, timestamp=item.timestamp,
                                            total_allocate_memory=item.total_allocate_memory,
@@ -84,7 +86,6 @@ class NpuOpMemCalculator(ICalculator, MsMultiProcess):
                                            allocated_size=allocated_size)
                 allocated_data[item_key] = item_value
             elif item.size < 0:
-                allocated_size += item.size
                 item_key = OperatorKey(operator=item.operator, addr=item.addr, device_type=item.device_type)
                 item_value = OperatorValue(size=item.size, timestamp=item.timestamp,
                                            total_allocate_memory=item.total_allocate_memory,
@@ -103,7 +104,10 @@ class NpuOpMemCalculator(ICalculator, MsMultiProcess):
                     allocated_data.pop(item_key)
         if len(allocated_data) > 0:
             for key, value in allocated_data.items():
-                self._opeartor_memory.append([key[0], value[0], value[1], "", "", value[4], value[3], "", "", key[2]])
+                self._opeartor_memory.append([key.operator, value.size, value.timestamp,
+                                              NumberConstant.EXCEPTION, NumberConstant.EXCEPTION,
+                                              value.allocated_size, value.total_reserve_memory,
+                                              NumberConstant.EXCEPTION, NumberConstant.EXCEPTION, key.device_type])
         self._reformat_data()
 
     def _calc_memory_record(self: any) -> None:

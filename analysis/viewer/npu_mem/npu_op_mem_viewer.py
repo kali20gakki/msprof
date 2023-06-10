@@ -35,12 +35,16 @@ class NpuOpMemViewer:
                 summary_data = [[datum.name,
                                  datum.size / NumberConstant.KILOBYTE,
                                  int(datum.allocation_time) / NumberConstant.MILLI_SECOND,
-                                 int(datum.release_time) / NumberConstant.MILLI_SECOND,
-                                 int(datum.duration) / NumberConstant.MILLI_SECOND,
+                                 int(datum.release_time) / NumberConstant.MILLI_SECOND \
+                                     if datum.release_time != NumberConstant.EXCEPTION else "",
+                                 int(datum.duration) / NumberConstant.MILLI_SECOND \
+                                     if datum.duration != NumberConstant.EXCEPTION else "",
                                  datum.allocation_total_allocated / NumberConstant.KILOBYTE / NumberConstant.KILOBYTE,
                                  datum.allocation_total_reserved / NumberConstant.KILOBYTE / NumberConstant.KILOBYTE,
-                                 datum.release_total_allocated / NumberConstant.KILOBYTE / NumberConstant.KILOBYTE,
-                                 datum.release_total_reserved / NumberConstant.KILOBYTE / NumberConstant.KILOBYTE,
+                                 datum.release_total_allocated / NumberConstant.KILOBYTE / NumberConstant.KILOBYTE \
+                                     if datum.release_total_allocated != NumberConstant.EXCEPTION else "",
+                                 datum.release_total_reserved / NumberConstant.KILOBYTE / NumberConstant.KILOBYTE \
+                                     if datum.release_total_reserved != NumberConstant.EXCEPTION else "",
                                  datum.device_type]
                                 for datum in summary_data]
             elif self._table_name == DBNameConstant.TABLE_NPU_OP_MEM_REC:
