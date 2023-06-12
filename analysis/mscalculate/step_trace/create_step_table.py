@@ -4,6 +4,7 @@
 
 import logging
 import sqlite3
+import typing
 from collections import deque
 
 from common_func.ai_stack_data_check_manager import AiStackDataCheckManager
@@ -277,6 +278,96 @@ class CreateTrainingTrace(CreateSubTable):
         return last_iter_index
 
 
+class GetNextCreator:
+    """
+    create get_next table
+    """
+    data = []
+    sample_config = {}
+    db_name = DBNameConstant.DB_TRACE
+    table_name = DBNameConstant.TABLE_GET_NEXT
+
+    @classmethod
+    def format_step_trace(cls: typing.Any, step_trace: typing.List[StepTraceOriginDto]) -> typing.Dict:
+        step_trace = list(filter(
+            lambda x: x.tag_id >= StepTraceConstant.GET_NEXT_START or x.tag_id == StepTraceConstant.FP_TAG,
+            step_trace
+        ))
+        step_trace.sort(key=lambda x: (x.model_id, x.timestamp))
+        step_trace_getnext = {}
+        index_id = 1
+        prev_tag = StepTraceConstant.FP_TAG
+        for record in step_trace:
+            model_id = record.model_id
+            if model_id not in step_trace_getnext:
+                step_trace_getnext[model_id] = {}
+                index_id = 1
+                prev_tag = StepTraceConstant.FP_TAG
+            step_trace_getnext.get(model_id, {}).setdefault(index_id, {})
+            # because of ge algorithm, the fp tag may be missing, we use get next start tag to distinguish index_id
+            if record.tag_id == StepTraceConstant.FP_TAG or (record.tag_id == StepTraceConstant.GET_NEXT_START
+                                                             and prev_tag != StepTraceConstant.FP_TAG):
+                index_id += 1
+                prev_tag = record.tag_id
+                continue
+            # contineous 2 tag means  start and getnext end
+            step_trace_getnext[model_id][index_id].setdefault(record.tag_id // 2, []).append(record)
+            prev_tag = record.tag_id
+        return step_trace_getnext
+
+    @classmethod
+    def update_data(cls: typing.Any, model_id: int, index_id: int, index_data: typing.Dict) -> None:
+        for records in index_data.values():
+            if len(records) != 2:
+                logging.debug("The get_next step trace data is missing")
+            getnext_time = [0, 0]
+            for record in records:
+                # contineous 2 tags means start and getnext end
+                getnext_time[record.tag_id % 2] = record.timestamp
+            cls.data.append(
+                [
+                    model_id,
+                    records[0].stream_id,
+                    index_id,
+                    *getnext_time,
+                ]
+            )
+
+    @classmethod
+    def extract_data(cls: typing.Any, step_trace: typing.List[StepTraceOriginDto]) -> None:
+        step_trace_getnext = cls.format_step_trace(step_trace)
+        for model_id, model_data in step_trace_getnext.items():
+            for index_id, index_data in model_data.items():
+                cls.update_data(model_id, index_id, index_data)
+
+    @classmethod
+    def create_table(cls: typing.Any, conn: typing.Any) -> None:
+        create_sql = "create table if not exists {0} " \
+                     "(model_id INTEGER, stream_id INTEGER, index_id INTEGER," \
+                     "start_time INTEGER, end_time INTEGER)".format(cls.table_name)
+        DBManager.execute_sql(conn, create_sql)
+
+        if not cls.data:
+            return
+        insert_sql = 'insert into {0} values ({1})'.format(cls.table_name, ",".join("?" * len(cls.data[0])))
+        DBManager.executemany_sql(conn, insert_sql, cls.data)
+
+    @classmethod
+    def run(cls: typing.Any, sample_config: typing.Dict, step_trace: typing.List[StepTraceOriginDto]) -> None:
+        """
+        extract data and build getnext table
+        :param sample_config: sample config
+        :param step_trace: step trace data of get_next
+        :return: void
+        """
+        cls.sample_config = sample_config
+        cls.extract_data(step_trace)
+        db_path = PathManager.get_db_path(cls.sample_config.get("result_dir"), cls.db_name)
+        conn, cur = DBManager.create_connect_db(db_path)
+        cls.create_table(conn)
+        DBManager.destroy_db_connect(conn, cur)
+
+
 class StepTableBuilder:
     """
     create table from step trace
@@ -339,8 +430,9 @@ class StepTableBuilder:
         step_trace_data = cls._get_step_trace_data()
         if not step_trace_data:
             return
-        cls.process_step_trace(step_trace_data)
+        cls.process_step_trace(list(filter(lambda x: x.tag_id < StepTraceConstant.GET_NEXT_START, step_trace_data)))
         cls.build_table(sample_config)
+        GetNextCreator.run(sample_config, step_trace_data)
 
     @classmethod
     def _get_step_data(cls: any, table_name: str, is_helper=False) -> list:

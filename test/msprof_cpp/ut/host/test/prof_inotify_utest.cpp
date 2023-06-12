@@ -4,7 +4,7 @@
 #include <iostream>
 #include <sys/inotify.h>
 #include "prof_host_core.h"
-#include "proto/profiler.pb.h"
+#include "proto/msprofiler.pb.h"
 #include <google/protobuf/util/json_util.h>
 #include "utils/utils.h"
 #include "message/codec.h"

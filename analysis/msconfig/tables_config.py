@@ -113,6 +113,10 @@ class TablesConfig(MetaConfig):
             ('end_time', 'INTEGER,null'),
             ('op_name', 'TEXT,null')
         ],
+        'GeLogicStreamInfoMap' : [
+            ('logic_stream', 'TEXT,null'),
+            ('physic_stream', 'TEXT,null')
+        ],
         'OriginalDataMap': [
             ('common', 'text,none'),
             ('pid', 'int,none'),
@@ -1119,7 +1123,7 @@ class TablesConfig(MetaConfig):
             ('level', 'TEXT,null'),
             ('struct_type', 'TEXT,null'),
             ('thread_id', 'INTEGER,null'),
-            ('timestamp', 'REAL,null'),
+            ('timestamp', 'NUMERIC,null'),
             ('op_name', 'TEXT,null'),
             ('task_type', 'TEXT,null'),
             ('op_type', 'TEXT,null'),
@@ -1167,9 +1171,41 @@ class TablesConfig(MetaConfig):
             ('level', 'TEXT,null'),
             ('struct_type', 'TEXT,null'),
             ('thread_id', 'INTEGER,null'),
-            ('timestamp', 'REAL,null'),
+            ('timestamp', 'NUMERIC,null'),
             ('op_name', 'TEXT,null'),
             ('ctx_id_num', 'INTEGER,null'),
             ('ctx_id', 'TEXT,null'),
+        ],
+        'NpuOpMemRawMap': [
+            ('operator', 'TEXT,null'),
+            ('addr', 'TEXT,null'),
+            ('size', 'INTEGER,null'),
+            ('timestamp', 'TEXT,null'),
+            ('thread_id', 'INTEGER,null'),
+            ('total_allocate_memory', 'INTEGER,null'),
+            ('total_reserve_memory', 'INTEGER,null'),
+            ('level', 'INTEGER,null'),
+            ('type', 'INTEGER,null'),
+            ('device_type', 'TEXT,null')
+        ],
+        'NpuOpMemMap': [
+            ('operator', 'TEXT,null'),
+            ('size', 'INTEGER,null'),
+            ('allocation_time', 'TEXT,null'),
+            ('release_time', 'TEXT,null'),
+            ('duration', 'TEXT,null'),
+            ('allocation_total_allocated', 'INTEGER,null'),
+            ('allocation_total_reserved', 'INTEGER,null'),
+            ('release_total_allocated', 'INTEGER,null'),
+            ('release_total_reserved', 'INTEGER,null'),
+            ('device_type', 'TEXT,null'),
+            ('name', 'TEXT,null')
+        ],
+        'NpuOpMemRecMap': [
+            ('component', 'TEXT,null'),
+            ('timestamp', 'TEXT,null'),
+            ('total_reserve_memory', 'INTEGER,null'),
+            ('total_allocate_memory', 'INTEGER,null'),
+            ('device_type', 'TEXT,null')
         ],
     }

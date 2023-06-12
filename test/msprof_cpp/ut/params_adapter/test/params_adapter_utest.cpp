@@ -152,7 +152,7 @@ TEST_F(ParamsAdapterUtest, ComCfgCheck2)
         bool ret = ParamsAdapterMgr->ComCfgCheck2(cfg, cfgValue);
         EXPECT_EQ(true, ret);
     }
-    InputCfg  errCfg = INPUT_CFG_COM_TASK_TIME;
+    InputCfg  errCfg = INPUT_CFG_COM_TASK_TIME_L1;
     bool ret = ParamsAdapterMgr->ComCfgCheck2(errCfg, cfgValue);
     EXPECT_EQ(false, ret);
 }

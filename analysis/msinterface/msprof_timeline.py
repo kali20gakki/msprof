@@ -81,7 +81,13 @@ class MsprofTimeline:
                 f'{process_name}({value.get(StrConstant.TRACE_HEADER_ARGS, {}).get(StrConstant.TRACE_HEADER_NAME, "")})'
 
         if cls.is_cann_ai_stack_data(layer_info, value):
-            value[StrConstant.TRACE_HEADER_NAME] = f'{process_name}@{value.get(StrConstant.TRACE_HEADER_NAME, "")}'
+            level = value.get(StrConstant.TRACE_HEADER_ARGS, {}).get(StrConstant.API_EVENT_HEADER_LEVEL)
+            if not level:
+                prefix = process_name
+            else:
+                prefix = StrConstant.LEVEL_MAP.get(level)
+            value[StrConstant.TRACE_HEADER_NAME] = \
+                f'{prefix}@{value.get(StrConstant.TRACE_HEADER_NAME, "")}'
 
     @classmethod
     def get_layer_label_and_sort(cls: any, pid: int, layer_info: TraceViewHeaderConstant.LayerInfo) -> list:

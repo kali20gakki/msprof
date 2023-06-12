@@ -16,7 +16,7 @@
 #include "platform/platform_adapter.h"
 #include "prof_acl_mgr.h"
 #include "prof_params_adapter.h"
-#include "proto/profiler.pb.h"
+#include "proto/msprofiler.pb.h"
 #include "uploader_mgr.h"
 #include "utils/utils.h"
 #include "validation/param_validation.h"

@@ -332,7 +332,11 @@ class TaskGear(CANNGear):
     INVALID_DIRECT = -1
     INVALID_CONTEXT_ID = 4294967295
     INVALID_MODEL_ID = 4294967295
-    TASK_INFO_BLACKLIST = [None, "FFTS_PLUS", 'HCCL']
+    KERNEL_TASK_PREFIX = "KERNEL"
+    AICORE_TASK_TYPE = "AI_CORE"
+    HCCL_TASK_TYPE = "HCCL"
+    FFTS_PLUS_TASK_TYPE = "FFTS_PLUS"
+    KERNEL_FFTS_PLUS_TASK_TYPE = "FFTS_PLUS"
 
     class RuntimeApi:
         def __init__(self, start, end, struct_type, thread_id):
@@ -370,14 +374,7 @@ class TaskGear(CANNGear):
         self.task_info = []
         self.tensor_info = []
         self.hccl_task_info = []
-
-    @staticmethod
-    def get_hccl_info_dto(event: Event) -> HCCLInfoDto:
-        for record in event.additional_record:
-            if isinstance(record.dto, HCCLInfoDto):
-                return record.dto
-        logging.error("No hccl info found for %s", event.to_string())
-        return HCCLInfoDto()
+        self.mismatch_hccl = 0
 
     @staticmethod
     def get_task_level_additional_dto(event: Event) -> tuple:
@@ -389,6 +386,13 @@ class TaskGear(CANNGear):
             elif isinstance(record.dto, TaskTrackDto):
                 task_track_dto = record.dto
         return mem_cpy_info_dto, task_track_dto
+
+    def get_hccl_info_dto(self, event: Event) -> HCCLInfoDto:
+        for record in event.additional_record:
+            if isinstance(record.dto, HCCLInfoDto):
+                return record.dto
+        self.mismatch_hccl += 1
+        return HCCLInfoDto()
 
     def get_node_descs(self, event: Event) -> dict:
         node_descs = dict()
@@ -404,49 +408,62 @@ class TaskGear(CANNGear):
                 node_desc.ctx_info = record.dto
         return node_descs
 
-    def add_task_detail(self, call_stack: dict, add_dto: TaskTrackDto, dto: ApiDataDto):
+    def is_hccl_task(self, hccl_event: Event):
+        return not hccl_event.is_invalid()
+
+    def add_hccl_task(self, hccl_event: Event, task_track_dto: TaskTrackDto):
+        hccl_dto: ApiDataDto = ApiDataDatabase().get(hccl_event)
+        hccl_info_dto = self.get_hccl_info_dto(hccl_event)
+        self.hccl_task_info.append(
+            [hccl_dto.item_id, hccl_info_dto.plane_id, hccl_info_dto.timestamp,
+             hccl_info_dto.duration_estimated, task_track_dto.stream_id, task_track_dto.task_id,
+             task_track_dto.batch_id, hccl_info_dto.to_args_json(task_track_dto.stream_id, task_track_dto.task_id)])
+
+    def is_kernel_task(self, task_track_dto: TaskTrackDto):
+        if task_track_dto.struct_type is None:
+            return False
+        if task_track_dto.task_type.startswith(self.KERNEL_TASK_PREFIX) or \
+                task_track_dto.task_type == self.KERNEL_FFTS_PLUS_TASK_TYPE:
+            return True
+        return False
+
+    def add_kernel_task(self, call_stack: dict, add_dto: TaskTrackDto):
         model_event: Event = call_stack.get(Constant.MODEL_LEVEL)
         model_dto: ApiDataDto = ApiDataDatabase().get(model_event)
         node_event: Event = call_stack.get(Constant.NODE_LEVEL)
-        node_dto: ApiDataDto = ApiDataDatabase().get(node_event)
 
-        hccl_event: Event = call_stack.get(Constant.HCCL_LEVEL)
-        if hccl_event.is_invalid():
-            node_descs = self.get_node_descs(node_event)
-            if not node_descs:
-                # this happen when runtime task is not respond to a op
-                return
+        node_descs = self.get_node_descs(node_event)
+        if not node_descs:
+            # this happen when runtime task is not respond to a op
+            return
 
-            model_id = model_dto.item_id if model_dto.item_id is not None else self.INVALID_MODEL_ID
-            request_id = model_dto.request_id if model_dto.request_id is not None else -1
-            for node_desc in node_descs.values():
-                node_basic_info_dto: NodeBasicInfoDto = node_desc.node_basic_info
-                tensor_info_dto: TensorInfoDto = node_desc.tensor_info
-                ctx_id_dto = node_desc.ctx_info
+        model_id = model_dto.item_id if model_dto.item_id is not None else self.INVALID_MODEL_ID
+        request_id = model_dto.request_id if model_dto.request_id is not None else -1
+        for node_desc in node_descs.values():
+            node_basic_info_dto: NodeBasicInfoDto = node_desc.node_basic_info
+            tensor_info_dto: TensorInfoDto = node_desc.tensor_info
+            ctx_id_dto = node_desc.ctx_info
 
-                if node_basic_info_dto.task_type in self.TASK_INFO_BLACKLIST:
-                    continue
-                self.task_info.append([model_id, node_basic_info_dto.op_name, add_dto.stream_id, add_dto.task_id,
-                                       node_basic_info_dto.block_dim, node_basic_info_dto.mix_block_dim,
-                                       node_basic_info_dto.is_dynamic, node_basic_info_dto.task_type,
-                                       node_basic_info_dto.op_type, request_id, dto.thread_id,
-                                       node_basic_info_dto.timestamp, add_dto.batch_id, ctx_id_dto.ctx_id])
+            if node_basic_info_dto.struct_type is None or node_basic_info_dto.task_type == self.FFTS_PLUS_TASK_TYPE:
+                continue
+            task_type = node_basic_info_dto.task_type
+            if node_basic_info_dto.task_type == self.HCCL_TASK_TYPE:
+                # notice: reduce TBE op
+                task_type = self.AICORE_TASK_TYPE
 
-                if tensor_info_dto.struct_type is None:
-                    continue
-                self.tensor_info.append([model_id, add_dto.stream_id, add_dto.task_id, tensor_info_dto.tensor_num,
-                                         tensor_info_dto.input_formats, tensor_info_dto.input_data_types,
-                                         tensor_info_dto.input_shapes, tensor_info_dto.output_formats,
-                                         tensor_info_dto.output_data_types, tensor_info_dto.output_shapes,
-                                         request_id, tensor_info_dto.timestamp, add_dto.batch_id])
+            self.task_info.append([model_id, node_basic_info_dto.op_name, add_dto.stream_id, add_dto.task_id,
+                                   node_basic_info_dto.block_dim, node_basic_info_dto.mix_block_dim,
+                                   node_basic_info_dto.is_dynamic, task_type,
+                                   node_basic_info_dto.op_type, request_id, add_dto.thread_id,
+                                   node_basic_info_dto.timestamp, add_dto.batch_id, ctx_id_dto.ctx_id])
 
-        else:
-            hccl_dto: ApiDataDto = ApiDataDatabase().get(hccl_event)
-            hccl_info_dto = self.get_hccl_info_dto(hccl_event)
-            self.hccl_task_info.append(
-                [hccl_dto.item_id, hccl_info_dto.plane_id, hccl_info_dto.timestamp,
-                 hccl_info_dto.duration_estimated, add_dto.stream_id, add_dto.task_id, add_dto.batch_id,
-                 hccl_info_dto.to_args_json(add_dto.stream_id, add_dto.task_id)])
+            if tensor_info_dto.struct_type is None:
+                continue
+            self.tensor_info.append([model_id, add_dto.stream_id, add_dto.task_id, tensor_info_dto.tensor_num,
+                                     tensor_info_dto.input_formats, tensor_info_dto.input_data_types,
+                                     tensor_info_dto.input_shapes, tensor_info_dto.output_formats,
+                                     tensor_info_dto.output_data_types, tensor_info_dto.output_shapes,
+                                     request_id, tensor_info_dto.timestamp, add_dto.batch_id])
 
     def run(self, event: Event, call_stack: dict):
         dto: ApiDataDto = ApiDataDatabase().get(event)
@@ -468,11 +485,13 @@ class TaskGear(CANNGear):
                 api.stream_id = task_track_dto.stream_id
                 api.task_id = task_track_dto.task_id
                 api.batch_id = task_track_dto.batch_id
-                self.add_task_detail(call_stack, task_track_dto, dto)
             self.api_call_info.append(api.to_list())
-        else:
-            if task_track_dto.struct_type is not None:
-                self.add_task_detail(call_stack, task_track_dto, dto)
+
+        hccl_event = call_stack.get(Constant.HCCL_LEVEL)
+        if self.is_hccl_task(hccl_event):
+            self.add_hccl_task(hccl_event, task_track_dto)
+        if self.is_kernel_task(task_track_dto):
+            self.add_kernel_task(call_stack, task_track_dto)
 
     def save_api_call_info(self):
         if not self.api_call_info:
@@ -510,7 +529,7 @@ class TaskGear(CANNGear):
     def save_hccl_task_info(self):
         if not self.hccl_task_info:
             return
-
+        logging.warning("There is %d hccl info lost", self.mismatch_hccl)
         model = HCCLHostModel(self._project_path)
         model.init()
         model.drop_table(DBNameConstant.TABLE_HCCL_TASK)

@@ -7,7 +7,7 @@
 #ifndef COLLECTOR_DVVP_PARAMS_ADAPTER_ACLJSON_H
 #define COLLECTOR_DVVP_PARAMS_ADAPTER_ACLJSON_H
 #include "params_adapter.h"
-#include "proto/profiler_ext.pb.h"
+#include "proto/msprofiler_ext.pb.h"
 namespace Collector {
 namespace Dvvp {
 namespace ParamsAdapter {

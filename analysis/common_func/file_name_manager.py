@@ -89,6 +89,8 @@ class FileNameManagerConstant:
     GE_FUSION_OP_PATTERN = r"^Framework\.fusion_op_info_(\d+)\.(\d+)\.slice_\d+"
     GE_HOST_SCH_FILE_PATTERN = r"^Framework\.dynamic_op_execute\.(\d+)\.slice_\d+"
 
+    GE_LOGIC_STREAM_INFO_PATTERN = r"^ge_logic_stream_info\.(\d+)\.slice_\d+"
+
     HBM_FILE_PATTERN = r"^hbm\.data\.(\d+)\.slice_\d+"
     HBM_TRAINING_FILE_PATTERN = r"hbm\.data\.\d+\.dev\.profiler_default_tag\.(\d+)\.slice_\d+"
 
@@ -209,12 +211,13 @@ class FileNameManagerConstant:
     NPU_MEM_FILE_PATTERN = r"^npu_mem\.data\.(\d+)\.slice_\d+"
     NPU_APP_MEM_FILE_PATTERN = r"^npu_mem\.app\.(\d+)\.slice_\d+"
 
+    NPU_OP_MEM_FILE_PATTERN = r"^(aging|unaging)\.additional\.task_memory_info\.slice_\d+"
+
     # freq
     FREQ_FILE_PATTERN = r"lpmFreqConv\.data\.(\d+)\.slice_\d+"
 
     # new data struct
-    API_FILE_PATTERN = r"^(aging|unaging)\.api\.data\.slice_\d+"
-    EVENT_DATA_FILE_PATTERN = r"^(aging|unaging)\.event\.data\.slice_\d+"
+    API_EVENT_FILE_PATTERN = r"^(aging|unaging)\.api_event\.data\.slice_\d+"
     HASH_DATA_FILE_PATTERN = r"^(aging|unaging)\.additional\.(hash_dic|type_info_dic)\.slice_\d+"
     HCCL_INFO_FILE_PATTERN = r"^(unaging|aging)\.additional\.hccl_info\.slice_\d+"
     MULTI_THREAD_FILE_PATTERN = r"^(unaging|aging)\.additional\.Multi_Thread\.slice_\d+"
@@ -476,6 +479,14 @@ def get_ge_host_compiles() -> tuple:
     get ge host compiles
     """
     return (re.compile(FileNameManagerConstant.GE_HOST_SCH_FILE_PATTERN),)
+
+
+def get_ge_logic_stream_info_compiles() -> tuple:
+    """
+    get ge logic stream info files regex compiles
+    :return: api data files regex
+    """
+    return (re.compile(FileNameManagerConstant.GE_LOGIC_STREAM_INFO_PATTERN),)
 
 
 def get_hbm_compiles() -> tuple:
@@ -842,6 +853,15 @@ def get_npu_mem_compiles() -> tuple:
             re.compile(FileNameManagerConstant.NPU_APP_MEM_FILE_PATTERN))
 
 
+def get_npu_op_mem_compiles() -> tuple:
+    """
+    get npu op mem files regex compiles
+    :return: npu op mem files regex
+    """
+    return (re.compile(FileNameManagerConstant.NPU_OP_MEM_FILE_PATTERN),
+            )
+
+
 def get_freq_compiles() -> tuple:
     """
     get freq files regex compiles
@@ -851,20 +871,12 @@ def get_freq_compiles() -> tuple:
             )
 
 
-def get_api_data_compiles() -> tuple:
+def get_api_event_compiles() -> tuple:
     """
-    get api data files regex compiles
-    :return: api data files regex
+    get api and event data files regex compiles
+    :return: api and event data files regex
     """
-    return (re.compile(FileNameManagerConstant.API_FILE_PATTERN),)
-
-
-def get_event_data_compiles() -> tuple:
-    """
-    get event data files regex compiles
-    :return: event data files regex
-    """
-    return (re.compile(FileNameManagerConstant.EVENT_DATA_FILE_PATTERN),)
+    return (re.compile(FileNameManagerConstant.API_EVENT_FILE_PATTERN),)
 
 
 def get_hash_data_compiles() -> tuple:

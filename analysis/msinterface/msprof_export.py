@@ -119,6 +119,10 @@ class ExportCommand:
              'handler': AiStackDataCheckManager.contain_acc_pmu_data},
             {'export_type': ExportDataType.TASK_QUEUE,
              'handler': AiStackDataCheckManager.contain_task_queue_data},
+            {'export_type': ExportDataType.EVENT,
+             'handler': AiStackDataCheckManager.contain_event_data},
+            {'export_type': ExportDataType.API,
+             'handler': AiStackDataCheckManager.contain_api_data},
             {'export_type': ExportDataType.MSPROF,
              'handler': lambda result_dir, device_id=None: True}
         ],
@@ -207,7 +211,11 @@ class ExportCommand:
             {'export_type': ExportDataType.HOST_DISK_USAGE,
              'handler': HostDataCheckManager.contain_host_disk_usage_data},
             {'export_type': ExportDataType.PYTORCH_OPERATOR_VIEW,
-             'handler': AiStackDataCheckManager.contain_pytorch_operator_profiler_data}
+             'handler': AiStackDataCheckManager.contain_pytorch_operator_profiler_data},
+            {'export_type': ExportDataType.GE_OPERATOR_MEMORY,
+             'handler': AiStackDataCheckManager.contain_npu_op_mem_data},
+            {'export_type': ExportDataType.GE_MEMORY_RECORD,
+             'handler': AiStackDataCheckManager.contain_npu_op_mem_rec_data},
         ]
     }
     MODEL_ID = "model_id"
@@ -464,6 +472,8 @@ class ExportCommand:
 
     def _handle_export_data(self: any, params: dict) -> None:
         result = json.loads(MsProfExportDataUtils.export_data(params))
+        if result.get('status', NumberConstant.EXCEPTION) == NumberConstant.SKIP:
+            return
         if result.get('status', NumberConstant.EXCEPTION) == NumberConstant.SUCCESS:
             self._print_export_info(params, result.get('data', []))
         else:

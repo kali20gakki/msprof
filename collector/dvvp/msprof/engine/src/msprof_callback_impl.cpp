@@ -254,7 +254,8 @@ int32_t MsprofApiReporterCallbackImpl(uint32_t agingFlag, const MsprofApi &api)
  
 int32_t MsprofEventReporterCallbackImpl(uint32_t agingFlag, const MsprofEvent &event)
 {
-    return InternalErrorCodeToExternal(MsprofReporterMgr::instance()->ReportData(agingFlag, event));
+    return InternalErrorCodeToExternal(MsprofReporterMgr::instance()->ReportData(agingFlag,
+        *(reinterpret_cast<const MsprofApi *>(&event))));
 }
  
 int32_t MsprofCompactInfoReporterCallbackImpl(uint32_t agingFlag, CONST_VOID_PTR data, uint32_t length)
