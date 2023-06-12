@@ -29,6 +29,7 @@ struct DeviceInfo {
     int64_t ts_cpu_core_num;
     int64_t ai_cpu_core_num;
     int64_t ai_core_num;
+    int64_t ai_vector_num;
     int64_t ai_cpu_core_id;
     int64_t ai_core_id;
     int64_t aicpu_occupy_bitmap;
