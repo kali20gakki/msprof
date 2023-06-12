@@ -272,7 +272,7 @@ class MsProfExportDataConfig(MetaConfig):
             ('table', 'AccPmu'),
             ('headers',
              'task_id,stream_id,acc_id,block_id,read_bandwidth,write_'
-             'bandwidth,read_ost,write_ost,time_stamp,start_time,dur_time')
+             'bandwidth,read_ost,write_ost,time_stamp(us),start_time,dur_time')
         ],
         'stars_soc': [
             ('handler', '_get_stars_soc_data'),
