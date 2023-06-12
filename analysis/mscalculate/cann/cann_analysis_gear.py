@@ -444,7 +444,7 @@ class TaskGear(CANNGear):
             tensor_info_dto: TensorInfoDto = node_desc.tensor_info
             ctx_id_dto = node_desc.ctx_info
 
-            if node_basic_info_dto.struct_type is None or node_basic_info_dto.task_type == self.FFTS_PLUS_TASK_TYPE:
+            if node_basic_info_dto.task_type is None or node_basic_info_dto.task_type == self.FFTS_PLUS_TASK_TYPE:
                 continue
             task_type = node_basic_info_dto.task_type
             if node_basic_info_dto.task_type == self.HCCL_TASK_TYPE:
