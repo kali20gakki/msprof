@@ -300,7 +300,31 @@ class MsProfExportDataConfig(MetaConfig):
             ('db', 'npu_mem.db'),
             ('table', 'NpuMem')
         ],
+        'ge_memory_record': [
+            ('handler', '_get_npu_op_mem_record'),
+            ('headers', 'Component,Timestamp(us),Total Allocated(MB),Total Reserved(MB),Device Type'),
+            ('db', 'memory_application.db'),
+            ('table', 'NpuOpMemRec')
+        ],
+        'ge_operator_memory': [
+            ('handler', '_get_npu_op_mem'),
+            ('headers', 'Name,Size(KB),Allocation Time(us),Release Time(us),Duration(us),'
+                        'Allocation Total Allocated(MB),Allocation Total Reserved(MB),'
+                        'Release Total Allocated(MB),Release Total Reserved(MB),Device Type'),
+            ('db', 'memory_application.db'),
+            ('table', 'NpuOpMem')
+        ],
         'task_queue': [
             ('handler', '_get_task_queue_timeline')
+        ],
+        'event': [
+            ('handler', '_get_event_data'),
+            ('db', 'api_event.db'),
+            ('table', 'EventData')
+        ],
+        'api': [
+            ('handler', '_get_api_data'),
+            ('db', 'api_event.db'),
+            ('table', 'ApiData')
         ]
     }

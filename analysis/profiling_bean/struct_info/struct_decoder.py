@@ -41,6 +41,7 @@ class StructDecoder:
         "GeSessionInfoBean": StructFmt.GE_SESSION_FMT,
         "GeTensorBean": StructFmt.GE_TENSOR_FMT,
         "GeHostBean": StructFmt.GE_HOST_FMT,
+        "GeLogicStreamInfoBean":StructFmt.GE_LOGIC_STREAM_INFO_FMT,
         "ModelWithQBean": StructFmt.HELPER_MODEL_WITH_Q_FMT,
         "StepTraceReader": StructFmt.STEP_TRACE_FMT,
         "StarsChipTransBean": StructFmt.CHIP_TRANS_FMT,
@@ -60,6 +61,7 @@ class StructDecoder:
         "FusionAddInfoBean": StructFmt.FUSION_ADD_INFO_FMT,
         "CtxIdBean": StructFmt.CTX_ID_FMT,
         "MemoryApplicationBean": StructFmt.MEMORY_APPLICATION_FMT,
+        "MemoryOpBean": StructFmt.MEMORY_OP_FMT,
     }
 
     @classmethod

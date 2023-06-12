@@ -8,7 +8,7 @@
 #include "config/config.h"
 #include "param_validation.h"
 #include "prof_channel_manager.h"
-#include "proto/profiler.pb.h"
+#include "proto/msprofiler.pb.h"
 #include "securec.h"
 #include "uploader_mgr.h"
 #include "utils/utils.h"

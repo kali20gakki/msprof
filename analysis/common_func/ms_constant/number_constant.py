@@ -14,6 +14,7 @@ class NumberConstant:
     SUCCESS = 0
     ERROR = 1
     WARN = 2
+    SKIP = 3
     KILOBYTE = 1024.0
     FLOAT_ZERO_BOUND = 1e-17
 

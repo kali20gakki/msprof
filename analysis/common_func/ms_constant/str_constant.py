@@ -137,7 +137,17 @@ class StrConstant:
     TRACE_HEADER_NAME = "name"
     TRACE_HEADER_ARGS = "args"
 
+    API_EVENT_HEADER_LEVEL = "level"
+
     TASK_START_TIME = 'Task Start Time'
+
+    #prefix for api and event
+    LEVEL_MAP = {
+        "acl": "AscendCL",
+        "runtime": "Runtime",
+        "model": "Model",
+        "node": "Node"
+    }
 
     # parallel mode
     STAND_ALONE = "stand_alone"

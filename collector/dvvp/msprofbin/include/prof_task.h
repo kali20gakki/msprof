@@ -10,7 +10,7 @@
 #include <condition_variable>
 #include <memory>
 #include <mutex>
-#include "proto/profiler.pb.h"
+#include "proto/msprofiler.pb.h"
 #include "thread/thread.h"
 #include "message/prof_params.h"
 #include "utils/utils.h"

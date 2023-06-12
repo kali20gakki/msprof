@@ -14,7 +14,7 @@ class EventDataModel(ParserModel):
     """
 
     def __init__(self: any, result_dir: str) -> None:
-        super().__init__(result_dir, DBNameConstant.DB_EVENT_DATA, [DBNameConstant.TABLE_EVENT_DATA])
+        super().__init__(result_dir, DBNameConstant.DB_API_EVENT, [DBNameConstant.TABLE_EVENT_DATA])
 
     @staticmethod
     def update_hash_value(data: EventDataBean, hash_dict: dict):

@@ -11,7 +11,7 @@
 #include "msprof_dlog.h"
 #include "prof_acl_mgr.h"
 #include "prof_manager.h"
-#include "proto/profiler.pb.h"
+#include "proto/msprofiler.pb.h"
 #include "securec.h"
 #include "transport/transport.h"
 #include "transport/file_transport.h"

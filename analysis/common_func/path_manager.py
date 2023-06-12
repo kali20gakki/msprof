@@ -91,10 +91,11 @@ class PathManager:
             DBNameConstant.DB_ACL_MODULE, DBNameConstant.DB_RUNTIME, DBNameConstant.DB_GE_MODEL_INFO,
             DBNameConstant.DB_GE_MODEL_TIME, DBNameConstant.DB_GE_HOST_INFO, DBNameConstant.DB_GE_INFO,
             DBNameConstant.DB_RTS_TRACK, DBNameConstant.DB_HCCL, DBNameConstant.DB_MSPROFTX,
-            DBNameConstant.DB_GE_HASH, DBNameConstant.DB_API_DATA, DBNameConstant.DB_EVENT_DATA,
-            DBNameConstant.DB_HCCL_INFO, DBNameConstant.DB_MULTI_THREAD, DBNameConstant.DB_TENSOR_ADD_INFO,
-            DBNameConstant.DB_NODE_BASIC_INFO, DBNameConstant.DB_FUSION_ADD_INFO, DBNameConstant.DB_GRAPH_ADD_INFO,
-            DBNameConstant.DB_CTX_ID, DBNameConstant.DB_SYNC_ACL_NPU
+            DBNameConstant.DB_GE_HASH, DBNameConstant.DB_API_EVENT, DBNameConstant.DB_HCCL_INFO,
+            DBNameConstant.DB_MULTI_THREAD, DBNameConstant.DB_TENSOR_ADD_INFO, DBNameConstant.DB_NODE_BASIC_INFO,
+            DBNameConstant.DB_FUSION_ADD_INFO, DBNameConstant.DB_GRAPH_ADD_INFO, DBNameConstant.DB_CTX_ID,
+            DBNameConstant.DB_SYNC_ACL_NPU,
+            DBNameConstant.DB_MEMORY_OP
         }
         base_result_dir = result_dir
         if db_name in db_filter:
