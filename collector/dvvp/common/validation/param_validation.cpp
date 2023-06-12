@@ -45,7 +45,7 @@ const int MIN_INTERVAL = 1;
 const int MAX_INTERVAL = 15 * 24 * 3600 * 1000; // 15 * 24 * 3600 * 1000 = 15day's micro seconds
 const int MAX_PERIOD = 30 * 24 * 3600; // 30 * 24 * 3600 = 30day's seconds
 const int MAX_EVENT_SIZE = 8;  // every batch event size
-const int MAX_CORE_ID_SIZE = 32;  // ai core or aiv core id size
+const int MAX_CORE_ID_SIZE = 50;  // ai core or aiv core id size
 const int BASE_HEX = 16;  // hex to int
 
 
