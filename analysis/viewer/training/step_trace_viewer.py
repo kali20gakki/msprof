@@ -230,7 +230,7 @@ class StepTraceViewer:
         """
         if not trace_data:
             return
-        model_id_index = 8  # 8 是model_id的index
+        model_id_index = 8  # 8 is model_id index in training_trace list
         model_ids_set = set()
         for trace_datum in trace_data:
             if len(trace_datum.get('training_trace', [])) > model_id_index:
