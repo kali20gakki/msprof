@@ -162,15 +162,17 @@ class FftsLogViewer(BaseViewer):
         node_name_dict, task_type_dict = self.get_ge_data_dict()
         ffts_plus_set = set()
         for data in data_dict.get("subtask_data_list", []):
-            ffts_plus_set.add("{0}-{1}-{2}".format(data.task_id, data.stream_id, NumberConstant.DEFAULT_GE_CONTEXT_ID))
-            node_key = "{0}-{1}-{2}".format(data.task_id, data.stream_id, data.subtask_id)
+            ffts_plus_set.add("{0}-{1}-{2}-{3}".format(
+                data.task_id, data.stream_id, NumberConstant.DEFAULT_GE_CONTEXT_ID, data.batch_id))
+            node_key = "{0}-{1}-{2}-{3}".format(data.task_id, data.stream_id, data.subtask_id, data.batch_id)
             data.op_name = node_name_dict.get(node_key, data.subtask_type)
         for data in data_dict.get("thread_data_list", []):
-            node_key = "{0}-{1}-{2}".format(data.task_id, data.stream_id, data.subtask_id)
+            node_key = "{0}-{1}-{2}-{3}".format(data.task_id, data.stream_id, data.subtask_id, data.batch_id)
             data.op_name = node_name_dict.get(node_key, data.subtask_type)
         tradition_list = []
         for data in data_dict.get("acsq_task_list", []):
-            node_key = "{0}-{1}-{2}".format(data.task_id, data.stream_id, NumberConstant.DEFAULT_GE_CONTEXT_ID)
+            node_key = "{0}-{1}-{2}-{3}".format(
+                data.task_id, data.stream_id, NumberConstant.DEFAULT_GE_CONTEXT_ID, data.batch_id)
             if node_key not in ffts_plus_set:
                 data.task_type = task_type_dict.get(node_key, data.task_type)
                 data.op_name = node_name_dict.get(node_key, data.task_type)
@@ -184,7 +186,7 @@ class FftsLogViewer(BaseViewer):
         view_model.init()
         ge_data = view_model.get_all_data(DBNameConstant.TABLE_SUMMARY_GE, dto_class=GeTaskDto)
         for data in ge_data:
-            node_key = "{0}-{1}-{2}".format(data.task_id, data.stream_id, data.context_id)
+            node_key = "{0}-{1}-{2}-{3}".format(data.task_id, data.stream_id, data.context_id, data.batch_id)
             node_dict[node_key] = data.op_name
             if data.context_id == NumberConstant.DEFAULT_GE_CONTEXT_ID:
                 task_type_dict[node_key] = data.task_type
