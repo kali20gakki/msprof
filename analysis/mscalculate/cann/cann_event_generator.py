@@ -74,7 +74,8 @@ class CANNEventGenerator:
         api_data, event_data = self.collect_time_period_data()
         for api_data_dto in api_data:
             # special api start equal end, abandon
-            if api_data_dto.struct_type == "StreamSyncTaskFinish":
+            if api_data_dto.struct_type == "StreamSyncTaskFinish" \
+                    or api_data_dto.start == 0 or api_data_dto.start == api_data_dto.end:
                 continue
             event = ApiDataDatabase().put(api_data_dto)
             self.event_queue.add(event)
