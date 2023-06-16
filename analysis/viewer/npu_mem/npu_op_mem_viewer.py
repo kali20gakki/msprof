@@ -35,23 +35,18 @@ class NpuOpMemViewer:
                 summary_data = [[datum.name,
                                  datum.size / NumberConstant.KILOBYTE,
                                  int(datum.allocation_time) / NumberConstant.MILLI_SECOND,
-                                 int(datum.release_time) / NumberConstant.MILLI_SECOND \
-                                     if datum.release_time != NumberConstant.EXCEPTION else "",
-                                 int(datum.duration) / NumberConstant.MILLI_SECOND \
-                                     if datum.duration != NumberConstant.EXCEPTION else "",
-                                 datum.allocation_total_allocated / NumberConstant.KILOBYTE / NumberConstant.KILOBYTE,
-                                 datum.allocation_total_reserved / NumberConstant.KILOBYTE / NumberConstant.KILOBYTE,
-                                 datum.release_total_allocated / NumberConstant.KILOBYTE / NumberConstant.KILOBYTE \
-                                     if datum.release_total_allocated != NumberConstant.EXCEPTION else "",
-                                 datum.release_total_reserved / NumberConstant.KILOBYTE / NumberConstant.KILOBYTE \
-                                     if datum.release_total_reserved != NumberConstant.EXCEPTION else "",
+                                 int(datum.duration) / NumberConstant.MILLI_SECOND,
+                                 datum.allocation_total_allocated / NumberConstant.KILOBYTE,
+                                 datum.allocation_total_reserved / NumberConstant.KILOBYTE,
+                                 datum.release_total_allocated / NumberConstant.KILOBYTE,
+                                 datum.release_total_reserved / NumberConstant.KILOBYTE,
                                  datum.device_type]
                                 for datum in summary_data]
             elif self._table_name == DBNameConstant.TABLE_NPU_OP_MEM_REC:
                 summary_data = [[datum.component,
                                  int(datum.timestamp) / NumberConstant.MILLI_SECOND,
-                                 datum.total_allocate_memory / NumberConstant.KILOBYTE / NumberConstant.KILOBYTE,
-                                 datum.total_reserve_memory / NumberConstant.KILOBYTE / NumberConstant.KILOBYTE,
+                                 datum.total_allocate_memory / NumberConstant.KILOBYTE,
+                                 datum.total_reserve_memory / NumberConstant.KILOBYTE,
                                  datum.device_type]
                                 for datum in summary_data]
         return self._configs.get(StrConstant.CONFIG_HEADERS), summary_data, len(summary_data)
