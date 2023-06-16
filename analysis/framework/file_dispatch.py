@@ -11,12 +11,12 @@ from common_func.file_name_manager import get_acl_hash_compiles
 from common_func.file_name_manager import get_ai_core_compiles
 from common_func.file_name_manager import get_ai_cpu_compiles
 from common_func.file_name_manager import get_aiv_compiles
+from common_func.file_name_manager import get_api_event_compiles
 from common_func.file_name_manager import get_biu_compiles
 from common_func.file_name_manager import get_ctrl_cpu_compiles
 from common_func.file_name_manager import get_data_preprocess_compiles
 from common_func.file_name_manager import get_ddr_compiles
 from common_func.file_name_manager import get_dvpp_compiles
-from common_func.file_name_manager import get_api_event_compiles
 from common_func.file_name_manager import get_ffts_pmu_compiles
 from common_func.file_name_manager import get_file_name_pattern_match
 from common_func.file_name_manager import get_freq_compiles

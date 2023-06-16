@@ -8,7 +8,6 @@ import struct
 
 from common_func.constant import Constant
 from common_func.file_manager import FileOpen
-from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.msvp_common import is_valid_original_data
@@ -24,7 +23,7 @@ from profiling_bean.struct_info.event_data_bean import EventDataBean
 
 class ApiEventParser(DataParser, MsMultiProcess):
     """
-    api/event data parser
+    api_event data parser
     """
     CHECK_RESERVE = 18446744073709551615  # 0xFFFF FFFF FFFF FFFF
 
@@ -51,7 +50,7 @@ class ApiEventParser(DataParser, MsMultiProcess):
                     continue
                 _file_path = self.get_file_path_and_check(_file)
                 logging.info(
-                    "start parsing api/event data file: %s", _file)
+                    "start parsing api_event data file: %s", _file)
                 self._read_data(_file_path, offset_calculator)
 
     def save(self: any) -> None:
@@ -70,7 +69,7 @@ class ApiEventParser(DataParser, MsMultiProcess):
 
     def ms_run(self: any) -> None:
         """
-        entrance for api/event parser
+        entrance for api_event parser
         :return:
         """
         if not (self._file_list.get(DataTag.API_EVENT, [])):
