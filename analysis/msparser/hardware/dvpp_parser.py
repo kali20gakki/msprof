@@ -93,7 +93,7 @@ class ParsingPeripheralData(MsMultiProcess):
         :return: None
         """
         try:
-            if self._file_list and (ChipManager().is_chip_v1() or ChipManager().is_chip_v2()):
+            if self._file_list:
                 self.start_parsing_data_file()
                 self.save()
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as dvpp_err:

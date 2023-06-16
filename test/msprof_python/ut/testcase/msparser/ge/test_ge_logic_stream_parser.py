@@ -16,15 +16,16 @@ NAMESPACE = 'msparser.ge.ge_logic_stream_parser'
 
 
 class TestGeLogicStreamInfoParser(unittest.TestCase):
-    def test_ms_run(self):
+    def test_ms_run_should_failed_when_the_fileList_is_empty(self):
         check = GeLogicStreamParser({}, CONFIG)
         check.ms_run()
 
+    def test_ms_run_should_success_when_the_fileList_is_not_empty(self):
         with mock.patch(NAMESPACE + '.GeLogicStreamParser.parse'):
             check = GeLogicStreamParser({DataTag.GE_LOGIC_STREAM_INFO: ['ge_logic_stream_info.1.slice_1']}, CONFIG)
             check.ms_run()
 
-    def test_parse(self):
+    def test_parse_should_success_when_the_data_is_correct(self):
         ctx_data = (23130, 0, 0, 0, 0, 0, 1, 2, *(120,) * 48)
         struct_data = struct.pack("HHIIIQII48H", *ctx_data)
         with mock.patch('builtins.open', mock.mock_open(read_data=struct_data)), \
