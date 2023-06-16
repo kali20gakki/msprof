@@ -15,9 +15,11 @@ class TestCriticalPathParser(unittest.TestCase):
             {"op_name": "MatMul", "task_type": "AI_CORE", "tid": 2, "ts": 1, "es": 3, "dur": 2.},
             {"op_name": "allReduce", "task_type": "HCCL", "tid": 8, "ts": 4, "es": 5, "dur": 1}
         ]
+        result_op = {'hccl_op'}
+        result_op.add('allReduce')
         with mock.patch(NAMESPACE + '.CriticalPathParser.parse_compute_ops'), \
                 mock.patch(NAMESPACE + '.CriticalPathParser.parse_hccl_ops'):
             critical_path_parser = CriticalPathParser([], {})
             critical_path_parser.events = test_events
             top_op = critical_path_parser.run()
-            self.assertEqual(top_op, ('allReduce',))
+            self.assertEqual(top_op, tuple(result_op))
