@@ -85,7 +85,7 @@ class MsprofTimeline:
             if not level:
                 prefix = process_name
             else:
-                prefix = StrConstant.LEVEL_MAP.get(level)
+                prefix = StrConstant.LEVEL_MAP.get(level, level.capitalize())
             value[StrConstant.TRACE_HEADER_NAME] = \
                 f'{prefix}@{value.get(StrConstant.TRACE_HEADER_NAME, "")}'
 
