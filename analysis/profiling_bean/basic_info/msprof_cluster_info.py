@@ -73,7 +73,8 @@ class MsProfClusterInfo:
             if not iteration_data:
                 return
             for each in iteration_data:
-                model_list.append(OrderedDict(list(zip(MsProfClusterInfo.OUTPUT_MODELS_HEADERS, each))))
+                iteration_info = ['N/A', each[1]] if each[0] == NumberConstant.INVALID_MODEL_ID else each
+                model_list.append(OrderedDict(list(zip(MsProfClusterInfo.OUTPUT_MODELS_HEADERS, iteration_info))))
             self.info_collection.append([rank_id,
                                          cluster_info.device_id,
                                          prof_dir,
