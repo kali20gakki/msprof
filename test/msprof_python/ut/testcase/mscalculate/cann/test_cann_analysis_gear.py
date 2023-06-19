@@ -31,6 +31,7 @@ from profiling_bean.db_dto.mem_copy_info_dto import MemCopyInfoDto
 from profiling_bean.db_dto.node_basic_info_dto import NodeBasicInfoDto
 from profiling_bean.db_dto.task_track_dto import TaskTrackDto
 from profiling_bean.db_dto.tensor_info_dto import TensorInfoDto
+from profiling_bean.db_dto.ge_time_dto import GeTimeDto
 
 
 class TestCANNAnalysisGear(unittest.TestCase):
@@ -96,6 +97,10 @@ class TestCANNAnalysisGear(unittest.TestCase):
         self.assertTrue(
             DBManager.check_item_in_table(PathManager.get_db_path(self.PROF_HOST_DIR, DBNameConstant.DB_GE_MODEL_TIME),
                                           DBNameConstant.TABLE_GE_MODEL_TIME, 'infer_start', 201))
+
+        gear = ModelGear(self.PROF_HOST_DIR)
+        gear.add_model_time_item_from_table(GeTimeDto())
+        self.assertEqual(gear.model_time_data, [])
 
     def test_node_gear(self):
         gear = NodeGear(self.PROF_HOST_DIR)

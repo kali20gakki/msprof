@@ -91,7 +91,7 @@ class TestFftsLogViewer(unittest.TestCase):
                 mock.patch(NAMESPACE + '.ViewModel.get_all_data', return_value=data):
             check = FftsLogViewer(configs, params)
             ret = check.get_ge_data_dict()
-            self.assertEqual(ret, ({'0-1-3': 4}, {}))
+            self.assertEqual(ret, ({'0-1-3-0': 4}, {}))
 
     def test_add_node_name(self):
         configs, params = {}, {}

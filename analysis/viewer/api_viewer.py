@@ -21,6 +21,7 @@ class ApiViewer:
     """
     Viewer for api data
     """
+    ACL_LEVEL = 'acl'
 
     def __init__(self: any, configs: dict, params: dict) -> None:
         self._configs = configs
@@ -45,13 +46,18 @@ class ApiViewer:
     def _get_api_data(timeline_data: list, pid: str) -> list:
         trace_data = []
         for sql_data in timeline_data:
-            struct_type = str(sql_data[0]) if str(sql_data[0]) else Constant.NA
+            level = sql_data[4]
+            if level == ApiViewer.ACL_LEVEL:
+                api_name = str(sql_data[5]) if str(sql_data[5]) else Constant.NA
+            else:
+                api_name = str(sql_data[0]) if str(sql_data[0]) else Constant.NA
             args = OrderedDict([('Thread Id', sql_data[3])])
+            args.setdefault("Mode", sql_data[0])
             args.setdefault("level", sql_data[4])
             args.setdefault("id", sql_data[5])
             args.setdefault("item_id", sql_data[6])
             trace_data.append(
-                (struct_type, pid,
+                (api_name, pid,
                  sql_data[3], sql_data[1] / NumberConstant.CONVERSION_TIME,
                  sql_data[2] / NumberConstant.CONVERSION_TIME,
                  args))

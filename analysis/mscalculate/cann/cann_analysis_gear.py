@@ -118,7 +118,10 @@ class ModelGear(CANNGear):
         item = [data.item_id, model_name, data.start, data.end]
         self.model_load_data.append(item)
 
-    def add_model_time_item_from_table(self, model_time: GeTimeDto):
+    def add_model_time_item_from_table(self, model_time: GeTimeDto) -> None:
+        # In helper scene, there is no ModelExecute, so return
+        if model_time.model_id == 0 and model_time.thread_id == 0:
+            return
         self.model_time_data.append(
             [model_time.model_name, model_time.model_id, model_time.request_id, model_time.thread_id,
              model_time.input_start, model_time.input_end, model_time.infer_start, model_time.infer_end,
@@ -444,7 +447,7 @@ class TaskGear(CANNGear):
             tensor_info_dto: TensorInfoDto = node_desc.tensor_info
             ctx_id_dto = node_desc.ctx_info
 
-            if node_basic_info_dto.struct_type is None or node_basic_info_dto.task_type == self.FFTS_PLUS_TASK_TYPE:
+            if node_basic_info_dto.task_type is None or node_basic_info_dto.task_type == self.FFTS_PLUS_TASK_TYPE:
                 continue
             task_type = node_basic_info_dto.task_type
             if node_basic_info_dto.task_type == self.HCCL_TASK_TYPE:
