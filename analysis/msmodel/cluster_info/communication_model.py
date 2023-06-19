@@ -22,13 +22,13 @@ class CommunicationModel(ViewModel):
         :return:
         """
         if top_hccl_ops is not None:
+            condition = "op_name='{}'".format(top_hccl_ops[0]) if len(top_hccl_ops) < 2 else \
+                "op_name IN {}".format(top_hccl_ops)
             sql = "select * from {0} where timestamp < ? and timestamp >= ? " \
-                  "and op_name IN {top_hccl_ops}" \
-                .format(DBNameConstant.TABLE_HCCL_ALL_REDUCE, top_hccl_ops=top_hccl_ops)
+                  "and {1}".format(DBNameConstant.TABLE_HCCL_ALL_REDUCE, condition)
         else:
             sql = "select * from {0} where timestamp < ? and timestamp >= ?" \
                 .format(DBNameConstant.TABLE_HCCL_ALL_REDUCE)
-
         data = DBManager.fetch_all_data(self.cur, sql,
                                         (conditions.get('iter_end', 0) * NumberConstant.NS_TO_US,
                                          conditions.get('iter_start', float('inf')) * NumberConstant.NS_TO_US),
