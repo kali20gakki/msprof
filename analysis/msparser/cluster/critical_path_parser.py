@@ -241,7 +241,7 @@ class CriticalPathParser(MetaParser):
         logging.info("With critical path analysis, total ops num: %d, hccl ops num: %d ",
                      len(critical_path_event), hccl_result.get('op_num'))
 
-        top_communication_op = {'hccl_op'}
+        top_communication_op = set()
         for idx, communication_op in enumerate(hccl_result.get("topk_op")):
             logging.info(
                 "Top %d hccl op: %s serial time(us): %f op dur time: %s ", idx,
