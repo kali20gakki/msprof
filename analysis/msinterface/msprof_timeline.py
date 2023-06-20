@@ -17,6 +17,7 @@ from common_func.trace_view_manager import TraceViewManager
 from profiling_bean.db_dto.step_trace_dto import IterationRange
 from viewer.association.acl_connect_hwts import AclToHwts
 from viewer.training.step_trace_viewer import StepTraceViewer
+from common_func.constant import Constant
 
 
 @singleton
@@ -34,6 +35,8 @@ class MsprofTimeline:
         self._export_data_list = []
         self._iteration_time = []
         self._default_sort_index = NumberConstant.DEFAULT_LAYER_SORT_START
+        self._pid_decimal_len = 10
+        self._index_decimal_len = 5
 
     @classmethod
     def get_timeline_header(cls: any, pid: str, pid_sort_index: int) -> list:
@@ -157,9 +160,18 @@ class MsprofTimeline:
             for filtered_data in filtered_data_list:
                 process_name = filtered_data[1]
                 json_data = filtered_data[2]
+                if process_name in (TraceViewHeaderConstant.PROCESS_TASK, TraceViewHeaderConstant.PROCESS_STEP_TRACE):
+                    pid = TraceViewHeaderConstant.DEFAULT_PID_VALUE
+                else:
+                    pid = filtered_data[0]
                 # get the msprof timeline layer info
                 layer_info = self.get_layer_info(process_name)
-                format_pid = layer_info.sort_index
+                if InfoConfReader().get_rank_id() == Constant.NA:
+                    rank_id = 0
+                else:
+                    rank_id = int(InfoConfReader().get_rank_id())
+                format_pid = rank_id * 10 ** (self._pid_decimal_len + self._index_decimal_len) \
+                             + pid * 10 ** self._index_decimal_len + layer_info.sort_index
                 for value in json_data:
                     self.modify_timeline_info(process_name, layer_info, format_pid, value)
                 json_list.extend(json_data)
