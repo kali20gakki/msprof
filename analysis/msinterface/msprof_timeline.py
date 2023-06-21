@@ -35,6 +35,7 @@ class MsprofTimeline:
         self._export_data_list = []
         self._iteration_time = []
         self._default_sort_index = NumberConstant.DEFAULT_LAYER_SORT_START
+        self._decimal_radix = 10
         self._pid_decimal_len = 10
         self._index_decimal_len = 5
 
@@ -170,8 +171,8 @@ class MsprofTimeline:
                     rank_id = 0
                 else:
                     rank_id = int(InfoConfReader().get_rank_id())
-                format_pid = rank_id * 10 ** (self._pid_decimal_len + self._index_decimal_len) \
-                             + pid * 10 ** self._index_decimal_len + layer_info.sort_index
+                format_pid = rank_id * self._decimal_radix ** (self._pid_decimal_len + self._index_decimal_len) \
+                             + pid * self._decimal_radix ** self._index_decimal_len + layer_info.sort_index
                 for value in json_data:
                     self.modify_timeline_info(process_name, layer_info, format_pid, value)
                 json_list.extend(json_data)
