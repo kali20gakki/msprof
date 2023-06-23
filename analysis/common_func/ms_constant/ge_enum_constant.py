@@ -123,6 +123,7 @@ class GeDataFormat(Enum):
     ND_RNN_BIAS = 43
     FRACTAL_ZN_RNN = 44
     END = 45
+    FORMAT_NCL = 47
     MAX = 0xff
     UNKNOWN_ = 200
     DEFAULT_ = 201

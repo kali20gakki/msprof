@@ -232,18 +232,10 @@ class HCCLInfoDto:
     def rdma_type(self, value):
         self._rdma_type = value
 
-    def get_bandwidth(self):
-        if self.duration_estimated == Constant.DEFAULT_INVALID_VALUE or self.size == Constant.DEFAULT_INVALID_VALUE or \
-                self.duration_estimated == 0:
-            return 0
-        return self.size / self.duration_estimated / 1000  # 1000 scale(GB/s)
-
     def to_args_json(self, stream_id, task_id):
-        bandwidth = self.get_bandwidth()
         json = {
             'notify_id': self.notify_id,
             'duration estimated(us)': self.duration_estimated,
-            'bandwidth(GB/s)': bandwidth,
             'stream id': stream_id,
             'task id': task_id,
             'task type': self.op_name,
