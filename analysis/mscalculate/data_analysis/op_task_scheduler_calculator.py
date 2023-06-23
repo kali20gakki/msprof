@@ -83,7 +83,6 @@ class OpTaskSchedulerCalculator(MsMultiProcess):
         if ProfilingScene().is_operator():
             self.process()
 
-
     def process(self: any) -> None:
         """
         parsing task process
@@ -195,8 +194,10 @@ class OpTaskSchedulerCalculator(MsMultiProcess):
 
     def _add_info(self: any, cal_task_data: list) -> list:
         # 0 is default batch id
-        task_time = [task_data + (
-            self.iter_range.iteration_id, NumberConstant.DEFAULT_BATCH_ID) for task_data in cal_task_data]
+        task_time = [
+            task_data + (self.iter_range.iteration_id, NumberConstant.INVALID_MODEL_ID, NumberConstant.DEFAULT_BATCH_ID)
+            for task_data in cal_task_data
+        ]
         return task_time
 
     def _collect_aicpu(self: any, task_time: list) -> None:
