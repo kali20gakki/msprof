@@ -23,6 +23,19 @@ class HcclCalculator(ICalculator, MsMultiProcess):
         self._model = HcclViewModel(self._project_path, DBNameConstant.DB_HCCL,
                                     [DBNameConstant.TABLE_HCCL_OP, DBNameConstant.TABLE_HCCL_TASK])
         self._hccl_data = []
+        self._hccl_op_counter = 0
+
+    @staticmethod
+    def update_bandwidth(communication_data: List[HcclDto]):
+        size_key = 'size(Byte)'
+        for data in communication_data:
+            size = data.args.get(size_key, 0)
+            time = data.duration
+            if time == 0:
+                bandwidth = 0
+            else:
+                bandwidth = size / time  # 10^9 / 10^9 = 1 scale(GB/s)
+            data.args['bandwidth(GB/s)'] = bandwidth
 
     def calculate(self: any) -> None:
         hccl_data = self._get_hccl_data()
@@ -53,4 +66,8 @@ class HcclCalculator(ICalculator, MsMultiProcess):
             if not hccl_model.check_table():
                 logging.warning("The HCCL table does not exist, so there is no need to continue associating operators.")
                 return []
-            return hccl_model.get_hccl_communication_data()
+            communication_data = hccl_model.get_hccl_communication_data()
+            if not communication_data:
+                return communication_data
+            self.update_bandwidth(communication_data)
+            return communication_data
