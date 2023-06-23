@@ -31,7 +31,7 @@ class GetOpTableTsTime:
     @staticmethod
     def _get_aiv_task_sql() -> str:
         return "select {1}.task_id, {1}.stream_id, {1}.running, {1}.complete - {1}.running, '{0}', " \
-               "{1}.index_id, batch_id,{subtask_id} from {1} order by running" \
+               "{1}.index_id,model_id,batch_id,{subtask_id} from {1} order by running" \
             .format(Constant.TASK_TYPE_AI_CORE, DBNameConstant.TABLE_HWTS_TASK_TIME,
                     subtask_id=NumberConstant.DEFAULT_GE_CONTEXT_ID)
 
@@ -40,10 +40,6 @@ class GetOpTableTsTime:
         sql = "select task_id, stream_id, start_time, task_time,task_type,index_id,model_id,batch_id,{subtask_id} " \
               "from {} order by start_time".format(DBNameConstant.TABLE_ACSQ_TASK_TIME,
                                                    subtask_id=NumberConstant.DEFAULT_GE_CONTEXT_ID)
-        if ProfilingScene().is_operator():
-            sql = "select task_id, stream_id, start_time, task_time,task_type,index_id, batch_id,{subtask_id} " \
-                  "from {} order by start_time".format(DBNameConstant.TABLE_ACSQ_TASK_TIME,
-                                                       subtask_id=NumberConstant.DEFAULT_GE_CONTEXT_ID)
         return sql
 
     @staticmethod
@@ -136,24 +132,28 @@ class GetOpTableTsTime:
             return []
         ge_data_set = set()
         for data in ge_data:
-            task_key = "{}-{}-{}".format(data.stream_id, data.task_id, data.context_id)
+            task_key = "{}-{}-{}-{}".format(data.stream_id, data.task_id, data.context_id, data.batch_id)
             ge_data_set.add(task_key)
         subtask_data = self._get_task_time_data(DBNameConstant.DB_SOC_LOG, [DBNameConstant.TABLE_SUBTASK_TIME],
                                                 self._get_sub_task_sql())
-        return [data for data in subtask_data if "{}-{}-{}".format(data[1], data[0], data[8]) in ge_data_set]
+        res = []
+        for data in subtask_data:
+            if "{}-{}-{}-{}".format(data[1], data[0], data[8], data[7]) in ge_data_set:
+                res.append(data)
+        return res
 
     def _get_acsq_task_time(self: any, ge_data) -> list:
         if not ge_data:
             return []
         ge_data_dict = dict()
         for data in ge_data:
-            task_key = "{}-{}".format(data.stream_id, data.task_id)
+            task_key = "{}-{}-{}".format(data.stream_id, data.task_id, data.batch_id)
             ge_data_dict[task_key] = data.task_type
         task_data = self._get_task_time_data(DBNameConstant.DB_SOC_LOG, [DBNameConstant.TABLE_ACSQ_TASK_TIME],
                                              self._get_acsq_task_sql())
         res_data = []
         for data in task_data:
-            task_type = ge_data_dict.get("{}-{}".format(data[1], data[0]))
+            task_type = ge_data_dict.get("{}-{}-{}".format(data[1], data[0], data[7]))
             if task_type is not None:
                 res_data.append(data[:4] + (task_type,) + data[5:])
         return res_data
@@ -197,7 +197,7 @@ class GetOpTableTsTime:
         :return:
         """
         return "select {1}.task_id, {1}.stream_id, {1}.running, {1}.complete - {1}.running, '{0}', " \
-               "{1}.index_id, {1}.batch_id, {subtask_id} from {1} group by running order by running" \
+               "{1}.index_id, model_id, {1}.batch_id, {subtask_id} from {1} group by running order by running" \
             .format(Constant.TASK_TYPE_AI_CORE, self._get_task_time_table(),
                     subtask_id=NumberConstant.DEFAULT_GE_CONTEXT_ID)
 
@@ -227,10 +227,11 @@ class GetOpTableTsTime:
         :return:
         """
         return "select task_id, stream_id, sys_start*{MS_TO_NS}, (sys_end - sys_start)*{MS_TO_NS}, " \
-               "'{0}', {2}, batch_id,{subtask_id} from {1} " \
+               "'{0}', {2}, {op_model}, batch_id,{subtask_id} from {1} " \
             .format(Constant.TASK_TYPE_AI_CPU, DBNameConstant.TABLE_AI_CPU_FROM_TS, self.iter_range.iteration_id,
                     MS_TO_NS=NumberConstant.MS_TO_NS,
-                    subtask_id=NumberConstant.DEFAULT_GE_CONTEXT_ID)
+                    subtask_id=NumberConstant.DEFAULT_GE_CONTEXT_ID,
+                    op_model=NumberConstant.INVALID_MODEL_ID)
 
     def _get_ai_cpu_task_sql(self: any) -> str:
         """

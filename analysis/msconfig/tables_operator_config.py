@@ -20,6 +20,7 @@ class TablesOperatorConfig(MetaConfig):
             ('running', 'TEXT,null'),
             ('complete', 'TEXT,null'),
             ('index_id', 'INTEGER,null'),
+            ('model_id', 'INTEGER,null'),
             ('batch_id', 'INTEGER,null')
         ],
         'ReportTaskMap': [
@@ -67,6 +68,7 @@ class TablesOperatorConfig(MetaConfig):
             ('duration', 'INTEGER,null'),
             ('task_type', 'text,null'),
             ('index_id', 'INTEGER,null'),
+            ('model_id', 'INTEGER,null'),
             ('batch_id', 'INTEGER,null'),
             ('subtask_id', 'INTEGER,null')
         ],
@@ -106,6 +108,7 @@ class TablesOperatorConfig(MetaConfig):
             ('output_shapes', 'TEXT,null'),
             ('index_id', 'INTEGER,null'),
             ('timestamp', 'TEXT,null'),
-            ('batch_id', 'INTEGER,null')
+            ('batch_id', 'INTEGER,null'),
+            ('context_id', 'INTEGER,null')
         ]
     }

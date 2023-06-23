@@ -28,7 +28,7 @@ class OpCommonFunc:
         previous_complete_time = 0
         for row_num, content in enumerate(data):
             # each row contains task id, stream id, start time,
-            # duration time, wait time and device id
+            # duration time, wait time, task_type, index_id, model_id, batch_id, subtask_id
             if not Utils.is_valid_num(float(content[2])) or \
                     not Utils.is_valid_num(float(content[3])):
                 continue
@@ -40,9 +40,11 @@ class OpCommonFunc:
             res[row_num][4] = cls._get_wait_time(row_num, float(content[2]), previous_complete_time)
             res[row_num][5] = content[4]
             res[row_num][6] = content[5]  # index_id
-            res[row_num][7] = content[6]  # model_id or batch_id
             if not ProfilingScene().is_operator():
+                res[row_num][7] = content[6]  # model_id
                 res[row_num].append(content[7])  # batch_id
+            else:
+                res[row_num][7] = content[7]  # batch_id
             # index -1 is subtask_id
             res[row_num].append(content[-1])
             previous_complete_time = float(content[2]) + float(content[3])
