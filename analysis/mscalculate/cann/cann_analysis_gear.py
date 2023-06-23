@@ -466,7 +466,7 @@ class TaskGear(CANNGear):
                                      tensor_info_dto.input_formats, tensor_info_dto.input_data_types,
                                      tensor_info_dto.input_shapes, tensor_info_dto.output_formats,
                                      tensor_info_dto.output_data_types, tensor_info_dto.output_shapes,
-                                     request_id, tensor_info_dto.timestamp, add_dto.batch_id])
+                                     request_id, tensor_info_dto.timestamp, add_dto.batch_id, ctx_id_dto.ctx_id])
 
     def run(self, event: Event, call_stack: dict):
         dto: ApiDataDto = ApiDataDatabase().get(event)
