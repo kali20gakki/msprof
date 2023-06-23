@@ -226,6 +226,13 @@ class NodeGear(CANNGear):
                 return record.dto.op_type
         return ""
 
+    def update_hccl_op_name(self: any) -> None:
+        op_name_index = 3  # 3 is op_name index
+        hccl_op_counter = 0
+        for hccl_op in self.hccl_op_info:
+            hccl_op[op_name_index] = hccl_op[op_name_index] + "_" + str(hccl_op_counter)
+            hccl_op_counter += 1
+
     def record_fusion_op_info(self, dto: FusionOpInfoDto, call_stack: dict):
         model_event: Event = call_stack.get(Constant.MODEL_LEVEL)
         model_dto: ApiDataDto = ApiDataDatabase().get(model_event)
@@ -303,6 +310,7 @@ class NodeGear(CANNGear):
     def save_hccl_op_info(self):
         if not self.hccl_op_info:
             return
+        self.update_hccl_op_name()
         model = HCCLHostModel(self._project_path)
         model.init()
         model.drop_table(DBNameConstant.TABLE_HCCL_OP)
@@ -532,7 +540,8 @@ class TaskGear(CANNGear):
     def save_hccl_task_info(self):
         if not self.hccl_task_info:
             return
-        logging.warning("There is %d hccl info lost", self.mismatch_hccl)
+        if self.mismatch_hccl > 0:
+            logging.warning("There is %d hccl info lost", self.mismatch_hccl)
         model = HCCLHostModel(self._project_path)
         model.init()
         model.drop_table(DBNameConstant.TABLE_HCCL_TASK)
