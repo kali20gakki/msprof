@@ -1893,7 +1893,7 @@ TEST_F(MSPROF_CALL_BACK_IMPL_UTEST, MsprofEventReporterCallbackImpl)
         .will(returnValue(false))
         .then(returnValue(true));
     EXPECT_EQ(PROFILING_FAILED, Msprof::Engine::MsprofReporterMgr::instance()->StartReporters());
-    EXPECT_EQ(MSPROF_ERROR, Analysis::Dvvp::ProfilerCommon::MsprofEventReporterCallbackImpl(true, data));
+    EXPECT_EQ(MSPROF_ERROR_UNINITIALIZE, Analysis::Dvvp::ProfilerCommon::MsprofEventReporterCallbackImpl(true, data));
     EXPECT_EQ(PROFILING_SUCCESS, Msprof::Engine::MsprofReporterMgr::instance()->StartReporters());
     EXPECT_EQ(MSPROF_ERROR_NONE, Analysis::Dvvp::ProfilerCommon::MsprofEventReporterCallbackImpl(true, data));
     Msprof::Engine::MsprofReporterMgr::instance()->StopReporters();
@@ -1913,7 +1913,7 @@ TEST_F(MSPROF_CALL_BACK_IMPL_UTEST, MsprofCompactInfoReporterCallbackImpl)
         .will(returnValue(false))
         .then(returnValue(true));
     EXPECT_EQ(PROFILING_FAILED, Msprof::Engine::MsprofReporterMgr::instance()->StartReporters());
-    EXPECT_EQ(MSPROF_ERROR, Analysis::Dvvp::ProfilerCommon::MsprofCompactInfoReporterCallbackImpl(true,
+    EXPECT_EQ(MSPROF_ERROR_UNINITIALIZE, Analysis::Dvvp::ProfilerCommon::MsprofCompactInfoReporterCallbackImpl(true,
         &data, sizeof(MsprofCompactInfo)));
     EXPECT_EQ(PROFILING_SUCCESS, Msprof::Engine::MsprofReporterMgr::instance()->StartReporters());
     EXPECT_EQ(MSPROF_ERROR_NONE, Analysis::Dvvp::ProfilerCommon::MsprofCompactInfoReporterCallbackImpl(true,
@@ -1935,7 +1935,7 @@ TEST_F(MSPROF_CALL_BACK_IMPL_UTEST, MsprofAddiInfoReporterCallbackImpl)
         .will(returnValue(false))
         .then(returnValue(true));
     EXPECT_EQ(PROFILING_FAILED, Msprof::Engine::MsprofReporterMgr::instance()->StartReporters());
-    EXPECT_EQ(MSPROF_ERROR, Analysis::Dvvp::ProfilerCommon::MsprofAddiInfoReporterCallbackImpl(true,
+    EXPECT_EQ(MSPROF_ERROR_UNINITIALIZE, Analysis::Dvvp::ProfilerCommon::MsprofAddiInfoReporterCallbackImpl(true,
         &data, sizeof(MsprofAdditionalInfo)));
     EXPECT_EQ(PROFILING_SUCCESS, Msprof::Engine::MsprofReporterMgr::instance()->StartReporters());
     EXPECT_EQ(MSPROF_ERROR_NONE, Analysis::Dvvp::ProfilerCommon::MsprofAddiInfoReporterCallbackImpl(true,
