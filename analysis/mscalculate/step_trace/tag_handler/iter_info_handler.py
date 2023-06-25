@@ -128,3 +128,42 @@ class TrainingTraceTagHandler(StepTraceTagHandler):
         :return: void
         """
         self.collect_data.clear()
+
+
+class GetNextTagHandler(StepTraceTagHandler):
+    """
+    get_next tag data handler
+    """
+    def __init__(self: any) -> None:
+        self.collect_data = {}
+
+    def receive_record(self: any, record: dict) -> None:
+        """
+        receive record of step trace
+        :param record: contain model_id, tag_id, timestamp
+        :return: void
+        """
+        self.process_record(record)
+
+    def get_data(self: any) -> dict:
+        """
+        return data of this handler
+        :return: dict
+        """
+        return self.collect_data
+
+    def process_record(self: any, record: dict) -> None:
+        """
+        get get_next start, get_next end from record
+        :param record: contain model_id, tag_id, timestamp
+        :return: void
+        """
+        # contineous 2 tags represent getnext start and end
+        self.collect_data.setdefault(record[StepTraceConstant.TAG_ID] // 2, []).append(record)
+
+    def clear(self: any) -> None:
+        """
+        clear collect data
+        :return: void
+        """
+        self.collect_data.clear()
