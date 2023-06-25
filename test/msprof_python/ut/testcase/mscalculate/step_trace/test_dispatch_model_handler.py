@@ -21,36 +21,40 @@ class TestDispatchModelHandler(unittest.TestCase):
                     "step_start": 2,
                     "step_end": 7,
                     "training_trace": {"fp": 3, "bp": 5},
-                    "all_reduce": [{"reduce_start": 4, "reduce_end": 6}]
+                    "all_reduce": [{"reduce_start": 4, "reduce_end": 6}],
+                    "get_next": {},
                 },
 
                 2: {
                     "step_start": 7,
                     "step_end": 12,
                     "training_trace": {"fp": 9, "bp": 11},
-                    "all_reduce": [{"reduce_start": 8, "reduce_end": 10}]
+                    "all_reduce": [{"reduce_start": 8, "reduce_end": 10}],
+                    "get_next": {},
                 },
 
                 3: {
                     "step_start": 16,
                     "step_end": 18,
                     "training_trace": {},
-                    "all_reduce": []
-
+                    "all_reduce": [],
+                    "get_next": {},
                 },
 
                 4: {
                     "step_start": 19,
                     "step_end": 21,
                     "training_trace": {"fp": 20},
-                    "all_reduce": []
+                    "all_reduce": [],
+                    "get_next": {},
                 },
 
                 5: {
                     "step_start": 22,
                     "step_end": 24,
                     "training_trace": {},
-                    "all_reduce": [{'reduce_end': None, 'reduce_start': 23}]
+                    "all_reduce": [{'reduce_end': None, 'reduce_start': 23}],
+                    "get_next": {},
                 }
 
             }
