@@ -212,9 +212,9 @@ class ExportCommand:
              'handler': HostDataCheckManager.contain_host_disk_usage_data},
             {'export_type': ExportDataType.PYTORCH_OPERATOR_VIEW,
              'handler': AiStackDataCheckManager.contain_pytorch_operator_profiler_data},
-            {'export_type': ExportDataType.GE_OPERATOR_MEMORY,
+            {'export_type': ExportDataType.OPERATOR_MEMORY,
              'handler': AiStackDataCheckManager.contain_npu_op_mem_data},
-            {'export_type': ExportDataType.GE_MEMORY_RECORD,
+            {'export_type': ExportDataType.MEMORY_RECORD,
              'handler': AiStackDataCheckManager.contain_npu_op_mem_rec_data},
         ]
     }
