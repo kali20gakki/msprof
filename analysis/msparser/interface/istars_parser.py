@@ -26,7 +26,6 @@ class IStarsParser:
         """
         if len(self._data_list) >= self.MAX_DATA_LEN:
             self.flush()
-            self._data_list = []
         self._data_list.append(self._decoder.decode(data))
 
     @abstractmethod
