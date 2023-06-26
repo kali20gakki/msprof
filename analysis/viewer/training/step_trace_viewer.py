@@ -474,29 +474,28 @@ class StepTraceViewer:
                 result_data.extend([result_dict.get("data_aug_dict0", {}), result_dict.get("data_aug_dict1", {})])
 
             StepTraceViewer.format_reduce_json(trace_item.get("all_reduce", []), trace_parm, pid, tid, result_data)
-            StepTraceViewer.format_get_next_json(trace_item.get("get_next", []), trace_parm, pid, tid, result_data)
+            StepTraceViewer.format_get_next_json(trace_item.get("get_next", []), pid, tid, result_data)
 
         return json.dumps(result_data)
 
     @staticmethod
-    def format_get_next_json(data: list, trace_parm: dict, pid: int, tid: int, result_data: list) -> None:
+    def format_get_next_json(data: list, pid: int, tid: int, result_data: list) -> None:
         get_next_trace_data = []
-        for i, get_next_data in enumerate(data):
+        for get_next_data in data:
             # length of get_next_data is 2 containing start time and end time
             if len(get_next_data) != 2 or get_next_data[0] == "N/A" or get_next_data[1] == "N/A":
                 continue
             get_next_start = get_next_data[0]
             get_next_end = get_next_data[1]
             refresh_data = [
-                "GetNext_{}_{}".format(trace_parm[StepTraceConstant.ITER_ID], i),
+                "GetNext",
                 pid,
                 tid,
                 get_next_start,
                 get_next_end - get_next_start,
                 OrderedDict([
-                    ("Iteration ID", trace_parm[StepTraceConstant.ITER_ID]),
-                    ("GetNext Start {}".format(i), get_next_start),
-                    ("GetNext End {}".format(i), get_next_end),
+                    ("GetNext Start", get_next_start),
+                    ("GetNext End", get_next_end),
                     ("GetNext Time(ns)",
                      round((get_next_end - get_next_start) * NumberConstant.USTONS, NumberConstant.ROUND_TWO_DECIMAL)
                      ),
@@ -506,40 +505,6 @@ class StepTraceViewer:
             get_next_trace_data.append(refresh_data)
         result_data.extend(TraceViewManager.time_graph_trace(
             TraceViewHeaderConstant.GRPC_TIME_GRAPH_HEAD, get_next_trace_data))
-        flow_points = StepTraceViewer.get_flow_points("getnext_to_fp", data, trace_parm, pid, tid)
-        result_data.extend(flow_points)
-
-    @staticmethod
-    def get_flow_points(cat: str, data: list, trace_parm: dict, pid: int, tid: int) -> list:
-        if trace_parm.get(StepTraceConstant.FORWARD_PROPAGATION, "N/A") == "N/A" \
-                or trace_parm.get(StepTraceConstant.BACK_PROPAGATION, "N/A") == "N/A":
-            return []
-        flow_points = []
-        for i, get_next_data in enumerate(data):
-            # length of get_next_data is 2 containing start time and end time
-            if len(get_next_data) != 2 or get_next_data[0] == "N/A" or get_next_data[1] == "N/A":
-                continue
-            start_point = OrderedDict({
-                "name": "{}_{}_{}".format(cat, trace_parm[StepTraceConstant.ITER_ID], i),
-                "ph": "s",
-                "pid": pid,
-                "tid": tid,
-                "id": "{}_{}_{}".format(tid, trace_parm[StepTraceConstant.ITER_ID], i),
-                "cat": cat,
-                "ts": get_next_data[0],  # GetNext start time
-            })
-            end_point = OrderedDict({
-                "name": "{}_{}_{}".format(cat, trace_parm[StepTraceConstant.ITER_ID], i),
-                "ph": "f",
-                "pid": pid,
-                "tid": tid,
-                "id": "{}_{}_{}".format(tid, trace_parm[StepTraceConstant.ITER_ID], i),
-                "cat": cat,
-                "ts": trace_parm[StepTraceConstant.FORWARD_PROPAGATION],  # FP start time
-                "bp": "e",
-            })
-            flow_points.extend([start_point, end_point])
-        return flow_points
 
     @staticmethod
     def __select_reduce(conn: any, trace: list) -> list:

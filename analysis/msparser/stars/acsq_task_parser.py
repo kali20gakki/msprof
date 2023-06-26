@@ -52,7 +52,7 @@ class AcsqTaskParser(IStarsParser):
             while start_que and end_que:
                 start_task = start_que[0]
                 end_task = end_que[0]
-                if start_task.sys_cnt >= end_task.sys_cnt:
+                if start_task.sys_cnt > end_task.sys_cnt:
                     mismatch_count += 1
                     _ = end_que.popleft()
                     continue
