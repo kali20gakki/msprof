@@ -108,15 +108,15 @@ class TestCreateStepTable(unittest.TestCase):
                         'AiStackDataCheckManager.contain_training_trace_data', return_value=True), \
                 mock.patch(NAMESPACE + '.CreateStepTraceData.run', return_value=None), \
                 mock.patch(NAMESPACE + '.CreateAllReduce.run', return_value=None), \
-                mock.patch(NAMESPACE + '.CreateTrainingTrace.run', return_value=None):
+                mock.patch(NAMESPACE + '.CreateTrainingTrace.run', return_value=None), \
+                mock.patch(NAMESPACE + '.GetNextCreator.run', return_value=None):
             StepTableBuilder.build_table(sample_config)
 
     def test_run(self):
         with mock.patch(NAMESPACE + '.StepTableBuilder._connect_step_db', return_value=None), \
                 mock.patch(NAMESPACE + '.StepTableBuilder.process_step_trace'), \
                 mock.patch(NAMESPACE + '.StepTableBuilder._get_step_trace_data'), \
-                mock.patch(NAMESPACE + '.StepTableBuilder.build_table'), \
-                mock.patch(NAMESPACE + '.GetNextCreator.run'):
+                mock.patch(NAMESPACE + '.StepTableBuilder.build_table'):
             StepTableBuilder.run({})
 
     def test_get_step_trace_data(self):
