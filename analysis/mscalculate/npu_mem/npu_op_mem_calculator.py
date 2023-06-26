@@ -4,6 +4,7 @@
 import logging
 from collections import namedtuple
 
+from common_func.path_manager import PathManager
 from common_func.db_manager import DBManager
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.db_name_constant import DBNameConstant
@@ -60,14 +61,21 @@ class NpuOpMemCalculator(ICalculator, MsMultiProcess):
         calculate for task scheduler
         :return:
         """
-        self._connect_db()
-        self.calculate()
-        self.save()
+        if self._connect_db():
+            self.calculate()
+            self.save()
+        else:
+            logging.debug("npu op memory data is null.")
 
     def _connect_db(self: any) -> None:
-        self._model_raw.init()
-        self._model_mem.init()
-        self._model_rec.init()
+        conn, curs = DBManager.check_connect_db_path(PathManager.get_db_path(self._sample_config['result_dir'],
+                                                                             DBNameConstant.DB_MEMORY_OP))
+        if conn and curs:
+            self._model_raw.init()
+            self._model_mem.init()
+            self._model_rec.init()
+            return True
+        return False
 
     def _calc_operator_memory(self: any) -> None:
         allocated_data = {}
