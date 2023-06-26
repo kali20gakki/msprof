@@ -7,6 +7,7 @@ from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_constant.str_constant import CommunicationMatrixInfo
 from common_func.ms_constant.str_constant import TransportType
 from mscalculate.cluster.slow_link_calculator import SlowLinkProf
+from profiling_bean.prof_enum.chip_model import ChipModel
 
 
 NAMESPACE = 'mscalculate.cluster.communication_matrix_calculator'
@@ -58,7 +59,14 @@ class TestCommunicationMatrixCalculator(unittest.TestCase):
         self.assertEqual(slowest_dict[TransportType.HCCS], link_dict)
 
     def test_average_rule(self):
-        with mock.patch(NAMESPACE + '.CommunicationMatrixCalculator.matrix_slow_link_rule', return_value=''):
+        standard_bandwidth = {
+            StrConstant.RDMA: 12.5,
+            StrConstant.HCCS: 18,
+            StrConstant.PCIE: 20
+        }
+        with mock.patch(NAMESPACE + '.CommunicationMatrixCalculator.matrix_slow_link_rule', return_value=''), \
+                mock.patch('msparser.cluster.meta_parser.HcclAnalysisTool.get_standard_bandwidth',
+                           return_value=standard_bandwidth):
             sum_link_dict = {
                 CommunicationMatrixInfo.TRANSIT_TIME_MS: 100,
                 CommunicationMatrixInfo.LARGE_PACKET_RATIO: 5,
@@ -68,8 +76,8 @@ class TestCommunicationMatrixCalculator(unittest.TestCase):
             ret = CommunicationMatrixCalculator([], []).average_rule(sum_link_dict, TransportType.HCCS)
             sug = list()
             sug.append(MatrixProf.PROF_SUM_TIME.format(sum_link_dict[CommunicationMatrixInfo.TRANSIT_TIME_MS]))
-            sug.append(MatrixProf.PROF_AVERAGE_BANDWIDTH.
-                       format(10, HcclAnalysisTool.StandardBandWidth.get(StrConstant.HCCS, -1)))
+            sug.append(MatrixProf.PROF_AVERAGE_BANDWIDTH.format(
+                10, HcclAnalysisTool.StandardBandWidth.get(ChipModel.CHIP_V2_1_0).get(StrConstant.HCCS, -1)))
             sug.append(MatrixProf.PROF_AVERAGE_PACKET_RATIO.format(0.5))
             sug.append('')
             self.assertEqual(ret, sug)
