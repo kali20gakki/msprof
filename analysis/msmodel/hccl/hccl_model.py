@@ -102,7 +102,7 @@ class HcclViewModel(ViewModel):
         get the real execution of the communication op
         """
         sql = f"select model_id, index_id, op_name, min(timestamp) as timestamp, " \
-              f"max(timestamp + duration) - min(timestamp) as duration, task_type, op_type, args " \
+              f"max(timestamp + duration) - min(timestamp) as duration, task_type, op_type " \
               f"from {DBNameConstant.TABLE_HCCL_ALL_REDUCE} " \
               f"group by op_name, first_timestamp"
         return DBManager.fetch_all_data(self.cur, sql, dto_class=HcclDto)
