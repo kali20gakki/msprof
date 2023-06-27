@@ -90,4 +90,5 @@ class AclApiTag(Enum):
     ACL_RTS = 3
     ACL_OTHERS = 4
     ACL_NN = 5
+    ACL_ASCENDC = 6
     HOST_HCCL = 7

@@ -453,17 +453,18 @@ class AiCoreOpReport:
             union_sql = "select {1}.model_id, {0}.task_id, {1}.stream_id, {index_info} " \
                         "op_name, {1}.op_type, {1}.task_type, " \
                         "{0}.start_time, {0}.duration_time/{NS_TO_US}, " \
-                        "{0}.wait_time/{NS_TO_US}, block_dim, mix_block_dim, " \
-                        "input_shapes, input_data_types, input_formats, " \
-                        "output_shapes, output_data_types, output_formats,  " \
-                        "(case when context_id={context_id} then 'N/A' else context_id end) " \
+                        "{0}.wait_time/{NS_TO_US}, {1}.block_dim, {1}.mix_block_dim, " \
+                        "{2}.input_shapes, {2}.input_data_types, {2}.input_formats, " \
+                        "{2}.output_shapes, {2}.output_data_types, {2}.output_formats,  " \
+                        "(case when {2}.context_id={context_id} then 'N/A' else {2}.context_id end) " \
                         "from {0} inner join {1} on {0}.task_id={1}.task_id " \
                         "and {0}.stream_id={1}.stream_id " \
                         "and {0}.subtask_id={1}.context_id " \
                         "and {1}.task_type = ? " \
                         "inner join {2} on {0}.task_id={2}.task_id and {0}.stream_id={2}.stream_id " \
                         "and {1}.timestamp={2}.timestamp " \
-                        "and {0}.batch_id={1}.batch_id" \
+                        "and {0}.batch_id={2}.batch_id " \
+                        "and {2}.context_id={0}.subtask_id " \
                 .format(DBNameConstant.TABLE_SUMMARY_TASK_TIME,
                         DBNameConstant.TABLE_SUMMARY_GE,
                         DBNameConstant.TABLE_SUMMARY_TENSOR,
@@ -478,11 +479,11 @@ class AiCoreOpReport:
         sql = "select {1}.model_id, {0}.task_id, {0}.stream_id, {index_info}" \
               "{1}.op_name, {1}.op_type, {1}.task_type, " \
               "{0}.start_time, {0}.duration_time/{NS_TO_US}, {0}.wait_time/{NS_TO_US}, {1}.block_dim, " \
-              "{1}.mix_block_dim, input_shapes, input_data_types, input_formats, " \
-              "output_shapes, output_data_types, output_formats, " \
-              "(case when context_id={context_id} then 'N/A' else context_id end) " \
+              "{1}.mix_block_dim, {2}.input_shapes, {2}.input_data_types, {2}.input_formats, " \
+              "{2}.output_shapes, {2}.output_data_types, {2}.output_formats, " \
+              "(case when {1}.context_id={context_id} then 'N/A' else {1}.context_id end) " \
               "from {0} inner join {2} on " \
-              "{0}.task_id={2}.task_id and {0}.stream_id={2}.stream_id " \
+              "{0}.task_id={2}.task_id and {0}.stream_id={2}.stream_id and {0}.subtask_id={2}.context_id " \
               "and {0}.task_type = {1}.task_type " \
               "inner join {1} on {0}.task_id={1}.task_id and {0}.stream_id={1}.stream_id " \
               "and {1}.timestamp={2}.timestamp " \

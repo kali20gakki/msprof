@@ -186,7 +186,11 @@ int32_t MsprofSetDeviceCallbackForDynProf(VOID_PTR data, uint32_t len)
 
 inline int32_t InternalErrorCodeToExternal(int32_t internalErrorCode)
 {
-    return (internalErrorCode == PROFILING_SUCCESS ? MSPROF_ERROR_NONE : MSPROF_ERROR);
+    if (internalErrorCode == PROFILING_NOTSUPPORT) {
+        return MSPROF_ERROR_UNINITIALIZE;
+    } else {
+        return (internalErrorCode == PROFILING_SUCCESS ? MSPROF_ERROR_NONE : MSPROF_ERROR);
+    }
 }
 
 // reporter callback

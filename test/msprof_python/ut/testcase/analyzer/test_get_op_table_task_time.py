@@ -4,6 +4,7 @@ from unittest import mock
 from analyzer.get_op_table_task_time import GetOpTableTsTime
 from analyzer.scene_base.profiling_scene import ProfilingScene
 from common_func.constant import Constant
+from profiling_bean.db_dto.ge_task_dto import GeTaskDto
 from profiling_bean.db_dto.step_trace_dto import IterationRange
 
 NAMESPACE = 'analyzer.get_op_table_task_time'
@@ -53,6 +54,21 @@ class TestGetOpTableTsTime(unittest.TestCase):
             check = GetOpTableTsTime(CONFIG)
             ret = check.get_task_time_data()
             self.assertEqual([], ret)
+
+    def test_get_sub_task_time(self):
+        with mock.patch(NAMESPACE + '.GetOpTableTsTime._get_task_time_data',
+                        return_value=[(0, 1, 2, 3, 4, 5, 6, 7, 8)]):
+            check = GetOpTableTsTime({'iter_id': IterationRange(model_id=1,
+                                                                iteration_id=1,
+                                                                iteration_count=1), 'model_id': -1})
+            ret = [(0, 1, 2, 3, 4, 5, 6, 7, 8)]
+            ge_task = GeTaskDto()
+            ge_task.stream_id = 1
+            ge_task.task_id = 0
+            ge_task.context_id = 8
+            ge_task.batch_id = 7
+            ge_data = [ge_task]
+            self.assertEqual(check._get_sub_task_time(ge_data), ret)
 
     def test_get_sub_task_sql(self):
         check = GetOpTableTsTime({'iter_id': IterationRange(model_id=1,
