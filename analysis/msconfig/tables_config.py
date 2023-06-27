@@ -45,7 +45,8 @@ class TablesConfig(MetaConfig):
             ('output_shapes', 'TEXT,null'),
             ('index_id', 'INTEGER,null'),
             ('timestamp', 'TEXT,null'),
-            ('batch_id', 'INTEGER,null')
+            ('batch_id', 'INTEGER,null'),
+            ('context_id', 'INTEGER,null')
         ],
         'GeTensorMap': [
             ('model_id', 'INTEGER,null'),
@@ -60,7 +61,8 @@ class TablesConfig(MetaConfig):
             ('output_shapes', 'TEXT,null'),
             ('index_id', 'INTEGER,null'),
             ('timestamp', 'TEXT,null'),
-            ('batch_id', 'INTEGER,null')
+            ('batch_id', 'INTEGER,null'),
+            ('context_id', 'INTEGER,null')
         ],
         'StepInfoMap': [
             ('model_id', 'INTEGER,null'),

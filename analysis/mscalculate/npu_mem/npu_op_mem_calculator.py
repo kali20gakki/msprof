@@ -1,9 +1,10 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-# Copyright (c) Huawei Technologies Co., Ltd. 2020-2022. All rights reserved.
+# Copyright (c) Huawei Technologies Co., Ltd. 2023-2023. All rights reserved.
 import logging
 from collections import namedtuple
 
+from common_func.path_manager import PathManager
 from common_func.db_manager import DBManager
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.db_name_constant import DBNameConstant
@@ -60,44 +61,47 @@ class NpuOpMemCalculator(ICalculator, MsMultiProcess):
         calculate for task scheduler
         :return:
         """
-        self._connect_db()
-        self.calculate()
-        self.save()
+        if self._connect_db():
+            self.calculate()
+            self.save()
+        else:
+            logging.debug("npu op memory data is null.")
 
     def _connect_db(self: any) -> None:
-        self._model_raw.init()
-        self._model_mem.init()
-        self._model_rec.init()
+        conn, curs = DBManager.check_connect_db_path(PathManager.get_db_path(self._sample_config['result_dir'],
+                                                                             DBNameConstant.DB_MEMORY_OP))
+        if conn and curs:
+            self._model_raw.init()
+            self._model_mem.init()
+            self._model_rec.init()
+            return True
+        return False
 
     def _calc_operator_memory(self: any) -> None:
         allocated_data = {}
-        allocated_size = 0
         OperatorKey = namedtuple('OperatorKey', ['operator', 'addr', 'device_type'])
         OperatorValue = namedtuple('OperatorValue',
                                    ['size', 'timestamp', 'total_allocate_memory',
-                                    'total_reserve_memory', 'allocated_size'])
+                                    'total_reserve_memory'])
         for item in self._op_data:
-            allocated_size += item.size
             if item.size > 0:
                 item_key = OperatorKey(operator=item.operator, addr=item.addr, device_type=item.device_type)
                 item_value = OperatorValue(size=item.size, timestamp=item.timestamp,
                                            total_allocate_memory=item.total_allocate_memory,
-                                           total_reserve_memory=item.total_reserve_memory,
-                                           allocated_size=allocated_size)
+                                           total_reserve_memory=item.total_reserve_memory)
                 allocated_data[item_key] = item_value
             elif item.size < 0:
                 item_key = OperatorKey(operator=item.operator, addr=item.addr, device_type=item.device_type)
                 item_value = OperatorValue(size=item.size, timestamp=item.timestamp,
                                            total_allocate_memory=item.total_allocate_memory,
-                                           total_reserve_memory=item.total_reserve_memory,
-                                           allocated_size=allocated_size)
+                                           total_reserve_memory=item.total_reserve_memory)
                 if item_key in allocated_data:
                     allocated_value = allocated_data[item_key]
                     op_mem = [
                         item.operator, allocated_value.size, allocated_value.timestamp,
                         item_value.timestamp, int(item_value.timestamp) - int(allocated_value.timestamp),
-                        allocated_value.allocated_size, allocated_value.total_reserve_memory,
-                        item_value.allocated_size, item_value.total_reserve_memory,
+                        allocated_value.total_allocate_memory, allocated_value.total_reserve_memory,
+                        item_value.total_allocate_memory, item_value.total_reserve_memory,
                         item_key.device_type
                     ]
                     self._opeartor_memory.append(op_mem)
@@ -105,9 +109,9 @@ class NpuOpMemCalculator(ICalculator, MsMultiProcess):
         if len(allocated_data) > 0:
             for key, value in allocated_data.items():
                 self._opeartor_memory.append([key.operator, value.size, value.timestamp,
-                                              NumberConstant.EXCEPTION, NumberConstant.EXCEPTION,
-                                              value.allocated_size, value.total_reserve_memory,
-                                              NumberConstant.EXCEPTION, NumberConstant.EXCEPTION, key.device_type])
+                                              NumberConstant.NULL_NUMBER, NumberConstant.NULL_NUMBER,
+                                              value.total_allocate_memory, value.total_reserve_memory,
+                                              NumberConstant.NULL_NUMBER, NumberConstant.NULL_NUMBER, key.device_type])
         self._reformat_data()
 
     def _calc_memory_record(self: any) -> None:

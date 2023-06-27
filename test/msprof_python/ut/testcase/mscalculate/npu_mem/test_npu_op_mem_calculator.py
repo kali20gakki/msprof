@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-# Copyright (c) Huawei Technologies Co., Ltd. 2020-2022. All rights reserved.
+# Copyright (c) Huawei Technologies Co., Ltd. 2023-2023. All rights reserved.
 import logging
 import os
 import unittest
@@ -90,7 +90,7 @@ class TestNpuOpMemCalculator(unittest.TestCase):
         setattr(check, "_op_data", [npu_op_mem_dto_1, npu_op_mem_dto_2])
         setattr(check, "_opeartor_memory", [])
         check._calc_operator_memory()
-        self.assertEqual(check._opeartor_memory, [['1', 1, 111, 112, 1, 1, 1, 0, 1, "NPU:0", '']])
+        self.assertEqual(check._opeartor_memory, [['1', 1, 111, 112, 1, 0, 1, 0, 1, "NPU:0", '']])
 
     def test_calc_memory_record(self):
         check = NpuOpMemCalculator({}, CONFIG)
