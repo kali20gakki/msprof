@@ -179,6 +179,8 @@ class MsprofTimeline:
                 return json.dumps(data_list)
         if not self._export_data_list:
             return ""
+        rank_id = InfoConfReader().get_rank_id()
+        self._export_data_list.insert(0, {"rank_id": rank_id})
         return json.dumps(self._export_data_list)
 
     def is_in_iteration(self: any, json_value: dict) -> bool:

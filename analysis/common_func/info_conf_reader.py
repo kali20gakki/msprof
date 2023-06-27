@@ -120,14 +120,14 @@ class InfoConfReader:
             devices += str(device_reader) + ","
         return list(filter(None, devices.split(",")))
 
-    def get_rank_id(self: any) -> str:
+    def get_rank_id(self: any) -> int:
         """
         get rank_id
         :return: rank_id
         """
-        rank_id = self._info_json.get("rank_id", Constant.NA)
+        rank_id = self._info_json.get("rank_id", Constant.DEFAULT_INVALID_RANK_ID_VALUE)
         if rank_id == Constant.DEFAULT_INVALID_VALUE or len(str(rank_id)) == 0:
-            return Constant.NA
+            rank_id = Constant.DEFAULT_INVALID_RANK_ID_VALUE
         return rank_id
 
     def is_version_matched(self):
