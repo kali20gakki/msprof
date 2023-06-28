@@ -48,8 +48,8 @@ class TestMonitorFlowCalculator(unittest.TestCase):
 
         with mock.patch(NAMESPACE + '.BiuPerfModel.get_all_data', return_value=[DataTest]):
             check = MonitorFlowCalculator(CONFIG)
-            InfoConfReader().get_biu_sample_cycle = mock.Mock()
-            InfoConfReader().get_biu_sample_cycle.return_value = 100
+            InfoConfReader().get_instr_profiling_freq = mock.Mock()
+            InfoConfReader().get_instr_profiling_freq.return_value = 100
             check.calculate()
 
     def test_get_unit_name(self):
@@ -78,8 +78,8 @@ class TestMonitorCyclesCalculator(unittest.TestCase):
 
         with mock.patch(NAMESPACE + '.BiuPerfModel.get_all_data', return_value=[DataTest]):
             check = MonitorCyclesCalculator(CONFIG)
-            InfoConfReader().get_biu_sample_cycle = mock.Mock()
-            InfoConfReader().get_biu_sample_cycle.return_value = 100
+            InfoConfReader().get_instr_profiling_freq = mock.Mock()
+            InfoConfReader().get_instr_profiling_freq.return_value = 100
             check.calculate()
 
     def test_get_unit_name(self):
