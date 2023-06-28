@@ -168,8 +168,8 @@ class MsprofTimeline:
                 # get the msprof timeline layer info
                 layer_info = self.get_layer_info(process_name)
                 rank_id = InfoConfReader().get_rank_id()
-                format_pid = rank_id * DECIMAL_RADIX ** (PID_DECIMAL_LEN + INDEX_DECIMAL_LEN) \
-                             + pid * DECIMAL_RADIX ** INDEX_DECIMAL_LEN + layer_info.sort_index
+                format_pid = rank_id * self.DECIMAL_RADIX ** (self.PID_DECIMAL_LEN + self.INDEX_DECIMAL_LEN) \
+                             + pid * self.DECIMAL_RADIX ** self.INDEX_DECIMAL_LEN + layer_info.sort_index
                 for value in json_data:
                     self.modify_timeline_info(process_name, layer_info, format_pid, value)
                 json_list.extend(json_data)
