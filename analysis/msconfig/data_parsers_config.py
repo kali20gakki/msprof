@@ -103,7 +103,8 @@ class DataParsersConfig(MetaConfig):
         'TstrackParser': [
             ('path', 'msparser.step_trace.ts_track_parser'),
             ('chip_model', '1,2,3,4,5,7'),
-            ('level', '2')
+            ('level', '2'),
+            ('position', 'D'),
         ],
         'RtsTrackParser': [
             ('path', 'msparser.runtime.rts_parser'),

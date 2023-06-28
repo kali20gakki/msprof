@@ -2,19 +2,25 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2022-2023. All rights reserved.
 
-import unittest
 import os
+from collections import defaultdict
+
+import unittest
 from unittest import mock
 import pytest
+
 from tuning.cluster.cluster_parser_factory import ClusterCommunicationParserFactory
+from tuning.cluster.cluster_parser_factory import CriticalPathAnalysisParserFactory
+from tuning.cluster.cluster_parser_factory import CommunicationMatrixParserFactory
 from common_func.msprof_exception import ProfException
 
 NAMESPACE = 'tuning.cluster.cluster_parser_factory'
 
 
-class Hccl:
+class HcclOp:
     op_name = 'all_reduce'
     iteration = 0
+    plane_id = 0
 
 
 class GeOp:
@@ -52,10 +58,18 @@ class TestClusterCommunicationParserFactory(unittest.TestCase):
 
     def test_get_hccl_ops_by_iter_rank_less_than_2(self):
         with mock.patch('msmodel.cluster_info.cluster_info_model.ClusterInfoViewModel.get_all_rank_id_and_dirnames',
-                        return_value=[(0, 'dir0')]), \
+                        return_value=[(0,)]), \
                 pytest.raises(ProfException) as err:
             ClusterCommunicationParserFactory(self.params).get_hccl_ops_by_iter()
             self.assertEqual(ProfException.PROF_CLUSTER_INVALID_DB, err.value.code)
+
+    def test_generate_parser_should_return_exception_when_no_rank_hccl_data_dict(self):
+        with mock.patch(NAMESPACE + '.ClusterCommunicationParserFactory.get_hccl_ops_by_iter'), \
+                pytest.raises(ProfException) as err:
+            parser_factory = ClusterCommunicationParserFactory(self.params)
+            parser_factory.rank_hccl_data_dict = {}
+            parser_factory.generate_parser()
+            self.assertEqual(ProfException.PROF_INVALID_DATA_ERROR, err.value.code)
 
     def test_get_conditions_from_db_invalid_rank_dir(self):
         with pytest.raises(ProfException) as err:
@@ -99,9 +113,23 @@ class TestClusterCommunicationParserFactory(unittest.TestCase):
             ClusterCommunicationParserFactory(self.params).get_step_info_from_db(rank_id)
             self.assertEqual(ProfException.PROF_INVALID_STEP_TRACE_ERROR, err.value.code)
 
+    def test_get_step_info_from_db_should_return_exception_when_no_iteration_id(self):
+        iter_model = [(0, 123), (1, 232)]
+        with mock.patch('msmodel.step_trace.cluster_step_trace_model.ClusterStepTraceViewModel.judge_table_exist',
+                        return_value=True), \
+             mock.patch(
+                'msmodel.step_trace.cluster_step_trace_model.ClusterStepTraceViewModel.get_model_id_with_iterations',
+                return_value=iter_model), \
+             pytest.raises(ProfException) as err:
+            parser_factory = ClusterCommunicationParserFactory(self.params)
+            parser_factory.iteration_id = None
+            parser_factory.get_step_info_from_db(1)
+            self.assertEqual(ProfException.PROF_INVALID_PARAM_ERROR, err.value.code)
+
     def test_get_conditions_from_db(self):
         iter_model = [(0, 123), (1, 232)]
         iter_start_end = [(44444444, 111)]
+        test_hccl_op = HcclOp()
         with mock.patch('msmodel.step_trace.cluster_step_trace_model.ClusterStepTraceViewModel.judge_table_exist',
                         return_value=True), \
              mock.patch(
@@ -109,9 +137,13 @@ class TestClusterCommunicationParserFactory(unittest.TestCase):
                  return_value=iter_model), \
              mock.patch('msmodel.step_trace.cluster_step_trace_model.ClusterStepTraceViewModel.get_iter_start_end',
                         return_value=iter_start_end), \
-             mock.patch(NAMESPACE + '.ClusterCommunicationParserFactory.get_hccl_events_from_db'):
-            rank_dir = {0: 'dir0', 1: 'dir1'}
-            ClusterCommunicationParserFactory(self.params).get_conditions_from_db(rank_dir)
+             mock.patch(NAMESPACE + '.CommunicationModel.get_all_events_from_db',
+                        return_value=[test_hccl_op]), \
+                mock.patch(NAMESPACE + '.CommunicationModel.check_db', return_value=True):
+            test_parser = ClusterCommunicationParserFactory(self.params)
+            test_parser.rank_dir_dict = {0: 'dir0'}
+            test_parser.get_conditions_from_db()
+            self.assertEqual(test_parser.rank_hccl_data_dict, {'all_reduce': {0: [test_hccl_op]}})
 
     def test_get_hccl_events_from_db_invalid_connect(self):
         with pytest.raises(ProfException) as err:
@@ -125,18 +157,22 @@ class TestClusterCommunicationParserFactory(unittest.TestCase):
             ClusterCommunicationParserFactory(self.params).get_hccl_events_from_db(0, '', [(0, 100)])
 
     def test_get_hccl_events_from_db(self):
-        hccl = Hccl()
+        hcclop = HcclOp()
         model_space = 'msmodel.cluster_info.communication_model.CommunicationModel'
         with mock.patch(model_space + '.check_db', return_value=True), \
-                mock.patch(model_space + '.get_all_events_from_db', return_value=[hccl]):
-            ClusterCommunicationParserFactory(self.params).get_hccl_events_from_db(0, '', [(0, 100)])
+                mock.patch(model_space + '.get_all_events_from_db', return_value=[hcclop]):
+            test_parser = ClusterCommunicationParserFactory(self.params)
+            test_parser.get_hccl_events_from_db(0, '', [(0, 100)])
+            self.assertEqual(test_parser.rank_hccl_data_dict, {'all_reduce': {0: [hcclop]}})
 
     def test_get_hccl_events_from_db_with_cpa(self):
-        hccl = Hccl()
+        hcclop = HcclOp()
         top_hccl_ops = tuple(('allReduce_1_1', 'allReduce_2_2', 'allReduce_3_3', 'allReduce_4_4', 'allReduce_5_5'))
         with mock.patch(NAMESPACE + '.CommunicationModel.check_db', return_value=True), \
-                mock.patch(NAMESPACE + '.CommunicationModel.get_all_events_from_db', return_value=[hccl]):
-            ClusterCommunicationParserFactory(self.params).get_hccl_events_from_db(0, '', [(0, 100)], top_hccl_ops)
+                mock.patch(NAMESPACE + '.CommunicationModel.get_all_events_from_db', return_value=[hcclop]):
+            test_parser = ClusterCommunicationParserFactory(self.params)
+            test_parser.get_hccl_events_from_db(0, '', [(0, 100)], top_hccl_ops)
+            self.assertEqual(test_parser.rank_hccl_data_dict, {'all_reduce': {0: [hcclop]}})
 
 
 class TestCommunicationMatrixParserFactory(unittest.TestCase):
@@ -146,6 +182,13 @@ class TestCommunicationMatrixParserFactory(unittest.TestCase):
               "model_id": 0,
               "iteration_id": 1,
               "data_type": 7}
+
+    def test_generate_parser_should_return_exception_when_no_op_hccl_events(self):
+        with mock.patch(NAMESPACE + '.CommunicationMatrixParserFactory.get_hccl_ops_by_iter'), \
+                pytest.raises(ProfException) as err:
+            parser_factory = CommunicationMatrixParserFactory(self.params)
+            parser_factory.generate_parser()
+            self.assertEqual(ProfException.PROF_INVALID_DATA_ERROR, err.value.code)
 
 
 class TestCriticalPathAnalysisParserFactory(unittest.TestCase):
@@ -159,12 +202,61 @@ class TestCriticalPathAnalysisParserFactory(unittest.TestCase):
     }
 
     def test_get_conditions_from_db(self):
-        with mock.patch(NAMESPACE + '.ClusterStepTraceViewModel.judge_table_exist', return_value=False), \
-                mock.patch(NAMESPACE + '.ClusterInfoViewModel.get_all_rank_id_and_dirnames',
-                           return_value=[(0, 'hccldb_dir')]),\
-                mock.patch(NAMESPACE + '.ClusterInfoViewModel.check_db', return_value=True), \
-                mock.patch(NAMESPACE + '.CommunicationModel.check_db', return_value=True),\
-                mock.patch(NAMESPACE + '.CommunicationModel.get_all_events_from_db', return_value=[Hccl()]), \
-                mock.patch(NAMESPACE + '.OpSummaryModel.get_operator_data_by_task_type', return_value=[GeOp()]):
-            top_hccl_ops = tuple(['allReduce_1_1'])
-            ClusterCommunicationParserFactory(self.params).get_conditions_from_db(top_hccl_ops)
+        iter_start_end = [(44444444, 111)]
+        test_hccl_op = HcclOp()
+        test_compute_op = GeOp()
+        with mock.patch(NAMESPACE + '.CommunicationModel.get_all_events_from_db', return_value=[test_hccl_op]), \
+                mock.patch(NAMESPACE + '.OpSummaryModel.get_operator_data_by_task_type',
+                           return_value=[test_compute_op]), \
+                mock.patch(NAMESPACE + '.CriticalPathAnalysisParserFactory.get_step_info_from_db',
+                           return_value=iter_start_end), \
+                mock.patch(NAMESPACE + '.CommunicationModel.check_db', return_value=True):
+            critical_analysis_parser_factory = CriticalPathAnalysisParserFactory(self.params)
+            critical_analysis_parser_factory.rank_dir_dict = {1: 'dir_1'}
+            critical_analysis_parser_factory.get_conditions_from_db()
+            self.assertEqual(critical_analysis_parser_factory.hccl_op_events, {'all_reduce': [test_hccl_op]})
+            self.assertEqual(critical_analysis_parser_factory.compute_op_events, [test_compute_op, test_compute_op])
+
+    def test_get_conditions_from_db_should_return_exception_when_check_rank_info_fail(self):
+        with pytest.raises(ProfException) as err:
+            critical_analysis_parser_factory = CriticalPathAnalysisParserFactory(self.params)
+            critical_analysis_parser_factory.rank_id = 2
+            critical_analysis_parser_factory.rank_dir_dict = {1: 'dir_1'}
+            critical_analysis_parser_factory.get_conditions_from_db()
+            self.assertEqual(ProfException.PROF_INVALID_PARAM_ERROR, err.value.code)
+
+    def test_update_data_should_success_when_get_hccl_events_ok(self):
+        hccl_op = HcclOp()
+        op_name_dict = defaultdict(list)
+        op_name_dict[hccl_op.op_name].append(hccl_op)
+        critical_analysis_parser_factory = CriticalPathAnalysisParserFactory(self.params)
+        critical_analysis_parser_factory.update_data(op_name_dict, 1)
+        self.assertEqual(critical_analysis_parser_factory.hccl_op_events, {'all_reduce': [hccl_op]})
+
+    def test_update_data_should_return_exception_when_no_main_events(self):
+        with pytest.raises(ProfException) as err:
+            hccl_op = HcclOp()
+            hccl_op.plane_id = 1
+            op_name_dict = defaultdict(list)
+            op_name_dict[hccl_op.op_name].append(hccl_op)
+            critical_analysis_parser_factory = CriticalPathAnalysisParserFactory(self.params)
+            critical_analysis_parser_factory.update_data(op_name_dict, 1)
+            self.assertEqual(ProfException.PROF_INVALID_DATA_ERROR, err.value.code)
+
+    def test_generate_parser_should_return_exception_when_no_hccl_op_events(self):
+        with mock.patch(NAMESPACE + '.CriticalPathAnalysisParserFactory.get_hccl_ops_by_iter'), \
+                pytest.raises(ProfException) as err:
+            parser_factory = CriticalPathAnalysisParserFactory(self.params)
+            parser_factory.generate_parser()
+            self.assertEqual(ProfException.PROF_INVALID_DATA_ERROR, err.value.code)
+
+    def test_generate_parser_should_return_exception_when_no_compute_op_events(self):
+        hccl_op = HcclOp()
+        op_name_dict = defaultdict(list)
+        op_name_dict[hccl_op.op_name].append(hccl_op)
+        with mock.patch(NAMESPACE + '.CriticalPathAnalysisParserFactory.get_hccl_ops_by_iter'), \
+                pytest.raises(ProfException) as err:
+            parser_factory = CriticalPathAnalysisParserFactory(self.params)
+            parser_factory.hccl_op_events = op_name_dict
+            parser_factory.generate_parser()
+            self.assertEqual(ProfException.PROF_INVALID_DATA_ERROR, err.value.code)

@@ -22,6 +22,7 @@ class ApiViewer:
     Viewer for api data
     """
     ACL_LEVEL = 'acl'
+    HCCL_LEVEL = 'hccl'
 
     def __init__(self: any, configs: dict, params: dict) -> None:
         self._configs = configs
@@ -43,6 +44,17 @@ class ApiViewer:
         return result_data
 
     @staticmethod
+    def _get_data_api_name(api_data: list) -> str:
+        level = api_data[4]
+        if level == ApiViewer.ACL_LEVEL:
+            api_name = str(api_data[5]) if str(api_data[5]) else Constant.NA
+        elif level == ApiViewer.HCCL_LEVEL:
+            api_name = str(api_data[6]) if str(api_data[6]) else Constant.NA
+        else:
+            api_name = str(api_data[0]) if str(api_data[0]) else Constant.NA
+        return api_name
+
+    @staticmethod
     def _get_api_data(timeline_data: list, pid: str) -> list:
         trace_data = []
         for sql_data in timeline_data:
@@ -52,7 +64,7 @@ class ApiViewer:
             args.setdefault("id", sql_data[5])
             args.setdefault("item_id", sql_data[6])
             trace_data.append(
-                (sql_data[5], pid,
+                (ApiViewer._get_data_api_name(sql_data), pid,
                  sql_data[3], sql_data[1] / NumberConstant.CONVERSION_TIME,
                  sql_data[2] / NumberConstant.CONVERSION_TIME,
                  args))

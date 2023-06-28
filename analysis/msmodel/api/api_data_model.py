@@ -16,38 +16,18 @@ class ApiDataModel(ParserModel):
     api model class
     """
 
-    PYTORCH_TX_LEVEL = 'pytorch_tx'
-    PTA_LEVEL = 'pta'
-    ACL_LEVEL = 'acl'
-    MODEL_LEVEL = 'model'
-    NODE_LEVEL = 'node'
-    HCCL_LEVEL = 'hccl'
-    RUNTIME_LEVEL = 'runtime'
-
     def __init__(self: any, result_dir: str) -> None:
         super().__init__(result_dir, DBNameConstant.DB_API_EVENT, [DBNameConstant.TABLE_API_DATA])
 
     @staticmethod
-    def update_hash_value(data: ApiDataBean, hash_dict_data: HashDictData) -> tuple:
-        type_dict = hash_dict_data.get_type_hash_dict()
-        ge_dict = hash_dict_data.get_ge_hash_dict()
-
-        item_id = ge_dict.get(data.item_id, data.item_id)
-        if data.level not in type_dict:
-            struct_type = data.struct_type
-            data_id = data.struct_type
-        else:
-            if data.level == ApiDataModel.ACL_LEVEL:
-                struct_type = AclApiTag(data.acl_type).name
-                data_id = type_dict[data.level].get(data.struct_type, data.struct_type)
-            elif data.level == ApiDataModel.HCCL_LEVEL:
-                struct_type = type_dict[data.level].get(data.struct_type, data.struct_type)
-                data_id = item_id
-            else:
-                struct_type = type_dict[data.level].get(data.struct_type, data.struct_type)
-                data_id = type_dict[data.level].get(data.struct_type, data.struct_type)
-
-        return struct_type, data_id, item_id
+    def update_type_hash_value(data: ApiDataBean, hash_dict: dict) -> tuple:
+        if data.level not in hash_dict:
+            return data.struct_type, 0
+        # acl and hccl have two hash values, other type set default second value：0
+        if data.level == 'acl':
+            return AclApiTag(data.acl_type).name, \
+                   hash_dict[data.level].get(data.struct_type, data.struct_type)
+        return hash_dict[data.level].get(data.struct_type, data.struct_type), 0
 
     def flush(self: any, data_list: list, table_name: str = DBNameConstant.TABLE_API_DATA) -> None:
         """
@@ -65,8 +45,10 @@ class ApiDataModel(ParserModel):
 
     def reformat_data(self: any, data_list: list) -> list:
         hash_dict_data = HashDictData(self.result_dir)
-        res = []
-        for data in data_list:
-            struct_type, data_id, item_id = self.update_hash_value(data, hash_dict_data)
-            res.append([struct_type, data_id, data.level, data.thread_id, item_id, data.start, data.end])
-        return res
+        type_dict = hash_dict_data.get_type_hash_dict()
+        ge_dict = hash_dict_data.get_ge_hash_dict()
+        return [
+            [*self.update_type_hash_value(data, type_dict), data.level, data.thread_id,
+             ge_dict.get(data.item_id, data.item_id), data.start, data.end]
+            for data in data_list
+        ]

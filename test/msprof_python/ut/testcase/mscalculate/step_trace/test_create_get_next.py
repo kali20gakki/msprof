@@ -4,6 +4,7 @@
 
 import unittest
 from unittest import mock
+from mscalculate.step_trace.create_step_table import StepTableBuilder
 from mscalculate.step_trace.create_step_table import GetNextCreator
 from profiling_bean.db_dto.step_trace_dto import StepTraceOriginDto
 
@@ -11,17 +12,10 @@ NAMESPACE = 'mscalculate.step_trace.create_step_table'
 
 
 def get_data():
-    data = [
-        StepTraceOriginDto(),
-        StepTraceOriginDto(),
-        StepTraceOriginDto(),
-        StepTraceOriginDto(),
-        StepTraceOriginDto(),
-        StepTraceOriginDto(),
-    ]
     timestamp = 189746300646091
-    model_ids = [1, 1, 2, 2, 2, 2]
-    tag_ids = [20000, 20001, 20000, 20001, 2, 20000]
+    model_ids = [1, 1, 1, 1, 1, 2, 2, 2, 2, 2]
+    tag_ids = [0, 20000, 20001, 20001, 1, 0, 20000, 20001, 20000, 1]
+    data = [StepTraceOriginDto() for _ in range(len(model_ids))]
     for step_trace, model_id, tag_id in zip(data, model_ids, tag_ids):
         step_trace.index_id = 1
         step_trace.model_id = model_id
@@ -35,14 +29,18 @@ def get_data():
 
 class TestCreateGetNext(unittest.TestCase):
     def test_run(self):
-        data = get_data()
         sample_config = {"result_dir": "./", "devices": 0}
-        with mock.patch(NAMESPACE + '.DBManager.execute_sql'), \
+        with mock.patch(NAMESPACE + '.StepTableBuilder._connect_step_db'), \
+                mock.patch(NAMESPACE + '.StepTableBuilder._get_step_trace_data', return_value=get_data()), \
+                mock.patch(NAMESPACE + '.AiStackDataCheckManager.contain_training_trace_data', return_value=False), \
+                mock.patch(NAMESPACE + '.CreateStepTraceData.run', return_value=None), \
+                mock.patch(NAMESPACE + '.CreateAllReduce.run', return_value=None), \
+                mock.patch(NAMESPACE + '.CreateTrainingTrace.run', return_value=None), \
+                mock.patch(NAMESPACE + '.DBManager.execute_sql'), \
                 mock.patch(NAMESPACE + '.DBManager.executemany_sql'):
-            GetNextCreator.run(sample_config, data)
-            self.assertEqual(GetNextCreator.data, [[1, 20, 1, 189746300646091, 189746300646101],
-                                                   [2, 20, 1, 189746300646111, 189746300646121],
-                                                   [2, 20, 2, 189746300646141, 0],
+            StepTableBuilder.run(sample_config)
+            self.assertEqual(GetNextCreator.data, [[1, 1, 189746300646101, 189746300646111],
+                                                   [2, 1, 189746300646151, 189746300646161],
                                                    ])
 
 
