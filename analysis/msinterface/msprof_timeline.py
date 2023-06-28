@@ -27,6 +27,9 @@ class MsprofTimeline:
     """
     CONNECT_LIST = [AclToHwts]
     FILE_NAME = os.path.basename(__file__)
+    DECIMAL_RADIX = 10
+    PID_DECIMAL_LEN = 10
+    INDEX_DECIMAL_LEN = 5
 
     def __init__(self: any) -> None:
         self._iter_range = None
@@ -35,9 +38,6 @@ class MsprofTimeline:
         self._export_data_list = []
         self._iteration_time = []
         self._default_sort_index = NumberConstant.DEFAULT_LAYER_SORT_START
-        self._decimal_radix = 10
-        self._pid_decimal_len = 10
-        self._index_decimal_len = 5
 
     @classmethod
     def get_timeline_header(cls: any, pid: str, pid_sort_index: int) -> list:
@@ -168,8 +168,8 @@ class MsprofTimeline:
                 # get the msprof timeline layer info
                 layer_info = self.get_layer_info(process_name)
                 rank_id = InfoConfReader().get_rank_id()
-                format_pid = rank_id * self._decimal_radix ** (self._pid_decimal_len + self._index_decimal_len) \
-                             + pid * self._decimal_radix ** self._index_decimal_len + layer_info.sort_index
+                format_pid = rank_id * DECIMAL_RADIX ** (PID_DECIMAL_LEN + INDEX_DECIMAL_LEN) \
+                             + pid * DECIMAL_RADIX ** INDEX_DECIMAL_LEN + layer_info.sort_index
                 for value in json_data:
                     self.modify_timeline_info(process_name, layer_info, format_pid, value)
                 json_list.extend(json_data)
