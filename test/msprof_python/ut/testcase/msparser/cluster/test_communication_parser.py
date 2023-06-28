@@ -4,6 +4,7 @@
 
 import unittest
 import os
+from collections import defaultdict
 from unittest import mock
 import pytest
 from msparser.cluster.communication_parser import CommunicationParser
@@ -19,8 +20,9 @@ NAMESPACE = 'msparser.cluster.communication_parser'
 class Event:
     def __init__(self, hccl_name: str):
         self.hccl_name = hccl_name
+        self.op_name = 'hcom_allReduce_1'
         self.size = 1024 ** 2
-        self.duration = 1000
+        self.duration = 1000000
         self.transport_type = StrConstant.RDMA
         self.timestamp = 0
 
@@ -41,18 +43,18 @@ class TestHcclAnalysisTool(unittest.TestCase):
     def test_determine_rdma1(self):
         events = [Event(StrConstant.RDMA_SEND), Event(StrConstant.RDMA_SEND), Event(StrConstant.NOTIFY_WAIT),
                   Event(StrConstant.RDMA_SEND), Event(StrConstant.NOTIFY_WAIT)]
-        ret = HcclAnalysisTool.determine_rdma(events, 0)
+        ret = HcclAnalysisTool.determine_rdma(events, 0, 5)
         self.assertEqual(ret, True)
 
     def test_determine_rdma2(self):
         events = [Event(StrConstant.RDMA_SEND)]
-        ret = HcclAnalysisTool.determine_rdma(events, 0)
+        ret = HcclAnalysisTool.determine_rdma(events, 0, 5)
         self.assertEqual(ret, False)
 
     def test_get_rdma_time_info(self):
         events = [Event(StrConstant.RDMA_SEND), Event(StrConstant.RDMA_SEND), Event(StrConstant.NOTIFY_WAIT),
                   Event(StrConstant.RDMA_SEND), Event(StrConstant.NOTIFY_WAIT)]
-        ret = HcclAnalysisTool.get_rdma_time_info(events, 0)
+        ret = HcclAnalysisTool.get_rdma_time_info(events, 0, 5)
         self.assertEqual(ret, [5, 1])
 
     def test_get_transport_type_hccs(self):
@@ -98,7 +100,49 @@ class TestCommunicationParser(unittest.TestCase):
         CommunicationParser({}).op_time_parser([Event(StrConstant.RDMA_SEND)])
 
     def test_op_bandwidth_parser(self):
-        CommunicationParser({}).op_bandwidth_parser([Event(StrConstant.RDMA_SEND)])
+        standard_bandwidth = {
+            StrConstant.RDMA: 12.5,
+            StrConstant.HCCS: 18,
+            StrConstant.PCIE: 20
+        }
+        expect_bandwidth_dict = {
+            'HCCS': {
+                'Bandwidth(GB/s)': 0,
+                'Bandwidth(Utilization)': 0.0,
+                'Large Packet Ratio': 0,
+                'Size Distribution': defaultdict(float),
+                'Transit Size(MB)': 0,
+                'Transit Time(ms)': 0
+            },
+            'PCIE': {
+                'Bandwidth(GB/s)': 0,
+                'Bandwidth(Utilization)': 0.0,
+                'Large Packet Ratio': 0,
+                'Size Distribution': defaultdict(float),
+                'Transit Size(MB)': 0,
+                'Transit Time(ms)': 0
+            },
+            'RDMA': {
+                'Bandwidth(GB/s)': 0,
+                'Bandwidth(Utilization)': 0.0,
+                'Large Packet Ratio': 0,
+                'Size Distribution': defaultdict(float),
+                'Transit Size(MB)': 0,
+                'Transit Time(ms)': 0
+            },
+            'SDMA': {
+                'Bandwidth(GB/s)': 0,
+                'Bandwidth(Utilization)': 0.0,
+                'Large Packet Ratio': 0,
+                'Size Distribution': defaultdict(float),
+                'Transit Size(MB)': 0,
+                'Transit Time(ms)': 0
+            },
+        }
+        with mock.patch("msparser.cluster.meta_parser.HcclAnalysisTool.get_standard_bandwidth",
+                        return_value=standard_bandwidth):
+            op_bandwidth_dict = CommunicationParser({}).op_bandwidth_parser([Event(StrConstant.RDMA_SEND)])
+            self.assertEqual(op_bandwidth_dict, expect_bandwidth_dict)
 
     def test_combine_time(self):
         com = CommunicationParser({})
@@ -138,87 +182,106 @@ class TestCommunicationParser(unittest.TestCase):
         self.assertEqual(ret[StrConstant.TOTAL][0]["Communication Time Info"]["Synchronization Time Ratio"], 0.5)
 
     def test_combine_bandwidth(self):
-        com = CommunicationParser({})
-        com.op_info = {
-            "allReduce_1_1": {
-                0: {
-                    "Communication Bandwidth Info": {
-                        "RDMA": {
-                            "Transit Size(MB)": 1024,
-                            "Transit Time(ms)": 1000,
-                            "Bandwidth(GB/s)": 1,
-                            "Bandwidth(Utilization)": 0.08,
-                            "Large Packet Ratio": 1.0,
-                            "Size Distribution": {
-                               20: 2.0
-                            }
-                        },
-                        "HCCS": {
-                            "Transit Size(MB)": 1024,
-                            "Transit Time(ms)": 1000,
-                            "Bandwidth(GB/s)": 1,
-                            "Bandwidth(Utilization)": 0.08,
-                            "Large Packet Ratio": 1.0,
-                            "Size Distribution": {
-                                20: 2.0
-                            }
-                        },
-                        "SDMA": {
-                            "Transit Size(MB)": 1024,
-                            "Transit Time(ms)": 1000,
-                            "Bandwidth(GB/s)": 1,
-                            "Bandwidth(Utilization)": 0,
-                            "Large Packet Ratio": 0,
-                            "Size Distribution": {}
-                    }
-                }
-                }
-            },
-            "allReduce_1_2": {
-                0: {
-                    "Communication Bandwidth Info": {
-                        "RDMA": {
-                            "Transit Size(MB)": 1024,
-                            "Transit Time(ms)": 1000,
-                            "Bandwidth(GB/s)": 1,
-                            "Bandwidth(Utilization)": 0.08,
-                            "Large Packet Ratio": 1.0,
-                            "Size Distribution": {
-                                20: 2.0
-                            }
-                        },
-                        "HCCS": {
-                            "Transit Size(MB)": 1024,
-                            "Transit Time(ms)": 1000,
-                            "Bandwidth(GB/s)": 1,
-                            "Bandwidth(Utilization)": 0.08,
-                            "Large Packet Ratio": 1.0,
-                            "Size Distribution": {
-                                20: 2.0
-                            }
-                        },
-                        "SDMA": {
-                            "Transit Size(MB)": 1024,
-                            "Transit Time(ms)": 1000,
-                            "Bandwidth(GB/s)": 1,
-                            "Bandwidth(Utilization)": 0,
-                            "Large Packet Ratio": 0,
-                            "Size Distribution": {}
-                    }
-                }
-                }
-            },
+        standard_bandwidth = {
+            StrConstant.RDMA: 12.5,
+            StrConstant.HCCS: 18,
+            StrConstant.PCIE: 20
         }
-        com.combine()
-        ret = com.op_info
-        self.assertEqual(ret[StrConstant.TOTAL][0]["Communication Bandwidth Info"]["RDMA"]["Transit Size(MB)"], 2048)
-        self.assertEqual(ret[StrConstant.TOTAL][0]["Communication Bandwidth Info"]["RDMA"]["Transit Time(ms)"], 2000)
-        self.assertEqual(ret[StrConstant.TOTAL][0]["Communication Bandwidth Info"]["RDMA"]["Bandwidth(GB/s)"], 1)
-        self.assertEqual(ret[StrConstant.TOTAL][0]["Communication Bandwidth Info"]["RDMA"]["Large Packet Ratio"], 1)
-        self.assertEqual(ret[StrConstant.TOTAL][0]["Communication Bandwidth Info"]["RDMA"]["Bandwidth(Utilization)"],
-                         1 / HcclAnalysisTool.StandardBandWidth['RDMA'])
-        self.assertEqual(ret[StrConstant.TOTAL][0]
-                         ["Communication Bandwidth Info"]["RDMA"]["Size Distribution"][20], 4)
-        self.assertEqual(ret[StrConstant.TOTAL][0]["Communication Bandwidth Info"]["SDMA"]["Transit Size(MB)"], 2048)
-        self.assertEqual(ret[StrConstant.TOTAL][0]["Communication Bandwidth Info"]["SDMA"]["Transit Time(ms)"], 2000)
-        self.assertEqual(ret[StrConstant.TOTAL][0]["Communication Bandwidth Info"]["SDMA"]["Bandwidth(GB/s)"], 1)
+        with mock.patch("msparser.cluster.meta_parser.HcclAnalysisTool.get_standard_bandwidth",
+                        return_value=standard_bandwidth):
+            com = CommunicationParser({})
+            com.op_info = {
+                "allReduce_1_1": {
+                    0: {
+                        "Communication Bandwidth Info": {
+                            "RDMA": {
+                                "Transit Size(MB)": 1024,
+                                "Transit Time(ms)": 1000,
+                                "Bandwidth(GB/s)": 1,
+                                "Bandwidth(Utilization)": 0.08,
+                                "Large Packet Ratio": 1.0,
+                                "Size Distribution": {
+                                   20: 2.0
+                                }
+                            },
+                            "HCCS": {
+                                "Transit Size(MB)": 1024,
+                                "Transit Time(ms)": 1000,
+                                "Bandwidth(GB/s)": 1,
+                                "Bandwidth(Utilization)": 0.08,
+                                "Large Packet Ratio": 1.0,
+                                "Size Distribution": {
+                                    20: 2.0
+                                }
+                            },
+                            "SDMA": {
+                                "Transit Size(MB)": 1024,
+                                "Transit Time(ms)": 1000,
+                                "Bandwidth(GB/s)": 1,
+                                "Bandwidth(Utilization)": 0,
+                                "Large Packet Ratio": 0,
+                                "Size Distribution": {}
+                        }
+                    }
+                    }
+                },
+                "allReduce_1_2": {
+                    0: {
+                        "Communication Bandwidth Info": {
+                            "RDMA": {
+                                "Transit Size(MB)": 1024,
+                                "Transit Time(ms)": 1000,
+                                "Bandwidth(GB/s)": 1,
+                                "Bandwidth(Utilization)": 0.08,
+                                "Large Packet Ratio": 1.0,
+                                "Size Distribution": {
+                                    20: 2.0
+                                }
+                            },
+                            "HCCS": {
+                                "Transit Size(MB)": 1024,
+                                "Transit Time(ms)": 1000,
+                                "Bandwidth(GB/s)": 1,
+                                "Bandwidth(Utilization)": 0.08,
+                                "Large Packet Ratio": 1.0,
+                                "Size Distribution": {
+                                    20: 2.0
+                                }
+                            },
+                            "SDMA": {
+                                "Transit Size(MB)": 1024,
+                                "Transit Time(ms)": 1000,
+                                "Bandwidth(GB/s)": 1,
+                                "Bandwidth(Utilization)": 0,
+                                "Large Packet Ratio": 0,
+                                "Size Distribution": {}
+                        }
+                    }
+                    }
+                },
+            }
+            com.combine()
+            ret = com.op_info
+            self.assertEqual(
+                ret[StrConstant.TOTAL][0]["Communication Bandwidth Info"]["RDMA"]["Transit Size(MB)"], 2048
+            )
+            self.assertEqual(
+                ret[StrConstant.TOTAL][0]["Communication Bandwidth Info"]["RDMA"]["Transit Time(ms)"], 2000
+            )
+            self.assertEqual(ret[StrConstant.TOTAL][0]["Communication Bandwidth Info"]["RDMA"]["Bandwidth(GB/s)"], 1)
+            self.assertEqual(ret[StrConstant.TOTAL][0]["Communication Bandwidth Info"]["RDMA"]["Large Packet Ratio"], 1)
+            self.assertEqual(
+                ret[StrConstant.TOTAL][0]["Communication Bandwidth Info"]["RDMA"]["Bandwidth(Utilization)"],
+                1 / HcclAnalysisTool.StandardBandWidth.get(ChipModel.CHIP_V2_1_0).get('RDMA')
+            )
+            self.assertEqual(ret[StrConstant.TOTAL][0]
+                             ["Communication Bandwidth Info"]["RDMA"]["Size Distribution"][20], 4)
+            self.assertEqual(
+                ret[StrConstant.TOTAL][0]["Communication Bandwidth Info"]["SDMA"]["Transit Size(MB)"], 2048
+            )
+            self.assertEqual(
+                ret[StrConstant.TOTAL][0]["Communication Bandwidth Info"]["SDMA"]["Transit Time(ms)"], 2000
+            )
+            self.assertEqual(
+                ret[StrConstant.TOTAL][0]["Communication Bandwidth Info"]["SDMA"]["Bandwidth(GB/s)"], 1
+            )
