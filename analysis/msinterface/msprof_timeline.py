@@ -158,6 +158,7 @@ class MsprofTimeline:
         if isinstance(json_list, list):
             filtered_data_list = self.filter_msprof_timeline(json_list)
             json_list.clear()
+            rank_id = InfoConfReader().get_rank_id()
             for filtered_data in filtered_data_list:
                 process_name = filtered_data[1]
                 json_data = filtered_data[2]
@@ -167,7 +168,6 @@ class MsprofTimeline:
                     pid = filtered_data[0]
                 # get the msprof timeline layer info
                 layer_info = self.get_layer_info(process_name)
-                rank_id = InfoConfReader().get_rank_id()
                 format_pid = rank_id * self.DECIMAL_RADIX ** (self.PID_DECIMAL_LEN + self.INDEX_DECIMAL_LEN) \
                              + pid * self.DECIMAL_RADIX ** self.INDEX_DECIMAL_LEN + layer_info.sort_index
                 for value in json_data:
