@@ -65,7 +65,7 @@ class TestApiViewer(unittest.TestCase):
                              '"args": {"name": "Thread 4"}, "ph": "M"}, '
                              '{"name": "thread_sort_index", "pid": 100,'
                              ' "tid": 4, "args": {"sort_index": 4}, "ph": "M"}, '
-                             '{"name": 6, "pid": 100, "tid": 4, '
+                             '{"name": "1", "pid": 100, "tid": 4, '
                              '"ts": 0.002, "dur": 0.003, "args": '
                              '{"Thread Id": 4, "Mode": 1, "level": 5, "id": 6, '
                              '"item_id": 7}, "ph": "X"}]', ret)
