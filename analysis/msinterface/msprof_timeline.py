@@ -26,6 +26,9 @@ class MsprofTimeline:
     """
     CONNECT_LIST = [AclToHwts]
     FILE_NAME = os.path.basename(__file__)
+    DECIMAL_RADIX = 10
+    PID_DECIMAL_LEN = 10
+    INDEX_DECIMAL_LEN = 5
 
     def __init__(self: any) -> None:
         self._iter_range = None
@@ -154,12 +157,18 @@ class MsprofTimeline:
         if isinstance(json_list, list):
             filtered_data_list = self.filter_msprof_timeline(json_list)
             json_list.clear()
+            rank_id = InfoConfReader().get_rank_id()
             for filtered_data in filtered_data_list:
                 process_name = filtered_data[1]
                 json_data = filtered_data[2]
+                if process_name in (TraceViewHeaderConstant.PROCESS_TASK, TraceViewHeaderConstant.PROCESS_STEP_TRACE):
+                    pid = TraceViewHeaderConstant.DEFAULT_PID_VALUE
+                else:
+                    pid = filtered_data[0]
                 # get the msprof timeline layer info
                 layer_info = self.get_layer_info(process_name)
-                format_pid = layer_info.sort_index
+                format_pid = rank_id * self.DECIMAL_RADIX ** (self.PID_DECIMAL_LEN + self.INDEX_DECIMAL_LEN) \
+                             + pid * self.DECIMAL_RADIX ** self.INDEX_DECIMAL_LEN + layer_info.sort_index
                 for value in json_data:
                     self.modify_timeline_info(process_name, layer_info, format_pid, value)
                 json_list.extend(json_data)
