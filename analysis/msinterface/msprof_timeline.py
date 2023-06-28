@@ -17,7 +17,6 @@ from common_func.trace_view_manager import TraceViewManager
 from profiling_bean.db_dto.step_trace_dto import IterationRange
 from viewer.association.acl_connect_hwts import AclToHwts
 from viewer.training.step_trace_viewer import StepTraceViewer
-from common_func.constant import Constant
 
 
 @singleton
