@@ -13,6 +13,7 @@ from common_func.ms_constant.str_constant import OpBandWidthType
 from common_func.ms_constant.str_constant import TransportType
 from common_func.constant import Constant
 from profiling_bean.db_dto.hccl_dto import HcclDto
+from profiling_bean.prof_enum.chip_model import ChipModel
 
 
 class MetaParser:
@@ -33,15 +34,26 @@ class HcclAnalysisTool:
     support hccl parse
     """
     StandardBandWidth = {
-        StrConstant.RDMA: NumberConstant.RDMA_BANDWIDTH,
-        StrConstant.HCCS: NumberConstant.HCCS_BANDWIDTH,
-        StrConstant.PCIE: NumberConstant.PCIE_BANDWIDTH
+        ChipModel.CHIP_V2_1_0: {
+            StrConstant.RDMA: NumberConstant.RDMA_BANDWIDTH_V2_1_0,
+            StrConstant.HCCS: NumberConstant.HCCS_BANDWIDTH_V2_1_0,
+            StrConstant.PCIE: NumberConstant.PCIE_BANDWIDTH_V2_1_0
+        },
+        ChipModel.CHIP_V4_1_0: {
+            StrConstant.RDMA: NumberConstant.RDMA_BANDWIDTH_V4_1_0,
+            StrConstant.HCCS: NumberConstant.HCCS_BANDWIDTH_V4_1_0,
+        }
     }
+
     MessageSizeThreshold = {
         StrConstant.RDMA: NumberConstant.RDMA_MESSAGE_SIZE_THRESHOLD,
         StrConstant.HCCS: NumberConstant.HCCS_MESSAGE_SIZE_THRESHOLD,
         StrConstant.PCIE: NumberConstant.PCIE_MESSAGE_SIZE_THRESHOLD
     }
+
+    @classmethod
+    def get_standard_bandwidth(cls):
+        return cls.StandardBandWidth.get(ChipManager().get_chip_id())
 
     @classmethod
     def get_value(cls: any, value: any, value_msg: str) -> float:
@@ -54,8 +66,8 @@ class HcclAnalysisTool:
         return 0
 
     @classmethod
-    def determine_rdma(cls: any, events: list, idx: int) -> bool:
-        if idx > len(events) - NumberConstant.RDMA_TRANSIT_OP_NUM:
+    def determine_rdma(cls: any, events: list, idx: int, rdma_transit_op_num: int) -> bool:
+        if idx > len(events) - rdma_transit_op_num:
             return False
         second_task_type = events[idx + 1].hccl_name
         third_task_type = events[idx + 2].hccl_name
@@ -65,12 +77,16 @@ class HcclAnalysisTool:
             return False
 
     @classmethod
-    def get_rdma_time_info(cls: any, events: list, idx: int) -> list:
-        transit_size = HcclAnalysisTool.get_value(events[idx].size, 'size') / (1024 ** 2)
+    def get_rdma_time_info(cls: any, events: list, idx: int, rdma_transit_op_num: int) -> list:
+        transit_size = HcclAnalysisTool.get_value(events[idx].size, 'size') / NumberConstant.B_to_MB
         transit_time = 0
-        for event in events[idx: idx + NumberConstant.RDMA_TRANSIT_OP_NUM]:
-            transit_time += HcclAnalysisTool.get_value(event.duration, 'duration') / 1000
+        for event in events[idx: idx + rdma_transit_op_num]:
+            transit_time += HcclAnalysisTool.get_value(event.duration, 'duration') / NumberConstant.NS_TO_MS
         return [transit_time, transit_size]
+
+    @classmethod
+    def is_send_or_recv_op(cls, events: list, idx: int) -> bool:
+        return 'send' in events[idx].op_name or 'receive' in events[idx].op_name
 
     @classmethod
     def init_dict(cls: any, keys: list) -> dict:
@@ -141,7 +157,7 @@ class HcclAnalysisTool:
             )
         bandwidth_dict[transport_type][OpBandWidthType.BANDWIDTH_UTILIZATION] = round(
             bandwidth_dict[transport_type][OpBandWidthType.BANDWIDTH_GB_S] /
-            cls.StandardBandWidth.get(transport_type, -1), 4
+            cls.get_standard_bandwidth().get(transport_type, -1), 4
         )
         packet_num = 0
         large_packet_num = 0

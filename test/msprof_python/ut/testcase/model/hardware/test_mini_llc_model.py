@@ -123,3 +123,18 @@ def test_cal_core2cpu():
         with mock.patch(NAMESPACE + '.logging.error'):
             InfoConfReader()._info_json = None
             cal_core2cpu('test', 0)
+
+            InfoConfReader()._info_json = {
+                'DeviceInfo': [
+                    {
+                        'ctrl_cpu': '0',
+                        'ai_cpu': '1,2,d,3',
+                    }
+                ]
+            }
+            InfoConfReader()._info_json['DeviceInfo'][0]['ai_cpu'] = '1,2,d,3'
+            result = cal_core2cpu('test', 0)
+            unittest.TestCase().assertEqual(result, {'aicpu': [],
+                                                     'ctrlcpu': ['dsid0']}
+                                            )
+
