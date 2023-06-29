@@ -204,6 +204,7 @@ class TestParsingRuntimeData(unittest.TestCase):
                  mock.patch('os.path.getsize', return_value=200), \
                  mock.patch('os.path.exists', return_value=True), \
                  mock.patch('os.path.isfile', return_value=True), \
+                 mock.patch('os.access', return_value=True), \
                  mock.patch(NAMESPACE + '.logging.error'):
                 check = ParsingRuntimeData(self.sample_config, CONFIG)
                 result = check.read_binary_data('runtime.api.0.slice_0', b'')
@@ -212,6 +213,7 @@ class TestParsingRuntimeData(unittest.TestCase):
                  mock.patch('os.path.getsize', return_value=200), \
                  mock.patch('os.path.exists', return_value=True), \
                  mock.patch('os.path.isfile', return_value=True), \
+                 mock.patch('os.access', return_value=True), \
                  mock.patch(NAMESPACE + '.logging.error'):
                 check = ParsingRuntimeData(self.sample_config, CONFIG)
                 result = check.read_binary_data('runtime.api.0.slice_0', b'')
@@ -220,6 +222,7 @@ class TestParsingRuntimeData(unittest.TestCase):
                  mock.patch('os.path.getsize', return_value=200), \
                  mock.patch('os.path.exists', return_value=True), \
                  mock.patch('os.path.isfile', return_value=True), \
+                 mock.patch('os.access', return_value=True), \
                  mock.patch(NAMESPACE + '.logging.error'):
                 check = ParsingRuntimeData(self.sample_config, CONFIG)
                 result = check.read_binary_data('runtime.api.0.slice_0', None)
@@ -228,6 +231,7 @@ class TestParsingRuntimeData(unittest.TestCase):
                  mock.patch('os.path.getsize', return_value=200), \
                  mock.patch('os.path.exists', return_value=True), \
                  mock.patch('os.path.isfile', return_value=True), \
+                 mock.patch('os.access', return_value=True), \
                  mock.patch(NAMESPACE + '.logging.error'):
                 check = ParsingRuntimeData(self.sample_config, CONFIG)
                 result = check.read_binary_data('runtime.api.0.slice_0', None)
