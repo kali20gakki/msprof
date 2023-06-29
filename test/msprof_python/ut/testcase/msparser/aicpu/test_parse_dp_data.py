@@ -42,6 +42,7 @@ def test_analyse_dp():
             mock.patch('os.path.getsize', return_value=4), \
             mock.patch('os.path.exists', return_value=True), \
             mock.patch('os.path.isfile', return_value=True), \
+            mock.patch('os.access', return_value=True), \
             mock.patch(NAMESPACE + '.logging.error'), \
             mock.patch('builtins.open', mock.mock_open(read_data=data)):
         result = ParseDpData.analyse_dp(dp_path, device_id)
@@ -55,6 +56,7 @@ def test_dp_data_dispatch():
             mock.patch('os.path.getsize', return_value=4), \
             mock.patch('os.path.exists', return_value=True), \
             mock.patch('os.path.isfile', return_value=True), \
+            mock.patch('os.access', return_value=True), \
             mock.patch(NAMESPACE + '.ParseDpData.analyse_bin_dp', return_value=(1, 2)), \
             mock.patch(NAMESPACE + '.logging.error'):
         result = ParseDpData.dp_data_dispatch(['test'])
