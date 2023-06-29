@@ -86,8 +86,7 @@ class HCCLExport:
             _hccl_format_op_data = [
                 [
                     hccl_op.op_name, self.pid_value, self.HCCL_SORTED_OFFSET,
-                    hccl_op.timestamp / NumberConstant.NS_TO_US, hccl_op.duration / NumberConstant.NS_TO_US,
-                    hccl_op.args
+                    hccl_op.timestamp / NumberConstant.NS_TO_US, hccl_op.duration / NumberConstant.NS_TO_US
                 ]
                 for hccl_op in hccl_op_data
             ]
