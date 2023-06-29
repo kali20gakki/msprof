@@ -24,6 +24,7 @@ from common_func.msvp_common import is_valid_original_data
 from common_func.path_manager import PathManager
 from common_func.batch_counter import BatchCounter
 from common_func.iter_recorder import IterRecorder
+from common_func.file_manager import FileOpen
 from analyzer.scene_base.profiling_scene import ProfilingScene
 
 
@@ -67,7 +68,7 @@ class ParseAiCpuData(MsMultiProcess):
         read lines from files
         """
         lines = []
-        with open(file_path, "rb") as file_reader:
+        with FileOpen(file_path, "rb") as file_reader:
             # replace \n and \x00 in lines
             line = str(file_reader.read().replace(b'\n\x00', b' ___ ').replace(b'\x00', b' ___ '),
                        encoding='utf-8')

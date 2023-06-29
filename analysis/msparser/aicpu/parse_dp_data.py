@@ -13,6 +13,7 @@ from common_func.file_name_manager import get_data_preprocess_compiles
 from common_func.file_name_manager import get_file_name_pattern_match
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msvp_common import is_valid_original_data
+from common_func.file_manager import FileOpen
 
 
 class ParseDpData:
@@ -101,7 +102,7 @@ class ParseDpData:
         if not files:
             return []
         for file_ in files:
-            with open(file_, "rb") as file_reader:
+            with FileOpen(file_, "rb") as file_reader:
                 # replace \n and \x00 in lines
                 file_str = str(file_reader.read().replace(b'\n\x00',
                                                           b' ___ ').replace(b'\x00', b' ___ '))
@@ -137,7 +138,7 @@ class ParseDpData:
         if ParseDpData.DP_DATA_FMT_SIZE - offset < struct.calcsize(cls.BIN_DP_HEADER_FMT):
             offset -= ParseDpData.DP_DATA_FMT_SIZE
         try:
-            with open(judge_file, 'rb') as dp_f:
+            with FileOpen(judge_file, 'rb') as dp_f:
                 _ = dp_f.read(file_size + offset - ParseDpData.DP_DATA_FMT_SIZE)
                 magic_num, data_tag = struct.unpack(cls.BIN_DP_HEADER_FMT,
                                                     dp_f.read(struct.calcsize(cls.BIN_DP_HEADER_FMT)))
@@ -172,7 +173,7 @@ class ParseDpData:
         origin_data = []
         file_size = os.path.getsize(file_)
         try:
-            with open(file_, "rb") as file_reader:
+            with FileOpen(file_, "rb") as file_reader:
                 dp_bin_data = file_reader.read()
                 struct_nums = file_size // cls.DP_DATA_FMT_SIZE
                 dp_data = struct.unpack(
