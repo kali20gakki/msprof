@@ -26,6 +26,7 @@ class ProfException(Exception):
     PROF_SYSTEM_EXIT = 10
     PROF_CLUSTER_DIR_ERROR = 11
     PROF_CLUSTER_INVALID_DB = 12
+    PROF_DB_RECORD_EXCEED_LIMIT = 13
 
     def __init__(self: any, code: int, message: str = '', callback: any = error) -> None:
         super().__init__(code, message)
