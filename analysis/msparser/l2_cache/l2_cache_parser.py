@@ -11,6 +11,7 @@ from common_func.file_manager import FileManager
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.path_manager import PathManager
+from common_func.file_manager import FileOpen
 from msmodel.l2_cache.l2_cache_parser_model import L2CacheParserModel
 from msparser.data_struct_size_constant import StructFmt
 from msparser.interface.iparser import IParser
@@ -63,8 +64,8 @@ class L2CacheParser(IParser, MsMultiProcess):
             _file_size = L2CacheParser._check_file_complete(_file_path)
             if not _file_size:
                 return
-            with open(_file_path, 'rb') as _l2_cache_file:
-                _all_l2_cache_data = _l2_cache_file.read(_file_size)
+            with FileOpen(_file_path, 'rb') as _l2_cache_file:
+                _all_l2_cache_data = _l2_cache_file.file_reader.read(_file_size)
                 for _index in range(_file_size // StructFmt.L2_CACHE_DATA_SIZE):
                     l2_cache_data_bean = L2CacheDataBean()
                     l2_cache_data_bean.decode(

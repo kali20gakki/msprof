@@ -3,6 +3,7 @@ import unittest
 from unittest import mock
 
 from msparser.aicpu.parse_dp_data import ParseDpData
+from common_func.file_manager import FileOpen
 
 sample_config = {"model_id": 1, 'iter_id': 'dasfsd', 'result_dir': 'jasdfjfjs'}
 NAMESPACE = 'msparser.aicpu.parse_dp_data'
@@ -39,6 +40,9 @@ def test_analyse_dp():
         unittest.TestCase().assertEqual(result, (1, 2))
     with mock.patch(NAMESPACE + '.ParseDpData.get_files', return_value=['test.slice_0']), \
             mock.patch('os.path.getsize', return_value=4), \
+            mock.patch('os.path.exists', return_value=True), \
+            mock.patch('os.path.isfile', return_value=True), \
+            mock.patch('os.access', return_value=True), \
             mock.patch(NAMESPACE + '.logging.error'), \
             mock.patch('builtins.open', mock.mock_open(read_data=data)):
         result = ParseDpData.analyse_dp(dp_path, device_id)
@@ -50,6 +54,9 @@ def test_dp_data_dispatch():
             mock.patch('builtins.open', side_effect=OSError), \
             mock.patch(NAMESPACE + '.ParseDpData.get_dp_judge_data', return_value=('tset', 124)), \
             mock.patch('os.path.getsize', return_value=4), \
+            mock.patch('os.path.exists', return_value=True), \
+            mock.patch('os.path.isfile', return_value=True), \
+            mock.patch('os.access', return_value=True), \
             mock.patch(NAMESPACE + '.ParseDpData.analyse_bin_dp', return_value=(1, 2)), \
             mock.patch(NAMESPACE + '.logging.error'):
         result = ParseDpData.dp_data_dispatch(['test'])
