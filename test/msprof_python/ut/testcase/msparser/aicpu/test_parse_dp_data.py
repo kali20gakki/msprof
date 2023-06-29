@@ -3,6 +3,7 @@ import unittest
 from unittest import mock
 
 from msparser.aicpu.parse_dp_data import ParseDpData
+from common_func.file_manager import FileOpen
 
 sample_config = {"model_id": 1, 'iter_id': 'dasfsd', 'result_dir': 'jasdfjfjs'}
 NAMESPACE = 'msparser.aicpu.parse_dp_data'
