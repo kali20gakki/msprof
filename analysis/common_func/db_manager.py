@@ -66,7 +66,7 @@ class DBManager:
     INSERT_SIZE = 10000
     TENNSTONS = 10
     NSTOUS = 1000
-    MAX_ROW_COUNT = 100
+    MAX_ROW_COUNT = 10000000
 
     @staticmethod
     def create_connect_db(db_path: str) -> tuple:
