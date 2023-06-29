@@ -63,6 +63,7 @@ class TestL2CacheParser(unittest.TestCase):
         data_bean.construct_bean(data)
         with mock.patch(NAMESPACE + '.L2CacheParser._check_file_complete', return_value=144), \
                 mock.patch('builtins.open', mock.mock_open(read_data="")), \
+                mock.patch('os.path.exists', return_value=True), \
                 mock.patch(BEAN_NAMESPACE + '.L2CacheDataBean.decode', return_value=data_bean):
             check = L2CacheParser(self.file_list, self.sample_config)
             check.parse()
