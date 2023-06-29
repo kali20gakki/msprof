@@ -202,24 +202,28 @@ class TestParsingRuntimeData(unittest.TestCase):
              mock.patch(NAMESPACE + '.logging.info'):
             with mock.patch('builtins.open', mock.mock_open(read_data=data_1)), \
                  mock.patch('os.path.getsize', return_value=200), \
+                 mock.patch('os.path.exists', return_value=True), \
                  mock.patch(NAMESPACE + '.logging.error'):
                 check = ParsingRuntimeData(self.sample_config, CONFIG)
                 result = check.read_binary_data('runtime.api.0.slice_0', b'')
             self.assertEqual(result, b'\x01\x0bp\x00')
             with mock.patch('builtins.open', mock.mock_open(read_data=data_2)), \
                  mock.patch('os.path.getsize', return_value=200), \
+                 mock.patch('os.path.exists', return_value=True), \
                  mock.patch(NAMESPACE + '.logging.error'):
                 check = ParsingRuntimeData(self.sample_config, CONFIG)
                 result = check.read_binary_data('runtime.api.0.slice_0', b'')
             self.assertEqual(result, b'')
             with mock.patch('builtins.open', mock.mock_open(read_data=data_3)), \
                  mock.patch('os.path.getsize', return_value=200), \
+                 mock.patch('os.path.exists', return_value=True), \
                  mock.patch(NAMESPACE + '.logging.error'):
                 check = ParsingRuntimeData(self.sample_config, CONFIG)
                 result = check.read_binary_data('runtime.api.0.slice_0', None)
             self.assertEqual(result, b'\x00')
             with mock.patch('builtins.open', mock.mock_open(read_data=data_4)), \
                  mock.patch('os.path.getsize', return_value=200), \
+                 mock.patch('os.path.exists', return_value=True), \
                  mock.patch(NAMESPACE + '.logging.error'):
                 check = ParsingRuntimeData(self.sample_config, CONFIG)
                 result = check.read_binary_data('runtime.api.0.slice_0', None)
