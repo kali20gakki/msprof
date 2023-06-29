@@ -12,7 +12,6 @@
 #include "cmd_log.h"
 #include "msprof_dlog.h"
 #include "ai_drv_dev_api.h"
-#include "prof_params_adapter.h"
 #include "config/config_manager.h"
 #include "application.h"
 #include "transport/file_transport.h"
