@@ -6,6 +6,7 @@ import logging
 import os
 import sqlite3
 
+from common_func.msprof_exception import ProfException
 from msconfig.config_manager import ConfigManager
 from common_func.constant import Constant
 from common_func.empty_class import EmptyClass
@@ -65,6 +66,7 @@ class DBManager:
     INSERT_SIZE = 10000
     TENNSTONS = 10
     NSTOUS = 1000
+    MAX_ROW_COUNT = 100
 
     @staticmethod
     def create_connect_db(db_path: str) -> tuple:
@@ -455,6 +457,11 @@ class DBManager:
                 data += res
                 if len(res) < cls.FETCH_SIZE:
                     break
+                if len(data) > cls.MAX_ROW_COUNT:
+                    logging.error("Please check the record counts in %s's table",
+                                  os.path.basename(curs.execute("PRAGMA database_list;").fetchone()[-1]))
+                    message = "The record counts in table exceed the limit!"
+                    raise ProfException(ProfException.PROF_DB_RECORD_EXCEED_LIMIT, message)
             return data
         except sqlite3.Error as _err:
             logging.error(str(_err), exc_info=Constant.TRACE_BACK_SWITCH)
