@@ -55,28 +55,6 @@ int Analyzer::Init()
     return PROFILING_SUCCESS;
 }
 
-void Analyzer::OnNewData(CONST_VOID_PTR data, uint32_t len)
-{
-    if (!inited_) {
-        MSPROF_LOGE("Analyzer is not been inited!");
-        return;
-    }
-
-    auto decoded = analysis::dvvp::message::DecodeMessage2(data, len);
-    auto message = std::dynamic_pointer_cast<analysis::dvvp::proto::FileChunkReq>(decoded);
-    if (message == nullptr || message->datamodule() == FileChunkDataModule::PROFILING_IS_CTRL_DATA) {
-        if (profileMode_ == PROFILE_MODE_INVALID && flushedChannel_) {
-            flushQueueLen_--;
-            if (flushQueueLen_ <= 0) {
-                profileMode_ = PROFILE_MODE_SINGLE_OP;
-                MSPROF_EVENT("set profile mode: PROFILE_MODE_SINGLE_OP.");
-            }
-        }
-        MSPROF_LOGW("Analyzer OnNewData is not data for analyzing");
-        return;
-    }
-    DispatchData(message);
-}
 
 void Analyzer::Flush()
 {
@@ -103,36 +81,6 @@ void Analyzer::PrintHostStats()
 {
     analyzerGe_->PrintStats();
     analyzerRt_->PrintStats();
-}
-
-void Analyzer::DispatchData(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message)
-{
-    if (analyzerGe_->IsGeData(message->filename())) {
-        analyzerGe_->Parse(message);
-        UploadAppOp(analyzerTs_->opTimes_);
-        UploadAppOp(analyzerHwts_->opTimes_);
-    } else if (analyzerTs_->IsTsData(message->filename())) {
-        analyzerTs_->Parse(message);
-        TsDataPostProc();
-    } else if (analyzerHwts_->IsHwtsData(message->filename())) {
-        analyzerHwts_->Parse(message);
-        HwtsDataPostProc();
-    } else if (analyzerFfts_->IsFftsData(message->filename())) {
-        analyzerFfts_->Parse(message);
-        FftsDataPostProc();
-    } else {
-        MSPROF_LOGI("Analyzer drop data, fileName:  %s", message->filename().c_str());
-    }
-
-    if (profileMode_ == PROFILE_MODE_INVALID && flushedChannel_) {
-        flushQueueLen_--;
-        if (flushQueueLen_ <= 0) {
-            profileMode_ = PROFILE_MODE_SINGLE_OP;
-            MSPROF_EVENT("set profile mode: PROFILE_MODE_SINGLE_OP.");
-            // in single op mode, need upload hwts op immediately
-            UploadAppOp(analyzerHwts_->opTimes_);
-        }
-    }
 }
 
 void Analyzer::TsDataPostProc()

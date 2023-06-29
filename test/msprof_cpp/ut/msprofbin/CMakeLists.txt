@@ -84,7 +84,6 @@ set(src_file
     ${MSPROF_SOURCE_DIR}/dvvp/msprofbin/src/msprof_bin.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/logger/cmd_log.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/msprofbin/src/msprof_manager.cpp
-    ${MSPROF_SOURCE_DIR}/dvvp/msprofbin/src/prof_params_adapter.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/msprofbin/src/data_handle.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/msprofbin/src/input_parser.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/msprofbin/src/prof_task.cpp
@@ -99,7 +98,6 @@ add_executable(msprof_bin_utest
     test/input_parser_utest.cpp
     test/data_handle_utest.cpp
     test/msprof_manager_utest.cpp
-    test/prof_param_adapter_utest.cpp
     test/prof_task_utest.cpp
     test/prof_device_transport_utest.cpp
     test/running_mode_utest.cpp
