@@ -162,6 +162,16 @@ def check_path_valid(path: str, is_file: bool) -> None:
                 {'status': NumberConstant.ERROR,
                  'info': "The path '%s' is not a file. Please check the "
                          'path.' % path}))
+        if os.path.islink(path):
+            ReturnCodeCheck.print_and_return_status(json.dumps(
+            {'status': NumberConstant.ERROR,
+            'info': "The file '%s' is link. Please check the "
+                    'path.' % path}))
+        if os.path.getsize(path) > Constant.MAX_READ_FILE_BYTES:
+            ReturnCodeCheck.print_and_return_status(json.dumps(
+            {'status': NumberConstant.ERROR,
+            'info': "The file '%s' is too large to read. Please check the "
+                    'path.' % path}))
     else:
         if not os.path.isdir(path):
             ReturnCodeCheck.print_and_return_status(json.dumps(
