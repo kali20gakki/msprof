@@ -2,6 +2,7 @@ import sqlite3
 import unittest
 from unittest import mock
 from common_func.info_conf_reader import InfoConfReader
+from common_func.file_manager import FileOpen
 from constant.constant import CONFIG
 from msparser.aicpu.parse_aicpu_data import ParseAiCpuData
 from profiling_bean.prof_enum.data_tag import DataTag

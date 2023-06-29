@@ -107,13 +107,13 @@ class CommunicationMatrixCalculator(MetaCalculator):
         if sum_link_dict['count'] == 0:
             return suggestion
         utilization_ratio = sum_link_dict[CommunicationMatrixInfo.BANDWIDTH_GB_S] / sum_link_dict['count'] \
-            / HcclAnalysisTool.StandardBandWidth.get(trans_type, -1)
+            / HcclAnalysisTool.get_standard_bandwidth().get(trans_type, -1)
         large_packet_ratio = sum_link_dict[CommunicationMatrixInfo.LARGE_PACKET_RATIO] / sum_link_dict['count']
         self.total_time_dict[trans_data_type] = sum_link_dict[CommunicationMatrixInfo.TRANSIT_TIME_MS]
         suggestion.append(MatrixProf.PROF_SUM_TIME.format(sum_link_dict[CommunicationMatrixInfo.TRANSIT_TIME_MS]))
         suggestion.append(MatrixProf.PROF_AVERAGE_BANDWIDTH.format(
             sum_link_dict[CommunicationMatrixInfo.BANDWIDTH_GB_S] / sum_link_dict['count'],
-            HcclAnalysisTool.StandardBandWidth.get(trans_type, -1)))
+            HcclAnalysisTool.get_standard_bandwidth().get(trans_type, -1)))
         suggestion.append(MatrixProf.PROF_AVERAGE_PACKET_RATIO.format(large_packet_ratio))
         suggestion.append(self.matrix_slow_link_rule(utilization_ratio, large_packet_ratio, trans_type))
         return suggestion

@@ -26,6 +26,7 @@ from common_func.msvp_common import is_valid_original_data
 from common_func.path_manager import PathManager
 from common_func.platform.chip_manager import ChipManager
 from common_func.utils import Utils
+from common_func.file_manager import FileOpen
 from mscalculate.step_trace.create_step_table import StepTableBuilder
 from msparser.data_struct_size_constant import StructFmt
 from profiling_bean.struct_info.event_counter import AiCoreTaskInfo
@@ -368,11 +369,11 @@ class ParsingRuntimeData(MsMultiProcess):
             self.TS_MEMCPY_TAG: self._ts_memcpy_tag
         }
 
-        with open(file_name, 'rb') as file_reader:
+        with FileOpen(file_name, 'rb') as file_reader:
             # File size security is guaranteed by external calls
             if legacy_bytes is None:
                 legacy_bytes = bytes()
-            binary_file_data = legacy_bytes + file_reader.read(os.path.getsize(file_name))
+            binary_file_data = legacy_bytes + file_reader.file_reader.read(os.path.getsize(file_name))
             # this offset record offset to func, caculate by bufsize
             binary_data_size = len(binary_file_data)
             offset = 0

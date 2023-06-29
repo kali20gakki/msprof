@@ -45,6 +45,7 @@ class ApiViewer:
 
     @staticmethod
     def _get_data_api_name(api_data: list) -> str:
+        # api_data[0]: struct_type    api_data[5]: id    api_data[6]: item_id
         level = api_data[4]
         if level == ApiViewer.ACL_LEVEL:
             api_name = str(api_data[5]) if str(api_data[5]) else Constant.NA
