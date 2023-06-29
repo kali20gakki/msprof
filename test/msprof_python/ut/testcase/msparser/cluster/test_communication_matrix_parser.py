@@ -20,9 +20,10 @@ class Event:
     def __init__(self, transport_type: str, hccl_name: str):
         self.src_rank = 0
         self.dst_rank = 1
+        self.op_name = 'hcom_allReduce_1'
         self.hccl_name = hccl_name
         self.size = 1024 ** 2
-        self.duration = 1000
+        self.duration = 1000000
         self.transport_type = transport_type
         self.timestamp = 0
 
@@ -88,12 +89,19 @@ class TestCommunicationMatrixParser(unittest.TestCase):
         self.assertEqual(parser.op_info[0][StrConstant.LINK_INFO]['0-1'][1], 1)
 
     def test_parse_rdma(self):
-        events = [Event(StrConstant.RDMA, StrConstant.RDMA_SEND), Event(StrConstant.RDMA, StrConstant.RDMA_SEND),
-                  Event(StrConstant.RDMA, StrConstant.NOTIFY_WAIT), Event(StrConstant.RDMA, StrConstant.RDMA_SEND),
-                  Event(StrConstant.RDMA, StrConstant.NOTIFY_WAIT)]
-        parser = CommunicationMatrixParser({})
-        parser.parse_ops(events, 'op_name')
-        self.assertEqual(parser.op_info[0][StrConstant.LINK_INFO]['0-1'][2], 5)
+        standard_bandwidth = {
+            StrConstant.RDMA: 12.5,
+            StrConstant.HCCS: 18,
+            StrConstant.PCIE: 20
+        }
+        with mock.patch("msparser.cluster.meta_parser.HcclAnalysisTool.get_standard_bandwidth",
+                        return_value=standard_bandwidth):
+            events = [Event(StrConstant.RDMA, StrConstant.RDMA_SEND), Event(StrConstant.RDMA, StrConstant.RDMA_SEND),
+                      Event(StrConstant.RDMA, StrConstant.NOTIFY_WAIT), Event(StrConstant.RDMA, StrConstant.RDMA_SEND),
+                      Event(StrConstant.RDMA, StrConstant.NOTIFY_WAIT)]
+            parser = CommunicationMatrixParser({})
+            parser.parse_ops(events, 'op_name')
+            self.assertEqual(parser.op_info[0][StrConstant.LINK_INFO]['0-1'][2], 5)
 
     def test_combine(self):
         parser = CommunicationMatrixParser({})
@@ -107,13 +115,20 @@ class TestCommunicationMatrixParser(unittest.TestCase):
         self.assertEqual(ret['0-4'][MatrixDataType.LARGE_PACKET_NUM], 1)
 
     def test_convert(self):
-        parser = CommunicationMatrixParser({})
-        parser.op_info = [self.hccl_dict1, self.hccl_dict2]
-        parser.convert()
-        ret1 = parser.op_info[0].get(StrConstant.LINK_INFO)
-        ret2 = parser.op_info[1].get(StrConstant.LINK_INFO)
-        self.assertEqual(ret1[0][CommunicationMatrixInfo.SRC_RANK], '0')
-        self.assertEqual(ret1[0][CommunicationMatrixInfo.DST_RANK], '1')
-        self.assertEqual(ret1[1][CommunicationMatrixInfo.BANDWIDTH_UTILIZATION], 0.08)
-        self.assertEqual(ret2[2][CommunicationMatrixInfo.BANDWIDTH_GB_S], 1.0)
-        self.assertEqual(ret2[1][CommunicationMatrixInfo.LARGE_PACKET_RATIO], round(100 / 105, 4))
+        standard_bandwidth = {
+            StrConstant.RDMA: 12.5,
+            StrConstant.HCCS: 18,
+            StrConstant.PCIE: 20
+        }
+        with mock.patch("msparser.cluster.meta_parser.HcclAnalysisTool.get_standard_bandwidth",
+                        return_value=standard_bandwidth):
+            parser = CommunicationMatrixParser({})
+            parser.op_info = [self.hccl_dict1, self.hccl_dict2]
+            parser.convert()
+            ret1 = parser.op_info[0].get(StrConstant.LINK_INFO)
+            ret2 = parser.op_info[1].get(StrConstant.LINK_INFO)
+            self.assertEqual(ret1[0][CommunicationMatrixInfo.SRC_RANK], '0')
+            self.assertEqual(ret1[0][CommunicationMatrixInfo.DST_RANK], '1')
+            self.assertEqual(ret1[1][CommunicationMatrixInfo.BANDWIDTH_UTILIZATION], 0.08)
+            self.assertEqual(ret2[2][CommunicationMatrixInfo.BANDWIDTH_GB_S], 1.0)
+            self.assertEqual(ret2[1][CommunicationMatrixInfo.LARGE_PACKET_RATIO], round(100 / 105, 4))
