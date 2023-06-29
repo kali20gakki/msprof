@@ -70,7 +70,7 @@ class ParseAiCpuData(MsMultiProcess):
         lines = []
         with FileOpen(file_path, "rb") as file_reader:
             # replace \n and \x00 in lines
-            line = str(file_reader.read().replace(b'\n\x00', b' ___ ').replace(b'\x00', b' ___ '),
+            line = str(file_reader.file_reader.read().replace(b'\n\x00', b' ___ ').replace(b'\x00', b' ___ '),
                        encoding='utf-8')
             lines += list(filter(None, line.split(" ___ ")))
         return lines

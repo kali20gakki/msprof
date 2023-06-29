@@ -65,7 +65,7 @@ class L2CacheParser(IParser, MsMultiProcess):
             if not _file_size:
                 return
             with FileOpen(_file_path, 'rb') as _l2_cache_file:
-                _all_l2_cache_data = _l2_cache_file.read(_file_size)
+                _all_l2_cache_data = _l2_cache_file.file_reader.read(_file_size)
                 for _index in range(_file_size // StructFmt.L2_CACHE_DATA_SIZE):
                     l2_cache_data_bean = L2CacheDataBean()
                     l2_cache_data_bean.decode(

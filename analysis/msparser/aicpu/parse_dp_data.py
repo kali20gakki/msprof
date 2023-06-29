@@ -104,7 +104,7 @@ class ParseDpData:
         for file_ in files:
             with FileOpen(file_, "rb") as file_reader:
                 # replace \n and \x00 in lines
-                file_str = str(file_reader.read().replace(b'\n\x00',
+                file_str = str(file_reader.file_reader.read().replace(b'\n\x00',
                                                           b' ___ ').replace(b'\x00', b' ___ '))
                 if len(file_str) > Constant.LINE_LEN:
                     lines += str(file_str)[2:-1].split(" ___ ")
@@ -139,9 +139,9 @@ class ParseDpData:
             offset -= ParseDpData.DP_DATA_FMT_SIZE
         try:
             with FileOpen(judge_file, 'rb') as dp_f:
-                _ = dp_f.read(file_size + offset - ParseDpData.DP_DATA_FMT_SIZE)
+                _ = dp_f.file_reader.read(file_size + offset - ParseDpData.DP_DATA_FMT_SIZE)
                 magic_num, data_tag = struct.unpack(cls.BIN_DP_HEADER_FMT,
-                                                    dp_f.read(struct.calcsize(cls.BIN_DP_HEADER_FMT)))
+                                                    dp_f.file_reader.read(struct.calcsize(cls.BIN_DP_HEADER_FMT)))
                 if magic_num == NumberConstant.MAGIC_NUM and data_tag == cls.BIN_DP_DATA_TAG:
                     return cls.DP_FILE_BIN_TYPE
                 return cls.DP_FILE_STR_TYPE
@@ -174,7 +174,7 @@ class ParseDpData:
         file_size = os.path.getsize(file_)
         try:
             with FileOpen(file_, "rb") as file_reader:
-                dp_bin_data = file_reader.read()
+                dp_bin_data = file_reader.file_reader.read()
                 struct_nums = file_size // cls.DP_DATA_FMT_SIZE
                 dp_data = struct.unpack(
                     cls.DP_BIN_START_TAG + cls.DP_DATA_FMT * struct_nums, dp_bin_data)
