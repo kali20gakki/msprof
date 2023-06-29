@@ -7,6 +7,7 @@ from common_func.platform.chip_manager import ChipManager
 from constant.constant import CONFIG
 from profiling_bean.prof_enum.chip_model import ChipModel
 from sqlite.db_manager import DBManager
+from common_func.file_manager import FileOpen
 
 NAMESPACE = 'analyzer.create_runtime_db'
 
