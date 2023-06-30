@@ -55,7 +55,7 @@ class TestHcclAnalysisTool(unittest.TestCase):
         events = [Event(StrConstant.RDMA_SEND), Event(StrConstant.RDMA_SEND), Event(StrConstant.NOTIFY_WAIT),
                   Event(StrConstant.RDMA_SEND), Event(StrConstant.NOTIFY_WAIT)]
         ret = HcclAnalysisTool.get_rdma_time_info(events, 0, 5)
-        self.assertEqual(ret, [5, 1])
+        self.assertEqual(ret, [1, 1])
 
     def test_get_transport_type_hccs(self):
         ret = HcclAnalysisTool.get_transport_type(1, 0)
@@ -201,7 +201,7 @@ class TestCommunicationParser(unittest.TestCase):
                                 "Bandwidth(Utilization)": 0.08,
                                 "Large Packet Ratio": 1.0,
                                 "Size Distribution": {
-                                   20: 2.0
+                                   20: [2, 2]
                                 }
                             },
                             "HCCS": {
@@ -211,7 +211,7 @@ class TestCommunicationParser(unittest.TestCase):
                                 "Bandwidth(Utilization)": 0.08,
                                 "Large Packet Ratio": 1.0,
                                 "Size Distribution": {
-                                    20: 2.0
+                                    20: [2, 2]
                                 }
                             },
                             "SDMA": {
@@ -235,7 +235,7 @@ class TestCommunicationParser(unittest.TestCase):
                                 "Bandwidth(Utilization)": 0.08,
                                 "Large Packet Ratio": 1.0,
                                 "Size Distribution": {
-                                    20: 2.0
+                                    20: [2, 2]
                                 }
                             },
                             "HCCS": {
@@ -245,7 +245,7 @@ class TestCommunicationParser(unittest.TestCase):
                                 "Bandwidth(Utilization)": 0.08,
                                 "Large Packet Ratio": 1.0,
                                 "Size Distribution": {
-                                    20: 2.0
+                                    20: [2, 2]
                                 }
                             },
                             "SDMA": {
@@ -275,7 +275,7 @@ class TestCommunicationParser(unittest.TestCase):
                 1 / HcclAnalysisTool.StandardBandWidth.get(ChipModel.CHIP_V2_1_0).get('RDMA')
             )
             self.assertEqual(ret[StrConstant.TOTAL][0]
-                             ["Communication Bandwidth Info"]["RDMA"]["Size Distribution"][20], 4)
+                             ["Communication Bandwidth Info"]["RDMA"]["Size Distribution"][20], [4, 4])
             self.assertEqual(
                 ret[StrConstant.TOTAL][0]["Communication Bandwidth Info"]["SDMA"]["Transit Size(MB)"], 2048
             )
