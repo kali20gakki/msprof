@@ -22,8 +22,10 @@ class CommunicationModel(ViewModel):
         :return:
         """
         if top_hccl_ops is not None:
-            condition = "op_name='{}'".format(top_hccl_ops[0]) if len(top_hccl_ops) < 2 else \
-                "op_name IN {}".format(top_hccl_ops)
+            if len(top_hccl_ops) < 2:
+                condition = "op_name='{}'".format(top_hccl_ops[0])
+            else:
+                condition = "op_name IN {}".format(top_hccl_ops)
             sql = "select * from {0} where timestamp < ? and timestamp >= ? " \
                   "and {1}".format(DBNameConstant.TABLE_HCCL_ALL_REDUCE, condition)
         else:
