@@ -16,6 +16,9 @@ class TestTuningView(unittest.TestCase):
     def test_load_result_file_1(self):
         with mock.patch('builtins.open', side_effect=FileNotFoundError), \
                 mock.patch(NAMESPACE + '.PathManager.get_summary_dir', return_value='test'), \
+                mock.patch('os.path.isfile', return_value=True), \
+                mock.patch('os.path.getsize', return_value=200), \
+                mock.patch('os.access', return_value=True), \
                 mock.patch('os.path.exists', return_value=True):
             res = TuningView("", {}, 0).get_tuning_data()
         self.assertEqual(res, None)
@@ -23,7 +26,10 @@ class TestTuningView(unittest.TestCase):
     def test_tuning_report(self):
         data = {"data": {"Op Summary": [{"result": [{'rule_subtype': 'test'}]}]}, "Rule Type": 1}
         with mock.patch(NAMESPACE + '.PathManager.get_summary_dir', return_value='test'),\
-                mock.patch('os.path.exists', return_value=True),\
+                mock.patch('os.path.exists', return_value=True), \
+                mock.patch('os.path.isfile', return_value=True), \
+                mock.patch('os.path.getsize', return_value=200), \
+                mock.patch('os.access', return_value=True), \
                 mock.patch('builtins.open', mock.mock_open(read_data=json.dumps(data))):
 
             TuningView("", {}, 0).tuning_report()
