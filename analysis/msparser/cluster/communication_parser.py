@@ -23,8 +23,9 @@ class CommunicationParser(MetaParser):
 
     @staticmethod
     def combine_size_distribution(part_dist_dict: dict, total_dist_dict: dict):
-        for size, cnt in part_dist_dict.items():
-            total_dist_dict[size] += cnt
+        for size, size_info in part_dist_dict.items():
+            total_dist_dict[size][0] += size_info[0]
+            total_dist_dict[size][1] += size_info[1]
 
     @staticmethod
     def combine_ops_time_info(part_dict: dict, total_dict: dict) -> None:

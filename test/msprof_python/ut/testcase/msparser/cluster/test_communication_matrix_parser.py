@@ -101,7 +101,7 @@ class TestCommunicationMatrixParser(unittest.TestCase):
                       Event(StrConstant.RDMA, StrConstant.NOTIFY_WAIT)]
             parser = CommunicationMatrixParser({})
             parser.parse_ops(events, 'op_name')
-            self.assertEqual(parser.op_info[0][StrConstant.LINK_INFO]['0-1'][2], 5)
+            self.assertEqual(parser.op_info[0][StrConstant.LINK_INFO]['0-1'][2], 1)
 
     def test_combine(self):
         parser = CommunicationMatrixParser({})
