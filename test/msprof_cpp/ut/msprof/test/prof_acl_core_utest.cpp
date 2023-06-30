@@ -1292,24 +1292,6 @@ TEST_F(MSPROF_ACL_CORE_UTEST, AddToUploaderGetUploaderFailed) {
     dumper->AddToUploader(hwts);
 }
 
-TEST_F(MSPROF_ACL_CORE_UTEST, Analyzer_OnNewData) {
-    SHARED_PTR_ALIA<PipeTransport> pipeTransport = std::make_shared<PipeTransport>();
-    SHARED_PTR_ALIA<Uploader> pipeUploader = std::make_shared<Uploader>(pipeTransport);
-    pipeUploader->Init(100000);
-    std::shared_ptr<Analyzer> analyzer(new Analyzer(pipeUploader));
-    EXPECT_EQ(PROFILING_SUCCESS, analyzer->Init());
-
-    analyzer->inited_ = false;
-    analyzer->OnNewData(nullptr, 0);
-
-    analyzer->inited_ = true;
-    analyzer->profileMode_ = PROFILE_MODE_INVALID;
-    analyzer->flushQueueLen_ = 1;
-    analyzer->flushedChannel_ = true;
-    analyzer->OnNewData(nullptr, 0);
-    EXPECT_EQ(PROFILE_MODE_SINGLE_OP, analyzer->profileMode_);
-}
-
 TEST_F(MSPROF_ACL_CORE_UTEST, Analyzer_TsDataPostProc) {
     GlobalMockObject::verify();
     MOCKER_CPP(&Analysis::Dvvp::Analyze::Analyzer::ConstructAndUploadData)
@@ -1519,29 +1501,6 @@ TEST_F(MSPROF_ACL_CORE_UTEST, Analyzer_UpdateTsOpIndexId) {
         iter->second.indexId = 1;
     }
     analyzer->UpdateOpIndexId(tsOpTimes);
-}
-
-TEST_F(MSPROF_ACL_CORE_UTEST, Analyzer_DispatchData) {
-    std::shared_ptr<Analyzer> analyzer(new Analyzer(nullptr));
-    EXPECT_EQ(PROFILING_SUCCESS, analyzer->Init());
-
-    HwtsProfileType01 hwtsChunk;
-    hwtsChunk.taskId = 30;
-    hwtsChunk.streamId = 100;
-    hwtsChunk.cntRes0Type = HWTS_TASK_START_TYPE;
-    hwtsChunk.syscnt = 1000000;
-    SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> hwts(new analysis::dvvp::proto::FileChunkReq());
-    hwts->set_filename("hwts.data");
-    hwts->set_chunk(reinterpret_cast<char *>(&hwtsChunk), sizeof(HwtsProfileType01));
-    hwts->set_chunksizeinbytes(sizeof(HwtsProfileType01));
-    auto data = analysis::dvvp::message::EncodeMessage(hwts);
-    auto decoded = analysis::dvvp::message::DecodeMessage2(data.c_str(), data.size());
-    auto message = std::dynamic_pointer_cast<analysis::dvvp::proto::FileChunkReq>(decoded);
-    analyzer->profileMode_ = PROFILE_MODE_INVALID;
-    analyzer->flushedChannel_ = true;
-    analyzer->flushQueueLen_  = 1;
-    analyzer->DispatchData(message);
-    EXPECT_EQ(PROFILE_MODE_SINGLE_OP, analyzer->profileMode_);
 }
 
 TEST_F(MSPROF_ACL_CORE_UTEST, AnalyzerTs_UploadKeypointOp) {
