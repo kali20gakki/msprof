@@ -79,9 +79,10 @@ class HcclAnalysisTool:
     @classmethod
     def get_rdma_time_info(cls: any, events: list, idx: int, rdma_transit_op_num: int) -> list:
         transit_size = HcclAnalysisTool.get_value(events[idx].size, 'size') / NumberConstant.B_to_MB
-        transit_time = 0
-        for event in events[idx: idx + rdma_transit_op_num]:
-            transit_time += HcclAnalysisTool.get_value(event.duration, 'duration') / NumberConstant.NS_TO_MS
+        transit_time = HcclAnalysisTool.get_value(events[idx + rdma_transit_op_num - 1].duration +
+                                                  events[idx + rdma_transit_op_num - 1].timestamp -
+                                                  events[idx].timestamp,
+                                                  'duration') / NumberConstant.NS_TO_MS
         return [transit_time, transit_size]
 
     @classmethod
@@ -99,7 +100,7 @@ class HcclAnalysisTool:
         values = [value for key, value in OpBandWidthType.__dict__.items() if '__' not in key]
         for trans_type in StrConstant.TRANSIT_TYPE:
             dic[trans_type] = HcclAnalysisTool.init_dict(values)
-            dic[trans_type][OpBandWidthType.SIZE_DISTRIBUTION] = defaultdict(float)
+            dic[trans_type][OpBandWidthType.SIZE_DISTRIBUTION] = defaultdict(lambda: [0, 0])
         return dic
 
     @classmethod
@@ -132,7 +133,8 @@ class HcclAnalysisTool:
     def update_bandwidth_record(cls: any, bandwidth_dict: dict, trans_type: str, size: float, dur: float) -> None:
         bandwidth_dict[trans_type][OpBandWidthType.TRANSIT_SIZE_MB] += size
         bandwidth_dict[trans_type][OpBandWidthType.TRANSIT_TIME_MS] += dur
-        bandwidth_dict[trans_type][OpBandWidthType.SIZE_DISTRIBUTION][size] += 1
+        bandwidth_dict[trans_type][OpBandWidthType.SIZE_DISTRIBUTION][size][0] += 1
+        bandwidth_dict[trans_type][OpBandWidthType.SIZE_DISTRIBUTION][size][1] += dur
 
     @classmethod
     def combine_sdma_info(cls: any, bandwidth_dict: dict) -> None:
@@ -161,10 +163,10 @@ class HcclAnalysisTool:
         )
         packet_num = 0
         large_packet_num = 0
-        for size, count in bandwidth_dict[transport_type][OpBandWidthType.SIZE_DISTRIBUTION].items():
+        for size, size_info in bandwidth_dict[transport_type][OpBandWidthType.SIZE_DISTRIBUTION].items():
             if size > cls.MessageSizeThreshold.get(transport_type, 0):
-                large_packet_num += count
-            packet_num += count
+                large_packet_num += size_info[0]
+            packet_num += size_info[0]
         if packet_num > 0:
             bandwidth_dict[transport_type][OpBandWidthType.LARGE_PACKET_RATIO] = \
                 round(large_packet_num / packet_num, 4)
