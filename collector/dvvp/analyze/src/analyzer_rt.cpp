@@ -50,6 +50,7 @@ void AnalyzerRt::RtCompactParse(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunk
 
 void AnalyzerRt::ParseRuntimeTrackData(CONST_CHAR_PTR data, uint32_t len, bool ageFlag)
 {
+    std::unique_lock<std::mutex> lk(AnalyzerBase::rtThreadMtx_);
     AppendToBufferedData(data, len);
     uint32_t offset = 0;
     while (dataPtr_ != nullptr && offset < dataLen_) {
@@ -70,6 +71,7 @@ void AnalyzerRt::ParseRuntimeTrackData(CONST_CHAR_PTR data, uint32_t len, bool a
         analyzedBytes_ += RT_COMPACT_INFO_SIZE;
     }
     BufferRemainingData(offset);
+    MatchDeviceOpInfo(AnalyzerBase::rtOpInfo_, AnalyzerBase::tsTmpOpInfo_, AnalyzerBase::geOpInfo_);
 }
  
 void AnalyzerRt::HandleRuntimeTrackData(CONST_CHAR_PTR data, bool ageFlag)
@@ -92,6 +94,41 @@ void AnalyzerRt::HandleRuntimeTrackData(CONST_CHAR_PTR data, bool ageFlag)
         ", key: %s, timeStamp: %llu, age: %d", key.c_str(), compactData->timeStamp, ageFlag);
 }
  
+void AnalyzerRt::MatchDeviceOpInfo(std::map<std::string, RtOpInfo> &rtOpInfo,
+    std::multimap<std::string, RtOpInfo> &tsTmpOpInfo,
+    std::multimap<uint32_t, GeOpFlagInfo> &geOpInfo)
+{
+    if (tsTmpOpInfo.empty()) {
+        return;
+    }
+    for (auto devIter = tsTmpOpInfo.begin(); devIter != tsTmpOpInfo.end(); ++devIter) {
+        auto hostIter = rtOpInfo.find(devIter->first);
+        if (hostIter == rtOpInfo.end()) {
+            MSPROF_LOGW("Device data not match runtime track, taskId+streamId: %s", devIter->first.c_str());
+            continue;
+        }
+        devIter->second.threadId = hostIter->second.threadId;
+        devIter->second.tsTrackTimeStamp = hostIter->second.tsTrackTimeStamp;
+        if (geOpInfo.empty()) {
+            AnalyzerBase::devTmpOpInfo_.emplace_back(std::move(devIter->second));
+            continue;
+        }
+        auto threadGroup = geOpInfo.equal_range(hostIter->second.threadId);
+        if (threadGroup.first == geOpInfo.end()) {
+            continue;
+        }
+        for (auto geIter = threadGroup.first; geIter != threadGroup.second; ++geIter) {
+            if (devIter->second.tsTrackTimeStamp > geIter->second.end ||
+                devIter->second.tsTrackTimeStamp <= geIter->second.start) { // time include
+                continue;
+            }
+            ConstructAndUploadOptimizeData(geIter->second, devIter->second);
+            break;
+        }
+    }
+    tsTmpOpInfo.clear();
+}
+
 void AnalyzerRt::PrintStats() const
 {
     MSPROF_EVENT("total_size_analyze, module: RT, analyzed %llu, total %llu, rt time %u, merge %u",

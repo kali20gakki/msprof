@@ -131,14 +131,10 @@ void PlatformAdapterInterface::SetParamsForTaskTimeL0()
 
 void PlatformAdapterInterface::SetParamsForTaskTimeL1()
 {
-    bool ret = false;
     SetParamsForTaskTimeL0();
     params_->dataTypeConfig |= PROF_TASK_TIME_L1;
     SetParamsForGEL0();
     SetParamsForGEL1();
-    if (!ret) {
-        MSPROF_LOGW("Unrecognized option:task_time for PlatformType:%d", static_cast<uint8_t>(platformType_));
-    }
 }
 
 void PlatformAdapterInterface::SetParamsForTaskTrace()
