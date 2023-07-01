@@ -110,7 +110,7 @@ class TestCommunicationParser(unittest.TestCase):
                 'Bandwidth(GB/s)': 0,
                 'Bandwidth(Utilization)': 0.0,
                 'Large Packet Ratio': 0,
-                'Size Distribution': defaultdict(float),
+                'Size Distribution': defaultdict(lambda: [0, 0]),
                 'Transit Size(MB)': 0,
                 'Transit Time(ms)': 0
             },
@@ -118,30 +118,34 @@ class TestCommunicationParser(unittest.TestCase):
                 'Bandwidth(GB/s)': 0,
                 'Bandwidth(Utilization)': 0.0,
                 'Large Packet Ratio': 0,
-                'Size Distribution': defaultdict(float),
+                'Size Distribution': defaultdict(lambda: [0, 0]),
                 'Transit Size(MB)': 0,
                 'Transit Time(ms)': 0
             },
             'RDMA': {
-                'Bandwidth(GB/s)': 0,
-                'Bandwidth(Utilization)': 0.0,
-                'Large Packet Ratio': 0,
-                'Size Distribution': defaultdict(float),
-                'Transit Size(MB)': 0,
-                'Transit Time(ms)': 0
+                'Bandwidth(GB/s)': 0.9766,
+                'Bandwidth(Utilization)': 0.0781,
+                'Large Packet Ratio': 1.0,
+                'Size Distribution': {1: [1, 1]},
+                'Transit Size(MB)': 1.0,
+                'Transit Time(ms)': 1.0
             },
             'SDMA': {
                 'Bandwidth(GB/s)': 0,
                 'Bandwidth(Utilization)': 0.0,
                 'Large Packet Ratio': 0,
-                'Size Distribution': defaultdict(float),
+                'Size Distribution': defaultdict(lambda: [0, 0]),
                 'Transit Size(MB)': 0,
                 'Transit Time(ms)': 0
             },
         }
+        events = [
+            Event(StrConstant.RDMA_SEND), Event(StrConstant.RDMA_SEND), Event(StrConstant.NOTIFY_WAIT),
+            Event(StrConstant.RDMA_SEND), Event(StrConstant.NOTIFY_WAIT)
+        ]
         with mock.patch("msparser.cluster.meta_parser.HcclAnalysisTool.get_standard_bandwidth",
                         return_value=standard_bandwidth):
-            op_bandwidth_dict = CommunicationParser({}).op_bandwidth_parser([Event(StrConstant.RDMA_SEND)])
+            op_bandwidth_dict = CommunicationParser({}).op_bandwidth_parser(events)
             self.assertEqual(op_bandwidth_dict, expect_bandwidth_dict)
 
     def test_combine_time(self):

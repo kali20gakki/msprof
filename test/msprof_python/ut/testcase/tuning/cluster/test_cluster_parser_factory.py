@@ -160,7 +160,7 @@ class TestClusterCommunicationParserFactory(unittest.TestCase):
         hcclop = HcclOp()
         model_space = 'msmodel.cluster_info.communication_model.CommunicationModel'
         with mock.patch(model_space + '.check_db', return_value=True), \
-                mock.patch(model_space + '.get_all_events_from_db', return_value=[hcclop]):
+                mock.patch('common_func.db_manager.DBManager.fetch_all_data', return_value=[hcclop]):
             test_parser = ClusterCommunicationParserFactory(self.params)
             test_parser.get_hccl_events_from_db(0, '', [(0, 100)])
             self.assertEqual(test_parser.rank_hccl_data_dict, {'all_reduce': {0: [hcclop]}})
