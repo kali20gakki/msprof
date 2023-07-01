@@ -849,9 +849,13 @@ void Utils::GetFiles(const std::string &dir, bool isRecur, std::vector<std::stri
 
             GetFiles(childPath, isRecur, files, depthCnt + 1);
         } else {
-            if (files.size() > MAX_FILES_NUM) {
+            if (childPath.size() >= MAX_PATH_LENGTH) {
+                MSPROF_LOGW("File len exceeds maximum value: %d, skip this file", MAX_PATH_LENGTH);
+                continue;
+            }
+            if (files.size() >= MAX_FILES_NUM) {
                 MSPROF_LOGW("Get files num exceeds maximum value: %d, stop get files", MAX_FILES_NUM);
-                return;
+                break;
             }
             files.push_back(childPath);
         }
