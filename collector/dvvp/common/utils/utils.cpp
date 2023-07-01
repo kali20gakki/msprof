@@ -38,6 +38,7 @@ using FuncIntPtr = int(*)(int);
 std::mutex g_envMtx;
 const unsigned long long CHANGE_FROM_S_TO_NS = 1000000000;
 const unsigned int MAX_FUNC_DEPTH = 20;
+const unsigned int MAX_FILES_NUM = 100000;
 
 unsigned long long Utils::GetClockRealtime()
 {
@@ -810,9 +811,14 @@ int Utils::MsleepInterruptible(unsigned long msec)
     return PROFILING_SUCCESS;
 }
 
-void Utils::GetFiles(const std::string &dir, bool isRecur, std::vector<std::string> &files)
+void Utils::GetFiles(const std::string &dir, bool isRecur, std::vector<std::string> &files,
+                     unsigned int depthCnt)
 {
     if (dir.empty()) {
+        return;
+    }
+    if (depthCnt > MAX_FUNC_DEPTH) {
+        MSPROF_LOGW("Directory hierarchy exceeds maximum value: %d, stop get files", MAX_FUNC_DEPTH);
         return;
     }
 
@@ -841,8 +847,12 @@ void Utils::GetFiles(const std::string &dir, bool isRecur, std::vector<std::stri
                 continue;
             }
 
-            GetFiles(childPath, isRecur, files);
+            GetFiles(childPath, isRecur, files, depthCnt + 1);
         } else {
+            if (files.size() > MAX_FILES_NUM) {
+                MSPROF_LOGW("Get files num exceeds maximum value: %d, stop get files", MAX_FILES_NUM);
+                return;
+            }
             files.push_back(childPath);
         }
     }
