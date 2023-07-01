@@ -65,18 +65,6 @@ TEST_F(MsprofReporterMgrUtest, ReportApiData)
     EXPECT_EQ(PROFILING_SUCCESS, MsprofReporterMgr::instance()->ReportData(true, data));
 }
  
-TEST_F(MsprofReporterMgrUtest, ReportEventData)
-{
-    GlobalMockObject::verify();
-    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::IsInited)
-        .stubs()
-        .will(returnValue(true));
-    EXPECT_EQ(PROFILING_SUCCESS, MsprofReporterMgr::instance()->StartReporters());
-
-    MsprofEvent data;
-    EXPECT_EQ(PROFILING_SUCCESS, MsprofReporterMgr::instance()->ReportData(true, data));
-}
- 
 TEST_F(MsprofReporterMgrUtest, ReportCompactData)
 {
     GlobalMockObject::verify();

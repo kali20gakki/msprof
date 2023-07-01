@@ -126,12 +126,23 @@ void AnalyzerTs::ParseTsTimelineData(CONST_CHAR_PTR data, uint32_t len)
     }
 }
 
+void AnalyzerTs::CreateTsKeyPointStartData(const TsProfileKeypoint *tsData, std::string opInfoKey)
+{
+    KeypointOp opData = {0, 0, 0, 0, 0, 0, 0, 0};
+    opData.startTime = static_cast<uint64_t>(tsData->timestamp / frequency_);
+    opData.indexId = tsData->indexId;
+    opData.modelId = tsData->modelId;
+    opData.streamId = tsData->streamId;
+    opData.taskId = tsData->taskId;
+    opData.uploaded = false;
+    keypointOpInfo_[opInfoKey] = opData;
+}
+
 void AnalyzerTs::ParseTsKeypointData(CONST_CHAR_PTR data, uint32_t len)
 {
     if (len < sizeof(TsProfileKeypoint)) {
         return;
     }
-
     auto tsData = reinterpret_cast<const TsProfileKeypoint *>(data);
     if (tsData == nullptr) {
         MSPROF_LOGE("Failed to call reinterpret_cast.");
@@ -144,34 +155,33 @@ void AnalyzerTs::ParseTsKeypointData(CONST_CHAR_PTR data, uint32_t len)
                     tsData->indexId, tsData->taskId, tsData->streamId, tsData->timestamp);
         return;
     }
-
+    std::string key = std::to_string(tsData->modelId) + std::to_string(tsData->indexId);
+    auto iter = keypointOpInfo_.find(key);
     if (tsData->tagId == TS_KEYPOINT_START_TASK_STATE) {
-        if (!keypointOpInfo_.empty() && !keypointOpInfo_.back().endTime) {
-            MSPROF_LOGE("last keypoint op's end time is 0. indexId %llu, taskId %u, streamId %u",
-                        tsData->indexId, tsData->taskId, tsData->streamId);
+        if (iter != keypointOpInfo_.end()) {
+            MSPROF_LOGE("Reapted start key point. modelId %llu, indexId %llu, taskId %u, streamId %u",
+                tsData->modelId, tsData->indexId, tsData->taskId, tsData->streamId);
             return;
         }
-        KeypointOp opData = {0, 0, 0, 0, 0, 0, 0, 0};
-        opData.startTime = static_cast<uint64_t>(tsData->timestamp / frequency_);
-        opData.indexId = tsData->indexId;
-        opData.modelId = tsData->modelId;
-        opData.streamId = tsData->streamId;
-        opData.taskId = tsData->taskId;
-        opData.uploaded = false;
-        keypointOpInfo_.push_back(opData);
-    } else if (tsData->tagId == TS_KEYPOINT_END_TASK_STATE && !keypointOpInfo_.empty()) {
-        KeypointOp &lastOp = keypointOpInfo_.back();
+        CreateTsKeyPointStartData(tsData, key);
+    } else if (tsData->tagId == TS_KEYPOINT_END_TASK_STATE) {
+        if (iter == keypointOpInfo_.end()) {
+            MSPROF_LOGW("Start key point is not found. modelId %llu, indexId %llu, taskId %u, streamId %u",
+                tsData->modelId, tsData->indexId, tsData->taskId, tsData->streamId);
+            return;
+        }
+        KeypointOp &curOp = iter->second;
         uint64_t ts = static_cast<uint64_t>(tsData->timestamp / frequency_);
-        if (lastOp.endTime || ts <= lastOp.startTime) {
+        if (curOp.endTime || ts <= curOp.startTime) {
             MSPROF_LOGE("keypoint op error. indexId %llu, taskId %u, streamId %u, "
                         "startTime %llu, endTime %llu, timestamp %llu",
                         tsData->indexId, tsData->taskId, tsData->streamId,
-                        lastOp.startTime, lastOp.endTime, ts);
+                        curOp.startTime, curOp.endTime, ts);
             return;
         } else {
-            lastOp.endTime = ts;
+            curOp.endTime = ts;
             MSPROF_LOGD("keypoint op: startTime %llu, endTime %llu, indexId=%llu, endSyscnt %llu",
-                        lastOp.startTime, lastOp.endTime, lastOp.indexId, tsData->timestamp);
+                        curOp.startTime, curOp.endTime, curOp.indexId, tsData->timestamp);
         }
     } else {
         MSPROF_LOGE("keypoint tagId error. tagId %u, keypointOp %u", tsData->tagId, keypointOpInfo_.size());
@@ -184,7 +194,7 @@ void AnalyzerTs::PrintStats() const
 {
     uint64_t times = 0;
     if (!keypointOpInfo_.empty()) {
-        times = keypointOpInfo_.back().findSuccTimes;
+        times = keypointOpInfo_.begin()->second.findSuccTimes;
     }
     MSPROF_EVENT("total_size_analyze, module: TS, analyzed %llu, total %llu, op time total %llu, "
                  "remain %u, draft %u. remain keypoint op %llu, last step find op %llu, merge time %u",

@@ -62,7 +62,6 @@ void AnalyzerFfts::ParseData(CONST_CHAR_PTR data, uint32_t len)
         }
         parsedOpNum += 1;
         parsedLen += FFTS_DATA_SIZE;
-        totalFftsTimes_++;
     }
     MSPROF_LOGI("Finish parsing ffts data, BuffLen:%u NewDataLen:%u parsedLen:%u TotalOpNum:%u ParsedOp:%u, "
                 "unknownOpNum:%u", dataLen_, len, parsedLen, opTimes_.size(), parsedOpNum, unknownOpNum);
@@ -80,7 +79,7 @@ void AnalyzerFfts::ParseAcsqTaskData(const FftsLogHead *data, uint32_t logType)
         std::to_string(acsqLog->streamId) + KEY_SEPARATOR + std::to_string(UINT32_MAX);
     auto iter = opDrafts_.find(key);
     if (iter == opDrafts_.end()) {
-        OpTime opTime = {0, 0, 0, 0, 0, 0, ACL_SUBSCRIBE_OP};  // default flag is OP not SUBGRAPH
+        OpTime opTime = {0, 0, 0, 0, 0, 0, acsqLog->streamId};  // default flag is OP not SUBGRAPH
         iter = opDrafts_.insert(std::make_pair(key, opTime)).first;
     }
     constexpr uint32_t offsetBit = 32;
@@ -111,7 +110,7 @@ void AnalyzerFfts::ParseSubTaskThreadData(const FftsLogHead *data, uint32_t logT
         std::to_string(cxtLog->streamId) + KEY_SEPARATOR + std::to_string(cxtLog->cxtId);
     auto iter = opDrafts_.find(key);
     if (iter == opDrafts_.end()) {
-        OpTime opTime = {0, 0, 0, 0, 0, 0, ACL_SUBSCRIBE_OP_THREAD};
+        OpTime opTime = {0, 0, 0, 0, 0, 0, cxtLog->streamId};
         iter = opDrafts_.insert(std::make_pair(key, opTime)).first;
     }
     constexpr uint32_t offsetBit = 32;
@@ -197,7 +196,7 @@ void AnalyzerFfts::ParseOptimizeAcsqTaskData(const FftsLogHead *data, uint32_t l
     std::string key = std::to_string(acsqLog->taskId) + KEY_SEPARATOR + std::to_string(acsqLog->streamId);
     auto iter = AnalyzerBase::tsOpInfo_.find(key);
     if (iter == AnalyzerBase::tsOpInfo_.end()) {
-        RtOpInfo opInfo = {0, 0, 0, 0, true, 0, ACL_SUBSCRIBE_OP, UINT16_MAX};
+        RtOpInfo opInfo = {0, 0, 0, 0, true, 0, 0, ACL_SUBSCRIBE_OP, UINT16_MAX};
         iter = AnalyzerBase::tsOpInfo_.insert(std::make_pair(key, opInfo)).first;
     }
     constexpr uint32_t offsetBit = 32;
@@ -207,7 +206,6 @@ void AnalyzerFfts::ParseOptimizeAcsqTaskData(const FftsLogHead *data, uint32_t l
     } else {
         iter->second.end = static_cast<uint64_t>(sysTime / frequency_);
     }
-    analyzedBytes_ += FFTS_DATA_SIZE;
     if (iter->second.start > 0 && iter->second.end > 0) {
         HandleDeviceData(key, iter->second, totalFftsMerges_);
     }
@@ -228,7 +226,7 @@ void AnalyzerFfts::ParseOptimizeSubTaskThreadData(const FftsLogHead *data, uint3
     std::string key = std::to_string(cxtLog->taskId) + KEY_SEPARATOR + std::to_string(cxtLog->streamId);
     auto iter = AnalyzerBase::tsOpInfo_.find(key);
     if (iter == AnalyzerBase::tsOpInfo_.end()) {
-        RtOpInfo opInfo = {0, 0, 0, 0, true, 0, 0, ACL_SUBSCRIBE_OP_THREAD, UINT16_MAX};
+        RtOpInfo opInfo = {0, 0, 0, 0, true, 0, 0, ACL_SUBSCRIBE_OP_THREAD, cxtLog->cxtId};
         iter = AnalyzerBase::tsOpInfo_.insert(std::make_pair(key, opInfo)).first;
     }
  

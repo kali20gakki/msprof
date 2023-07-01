@@ -20,7 +20,8 @@ class Analyzer;
 class AnalyzerGe : public AnalyzerBase {
 friend class Analyzer;
 public:
-    AnalyzerGe() : totalEventTimes_(0), totalApiTimes_(0), totalNodeTimes_(0), totalGeMerges_(0) {}
+    AnalyzerGe() : isAllStaticShape_(true), totalEventTimes_(0), totalApiTimes_(0), totalNodeTimes_(0),
+        totalGeMerges_(0) {}
     ~AnalyzerGe() {}
 
 public:
@@ -41,6 +42,8 @@ public:
     uint32_t GetModelId(uint32_t modelId);
     std::string GetOpName(const std::string &opId);
     std::string GetOpType(const std::string &opId);
+    bool GetIsAllStaticShape() const;
+    bool GetStreamType(const int &streamId, int &streamType);
 
 private:
 struct GeOpInfo {
@@ -77,6 +80,8 @@ private:
         std::multimap<uint32_t, GeOpFlagInfo> &modelInfo,
         std::multimap<uint32_t, GeOpFlagInfo> &nodeInfo,
         std::multimap<uint32_t, GeOpFlagInfo> &contextInfo);
+    void MatchDeviceOpInfo(std::vector<RtOpInfo> &devTmpOpInfo,
+        std::multimap<uint32_t, GeOpFlagInfo> &geOpInfo);
 
 private:
     std::map<std::string, GeOpInfo> opInfos_;       // <taskId-streamId, GeOpInfo>
@@ -84,6 +89,8 @@ private:
     uint32_t totalApiTimes_;
     uint32_t totalNodeTimes_;
     uint32_t totalGeMerges_;
+    std::map<uint32_t, StreamInfo> steamState_;  // <streamid, StreamInfo>
+    bool isAllStaticShape_;
 };
 }  // namespace Analyze
 }  // namespace Dvvp

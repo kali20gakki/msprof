@@ -40,9 +40,9 @@ protected:
      */
     int32_t InitFrequency();
 
-    void EraseRtMapByTaskId(uint32_t taskId, uint16_t streamId, std::map<std::string, RtOpInfo> &rtOpInfo) const;
     void EraseRtMapByStreamId(uint16_t streamId, std::map<std::string, RtOpInfo> &rtOpInfo) const;
     void HandleDeviceData(const std::string &key, RtOpInfo &devData, uint32_t &time);
+    void HandleUploadData(const std::string &key, RtOpInfo &devData);
     void ConstructAndUploadOptimizeData(GeOpFlagInfo &opFlagData, RtOpInfo &rtTsOpdata);
     uint32_t GetGraphModelId(uint32_t modelId) const;
     void SetGraphModelId(uint32_t modelId, uint32_t graphId) const;
@@ -61,6 +61,7 @@ protected:
     static bool isFftsPlus_;
     static std::map<std::string, RtOpInfo> rtOpInfo_;
     static std::map<std::string, RtOpInfo> tsOpInfo_;
+    static std::multimap<std::string, RtOpInfo> tsTmpOpInfo_;
     static std::multimap<uint32_t, GeOpFlagInfo> geNodeInfo_;
     static std::multimap<uint32_t, GeOpFlagInfo> geApiInfo_;
     static std::multimap<uint32_t, GeOpFlagInfo> geModelInfo_;
@@ -68,8 +69,11 @@ protected:
     static std::multimap<uint32_t, GeOpFlagInfo> geOpInfo_;
     static std::map<uint32_t, uint32_t> graphIdMap_;    // <modeId, graphId>
     static std::vector<ProfOpDesc> opDescInfos_;
+    static std::vector<RtOpInfo> devTmpOpInfo_;
     static std::mutex opDescInfoMtx_;
     static std::mutex graphIdMtx_;
+    static std::mutex rtThreadMtx_;
+    static std::mutex geThreadMtx_;
 };
 }  // namespace Analyze
 }  // namespace Dvvp

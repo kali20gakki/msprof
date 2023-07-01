@@ -435,6 +435,11 @@ int ProfAclMgr::CancleHostAndDevTasks(const uint32_t devNums, CONST_UINT32_T_PTR
                 MSPROF_INNER_ERROR("EK9999", "Failed to stop profiling on device %u", devId);
                 ret = ACL_ERROR_PROFILING_FAILURE;
             }
+            if (devId == DEFAULT_HOST_ID && iter->second.count > 1) {
+                MSPROF_LOGI("The host process still needs to use.");
+                iter->second.count--;
+                continue;
+            }
             devTasks_.erase(iter);
         }
     }
@@ -583,7 +588,11 @@ int ProfAclMgr::ProfAclModelSubscribe(const uint32_t modelId, const uint32_t dev
         if (devTasks_.find(id) != devTasks_.end()) {
             // device already started, check cfg and add fd to subscribe list
             MSPROF_LOGI("Update subscription config Model:%u, devId %u", modelId, id);
-            return UpdateSubscribeInfo(modelId, id, profSubscribeConfig);
+            int ret = UpdateSubscribeInfo(modelId, id, profSubscribeConfig);
+            if (id == DEFAULT_HOST_ID) {
+                return ret;
+            }
+            continue;
         }
  
         // start device
@@ -598,9 +607,8 @@ int ProfAclMgr::ProfAclModelSubscribe(const uint32_t modelId, const uint32_t dev
     }
     uint64_t dataTypeConfig = ProfAclGetDataTypeConfig(profSubscribeConfig);
     dataTypeConfig |= PROF_RUNTIME_TRACE;
-    MSPROF_LOGI("Allocate subscription config to Runtime, dataTypeConfig 0x%lx", dataTypeConfig | PROF_RUNTIME_TRACE);
-    return Analysis::Dvvp::ProfilerCommon::CommandHandleProfStart(devIdList.data(),
-                                                                  1, dataTypeConfig | PROF_RUNTIME_TRACE);
+    MSPROF_LOGI("Allocate subscription config to Runtime, dataTypeConfig 0x%lx", dataTypeConfig);
+    return Analysis::Dvvp::ProfilerCommon::CommandHandleProfStart(devIdList.data(), 1, dataTypeConfig);
 }
 
 int ProfAclMgr::CancleSubScribeDevTask(const uint32_t devId, const uint32_t modelId)
@@ -624,7 +632,7 @@ int ProfAclMgr::CancleSubScribeDevTask(const uint32_t devId, const uint32_t mode
                 MSPROF_LOGE("Failed to stop profiling on device %u", iterDev->first);
                 ret = ACL_ERROR_PROFILING_FAILURE;
             }
-            CloseSubscribeFd(iterDev->first);
+            CloseSubscribeFdIfHostId(devId);
             devTasks_.erase(iterDev);
         } else {
 #if (defined(linux) || defined(__linux__))
@@ -672,11 +680,23 @@ int ProfAclMgr::ProfAclModelUnSubscribe(const uint32_t modelId)
     return ret;
 }
 
+void ProfAclMgr::CloseSubscribeFdIfHostId(uint32_t devId)
+{
+    if (devId == DEFAULT_HOST_ID) {
+        for (auto &it : fdCloseDevIds_) {
+            CloseSubscribeFd(it);
+        }
+        fdCloseDevIds_.clear();
+    } else {
+        fdCloseDevIds_.emplace_back(devId);
+    }
+}
+
 void ProfAclMgr::FlushAllData(const std::string &devId)
 {
     // flush ai stack data
     Msprof::Engine::FlushAllModule();
-    Msprof::Engine::MsprofReporterMgr::instance()->FlushAllReporter(devId);
+    Msprof::Engine::MsprofReporterMgr::instance()->FlushAllReporter();
     // flush drv data
     ProfChannelManager::instance()->FlushChannel();
     // flush parserTransport
@@ -845,7 +865,7 @@ int ProfAclMgr::InitSubscribeUploader(const std::string& devIdStr)
         MSVP_MAKE_SHARED0_RET(pipeTransport, PipeTransport, ACL_ERROR_PROFILING_FAILURE);
         SHARED_PTR_ALIA<Uploader> pipeUploader = nullptr;
         MSVP_MAKE_SHARED1_RET(pipeUploader, Uploader, pipeTransport, ACL_ERROR_PROFILING_FAILURE);
-        static const size_t subscribeUploaderCapacity = 100000; // subscribe need more capacity (100000 op data)
+        static const size_t subscribeUploaderCapacity = 200000; // subscribe need more capacity (100000 op data)
         int ret = pipeUploader->Init(subscribeUploaderCapacity);
         if (ret != PROFILING_SUCCESS) {
             MSPROF_LOGE("Failed to init uploader for subscribe");
@@ -889,7 +909,13 @@ int ProfAclMgr::CheckDeviceTask(PROF_CONF_CONST_PTR profStartCfg)
     std::vector<uint32_t> devIds;
     for (uint32_t i = 0; i < profStartCfg->devNums; i++) {
         uint32_t devId = profStartCfg->devIdList[i];
-        if (devTasks_.find(devId) != devTasks_.end()) {
+        auto iter = devTasks_.find(devId);
+        if (iter != devTasks_.end()) {
+            if (devId == DEFAULT_HOST_ID) { // multi device only start one hostId thread
+                MSPROF_LOGI("The host process is already in use.");
+                iter->second.count++;
+                continue;
+            }
             MSPROF_LOGE("Device %u already started", devId);
             MSPROF_INNER_ERROR("EK9999", "Device %u already started", devId);
             return ACL_ERROR_PROF_ALREADY_RUN;
@@ -1030,6 +1056,9 @@ int ProfAclMgr::UpdateSubscribeInfo(const uint32_t modelId, const uint32_t devId
         return ACL_ERROR_INVALID_PROFILING_CONFIG;
     }
     iterDev->second.count++;
+    if (devId == DEFAULT_HOST_ID) {
+        return ACL_SUCCESS;
+    }
     std::lock_guard<std::mutex> lk(mtxSubscribe_);
     auto iter = subscribeInfos_.find(modelId);
     if (iter != subscribeInfos_.end()) {
@@ -1037,7 +1066,7 @@ int ProfAclMgr::UpdateSubscribeInfo(const uint32_t modelId, const uint32_t devId
         iter->second.subscribed = true;
         iter->second.devId = devId;
         iter->second.fd = static_cast<int *>(profSubscribeConfig->fd);
-    } else if (devId != DEFAULT_HOST_ID) {
+    } else {
         // new subscribe
         ProfSubscribeInfo subscribeInfo = {true, devId, static_cast<int *>(profSubscribeConfig->fd)};
         subscribeInfos_.insert(std::make_pair(modelId, subscribeInfo));
@@ -1063,7 +1092,6 @@ int ProfAclMgr::StartDeviceSubscribeTask(const uint32_t modelId, const uint32_t 
     std::string devIdStr = std::to_string(devId);
     params->job_id = devIdStr;
     params->devices = devIdStr;
-
     params->profiling_mode = PROFILING_MODE_DEF;
     params->profiling_options = PROF_FEATURE_TASK;
     // open host_profiling
@@ -1091,7 +1119,6 @@ int ProfAclMgr::StartDeviceSubscribeTask(const uint32_t modelId, const uint32_t 
     // add taskInfo
     ProfAclTaskInfo taskInfo = {1, dataTypeConfig, paramsHandled};
     devTasks_[devId] = taskInfo;
-
     if (devId != DEFAULT_HOST_ID) {
         mtxSubscribe_.lock();
         ProfSubscribeInfo subscribeInfo = {true, devId, static_cast<int *>(profSubscribeConfig->fd)};
@@ -1108,6 +1135,7 @@ int ProfAclMgr::StartDeviceSubscribeTask(const uint32_t modelId, const uint32_t 
     if (devId == DEFAULT_HOST_ID) {
         params->host_profiling = false;
     }
+    params_ = params;
     return ACL_SUCCESS;
 }
 
@@ -1430,6 +1458,10 @@ int32_t ProfAclMgr::MsprofSetDeviceImpl(uint32_t devId)
     MSPROF_EVENT("MsprofSetDeviceImpl, devId:%u", devId);
     auto iterDev = devTasks_.find(devId);
     if (iterDev != devTasks_.end()) {
+        if (devId == DEFAULT_HOST_ID) {
+            MSPROF_LOGI("MsprofSetDeviceImpl, the host process is already in use.");
+            return PROFILING_SUCCESS;
+        }
         MSPROF_LOGI("MsprofSetDeviceImpl, device:%u is running", devId);
         return PROFILING_FAILED;
     }
@@ -1453,6 +1485,9 @@ int32_t ProfAclMgr::MsprofSetDeviceImpl(uint32_t devId)
 
 void ProfAclMgr::CloseSubscribeFd(const uint32_t devId)
 {
+    if (devId == DEFAULT_HOST_ID) {
+        return;
+    }
     std::lock_guard<std::mutex> lk(mtxSubscribe_);
     std::set<int *> closedFds;
     std::set<int> usedFds;
