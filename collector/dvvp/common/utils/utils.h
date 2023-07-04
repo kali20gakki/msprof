@@ -450,7 +450,8 @@ public:
     static std::string BaseName(const std::string &path);
     static int SplitPath(const std::string &path, std::string &dir, std::string &base);
     static int RelativePath(const std::string &path, const std::string &dir, std::string &relativePath);
-    static void GetFiles(const std::string &dir, bool isRecur, std::vector<std::string> &files);
+    static void GetFiles(const std::string &dir, bool isRecur, std::vector<std::string> &files,
+        unsigned int depthCnt = 1);
     static void GetChildFilenames(const std::string &dir, std::vector<std::string> &files);
     static int CreateDir(const std::string &path);
     static void RemoveDir(const std::string &dir, bool rmTopDir = true);
@@ -511,8 +512,7 @@ public:
     static std::string RelativePathToAbsolutePath(const std::string &path);
     static bool IsSoftLink(const std::string &path);
     static bool IsSocketFile(const std::string &path);
-    template<typename T>
-    static std::string Int2HexStr(T number)
+    template<typename T> static std::string Int2HexStr(T number)
     {
         std::stringstream ioss;
         std::string ret;
