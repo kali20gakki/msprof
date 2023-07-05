@@ -140,9 +140,9 @@ class Utils:
         if not info_json_path or not os.path.exists(info_json_path) or not os.path.isfile(
                 info_json_path):
             return []
-        check_path_valid(info_json_path, is_file=True)
         if os.path.getsize(info_json_path) > 1024 * 1024 * 1024:
             return []
+        check_path_valid(info_json_path, is_file=True, max_size=1024 * 1024 * 1024)
         with open(info_json_path, "r") as json_reader:
             json_data = json_reader.read()
             json_data = json.loads(json_data)
