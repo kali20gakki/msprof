@@ -51,6 +51,7 @@ set(localSrcFiles
     test/ring_buffer_utest.cpp
     test/param_validation_utest.cpp
     test/platform_adapter_utest.cpp
+    test/mmpa_utest.cpp
 )
 
 add_executable(common_utest

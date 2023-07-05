@@ -550,19 +550,26 @@ int ProfAclMgr::LaunchSubscribeDevTask(const uint32_t devId, const uint32_t mode
     return ret;
 }
 
-int ProfAclMgr::ProfAclModelSubscribe(const uint32_t modelId, const uint32_t devId,
-                                      PROF_SUB_CONF_CONST_PTR profSubscribeConfig)
+int ProfAclMgr::CheckSubscribeConfigIfValid(PROF_SUB_CONF_CONST_PTR profSubscribeConfig) const
 {
     if (profSubscribeConfig == nullptr || profSubscribeConfig->fd == nullptr) {
         MSPROF_LOGE("SubscribeConfig is nullptr");
         MSPROF_INNER_ERROR("EK9999", "SubscribeConfig is nullptr");
-        return ACL_ERROR_INVALID_PARAM;
+        return PROFILING_FAILED;
     }
     if (!(profSubscribeConfig->timeInfo) && profSubscribeConfig->aicoreMetrics == PROF_AICORE_NONE) {
         MSPROF_LOGE("SubscribeConfig is invalid");
         MSPROF_INNER_ERROR("EK9999", "SubscribeConfig is invalid");
-        return ACL_ERROR_INVALID_PARAM;
+        return PROFILING_FAILED;
     }
+    return PROFILING_SUCCESS;
+}
+
+int ProfAclMgr::ProfAclModelSubscribe(const uint32_t modelId, const uint32_t devId,
+                                      PROF_SUB_CONF_CONST_PTR profSubscribeConfig)
+{
+    FUNRET_CHECK_EQUAL_RET_VALUE(CheckSubscribeConfigIfValid(profSubscribeConfig), PROFILING_FAILED,
+        ACL_ERROR_INVALID_PARAM);
     MSPROF_EVENT("Received ProfAclModelSubscribe request from acl, device: %u, model: %u fd: %u",
         devId, modelId, profSubscribeConfig->fd);
     std::lock_guard<std::mutex> lk(mtx_);
@@ -589,16 +596,13 @@ int ProfAclMgr::ProfAclModelSubscribe(const uint32_t modelId, const uint32_t dev
             // device already started, check cfg and add fd to subscribe list
             MSPROF_LOGI("Update subscription config Model:%u, devId %u", modelId, id);
             int ret = UpdateSubscribeInfo(modelId, id, profSubscribeConfig);
-            if (id == DEFAULT_HOST_ID) {
-                return ret;
-            }
+            FUNRET_CHECK_EQUAL_RET_VALUE(id, DEFAULT_HOST_ID, ret);
             continue;
         }
  
         // start device
-        if (LaunchSubscribeDevTask(id, modelId, profSubscribeConfig) != ACL_SUCCESS) {
-            return ACL_ERROR_PROFILING_FAILURE;
-        }
+        FUNRET_CHECK_FAIL_RET_VALUE(LaunchSubscribeDevTask(id, modelId, profSubscribeConfig), ACL_SUCCESS,
+            ACL_ERROR_PROFILING_FAILURE);
     }
     if (Analysis::Dvvp::ProfilerCommon::RegisterReporterCallback() != ACL_SUCCESS) {
         MSPROF_LOGE("RegisterReporterCallback failed, Model:%u", modelId);

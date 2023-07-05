@@ -507,6 +507,10 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, MsprofCheckAppParamValid)
     file.close();
     app = "./CheckAppValid";
     EXPECT_EQ(PROFILING_SUCCESS, entry->MsprofCheckAppParamValid(app));
+    system("ln -s ./CheckAppValid/CheckAppValid");
+    app = "./CheckAppValid/CheckAppValid";
+    EXPECT_EQ(PROFILING_FAILED, entry->MsprofCheckAppParamValid(app));
+    system("rm ./CheckAppValid/CheckAppValid");
 }
 
 TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckL2CacheEventsValid) {
@@ -652,12 +656,72 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckPythonPathIsValid)
     pythonPath = "TestPython";
     EXPECT_EQ(false, entry->CheckPythonPathIsValid(pythonPath));
     Utils::RemoveDir("TestPython");
+
+    pythonPath = "./TestPython/TestPython";
+    EXPECT_EQ(false, entry->CheckPythonPathIsValid(pythonPath));
+    
     pythonPath = "testpython";
     std::ofstream ftest("testpython");
     ftest << "test";
     ftest.close();
     EXPECT_EQ(true, entry->CheckPythonPathIsValid(pythonPath));
     remove("testpython");
+
+    system("ln -s ./testpython");
+    pythonPath = "/testpython";
+    EXPECT_EQ(false, entry->CheckPythonPathIsValid(pythonPath));
+    system("rm ./testpython");
+}
+
+TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckParamLengthIsValid)
+{
+    GlobalMockObject::verify();
+    std::string paramPath;
+    auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
+
+    paramPath = "a";
+    EXPECT_EQ(true, entry->CheckParamLengthIsValid(paramPath));
+
+    paramPath = std::string(1025, 'c'); // 1025 = MAX_PATH_LENGTH + 1;
+    EXPECT_EQ(false, entry->CheckParamLengthIsValid(paramPath));
+}
+
+TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckParamPermission)
+{
+    GlobalMockObject::verify();
+    std::string paramPath;
+    struct stat fileStat;
+    auto entry = analysis::dvvp::common::validation::ParamValidation::instance();
+
+    EXPECT_EQ(PROFILING_FAILED, entry->CheckParamPermission(paramPath));
+
+    paramPath = "./non/existent/paramPath";
+    EXPECT_EQ(PROFILING_FAILED, entry->CheckParamPermission(paramPath));
+
+    paramPath = "./writable/paramPath";
+    std::ofstream ftest(paramPath);
+    ftest << "test" << std::endl;
+    ftest.close();
+    chmod(paramPath.c_str(), S_IWOTH);
+    EXPECT_EQ(PROFILING_FAILED, entry->CheckParamPermission(paramPath));
+    remove(paramPath.c_str());
+
+    paramPath = "./inconsistent/paramPath";
+    std::ofstream ftest2(paramPath);
+    ftest2 << "test" << std::endl;
+    ftest2.close();
+    chmod(paramPath.c_str(), S_IRUSR);
+    EXPECT_EQ(PROFILING_FAILED, entry->CheckParamPermission(paramPath));
+    remove(paramPath.c_str());
+
+    paramPath = "./valid/paramPath/current/user/owner";
+    std::ofstream ftest3(paramPath);
+    ftest3 << "test" << std::endl;
+    ftest3.close();
+    fileStat.st_uid = MmGetUid() + 1;
+    stat(paramPath.c_str(), &fileStat);
+    EXPECT_EQ(PROFILING_FAILED, entry->CheckParamPermission(paramPath));
+    remove(paramPath.c_str());
 }
 
 TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckParamsJobIdRegexMatch)
