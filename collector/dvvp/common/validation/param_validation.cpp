@@ -11,10 +11,12 @@
 
 #include <sstream>
 #include <cctype>
+#include <sys/stat.h>
 #include "config/config.h"
 #include "errno/error_code.h"
 #include "message/prof_params.h"
 #include "message/codec.h"
+#include "mmpa_api.h"
 #include "platform/platform.h"
 #include "msprof_error_manager.h"
 #include "config/config_manager.h"
@@ -386,20 +388,14 @@ bool ParamValidation::CheckHostSysPidValid(const std::string &hostSysPid) const
     }
 }
 
-bool ParamValidation::CheckPythonPathIsValid(const std::string&pythonPath) const
+bool ParamValidation::CheckPythonPathIsValid(const std::string &pythonPath) const
 {
-    std::string errReason = "python-path should be a valid file path and path lenth shoule be shorter than 1024.";
+    std::string errReason = "python-path should be a valid file path and path length should be shorter than 1024.";
     if (pythonPath.empty()) {
         MSPROF_LOGE("Argument --python-path: expected one argument");
         return false;
     }
-    if (pythonPath.size() > MAX_PATH_LENGTH) {
-        MSPROF_LOGE("Argument --python-path is invalid because of exceeds"
-            " the maximum length of %d", MAX_PATH_LENGTH);
-        CMD_LOGE("Argument --python-path is invalid because of exceeds"
-            " the maximum length of %d", MAX_PATH_LENGTH);
-        MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
-            std::vector<std::string>({"python-path", pythonPath, errReason}));
+    if (!CheckParamLengthIsValid(pythonPath)) {
         return false;
     }
     std::string absolutePythonPath = Utils::CanonicalizePath(pythonPath);
@@ -408,6 +404,11 @@ bool ParamValidation::CheckPythonPathIsValid(const std::string&pythonPath) const
         CMD_LOGE("Argument --python-path=%s does not exist or permission denied.", pythonPath.c_str());
         MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
             std::vector<std::string>({"python-path", pythonPath, errReason}));
+        return false;
+    }
+    if (Utils::IsSoftLink(absolutePythonPath)) {
+        MSPROF_LOGE("Argument --python-path=%s is soft link, not support!", pythonPath.c_str());
+        CMD_LOGE("Argument --python-path=%s is soft link, not support!", pythonPath.c_str());
         return false;
     }
     if (MmAccess2(absolutePythonPath, M_X_OK) != PROFILING_SUCCESS) {
@@ -424,6 +425,26 @@ bool ParamValidation::CheckPythonPathIsValid(const std::string&pythonPath) const
             "please enter the executable file path.", pythonPath.c_str());
         MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
             std::vector<std::string>({"python-path", pythonPath, errReason}));
+        return false;
+    }
+    if (CheckParamPermission(absolutePythonPath) != PROFILING_SUCCESS) {
+        MSPROF_LOGE("Failed to check the permission of argument --python-path=%s.", pythonPath.c_str());
+        CMD_LOGE("Failed to check the permission of argument --python-path=%s.", pythonPath.c_str());
+        return false;
+    }
+    return true;
+}
+
+bool ParamValidation::CheckParamLengthIsValid(const std::string &paramPath) const
+{
+    std::string errReason = paramPath + "should be a valid file path and path length should be shorter than 1024.";
+    if (paramPath.size() > MAX_PATH_LENGTH) {
+        MSPROF_LOGE("Argument %s is invalid because of exceeds"
+                    " the maximum length of %d", paramPath.c_str(), MAX_PATH_LENGTH);
+        CMD_LOGE("Argument %s is invalid because of exceeds"
+                 " the maximum length of %d", paramPath.c_str(), MAX_PATH_LENGTH);
+        MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
+                           std::vector<std::string>({"paramPath", paramPath, errReason}));
         return false;
     }
     return true;
@@ -1234,6 +1255,13 @@ int ParamValidation::MsprofCheckAppParamValid(const std::string &appParam) const
         CMD_LOGE("Argument --application=%s has no executable permission.", Utils::RealPath(appParam).c_str());
         return PROFILING_FAILED;
     }
+    if (CheckParamPermission(appParam) != PROFILING_SUCCESS) {
+        MSPROF_LOGE("Failed to check the permission of "
+                    "argument --application=%s.",  Utils::RealPath(appParam).c_str());
+        CMD_LOGE("Failed to check the permission of "
+                    "argument --application=%s.",  Utils::RealPath(appParam).c_str());
+        return PROFILING_FAILED;
+    }
     std::string appDir;
     std::string appName;
     int ret = Utils::SplitPath(Utils::RealPath(appParam), appDir, appName);
@@ -1248,6 +1276,29 @@ int ParamValidation::MsprofCheckAppParamValid(const std::string &appParam) const
         return PROFILING_FAILED;
     }
     return PROFILING_SUCCESS;
+}
+
+int ParamValidation::CheckParamPermission(const std::string& paramPath) const
+{
+    struct stat fileStat;
+    if (stat(paramPath.c_str(), &fileStat) == 0) {
+        if (fileStat.st_mode & S_IWOTH) {
+            MSPROF_LOGE("Argument %s is writable by any other users.", paramPath.c_str());
+            CMD_LOGE("Argument %s is writable by any other users.", paramPath.c_str());
+            return PROFILING_FAILED;
+        } else {
+            if (fileStat.st_uid == 0) {
+                return PROFILING_SUCCESS;
+            }
+            if (fileStat.st_uid == static_cast<uint32_t>(MmGetUid())) {
+                return PROFILING_SUCCESS;
+            }
+            MSPROF_LOGE("Argument %s and the current owner have inconsistent permission.", paramPath.c_str());
+            CMD_LOGE("Argument %s and the current owner have inconsistent permission.", paramPath.c_str());
+            return PROFILING_FAILED;
+        }
+    }
+    return PROFILING_FAILED;
 }
 
 bool ParamValidation::MsprofCheckEnvValid(const std::string &envParam) const
