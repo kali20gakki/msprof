@@ -116,3 +116,19 @@ TEST_F(ParamsAdapterAcljsonUtest, AclJsonSetOutputDir)
     EXPECT_EQ(output, ret);
     Utils::RemoveDir(output);
 }
+
+TEST_F(ParamsAdapterAcljsonUtest, CheckHostSysAclJsonValid)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<ParamsAdapterAclJson> AclJsonParamAdapterMgr;
+    MSVP_MAKE_SHARED0_BREAK(AclJsonParamAdapterMgr, ParamsAdapterAclJson);
+
+    std::string cfg;
+    EXPECT_EQ(false, AclJsonParamAdapterMgr->CheckHostSysAclJsonValid(cfg));
+
+    cfg = "xxx";
+    EXPECT_EQ(false, AclJsonParamAdapterMgr->CheckHostSysAclJsonValid(cfg));
+
+    cfg = "cpu,mem";
+    EXPECT_EQ(true, AclJsonParamAdapterMgr->CheckHostSysAclJsonValid(cfg));
+}

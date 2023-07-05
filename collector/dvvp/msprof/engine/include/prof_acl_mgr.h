@@ -184,6 +184,7 @@ private:
     int CancleSubScribeDevTask(const uint32_t devId, const uint32_t modelId);
     int LaunchSubscribeDevTask(const uint32_t devId, const uint32_t modelId,
                                PROF_SUB_CONF_CONST_PTR profSubscribeConfig);
+    int CheckSubscribeConfigIfValid(PROF_SUB_CONF_CONST_PTR profSubscribeConfig) const;
 
 private:
     bool isReady_;

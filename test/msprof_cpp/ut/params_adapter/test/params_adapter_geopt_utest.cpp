@@ -31,6 +31,17 @@ protected:
     }
 };
 
+TEST_F(ParamsAdapterGeoptUtest, InitFailed)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<ParamsAdapterGeOpt> GeOptParamAdapterMgr;
+    MSVP_MAKE_SHARED0_BREAK(GeOptParamAdapterMgr, ParamsAdapterGeOpt);
+    MOCKER_CPP(&ParamsAdapterGeOpt::CheckListInit)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED));
+    EXPECT_EQ(PROFILING_FAILED, GeOptParamAdapterMgr->Init());
+}
+
 TEST_F(ParamsAdapterGeoptUtest, GeOptParamAdapterModule)
 {
     GlobalMockObject::verify();
@@ -124,4 +135,20 @@ TEST_F(ParamsAdapterGeoptUtest, GeGetParamFromInputCfg)
         .stubs()
         .will(returnValue(true));
     EXPECT_EQ(PROFILING_FAILED, ret);
+}
+
+TEST_F(ParamsAdapterGeoptUtest, CheckHostSysGeOptValid)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<ParamsAdapterGeOpt> GeOptParamAdapterMgr;
+    MSVP_MAKE_SHARED0_BREAK(GeOptParamAdapterMgr, ParamsAdapterGeOpt);
+
+    std::string cfg;
+    EXPECT_EQ(false, GeOptParamAdapterMgr->CheckHostSysGeOptValid(cfg));
+
+    cfg = "xxx";
+    EXPECT_EQ(false, GeOptParamAdapterMgr->CheckHostSysGeOptValid(cfg));
+
+    cfg = "cpu,mem";
+    EXPECT_EQ(true, GeOptParamAdapterMgr->CheckHostSysGeOptValid(cfg));
 }
