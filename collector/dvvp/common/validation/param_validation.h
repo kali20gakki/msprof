@@ -95,6 +95,8 @@ private:
     bool CheckSystemTraceSwitchProfiling(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params);
     int MsprofCheckNotAppValid(const std::vector<std::string> &AppParamsList, std::string &resultAppParam) const;
     int MsprofCheckAppParamValid(const std::string &appParam) const;
+    bool CheckParamLengthIsValid(const std::string &paramPath) const;
+    int CheckParamPermission(const std::string &paramPath) const;
     int CheckHostSysToolsIsExist(const std::string toolName, const std::string &resultDir,
         const std::string &appDir) const;
     int CheckHostSysCmdOutIsExist(const std::string tmpDir, const std::string toolName,

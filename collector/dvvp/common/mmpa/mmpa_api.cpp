@@ -679,6 +679,11 @@ int32_t MmGetPid()
     return static_cast<int32_t>(getpid());
 }
 
+int32_t MmGetUid()
+{
+    return static_cast<int32_t>(getuid());
+}
+
 int32_t MmGetTid()
 {
     int32_t ret = static_cast<int32_t>(syscall(SYS_gettid));
