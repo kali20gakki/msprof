@@ -398,17 +398,17 @@ bool ParamValidation::CheckPythonPathIsValid(const std::string &pythonPath) cons
     if (!CheckParamLengthIsValid(pythonPath)) {
         return false;
     }
+    if (Utils::IsSoftLink(Utils::RelativePathToAbsolutePath(pythonPath))) {
+        MSPROF_LOGE("Argument --python-path=%s is soft link, not support!", pythonPath.c_str());
+        CMD_LOGE("Argument --python-path=%s is soft link, not support!", pythonPath.c_str());
+        return false;
+    }
     std::string absolutePythonPath = Utils::CanonicalizePath(pythonPath);
     if (absolutePythonPath.empty()) {
         MSPROF_LOGE("Argument --python-path=%s does not exist or permission denied.", pythonPath.c_str());
         CMD_LOGE("Argument --python-path=%s does not exist or permission denied.", pythonPath.c_str());
         MSPROF_INPUT_ERROR("EK0003", std::vector<std::string>({"config", "value", "reason"}),
             std::vector<std::string>({"python-path", pythonPath, errReason}));
-        return false;
-    }
-    if (Utils::IsSoftLink(absolutePythonPath)) {
-        MSPROF_LOGE("Argument --python-path=%s is soft link, not support!", pythonPath.c_str());
-        CMD_LOGE("Argument --python-path=%s is soft link, not support!", pythonPath.c_str());
         return false;
     }
     if (MmAccess2(absolutePythonPath, M_X_OK) != PROFILING_SUCCESS) {
