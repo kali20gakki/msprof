@@ -92,3 +92,7 @@ class IterInfoUpdater:
         max_iter_id = max(self.iteration_manager.iter_to_iter_info.keys())
         self.update_parallel_iter_info_pool(max_iter_id)
 
+    def calibrate_iter_info_offset(self: any, task_offset: int, iter_offset: int):
+        for iter_id, iter_info in self.iteration_manager.iter_to_iter_info.items():
+            if iter_id >= iter_offset:
+                iter_info.hwts_offset += task_offset
