@@ -98,6 +98,7 @@ public:
     void FlushAllData(const std::string &devId);
     bool IsModelSubscribed(const uint32_t modelId);
     int GetSubscribeFdForModel(const uint32_t modelId);
+    void CloseSubscribeFdIfHostId(uint32_t devId);
     // task info query
     void GetRunningDevices(std::vector<uint32_t> &devIds);
     uint64_t GetDeviceSubscribeCount(uint32_t modelId, uint32_t &devId);
@@ -183,6 +184,7 @@ private:
     int CancleSubScribeDevTask(const uint32_t devId, const uint32_t modelId);
     int LaunchSubscribeDevTask(const uint32_t devId, const uint32_t modelId,
                                PROF_SUB_CONF_CONST_PTR profSubscribeConfig);
+    int CheckSubscribeConfigIfValid(PROF_SUB_CONF_CONST_PTR profSubscribeConfig) const;
 
 private:
     bool isReady_;
@@ -194,6 +196,7 @@ private:
     std::map<uint32_t, SHARED_PTR_ALIA<DeviceResponseHandler>> devResponses_;
     std::map<std::string, std::string> devUuid_;
     std::map<uint32_t, ProfSubscribeInfo> subscribeInfos_;
+    std::vector<uint32_t> fdCloseDevIds_;
     std::array<std::string, ACL_PROF_ARGS_MAX> argsArr_;
     std::mutex mtx_; // mutex for start/stop
     std::mutex mtxUploader_; // mutex for uploader

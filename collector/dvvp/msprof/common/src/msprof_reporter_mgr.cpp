@@ -73,15 +73,6 @@ int32_t MsprofReporterMgr::ReportData(uint32_t agingFlag, const MsprofApi &data)
     return reporters_[agingFlag ? AGING_API : UNAGING_API].ReportData(data);
 }
 
-int32_t MsprofReporterMgr::ReportData(uint32_t agingFlag, const MsprofEvent &data)
-{
-    if (!isStarted_) {
-        MSPROF_LOGW("The reporter has not been started.");
-        return PROFILING_NOTSUPPORT;
-    }
-    return reporters_[agingFlag ?  AGING_EVENT : UNAGING_EVENT].ReportData(data);
-}
-
 int32_t MsprofReporterMgr::ReportData(uint32_t agingFlag, const MsprofCompactInfo &data)
 {
     if (!isStarted_) {

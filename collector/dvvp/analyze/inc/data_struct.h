@@ -18,6 +18,10 @@ static const std::string KEY_SEPARATOR = "-";
 static const uint32_t PROFILE_MODE_INVALID = 0;
 static const uint32_t PROFILE_MODE_SINGLE_OP = 1;
 static const uint32_t PROFILE_MODE_STEP_TRACE = 2;
+static const uint32_t PROFILE_MODE_STATIC_SHAPE = 3;
+ 
+static const uint32_t KNOWN_SHAPE_STREAM = 0;
+static const uint32_t UNKNOWN_SHAPE_STREAM = 1;
 
 struct KeypointOp {
     uint16_t streamId;
@@ -38,6 +42,12 @@ struct OpTime {
     uint64_t end;
     uint32_t threadId;
     uint32_t flag;  // enum aclprofSubscribeOpFlag
+    uint32_t streamId;  // used in aclprofSubscribe scene
+};
+struct StreamInfo {
+    uint32_t curTaskidHigh;  // high 16 bit of task id
+    uint32_t curTaskidLow;   // low 16 bit of task id
+    uint32_t streamType;     // 0:known shape stream, 1:unknown shape stream
 };
 
 // ge

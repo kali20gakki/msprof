@@ -192,7 +192,7 @@ TEST_F(MSPROF_ACL_CORE_UTEST, ConstructAndUploadData)
 
 TEST_F(MSPROF_ACL_CORE_UTEST, acl_api) {
     GlobalMockObject::verify();
-    std::string result = "/tmp/acl_api_stest_new";
+    std::string result = "./acl_api_stest_new";
     analysis::dvvp::common::utils::Utils::RemoveDir(result);
     analysis::dvvp::common::utils::Utils::CreateDir(result);
     EXPECT_EQ(ge::SUCCESS, ge::aclgrphProfInit(result.c_str(), result.size()));
@@ -336,7 +336,7 @@ TEST_F(MSPROF_ACL_CORE_UTEST, aclgrphProfInit_failed) {
         .will(returnValue(ACL_ERROR_PROFILING_FAILURE))
         .then(returnValue(ACL_SUCCESS));
 
-    std::string result = "/tmp/aclgrphProfInit_failed";
+    std::string result = "./aclgrphProfInit_failed";
     analysis::dvvp::common::utils::Utils::RemoveDir(result);
     analysis::dvvp::common::utils::Utils::CreateDir(result);
     EXPECT_EQ(ge::FAILED, ge::aclgrphProfInit(result.c_str(), result.size()));
@@ -350,14 +350,14 @@ std::string RelativePathToAbsolutePath_stub(const std::string &path)
     if (RelativePathToAbsolutePath_stub_cnt == 1) {
         return "";
     } else {
-        return "/tmp/MSPROF_ACL_CORE_UTEST_ProfAclInit_failed";
+        return "./MSPROF_ACL_CORE_UTEST_ProfAclInit_failed";
     }
 }
 
 TEST_F(MSPROF_ACL_CORE_UTEST, ProfAclInit_failed) {
     GlobalMockObject::verify();
     Msprofiler::Api::ProfAclMgr::instance()->Init();
-    std::string result = "/tmp/MSPROF_ACL_CORE_UTEST_ProfAclInit_failed";
+    std::string result = "./MSPROF_ACL_CORE_UTEST_ProfAclInit_failed";
 
     MOCKER(analysis::dvvp::common::utils::Utils::RelativePathToAbsolutePath)
         .stubs()
@@ -399,7 +399,7 @@ TEST_F(MSPROF_ACL_CORE_UTEST, acl_prof_api) {
         .stubs()
         .will(returnValue(PROFILING_SUCCESS));
 
-    std::string result = "/tmp/acl_prof_api_stest_new";
+    std::string result = "./acl_prof_api_stest_new";
     analysis::dvvp::common::utils::Utils::RemoveDir(result);
     analysis::dvvp::common::utils::Utils::CreateDir(result);
     EXPECT_EQ(ACL_SUCCESS, aclprofInit(result.c_str(), result.size()));
@@ -551,7 +551,7 @@ TEST_F(MSPROF_ACL_CORE_UTEST, acl_prof_init_failed) {
         .will(returnValue(ACL_ERROR_PROFILING_FAILURE))
         .then(returnValue(ACL_SUCCESS));
 
-    std::string result = "/tmp/acl_prof_init_failed";
+    std::string result = "./acl_prof_init_failed";
     analysis::dvvp::common::utils::Utils::RemoveDir(result);
     analysis::dvvp::common::utils::Utils::CreateDir(result);
     EXPECT_EQ(ACL_ERROR_PROFILING_FAILURE, aclprofInit(result.c_str(), result.size()));
@@ -1038,7 +1038,7 @@ TEST_F(MSPROF_ACL_CORE_UTEST, RecordOutPut) {
                        hisi_l3c0_1/dsid4/,hisi_l3c0_1/dsid5/,hisi_l3c0_1/dsid6/,hisi_l3c0_1/dsid7/\",\"modelExecution\":\"off\", \
                        \"modelLoad\":\"\",\"msprof\":\"off\",\"nicInterval\":100,\"nicProfiling\":\"off\",\"pcieInterval\":100, \
                        \"pcieProfiling\":\"\",\"pid_profiling\":\"off\",\"pid_sampling_interval\":100,\"profiling_mode\":\"def_mode\", \
-                       \"profiling_options\":\"\",\"profiling_period\":-1,\"result_dir\":\"/tmp/profiler_st_init_env\", \
+                       \"profiling_options\":\"\",\"profiling_period\":-1,\"result_dir\":\"./profiler_st_init_env\", \
                        \"roceInterval\":100,\"roceProfiling\":\"off\", \
                        \"runtimeApi\":\"off\",\"runtimeTrace\":\"\",\"stream_enabled\":\"on\",\"sys_profiling\":\"off\", \
                        \"sys_sampling_interval\":100,\"traceId\":\"\",\"tsCpuProfiling\":\"off\",\"ts_cpu_hot_function\":\"\", \
@@ -1100,7 +1100,7 @@ TEST_F(MSPROF_ACL_CORE_UTEST, MsprofInitAclJson) {
         .stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
-    std::string result = "/tmp/MsprofInitAclJson";
+    std::string result = "./MsprofInitAclJson";
     analysis::dvvp::common::utils::Utils::RemoveDir(result);
     analysis::dvvp::common::utils::Utils::CreateDir(result);
     EXPECT_EQ(0, ProfAclMgr::instance()->MsprofInitAclJson((void *)aclJson.c_str(), aclJson.size()));
@@ -1112,10 +1112,10 @@ TEST_F(MSPROF_ACL_CORE_UTEST, MsprofInitAclJson) {
     aclJson = "{\"switch\": \"off\", \"output\": \"output\",\"aic_metrics\": \"Memory\",\"aicpu\": \"on\"}";
     EXPECT_EQ(MSPROF_ERROR_ACL_JSON_OFF,
               ProfAclMgr::instance()->MsprofInitAclJson((void *)aclJson.c_str(), aclJson.size()));
-    aclJson = "{\"switch\": \"on\", \"output\": \"/tmp/MsprofInitAclJson\",\"aic_metrics\": \"Memory\"}";
+    aclJson = "{\"switch\": \"on\", \"output\": \"./MsprofInitAclJson\",\"aic_metrics\": \"Memory\"}";
     EXPECT_EQ(0, ProfAclMgr::instance()->MsprofInitAclJson((void *)aclJson.c_str(), aclJson.size()));
 
-    aclJson = "{\"switch\": \"on\", \"output\": \"/tmp/MsprofInitAclJson\",\"aic_metrics\": \"Memory\"}";
+    aclJson = "{\"switch\": \"on\", \"output\": \"./MsprofInitAclJson\",\"aic_metrics\": \"Memory\"}";
     EXPECT_EQ(0, ProfAclMgr::instance()->MsprofInitAclJson((void *)aclJson.c_str(), aclJson.size()));
 
     analysis::dvvp::common::utils::Utils::RemoveDir(result);
@@ -1161,20 +1161,20 @@ TEST_F(MSPROF_ACL_CORE_UTEST, MsprofInitGeOptions) {
         .stubs()
         .will(returnValue(PROFILING_SUCCESS));
     struct MsprofGeOptions options;
-    std::string result = "/tmp/MsprofInitGeOptions";
+    std::string result = "./MsprofInitGeOptions";
     analysis::dvvp::common::utils::Utils::RemoveDir(result);
     analysis::dvvp::common::utils::Utils::CreateDir(result);
     EXPECT_EQ(MSPROF_ERROR_CONFIG_INVALID, ProfAclMgr::instance()->MsprofInitGeOptions((void *)&options, sizeof(options)));
-    std::string ge_json = "{\"output\": \"/tmp/MsprofInitGeOptions\",\"aic_metrics\": \"ArithmeticUtilization\","
+    std::string ge_json = "{\"output\": \"./MsprofInitGeOptions\",\"aic_metrics\": \"ArithmeticUtilization\","
         "\"aicpu\": \"on\",\"l2\": \"on\"}";
     strcpy(options.jobId, "123");
     strcpy(options.options, ge_json.c_str());
     EXPECT_EQ(MSPROF_ERROR_NONE, ProfAclMgr::instance()->MsprofInitGeOptions((void *)&options, sizeof(options)));
-    ge_json = "{\"output\": \"/tmp/MsprofInitGeOptions\",\"aic_metrics\": \"ArithmeticUtilization\",\"aicpu\": \"on\",\"l2\": \"off\"}";
+    ge_json = "{\"output\": \"./MsprofInitGeOptions\",\"aic_metrics\": \"ArithmeticUtilization\",\"aicpu\": \"on\",\"l2\": \"off\"}";
     strcpy(options.jobId, "123");
     strcpy(options.options, ge_json.c_str());
     EXPECT_EQ(MSPROF_ERROR_NONE, ProfAclMgr::instance()->MsprofInitGeOptions((void *)&options, sizeof(options)));
-    ge_json = "{\"output\": \"/tmp/MsprofInitGeOptions\",\"aic_metrics\": \"ArithmeticUtilization\",\"aicpu\": \"on\",\"l2\": \"xx\"}";
+    ge_json = "{\"output\": \"./MsprofInitGeOptions\",\"aic_metrics\": \"ArithmeticUtilization\",\"aicpu\": \"on\",\"l2\": \"xx\"}";
     strcpy(options.jobId, "123");
     strcpy(options.options, ge_json.c_str());
     EXPECT_EQ(MSPROF_ERROR_CONFIG_INVALID, ProfAclMgr::instance()->MsprofInitGeOptions((void *)&options, sizeof(options)));
@@ -1318,47 +1318,6 @@ TEST_F(MSPROF_ACL_CORE_UTEST, Analyzer_TsDataPostProc) {
     analyzer->TsDataPostProc();
     EXPECT_EQ(PROFILE_MODE_STEP_TRACE, analyzer->profileMode_);
 }
-
-TEST_F(MSPROF_ACL_CORE_UTEST, Analyzer_HwtsDataPostProc) {
-    std::shared_ptr<Analyzer> analyzer(new Analyzer(nullptr));
-    EXPECT_EQ(PROFILING_SUCCESS, analyzer->Init());
-    HwtsProfileType01 data;
-    data.taskId = 0;
-    data.streamId = 0;
-    data.syscnt = 1000000;
-    analyzer->analyzerHwts_->ParseTaskStartEndData((CONST_CHAR_PTR)(&data), sizeof(data), HWTS_TASK_START_TYPE);
-    analyzer->analyzerHwts_->ParseTaskStartEndData((CONST_CHAR_PTR)(&data), sizeof(data), HWTS_TASK_END_TYPE);
-
-    analyzer->inited_ = true;
-    analyzer->profileMode_ = PROFILE_MODE_INVALID;
-    analyzer->flushQueueLen_ = 1;
-    analyzer->flushedChannel_ = false;
-    analyzer->devIdStr_ = "123";
-    analyzer->HwtsDataPostProc();
-
-    EXPECT_EQ(false, analyzer->inited_);
-}
-
-// TEST_F(MSPROF_ACL_CORE_UTEST, Analyzer_FftsDataPostProc) {
-//     std::shared_ptr<Analyzer> analyzer(new Analyzer(nullptr));
-//     FftsCxtLog data;
-//     data.taskId = 0;
-//     data.streamId = 0;
-//     data.sysCountLow = 1000000;
-//     analyzer->analyzerFfts_->ParseSubTaskThreadData((Analysis::Dvvp::Analyze::FftsLogHead*)&data,
-//                                                     FFTS_SUBTASK_THREAD_START_FUNC_TYPE);
-//     analyzer->analyzerFfts_->ParseSubTaskThreadData((Analysis::Dvvp::Analyze::FftsLogHead*)&data,
-//                                                     FFTS_SUBTASK_THREAD_END_FUNC_TYPE);
-
-//     analyzer->inited_ = true;
-//     analyzer->profileMode_ = PROFILE_MODE_INVALID;
-//     analyzer->flushQueueLen_ = 1;
-//     analyzer->flushedChannel_ = false;
-//     analyzer->devIdStr_ = "123";
-//     analyzer->FftsDataPostProc();
-
-//     EXPECT_EQ(false, analyzer->inited_);
-// }
 
 TEST_F(MSPROF_ACL_CORE_UTEST, Analyzer_Ffts_PrintStats) {
     std::shared_ptr<Analyzer> analyzer(new Analyzer(nullptr));
@@ -1508,76 +1467,93 @@ TEST_F(MSPROF_ACL_CORE_UTEST, AnalyzerTs_UploadKeypointOp) {
     MOCKER_CPP(&Analysis::Dvvp::Analyze::Analyzer::ConstructAndUploadData)
         .stubs();
 
-    auto analyzer = std::make_shared<Analysis::Dvvp::Analyze::Analyzer>(nullptr);
+    std::shared_ptr<Analyzer> analyzer(new Analyzer(nullptr));
     EXPECT_EQ(PROFILING_SUCCESS, analyzer->Init());
-
+    analyzer->profileMode_ = PROFILE_MODE_STEP_TRACE;
     TsProfileKeypoint data;
     data.head.bufSize = sizeof(TsProfileKeypoint);
     data.taskId = 1;
     data.streamId = 1;
+    data.modelId = 0;
+
+    data.indexId = 0;
     data.timestamp = 1000000;
     data.tagId = TS_KEYPOINT_START_TASK_STATE;
     analyzer->analyzerTs_->ParseTsKeypointData((CONST_CHAR_PTR)(&data), sizeof(data));
+
     data.timestamp = 2000000;
     data.tagId = TS_KEYPOINT_END_TASK_STATE;
     analyzer->analyzerTs_->ParseTsKeypointData((CONST_CHAR_PTR)(&data), sizeof(data));
 
+    data.indexId = 1;
     data.timestamp = 3000000;
     data.tagId = TS_KEYPOINT_START_TASK_STATE;
     analyzer->analyzerTs_->ParseTsKeypointData((CONST_CHAR_PTR)(&data), sizeof(data));
+
     data.timestamp = 4000000;
     data.tagId = TS_KEYPOINT_END_TASK_STATE;
     analyzer->analyzerTs_->ParseTsKeypointData((CONST_CHAR_PTR)(&data), sizeof(data));
 
+    data.indexId = 2;
     data.timestamp = 5000000;
     data.tagId = TS_KEYPOINT_START_TASK_STATE;
     analyzer->analyzerTs_->ParseTsKeypointData((CONST_CHAR_PTR)(&data), sizeof(data));
 
     auto &keypointOpInfo = analyzer->analyzerTs_->keypointOpInfo_;
-    keypointOpInfo[0].uploaded = true;
-    keypointOpInfo[1].uploaded = false;
-    keypointOpInfo[2].uploaded = false;
 
     analyzer->UploadKeypointOp();
-    EXPECT_EQ(true, keypointOpInfo[1].uploaded);
+    int uploadNum = 0;
+    for (auto iter = keypointOpInfo.begin(); iter != keypointOpInfo.end(); ++iter) {
+        if (iter->second.uploaded == true) {
+            uploadNum++;
+        }
+    }
+    EXPECT_EQ(2, uploadNum);
 }
 
 TEST_F(MSPROF_ACL_CORE_UTEST, Graph_aclgrphProfGraphSubscribe) {
-    GlobalMockObject::verify();
+GlobalMockObject::verify();
     MOCKER_CPP(&Analysis::Dvvp::Analyze::Analyzer::ConstructAndUploadData)
         .stubs();
 
     std::shared_ptr<Analyzer> analyzer(new Analyzer(nullptr));
     EXPECT_EQ(PROFILING_SUCCESS, analyzer->Init());
+    analyzer->profileMode_ = PROFILE_MODE_STATIC_SHAPE;
     TsProfileKeypoint data;
     data.head.bufSize = sizeof(TsProfileKeypoint);
     data.taskId = 1;
     data.streamId = 1;
+    data.modelId = 0;
+
+    data.indexId = 0;
     data.timestamp = 1000000;
     data.tagId = TS_KEYPOINT_START_TASK_STATE;
     analyzer->analyzerTs_->ParseTsKeypointData((CONST_CHAR_PTR)(&data), sizeof(data));
+
+    data.indexId = 0;
     data.timestamp = 2000000;
     data.tagId = TS_KEYPOINT_END_TASK_STATE;
     analyzer->analyzerTs_->ParseTsKeypointData((CONST_CHAR_PTR)(&data), sizeof(data));
 
+    data.indexId = 1;
     data.timestamp = 3000000;
     data.tagId = TS_KEYPOINT_START_TASK_STATE;
     analyzer->analyzerTs_->ParseTsKeypointData((CONST_CHAR_PTR)(&data), sizeof(data));
+
+    data.indexId = 1;
     data.timestamp = 4000000;
     data.tagId = TS_KEYPOINT_END_TASK_STATE;
     analyzer->analyzerTs_->ParseTsKeypointData((CONST_CHAR_PTR)(&data), sizeof(data));
 
+    data.indexId = 2;
     data.timestamp = 5000000;
     data.tagId = TS_KEYPOINT_START_TASK_STATE;
     analyzer->analyzerTs_->ParseTsKeypointData((CONST_CHAR_PTR)(&data), sizeof(data));
 
     auto &keypointOpInfo = analyzer->analyzerTs_->keypointOpInfo_;
-    keypointOpInfo[0].uploaded = true;
-    keypointOpInfo[1].uploaded = false;
-    keypointOpInfo[2].uploaded = false;
 
     analyzer->UploadKeypointOp();
-    EXPECT_EQ(true, keypointOpInfo[1].uploaded);
+    EXPECT_EQ(1, keypointOpInfo.size());
 }
 
 TEST_F(MSPROF_ACL_CORE_UTEST, AicoreMetricsEnumToName) {

@@ -524,9 +524,6 @@ void GeFinalizeHandle()
     std::vector<uint32_t> devIds;
     Msprofiler::Api::ProfAclMgr::instance()->GetRunningDevices(devIds);
     for (uint32_t devId : devIds) {
-        if (devId == DEFAULT_HOST_ID) {
-            continue;
-        }
         uint64_t dataTypeConfig = 0;
         if (Msprofiler::Api::ProfAclMgr::instance()->ProfAclGetDataTypeConfig(devId, dataTypeConfig) != ACL_SUCCESS) {
             continue;
