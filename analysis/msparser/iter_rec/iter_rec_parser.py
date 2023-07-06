@@ -56,6 +56,7 @@ class IterParser(IParser, MsMultiProcess):
         self.default_index = 0
         self.hwts_iter_model = HwtsIterModel(self._project_path)
         self.ai_core_task = set()
+        self._task_cnt_not_in_iter = dict()
 
     def save(self: any) -> None:
         """
@@ -105,6 +106,13 @@ class IterParser(IParser, MsMultiProcess):
             _task_log = HwtsLogBean.decode(_chunk)
             if not _task_log.is_log_type():
                 continue
+            # Because of cache in runtime to be reported, the hwts may contain tasks which are not in iteration.
+            # we should filter out these tasks.
+            if not self._iter_recorder.check_task_in_iter(_task_log.sys_cnt):
+                curr_iter = self._iter_info_updater.current_iter if self._iter_info_updater.current_iter != -1 else 0
+                self._task_cnt_not_in_iter.setdefault(curr_iter + 1, 0)
+                self._task_cnt_not_in_iter[curr_iter + 1] += 1
+                continue
             if self._iter_recorder.check_task_in_iteration(_task_log.sys_cnt):
                 stream_task_id = self.STREAM_TASK_KEY_FMT.format(_task_log.stream_id, _task_log.task_id)
                 if stream_task_id not in self._iter_op_set:
@@ -118,6 +126,8 @@ class IterParser(IParser, MsMultiProcess):
                 self._iter_info_updater.update_count_and_offset(_task_log)
             else:
                 self._overstep_task_cnt = self._overstep_task_cnt + 1
+        for iter_num, task_offset in self._task_cnt_not_in_iter.items():
+            self._iter_info_updater.calibrate_iter_info_offset(task_offset=task_offset, iter_offset=iter_num)
 
     def _calculate_batch_list(self: any, task_log: HwtsLogBean) -> None:
         setattr(task_log, "batch_id", self._batch_counter.calculate_batch(

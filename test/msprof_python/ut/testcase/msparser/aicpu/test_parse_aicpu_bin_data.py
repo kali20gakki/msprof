@@ -8,8 +8,17 @@ from common_func.constant import Constant
 from constant.constant import CONFIG
 from msparser.aicpu.parse_aicpu_bin_data import ParseAiCpuBinData
 from profiling_bean.prof_enum.data_tag import DataTag
+from profiling_bean.db_dto.step_trace_dto import StepTraceDto
 
 NAMESPACE = 'msparser.aicpu.parse_aicpu_bin_data'
+
+
+def get_step_trace_data():
+    step_trace_dto = StepTraceDto()
+    step_trace_dto.step_start = 1
+    step_trace_dto.step_end = 10
+    step_trace_dto.iter_id = 1
+    return step_trace_dto
 
 
 class TestParseAiCpuBinData(unittest.TestCase):
@@ -24,7 +33,9 @@ class TestParseAiCpuBinData(unittest.TestCase):
             with mock.patch('builtins.open', mock.mock_open(read_data=data)), \
                     mock.patch(NAMESPACE + '.logging.error'), \
                     mock.patch('common_func.msprof_iteration.Utils.is_step_scene', return_value=True), \
-                    mock.patch('common_func.msprof_iteration.MsprofIteration.get_iteration_end_dict', return_value={1:10}):
+                    mock.patch('common_func.utils.Utils.get_scene', return_value=''), \
+                    mock.patch('msmodel.step_trace.ts_track_model.TsTrackModel.get_step_trace_data',
+                               return_value=[get_step_trace_data()]):
                 check = ParseAiCpuBinData(self.file_list, CONFIG)
                 InfoConfReader()._info_json = {"DeviceInfo": [{'hwts_frequency': 100}]}
                 check.read_binary_data('DATA_PREPROCESS.AICPU.7.slice_0')
