@@ -442,7 +442,7 @@ class RoceModel(BaseModel, ABC):
 
         rx_error_rate = str(
             (round(float(roce_info.get("rx_error")) /
-                   float(roce_info.get("rx_packet")), self.ROUND_NUMBER)) * self.PERCENTAGE) + "%"
+                   float(roce_info.get("rx_packet")), self.ROUND_NUMBER)) * self.PERCENTAGE)
         return rx_error_rate
 
     def _get_rx_dropped_rate(self: any, roce_info: dict, device_id: str, func_id: str) -> str:
@@ -452,7 +452,7 @@ class RoceModel(BaseModel, ABC):
         roce_info["rx_dropped"] = self.cur.execute(_sql, (device_id, func_id)).fetchone()[0]
         rx_dropped_rate = str(
             (round(float(roce_info.get("rx_dropped")) /
-                   float(roce_info.get("rx_packet")), self.ROUND_NUMBER)) * self.PERCENTAGE) + "%"
+                   float(roce_info.get("rx_packet")), self.ROUND_NUMBER)) * self.PERCENTAGE)
         return rx_dropped_rate
 
     def _get_tx_error_rate(self: any, tx_packet_dic: dict, device_id: str, func_id: str) -> str:
@@ -463,7 +463,7 @@ class RoceModel(BaseModel, ABC):
             (device_id, func_id)).fetchone()[0]
         tx_error_rate = str(
             (round(float(tx_error) / float(tx_packet_dic.get('tx_packet')),
-                   self.ROUND_NUMBER)) * self.PERCENTAGE) + "%"
+                   self.ROUND_NUMBER)) * self.PERCENTAGE)
         return tx_error_rate
 
     def _get_tx_dropped_rate(self: any, tx_packet_dic: dict, device_id: str, func_id: str) -> str:
@@ -474,7 +474,7 @@ class RoceModel(BaseModel, ABC):
             (device_id, func_id)).fetchone()[0]
         tx_dropped_rate = str(
             (round(float(tx_dropped) / float(tx_packet_dic.get('tx_packet')),
-                   self.ROUND_NUMBER)) * self.PERCENTAGE) + "%"
+                   self.ROUND_NUMBER)) * self.PERCENTAGE)
         return tx_dropped_rate
 
     def _insert_roce_report_data(self: any, *param: list) -> None:
@@ -517,8 +517,8 @@ class RoceModel(BaseModel, ABC):
                                                       float(roce_info.get("duration")))
 
     def _init_roce_packet(self: any, roce_info: dict, tx_packet_dic: dict, device_id: str, func_id: str) -> tuple:
-        rx_error_rate, rx_dropped_rate = "0%", "0%"
-        tx_error_rate, tx_dropped_rate = "0%", "0%"
+        rx_error_rate, rx_dropped_rate = "0", "0"
+        tx_error_rate, tx_dropped_rate = "0", "0"
         if float(roce_info.get("rx_packet")) != Constant.DEFAULT_COUNT:
             rx_error_rate = self._get_rx_error_rate(roce_info, device_id)
             rx_dropped_rate = self._get_rx_dropped_rate(roce_info, device_id, func_id)
