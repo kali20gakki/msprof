@@ -125,9 +125,7 @@ class InfoConfReader:
         get rank_id
         :return: rank_id
         """
-        rank_id = self._info_json.get("rank_id", Constant.DEFAULT_INVALID_RANK_ID_VALUE)
-        if rank_id == Constant.DEFAULT_INVALID_VALUE or len(str(rank_id)) == 0:
-            rank_id = Constant.DEFAULT_INVALID_RANK_ID_VALUE
+        rank_id = self._info_json.get("rank_id", Constant.DEFAULT_INVALID_VALUE)
         return rank_id
 
     def is_version_matched(self):
