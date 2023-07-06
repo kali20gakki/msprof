@@ -214,10 +214,12 @@ int32_t MsprofReporterCallbackImpl(uint32_t moduleId, uint32_t type, VOID_PTR da
 
 int32_t RegisterReporterCallback()
 {
-    if (Msprof::Engine::MsprofCallbackHandler::reporters_.empty()) {
-        MSPROF_LOGI("MsprofCallbackHandler InitReporters");
-        Msprof::Engine::MsprofCallbackHandler::InitReporters();
+    if (!Msprof::Engine::MsprofCallbackHandler::reporters_.empty()) {
+        return ACL_SUCCESS;
     }
+    MSPROF_LOGI("MsprofCallbackHandler InitReporters");
+    Msprof::Engine::MsprofCallbackHandler::InitReporters();
+    
     MSPROF_LOGI("Call profRegReporterCallback");
     aclError ret = ProfApiPlugin::instance()->MsprofProfRegReporterCallback(MsprofReporterCallbackImpl);
     if (ret != ACL_SUCCESS) {

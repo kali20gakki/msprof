@@ -32,6 +32,17 @@ protected:
     }
 };
 
+TEST_F(ParamsAdapterAclapiUtest, InitFailed)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<ParamsAdapterAclApi> AclApiParamAdapterMgr;
+    MSVP_MAKE_SHARED0_BREAK(AclApiParamAdapterMgr, ParamsAdapterAclApi);
+    MOCKER_CPP(&ParamsAdapterAclApi::CheckListInit)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED));
+    EXPECT_EQ(PROFILING_FAILED, AclApiParamAdapterMgr->Init());
+}
+
 TEST_F(ParamsAdapterAclapiUtest, DevIdToStr)
 {
     GlobalMockObject::verify();
@@ -119,4 +130,19 @@ TEST_F(ParamsAdapterAclapiUtest, ProfSystemCfgToContainer)
     AclApiParamAdapterMgr->ProfSystemCfgToContainer(&apiCfg, argsArr);
     argsArr[ACL_PROF_LLC_MODE] = "read";
     AclApiParamAdapterMgr->ProfSystemCfgToContainer(&apiCfg, argsArr);
+}
+
+TEST_F(ParamsAdapterAclapiUtest, CheckHostSysAclApiValid)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<ParamsAdapterAclApi> AclApiParamAdapterMgr;
+    MSVP_MAKE_SHARED0_BREAK(AclApiParamAdapterMgr, ParamsAdapterAclApi);
+    std::string cfg;
+    EXPECT_EQ(false, AclApiParamAdapterMgr->CheckHostSysAclApiValid(cfg));
+
+    cfg = "xxx";
+    EXPECT_EQ(false, AclApiParamAdapterMgr->CheckHostSysAclApiValid(cfg));
+
+    cfg = "cpu,mem";
+    EXPECT_EQ(true, AclApiParamAdapterMgr->CheckHostSysAclApiValid(cfg));
 }

@@ -59,8 +59,7 @@ struct ReporterDataChunk {
 
 enum MsprofProfileDataType {
     MSPROF_DEFAULT_PROFILE_DATA_TYPE = 0,
-    MSPROF_API_PROFILE_DATA_TYPE,
-    MSPROF_EVENT_PROFILE_DATA_TYPE,
+    MSPROF_API_AND_EVENT_PROFILE_DATA_TYPE,
     MSPROF_COMPACT_PROFILE_DATA_TYPE,
     MSPROF_ADDITIONAL_PROFILE_DATA_TYPE
 };
@@ -105,7 +104,6 @@ public:
         MSPROF_LOGI("ReceiveData::DumpDynProfCachedMsg, devId is %s", devId.c_str());
     }
     int32_t DoReportData(const MsprofApi &dataChunk);
-    int32_t DoReportData(const MsprofEvent &dataChunk);
     int32_t DoReportData(const MsprofCompactInfo &dataChunk);
     int32_t DoReportData(const MsprofAdditionalInfo &dataChunk);
 
@@ -146,7 +144,6 @@ private:
 private:
     analysis::dvvp::common::queue::RingBuffer<ReporterDataChunk> dataChunkBuf_;
     analysis::dvvp::common::queue::RingBuffer<MsprofApi> dataBufApi_;
-    analysis::dvvp::common::queue::RingBuffer<MsprofEvent> dataBufEvent_;
     analysis::dvvp::common::queue::RingBuffer<MsprofCompactInfo> dataBufCompactInfo_;
     analysis::dvvp::common::queue::RingBuffer<MsprofAdditionalInfo> dataBufAdditionalInfo_;
     int32_t profileDataType_;

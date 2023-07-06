@@ -106,72 +106,99 @@ void Analyzer::TsDataPostProc()
     UploadKeypointOp();
 }
 
-void Analyzer::HwtsDataPostProc()
-{
-    if (profileMode_ == PROFILE_MODE_INVALID && !analyzerHwts_->opTimes_.empty() && !flushedChannel_) {
-        Analysis::Dvvp::JobWrapper::ProfChannelManager::instance()->FlushChannel();
-        MSPROF_LOGI("flush channel data ...");
-        flushedChannel_ = true;
-
-        SHARED_PTR_ALIA<analysis::dvvp::transport::Uploader> uploader = nullptr;
-        analysis::dvvp::transport::UploaderMgr::instance()->GetUploader(devIdStr_, uploader);
-        if (uploader == nullptr) {
-            MSPROF_LOGE("GetUploader failed. devIdStr_: %s. inited_ = false", devIdStr_.c_str());
-            inited_ = false;
-            return;
-        }
-        flushQueueLen_ = uploader->GetQueueSize();
-        if (flushQueueLen_ == 0) {
-            MSPROF_EVENT("set profile mode: PROFILE_MODE_SINGLE_OP.");
-            profileMode_ = PROFILE_MODE_SINGLE_OP;
-        }
-    }
-
-    UpdateOpIndexId(analyzerHwts_->opTimes_);
-    UploadAppOp(analyzerHwts_->opTimes_);
-}
-
-void Analyzer::FftsDataPostProc()
-{
-    // profileMode_ default is PROFILE_MODE_STEP_TRACE, no need check.
-    UpdateOpIndexId(analyzerFfts_->opTimes_);
-    UploadAppOp(analyzerFfts_->opTimes_);
-}
-
 void Analyzer::UploadAppOp(std::multimap<std::string, OpTime> &opTimes)
 {
     if (profileMode_ == PROFILE_MODE_STEP_TRACE) {
+        UploadAppOpModeStepTrace(opTimes);
+    } else if (profileMode_ == PROFILE_MODE_STATIC_SHAPE) {
+        UploadAppOpModeStaticShape(opTimes);
+    } else if (profileMode_ == PROFILE_MODE_SINGLE_OP) {
+        UploadAppOpModeSingleOp(opTimes);
+    }
+}
+
+void Analyzer::UploadAppOpModeStepTrace(std::multimap<std::string, OpTime> &opTimes)
+{
+    for (auto iter = opTimes.begin(); iter != opTimes.end();) {
+        if (iter->second.indexId == 0) {
+            iter++;
+            continue;
+        }
+        std::string key0 = iter->first + KEY_SEPARATOR + "0";
+        std::string key1 = iter->first + KEY_SEPARATOR + std::to_string(iter->second.indexId);
+        bool key0_res = analyzerGe_->IsOpInfoCompleted(key0);
+        bool key1_res = analyzerGe_->IsOpInfoCompleted(key1);
+        if (key0_res && key1_res) {
+            MSPROF_LOGE("GE data error. %s %s", key0.c_str(), key1.c_str());
+            iter = opTimes.erase(iter);
+        } else if (analyzerGe_->IsOpInfoCompleted(key0)) {
+            ConstructAndUploadData(key0, iter->second);
+            iter = opTimes.erase(iter);
+        } else if (analyzerGe_->IsOpInfoCompleted(key1)) {
+            ConstructAndUploadData(key1, iter->second);
+            iter = opTimes.erase(iter);
+        } else {
+            iter++;
+        }
+    }
+}
+
+void Analyzer::UploadAppOpModeStaticShape(std::multimap<std::string, OpTime> &opTimes)
+{
+    bool isAllStatic = analyzerGe_->GetIsAllStaticShape();
+    if (isAllStatic) {
+        // in final solution only this branch is needed,need to query high16bit taskid from stream info
         for (auto iter = opTimes.begin(); iter != opTimes.end();) {
-            if (iter->second.indexId == 0) {
+            std::string key0 = iter->first + KEY_SEPARATOR + "0";
+            bool key0Res = analyzerGe_->IsOpInfoCompleted(key0);
+            if (key0Res) {
+                ConstructAndUploadData(key0, iter->second);
+                iter = opTimes.erase(iter);
+                MSPROF_LOGD("Op info is Constructed, %s", key0.c_str());
+            } else {
+                iter++;
+                MSPROF_LOGD("Op info is incomplete, %s", key0.c_str());
+            }
+        }
+    } else {
+        MSPROF_LOGD("Try to custruct Op info, is not all static");
+        for (auto iter = opTimes.begin(); iter != opTimes.end();) {  // tmp solution, discard dynamic shape task
+            int streamType;
+            if (!analyzerGe_->GetStreamType(iter->second.streamId, streamType)) {
+                MSPROF_LOGI("Op Stream info hasn't been received, stream id is %u", iter->second.streamId);
                 iter++;
                 continue;
             }
-            std::string key0 = iter->first + KEY_SEPARATOR + "0";
-            std::string key1 = iter->first + KEY_SEPARATOR + std::to_string(iter->second.indexId);
-            bool key0_res = analyzerGe_->IsOpInfoCompleted(key0);
-            bool key1_res = analyzerGe_->IsOpInfoCompleted(key1);
-            if (key0_res && key1_res) {
-                MSPROF_LOGE("GE data error. %s %s", key0.c_str(), key1.c_str());
+ 
+            if (streamType == UNKNOWN_SHAPE_STREAM) {
+                MSPROF_LOGI("Op belong to unknown shape stream, not supported yet");
                 iter = opTimes.erase(iter);
-            } else if (analyzerGe_->IsOpInfoCompleted(key0)) {
+                continue;
+            }
+ 
+            std::string key0 = iter->first + KEY_SEPARATOR + "0";
+            bool key0Res = analyzerGe_->IsOpInfoCompleted(key0);
+            if (key0Res) {
                 ConstructAndUploadData(key0, iter->second);
                 iter = opTimes.erase(iter);
-            } else if (analyzerGe_->IsOpInfoCompleted(key1)) {
-                ConstructAndUploadData(key1, iter->second);
-                iter = opTimes.erase(iter);
+                MSPROF_LOGD("Op info is Constructed, %s", key0.c_str());
             } else {
                 iter++;
+                MSPROF_LOGD("Op info is incomplete, %s", key0.c_str());
             }
         }
-    } else if (profileMode_ == PROFILE_MODE_SINGLE_OP) {
-        for (auto iter = opTimes.begin(); iter != opTimes.end();) {
-            std::string key = iter->first + KEY_SEPARATOR + "0";
-            if (analyzerGe_->IsOpInfoCompleted(key)) {
-                ConstructAndUploadData(key, iter->second);
-                iter = opTimes.erase(iter);
-            } else {
-                iter++;
-            }
+    }
+}
+
+void Analyzer::UploadAppOpModeSingleOp(std::multimap<std::string, OpTime> &opTimes)
+{
+    for (auto iter = opTimes.begin(); iter != opTimes.end();) {
+        std::string key = iter->first + KEY_SEPARATOR + "0";
+        if (analyzerGe_->IsOpInfoCompleted(key)) {
+            ConstructAndUploadData(key, iter->second);
+            iter = opTimes.erase(iter);
+        } else {
+            iter++;
         }
     }
 }
@@ -180,22 +207,39 @@ void Analyzer::UploadKeypointOp()
 {
     auto &tsKeypointOp = analyzerTs_->keypointOpInfo_;
 
-    for (size_t i = 0; i < tsKeypointOp.size(); i++) {
-        if (tsKeypointOp[i].uploaded) {
-            continue;
+    if (profileMode_ == PROFILE_MODE_STATIC_SHAPE) {
+        for (auto iter = tsKeypointOp.begin(); iter != tsKeypointOp.end();) {
+            if (iter->second.endTime == 0) {
+                ++iter;
+                MSPROF_LOGD("Key point end is not ready");
+                continue;
+            }
+            std::string nullStr;
+            OpTime opTime = {0, 0, 0, 0, 0, 0, ACL_SUBSCRIBE_OP, 0};
+            opTime.start = iter->second.startTime;
+            opTime.end = iter->second.endTime;
+            opTime.indexId = analyzerGe_->GetModelId(iter->second.modelId);
+            ConstructAndUploadData(nullStr, opTime);
+            iter = tsKeypointOp.erase(iter);  // static shape, no need to keep uploaded keypoint
         }
+    } else {
+        for (auto iter = tsKeypointOp.begin(); iter != tsKeypointOp.end(); ++iter) {
+            if (iter->second.uploaded) {
+                continue;
+            }
 
-        if (tsKeypointOp[i].endTime == 0) {
-            continue;
+            if (iter->second.endTime == 0) {
+                continue;
+            }
+
+            std::string nullStr;
+            OpTime opTime = {0, 0, 0, 0, 0, 0, ACL_SUBSCRIBE_OP, 0};
+            opTime.start = iter->second.startTime;
+            opTime.end = iter->second.endTime;
+            opTime.indexId = analyzerGe_->GetModelId(iter->second.modelId);
+            ConstructAndUploadData(nullStr, opTime);
+            iter->second.uploaded = true;
         }
-
-        std::string nullStr;
-        OpTime opTime = {0, 0, 0, 0, 0, 0, ACL_SUBSCRIBE_OP};
-        opTime.start = tsKeypointOp[i].startTime;
-        opTime.end = tsKeypointOp[i].endTime;
-        opTime.indexId = analyzerGe_->GetModelId(tsKeypointOp[i].modelId);
-        ConstructAndUploadData(nullStr, opTime);
-        tsKeypointOp[i].uploaded = true;
     }
 }
 
@@ -204,57 +248,58 @@ uint64_t Analyzer::GetOpIndexId(uint64_t opTimeStamp)
     auto &tsKeypointOp = analyzerTs_->keypointOpInfo_;
 
     size_t opNum = tsKeypointOp.size();
-    if ((opNum == 0) || ((opNum == 1) && (tsKeypointOp[0].endTime == 0))) {
+    if ((opNum == 0) || ((opNum == 1) && (tsKeypointOp.begin()->second.endTime == 0))) {
+        MSPROF_LOGD("Get OpIndex failed");
         return 0;
     }
 
-    size_t endIndex = opNum - 1;
-    if (tsKeypointOp[endIndex].endTime == 0 && endIndex >= 1) {
-        // last keypoint op not completed, so index more offset 1
-        endIndex--;
-    }
-    if (opTimeStamp > tsKeypointOp[endIndex].endTime) {
-        // the latest keypoint op's time less than opTimeStamp, need waiting later keypoint op
-        return 0;
-    }
-    for (size_t i = 0; i <= endIndex; i++) {
-        if ((opTimeStamp > tsKeypointOp[endIndex - i].startTime) &&
-            (opTimeStamp < tsKeypointOp[endIndex - i].endTime)) {
-            tsKeypointOp[endIndex - i].findSuccTimes += 1;
-            return tsKeypointOp[endIndex - i].indexId;
+    for (auto iter = tsKeypointOp.begin(); iter != tsKeypointOp.end(); ++iter) {
+        if (iter->second.endTime == 0) {
+            MSPROF_LOGI("Incomplete keypoint");
+            continue;
+        }
+        if ((opTimeStamp > iter->second.startTime) && (opTimeStamp < iter->second.endTime)) {
+            iter->second.findSuccTimes += 1;
+            return iter->second.indexId;
         }
     }
-    MSPROF_LOGI("Unable to get OpIndexID. opNum %d, opTimeStamp %llu.", opNum, opTimeStamp);
 
+    MSPROF_LOGI("Unable to get OpIndexID. opNum %d, opTimeStamp %llu.", opNum, opTimeStamp);
     return 0;
 }
 
 void Analyzer::UpdateOpIndexId(std::multimap<std::string, OpTime> &opTimes)
 {
-    uint64_t maxIndexId = 0;
-    for (auto iter = opTimes.begin(); iter != opTimes.end(); iter++) {
-        if (iter->second.indexId != 0) {
-            continue;
+    if (profileMode_ == PROFILE_MODE_STATIC_SHAPE) {
+        MSPROF_LOGI("Static shape scen, no need to update op index");
+        return;
+    } else {
+        uint64_t maxIndexId = 0;
+        for (auto iter = opTimes.begin(); iter != opTimes.end(); iter++) {
+            if (iter->second.indexId != 0) {
+                continue;
+            }
+            iter->second.indexId = GetOpIndexId(iter->second.end);
+            if (iter->second.indexId > maxIndexId) {
+                maxIndexId = iter->second.indexId;
+            }
         }
-        iter->second.indexId = GetOpIndexId(iter->second.end);
-        if (iter->second.indexId > maxIndexId) {
-            maxIndexId = iter->second.indexId;
-        }
-    }
 
-    // clean useless keypoint op
-    auto &tsKeypointOp = analyzerTs_->keypointOpInfo_;
-    for (auto iter = tsKeypointOp.begin(); iter != tsKeypointOp.end();) {
-        if (!iter->uploaded) {
-            iter++;
-            continue;
-        }
-        if (iter->indexId < maxIndexId) {
-            MSPROF_LOGI("delete keypoint. indexId:%llu findSuccTimes:%llu",
-                        iter->indexId, iter->findSuccTimes);
-            iter = tsKeypointOp.erase(iter);
-        } else {
-            iter++;
+        // clean useless keypoint op
+        auto &tsKeypointOp = analyzerTs_->keypointOpInfo_;
+        for (auto iter = tsKeypointOp.begin(); iter != tsKeypointOp.end();) {
+            if (!iter->second.uploaded) {
+                iter++;
+                continue;
+            }
+            if (iter->second.indexId < maxIndexId) {
+                MSPROF_LOGI("delete keypoint. indexId:%llu findSuccTimes:%llu",
+                    iter->second.indexId,
+                    iter->second.findSuccTimes);
+                iter = tsKeypointOp.erase(iter);
+            } else {
+                iter++;
+            }
         }
     }
 }
@@ -267,12 +312,12 @@ bool Analyzer::IsNeedUpdateIndexId()
         return false;
     }
 
-    if (tsKeypointOp.back().endTime != 0 &&
-        !(tsKeypointOp.back().uploaded)) {
-        return true;
-    } else {
-        return false;
+    for (auto iter = tsKeypointOp.begin(); iter != tsKeypointOp.end(); ++iter) {
+        if (iter->second.endTime != 0 && !(iter->second.uploaded)) {
+            return true;
+        }
     }
+    return false;
 }
 
 void Analyzer::ConstructAndUploadData(const std::string &opId, OpTime &opTime)
