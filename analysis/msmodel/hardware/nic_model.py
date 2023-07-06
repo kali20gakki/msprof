@@ -411,7 +411,7 @@ class NicModel(BaseModel, ABC):
         nic_info["rx_error"] = self.cur.execute(_sql, (device[0],)).fetchone()[0]
         rx_error_rate = str(
             (round(float(nic_info.get("rx_error")) /
-                   float(nic_info.get("rx_packet")), self.ROUND_NUMBER)) * self.PERCENTAGE) + "%"
+                   float(nic_info.get("rx_packet")), self.ROUND_NUMBER)) * self.PERCENTAGE)
         return rx_error_rate
 
     def _cal_rx_drop_sql_exec(self: any, nic_info: dict, device: list, func_id: int) -> str:
@@ -421,7 +421,7 @@ class NicModel(BaseModel, ABC):
         nic_info["rx_dropped"] = self.cur.execute(_sql, (device[0], func_id)).fetchone()[0]
         rx_dropped_rate = str(
             (round(float(nic_info.get("rx_dropped")) /
-                   float(nic_info.get("rx_packet")), self.ROUND_NUMBER)) * self.PERCENTAGE) + "%"
+                   float(nic_info.get("rx_packet")), self.ROUND_NUMBER)) * self.PERCENTAGE)
         return rx_dropped_rate
 
     def _cal_tx_error_sql_exec(self: any, tx_packet_dic: dict, device: list, func_id: int) -> str:
@@ -432,7 +432,7 @@ class NicModel(BaseModel, ABC):
             (device[0], func_id)).fetchone()[0]
         tx_error_rate = str(
             (round(float(tx_error) / float(tx_packet_dic.get('tx_packet')),
-                   self.ROUND_NUMBER)) * self.PERCENTAGE) + "%"
+                   self.ROUND_NUMBER)) * self.PERCENTAGE)
         return tx_error_rate
 
     def _cal_tx_drop_sql_exec(self: any, tx_packet_dic: dict, device: list, func_id: int) -> str:
@@ -443,7 +443,7 @@ class NicModel(BaseModel, ABC):
             (device[0], func_id)).fetchone()[0]
         tx_dropped_rate = str(
             (round(float(tx_dropped) / float(tx_packet_dic.get('tx_packet')),
-                   self.ROUND_NUMBER)) * self.PERCENTAGE) + "%"
+                   self.ROUND_NUMBER)) * self.PERCENTAGE)
         return tx_dropped_rate
 
     def _cal_rx_bytes_packet_info(self: any, nic_info: dict, device: list, func_id: int) -> None:
@@ -456,14 +456,14 @@ class NicModel(BaseModel, ABC):
             rx_error_rate = self._cal_rx_error_sql_exec(nic_info, device)
             rx_dropped_rate = self._cal_rx_drop_sql_exec(nic_info, device, func_id)
             return rx_error_rate, rx_dropped_rate
-        return "0%", "0%"
+        return "0", "0"
 
     def _cal_tx_rate_adapter(self: any, tx_packet_dic: dict, device: list, func_id: int) -> tuple:
         if float(tx_packet_dic.get('tx_packet')) != Constant.DEFAULT_COUNT:
             tx_error_rate = self._cal_tx_error_sql_exec(tx_packet_dic, device, func_id)
             tx_dropped_rate = self._cal_tx_drop_sql_exec(tx_packet_dic, device, func_id)
             return tx_error_rate, tx_dropped_rate
-        return "0%", "0%"
+        return "0", "0"
 
     def _report_data_per_device(self: any, device_id_list: list) -> None:
         for device in set(device_id_list):
