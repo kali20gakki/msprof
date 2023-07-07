@@ -5,6 +5,7 @@ import configparser
 import json
 import logging
 import os
+from typing import Dict
 
 from common_func.constant import Constant
 from common_func.file_manager import check_path_valid
@@ -85,6 +86,26 @@ class InfoConfReader:
                         and is_valid_original_data(_file, project_path, is_conf=True):
                     return os.path.join(project_path, _file)
         return ""
+
+    @classmethod
+    def _get_instr_profiling_frequency_from_sample(cls, sample_json: Dict) -> int:
+        instr_profiling_freq0 = sample_json.get("instr_profiling_freq")
+        instr_profiling_freq1 = sample_json.get("instrProfilingFreq")
+        if instr_profiling_freq0 is None and instr_profiling_freq1 is None:
+            logging.error(
+                "instr profiling frequency not found in sample.json",
+                exc_info=Constant.TRACE_BACK_SWITCH
+            )
+            raise ProfException(ProfException.PROF_INVALID_DATA_ERROR)
+
+        instr_profiling_freq_val = instr_profiling_freq0 if instr_profiling_freq1 is None else instr_profiling_freq1
+        instr_profiling_freq = int(instr_profiling_freq_val)
+
+        if instr_profiling_freq <= 0:
+            logging.error("Instr Profiling Frequency is invalid.")
+            raise ProfException(ProfException.PROF_INVALID_DATA_ERROR)
+
+        return instr_profiling_freq
 
     def load_info(self: any, result_path: str) -> None:
         """
@@ -271,23 +292,7 @@ class InfoConfReader:
         """
         get instr_profiling_freq from info json
         """
-        instr_profiling_freq0 = self._sample_json.get("instr_profiling_freq")
-        instr_profiling_freq1 = self._sample_json.get("instrProfilingFreq")
-        if instr_profiling_freq0 is None and instr_profiling_freq1 is None:
-            logging.error(
-                "instr profiling frequency not found in sample.json",
-                exc_info=Constant.TRACE_BACK_SWITCH
-            )
-            raise ProfException(ProfException.PROF_INVALID_DATA_ERROR)
-
-        instr_profiling_freq_val = instr_profiling_freq0 if instr_profiling_freq1 is None else instr_profiling_freq1
-        instr_profiling_freq = int(instr_profiling_freq_val)
-
-        if instr_profiling_freq <= 0:
-            logging.error("Instr Profiling Frequency is invalid.")
-            raise ProfException(ProfException.PROF_INVALID_DATA_ERROR)
-
-        return instr_profiling_freq
+        return self._get_instr_profiling_frequency_from_sample(self._sample_json)
 
     def get_job_basic_info(self: any) -> list:
         job_info = self.get_job_info()

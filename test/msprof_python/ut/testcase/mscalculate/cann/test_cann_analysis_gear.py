@@ -260,5 +260,16 @@ class TestCANNAnalysisGear(unittest.TestCase):
                                           DBNameConstant.TABLE_HCCL_TASK, 'plane_id', 8))
 
 
+class TestFindModelNameInModelLoad(unittest.TestCase):
+    DIR_PATH = os.path.join(os.path.dirname(__file__), "DT_CANNAnalysisGear")
+    PROF_HOST_DIR = os.path.join(DIR_PATH, 'PROF1', 'host')
+
+    def test_find_model_name_in_model_load(self):
+        gear = ModelGear(self.PROF_HOST_DIR)
+        gear.model_load_data = [(0, "test", 1, 1), (1, "test2", 2, 3)]
+        self.assertEqual(gear.find_model_name(0), "test")
+        self.assertEqual(gear.find_model_name(1), "test2")
+
+
 if __name__ == '__main__':
     unittest.main()
