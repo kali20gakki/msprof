@@ -24,7 +24,7 @@ class ApiDataViewModel(ViewModel):
     def get_timeline_data(self: any) -> list:
         sql = "select struct_type, start, (end - start), " \
               "thread_id, level, id," \
-              "item_id from {} {where_condition}".format(DBNameConstant.TABLE_API_DATA,
+              "item_id from (select* from {} where start > 0) {where_condition}".format(DBNameConstant.TABLE_API_DATA,
                                                                     where_condition=self._get_where_condition())
         return DBManager.fetch_all_data(self.cur, sql)
 
