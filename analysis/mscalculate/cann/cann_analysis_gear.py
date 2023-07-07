@@ -462,19 +462,22 @@ class TaskGear(CANNGear):
                 # notice: reduce TBE op
                 task_type = self.AICORE_TASK_TYPE
 
-            self.task_info.append([model_id, node_basic_info_dto.op_name, add_dto.stream_id, add_dto.task_id,
-                                   node_basic_info_dto.block_dim, node_basic_info_dto.mix_block_dim,
-                                   node_basic_info_dto.is_dynamic, task_type,
-                                   node_basic_info_dto.op_type, request_id, add_dto.thread_id,
-                                   node_basic_info_dto.timestamp, add_dto.batch_id, ctx_id_dto.ctx_id])
+            cxt_ids = str(ctx_id_dto.ctx_id).split(',')
+            for cxt_id in cxt_ids:
+                self.task_info.append([model_id, node_basic_info_dto.op_name, add_dto.stream_id, add_dto.task_id,
+                                       node_basic_info_dto.block_dim, node_basic_info_dto.mix_block_dim,
+                                       node_basic_info_dto.is_dynamic, task_type,
+                                       node_basic_info_dto.op_type, request_id, add_dto.thread_id,
+                                       node_basic_info_dto.timestamp, add_dto.batch_id, int(cxt_id)])
 
             if tensor_info_dto.struct_type is None:
                 continue
-            self.tensor_info.append([model_id, add_dto.stream_id, add_dto.task_id, tensor_info_dto.tensor_num,
-                                     tensor_info_dto.input_formats, tensor_info_dto.input_data_types,
-                                     tensor_info_dto.input_shapes, tensor_info_dto.output_formats,
-                                     tensor_info_dto.output_data_types, tensor_info_dto.output_shapes,
-                                     request_id, tensor_info_dto.timestamp, add_dto.batch_id, ctx_id_dto.ctx_id])
+            for cxt_id in cxt_ids:
+                self.tensor_info.append([model_id, add_dto.stream_id, add_dto.task_id, tensor_info_dto.tensor_num,
+                                         tensor_info_dto.input_formats, tensor_info_dto.input_data_types,
+                                         tensor_info_dto.input_shapes, tensor_info_dto.output_formats,
+                                         tensor_info_dto.output_data_types, tensor_info_dto.output_shapes,
+                                         request_id, tensor_info_dto.timestamp, add_dto.batch_id, int(cxt_id)])
 
     def run(self, event: Event, call_stack: dict):
         dto: ApiDataDto = ApiDataDatabase().get(event)
