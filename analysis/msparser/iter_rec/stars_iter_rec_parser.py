@@ -17,6 +17,7 @@ from common_func.msprof_iteration import MsprofIteration
 from common_func.path_manager import PathManager
 from common_func.platform.chip_manager import ChipManager
 from common_func.utils import Utils
+from common_func.iter_recorder import IterRecorder
 from framework.offset_calculator import OffsetCalculator
 from msmodel.iter_rec.iter_rec_model import HwtsIterModel
 from msmodel.ge.ge_info_calculate_model import GeInfoModel
@@ -42,10 +43,12 @@ class StarsIterRecParser(IParser, MsMultiProcess):
         self.sample_config = sample_config
         self._project_path = sample_config.get(StrConstant.SAMPLE_CONFIG_PROJECT_PATH)
         self.hwts_iter_model = HwtsIterModel(self._project_path)
+        self._iter_recorder = IterRecorder(self._project_path)
         self._iter_info_dict = {}
         self._current_iter_id = 0
         self._iter_end_dict = {}
         self._file_list = file_list
+        self._task_cnt_not_in_iter = dict()
 
     @staticmethod
     def _get_log_syscnt(chunk):
@@ -126,6 +129,10 @@ class StarsIterRecParser(IParser, MsMultiProcess):
                                    step_dto.step_end])
             aic_offset += iter_info.aic_count
             hwts_offset += iter_info.hwts_count
+        for iter_num, task_offset in self._task_cnt_not_in_iter.items():
+            for iter_info in iter_info_list:
+                if iter_info[0] >= iter_num:
+                    iter_info[4] += task_offset
         return iter_info_list
 
     def _is_need_to_calculate(self):
@@ -147,6 +154,10 @@ class StarsIterRecParser(IParser, MsMultiProcess):
     def _process_log_data(self, all_bytes: bytes) -> None:
         for chunk in Utils.chunks(all_bytes, self.STARS_LOG_SIZE):
             sys_cnt = self._get_log_syscnt(chunk)
+            if not self._iter_recorder.check_task_in_iter(sys_cnt):
+                self._task_cnt_not_in_iter.setdefault(self._current_iter_id + 1, 0)
+                self._task_cnt_not_in_iter[self._current_iter_id + 1] += 1
+                continue
             self._set_current_iter_id(sys_cnt)
             self._update_iter_info(sys_cnt, self.STARS_LOG_TYPE)
 
