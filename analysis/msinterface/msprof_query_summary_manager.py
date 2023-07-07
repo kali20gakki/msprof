@@ -108,7 +108,7 @@ class MsprofQuerySummaryManager:
                 InfoConfReader().load_info(device_path)
                 rank_id_list.append(InfoConfReader().get_rank_id())
                 device_id_list.append(InfoConfReader().get_device_id())
-        rank_id_na_check = rank_id_list.count(Constant.NA) == len(rank_id_list)
+        rank_id_na_check = rank_id_list.count(Constant.DEFAULT_INVALID_VALUE) == len(rank_id_list)
         return cls.check_every_id_differs_and_no_na(rank_id_list) or \
             (rank_id_na_check and cls.check_every_id_differs_and_no_na(device_id_list) and len(device_id_list) > 1)
 
