@@ -40,7 +40,10 @@ class MsprofQueryData:
         cluster_query_data = []
         with ClusterStepTraceModel(collection_path, []) as cluster_step_trace:
             for cluster_info in cluster_info_list:
-                rank_or_device_id = cluster_info[1] if cluster_info[3] == Constant.DEFAULT_INVALID_VALUE else cluster_info[3]
+                if cluster_info[3] == Constant.DEFAULT_INVALID_VALUE:
+                    rank_or_device_id = cluster_info[1]
+                else:
+                    rank_or_device_id = cluster_info[3]
                 step_table_name = DBNameConstant.TABLE_CLUSTER_STEP_TRACE.format(rank_or_device_id)
                 model_info_list = cluster_step_trace.get_model_info(step_table_name)
                 if not model_info_list:
