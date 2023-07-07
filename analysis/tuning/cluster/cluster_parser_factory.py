@@ -139,7 +139,7 @@ class ClusterParserFactory:
                           DBNameConstant.DB_CLUSTER_RANK)
             raise ProfException(ProfException.PROF_CLUSTER_INVALID_DB)
 
-        if rank_id == Constant.NA:
+        if rank_id == Constant.DEFAULT_INVALID_VALUE:
             logging.error('Not Device id or rank id!')
             raise ProfException(ProfException.PROF_CLUSTER_INVALID_DB)
         if rank_id >= NumberConstant.MAX_RANK_NUMS:
