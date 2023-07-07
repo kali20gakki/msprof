@@ -81,6 +81,9 @@ class TsTrackModel(BaseModel, ABC):
         """
         get step trace data
         """
+        if not DBManager.judge_table_exist(self.cur, DBNameConstant.TABLE_STEP_TRACE_DATA) or \
+           not DBManager.judge_row_exist(self.cur, DBNameConstant.TABLE_STEP_TRACE_DATA):
+            return []
         sql = "select model_id, index_id, iter_id, step_start, step_end from {0}".format(
             DBNameConstant.TABLE_STEP_TRACE_DATA)
         step_trace_data = DBManager.fetch_all_data(self.cur, sql, dto_class=StepTraceDto)

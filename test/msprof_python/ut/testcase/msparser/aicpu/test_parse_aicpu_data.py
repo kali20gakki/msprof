@@ -7,8 +7,18 @@ from constant.constant import CONFIG
 from msparser.aicpu.parse_aicpu_data import ParseAiCpuData
 from profiling_bean.prof_enum.data_tag import DataTag
 from sqlite.db_manager import DBManager
+from profiling_bean.db_dto.step_trace_dto import StepTraceDto
+from analyzer.scene_base.profiling_scene import ProfilingScene
 
 NAMESPACE = 'msparser.aicpu.parse_aicpu_data'
+
+
+def get_step_trace_data():
+    step_trace_dto = StepTraceDto()
+    step_trace_dto.step_start = 1
+    step_trace_dto.step_end = 28017250105
+    step_trace_dto.iter_id = 1
+    return step_trace_dto
 
 
 class TestParseAiCpuData(unittest.TestCase):
@@ -112,8 +122,9 @@ class TestParseAiCpuData(unittest.TestCase):
         )
 
         with mock.patch('common_func.msprof_iteration.Utils.is_step_scene', return_value=True), \
-             mock.patch('common_func.msprof_iteration.MsprofIteration.get_iteration_end_dict',
-                        return_value={1: 28017250105}):
+                mock.patch('common_func.utils.Utils.get_scene', return_value=''), \
+                mock.patch('msmodel.step_trace.ts_track_model.TsTrackModel.get_step_trace_data',
+                           return_value=[get_step_trace_data()]):
             check = ParseAiCpuData(self.file_list, CONFIG)
 
         InfoConfReader()._info_json = {"DeviceInfo": [
@@ -123,14 +134,16 @@ class TestParseAiCpuData(unittest.TestCase):
              "ai_cpu": "4,5,6,7", "aiv_num": 0, "hwts_frequency": "19.2", "aic_frequency": "680",
              "aiv_frequency": "1000"}]}
 
-        with mock.patch('common_func.msprof_iteration.Utils.is_step_scene', return_value=True):
+        with mock.patch('common_func.msprof_iteration.Utils.is_step_scene', return_value=True), \
+                mock.patch('common_func.utils.Utils.get_scene', return_value=''):
             check._ParseAiCpuData__analysis_ai_cpu(ai_cpu_datas)
             self.assertEqual(len(check.ai_cpu_datas), 1)
 
         with mock.patch(NAMESPACE + '.logging.warning'), \
              mock.patch('common_func.msprof_iteration.Utils.is_step_scene', return_value=True), \
-             mock.patch('common_func.msprof_iteration.MsprofIteration.get_iteration_end_dict',
-                        return_value={1: 28017250105}):
+                mock.patch('common_func.utils.Utils.get_scene', return_value=''), \
+                mock.patch('msmodel.step_trace.ts_track_model.TsTrackModel.get_step_trace_data',
+                           return_value=[get_step_trace_data()]):
             check = ParseAiCpuData(self.file_list, CONFIG)
             check._ParseAiCpuData__analysis_ai_cpu(wrong_ai_cpu_datas)
             self.assertEqual(check.ai_cpu_datas, [])

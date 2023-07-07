@@ -6,6 +6,8 @@ import logging
 
 from common_func.msprof_exception import ProfException
 from common_func.msprof_iteration import MsprofIteration
+from common_func.db_name_constant import DBNameConstant
+from msmodel.step_trace.ts_track_model import TsTrackModel
 
 
 class IterRecorder:
@@ -19,7 +21,9 @@ class IterRecorder:
 
     def __init__(self: any, project_path) -> None:
         self._project_path = project_path
-        self._iter_end_dict = MsprofIteration(self._project_path).get_iteration_end_dict()
+        self._iter_end_dict = dict()
+        self._iter_time = list()
+        self.init_iter_time()
         self._max_iter_time = self._get_max_iter_time()
         self._current_iter_id = self.DEFAULT_ITER_ID
 
@@ -39,10 +43,31 @@ class IterRecorder:
         """
         return self._current_iter_id
 
+    def init_iter_time(self: any) -> None:
+        """
+        init self._iter_start_dict and self._iter_end_dict
+        :return: tuple(iter_start_dict, iter_end_dict)
+        """
+        with TsTrackModel(self._project_path, DBNameConstant.DB_STEP_TRACE,
+                          [DBNameConstant.TABLE_STEP_TRACE_DATA]) as ts_track_model:
+            step_trace_data = ts_track_model.get_step_trace_data()
+            for step_trace in step_trace_data:
+                self._iter_end_dict[step_trace.iter_id] = step_trace.step_end
+                self._iter_time.append([step_trace.step_start, step_trace.step_end])
+
     def check_task_in_iteration(self: any, sys_cnt: int) -> bool:
         if self._max_iter_time == self.DEFAULT_ITER_TIME:
             return True
         return self._max_iter_time >= sys_cnt
+
+    def check_task_in_iter(self: any, sys_cnt: int) -> bool:
+        curr_iter = self._current_iter_id - 1 if self._current_iter_id != self.DEFAULT_ITER_ID else 0
+        for iter_start_time, iter_end_time in self._iter_time[curr_iter:]:
+            if sys_cnt < iter_start_time:
+                return False
+            if sys_cnt <= iter_end_time:
+                return True
+        return False
 
     def set_current_iter_id(self: any, sys_cnt: int) -> None:
         """

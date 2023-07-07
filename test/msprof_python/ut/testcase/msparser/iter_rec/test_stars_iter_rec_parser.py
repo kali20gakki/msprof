@@ -7,12 +7,22 @@ import pytest
 
 from common_func.msprof_exception import ProfException
 from msparser.iter_rec.stars_iter_rec_parser import StarsIterRecParser
+from msparser.iter_rec.iter_info_updater.iter_info import IterInfo
 from profiling_bean.prof_enum.data_tag import DataTag
 from profiling_bean.stars.ffts_pmu import FftsPmuBean
+from profiling_bean.db_dto.step_trace_dto import StepTraceDto
 
 NAMESPACE = 'msparser.iter_rec.stars_iter_rec_parser'
 sample_config = {"model_id": 1, 'iter_id': 'dasfsd', 'result_dir': 'jasdfjfjs',
                  "ai_core_profiling_mode": "task-based", "aiv_profiling_mode": "sample-based"}
+
+
+def get_step_trace_data():
+    step_trace_dto = StepTraceDto()
+    step_trace_dto.step_start = 1
+    step_trace_dto.step_end = 3
+    step_trace_dto.iter_id = 1
+    return step_trace_dto
 
 
 class TestStarsIterRecParser(unittest.TestCase):
@@ -37,9 +47,12 @@ class TestStarsIterRecParser(unittest.TestCase):
             StarsIterRecParser(self.stars_file_list, sample_config).parse()
 
     def test_save(self):
-        with mock.patch(NAMESPACE + '.HwtsIterModel.flush'):
+        with mock.patch(NAMESPACE + '.HwtsIterModel.flush'), \
+                mock.patch(NAMESPACE + '.GeInfoModel.get_step_trace_data', return_value=[get_step_trace_data()]):
             check = StarsIterRecParser(self.stars_file_list, sample_config)
-            check._iter_info_dict = {100: FftsPmuBean}
+            iter_info = IterInfo(1, 1, 1, 2, 3)
+            check._iter_info_dict = {1: iter_info}
+            check._task_cnt_not_in_iter = {1: 2}
             check.save()
         with mock.patch(NAMESPACE + '.HwtsIterModel.flush', side_effect=sqlite3.Error), \
                 mock.patch(NAMESPACE + '.logging.error'):
@@ -59,7 +72,13 @@ class TestStarsIterRecParser(unittest.TestCase):
     def test_process_log_data(self):
         data = b'0' * 64
         with mock.patch(NAMESPACE + '.StarsIterRecParser._set_current_iter_id'), \
-                mock.patch(NAMESPACE + '.StarsIterRecParser._update_iter_info'):
+                mock.patch(NAMESPACE + '.StarsIterRecParser._update_iter_info'), \
+                mock.patch(NAMESPACE + '.IterRecorder.check_task_in_iter', return_value=False):
+            StarsIterRecParser(self.stars_file_list, sample_config)._process_log_data(data)
+
+        with mock.patch(NAMESPACE + '.StarsIterRecParser._set_current_iter_id'), \
+                mock.patch(NAMESPACE + '.StarsIterRecParser._update_iter_info'), \
+                mock.patch(NAMESPACE + '.IterRecorder.check_task_in_iter', return_value=True):
             StarsIterRecParser(self.stars_file_list, sample_config)._process_log_data(data)
 
     def test_parse_pmu_data(self):
