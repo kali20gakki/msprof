@@ -62,7 +62,10 @@ class MsProfClusterInfo:
                 self._collect_info_for_each_rank(cluster_info, model)
 
     def _collect_info_for_each_rank(self: any, cluster_info: ClusterRankDto, model: ClusterStepTraceViewModel):
-        rank_id = cluster_info.device_id if cluster_info.rank_id == Constant.NA else cluster_info.rank_id
+        if cluster_info.rank_id == Constant.DEFAULT_INVALID_VALUE:
+            rank_id = cluster_info.device_id
+        else:
+            rank_id = cluster_info.rank_id
         step_trace_table = DBNameConstant.TABLE_CLUSTER_STEP_TRACE.format(rank_id)
         prof_dir, device_dir = cluster_info.dir_name.split(os.sep)
         model_list = []

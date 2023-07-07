@@ -38,7 +38,7 @@ class ParallelViewModel(ViewModel):
 
     def get_parallel_index_data(self: any, tabel_name: str, rank_id: any, device_id: int, hwts_freq: int) -> list:
         freq_to_us = 1000000 / hwts_freq
-        if rank_id == Constant.NA:
+        if rank_id == Constant.DEFAULT_INVALID_VALUE:
             rank_id = "null"
         if tabel_name == DBNameConstant.TABLE_CLUSTER_DATA_PARALLEL:
             sql = "SELECT {0} rank_id, {1} device_id, t1.model_id, t1.index_id, " \
