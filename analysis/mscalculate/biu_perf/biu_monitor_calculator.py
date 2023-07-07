@@ -53,14 +53,14 @@ class BiuMonitorCalculator:
         """
         Calculate the ratio of cycles
         """
-        return cycle_num / InfoConfReader().get_biu_sample_cycle()
+        return cycle_num / InfoConfReader().get_instr_profiling_freq()
 
     @staticmethod
     def get_interval(ratio: float) -> int:
         """
         get interval in timeline according to its ratio
         """
-        return int(ratio * InfoConfReader().get_biu_sample_cycle())
+        return int(ratio * InfoConfReader().get_instr_profiling_freq())
 
     def calculate(self: any) -> None:
         """
@@ -74,7 +74,7 @@ class BiuMonitorCalculator:
 
         for monitor_data in monitor_data_dict.values():
             for data_index, monitor_datum in enumerate(monitor_data):
-                interval_start = data_index * InfoConfReader().get_biu_sample_cycle()
+                interval_start = data_index * InfoConfReader().get_instr_profiling_freq()
                 unit_name = self.get_unit_name(
                     monitor_datum.core_id, monitor_datum.group_id, monitor_datum.core_type)
                 pid = self.get_pid(

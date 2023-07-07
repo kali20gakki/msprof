@@ -269,21 +269,27 @@ class InfoConfReader:
         """
         return self._host_mon - self._start_log_time / NumberConstant.NANO_SECOND
 
-    def get_biu_sample_cycle(self: any) -> int:
+    def get_instr_profiling_freq(self: any) -> int:
         """
-        calculate biu sample cycle
+        get instr_profiling_freq from info json
         """
-        try:
-            biu_sample_cycle = int(self._sample_json.get("instr_profiling_freq"))
-        except TypeError as err:
-            logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
-            raise ProfException(ProfException.PROF_INVALID_DATA_ERROR) from err
-
-        if biu_sample_cycle <= 0:
-            logging.error("Biu freq is invalid.")
+        instr_profiling_freq0 = self._sample_json.get("instr_profiling_freq")
+        instr_profiling_freq1 = self._sample_json.get("instrProfilingFreq")
+        if instr_profiling_freq0 is None and instr_profiling_freq1 is None:
+            logging.error(
+                "instr profiling frequency not found in sample.json",
+                exc_info=Constant.TRACE_BACK_SWITCH
+            )
             raise ProfException(ProfException.PROF_INVALID_DATA_ERROR)
 
-        return biu_sample_cycle
+        instr_profiling_freq_val = instr_profiling_freq0 if instr_profiling_freq1 is None else instr_profiling_freq1
+        instr_profiling_freq = int(instr_profiling_freq_val)
+
+        if instr_profiling_freq <= 0:
+            logging.error("Instr Profiling Frequency is invalid.")
+            raise ProfException(ProfException.PROF_INVALID_DATA_ERROR)
+
+        return instr_profiling_freq
 
     def get_job_basic_info(self: any) -> list:
         job_info = self.get_job_info()
