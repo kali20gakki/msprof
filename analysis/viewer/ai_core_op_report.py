@@ -58,7 +58,8 @@ class AiCoreOpReport:
     OPERATOR_UNUSED_HEADERS = ["Model Name", "Infer ID"]
     HEADERS_WITH_NO_GE_DATA = ["Block Dim", "Mix Block Dim"]
     HARDWARE_OP_LIST = ['AI_CPU', 'DSA', 'DVPP']
-    START_TIME_INDEX = 8
+    TASK_DURATION = 'Task Duration(us)'
+    TASK_WAIT_TIME = 'Task Wait Time(us)'
     MODEL_NAME_INDEX = 0
     INFER_ID_INDEX = 4
     AI_CPU_TABLE = "ai_cpu_datas"
@@ -158,15 +159,32 @@ class AiCoreOpReport:
         headers = configs.get('headers')
         cls.delete_useless_cols(headers, data)
         cls.sort_summary_data(headers, data)
+        task_data = cls.update_device_task_wait_time(headers, data)
         add_aicore_units(headers)
-        return headers, data, len(data)
+        return headers, task_data, len(task_data)
+
+    @classmethod    
+    def update_device_task_wait_time(cls, headers : list, device_tasks : list) -> list:
+        result = filter(lambda x:x not in headers, [StrConstant.TASK_START_TIME, cls.TASK_DURATION, cls.TASK_WAIT_TIME])
+        if list(result):
+            logging.error("Op_summary_data don't have start time or duration")
+        else:
+            task_start_index = headers.index(StrConstant.TASK_START_TIME)
+            task_duration_index = headers.index(cls.TASK_DURATION)
+            task_wait_time_index = headers.index(cls.TASK_WAIT_TIME)
+            for i, task in enumerate(device_tasks):
+                if i == 0:
+                    task[task_wait_time_index] = 0
+                    continue
+                task[task_wait_time_index] = max(task[task_start_index] - device_tasks[i - 1][task_start_index] \
+                                            - device_tasks[i - 1][task_duration_index], 0)
+        return device_tasks
 
     @classmethod
     def sort_summary_data(cls, headers, data):
-        task_start_index = cls.START_TIME_INDEX
         if StrConstant.TASK_START_TIME in headers:
             task_start_index = headers.index(StrConstant.TASK_START_TIME)
-        data.sort(key=lambda x: x[task_start_index])
+            data.sort(key=lambda x: x[task_start_index])
 
     @classmethod
     def get_hccl_op_data(cls, project_path: str, configs: dict) -> list:

@@ -37,7 +37,7 @@ class OpCommonFunc:
             res[row_num][2] = float(content[2])  # start time
             res[row_num][3] = float(content[3])  # duration time
             # wait time
-            res[row_num][4] = cls._get_wait_time(row_num, float(content[2]), previous_complete_time)
+            res[row_num][4] = 0
             res[row_num][5] = content[4]
             res[row_num][6] = content[5]  # index_id
             if not ProfilingScene().is_operator():
