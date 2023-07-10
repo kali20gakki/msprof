@@ -71,10 +71,6 @@ class MsProfExportDataConfig(MetaConfig):
              'Task Start Time,Task Duration(us),Task Wait Time(us),Block Dim,Mix Block Dim'),
             ('db', 'ai_core_op_summary.db')
         ],
-        'ai_stack_time': [
-            ('handler', '_get_ai_stack_time_data'),
-            ('headers', 'Infer ID,Module,API,Start Time,Duration(ns)')
-        ],
         'l2_cache': [
             ('handler', '_get_l2_cache_data'),
             ('db', 'l2cache.db'),

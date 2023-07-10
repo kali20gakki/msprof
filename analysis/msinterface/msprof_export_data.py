@@ -72,7 +72,6 @@ from viewer.stars.stars_chip_trans_view import StarsChipTransView
 from viewer.stars.stars_soc_view import StarsSocView
 from viewer.task_queue_viewer import TaskQueueViewer
 from viewer.thread_group_viewer import ThreadGroupViewer
-from viewer.top_down_report import TopDownData
 from viewer.training.core_cpu_reduce_viewer import CoreCpuReduceViewer
 from viewer.training.step_trace_viewer import StepTraceViewer
 from viewer.training.task_op_viewer import TaskOpViewer
@@ -238,20 +237,6 @@ class MsProfExportDataUtils:
         db_path = PathManager.get_db_path(params.get(StrConstant.PARAM_RESULT_DIR), db_name)
         return AiCoreOpReport.get_op_summary_data(params.get(StrConstant.PARAM_RESULT_DIR),
                                                   db_path, configs)
-
-    @staticmethod
-    def _get_ai_stack_time_data(configs: dict, params: dict) -> any:
-        """
-        get ai stack time data
-        """
-        _ = configs
-        device_id = params.get(StrConstant.PARAM_DEVICE_ID)
-        iter_range = params.get(StrConstant.PARAM_ITER_ID)
-        result_dir = params.get(StrConstant.PARAM_RESULT_DIR)
-
-        if params.get(StrConstant.PARAM_EXPORT_TYPE) == MsProfCommonConstant.TIMELINE:
-            return TopDownData.get_top_down_timeline_data(result_dir, device_id, iter_range)
-        return TopDownData.get_top_down_data(result_dir, device_id, iter_range)
 
     @staticmethod
     def _get_l2_cache_data(configs: dict, params: dict) -> tuple:
@@ -685,7 +670,7 @@ class MsProfExportDataUtils:
         :return:
         """
         filter_list = [
-            "msprof", "ai_stack_time", "step_trace", "thread_group",
+            "msprof", "step_trace", "thread_group",
             "ffts_sub_task_time", "acl", "runtime_api", "ge_op_execute"
         ]
         if params.get(StrConstant.PARAM_DATA_TYPE) not in filter_list:

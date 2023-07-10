@@ -173,17 +173,6 @@ class AiStackDataCheckManager(DataCheckManager):
                DBManager.check_connect_db(result_dir, DBNameConstant.DB_OP_COUNTER)[0]
 
     @classmethod
-    def contain_ai_stack_time_data(cls: any, result_dir: str, device_id: any = None) -> bool:
-        """
-        The data path contain acl data or not
-        """
-        return device_id != NumberConstant.HOST_ID and \
-               (cls.contain_acl_data(result_dir, device_id=device_id) or \
-                cls.contain_ge_model_time_data(result_dir, device_id=device_id) or \
-                cls.contain_runtime_api_data(result_dir, device_id=device_id) or \
-                cls.contain_task_time_data(result_dir, device_id=device_id))
-
-    @classmethod
     def contain_core_cpu_reduce_data(cls: any, result_dir: str, device_id: any = None) -> bool:
         """
         The data path contain step_trace data or not
