@@ -256,24 +256,6 @@ class TestMsProfExportDataUtils(unittest.TestCase):
             result = key._get_op_summary_data(configs, params)
         self.assertEqual(result, 321)
 
-    def test_get_ai_stack_time_data_1(self):
-        config = 1
-        params = {"export_type": 'timeline', "project": '123', "device_id": '456', "iter_id": '789', "model_id": 1}
-        with mock.patch(NAMESPACE + '.TopDownData.get_top_down_timeline_data', return_value=123):
-            InfoConfReader()._info_json = {"pid": 123}
-            key = MsProfExportDataUtils()
-            result = key._get_ai_stack_time_data(config, params)
-        self.assertEqual(result, 123)
-
-    def test_get_ai_stack_time_data_2(self):
-        config = 1
-        params = {"export_type": 'summary', "project": '123', "device_id": '456', "iter_id": '789', "model_id": 1}
-        with mock.patch(NAMESPACE + '.TopDownData.get_top_down_data', return_value=123):
-            InfoConfReader()._info_json = {"pid": 123}
-            key = MsProfExportDataUtils()
-            result = key._get_ai_stack_time_data(config, params)
-        self.assertEqual(result, 123)
-
     def test_get_l2_cache_data(self):
         configs = {"db": 'hwts', "table": '123', "unused_cols": '456'}
         params = {"project": '321', "device_id": '654', "iter_id": '987'}
