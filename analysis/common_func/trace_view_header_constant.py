@@ -31,7 +31,6 @@ class TraceViewHeaderConstant:
     # process name
     PROCESS_RUNTIME = "Runtime"
     PROCESS_AI_CORE_UTILIZATION = "AI Core Utilization"
-    PROCESS_AI_STACK_TIME = "AI Stack Time"
     PROCESS_ACL = "AscendCL"
     PROCESS_AI_CPU = "AI CPU"
     PROCESS_ALL_REDUCE = "All Reduce"
