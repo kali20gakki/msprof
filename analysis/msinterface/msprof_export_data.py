@@ -39,7 +39,7 @@ from viewer.cpu_usage_report import get_sys_cpu_usage_data
 from viewer.ge.ge_op_execute_viewer import GeOpExecuteViewer
 from viewer.ge_info_report import get_ge_model_data
 from viewer.get_hccl_export_data import HCCLExport
-from viewer.get_l2_cache_data import add_op_name
+from viewer.get_l2_cache_data import add_op_name, process_hit_rate
 from viewer.get_l2_cache_data import get_l2_cache_data
 from viewer.get_msvp_llc_timeline_training import get_ddr_timeline
 from viewer.get_msvp_llc_timeline_training import get_hbm_timeline
@@ -263,6 +263,7 @@ class MsProfExportDataUtils:
         headers, data, count = get_l2_cache_data(
             db_path, configs.get(StrConstant.CONFIG_TABLE), configs.get(StrConstant.CONFIG_UNUSED_COLS))
         if headers and data:
+            data = process_hit_rate(headers, data)
             op_dict = DataManager.get_op_dict(params.get(StrConstant.PARAM_RESULT_DIR))
             if op_dict:
                 if add_op_name(headers, data, op_dict):
