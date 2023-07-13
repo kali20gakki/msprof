@@ -200,6 +200,8 @@ class ModelGear(CANNGear):
         if self.model_time_data_table:
             for model_time_data in list(self.model_time_data_table.values()):
                 self.add_model_time_item_from_table(model_time_data)
+        if not self.model_time_data:
+            return
 
         model = GeModelTimeModel(self._project_path, [DBNameConstant.TABLE_GE_MODEL_TIME])
         model.init()
