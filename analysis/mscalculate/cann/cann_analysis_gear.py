@@ -405,7 +405,9 @@ class TaskGear(CANNGear):
         for record in event.additional_record:
             if isinstance(record.dto, MemCopyInfoDto):
                 mem_cpy_info_dto = record.dto
-            elif isinstance(record.dto, TaskTrackDto):
+            elif isinstance(record.dto, TaskTrackDto) and task_track_dto.struct_type is None:
+                # RUNTIME sometimes report multiple task tracks in one api call,
+                # in which case, only the first task track is valid
                 task_track_dto = record.dto
         return mem_cpy_info_dto, task_track_dto
 
