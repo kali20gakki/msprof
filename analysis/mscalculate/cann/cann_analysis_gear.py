@@ -361,6 +361,7 @@ class TaskGear(CANNGear):
     HCCL_TASK_TYPE = "HCCL"
     FFTS_PLUS_TASK_TYPE = "FFTS_PLUS"
     KERNEL_FFTS_PLUS_TASK_TYPE = "FFTS_PLUS"
+    KERNEL_STARS_COMMON_TASK_TYPE = "STARS_COMMON"
 
     class RuntimeApi:
         def __init__(self, start, end, struct_type, thread_id):
@@ -449,6 +450,7 @@ class TaskGear(CANNGear):
         if task_track_dto.struct_type is None:
             return False
         if task_track_dto.task_type.startswith(self.KERNEL_TASK_PREFIX) or \
+                task_track_dto.task_type == self.KERNEL_STARS_COMMON_TASK_TYPE or \
                 task_track_dto.task_type == self.KERNEL_FFTS_PLUS_TASK_TYPE:
             return True
         return False
