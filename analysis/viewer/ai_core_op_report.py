@@ -213,7 +213,8 @@ class AiCoreOpReport:
             hccl_data[index] = model_name + [_hccl_op.model_id, Constant.NA, Constant.NA] + index_id + \
                                [
                                    _hccl_op.op_name, _hccl_op.op_type, _hccl_op.task_type,
-                                   _hccl_op.timestamp, _hccl_op.duration / NumberConstant.NS_TO_US,
+                                   _hccl_op.timestamp / NumberConstant.NS_TO_US,
+                                   _hccl_op.duration / NumberConstant.NS_TO_US,
                                    Constant.DEFAULT_VALUE, Constant.DEFAULT_VALUE
                                ]
             hccl_data[index].extend([Constant.NA] * (header_length - len(hccl_data[index])))
@@ -431,7 +432,7 @@ class AiCoreOpReport:
         get union sql statement from task time and ge tables
         """
         return "select {1}.model_id, {0}.task_id, {0}.stream_id, {index_info} " \
-               "op_name, {1}.op_type, {1}.task_type, start_time, duration_time/{NS_TO_US}, " \
+               "op_name, {1}.op_type, {1}.task_type, start_time/{NS_TO_US}, duration_time/{NS_TO_US}, " \
                "wait_time/{NS_TO_US}, block_dim, mix_block_dim, " \
                "(case when context_id={context_id} then 'N/A' else context_id end) from {0} " \
                "inner join {1} on {0}.task_id={1}.task_id and {0}.stream_id = {1}.stream_id " \
@@ -453,7 +454,7 @@ class AiCoreOpReport:
         """
         union_sql = "select {1}.model_id, {0}.task_id, {1}.stream_id, {index_info} " \
                     "op_name, {1}.op_type, {1}.task_type, " \
-                    "{0}.start_time, {0}.duration_time/{NS_TO_US}, " \
+                    "{0}.start_time/{NS_TO_US}, {0}.duration_time/{NS_TO_US}, " \
                     "{0}.wait_time/{NS_TO_US}, block_dim, mix_block_dim, " \
                     "(case when context_id={context_id} then 'N/A' else context_id end) " \
                     " from {0} " \
@@ -470,7 +471,7 @@ class AiCoreOpReport:
         if DBManager.judge_table_exist(curs, DBNameConstant.TABLE_SUMMARY_TENSOR):
             union_sql = "select {1}.model_id, {0}.task_id, {1}.stream_id, {index_info} " \
                         "op_name, {1}.op_type, {1}.task_type, " \
-                        "{0}.start_time, {0}.duration_time/{NS_TO_US}, " \
+                        "{0}.start_time/{NS_TO_US}, {0}.duration_time/{NS_TO_US}, " \
                         "{0}.wait_time/{NS_TO_US}, {1}.block_dim, {1}.mix_block_dim, " \
                         "{2}.input_shapes, {2}.input_data_types, {2}.input_formats, " \
                         "{2}.output_shapes, {2}.output_data_types, {2}.output_formats,  " \
@@ -496,7 +497,7 @@ class AiCoreOpReport:
         # ge or subtask need modify the context_id or subtask_id so that it should be same.
         sql = "select {1}.model_id, {0}.task_id, {0}.stream_id, {index_info}" \
               "{1}.op_name, {1}.op_type, {1}.task_type, " \
-              "{0}.start_time, {0}.duration_time/{NS_TO_US}, {0}.wait_time/{NS_TO_US}, {1}.block_dim, " \
+              "{0}.start_time/{NS_TO_US}, {0}.duration_time/{NS_TO_US}, {0}.wait_time/{NS_TO_US}, {1}.block_dim, " \
               "{1}.mix_block_dim, {2}.input_shapes, {2}.input_data_types, {2}.input_formats, " \
               "{2}.output_shapes, {2}.output_data_types, {2}.output_formats, " \
               "(case when {1}.context_id={context_id} then 'N/A' else {1}.context_id end) " \
@@ -533,7 +534,7 @@ class AiCoreOpReport:
         cls.clear_no_ge_data_headers(headers)
         model_id = "{0}, ".format(NumberConstant.DEFAULT_MODEL_ID) if ProfilingScene().is_operator() else 'model_id, '
         subtask_id = ",subtask_id " if ChipManager().is_chip_v4() else ",'N/A'"
-        sql = "select {model_id} task_id, stream_id, {index_info} 'N/A', 'N/A', task_type, start_time, " \
+        sql = "select {model_id} task_id, stream_id, {index_info} 'N/A', 'N/A', task_type, start_time/{NS_TO_US}, " \
               "duration_time/{NS_TO_US}, wait_time/{NS_TO_US} {subtask_id} from {0} where " \
               "task_type!=? and task_type!=? and task_type!=? order by start_time" \
             .format(DBNameConstant.TABLE_SUMMARY_TASK_TIME,
