@@ -44,7 +44,7 @@ class TablesConfig(MetaConfig):
             ('output_data_types', 'TEXT,null'),
             ('output_shapes', 'TEXT,null'),
             ('index_id', 'INTEGER,null'),
-            ('timestamp', 'TEXT,null'),
+            ('timestamp', 'NUMERIC,null'),
             ('batch_id', 'INTEGER,null'),
             ('context_id', 'INTEGER,null')
         ],
@@ -60,7 +60,7 @@ class TablesConfig(MetaConfig):
             ('output_data_types', 'TEXT,null'),
             ('output_shapes', 'TEXT,null'),
             ('index_id', 'INTEGER,null'),
-            ('timestamp', 'TEXT,null'),
+            ('timestamp', 'NUMERIC,null'),
             ('batch_id', 'INTEGER,null'),
             ('context_id', 'INTEGER,null')
         ],
@@ -523,7 +523,7 @@ class TablesConfig(MetaConfig):
             ('clk_jiffies', 'INTEGER, null')
         ],
         'ProcessUsageMap': [
-            ('timestamp', 'text,null'),
+            ('timestamp', 'NUMERIC,null'),
             ('uptime', 'text,null'),
             ('pid', 'INTEGER, null'),
             ('tid', 'INTEGER, null'),
@@ -810,7 +810,7 @@ class TablesConfig(MetaConfig):
             ('stat_flux_wr', 'INTEGER, null'),
             ('stat_flux_rd_l2', 'INTEGER, null'),
             ('stat_flux_wr_l2', 'INTEGER, null'),
-            ('timestamp', 'TEXT, null'),
+            ('timestamp', 'NUMERIC, null'),
             ('l2_cache_hit', 'INTEGER, null'),
             ('core_id', 'INTEGER, null'),
             ('group_id', 'INTEGER, null'),
@@ -823,13 +823,13 @@ class TablesConfig(MetaConfig):
             ('lsu0_cycles', 'INTEGER, null'),
             ('lsu1_cycles', 'INTEGER, null'),
             ('lsu2_cycles', 'INTEGER, null'),
-            ('timestamp', 'TEXT, null'),
+            ('timestamp', 'NUMERIC, null'),
             ('core_id', 'INTEGER, null'),
             ('group_id', 'INTEGER, null'),
             ('core_type', 'TEXT, null')
         ],
         'BiuFlowMap': [
-            ('timestamp', 'TEXT, null'),
+            ('timestamp', 'NUMERIC, null'),
             ('flow', 'INTEGER, null'),
             ('flow_type', 'TEXT, null'),
             ('unit_name', 'TEXT, null'),
@@ -838,7 +838,7 @@ class TablesConfig(MetaConfig):
             ('interval_start', 'INTEGER, null')
         ],
         'BiuCyclesMap': [
-            ('timestamp', 'TEXT, null'),
+            ('timestamp', 'NUMERIC, null'),
             ('duration', 'INTEGER, null'),
             ('cycle_type', 'TEXT, null'),
             ('unit_name', 'TEXT, null'),
@@ -849,7 +849,7 @@ class TablesConfig(MetaConfig):
             ('interval_start', 'INTEGER, null')
         ],
         'TaskTypeMap': [
-            ('timestamp', 'TEXT, null'),
+            ('timestamp', 'NUMERIC, null'),
             ('stream_id', 'INTEGER, null'),
             ('task_id', 'INTEGER, null'),
             ('task_type', 'TEXT, null'),
@@ -1160,7 +1160,7 @@ class TablesConfig(MetaConfig):
             ('level', 'TEXT,null'),
             ('type', 'TEXT,null'),
             ('thread_id', 'INTEGER,null'),
-            ('timestamp', 'TEXT,null'),
+            ('timestamp', 'NUMERIC,null'),
             ('op_name', 'TEXT,null'),
             ('ptr', 'TEXT,null'),
             ('memory_size', 'TEXT,null'),
@@ -1182,7 +1182,7 @@ class TablesConfig(MetaConfig):
             ('operator', 'TEXT,null'),
             ('addr', 'TEXT,null'),
             ('size', 'INTEGER,null'),
-            ('timestamp', 'TEXT,null'),
+            ('timestamp', 'NUMERIC,null'),
             ('thread_id', 'INTEGER,null'),
             ('total_allocate_memory', 'INTEGER,null'),
             ('total_reserve_memory', 'INTEGER,null'),
@@ -1205,7 +1205,7 @@ class TablesConfig(MetaConfig):
         ],
         'NpuOpMemRecMap': [
             ('component', 'TEXT,null'),
-            ('timestamp', 'TEXT,null'),
+            ('timestamp', 'NUMERIC,null'),
             ('total_reserve_memory', 'INTEGER,null'),
             ('total_allocate_memory', 'INTEGER,null'),
             ('device_type', 'TEXT,null')

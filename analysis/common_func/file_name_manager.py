@@ -13,7 +13,7 @@ class FileNameManagerConstant:
     """
     file name manager constant class
     """
-    HOST_START_PATTERN = r"^host_start\.log\.\d+"
+    HOST_START_PATTERN = r"^host_start\.log(\.\d+)?"
 
     DEV_START_PATTERN = r"^dev_start\.log\.\d+"
 

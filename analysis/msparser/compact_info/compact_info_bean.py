@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2023-2023. All rights reserved.
-
+from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.level_type_constant import LevelDataType
 from profiling_bean.struct_info.struct_decoder import StructDecoder
 
@@ -52,4 +52,4 @@ class CompactInfoBean(StructDecoder):
         """
         timestamp
         """
-        return self._timestamp
+        return InfoConfReader().time_from_host_syscnt(self._timestamp)

@@ -6,6 +6,7 @@ import struct
 import unittest
 from unittest import mock
 
+from common_func.info_conf_reader import InfoConfReader
 from constant.constant import CONFIG
 from msparser.npu_mem.npu_op_mem_parser import NpuOpMemParser
 from profiling_bean.prof_enum.data_tag import DataTag
@@ -67,6 +68,7 @@ class TestNpuOpMemParser(unittest.TestCase):
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0
         )
+        InfoConfReader()._info_json = {'CPU': [{'Frequency': "1000"}]}
         with mock.patch('builtins.open', mock.mock_open(read_data=npu_op_mem_data_new)), \
                 mock.patch(NAMESPACE + '.FileOpen'), \
                 mock.patch(NAMESPACE + '.OffsetCalculator.pre_process', return_value=npu_op_mem_data_new):

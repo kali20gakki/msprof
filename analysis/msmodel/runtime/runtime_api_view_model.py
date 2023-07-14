@@ -28,23 +28,20 @@ class RuntimeApiViewModel(ViewModel, IAnalysisModel):
 
     def get_summary_data(self: any) -> list:
         time_total = self.get_runtime_total_time()
-        host_freq = InfoConfReader().get_host_freq()
-        scale = host_freq / NumberConstant.NS_TO_US
         if not (time_total and time_total[0]):
             return []
 
         sql = "select api, (case when stream_id=65535 then 'N/A' else stream_id end), " \
               "round(1.0*sum(exit_time-entry_time)*{percent}/{0}, {accuracy}), " \
-              "sum(exit_time-entry_time) / {scale}, count(*), " \
-              "sum(exit_time-entry_time)/count(*) / {scale}, min(exit_time-entry_time) / {scale}, " \
-              "max(exit_time-entry_time) / {scale}, {process_id}, thread " \
+              "sum(exit_time-entry_time), count(*), " \
+              "sum(exit_time-entry_time)/count(*), min(exit_time-entry_time), " \
+              "max(exit_time-entry_time), {process_id}, thread " \
               "from {1} {where_condition} group by api ".format(time_total[0],
                                                                 DBNameConstant.TABLE_API_CALL,
                                                                 percent=NumberConstant.PERCENTAGE,
                                                                 accuracy=NumberConstant.DECIMAL_ACCURACY,
                                                                 process_id=InfoConfReader().get_json_pid_data(),
-                                                                where_condition=self._get_where_condition(),
-                                                                scale=scale)
+                                                                where_condition=self._get_where_condition())
         return DBManager.fetch_all_data(self.cur, sql)
 
     def get_runtime_total_time(self):
