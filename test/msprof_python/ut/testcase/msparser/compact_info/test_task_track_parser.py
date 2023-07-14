@@ -5,6 +5,7 @@
 import unittest
 from unittest import mock
 
+from common_func.info_conf_reader import InfoConfReader
 from msparser.compact_info.task_track_parser import TaskTrackParser
 from msparser.compact_info.task_track_bean import TaskTrackBean
 from profiling_bean.prof_enum.data_tag import DataTag
@@ -19,6 +20,8 @@ class TestTaskTrackParser(unittest.TestCase):
     file_list = {DataTag.TASK_TRACK: ['aging.compact.task_track.slice_0', 'unaging.compact.task_track.slice_0']}
 
     def test_reformat_data(self):
+        InfoConfReader()._start_info = {"clockMonotonicRaw": "0", "cntvct": "0"}
+        InfoConfReader()._info_json = {'CPU': [{'Frequency': "1000"}]}
         hash_key = {
             'runtime': {
                 '1000': 'task_track',

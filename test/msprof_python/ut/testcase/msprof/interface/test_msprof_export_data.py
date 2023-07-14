@@ -75,6 +75,7 @@ class TestMsProfExportDataUtils(unittest.TestCase):
         self.assertEqual(result, '{"status": 1, "info": "Failed to connect runtime.db"}')
 
     def test_get_runtime_api_data_2(self):
+        InfoConfReader()._info_json = {'CPU': [{'Frequency': "1000"}]}
         configs = {"db": '123', "table": '456'}
         params = {"export_type": "export", "project": '123'}
         with mock.patch(NAMESPACE + '.PathManager.get_db_path', return_value='runtime.db'):
