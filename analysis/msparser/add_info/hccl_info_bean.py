@@ -3,6 +3,7 @@
 # Copyright (c) Huawei Technologies Co., Ltd. 2023-2023. All rights reserved.
 import struct
 
+from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.level_type_constant import LevelDataType
 from profiling_bean.struct_info.struct_decoder import StructDecoder
 
@@ -75,7 +76,7 @@ class HcclInfoBean(StructDecoder):
         """
         hccl information timestamp
         """
-        return self._timestamp
+        return InfoConfReader().time_from_host_syscnt(self._timestamp)
 
     @property
     def item_id(self: any) -> str:

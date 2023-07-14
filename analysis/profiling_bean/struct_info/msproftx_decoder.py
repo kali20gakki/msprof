@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2021-2022. All rights reserved.
 from common_func.constant import Constant
+from common_func.info_conf_reader import InfoConfReader
 
 from profiling_bean.struct_info.struct_decoder import StructDecoder
 
@@ -64,11 +65,11 @@ class MsprofTxDecoder(StructDecoder):
 
     @property
     def start_time(self: any) -> int:
-        return self._start_time
+        return InfoConfReader().time_from_host_syscnt(self._start_time)
 
     @property
     def end_time(self: any) -> int:
-        return self._end_time
+        return InfoConfReader().time_from_host_syscnt(self._end_time)
 
     @property
     def message_type(self: any) -> int:

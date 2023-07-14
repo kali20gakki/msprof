@@ -9,6 +9,7 @@ import unittest
 from unittest import mock
 
 from common_func.hash_dict_constant import HashDictData
+from common_func.info_conf_reader import InfoConfReader
 from constant.constant import CONFIG
 from msparser.add_info.multi_thread_bean import MultiThreadBean
 from msparser.add_info.multi_thread_parser import MultiThreadParser
@@ -35,6 +36,8 @@ class TestMultiThreadParser(unittest.TestCase):
                 check.parse()
 
     def test_save(self):
+        InfoConfReader()._start_info = {"clockMonotonicRaw": "0", "cntvct": "0"}
+        InfoConfReader()._info_json = {'CPU': [{'Frequency': "1000"}]}
         check = MultiThreadParser(self.file_list, CONFIG)
         check.save()
         HashDictData('test')._type_hash_dict = {'node': {}}

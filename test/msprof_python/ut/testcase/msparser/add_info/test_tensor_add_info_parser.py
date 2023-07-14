@@ -10,6 +10,7 @@ import unittest
 from unittest import mock
 
 from common_func.hash_dict_constant import HashDictData
+from common_func.info_conf_reader import InfoConfReader
 from constant.constant import CONFIG
 from msparser.add_info.tensor_add_info_parser import TensorAddInfoParser
 from msparser.add_info.tensor_add_info_bean import TensorAddInfoBean
@@ -54,6 +55,8 @@ class TestTensorAddInfoParser(unittest.TestCase):
             check.parse()
 
     def test_get_tensor_info_data(self):
+        InfoConfReader()._start_info = {"clockMonotonicRaw": "0", "cntvct": "0"}
+        InfoConfReader()._info_json = {'CPU': [{'Frequency': "1000"}]}
         ctx_data = (23130, 10000, *(0,) * 61)
         struct_data = struct.pack("HHIIIQQI55I", *ctx_data)
         data = TensorAddInfoBean.decode(struct_data)

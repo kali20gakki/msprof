@@ -9,7 +9,11 @@ import struct
 import unittest
 from unittest import mock
 
+import pytest
+
 from common_func.hash_dict_constant import HashDictData
+from common_func.info_conf_reader import InfoConfReader
+from common_func.msprof_exception import ProfException
 from constant.constant import CONFIG
 from msparser.add_info.ctx_id_bean import CtxIdBean
 from msparser.add_info.ctx_id_parser import CtxIdParser
@@ -54,9 +58,22 @@ class TestCtxIdParser(unittest.TestCase):
         ctx_data = (23130, 10000, *(0,) * 61)
         struct_data = struct.pack("HHIIIQQI55I", *ctx_data)
         data = CtxIdBean.decode(struct_data)
+        InfoConfReader()._host_freq = None
+        with pytest.raises(ProfException) as error:
+            check = CtxIdParser(self.file_list, CONFIG)
+            check._get_ctx_id_data(data)
+            self.assertEqual(error.value, 0)
+
+        InfoConfReader()._start_info = {"clockMonotonicRaw": "0", "cntvct": "0"}
+        InfoConfReader()._info_json = {'CPU': [{'Frequency': "0"}]}
         check = CtxIdParser(self.file_list, CONFIG)
         result = check._get_ctx_id_data(data)
-        self.assertEqual(result, ['node', '0', 0, '0', '0', 0, ''])
+        self.assertEqual(result, ['node', '0', 0, 0, '0', 0, ''])
+
+        InfoConfReader()._info_json = {'CPU': [{'Frequency': "1000"}]}
+        check = CtxIdParser(self.file_list, CONFIG)
+        result = check._get_ctx_id_data(data)
+        self.assertEqual(result, ['node', '0', 0, 0, '0', 0, ''])
 
 
 if __name__ == '__main__':

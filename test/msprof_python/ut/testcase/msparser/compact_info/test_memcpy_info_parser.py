@@ -5,6 +5,7 @@
 import unittest
 from unittest import mock
 
+from common_func.info_conf_reader import InfoConfReader
 from msparser.compact_info.memcpy_info_parser import MemcpyInfoParser
 from msparser.compact_info.memcpy_info_bean import MemcpyInfoBean
 from profiling_bean.prof_enum.data_tag import DataTag
@@ -19,6 +20,8 @@ class TestMemcpyInfoParser(unittest.TestCase):
     file_list = {DataTag.MEMCPY_INFO: ['aging.compact.memcpy_info.slice_0', 'unaging.compact.memcpy_info.slice_0']}
 
     def test_reformat_data(self):
+        InfoConfReader()._start_info = {"clockMonotonicRaw": "0", "cntvct": "0"}
+        InfoConfReader()._info_json = {'CPU': [{'Frequency': "1000"}]}
         hash_key = {
             'runtime': {
                 '999': 'memcpy_info',
