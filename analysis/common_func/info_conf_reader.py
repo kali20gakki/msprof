@@ -35,7 +35,7 @@ class InfoConfReader:
     FREQ = "38.4"
     NPU_PROFILING_TYPE = "npu_profiling"
     HOST_PROFILING_TYPE = "host_profiling"
-    HOST_DEFAULT_FREQ = 0
+    HOST_DEFAULT_FREQ = NumberConstant.NANO_SECOND
     ANALYSIS_VERSION = "1.0"
 
     def __init__(self: any) -> None:
@@ -45,6 +45,8 @@ class InfoConfReader:
         self._sample_json = None
         self._start_log_time = 0
         self._host_mon = 0
+        self._host_cnt = 0
+        self._host_freq = None
         self._dev_cnt = 0
 
     @staticmethod
@@ -112,9 +114,8 @@ class InfoConfReader:
         load all info
         """
         self._load_json(result_path)
-        if not self.is_host_profiling():
-            self._load_dev_start_time(result_path)
-            self._load_host_start_time(result_path)
+        self._load_dev_start_time(result_path)
+        self._load_host_start_time(result_path)
 
     def get_start_timestamp(self: any) -> int:
         """
@@ -223,6 +224,19 @@ class InfoConfReader:
         return float(
             sys_cnt - self._dev_cnt * NumberConstant.NANO_SECOND) / hwts_freq * time_fmt + self._host_mon * time_fmt
 
+    def time_from_host_syscnt(self: any, host_timestamp: int) -> float:
+        """
+        transfer sys cnt to time unit.
+        :param host_timestamp: host sys timestamp
+        :return: sys time
+        """
+        host_freq = self.get_host_freq()
+        if host_freq != self.HOST_DEFAULT_FREQ:
+            time = float(host_timestamp - self._host_cnt * NumberConstant.NANO_SECOND) /\
+                host_freq * NumberConstant.NANO_SECOND + self._host_mon * NumberConstant.NANO_SECOND
+            return round(time, NumberConstant.ROUND_TWO_DECIMAL) if time >= 0.0 else 0
+        return host_timestamp
+
     def get_json_pid_data(self: any) -> int:
         """
         get pid message
@@ -304,12 +318,19 @@ class InfoConfReader:
         return [job_info, device_id, collection_time, rank_id]
 
     def get_host_freq(self: any) -> float:
+        if self._host_freq is not None:
+            return self._host_freq
         host_cpu_info = self._info_json.get('CPU', [])
         if host_cpu_info:
-            freq = host_cpu_info[0].get('Frequency', self.HOST_DEFAULT_FREQ)
-            if is_number(freq):
-                return freq
-        return self.HOST_DEFAULT_FREQ
+            freq = host_cpu_info[0].get('Frequency')
+            if is_number(freq) and float(freq) > 0.0:
+                self._host_freq = float(freq) * 1000000.0
+            else:
+                logging.info("No host frequency, or the frequency is invalid.")
+                self._host_freq = self.HOST_DEFAULT_FREQ
+            return self._host_freq
+        logging.error("No host info json.")
+        raise ProfException(ProfException.PROF_NONE_ERROR)
 
     def get_host_time_by_sampling_timestamp(self: any, timestamp: any) -> int:
         """
@@ -365,6 +386,11 @@ class InfoConfReader:
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
             logging.error(err, exc_info=Constant.TRACE_BACK_SWITCH)
 
+    def _check_monotonic_and_cnt(self, host_start_file: str) -> bool:
+        if host_start_file == '' and self.is_host_profiling():
+            return False
+        return self._host_mon <= 0 or (self._dev_cnt <= 0 and self._host_cnt <= 0)
+
     def _load_host_start_time(self: any, project_path: str) -> None:
         """
         load host start time
@@ -382,9 +408,10 @@ class InfoConfReader:
                 time = dict(config.items(sections[0]))
                 timer = TimerBean(time, self.get_host_freq())
                 self._host_mon = float(timer.host_mon) / NumberConstant.NANO_SECOND
+                self._host_cnt = float(timer.cntvct) / NumberConstant.NANO_SECOND
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
             logging.error('Parse time sync data error: %s', str(err), exc_info=Constant.TRACE_BACK_SWITCH)
-        if self._host_mon <= 0 or self._dev_cnt <= 0:
-            logging.error("The monotonic time %s or cntvct %s is unusual, "
-                          "maybe get data from driver failed", self._host_mon, self._dev_cnt)
+        if self._check_monotonic_and_cnt(host_start_file):
+            logging.error("The monotonic time %s, dev_cntvct %s or host_cntvct %s is unusual, "
+                          "maybe get data from driver failed", self._host_mon, self._dev_cnt, self._host_cnt)
 

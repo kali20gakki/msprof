@@ -5,6 +5,7 @@
 import logging
 import struct
 
+from common_func.info_conf_reader import InfoConfReader
 from profiling_bean.struct_info.struct_decoder import StructDecoder
 from msparser.data_struct_size_constant import StructFmt
 
@@ -69,7 +70,7 @@ class NpuOpMemDataBean(StructDecoder):
         """
         :return: timestamp
         """
-        return self._timestamp
+        return InfoConfReader().time_from_host_syscnt(self._timestamp)
 
     @property
     def addr(self: any) -> str:
