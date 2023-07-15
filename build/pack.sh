@@ -109,6 +109,7 @@ for DIR in ${OUT_DIR}/platform/Tuscany/*$(lsb_release -i | awk '{print $3}' | tr
     --complevel 4 \
     --nomd5 \
     --sha256 \
+    --chown \
     ${CUR_DIR}/tmp/mindstudio \
     ${CUR_DIR}/tmp/${PACKAGE_NAME_MINDSTUDIO_SUFFIX} \
     ${COMMENTS} \
