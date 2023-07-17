@@ -45,8 +45,6 @@ class StarsIterRecParser(IParser, MsMultiProcess):
         self.hwts_iter_model = HwtsIterModel(self._project_path)
         self._iter_recorder = IterRecorder(self._project_path)
         self._iter_info_dict = {}
-        self._current_iter_id = 0
-        self._iter_end_dict = {}
         self._file_list = file_list
         self._task_cnt_not_in_iter = dict()
 
@@ -83,10 +81,9 @@ class StarsIterRecParser(IParser, MsMultiProcess):
         parse ffts profiler data
         :return:
         """
-        self._iter_end_dict = self._get_iter_end_dict()
         if Utils.get_aicore_type(self.sample_config) != StrConstant.AIC_SAMPLE_BASED_MODE:
             self._parse_pmu_data()
-        self._current_iter_id = 0
+        self._iter_recorder.reset_current_iter_id()
         self._parse_log_file_list()
 
     def save(self: any) -> None:
@@ -155,10 +152,10 @@ class StarsIterRecParser(IParser, MsMultiProcess):
         for chunk in Utils.chunks(all_bytes, self.STARS_LOG_SIZE):
             sys_cnt = self._get_log_syscnt(chunk)
             if not self._iter_recorder.check_task_in_iter(sys_cnt):
-                self._task_cnt_not_in_iter.setdefault(self._current_iter_id + 1, 0)
-                self._task_cnt_not_in_iter[self._current_iter_id + 1] += 1
+                curr_iter = self._iter_recorder.current_iter_id if self._iter_recorder.current_iter_id >= 0 else 0
+                self._task_cnt_not_in_iter.setdefault(curr_iter + 1, 0)
+                self._task_cnt_not_in_iter[curr_iter + 1] += 1
                 continue
-            self._set_current_iter_id(sys_cnt)
             self._update_iter_info(sys_cnt, self.STARS_LOG_TYPE)
 
     def _parse_pmu_data(self):
@@ -172,41 +169,16 @@ class StarsIterRecParser(IParser, MsMultiProcess):
                 all_bytes = _offset_calculator.pre_process(fft_pmu_reader, os.path.getsize(_ffts_profile_file))
                 self._process_pmu_data(all_bytes)
 
-    def _set_current_iter_id(self: any, sys_cnt: int) -> None:
-        if self._current_iter_id == 0:
-            for iter_id, end_sys_cnt in self._iter_end_dict.items():
-                if sys_cnt <= end_sys_cnt:
-                    self._current_iter_id = iter_id
-                    return
-            logging.error("Ffts Pmu cannot find the iteration to which the current chunk belongs, "
-                          "please check the iteration data")
-            raise ProfException(ProfException.PROF_INVALID_DATA_ERROR)
-
     def _process_pmu_data(self: any, all_bytes: bytes) -> None:
         for chunk in Utils.chunks(all_bytes, self.PMU_LOG_SIZE):
             pmu_data = FftsPmuBean.decode(chunk)
-            self._set_current_iter_id(pmu_data.time_list[0])
             self._update_iter_info(pmu_data.time_list[0], self.PMU_LOG_TYPE)
 
-    def _check_current_iter_id(self: any, sys_cnt) -> None:
-        iter_end = self._iter_end_dict.get(self._current_iter_id)
-        return iter_end is not None and sys_cnt > iter_end
-
     def _update_iter_info(self, sys_cnt: int, log_type: int):
-        while self._check_current_iter_id(sys_cnt):
-            self._current_iter_id += 1
+        self._iter_recorder.set_current_iter_id(sys_cnt)
 
-        iter_info = self._iter_info_dict.setdefault(self._current_iter_id,
-                                                    IterInfo(self._current_iter_id,
-                                                             self._iter_end_dict.get(self._current_iter_id)))
+        iter_info = self._iter_info_dict.setdefault(self._iter_recorder.current_iter_id, IterInfo())
         if log_type == self.STARS_LOG_TYPE:
             iter_info.hwts_count += 1
         else:
             iter_info.aic_count += 1
-
-    def _get_iter_end_dict(self: any) -> dict:
-        iter_dict = MsprofIteration(self._project_path).get_iteration_end_dict()
-        if not iter_dict:
-            logging.info("No need to calculate task count at op scene.")
-            raise ProfException(ProfException.PROF_INVALID_DATA_ERROR)
-        return iter_dict
