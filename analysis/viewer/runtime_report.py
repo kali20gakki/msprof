@@ -258,7 +258,9 @@ def add_mem_bound(value: list, vec_index: int, mac_index: int, mte2_index: int) 
     :param mte2_index: mte2 ratio index
     :return: appended value
     """
-    if not NumberConstant.is_zero(max(value[vec_index], value[mac_index])):
+    if value[vec_index] == Constant.NA:
+        value.append(Constant.NA)
+    elif not NumberConstant.is_zero(max(value[vec_index], value[mac_index])):
         value.append(StrConstant.ACCURACY % float(value[mte2_index] /
                                                   max(value[vec_index], value[mac_index])))
     else:

@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2023-2023. All rights reserved.
+import logging
 
 from common_func.constant import Constant
 from mscalculate.cann.cann_database import AdditionalRecordDatabase
@@ -46,6 +47,7 @@ class CANNAnalysisChain:
         # based on timestamp points to build a callstack tree.
         root = TreeNode(root_event)
         event_tree = self.build_tree(root)
+        logging.info("Finish build event tree for thread %d", self.thread_id)
         # Perform inter-layer association.
         self.run(event_tree)
 
