@@ -8,6 +8,7 @@ import sqlite3
 from collections import defaultdict
 from abc import ABC, abstractmethod
 
+from common_func.ai_stack_data_check_manager import AiStackDataCheckManager
 from common_func.constant import Constant
 from common_func.section_calculator import SectionCalculator
 from msconfig.config_manager import ConfigManager
@@ -215,6 +216,8 @@ class OpSummaryTuningDataHandle(BaseTuningDataHandle):
             headers = ConfigManager.get(ConfigManager.MSPROF_EXPORT_DATA).get('op_summary', 'headers').split(",")
             configs = {StrConstant.CONFIG_HEADERS: headers}
             db_path = PathManager.get_db_path(project_path, DBNameConstant.DB_AICORE_OP_SUMMARY)
+            if not AiStackDataCheckManager.contain_op_summary_data(project_path, device_id):
+                return [], []
             headers, data, _ = AiCoreOpReport.get_op_summary_data(project_path, db_path, configs)
         else:
             param = {}

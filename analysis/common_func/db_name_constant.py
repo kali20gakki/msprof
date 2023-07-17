@@ -77,6 +77,7 @@ class DBNameConstant(metaclass=ABCMeta):
     DB_CTX_ID = "ctx_id.db"
     DB_MEMORY_APPLICATION = "memory_application.db"
     DB_MEMORY_OP = "task_memory.db"
+    DB_ASCEND_TASK = "ascend_task.db"
 
     # DB tables
     TABLE_ACL_DATA = "AclData"
@@ -278,6 +279,8 @@ class DBNameConstant(metaclass=ABCMeta):
     TABLE_MEMORY_APPLICATION = "MemoryApplication"
     TABLE_HCCL_OP = "HCCLOP"
     TABLE_HCCL_TASK = "HCCLTask"
+    TABLE_HOST_TASK = "HostTask"
+    TABLE_ASCEND_TASK = "AscendTask"
 
     @abstractmethod
     def get_db_name(self: any) -> str:
