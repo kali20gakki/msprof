@@ -88,7 +88,7 @@ void AnalyzerTs::ParseTsTimelineData(CONST_CHAR_PTR data, uint32_t len)
         std::string optKey = std::to_string(tsData->taskId) + KEY_SEPARATOR + std::to_string(tsData->streamId);
         auto iter = opTimeDrafts_.find(key);
         if (iter == opTimeDrafts_.end()) {
-            OpTime opTime = {0, 0, 0, 0, 0, 0, ACL_SUBSCRIBE_OP};
+            OpTime opTime = {0, 0, 0, 0, 0, 0, ACL_SUBSCRIBE_OP, tsData->streamId};
             iter = opTimeDrafts_.insert(std::make_pair(key, opTime)).first;
         }
         switch (tsData->taskState) {
