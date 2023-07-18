@@ -86,6 +86,9 @@ class IterRecorder:
         while self._check_current_iter_id(sys_cnt):
             self._current_iter_id += 1
 
+    def reset_current_iter_id(self: any) -> None:
+        self._current_iter_id = self.DEFAULT_ITER_ID
+
     def _check_current_iter_id(self: any, sys_cnt: int) -> int:
         iter_end = self._iter_end_dict.get(self._current_iter_id)
         return iter_end is not None and sys_cnt > iter_end
