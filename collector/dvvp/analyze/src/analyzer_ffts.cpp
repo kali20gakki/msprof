@@ -79,7 +79,7 @@ void AnalyzerFfts::ParseAcsqTaskData(const FftsLogHead *data, uint32_t logType)
         std::to_string(acsqLog->streamId) + KEY_SEPARATOR + std::to_string(UINT32_MAX);
     auto iter = opDrafts_.find(key);
     if (iter == opDrafts_.end()) {
-        OpTime opTime = {0, 0, 0, 0, 0, 0, acsqLog->streamId};  // default flag is OP not SUBGRAPH
+        OpTime opTime = {0, 0, 0, 0, 0, 0, ACL_SUBSCRIBE_OP, acsqLog->streamId};  // default flag is OP not SUBGRAPH
         iter = opDrafts_.insert(std::make_pair(key, opTime)).first;
     }
     constexpr uint32_t offsetBit = 32;
@@ -110,7 +110,7 @@ void AnalyzerFfts::ParseSubTaskThreadData(const FftsLogHead *data, uint32_t logT
         std::to_string(cxtLog->streamId) + KEY_SEPARATOR + std::to_string(cxtLog->cxtId);
     auto iter = opDrafts_.find(key);
     if (iter == opDrafts_.end()) {
-        OpTime opTime = {0, 0, 0, 0, 0, 0, cxtLog->streamId};
+        OpTime opTime = {0, 0, 0, 0, 0, 0, ACL_SUBSCRIBE_OP, cxtLog->streamId};
         iter = opDrafts_.insert(std::make_pair(key, opTime)).first;
     }
     constexpr uint32_t offsetBit = 32;
