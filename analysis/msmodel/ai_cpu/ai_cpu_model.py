@@ -62,6 +62,6 @@ class AiCpuModel(ParserModel):
                         DBNameConstant.TABLE_AI_CPU_FROM_TS, "sys_start", "sys_end"))
         ai_cpu_device_tasks = DBManager.fetch_all_data(self.cur, ai_cpu_sql)
         if not ai_cpu_device_tasks:
-            logging.error("no aicpu device task get from %s.%s" %
-                          (DBNameConstant.DB_AI_CPU, DBNameConstant.TABLE_AI_CPU_FROM_TS))
+            logging.error("no aicpu device task get from %s.%s",
+                          DBNameConstant.DB_AI_CPU, DBNameConstant.TABLE_AI_CPU_FROM_TS)
         return ai_cpu_device_tasks

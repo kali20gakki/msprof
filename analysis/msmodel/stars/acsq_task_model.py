@@ -78,6 +78,6 @@ class AcsqTaskModel(ParserModel):
                         start_time, end_time, DBNameConstant.TABLE_ACSQ_TASK, "start_time", "end_time"))
         device_tasks = DBManager.fetch_all_data(self.cur, sql)
         if not device_tasks:
-            logging.error("get device acsq task from %s.%s error" %
-                          (DBNameConstant.DB_SOC_LOG, DBNameConstant.TABLE_ACSQ_TASK))
+            logging.error("get device acsq task from %s.%s error",
+                          DBNameConstant.DB_SOC_LOG, DBNameConstant.TABLE_ACSQ_TASK)
         return device_tasks
