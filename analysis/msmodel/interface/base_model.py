@@ -5,6 +5,7 @@
 import logging
 from abc import ABCMeta
 
+from common_func.ms_constant.number_constant import NumberConstant
 from msconfig.config_manager import ConfigManager
 from common_func.constant import Constant
 from common_func.db_manager import DBManager

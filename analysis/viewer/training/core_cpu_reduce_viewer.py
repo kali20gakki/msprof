@@ -286,6 +286,8 @@ class CoreCpuReduceViewer:
         ai_cpu_datas = []
         dir_path = job_path
         ai_cpu_data = ParseAiCpuData.get_ai_cpu_from_ts(dir_path)
+        if not ai_cpu_data:
+            return []
         op_names, _ = cls.get_op_names_and_task_type(dir_path)
         result_data = []
         if ai_cpu_data:
