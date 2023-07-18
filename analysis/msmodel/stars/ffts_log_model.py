@@ -72,17 +72,6 @@ class FftsLogModel(ParserModel):
               "order by start_time ".format(DBNameConstant.TABLE_SUBTASK_TIME)
         return DBManager.fetch_all_data(self.cur, sql)
 
-    def _get_task_time_data(self: any) -> list:
-        task_data = self.get_all_data(DBNameConstant.TABLE_ACSQ_TASK_TIME, dto_class=TaskTimeDto)
-        # task_type: place_holder is an invalid type
-        return [task for task in task_data if task.task_type != SqeType.PLACE_HOLDER_SQE.name]
-
-    def _get_thread_time_data(self: any) -> list:
-        return self.get_all_data(DBNameConstant.TABLE_THREAD_TASK, dto_class=TaskTimeDto)
-
-    def _get_subtask_time_data(self: any) -> list:
-        return self.get_all_data(DBNameConstant.TABLE_SUBTASK_TIME, dto_class=TaskTimeDto)
-
     def get_ffts_plus_sub_task_data_within_time_range(self: any, start_time: float, end_time: float) -> list:
         # ffts+ task subtask_id is stored in db
         sql = "select {0}.stream_id, {0}.task_id, {0}.subtask_id, {0}.start_time, " \
@@ -93,6 +82,17 @@ class FftsLogModel(ParserModel):
                         start_time, end_time, DBNameConstant.TABLE_SUBTASK_TIME, "start_time", "end_time"))
         device_tasks = DBManager.fetch_all_data(self.cur, sql)
         if not device_tasks:
-            logging.error("get device ffts plus sub task from %s.%s error" %
-                          (DBNameConstant.DB_SOC_LOG, DBNameConstant.TABLE_SUBTASK_TIME))
+            logging.error("get device ffts plus sub task from %s.%s error",
+                          DBNameConstant.DB_SOC_LOG, DBNameConstant.TABLE_SUBTASK_TIME)
         return device_tasks
+
+    def _get_task_time_data(self: any) -> list:
+        task_data = self.get_all_data(DBNameConstant.TABLE_ACSQ_TASK_TIME, dto_class=TaskTimeDto)
+        # task_type: place_holder is an invalid type
+        return [task for task in task_data if task.task_type != SqeType.PLACE_HOLDER_SQE.name]
+
+    def _get_thread_time_data(self: any) -> list:
+        return self.get_all_data(DBNameConstant.TABLE_THREAD_TASK, dto_class=TaskTimeDto)
+
+    def _get_subtask_time_data(self: any) -> list:
+        return self.get_all_data(DBNameConstant.TABLE_SUBTASK_TIME, dto_class=TaskTimeDto)
