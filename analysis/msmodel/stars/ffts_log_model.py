@@ -1,12 +1,14 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2021-2022. All rights reserved.
+import logging
 
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.stars_constant import StarsConstant
 from common_func.utils import Utils
 from msmodel.interface.parser_model import ParserModel
+from msmodel.interface.sql_helper import SqlWhereCondition
 from msmodel.sqe_type_map import SqeType
 from profiling_bean.db_dto.task_time_dto import TaskTimeDto
 
@@ -51,7 +53,7 @@ class FftsLogModel(ParserModel):
             thread_data_list = self._get_thread_time_data()
             subtask_data_list = self._get_subtask_time_data()
         return [{'acsq_task_list': acsq_task_list, 'thread_data_list': thread_data_list,
-                'subtask_data_list': subtask_data_list}]
+                 'subtask_data_list': subtask_data_list}]
 
     def get_summary_data(self: any) -> list:
         """
@@ -69,6 +71,20 @@ class FftsLogModel(ParserModel):
               "from {0} " \
               "order by start_time ".format(DBNameConstant.TABLE_SUBTASK_TIME)
         return DBManager.fetch_all_data(self.cur, sql)
+
+    def get_ffts_plus_sub_task_data_within_time_range(self: any, start_time: float, end_time: float) -> list:
+        # ffts+ task subtask_id is stored in db
+        sql = "select {0}.stream_id, {0}.task_id, {0}.subtask_id, {0}.start_time, " \
+              "({0}.end_time - {0}.start_time) as duration_time, {0}.subtask_type as task_type from {0} " \
+              "{1} order by start_time" \
+            .format(DBNameConstant.TABLE_SUBTASK_TIME,
+                    SqlWhereCondition.get_interval_intersection_condition(
+                        start_time, end_time, DBNameConstant.TABLE_SUBTASK_TIME, "start_time", "end_time"))
+        device_tasks = DBManager.fetch_all_data(self.cur, sql)
+        if not device_tasks:
+            logging.error("get device ffts plus sub task from %s.%s error",
+                          DBNameConstant.DB_SOC_LOG, DBNameConstant.TABLE_SUBTASK_TIME)
+        return device_tasks
 
     def _get_task_time_data(self: any) -> list:
         task_data = self.get_all_data(DBNameConstant.TABLE_ACSQ_TASK_TIME, dto_class=TaskTimeDto)
