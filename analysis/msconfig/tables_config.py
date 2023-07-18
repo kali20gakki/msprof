@@ -1178,6 +1178,27 @@ class TablesConfig(MetaConfig):
             ('ctx_id_num', 'INTEGER,null'),
             ('ctx_id', 'TEXT,null'),
         ],
+        'HostTaskMap': [
+            ('model_id', 'INTEGER,null'),
+            ('request_id', 'INTEGER,null'),
+            ('stream_id', 'INTEGER,null'),
+            ('task_id', 'INTEGER,null'),
+            ('batch_id', 'INTEGER,null'),
+            ('task_type', 'TEXT,null'),
+            ('timestamp', 'NUMERIC,null')
+        ],
+        'AscendTaskMap': [
+            ('model_id', 'INTEGER,null'),
+            ('index_id', 'INTEGER,null'),
+            ('stream_id', 'INTEGER,null'),
+            ('task_id', 'INTEGER,null'),
+            ('context_id', 'INTEGER,null'),
+            ('batch_id', 'INTEGER,null'),
+            ('start_time', 'NUMERIC,null'),
+            ('duration', 'NUMERIC,null'),
+            ('host_task_type', 'TEXT,null'),
+            ('device_task_type', 'TEXT,null'),
+        ],
         'NpuOpMemRawMap': [
             ('operator', 'TEXT,null'),
             ('addr', 'TEXT,null'),
