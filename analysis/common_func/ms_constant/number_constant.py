@@ -140,6 +140,8 @@ class NumberConstant:
 
     HOST_ID = 64
 
+    STATIC_GRAPH_INDEX = 0
+
     @property
     def conversion_time(self: any) -> float:
         """
