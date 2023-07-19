@@ -93,13 +93,13 @@ class DataCalculatorConfig(MetaConfig):
         'TaskSchedulerCalculator': [
             ('path', 'mscalculate.data_analysis.task_scheduler_calculator'),
             ('chip_model', '0'),
-            ('level', '13'),
+            ('level', '5'),
             ('position', 'D')
         ],
         'OpTaskSchedulerCalculator': [
             ('path', 'mscalculate.data_analysis.op_task_scheduler_calculator'),
             ('chip_model', '0'),
-            ('level', '13'),
+            ('level', '5'),
             ('position', 'D')
         ],
         'ParseAiCoreOpSummaryCalculator': [
@@ -138,10 +138,16 @@ class DataCalculatorConfig(MetaConfig):
             ('level', '3'),
             ('position', 'H')
         ],
+        'AscendTaskCalculator': [
+            ('path', 'mscalculate.ascend_task.ascend_task_calculator'),
+            ('chip_model', '0,1,2,3,4,5,7'),
+            ('level', '6'),
+            ('position', 'D')
+        ],
         'HcclCalculator': [
             ('path', 'mscalculate.hccl_calculator'),
             ('chip_model', '0,1,2,3,4,5,7'),
-            ('level', '5'),
+            ('level', '7'),
             ('position', 'D')
         ],
         'NpuOpMemCalculator': [

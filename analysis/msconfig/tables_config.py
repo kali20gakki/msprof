@@ -579,6 +579,7 @@ class TablesConfig(MetaConfig):
             ('task_id', 'INTEGER,null'),
             ('running', 'INTEGER,null'),
             ('complete', 'INTEGER,null'),
+            ('task_type', 'text,null'),
             ('index_id', 'INTEGER,null'),
             ('model_id', 'INTEGER,null'),
             ('batch_id', 'INTEGER,null')
@@ -663,6 +664,17 @@ class TablesConfig(MetaConfig):
             ('task_type', 'TEXT,null'),
             ('task_time', 'INTEGER,null')
         ],
+        'SubtaskTimeMap': [
+            ('subtask_id', 'INTEGER,null'),
+            ('task_id', 'INTEGER,null'),
+            ('stream_id', 'INTEGER,null'),
+            ('subtask_type', 'text,null'),
+            ('ffts_type', 'INTEGER,null'),
+            ('start_time', 'NUMERIC,null'),
+            ('end_time', 'NUMERIC,null'),
+            ('dur_time', 'NUMERIC,null'),
+            ('batch_id', 'INTEGER,null')
+        ],
         'StarsTaskTimeMap': [
             ('context_id', 'INTEGER, null'),
             ('task_id', 'INTEGER, null'),
@@ -712,6 +724,8 @@ class TablesConfig(MetaConfig):
             ('is_dynamic', 'INTEGER, null')
         ],
         'HCCLTaskMap': [
+            ('model_id', 'INTEGER, null'),
+            ('index_id', 'INTEGER, null'),
             ('name', 'TEXT, null'),
             ('plane_id', 'INTEGER, null'),
             ('timestamp', 'REAL, null'),

@@ -145,32 +145,26 @@ class TestOpSummaryOpSceneCalculator(unittest.TestCase):
             self.assertEqual(result, False)
 
     def test_get_task_time_data(self):
-        InfoConfReader()._info_json = {'devices': ['0']}
-        with mock.patch(NAMESPACE + '.AiStackDataCheckManager.contain_task_time_data',
-                        return_value=True):
-            with mock.patch(NAMESPACE + '.GetOpTableTsTime.get_task_time_data', return_value=[]), \
-                    mock.patch(NAMESPACE + '.OpCommonFunc.calculate_task_time',
-                               return_value=((1, 2, 3),)):
-                check = OpSummaryOpSceneCalculator(file_list, CONFIG)
-                result = check.get_task_time_data()
-            self.assertEqual(result, ((1, 2, 3),))
-        with mock.patch(NAMESPACE + '.AiStackDataCheckManager.contain_task_time_data',
-                        return_value=False):
-            check = OpSummaryOpSceneCalculator(file_list, CONFIG)
-            result = check.get_task_time_data()
-        self.assertEqual(result, [])
+        check = OpSummaryOpSceneCalculator(file_list, CONFIG)
+        self.assertEqual(check.get_task_time_data(), [])
+        with mock.patch(NAMESPACE + '.AscendTaskModel.get_all_data',
+                        return_value=[[1, 1, 1, 1, 1, 1, 1000, 1000, 'AI_CORE', 'AI_CORE']]):
+            self.assertEqual(check.get_task_time_data(), [[1, 1, 1000, 1000, 0, 'AI_CORE', 1, 1, 1, 1]])
 
     def test_create_task_time_table(self):
-        with mock.patch(NAMESPACE + '.DBManager.sql_create_general_table', return_value=True), \
+        check = OpSummaryOpSceneCalculator(file_list, CONFIG)
+        result = check.create_task_time_table()
+        self.assertFalse(result)
+
+        with mock.patch('os.path.exists', return_value=True), \
+                mock.patch(NAMESPACE + '.DBManager.sql_create_general_table', return_value=True), \
                 mock.patch(NAMESPACE + '.DBManager.execute_sql'):
-            with mock.patch(NAMESPACE + '.OpSummaryOpSceneCalculator.get_task_time_data', return_value=False):
+            with mock.patch(NAMESPACE + '.OpSummaryOpSceneCalculator.get_task_time_data', return_value=[]):
                 check = OpSummaryOpSceneCalculator(file_list, CONFIG)
                 result = check.create_task_time_table()
             self.assertEqual(result, False)
             with mock.patch(NAMESPACE + '.OpSummaryOpSceneCalculator.get_task_time_data',
-                            return_value=[(1, 2, 3, 4, 5, 6, 7, 8, 9)]), \
-                    mock.patch(NAMESPACE + '.OpCommonFunc.deal_batch_id', return_value=((1, 2, 3),)), \
-                    mock.patch(NAMESPACE + '.DBManager.executemany_sql'):
+                            return_value=[(1, 2, 3, 4, 5, 6, 7, 8, 9)]):
                 check = OpSummaryOpSceneCalculator(file_list, CONFIG)
                 result = check.create_task_time_table()
             self.assertTrue(result)

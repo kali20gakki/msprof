@@ -26,6 +26,6 @@ class TestConfigManager(unittest.TestCase):
         config = ConfigManager.get(ConfigManager.MSPROF_EXPORT_DATA)
         self.assertEqual(len(config.sections()), 60)
         config = ConfigManager.get(ConfigManager.DATA_CALCULATOR)
-        self.assertEqual(len(config.sections()), 25)
+        self.assertEqual(len(config.sections()), 26)
         config = ConfigManager.get(ConfigManager.TUNING_RULE)
         self.assertEqual(len(config.get_data()), 18)

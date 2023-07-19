@@ -15,10 +15,10 @@ class TablesOperatorConfig(MetaConfig):
             ('tasktype', 'INTEGER,null'),
             ('task_id', 'INTEGER,null'),
             ('stream_id', 'INTEGER,null'),
-            ('waittime', 'TEXT,null'),
-            ('pendingtime', 'Text,null'),
-            ('running', 'TEXT,null'),
-            ('complete', 'TEXT,null'),
+            ('waittime', 'NUMERIC,null'),
+            ('pendingtime', 'NUMERIC,null'),
+            ('running', 'NUMERIC,null'),
+            ('complete', 'NUMERIC,null'),
             ('index_id', 'INTEGER,null'),
             ('model_id', 'INTEGER,null'),
             ('batch_id', 'INTEGER,null')
@@ -48,6 +48,7 @@ class TablesOperatorConfig(MetaConfig):
             ('wait_time', 'INTEGER, null'),
             ('task_type', 'INTEGER,null'),
             ('index_id', 'INTEGER,null'),
+            ('model_id', 'INTEGER, null'),
             ('batch_id', 'INTEGER,null'),
             ('subtask_id', 'INTEGER,null')
         ],

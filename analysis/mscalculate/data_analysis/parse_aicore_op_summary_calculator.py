@@ -6,10 +6,7 @@ import logging
 import os
 import sqlite3
 
-from analyzer.get_op_table_task_time import GetOpTableTsTime
-from analyzer.op_common_function import OpCommonFunc
 from analyzer.scene_base.profiling_scene import ProfilingScene
-from common_func.ai_stack_data_check_manager import AiStackDataCheckManager
 from common_func.common import CommonConstant
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
@@ -20,8 +17,9 @@ from common_func.ms_multi_process import MsMultiProcess
 from common_func.msprof_exception import ProfException
 from common_func.msprof_iteration import MsprofIteration
 from common_func.path_manager import PathManager
-from common_func.platform.chip_manager import ChipManager
+from mscalculate.ascend_task.ascend_task import TopDownTask
 from msconfig.config_manager import ConfigManager
+from msmodel.task_time.ascend_task_model import AscendTaskModel
 from profiling_bean.db_dto.ge_task_dto import GeTaskDto
 
 
@@ -179,6 +177,12 @@ class ParseAiCoreOpSummaryCalculator(MsMultiProcess):
         create task time table
         :return: true or false
         """
+        ascend_task_db_path = PathManager.get_db_path(self.project_path, DBNameConstant.DB_ASCEND_TASK)
+
+        if not os.path.exists(ascend_task_db_path):
+            logging.warning("no task db %s found, task_time table will not be created",
+                            DBNameConstant.TABLE_ASCEND_TASK)
+            return
         create_table_sql = DBManager.sql_create_general_table("ModifiedTaskTimeMap", "task_time",
                                                               self.TABLE_PATH)
         if not create_table_sql:
@@ -199,13 +203,14 @@ class ParseAiCoreOpSummaryCalculator(MsMultiProcess):
         get task time data
         :return: task data list
         """
-        ge_data = self._get_ge_data_from_summary()
-        project_path = self.sample_config.get("result_dir")
-        if AiStackDataCheckManager.contain_task_time_data(project_path):
-            fetch_data = GetOpTableTsTime(self.sample_config).get_task_time_data(ge_data)
-            task_data = OpCommonFunc.calculate_task_time(fetch_data)
-            return task_data
-        return []
+        with AscendTaskModel(self.project_path, DBNameConstant.TABLE_ASCEND_TASK) as model:
+            tasks = model.get_all_data(DBNameConstant.TABLE_ASCEND_TASK)
+            if not tasks:
+                logging.error("Get tasks from %s error", DBNameConstant.TABLE_ASCEND_TASK)
+                return []
+            ascend_tasks = [TopDownTask(*task) for task in tasks]
+            return [[task.task_id, task.stream_id, task.start_time, task.duration, 0, task.device_task_type,
+                     task.index_id, task.model_id, task.batch_id, task.context_id] for task in ascend_tasks]
 
     def get_db_path(self: any, db_name: str) -> str:
         """

@@ -11,7 +11,6 @@ from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
-from common_func.platform.chip_manager import ChipManager
 from mscalculate.cann.additional_record import AdditionalRecord
 from mscalculate.cann.cann_database import ApiDataDatabase
 from mscalculate.cann.event import Event
@@ -22,6 +21,7 @@ from msmodel.ge.ge_model_load_model import GeFusionModel
 from msmodel.ge.ge_model_time_load import GeModelTimeModel
 from msmodel.hccl.hccl_host_model import HCCLHostModel
 from msmodel.runtime.runtime_api_model import RuntimeApiModel
+from msmodel.runtime.runtime_host_task_model import RuntimeHostTaskModel
 from profiling_bean.db_dto.api_data_dto import ApiDataDto
 from profiling_bean.db_dto.ctx_id_dto import CtxIdDto
 from profiling_bean.db_dto.fusion_op_info_dto import FusionOpInfoDto
@@ -399,6 +399,7 @@ class TaskGear(CANNGear):
         self.task_info = []
         self.tensor_info = []
         self.hccl_task_info = []
+        self.host_tasks = []
         self.mismatch_hccl = 0
 
     @staticmethod
@@ -435,14 +436,31 @@ class TaskGear(CANNGear):
                 node_desc.ctx_info = record.dto
         return node_descs
 
+    def add_host_task(self, call_stack: dict, task_track_dto: TaskTrackDto):
+        model_event: Event = call_stack.get(Constant.MODEL_LEVEL)
+        model_dto: ApiDataDto = ApiDataDatabase().get(model_event)
+
+        model_id = model_dto.item_id if model_dto.item_id is not None else self.INVALID_MODEL_ID
+        request_id = model_dto.request_id if model_dto.request_id is not None else -1
+
+        self.host_tasks.append(
+            [model_id, request_id, task_track_dto.stream_id,
+             task_track_dto.task_id, task_track_dto.batch_id,
+             task_track_dto.task_type, task_track_dto.timestamp]
+        )
+
     def is_hccl_task(self, hccl_event: Event):
         return not hccl_event.is_invalid()
 
-    def add_hccl_task(self, hccl_event: Event, task_track_dto: TaskTrackDto):
+    def add_hccl_task(self, model_event: Event, hccl_event: Event, task_track_dto: TaskTrackDto):
         hccl_dto: ApiDataDto = ApiDataDatabase().get(hccl_event)
         hccl_info_dto = self.get_hccl_info_dto(hccl_event)
+        model_dto: ApiDataDto = ApiDataDatabase().get(model_event)
+
+        model_id = model_dto.item_id if model_dto.item_id is not None else self.INVALID_MODEL_ID
+        request_id = model_dto.request_id if model_dto.request_id is not None else -1
         self.hccl_task_info.append(
-            [hccl_dto.item_id, hccl_info_dto.plane_id, hccl_info_dto.timestamp,
+            [model_id, request_id, hccl_dto.item_id, hccl_info_dto.plane_id, hccl_info_dto.timestamp,
              hccl_info_dto.duration_estimated, task_track_dto.stream_id, task_track_dto.task_id,
              task_track_dto.batch_id, hccl_info_dto.to_args_json(task_track_dto.stream_id, task_track_dto.task_id)])
 
@@ -506,6 +524,8 @@ class TaskGear(CANNGear):
             return
 
         mem_cpy_dto, task_track_dto = self.get_task_level_additional_dto(event)
+        if task_track_dto.struct_type is not None:
+            self.add_host_task(call_stack, task_track_dto)
         if not event.is_invalid():
             api = self.RuntimeApi(dto.start, dto.end, dto.struct_type, dto.thread_id)
 
@@ -520,7 +540,7 @@ class TaskGear(CANNGear):
 
         hccl_event = call_stack.get(Constant.HCCL_LEVEL)
         if self.is_hccl_task(hccl_event):
-            self.add_hccl_task(hccl_event, task_track_dto)
+            self.add_hccl_task(call_stack.get(Constant.MODEL_LEVEL), hccl_event, task_track_dto)
         if self.is_kernel_task(task_track_dto):
             self.add_kernel_task(call_stack, task_track_dto)
 
@@ -569,11 +589,22 @@ class TaskGear(CANNGear):
         model.insert_data_to_db(DBNameConstant.TABLE_HCCL_TASK, self.hccl_task_info)
         model.finalize()
 
+    def save_host_tasks(self):
+        if not self.host_tasks:
+            return
+        model = RuntimeHostTaskModel(self._project_path)
+        model.init()
+        model.drop_table(DBNameConstant.TABLE_HOST_TASK)
+        model.create_table()
+        model.flush(self.host_tasks)
+        model.finalize()
+
     def flush_data(self):
         self.save_api_call_info()
         self.save_task_info()
         self.save_tensor_info()
         self.save_hccl_task_info()
+        self.save_host_tasks()
 
 
 class HCCLGear(CANNGear):

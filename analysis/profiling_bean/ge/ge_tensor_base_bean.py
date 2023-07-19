@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2023-2023. All rights reserved.
+import logging
 
 from common_func.utils import Utils
 from common_func.ms_constant.ge_enum_constant import GeDataFormat
@@ -98,6 +99,8 @@ class GeTensorBaseBean(StructDecoder):
         for index, _format in enumerate(_input_format):
             tensor_format, tensor_sub_format = cls._process_with_sub_format(_format)
             if tensor_format not in enum_dict:
+                logging.error("Unsupported tensor format %d", tensor_format)
+                _input_format[index] = str(_input_format[index])
                 continue
             enum_format = enum_dict.get(tensor_format).name
             if tensor_sub_format > 0:

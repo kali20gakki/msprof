@@ -49,28 +49,6 @@ class TestHCCLModel(unittest.TestCase):
                 check.cur = db_open.db_curs
                 check.get_hccl_data()
 
-    def test_get_task_db_and_table_when_given_different_chip_model_then_return_task_time_sql_info(self):
-        ChipManager().chip_id = ChipModel.CHIP_V1_1_0
-        ret = HcclViewModel.get_task_db_and_table()
-        self.assertEqual(DBNameConstant.DB_RUNTIME, ret.db_name)
-
-        ChipManager().chip_id = ChipModel.CHIP_V2_1_0
-        ret = HcclViewModel.get_task_db_and_table()
-        self.assertEqual(DBNameConstant.DB_HWTS, ret.db_name)
-
-        ChipManager().chip_id = ChipModel.CHIP_V3_1_0
-        ret = HcclViewModel.get_task_db_and_table()
-        self.assertEqual(DBNameConstant.DB_HWTS, ret.db_name)
-
-        ChipManager().chip_id = ChipModel.CHIP_V4_1_0
-        ret = HcclViewModel.get_task_db_and_table()
-        self.assertEqual(DBNameConstant.DB_SOC_LOG, ret.db_name)
-
-        # invalid chip model type
-        ChipManager().chip_id = 1000
-        ret = HcclViewModel.get_task_db_and_table()
-        self.assertEqual('', ret.db_name)
-
     def test_get_hccl_communication_data_when_given_attach_to_db_failed_then_return_empty_list(self):
         ChipManager().chip_id = 1000
         check = HcclViewModel("", DBNameConstant.DB_HCCL, [DBNameConstant.TABLE_HCCL_ALL_REDUCE])
