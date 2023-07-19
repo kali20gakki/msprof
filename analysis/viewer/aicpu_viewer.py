@@ -1,6 +1,8 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
+import logging
+import os
 
 from analyzer.scene_base.profiling_scene import ProfilingScene
 from common_func.constant import Constant
@@ -61,6 +63,9 @@ class ParseAiCpuData:
         :return: control statement
         """
         aicpu_model = AiCpuModel(project_path)
+        if not os.path.exists(PathManager.get_db_path(project_path, DBNameConstant.DB_AI_CPU)):
+            logging.info("no aicpu db found")
+            return []
         with aicpu_model:
             aicpu_data = aicpu_model.get_ai_cpu_data_from_ts()
         return aicpu_data

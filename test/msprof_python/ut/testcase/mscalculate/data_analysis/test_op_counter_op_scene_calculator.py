@@ -6,6 +6,7 @@ import sqlite3
 import unittest
 from unittest import mock
 
+from analyzer.scene_base.profiling_scene import ProfilingScene
 from mscalculate.data_analysis.op_counter_op_scene_calculator import OpCounterOpSceneCalculator
 from common_func.info_conf_reader import InfoConfReader
 from common_func.platform.chip_manager import ChipManager
@@ -18,11 +19,6 @@ NAMESPACE = 'mscalculate.data_analysis.op_counter_op_scene_calculator'
 
 
 class TestOpCounterOpSceneCalculator(unittest.TestCase):
-
-    def test_ms_run(self):
-        with mock.patch(NAMESPACE + '.OpCounterOpSceneCalculator.process'):
-            key = OpCounterOpSceneCalculator(file_list, CONFIG)
-            key.ms_run()
 
     def test_process(self):
         setattr(InfoConfReader(), "_info_json", {'devices': '0'})
@@ -154,16 +150,13 @@ class TestOpCounterOpSceneCalculator(unittest.TestCase):
         db_manager.destroy(res)
 
     def test_create_task(self):
-        InfoConfReader()._info_json = {'devices': '0'}
-        with mock.patch(NAMESPACE + '.GetOpTableTsTime.get_task_time_data', return_value=[]), \
-                mock.patch(NAMESPACE + '.DBManager.insert_data_into_table'):
-            check = OpCounterOpSceneCalculator(file_list, CONFIG)
+        check = OpCounterOpSceneCalculator(file_list, CONFIG)
+        check.create_task()
+        with mock.patch(NAMESPACE + '.DBManager.check_tables_in_db', return_value=True):
             check.create_task()
-        with mock.patch(NAMESPACE + '.GetOpTableTsTime.get_task_time_data', return_value=[]), \
-                mock.patch(NAMESPACE + '.DBManager.insert_data_into_table', side_effect=sqlite3.Error), \
-                mock.patch(NAMESPACE + '.logging.error'):
-            check = OpCounterOpSceneCalculator(file_list, CONFIG)
-            check.create_task()
+            with mock.patch(NAMESPACE + '.AscendTaskModel.get_all_data',
+                            return_value=[[1, 1, 1, 1, 1, 1, 1000, 1000, 'AI_CORE', 'AI_CORE']]):
+                check.create_task()
 
     def test_get_op_report_sql(self):
         check = OpCounterOpSceneCalculator(file_list, CONFIG)

@@ -5,6 +5,8 @@ import logging
 import os
 from typing import List
 
+from analyzer.scene_base.profiling_scene import ProfilingScene
+from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
@@ -50,8 +52,23 @@ class HcclCalculator(ICalculator, MsMultiProcess):
             hccl_model.insert_data_to_db(DBNameConstant.TABLE_HCCL_ALL_REDUCE, self._hccl_data)
 
     def ms_run(self: any) -> None:
+        if not self._judge_calculate_again():
+            return
         self.calculate()
         self.save()
+
+    def _judge_calculate_again(self):
+        if not ProfilingScene().is_operator():
+            logging.info("In graph scene, to generate table %s", DBNameConstant.TABLE_HCCL_ALL_REDUCE)
+            return True
+        else:
+            hccl_db_path = PathManager.get_db_path(self._project_path, DBNameConstant.DB_HCCL)
+            if DBManager.check_tables_in_db(hccl_db_path, DBNameConstant.TABLE_HCCL_ALL_REDUCE):
+                logging.info("Found table %s in operator scene, no need to generate again",
+                             DBNameConstant.TABLE_HCCL_ALL_REDUCE)
+                return False
+            logging.info("No table %s found, to generate it", DBNameConstant.TABLE_HCCL_ALL_REDUCE)
+            return True
 
     def _generate_hccl_op_info(self, hccl_data: List[HcclDto]):
         for data in hccl_data:

@@ -448,7 +448,8 @@ class DBManager:
             else:
                 curs.execute(sql)
         except sqlite3.Error as _err:
-            logging.error(str(_err), exc_info=Constant.TRACE_BACK_SWITCH)
+            logging.error("%s", str(_err), exc_info=Constant.TRACE_BACK_SWITCH)
+            logging.debug("%s, sql: %s", str(_err), sql, exc_info=Constant.TRACE_BACK_SWITCH)
             curs.row_factory = None
             return []
         try:
