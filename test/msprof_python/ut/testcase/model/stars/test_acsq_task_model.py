@@ -1,12 +1,13 @@
-import unittest
 from unittest import mock
+
+from common_func.db_name_constant import DBNameConstant
+from model.test_dir_cr_base_model import TestDirCRBaseModel
 from msmodel.stars.acsq_task_model import AcsqTaskModel
 
 NAMESPACE = 'msmodel.stars.acsq_task_model'
 
 
-class TestAcsqTaskModel(unittest.TestCase):
-
+class TestAcsqTaskModel(TestDirCRBaseModel):
     def test_flush(self):
         with mock.patch(NAMESPACE + '.AcsqTaskModel.insert_data_to_db'):
             check = AcsqTaskModel('test', 'test', [])
@@ -18,7 +19,7 @@ class TestAcsqTaskModel(unittest.TestCase):
             check.flush_task_time([])
 
     def test_get_summary_data(self):
-        with mock.patch(NAMESPACE + '.DBManager.fetch_all_data', return_value=[(1, 2)]),\
+        with mock.patch(NAMESPACE + '.DBManager.fetch_all_data', return_value=[(1, 2)]), \
                 mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=1):
             check = AcsqTaskModel('test', 'test', [])
             ret = check.get_summary_data()
@@ -37,3 +38,23 @@ class TestAcsqTaskModel(unittest.TestCase):
             check = AcsqTaskModel('test', 'test', [])
             ret = check.get_ffts_type_data()
         self.assertEqual(ret, 1)
+
+    def test_get_acsq_data_within_time_range_by_different_time_staggered_situation(self):
+        acsq_data = [
+            [2, 23, 0, "AI_CORE", 1000, 2000, 1000],
+            [2, 24, 0, "AI_CORE", 3000, 4000, 1000],
+            [2, 25, 0, "AI_CORE", 5000, 6000, 1000],
+        ]
+        model = AcsqTaskModel(self.PROF_DEVICE_DIR, DBNameConstant.DB_SOC_LOG, [DBNameConstant.TABLE_ACSQ_TASK])
+        model.init()
+        model.flush(acsq_data)
+
+        device_tasks = model.get_acsq_data_within_time_range(float("-inf"), float("inf"))
+        self.assertEqual(len(device_tasks), 3)
+
+        device_tasks = model.get_acsq_data_within_time_range(0, 500)
+        self.assertEqual(len(device_tasks), 0)
+
+        device_tasks = model.get_acsq_data_within_time_range(3500, 4500)
+        self.assertEqual(len(device_tasks), 1)
+        model.finalize()

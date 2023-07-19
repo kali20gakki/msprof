@@ -9,8 +9,8 @@ import sqlite3
 from collections import defaultdict
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.ms_constant.str_constant import StrConstant
+from mscalculate.ascend_task.ascend_task import TopDownTask
 from msconfig.config_manager import ConfigManager
-from analyzer.get_op_table_task_time import GetOpTableTsTime
 from analyzer.scene_base.profiling_scene import ProfilingScene
 from common_func.common import CommonConstant
 from common_func.constant import Constant
@@ -21,6 +21,7 @@ from common_func.msprof_exception import ProfException
 from common_func.msprof_iteration import MsprofIteration
 from common_func.path_manager import PathManager
 from common_func.platform.chip_manager import ChipManager
+from msmodel.task_time.ascend_task_model import AscendTaskModel
 from viewer.ge_info_report import get_ge_model_name_dict
 from profiling_bean.db_dto.ge_task_dto import GeTaskDto
 
@@ -191,14 +192,24 @@ class MergeOpCounterCalculator(MsMultiProcess):
         insert data to task time table
         :return:
         """
-        ge_data = self._get_ge_data_from_merge_task()
-        rts_data = GetOpTableTsTime(self.sample_config).get_task_time_data(ge_data)
-        try:
-            DBManager.insert_data_into_table(self.conn, CommonConstant.RTS_TASK_TABLE, rts_data)
-        except sqlite3.Error as err:
-            logging.error(err, exc_info=Constant.TRACE_BACK_SWITCH)
-        finally:
-            pass
+        project_path = self.sample_config.get("result_dir")
+        ascend_task_db_path = PathManager.get_db_path(project_path, DBNameConstant.DB_ASCEND_TASK)
+
+        if not DBManager.check_tables_in_db(ascend_task_db_path, DBNameConstant.TABLE_ASCEND_TASK):
+            logging.warning("No table %s found in %s", DBNameConstant.TABLE_ASCEND_TASK, DBNameConstant.DB_ASCEND_TASK)
+            return
+        with AscendTaskModel(project_path, DBNameConstant.TABLE_ASCEND_TASK) as model:
+            tasks = model.get_all_data(DBNameConstant.TABLE_ASCEND_TASK)
+            if not tasks:
+                logging.error("Get tasks from %s error", DBNameConstant.TABLE_ASCEND_TASK)
+                return
+            ascend_tasks = [TopDownTask(*task) for task in tasks]
+            rts_data = [[task.task_id, task.stream_id, task.start_time, task.duration, task.device_task_type,
+                         task.index_id, task.model_id, task.batch_id, task.context_id] for task in ascend_tasks]
+            try:
+                DBManager.insert_data_into_table(self.conn, CommonConstant.RTS_TASK_TABLE, rts_data)
+            except sqlite3.Error as err:
+                logging.error(err, exc_info=Constant.TRACE_BACK_SWITCH)
 
     def _get_sql_dir(self: any) -> str:
         return PathManager.get_sql_dir(self.project_path)

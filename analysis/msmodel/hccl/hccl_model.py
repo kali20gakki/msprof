@@ -2,18 +2,14 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 import logging
-from collections import namedtuple
 
 from analyzer.scene_base.profiling_scene import ProfilingScene
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
-from common_func.platform.chip_manager import ChipManager
 from msmodel.interface.parser_model import ParserModel
 from msmodel.interface.view_model import ViewModel
 from profiling_bean.db_dto.hccl_dto import HcclDto
 from profiling_bean.db_dto.time_section_dto import CommunicationTimeSection
-
-TaskTimeSqlInfo = namedtuple("TaskTimeSqlInfo", ["db_name", "select_sql"])
 
 
 class HCCLModel(ParserModel):
@@ -46,23 +42,12 @@ class HcclViewModel(ViewModel):
     def __init__(self, result_dir: str, db_name: str, table_list: list):
         super().__init__(result_dir, db_name, table_list)
 
-    @staticmethod
-    def get_task_db_and_table():
-        if ChipManager().is_chip_v1():
-            return TaskTimeSqlInfo(db_name=DBNameConstant.DB_RUNTIME,
-                                   select_sql=f"(select model_id, index_id, stream_id, task_id, batch_id, running, "
-                                              f"complete from {DBNameConstant.TABLE_RUNTIME_TASK_TIME} )")
-        if ChipManager().is_chip_v2() or ChipManager().is_chip_v3():
-            return TaskTimeSqlInfo(db_name=DBNameConstant.DB_HWTS,
-                                   select_sql=f"(select model_id, index_id, stream_id, task_id, batch_id, running, "
-                                              f"complete from {DBNameConstant.TABLE_HWTS_TASK_TIME} )")
-        if ChipManager().is_stars_chip():
-            return TaskTimeSqlInfo(db_name=DBNameConstant.DB_SOC_LOG,
-                                   select_sql=f"(select model_id, index_id, stream_id, task_id, batch_id, "
-                                              f"start_time as running, start_time + task_time as complete "
-                                              f"from {DBNameConstant.TABLE_ACSQ_TASK_TIME} )")
-        logging.error("Unsupported chip type, data reporting error or new chip reported.")
-        return TaskTimeSqlInfo(db_name='', select_sql='')
+    @classmethod
+    def get_task_time_sql(cls):
+        select_sql = "(select {0}.model_id, {0}.index_id, {0}.stream_id, {0}.task_id, " \
+                     "{0}.batch_id, {0}.start_time as running, " \
+                     "{0}.start_time + {0}.duration as complete from {0} )".format(DBNameConstant.TABLE_ASCEND_TASK)
+        return select_sql
 
     def rebuild_hccl_table(self):
         self.create_table_by_name(DBNameConstant.TABLE_HCCL_ALL_REDUCE)
@@ -71,30 +56,29 @@ class HcclViewModel(ViewModel):
         """
         generate the table for communication op and task executed in device.
         """
-        task_time_sql_info = self.get_task_db_and_table()
-        if not task_time_sql_info.db_name or not task_time_sql_info.select_sql:
-            return []
 
-        if not self.attach_to_db(task_time_sql_info.db_name):
-            logging.error("Attach to db failed, task data not found.")
+        if not self.attach_to_db(DBNameConstant.DB_ASCEND_TASK):
+            logging.error("Attach to db %s failed, task data not found.", DBNameConstant.DB_ASCEND_TASK)
             return []
+        task_time_sql = self.get_task_time_sql()
         where_condition = ''
         if not ProfilingScene().is_operator():
             where_condition = 'and t1.model_id=t2.model_id and (t1.index_id=t2.index_id or t1.is_dynamic=0)'
         sql = "SELECT t1.model_id as model_id, t1.index_id as index_id, t1.op_name as op_name, " \
               "t1.name as hccl_name, " \
               "t1.plane_id as plane_id, t1.args as args, t2.running as timestamp, " \
-              "t2.complete-t2.running as duration, t1.is_dynamic as is_dynamic, t1.task_type as task_type," \
-              " t1.op_type as op_type, t1.begin as first_timestamp " \
-              "from (select op_name, task_type, op_type, model_id, index_id, name, plane_id, args, " \
-              "stream_id, task_id, batch_id, is_dynamic, begin from {0} " \
-              "inner join {1} where timestamp >=begin and timestamp <= end ) t1 " \
+              "t2.complete-t2.running as duration, t1.is_dynamic as is_dynamic, t1.task_type as task_type, " \
+              "t1.op_type as op_type, t1.begin as first_timestamp " \
+              "from (select {0}.op_name, {0}.task_type, {0}.op_type, {0}.model_id, " \
+              "{0}.index_id, {1}.name, {1}.plane_id, {1}.args, " \
+              "{1}.stream_id, {1}.task_id, {1}.batch_id, {0}.is_dynamic, {0}.begin from {0} " \
+              "inner join {1} where {1}.timestamp >={0}.begin and {1}.timestamp <= {0}.end ) t1 " \
               "inner join {task_time_sql} t2 " \
               "on  t1.stream_id = t2.stream_id " \
               "and t1.task_id = t2.task_id " \
               "and t1.batch_id = t2.batch_id {where_condition} " \
               "order by t2.running".format(DBNameConstant.TABLE_HCCL_OP, DBNameConstant.TABLE_HCCL_TASK,
-                                           task_time_sql=task_time_sql_info.select_sql, where_condition=where_condition)
+                                           task_time_sql=task_time_sql, where_condition=where_condition)
         return DBManager.fetch_all_data(self.cur, sql, dto_class=HcclDto)
 
     def get_hccl_op_data(self):

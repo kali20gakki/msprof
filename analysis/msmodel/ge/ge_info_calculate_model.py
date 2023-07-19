@@ -24,7 +24,7 @@ class GeInfoModel(BaseModel):
     STREAM_TASK_BATCH_KEY_FMT = "{0}-{1}-{2}"
 
     def __init__(self: any, result_dir: str) -> None:
-        super(GeInfoModel, self).__init__(result_dir, DBNameConstant.DB_GE_INFO, DBNameConstant.TABLE_GE_TASK)
+        super(GeInfoModel, self).__init__(result_dir, DBNameConstant.DB_GE_INFO, [DBNameConstant.TABLE_GE_TASK])
 
     def check_table(self: any, table_name=DBNameConstant.TABLE_GE_TASK) -> bool:
         """

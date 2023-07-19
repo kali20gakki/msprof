@@ -63,18 +63,21 @@ class AiCoreOpReport:
     MODEL_NAME_INDEX = 0
     INFER_ID_INDEX = 4
     AI_CPU_TABLE = "ai_cpu_datas"
+    INVALID_TASK_TIME = -1
 
     @staticmethod
     def _union_task_ge_ai_core_data(data: list, ai_core_group_dict: dict) -> list:
         union_data = []
         if not ai_core_group_dict or not data:
             return data
+        ai_core_data_len = len(ai_core_group_dict.get(next(iter(ai_core_group_dict)))[0])
         for datum in data:
             # 2 stream id; 1 task id of datum
 
             ai_core_queue = ai_core_group_dict.get(datum[1:3] + (datum[-1],), deque([]))
             if not ai_core_queue:
-                logging.debug("Losing ai core data of stream %d, task %d", datum[2], datum[1])
+                logging.debug("No ai core data of stream %d, task %d", datum[2], datum[1])
+                union_data.append(datum + (Constant.NA,) * ai_core_data_len)
                 continue
             ai_core_datum = ai_core_queue.popleft()
             union_data.append(datum + ai_core_datum)
@@ -153,8 +156,8 @@ class AiCoreOpReport:
         :param configs: info config
         :return: headers and data
         """
-        ai_core_data = cls.get_ai_core_op_summary_data(project_path, db_path, configs)
-        data = cls.get_ai_cpu_op_summary_data(project_path, db_path, ai_core_data, configs)
+        data = cls.get_ai_core_op_summary_data(project_path, db_path, configs)
+        data = cls.get_hardware_op_summary_data(project_path, db_path, data, configs)
         data.extend(cls.get_hccl_op_data(project_path, configs))
         headers = configs.get('headers')
         cls.delete_useless_cols(headers, data)
@@ -163,9 +166,10 @@ class AiCoreOpReport:
         add_aicore_units(headers)
         return headers, task_data, len(task_data)
 
-    @classmethod    
-    def update_device_task_wait_time(cls, headers : list, device_tasks : list) -> list:
-        result = filter(lambda x:x not in headers, [StrConstant.TASK_START_TIME, cls.TASK_DURATION, cls.TASK_WAIT_TIME])
+    @classmethod
+    def update_device_task_wait_time(cls, headers: list, device_tasks: list) -> list:
+        result = filter(lambda x: x not in headers,
+                        [StrConstant.TASK_START_TIME, cls.TASK_DURATION, cls.TASK_WAIT_TIME])
         if list(result):
             logging.error("Op_summary_data don't have start time or duration")
         else:
@@ -177,7 +181,7 @@ class AiCoreOpReport:
                     task[task_wait_time_index] = 0
                     continue
                 task[task_wait_time_index] = max(task[task_start_index] - device_tasks[i - 1][task_start_index] \
-                                            - device_tasks[i - 1][task_duration_index], 0)
+                                                 - device_tasks[i - 1][task_duration_index], 0)
         return device_tasks
 
     @classmethod
@@ -221,7 +225,7 @@ class AiCoreOpReport:
         return hccl_data
 
     @classmethod
-    def get_ai_cpu_op_summary_data(cls: any, project_path: str, db_path: str, *args: any) -> list:
+    def get_hardware_op_summary_data(cls: any, project_path: str, db_path: str, *args: any) -> list:
         """
         get ai cpu op summary data
         :param project_path: project path
@@ -230,10 +234,12 @@ class AiCoreOpReport:
         """
         data, configs = args
         conn, curs = DBManager.check_connect_db_path(db_path)
-        if not cls._check_ai_cpu_data(conn, curs):
-            return data
+        if not conn:
+            return []
+        if not cls._check_op_summary_task_time_table(conn, curs):
+            return []
         try:
-            return cls.get_ai_cpu_data(project_path, curs, data, configs)
+            return cls.get_hardware_op_data(project_path, curs, data, configs)
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as op_err:
             logging.error(str(op_err), exc_info=Constant.TRACE_BACK_SWITCH)
             return data
@@ -241,7 +247,7 @@ class AiCoreOpReport:
             DBManager.destroy_db_connect(conn, curs)
 
     @classmethod
-    def get_ai_cpu_data(cls: any, project_path: str, curs: any, *args: any) -> list:
+    def get_hardware_op_data(cls: any, project_path: str, curs: any, *args: any) -> list:
         """
         ai cpu metric value is N/A
         """
@@ -254,9 +260,9 @@ class AiCoreOpReport:
         header_length = len(configs.get('headers', []))
         na_tag = (Constant.NA,) * (header_length - len(hardware_op_datas[0]))
         if header_length > len(hardware_op_datas[0]):
-            for index, ai_cpu_data in enumerate(hardware_op_datas):
-                ai_cpu_data += na_tag
-                hardware_op_datas[index] = list(ai_cpu_data)
+            for index, hardware_op_data in enumerate(hardware_op_datas):
+                hardware_op_data += na_tag
+                hardware_op_datas[index] = list(hardware_op_data)
         data.extend(hardware_op_datas)
         return data
 
@@ -294,7 +300,7 @@ class AiCoreOpReport:
         :return:
         """
         conn, curs = DBManager.check_connect_db_path(db_path)
-        if not cls._check_op_summary_table_no_op_scene(conn, curs):
+        if not cls._check_op_summary_task_time_table(conn, curs):
             return []
         headers = cls.get_op_summary_header(configs)
         try:
@@ -331,14 +337,11 @@ class AiCoreOpReport:
 
     @classmethod
     def _get_hardware_op_datas(cls: any, curs: any) -> list:
-        aicpu_data = cls._get_hardware_op_sql_data(curs,
-                                                   (Constant.TASK_TYPE_AI_CPU,))
         dvpp_data = cls._get_hardware_op_sql_data(curs, (Constant.TASK_TYPE_DVPP,))
         dsa_data = cls._get_hardware_op_sql_data(curs, (Constant.TASK_TYPE_DSA,))
-        res_list = [None] * (len(aicpu_data) + len(dsa_data) + len(dvpp_data))
-        res_list[:len(aicpu_data)] = aicpu_data
-        res_list[len(aicpu_data): len(aicpu_data) + len(dsa_data)] = dsa_data
-        res_list[len(aicpu_data) + len(dsa_data):] = dvpp_data
+        res_list = [None] * (len(dsa_data) + len(dvpp_data))
+        res_list[:len(dsa_data)] = dsa_data
+        res_list[len(dsa_data): len(dsa_data) + len(dvpp_data)] = dvpp_data
         return res_list
 
     @classmethod
@@ -356,7 +359,7 @@ class AiCoreOpReport:
         return True
 
     @classmethod
-    def _check_op_summary_table_no_op_scene(cls: any, conn: any, curs: any) -> bool:
+    def _check_op_summary_task_time_table(cls: any, conn: any, curs: any) -> bool:
         if not (conn and curs) or not DBManager.judge_table_exist(curs, DBNameConstant.TABLE_SUMMARY_TASK_TIME):
             return False
         return True
@@ -367,8 +370,7 @@ class AiCoreOpReport:
         headers.append(cls.ADDITION_HEADER[0])
         ai_core_group_dict, headers = cls._get_aicore_data(curs, headers)
         hardware_params = (
-            Constant.TASK_TYPE_DVPP, Constant.TASK_TYPE_DSA,
-            Constant.TASK_TYPE_AI_CPU
+            Constant.TASK_TYPE_DVPP, Constant.TASK_TYPE_DSA
         )
         data = DBManager.fetch_all_data(curs, union_sql, hardware_params)
         if not data:
@@ -436,12 +438,13 @@ class AiCoreOpReport:
                "wait_time/{NS_TO_US}, block_dim, mix_block_dim, " \
                "(case when context_id={context_id} then 'N/A' else context_id end) from {0} " \
                "inner join {1} on {0}.task_id={1}.task_id and {0}.stream_id = {1}.stream_id " \
-               "and {0}.task_type = {1}.task_type " \
                "and {1}.task_type!=? and {1}.task_type!=? and {1}.task_type!=? " \
                "and {0}.batch_id={1}.batch_id " \
                "and {1}.context_id={0}.subtask_id " \
+               "and {0}.start_time != {2} " \
                "order by start_time" \
             .format(DBNameConstant.TABLE_SUMMARY_TASK_TIME, DBNameConstant.TABLE_SUMMARY_GE,
+                    cls.INVALID_TASK_TIME,
                     NS_TO_US=NumberConstant.NS_TO_US,
                     context_id=NumberConstant.DEFAULT_GE_CONTEXT_ID,
                     index_info=cls._get_index_id_sql_condition())
@@ -462,9 +465,11 @@ class AiCoreOpReport:
                     "and {0}.stream_id={1}.stream_id " \
                     "and {0}.subtask_id={1}.context_id " \
                     "and {1}.task_type = ? " \
-                    "and {0}.batch_id={1}.batch_id" \
+                    "and {0}.batch_id={1}.batch_id " \
+                    "and {0}.start_time != {2} " \
             .format(DBNameConstant.TABLE_SUMMARY_TASK_TIME,
                     DBNameConstant.TABLE_SUMMARY_GE,
+                    cls.INVALID_TASK_TIME,
                     NS_TO_US=NumberConstant.NS_TO_US,
                     index_info=cls._get_index_id_sql_condition(),
                     context_id=NumberConstant.DEFAULT_GE_CONTEXT_ID)
@@ -480,6 +485,7 @@ class AiCoreOpReport:
                         "and {0}.stream_id={1}.stream_id " \
                         "and {0}.subtask_id={1}.context_id " \
                         "and {1}.task_type = ? " \
+                        "and {0}.start_time != {3} " \
                         "inner join {2} on {0}.task_id={2}.task_id and {0}.stream_id={2}.stream_id " \
                         "and {1}.timestamp={2}.timestamp " \
                         "and {0}.batch_id={2}.batch_id " \
@@ -487,6 +493,7 @@ class AiCoreOpReport:
                 .format(DBNameConstant.TABLE_SUMMARY_TASK_TIME,
                         DBNameConstant.TABLE_SUMMARY_GE,
                         DBNameConstant.TABLE_SUMMARY_TENSOR,
+                        cls.INVALID_TASK_TIME,
                         NS_TO_US=NumberConstant.NS_TO_US,
                         index_info=cls._get_index_id_sql_condition(),
                         context_id=NumberConstant.DEFAULT_GE_CONTEXT_ID)
@@ -503,16 +510,17 @@ class AiCoreOpReport:
               "(case when {1}.context_id={context_id} then 'N/A' else {1}.context_id end) " \
               "from {0} inner join {2} on " \
               "{0}.task_id={2}.task_id and {0}.stream_id={2}.stream_id and {0}.subtask_id={2}.context_id " \
-              "and {0}.task_type = {1}.task_type " \
+              "and {0}.start_time != {3} " \
               "inner join {1} on {0}.task_id={1}.task_id and {0}.stream_id={1}.stream_id " \
               "and {1}.timestamp={2}.timestamp " \
-              "and {1}.task_type != ? and {1}.task_type != ? and {1}.task_type != ? " \
+              "and {1}.task_type != ? and {1}.task_type != ? " \
               "and {0}.batch_id={1}.batch_id " \
               "and {1}.context_id={0}.subtask_id " \
               "order by start_time" \
             .format(DBNameConstant.TABLE_SUMMARY_TASK_TIME,
                     DBNameConstant.TABLE_SUMMARY_GE,
                     DBNameConstant.TABLE_SUMMARY_TENSOR,
+                    cls.INVALID_TASK_TIME,
                     NS_TO_US=NumberConstant.NS_TO_US,
                     context_id=NumberConstant.DEFAULT_GE_CONTEXT_ID,
                     index_info=cls._get_index_id_sql_condition())

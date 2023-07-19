@@ -64,8 +64,8 @@ class SubTaskCalculator(MsMultiProcess):
         subtask_base_sql = "Select end_log.subtask_id as subtask_id, end_log.task_id as task_id," \
                            "end_log.stream_id as stream_id,end_log.subtask_type as subtask_type," \
                            "end_log.ffts_type as ffts_type,start_log.task_time as start_time, " \
-                           "(end_log.task_time-start_log.task_time) as dur_time, 0 as batch_id " \
-                           "from {0} end_log join {0} start_log " \
+                           "(end_log.task_time-start_log.task_time) as dur_time, end_log.task_time as end_time, " \
+                           "0 as batch_id from {0} end_log join {0} start_log " \
                            "on end_log.subtask_id=start_log.subtask_id " \
                            "and end_log.stream_id=start_log.stream_id " \
                            "and end_log.task_id=start_log.task_id " \
