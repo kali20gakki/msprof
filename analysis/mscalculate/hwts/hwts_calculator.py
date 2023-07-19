@@ -107,10 +107,10 @@ class HwtsCalculator(ICalculator, MsMultiProcess):
                 start_log_dict[stream_task_id] = task
         train_data = []
         for task in prep:
-            data_info = [task.stream_id, task.task_id, task.start_time, task.end_time]
+            data_info = [task.stream_id, task.task_id, task.start_time, task.end_time, task.task_type]
             train_data.append(data_info)
             if not ChipManager().is_chip_v2():
-                self._aicpu_collector.filter_aicpu(data_info + [task.task_type])
+                self._aicpu_collector.filter_aicpu(data_info)
         if not ChipManager().is_chip_v2():
             self._aicpu_collector.save_aicpu()
         return sorted(train_data, key=lambda data: data[self.TASK_TIME_COMPLETE_INDEX])
@@ -147,6 +147,7 @@ class HwtsCalculator(ICalculator, MsMultiProcess):
                 prep_data_res[index] = list(datum[:2]) + [
                     InfoConfReader().time_from_syscnt(datum[2]),
                     InfoConfReader().time_from_syscnt(datum[3]),
+                    datum[-1],
                     self._iter_range.iteration_id,
                     self._iter_range.model_id,
                     batch_id]
@@ -176,6 +177,7 @@ class HwtsCalculator(ICalculator, MsMultiProcess):
             result_data.append(
                 list(prep_data_res[index][:2]) + [InfoConfReader().time_from_syscnt(prep_data_res[index][2]),
                                                   InfoConfReader().time_from_syscnt(prep_data_res[index][3]),
+                                                  prep_data_res[index][-1],
                                                   index_id, model_id, batch[0]])
         return result_data
 

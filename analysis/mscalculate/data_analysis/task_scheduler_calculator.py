@@ -81,8 +81,6 @@ class TaskSchedulerCalculator(MsMultiProcess):
             self.generate_report_data()
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
             logging.error(str(err))
-        finally:
-            pass
 
     def create_task_time(self: any, runtime_conn: any, device: int, iter_time_range: list) -> None:
         """

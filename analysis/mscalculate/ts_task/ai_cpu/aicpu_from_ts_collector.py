@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
+import logging
 
 from analyzer.scene_base.profiling_scene import ProfilingScene
 from msmodel.ai_cpu.ai_cpu_model import AiCpuModel
@@ -64,6 +65,9 @@ class AICpuFromTsCollector:
         """
         save ai cpu data
         """
+        if not self.aicpu_list:
+            logging.info("no aicpu data, no need to flush %s", DBNameConstant.TABLE_AI_CPU_FROM_TS)
+            return
         with self._aicpu_model:
             self._aicpu_model.flush(self.aicpu_list, DBNameConstant.TABLE_AI_CPU_FROM_TS)
 
