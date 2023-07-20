@@ -237,7 +237,7 @@ class MsprofDataStorage:
             logging.warning("Read slice config failed: %s", os.path.basename(self.SLICE_CONFIG_PATH))
             return self.DEFAULT_SETTING
         slice_switch = config_json.get('slice_switch', 'on')
-        switch_range = ['on', 'off']
+        switch_range = ('on', 'off')
         if slice_switch not in switch_range:
             logging.warning("slice_switch should be on or off")
             return self.DEFAULT_SETTING

@@ -4,8 +4,8 @@
 
 import logging
 
+from common_func.utils import Utils
 from common_func.msprof_exception import ProfException
-from common_func.msprof_iteration import MsprofIteration
 from common_func.db_name_constant import DBNameConstant
 from msmodel.step_trace.ts_track_model import TsTrackModel
 
@@ -48,6 +48,8 @@ class IterRecorder:
         init self._iter_start_dict and self._iter_end_dict
         :return: tuple(iter_start_dict, iter_end_dict)
         """
+        if not Utils.is_step_scene(self._project_path):
+            return
         with TsTrackModel(self._project_path, DBNameConstant.DB_STEP_TRACE,
                           [DBNameConstant.TABLE_STEP_TRACE_DATA]) as ts_track_model:
             step_trace_data = ts_track_model.get_step_trace_data()
