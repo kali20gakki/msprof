@@ -47,7 +47,8 @@ class TestStarsIterRecParser(unittest.TestCase):
 
     def test_save(self):
         with mock.patch(NAMESPACE + '.HwtsIterModel.flush'), \
-                mock.patch(NAMESPACE + '.GeInfoModel.get_step_trace_data', return_value=[get_step_trace_data()]):
+                mock.patch(NAMESPACE + '.GeInfoModel.get_step_trace_data', return_value=[get_step_trace_data()]), \
+                mock.patch('common_func.utils.Utils.is_step_scene', return_value=True):
             check = StarsIterRecParser(self.stars_file_list, sample_config)
             iter_info = IterInfo(1, 1, 1, 2, 3)
             check._iter_info_dict = {1: iter_info}

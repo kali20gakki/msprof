@@ -429,7 +429,6 @@ class ExportCommand:
                 StrConstant.SAMPLE_CONFIG_PROJECT_PATH: result_dir,
                 StrConstant.PARAM_DEVICE_ID: device,
                 StrConstant.PARAM_ITER_ID: self.iteration_range,
-                StrConstant.PARAM_JOB_ID: MsProfCommonConstant.DEFAULT_JOB,
             }
         else:
             sample_json = {
@@ -438,7 +437,7 @@ class ExportCommand:
         return sample_json
 
     def _has_data_to_export(self):
-        if len(self.list_map.get('export_type_list')) == 0:
+        if not self.list_map.get('export_type_list'):
             return False
         return True
 
@@ -486,16 +485,16 @@ class ExportCommand:
 
         if params.get(StrConstant.PARAM_DEVICE_ID) is not None:
             if params.get(StrConstant.PARAM_DEVICE_ID) == str(NumberConstant.HOST_ID):
+                export_info = 'The {0} {1} data of host for iteration {2} has been ' \
+                              'exported to "{3}".'.format(params.get(StrConstant.PARAM_DATA_TYPE),
+                                                          self.command_type,
+                                                          params.get(StrConstant.PARAM_ITER_ID),
+                                                          data)
+            else:
                 export_info = 'The {0} {1} data of device {2} for iteration {3} has been ' \
                               'exported to "{4}".'.format(params.get(StrConstant.PARAM_DATA_TYPE),
                                                           self.command_type,
                                                           params.get(StrConstant.PARAM_DEVICE_ID),
-                                                          params.get(StrConstant.PARAM_ITER_ID),
-                                                          data)
-            else:
-                export_info = 'The {0} {1} data of host for iteration {2} has been ' \
-                              'exported to "{3}".'.format(params.get(StrConstant.PARAM_DATA_TYPE),
-                                                          self.command_type,
                                                           params.get(StrConstant.PARAM_ITER_ID),
                                                           data)
         print_info(self.FILE_NAME, export_info)
@@ -536,7 +535,6 @@ class ExportCommand:
             StrConstant.PARAM_DATA_TYPE: export_data_type,
             StrConstant.PARAM_RESULT_DIR: result_dir,
             StrConstant.PARAM_DEVICE_ID: device_id,
-            StrConstant.PARAM_JOB_ID: MsProfCommonConstant.DEFAULT_JOB,
             StrConstant.PARAM_EXPORT_TYPE: self.command_type,
             StrConstant.PARAM_ITER_ID: self.iteration_range,
             StrConstant.PARAM_EXPORT_FORMAT: self.export_format,

@@ -105,7 +105,6 @@ class MsProfExportDataUtils:
         """
         if params.get(StrConstant.PARAM_EXPORT_TYPE) == MsProfCommonConstant.TIMELINE:
             message = {
-                "job_id": params.get(StrConstant.PARAM_JOB_ID),
                 "host_id": MsProfCommonConstant.DEFAULT_IP,
                 "device_id": params.get(StrConstant.PARAM_DEVICE_ID),
                 "iter_id": params.get(StrConstant.PARAM_ITER_ID),
@@ -120,7 +119,6 @@ class MsProfExportDataUtils:
             return get_task_scheduler_data(db_path, configs.get(StrConstant.CONFIG_TABLE), configs,
                                            params)
         message = {
-            'job_id': params.get(StrConstant.PARAM_JOB_ID),
             'host_id': MsProfCommonConstant.DEFAULT_IP,
             'device_id': params.get(StrConstant.PARAM_DEVICE_ID),
             'result_dir': params.get(StrConstant.PARAM_RESULT_DIR)
@@ -261,7 +259,6 @@ class MsProfExportDataUtils:
         get training trace data for desired job ID
         """
         message = {
-            "job_id": params.get(StrConstant.PARAM_JOB_ID),
             "device_id": params.get(StrConstant.PARAM_DEVICE_ID),
             'host_id': MsProfCommonConstant.DEFAULT_IP,
             'project_path': params.get(StrConstant.PARAM_RESULT_DIR)
