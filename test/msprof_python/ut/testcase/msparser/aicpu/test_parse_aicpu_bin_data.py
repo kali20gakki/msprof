@@ -35,7 +35,8 @@ class TestParseAiCpuBinData(unittest.TestCase):
                     mock.patch('common_func.msprof_iteration.Utils.is_step_scene', return_value=True), \
                     mock.patch('common_func.utils.Utils.get_scene', return_value=''), \
                     mock.patch('msmodel.step_trace.ts_track_model.TsTrackModel.get_step_trace_data',
-                               return_value=[get_step_trace_data()]):
+                               return_value=[get_step_trace_data()]), \
+                    mock.patch('common_func.utils.Utils.is_step_scene', return_value=True):
                 check = ParseAiCpuBinData(self.file_list, CONFIG)
                 InfoConfReader()._info_json = {"DeviceInfo": [{'hwts_frequency': 100}]}
                 check.read_binary_data('DATA_PREPROCESS.AICPU.7.slice_0')
