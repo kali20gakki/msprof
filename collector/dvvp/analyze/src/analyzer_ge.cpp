@@ -540,7 +540,7 @@ void AnalyzerGe::MatchApiInfoByNodeInfo(const uint32_t &threadId, struct GeOpFla
             nodeInfo.erase(node++);
             std::string nodeName = HashData::instance()->GetHashInfo(info.opNameHash);
             MSPROF_LOGD("Success to match ge opinfo data and insert in map."
-                "Key: %u, start: %llu, end: %llu, name: %s, context: %u.", info,
+                "Key: %u, start: %llu, end: %llu, name: %s, context: %u.", threadId,
                 info.start, info.end, nodeName.c_str(), info.contextId);
             AnalyzerBase::geOpInfo_.insert(std::pair<uint32_t, GeOpFlagInfo>(threadId, info));
             totalGeMerges_++;
