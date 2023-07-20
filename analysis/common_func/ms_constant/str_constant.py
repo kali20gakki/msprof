@@ -39,7 +39,6 @@ class StrConstant:
     PARAM_DEVICE_ID = "device_id"
     PARAM_MODEL_ID = "model_id"
     PARAM_ITER_ID = "iter_id"
-    PARAM_JOB_ID = "job_id"
     PARAM_EXPORT_TYPE = "export_type"
     PARAM_EXPORT_FORMAT = "export_format"
 

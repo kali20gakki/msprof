@@ -39,7 +39,8 @@ class TestNoGeIterRecParser(unittest.TestCase):
         step_trace_dto.step_end = 101
         step_trace_dto.iter_id = 1
         with mock.patch('msmodel.step_trace.ts_track_model.TsTrackModel.get_step_trace_data',
-                        return_value=[step_trace_dto]):
+                        return_value=[step_trace_dto]), \
+                mock.patch('common_func.utils.Utils.is_step_scene', return_value=True):
             check = NoGeIterRecParser(self.file_list, CONFIG)
             check._iter_recorder.set_current_iter_id(100)
         with mock.patch(NAMESPACE + '.logging.error'), \
@@ -63,7 +64,8 @@ class TestNoGeIterRecParser(unittest.TestCase):
                 mock.patch(
                     "msparser.iter_rec.iter_info_updater.iter_info_updater.IterInfoUpdater.update_count_and_offset"), \
                 mock.patch("msmodel.step_trace.ts_track_model.TsTrackModel.get_step_trace_data",
-                           return_value=[get_step_trace_data()]):
+                           return_value=[get_step_trace_data()]), \
+                mock.patch('common_func.utils.Utils.is_step_scene', return_value=True):
             check = NoGeIterRecParser(self.file_list, CONFIG)
             check._read_hwts_data(bytes(data))
 

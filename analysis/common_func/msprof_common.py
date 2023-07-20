@@ -34,7 +34,6 @@ class MsProfCommonConstant:
     DEFAULT_IP = '127.0.0.1'
     SUMMARY = "summary"
     TIMELINE = "timeline"
-    DEFAULT_JOB = 'job_default'
     COMMON_FILE_NAME = os.path.basename(__file__)
 
     # key for the query data
