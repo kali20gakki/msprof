@@ -47,9 +47,7 @@ class DeviceTaskCollector:
 
     @classmethod
     def _generate_device_task_objs(cls: any, raw_data: list) -> List[DeviceTask]:
-        return [
-            DeviceTask(*data) for data in raw_data
-        ]
+        return [DeviceTask(*data) for data in raw_data]
 
     def get_all_device_tasks(self: any) -> List[DeviceTask]:
         if not self._check_device_data_db_exists():

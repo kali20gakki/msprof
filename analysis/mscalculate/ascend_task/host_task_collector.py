@@ -19,9 +19,7 @@ class HostTaskCollector:
 
     @classmethod
     def _generate_host_task_objs(cls: any, raw_data: list):
-        return [
-            HostTask(*data) for data in raw_data
-        ]
+        return [HostTask(*data) for data in raw_data]
 
     @classmethod
     def _filter_dev_visible_host_tasks(cls: any, all_host_tasks: List[HostTask],
