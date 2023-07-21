@@ -46,25 +46,28 @@ class TensorAddInfoParser(DataParser, MsMultiProcess):
             'thread_id': data[2],
             'timestamp': data[3],
             'node_id': data[4],
-            'tensor_num': data[5],
-            'input_format': data[6],
-            'input_data_type': data[7],
-            'input_shape': data[8],
-            'output_format': data[9],
-            'output_data_type': data[10],
-            'output_shape': data[11],
+            'tensor_num': 0,
+            'input_format': [],
+            'input_data_type': [],
+            'input_shape': [],
+            'output_format': [],
+            'output_data_type': [],
+            'output_shape': [],
         }
+        cls._update_hash_dict_data(hash_dict, key, data)
 
     @classmethod
     def _update_hash_dict_data(cls: any, hash_dict: dict, key: any, data: list) -> None:
         value = hash_dict.get(key, {})
         value['tensor_num'] += data[5]
-        value['input_format'] = '{0};{1}'.format(value['input_format'], str(data[6]) if data[6] else '')
-        value['input_data_type'] = '{0};{1}'.format(value['input_data_type'], str(data[7]) if data[7] else '')
-        value['input_shape'] = '{0};{1}'.format(value['input_shape'], str(data[8]) if data[8] else '')
-        value['output_format'] = '{0};{1}'.format(value['output_format'], str(data[9]) if data[9] else '')
-        value['output_data_type'] = '{0};{1}'.format(value['output_data_type'], str(data[10]) if data[10] else '')
-        value['output_shape'] = '{0};{1}'.format(value['output_shape'], str(data[11]) if data[11] else '')
+        if data[6] or data[7] or data[8]:
+            value['input_format'].append(str(data[6]) if data[6] else '')
+            value['input_data_type'].append(str(data[7]) if data[7] else '')
+            value['input_shape'].append(str(data[8]) if data[8] else '')
+        if data[9] or data[10] or data[11]:
+            value['output_format'].append(str(data[9]) if data[9] else '')
+            value['output_data_type'].append(str(data[10]) if data[10] else '')
+            value['output_shape'].append(str(data[11]) if data[11] else '')
         hash_dict[key] = value
 
     def parse(self: any) -> None:
@@ -128,9 +131,9 @@ class TensorAddInfoParser(DataParser, MsMultiProcess):
             self._ge_tensor_info_data.append(
                 [
                     value['level'], value['add_info_type'], thread_id, timestamp, node_id, value['tensor_num'],
-                    value['input_format'], value['input_data_type'], "\"" + value['input_shape'] + "\"",
-                    value['output_format'],
-                    value['output_data_type'], "\"" + value['output_shape'] + "\""
+                    ";".join(value['input_format']), ";".join(value['input_data_type']),
+                    "\"" + ";".join(value['input_shape']) + "\"", ";".join(value['output_format']),
+                    ";".join(value['output_data_type']), "\"" + ";".join(value['output_shape']) + "\""
                 ]
             )
 
