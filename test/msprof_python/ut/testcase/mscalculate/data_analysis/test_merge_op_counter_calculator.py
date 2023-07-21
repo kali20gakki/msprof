@@ -149,6 +149,7 @@ class TestMergeOpCounterCalculator(unittest.TestCase):
                          "and ge_task_merge.batch_id=rts_task.batch_id "
                          "and (ge_task_merge.context_id=rts_task.subtask_id "
                          "or (ge_task_merge.context_id=4294967295 and subtask_id=0)) "
+                         "and rts_task.start_time != -1 "
                          "group by op_type,ge_task_merge.task_type",
                          result)
 
