@@ -103,6 +103,7 @@ class NumberConstant:
     DEFAULT_GE_CONTEXT_ID = 4294967295
 
     # invalid id
+    INVALID_TASK_TIME = -1
     INVALID_STREAM_ID = -1
     INVALID_TASK_ID = -1
     INVALID_OP_EXE_TIME = -1
