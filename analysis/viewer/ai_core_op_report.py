@@ -63,7 +63,6 @@ class AiCoreOpReport:
     MODEL_NAME_INDEX = 0
     INFER_ID_INDEX = 4
     AI_CPU_TABLE = "ai_cpu_datas"
-    INVALID_TASK_TIME = -1
 
     @staticmethod
     def _union_task_ge_ai_core_data(data: list, ai_core_group_dict: dict) -> list:
@@ -444,7 +443,7 @@ class AiCoreOpReport:
                "and {0}.start_time != {2} " \
                "order by start_time" \
             .format(DBNameConstant.TABLE_SUMMARY_TASK_TIME, DBNameConstant.TABLE_SUMMARY_GE,
-                    cls.INVALID_TASK_TIME,
+                    NumberConstant.INVALID_TASK_TIME,
                     NS_TO_US=NumberConstant.NS_TO_US,
                     context_id=NumberConstant.DEFAULT_GE_CONTEXT_ID,
                     index_info=cls._get_index_id_sql_condition())
@@ -469,7 +468,7 @@ class AiCoreOpReport:
                     "and {0}.start_time != {2} " \
             .format(DBNameConstant.TABLE_SUMMARY_TASK_TIME,
                     DBNameConstant.TABLE_SUMMARY_GE,
-                    cls.INVALID_TASK_TIME,
+                    NumberConstant.INVALID_TASK_TIME,
                     NS_TO_US=NumberConstant.NS_TO_US,
                     index_info=cls._get_index_id_sql_condition(),
                     context_id=NumberConstant.DEFAULT_GE_CONTEXT_ID)
@@ -493,7 +492,7 @@ class AiCoreOpReport:
                 .format(DBNameConstant.TABLE_SUMMARY_TASK_TIME,
                         DBNameConstant.TABLE_SUMMARY_GE,
                         DBNameConstant.TABLE_SUMMARY_TENSOR,
-                        cls.INVALID_TASK_TIME,
+                        NumberConstant.INVALID_TASK_TIME,
                         NS_TO_US=NumberConstant.NS_TO_US,
                         index_info=cls._get_index_id_sql_condition(),
                         context_id=NumberConstant.DEFAULT_GE_CONTEXT_ID)
@@ -520,7 +519,7 @@ class AiCoreOpReport:
             .format(DBNameConstant.TABLE_SUMMARY_TASK_TIME,
                     DBNameConstant.TABLE_SUMMARY_GE,
                     DBNameConstant.TABLE_SUMMARY_TENSOR,
-                    cls.INVALID_TASK_TIME,
+                    NumberConstant.INVALID_TASK_TIME,
                     NS_TO_US=NumberConstant.NS_TO_US,
                     context_id=NumberConstant.DEFAULT_GE_CONTEXT_ID,
                     index_info=cls._get_index_id_sql_condition())
