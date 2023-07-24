@@ -363,8 +363,8 @@ void DynProfMngSrv::StopDynProfSrv()
         return;
     }
     // notify client
-    dynProfSrv_->NotifyClientDisconnet("Server process exit.");
     if (dynProfSrv_ != nullptr) {
+        dynProfSrv_->NotifyClientDisconnet("Server process exit.");
         (void)dynProfSrv_->Stop();
     }
     started_ = false;
