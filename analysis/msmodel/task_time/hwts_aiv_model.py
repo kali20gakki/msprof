@@ -1,12 +1,15 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
-
+import logging
 import os
 
+from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
+from common_func.ms_constant.number_constant import NumberConstant
 from common_func.path_manager import PathManager
 from msmodel.interface.parser_model import ParserModel
+from msmodel.interface.sql_helper import SqlWhereCondition
 
 
 class HwtsAivModel(ParserModel):
@@ -43,3 +46,17 @@ class HwtsAivModel(ParserModel):
         """
         if os.path.exists(PathManager.get_db_path(self.result_dir, DBNameConstant.DB_HWTS_AIV)):
             os.remove(PathManager.get_db_path(self.result_dir, DBNameConstant.DB_HWTS_AIV))
+
+    def get_hwts_aiv_data_within_time_range(self: any, start_time: float, end_time: float) -> list:
+        # in this chip subtask_id is always 0xffffffff
+        sql = "select {1}.stream_id, {1}.task_id, {0}, {1}.running as start_time, " \
+              "{1}.complete - {1}.running as duration_time, {1}.task_type from {1} " \
+              "{2} order by start_time" \
+            .format(NumberConstant.DEFAULT_GE_CONTEXT_ID, DBNameConstant.TABLE_HWTS_TASK_TIME,
+                    SqlWhereCondition.get_interval_intersection_condition(
+                        start_time, end_time, DBNameConstant.TABLE_HWTS_TASK_TIME, "running", "complete"))
+        device_tasks = DBManager.fetch_all_data(self.cur, sql)
+        if not device_tasks:
+            logging.error("get device task from %s.%s error",
+                          DBNameConstant.DB_HWTS_AIV, DBNameConstant.TABLE_HWTS_TASK_TIME)
+        return device_tasks

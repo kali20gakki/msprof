@@ -15,6 +15,7 @@ from mscalculate.ascend_task.ascend_task import DeviceTask
 from msmodel.ai_cpu.ai_cpu_model import AiCpuModel
 from msmodel.stars.acsq_task_model import AcsqTaskModel
 from msmodel.stars.ffts_log_model import FftsLogModel
+from msmodel.task_time.hwts_aiv_model import HwtsAivModel
 from msmodel.task_time.hwts_log_model import HwtsLogModel
 from msmodel.task_time.runtime_task_time_model import RuntimeTaskTimeModel
 from profiling_bean.db_dto.step_trace_dto import IterationRange
@@ -38,7 +39,7 @@ class DeviceTaskCollector:
         self.check_dbs = {
             ChipModel.CHIP_V1_1_0: [DBNameConstant.DB_RUNTIME],
             ChipModel.CHIP_V2_1_0: [DBNameConstant.DB_HWTS, DBNameConstant.DB_AI_CPU],
-            ChipModel.CHIP_V3_1_0: [DBNameConstant.DB_HWTS],
+            ChipModel.CHIP_V3_1_0: [DBNameConstant.DB_HWTS, DBNameConstant.DB_HWTS_AIV],
             ChipModel.CHIP_V3_2_0: [DBNameConstant.DB_HWTS],
             ChipModel.CHIP_V3_3_0: [DBNameConstant.DB_HWTS],
             ChipModel.CHIP_V4_1_0: [DBNameConstant.DB_SOC_LOG],
@@ -80,6 +81,19 @@ class DeviceTaskCollector:
 
         with HwtsLogModel(self.result_dir) as model:
             device_tasks = model.get_hwts_data_within_time_range(start_time, end_time)
+            return self._generate_device_task_objs(device_tasks)
+
+    def _gather_device_tasks_from_hwts_aiv(self: any, start_time: float, end_time: float) -> List[DeviceTask]:
+        """
+        gather all device tasks in hwts_aiv.
+        """
+        db_path = PathManager.get_db_path(self.result_dir, DBNameConstant.DB_HWTS_AIV)
+        if not os.path.exists(db_path):
+            logging.warning("no db %s found", DBNameConstant.DB_HWTS_AIV)
+            return []
+
+        with HwtsAivModel(self.result_dir, [DBNameConstant.TABLE_HWTS_TASK_TIME]) as model:
+            device_tasks = model.get_hwts_aiv_data_within_time_range(start_time, end_time)
             return self._generate_device_task_objs(device_tasks)
 
     def _gather_ai_cpu_device_tasks_from_ts(self: any, start_time: float, end_time: float) -> List[DeviceTask]:
@@ -145,9 +159,14 @@ class DeviceTaskCollector:
 
     def _gather_chip_v3_device_tasks(self: any, start_time: float, end_time: float) -> List[DeviceTask]:
         # in this chip ai_core and ai_cpu data will be uploaded in hwts data
-        device_tasks = self._gather_device_tasks_from_hwts(start_time, end_time)
+        ai_core_ai_cpu_tasks = self._gather_device_tasks_from_hwts(start_time, end_time)
+        # these tasks only take effects in CHIP_V3_1_0
+        aiv_tasks = self._gather_device_tasks_from_hwts_aiv(start_time, end_time)
+
+        device_tasks = [*ai_core_ai_cpu_tasks, *aiv_tasks]
+
         if not device_tasks:
-            logging.error("no aicore and ai_cpu device task found.")
+            logging.error("no aic, aiv and ai_cpu device task found.")
         return device_tasks
 
     def _gather_chip_stars_device_tasks(self: any, start_time: float, end_time: float) -> List[DeviceTask]:
