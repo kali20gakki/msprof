@@ -37,6 +37,18 @@ class TestDeviceTaskCollector(unittest.TestCase):
             tasks = collector._gather_device_tasks_from_hwts(0, 1)
             self.assertEqual(len(tasks), 1)
 
+    def test__gather_device_tasks_from_hwts_aiv_when_data_exists(self):
+        collector = DeviceTaskCollector(self.PROF_DIR)
+        tasks = collector._gather_device_tasks_from_hwts_aiv(float("-inf"), float("inf"))
+        self.assertEqual(tasks, [])
+
+        with mock.patch("os.path.exists", return_value=True), \
+                mock.patch(NAMESPACE + '.HwtsAivModel.get_hwts_aiv_data_within_time_range',
+                           return_value=[[1, 2, 4294967295, 1000, 2000, ""]]):
+            collector = DeviceTaskCollector(self.PROF_DIR)
+            tasks = collector._gather_device_tasks_from_hwts_aiv(0, 1)
+            self.assertEqual(len(tasks), 1)
+
     def test__gather_ai_cpu_device_tasks_from_ts_when_data_exists(self):
         collector = DeviceTaskCollector(self.PROF_DIR)
         tasks = collector._gather_ai_cpu_device_tasks_from_ts(float("-inf"), float("inf"))
@@ -125,7 +137,9 @@ class TestDeviceTaskCollector(unittest.TestCase):
     def test__gather_chip_v3_device_tasks_should_return_0_task_when_no_hwts_task(self):
         collector = DeviceTaskCollector(self.PROF_DIR)
         with mock.patch(NAMESPACE + '.DeviceTaskCollector._gather_device_tasks_from_hwts',
-                        return_value=[]):
+                        return_value=[]), \
+                mock.patch(NAMESPACE + '.DeviceTaskCollector._gather_device_tasks_from_hwts_aiv',
+                           return_value=[]):
             tasks = collector._gather_chip_v3_device_tasks(float("-inf"), float("inf"))
             self.assertEqual(len(tasks), 0)
 
