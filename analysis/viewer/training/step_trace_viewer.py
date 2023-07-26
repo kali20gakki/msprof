@@ -262,10 +262,11 @@ class StepTraceViewer:
         """
         if DBManager.judge_table_exist(conn.cursor(), DBNameConstant.TABLE_ALL_REDUCE):
             reduce_data = conn.cursor().execute(
-                "select count(*) from  {0} where device_id=?"
-                " group by iteration_end, model_id;".format(DBNameConstant.TABLE_ALL_REDUCE),
+                "select max(count) from "
+                "(select count(*) as count from  {0} where device_id=?"
+                " group by iteration_end, model_id);".format(DBNameConstant.TABLE_ALL_REDUCE),
                 (message["device_id"],)).fetchone()
-            if reduce_data:
+            if reduce_data[0]:
                 headers += ["Reduce Start", "Reduce Duration(us)"] * \
                            int(reduce_data[0])
 

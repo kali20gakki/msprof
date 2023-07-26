@@ -56,6 +56,57 @@ def create_trace_db():
 
 class TestStepTraceViewer(unittest.TestCase):
 
+    def test_add_reduce_headers_should_return_headers_with_length_is_1(self):
+        test_message = {'job_id': 'job_default', 'device_id': '4'}
+        headers = ["Model ID"]
+        db_manager = DBManager()
+        if os.path.exists(os.path.join(db_manager.db_path, DB_TRACE)):
+            os.remove(os.path.join(db_manager.db_path, DB_TRACE))
+        sql = "create table if not exists {0}(host_id int, device_id int," \
+              "iteration_end int, start int, start_stream int, start_task int," \
+              "end int, end_stream int, end_task int, model_id int default 0)".format(
+            TABLE_ALL_REDUCE)
+        conn, cur = db_manager.create_table(DB_TRACE, sql)
+
+        StepTraceViewer.add_reduce_headers(conn, headers, test_message)
+        conn.close()
+
+        if os.path.exists(db_manager.db_name):
+            os.remove(db_manager.db_name)
+        self.assertEqual(len(headers), 1)
+
+    def test_add_reduce_headers_should_return_headers_with_length_is_5(self):
+        test_message = {'job_id': 'job_default', 'device_id': '4'}
+        headers = ["Model ID"]
+        db_manager, conn, curs = create_trace_db()
+
+        StepTraceViewer.add_reduce_headers(conn, headers, test_message)
+        conn.close()
+
+        if os.path.exists(db_manager.db_name):
+            os.remove(db_manager.db_name)
+        self.assertEqual(len(headers), 5)
+
+    def test_add_reduce_headers_should_return_headers_with_length_is_11(self):
+        data = (
+            ('127.0.0.1', 4, 1013981571636, 1013980654091, 70, 4, 1013981072280, 70, 103, 0),
+            ('127.0.0.1', 4, 1013981571636, 1013981251417, 72, 6, 1013981476623, 72, 105, 0),
+            ('127.0.0.1', 4, 1013981571636, 1013983452167, 74, 8, 1013981476623, 74, 107, 0),
+        )
+        test_message = {'job_id': 'job_default', 'device_id': '4'}
+        headers = ["Model ID"]
+        db_manager, conn, curs = create_trace_db()
+        insert_sql = "insert into {0} values ({value})".format(
+            TABLE_ALL_REDUCE, value="?," * (len(data[0]) - 1) + "?")
+        db_manager._insert_data(insert_sql, data)
+
+        StepTraceViewer.add_reduce_headers(conn, headers, test_message)
+        conn.close()
+
+        if os.path.exists(db_manager.db_name):
+            os.remove(db_manager.db_name)
+        self.assertEqual(len(headers), 11)
+
     def test_get_step_trace_summary(self):
         message1 = {'job_id': 'job_default', 'device_id': '4'}
         InfoJsonReaderManager(info_json=InfoJson(devices='0', DeviceInfo=[
@@ -105,7 +156,7 @@ class TestStepTraceViewer(unittest.TestCase):
         db_manager.conn.close()
 
         self.assertEqual(len(res), 73)
-        
+
     def test_reformat_step_trace_data(self):
         data_list = [
             (1, 4223700155120, 4223701928137, 4223701928704, 35557.520000000004, 35460.340000000004, 11.34, 'N/A', 1)
@@ -125,11 +176,11 @@ class TestStepTraceViewer(unittest.TestCase):
         ]
         get_next_value = [
             (189746300646091, 189746300646091),
-            (189746300646091, ),
+            (189746300646091,),
         ]
         all_reduce_value = [
             (189746300646091, 189746300646091),
-            (189746300646091, ),
+            (189746300646091,),
         ]
         InfoConfReader()._info_json = {"pid": 0}
         with mock.patch(NAMESPACE + '.StepTraceViewer._StepTraceViewer__select_getnext', return_value=get_next_value), \
@@ -145,4 +196,3 @@ class TestStepTraceViewer(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-
