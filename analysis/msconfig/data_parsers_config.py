@@ -7,14 +7,6 @@ from msconfig.meta_config import MetaConfig
 
 class DataParsersConfig(MetaConfig):
     DATA = {
-        'GeModelInfoParser': [
-            ('path', 'msparser.ge.ge_model_parser'),
-            ('chip_model', '0,1,2,3,4,5,7')
-        ],
-        'GeModelTimeParser': [
-            ('path', 'msparser.ge.ge_model_time_parser'),
-            ('chip_model', '0,1,2,3,4,5,7')
-        ],
         'GeHashParser': [
             ('path', 'msparser.ge.ge_hash_parser'),
             ('chip_model', '0,1,2,3,4,5,7')
