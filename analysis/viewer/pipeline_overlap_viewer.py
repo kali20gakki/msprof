@@ -45,9 +45,7 @@ class PipelineOverlapViewer:
             'model_id': Constant.DEFAULT_INVALID_VALUE
         }
         with OpSummaryModel(sample_config) as _model:
-            ai_core_data = _model.get_operator_data_by_task_type(Constant.TASK_TYPE_AI_CORE)
-            ai_cpu_data = _model.get_operator_data_by_task_type(Constant.TASK_TYPE_AI_CPU)
-        compute_data = SectionCalculator.merge_continuous_intervals(ai_core_data + ai_cpu_data)
+            compute_data = SectionCalculator.merge_continuous_intervals(_model.get_operator_data_by_task_type())
         result.extend(self._format_timeline_data(OverlapType.COMPUTE_TIME, data) for data in compute_data)
 
         if not os.path.exists(PathManager.get_db_path(self._project_path, DBNameConstant.DB_HCCL)):

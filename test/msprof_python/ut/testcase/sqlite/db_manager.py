@@ -29,6 +29,10 @@ class DBOpen:
             return None, None
 
     @property
+    def db_path(self):
+        return self._db_path
+
+    @property
     def db_conn(self):
         return self._conn
 

@@ -6,6 +6,7 @@ import logging
 import sqlite3
 
 from common_func.common import CommonConstant
+from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.path_manager import PathManager
@@ -20,6 +21,12 @@ class OpSummaryModel(ViewModel, IAnalysisModel):
     """
     class used to operate summary db
     """
+
+    COMPUTED_TASK_TYPE = (
+        Constant.TASK_TYPE_AI_CORE, Constant.TASK_TYPE_AI_CPU,
+        Constant.TASK_TYPE_AIV, Constant.TASK_TYPE_MIX_AIV,
+        Constant.TASK_TYPE_MIX_AIC
+    )
 
     def __init__(self: any, sample_config: dict) -> None:
         super().__init__(sample_config.get("result_dir"), DBNameConstant.DB_AICORE_OP_SUMMARY, [])
@@ -125,7 +132,7 @@ class OpSummaryModel(ViewModel, IAnalysisModel):
     def get_timeline_data(self: any) -> str:
         return self.__module__
 
-    def get_operator_data_by_task_type(self: any, task_type: str) -> list:
+    def get_operator_data_by_task_type(self: any, task_type: tuple = COMPUTED_TASK_TYPE) -> list:
         db_path = PathManager.get_db_path(self.result_dir, DBNameConstant.DB_AICORE_OP_SUMMARY)
         if not DBManager.check_tables_in_db(db_path, DBNameConstant.TABLE_SUMMARY_TASK_TIME,
                                             DBNameConstant.TABLE_SUMMARY_GE):
@@ -140,9 +147,13 @@ class OpSummaryModel(ViewModel, IAnalysisModel):
         sql = "SELECT a.stream_id, op_name, b.task_type, start_time, duration_time, " \
               "start_time+duration_time as end_time FROM {0} a INNER JOIN {1} b " \
               "on a.stream_id=b.stream_id and a.task_id=b.task_id and a.batch_id=b.batch_id {2} " \
-              "and b.task_type=?".format(DBNameConstant.TABLE_SUMMARY_TASK_TIME, DBNameConstant.TABLE_SUMMARY_GE,
-                                         inner_join_condition)
-        return DBManager.fetch_all_data(self.cur, sql, (task_type,), dto_class=TimeSectionDto)
+              "and a.task_type<>'{unknown}' and b.task_type in ({value})".format(
+                DBNameConstant.TABLE_SUMMARY_TASK_TIME,
+                DBNameConstant.TABLE_SUMMARY_GE,
+                inner_join_condition,
+                unknown=Constant.TASK_TYPE_UNKNOWN,
+                value=('?,' * (len(task_type) - 1) + '?'))
+        return DBManager.fetch_all_data(self.cur, sql, task_type, dto_class=TimeSectionDto)
 
     def _get_ge_sql(self: any) -> tuple:
         ge_sql = "SELECT model_id, task_id, stream_id, " \

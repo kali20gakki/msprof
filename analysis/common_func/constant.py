@@ -439,6 +439,7 @@ class Constant:
     TASK_TYPE_HCCL = "HCCL"
     TASK_TYPE_DSA = "DSA_SQE"
     TASK_TYPE_DVPP = "DVPP"
+    TASK_TYPE_UNKNOWN = "UnKnown"
     DATA_PROCESS_DP = "DP"
     DATA_QUEUE = "AICPUMI"
     TASK_TYPE = 'task_type'

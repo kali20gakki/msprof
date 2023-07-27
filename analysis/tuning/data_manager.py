@@ -66,8 +66,8 @@ class OpParallelTuningDataHandle(BaseTuningDataHandle):
             'model_id': Constant.DEFAULT_INVALID_VALUE
         }
         with OpSummaryModel(sample_config) as _model:
-            ai_core_data = _model.get_operator_data_by_task_type(Constant.TASK_TYPE_AI_CORE)
-            ai_cpu_data = _model.get_operator_data_by_task_type(Constant.TASK_TYPE_AI_CPU)
+            ai_core_data = _model.get_operator_data_by_task_type((Constant.TASK_TYPE_AI_CORE,))
+            ai_cpu_data = _model.get_operator_data_by_task_type((Constant.TASK_TYPE_AI_CPU,))
         if not ai_core_data or not ai_cpu_data:
             return op_parallel_data
         ai_core_data = SectionCalculator.merge_continuous_intervals(ai_core_data)
