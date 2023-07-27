@@ -64,6 +64,79 @@ class TestTensorAddInfoParser(unittest.TestCase):
         result = check._get_tensor_info_data(data)
         self.assertEqual(result, ['node', '0', 0, 0, '0', 0, '', '', '', '', '', ''])
 
+    def test_update_tensor_data_should_return_correct_tensor_info_when_missing_initial_input(self):
+        expected_result = [
+            [1, 2, '3', '4', '5', 3, '7', '8', '"9"', '10;10', '11;11', '"12;12"']
+        ]
+        check = TensorAddInfoParser(self.file_list, CONFIG)
+        HashDictData('test')._type_hash_dict = {'node': {}}
+        HashDictData('test')._ge_hash_dict = {}
+        check._ge_tensor_info_data = [
+            [1, 2, 3, 4, 5, 1, '', '', '', 10, 11, 12],
+            [1, 2, 3, 4, 5, 2, 7, 8, 9, 10, 11, 12]
+        ]
+        check._update_tensor_data()
+        self.assertEqual(check._ge_tensor_info_data, expected_result)
+
+    def test_update_tensor_data_should_return_correct_tensor_info_when_missing_initial_output(self):
+        expected_result = [
+            [1, 2, '3', '4', '5', 3, '7;7', '8;8', '"9;9"', '10', '11', '"12"']
+        ]
+        check = TensorAddInfoParser(self.file_list, CONFIG)
+        HashDictData('test')._type_hash_dict = {'node': {}}
+        HashDictData('test')._ge_hash_dict = {}
+        check._ge_tensor_info_data = [
+            [1, 2, 3, 4, 5, 1, 7, 8, 9, '', '', ''],
+            [1, 2, 3, 4, 5, 2, 7, 8, 9, 10, 11, 12]
+        ]
+        check._update_tensor_data()
+        self.assertEqual(check._ge_tensor_info_data, expected_result)
+
+    def test_update_tensor_data_should_return_correct_tensor_info_when_missing_input(self):
+        expected_result = [
+            [1, 2, '3', '4', '5', 3, '7', '8', '"9"', '10;10', '11;11', '"12;12"']
+        ]
+        check = TensorAddInfoParser(self.file_list, CONFIG)
+        HashDictData('test')._type_hash_dict = {'node': {}}
+        HashDictData('test')._ge_hash_dict = {}
+        check._ge_tensor_info_data = [
+            [1, 2, 3, 4, 5, 2, 7, 8, 9, 10, 11, 12],
+            [1, 2, 3, 4, 5, 1, '', '', '', 10, 11, 12]
+        ]
+        check._update_tensor_data()
+        self.assertEqual(check._ge_tensor_info_data, expected_result)
+
+    def test_update_tensor_data_should_return_correct_tensor_info_when_missing_output(self):
+        expected_result = [
+            [1, 2, '3', '4', '5', 3, '7;7', '8;8', '"9;9"', '10', '11', '"12"']
+        ]
+        check = TensorAddInfoParser(self.file_list, CONFIG)
+        HashDictData('test')._type_hash_dict = {'node': {}}
+        HashDictData('test')._ge_hash_dict = {}
+        check._ge_tensor_info_data = [
+            [1, 2, 3, 4, 5, 2, 7, 8, 9, 10, 11, 12],
+            [1, 2, 3, 4, 5, 1, 7, 8, 9, '', '', '']
+        ]
+        check._update_tensor_data()
+        self.assertEqual(check._ge_tensor_info_data, expected_result)
+
+    def test_update_tensor_data_should_return_correct_tensor_info_when_missing_intermediate_output(self):
+        expected_result = [
+            [1, 2, '3', '4', '5', 6, '7;7;7', '8;8;8', '"9;9;9"', '10;10;10', '11;11;11', '"12;12;12"']
+        ]
+        check = TensorAddInfoParser(self.file_list, CONFIG)
+        HashDictData('test')._type_hash_dict = {'node': {}}
+        HashDictData('test')._ge_hash_dict = {}
+        check._ge_tensor_info_data = [
+            [1, 2, 3, 4, 5, 2, 7, 8, 9, 10, 11, 12],
+            [1, 2, 3, 4, 5, 1, '', '', '', 10, 11, 12],
+            [1, 2, 3, 4, 5, 1, 7, 8, 9, '', '', ''],
+            [1, 2, 3, 4, 5, 0, '', '', '', '', '', ''],
+            [1, 2, 3, 4, 5, 2, 7, 8, 9, 10, 11, 12]
+        ]
+        check._update_tensor_data()
+        self.assertEqual(check._ge_tensor_info_data, expected_result)
+
 
 if __name__ == '__main__':
     unittest.main()
