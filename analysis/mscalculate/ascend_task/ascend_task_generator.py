@@ -63,11 +63,12 @@ class AscendTaskGenerator:
 
     def _gen_top_down_task_by_device_task(self, dt: DeviceTask) -> TopDownTask:
         return TopDownTask(Constant.GE_OP_MODEL_ID, self.iter_id, dt.stream_id, dt.task_id, dt.subtask_id,
-                           NumberConstant.DEFAULT_BATCH_ID, dt.start_time, dt.duration, "UnKnown", dt.task_type)
+                           NumberConstant.DEFAULT_BATCH_ID, dt.start_time, dt.duration,
+                           Constant.TASK_TYPE_UNKNOWN, dt.task_type)
 
     def _gen_top_down_task_by_host_task(self, ht: HostTask) -> TopDownTask:
         return TopDownTask(ht.model_id, self.iter_id, ht.stream_id, ht.task_id, NumberConstant.DEFAULT_GE_CONTEXT_ID,
-                           ht.batch_id, -1, -1, ht.task_type, "Unknown")
+                           ht.batch_id, -1, -1, ht.task_type, Constant.TASK_TYPE_UNKNOWN)
 
     def _match_host_device_task_in_static_model(self, host_task: HostTask, device_tasks: List[DeviceTask]) \
             -> List[TopDownTask]:
