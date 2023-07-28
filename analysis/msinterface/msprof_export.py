@@ -390,13 +390,19 @@ class ExportCommand:
         model_ids_step = ExportCommand.get_model_id_set(
             result_dir, DBNameConstant.DB_STEP_TRACE, DBNameConstant.TABLE_STEP_TRACE_DATA)
 
+        model_ids_hccl = ExportCommand.get_model_id_set(
+            result_dir, DBNameConstant.DB_HCCL, DBNameConstant.TABLE_HCCL_TASK)
+
+        model_match_union = model_ids_ge
+        if model_ids_hccl:
+            model_match_union = model_ids_hccl | model_ids_ge
         model_match_set = model_ids_step
         if model_ids_ge and model_ids_step:
             not_match_set = model_ids_ge - model_ids_step
             if not_match_set:
                 logging.warning("step trace data miss model id.")
                 logging.debug("step trace data miss %s.", not_match_set)
-            model_match_set = model_ids_ge & model_ids_step
+            model_match_set = model_match_union & model_ids_step
         else:
             logging.warning("ge step info data miss model id.")
 
