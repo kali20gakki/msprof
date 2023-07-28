@@ -92,6 +92,66 @@ class TestExportCommand(unittest.TestCase):
             test = ExportCommand("timeline", args)
             test._check_model_id(db_manager.db_path + "/../")
 
+    def test_check_model_id_should_return_error_without_model_ids_hccl(self):
+        args_dic = {'collection_path': 'test', 'iteration_id': 2, 'model_id': 1}
+        args = Namespace(**args_dic)
+        model_ids_ge = {1}
+        model_ids_step = {1}
+        model_ids_hccl = set()
+        with mock.patch(NAMESPACE + '.ExportCommand.get_model_id_set', return_value=model_ids_ge), \
+                mock.patch(NAMESPACE + '.ExportCommand.get_model_id_set', return_value=model_ids_step), \
+                mock.patch(NAMESPACE + '.ExportCommand.get_model_id_set', return_value=model_ids_hccl), \
+                mock.patch('analyzer.scene_base.profiling_scene.Utils.get_scene', return_value='step_info'):
+            ProfilingScene().init('')
+            test = ExportCommand('timeline', args)
+            with self.assertRaises(ProfException):
+                test._check_model_id('2')
+
+    def test_check_model_id_should_return_2_with_model_ids_hccl(self):
+        args_dic = {'collection_path': 'test', 'iteration_id': 2, 'model_id': 2}
+        args = Namespace(**args_dic)
+        model_ids_ge = {1}
+        model_ids_step = {1}
+        model_ids_hccl = {2}
+        with mock.patch(NAMESPACE + '.ExportCommand.get_model_id_set', return_value=model_ids_ge), \
+                mock.patch(NAMESPACE + '.ExportCommand.get_model_id_set', return_value=model_ids_step), \
+                mock.patch(NAMESPACE + '.ExportCommand.get_model_id_set', return_value=model_ids_hccl), \
+                mock.patch('analyzer.scene_base.profiling_scene.Utils.get_scene', return_value='step_info'):
+            ProfilingScene().init('')
+            test = ExportCommand('timeline', args)
+            test._check_model_id('2')
+            self.assertEqual(test.list_map[test.MODEL_ID], 2)
+
+    def test_check_model_id_should_return_1_without_model_ids_step(self):
+        args_dic = {'collection_path': 'test', 'iteration_id': 2, 'model_id': 1}
+        args = Namespace(**args_dic)
+        model_ids_ge = {1}
+        model_ids_step = set()
+        model_ids_hccl = {1}
+        with mock.patch(NAMESPACE + '.ExportCommand.get_model_id_set', return_value=model_ids_ge), \
+                mock.patch(NAMESPACE + '.ExportCommand.get_model_id_set', return_value=model_ids_step), \
+                mock.patch(NAMESPACE + '.ExportCommand.get_model_id_set', return_value=model_ids_hccl), \
+                mock.patch('analyzer.scene_base.profiling_scene.Utils.get_scene', return_value='step_info'):
+            ProfilingScene().init('')
+            test = ExportCommand('timeline', args)
+            test._check_model_id('1')
+            self.assertEqual(test.list_map[test.MODEL_ID], 1)
+
+    def test_check_model_id_should_return_1_without_model_ids_ge(self):
+        args_dic = {'collection_path': 'test', 'iteration_id': 2, 'model_id': 1}
+        args = Namespace(**args_dic)
+        model_ids_ge = set()
+        model_ids_step = {1}
+        model_ids_hccl = {1}
+        with mock.patch(NAMESPACE + '.ExportCommand.get_model_id_set', return_value=model_ids_ge), \
+                mock.patch(NAMESPACE + '.ExportCommand.get_model_id_set', return_value=model_ids_step), \
+                mock.patch(NAMESPACE + '.ExportCommand.get_model_id_set', return_value=model_ids_hccl), \
+                mock.patch('analyzer.scene_base.profiling_scene.Utils.get_scene', return_value='step_info'):
+            ProfilingScene().init('')
+            test = ExportCommand('timeline', args)
+            test._check_model_id('1')
+            self.assertEqual(test.list_map[test.MODEL_ID], 1)
+
     def test_analyse_sample_config(self):
         args_dic = {"collection_path": "test", "iteration_id": 1, "model_id": 3}
         args = Namespace(**args_dic)
