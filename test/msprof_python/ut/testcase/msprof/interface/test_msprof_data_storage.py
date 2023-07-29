@@ -106,15 +106,14 @@ class TestMsprofDataStorage(unittest.TestCase):
         self.assertEqual(res, '{"status": 0, "data": [1]}')
         self.assertEqual(result, '{"status": 0, "data": [true]}')
 
-    def test_export_timeline_data_to_json_3(self):
-        result = '123'
+    def test_export_timeline_data_should_return_directly_when_input_contains_status(self):
+        result = json.loads('{"status": "123"}')
         params = {"data_type": 2}
-        with mock.patch(NAMESPACE + '.json.loads', return_value={'status': 1}), \
-                mock.patch(NAMESPACE + '.check_file_writable'), \
+        with mock.patch(NAMESPACE + '.check_file_writable'), \
                 mock.patch('os.path.exists', return_value=False):
             key = MsprofDataStorage()
             res = key.export_timeline_data_to_json(result, params)
-        self.assertEqual(res, '123')
+        self.assertEqual(res, result)
 
     def test_export_timeline_data_to_json_4(self):
         result = None
