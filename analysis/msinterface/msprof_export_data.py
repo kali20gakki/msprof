@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 
+import logging
 import json
 import threading
 
@@ -534,15 +535,22 @@ class MsProfExportDataUtils:
 
     @staticmethod
     def _get_bulk_data(configs: dict, params: dict) -> any:
-        if params.get(StrConstant.PARAM_EXPORT_TYPE) == MsProfCommonConstant.TIMELINE:
-            MsprofTimeline().add_export_data(PipelineOverlapViewer(configs, params).get_timeline_data(),
-                                             params.get(StrConstant.PARAM_DATA_TYPE))
-            return MsprofTimeline().export_all_data()
-        return json.dumps({
-            "status": NumberConstant.WARN,
-            "info": "Please check params, "
-                    "Currently bulk data export params should be timeline."
-        })
+        if params.get(StrConstant.PARAM_EXPORT_TYPE) != MsProfCommonConstant.TIMELINE:
+            return json.dumps({
+                "status": NumberConstant.WARN,
+                "info": "Please check params, "
+                        "Currently bulk data export params should be timeline."
+            })
+        timeline = {}
+        row_timeline = PipelineOverlapViewer(configs, params).get_timeline_data()
+        if row_timeline:
+            try:
+                timeline = json.loads(row_timeline)
+            except (TypeError, ValueError) as err:
+                logging.error("timeline data is not json format.", err)
+        MsprofTimeline().add_export_data(timeline, params.get(StrConstant.PARAM_DATA_TYPE))
+        return MsprofTimeline().export_all_data()
+
 
     @staticmethod
     def _get_sub_task_time(configs: dict, params: dict) -> str:
@@ -648,11 +656,16 @@ class MsProfExportDataUtils:
                 return MsprofDataStorage().export_summary_data(headers, Utils.data_processing_with_decimals(data),
                                                                params)
             data = handler(configs, params)
-            cls.add_timeline_data(params, data)
+            timeline_data = []
+            try:
+                timeline_data = json.loads(data)
+            except (TypeError, ValueError) as err:
+                logging.error("timeline data is not json format.", err)
+            cls.add_timeline_data(params, timeline_data)
             skip_list = ["event", "api"]
             if params.get(StrConstant.PARAM_DATA_TYPE) in skip_list:
                 return json.dumps({"status": NumberConstant.SKIP})
-            return MsprofDataStorage().export_timeline_data_to_json(data, params)
+            return MsprofDataStorage().export_timeline_data_to_json(timeline_data, params)
         return json.dumps({
             "status": NumberConstant.ERROR,
             "info": "Unable to handler data type %s." % params.get(StrConstant.PARAM_DATA_TYPE)
