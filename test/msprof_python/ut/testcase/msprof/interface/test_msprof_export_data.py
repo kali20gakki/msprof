@@ -33,7 +33,7 @@ class TestMsProfExportDataUtils(unittest.TestCase):
              mock.patch(NAMESPACE + '.MsProfExportDataUtils.add_timeline_data'):
             key = MsProfExportDataUtils()
             result = key.export_data(params)
-        self.assertEqual(result, '{"status": 1, "info": "Failed to connect runtime.db"}')
+        self.assertEqual(result, {'info': 'Failed to connect runtime.db', 'status': 1})
 
     def test_export_data_4(self):
         params = {"data_type": 123, "export_type": "456"}
