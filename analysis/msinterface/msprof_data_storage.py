@@ -40,27 +40,23 @@ class MsprofDataStorage:
         self.data_list = None
 
     @staticmethod
-    def export_timeline_data_to_json(result: str or dict, params: dict) -> any:
+    def export_timeline_data_to_json(timeline_data: json, params: dict) -> any:
         """
         export data to json file
-        :param result: export result
+        :param timeline_data: export result
         :param params: params
         :return: result
         """
-        if not result:
+        if not timeline_data:
             return json.dumps({"status": NumberConstant.WARN,
                                "info": "Unable to get %s data. Maybe the data is not "
                                        "collected, or the data may fail to be analyzed."
                                        % params.get(StrConstant.PARAM_DATA_TYPE)})
-        if isinstance(result, dict):
-            if 'status' in result:
-                return result
-            result = json.dumps(result)
-        elif isinstance(result, str):
-            if 'status' in json.loads(result):
-                return result
-        result = MsprofDataStorage().slice_data_list(json.loads(result))
-        error_code, data_path = MsprofDataStorage.write_json_files(result, params)
+
+        if 'status' in timeline_data:
+            return timeline_data
+        sliced_timeline_data = MsprofDataStorage().slice_data_list(timeline_data)
+        error_code, data_path = MsprofDataStorage.write_json_files(sliced_timeline_data, params)
         if error_code:
             return json.dumps({"status": NumberConstant.ERROR,
                                "info": "message error: %s" % data_path})
@@ -208,7 +204,7 @@ class MsprofDataStorage:
         slice_count = self.get_slice_times(limit_size, method)
         if not slice_count:
             return False, [self.timeline_head + data_list]
-        slice_point = len(self.data_list) // slice_count
+        slice_point = len(data_list) // slice_count
         slice_data = []
         for i in range(slice_count):
             slice_data.append(self.timeline_head + data_list[i * slice_point:(i + 1) * slice_point])
