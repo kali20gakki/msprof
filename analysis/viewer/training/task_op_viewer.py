@@ -4,25 +4,23 @@
 
 import logging
 import sqlite3
+from typing import List, Tuple
 
-from analyzer.scene_base.profiling_scene import ProfilingScene
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
-from common_func.db_manager import ClassRowType
 from common_func.db_name_constant import DBNameConstant
-from common_func.platform.chip_manager import ChipManager
 from profiling_bean.db_dto.ge_task_dto import GeTaskDto
 from viewer.memory_copy.memory_copy_viewer import MemoryCopyViewer
-from viewer.stars.acsq_task_viewer import AcsqTaskViewer
 
 
 class TaskOpViewer:
     """
     viewer of training trace data
     """
+    INVALID_CONTEXT_ID = 4294967295
 
     @staticmethod
-    def get_task_op_summary(message: dict) -> tuple:
+    def get_task_op_summary(message: dict) -> Tuple[List[str], List, int]:
         """
         @param message
         Rewrite gRPC task op method.
@@ -34,19 +32,10 @@ class TaskOpViewer:
         if not message:
             logging.error("get_task_op_summary message empty")
             return headers, [], 0
-        if ChipManager().is_stars_chip():
-            return AcsqTaskViewer(message).get_summary_data(headers)
-        hwts_conn, hwts_curs = DBManager.check_connect_db(message.get("result_dir"), DBNameConstant.DB_HWTS)
-        task_conn, task_curs = DBManager.check_connect_db(message.get("result_dir"), DBNameConstant.DB_RTS_TRACK)
+        ascend_conn, ascend_curs = DBManager.check_connect_db(message.get("result_dir"), DBNameConstant.DB_ASCEND_TASK)
         ge_conn, ge_curs = DBManager.check_connect_db(message.get("result_dir"), DBNameConstant.DB_GE_INFO)
-        hwts_aiv_conn, hwts_aiv_curs = DBManager.check_connect_db(message.get("result_dir"), DBNameConstant.DB_HWTS_AIV)
-        if TaskOpViewer._is_operator_scene_without_runtime_track(task_curs):
-            data, _ = TaskOpViewer.get_op_task_data_summary(hwts_curs, hwts_aiv_curs, ge_curs)
-        else:
-            data, _ = TaskOpViewer.get_task_data_summary(hwts_curs, hwts_aiv_curs, task_curs, ge_curs)
-        DBManager.destroy_db_connect(hwts_conn, hwts_curs)
-        DBManager.destroy_db_connect(hwts_aiv_conn, hwts_aiv_curs)
-        DBManager.destroy_db_connect(task_conn, task_curs)
+        data, _ = TaskOpViewer.get_task_data_summary(ascend_curs, ge_curs)
+        DBManager.destroy_db_connect(ascend_conn, ascend_curs)
         DBManager.destroy_db_connect(ge_conn, ge_curs)
         if not data:
             return headers, [], 0
@@ -54,80 +43,38 @@ class TaskOpViewer:
         return headers, data, len(data)
 
     @staticmethod
-    def get_task_data_summary(hwts_curs: any, hwts_aiv_curs: any, task_curs: any, ge_curs: any) -> tuple:
+    def get_task_data_summary(ascend_curs: sqlite3.Cursor, ge_curs: sqlite3.Cursor) -> Tuple[List, int]:
         """
         get task info csv
         """
         if not DBManager.judge_table_exist(ge_curs, DBNameConstant.TABLE_GE_TASK):
             logging.warning(
                 "No ge data collected, maybe the TaskInfo table is not created, try to export data with no ge data")
-        if not DBManager.judge_table_exist(task_curs, DBNameConstant.TABLE_TASK_TRACK):
-            logging.warning("No need to export task time data, maybe the RuntimeTrack table is not created.")
-            return [], 0
-        if not DBManager.judge_table_exist(hwts_curs, DBNameConstant.TABLE_HWTS_TASK_TIME) \
-                and not DBManager.judge_table_exist(hwts_aiv_curs, DBNameConstant.TABLE_HWTS_TASK_TIME):
-            logging.warning("No need to export task time data, maybe the hwts is not collected.")
+
+        if not DBManager.judge_table_exist(ascend_curs, DBNameConstant.TABLE_ASCEND_TASK):
+            logging.warning("table AscendTask not exists, can't export device tasks.")
             return [], 0
 
-        hwts_aiv_data = []
-        sql = "SELECT stream_id, task_id, running," \
-              "complete, batch_id from {0}".format(DBNameConstant.TABLE_HWTS_TASK_TIME)
-        hwts_data = DBManager.fetch_all_data(hwts_curs, sql)
-        if hwts_aiv_curs:
-            hwts_aiv_data = DBManager.fetch_all_data(hwts_aiv_curs, sql)
-        hwts_data.extend(hwts_aiv_data)
+        # select device & non-ffts-plus task only
+        sql = (
+            f"SELECT stream_id, task_id, batch_id, host_task_type, start_time, duration "
+            f"from {DBNameConstant.TABLE_ASCEND_TASK} "
+            f"where device_task_type != 'Unknown' and context_id = {TaskOpViewer.INVALID_CONTEXT_ID}"
+        )
+        device_tasks = DBManager.fetch_all_data(ascend_curs, sql)
+        if not device_tasks:
+            logging.error("No device task fetched, can't export task_time.")
+            return [], 0
 
         try:
-            task_info = TaskOpViewer._reformat_task_info(hwts_data, task_curs, ge_curs)
-        except sqlite3.Error as error:
-            logging.error(str(error), exc_info=Constant.TRACE_BACK_SWITCH)
-            return [], 0
-        return task_info, len(task_info)
-
-    @staticmethod
-    def get_op_task_data_summary(hwts_curs: any, hwts_aiv_curs: any, ge_curs: any) -> tuple:
-        """
-        get task time data for operator scene
-        :param hwts_curs: cursor of hwts
-        :param hwts_aiv_curs: cursor of hwts_aiv
-        :param ge_curs: cursor of ge
-        :return: task data and count of the task data
-        """
-
-        if not DBManager.judge_table_exist(ge_curs, DBNameConstant.TABLE_GE_TASK):
-            logging.warning(
-                "No ge data collected, maybe the TaskInfo table is not created, try to export data with no ge data")
-        if not DBManager.judge_table_exist(hwts_curs, DBNameConstant.TABLE_HWTS_TASK_TIME) \
-                and not DBManager.judge_table_exist(hwts_aiv_curs, DBNameConstant.TABLE_HWTS_TASK_TIME):
-            logging.warning("No need to export task time data, maybe the hwts is not collected.")
-            return [], 0
-
-        hwts_aiv_data = []
-        sql = "SELECT stream_id, task_id, running, " \
-              "complete, batch_id from {0}".format(DBNameConstant.TABLE_HWTS_TASK_TIME)
-        hwts_data = DBManager.fetch_all_data(hwts_curs, sql)
-        if hwts_aiv_curs:
-            hwts_aiv_data = DBManager.fetch_all_data(hwts_aiv_curs, sql)
-        hwts_data.extend(hwts_aiv_data)
-
-        sql = "SELECT stream_id, task_id, op_name, " \
-              "task_type, batch_id from {0}".format(DBNameConstant.TABLE_GE_TASK)
-        ge_data = DBManager.fetch_all_data(ge_curs, sql)
-
-        try:
-            task_info = TaskOpViewer._reformat_op_task_info(hwts_data, ge_data)
+            task_info = TaskOpViewer._reformat_task_info(device_tasks, ge_curs)
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as error:
             logging.error(str(error), exc_info=Constant.TRACE_BACK_SWITCH)
             return [], 0
         return task_info, len(task_info)
 
     @staticmethod
-    def _is_operator_scene_without_runtime_track(task_curs):
-        return ProfilingScene().is_operator() \
-               and (not task_curs or not DBManager.judge_table_exist(task_curs, DBNameConstant.TABLE_TASK_TRACK))
-
-    @staticmethod
-    def _add_memcpy_data(result_dir: str, data: list) -> list:
+    def _add_memcpy_data(result_dir: str, data: List) -> List:
         memcpy_viewer = MemoryCopyViewer(result_dir)
         memcpy_data = memcpy_viewer.get_memory_copy_non_chip0_summary()
         data.extend(memcpy_data)
@@ -135,65 +82,22 @@ class TaskOpViewer:
         return data
 
     @staticmethod
-    def _reformat_task_info(task_data: list, task_curs: any, ge_curs: any) -> list:
-        ge_sql = "SELECT op_name, stream_id, task_id, batch_id from {0}".format(
-            DBNameConstant.TABLE_GE_TASK)
-        track_sql = "SELECT task_type, stream_id, task_id, batch_id from {0}".format(
-            DBNameConstant.TABLE_TASK_TRACK)
+    def _reformat_task_info(task_data: List, ge_curs: sqlite3.Cursor) -> List:
+        ge_sql = f"SELECT op_name, stream_id, task_id, batch_id from {DBNameConstant.TABLE_GE_TASK}"
 
         op_name_list = DBManager.fetch_all_data(ge_curs, ge_sql, dto_class=GeTaskDto)
-        track_data_list = DBManager.fetch_all_data(task_curs, track_sql, dto_class=GeTaskDto)
-
-        op_name_dict, task_type_dict = {}, {}
-        if op_name_list:
-            op_name_dict = {(row.stream_id, row.task_id, row.batch_id): row.op_name for row in op_name_list}
-        if track_data_list:
-            task_type_dict = {(row.stream_id, row.task_id, row.batch_id): row.task_type for row in track_data_list}
+        op_name_dict = {
+            (row.stream_id, row.task_id, row.batch_id): row.op_name
+            for row in op_name_list
+        }
 
         task_info = []
-        for data in task_data:
-            op_name = op_name_dict.get((data[0], data[1], data[4]), "N/A")
-            task_type = task_type_dict.get((data[0], data[1], data[4]))
-            if task_type and len(data) >= 4:  # 4 is the minimum length for hwts data array
-                # task_data[0] is kernel name, task_data[1] is task type
-                task_time = "N/A"
-                if data[3] != 0:
-                    task_time = str((data[3] - data[2]) / DBManager.NSTOUS)
-                task_info.append((op_name, str(task_type), data[0],
-                                  data[1], task_time,
-                                  "\"" + str(data[2]) + "\"",
-                                  "\"" + str(data[3]) + "\""))
-        return task_info
-
-    @staticmethod
-    def _reformat_op_task_info(task_data: list, ge_data: list) -> list:
-        task_info = []
-        ge_data_dict = {}
-        if ge_data:
-            ge_data_dict = {"{}-{}-{}".format(ge_datum[0], ge_datum[1],
-                                              ge_datum[4]): (ge_datum[2], ge_datum[3])
-                            for ge_datum in ge_data}
-        warning_status = False
-        for task_datum in task_data:
-            duration = str((task_datum[3] - task_datum[2]) / DBManager.NSTOUS)
-            task_start = "".join(["\"", str(task_datum[2]), "\""])
-            task_end = "".join(["\"", str(task_datum[3]), "\""])
-            name_type = ge_data_dict.get("{}-{}-{}".format(task_datum[0], task_datum[1],
-                                                           task_datum[4]), (Constant.NA, Constant.NA))
-            if name_type == (Constant.NA, Constant.NA):
-                logging.debug(
-                    "Can not find name and type for stream %d, "
-                    "task %d", task_datum[0], task_datum[1])
-                warning_status = True
-            task_info.append((name_type[0],  # op name
-                              name_type[1],  # task type
-                              task_datum[0],  # stream id
-                              task_datum[1],  # task id
-                              duration,  # duration
-                              task_start,  # task start
-                              task_end,  # task end
-                              ))
-        if warning_status:
-            logging.warning("Some task data are missing, set the log level to debug "
-                            "and run again to know which tasks are missing.")
+        for stream_id, task_id, batch_id, host_task_type, start_time, duration in task_data:
+            op_name: str = op_name_dict.get((stream_id, task_id, batch_id), "N/A")
+            task_type: str = host_task_type if host_task_type != 'Unknown' else 'Other'
+            task_time: float = duration / DBManager.NSTOUS
+            task_info.append((
+                op_name, task_type, stream_id, task_id,
+                task_time, f'"{start_time}"', f'"{start_time + duration}"',
+            ))
         return task_info
