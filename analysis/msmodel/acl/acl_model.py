@@ -34,10 +34,9 @@ class AclModel(ViewModel, IAnalysisModel):
         return DBManager.fetch_all_data(self.cur, sql)
 
     def get_summary_data(self: any) -> list:
-        sql = "select api_name, api_type, start_time, (end_time-start_time)/{0} " \
+        sql = "select api_name, api_type, start_time, (end_time-start_time) " \
               "as output_duration, process_id, thread_id " \
-              "from {1} order by start_time asc".format(NumberConstant.NS_TO_US,
-                                                        DBNameConstant.TABLE_ACL_DATA)
+              "from {0} order by start_time asc".format(DBNameConstant.TABLE_ACL_DATA)
         return DBManager.fetch_all_data(self.cur, sql)
 
     def get_acl_total_time(self):
@@ -52,13 +51,12 @@ class AclModel(ViewModel, IAnalysisModel):
 
         search_data_sql = "select api_name, api_type, " \
                           "round({percent}*sum(end_time-start_time)/{total_time}, {accuracy}), " \
-                          "sum((end_time-start_time)/{1}), count(*), " \
-                          "sum((end_time-start_time)/{1})/count(*), " \
-                          "min((end_time-start_time)/{1}), " \
-                          "max((end_time-start_time)/{1}), " \
+                          "sum((end_time-start_time)), count(*), " \
+                          "sum((end_time-start_time))/count(*), " \
+                          "min((end_time-start_time)), " \
+                          "max((end_time-start_time)), " \
                           "process_id, thread_id from {0} " \
                           "group by api_name".format(DBNameConstant.TABLE_ACL_DATA,
-                                                     NumberConstant.NS_TO_US,
                                                      percent=CommonConstant.PERCENT,
                                                      total_time=total_time,
                                                      accuracy=CommonConstant.ROUND_SIX)

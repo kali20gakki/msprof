@@ -224,18 +224,46 @@ class InfoConfReader:
         return float(
             sys_cnt - self._dev_cnt * NumberConstant.NANO_SECOND) / hwts_freq * time_fmt + self._host_mon * time_fmt
 
-    def time_from_host_syscnt(self: any, host_timestamp: int) -> float:
+    def time_from_host_syscnt(self: any, sys_cnt: int, time_fmt: int = NumberConstant.NANO_SECOND) -> float:
         """
-        transfer sys cnt to time unit.
-        :param host_timestamp: host sys timestamp
-        :return: sys time
+        transfer sys cnt to host_time unit.
+        1.task_duration_sys_count: data_sys_count - start_sys_count
+        2.task_duration_timestamp: task_duration_sys_count / freq
+        3.data_timestamp(host): task_duration_timestamp + start_timestamp(host)
+        :param sys_cnt: host sys count
+        :param time_fmt: time format
+        :return: sys timestamp
         """
         host_freq = self.get_host_freq()
         if host_freq != self.HOST_DEFAULT_FREQ:
-            time = float(host_timestamp - self._host_cnt * NumberConstant.NANO_SECOND) /\
-                host_freq * NumberConstant.NANO_SECOND + self._host_mon * NumberConstant.NANO_SECOND
-            return round(time, NumberConstant.ROUND_TWO_DECIMAL) if time >= 0.0 else 0
-        return host_timestamp
+            time = float(sys_cnt - self._host_cnt * NumberConstant.NANO_SECOND) / \
+                   host_freq * time_fmt + self._host_mon * time_fmt
+            return time if time >= 0.0 else 0
+        return sys_cnt * time_fmt / NumberConstant.NANO_SECOND
+
+    def get_host_duration(self: any, host_syscnt_duration: int, time_fmt: int = NumberConstant.NANO_SECOND) -> float:
+        """
+        transfer sys cnt duration to time duration.
+        :param host_syscnt_duration: host sys counts duration
+        :param time_fmt: time format
+        :return: sys time duration
+        """
+        host_freq = self.get_host_freq()
+        if host_freq != self.HOST_DEFAULT_FREQ:
+            return host_syscnt_duration / host_freq * time_fmt
+        return host_syscnt_duration * time_fmt / NumberConstant.NANO_SECOND
+
+    def get_host_syscnt_from_dev_time(self: any, dev_timestamp: float) -> float:
+        """
+        transfer dev timestamp to host sys count, Inverse operation of time_from_syscnt()
+        :param dev_timestamp: device timestamp
+        :return: host sys count
+        """
+        host_freq = self.get_host_freq()
+        if host_freq != self.HOST_DEFAULT_FREQ:
+            return (dev_timestamp - self._host_mon * NumberConstant.NANO_SECOND) / NumberConstant.NANO_SECOND * \
+                    host_freq + self._host_cnt * NumberConstant.NANO_SECOND
+        return dev_timestamp
 
     def get_json_pid_data(self: any) -> int:
         """
@@ -388,6 +416,7 @@ class InfoConfReader:
 
     def _check_monotonic_and_cnt(self, host_start_file: str) -> bool:
         if host_start_file == '' and self.is_host_profiling():
+            self._host_freq = self.HOST_DEFAULT_FREQ
             return False
         return self._host_mon <= 0 or (self._dev_cnt <= 0 and self._host_cnt <= 0)
 

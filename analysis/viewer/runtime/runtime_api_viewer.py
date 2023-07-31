@@ -53,6 +53,30 @@ class RuntimeApiViewer:
         result_data.extend(TraceViewManager.metadata_event(meta_data))
         return result_data
 
+    @staticmethod
+    def _summary_reformat(summary_data: list) -> list:
+        return [
+            (
+                data[0], data[1], data[2],
+                InfoConfReader().get_host_duration(data[3]),
+                data[4],
+                InfoConfReader().get_host_duration(data[5]),
+                InfoConfReader().get_host_duration(data[6]),
+                InfoConfReader().get_host_duration(data[7]),
+                data[8], data[9]
+            ) for data in summary_data
+        ]
+
+    @staticmethod
+    def _timeline_reformat(timeline_data: list) -> list:
+        return [
+            (
+                data[0], InfoConfReader().time_from_host_syscnt(data[1]),
+                InfoConfReader().get_host_duration(data[2]),
+                data[3], data[4], data[5], data[6], data[7]
+            ) for data in timeline_data
+        ]
+
     def get_summary_data(self: any) -> tuple:
         """
         get summary data from acl data
@@ -62,6 +86,7 @@ class RuntimeApiViewer:
             logging.error("Maybe acl data parse failed, please check the data parsing log.")
             return MsvpConstant.MSVP_EMPTY_DATA
         summary_data = self._model.get_summary_data()
+        summary_data = self._summary_reformat(summary_data)
         if summary_data:
             return self._configs.get(StrConstant.CONFIG_HEADERS), summary_data, len(summary_data)
         return MsvpConstant.MSVP_EMPTY_DATA
@@ -73,6 +98,7 @@ class RuntimeApiViewer:
                     {"status": NumberConstant.ERROR, "info": f"Failed to connect {DBNameConstant.DB_RUNTIME}"})
 
             timeline_data = _model.get_timeline_data()
+            timeline_data = self._timeline_reformat(timeline_data)
             if not timeline_data:
                 return json.dumps(
                     {"status": NumberConstant.WARN, "info": f"Unable to get runtime api data."})

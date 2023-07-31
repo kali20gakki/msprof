@@ -10,7 +10,6 @@ import unittest
 from unittest import mock
 
 from common_func.hash_dict_constant import HashDictData
-from common_func.info_conf_reader import InfoConfReader
 from constant.constant import CONFIG
 from msparser.compact_info.node_basic_info_bean import NodeBasicInfoBean
 from msparser.compact_info.node_basic_info_parser import NodeBasicInfoParser
@@ -89,8 +88,6 @@ class TestNodeBasicInfoParser(unittest.TestCase):
         )
 
     def test_get_node_basic_data(self):
-        InfoConfReader()._start_info = {"clockMonotonicRaw": "0", "cntvct": "0"}
-        InfoConfReader()._info_json = {'CPU': [{'Frequency': "1000"}]}
         ctx_data = (23130, 10000, *(0,) * 11)
         struct_data = struct.pack("HHIIIQQIQIIQI", *ctx_data)
         data = NodeBasicInfoBean.decode(struct_data)

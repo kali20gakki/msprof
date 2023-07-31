@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2023-2023. All rights reserved.
-from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.level_type_constant import LevelDataType
 from profiling_bean.struct_info.struct_decoder import StructDecoder
 
@@ -34,7 +33,7 @@ class ApiDataBean(StructDecoder):
         api data start time
         :return: api start time
         """
-        return InfoConfReader().time_from_host_syscnt(self._start)
+        return self._start
 
     @property
     def end(self: any) -> int:
@@ -42,7 +41,7 @@ class ApiDataBean(StructDecoder):
         api data end time
         :return: api end time
         """
-        return InfoConfReader().time_from_host_syscnt(self._end)
+        return self._end
 
     @property
     def thread_id(self: any) -> int:

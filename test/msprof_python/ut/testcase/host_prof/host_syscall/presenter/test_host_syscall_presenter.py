@@ -94,16 +94,19 @@ class TestHostSyscallPresenter(unittest.TestCase):
             check.cur_model = HostSyscall('test')
             result = check.get_summary_api_info('test')
             self.assertEqual(result, [])
+        data_list = [(1, 2, 'name', 0.6, 200, 8, 120, 50, 20)]
+        InfoConfReader()._host_freq = None
+        InfoConfReader()._info_json = {'CPU': [{'Frequency': "1000"}]}
         with mock.patch('host_prof.host_syscall.model.host_syscall.'
                         'HostSyscall.check_db', return_value=True), \
                 mock.patch('host_prof.host_syscall.model.host_syscall.'
                            'HostSyscall.has_runtime_api_data', return_value=True), \
                 mock.patch('host_prof.host_syscall.model.host_syscall.'
-                           'HostSyscall.get_summary_runtime_api_data', return_value=123):
+                           'HostSyscall.get_summary_runtime_api_data', return_value=data_list):
             check = HostSyscallPresenter(self.result_dir, self.file_name)
             check.cur_model = HostSyscall('test')
             result = check.get_summary_api_info('test')
-            self.assertEqual(result, 123)
+            self.assertEqual(result, [(1, 2, 'name', 0.6, 0.2, 8, 0.12, 0.05, 0.02)])
 
     def test_get_runtime_api_data(self):
         with mock.patch('host_prof.host_syscall.model.host_syscall.'
@@ -135,17 +138,19 @@ class TestHostSyscallPresenter(unittest.TestCase):
     def test_get_timeline_data(self):
         with mock.patch(NAMESPACE + '.HostSyscallPresenter.get_runtime_api_data',
                         return_value=[]):
-            InfoConfReader()._info_json = {'pid': 1, 'tid': 0}
+            InfoConfReader()._host_freq = None
+            InfoConfReader()._info_json = {'pid': 1, 'tid': 0, 'CPU': [{'Frequency': "1000"}]}
             check = HostSyscallPresenter(self.result_dir, self.file_name)
             result = check.get_timeline_data()
         self.assertEqual(result, [])
         with mock.patch(NAMESPACE + '.HostSyscallPresenter.get_runtime_api_data',
                         return_value=[('MSVP_UploaderD', 18070, 18072, 'nanosleep', 191449517.503,
                                        1057.0, 191449518.56, 191454818891.872, 191454819948.872)]):
-            InfoConfReader()._info_json = {'pid': 1, 'tid': 0}
+            InfoConfReader()._host_freq = None
+            InfoConfReader()._info_json = {'pid': 1, 'tid': 0, 'CPU': [{'Frequency': "1000"}]}
             check = HostSyscallPresenter(self.result_dir, self.file_name)
             result = check.get_timeline_data()
-        self.assertEqual(result, [['nanosleep', 18070, 18072, 191454818891.872, 1057.0]])
+        self.assertEqual(result, [['nanosleep', 18070, 18072, 191454818.891872, 1.057]])
 
     def test_get_timeline_header(self):
         with mock.patch(NAMESPACE + '.HostSyscallPresenter._get_tid_list',

@@ -23,7 +23,7 @@ class HostDiskUsagePresenter(HostProfPresenterBase):
     """
 
     FILE_NAME = os.path.basename(__file__)
-    FREQ_TO_US = 10 ** 6
+    FREQ_TO_NS = 10 ** 9
     TYPE_CONVERSION_DICT = {
         'B/s': 1.0 / NumberConstant.KILOBYTE,
         'K/s': 1.0,
@@ -115,8 +115,8 @@ class HostDiskUsagePresenter(HostProfPresenterBase):
         start_time, usage_items = self._get_disk_usage_items(file)
         disk_freq = ConfigMgr.get_disk_freq(self.result_dir)
         if is_number(disk_freq) and disk_freq > 0:
-            # convert freq to interval(us)
-            interval = 1 / float(disk_freq) * self.FREQ_TO_US
+            # convert freq to interval(ns)
+            interval = 1 / float(disk_freq) * self.FREQ_TO_NS
             self._parse_disk_data(start_time, interval, usage_items)
         else:
             error(self.FILE_NAME, "Host disk freq is invalid, please check sample.json file!")
@@ -132,7 +132,7 @@ class HostDiskUsagePresenter(HostProfPresenterBase):
             return 1.0
 
     def _get_disk_usage_items(self: any, file: any) -> tuple:
-        start_time = 0
+        start_time = 0.0
         usage_items = []
 
         for line in file:
@@ -142,7 +142,7 @@ class HostDiskUsagePresenter(HostProfPresenterBase):
             if not fields[1].isdigit():  # invalid pid
                 continue
             if fields[0] == 'start_time' and fields[1].isdigit():
-                start_time = float(fields[1]) / NumberConstant.CONVERSION_TIME
+                start_time = float(fields[1])
                 continue
 
             pid = int(fields[1])
