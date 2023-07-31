@@ -5,6 +5,7 @@
 from collections import OrderedDict
 
 from common_func.db_manager import DBManager
+from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.trace_view_header_constant import TraceViewHeaderConstant
 
@@ -93,7 +94,8 @@ class TraceViewManager:
         start_time = float(data_dict.get('ts', '0'))
         end_time = start_time + float(data_dict.get('dur', '0'))
         while data_list:
-            if start_time < float(int(data_list[0].get('timestamp', '0')) / DBManager.NSTOUS) < end_time:
+            if start_time < float(InfoConfReader().time_from_host_syscnt(data_list[0].get('timestamp', 0))
+                                  / DBManager.NSTOUS) < end_time:
                 connect_dict = {
                     'name': 'acl_to_npu', 'ph': 's', 'cat': StrConstant.ASYNC_ACL_NPU,
                     'id': '{}-{}-{}'.format(data_list[0].get('stream_id'), data_list[0].get('task_id'),
@@ -101,7 +103,8 @@ class TraceViewManager:
                     'pid': data_dict.get('pid'), 'tid': data_dict.get('tid'), 'ts': start_time
                 }
                 connect_list.append(connect_dict)
-            elif float(int(data_list[0].get('timestamp', '0')) / DBManager.NSTOUS) > end_time:
+            elif float(InfoConfReader().time_from_host_syscnt(data_list[0].get('timestamp', 0))
+                       / DBManager.NSTOUS) > end_time:
                 break
             data_list.pop(0)
         return connect_list

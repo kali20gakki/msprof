@@ -76,11 +76,13 @@ class TestHostNetworkUsage(unittest.TestCase):
             self.assertEqual(result, 123)
 
     def test_get_timeline_data(self):
+        InfoConfReader()._host_freq = None
+        InfoConfReader()._info_json = {'CPU': [{'Frequency': "1000"}]}
         with mock.patch(NAMESPACE + '.HostNetworkUsagePresenter.get_network_usage_data',
                         return_value={'data': [{'start': 100, 'usage': 10000}]}):
             check = HostNetworkUsagePresenter(self.result_dir, self.file_name)
             result = check.get_timeline_data()
-        self.assertEqual(result, [['Network Usage', 100000000.0, {'Usage(%)': 10000}]])
+        self.assertEqual(result, [['Network Usage', 100.0, {'Usage(%)': 10000}]])
 
     def test_get_timeline_header(self):
         check = HostNetworkUsagePresenter(self.result_dir, self.file_name)

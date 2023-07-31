@@ -1,5 +1,7 @@
 import unittest
 from unittest import mock
+
+from common_func.info_conf_reader import InfoConfReader
 from sqlite.db_manager import DBManager
 from host_prof.host_cpu_usage.model.host_cpu_usage import HostCpuUsage
 
@@ -59,7 +61,9 @@ class TsetHostCpuUsage(unittest.TestCase):
         db_manager.destroy(res)
 
     def test_get_cpu_usage_data(self):
-        create_sql = "create table if not exists CpuUsage (start_time text,end_time text,cpu_no text,usage REAL)"
+        InfoConfReader()._host_freq = None
+        InfoConfReader()._info_json = {'CPU': [{'Frequency': "1000"}]}
+        create_sql = "create table if not exists CpuUsage (start_time numeric,end_time numeric,cpu_no text,usage REAL)"
         insert_sql = "insert into {} values (?,?,?,?)".format('CpuUsage')
         data = ((10000, 20000, 20, 100),)
         db_manager = DBManager()

@@ -6,6 +6,7 @@ import json
 import logging
 
 from common_func.db_name_constant import DBNameConstant
+from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.msvp_constant import MsvpConstant
@@ -34,8 +35,10 @@ class NpuOpMemViewer:
             if self._table_name == DBNameConstant.TABLE_NPU_OP_MEM:
                 summary_data = [[datum.name,
                                  datum.size / NumberConstant.KILOBYTE,
-                                 int(datum.allocation_time) / NumberConstant.MILLI_SECOND,
-                                 int(datum.duration) / NumberConstant.MILLI_SECOND,
+                                 InfoConfReader().time_from_host_syscnt(int(datum.allocation_time),
+                                                                        NumberConstant.MICRO_SECOND),
+                                 InfoConfReader().get_host_duration(int(datum.duration),
+                                                                    NumberConstant.MICRO_SECOND),
                                  datum.allocation_total_allocated / NumberConstant.KILOBYTE,
                                  datum.allocation_total_reserved / NumberConstant.KILOBYTE,
                                  datum.release_total_allocated / NumberConstant.KILOBYTE,
@@ -44,7 +47,8 @@ class NpuOpMemViewer:
                                 for datum in summary_data]
             elif self._table_name == DBNameConstant.TABLE_NPU_OP_MEM_REC:
                 summary_data = [[datum.component,
-                                 int(datum.timestamp) / NumberConstant.MILLI_SECOND,
+                                 InfoConfReader().time_from_host_syscnt(int(datum.timestamp),
+                                                                        NumberConstant.MICRO_SECOND),
                                  datum.total_allocate_memory / NumberConstant.KILOBYTE,
                                  datum.total_reserve_memory / NumberConstant.KILOBYTE,
                                  datum.device_type]

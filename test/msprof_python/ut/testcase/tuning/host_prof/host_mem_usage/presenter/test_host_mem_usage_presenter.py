@@ -75,6 +75,8 @@ class TestHostMemUsagePresenter(unittest.TestCase):
             self.assertEqual(result, 123)
 
     def test_get_timeline_data(self):
+        InfoConfReader()._host_freq = None
+        InfoConfReader()._info_json = {'CPU': [{'Frequency': "1000"}]}
         with mock.patch(NAMESPACE + '.HostMemUsagePresenter.get_mem_usage_data',
                         return_value=None):
             check = HostMemUsagePresenter(self.result_dir, self.file_name)
@@ -84,7 +86,7 @@ class TestHostMemUsagePresenter(unittest.TestCase):
                         return_value={'data': [{'start': 100, 'usage': 10000}]}):
             check = HostMemUsagePresenter(self.result_dir, self.file_name)
             result = check.get_timeline_data()
-        self.assertEqual(result, [['Memory Usage', 0.1, {'Usage(%)': 10000}]])
+        self.assertEqual(result, [['Memory Usage', 100.0, {'Usage(%)': 10000}]])
 
     def test_get_timeline_header(self):
         check = HostMemUsagePresenter(self.result_dir, self.file_name)

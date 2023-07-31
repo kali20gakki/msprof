@@ -44,6 +44,16 @@ class ApiViewer:
         return result_data
 
     @staticmethod
+    def _timeline_reformat(timeline_data: list) -> list:
+        return [
+            (
+                data[0], InfoConfReader().time_from_host_syscnt(data[1]),
+                InfoConfReader().get_host_duration(data[2]),
+                data[3], data[4], data[5], data[6]
+            ) for data in timeline_data
+        ]
+
+    @staticmethod
     def _get_data_api_name(api_data: list) -> str:
         # api_data[0]: struct_type    api_data[5]: id    api_data[6]: item_id
         level = api_data[4]
@@ -81,6 +91,7 @@ class ApiViewer:
                 return json.dumps({"status": NumberConstant.ERROR,
                                     "info": f"Failed to connect {DBNameConstant.DB_API_EVENT}"})
             timeline_data = _model.get_timeline_data()
+            timeline_data = self._timeline_reformat(timeline_data)
             if not timeline_data:
                 return json.dumps(
                     {"status": NumberConstant.WARN, "info": f"Unable to get api data."})

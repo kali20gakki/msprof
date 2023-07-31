@@ -38,7 +38,7 @@ class TestMsprofTxParser(unittest.TestCase):
                 mock.patch(NAMESPACE + '.check_file_readable', return_value=True), \
                 mock.patch('os.path.getsize', return_value=256), \
                 mock.patch(NAMESPACE + '.logging.error'):
-            InfoConfReader()._info_json = {'devices': '0', 'CPU': [{'Frequency': "1000"}]}
+            InfoConfReader()._info_json = {'devices': '0'}
             check = MsprofTxParser(self.file_list, CONFIG)
             result = check.read_binary_data('msproftx.data.5.slice_0')
         self.assertEqual(result, 1)
@@ -46,13 +46,12 @@ class TestMsprofTxParser(unittest.TestCase):
                 mock.patch('builtins.open', mock.mock_open(read_data=data)), \
                 mock.patch(NAMESPACE + '.check_file_readable', return_value=True), \
                 mock.patch('os.path.getsize', return_value=256):
-            InfoConfReader()._info_json = {'devices': '0', 'CPU': [{'Frequency': "1000"}]}
+            InfoConfReader()._info_json = {'devices': '0'}
             check = MsprofTxParser(self.file_list, CONFIG)
             result = check.read_binary_data('msprotx.data.5.slice_0')
         self.assertEqual(result, 0)
 
     def test_reshape_data(self):
-        InfoConfReader()._info_json = {'CPU': [{'Frequency': "1000"}]}
         msproftx_parser = mock.Mock()
         end_time = 1
         data_object = MsprofTxDecoder.decode(b'\x00' * StructFmt.MSPROFTX_FMT_SIZE)

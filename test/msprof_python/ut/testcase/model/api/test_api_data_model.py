@@ -4,7 +4,6 @@ from unittest import mock
 from collections import namedtuple
 
 from common_func.hash_dict_constant import HashDictData
-from common_func.info_conf_reader import InfoConfReader
 from msmodel.api.api_data_model import ApiDataModel
 from profiling_bean.struct_info.api_data_bean import ApiDataBean
 
@@ -35,8 +34,6 @@ class TestApiDataModel(unittest.TestCase):
         ]
         HashDictData('test')._type_hash_dict = {'runtime': {}, 'acl': {}}
         HashDictData('test')._ge_hash_dict = {}
-        InfoConfReader()._start_info = {"clockMonotonicRaw": "0", "cntvct": "0"}
-        InfoConfReader()._info_json = {'CPU': [{'Frequency': "1000"}]}
         with mock.patch(NAMESPACE + '.ApiDataModel.insert_data_to_db'):
             self.assertEqual(len(ApiDataModel('test').reformat_data(data_list)), 3)
 

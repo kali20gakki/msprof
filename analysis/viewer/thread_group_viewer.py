@@ -88,8 +88,10 @@ class ThreadGroupViewer:
             args = OrderedDict([("Mode", _data.api_type)])
             _format_data.append([self.PREFIX_ACL.format(_data.api_name), self._pid,
                                  self.PREFIX_THREAD_ID.format(_data.thread_id),
-                                 _data.start_time / NumberConstant.NS_TO_US,
-                                 (_data.end_time - _data.start_time) / NumberConstant.NS_TO_US,
+                                 InfoConfReader().time_from_host_syscnt(_data.start_time,
+                                                                        NumberConstant.MICRO_SECOND),
+                                 InfoConfReader().get_host_duration((_data.end_time - _data.start_time),
+                                                                    NumberConstant.MICRO_SECOND),
                                  args
                                  ])
         return TraceViewManager.time_graph_trace(TraceViewHeaderConstant.TOP_DOWN_TIME_GRAPH_HEAD, _format_data)
@@ -114,22 +116,28 @@ class ThreadGroupViewer:
             _input_data = [
                 self.PREFIX_GE.format("Input"), self._pid,
                 self.PREFIX_THREAD_ID.format(_ge_time_data.thread_id),
-                _ge_time_data.input_start / NumberConstant.NS_TO_US,
-                (_ge_time_data.input_end - _ge_time_data.input_start) / NumberConstant.NS_TO_US,
+                InfoConfReader().time_from_host_syscnt(_ge_time_data.input_start,
+                                                       NumberConstant.MICRO_SECOND),
+                InfoConfReader().get_host_duration((_ge_time_data.input_end - _ge_time_data.input_start),
+                                                   NumberConstant.MICRO_SECOND),
                 args
             ]
             _infer_data = [
                 self.PREFIX_GE.format("Infer"), self._pid,
                 self.PREFIX_THREAD_ID.format(_ge_time_data.thread_id),
-                _ge_time_data.infer_start / NumberConstant.NS_TO_US,
-                (_ge_time_data.infer_end - _ge_time_data.infer_start) / NumberConstant.NS_TO_US,
+                InfoConfReader().time_from_host_syscnt(_ge_time_data.infer_start,
+                                                       NumberConstant.MICRO_SECOND),
+                InfoConfReader().get_host_duration((_ge_time_data.infer_end - _ge_time_data.infer_start),
+                                                   NumberConstant.MICRO_SECOND),
                 args
             ]
             _output_data = [
                 self.PREFIX_GE.format("Output"), self._pid,
                 self.PREFIX_THREAD_ID.format(_ge_time_data.thread_id),
-                _ge_time_data.output_start / NumberConstant.NS_TO_US,
-                (_ge_time_data.output_end - _ge_time_data.output_start) / NumberConstant.NS_TO_US,
+                InfoConfReader().time_from_host_syscnt(_ge_time_data.output_start,
+                                                       NumberConstant.MICRO_SECOND),
+                InfoConfReader().get_host_duration((_ge_time_data.output_end - _ge_time_data.output_start),
+                                                   NumberConstant.MICRO_SECOND),
                 args
             ]
             _format_data.extend([_input_data, _infer_data, _output_data])
@@ -154,8 +162,10 @@ class ThreadGroupViewer:
             _format_data.append([self.PREFIX_GE_OP_EXECUTE.format(
                 hash_dict.get(_data.op_type, _data.op_type), hash_dict.get(_data.event_type, _data.event_type)),
                 self._pid, self.PREFIX_THREAD_ID.format(_data.thread_id),
-                _data.start_time / NumberConstant.NS_TO_US,
-                (_data.end_time - _data.start_time) / NumberConstant.NS_TO_US])
+                InfoConfReader().time_from_host_syscnt(_data.start_time,
+                                                       NumberConstant.MICRO_SECOND),
+                InfoConfReader().get_host_duration((_data.end_time - _data.start_time),
+                                                   NumberConstant.MICRO_SECOND)])
         return TraceViewManager.time_graph_trace(TraceViewHeaderConstant.TASK_TIME_GRAPH_HEAD, _format_data)
 
     def _get_runtime_api_sql(self):
@@ -174,7 +184,10 @@ class ThreadGroupViewer:
         for _runtime_api_data in runtime_api_data:
             _format_data.append([self.PREFIX_RUNTIME_API.format(_runtime_api_data.api),
                                  self._pid, self.PREFIX_THREAD_ID.format(_runtime_api_data.thread),
-                                 _runtime_api_data.entry_time / NumberConstant.NS_TO_US,
-                                 (_runtime_api_data.exit_time - _runtime_api_data.entry_time) / NumberConstant.NS_TO_US
+                                 InfoConfReader().time_from_host_syscnt(_runtime_api_data.entry_time,
+                                                                        NumberConstant.MICRO_SECOND),
+                                 InfoConfReader().get_host_duration((_runtime_api_data.exit_time -
+                                                                     _runtime_api_data.entry_time),
+                                                                    NumberConstant.MICRO_SECOND)
                                  ])
         return TraceViewManager.time_graph_trace(TraceViewHeaderConstant.TASK_TIME_GRAPH_HEAD, _format_data)

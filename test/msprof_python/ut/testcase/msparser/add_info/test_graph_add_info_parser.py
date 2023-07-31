@@ -10,7 +10,6 @@ import unittest
 from unittest import mock
 
 from common_func.hash_dict_constant import HashDictData
-from common_func.info_conf_reader import InfoConfReader
 from constant.constant import CONFIG
 from msparser.add_info.graph_add_info_bean import GraphAddInfoBean
 from msparser.add_info.graph_add_info_parser import GraphAddInfoParser
@@ -54,8 +53,6 @@ class TestGraphAddInfoParser(unittest.TestCase):
             check.parse()
 
     def test_get_graph_info_data(self):
-        InfoConfReader()._start_info = {"clockMonotonicRaw": "0", "cntvct": "0"}
-        InfoConfReader()._info_json = {'CPU': [{'Frequency': "1000"}]}
         ctx_data = (23130, 10000, *(0,) * 61)
         struct_data = struct.pack("HHIIIQQI55I", *ctx_data)
         data = GraphAddInfoBean.decode(struct_data)
