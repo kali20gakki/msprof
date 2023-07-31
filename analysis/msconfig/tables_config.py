@@ -120,19 +120,19 @@ class TablesConfig(MetaConfig):
             ('physic_stream', 'TEXT,null')
         ],
         'OriginalDataMap': [
-            ('common', 'text,none'),
-            ('pid', 'int,none'),
-            ('tid', 'int,none'),
-            ('core', 'int,none'),
-            ('timestamp', 'numeric,none'),
-            ('pmucount', 'int,none'),
-            ('pmuevent', 'char(10),none'),
-            ('ip', 'text,none'),
-            ('function', 'text,none'),
-            ('offset', 'text,none'),
-            ('module', 'text,none'),
-            ('callstack', 'text,none'),
-            ('replayid', 'int,none')
+            ('common', 'TEXT,null'),
+            ('pid', 'INT,null'),
+            ('tid', 'INT,null'),
+            ('core', 'INT,null'),
+            ('timestamp', 'NUMERIC,null'),
+            ('pmucount', 'INT,null'),
+            ('pmuevent', 'CHAR(10),null'),
+            ('ip', 'TEXT,null'),
+            ('function', 'TEXT,null'),
+            ('offset', 'TEXT,null'),
+            ('module', 'TEXT,null'),
+            ('callstack', 'TEXT,null'),
+            ('replayid', 'INT,null')
         ],
         'ApiCallMap': [
             ('entry_time', 'INTEGER,null'),
@@ -237,7 +237,7 @@ class TablesConfig(MetaConfig):
         ],
         'TsOriginalDataMap': [
             ('replayid', 'INTEGER,null'),
-            ('timestamp', 'numeric,null'),
+            ('timestamp', 'NUMERIC,null'),
             ('pc', 'TEXT,null'),
             ('callstack', 'TEXT,null'),
             ('event', 'TEXT,null'),
@@ -247,7 +247,7 @@ class TablesConfig(MetaConfig):
         'AICoreOriginalDataMap': [
             ('mode', 'INTEGER,null'),
             ('replayid', 'INTEGER,null'),
-            ('timestamp', 'numeric,null'),
+            ('timestamp', 'NUMERIC,null'),
             ('coreid', 'INTEGER,null'),
             ('task_cyc', 'Text,null'),
             ('event1', 'Text,null'),
@@ -443,11 +443,11 @@ class TablesConfig(MetaConfig):
             ('committed_as', 'INTEGER,null'),
             ('hugepages_total', 'INTEGER,null'),
             ('hugepages_free', 'INTEGER,null'),
-            ('unit', 'text,null')
+            ('unit', 'TEXT,null')
         ],
         'pidmemMap': [
             ('timestamp', 'INT,null'),
-            ('name', 'text,null'),
+            ('name', 'TEXT,null'),
             ('size', 'INTEGER,null'),
             ('resident', 'INTEGER,null'),
             ('shared', 'INTEGER,null'),
@@ -469,7 +469,7 @@ class TablesConfig(MetaConfig):
             ('cputype', 'TEXT,null')
         ],
         'ProCpuUsageDataMap': [
-            ('pid', 'int,null'),
+            ('pid', 'INT,null'),
             ('process_name', 'VARCHAR,null'),
             ('utime', 'REAL,null'),
             ('stime', 'REAL,null'),
@@ -479,8 +479,8 @@ class TablesConfig(MetaConfig):
             ('sys_usage', 'REAL,null')
         ],
         'AclDataMap': [
-            ('api_name', 'text,null'),
-            ('api_type', 'text,null'),
+            ('api_name', 'TEXT,null'),
+            ('api_type', 'TEXT,null'),
             ('start_time', 'INTEGER,null'),
             ('end_time', 'INTEGER,null'),
             ('process_id', 'INTEGER,null'),
@@ -524,43 +524,43 @@ class TablesConfig(MetaConfig):
         ],
         'ProcessUsageMap': [
             ('timestamp', 'NUMERIC,null'),
-            ('uptime', 'text,null'),
+            ('uptime', 'TEXT,null'),
             ('pid', 'INTEGER, null'),
             ('tid', 'INTEGER, null'),
             ('jiffies', 'INTEGER, null'),
-            ('cpu_no', 'text,null'),
+            ('cpu_no', 'TEXT,null'),
             ('usage', 'REAL,null')
         ],
         'CpuUsageMap': [
-            ('start_time', 'numeric,null'),
-            ('end_time', 'text,null'),
-            ('cpu_no', 'text,null'),
+            ('start_time', 'NUMERIC,null'),
+            ('end_time', 'NUMERIC,null'),
+            ('cpu_no', 'TEXT,null'),
             ('usage', 'REAL,null')
         ],
         'MemUsageMap': [
-            ('start_time', 'numeric,null'),
-            ('end_time', 'text,null'),
+            ('start_time', 'NUMERIC,null'),
+            ('end_time', 'NUMERIC,null'),
             ('usage', 'REAL,null')
         ],
         'DiskUsageMap': [
-            ('start_time', 'numeric,null'),
-            ('end_time', 'text,null'),
+            ('start_time', 'NUMERIC,null'),
+            ('end_time', 'NUMERIC,null'),
             ('disk_read', 'REAL,null'),
             ('disk_write', 'REAL,null'),
-            ('swap_in', 'text,null'),
+            ('swap_in', 'TEXT,null'),
             ('usage', 'REAL,null')
         ],
         'NetworkUsageMap': [
-            ('start_time', 'numeric,null'),
-            ('end_time', 'text,null'),
+            ('start_time', 'NUMERIC,null'),
+            ('end_time', 'NUMERIC,null'),
             ('usage', 'REAL,null'),
             ('speed', 'REAL,null')
         ],
         'SyscallMap': [
-            ('runtime_comm', 'text,null'),
+            ('runtime_comm', 'TEXT,null'),
             ('runtime_pid', 'INTEGER,null'),
             ('runtime_tid', 'INTEGER,null'),
-            ('runtime_api_name', 'text,null'),
+            ('runtime_api_name', 'TEXT,null'),
             ('runtime_start_time', 'REAL,null'),
             ('runtime_duration', 'REAL,null'),
             ('runtime_end_time', 'REAL,null'),
@@ -605,9 +605,9 @@ class TablesConfig(MetaConfig):
         ],
         'GeMergeMap': [
             ('model_id', 'INTEGER,null'),
-            ('op_name', 'text,null'),
-            ('op_type', 'text,null'),
-            ('task_type', 'text,null'),
+            ('op_name', 'TEXT,null'),
+            ('op_type', 'TEXT,null'),
+            ('task_type', 'TEXT,null'),
             ('task_id', 'INTEGER,null'),
             ('stream_id', 'INTEGER,null'),
             ('batch_id', 'INTEGER,null'),
@@ -618,22 +618,22 @@ class TablesConfig(MetaConfig):
             ('stream_id', 'INTEGER,null'),
             ('start_time', 'INTEGER,null'),
             ('duration', 'INTEGER,null'),
-            ('task_type', 'text,null'),
+            ('task_type', 'TEXT,null'),
             ('index_id', 'INTEGER, null'),
             ('model_id', 'INTEGER,null'),
             ('batch_id', 'INTEGER,null'),
             ('subtask_id', 'INTEGER,null')
         ],
         'OpReportMap': [
-            ('model_name', 'text,null'),
-            ('op_type', 'text,null'),
-            ('core_type', 'text,null'),
-            ('occurrences', 'text,null'),
+            ('model_name', 'TEXT,null'),
+            ('op_type', 'TEXT,null'),
+            ('core_type', 'TEXT,null'),
+            ('occurrences', 'TEXT,null'),
             ('total_time', 'REAL,null'),
             ('min', 'REAL,null'),
             ('avg', 'REAL,null'),
             ('max', 'REAL,null'),
-            ('ratio', 'text,null')
+            ('ratio', 'TEXT,null')
         ],
         'AcsqTaskMap': [
             ('stream_id', 'INTEGER,null'),

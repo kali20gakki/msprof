@@ -217,7 +217,8 @@ class MsprofIteration:
         iter_time_range = self.get_iteration_time(iter_range, time_fmt=NumberConstant.NANO_SECOND)
         if not iter_time_range:
             return ''
-        iter_start, iter_end = iter_time_range[0]
+        iter_start = InfoConfReader().get_host_syscnt_from_dev_time(iter_time_range[0][0])
+        iter_end = InfoConfReader().get_host_syscnt_from_dev_time(iter_time_range[0][1])
         return f'where ({time_start_key}>={iter_start} and {time_start_key}<={iter_end}) ' \
                f'or ({time_start_key}<={iter_start} and {iter_start}<={time_end_key})'
 

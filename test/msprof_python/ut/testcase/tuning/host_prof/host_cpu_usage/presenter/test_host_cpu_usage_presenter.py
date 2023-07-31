@@ -81,16 +81,19 @@ class TestHostCpuUsagePresenter(unittest.TestCase):
             check.cur_model = HostCpuUsage('test')
             result = check.get_cpu_usage_data()
             self.assertEqual(result, {})
+        data_list = [[1, 2, 'name', 0.6, 200, 8, 120, 50, 20]]
+        InfoConfReader()._host_freq = None
+        InfoConfReader()._info_json = {'CPU': [{'Frequency': "1000"}]}
         with mock.patch('host_prof.host_cpu_usage.model.host_cpu_usage.'
                         'HostCpuUsage.check_db', return_value=True), \
                 mock.patch('host_prof.host_cpu_usage.model.host_cpu_usage.'
                            'HostCpuUsage.has_cpu_usage_data', return_value=True), \
                 mock.patch('host_prof.host_cpu_usage.model.host_cpu_usage.'
-                           'HostCpuUsage.get_cpu_usage_data', return_value=123):
+                           'HostCpuUsage.get_cpu_usage_data', return_value=data_list):
             check = HostCpuUsagePresenter(self.result_dir, self.file_name)
             check.cur_model = HostCpuUsage('test')
             result = check.get_cpu_usage_data()
-            self.assertEqual(result, 123)
+            self.assertEqual(result, data_list)
 
     def test_get_cpu_list(self):
         check = HostCpuUsagePresenter(self.result_dir, self.file_name)

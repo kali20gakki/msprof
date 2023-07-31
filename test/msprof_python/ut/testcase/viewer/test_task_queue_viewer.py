@@ -4,6 +4,7 @@
 import unittest
 from unittest import mock
 
+from common_func.info_conf_reader import InfoConfReader
 from profiling_bean.db_dto.msproftx_dto import MsprofTxDto
 from viewer.task_queue_viewer import TaskQueueViewer
 
@@ -44,15 +45,19 @@ class TestTaskQueueViewer(unittest.TestCase):
     task_queue4.message = 'Add'
     task_queue = [task_queue1, task_queue2, task_queue3, task_queue4]
 
-    result = '[{"name": "Add", "pid": 1, "tid": 11, "ts": 0.001, "ph": "X", "args": {}, "dur": 0.002}, {"name": ' \
-             '"Add", "pid": 1, "tid": 12, "ts": 0.005, "ph": "X", "args": {}, "dur": 0.005}, {"name": "process_name",' \
-             ' "pid": 1, "tid": 0, "args": {"name": "PTA"}, "ph": "M"}, {"name": "thread_name", "pid": 1, "tid": 11,' \
-             ' "args": {"name": "Thread 11 (Enqueue)"}, "ph": "M"}, {"name": "thread_sort_index", "pid": 1, "tid": 11,'\
-             ' "args": {"sort_index": 0}, "ph": "M"}, {"name": "thread_name", "pid": 1, "tid": 12, "args": {"name":' \
-             ' "Thread 12 (Dequeue)"}, "ph": "M"}, {"name": "thread_sort_index", "pid": 1, "tid": 12, "args": ' \
-             '{"sort_index": 1}, "ph": "M"}]'
+    result = ('[{"name": "Add", "pid": 1, "tid": 11, "ts": 0.001, "ph": "X", "args": {}, "dur": '
+              '0.002}, {"name": "Add", "pid": 1, "tid": 12, "ts": 0.005, "ph": "X", "args": {}, '
+              '"dur": 0.005}, {"name": "process_name", "pid": 1, "tid": 0, "args": {"name": '
+              '"PTA"}, "ph": "M"}, {"name": "thread_name", "pid": 1, "tid": 11, "args": '
+              '{"name": "Thread 11 (Enqueue)"}, "ph": "M"}, {"name": "thread_sort_index", '
+              '"pid": 1, "tid": 11, "args": {"sort_index": 0}, "ph": "M"}, {"name": '
+              '"thread_name", "pid": 1, "tid": 12, "args": {"name": "Thread 12 (Dequeue)"}, '
+              '"ph": "M"}, {"name": "thread_sort_index", "pid": 1, "tid": 12, "args": '
+              '{"sort_index": 1}, "ph": "M"}]')
 
     def test_get_task_queue_data(self):
+        InfoConfReader()._host_freq = None
+        InfoConfReader()._info_json = {'CPU': [{'Frequency': "1000"}]}
         with mock.patch(NAMESPACE + '.MsprofTxModel.check_db', return_value=True), \
                 mock.patch(NAMESPACE + '.MsprofTxModel.check_table', return_value=True), \
                 mock.patch(NAMESPACE + '.MsprofTxModel.get_task_queue_origin_data', return_value=self.task_queue), \

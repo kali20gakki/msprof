@@ -69,12 +69,25 @@ class MsprofTxViewer:
             ])
             trace_data_msproftx = [
                 top_down_data.message, top_down_data.pid, top_down_data.tid,
-                int(top_down_data.start_time) / NumberConstant.CONVERSION_TIME,
-                int(top_down_data.dur_time) / NumberConstant.CONVERSION_TIME,
+                InfoConfReader().time_from_host_syscnt(top_down_data.start_time,
+                                                       NumberConstant.MICRO_SECOND),
+                InfoConfReader().get_host_duration(top_down_data.dur_time,
+                                                   NumberConstant.MICRO_SECOND),
                 trace_data_args
             ]
             trace_data.append(trace_data_msproftx)
         return trace_data
+
+    @staticmethod
+    def _summary_reformat(summary_data: list) -> list:
+        return [
+            (
+                data[0], data[1], data[2], data[3], data[4], data[5],
+                InfoConfReader().time_from_host_syscnt(data[6]),
+                InfoConfReader().time_from_host_syscnt(data[7]),
+                data[8], data[9]
+            ) for data in summary_data
+        ]
 
     def get_summary_data(self: any) -> tuple:
         """
@@ -84,6 +97,7 @@ class MsprofTxViewer:
         self.init_model()
         try:
             msproftx_data = self.model.get_summary_data()
+            msproftx_data = self._summary_reformat(msproftx_data)
             return self.configs.get('headers'), msproftx_data, len(msproftx_data)
         except (ValueError, IOError, TypeError) as error:
             logging.error(error, exc_info=Constant.TRACE_BACK_SWITCH)

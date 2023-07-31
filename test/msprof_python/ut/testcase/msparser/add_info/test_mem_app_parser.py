@@ -10,7 +10,6 @@ import unittest
 from unittest import mock
 
 from common_func.hash_dict_constant import HashDictData
-from common_func.info_conf_reader import InfoConfReader
 from constant.constant import CONFIG
 from msparser.add_info.memory_application_bean import MemoryApplicationBean
 from msparser.add_info.memory_application_parser import MemoryApplicationParser
@@ -57,8 +56,6 @@ class TestMemoryApplicationParser(unittest.TestCase):
             check.parse()
 
     def test_get_memory_application_data(self):
-        InfoConfReader()._start_info = {"clockMonotonicRaw": "0", "cntvct": "0"}
-        InfoConfReader()._info_json = {'CPU': [{'Frequency': "1000"}]}
         ctx_data = (23130, 10000, *(0,) * 9, b'a', b'0')
         struct_data = struct.pack("HHIIIQQQQQQss", *ctx_data)
         data = MemoryApplicationBean.decode(struct_data)

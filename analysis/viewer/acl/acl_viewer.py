@@ -6,6 +6,7 @@ import json
 import logging
 
 from common_func.db_name_constant import DBNameConstant
+from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.msvp_constant import MsvpConstant
@@ -28,6 +29,40 @@ class AclViewer:
         self._project_path = params.get(StrConstant.PARAM_RESULT_DIR)
         self._model = AclModel(params)
 
+    @staticmethod
+    def _summary_reformat(summary_data: list) -> list:
+        return [
+            (
+                data[0], data[1], InfoConfReader().time_from_host_syscnt(data[2]),
+                InfoConfReader().get_host_duration(data[3], NumberConstant.MICRO_SECOND),
+                data[4], data[5]
+            ) for data in summary_data
+        ]
+
+    @staticmethod
+    def _timeline_reformat(timeline_data: list) -> list:
+        return [
+            (
+                data[0], InfoConfReader().time_from_host_syscnt(data[1]),
+                InfoConfReader().get_host_duration(data[2]),
+                data[3], data[4], data[5]
+            ) for data in timeline_data
+        ]
+
+    @staticmethod
+    def _acl_statistic_reformat(acl_data: list) -> list:
+        return [
+            (
+                data[0], data[1], data[2],
+                InfoConfReader().get_host_duration(data[3], NumberConstant.MICRO_SECOND),
+                data[4],
+                InfoConfReader().get_host_duration(data[5], NumberConstant.MICRO_SECOND),
+                InfoConfReader().get_host_duration(data[6], NumberConstant.MICRO_SECOND),
+                InfoConfReader().get_host_duration(data[7], NumberConstant.MICRO_SECOND),
+                data[8], data[9]
+            ) for data in acl_data
+        ]
+
     def get_summary_data(self: any) -> tuple:
         """
         get summary data from acl data
@@ -37,6 +72,7 @@ class AclViewer:
             logging.error("Maybe acl data parse failed, please check the data parsing log.")
             return MsvpConstant.MSVP_EMPTY_DATA
         summary_data = self._model.get_summary_data()
+        summary_data = self._summary_reformat(summary_data)
         if summary_data:
             return self._configs.get(StrConstant.CONFIG_HEADERS), summary_data, len(summary_data)
         return MsvpConstant.MSVP_EMPTY_DATA
@@ -52,6 +88,7 @@ class AclViewer:
                 return json.dumps({"status": NumberConstant.ERROR,
                                    "info": "No acl data found, maybe the switch of acl is not on."})
             timeline_data = _model.get_timeline_data()
+            timeline_data = self._timeline_reformat(timeline_data)
         if not timeline_data:
             return json.dumps(
                 {"status": NumberConstant.ERROR, "info": f"Failed to connect {DBNameConstant.DB_ACL_MODULE}."})
@@ -72,6 +109,7 @@ class AclViewer:
                 logging.error("Maybe Acl data parse failed, please check the data parsing log.")
                 return MsvpConstant.MSVP_EMPTY_DATA
             acl_data = _model.get_acl_statistic_data()
+            acl_data = self._acl_statistic_reformat(acl_data)
         if not acl_data:
             return MsvpConstant.MSVP_EMPTY_DATA
         return self._configs.get(StrConstant.CONFIG_HEADERS), acl_data, len(acl_data)
