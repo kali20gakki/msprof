@@ -215,7 +215,7 @@ class TestCriticalPathAnalysisParserFactory(unittest.TestCase):
             critical_analysis_parser_factory.rank_dir_dict = {1: 'dir_1'}
             critical_analysis_parser_factory.get_conditions_from_db()
             self.assertEqual(critical_analysis_parser_factory.hccl_op_events, {'all_reduce': [test_hccl_op]})
-            self.assertEqual(critical_analysis_parser_factory.compute_op_events, [test_compute_op, test_compute_op])
+            self.assertEqual(critical_analysis_parser_factory.compute_op_events, [test_compute_op])
 
     def test_get_conditions_from_db_should_return_exception_when_check_rank_info_fail(self):
         with pytest.raises(ProfException) as err:

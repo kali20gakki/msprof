@@ -4,7 +4,6 @@
 
 import os
 import logging
-import json
 from collections import defaultdict
 from abc import abstractmethod
 from msmodel.stars.op_summary_model import OpSummaryModel
@@ -17,7 +16,6 @@ from msparser.cluster.communication_matrix_parser import CommunicationMatrixPars
 from msparser.cluster.meta_parser import MetaParser
 from common_func.db_name_constant import DBNameConstant
 from common_func.msprof_exception import ProfException
-from common_func.common import error
 from common_func.common import print_msg
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.constant import Constant
@@ -260,9 +258,7 @@ class CriticalPathAnalysisParserFactory(ClusterParserFactory):
         # Get compute op info
         sample_config = {'result_dir': rank_path, 'iter_id': self.iteration_id, 'model_id': self.model_id}
         with OpSummaryModel(sample_config) as op_model:
-            ai_core_data = op_model.get_operator_data_by_task_type(Constant.TASK_TYPE_AI_CORE)
-            ai_cpu_data = op_model.get_operator_data_by_task_type(Constant.TASK_TYPE_AI_CPU)
-        self.compute_op_events = ai_core_data + ai_cpu_data
+            self.compute_op_events = op_model.get_operator_data_by_task_type()
 
     def update_data(self: any, op_name_dict: dict, rank_id: int) -> None:
         for hccl_name in op_name_dict:
