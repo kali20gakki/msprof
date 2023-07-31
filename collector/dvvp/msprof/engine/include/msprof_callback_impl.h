@@ -48,6 +48,8 @@ int32_t MsprofRegReportTypeInfoImpl(uint16_t level, uint32_t typeId, const std::
 // get hash id call back
 uint64_t MsprofGetHashIdImpl(const std::string &hashInfo);
 
+bool MsprofHostFreqIsEnableImpl();
+
 int32_t GetRegisterResult();
 
 int32_t RegisterReporterCallback();

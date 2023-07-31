@@ -206,7 +206,7 @@ message DataChannelClose {
 message InfoCpu {
     uint32 Id = 1;
     string Name = 2;
-    uint32 Frequency = 3;
+    string Frequency = 3;
     uint32 Logical_CPU_Count = 4;
     string Type = 5;
 }

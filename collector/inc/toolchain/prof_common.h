@@ -468,6 +468,8 @@ const uint32_t MSPROF_REPORT_ACL_RUNTIME_BASE_TYPE       = 0x030000;
 const uint32_t MSPROF_REPORT_ACL_OTHERS_BASE_TYPE        = 0x040000;
 
 /* Msprof report type of acl(20000) level(host api hccl), offset: 0x070000 */
+const uint32_t MSPROF_REPORT_ACL_NN_BASE_TYPE            = 0x050000;
+const uint32_t MSPROF_REPORT_ACL_ASCENDC_TYPE            = 0x060000;
 const uint32_t MSPROF_REPORT_ACL_HOST_HCCL_BASE_TYPE     = 0x070000;
 
 /* Msprof report type of model(15000) level, offset: 0x000000 */

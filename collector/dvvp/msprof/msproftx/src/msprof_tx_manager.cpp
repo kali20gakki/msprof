@@ -271,7 +271,7 @@ int MsprofTxManager::Mark(ACL_PROF_STAMP_PTR stamp) const
         return PROFILING_FAILED;
     }
 
-    stamp->stampInfo.startTime = static_cast<uint64_t>(Utils::GetClockMonotonicRaw());
+    stamp->stampInfo.startTime = static_cast<uint64_t>(Utils::GetCPUCycleCounter());
     stamp->stampInfo.endTime = stamp->stampInfo.startTime;
     stamp->stampInfo.eventType = static_cast<uint32_t>(EventType::MARK);
     return ReportStampData(stamp);
@@ -291,7 +291,7 @@ int MsprofTxManager::Push(ACL_PROF_STAMP_PTR stamp) const
         return PROFILING_FAILED;
     }
 
-    stamp->stampInfo.startTime = static_cast<uint64_t>(Utils::GetClockMonotonicRaw());
+    stamp->stampInfo.startTime = static_cast<uint64_t>(Utils::GetCPUCycleCounter());
     return stampPool_->MsprofStampPush(stamp);
 }
 
@@ -307,7 +307,7 @@ int MsprofTxManager::Pop() const
         MSPROF_LOGE("[Pop]stampPool pop failed ,stamp is null!");
         return PROFILING_FAILED;
     }
-    stamp->stampInfo.endTime = static_cast<uint64_t>(Utils::GetClockMonotonicRaw());
+    stamp->stampInfo.endTime = static_cast<uint64_t>(Utils::GetCPUCycleCounter());
     stamp->stampInfo.eventType = static_cast<uint32_t>(EventType::PUSH_OR_POP);
     return ReportStampData(stamp);
 }
@@ -326,7 +326,7 @@ int MsprofTxManager::RangeStart(ACL_PROF_STAMP_PTR stamp, uint32_t *rangeId) con
         return PROFILING_FAILED;
     }
     auto &stampInfo = stamp->stampInfo;
-    stampInfo.startTime = static_cast<uint64_t>(Utils::GetClockMonotonicRaw());
+    stampInfo.startTime = static_cast<uint64_t>(Utils::GetCPUCycleCounter());
     *rangeId = stampPool_->GetIdByStamp(stamp);
     return PROFILING_SUCCESS;
 }
@@ -345,7 +345,7 @@ int MsprofTxManager::RangeStop(uint32_t rangeId) const
             std::vector<std::string>({std::to_string(rangeId), "rangeId", errorReason}));
         return PROFILING_FAILED;
     }
-    stamp->stampInfo.endTime = static_cast<uint64_t>(Utils::GetClockMonotonicRaw());
+    stamp->stampInfo.endTime = static_cast<uint64_t>(Utils::GetCPUCycleCounter());
     stamp->stampInfo.eventType = static_cast<uint32_t>(EventType::START_OR_STOP);
     return ReportStampData(stamp);
 }

@@ -238,7 +238,8 @@ int32_t RegisterNewReporterCallback()
         {PROFILE_REPORT_COMPACT_INFO_CALLBACK, reinterpret_cast<VOID_PTR>(MsprofCompactInfoReporterCallbackImpl)},
         {PROFILE_REPORT_ADDITIONAL_INFO_CALLBACK, reinterpret_cast<VOID_PTR>(MsprofAddiInfoReporterCallbackImpl)},
         {PROFILE_REPORT_REG_TYPE_INFO_CALLBACK, reinterpret_cast<VOID_PTR>(MsprofRegReportTypeInfoImpl)},
-        {PROFILE_REPORT_GET_HASH_ID_CALLBACK, reinterpret_cast<VOID_PTR>(MsprofGetHashIdImpl)}
+        {PROFILE_REPORT_GET_HASH_ID_CALLBACK, reinterpret_cast<VOID_PTR>(MsprofGetHashIdImpl)},
+        {PROFILE_HOST_FREQ_IS_ENABLE_CALLBACK, reinterpret_cast<VOID_PTR>(MsprofHostFreqIsEnableImpl)}
     };
     for (auto iter : CALLBACK_FUNC_LIST) {
         aclError ret = ProfApiPlugin::instance()->MsprofProfRegProfilerCallback(iter.first, iter.second,
@@ -293,6 +294,11 @@ int32_t MsprofRegReportTypeInfoImpl(uint16_t level, uint32_t typeId, const std::
 uint64_t MsprofGetHashIdImpl(const std::string &hashInfo)
 {
     return MsprofReporterMgr::instance()->GetHashId(hashInfo);
+}
+
+bool MsprofHostFreqIsEnableImpl()
+{
+    return Platform::instance()->PlatformHostFreqIsEnable();
 }
 
 void RegisterMsprofTxReporterCallback()
