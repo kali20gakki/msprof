@@ -78,7 +78,7 @@ class TestAscendTaskGenerator(unittest.TestCase):
         self.assertEqual(len(tasks[1]), 0)
         self.assertEqual(len(tasks[2]), 1)
 
-    def test__replace_acsq_task_with_sub_tasks(self):
+    def test__insert_sub_tasks_of_acsq_task(self):
         ascend_tasks = [
             TopDownTask(1, 0, 1, 2, 4294967295, 0, 1000, 2000, "AI_CORE", "AI_CORE"),
             TopDownTask(1, 0, 1, 3, 4294967295, 0, 3800, 5200, "AI_CORE", "AI_CORE"),
@@ -96,8 +96,8 @@ class TestAscendTaskGenerator(unittest.TestCase):
         ]
         with mock.patch(NAMESPACE + ".DeviceTaskCollector.get_sub_tasks_by_time_range",
                         return_value=ret_sub_tasks):
-            tasks = generator._replace_acsq_task_with_sub_tasks(ascend_tasks)
-            self.assertEqual(len(tasks), 7)
+            tasks = generator._insert_sub_tasks_of_acsq_task(ascend_tasks)
+            self.assertEqual(len(tasks), 9)
 
     def test__generate_top_down_tasks_when_pure_static_graph_scene(self):
         """
