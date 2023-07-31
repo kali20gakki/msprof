@@ -29,7 +29,8 @@ class Event:
         Event._ID += 1
 
     def __lt__(self, other):
-        return self.timestamp < other.timestamp
+        return self.timestamp < other.timestamp or \
+            (self.timestamp == other.timestamp and self.cann_level < other.cann_level)
 
     def __hash__(self):
         return hash(self.id)

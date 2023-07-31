@@ -23,19 +23,22 @@ class TestGeOpExecuteViewer(unittest.TestCase):
             result = obj.get_summary_data()
         self.assertEqual(MsvpConstant.MSVP_EMPTY_DATA, result)
         with mock.patch(NAMESPACE + '.GeOpExecuteViewModel.init', return_value=True), \
-             mock.patch(NAMESPACE + '.GeOpExecuteViewModel.get_summary_data', return_value=[]):
+                mock.patch(NAMESPACE + '.GeOpExecuteViewModel.get_summary_data', return_value=[]):
             obj = GeOpExecuteViewer({}, {"result_dir": "test"})
             result = obj.get_summary_data()
         self.assertEqual(MsvpConstant.MSVP_EMPTY_DATA, result)
+        InfoConfReader()._host_freq = None
+        InfoConfReader()._info_json = {'CPU': [{'Frequency': "1000"}]}
         with mock.patch(NAMESPACE + '.GeOpExecuteViewModel.init', return_value=True), \
-             mock.patch(NAMESPACE + '.GeOpExecuteViewModel.get_summary_data',
-                        return_value=[[1, 'Cast', 'tiling', 0, 10]]):
-            obj = GeOpExecuteViewer({"headers": ['Thread ID', 'OP Type', 'Event Type', 'Start Time', 'Duration']},
+                mock.patch(NAMESPACE + '.GeOpExecuteViewModel.get_summary_data',
+                           return_value=[[1, 'name', 'Cast', 'tiling', 0, 10]]):
+            obj = GeOpExecuteViewer({"headers": ['Thread ID', 'OP Name', 'OP Type', 'Event Type',
+                                                 'Start Time', 'Duration']},
                                     {"project": "test"})
             result = obj.get_summary_data()
         self.assertEqual(3, len(result))
-        self.assertEqual((['Thread ID', 'OP Type', 'Event Type', 'Start Time', 'Duration'],
-                           [[1, 'Cast', 'tiling', 0, 10]], 1), result)
+        self.assertEqual((['Thread ID', 'OP Name', 'OP Type', 'Event Type', 'Start Time', 'Duration'],
+                          [[1, 'name', 'Cast', 'tiling', 0.0, 0.01]], 1), result)
 
     def test_get_timeline_data(self):
         with mock.patch(NAMESPACE + '.GeOpExecuteViewModel.init', return_value=False):
@@ -43,15 +46,16 @@ class TestGeOpExecuteViewer(unittest.TestCase):
             result = obj.get_timeline_data()
         self.assertEqual(NumberConstant.ERROR, json.loads(result).get("status"))
         with mock.patch(NAMESPACE + '.GeOpExecuteViewModel.init', return_value=True), \
-             mock.patch(NAMESPACE + '.GeOpExecuteViewModel.get_timeline_data', return_value=[]):
+                mock.patch(NAMESPACE + '.GeOpExecuteViewModel.get_timeline_data', return_value=[]):
             InfoConfReader()._info_json = {'devices': '0', "pid": "1"}
             obj = GeOpExecuteViewer({}, {"project": "test"})
             result = obj.get_timeline_data()
         self.assertEqual(1, json.loads(result)[0].get("pid"))
         with mock.patch(NAMESPACE + '.GeOpExecuteViewModel.init', return_value=True), \
-             mock.patch(NAMESPACE + '.GeOpExecuteViewModel.get_timeline_data',
-                        return_value=[[1, 'Cast', 'tiling', 0, 10, 'name']]):
-            InfoConfReader()._info_json = {'devices': '0', "pid": "1"}
+                mock.patch(NAMESPACE + '.GeOpExecuteViewModel.get_timeline_data',
+                           return_value=[[1, 'name', 'Cast', 'tiling', 0.0, 0.01]]):
+            InfoConfReader()._host_freq = None
+            InfoConfReader()._info_json = {'devices': '0', "pid": "1", 'CPU': [{'Frequency': "1000"}]}
             obj = GeOpExecuteViewer({}, {"project": "test"})
             result = obj.get_timeline_data()
         self.assertEqual(4, len(json.loads(result)))
