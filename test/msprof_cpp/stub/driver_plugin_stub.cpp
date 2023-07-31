@@ -54,6 +54,11 @@ drvError_t DriverPlugin::MsprofHalGetDeviceInfo(uint32_t devId, int32_t moduleTy
 {
     return DRV_ERROR_NONE;
 }
+
+drvError_t DriverPlugin::MsprofHalGetApiVersion(int32_t *value)
+{
+    return DRV_ERROR_NONE;
+}
  
 int DriverPlugin::MsprofHalProfDataFlush(unsigned int device_id, unsigned int channel_id, unsigned int *data_len)
 {

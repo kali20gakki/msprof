@@ -8,10 +8,10 @@ set(profilerSrcFiles
     ${MSPROF_SOURCE_DIR}/dvvp/common/memory/chunk_pool.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/thread/thread.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/config/config_manager.cpp
+    ${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/logger/cmd_log.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/depend/src/slog_plugin.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/driver/devmgmt/ai_drv_dev_api.cpp
-    ${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter_interface.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter_mini.cpp
     ${MSPROF_SOURCE_DIR}/dvvp/common/platform/platform_adapter_miniv2.cpp
@@ -52,6 +52,7 @@ set(localSrcFiles
     test/param_validation_utest.cpp
     test/platform_adapter_utest.cpp
     test/mmpa_utest.cpp
+    test/platform_utest.cpp
 )
 
 add_executable(common_utest

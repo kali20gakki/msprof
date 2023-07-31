@@ -471,6 +471,51 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvCheckIfHelperHost) {
     EXPECT_EQ(true, analysis::dvvp::driver::DrvCheckIfHelperHost());
 }
 
+TEST_F(DRIVER_AI_DRV_API_TEST, DrvGetHostFreq)
+{
+    GlobalMockObject::verify();
+    std::string freq;
+    int64_t hostFreq = 1000;
+    MOCKER(&DriverPlugin::MsprofHalGetDeviceInfo)
+        .stubs()
+        .with(any(), any(), any(), outBoundP(&hostFreq))
+        .will(returnValue(DRV_ERROR_NONE))
+        .then(returnValue(DRV_ERROR_INNER_ERR));
+
+    EXPECT_EQ(true, analysis::dvvp::driver::DrvGetHostFreq(freq));
+    EXPECT_EQ(false, analysis::dvvp::driver::DrvGetHostFreq(freq));
+}
+
+TEST_F(DRIVER_AI_DRV_API_TEST, DrvGetDeviceFreq)
+{
+    GlobalMockObject::verify();
+    uint32_t deviceId = 0;
+    std::string freq;
+    int64_t deviceFreq = 1000;
+    MOCKER(&DriverPlugin::MsprofHalGetDeviceInfo)
+        .stubs()
+        .with(any(), any(), any(), outBoundP(&deviceFreq))
+        .will(returnValue(DRV_ERROR_NONE))
+        .then(returnValue(DRV_ERROR_INNER_ERR));
+
+    EXPECT_EQ(true, analysis::dvvp::driver::DrvGetDeviceFreq(deviceId, freq));
+    EXPECT_EQ(false, analysis::dvvp::driver::DrvGetDeviceFreq(deviceId, freq));
+}
+
+TEST_F(DRIVER_AI_DRV_API_TEST, DrvGetApiVersion)
+{
+    GlobalMockObject::verify();
+    int32_t ver = 1;
+    MOCKER(&DriverPlugin::MsprofHalGetApiVersion)
+        .stubs()
+        .with(outBoundP(&ver))
+        .will(returnValue(DRV_ERROR_NONE))
+        .then(returnValue(DRV_ERROR_INNER_ERR));
+
+    EXPECT_EQ(1, analysis::dvvp::driver::DrvGetApiVersion());
+    EXPECT_EQ(0, analysis::dvvp::driver::DrvGetApiVersion());
+}
+
 TEST_F(DRIVER_AI_DRV_API_TEST, DrvGetEnvType)
 {
     GlobalMockObject::verify();

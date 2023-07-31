@@ -18,7 +18,6 @@ namespace analysis {
 namespace dvvp {
 namespace host {
 const char * const PLATFORM_CLOUD = "cloud";
-const std::string PROF_VERSION_INFO = "1.0";
 const std::string INFO_FILE_NAME = "info.json";
 
 struct DeviceInfo {
@@ -52,7 +51,7 @@ private:
     int AddHostInfo(SHARED_PTR_ALIA<analysis::dvvp::proto::InfoMain> message);
     int AddDeviceInfo(SHARED_PTR_ALIA<analysis::dvvp::proto::InfoMain> message);
     int AddOtherInfo(SHARED_PTR_ALIA<analysis::dvvp::proto::InfoMain> message);
-    void SetHwtsFrequency(analysis::dvvp::proto::InfoDeviceInfo &message);
+    void SetHwtsFrequency(uint32_t deviceId, analysis::dvvp::proto::InfoDeviceInfo &message);
     int GetCtrlCpuInfo(uint32_t devId, struct DeviceInfo &devInfo);
     int GetDevInfo(int deviceId, struct DeviceInfo &devInfo);
     void SetPlatFormVersion(SHARED_PTR_ALIA<analysis::dvvp::proto::InfoMain> infoMain);
@@ -65,7 +64,8 @@ private:
     void AddCycleToTimeInfo(SHARED_PTR_ALIA<analysis::dvvp::proto::InfoMain> infoMain);
     void SetRankId(SHARED_PTR_ALIA<analysis::dvvp::proto::InfoMain> infoMain);
     void SetVersionInfo(SHARED_PTR_ALIA<analysis::dvvp::proto::InfoMain> infoMain) const;
-    uint32_t GetCpuFrequency() const;
+    std::string GetHostOscFrequency() const;
+    std::string GetDeviceOscFrequency(uint32_t deviceId, const std::string &freq);
 
 private:
     std::string jobInfo_;

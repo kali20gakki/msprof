@@ -126,11 +126,6 @@ TEST_F(INFO_JSON_TEST, AddHostInfo) {
     InfoJson infoJson(start_time, end_time, devices);
     std::shared_ptr<InfoMain> infoMain = std::make_shared<InfoMain>();
     EXPECT_EQ(PROFILING_SUCCESS, infoJson.AddHostInfo(infoMain));
-
-    MOCKER_CPP(&Analysis::Dvvp::Common::Platform::Platform::RunSocSide)
-        .stubs()
-        .will(returnValue(true));
-    EXPECT_EQ(PROFILING_SUCCESS, infoJson.AddHostInfo(infoMain));
 }
 
 TEST_F(INFO_JSON_TEST, AddDeviceInfo) {

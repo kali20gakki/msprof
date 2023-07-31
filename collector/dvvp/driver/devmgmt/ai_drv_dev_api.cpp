@@ -304,6 +304,54 @@ bool DrvCheckIfHelperHost()
     }
     return false;
 }
+
+bool DrvGetHostFreq(std::string &freq)
+{
+    int64_t hostFreq = 0;
+    auto ret = DriverPlugin::instance()->MsprofHalGetDeviceInfo(0, static_cast<int32_t>(MODULE_TYPE_SYSTEM),
+        static_cast<int32_t>(INFO_TYPE_HOST_OSC_FREQUE), &hostFreq);
+    if (ret == DRV_ERROR_NONE && hostFreq > 0) {
+        MSPROF_LOGI("Succeeded to DrvGetHostFreq frequency=%lld", hostFreq);
+        freq = std::to_string(static_cast<float>(hostFreq) / FREQUENCY_KHZ_TO_MHZ);
+        return true;
+    } else {
+        MSPROF_LOGW("Driver doesn't support DrvGetHostFreq by halGetDeviceInfo interface, ret=%d",
+            static_cast<int32_t>(ret));
+        freq = NOT_SUPPORT_FREQUENCY;
+    }
+
+    return false;
+}
+
+bool DrvGetDeviceFreq(uint32_t deviceId, std::string &freq)
+{
+    int64_t deviceFreq = 0;
+    auto ret = DriverPlugin::instance()->MsprofHalGetDeviceInfo(deviceId, static_cast<int32_t>(MODULE_TYPE_SYSTEM),
+        static_cast<int32_t>(INFO_TYPE_DEV_OSC_FREQUE), &deviceFreq);
+    if (ret == DRV_ERROR_NONE && deviceFreq > 0) {
+        MSPROF_LOGI("Succeeded to DrvGetDeviceFreq frequency=%lld", deviceFreq);
+        freq = std::to_string(static_cast<float>(deviceFreq) / FREQUENCY_KHZ_TO_MHZ);
+        return true;
+    } else {
+        MSPROF_LOGW("Driver doesn't support DrvGetDeviceFreq by halGetDeviceInfo interface, ret=%d",
+            static_cast<int32_t>(ret));
+        freq = NOT_SUPPORT_FREQUENCY;
+    }
+
+    return false;
+}
+
+uint32_t DrvGetApiVersion()
+{
+    int32_t ver = 0;
+    auto ret = DriverPlugin::instance()->MsprofHalGetApiVersion(&ver);
+    if (ret == DRV_ERROR_NONE) {
+        MSPROF_EVENT("Succeeded to DrvGetApiVersion version: 0x%x", ver);
+        return static_cast<uint32_t>(ver);
+    }
+    return 0;
+}
+
 }  // namespace driver
 }  // namespace dvvp
 }  // namespace analysis
