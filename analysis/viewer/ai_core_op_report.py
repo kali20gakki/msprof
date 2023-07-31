@@ -341,6 +341,7 @@ class AiCoreOpReport:
         res_list = [None] * (len(dsa_data) + len(dvpp_data))
         res_list[:len(dsa_data)] = dsa_data
         res_list[len(dsa_data): len(dsa_data) + len(dvpp_data)] = dvpp_data
+        res_list = [list(res) for res in res_list]
         return res_list
 
     @classmethod
