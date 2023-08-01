@@ -116,8 +116,6 @@ void ParamsAdapterAclApi::ProfTaskCfgToContainer(const ProfConfig * apiCfg,
     }
     ProfMetricsCfgToContainer(apiCfg->aicoreMetrics, apiCfg->dataTypeConfig, argsArr);
     const std::map<uint64_t, InputCfg> profCfgList = {
-        {PROF_TASK_TIME_MASK, INPUT_CFG_COM_TASK_TIME_L1},
-        {PROF_TASK_TIME_L0_MASK, INPUT_CFG_COM_TASK_TIME_L0},
         {PROF_KEYPOINT_TRACE_MASK, INPUT_CFG_COM_TRAINING_TRACE},
         {PROF_L2CACHE_MASK, INPUT_CFG_COM_L2},
         {PROF_ACL_API_MASK, INPUT_CFG_COM_ASCENDCL},
@@ -125,6 +123,7 @@ void ParamsAdapterAclApi::ProfTaskCfgToContainer(const ProfConfig * apiCfg,
         {PROF_RUNTIME_API_MASK, INPUT_CFG_COM_RUNTIME_API},
         {PROF_HCCL_TRACE_MASK, INPUT_CFG_COM_HCCL},
         {PROF_MSPROFTX_MASK, INPUT_CFG_COM_MSPROFTX},
+        {PROF_TASK_MEMORY_MASK, INPUT_CFG_COM_TASK_MEMORY}
     };
     for (auto cfg : profCfgList) {
         if (apiCfg->dataTypeConfig & cfg.first) {
@@ -132,9 +131,10 @@ void ParamsAdapterAclApi::ProfTaskCfgToContainer(const ProfConfig * apiCfg,
             setConfig_.insert(cfg.second);
         }
     }
-    if (apiCfg->dataTypeConfig & PROF_TASK_MEMORY) {
-        paramContainer_[INPUT_CFG_COM_TASK_MEMORY] = MSVP_PROF_ON;
-        setConfig_.insert(INPUT_CFG_COM_TASK_MEMORY);
+    if (apiCfg->dataTypeConfig & PROF_TASK_TIME_L1_MASK) {
+        paramContainer_[INPUT_CFG_COM_TASK_TIME] = MSVP_PROF_L1;
+    } else if (apiCfg->dataTypeConfig & PROF_TASK_TIME_L0_MASK) {
+        paramContainer_[INPUT_CFG_COM_TASK_TIME] = MSVP_PROF_L0;
     }
 }
 

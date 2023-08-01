@@ -43,7 +43,7 @@ void ParamsAdapterAclJson::InitWholeConfigMap()
         INPUT_CFG_COM_OUTPUT,
         INPUT_CFG_COM_STORAGE_LIMIT,
         INPUT_CFG_COM_MSPROFTX,
-        INPUT_CFG_COM_TASK_TIME_L1,
+        INPUT_CFG_COM_TASK_TIME,
         INPUT_CFG_COM_AICPU,
         INPUT_CFG_COM_L2,
         INPUT_CFG_COM_HCCL,
@@ -69,7 +69,7 @@ void ParamsAdapterAclJson::InitPrintMap()
         {INPUT_CFG_COM_OUTPUT, "output"},
         {INPUT_CFG_COM_STORAGE_LIMIT, "storage_limit"},
         {INPUT_CFG_COM_MSPROFTX, "msproftx"},
-        {INPUT_CFG_COM_TASK_TIME_L1, "task_time"},
+        {INPUT_CFG_COM_TASK_TIME, "task_time"},
         {INPUT_CFG_COM_AICPU, "aicpu"},
         {INPUT_CFG_COM_L2, "l2"},
         {INPUT_CFG_COM_HCCL, "hccl"},
@@ -137,7 +137,7 @@ void ParamsAdapterAclJson::GenAclJsonContainer(SHARED_PTR_ALIA<ProfAclConfig> ac
     paramContainer_[INPUT_CFG_COM_OUTPUT] = aclCfg->output();
     paramContainer_[INPUT_CFG_COM_STORAGE_LIMIT] = aclCfg->storage_limit();
     paramContainer_[INPUT_CFG_COM_MSPROFTX] = aclCfg->msproftx();
-    paramContainer_[INPUT_CFG_COM_TASK_TIME_L1] = aclCfg->task_time();
+    paramContainer_[INPUT_CFG_COM_TASK_TIME] = aclCfg->task_time();
     paramContainer_[INPUT_CFG_COM_AICPU] = aclCfg->aicpu();
     paramContainer_[INPUT_CFG_COM_L2] = aclCfg->l2();
     paramContainer_[INPUT_CFG_COM_HCCL] = aclCfg->hccl();
@@ -194,9 +194,8 @@ void ParamsAdapterAclJson::SetAclJsonContainerDefaultValue()
     if (paramContainer_[INPUT_CFG_COM_RUNTIME_API].empty()) {
         paramContainer_[INPUT_CFG_COM_RUNTIME_API] = MSVP_PROF_ON;
     }
-    paramContainer_[INPUT_CFG_COM_MODEL_EXECUTION] = MSVP_PROF_ON;
-    if (paramContainer_[INPUT_CFG_COM_TASK_TIME_L1].empty()) {
-        paramContainer_[INPUT_CFG_COM_TASK_TIME_L1] = MSVP_PROF_ON;
+    if (paramContainer_[INPUT_CFG_COM_TASK_TIME].empty()) {
+        paramContainer_[INPUT_CFG_COM_TASK_TIME] = MSVP_PROF_ON;
     }
     paramContainer_[INPUT_CFG_COM_AI_CORE] = MSVP_PROF_ON;
     paramContainer_[INPUT_CFG_COM_AIC_MODE] = PROFILING_MODE_TASK_BASED;
@@ -248,14 +247,14 @@ bool ParamsAdapterAclJson::CheckInstrAndTaskParamBothSet(SHARED_PTR_ALIA<ProfAcl
         return false;
     }
     const std::vector<std::pair<bool, std::string>> ARG_VEC {
-        { aclCfg->task_time() == "on", " task_time " },
-        { aclCfg->aicpu() == "on", " aicpu " },
-        { aclCfg->l2() == "on", " l2 " },
-        { aclCfg->hccl() == "on", " hccl " },
-        { aclCfg->ascendcl() == "on", " acsendcl " },
-        { aclCfg->runtime_api() == "on", " runtime_api " },
-        { !aclCfg->aic_metrics().empty(), " aic_metrics " },
-        { !aclCfg->aiv_metrics().empty(), " aiv_metrics " }
+        {aclCfg->task_time() == "on" || aclCfg->task_time() == "l0" || aclCfg->task_time() == "l1", " task_time "},
+        {aclCfg->aicpu() == "on", " aicpu "},
+        {aclCfg->l2() == "on", " l2 "},
+        {aclCfg->hccl() == "on", " hccl "},
+        {aclCfg->ascendcl() == "on", " acsendcl "},
+        {aclCfg->runtime_api() == "on", " runtime_api "},
+        {!aclCfg->aic_metrics().empty(), " aic_metrics "},
+        {!aclCfg->aiv_metrics().empty(), " aiv_metrics "}
     };
     bool anyComflict = std::any_of(ARG_VEC.begin(), ARG_VEC.end(), [](std::pair<bool, std::string> arg) {
         return arg.first;
