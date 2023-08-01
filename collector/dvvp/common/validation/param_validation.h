@@ -73,6 +73,7 @@ public:
     bool ProfStarsAcsqParamIsValid(const std::string &param) const;
     bool IsValidSwitch(const std::string &switchStr) const;
     bool IsValidInputCfgSwitch(const std::string &switchName, const std::string &switchVal) const;
+    bool IsValidTaskTimeSwitch(const std::string &switchVal) const;
     bool CheckStorageLimit(const std::string &storageLimit) const;
     bool StorageLimitUnitValid(const std::string &storageLimit) const;
     bool MsprofCheckAppValid(std::string &appParam) const;
