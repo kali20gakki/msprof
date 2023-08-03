@@ -59,7 +59,8 @@ class TaskOpViewer:
         sql = (
             f"SELECT stream_id, task_id, batch_id, host_task_type, start_time, duration "
             f"from {DBNameConstant.TABLE_ASCEND_TASK} "
-            f"where device_task_type != 'Unknown' and context_id = {TaskOpViewer.INVALID_CONTEXT_ID}"
+            f"where device_task_type != '{Constant.TASK_TYPE_UNKNOWN}'"
+            f" and context_id = {TaskOpViewer.INVALID_CONTEXT_ID}"
         )
         device_tasks = DBManager.fetch_all_data(ascend_curs, sql)
         if not device_tasks:
@@ -94,7 +95,7 @@ class TaskOpViewer:
         task_info = []
         for stream_id, task_id, batch_id, host_task_type, start_time, duration in task_data:
             op_name: str = op_name_dict.get((stream_id, task_id, batch_id), "N/A")
-            task_type: str = host_task_type if host_task_type != 'Unknown' else 'Other'
+            task_type: str = host_task_type if host_task_type != f'{Constant.TASK_TYPE_UNKNOWN}' else 'Other'
             task_time: float = duration / DBManager.NSTOUS
             task_info.append((
                 op_name, task_type, stream_id, task_id,
