@@ -81,12 +81,12 @@ class PipelineOverlapViewer:
                                                         TraceViewHeaderConstant.PROCESS_OVERLAP_ANALYSE]]))
         _trace.extend(
             TraceViewManager.metadata_event(
-                [["thread_name", self._pid, overlap_type.value, self._mapping[overlap_type.name]]
+                [["thread_name", self._pid, overlap_type.value, self._mapping.get(overlap_type.name)]
                  for overlap_type in OverlapType]
             )
         )
         return json.dumps(_trace)
 
     def _format_timeline_data(self, overlap_type, data):
-        return [self._mapping[overlap_type.name], self._pid, overlap_type.value, data.start_time / NumberConstant.NS_TO_US,
-                (data.end_time - data.start_time) / NumberConstant.NS_TO_US]
+        return [self._mapping.get(overlap_type.name), self._pid, overlap_type.value, data.start_time /
+                NumberConstant.NS_TO_US, (data.end_time - data.start_time) / NumberConstant.NS_TO_US]
