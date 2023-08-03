@@ -289,13 +289,14 @@ class MsProfExportDataUtils:
         return ReportOPCounter.report_op(db_path,
                                          configs.get(StrConstant.CONFIG_HEADERS))
 
+    @staticmethod
     def _get_hccl_statistic_data(configs: dict, params: dict) -> any:
         """
         get hccl statistic data
         """
         db_path = PathManager.get_db_path(params.get(StrConstant.PARAM_RESULT_DIR), configs.get(StrConstant.CONFIG_DB))
         return ReportHcclStatisticData.report_hccl_op(db_path,
-                                         configs.get(StrConstant.CONFIG_HEADERS))
+                                                      configs.get(StrConstant.CONFIG_HEADERS))
 
     @staticmethod
     def _get_dvpp_data(configs: dict, params: dict) -> any:
