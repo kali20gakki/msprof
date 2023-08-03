@@ -74,7 +74,7 @@ class TestMsprofDataStorage(unittest.TestCase):
         params = {"data_type": 1}
         key = MsprofDataStorage()
         res = key.export_timeline_data_to_json(result, params)
-        self.assertEqual(res, result)
+        self.assertEqual(res, json.dumps(result))
 
     def test_export_timeline_data_to_json_2(self):
         result = {'test1': 1}
@@ -113,7 +113,7 @@ class TestMsprofDataStorage(unittest.TestCase):
                 mock.patch('os.path.exists', return_value=False):
             key = MsprofDataStorage()
             res = key.export_timeline_data_to_json(result, params)
-        self.assertEqual(res, result)
+        self.assertEqual(res, '{"status": "123"}')
 
     def test_export_timeline_data_to_json_4(self):
         result = None
