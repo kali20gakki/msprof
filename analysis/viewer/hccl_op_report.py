@@ -26,7 +26,7 @@ class ReportHcclStatisticData:
         sql = "select op_type,  occurrences, total_time/{NS_TO_US}, " \
               "min/{NS_TO_US}, avg/{NS_TO_US}, max/{NS_TO_US}, ratio from {0} " \
               "order by total_time desc " \
-              .format(DBNameConstant.TABLE_HCCL_OP_REPORT, NS_TO_US=NumberConstant.NS_TO_US)
+            .format(DBNameConstant.TABLE_HCCL_OP_REPORT, NS_TO_US=NumberConstant.NS_TO_US)
         return sql
 
     @classmethod
@@ -39,8 +39,9 @@ class ReportHcclStatisticData:
         """
         conn, curs = DBManager.check_connect_db_path(db_path)
         if not cls.check_param(conn, curs):
-            return MsvpConstant.MSVP_EMPTY_DATA
+            return [], [], 0
         sql = cls._get_hccl_op_report_sql()
         data = DBManager.fetch_all_data(curs, sql)
         DBManager.destroy_db_connect(conn, curs)
         return headers, data, len(data)
+

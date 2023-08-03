@@ -10,11 +10,13 @@ from sqlite.db_manager import DBOpen
 
 NAMESPACE = 'viewer.hccl_op_report'
 
+
 class TestReportHcclStatisticData(unittest.TestCase):
+
     def test_check_param(self):
         with mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=False):
             res = ReportHcclStatisticData.check_param('', '')
-        self.assertEqual(res, False)
+        self.assertFalse(res)
 
     def test_report_op_1(self):
         with mock.patch(NAMESPACE + '.DBManager.check_connect_db_path', return_value=(None, None)):
