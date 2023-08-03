@@ -14,23 +14,27 @@ from msmodel.runtime.runtime_host_task_model import RuntimeHostTaskModel
 
 
 class HostTaskCollector:
+    CONTEXT_ID_INDEX = 4
+
     def __init__(self: any, result_dir: str):
         self.result_dir = result_dir
 
     @classmethod
     def _generate_host_task_objs(cls: any, raw_data: list):
-        return [HostTask(*data) for data in raw_data]
-
-    @classmethod
-    def _filter_dev_visible_host_tasks(cls: any, all_host_tasks: List[HostTask],
-                                       dev_visible_ids: List[Tuple]) -> List[HostTask]:
-
-        return list(filter(lambda x: (x.stream_id, x.task_id, x.batch_id) in dev_visible_ids, all_host_tasks))
+        objs = []
+        for data in raw_data:
+            if data[cls.CONTEXT_ID_INDEX] == str(NumberConstant.DEFAULT_GE_CONTEXT_ID):
+                objs.append(HostTask(*data[:cls.CONTEXT_ID_INDEX],
+                                     NumberConstant.DEFAULT_GE_CONTEXT_ID, *data[cls.CONTEXT_ID_INDEX + 1:]))
+            else:
+                context_ids = data[cls.CONTEXT_ID_INDEX].split(",")
+                for _id in context_ids:
+                    objs.append(HostTask(*data[:cls.CONTEXT_ID_INDEX], int(_id), *data[cls.CONTEXT_ID_INDEX + 1:]))
+        return objs
 
     def get_host_tasks_by_model_and_iter(self: any, model_id: int, iter_id: int) -> List[HostTask]:
         """
-        This function will get host tasks which are visible on the device side that with model within iter.
-        Notice: Now, device tasks are all ge and hccl tasks, if new scene in future, expand it
+        This function will get host tasks with model within iter.
         """
         if not self._check_host_tasks_exists():
             return []
@@ -45,8 +49,7 @@ class HostTaskCollector:
 
     def get_host_tasks(self) -> List[HostTask]:
         """
-        This function will get host tasks which are visible on the device side that with model within iter.
-        Notice: Now, device tasks are all ge and hccl tasks, if new scene in future, expand it
+        This function will get host tasks.
         """
         if not self._check_host_tasks_exists():
             return []

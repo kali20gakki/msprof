@@ -415,6 +415,17 @@ class TaskGear(CANNGear):
                 task_track_dto = record.dto
         return mem_cpy_info_dto, task_track_dto
 
+    @classmethod
+    def get_context_ids(cls, call_stack: dict) -> str:
+        node_event: Event = call_stack.get(Constant.NODE_LEVEL)
+        if node_event.is_invalid():
+            return str(NumberConstant.DEFAULT_GE_CONTEXT_ID)
+        ids = []
+        for record in node_event.additional_record:
+            if isinstance(record.dto, CtxIdDto):
+                ids.append(record.dto.ctx_id)
+        return ",".join(ids) if ids else str(NumberConstant.DEFAULT_GE_CONTEXT_ID)
+
     def get_hccl_info_dto(self, event: Event) -> HCCLInfoDto:
         for record in event.additional_record:
             if isinstance(record.dto, HCCLInfoDto):
@@ -442,10 +453,11 @@ class TaskGear(CANNGear):
 
         model_id = model_dto.item_id if model_dto.item_id is not None else self.INVALID_MODEL_ID
         request_id = model_dto.request_id if model_dto.request_id is not None else -1
+        context_ids = self.get_context_ids(call_stack)
 
         self.host_tasks.append(
             [model_id, request_id, task_track_dto.stream_id,
-             task_track_dto.task_id, task_track_dto.batch_id,
+             task_track_dto.task_id, context_ids, task_track_dto.batch_id,
              task_track_dto.task_type, task_track_dto.timestamp]
         )
 
