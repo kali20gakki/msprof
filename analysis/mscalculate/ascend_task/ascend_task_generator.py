@@ -53,7 +53,7 @@ class AscendTaskGenerator:
 
         ascend_tasks = sorted(ascend_tasks, key=lambda x: x.start_time)
         if ChipManager().is_stars_chip():
-            ascend_tasks = self._replace_acsq_task_with_sub_tasks(ascend_tasks)
+            ascend_tasks = self._insert_sub_tasks_of_acsq_task(ascend_tasks)
         return ascend_tasks
 
     def _gen_top_down_task(self, dt: DeviceTask, ht: HostTask) -> TopDownTask:
@@ -131,7 +131,7 @@ class AscendTaskGenerator:
         mismatch_host_tasks = [self._gen_top_down_task_by_host_task(data) for data in list(host_queue)]
         return top_down_tasks, mismatch_host_tasks, mismatch_device_tasks
 
-    def _replace_acsq_task_with_sub_tasks(self, ascend_tasks: List[TopDownTask]) -> List[TopDownTask]:
+    def _insert_sub_tasks_of_acsq_task(self, ascend_tasks: List[TopDownTask]) -> List[TopDownTask]:
         def _gen_top_down_task_by_super_td_task_and_sub_dev_task(
                 ascend_t: TopDownTask, sub_t: DeviceTask) -> TopDownTask:
             return TopDownTask(ascend_t.model_id, ascend_t.index_id, ascend_t.stream_id, ascend_t.task_id,
@@ -143,7 +143,7 @@ class AscendTaskGenerator:
             logging.info("No sub tasks found")
             return ascend_tasks
         stream_task_set = set((data.stream_id, data.task_id) for data in subtasks)
-        ret = []
+        ret = ascend_tasks[:]
         for ascend_task in ascend_tasks:
             if (ascend_task.stream_id, ascend_task.task_id) in stream_task_set:
                 start_bound = ascend_task.start_time
@@ -152,8 +152,6 @@ class AscendTaskGenerator:
                         subtasks[0].start_time + subtasks[0].duration <= end_bound:
                     subtask = subtasks.popleft()
                     ret.append(_gen_top_down_task_by_super_td_task_and_sub_dev_task(ascend_task, subtask))
-            else:
-                ret.append(ascend_task)
         return ret
 
     def _generate_top_down_tasks(self: any, host_tasks: List[HostTask], device_tasks: List[DeviceTask]) \
