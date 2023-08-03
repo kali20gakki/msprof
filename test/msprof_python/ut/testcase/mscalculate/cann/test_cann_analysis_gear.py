@@ -13,6 +13,7 @@ from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
+from common_func.ms_constant.number_constant import NumberConstant
 from common_func.path_manager import PathManager
 from constant.constant import clear_dt_project
 from mscalculate.cann.additional_record import AdditionalRecord
@@ -188,7 +189,7 @@ class TestCANNAnalysisGear(unittest.TestCase):
         tensor_info_dto.timestamp = 360
         tensor_info_dto.struct_type = '1'
         ctx_id_dto = CtxIdDto()
-        ctx_id_dto.ctx_id = 8
+        ctx_id_dto.ctx_id = "8"
         ctx_id_dto.op_name = "1"
         ctx_id_dto.timestamp = 360
         event6.additional_record = [
@@ -258,6 +259,53 @@ class TestCANNAnalysisGear(unittest.TestCase):
         self.assertTrue(
             DBManager.check_item_in_table(PathManager.get_db_path(self.PROF_HOST_DIR, DBNameConstant.DB_HCCL),
                                           DBNameConstant.TABLE_HCCL_TASK, 'plane_id', 8))
+
+
+class TestTaskGear(unittest.TestCase):
+    def test_get_context_ids_should_return_invalid_ids_when_invalid_node_event(self):
+        gear = TaskGear("")
+        node_event = Event.invalid_event()
+        call_stack = {Constant.NODE_LEVEL: node_event}
+        ids = gear.get_context_ids(call_stack)
+        self.assertEqual(ids, str(NumberConstant.DEFAULT_GE_CONTEXT_ID))
+
+    def test_get_context_ids_should_return_invalid_ids_when_no_context_ids(self):
+        gear = TaskGear("")
+        node_event = Event.invalid_event()
+        node_event.struct_type = "1"
+        call_stack = {Constant.NODE_LEVEL: node_event}
+        ids = gear.get_context_ids(call_stack)
+        self.assertEqual(ids, str(NumberConstant.DEFAULT_GE_CONTEXT_ID))
+
+    def test_get_context_ids_should_return_valid_ids_when_node_contains_single_context_ids(self):
+        gear = TaskGear("")
+        node_event = Event.invalid_event()
+        node_event.struct_type = "1"
+        context_id_info1 = CtxIdDto()
+        context_id_info1.ctx_id = "1"
+        addition_info1 = AdditionalRecord(context_id_info1)
+        context_id_info2 = CtxIdDto()
+        context_id_info2.ctx_id = "2"
+        addition_info2 = AdditionalRecord(context_id_info2)
+        node_event.additional_record = [addition_info1, addition_info2]
+        call_stack = {Constant.NODE_LEVEL: node_event}
+        ids = gear.get_context_ids(call_stack)
+        self.assertEqual(ids, "1,2")
+
+    def test_get_context_ids_should_return_valid_ids_when_node_contains_mutil_context_ids(self):
+        gear = TaskGear("")
+        node_event = Event.invalid_event()
+        node_event.struct_type = "1"
+        context_id_info1 = CtxIdDto()
+        context_id_info1.ctx_id = "1,2"
+        addition_info1 = AdditionalRecord(context_id_info1)
+        context_id_info2 = CtxIdDto()
+        context_id_info2.ctx_id = "3,4"
+        addition_info2 = AdditionalRecord(context_id_info2)
+        node_event.additional_record = [addition_info1, addition_info2]
+        call_stack = {Constant.NODE_LEVEL: node_event}
+        ids = gear.get_context_ids(call_stack)
+        self.assertEqual(ids, "1,2,3,4")
 
 
 class TestFindModelNameInModelLoad(unittest.TestCase):
