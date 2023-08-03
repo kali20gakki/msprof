@@ -40,7 +40,7 @@ class MsprofDataStorage:
         self.data_list = None
 
     @staticmethod
-    def export_timeline_data_to_json(timeline_data: json, params: dict) -> any:
+    def export_timeline_data_to_json(timeline_data: json, params: dict) -> str:
         """
         export data to json file
         :param timeline_data: export result
@@ -54,7 +54,7 @@ class MsprofDataStorage:
                                        % params.get(StrConstant.PARAM_DATA_TYPE)})
 
         if 'status' in timeline_data:
-            return timeline_data
+            return json.dumps(timeline_data)
         sliced_timeline_data = MsprofDataStorage().slice_data_list(timeline_data)
         error_code, data_path = MsprofDataStorage.write_json_files(sliced_timeline_data, params)
         if error_code:
