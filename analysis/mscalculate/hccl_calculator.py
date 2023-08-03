@@ -99,6 +99,42 @@ class HcclCalculator(ICalculator, MsMultiProcess):
         self.save()
         self.process()
 
+    def process(self: any) -> None:
+        """
+        process of calculating statistic data
+        :return: None
+        """
+        if not self._judge_precess_again():
+            return
+        self.create_and_insert_db()
+
+    def create_and_insert_db(self: any) -> None:
+        if not self._is_table_need_to_create():
+            logging.warning("No need to create table for hccl_op_report,"
+                            "maybe the data of framework or task is not collected.")
+            return
+        map_path = self.TABLE_PATH
+        self.create_table(map_path)
+        self._create_time_data()
+        self._create_report()
+        DBManager.destroy_db_connect(self.conn, self.curs)
+
+    def create_table(self: any, map_path: str) -> None:
+        self.conn, self.curs = DBManager.create_connect_db(
+            PathManager.get_db_path(self._project_path, DBNameConstant.DB_HCCL))
+        if not self.conn or not self.curs:
+            logging.error("unable to create hccl db connection")
+            raise ProfException(ProfException.PROF_SYSTEM_EXIT)
+
+        hccl_time_create_sql = DBManager.sql_create_general_table("HcclTimeMap", DBNameConstant.TABLE_HCCL_OP_TIME,
+                                                                    map_path)
+        DBManager.execute_sql(self.conn, hccl_time_create_sql)
+
+        hccl_report_create_sql = DBManager.sql_create_general_table("HcclReportMap",
+                                                                     DBNameConstant.TABLE_HCCL_OP_REPORT,
+                                                                     map_path)
+        DBManager.execute_sql(self.conn, hccl_report_create_sql)
+
     def _judge_calculate_again(self):
         if not ProfilingScene().is_operator():
             logging.info("In graph scene, to generate table %s", DBNameConstant.TABLE_HCCL_ALL_REDUCE)
@@ -131,15 +167,6 @@ class HcclCalculator(ICalculator, MsMultiProcess):
             self.update_bandwidth(communication_data)
             return communication_data
 
-    def process(self: any) -> None:
-        """
-        process of calculating statistic data
-        :return: None
-        """
-        if not self._judge_precess_again():
-            return
-        self.create_and_insert_db()
-
     def _judge_precess_again(self: any) -> bool:
         if not ProfilingScene().is_operator():
             logging.info("In graph scene, to generate table %s", DBNameConstant.TABLE_HCCL_OP_REPORT)
@@ -153,36 +180,9 @@ class HcclCalculator(ICalculator, MsMultiProcess):
             logging.info("No table %s found, to generate it", DBNameConstant.TABLE_HCCL_OP_REPORT)
             return True
 
-    def create_and_insert_db(self: any) -> None:
-        if not self._is_table_need_to_create():
-            logging.warning("No need to create table for hccl_op_report,"
-                            "maybe the data of framework or task is not collected.")
-            return
-        map_path = self.TABLE_PATH
-        self.create_table(map_path)
-        self._create_time_data()
-        self._create_report()
-        DBManager.destroy_db_connect(self.conn, self.curs)
-
     def _is_table_need_to_create(self: any) -> bool:
         hccl_db_path = PathManager.get_db_path(self._project_path, DBNameConstant.DB_HCCL)
         return DBManager.check_tables_in_db(hccl_db_path, DBNameConstant.TABLE_HCCL_OP)
-
-    def create_table(self: any, map_path: str) -> None:
-        self.conn, self.curs = DBManager.create_connect_db(
-            PathManager.get_db_path(self._project_path, DBNameConstant.DB_HCCL))
-        if not self.conn or not self.curs:
-            logging.error("unable to create hccl db connection")
-            raise ProfException(ProfException.PROF_SYSTEM_EXIT)
-
-        hccl_time_create_sql = DBManager.sql_create_general_table("HcclTimeMap", DBNameConstant.TABLE_HCCL_OP_TIME,
-                                                                    map_path)
-        DBManager.execute_sql(self.conn, hccl_time_create_sql)
-
-        hccl_report_create_sql = DBManager.sql_create_general_table("HcclReportMap",
-                                                                     DBNameConstant.TABLE_HCCL_OP_REPORT,
-                                                                     map_path)
-        DBManager.execute_sql(self.conn, hccl_report_create_sql)
 
     def _create_time_data(self: any) -> None:
         """

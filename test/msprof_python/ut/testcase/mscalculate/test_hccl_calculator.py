@@ -106,7 +106,7 @@ class TestHcclCalculator(unittest.TestCase):
             with mock.patch(NAMESPACE + '.DBManager.check_tables_in_db', return_value=False):
                 check = HcclCalculator([], CONFIG)
                 result = check._is_table_need_to_create()
-            self.assertEqual(result, False)
+            self.assertFalse(result)
 
     def test_create_table(self):
         db_manager = DBManager()
@@ -162,8 +162,10 @@ class TestHcclCalculator(unittest.TestCase):
                           result)
 
     def test_cal_total(self):
-        task_time = {'1': {'op_type': '1', 'count': 2, 'duration': 4, 'min': 1, 'max': 3, 'avg': 2},
-                     '2': {'op_type': '2', 'count': 1, 'duration': 3, 'min': 1, 'max': 1, 'avg': 1}}
+        task_time = {
+                     '1': {'op_type': '1', 'count': 2, 'duration': 4, 'min': 1, 'max': 3, 'avg': 2},
+                     '2': {'op_type': '2', 'count': 1, 'duration': 3, 'min': 1, 'max': 1, 'avg': 1}
+        }
         check = HcclCalculator([], CONFIG)
         _cal_total = getattr(check, "_cal_total")
         result = _cal_total(task_time)
