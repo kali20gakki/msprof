@@ -71,4 +71,5 @@ class ExportDataType(Enum):
     MEMORY_RECORD = 58
     EVENT = 59
     API = 60
+    HCCL_STATISTIC = 61
     MSPROF = 100

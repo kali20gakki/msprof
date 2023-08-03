@@ -4,11 +4,16 @@
 import os
 import unittest
 from unittest import mock
+import pytest
 
+from common_func.msprof_exception import ProfException
 from common_func.ms_constant.str_constant import StrConstant
 from constant.constant import clear_dt_project
 from mscalculate.hccl_calculator import HcclCalculator
 from profiling_bean.db_dto.hccl_dto import HcclDto
+from sqlite.db_manager import DBManager
+from constant.constant import CONFIG
+
 
 NAMESPACE = 'mscalculate.hccl_calculator'
 
@@ -34,27 +39,23 @@ class TestHcclCalculator(unittest.TestCase):
         with mock.patch(NAMESPACE + ".HcclCalculator._get_hccl_data",
                         return_value=[self.construct_hccl_dto("hccl_op")]), \
                 mock.patch(NAMESPACE + ".HcclCalculator._generate_hccl_op_info"):
-            check = HcclCalculator([], {
-                StrConstant.SAMPLE_CONFIG_PROJECT_PATH: os.path.join(self.DIR_PATH, 'PROF1', 'device_0')})
+            check = HcclCalculator([], CONFIG)
             check.calculate()
 
     def test_get_hccl_data(self):
         with mock.patch('os.path.exists', return_value=False):
-            check = HcclCalculator([], {
-                StrConstant.SAMPLE_CONFIG_PROJECT_PATH: os.path.join(self.DIR_PATH, 'PROF1', 'device_0')})
+            check = HcclCalculator([], CONFIG)
             self.assertEqual([], check._get_hccl_data())
 
         with mock.patch('os.path.exists', return_value=True):
-            check = HcclCalculator([], {
-                StrConstant.SAMPLE_CONFIG_PROJECT_PATH: os.path.join(self.DIR_PATH, 'PROF1', 'device_0')})
+            check = HcclCalculator([], CONFIG)
             self.assertEqual([], check._get_hccl_data())
 
         with mock.patch('os.path.exists', return_value=True), \
                 mock.patch(NAMESPACE + '.HcclViewModel.check_table', return_value=True), \
                 mock.patch(NAMESPACE + '.HcclViewModel.get_hccl_communication_data',
                            return_value=[self.construct_hccl_dto("hccl_op")]):
-            check = HcclCalculator([], {
-                StrConstant.SAMPLE_CONFIG_PROJECT_PATH: os.path.join(self.DIR_PATH, 'PROF1', 'device_0')})
+            check = HcclCalculator([], CONFIG)
             self.assertEqual("hccl_op", check._get_hccl_data()[0].op_name)
 
     def test_generate_hccl_op_info(self):
@@ -63,7 +64,157 @@ class TestHcclCalculator(unittest.TestCase):
             self.construct_hccl_dto("hccl_op1", timestamp=123457),
             self.construct_hccl_dto("hccl_op2", timestamp=123458)
         ]
-        check = HcclCalculator([], {
-            StrConstant.SAMPLE_CONFIG_PROJECT_PATH: os.path.join(self.DIR_PATH, 'PROF1', 'device_0')})
+        check = HcclCalculator([], CONFIG)
         check._generate_hccl_op_info(hccl_data)
         self.assertEqual(3, len(check._hccl_data))
+
+    def test_ms_run(self):
+        with mock.patch('os.path.exists', return_value=True), \
+             mock.patch(NAMESPACE + '.HcclCalculator.calculate'), \
+             mock.patch(NAMESPACE + '.HcclCalculator.save'), \
+             mock.patch(NAMESPACE + '.HcclCalculator.process'):
+            key = HcclCalculator([], CONFIG)
+            key.ms_run()
+
+    def test_process(self):
+        db_manager = DBManager()
+        res = db_manager.create_table('hccl.db')
+        with mock.patch(NAMESPACE + '.HcclCalculator._judge_precess_again', return_value=True), \
+             mock.patch(NAMESPACE + '.DBManager.destroy_db_connect'):
+            with mock.patch(NAMESPACE + '.HcclCalculator._is_table_need_to_create',
+                            return_value=False), \
+                    mock.patch(NAMESPACE + '.logging.warning'):
+                check = HcclCalculator([], CONFIG)
+                result = check.process()
+            self.assertEqual(result, None)
+            with mock.patch(NAMESPACE + '.HcclCalculator._is_table_need_to_create',
+                            return_value=True):
+                with mock.patch(NAMESPACE + '.HcclCalculator.create_table',
+                                return_value=res), \
+                        mock.patch(NAMESPACE + '.HcclCalculator._create_time_data'), \
+                        mock.patch(NAMESPACE + '.HcclCalculator._create_report'):
+                    check = HcclCalculator([], CONFIG)
+                    check.process()
+        db_manager.destroy(res)
+
+    def test_is_table_need_to_create(self):
+        with mock.patch(NAMESPACE + '.PathManager.get_db_path', return_value=True):
+            with mock.patch(NAMESPACE + '.DBManager.check_tables_in_db', return_value=True):
+                check = HcclCalculator([], CONFIG)
+                result = check._is_table_need_to_create()
+            self.assertTrue(result)
+            with mock.patch(NAMESPACE + '.DBManager.check_tables_in_db', return_value=False):
+                check = HcclCalculator([], CONFIG)
+                result = check._is_table_need_to_create()
+            self.assertEqual(result, False)
+
+    def test_create_table(self):
+        db_manager = DBManager()
+        res = db_manager.create_table('hccl.db')
+        hccl_time_create_sql = "CREATE TABLE IF NOT EXISTS hccl_op_time(op_type TEXT,begin REAL," \
+                               "end REAL,duration REAL)"
+        hccl_report_create_sql = " CREATE TABLE IF NOT EXISTS hccl_op_report(op_type text," \
+                                 "occurrences text,total_time REAL,min REAL,avg REAL,max REAL,ratio text)"
+        with mock.patch(NAMESPACE + '.DBManager.create_connect_db',
+                        return_value=(None, None)), \
+                mock.patch(NAMESPACE + '.logging.error'), \
+                pytest.raises(ProfException) as error:
+            check = HcclCalculator([], CONFIG)
+            check.create_table('test')
+            self.assertEqual(error.value.code, 10)
+        with mock.patch(NAMESPACE + '.DBManager.create_connect_db',
+                        return_value=res):
+            with mock.patch(NAMESPACE + '.DBManager.sql_create_general_table',
+                            return_value=hccl_time_create_sql):
+                check = HcclCalculator([], CONFIG)
+                check.create_table('test')
+            with mock.patch(NAMESPACE + '.DBManager.sql_create_general_table',
+                            return_value=hccl_report_create_sql):
+                check = HcclCalculator([], CONFIG)
+                check.create_table('test')
+        res[1].execute("drop table hccl_op_time")
+        res[1].execute("drop table hccl_op_report")
+        db_manager.destroy(res)
+
+    def test_create_time_data(self):
+        with mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True), \
+             mock.patch(NAMESPACE + '.HcclCalculator._get_hccl_time_data', return_value=[[1]]), \
+             mock.patch(NAMESPACE + '.DBManager.executemany_sql'):
+            check = HcclCalculator([], CONFIG)
+            check.conn = True
+            check.curs = True
+            getattr(check, "_create_time_data")()
+
+    def test_get_hccl_time_data(self):
+        with mock.patch(NAMESPACE + '.MsprofIteration.get_index_id_list_with_index_and_model',
+                        return_value={}), \
+                mock.patch(NAMESPACE + '.DBManager.fetch_all_data', return_value=[1]):
+            check = HcclCalculator([], CONFIG)
+            result = check._get_hccl_time_data()
+        self.assertEqual(result, [])
+
+    def test_get_hccl_op_report_sql(self):
+        check = HcclCalculator([], CONFIG)
+        result = check._get_hccl_op_report_sql()
+        self.assertEqual("select op_type, count(op_type), sum(duration) as total_time, " \
+                         "min(duration) as min, sum(duration)/count(op_type) as avg, " \
+                         "max(duration) as max from hccl_op_time group by op_type",
+                          result)
+
+    def test_cal_total(self):
+        task_time = {'1': {'op_type': '1', 'count': 2, 'duration': 4, 'min': 1, 'max': 3, 'avg': 2},
+                     '2': {'op_type': '2', 'count': 1, 'duration': 3, 'min': 1, 'max': 1, 'avg': 1}}
+        check = HcclCalculator([], CONFIG)
+        _cal_total = getattr(check, "_cal_total")
+        result = _cal_total(task_time)
+        self.assertEqual(result, 7)
+
+    def test_create_report(self):
+        db_manager = DBManager()
+        res = db_manager.create_table('hccl.db')
+        curs = res[1]
+        curs.execute("CREATE TABLE IF NOT EXISTS hccl_op_time(op_type TEXT,begin REAL," \
+                    "end REAL,duration REAL)")
+        curs.execute("CREATE TABLE IF NOT EXISTS hccl_op_report(model_name text,op_type text,"
+                     "core_type text,occurrences text,total_time REAL,min REAL,avg REAL,"
+                     "max REAL,ratio text)")
+        res[0].commit()
+        sql = "select op_type, count(op_type), sum(duration) as total_time," \
+              "min(duration) as min, sum(duration)/count(op_type) as avg," \
+              "max(duration) as max from hccl_op_time group by op_type"
+
+        with mock.patch(NAMESPACE + '.HcclCalculator._get_hccl_op_report_sql', return_value=sql):
+            check = HcclCalculator([], CONFIG)
+            check.conn, check.curs = res[0], res[1]
+            check._create_report()
+        curs.execute("insert into hccl_op_time values ('allreduce', 1, 2, 1)")
+        res[0].commit()
+        with mock.patch(NAMESPACE + '.HcclCalculator._get_hccl_op_report_sql', return_value=sql):
+            check = HcclCalculator([], CONFIG)
+            check.conn, check.curs = res[0], res[1]
+            check._create_report()
+        curs.execute('drop table hccl_op_time')
+        curs.execute('drop table hccl_op_report')
+        res[0].commit()
+        db_manager.destroy(res)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

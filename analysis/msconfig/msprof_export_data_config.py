@@ -322,5 +322,11 @@ class MsProfExportDataConfig(MetaConfig):
             ('handler', '_get_api_data'),
             ('db', 'api_event.db'),
             ('table', 'ApiData')
-        ]
+        ],
+        'hccl_statistic': [
+            ('handler', '_get_hccl_statistic_data'),
+            ('headers',
+             'OP Type,Count,Total Time(us),Min Time(us),Avg Time(us),Max Time(us),Ratio(%)'),
+            ('db', 'hccl.db')
+        ],
     }
