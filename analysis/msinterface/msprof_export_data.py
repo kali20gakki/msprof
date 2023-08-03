@@ -29,6 +29,7 @@ from msparser.aicpu.parse_dp_data import ParseDpData
 from viewer.acl.acl_viewer import AclViewer
 from viewer.ai_core_op_report import AiCoreOpReport
 from viewer.ai_core_op_report import ReportOPCounter
+from viewer.hccl_op_report import ReportHcclStatisticData
 from viewer.ai_core_report import get_core_sample_data
 from viewer.aicpu_viewer import ParseAiCpuData
 from viewer.biu_perf_viewer import BiuPerfViewer
@@ -286,6 +287,14 @@ class MsProfExportDataUtils:
         """
         db_path = PathManager.get_db_path(params.get(StrConstant.PARAM_RESULT_DIR), configs.get(StrConstant.CONFIG_DB))
         return ReportOPCounter.report_op(db_path,
+                                         configs.get(StrConstant.CONFIG_HEADERS))
+
+    def _get_hccl_statistic_data(configs: dict, params: dict) -> any:
+        """
+        get hccl statistic data
+        """
+        db_path = PathManager.get_db_path(params.get(StrConstant.PARAM_RESULT_DIR), configs.get(StrConstant.CONFIG_DB))
+        return ReportHcclStatisticData.report_hccl_op(db_path,
                                          configs.get(StrConstant.CONFIG_HEADERS))
 
     @staticmethod
