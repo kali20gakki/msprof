@@ -27,7 +27,7 @@ class OverlapType(Enum):
 
 
 class PipelineOverlapViewer:
-    Mapping = {
+    OverlapTypeName = {
         "COMPUTE_TIME": "Computing",
         "COMMUNICATION_TIME": "Communication",
         "COMMUNICATION_NOT_OVERLAPPED": "Communication(Not Overlapped)",
@@ -81,12 +81,12 @@ class PipelineOverlapViewer:
                                                         TraceViewHeaderConstant.PROCESS_OVERLAP_ANALYSE]]))
         _trace.extend(
             TraceViewManager.metadata_event(
-                [["thread_name", self._pid, overlap_type.value, self.Mapping.get(overlap_type.name)]
+                [["thread_name", self._pid, overlap_type.value, self.OverlapTypeName.get(overlap_type.name)]
                  for overlap_type in OverlapType]
             )
         )
         return json.dumps(_trace)
 
     def _format_timeline_data(self, overlap_type, data):
-        return [self.Mapping.get(overlap_type.name), self._pid, overlap_type.value, data.start_time /
+        return [self.OverlapTypeName.get(overlap_type.name), self._pid, overlap_type.value, data.start_time /
                 NumberConstant.NS_TO_US, (data.end_time - data.start_time) / NumberConstant.NS_TO_US]
