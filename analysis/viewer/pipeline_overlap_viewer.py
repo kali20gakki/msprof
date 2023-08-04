@@ -27,18 +27,18 @@ class OverlapType(Enum):
 
 
 class PipelineOverlapViewer:
+    Mapping = {
+        "COMPUTE_TIME": "Computing",
+        "COMMUNICATION_TIME": "Communication",
+        "COMMUNICATION_NOT_OVERLAPPED": "Communication(Not Overlapped)",
+        "FREE_TIME": "Free"
+    }
 
     def __init__(self, configs: dict, params: dict):
         self._configs = configs
         self._params = params
         self._project_path = params.get(StrConstant.PARAM_RESULT_DIR)
         self._pid = InfoConfReader().get_json_pid_data()
-        self._mapping = {
-            "COMPUTE_TIME": "Computing",
-            "COMMUNICATION_TIME": "Communication",
-            "COMMUNICATION_NOT_OVERLAPPED": "Communication(Not Overlapped)",
-            "FREE_TIME": "Free"
-        }
 
     def get_timeline_data(self):
         result = []
@@ -81,12 +81,12 @@ class PipelineOverlapViewer:
                                                         TraceViewHeaderConstant.PROCESS_OVERLAP_ANALYSE]]))
         _trace.extend(
             TraceViewManager.metadata_event(
-                [["thread_name", self._pid, overlap_type.value, self._mapping.get(overlap_type.name)]
+                [["thread_name", self._pid, overlap_type.value, self.Mapping.get(overlap_type.name)]
                  for overlap_type in OverlapType]
             )
         )
         return json.dumps(_trace)
 
     def _format_timeline_data(self, overlap_type, data):
-        return [self._mapping.get(overlap_type.name), self._pid, overlap_type.value, data.start_time /
+        return [self.Mapping.get(overlap_type.name), self._pid, overlap_type.value, data.start_time /
                 NumberConstant.NS_TO_US, (data.end_time - data.start_time) / NumberConstant.NS_TO_US]
