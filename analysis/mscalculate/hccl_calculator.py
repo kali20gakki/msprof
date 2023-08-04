@@ -126,6 +126,13 @@ class HcclCalculator(ICalculator, MsMultiProcess):
             logging.error("unable to create hccl db connection")
             raise ProfException(ProfException.PROF_SYSTEM_EXIT)
 
+        if DBManager.check_tables_in_db(PathManager.get_db_path(self._project_path, DBNameConstant.DB_HCCL),
+                                        DBNameConstant.TABLE_HCCL_OP_TIME):
+            DBManager.drop_table(self.conn, DBNameConstant.TABLE_HCCL_OP_TIME)
+        if DBManager.check_tables_in_db(PathManager.get_db_path(self._project_path, DBNameConstant.DB_HCCL),
+                                        DBNameConstant.TABLE_HCCL_OP_REPORT):
+            DBManager.drop_table(self.conn, DBNameConstant.TABLE_HCCL_OP_REPORT)
+
         hccl_time_create_sql = DBManager.sql_create_general_table("HcclTimeMap", DBNameConstant.TABLE_HCCL_OP_TIME,
                                                                     map_path)
         DBManager.execute_sql(self.conn, hccl_time_create_sql)
