@@ -44,10 +44,10 @@ class TestFftsLogModel(TestDirCRBaseModel):
 
     def test_get_ffts_plus_sub_task_data_within_time_range_by_different_time_staggered_situation(self):
         ffts_plus_data = [
-            [0, 23, 2, "AIV", "FFTS+", 1000, 2000, 1000, 0],
-            [1, 23, 2, "AIC", "FFTS+", 3000, 4000, 1000, 0],
-            [2, 23, 2, "AIC", "FFTS+", 5000, 6000, 1000, 0],
-            [0, 24, 2, "MIX_AIV", "FFTS+", 7000, 8000, 1000, 0],
+            [0, 23, 2, "AIV", "FFTS+", 1000, 1000, 2000, 0, 0],
+            [1, 23, 2, "AIC", "FFTS+", 3000, 1000, 4000, 0, 0],
+            [2, 23, 2, "AIC", "FFTS+", 5000, 1000, 6000, 0, 0],
+            [0, 24, 2, "MIX_AIV", "FFTS+", 7000, 1000, 8000, 0, 0],
         ]
         model = FftsLogModel(self.PROF_DEVICE_DIR, DBNameConstant.DB_SOC_LOG, [DBNameConstant.TABLE_SUBTASK_TIME])
         model.init()
