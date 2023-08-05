@@ -1197,6 +1197,7 @@ class TablesConfig(MetaConfig):
             ('request_id', 'INTEGER,null'),
             ('stream_id', 'INTEGER,null'),
             ('task_id', 'INTEGER,null'),
+            ('context_ids', 'TEXT,null'),
             ('batch_id', 'INTEGER,null'),
             ('task_type', 'TEXT,null'),
             ('timestamp', 'NUMERIC,null')

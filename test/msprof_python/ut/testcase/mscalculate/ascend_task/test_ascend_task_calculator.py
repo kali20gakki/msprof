@@ -9,9 +9,11 @@ from analyzer.scene_base.profiling_scene import ProfilingScene
 from common_func.constant import Constant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.str_constant import StrConstant
+from common_func.platform.chip_manager import ChipManager
 from mscalculate.ascend_task.ascend_task import TopDownTask
 from mscalculate.ascend_task.ascend_task_calculator import AscendTaskCalculator
 from profiling_bean.db_dto.step_trace_dto import IterationRange
+from profiling_bean.prof_enum.chip_model import ChipModel
 
 NAMESPACE = 'mscalculate.ascend_task.ascend_task_calculator'
 
@@ -59,6 +61,18 @@ class TestAscendTaskCalculator(unittest.TestCase):
         with mock.patch(NAMESPACE + ".DBManager.check_tables_in_db", return_value=True):
             self.assertFalse(self.calculator._judge_calculate_again())
         scene._scene = None
+
+    def test__judge_calculate_again_should_return_false_when_sample_based_in_stars(self):
+        info = InfoConfReader()
+        info._sample_json = {
+            "ai_core_profiling_mode": 'sample-based',
+            'platform_version': "5"
+        }
+        chip_m = ChipManager()
+        chip_m.chip_id = ChipModel.CHIP_V1_1_1
+        self.assertFalse(self.calculator._judge_calculate_again())
+        info._sample_json = {}
+        chip_m.chip_id = ChipModel.CHIP_V1_1_0
 
     def test__save(self):
         data = [TopDownTask(1, 1, 1, 1, 1, 1, 1000, 1000, "", "")]
