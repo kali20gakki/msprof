@@ -415,6 +415,17 @@ class TaskGear(CANNGear):
                 task_track_dto = record.dto
         return mem_cpy_info_dto, task_track_dto
 
+    @classmethod
+    def get_context_ids(cls, call_stack: dict) -> str:
+        node_event: Event = call_stack.get(Constant.NODE_LEVEL)
+        if node_event.is_invalid():
+            return str(NumberConstant.DEFAULT_GE_CONTEXT_ID)
+        ids = []
+        for record in node_event.additional_record:
+            if isinstance(record.dto, CtxIdDto):
+                ids.append(record.dto.ctx_id)
+        return ",".join(ids) if ids else str(NumberConstant.DEFAULT_GE_CONTEXT_ID)
+
     def get_hccl_info_dto(self, event: Event) -> HCCLInfoDto:
         for record in event.additional_record:
             if isinstance(record.dto, HCCLInfoDto):
@@ -442,10 +453,11 @@ class TaskGear(CANNGear):
 
         model_id = model_dto.item_id if model_dto.item_id is not None else self.INVALID_MODEL_ID
         request_id = model_dto.request_id if model_dto.request_id is not None else -1
+        context_ids = self.get_context_ids(call_stack)
 
         self.host_tasks.append(
             [model_id, request_id, task_track_dto.stream_id,
-             task_track_dto.task_id, task_track_dto.batch_id,
+             task_track_dto.task_id, context_ids, task_track_dto.batch_id,
              task_track_dto.task_type, task_track_dto.timestamp]
         )
 
@@ -477,19 +489,35 @@ class TaskGear(CANNGear):
         model_event: Event = call_stack.get(Constant.MODEL_LEVEL)
         model_dto: ApiDataDto = ApiDataDatabase().get(model_event)
         node_event: Event = call_stack.get(Constant.NODE_LEVEL)
+        node_dto : ApiDataDto = ApiDataDatabase().get(node_event)
 
-        node_descs = self.get_node_descs(node_event)
-        if not node_descs:
+        if not node_dto.item_id:
             # this happen when runtime task is not respond to a op
             return
 
         model_id = model_dto.item_id if model_dto.item_id is not None else self.INVALID_MODEL_ID
         request_id = model_dto.request_id if model_dto.request_id is not None else -1
+
+        node_descs = self.get_node_descs(node_event)
+        if not node_descs:
+            # this happen when prof data is collected in level 0
+            self.task_info.append([model_id, node_dto.item_id, add_dto.stream_id, add_dto.task_id,
+                                   0, 0, 'N/A', 'N/A', 'N/A', request_id, add_dto.thread_id,
+                                   'N/A', add_dto.batch_id, self.INVALID_CONTEXT_ID])
+            return
+
         for node_desc in node_descs.values():
             node_basic_info_dto: NodeBasicInfoDto = node_desc.node_basic_info
             tensor_info_dto: TensorInfoDto = node_desc.tensor_info
             ctx_id_dto = node_desc.ctx_info
 
+            cxt_ids = str(ctx_id_dto.ctx_id).split(',')
+            if not node_basic_info_dto:
+                for cxt_id in cxt_ids:
+                    self.task_info.append([model_id, node_dto.item_id, add_dto.stream_id, add_dto.task_id,
+                                           0, 0, 'N/A', 'N/A', 'N/A', request_id, add_dto.thread_id,
+                                           'N/A', add_dto.batch_id, int(cxt_id)])
+                continue
             if node_basic_info_dto.task_type is None or node_basic_info_dto.task_type == self.FFTS_PLUS_TASK_TYPE:
                 continue
             task_type = node_basic_info_dto.task_type
@@ -497,7 +525,6 @@ class TaskGear(CANNGear):
                 # notice: reduce TBE op
                 task_type = self.AICORE_TASK_TYPE
 
-            cxt_ids = str(ctx_id_dto.ctx_id).split(',')
             for cxt_id in cxt_ids:
                 self.task_info.append([model_id, node_basic_info_dto.op_name, add_dto.stream_id, add_dto.task_id,
                                        node_basic_info_dto.block_dim, node_basic_info_dto.mix_block_dim,

@@ -438,7 +438,7 @@ class AiCoreOpReport:
                "wait_time/{NS_TO_US}, block_dim, mix_block_dim, " \
                "(case when context_id={context_id} then 'N/A' else context_id end) from {0} " \
                "inner join {1} on {0}.task_id={1}.task_id and {0}.stream_id = {1}.stream_id " \
-               "and {1}.task_type!=? and {1}.task_type!=? and {1}.task_type!=? " \
+               "and {1}.task_type!=? and {1}.task_type!=? " \
                "and {0}.batch_id={1}.batch_id " \
                "and {1}.context_id={0}.subtask_id " \
                "and {0}.start_time != {2} " \
@@ -580,15 +580,16 @@ class ReportOPCounter:
     @staticmethod
     def _get_op_report_sql_operator_scene() -> str:
         sql = "select op_type, core_type, occurrences, total_time/{NS_TO_US}, " \
-              "min/{NS_TO_US}, avg/{NS_TO_US}, max/{NS_TO_US}, ratio from {0} order by " \
-              "total_time desc".format(CommonConstant.OP_REPORT_TABLE, NS_TO_US=NumberConstant.NS_TO_US)
+              "min/{NS_TO_US}, avg/{NS_TO_US}, max/{NS_TO_US}, ratio from {0} " \
+              "where op_type != 'N/A' order by total_time desc" \
+             .format(CommonConstant.OP_REPORT_TABLE, NS_TO_US=NumberConstant.NS_TO_US)
         return sql
 
     @staticmethod
     def _get_op_report_sql_network_scene() -> str:
         sql = "select model_name, op_type, core_type, occurrences, total_time/{NS_TO_US}, " \
               "min/{NS_TO_US}, avg/{NS_TO_US}, max/{NS_TO_US}, ratio from {0} " \
-              "order by model_name asc, " \
+              "where op_type != 'N/A' order by model_name asc, " \
               "total_time desc".format(CommonConstant.OP_REPORT_TABLE, NS_TO_US=NumberConstant.NS_TO_US)
         return sql
 

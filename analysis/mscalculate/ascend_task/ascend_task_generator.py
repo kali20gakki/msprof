@@ -27,10 +27,10 @@ class AscendTaskGenerator:
         self.iter_id = -1
 
     @classmethod
-    def _sep_task_by_stream_task(cls, tasks: Union[List[DeviceTask], List[HostTask]]) -> dict:
+    def _sep_task_by_stream_task_ctx(cls, tasks: Union[List[DeviceTask], List[HostTask]]) -> dict:
         ret = {}
         for task in tasks:
-            ret.setdefault((task.stream_id, task.task_id), []).append(task)
+            ret.setdefault((task.stream_id, task.task_id, task.context_id), []).append(task)
         return ret
 
     @classmethod
@@ -52,17 +52,15 @@ class AscendTaskGenerator:
                 ascend_tasks.extend(ascend_tasks_in_iter)
 
         ascend_tasks = sorted(ascend_tasks, key=lambda x: x.start_time)
-        if ChipManager().is_stars_chip():
-            ascend_tasks = self._replace_acsq_task_with_sub_tasks(ascend_tasks)
         return ascend_tasks
 
     def _gen_top_down_task(self, dt: DeviceTask, ht: HostTask) -> TopDownTask:
         # wait time will calculate after this
-        return TopDownTask(ht.model_id, self.iter_id, ht.stream_id, ht.task_id, dt.subtask_id, ht.batch_id,
+        return TopDownTask(ht.model_id, self.iter_id, ht.stream_id, ht.task_id, dt.context_id, ht.batch_id,
                            dt.start_time, dt.duration, ht.task_type, dt.task_type)
 
     def _gen_top_down_task_by_device_task(self, dt: DeviceTask) -> TopDownTask:
-        return TopDownTask(Constant.GE_OP_MODEL_ID, self.iter_id, dt.stream_id, dt.task_id, dt.subtask_id,
+        return TopDownTask(Constant.GE_OP_MODEL_ID, self.iter_id, dt.stream_id, dt.task_id, dt.context_id,
                            NumberConstant.DEFAULT_BATCH_ID, dt.start_time, dt.duration,
                            Constant.TASK_TYPE_UNKNOWN, dt.task_type)
 
@@ -82,7 +80,7 @@ class AscendTaskGenerator:
     def _match_host_device_task(self, host_tasks: List[HostTask], device_tasks: List[DeviceTask]) -> \
             Tuple[List[TopDownTask], List[TopDownTask], List[TopDownTask]]:
 
-        if len(host_tasks) == 1 and self._is_task_in_static_model(host_tasks[0]):
+        if len(host_tasks) == 1 and device_tasks and self._is_task_in_static_model(host_tasks[0]):
             # task in static model, there may be a one-to-many relationship between host tasks and device tasks.
             return self._match_host_device_task_in_static_model(host_tasks[0], device_tasks), [], []
 
@@ -101,9 +99,10 @@ class AscendTaskGenerator:
             pre_batch_id = host_queue[0].batch_id - 1
         while device_queue and host_queue:
             if host_queue[0].batch_id != pre_batch_id + 1:
-                logging.error("lost host tasks for stream_id: %d, task_id: %d, batch_id: %d"
+                logging.error("lost host tasks for stream_id: %d, task_id: %d, batch_id: %d, ctx_id: %d."
                               " Tasks that use these IDs may have mismatches.",
-                              host_queue[0].stream_id, host_queue[0].task_id, pre_batch_id + 1)
+                              host_queue[0].stream_id, host_queue[0].task_id,
+                              pre_batch_id + 1, host_queue[0].context_id)
             device_task = device_queue.popleft()
             host_task = host_queue.popleft()
             # when unique id takes effect, judge match or not by it
@@ -113,48 +112,23 @@ class AscendTaskGenerator:
 
         if host_queue:
             if failed_match:
-                logging.error("device tasks less than host tasks for stream_id: %d, task_id: %d."
+                logging.error("device tasks less than host tasks for stream_id: %d, task_id: %d, ctx_id: %d."
                               " Tasks that use these IDs may have mismatches.",
-                              host_queue[0].stream_id, host_queue[0].task_id)
+                              host_queue[0].stream_id, host_queue[0].task_id, host_queue[0].context_id)
             else:
-                logging.debug("no device tasks found for stream_id: %d, task_id: %d.",
-                              host_queue[0].stream_id, host_queue[0].task_id)
+                logging.debug("no device tasks found for stream_id: %d, task_id: %d, ctx_id: %d.",
+                              host_queue[0].stream_id, host_queue[0].task_id, host_queue[0].context_id)
         if device_queue:
             if failed_match:
-                logging.error("host tasks less than device tasks for stream_id: %d, task_id: %d."
+                logging.error("host tasks less than device tasks for stream_id: %d, task_id: %d, ctx_id: %d."
                               " Tasks that use these IDs may have mismatches.",
-                              device_queue[0].stream_id, device_queue[0].task_id)
+                              device_queue[0].stream_id, device_queue[0].task_id, device_queue[0].context_id)
             else:
-                logging.debug("no host tasks found for stream_id: %d, task_id: %d.",
-                              device_queue[0].stream_id, device_queue[0].task_id)
+                logging.debug("no host tasks found for stream_id: %d, task_id: %d, ctx_id: %d.",
+                              device_queue[0].stream_id, device_queue[0].task_id, device_queue[0].context_id)
         mismatch_device_tasks = [self._gen_top_down_task_by_device_task(data) for data in list(device_queue)]
         mismatch_host_tasks = [self._gen_top_down_task_by_host_task(data) for data in list(host_queue)]
         return top_down_tasks, mismatch_host_tasks, mismatch_device_tasks
-
-    def _replace_acsq_task_with_sub_tasks(self, ascend_tasks: List[TopDownTask]) -> List[TopDownTask]:
-        def _gen_top_down_task_by_super_td_task_and_sub_dev_task(
-                ascend_t: TopDownTask, sub_t: DeviceTask) -> TopDownTask:
-            return TopDownTask(ascend_t.model_id, ascend_t.index_id, ascend_t.stream_id, ascend_t.task_id,
-                               sub_t.subtask_id, ascend_t.batch_id, sub_t.start_time, sub_t.duration,
-                               ascend_t.host_task_type, sub_t.task_type)
-
-        subtasks = deque(self.device_task_collector.get_sub_tasks_by_time_range(float('-inf'), float('inf')))
-        if not subtasks:
-            logging.info("No sub tasks found")
-            return ascend_tasks
-        stream_task_set = set((data.stream_id, data.task_id) for data in subtasks)
-        ret = []
-        for ascend_task in ascend_tasks:
-            if (ascend_task.stream_id, ascend_task.task_id) in stream_task_set:
-                start_bound = ascend_task.start_time
-                end_bound = ascend_task.start_time + ascend_task.duration
-                while subtasks and subtasks[0].start_time >= start_bound and \
-                        subtasks[0].start_time + subtasks[0].duration <= end_bound:
-                    subtask = subtasks.popleft()
-                    ret.append(_gen_top_down_task_by_super_td_task_and_sub_dev_task(ascend_task, subtask))
-            else:
-                ret.append(ascend_task)
-        return ret
 
     def _generate_top_down_tasks(self: any, host_tasks: List[HostTask], device_tasks: List[DeviceTask]) \
             -> Tuple[List[TopDownTask], List[TopDownTask]]:
@@ -162,15 +136,15 @@ class AscendTaskGenerator:
         associate host and device task to generate up-down task which
         contains complete ascend software and hardware info.
         """
-        stream_task_separated_host_tasks = self._sep_task_by_stream_task(host_tasks)
-        stream_task_separated_device_tasks = self._sep_task_by_stream_task(device_tasks)
+        stream_task_ctx_separated_host_tasks = self._sep_task_by_stream_task_ctx(host_tasks)
+        stream_task_ctx_separated_device_tasks = self._sep_task_by_stream_task_ctx(device_tasks)
 
         top_down_tasks = []
         matched_top_down_tasks = []
-        stream_task_set = stream_task_separated_host_tasks.keys() | stream_task_separated_device_tasks.keys()
+        stream_task_set = stream_task_ctx_separated_host_tasks.keys() | stream_task_ctx_separated_device_tasks.keys()
         for key in stream_task_set:
-            host_t = stream_task_separated_host_tasks.get(key, [])
-            device_t = stream_task_separated_device_tasks.get(key, [])
+            host_t = stream_task_ctx_separated_host_tasks.get(key, [])
+            device_t = stream_task_ctx_separated_device_tasks.get(key, [])
             matched_top_down_t, mismatch_host_t, mismatch_device_t = self._match_host_device_task(host_t, device_t)
             # statistic mismatch task, for future interface
             top_down_tasks.extend([*matched_top_down_t, *mismatch_host_t, *mismatch_device_t])

@@ -133,7 +133,7 @@ class TestAiCoreOpReport(unittest.TestCase):
                     "from task_time inner join ge_summary on task_time.task_id=ge_summary.task_id " \
                     "and task_time.stream_id = ge_summary.stream_id " \
                     "and ge_summary.task_type!=? " \
-                    "and ge_summary.task_type!=? and ge_summary.task_type!=? " \
+                    "and ge_summary.task_type!=? " \
                     "and task_time.batch_id=ge_summary.batch_id and ge_summary.context_id=task_time.subtask_id " \
                     "and task_time.start_time != -1 " \
                     "order by start_time"

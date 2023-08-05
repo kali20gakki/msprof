@@ -54,13 +54,11 @@ class MergeOpCounterCalculator(MsMultiProcess):
               "max(duration) as max, {0}.model_id from {0}, {1} " \
               "where {0}.task_id={1}.task_id and {0}.stream_id={1}.stream_id " \
               "and {0}.batch_id={1}.batch_id " \
-              "and ({0}.context_id={1}.subtask_id or ({0}.context_id={context_id} and subtask_id={subtask_id})) " \
+              "and {0}.context_id={1}.subtask_id " \
               "and {1}.start_time != {2} " \
               "group by op_type,{0}.task_type" \
             .format(CommonConstant.GE_TASK_MEGED_TABLE, CommonConstant.RTS_TASK_TABLE,
-                    NumberConstant.INVALID_TASK_TIME,
-                    context_id=NumberConstant.DEFAULT_GE_CONTEXT_ID,
-                    subtask_id=NumberConstant.DEFAULT_FFTS_SUBTASK_ID)
+                    NumberConstant.INVALID_TASK_TIME,)
         return sql
 
     @staticmethod
