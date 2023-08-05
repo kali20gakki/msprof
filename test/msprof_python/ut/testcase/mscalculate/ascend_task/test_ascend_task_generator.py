@@ -29,17 +29,17 @@ class TestAscendTaskGenerator(unittest.TestCase):
             DeviceTask(2, 2, 0, 1000, 1000, "AI_CORE"),
         ]
         generator = AscendTaskGenerator("")
-        tasks = generator._sep_task_by_stream_task(device_tasks)
+        tasks = generator._sep_task_by_stream_task_ctx(device_tasks)
         self.assertEqual(len(tasks), 3)
 
     def test__sep_host_task_by_stream_should_return_3_stream(self):
         host_tasks = [
-            HostTask(1, 1, 1, 2, 0, "AI_CORE", 1000),
-            HostTask(1, 1, 1, 3, 0, "AI_CORE", 2000),
-            HostTask(1, 1, 2, 2, 0, "AI_CORE", 3000),
+            HostTask(1, 1, 1, 2, 4294967295, 0, "AI_CORE", 1000),
+            HostTask(1, 1, 1, 3, 4294967295, 0, "AI_CORE", 2000),
+            HostTask(1, 1, 2, 2, 4294967295, 0, "AI_CORE", 3000),
         ]
         generator = AscendTaskGenerator("")
-        tasks = generator._sep_task_by_stream_task(host_tasks)
+        tasks = generator._sep_task_by_stream_task_ctx(host_tasks)
         self.assertEqual(len(tasks), 3)
 
     def test__match_host_device_task_should_return_3_matched_1_host_mismatch(self):
@@ -49,10 +49,10 @@ class TestAscendTaskGenerator(unittest.TestCase):
             DeviceTask(1, 2, 0, 1000, 1000, "AI_CORE"),
         ]
         host_tasks = [
-            HostTask(1, 1, 1, 2, 0, "AI_CORE", 1000),
-            HostTask(1, 1, 1, 2, 0, "AI_CORE", 2000),
-            HostTask(1, 1, 1, 2, 0, "AI_CORE", 3000),
-            HostTask(1, 1, 1, 2, 0, "AI_CORE", 3000),
+            HostTask(1, 1, 1, 2, 4294967295, 0, "AI_CORE", 1000),
+            HostTask(1, 1, 1, 2, 4294967295, 0, "AI_CORE", 2000),
+            HostTask(1, 1, 1, 2, 4294967295, 0, "AI_CORE", 3000),
+            HostTask(1, 1, 1, 2, 4294967295, 0, "AI_CORE", 3000),
         ]
         generator = AscendTaskGenerator("")
         tasks = generator._match_host_device_task(host_tasks, device_tasks)
@@ -68,36 +68,15 @@ class TestAscendTaskGenerator(unittest.TestCase):
             DeviceTask(1, 2, 0, 1000, 1000, "AI_CORE"),
         ]
         host_tasks = [
-            HostTask(1, 1, 1, 2, 0, "AI_CORE", 1000),
-            HostTask(1, 1, 1, 2, 0, "AI_CORE", 2000),
-            HostTask(1, 1, 1, 2, 0, "AI_CORE", 3000),
+            HostTask(1, 1, 1, 2, 4294967295, 0, "AI_CORE", 1000),
+            HostTask(1, 1, 1, 2, 4294967295, 0, "AI_CORE", 2000),
+            HostTask(1, 1, 1, 2, 4294967295, 0, "AI_CORE", 3000),
         ]
         generator = AscendTaskGenerator("")
         tasks = generator._match_host_device_task(host_tasks, device_tasks)
         self.assertEqual(len(tasks[0]), 3)
         self.assertEqual(len(tasks[1]), 0)
         self.assertEqual(len(tasks[2]), 1)
-
-    def test__replace_acsq_task_with_sub_tasks(self):
-        ascend_tasks = [
-            TopDownTask(1, 0, 1, 2, 4294967295, 0, 1000, 2000, "AI_CORE", "AI_CORE"),
-            TopDownTask(1, 0, 1, 3, 4294967295, 0, 3800, 5200, "AI_CORE", "AI_CORE"),
-            TopDownTask(1, 0, 1, 4, 4294967295, 0, 5300, 1000, "AI_CORE", "AI_CORE"),
-        ]
-
-        generator = AscendTaskGenerator("")
-        ret_sub_tasks = [
-            DeviceTask(1, 2, 0, 1000, 1000, "MIX_AIC"),
-            DeviceTask(1, 2, 1, 1200, 1000, "MIX_AIC"),
-            DeviceTask(1, 2, 2, 1500, 1000, "MIX_AIC"),
-            DeviceTask(1, 2, 3, 1800, 1000, "MIX_AIC"),
-            DeviceTask(1, 3, 0, 4000, 1000, "MIX_AIC"),
-            DeviceTask(1, 3, 1, 4100, 1000, "MIX_AIC"),
-        ]
-        with mock.patch(NAMESPACE + ".DeviceTaskCollector.get_sub_tasks_by_time_range",
-                        return_value=ret_sub_tasks):
-            tasks = generator._replace_acsq_task_with_sub_tasks(ascend_tasks)
-            self.assertEqual(len(tasks), 7)
 
     def test__generate_top_down_tasks_when_pure_static_graph_scene(self):
         """
@@ -110,9 +89,9 @@ class TestAscendTaskGenerator(unittest.TestCase):
         host_timestamp: int
         """
         host_tasks = [
-            HostTask(1, 0, 1, 2, 0, "AI_CORE", 1000),
-            HostTask(1, 0, 1, 3, 0, "AI_CORE", 2000),
-            HostTask(1, 0, 1, 4, 0, "AI_CORE", 3000),
+            HostTask(1, 0, 1, 2, 4294967295, 0, "AI_CORE", 1000),
+            HostTask(1, 0, 1, 3, 4294967295, 0, "AI_CORE", 2000),
+            HostTask(1, 0, 1, 4, 4294967295, 0, "AI_CORE", 3000),
         ]
 
         """
@@ -138,14 +117,14 @@ class TestAscendTaskGenerator(unittest.TestCase):
 
     def test__generate_top_down_tasks_when_static_graph_mix_with_dynamic_graph_scene(self):
         host_tasks = [
-            HostTask(1, 0, 1, 2, 0, "AI_CORE", 1000),
-            HostTask(1, 0, 1, 3, 0, "AI_CORE", 2000),
-            HostTask(1, 0, 1, 4, 0, "AI_CORE", 3000),
-            HostTask(1, 1, 1, 6, 0, "AI_CORE", 5000),
-            HostTask(1, 1, 1, 7, 0, "AI_CORE", 6000),
-            HostTask(1, 1, 1, 8, 0, "AI_CORE", 7000),
-            HostTask(1, 1, 1, 65535, 0, "AI_CORE", 8000),
-            HostTask(1, 1, 1, 6, 1, "AI_CORE", 9000),
+            HostTask(1, 0, 1, 2, 4294967295, 0, "AI_CORE", 1000),
+            HostTask(1, 0, 1, 3, 4294967295, 0, "AI_CORE", 2000),
+            HostTask(1, 0, 1, 4, 4294967295, 0, "AI_CORE", 3000),
+            HostTask(1, 1, 1, 6, 4294967295, 0, "AI_CORE", 5000),
+            HostTask(1, 1, 1, 7, 4294967295, 0, "AI_CORE", 6000),
+            HostTask(1, 1, 1, 8, 4294967295, 0, "AI_CORE", 7000),
+            HostTask(1, 1, 1, 65535, 4294967295, 0, "AI_CORE", 8000),
+            HostTask(1, 1, 1, 6, 4294967295, 1, "AI_CORE", 9000),
         ]
 
         device_tasks = [
@@ -168,14 +147,14 @@ class TestAscendTaskGenerator(unittest.TestCase):
 
     def test__generate_top_down_tasks_operate_scene(self):
         host_tasks = [
-            HostTask(4294967295, -1, 1, 2, 0, "AI_CORE", 1000),
-            HostTask(4294967295, -1, 1, 3, 0, "AI_CORE", 2000),
-            HostTask(4294967295, -1, 1, 4, 0, "AI_CORE", 3000),
-            HostTask(4294967295, -1, 1, 6, 0, "AI_CORE", 5000),
-            HostTask(4294967295, -1, 1, 7, 0, "AI_CORE", 6000),
-            HostTask(4294967295, -1, 1, 8, 0, "AI_CORE", 7000),
-            HostTask(4294967295, -1, 1, 65535, 0, "AI_CORE", 8000),
-            HostTask(4294967295, -1, 1, 6, 1, "AI_CORE", 9000),
+            HostTask(4294967295, -1, 1, 2, 4294967295, 0, "AI_CORE", 1000),
+            HostTask(4294967295, -1, 1, 3, 4294967295, 0, "AI_CORE", 2000),
+            HostTask(4294967295, -1, 1, 4, 4294967295, 0, "AI_CORE", 3000),
+            HostTask(4294967295, -1, 1, 6, 4294967295, 0, "AI_CORE", 5000),
+            HostTask(4294967295, -1, 1, 7, 4294967295, 0, "AI_CORE", 6000),
+            HostTask(4294967295, -1, 1, 8, 4294967295, 0, "AI_CORE", 7000),
+            HostTask(4294967295, -1, 1, 65535, 4294967295, 0, "AI_CORE", 8000),
+            HostTask(4294967295, -1, 1, 6, 4294967295, 1, "AI_CORE", 9000),
         ]
 
         device_tasks = [

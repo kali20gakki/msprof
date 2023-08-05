@@ -126,18 +126,3 @@ class TestSubTaskCalculator(unittest.TestCase):
             check = SubTaskCalculator(file_list, self.sample_config)
             ret = check._get_thread_task_time_sql()
             self.assertEqual(ret, sql)
-
-    def test_get_subtask_time_sql(self):
-        file_list = {DataTag.STARS_LOG: ['stars_soc.data.0.slice_0', 'stars_soc.data.0.slice_1']}
-        sql = "Select end_log.subtask_id as subtask_id, end_log.task_id as task_id," \
-              "end_log.stream_id as stream_id,end_log.subtask_type as subtask_type," \
-              "end_log.ffts_type as ffts_type,start_log.task_time as start_time, " \
-              "(end_log.task_time-start_log.task_time) as dur_time, end_log.task_time as end_time, " \
-              "0 as batch_id from FftsLog end_log join FftsLog " \
-              "start_log on end_log.subtask_id=start_log.subtask_id and end_log.stream_id=start_log.stream_id " \
-              "and end_log.task_id=start_log.task_id where end_log.task_type='100011' " \
-              "and start_log.task_type='100010' group by end_log.subtask_id, end_log.task_id order by start_time"
-        with mock.patch(NAMESPACE + '.MsprofIteration.get_iter_interval', return_value=(1, 2)):
-            check = SubTaskCalculator(file_list, self.sample_config)
-            ret = check._get_subtask_time_sql()
-            self.assertEqual(ret, sql)

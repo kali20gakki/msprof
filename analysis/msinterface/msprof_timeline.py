@@ -125,7 +125,7 @@ class MsprofTimeline:
             return
 
         try:
-            if isinstance(export_data, list) and export_data:
+            if isinstance(export_data, list):
                 self.add_sort_index(export_data)
                 self.add_connect_json_line(export_data, data_type)
                 export_data = filter(
