@@ -11,7 +11,6 @@ from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.stars_constant import StarsConstant
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
-from common_func.msprof_iteration import MsprofIteration
 from common_func.path_manager import PathManager
 from common_func.platform.chip_manager import ChipManager
 from profiling_bean.prof_enum.data_tag import DataTag
@@ -66,38 +65,40 @@ class SubTaskCalculator(MsMultiProcess):
             task_key = "{0}-{1}-{2}-{3}".format(data.stream_id, data.task_id, data.subtask_id, data.thread_id)
             task_map.setdefault(task_key, {}).setdefault(data.task_type, deque([])).append(data)
         matched_result = []
-        remaining_data = []
         mismatch_count = 0
+        notify_mismatch = 0
         for task_key, data in task_map.items():
             start_que = data.get(StarsConstant.FFTS_LOG_START_TAG, [])
             end_que = data.get(StarsConstant.FFTS_LOG_END_TAG, [])
-            batch_id = 0
             while start_que and end_que:
                 start_task = start_que[0]
                 end_task = end_que[0]
                 if start_task.task_time > end_task.task_time:
                     mismatch_count += 1
                     _ = end_que.popleft()
-                    batch_id += 1
                     continue
                 start_task = start_que.popleft()
                 end_task = end_que.popleft()
                 matched_result.append(
                     [start_task.subtask_id, start_task.task_id, start_task.stream_id, start_task.subtask_type,
-                     start_task.ffts_type, start_task.task_time, end_task.task_time - start_task.task_time,
-                     end_task.task_time, batch_id, int(start_task.thread_id)]
+                     start_task.ffts_type, start_task.task_time, end_task.task_time,
+                     end_task.task_time - start_task.task_time, int(start_task.thread_id)]
                 )
-                batch_id += 1
-            if len(start_que) > 1 or end_que:
+            for start_task in start_que:
+                if start_task.subtask_type == "Notify Wait":
+                    notify_mismatch += 1
+                    matched_result.append(
+                        [start_task.subtask_id, start_task.task_id, start_task.stream_id, start_task.subtask_type,
+                         start_task.ffts_type, start_task.task_time, start_task.task_time,
+                         0, int(start_task.thread_id)]
+                    )
+            if start_que or end_que:
                 logging.debug("subtask_time task mismatch happen in %s, start_que size: %d, end_que size: %d",
                               task_key, len(start_que), len(end_que))
                 mismatch_count += len(start_que)
                 mismatch_count += len(end_que)
-                # when mismatched, discards illegal task
-                continue
-            while start_que:
-                start_task = start_que.popleft()
-                remaining_data.append(start_task)
+        if notify_mismatch > 0:
+            logging.error("There are %d notify wait mismatching.", notify_mismatch)
         if mismatch_count > 0:
             logging.error("There are %d subtask_time tasks mismatching.", mismatch_count)
         return sorted(matched_result, key=lambda data: data[5])  # data[5] represents subtask start time
