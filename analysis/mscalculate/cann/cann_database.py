@@ -27,8 +27,7 @@ class ApiDataDatabase(CANNDatabase):
 
     def put(self, data: ApiDataDto) -> Event:
         event = Event(
-            self.LEVELS_MAP.get(data.level, data.level), data.thread_id, data.start, data.end, data.struct_type,
-                                data.item_id)
+            self.LEVELS_MAP.get(data.level, data.level), data.thread_id, data.start, data.end, data.struct_type)
         self._max_bound = max(data.end, self._max_bound)
 
         self._data[event] = data
