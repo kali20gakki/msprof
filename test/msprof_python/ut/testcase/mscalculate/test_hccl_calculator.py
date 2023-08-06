@@ -7,7 +7,6 @@ from unittest import mock
 import pytest
 
 from common_func.msprof_exception import ProfException
-from common_func.ms_constant.str_constant import StrConstant
 from constant.constant import clear_dt_project
 from mscalculate.hccl_calculator import HcclCalculator
 from profiling_bean.db_dto.hccl_dto import HcclDto
@@ -89,8 +88,7 @@ class TestHcclCalculator(unittest.TestCase):
             self.assertEqual(result, None)
             with mock.patch(NAMESPACE + '.HcclCalculator._is_table_need_to_create',
                             return_value=True):
-                with mock.patch(NAMESPACE + '.HcclCalculator.create_table',
-                                return_value=res), \
+                with mock.patch(NAMESPACE + '.HcclCalculator.create_table'), \
                         mock.patch(NAMESPACE + '.HcclCalculator._create_time_data'), \
                         mock.patch(NAMESPACE + '.HcclCalculator._create_report'):
                     check = HcclCalculator([], CONFIG)
@@ -111,10 +109,10 @@ class TestHcclCalculator(unittest.TestCase):
     def test_create_table(self):
         db_manager = DBManager()
         res = db_manager.create_table('hccl.db')
-        hccl_time_create_sql = "CREATE TABLE IF NOT EXISTS hccl_op_time(op_type TEXT,begin REAL," \
-                               "end REAL,duration REAL)"
-        hccl_report_create_sql = " CREATE TABLE IF NOT EXISTS hccl_op_report(op_type text," \
-                                 "occurrences text,total_time REAL,min REAL,avg REAL,max REAL,ratio text)"
+        hccl_time_create_sql = "CREATE TABLE IF NOT EXISTS hccl_op_time(op_type TEXT,begin NUMERIC," \
+                               "end NUMERIC,duration NUMERIC)"
+        hccl_report_create_sql = " CREATE TABLE IF NOT EXISTS hccl_op_report(op_type TEXT," \
+                                 "occurrences TEXT,total_time NUMERIC,min NUMERIC,avg NUMERIC,max NUMERIC,ratio TEXT)"
         with mock.patch(NAMESPACE + '.DBManager.create_connect_db',
                         return_value=(None, None)), \
                 mock.patch(NAMESPACE + '.logging.error'), \
@@ -148,10 +146,18 @@ class TestHcclCalculator(unittest.TestCase):
     def test_get_hccl_time_data(self):
         with mock.patch(NAMESPACE + '.MsprofIteration.get_index_id_list_with_index_and_model',
                         return_value={}), \
-                mock.patch(NAMESPACE + '.DBManager.fetch_all_data', return_value=[1]):
+             mock.patch('analyzer.scene_base.profiling_scene.Utils.get_scene', return_value="step_info"), \
+             mock.patch(NAMESPACE + '.DBManager.fetch_all_data', return_value=[1]):
             check = HcclCalculator([], CONFIG)
             result = check._get_hccl_time_data()
-        self.assertEqual(result, [])
+            self.assertEqual(result, [])
+        with mock.patch(NAMESPACE + '.MsprofIteration.get_index_id_list_with_index_and_model',
+                        return_value={(1, 1)}), \
+             mock.patch('analyzer.scene_base.profiling_scene.Utils.get_scene', return_value="step_info"), \
+             mock.patch(NAMESPACE + '.DBManager.fetch_all_data', return_value=[1]):
+            check = HcclCalculator([], CONFIG)
+            result = check._get_hccl_time_data()
+            self.assertEqual(result, [1])
 
     def test_get_hccl_op_report_sql(self):
         check = HcclCalculator([], CONFIG)
@@ -175,11 +181,10 @@ class TestHcclCalculator(unittest.TestCase):
         db_manager = DBManager()
         res = db_manager.create_table('hccl.db')
         curs = res[1]
-        curs.execute("CREATE TABLE IF NOT EXISTS hccl_op_time(op_type TEXT,begin REAL," \
-                    "end REAL,duration REAL)")
-        curs.execute("CREATE TABLE IF NOT EXISTS hccl_op_report(model_name text,op_type text,"
-                     "core_type text,occurrences text,total_time REAL,min REAL,avg REAL,"
-                     "max REAL,ratio text)")
+        curs.execute("CREATE TABLE IF NOT EXISTS hccl_op_time(op_type TEXT,begin NUMERIC," \
+                     "end NUMERIC,duration NUMERIC)")
+        curs.execute("CREATE TABLE IF NOT EXISTS hccl_op_report(op_type TEXT," \
+                     "occurrences TEXT,total_time NUMERIC,min NUMERIC,avg NUMERIC,max NUMERIC,ratio TEXT)")
         res[0].commit()
         sql = "select op_type, count(op_type), sum(duration) as total_time," \
               "min(duration) as min, sum(duration)/count(op_type) as avg," \
@@ -199,24 +204,3 @@ class TestHcclCalculator(unittest.TestCase):
         curs.execute('drop table hccl_op_report')
         res[0].commit()
         db_manager.destroy(res)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

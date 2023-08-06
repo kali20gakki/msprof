@@ -1247,17 +1247,17 @@ class TablesConfig(MetaConfig):
         ],
         'HcclTimeMap': [
             ('op_type', 'TEXT, null'),
-            ('begin', 'REAL, null'),
-            ('end', 'REAL, null'),
-            ('duration', 'REAL, null')
+            ('begin', 'NUMERIC, null'),
+            ('end', 'NUMERIC, null'),
+            ('duration', 'NUMERIC, null')
         ],
         'HcclReportMap': [
-            ('op_type', 'text,null'),
-            ('occurrences', 'text,null'),
-            ('total_time', 'REAL,null'),
-            ('min', 'REAL,null'),
-            ('avg', 'REAL,null'),
-            ('max', 'REAL,null'),
-            ('ratio', 'text,null')
+            ('op_type', 'TEXT,null'),
+            ('occurrences', 'TEXT,null'),
+            ('total_time', 'NUMERIC,null'),
+            ('min', 'NUMERIC,null'),
+            ('avg', 'NUMERIC,null'),
+            ('max', 'NUMERIC,null'),
+            ('ratio', 'TEXT,null')
         ],
     }
