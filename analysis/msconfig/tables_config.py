@@ -671,9 +671,8 @@ class TablesConfig(MetaConfig):
             ('subtask_type', 'text,null'),
             ('ffts_type', 'INTEGER,null'),
             ('start_time', 'NUMERIC,null'),
-            ('dur_time', 'NUMERIC,null'),
             ('end_time', 'NUMERIC,null'),
-            ('batch_id', 'INTEGER,null'),
+            ('dur_time', 'NUMERIC,null'),
             ('thread_id', 'INTEGER,null'),
         ],
         'StarsTaskTimeMap': [
