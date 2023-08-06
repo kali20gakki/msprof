@@ -167,8 +167,6 @@ class MsprofIteration:
                     for _count in range(iter_range.iteration_count)}
         iter_set.add((NumberConstant.STATIC_SHAPE_ITER_ID, iter_range.model_id))
         if not (ProfilingScene().is_mix_operator_and_graph() and iter_range.model_id == Constant.GE_OP_MODEL_ID):
-            if iter_range.model_id == Constant.GE_OP_MODEL_ID:
-                iter_set.add((NumberConstant.DEFAULT_OP_INDEX_ID, iter_range.model_id))
             return iter_set
 
         db_path = PathManager.get_db_path(self._result_dir, DBNameConstant.DB_STEP_TRACE)

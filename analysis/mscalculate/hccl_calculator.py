@@ -209,10 +209,12 @@ class HcclCalculator(ICalculator, MsMultiProcess):
         :return: None
         """
         hccl_time_data = []
-        iter_list = MsprofIteration(self._project_path).get_index_id_list_with_index_and_model(self.iter_range)
-        for index_and_model in iter_list:
-            hccl_time_sql = f'select op_type, begin, end, (end-begin) as duration '\
-                            f'from {DBNameConstant.TABLE_HCCL_OP} where index_id=? and model_id=?'
+        iter_set = MsprofIteration(self._project_path).get_index_id_list_with_index_and_model(self.iter_range)
+        if ProfilingScene().is_operator():
+            iter_set.add((NumberConstant.DEFAULT_OP_INDEX_ID, self.iter_range.model_id))
+        hccl_time_sql = f'select op_type, begin, end, (end-begin) as duration ' \
+                        f'from {DBNameConstant.TABLE_HCCL_OP} where index_id=? and model_id=?'
+        for index_and_model in iter_set:
             hccl_time_data.extend(DBManager.fetch_all_data(self.curs, hccl_time_sql, index_and_model))
         return hccl_time_data
 
