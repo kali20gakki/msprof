@@ -58,6 +58,7 @@ class ApiDataDto:
         dto.struct_type = struct_type
         dto.start = start
         dto.end = end
+        dto.item_id = ""
         return dto
 
     @struct_type.setter
