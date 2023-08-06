@@ -17,8 +17,7 @@ class Event:
     INVALID_THREAD_ID = -1
     _ID = 0
 
-    def __init__(self, cann_level: int, thread_id: int, timestamp: float, bound: int, struct_type: str,
-                 item_id: str = ''):
+    def __init__(self, cann_level: int, thread_id: int, timestamp: float, bound: int, struct_type: str):
         self.cann_level = cann_level
         self.timestamp = timestamp  # begin
         self.thread_id = thread_id
@@ -27,7 +26,6 @@ class Event:
         # additional record
         self.additional_record: List[AdditionalRecord] = list()
         self.id = self._ID
-        self.item_id = item_id
         Event._ID += 1
 
     def __lt__(self, other):
