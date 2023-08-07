@@ -92,14 +92,6 @@ class TablesOperatorConfig(MetaConfig):
             ('block_dim', 'INTEGER,null'),
             ('mix_block_dim', 'INTEGER,null'),
             ('task_type', 'text,null'),
-            ('timestamp', 'TEXT,null'),
-            ('batch_id', 'INTEGER,null'),
-            ('context_id', 'INTEGER,null')
-        ],
-        'TensorGeMap': [
-            ('model_id', 'INTEGER,null'),
-            ('stream_id', 'INTEGER,null'),
-            ('task_id', 'INTEGER,null'),
             ('tensor_num', 'INTEGER,null'),
             ('input_formats', 'TEXT,null'),
             ('input_data_types', 'TEXT,null'),
@@ -110,7 +102,6 @@ class TablesOperatorConfig(MetaConfig):
             ('index_id', 'INTEGER,null'),
             ('timestamp', 'TEXT,null'),
             ('batch_id', 'INTEGER,null'),
-            ('device_id', 'INTEGER,null'),
             ('context_id', 'INTEGER,null')
-        ]
+        ],
     }
