@@ -79,8 +79,10 @@ class TestHcclCalculator(unittest.TestCase):
         self.assertEqual(result, 5)
 
     def test_create_report_should_return_list_data_when_input_is_not_none(self):
-        task_data = [["1", 2, 4, 1, 3, 2],
-                     ["2", 1, 1, 1, 1, 1]]
+        task_data = [
+                     ["1", 2, 4, 1, 3, 2],
+                     ["2", 1, 1, 1, 1, 1]
+        ]
         check = HcclCalculator([], CONFIG)
         check._create_report(task_data)
         hccl_op_report_data = check._hccl_op_report_data
