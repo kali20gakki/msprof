@@ -31,6 +31,7 @@ enum ProfDataTypeConfig {
     kProfL2cache = 0x0010,
     kProfHccl = 0x0020,
     kProfTrainingTrace = 0x0040,
+    kProfTaskTimeL0 = 0x0800,
 };
 
 enum ProfilingAicoreMetrics {
