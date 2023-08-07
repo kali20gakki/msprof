@@ -48,6 +48,7 @@ class OpCounterOpSceneCalculator(MsMultiProcess):
               "min(duration) as min, sum(duration)/count(op_type) as avg, max(duration) as max" \
               " from {0}, {1} where {0}.task_id={1}.task_id and {0}.stream_id={1}.stream_id " \
               "and {0}.batch_id={1}.batch_id " \
+              "and {0}.context_id={1}.subtask_id " \
               "and {1}.start_time != {2} " \
               "group by op_type,{0}.task_type" \
             .format(CommonConstant.GE_TASK_MEGED_TABLE, DBNameConstant.TABLE_OP_COUNTER_RTS_TASK,

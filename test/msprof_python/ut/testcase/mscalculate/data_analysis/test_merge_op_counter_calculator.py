@@ -147,8 +147,7 @@ class TestMergeOpCounterCalculator(unittest.TestCase):
                          "ge_task_merge.model_id from ge_task_merge, rts_task "
                          "where ge_task_merge.task_id=rts_task.task_id and ge_task_merge.stream_id=rts_task.stream_id "
                          "and ge_task_merge.batch_id=rts_task.batch_id "
-                         "and (ge_task_merge.context_id=rts_task.subtask_id "
-                         "or (ge_task_merge.context_id=4294967295 and subtask_id=0)) "
+                         "and ge_task_merge.context_id=rts_task.subtask_id "
                          "and rts_task.start_time != -1 "
                          "group by op_type,ge_task_merge.task_type",
                          result)

@@ -673,7 +673,7 @@ class TablesConfig(MetaConfig):
             ('start_time', 'NUMERIC,null'),
             ('end_time', 'NUMERIC,null'),
             ('dur_time', 'NUMERIC,null'),
-            ('batch_id', 'INTEGER,null')
+            ('thread_id', 'INTEGER,null'),
         ],
         'StarsTaskTimeMap': [
             ('context_id', 'INTEGER, null'),
@@ -1197,6 +1197,7 @@ class TablesConfig(MetaConfig):
             ('request_id', 'INTEGER,null'),
             ('stream_id', 'INTEGER,null'),
             ('task_id', 'INTEGER,null'),
+            ('context_ids', 'TEXT,null'),
             ('batch_id', 'INTEGER,null'),
             ('task_type', 'TEXT,null'),
             ('timestamp', 'NUMERIC,null')

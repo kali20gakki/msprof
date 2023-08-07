@@ -6,10 +6,12 @@ import logging
 from typing import List
 from dataclasses import astuple
 
+from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.ms_constant.str_constant import StrConstant
 from analyzer.scene_base.profiling_scene import ProfilingScene
+from common_func.platform.chip_manager import ChipManager
 from mscalculate.ascend_task.ascend_task import TopDownTask
 from mscalculate.ascend_task.ascend_task_generator import AscendTaskGenerator
 from common_func.db_manager import DBManager
@@ -63,6 +65,8 @@ class AscendTaskCalculator(MsMultiProcess):
         self.model.finalize()
 
     def _judge_calculate_again(self):
+        if ChipManager().is_stars_chip() and InfoConfReader().get_ai_core_profiling_mode() == 'sample-based':
+            return False
         if not ProfilingScene().is_operator():
             logging.info("In graph scene, to generate table %s", DBNameConstant.TABLE_ASCEND_TASK)
             return True
