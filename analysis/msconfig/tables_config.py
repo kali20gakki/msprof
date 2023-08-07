@@ -21,6 +21,7 @@ class TablesConfig(MetaConfig):
             ('thread_id', 'INTEGER,null'),
             ('timestamp', 'INTEGER,null'),
             ('batch_id', 'INTEGER,null'),
+            ('device_id', 'INTEGER,null'),
             ('context_id', 'INTEGER,null')
         ],
         'GeHashInfoMap': [
@@ -46,6 +47,7 @@ class TablesConfig(MetaConfig):
             ('index_id', 'INTEGER,null'),
             ('timestamp', 'NUMERIC,null'),
             ('batch_id', 'INTEGER,null'),
+            ('device_id', 'INTEGER,null'),
             ('context_id', 'INTEGER,null')
         ],
         'GeTensorMap': [
@@ -62,6 +64,7 @@ class TablesConfig(MetaConfig):
             ('index_id', 'INTEGER,null'),
             ('timestamp', 'NUMERIC,null'),
             ('batch_id', 'INTEGER,null'),
+            ('device_id', 'INTEGER,null'),
             ('context_id', 'INTEGER,null')
         ],
         'StepInfoMap': [
@@ -1200,6 +1203,7 @@ class TablesConfig(MetaConfig):
             ('context_ids', 'TEXT,null'),
             ('batch_id', 'INTEGER,null'),
             ('task_type', 'TEXT,null'),
+            ('device_id', 'INTEGER,null'),
             ('timestamp', 'NUMERIC,null')
         ],
         'AscendTaskMap': [

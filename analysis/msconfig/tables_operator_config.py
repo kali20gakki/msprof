@@ -110,6 +110,7 @@ class TablesOperatorConfig(MetaConfig):
             ('index_id', 'INTEGER,null'),
             ('timestamp', 'TEXT,null'),
             ('batch_id', 'INTEGER,null'),
+            ('device_id', 'INTEGER,null'),
             ('context_id', 'INTEGER,null')
         ]
     }
