@@ -281,8 +281,7 @@ class DBNameConstant(metaclass=ABCMeta):
     TABLE_HCCL_TASK = "HCCLTask"
     TABLE_HOST_TASK = "HostTask"
     TABLE_ASCEND_TASK = "AscendTask"
-    TABLE_HCCL_OP_TIME = "hccl_op_time"
-    TABLE_HCCL_OP_REPORT = "hccl_op_report"
+    TABLE_HCCL_OP_REPORT = "HcclOpReport"
 
 
     @abstractmethod
