@@ -13,25 +13,19 @@ NAMESPACE = 'viewer.hccl_op_report'
 
 class TestReportHcclStatisticData(unittest.TestCase):
 
-    def test_check_param(self):
-        with mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=False):
-            res = ReportHcclStatisticData.check_param('', '')
-        self.assertFalse(res)
-
-    def test_report_op_1(self):
+    def test_report_hccl_op_should_return_MSVP_EMPTY_DATA_when_db_is_none(self):
         with mock.patch(NAMESPACE + '.DBManager.check_connect_db_path', return_value=(None, None)):
             res = ReportHcclStatisticData.report_hccl_op('', [])
         self.assertEqual(res, MsvpConstant.MSVP_EMPTY_DATA)
 
-    def test_report_op_2(self):
-        create_sql = "CREATE TABLE IF NOT EXISTS hccl_op_report" \
-                     "(op_type, occurrences, total_time, " \
-                     "min, avg, max, ratio)"
-        data = ((1, 4, 10, 1, 2.5, 4, 100),)
-
+    def test_report_hccl_op_should_return_tuple_when_exist_HcclOpReport_table(self):
+        create_sql = "CREATE TABLE IF NOT EXISTS HcclOpReport" \
+                     "(op_type TEXT, occurrences NUMERIC, total_time NUMERIC, " \
+                     "min NUMERIC, avg NUMERIC, max NUMERIC, ratio TEXT)"
+        data = ((1, 4, 10.0, 1.0, 2.5, 4.0, 100.0),)
         with DBOpen("hccl.db") as db_open:
             db_open.create_table(create_sql)
-            db_open.insert_data("hccl_op_report", data)
+            db_open.insert_data("HcclOpReport", data)
             with mock.patch(NAMESPACE + '.DBManager.check_connect_db_path',
                             return_value=(db_open.db_conn, db_open.db_curs)):
                 res = ReportHcclStatisticData.report_hccl_op('', [])

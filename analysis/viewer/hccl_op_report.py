@@ -5,21 +5,13 @@
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.number_constant import NumberConstant
-from common_func.msvp_constant import MsvpConstant
+import logging
 
 
 class ReportHcclStatisticData:
     """
     class to report hccl op data
     """
-    @staticmethod
-    def check_param(conn: any, curs: any) -> bool:
-        """
-        check exist of db table
-        """
-        if not (conn and curs) or not DBManager.judge_table_exist(curs, DBNameConstant.TABLE_HCCL_OP_REPORT):
-            return False
-        return True
 
     @staticmethod
     def _get_hccl_op_report_sql() -> str:
@@ -38,7 +30,10 @@ class ReportHcclStatisticData:
         :return: headers, data, data length
         """
         conn, curs = DBManager.check_connect_db_path(db_path)
-        if not cls.check_param(conn, curs):
+        if not (conn and curs) or not DBManager.judge_table_exist(curs, DBNameConstant.TABLE_HCCL_OP_REPORT):
+            logging.warning("Failed to connect to the database %s or the table %s does not exist.",
+                            DBNameConstant.DB_HCCL,
+                            DBNameConstant.TABLE_HCCL_OP_REPORT)
             return [], [], 0
         sql = cls._get_hccl_op_report_sql()
         data = DBManager.fetch_all_data(curs, sql)

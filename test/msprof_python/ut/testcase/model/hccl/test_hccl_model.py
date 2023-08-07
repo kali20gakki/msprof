@@ -53,13 +53,13 @@ class TestHCCLModel(unittest.TestCase):
         ChipManager().chip_id = 1000
         check = HcclViewModel("", DBNameConstant.DB_HCCL, [DBNameConstant.TABLE_HCCL_ALL_REDUCE])
         ret = check.get_hccl_communication_data()
-        self.assertEqual([], ret)
+        self.assertEqual(([], []), ret)
 
         with mock.patch(NAMESPACE + '.HcclViewModel.attach_to_db', return_value=False):
             ChipManager().chip_id = ChipModel.CHIP_V2_1_0
             check = HcclViewModel("", DBNameConstant.DB_HCCL, [DBNameConstant.TABLE_HCCL_ALL_REDUCE])
             ret = check.get_hccl_communication_data()
-            self.assertEqual([], ret)
+            self.assertEqual(([], []), ret)
 
     def test_get_hccl_communication_data_when_given_network_scene_then_return_data_list(self):
         with mock.patch(NAMESPACE + '.HcclViewModel.attach_to_db', return_value=True), \
