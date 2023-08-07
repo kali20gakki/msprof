@@ -9,8 +9,8 @@ from typing import Tuple
 from typing import Union
 
 from common_func.constant import Constant
+from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
-from common_func.platform.chip_manager import ChipManager
 from mscalculate.ascend_task.ascend_task import TopDownTask
 from mscalculate.ascend_task.ascend_task import DeviceTask
 from mscalculate.ascend_task.ascend_task import HostTask
@@ -155,11 +155,21 @@ class AscendTaskGenerator:
         return matched_top_down_tasks, top_down_tasks
 
     def _get_all_ascend_tasks(self) -> Tuple[List[TopDownTask], List[TopDownTask]]:
-        host_tasks = self.host_task_collector.get_host_tasks()
+        device_id = InfoConfReader().get_device_id()
+        if device_id == Constant.NA:
+            logging.error("No device id found.")
+            return [], []
+        host_tasks = self.host_task_collector.get_host_tasks(int(device_id))
         device_tasks = self.device_task_collector.get_all_device_tasks()
-        return self._generate_top_down_tasks(host_tasks, device_tasks)
+        matched_top_down_tasks, top_down_tasks = self._generate_top_down_tasks(host_tasks, device_tasks)
+        return matched_top_down_tasks, top_down_tasks
 
     def _get_ascend_tasks_within_iter(self, model_id, iter_id) -> Tuple[List[TopDownTask], List[TopDownTask]]:
-        host_tasks = self.host_task_collector.get_host_tasks_by_model_and_iter(model_id, iter_id)
+        device_id = InfoConfReader().get_device_id()
+        if device_id == Constant.NA:
+            logging.error("No device id found.")
+            return [], []
+        host_tasks = self.host_task_collector.get_host_tasks_by_model_and_iter(model_id, iter_id, int(device_id))
         device_tasks = self.device_task_collector.get_device_tasks_by_model_and_iter(model_id, iter_id)
-        return self._generate_top_down_tasks(host_tasks, device_tasks)
+        matched_top_down_tasks, top_down_tasks = self._generate_top_down_tasks(host_tasks, device_tasks)
+        return matched_top_down_tasks, top_down_tasks

@@ -440,7 +440,7 @@ class TaskGear(CANNGear):
         self.host_tasks.append(
             [model_id, request_id, task_track_dto.stream_id,
              task_track_dto.task_id, context_ids, task_track_dto.batch_id,
-             task_track_dto.task_type, task_track_dto.timestamp]
+             task_track_dto.task_type, task_track_dto.device_id, task_track_dto.timestamp]
         )
 
     def is_hccl_task(self, hccl_event: Event):
@@ -498,7 +498,7 @@ class TaskGear(CANNGear):
                 for cxt_id in cxt_ids:
                     self.task_info.append([model_id, node_dto.item_id, add_dto.stream_id, add_dto.task_id,
                                            0, 0, 'N/A', 'N/A', 'N/A', request_id, add_dto.thread_id,
-                                           'N/A', add_dto.batch_id, int(cxt_id)])
+                                           'N/A', add_dto.batch_id, add_dto.device_id, int(cxt_id)])
                 continue
             if node_basic_info_dto.task_type is None or node_basic_info_dto.task_type == self.FFTS_PLUS_TASK_TYPE:
                 continue
@@ -512,7 +512,7 @@ class TaskGear(CANNGear):
                                        node_basic_info_dto.block_dim, node_basic_info_dto.mix_block_dim,
                                        node_basic_info_dto.is_dynamic, task_type,
                                        node_basic_info_dto.op_type, request_id, add_dto.thread_id,
-                                       node_basic_info_dto.timestamp, add_dto.batch_id, int(cxt_id)])
+                                       node_basic_info_dto.timestamp, add_dto.batch_id, add_dto.device_id, int(cxt_id)])
 
             if tensor_info_dto.struct_type is None:
                 continue
@@ -521,7 +521,8 @@ class TaskGear(CANNGear):
                                          tensor_info_dto.input_formats, tensor_info_dto.input_data_types,
                                          tensor_info_dto.input_shapes, tensor_info_dto.output_formats,
                                          tensor_info_dto.output_data_types, tensor_info_dto.output_shapes,
-                                         request_id, tensor_info_dto.timestamp, add_dto.batch_id, int(cxt_id)])
+                                         request_id, tensor_info_dto.timestamp, add_dto.batch_id, add_dto.device_id,
+                                         int(cxt_id)])
 
     def run(self, event: Event, call_stack: dict):
         dto: ApiDataDto = ApiDataDatabase().get(event)
@@ -659,9 +660,8 @@ class HCCLGear(CANNGear):
                                           record.dto.task_type, record.dto.op_type, node_dto.start, node_dto.end,
                                           record.dto.is_dynamic])
 
-
     def update_hccl_op_name(self):
-        op_name_index = 3 # 3 is op_name index
+        op_name_index = 3  # 3 is op_name index
         hccl_op_counter = 0
         for hccl_op in self.hccl_op_info:
             hccl_op[op_name_index] = hccl_op[op_name_index] + "_" + str(hccl_op_counter)
