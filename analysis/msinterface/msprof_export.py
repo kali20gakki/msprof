@@ -212,6 +212,8 @@ class ExportCommand:
              'handler': AiStackDataCheckManager.contain_npu_op_mem_data},
             {'export_type': ExportDataType.MEMORY_RECORD,
              'handler': AiStackDataCheckManager.contain_npu_op_mem_rec_data},
+            {'export_type': ExportDataType.HCCL_STATISTIC,
+             'handler': AiStackDataCheckManager.contain_hccl_statistic_data},
         ]
     }
     MODEL_ID = "model_id"

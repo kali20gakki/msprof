@@ -1250,4 +1250,13 @@ class TablesConfig(MetaConfig):
             ('total_allocate_memory', 'INTEGER,null'),
             ('device_type', 'TEXT,null')
         ],
+        'HcclOpReportMap': [
+            ('op_type', 'TEXT,null'),
+            ('occurrences', 'TEXT,null'),
+            ('total_time', 'NUMERIC,null'),
+            ('min', 'NUMERIC,null'),
+            ('avg', 'NUMERIC,null'),
+            ('max', 'NUMERIC,null'),
+            ('ratio', 'TEXT,null')
+        ],
     }
