@@ -23,9 +23,9 @@ class SqlWhereCondition:
         return condition
 
     @staticmethod
-    def get_host_select_condition(is_all_model_iter: bool, model_id: int, iter_id: int):
+    def get_host_select_condition(is_all_model_iter: bool, model_id: int, iter_id: int, device_id: int):
         if is_all_model_iter:
-            return ""
+            return f"where device_id={device_id}"
         condition = f"where model_id={model_id} and (index_id={iter_id} or" \
-                    f" index_id={NumberConstant.STATIC_GRAPH_INDEX})"
+                    f" index_id={NumberConstant.STATIC_GRAPH_INDEX}) and device_id={device_id}"
         return condition
