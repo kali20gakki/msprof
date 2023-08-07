@@ -68,7 +68,7 @@ class HCCLExport:
 
         # In order to show Communication OP on the top of HCCL process.
         self.result.extend(TraceViewManager.metadata_event(
-            [["thread_name", self.pid_value, self.HCCL_SORTED_OFFSET, "Communication OP"]]))
+            [["thread_name", self.pid_value, self.HCCL_SORTED_OFFSET, "Communication Kernel"]]))
         self.result.extend(TraceViewManager.metadata_event(
             [["thread_sort_index", self.pid_value, self.HCCL_SORTED_OFFSET, 0]]))
 

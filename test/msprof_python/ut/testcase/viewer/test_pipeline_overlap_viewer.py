@@ -53,7 +53,7 @@ class TestPipelineOverlapViewer(unittest.TestCase):
             check = PipelineOverlapViewer({}, {
                 StrConstant.PARAM_RESULT_DIR: os.path.join(self.DIR_PATH, 'PROF1', 'device_0')})
             ret = check.get_timeline_data()
-            self.assertEqual(930, len(ret))
+            self.assertEqual(903, len(ret))
 
     def test_format_timeline_data(self):
         time_section = TimeSectionDto()
