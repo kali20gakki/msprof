@@ -115,9 +115,10 @@ class HcclCalculator(ICalculator, MsMultiProcess):
             if not hccl_model.check_table():
                 logging.warning("The HCCL table does not exist, so there is no need to continue associating operators.")
                 return [], []
-            communication_data, report_data = hccl_model.get_hccl_communication_data()
+            communication_data = hccl_model.get_hccl_communication_data()
             if not communication_data:
                 return [], []
+            report_data = hccl_model.get_hccl_op_report_data()
             self.update_bandwidth(communication_data)
             return communication_data, report_data
 
@@ -139,12 +140,11 @@ class HcclCalculator(ICalculator, MsMultiProcess):
         total_time = self._cal_total(type_time)
         total_data = []
         for op_type in type_time:
-            task_data = type_time[op_type]
-            try:
-                task_duration_ratio = round(float(task_data["duration"] / total_time * 100),
-                                      NumberConstant.DECIMAL_ACCURACY)
-            except ZeroDivisionError:
-                task_duration_ratio = 0
+            task_data = type_time.get(op_type, {})
+            if not task_data:
+                continue
+            task_duration_ratio = round(float(task_data["duration"] / total_time * 100),
+                                        NumberConstant.DECIMAL_ACCURACY) if total_time != 0 else 0
             total_data.append(
                 (task_data['op_type'],
                  task_data["count"],
@@ -154,5 +154,4 @@ class HcclCalculator(ICalculator, MsMultiProcess):
                  round(float(task_data["max"]), NumberConstant.DECIMAL_ACCURACY),
                  task_duration_ratio))
         if total_data:
-            sorted_total_data = sorted(total_data, key=lambda x: x[5], reverse=True)
-            self._hccl_op_report_data = sorted_total_data
+            self._hccl_op_report_data = sorted(total_data, key=lambda x: x[5], reverse=True)
