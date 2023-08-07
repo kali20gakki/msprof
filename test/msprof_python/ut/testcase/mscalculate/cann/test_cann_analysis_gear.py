@@ -13,13 +13,16 @@ from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
+from common_func.ms_constant.number_constant import NumberConstant
 from common_func.path_manager import PathManager
 from constant.constant import clear_dt_project
+from model.test_dir_cr_base_model import TestDirCRBaseModel
 from mscalculate.cann.additional_record import AdditionalRecord
 from mscalculate.cann.cann_analysis_gear import ACLGear
 from mscalculate.cann.cann_analysis_gear import ModelGear
 from mscalculate.cann.cann_analysis_gear import NodeGear
 from mscalculate.cann.cann_analysis_gear import TaskGear
+from mscalculate.cann.cann_analysis_gear import HCCLGear
 from mscalculate.cann.cann_database import AdditionalRecordDatabase
 from mscalculate.cann.cann_database import ApiDataDatabase
 from mscalculate.cann.event import Event
@@ -142,9 +145,6 @@ class TestCANNAnalysisGear(unittest.TestCase):
                                           DBNameConstant.TABLE_GE_STEP_INFO, 'tag', 0))
 
         self.assertEqual(
-            DBManager.get_table_data_count(PathManager.get_db_path(self.PROF_HOST_DIR, DBNameConstant.DB_HCCL),
-                                           DBNameConstant.TABLE_HCCL_OP), 1)
-        self.assertEqual(
             DBManager.get_table_data_count(PathManager.get_db_path(self.PROF_HOST_DIR, DBNameConstant.DB_GE_MODEL_INFO),
                                            DBNameConstant.TABLE_GE_FUSION_OP_INFO), 1)
 
@@ -188,7 +188,7 @@ class TestCANNAnalysisGear(unittest.TestCase):
         tensor_info_dto.timestamp = 360
         tensor_info_dto.struct_type = '1'
         ctx_id_dto = CtxIdDto()
-        ctx_id_dto.ctx_id = 8
+        ctx_id_dto.ctx_id = "8"
         ctx_id_dto.op_name = "1"
         ctx_id_dto.timestamp = 360
         event6.additional_record = [
@@ -260,6 +260,53 @@ class TestCANNAnalysisGear(unittest.TestCase):
                                           DBNameConstant.TABLE_HCCL_TASK, 'plane_id', 8))
 
 
+class TestTaskGear(unittest.TestCase):
+    def test_get_context_ids_should_return_invalid_ids_when_invalid_node_event(self):
+        gear = TaskGear("")
+        node_event = Event.invalid_event()
+        call_stack = {Constant.NODE_LEVEL: node_event}
+        ids = gear.get_context_ids(call_stack)
+        self.assertEqual(ids, str(NumberConstant.DEFAULT_GE_CONTEXT_ID))
+
+    def test_get_context_ids_should_return_invalid_ids_when_no_context_ids(self):
+        gear = TaskGear("")
+        node_event = Event.invalid_event()
+        node_event.struct_type = "1"
+        call_stack = {Constant.NODE_LEVEL: node_event}
+        ids = gear.get_context_ids(call_stack)
+        self.assertEqual(ids, str(NumberConstant.DEFAULT_GE_CONTEXT_ID))
+
+    def test_get_context_ids_should_return_valid_ids_when_node_contains_single_context_ids(self):
+        gear = TaskGear("")
+        node_event = Event.invalid_event()
+        node_event.struct_type = "1"
+        context_id_info1 = CtxIdDto()
+        context_id_info1.ctx_id = "1"
+        addition_info1 = AdditionalRecord(context_id_info1)
+        context_id_info2 = CtxIdDto()
+        context_id_info2.ctx_id = "2"
+        addition_info2 = AdditionalRecord(context_id_info2)
+        node_event.additional_record = [addition_info1, addition_info2]
+        call_stack = {Constant.NODE_LEVEL: node_event}
+        ids = gear.get_context_ids(call_stack)
+        self.assertEqual(ids, "1,2")
+
+    def test_get_context_ids_should_return_valid_ids_when_node_contains_mutil_context_ids(self):
+        gear = TaskGear("")
+        node_event = Event.invalid_event()
+        node_event.struct_type = "1"
+        context_id_info1 = CtxIdDto()
+        context_id_info1.ctx_id = "1,2"
+        addition_info1 = AdditionalRecord(context_id_info1)
+        context_id_info2 = CtxIdDto()
+        context_id_info2.ctx_id = "3,4"
+        addition_info2 = AdditionalRecord(context_id_info2)
+        node_event.additional_record = [addition_info1, addition_info2]
+        call_stack = {Constant.NODE_LEVEL: node_event}
+        ids = gear.get_context_ids(call_stack)
+        self.assertEqual(ids, "1,2,3,4")
+
+
 class TestFindModelNameInModelLoad(unittest.TestCase):
     DIR_PATH = os.path.join(os.path.dirname(__file__), "DT_CANNAnalysisGear")
     PROF_HOST_DIR = os.path.join(DIR_PATH, 'PROF1', 'host')
@@ -269,6 +316,46 @@ class TestFindModelNameInModelLoad(unittest.TestCase):
         gear.model_load_data = [(0, "test", 1, 1), (1, "test2", 2, 3)]
         self.assertEqual(gear.find_model_name(0), "test")
         self.assertEqual(gear.find_model_name(1), "test2")
+
+
+class TestHcclGear(TestCANNAnalysisGear):
+    DIR_PATH = os.path.join(os.path.dirname(__file__), "DT_HcclGear")
+    PROF_HOST_DIR = os.path.join(DIR_PATH, 'PROF1', 'host')
+
+    def test_hccl_gear_should_return_one_hccl_op_when_one_hccl_op_within_one_node_info(self):
+        gear = HCCLGear(self.PROF_HOST_DIR)
+        event1: Event = self.create_api_event(self.event_col(Constant.NODE_LEVEL, 1, 302, 340, "launch", "hccl1"))
+        event2 = self.create_api_event(self.event_col(Constant.HCCL_LEVEL, 1, 310, 320, "hccl api", 0))
+        gear.run(event2, {Constant.MODEL_LEVEL: Event.invalid_event(), Constant.NODE_LEVEL: event1,
+                          Constant.HCCL_LEVEL: event2})
+        gear.flush_data()
+        self.assertEqual(
+            DBManager.get_table_data_count(PathManager.get_db_path(self.PROF_HOST_DIR, DBNameConstant.DB_HCCL),
+                                           DBNameConstant.TABLE_HCCL_OP), 1)
+
+    def test_hccl_gear_should_return_zero_hccl_op_when_without_one_node_info(self):
+        gear = HCCLGear(self.PROF_HOST_DIR)
+        event1 = self.create_api_event(self.event_col(Constant.HCCL_LEVEL, 1, 350, 360, "hccl api", 0))
+        gear.run(event1, {Constant.MODEL_LEVEL: Event.invalid_event(), Constant.NODE_LEVEL: Event.invalid_event(),
+                          Constant.HCCL_LEVEL: event1})
+        gear.flush_data()
+        self.assertEqual(
+            DBManager.get_table_data_count(PathManager.get_db_path(self.PROF_HOST_DIR, DBNameConstant.DB_HCCL),
+                                           DBNameConstant.TABLE_HCCL_OP), 0)
+
+    def test_hccl_gear_should_return_one_hccl_op_when_multi_hccl_op_with_one_node_info(self):
+        gear = HCCLGear(self.PROF_HOST_DIR)
+        event1: Event = self.create_api_event(self.event_col(Constant.NODE_LEVEL, 1, 370, 390, "launch", "hccl"))
+        event2 = self.create_api_event(self.event_col(Constant.HCCL_LEVEL, 1, 371, 375, "hccl api", 0))
+        event3 = self.create_api_event(self.event_col(Constant.HCCL_LEVEL, 1, 381, 385, "hccl api", 0))
+        gear.run(event2, {Constant.MODEL_LEVEL: Event.invalid_event(), Constant.NODE_LEVEL: event1,
+                          Constant.HCCL_LEVEL: event2})
+        gear.run(event3, {Constant.MODEL_LEVEL: Event.invalid_event(), Constant.NODE_LEVEL: event1,
+                          Constant.HCCL_LEVEL: event3})
+        gear.flush_data()
+        self.assertEqual(
+            DBManager.get_table_data_count(PathManager.get_db_path(self.PROF_HOST_DIR, DBNameConstant.DB_HCCL),
+                                           DBNameConstant.TABLE_HCCL_OP), 1)
 
 
 if __name__ == '__main__':

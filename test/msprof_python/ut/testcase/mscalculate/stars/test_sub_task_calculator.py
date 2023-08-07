@@ -14,6 +14,7 @@ from constant.constant import clear_dt_project
 from mscalculate.stars.sub_task_calculate import SubTaskCalculator
 from msmodel.stars.ffts_log_model import FftsLogModel
 from profiling_bean.prof_enum.data_tag import DataTag
+from profiling_bean.db_dto.task_time_dto import TaskTimeDto
 
 NAMESPACE = 'mscalculate.stars.sub_task_calculate'
 MODELNAMESPACE = 'msmodel.stars.ffts_log_model'
@@ -32,6 +33,22 @@ class DataConstant:
     subtask_type = 6
     ffts_type = 0
     func_type = 7
+
+
+def get_ffts_log_dto(ffts_log_data: list) -> list:
+    ffts_log_dto = []
+    for data in ffts_log_data:
+        data_dto = TaskTimeDto()
+        data_dto.stream_id = data[0]
+        data_dto.task_id = data[1]
+        data_dto.subtask_id = data[2]
+        data_dto.thread_id = data[3]
+        data_dto.subtask_type = data[4]
+        data_dto.ffts_type = data[5]
+        data_dto.task_type = data[6]
+        data_dto.task_time = data[7]
+        ffts_log_dto.append(data_dto)
+    return ffts_log_dto
 
 
 class TestSubTaskCalculator(unittest.TestCase):
@@ -63,7 +80,6 @@ class TestSubTaskCalculator(unittest.TestCase):
     def test_ms_run(self):
         file_list = {DataTag.STARS_LOG: ['stars_soc.data.0.slice_0', 'stars_soc.data.0.slice_1']}
         with mock.patch(NAMESPACE + '.SubTaskCalculator.calculate'), \
-                mock.patch(NAMESPACE + '.MsprofIteration.get_iter_interval', return_value=(1, 2)), \
                 mock.patch(NAMESPACE + '.SubTaskCalculator.save'):
             check = SubTaskCalculator(file_list, self.sample_config)
             check.ms_run()
@@ -78,14 +94,12 @@ class TestSubTaskCalculator(unittest.TestCase):
 
     def test_calculate(self):
         file_list = {DataTag.STARS_LOG: ['stars_soc.data.0.slice_0', 'stars_soc.data.0.slice_1']}
-        with mock.patch(NAMESPACE + '.MsprofIteration.get_iter_interval', return_value=(1, 2)), \
-                mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=(True, True)), \
+        with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=(True, True)), \
                 mock.patch(NAMESPACE + '.DBManager.check_tables_in_db', return_value=True), \
                 mock.patch(NAMESPACE + '.SubTaskCalculator.save', return_value=[]):
             check = SubTaskCalculator(file_list, self.sample_config)
             check.calculate()
-        with mock.patch(NAMESPACE + '.MsprofIteration.get_iter_interval', return_value=(1, 2)), \
-                mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=(True, True)), \
+        with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=(True, True)), \
                 mock.patch(NAMESPACE + '.DBManager.check_tables_in_db', return_value=True), \
                 mock.patch(NAMESPACE + '.SubTaskCalculator.save', side_effect=ValueError):
             check = SubTaskCalculator(file_list, self.sample_config)
@@ -93,8 +107,7 @@ class TestSubTaskCalculator(unittest.TestCase):
 
     def test_init(self: any) -> None:
         file_list = {DataTag.STARS_LOG: ['stars_soc.data.0.slice_0', 'stars_soc.data.0.slice_1']}
-        with mock.patch(NAMESPACE + '.MsprofIteration.get_iter_interval', return_value=(1, 2)), \
-                mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=(True, True)), \
+        with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=(True, True)), \
                 mock.patch(NAMESPACE + '.DBManager.check_tables_in_db', return_value=False):
             with pytest.raises(ValueError) as err:
                 check = SubTaskCalculator(file_list, self.sample_config)
@@ -102,8 +115,7 @@ class TestSubTaskCalculator(unittest.TestCase):
 
     def test_save(self):
         file_list = {DataTag.STARS_LOG: ['stars_soc.data.0.slice_0', 'stars_soc.data.0.slice_1']}
-        with mock.patch(NAMESPACE + '.MsprofIteration.get_iter_interval', return_value=(1, 2)), \
-                mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=False):
+        with mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=False):
             with pytest.raises(AttributeError) as err:
                 check = SubTaskCalculator(file_list, self.sample_config)
                 check.save()
@@ -122,22 +134,52 @@ class TestSubTaskCalculator(unittest.TestCase):
               "where end_log.task_type='100011' and start_log.task_type='100010' " \
               "group by end_log.subtask_id,end_log.thread_id, end_log.task_id " \
               "order by end_log.subtask_id"
-        with mock.patch(NAMESPACE + '.MsprofIteration.get_iter_interval', return_value=(1, 2)):
-            check = SubTaskCalculator(file_list, self.sample_config)
-            ret = check._get_thread_task_time_sql()
-            self.assertEqual(ret, sql)
+        check = SubTaskCalculator(file_list, self.sample_config)
+        ret = check._get_thread_task_time_sql()
+        self.assertEqual(ret, sql)
 
-    def test_get_subtask_time_sql(self):
+    def test_get_subtask_time_should_return_all_matched_result_when_fftslog_data_is_completed(self):
+        ffts_log_data = [
+            [0, 23, 1, 0, "AIC", "FFTS+", '100010', 38140480339123],
+            [0, 24, 2, 1, "AIV", "FFTS+", '100010', 38140480339683],
+            [0, 23, 1, 0, "AIC", "FFTS+", '100011', 38140480340343],
+            [0, 24, 2, 1, "AIV", "FFTS+", '100011', 38140480398243],
+        ]
+        ffts_log_dto = get_ffts_log_dto(ffts_log_data)
         file_list = {DataTag.STARS_LOG: ['stars_soc.data.0.slice_0', 'stars_soc.data.0.slice_1']}
-        sql = "Select end_log.subtask_id as subtask_id, end_log.task_id as task_id," \
-              "end_log.stream_id as stream_id,end_log.subtask_type as subtask_type," \
-              "end_log.ffts_type as ffts_type,start_log.task_time as start_time, " \
-              "(end_log.task_time-start_log.task_time) as dur_time, end_log.task_time as end_time, " \
-              "0 as batch_id from FftsLog end_log join FftsLog " \
-              "start_log on end_log.subtask_id=start_log.subtask_id and end_log.stream_id=start_log.stream_id " \
-              "and end_log.task_id=start_log.task_id where end_log.task_type='100011' " \
-              "and start_log.task_type='100010' group by end_log.subtask_id, end_log.task_id order by start_time"
-        with mock.patch(NAMESPACE + '.MsprofIteration.get_iter_interval', return_value=(1, 2)):
-            check = SubTaskCalculator(file_list, self.sample_config)
-            ret = check._get_subtask_time_sql()
-            self.assertEqual(ret, sql)
+        with mock.patch(NAMESPACE + '.FftsLogModel.get_ffts_log_data', return_value=ffts_log_dto):
+            subtask_calculator = SubTaskCalculator(file_list, self.sample_config)
+            result = subtask_calculator.get_subtask_time()
+            self.assertEqual(len(result), 2)
+            self.assertEqual(result[0][7], 1220)
+            self.assertEqual(result[1][7], 58560)
+
+    def test_get_subtask_time_should_mismatch_when_fftslog_data_is_not_completed(self):
+        ffts_log_data = [
+            [0, 23, 1, 0, "AIC", "FFTS+", '100010', 38140480339123],
+            [0, 24, 2, 1, "AIV", "FFTS+", '100010', 38140480339683],
+            [0, 23, 1, 0, "AIC", "FFTS+", '100011', 38140480339121],
+            [0, 24, 2, 1, "AIV", "FFTS+", '100011', 38140480398243],
+            [0, 25, 1, 0, "MIX_AIV", "FFTS+", '100010', 38140480398643],
+        ]
+        ffts_log_dto = get_ffts_log_dto(ffts_log_data)
+        file_list = {DataTag.STARS_LOG: ['stars_soc.data.0.slice_0', 'stars_soc.data.0.slice_1']}
+        with mock.patch(NAMESPACE + '.FftsLogModel.get_ffts_log_data', return_value=ffts_log_dto):
+            subtask_calculator = SubTaskCalculator(file_list, self.sample_config)
+            result = subtask_calculator.get_subtask_time()
+            self.assertEqual(len(result), 1)
+
+    def test_get_subtask_time_should_notify_wait_mismatch_when_missing_notify_wait_end(self):
+        ffts_log_data = [
+            [0, 23, 1, 0, "AIC", "FFTS+", '100010', 38140480339123],
+            [0, 24, 2, 1, "AIV", "FFTS+", '100010', 38140480339683],
+            [0, 27, 2, 1, "Notify Wait", "FFTS+", '100010', 38140480339688],
+            [0, 23, 1, 0, "AIC", "FFTS+", '100011', 38140480340343],
+            [0, 24, 2, 1, "AIV", "FFTS+", '100011', 38140480398243],
+        ]
+        ffts_log_dto = get_ffts_log_dto(ffts_log_data)
+        file_list = {DataTag.STARS_LOG: ['stars_soc.data.0.slice_0', 'stars_soc.data.0.slice_1']}
+        with mock.patch(NAMESPACE + '.FftsLogModel.get_ffts_log_data', return_value=ffts_log_dto):
+            subtask_calculator = SubTaskCalculator(file_list, self.sample_config)
+            result = subtask_calculator.get_subtask_time()
+            self.assertEqual(len(result), 3)

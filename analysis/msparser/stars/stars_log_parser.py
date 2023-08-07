@@ -1,14 +1,14 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2021-2022. All rights reserved.
-
+import logging
 import os
 
 from analyzer.scene_base.profiling_scene import ProfilingScene
+from common_func.db_name_constant import DBNameConstant
 from common_func.file_manager import FileOpen
 from common_func.ms_constant.str_constant import StrConstant
 from common_func.ms_multi_process import MsMultiProcess
-from common_func.msprof_iteration import MsprofIteration
 from common_func.path_manager import PathManager
 from common_func.utils import Utils
 from framework.offset_calculator import FileCalculator, OffsetCalculator
@@ -56,6 +56,9 @@ class StarsLogCalCulator(ICalculator, MsMultiProcess):
         """
         self.init_dispatcher()
         if ProfilingScene().is_step_trace():
+            if not os.path.exists(PathManager.get_db_path(self._project_path, DBNameConstant.DB_HWTS_REC)):
+                logging.warning("No %s db found", DBNameConstant.DB_HWTS_REC)
+                return
             self._parse_by_iter()
         else:
             self._parse_all_file()
