@@ -62,12 +62,12 @@ class HcclViewModel(ViewModel):
 
         if not self.attach_to_db(DBNameConstant.DB_ASCEND_TASK):
             logging.error("Attach to db %s failed, task data not found.", DBNameConstant.DB_ASCEND_TASK)
-            return [], []
+            return []
         task_time_sql = self.get_task_time_sql()
         where_condition = ''
         if not ProfilingScene().is_operator():
             where_condition = 'and t1.model_id=t2.model_id and (t1.index_id=t2.index_id or t1.is_dynamic=0)'
-        sql1 = "SELECT t1.model_id as model_id, t1.index_id as index_id, t1.op_name as op_name, " \
+        sql = "SELECT t1.model_id as model_id, t1.index_id as index_id, t1.op_name as op_name, " \
               "t1.name as hccl_name, " \
               "t1.plane_id as plane_id, t1.args as args, t2.running as timestamp, " \
               "t2.complete-t2.running as duration, t1.is_dynamic as is_dynamic, t1.task_type as task_type, " \
@@ -83,15 +83,42 @@ class HcclViewModel(ViewModel):
               "order by t2.running".format(DBNameConstant.TABLE_HCCL_OP, DBNameConstant.TABLE_HCCL_TASK,
                                            task_time_sql=task_time_sql, where_condition=where_condition)
 
-        sql2 = "SELECT t4.op_type as op_type, count(t4.op_type), sum(t4.duration) as total_time, " \
-               "min(t4.duration) as min, sum(t4.duration)/count(t4.op_type) as avg, max(t4.duration) as max FROM " \
-               "(SELECT t3.op_name as op_name, t3.op_type as op_type, " \
-               "max(t3.timestamp+duration)-min(t3.timestamp) as duration " \
-               "FROM ({hccl_all_reduce_sql}) t3 group by t3.op_name, t3.op_type) t4 group by t4.op_type"\
-               .format(hccl_all_reduce_sql=sql1)
+        return DBManager.fetch_all_data(self.cur, sql, dto_class=HcclDto)
 
-        return DBManager.fetch_all_data(self.cur, sql1, dto_class=HcclDto), \
-            DBManager.fetch_all_data(self.cur, sql2)
+    def get_hccl_op_report_data(self):
+        """
+         generate the table data for HcclOpReport
+        """
+
+        task_time_sql = self.get_task_time_sql()
+        where_condition = ''
+        if not ProfilingScene().is_operator():
+            where_condition = 'and t1.model_id=t2.model_id and (t1.index_id=t2.index_id or t1.is_dynamic=0)'
+
+        sql1 = "SELECT t1.model_id as model_id, t1.index_id as index_id, t1.op_name as op_name, " \
+               "t1.name as hccl_name, " \
+               "t1.plane_id as plane_id, t1.args as args, t2.running as timestamp, " \
+               "t2.complete-t2.running as duration, t1.is_dynamic as is_dynamic, t1.task_type as task_type, " \
+               "t1.op_type as op_type, t1.begin as first_timestamp " \
+               "from (select {0}.op_name, {0}.task_type, {0}.op_type, {0}.model_id, " \
+               "{0}.index_id, {1}.name, {1}.plane_id, {1}.args, " \
+               "{1}.stream_id, {1}.task_id, {1}.batch_id, {0}.is_dynamic, {0}.begin from {0} " \
+               "inner join {1} where {1}.timestamp >={0}.begin and {1}.timestamp <= {0}.end ) t1 " \
+               "inner join {task_time_sql} t2 " \
+               "on  t1.stream_id = t2.stream_id " \
+               "and t1.task_id = t2.task_id " \
+               "and t1.batch_id = t2.batch_id {where_condition} " \
+               "order by t2.running".format(DBNameConstant.TABLE_HCCL_OP, DBNameConstant.TABLE_HCCL_TASK,
+                                            task_time_sql=task_time_sql, where_condition=where_condition)
+
+        sql2 = "SELECT op_type, count(op_type), sum(duration) as total_time, " \
+               "min(duration) as min, sum(duration)/count(op_type) as avg, max(duration) as max FROM " \
+               "(SELECT op_name, op_type, " \
+               "max(timestamp+duration)-min(timestamp) as duration " \
+               "FROM ({hccl_all_reduce_sql}) group by op_name, first_timestamp, op_type) group by op_type" \
+            .format(hccl_all_reduce_sql=sql1)
+
+        return DBManager.fetch_all_data(self.cur, sql2)
 
     def get_hccl_op_data(self):
         """

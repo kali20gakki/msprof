@@ -53,7 +53,9 @@ class TestHcclCalculator(unittest.TestCase):
         with mock.patch('os.path.exists', return_value=True), \
                 mock.patch(NAMESPACE + '.HcclViewModel.check_table', return_value=True), \
                 mock.patch(NAMESPACE + '.HcclViewModel.get_hccl_communication_data',
-                           return_value=[[self.construct_hccl_dto("hccl_op")], [["all_reduce", 1, 1, 1, 1, 1]]]):
+                           return_value=[self.construct_hccl_dto("hccl_op")]), \
+                mock.patch(NAMESPACE + '.HcclViewModel.get_hccl_op_report_data',
+                           return_value=[["all_reduce", 1, 1, 1, 1, 1]]):
             check = HcclCalculator([], CONFIG)
             self.assertEqual("hccl_op", check._get_hccl_data()[0][0].op_name)
             self.assertEqual("all_reduce", check._get_hccl_data()[1][0][0])
