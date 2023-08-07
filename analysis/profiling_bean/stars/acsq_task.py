@@ -13,15 +13,17 @@ class AcsqTask(StructDecoder):
 
     def __init__(self: any, *args: any) -> None:
         args = args[0]
-        # get lower 6 bit
+        # total 16 bit, get lower 6 bit
         self._func_type = Utils.get_func_type(args[0])
-        # get high 6 bit
+        # total 16 bit, get high 6 bit
         self._task_type = args[0] >> 10
         self._stream_id = Utils.get_stream_id(args[2])
         self._task_id = args[3]
         self._sys_cnt = args[4]
-        self._acc_id = args[6] >> 10
-        self._acsq_id = args[6] & 127
+        # [acsq_id, acc_id] is total 16 bit, acc_id is the lower 6 bit
+        self._acc_id = args[6] & 63
+        # acsq_id is higher 10 bit where only lower 7 bit is valid
+        self._acsq_id = (args[6] >> 6) & 127
 
     @property
     def func_type(self: any) -> str:

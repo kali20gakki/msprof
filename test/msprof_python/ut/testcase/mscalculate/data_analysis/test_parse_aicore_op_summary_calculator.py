@@ -75,19 +75,12 @@ class TestParseAiCoreOpSummaryCalculator(unittest.TestCase):
                                return_value=False), \
                     mock.patch(NAMESPACE + '.ParseAiCoreOpSummaryCalculator.create_ai_core_metrics_table',
                                return_value=False), \
-                    mock.patch(NAMESPACE + '.ParseAiCoreOpSummaryCalculator.create_ge_tensor_table',
-                               return_value=False), \
                     mock.patch(NAMESPACE + '.ParseAiCoreOpSummaryCalculator.create_task_time_table',
                                return_value=False):
                 check = ParseAiCoreOpSummaryCalculator(file_list, CONFIG)
                 check.conn, check.curs = res
                 check.create_summary_table()
         db_manager.destroy(res)
-
-    def test_create_ge_tensor_table(self):
-        with mock.patch(NAMESPACE + '.DBManager.check_tables_in_db', return_value=False):
-            check = ParseAiCoreOpSummaryCalculator(file_list, CONFIG)
-            check.create_ge_tensor_table()
 
     def test_create_conn(self):
         db_manager = DBManager()

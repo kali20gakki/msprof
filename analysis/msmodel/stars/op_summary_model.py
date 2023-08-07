@@ -42,7 +42,6 @@ class OpSummaryModel(ViewModel, IAnalysisModel):
         :return:
         """
         self.create_ge_summary_table()
-        self.create_ge_tensor_table()
         self.create_ai_core_metrics_table()
         self.create_task_time_table()
         self.sql_commit()
@@ -57,17 +56,6 @@ class OpSummaryModel(ViewModel, IAnalysisModel):
         ge_merge_sql, sql_param = self._get_ge_sql()
         create_ge_summary_sql = "create table if not exists ge_summary as {}".format(ge_merge_sql)
         DBManager.execute_sql(self.conn, create_ge_summary_sql, sql_param)
-
-    def create_ge_tensor_table(self: any) -> None:
-        """
-        create ge tensor table
-        :return: None
-        """
-        ge_tensor_sql = "select * from {0} where (index_id={1} or index_id=0)" \
-            .format(DBNameConstant.TABLE_GE_TENSOR, self.iter_id)
-        create_ge_tensor_sql = "create table if not exists {0} as {1}" \
-            .format(DBNameConstant.TABLE_SUMMARY_TENSOR, ge_tensor_sql)
-        DBManager.execute_sql(self.conn, create_ge_tensor_sql)
 
     def create_ai_core_metrics_table(self: any) -> None:
         """

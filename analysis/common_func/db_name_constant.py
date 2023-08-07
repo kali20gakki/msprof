@@ -218,7 +218,6 @@ class DBNameConstant(metaclass=ABCMeta):
 
     # ge
     TABLE_GE_TASK = "TaskInfo"
-    TABLE_GE_TENSOR = "TensorInfo"
     TABLE_GE_STEP = "StepInfo"
     TABLE_GE_SESSION = "SessionInfo"
     TABLE_GE_HASH = "GeHashInfo"
