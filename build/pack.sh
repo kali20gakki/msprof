@@ -41,7 +41,7 @@ function create_run_package() {
 
 	  ${CREATE_RUN_SCRIPT} \
     --header ${CONTROL_PARAM_SCRIPT} --help-header ${cann_component_dir}/${cann_component_name}/scripts/help.info --pigz --complevel 4 --nomd5 --sha256 \
-    --nooverwrite --chown --tar-format gnu --tar-extra --numeric-owner \
+    --nooverwrite --chown --tar-format gnu --tar-extra --numeric-owner --tar-quietly \
     ${cann_component_dir} \
     ${CUR_DIR}/tmp/${package_name_suffix} \
     ${COMMENTS} \
