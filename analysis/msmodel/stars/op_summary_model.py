@@ -135,13 +135,12 @@ class OpSummaryModel(ViewModel, IAnalysisModel):
         sql = "SELECT a.stream_id, op_name, b.task_type, start_time, duration_time, " \
               "start_time+duration_time as end_time FROM {0} a INNER JOIN {1} b " \
               "on a.stream_id=b.stream_id and a.task_id=b.task_id and a.batch_id=b.batch_id {2} " \
-              "and a.task_type<>'{unknown}' and b.task_type in ({value})".format(
+              "and a.task_type<>'{unknown}'".format(
                 DBNameConstant.TABLE_SUMMARY_TASK_TIME,
                 DBNameConstant.TABLE_SUMMARY_GE,
                 inner_join_condition,
-                unknown=Constant.TASK_TYPE_UNKNOWN,
-                value=('?,' * (len(task_type) - 1) + '?'))
-        return DBManager.fetch_all_data(self.cur, sql, task_type, dto_class=TimeSectionDto)
+                unknown=Constant.TASK_TYPE_UNKNOWN)
+        return DBManager.fetch_all_data(self.cur, sql, dto_class=TimeSectionDto)
 
     def _get_ge_sql(self: any) -> tuple:
         ge_sql = "SELECT model_id, task_id, stream_id, " \

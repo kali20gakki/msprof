@@ -66,7 +66,7 @@ class HcclViewModel(ViewModel):
         task_time_sql = self.get_task_time_sql()
         where_condition = ''
         if not ProfilingScene().is_operator():
-            where_condition = 'and t1.model_id=t2.model_id and (t1.index_id=t2.index_id or t1.is_dynamic=0)'
+            where_condition = 'and t1.model_id=t2.model_id and (t1.index_id=t2.index_id or t1.index_id=0)'
         sql = "SELECT t1.model_id as model_id, t1.index_id as index_id, t1.op_name as op_name, " \
               "t1.name as hccl_name, " \
               "t1.plane_id as plane_id, t1.args as args, t2.running as timestamp, " \
