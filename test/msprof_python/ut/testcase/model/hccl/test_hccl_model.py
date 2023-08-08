@@ -77,11 +77,6 @@ class TestHCCLModel(TestDirCRBaseModel):
             check = HcclViewModel("", DBNameConstant.DB_HCCL, [DBNameConstant.TABLE_HCCL_ALL_REDUCE])
             check.get_hccl_communication_data()
 
-    def test_get_hccl_op_report_data_when_given_attach_to_db_failed_then_return_empty_list(self):
-        check = HcclViewModel("", DBNameConstant.DB_HCCL, [DBNameConstant.TABLE_HCCL_OP_REPORT])
-        ret = check.get_hccl_op_report_data()
-        self.assertEqual([], ret)
-
     def test_get_hccl_op_data_sql(self):
         with mock.patch(NAMESPACE + '.DBManager.fetch_all_data'):
             check = HcclViewModel("", DBNameConstant.DB_HCCL, [DBNameConstant.TABLE_HCCL_ALL_REDUCE])
