@@ -303,18 +303,6 @@ class NodeGear(CANNGear):
         model.insert_data_to_db(DBNameConstant.TABLE_GE_STEP, self.step_info)
         model.finalize()
 
-    def save_hccl_op_info(self):
-        if not self.hccl_op_info:
-            return
-        self.update_hccl_op_name()
-        model = HCCLHostModel(self._project_path)
-        model.init()
-        model.drop_table(DBNameConstant.TABLE_HCCL_OP)
-        model.create_table()
-
-        model.insert_data_to_db(DBNameConstant.TABLE_HCCL_OP, self.hccl_op_info)
-        model.finalize()
-
     def save_fusion_op_info(self):
         if not self.fusion_op_info:
             return
@@ -512,17 +500,11 @@ class TaskGear(CANNGear):
                                        node_basic_info_dto.block_dim, node_basic_info_dto.mix_block_dim,
                                        node_basic_info_dto.is_dynamic, task_type,
                                        node_basic_info_dto.op_type, request_id, add_dto.thread_id,
-                                       node_basic_info_dto.timestamp, add_dto.batch_id, add_dto.device_id, int(cxt_id)])
-
-            if tensor_info_dto.struct_type is None:
-                continue
-            for cxt_id in cxt_ids:
-                self.tensor_info.append([model_id, add_dto.stream_id, add_dto.task_id, tensor_info_dto.tensor_num,
-                                         tensor_info_dto.input_formats, tensor_info_dto.input_data_types,
-                                         tensor_info_dto.input_shapes, tensor_info_dto.output_formats,
-                                         tensor_info_dto.output_data_types, tensor_info_dto.output_shapes,
-                                         request_id, tensor_info_dto.timestamp, add_dto.batch_id, add_dto.device_id,
-                                         int(cxt_id)])
+                                       node_basic_info_dto.timestamp, add_dto.batch_id,
+                                       tensor_info_dto.tensor_num, tensor_info_dto.input_formats,
+                                       tensor_info_dto.input_data_types, tensor_info_dto.input_shapes,
+                                       tensor_info_dto.output_formats, tensor_info_dto.output_data_types,
+                                       tensor_info_dto.output_shapes, add_dto.device_id, int(cxt_id)])
 
     def run(self, event: Event, call_stack: dict):
         dto: ApiDataDto = ApiDataDatabase().get(event)
@@ -576,17 +558,6 @@ class TaskGear(CANNGear):
         model.insert_data_to_db(DBNameConstant.TABLE_GE_TASK, self.task_info)
         model.finalize()
 
-    def save_tensor_info(self):
-        if not self.tensor_info:
-            return
-
-        model = GeModel(self._project_path, [DBNameConstant.TABLE_GE_TENSOR])
-        model.init()
-        model.drop_table(DBNameConstant.TABLE_GE_TENSOR)
-        model.create_table()
-        model.insert_data_to_db(DBNameConstant.TABLE_GE_TENSOR, self.tensor_info)
-        model.finalize()
-
     def save_hccl_task_info(self):
         if not self.hccl_task_info:
             return
@@ -612,7 +583,6 @@ class TaskGear(CANNGear):
     def flush_data(self):
         self.save_api_call_info()
         self.save_task_info()
-        self.save_tensor_info()
         self.save_hccl_task_info()
         self.save_host_tasks()
 
