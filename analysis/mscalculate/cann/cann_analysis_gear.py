@@ -442,7 +442,7 @@ class TaskGear(CANNGear):
         model_id = model_dto.item_id if model_dto.item_id is not None else self.INVALID_MODEL_ID
         request_id = model_dto.request_id if model_dto.request_id is not None else -1
         self.hccl_task_info.append(
-            [model_id, request_id, hccl_dto.item_id, hccl_info_dto.plane_id, hccl_info_dto.timestamp,
+            [model_id, request_id, hccl_dto.item_id, hccl_info_dto.plane_id, task_track_dto.timestamp,
              hccl_info_dto.duration_estimated, task_track_dto.stream_id, task_track_dto.task_id,
              task_track_dto.batch_id, hccl_info_dto.to_args_json(task_track_dto.stream_id, task_track_dto.task_id)])
 
@@ -473,7 +473,8 @@ class TaskGear(CANNGear):
             # this happen when prof data is collected in level 0
             self.task_info.append([model_id, node_dto.item_id, add_dto.stream_id, add_dto.task_id,
                                    0, 0, 'N/A', 'N/A', 'N/A', request_id, add_dto.thread_id,
-                                   'N/A', add_dto.batch_id, self.INVALID_CONTEXT_ID])
+                                   'N/A', add_dto.batch_id, None, None, None, None, None, None, None,
+                                   add_dto.device_id, self.INVALID_CONTEXT_ID])
             return
 
         for node_desc in node_descs.values():
@@ -486,7 +487,8 @@ class TaskGear(CANNGear):
                 for cxt_id in cxt_ids:
                     self.task_info.append([model_id, node_dto.item_id, add_dto.stream_id, add_dto.task_id,
                                            0, 0, 'N/A', 'N/A', 'N/A', request_id, add_dto.thread_id,
-                                           'N/A', add_dto.batch_id, add_dto.device_id, int(cxt_id)])
+                                           'N/A', add_dto.batch_id, None, None, None, None, None, None, None,
+                                           add_dto.device_id, int(cxt_id)])
                 continue
             if node_basic_info_dto.task_type is None or node_basic_info_dto.task_type == self.FFTS_PLUS_TASK_TYPE:
                 continue
@@ -601,7 +603,6 @@ class HCCLGear(CANNGear):
         self.hccl_node_mismatch = 0
 
     def run(self, event: Event, call_stack: dict):
-        dto: ApiDataDto = ApiDataDatabase().get(event)
         node_event: Event = call_stack.get(Constant.NODE_LEVEL)
         node_dto: ApiDataDto = ApiDataDatabase().get(node_event)
 

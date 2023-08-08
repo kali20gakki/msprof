@@ -59,6 +59,12 @@ class TestHCCLExport(unittest.TestCase):
             hccl._format_hccl_data(hccl_data)
             self.assertEqual(len(hccl.result), 10)
 
+    def test_format_hccl_communication_data(self):
+        hccl_data = []
+        hccl = HCCLExport(PARAMS)
+        result = hccl._format_hccl_communication_data(hccl_data)
+        self.assertEqual(len(result), 0)
+
 
 if __name__ == '__main__':
     unittest.main()
