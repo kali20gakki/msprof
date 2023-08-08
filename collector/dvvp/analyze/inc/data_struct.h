@@ -7,7 +7,6 @@
 #ifndef ANALYSIS_DVVP_ANALYZE_DATA_STRUCT_H
 #define ANALYSIS_DVVP_ANALYZE_DATA_STRUCT_H
 
-#include <cstdint>
 #include <string>
 
 namespace Analysis {
