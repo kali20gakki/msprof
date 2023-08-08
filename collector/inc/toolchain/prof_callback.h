@@ -162,7 +162,7 @@ MSVP_PROF_API int32_t MsprofInit(uint32_t dataType, void *data, uint32_t dataLen
  * @param NULL
  * @return 0:SUCCESS, >0:FAILED
  */
-MSVP_PROF_API int32_t MsprofFinalize();
+MSVP_PROF_API int32_t MsprofFinalize(void);
 #ifdef __cplusplus
 }
 #endif

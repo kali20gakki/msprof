@@ -87,7 +87,7 @@ MSVP_PROF_API int32_t MsprofReportData(uint32_t moduleId, uint32_t type, void* d
 MSVP_PROF_API int32_t MsprofSetDeviceIdByGeModelIdx(const uint32_t geModelIdx, const uint32_t deviceId);
 MSVP_PROF_API int32_t MsprofUnsetDeviceIdByGeModelIdx(const uint32_t geModelIdx, const uint32_t deviceId);
 MSVP_PROF_API int32_t MsprofNotifySetDevice(uint32_t chipId, uint32_t deviceId, bool isOpen);
-MSVP_PROF_API int32_t MsprofFinalize();
+MSVP_PROF_API int32_t MsprofFinalize(void);
 
 /* ACL API */
 MSVP_PROF_API int32_t profAclInit(uint32_t type, const char *profilerPath, uint32_t len);
@@ -96,7 +96,7 @@ MSVP_PROF_API int32_t profAclStop(uint32_t type, PROFAPI_CONFIG_CONST_PTR profil
 MSVP_PROF_API int32_t profAclFinalize(uint32_t type);
 MSVP_PROF_API int32_t profAclSubscribe(uint32_t type, uint32_t modelId, PROFAPI_SUBSCRIBECONFIG_CONST_PTR config);
 MSVP_PROF_API int32_t profAclUnSubscribe(uint32_t type, uint32_t modelId);
-MSVP_PROF_API int32_t profAclDrvGetDevNum();
+MSVP_PROF_API int32_t profAclDrvGetDevNum(void);
 MSVP_PROF_API int64_t profAclGetOpTime(uint32_t type, const void *opInfo, size_t opInfoLen, uint32_t index);
 MSVP_PROF_API int32_t profAclGetId(uint32_t type, const void *opInfo, size_t opInfoLen, uint32_t index);
 MSVP_PROF_API int32_t profAclGetOpVal(uint32_t type, const void *opInfo, size_t opInfoLen,
@@ -111,7 +111,7 @@ MSVP_PROF_API const char *profAclGetOpAttriVal(uint32_t type, const void *opInfo
 *
 * @retval aclprofStamp pointer
 */
-MSVP_PROF_API void *profAclCreateStamp();
+MSVP_PROF_API void *profAclCreateStamp(void);
 
 /**
 * @ingroup AscendCL
@@ -139,7 +139,7 @@ MSVP_PROF_API int32_t profAclPush(void *stamp);
 * @retval ACL_SUCCESS The function is successfully executed.
 * @retval OtherValues Failure
 */
-MSVP_PROF_API int32_t profAclPop();
+MSVP_PROF_API int32_t profAclPop(void);
 
 /**
 * @ingroup AscendCL
