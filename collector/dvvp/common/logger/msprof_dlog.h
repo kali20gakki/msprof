@@ -9,9 +9,9 @@
 
 #include <cstdio>
 #include <cstring>
-#include "slog_plugin.h"
 #include <unistd.h>
 #include <sys/syscall.h>
+#include "slog_plugin.h"
 
 #if (defined(linux) || defined(__linux__))
 #include <syslog.h>
@@ -27,7 +27,7 @@ enum {
     DVPP,          /**< DVPP */
     RUNTIME,       /**< Runtime */
     CCE,           /**< CCE */
-#if (OS_TYPE == LINUX)
+#if (defined(linux) || defined(__linux__))
     HDC,         /**< HDC */
 #else
     HDCL,

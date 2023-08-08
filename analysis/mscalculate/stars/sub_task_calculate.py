@@ -115,10 +115,10 @@ class SubTaskCalculator(MsMultiProcess):
     def calculate(self: any) -> None:
         try:
             self.init()
-            self.subtask_time_data = self.get_subtask_time()
         except ValueError:
             logging.warning("calculate subtask failed, maybe the data is not in fftsplus mode")
             return
+        self.subtask_time_data = self.get_subtask_time()
         try:
             self.save()
         except ValueError as err:
