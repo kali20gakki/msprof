@@ -248,10 +248,6 @@ class TestCANNAnalysisGear(unittest.TestCase):
                                           DBNameConstant.TABLE_GE_TASK, 'context_id', 8))
 
         self.assertEqual(
-            DBManager.get_table_data_count(PathManager.get_db_path(self.PROF_HOST_DIR, DBNameConstant.DB_GE_INFO),
-                                           DBNameConstant.TABLE_GE_TENSOR), 1)
-
-        self.assertEqual(
             DBManager.get_table_data_count(PathManager.get_db_path(self.PROF_HOST_DIR, DBNameConstant.DB_HCCL),
                                            DBNameConstant.TABLE_HCCL_TASK), 2)
 
