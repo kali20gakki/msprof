@@ -3,7 +3,7 @@
 # Copyright (c) Huawei Technologies Co., Ltd. 2023. All rights reserved.
 import logging
 import os
-from typing import List, Dict
+from typing import List
 from collections import defaultdict
 
 from analyzer.scene_base.profiling_scene import ProfilingScene
@@ -175,7 +175,5 @@ class HcclCalculator(ICalculator, MsMultiProcess):
                  task_duration_ratio))
         if total_data:
             self._hccl_op_report_data = sorted(total_data, key=lambda x: x[5], reverse=True)
-
-
-
-
+        else:
+            logging.warning("There is no hccl op report data. Maybe an error occurs during the calculation")
