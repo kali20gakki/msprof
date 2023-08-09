@@ -17,7 +17,6 @@ class TestOpSummaryModel(TestDirCRBaseModel):
 
     def test_create_table(self):
         with mock.patch(NAMESPACE + '.OpSummaryModel.create_ge_summary_table', return_value=""), \
-             mock.patch(NAMESPACE + '.OpSummaryModel.create_ge_tensor_table', return_value=""), \
              mock.patch(NAMESPACE + '.OpSummaryModel.create_ai_core_metrics_table', return_value=""), \
              mock.patch(NAMESPACE + '.OpSummaryModel.create_task_time_table', return_value=""), \
              mock.patch(NAMESPACE + '.OpSummaryModel.sql_commit', return_value=""):
@@ -34,11 +33,6 @@ class TestOpSummaryModel(TestDirCRBaseModel):
              mock.patch(NAMESPACE + '.logging.warning'):
             check = OpSummaryModel(SAMPLE_CONFIG)
             check.create_ge_summary_table()
-
-    def test_create_ge_tensor_table(self):
-        with mock.patch(NAMESPACE + '.DBManager.execute_sql'):
-            check = OpSummaryModel(SAMPLE_CONFIG)
-            check.create_ge_tensor_table()
 
     def test_create_ai_core_metrics_table(self):
         with mock.patch(NAMESPACE + '.OpSummaryModel.attach_to_db', return_value=True), \

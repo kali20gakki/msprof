@@ -218,7 +218,6 @@ class DBNameConstant(metaclass=ABCMeta):
 
     # ge
     TABLE_GE_TASK = "TaskInfo"
-    TABLE_GE_TENSOR = "TensorInfo"
     TABLE_GE_STEP = "StepInfo"
     TABLE_GE_SESSION = "SessionInfo"
     TABLE_GE_HASH = "GeHashInfo"
@@ -281,6 +280,8 @@ class DBNameConstant(metaclass=ABCMeta):
     TABLE_HCCL_TASK = "HCCLTask"
     TABLE_HOST_TASK = "HostTask"
     TABLE_ASCEND_TASK = "AscendTask"
+    TABLE_HCCL_OP_REPORT = "HcclOpReport"
+
 
     @abstractmethod
     def get_db_name(self: any) -> str:
