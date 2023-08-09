@@ -13,7 +13,7 @@
 // Other:48-63
 // DataTypeConfig
 #define PROF_ACL_API                0x00000001ULL
-#define PROF_TASK_TIME              0x00000002ULL
+#define PROF_TASK_TIME_L1           0x00000002ULL
 #define PROF_AICORE_METRICS         0x00000004ULL
 #define PROF_AICPU_TRACE            0x00000008ULL
 #define PROF_L2CACHE                0x00000010ULL
@@ -22,7 +22,7 @@
 #define PROF_MSPROFTX               0x00000080ULL
 #define PROF_RUNTIME_API            0x00000100ULL
 #define PROF_FRAMEWORK_SCHEDULE_L0  0x00000200ULL // ge infershape info
-#define PROF_TASK_TIME_L1           0x00000800ULL
+#define PROF_TASK_TIME_L0           0x00000800ULL
 #define PROF_TASK_MEMORY            0x00001000ULL
 #define PROF_AIV_METRICS            0x0000020000000ULL
 #define PROF_FRAMEWORK_SCHEDULE_L1  0x0000001000000ULL // ge profiling info
@@ -33,7 +33,7 @@
 #define PROF_OP_DETAIL              0x0000080000000ULL
 
 #define PROF_TASK_TRACE             (PROF_MODEL_EXECUTE | PROF_RUNTIME_TRACE | PROF_KEYPOINT_TRACE | \
-                                     PROF_HCCL_TRACE | PROF_TASK_TIME)
+                                     PROF_HCCL_TRACE | PROF_TASK_TIME_L0 | PROF_TASK_TIME_L1)
 
 // System
 #define PROF_INSTR_PROFILING         0x000000800000ULL
@@ -54,7 +54,7 @@
 // ========================================== mask ====================================
 // Task mask
 #define PROF_ACL_API_MASK                0x00000001ULL
-#define PROF_TASK_TIME_MASK              0x00000002ULL
+#define PROF_TASK_TIME_L1_MASK           0x00000002ULL
 #define PROF_AICORE_METRICS_MASK         0x00000004ULL
 #define PROF_AICPU_TRACE_MASK            0x00000008ULL
 #define PROF_L2CACHE_MASK                0x00000010ULL

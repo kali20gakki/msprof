@@ -16,6 +16,7 @@ class HostTask:
     context_id: int
     batch_id: int
     task_type: str
+    device_id: int
     host_timestamp: int
 
 

@@ -32,7 +32,7 @@ class HostTaskCollector:
                     objs.append(HostTask(*data[:cls.CONTEXT_ID_INDEX], int(_id), *data[cls.CONTEXT_ID_INDEX + 1:]))
         return objs
 
-    def get_host_tasks_by_model_and_iter(self: any, model_id: int, iter_id: int) -> List[HostTask]:
+    def get_host_tasks_by_model_and_iter(self: any, model_id: int, iter_id: int, device_id: int) -> List[HostTask]:
         """
         This function will get host tasks with model within iter.
         """
@@ -40,14 +40,14 @@ class HostTaskCollector:
             return []
 
         dev_visible_host_tasks = self._get_host_tasks(is_all=False, model_id=model_id,
-                                                      iter_id=iter_id)
+                                                      iter_id=iter_id, device_id=device_id)
 
         if not dev_visible_host_tasks:
             logging.error("Get dev visible hosts for model_id: %d, iter_id: %d error.", model_id, iter_id)
 
         return dev_visible_host_tasks
 
-    def get_host_tasks(self) -> List[HostTask]:
+    def get_host_tasks(self, device_id: int) -> List[HostTask]:
         """
         This function will get host tasks.
         """
@@ -55,14 +55,14 @@ class HostTaskCollector:
             return []
 
         dev_visible_host_tasks = self._get_host_tasks(is_all=True, model_id=NumberConstant.INVALID_MODEL_ID,
-                                                      iter_id=NumberConstant.INVALID_ITER_ID)
+                                                      iter_id=NumberConstant.INVALID_ITER_ID, device_id=device_id)
 
         if not dev_visible_host_tasks:
             logging.error("Get dev visible hosts error.")
 
         return dev_visible_host_tasks
 
-    def _get_host_tasks(self: any, is_all: bool, model_id: int, iter_id: int) -> List[HostTask]:
+    def _get_host_tasks(self: any, is_all: bool, model_id: int, iter_id: int, device_id: int) -> List[HostTask]:
         """
         get host tasks
         filter_: host tasks unique id range
@@ -73,7 +73,7 @@ class HostTaskCollector:
         if not self._check_host_tasks_exists():
             return []
         with RuntimeHostTaskModel(self.result_dir) as model:
-            host_tasks = model.get_host_tasks(is_all, model_id, iter_id)
+            host_tasks = model.get_host_tasks(is_all, model_id, iter_id, device_id)
             return self._generate_host_task_objs(host_tasks)
 
     def _check_host_tasks_exists(self):

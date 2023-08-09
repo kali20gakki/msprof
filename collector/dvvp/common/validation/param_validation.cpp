@@ -656,12 +656,20 @@ bool ParamValidation::IsValidSwitch(const std::string &switchStr) const
     if (switchStr.empty()) {
         return true;
     }
-    if (switchStr.compare("on") != 0 &&
-        switchStr.compare("off") != 0) {
-        MSPROF_LOGE("The switch should be set to on or off.");
+    if (switchStr.compare("on") != 0 && switchStr.compare("off") != 0) {
         return false;
     }
     return true;
+}
+
+bool ParamValidation::IsValidTaskTimeSwitch(const std::string &switchVal) const
+{
+    if (switchVal.compare(MSVP_PROF_L0) == 0 || switchVal.compare(MSVP_PROF_L1) == 0 || IsValidSwitch(switchVal)) {
+        return true;
+    }
+    MSPROF_LOGE("The switch task_time should be set in range [l0, l1, on, off].");
+    CMD_LOGE("Argument --task-time should be set in range [l0, l1, on, off].");
+    return false;
 }
 
 bool ParamValidation::IsValidInputCfgSwitch(const std::string &switchName, const std::string &switchVal) const

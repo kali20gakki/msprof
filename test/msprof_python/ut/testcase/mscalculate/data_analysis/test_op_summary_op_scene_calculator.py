@@ -33,24 +33,10 @@ class TestOpSummaryOpSceneCalculator(unittest.TestCase):
     def test_get_ge_sql(self):
         check = OpSummaryOpSceneCalculator(file_list, CONFIG)
         result = check._get_ge_sql()
-        sql = "SELECT model_id, task_id, stream_id, op_name, op_type, block_dim, mix_block_dim, " \
-              "task_type, timestamp, batch_id, context_id from TaskInfo"
+        sql = "SELECT model_id, task_id, stream_id, op_name, op_type, block_dim, mix_block_dim, task_type, " \
+              "tensor_num, input_formats, input_data_types, input_shapes, output_formats, output_data_types," \
+              "output_shapes, index_id, timestamp, batch_id, context_id from TaskInfo"
         self.assertEqual(sql, result)
-
-    def test_create_ge_tensor_table(self):
-        with mock.patch(NAMESPACE + '.OpSummaryOpSceneCalculator._check_tensor_table', return_value=True), \
-                mock.patch(NAMESPACE + '.DBManager.fetch_all_data', return_value=[]):
-            check = OpSummaryOpSceneCalculator(file_list, CONFIG)
-            result = check.create_ge_tensor_table()
-        self.assertFalse(result)
-        with mock.patch(NAMESPACE + '.OpSummaryOpSceneCalculator._check_tensor_table', return_value=True), \
-                mock.patch(NAMESPACE + '.DBManager.sql_create_general_table', return_value='test'), \
-                mock.patch(NAMESPACE + '.DBManager.execute_sql'), \
-                mock.patch(NAMESPACE + '.DBManager.executemany_sql'), \
-                mock.patch(NAMESPACE + '.OpSummaryOpSceneCalculator._get_tensor_data', return_value=[[1]]):
-            check = OpSummaryOpSceneCalculator(file_list, CONFIG)
-            result = check.create_ge_tensor_table()
-        self.assertTrue(result)
 
     def test_get_ge_merge_data(self):
         with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=(False, False)), \
