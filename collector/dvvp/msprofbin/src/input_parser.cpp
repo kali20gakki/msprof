@@ -262,7 +262,8 @@ void ArgsManager::AddBasicArgs()
         {"ascendcl", "Show acl profiling data, the default value is on.(full-platform)", ON},
         {"model-execution", "Show ge model execution profiling data, the default value is off.(full-platform)", OFF},
         {"runtime-api", "Show runtime api profiling data, the default value is off.(full-platform)", OFF},
-        {"task-time", "Show task profiling data, the default value is on.(full-platform)", ON},
+         {"task-time", "Show task profiling data, the default value is on.(full-platform)\n"
+            "\t\t\t\t\t\t   The switch can be set in range [l0, l1, on, off]", ON},
         {"environment", "User app custom environment variable configuration.(full-platform)"},
         {"sys-period", "Set total sampling period of system profiling in seconds.(full-platform)"},
         {"sys-devices", "Specify the profiling scope by device ID when collect sys profiling.\n"

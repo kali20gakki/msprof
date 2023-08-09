@@ -146,7 +146,7 @@ bool ParamsAdapterMsprof::ParamsCheckMsprofV1(InputCfg inputCfg, std::string cfg
 int ParamsAdapterMsprof::ParamsCheckDynProf() const
 {
     // --dynamic != on, no need check params
-    if (paramContainer_[INPUT_CFG_MSPROF_DYNAMIC] != MSPROF_SWITCH_ON) {
+    if (paramContainer_[INPUT_CFG_MSPROF_DYNAMIC] != MSVP_PROF_ON) {
         return PROFILING_SUCCESS;
     }
     // --pid and --application is both empty
@@ -182,8 +182,8 @@ void ParamsAdapterMsprof::SetDefaultParamsApp()
     if (paramContainer_[INPUT_CFG_COM_ASCENDCL].empty()) {
         paramContainer_[INPUT_CFG_COM_ASCENDCL] = MSVP_PROF_ON;
     }
-    if (paramContainer_[INPUT_CFG_COM_TASK_TIME_L1].empty()) {
-        paramContainer_[INPUT_CFG_COM_TASK_TIME_L1] = MSVP_PROF_ON;
+    if (paramContainer_[INPUT_CFG_COM_TASK_TIME].empty()) {
+        paramContainer_[INPUT_CFG_COM_TASK_TIME] = MSVP_PROF_ON;
     }
     if (paramContainer_[INPUT_CFG_COM_AI_CORE].empty()) {
         paramContainer_[INPUT_CFG_COM_AI_CORE] = MSVP_PROF_ON;
@@ -520,7 +520,7 @@ void ParamsAdapterMsprof::CreateCfgMap()
         {ARGS_PYTHON_PATH, INPUT_CFG_PYTHON_PATH}, {ARGS_SUMMARY_FORMAT, INPUT_CFG_SUMMARY_FORMAT},
         {ARGS_ASCENDCL, INPUT_CFG_COM_ASCENDCL}, {ARGS_AI_CORE, INPUT_CFG_COM_AI_CORE},
         {ARGS_AIV, INPUT_CFG_COM_AI_VECTOR}, {ARGS_MODEL_EXECUTION, INPUT_CFG_COM_MODEL_EXECUTION},
-        {ARGS_RUNTIME_API, INPUT_CFG_COM_RUNTIME_API}, {ARGS_TASK_TIME, INPUT_CFG_COM_TASK_TIME_L1},
+        {ARGS_RUNTIME_API, INPUT_CFG_COM_RUNTIME_API}, {ARGS_TASK_TIME, INPUT_CFG_COM_TASK_TIME},
         {ARGS_AICPU, INPUT_CFG_COM_AICPU}, {ARGS_MSPROFTX, INPUT_CFG_COM_MSPROFTX},
         {ARGS_CPU_PROFILING, INPUT_CFG_COM_SYS_CPU}, {ARGS_SYS_PROFILING, INPUT_CFG_COM_SYS_USAGE},
         {ARGS_PID_PROFILING, INPUT_CFG_COM_SYS_PID_USAGE}, {ARGS_HARDWARE_MEM, INPUT_CFG_COM_SYS_HARDWARE_MEM},
