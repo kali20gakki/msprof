@@ -94,14 +94,15 @@ class MsprofTxViewer:
         to get summary data
         :return:summary data
         """
+        self.init_model()
         try:
             msproftx_data = self.model.get_summary_data()
-            msproftx_data = self._summary_reformat(msproftx_data)
         except (ValueError, IOError, TypeError) as error:
             logging.error(error, exc_info=Constant.TRACE_BACK_SWITCH)
             return MsvpConstant.MSVP_EMPTY_DATA
         finally:
             self.model.finalize()
+        msproftx_data = self._summary_reformat(msproftx_data)
         return self.configs.get('headers'), msproftx_data, len(msproftx_data)
 
     def get_pytorch_operator_data(self: any) -> tuple:
