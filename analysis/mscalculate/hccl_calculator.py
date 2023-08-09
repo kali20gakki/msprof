@@ -52,14 +52,41 @@ class HcclCalculator(ICalculator, MsMultiProcess):
     def _cal_total(type_time: dict) -> int:
         """
         calculate total time for each device
-        :param type_time: {"op":{'op_type': 0,'count': 0,'duration': 0,
-        'min': 0,'avg': 0,max': 0}}
+        :param type_time: {"op_type":{'count': 0,'duration': 0, 'min': 0,'avg': 0,max': 0}}
         :return: total time
         """
         total_time = 0
         for ops in type_time.values():
-            total_time += ops.get("duration", 0)
+            total_time += ops.get("total_time", 0)
         return total_time
+
+    @staticmethod
+    def _get_hccl_op_report_data(communication_data: List[HcclDto]) -> any:
+        """
+        Calculate the hccl op report data by communication data
+        return：{"op_type":{'count': 0,'duration': 0, min': 0,'avg': 0,max': 0}}
+        """
+        if not communication_data:
+            return {}
+        grouped_data = defaultdict(lambda: {"min_timestamp": float("inf"), "max_timestamp": -float("inf")})
+        for data in communication_data:
+            key = (data.op_name, data.first_timestamp, data.op_type)
+            grouped_data[key]["min_timestamp"] = min(grouped_data[key]["min_timestamp"], data.timestamp)
+            grouped_data[key]["max_timestamp"] = max(grouped_data[key]["max_timestamp"], data.timestamp + data.duration)
+            grouped_data[key]["op_type"] = data.op_type
+        for value in grouped_data.values():
+            value["duration"] = value["max_timestamp"] - value["min_timestamp"]
+
+        op_type_group = defaultdict(lambda: {"count": 0, "total_time": 0, "min": float("inf"), "max": -float("inf")})
+        for entry in grouped_data.values():
+            op_type_status = op_type_group[entry["op_type"]]
+            op_type_status["count"] += 1
+            op_type_status["total_time"] += entry["duration"]
+            op_type_status["min"] = min(op_type_status["min"], entry["duration"])
+            op_type_status["max"] = max(op_type_status["max"], entry["duration"])
+        for status in op_type_group.values():
+            status["avg"] = status["total_time"] / status["count"]
+        return op_type_group
 
     def calculate(self: any) -> None:
         hccl_data, hccl_op_report_data = self._get_hccl_data()
@@ -118,11 +145,11 @@ class HcclCalculator(ICalculator, MsMultiProcess):
             communication_data = hccl_model.get_hccl_communication_data()
             if not communication_data:
                 return [], []
-            report_data = hccl_model.get_hccl_op_report_data()
             self.update_bandwidth(communication_data)
-            return communication_data, report_data
+            hccl_op_report_data = self._get_hccl_op_report_data(communication_data)
+            return communication_data, hccl_op_report_data
 
-    def _create_report(self, hccl_op_report_data: List[list]) -> None:
+    def _create_report(self, hccl_op_report_data) -> None:
         """
         calculate report data
         :return: None
@@ -130,28 +157,23 @@ class HcclCalculator(ICalculator, MsMultiProcess):
         task_data = hccl_op_report_data
         if not task_data:
             return
-        type_time = defaultdict(dict)
-
-        for task in task_data:
-            type_time[task[0]] = {
-                'op_type': task[0], 'count': task[1], 'duration': task[2],
-                'min': task[3], 'avg': task[4], 'max': task[5]
-            }
-        total_time = self._cal_total(type_time)
+        hccl_op_total_time = self._cal_total(task_data)
         total_data = []
-        for op_type in type_time:
-            task_data = type_time.get(op_type, {})
-            if not task_data:
+        for op_type in task_data:
+            statistic_data = task_data.get(op_type, {})
+            if not statistic_data:
                 continue
-            task_duration_ratio = round(float(task_data["duration"] / total_time * 100),
-                                        NumberConstant.DECIMAL_ACCURACY) if total_time != 0 else 0
+            task_duration_ratio = round(float(statistic_data["total_time"] / hccl_op_total_time * 100),
+                                        NumberConstant.DECIMAL_ACCURACY) if hccl_op_total_time != 0 else 0
             total_data.append(
-                (task_data['op_type'],
-                 task_data["count"],
-                 round(float(task_data["duration"]), NumberConstant.DECIMAL_ACCURACY),
-                 round(float(task_data["min"]), NumberConstant.DECIMAL_ACCURACY),
-                 round(float(task_data["avg"]), NumberConstant.DECIMAL_ACCURACY),
-                 round(float(task_data["max"]), NumberConstant.DECIMAL_ACCURACY),
+                (op_type,
+                 statistic_data["count"],
+                 round(float(statistic_data["total_time"]), NumberConstant.DECIMAL_ACCURACY),
+                 round(float(statistic_data["min"]), NumberConstant.DECIMAL_ACCURACY),
+                 round(float(statistic_data["avg"]), NumberConstant.DECIMAL_ACCURACY),
+                 round(float(statistic_data["max"]), NumberConstant.DECIMAL_ACCURACY),
                  task_duration_ratio))
         if total_data:
             self._hccl_op_report_data = sorted(total_data, key=lambda x: x[5], reverse=True)
+        else:
+            logging.warning("There is no hccl op report data. Maybe an error occurs during the calculation")
