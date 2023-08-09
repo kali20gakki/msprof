@@ -93,6 +93,9 @@ class HCCLExport:
         return _hccl_format_op_data
 
     def _format_hccl_communication_data(self, hccl_data):
+        # for L0 collect, plane id will be filled -1
+        if not hccl_data or hccl_data[0].plane_id == -1:
+            return []
         _hccl_format_data = [0] * len(hccl_data)
         for index, _hccl_data in enumerate(hccl_data):
             hccl_args = OrderedDict(_hccl_data.args)

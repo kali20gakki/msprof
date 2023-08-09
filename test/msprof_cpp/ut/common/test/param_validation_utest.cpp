@@ -903,3 +903,25 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckStorageLimit) {
     ret = ParamValidation::instance()->CheckStorageLimit("");
     EXPECT_EQ(true, ret);
 }
+
+TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, IsValidTaskTimeSwitch)
+{
+    using namespace analysis::dvvp::common::validation;
+    int ret = ParamValidation::instance()->IsValidTaskTimeSwitch("");
+    EXPECT_EQ(true, ret);
+
+    ret = ParamValidation::instance()->IsValidTaskTimeSwitch("l0");
+    EXPECT_EQ(true, ret);
+
+    ret = ParamValidation::instance()->IsValidTaskTimeSwitch("l1");
+    EXPECT_EQ(true, ret);
+
+    ret = ParamValidation::instance()->IsValidTaskTimeSwitch("on");
+    EXPECT_EQ(true, ret);
+
+    ret = ParamValidation::instance()->IsValidTaskTimeSwitch("off");
+    EXPECT_EQ(true, ret);
+
+    ret = ParamValidation::instance()->IsValidTaskTimeSwitch("xxx");
+    EXPECT_EQ(false, ret);
+}

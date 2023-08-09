@@ -21,7 +21,15 @@ class TablesConfig(MetaConfig):
             ('thread_id', 'INTEGER,null'),
             ('timestamp', 'INTEGER,null'),
             ('batch_id', 'INTEGER,null'),
-            ('context_id', 'INTEGER,null')
+            ('tensor_num', 'INTEGER,null'),
+            ('input_formats', 'TEXT,null'),
+            ('input_data_types', 'TEXT,null'),
+            ('input_shapes', 'TEXT,null'),
+            ('output_formats', 'TEXT,null'),
+            ('output_data_types', 'TEXT,null'),
+            ('output_shapes', 'TEXT,null'),
+            ('device_id', 'INTEGER,null'),
+            ('context_id', 'INTEGER,null'),
         ],
         'GeHashInfoMap': [
             ('hash_key', 'TEXT,null'),
@@ -31,38 +39,6 @@ class TablesConfig(MetaConfig):
             ('hash_key', 'TEXT,null'),
             ('hash_value', 'TEXT,null'),
             ('level', 'TEXT,null')
-        ],
-        'TensorInfoMap': [
-            ('model_id', 'INTEGER,null'),
-            ('stream_id', 'INTEGER,null'),
-            ('task_id', 'INTEGER,null'),
-            ('tensor_num', 'INTEGER,null'),
-            ('input_formats', 'TEXT,null'),
-            ('input_data_types', 'TEXT,null'),
-            ('input_shapes', 'TEXT,null'),
-            ('output_formats', 'TEXT,null'),
-            ('output_data_types', 'TEXT,null'),
-            ('output_shapes', 'TEXT,null'),
-            ('index_id', 'INTEGER,null'),
-            ('timestamp', 'NUMERIC,null'),
-            ('batch_id', 'INTEGER,null'),
-            ('context_id', 'INTEGER,null')
-        ],
-        'GeTensorMap': [
-            ('model_id', 'INTEGER,null'),
-            ('stream_id', 'INTEGER,null'),
-            ('task_id', 'INTEGER,null'),
-            ('tensor_num', 'INTEGER,null'),
-            ('input_formats', 'TEXT,null'),
-            ('input_data_types', 'TEXT,null'),
-            ('input_shapes', 'TEXT,null'),
-            ('output_formats', 'TEXT,null'),
-            ('output_data_types', 'TEXT,null'),
-            ('output_shapes', 'TEXT,null'),
-            ('index_id', 'INTEGER,null'),
-            ('timestamp', 'NUMERIC,null'),
-            ('batch_id', 'INTEGER,null'),
-            ('context_id', 'INTEGER,null')
         ],
         'StepInfoMap': [
             ('model_id', 'INTEGER,null'),
@@ -879,6 +855,13 @@ class TablesConfig(MetaConfig):
             ('block_dim', 'INTEGER,null'),
             ('mix_block_dim', 'INTEGER,null'),
             ('task_type', 'TEXT,null'),
+            ('tensor_num', 'INTEGER,null'),
+            ('input_formats', 'TEXT,null'),
+            ('input_data_types', 'TEXT,null'),
+            ('input_shapes', 'TEXT,null'),
+            ('output_formats', 'TEXT,null'),
+            ('output_data_types', 'TEXT,null'),
+            ('output_shapes', 'TEXT,null'),
             ('timestamp', 'INTEGER,null'),
             ('index_id', 'INTEGER,null'),
             ('context_id', 'INTEGER,null')
@@ -1200,6 +1183,7 @@ class TablesConfig(MetaConfig):
             ('context_ids', 'TEXT,null'),
             ('batch_id', 'INTEGER,null'),
             ('task_type', 'TEXT,null'),
+            ('device_id', 'INTEGER,null'),
             ('timestamp', 'NUMERIC,null')
         ],
         'AscendTaskMap': [
@@ -1245,5 +1229,14 @@ class TablesConfig(MetaConfig):
             ('total_reserve_memory', 'INTEGER,null'),
             ('total_allocate_memory', 'INTEGER,null'),
             ('device_type', 'TEXT,null')
+        ],
+        'HcclOpReportMap': [
+            ('op_type', 'TEXT,null'),
+            ('occurrences', 'TEXT,null'),
+            ('total_time', 'NUMERIC,null'),
+            ('min', 'NUMERIC,null'),
+            ('avg', 'NUMERIC,null'),
+            ('max', 'NUMERIC,null'),
+            ('ratio', 'TEXT,null')
         ],
     }

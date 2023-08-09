@@ -387,7 +387,7 @@ MSVP_PROF_API aclError aclprofGetStepTimestamp(aclprofStepInfo* stepInfo, aclpro
  *
  * @retval aclprofStepInfo pointer
  */
-MSVP_PROF_API aclprofStepInfo* aclprofCreateStepInfo();
+MSVP_PROF_API aclprofStepInfo* aclprofCreateStepInfo(void);
 
  /**
  * @ingroup AscendCL
@@ -405,7 +405,7 @@ MSVP_PROF_API void aclprofDestroyStepInfo(aclprofStepInfo* stepinfo);
 *
 * @retval aclprofStamp pointer
 */
-MSVP_PROF_API void *aclprofCreateStamp();
+MSVP_PROF_API void *aclprofCreateStamp(void);
 
 /**
 * @ingroup AscendCL

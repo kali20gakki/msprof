@@ -24,10 +24,10 @@ class TestSqlWhereCondition(unittest.TestCase):
 
     def test__get_select_condition_return_model_iter_range_when_not_is_all(self):
         model = SqlWhereCondition()
-        condition = model.get_host_select_condition(False, 1, 2)
-        self.assertEqual(condition, "where model_id=1 and (index_id=2 or index_id=0)")
+        condition = model.get_host_select_condition(False, 1, 2, 0)
+        self.assertEqual(condition, "where model_id=1 and (index_id=2 or index_id=0) and device_id=0")
 
     def test__get_select_condition_return_empty_when_is_all_and(self):
         model = SqlWhereCondition()
-        condition = model.get_host_select_condition(True, 1, 2)
-        self.assertEqual(condition, "")
+        condition = model.get_host_select_condition(True, 1, 2, 0)
+        self.assertEqual(condition, "where device_id=0")

@@ -101,8 +101,7 @@ public:
     virtual int Uninit();
     virtual void SetParamsForGlobal(struct CommonParams &comParams);
     virtual void SetParamsForStorageLimit(struct CommonParams &comParams);
-    virtual void SetParamsForTaskTimeL0();
-    virtual void SetParamsForTaskTimeL1();
+    virtual void SetParamsForTaskTime(const std::string taskTimeLevel);
     virtual void SetParamsForTaskTrace();
     virtual void SetParamsForTrainingTrace();
     virtual void SetParamsForAscendCL();
@@ -148,6 +147,8 @@ protected:
 
 private:
     int GetMetricsEvents(const std::string &metricsType, std::string &events, const CoreType type) const;
+    void SetParamsForTaskTimeL0();
+    void SetParamsForTaskTimeL1();
 };
 }
 }

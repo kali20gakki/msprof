@@ -248,16 +248,69 @@ class TestCANNAnalysisGear(unittest.TestCase):
                                           DBNameConstant.TABLE_GE_TASK, 'context_id', 8))
 
         self.assertEqual(
-            DBManager.get_table_data_count(PathManager.get_db_path(self.PROF_HOST_DIR, DBNameConstant.DB_GE_INFO),
-                                           DBNameConstant.TABLE_GE_TENSOR), 1)
-
-        self.assertEqual(
             DBManager.get_table_data_count(PathManager.get_db_path(self.PROF_HOST_DIR, DBNameConstant.DB_HCCL),
                                            DBNameConstant.TABLE_HCCL_TASK), 2)
 
         self.assertTrue(
             DBManager.check_item_in_table(PathManager.get_db_path(self.PROF_HOST_DIR, DBNameConstant.DB_HCCL),
                                           DBNameConstant.TABLE_HCCL_TASK, 'plane_id', 8))
+
+    def test_task_gear_should_return_when_invalid_node_event(self):
+        gear = TaskGear(self.PROF_HOST_DIR)
+        event1 = self.create_api_event(self.event_col(Constant.TASK_LEVEL, 1, 100, 101, "api", 0))
+        gear.run(event1, {Constant.MODEL_LEVEL: Event.invalid_event(), Constant.NODE_LEVEL: Event.invalid_event(),
+                          Constant.HCCL_LEVEL: Event.invalid_event()})
+        gear.flush_data()
+        self.assertEqual(
+            DBManager.get_table_data_count(PathManager.get_db_path(self.PROF_HOST_DIR, DBNameConstant.DB_GE_INFO),
+                                           DBNameConstant.TABLE_GE_TASK), 0)
+
+    def test_task_gear_should_save_one_op_when_one_traditional_mode_node_event_FROM_PROF_LEVEL0(self):
+        gear = TaskGear(self.PROF_HOST_DIR)
+        event1 = self.create_api_event(self.event_col(Constant.TASK_LEVEL, 1, 120, 130, "api", 0))
+        task_dto = TaskTrackDto()
+        task_dto.task_id = 15
+        task_dto.struct_type = "1"
+        task_dto.task_type = "KERNEL_AICORE"
+        event1.additional_record = [self.create_addition_record(task_dto, 125)]
+        event2: Event = self.create_api_event(self.event_col(Constant.NODE_LEVEL, 1, 110, 140, "launch", "op"))
+
+        gear.run(event1, {Constant.MODEL_LEVEL: Event.invalid_event(), Constant.NODE_LEVEL: event2,
+                          Constant.HCCL_LEVEL: Event.invalid_event()})
+        gear.flush_data()
+        self.assertEqual(
+            DBManager.get_table_data_count(PathManager.get_db_path(self.PROF_HOST_DIR, DBNameConstant.DB_GE_INFO),
+                                           DBNameConstant.TABLE_GE_TASK), 1)
+
+    def test_task_gear_should_save_one_op_when_one_traditional_mode_node_event_FROM_PROF_LEVEL1(self):
+        gear = TaskGear(self.PROF_HOST_DIR)
+        event1 = self.create_api_event(self.event_col(Constant.TASK_LEVEL, 1, 120, 130, "api", 0))
+        task_dto = TaskTrackDto()
+        task_dto.task_id = 15
+        task_dto.struct_type = "1"
+        task_dto.task_type = "KERNEL_AICORE"
+        event1.additional_record = [self.create_addition_record(task_dto, 125)]
+        event2: Event = self.create_api_event(self.event_col(Constant.NODE_LEVEL, 1, 110, 140, "launch", "op"))
+        node_basic_info_dto = NodeBasicInfoDto()
+        node_basic_info_dto.op_type = "1"
+        node_basic_info_dto.task_type = 'AI_CORE'
+        node_basic_info_dto.op_name = "1"
+        node_basic_info_dto.timestamp = 140
+        tensor_info_dto = TensorInfoDto()
+        tensor_info_dto.op_name = "1"
+        tensor_info_dto.timestamp = 140
+        tensor_info_dto.struct_type = '1'
+        event2.additional_record = [
+            self.create_addition_record(node_basic_info_dto, 140),
+            self.create_addition_record(tensor_info_dto, 140)
+        ]
+
+        gear.run(event1, {Constant.MODEL_LEVEL: Event.invalid_event(), Constant.NODE_LEVEL: event2,
+                          Constant.HCCL_LEVEL: Event.invalid_event()})
+        gear.flush_data()
+        self.assertEqual(
+            DBManager.get_table_data_count(PathManager.get_db_path(self.PROF_HOST_DIR, DBNameConstant.DB_GE_INFO),
+                                           DBNameConstant.TABLE_GE_TASK), 1)
 
 
 class TestTaskGear(unittest.TestCase):
