@@ -100,8 +100,8 @@ class MsprofTxViewer:
             logging.error(error, exc_info=Constant.TRACE_BACK_SWITCH)
             return MsvpConstant.MSVP_EMPTY_DATA
         finally:
+            msproftx_data = self._summary_reformat(msproftx_data)
             self.model.finalize()
-        msproftx_data = self._summary_reformat(msproftx_data)
         return self.configs.get('headers'), msproftx_data, len(msproftx_data)
 
     def get_pytorch_operator_data(self: any) -> tuple:
