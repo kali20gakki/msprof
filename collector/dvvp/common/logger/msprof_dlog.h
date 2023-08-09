@@ -27,7 +27,7 @@ enum {
     DVPP,          /**< DVPP */
     RUNTIME,       /**< Runtime */
     CCE,           /**< CCE */
-#if defined(OS_TYPE) && (OS_TYPE == LINUX)
+#if (defined(linux) || defined(__linux__))
     HDC,         /**< HDC */
 #else
     HDCL,
