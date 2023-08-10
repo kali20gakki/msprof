@@ -4,7 +4,7 @@
 
 
 class CtxIdDto:
-    INVALID_CONTEXT_ID = 4294967295
+    INVALID_CONTEXT_ID = "4294967295"
 
     def __init__(self: any) -> None:
         self._level = None

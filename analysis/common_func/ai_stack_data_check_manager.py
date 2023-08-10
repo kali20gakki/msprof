@@ -153,8 +153,7 @@ class AiStackDataCheckManager(DataCheckManager):
         The data path contain op summary data or not
         """
         return device_id != NumberConstant.HOST_ID and \
-               (cls.contain_op_static_data(result_dir, device_id=device_id) or \
-                cls.contain_op_summary_without_ge_data(result_dir, device_id=device_id))
+               DBManager.check_connect_db(result_dir, DBNameConstant.DB_AICORE_OP_SUMMARY)[0]
 
     @classmethod
     def contain_op_summary_without_ge_data(cls: any, result_dir: str, device_id: any = None) -> bool:
@@ -190,6 +189,11 @@ class AiStackDataCheckManager(DataCheckManager):
         """
         return cls.check_data_exist(result_dir, file_name_manager.get_soc_log_compiles(),
                                     device_id=device_id)
+
+    @classmethod
+    def contain_sub_task_data(cls: any, result_dir: str, device_id: int = None) -> bool:
+        return device_id != NumberConstant.HOST_ID and DBManager.check_tables_in_db(
+            PathManager.get_db_path(result_dir, DBNameConstant.DB_SOC_LOG), DBNameConstant.TABLE_FFTS_LOG)
 
     @classmethod
     def contain_hccl_hcom_data(cls: any, result_dir: str, device_id: int = None) -> bool:
