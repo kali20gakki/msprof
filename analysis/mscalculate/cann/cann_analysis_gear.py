@@ -4,7 +4,9 @@
 from abc import abstractmethod
 
 import logging
+from collections import OrderedDict
 from typing import List
+from typing import Union
 
 from common_func.constant import Constant
 from common_func.db_name_constant import DBNameConstant
@@ -326,6 +328,7 @@ class TaskGear(CANNGear):
     INVALID_DIRECT = -1
     INVALID_CONTEXT_ID = 4294967295
     INVALID_MODEL_ID = 4294967295
+    HCCL_CONTEXT_ID_NUM = 2
     KERNEL_TASK_PREFIX = "KERNEL"
     AICORE_TASK_TYPE = "AI_CORE"
     HCCL_TASK_TYPE = "HCCL"
@@ -356,11 +359,20 @@ class TaskGear(CANNGear):
             self.ctx_info = ctx_info
 
         @staticmethod
-        def get_hash(dto: any):
+        def get_hash(dto: Union[NodeBasicInfoDto, TensorInfoDto, CtxIdDto]):
             return dto.op_name + "-" + str(int(dto.timestamp))
 
         def is_invalid(self):
             return self.node_basic_info is not None and self.tensor_info is not None
+
+    class HcclDesc:
+        def __init__(self, hccl_info=HCCLInfoDto(), ctx_info=CtxIdDto()):
+            self.hccl_info = hccl_info
+            self.ctx_info = ctx_info
+
+        @staticmethod
+        def get_hash(dto: Union[HCCLInfoDto, CtxIdDto]):
+            return dto.context_id
 
     def __init__(self, project_path):
         super().__init__(project_path)
@@ -386,17 +398,42 @@ class TaskGear(CANNGear):
         return mem_cpy_info_dto, task_track_dto
 
     @classmethod
-    def get_context_ids(cls, call_stack: dict) -> str:
-        node_event: Event = call_stack.get(Constant.NODE_LEVEL)
+    def get_context_ids_in_node(cls: any, node_event: Event) -> list:
         if node_event.is_invalid():
-            return str(NumberConstant.DEFAULT_GE_CONTEXT_ID)
+            return []
         ids = []
         for record in node_event.additional_record:
             if isinstance(record.dto, CtxIdDto):
                 ids.append(record.dto.ctx_id)
-        return ",".join(ids) if ids else str(NumberConstant.DEFAULT_GE_CONTEXT_ID)
+        return ids
 
-    def get_hccl_info_dto(self, event: Event) -> HCCLInfoDto:
+    @classmethod
+    def get_context_ids_in_hccl(cls: any, hccl_event: Event) -> list:
+        if hccl_event.is_invalid():
+            return []
+        ids = []
+        # context id in hccl level will only report one add info which in the add queue end
+        for record in reversed(hccl_event.additional_record):
+            if isinstance(record.dto, CtxIdDto):
+                ids.extend(record.dto.ctx_id.split(','))
+                break
+        if ids:
+            if len(ids) != cls.HCCL_CONTEXT_ID_NUM:
+                logging.error("Illegal context id size, except: %d, found: %d",
+                              cls.HCCL_CONTEXT_ID_NUM, len(ids))
+                return []
+            return [str(_id) for _id in list(range(int(ids[0]), int(ids[1]) + 1))]
+        return ids
+
+    @classmethod
+    def get_context_ids(cls, call_stack: dict) -> str:
+        node_context_ids = cls.get_context_ids_in_node(call_stack.get(Constant.NODE_LEVEL))
+        hccl_context_ids = cls.get_context_ids_in_hccl(call_stack.get(Constant.HCCL_LEVEL))
+        context_ids = [*node_context_ids, *hccl_context_ids]
+
+        return ",".join(context_ids) if context_ids else str(NumberConstant.DEFAULT_GE_CONTEXT_ID)
+
+    def get_hccl_info_dtos(self, event: Event) -> HCCLInfoDto:
         for record in event.additional_record:
             if isinstance(record.dto, HCCLInfoDto):
                 return record.dto
@@ -415,7 +452,28 @@ class TaskGear(CANNGear):
             elif isinstance(record.dto, CtxIdDto):
                 node_desc = node_descs.setdefault(self.NodeDesc.get_hash(record.dto), self.NodeDesc())
                 node_desc.ctx_info = record.dto
+            else:
+                logging.error("Unsupported additional type: %s in node level.", type(record.dto))
         return node_descs
+
+    def get_hccl_descs(self, event: Event) -> OrderedDict:
+        hccl_descs = OrderedDict()
+        for record in event.additional_record:
+            if isinstance(record.dto, HCCLInfoDto):
+                hccl_desc = hccl_descs.setdefault(self.HcclDesc.get_hash(record.dto), self.HcclDesc())
+                hccl_desc.hccl_info = record.dto
+            elif isinstance(record.dto, CtxIdDto):
+                context_ids = self.get_context_ids_in_hccl(event)
+                for context_id in context_ids:
+                    hccl_desc = hccl_descs.setdefault(int(context_id), self.HcclDesc())
+                    ctx_dto = CtxIdDto()
+                    ctx_dto.ctx_id = context_id
+                    hccl_desc.ctx_info = ctx_dto
+            else:
+                logging.error("Unsupported additional type: %s in hccl level.", type(record.dto))
+        if not hccl_descs:
+            hccl_descs[NumberConstant.DEFAULT_GE_CONTEXT_ID] = self.HcclDesc()
+        return hccl_descs
 
     def add_host_task(self, call_stack: dict, task_track_dto: TaskTrackDto):
         model_event: Event = call_stack.get(Constant.MODEL_LEVEL)
@@ -435,24 +493,37 @@ class TaskGear(CANNGear):
         return not hccl_event.is_invalid()
 
     def add_hccl_task(self, model_event: Event, hccl_event: Event, task_track_dto: TaskTrackDto):
-        hccl_dto: ApiDataDto = ApiDataDatabase().get(hccl_event)
-        hccl_info_dto = self.get_hccl_info_dto(hccl_event)
+        hccl_descs = self.get_hccl_descs(hccl_event)
         model_dto: ApiDataDto = ApiDataDatabase().get(model_event)
 
         model_id = model_dto.item_id if model_dto.item_id is not None else self.INVALID_MODEL_ID
         request_id = model_dto.request_id if model_dto.request_id is not None else -1
-        self.hccl_task_info.append(
-            [model_id, request_id, hccl_dto.item_id, hccl_info_dto.plane_id, task_track_dto.timestamp,
-             hccl_info_dto.duration_estimated, task_track_dto.stream_id, task_track_dto.task_id,
-             task_track_dto.batch_id, hccl_info_dto.to_args_json(task_track_dto.stream_id, task_track_dto.task_id)])
 
-    def is_kernel_task(self, task_track_dto: TaskTrackDto):
+        hccl_tasks = [0] * len(hccl_descs)
+        for i, hccl_desc in enumerate(hccl_descs.values()):
+            hccl_info_dto = hccl_desc.hccl_info
+            context_id = int(hccl_desc.ctx_info.ctx_id)
+            hccl_tasks[i] = [
+                model_id, request_id, hccl_info_dto.op_name, hccl_info_dto.group_name,
+                hccl_info_dto.plane_id, task_track_dto.timestamp, hccl_info_dto.duration_estimated,
+                task_track_dto.stream_id, task_track_dto.task_id, context_id, task_track_dto.batch_id,
+                hccl_info_dto.to_args_json(task_track_dto.stream_id, task_track_dto.task_id)
+            ]
+        self.hccl_task_info.extend(hccl_tasks)
+
+    def is_kernel_task(self, task_track_dto: TaskTrackDto, is_not_hccl_task: bool) -> bool:
         if task_track_dto.struct_type is None:
             return False
-        if task_track_dto.task_type.startswith(self.KERNEL_TASK_PREFIX) or \
-                task_track_dto.task_type == self.KERNEL_STARS_COMMON_TASK_TYPE or \
-                task_track_dto.task_type == self.KERNEL_FFTS_PLUS_TASK_TYPE:
+        # In these scene, tasks are thought to be kernel tasks
+        # traditional core task
+        if task_track_dto.task_type.startswith(self.KERNEL_TASK_PREFIX):
             return True
+        # traditional dsa task
+        if task_track_dto.task_type == self.KERNEL_STARS_COMMON_TASK_TYPE:
+            return True
+        # ffts+ task
+        if task_track_dto.task_type == self.KERNEL_FFTS_PLUS_TASK_TYPE:
+            return is_not_hccl_task
         return False
 
     def add_kernel_task(self, call_stack: dict, add_dto: TaskTrackDto):
@@ -532,10 +603,10 @@ class TaskGear(CANNGear):
                 api.batch_id = task_track_dto.batch_id
             self.api_call_info.append(api.to_list())
 
-        hccl_event = call_stack.get(Constant.HCCL_LEVEL)
+        hccl_event: Event = call_stack.get(Constant.HCCL_LEVEL)
         if self.is_hccl_task(hccl_event):
             self.add_hccl_task(call_stack.get(Constant.MODEL_LEVEL), hccl_event, task_track_dto)
-        if self.is_kernel_task(task_track_dto):
+        if self.is_kernel_task(task_track_dto, hccl_event.is_invalid()):
             self.add_kernel_task(call_stack, task_track_dto)
 
     def save_api_call_info(self):

@@ -63,6 +63,10 @@ class OpSummaryOpSceneCalculator(MsMultiProcess):
         """
         if os.path.exists(PathManager.get_db_path(self.project_path, DBNameConstant.DB_AICORE_OP_SUMMARY)):
             return
+        if not os.path.exists(PathManager.get_db_path(self.project_path, DBNameConstant.DB_ASCEND_TASK)):
+            logging.warning("No %s found, no need to create %s",
+                            DBNameConstant.DB_ASCEND_TASK, DBNameConstant.DB_AICORE_OP_SUMMARY)
+            return
         self.create_summary_table()
 
     def create_ge_summary_table(self: any) -> bool:
