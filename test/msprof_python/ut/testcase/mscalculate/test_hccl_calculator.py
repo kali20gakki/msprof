@@ -9,6 +9,7 @@ from constant.constant import clear_dt_project
 from mscalculate.hccl_calculator import HcclCalculator
 from profiling_bean.db_dto.hccl_dto import HcclDto
 from constant.constant import CONFIG
+from common_func.constant import Constant
 
 
 NAMESPACE = 'mscalculate.hccl_calculator'
@@ -31,35 +32,36 @@ class TestHcclCalculator(unittest.TestCase):
     def tearDown(self) -> None:
         clear_dt_project(self.DIR_PATH)
 
-    def test_calculate_should_return_data_when_data_is_not_empty(self):
-        with mock.patch(NAMESPACE + ".HcclCalculator._get_hccl_data",
-                        return_value=[[self.construct_hccl_dto("hccl_op")], 
-                                      {"all_reduce": {"count": 1, "total_time": 1, "min": 1, "max": 1, "avg": 1}}]):
+    def test_calculate_should_return_empty_when_table_is_empty(self):
+        with mock.patch(NAMESPACE + ".HcclViewModel.check_table", return_value=False):
             check = HcclCalculator([], CONFIG)
             check.calculate()
             hccl_data = check._hccl_data
             hccl_op_report_data = check._hccl_op_report_data
-            self.assertEqual(hccl_data[0][2], "hccl_op")
-            self.assertEqual(hccl_op_report_data[0][0], "all_reduce")
+            self.assertEqual(hccl_data, [])
+            self.assertEqual(hccl_op_report_data, [])
 
-    def test_get_hccl_data(self):
-        with mock.patch('os.path.exists', return_value=False):
+    def test_calculate_should_return_both_hccl_data_and_hccl_op_report_data_when_op_type_valid(self):
+        with mock.patch(NAMESPACE + ".HcclViewModel.check_table", return_value=True), \
+             mock.patch(NAMESPACE + '.HcclViewModel.get_hccl_communication_data', return_value=[
+                 self.construct_hccl_dto("hccl_op", timestamp=1, duration=1, op_type="all_reduce")]):
             check = HcclCalculator([], CONFIG)
-            self.assertEqual(([], []), check._get_hccl_data())
+            check.calculate()
+            hccl_data = check._hccl_data
+            hccl_op_report_data = check._hccl_op_report_data
+            self.assertEqual(14, len(hccl_data[0]))
+            self.assertEqual([("all_reduce", 1.0, 1.0, 1.0, 1.0, 1.0, 100.0)], hccl_op_report_data)
 
-        with mock.patch('os.path.exists', return_value=True):
+    def test_calculate_should_return_only_hccl_data_not_valid_op_type(self):
+        with mock.patch(NAMESPACE + ".HcclViewModel.check_table", return_value=True), \
+             mock.patch(NAMESPACE + '.HcclViewModel.get_hccl_communication_data', return_value=[
+                 self.construct_hccl_dto("hccl_op", timestamp=1, duration=1, op_type=Constant.NA)]):
             check = HcclCalculator([], CONFIG)
-            self.assertEqual(([], []), check._get_hccl_data())
-
-        with mock.patch('os.path.exists', return_value=True), \
-                mock.patch(NAMESPACE + '.HcclViewModel.check_table', return_value=True), \
-                mock.patch(NAMESPACE + '.HcclViewModel.get_hccl_communication_data',
-                           return_value=[self.construct_hccl_dto("hccl_op", timestamp=1,
-                                                                 duration=1, op_type="all_reduce")]):
-            check = HcclCalculator([], CONFIG)
-            self.assertEqual("hccl_op", check._get_hccl_data()[0][0].op_name)
-            self.assertEqual({"all_reduce": {"count": 1, "total_time": 1, "min": 1, "max": 1, "avg": 1}},
-                             check._get_hccl_data()[1])
+            check.calculate()
+            hccl_data = check._hccl_data
+            hccl_op_report_data = check._hccl_op_report_data
+            self.assertEqual(14, len(hccl_data[0]))
+            self.assertEqual([], hccl_op_report_data)
 
     def test_generate_hccl_op_info_should_return_three_data_when_the_input_len_is_three(self):
         hccl_data = [
@@ -118,5 +120,3 @@ class TestHcclCalculator(unittest.TestCase):
         check._create_report(task_data)
         hccl_op_report_data = check._hccl_op_report_data
         self.assertEqual(hccl_op_report_data, [])
-
-
