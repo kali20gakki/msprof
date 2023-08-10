@@ -17,6 +17,7 @@ from msmodel.hccl.hccl_model import HcclViewModel
 from profiling_bean.db_dto.hccl_dto import HcclDto
 from msconfig.config_manager import ConfigManager
 from common_func.ms_constant.number_constant import NumberConstant
+from common_func.constant import Constant
 
 
 class HcclCalculator(ICalculator, MsMultiProcess):
@@ -33,6 +34,7 @@ class HcclCalculator(ICalculator, MsMultiProcess):
                                     [DBNameConstant.TABLE_HCCL_OP, DBNameConstant.TABLE_HCCL_TASK])
         self._hccl_data = []
         self._hccl_op_report_data = []
+        self._op_type_valid = False
         self.conn = None
         self.curs = None
 
@@ -89,10 +91,23 @@ class HcclCalculator(ICalculator, MsMultiProcess):
         return op_type_group
 
     def calculate(self: any) -> None:
-        hccl_data, hccl_op_report_data = self._get_hccl_data()
-        if hccl_data:
-            self._generate_hccl_op_info(hccl_data)
-            self._create_report(hccl_op_report_data)
+        """
+        calculate hccl communication data and hccl op report data
+        """
+        with self._model as hccl_model:
+            if not hccl_model.check_table():
+                logging.warning("The HCCL table does not exist, so there is no need to continue associating operators.")
+                return
+            communication_data = hccl_model.get_hccl_communication_data()
+            if not communication_data:
+                return
+            self.update_bandwidth(communication_data)
+            self._generate_hccl_op_info(communication_data)
+            if self._op_type_valid:
+                hccl_op_report_data = self._get_hccl_op_report_data(communication_data)
+                self._create_report(hccl_op_report_data)
+            else:
+                logging.warning("No valid hccl op type exists, therefore not calculate hccl op report data")
 
     def save(self: any) -> None:
         if not self._hccl_data:
@@ -137,6 +152,8 @@ class HcclCalculator(ICalculator, MsMultiProcess):
                                     data.hccl_name, data.group_name, data.first_timestamp, data.plane_id,
                                     data.timestamp, data.duration, data.is_dynamic,
                                     data.task_type, data.op_type, str(data.args)])
+            if data.op_type != Constant.NA:
+                self._op_type_valid = True
 
     def _get_hccl_data(self):
         with self._model as hccl_model:
