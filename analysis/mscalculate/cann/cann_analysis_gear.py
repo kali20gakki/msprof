@@ -473,7 +473,7 @@ class TaskGear(CANNGear):
             # this happen when prof data is collected in level 0
             self.task_info.append([model_id, node_dto.item_id, add_dto.stream_id, add_dto.task_id,
                                    0, 0, 'N/A', 'N/A', 'N/A', request_id, add_dto.thread_id,
-                                   'N/A', add_dto.batch_id, None, None, None, None, None, None, None,
+                                   add_dto.timestamp, add_dto.batch_id, None, None, None, None, None, None, None,
                                    add_dto.device_id, self.INVALID_CONTEXT_ID])
             return
 
@@ -483,12 +483,12 @@ class TaskGear(CANNGear):
             ctx_id_dto = node_desc.ctx_info
 
             cxt_ids = str(ctx_id_dto.ctx_id).split(',')
-            if not node_basic_info_dto:
+            if node_basic_info_dto.task_type is None:
                 for cxt_id in cxt_ids:
                     self.task_info.append([model_id, node_dto.item_id, add_dto.stream_id, add_dto.task_id,
                                            0, 0, 'N/A', 'N/A', 'N/A', request_id, add_dto.thread_id,
-                                           'N/A', add_dto.batch_id, None, None, None, None, None, None, None,
-                                           add_dto.device_id, int(cxt_id)])
+                                           add_dto.timestamp, add_dto.batch_id, None, None, None, None, None, None,
+                                           None, add_dto.device_id, int(cxt_id)])
                 continue
             if node_basic_info_dto.task_type is None or node_basic_info_dto.task_type == self.FFTS_PLUS_TASK_TYPE:
                 continue
@@ -498,11 +498,11 @@ class TaskGear(CANNGear):
                 task_type = self.AICORE_TASK_TYPE
 
             for cxt_id in cxt_ids:
-                self.task_info.append([model_id, node_basic_info_dto.op_name, add_dto.stream_id, add_dto.task_id,
+                self.task_info.append([model_id, node_dto.item_id, add_dto.stream_id, add_dto.task_id,
                                        node_basic_info_dto.block_dim, node_basic_info_dto.mix_block_dim,
                                        node_basic_info_dto.is_dynamic, task_type,
                                        node_basic_info_dto.op_type, request_id, add_dto.thread_id,
-                                       node_basic_info_dto.timestamp, add_dto.batch_id,
+                                       add_dto.timestamp, add_dto.batch_id,
                                        tensor_info_dto.tensor_num, tensor_info_dto.input_formats,
                                        tensor_info_dto.input_data_types, tensor_info_dto.input_shapes,
                                        tensor_info_dto.output_formats, tensor_info_dto.output_data_types,
