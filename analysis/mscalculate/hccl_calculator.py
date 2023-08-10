@@ -155,18 +155,6 @@ class HcclCalculator(ICalculator, MsMultiProcess):
             if data.op_type != Constant.NA:
                 self._op_type_valid = True
 
-    def _get_hccl_data(self):
-        with self._model as hccl_model:
-            if not hccl_model.check_table():
-                logging.warning("The HCCL table does not exist, so there is no need to continue associating operators.")
-                return [], []
-            communication_data = hccl_model.get_hccl_communication_data()
-            if not communication_data:
-                return [], []
-            self.update_bandwidth(communication_data)
-            hccl_op_report_data = self._get_hccl_op_report_data(communication_data)
-            return communication_data, hccl_op_report_data
-
     def _create_report(self, hccl_op_report_data) -> None:
         """
         calculate report data
