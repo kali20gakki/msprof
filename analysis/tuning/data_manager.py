@@ -65,6 +65,9 @@ class OpParallelTuningDataHandle(BaseTuningDataHandle):
             'iter_id': Constant.DEFAULT_INVALID_VALUE,
             'model_id': Constant.DEFAULT_INVALID_VALUE
         }
+        device_id = param.get(StrConstant.PARAM_DEVICE_ID, '')
+        if not AiStackDataCheckManager.contain_op_summary_data(project_path, device_id):
+            return []
         with OpSummaryModel(sample_config) as _model:
             ai_core_data = _model.get_operator_data_by_task_type((Constant.TASK_TYPE_AI_CORE,))
             ai_cpu_data = _model.get_operator_data_by_task_type((Constant.TASK_TYPE_AI_CPU,))
@@ -215,9 +218,9 @@ class OpSummaryTuningDataHandle(BaseTuningDataHandle):
         if cls.is_network(project_path, device_id):
             headers = ConfigManager.get(ConfigManager.MSPROF_EXPORT_DATA).get('op_summary', 'headers').split(",")
             configs = {StrConstant.CONFIG_HEADERS: headers}
-            db_path = PathManager.get_db_path(project_path, DBNameConstant.DB_AICORE_OP_SUMMARY)
             if not AiStackDataCheckManager.contain_op_summary_data(project_path, device_id):
                 return [], []
+            db_path = PathManager.get_db_path(project_path, DBNameConstant.DB_AICORE_OP_SUMMARY)
             headers, data, _ = AiCoreOpReport.get_op_summary_data(project_path, db_path, configs)
         else:
             param = {}
