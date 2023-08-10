@@ -27,6 +27,7 @@ class HcclInfoBean(StructDecoder):
         self._rank_size = filed[11]
         self._work_flow_mode = filed[12]
         self._plane_id = filed[13]
+        self._context_id = filed[14]
         self._notify_id = filed[15]
         self._stage = filed[16]
         self._role = filed[17]
@@ -138,6 +139,10 @@ class HcclInfoBean(StructDecoder):
         plane id
         """
         return self._plane_id
+
+    @property
+    def context_id(self: any) -> int:
+        return self._context_id
 
     @property
     def notify_id(self: any) -> str:

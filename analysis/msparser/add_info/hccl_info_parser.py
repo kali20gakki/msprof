@@ -135,7 +135,7 @@ class HcclInfoParser(DataParser, MsMultiProcess):
                 [data.level, type_info_data.get(data.struct_type, data.struct_type), data.thread_id, data.data_len,
                  data.timestamp, hash_data.get(data.item_id, data.item_id), data.ccl_tag,
                  hash_data.get(data.group_name, data.group_name), data.local_rank,
-                 data.remote_rank, data.rank_size, data.work_flow_mode, data.plane_id, data.notify_id,
+                 data.remote_rank, data.rank_size, data.work_flow_mode, data.plane_id, data.context_id, data.notify_id,
                  data.stage, role, str(data.duration_estimated), data.src_addr, data.dst_addr,
                  data.size, op_type, data_type, link_type, transport_type,
                  rdma_type])

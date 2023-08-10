@@ -98,7 +98,7 @@ class ExportCommand:
             {'export_type': ExportDataType.OS_RUNTIME_API,
              'handler': HostDataCheckManager.contain_runtime_api_data},
             {'export_type': ExportDataType.FFTS_SUB_TASK_TIME,
-             'handler': AiStackDataCheckManager.contain_stars_soc_data},
+             'handler': AiStackDataCheckManager.contain_sub_task_data},
             {'export_type': ExportDataType.HCCL,
              'handler': AiStackDataCheckManager.contain_hccl_hcom_data},
             {'export_type': ExportDataType.MSPROF_TX,
