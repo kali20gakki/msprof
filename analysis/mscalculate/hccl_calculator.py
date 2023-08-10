@@ -17,6 +17,7 @@ from msmodel.hccl.hccl_model import HcclViewModel
 from profiling_bean.db_dto.hccl_dto import HcclDto
 from msconfig.config_manager import ConfigManager
 from common_func.ms_constant.number_constant import NumberConstant
+from common_func.constant import Constant
 
 
 class HcclCalculator(ICalculator, MsMultiProcess):
@@ -89,17 +90,32 @@ class HcclCalculator(ICalculator, MsMultiProcess):
         return op_type_group
 
     def calculate(self: any) -> None:
-        hccl_data, hccl_op_report_data = self._get_hccl_data()
-        if hccl_data:
-            self._generate_hccl_op_info(hccl_data)
-            self._create_report(hccl_op_report_data)
+        """
+        calculate hccl communication data and hccl op report data
+        """
+        with self._model as hccl_model:
+            if not hccl_model.check_table():
+                logging.warning("The HCCL table does not exist, so there is no need to continue associating operators.")
+                return
+            communication_data = hccl_model.get_hccl_communication_data()
+            if not communication_data:
+                return
+            self.update_bandwidth(communication_data)
+            is_hccl_op_type_valid = self._generate_hccl_op_info(communication_data)
+            if is_hccl_op_type_valid:
+                hccl_op_report_data = self._get_hccl_op_report_data(communication_data)
+                self._create_report(hccl_op_report_data)
+            else:
+                logging.warning("No valid hccl op type exists, therefore not calculate hccl op report data")
 
     def save(self: any) -> None:
-        if not self._hccl_data:
-            return
         with self._model as hccl_model:
+            if not self._hccl_data:
+                return
             hccl_model.rebuild_hccl_table()
             hccl_model.insert_data_to_db(DBNameConstant.TABLE_HCCL_ALL_REDUCE, self._hccl_data)
+            if not self._hccl_op_report_data:
+                return
             hccl_model.rebuild_hccl_op_report_table()
             hccl_model.insert_data_to_db(DBNameConstant.TABLE_HCCL_OP_REPORT, self._hccl_op_report_data)
 
@@ -131,24 +147,16 @@ class HcclCalculator(ICalculator, MsMultiProcess):
                          DBNameConstant.TABLE_HCCL_OP_REPORT)
             return True
 
-    def _generate_hccl_op_info(self, hccl_data: List[HcclDto]):
+    def _generate_hccl_op_info(self, hccl_data: List[HcclDto]) -> bool:
+        is_hccl_op_type_valid = False
         for data in hccl_data:
             self._hccl_data.append([data.model_id, data.index_id, data.op_name, data.iteration,
                                     data.hccl_name, data.group_name, data.first_timestamp, data.plane_id,
                                     data.timestamp, data.duration, data.is_dynamic,
                                     data.task_type, data.op_type, str(data.args)])
-
-    def _get_hccl_data(self):
-        with self._model as hccl_model:
-            if not hccl_model.check_table():
-                logging.warning("The HCCL table does not exist, so there is no need to continue associating operators.")
-                return [], []
-            communication_data = hccl_model.get_hccl_communication_data()
-            if not communication_data:
-                return [], []
-            self.update_bandwidth(communication_data)
-            hccl_op_report_data = self._get_hccl_op_report_data(communication_data)
-            return communication_data, hccl_op_report_data
+            if data.op_type != Constant.NA:
+                is_hccl_op_type_valid = True
+        return is_hccl_op_type_valid
 
     def _create_report(self, hccl_op_report_data) -> None:
         """
