@@ -10,7 +10,7 @@ from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.ms_constant.str_constant import StrConstant
-from analyzer.scene_base.profiling_scene import ProfilingScene
+from common_func.profiling_scene import ProfilingScene
 from common_func.platform.chip_manager import ChipManager
 from mscalculate.ascend_task.ascend_task import TopDownTask
 from mscalculate.ascend_task.ascend_task_generator import AscendTaskGenerator

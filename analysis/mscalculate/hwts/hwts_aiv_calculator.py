@@ -3,8 +3,8 @@
 # Copyright (c) Huawei Technologies Co., Ltd. 2021-2023. All rights reserved.
 import os
 
-from analyzer.scene_base.profiling_scene import ProfilingScene
-from analyzer.op_common_function import OpCommonFunc
+from common_func.profiling_scene import ProfilingScene
+from common_func.op_common_function import OpCommonFunc
 from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.path_manager import PathManager
