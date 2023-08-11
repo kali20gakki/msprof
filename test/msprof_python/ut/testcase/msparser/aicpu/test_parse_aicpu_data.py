@@ -8,7 +8,7 @@ from msparser.aicpu.parse_aicpu_data import ParseAiCpuData
 from profiling_bean.prof_enum.data_tag import DataTag
 from sqlite.db_manager import DBManager
 from profiling_bean.db_dto.step_trace_dto import StepTraceDto
-from analyzer.scene_base.profiling_scene import ProfilingScene
+from common_func.profiling_scene import ProfilingScene
 
 NAMESPACE = 'msparser.aicpu.parse_aicpu_data'
 

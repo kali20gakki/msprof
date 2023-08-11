@@ -8,7 +8,7 @@ import os
 import sqlite3
 import struct
 
-from analyzer.scene_base.profiling_scene import ProfilingScene
+from common_func.profiling_scene import ProfilingScene
 from common_func.common import generate_config
 from common_func.config_mgr import ConfigMgr
 from common_func.constant import Constant
