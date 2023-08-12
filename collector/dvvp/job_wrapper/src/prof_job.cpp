@@ -1024,10 +1024,9 @@ int ProfCtrlcpuJob::Uninit()
     std::vector<std::string> envV;
     envV.push_back(ENV_PATH);
     std::vector<std::string> argsV;
-    argsV.push_back("pkill");
+    argsV.push_back("kill");
     argsV.push_back("-2");
-    argsV.push_back("perf");
-
+    argsV.push_back("ctrlcpuProcess_");
     MmProcess appProcess = MSVP_MMPROCESS;
     int exitCode = analysis::dvvp::common::utils::VALID_EXIT_CODE;
     static const std::string CMD = "sudo";
