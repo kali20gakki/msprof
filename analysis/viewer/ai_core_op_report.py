@@ -6,7 +6,7 @@ import logging
 import os
 from collections import deque
 
-from analyzer.scene_base.profiling_scene import ProfilingScene
+from common_func.profiling_scene import ProfilingScene
 from common_func.common import CommonConstant
 from common_func.constant import Constant
 from common_func.data_manager import DataManager
