@@ -48,6 +48,20 @@ class HcclCalculator(ICalculator, MsMultiProcess):
             else:
                 bandwidth = size / time  # 10^9 / 10^9 = 1 scale(GB/s)
             data.args['bandwidth(GB/s)'] = bandwidth
+    
+    @staticmethod
+    def update_op_name_by_group_name(communication_data: List[HcclDto]):
+        group_dict = defaultdict(lambda: {"first_timestamp": 0, "count": 0})
+        for data in communication_data:
+            if data.group_name in group_dict:
+                if data.first_timestamp > group_dict[data.group_name]["first_timestamp"]:
+                    group_dict[data.group_name]["first_timestamp"] = data.first_timestamp
+                    group_dict[data.group_name]["count"] += 1
+            else:
+                group_dict[data.group_name]["first_timestamp"] = data.first_timestamp
+                group_dict[data.group_name]["count"] = 0
+            index = group_dict[data.group_name]["count"]
+            data.op_name = data.op_name + "_" + data.group_name[-3:] + "_" + str(index)
 
     @staticmethod
     def _cal_total(type_time: dict) -> int:
@@ -101,6 +115,7 @@ class HcclCalculator(ICalculator, MsMultiProcess):
             if not communication_data:
                 return
             self.update_bandwidth(communication_data)
+            self.update_op_name_by_group_name(communication_data)
             is_hccl_op_type_valid = self._generate_hccl_op_info(communication_data)
             if is_hccl_op_type_valid:
                 hccl_op_report_data = self._get_hccl_op_report_data(communication_data)
