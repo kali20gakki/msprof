@@ -6,7 +6,7 @@ import json
 import logging
 import os
 
-from analyzer.scene_base.profiling_scene import ProfilingScene
+from common_func.profiling_scene import ProfilingScene
 from common_func.ai_stack_data_check_manager import AiStackDataCheckManager
 from common_func.common import error
 from common_func.common import print_info

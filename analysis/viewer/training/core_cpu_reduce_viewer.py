@@ -7,8 +7,8 @@ import logging
 import os
 from collections import OrderedDict
 
-from analyzer.op_common_function import OpCommonFunc
-from analyzer.scene_base.profiling_scene import ProfilingScene
+from common_func.op_common_function import OpCommonFunc
+from common_func.profiling_scene import ProfilingScene
 from common_func.common import CommonConstant
 from common_func.constant import Constant
 from common_func.db_manager import DBManager

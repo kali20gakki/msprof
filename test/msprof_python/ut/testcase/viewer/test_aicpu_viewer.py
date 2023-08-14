@@ -8,7 +8,7 @@ from constant.constant import ITER_RANGE
 from profiling_bean.db_dto.step_trace_dto import IterationRange
 from sqlite.db_manager import DBOpen
 from viewer.aicpu_viewer import ParseAiCpuData
-from analyzer.scene_base.profiling_scene import ProfilingScene
+from common_func.profiling_scene import ProfilingScene
 from common_func.constant import Constant
 from common_func.ms_constant.number_constant import NumberConstant
 

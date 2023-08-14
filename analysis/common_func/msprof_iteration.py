@@ -7,7 +7,7 @@ import sqlite3
 from collections import OrderedDict
 from itertools import chain
 
-from analyzer.scene_base.profiling_scene import ProfilingScene
+from common_func.profiling_scene import ProfilingScene
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
