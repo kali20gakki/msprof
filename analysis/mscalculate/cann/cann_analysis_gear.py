@@ -702,17 +702,9 @@ class HCCLGear(CANNGear):
                                           record.dto.task_type, record.dto.op_type, node_dto.start, node_dto.end,
                                           record.dto.is_dynamic])
 
-    def update_hccl_op_name(self):
-        op_name_index = 3  # 3 is op_name index
-        hccl_op_counter = 0
-        for hccl_op in self.hccl_op_info:
-            hccl_op[op_name_index] = hccl_op[op_name_index] + "_" + str(hccl_op_counter)
-            hccl_op_counter += 1
-
     def save_hccl_op_info(self):
         if not self.hccl_op_info:
             return
-        self.update_hccl_op_name()
         model = HCCLHostModel(self._project_path)
         model.init()
         model.drop_table(DBNameConstant.TABLE_HCCL_OP)
