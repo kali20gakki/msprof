@@ -10,6 +10,7 @@ from msmodel.interface.parser_model import ParserModel
 from msmodel.interface.view_model import ViewModel
 from profiling_bean.db_dto.hccl_dto import HcclDto
 from profiling_bean.db_dto.time_section_dto import CommunicationTimeSection
+from common_func.ms_constant.number_constant import NumberConstant
 
 
 class HCCLModel(ParserModel):
@@ -80,9 +81,11 @@ class HcclViewModel(ViewModel):
               "on  t1.stream_id = t2.stream_id " \
               "and t1.task_id = t2.task_id " \
               "and t1.batch_id = t2.batch_id " \
-              "and t1.context_id = t2.context_id {where_condition} " \
+              "and t1.context_id = t2.context_id " \
+              "and t2.running != {invalid_start} {where_condition} " \
               "order by t1.begin".format(DBNameConstant.TABLE_HCCL_OP, DBNameConstant.TABLE_HCCL_TASK,
-                                           task_time_sql=task_time_sql, where_condition=where_condition)
+                                         task_time_sql=task_time_sql, where_condition=where_condition,
+                                         invalid_start=NumberConstant.INVALID_TASK_TIME)
 
         return DBManager.fetch_all_data(self.cur, sql, dto_class=HcclDto)
 
