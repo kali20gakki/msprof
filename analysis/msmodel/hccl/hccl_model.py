@@ -81,7 +81,7 @@ class HcclViewModel(ViewModel):
               "and t1.task_id = t2.task_id " \
               "and t1.batch_id = t2.batch_id " \
               "and t1.context_id = t2.context_id {where_condition} " \
-              "order by t2.running".format(DBNameConstant.TABLE_HCCL_OP, DBNameConstant.TABLE_HCCL_TASK,
+              "order by t1.begin".format(DBNameConstant.TABLE_HCCL_OP, DBNameConstant.TABLE_HCCL_TASK,
                                            task_time_sql=task_time_sql, where_condition=where_condition)
 
         return DBManager.fetch_all_data(self.cur, sql, dto_class=HcclDto)
