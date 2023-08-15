@@ -16,7 +16,7 @@ class DataParsersConfig(MetaConfig):
             ('chip_model', '0,1,2,3,4,5,7')
         ],
         'ParsingRuntimeData': [
-            ('path', 'analyzer.create_runtime_db'),
+            ('path', 'common_func.create_runtime_db'),
             ('chip_model', '0,1,2,3,4,5,7')
         ],
         'AclParser': [
