@@ -187,16 +187,22 @@ class HcclCalculator(ICalculator, MsMultiProcess):
             statistic_data = task_data.get(op_type, {})
             if not statistic_data:
                 continue
-            task_duration_ratio = round(float(statistic_data["total_time"] / hccl_op_total_time * 100),
-                                        NumberConstant.DECIMAL_ACCURACY) if hccl_op_total_time != 0 else 0
+            if hccl_op_total_time != 0:
+                task_duration_ratio = round(float(statistic_data["total_time"] / hccl_op_total_time * 100),
+                                            NumberConstant.DECIMAL_ACCURACY)
+            else:
+                task_duration_ratio = 0
             total_data.append(
-                (op_type,
-                 statistic_data["count"],
-                 round(float(statistic_data["total_time"]), NumberConstant.DECIMAL_ACCURACY),
-                 round(float(statistic_data["min"]), NumberConstant.DECIMAL_ACCURACY),
-                 round(float(statistic_data["avg"]), NumberConstant.DECIMAL_ACCURACY),
-                 round(float(statistic_data["max"]), NumberConstant.DECIMAL_ACCURACY),
-                 task_duration_ratio))
+                (
+                    op_type,
+                    statistic_data["count"],
+                    round(float(statistic_data["total_time"]), NumberConstant.DECIMAL_ACCURACY),
+                    round(float(statistic_data["min"]), NumberConstant.DECIMAL_ACCURACY),
+                    round(float(statistic_data["avg"]), NumberConstant.DECIMAL_ACCURACY),
+                    round(float(statistic_data["max"]), NumberConstant.DECIMAL_ACCURACY),
+                    task_duration_ratio
+                )
+            )
         if total_data:
             self._hccl_op_report_data = sorted(total_data, key=lambda x: x[5], reverse=True)
         else:
