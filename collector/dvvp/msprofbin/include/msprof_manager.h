@@ -29,6 +29,8 @@ public:
     SHARED_PTR_ALIA<Collector::Dvvp::Msprofbin::RunningMode> rMode_;
 private:
     int GenerateRunningMode();
+    int GenerateCollectRunningMode();
+    int GenerateAnalyzeRunningMode();
     // check params dependence and update metrics and events
     int ParamsCheck() const;
 

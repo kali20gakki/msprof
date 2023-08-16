@@ -14,7 +14,7 @@ class CommunicationModel(ViewModel):
     """
 
     def __init__(self, collection_path):
-        super().__init__(collection_path, DBNameConstant.DB_HCCL, [])
+        super().__init__(collection_path, DBNameConstant.DB_HCCL, [DBNameConstant.TABLE_HCCL_ALL_REDUCE])
 
     def get_all_events_from_db(self: any, conditions: dict, top_hccl_ops: tuple = None) -> list:
         """
