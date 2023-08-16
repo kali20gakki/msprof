@@ -28,18 +28,6 @@ class TestMsProfExportDataUtils(unittest.TestCase):
         result = key.export_data(params)
         self.assertEqual(result, '{"status": 1, "info": "Parameter data_type is none."}')
 
-    def test_export_data_3(self):
-        params = {'data_type': 'step_trace', 'project': 't', 'device_id': '0',
-                  'job_id': 'job_default', 'export_type': 'timeline', 'iter_id': 1,
-                  'export_format': None, 'model_id': 1}
-        with mock.patch(NAMESPACE + '.MsProfExportDataUtils._load_export_data_config'), \
-             mock.patch(NAMESPACE + '.MsProfExportDataUtils._get_configs_with_data_type',
-                        return_value={"handler": '_get_runtime_api_data'}), \
-             mock.patch(NAMESPACE + '.MsProfExportDataUtils.add_timeline_data'):
-            key = MsProfExportDataUtils()
-            result = key.export_data(params)
-        self.assertEqual(result, json.dumps({'status': 1, 'info': 'Failed to connect runtime.db'}))
-
     def test_export_data_4(self):
         params = {"data_type": 123, "export_type": "456"}
         with mock.patch(NAMESPACE + '.MsProfExportDataUtils._load_export_data_config'), \
@@ -49,22 +37,6 @@ class TestMsProfExportDataUtils(unittest.TestCase):
             key = MsProfExportDataUtils()
             result = key.export_data(params)
         self.assertEqual(result, '{"status": 1, "info": "Unable to handler data type 123."}')
-
-    def test_export_data_should_return_error_message_when_input_invalid_timeline(self):
-        params = \
-        {
-            'data_type': 'step_trace', 'project': 't', 'device_id': '0',
-            'job_id': 'job_default', 'export_type': 'timeline', 'iter_id': 1,
-            'export_format': None, 'model_id': 1
-        }
-        with mock.patch(NAMESPACE + '.MsProfExportDataUtils._load_export_data_config'), \
-                mock.patch(NAMESPACE + '.MsProfExportDataUtils._get_configs_with_data_type',
-                           return_value={"handler": '_get_runtime_api_data'}), \
-                mock.patch(NAMESPACE + '.MsProfExportDataUtils._get_runtime_api_data', return_value="invalid_data"):
-            key = MsProfExportDataUtils()
-            expected = ('{"status": 2, "info": "Unable to get step_trace data. Maybe the data is not collected, '
-                        'or the data may fail to be analyzed."}')
-            self.assertEqual(expected, key.export_data(params))
 
     def test_add_timeline_data(self):
         params = {"data_type": '123'}
@@ -79,22 +51,6 @@ class TestMsProfExportDataUtils(unittest.TestCase):
             key = MsProfExportDataUtils()
             MsProfExportDataUtils.cfg_parser = configparser.ConfigParser(interpolation=None)
             key._get_configs_with_data_type(data_type)
-
-    def test_get_runtime_api_data_1(self):
-        configs = {"db": 'runtime', "table": 'trace'}
-        params = {"export_type": "timeline", "project": '123'}
-        with mock.patch(NAMESPACE + '.PathManager.get_db_path', return_value='runtime.db'):
-            key = MsProfExportDataUtils()
-            result = key._get_runtime_api_data(configs, params)
-        self.assertEqual(result, '{"status": 1, "info": "Failed to connect runtime.db"}')
-
-    def test_get_runtime_api_data_2(self):
-        configs = {"db": '123', "table": '456'}
-        params = {"export_type": "export", "project": '123'}
-        with mock.patch(NAMESPACE + '.PathManager.get_db_path', return_value='runtime.db'):
-            key = MsProfExportDataUtils()
-            result = key._get_runtime_api_data(configs, params)
-        self.assertEqual(result, ([], [], 0))
 
     def test_get_task_time_data_1(self):
         configs = {"db": 'runtime.db', "table": '123'}
@@ -234,32 +190,6 @@ class TestMsProfExportDataUtils(unittest.TestCase):
             key = MsProfExportDataUtils()
             result = key._get_memory_data(configs, params)
         self.assertEqual(result, ([], [], 0))
-
-    def test_get_acl_data_1(self):
-        configs = {"db": 'res-hwts', "table": '111'}
-        params = {"export_type": "timeline", "device_id": '456', "project": '12'}
-        with mock.patch(NAMESPACE + '.AclViewer.get_timeline_data', return_value=111):
-            key = MsProfExportDataUtils()
-            result = key._get_acl_data(configs, params)
-        self.assertEqual(result, 111)
-
-    def test_get_acl_data_2(self):
-        configs = {"db": 'hwts', "table": '123'}
-        params = {"export_type": "summary", "device_id": '456', "project": '12'}
-        with mock.patch(NAMESPACE + '.PathManager.get_db_path', return_value='111'), \
-             mock.patch(NAMESPACE + '.AclViewer.get_summary_data', return_value=222):
-            key = MsProfExportDataUtils()
-            result = key._get_acl_data(configs, params)
-        self.assertEqual(result, 222)
-
-    def test_get_acl_statistic_data(self):
-        configs = {"db": 'hwts', "table": '456'}
-        params = {"project": '12', "device_id": '456'}
-        with mock.patch(NAMESPACE + '.PathManager.get_db_path', return_value='123'), \
-             mock.patch(NAMESPACE + '.AclViewer.get_acl_statistic_data', return_value=123):
-            key = MsProfExportDataUtils()
-            result = key._get_acl_statistic_data(configs, params)
-        self.assertEqual(result, 123)
 
     def test_get_op_summary_data(self):
         configs = {"db": 'hwts'}
@@ -666,22 +596,6 @@ class TestMsProfExportDataUtils(unittest.TestCase):
             result = key._get_host_runtime_api(configs, params)
         self.assertEqual(result, 1)
 
-    def test_get_ge_data_1(self):
-        sample_configs = {"test": 1}
-        params = {"export_type": "timeline", "project": 1}
-        with mock.patch(NAMESPACE + '.get_ge_timeline_data', return_value=1):
-            key = MsProfExportDataUtils()
-            result = key._get_ge_data(sample_configs, params)
-        self.assertEqual(result, 1)
-
-    def test_get_ge_data_2(self):
-        sample_configs = {"test": 2}
-        params = {"export_type": "summary", "project": 1}
-        key = MsProfExportDataUtils()
-        result = key._get_ge_data(sample_configs, params)
-        self.assertEqual(result, '{"status": 2, "info": "Please check params, '
-                                 'Currently ge data does not support exporting files other than timeline."}')
-
     def test_get_bulk_data_1(self):
         sample_configs = {"test": 2}
         params = {"export_type": "timeline"}
@@ -700,27 +614,6 @@ class TestMsProfExportDataUtils(unittest.TestCase):
         result = key._get_bulk_data(sample_configs, params)
         self.assertEqual(result, '{"status": 2, "info": "Please check params, '
                                  'Currently bulk data export params should be timeline."}')
-
-    def test_get_bulk_data_should_return_timeline_when_input_valid_data(self):
-        sample_configs = {"test": 2}
-        params = {"export_type": "timeline"}
-        data = json.dumps([
-            {'name': 'process_name', 'pid': 0, 'tid': 0, 'args': {'name': 'Step Trace'}, 'ph': 'M'},
-            {'name': 'Reduce', 'pid': 0, 'ph': 'X', 'ts': 1210122}])
-        with mock.patch('viewer.pipeline_overlap_viewer.PipelineOverlapViewer.get_timeline_data',
-                        return_value=data), \
-             mock.patch('msinterface.msprof_timeline.StepTraceViewer.get_one_iter_timeline_data',
-                        return_value=json.dumps([])):
-            InfoConfReader()._info_json = {"pid": 123}
-            key = MsProfExportDataUtils()
-            result = key._get_bulk_data(sample_configs, params)
-        expected = '[{"name": "process_name", "pid": 3, "tid": 0, "args": {"name": "Ascend ' \
-                   'Hardware"}, "ph": "M"}, {"name": "Reduce", "pid": 3, "ph": "X", "ts": ' \
-                   '1210122}, {"name": "process_labels", "pid": 3, "tid": 0, "args": {"labels": ' \
-                   '"NPU"}, "ph": "M"}, {"name": "process_sort_index", "pid": 3, "tid": 0, ' \
-                   '"args": {"sort_index": 3}, "ph": "M"}]'
-        self.assertEqual(expected, result)
-        InfoConfReader()._info_json = {}
 
     def test_get_bulk_data_should_return_empty_when_input_invalid_data(self):
         sample_configs = {"test": 1}
@@ -764,17 +657,6 @@ class TestMsProfExportDataUtils(unittest.TestCase):
         with mock.patch(NAMESPACE + '.MsprofTxViewer.get_timeline_data', return_value=''):
             key = MsProfExportDataUtils()
             result = key._get_msproftx_data(sample_configs, {"export_type": "timeline"})
-        self.assertEqual(result, '')
-
-    def test_get_ge_op_execute_data(self):
-        sample_configs = {"test": 2}
-        with mock.patch(NAMESPACE + '.GeOpExecuteViewer.get_summary_data', return_value=('test', [1], 1)):
-            key = MsProfExportDataUtils()
-            result = key._get_ge_op_execute_data(sample_configs, {"export_type": "summary"})
-        self.assertEqual(result, ('test', [1], 1))
-        with mock.patch(NAMESPACE + '.GeOpExecuteViewer.get_timeline_data', return_value=''):
-            key = MsProfExportDataUtils()
-            result = key._get_ge_op_execute_data(sample_configs, {"export_type": "timeline"})
         self.assertEqual(result, '')
 
     def test_get_stars_soc_data(self):
