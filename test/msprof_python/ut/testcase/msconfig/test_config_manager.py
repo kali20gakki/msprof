@@ -24,7 +24,7 @@ class TestConfigManager(unittest.TestCase):
         config = ConfigManager.get(ConfigManager.TABLES_OPERATOR)
         self.assertEqual(len(config.items('SummaryGeMap')), 19)
         config = ConfigManager.get(ConfigManager.MSPROF_EXPORT_DATA)
-        self.assertEqual(len(config.sections()), 61)
+        self.assertEqual(len(config.sections()), 56)
         config = ConfigManager.get(ConfigManager.DATA_CALCULATOR)
         self.assertEqual(len(config.sections()), 26)
         config = ConfigManager.get(ConfigManager.TUNING_RULE)
