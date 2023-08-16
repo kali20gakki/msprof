@@ -322,8 +322,8 @@ int RunningMode::StartAnalyzeTask()
     std::vector<std::string> argsV = {
         analysisPath_,
         "analyze",
-        "-dir " + jobResultDir_,
-        "-r " +  params_->analyzeRuleSwitch
+        "-dir=" + jobResultDir_,
+        "-r=" +  params_->analyzeRuleSwitch
         
     };
     int ret = analysis::dvvp::common::utils::Utils::ExecCmd(execCmdParams, argsV, envsV, exitCode, taskPid_);
