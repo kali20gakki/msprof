@@ -682,6 +682,26 @@ bool ParamValidation::IsValidInputCfgSwitch(const std::string &switchName, const
     return true;
 }
 
+bool ParamValidation::IsValidAnalyzeRuleSwitch(const std::string &switchName, const std::string &switchVal) const
+{
+    if (switchVal.empty()) {
+        return true;
+    }
+    std::vector<std::string> ruleVal =
+        analysis::dvvp::common::utils::Utils::Split(switchVal, false, "", ",");
+    
+    for (size_t i = 0; i < ruleVal.size(); ++i) {
+        if (ruleVal[i].compare("communication") != 0 && ruleVal[i].compare("max_step_time") != 0) {
+            MSPROF_LOGE("The switch %s should be set to communication or max_step_time.", switchName.c_str());
+            CMD_LOGE("Argument --%s=%s is invalid."
+                "Should be set to communication or max_step_time.", switchName.c_str(), switchVal.c_str());
+            return false;
+        }
+    }
+
+    return true;
+}
+
 bool ParamValidation::CheckTsSwitchProfiling(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params)
 {
     if (!IsValidSwitch(params->ts_timeline)) {

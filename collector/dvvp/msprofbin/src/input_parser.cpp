@@ -316,6 +316,11 @@ void ArgsManager::AddAnalysisArgs()
     argsList = {
         {"python-path", "Specify the python interpreter path that is used for analysis, please\n"
             "\t\t\t\t\t\t   ensure the python version is 3.7.5 or later.(full-platform)"},
+        {"analyze", "Switch for using msprof to analyze collecting data, the default value\n"
+            "\t\t\t\t\t\t   is off.(full-platform)", OFF},
+        {"rule", "Switch specified rule for using msprof to analyze collecting data, the default value\n"
+            "\t\t\t\t\t\t   is communication.(full-platform)\n"
+            "\t\t\t\t\t\t   The switch can be set in [communication]"},
         {"parse", "Switch for using msprof to parse collecting data, the default value\n"
             "\t\t\t\t\t\t   is off.(full-platform)", OFF},
         {"query", "Switch for using msprof to query collecting data, the default value\n"
