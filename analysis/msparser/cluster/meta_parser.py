@@ -1,10 +1,11 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-# Copyright (c) Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
+# Copyright (c) Huawei Technologies Co., Ltd. 2022-2023. All rights reserved.
 
 import logging
 from abc import abstractmethod
 from collections import defaultdict
+from common_func.common import warn
 from common_func.platform.chip_manager import ChipManager
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
@@ -78,7 +79,7 @@ class HcclAnalysisTool:
 
     @classmethod
     def get_rdma_time_info(cls: any, events: list, idx: int, rdma_transit_op_num: int) -> list:
-        transit_size = HcclAnalysisTool.get_value(events[idx].size, 'size') / NumberConstant.B_to_MB
+        transit_size = HcclAnalysisTool.get_value(events[idx].size, 'size') / NumberConstant.COMMUNICATION_B_to_MB
         transit_time = HcclAnalysisTool.get_value(events[idx + rdma_transit_op_num - 1].duration +
                                                   events[idx + rdma_transit_op_num - 1].timestamp -
                                                   events[idx].timestamp,
@@ -114,20 +115,20 @@ class HcclAnalysisTool:
         return StrConstant.HCCS
 
     @classmethod
-    def update_time_ratio(cls: any, op_time_dict: dict) -> None:
+    def update_time_ratio(cls: any, op_time_dict: dict, op_name: str) -> None:
         try:
             op_time_dict[OpAnalysisType.WAIT_TIME_RATIO] = \
                 round(op_time_dict.get(OpAnalysisType.WAIT_TIME) /
                       (op_time_dict.get(OpAnalysisType.WAIT_TIME) + op_time_dict.get(OpAnalysisType.TRANSIT_TIME)), 4)
         except ZeroDivisionError as err:
-            logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
+            warn('', '%s Transit Time and Wait Time is 0 %s' % (op_name, err))
         try:
             op_time_dict[OpAnalysisType.SYNCHRONIZATION_TIME_RATIO] = \
                 round(op_time_dict.get(OpAnalysisType.SYNCHRONIZATION_TIME)
                       / (op_time_dict.get(OpAnalysisType.SYNCHRONIZATION_TIME) +
                          op_time_dict.get(OpAnalysisType.TRANSIT_TIME)), 4)
         except ZeroDivisionError as err:
-            logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
+            warn('', '%s Transit Time and Synchronization Time Time is 0 %s' % (op_name, err))
 
     @classmethod
     def update_bandwidth_record(cls: any, bandwidth_dict: dict, trans_type: str, size: float, dur: float) -> None:
@@ -146,7 +147,8 @@ class HcclAnalysisTool:
             bandwidth_dict[StrConstant.PCIE][OpBandWidthType.TRANSIT_TIME_MS]
         if bandwidth_dict[StrConstant.SDMA][OpBandWidthType.TRANSIT_TIME_MS] != 0:
             bandwidth_dict[StrConstant.SDMA][OpBandWidthType.BANDWIDTH_GB_S] = round(
-                (bandwidth_dict[StrConstant.SDMA][OpBandWidthType.TRANSIT_SIZE_MB] / NumberConstant.MB_to_GB) /
+                (bandwidth_dict[StrConstant.SDMA][OpBandWidthType.TRANSIT_SIZE_MB] /
+                 NumberConstant.COMMUNICATION_MB_to_GB) /
                 (bandwidth_dict[StrConstant.SDMA][OpBandWidthType.TRANSIT_TIME_MS] / NumberConstant.CONVERSION_TIME), 4
             )
 
@@ -154,7 +156,8 @@ class HcclAnalysisTool:
     def analyze_bandwidth_info(cls: any, bandwidth_dict: dict, transport_type: str) -> None:
         if bandwidth_dict[transport_type][OpBandWidthType.TRANSIT_TIME_MS] != 0:
             bandwidth_dict[transport_type][OpBandWidthType.BANDWIDTH_GB_S] = round(
-                (bandwidth_dict[transport_type][OpBandWidthType.TRANSIT_SIZE_MB] / NumberConstant.MB_to_GB) /
+                (bandwidth_dict[transport_type][OpBandWidthType.TRANSIT_SIZE_MB] /
+                 NumberConstant.COMMUNICATION_MB_to_GB) /
                 (bandwidth_dict[transport_type][OpBandWidthType.TRANSIT_TIME_MS] / NumberConstant.CONVERSION_TIME), 4
             )
         bandwidth_dict[transport_type][OpBandWidthType.BANDWIDTH_UTILIZATION] = round(

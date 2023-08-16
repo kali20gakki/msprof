@@ -49,6 +49,7 @@ protected:
     int StartParseTask();
     int StartQueryTask();
     int StartExportTask();
+    int StartAnalyzeTask();
     int RunExportSummaryTask(const analysis::dvvp::common::utils::ExecCmdParams &execCmdParams,
         std::vector<std::string> &envsV, int &exitCode);
     int RunExportTimelineTask(const analysis::dvvp::common::utils::ExecCmdParams &execCmdParams,
@@ -126,6 +127,15 @@ private:
         SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params) const;
 
     std::string baseDir_;
+};
+
+class AnalyzeMode : public RunningMode {
+public:
+    AnalyzeMode(std::string preCheckParams, SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params);
+    ~AnalyzeMode() override;
+    int ModeParamsCheck() override;
+    int RunModeTasks() override;
+    void UpdateOutputDirInfo() override;
 };
 
 class ParseMode : public RunningMode {

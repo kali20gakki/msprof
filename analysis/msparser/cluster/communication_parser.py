@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-# Copyright (c) Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
+# Copyright (c) Huawei Technologies Co., Ltd. 2022-2023. All rights reserved.
 
 import logging
 from profiling_bean.db_dto.hccl_dto import HcclDto
@@ -29,13 +29,14 @@ class CommunicationParser(MetaParser):
 
     @staticmethod
     def combine_ops_time_info(part_dict: dict, total_dict: dict) -> None:
-        ratio_list = [OpAnalysisType.WAIT_TIME_RATIO, OpAnalysisType.SYNCHRONIZATION_TIME_RATIO]
+        no_accumulative_list = \
+            [OpAnalysisType.WAIT_TIME_RATIO, OpAnalysisType.SYNCHRONIZATION_TIME_RATIO, OpAnalysisType.START_TIME]
         # first level combine
         for key, value in part_dict.items():
-            if key not in ratio_list:
+            if key not in no_accumulative_list:
                 total_dict[key] += value
         # second level combine
-        HcclAnalysisTool.update_time_ratio(total_dict)
+        HcclAnalysisTool.update_time_ratio(total_dict, StrConstant.TOTAL)
         return
 
     @staticmethod
@@ -56,6 +57,7 @@ class CommunicationParser(MetaParser):
         op_time_dict = HcclAnalysisTool.init_dict(values)
         wait_flag = True
         idx = 0
+        op_name = main_events[0].op_name
         rdma_transit_op_num = 3 if HcclAnalysisTool.is_send_or_recv_op(main_events, idx) else 5
         while idx < len(main_events):
             event = main_events[idx]
@@ -78,7 +80,11 @@ class CommunicationParser(MetaParser):
             idx += 1
         op_time_dict[OpAnalysisType.ELAPSE_TIME] = \
             (main_events[-1].timestamp + main_events[-1].duration - main_events[0].timestamp) / NumberConstant.NS_TO_MS
-        HcclAnalysisTool.update_time_ratio(op_time_dict)
+        op_time_dict[OpAnalysisType.IDLE_TIME] = \
+            op_time_dict[OpAnalysisType.ELAPSE_TIME] - \
+            op_time_dict[OpAnalysisType.TRANSIT_TIME] - \
+            op_time_dict[OpAnalysisType.WAIT_TIME]
+        HcclAnalysisTool.update_time_ratio(op_time_dict, op_name)
         return op_time_dict
 
     @staticmethod
@@ -99,7 +105,7 @@ class CommunicationParser(MetaParser):
                     continue
                 HcclAnalysisTool.update_bandwidth_record(
                     op_bandwidth_dict, transport_type,
-                    HcclAnalysisTool.get_value(event.size, "size") / NumberConstant.B_to_MB,
+                    HcclAnalysisTool.get_value(event.size, "size") / NumberConstant.COMMUNICATION_B_to_MB,
                     HcclAnalysisTool.get_value(event.duration, "duration") / NumberConstant.NS_TO_MS)
             if event.transport_type == StrConstant.RDMA and \
                     HcclAnalysisTool.determine_rdma(events, idx, rdma_transit_op_num):
@@ -145,6 +151,8 @@ class CommunicationParser(MetaParser):
                 [event for event in events if event.plane_id == min(events, key=lambda x: x.plane_id).plane_id]
             if main_events:
                 self.op_info[hccl_name][rank_id][StrConstant.COMMUNICATION_TIME_INFO] = self.op_time_parser(main_events)
+                self.op_info[hccl_name][rank_id][StrConstant.COMMUNICATION_TIME_INFO][OpAnalysisType.START_TIME] = \
+                    min(events, key=lambda x: x.timestamp).timestamp / NumberConstant.NS_TO_US
             else:
                 logging.error("Fail to get no.%s rank main events info,"
                               " communication parser is interrupted", str(rank_id))

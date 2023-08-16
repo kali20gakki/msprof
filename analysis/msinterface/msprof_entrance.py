@@ -15,6 +15,7 @@ from msinterface.msprof_import import ImportCommand
 from msinterface.msprof_monitor import monitor
 from msinterface.msprof_query import QueryCommand
 from msinterface.msprof_query_summary_manager import QueryDataType
+from analyzer.communication_analyzer import CommunicationAnalyzer
 
 
 class MsprofEntrance:
@@ -56,12 +57,21 @@ class MsprofEntrance:
         import_command = ImportCommand(args)
         import_command.process()
 
+    @staticmethod
+    def _handle_analyze_command(parser: any, args: any) -> None:
+        _ = parser
+        analyze_handler = {
+            'communication': CommunicationAnalyzer,
+        }
+        analyze_command = analyze_handler.get(args.rule)(args.collection_path)
+        analyze_command.process()
+
     def main(self: any) -> None:
         """
         parse argument and run command
         :return: None
         """
-        parser, export_parser, import_parser, monitor_parser, query_parser = self.construct_arg_parser()
+        parser, export_parser, import_parser, monitor_parser, query_parser, analyze_parser = self.construct_arg_parser()
 
         args = parser.parse_args(sys.argv[1:])
         if len(sys.argv) < 2:
@@ -85,6 +95,8 @@ class MsprofEntrance:
                         'handler': self._handle_monitor_command},
             'import': {'parser': import_parser,
                        'handler': self._handle_import_command},
+            'analyze': {'parser': analyze_parser,
+                        'handler': self._handle_analyze_command}
         }
         handler = command_handler.get(sys.argv[1])
         try:
@@ -113,11 +125,15 @@ class MsprofEntrance:
             'query', help='Query specified info.')
         monitor_parser = subparsers.add_parser(
             'monitor', help="Monitor the specified directory.")
+        analyzer_parser = subparsers.add_parser(
+            'analyze', help='Analyze prased profiling data and generate analysis report.'
+        )
         self._query_parser(query_parser)
         self._export_parser(export_parser)
         self._monitor_parser(monitor_parser)
         self._import_parser(import_parser)
-        parser_tuple = (parser, export_parser, import_parser, monitor_parser, query_parser)
+        self._analyze_parser(analyzer_parser)
+        parser_tuple = (parser, export_parser, import_parser, monitor_parser, query_parser, analyzer_parser)
         return parser_tuple
 
     def _query_parser(self: any, query_parser: any) -> None:
@@ -174,3 +190,8 @@ class MsprofEntrance:
 
     def _monitor_parser(self: any, monitor_parser: any) -> None:
         self._add_collect_path_argument(monitor_parser)
+
+    def _analyze_parser(self: any, analyze_parser: any) -> None:
+        self._add_collect_path_argument(analyze_parser)
+        analyze_parser.add_argument(
+            '--rule', '-r', type=str, help='Specify the rule that is used for analyzing prased profiling data')
