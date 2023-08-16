@@ -20,9 +20,7 @@ class TestMsprofTimeline(unittest.TestCase):
              {'name': 'trans_TransData_7', 'pid': 0, 'tid': '0', 'ts': 1210122,
               'args': {'Stream Id': 1, 'Task Id': 1}, 'ph': 'X'}])
 
-        with mock.patch('common_func.ai_stack_data_check_manager.AiStackDataCheckManager.contain_acl_data',
-                        return_value=True), \
-                mock.patch(
+        with mock.patch(
                     'common_func.ai_stack_data_check_manager.AiStackDataCheckManager.contain_core_cpu_reduce_data',
                     return_value=True):
 
