@@ -344,8 +344,6 @@ class AiCoreOpReport:
     def _update_op_name_from_hash(cls: any, project_path: str, ai_core_data: list) -> list:
         hash_dict = get_ge_hash_dict(project_path)
         result_data = []
-        if not hash_dict:
-            return ai_core_data
         for _data in ai_core_data:
             _data = list(_data)
             _data[3] = hash_dict.get(_data[3], _data[3])  # op_name
