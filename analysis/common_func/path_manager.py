@@ -135,6 +135,14 @@ class PathManager:
         return cls.get_path_under_result_dir(result_dir, cls.TIMELINE)
 
     @classmethod
+    def get_analyze_dir(cls: any, result_dir: str) -> str:
+        """
+        get timeline dir in result directory
+        :return: the timeline dir
+        """
+        return cls.get_path_under_result_dir(result_dir, cls.ANALYZE)
+
+    @classmethod
     def get_sample_json_path(cls: any, result_dir: str) -> str:
         """
         get sample json path in result directory
