@@ -3,7 +3,6 @@
 # Copyright (c) Huawei Technologies Co., Ltd. 2023-2023. All rights reserved.
 
 import logging
-import numpy as np
 
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
@@ -28,7 +27,10 @@ class ApiStatisticViewer:
         reformat_result = []
         for data in data_list:
             try:
-                variance = np.var(self.result[data[0]])
+                n = len(self.result[data[0]])
+                mean = sum(self.result[data[0]]) / n
+                deviations = [(x - mean) ** 2 for x in self.result[data[0]]]
+                variance = sum(deviations) / n
             except KeyError:
                 logging.error("api data maybe parse failed, please check the data parsing log.")
             reformat_result.append(
