@@ -121,14 +121,14 @@ class HcclAnalysisTool:
                 round(op_time_dict.get(OpAnalysisType.WAIT_TIME) /
                       (op_time_dict.get(OpAnalysisType.WAIT_TIME) + op_time_dict.get(OpAnalysisType.TRANSIT_TIME)), 4)
         except ZeroDivisionError as err:
-            warn('', '%s Transit Time and Wait Time is 0 %s' % (op_name, err))
+            logging.warning('%s Transit Time and Wait Time is 0 %s', op_name, err)
         try:
             op_time_dict[OpAnalysisType.SYNCHRONIZATION_TIME_RATIO] = \
                 round(op_time_dict.get(OpAnalysisType.SYNCHRONIZATION_TIME)
                       / (op_time_dict.get(OpAnalysisType.SYNCHRONIZATION_TIME) +
                          op_time_dict.get(OpAnalysisType.TRANSIT_TIME)), 4)
         except ZeroDivisionError as err:
-            warn('', '%s Transit Time and Synchronization Time Time is 0 %s' % (op_name, err))
+            logging.warning('%s Transit Time and Synchronization Time Time is 0 %s', op_name, err)
 
     @classmethod
     def update_bandwidth_record(cls: any, bandwidth_dict: dict, trans_type: str, size: float, dur: float) -> None:

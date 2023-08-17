@@ -8,6 +8,7 @@ import json
 from collections import defaultdict
 
 from msmodel.cluster_info.communication_model import CommunicationModel
+from common_func.msprof_common import prepare_for_analyze
 from common_func.db_name_constant import DBNameConstant
 from common_func.msprof_exception import ProfException
 from common_func.ms_constant.number_constant import NumberConstant
@@ -97,7 +98,7 @@ class CommunicationAnalyzer:
 
         return CommunicationParser(self.rank_hccl_data_dict)
 
-    def _communication_analyze(self, rank_path):
+    def _generate_output(self, rank_path):
         communication_parser = self._generate_parser(rank_path)
         op_info = communication_parser.run()
 
@@ -129,11 +130,19 @@ class CommunicationAnalyzer:
                     os.path.join(collect_path, sub_dir))
                 check_path_valid(sub_path, False)
                 if DataCheckManager.contain_info_json_data(sub_path):
-                    LoadInfoManager.load_info(sub_path)
-                    # communication analyzer
                     self._communication_analyze(sub_path)
                 elif sub_path and is_cluster:
                     warn(self.FILE_NAME, 'Invalid parsing dir("%s"), -dir must be profiling data dir '
                                          'such as PROF_XXX_XXX_XXX' % collect_path)
                 else:
                     self._process_sub_dirs(sub_dir, is_cluster=True)
+
+    def _communication_analyze(self, sub_path):
+        LoadInfoManager.load_info(sub_path)
+        # communication analyzer
+        prepare_for_analyze(os.path.join(sub_path, '..'))
+        if os.path.exists(PathManager.get_db_path(sub_path, DBNameConstant.DB_HCCL)):
+            self._generate_output(sub_path)
+        else:
+            host_dir = PathManager.get_host_result_dir(sub_path)
+            logging.info('There is not hccl.db in %s', host_dir)
