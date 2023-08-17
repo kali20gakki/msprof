@@ -281,6 +281,39 @@ TEST_F(RUNNING_MODE_UTEST, StartParseTask)
     EXPECT_EQ(PROFILING_SUCCESS, rMode.StartParseTask());
 }
 
+TEST_F(RUNNING_MODE_UTEST, StartAnalyzeTask)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<analysis::dvvp::message::ProfileParams> params(
+    new analysis::dvvp::message::ProfileParams);
+    Collector::Dvvp::Msprofbin::AppMode rMode("app", params);
+    rMode.isQuit_ = true;
+    EXPECT_EQ(PROFILING_FAILED, rMode.StartAnalyzeTask());
+    rMode.isQuit_ = false;
+    rMode.taskPid_ = 1111;
+    EXPECT_EQ(PROFILING_FAILED, rMode.StartAnalyzeTask());
+    rMode.taskPid_ = MSVP_MMPROCESS;
+    EXPECT_EQ(PROFILING_FAILED, rMode.StartAnalyzeTask());
+    rMode.jobResultDir_ = "123";
+    rMode.analysisPath_ = "path_test";
+    MOCKER_CPP(&RunningMode::GetParseDataType)
+        .stubs()
+        .will(returnValue(ParseDataType::DATA_PATH_INVALID))
+        .then(returnValue(ParseDataType::DATA_PATH_CLUSTER));
+    EXPECT_EQ(PROFILING_FAILED, rMode.StartAnalyzeTask());
+    MOCKER(Utils::ExecCmd)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED))
+        .then(returnValue(PROFILING_SUCCESS));
+    EXPECT_EQ(PROFILING_FAILED, rMode.StartAnalyzeTask());
+    MOCKER_CPP(&RunningMode::WaitRunningProcess)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED))
+        .then(returnValue(PROFILING_SUCCESS));
+    EXPECT_EQ(PROFILING_FAILED, rMode.StartAnalyzeTask());
+    EXPECT_EQ(PROFILING_SUCCESS, rMode.StartAnalyzeTask());
+}
+
 TEST_F(RUNNING_MODE_UTEST, StartQueryTask)
 {
     GlobalMockObject::verify();
@@ -317,7 +350,7 @@ TEST_F(RUNNING_MODE_UTEST, StartExportTask){
     rMode.isQuit_ = true;
     EXPECT_EQ(PROFILING_FAILED, rMode.StartExportTask());
     rMode.isQuit_ = false;
-    rMode.taskPid_ = 1111;
+    rMode.taskPid_ = 1;
     EXPECT_EQ(PROFILING_FAILED, rMode.StartExportTask());
     rMode.taskPid_ = MSVP_MMPROCESS;
     EXPECT_EQ(PROFILING_FAILED, rMode.StartExportTask());
@@ -1015,6 +1048,56 @@ TEST_F(RUNNING_MODE_UTEST, StartSysTask) {
     EXPECT_EQ(PROFILING_SUCCESS, rMode.StartSysTask());
 }
 
+TEST_F(RUNNING_MODE_UTEST, AnalyzeModeModeParamsCheck)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<analysis::dvvp::message::ProfileParams> params(
+    new analysis::dvvp::message::ProfileParams);
+    Collector::Dvvp::Msprofbin::AnalyzeMode rMode("analyze", nullptr);
+    EXPECT_EQ(PROFILING_FAILED, rMode.ModeParamsCheck());
+    rMode.params_ = params;
+
+    GlobalMockObject::verify();
+    params->usedParams = {ARGS_QUERY};
+    EXPECT_EQ(PROFILING_FAILED, rMode.ModeParamsCheck());
+    params->usedParams = {};
+    EXPECT_EQ(PROFILING_FAILED, rMode.ModeParamsCheck());
+    params->usedParams = {ARGS_OUTPUT, ARGS_ANALYZE, ARGS_PYTHON_PATH};
+    EXPECT_EQ(PROFILING_SUCCESS, rMode.ModeParamsCheck());
+    params->usedParams = {ARGS_OUTPUT, ARGS_ANALYZE, ARGS_RULE};
+    EXPECT_EQ(PROFILING_SUCCESS, rMode.ModeParamsCheck());
+}
+
+TEST_F(RUNNING_MODE_UTEST, AnalyzeModeUpdateOutputDirInfo)
+{
+    std::shared_ptr<analysis::dvvp::message::ProfileParams> params(
+    new analysis::dvvp::message::ProfileParams);
+    Collector::Dvvp::Msprofbin::AnalyzeMode rMode("analyze", params);
+    rMode.jobResultDir_="123";
+    rMode.UpdateOutputDirInfo();
+}
+
+TEST_F(RUNNING_MODE_UTEST, AnalyzeModeRunModeTasks)
+{
+    GlobalMockObject::verify();
+    std::shared_ptr<analysis::dvvp::message::ProfileParams> params(
+    new analysis::dvvp::message::ProfileParams);
+    Collector::Dvvp::Msprofbin::AnalyzeMode rMode("analyze", nullptr);
+    EXPECT_EQ(PROFILING_FAILED, rMode.RunModeTasks());
+    rMode.params_ = params;
+    MOCKER_CPP(&SystemMode::CheckAnalysisEnv)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED))
+        .then(returnValue(PROFILING_SUCCESS));
+    EXPECT_EQ(PROFILING_FAILED, rMode.RunModeTasks());
+    MOCKER_CPP(&SystemMode::StartAnalyzeTask)
+        .stubs()
+        .will(returnValue(PROFILING_FAILED))
+        .then(returnValue(PROFILING_SUCCESS));
+    EXPECT_EQ(PROFILING_FAILED, rMode.RunModeTasks());
+    EXPECT_EQ(PROFILING_SUCCESS, rMode.RunModeTasks());
+}
+
 TEST_F(RUNNING_MODE_UTEST, ParseModeModeParamsCheck) {
     GlobalMockObject::verify();
     std::shared_ptr<analysis::dvvp::message::ProfileParams> params(
@@ -1099,7 +1182,7 @@ TEST_F(RUNNING_MODE_UTEST, QueryModeModeParamsCheck) {
 TEST_F(RUNNING_MODE_UTEST, QueryModeRunModeTasks) {
     GlobalMockObject::verify();
     std::shared_ptr<analysis::dvvp::message::ProfileParams> params(
-    new analysis::dvvp::message::ProfileParams);
+        new analysis::dvvp::message::ProfileParams);
     Collector::Dvvp::Msprofbin::QueryMode rMode("query", nullptr);
     EXPECT_EQ(PROFILING_FAILED, rMode.RunModeTasks());
     rMode.params_ = params;
@@ -1119,7 +1202,7 @@ TEST_F(RUNNING_MODE_UTEST, QueryModeRunModeTasks) {
 TEST_F(RUNNING_MODE_UTEST, ExportModeUpdateOutputDirInfo) 
 {
     std::shared_ptr<analysis::dvvp::message::ProfileParams> params(
-    new analysis::dvvp::message::ProfileParams);
+        new analysis::dvvp::message::ProfileParams);
     Collector::Dvvp::Msprofbin::ExportMode rMode("export", params);
     rMode.jobResultDir_ = "123";
     rMode.UpdateOutputDirInfo();
@@ -1128,7 +1211,7 @@ TEST_F(RUNNING_MODE_UTEST, ExportModeUpdateOutputDirInfo)
 TEST_F(RUNNING_MODE_UTEST, ExportModeModeParamsCheck) {
     GlobalMockObject::verify();
     std::shared_ptr<analysis::dvvp::message::ProfileParams> params(
-    new analysis::dvvp::message::ProfileParams);
+        new analysis::dvvp::message::ProfileParams);
     Collector::Dvvp::Msprofbin::ExportMode rMode("export", nullptr);
     EXPECT_EQ(PROFILING_FAILED, rMode.ModeParamsCheck());
     rMode.params_ = params;
@@ -1147,7 +1230,7 @@ TEST_F(RUNNING_MODE_UTEST, ExportModeModeParamsCheck) {
 TEST_F(RUNNING_MODE_UTEST,ExportModeRunModeTasks) {
     GlobalMockObject::verify();
     std::shared_ptr<analysis::dvvp::message::ProfileParams> params(
-    new analysis::dvvp::message::ProfileParams);
+        new analysis::dvvp::message::ProfileParams);
     Collector::Dvvp::Msprofbin::ExportMode rMode("export", nullptr);
     EXPECT_EQ(PROFILING_FAILED, rMode.RunModeTasks());
     rMode.params_ = params;

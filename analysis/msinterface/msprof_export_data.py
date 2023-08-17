@@ -29,6 +29,7 @@ from msparser.aicpu.parse_dp_data import ParseDpData
 from viewer.acl.acl_viewer import AclViewer
 from viewer.ai_core_op_report import AiCoreOpReport
 from viewer.ai_core_op_report import ReportOPCounter
+from viewer.hccl_op_report import ReportHcclStatisticData
 from viewer.ai_core_report import get_core_sample_data
 from viewer.aicpu_viewer import ParseAiCpuData
 from viewer.biu_perf_viewer import BiuPerfViewer
@@ -59,12 +60,12 @@ from viewer.hardware_info_report import get_llc_bandwidth
 from viewer.hardware_info_report import llc_capacity_data
 from viewer.hardware_info_view import get_llc_train_summary
 from viewer.interconnection_view import InterConnectionView
+from viewer.api_statistic_viewer import ApiStatisticViewer
 from viewer.msproftx_viewer import MsprofTxViewer
 from viewer.npu_mem.npu_mem_viewer import NpuMemViewer
 from viewer.peripheral_report import get_peripheral_dvpp_data
 from viewer.peripheral_report import get_peripheral_nic_data
 from viewer.pipeline_overlap_viewer import PipelineOverlapViewer
-from viewer.runtime.runtime_api_viewer import RuntimeApiViewer
 from viewer.runtime_report import get_task_scheduler_data
 from viewer.stars.acc_pmu_viewer import AccPmuViewer
 from viewer.stars.ffts_log_viewer import FftsLogViewer
@@ -72,7 +73,6 @@ from viewer.stars.low_power_viewer import LowPowerViewer
 from viewer.stars.stars_chip_trans_view import StarsChipTransView
 from viewer.stars.stars_soc_view import StarsSocView
 from viewer.task_queue_viewer import TaskQueueViewer
-from viewer.thread_group_viewer import ThreadGroupViewer
 from viewer.training.core_cpu_reduce_viewer import CoreCpuReduceViewer
 from viewer.training.step_trace_viewer import StepTraceViewer
 from viewer.training.task_op_viewer import TaskOpViewer
@@ -89,15 +89,6 @@ class MsProfExportDataUtils:
     cfg_parser = None
     init_cfg_finished = False
     LOCK = threading.Lock()
-
-    @staticmethod
-    def _get_runtime_api_data(configs: dict, params: dict) -> any:
-        """
-        get runtime data handler
-        """
-        if params.get(StrConstant.PARAM_EXPORT_TYPE) == MsProfCommonConstant.TIMELINE:
-            return RuntimeApiViewer(configs, params).get_timeline_data()
-        return RuntimeApiViewer(configs, params).get_summary_data()
 
     @staticmethod
     def _get_task_time_data(configs: dict, params: dict) -> any:
@@ -212,22 +203,6 @@ class MsProfExportDataUtils:
         return MsvpConstant.MSVP_EMPTY_DATA
 
     @staticmethod
-    def _get_acl_data(configs: dict, params: dict) -> any:
-        """
-        get acl data
-        """
-        if params.get(StrConstant.PARAM_EXPORT_TYPE) == MsProfCommonConstant.TIMELINE:
-            return AclViewer(configs, params).get_timeline_data()
-        return AclViewer(configs, params).get_summary_data()
-
-    @staticmethod
-    def _get_acl_statistic_data(configs: dict, params: dict) -> any:
-        """
-        get acl data
-        """
-        return AclViewer(configs, params).get_acl_statistic_data()
-
-    @staticmethod
     def _get_op_summary_data(configs: dict, params: dict) -> any:
         """
         get ai core op summary detail table
@@ -280,6 +255,13 @@ class MsProfExportDataUtils:
             })
 
     @staticmethod
+    def _get_api_statistic_data(configs: dict, params: dict) -> any:
+        """
+        get API(ACL/GE/RUNTIME_API) statistic data
+        """
+        return ApiStatisticViewer(configs, params).get_api_statistic_data()
+
+    @staticmethod
     def _get_op_statistic_data(configs: dict, params: dict) -> any:
         """
         get op statistic data
@@ -287,6 +269,15 @@ class MsProfExportDataUtils:
         db_path = PathManager.get_db_path(params.get(StrConstant.PARAM_RESULT_DIR), configs.get(StrConstant.CONFIG_DB))
         return ReportOPCounter.report_op(db_path,
                                          configs.get(StrConstant.CONFIG_HEADERS))
+
+    @staticmethod
+    def _get_hccl_statistic_data(configs: dict, params: dict) -> any:
+        """
+        get hccl statistic data
+        """
+        db_path = PathManager.get_db_path(params.get(StrConstant.PARAM_RESULT_DIR), configs.get(StrConstant.CONFIG_DB))
+        return ReportHcclStatisticData.report_hccl_op(db_path,
+                                                      configs.get(StrConstant.CONFIG_HEADERS))
 
     @staticmethod
     def _get_dvpp_data(configs: dict, params: dict) -> any:
@@ -517,23 +508,6 @@ class MsProfExportDataUtils:
                                       HostExportType.HOST_RUNTIME_API)
 
     @staticmethod
-    def _get_ge_data(configs: dict, params: dict) -> any:
-        _ = configs
-        if params.get(StrConstant.PARAM_EXPORT_TYPE) == MsProfCommonConstant.TIMELINE:
-            return get_ge_timeline_data(params.get(StrConstant.PARAM_RESULT_DIR))
-        return json.dumps({
-            "status": NumberConstant.WARN,
-            "info": "Please check params, "
-                    "Currently ge data does not support exporting files other than timeline."
-        })
-
-    @staticmethod
-    def _get_ge_op_execute_data(configs: dict, params: dict) -> any:
-        if params.get(StrConstant.PARAM_EXPORT_TYPE) == MsProfCommonConstant.TIMELINE:
-            return GeOpExecuteViewer(configs, params).get_timeline_data()
-        return GeOpExecuteViewer(configs, params).get_summary_data()
-
-    @staticmethod
     def _get_bulk_data(configs: dict, params: dict) -> any:
         if params.get(StrConstant.PARAM_EXPORT_TYPE) != MsProfCommonConstant.TIMELINE:
             return json.dumps({
@@ -547,7 +521,8 @@ class MsProfExportDataUtils:
             try:
                 timeline = json.loads(row_timeline)
             except (TypeError, ValueError) as err:
-                logging.error("timeline data is not json format.", err)
+                logging.error("timeline data is not json format.")
+                return ""
         MsprofTimeline().add_export_data(timeline, params.get(StrConstant.PARAM_DATA_TYPE))
         return MsprofTimeline().export_all_data()
 
@@ -593,10 +568,6 @@ class MsProfExportDataUtils:
     @staticmethod
     def _get_stars_chip_trans_data(configs: dict, params: dict) -> any:
         return StarsChipTransView(configs, params).get_timeline_data()
-
-    @staticmethod
-    def _get_thread_group_data(configs: dict, params: dict) -> any:
-        return ThreadGroupViewer(configs, params).get_timeline_data()
 
     @staticmethod
     def _get_low_power_data(configs: dict, params: dict) -> any:
@@ -660,7 +631,7 @@ class MsProfExportDataUtils:
             try:
                 timeline_data = json.loads(data)
             except (TypeError, ValueError) as err:
-                logging.error("timeline data is not json format.", err)
+                logging.error("timeline data is not json format.")
             cls.add_timeline_data(params, timeline_data)
             skip_list = ["event", "api"]
             if params.get(StrConstant.PARAM_DATA_TYPE) in skip_list:

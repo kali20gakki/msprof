@@ -525,7 +525,7 @@ uint64_t ProfAclMgr::ProfAclGetDataTypeConfig(PROF_SUB_CONF_CONST_PTR profSubscr
     }
     uint64_t dataTypeConfig = 0;
     if (profSubscribeConfig->timeInfo) {
-        dataTypeConfig |= PROF_TASK_TIME | PROF_TASK_TIME_L1;
+        dataTypeConfig |= PROF_TASK_TIME_L0 | PROF_TASK_TIME_L1;
     }
     if (profSubscribeConfig->aicoreMetrics != PROF_AICORE_NONE) {
         dataTypeConfig |= PROF_AICORE_METRICS;

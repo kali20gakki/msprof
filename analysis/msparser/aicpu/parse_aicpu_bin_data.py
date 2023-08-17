@@ -23,7 +23,7 @@ from msmodel.ai_cpu.ai_cpu_model import AiCpuModel
 from msparser.data_struct_size_constant import StructFmt
 from profiling_bean.prof_enum.data_tag import DataTag
 from profiling_bean.struct_info.ai_cpu_data import AiCpuData
-from analyzer.scene_base.profiling_scene import ProfilingScene
+from common_func.profiling_scene import ProfilingScene
 
 
 class ParseAiCpuBinData(MsMultiProcess):

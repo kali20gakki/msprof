@@ -6,7 +6,7 @@ import logging
 import os
 import sqlite3
 
-from analyzer.scene_base.profiling_scene import ProfilingScene
+from common_func.profiling_scene import ProfilingScene
 from common_func.common import CommonConstant
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
@@ -54,6 +54,10 @@ class ParseAiCoreOpSummaryCalculator(MsMultiProcess):
         entry for analysis op summary data
         :return: None
         """
+        if not os.path.exists(PathManager.get_db_path(self.project_path, DBNameConstant.DB_ASCEND_TASK)):
+            logging.warning("No %s found, no need to create %s",
+                            DBNameConstant.DB_ASCEND_TASK, DBNameConstant.DB_AICORE_OP_SUMMARY)
+            return
         try:
             self.init_params()
         except (OSError, SystemError, ValueError, TypeError, RuntimeError, ProfException) as err:
@@ -97,7 +101,6 @@ class ParseAiCoreOpSummaryCalculator(MsMultiProcess):
         if not (self.conn and self.curs):
             return
         self.create_ge_summary_table()
-        self.create_ge_tensor_table()
         self.create_ai_core_metrics_table()
         self.create_task_time_table()
         DBManager.destroy_db_connect(self.conn, self.curs)
@@ -128,25 +131,6 @@ class ParseAiCoreOpSummaryCalculator(MsMultiProcess):
         DBManager.execute_sql(self.conn, ge_create_sql)
         ge_data = self._get_ge_data()
         DBManager.insert_data_into_table(self.conn, DBNameConstant.TABLE_SUMMARY_GE, ge_data)
-
-    def create_ge_tensor_table(self: any) -> None:
-        """
-        create ge tensor table
-        """
-        if not DBManager.check_tables_in_db(self.get_db_path(DBNameConstant.DB_GE_INFO),
-                                            DBNameConstant.TABLE_GE_TENSOR):
-            logging.warning("unable to create ge tensor table, because table %s is not found.",
-                            DBNameConstant.TABLE_GE_TENSOR)
-            return
-        ge_tensor_create_sql = DBManager.sql_create_general_table("GeTensorMap",
-                                                                  DBNameConstant.TABLE_SUMMARY_TENSOR, self.TABLES_PATH)
-        DBManager.execute_sql(self.conn, ge_tensor_create_sql)
-        ge_data = []
-        iter_list = MsprofIteration(self.project_path).get_index_id_list_with_index_and_model(self.iter_range)
-        ge_tensor_sql = f"select * from {DBNameConstant.TABLE_GE_TENSOR} where index_id=? and model_id=?"
-        for index_and_model in iter_list:
-            ge_data.extend(DBManager.fetch_all_data(self.curs, ge_tensor_sql, index_and_model))
-        DBManager.insert_data_into_table(self.conn, DBNameConstant.TABLE_SUMMARY_TENSOR, ge_data)
 
     def create_ai_core_metrics_table(self: any) -> None:
         """
@@ -231,7 +215,9 @@ class ParseAiCoreOpSummaryCalculator(MsMultiProcess):
         ge_data = []
         iter_list = MsprofIteration(self.project_path).get_index_id_list_with_index_and_model(self.iter_range)
         ge_sql = f"SELECT model_id, batch_id, task_id, stream_id, " \
-                 f"op_name, op_type, block_dim, mix_block_dim, task_type, timestamp, index_id, context_id " \
+                 f"op_name, op_type, block_dim, mix_block_dim, task_type, tensor_num, input_formats," \
+                 f" input_data_types, input_shapes, output_formats, output_data_types," \
+                 f" output_shapes, timestamp, index_id, context_id " \
                  f"from {DBNameConstant.TABLE_GE_TASK} where index_id=? and model_id=?"
         for index_and_model in iter_list:
             ge_data.extend(DBManager.fetch_all_data(self.curs, ge_sql, index_and_model))

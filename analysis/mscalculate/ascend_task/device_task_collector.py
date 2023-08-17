@@ -171,9 +171,12 @@ class DeviceTaskCollector:
 
     def _gather_chip_stars_device_tasks(self: any, start_time: float, end_time: float) -> List[DeviceTask]:
         # in this chip ai_core and ai_cpu data will be uploaded in soc_stars data
-        device_tasks = self._gather_device_acsq_tasks_from_stars(start_time, end_time)
+        device_acsq_tasks = self._gather_device_acsq_tasks_from_stars(start_time, end_time)
+        device_ffts_tasks = self._gather_device_ffts_plus_sub_tasks_from_stars(start_time, end_time)
+        device_tasks = [*device_acsq_tasks, *device_ffts_tasks]
+
         if not device_tasks:
-            logging.error("no aicore and ai_cpu device task found.")
+            logging.error("no acsq and ffts device task found.")
         return device_tasks
 
     def _check_device_data_db_exists(self: any) -> bool:

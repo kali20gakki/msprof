@@ -150,5 +150,7 @@ class TraceViewManager:
         :param stream_id: int, task_id: int, batch_id: int
         :return: format_pid: int
         """
-        format_pid = (stream_id << 32) + (task_id << 16) + batch_id
+        stream_id_pos = 32
+        task_id_pos = 16
+        format_pid = (stream_id << stream_id_pos) + (task_id << task_id_pos) + batch_id
         return format_pid

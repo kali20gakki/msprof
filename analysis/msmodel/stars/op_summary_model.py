@@ -42,7 +42,6 @@ class OpSummaryModel(ViewModel, IAnalysisModel):
         :return:
         """
         self.create_ge_summary_table()
-        self.create_ge_tensor_table()
         self.create_ai_core_metrics_table()
         self.create_task_time_table()
         self.sql_commit()
@@ -57,17 +56,6 @@ class OpSummaryModel(ViewModel, IAnalysisModel):
         ge_merge_sql, sql_param = self._get_ge_sql()
         create_ge_summary_sql = "create table if not exists ge_summary as {}".format(ge_merge_sql)
         DBManager.execute_sql(self.conn, create_ge_summary_sql, sql_param)
-
-    def create_ge_tensor_table(self: any) -> None:
-        """
-        create ge tensor table
-        :return: None
-        """
-        ge_tensor_sql = "select * from {0} where (index_id={1} or index_id=0)" \
-            .format(DBNameConstant.TABLE_GE_TENSOR, self.iter_id)
-        create_ge_tensor_sql = "create table if not exists {0} as {1}" \
-            .format(DBNameConstant.TABLE_SUMMARY_TENSOR, ge_tensor_sql)
-        DBManager.execute_sql(self.conn, create_ge_tensor_sql)
 
     def create_ai_core_metrics_table(self: any) -> None:
         """
@@ -146,14 +134,14 @@ class OpSummaryModel(ViewModel, IAnalysisModel):
             inner_join_condition += " and (a.index_id=b.index_id or b.index_id=0)"
         sql = "SELECT a.stream_id, op_name, b.task_type, start_time, duration_time, " \
               "start_time+duration_time as end_time FROM {0} a INNER JOIN {1} b " \
-              "on a.stream_id=b.stream_id and a.task_id=b.task_id and a.batch_id=b.batch_id {2} " \
-              "and a.task_type<>'{unknown}' and b.task_type in ({value})".format(
+              "on a.stream_id=b.stream_id and a.task_id=b.task_id and a.batch_id=b.batch_id " \
+              "and a.subtask_id=b.context_id {2} " \
+              "and a.task_type<>'{unknown}'".format(
                 DBNameConstant.TABLE_SUMMARY_TASK_TIME,
                 DBNameConstant.TABLE_SUMMARY_GE,
                 inner_join_condition,
-                unknown=Constant.TASK_TYPE_UNKNOWN,
-                value=('?,' * (len(task_type) - 1) + '?'))
-        return DBManager.fetch_all_data(self.cur, sql, task_type, dto_class=TimeSectionDto)
+                unknown=Constant.TASK_TYPE_UNKNOWN)
+        return DBManager.fetch_all_data(self.cur, sql, dto_class=TimeSectionDto)
 
     def _get_ge_sql(self: any) -> tuple:
         ge_sql = "SELECT model_id, task_id, stream_id, " \

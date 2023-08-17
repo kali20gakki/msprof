@@ -25,7 +25,7 @@ from common_func.path_manager import PathManager
 from common_func.batch_counter import BatchCounter
 from common_func.iter_recorder import IterRecorder
 from common_func.file_manager import FileOpen
-from analyzer.scene_base.profiling_scene import ProfilingScene
+from common_func.profiling_scene import ProfilingScene
 
 
 class ParseAiCpuData(MsMultiProcess):
