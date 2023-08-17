@@ -146,7 +146,7 @@ bool ParamsAdapterMsprof::ParamsCheckMsprofV1(InputCfg inputCfg, std::string cfg
 int ParamsAdapterMsprof::ParamsCheckDynProf() const
 {
     // --dynamic != on, no need check params
-    if (paramContainer_[INPUT_CFG_MSPROF_DYNAMIC] != MSPROF_SWITCH_ON) {
+    if (paramContainer_[INPUT_CFG_MSPROF_DYNAMIC] != MSVP_PROF_ON) {
         return PROFILING_SUCCESS;
     }
     // --pid and --application is both empty
@@ -182,8 +182,8 @@ void ParamsAdapterMsprof::SetDefaultParamsApp()
     if (paramContainer_[INPUT_CFG_COM_ASCENDCL].empty()) {
         paramContainer_[INPUT_CFG_COM_ASCENDCL] = MSVP_PROF_ON;
     }
-    if (paramContainer_[INPUT_CFG_COM_TASK_TIME_L1].empty()) {
-        paramContainer_[INPUT_CFG_COM_TASK_TIME_L1] = MSVP_PROF_ON;
+    if (paramContainer_[INPUT_CFG_COM_TASK_TIME].empty()) {
+        paramContainer_[INPUT_CFG_COM_TASK_TIME] = MSVP_PROF_ON;
     }
     if (paramContainer_[INPUT_CFG_COM_AI_CORE].empty()) {
         paramContainer_[INPUT_CFG_COM_AI_CORE] = MSVP_PROF_ON;
@@ -213,6 +213,7 @@ int ParamsAdapterMsprof::CheckMsprofMode(const std::unordered_map<int, std::pair
         {ARGS_PARSE, MsprofMode::MSPROF_MODE_PARSE},
         {ARGS_QUERY, MsprofMode::MSPROF_MODE_QUERY},
         {ARGS_EXPORT, MsprofMode::MSPROF_MODE_EXPORT},
+        {ARGS_ANALYZE, MsprofMode::MSPROF_MODE_ANALYZE},
         {ARGS_DYNAMIC_PROF, MsprofMode::MSPROF_MODE_APP}
     };
 
@@ -293,6 +294,10 @@ void ParamsAdapterMsprof::SetParamsSelf()
         params_->pythonPath : paramContainer_[INPUT_CFG_PYTHON_PATH];
     params_->parseSwitch = paramContainer_[INPUT_CFG_PARSE].empty() ?
         params_->parseSwitch : paramContainer_[INPUT_CFG_PARSE];
+    params_->analyzeSwitch = paramContainer_[INPUT_CFG_ANALYZE].empty() ?
+        params_->analyzeSwitch : paramContainer_[INPUT_CFG_ANALYZE];
+    params_->analyzeRuleSwitch = paramContainer_[INPUT_CFG_RULE].empty() ?
+        params_->analyzeRuleSwitch : paramContainer_[INPUT_CFG_RULE];
     params_->querySwitch = paramContainer_[INPUT_CFG_QUERY].empty() ?
         params_->querySwitch : paramContainer_[INPUT_CFG_QUERY];
     params_->exportSwitch = paramContainer_[INPUT_CFG_EXPORT].empty() ?
@@ -347,12 +352,13 @@ int ParamsAdapterMsprof::AnalysisParamsAdapt(
     bool ret = false;
     std::set<MsprofArgsType> analysisArgs = {
         ARGS_OUTPUT, ARGS_PYTHON_PATH, ARGS_SUMMARY_FORMAT, ARGS_PARSE, ARGS_QUERY, ARGS_EXPORT,
-        ARGS_EXPORT_ITERATION_ID, ARGS_EXPORT_MODEL_ID};
+        ARGS_ANALYZE, ARGS_RULE, ARGS_EXPORT_ITERATION_ID, ARGS_EXPORT_MODEL_ID};
     std::unordered_map<int, InputCfg> argsTransMap = {
         {ARGS_OUTPUT, INPUT_CFG_COM_OUTPUT}, {ARGS_PYTHON_PATH, INPUT_CFG_PYTHON_PATH},
         {ARGS_SUMMARY_FORMAT, INPUT_CFG_SUMMARY_FORMAT}, {ARGS_PARSE, INPUT_CFG_PARSE},
         {ARGS_QUERY, INPUT_CFG_QUERY}, {ARGS_EXPORT, INPUT_CFG_EXPORT},
-        {ARGS_EXPORT_ITERATION_ID, INPUT_CFG_ITERATION_ID}, {ARGS_EXPORT_MODEL_ID, INPUT_CFG_MODEL_ID}
+        {ARGS_EXPORT_ITERATION_ID, INPUT_CFG_ITERATION_ID}, {ARGS_EXPORT_MODEL_ID, INPUT_CFG_MODEL_ID},
+        {ARGS_ANALYZE, INPUT_CFG_ANALYZE}, {ARGS_RULE, INPUT_CFG_RULE}
     };
     for (auto arg : analysisArgs) {
         if (argvMap.find(arg) == argvMap.end()) {
@@ -386,6 +392,12 @@ bool ParamsAdapterMsprof::CheckAnalysisConfig(MsprofArgsType arg, const std::str
             break;
         case ARGS_SUMMARY_FORMAT:
             ret = ParamValidation::instance()->CheckExportSummaryFormatIsValid(argsValue);
+            break;
+        case ARGS_ANALYZE:
+            ret = ParamValidation::instance()->IsValidInputCfgSwitch("analyze", argsValue);
+            break;
+        case ARGS_RULE:
+            ret = ParamValidation::instance()->IsValidAnalyzeRuleSwitch("rule", argsValue);
             break;
         case ARGS_PARSE:
             ret = ParamValidation::instance()->IsValidInputCfgSwitch("parse", argsValue);
@@ -423,7 +435,7 @@ int ParamsAdapterMsprof::GetParamFromInputCfg(
         return PROFILING_FAILED;
     }
     if (msprofMode_ == MsprofMode::MSPROF_MODE_PARSE || msprofMode_ == MsprofMode::MSPROF_MODE_QUERY ||
-        msprofMode_ == MsprofMode::MSPROF_MODE_EXPORT) {
+        msprofMode_ == MsprofMode::MSPROF_MODE_EXPORT || msprofMode_ == MsprofMode::MSPROF_MODE_ANALYZE) {
         return AnalysisParamsAdapt(argvMap);
     }
     if (Init() != PROFILING_SUCCESS) {
@@ -520,7 +532,7 @@ void ParamsAdapterMsprof::CreateCfgMap()
         {ARGS_PYTHON_PATH, INPUT_CFG_PYTHON_PATH}, {ARGS_SUMMARY_FORMAT, INPUT_CFG_SUMMARY_FORMAT},
         {ARGS_ASCENDCL, INPUT_CFG_COM_ASCENDCL}, {ARGS_AI_CORE, INPUT_CFG_COM_AI_CORE},
         {ARGS_AIV, INPUT_CFG_COM_AI_VECTOR}, {ARGS_MODEL_EXECUTION, INPUT_CFG_COM_MODEL_EXECUTION},
-        {ARGS_RUNTIME_API, INPUT_CFG_COM_RUNTIME_API}, {ARGS_TASK_TIME, INPUT_CFG_COM_TASK_TIME_L1},
+        {ARGS_RUNTIME_API, INPUT_CFG_COM_RUNTIME_API}, {ARGS_TASK_TIME, INPUT_CFG_COM_TASK_TIME},
         {ARGS_AICPU, INPUT_CFG_COM_AICPU}, {ARGS_MSPROFTX, INPUT_CFG_COM_MSPROFTX},
         {ARGS_CPU_PROFILING, INPUT_CFG_COM_SYS_CPU}, {ARGS_SYS_PROFILING, INPUT_CFG_COM_SYS_USAGE},
         {ARGS_PID_PROFILING, INPUT_CFG_COM_SYS_PID_USAGE}, {ARGS_HARDWARE_MEM, INPUT_CFG_COM_SYS_HARDWARE_MEM},
@@ -530,7 +542,7 @@ void ParamsAdapterMsprof::CreateCfgMap()
         {ARGS_L2_PROFILING, INPUT_CFG_COM_L2}, {ARGS_PARSE, INPUT_CFG_PARSE}, {ARGS_QUERY, INPUT_CFG_QUERY},
         {ARGS_EXPORT, INPUT_CFG_EXPORT}, {ARGS_AIC_FREQ, INPUT_CFG_COM_AIC_FREQ},
         {ARGS_AIV_FREQ, INPUT_CFG_COM_AIV_FREQ}, {ARGS_INSTR_PROFILING_FREQ, INPUT_CFG_COM_INSTR_PROFILING_FREQ},
-        {ARGS_SYS_PERIOD, INPUT_CFG_COM_SYS_PERIOD},
+        {ARGS_SYS_PERIOD, INPUT_CFG_COM_SYS_PERIOD}, {ARGS_ANALYZE, INPUT_CFG_ANALYZE}, {ARGS_RULE, INPUT_CFG_RULE},
         {ARGS_SYS_SAMPLING_FREQ, INPUT_CFG_COM_SYS_USAGE_FREQ},
         {ARGS_PID_SAMPLING_FREQ, INPUT_CFG_COM_SYS_PID_USAGE_FREQ},
         {ARGS_HARDWARE_MEM_SAMPLING_FREQ, INPUT_CFG_COM_SYS_HARDWARE_MEM_FREQ},

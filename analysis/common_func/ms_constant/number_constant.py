@@ -132,8 +132,8 @@ class NumberConstant:
     RANK_NUM_PER_SERVER = 8
     RANK_NUM_PER_OS = 4
     MAX_RANK_NUMS = 4096
-    B_to_MB = 1024 ** 2
-    MB_to_GB = 1024
+    COMMUNICATION_B_to_MB = 1000 ** 2
+    COMMUNICATION_MB_to_GB = 1000
 
     DEFAULT_LAYER_SORT_START = 10
     # magic number: 5A5A

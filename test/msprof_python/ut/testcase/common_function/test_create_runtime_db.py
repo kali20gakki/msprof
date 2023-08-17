@@ -2,14 +2,14 @@ import struct
 import unittest
 from unittest import mock
 
-from analyzer.create_runtime_db import ParsingRuntimeData
+from common_func.create_runtime_db import ParsingRuntimeData
 from common_func.platform.chip_manager import ChipManager
 from constant.constant import CONFIG
 from profiling_bean.prof_enum.chip_model import ChipModel
 from sqlite.db_manager import DBManager
 from common_func.file_manager import FileOpen
 
-NAMESPACE = 'analyzer.create_runtime_db'
+NAMESPACE = 'common_func.create_runtime_db'
 
 
 class TestParsingRuntimeData(unittest.TestCase):
@@ -68,7 +68,7 @@ class TestParsingRuntimeData(unittest.TestCase):
         res = db_manager.create_table('runtime.db')
         with mock.patch(NAMESPACE + '.ParsingRuntimeData._start_parsing_data_file',
                         return_value=(1, 'fail')), \
-             mock.patch(NAMESPACE + '.logging.error'):
+                mock.patch(NAMESPACE + '.logging.error'):
             check = ParsingRuntimeData(self.sample_config, CONFIG)
             result = check.create_runtime_db()
         self.assertEqual(result, None)
@@ -79,12 +79,12 @@ class TestParsingRuntimeData(unittest.TestCase):
         self.assertEqual(result, None)
         with mock.patch(NAMESPACE + '.ParsingRuntimeData._start_parsing_data_file',
                         return_value=(0, 'success')), \
-             mock.patch(NAMESPACE + '.DBManager.judge_table_exist',
-                        return_value=True), \
-             mock.patch(NAMESPACE + '.create_ai_event_tables'), \
-             mock.patch(NAMESPACE + '.insert_event_value'), \
-             mock.patch(NAMESPACE + '.StepTableBuilder.run'), \
-             mock.patch(NAMESPACE + '.logging.info'):
+                mock.patch(NAMESPACE + '.DBManager.judge_table_exist',
+                           return_value=True), \
+                mock.patch(NAMESPACE + '.create_ai_event_tables'), \
+                mock.patch(NAMESPACE + '.insert_event_value'), \
+                mock.patch(NAMESPACE + '.StepTableBuilder.run'), \
+                mock.patch(NAMESPACE + '.logging.info'):
             ChipManager().chip_id = ChipModel.CHIP_V1_1_0
             check = ParsingRuntimeData(self.sample_config, CONFIG)
             check.conn = res[0]
@@ -117,9 +117,9 @@ class TestParsingRuntimeData(unittest.TestCase):
         with mock.patch(NAMESPACE + '.DBManager.sql_create_general_table', return_value=sql):
             check = ParsingRuntimeData(self.sample_config, CONFIG)
             check.conn, check.curs = res[0], res[1]
-            check.rts_data['event_count'] = \
-                [('0', 0, 3, 5, 0, 0, 101612566070, 26050, 0, 526, 0, 14002, 26675, 224, 12,
-                  58006, 2, 0, '0', 1)]
+            check.rts_data['event_count'] = [
+                ('0', 0, 3, 5, 0, 0, 101612566070, 26050, 0, 526, 0, 14002, 26675, 224, 12, 58006, 2, 0, '0', 1)
+            ]
             result = check.create_event_counter_table('EventCounterMap')
             self.assertEqual(result, None)
         res[1].execute('drop table EventCounter')
@@ -133,11 +133,11 @@ class TestParsingRuntimeData(unittest.TestCase):
               "stream_id INTEGER,task_id INTEGER,tag_id INTEGER)"
         with mock.patch(NAMESPACE + '.PathManager.get_db_path',
                         return_value='test\\test'), \
-             mock.patch(NAMESPACE + '.DBManager.destroy_db_connect'):
+                mock.patch(NAMESPACE + '.DBManager.destroy_db_connect'):
             with mock.patch(NAMESPACE + '.DBManager.create_connect_db',
                             return_value=res), \
-                 mock.patch(NAMESPACE + '.DBManager.sql_create_general_table',
-                            return_value=sql):
+                    mock.patch(NAMESPACE + '.DBManager.sql_create_general_table',
+                               return_value=sql):
                 check = ParsingRuntimeData(self.sample_config, CONFIG)
                 check.rts_data["step_trace"] = [(1, 1, 101612167908.0, 3, 1, 0)]
                 check.create_step_trace_table('StepTraceMap')
@@ -157,11 +157,11 @@ class TestParsingRuntimeData(unittest.TestCase):
               "stream_id INTEGER, task_id INTEGER, task_state INTEGER )"
         with mock.patch(NAMESPACE + '.PathManager.get_db_path',
                         return_value='test\\test'), \
-             mock.patch(NAMESPACE + '.DBManager.destroy_db_connect'):
+                mock.patch(NAMESPACE + '.DBManager.destroy_db_connect'):
             with mock.patch(NAMESPACE + '.DBManager.create_connect_db',
                             return_value=res), \
-                 mock.patch(NAMESPACE + '.DBManager.sql_create_general_table',
-                            return_value=sql):
+                    mock.patch(NAMESPACE + '.DBManager.sql_create_general_table',
+                               return_value=sql):
                 check = ParsingRuntimeData(self.sample_config, CONFIG)
                 check.rts_data["ts_memcpy"] = [(101612167908.0, 10, 10, 0)]
                 check.create_step_trace_table('TsMemcpyMap')
@@ -178,13 +178,13 @@ class TestParsingRuntimeData(unittest.TestCase):
         db_manager = DBManager()
         res = db_manager.create_table('runtime.db')
         with mock.patch(NAMESPACE + '.ParsingRuntimeData.create_timeline_table'), \
-             mock.patch(NAMESPACE + '.ParsingRuntimeData.create_event_counter_table'), \
-             mock.patch(NAMESPACE + '.ParsingRuntimeData.create_step_trace_table'):
+                mock.patch(NAMESPACE + '.ParsingRuntimeData.create_event_counter_table'), \
+                mock.patch(NAMESPACE + '.ParsingRuntimeData.create_step_trace_table'):
             check = ParsingRuntimeData(self.sample_config, CONFIG)
             check.rts_data["time_line"] = [('0', 7, 0, 1, 1, 101010019214.0, 4294967295, '0', 1)]
-            check.rts_data["event_count"] = \
-                [('0', 0, 3, 5, 0, 0, 101612566070, 26050, 0, 526, 0, 14002, 26675, 224, 12,
-                  58006, 2, 0, '0', 1)]
+            check.rts_data["event_count"] = [
+                ('0', 0, 3, 5, 0, 0, 101612566070, 26050, 0, 526, 0, 14002, 26675, 224, 12, 58006, 2, 0, '0', 1)
+            ]
             check.rts_data["step_trace"] = [(1, 1, 101612167908.0, 3, 1, 0)]
             check.conn, check.curs = res[0], res[1]
             check.insert_data()
@@ -198,41 +198,41 @@ class TestParsingRuntimeData(unittest.TestCase):
         data_4 = struct.pack("=BBHLHHHHQ8QQQH3H", 1, 4, 112, 200, 0, 5, 3, 0, 18446744073709551615,
                              26050, 0, 526, 0, 14002, 26675, 224, 12, 58006, 101612566070, 2, 0, 0, 0)
         with mock.patch('os.path.join', return_value='test\\data'), \
-             mock.patch(NAMESPACE + '.ParsingRuntimeData.insert_data'), \
-             mock.patch(NAMESPACE + '.logging.info'):
+                mock.patch(NAMESPACE + '.ParsingRuntimeData.insert_data'), \
+                mock.patch(NAMESPACE + '.logging.info'):
             with mock.patch('builtins.open', mock.mock_open(read_data=data_1)), \
-                 mock.patch('os.path.getsize', return_value=200), \
-                 mock.patch('os.path.exists', return_value=True), \
-                 mock.patch('os.path.isfile', return_value=True), \
-                 mock.patch('os.access', return_value=True), \
-                 mock.patch(NAMESPACE + '.logging.error'):
+                    mock.patch('os.path.getsize', return_value=200), \
+                    mock.patch('os.path.exists', return_value=True), \
+                    mock.patch('os.path.isfile', return_value=True), \
+                    mock.patch('os.access', return_value=True), \
+                    mock.patch(NAMESPACE + '.logging.error'):
                 check = ParsingRuntimeData(self.sample_config, CONFIG)
                 result = check.read_binary_data('runtime.api.0.slice_0', b'')
             self.assertEqual(result, b'\x01\x0bp\x00')
             with mock.patch('builtins.open', mock.mock_open(read_data=data_2)), \
-                 mock.patch('os.path.getsize', return_value=200), \
-                 mock.patch('os.path.exists', return_value=True), \
-                 mock.patch('os.path.isfile', return_value=True), \
-                 mock.patch('os.access', return_value=True), \
-                 mock.patch(NAMESPACE + '.logging.error'):
+                    mock.patch('os.path.getsize', return_value=200), \
+                    mock.patch('os.path.exists', return_value=True), \
+                    mock.patch('os.path.isfile', return_value=True), \
+                    mock.patch('os.access', return_value=True), \
+                    mock.patch(NAMESPACE + '.logging.error'):
                 check = ParsingRuntimeData(self.sample_config, CONFIG)
                 result = check.read_binary_data('runtime.api.0.slice_0', b'')
             self.assertEqual(result, b'')
             with mock.patch('builtins.open', mock.mock_open(read_data=data_3)), \
-                 mock.patch('os.path.getsize', return_value=200), \
-                 mock.patch('os.path.exists', return_value=True), \
-                 mock.patch('os.path.isfile', return_value=True), \
-                 mock.patch('os.access', return_value=True), \
-                 mock.patch(NAMESPACE + '.logging.error'):
+                    mock.patch('os.path.getsize', return_value=200), \
+                    mock.patch('os.path.exists', return_value=True), \
+                    mock.patch('os.path.isfile', return_value=True), \
+                    mock.patch('os.access', return_value=True), \
+                    mock.patch(NAMESPACE + '.logging.error'):
                 check = ParsingRuntimeData(self.sample_config, CONFIG)
                 result = check.read_binary_data('runtime.api.0.slice_0', None)
             self.assertEqual(result, b'\x00')
             with mock.patch('builtins.open', mock.mock_open(read_data=data_4)), \
-                 mock.patch('os.path.getsize', return_value=200), \
-                 mock.patch('os.path.exists', return_value=True), \
-                 mock.patch('os.path.isfile', return_value=True), \
-                 mock.patch('os.access', return_value=True), \
-                 mock.patch(NAMESPACE + '.logging.error'):
+                    mock.patch('os.path.getsize', return_value=200), \
+                    mock.patch('os.path.exists', return_value=True), \
+                    mock.patch('os.path.isfile', return_value=True), \
+                    mock.patch('os.access', return_value=True), \
+                    mock.patch(NAMESPACE + '.logging.error'):
                 check = ParsingRuntimeData(self.sample_config, CONFIG)
                 result = check.read_binary_data('runtime.api.0.slice_0', None)
             self.assertEqual(result, b'')
@@ -244,23 +244,23 @@ class TestParsingRuntimeData(unittest.TestCase):
             ChipManager().chip_id = ChipModel.CHIP_V1_1_0
             check = ParsingRuntimeData(self.sample_config, CONFIG)
             result = check._check_file_match('ts_track.data.0.slice_0', 'test')
-            self.assertEqual(result, True)
+            self.assertTrue(result)
             result = check._check_file_match('ts_track.aiv_data.0.slice_0', 'test')
-            self.assertEqual(result, True)
+            self.assertTrue(result)
             result = check._check_file_match('aicore.data.0.slice_0', 'test')
-            self.assertEqual(result, True)
+            self.assertTrue(result)
             result = check._check_file_match('test', 'test')
-            self.assertEqual(result, False)
+            self.assertFalse(result)
         with mock.patch(NAMESPACE + '.is_valid_original_data',
                         return_value=True):
             ChipManager().chip_id = ChipModel.CHIP_V1_1_0
             check = ParsingRuntimeData(self.sample_config, CONFIG)
             result = check._check_file_match('aiVectorCore.data.0.slice_0', 'test')
-            self.assertEqual(result, False)
+            self.assertFalse(result)
             CONFIG['aiv_profiling_mode'] = "task-based"
             check = ParsingRuntimeData(self.sample_config, CONFIG)
             result = check._check_file_match('aiVectorCore.data.0.slice_0', 'test')
-            self.assertEqual(result, False)
+            self.assertFalse(result)
 
     def test_start_parsing_data_file(self):
         wrong_file = ['test']
@@ -269,36 +269,35 @@ class TestParsingRuntimeData(unittest.TestCase):
         res = db_manager.create_table('runtime.db')
         with mock.patch(NAMESPACE + '.ParsingRuntimeData._do_parse_data_file',
                         side_effect=SystemError), \
-             mock.patch(NAMESPACE + '.logging.error'):
+                mock.patch(NAMESPACE + '.logging.error'):
             check = ParsingRuntimeData(self.sample_config, CONFIG)
             result = check._start_parsing_data_file()
         self.assertEqual(result, 1)
         with mock.patch(NAMESPACE + '.PathManager.get_data_dir',
                         return_value='test\\db'), \
-             mock.patch(NAMESPACE + '.get_data_dir_sorted_files', return_value=wrong_file), \
-             mock.patch(NAMESPACE + '.ParsingRuntimeData._check_file_match',
-                        return_value=False):
+                mock.patch(NAMESPACE + '.get_data_dir_sorted_files', return_value=wrong_file), \
+                mock.patch(NAMESPACE + '.ParsingRuntimeData._check_file_match',
+                           return_value=False):
             check = ParsingRuntimeData(self.sample_config, CONFIG)
             result = check._start_parsing_data_file()
         self.assertEqual(result, 0)
         with mock.patch(NAMESPACE + '.PathManager.get_data_dir',
                         return_value='test\\db'), \
-             mock.patch(NAMESPACE + '.get_data_dir_sorted_files', return_value=file_all), \
-             mock.patch(NAMESPACE + '.ParsingRuntimeData._check_file_match',
-                        return_value=True), \
-             mock.patch(NAMESPACE + '.FileManager.add_complete_file'), \
-             mock.patch(NAMESPACE + '.logging.info'), \
-             mock.patch(NAMESPACE + '.PathManager.get_sql_dir', return_value='test\\db'), \
-             mock.patch('os.path.join', return_value='test\\db'), \
-             mock.patch(NAMESPACE + '.DBManager.create_connect_db', return_value=res), \
-             mock.patch(NAMESPACE + '.logging.error'), \
-             mock.patch(NAMESPACE + '.ParsingRuntimeData.read_binary_data',
-                        return_value=b'\x00'):
+                mock.patch(NAMESPACE + '.get_data_dir_sorted_files', return_value=file_all), \
+                mock.patch(NAMESPACE + '.ParsingRuntimeData._check_file_match',
+                           return_value=True), \
+                mock.patch(NAMESPACE + '.FileManager.add_complete_file'), \
+                mock.patch(NAMESPACE + '.logging.info'), \
+                mock.patch(NAMESPACE + '.PathManager.get_sql_dir', return_value='test\\db'), \
+                mock.patch('os.path.join', return_value='test\\db'), \
+                mock.patch(NAMESPACE + '.DBManager.create_connect_db', return_value=res), \
+                mock.patch(NAMESPACE + '.logging.error'), \
+                mock.patch(NAMESPACE + '.ParsingRuntimeData.read_binary_data',
+                           return_value=b'\x00'):
             check = ParsingRuntimeData(self.sample_config, CONFIG)
             result = check._start_parsing_data_file()
         db_manager.destroy(res)
         self.assertEqual(result, 0)
-
 
     def test_ms_run(self):
         with mock.patch(NAMESPACE + '.ParsingRuntimeData.create_runtime_db'):

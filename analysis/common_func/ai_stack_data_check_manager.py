@@ -68,15 +68,6 @@ class AiStackDataCheckManager(DataCheckManager):
                DBManager.check_connect_db(result_dir, DBNameConstant.DB_GE_MODEL_TIME)[0]
 
     @classmethod
-    def contain_ge_op_execute_data(cls: any, result_dir: str, device_id: any = None) -> bool:
-        """
-        ge will always report this type data in host data
-        """
-        return device_id != NumberConstant.HOST_ID and \
-               DBManager.check_tables_in_db(PathManager.get_db_path(
-                   result_dir, DBNameConstant.DB_GE_HOST_INFO), DBNameConstant.TABLE_GE_HOST)
-
-    @classmethod
     def contain_l2_cache_data(cls: any, result_dir: str, device_id: any = None) -> bool:
         """
         The data path contain l2_cache data or not
@@ -153,8 +144,7 @@ class AiStackDataCheckManager(DataCheckManager):
         The data path contain op summary data or not
         """
         return device_id != NumberConstant.HOST_ID and \
-               (cls.contain_op_static_data(result_dir, device_id=device_id) or \
-                cls.contain_op_summary_without_ge_data(result_dir, device_id=device_id))
+               DBManager.check_connect_db(result_dir, DBNameConstant.DB_AICORE_OP_SUMMARY)[0]
 
     @classmethod
     def contain_op_summary_without_ge_data(cls: any, result_dir: str, device_id: any = None) -> bool:
@@ -165,12 +155,20 @@ class AiStackDataCheckManager(DataCheckManager):
                cls.contain_task_time_data(result_dir, device_id=device_id)
 
     @classmethod
-    def contain_op_static_data(cls: any, result_dir: str, device_id: any = None) -> bool:
+    def contain_op_statistic_data(cls: any, result_dir: str, device_id: any = None) -> bool:
         """
         The data path contain op summary data or not
         """
         return device_id != NumberConstant.HOST_ID and \
                DBManager.check_connect_db(result_dir, DBNameConstant.DB_OP_COUNTER)[0]
+
+    @classmethod
+    def contain_api_statistic_data(cls: any, result_dir: str, device_id: any = None) -> bool:
+        """
+        The data path contain api data or not
+        """
+        return device_id != NumberConstant.HOST_ID and DBManager.check_tables_in_db(
+            PathManager.get_db_path(result_dir, DBNameConstant.DB_API_EVENT), DBNameConstant.TABLE_API_DATA)
 
     @classmethod
     def contain_core_cpu_reduce_data(cls: any, result_dir: str, device_id: any = None) -> bool:
@@ -192,6 +190,11 @@ class AiStackDataCheckManager(DataCheckManager):
                                     device_id=device_id)
 
     @classmethod
+    def contain_sub_task_data(cls: any, result_dir: str, device_id: int = None) -> bool:
+        return device_id != NumberConstant.HOST_ID and DBManager.check_tables_in_db(
+            PathManager.get_db_path(result_dir, DBNameConstant.DB_SOC_LOG), DBNameConstant.TABLE_FFTS_LOG)
+
+    @classmethod
     def contain_hccl_hcom_data(cls: any, result_dir: str, device_id: int = None) -> bool:
         """
         The data path contain hccl hcom data or not
@@ -200,7 +203,8 @@ class AiStackDataCheckManager(DataCheckManager):
         :return: if contained hccl hcom data, true or false
         """
         return device_id != NumberConstant.HOST_ID and \
-               DBManager.check_connect_db(result_dir, DBNameConstant.DB_HCCL_INFO)[0]
+               DBManager.check_tables_in_db(
+                   PathManager.get_db_path(result_dir, DBNameConstant.DB_HCCL), DBNameConstant.TABLE_HCCL_ALL_REDUCE)
 
     @classmethod
     def contain_training_trace_data_or_step(cls: any, result_dir: str, device_id: int = None) -> bool:
@@ -255,20 +259,6 @@ class AiStackDataCheckManager(DataCheckManager):
         """
         return cls._contain_stars_profiler_data(result_dir, device_id=device_id) \
                and bool(path_check(PathManager.get_db_path(result_dir, DBNameConstant.DB_ACC_PMU)))
-
-    @classmethod
-    def contain_thread_group_data(cls: any, result_dir: str, device_id: int = None) -> bool:
-        """
-        The data path contain acl,ge,ge_op_execute or runtime api group by thread
-        :param result_dir: data dir path
-        :param device_id: device id
-        :return: if contained data group by thread, true or false
-        """
-        return device_id != NumberConstant.HOST_ID and \
-               (cls.contain_acl_data(result_dir, device_id=device_id) or \
-                cls.contain_ge_model_time_data(result_dir, device_id=device_id) or \
-                cls.contain_ge_op_execute_data(result_dir, device_id=device_id) or \
-                cls.contain_runtime_api_data(result_dir, device_id=device_id))
 
     @classmethod
     def contain_stars_low_power_data(cls: any, result_dir: str, device_id: int = None) -> bool:
@@ -395,3 +385,11 @@ class AiStackDataCheckManager(DataCheckManager):
         """
         return device_id != NumberConstant.HOST_ID and DBManager.check_tables_in_db(
             PathManager.get_db_path(result_dir, DBNameConstant.DB_API_EVENT), DBNameConstant.TABLE_API_DATA)
+
+    @classmethod
+    def contain_hccl_statistic_data(cls: any, result_dir: str, device_id: int = None) -> bool:
+        """
+        The data path contain hccl statistic data or not
+        """
+        return device_id != NumberConstant.HOST_ID and DBManager.check_tables_in_db(
+            PathManager.get_db_path(result_dir, DBNameConstant.DB_HCCL), DBNameConstant.TABLE_HCCL_OP_REPORT)

@@ -262,7 +262,8 @@ void ArgsManager::AddBasicArgs()
         {"ascendcl", "Show acl profiling data, the default value is on.(full-platform)", ON},
         {"model-execution", "Show ge model execution profiling data, the default value is off.(full-platform)", OFF},
         {"runtime-api", "Show runtime api profiling data, the default value is off.(full-platform)", OFF},
-        {"task-time", "Show task profiling data, the default value is on.(full-platform)", ON},
+         {"task-time", "Show task profiling data, the default value is on.(full-platform)\n"
+            "\t\t\t\t\t\t   The switch can be set in range [l0, l1, on, off]", ON},
         {"environment", "User app custom environment variable configuration.(full-platform)"},
         {"sys-period", "Set total sampling period of system profiling in seconds.(full-platform)"},
         {"sys-devices", "Specify the profiling scope by device ID when collect sys profiling.\n"
@@ -315,6 +316,11 @@ void ArgsManager::AddAnalysisArgs()
     argsList = {
         {"python-path", "Specify the python interpreter path that is used for analysis, please\n"
             "\t\t\t\t\t\t   ensure the python version is 3.7.5 or later.(full-platform)"},
+        {"analyze", "Switch for using msprof to analyze collecting data, the default value\n"
+            "\t\t\t\t\t\t   is off.(full-platform)", OFF},
+        {"rule", "Switch specified rule for using msprof to analyze collecting data, the default value\n"
+            "\t\t\t\t\t\t   is communication.(full-platform)\n"
+            "\t\t\t\t\t\t   The switch can be set in [communication]"},
         {"parse", "Switch for using msprof to parse collecting data, the default value\n"
             "\t\t\t\t\t\t   is off.(full-platform)", OFF},
         {"query", "Switch for using msprof to query collecting data, the default value\n"

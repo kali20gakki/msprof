@@ -7,7 +7,7 @@ Copyright Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 import unittest
 from unittest import mock
 
-from analyzer.scene_base.profiling_scene import ProfilingScene
+from common_func.profiling_scene import ProfilingScene
 from constant.constant import CONFIG
 from mscalculate.hwts.hwts_aiv_calculator import HwtsAivCalculator
 from profiling_bean.prof_enum.data_tag import DataTag

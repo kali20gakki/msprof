@@ -34,8 +34,8 @@ class TestTorchToAclNpu(unittest.TestCase):
         {'name': 'torch_to_acl', 'ph': 's', 'id': 1.5, 'pid': 100, 'tid': 1, 'ts': 1.0, 'cat': 'async_acl_npu'},
         {'name': 'torch_to_acl', 'ph': 'f', 'id': 1.5, 'pid': 107153202, 'tid': 1071819, 'ts': 1.5, 'bp': 'e',
          'cat': 'async_acl_npu'},
-        {'name': 'torch_to_npu', 'ph': 's', 'id': '530', 'pid': 100, 'tid': 1, 'ts': 1.0, 'cat': 'async_npu'},
-        {'name': 'torch_to_npu', 'ph': 'f', 'id': '530', 'pid': 3, 'tid': 5, 'ts': 3, 'bp': 'e',
+        {'name': 'torch_to_npu', 'ph': 's', 'id': 21475033088, 'pid': 100, 'tid': 1, 'ts': 1.0, 'cat': 'async_npu'},
+        {'name': 'torch_to_npu', 'ph': 'f', 'id': 21475033088, 'pid': 3, 'tid': 5, 'ts': 3, 'bp': 'e',
          'cat': 'async_npu'}
     ]
 

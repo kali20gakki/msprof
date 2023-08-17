@@ -153,17 +153,6 @@ TEST_F(ParamsAdapterMsprofUtest, SpliteAppPath)
     MsprofParamAdapterMgr->SpliteAppPath(appParam);
 }
 
-TEST_F(ParamsAdapterMsprofUtest, SetParamsSelf)
-{
-    GlobalMockObject::verify();
-    std::shared_ptr<ParamsAdapterMsprof> MsprofParamAdapterMgr;
-    MSVP_MAKE_SHARED0_BREAK(MsprofParamAdapterMgr, ParamsAdapterMsprof);
-    SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params;
-    MSVP_MAKE_SHARED0_VOID(params, analysis::dvvp::message::ProfileParams);
-    MsprofParamAdapterMgr->params_ = params;
-    MsprofParamAdapterMgr->SetParamsSelf();
-}
-
 TEST_F(ParamsAdapterMsprofUtest, CreateCfgMap)
 {
     GlobalMockObject::verify();

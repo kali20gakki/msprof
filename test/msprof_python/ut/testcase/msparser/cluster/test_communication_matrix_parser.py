@@ -22,7 +22,7 @@ class Event:
         self.dst_rank = 1
         self.op_name = 'hcom_allReduce_1'
         self.hccl_name = hccl_name
-        self.size = 1024 ** 2
+        self.size = 1000 ** 2
         self.duration = 1000000
         self.transport_type = transport_type
         self.timestamp = 0

@@ -6,7 +6,7 @@ import pytest
 
 from mscalculate.ascend_task.ascend_task import TopDownTask
 from mscalculate.data_analysis.merge_op_counter_calculator import MergeOpCounterCalculator
-from analyzer.scene_base.profiling_scene import ProfilingScene
+from common_func.profiling_scene import ProfilingScene
 from common_func.constant import Constant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.msprof_exception import ProfException
@@ -44,7 +44,7 @@ class TestMergeOpCounterCalculator(unittest.TestCase):
             self.assertEqual(result, None)
             with mock.patch(NAMESPACE + '.MergeOpCounterCalculator._is_db_need_to_create',
                             return_value=True), \
-                    mock.patch('analyzer.scene_base.profiling_scene.Utils.get_scene',
+                    mock.patch('common_func.profiling_scene.Utils.get_scene',
                                return_value="step_info"):
                 with mock.patch(NAMESPACE + '.MergeOpCounterCalculator.create_db',
                                 return_value=res), \
@@ -136,7 +136,7 @@ class TestMergeOpCounterCalculator(unittest.TestCase):
         self.assertEqual(result, [])
 
     def test_get_op_report_sql(self):
-        with mock.patch('analyzer.scene_base.profiling_scene.Utils.get_scene',
+        with mock.patch('common_func.profiling_scene.Utils.get_scene',
                         return_value="step_info"):
             check = MergeOpCounterCalculator(file_list, CONFIG)
             ProfilingScene().init('')
@@ -147,8 +147,7 @@ class TestMergeOpCounterCalculator(unittest.TestCase):
                          "ge_task_merge.model_id from ge_task_merge, rts_task "
                          "where ge_task_merge.task_id=rts_task.task_id and ge_task_merge.stream_id=rts_task.stream_id "
                          "and ge_task_merge.batch_id=rts_task.batch_id "
-                         "and (ge_task_merge.context_id=rts_task.subtask_id "
-                         "or (ge_task_merge.context_id=4294967295 and subtask_id=0)) "
+                         "and ge_task_merge.context_id=rts_task.subtask_id "
                          "and rts_task.start_time != -1 "
                          "group by op_type,ge_task_merge.task_type",
                          result)
