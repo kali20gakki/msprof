@@ -67,7 +67,8 @@ class TorchToAclNpu:
         for torch_npu_data in self._torch_npu_data_list:
             start_point = {
                 'name': 'torch_to_npu', 'ph': 's',
-                'id': f'{torch_npu_data.stream_id}{torch_npu_data.task_id}{torch_npu_data.batch_id}',
+                'id': TraceViewManager.get_line_format_pid(torch_npu_data.stream_id, torch_npu_data.task_id,
+                                                           torch_npu_data.batch_id),
                 'pid': TraceViewManager.get_format_pid(torch_npu_data.torch_op_pid, self.TORCH_PID),
                 'tid': torch_npu_data.torch_op_tid,
                 'ts': torch_npu_data.torch_op_start_time / DBManager.NSTOUS, 'cat': StrConstant.ASYNC_NPU
@@ -81,7 +82,8 @@ class TorchToAclNpu:
                     continue
                 end_point = {
                     'name': 'torch_to_npu', 'ph': 'f',
-                    'id': '{}{}{}'.format(args.get('Stream Id'), args.get('Task Id'), args.get('Batch Id')),
+                    'id': TraceViewManager.get_line_format_pid(args.get('Stream Id'), args.get('Task Id'),
+                                                               args.get('Batch Id')),
                     'pid': data.get('pid'), 'tid': data.get('tid'), 'ts': data.get('ts'), 'bp': 'e',
                     'cat': StrConstant.ASYNC_NPU
                 }
