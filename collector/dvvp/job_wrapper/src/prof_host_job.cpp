@@ -756,8 +756,8 @@ int ProfHostService::KillToolAndWaitHostProcess() const
     envV.push_back(ENV_PATH);
     std::vector<std::string> argsV;
     argsV.push_back(PROF_SCRIPT_FILE_PATH);
-    argsV.push_back("pkill");
-    argsV.push_back(toolName_);
+    argsV.push_back("kill");
+    argsV.push_back(std::to_string(hostProcess_));
     int exitCode = analysis::dvvp::common::utils::VALID_EXIT_CODE;
     static const std::string CMD = "sudo";
     MmProcess appProcess = MSVP_MMPROCESS;
