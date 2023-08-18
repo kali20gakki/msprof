@@ -25,6 +25,7 @@ class PathManager:
     PROFILER = ".profiler"
     HCCL = "hccl"
     QUERY_CLUSTER = "query"
+    ANALYZE = 'analyze'
 
     @staticmethod
     def get_path_under_result_dir(result_dir: str, *paths: str) -> str:
@@ -134,6 +135,14 @@ class PathManager:
         return cls.get_path_under_result_dir(result_dir, cls.TIMELINE)
 
     @classmethod
+    def get_analyze_dir(cls: any, result_dir: str) -> str:
+        """
+        get timeline dir in result directory
+        :return: the timeline dir
+        """
+        return cls.get_path_under_result_dir(result_dir, cls.ANALYZE)
+
+    @classmethod
     def get_sample_json_path(cls: any, result_dir: str) -> str:
         """
         get sample json path in result directory
@@ -153,3 +162,10 @@ class PathManager:
         get query result path in result directory
         """
         return cls.get_path_under_result_dir(result_dir, cls.QUERY_CLUSTER, file_name)
+
+    @classmethod
+    def get_analyze_result_path(cls: any, result_dir: str, file_name: str) -> str:
+        """
+        get query result path in result directory
+        """
+        return cls.get_path_under_result_dir(result_dir, cls.ANALYZE, file_name)

@@ -116,6 +116,15 @@ def prepare_for_parse(output_path: str) -> None:
     prepare_log(output_path)
 
 
+def prepare_for_analyze(out_path):
+    """
+    create analyze log directories
+    """
+    analyze_dir = PathManager.get_analyze_dir(out_path)
+    check_path_valid(analyze_dir, True)
+    prepare_log(analyze_dir)
+
+
 def prepare_log(output_path: str) -> None:
     """
     create data and corresponding directories

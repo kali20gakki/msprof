@@ -6,7 +6,7 @@ import logging
 import os
 from collections import deque
 
-from analyzer.scene_base.profiling_scene import ProfilingScene
+from common_func.profiling_scene import ProfilingScene
 from common_func.common import CommonConstant
 from common_func.constant import Constant
 from common_func.data_manager import DataManager
@@ -345,7 +345,8 @@ class AiCoreOpReport:
         hash_dict = get_ge_hash_dict(project_path)
         result_data = []
         if not hash_dict:
-            return ai_core_data
+            logging.error("create op_summary data may be an error, because table GeHashInfo is not found.")
+            return [list(_data) for _data in ai_core_data]
         for _data in ai_core_data:
             _data = list(_data)
             _data[3] = hash_dict.get(_data[3], _data[3])  # op_name

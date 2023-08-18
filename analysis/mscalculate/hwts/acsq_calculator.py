@@ -4,7 +4,7 @@
 
 import logging
 
-from analyzer.scene_base.profiling_scene import ProfilingScene
+from common_func.profiling_scene import ProfilingScene
 from common_func.batch_counter import BatchCounter
 from common_func.constant import Constant
 from common_func.db_manager import DBManager

@@ -6,7 +6,7 @@ import os
 from typing import List
 from collections import defaultdict
 
-from analyzer.scene_base.profiling_scene import ProfilingScene
+from common_func.profiling_scene import ProfilingScene
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.str_constant import StrConstant
@@ -48,6 +48,20 @@ class HcclCalculator(ICalculator, MsMultiProcess):
             else:
                 bandwidth = size / time  # 10^9 / 10^9 = 1 scale(GB/s)
             data.args['bandwidth(GB/s)'] = bandwidth
+    
+    @staticmethod
+    def update_op_name_by_group_name(communication_data: List[HcclDto]):
+        group_dict = defaultdict(lambda: {"first_timestamp": 0, "count": 0})
+        for data in communication_data:
+            if data.group_name in group_dict:
+                if data.first_timestamp > group_dict[data.group_name]["first_timestamp"]:
+                    group_dict[data.group_name]["first_timestamp"] = data.first_timestamp
+                    group_dict[data.group_name]["count"] += 1
+            else:
+                group_dict[data.group_name]["first_timestamp"] = data.first_timestamp
+                group_dict[data.group_name]["count"] = 0
+            index = group_dict[data.group_name]["count"]
+            data.op_name = data.op_name + "_" + data.group_name[-3:] + "_" + str(index)
 
     @staticmethod
     def _cal_total(type_time: dict) -> int:
@@ -101,6 +115,7 @@ class HcclCalculator(ICalculator, MsMultiProcess):
             if not communication_data:
                 return
             self.update_bandwidth(communication_data)
+            self.update_op_name_by_group_name(communication_data)
             is_hccl_op_type_valid = self._generate_hccl_op_info(communication_data)
             if is_hccl_op_type_valid:
                 hccl_op_report_data = self._get_hccl_op_report_data(communication_data)
@@ -172,16 +187,22 @@ class HcclCalculator(ICalculator, MsMultiProcess):
             statistic_data = task_data.get(op_type, {})
             if not statistic_data:
                 continue
-            task_duration_ratio = round(float(statistic_data["total_time"] / hccl_op_total_time * 100),
-                                        NumberConstant.DECIMAL_ACCURACY) if hccl_op_total_time != 0 else 0
+            if hccl_op_total_time != 0:
+                task_duration_ratio = round(float(statistic_data["total_time"] / hccl_op_total_time * 100),
+                                            NumberConstant.DECIMAL_ACCURACY)
+            else:
+                task_duration_ratio = 0
             total_data.append(
-                (op_type,
-                 statistic_data["count"],
-                 round(float(statistic_data["total_time"]), NumberConstant.DECIMAL_ACCURACY),
-                 round(float(statistic_data["min"]), NumberConstant.DECIMAL_ACCURACY),
-                 round(float(statistic_data["avg"]), NumberConstant.DECIMAL_ACCURACY),
-                 round(float(statistic_data["max"]), NumberConstant.DECIMAL_ACCURACY),
-                 task_duration_ratio))
+                (
+                    op_type,
+                    statistic_data["count"],
+                    round(float(statistic_data["total_time"]), NumberConstant.DECIMAL_ACCURACY),
+                    round(float(statistic_data["min"]), NumberConstant.DECIMAL_ACCURACY),
+                    round(float(statistic_data["avg"]), NumberConstant.DECIMAL_ACCURACY),
+                    round(float(statistic_data["max"]), NumberConstant.DECIMAL_ACCURACY),
+                    task_duration_ratio
+                )
+            )
         if total_data:
             self._hccl_op_report_data = sorted(total_data, key=lambda x: x[5], reverse=True)
         else:

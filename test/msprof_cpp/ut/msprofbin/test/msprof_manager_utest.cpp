@@ -119,6 +119,9 @@ TEST_F(MSPROF_MANAGER_UTEST, GenerateRunningMode) {
     params->exportSwitch = "on";
     EXPECT_EQ(PROFILING_SUCCESS, msprofManager->GenerateRunningMode());
     params->exportSwitch = "";
+    params->analyzeSwitch = "on";
+    EXPECT_EQ(PROFILING_SUCCESS, msprofManager->GenerateRunningMode());
+    params->analyzeSwitch = "";
     EXPECT_EQ(PROFILING_FAILED, msprofManager->GenerateRunningMode());
 
     MOCKER_CPP(&Analysis::Dvvp::Common::Platform::Platform::PlatformIsHelperHostSide)
@@ -134,7 +137,7 @@ TEST_F(MSPROF_MANAGER_UTEST, GenerateRunningMode) {
 TEST_F(MSPROF_MANAGER_UTEST, GenerateRunningMod_helper) { 
     auto msprofManager = MsprofManager::instance();
     std::shared_ptr<analysis::dvvp::message::ProfileParams> params(
-    new analysis::dvvp::message::ProfileParams);
+        new analysis::dvvp::message::ProfileParams);
     
     MOCKER_CPP(&Analysis::Dvvp::Common::Platform::Platform::PlatformIsHelperHostSide)
         .stubs()
@@ -148,9 +151,9 @@ TEST_F(MSPROF_MANAGER_UTEST, GenerateRunningMod_helper) {
 TEST_F(MSPROF_MANAGER_UTEST, ParamsCheck) { 
     GlobalMockObject::verify();
     std::shared_ptr<analysis::dvvp::message::ProfileParams> params(
-    new analysis::dvvp::message::ProfileParams);
+        new analysis::dvvp::message::ProfileParams);
     std::shared_ptr<Collector::Dvvp::Msprofbin::AppMode> rMode(
-    new Collector::Dvvp::Msprofbin::AppMode("app", params));
+        new Collector::Dvvp::Msprofbin::AppMode("app", params));
     auto msprofManager = MsprofManager::instance();
     msprofManager->UnInit();   
     EXPECT_EQ(PROFILING_FAILED, msprofManager->ParamsCheck());

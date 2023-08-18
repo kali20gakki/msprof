@@ -6,7 +6,7 @@ import logging
 import os
 
 from common_func.ms_multi_process import MsMultiProcess
-from analyzer.scene_base.profiling_scene import ProfilingScene
+from common_func.profiling_scene import ProfilingScene
 from common_func.ms_constant.str_constant import StrConstant
 from msconfig.config_manager import ConfigManager
 from common_func.constant import Constant

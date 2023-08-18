@@ -1,7 +1,7 @@
 import unittest
 from unittest import mock
 
-from analyzer.scene_base.profiling_scene import ProfilingScene
+from common_func.profiling_scene import ProfilingScene
 from mscalculate.data_analysis.op_summary_op_scene_calculator import OpSummaryOpSceneCalculator
 from common_func.info_conf_reader import InfoConfReader
 from constant.constant import CONFIG
