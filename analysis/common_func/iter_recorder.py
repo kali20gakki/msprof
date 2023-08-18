@@ -62,13 +62,15 @@ class IterRecorder:
             return True
         return self._max_iter_time >= sys_cnt
 
-    def check_task_in_iter(self: any, sys_cnt: int) -> bool:
-        curr_iter = self._current_iter_id - 1 if self._current_iter_id != self.DEFAULT_ITER_ID else 0
-        for iter_start_time, iter_end_time in self._iter_time[curr_iter:]:
-            if sys_cnt < iter_start_time:
-                return False
-            if sys_cnt <= iter_end_time:
-                return True
+    def check_task_in_iter(self: any, sys_cnt: int, iters: list = None) -> bool:
+        if iters is None:
+            iters = [self._current_iter_id if self._current_iter_id != self.DEFAULT_ITER_ID else 1]
+        for curr_iter in iters:
+            for iter_start_time, iter_end_time in self._iter_time[curr_iter - 1:]:
+                if sys_cnt < iter_start_time:
+                    break
+                if sys_cnt <= iter_end_time:
+                    return True
         return False
 
     def set_current_iter_id(self: any, sys_cnt: int) -> None:
