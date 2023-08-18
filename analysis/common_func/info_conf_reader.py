@@ -408,6 +408,7 @@ class InfoConfReader:
         dev_start_path = self.get_conf_file_path(result_path, get_dev_start_compiles())
         if not os.path.exists(dev_start_path):
             return
+        check_path_valid(dev_start_path, True)
         try:
             with open(dev_start_path, "r") as log_file:
                 self._load_dev_start_path_line_by_line(log_file)
