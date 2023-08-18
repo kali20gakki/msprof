@@ -15,7 +15,7 @@ class DataCalculatorConfig(MetaConfig):
         'SubTaskCalculator': [
             ('path', 'mscalculate.stars.sub_task_calculate'),
             ('chip_model', '5'),
-            ('level', '4'),
+            ('level', '5'),
             ('position', 'D')
         ],
         'L2CacheCalculator': [

@@ -60,7 +60,6 @@ class ExportDataType(Enum):
     TS_CPU_TOP_FUNCTION = 47
     STARS_SOC = 48
     STARS_CHIP_TRANS = 49
-    THREAD_GROUP = 50
     LOW_POWER = 51
     INSTR = 52
     ACC_PMU = 53
@@ -72,4 +71,5 @@ class ExportDataType(Enum):
     EVENT = 59
     API = 60
     HCCL_STATISTIC = 61
+    API_STATISTIC = 62
     MSPROF = 100

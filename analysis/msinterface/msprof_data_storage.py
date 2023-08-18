@@ -8,7 +8,7 @@ import math
 import os
 import re
 
-from analyzer.scene_base.profiling_scene import ProfilingScene
+from common_func.profiling_scene import ProfilingScene
 from common_func.constant import Constant
 from common_func.file_manager import FileOpen
 from common_func.ms_constant.number_constant import NumberConstant
