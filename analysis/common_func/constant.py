@@ -424,7 +424,7 @@ class Constant:
     L2_CACHE_ITEM = 8
     HEX_NUMBER = 16
     DVPP_TYPE_NAME = ['VDEC', 'JPEGD', 'PNGD', 'JPEGE', 'VPC']
-    FILTER_DIRS = [".profiler", "HCCL_PROF", "timeline", "query", 'sqlite', 'log']
+    FILTER_DIRS = [".profiler", "HCCL_PROF", "timeline", "query", 'sqlite', 'log', 'analyze']
     NA = 'N/A'
     TASK_TYPE_OTHER = "Other"
     TASK_TYPE_AI_CORE = "AI_CORE"
@@ -439,7 +439,7 @@ class Constant:
     TASK_TYPE_HCCL = "HCCL"
     TASK_TYPE_DSA = "DSA_SQE"
     TASK_TYPE_DVPP = "DVPP"
-    TASK_TYPE_UNKNOWN = "UnKnown"
+    TASK_TYPE_UNKNOWN = "UNKNOWN"
     DATA_PROCESS_DP = "DP"
     DATA_QUEUE = "AICPUMI"
     TASK_TYPE = 'task_type'

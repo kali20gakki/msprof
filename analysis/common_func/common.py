@@ -215,19 +215,6 @@ class LogFactory:
         return LogFactory.loggers.get(name)
 
 
-def get_col_index(curs: any, table_name: str, col_name: str) -> int:
-    """
-    get column index from certain table
-    """
-    curs.execute("SELECT * FROM {}".format(table_name))
-    index = 0
-    for col_tuple in curs.description:
-        if col_name == col_tuple[0]:
-            return index
-        index += 1
-    return -1
-
-
 def is_linux() -> bool:
     """
     check whether our system is linux or not

@@ -3,7 +3,7 @@
 # Copyright (c) Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
 import logging
 
-from analyzer.scene_base.profiling_scene import ProfilingScene
+from common_func.profiling_scene import ProfilingScene
 from msmodel.ai_cpu.ai_cpu_model import AiCpuModel
 from common_func.batch_counter import BatchCounter
 from common_func.db_name_constant import DBNameConstant

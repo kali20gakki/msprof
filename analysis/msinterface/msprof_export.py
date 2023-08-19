@@ -6,7 +6,7 @@ import json
 import logging
 import os
 
-from analyzer.scene_base.profiling_scene import ProfilingScene
+from common_func.profiling_scene import ProfilingScene
 from common_func.ai_stack_data_check_manager import AiStackDataCheckManager
 from common_func.common import error
 from common_func.common import print_info
@@ -56,14 +56,6 @@ class ExportCommand:
         MsProfCommonConstant.TIMELINE: [
             {'export_type': ExportDataType.STEP_TRACE,
              'handler': AiStackDataCheckManager.contain_training_trace_data_or_step},
-            {'export_type': ExportDataType.ACL,
-             'handler': AiStackDataCheckManager.contain_acl_data},
-            {'export_type': ExportDataType.GE,
-             'handler': AiStackDataCheckManager.contain_ge_model_time_data},
-            {'export_type': ExportDataType.GE_OP_EXECUTE,
-             'handler': AiStackDataCheckManager.contain_ge_op_execute_data},
-            {'export_type': ExportDataType.RUNTIME_API,
-             'handler': AiStackDataCheckManager.contain_runtime_api_data},
             {'export_type': ExportDataType.TASK_TIME,
              'handler': AiStackDataCheckManager.contain_core_cpu_reduce_data},
             {'export_type': ExportDataType.HBM, 'handler': SystemDataCheckManager.contain_hbm_data},
@@ -98,7 +90,7 @@ class ExportCommand:
             {'export_type': ExportDataType.OS_RUNTIME_API,
              'handler': HostDataCheckManager.contain_runtime_api_data},
             {'export_type': ExportDataType.FFTS_SUB_TASK_TIME,
-             'handler': AiStackDataCheckManager.contain_stars_soc_data},
+             'handler': AiStackDataCheckManager.contain_sub_task_data},
             {'export_type': ExportDataType.HCCL,
              'handler': AiStackDataCheckManager.contain_hccl_hcom_data},
             {'export_type': ExportDataType.MSPROF_TX,
@@ -107,8 +99,6 @@ class ExportCommand:
              'handler': AiStackDataCheckManager.contain_stars_soc_profiler_data},
             {'export_type': ExportDataType.STARS_CHIP_TRANS,
              'handler': AiStackDataCheckManager.contain_stars_chip_trans_data},
-            {'export_type': ExportDataType.THREAD_GROUP,
-             'handler': AiStackDataCheckManager.contain_thread_group_data},
             {'export_type': ExportDataType.LOW_POWER,
              'handler': AiStackDataCheckManager.contain_stars_low_power_data},
             {'export_type': ExportDataType.INSTR,
@@ -131,12 +121,10 @@ class ExportCommand:
              'handler': AiStackDataCheckManager.contain_l2_cache_data},
             {'export_type': ExportDataType.STEP_TRACE,
              'handler': AiStackDataCheckManager.contain_training_trace_data_or_step},
-            {'export_type': ExportDataType.GE_OP_EXECUTE,
-             'handler': AiStackDataCheckManager.contain_ge_op_execute_data},
             {'export_type': ExportDataType.OP_SUMMARY,
              'handler': AiStackDataCheckManager.contain_op_summary_data},
             {'export_type': ExportDataType.OP_STATISTIC,
-             'handler': AiStackDataCheckManager.contain_op_static_data},
+             'handler': AiStackDataCheckManager.contain_op_statistic_data},
             {'export_type': ExportDataType.AICPU,
              'handler': AiStackDataCheckManager.contain_dp_aicpu_data},
             {'export_type': ExportDataType.DP,
@@ -182,14 +170,8 @@ class ExportCommand:
              'handler': SystemDataCheckManager.contain_ts_cpu_data},
             {'export_type': ExportDataType.NPU_MEM,
              'handler': SystemDataCheckManager.contain_npu_mem_data},
-            {'export_type': ExportDataType.ACL,
-             'handler': AiStackDataCheckManager.contain_acl_data},
-            {'export_type': ExportDataType.ACL_STATISTIC,
-             'handler': AiStackDataCheckManager.contain_acl_data},
             {'export_type': ExportDataType.FUSION_OP,
              'handler': AiStackDataCheckManager.contain_fusion_op_data},
-            {'export_type': ExportDataType.RUNTIME_API,
-             'handler': AiStackDataCheckManager.contain_runtime_api_data},
             {'export_type': ExportDataType.AI_CORE_UTILIZATION,
              'handler': AiStackDataCheckManager.contain_ai_core_sample_based},
             {'export_type': ExportDataType.AI_VECTOR_CORE_UTILIZATION,
@@ -212,6 +194,10 @@ class ExportCommand:
              'handler': AiStackDataCheckManager.contain_npu_op_mem_data},
             {'export_type': ExportDataType.MEMORY_RECORD,
              'handler': AiStackDataCheckManager.contain_npu_op_mem_rec_data},
+            {'export_type': ExportDataType.HCCL_STATISTIC,
+             'handler': AiStackDataCheckManager.contain_hccl_statistic_data},
+            {'export_type': ExportDataType.API_STATISTIC,
+             'handler': AiStackDataCheckManager.contain_api_statistic_data},
         ]
     }
     MODEL_ID = "model_id"

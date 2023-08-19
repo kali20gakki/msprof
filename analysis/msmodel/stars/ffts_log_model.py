@@ -62,6 +62,13 @@ class FftsLogModel(ParserModel):
         """
         return self.get_all_data(DBNameConstant.TABLE_FFTS_LOG)
 
+    def get_ffts_log_data(self: any) -> list:
+        """
+        get ffts log data from database
+        :return: result list
+        """
+        return self.get_all_data(DBNameConstant.TABLE_FFTS_LOG, dto_class=TaskTimeDto)
+
     def get_ffts_task_data(self):
         """
         get ffts task data

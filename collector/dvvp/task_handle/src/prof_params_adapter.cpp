@@ -76,7 +76,7 @@ void ProfParamsAdapter::ProfStartCfgToParamsCfg(const uint64_t dataTypeConfig,
     SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params)
 {
     // ts_memcpy
-    if (dataTypeConfig & PROF_TASK_TIME_MASK) {
+    if (dataTypeConfig & PROF_TASK_TIME_L1_MASK) {
         params->ts_memcpy = MSVP_PROF_ON;
     }
     params->ts_keypoint = MSVP_PROF_ON;

@@ -656,12 +656,20 @@ bool ParamValidation::IsValidSwitch(const std::string &switchStr) const
     if (switchStr.empty()) {
         return true;
     }
-    if (switchStr.compare("on") != 0 &&
-        switchStr.compare("off") != 0) {
-        MSPROF_LOGE("The switch should be set to on or off.");
+    if (switchStr.compare("on") != 0 && switchStr.compare("off") != 0) {
         return false;
     }
     return true;
+}
+
+bool ParamValidation::IsValidTaskTimeSwitch(const std::string &switchVal) const
+{
+    if (switchVal.compare(MSVP_PROF_L0) == 0 || switchVal.compare(MSVP_PROF_L1) == 0 || IsValidSwitch(switchVal)) {
+        return true;
+    }
+    MSPROF_LOGE("The switch task_time should be set in range [l0, l1, on, off].");
+    CMD_LOGE("Argument --task-time should be set in range [l0, l1, on, off].");
+    return false;
 }
 
 bool ParamValidation::IsValidInputCfgSwitch(const std::string &switchName, const std::string &switchVal) const
@@ -671,6 +679,26 @@ bool ParamValidation::IsValidInputCfgSwitch(const std::string &switchName, const
         CMD_LOGE("Argument --%s=%s should be set to on or off.", switchName.c_str(), switchVal.c_str());
         return false;
     }
+    return true;
+}
+
+bool ParamValidation::IsValidAnalyzeRuleSwitch(const std::string &switchName, const std::string &switchVal) const
+{
+    if (switchVal.empty()) {
+        return true;
+    }
+    std::vector<std::string> ruleVal =
+        analysis::dvvp::common::utils::Utils::Split(switchVal, false, "", ",");
+    
+    for (size_t i = 0; i < ruleVal.size(); ++i) {
+        if (ruleVal[i].compare("communication") != 0 && ruleVal[i].compare("max_step_time") != 0) {
+            MSPROF_LOGE("The switch %s should be set to communication or max_step_time.", switchName.c_str());
+            CMD_LOGE("Argument --%s=%s is invalid."
+                "Should be set to communication or max_step_time.", switchName.c_str(), switchVal.c_str());
+            return false;
+        }
+    }
+
     return true;
 }
 

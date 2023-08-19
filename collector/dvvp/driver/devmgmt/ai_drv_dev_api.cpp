@@ -305,29 +305,13 @@ bool DrvCheckIfHelperHost()
     return false;
 }
 
-bool DrvGetHostFreq(std::string &freq)
-{
-    int64_t hostFreq = 0;
-    auto ret = DriverPlugin::instance()->MsprofHalGetDeviceInfo(0, static_cast<int32_t>(MODULE_TYPE_SYSTEM),
-        static_cast<int32_t>(INFO_TYPE_HOST_OSC_FREQUE), &hostFreq);
-    if (ret == DRV_ERROR_NONE && hostFreq > 0) {
-        MSPROF_LOGI("Succeeded to DrvGetHostFreq frequency=%lld", hostFreq);
-        freq = std::to_string(static_cast<float>(hostFreq) / FREQUENCY_KHZ_TO_MHZ);
-        return true;
-    } else {
-        MSPROF_LOGW("Driver doesn't support DrvGetHostFreq by halGetDeviceInfo interface, ret=%d",
-            static_cast<int32_t>(ret));
-        freq = NOT_SUPPORT_FREQUENCY;
-    }
-
-    return false;
-}
-
 bool DrvGetDeviceFreq(uint32_t deviceId, std::string &freq)
 {
+    auto type = (deviceId == HOST_ID) ? INFO_TYPE_HOST_OSC_FREQUE : INFO_TYPE_DEV_OSC_FREQUE;
+    uint32_t devId = (deviceId == HOST_ID) ? 0 : deviceId;
     int64_t deviceFreq = 0;
-    auto ret = DriverPlugin::instance()->MsprofHalGetDeviceInfo(deviceId, static_cast<int32_t>(MODULE_TYPE_SYSTEM),
-        static_cast<int32_t>(INFO_TYPE_DEV_OSC_FREQUE), &deviceFreq);
+    auto ret = DriverPlugin::instance()->MsprofHalGetDeviceInfo(devId, static_cast<int32_t>(MODULE_TYPE_SYSTEM),
+        static_cast<int32_t>(type), &deviceFreq);
     if (ret == DRV_ERROR_NONE && deviceFreq > 0) {
         MSPROF_LOGI("Succeeded to DrvGetDeviceFreq frequency=%lld", deviceFreq);
         freq = std::to_string(static_cast<float>(deviceFreq) / FREQUENCY_KHZ_TO_MHZ);

@@ -17,7 +17,6 @@ class TestOpSummaryModel(TestDirCRBaseModel):
 
     def test_create_table(self):
         with mock.patch(NAMESPACE + '.OpSummaryModel.create_ge_summary_table', return_value=""), \
-             mock.patch(NAMESPACE + '.OpSummaryModel.create_ge_tensor_table', return_value=""), \
              mock.patch(NAMESPACE + '.OpSummaryModel.create_ai_core_metrics_table', return_value=""), \
              mock.patch(NAMESPACE + '.OpSummaryModel.create_task_time_table', return_value=""), \
              mock.patch(NAMESPACE + '.OpSummaryModel.sql_commit', return_value=""):
@@ -34,11 +33,6 @@ class TestOpSummaryModel(TestDirCRBaseModel):
              mock.patch(NAMESPACE + '.logging.warning'):
             check = OpSummaryModel(SAMPLE_CONFIG)
             check.create_ge_summary_table()
-
-    def test_create_ge_tensor_table(self):
-        with mock.patch(NAMESPACE + '.DBManager.execute_sql'):
-            check = OpSummaryModel(SAMPLE_CONFIG)
-            check.create_ge_tensor_table()
 
     def test_create_ai_core_metrics_table(self):
         with mock.patch(NAMESPACE + '.OpSummaryModel.attach_to_db', return_value=True), \
@@ -137,7 +131,7 @@ class TestOpSummaryModel(TestDirCRBaseModel):
 
         task_time_data = [
             (1, 23, 397531459795910, 4280, 0, "AI_CORE", -1, 4294967295, 0, 4294967295),
-            (2, 23, 397531459795911, 4280, 0, "UnKnown", -1, 4294967295, 0, 4294967295),
+            (2, 23, 397531459795911, 4280, 0, "UNKNOWN", -1, 4294967295, 0, 4294967295),
             (3, 23, 397531459795912, 4280, 0, "AI_CPU", -1, 4294967295, 0, 4294967295),
             (4, 23, 397531459795913, 4280, 0, "AI_VECTOR_CORE", -1, 4294967295, 0, 4294967295),
             (5, 23, 397531459795914, 4280, 0, "MIX_AIV", -1, 4294967295, 0, 4294967295),

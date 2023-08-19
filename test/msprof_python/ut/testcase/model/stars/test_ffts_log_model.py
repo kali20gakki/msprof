@@ -69,3 +69,17 @@ class TestFftsLogModel(TestDirCRBaseModel):
         device_tasks = model.get_ffts_plus_sub_task_data_within_time_range(9000, 10000)
         self.assertEqual(len(device_tasks), 0)
         model.finalize()
+
+    def test_get_ffts_log_data_should_return_all_data(self: any) -> None:
+        ffts_plus_data = [
+            [0, 23, 1, 0, "AIC", "FFTS+", '100010', 38140480339123],
+            [0, 24, 2, 1, "AIV", "FFTS+", '100010', 38140480339683],
+            [0, 23, 1, 0, "AIC", "FFTS+", '100011', 38140480340343],
+            [0, 24, 2, 1, "AIV", "FFTS+", '100011', 38140480398243],
+            [0, 25, 1, 0, "MIX_AIV", "FFTS+", '100010', 38140480398643],
+        ]
+        with FftsLogModel(self.PROF_DEVICE_DIR, DBNameConstant.DB_SOC_LOG, [DBNameConstant.TABLE_FFTS_LOG]) as model:
+            model.insert_data_to_db(DBNameConstant.TABLE_FFTS_LOG, ffts_plus_data)
+            ffts_log_dto = model.get_ffts_log_data()
+            self.assertEqual(len(ffts_log_dto), 5)
+            self.assertEqual(ffts_log_dto[0].task_time, 38140480339123)

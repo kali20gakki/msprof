@@ -21,7 +21,7 @@ class Event:
     def __init__(self, hccl_name: str):
         self.hccl_name = hccl_name
         self.op_name = 'hcom_allReduce_1'
-        self.size = 1024 ** 2
+        self.size = 1000 ** 2
         self.duration = 1000000
         self.transport_type = StrConstant.RDMA
         self.timestamp = 0
@@ -123,8 +123,8 @@ class TestCommunicationParser(unittest.TestCase):
                 'Transit Time(ms)': 0
             },
             'RDMA': {
-                'Bandwidth(GB/s)': 0.9766,
-                'Bandwidth(Utilization)': 0.0781,
+                'Bandwidth(GB/s)': 1.0,
+                'Bandwidth(Utilization)': 0.08,
                 'Large Packet Ratio': 1.0,
                 'Size Distribution': {1: [1, 1]},
                 'Transit Size(MB)': 1.0,
@@ -199,7 +199,7 @@ class TestCommunicationParser(unittest.TestCase):
                     0: {
                         "Communication Bandwidth Info": {
                             "RDMA": {
-                                "Transit Size(MB)": 1024,
+                                "Transit Size(MB)": 1000,
                                 "Transit Time(ms)": 1000,
                                 "Bandwidth(GB/s)": 1,
                                 "Bandwidth(Utilization)": 0.08,
@@ -209,7 +209,7 @@ class TestCommunicationParser(unittest.TestCase):
                                 }
                             },
                             "HCCS": {
-                                "Transit Size(MB)": 1024,
+                                "Transit Size(MB)": 1000,
                                 "Transit Time(ms)": 1000,
                                 "Bandwidth(GB/s)": 1,
                                 "Bandwidth(Utilization)": 0.08,
@@ -219,7 +219,7 @@ class TestCommunicationParser(unittest.TestCase):
                                 }
                             },
                             "SDMA": {
-                                "Transit Size(MB)": 1024,
+                                "Transit Size(MB)": 1000,
                                 "Transit Time(ms)": 1000,
                                 "Bandwidth(GB/s)": 1,
                                 "Bandwidth(Utilization)": 0,
@@ -233,7 +233,7 @@ class TestCommunicationParser(unittest.TestCase):
                     0: {
                         "Communication Bandwidth Info": {
                             "RDMA": {
-                                "Transit Size(MB)": 1024,
+                                "Transit Size(MB)": 1000,
                                 "Transit Time(ms)": 1000,
                                 "Bandwidth(GB/s)": 1,
                                 "Bandwidth(Utilization)": 0.08,
@@ -243,7 +243,7 @@ class TestCommunicationParser(unittest.TestCase):
                                 }
                             },
                             "HCCS": {
-                                "Transit Size(MB)": 1024,
+                                "Transit Size(MB)": 1000,
                                 "Transit Time(ms)": 1000,
                                 "Bandwidth(GB/s)": 1,
                                 "Bandwidth(Utilization)": 0.08,
@@ -253,7 +253,7 @@ class TestCommunicationParser(unittest.TestCase):
                                 }
                             },
                             "SDMA": {
-                                "Transit Size(MB)": 1024,
+                                "Transit Size(MB)": 1000,
                                 "Transit Time(ms)": 1000,
                                 "Bandwidth(GB/s)": 1,
                                 "Bandwidth(Utilization)": 0,
@@ -267,7 +267,7 @@ class TestCommunicationParser(unittest.TestCase):
             com.combine()
             ret = com.op_info
             self.assertEqual(
-                ret[StrConstant.TOTAL][0]["Communication Bandwidth Info"]["RDMA"]["Transit Size(MB)"], 2048
+                ret[StrConstant.TOTAL][0]["Communication Bandwidth Info"]["RDMA"]["Transit Size(MB)"], 2000
             )
             self.assertEqual(
                 ret[StrConstant.TOTAL][0]["Communication Bandwidth Info"]["RDMA"]["Transit Time(ms)"], 2000
@@ -281,7 +281,7 @@ class TestCommunicationParser(unittest.TestCase):
             self.assertEqual(ret[StrConstant.TOTAL][0]
                              ["Communication Bandwidth Info"]["RDMA"]["Size Distribution"][20], [4, 4])
             self.assertEqual(
-                ret[StrConstant.TOTAL][0]["Communication Bandwidth Info"]["SDMA"]["Transit Size(MB)"], 2048
+                ret[StrConstant.TOTAL][0]["Communication Bandwidth Info"]["SDMA"]["Transit Size(MB)"], 2000
             )
             self.assertEqual(
                 ret[StrConstant.TOTAL][0]["Communication Bandwidth Info"]["SDMA"]["Transit Time(ms)"], 2000
