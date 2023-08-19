@@ -903,3 +903,46 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, CheckStorageLimit) {
     ret = ParamValidation::instance()->CheckStorageLimit("");
     EXPECT_EQ(true, ret);
 }
+
+TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, IsValidTaskTimeSwitch)
+{
+    using namespace analysis::dvvp::common::validation;
+    int ret = ParamValidation::instance()->IsValidTaskTimeSwitch("");
+    EXPECT_EQ(true, ret);
+
+    ret = ParamValidation::instance()->IsValidTaskTimeSwitch("l0");
+    EXPECT_EQ(true, ret);
+
+    ret = ParamValidation::instance()->IsValidTaskTimeSwitch("l1");
+    EXPECT_EQ(true, ret);
+
+    ret = ParamValidation::instance()->IsValidTaskTimeSwitch("on");
+    EXPECT_EQ(true, ret);
+
+    ret = ParamValidation::instance()->IsValidTaskTimeSwitch("off");
+    EXPECT_EQ(true, ret);
+
+    ret = ParamValidation::instance()->IsValidTaskTimeSwitch("xxx");
+    EXPECT_EQ(false, ret);
+}
+
+TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, IsValidAnalyzeRuleSwitch)
+{
+    using namespace analysis::dvvp::common::validation;
+    int ret = ParamValidation::instance()->IsValidAnalyzeRuleSwitch("rule", "");
+    EXPECT_EQ(true, ret);
+
+    ret = ParamValidation::instance()->IsValidAnalyzeRuleSwitch("rule", "communication");
+    EXPECT_EQ(true, ret);
+
+    ret = ParamValidation::instance()->IsValidAnalyzeRuleSwitch("rule", "max_step_time");
+    EXPECT_EQ(true, ret);
+
+    ret = ParamValidation::instance()->IsValidAnalyzeRuleSwitch("rule", "communication,max_step_time");
+    EXPECT_EQ(true, ret);
+
+    ret = ParamValidation::instance()->IsValidAnalyzeRuleSwitch("rule", "xxxx");
+    EXPECT_EQ(false, ret);
+    ret = ParamValidation::instance()->IsValidAnalyzeRuleSwitch("rule", "communication,xxxx");
+    EXPECT_EQ(false, ret);
+}

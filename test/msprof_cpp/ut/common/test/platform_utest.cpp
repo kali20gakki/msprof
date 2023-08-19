@@ -30,7 +30,7 @@ TEST_F(PlatformUtest, Init)
     MOCKER(analysis::dvvp::driver::DrvGetApiVersion)
             .stubs()
             .will(returnValue(SUPPORT_OSC_FREQ_API_VERSION));
-    MOCKER(analysis::dvvp::driver::DrvGetHostFreq)
+    MOCKER(analysis::dvvp::driver::DrvGetDeviceFreq)
             .stubs()
             .will(returnValue(true));
     MOCKER(analysis::dvvp::driver::DrvGetPlatformInfo)

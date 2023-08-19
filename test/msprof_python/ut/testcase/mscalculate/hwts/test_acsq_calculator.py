@@ -1,7 +1,7 @@
 import unittest
 from unittest import mock
 
-from analyzer.scene_base.profiling_scene import ProfilingScene
+from common_func.profiling_scene import ProfilingScene
 from common_func.batch_counter import BatchCounter
 from mock_tools import ClassMock
 from mscalculate.hwts.acsq_calculator import AcsqCalculator

@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2023-2023. All rights reserved.
 from common_func.constant import Constant
+from common_func.ms_constant.number_constant import NumberConstant
 
 
 class HCCLInfoDto:
@@ -19,6 +20,7 @@ class HCCLInfoDto:
         self._rank_size = Constant.DEFAULT_INVALID_VALUE
         self._work_flow_mode = Constant.NA
         self._plane_id = Constant.DEFAULT_INVALID_VALUE
+        self._context_id = NumberConstant.DEFAULT_GE_CONTEXT_ID
         self._notify_id = Constant.DEFAULT_INVALID_VALUE
         self._stage = Constant.DEFAULT_INVALID_VALUE
         self._role = Constant.NA
@@ -83,6 +85,10 @@ class HCCLInfoDto:
     @property
     def plane_id(self):
         return self._plane_id
+
+    @property
+    def context_id(self):
+        return self._context_id
 
     @property
     def notify_id(self):
@@ -183,6 +189,10 @@ class HCCLInfoDto:
     @plane_id.setter
     def plane_id(self, value):
         self._plane_id = value
+
+    @context_id.setter
+    def context_id(self, value):
+        self._context_id = value
 
     @notify_id.setter
     def notify_id(self, value):

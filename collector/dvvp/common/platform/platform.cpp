@@ -38,7 +38,7 @@ void Platform::Init()
     uint32_t platformType;
     MSPROF_EVENT("Profiling platform version: %s.", PROF_VERSION_INFO);
     if (analysis::dvvp::driver::DrvGetApiVersion() >= analysis::dvvp::driver::SUPPORT_OSC_FREQ_API_VERSION) {
-        enableHostOscFreq_ = analysis::dvvp::driver::DrvGetHostFreq(hostOscFreq_);
+        enableHostOscFreq_ = analysis::dvvp::driver::DrvGetDeviceFreq(analysis::dvvp::driver::HOST_ID, hostOscFreq_);
     }
     driverAvailable_ = (analysis::dvvp::driver::DrvGetPlatformInfo(platformType) == PROFILING_SUCCESS) ? true : false;
     if (driverAvailable_) {

@@ -471,21 +471,6 @@ TEST_F(DRIVER_AI_DRV_API_TEST, DrvCheckIfHelperHost) {
     EXPECT_EQ(true, analysis::dvvp::driver::DrvCheckIfHelperHost());
 }
 
-TEST_F(DRIVER_AI_DRV_API_TEST, DrvGetHostFreq)
-{
-    GlobalMockObject::verify();
-    std::string freq;
-    int64_t hostFreq = 1000;
-    MOCKER(&DriverPlugin::MsprofHalGetDeviceInfo)
-        .stubs()
-        .with(any(), any(), any(), outBoundP(&hostFreq))
-        .will(returnValue(DRV_ERROR_NONE))
-        .then(returnValue(DRV_ERROR_INNER_ERR));
-
-    EXPECT_EQ(true, analysis::dvvp::driver::DrvGetHostFreq(freq));
-    EXPECT_EQ(false, analysis::dvvp::driver::DrvGetHostFreq(freq));
-}
-
 TEST_F(DRIVER_AI_DRV_API_TEST, DrvGetDeviceFreq)
 {
     GlobalMockObject::verify();

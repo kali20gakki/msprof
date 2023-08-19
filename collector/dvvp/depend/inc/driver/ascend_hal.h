@@ -14,8 +14,6 @@
 #ifndef __ASCEND_HAL_H__
 #define __ASCEND_HAL_H__
 
-#include <stddef.h>
-#include <stdbool.h>
 #include <stdint.h>
 #include <time.h>
 #include <sys/types.h>

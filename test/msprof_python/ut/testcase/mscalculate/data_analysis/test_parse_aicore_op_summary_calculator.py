@@ -5,7 +5,7 @@ from unittest import mock
 import pytest
 
 from mscalculate.data_analysis.parse_aicore_op_summary_calculator import ParseAiCoreOpSummaryCalculator
-from analyzer.scene_base.profiling_scene import ProfilingScene
+from common_func.profiling_scene import ProfilingScene
 from common_func.info_conf_reader import InfoConfReader
 from common_func.msprof_exception import ProfException
 from constant.constant import CONFIG
@@ -75,19 +75,12 @@ class TestParseAiCoreOpSummaryCalculator(unittest.TestCase):
                                return_value=False), \
                     mock.patch(NAMESPACE + '.ParseAiCoreOpSummaryCalculator.create_ai_core_metrics_table',
                                return_value=False), \
-                    mock.patch(NAMESPACE + '.ParseAiCoreOpSummaryCalculator.create_ge_tensor_table',
-                               return_value=False), \
                     mock.patch(NAMESPACE + '.ParseAiCoreOpSummaryCalculator.create_task_time_table',
                                return_value=False):
                 check = ParseAiCoreOpSummaryCalculator(file_list, CONFIG)
                 check.conn, check.curs = res
                 check.create_summary_table()
         db_manager.destroy(res)
-
-    def test_create_ge_tensor_table(self):
-        with mock.patch(NAMESPACE + '.DBManager.check_tables_in_db', return_value=False):
-            check = ParseAiCoreOpSummaryCalculator(file_list, CONFIG)
-            check.create_ge_tensor_table()
 
     def test_create_conn(self):
         db_manager = DBManager()
@@ -162,7 +155,7 @@ class TestParseAiCoreOpSummaryCalculator(unittest.TestCase):
         db_manager_rt.destroy(res_runtime)
 
     def test_create_task_time_table(self):
-        with mock.patch('analyzer.scene_base.profiling_scene.Utils.get_scene',
+        with mock.patch('common_func.profiling_scene.Utils.get_scene',
                         return_value="train"), \
                 mock.patch(NAMESPACE + '.logging.warning'), \
                 mock.patch(NAMESPACE + '.logging.error'):

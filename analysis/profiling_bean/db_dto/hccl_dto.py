@@ -18,6 +18,7 @@ class HcclDto:
         self._op_name = Constant.NA
         self._iteration = Constant.DEFAULT_VALUE
         self._hccl_name = Constant.NA
+        self._group_name = Constant.NA
         self._first_timestamp = Constant.DEFAULT_VALUE
         self._plane_id = Constant.DEFAULT_VALUE
         self._timestamp = Constant.DEFAULT_VALUE
@@ -47,6 +48,10 @@ class HcclDto:
     @property
     def hccl_name(self: any) -> any:
         return self._args.get('task type', self._hccl_name)
+
+    @property
+    def group_name(self: any) -> any:
+        return self._group_name
 
     @property
     def first_timestamp(self: any) -> float:
@@ -143,6 +148,10 @@ class HcclDto:
     @hccl_name.setter
     def hccl_name(self: any, value: any) -> None:
         self._hccl_name = value
+
+    @group_name.setter
+    def group_name(self: any, value: any) -> None:
+        self._group_name = value
 
     @first_timestamp.setter
     def first_timestamp(self: any, value: float) -> None:

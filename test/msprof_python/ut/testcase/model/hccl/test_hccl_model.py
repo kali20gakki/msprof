@@ -1,5 +1,6 @@
 import unittest
 from unittest import mock
+import os
 
 from common_func.constant import Constant
 from common_func.db_name_constant import DBNameConstant
@@ -11,16 +12,23 @@ from profiling_bean.db_dto.hccl_dto import HcclDto
 from profiling_bean.prof_enum.chip_model import ChipModel
 from profiling_bean.prof_enum.data_tag import DataTag
 from sqlite.db_manager import DBOpen
+from model.test_dir_cr_base_model import TestDirCRBaseModel
+
 
 NAMESPACE = 'msmodel.hccl.hccl_model'
 
 
-class TestHCCLModel(unittest.TestCase):
+class TestHCCLModel(TestDirCRBaseModel):
     sample_config = {'result_dir': '/tmp/result',
                      'tag_id': 'JOBEJGBAHABDEEIJEDFHHFAAAAAAAAAA',
                      'device_id': '127.0.0.1'
                      }
     file_list = {DataTag.HCCL: ['HCCL.hcom_allReduce_1_1_1.1.slice_0']}
+
+    DIR_PATH = os.path.join(os.path.dirname(__file__), "DT_HCCL_MODEL")
+    PROF_DIR = os.path.join(DIR_PATH, 'PROF1')
+    PROF_DEVICE_DIR = os.path.join(PROF_DIR, 'device')
+    PROF_HOST_DIR = os.path.join(PROF_DIR, 'host')
 
     def test_flush(self):
         with mock.patch(NAMESPACE + '.HCCLModel.insert_data_to_db'):

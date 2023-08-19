@@ -98,8 +98,8 @@ class TraceViewManager:
                                   / DBManager.NSTOUS) < end_time:
                 connect_dict = {
                     'name': 'acl_to_npu', 'ph': 's', 'cat': StrConstant.ASYNC_ACL_NPU,
-                    'id': '{}-{}-{}'.format(data_list[0].get('stream_id'), data_list[0].get('task_id'),
-                                            data_list[0].get('batch_id')),
+                    'id': TraceViewManager.get_line_format_pid(data_list[0].get('stream_id'),
+                                data_list[0].get('task_id'), data_list[0].get('batch_id')),
                     'pid': data_dict.get('pid'), 'tid': data_dict.get('tid'), 'ts': start_time
                 }
                 connect_list.append(connect_dict)
@@ -123,9 +123,34 @@ class TraceViewManager:
                     continue
                 connect_dict = {
                     'name': 'acl_to_npu', 'ph': 'f',
-                    'id': '{}-{}-{}'.format(args.get('Stream Id'), args.get('Task Id'), args.get('Batch Id')),
+                    'id': TraceViewManager.get_line_format_pid(args.get('Stream Id'), args.get('Task Id'),
+                                                               args.get('Batch Id')),
                     'cat': StrConstant.ASYNC_ACL_NPU, 'pid': data_dict.get('pid'), 'tid': data_dict.get('tid'),
                     'ts': data_dict.get('ts'), 'bp': 'e'
                 }
                 json_list.append(connect_dict)
         return json_list
+
+    @staticmethod
+    def get_format_pid(pid: int, index_id: int) -> int:
+        """
+        get format_pid
+        :param pid: int, index_id: int
+        :return: format_pid: int
+        """
+        decimal_radix = 10
+        index_decimal_len = 2
+        format_pid = pid * decimal_radix ** index_decimal_len + index_id
+        return format_pid
+    
+    @staticmethod
+    def get_line_format_pid(stream_id: int, task_id: int, batch_id: int) -> int:
+        """
+        get format_pid
+        :param stream_id: int, task_id: int, batch_id: int
+        :return: format_pid: int
+        """
+        stream_id_pos = 32
+        task_id_pos = 16
+        format_pid = (stream_id << stream_id_pos) + (task_id << task_id_pos) + batch_id
+        return format_pid

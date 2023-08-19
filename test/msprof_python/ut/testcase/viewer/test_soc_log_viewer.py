@@ -2,11 +2,13 @@ import json
 import unittest
 from unittest import mock
 
-from common_func.info_conf_reader import InfoConfReader
 from constant.info_json_construct import DeviceInfo
 from constant.info_json_construct import InfoJson
 from constant.info_json_construct import InfoJsonReaderManager
+from common_func.trace_view_header_constant import TraceViewHeaderConstant
 from viewer.stars.ffts_log_viewer import FftsLogViewer
+from mscalculate.ascend_task.ascend_task import TopDownTask
+from profiling_bean.db_dto.task_time_dto import TaskTimeDto
 
 NAMESPACE = 'viewer.stars.ffts_log_viewer'
 
@@ -46,7 +48,7 @@ class TestFftsLogViewer(unittest.TestCase):
 
     def test_get_timeline_data(self):
         configs, params = {}, {}
-        with mock.patch(NAMESPACE + '.FftsLogViewer.get_data_from_db', return_value=[]), \
+        with mock.patch(NAMESPACE + '.FftsLogViewer.get_ascend_task_data', return_value={}), \
                 mock.patch(NAMESPACE + '.FftsLogViewer.get_trace_timeline', return_value=[]):
             check = FftsLogViewer(configs, params)
             ret = check.get_timeline_data()
@@ -56,9 +58,16 @@ class TestFftsLogViewer(unittest.TestCase):
 
     def test_get_trace_timeline(self):
         configs, params = {}, {}
-        data = {"acsq_task_list": [TestData(105, 2, 30, 1, 'FFTS+', 949987561536, 3580, 'NA', 8, 9, 1, 2, 3, 1, 0)],
-                "thread_data_list": [TestData(105, 2, 30, 1, 'FFTS+', 949987561536, 3580, 'NA', 8, 9, 1, 2, 3, 1, 0)],
-                "subtask_data_list": [TestData(105, 2, 30, 1, 'FFTS+', 949987561536, 3580, 'NA', 8, 9, 1, 2, 3, 1, 0)]}
+        data = {
+            "acsq_task_list": [
+                TopDownTask(0, 1, 27, 2, 4294967295, 0, 38140478706523, 1510560, "KERNEL_AICPU", "AI_CPU"),
+            ],
+            "subtask_data_list": [
+                TopDownTask(0, 1, 36, 2, 47, 0, 38140480645103, 12400, "FFTS_PLUS", "AIV"),
+            ],
+        }
+        setattr(data.get('acsq_task_list', [])[0], 'op_name', 'Add')
+        setattr(data.get('subtask_data_list', [])[0], 'op_name', 'MatMul_1_lxslice1')
         with mock.patch('common_func.trace_view_manager.TraceViewManager.time_graph_trace', return_value=[]), \
                 mock.patch('common_func.trace_view_manager.TraceViewManager.metadata_event', return_value=[]), \
                 mock.patch(NAMESPACE + '.FftsLogViewer.add_node_name', return_value=data), \
@@ -71,12 +80,21 @@ class TestFftsLogViewer(unittest.TestCase):
 
     def test_format_task_type_data(self):
         configs, params = {}, {'data_type': 'ffts_sub_task_time'}
-        data = {"acsq_task_list": [TestData(105, 2, 30, 1, 'FFTS+', 949987561536, 3580, 'NA', 8, 9, 1, 2, 3, 1, 0)],
-                "thread_data_list": [TestData(105, 2, 30, 1, 'FFTS+', 949987561536, 3580, 'NA', 8, 9, 1, 2, 3, 1, 0)],
-                "subtask_data_list": [TestData(105, 2, 30, 1, 'FFTS+', 949987561536, 3580, 'NA', 8, 9, 1, 2, 3, 1, 0)]}
+        data = {
+            "acsq_task_list": [
+                TopDownTask(0, 1, 27, 2, 4294967295, 0, 38140478706523, 1510560, "KERNEL_AICPU", "AI_CPU"),
+            ],
+            "subtask_data_list": [
+                TopDownTask(0, 1, 36, 2, 47, 0, 38140480645103, 12400, "FFTS_PLUS", "AIV"),
+            ],
+        }
+        setattr(data.get('acsq_task_list', [])[0], 'op_name', 'Add')
+        setattr(data.get('subtask_data_list', [])[0], 'op_name', 'MatMul_1_lxslice1')
+        setattr(data.get('subtask_data_list', [])[0], 'thread_id', 1)
         with mock.patch('common_func.trace_view_manager.TraceViewManager.time_graph_trace', return_value=[]), \
                 mock.patch('common_func.trace_view_manager.TraceViewManager.metadata_event', return_value=[]), \
-                mock.patch(NAMESPACE + '.FftsLogViewer.add_node_name', return_value=data), \
+                mock.patch(NAMESPACE + '.FftsLogViewer.add_node_name'), \
+                mock.patch(NAMESPACE + '.FftsLogViewer.add_thread_id'), \
                 mock.patch(NAMESPACE + '.FftsLogViewer.get_time_timeline_header', return_value=()):
             check = FftsLogViewer(configs, params)
             InfoJsonReaderManager(info_json=InfoJson(devices='0', DeviceInfo=[
@@ -95,14 +113,69 @@ class TestFftsLogViewer(unittest.TestCase):
 
     def test_add_node_name(self):
         configs, params = {}, {}
-        node_dict = {'1-2-3': 'translate'}
-        data = {"thread_data_list": [TestData(3, 2, 1, 1, 'FFTS+', 949987561536, 3580, 7, 8, 9, 1, 2, 3, 1, 0)],
-                "acsq_task_list": [TestData(0, 2, 1, 1, 'FFTS+', 949987561536, 3580, 7, 8, 9, 1, 2, 3, 1, 0)],
-                "subtask_data_list": [TestData(3, 2, 1, 1, 'FFTS+', 949987561536, 3580, 7, 8, 9, 1, 2, 3, 1, 0)]}
+        node_dict = {'2-36-47-0': 'MatMul_1_lxslice1',
+                     '2-27-4294967295-0': 'Add',
+                     }
+        data = {
+            "acsq_task_list": [
+                TopDownTask(0, 1, 27, 2, 4294967295, 0, 38140478706523, 1510560, "KERNEL_AICPU", "AI_CPU"),
+            ],
+            "subtask_data_list": [
+                TopDownTask(0, 1, 36, 2, 47, 0, 38140480645103, 12400, "FFTS_PLUS", "AIV"),
+            ],
+        }
         with mock.patch(NAMESPACE + '.FftsLogViewer.get_ge_data_dict', return_value=(node_dict, {})):
             check = FftsLogViewer(configs, params)
             check.add_node_name(data)
-            self.assertTrue(isinstance(data.get('subtask_data_list', [])[0], TestData))
+            self.assertEqual(data.get('subtask_data_list', [])[0].op_name, 'MatMul_1_lxslice1')
+            self.assertEqual(data.get('acsq_task_list', [])[0].op_name, 'Add')
+
+    def test_get_ascend_task_data_should_split_acsq_task_and_subtask_by_context_id(self):
+        configs = {}
+        params = {"project": './'}
+        data = [
+            TopDownTask(0, 1, 27, 2, 4294967295, 0, 38140478706523, 1510560, "KERNEL_AICPU", "AI_CPU"),
+            TopDownTask(0, 1, 36, 2, 47, 0, 38140480645103, 12400, "FFTS_PLUS", "AIV"),
+        ]
+        with mock.patch(NAMESPACE + '.AscendTaskModel.get_ascend_task_data_without_unknown', return_value=data):
+            check = FftsLogViewer(configs, params)
+            ret = check.get_ascend_task_data()
+            self.assertEqual(len(ret), 2)
+            self.assertEqual(len(ret.get('acsq_task_list', [])), 1)
+            self.assertEqual(ret.get('acsq_task_list', [])[0].context_id, 4294967295)
+            self.assertEqual(len(ret.get('subtask_data_list', [])), 1)
+            self.assertEqual(ret.get('subtask_data_list', [])[0].context_id, 47)
+
+    def test_add_thread_id_should_add_thread_id_when_matched(self):
+        configs = {}
+        params = {"project": './'}
+        data = {
+            "subtask_data_list": [
+                TopDownTask(0, 1, 36, 2, 47, 0, 38140480645103, 12400, "FFTS_PLUS", "AIV"),
+            ],
+        }
+        subtask_data = [TaskTimeDto()]
+        subtask_data[0].stream_id = 36
+        subtask_data[0].task_id = 2
+        subtask_data[0].subtask_id = 47
+        subtask_data[0].start_time = 38140480645103
+        subtask_data[0].thread_id = 10
+        with mock.patch(NAMESPACE + '.SubTaskTimeModel.get_all_data', return_value=subtask_data), \
+                mock.patch('msmodel.interface.parser_model.ParserModel.init'):
+            check = FftsLogViewer(configs, params)
+            check.add_thread_id(data)
+            self.assertEqual(data.get("subtask_data_list")[0].thread_id, 10)
+
+    def test_get_time_timeline_header_should_have_thread_name_when_thread_task_time(self):
+        data = (['thread', 2, "Thread 0(AIV)", 4, 5],)
+        configs, params = {}, {}
+        InfoJsonReaderManager(info_json=InfoJson(devices='0', DeviceInfo=[
+            DeviceInfo(pid='1', tid='0').device_info])).process()
+        check = FftsLogViewer(configs, params)
+        ret = check.get_time_timeline_header(data, TraceViewHeaderConstant.PROCESS_THREAD_TASK)
+        self.assertEqual(ret, [['process_name', 2, 0, 'Thread Task Time'],
+                               ['thread_name', 2, 'Thread 0(AIV)', 'Thread 0(AIV)'],
+                               ['thread_sort_index', 2, 'Thread 0(AIV)', 'Thread 0(AIV)']])
 
 
 if __name__ == '__main__':

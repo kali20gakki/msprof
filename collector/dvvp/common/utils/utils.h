@@ -480,6 +480,7 @@ public:
     static unsigned long long GetClockRealtime();
     static unsigned long long GetClockMonotonicRaw();
     static unsigned long long GetCPUCycleCounter();
+    static unsigned long long GetClockRealtimeOrCPUCycleCounter();
     static double StatCpuRealFreq();
     static void GetTime(unsigned long long &startRealtime, unsigned long long &startMono, unsigned long long &cntvct);
     static void GetChildDirs(const std::string &dir, bool isRecur, std::vector<std::string> &childDirs,
@@ -531,8 +532,7 @@ public:
     static std::string RealPath(const std::string &path);
 };
 
-template<class T>
-class UtilsStringBuilder {
+template<class T> class UtilsStringBuilder {
 public:
     std::string Join(const std::vector<T> &elems, const std::string &sep);
 };

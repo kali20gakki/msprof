@@ -7,12 +7,6 @@ from msconfig.meta_config import MetaConfig
 
 class MsProfExportDataConfig(MetaConfig):
     DATA = {
-        'runtime_api': [
-            ('handler', '_get_runtime_api_data'),
-            ('headers', 'Name,Stream ID,Time(%),Time(ns),Calls,Avg(ns),Min(ns),Max(ns),Process ID,Thread ID'),
-            ('table', 'ApiCall'),
-            ('db', 'runtime.db')
-        ],
         'task_time': [
             ('handler', '_get_task_time_data'),
             ('headers',
@@ -51,18 +45,6 @@ class MsProfExportDataConfig(MetaConfig):
             ('headers', 'PID,Name,Size(pages),Resident(pages),Shared(pages)'),
             ('db', 'memory_{}.db'),
             ('table', 'pidmem')
-        ],
-        'acl': [
-            ('handler', '_get_acl_data'),
-            ('headers', 'Name,Type,Start Time,Duration(us),Process ID,Thread ID'),
-            ('db', 'acl_module.db'),
-            ('table', 'acl_data')
-        ],
-        'acl_statistic': [
-            ('handler', '_get_acl_statistic_data'),
-            ('headers', 'Name,Type,Time(%),Time(us),Count,Avg(us),Min(us),Max(us),Process ID,Thread ID'),
-            ('db', 'acl_module.db'),
-            ('table', 'acl_data')
         ],
         'op_summary': [
             ('handler', '_get_op_summary_data'),
@@ -197,13 +179,6 @@ class MsProfExportDataConfig(MetaConfig):
             ('handler', '_get_ts_cpu_top_funcs'),
             ('db', 'tscpu_{}.db')
         ],
-        'ge': [
-            ('handler', '_get_ge_data')
-        ],
-        'ge_op_execute': [
-            ('handler', '_get_ge_op_execute_data'),
-            ('headers', 'Thread ID,OP Name,OP Type,Event Type,Start Time,Duration(us)')
-        ],
         'os_runtime_api': [
             ('handler', '_get_host_runtime_api'),
             ('db', 'runtime_api_analysis{}.db')
@@ -279,9 +254,6 @@ class MsProfExportDataConfig(MetaConfig):
             ('handler', '_get_stars_chip_trans_data'),
             ('db', 'chip_trans.db')
         ],
-        'thread_group': [
-            ('handler', '_get_thread_group_data')
-        ],
         'low_power': [
             ('handler', '_get_low_power_data'),
             ('db', 'lowpower.db'),
@@ -322,5 +294,15 @@ class MsProfExportDataConfig(MetaConfig):
             ('handler', '_get_api_data'),
             ('db', 'api_event.db'),
             ('table', 'ApiData')
-        ]
+        ],
+        'hccl_statistic': [
+            ('handler', '_get_hccl_statistic_data'),
+            ('headers',
+             'OP Type,Count,Total Time(us),Min Time(us),Avg Time(us),Max Time(us),Ratio(%)'),
+            ('db', 'hccl.db')
+        ],
+        'api_statistic': [
+            ('handler', '_get_api_statistic_data'),
+            ('headers', 'Level,API Name,Time(us),Count,Avg(us),Min(us),Max(us),Variance'),
+        ],
     }

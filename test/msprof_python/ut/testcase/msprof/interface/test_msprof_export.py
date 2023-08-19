@@ -4,7 +4,7 @@ from argparse import Namespace
 from unittest import mock
 
 import pytest
-from analyzer.scene_base.profiling_scene import ProfilingScene
+from common_func.profiling_scene import ProfilingScene
 from common_func.common import print_info, warn, error
 from common_func.constant import Constant
 from common_func.db_name_constant import DBNameConstant
@@ -76,7 +76,7 @@ class TestExportCommand(unittest.TestCase):
         args_dic = {"collection_path": "test", "iteration_id": 2, "model_id": 1}
         args = Namespace(**args_dic)
         with mock.patch(NAMESPACE + ".ExportCommand.get_model_id_set", return_value={1}), \
-                mock.patch('analyzer.scene_base.profiling_scene.Utils.get_scene',
+                mock.patch('common_func.profiling_scene.Utils.get_scene',
                            return_value="step_info"):
             ProfilingScene().init('')
             test = ExportCommand("timeline", args)
@@ -86,7 +86,7 @@ class TestExportCommand(unittest.TestCase):
         db_manager = create_trace_db()
         args_dic = {"collection_path": "test", "iteration_id": 2, "model_id": None}
         args = Namespace(**args_dic)
-        with mock.patch('analyzer.scene_base.profiling_scene.Utils.get_scene',
+        with mock.patch('common_func.profiling_scene.Utils.get_scene',
                         return_value="train"):
             ProfilingScene().init('')
             test = ExportCommand("timeline", args)
@@ -101,7 +101,7 @@ class TestExportCommand(unittest.TestCase):
         with mock.patch(NAMESPACE + '.ExportCommand.get_model_id_set', return_value=model_ids_ge), \
                 mock.patch(NAMESPACE + '.ExportCommand.get_model_id_set', return_value=model_ids_step), \
                 mock.patch(NAMESPACE + '.ExportCommand.get_model_id_set', return_value=model_ids_hccl), \
-                mock.patch('analyzer.scene_base.profiling_scene.Utils.get_scene', return_value='step_info'):
+                mock.patch('common_func.profiling_scene.Utils.get_scene', return_value='step_info'):
             ProfilingScene().init('')
             test = ExportCommand('timeline', args)
             with self.assertRaises(ProfException):
@@ -116,7 +116,7 @@ class TestExportCommand(unittest.TestCase):
         with mock.patch(NAMESPACE + '.ExportCommand.get_model_id_set', return_value=model_ids_ge), \
                 mock.patch(NAMESPACE + '.ExportCommand.get_model_id_set', return_value=model_ids_step), \
                 mock.patch(NAMESPACE + '.ExportCommand.get_model_id_set', return_value=model_ids_hccl), \
-                mock.patch('analyzer.scene_base.profiling_scene.Utils.get_scene', return_value='step_info'):
+                mock.patch('common_func.profiling_scene.Utils.get_scene', return_value='step_info'):
             ProfilingScene().init('')
             test = ExportCommand('timeline', args)
             test._check_model_id('2')
@@ -131,7 +131,7 @@ class TestExportCommand(unittest.TestCase):
         with mock.patch(NAMESPACE + '.ExportCommand.get_model_id_set', return_value=model_ids_ge), \
                 mock.patch(NAMESPACE + '.ExportCommand.get_model_id_set', return_value=model_ids_step), \
                 mock.patch(NAMESPACE + '.ExportCommand.get_model_id_set', return_value=model_ids_hccl), \
-                mock.patch('analyzer.scene_base.profiling_scene.Utils.get_scene', return_value='step_info'):
+                mock.patch('common_func.profiling_scene.Utils.get_scene', return_value='step_info'):
             ProfilingScene().init('')
             test = ExportCommand('timeline', args)
             test._check_model_id('1')
@@ -146,7 +146,7 @@ class TestExportCommand(unittest.TestCase):
         with mock.patch(NAMESPACE + '.ExportCommand.get_model_id_set', return_value=model_ids_ge), \
                 mock.patch(NAMESPACE + '.ExportCommand.get_model_id_set', return_value=model_ids_step), \
                 mock.patch(NAMESPACE + '.ExportCommand.get_model_id_set', return_value=model_ids_hccl), \
-                mock.patch('analyzer.scene_base.profiling_scene.Utils.get_scene', return_value='step_info'):
+                mock.patch('common_func.profiling_scene.Utils.get_scene', return_value='step_info'):
             ProfilingScene().init('')
             test = ExportCommand('timeline', args)
             test._check_model_id('1')

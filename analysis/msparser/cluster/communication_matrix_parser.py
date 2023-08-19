@@ -94,7 +94,7 @@ class CommunicationMatrixParser(MetaParser):
                     idx += 1
                     continue
                 link_info[link_key][MatrixDataType.TRANSPORT_TYPE] = HcclAnalysisTool.convert_to_enum(trans_type)
-                trans_size = HcclAnalysisTool.get_value(event.size, "size") / NumberConstant.B_to_MB
+                trans_size = HcclAnalysisTool.get_value(event.size, "size") / NumberConstant.COMMUNICATION_B_to_MB
                 link_info[link_key][MatrixDataType.TRANS_SIZE] += trans_size
                 link_info[link_key][MatrixDataType.TRANS_TIME] += \
                     HcclAnalysisTool.get_value(event.duration, "duration") / NumberConstant.NS_TO_MS

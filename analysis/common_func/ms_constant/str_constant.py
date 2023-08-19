@@ -428,10 +428,12 @@ class StrConstant:
 
 
 class OpAnalysisType:
+    START_TIME = 'Start Timestamp(us)'
     ELAPSE_TIME = "Elapse Time(ms)"
     TRANSIT_TIME = "Transit Time(ms)"
     WAIT_TIME = "Wait Time(ms)"
     SYNCHRONIZATION_TIME = "Synchronization Time(ms)"
+    IDLE_TIME = 'Idle Time(ms)'
     WAIT_TIME_RATIO = "Wait Time Ratio"
     SYNCHRONIZATION_TIME_RATIO = "Synchronization Time Ratio"
 

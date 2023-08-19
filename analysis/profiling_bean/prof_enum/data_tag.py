@@ -92,3 +92,5 @@ class AclApiTag(Enum):
     ACL_NN = 5
     ACL_ASCENDC = 6
     HOST_HCCL = 7
+    ACL_DVPP = 9
+    ACL_GRAPH = 10

@@ -13,8 +13,10 @@ class HostTask:
     index_id: int
     stream_id: int
     task_id: int
+    context_id: int
     batch_id: int
     task_type: str
+    device_id: int
     host_timestamp: int
 
 
@@ -25,7 +27,7 @@ class DeviceTask:
     """
     stream_id: int
     task_id: int
-    subtask_id: int
+    context_id: int
     start_time: int
     duration: int
     task_type: str
