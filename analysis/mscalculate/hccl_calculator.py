@@ -18,6 +18,7 @@ from profiling_bean.db_dto.hccl_dto import HcclDto
 from msconfig.config_manager import ConfigManager
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.constant import Constant
+from common_func.msprof_exception import ProfException
 
 
 class HcclCalculator(ICalculator, MsMultiProcess):
@@ -34,8 +35,6 @@ class HcclCalculator(ICalculator, MsMultiProcess):
                                     [DBNameConstant.TABLE_HCCL_OP, DBNameConstant.TABLE_HCCL_TASK])
         self._hccl_data = []
         self._hccl_op_report_data = []
-        self.conn = None
-        self.curs = None
 
     @staticmethod
     def update_bandwidth(communication_data: List[HcclDto]):
@@ -147,12 +146,19 @@ class HcclCalculator(ICalculator, MsMultiProcess):
         self.save()
 
     def _judge_calculate_again(self):
+        hccl_db_path = PathManager.get_db_path(self._project_path, DBNameConstant.DB_HCCL)
         if not ProfilingScene().is_operator():
+            conn, curs = DBManager.create_connect_db(hccl_db_path)
+            if not conn or not curs:
+                logging.error("unable to create op counter db connection")
+                raise ProfException(ProfException.PROF_SYSTEM_EXIT)
+            DBManager.drop_table(conn, DBNameConstant.TABLE_HCCL_ALL_REDUCE)
+            DBManager.drop_table(conn, DBNameConstant.TABLE_HCCL_OP_REPORT)
+            DBManager.destroy_db_connect(conn, curs)
             logging.info("In graph scene, to generate table %s and %s", DBNameConstant.TABLE_HCCL_ALL_REDUCE,
                          DBNameConstant.TABLE_HCCL_OP_REPORT)
             return True
         else:
-            hccl_db_path = PathManager.get_db_path(self._project_path, DBNameConstant.DB_HCCL)
             if DBManager.check_tables_in_db(hccl_db_path, DBNameConstant.TABLE_HCCL_ALL_REDUCE,
                                             DBNameConstant.TABLE_HCCL_OP_REPORT):
                 logging.info("Found table %s and %s in operator scene, no need to generate again",
