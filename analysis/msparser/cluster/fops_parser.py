@@ -123,9 +123,9 @@ class FopsParser:
                                                    self.model_id, self.iter_id)
         file_path = self.get_cluster_path(file_name)
         check_file_writable(file_path)
+        check_path_valid(file_path, True)
         if os.path.exists(file_path):
             os.remove(file_path)
-        check_path_valid(file_path, True)
         try:
             with os.fdopen(os.open(file_path, Constant.WRITE_FLAGS,
                                    Constant.WRITE_MODES), "w") as _file:
