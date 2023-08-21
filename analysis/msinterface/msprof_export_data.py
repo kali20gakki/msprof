@@ -669,7 +669,8 @@ class MsProfExportDataUtils:
             data = handler(configs, params)
             timeline_data = []
             try:
-                timeline_data = json.loads(data)
+                if data:
+                    timeline_data = json.loads(data)
             except (TypeError, ValueError) as err:
                 logging.error("timeline data is not json format.")
             cls.add_timeline_data(params, timeline_data)
