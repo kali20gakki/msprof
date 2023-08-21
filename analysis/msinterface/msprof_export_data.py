@@ -257,7 +257,7 @@ class MsProfExportDataUtils:
     @staticmethod
     def _get_api_statistic_data(configs: dict, params: dict) -> any:
         """
-        get API(ACL/GE/RUNTIME_API) statistic data
+        get API(acl/hccl/model/node/runtime) statistic data
         """
         return ApiStatisticViewer(configs, params).get_api_statistic_data()
 
