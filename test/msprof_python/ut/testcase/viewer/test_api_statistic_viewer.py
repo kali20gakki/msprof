@@ -16,10 +16,10 @@ NAMESPACE = 'viewer.api_statistic_viewer'
 
 class TestApiStatisticViewer(unittest.TestCase):
 
-    def test_get_api_summary_data_should_return_success_when_model_init_ok_and_data_exists(self):
+    def test_get_api_summary_data_should_return_list_when_data_exists(self):
         config = {
             'headers': [
-                'level', 'API Name', 'Time(us)', 'Count',
+                'Level', 'API Name', 'Time(us)', 'Count',
                 'Avg(us)', 'Min(us)', 'Max(us)', 'Variance'
             ]
         }
@@ -30,18 +30,17 @@ class TestApiStatisticViewer(unittest.TestCase):
         }
         InfoConfReader()._host_freq = None
         InfoConfReader()._info_json = {'CPU': [{'Frequency': "1000"}]}
-        data = [(0, 1, 2, 3, 4, 5, 6, 7, 8)]
+        data = [(0, 1, 2)]
         with mock.patch(NAMESPACE + '.ApiDataViewModel.init', return_value=True), \
-                mock.patch(NAMESPACE + '.ApiDataViewModel.get_api_statistic_data', return_value=data), \
-                mock.patch(NAMESPACE + '.ApiDataViewModel.get_api_statistic_data_for_variance', return_value=[(0, 0)]):
+                mock.patch(NAMESPACE + '.ApiDataViewModel.get_api_statistic_data', return_value=data):
             check = ApiStatisticViewer(config, params)
             ret = check.get_api_summary_data()
-            self.assertEqual([(7, 0, 0.002, 3, 0.004, 0.005, 0.006, 0)], ret)
+            self.assertEqual([(2, 0, 0.001, 1, 0.001, 0.001, 0.001, 0.0)], ret)
 
-    def test_get_api_summary_data_should_return_empty_list_when_model_init_fail(self):
+    def test_get_api_summary_data_should_return_empty_list_when_model_init_fails(self):
         config = {
             'headers': [
-                'level', 'API Name', 'Time(us)', 'Count',
+                'Level', 'API Name', 'Time(us)', 'Count',
                 'Avg(us)', 'Min(us)', 'Max(us)', 'Variance'
             ]
         }
@@ -54,10 +53,10 @@ class TestApiStatisticViewer(unittest.TestCase):
         ret = check.get_api_summary_data()
         self.assertEqual(MsvpConstant.EMPTY_LIST, ret)
 
-    def test_get_api_summary_data_should_return_empty_when_model_init_ok_but_data_misses(self):
+    def test_get_api_summary_data_should_return_empty_list_when_data_misses(self):
         config = {
             'headers': [
-                'level', 'API Name', 'Time(us)', 'Count',
+                'Level', 'API Name', 'Time(us)', 'Count',
                 'Avg(us)', 'Min(us)', 'Max(us)', 'Variance'
             ]
         }
@@ -67,16 +66,15 @@ class TestApiStatisticViewer(unittest.TestCase):
             "iter_id": 3
         }
         with mock.patch(NAMESPACE + '.ApiDataViewModel.init', return_value=True), \
-                mock.patch(NAMESPACE + ".ApiDataViewModel.get_api_statistic_data", return_value=[]), \
-                mock.patch(NAMESPACE + ".ApiDataViewModel.get_api_statistic_data_for_variance", return_value=[]):
+                mock.patch(NAMESPACE + ".ApiDataViewModel.get_api_statistic_data", return_value=[]):
             check = ApiStatisticViewer(config, params)
             ret = check.get_api_summary_data()
             self.assertEqual(MsvpConstant.EMPTY_LIST, ret)
 
-    def test_get_api_statistic_data_should_return_success_when_model_init_ok_and_data_exists(self):
+    def test_get_api_statistic_data_should_return_tuple_data_exists(self):
         config = {
             'headers': [
-                'level', 'API Name', 'Time(us)', 'Count',
+                'Level', 'API Name', 'Time(us)', 'Count',
                 'Avg(us)', 'Min(us)', 'Max(us)', 'Variance'
             ]
         }
@@ -87,21 +85,20 @@ class TestApiStatisticViewer(unittest.TestCase):
         }
         InfoConfReader()._host_freq = None
         InfoConfReader()._info_json = {'CPU': [{'Frequency': "1000"}]}
-        data = [(0, 1, 2, 3, 4, 5, 6, 7, 8)]
+        data = [(0, 1, 2)]
         with mock.patch(NAMESPACE + '.ApiDataViewModel.init', return_value=True), \
-                mock.patch(NAMESPACE + '.ApiDataViewModel.get_api_statistic_data', return_value=data), \
-                mock.patch(NAMESPACE + '.ApiDataViewModel.get_api_statistic_data_for_variance', return_value=[(0, 0)]):
+                mock.patch(NAMESPACE + '.ApiDataViewModel.get_api_statistic_data', return_value=data):
             check = ApiStatisticViewer(config, params)
             ret = check.get_api_statistic_data()
-            self.assertEqual((["level", "API Name", "Time(us)", "Count",
+            self.assertEqual((["Level", "API Name", "Time(us)", "Count",
                               "Avg(us)", "Min(us)", "Max(us)", "Variance"],
-                              [(7, 0, 0.002, 3, 0.004, 0.005, 0.006, 0)],
+                              [(2, 0, 0.001, 1, 0.001, 0.001, 0.001, 0.0)],
                               1), ret)
 
-    def test_get_api_statistic_data_should_return_success_when_model_init_ok_and_data_is_double(self):
+    def test_get_api_statistic_data_should_return_tuple_when_data_contains_two_level(self):
         config = {
             'headers': [
-                'level', 'API Name', 'Time(us)', 'Count',
+                'Level', 'API Name', 'Time(us)', 'Count',
                 'Avg(us)', 'Min(us)', 'Max(us)', 'Variance'
             ]
         }
@@ -112,14 +109,65 @@ class TestApiStatisticViewer(unittest.TestCase):
         }
         InfoConfReader()._host_freq = None
         InfoConfReader()._info_json = {'CPU': [{'Frequency': "1000"}]}
-        data = [(0, 1, 2, 3, 4, 5, 6, 7, 8)]
+        data = [(0, 1, 2)]
+        data1 = [(3, 4, 5)]
         with mock.patch(NAMESPACE + '.ApiDataViewModel.init', return_value=True), \
-                mock.patch(NAMESPACE + '.ApiDataViewModel.get_api_statistic_data', return_value=data + data), \
-                mock.patch(NAMESPACE + '.ApiDataViewModel.get_api_statistic_data_for_variance', return_value=[(0, 0)]):
+                mock.patch(NAMESPACE + '.ApiDataViewModel.get_api_statistic_data', return_value=data + data1):
             check = ApiStatisticViewer(config, params)
             ret = check.get_api_statistic_data()
-            self.assertEqual((["level", "API Name", "Time(us)", "Count",
+            self.assertEqual((["Level", "API Name", "Time(us)", "Count",
+                               "Avg(us)", "Min(us)", "Max(us)", "Variance"],
+                              [(2, 0, 0.001, 1, 0.001, 0.001, 0.001, 0.0),
+                               (5, 3, 0.004, 1, 0.004, 0.004, 0.004, 0.0)],
+                              2), ret)
+
+    def test_get_api_statistic_data_should_return_success_when_data_contains_single_level_and_one_level_name(self):
+        config = {
+            'headers': [
+                'Level', 'API Name', 'Time(us)', 'Count',
+                'Avg(us)', 'Min(us)', 'Max(us)', 'Variance'
+            ]
+        }
+        params = {
+            "project": "test_get_api_statistic_data",
+            "model_id": 6,
+            "iter_id": 6
+        }
+        InfoConfReader()._host_freq = None
+        InfoConfReader()._info_json = {'CPU': [{'Frequency': "1000"}]}
+        data = [(0, 6, 2)]
+        data1 = [(0, 8, 2)]
+        with mock.patch(NAMESPACE + '.ApiDataViewModel.init', return_value=True), \
+                mock.patch(NAMESPACE + '.ApiDataViewModel.get_api_statistic_data', return_value=data + data1):
+            check = ApiStatisticViewer(config, params)
+            ret = check.get_api_statistic_data()
+            self.assertEqual((["Level", "API Name", "Time(us)", "Count",
                               "Avg(us)", "Min(us)", "Max(us)", "Variance"],
-                              [(7, 0, 0.002, 3, 0.004, 0.005, 0.006, 0),
-                               (7, 0, 0.002, 3, 0.004, 0.005, 0.006, 0)],
+                              [(2, 0, 0.014, 2, 0.007, 0.006, 0.008, 1e-06)],
+                              1), ret)
+
+    def test_get_api_statistic_data_should_return_success_when_data_contains_single_level_and_two_api_name(self):
+        config = {
+            'headers': [
+                'Level', 'API Name', 'Time(us)', 'Count',
+                'Avg(us)', 'Min(us)', 'Max(us)', 'Variance'
+            ]
+        }
+        params = {
+            "project": "test_get_api_statistic_data",
+            "model_id": 7,
+            "iter_id": 7
+        }
+        InfoConfReader()._host_freq = None
+        InfoConfReader()._info_json = {'CPU': [{'Frequency': "1000"}]}
+        data = [(0, 6, 2)]
+        data1 = [(1, 8, 2)]
+        with mock.patch(NAMESPACE + '.ApiDataViewModel.init', return_value=True), \
+                mock.patch(NAMESPACE + '.ApiDataViewModel.get_api_statistic_data', return_value=data + data1):
+            check = ApiStatisticViewer(config, params)
+            ret = check.get_api_statistic_data()
+            self.assertEqual((["Level", "API Name", "Time(us)", "Count",
+                              "Avg(us)", "Min(us)", "Max(us)", "Variance"],
+                              [(2, 0, 0.006, 1, 0.006, 0.006, 0.006, 0.0),
+                               (2, 1, 0.008, 1, 0.008, 0.008, 0.008, 0.0)],
                               2), ret)

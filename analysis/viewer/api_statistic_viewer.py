@@ -13,7 +13,7 @@ from msmodel.api.api_data_viewer_model import ApiDataViewModel
 
 class ApiStatisticViewer:
     """
-    Viewer for showing API(ACL/Runtime API/GE) data
+    Viewer for showing API(acl/hccl/model/node/runtime) data
     """
 
     def __init__(self: any, configs: dict, params: dict) -> None:
@@ -21,28 +21,25 @@ class ApiStatisticViewer:
         self._params = params
         self._project_path = params.get(StrConstant.PARAM_RESULT_DIR)
         self._api_model = ApiDataViewModel(params)
-        self.result = {}
+        self._api_duration = {}
 
-    def api_statistic_reformat(self, data_list: list) -> list:
+    @staticmethod
+    def _api_statistic_reformat(data_dict: dict) -> list:
         reformat_result = []
-        for data in data_list:
-            try:
-                n = len(self.result[data[0]])
-                mean = sum(self.result[data[0]]) / n
-                deviations = [(x - mean) ** 2 for x in self.result[data[0]]]
-                variance = sum(deviations) / n
-            except KeyError:
-                logging.error("api data maybe parse failed, please check the data parsing log.")
+
+        for api_data, duration in data_dict.items():
+            api_name = api_data[0]
+            level = api_data[1]
+            sum_value = sum(duration)
+            count = len(duration)
+            average_value = sum_value / count
+            max_value = max(duration)
+            min_value = min(duration)
+            deviations = [(x - average_value) ** 2 for x in duration]
+            variance = sum(deviations) / count
             reformat_result.append(
                 (
-                    data[7],
-                    data[0],
-                    InfoConfReader().get_host_duration(data[2], NumberConstant.MICRO_SECOND),
-                    data[3],
-                    InfoConfReader().get_host_duration(data[4], NumberConstant.MICRO_SECOND),
-                    InfoConfReader().get_host_duration(data[5], NumberConstant.MICRO_SECOND),
-                    InfoConfReader().get_host_duration(data[6], NumberConstant.MICRO_SECOND),
-                    variance
+                    level, api_name, sum_value, count, average_value, min_value, max_value, variance
                 )
             )
         return reformat_result
@@ -56,11 +53,14 @@ class ApiStatisticViewer:
             logging.error("api data maybe parse failed, please check the data parsing log.")
             return MsvpConstant.EMPTY_LIST
         api_statistic_data = self._api_model.get_api_statistic_data()
-        var_data = self._api_model.get_api_statistic_data_for_variance()
-        for key, value in var_data:
-            reformatted_value = InfoConfReader().get_host_duration(value, NumberConstant.MICRO_SECOND)
-            self.result.setdefault(key, []).append(reformatted_value)
-        api_statistic_data = self.api_statistic_reformat(api_statistic_data)
+        for api_name, duration, level in api_statistic_data:
+            duration = InfoConfReader().get_host_duration(duration, NumberConstant.MICRO_SECOND)
+            if (api_name, level) in self._api_duration:
+                self._api_duration[(api_name, level)].append(duration)
+            else:
+                self._api_duration[(api_name, level)] = [duration]
+        api_statistic_data = self._api_statistic_reformat(self._api_duration)
+
         if api_statistic_data:
             return api_statistic_data
         return MsvpConstant.EMPTY_LIST
