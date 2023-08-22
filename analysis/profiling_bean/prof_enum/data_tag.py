@@ -78,6 +78,9 @@ class DataTag(Enum):
     CTX_ID = 65
     GE_LOGIC_STREAM_INFO = 66
     MEMORY_OP = 67
+    NANO_MODEL_EXEOM = 68
+    NANO_STARS_PROFILE = 69
+    DBG_FILE = 70
 
 
 @unique

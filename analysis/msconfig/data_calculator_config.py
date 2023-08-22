@@ -41,6 +41,12 @@ class DataCalculatorConfig(MetaConfig):
             ('level', '3'),
             ('position', 'D')
         ],
+        'NanoAicCalculator': [
+            ('path', 'mscalculate.aic.aic_calculator'),
+            ('chip_model', '9'),
+            ('level', '3'),
+            ('position', 'D')
+        ],
         'MiniAicCalculator': [
             ('path', 'mscalculate.aic.mini_aic_calculator'),
             ('chip_model', '0'),
@@ -104,25 +110,25 @@ class DataCalculatorConfig(MetaConfig):
         ],
         'ParseAiCoreOpSummaryCalculator': [
             ('path', 'mscalculate.data_analysis.parse_aicore_op_summary_calculator'),
-            ('chip_model', '0,1,2,3,4,5,7'),
+            ('chip_model', '0,1,2,3,4,5,7,9'),
             ('level', '14'),
             ('position', 'D')
         ],
         'OpSummaryOpSceneCalculator': [
             ('path', 'mscalculate.data_analysis.op_summary_op_scene_calculator'),
-            ('chip_model', '0,1,2,3,4,5,7'),
+            ('chip_model', '0,1,2,3,4,5,7,9'),
             ('level', '14'),
             ('position', 'D')
         ],
         'MergeOpCounterCalculator': [
             ('path', 'mscalculate.data_analysis.merge_op_counter_calculator'),
-            ('chip_model', '0,1,2,3,4,5,7'),
+            ('chip_model', '0,1,2,3,4,5,7,9'),
             ('level', '14'),
             ('position', 'D')
         ],
         'OpCounterOpSceneCalculator': [
             ('path', 'mscalculate.data_analysis.op_counter_op_scene_calculator'),
-            ('chip_model', '0,1,2,3,4,5,7'),
+            ('chip_model', '0,1,2,3,4,5,7,9'),
             ('level', '14'),
             ('position', 'D')
         ],
@@ -140,7 +146,7 @@ class DataCalculatorConfig(MetaConfig):
         ],
         'AscendTaskCalculator': [
             ('path', 'mscalculate.ascend_task.ascend_task_calculator'),
-            ('chip_model', '0,1,2,3,4,5,7'),
+            ('chip_model', '0,1,2,3,4,5,7,9'),
             ('level', '6'),
             ('position', 'D')
         ],
