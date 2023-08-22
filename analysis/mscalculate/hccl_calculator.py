@@ -142,23 +142,22 @@ class HcclCalculator(ICalculator, MsMultiProcess):
             return
         if not self._judge_calculate_again():
             return
+        self._drop_table()
         self.calculate()
         self.save()
 
+    def _drop_table(self):
+        with self._model as hccl_model:
+            hccl_model.drop_table(DBNameConstant.TABLE_HCCL_ALL_REDUCE)
+            hccl_model.drop_table(DBNameConstant.TABLE_HCCL_OP_REPORT)
+
     def _judge_calculate_again(self):
-        hccl_db_path = PathManager.get_db_path(self._project_path, DBNameConstant.DB_HCCL)
         if not ProfilingScene().is_operator():
-            conn, curs = DBManager.create_connect_db(hccl_db_path)
-            if not conn or not curs:
-                logging.error("unable to create op counter db connection")
-                raise ProfException(ProfException.PROF_SYSTEM_EXIT)
-            DBManager.drop_table(conn, DBNameConstant.TABLE_HCCL_ALL_REDUCE)
-            DBManager.drop_table(conn, DBNameConstant.TABLE_HCCL_OP_REPORT)
-            DBManager.destroy_db_connect(conn, curs)
             logging.info("In graph scene, to generate table %s and %s", DBNameConstant.TABLE_HCCL_ALL_REDUCE,
                          DBNameConstant.TABLE_HCCL_OP_REPORT)
             return True
         else:
+            hccl_db_path = PathManager.get_db_path(self._project_path, DBNameConstant.DB_HCCL)
             if DBManager.check_tables_in_db(hccl_db_path, DBNameConstant.TABLE_HCCL_ALL_REDUCE,
                                             DBNameConstant.TABLE_HCCL_OP_REPORT):
                 logging.info("Found table %s and %s in operator scene, no need to generate again",
