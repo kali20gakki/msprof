@@ -18,6 +18,7 @@ class ChipModel(Enum):
     CHIP_V3_3_0 = 4
     CHIP_V4_1_0 = 5
     CHIP_V1_1_1 = 7
+    CHIP_V5_1_0 = 9
 
 
 @unique

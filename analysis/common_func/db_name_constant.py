@@ -283,6 +283,10 @@ class DBNameConstant(metaclass=ABCMeta):
     TABLE_HCCL_OP_REPORT = "HcclOpReport"
 
 
+    # nano
+    TABLE_NANO_TASK = "NanoTask"
+
+
     @abstractmethod
     def get_db_name(self: any) -> str:
         """
