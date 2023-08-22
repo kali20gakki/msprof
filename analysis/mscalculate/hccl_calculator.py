@@ -18,6 +18,7 @@ from profiling_bean.db_dto.hccl_dto import HcclDto
 from msconfig.config_manager import ConfigManager
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.constant import Constant
+from common_func.msprof_exception import ProfException
 
 
 class HcclCalculator(ICalculator, MsMultiProcess):
@@ -34,8 +35,6 @@ class HcclCalculator(ICalculator, MsMultiProcess):
                                     [DBNameConstant.TABLE_HCCL_OP, DBNameConstant.TABLE_HCCL_TASK])
         self._hccl_data = []
         self._hccl_op_report_data = []
-        self.conn = None
-        self.curs = None
 
     @staticmethod
     def update_bandwidth(communication_data: List[HcclDto]):
@@ -143,8 +142,14 @@ class HcclCalculator(ICalculator, MsMultiProcess):
             return
         if not self._judge_calculate_again():
             return
+        self._drop_table()
         self.calculate()
         self.save()
+
+    def _drop_table(self):
+        with self._model as hccl_model:
+            hccl_model.drop_table(DBNameConstant.TABLE_HCCL_ALL_REDUCE)
+            hccl_model.drop_table(DBNameConstant.TABLE_HCCL_OP_REPORT)
 
     def _judge_calculate_again(self):
         if not ProfilingScene().is_operator():
