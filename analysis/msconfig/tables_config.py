@@ -1243,4 +1243,25 @@ class TablesConfig(MetaConfig):
             ('max', 'NUMERIC,null'),
             ('ratio', 'TEXT,null')
         ],
+        'NanoTaskMap': [
+            ('model_id', 'INTEGER,null'),
+            ('stream_id', 'INTEGER,null'),
+            ('task_id', 'INTEGER,null'),
+            ('task_type', 'TEXT,null'),
+            ('start_time', 'NUMERIC,null'),
+            ('end_time', 'NUMERIC,null'),
+            ('duration', 'NUMERIC,null'),
+            ('total_cycle', 'NUMERIC,null'),
+            ('block_dim', 'INTEGER,null'),
+            ('pmu0', 'NUMERIC,null'),
+            ('pmu1', 'NUMERIC,null'),
+            ('pmu2', 'NUMERIC,null'),
+            ('pmu3', 'NUMERIC,null'),
+            ('pmu4', 'NUMERIC,null'),
+            ('pmu5', 'NUMERIC,null'),
+            ('pmu6', 'NUMERIC,null'),
+            ('pmu7', 'NUMERIC,null'),
+            ('pmu8', 'NUMERIC,null'),
+            ('pmu9', 'NUMERIC,null')
+        ],
     }

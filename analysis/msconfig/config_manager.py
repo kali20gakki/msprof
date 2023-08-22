@@ -4,6 +4,7 @@
 
 import logging
 from msconfig.meta_config import MetaConfig
+from msconfig.nano_ai_core_config import NanoAICoreConfig
 from msconfig.prof_condition_config import ProfConditionConfig
 from msconfig.prof_rule_config import ProfRuleConfig
 from msconfig.data_parsers_config import DataParsersConfig
@@ -39,6 +40,7 @@ class ConfigManager:
     TS_CPU = "TsCPUConfig"
     CONSTANT = "ConstantConfig"
     L2_CACHE = "L2CacheConfig"
+    NANO_AI_CORE = "NanoAICoreConfig"
 
     CONFIG_MAP = {
         PROF_CONDITION: ProfConditionConfig,
@@ -56,7 +58,8 @@ class ConfigManager:
         CTRL_CPU: CtrlCPUConfig,
         TS_CPU: TsCPUConfig,
         CONSTANT: ConstantConfig,
-        L2_CACHE: L2CacheConfig
+        L2_CACHE: L2CacheConfig,
+        NANO_AI_CORE: NanoAICoreConfig,
     }
 
     @classmethod
