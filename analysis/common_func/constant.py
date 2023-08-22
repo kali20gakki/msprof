@@ -317,6 +317,7 @@ class Constant:
         "mte2_exe_ratio": PmuCalculateFunc.mte2_ratio,
         "mte3_ratio": PmuCalculateFunc.mte3_ratio,
         "mte3_exe_ratio": PmuCalculateFunc.mte3_ratio,
+        "mte3_preload_ratio": PmuCalculateFunc.mte3_ratio,
         "icache_miss_rate": PmuCalculateFunc.icache_miss_rate,
         "icache_req_ratio": PmuCalculateFunc.icache_req_ratio,
         "scalar_waitflag_ratio": PmuCalculateFunc.scalar_waitflag_ratio,
@@ -384,6 +385,16 @@ class Constant:
                       "r1_read_cache_hit,r1_read_cache_miss_allocate"
     }
 
+    NANO_AICORE_METRICS_LIST = {
+        PMU_PIPE: "mac_exe_ratio,vec_exe_ratio,scalar_ratio,mte1_ratio,mte2_ratio,"
+                  "mte3_ratio,fixpipe_ratio,mte3_preload_ratio,icache_miss_rate",
+        PMU_MEM: "main_mem_read_bw(GB/s),main_mem_write_bw(GB/s)",
+        PMU_MEM_UB: "ub_read_bw_mte(GB/s),ub_write_bw_mte(GB/s),"
+                    "ub_read_bw_vector(GB/s),ub_write_bw_vector(GB/s),"
+                    "ub_read_bw_scalar(GB/s),ub_write_bw_scalar(GB/s),"
+                    "cube_ub_wr_req_num(GB/s),cube_ub_rd_req_num(GB/s)",
+    }
+
     # add default limit for reader buffer size ->8196  * 1024 Byte
     MAX_READ_LINE_BYTES = 8196 * 1024
     MAX_READ_FILE_BYTES = 64 * 1024 * 1024
@@ -399,6 +410,7 @@ class Constant:
     CHIP_V3_3_0 = "4"
     CHIP_V4_1_0 = "5"
     CHIP_V1_1_1 = "7"
+    CHIP_V5_1_0 = "9"
 
     MIX_OP_AND_GRAPH = "mix_operator_and_graph"
     STEP_INFO = "step_info"
