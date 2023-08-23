@@ -51,7 +51,7 @@ int Thread::Start()
     funcBlock.procFunc = Thread::ThrProcess;
     funcBlock.pulArg = this;
     const unsigned int defaultStackSize = 128 * 1024; // 128 * 1024 means 128 kb
-    threadAttr.stackFlag = 1;
+    threadAttr.stackFlag = 0;
     threadAttr.stackSize = defaultStackSize;
 
     quit_ = false;
