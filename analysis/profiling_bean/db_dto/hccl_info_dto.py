@@ -248,6 +248,7 @@ class HCCLInfoDto:
             'duration estimated(us)': self.duration_estimated,
             'stream id': stream_id,
             'task id': task_id,
+            'context id': self.context_id,
             'task type': self.op_name,
             'src rank': self.local_rank,
             'dst rank': self.remote_rank,
