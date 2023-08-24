@@ -18,7 +18,7 @@ class FftsPmuBean(StructDecoder):
         self._subtask_id = filed[6]
         self._ffts_type = filed[7] >> 13
         self._subtask_type = filed[5] & int(b'11111111')
-        self._total_cycle = filed[10]
+        self._total_cycle = Utils.get_total_cycle(filed)
         self._pmu_list = filed[12:20]
         self._time_list = filed[20:]
 

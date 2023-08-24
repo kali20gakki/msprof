@@ -228,6 +228,15 @@ class Utils:
         return stream_id % (1 << 11)
 
     @classmethod
+    def get_total_cycle(cls: any, filed: tuple) -> int:
+        if filed[5] & 0x400:
+            logging.warning("An overflow in the operator (stream id = %d, task id = %d) count has been detected and "
+                            "the total_cycle value is not credible!", cls.get_stream_id(filed[2]), filed[3])
+            return filed[10] + 2**32 - 1
+
+        return filed[10]
+
+    @classmethod
     def get_cnt(cls: any, header: int) -> str:
         """
         cnt is the 7 - 10 bits of the first byte.
