@@ -100,7 +100,8 @@ class TestClusterParallelAnalysisParser(unittest.TestCase):
     def test_process(self):
         with mock.patch(NAMESPACE + ".ClusterParallelAnalysisParser._prepare_parallel_analysis"), \
                 mock.patch(NAMESPACE + ".ClusterParallelAnalysis.get_parallel_data",
-                           return_value={"parallel_mode": "Data Parallel"}):
+                           return_value={"parallel_mode": "Data Parallel"}), \
+             mock.patch('common_func.file_manager.check_path_valid'):
             check = ClusterParallelAnalysisParser(self.PARAMS2)
             check.process()
             self.assertEqual(
