@@ -92,7 +92,7 @@ int MsprofManager::GenerateRunningMode()
         return PROFILING_SUCCESS;
     }
     CmdLog::instance()->CmdErrorLog("No valid argument found in --dynamic --application "
-    "--sys-devices --host-sys --host-sys-usage --parse --query --export");
+    "--sys-devices --host-sys --host-sys-usage --parse --query --export --analyze");
     return PROFILING_FAILED;
 }
 
