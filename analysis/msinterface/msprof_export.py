@@ -467,7 +467,7 @@ class ExportCommand:
             if result.get('status', NumberConstant.EXCEPTION) == NumberConstant.ERROR:
                 error(self.FILE_NAME, result.get('info', ""))
             else:
-                warn(self.FILE_NAME, result.get('info', ""))
+                logging.warning(result.get('info', ""))
 
     def _print_export_info(self: any, params: dict, data: str) -> None:
         export_info = 'The {0} {1} data has been ' \
