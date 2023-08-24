@@ -628,10 +628,11 @@ class MsProfExportDataUtils:
                                                                params)
             data = handler(configs, params)
             timeline_data = []
-            try:
-                timeline_data = json.loads(data)
-            except (TypeError, ValueError) as err:
-                logging.error("timeline data is not json format.")
+            if data:
+                try:
+                    timeline_data = json.loads(data)
+                except (TypeError, ValueError) as err:
+                    logging.error("timeline data is not json format.")
             cls.add_timeline_data(params, timeline_data)
             skip_list = ["event", "api"]
             if params.get(StrConstant.PARAM_DATA_TYPE) in skip_list:
