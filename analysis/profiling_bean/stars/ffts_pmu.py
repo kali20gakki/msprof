@@ -77,7 +77,7 @@ class FftsPmuBean(StructDecoder):
         if self._ov_flag:
             logging.warning("An overflow in the operator (stream id = %d, task id = %d) count has been detected and "
                             "the total_cycle value is not credible!", self._stream_id, self._task_id)
-            return self._total_cycle + 2**32 - 1
+            return self._total_cycle + 4294967296 # 2**32 == 4294967296
         return self._total_cycle
 
     @property
