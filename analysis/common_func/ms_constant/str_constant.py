@@ -462,3 +462,4 @@ class TransportType(IntEnum):
     HCCS = 0
     PCIE = 1
     RDMA = 2
+    LOCAL = 3

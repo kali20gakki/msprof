@@ -320,7 +320,7 @@ void ArgsManager::AddAnalysisArgs()
             "\t\t\t\t\t\t   is off.(full-platform)", OFF},
         {"rule", "Switch specified rule for using msprof to analyze collecting data, the default value\n"
             "\t\t\t\t\t\t   is communication.(full-platform)\n"
-            "\t\t\t\t\t\t   The switch can be set in [communication]"},
+            "\t\t\t\t\t\t   The switch can be set in [communication, communication_matrix]"},
         {"parse", "Switch for using msprof to parse collecting data, the default value\n"
             "\t\t\t\t\t\t   is off.(full-platform)", OFF},
         {"query", "Switch for using msprof to query collecting data, the default value\n"
