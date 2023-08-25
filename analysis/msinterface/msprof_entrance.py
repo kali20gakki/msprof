@@ -16,6 +16,7 @@ from msinterface.msprof_monitor import monitor
 from msinterface.msprof_query import QueryCommand
 from msinterface.msprof_query_summary_manager import QueryDataType
 from analyzer.communication_analyzer import CommunicationAnalyzer
+from analyzer.communication_matrix_analyzer import CommunicationMatrixAnalyzer
 
 
 class MsprofEntrance:
@@ -62,6 +63,7 @@ class MsprofEntrance:
         _ = parser
         analyze_handler = {
             'communication': CommunicationAnalyzer,
+            'communication_matrix': CommunicationMatrixAnalyzer
         }
         analyze_command = analyze_handler.get(args.rule)(args.collection_path)
         analyze_command.process()
