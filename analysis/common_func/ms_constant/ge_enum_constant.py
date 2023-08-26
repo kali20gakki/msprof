@@ -155,3 +155,29 @@ class GeDataFormat(Enum):
         :return:
         """
         return cls._value2member_map_
+
+
+@unique
+class GeTaskType(Enum):
+    """
+    TaskType enum for ge graph operator data
+    """
+    AI_CORE = 0
+    AI_CPU = 1
+    AI_VECTOR_CORE = 2
+    WRITE_BACK = 3
+    MIX_AIC = 4
+    MIX_AIV = 5
+    FFTS_PLUS = 6
+    DSA_SQE = 7
+    DVPP = 8
+    HCCL = 9
+    INVALID = 10
+
+    @classmethod
+    def member_map(cls: any) -> dict:
+        """
+        enum map for TaskType member
+        :return:
+        """
+        return cls._value2member_map_
