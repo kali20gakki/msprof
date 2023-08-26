@@ -633,7 +633,7 @@ class MsProfExportDataUtils:
                     timeline_data = json.loads(data)
                 except (TypeError, ValueError) as err:
                     logging.error("timeline data is not json format.")
-                    return json.dumps({"status": NumberConstant.ERROR,
+                    return json.dumps({"status": NumberConstant.WARN,
                                        "info": "timeline data is not json format."})
             cls.add_timeline_data(params, timeline_data)
             skip_list = ["event", "api"]

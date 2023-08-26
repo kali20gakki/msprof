@@ -45,7 +45,7 @@ class TestMsProfExportDataUtils(unittest.TestCase):
                            return_value={"handler": '_get_step_trace_data'}), \
                 mock.patch(NAMESPACE + '.MsProfExportDataUtils._get_step_trace_data', return_value="invalid_data"):
             key = MsProfExportDataUtils()
-            expected = '{"status": 1, "info": "timeline data is not json format."}'
+            expected = '{"status": 2, "info": "timeline data is not json format."}'
             self.assertEqual(expected, key.export_data(params))
 
     def test_add_timeline_data(self):
