@@ -39,12 +39,7 @@ class TestMsProfExportDataUtils(unittest.TestCase):
         self.assertEqual(result, '{"status": 1, "info": "Unable to handler data type 123."}')
 
     def test_export_data_should_return_error_message_when_input_invalid_timeline(self):
-        params = \
-            {
-                'data_type': 'step_trace', 'project': 't', 'device_id': '0',
-                'job_id': 'job_default', 'export_type': 'timeline', 'iter_id': 1,
-                'export_format': None, 'model_id': 1
-            }
+        params = {'data_type': 'step_trace', 'export_type': 'timeline'}
         with mock.patch(NAMESPACE + '.MsProfExportDataUtils._load_export_data_config'), \
                 mock.patch(NAMESPACE + '.MsProfExportDataUtils._get_configs_with_data_type',
                            return_value={"handler": '_get_step_trace_data'}), \
