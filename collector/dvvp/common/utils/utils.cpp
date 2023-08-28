@@ -894,6 +894,10 @@ void Utils::GetChildDirs(const std::string &dir, bool isRecur, std::vector<std::
             if ((fileName.compare(".") == 0) || (fileName.compare("..") == 0)) {
                 continue;
             }
+            if (childDirs.size() >= MAX_FILES_NUM) {
+                MSPROF_LOGW("Get dirs num exceeds maximum value: %d, stop get dirs", MAX_FILES_NUM);
+                break;
+            }
             childDirs.push_back(childPath);
             if (!isRecur) {
                 continue;
@@ -925,6 +929,10 @@ void Utils::GetChildFilenames(const std::string &dir, std::vector<std::string> &
         std::string fileName = dirNameList[j]->d_name;
         if ((fileName.compare(".") == 0) || (fileName.compare("..") == 0)) {
             continue;
+        }
+        if (files.size() >= MAX_FILES_NUM) {
+            MSPROF_LOGW("Get files num exceeds maximum value: %d, stop get files", MAX_FILES_NUM);
+            break;
         }
         files.push_back(fileName);
     }
