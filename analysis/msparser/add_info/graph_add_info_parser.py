@@ -44,7 +44,9 @@ class GraphAddInfoParser(DataParser, MsMultiProcess):
         graph_info_files = self.group_aging_file(graph_info_files)
         for file_list in graph_info_files.values():
             self._graph_info_data.extend(self.parse_bean_data(file_list, StructFmt.GRAPH_ADD_INFO_SIZE,
-                                                              GraphAddInfoBean, self._get_graph_info_data))
+                                                              GraphAddInfoBean, self._get_graph_info_data,
+                                                              check_func=self.check_magic_num,
+                                                              ))
 
     def save(self: any) -> None:
         """
