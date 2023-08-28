@@ -97,6 +97,9 @@ double Utils::StatCpuRealFreq()
 
     double freqSum = 0;
     for (int i = 0; i < sampleTimes; i++) {
+        if (monotonicRaws[i + 1] == monotonicRaws[i]) {
+            continue;
+        }
         freqSum += static_cast<double>(cycleCnts[i + 1] - cycleCnts[i]) / (monotonicRaws[i + 1] - monotonicRaws[i]);
     }
     return freqSum / sampleTimes;
