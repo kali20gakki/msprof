@@ -46,6 +46,7 @@ class AicPmuModel(ParserModel):
         if DBManager.check_tables_in_db(db_path, DBNameConstant.TABLE_METRIC_SUMMARY):
             DBManager.drop_table(self.conn, DBNameConstant.TABLE_METRIC_SUMMARY)
 
+
 class NanoAicPmuModel(AicPmuModel):
     """
     ffts pmu model.
