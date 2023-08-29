@@ -10,12 +10,13 @@ class NanoExeomBean(AddInfoBean):
     """
 
     def __init__(self: any, *args) -> None:
+        super().__init__(*args)
         filed = args[0]
         self._model_id = filed[6]
         self._model_name = filed[7]
 
     @property
-    def model_id(self: any) -> int:
+    def graph_id(self: any) -> int:
         """
         nano host data model_id
         :return: model_id

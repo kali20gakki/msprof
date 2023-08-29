@@ -38,6 +38,16 @@ class TestMsProfExportDataUtils(unittest.TestCase):
             result = key.export_data(params)
         self.assertEqual(result, '{"status": 1, "info": "Unable to handler data type 123."}')
 
+    def test_export_data_should_return_error_message_when_input_invalid_timeline(self):
+        params = {'data_type': 'step_trace', 'export_type': 'timeline'}
+        with mock.patch(NAMESPACE + '.MsProfExportDataUtils._load_export_data_config'), \
+                mock.patch(NAMESPACE + '.MsProfExportDataUtils._get_configs_with_data_type',
+                           return_value={"handler": '_get_step_trace_data'}), \
+                mock.patch(NAMESPACE + '.MsProfExportDataUtils._get_step_trace_data', return_value="invalid_data"):
+            key = MsProfExportDataUtils()
+            expected = '{"status": 2, "info": "timeline data is not json format."}'
+            self.assertEqual(expected, key.export_data(params))
+
     def test_add_timeline_data(self):
         params = {"data_type": '123'}
         data = 123
