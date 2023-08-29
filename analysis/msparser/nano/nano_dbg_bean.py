@@ -18,16 +18,11 @@ L1_OP_DESC_FMT = "=IIIIIBI"
 L2_INPUT_DESC_FMT = "=IIIQQQI"
 L2_OUTPUT_DESC_FMT = "=IIIIIIQQQI"
 
-DATA_TYPE_DICT = GeDataType.member_map()
-FORMAT_DICT = GeDataFormat.member_map()
-TASK_TYPE_DICT = GeTaskType.member_map()
-
 
 class MagicHeadBean(StructDecoder):
     """
     dbg magic head bean data for the dbg data.
     """
-
     def __init__(self: any) -> None:
         self._magic_num = -1
         self._fmt_size = struct.calcsize(HEAD_FMT)
@@ -65,25 +60,24 @@ class TypeHeadBean(StructDecoder):
     """
     dbg type head bean data for the dbg data.
     """
-
     def __init__(self: any) -> None:
-        self._type = -1
-        self._len = 0
+        self._datatype = -1
+        self._length = 0
         self._fmt_size = struct.calcsize(HEAD_FMT)
 
     @property
-    def type(self: any) -> int:
+    def datatype(self: any) -> int:
         """
         head data type
         """
-        return self._type
+        return self._datatype
 
     @property
-    def len(self: any) -> int:
+    def length(self: any) -> int:
         """
-        head data len
+        head data length
         """
-        return self._len
+        return self._length
 
     @property
     def fmt_size(self: any) -> int:
@@ -104,15 +98,14 @@ class TypeHeadBean(StructDecoder):
         refresh the head data
         """
         field = args[0]
-        self._type = field[0]
-        self._len = field[1]
+        self._datatype = field[0]
+        self._length = field[1]
 
 
 class NameBean(StructDecoder):
     """
     dbg name bean data for the dbg data.
     """
-
     def __init__(self: any) -> None:
         self._name = ""
 
@@ -125,10 +118,10 @@ class NameBean(StructDecoder):
 
     def decode(self: any, data: bytes, offset: int, type_head: TypeHeadBean):
         """
-        decode the name data by TyptHeadBean's len
+        decode the name data by TyptHeadBean's length
         """
         self.construct_bean(struct.unpack(
-            StructFmt.BYTE_ORDER_CHAR + str(type_head.len) + NAME_FMT, data[offset:offset + type_head.len]))
+            StructFmt.BYTE_ORDER_CHAR + str(type_head.length) + NAME_FMT, data[offset:offset + type_head.length]))
         return self
 
     def construct_bean(self: any, *args: any) -> None:
@@ -143,7 +136,6 @@ class ShapeBean(StructDecoder):
     """
     dbg shape bean data for the dbg data.
     """
-
     def __init__(self: any) -> None:
         self._shape = ""
         self._count = 0
@@ -157,9 +149,9 @@ class ShapeBean(StructDecoder):
 
     def decode(self: any, data: bytes, offset: int, type_head: TypeHeadBean):
         """
-        decode the shape bin data by TyptHeadBean's len
+        decode the shape bin data by TyptHeadBean's length
         """
-        self._count = type_head.len // struct.calcsize(SHAPE_FMT)
+        self._count = type_head.length // struct.calcsize(SHAPE_FMT)
         self.construct_bean(struct.unpack(
             StructFmt.BYTE_ORDER_CHAR + str(self._count) + SHAPE_FMT,
             data[offset:offset + self._count * struct.calcsize(SHAPE_FMT)]))
@@ -179,7 +171,6 @@ class NumBean(StructDecoder):
     """
     dbg num bean data for the dbg data.
     """
-
     def __init__(self: any) -> None:
         self._num = -1
         self._fmt_size = struct.calcsize(NUM_FMT)
@@ -217,13 +208,12 @@ class L1OpDescBean(StructDecoder):
     """
     dbg op description bean data for the dbg data.
     """
-
     def __init__(self: any) -> None:
         self._task_id = -1
         self._stream_id = -1
         self._task_type = -1
         self._block_dim = -1
-        self._len = 0
+        self._length = 0
         self._fmt_size = struct.calcsize(L1_OP_DESC_FMT)
 
     @property
@@ -248,10 +238,11 @@ class L1OpDescBean(StructDecoder):
         op task_type data
         :return: task_type
         """
-        if self._task_type not in TASK_TYPE_DICT:
+        task_type_dict = GeTaskType.member_map()
+        if self._task_type not in task_type_dict:
             logging.error("Unsupported task_type %d", self._task_type)
             return str(self._task_type)
-        return TASK_TYPE_DICT.get(self._task_type).name
+        return task_type_dict.get(self._task_type).name
 
     @property
     def block_dim(self: any) -> int:
@@ -262,11 +253,11 @@ class L1OpDescBean(StructDecoder):
         return self._block_dim
 
     @property
-    def len(self: any) -> int:
+    def length(self: any) -> int:
         """
-        op description data's other info's len
+        op description data's other info's length
         """
-        return self._len
+        return self._length
 
     @property
     def fmt_size(self: any) -> int:
@@ -291,18 +282,17 @@ class L1OpDescBean(StructDecoder):
         self._stream_id = field[1]
         self._task_type = field[3]
         self._block_dim = field[4]
-        self._len = field[6]
+        self._length = field[6]
 
 
 class L2InputDescBean(StructDecoder):
     """
     dbg op input info bean data for the dbg data.
     """
-
     def __init__(self: any) -> None:
         self._data_type = -1
         self._format = -1
-        self._len = 0
+        self._length = 0
         self._fmt_size = struct.calcsize(L2_INPUT_DESC_FMT)
 
     @property
@@ -310,27 +300,29 @@ class L2InputDescBean(StructDecoder):
         """
         intput data type
         """
-        if self._data_type not in DATA_TYPE_DICT:
-            logging.error("Unsupported data_type %d", self._data_type)
+        data_type_dict = GeDataType.member_map()
+        if self._data_type not in data_type_dict:
+            logging.error("Unsupported input data_type %d", self._data_type)
             return str(self._data_type)
-        return DATA_TYPE_DICT.get(self._data_type).name
+        return data_type_dict.get(self._data_type).name
 
     @property
     def format(self: any) -> str:
         """
         intput data format
         """
-        if self._format not in FORMAT_DICT:
-            logging.error("Unsupported tensor format %d", self._format)
+        format_dict = GeDataFormat.member_map()
+        if self._format not in format_dict:
+            logging.error("Unsupported input tensor format %d", self._format)
             return str(self._format)
-        return FORMAT_DICT.get(self._format).name
+        return format_dict.get(self._format).name
 
     @property
-    def len(self: any) -> int:
+    def length(self: any) -> int:
         """
-        input other info's len
+        input other info's length
         """
-        return self._len
+        return self._length
 
     @property
     def fmt_size(self: any) -> int:
@@ -353,18 +345,15 @@ class L2InputDescBean(StructDecoder):
         field = args[0]
         self._data_type = field[0]
         self._format = field[1]
-        self._len = field[6]
+        self._length = field[6]
 
 
-class L2OutputDescBean(StructDecoder):
+class L2OutputDescBean(L2InputDescBean):
     """
     dbg op output info bean data for the dbg data.
     """
-
     def __init__(self: any) -> None:
-        self._data_type = -1
-        self._format = -1
-        self._len = 0
+        super().__init__()
         self._fmt_size = struct.calcsize(L2_OUTPUT_DESC_FMT)
 
     @property
@@ -372,34 +361,22 @@ class L2OutputDescBean(StructDecoder):
         """
         output data type
         """
-        if self._data_type not in DATA_TYPE_DICT:
-            logging.error("Unsupported data_type %d", self._data_type)
+        data_type_dict = GeDataType.member_map()
+        if self._data_type not in data_type_dict:
+            logging.error("Unsupported output data_type %d", self._data_type)
             return str(self._data_type)
-        return DATA_TYPE_DICT.get(self._data_type).name
+        return data_type_dict.get(self._data_type).name
 
     @property
     def format(self: any) -> str:
         """
         output data format
         """
-        if self._format not in FORMAT_DICT:
-            logging.error("Unsupported tensor format %d", self._format)
+        format_dict = GeDataFormat.member_map()
+        if self._format not in format_dict:
+            logging.error("Unsupported output tensor format %d", self._format)
             return str(self._format)
-        return FORMAT_DICT.get(self._format).name
-
-    @property
-    def len(self: any) -> int:
-        """
-        output other info's len
-        """
-        return self._len
-
-    @property
-    def fmt_size(self: any) -> int:
-        """
-        output's fmt size
-        """
-        return self._fmt_size
+        return format_dict.get(self._format).name
 
     def decode(self: any, data: bytes, offset: int):
         """
@@ -415,4 +392,4 @@ class L2OutputDescBean(StructDecoder):
         field = args[0]
         self._data_type = field[0]
         self._format = field[1]
-        self._len = field[9]
+        self._length = field[9]

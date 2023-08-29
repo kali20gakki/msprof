@@ -1,10 +1,10 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2023-2023. All rights reserved.
+import logging
 
-
+from common_func.ms_constant.ge_enum_constant import GeTaskType
 from msparser.compact_info.compact_info_bean import CompactInfoBean
-from profiling_bean.ge.ge_task_bean import GeTaskBean
 
 
 class NodeBasicInfoBean(CompactInfoBean):
@@ -27,7 +27,11 @@ class NodeBasicInfoBean(CompactInfoBean):
         """
         for task type
         """
-        return GeTaskBean.TASK_TYPE_DICT.get(self._task_type, self._task_type)
+        task_type_dict = GeTaskType.member_map()
+        if self._task_type not in task_type_dict:
+            logging.error("Unsupported task_type %d", self._task_type)
+            return str(self._task_type)
+        return task_type_dict.get(self._task_type).name
 
     @property
     def op_type(self: any) -> str:

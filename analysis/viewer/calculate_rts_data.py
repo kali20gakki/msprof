@@ -24,6 +24,7 @@ from common_func.msvp_common import read_cpu_cfg
 from common_func.path_manager import PathManager
 from common_func.utils import Utils
 from framework.load_info_manager import LoadInfoManager
+from mscalculate.aic.aic_utils import AicPmuUtils
 from mscalculate.calculate_ai_core_data import CalculateAiCoreData
 from profiling_bean.db_dto.step_trace_dto import IterationRange
 
@@ -436,7 +437,8 @@ def get_limit_and_offset(result_dir: str, iter_range: IterationRange) -> list:
 
 
 def get_metrics_from_sample_config(project_path: str,
-                                   metrics_type: str = StrConstant.AI_CORE_PROFILING_METRICS) -> list:
+                                   metrics_type: str = StrConstant.AI_CORE_PROFILING_METRICS,
+                                   cfg_name: str = "ai_core") -> list:
     """
     get ai core metric from sample json.
     """
@@ -445,20 +447,27 @@ def get_metrics_from_sample_config(project_path: str,
     if judge_custom_pmu_scene(sample_config, metrics_type=metrics_type):
         metrics.extend(sample_config.get('ai_core_profiling_events').replace('0x', 'r').split(','))
         return metrics
-    if sample_config.get(metrics_type) not in Constant.AICORE_METRICS_LIST:
+
+    metrics_list = []
+    if cfg_name == "ai_core":
+        metrics_list = Constant.AICORE_METRICS_LIST
+    elif cfg_name == "nano_ai_core":
+        metrics_list = Constant.NANO_AICORE_METRICS_LIST
+
+    if sample_config.get(metrics_type) not in metrics_list:
         return []
-    sample_metrics = Constant.AICORE_METRICS_LIST.get(sample_config.get(metrics_type)).split(",")
+    sample_metrics = metrics_list.get(sample_config.get(metrics_type)).split(",")
     for tmp in sample_metrics:
         if tmp.lower() not in \
-                Utils.generator_to_list(item[0] for item in config_file_obj(file_name='ai_core').items('metrics')):
-            error(CalculateRtsDataConst.FILE_NAME, 'Invalid metric {} .'.format(tmp))
-            call_sys_exit(NumberConstant.ERROR)
+                Utils.generator_to_list(item[0] for item in config_file_obj(file_name=cfg_name).items('metrics')):
+            logging.error(CalculateRtsDataConst.FILE_NAME, 'Invalid metric {} .'.format(tmp))
     new_metrics = []
-    if sample_config.get(metrics_type) in {Constant.PMU_PIPE, Constant.PMU_PIPE_EXCT, Constant.PMU_PIPE_EXECUT}:
+    if sample_config.get(metrics_type) in {Constant.PMU_PIPE, Constant.PMU_PIPE_EXCT, Constant.PMU_PIPE_EXECUT,
+                                           Constant.PMU_SCALAR_RATIO, Constant.PMU_PIPE_STALL_CYCLE}:
         for metric in sample_metrics[:-1]:
             if metric.endswith('extra'):
                 new_metrics.append(metric[:-NumberConstant.EXTRA_RATIO_NAME_LEN] + "time")
-            else:
+            elif metric.endswith('ratio'):
                 new_metrics.append(metric[:-NumberConstant.RATIO_NAME_LEN] + "time")
             new_metrics.append(metric)
         if sample_config.get(metrics_type) == Constant.PMU_PIPE_EXECUT:
