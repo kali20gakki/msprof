@@ -115,6 +115,10 @@ class PmuCalculateFunc:
         return PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc)
 
     @staticmethod
+    def mte_preload_ratio(pmu, task_cyc):
+        return PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc)
+
+    @staticmethod
     def icache_miss_rate(pmu, task_cyc):
         return PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc)
 
@@ -187,6 +191,18 @@ class PmuCalculateFunc:
         return PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc)
 
     @staticmethod
+    def acess_stack_ratio(pmu, task_cyc):
+        return PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc)
+
+    @staticmethod
+    def control_flow_prediction_ratio(pmu, task_cyc):
+        return PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc)
+
+    @staticmethod
+    def control_flow_mis_prediction_rate(pmu, task_cyc):
+        return PmuMetricCalculate.pmu_metric_calculate_without_freq(1.0, pmu, task_cyc)
+
+    @staticmethod
     def ub_read_bw(pmu, task_cyc, freq):
         return PmuMetricCalculate.pmu_metric_calculate_with_freq(1.0, 256.0, 4.0, pmu, task_cyc, freq)
 
@@ -212,11 +228,11 @@ class PmuCalculateFunc:
 
     @staticmethod
     def main_mem_read_bw(pmu, task_cyc, freq):
-        return PmuMetricCalculate.pmu_metric_calculate_with_freq(1.0, 256.0, 8.0, pmu, task_cyc, freq)
+        return PmuMetricCalculate.pmu_metric_calculate_with_freq(1.0, 8.0, 8.0, pmu, task_cyc, freq)
 
     @staticmethod
     def main_mem_write_bw(pmu, task_cyc, freq):
-        return PmuMetricCalculate.pmu_metric_calculate_with_freq(1.0, 256.0, 8.0, pmu, task_cyc, freq)
+        return PmuMetricCalculate.pmu_metric_calculate_with_freq(1.0, 8.0, 8.0, pmu, task_cyc, freq)
 
     @staticmethod
     def l0a_read_bw(pmu, task_cyc, freq):
@@ -251,20 +267,28 @@ class PmuCalculateFunc:
         return PmuMetricCalculate.pmu_metric_calculate_with_freq(1.0, 256.0, 32.0, pmu, task_cyc, freq)
 
     @staticmethod
+    def ub_read_bw_mte(pmu, task_cyc, freq):
+        return PmuMetricCalculate.pmu_metric_calculate_with_freq(1.0, 128.0, 1.0, pmu, task_cyc, freq)
+
+    @staticmethod
+    def ub_write_bw_mte(pmu, task_cyc, freq):
+        return PmuMetricCalculate.pmu_metric_calculate_with_freq(1.0, 128.0, 1.0, pmu, task_cyc, freq)
+
+    @staticmethod
     def ub_read_bw_vector(pmu, task_cyc, freq):
-        return PmuMetricCalculate.pmu_metric_calculate_with_freq(1.0, 256.0, 16.0, pmu, task_cyc, freq)
+        return PmuMetricCalculate.pmu_metric_calculate_with_freq(1.0, 128.0, 2.0, pmu, task_cyc, freq)
 
     @staticmethod
     def ub_write_bw_vector(pmu, task_cyc, freq):
-        return PmuMetricCalculate.pmu_metric_calculate_with_freq(1.0, 256.0, 8.0, pmu, task_cyc, freq)
+        return PmuMetricCalculate.pmu_metric_calculate_with_freq(1.0, 128.0, 2.0, pmu, task_cyc, freq)
 
     @staticmethod
     def ub_read_bw_scalar(pmu, task_cyc, freq):
-        return PmuMetricCalculate.pmu_metric_calculate_with_freq(1.0, 256.0, 32.0, pmu, task_cyc, freq)
+        return PmuMetricCalculate.pmu_metric_calculate_with_freq(1.0, 128.0, 1.0, pmu, task_cyc, freq)
 
     @staticmethod
     def ub_write_bw_scalar(pmu, task_cyc, freq):
-        return PmuMetricCalculate.pmu_metric_calculate_with_freq(1.0, 256.0, 32.0, pmu, task_cyc, freq)
+        return PmuMetricCalculate.pmu_metric_calculate_with_freq(1.0, 128.0, 1.0, pmu, task_cyc, freq)
 
 
 class Constant:
@@ -287,6 +311,8 @@ class Constant:
     PMU_RESOURCE = 'ResourceConflictRatio'
     PMU_MEM_UB = 'MemoryUB'
     PMU_L2_CACHE = 'L2Cache'
+    PMU_PIPE_STALL_CYCLE = 'PipeStallCycle'
+    PMU_SCALAR_RATIO = 'ScalarRatio'
 
     INVALID_INDEX = -1
 
@@ -317,7 +343,7 @@ class Constant:
         "mte2_exe_ratio": PmuCalculateFunc.mte2_ratio,
         "mte3_ratio": PmuCalculateFunc.mte3_ratio,
         "mte3_exe_ratio": PmuCalculateFunc.mte3_ratio,
-        "mte3_preload_ratio": PmuCalculateFunc.mte3_ratio,
+        "mte_preload_ratio": PmuCalculateFunc.mte_preload_ratio,
         "icache_miss_rate": PmuCalculateFunc.icache_miss_rate,
         "icache_req_ratio": PmuCalculateFunc.icache_req_ratio,
         "scalar_waitflag_ratio": PmuCalculateFunc.scalar_waitflag_ratio,
@@ -336,6 +362,9 @@ class Constant:
         "mte3_iq_full_ratio": PmuCalculateFunc.mte3_iq_full_ratio,
         "cube_iq_full_ratio": PmuCalculateFunc.cube_iq_full_ratio,
         "vec_iq_full_ratio": PmuCalculateFunc.vec_iq_full_ratio,
+        "acess_stack_ratio": PmuCalculateFunc.acess_stack_ratio,
+        "control_flow_prediction_ratio": PmuCalculateFunc.control_flow_prediction_ratio,
+        "control_flow_mis_prediction_rate": PmuCalculateFunc.control_flow_mis_prediction_rate,
         "ub_read_bw(GB/s)": PmuCalculateFunc.ub_read_bw,
         "ub_write_bw(GB/s)": PmuCalculateFunc.ub_write_bw,
         "l1_read_bw(GB/s)": PmuCalculateFunc.l1_read_bw,
@@ -352,6 +381,10 @@ class Constant:
         "l0c_write_bw(GB/s)": PmuCalculateFunc.l0c_write_bw,
         "l0c_read_bw_cube(GB/s)": PmuCalculateFunc.l0c_read_bw_cube,
         "l0c_write_bw_cube(GB/s)": PmuCalculateFunc.l0c_write_bw_cube,
+        "ub_read_bw_mte(GB/s)": PmuCalculateFunc.ub_read_bw_mte,
+        "ub_write_bw_mte(GB/s)": PmuCalculateFunc.ub_write_bw_mte,
+        "ub_read_bw_mte2(GB/s)": PmuCalculateFunc.ub_read_bw_mte,
+        "ub_write_bw_mte2(GB/s)": PmuCalculateFunc.ub_write_bw_mte,
         "ub_read_bw_vector(GB/s)": PmuCalculateFunc.ub_read_bw_vector,
         "ub_write_bw_vector(GB/s)": PmuCalculateFunc.ub_write_bw_vector,
         "ub_read_bw_scalar(GB/s)": PmuCalculateFunc.ub_read_bw_scalar,
@@ -386,13 +419,20 @@ class Constant:
     }
 
     NANO_AICORE_METRICS_LIST = {
-        PMU_PIPE: "mac_exe_ratio,vec_exe_ratio,scalar_ratio,mte1_ratio,mte2_ratio,"
-                  "mte3_ratio,fixpipe_ratio,mte3_preload_ratio,icache_miss_rate",
+        PMU_PIPE: "vec_exe_ratio,mac_exe_ratio,scalar_ratio,mte1_ratio,mte2_ratio,"
+                  "mte3_ratio,fixpipe_ratio,mte_preload_ratio,icache_miss_rate",
         PMU_MEM: "main_mem_read_bw(GB/s),main_mem_write_bw(GB/s)",
-        PMU_MEM_UB: "ub_read_bw_mte(GB/s),ub_write_bw_mte(GB/s),"
+        PMU_MEM_UB: "ub_read_bw_mte2(GB/s),ub_write_bw_mte2(GB/s),"
+                    "ub_read_bw_mte(GB/s),ub_write_bw_mte(GB/s),"
                     "ub_read_bw_vector(GB/s),ub_write_bw_vector(GB/s),"
-                    "ub_read_bw_scalar(GB/s),ub_write_bw_scalar(GB/s),"
-                    "cube_ub_wr_req_num(GB/s),cube_ub_rd_req_num(GB/s)",
+                    "ub_read_bw_scalar(GB/s),ub_write_bw_scalar(GB/s)",
+        PMU_PIPE_STALL_CYCLE: "cube_self_stall_cycles,vec_self_stall_cycles,"
+                              "cube_mte2_cflt_stall_cycles,cube_mte3_cflt_stall_cycles,"
+                              "cube_mte1_cflt_stall_cycles,vec_mte2_cflt_stall_cycles,"
+                              "vec_mte3_cflt_stall_cycles,vec_mte1_cflt_stall_cycles,"
+                              "mte1_mte2_stall_cycles,mte1_mte3_stall_cycles,"
+                              "mte2_mte3_stall_cycles,su_stall_cycles",
+        PMU_SCALAR_RATIO: "acess_stack_ratio,control_flow_mis_prediction_rate",
     }
 
     # add default limit for reader buffer size ->8196  * 1024 Byte
@@ -410,7 +450,9 @@ class Constant:
     CHIP_V3_3_0 = "4"
     CHIP_V4_1_0 = "5"
     CHIP_V1_1_1 = "7"
+    CHIP_V1_1_2 = "8"
     CHIP_V5_1_0 = "9"
+    CHIP_V1_1_3 = "10"
 
     MIX_OP_AND_GRAPH = "mix_operator_and_graph"
     STEP_INFO = "step_info"

@@ -15,28 +15,30 @@ class AicPmuUtils:
     HEX = 16
 
     @staticmethod
-    def get_pmu_event_name(pmu_event: str) -> str:
+    def get_pmu_event_name(pmu_event: str, cfg_name: str = "ai_core") -> str:
         """
         return pmu event name by pmu_event
         :param pmu_event:
+        :param cfg_name: decide use which config
         :return: pmu name
         """
-        aicore_events_map = read_cpu_cfg("ai_core", "event2metric")
+        aicore_events_map = read_cpu_cfg(cfg_name, "event2metric")
         pmu_name = aicore_events_map.get(int(pmu_event, AicPmuUtils.HEX), "")
         if not pmu_name:
             pmu_name = str(pmu_event)
         return pmu_name
 
     @staticmethod
-    def get_pmu_events(aic_pmu_events: str) -> list:
+    def get_pmu_events(aic_pmu_events: str, cfg_name: str = "ai_core") -> list:
         """
         get pmu events
         :param aic_pmu_events:
+        :param cfg_name: decide use which config
         :return:
         """
         if not aic_pmu_events:
             return []
-        return Utils.generator_to_list(AicPmuUtils.get_pmu_event_name(pmu_event)
+        return Utils.generator_to_list(AicPmuUtils.get_pmu_event_name(pmu_event, cfg_name)
                                        for pmu_event in aic_pmu_events.split(","))
 
     @staticmethod

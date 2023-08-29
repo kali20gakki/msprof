@@ -822,6 +822,9 @@ int32_t MmGetOsName(char *name, int32_t nameSize)
 
 static int32_t LocalLookup(char *buf, uint32_t bufLen, const char *pattern, char *value, uint32_t valueLen)
 {
+    if (buf == nullptr) {
+        return PROFILING_FAILED;
+    }
     const char *pValue = nullptr;
     char *pBuf = nullptr;
     uint32_t len = strlen(pattern);
