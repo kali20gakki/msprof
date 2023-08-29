@@ -204,7 +204,8 @@ class AiStackDataCheckManager(DataCheckManager):
         """
         return device_id != NumberConstant.HOST_ID and \
                DBManager.check_tables_in_db(
-                   PathManager.get_db_path(result_dir, DBNameConstant.DB_HCCL), DBNameConstant.TABLE_HCCL_ALL_REDUCE)
+                   PathManager.get_db_path(result_dir, DBNameConstant.DB_HCCL_SINGLE_DEVICE),
+                   DBNameConstant.TABLE_HCCL_SINGLE_DEVICE)
 
     @classmethod
     def contain_training_trace_data_or_step(cls: any, result_dir: str, device_id: int = None) -> bool:
@@ -392,4 +393,5 @@ class AiStackDataCheckManager(DataCheckManager):
         The data path contain hccl statistic data or not
         """
         return device_id != NumberConstant.HOST_ID and DBManager.check_tables_in_db(
-            PathManager.get_db_path(result_dir, DBNameConstant.DB_HCCL), DBNameConstant.TABLE_HCCL_OP_REPORT)
+            PathManager.get_db_path(result_dir, DBNameConstant.DB_HCCL_SINGLE_DEVICE),
+            DBNameConstant.TABLE_HCCL_OP_REPORT)

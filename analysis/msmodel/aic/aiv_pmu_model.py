@@ -10,7 +10,7 @@ from common_func.ms_constant.str_constant import StrConstant
 from common_func.path_manager import PathManager
 from msmodel.interface.parser_model import ParserModel
 from mscalculate.aic.aic_utils import AicPmuUtils
-from viewer.calculate_rts_data import insert_metric_value
+from viewer.calculate_rts_data import create_metric_table
 from viewer.calculate_rts_data import get_metrics_from_sample_config
 
 
@@ -30,7 +30,7 @@ class AivPmuModel(ParserModel):
         self.clear()
         aic_profiling_events = get_metrics_from_sample_config(self.result_dir, StrConstant.AIV_PROFILING_METRICS)
         column_list = AicPmuUtils.remove_unused_column(aic_profiling_events)
-        insert_metric_value(self.conn, column_list, DBNameConstant.TABLE_AIV_METRIC_SUMMARY)
+        create_metric_table(self.conn, column_list, DBNameConstant.TABLE_AIV_METRIC_SUMMARY)
 
     def flush(self: any, data_list: list) -> None:
         """

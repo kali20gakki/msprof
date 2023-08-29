@@ -21,6 +21,7 @@ from common_func.msprof_exception import ProfException
 from common_func.msprof_iteration import MsprofIteration
 from common_func.path_manager import PathManager
 from common_func.platform.chip_manager import ChipManager
+from common_func.info_conf_reader import InfoConfReader
 from msmodel.task_time.ascend_task_model import AscendTaskModel
 from viewer.ge_info_report import get_ge_model_name_dict
 from profiling_bean.db_dto.ge_task_dto import GeTaskDto
@@ -58,7 +59,7 @@ class MergeOpCounterCalculator(MsMultiProcess):
               "and {1}.start_time != {2} " \
               "group by op_type,{0}.task_type" \
             .format(CommonConstant.GE_TASK_MEGED_TABLE, CommonConstant.RTS_TASK_TABLE,
-                    NumberConstant.INVALID_TASK_TIME,)
+                    NumberConstant.INVALID_TASK_TIME)
         return sql
 
     @staticmethod
@@ -156,10 +157,11 @@ class MergeOpCounterCalculator(MsMultiProcess):
                                             DBNameConstant.TABLE_HWTS_TASK_TIME)
 
     def _get_ge_data(self: any, ge_curs: any) -> list:
+        device_id = InfoConfReader().get_device_id()
         ge_data = []
         iter_list = MsprofIteration(self.project_path).get_index_id_list_with_index_and_model(self.iter_range)
         ge_sql = f'select model_id, op_name, op_type, task_type, task_id, stream_id, batch_id, context_id ' \
-                 f'from {DBNameConstant.TABLE_GE_TASK} where index_id=? and model_id=?'
+                 f'from {DBNameConstant.TABLE_GE_TASK} where index_id=? and model_id=? and device_id={device_id}'
         for index_and_model in iter_list:
             ge_data.extend(DBManager.fetch_all_data(ge_curs, ge_sql, index_and_model))
 

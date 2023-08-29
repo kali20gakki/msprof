@@ -22,7 +22,6 @@ from mscalculate.cann.cann_analysis_gear import ACLGear
 from mscalculate.cann.cann_analysis_gear import ModelGear
 from mscalculate.cann.cann_analysis_gear import NodeGear
 from mscalculate.cann.cann_analysis_gear import TaskGear
-from mscalculate.cann.cann_analysis_gear import HCCLGear
 from mscalculate.cann.cann_database import AdditionalRecordDatabase
 from mscalculate.cann.cann_database import ApiDataDatabase
 from mscalculate.cann.event import Event
@@ -511,47 +510,6 @@ class TestFindModelNameInModelLoad(unittest.TestCase):
         gear.model_load_data = [(0, "test", 1, 1), (1, "test2", 2, 3)]
         self.assertEqual(gear.find_model_name(0), "test")
         self.assertEqual(gear.find_model_name(1), "test2")
-
-
-class TestHcclGear(TestCANNAnalysisGear):
-    DIR_PATH = os.path.join(os.path.dirname(__file__), "DT_HcclGear")
-    PROF_HOST_DIR = os.path.join(DIR_PATH, 'PROF1', 'host')
-
-    def test_hccl_gear_should_return_one_hccl_op_when_one_hccl_op_within_one_node_info(self):
-        gear = HCCLGear(self.PROF_HOST_DIR)
-        event1: Event = self.create_api_event(self.event_col(Constant.NODE_LEVEL, 1, 302, 340, "launch", "hccl1"))
-        event2 = self.create_api_event(self.event_col(Constant.HCCL_LEVEL, 1, 310, 320, "hccl api", 0))
-        gear.run(event2, {Constant.MODEL_LEVEL: Event.invalid_event(), Constant.NODE_LEVEL: event1,
-                          Constant.HCCL_LEVEL: event2})
-        gear.flush_data()
-        self.assertEqual(
-            DBManager.get_table_data_count(PathManager.get_db_path(self.PROF_HOST_DIR, DBNameConstant.DB_HCCL),
-                                           DBNameConstant.TABLE_HCCL_OP), 1)
-
-    def test_hccl_gear_should_return_zero_hccl_op_when_without_one_node_info(self):
-        gear = HCCLGear(self.PROF_HOST_DIR)
-        event1 = self.create_api_event(self.event_col(Constant.HCCL_LEVEL, 1, 350, 360, "hccl api", 0))
-        gear.run(event1, {Constant.MODEL_LEVEL: Event.invalid_event(), Constant.NODE_LEVEL: Event.invalid_event(),
-                          Constant.HCCL_LEVEL: event1})
-        gear.flush_data()
-        self.assertEqual(
-            DBManager.get_table_data_count(PathManager.get_db_path(self.PROF_HOST_DIR, DBNameConstant.DB_HCCL),
-                                           DBNameConstant.TABLE_HCCL_OP), 0)
-
-    def test_hccl_gear_should_return_one_hccl_op_when_multi_hccl_op_with_one_node_info(self):
-        gear = HCCLGear(self.PROF_HOST_DIR)
-        event1: Event = self.create_api_event(self.event_col(Constant.NODE_LEVEL, 1, 370, 390, "launch", "hccl"))
-        event2 = self.create_api_event(self.event_col(Constant.HCCL_LEVEL, 1, 371, 375, "hccl api", 0))
-        event3 = self.create_api_event(self.event_col(Constant.HCCL_LEVEL, 1, 381, 385, "hccl api", 0))
-        gear.run(event2, {Constant.MODEL_LEVEL: Event.invalid_event(), Constant.NODE_LEVEL: event1,
-                          Constant.HCCL_LEVEL: event2})
-        gear.run(event3, {Constant.MODEL_LEVEL: Event.invalid_event(), Constant.NODE_LEVEL: event1,
-                          Constant.HCCL_LEVEL: event3})
-        gear.flush_data()
-        self.assertEqual(
-            DBManager.get_table_data_count(PathManager.get_db_path(self.PROF_HOST_DIR, DBNameConstant.DB_HCCL),
-                                           DBNameConstant.TABLE_HCCL_OP), 1)
-
 
 if __name__ == '__main__':
     unittest.main()

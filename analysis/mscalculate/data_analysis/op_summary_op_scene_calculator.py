@@ -13,6 +13,7 @@ from msconfig.config_manager import ConfigManager
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.path_manager import PathManager
+from common_func.info_conf_reader import InfoConfReader
 from msmodel.task_time.ascend_task_model import AscendTaskModel
 from profiling_bean.db_dto.ge_task_dto import GeTaskDto
 
@@ -34,11 +35,12 @@ class OpSummaryOpSceneCalculator(MsMultiProcess):
 
     @staticmethod
     def _get_ge_sql() -> str:
+        device_id = InfoConfReader().get_device_id()
         ge_sql = "SELECT model_id, task_id, stream_id, " \
                  "op_name, op_type, block_dim, mix_block_dim, task_type, " \
                  "tensor_num, input_formats, input_data_types, input_shapes, output_formats, output_data_types," \
-                 "output_shapes, index_id, timestamp, batch_id, context_id from {0}" \
-            .format(DBNameConstant.TABLE_GE_TASK)
+                 "output_shapes, index_id, timestamp, batch_id, context_id from {0} where device_id = {1}" \
+            .format(DBNameConstant.TABLE_GE_TASK, device_id)
         return ge_sql
 
     @staticmethod
@@ -95,9 +97,9 @@ class OpSummaryOpSceneCalculator(MsMultiProcess):
         """
         create ai core metrics table
         """
-        db_path = PathManager.get_db_path(self.project_path, DBNameConstant.DB_RUNTIME)
-        if DBManager.check_tables_in_db(db_path, DBNameConstant.TABLE_AI_CORE_METRIC_SUMMARY):
-            core_merge_data = self._get_ai_core_metric(DBNameConstant.TABLE_AI_CORE_METRIC_SUMMARY)
+        db_path = PathManager.get_db_path(self.project_path, DBNameConstant.DB_METRICS_SUMMARY)
+        if DBManager.check_tables_in_db(db_path, DBNameConstant.TABLE_METRIC_SUMMARY):
+            core_merge_data = self._get_ai_core_metric(DBNameConstant.TABLE_METRIC_SUMMARY)
         elif DBManager.check_tables_in_db(db_path, DBNameConstant.TABLE_AIV_METRIC_SUMMARY):
             core_merge_data = self._get_ai_core_metric(DBNameConstant.TABLE_AIV_METRIC_SUMMARY)
         else:
@@ -183,7 +185,7 @@ class OpSummaryOpSceneCalculator(MsMultiProcess):
 
     def _get_ai_core_metric(self: any, table_name: str) -> list:
         core_data = []
-        core_conn, core_curs = DBManager.check_connect_db(self.project_path, DBNameConstant.DB_RUNTIME)
+        core_conn, core_curs = DBManager.check_connect_db(self.project_path, DBNameConstant.DB_METRICS_SUMMARY)
         if not (core_conn and core_curs):
             DBManager.destroy_db_connect(core_conn, core_curs)
             return core_data

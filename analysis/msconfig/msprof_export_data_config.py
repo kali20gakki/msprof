@@ -214,8 +214,8 @@ class MsProfExportDataConfig(MetaConfig):
         ],
         'hccl': [
             ('handler', '_get_hccl_timeline'),
-            ('db', 'hccl.db'),
-            ('table', 'HCCLAllReduce')
+            ('db', 'hccl_single_device.db'),
+            ('table', 'HCCLSingleDevice')
         ],
         'msprof_tx': [
             ('handler', '_get_msproftx_data'),
@@ -299,7 +299,7 @@ class MsProfExportDataConfig(MetaConfig):
             ('handler', '_get_hccl_statistic_data'),
             ('headers',
              'OP Type,Count,Total Time(us),Min Time(us),Avg Time(us),Max Time(us),Ratio(%)'),
-            ('db', 'hccl.db')
+            ('db', 'hccl_single_device.db')
         ],
         'api_statistic': [
             ('handler', '_get_api_statistic_data'),
