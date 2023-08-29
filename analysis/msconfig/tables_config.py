@@ -139,7 +139,7 @@ class TablesConfig(MetaConfig):
             ('stream_id', 'INTEGER,null'),
             ('overflow', 'INTEGER,null'),
             ('overflowcycle', 'INTEGER,null'),
-            ('timestamp', 'INTEGER,null'),
+            ('timestamp', 'NUMERIC,null'),
             ('event1', 'TEXT,null'),
             ('event2', 'TEXT,null'),
             ('event3', 'TEXT,null'),
@@ -238,7 +238,7 @@ class TablesConfig(MetaConfig):
         'NicOriginalDataMap': [
             ('device_id', 'INTEGER,null'),
             ('replayid', 'INTEGER,null'),
-            ('timestamp', 'REAL,null'),
+            ('timestamp', 'NUMERIC,null'),
             ('bandwidth', 'INTEGER,null'),
             ('rxpacket', 'REAL,null'),
             ('rxbyte', 'REAL,null'),

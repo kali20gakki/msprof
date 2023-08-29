@@ -82,16 +82,20 @@ class TestCalculateAiCoreData(unittest.TestCase):
             result = key.compute_ai_core_data(events_name_list, ai_core_profiling_events, task_cyc, pmu_data)
         self.assertEqual(result, check)
 
-    def test_cal_addition(self):
+    def test_cal_addition_when_normal_then_pass(self):
         events_name_list = ["vec_fp16_128lane_ratio", "vec_fp16_64lane_ratio", "mac_fp16_ratio",
                             "mac_int8_ratio", "mte1_iq_full_ratio", "mte2_iq_full_ratio",
                             "mte3_iq_full_ratio", "cube_iq_full_ratio", "vec_iq_full_ratio",
-                            "icache_miss_rate", "icache_req_ratio", "fixpipe_ratio", 'vec_exe_ratio']
+                            "icache_miss_rate", "icache_req_ratio", "fixpipe_ratio", "vec_exe_ratio",
+                            "main_mem_read_bw(GB/s)", "main_mem_write_bw(GB/s)", "mte2_ratio", "mte3_ratio",
+                            "control_flow_prediction_ratio", "control_flow_mis_prediction_rate"]
         ai_core_profiling_events = {"vec_fp16_128lane_ratio": [1], "vec_fp16_64lane_ratio": [1], "mac_fp16_ratio": [1],
                                     "mac_int8_ratio": [1], "mte1_iq_full_ratio": [1], "mte2_iq_full_ratio": [1],
                                     "mte3_iq_full_ratio": [1], "cube_iq_full_ratio": [1], "vec_iq_full_ratio": [1],
                                     "icache_req_ratio": [1], "icache_miss_rate": [1], "fixpipe_ratio": [0],
-                                    "vec_exe_ratio": [0]}
+                                    "vec_exe_ratio": [0], "main_mem_read_bw(GB/s)": [5], "main_mem_write_bw(GB/s)": [4],
+                                    "mte2_ratio": [2], "mte3_ratio": [4],
+                                    "control_flow_prediction_ratio": [3], "control_flow_mis_prediction_rate": [2]}
         task_cyc = 1
         with mock.patch(NAMESPACE + '.CalculateAiCoreData.add_vector_data'):
             key = CalculateAiCoreData('123')

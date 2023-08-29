@@ -4,7 +4,6 @@
 
 import os
 
-from common_func.common import error
 from common_func.constant import Constant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.msprof_exception import ProfException
@@ -25,11 +24,15 @@ class ChipManager:
         Constant.CHIP_V3_3_0: ChipModel.CHIP_V3_3_0,
         Constant.CHIP_V4_1_0: ChipModel.CHIP_V4_1_0,
         Constant.CHIP_V1_1_1: ChipModel.CHIP_V1_1_1,
-        Constant.CHIP_V5_1_0: ChipModel.CHIP_V5_1_0
+        Constant.CHIP_V1_1_2: ChipModel.CHIP_V1_1_2,
+        Constant.CHIP_V5_1_0: ChipModel.CHIP_V5_1_0,
+        Constant.CHIP_V1_1_3: ChipModel.CHIP_V1_1_3
     }
     CHIP_CORE_NUM_MAP = {
         ChipModel.CHIP_V4_1_0: ChipCoreNum.CHIP_V4_1_0,
-        ChipModel.CHIP_V1_1_1: ChipCoreNum.CHIP_V1_1_1
+        ChipModel.CHIP_V1_1_1: ChipCoreNum.CHIP_V1_1_1,
+        ChipModel.CHIP_V1_1_2: ChipCoreNum.CHIP_V1_1_2,
+        ChipModel.CHIP_V1_1_3: ChipCoreNum.CHIP_V1_1_3
     }
 
     FILE_NAME = os.path.basename(__file__)
@@ -123,17 +126,24 @@ class ChipManager:
 
     def is_chip_v1_1(self: any) -> bool:
         """
-        check the scene of chip.v1.1.1
+        check the scene of chip.v1.1.1 or chip.v1.1.2 or chip.v1.1.3
         :return: True or False
         """
-        return self.chip_id == ChipModel.CHIP_V1_1_1
+        return self.chip_id in (ChipModel.CHIP_V1_1_1, ChipModel.CHIP_V1_1_2, ChipModel.CHIP_V1_1_3)
 
     def is_stars_chip(self) -> bool:
         """
-        check the scene of chip.v4.1.0 or chip.v1.1.1
+        check the scene of chip.v4.1.0 or chip.v1.1.x
         :return: True or False
         """
         return self.is_chip_v1_1() or self.is_chip_v4()
+
+    def is_chip_v5_1_0(self: any) -> bool:
+        """
+        check the scene of chip.v5.1.0
+        :return: True or False
+        """
+        return self.chip_id == ChipModel.CHIP_V5_1_0
 
     def get_max_core_id(self) -> ChipCoreNum:
         if self.chip_id not in self.CHIP_CORE_NUM_MAP:
