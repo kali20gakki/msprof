@@ -10,6 +10,7 @@ from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.path_manager import PathManager
+from common_func.info_conf_reader import InfoConfReader
 from msmodel.interface.ianalysis_model import IAnalysisModel
 from msmodel.interface.view_model import ViewModel
 from msmodel.stars.acsq_task_model import AcsqTaskModel
@@ -62,13 +63,13 @@ class OpSummaryModel(ViewModel, IAnalysisModel):
         create ai core metrics table
         :return: None
         """
-        if not self.attach_to_db(DBNameConstant.DB_RUNTIME):
+        if not self.attach_to_db(DBNameConstant.DB_METRICS_SUMMARY):
             logging.warning("unable to create ai core metrics table, because attach db of runtime failed.")
             return
-        if DBManager.check_tables_in_db(self.get_db_path(DBNameConstant.DB_RUNTIME),
-                                        CommonConstant.METRICS_SUMMARY_TABLE):
+        if DBManager.check_tables_in_db(self.get_db_path(DBNameConstant.DB_METRICS_SUMMARY),
+                                        DBNameConstant.TABLE_METRIC_SUMMARY):
             sql = "create table if not exists ai_core_metrics " \
-                  "as select * from {0}".format(CommonConstant.METRICS_SUMMARY_TABLE)
+                  "as select * from {0}".format(DBNameConstant.TABLE_METRIC_SUMMARY)
         else:
             logging.warning("unable to create ai core metrics table, because table is not found.")
             return
@@ -144,13 +145,15 @@ class OpSummaryModel(ViewModel, IAnalysisModel):
         return DBManager.fetch_all_data(self.cur, sql, dto_class=TimeSectionDto)
 
     def _get_ge_sql(self: any) -> tuple:
+        device_id = InfoConfReader().get_device_id()
         ge_sql = "SELECT model_id, task_id, stream_id, " \
                  "op_name, op_type, block_dim, task_type, timestamp " \
                  "from {0} " \
                  "where (index_id=? or index_id=0) " \
-                 "and model_id=?" \
+                 "and model_id=? " \
+                 "and device_id=?" \
             .format(DBNameConstant.TABLE_GE_TASK)
-        return ge_sql, (self.iter_id, self.model_id)
+        return ge_sql, (self.iter_id, self.model_id, device_id)
 
     def _get_acsq_task_data(self: any) -> list:
         try:

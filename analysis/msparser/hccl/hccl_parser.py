@@ -32,7 +32,7 @@ class HCCLParser(MsMultiProcess):
         self.project_path = self.sample_config.get("result_dir", "")
         self._file_list = file_list.get(DataTag.HCCL, [])
         self._hccl_dir = os.path.realpath(PathManager.get_hccl_path(self.project_path))
-        self._model = HCCLModel(self.project_path, [DBNameConstant.TABLE_HCCL_ALL_REDUCE])
+        self._model = HCCLModel(self.project_path, [DBNameConstant.TABLE_HCCL_SINGLE_DEVICE])
         self._hccl_data = []
         self._file_list.sort(key=lambda x: int(x.split("_")[-1]))
 

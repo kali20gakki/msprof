@@ -4,11 +4,13 @@
 
 import logging
 import sqlite3
+import os
 
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.str_constant import StrConstant
+from common_func.path_manager import PathManager
 from mscalculate.aic.aic_utils import AicPmuUtils
 from msmodel.interface.parser_model import ParserModel
 from viewer.calculate_rts_data import get_metrics_from_sample_config
@@ -30,12 +32,14 @@ class FftsPmuModel(ParserModel):
         :return:
         """
         # aic metrics table
+        if DBManager.judge_table_exist(self.cur, DBNameConstant.TABLE_METRIC_SUMMARY):
+            DBManager.drop_table(self.conn, DBNameConstant.TABLE_METRIC_SUMMARY)
         column_list = []
         self.profiling_events['aiv'] = get_metrics_from_sample_config(self.result_dir,
                                                                       StrConstant.AIV_PROFILING_METRICS)
         self.profiling_events['aic'] = get_metrics_from_sample_config(self.result_dir)
         self.update_pmu_list(column_list)
-        self._insert_metric_value(column_list, DBNameConstant.TABLE_METRICS_SUMMARY)
+        self._insert_table_metric_head(column_list, DBNameConstant.TABLE_METRIC_SUMMARY)
 
     def update_pmu_list(self: any, column_list: list) -> None:
         for core_type, pmu_list in self.profiling_events.items():
@@ -52,9 +56,9 @@ class FftsPmuModel(ParserModel):
         if not data_list:
             logging.warning("ffts pmu data is empty, no data found.")
             return
-        self.insert_data_to_db(DBNameConstant.TABLE_METRICS_SUMMARY, data_list)
+        self.insert_data_to_db(DBNameConstant.TABLE_METRIC_SUMMARY, data_list)
 
-    def _insert_metric_value(self: any, metrics: list, table_name: str) -> None:
+    def _insert_table_metric_head(self: any, metrics: list, table_name: str) -> None:
         """
         insert event value into metric op_summary
         """

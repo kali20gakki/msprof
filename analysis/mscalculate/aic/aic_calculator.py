@@ -138,10 +138,8 @@ class AicCalculator(PmuCalculator, MsMultiProcess):
         :return: None
         """
         if self._aic_data_list:
-            aic_pmu_model = AicPmuModel(self._project_path)
-            aic_pmu_model.init()
-            aic_pmu_model.flush(self._aic_data_list)
-            aic_pmu_model.finalize()
+            with AicPmuModel(self._project_path) as aic_pmu_model:
+                aic_pmu_model.flush(self._aic_data_list)
 
     def ms_run(self: any) -> None:
         """
