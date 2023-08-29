@@ -13,6 +13,7 @@ from msmodel.add_info.graph_add_info_model import GraphAddInfoModel
 from msparser.data_struct_size_constant import StructFmt
 from msparser.interface.data_parser import DataParser
 from msparser.add_info.graph_add_info_bean import GraphAddInfoBean
+from msparser.nano.nano_exeom_bean import NanoExeomBean
 from profiling_bean.prof_enum.data_tag import DataTag
 
 
@@ -38,7 +39,7 @@ class GraphAddInfoParser(DataParser, MsMultiProcess):
 
     def parse(self: any) -> None:
         """
-        parse ge graph data
+        parse ge graph data or nano's model info
         """
         graph_info_files = self._file_list.get(DataTag.GRAPH_ADD_INFO, [])
         graph_info_files = self.group_aging_file(graph_info_files)
@@ -47,6 +48,12 @@ class GraphAddInfoParser(DataParser, MsMultiProcess):
                                                               GraphAddInfoBean, self._get_graph_info_data,
                                                               check_func=self.check_magic_num,
                                                               ))
+
+        nano_exeom_info_files = self._file_list.get(DataTag.NANO_MODEL_EXEOM, [])
+        nano_exeom_info_files = self.group_aging_file(nano_exeom_info_files)
+        for file_list in nano_exeom_info_files.values():
+            self._graph_info_data.extend(self.parse_bean_data(file_list, StructFmt.NANO_MODEL_EXEOM_SIZE,
+                                                              NanoExeomBean, self._get_graph_info_data))
 
     def save(self: any) -> None:
         """
@@ -63,7 +70,8 @@ class GraphAddInfoParser(DataParser, MsMultiProcess):
         parse and save ge graph data
         :return:
         """
-        if not self._file_list.get(DataTag.GRAPH_ADD_INFO, []):
+        if not self._file_list.get(DataTag.GRAPH_ADD_INFO, []) and \
+                not self._file_list.get(DataTag.NANO_MODEL_EXEOM, []):
             return
         try:
             self.parse()

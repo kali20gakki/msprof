@@ -16,10 +16,6 @@ class NanoExeomModel(ParserModel):
     nano host data for table:TaskInfo in db:ge_info
     """
 
-    INVALID_ID = 4294967295
-    INVALID_VALUE = -1
-    DEFAULT_VALUE = 0
-
     def __init__(self: any, result_dir: str) -> None:
         super().__init__(result_dir, DBNameConstant.DB_GE_INFO, [DBNameConstant.TABLE_GE_TASK])
 
