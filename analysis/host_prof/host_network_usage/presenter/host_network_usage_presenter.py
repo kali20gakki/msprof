@@ -42,15 +42,18 @@ def init_params(line: str) -> tuple:
     :return:
     """
     fields = line.split()
-    intf = fields[0][0:-1]
-    rxbytes = int(fields[1])
-    rxpackets = int(fields[2])
-    rxerrs = int(fields[3])
-    txbytes = int(fields[9])
-    txpackets = int(fields[10])
-    txerrs = int(fields[11])
-    stat_info = (intf, rxbytes, rxpackets, rxerrs, txbytes, txpackets, txerrs)
-    return stat_info
+    if len(fields) >= 12:
+        intf = fields[0][0:-1]
+        rxbytes = int(fields[1])
+        rxpackets = int(fields[2])
+        rxerrs = int(fields[3])
+        txbytes = int(fields[9])
+        txpackets = int(fields[10])
+        txerrs = int(fields[11])
+        stat_info = (intf, rxbytes, rxpackets, rxerrs, txbytes, txpackets, txerrs)
+        return stat_info
+    else:
+        return MsvpConstant.EMPTY_TUPLE
 
 
 class HostNetworkUsagePresenter(HostProfPresenterBase):
