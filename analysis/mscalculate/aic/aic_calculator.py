@@ -20,8 +20,10 @@ from mscalculate.aic.aic_utils import AicPmuUtils
 from mscalculate.aic.pmu_calculator import PmuCalculator
 from mscalculate.calculate_ai_core_data import CalculateAiCoreData
 from msmodel.aic.aic_pmu_model import AicPmuModel
+from msmodel.aic.aic_pmu_model import NanoAicPmuModel
 from msmodel.ge.ge_info_calculate_model import GeInfoModel
 from msmodel.iter_rec.iter_rec_model import HwtsIterModel
+from msmodel.nano.nano_stars_model import NanoStarsViewModel
 from profiling_bean.db_dto.step_trace_dto import IterationRange
 from profiling_bean.prof_enum.data_tag import DataTag
 from profiling_bean.struct_info.aic_pmu import AicPmuBean
@@ -137,11 +139,10 @@ class AicCalculator(PmuCalculator, MsMultiProcess):
         save ai core data
         :return: None
         """
-        if self._aic_data_list:
-            aic_pmu_model = AicPmuModel(self._project_path)
-            aic_pmu_model.init()
-            aic_pmu_model.flush(self._aic_data_list)
-            aic_pmu_model.finalize()
+        if not self._aic_data_list:
+            return
+        with AicPmuModel(self._project_path) as _model:
+            _model.flush(self._aic_data_list)
 
     def ms_run(self: any) -> None:
         """
@@ -210,3 +211,51 @@ class AicCalculator(PmuCalculator, MsMultiProcess):
             _aic_pmu_log = AicPmuBean.decode(log_data)
             total_time = self.calculate_total_time(_aic_pmu_log)
             self.calculate_pmu_list(_aic_pmu_log, aic_pmu_events, self._aic_data_list, total_time)
+
+
+class NanoAicCalculator(AicCalculator):
+    """
+    class used to parse aicore data by iter
+    """
+
+    def __init__(self: any, file_list: dict, sample_config: dict) -> None:
+        super().__init__(file_list, sample_config)
+
+    def calculate(self: any) -> None:
+        """
+        calculate the ai core
+        :return: None
+        """
+        self._parse_without_decode()
+
+    def save(self: any) -> None:
+        """
+        save ai core data
+        :return: None
+        """
+        if not self._aic_data_list:
+            return
+        with NanoAicPmuModel(self._project_path) as _model:
+            _model.flush(self._aic_data_list)
+
+    def ms_run(self: any) -> None:
+        """
+        entrance or ai core calculator
+        :return: None
+        """
+        if self._sample_json.get('ai_core_profiling_mode') == StrConstant.AIC_SAMPLE_BASED_MODE:
+            return
+
+        self.init_params()
+        self.calculate()
+        self.save()
+
+    def _parse_without_decode(self: any) -> None:
+        with NanoStarsViewModel(self._project_path) as _model:
+            pmu_data = _model.get_nano_pmu_details()
+            aic_pmu_events = AicPmuUtils.get_pmu_events(self._sample_json.get("ai_core_profiling_events"),
+                                                        "nano_ai_core")
+        for data in pmu_data:
+            core_num = self._core_num_dict.get("aic")
+            total_time = Utils.cal_total_time(data.total_cycle, int(self._freq), data.block_dim, core_num)
+            self.calculate_pmu_list(data, aic_pmu_events, self._aic_data_list, total_time)

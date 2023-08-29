@@ -1,7 +1,10 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2023-2023. All rights reserved.
+import logging
+
 from common_func.constant import Constant
+from common_func.ms_constant.ge_enum_constant import GeTaskType
 from profiling_bean.struct_info.struct_decoder import StructDecoder
 
 
@@ -10,12 +13,9 @@ class NanoStarsBean(StructDecoder):
     Nano device data for the data parsing.
     """
 
-    # task type on nano will be AI_CORE in normal
-    DEFAULT_TASK_TYPE = "AI_CORE"
-
     def __init__(self: any, *args) -> None:
         filed = args[0]
-        self._task_type = filed[0] & 0x70
+        self._task_type = filed[0] & int(b'1110')
         self._model_id = filed[1]
         self._task_id = filed[4]
         self._timestamp = (filed[9] << 48) + (filed[8] << 32) + filed[5]
@@ -27,8 +27,13 @@ class NanoStarsBean(StructDecoder):
     def task_type(self: any) -> str:
         """
         device data task_type
+        task type on nano will be AI_CORE in normal
         """
-        return Constant.TASK_TYPE_AI_CORE
+        task_type_dict = GeTaskType.member_map()
+        if self._task_type not in task_type_dict:
+            logging.error("Unsupported task_type %d", self._task_type)
+            return str(self._task_type)
+        return task_type_dict.get(self._task_type).name
 
     @property
     def model_id(self: any) -> int:
