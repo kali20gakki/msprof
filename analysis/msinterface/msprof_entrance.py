@@ -65,8 +65,10 @@ class MsprofEntrance:
             'communication': CommunicationAnalyzer,
             'communication_matrix': CommunicationMatrixAnalyzer
         }
-        analyze_command = analyze_handler.get(args.rule)(args.collection_path)
-        analyze_command.process()
+        rules = set(args.rule.split(','))
+        for rule in rules:
+            analyze_command = analyze_handler.get(rule)(args.collection_path)
+            analyze_command.process()
 
     def main(self: any) -> None:
         """
