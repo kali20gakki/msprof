@@ -62,12 +62,12 @@ class MiniAicCalculator(PmuCalculator, MsMultiProcess):
             return
         try:
             create_metric_table(self.conn, self.metrics_head, DBNameConstant.TABLE_METRIC_SUMMARY)
-        except:
+        except ValueError:
             logging.warning("creat metrics summary table failed")
             return
         try:
             DBManager.insert_data_into_table(self.conn, DBNameConstant.TABLE_METRIC_SUMMARY, self.metrics_datas)
-        except:
+        except ValueError:
             logging.warning("insert metrics summary data failed")
             return
         finally:
