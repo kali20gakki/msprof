@@ -335,7 +335,6 @@ class TaskGear(CANNGear):
     FFTS_PLUS_TASK_TYPE = "FFTS_PLUS"
     KERNEL_FFTS_PLUS_TASK_TYPE = "FFTS_PLUS"
     KERNEL_STARS_COMMON_TASK_TYPE = "STARS_COMMON"
-    GE_HCCL_OP_TYPE = "HCCL"
 
     class RuntimeApi:
         def __init__(self, start, end, struct_type, thread_id):
@@ -516,7 +515,7 @@ class TaskGear(CANNGear):
             ]
         self.hccl_task_info.extend(hccl_tasks)
 
-    def add_hccl_op_task(self, call_stack: dict, task_track_dto: TaskTrackDto):
+    def add_hccl_op(self, call_stack: dict, task_track_dto: TaskTrackDto):
         node_event: Event = call_stack.get(Constant.NODE_LEVEL)
         node_dto: ApiDataDto = ApiDataDatabase().get(node_event)
  
@@ -536,7 +535,7 @@ class TaskGear(CANNGear):
         if not node_event.additional_record:
             self.hccl_op_info.append([task_track_dto.device_id, model_id, request_id,
                                       node_dto.thread_id, node_dto.item_id,
-                                      self.GE_HCCL_OP_TYPE, "N/A", node_dto.start, node_dto.end,
+                                      self.HCCL_TASK_TYPE, "N/A", node_dto.start, node_dto.end,
                                       "N/A"])
             return
  
@@ -643,7 +642,7 @@ class TaskGear(CANNGear):
         hccl_event: Event = call_stack.get(Constant.HCCL_LEVEL)
         if self.is_hccl_task(hccl_event):
             self.add_hccl_task(call_stack.get(Constant.MODEL_LEVEL), hccl_event, task_track_dto)
-            self.add_hccl_op_task(call_stack, task_track_dto)
+            self.add_hccl_op(call_stack, task_track_dto)
         if self.is_kernel_task(task_track_dto, hccl_event.is_invalid()):
             self.add_kernel_task(call_stack, task_track_dto)
 
@@ -695,12 +694,9 @@ class TaskGear(CANNGear):
     def save_host_tasks(self):
         if not self.host_tasks:
             return
-        model = RuntimeHostTaskModel(self._project_path)
-        model.init()
-        model.drop_table(DBNameConstant.TABLE_HOST_TASK)
-        model.create_table()
-        model.flush(self.host_tasks)
-        model.finalize()
+        with RuntimeHostTaskModel(self._project_path) as model:
+            model.drop_table(DBNameConstant.TABLE_HOST_TASK)
+            model.flush(self.host_tasks)
 
     def flush_data(self):
         self.save_api_call_info()
@@ -714,7 +710,6 @@ class HCCLGear(CANNGear):
     """
     hccl op contains several threads, link will represent in hccl_calculator.py
     """
-    GE_HCCL_OP_TYPE = "HCCL"
 
     def __init__(self, project_path):
         super().__init__(project_path)

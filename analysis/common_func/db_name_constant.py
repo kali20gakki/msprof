@@ -108,7 +108,7 @@ class DBNameConstant(metaclass=ABCMeta):
     TABLE_LLC_DSID = "LLCDsidData"
 
     # MetricSummary
-    DB_METRICS_SUMMARY = "metricSummary.db"
+    DB_METRICS_SUMMARY = "metric_summary.db"
     TABLE_METRIC_SUMMARY = "MetricSummary"
     TABLE_AIV_METRIC_SUMMARY = "AivMetricSummary"
 
