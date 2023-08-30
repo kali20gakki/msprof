@@ -77,6 +77,7 @@ class TestMiniMiniAicCalculator(unittest.TestCase):
                 check.ms_run()
         (test_sql[1]).execute("drop Table EventCount")
         test_sql[0].commit()
+        ProfilingScene().init("")
         db_manager.destroy(test_sql)
 
     def test_insert_metric_summary_table_2(self):
@@ -108,5 +109,6 @@ class TestMiniMiniAicCalculator(unittest.TestCase):
                 check.ms_run()
         (test_sql[1]).execute("drop Table EventCount")
         test_sql[0].commit()
+        ProfilingScene().init("")
         db_manager.destroy(test_sql)
 
