@@ -51,9 +51,8 @@ class HCCLParser(MsMultiProcess):
         :return:
         """
         if self._hccl_data:
-            self._model.init()
-            self._model.flush(self._hccl_data)
-            self._model.finalize()
+            with self._model as model:
+                self._model.flush(self._hccl_data)
 
     def ms_run(self: any) -> None:
         """
