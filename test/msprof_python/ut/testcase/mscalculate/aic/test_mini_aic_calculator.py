@@ -44,19 +44,20 @@ class TestMiniMiniAicCalculator(unittest.TestCase):
         with mock.patch(NAMESPACE + '.generate_config', return_value={'ai_core_profiling_mode': 'task-based'}), \
                 mock.patch(NAMESPACE + '.PathManager.get_sample_json_path', return_value='test'), \
                 mock.patch("common_func.config_mgr.ConfigMgr.read_sample_config", return_value={}),\
-                mock.patch(NAMESPACE + '.MiniAicCalculator.insert_metric_summary_table', return_value='test'):
+                mock.patch(NAMESPACE + '.MiniAicCalculator.save', return_value='test'):
             check = MiniAicCalculator(self.file_list, CONFIG)
             check.ms_run()
             ProfilingScene().init('')
             ProfilingScene()._scene = "single_op"
             check.ms_run()
 
-    def test_insert_metric_summary_table_1(self):
-        freq = 680000000.0
+    def test_ms_run_should_return_ok_when_EventCount_exist(self):
         metrics = [
             'total_time(ms)', 'total_cycles', 'vec_ratio', 'mac_ratio', 'scalar_ratio',
             'mte1_ratio', 'mte2_ratio', 'mte3_ratio', 'icache_miss_rate'
         ]
+        InfoConfReader()._info_json = {"DeviceInfo": [{'aic_frequency': 100}]}
+        ProfilingScene()._scene = "step_info"
         create_sql = "CREATE TABLE IF NOT EXISTS EventCount " \
                      "(r8, ra, r9, rb, rc, rd, r54, r55, task_cyc, task_id, stream_id, block_num, core_num, device_id)"
         data = ((26050, 0, 526, 0, 14002, 26675, 224, 12, 58006, 3, 5, 2, 2, 0),)
@@ -73,8 +74,7 @@ class TestMiniMiniAicCalculator(unittest.TestCase):
                                return_value=(db_open.db_conn, db_open.db_curs)), \
                     mock.patch(NAMESPACE + ".get_metrics_from_sample_config", return_value=metrics):
                 check = MiniAicCalculator(self.file_list, CONFIG)
-                check.init()
-                check.insert_metric_summary_table(freq, iter_range=ITER_RANGE, have_step_info=False)
+                check.ms_run()
         (test_sql[1]).execute("drop Table EventCount")
         test_sql[0].commit()
         db_manager.destroy(test_sql)
@@ -85,6 +85,8 @@ class TestMiniMiniAicCalculator(unittest.TestCase):
             'total_time(ms)', 'total_cycles', 'vec_ratio', 'mac_ratio', 'scalar_ratio',
             'mte1_ratio', 'mte2_ratio', 'mte3_ratio', 'icache_miss_rate'
         ]
+        InfoConfReader()._info_json = {"DeviceInfo": [{'aic_frequency': 100}]}
+        ProfilingScene()._scene = "step_info"
         create_sql = "CREATE TABLE IF NOT EXISTS EventCount " \
                      "(r8, ra, r9, rb, rc, rd, r54, r55, task_cyc, task_id, stream_id, block_num, core_num, device_id)"
         data = ((26050, 0, 526, 0, 14002, 26675, 224, 12, 23456, 3, 5, 2, 2, 10),)
@@ -103,8 +105,7 @@ class TestMiniMiniAicCalculator(unittest.TestCase):
                                return_value=(10, 0)), \
                     mock.patch(NAMESPACE + ".get_metrics_from_sample_config", return_value=metrics):
                 check = MiniAicCalculator(self.file_list, CONFIG)
-                check.init()
-                check.insert_metric_summary_table(freq, iter_range=ITER_RANGE, have_step_info=True)
+                check.ms_run()
         (test_sql[1]).execute("drop Table EventCount")
         test_sql[0].commit()
         db_manager.destroy(test_sql)
