@@ -37,7 +37,7 @@ class FftsPmuModel(ParserModel):
                                                                       StrConstant.AIV_PROFILING_METRICS)
         self.profiling_events['aic'] = get_metrics_from_sample_config(self.result_dir)
         self.update_pmu_list(column_list)
-        self._insert_table_metric_head(column_list, DBNameConstant.TABLE_METRIC_SUMMARY)
+        self._creat_metric_table_by_head(column_list, DBNameConstant.TABLE_METRIC_SUMMARY)
 
     def update_pmu_list(self: any, column_list: list) -> None:
         for core_type, pmu_list in self.profiling_events.items():
@@ -56,7 +56,7 @@ class FftsPmuModel(ParserModel):
             return
         self.insert_data_to_db(DBNameConstant.TABLE_METRIC_SUMMARY, data_list)
 
-    def _insert_table_metric_head(self: any, metrics: list, table_name: str) -> None:
+    def _creat_metric_table_by_head(self: any, metrics: list, table_name: str) -> None:
         """
         insert event value into metric op_summary
         """
