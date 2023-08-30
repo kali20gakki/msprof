@@ -63,4 +63,4 @@ class NanoAicPmuModel(AicPmuModel):
         self.clear()
         aic_profiling_events = get_metrics_from_sample_config(self.result_dir, cfg_name="nano_ai_core")
         column_list = AicPmuUtils.remove_unused_column(aic_profiling_events)
-        insert_metric_value(self.conn, column_list, DBNameConstant.TABLE_METRIC_SUMMARY)
+        create_metric_table(self.conn, column_list, DBNameConstant.TABLE_METRIC_SUMMARY)

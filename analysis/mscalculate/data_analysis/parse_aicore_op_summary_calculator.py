@@ -220,8 +220,10 @@ class ParseAiCoreOpSummaryCalculator(MsMultiProcess):
                  f"op_name, op_type, block_dim, mix_block_dim, task_type, tensor_num, input_formats," \
                  f" input_data_types, input_shapes, output_formats, output_data_types," \
                  f" output_shapes, timestamp, index_id, context_id " \
-                 f"from {DBNameConstant.TABLE_GE_TASK} where index_id=? and model_id=? and device_id={0}" \
-                 .format(device_id)
+                 f"from {DBNameConstant.TABLE_GE_TASK} where index_id=? and model_id=? and device_id=?"
         for index_and_model in iter_list:
+            index_and_model_list = list(index_and_model)
+            index_and_model_list.append(device_id)
+            index_and_model = tuple(index_and_model_list)
             ge_data.extend(DBManager.fetch_all_data(self.curs, ge_sql, index_and_model))
         return ge_data
