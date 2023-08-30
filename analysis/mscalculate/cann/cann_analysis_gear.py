@@ -695,7 +695,6 @@ class TaskGear(CANNGear):
         if not self.host_tasks:
             return
         with RuntimeHostTaskModel(self._project_path) as model:
-            model.drop_table(DBNameConstant.TABLE_HOST_TASK)
             model.flush(self.host_tasks)
 
     def flush_data(self):
