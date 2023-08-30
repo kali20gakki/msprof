@@ -24,7 +24,7 @@ class MiniAicCalculator(PmuCalculator, MsMultiProcess):
     """
     class used to calculator aic pmu of mini
     """
-    TYPE = "ai_core"
+    AI_CORE_TYPE = "ai_core"
 
     def __init__(self: any, file_list: dict, sample_config: dict) -> None:
         super().__init__(sample_config)
@@ -34,33 +34,44 @@ class MiniAicCalculator(PmuCalculator, MsMultiProcess):
         self.events_name_list = []
         self.conn = None
         self.cur = None
+        self.metrics_head = []
+        self.metrics_datas = []
 
     def calculate(self: any) -> None:
         """
         calculate for ai core
         :return:
         """
-        try:
-            self.init()
-        except ValueError:
-            logging.warning("calculate subtask failed, maybe the data is not in fftsplus mode")
+        self._parse_ai_core_pmu_event()
+        freq = InfoConfReader().get_freq(StrConstant.AIC)
+        metrics_head = get_metrics_from_sample_config(self._project_path)
+        metrics_datas = self.get_metric_summary_data(freq, metrics_head, iter_range=self._iter_range)
+        if not metrics_datas or not metrics_head:
+            logging.warning("metrics data or head is empty, please check the query conditions.")
             return
-        finally:
-            self._parse_ai_core_pmu_event()
-            freq = InfoConfReader().get_freq(StrConstant.AIC)
-            if ProfilingScene().is_step_trace():
-                self.insert_metric_summary_table(freq, iter_range=self._iter_range,
-                                                 have_step_info=True)
-            elif ProfilingScene().is_operator():
-                self.insert_metric_summary_table(freq, iter_range=self._iter_range)
-            DBManager().destroy_db_connect(self.conn, self.cur)
 
     def save(self: any) -> None:
         """
         save data for aic core
         :return:
         """
-        self.events_name_list = []
+        try:
+            self.creat_metrics_summary_db()
+        except ValueError:
+            logging.warning("creat metrics summary db failed")
+            return
+        try:
+            create_metric_table(self.conn, metrics_head, DBNameConstant.TABLE_METRIC_SUMMARY)
+        except:
+            logging.warning("creat metrics summary table failed")
+            return
+        try:
+            DBManager.insert_data_into_table(self.conn, DBNameConstant.TABLE_METRIC_SUMMARY, metrics_datas)
+        except:
+            logging.warning("insert metrics summary data failed")
+            return
+        finally:
+            DBManager().destroy_db_connect(self.conn, self.cur)
 
     def ms_run(self: any) -> None:
         """
@@ -76,30 +87,27 @@ class MiniAicCalculator(PmuCalculator, MsMultiProcess):
         if config.get('ai_core_profiling_mode') == StrConstant.AIC_SAMPLE_BASED_MODE:
             return
         self.calculate()
+        self.save()
 
-    def init(self: any) -> None:
+    def creat_metrics_summary_db(self: any) -> None:
         self.conn, self.cur = DBManager.create_connect_db(
             PathManager.get_db_path(self._project_path, DBNameConstant.DB_METRICS_SUMMARY))
         if not self.conn or not self.cur:
             raise ValueError
-        if DBManager.judge_table_exist(self.cur, DBNameConstant.TABLE_METRIC_SUMMARY):
-            DBManager.drop_table(self.conn, DBNameConstant.TABLE_METRIC_SUMMARY)
  
-    def insert_metric_summary_table(self, freq: float, iter_range: IterationRange,
-                                    have_step_info: bool = False) -> None:
+    def get_metric_summary_data(self, freq: float, metrics_head, iter_range: IterationRange) -> []:
         """
-        insert metric summary table
+        get_metric_summary_data
+        :return: []
         """
-        metrics_datas = self.get_metric_summary_data(freq, iter_range, have_step_info)
-        DBManager.insert_data_into_table(self.conn, DBNameConstant.TABLE_METRIC_SUMMARY, metrics_datas)
- 
-    def get_metric_summary_data(self, freq: float, iter_range: IterationRange, have_step_info: bool) -> []:
-        sql = self.get_metric_summary_sql(freq, have_step_info)
-        conn, curs = DBManager.check_connect_db_path(PathManager.get_db_path(self._project_path,
-                                                                             DBNameConstant.DB_RUNTIME))
-        if not conn or not curs or not DBManager.judge_table_exist(curs, DBNameConstant.TABLE_EVENT_COUNT):
-            logging.warning("unable to get metrics data, because it can’t find the event_count table")
- 
+        if ProfilingScene().is_step_trace():
+            have_step_info=True
+        elif ProfilingScene().is_operator():
+            have_step_info=False
+        else:
+            return []
+
+        sql = self.get_metric_summary_sql(freq, metrics_head, have_step_info)
         if have_step_info:
             limit_and_offset = get_limit_and_offset(self._project_path, iter_range)
             if not limit_and_offset:
@@ -112,17 +120,12 @@ class MiniAicCalculator(PmuCalculator, MsMultiProcess):
         return metric_results
  
     def get_metric_summary_sql(self, freq: float, have_step_info: bool) -> "":
-        metrics = get_metrics_from_sample_config(self._project_path)
-        if not metrics or not create_metric_table(self.conn, metrics,
-                                                       DBNameConstant.TABLE_METRIC_SUMMARY):
-            return ""
- 
         algos = []
-        field_dict = read_cpu_cfg(MiniAicCalculator.TYPE, 'metrics')
+        field_dict = read_cpu_cfg(MiniAicCalculator.AI_CORE_TYPE, 'metrics')
         if field_dict is None:
             return ''
         metrics_res = []
-        for metric in metrics:
+        for metric in metrics_head:
             replaced_metric = metric.replace("(GB/s)", "(gb/s)")
             replaced_field = field_dict.get(replaced_metric, replaced_metric).replace("freq", str(freq))
             metrics_res.append((metric, replaced_field))

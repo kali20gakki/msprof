@@ -32,8 +32,6 @@ class FftsPmuModel(ParserModel):
         :return:
         """
         # aic metrics table
-        if DBManager.judge_table_exist(self.cur, DBNameConstant.TABLE_METRIC_SUMMARY):
-            DBManager.drop_table(self.conn, DBNameConstant.TABLE_METRIC_SUMMARY)
         column_list = []
         self.profiling_events['aiv'] = get_metrics_from_sample_config(self.result_dir,
                                                                       StrConstant.AIV_PROFILING_METRICS)
