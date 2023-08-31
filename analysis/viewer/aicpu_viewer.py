@@ -28,7 +28,7 @@ class ParseAiCpuData:
         :return: ai cpu data , headers
         """
         headers = [
-            "Timestamp", "Node", "Compute_time(us)", "Memcpy_time(us)", "Task_time(us)",
+            "Timestamp(us)", "Node", "Compute_time(us)", "Memcpy_time(us)", "Task_time(us)",
             "Dispatch_time(us)", "Total_time(us)", "Stream ID", "Task ID"
         ]
         ai_cpu_results = []

@@ -33,11 +33,11 @@ class TestGeOpExecuteViewer(unittest.TestCase):
                 mock.patch(NAMESPACE + '.GeOpExecuteViewModel.get_summary_data',
                            return_value=[[1, 'name', 'Cast', 'tiling', 0, 10]]):
             obj = GeOpExecuteViewer({"headers": ['Thread ID', 'OP Name', 'OP Type', 'Event Type',
-                                                 'Start Time', 'Duration']},
+                                                 'Start Time(us)', 'Duration(us)']},
                                     {"project": "test"})
             result = obj.get_summary_data()
         self.assertEqual(3, len(result))
-        self.assertEqual((['Thread ID', 'OP Name', 'OP Type', 'Event Type', 'Start Time', 'Duration'],
+        self.assertEqual((['Thread ID', 'OP Name', 'OP Type', 'Event Type', 'Start Time(us)', 'Duration(us)'],
                           [[1, 'name', 'Cast', 'tiling', 0.0, 0.01]], 1), result)
 
     def test_get_timeline_data(self):

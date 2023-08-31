@@ -60,7 +60,7 @@ class ParseDpData:
         split dp data into dp_tuple
         """
         dp_data_length = index * ParseDpData.DP_TUPLE_LENGTH
-        timestamp = dp_data[dp_data_length + 3]
+        timestamp = dp_data[dp_data_length + 3] / NumberConstant.NS_TO_US
         action = dp_data[dp_data_length + 4].partition(b'\x00')[0].decode('utf-8', 'ignore')
         source = dp_data[dp_data_length + 5].partition(b'\x00')[0].decode('utf-8', 'ignore')
         size = dp_data[dp_data_length + 7]
@@ -118,12 +118,11 @@ class ParseDpData:
             if len(info_split) > Constant.LINE_LEN:
                 # info are in the following format
                 # [13135969231] Last queue dequeue, source:iterator_default, index:1, size:131
-                data.append(
-                    (info_split[0].split("]")[0].strip("["),
-                     info_split[0].split("]")[-1].strip(),
-                     info_split[-3].split(":")[-1],
-                     info_split[-1].split(":")[-1])
-                )
+                timestamp = float(info_split[0].split("]")[0].strip("[")) / NumberConstant.NS_TO_US
+                action = info_split[0].split("]")[-1].strip()
+                source = info_split[-3].split(":")[-1]
+                size = info_split[-1].split(":")[-1]
+                data.append((timestamp, action, source, size))
         return data
 
     @classmethod
