@@ -154,8 +154,8 @@ def get_llc_bandwidth(project_path: str, device_id: str) -> tuple:
 def _get_llc_capacity_data(curs: any, project_path: str, device_id: str, types: str) -> tuple:
     core2cpu = cal_core2cpu(project_path, device_id)
     dsid_name = core2cpu[types]
-    dsid_name = Utils.generator_to_list("sum(" + i + ")" + "*{LLC_CAPACITY}/({KILOBYTE}*{KILOBYTE})".format(
-        LLC_CAPACITY=NumberConstant.LLC_CAPACITY, KILOBYTE=NumberConstant.KILOBYTE) for i in dsid_name)
+    dsid_name = Utils.generator_to_list("sum(" + i + ")" + "*{LLC_CAPACITY}/({BYTES_TO_KB})".format(
+        LLC_CAPACITY=NumberConstant.LLC_CAPACITY, BYTES_TO_KB=NumberConstant.BYTES_TO_KB) for i in dsid_name)
     sql = "select {column} from LLCDsidData " \
           "where device_id = ?".format(column=",".join(dsid_name))
     dsid_data = DBManager.fetch_all_data(curs, sql, (device_id,))
@@ -164,9 +164,9 @@ def _get_llc_capacity_data(curs: any, project_path: str, device_id: str, types: 
         dsid_data[index] = Utils.generator_to_list(round(i, NumberConstant.DECIMAL_ACCURACY) for i in value)
     dsid_data = Utils.generator_to_list(['Used Capacity of LLC'] + i + [round(sum(i), NumberConstant.DECIMAL_ACCURACY)]
                                         for i in dsid_data)
-    cpu_list = Utils.generator_to_list('CPU{}(MB)'.format(value)
+    cpu_list = Utils.generator_to_list('CPU{}(KB)'.format(value)
                                        for value in range(len(core2cpu[types])))
-    headers = ['Metric'] + cpu_list + ['Total(MB)']
+    headers = ['Metric'] + cpu_list + ['Total(KB)']
     return headers, dsid_data, 1  # 1 refers to the count of data of llc capacity
 
 
