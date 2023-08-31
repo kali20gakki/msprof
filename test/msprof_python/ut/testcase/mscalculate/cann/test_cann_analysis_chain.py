@@ -10,11 +10,18 @@ import unittest
 from unittest import mock
 
 from common_func.constant import Constant
+from mscalculate.cann.additional_record import AdditionalRecord
 from mscalculate.cann.cann_analysis_chain import CANNAnalysisChain
 from mscalculate.cann.cann_analysis_gear import RootGear
+from mscalculate.cann.cann_database import AdditionalRecordDatabase
+from mscalculate.cann.cann_database import ApiDataDatabase
+from mscalculate.cann.cann_event_generator import CANNThreadDB
 from mscalculate.cann.event import Event
 from mscalculate.cann.event_queue import EventQueue
 from mscalculate.cann.tree import TreeNode
+from profiling_bean.db_dto.api_data_dto import ApiDataDto
+from profiling_bean.db_dto.node_basic_info_dto import NodeBasicInfoDto
+from profiling_bean.db_dto.task_track_dto import TaskTrackDto
 
 NAMESPACE = 'mscalculate.cann.cann_analysis_chain'
 
@@ -23,34 +30,70 @@ class TestCANNAnalysisChain(unittest.TestCase):
     event_col = collections.namedtuple('Event', 'level, thread, start, end, type_')
 
     def test_start(self):
-        chain = CANNAnalysisChain(1, EventQueue(), {Constant.ROOT_LEVEL: RootGear("")})
+        chain = CANNAnalysisChain(1, CANNThreadDB(1, EventQueue(1), ApiDataDatabase(1), AdditionalRecordDatabase(1)),
+                                  {Constant.ROOT_LEVEL: RootGear("")})
         with mock.patch(NAMESPACE + '.CANNAnalysisChain.build_tree',
                         return_value=TreeNode(Event(Constant.ROOT_LEVEL, 1, 0, 300, 'root'))):
             chain.start()
 
     def test_build_tree(self):
-        def add_event(q, event_col):
-            event = Event(event_col.level, event_col.thread, event_col.start, event_col.end, event_col.type_)
+        def add_api_event(q, api_db: ApiDataDatabase, event_col):
+            api = ApiDataDto()
+            api.level = event_col.level
+            api.thread_id = event_col.thread
+            api.start = event_col.start
+            api.end = event_col.end
+            api.struct_type = event_col.type_
+            event = api_db.put(api)
+            q.add(event)
+
+        def add_node_basic_record_event(q, record_db: AdditionalRecordDatabase, event_col):
+            node_basic = NodeBasicInfoDto()
+            node_basic.level = event_col.level
+            node_basic.thread_id = event_col.thread
+            node_basic.timestamp = event_col.start
+            node_basic.struct_type = event_col.type_
+            record = AdditionalRecord(node_basic, event_col.start, event_col.type_)
+            event = record_db.put(record)
+            q.add(event)
+
+        def add_task_track_record_event(q, record_db: AdditionalRecordDatabase, event_col):
+            task_track = TaskTrackDto()
+            task_track.level = event_col.level
+            task_track.thread_id = event_col.thread
+            task_track.timestamp = event_col.start
+            task_track.struct_type = event_col.type_
+            record = AdditionalRecord(task_track, event_col.start, event_col.type_)
+            event = record_db.put(record)
             q.add(event)
 
         def build_event_q():
-            q = EventQueue()
-            add_event(q, self.event_col(Constant.MODEL_LEVEL, 1, 100, 200, 'ModelLoad'))
-            add_event(q, self.event_col(Constant.NODE_LEVEL, 1, 110, 130, 'node1'))
-            add_event(q, self.event_col(Constant.NODE_LEVEL, 1, 150, 170, 'node2'))
-            add_event(q, self.event_col(Constant.NODE_LEVEL, 1, 130, 130, 'node_basic_info1'))
-            add_event(q, self.event_col(Constant.NODE_LEVEL, 1, 170, 170, 'node_basic_info2'))
-            add_event(q, self.event_col(Constant.TASK_LEVEL, 1, 116, 120, 'task1'))
-            add_event(q, self.event_col(Constant.TASK_LEVEL, 1, 152, 160, 'task2'))
-            add_event(q, self.event_col(Constant.TASK_LEVEL, 1, 118, 118, 'task_track1'))
-            add_event(q, self.event_col(Constant.TASK_LEVEL, 1, 155, 155, 'task_track2'))
-            add_event(q, self.event_col(Constant.TASK_LEVEL, 1, 180, 190, 'task3'))
-            add_event(q, self.event_col(Constant.TASK_LEVEL, 1, 210, 222, 'task4'))
-            return q
+            q = EventQueue(1)
+            api_db = ApiDataDatabase(1)
+            record_db = AdditionalRecordDatabase(1)
+            add_api_event(q, api_db, self.event_col('model', 1, 100, 200, 'ModelLoad'))
+            add_api_event(q, api_db, self.event_col('node', 1, 110, 130, 'node1'))
+            add_api_event(q, api_db, self.event_col('node', 1, 150, 170, 'node2'))
+            add_node_basic_record_event(q, record_db, self.event_col(
+                'node', 1, 130, 130, 'node_basic_info1'))
+            add_node_basic_record_event(q, record_db, self.event_col(
+                'node', 1, 170, 170, 'node_basic_info2'))
+            add_api_event(q, api_db, self.event_col("runtime", 1, 116, 120, 'task1'))
+            add_api_event(q, api_db, self.event_col("runtime", 1, 152, 160, 'task2'))
+            add_task_track_record_event(q, record_db, self.event_col(
+                "runtime", 1, 118, 118, 'task_track1'))
+            add_task_track_record_event(q, record_db, self.event_col(
+                "runtime", 1, 155, 155, 'task_track2'))
+            add_api_event(q, api_db, self.event_col("runtime", 1, 180, 190, 'task3'))
+            add_api_event(q, api_db, self.event_col("runtime", 1, 210, 222, 'task4'))
+            return q, api_db, record_db
 
-        event_q = build_event_q()
-        chain = CANNAnalysisChain(1, event_q, {})
-        root_node = TreeNode(Event(Constant.ROOT_LEVEL, 1, 0, 300, 'root'))
+        event_q, api_db, record_db = build_event_q()
+        event_q.lock()
+        chain = CANNAnalysisChain(1, CANNThreadDB(1, event_q, api_db, record_db), {})
+        root_api = ApiDataDto.invalid_dto('root', 1, 0, 300, 'root')
+        root_event = chain.db.add_api(root_api)
+        root_node = TreeNode(root_event)
         tree = chain.build_tree(root_node)
         # check level1
         self.assertEqual(len(tree.children), 2)
