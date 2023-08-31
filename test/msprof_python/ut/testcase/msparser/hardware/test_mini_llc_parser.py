@@ -65,6 +65,16 @@ class TestMiniLLCParser(unittest.TestCase):
             self.assertEqual(list(check.metric_tmp.values()),
                              [0, 0, 1466.706340169, '166393', '21', '151150', '81601', 0, 0])
 
+    def test_read_binary_data_when_data_empty_after_filter_then_get_zero(self):
+        with mock.patch('builtins.open', mock.mock_open(read_data="()")), \
+                mock.patch(NAMESPACE + '.check_file_readable'):
+            InfoConfReader()._info_json = {"devices": '0'}
+            check = MiniLLCParser(self.file_list, CONFIG)
+            InfoConfReader()._start_log_time = 1466685625065
+            check.read_binary_data('llc.data.0.slice_0', 0, 0)
+        self.assertEqual(list(check.metric_tmp.values()),
+                         [0, 0, 0, 0, 0, 0, 0, 0, 0])
+
     def test_start_parsing_data_file(self):
         with mock.patch(NAMESPACE + '.is_valid_original_data', side_effect=ValueError), \
                 mock.patch(NAMESPACE + '.logging.error'):
