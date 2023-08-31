@@ -30,7 +30,7 @@ class TestTaskOpViewer(unittest.TestCase):
 
         expect_headers = [
             "kernel_name", "kernel_type", "stream_id", "task_id",
-            "task_time(us)", "task_start(ns)", "task_stop(ns)",
+            "task_time(us)", "task_start(us)", "task_stop(us)",
         ]
         expect_data = [
             ('trans_TransData_0', 'AI_CORE', 148, 3, '"7.62"', '"155149754006240"', '"155149754013860"'),
@@ -77,8 +77,8 @@ class TestTaskOpViewer(unittest.TestCase):
             (1, 0, 4, 1, 4294967295, 0, 18870605628870, 35.5, "AICORE", "AICORE"),
         )
         expect_data = [
-            ('N/A', 'AICORE', 4, 0, 2.310, '"18870605628550"', '"18870605630860"'),
-            ('Cast', 'AICORE', 4, 1, 0.0355, '"18870605628870"', '"18870605628905.5"'),
+            ('N/A', 'AICORE', 4, 0, 2.310, '"18870605628.55"', '"18870605630.86"'),
+            ('Cast', 'AICORE', 4, 1, 0.0355, '"18870605628.87"', '"18870605628.9055"'),
         ]
 
         insert_ascend_sql = "insert into {0} values ({value})".format(
