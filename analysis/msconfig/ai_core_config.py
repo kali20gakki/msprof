@@ -278,8 +278,8 @@ class AICoreConfig(MetaConfig):
              '1.0*r38*256.0*32.0/((task_cyc*1000/(freq*1000.0))/'
              'block_num*((block_num+core_num-1)/core_num))/(8589934592.0)'),
             ('ub_read_bw_mte(GB/s)',
-             '((r3d-r10*4.0-r13*4.0)*128.0 +(r10*4.0+r13*4.0)*64.0)/'
-             '((task_cyc*1000/(freq*1000.0))/block_num*((block_num+core_num-1)/core_num))/(8589934592.0)'),
+             '(r3d*128.0*8.0)/((task_cyc*1000/(freq*1000.0))/'
+             'block_num*((block_num+core_num-1)/core_num))/(8589934592.0)'),
             ('ub_write_bw_mte(GB/s)',
              '(r3e*128.0*8.0)/((task_cyc*1000/(freq*1000.0))/'
              'block_num*((block_num+core_num-1)/core_num))/(8589934592.0)'),
