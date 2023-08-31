@@ -8,6 +8,7 @@
 #include "prof_acl_mgr.h"
 
 #include <iomanip>
+#include <csignal>
 #include <google/protobuf/util/json_util.h>
 
 #include "config/config.h"
@@ -74,6 +75,17 @@ uint64_t ProfGetOpExecutionTime(CONST_VOID_PTR data, uint32_t len, uint32_t inde
         return Analysis::Dvvp::Analyze::OpDescParser::GetOpExecutionTime(data, len, index);
     }
     return 0;
+}
+
+void SigHandler(int sig)
+{
+    if (sig == SIGINT) {
+        MSPROF_LOGI("Received ctrl+c signal, Starting the finalize operation.");
+        ProfAclMgr::instance()->MsprofFinalizeHandle();
+        MSPROF_LOGI("finished finalize.");
+        pid_t pid = analysis::dvvp::common::utils::Utils::GetPid(); // 获取当前进程的PID
+        kill(pid, SIGTERM); // 发送SIGTERM信号杀死进程
+    }
 }
 
 ProfAclMgr::ProfAclMgr() : isReady_(false), mode_(WORK_MODE_OFF), params_(nullptr), dataTypeConfig_(0),
@@ -226,6 +238,11 @@ bool ProfAclMgr::IsModeOff()
  */
 int ProfAclMgr::Init()
 {
+    std::string envValue = Utils::GetEnvString(PROFILER_SAMPLE_CONFIG_ENV);
+    if (!envValue.empty()) {
+        signal(SIGINT, SigHandler);
+    }
+
     MSPROF_LOGI("ProfAclMgr Init");
     if (isReady_) {
         return PROFILING_SUCCESS;
@@ -422,13 +439,13 @@ int ProfAclMgr::ProfAclStop(PROF_CONF_CONST_PTR profStopCfg)
 
 int ProfAclMgr::CancleHostAndDevTasks(const uint32_t devNums, CONST_UINT32_T_PTR devIdList)
 {
+    HashData::instance()->SaveHashData();
     int ret = ACL_SUCCESS;
     for (uint32_t i = 0; i < devNums; i++) {
         uint32_t devId = devIdList[i];
         MSPROF_LOGI("Processing ProfAclStop of device %u", devId);
         auto iter = devTasks_.find(devId);
         if (iter != devTasks_.end()) {
-            HashData::instance()->SaveHashData(devId);
             iter->second.params->is_cancel = true;
             if (ProfManager::instance()->IdeCloudProfileProcess(iter->second.params) != PROFILING_SUCCESS) {
                 MSPROF_LOGE("Failed to stop profiling on device %u", devId);
@@ -1436,8 +1453,8 @@ int32_t ProfAclMgr::MsprofFinalizeHandle(void)
         MSPROF_LOGI("MsprofFinalizeHandle, not on cmd mode, mode:%d", mode_);
         return MSPROF_ERROR_NONE;
     }
+    HashData::instance()->SaveHashData();
     for (auto iter = devTasks_.begin(); iter != devTasks_.end(); iter++) {
-        HashData::instance()->SaveHashData(iter->first);
         iter->second.params->is_cancel = true;
         if (ProfManager::instance()->IdeCloudProfileProcess(iter->second.params) != PROFILING_SUCCESS) {
             MSPROF_LOGE("Failed to finalize profiling on device %u", iter->first);
