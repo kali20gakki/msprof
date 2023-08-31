@@ -383,6 +383,9 @@ class TaskGear(CANNGear):
         self.hccl_task_info = []
         self.host_tasks = []
         self.mismatch_hccl = 0
+        self.hccl_op_info = []
+        self.hccl_node_keys = set()
+        self.hccl_node_mismatch = 0
 
     @staticmethod
     def get_task_level_additional_dto(event: Event) -> tuple:
@@ -506,10 +509,42 @@ class TaskGear(CANNGear):
             hccl_tasks[i] = [
                 model_id, request_id, hccl_info_dto.op_name, hccl_info_dto.group_name,
                 hccl_info_dto.plane_id, task_track_dto.timestamp, hccl_info_dto.duration_estimated,
-                task_track_dto.stream_id, task_track_dto.task_id, context_id, task_track_dto.batch_id,
+                task_track_dto.stream_id, task_track_dto.task_id, context_id,
+                task_track_dto.batch_id, task_track_dto.device_id,
                 hccl_info_dto.to_args_json(task_track_dto.stream_id, task_track_dto.task_id)
             ]
         self.hccl_task_info.extend(hccl_tasks)
+
+    def add_hccl_op(self, call_stack: dict, task_track_dto: TaskTrackDto):
+        node_event: Event = call_stack.get(Constant.NODE_LEVEL)
+        node_dto: ApiDataDto = ApiDataDatabase().get(node_event)
+ 
+        if node_event.is_invalid():
+            self.hccl_node_mismatch += 1
+            return
+ 
+        hccl_node_key = node_dto.item_id + str(node_dto.end)
+        if hccl_node_key in self.hccl_node_keys:
+            return
+        self.hccl_node_keys.add(node_dto.item_id + str(node_dto.end))
+ 
+        model_event: Event = call_stack.get(Constant.MODEL_LEVEL)
+        model_dto: ApiDataDto = ApiDataDatabase().get(model_event)
+        request_id = model_dto.request_id if model_dto.request_id is not None else -1
+        model_id = NumberConstant.INVALID_MODEL_ID if model_dto.item_id is None else model_dto.item_id
+        if not node_event.additional_record:
+            self.hccl_op_info.append([task_track_dto.device_id, model_id, request_id,
+                                      node_dto.thread_id, node_dto.item_id,
+                                      self.HCCL_TASK_TYPE, "N/A", node_dto.start, node_dto.end,
+                                      "N/A"])
+            return
+ 
+        for record in node_event.additional_record:
+            if isinstance(record.dto, NodeBasicInfoDto):
+                self.hccl_op_info.append([task_track_dto.device_id, model_id, request_id,
+                                          node_dto.thread_id, node_dto.item_id,
+                                          record.dto.task_type, record.dto.op_type, node_dto.start, node_dto.end,
+                                          record.dto.is_dynamic])
 
     def is_kernel_task(self, task_track_dto: TaskTrackDto, is_not_hccl_task: bool) -> bool:
         if task_track_dto.struct_type is None:
@@ -607,6 +642,7 @@ class TaskGear(CANNGear):
         hccl_event: Event = call_stack.get(Constant.HCCL_LEVEL)
         if self.is_hccl_task(hccl_event):
             self.add_hccl_task(call_stack.get(Constant.MODEL_LEVEL), hccl_event, task_track_dto)
+            self.add_hccl_op(call_stack, task_track_dto)
         if self.is_kernel_task(task_track_dto, hccl_event.is_invalid()):
             self.add_kernel_task(call_stack, task_track_dto)
 
@@ -644,20 +680,28 @@ class TaskGear(CANNGear):
         model.insert_data_to_db(DBNameConstant.TABLE_HCCL_TASK, self.hccl_task_info)
         model.finalize()
 
+    def save_hccl_op_info(self):
+        if not self.hccl_op_info:
+            return
+ 
+        model = HCCLHostModel(self._project_path)
+        model.init()
+        model.drop_table(DBNameConstant.TABLE_HCCL_OP)
+        model.create_table()
+        model.insert_data_to_db(DBNameConstant.TABLE_HCCL_OP, self.hccl_op_info)
+        model.finalize()
+
     def save_host_tasks(self):
         if not self.host_tasks:
             return
-        model = RuntimeHostTaskModel(self._project_path)
-        model.init()
-        model.drop_table(DBNameConstant.TABLE_HOST_TASK)
-        model.create_table()
-        model.flush(self.host_tasks)
-        model.finalize()
+        with RuntimeHostTaskModel(self._project_path) as model:
+            model.flush(self.host_tasks)
 
     def flush_data(self):
         self.save_api_call_info()
         self.save_task_info()
         self.save_hccl_task_info()
+        self.save_hccl_op_info()
         self.save_host_tasks()
 
 
@@ -665,56 +709,13 @@ class HCCLGear(CANNGear):
     """
     hccl op contains several threads, link will represent in hccl_calculator.py
     """
-    GE_HCCL_OP_TYPE = "HCCL"
 
     def __init__(self, project_path):
         super().__init__(project_path)
         self.cann_level = Constant.HCCL_LEVEL
-        self.hccl_op_info = []
-        self.hccl_node_keys = set()
-        self.hccl_node_mismatch = 0
 
     def run(self, event: Event, call_stack: dict):
-        node_event: Event = call_stack.get(Constant.NODE_LEVEL)
-        node_dto: ApiDataDto = ApiDataDatabase().get(node_event)
-
-        if node_event.is_invalid():
-            self.hccl_node_mismatch += 1
-            return
-
-        hccl_node_key = node_dto.item_id + str(node_dto.end)
-        if hccl_node_key in self.hccl_node_keys:
-            return
-        self.hccl_node_keys.add(node_dto.item_id + str(node_dto.end))
-
-        model_event: Event = call_stack.get(Constant.MODEL_LEVEL)
-        model_dto: ApiDataDto = ApiDataDatabase().get(model_event)
-        request_id = model_dto.request_id if model_dto.request_id is not None else -1
-        model_id = NumberConstant.INVALID_MODEL_ID if model_dto.item_id is None else model_dto.item_id
-        if not node_event.additional_record:
-            self.hccl_op_info.append([model_id, request_id, node_dto.thread_id, node_dto.item_id,
-                                      self.GE_HCCL_OP_TYPE, "N/A", node_dto.start, node_dto.end,
-                                      "N/A"])
-            return
-
-        for record in node_event.additional_record:
-            if isinstance(record.dto, NodeBasicInfoDto):
-                self.hccl_op_info.append([model_id, request_id, node_dto.thread_id, node_dto.item_id,
-                                          record.dto.task_type, record.dto.op_type, node_dto.start, node_dto.end,
-                                          record.dto.is_dynamic])
-
-    def save_hccl_op_info(self):
-        if not self.hccl_op_info:
-            return
-        model = HCCLHostModel(self._project_path)
-        model.init()
-        model.drop_table(DBNameConstant.TABLE_HCCL_OP)
-        model.create_table()
-
-        model.insert_data_to_db(DBNameConstant.TABLE_HCCL_OP, self.hccl_op_info)
-        model.finalize()
+        pass
 
     def flush_data(self):
-        if self.hccl_node_mismatch:
-            logging.error("There are %d hccl op mismatching with node", self.hccl_node_mismatch)
-        self.save_hccl_op_info()
+        pass

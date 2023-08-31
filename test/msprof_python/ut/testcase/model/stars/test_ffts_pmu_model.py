@@ -23,18 +23,18 @@ class TestFftsPmuModel(unittest.TestCase):
                          'scalar_time', 'scalar_ratio', 'mte1_time', 'mte1_ratio', 'mte2_time', 'mte2_ratio',
                          'mte3_time', 'mte3_ratio', 'icache_miss_rate']), \
                 mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=False), \
-                mock.patch(NAMESPACE + '.FftsPmuModel._insert_metric_value'):
+                mock.patch(NAMESPACE + '.FftsPmuModel._creat_metric_table_by_head'):
             check = FftsPmuModel('test', 'test', ['test'])
         check.create_table()
 
-    def test_insert_metric_value(self):
+    def test_creat_metric_table(self):
         with DBOpen(DB_FFTS_PMU) as db_open:
             metrics = ['(ms)test', '(ms)abc']
             check = FftsPmuModel('test', 'test', ['test'])
             check.conn, check.cur = db_open.db_conn, db_open.db_curs
-            check._insert_metric_value(metrics, TABLE_FFTS_PMU)
+            check._creat_metric_table_by_head(metrics, TABLE_FFTS_PMU)
             with mock.patch(NAMESPACE + '.logging.error'):
-                check._insert_metric_value(metrics, TABLE_FFTS_PMU)
+                check._creat_metric_table_by_head(metrics, TABLE_FFTS_PMU)
 
     def test_update_pmu_list(self):
         data_1 = [1, 2, 3, 4, 5, 6, 7, 89, 9, 1, 4, 5, 6, 789, 9, 5, 5, 5, 6, 7, 9, 54, 1, 55, 5]

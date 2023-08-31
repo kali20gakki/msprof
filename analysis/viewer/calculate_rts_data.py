@@ -383,7 +383,7 @@ def insert_event_value(curs: any, conn: any, device: str) -> None:
     DBManager.executemany_sql(conn, sql, event_result)
 
 
-def insert_metric_value(conn: any, metrics: list, table_name: str) -> bool:
+def create_metric_table(conn: any, metrics: list, table_name: str) -> bool:
     """
     insert event value into metric summary
     """
@@ -478,89 +478,3 @@ def get_metrics_from_sample_config(project_path: str,
     cal = CalculateAiCoreData(project_path)
     cal.add_fops_header(metrics_type, metrics)
     return metrics
-
-
-def _check_metric_summary_table(conn: any, curs: any) -> bool:
-    if not conn or not curs:
-        return False
-    if not DBManager.judge_table_exist(curs, DBNameConstant.TABLE_EVENT_COUNTER):
-        return False
-
-    if DBManager.judge_table_exist(curs, DBNameConstant.TABLE_METRICS_SUMMARY):
-        DBManager.drop_table(conn, DBNameConstant.TABLE_METRICS_SUMMARY)
-    return True
-
-
-def _get_metric_summary_sql(project_path: str, conn: any, freq: float, have_step_info: bool) -> "":
-    metrics = get_metrics_from_sample_config(project_path)
-    if not metrics or not insert_metric_value(conn, metrics,
-                                              DBNameConstant.TABLE_AI_CORE_METRIC_SUMMARY):
-        return ""
-    logging.info('start to insert into MetricSummary')
-    sql = sql_insert_metric_summary_table(metrics, freq, have_step_info)
-    return sql
-
-
-def _do_insert_metric_summary(*args: any, iter_range: IterationRange, curs: any, conn: any) -> None:
-    project_path, have_step_info, sql = args
-    if have_step_info:
-        limit_and_offset = get_limit_and_offset(project_path, iter_range)
-        if not limit_and_offset:
-            return
-        metric_results = curs.execute(sql,
-                                      (limit_and_offset[0],
-                                       limit_and_offset[1])).fetchall()
-    else:
-        metric_results = curs.execute(sql).fetchall()
-    if not metric_results:
-        return
-    curs.executemany('insert into {0} '
-                     'values ({value})'.format(DBNameConstant.TABLE_METRICS_SUMMARY,
-                                               value="?," * (len(metric_results[0]) - 1) + '?'),
-                     metric_results)
-    conn.commit()
-
-
-def insert_metric_summary_table(*args: any, iter_range: IterationRange, have_step_info: bool = False) -> None:
-    """
-    insert metric summary table
-    """
-    project_path, freq = args
-    db_path = PathManager.get_db_path(project_path, DBNameConstant.DB_RUNTIME)
-    conn, curs = DBManager.check_connect_db_path(db_path)
-    if not _check_metric_summary_table(conn, curs):
-        return
-    sql = _get_metric_summary_sql(project_path, conn, freq, have_step_info)
-    _do_insert_metric_summary(project_path, have_step_info, sql, iter_range=iter_range, curs=curs, conn=conn)
-    DBManager.destroy_db_connect(conn, curs)
-
-
-def sql_insert_metric_summary_table(metrics: list, freq: float, have_step_info: bool = False) -> str:
-    """
-    generate sql statement for inserting metric from EventCount
-    :param have_step_info: diff sql by step info
-    :param metrics: metrics to be calculated
-    :param freq: running frequency, which can be used to calculate aic metrics
-    :return: merged sql sentence
-    """
-    algos = []
-    field_dict = read_cpu_cfg(CalculateRtsDataConst.TYPE, 'metrics')
-    if field_dict is None:
-        return ''
-    metrics_res = []
-    for metric in metrics:
-        replaced_metric = metric.replace("(GB/s)", "(gb/s)")
-        replaced_field = field_dict.get(replaced_metric, replaced_metric).replace("freq", str(freq))
-        metrics_res.append((metric, replaced_field))
-    field_dict = OrderedDict(metrics_res)
-    for field in field_dict:
-        algo = field_dict[field]
-        algos.append(algo)
-    algo_lst = Utils.generator_to_list("cast(" + algo + " as decimal(8,2)) " for algo in algos)
-    sql = "SELECT " + ",".join(algo_lst) \
-          + ", task_id, stream_id, '0' FROM EventCount"
-    if have_step_info:
-        sql = "SELECT " + ",".join(algo_lst) \
-              + ", task_id, stream_id, '0' " \
-                "FROM EventCount limit ? offset ?"
-    return sql
