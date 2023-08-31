@@ -16,7 +16,7 @@ NAMESPACE = 'viewer.acl.acl_viewer'
 
 class TestAclViewer(unittest.TestCase):
     def test_get_summary_data_should_return_empty_when_model_init_fail(self):
-        config = {"headers": ["Name", "Type", "Start Time",
+        config = {"headers": ["Name", "Type", "Start Time(us)",
                               "Duration(us)", "Process ID", "Thread ID"]}
         params = {
             "project": "test_acl_view",
@@ -28,7 +28,7 @@ class TestAclViewer(unittest.TestCase):
         self.assertEqual(MsvpConstant.MSVP_EMPTY_DATA, ret)
 
     def test_get_summary_data_should_return_success_when_model_init_ok(self):
-        config = {"headers": ["Name", "Type", "Start Time",
+        config = {"headers": ["Name", "Type", "Start Time(us)",
                               "Duration(us)", "Process ID", "Thread ID"]}
         params = {
             "project": "test_acl_view",
@@ -41,12 +41,12 @@ class TestAclViewer(unittest.TestCase):
                 mock.patch(NAMESPACE + '.AclModel.get_summary_data', return_value=[(1, 2, 3, 4, 5, 6)]):
             check = AclViewer(config, params)
             ret = check.get_summary_data()
-            self.assertEqual((['Name', 'Type', 'Start Time', 'Duration(us)', 'Process ID', 'Thread ID'],
+            self.assertEqual((['Name', 'Type', 'Start Time(us)', 'Duration(us)', 'Process ID', 'Thread ID'],
                               [(1, 2, 3.0, 0.004, 5, 6)],
                               1), ret)
 
     def test_get_acl_statistic_data_should_return_empty_when_db_check_fail(self):
-        config = {"headers": ["Name", "Type", "Start Time",
+        config = {"headers": ["Name", "Type", "Start Time(us)",
                               "Duration(us)", "Process ID", "Thread ID"]}
         params = {
             "project": "test_acl_view",
@@ -58,7 +58,7 @@ class TestAclViewer(unittest.TestCase):
         self.assertEqual(MsvpConstant.MSVP_EMPTY_DATA, ret)
 
     def test_get_acl_statistic_data_should_return_empty_when_db_check_ok(self):
-        config = {"headers": ["Name", "Type", "Start Time",
+        config = {"headers": ["Name", "Type", "Start Time(us)",
                               "Duration(us)", "Process ID", "Thread ID"]}
         params = {
             "project": "test_acl_view",
@@ -73,7 +73,7 @@ class TestAclViewer(unittest.TestCase):
             self.assertEqual(MsvpConstant.MSVP_EMPTY_DATA, ret)
 
     def test_get_timeline_data_should_return_empty_when_db_check_fail(self):
-        config = {"headers": ["Name", "Type", "Start Time",
+        config = {"headers": ["Name", "Type", "Start Time(us)",
                               "Duration(us)", "Process ID", "Thread ID"]}
         params = {
             "project": "test_acl_view",
@@ -86,7 +86,7 @@ class TestAclViewer(unittest.TestCase):
                          '"info": "No acl data found, maybe the switch of acl is not on."}', ret)
 
     def test_get_timeline_data_should_return_empty_when_db_check_ok(self):
-        config = {"headers": ["Name", "Type", "Start Time",
+        config = {"headers": ["Name", "Type", "Start Time(us)",
                               "Duration(us)", "Process ID", "Thread ID"]}
         params = {
             "project": "test_acl_view",
@@ -102,7 +102,7 @@ class TestAclViewer(unittest.TestCase):
                              '"info": "Failed to connect acl_module.db."}', ret)
 
     def test_get_timeline_data_should_return_empty_when_data_exist(self):
-        config = {"headers": ["Name", "Type", "Start Time",
+        config = {"headers": ["Name", "Type", "Start Time(us)",
                               "Duration(us)", "Process ID", "Thread ID"]}
         params = {
             "project": "test_acl_view",

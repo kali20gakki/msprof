@@ -50,7 +50,7 @@ class MsProfExportDataConfig(MetaConfig):
             ('handler', '_get_op_summary_data'),
             ('headers',
              'Model Name,Model ID,Task ID,Stream ID,Infer ID,Op Name,OP Type,Task Type,'
-             'Task Start Time,Task Duration(us),Task Wait Time(us),Block Dim,Mix Block Dim'),
+             'Task Start Time(us),Task Duration(us),Task Wait Time(us),Block Dim,Mix Block Dim'),
             ('db', 'ai_core_op_summary.db')
         ],
         'l2_cache': [
@@ -63,7 +63,7 @@ class MsProfExportDataConfig(MetaConfig):
         'step_trace': [
             ('handler', '_get_step_trace_data'),
             ('headers',
-             'Iteration ID,FP Start,BP End,Iteration End,Iteration Time(us),FP to BP Time(us),'
+             'Iteration ID,FP Start(us),BP End(us),Iteration End(us),Iteration Time(us),FP to BP Time(us),'
              'Iteration Refresh(us),Data Aug Bound(us)')
         ],
         'aicpu': [
@@ -71,7 +71,7 @@ class MsProfExportDataConfig(MetaConfig):
         ],
         'dp': [
             ('handler', '_get_dp_data'),
-            ('headers', 'Timestamp,Action,Source,Cached Buffer Size')
+            ('headers', 'Timestamp(us),Action,Source,Cached Buffer Size')
         ],
         'op_statistic': [
             ('handler', '_get_op_statistic_data'),
@@ -89,8 +89,8 @@ class MsProfExportDataConfig(MetaConfig):
         'fusion_op': [
             ('handler', '_get_fusion_op_data'),
             ('headers',
-             'Model Name,Model ID,Fusion Op,Original Ops,Memory Input(Bytes),Memory Output(Bytes),'
-             'Memory Weight(Bytes),Memory Workspace(Bytes),Memory Total(Bytes)'),
+             'Model Name,Model ID,Fusion Op,Original Ops,Memory Input(KB),Memory Output(KB),'
+             'Memory Weight(KB),Memory Workspace(KB),Memory Total(KB)'),
             ('db', 'ge_model_info.db'),
             ('table', 'GeModelLoad')
         ],
@@ -128,22 +128,16 @@ class MsProfExportDataConfig(MetaConfig):
             ('db', 'nic.db'),
             ('table', 'NicReportData'),
             ('headers',
-             'Timestamp,Bandwidth(MB/s),Rx Bandwidth efficiency(%),rxPacket/s,rxError rate(%),'
-             'rxDropped rate(%),Tx Bandwidth efficiency(%),txPacket/s,txError rate(%),txDropped rate(%),funcId'),
-            ('columns',
-             'duration,bandwidth,rxBandwidth,rxPacket,rxErrorRate,rxDroppedRate,txBandwidth,'
-             'txPacket,txErrorRate,txDroppedRate,funcId')
+             'Timestamp(us),Bandwidth(MB/s),Rx Bandwidth efficiency(%),rxPacket/s,rxError rate(%),'
+             'rxDropped rate(%),Tx Bandwidth efficiency(%),txPacket/s,txError rate(%),txDropped rate(%),funcId')
         ],
         'roce': [
             ('handler', '_get_roce_data'),
             ('db', 'roce.db'),
             ('table', 'RoceReportData'),
             ('headers',
-             'Timestamp,Bandwidth(MB/s),Rx Bandwidth efficiency(%),rxPacket/s,rxError rate(%),'
-             'rxDropped rate(%),Tx Bandwidth efficiency(%),txPacket/s,txError rate(%),txDropped rate(%),funcId'),
-            ('columns',
-             'duration,bandwidth,rxBandwidth,rxPacket,rxErrorRate,rxDroppedRate,txBandwidth,'
-             'txPacket,txErrorRate,txDroppedRate,funcId')
+             'Timestamp(us),Bandwidth(MB/s),Rx Bandwidth efficiency(%),rxPacket/s,rxError rate(%),'
+             'rxDropped rate(%),Tx Bandwidth efficiency(%),txPacket/s,txError rate(%),txDropped rate(%),funcId')
         ],
         'ctrl_cpu_pmu_events': [
             ('handler', '_get_cpu_pmu_events'),
@@ -222,8 +216,8 @@ class MsProfExportDataConfig(MetaConfig):
             ('db', 'msproftx.db'),
             ('table', 'MsprofTx'),
             ('headers',
-             'pid, tid, category, event_type, payload_type, payload_value, Start_time(ns), '
-             'End_time(ns), message_type, message')
+             'pid, tid, category, event_type, payload_type, payload_value, Start_time(us), '
+             'End_time(us), message_type, message')
         ],
         'pytorch_operator_view': [
             ('handler', '_get_pytorch_operator_data'),
