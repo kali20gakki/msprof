@@ -139,10 +139,9 @@ class AicCalculator(PmuCalculator, MsMultiProcess):
         save ai core data
         :return: None
         """
-        if not self._aic_data_list:
-            return
-        with AicPmuModel(self._project_path) as _model:
-            _model.flush(self._aic_data_list)
+        if self._aic_data_list:
+            with AicPmuModel(self._project_path) as aic_pmu_model:
+                aic_pmu_model.flush(self._aic_data_list)
 
     def ms_run(self: any) -> None:
         """

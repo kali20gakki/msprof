@@ -45,7 +45,7 @@ class TestHCCLModel(TestDirCRBaseModel):
                      "plane_id INTEGER, " \
                      "timestamp REAL, " \
                      "duration REAL, " \
-                     "args TEXT)".format(DBNameConstant.TABLE_HCCL_ALL_REDUCE)
+                     "args TEXT)".format(DBNameConstant.TABLE_HCCL_SINGLE_DEVICE)
         test = HcclDto()
         for index, i in enumerate(data):
             if hasattr(test, col[index]):
@@ -53,19 +53,19 @@ class TestHCCLModel(TestDirCRBaseModel):
         with DBOpen(DBNameConstant.DB_HCCL) as db_open:
             db_open.create_table(create_sql)
             with mock.patch(NAMESPACE + '.DBManager.fetch_all_data', return_value=[test]):
-                check = HCCLModel("", [DBNameConstant.TABLE_HCCL_ALL_REDUCE])
+                check = HCCLModel("", [DBNameConstant.TABLE_HCCL_SINGLE_DEVICE])
                 check.cur = db_open.db_curs
                 check.get_hccl_data()
 
     def test_get_hccl_communication_data_when_given_attach_to_db_failed_then_return_empty_list(self):
         ChipManager().chip_id = 1000
-        check = HcclViewModel("", DBNameConstant.DB_HCCL, [DBNameConstant.TABLE_HCCL_ALL_REDUCE])
+        check = HcclViewModel("", DBNameConstant.DB_HCCL_SINGLE_DEVICE, [DBNameConstant.TABLE_HCCL_SINGLE_DEVICE])
         ret = check.get_hccl_communication_data()
         self.assertEqual([], ret)
 
         with mock.patch(NAMESPACE + '.HcclViewModel.attach_to_db', return_value=False):
             ChipManager().chip_id = ChipModel.CHIP_V2_1_0
-            check = HcclViewModel("", DBNameConstant.DB_HCCL, [DBNameConstant.TABLE_HCCL_ALL_REDUCE])
+            check = HcclViewModel("", DBNameConstant.DB_HCCL_SINGLE_DEVICE, [DBNameConstant.TABLE_HCCL_SINGLE_DEVICE])
             ret = check.get_hccl_communication_data()
             self.assertEqual([], ret)
 
@@ -74,15 +74,15 @@ class TestHCCLModel(TestDirCRBaseModel):
                 mock.patch(NAMESPACE + '.DBManager.fetch_all_data'), \
                 mock.patch('common_func.utils.Utils.get_scene', return_value=Constant.STEP_INFO):
             ChipManager().chip_id = ChipModel.CHIP_V2_1_0
-            check = HcclViewModel("", DBNameConstant.DB_HCCL, [DBNameConstant.TABLE_HCCL_ALL_REDUCE])
+            check = HcclViewModel("", DBNameConstant.DB_HCCL_SINGLE_DEVICE, [DBNameConstant.TABLE_HCCL_SINGLE_DEVICE])
             check.get_hccl_communication_data()
 
     def test_get_hccl_op_data_sql(self):
         with mock.patch(NAMESPACE + '.DBManager.fetch_all_data'):
-            check = HcclViewModel("", DBNameConstant.DB_HCCL, [DBNameConstant.TABLE_HCCL_ALL_REDUCE])
+            check = HcclViewModel("", DBNameConstant.DB_HCCL_SINGLE_DEVICE, [DBNameConstant.TABLE_HCCL_SINGLE_DEVICE])
             check.get_hccl_op_data()
 
     def test_get_hccl_op_time_section_sql(self):
         with mock.patch(NAMESPACE + '.DBManager.fetch_all_data'):
-            check = HcclViewModel("", DBNameConstant.DB_HCCL, [DBNameConstant.TABLE_HCCL_ALL_REDUCE])
+            check = HcclViewModel("", DBNameConstant.DB_HCCL_SINGLE_DEVICE, [DBNameConstant.TABLE_HCCL_SINGLE_DEVICE])
             check.get_hccl_op_time_section()

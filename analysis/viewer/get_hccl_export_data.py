@@ -45,8 +45,8 @@ class HCCLExport:
         """
         get data for hccl timeline
         """
-        with HcclViewModel(self.project_path, DBNameConstant.DB_HCCL,
-                           [DBNameConstant.TABLE_HCCL_ALL_REDUCE]) as hccl_model:
+        with HcclViewModel(self.project_path, DBNameConstant.DB_HCCL_SINGLE_DEVICE,
+                           [DBNameConstant.TABLE_HCCL_SINGLE_DEVICE]) as hccl_model:
             if not hccl_model.check_table():
                 return json.dumps({
                     'status': NumberConstant.ERROR,
@@ -54,7 +54,7 @@ class HCCLExport:
                             " please check data file."
                 })
 
-            hccl_data = hccl_model.get_all_data(DBNameConstant.TABLE_HCCL_ALL_REDUCE, dto_class=HcclDto)
+            hccl_data = hccl_model.get_all_data(DBNameConstant.TABLE_HCCL_SINGLE_DEVICE, dto_class=HcclDto)
             if not hccl_data:
                 return json.dumps({
                     'status': NumberConstant.WARN,
@@ -123,8 +123,8 @@ class HCCLExport:
             TraceViewHeaderConstant.GRPC_TIME_GRAPH_HEAD, _hccl_format_data + _hccl_format_op_data))
 
     def _format_hccl_op_data(self):
-        with HcclViewModel(self.project_path, DBNameConstant.DB_HCCL,
-                           DBNameConstant.TABLE_HCCL_ALL_REDUCE) as hccl_model:
+        with HcclViewModel(self.project_path, DBNameConstant.DB_HCCL_SINGLE_DEVICE,
+                           DBNameConstant.TABLE_HCCL_SINGLE_DEVICE) as hccl_model:
             hccl_op_data = hccl_model.get_hccl_op_data_by_group()
             _hccl_format_op_data = [
                 [

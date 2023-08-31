@@ -108,14 +108,14 @@ class TestRuntimeReport(unittest.TestCase):
 
     def test_get_task_based_core_data_2(self):
         params["data_type"] = StrConstant.AI_CORE_PMU_EVENTS
-        create_sql = "CREATE TABLE IF NOT EXISTS " + DBNameConstant.TABLE_AI_CORE_METRIC_SUMMARY + \
+        create_sql = "CREATE TABLE IF NOT EXISTS " + DBNameConstant.TABLE_METRIC_SUMMARY + \
                      " (total_time, total_cycles, vec_time, vec_ratio, mac_time, mac_ratio, scalar_time, " \
                      "scalar_ratio, mte1_time, mte1_ratio, mte2_time, mte2_ratio, mte3_time, mte3_ratio, " \
                      "icache_miss_rate, device_id, task_id, stream_id, index_id, model_id)"
         data = ((0.0426514705882353, 58006, 0.019154, 0.449091473295866, 0, 0, 0.000387, 0.00906802744543668, 0, 0,
                  0.010296, 0.241388821846016, 0.019614, 0.459866220735786, 0.0535714285714286, 0, 3, 5, 1, 1),)
         db_manager = DBManager()
-        insert_sql = db_manager.insert_sql(DBNameConstant.TABLE_AI_CORE_METRIC_SUMMARY, data)
+        insert_sql = db_manager.insert_sql(DBNameConstant.TABLE_METRIC_SUMMARY, data)
 
         test_sql = db_manager.create_table(DBNameConstant.DB_RUNTIME, create_sql, insert_sql, data)
         with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=test_sql), \
@@ -125,7 +125,7 @@ class TestRuntimeReport(unittest.TestCase):
                 mock.patch(NAMESPACE + '.cal_metrics', return_value=[1, 2]):
             res = get_task_based_core_data('', DBNameConstant.DB_RUNTIME, params)
         test_sql = db_manager.connect_db(DBNameConstant.DB_RUNTIME)
-        (test_sql[1]).execute("drop Table {}".format(DBNameConstant.TABLE_AI_CORE_METRIC_SUMMARY))
+        (test_sql[1]).execute("drop Table {}".format(DBNameConstant.TABLE_METRIC_SUMMARY))
         db_manager.destroy(test_sql)
         self.assertEqual(res[0], 1)
 

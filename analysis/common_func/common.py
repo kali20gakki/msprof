@@ -24,8 +24,6 @@ class CommonConstant:
     """
     CLIENT_NUM = 16
     SAMPLE_JSON = "sample.json"
-    METRICS_SUMMARY_TABLE = "MetricSummary"
-    AIV_METRICS_SUMMARY_TABLE = "AivMetricSummary"
     GE_TASK_MEGED_TABLE = "ge_task_merge"
     OP_REPORT_TABLE = "op_report"
     RTS_TASK_TABLE = "rts_task"

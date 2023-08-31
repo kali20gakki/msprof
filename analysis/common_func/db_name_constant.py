@@ -81,8 +81,7 @@ class DBNameConstant(metaclass=ABCMeta):
 
     # DB tables
     TABLE_ACL_DATA = "AclData"
-    TABLE_AI_CORE_METRIC_SUMMARY = "MetricSummary"
-    TABLE_AIV_METRIC_SUMMARY = "AivMetricSummary"
+
     TABLE_AI_CORE_REC = "AiCoreRec"
     TABLE_AI_CPU = "AiCpuData"
     TABLE_AI_CPU_FROM_TS = "AiCpuFromTs"
@@ -107,7 +106,16 @@ class DBNameConstant(metaclass=ABCMeta):
     TABLE_HWTS_TASK_TIME = "HwtsTaskTime"
     TABLE_LLC_METRIC_DATA = "LLCMetricData"
     TABLE_LLC_DSID = "LLCDsidData"
-    TABLE_METRICS_SUMMARY = "MetricSummary"
+
+    # MetricSummary
+    DB_METRICS_SUMMARY = "metric_summary.db"
+    TABLE_METRIC_SUMMARY = "MetricSummary"
+    TABLE_AIV_METRIC_SUMMARY = "AivMetricSummary"
+
+    DB_HCCL_SINGLE_DEVICE = "hccl_single_device.db"
+    TABLE_HCCL_SINGLE_DEVICE = "HCCLSingleDevice"
+    TABLE_HCCL_OP_REPORT = "HcclOpReport"
+
     TABLE_OP_COUNTER_GE_MERGE = "ge_task_merge"
     TABLE_OP_COUNTER_OP_REPORT = "op_report"
     TABLE_OP_COUNTER_RTS_TASK = "rts_task"
@@ -198,7 +206,6 @@ class DBNameConstant(metaclass=ABCMeta):
     # tscpu
     TABLE_TS_CPU_EVENT = "EventCount"
     TABLE_TS_CPU_HOT_INS = "HotIns"
-    TABLE_HCCL_ALL_REDUCE = "HCCLAllReduce"
 
     # msproftx
     TABLE_MSPROFTX = "MsprofTx"

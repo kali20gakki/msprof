@@ -673,7 +673,7 @@ class TablesConfig(MetaConfig):
             ('hit_rate', 'REAL'),
             ('victim_rate', 'REAL')
         ],
-        'HCCLAllReduceMap': [
+        'HCCLSingleDeviceMap': [
             ('model_id', 'INTEGER, null'),
             ('index_id', 'INTEGER, null'),
             ('op_name', 'TEXT, null'),
@@ -690,6 +690,7 @@ class TablesConfig(MetaConfig):
             ('args', 'TEXT, null')
         ],
         'HCCLOPMap': [
+            ('device_id', 'INTEGER, null'),
             ('model_id', 'INTEGER, null'),
             ('index_id', 'INTEGER, null'),
             ('thread_id', 'INTEGER, null'),
@@ -712,6 +713,7 @@ class TablesConfig(MetaConfig):
             ('task_id', 'INTEGER, null'),
             ('context_id', 'INTEGER, null'),
             ('batch_id', 'INTEGER, null'),
+            ('device_id', 'INTEGER, null'),
             ('args', 'TEXT, null')
         ],
         'MsprofTxMap': [
