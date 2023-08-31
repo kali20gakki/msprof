@@ -106,16 +106,15 @@ TEST_F(COMMON_HASH_DATA_TEST, SaveHashData) {
         .stubs()
         .will(returnValue(PROFILING_FAILED))
         .then(returnValue(PROFILING_SUCCESS));
-    
-    // EXPECT_EQ(PROFILING_FAILED, HashData::instance()->SaveHashData("DATA_PREPROCESS"));
-    HashData::instance()->SaveHashData(0);
+
+    HashData::instance()->SaveHashData();
     HashData::instance()->Init();
     const char *data = "ABCDEFGHIJK";
     HashData::instance()->GenHashId("DATA_PREPROCESS", data, strlen(data));
     HashData::instance()->GenHashId("AclModule", data, strlen(data));
-    HashData::instance()->SaveHashData(0);
-    HashData::instance()->SaveHashData(64);
-    HashData::instance()->SaveHashData(-1);
+    HashData::instance()->SaveHashData();
+    HashData::instance()->SaveHashData();
+    HashData::instance()->SaveHashData();
     HashData::instance()->Uninit();
 }
 
