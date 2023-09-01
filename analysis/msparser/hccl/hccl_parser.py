@@ -32,7 +32,7 @@ class HCCLParser(MsMultiProcess):
         self.project_path = self.sample_config.get("result_dir", "")
         self._file_list = file_list.get(DataTag.HCCL, [])
         self._hccl_dir = os.path.realpath(PathManager.get_hccl_path(self.project_path))
-        self._model = HCCLModel(self.project_path, [DBNameConstant.TABLE_HCCL_ALL_REDUCE])
+        self._model = HCCLModel(self.project_path, [DBNameConstant.TABLE_HCCL_SINGLE_DEVICE])
         self._hccl_data = []
         self._file_list.sort(key=lambda x: int(x.split("_")[-1]))
 
@@ -51,9 +51,8 @@ class HCCLParser(MsMultiProcess):
         :return:
         """
         if self._hccl_data:
-            self._model.init()
-            self._model.flush(self._hccl_data)
-            self._model.finalize()
+            with self._model as model:
+                self._model.flush(self._hccl_data)
 
     def ms_run(self: any) -> None:
         """

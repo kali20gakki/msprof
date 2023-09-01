@@ -42,7 +42,7 @@ class TestHcclCalculator(unittest.TestCase):
             self.assertEqual(hccl_op_report_data, [])
 
     def test_calculate_should_return_both_hccl_data_and_hccl_op_report_data_when_op_type_valid(self):
-        with mock.patch(NAMESPACE + ".HcclViewModel.check_table", return_value=True), \
+        with mock.patch(NAMESPACE + ".DBManager.check_tables_in_db", return_value=True), \
              mock.patch(NAMESPACE + '.HcclViewModel.get_hccl_communication_data', return_value=[
                  self.construct_hccl_dto("hccl_op", timestamp=1, duration=1, op_type="all_reduce")]):
             check = HcclCalculator([], CONFIG)
@@ -53,7 +53,7 @@ class TestHcclCalculator(unittest.TestCase):
             self.assertEqual([("all_reduce", 1.0, 1.0, 1.0, 1.0, 1.0, 100.0)], hccl_op_report_data)
 
     def test_calculate_should_return_only_hccl_data_not_valid_op_type(self):
-        with mock.patch(NAMESPACE + ".HcclViewModel.check_table", return_value=True), \
+        with mock.patch(NAMESPACE + ".DBManager.check_tables_in_db", return_value=True), \
              mock.patch(NAMESPACE + '.HcclViewModel.get_hccl_communication_data', return_value=[
                  self.construct_hccl_dto("hccl_op", timestamp=1, duration=1, op_type=Constant.NA)]):
             check = HcclCalculator([], CONFIG)

@@ -18,6 +18,7 @@ from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.path_manager import PathManager
 from common_func.platform.chip_manager import ChipManager
+from common_func.info_conf_reader import InfoConfReader
 from msmodel.task_time.ascend_task_model import AscendTaskModel
 from profiling_bean.db_dto.ge_task_dto import GeTaskDto
 
@@ -38,8 +39,10 @@ class OpCounterOpSceneCalculator(MsMultiProcess):
 
     @staticmethod
     def _get_ge_sql() -> str:
+        device_id = InfoConfReader().get_device_id()
         ge_sql = 'select model_id, op_name, op_type, task_type, ' \
-                 'task_id, stream_id, batch_id,context_id from {0}'.format(DBNameConstant.TABLE_GE_TASK)
+                 'task_id, stream_id, batch_id,context_id from {0} where device_id={1}' \
+                .format(DBNameConstant.TABLE_GE_TASK, device_id)
         return ge_sql
 
     @staticmethod

@@ -39,7 +39,8 @@ class MsvpCommonConst:
         "ai_cpu": ConfigManager.get("AICPUConfig"),
         "ai_core": ConfigManager.get("AICoreConfig"),
         "ctrl_cpu": ConfigManager.get("CtrlCPUConfig"),
-        "constant": ConfigManager.get("ConstantConfig")
+        "constant": ConfigManager.get("ConstantConfig"),
+        "nano_ai_core": ConfigManager.get("NanoAICoreConfig"),
     }
 
     @staticmethod

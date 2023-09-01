@@ -257,7 +257,7 @@ class MsProfExportDataUtils:
     @staticmethod
     def _get_api_statistic_data(configs: dict, params: dict) -> any:
         """
-        get API(ACL/GE/RUNTIME_API) statistic data
+        get API(acl/hccl/model/node/runtime) statistic data
         """
         return ApiStatisticViewer(configs, params).get_api_statistic_data()
 
@@ -628,10 +628,13 @@ class MsProfExportDataUtils:
                                                                params)
             data = handler(configs, params)
             timeline_data = []
-            try:
-                timeline_data = json.loads(data)
-            except (TypeError, ValueError) as err:
-                logging.error("timeline data is not json format.")
+            if data:
+                try:
+                    timeline_data = json.loads(data)
+                except (TypeError, ValueError) as err:
+                    logging.error("timeline data is not json format.")
+                    return json.dumps({"status": NumberConstant.WARN,
+                                       "info": "timeline data is not json format."})
             cls.add_timeline_data(params, timeline_data)
             skip_list = ["event", "api"]
             if params.get(StrConstant.PARAM_DATA_TYPE) in skip_list:

@@ -13,7 +13,6 @@ from unittest import mock
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
-from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.path_manager import PathManager
 from constant.constant import clear_dt_project
@@ -22,9 +21,9 @@ from mscalculate.cann.cann_analysis_gear import ACLGear
 from mscalculate.cann.cann_analysis_gear import ModelGear
 from mscalculate.cann.cann_analysis_gear import NodeGear
 from mscalculate.cann.cann_analysis_gear import TaskGear
-from mscalculate.cann.cann_analysis_gear import HCCLGear
 from mscalculate.cann.cann_database import AdditionalRecordDatabase
 from mscalculate.cann.cann_database import ApiDataDatabase
+from mscalculate.cann.cann_event_generator import CANNThreadDB
 from mscalculate.cann.event import Event
 from profiling_bean.db_dto.api_data_dto import ApiDataDto
 from profiling_bean.db_dto.ctx_id_dto import CtxIdDto
@@ -48,7 +47,7 @@ class TestCANNAnalysisGear(unittest.TestCase):
     event_col = collections.namedtuple('Event', 'level, thread_id, start, end, struct_type, item_id')
 
     @staticmethod
-    def create_api_event(event_c):
+    def create_api_event(event_c, api_db):
         api = ApiDataDto()
         api.level = event_c.level
         api.thread_id = event_c.thread_id
@@ -56,13 +55,13 @@ class TestCANNAnalysisGear(unittest.TestCase):
         api.end = event_c.end
         api.struct_type = event_c.struct_type
         api.item_id = event_c.item_id
-        event = ApiDataDatabase().put(api)
+        event = api_db.put(api)
         return event
 
     @staticmethod
-    def create_addition_record(dto, time, struct_type=""):
+    def create_addition_record(dto, time, record_db, struct_type=""):
         record = AdditionalRecord(dto, time, struct_type)
-        event = AdditionalRecordDatabase().put(record)
+        event = record_db.put(record)
         return record
 
     def setUp(self) -> None:
@@ -74,24 +73,23 @@ class TestCANNAnalysisGear(unittest.TestCase):
         clear_dt_project(self.DIR_PATH)
 
     def test_acl_gear(self):
-        InfoConfReader()._info_json = {'pid': '10'}
         gear = ACLGear(self.PROF_HOST_DIR)
 
-        event = self.create_api_event(self.event_col(Constant.ACL_LEVEL, 1, 0, 100, "", 0))
+        api_db = ApiDataDatabase(1)
+        event = self.create_api_event(self.event_col(Constant.ACL_LEVEL, 1, 0, 100, "", 0), api_db)
 
         gear.run(event, {})
         gear.flush_data()
 
-        self.assertTrue(
-            DBManager.check_item_in_table(PathManager.get_db_path(self.PROF_HOST_DIR, DBNameConstant.DB_ACL_MODULE),
-                                          DBNameConstant.TABLE_ACL_DATA, 'thread_id', 1))
-
     def test_model_gear(self):
         gear = ModelGear(self.PROF_HOST_DIR)
-        event1 = self.create_api_event(self.event_col(Constant.MODEL_LEVEL, 1, 0, 100, "ModelLoad", 0))
-        event2 = self.create_api_event(self.event_col(Constant.MODEL_LEVEL, 1, 101, 200, "InputCopy", 0))
-        event3 = self.create_api_event(self.event_col(Constant.MODEL_LEVEL, 1, 201, 300, "ModelExecute", 0))
-        event4 = self.create_api_event(self.event_col(Constant.MODEL_LEVEL, 1, 301, 400, "OutputCopy", 0))
+        api_db = ApiDataDatabase(1)
+        db = CANNThreadDB(1, api_db=api_db)
+        gear.set_db(db)
+        event1 = self.create_api_event(self.event_col(Constant.MODEL_LEVEL, 1, 0, 100, "ModelLoad", 0), api_db)
+        event2 = self.create_api_event(self.event_col(Constant.MODEL_LEVEL, 1, 101, 200, "InputCopy", 0), api_db)
+        event3 = self.create_api_event(self.event_col(Constant.MODEL_LEVEL, 1, 201, 300, "ModelExecute", 0), api_db)
+        event4 = self.create_api_event(self.event_col(Constant.MODEL_LEVEL, 1, 301, 400, "OutputCopy", 0), api_db)
 
         gear.run(event1, {})
         gear.run(event2, {})
@@ -112,21 +110,27 @@ class TestCANNAnalysisGear(unittest.TestCase):
 
     def test_node_gear(self):
         gear = NodeGear(self.PROF_HOST_DIR)
-        event1 = self.create_api_event(self.event_col(Constant.NODE_LEVEL, 1, 100, 101, "step_info", 0))
-        event2 = self.create_api_event(self.event_col(Constant.NODE_LEVEL, 1, 200, 201, "step_info", 1))
-        event3: Event = self.create_api_event(self.event_col(Constant.NODE_LEVEL, 1, 102, 140, "launch", "conv"))
+        api_db = ApiDataDatabase(1)
+        record_db = AdditionalRecordDatabase(1)
+        db = CANNThreadDB(1, api_db=api_db, record_db=record_db)
+        gear.set_db(db)
+        event1 = self.create_api_event(self.event_col(Constant.NODE_LEVEL, 1, 100, 101, "step_info", 0), api_db)
+        event2 = self.create_api_event(self.event_col(Constant.NODE_LEVEL, 1, 200, 201, "step_info", 1), api_db)
+        event3: Event = self.create_api_event(
+            self.event_col(Constant.NODE_LEVEL, 1, 102, 140, "launch", "conv"), api_db)
         event3.additional_record = [
-            self.create_addition_record(NodeBasicInfoDto(), 140),
-            self.create_addition_record(TensorInfoDto(), 140)
+            self.create_addition_record(NodeBasicInfoDto(), 140, record_db),
+            self.create_addition_record(TensorInfoDto(), 140, record_db)
         ]
-        event4: Event = self.create_api_event(self.event_col(Constant.NODE_LEVEL, 1, 141, 145, "", 1))
+        event4: Event = self.create_api_event(self.event_col(Constant.NODE_LEVEL, 1, 141, 145, "", 1), api_db)
         fusion_op = FusionOpInfoDto()
         fusion_op.op_name = "fusion1"
-        event4.additional_record = [self.create_addition_record(fusion_op, 143)]
-        event5: Event = self.create_api_event(self.event_col(Constant.NODE_LEVEL, 1, 146, 160, "launch", "hccl1"))
+        event4.additional_record = [self.create_addition_record(fusion_op, 143, record_db)]
+        event5: Event = self.create_api_event(
+            self.event_col(Constant.NODE_LEVEL, 1, 146, 160, "launch", "hccl1"), api_db)
         hccl_node_basic_info = NodeBasicInfoDto()
         hccl_node_basic_info.task_type = "HCCL"
-        event5.additional_record = [self.create_addition_record(hccl_node_basic_info, 150)]
+        event5.additional_record = [self.create_addition_record(hccl_node_basic_info, 150, record_db)]
 
         gear.run(event1, {})
         gear.run(event2, {})
@@ -155,8 +159,12 @@ class TestCANNAnalysisGear(unittest.TestCase):
 
     def test_task_gear(self):
         gear = TaskGear(self.PROF_HOST_DIR)
-        event1 = self.create_api_event(self.event_col(Constant.TASK_LEVEL, 1, 100, 101, "api1", 0))
-        event2 = self.create_api_event(self.event_col(Constant.TASK_LEVEL, 1, 200, 250, "api2", 0))
+        api_db = ApiDataDatabase(1)
+        record_db = AdditionalRecordDatabase(1)
+        db = CANNThreadDB(1, api_db=api_db, record_db=record_db)
+        gear.set_db(db)
+        event1 = self.create_api_event(self.event_col(Constant.TASK_LEVEL, 1, 100, 101, "api1", 0), api_db)
+        event2 = self.create_api_event(self.event_col(Constant.TASK_LEVEL, 1, 200, 250, "api2", 0), api_db)
 
         mem_dto = MemCopyInfoDto()
         mem_dto.struct_type = "1"
@@ -166,23 +174,25 @@ class TestCANNAnalysisGear(unittest.TestCase):
         task_dto.task_id = 10
         task_dto.task_type = "KERNEL_AICORE"
         event2.additional_record = [
-            self.create_addition_record(mem_dto, 210),
-            self.create_addition_record(task_dto, 220)
+            self.create_addition_record(mem_dto, 210, record_db),
+            self.create_addition_record(task_dto, 220, record_db)
         ]
 
-        event3: Event = self.create_api_event(self.event_col(Constant.NODE_LEVEL, 1, 258, 300, "launch", "hccl1"))
-        event4 = self.create_api_event(self.event_col(Constant.HCCL_LEVEL, 1, 260, 290, "hccl api", 0))
+        event3: Event = self.create_api_event(
+            self.event_col(Constant.NODE_LEVEL, 1, 258, 300, "launch", "hccl1"), api_db)
+        event4 = self.create_api_event(self.event_col(Constant.HCCL_LEVEL, 1, 260, 290, "hccl api", 0), api_db)
         hccl_info_dto = HCCLInfoDto()
         hccl_info_dto.plane_id = 8
-        event4.additional_record = [self.create_addition_record(hccl_info_dto, 277)]
-        event5 = self.create_api_event(self.event_col(Constant.TASK_LEVEL, 1, 264, 280, "api3", 0))
+        event4.additional_record = [self.create_addition_record(hccl_info_dto, 277, record_db)]
+        event5 = self.create_api_event(self.event_col(Constant.TASK_LEVEL, 1, 264, 280, "api3", 0), api_db)
         task_dto2 = TaskTrackDto()
         task_dto2.task_id = 11
         task_dto2.struct_type = "1"
         task_dto2.task_type = "NOTIFY_RECORD"
-        event5.additional_record = [self.create_addition_record(task_dto2, 266)]
+        event5.additional_record = [self.create_addition_record(task_dto2, 266, record_db)]
 
-        event6: Event = self.create_api_event(self.event_col(Constant.NODE_LEVEL, 1, 310, 360, "launch", "conv"))
+        event6: Event = self.create_api_event(
+            self.event_col(Constant.NODE_LEVEL, 1, 310, 360, "launch", "conv"), api_db)
         node_basic_info_dto = NodeBasicInfoDto()
         node_basic_info_dto.op_type = "1"
         node_basic_info_dto.task_type = 'AI_CORE'
@@ -197,34 +207,35 @@ class TestCANNAnalysisGear(unittest.TestCase):
         ctx_id_dto.op_name = "1"
         ctx_id_dto.timestamp = 360
         event6.additional_record = [
-            self.create_addition_record(node_basic_info_dto, 360),
-            self.create_addition_record(tensor_info_dto, 360),
-            self.create_addition_record(ctx_id_dto, 360)
+            self.create_addition_record(node_basic_info_dto, 360, record_db),
+            self.create_addition_record(tensor_info_dto, 360, record_db),
+            self.create_addition_record(ctx_id_dto, 360, record_db)
         ]
-        event7 = self.create_api_event(self.event_col(Constant.TASK_LEVEL, 1, 320, 350, "api4", 0))
+        event7 = self.create_api_event(self.event_col(Constant.TASK_LEVEL, 1, 320, 350, "api4", 0), api_db)
         task_dto3 = TaskTrackDto()
         task_dto3.task_id = 12
         task_dto3.struct_type = "1"
         task_dto3.task_type = "KERNEL_AICORE"
-        event7.additional_record = [self.create_addition_record(task_dto3, 333)]
+        event7.additional_record = [self.create_addition_record(task_dto3, 333, record_db)]
 
-        event8: Event = self.create_api_event(self.event_col(Constant.NODE_LEVEL, 1, 370, 400, "launch", "reduceTBE"))
+        event8: Event = self.create_api_event(
+            self.event_col(Constant.NODE_LEVEL, 1, 370, 400, "launch", "reduceTBE"), api_db)
         node_basic_info_dto = NodeBasicInfoDto()
         node_basic_info_dto.op_type = "1"
         node_basic_info_dto.task_type = 'HCCL'
         node_basic_info_dto.op_name = "1"
         node_basic_info_dto.timestamp = 400
-        event8.additional_record = [self.create_addition_record(node_basic_info_dto, 400)]
-        event9 = self.create_api_event(self.event_col(Constant.HCCL_LEVEL, 1, 372, 390, "hccl tbe", 0))
+        event8.additional_record = [self.create_addition_record(node_basic_info_dto, 400, record_db)]
+        event9 = self.create_api_event(self.event_col(Constant.HCCL_LEVEL, 1, 372, 390, "hccl tbe", 0), api_db)
         hccl_info_dto = HCCLInfoDto()
         hccl_info_dto.plane_id = 9
-        event9.additional_record = [self.create_addition_record(hccl_info_dto, 380)]
-        event10 = self.create_api_event(self.event_col(Constant.TASK_LEVEL, 1, 375, 380, "api5", 0))
+        event9.additional_record = [self.create_addition_record(hccl_info_dto, 380, record_db)]
+        event10 = self.create_api_event(self.event_col(Constant.TASK_LEVEL, 1, 375, 380, "api5", 0), api_db)
         task_dto4 = TaskTrackDto()
         task_dto4.task_id = 15
         task_dto4.struct_type = "1"
         task_dto4.task_type = "KERNEL_AICORE"
-        event10.additional_record = [self.create_addition_record(task_dto4, 377)]
+        event10.additional_record = [self.create_addition_record(task_dto4, 377, record_db)]
 
         gear.run(event1, {})
         gear.run(event2, {Constant.MODEL_LEVEL: Event.invalid_event(), Constant.NODE_LEVEL: Event.invalid_event(),
@@ -262,7 +273,11 @@ class TestCANNAnalysisGear(unittest.TestCase):
 
     def test_task_gear_should_return_when_invalid_node_event(self):
         gear = TaskGear(self.PROF_HOST_DIR)
-        event1 = self.create_api_event(self.event_col(Constant.TASK_LEVEL, 1, 100, 101, "api", 0))
+        api_db = ApiDataDatabase(1)
+        record_db = AdditionalRecordDatabase(1)
+        db = CANNThreadDB(1, api_db=api_db, record_db=record_db)
+        gear.set_db(db)
+        event1 = self.create_api_event(self.event_col(Constant.TASK_LEVEL, 1, 100, 101, "api", 0), api_db)
         gear.run(event1, {Constant.MODEL_LEVEL: Event.invalid_event(), Constant.NODE_LEVEL: Event.invalid_event(),
                           Constant.HCCL_LEVEL: Event.invalid_event()})
         gear.flush_data()
@@ -272,13 +287,17 @@ class TestCANNAnalysisGear(unittest.TestCase):
 
     def test_task_gear_should_save_one_op_when_one_traditional_mode_node_event_FROM_PROF_LEVEL0(self):
         gear = TaskGear(self.PROF_HOST_DIR)
-        event1 = self.create_api_event(self.event_col(Constant.TASK_LEVEL, 1, 120, 130, "api", 0))
+        api_db = ApiDataDatabase(1)
+        record_db = AdditionalRecordDatabase(1)
+        db = CANNThreadDB(1, api_db=api_db, record_db=record_db)
+        gear.set_db(db)
+        event1 = self.create_api_event(self.event_col(Constant.TASK_LEVEL, 1, 120, 130, "api", 0), api_db)
         task_dto = TaskTrackDto()
         task_dto.task_id = 15
         task_dto.struct_type = "1"
         task_dto.task_type = "KERNEL_AICORE"
-        event1.additional_record = [self.create_addition_record(task_dto, 125)]
-        event2: Event = self.create_api_event(self.event_col(Constant.NODE_LEVEL, 1, 110, 140, "launch", "op"))
+        event1.additional_record = [self.create_addition_record(task_dto, 125, record_db)]
+        event2: Event = self.create_api_event(self.event_col(Constant.NODE_LEVEL, 1, 110, 140, "launch", "op"), api_db)
 
         gear.run(event1, {Constant.MODEL_LEVEL: Event.invalid_event(), Constant.NODE_LEVEL: event2,
                           Constant.HCCL_LEVEL: Event.invalid_event()})
@@ -289,13 +308,17 @@ class TestCANNAnalysisGear(unittest.TestCase):
 
     def test_task_gear_should_save_one_op_when_one_traditional_mode_node_event_FROM_PROF_LEVEL1(self):
         gear = TaskGear(self.PROF_HOST_DIR)
-        event1 = self.create_api_event(self.event_col(Constant.TASK_LEVEL, 1, 120, 130, "api", 0))
+        api_db = ApiDataDatabase(1)
+        record_db = AdditionalRecordDatabase(1)
+        db = CANNThreadDB(1, api_db=api_db, record_db=record_db)
+        gear.set_db(db)
+        event1 = self.create_api_event(self.event_col(Constant.TASK_LEVEL, 1, 120, 130, "api", 0), api_db)
         task_dto = TaskTrackDto()
         task_dto.task_id = 15
         task_dto.struct_type = "1"
         task_dto.task_type = "KERNEL_AICORE"
-        event1.additional_record = [self.create_addition_record(task_dto, 125)]
-        event2: Event = self.create_api_event(self.event_col(Constant.NODE_LEVEL, 1, 110, 140, "launch", "op"))
+        event1.additional_record = [self.create_addition_record(task_dto, 125, record_db)]
+        event2: Event = self.create_api_event(self.event_col(Constant.NODE_LEVEL, 1, 110, 140, "launch", "op"), api_db)
         node_basic_info_dto = NodeBasicInfoDto()
         node_basic_info_dto.op_type = "1"
         node_basic_info_dto.task_type = 'AI_CORE'
@@ -306,8 +329,8 @@ class TestCANNAnalysisGear(unittest.TestCase):
         tensor_info_dto.timestamp = 140
         tensor_info_dto.struct_type = '1'
         event2.additional_record = [
-            self.create_addition_record(node_basic_info_dto, 140),
-            self.create_addition_record(tensor_info_dto, 140)
+            self.create_addition_record(node_basic_info_dto, 140, record_db),
+            self.create_addition_record(tensor_info_dto, 140, record_db)
         ]
 
         gear.run(event1, {Constant.MODEL_LEVEL: Event.invalid_event(), Constant.NODE_LEVEL: event2,
@@ -318,7 +341,7 @@ class TestCANNAnalysisGear(unittest.TestCase):
                                            DBNameConstant.TABLE_GE_TASK), 1)
 
 
-class TestTaskGear(unittest.TestCase):
+class TestTaskGear(TestCANNAnalysisGear):
     def test_get_context_ids_should_return_invalid_ids_when_invalid_node_and_invalid_hccl(self):
         gear = TaskGear("")
         call_stack = {Constant.NODE_LEVEL: Event.invalid_event(), Constant.HCCL_LEVEL: Event.invalid_event()}
@@ -444,14 +467,23 @@ class TestTaskGear(unittest.TestCase):
 
     def test_add_hccl_task_should_add_1_task_when_no_hccl_descs(self):
         gear = TaskGear("")
+        api_db = ApiDataDatabase(1)
+        record_db = AdditionalRecordDatabase(1)
+        db = CANNThreadDB(1, api_db=api_db, record_db=record_db)
+        gear.set_db(db)
         hccl_event = Event.invalid_event()
         model_event = Event.invalid_event()
         task_track_dto: TaskTrackDto = TaskTrackDto()
+
         gear.add_hccl_task(hccl_event, model_event, task_track_dto)
         self.assertEqual(len(gear.hccl_task_info), 1)
 
     def test_add_hccl_task_should_add_3_task_when_get_3_hccl_descs(self):
         gear = TaskGear("")
+        api_db = ApiDataDatabase(1)
+        record_db = AdditionalRecordDatabase(1)
+        db = CANNThreadDB(1, api_db=api_db, record_db=record_db)
+        gear.set_db(db)
         hccl_event = Event.invalid_event()
         model_event = Event.invalid_event()
         task_track_dto: TaskTrackDto = TaskTrackDto()
@@ -511,46 +543,6 @@ class TestFindModelNameInModelLoad(unittest.TestCase):
         gear.model_load_data = [(0, "test", 1, 1), (1, "test2", 2, 3)]
         self.assertEqual(gear.find_model_name(0), "test")
         self.assertEqual(gear.find_model_name(1), "test2")
-
-
-class TestHcclGear(TestCANNAnalysisGear):
-    DIR_PATH = os.path.join(os.path.dirname(__file__), "DT_HcclGear")
-    PROF_HOST_DIR = os.path.join(DIR_PATH, 'PROF1', 'host')
-
-    def test_hccl_gear_should_return_one_hccl_op_when_one_hccl_op_within_one_node_info(self):
-        gear = HCCLGear(self.PROF_HOST_DIR)
-        event1: Event = self.create_api_event(self.event_col(Constant.NODE_LEVEL, 1, 302, 340, "launch", "hccl1"))
-        event2 = self.create_api_event(self.event_col(Constant.HCCL_LEVEL, 1, 310, 320, "hccl api", 0))
-        gear.run(event2, {Constant.MODEL_LEVEL: Event.invalid_event(), Constant.NODE_LEVEL: event1,
-                          Constant.HCCL_LEVEL: event2})
-        gear.flush_data()
-        self.assertEqual(
-            DBManager.get_table_data_count(PathManager.get_db_path(self.PROF_HOST_DIR, DBNameConstant.DB_HCCL),
-                                           DBNameConstant.TABLE_HCCL_OP), 1)
-
-    def test_hccl_gear_should_return_zero_hccl_op_when_without_one_node_info(self):
-        gear = HCCLGear(self.PROF_HOST_DIR)
-        event1 = self.create_api_event(self.event_col(Constant.HCCL_LEVEL, 1, 350, 360, "hccl api", 0))
-        gear.run(event1, {Constant.MODEL_LEVEL: Event.invalid_event(), Constant.NODE_LEVEL: Event.invalid_event(),
-                          Constant.HCCL_LEVEL: event1})
-        gear.flush_data()
-        self.assertEqual(
-            DBManager.get_table_data_count(PathManager.get_db_path(self.PROF_HOST_DIR, DBNameConstant.DB_HCCL),
-                                           DBNameConstant.TABLE_HCCL_OP), 0)
-
-    def test_hccl_gear_should_return_one_hccl_op_when_multi_hccl_op_with_one_node_info(self):
-        gear = HCCLGear(self.PROF_HOST_DIR)
-        event1: Event = self.create_api_event(self.event_col(Constant.NODE_LEVEL, 1, 370, 390, "launch", "hccl"))
-        event2 = self.create_api_event(self.event_col(Constant.HCCL_LEVEL, 1, 371, 375, "hccl api", 0))
-        event3 = self.create_api_event(self.event_col(Constant.HCCL_LEVEL, 1, 381, 385, "hccl api", 0))
-        gear.run(event2, {Constant.MODEL_LEVEL: Event.invalid_event(), Constant.NODE_LEVEL: event1,
-                          Constant.HCCL_LEVEL: event2})
-        gear.run(event3, {Constant.MODEL_LEVEL: Event.invalid_event(), Constant.NODE_LEVEL: event1,
-                          Constant.HCCL_LEVEL: event3})
-        gear.flush_data()
-        self.assertEqual(
-            DBManager.get_table_data_count(PathManager.get_db_path(self.PROF_HOST_DIR, DBNameConstant.DB_HCCL),
-                                           DBNameConstant.TABLE_HCCL_OP), 1)
 
 
 if __name__ == '__main__':

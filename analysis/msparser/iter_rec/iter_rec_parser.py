@@ -53,7 +53,6 @@ class IterParser(IParser, MsMultiProcess):
         self._hwts_task_time_data = [None] * self.DEFAULT_TASK_TIME_SIZE
         self.ge_info_model = GeInfoModel(PathManager.get_host_result_dir(self._project_path))
         self._task_start_dict = {}
-        self._overstep_task_cnt = 0
         self.default_index = 0
         self.hwts_iter_model = HwtsIterModel(self._project_path)
         self.ai_core_task = set()
@@ -105,7 +104,7 @@ class IterParser(IParser, MsMultiProcess):
     def _read_hwts_data(self: any, all_bytes: bytes) -> None:
         for _chunk in Utils.chunks(all_bytes, self.HWTS_LOG_SIZE):
             _task_log = HwtsLogBean.decode(_chunk)
-            if not _task_log.is_log_type():
+            if not _task_log.is_log_type() or not self._iter_recorder.check_task_before_max_iter(_task_log.sys_cnt):
                 continue
             stream_task_id = self.STREAM_TASK_KEY_FMT.format(_task_log.stream_id, _task_log.task_id)
             if stream_task_id not in self._iter_op_set:
@@ -118,16 +117,13 @@ class IterParser(IParser, MsMultiProcess):
                 self._task_cnt_not_in_iter.setdefault(curr_iter, 0)
                 self._task_cnt_not_in_iter[curr_iter] += 1
                 continue
-            if self._iter_recorder.check_task_in_iteration(_task_log.sys_cnt):
-                if _task_log.sys_tag == self.HWTS_TASK_END:
-                    self._calculate_batch_list(_task_log)
-                    self._create_hwts_task_time_data(_task_log, stream_task_id)
-                else:
-                    self._task_start_dict[stream_task_id] = _task_log
-                self._iter_info_updater.update_parallel_iter_info_pool(self._iter_recorder.current_iter_id)
-                self._iter_info_updater.update_count_and_offset(_task_log)
+            if _task_log.sys_tag == self.HWTS_TASK_END:
+                self._calculate_batch_list(_task_log)
+                self._create_hwts_task_time_data(_task_log, stream_task_id)
             else:
-                self._overstep_task_cnt = self._overstep_task_cnt + 1
+                self._task_start_dict[stream_task_id] = _task_log
+            self._iter_info_updater.update_parallel_iter_info_pool(self._iter_recorder.current_iter_id)
+            self._iter_info_updater.update_count_and_offset(_task_log)
 
     def _calculate_batch_list(self: any, task_log: HwtsLogBean) -> None:
         setattr(task_log, "batch_id", self._batch_counter.calculate_batch(
@@ -169,8 +165,6 @@ class IterParser(IParser, MsMultiProcess):
             del self._hwts_task_time_data[self.default_index:]
             self.hwts_iter_model.flush(self._hwts_task_time_data,
                                        DBNameConstant.TABLE_HWTS_BATCH)
-        if self._overstep_task_cnt > 0:
-            logging.warning("HWTS overstep task number is %s", self._overstep_task_cnt)
 
 
 class IterRecParser(IterParser):
@@ -240,8 +234,6 @@ class NoGeIterRecParser(IterParser):
         self._parse_ai_core_data()
         self._iter_info_updater.iteration_manager.initial_iter_to_info()
         self._parse_hwts_data()
-        if self._overstep_task_cnt > 0:
-            logging.warning("overstep task number is %s", self._overstep_task_cnt)
 
     def ms_run(self: any) -> None:
         """

@@ -56,8 +56,7 @@ class CommunicationMatrixAnalyzer:
             link_info = data.get(StrConstant.LINK_INFO)
             for info in link_info:
                 src_rank = info.get(CommunicationMatrixInfo.SRC_RANK)
-                dst_rank = src_rank if int(info.get(CommunicationMatrixInfo.DST_RANK)) == int("0xffffffff", 16) else \
-                    info.get(CommunicationMatrixInfo.DST_RANK)
+                dst_rank = info.get(CommunicationMatrixInfo.DST_RANK)
                 link_key = f"{src_rank}-{dst_rank}"
                 proc_dict[data.get(StrConstant.OP_NAME)][link_key] = {
                     CommunicationMatrixInfo.TRANSPORT_TYPE:
@@ -74,7 +73,7 @@ class CommunicationMatrixAnalyzer:
         """
         with CommunicationModel(rank_path) as _model:
             if not _model.check_table():
-                logging.error("Fail to connect %s, hccl parser is interrupted", DBNameConstant.DB_HCCL)
+                logging.error("Fail to connect %s, hccl parser is interrupted", DBNameConstant.DB_HCCL_SINGLE_DEVICE)
                 raise ProfException(ProfException.PROF_INVALID_CONNECT_ERROR)
             conditions = {
                 'iter_start': NumberConstant.DEFAULT_START_TIME,
@@ -83,10 +82,10 @@ class CommunicationMatrixAnalyzer:
             events_all = _model.get_all_events_from_db(conditions)
             if not events_all:
                 print_msg(f"Fail to get hccl events, "
-                          f"please check hccl.db from {PathManager.get_host_result_dir(rank_path)}")
+                          f"please check hccl_single_device.db from {rank_path}")
                 raise ProfException(ProfException.PROF_INVALID_DATA_ERROR)
             for event in events_all:
-                # get group_name from hccl.db
+                # get group_name from hccl_single_device.db
                 op_name = event.op_name + "@" + event.group_name
                 self.hccl_op_data[op_name].append(event)
 
@@ -146,8 +145,7 @@ class CommunicationMatrixAnalyzer:
     def _communication_matrix_analyze(self, sub_path: str) -> None:
         """ communication matrix analyzer"""
         prepare_for_analyze(os.path.join(sub_path, '..'))
-        if os.path.exists(PathManager.get_db_path(sub_path, DBNameConstant.DB_HCCL)):
+        if os.path.exists(PathManager.get_db_path(sub_path, DBNameConstant.DB_HCCL_SINGLE_DEVICE)):
             self._generate_output(sub_path)
         else:
-            host_dir = PathManager.get_host_result_dir(sub_path)
-            logging.warning('There is not hccl.db in %s', host_dir)
+            logging.warning('There is not hccl_single_device.db in %s', sub_path)

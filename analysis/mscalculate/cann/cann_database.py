@@ -5,12 +5,12 @@
 from mscalculate.cann.additional_record import AdditionalRecord
 from mscalculate.cann.event import Event
 from common_func.constant import Constant
-from common_func.singleton import singleton
 from profiling_bean.db_dto.api_data_dto import ApiDataDto
 
 
 class CANNDatabase:
     LEVELS_MAP = {
+        'root': Constant.ROOT_LEVEL,
         "acl": Constant.ACL_LEVEL,
         "model": Constant.MODEL_LEVEL,
         "node": Constant.NODE_LEVEL,
@@ -18,10 +18,13 @@ class CANNDatabase:
         "runtime": Constant.TASK_LEVEL,
     }
 
+    def __init__(self, thread_id):
+        self.thread_id = thread_id
 
-@singleton
+
 class ApiDataDatabase(CANNDatabase):
-    def __init__(self):
+    def __init__(self, thread_id):
+        super().__init__(thread_id)
         self._max_bound = -1
         self._data = dict()
 
@@ -40,10 +43,10 @@ class ApiDataDatabase(CANNDatabase):
         return self._max_bound
 
 
-@singleton
 class AdditionalRecordDatabase(CANNDatabase):
 
-    def __init__(self):
+    def __init__(self, thread_id):
+        super().__init__(thread_id)
         self._data = dict()
 
     def put(self, data: AdditionalRecord) -> Event:

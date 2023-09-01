@@ -9,7 +9,7 @@ class DataCalculatorConfig(MetaConfig):
     DATA = {
         'AclCalculator': [
             ('path', 'mscalculate.acl.acl_calculator'),
-            ('chip_model', '0,1,2,3,4,5,7'),
+            ('chip_model', '0,1,2,3,4,5,7,8,10'),
             ('position', 'H')
         ],
         'SubTaskCalculator': [
@@ -20,7 +20,7 @@ class DataCalculatorConfig(MetaConfig):
         ],
         'L2CacheCalculator': [
             ('path', 'mscalculate.l2_cache.l2_cache_calculator'),
-            ('chip_model', '1,2,3,4,5,7'),
+            ('chip_model', '1,2,3,4,5,7,8,10'),
             ('position', 'D')
         ],
         'HwtsCalculator': [
@@ -38,6 +38,12 @@ class DataCalculatorConfig(MetaConfig):
         'AicCalculator': [
             ('path', 'mscalculate.aic.aic_calculator'),
             ('chip_model', '1,2,3,4'),
+            ('level', '3'),
+            ('position', 'D')
+        ],
+        'NanoAicCalculator': [
+            ('path', 'mscalculate.aic.aic_calculator'),
+            ('chip_model', '9'),
             ('level', '3'),
             ('position', 'D')
         ],
@@ -59,29 +65,29 @@ class DataCalculatorConfig(MetaConfig):
         ],
         'GeHashCalculator': [
             ('path', 'mscalculate.ge.ge_hash_calculator'),
-            ('chip_model', '0,1,2,3,4,5,7'),
+            ('chip_model', '0,1,2,3,4,5,7,8,10'),
             ('position', 'H')
         ],
         'StarsLogCalCulator': [
             ('path', 'msparser.stars.stars_log_parser'),
-            ('chip_model', '5,7'),
+            ('chip_model', '5,7,8,10'),
             ('level', '3'),
             ('position', 'D')
         ],
         'BiuPerfCalculator': [
             ('path', 'mscalculate.biu_perf.biu_perf_calculator'),
-            ('chip_model', '5,7'),
+            ('chip_model', '5,7,8,10'),
             ('position', 'D')
         ],
         'AcsqCalculator': [
             ('path', 'mscalculate.hwts.acsq_calculator'),
-            ('chip_model', '5,7'),
+            ('chip_model', '5,7,8,10'),
             ('level', '4'),
             ('position', 'D')
         ],
         'FftsPmuCalculate': [
             ('path', 'mscalculate.stars.ffts_pmu_calculate'),
-            ('chip_model', '5,7'),
+            ('chip_model', '5,7,8,10'),
             ('level', '3'),
             ('position', 'D')
         ],
@@ -104,55 +110,55 @@ class DataCalculatorConfig(MetaConfig):
         ],
         'ParseAiCoreOpSummaryCalculator': [
             ('path', 'mscalculate.data_analysis.parse_aicore_op_summary_calculator'),
-            ('chip_model', '0,1,2,3,4,5,7'),
+            ('chip_model', '0,1,2,3,4,5,7,8,9,10'),
             ('level', '14'),
             ('position', 'D')
         ],
         'OpSummaryOpSceneCalculator': [
             ('path', 'mscalculate.data_analysis.op_summary_op_scene_calculator'),
-            ('chip_model', '0,1,2,3,4,5,7'),
+            ('chip_model', '0,1,2,3,4,5,7,8,9,10'),
             ('level', '14'),
             ('position', 'D')
         ],
         'MergeOpCounterCalculator': [
             ('path', 'mscalculate.data_analysis.merge_op_counter_calculator'),
-            ('chip_model', '0,1,2,3,4,5,7'),
+            ('chip_model', '0,1,2,3,4,5,7,8,9,10'),
             ('level', '14'),
             ('position', 'D')
         ],
         'OpCounterOpSceneCalculator': [
             ('path', 'mscalculate.data_analysis.op_counter_op_scene_calculator'),
-            ('chip_model', '0,1,2,3,4,5,7'),
+            ('chip_model', '0,1,2,3,4,5,7,8,9,10'),
             ('level', '14'),
             ('position', 'D')
         ],
         'TorchAclRelationCalculator': [
             ('path', 'mscalculate.sync_acl_npu.torch_acl_relation'),
-            ('chip_model', '0,1,2,3,4,5,7'),
+            ('chip_model', '0,1,2,3,4,5,7,8,10'),
             ('level', '2'),
             ('position', 'H')
         ],
         'TorchNpuRelationCalculator': [
             ('path', 'mscalculate.sync_acl_npu.torch_npu_relation'),
-            ('chip_model', '0,1,2,3,4,5,7'),
+            ('chip_model', '0,1,2,3,4,5,7,8,10'),
             ('level', '3'),
             ('position', 'H')
         ],
         'AscendTaskCalculator': [
             ('path', 'mscalculate.ascend_task.ascend_task_calculator'),
-            ('chip_model', '0,1,2,3,4,5,7'),
+            ('chip_model', '0,1,2,3,4,5,7,8,9,10'),
             ('level', '6'),
             ('position', 'D')
         ],
         'HcclCalculator': [
             ('path', 'mscalculate.hccl_calculator'),
-            ('chip_model', '0,1,2,3,4,5,7'),
+            ('chip_model', '0,1,2,3,4,5,7,8,10'),
             ('level', '7'),
             ('position', 'D')
         ],
         'NpuOpMemCalculator': [
             ('path', 'mscalculate.npu_mem.npu_op_mem_calculator'),
-            ('chip_model', '0,1,2,3,4,5,7'),
+            ('chip_model', '0,1,2,3,4,5,7,8,10'),
             ('position', 'H')
         ],
     }

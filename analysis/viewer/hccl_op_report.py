@@ -32,7 +32,7 @@ class ReportHcclStatisticData:
         conn, curs = DBManager.check_connect_db_path(db_path)
         if not (conn and curs) or not DBManager.judge_table_exist(curs, DBNameConstant.TABLE_HCCL_OP_REPORT):
             logging.warning("Failed to connect to the database %s or the table %s does not exist.",
-                            DBNameConstant.DB_HCCL,
+                            DBNameConstant.DB_HCCL_SINGLE_DEVICE,
                             DBNameConstant.TABLE_HCCL_OP_REPORT)
             return [], [], 0
         sql = cls._get_hccl_op_report_sql()

@@ -104,9 +104,9 @@ class CoreCpuReduceViewer:
         total_cycle_data = {}
         total_time_data = {}
         conn_ge, cur_ge = DBManager.check_connect_db_path(
-            PathManager.get_db_path(result_dir, DBNameConstant.DB_RUNTIME))
+            PathManager.get_db_path(result_dir, DBNameConstant.DB_METRICS_SUMMARY))
         if conn_ge and cur_ge:
-            if not DBManager.judge_table_exist(cur_ge, DBNameConstant.TABLE_METRICS_SUMMARY):
+            if not DBManager.judge_table_exist(cur_ge, DBNameConstant.TABLE_METRIC_SUMMARY):
                 return total_cycle_data, total_time_data
             total_cycles = DBManager.fetch_all_data(cur_ge, CoreCpuReduceViewer._get_aicore_sql(result_dir))
             total_cycles = OpCommonFunc.deal_batch_id(stream_index=0, task_index=1, merge_data=total_cycles)
@@ -124,10 +124,10 @@ class CoreCpuReduceViewer:
         if ChipManager().is_chip_v4():
             total_cycles = 'aic_total_time, aic_total_cycles, aiv_total_time, aiv_total_cycles'
         sql = "SELECT stream_id, task_id, {total_cycles} FROM {} ".format(
-            DBNameConstant.TABLE_METRICS_SUMMARY, total_cycles=total_cycles)
+            DBNameConstant.TABLE_METRIC_SUMMARY, total_cycles=total_cycles)
         if not os.path.exists(PathManager.get_db_path(result_dir, DBNameConstant.DB_GE_INFO)):
             sql = "SELECT stream_id, task_id, {total_cycles} FROM {} ".format(
-                DBNameConstant.TABLE_METRICS_SUMMARY, total_cycles=total_cycles)
+                DBNameConstant.TABLE_METRIC_SUMMARY, total_cycles=total_cycles)
         return sql
 
     @staticmethod

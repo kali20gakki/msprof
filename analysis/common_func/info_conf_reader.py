@@ -262,7 +262,7 @@ class InfoConfReader:
         host_freq = self.get_host_freq()
         if host_freq != self.HOST_DEFAULT_FREQ:
             return (dev_timestamp - self._host_mon * NumberConstant.NANO_SECOND) / NumberConstant.NANO_SECOND * \
-                    host_freq + self._host_cnt * NumberConstant.NANO_SECOND
+                host_freq + self._host_cnt * NumberConstant.NANO_SECOND
         return dev_timestamp
 
     def get_json_pid_data(self: any) -> int:
@@ -408,6 +408,7 @@ class InfoConfReader:
         dev_start_path = self.get_conf_file_path(result_path, get_dev_start_compiles())
         if not os.path.exists(dev_start_path):
             return
+        check_path_valid(dev_start_path, True)
         try:
             with open(dev_start_path, "r") as log_file:
                 self._load_dev_start_path_line_by_line(log_file)
@@ -443,4 +444,3 @@ class InfoConfReader:
         if self._check_monotonic_and_cnt(host_start_file):
             logging.error("The monotonic time %s, dev_cntvct %s or host_cntvct %s is unusual, "
                           "maybe get data from driver failed", self._host_mon, self._dev_cnt, self._host_cnt)
-

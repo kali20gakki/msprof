@@ -18,12 +18,16 @@ class ChipModel(Enum):
     CHIP_V3_3_0 = 4
     CHIP_V4_1_0 = 5
     CHIP_V1_1_1 = 7
+    CHIP_V1_1_2 = 8
+    CHIP_V5_1_0 = 9
+    CHIP_V1_1_3 = 10
 
 
-@unique
 class ChipCoreNum(Enum):
     """
     Define the ai core num of stars chip
     """
     CHIP_V4_1_0 = 24
     CHIP_V1_1_1 = 0
+    CHIP_V1_1_2 = 0
+    CHIP_V1_1_3 = 0

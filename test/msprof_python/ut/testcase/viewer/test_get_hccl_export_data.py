@@ -28,7 +28,7 @@ class TestHCCLExport(unittest.TestCase):
 
     def test_get_hccl_timeline_data(self):
         db_manager = DBManager()
-        table_name = 'HCCLAllReduce'
+        table_name = 'HCCLSingleDevice'
         create_sql = "CREATE TABLE IF NOT EXISTS {0} (model_id int, index_id int, _iteration int)".format(table_name)
 
         data = ((1, 1, 1),)
