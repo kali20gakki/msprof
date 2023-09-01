@@ -8,6 +8,7 @@ import sqlite3
 from collections import defaultdict
 from abc import ABC, abstractmethod
 
+from common_func.ai_stack_data_check_manager import AiStackDataCheckManager
 from common_func.constant import Constant
 from common_func.section_calculator import SectionCalculator
 from msconfig.config_manager import ConfigManager
@@ -64,9 +65,12 @@ class OpParallelTuningDataHandle(BaseTuningDataHandle):
             'iter_id': Constant.DEFAULT_INVALID_VALUE,
             'model_id': Constant.DEFAULT_INVALID_VALUE
         }
+        device_id = param.get(StrConstant.PARAM_DEVICE_ID, '')
+        if not AiStackDataCheckManager.contain_op_summary_data(project_path, device_id):
+            return []
         with OpSummaryModel(sample_config) as _model:
-            ai_core_data = _model.get_operator_data_by_task_type(Constant.TASK_TYPE_AI_CORE)
-            ai_cpu_data = _model.get_operator_data_by_task_type(Constant.TASK_TYPE_AI_CPU)
+            ai_core_data = _model.get_operator_data_by_task_type((Constant.TASK_TYPE_AI_CORE,))
+            ai_cpu_data = _model.get_operator_data_by_task_type((Constant.TASK_TYPE_AI_CPU,))
         if not ai_core_data or not ai_cpu_data:
             return op_parallel_data
         ai_core_data = SectionCalculator.merge_continuous_intervals(ai_core_data)
@@ -214,6 +218,8 @@ class OpSummaryTuningDataHandle(BaseTuningDataHandle):
         if cls.is_network(project_path, device_id):
             headers = ConfigManager.get(ConfigManager.MSPROF_EXPORT_DATA).get('op_summary', 'headers').split(",")
             configs = {StrConstant.CONFIG_HEADERS: headers}
+            if not AiStackDataCheckManager.contain_op_summary_data(project_path, device_id):
+                return [], []
             db_path = PathManager.get_db_path(project_path, DBNameConstant.DB_AICORE_OP_SUMMARY)
             headers, data, _ = AiCoreOpReport.get_op_summary_data(project_path, db_path, configs)
         else:

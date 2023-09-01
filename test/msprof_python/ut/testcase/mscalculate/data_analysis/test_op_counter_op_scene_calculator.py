@@ -6,6 +6,7 @@ import sqlite3
 import unittest
 from unittest import mock
 
+from common_func.profiling_scene import ProfilingScene
 from mscalculate.data_analysis.op_counter_op_scene_calculator import OpCounterOpSceneCalculator
 from common_func.info_conf_reader import InfoConfReader
 from common_func.platform.chip_manager import ChipManager
@@ -18,11 +19,6 @@ NAMESPACE = 'mscalculate.data_analysis.op_counter_op_scene_calculator'
 
 
 class TestOpCounterOpSceneCalculator(unittest.TestCase):
-
-    def test_ms_run(self):
-        with mock.patch(NAMESPACE + '.OpCounterOpSceneCalculator.process'):
-            key = OpCounterOpSceneCalculator(file_list, CONFIG)
-            key.ms_run()
 
     def test_process(self):
         setattr(InfoConfReader(), "_info_json", {'devices': '0'})
@@ -76,9 +72,11 @@ class TestOpCounterOpSceneCalculator(unittest.TestCase):
                 self.assertEqual(result, True)
 
     def test_get_ge_sql(self):
+        InfoConfReader()._info_json = {'devices': '0'}
         check = OpCounterOpSceneCalculator(file_list, CONFIG)
         result = getattr(check, "_get_ge_sql")()
-        sql = "select model_id, op_name, op_type, task_type, task_id, stream_id, batch_id,context_id from TaskInfo"
+        sql = "select model_id, op_name, op_type, task_type, task_id, stream_id,"\
+              " batch_id,context_id from TaskInfo where device_id=0"
         self.assertEqual(sql, result)
 
     def test_create_ge_merge(self):
@@ -154,16 +152,13 @@ class TestOpCounterOpSceneCalculator(unittest.TestCase):
         db_manager.destroy(res)
 
     def test_create_task(self):
-        InfoConfReader()._info_json = {'devices': '0'}
-        with mock.patch(NAMESPACE + '.GetOpTableTsTime.get_task_time_data', return_value=[]), \
-                mock.patch(NAMESPACE + '.DBManager.insert_data_into_table'):
-            check = OpCounterOpSceneCalculator(file_list, CONFIG)
+        check = OpCounterOpSceneCalculator(file_list, CONFIG)
+        check.create_task()
+        with mock.patch(NAMESPACE + '.DBManager.check_tables_in_db', return_value=True):
             check.create_task()
-        with mock.patch(NAMESPACE + '.GetOpTableTsTime.get_task_time_data', return_value=[]), \
-                mock.patch(NAMESPACE + '.DBManager.insert_data_into_table', side_effect=sqlite3.Error), \
-                mock.patch(NAMESPACE + '.logging.error'):
-            check = OpCounterOpSceneCalculator(file_list, CONFIG)
-            check.create_task()
+            with mock.patch(NAMESPACE + '.AscendTaskModel.get_all_data',
+                            return_value=[[1, 1, 1, 1, 1, 1, 1000, 1000, 'AI_CORE', 'AI_CORE']]):
+                check.create_task()
 
     def test_get_op_report_sql(self):
         check = OpCounterOpSceneCalculator(file_list, CONFIG)
@@ -172,6 +167,8 @@ class TestOpCounterOpSceneCalculator(unittest.TestCase):
                        " min(duration) as min, sum(duration)/count(op_type) as avg, max(duration) as max " \
                        "from ge_task_merge, rts_task where ge_task_merge.task_id=rts_task.task_id " \
                        "and ge_task_merge.stream_id=rts_task.stream_id and ge_task_merge.batch_id=rts_task.batch_id " \
+                       "and ge_task_merge.context_id=rts_task.subtask_id " \
+                       "and rts_task.start_time != -1 " \
                        "group by op_type,ge_task_merge.task_type"
         self.assertEqual(result, expected_sql)
 

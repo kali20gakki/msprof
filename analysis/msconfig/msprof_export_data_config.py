@@ -7,12 +7,6 @@ from msconfig.meta_config import MetaConfig
 
 class MsProfExportDataConfig(MetaConfig):
     DATA = {
-        'runtime_api': [
-            ('handler', '_get_runtime_api_data'),
-            ('headers', 'Name,Stream ID,Time(%),Time(ns),Calls,Avg(ns),Min(ns),Max(ns),Process ID,Thread ID'),
-            ('table', 'ApiCall'),
-            ('db', 'runtime.db')
-        ],
         'task_time': [
             ('handler', '_get_task_time_data'),
             ('headers',
@@ -52,28 +46,12 @@ class MsProfExportDataConfig(MetaConfig):
             ('db', 'memory_{}.db'),
             ('table', 'pidmem')
         ],
-        'acl': [
-            ('handler', '_get_acl_data'),
-            ('headers', 'Name,Type,Start Time,Duration(us),Process ID,Thread ID'),
-            ('db', 'acl_module.db'),
-            ('table', 'acl_data')
-        ],
-        'acl_statistic': [
-            ('handler', '_get_acl_statistic_data'),
-            ('headers', 'Name,Type,Time(%),Time(us),Count,Avg(us),Min(us),Max(us),Process ID,Thread ID'),
-            ('db', 'acl_module.db'),
-            ('table', 'acl_data')
-        ],
         'op_summary': [
             ('handler', '_get_op_summary_data'),
             ('headers',
              'Model Name,Model ID,Task ID,Stream ID,Infer ID,Op Name,OP Type,Task Type,'
-             'Task Start Time,Task Duration(us),Task Wait Time(us),Block Dim,Mix Block Dim'),
+             'Task Start Time(us),Task Duration(us),Task Wait Time(us),Block Dim,Mix Block Dim'),
             ('db', 'ai_core_op_summary.db')
-        ],
-        'ai_stack_time': [
-            ('handler', '_get_ai_stack_time_data'),
-            ('headers', 'Infer ID,Module,API,Start Time,Duration(ns)')
         ],
         'l2_cache': [
             ('handler', '_get_l2_cache_data'),
@@ -85,7 +63,7 @@ class MsProfExportDataConfig(MetaConfig):
         'step_trace': [
             ('handler', '_get_step_trace_data'),
             ('headers',
-             'Iteration ID,FP Start,BP End,Iteration End,Iteration Time(us),FP to BP Time(us),'
+             'Iteration ID,FP Start(us),BP End(us),Iteration End(us),Iteration Time(us),FP to BP Time(us),'
              'Iteration Refresh(us),Data Aug Bound(us)')
         ],
         'aicpu': [
@@ -93,7 +71,7 @@ class MsProfExportDataConfig(MetaConfig):
         ],
         'dp': [
             ('handler', '_get_dp_data'),
-            ('headers', 'Timestamp,Action,Source,Cached Buffer Size')
+            ('headers', 'Timestamp(us),Action,Source,Cached Buffer Size')
         ],
         'op_statistic': [
             ('handler', '_get_op_statistic_data'),
@@ -111,8 +89,8 @@ class MsProfExportDataConfig(MetaConfig):
         'fusion_op': [
             ('handler', '_get_fusion_op_data'),
             ('headers',
-             'Model Name,Model ID,Fusion Op,Original Ops,Memory Input(Bytes),Memory Output(Bytes),'
-             'Memory Weight(Bytes),Memory Workspace(Bytes),Memory Total(Bytes)'),
+             'Model Name,Model ID,Fusion Op,Original Ops,Memory Input(KB),Memory Output(KB),'
+             'Memory Weight(KB),Memory Workspace(KB),Memory Total(KB)'),
             ('db', 'ge_model_info.db'),
             ('table', 'GeModelLoad')
         ],
@@ -150,22 +128,16 @@ class MsProfExportDataConfig(MetaConfig):
             ('db', 'nic.db'),
             ('table', 'NicReportData'),
             ('headers',
-             'Timestamp,Bandwidth(MB/s),Rx Bandwidth efficiency(%),rxPacket/s,rxError rate(%),'
-             'rxDropped rate(%),Tx Bandwidth efficiency(%),txPacket/s,txError rate(%),txDropped rate(%),funcId'),
-            ('columns',
-             'duration,bandwidth,rxBandwidth,rxPacket,rxErrorRate,rxDroppedRate,txBandwidth,'
-             'txPacket,txErrorRate,txDroppedRate,funcId')
+             'Timestamp(us),Bandwidth(MB/s),Rx Bandwidth efficiency(%),rxPacket/s,rxError rate(%),'
+             'rxDropped rate(%),Tx Bandwidth efficiency(%),txPacket/s,txError rate(%),txDropped rate(%),funcId')
         ],
         'roce': [
             ('handler', '_get_roce_data'),
             ('db', 'roce.db'),
             ('table', 'RoceReportData'),
             ('headers',
-             'Timestamp,Bandwidth(MB/s),Rx Bandwidth efficiency(%),rxPacket/s,rxError rate(%),'
-             'rxDropped rate(%),Tx Bandwidth efficiency(%),txPacket/s,txError rate(%),txDropped rate(%),funcId'),
-            ('columns',
-             'duration,bandwidth,rxBandwidth,rxPacket,rxErrorRate,rxDroppedRate,txBandwidth,'
-             'txPacket,txErrorRate,txDroppedRate,funcId')
+             'Timestamp(us),Bandwidth(MB/s),Rx Bandwidth efficiency(%),rxPacket/s,rxError rate(%),'
+             'rxDropped rate(%),Tx Bandwidth efficiency(%),txPacket/s,txError rate(%),txDropped rate(%),funcId')
         ],
         'ctrl_cpu_pmu_events': [
             ('handler', '_get_cpu_pmu_events'),
@@ -200,13 +172,6 @@ class MsProfExportDataConfig(MetaConfig):
         'ts_cpu_top_function': [
             ('handler', '_get_ts_cpu_top_funcs'),
             ('db', 'tscpu_{}.db')
-        ],
-        'ge': [
-            ('handler', '_get_ge_data')
-        ],
-        'ge_op_execute': [
-            ('handler', '_get_ge_op_execute_data'),
-            ('headers', 'Thread ID,OP Name,OP Type,Event Type,Start Time,Duration(us)')
         ],
         'os_runtime_api': [
             ('handler', '_get_host_runtime_api'),
@@ -243,16 +208,16 @@ class MsProfExportDataConfig(MetaConfig):
         ],
         'hccl': [
             ('handler', '_get_hccl_timeline'),
-            ('db', 'hccl.db'),
-            ('table', 'HCCLAllReduce')
+            ('db', 'hccl_single_device.db'),
+            ('table', 'HCCLSingleDevice')
         ],
         'msprof_tx': [
             ('handler', '_get_msproftx_data'),
             ('db', 'msproftx.db'),
             ('table', 'MsprofTx'),
             ('headers',
-             'pid, tid, category, event_type, payload_type, payload_value, Start_time(ns), '
-             'End_time(ns), message_type, message')
+             'pid, tid, category, event_type, payload_type, payload_value, Start_time(us), '
+             'End_time(us), message_type, message')
         ],
         'pytorch_operator_view': [
             ('handler', '_get_pytorch_operator_data'),
@@ -272,7 +237,7 @@ class MsProfExportDataConfig(MetaConfig):
             ('table', 'AccPmu'),
             ('headers',
              'task_id,stream_id,acc_id,block_id,read_bandwidth,write_'
-             'bandwidth,read_ost,write_ost,time_stamp,start_time,dur_time')
+             'bandwidth,read_ost,write_ost,time_stamp(us),start_time,dur_time')
         ],
         'stars_soc': [
             ('handler', '_get_stars_soc_data'),
@@ -282,9 +247,6 @@ class MsProfExportDataConfig(MetaConfig):
         'stars_chip_trans': [
             ('handler', '_get_stars_chip_trans_data'),
             ('db', 'chip_trans.db')
-        ],
-        'thread_group': [
-            ('handler', '_get_thread_group_data')
         ],
         'low_power': [
             ('handler', '_get_low_power_data'),
@@ -300,21 +262,41 @@ class MsProfExportDataConfig(MetaConfig):
             ('db', 'npu_mem.db'),
             ('table', 'NpuMem')
         ],
-        'ge_memory_record': [
+        'memory_record': [
             ('handler', '_get_npu_op_mem_record'),
-            ('headers', 'Component,Timestamp(us),Total Allocated(MB),Total Reserved(MB),Device Type'),
+            ('headers', 'Component,Timestamp(us),Total Allocated(KB),Total Reserved(KB),Device'),
             ('db', 'memory_application.db'),
             ('table', 'NpuOpMemRec')
         ],
-        'ge_operator_memory': [
+        'operator_memory': [
             ('handler', '_get_npu_op_mem'),
-            ('headers', 'Name,Size(KB),Allocation Time(us),Release Time(us),Duration(us),'
-                        'Allocation Total Allocated(MB),Allocation Total Reserved(MB),'
-                        'Release Total Allocated(MB),Release Total Reserved(MB),Device Type'),
+            ('headers', 'Name,Size(KB),Allocation Time(us),Duration(us),'
+                        'Allocation Total Allocated(KB),Allocation Total Reserved(KB),'
+                        'Release Total Allocated(KB),Release Total Reserved(KB),Device'),
             ('db', 'memory_application.db'),
             ('table', 'NpuOpMem')
         ],
         'task_queue': [
             ('handler', '_get_task_queue_timeline')
-        ]
+        ],
+        'event': [
+            ('handler', '_get_event_data'),
+            ('db', 'api_event.db'),
+            ('table', 'EventData')
+        ],
+        'api': [
+            ('handler', '_get_api_data'),
+            ('db', 'api_event.db'),
+            ('table', 'ApiData')
+        ],
+        'hccl_statistic': [
+            ('handler', '_get_hccl_statistic_data'),
+            ('headers',
+             'OP Type,Count,Total Time(us),Min Time(us),Avg Time(us),Max Time(us),Ratio(%)'),
+            ('db', 'hccl_single_device.db')
+        ],
+        'api_statistic': [
+            ('handler', '_get_api_statistic_data'),
+            ('headers', 'Level,API Name,Time(us),Count,Avg(us),Min(us),Max(us),Variance'),
+        ],
     }

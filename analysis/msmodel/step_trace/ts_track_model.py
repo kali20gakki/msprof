@@ -81,6 +81,9 @@ class TsTrackModel(BaseModel, ABC):
         """
         get step trace data
         """
+        if not DBManager.judge_table_exist(self.cur, DBNameConstant.TABLE_STEP_TRACE_DATA) or \
+           not DBManager.judge_row_exist(self.cur, DBNameConstant.TABLE_STEP_TRACE_DATA):
+            return []
         sql = "select model_id, index_id, iter_id, step_start, step_end from {0}".format(
             DBNameConstant.TABLE_STEP_TRACE_DATA)
         step_trace_data = DBManager.fetch_all_data(self.cur, sql, dto_class=StepTraceDto)
@@ -128,14 +131,16 @@ class TsTrackViewModel(ViewModel):
     def get_hccl_operator_exe_data(self) -> list:
         if not self.attach_to_db(DBNameConstant.DB_GE_INFO):
             return []
+        device_id = InfoConfReader().get_device_id()
         sql = "SELECT t1.model_id model_id, t1.index_id index_id, t1.stream_id stream_id, t1.task_id task_id, " \
               "t1.tag_id tag_id, t1.timestamp timestamp, t2.op_name op_name, t2.op_type op_type " \
               "FROM ( SELECT model_id, index_id, tag_id, stream_id, task_id-1 AS task_id, timestamp " \
-              "FROM {} WHERE tag_id>=10000 ) t1 LEFT JOIN ( " \
-              "SELECT model_id, index_id, stream_id, task_id, op_name, op_type FROM {} WHERE task_type='{}' ) t2 " \
+              "FROM {0} WHERE tag_id>=10000 ) t1 LEFT JOIN ( " \
+              "SELECT model_id, index_id, stream_id, task_id, op_name, op_type FROM {1} WHERE task_type='{2}' ) t2 " \
               "ON t1.model_id=t2.model_id AND (t1.index_id=t2.index_id OR t2.index_id=0 ) " \
-              "AND t1.stream_id = t2.stream_id AND t1.task_id = t2.task_id ORDER BY t1.timestamp".format(
-            DBNameConstant.TABLE_STEP_TRACE, DBNameConstant.TABLE_GE_TASK, Constant.TASK_TYPE_HCCL)
+              "AND t1.stream_id = t2.stream_id AND t1.task_id = t2.task_id AND " \
+              "t2.device_id = {3} ORDER BY t1.timestamp".format(
+            DBNameConstant.TABLE_STEP_TRACE, DBNameConstant.TABLE_GE_TASK, Constant.TASK_TYPE_HCCL, device_id)
         return DBManager.fetch_all_data(self.cur, sql, dto_class=StepTraceGeDto)
 
     def get_ai_cpu_data(self) -> list:

@@ -62,7 +62,6 @@ add_executable(msprofbin
     src/msprof_manager.cpp
     src/prof_task.cpp
     src/data_handle.cpp
-    src/prof_params_adapter.cpp
     src/input_parser.cpp
     src/running_mode.cpp
     ../app/application.cpp

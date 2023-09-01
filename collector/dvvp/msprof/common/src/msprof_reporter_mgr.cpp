@@ -67,26 +67,17 @@ void MsprofReporterMgr::FlushAllReporter(const std::string &devId)
 int32_t MsprofReporterMgr::ReportData(uint32_t agingFlag, const MsprofApi &data)
 {
     if (!isStarted_) {
-        MSPROF_LOGE("The reporter has not been started.");
-        return PROFILING_FAILED;
+        MSPROF_LOGW("The reporter has not been started.");
+        return PROFILING_NOTSUPPORT;
     }
     return reporters_[agingFlag ? AGING_API : UNAGING_API].ReportData(data);
-}
-
-int32_t MsprofReporterMgr::ReportData(uint32_t agingFlag, const MsprofEvent &data)
-{
-    if (!isStarted_) {
-        MSPROF_LOGE("The reporter has not been started.");
-        return PROFILING_FAILED;
-    }
-    return reporters_[agingFlag ?  AGING_EVENT : UNAGING_EVENT].ReportData(data);
 }
 
 int32_t MsprofReporterMgr::ReportData(uint32_t agingFlag, const MsprofCompactInfo &data)
 {
     if (!isStarted_) {
-        MSPROF_LOGE("The reporter has not been started.");
-        return PROFILING_FAILED;
+        MSPROF_LOGW("The reporter has not been started.");
+        return PROFILING_NOTSUPPORT;
     }
     return reporters_[agingFlag ?  AGING_COMPACT_INFO : UNAGING_COMPACT_INFO].ReportData(data);
 }
@@ -94,8 +85,8 @@ int32_t MsprofReporterMgr::ReportData(uint32_t agingFlag, const MsprofCompactInf
 int32_t MsprofReporterMgr::ReportData(uint32_t agingFlag, const MsprofAdditionalInfo &data)
 {
     if (!isStarted_) {
-        MSPROF_LOGE("The reporter has not been started.");
-        return PROFILING_FAILED;
+        MSPROF_LOGW("The reporter has not been started.");
+        return PROFILING_NOTSUPPORT;
     }
     return reporters_[agingFlag ?  AGING_ADDITIONAL_INFO : UNAGING_ADDITIONAL_INFO].ReportData(data);
 }

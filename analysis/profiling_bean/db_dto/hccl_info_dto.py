@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2023-2023. All rights reserved.
 from common_func.constant import Constant
+from common_func.ms_constant.number_constant import NumberConstant
 
 
 class HCCLInfoDto:
@@ -19,6 +20,7 @@ class HCCLInfoDto:
         self._rank_size = Constant.DEFAULT_INVALID_VALUE
         self._work_flow_mode = Constant.NA
         self._plane_id = Constant.DEFAULT_INVALID_VALUE
+        self._context_id = NumberConstant.DEFAULT_GE_CONTEXT_ID
         self._notify_id = Constant.DEFAULT_INVALID_VALUE
         self._stage = Constant.DEFAULT_INVALID_VALUE
         self._role = Constant.NA
@@ -83,6 +85,10 @@ class HCCLInfoDto:
     @property
     def plane_id(self):
         return self._plane_id
+
+    @property
+    def context_id(self):
+        return self._context_id
 
     @property
     def notify_id(self):
@@ -184,6 +190,10 @@ class HCCLInfoDto:
     def plane_id(self, value):
         self._plane_id = value
 
+    @context_id.setter
+    def context_id(self, value):
+        self._context_id = value
+
     @notify_id.setter
     def notify_id(self, value):
         self._notify_id = value
@@ -232,20 +242,13 @@ class HCCLInfoDto:
     def rdma_type(self, value):
         self._rdma_type = value
 
-    def get_bandwidth(self):
-        if self.duration_estimated == Constant.DEFAULT_INVALID_VALUE or self.size == Constant.DEFAULT_INVALID_VALUE or \
-                self.duration_estimated == 0:
-            return 0
-        return self.size / self.duration_estimated / 1000  # 1000 scale(GB/s)
-
     def to_args_json(self, stream_id, task_id):
-        bandwidth = self.get_bandwidth()
         json = {
             'notify_id': self.notify_id,
             'duration estimated(us)': self.duration_estimated,
-            'bandwidth(GB/s)': bandwidth,
             'stream id': stream_id,
             'task id': task_id,
+            'context id': self.context_id,
             'task type': self.op_name,
             'src rank': self.local_rank,
             'dst rank': self.remote_rank,

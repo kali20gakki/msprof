@@ -1,13 +1,13 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2021-2022. All rights reserved.
-
-from abc import ABC
+import os
 
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
+from common_func.path_manager import PathManager
 from common_func.trace_view_header_constant import TraceViewHeaderConstant
 from common_func.trace_view_manager import TraceViewManager
 from msmodel.sqe_type_map import SqeType
@@ -58,6 +58,9 @@ class AcsqTaskViewer:
         get acsq task op_summary data,
         :return: headers, data, count of data
         """
+        db_path = PathManager.get_db_path(self.configs.get('result_dir'), DBNameConstant.DB_SOC_LOG)
+        if not os.path.exists(db_path):
+            return headers, [], 0
         with self._model as _model:
             data_list = _model.get_summary_data()
         self._update_kernel_name(data_list)

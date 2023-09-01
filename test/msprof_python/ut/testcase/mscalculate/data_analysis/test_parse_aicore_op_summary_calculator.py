@@ -5,7 +5,7 @@ from unittest import mock
 import pytest
 
 from mscalculate.data_analysis.parse_aicore_op_summary_calculator import ParseAiCoreOpSummaryCalculator
-from analyzer.scene_base.profiling_scene import ProfilingScene
+from common_func.profiling_scene import ProfilingScene
 from common_func.info_conf_reader import InfoConfReader
 from common_func.msprof_exception import ProfException
 from constant.constant import CONFIG
@@ -75,19 +75,12 @@ class TestParseAiCoreOpSummaryCalculator(unittest.TestCase):
                                return_value=False), \
                     mock.patch(NAMESPACE + '.ParseAiCoreOpSummaryCalculator.create_ai_core_metrics_table',
                                return_value=False), \
-                    mock.patch(NAMESPACE + '.ParseAiCoreOpSummaryCalculator.create_ge_tensor_table',
-                               return_value=False), \
                     mock.patch(NAMESPACE + '.ParseAiCoreOpSummaryCalculator.create_task_time_table',
                                return_value=False):
                 check = ParseAiCoreOpSummaryCalculator(file_list, CONFIG)
                 check.conn, check.curs = res
                 check.create_summary_table()
         db_manager.destroy(res)
-
-    def test_create_ge_tensor_table(self):
-        with mock.patch(NAMESPACE + '.DBManager.check_tables_in_db', return_value=False):
-            check = ParseAiCoreOpSummaryCalculator(file_list, CONFIG)
-            check.create_ge_tensor_table()
 
     def test_create_conn(self):
         db_manager = DBManager()
@@ -162,7 +155,7 @@ class TestParseAiCoreOpSummaryCalculator(unittest.TestCase):
         db_manager_rt.destroy(res_runtime)
 
     def test_create_task_time_table(self):
-        with mock.patch('analyzer.scene_base.profiling_scene.Utils.get_scene',
+        with mock.patch('common_func.profiling_scene.Utils.get_scene',
                         return_value="train"), \
                 mock.patch(NAMESPACE + '.logging.warning'), \
                 mock.patch(NAMESPACE + '.logging.error'):
@@ -189,39 +182,11 @@ class TestParseAiCoreOpSummaryCalculator(unittest.TestCase):
                 check.create_task_time_table()
 
     def test_get_task_time_data(self):
-        _info_json = hasattr(InfoConfReader, "_info_json")
-        _info_json = {'devices': '0'}
-        with mock.patch(NAMESPACE + '.AiStackDataCheckManager.contain_task_time_data',
-                        return_value=True):
-            with mock.patch(NAMESPACE + '.GetOpTableTsTime.get_task_time_data',
-                            return_value=1), \
-                    mock.patch(NAMESPACE + '.OpCommonFunc.calculate_task_time',
-                               return_value=1):
-                check = ParseAiCoreOpSummaryCalculator(file_list, CONFIG)
-                ProfilingScene().init('')
-                result = check.get_task_time_data()
-            self.assertEqual(result, 1)
-            with mock.patch(NAMESPACE + '.GetOpTableTsTime.get_task_time_data',
-                            return_value=1), \
-                    mock.patch(NAMESPACE + '.OpCommonFunc.calculate_task_time',
-                               return_value=1):
-                check = ParseAiCoreOpSummaryCalculator(file_list, CONFIG)
-                ProfilingScene().init('')
-                result = check.get_task_time_data()
-            self.assertEqual(result, 1)
-            with mock.patch(NAMESPACE + '.GetOpTableTsTime.get_task_time_data',
-                            return_value=1), \
-                    mock.patch(NAMESPACE + '.OpCommonFunc.calculate_task_time',
-                               return_value=1):
-                check = ParseAiCoreOpSummaryCalculator(file_list, CONFIG)
-                ProfilingScene().init('')
-                result = check.get_task_time_data()
-            self.assertEqual(result, 1)
-        with mock.patch(NAMESPACE + '.AiStackDataCheckManager.contain_task_time_data',
-                        return_value=False):
-            check = ParseAiCoreOpSummaryCalculator(file_list, CONFIG)
-            result = check.get_task_time_data()
-        self.assertEqual(result, [])
+        check = ParseAiCoreOpSummaryCalculator(file_list, CONFIG)
+        self.assertEqual(check.get_task_time_data(), [])
+        with mock.patch(NAMESPACE + '.AscendTaskModel.get_all_data',
+                        return_value=[[1, 1, 1, 1, 1, 1, 1000, 1000, 'AI_CORE', 'AI_CORE']]):
+            self.assertEqual(check.get_task_time_data(), [[1, 1, 1000, 1000, 0, 'AI_CORE', 1, 1, 1, 1]])
 
     def test_get_db_path(self):
         db_name = 'test'

@@ -1,0 +1,15 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+cmake-build-debug
+
+# C extensions
+*.so
+
+# Visual Studio Code files
+.vscode
+.vs
+
+# PyCharm files
+.idea

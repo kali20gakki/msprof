@@ -20,7 +20,8 @@ NAMESPACE = 'msparser.add_info.graph_add_info_parser'
 
 class TestGraphAddInfoParser(unittest.TestCase):
     file_list = {
-        DataTag.GRAPH_ADD_INFO: ['aging.additional.graph_id_map.slice_0', 'unaging.additional.graph_id_map.slice_0']
+        DataTag.GRAPH_ADD_INFO: ['aging.additional.graph_id_map.slice_0', 'unaging.additional.graph_id_map.slice_0'],
+        DataTag.NANO_MODEL_EXEOM: ['unaging.additional.model_exeom.slice_0']
     }
 
     def test_ms_run(self):
@@ -58,7 +59,7 @@ class TestGraphAddInfoParser(unittest.TestCase):
         data = GraphAddInfoBean.decode(struct_data)
         check = GraphAddInfoParser(self.file_list, CONFIG)
         result = check._get_graph_info_data(data)
-        self.assertEqual(result, ['node', '0', 0, '0', '0', '0'])
+        self.assertEqual(result, ['node', '0', 0, 0, '0', '0'])
 
 
 if __name__ == '__main__':

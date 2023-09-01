@@ -6,6 +6,8 @@ from abc import abstractmethod
 
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
+from common_func.info_conf_reader import InfoConfReader
+from common_func.ms_constant.number_constant import NumberConstant
 from host_prof.host_prof_base.host_prof_data_base import HostProfDataBase
 
 
@@ -43,7 +45,11 @@ class HostDiskUsage(HostProfDataBase):
 
         result = []
         for disk_item in disk_info_list:
-            time_mem = {"start": disk_item[0], "end": disk_item[1], "usage": disk_item[5]}
+            time_mem = {
+                "start": InfoConfReader().time_from_host_syscnt(disk_item[0], NumberConstant.MICRO_SECOND),
+                "end": InfoConfReader().time_from_host_syscnt(disk_item[1], NumberConstant.MICRO_SECOND),
+                "usage": disk_item[5]
+            }
             result.append(time_mem)
 
         return {"data": result}

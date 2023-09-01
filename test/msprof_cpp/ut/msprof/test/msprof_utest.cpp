@@ -182,13 +182,18 @@ TEST_F(MsprofUtest, MsprofTxManager)
     ret = manager->Init();
     EXPECT_EQ(PROFILING_SUCCESS, ret);
 
+    EXPECT_EQ(PROFILING_SUCCESS, manager->Init());
+
     stamp = manager->CreateStamp();
     EXPECT_NE(nullptr, stamp);
+
+    EXPECT_EQ(PROFILING_FAILED, manager->SetStampTagName(nullptr, nullptr, 0));
 
     std::string tagName = "cann_op";
     ret = manager->SetStampTagName(stamp, tagName.c_str(), tagName.size());
     EXPECT_EQ(PROFILING_SUCCESS, ret);
 
+    EXPECT_EQ(PROFILING_FAILED, manager->SetStampCallStack(nullptr, nullptr, 0));
     std::string callStack = "path/to/op(12):op_name";
     ret = manager->SetStampCallStack(stamp, callStack.c_str(), callStack.size());
     EXPECT_EQ(PROFILING_SUCCESS, ret);
@@ -196,14 +201,20 @@ TEST_F(MsprofUtest, MsprofTxManager)
     ret = manager->SetCategoryName(1, "test");
     EXPECT_EQ(PROFILING_SUCCESS, ret);
 
+    EXPECT_EQ(PROFILING_FAILED, manager->SetStampCategory(nullptr, 1));
+
     ret = manager->SetStampCategory(stamp, 1);
     EXPECT_EQ(PROFILING_SUCCESS, ret);
     
+    EXPECT_EQ(PROFILING_FAILED, manager->SetStampTraceMessage(nullptr, msg.c_str(), 0));
+
     ret = manager->SetStampTraceMessage(stamp, msg.c_str(), 129);
     EXPECT_EQ(PROFILING_FAILED, ret);
 
     ret = manager->SetStampTraceMessage(stamp, msg.c_str(), msg.size());
     EXPECT_EQ(PROFILING_SUCCESS, ret);
+
+    EXPECT_EQ(PROFILING_FAILED, manager->SetStampPayload(nullptr, 0, nullptr));
 
     ret = manager->SetStampPayload(stamp, 0, nullptr);
     EXPECT_EQ(PROFILING_FAILED, ret);

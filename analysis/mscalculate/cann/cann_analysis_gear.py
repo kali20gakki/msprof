@@ -4,14 +4,15 @@
 from abc import abstractmethod
 
 import logging
+from collections import OrderedDict
 from typing import List
+from typing import Union
 
 from common_func.constant import Constant
 from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
-from common_func.platform.chip_manager import ChipManager
 from mscalculate.cann.additional_record import AdditionalRecord
 from mscalculate.cann.cann_database import ApiDataDatabase
 from mscalculate.cann.event import Event
@@ -22,6 +23,7 @@ from msmodel.ge.ge_model_load_model import GeFusionModel
 from msmodel.ge.ge_model_time_load import GeModelTimeModel
 from msmodel.hccl.hccl_host_model import HCCLHostModel
 from msmodel.runtime.runtime_api_model import RuntimeApiModel
+from msmodel.runtime.runtime_host_task_model import RuntimeHostTaskModel
 from profiling_bean.db_dto.api_data_dto import ApiDataDto
 from profiling_bean.db_dto.ctx_id_dto import CtxIdDto
 from profiling_bean.db_dto.fusion_op_info_dto import FusionOpInfoDto
@@ -118,7 +120,21 @@ class ModelGear(CANNGear):
         item = [data.item_id, model_name, data.start, data.end]
         self.model_load_data.append(item)
 
-    def add_model_time_item_from_table(self, model_time: GeTimeDto):
+    def find_model_name(self, model_id) -> str:
+        for mdl_id, model_name, *_ in self.model_load_data:
+            if mdl_id == model_id:
+                return model_name
+        return ""
+
+    def add_model_time_item_from_table(self, model_time: GeTimeDto) -> None:
+        # In helper scene, there is no ModelExecute, so return
+        if model_time.model_id == 0 and model_time.thread_id == 0:
+            return
+
+        if model_time.model_name is None:
+            model_id = model_time.model_id
+            model_time.model_name = self.find_model_name(model_id)
+
         self.model_time_data.append(
             [model_time.model_name, model_time.model_id, model_time.request_id, model_time.thread_id,
              model_time.input_start, model_time.input_end, model_time.infer_start, model_time.infer_end,
@@ -186,6 +202,8 @@ class ModelGear(CANNGear):
         if self.model_time_data_table:
             for model_time_data in list(self.model_time_data_table.values()):
                 self.add_model_time_item_from_table(model_time_data)
+        if not self.model_time_data:
+            return
 
         model = GeModelTimeModel(self._project_path, [DBNameConstant.TABLE_GE_MODEL_TIME])
         model.init()
@@ -201,7 +219,6 @@ class ModelGear(CANNGear):
 
 class NodeGear(CANNGear):
     GE_STEP_INFO_API_TYPE = "step_info"
-    GE_HCCL_OP_TYPE = "HCCL"
 
     def __init__(self, project_path):
         super().__init__(project_path)
@@ -258,15 +275,6 @@ class NodeGear(CANNGear):
                 self.node_name_type_table[dto.item_id] = op_type
             self.ge_host_info.append([dto.thread_id, op_type, dto.struct_type,
                                       dto.start, dto.end, dto.item_id])
-            for record in event.additional_record:
-                if isinstance(record.dto, NodeBasicInfoDto) and record.dto.task_type == self.GE_HCCL_OP_TYPE:
-                    model_event: Event = call_stack.get(Constant.MODEL_LEVEL)
-                    model_dto: ApiDataDto = ApiDataDatabase().get(model_event)
-                    request_id = model_dto.request_id if model_dto.request_id is not None else -1
-                    model_id = NumberConstant.INVALID_MODEL_ID if model_dto.item_id is None else model_dto.item_id
-                    self.hccl_op_info.append([model_id, request_id, dto.thread_id, dto.item_id,
-                                              record.dto.task_type, record.dto.op_type, dto.start, dto.end,
-                                              record.dto.is_dynamic])
 
     def update_node_name(self):
         op_type_index = 1
@@ -297,17 +305,6 @@ class NodeGear(CANNGear):
         model.insert_data_to_db(DBNameConstant.TABLE_GE_STEP, self.step_info)
         model.finalize()
 
-    def save_hccl_op_info(self):
-        if not self.hccl_op_info:
-            return
-        model = HCCLHostModel(self._project_path)
-        model.init()
-        model.drop_table(DBNameConstant.TABLE_HCCL_OP)
-        model.create_table()
-
-        model.insert_data_to_db(DBNameConstant.TABLE_HCCL_OP, self.hccl_op_info)
-        model.finalize()
-
     def save_fusion_op_info(self):
         if not self.fusion_op_info:
             return
@@ -322,7 +319,6 @@ class NodeGear(CANNGear):
     def flush_data(self):
         self.save_ge_host_info()
         self.save_step_info()
-        self.save_hccl_op_info()
         self.save_fusion_op_info()
 
 
@@ -332,11 +328,13 @@ class TaskGear(CANNGear):
     INVALID_DIRECT = -1
     INVALID_CONTEXT_ID = 4294967295
     INVALID_MODEL_ID = 4294967295
+    HCCL_CONTEXT_ID_NUM = 2
     KERNEL_TASK_PREFIX = "KERNEL"
     AICORE_TASK_TYPE = "AI_CORE"
     HCCL_TASK_TYPE = "HCCL"
     FFTS_PLUS_TASK_TYPE = "FFTS_PLUS"
     KERNEL_FFTS_PLUS_TASK_TYPE = "FFTS_PLUS"
+    KERNEL_STARS_COMMON_TASK_TYPE = "STARS_COMMON"
 
     class RuntimeApi:
         def __init__(self, start, end, struct_type, thread_id):
@@ -361,11 +359,20 @@ class TaskGear(CANNGear):
             self.ctx_info = ctx_info
 
         @staticmethod
-        def get_hash(dto: any):
+        def get_hash(dto: Union[NodeBasicInfoDto, TensorInfoDto, CtxIdDto]):
             return dto.op_name + "-" + str(int(dto.timestamp))
 
         def is_invalid(self):
             return self.node_basic_info is not None and self.tensor_info is not None
+
+    class HcclDesc:
+        def __init__(self, hccl_info=HCCLInfoDto(), ctx_info=CtxIdDto()):
+            self.hccl_info = hccl_info
+            self.ctx_info = ctx_info
+
+        @staticmethod
+        def get_hash(dto: Union[HCCLInfoDto, CtxIdDto]):
+            return dto.context_id
 
     def __init__(self, project_path):
         super().__init__(project_path)
@@ -374,7 +381,11 @@ class TaskGear(CANNGear):
         self.task_info = []
         self.tensor_info = []
         self.hccl_task_info = []
+        self.host_tasks = []
         self.mismatch_hccl = 0
+        self.hccl_op_info = []
+        self.hccl_node_keys = set()
+        self.hccl_node_mismatch = 0
 
     @staticmethod
     def get_task_level_additional_dto(event: Event) -> tuple:
@@ -383,11 +394,49 @@ class TaskGear(CANNGear):
         for record in event.additional_record:
             if isinstance(record.dto, MemCopyInfoDto):
                 mem_cpy_info_dto = record.dto
-            elif isinstance(record.dto, TaskTrackDto):
+            elif isinstance(record.dto, TaskTrackDto) and task_track_dto.struct_type is None:
+                # RUNTIME sometimes report multiple task tracks in one api call,
+                # in which case, only the first task track is valid
                 task_track_dto = record.dto
         return mem_cpy_info_dto, task_track_dto
 
-    def get_hccl_info_dto(self, event: Event) -> HCCLInfoDto:
+    @classmethod
+    def get_context_ids_in_node(cls: any, node_event: Event) -> list:
+        if node_event.is_invalid():
+            return []
+        ids = []
+        for record in node_event.additional_record:
+            if isinstance(record.dto, CtxIdDto):
+                ids.append(record.dto.ctx_id)
+        return ids
+
+    @classmethod
+    def get_context_ids_in_hccl(cls: any, hccl_event: Event) -> list:
+        if hccl_event.is_invalid():
+            return []
+        ids = []
+        # context id in hccl level will only report one add info which in the add queue end
+        for record in reversed(hccl_event.additional_record):
+            if isinstance(record.dto, CtxIdDto):
+                ids.extend(record.dto.ctx_id.split(','))
+                break
+        if ids:
+            if len(ids) != cls.HCCL_CONTEXT_ID_NUM:
+                logging.error("Illegal context id size, except: %d, found: %d",
+                              cls.HCCL_CONTEXT_ID_NUM, len(ids))
+                return []
+            return [str(_id) for _id in list(range(int(ids[0]), int(ids[1]) + 1))]
+        return ids
+
+    @classmethod
+    def get_context_ids(cls, call_stack: dict) -> str:
+        node_context_ids = cls.get_context_ids_in_node(call_stack.get(Constant.NODE_LEVEL))
+        hccl_context_ids = cls.get_context_ids_in_hccl(call_stack.get(Constant.HCCL_LEVEL))
+        context_ids = [*node_context_ids, *hccl_context_ids]
+
+        return ",".join(context_ids) if context_ids else str(NumberConstant.DEFAULT_GE_CONTEXT_ID)
+
+    def get_hccl_info_dtos(self, event: Event) -> HCCLInfoDto:
         for record in event.additional_record:
             if isinstance(record.dto, HCCLInfoDto):
                 return record.dto
@@ -406,64 +455,165 @@ class TaskGear(CANNGear):
             elif isinstance(record.dto, CtxIdDto):
                 node_desc = node_descs.setdefault(self.NodeDesc.get_hash(record.dto), self.NodeDesc())
                 node_desc.ctx_info = record.dto
+            else:
+                logging.error("Unsupported additional type: %s in node level.", type(record.dto))
         return node_descs
+
+    def get_hccl_descs(self, event: Event) -> OrderedDict:
+        hccl_descs = OrderedDict()
+        for record in event.additional_record:
+            if isinstance(record.dto, HCCLInfoDto):
+                hccl_desc = hccl_descs.setdefault(self.HcclDesc.get_hash(record.dto), self.HcclDesc())
+                hccl_desc.hccl_info = record.dto
+            elif isinstance(record.dto, CtxIdDto):
+                context_ids = self.get_context_ids_in_hccl(event)
+                for context_id in context_ids:
+                    hccl_desc = hccl_descs.setdefault(int(context_id), self.HcclDesc())
+                    ctx_dto = CtxIdDto()
+                    ctx_dto.ctx_id = context_id
+                    hccl_desc.ctx_info = ctx_dto
+            else:
+                logging.error("Unsupported additional type: %s in hccl level.", type(record.dto))
+        if not hccl_descs:
+            hccl_descs[NumberConstant.DEFAULT_GE_CONTEXT_ID] = self.HcclDesc()
+        return hccl_descs
+
+    def add_host_task(self, call_stack: dict, task_track_dto: TaskTrackDto):
+        model_event: Event = call_stack.get(Constant.MODEL_LEVEL)
+        model_dto: ApiDataDto = ApiDataDatabase().get(model_event)
+
+        model_id = model_dto.item_id if model_dto.item_id is not None else self.INVALID_MODEL_ID
+        request_id = model_dto.request_id if model_dto.request_id is not None else -1
+        context_ids = self.get_context_ids(call_stack)
+
+        self.host_tasks.append(
+            [model_id, request_id, task_track_dto.stream_id,
+             task_track_dto.task_id, context_ids, task_track_dto.batch_id,
+             task_track_dto.task_type, task_track_dto.device_id, task_track_dto.timestamp]
+        )
 
     def is_hccl_task(self, hccl_event: Event):
         return not hccl_event.is_invalid()
 
-    def add_hccl_task(self, hccl_event: Event, task_track_dto: TaskTrackDto):
-        hccl_dto: ApiDataDto = ApiDataDatabase().get(hccl_event)
-        hccl_info_dto = self.get_hccl_info_dto(hccl_event)
-        self.hccl_task_info.append(
-            [hccl_dto.item_id, hccl_info_dto.plane_id, hccl_info_dto.timestamp,
-             hccl_info_dto.duration_estimated, task_track_dto.stream_id, task_track_dto.task_id,
-             task_track_dto.batch_id, hccl_info_dto.to_args_json(task_track_dto.stream_id, task_track_dto.task_id)])
+    def add_hccl_task(self, model_event: Event, hccl_event: Event, task_track_dto: TaskTrackDto):
+        hccl_descs = self.get_hccl_descs(hccl_event)
+        model_dto: ApiDataDto = ApiDataDatabase().get(model_event)
 
-    def is_kernel_task(self, task_track_dto: TaskTrackDto):
+        model_id = model_dto.item_id if model_dto.item_id is not None else self.INVALID_MODEL_ID
+        request_id = model_dto.request_id if model_dto.request_id is not None else -1
+
+        hccl_tasks = [0] * len(hccl_descs)
+        for i, hccl_desc in enumerate(hccl_descs.values()):
+            hccl_info_dto = hccl_desc.hccl_info
+            context_id = int(hccl_desc.ctx_info.ctx_id)
+            hccl_tasks[i] = [
+                model_id, request_id, hccl_info_dto.op_name, hccl_info_dto.group_name,
+                hccl_info_dto.plane_id, task_track_dto.timestamp, hccl_info_dto.duration_estimated,
+                task_track_dto.stream_id, task_track_dto.task_id, context_id,
+                task_track_dto.batch_id, task_track_dto.device_id,
+                hccl_info_dto.to_args_json(task_track_dto.stream_id, task_track_dto.task_id)
+            ]
+        self.hccl_task_info.extend(hccl_tasks)
+
+    def add_hccl_op(self, call_stack: dict, task_track_dto: TaskTrackDto):
+        node_event: Event = call_stack.get(Constant.NODE_LEVEL)
+        node_dto: ApiDataDto = ApiDataDatabase().get(node_event)
+ 
+        if node_event.is_invalid():
+            self.hccl_node_mismatch += 1
+            return
+ 
+        hccl_node_key = node_dto.item_id + str(node_dto.end)
+        if hccl_node_key in self.hccl_node_keys:
+            return
+        self.hccl_node_keys.add(node_dto.item_id + str(node_dto.end))
+ 
+        model_event: Event = call_stack.get(Constant.MODEL_LEVEL)
+        model_dto: ApiDataDto = ApiDataDatabase().get(model_event)
+        request_id = model_dto.request_id if model_dto.request_id is not None else -1
+        model_id = NumberConstant.INVALID_MODEL_ID if model_dto.item_id is None else model_dto.item_id
+        if not node_event.additional_record:
+            self.hccl_op_info.append([task_track_dto.device_id, model_id, request_id,
+                                      node_dto.thread_id, node_dto.item_id,
+                                      self.HCCL_TASK_TYPE, "N/A", node_dto.start, node_dto.end,
+                                      "N/A"])
+            return
+ 
+        for record in node_event.additional_record:
+            if isinstance(record.dto, NodeBasicInfoDto):
+                self.hccl_op_info.append([task_track_dto.device_id, model_id, request_id,
+                                          node_dto.thread_id, node_dto.item_id,
+                                          record.dto.task_type, record.dto.op_type, node_dto.start, node_dto.end,
+                                          record.dto.is_dynamic])
+
+    def is_kernel_task(self, task_track_dto: TaskTrackDto, is_not_hccl_task: bool) -> bool:
         if task_track_dto.struct_type is None:
             return False
-        if task_track_dto.task_type.startswith(self.KERNEL_TASK_PREFIX) or \
-                task_track_dto.task_type == self.KERNEL_FFTS_PLUS_TASK_TYPE:
+        # In these scene, tasks are thought to be kernel tasks
+        # traditional core task
+        if task_track_dto.task_type.startswith(self.KERNEL_TASK_PREFIX):
             return True
+        # traditional dsa task
+        if task_track_dto.task_type == self.KERNEL_STARS_COMMON_TASK_TYPE:
+            return True
+        # ffts+ task
+        if task_track_dto.task_type == self.KERNEL_FFTS_PLUS_TASK_TYPE:
+            return is_not_hccl_task
         return False
 
     def add_kernel_task(self, call_stack: dict, add_dto: TaskTrackDto):
         model_event: Event = call_stack.get(Constant.MODEL_LEVEL)
         model_dto: ApiDataDto = ApiDataDatabase().get(model_event)
         node_event: Event = call_stack.get(Constant.NODE_LEVEL)
+        node_dto: ApiDataDto = ApiDataDatabase().get(node_event)
 
-        node_descs = self.get_node_descs(node_event)
-        if not node_descs:
+        if not node_dto.item_id:
             # this happen when runtime task is not respond to a op
             return
 
         model_id = model_dto.item_id if model_dto.item_id is not None else self.INVALID_MODEL_ID
         request_id = model_dto.request_id if model_dto.request_id is not None else -1
+
+        node_descs = self.get_node_descs(node_event)
+        if not node_descs:
+            # this happen when prof data is collected in level 0
+            self.task_info.append([model_id, node_dto.item_id, add_dto.stream_id, add_dto.task_id,
+                                   0, 0, 'N/A', 'N/A', 'N/A', request_id, add_dto.thread_id,
+                                   add_dto.timestamp, add_dto.batch_id, None, None, None, None, None, None, None,
+                                   add_dto.device_id, self.INVALID_CONTEXT_ID])
+            return
+
         for node_desc in node_descs.values():
             node_basic_info_dto: NodeBasicInfoDto = node_desc.node_basic_info
             tensor_info_dto: TensorInfoDto = node_desc.tensor_info
             ctx_id_dto = node_desc.ctx_info
 
-            if node_basic_info_dto.struct_type is None or node_basic_info_dto.task_type == self.FFTS_PLUS_TASK_TYPE:
+            cxt_ids = str(ctx_id_dto.ctx_id).split(',')
+            op_name = ctx_id_dto.op_name if ctx_id_dto.op_name else node_dto.item_id
+            if node_basic_info_dto.task_type is None:
+                for cxt_id in cxt_ids:
+                    self.task_info.append([model_id, op_name, add_dto.stream_id, add_dto.task_id,
+                                           0, 0, 'N/A', 'N/A', 'N/A', request_id, add_dto.thread_id,
+                                           add_dto.timestamp, add_dto.batch_id,
+                                           None, None, None, None, None, None, None, add_dto.device_id, int(cxt_id)])
+                continue
+            if node_basic_info_dto.task_type is None or node_basic_info_dto.task_type == self.FFTS_PLUS_TASK_TYPE:
                 continue
             task_type = node_basic_info_dto.task_type
             if node_basic_info_dto.task_type == self.HCCL_TASK_TYPE:
                 # notice: reduce TBE op
                 task_type = self.AICORE_TASK_TYPE
 
-            self.task_info.append([model_id, node_basic_info_dto.op_name, add_dto.stream_id, add_dto.task_id,
-                                   node_basic_info_dto.block_dim, node_basic_info_dto.mix_block_dim,
-                                   node_basic_info_dto.is_dynamic, task_type,
-                                   node_basic_info_dto.op_type, request_id, add_dto.thread_id,
-                                   node_basic_info_dto.timestamp, add_dto.batch_id, ctx_id_dto.ctx_id])
-
-            if tensor_info_dto.struct_type is None:
-                continue
-            self.tensor_info.append([model_id, add_dto.stream_id, add_dto.task_id, tensor_info_dto.tensor_num,
-                                     tensor_info_dto.input_formats, tensor_info_dto.input_data_types,
-                                     tensor_info_dto.input_shapes, tensor_info_dto.output_formats,
-                                     tensor_info_dto.output_data_types, tensor_info_dto.output_shapes,
-                                     request_id, tensor_info_dto.timestamp, add_dto.batch_id])
+            for cxt_id in cxt_ids:
+                self.task_info.append([model_id, op_name, add_dto.stream_id, add_dto.task_id,
+                                       node_basic_info_dto.block_dim, node_basic_info_dto.mix_block_dim,
+                                       node_basic_info_dto.is_dynamic, task_type,
+                                       node_basic_info_dto.op_type, request_id, add_dto.thread_id,
+                                       add_dto.timestamp, add_dto.batch_id,
+                                       tensor_info_dto.tensor_num, tensor_info_dto.input_formats,
+                                       tensor_info_dto.input_data_types, tensor_info_dto.input_shapes,
+                                       tensor_info_dto.output_formats, tensor_info_dto.output_data_types,
+                                       tensor_info_dto.output_shapes, add_dto.device_id, int(cxt_id)])
 
     def run(self, event: Event, call_stack: dict):
         dto: ApiDataDto = ApiDataDatabase().get(event)
@@ -475,6 +625,8 @@ class TaskGear(CANNGear):
             return
 
         mem_cpy_dto, task_track_dto = self.get_task_level_additional_dto(event)
+        if task_track_dto.struct_type is not None:
+            self.add_host_task(call_stack, task_track_dto)
         if not event.is_invalid():
             api = self.RuntimeApi(dto.start, dto.end, dto.struct_type, dto.thread_id)
 
@@ -487,10 +639,11 @@ class TaskGear(CANNGear):
                 api.batch_id = task_track_dto.batch_id
             self.api_call_info.append(api.to_list())
 
-        hccl_event = call_stack.get(Constant.HCCL_LEVEL)
+        hccl_event: Event = call_stack.get(Constant.HCCL_LEVEL)
         if self.is_hccl_task(hccl_event):
-            self.add_hccl_task(hccl_event, task_track_dto)
-        if self.is_kernel_task(task_track_dto):
+            self.add_hccl_task(call_stack.get(Constant.MODEL_LEVEL), hccl_event, task_track_dto)
+            self.add_hccl_op(call_stack, task_track_dto)
+        if self.is_kernel_task(task_track_dto, hccl_event.is_invalid()):
             self.add_kernel_task(call_stack, task_track_dto)
 
     def save_api_call_info(self):
@@ -515,21 +668,11 @@ class TaskGear(CANNGear):
         model.insert_data_to_db(DBNameConstant.TABLE_GE_TASK, self.task_info)
         model.finalize()
 
-    def save_tensor_info(self):
-        if not self.tensor_info:
-            return
-
-        model = GeModel(self._project_path, [DBNameConstant.TABLE_GE_TENSOR])
-        model.init()
-        model.drop_table(DBNameConstant.TABLE_GE_TENSOR)
-        model.create_table()
-        model.insert_data_to_db(DBNameConstant.TABLE_GE_TENSOR, self.tensor_info)
-        model.finalize()
-
     def save_hccl_task_info(self):
         if not self.hccl_task_info:
             return
-        logging.warning("There is %d hccl info lost", self.mismatch_hccl)
+        if self.mismatch_hccl > 0:
+            logging.warning("There is %d hccl info lost", self.mismatch_hccl)
         model = HCCLHostModel(self._project_path)
         model.init()
         model.drop_table(DBNameConstant.TABLE_HCCL_TASK)
@@ -537,11 +680,29 @@ class TaskGear(CANNGear):
         model.insert_data_to_db(DBNameConstant.TABLE_HCCL_TASK, self.hccl_task_info)
         model.finalize()
 
+    def save_hccl_op_info(self):
+        if not self.hccl_op_info:
+            return
+ 
+        model = HCCLHostModel(self._project_path)
+        model.init()
+        model.drop_table(DBNameConstant.TABLE_HCCL_OP)
+        model.create_table()
+        model.insert_data_to_db(DBNameConstant.TABLE_HCCL_OP, self.hccl_op_info)
+        model.finalize()
+
+    def save_host_tasks(self):
+        if not self.host_tasks:
+            return
+        with RuntimeHostTaskModel(self._project_path) as model:
+            model.flush(self.host_tasks)
+
     def flush_data(self):
         self.save_api_call_info()
         self.save_task_info()
-        self.save_tensor_info()
         self.save_hccl_task_info()
+        self.save_hccl_op_info()
+        self.save_host_tasks()
 
 
 class HCCLGear(CANNGear):

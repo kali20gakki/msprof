@@ -1,10 +1,11 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-# Copyright (c) Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
+# Copyright (c) Huawei Technologies Co., Ltd. 2022-2023. All rights reserved.
 
 import logging
 from abc import abstractmethod
 from collections import defaultdict
+from common_func.common import warn
 from common_func.platform.chip_manager import ChipManager
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.ms_constant.str_constant import StrConstant
@@ -13,6 +14,7 @@ from common_func.ms_constant.str_constant import OpBandWidthType
 from common_func.ms_constant.str_constant import TransportType
 from common_func.constant import Constant
 from profiling_bean.db_dto.hccl_dto import HcclDto
+from profiling_bean.prof_enum.chip_model import ChipModel
 
 
 class MetaParser:
@@ -33,15 +35,26 @@ class HcclAnalysisTool:
     support hccl parse
     """
     StandardBandWidth = {
-        StrConstant.RDMA: NumberConstant.RDMA_BANDWIDTH,
-        StrConstant.HCCS: NumberConstant.HCCS_BANDWIDTH,
-        StrConstant.PCIE: NumberConstant.PCIE_BANDWIDTH
+        ChipModel.CHIP_V2_1_0: {
+            StrConstant.RDMA: NumberConstant.RDMA_BANDWIDTH_V2_1_0,
+            StrConstant.HCCS: NumberConstant.HCCS_BANDWIDTH_V2_1_0,
+            StrConstant.PCIE: NumberConstant.PCIE_BANDWIDTH_V2_1_0
+        },
+        ChipModel.CHIP_V4_1_0: {
+            StrConstant.RDMA: NumberConstant.RDMA_BANDWIDTH_V4_1_0,
+            StrConstant.HCCS: NumberConstant.HCCS_BANDWIDTH_V4_1_0,
+        }
     }
+
     MessageSizeThreshold = {
         StrConstant.RDMA: NumberConstant.RDMA_MESSAGE_SIZE_THRESHOLD,
         StrConstant.HCCS: NumberConstant.HCCS_MESSAGE_SIZE_THRESHOLD,
         StrConstant.PCIE: NumberConstant.PCIE_MESSAGE_SIZE_THRESHOLD
     }
+
+    @classmethod
+    def get_standard_bandwidth(cls):
+        return cls.StandardBandWidth.get(ChipManager().get_chip_id())
 
     @classmethod
     def get_value(cls: any, value: any, value_msg: str) -> float:
@@ -54,8 +67,8 @@ class HcclAnalysisTool:
         return 0
 
     @classmethod
-    def determine_rdma(cls: any, events: list, idx: int) -> bool:
-        if idx > len(events) - NumberConstant.RDMA_TRANSIT_OP_NUM:
+    def determine_rdma(cls: any, events: list, idx: int, rdma_transit_op_num: int) -> bool:
+        if idx > len(events) - rdma_transit_op_num:
             return False
         second_task_type = events[idx + 1].hccl_name
         third_task_type = events[idx + 2].hccl_name
@@ -65,12 +78,17 @@ class HcclAnalysisTool:
             return False
 
     @classmethod
-    def get_rdma_time_info(cls: any, events: list, idx: int) -> list:
-        transit_size = HcclAnalysisTool.get_value(events[idx].size, 'size') / (1024 ** 2)
-        transit_time = 0
-        for event in events[idx: idx + NumberConstant.RDMA_TRANSIT_OP_NUM]:
-            transit_time += HcclAnalysisTool.get_value(event.duration, 'duration') / 1000
+    def get_rdma_time_info(cls: any, events: list, idx: int, rdma_transit_op_num: int) -> list:
+        transit_size = HcclAnalysisTool.get_value(events[idx].size, 'size') / NumberConstant.COMMUNICATION_B_to_MB
+        transit_time = HcclAnalysisTool.get_value(events[idx + rdma_transit_op_num - 1].duration +
+                                                  events[idx + rdma_transit_op_num - 1].timestamp -
+                                                  events[idx].timestamp,
+                                                  'duration') / NumberConstant.NS_TO_MS
         return [transit_time, transit_size]
+
+    @classmethod
+    def is_send_or_recv_op(cls, events: list, idx: int) -> bool:
+        return 'send' in events[idx].op_name or 'receive' in events[idx].op_name
 
     @classmethod
     def init_dict(cls: any, keys: list) -> dict:
@@ -83,7 +101,7 @@ class HcclAnalysisTool:
         values = [value for key, value in OpBandWidthType.__dict__.items() if '__' not in key]
         for trans_type in StrConstant.TRANSIT_TYPE:
             dic[trans_type] = HcclAnalysisTool.init_dict(values)
-            dic[trans_type][OpBandWidthType.SIZE_DISTRIBUTION] = defaultdict(float)
+            dic[trans_type][OpBandWidthType.SIZE_DISTRIBUTION] = defaultdict(lambda: [0, 0])
         return dic
 
     @classmethod
@@ -97,26 +115,27 @@ class HcclAnalysisTool:
         return StrConstant.HCCS
 
     @classmethod
-    def update_time_ratio(cls: any, op_time_dict: dict) -> None:
+    def update_time_ratio(cls: any, op_time_dict: dict, op_name: str) -> None:
         try:
             op_time_dict[OpAnalysisType.WAIT_TIME_RATIO] = \
                 round(op_time_dict.get(OpAnalysisType.WAIT_TIME) /
                       (op_time_dict.get(OpAnalysisType.WAIT_TIME) + op_time_dict.get(OpAnalysisType.TRANSIT_TIME)), 4)
         except ZeroDivisionError as err:
-            logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
+            logging.warning('%s Transit Time and Wait Time is 0 %s', op_name, err)
         try:
             op_time_dict[OpAnalysisType.SYNCHRONIZATION_TIME_RATIO] = \
                 round(op_time_dict.get(OpAnalysisType.SYNCHRONIZATION_TIME)
                       / (op_time_dict.get(OpAnalysisType.SYNCHRONIZATION_TIME) +
                          op_time_dict.get(OpAnalysisType.TRANSIT_TIME)), 4)
         except ZeroDivisionError as err:
-            logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
+            logging.warning('%s Transit Time and Synchronization Time Time is 0 %s', op_name, err)
 
     @classmethod
     def update_bandwidth_record(cls: any, bandwidth_dict: dict, trans_type: str, size: float, dur: float) -> None:
         bandwidth_dict[trans_type][OpBandWidthType.TRANSIT_SIZE_MB] += size
         bandwidth_dict[trans_type][OpBandWidthType.TRANSIT_TIME_MS] += dur
-        bandwidth_dict[trans_type][OpBandWidthType.SIZE_DISTRIBUTION][size] += 1
+        bandwidth_dict[trans_type][OpBandWidthType.SIZE_DISTRIBUTION][size][0] += 1
+        bandwidth_dict[trans_type][OpBandWidthType.SIZE_DISTRIBUTION][size][1] += dur
 
     @classmethod
     def combine_sdma_info(cls: any, bandwidth_dict: dict) -> None:
@@ -128,7 +147,8 @@ class HcclAnalysisTool:
             bandwidth_dict[StrConstant.PCIE][OpBandWidthType.TRANSIT_TIME_MS]
         if bandwidth_dict[StrConstant.SDMA][OpBandWidthType.TRANSIT_TIME_MS] != 0:
             bandwidth_dict[StrConstant.SDMA][OpBandWidthType.BANDWIDTH_GB_S] = round(
-                (bandwidth_dict[StrConstant.SDMA][OpBandWidthType.TRANSIT_SIZE_MB] / NumberConstant.MB_to_GB) /
+                (bandwidth_dict[StrConstant.SDMA][OpBandWidthType.TRANSIT_SIZE_MB] /
+                 NumberConstant.COMMUNICATION_MB_to_GB) /
                 (bandwidth_dict[StrConstant.SDMA][OpBandWidthType.TRANSIT_TIME_MS] / NumberConstant.CONVERSION_TIME), 4
             )
 
@@ -136,19 +156,20 @@ class HcclAnalysisTool:
     def analyze_bandwidth_info(cls: any, bandwidth_dict: dict, transport_type: str) -> None:
         if bandwidth_dict[transport_type][OpBandWidthType.TRANSIT_TIME_MS] != 0:
             bandwidth_dict[transport_type][OpBandWidthType.BANDWIDTH_GB_S] = round(
-                (bandwidth_dict[transport_type][OpBandWidthType.TRANSIT_SIZE_MB] / NumberConstant.MB_to_GB) /
+                (bandwidth_dict[transport_type][OpBandWidthType.TRANSIT_SIZE_MB] /
+                 NumberConstant.COMMUNICATION_MB_to_GB) /
                 (bandwidth_dict[transport_type][OpBandWidthType.TRANSIT_TIME_MS] / NumberConstant.CONVERSION_TIME), 4
             )
         bandwidth_dict[transport_type][OpBandWidthType.BANDWIDTH_UTILIZATION] = round(
             bandwidth_dict[transport_type][OpBandWidthType.BANDWIDTH_GB_S] /
-            cls.StandardBandWidth.get(transport_type, -1), 4
+            cls.get_standard_bandwidth().get(transport_type, -1), 4
         )
         packet_num = 0
         large_packet_num = 0
-        for size, count in bandwidth_dict[transport_type][OpBandWidthType.SIZE_DISTRIBUTION].items():
+        for size, size_info in bandwidth_dict[transport_type][OpBandWidthType.SIZE_DISTRIBUTION].items():
             if size > cls.MessageSizeThreshold.get(transport_type, 0):
-                large_packet_num += count
-            packet_num += count
+                large_packet_num += size_info[0]
+            packet_num += size_info[0]
         if packet_num > 0:
             bandwidth_dict[transport_type][OpBandWidthType.LARGE_PACKET_RATIO] = \
                 round(large_packet_num / packet_num, 4)

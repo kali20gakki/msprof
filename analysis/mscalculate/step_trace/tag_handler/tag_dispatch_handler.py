@@ -6,6 +6,7 @@ import collections
 
 from mscalculate.step_trace.tag_handler.iter_info_handler import AllReduceStreamHandler
 from mscalculate.step_trace.tag_handler.iter_info_handler import TrainingTraceTagHandler
+from mscalculate.step_trace.tag_handler.iter_info_handler import GetNextTagHandler
 from mscalculate.step_trace.tag_handler.state_machine.index_tracer import IndexTracker
 from mscalculate.interface.step_trace_tag_handler import StepTraceTagHandler
 from common_func.step_trace_constant import StepTraceConstant
@@ -114,7 +115,8 @@ class DispatchIterInfoHandler(StepTraceTagHandler):
         self.next_handler = None
         self.next_handler_group = {
             StepTraceConstant.ALL_REDUCE: AllReduceStreamHandler(),
-            StepTraceConstant.TRAINING_TRACE: TrainingTraceTagHandler()
+            StepTraceConstant.TRAINING_TRACE: TrainingTraceTagHandler(),
+            StepTraceConstant.GET_NEXT: GetNextTagHandler(),
         }
         self.collect_data = {}
 
@@ -143,6 +145,10 @@ class DispatchIterInfoHandler(StepTraceTagHandler):
         :param tag_id: set next handler according to tag id
         :return: bool
         """
+        if tag_id >= StepTraceConstant.GET_NEXT_START_TAG:
+            self.next_handler = self.next_handler_group.get(StepTraceConstant.GET_NEXT)
+            return True
+
         if tag_id >= StepTraceConstant.ALL_REDUCE_START:
             self.next_handler = self.next_handler_group.get(StepTraceConstant.ALL_REDUCE)
             return True

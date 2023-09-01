@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-# Copyright (c) Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
+# Copyright (c) Huawei Technologies Co., Ltd. 2022-2023. All rights reserved.
 
 import logging
 from profiling_bean.db_dto.hccl_dto import HcclDto
@@ -23,18 +23,20 @@ class CommunicationParser(MetaParser):
 
     @staticmethod
     def combine_size_distribution(part_dist_dict: dict, total_dist_dict: dict):
-        for size, cnt in part_dist_dict.items():
-            total_dist_dict[size] += cnt
+        for size, size_info in part_dist_dict.items():
+            total_dist_dict[size][0] += size_info[0]
+            total_dist_dict[size][1] += size_info[1]
 
     @staticmethod
     def combine_ops_time_info(part_dict: dict, total_dict: dict) -> None:
-        ratio_list = [OpAnalysisType.WAIT_TIME_RATIO, OpAnalysisType.SYNCHRONIZATION_TIME_RATIO]
+        no_accumulative_list = \
+            [OpAnalysisType.WAIT_TIME_RATIO, OpAnalysisType.SYNCHRONIZATION_TIME_RATIO, OpAnalysisType.START_TIME]
         # first level combine
         for key, value in part_dict.items():
-            if key not in ratio_list:
+            if key not in no_accumulative_list:
                 total_dict[key] += value
         # second level combine
-        HcclAnalysisTool.update_time_ratio(total_dict)
+        HcclAnalysisTool.update_time_ratio(total_dict, StrConstant.TOTAL)
         return
 
     @staticmethod
@@ -55,27 +57,34 @@ class CommunicationParser(MetaParser):
         op_time_dict = HcclAnalysisTool.init_dict(values)
         wait_flag = True
         idx = 0
+        op_name = main_events[0].op_name
+        rdma_transit_op_num = 3 if HcclAnalysisTool.is_send_or_recv_op(main_events, idx) else 5
         while idx < len(main_events):
             event = main_events[idx]
             if CommunicationParser.is_transit_sdma_event(event):
                 wait_flag = False
                 op_time_dict[OpAnalysisType.TRANSIT_TIME] += \
-                    HcclAnalysisTool.get_value(event.duration, "duration") / NumberConstant.US_TO_MS
-            if event.transport_type == StrConstant.RDMA and HcclAnalysisTool.determine_rdma(main_events, idx):
+                    HcclAnalysisTool.get_value(event.duration, "duration") / NumberConstant.NS_TO_MS
+            if event.transport_type == StrConstant.RDMA and \
+                    HcclAnalysisTool.determine_rdma(main_events, idx, rdma_transit_op_num):
                 wait_flag = False
-                rdma_transit_result = HcclAnalysisTool.get_rdma_time_info(main_events, idx)
+                rdma_transit_result = HcclAnalysisTool.get_rdma_time_info(main_events, idx, rdma_transit_op_num)
                 op_time_dict[OpAnalysisType.TRANSIT_TIME] += rdma_transit_result[0]
-                idx += NumberConstant.RDMA_TRANSIT_OP_NUM
+                idx += rdma_transit_op_num
                 continue
             if event.hccl_name == StrConstant.NOTIFY_WAIT:
-                wait_time = HcclAnalysisTool.get_value(event.duration, "duration") / NumberConstant.US_TO_MS
+                wait_time = HcclAnalysisTool.get_value(event.duration, "duration") / NumberConstant.NS_TO_MS
                 if wait_flag:
                     op_time_dict[OpAnalysisType.SYNCHRONIZATION_TIME] += wait_time
                 op_time_dict[OpAnalysisType.WAIT_TIME] += wait_time
             idx += 1
         op_time_dict[OpAnalysisType.ELAPSE_TIME] = \
-            (main_events[-1].timestamp + main_events[-1].duration - main_events[0].timestamp) / NumberConstant.US_TO_MS
-        HcclAnalysisTool.update_time_ratio(op_time_dict)
+            (main_events[-1].timestamp + main_events[-1].duration - main_events[0].timestamp) / NumberConstant.NS_TO_MS
+        op_time_dict[OpAnalysisType.IDLE_TIME] = \
+            op_time_dict[OpAnalysisType.ELAPSE_TIME] - \
+            op_time_dict[OpAnalysisType.TRANSIT_TIME] - \
+            op_time_dict[OpAnalysisType.WAIT_TIME]
+        HcclAnalysisTool.update_time_ratio(op_time_dict, op_name)
         return op_time_dict
 
     @staticmethod
@@ -85,6 +94,7 @@ class CommunicationParser(MetaParser):
         """
         op_bandwidth_dict = HcclAnalysisTool.init_bandwidth_dict()
         idx = 0
+        rdma_transit_op_num = 3 if HcclAnalysisTool.is_send_or_recv_op(events, idx) else 5
         while idx < len(events):
             event = events[idx]
             if event.transport_type == StrConstant.SDMA and event.hccl_name in StrConstant.SDMA_TRANSIT_ITEMS:
@@ -95,14 +105,15 @@ class CommunicationParser(MetaParser):
                     continue
                 HcclAnalysisTool.update_bandwidth_record(
                     op_bandwidth_dict, transport_type,
-                    HcclAnalysisTool.get_value(event.size, "size") / NumberConstant.B_to_MB,
-                    HcclAnalysisTool.get_value(event.duration, "duration") / NumberConstant.US_TO_MS)
-            if event.transport_type == StrConstant.RDMA and HcclAnalysisTool.determine_rdma(events, idx):
-                rdma_transit_result = HcclAnalysisTool.get_rdma_time_info(events, idx)
+                    HcclAnalysisTool.get_value(event.size, "size") / NumberConstant.COMMUNICATION_B_to_MB,
+                    HcclAnalysisTool.get_value(event.duration, "duration") / NumberConstant.NS_TO_MS)
+            if event.transport_type == StrConstant.RDMA and \
+                    HcclAnalysisTool.determine_rdma(events, idx, rdma_transit_op_num):
+                rdma_transit_result = HcclAnalysisTool.get_rdma_time_info(events, idx, rdma_transit_op_num)
                 HcclAnalysisTool.update_bandwidth_record(op_bandwidth_dict, event.transport_type,
                                                          rdma_transit_result[1],
                                                          rdma_transit_result[0])
-                idx += NumberConstant.RDMA_TRANSIT_OP_NUM
+                idx += rdma_transit_op_num
                 continue
             idx += 1
         for transport_type in StrConstant.TRANSIT_TYPE:
@@ -136,9 +147,12 @@ class CommunicationParser(MetaParser):
                 raise ProfException(ProfException.PROF_INVALID_DATA_ERROR)
             events = op_events.get(rank_id)
             # only choose main stream for op time analysis parser
-            main_events = [event for event in events if event.plane_id == NumberConstant.MAIN_STREAM_THREAD_ID]
+            main_events = \
+                [event for event in events if event.plane_id == min(events, key=lambda x: x.plane_id).plane_id]
             if main_events:
                 self.op_info[hccl_name][rank_id][StrConstant.COMMUNICATION_TIME_INFO] = self.op_time_parser(main_events)
+                self.op_info[hccl_name][rank_id][StrConstant.COMMUNICATION_TIME_INFO][OpAnalysisType.START_TIME] = \
+                    min(events, key=lambda x: x.timestamp).timestamp / NumberConstant.NS_TO_US
             else:
                 logging.error("Fail to get no.%s rank main events info,"
                               " communication parser is interrupted", str(rank_id))

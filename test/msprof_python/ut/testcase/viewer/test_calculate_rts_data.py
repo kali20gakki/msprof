@@ -10,13 +10,12 @@ from constant.info_json_construct import DeviceInfo
 from constant.info_json_construct import InfoJson
 from constant.info_json_construct import InfoJsonReaderManager
 from sqlite.db_manager import DBManager
-from sqlite.db_manager import DBOpen
 from viewer.calculate_rts_data import calculate_task_schedule_data, \
-    multi_calculate_task_cost_time, calculate_timeline_task_time, handle_task_time, check_aicore_events, \
-    create_ai_event_tables, insert_event_value, insert_metric_value, get_limit_and_offset, \
-    get_metrics_from_sample_config, insert_metric_summary_table, calculate_timeline_task_time, \
+    handle_task_time, check_aicore_events, \
+    create_ai_event_tables, create_metric_table, get_limit_and_offset, \
+    get_metrics_from_sample_config, calculate_timeline_task_time, \
     _get_pmu_data, _get_stream_and_task_id, insert_event_value
-from common_func.msprof_exception import ProfException
+
 
 NAMESPACE = 'viewer.calculate_rts_data'
 sample_config = {'ai_core_profiling_events': '0x8,0x9',
@@ -113,13 +112,13 @@ class TestCalculateRts(unittest.TestCase):
         metrics_1 = []
         db_manager = DBManager()
         test_sql = db_manager.create_table(DBNameConstant.DB_RUNTIME)
-        res = insert_metric_value(test_sql[0], metrics, "ts")
+        res = create_metric_table(test_sql[0], metrics, "ts")
         self.assertEqual(res, True)
 
-        res = insert_metric_value(test_sql[0], metrics, "ts")
+        res = create_metric_table(test_sql[0], metrics, "ts")
         self.assertEqual(res, True)
 
-        res = insert_metric_value(test_sql[0], metrics_1, "ts")
+        res = create_metric_table(test_sql[0], metrics_1, "ts")
         self.assertEqual(res, False)
 
         (test_sql[1]).execute("drop Table ts")
@@ -177,53 +176,6 @@ class TestCalculateRts(unittest.TestCase):
             res = get_metrics_from_sample_config('')
         self.assertEqual(res, [])
         sample_config["ai_core_metrics"] = "PipeUtilization"
-
-    def test_insert_metric_summary_table_1(self):
-        freq = 680000000.0
-        metrics = ['total_time(ms)', 'total_cycles', 'vec_ratio', 'mac_ratio', 'scalar_ratio', 'mte1_ratio',
-                   'mte2_ratio', 'mte3_ratio', 'icache_miss_rate']
-        create_sql = "CREATE TABLE IF NOT EXISTS EventCount " \
-                     "(r8, ra, r9, rb, rc, rd, r54, r55, task_cyc, task_id, stream_id, block_num, core_num, device_id)"
-        data = ((26050, 0, 526, 0, 14002, 26675, 224, 12, 58006, 3, 5, 2, 2, 0),)
-        insert_sql = "insert into {0} values ({value})".format(
-            "EventCount", value="?," * (len(data[0]) - 1) + "?")
-        db_manager = DBManager()
-        test_sql = db_manager.create_table(DBNameConstant.DB_RUNTIME, create_sql, insert_sql, data)
-        with mock.patch(NAMESPACE + ".PathManager.get_db_path", return_value=""), \
-                mock.patch(NAMESPACE + ".DBManager.judge_table_exist", return_value=True), \
-                mock.patch(NAMESPACE + ".DBManager.check_connect_db_path", return_value=test_sql), \
-                mock.patch(NAMESPACE + ".DBManager.destroy_db_connect"), \
-                mock.patch(NAMESPACE + ".get_metrics_from_sample_config", return_value=metrics):
-            insert_metric_summary_table('', freq, iter_range=ITER_RANGE, have_step_info=False)
-            insert_metric_summary_table('', freq, iter_range=ITER_RANGE, have_step_info=True)
-        (test_sql[1]).execute("drop Table EventCount")
-        (test_sql[1]).execute("drop Table MetricSummary")
-        test_sql[0].commit()
-        db_manager.destroy(test_sql)
-
-    def test_insert_metric_summary_table_2(self):
-        with DBOpen("runtime.db") as _db_open:
-            test_sql = (_db_open.db_conn, _db_open.db_curs)
-            with mock.patch(NAMESPACE + ".PathManager.get_db_path", return_value=""), \
-                    mock.patch(NAMESPACE + ".DBManager.judge_table_exist", return_value=True), \
-                    mock.patch(NAMESPACE + ".DBManager.check_connect_db_path", return_value=test_sql), \
-                    mock.patch(NAMESPACE + ".DBManager.destroy_db_connect"), \
-                    mock.patch(NAMESPACE + ".DBManager.drop_table"), \
-                    mock.patch(NAMESPACE + ".get_metrics_from_sample_config", return_value=[]), \
-                    mock.patch(NAMESPACE + ".insert_metric_value", return_value=True):
-                insert_metric_summary_table('', 6800000, iter_range=ITER_RANGE, have_step_info=False)
-
-            with mock.patch(NAMESPACE + ".PathManager.get_db_path", return_value=""), \
-                    mock.patch(NAMESPACE + ".DBManager.judge_table_exist", return_value=False), \
-                    mock.patch(NAMESPACE + ".DBManager.check_connect_db_path", return_value=test_sql), \
-                    mock.patch(NAMESPACE + ".DBManager.destroy_db_connect"):
-                insert_metric_summary_table('', 6800000, iter_range=ITER_RANGE, have_step_info=False)
-
-            with mock.patch(NAMESPACE + ".PathManager.get_db_path", return_value=""), \
-                    mock.patch(NAMESPACE + ".DBManager.judge_table_exist", return_value=False), \
-                    mock.patch(NAMESPACE + ".DBManager.check_connect_db_path", return_value=test_sql), \
-                    mock.patch(NAMESPACE + ".DBManager.destroy_db_connect"):
-                insert_metric_summary_table('', 6800000, iter_range=ITER_RANGE, have_step_info=False)
 
     def test_calculate_timeline_task_time(self):
         timeline_data = [[0] * 10] * 10

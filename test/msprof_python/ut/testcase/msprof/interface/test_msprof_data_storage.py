@@ -3,7 +3,7 @@ import json
 import unittest
 from unittest import mock
 
-from analyzer.scene_base.profiling_scene import ProfilingScene
+from common_func.profiling_scene import ProfilingScene
 from common_func.constant import Constant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.platform.chip_manager import ChipManager
@@ -74,7 +74,7 @@ class TestMsprofDataStorage(unittest.TestCase):
         params = {"data_type": 1}
         key = MsprofDataStorage()
         res = key.export_timeline_data_to_json(result, params)
-        self.assertEqual(res, result)
+        self.assertEqual(res, json.dumps(result))
 
     def test_export_timeline_data_to_json_2(self):
         result = {'test1': 1}
@@ -106,15 +106,14 @@ class TestMsprofDataStorage(unittest.TestCase):
         self.assertEqual(res, '{"status": 0, "data": [1]}')
         self.assertEqual(result, '{"status": 0, "data": [true]}')
 
-    def test_export_timeline_data_to_json_3(self):
-        result = '123'
+    def test_export_timeline_data_should_return_directly_when_input_contains_status(self):
+        result = json.loads('{"status": "123"}')
         params = {"data_type": 2}
-        with mock.patch(NAMESPACE + '.json.loads', return_value={'status': 1}), \
-                mock.patch(NAMESPACE + '.check_file_writable'), \
+        with mock.patch(NAMESPACE + '.check_file_writable'), \
                 mock.patch('os.path.exists', return_value=False):
             key = MsprofDataStorage()
             res = key.export_timeline_data_to_json(result, params)
-        self.assertEqual(res, '123')
+        self.assertEqual(res, '{"status": "123"}')
 
     def test_export_timeline_data_to_json_4(self):
         result = None

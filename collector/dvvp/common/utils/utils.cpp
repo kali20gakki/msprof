@@ -38,6 +38,7 @@ using FuncIntPtr = int(*)(int);
 std::mutex g_envMtx;
 const unsigned long long CHANGE_FROM_S_TO_NS = 1000000000;
 const unsigned int MAX_FUNC_DEPTH = 20;
+const unsigned int MAX_FILES_NUM = 100000;
 
 unsigned long long Utils::GetClockRealtime()
 {
@@ -96,6 +97,9 @@ double Utils::StatCpuRealFreq()
 
     double freqSum = 0;
     for (int i = 0; i < sampleTimes; i++) {
+        if (monotonicRaws[i + 1] == monotonicRaws[i]) {
+            continue;
+        }
         freqSum += static_cast<double>(cycleCnts[i + 1] - cycleCnts[i]) / (monotonicRaws[i + 1] - monotonicRaws[i]);
     }
     return freqSum / sampleTimes;
@@ -810,9 +814,14 @@ int Utils::MsleepInterruptible(unsigned long msec)
     return PROFILING_SUCCESS;
 }
 
-void Utils::GetFiles(const std::string &dir, bool isRecur, std::vector<std::string> &files)
+void Utils::GetFiles(const std::string &dir, bool isRecur, std::vector<std::string> &files,
+                     unsigned int depthCnt)
 {
     if (dir.empty()) {
+        return;
+    }
+    if (depthCnt > MAX_FUNC_DEPTH) {
+        MSPROF_LOGW("Directory hierarchy exceeds maximum value: %d, stop get files", MAX_FUNC_DEPTH);
         return;
     }
 
@@ -841,8 +850,16 @@ void Utils::GetFiles(const std::string &dir, bool isRecur, std::vector<std::stri
                 continue;
             }
 
-            GetFiles(childPath, isRecur, files);
+            GetFiles(childPath, isRecur, files, depthCnt + 1);
         } else {
+            if (childPath.size() >= MAX_PATH_LENGTH) {
+                MSPROF_LOGW("File len exceeds maximum value: %d, skip this file", MAX_PATH_LENGTH);
+                continue;
+            }
+            if (files.size() >= MAX_FILES_NUM) {
+                MSPROF_LOGW("Get files num exceeds maximum value: %d, stop get files", MAX_FILES_NUM);
+                break;
+            }
             files.push_back(childPath);
         }
     }
@@ -880,6 +897,10 @@ void Utils::GetChildDirs(const std::string &dir, bool isRecur, std::vector<std::
             if ((fileName.compare(".") == 0) || (fileName.compare("..") == 0)) {
                 continue;
             }
+            if (childDirs.size() >= MAX_FILES_NUM) {
+                MSPROF_LOGW("Get dirs num exceeds maximum value: %d, stop get dirs", MAX_FILES_NUM);
+                break;
+            }
             childDirs.push_back(childPath);
             if (!isRecur) {
                 continue;
@@ -911,6 +932,10 @@ void Utils::GetChildFilenames(const std::string &dir, std::vector<std::string> &
         std::string fileName = dirNameList[j]->d_name;
         if ((fileName.compare(".") == 0) || (fileName.compare("..") == 0)) {
             continue;
+        }
+        if (files.size() >= MAX_FILES_NUM) {
+            MSPROF_LOGW("Get files num exceeds maximum value: %d, stop get files", MAX_FILES_NUM);
+            break;
         }
         files.push_back(fileName);
     }

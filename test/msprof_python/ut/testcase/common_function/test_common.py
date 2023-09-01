@@ -1,9 +1,13 @@
+import sqlite3
 import unittest
 from unittest import mock
+
+import pytest
 
 from common_func.common import get_data_file_memory, check_free_memory
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
+from common_func.msprof_exception import ProfException
 
 NAMESPACE = 'common_func.common'
 
@@ -32,6 +36,14 @@ def test_fetch_all_data():
     curs.execute.return_value = ValueError
     res = DBManager.fetch_all_data(curs, "")
     unittest.TestCase().assertEqual(expect_res, res)
+
+    curs2 = mock.Mock(sqlite3.Cursor)
+    curs2.fetchmany.return_value = [(0,)] * 10000
+    curs2.execute.return_value = curs2
+    curs2.fetchone.return_value = (0, 'main', 'api_event.db')
+    with pytest.raises(ProfException) as error:
+        DBManager.fetch_all_data(curs2, "")
+        unittest.TestCase().assertEqual(error.value, 13)
 
 
 if __name__ == '__main__':

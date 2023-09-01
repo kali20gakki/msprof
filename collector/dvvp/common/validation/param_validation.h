@@ -73,6 +73,8 @@ public:
     bool ProfStarsAcsqParamIsValid(const std::string &param) const;
     bool IsValidSwitch(const std::string &switchStr) const;
     bool IsValidInputCfgSwitch(const std::string &switchName, const std::string &switchVal) const;
+    bool IsValidAnalyzeRuleSwitch(const std::string &switchName, const std::string &switchVal) const;
+    bool IsValidTaskTimeSwitch(const std::string &switchVal) const;
     bool CheckStorageLimit(const std::string &storageLimit) const;
     bool StorageLimitUnitValid(const std::string &storageLimit) const;
     bool MsprofCheckAppValid(std::string &appParam) const;
@@ -95,6 +97,8 @@ private:
     bool CheckSystemTraceSwitchProfiling(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> params);
     int MsprofCheckNotAppValid(const std::vector<std::string> &AppParamsList, std::string &resultAppParam) const;
     int MsprofCheckAppParamValid(const std::string &appParam) const;
+    bool CheckParamLengthIsValid(const std::string &paramPath) const;
+    int CheckParamPermission(const std::string &paramPath) const;
     int CheckHostSysToolsIsExist(const std::string toolName, const std::string &resultDir,
         const std::string &appDir) const;
     int CheckHostSysCmdOutIsExist(const std::string tmpDir, const std::string toolName,

@@ -30,24 +30,23 @@ public:
 
 public:
     int Init();
-    void OnNewData(CONST_VOID_PTR data, uint32_t len);
     void OnOptimizeData(CONST_VOID_PTR data, uint32_t len);
     void Flush();
     void SetDevId(const std::string &devIdStr);
     void PrintStats();
 
 private:
-    void DispatchData(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message);
     void DispatchOptimizeData(SHARED_PTR_ALIA<analysis::dvvp::proto::FileChunkReq> message);
     void ConstructAndUploadData(const std::string &opId, OpTime &opTime);
     void TsDataPostProc();
-    void HwtsDataPostProc();
     void UploadAppOp(std::multimap<std::string, OpTime> &opTimes);
     void UploadKeypointOp();
     bool IsNeedUpdateIndexId();
     void UpdateOpIndexId(std::multimap<std::string, OpTime> &opTimes);
+    void UploadAppOpModeStepTrace(std::multimap<std::string, OpTime> &opTimes);
+    void UploadAppOpModeStaticShape(std::multimap<std::string, OpTime> &opTimes);
+    void UploadAppOpModeSingleOp(std::multimap<std::string, OpTime> &opTimes);
     uint64_t GetOpIndexId(uint64_t opTimeStamp);
-    void FftsDataPostProc();
 
     void PrintDeviceStats();
     void PrintHostStats();

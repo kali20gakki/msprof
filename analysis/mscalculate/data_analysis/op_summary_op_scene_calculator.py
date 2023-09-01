@@ -6,16 +6,15 @@ import logging
 import os
 
 from common_func.ms_multi_process import MsMultiProcess
-from common_func.constant import Constant
 from common_func.ms_constant.str_constant import StrConstant
-from analyzer.scene_base.profiling_scene import ProfilingScene
+from common_func.profiling_scene import ProfilingScene
+from mscalculate.ascend_task.ascend_task import TopDownTask
 from msconfig.config_manager import ConfigManager
-from analyzer.get_op_table_task_time import GetOpTableTsTime
-from analyzer.op_common_function import OpCommonFunc
-from common_func.ai_stack_data_check_manager import AiStackDataCheckManager
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.path_manager import PathManager
+from common_func.info_conf_reader import InfoConfReader
+from msmodel.task_time.ascend_task_model import AscendTaskModel
 from profiling_bean.db_dto.ge_task_dto import GeTaskDto
 
 
@@ -36,9 +35,12 @@ class OpSummaryOpSceneCalculator(MsMultiProcess):
 
     @staticmethod
     def _get_ge_sql() -> str:
+        device_id = InfoConfReader().get_device_id()
         ge_sql = "SELECT model_id, task_id, stream_id, " \
-                 "op_name, op_type, block_dim, mix_block_dim, task_type, timestamp, batch_id, context_id from {0}" \
-            .format(DBNameConstant.TABLE_GE_TASK)
+                 "op_name, op_type, block_dim, mix_block_dim, task_type, " \
+                 "tensor_num, input_formats, input_data_types, input_shapes, output_formats, output_data_types," \
+                 "output_shapes, index_id, timestamp, batch_id, context_id from {0} where device_id = {1}" \
+            .format(DBNameConstant.TABLE_GE_TASK, device_id)
         return ge_sql
 
     @staticmethod
@@ -62,6 +64,10 @@ class OpSummaryOpSceneCalculator(MsMultiProcess):
         run for op summary
         """
         if os.path.exists(PathManager.get_db_path(self.project_path, DBNameConstant.DB_AICORE_OP_SUMMARY)):
+            return
+        if not os.path.exists(PathManager.get_db_path(self.project_path, DBNameConstant.DB_ASCEND_TASK)):
+            logging.warning("No %s found, no need to create %s",
+                            DBNameConstant.DB_ASCEND_TASK, DBNameConstant.DB_AICORE_OP_SUMMARY)
             return
         self.create_summary_table()
 
@@ -87,26 +93,13 @@ class OpSummaryOpSceneCalculator(MsMultiProcess):
         DBManager.executemany_sql(self.conn, insert_sql, ge_merge_data)
         return True
 
-    def create_ge_tensor_table(self: any) -> bool:
-        """
-        create ge tensor table
-        """
-        if not self._check_tensor_table():
-            return False
-        tensor_data = self._get_tensor_data()
-
-        if not tensor_data:
-            return False
-        self._save_tensor_data(tensor_data)
-        return True
-
     def create_ai_core_metrics_table(self: any) -> bool:
         """
         create ai core metrics table
         """
-        db_path = PathManager.get_db_path(self.project_path, DBNameConstant.DB_RUNTIME)
-        if DBManager.check_tables_in_db(db_path, DBNameConstant.TABLE_AI_CORE_METRIC_SUMMARY):
-            core_merge_data = self._get_ai_core_metric(DBNameConstant.TABLE_AI_CORE_METRIC_SUMMARY)
+        db_path = PathManager.get_db_path(self.project_path, DBNameConstant.DB_METRICS_SUMMARY)
+        if DBManager.check_tables_in_db(db_path, DBNameConstant.TABLE_METRIC_SUMMARY):
+            core_merge_data = self._get_ai_core_metric(DBNameConstant.TABLE_METRIC_SUMMARY)
         elif DBManager.check_tables_in_db(db_path, DBNameConstant.TABLE_AIV_METRIC_SUMMARY):
             core_merge_data = self._get_ai_core_metric(DBNameConstant.TABLE_AIV_METRIC_SUMMARY)
         else:
@@ -123,18 +116,25 @@ class OpSummaryOpSceneCalculator(MsMultiProcess):
         """
         get task time data
         """
-        ge_data = self._get_ge_data_from_summary()
-        project_path = self.sample_config.get("result_dir")
-        if AiStackDataCheckManager.contain_task_time_data(project_path):
-            fetch_data = GetOpTableTsTime(self.sample_config).get_task_time_data(ge_data)
-            task_data = OpCommonFunc.calculate_task_time(fetch_data)
-            return task_data
-        return []
+        with AscendTaskModel(self.project_path, DBNameConstant.TABLE_ASCEND_TASK) as model:
+            tasks = model.get_all_data(DBNameConstant.TABLE_ASCEND_TASK)
+            if not tasks:
+                logging.error("Get tasks from %s error", DBNameConstant.TABLE_ASCEND_TASK)
+                return []
+            ascend_tasks = [TopDownTask(*task) for task in tasks]
+            return [[task.task_id, task.stream_id, task.start_time, task.duration, 0, task.device_task_type,
+                     task.index_id, task.model_id, task.batch_id, task.context_id] for task in ascend_tasks]
 
     def create_task_time_table(self: any) -> bool:
         """
         create task time table
         """
+        ascend_task_db_path = PathManager.get_db_path(self.project_path, DBNameConstant.DB_ASCEND_TASK)
+
+        if not os.path.exists(ascend_task_db_path):
+            logging.warning("no task db %s found, task_time table will not be created",
+                            DBNameConstant.TABLE_ASCEND_TASK)
+            return False
         create_table_sql = DBManager.sql_create_general_table("ModifiedTaskTimeMap",
                                                               DBNameConstant.TABLE_SUMMARY_TASK_TIME,
                                                               ConfigManager.TABLES_OPERATOR)
@@ -172,11 +172,6 @@ class OpSummaryOpSceneCalculator(MsMultiProcess):
             DBNameConstant.TABLE_SUMMARY_GE)
         return DBManager.fetch_all_data(self.curs, ge_sql, dto_class=GeTaskDto)
 
-    def _get_tensor_data(self) -> list:
-        ge_tensor_sql = "select * from {}".format(DBNameConstant.TABLE_GE_TENSOR)
-        tensor_data = DBManager.fetch_all_data(self.curs, ge_tensor_sql)
-        return tensor_data
-
     def _get_ge_merge_data(self: any) -> list:
         ge_result = []
         ge_conn, ge_curs = DBManager.check_connect_db(self.project_path, DBNameConstant.DB_GE_INFO)
@@ -190,7 +185,7 @@ class OpSummaryOpSceneCalculator(MsMultiProcess):
 
     def _get_ai_core_metric(self: any, table_name: str) -> list:
         core_data = []
-        core_conn, core_curs = DBManager.check_connect_db(self.project_path, DBNameConstant.DB_RUNTIME)
+        core_conn, core_curs = DBManager.check_connect_db(self.project_path, DBNameConstant.DB_METRICS_SUMMARY)
         if not (core_conn and core_curs):
             DBManager.destroy_db_connect(core_conn, core_curs)
             return core_data
@@ -203,31 +198,9 @@ class OpSummaryOpSceneCalculator(MsMultiProcess):
         DBManager.destroy_db_connect(core_conn, core_curs)
         return core_data
 
-    def _check_tensor_table(self: any) -> bool:
-        if not DBManager.check_tables_in_db(PathManager.get_db_path(self.project_path, DBNameConstant.DB_GE_INFO),
-                                            DBNameConstant.TABLE_GE_TENSOR):
-            return False
-        if not DBManager.attach_to_db(self.conn, self.project_path, DBNameConstant.DB_GE_INFO, "ge_info_attach"):
-            logging.warning("unable to create ge tensor table, because attach db of ge failed.")
-            return False
-        return True
-
-    def _save_tensor_data(self: any, tensor_data: list) -> None:
-        create_ge_tensor_sql = DBManager.sql_create_general_table("TensorGeMap",
-                                                                  DBNameConstant.TABLE_SUMMARY_TENSOR,
-                                                                  ConfigManager.TABLES_OPERATOR)
-        DBManager.execute_sql(self.conn, create_ge_tensor_sql)
-
-        insert_sql = "insert into {0} " \
-                     "values({value})".format(DBNameConstant.TABLE_SUMMARY_TENSOR,
-                                              value="?," * (len(tensor_data[0]) - 1) + "?")
-        DBManager.executemany_sql(self.conn, insert_sql, tensor_data)
-
     def _create_summary_table_helper(self: any) -> None:
         if not self.create_ge_summary_table():
             logging.warning("unable to create ge summary table")
-        if not self.create_ge_tensor_table():
-            logging.warning("unable to create ge tensor table")
         if not self.create_ai_core_metrics_table():
             logging.warning("unable to create ai core metrics table")
         if not self.create_task_time_table():

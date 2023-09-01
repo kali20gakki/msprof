@@ -8,6 +8,7 @@ import unittest
 from unittest import mock
 
 from msparser.iter_rec.iter_info_updater.iter_info_updater import IterInfoUpdater
+from msparser.iter_rec.iter_info_updater.iter_info import IterInfo
 from mock_tools import ClassMock
 
 
@@ -92,3 +93,12 @@ class TestIterInfoUpdater(unittest.TestCase):
         IterInfoUpdater.update_aicore(iter_info_list)
 
         self.assertEqual(iter_info_bean.aic_count, 2)
+
+    def test_calibrate_iter_info_offset(self: any) -> None:
+        iter_info_updater = IterInfoUpdater('./')
+        iter_info = IterInfo(1, 1, 1, 2, 3)
+        iter_info_updater.iteration_manager.iter_to_iter_info = {
+            1: iter_info,
+        }
+        iter_info_updater.calibrate_iter_info_offset(1, 1)
+        self.assertEqual(iter_info.hwts_offset, 1)

@@ -39,7 +39,6 @@ class StrConstant:
     PARAM_DEVICE_ID = "device_id"
     PARAM_MODEL_ID = "model_id"
     PARAM_ITER_ID = "iter_id"
-    PARAM_JOB_ID = "job_id"
     PARAM_EXPORT_TYPE = "export_type"
     PARAM_EXPORT_FORMAT = "export_format"
 
@@ -137,7 +136,17 @@ class StrConstant:
     TRACE_HEADER_NAME = "name"
     TRACE_HEADER_ARGS = "args"
 
-    TASK_START_TIME = 'Task Start Time'
+    API_EVENT_HEADER_LEVEL = "level"
+
+    TASK_START_TIME = 'Task Start Time(us)'
+
+    #prefix for api and event
+    LEVEL_MAP = {
+        "acl": "AscendCL",
+        "runtime": "Runtime",
+        "model": "Model",
+        "node": "Node"
+    }
 
     # parallel mode
     STAND_ALONE = "stand_alone"
@@ -377,7 +386,7 @@ class StrConstant:
     RDMA = "RDMA"
     SDMA = "SDMA"
     LOCAL = "LOCAL"
-    NOTIFY_WAIT = "Notify Wait"
+    NOTIFY_WAIT = "Notify_Wait"
     REDUCE_TBE = "Reduce TBE"
     RDMA_SEND = "RDMASend"
     SDMA_TRANSIT_ITEMS = ["Memcpy", "Reduce Inline"]
@@ -419,10 +428,12 @@ class StrConstant:
 
 
 class OpAnalysisType:
+    START_TIME = 'Start Timestamp(us)'
     ELAPSE_TIME = "Elapse Time(ms)"
     TRANSIT_TIME = "Transit Time(ms)"
     WAIT_TIME = "Wait Time(ms)"
     SYNCHRONIZATION_TIME = "Synchronization Time(ms)"
+    IDLE_TIME = 'Idle Time(ms)'
     WAIT_TIME_RATIO = "Wait Time Ratio"
     SYNCHRONIZATION_TIME_RATIO = "Synchronization Time Ratio"
 

@@ -25,7 +25,6 @@ ReceiveData::ReceiveData()
       stopped_(false),
       dataChunkBuf_(DEFAULT_DATA_CHUNK),
       dataBufApi_(MsprofApi()),
-      dataBufEvent_(MsprofEvent()),
       dataBufCompactInfo_(MsprofCompactInfo()),
       dataBufAdditionalInfo_(MsprofAdditionalInfo()),
       profileDataType_(MSPROF_DEFAULT_PROFILE_DATA_TYPE),
@@ -95,11 +94,8 @@ void ReceiveData::Run(std::vector<SHARED_PTR_ALIA<FileChunkReq>>& fileChunks)
 void ReceiveData::RunProfileData(std::vector<SHARED_PTR_ALIA<FileChunkReq>>& fileChunks)
 {
     switch (profileDataType_) {
-        case MSPROF_API_PROFILE_DATA_TYPE:
+        case MSPROF_API_AND_EVENT_PROFILE_DATA_TYPE:
             RunNoTagData<MsprofApi>(dataBufApi_, fileChunks);
-            break;
-        case MSPROF_EVENT_PROFILE_DATA_TYPE:
-            RunNoTagData<MsprofEvent>(dataBufEvent_, fileChunks);
             break;
         case MSPROF_COMPACT_PROFILE_DATA_TYPE:
             RunTagData<MsprofCompactInfo>(dataBufCompactInfo_, fileChunks);
@@ -157,8 +153,8 @@ void ReceiveData::RunTagData(analysis::dvvp::common::queue::RingBuffer<T> &dataB
 {
     std::map<std::string, std::vector<T>> dataMap; // data binding with tag
     uint64_t batchSizeMax = 0;
+    T data;
     for (; batchSizeMax < MSVP_BATCH_MAX_LEN;) {
-        T data;
         bool isOK = dataBuffer.TryPop(data);
         if (!isOK) {
             break;
@@ -167,16 +163,9 @@ void ReceiveData::RunTagData(analysis::dvvp::common::queue::RingBuffer<T> &dataB
         totalDataLengthFromRingBuff_ += sizeof(T);
         batchSizeMax += sizeof(T);
  
-        std::string tagWizSuffix = moduleName_ + "." + std::to_string(data.type);
+        std::string tagWizSuffix = std::to_string(data.level) + "_" + std::to_string(data.type);
         // classify data by tag.type
-        auto iter = dataMap.find(tagWizSuffix);
-        if (iter == dataMap.end()) {
-            std::vector<T> dataChunkForTag;
-            dataChunkForTag.push_back(data);
-            dataMap[tagWizSuffix] = dataChunkForTag;
-        } else {
-            iter->second.push_back(data);
-        }
+        dataMap[tagWizSuffix].push_back(data);
     }
     for (auto iter = dataMap.begin(); iter != dataMap.end(); ++iter) {
         if (iter->second.size() > 0) {
@@ -217,16 +206,23 @@ int ReceiveData::SendData(SHARED_PTR_ALIA<FileChunkReq> fileChunk /* = nullptr *
 void ReceiveData::SetBufferEmptyEvent()
 {
     std::lock_guard<std::mutex> lk(cvBufferEmptyMtx_);
-    cvBufferEmpty_.notify_all();
+    cvBufferEmpty_.notify_one();
 }
 
 void ReceiveData::WaitBufferEmptyEvent(uint64_t us)
 {
     std::unique_lock<std::mutex> lk(cvBufferEmptyMtx_);
-    auto res = cvBufferEmpty_.wait_for(lk, std::chrono::microseconds(us));
-    if (res == std::cv_status::timeout) {
-        MSPROF_LOGW("Wait buf empty timeout, moduleName:%s", moduleName_.c_str());
-    }
+    MSPROF_LOGI("Wait buf empty, moduleName:%s, size: %zu.", moduleName_.c_str(), dataBufApi_.GetUsedSize());
+    bool status;
+    do {
+        status = cvBufferEmpty_.wait_for(lk, std::chrono::microseconds(us),
+            [this] {
+                return this->dataChunkBuf_.GetUsedSize() == 0 &&
+                    this->dataBufApi_.GetUsedSize() == 0 &&
+                    this->dataBufCompactInfo_.GetUsedSize() == 0 &&
+                    this->dataBufAdditionalInfo_.GetUsedSize() == 0;
+            });
+    } while (!status);
 }
 
 /**
@@ -258,25 +254,22 @@ void ReceiveData::PrintTotalSize()
 
 int ReceiveData::Init(size_t capacity)
 {
-    if (moduleName_.find("api") != std::string::npos) {
+    if (moduleName_.find("api_event") != std::string::npos) {
         dataBufApi_.Init(capacity);
-        dataBufApi_.SetName("ReceiveDataApiRing");
-        profileDataType_ = MSPROF_API_PROFILE_DATA_TYPE;
-    } else if (moduleName_.find("event") != std::string::npos) {
-        dataBufEvent_.Init(capacity);
-        dataBufEvent_.SetName("ReceiveDataEventRing");
-        profileDataType_ = MSPROF_EVENT_PROFILE_DATA_TYPE;
+        dataBufApi_.SetName(moduleName_);
+        profileDataType_ = MSPROF_API_AND_EVENT_PROFILE_DATA_TYPE;
     } else if (moduleName_.find("compact") != std::string::npos) {
         dataBufCompactInfo_.Init(capacity);
-        dataBufCompactInfo_.SetName("ReceiveDataCompactInfoRing");
+        dataBufCompactInfo_.SetName(moduleName_);
         profileDataType_ = MSPROF_COMPACT_PROFILE_DATA_TYPE;
     } else if (moduleName_.find("additional") != std::string::npos) {
         dataBufAdditionalInfo_.Init(capacity);
-        dataBufAdditionalInfo_.SetName("ReceiveDataAdditionalInfoRing");
+        dataBufAdditionalInfo_.SetName(moduleName_);
         profileDataType_ = MSPROF_ADDITIONAL_PROFILE_DATA_TYPE;
     } else {
+        profileDataType_ = MSPROF_DEFAULT_PROFILE_DATA_TYPE;
         dataChunkBuf_.Init(capacity);
-        dataChunkBuf_.SetName("ReceiveDataRingBuffer");
+        dataChunkBuf_.SetName(moduleName_);
     }
     return PROFILING_SUCCESS;
 }
@@ -285,10 +278,7 @@ int ReceiveData::DoReport(CONST_REPORT_DATA_PTR rData)
 {
     ReporterDataChunk dataChunk;
     auto ret = memset_s(&dataChunk, sizeof(dataChunk), 0, sizeof(dataChunk));
-    if (ret != EOK) {
-        MSPROF_LOGE("memset data chunk ret:%d", ret);
-        return PROFILING_FAILED;
-    }
+    FUNRET_CHECK_FAIL_RET_VALUE(ret == EOK, true, PROFILING_FAILED);
 
     if (!started_ || rData == nullptr) {
         MSPROF_LOGE("module:%s, report failed! started %llu", moduleName_.c_str(), started_);
@@ -302,6 +292,7 @@ int ReceiveData::DoReport(CONST_REPORT_DATA_PTR rData)
         MSPROF_LOGW("module:%s, invalid device id:%d", moduleName_.c_str(), rData->deviceId);
         return PROFILING_SUCCESS;
     }
+    dataChunk.reportTime = 0;
     dataChunk.deviceId = rData->deviceId;
     dataChunk.dataLen = rData->dataLen;
     errno_t err = memcpy_s(dataChunk.tag.tag, MSPROF_ENGINE_MAX_TAG_LEN + 1, rData->tag, MSPROF_ENGINE_MAX_TAG_LEN);
@@ -322,7 +313,7 @@ int ReceiveData::DoReport(CONST_REPORT_DATA_PTR rData)
 void ReceiveData::DoReportRun()
 {
     std::vector<SHARED_PTR_ALIA<FileChunkReq> > fileChunks;
-    unsigned long sleepIntevalMs = 500; // 500 : 500ms
+    unsigned long sleepIntevalNs = 50000000; // 50000000 : 50ms
     timeStamp_ = analysis::dvvp::common::utils::Utils::GetClockMonotonicRaw();
 
     for (;;) {
@@ -340,7 +331,12 @@ void ReceiveData::DoReportRun()
                 MSPROF_LOGI("Exit the Run thread");
                 break;
             }
-            std::this_thread::sleep_for(std::chrono::milliseconds(sleepIntevalMs));
+            analysis::dvvp::common::utils::Utils::UsleepInterupt(SLEEP_INTEVAL_US);
+            unsigned long long curTimeStamp = analysis::dvvp::common::utils::Utils::GetClockMonotonicRaw();
+            if ((curTimeStamp - timeStamp_) >= sleepIntevalNs || (timeStamp_ == 0)) {
+                TimedTask();
+                timeStamp_ = curTimeStamp;
+            }
             continue;
         }
         if (Dump(fileChunks) != PROFILING_SUCCESS) {
@@ -356,7 +352,6 @@ void ReceiveData::DoReportRun()
 */
 int ReceiveData::DoReportData(const ReporterDataChunk& dataChunk)
 {
-    int retu = PROFILING_FAILED;
     totalPushCounter_++;
     bool ret = dataChunkBuf_.TryPush(dataChunk);
     if (!ret) {
@@ -378,7 +373,7 @@ int ReceiveData::DoReportData(const ReporterDataChunk& dataChunk)
 }
 
 /**
-* @brief DoReportData: get the api data from user and save the data to ring buffer
+* @brief DoReportData: get the api/event data from user and save the data to ring buffer
 * @param [in] dataChunk: the data from user
 * @return : success return PROFILING_SUCCESS, failed return PROFIING_FAILED
 */
@@ -401,33 +396,7 @@ int ReceiveData::DoReportData(const MsprofApi& dataChunk)
     totalDataLengthSuccess_ += sizeof(MsprofApi);
     return PROFILING_SUCCESS;
 }
- 
-/**
-* @brief DoReportData: get the event data from user and save the data to ring buffer
-* @param [in] dataChunk: the data from user
-* @return : success return PROFILING_SUCCESS, failed return PROFIING_FAILED
-*/
-int ReceiveData::DoReportData(const MsprofEvent& dataChunk)
-{
-    totalPushCounter_.fetch_add(1, std::memory_order_relaxed);
-    bool ret = dataBufEvent_.TryPush(dataChunk);
-    if (!ret) {
-        totalPushCounterFailed_++;
-        totalDataLengthFailed_ += sizeof(MsprofEvent);
-        uint64_t totalLengthFailed = totalDataLengthFailed_.load(std::memory_order_relaxed);
-        uint64_t totalPushFailed = totalPushCounterFailed_.load(std::memory_order_relaxed);
-        size_t buffUsedSize = dataBufEvent_.GetUsedSize();
-        MSPROF_LOGE("try push ring buff failed, deviceID:%d, module:%s, dataLen:%llu,"
-            " totalPushCounterFailed_:%llu, totalDataLengthFailed_:%llu, buffUsedSize:%llu",
-            DEFAULT_HOST_ID, moduleName_.c_str(), sizeof(MsprofEvent), totalPushFailed, totalLengthFailed,
-            buffUsedSize);
-        return PROFILING_FAILED;
-    }
-    totalPushCounterSuccess_++;
-    totalDataLengthSuccess_ += sizeof(MsprofEvent);
-    return PROFILING_SUCCESS;
-}
- 
+
 /**
 * @brief DoReportData: get the compact info data from user and save the data to ring buffer
 * @param [in] dataChunk: the data from user
@@ -511,7 +480,7 @@ int ReceiveData::DumpData(std::vector<ReporterDataChunk> &message, SHARED_PTR_AL
             return PROFILING_FAILED;
         }
         if (isFirstMessage) { // deal with the data only need to init once
-            jobCtx->dev_id = std::to_string(message[i].deviceId);
+            jobCtx->dev_id = std::to_string(DEFAULT_HOST_ID);
             jobCtx->tag = std::string(message[i].tag.tag, strlen(message[i].tag.tag));
             fileChunk->set_filename(moduleName_);
             fileChunk->set_offset(-1);
@@ -544,8 +513,7 @@ int ReceiveData::DumpData(std::vector<ReporterDataChunk> &message, SHARED_PTR_AL
 void ReceiveData::SetDataChunkTag(uint16_t level, uint32_t typeId, std::string &tag) const
 {
     switch (profileDataType_) {
-        case MSPROF_API_PROFILE_DATA_TYPE:
-        case MSPROF_EVENT_PROFILE_DATA_TYPE:
+        case MSPROF_API_AND_EVENT_PROFILE_DATA_TYPE:
             tag = "data";
             break;
         case MSPROF_COMPACT_PROFILE_DATA_TYPE:
@@ -622,8 +590,6 @@ template int ReceiveData::DumpData(std::vector<MsprofAdditionalInfo> &message,
                                    SHARED_PTR_ALIA<FileChunkReq> fileChunk);
  
 template void ReceiveData::RunNoTagData(analysis::dvvp::common::queue::RingBuffer<MsprofApi> &dataBuffer,
-    std::vector<SHARED_PTR_ALIA<FileChunkReq>>& fileChunks);
-template void ReceiveData::RunNoTagData(analysis::dvvp::common::queue::RingBuffer<MsprofEvent> &dataBuffer,
     std::vector<SHARED_PTR_ALIA<FileChunkReq>>& fileChunks);
 template void ReceiveData::RunTagData(analysis::dvvp::common::queue::RingBuffer<MsprofCompactInfo> &dataBuffer,
     std::vector<SHARED_PTR_ALIA<FileChunkReq>>& fileChunks);

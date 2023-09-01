@@ -8,11 +8,13 @@ import collections
 
 import os
 import unittest
+from unittest import mock
 
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.info_conf_reader import InfoConfReader
+from common_func.ms_constant.number_constant import NumberConstant
 from common_func.path_manager import PathManager
 from constant.constant import clear_dt_project
 from mscalculate.cann.additional_record import AdditionalRecord
@@ -31,9 +33,15 @@ from profiling_bean.db_dto.mem_copy_info_dto import MemCopyInfoDto
 from profiling_bean.db_dto.node_basic_info_dto import NodeBasicInfoDto
 from profiling_bean.db_dto.task_track_dto import TaskTrackDto
 from profiling_bean.db_dto.tensor_info_dto import TensorInfoDto
+from profiling_bean.db_dto.ge_time_dto import GeTimeDto
+
+NAMESPACE = 'mscalculate.cann.cann_analysis_gear'
 
 
 class TestCANNAnalysisGear(unittest.TestCase):
+    """
+    this class if for st
+    """
     DIR_PATH = os.path.join(os.path.dirname(__file__), "DT_CANNAnalysisGear")
     PROF_HOST_DIR = os.path.join(DIR_PATH, 'PROF1', 'host')
     event_col = collections.namedtuple('Event', 'level, thread_id, start, end, struct_type, item_id')
@@ -97,6 +105,10 @@ class TestCANNAnalysisGear(unittest.TestCase):
             DBManager.check_item_in_table(PathManager.get_db_path(self.PROF_HOST_DIR, DBNameConstant.DB_GE_MODEL_TIME),
                                           DBNameConstant.TABLE_GE_MODEL_TIME, 'infer_start', 201))
 
+        gear = ModelGear(self.PROF_HOST_DIR)
+        gear.add_model_time_item_from_table(GeTimeDto())
+        self.assertEqual(gear.model_time_data, [])
+
     def test_node_gear(self):
         gear = NodeGear(self.PROF_HOST_DIR)
         event1 = self.create_api_event(self.event_col(Constant.NODE_LEVEL, 1, 100, 101, "step_info", 0))
@@ -136,9 +148,6 @@ class TestCANNAnalysisGear(unittest.TestCase):
             DBManager.check_item_in_table(PathManager.get_db_path(self.PROF_HOST_DIR, DBNameConstant.DB_GE_INFO),
                                           DBNameConstant.TABLE_GE_STEP_INFO, 'tag', 0))
 
-        self.assertEqual(
-            DBManager.get_table_data_count(PathManager.get_db_path(self.PROF_HOST_DIR, DBNameConstant.DB_HCCL),
-                                           DBNameConstant.TABLE_HCCL_OP), 1)
         self.assertEqual(
             DBManager.get_table_data_count(PathManager.get_db_path(self.PROF_HOST_DIR, DBNameConstant.DB_GE_MODEL_INFO),
                                            DBNameConstant.TABLE_GE_FUSION_OP_INFO), 1)
@@ -183,7 +192,7 @@ class TestCANNAnalysisGear(unittest.TestCase):
         tensor_info_dto.timestamp = 360
         tensor_info_dto.struct_type = '1'
         ctx_id_dto = CtxIdDto()
-        ctx_id_dto.ctx_id = 8
+        ctx_id_dto.ctx_id = "8"
         ctx_id_dto.op_name = "1"
         ctx_id_dto.timestamp = 360
         event6.additional_record = [
@@ -243,10 +252,6 @@ class TestCANNAnalysisGear(unittest.TestCase):
                                           DBNameConstant.TABLE_GE_TASK, 'context_id', 8))
 
         self.assertEqual(
-            DBManager.get_table_data_count(PathManager.get_db_path(self.PROF_HOST_DIR, DBNameConstant.DB_GE_INFO),
-                                           DBNameConstant.TABLE_GE_TENSOR), 1)
-
-        self.assertEqual(
             DBManager.get_table_data_count(PathManager.get_db_path(self.PROF_HOST_DIR, DBNameConstant.DB_HCCL),
                                            DBNameConstant.TABLE_HCCL_TASK), 2)
 
@@ -254,6 +259,257 @@ class TestCANNAnalysisGear(unittest.TestCase):
             DBManager.check_item_in_table(PathManager.get_db_path(self.PROF_HOST_DIR, DBNameConstant.DB_HCCL),
                                           DBNameConstant.TABLE_HCCL_TASK, 'plane_id', 8))
 
+    def test_task_gear_should_return_when_invalid_node_event(self):
+        gear = TaskGear(self.PROF_HOST_DIR)
+        event1 = self.create_api_event(self.event_col(Constant.TASK_LEVEL, 1, 100, 101, "api", 0))
+        gear.run(event1, {Constant.MODEL_LEVEL: Event.invalid_event(), Constant.NODE_LEVEL: Event.invalid_event(),
+                          Constant.HCCL_LEVEL: Event.invalid_event()})
+        gear.flush_data()
+        self.assertEqual(
+            DBManager.get_table_data_count(PathManager.get_db_path(self.PROF_HOST_DIR, DBNameConstant.DB_GE_INFO),
+                                           DBNameConstant.TABLE_GE_TASK), 0)
+
+    def test_task_gear_should_save_one_op_when_one_traditional_mode_node_event_FROM_PROF_LEVEL0(self):
+        gear = TaskGear(self.PROF_HOST_DIR)
+        event1 = self.create_api_event(self.event_col(Constant.TASK_LEVEL, 1, 120, 130, "api", 0))
+        task_dto = TaskTrackDto()
+        task_dto.task_id = 15
+        task_dto.struct_type = "1"
+        task_dto.task_type = "KERNEL_AICORE"
+        event1.additional_record = [self.create_addition_record(task_dto, 125)]
+        event2: Event = self.create_api_event(self.event_col(Constant.NODE_LEVEL, 1, 110, 140, "launch", "op"))
+
+        gear.run(event1, {Constant.MODEL_LEVEL: Event.invalid_event(), Constant.NODE_LEVEL: event2,
+                          Constant.HCCL_LEVEL: Event.invalid_event()})
+        gear.flush_data()
+        self.assertEqual(
+            DBManager.get_table_data_count(PathManager.get_db_path(self.PROF_HOST_DIR, DBNameConstant.DB_GE_INFO),
+                                           DBNameConstant.TABLE_GE_TASK), 1)
+
+    def test_task_gear_should_save_one_op_when_one_traditional_mode_node_event_FROM_PROF_LEVEL1(self):
+        gear = TaskGear(self.PROF_HOST_DIR)
+        event1 = self.create_api_event(self.event_col(Constant.TASK_LEVEL, 1, 120, 130, "api", 0))
+        task_dto = TaskTrackDto()
+        task_dto.task_id = 15
+        task_dto.struct_type = "1"
+        task_dto.task_type = "KERNEL_AICORE"
+        event1.additional_record = [self.create_addition_record(task_dto, 125)]
+        event2: Event = self.create_api_event(self.event_col(Constant.NODE_LEVEL, 1, 110, 140, "launch", "op"))
+        node_basic_info_dto = NodeBasicInfoDto()
+        node_basic_info_dto.op_type = "1"
+        node_basic_info_dto.task_type = 'AI_CORE'
+        node_basic_info_dto.op_name = "1"
+        node_basic_info_dto.timestamp = 140
+        tensor_info_dto = TensorInfoDto()
+        tensor_info_dto.op_name = "1"
+        tensor_info_dto.timestamp = 140
+        tensor_info_dto.struct_type = '1'
+        event2.additional_record = [
+            self.create_addition_record(node_basic_info_dto, 140),
+            self.create_addition_record(tensor_info_dto, 140)
+        ]
+
+        gear.run(event1, {Constant.MODEL_LEVEL: Event.invalid_event(), Constant.NODE_LEVEL: event2,
+                          Constant.HCCL_LEVEL: Event.invalid_event()})
+        gear.flush_data()
+        self.assertEqual(
+            DBManager.get_table_data_count(PathManager.get_db_path(self.PROF_HOST_DIR, DBNameConstant.DB_GE_INFO),
+                                           DBNameConstant.TABLE_GE_TASK), 1)
+
+
+class TestTaskGear(unittest.TestCase):
+    def test_get_context_ids_should_return_invalid_ids_when_invalid_node_and_invalid_hccl(self):
+        gear = TaskGear("")
+        call_stack = {Constant.NODE_LEVEL: Event.invalid_event(), Constant.HCCL_LEVEL: Event.invalid_event()}
+        ids = gear.get_context_ids(call_stack)
+        self.assertEqual(ids, str(NumberConstant.DEFAULT_GE_CONTEXT_ID))
+
+    def test_get_context_ids_should_return_invalid_ids_when_no_context_ids(self):
+        gear = TaskGear("")
+        node_event = Event.invalid_event()
+        node_event.struct_type = "1"
+        call_stack = {Constant.NODE_LEVEL: node_event, Constant.HCCL_LEVEL: Event.invalid_event()}
+        ids = gear.get_context_ids(call_stack)
+        self.assertEqual(ids, str(NumberConstant.DEFAULT_GE_CONTEXT_ID))
+
+    def test_get_context_ids_should_return_valid_ids_when_node_contains_single_context_ids(self):
+        gear = TaskGear("")
+        node_event = Event.invalid_event()
+        node_event.struct_type = "1"
+        context_id_info1 = CtxIdDto()
+        context_id_info1.ctx_id = "1"
+        addition_info1 = AdditionalRecord(context_id_info1)
+        context_id_info2 = CtxIdDto()
+        context_id_info2.ctx_id = "2"
+        addition_info2 = AdditionalRecord(context_id_info2)
+        node_event.additional_record = [addition_info1, addition_info2]
+        call_stack = {Constant.NODE_LEVEL: node_event, Constant.HCCL_LEVEL: Event.invalid_event()}
+        ids = gear.get_context_ids(call_stack)
+        self.assertEqual(ids, "1,2")
+
+    def test_get_context_ids_should_return_valid_ids_when_node_contains_mutil_context_ids(self):
+        gear = TaskGear("")
+        node_event = Event.invalid_event()
+        node_event.struct_type = "1"
+        context_id_info1 = CtxIdDto()
+        context_id_info1.ctx_id = "1,2"
+        addition_info1 = AdditionalRecord(context_id_info1)
+        context_id_info2 = CtxIdDto()
+        context_id_info2.ctx_id = "3,4"
+        addition_info2 = AdditionalRecord(context_id_info2)
+        node_event.additional_record = [addition_info1, addition_info2]
+        call_stack = {Constant.NODE_LEVEL: node_event, Constant.HCCL_LEVEL: Event.invalid_event()}
+        ids = gear.get_context_ids(call_stack)
+        self.assertEqual(ids, "1,2,3,4")
+
+    def test_get_context_ids_should_return_valid_ids_when_node_contains_mutil_context_ids_hccl_contains_context(self):
+        gear = TaskGear("")
+        node_event = Event.invalid_event()
+        node_event.struct_type = "1"
+        context_id_info1 = CtxIdDto()
+        context_id_info1.ctx_id = "1,2"
+        addition_info1 = AdditionalRecord(context_id_info1)
+        context_id_info2 = CtxIdDto()
+        context_id_info2.ctx_id = "3,4"
+        addition_info2 = AdditionalRecord(context_id_info2)
+        node_event.additional_record = [addition_info1, addition_info2]
+
+        hccl_event = Event.invalid_event()
+        hccl_event.struct_type = "1"
+        context_id_info3 = CtxIdDto()
+        context_id_info3.ctx_id = "5,8"
+        addition_info3 = AdditionalRecord(context_id_info3)
+        hccl_event.additional_record = [addition_info3]
+
+        call_stack = {Constant.NODE_LEVEL: node_event, Constant.HCCL_LEVEL: hccl_event}
+        ids = gear.get_context_ids(call_stack)
+        self.assertEqual(ids, "1,2,3,4,5,6,7,8")
+
+    def test_get_context_ids_should_return_empty_when_hccl_context_ids_length_is_not_2(self):
+        gear = TaskGear("")
+        hccl_event = Event.invalid_event()
+        hccl_event.struct_type = "1"
+        context_id_info3 = CtxIdDto()
+        context_id_info3.ctx_id = "5,8,10"
+        addition_info3 = AdditionalRecord(context_id_info3)
+        hccl_event.additional_record = [addition_info3]
+        ids = gear.get_context_ids_in_hccl(hccl_event)
+        self.assertEqual(ids, [])
+
+    def test_get_hccl_descs_should_return_default_hccl_desc_when_no_context_id_no_hccl_info(self):
+        gear = TaskGear("")
+        hccl_event = Event.invalid_event()
+        descs = gear.get_hccl_descs(hccl_event)
+        self.assertEqual(len(descs), 1)
+        self.assertEqual(descs.get(NumberConstant.DEFAULT_GE_CONTEXT_ID).ctx_info.ctx_id,
+                         str(NumberConstant.DEFAULT_GE_CONTEXT_ID))
+
+    def test_get_hccl_descs_should_return_1_descs_when_traditional_task(self):
+        gear = TaskGear("")
+        hccl_event = Event.invalid_event()
+        hccl_info = HCCLInfoDto()
+        addition_info = AdditionalRecord(hccl_info)
+        hccl_event.additional_record = [addition_info]
+
+        descs = gear.get_hccl_descs(hccl_event)
+        self.assertEqual(len(descs), 1)
+
+    def test_get_hccl_descs_should_return_3_descs_when_ffts_task_3_context_id_and_3_hccl_info(self):
+        gear = TaskGear("")
+        hccl_event = Event.invalid_event()
+        hccl_event.struct_type = "1"
+        hccl_info1 = HCCLInfoDto()
+        hccl_info1.context_id = 1
+        hccl_info2 = HCCLInfoDto()
+        hccl_info2.context_id = 2
+        hccl_info3 = HCCLInfoDto()
+        hccl_info3.context_id = 3
+        context_id_info3 = CtxIdDto()
+        context_id_info3.ctx_id = "1,3"
+        hccl_event.additional_record = [
+            AdditionalRecord(hccl_info1), AdditionalRecord(hccl_info2),
+            AdditionalRecord(hccl_info3), AdditionalRecord(context_id_info3),
+            AdditionalRecord("1")
+        ]
+
+        descs = gear.get_hccl_descs(hccl_event)
+        self.assertEqual(len(descs), 3)
+        self.assertEqual(descs.get(1).hccl_info.context_id, 1)
+        self.assertEqual(descs.get(1).ctx_info.ctx_id, "1")
+        self.assertEqual(descs.get(2).hccl_info.context_id, 2)
+        self.assertEqual(descs.get(2).ctx_info.ctx_id, "2")
+        self.assertEqual(descs.get(3).hccl_info.context_id, 3)
+        self.assertEqual(descs.get(3).ctx_info.ctx_id, "3")
+
+    def test_add_hccl_task_should_add_1_task_when_no_hccl_descs(self):
+        gear = TaskGear("")
+        hccl_event = Event.invalid_event()
+        model_event = Event.invalid_event()
+        task_track_dto: TaskTrackDto = TaskTrackDto()
+        gear.add_hccl_task(hccl_event, model_event, task_track_dto)
+        self.assertEqual(len(gear.hccl_task_info), 1)
+
+    def test_add_hccl_task_should_add_3_task_when_get_3_hccl_descs(self):
+        gear = TaskGear("")
+        hccl_event = Event.invalid_event()
+        model_event = Event.invalid_event()
+        task_track_dto: TaskTrackDto = TaskTrackDto()
+        hccl_descs = collections.OrderedDict([("1", gear.HcclDesc()), ("2", gear.HcclDesc()), ("3", gear.HcclDesc())])
+
+        with mock.patch(NAMESPACE + '.TaskGear.get_hccl_descs', return_value=hccl_descs):
+            gear.add_hccl_task(model_event, hccl_event, task_track_dto)
+            self.assertEqual(len(gear.hccl_task_info), 3)
+
+    def test_is_kernel_task_should_return_false_when_invalid_dto(self):
+        gear = TaskGear("")
+        task_track = TaskTrackDto()
+        self.assertFalse(gear.is_kernel_task(task_track, True))
+
+    def test_is_kernel_task_should_return_ture_when_kernel_prefix_dto(self):
+        gear = TaskGear("")
+        task_track = TaskTrackDto()
+        task_track.struct_type = "1"
+        task_track.task_type = "KERNEL_AICPU"
+        self.assertTrue(gear.is_kernel_task(task_track, True))
+
+    def test_is_kernel_task_should_return_ture_when_stars_common_dto(self):
+        gear = TaskGear("")
+        task_track = TaskTrackDto()
+        task_track.struct_type = "1"
+        task_track.task_type = "STARS_COMMON"
+        self.assertTrue(gear.is_kernel_task(task_track, True))
+
+    def test_is_kernel_task_should_return_false_when_hccl_ffts_dto(self):
+        gear = TaskGear("")
+        task_track = TaskTrackDto()
+        task_track.struct_type = "1"
+        task_track.task_type = "FFTS_PLUS"
+        self.assertFalse(gear.is_kernel_task(task_track, False))
+
+    def test_is_kernel_task_should_return_true_when_not_hccl_ffts_dto(self):
+        gear = TaskGear("")
+        task_track = TaskTrackDto()
+        task_track.struct_type = "1"
+        task_track.task_type = "FFTS_PLUS"
+        self.assertTrue(gear.is_kernel_task(task_track, True))
+
+    def test_is_kernel_task_should_return_false_when_other_dto(self):
+        gear = TaskGear("")
+        task_track = TaskTrackDto()
+        task_track.struct_type = "1"
+        task_track.task_type = "MM"
+        self.assertFalse(gear.is_kernel_task(task_track, True))
+
+
+class TestFindModelNameInModelLoad(unittest.TestCase):
+    DIR_PATH = os.path.join(os.path.dirname(__file__), "DT_CANNAnalysisGear")
+    PROF_HOST_DIR = os.path.join(DIR_PATH, 'PROF1', 'host')
+
+    def test_find_model_name_in_model_load(self):
+        gear = ModelGear(self.PROF_HOST_DIR)
+        gear.model_load_data = [(0, "test", 1, 1), (1, "test2", 2, 3)]
+        self.assertEqual(gear.find_model_name(0), "test")
+        self.assertEqual(gear.find_model_name(1), "test2")
 
 if __name__ == '__main__':
     unittest.main()

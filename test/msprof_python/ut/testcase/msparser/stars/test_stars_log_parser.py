@@ -2,7 +2,7 @@ import struct
 import unittest
 from unittest import mock
 
-from analyzer.scene_base.profiling_scene import ProfilingScene
+from common_func.profiling_scene import ProfilingScene
 from common_func.file_manager import FileOpen
 from msparser.stars.parser_dispatcher import ParserDispatcher
 from msparser.stars.stars_log_parser import StarsLogCalCulator

@@ -27,6 +27,16 @@ class GeOpExecuteViewer:
         self._project_path = params.get(StrConstant.PARAM_RESULT_DIR)
         self._model = GeOpExecuteViewModel(params)
 
+    @staticmethod
+    def _reformat(data_list: list) -> list:
+        return [
+            (
+                data[0], data[1], data[2], data[3],
+                InfoConfReader().time_from_host_syscnt(data[4], NumberConstant.MICRO_SECOND),
+                InfoConfReader().get_host_duration(data[5], NumberConstant.MICRO_SECOND)
+            ) for data in data_list
+        ]
+
     def get_summary_data(self: any) -> tuple:
         """
         get summary data from ge op execute
@@ -37,6 +47,7 @@ class GeOpExecuteViewer:
             return MsvpConstant.MSVP_EMPTY_DATA
         summary_data = self._model.get_summary_data()
         if summary_data:
+            summary_data = self._reformat(summary_data)
             summary_data = self.update_dynamic_info(summary_data)
             return self._configs.get(StrConstant.CONFIG_HEADERS), summary_data, len(summary_data)
         return MsvpConstant.MSVP_EMPTY_DATA
@@ -50,6 +61,7 @@ class GeOpExecuteViewer:
             logging.error("Ge op_execute maybe parse failed, please check the data parsing log.")
             return json.dumps({"status": NumberConstant.ERROR, "info": "No data found for ge op execute."})
         timeline_data = self._model.get_timeline_data()
+        timeline_data = self._reformat(timeline_data)
         timeline_data = self.update_dynamic_info(timeline_data)
 
         result = []

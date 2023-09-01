@@ -78,6 +78,9 @@ class DataTag(Enum):
     CTX_ID = 65
     GE_LOGIC_STREAM_INFO = 66
     MEMORY_OP = 67
+    NANO_MODEL_EXEOM = 68
+    NANO_STARS_PROFILE = 69
+    DBG_FILE = 70
 
 
 @unique
@@ -90,4 +93,7 @@ class AclApiTag(Enum):
     ACL_RTS = 3
     ACL_OTHERS = 4
     ACL_NN = 5
+    ACL_ASCENDC = 6
     HOST_HCCL = 7
+    ACL_DVPP = 9
+    ACL_GRAPH = 10

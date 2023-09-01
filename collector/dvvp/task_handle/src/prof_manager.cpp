@@ -214,14 +214,15 @@ int ProfManager::Handle(SHARED_PTR_ALIA<analysis::dvvp::message::ProfileParams> 
 {
     analysis::dvvp::message::StatusInfo statusInfo;
     statusInfo.status = analysis::dvvp::message::ERR;
+    
+    if (params == nullptr) {
+        return PROFILING_FAILED;
+    }
     statusInfo.dev_id = params->devices;
 
     if (!isInited_) {
         statusInfo.info = "Profiling is not inited";
         SendFailedStatusInfo(statusInfo, params->job_id);
-        return PROFILING_FAILED;
-    }
-    if (params == nullptr) {
         return PROFILING_FAILED;
     }
     MSPROF_LOGI("Handle profiling task");

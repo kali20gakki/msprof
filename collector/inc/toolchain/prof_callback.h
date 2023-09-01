@@ -32,6 +32,7 @@ enum MsprofErrorCode {
     MSPROF_ERROR_CONFIG_INVALID,
     MSPROF_ERROR_ACL_JSON_OFF,
     MSPROF_ERROR,
+    MSPROF_ERROR_UNINITIALIZE,
 };
 
 #define MSPROF_ENGINE_MAX_TAG_LEN (63)
@@ -161,7 +162,7 @@ MSVP_PROF_API int32_t MsprofInit(uint32_t dataType, void *data, uint32_t dataLen
  * @param NULL
  * @return 0:SUCCESS, >0:FAILED
  */
-MSVP_PROF_API int32_t MsprofFinalize();
+MSVP_PROF_API int32_t MsprofFinalize(void);
 #ifdef __cplusplus
 }
 #endif

@@ -6,6 +6,7 @@ from abc import abstractmethod
 
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
+from common_func.info_conf_reader import InfoConfReader
 from common_func.msvp_common import is_number
 from common_func.ms_constant.number_constant import NumberConstant
 from host_prof.host_prof_base.host_prof_data_base import HostProfDataBase
@@ -95,7 +96,9 @@ class HostCpuUsage(HostProfDataBase):
         for item in per_cpu_usage:
             if is_number(item[0]):
                 time_cpu = [
-                    "CPU " + str(item[2]), float(item[0]) / NumberConstant.CONVERSION_TIME, {"Usage(%)": item[3]}
+                    "CPU " + str(item[2]),
+                    InfoConfReader().time_from_host_syscnt(item[0], NumberConstant.MICRO_SECOND),
+                    {"Usage(%)": item[3]}
                 ]
                 result.append(time_cpu)
 

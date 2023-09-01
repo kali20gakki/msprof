@@ -7,8 +7,8 @@ import logging
 import os
 from collections import OrderedDict
 
-from analyzer.op_common_function import OpCommonFunc
-from analyzer.scene_base.profiling_scene import ProfilingScene
+from common_func.op_common_function import OpCommonFunc
+from common_func.profiling_scene import ProfilingScene
 from common_func.common import CommonConstant
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
@@ -104,9 +104,9 @@ class CoreCpuReduceViewer:
         total_cycle_data = {}
         total_time_data = {}
         conn_ge, cur_ge = DBManager.check_connect_db_path(
-            PathManager.get_db_path(result_dir, DBNameConstant.DB_RUNTIME))
+            PathManager.get_db_path(result_dir, DBNameConstant.DB_METRICS_SUMMARY))
         if conn_ge and cur_ge:
-            if not DBManager.judge_table_exist(cur_ge, DBNameConstant.TABLE_METRICS_SUMMARY):
+            if not DBManager.judge_table_exist(cur_ge, DBNameConstant.TABLE_METRIC_SUMMARY):
                 return total_cycle_data, total_time_data
             total_cycles = DBManager.fetch_all_data(cur_ge, CoreCpuReduceViewer._get_aicore_sql(result_dir))
             total_cycles = OpCommonFunc.deal_batch_id(stream_index=0, task_index=1, merge_data=total_cycles)
@@ -124,10 +124,10 @@ class CoreCpuReduceViewer:
         if ChipManager().is_chip_v4():
             total_cycles = 'aic_total_time, aic_total_cycles, aiv_total_time, aiv_total_cycles'
         sql = "SELECT stream_id, task_id, {total_cycles} FROM {} ".format(
-            DBNameConstant.TABLE_METRICS_SUMMARY, total_cycles=total_cycles)
+            DBNameConstant.TABLE_METRIC_SUMMARY, total_cycles=total_cycles)
         if not os.path.exists(PathManager.get_db_path(result_dir, DBNameConstant.DB_GE_INFO)):
             sql = "SELECT stream_id, task_id, {total_cycles} FROM {} ".format(
-                DBNameConstant.TABLE_METRICS_SUMMARY, total_cycles=total_cycles)
+                DBNameConstant.TABLE_METRIC_SUMMARY, total_cycles=total_cycles)
         return sql
 
     @staticmethod
@@ -286,6 +286,8 @@ class CoreCpuReduceViewer:
         ai_cpu_datas = []
         dir_path = job_path
         ai_cpu_data = ParseAiCpuData.get_ai_cpu_from_ts(dir_path)
+        if not ai_cpu_data:
+            return []
         op_names, _ = cls.get_op_names_and_task_type(dir_path)
         result_data = []
         if ai_cpu_data:

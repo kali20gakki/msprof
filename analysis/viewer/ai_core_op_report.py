@@ -6,7 +6,7 @@ import logging
 import os
 from collections import deque
 
-from analyzer.scene_base.profiling_scene import ProfilingScene
+from common_func.profiling_scene import ProfilingScene
 from common_func.common import CommonConstant
 from common_func.constant import Constant
 from common_func.data_manager import DataManager
@@ -58,7 +58,8 @@ class AiCoreOpReport:
     OPERATOR_UNUSED_HEADERS = ["Model Name", "Infer ID"]
     HEADERS_WITH_NO_GE_DATA = ["Block Dim", "Mix Block Dim"]
     HARDWARE_OP_LIST = ['AI_CPU', 'DSA', 'DVPP']
-    START_TIME_INDEX = 8
+    TASK_DURATION = 'Task Duration(us)'
+    TASK_WAIT_TIME = 'Task Wait Time(us)'
     MODEL_NAME_INDEX = 0
     INFER_ID_INDEX = 4
     AI_CPU_TABLE = "ai_cpu_datas"
@@ -68,12 +69,14 @@ class AiCoreOpReport:
         union_data = []
         if not ai_core_group_dict or not data:
             return data
+        ai_core_data_len = len(ai_core_group_dict.get(next(iter(ai_core_group_dict)))[0])
         for datum in data:
             # 2 stream id; 1 task id of datum
 
             ai_core_queue = ai_core_group_dict.get(datum[1:3] + (datum[-1],), deque([]))
             if not ai_core_queue:
-                logging.debug("Losing ai core data of stream %d, task %d", datum[2], datum[1])
+                logging.debug("No ai core data of stream %d, task %d", datum[2], datum[1])
+                union_data.append(datum + (Constant.NA,) * ai_core_data_len)
                 continue
             ai_core_datum = ai_core_queue.popleft()
             union_data.append(datum + ai_core_datum)
@@ -152,30 +155,48 @@ class AiCoreOpReport:
         :param configs: info config
         :return: headers and data
         """
-        ai_core_data = cls.get_ai_core_op_summary_data(project_path, db_path, configs)
-        data = cls.get_ai_cpu_op_summary_data(project_path, db_path, ai_core_data, configs)
+        data = cls.get_ai_core_op_summary_data(project_path, db_path, configs)
         data.extend(cls.get_hccl_op_data(project_path, configs))
         headers = configs.get('headers')
         cls.delete_useless_cols(headers, data)
         cls.sort_summary_data(headers, data)
+        task_data = cls.update_device_task_wait_time(headers, data)
         add_aicore_units(headers)
-        return headers, data, len(data)
+        return headers, task_data, len(task_data)
+
+    @classmethod
+    def update_device_task_wait_time(cls, headers: list, device_tasks: list) -> list:
+        result = filter(lambda x: x not in headers,
+                        [StrConstant.TASK_START_TIME, cls.TASK_DURATION, cls.TASK_WAIT_TIME])
+        if list(result):
+            logging.error("Op_summary_data don't have start time or duration")
+        else:
+            task_start_index = headers.index(StrConstant.TASK_START_TIME)
+            task_duration_index = headers.index(cls.TASK_DURATION)
+            task_wait_time_index = headers.index(cls.TASK_WAIT_TIME)
+            for i, task in enumerate(device_tasks):
+                if i == 0:
+                    task[task_wait_time_index] = 0
+                    continue
+                task[task_wait_time_index] = max(task[task_start_index] - device_tasks[i - 1][task_start_index] \
+                                                 - device_tasks[i - 1][task_duration_index], 0)
+        return device_tasks
 
     @classmethod
     def sort_summary_data(cls, headers, data):
-        task_start_index = cls.START_TIME_INDEX
         if StrConstant.TASK_START_TIME in headers:
             task_start_index = headers.index(StrConstant.TASK_START_TIME)
-        data.sort(key=lambda x: x[task_start_index])
+            data.sort(key=lambda x: x[task_start_index])
 
     @classmethod
     def get_hccl_op_data(cls, project_path: str, configs: dict) -> list:
         """
         get hccl op summary data
         """
-        if not os.path.exists(PathManager.get_db_path(project_path, DBNameConstant.DB_HCCL)):
+        if not os.path.exists(PathManager.get_db_path(project_path, DBNameConstant.DB_HCCL_SINGLE_DEVICE)):
             return []
-        with HcclViewModel(project_path, DBNameConstant.DB_HCCL, [DBNameConstant.TABLE_HCCL_ALL_REDUCE]) as hccl_model:
+        with HcclViewModel(project_path, DBNameConstant.DB_HCCL_SINGLE_DEVICE,
+                           [DBNameConstant.TABLE_HCCL_SINGLE_DEVICE]) as hccl_model:
             if not hccl_model.check_table():
                 return []
             hccl_comunication_data = hccl_model.get_hccl_op_data()
@@ -195,51 +216,12 @@ class AiCoreOpReport:
             hccl_data[index] = model_name + [_hccl_op.model_id, Constant.NA, Constant.NA] + index_id + \
                                [
                                    _hccl_op.op_name, _hccl_op.op_type, _hccl_op.task_type,
-                                   _hccl_op.timestamp, _hccl_op.duration / NumberConstant.NS_TO_US,
+                                   _hccl_op.timestamp / NumberConstant.NS_TO_US,
+                                   _hccl_op.duration / NumberConstant.NS_TO_US,
                                    Constant.DEFAULT_VALUE, Constant.DEFAULT_VALUE
                                ]
             hccl_data[index].extend([Constant.NA] * (header_length - len(hccl_data[index])))
         return hccl_data
-
-    @classmethod
-    def get_ai_cpu_op_summary_data(cls: any, project_path: str, db_path: str, *args: any) -> list:
-        """
-        get ai cpu op summary data
-        :param project_path: project path
-        :param db_path: database path
-        :return: headers and data
-        """
-        data, configs = args
-        conn, curs = DBManager.check_connect_db_path(db_path)
-        if not cls._check_ai_cpu_data(conn, curs):
-            return data
-        try:
-            return cls.get_ai_cpu_data(project_path, curs, data, configs)
-        except (OSError, SystemError, ValueError, TypeError, RuntimeError) as op_err:
-            logging.error(str(op_err), exc_info=Constant.TRACE_BACK_SWITCH)
-            return data
-        finally:
-            DBManager.destroy_db_connect(conn, curs)
-
-    @classmethod
-    def get_ai_cpu_data(cls: any, project_path: str, curs: any, *args: any) -> list:
-        """
-        ai cpu metric value is N/A
-        """
-        data, configs = args
-        hardware_op_datas = cls._get_hardware_op_datas(curs)
-        if not hardware_op_datas:
-            return data
-        if not ProfilingScene().is_operator():
-            hardware_op_datas = cls._update_model_name_and_infer_id(project_path, hardware_op_datas)
-        header_length = len(configs.get('headers', []))
-        na_tag = (Constant.NA,) * (header_length - len(hardware_op_datas[0]))
-        if header_length > len(hardware_op_datas[0]):
-            for index, ai_cpu_data in enumerate(hardware_op_datas):
-                ai_cpu_data += na_tag
-                hardware_op_datas[index] = list(ai_cpu_data)
-        data.extend(hardware_op_datas)
-        return data
 
     @classmethod
     def get_op_summary_header(cls: any, configs: dict) -> list:
@@ -275,7 +257,7 @@ class AiCoreOpReport:
         :return:
         """
         conn, curs = DBManager.check_connect_db_path(db_path)
-        if not cls._check_op_summary_table_no_op_scene(conn, curs):
+        if not cls._check_op_summary_task_time_table(conn, curs):
             return []
         headers = cls.get_op_summary_header(configs)
         try:
@@ -311,18 +293,6 @@ class AiCoreOpReport:
         return ai_core_head_list
 
     @classmethod
-    def _get_hardware_op_datas(cls: any, curs: any) -> list:
-        aicpu_data = cls._get_hardware_op_sql_data(curs,
-                                                   (Constant.TASK_TYPE_AI_CPU,))
-        dvpp_data = cls._get_hardware_op_sql_data(curs, (Constant.TASK_TYPE_DVPP,))
-        dsa_data = cls._get_hardware_op_sql_data(curs, (Constant.TASK_TYPE_DSA,))
-        res_list = [None] * (len(aicpu_data) + len(dsa_data) + len(dvpp_data))
-        res_list[:len(aicpu_data)] = aicpu_data
-        res_list[len(aicpu_data): len(aicpu_data) + len(dsa_data)] = dsa_data
-        res_list[len(aicpu_data) + len(dsa_data):] = dvpp_data
-        return res_list
-
-    @classmethod
     def _check_ai_cpu_data(cls: any, conn: any, curs: any) -> bool:
         """
         check ai cpu sqlite data
@@ -337,7 +307,7 @@ class AiCoreOpReport:
         return True
 
     @classmethod
-    def _check_op_summary_table_no_op_scene(cls: any, conn: any, curs: any) -> bool:
+    def _check_op_summary_task_time_table(cls: any, conn: any, curs: any) -> bool:
         if not (conn and curs) or not DBManager.judge_table_exist(curs, DBNameConstant.TABLE_SUMMARY_TASK_TIME):
             return False
         return True
@@ -347,11 +317,10 @@ class AiCoreOpReport:
         union_sql, headers = cls._get_sql_and_headers(curs, headers)
         headers.append(cls.ADDITION_HEADER[0])
         ai_core_group_dict, headers = cls._get_aicore_data(curs, headers)
-        hardware_params = (
-            Constant.TASK_TYPE_DVPP, Constant.TASK_TYPE_DSA,
-            Constant.TASK_TYPE_AI_CPU
+        filter_params = (
+            Constant.TASK_TYPE_WRITE_BACK, Constant.TASK_TYPE_INVALID
         )
-        data = DBManager.fetch_all_data(curs, union_sql, hardware_params)
+        data = DBManager.fetch_all_data(curs, union_sql, filter_params)
         if not data:
             return []
         data = cls._union_task_ge_ai_core_data(data, ai_core_group_dict)
@@ -377,7 +346,8 @@ class AiCoreOpReport:
         hash_dict = get_ge_hash_dict(project_path)
         result_data = []
         if not hash_dict:
-            return ai_core_data
+            logging.error("create op_summary data may be an error, because table GeHashInfo is not found.")
+            return [list(_data) for _data in ai_core_data]
         for _data in ai_core_data:
             _data = list(_data)
             _data[3] = hash_dict.get(_data[3], _data[3])  # op_name
@@ -408,91 +378,27 @@ class AiCoreOpReport:
         return {}, headers
 
     @classmethod
-    def _get_two_table_union_sql(cls: any) -> str:
-        """
-        get union sql statement from task time and ge tables
-        """
-        return "select {1}.model_id, {0}.task_id, {0}.stream_id, {index_info} " \
-               "op_name, {1}.op_type, {1}.task_type, start_time, duration_time/{NS_TO_US}, " \
-               "wait_time/{NS_TO_US}, block_dim, mix_block_dim, " \
-               "(case when context_id={context_id} then 'N/A' else context_id end) from {0} " \
-               "inner join {1} on {0}.task_id={1}.task_id and {0}.stream_id = {1}.stream_id " \
-               "and {0}.task_type = {1}.task_type " \
-               "and {1}.task_type!=? and {1}.task_type!=? and {1}.task_type!=? " \
-               "and {0}.batch_id={1}.batch_id " \
-               "and {1}.context_id={0}.subtask_id " \
-               "order by start_time" \
-            .format(DBNameConstant.TABLE_SUMMARY_TASK_TIME, DBNameConstant.TABLE_SUMMARY_GE,
-                    NS_TO_US=NumberConstant.NS_TO_US,
-                    context_id=NumberConstant.DEFAULT_GE_CONTEXT_ID,
-                    index_info=cls._get_index_id_sql_condition())
-
-    @classmethod
-    def _get_hardware_op_sql_data(cls: any, curs: any, sql_param: tuple) -> list:
-        """
-        get sql to get hardware op sql data
-        Return: hardware op sql data
-        """
-        union_sql = "select {1}.model_id, {0}.task_id, {1}.stream_id, {index_info} " \
-                    "op_name, {1}.op_type, {1}.task_type, " \
-                    "{0}.start_time, {0}.duration_time/{NS_TO_US}, " \
-                    "{0}.wait_time/{NS_TO_US}, block_dim, mix_block_dim, " \
-                    "(case when context_id={context_id} then 'N/A' else context_id end) " \
-                    " from {0} " \
-                    "inner join {1} on {0}.task_id={1}.task_id " \
-                    "and {0}.stream_id={1}.stream_id " \
-                    "and {0}.subtask_id={1}.context_id " \
-                    "and {1}.task_type = ? " \
-                    "and {0}.batch_id={1}.batch_id" \
-            .format(DBNameConstant.TABLE_SUMMARY_TASK_TIME,
-                    DBNameConstant.TABLE_SUMMARY_GE,
-                    NS_TO_US=NumberConstant.NS_TO_US,
-                    index_info=cls._get_index_id_sql_condition(),
-                    context_id=NumberConstant.DEFAULT_GE_CONTEXT_ID)
-        if DBManager.judge_table_exist(curs, DBNameConstant.TABLE_SUMMARY_TENSOR):
-            union_sql = "select {1}.model_id, {0}.task_id, {1}.stream_id, {index_info} " \
-                        "op_name, {1}.op_type, {1}.task_type, " \
-                        "{0}.start_time, {0}.duration_time/{NS_TO_US}, " \
-                        "{0}.wait_time/{NS_TO_US}, block_dim, mix_block_dim, " \
-                        "input_shapes, input_data_types, input_formats, " \
-                        "output_shapes, output_data_types, output_formats,  " \
-                        "(case when context_id={context_id} then 'N/A' else context_id end) " \
-                        "from {0} inner join {1} on {0}.task_id={1}.task_id " \
-                        "and {0}.stream_id={1}.stream_id " \
-                        "and {0}.subtask_id={1}.context_id " \
-                        "and {1}.task_type = ? " \
-                        "inner join {2} on {0}.task_id={2}.task_id and {0}.stream_id={2}.stream_id " \
-                        "and {1}.timestamp={2}.timestamp " \
-                        "and {0}.batch_id={1}.batch_id" \
-                .format(DBNameConstant.TABLE_SUMMARY_TASK_TIME,
-                        DBNameConstant.TABLE_SUMMARY_GE,
-                        DBNameConstant.TABLE_SUMMARY_TENSOR,
-                        NS_TO_US=NumberConstant.NS_TO_US,
-                        index_info=cls._get_index_id_sql_condition(),
-                        context_id=NumberConstant.DEFAULT_GE_CONTEXT_ID)
-        return DBManager.fetch_all_data(curs, union_sql, sql_param)
-
-    @classmethod
     def _get_tensor_table_sql_and_headers(cls: any, headers: list) -> tuple:
         # ge or subtask need modify the context_id or subtask_id so that it should be same.
         sql = "select {1}.model_id, {0}.task_id, {0}.stream_id, {index_info}" \
               "{1}.op_name, {1}.op_type, {1}.task_type, " \
-              "{0}.start_time, {0}.duration_time/{NS_TO_US}, {0}.wait_time/{NS_TO_US}, {1}.block_dim, " \
-              "{1}.mix_block_dim, input_shapes, input_data_types, input_formats, " \
-              "output_shapes, output_data_types, output_formats, " \
-              "(case when context_id={context_id} then 'N/A' else context_id end) " \
-              "from {0} inner join {2} on " \
-              "{0}.task_id={2}.task_id and {0}.stream_id={2}.stream_id " \
-              "and {0}.task_type = {1}.task_type " \
-              "inner join {1} on {0}.task_id={1}.task_id and {0}.stream_id={1}.stream_id " \
-              "and {1}.timestamp={2}.timestamp " \
-              "and {1}.task_type != ? and {1}.task_type != ? and {1}.task_type != ? " \
+              "{0}.start_time/{NS_TO_US}, {0}.duration_time/{NS_TO_US}, {0}.wait_time/{NS_TO_US}, {1}.block_dim, " \
+              "{1}.mix_block_dim, " \
+              "(case when {1}.input_shapes is NULL then 'N/A' else {1}.input_shapes end), " \
+              "(case when {1}.input_data_types is NULL then 'N/A' else {1}.input_data_types end), " \
+              "(case when {1}.input_formats is NULL then 'N/A' else {1}.input_formats end), " \
+              "(case when {1}.output_shapes is NULL then 'N/A' else {1}.output_shapes end), " \
+              "(case when {1}.output_data_types is NULL then 'N/A' else {1}.output_data_types end), " \
+              "(case when {1}.output_formats is NULL then 'N/A' else {1}.output_formats end), " \
+              "(case when {1}.context_id={context_id} then 'N/A' else {1}.context_id end) " \
+              "from {0} inner join {1} on {0}.task_id={1}.task_id and {0}.stream_id={1}.stream_id " \
+              "and {1}.task_type != ? and {1}.task_type != ? " \
               "and {0}.batch_id={1}.batch_id " \
-              "and {1}.context_id={0}.subtask_id " \
+              "and {1}.context_id={0}.subtask_id and {0}.start_time != {2} " \
               "order by start_time" \
             .format(DBNameConstant.TABLE_SUMMARY_TASK_TIME,
                     DBNameConstant.TABLE_SUMMARY_GE,
-                    DBNameConstant.TABLE_SUMMARY_TENSOR,
+                    NumberConstant.INVALID_TASK_TIME,
                     NS_TO_US=NumberConstant.NS_TO_US,
                     context_id=NumberConstant.DEFAULT_GE_CONTEXT_ID,
                     index_info=cls._get_index_id_sql_condition())
@@ -514,9 +420,9 @@ class AiCoreOpReport:
         cls.clear_no_ge_data_headers(headers)
         model_id = "{0}, ".format(NumberConstant.DEFAULT_MODEL_ID) if ProfilingScene().is_operator() else 'model_id, '
         subtask_id = ",subtask_id " if ChipManager().is_chip_v4() else ",'N/A'"
-        sql = "select {model_id} task_id, stream_id, {index_info} 'N/A', 'N/A', task_type, start_time, " \
+        sql = "select {model_id} task_id, stream_id, {index_info} 'N/A', 'N/A', task_type, start_time/{NS_TO_US}, " \
               "duration_time/{NS_TO_US}, wait_time/{NS_TO_US} {subtask_id} from {0} where " \
-              "task_type!=? and task_type!=? and task_type!=? order by start_time" \
+              "task_type!=? and task_type!=? order by start_time" \
             .format(DBNameConstant.TABLE_SUMMARY_TASK_TIME,
                     NS_TO_US=NumberConstant.NS_TO_US,
                     index_info=cls._get_index_id_sql_condition(),
@@ -526,12 +432,10 @@ class AiCoreOpReport:
 
     @classmethod
     def _get_sql_and_headers(cls: any, curs: any, headers: list) -> tuple:
-        if DBManager.judge_table_exist(curs, DBNameConstant.TABLE_SUMMARY_TENSOR):
+        if DBManager.judge_table_exist(curs, DBNameConstant.TABLE_SUMMARY_GE):
             return cls._get_tensor_table_sql_and_headers(headers)
-        if not DBManager.judge_table_exist(curs, DBNameConstant.TABLE_SUMMARY_GE):
-            return cls._get_table_sql_and_headers_without_ge(headers)
 
-        return cls._get_two_table_union_sql(), headers
+        return cls._get_table_sql_and_headers_without_ge(headers)
 
 
 class ReportOPCounter:
@@ -552,15 +456,16 @@ class ReportOPCounter:
     @staticmethod
     def _get_op_report_sql_operator_scene() -> str:
         sql = "select op_type, core_type, occurrences, total_time/{NS_TO_US}, " \
-              "min/{NS_TO_US}, avg/{NS_TO_US}, max/{NS_TO_US}, ratio from {0} order by " \
-              "total_time desc".format(CommonConstant.OP_REPORT_TABLE, NS_TO_US=NumberConstant.NS_TO_US)
+              "min/{NS_TO_US}, avg/{NS_TO_US}, max/{NS_TO_US}, ratio from {0} " \
+              "where op_type != 'N/A' order by total_time desc" \
+             .format(CommonConstant.OP_REPORT_TABLE, NS_TO_US=NumberConstant.NS_TO_US)
         return sql
 
     @staticmethod
     def _get_op_report_sql_network_scene() -> str:
         sql = "select model_name, op_type, core_type, occurrences, total_time/{NS_TO_US}, " \
               "min/{NS_TO_US}, avg/{NS_TO_US}, max/{NS_TO_US}, ratio from {0} " \
-              "order by model_name asc, " \
+              "where op_type != 'N/A' order by model_name asc, " \
               "total_time desc".format(CommonConstant.OP_REPORT_TABLE, NS_TO_US=NumberConstant.NS_TO_US)
         return sql
 

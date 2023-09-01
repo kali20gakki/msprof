@@ -40,7 +40,6 @@ class GeLogicStreamParser(DataParser, MsMultiProcess):
         parse ge logic stream data
         """
         logic_stream_info_file = self._file_list.get(DataTag.GE_LOGIC_STREAM_INFO, [])
-        logic_stream_info_file = self.group_aging_file(logic_stream_info_file)
         if logic_stream_info_file:
             self._ge_logic_stream_data = self.parse_bean_data(logic_stream_info_file, 
                                                               StructFmt.GE_LOGIC_STREAM_INFO_SIZE,

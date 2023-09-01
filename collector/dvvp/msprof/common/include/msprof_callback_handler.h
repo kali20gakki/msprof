@@ -8,7 +8,6 @@
 #define ANALYSIS_DVVP_PROFILER_MSPROF_CALLBACK_HANDLER_H
 
 #include <cstdint>
-#include <unordered_map>
 #include "data_dumper.h"
 #include "prof_callback.h"
 #include "utils/utils.h"
@@ -35,7 +34,7 @@ public:
     int StopReporter();
 
 public:
-    static std::unordered_map<uint32_t, MsprofCallbackHandler> reporters_;
+    static std::map<uint32_t, MsprofCallbackHandler> reporters_;
 
 private:
     int ReportData(CONST_VOID_PTR data, uint32_t len) const;

@@ -64,7 +64,7 @@ class TestFusionAddInfoParser(unittest.TestCase):
         data = FusionAddInfoBean.decode(struct_data)
         check = FusionAddInfoParser(self.file_list, CONFIG)
         result = check._get_fusion_info_data(data)
-        self.assertEqual(result, ['node', '0', 0, '0', '0', 0, '0', '0', '0', '0', '0', ''])
+        self.assertEqual(result, ['node', '0', 0, 0, '0', 0, '0', '0', '0', '0', '0', ''])
 
 
 if __name__ == '__main__':

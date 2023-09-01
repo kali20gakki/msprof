@@ -34,6 +34,9 @@ public:
 private:
     void ParseRuntimeTrackData(CONST_CHAR_PTR data, uint32_t len, bool ageFlag);
     void HandleRuntimeTrackData(CONST_CHAR_PTR data, bool ageFlag);
+    void MatchDeviceOpInfo(std::map<std::string, RtOpInfo> &rtOpInfo,
+        std::multimap<std::string, RtOpInfo> &tsTmpOpInfo,
+        std::multimap<uint32_t, GeOpFlagInfo> &geOpInfo);
  
 private:
     uint32_t totalRtTimes_;

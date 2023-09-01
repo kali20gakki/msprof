@@ -2,12 +2,10 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2019-2020. All rights reserved.
 
-import sqlite3
-
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
-from common_func.get_table_data import GetTableData
 from common_func.msvp_constant import MsvpConstant
+from common_func.platform.chip_manager import ChipManager
 from common_func.utils import Utils
 
 
@@ -47,3 +45,15 @@ def add_op_name(l2_cache_header: list, l2_cache_data: list, op_dict: dict) -> bo
         tmp.append(op_dict[key] if key in op_dict else Constant.NA)
         l2_cache_data[index] = tmp
     return True
+
+
+def process_hit_rate(l2_cache_header: list, l2_cache_data: list) -> list:
+    if not ChipManager().is_stars_chip():
+        return l2_cache_data
+    if "Hit Rate" not in l2_cache_header:
+        return l2_cache_data
+    hit_rate_inx = l2_cache_header.index("Hit Rate")
+    return [
+        _l2_cache_data[:hit_rate_inx] + (Constant.NA,) + _l2_cache_data[hit_rate_inx + 1:]
+        for _l2_cache_data in l2_cache_data
+    ]

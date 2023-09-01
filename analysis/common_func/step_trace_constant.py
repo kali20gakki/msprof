@@ -17,7 +17,7 @@ class StepTraceConstant:
     BP_TAG = 3
     ITER_END_TAG = 4
     ALL_REDUCE_START = 10000
-    GET_NEXT_START = 20000
+    GET_NEXT_START_TAG = 20000
 
     STEP_START = "step_start"
     STEP_END = "step_end"
@@ -33,6 +33,7 @@ class StepTraceConstant:
     TIME_STAMP = "timestamp"
     ITER_ID = "iter_id"
     INDEX_ID = "index_id"
+    GET_NEXT = "get_next"
 
     ITER_TIME = "iter_time"
     FORWARD_TO_BACK = "fp_bp"

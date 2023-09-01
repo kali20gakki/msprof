@@ -34,7 +34,6 @@ class MsProfCommonConstant:
     DEFAULT_IP = '127.0.0.1'
     SUMMARY = "summary"
     TIMELINE = "timeline"
-    DEFAULT_JOB = 'job_default'
     COMMON_FILE_NAME = os.path.basename(__file__)
 
     # key for the query data
@@ -115,6 +114,15 @@ def prepare_for_parse(output_path: str) -> None:
     """
     check_path_valid(PathManager.get_sql_dir(output_path), True)
     prepare_log(output_path)
+
+
+def prepare_for_analyze(out_path):
+    """
+    create analyze log directories
+    """
+    analyze_dir = PathManager.get_analyze_dir(out_path)
+    check_path_valid(analyze_dir, True)
+    prepare_log(analyze_dir)
 
 
 def prepare_log(output_path: str) -> None:

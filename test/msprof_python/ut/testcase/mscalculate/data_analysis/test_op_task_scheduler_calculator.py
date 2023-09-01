@@ -26,12 +26,12 @@ class TestCalculateOpTaskScheduler(unittest.TestCase):
 
     def test_process(self):
         ChipManager().chip_id = ChipModel.CHIP_V1_1_0
-        with mock.patch('analyzer.scene_base.profiling_scene.Utils.get_scene',
+        with mock.patch('common_func.profiling_scene.Utils.get_scene',
                         return_value="single_op"):
             with mock.patch(NAMESPACE + '.OpTaskSchedulerCalculator.op_generate_report_data'):
                 check = OpTaskSchedulerCalculator(file_list, CONFIG)
                 check.process()
-        with mock.patch('analyzer.scene_base.profiling_scene.Utils.get_scene',
+        with mock.patch('common_func.profiling_scene.Utils.get_scene',
                            return_value="single_op"):
             with mock.patch(NAMESPACE + '.OpTaskSchedulerCalculator.op_generate_report_data', side_effect=OSError), \
                     mock.patch(NAMESPACE + '.logging.error'):

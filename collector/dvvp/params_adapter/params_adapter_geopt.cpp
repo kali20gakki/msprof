@@ -47,7 +47,7 @@ void ParamsAdapterGeOpt::InitWholeConfigMap()
         INPUT_CFG_COM_OUTPUT,
         INPUT_CFG_COM_STORAGE_LIMIT,
         INPUT_CFG_COM_MSPROFTX,
-        INPUT_CFG_COM_TASK_TIME_L1,
+        INPUT_CFG_COM_TASK_TIME,
         INPUT_CFG_COM_TASK_TRACE,
         INPUT_CFG_COM_TRAINING_TRACE,
         INPUT_CFG_COM_AICPU,
@@ -74,7 +74,7 @@ void ParamsAdapterGeOpt::InitPrintMap()
         {INPUT_CFG_COM_OUTPUT, "output"},
         {INPUT_CFG_COM_STORAGE_LIMIT, "storage_limit"},
         {INPUT_CFG_COM_MSPROFTX, "msproftx"},
-        {INPUT_CFG_COM_TASK_TIME_L1, "task_time"},
+        {INPUT_CFG_COM_TASK_TIME, "task_time"},
         {INPUT_CFG_COM_TASK_TRACE, "task_trace"},
         {INPUT_CFG_COM_TRAINING_TRACE, "training_trace"},
         {INPUT_CFG_COM_AICPU, "aicpu"},
@@ -147,7 +147,7 @@ void ParamsAdapterGeOpt::GenGeOptionsContainer(SHARED_PTR_ALIA<ProfGeOptionsConf
     paramContainer_[INPUT_CFG_COM_OUTPUT] = geCfg->output();
     paramContainer_[INPUT_CFG_COM_STORAGE_LIMIT] = geCfg->storage_limit();
     paramContainer_[INPUT_CFG_COM_MSPROFTX] = geCfg->msproftx();
-    paramContainer_[INPUT_CFG_COM_TASK_TIME_L1] = geCfg->task_time();
+    paramContainer_[INPUT_CFG_COM_TASK_TIME] = geCfg->task_time();
     paramContainer_[INPUT_CFG_COM_TRAINING_TRACE] = geCfg->training_trace();
     paramContainer_[INPUT_CFG_COM_TASK_TRACE] = geCfg->task_trace();
     paramContainer_[INPUT_CFG_COM_AICPU] = geCfg->aicpu();
@@ -252,15 +252,15 @@ bool ParamsAdapterGeOpt::CheckInstrAndTaskParamBothSet(SHARED_PTR_ALIA<ProfGeOpt
         return false;
     }
     const std::vector<std::pair<bool, std::string>> ARG_VEC {
-        { geCfg->task_time() == "on", " task_time " },
-        { geCfg->task_trace() == "on", " task_trace " },
-        { geCfg->training_trace() == "on", " training_trace " },
-        { geCfg->aicpu() == "on", " aicpu " },
-        { geCfg->l2() == "on", " l2 " },
-        { geCfg->hccl() == "on", " hccl " },
-        { geCfg->runtime_api() == "on", " runtime_api " },
-        { !geCfg->aic_metrics().empty(), " aic_metrics " },
-        { !geCfg->aiv_metrics().empty(), " aiv_metrics " }
+        {geCfg->task_time() == "on" || geCfg->task_time() == "l0" || geCfg->task_time() == "l1", " task_time "},
+        {geCfg->task_trace() == "on", " task_trace "},
+        {geCfg->training_trace() == "on", " training_trace "},
+        {geCfg->aicpu() == "on", " aicpu "},
+        {geCfg->l2() == "on", " l2 "},
+        {geCfg->hccl() == "on", " hccl "},
+        {geCfg->runtime_api() == "on", " runtime_api "},
+        {!geCfg->aic_metrics().empty(), " aic_metrics "},
+        {!geCfg->aiv_metrics().empty(), " aiv_metrics "}
     };
     bool anyComflict = std::any_of(ARG_VEC.begin(), ARG_VEC.end(), [](std::pair<bool, std::string> arg) {
         return arg.first;

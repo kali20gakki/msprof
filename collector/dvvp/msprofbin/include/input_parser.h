@@ -66,6 +66,8 @@ enum MsprofArgsType {
     ARGS_HCCL,
     ARGS_INSTR_PROFILING,
     ARGS_L2_PROFILING,
+    ARGS_ANALYZE,
+    ARGS_RULE,
     ARGS_PARSE,
     ARGS_QUERY,
     ARGS_EXPORT,
@@ -134,6 +136,8 @@ const MmStructOption longOptions[] = {
     {"hccl", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_HCCL},  // the default value is off
     {"instr-profiling", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_INSTR_PROFILING},
     {"l2", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_L2_PROFILING},
+    {"analyze", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_ANALYZE},
+    {"rule", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_RULE},
     {"parse", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_PARSE},
     {"query", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_QUERY},
     {"export", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_EXPORT},

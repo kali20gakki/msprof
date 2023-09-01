@@ -1,7 +1,7 @@
 import unittest
 from unittest import mock
 
-from analyzer.scene_base.profiling_scene import ProfilingScene
+from common_func.profiling_scene import ProfilingScene
 from mscalculate.data_analysis.op_summary_op_scene_calculator import OpSummaryOpSceneCalculator
 from common_func.info_conf_reader import InfoConfReader
 from constant.constant import CONFIG
@@ -32,25 +32,12 @@ class TestOpSummaryOpSceneCalculator(unittest.TestCase):
 
     def test_get_ge_sql(self):
         check = OpSummaryOpSceneCalculator(file_list, CONFIG)
+        InfoConfReader()._info_json = {'devices': '0'}
         result = check._get_ge_sql()
-        sql = "SELECT model_id, task_id, stream_id, op_name, op_type, block_dim, mix_block_dim, " \
-              "task_type, timestamp, batch_id, context_id from TaskInfo"
+        sql = "SELECT model_id, task_id, stream_id, op_name, op_type, block_dim, mix_block_dim, task_type, " \
+              "tensor_num, input_formats, input_data_types, input_shapes, output_formats, output_data_types," \
+              "output_shapes, index_id, timestamp, batch_id, context_id from TaskInfo where device_id = 0"
         self.assertEqual(sql, result)
-
-    def test_create_ge_tensor_table(self):
-        with mock.patch(NAMESPACE + '.OpSummaryOpSceneCalculator._check_tensor_table', return_value=True), \
-                mock.patch(NAMESPACE + '.DBManager.fetch_all_data', return_value=[]):
-            check = OpSummaryOpSceneCalculator(file_list, CONFIG)
-            result = check.create_ge_tensor_table()
-        self.assertFalse(result)
-        with mock.patch(NAMESPACE + '.OpSummaryOpSceneCalculator._check_tensor_table', return_value=True), \
-                mock.patch(NAMESPACE + '.DBManager.sql_create_general_table', return_value='test'), \
-                mock.patch(NAMESPACE + '.DBManager.execute_sql'), \
-                mock.patch(NAMESPACE + '.DBManager.executemany_sql'), \
-                mock.patch(NAMESPACE + '.OpSummaryOpSceneCalculator._get_tensor_data', return_value=[[1]]):
-            check = OpSummaryOpSceneCalculator(file_list, CONFIG)
-            result = check.create_ge_tensor_table()
-        self.assertTrue(result)
 
     def test_get_ge_merge_data(self):
         with mock.patch(NAMESPACE + '.DBManager.check_connect_db', return_value=(False, False)), \
@@ -145,32 +132,26 @@ class TestOpSummaryOpSceneCalculator(unittest.TestCase):
             self.assertEqual(result, False)
 
     def test_get_task_time_data(self):
-        InfoConfReader()._info_json = {'devices': ['0']}
-        with mock.patch(NAMESPACE + '.AiStackDataCheckManager.contain_task_time_data',
-                        return_value=True):
-            with mock.patch(NAMESPACE + '.GetOpTableTsTime.get_task_time_data', return_value=[]), \
-                    mock.patch(NAMESPACE + '.OpCommonFunc.calculate_task_time',
-                               return_value=((1, 2, 3),)):
-                check = OpSummaryOpSceneCalculator(file_list, CONFIG)
-                result = check.get_task_time_data()
-            self.assertEqual(result, ((1, 2, 3),))
-        with mock.patch(NAMESPACE + '.AiStackDataCheckManager.contain_task_time_data',
-                        return_value=False):
-            check = OpSummaryOpSceneCalculator(file_list, CONFIG)
-            result = check.get_task_time_data()
-        self.assertEqual(result, [])
+        check = OpSummaryOpSceneCalculator(file_list, CONFIG)
+        self.assertEqual(check.get_task_time_data(), [])
+        with mock.patch(NAMESPACE + '.AscendTaskModel.get_all_data',
+                        return_value=[[1, 1, 1, 1, 1, 1, 1000, 1000, 'AI_CORE', 'AI_CORE']]):
+            self.assertEqual(check.get_task_time_data(), [[1, 1, 1000, 1000, 0, 'AI_CORE', 1, 1, 1, 1]])
 
     def test_create_task_time_table(self):
-        with mock.patch(NAMESPACE + '.DBManager.sql_create_general_table', return_value=True), \
+        check = OpSummaryOpSceneCalculator(file_list, CONFIG)
+        result = check.create_task_time_table()
+        self.assertFalse(result)
+
+        with mock.patch('os.path.exists', return_value=True), \
+                mock.patch(NAMESPACE + '.DBManager.sql_create_general_table', return_value=True), \
                 mock.patch(NAMESPACE + '.DBManager.execute_sql'):
-            with mock.patch(NAMESPACE + '.OpSummaryOpSceneCalculator.get_task_time_data', return_value=False):
+            with mock.patch(NAMESPACE + '.OpSummaryOpSceneCalculator.get_task_time_data', return_value=[]):
                 check = OpSummaryOpSceneCalculator(file_list, CONFIG)
                 result = check.create_task_time_table()
             self.assertEqual(result, False)
             with mock.patch(NAMESPACE + '.OpSummaryOpSceneCalculator.get_task_time_data',
-                            return_value=[(1, 2, 3, 4, 5, 6, 7, 8, 9)]), \
-                    mock.patch(NAMESPACE + '.OpCommonFunc.deal_batch_id', return_value=((1, 2, 3),)), \
-                    mock.patch(NAMESPACE + '.DBManager.executemany_sql'):
+                            return_value=[(1, 2, 3, 4, 5, 6, 7, 8, 9)]):
                 check = OpSummaryOpSceneCalculator(file_list, CONFIG)
                 result = check.create_task_time_table()
             self.assertTrue(result)

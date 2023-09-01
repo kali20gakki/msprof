@@ -11,6 +11,7 @@ from unittest import mock
 from msparser.l2_cache.l2_cache_parser import L2CacheParser
 from profiling_bean.struct_info.l2_cache import L2CacheDataBean
 from common_func.info_conf_reader import InfoConfReader
+from common_func.file_manager import FileOpen
 from profiling_bean.prof_enum.data_tag import DataTag
 
 from constant.constant import CONFIG
@@ -62,6 +63,10 @@ class TestL2CacheParser(unittest.TestCase):
         data_bean.construct_bean(data)
         with mock.patch(NAMESPACE + '.L2CacheParser._check_file_complete', return_value=144), \
                 mock.patch('builtins.open', mock.mock_open(read_data="")), \
+                mock.patch('os.path.exists', return_value=True), \
+                mock.patch('os.path.isfile', return_value=True), \
+                mock.patch('os.path.getsize', return_value=100), \
+                mock.patch('os.access', return_value=True), \
                 mock.patch(BEAN_NAMESPACE + '.L2CacheDataBean.decode', return_value=data_bean):
             check = L2CacheParser(self.file_list, self.sample_config)
             check.parse()

@@ -16,6 +16,7 @@ using namespace analysis::dvvp::transport;
 bool AnalyzerBase::isFftsPlus_ = false;
 std::map<std::string, RtOpInfo> AnalyzerBase::rtOpInfo_;
 std::map<std::string, RtOpInfo> AnalyzerBase::tsOpInfo_;
+std::multimap<std::string, RtOpInfo> AnalyzerBase::tsTmpOpInfo_;
 std::multimap<uint32_t, GeOpFlagInfo> AnalyzerBase::geNodeInfo_;
 std::multimap<uint32_t, GeOpFlagInfo> AnalyzerBase::geApiInfo_;
 std::multimap<uint32_t, GeOpFlagInfo> AnalyzerBase::geModelInfo_;
@@ -23,8 +24,11 @@ std::multimap<uint32_t, GeOpFlagInfo> AnalyzerBase::geOpInfo_;
 std::multimap<uint32_t, GeOpFlagInfo> AnalyzerBase::geContextInfo_;
 std::map<uint32_t, uint32_t> AnalyzerBase::graphIdMap_;
 std::vector<ProfOpDesc> AnalyzerBase::opDescInfos_;
+std::vector<RtOpInfo> AnalyzerBase::devTmpOpInfo_;
 std::mutex AnalyzerBase::opDescInfoMtx_;
 std::mutex AnalyzerBase::graphIdMtx_;
+std::mutex AnalyzerBase::rtThreadMtx_;
+std::mutex AnalyzerBase::geThreadMtx_;
 
 void AnalyzerBase::AppendToBufferedData(CONST_CHAR_PTR data, uint32_t len)
 {
@@ -46,7 +50,7 @@ void AnalyzerBase::BufferRemainingData(uint32_t offset)
         buffer_ = std::string(dataPtr_ + offset, dataLen_ - offset);
     } else {
         // no data to buffer
-        if (buffer_.empty()) {
+        if (!buffer_.empty()) {
             buffer_.clear();
         }
     }
@@ -62,25 +66,6 @@ int32_t AnalyzerBase::InitFrequency()
     } else {
         MSPROF_EVENT("InitFrequency success. freqency: %f", frequency_);
         return PROFILING_SUCCESS;
-    }
-}
-
-void AnalyzerBase::EraseRtMapByTaskId(uint32_t taskId, uint16_t streamId,
-    std::map<std::string, RtOpInfo> &rtOpInfo) const
-{
-    for (auto iter = rtOpInfo.begin(); iter != rtOpInfo.end();) {
-        auto pos = iter->first.find(KEY_SEPARATOR);
-        uint32_t iterTaskId = static_cast<uint32_t>(std::stoi(iter->first.substr(0, pos)));
-        uint16_t iterStreamId = static_cast<uint16_t>(std::stoi(iter->first.substr(pos + 1)));
-        if (iterStreamId != streamId) {
-            iter++;
-            continue;
-        }
-        if (iterTaskId > taskId) {
-            iter++;
-            continue;
-        }
-        rtOpInfo.erase(iter++);
     }
 }
  
@@ -99,39 +84,54 @@ void AnalyzerBase::EraseRtMapByStreamId(uint16_t streamId, std::map<std::string,
  
 void AnalyzerBase::HandleDeviceData(const std::string &key, RtOpInfo &devData, uint32_t &time)
 {
+    std::unique_lock<std::mutex> lk(AnalyzerBase::rtThreadMtx_);
     if (devData.start >= devData.end) {
-        MSPROF_LOGD("Device op data start and end error, start: %llu, end: %llu", devData.start, devData.end);
+        MSPROF_LOGD("Device start and end error, start: %llu, end: %llu", devData.start, devData.end);
+        AnalyzerBase::tsOpInfo_.erase(key);
+        return;
+    }
+ 
+    if (AnalyzerBase::rtOpInfo_.empty()) {
+        MSPROF_LOGI("rt opInfo is empty.");
+        AnalyzerBase::tsTmpOpInfo_.insert(std::pair<std::string, RtOpInfo>(key, devData));
         AnalyzerBase::tsOpInfo_.erase(key);
         return;
     }
 
     auto hostIter = AnalyzerBase::rtOpInfo_.find(key);
     if (hostIter == AnalyzerBase::rtOpInfo_.end()) {
-        MSPROF_LOGI("Device data not match runtime track, taskId+streamId: %s", key.c_str());
+        MSPROF_LOGI("Device data not match runtime track.");
         AnalyzerBase::tsOpInfo_.erase(key);
         return;
     }
 
-    uint32_t mergeKey = hostIter->second.threadId;
     devData.tsTrackTimeStamp = hostIter->second.tsTrackTimeStamp;
     devData.threadId = hostIter->second.threadId;
 
     time++;
     MSPROF_LOGD("Success to merge runtime track and Hwts|Ffts data. timeStamp: %llu, "
         "threadId: %u, taskId+streamId: %s, start: %llu, end: %llu, startAicore: %llu, endAicore: %llu, contextId: %u",
-        hostIter->second.tsTrackTimeStamp, mergeKey, key.c_str(), devData.start, devData.end,
+        hostIter->second.tsTrackTimeStamp, devData.threadId, key.c_str(), devData.start, devData.end,
         devData.startAicore, devData.endAicore, devData.contextId);
+    HandleUploadData(key, devData);
+}
 
+void AnalyzerBase::HandleUploadData(const std::string &key, RtOpInfo &devData)
+{
+    std::unique_lock<std::mutex> lk(AnalyzerBase::geThreadMtx_);
+    AnalyzerBase::devTmpOpInfo_.emplace_back(std::move(devData));
     if (AnalyzerBase::geOpInfo_.empty()) {
-        MSPROF_LOGE("geOpInfo is empty");
+        MSPROF_LOGI("ge opInfo is empty.");
         AnalyzerBase::tsOpInfo_.erase(key);
         return;
+    } else {
+        AnalyzerBase::devTmpOpInfo_.pop_back();
     }
 
-    auto threadGroup = AnalyzerBase::geOpInfo_.equal_range(mergeKey);
+    auto threadGroup = AnalyzerBase::geOpInfo_.equal_range(devData.threadId);
     if (threadGroup.first != AnalyzerBase::geOpInfo_.end()) {
         for (auto geIter = threadGroup.first; geIter != threadGroup.second; ++geIter) {
-            if (devData.tsTrackTimeStamp >= geIter->second.end ||
+            if (devData.tsTrackTimeStamp > geIter->second.end ||
                 devData.tsTrackTimeStamp <= geIter->second.start) { // time include
                 continue;
             }
@@ -176,7 +176,7 @@ void AnalyzerBase::ConstructAndUploadOptimizeData(GeOpFlagInfo &opFlagData, RtOp
         " opName: %s, opType: %s", opDesc.modelId, opDesc.threadId, opDesc.duration, opDesc.executionTime,
         opName.c_str(), opType.c_str());
     std::unique_lock<std::mutex> lk(opDescInfoMtx_);
-    opDescInfos_.emplace_back(std::move(opDesc));
+    AnalyzerBase::opDescInfos_.emplace_back(std::move(opDesc));
 }
  
 uint32_t AnalyzerBase::GetGraphModelId(uint32_t modelId) const

@@ -298,6 +298,14 @@ class MiniLlcModel(BaseModel, ABC):
                 DBManager.executemany_sql(self.conn, insert_sql, insert_data)
 
 
+def check_device_cpu(cpu_num: str) -> str:
+    for num in cpu_num.replace(' ', '').split(","):
+        if not num.isdigit():
+            logging.error("Invalid device cpu: %s", cpu_num)
+            return ''
+    return cpu_num
+
+
 def cal_core2cpu(project_path: str, device_id: int) -> dict:
     """
     calculate CORE2CPU list through
@@ -311,6 +319,8 @@ def cal_core2cpu(project_path: str, device_id: int) -> dict:
         if os.path.isfile(info_path):
             ctrl_cpu = InfoConfReader().get_data_under_device("ctrl_cpu")
             ai_cpu = InfoConfReader().get_data_under_device("ai_cpu")
+            ctrl_cpu = check_device_cpu(ctrl_cpu)
+            ai_cpu = check_device_cpu(ai_cpu)
             core2cpu['ctrlcpu'] = Utils.generator_to_list("dsid{}".format(x) for x in ctrl_cpu.split(",") if ctrl_cpu)
             core2cpu['aicpu'] = Utils.generator_to_list("dsid{}".format(x) for x in ai_cpu.split(",") if ai_cpu)
     except (OSError, SystemError, ValueError, TypeError, RuntimeError, AttributeError) as err:

@@ -18,25 +18,17 @@ function get_version(){
     fi
 }
 
-function pkill_prof_cmd(){
-    if [ "${command_param}" = "perf" ] || [ "${command_param}" = "ltrace" ] || [ "${command_param}" = "iotop" ]; then
-        try_times=0
-        while [ ${try_times} -lt 10 ]
-        do
-            pkill -2 "${command_param}"
-            sleep 1
-            count=`pgrep ${command_param} | wc -l`
-            if [ $count -eq 0 ]; then
-                exit 0
-            fi
-            let try_times+=1
-        done
-        echo "'pkill -2 ${command_param}' executed ${try_times} times failed"
-        pkill -9 "${command_param}"
+function kill_prof_cmd(){
+    if [[ ${command_param} =~ ${reg_int} ]]; then
+        pidLine=`pstree -p ${command_param}`
+        pidLine=`echo $pidLine | awk 'BEGIN{ FS="(" ; RS=")" } NF>1 { print $NF }'`
+        for pid in $pidLine
+            do 
+                kill -2 ${pid}
+            done     
         exit 1
     else
-        printf "The value of the second parameter is incorrect, please enter the correct parameter, "
-        printf "such as: perf, ltrace, iotop\n"
+        echo "Input pid:${command_param} error"
         exit 1
     fi
 }
@@ -110,7 +102,7 @@ function get_cmd(){
         arr[i]=${compile}
     done
     cmd="${script_dir}/${script_name} get-version perf,${script_dir}/${script_name} get-version ltrace,${script_dir}/${script_name} get-version iotop"
-    cmd="${cmd},${script_dir}/${script_name} pkill perf,${script_dir}/${script_name} pkill ltrace,${script_dir}/${script_name} pkill iotop"
+    cmd="${cmd},${script_dir}/${script_name} kill pid"
     for i in "${arr[@]}"; do
         cmd="${cmd},${script_dir}/${script_name} perf $i,${script_dir}/${script_name} ltrace $i,${script_dir}/${script_name} iotop $i"
     done
@@ -167,9 +159,9 @@ function main(){
     elif [ "${command_type}" = "get-version" ]; then
         #echo "Run get-version cmd"
         get_version
-    elif [ "${command_type}" = "pkill" ]; then
-        #echo "pkill cmd"
-        pkill_prof_cmd
+    elif [ "${command_type}" = "kill" ]; then
+        #echo "kill cmd"
+        kill_prof_cmd
     elif [ "${command_type}" = "perf" ]; then
         #echo "run perf trace cmd"
         run_prof_trace_cmd
@@ -181,7 +173,7 @@ function main(){
         run_iotop_cmd
     else
         printf "The value of the first parameter is incorrect, please enter the correct parameter, "
-        printf "such as: set-sudoers, get-version, pkill, perf, ltrace, iotop\n"
+        printf "such as: set-sudoers, get-version, kill, perf, ltrace, iotop\n"
         exit 1
     fi
 }

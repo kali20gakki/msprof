@@ -69,7 +69,8 @@ class TestClusterParallelAnalysisTuning(unittest.TestCase):
         with mock.patch(NAMESPACE + ".ClusterParallelAnalysisTuning._prepare_parallel_analysis"), \
                 mock.patch(NAMESPACE + ".ClusterParallelViewModel.get_table_name", return_value="test"), \
                 mock.patch(NAMESPACE + ".ClusterParallelAnalysis.get_tuning_suggestion",
-                           return_value={"model": "data_parallel"}):
+                           return_value={"model": "data_parallel"}), \
+                mock.patch('common_func.file_manager.check_path_valid'):
             check = ClusterParallelAnalysisTuning(self.PARAMS1)
             check.process()
             self.assertEqual(os.path.exists(os.path.join(

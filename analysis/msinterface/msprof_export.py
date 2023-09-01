@@ -6,7 +6,7 @@ import json
 import logging
 import os
 
-from analyzer.scene_base.profiling_scene import ProfilingScene
+from common_func.profiling_scene import ProfilingScene
 from common_func.ai_stack_data_check_manager import AiStackDataCheckManager
 from common_func.common import error
 from common_func.common import print_info
@@ -56,14 +56,6 @@ class ExportCommand:
         MsProfCommonConstant.TIMELINE: [
             {'export_type': ExportDataType.STEP_TRACE,
              'handler': AiStackDataCheckManager.contain_training_trace_data_or_step},
-            {'export_type': ExportDataType.ACL,
-             'handler': AiStackDataCheckManager.contain_acl_data},
-            {'export_type': ExportDataType.GE,
-             'handler': AiStackDataCheckManager.contain_ge_model_time_data},
-            {'export_type': ExportDataType.GE_OP_EXECUTE,
-             'handler': AiStackDataCheckManager.contain_ge_op_execute_data},
-            {'export_type': ExportDataType.RUNTIME_API,
-             'handler': AiStackDataCheckManager.contain_runtime_api_data},
             {'export_type': ExportDataType.TASK_TIME,
              'handler': AiStackDataCheckManager.contain_core_cpu_reduce_data},
             {'export_type': ExportDataType.HBM, 'handler': SystemDataCheckManager.contain_hbm_data},
@@ -85,8 +77,6 @@ class ExportCommand:
              'handler': SystemDataCheckManager.contain_llc_bandwidth_data},
             {'export_type': ExportDataType.NPU_MEM,
              'handler': SystemDataCheckManager.contain_npu_mem_data},
-            {'export_type': ExportDataType.AI_STACK_TIME,
-             'handler': AiStackDataCheckManager.contain_ai_stack_time_data},
             {'export_type': ExportDataType.AI_CORE_UTILIZATION,
              'handler': AiStackDataCheckManager.contain_ai_core_sample_based},
             {'export_type': ExportDataType.HOST_CPU_USAGE,
@@ -100,7 +90,7 @@ class ExportCommand:
             {'export_type': ExportDataType.OS_RUNTIME_API,
              'handler': HostDataCheckManager.contain_runtime_api_data},
             {'export_type': ExportDataType.FFTS_SUB_TASK_TIME,
-             'handler': AiStackDataCheckManager.contain_stars_soc_data},
+             'handler': AiStackDataCheckManager.contain_sub_task_data},
             {'export_type': ExportDataType.HCCL,
              'handler': AiStackDataCheckManager.contain_hccl_hcom_data},
             {'export_type': ExportDataType.MSPROF_TX,
@@ -109,8 +99,6 @@ class ExportCommand:
              'handler': AiStackDataCheckManager.contain_stars_soc_profiler_data},
             {'export_type': ExportDataType.STARS_CHIP_TRANS,
              'handler': AiStackDataCheckManager.contain_stars_chip_trans_data},
-            {'export_type': ExportDataType.THREAD_GROUP,
-             'handler': AiStackDataCheckManager.contain_thread_group_data},
             {'export_type': ExportDataType.LOW_POWER,
              'handler': AiStackDataCheckManager.contain_stars_low_power_data},
             {'export_type': ExportDataType.INSTR,
@@ -119,6 +107,10 @@ class ExportCommand:
              'handler': AiStackDataCheckManager.contain_acc_pmu_data},
             {'export_type': ExportDataType.TASK_QUEUE,
              'handler': AiStackDataCheckManager.contain_task_queue_data},
+            {'export_type': ExportDataType.EVENT,
+             'handler': AiStackDataCheckManager.contain_event_data},
+            {'export_type': ExportDataType.API,
+             'handler': AiStackDataCheckManager.contain_api_data},
             {'export_type': ExportDataType.MSPROF,
              'handler': lambda result_dir, device_id=None: True}
         ],
@@ -129,12 +121,10 @@ class ExportCommand:
              'handler': AiStackDataCheckManager.contain_l2_cache_data},
             {'export_type': ExportDataType.STEP_TRACE,
              'handler': AiStackDataCheckManager.contain_training_trace_data_or_step},
-            {'export_type': ExportDataType.GE_OP_EXECUTE,
-             'handler': AiStackDataCheckManager.contain_ge_op_execute_data},
             {'export_type': ExportDataType.OP_SUMMARY,
              'handler': AiStackDataCheckManager.contain_op_summary_data},
             {'export_type': ExportDataType.OP_STATISTIC,
-             'handler': AiStackDataCheckManager.contain_op_static_data},
+             'handler': AiStackDataCheckManager.contain_op_statistic_data},
             {'export_type': ExportDataType.AICPU,
              'handler': AiStackDataCheckManager.contain_dp_aicpu_data},
             {'export_type': ExportDataType.DP,
@@ -180,16 +170,8 @@ class ExportCommand:
              'handler': SystemDataCheckManager.contain_ts_cpu_data},
             {'export_type': ExportDataType.NPU_MEM,
              'handler': SystemDataCheckManager.contain_npu_mem_data},
-            {'export_type': ExportDataType.ACL,
-             'handler': AiStackDataCheckManager.contain_acl_data},
-            {'export_type': ExportDataType.ACL_STATISTIC,
-             'handler': AiStackDataCheckManager.contain_acl_data},
             {'export_type': ExportDataType.FUSION_OP,
              'handler': AiStackDataCheckManager.contain_fusion_op_data},
-            {'export_type': ExportDataType.RUNTIME_API,
-             'handler': AiStackDataCheckManager.contain_runtime_api_data},
-            {'export_type': ExportDataType.AI_STACK_TIME,
-             'handler': AiStackDataCheckManager.contain_ai_stack_time_data},
             {'export_type': ExportDataType.AI_CORE_UTILIZATION,
              'handler': AiStackDataCheckManager.contain_ai_core_sample_based},
             {'export_type': ExportDataType.AI_VECTOR_CORE_UTILIZATION,
@@ -208,10 +190,14 @@ class ExportCommand:
              'handler': HostDataCheckManager.contain_host_disk_usage_data},
             {'export_type': ExportDataType.PYTORCH_OPERATOR_VIEW,
              'handler': AiStackDataCheckManager.contain_pytorch_operator_profiler_data},
-            {'export_type': ExportDataType.GE_OPERATOR_MEMORY,
+            {'export_type': ExportDataType.OPERATOR_MEMORY,
              'handler': AiStackDataCheckManager.contain_npu_op_mem_data},
-            {'export_type': ExportDataType.GE_MEMORY_RECORD,
+            {'export_type': ExportDataType.MEMORY_RECORD,
              'handler': AiStackDataCheckManager.contain_npu_op_mem_rec_data},
+            {'export_type': ExportDataType.HCCL_STATISTIC,
+             'handler': AiStackDataCheckManager.contain_hccl_statistic_data},
+            {'export_type': ExportDataType.API_STATISTIC,
+             'handler': AiStackDataCheckManager.contain_api_statistic_data},
         ]
     }
     MODEL_ID = "model_id"
@@ -390,13 +376,19 @@ class ExportCommand:
         model_ids_step = ExportCommand.get_model_id_set(
             result_dir, DBNameConstant.DB_STEP_TRACE, DBNameConstant.TABLE_STEP_TRACE_DATA)
 
+        model_ids_hccl = ExportCommand.get_model_id_set(
+            result_dir, DBNameConstant.DB_HCCL, DBNameConstant.TABLE_HCCL_TASK)
+
+        model_match_union = model_ids_ge
+        if model_ids_hccl:
+            model_match_union = model_ids_hccl | model_ids_ge
         model_match_set = model_ids_step
         if model_ids_ge and model_ids_step:
             not_match_set = model_ids_ge - model_ids_step
             if not_match_set:
                 logging.warning("step trace data miss model id.")
                 logging.debug("step trace data miss %s.", not_match_set)
-            model_match_set = model_ids_ge & model_ids_step
+            model_match_set = model_match_union & model_ids_step
         else:
             logging.warning("ge step info data miss model id.")
 
@@ -429,7 +421,6 @@ class ExportCommand:
                 StrConstant.SAMPLE_CONFIG_PROJECT_PATH: result_dir,
                 StrConstant.PARAM_DEVICE_ID: device,
                 StrConstant.PARAM_ITER_ID: self.iteration_range,
-                StrConstant.PARAM_JOB_ID: MsProfCommonConstant.DEFAULT_JOB,
             }
         else:
             sample_json = {
@@ -438,7 +429,7 @@ class ExportCommand:
         return sample_json
 
     def _has_data_to_export(self):
-        if len(self.list_map.get('export_type_list')) == 0:
+        if not self.list_map.get('export_type_list'):
             return False
         return True
 
@@ -468,13 +459,15 @@ class ExportCommand:
 
     def _handle_export_data(self: any, params: dict) -> None:
         result = json.loads(MsProfExportDataUtils.export_data(params))
+        if result.get('status', NumberConstant.EXCEPTION) == NumberConstant.SKIP:
+            return
         if result.get('status', NumberConstant.EXCEPTION) == NumberConstant.SUCCESS:
             self._print_export_info(params, result.get('data', []))
         else:
             if result.get('status', NumberConstant.EXCEPTION) == NumberConstant.ERROR:
                 error(self.FILE_NAME, result.get('info', ""))
             else:
-                warn(self.FILE_NAME, result.get('info', ""))
+                logging.warning(result.get('info', ""))
 
     def _print_export_info(self: any, params: dict, data: str) -> None:
         export_info = 'The {0} {1} data has been ' \
@@ -484,16 +477,16 @@ class ExportCommand:
 
         if params.get(StrConstant.PARAM_DEVICE_ID) is not None:
             if params.get(StrConstant.PARAM_DEVICE_ID) == str(NumberConstant.HOST_ID):
+                export_info = 'The {0} {1} data of host for iteration {2} has been ' \
+                              'exported to "{3}".'.format(params.get(StrConstant.PARAM_DATA_TYPE),
+                                                          self.command_type,
+                                                          params.get(StrConstant.PARAM_ITER_ID),
+                                                          data)
+            else:
                 export_info = 'The {0} {1} data of device {2} for iteration {3} has been ' \
                               'exported to "{4}".'.format(params.get(StrConstant.PARAM_DATA_TYPE),
                                                           self.command_type,
                                                           params.get(StrConstant.PARAM_DEVICE_ID),
-                                                          params.get(StrConstant.PARAM_ITER_ID),
-                                                          data)
-            else:
-                export_info = 'The {0} {1} data of host for iteration {2} has been ' \
-                              'exported to "{3}".'.format(params.get(StrConstant.PARAM_DATA_TYPE),
-                                                          self.command_type,
                                                           params.get(StrConstant.PARAM_ITER_ID),
                                                           data)
         print_info(self.FILE_NAME, export_info)
@@ -534,7 +527,6 @@ class ExportCommand:
             StrConstant.PARAM_DATA_TYPE: export_data_type,
             StrConstant.PARAM_RESULT_DIR: result_dir,
             StrConstant.PARAM_DEVICE_ID: device_id,
-            StrConstant.PARAM_JOB_ID: MsProfCommonConstant.DEFAULT_JOB,
             StrConstant.PARAM_EXPORT_TYPE: self.command_type,
             StrConstant.PARAM_ITER_ID: self.iteration_range,
             StrConstant.PARAM_EXPORT_FORMAT: self.export_format,

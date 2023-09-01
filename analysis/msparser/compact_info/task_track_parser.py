@@ -71,6 +71,7 @@ class TaskTrackParser(DataParser, MsMultiProcess):
                 StructFmt.TASK_TRACK_DATA_SIZE,
                 TaskTrackBean,
                 lambda x: x,
+                check_func=self.check_magic_num,
             )
         self._task_track_data = self.reformat_data(bean_data)
 

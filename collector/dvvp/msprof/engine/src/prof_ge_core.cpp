@@ -487,6 +487,11 @@ Status aclgrphProfStop(ACL_GRPH_PROF_CONFIG_PTR profilerConfig)
 
 int32_t GeOpenDeviceHandle(const uint32_t devId)
 {
+    static std::unordered_set<uint32_t> devRecord;
+    if (devRecord.count(devId) > 0) {
+        MSPROF_LOGI("MsprofSetDeviceImpl devId %u is running", devId);
+        return PROFILING_SUCCESS;
+    }
     if (ProfAclMgr::instance()->MsprofSetDeviceImpl(devId) != PROFILING_SUCCESS) {
         MSPROF_LOGE("MsprofSetDeviceImpl failed, devId=%d", devId);
         return PROFILING_FAILED;
@@ -510,6 +515,7 @@ int32_t GeOpenDeviceHandle(const uint32_t devId)
             dataTypeConfig);
         return PROFILING_FAILED;
     }
+    devRecord.insert(devId);
     return PROFILING_SUCCESS;
 }
 
@@ -518,9 +524,6 @@ void GeFinalizeHandle()
     std::vector<uint32_t> devIds;
     Msprofiler::Api::ProfAclMgr::instance()->GetRunningDevices(devIds);
     for (uint32_t devId : devIds) {
-        if (devId == DEFAULT_HOST_ID) {
-            continue;
-        }
         uint64_t dataTypeConfig = 0;
         if (Msprofiler::Api::ProfAclMgr::instance()->ProfAclGetDataTypeConfig(devId, dataTypeConfig) != ACL_SUCCESS) {
             continue;
