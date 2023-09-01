@@ -72,6 +72,7 @@ enum MsprofArgsType {
     ARGS_QUERY,
     ARGS_EXPORT,
     ARGS_DYNAMIC_PROF,
+    ARGS_MSOPPROF,
     // number
     ARGS_AIC_FREQ, // 10 10-1000
     ARGS_AIV_FREQ, // 10 10-1000
@@ -142,6 +143,7 @@ const MmStructOption longOptions[] = {
     {"query", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_QUERY},
     {"export", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_EXPORT},
     {"dynamic", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_DYNAMIC_PROF},
+    {"op", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_MSOPPROF},
     // number
     {"aic-freq", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_AIC_FREQ},
     {"aiv-freq", MM_OPTIONAL_ARGUMENT, nullptr, ARGS_AIV_FREQ},
@@ -224,10 +226,26 @@ private:
     void AddStarsArgs();
     void AddAnalysisArgs();
     void AddDynProfArgs();
+    void AddMsopprofArgs();
+
 private:
     bool driverOnline_;
     PlatformType platform_;
     std::vector<Args> argsList_;
+};
+
+class MsoprofTask : public analysis::dvvp::common::singleton::Singleton<MsoprofTask> {
+public:
+    MsoprofTask();
+public:
+    bool MsopprofProcess(int argc, CONST_CHAR_PTR argv[]);
+    bool CheckMsopprof(int, CONST_CHAR_PTR argv[], std::vector<std::string> &op_argv);
+    void PrintHelp();
+    int ExecMsopprof(CONST_CHAR_PTR path, std::vector<std::string> argsVec);
+
+private:
+    CONST_CHAR_PTR path_;
+    CONST_CHAR_PTR filename_ = "msopprof";
 };
 }
 }
