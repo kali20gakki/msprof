@@ -51,9 +51,9 @@ def init_params(line: str) -> tuple:
         txpackets = int(fields[10])
         txerrs = int(fields[11])
         stat_info = (intf, rxbytes, rxpackets, rxerrs, txbytes, txpackets, txerrs)
-        return stat_info
     else:
-        return MsvpConstant.EMPTY_TUPLE
+        stat_info = (0, 0, 0, 0, 0, 0, 0)
+    return stat_info
 
 
 class HostNetworkUsagePresenter(HostProfPresenterBase):
