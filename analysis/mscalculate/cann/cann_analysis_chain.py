@@ -4,10 +4,8 @@
 import logging
 
 from common_func.constant import Constant
-from mscalculate.cann.cann_database import AdditionalRecordDatabase
-from mscalculate.cann.cann_database import ApiDataDatabase
+from mscalculate.cann.cann_event_generator import CANNThreadDB
 from mscalculate.cann.event import Event
-from mscalculate.cann.event_queue import EventQueue
 from mscalculate.cann.tree import TreeNode
 from profiling_bean.db_dto.api_data_dto import ApiDataDto
 
@@ -17,14 +15,15 @@ class CANNAnalysisChain:
     The analysis chain for CANN software stack. Each instance processes the data of a thread in the CANN.
     """
 
-    def __init__(self, thread_id: int, event_q: EventQueue, gears: dict):
+    def __init__(self, thread_id: int, db: CANNThreadDB, gears: dict):
         """
         thread_id：
         event_q: priority queue with thread id
         gears: gear set, one gear process one cann level
         """
         self.thread_id = thread_id
-        self.event_q = event_q
+        self.event_q = db.event_q
+        self.db = db
         self.gears = gears
         self.last_event_record = {
             Constant.MODEL_LEVEL: Event.invalid_event(),
@@ -41,8 +40,8 @@ class CANNAnalysisChain:
 
     def start(self):
         root_dto = ApiDataDto.invalid_dto(Constant.ROOT_LEVEL, self.thread_id, 0,
-                                          ApiDataDatabase().get_max_bound() + 1, "root")
-        root_event = ApiDataDatabase().put(root_dto)
+                                          self.db.get_time_bound() + 1, "root")
+        root_event = self.db.add_api(root_dto)
         # Associate the upper-level and lower-level relationships of events
         # based on timestamp points to build a callstack tree.
         root = TreeNode(root_event)
@@ -61,9 +60,9 @@ class CANNAnalysisChain:
     def build_tree(self, parent: TreeNode) -> TreeNode:
         while True:
             # All processing is complete
-            if self.event_q.empty(self.thread_id):
+            if self.event_q.empty():
                 return parent
-            event = self.event_q.top(self.thread_id)
+            event = self.event_q.top()
 
             # the current level has been processed.
             if not event.is_additional() and event.cann_level <= parent.event.cann_level:
@@ -72,14 +71,14 @@ class CANNAnalysisChain:
             if event.bound > parent.event.bound:
                 return parent
 
-            event = self.event_q.pop(self.thread_id)
+            event = self.event_q.pop()
             if event.is_additional():
                 last_event = self.last_event_record.get(event.cann_level)
                 if last_event and last_event.timestamp <= event.timestamp <= last_event.bound:
                     # This event is a supplementary information, not an independent task unit.
                     # Events are sorted by timestamp. Therefore, this information is recorded in the last
                     # processed event.
-                    last_event.add_additional_record(AdditionalRecordDatabase().get(event))
+                    last_event.add_additional_record(self.db.get_record(event))
                     continue
                 else:
                     # This scenario indicates that the event corresponding to the additional information is not
@@ -87,8 +86,8 @@ class CANNAnalysisChain:
                     # 1. Start and end tasks of runtime
                     # 2 ....
                     empty_dto = ApiDataDto().invalid_dto(event.cann_level, event.thread_id)
-                    empty_event: Event = ApiDataDatabase().put(empty_dto)
-                    empty_event.add_additional_record(AdditionalRecordDatabase().get(event))
+                    empty_event: Event = self.db.add_api(empty_dto)
+                    empty_event.add_additional_record(self.db.get_record(event))
                     parent.add_child(TreeNode(empty_event))
                     continue
 
