@@ -25,7 +25,8 @@ class TestMsprofTxViewer(unittest.TestCase):
             result = MsprofTxViewer(self.configs, self.params).get_summary_data()
             self.assertEqual(result, (['pid', ' tid', ' category', ' event_type', ' payload_type',
                                        ' payload_value', ' Start_time', ' End_time', ' message_type', ' message'],
-                                      [(0, 0, 0, 0, 0, 0, 0, 5, 0, 'test'), (0, 1, 0, 0, 1, 0, 1, 7, 0, 'test')],
+                                      [(0, 0, 0, 0, 0, 0, 0.0, 0.005, 0, 'test'),
+                                       (0, 1, 0, 0, 1, 0, 0.001, 0.007, 0, 'test')],
                                       2))
 
     def test_get_timeline_data(self):

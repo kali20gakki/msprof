@@ -84,7 +84,8 @@ class CommunicationMatrixParser(MetaParser):
             if not HcclAnalysisTool.is_valid_link(event):
                 idx += 1
                 continue
-            link_key = "{}-{}".format(event.src_rank, event.dst_rank)
+            dst_rank = event.src_rank if int(event.dst_rank) == int("0xffffffff", 16) else event.dst_rank
+            link_key = "{}-{}".format(event.src_rank, dst_rank)
             if event.transport_type == StrConstant.SDMA and event.hccl_name in StrConstant.SDMA_TRANSIT_ITEMS:
                 if link_key not in link_info:
                     link_info[link_key] = [0] * len(MatrixDataType.__members__)

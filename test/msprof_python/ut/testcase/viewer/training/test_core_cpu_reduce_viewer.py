@@ -78,12 +78,12 @@ class TestCoreCpuReduceViewer(unittest.TestCase):
 
     def test_get_total_cycle_2(self):
         result = {'12_2_0': 3450}
-        create_sql = "CREATE TABLE IF NOT EXISTS " + DBNameConstant.TABLE_AI_CORE_METRIC_SUMMARY + \
+        create_sql = "CREATE TABLE IF NOT EXISTS " + DBNameConstant.TABLE_METRIC_SUMMARY + \
                      "(total_cycles, stream_id, task_id, index_id, total_time)"
         data = ((3450, 12, 2, 1, 0.00345),)
         with DBOpen(DBNameConstant.DB_RUNTIME) as db_open:
             db_open.create_table(create_sql)
-            db_open.insert_data(DBNameConstant.TABLE_AI_CORE_METRIC_SUMMARY, data)
+            db_open.insert_data(DBNameConstant.TABLE_METRIC_SUMMARY, data)
             with mock.patch(NAMESPACE + '.DBManager.check_connect_db_path',
                             return_value=(db_open.db_conn, db_open.db_curs)), \
                     mock.patch(NAMESPACE + '.DBManager.judge_table_exist', return_value=True), \

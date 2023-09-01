@@ -64,7 +64,7 @@ class TestCommunicationAnalyzer(unittest.TestCase):
                     },
                     {
                         'Src Rank': 0,
-                        'Dst Rank': 4294967295,
+                        'Dst Rank': 0,
                         'Transport Type': 3,
                         'Transit Size(MB)': 1,
                         'Transit Time(ms)': 1,
@@ -85,7 +85,7 @@ class TestCommunicationAnalyzer(unittest.TestCase):
                     },
                     {
                         'Src Rank': 1,
-                        'Dst Rank': 4294967295,
+                        'Dst Rank': 1,
                         'Transport Type': 3,
                         'Transit Size(MB)': 1,
                         'Transit Time(ms)': 1,

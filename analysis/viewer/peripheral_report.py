@@ -49,8 +49,7 @@ def get_peripheral_nic_data(db_path: str, table_name: str, device_id: str, confi
     conn, curs = DBManager.check_connect_db_path(db_path)
     if not (conn and curs and DBManager.judge_table_exist(curs, table_name)):
         return MsvpConstant.MSVP_EMPTY_DATA
-    data = GetTableData.get_table_data_for_device(curs, table_name, device_id,
-                                                  configs.get(StrConstant.CONFIG_COLUMNS))
+    data = GetTableData.get_table_data_for_device(curs, table_name, device_id)
     try:
         count = GetTableData.get_data_count_for_device(curs, table_name, device_id)
         return configs.get(StrConstant.CONFIG_HEADERS), data, count

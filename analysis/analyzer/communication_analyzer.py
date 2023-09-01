@@ -58,7 +58,7 @@ class CommunicationAnalyzer:
         """
         with CommunicationModel(rank_path) as _model:
             if not _model.check_table():
-                logging.error("Fail to connect %s, hccl parser is interrupted", DBNameConstant.DB_HCCL)
+                logging.error("Fail to connect %s, hccl parser is interrupted", DBNameConstant.DB_HCCL_SINGLE_DEVICE)
                 raise ProfException(ProfException.PROF_INVALID_CONNECT_ERROR)
             conditions = {
                 'iter_start': NumberConstant.DEFAULT_START_TIME,

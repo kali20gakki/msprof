@@ -19,7 +19,7 @@ from viewer.ai_core_op_report import ReportOPCounter
 NAMESPACE = 'viewer.ai_core_op_report'
 config = {'handler': '_get_op_summary_data',
           'headers': ['Model Name', 'Model ID', 'Task ID', 'Stream ID', 'Infer ID', 'Op Name', 'OP Type',
-                      'Task Type', 'Task Start Time', 'Task Duration(us)', 'Task Wait Time(us)', 'Block Dim'],
+                      'Task Type', 'Task Start Time(us)', 'Task Duration(us)', 'Task Wait Time(us)', 'Block Dim'],
           'db': 'ai_core_op_summary.db', 'unused_cols': []}
 
 
@@ -30,7 +30,7 @@ class TestAiCoreOpReport(unittest.TestCase):
             res = check.get_op_summary_data("0", "", config)
         expect_res = [
             'Model Name', 'Model ID', 'Task ID', 'Stream ID', 'Infer ID', 'Op Name', 'OP Type',
-            'Task Type', 'Task Start Time', 'Task Duration(us)', 'Task Wait Time(us)', 'Block Dim'
+            'Task Type', 'Task Start Time(us)', 'Task Duration(us)', 'Task Wait Time(us)', 'Block Dim'
         ]
         self.assertEqual(res[0], expect_res)
         self.assertEqual(res[1], [])

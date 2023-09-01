@@ -11,6 +11,7 @@ from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msprof_iteration import MsprofIteration
 from common_func.path_manager import PathManager
+from common_func.info_conf_reader import InfoConfReader
 from msmodel.ai_cpu.ai_cpu_model import AiCpuModel
 from profiling_bean.db_dto.step_trace_dto import IterationRange
 
@@ -27,7 +28,7 @@ class ParseAiCpuData:
         :return: ai cpu data , headers
         """
         headers = [
-            "Timestamp", "Node", "Compute_time(us)", "Memcpy_time(us)", "Task_time(us)",
+            "Timestamp(us)", "Node", "Compute_time(us)", "Memcpy_time(us)", "Task_time(us)",
             "Dispatch_time(us)", "Total_time(us)", "Stream ID", "Task ID"
         ]
         ai_cpu_results = []
@@ -98,13 +99,15 @@ class ParseAiCpuData:
 
     @staticmethod
     def _get_aicpu_data_with_ge_data(ai_cpu_conn, iter_range, project_path):
+        device_id = InfoConfReader().get_device_id()
         if ProfilingScene().is_operator():
             sql = "select sys_start*{MS_TO_US},op_name,compute_time*{MS_TO_US},memcpy_time*{MS_TO_US}," \
                   "task_time*{MS_TO_US},dispatch_time*{MS_TO_US},total_time*{MS_TO_US}," \
                   "{0}.stream_id, {0}.task_id from {0} join {1} on " \
-                  "{0}.stream_id={1}.stream_id and {0}.task_id={1}.task_id and {0}.batch_id={1}.batch_id " \
+                  "{0}.stream_id={1}.stream_id and {0}.task_id={1}.task_id and " \
+                  "{0}.batch_id={1}.batch_id and {1}.device_id={2} " \
                   "and {1}.task_type='{task_type}'" \
-                .format(DBNameConstant.TABLE_AI_CPU, DBNameConstant.TABLE_GE_TASK,
+                .format(DBNameConstant.TABLE_AI_CPU, DBNameConstant.TABLE_GE_TASK, device_id,
                         MS_TO_US=NumberConstant.MS_TO_US, task_type=Constant.TASK_TYPE_AI_CPU)
             return DBManager.fetch_all_data(ai_cpu_conn.cursor(), sql)
 
@@ -117,12 +120,14 @@ class ParseAiCpuData:
         sql = "select sys_start*{MS_TO_US},op_name,compute_time*{MS_TO_US},memcpy_time*{MS_TO_US}," \
               "task_time*{MS_TO_US},dispatch_time*{MS_TO_US}, total_time*{MS_TO_US}, " \
               "{0}.stream_id, {0}.task_id from {0} join {3} on sys_start>={1} and sys_end<={2} " \
-              "and {0}.stream_id={3}.stream_id and {0}.task_id={3}.task_id and {0}.batch_id={3}.batch_id " \
+              "and {0}.stream_id={3}.stream_id and {0}.task_id={3}.task_id and " \
+              "{0}.batch_id={3}.batch_id and {3}.device_id={4} " \
               "and {3}.index_id=? and {3}.model_id=? and {3}.task_type='{task_type}'" \
             .format(DBNameConstant.TABLE_AI_CPU,
                     iter_time[0] / NumberConstant.MS_TO_NS,
                     iter_time[1] / NumberConstant.MS_TO_NS,
                     DBNameConstant.TABLE_GE_TASK,
+                    device_id,
                     MS_TO_US=NumberConstant.MS_TO_US,
                     task_type=Constant.TASK_TYPE_AI_CPU)
 
