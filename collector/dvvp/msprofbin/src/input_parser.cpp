@@ -22,6 +22,7 @@
 #include "platform/platform.h"
 #include "msprof_dlog.h"
 #include "mmpa_api.h"
+#include "env_manager.h"
 #include "params_adapter_msprof.h"
 
 namespace Analysis {
@@ -73,6 +74,7 @@ void InputParser::MsprofCmdUsage(const std::string msg)
         CmdLog::instance()->CmdErrorLog("%s", msg.c_str());
     }
     ArgsManager::instance()->PrintHelp();
+    MsoprofTask::instance()->PrintHelp();
 }
 
 bool InputParser::CheckInstrAndTaskParamBothSet(std::unordered_map<int, std::pair<MsprofCmdInfo, std::string>> &argvMap)
@@ -247,6 +249,7 @@ void ArgsManager::Init()
     AddInstrArgs();
     AddHostArgs();
     AddStarsArgs();
+    AddMsopprofArgs();
     Args help = {"help", "help message.(full-platform)"};
     argsList_.push_back(help);
 }
@@ -528,6 +531,15 @@ void ArgsManager::AddL2Args()
     argsList_.push_back(l2);
 }
 
+void ArgsManager::AddMsopprofArgs()
+{
+    if (driverOnline_ && !(platform_ == PlatformType::CLOUD_TYPE || platform_ == PlatformType::CHIP_V4_1_0)) {
+        return;
+    }
+    Args op = {"op", "Enable the binary file msopprof. The default value is off.(Ascend910, Ascend910B)", OFF};
+    argsList_.push_back(op);
+}
+
 void ArgsManager::PrintHelp()
 {
     Init();
@@ -563,6 +575,84 @@ void ArgsManager::AddHostArgs()
     argsList_.push_back(hostSysPid);
     argsList_.push_back(hostSysUsage);
     argsList_.push_back(hostSysUsageFreq);
+}
+
+MsoprofTask::MsoprofTask()
+{
+    auto ascend_toolkit_home = getenv("ASCEND_TOOLKIT_HOME");
+    if (ascend_toolkit_home == nullptr) {
+        path_ = nullptr;
+    } else {
+        std::string pathStr = ascend_toolkit_home;
+        std::string msopprofPath = pathStr + "/tools/msopt/bin/msopprof";
+        path_ = msopprofPath.c_str();
+    }
+}
+
+bool MsoprofTask::MsopprofProcess(int argc, CONST_CHAR_PTR argv[])
+{
+    bool ret = false;
+    int valid_ret;
+    std::vector<std::string> op_argv;
+    ret = CheckMsopprof(argc, argv, op_argv);
+    if (ret && (path_ != nullptr) && (ParamValidation::instance()->CheckMsopprofBinValid(path_) == 0)) {
+        ExecMsopprof(path_, op_argv);
+    }
+    return ret;
+}
+
+bool MsoprofTask::CheckMsopprof(int argc, CONST_CHAR_PTR argv[], std::vector<std::string> &op_argv)
+{
+    bool ret = false;
+    for (int i = 1; i < argc; i++) {
+        if (strcmp(argv[i], "--op=on") == 0) {
+            ret = true;
+        } else {
+            op_argv.push_back(argv[i]);
+        }
+    }
+    if (path_ == nullptr && ret == true) {
+        CmdLog::instance()->CmdErrorLog("cannot find msopprof,"
+            "because not set environment variable ASCEND_TOOLKIT_HOME,"
+            "Maybe you should run setenv.sh.");
+    }
+    return ret;
+}
+
+void MsoprofTask::PrintHelp()
+{
+    std::vector<std::string> op_args;
+    op_args.push_back("--help");
+    if (path_ != nullptr) {
+        std::cout << "If you activate the --op option with '--op=on',"
+            "the following options are available ." << std::endl;
+        ExecMsopprof(path_, op_args);
+    } else {
+        std::cout << "no msopprof help message,"
+            "because not set environment variable ASCEND_TOOLKIT_HOME,"
+            "Maybe you should run setenv.sh." << std::endl;
+    }
+}
+
+int MsoprofTask::ExecMsopprof(CONST_CHAR_PTR path, std::vector<std::string> argsVec)
+{
+    std::string cmd = path;
+    ExecCmdParams execCmdParams(cmd, true, "");
+    std::vector<std::string> envsVec = Analysis::Dvvp::App::EnvManager::instance()->GetGlobalEnv();
+    int exitCode = analysis::dvvp::common::utils::INVALID_EXIT_CODE;
+    auto opProcess = MSVP_MMPROCESS;
+    int ret = analysis::dvvp::common::utils::Utils::ExecCmd(execCmdParams, argsVec, envsVec, exitCode, opProcess);
+    if (ret != PROFILING_SUCCESS) {
+        MSPROF_LOGE("Failed to launch msopprof: %s", cmd.c_str());
+        return PROFILING_FAILED;
+    }
+    bool isExited = false;
+    ret = analysis::dvvp::common::utils::Utils::WaitProcess(opProcess, isExited, exitCode, false);
+    if (ret != PROFILING_SUCCESS) {
+        MSPROF_LOGE("Failed to wait msopprof: %s", cmd.c_str());
+        return PROFILING_FAILED;
+    }
+    return ret;
 }
 }
 }
