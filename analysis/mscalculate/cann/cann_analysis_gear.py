@@ -425,9 +425,9 @@ class TaskGear(CANNGear):
     def get_context_ids(cls, call_stack: dict) -> str:
         node_context_ids = cls.get_context_ids_in_node(call_stack.get(Constant.NODE_LEVEL))
         hccl_context_ids = cls.get_context_ids_in_hccl(call_stack.get(Constant.HCCL_LEVEL))
-        context_ids = [*node_context_ids, *hccl_context_ids]
+        context_ids = [*node_context_ids, *hccl_context_ids, str(NumberConstant.DEFAULT_GE_CONTEXT_ID)]
 
-        return ",".join(context_ids) if context_ids else str(NumberConstant.DEFAULT_GE_CONTEXT_ID)
+        return ",".join(context_ids)
 
     def get_hccl_info_dtos(self, event: Event) -> HCCLInfoDto:
         for record in event.additional_record:

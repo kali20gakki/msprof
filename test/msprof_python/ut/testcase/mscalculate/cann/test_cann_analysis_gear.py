@@ -369,7 +369,7 @@ class TestTaskGear(TestCANNAnalysisGear):
         node_event.additional_record = [addition_info1, addition_info2]
         call_stack = {Constant.NODE_LEVEL: node_event, Constant.HCCL_LEVEL: Event.invalid_event()}
         ids = gear.get_context_ids(call_stack)
-        self.assertEqual(ids, "1,2")
+        self.assertEqual(ids, f"1,2,{str(NumberConstant.DEFAULT_GE_CONTEXT_ID)}")
 
     def test_get_context_ids_should_return_valid_ids_when_node_contains_mutil_context_ids(self):
         gear = TaskGear("")
@@ -384,7 +384,7 @@ class TestTaskGear(TestCANNAnalysisGear):
         node_event.additional_record = [addition_info1, addition_info2]
         call_stack = {Constant.NODE_LEVEL: node_event, Constant.HCCL_LEVEL: Event.invalid_event()}
         ids = gear.get_context_ids(call_stack)
-        self.assertEqual(ids, "1,2,3,4")
+        self.assertEqual(ids, f"1,2,3,4,{str(NumberConstant.DEFAULT_GE_CONTEXT_ID)}")
 
     def test_get_context_ids_should_return_valid_ids_when_node_contains_mutil_context_ids_hccl_contains_context(self):
         gear = TaskGear("")
@@ -407,7 +407,7 @@ class TestTaskGear(TestCANNAnalysisGear):
 
         call_stack = {Constant.NODE_LEVEL: node_event, Constant.HCCL_LEVEL: hccl_event}
         ids = gear.get_context_ids(call_stack)
-        self.assertEqual(ids, "1,2,3,4,5,6,7,8")
+        self.assertEqual(ids, f"1,2,3,4,5,6,7,8,{str(NumberConstant.DEFAULT_GE_CONTEXT_ID)}")
 
     def test_get_context_ids_should_return_empty_when_hccl_context_ids_length_is_not_2(self):
         gear = TaskGear("")
