@@ -59,7 +59,7 @@ class ClusterBasicInfo:
         self._job_info = Constant.NA
         self._device_id = Constant.NA
         self._collection_time = Constant.NA
-        self._rank_id = Constant.NA
+        self._rank_id = Constant.DEFAULT_INVALID_VALUE
 
     @property
     def is_host_profiling(self: any) -> bool:

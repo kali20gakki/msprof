@@ -19,6 +19,9 @@ def _check_path_valid(path: str, is_file: bool) -> None:
         if not os.path.isfile(path):
             raise ProfException(ProfException.PROF_INVALID_PATH_ERROR,
                                 f"The path \"{path}\" is not a file. Please check the path.")
+        if os.path.islink(path):
+            raise ProfException(ProfException.PROF_INVALID_PATH_ERROR,
+                                f"The path \"{path}\" is link. Please check the path.")
     else:
         if not os.path.isdir(path):
             raise ProfException(ProfException.PROF_INVALID_PATH_ERROR,

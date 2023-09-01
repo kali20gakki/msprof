@@ -36,12 +36,13 @@ class TestHostDiskUsagePresenter(unittest.TestCase):
                 mock.patch(NAMESPACE + '.ConfigMgr.get_disk_freq', return_value=50), \
                 mock.patch(NAMESPACE + '.logging.info'):
             check = HostDiskUsagePresenter(self.result_dir, self.file_name)
-            InfoConfReader()._info_json = {"cpuNums": 8, "sysClockFreq": 100}
+            InfoConfReader()._host_freq = None
+            InfoConfReader()._info_json = {"cpuNums": 8, "sysClockFreq": 100, 'CPU': [{'Frequency': "1000"}]}
             check.cur_model = HostDiskUsage('test')
             check.cur_model.conn = res[0]
             check.parse_prof_data()
-        self.assertEqual(check.disk_usage_info, [[191425757976.595, 191425777976.595, 1,
-                                                  0, '0.00', 0.0]])
+        self.assertEqual(check.disk_usage_info, [[191425757976595.0, 191425777976595.0, 1.0, 0.0, '0.00', 0.0]])
+
         with mock.patch('builtins.open', mock.mock_open(read_data=data)), \
                 mock.patch(NAMESPACE + '.ConfigMgr.get_disk_freq', return_value=0), \
                 mock.patch(NAMESPACE + '.error'):

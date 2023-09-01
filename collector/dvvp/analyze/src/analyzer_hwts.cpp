@@ -104,7 +104,7 @@ void AnalyzerHwts::ParseTaskStartEndData(CONST_CHAR_PTR data, uint32_t len, uint
             KEY_SEPARATOR + std::to_string(UINT32_MAX);
         auto iter = opTimeDrafts_.find(key);
         if (iter == opTimeDrafts_.end()) {
-            OpTime opTime = {0, 0, 0, 0, 0, 0, ACL_SUBSCRIBE_OP};
+            OpTime opTime = {0, 0, 0, 0, 0, 0, ACL_SUBSCRIBE_OP, hwtsData->streamId};
             iter = opTimeDrafts_.insert(std::make_pair(key, opTime)).first;
         }
         uint64_t sysTime = static_cast<uint64_t>(hwtsData->syscnt / frequency_);  // ns

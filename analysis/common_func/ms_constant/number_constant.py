@@ -14,6 +14,7 @@ class NumberConstant:
     SUCCESS = 0
     ERROR = 1
     WARN = 2
+    SKIP = 3
     KILOBYTE = 1024.0
     FLOAT_ZERO_BOUND = 1e-17
 
@@ -54,6 +55,7 @@ class NumberConstant:
 
     # time units transfer
     NS_TO_US = 1000.0
+    NS_TO_MS = 1000000.0
     TEN_NS_TO_US = 100.0
     MS_TO_US = 1000.0
     US_TO_MS = 1000.0
@@ -64,6 +66,9 @@ class NumberConstant:
     DEFAULT_STREAM_ID = 65535
     DEFAULT_TASK_ID = 65535
     PROF_PATH_MAX_LEN = 300
+
+    # memory units transfer
+    BYTES_TO_KB = 1024.0
 
     # time conversion ns to us / ms to s
     CONVERSION_TIME = 1000.0
@@ -101,6 +106,7 @@ class NumberConstant:
     DEFAULT_GE_CONTEXT_ID = 4294967295
 
     # invalid id
+    INVALID_TASK_TIME = -1
     INVALID_STREAM_ID = -1
     INVALID_TASK_ID = -1
     INVALID_OP_EXE_TIME = -1
@@ -114,9 +120,11 @@ class NumberConstant:
     MAIN_STREAM_THREAD_ID = 0
     WAIT_TIME_THRESHOLD = 0.2
     ANALYSIS_STEP_NUM = 1
-    RDMA_BANDWIDTH = 12.5
-    HCCS_BANDWIDTH = 18
-    PCIE_BANDWIDTH = 20
+    RDMA_BANDWIDTH_V2_1_0 = 12.5
+    HCCS_BANDWIDTH_V2_1_0 = 18
+    PCIE_BANDWIDTH_V2_1_0 = 20
+    RDMA_BANDWIDTH_V4_1_0 = 25
+    HCCS_BANDWIDTH_V4_1_0 = 28
     HCCS_MESSAGE_SIZE_THRESHOLD = 32
     PCIE_MESSAGE_SIZE_THRESHOLD = 32
     RDMA_MESSAGE_SIZE_THRESHOLD = 0.5
@@ -127,14 +135,16 @@ class NumberConstant:
     RANK_NUM_PER_SERVER = 8
     RANK_NUM_PER_OS = 4
     MAX_RANK_NUMS = 4096
-    B_to_MB = 1024 ** 2
-    MB_to_GB = 1024
+    COMMUNICATION_B_to_MB = 1000 ** 2
+    COMMUNICATION_MB_to_GB = 1000
 
     DEFAULT_LAYER_SORT_START = 10
     # magic number: 5A5A
     MAGIC_NUM = 23130
 
     HOST_ID = 64
+
+    STATIC_GRAPH_INDEX = 0
 
     @property
     def conversion_time(self: any) -> float:

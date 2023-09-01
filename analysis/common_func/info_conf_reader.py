@@ -5,6 +5,7 @@ import configparser
 import json
 import logging
 import os
+from typing import Dict
 
 from common_func.constant import Constant
 from common_func.file_manager import check_path_valid
@@ -34,7 +35,7 @@ class InfoConfReader:
     FREQ = "38.4"
     NPU_PROFILING_TYPE = "npu_profiling"
     HOST_PROFILING_TYPE = "host_profiling"
-    HOST_DEFAULT_FREQ = 0
+    HOST_DEFAULT_FREQ = NumberConstant.NANO_SECOND
     ANALYSIS_VERSION = "1.0"
 
     def __init__(self: any) -> None:
@@ -44,6 +45,8 @@ class InfoConfReader:
         self._sample_json = None
         self._start_log_time = 0
         self._host_mon = 0
+        self._host_cnt = 0
+        self._host_freq = None
         self._dev_cnt = 0
 
     @staticmethod
@@ -86,14 +89,33 @@ class InfoConfReader:
                     return os.path.join(project_path, _file)
         return ""
 
+    @classmethod
+    def _get_instr_profiling_frequency_from_sample(cls, sample_json: Dict) -> int:
+        instr_profiling_freq0 = sample_json.get("instr_profiling_freq")
+        instr_profiling_freq1 = sample_json.get("instrProfilingFreq")
+        if instr_profiling_freq0 is None and instr_profiling_freq1 is None:
+            logging.error(
+                "instr profiling frequency not found in sample.json",
+                exc_info=Constant.TRACE_BACK_SWITCH
+            )
+            raise ProfException(ProfException.PROF_INVALID_DATA_ERROR)
+
+        instr_profiling_freq_val = instr_profiling_freq0 if instr_profiling_freq1 is None else instr_profiling_freq1
+        instr_profiling_freq = int(instr_profiling_freq_val)
+
+        if instr_profiling_freq <= 0:
+            logging.error("Instr Profiling Frequency is invalid.")
+            raise ProfException(ProfException.PROF_INVALID_DATA_ERROR)
+
+        return instr_profiling_freq
+
     def load_info(self: any, result_path: str) -> None:
         """
         load all info
         """
         self._load_json(result_path)
-        if not self.is_host_profiling():
-            self._load_dev_start_time(result_path)
-            self._load_host_start_time(result_path)
+        self._load_dev_start_time(result_path)
+        self._load_host_start_time(result_path)
 
     def get_start_timestamp(self: any) -> int:
         """
@@ -120,14 +142,12 @@ class InfoConfReader:
             devices += str(device_reader) + ","
         return list(filter(None, devices.split(",")))
 
-    def get_rank_id(self: any) -> str:
+    def get_rank_id(self: any) -> int:
         """
         get rank_id
         :return: rank_id
         """
-        rank_id = self._info_json.get("rank_id", Constant.NA)
-        if rank_id == Constant.DEFAULT_INVALID_VALUE or len(str(rank_id)) == 0:
-            return Constant.NA
+        rank_id = self._info_json.get("rank_id", Constant.DEFAULT_INVALID_VALUE)
         return rank_id
 
     def is_version_matched(self):
@@ -204,6 +224,47 @@ class InfoConfReader:
         return float(
             sys_cnt - self._dev_cnt * NumberConstant.NANO_SECOND) / hwts_freq * time_fmt + self._host_mon * time_fmt
 
+    def time_from_host_syscnt(self: any, sys_cnt: int, time_fmt: int = NumberConstant.NANO_SECOND) -> float:
+        """
+        transfer sys cnt to host_time unit.
+        1.task_duration_sys_count: data_sys_count - start_sys_count
+        2.task_duration_timestamp: task_duration_sys_count / freq
+        3.data_timestamp(host): task_duration_timestamp + start_timestamp(host)
+        :param sys_cnt: host sys count
+        :param time_fmt: time format
+        :return: sys timestamp
+        """
+        host_freq = self.get_host_freq()
+        if host_freq != self.HOST_DEFAULT_FREQ:
+            time = float(sys_cnt - self._host_cnt * NumberConstant.NANO_SECOND) / \
+                   host_freq * time_fmt + self._host_mon * time_fmt
+            return time if time >= 0.0 else 0
+        return sys_cnt * time_fmt / NumberConstant.NANO_SECOND
+
+    def get_host_duration(self: any, host_syscnt_duration: int, time_fmt: int = NumberConstant.NANO_SECOND) -> float:
+        """
+        transfer sys cnt duration to time duration.
+        :param host_syscnt_duration: host sys counts duration
+        :param time_fmt: time format
+        :return: sys time duration
+        """
+        host_freq = self.get_host_freq()
+        if host_freq != self.HOST_DEFAULT_FREQ:
+            return host_syscnt_duration / host_freq * time_fmt
+        return host_syscnt_duration * time_fmt / NumberConstant.NANO_SECOND
+
+    def get_host_syscnt_from_dev_time(self: any, dev_timestamp: float) -> float:
+        """
+        transfer dev timestamp to host sys count, Inverse operation of time_from_syscnt()
+        :param dev_timestamp: device timestamp
+        :return: host sys count
+        """
+        host_freq = self.get_host_freq()
+        if host_freq != self.HOST_DEFAULT_FREQ:
+            return (dev_timestamp - self._host_mon * NumberConstant.NANO_SECOND) / NumberConstant.NANO_SECOND * \
+                host_freq + self._host_cnt * NumberConstant.NANO_SECOND
+        return dev_timestamp
+
     def get_json_pid_data(self: any) -> int:
         """
         get pid message
@@ -269,21 +330,11 @@ class InfoConfReader:
         """
         return self._host_mon - self._start_log_time / NumberConstant.NANO_SECOND
 
-    def get_biu_sample_cycle(self: any) -> int:
+    def get_instr_profiling_freq(self: any) -> int:
         """
-        calculate biu sample cycle
+        get instr_profiling_freq from info json
         """
-        try:
-            biu_sample_cycle = int(self._sample_json.get("instr_profiling_freq"))
-        except TypeError as err:
-            logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
-            raise ProfException(ProfException.PROF_INVALID_DATA_ERROR) from err
-
-        if biu_sample_cycle <= 0:
-            logging.error("Biu freq is invalid.")
-            raise ProfException(ProfException.PROF_INVALID_DATA_ERROR)
-
-        return biu_sample_cycle
+        return self._get_instr_profiling_frequency_from_sample(self._sample_json)
 
     def get_job_basic_info(self: any) -> list:
         job_info = self.get_job_info()
@@ -295,12 +346,19 @@ class InfoConfReader:
         return [job_info, device_id, collection_time, rank_id]
 
     def get_host_freq(self: any) -> float:
+        if self._host_freq is not None:
+            return self._host_freq
         host_cpu_info = self._info_json.get('CPU', [])
         if host_cpu_info:
-            freq = host_cpu_info[0].get('Frequency', self.HOST_DEFAULT_FREQ)
-            if is_number(freq):
-                return freq
-        return self.HOST_DEFAULT_FREQ
+            freq = host_cpu_info[0].get('Frequency')
+            if is_number(freq) and float(freq) > 0.0:
+                self._host_freq = float(freq) * 1000000.0
+            else:
+                logging.info("No host frequency, or the frequency is invalid.")
+                self._host_freq = self.HOST_DEFAULT_FREQ
+            return self._host_freq
+        logging.error("No host info json.")
+        raise ProfException(ProfException.PROF_NONE_ERROR)
 
     def get_host_time_by_sampling_timestamp(self: any, timestamp: any) -> int:
         """
@@ -350,11 +408,18 @@ class InfoConfReader:
         dev_start_path = self.get_conf_file_path(result_path, get_dev_start_compiles())
         if not os.path.exists(dev_start_path):
             return
+        check_path_valid(dev_start_path, True)
         try:
             with open(dev_start_path, "r") as log_file:
                 self._load_dev_start_path_line_by_line(log_file)
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
             logging.error(err, exc_info=Constant.TRACE_BACK_SWITCH)
+
+    def _check_monotonic_and_cnt(self, host_start_file: str) -> bool:
+        if host_start_file == '' and self.is_host_profiling():
+            self._host_freq = self.HOST_DEFAULT_FREQ
+            return False
+        return self._host_mon <= 0 or (self._dev_cnt <= 0 and self._host_cnt <= 0)
 
     def _load_host_start_time(self: any, project_path: str) -> None:
         """
@@ -373,9 +438,9 @@ class InfoConfReader:
                 time = dict(config.items(sections[0]))
                 timer = TimerBean(time, self.get_host_freq())
                 self._host_mon = float(timer.host_mon) / NumberConstant.NANO_SECOND
+                self._host_cnt = float(timer.cntvct) / NumberConstant.NANO_SECOND
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
             logging.error('Parse time sync data error: %s', str(err), exc_info=Constant.TRACE_BACK_SWITCH)
-        if self._host_mon <= 0 or self._dev_cnt <= 0:
-            logging.error("The monotonic time %s or cntvct %s is unusual, "
-                          "maybe get data from driver failed", self._host_mon, self._dev_cnt)
-
+        if self._check_monotonic_and_cnt(host_start_file):
+            logging.error("The monotonic time %s, dev_cntvct %s or host_cntvct %s is unusual, "
+                          "maybe get data from driver failed", self._host_mon, self._dev_cnt, self._host_cnt)

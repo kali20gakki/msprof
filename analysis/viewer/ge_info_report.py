@@ -8,6 +8,7 @@ import sqlite3
 from common_func.constant import Constant
 from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.str_constant import StrConstant
+from common_func.ms_constant.number_constant import NumberConstant
 from common_func.msvp_constant import MsvpConstant
 from common_func.utils import Utils
 from msmodel.interface.view_model import ViewModel
@@ -19,10 +20,10 @@ def get_ge_model_data(params: dict, table_name: str, configs: dict) -> tuple:
     """
     result_data = []
     project_path = params.get(StrConstant.PARAM_RESULT_DIR)
-    search_data_sql = "select {0}.model_name, {1}.model_id, fusion_name, op_names, memory_input, memory_output," \
-                      " memory_weight, memory_workspace, memory_total " \
-                      "from {1} inner join {0} where {0}.model_id={1}.model_id " \
-        .format(table_name, DBNameConstant.TABLE_GE_FUSION_OP_INFO)
+    search_data_sql = "select {0}.model_name, {1}.model_id, fusion_name, op_names, memory_input/{BYTES_TO_KB}, " \
+                      "memory_output/{BYTES_TO_KB}, memory_weight/{BYTES_TO_KB}, memory_workspace/{BYTES_TO_KB}," \
+                      " memory_total/{BYTES_TO_KB} from {1} inner join {0} where {0}.model_id={1}.model_id " \
+        .format(table_name, DBNameConstant.TABLE_GE_FUSION_OP_INFO, BYTES_TO_KB=NumberConstant.BYTES_TO_KB)
     model_view = ViewModel(project_path, configs.get(StrConstant.CONFIG_DB), [table_name])
     if not model_view.check_table():
         return MsvpConstant.MSVP_EMPTY_DATA

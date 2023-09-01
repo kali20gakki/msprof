@@ -5,6 +5,7 @@ function:
 Copyright Huawei Technologies Co., Ltd. 2020-2021. All rights reserved.
 """
 
+import functools
 import unittest
 from unittest import mock
 
@@ -48,8 +49,8 @@ class TestMonitorFlowCalculator(unittest.TestCase):
 
         with mock.patch(NAMESPACE + '.BiuPerfModel.get_all_data', return_value=[DataTest]):
             check = MonitorFlowCalculator(CONFIG)
-            InfoConfReader().get_biu_sample_cycle = mock.Mock()
-            InfoConfReader().get_biu_sample_cycle.return_value = 100
+            InfoConfReader().get_instr_profiling_freq = mock.Mock()
+            InfoConfReader().get_instr_profiling_freq.return_value = 100
             check.calculate()
 
     def test_get_unit_name(self):
@@ -78,8 +79,8 @@ class TestMonitorCyclesCalculator(unittest.TestCase):
 
         with mock.patch(NAMESPACE + '.BiuPerfModel.get_all_data', return_value=[DataTest]):
             check = MonitorCyclesCalculator(CONFIG)
-            InfoConfReader().get_biu_sample_cycle = mock.Mock()
-            InfoConfReader().get_biu_sample_cycle.return_value = 100
+            InfoConfReader().get_instr_profiling_freq = mock.Mock()
+            InfoConfReader().get_instr_profiling_freq.return_value = 100
             check.calculate()
 
     def test_get_unit_name(self):
@@ -101,6 +102,28 @@ class TestMonitorCyclesCalculator(unittest.TestCase):
             check = MonitorCyclesCalculator(CONFIG)
             check.data = [123]
             check.save()
+
+
+class TestGetInstrProfiling(unittest.TestCase):
+    def test_get_instr_profiling_error(self):
+        sample_json = {}
+        self.assertRaises(Exception, functools.partial(
+            InfoConfReader()._get_instr_profiling_frequency_from_sample, sample_json)
+        )
+
+    def test_get_instr_profiling_invalid_value(self):
+        sample_json = {"instr_profiling_freq": -100}
+        self.assertRaises(Exception, functools.partial(
+            InfoConfReader()._get_instr_profiling_frequency_from_sample, sample_json)
+        )
+
+    def test_get_instr_profiling_camel(self):
+        sample_json = {"instrProfilingFreq": 200}
+        self.assertEqual(InfoConfReader()._get_instr_profiling_frequency_from_sample(sample_json), 200)
+
+    def test_get_instr_profiling_snake(self):
+        sample_json = {"instr_profiling_freq": 100}
+        self.assertEqual(InfoConfReader()._get_instr_profiling_frequency_from_sample(sample_json), 100)
 
 
 if __name__ == '__main__':

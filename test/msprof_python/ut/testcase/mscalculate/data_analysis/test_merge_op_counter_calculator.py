@@ -4,8 +4,9 @@ from unittest import mock
 
 import pytest
 
+from mscalculate.ascend_task.ascend_task import TopDownTask
 from mscalculate.data_analysis.merge_op_counter_calculator import MergeOpCounterCalculator
-from analyzer.scene_base.profiling_scene import ProfilingScene
+from common_func.profiling_scene import ProfilingScene
 from common_func.constant import Constant
 from common_func.info_conf_reader import InfoConfReader
 from common_func.msprof_exception import ProfException
@@ -43,7 +44,7 @@ class TestMergeOpCounterCalculator(unittest.TestCase):
             self.assertEqual(result, None)
             with mock.patch(NAMESPACE + '.MergeOpCounterCalculator._is_db_need_to_create',
                             return_value=True), \
-                    mock.patch('analyzer.scene_base.profiling_scene.Utils.get_scene',
+                    mock.patch('common_func.profiling_scene.Utils.get_scene',
                                return_value="step_info"):
                 with mock.patch(NAMESPACE + '.MergeOpCounterCalculator.create_db',
                                 return_value=res), \
@@ -135,7 +136,7 @@ class TestMergeOpCounterCalculator(unittest.TestCase):
         self.assertEqual(result, [])
 
     def test_get_op_report_sql(self):
-        with mock.patch('analyzer.scene_base.profiling_scene.Utils.get_scene',
+        with mock.patch('common_func.profiling_scene.Utils.get_scene',
                         return_value="step_info"):
             check = MergeOpCounterCalculator(file_list, CONFIG)
             ProfilingScene().init('')
@@ -146,8 +147,8 @@ class TestMergeOpCounterCalculator(unittest.TestCase):
                          "ge_task_merge.model_id from ge_task_merge, rts_task "
                          "where ge_task_merge.task_id=rts_task.task_id and ge_task_merge.stream_id=rts_task.stream_id "
                          "and ge_task_merge.batch_id=rts_task.batch_id "
-                         "and (ge_task_merge.context_id=rts_task.subtask_id "
-                         "or (ge_task_merge.context_id=4294967295 and subtask_id=0)) "
+                         "and ge_task_merge.context_id=rts_task.subtask_id "
+                         "and rts_task.start_time != -1 "
                          "group by op_type,ge_task_merge.task_type",
                          result)
 
@@ -163,20 +164,13 @@ class TestMergeOpCounterCalculator(unittest.TestCase):
             getattr(check, "_create_ge_merge")()
 
     def test_create_task(self):
-        InfoConfReader()._info_json = {'devices': '0'}
-        with mock.patch(NAMESPACE + '.GetOpTableTsTime.get_task_time_data', return_value=[]), \
-                mock.patch(NAMESPACE + '.DBManager.insert_data_into_table'):
-            ProfilingScene().init("")
-            ProfilingScene()._scene = Constant.SINGLE_OP
-            check = MergeOpCounterCalculator(file_list, CONFIG)
+        check = MergeOpCounterCalculator(file_list, CONFIG)
+        check._create_task()
+        with mock.patch(NAMESPACE + '.DBManager.check_tables_in_db', return_value=True):
             check._create_task()
-        with mock.patch(NAMESPACE + '.DBManager.insert_data_into_table', side_effect=sqlite3.Error), \
-                mock.patch(NAMESPACE + '.GetOpTableTsTime.get_task_time_data', return_value=[]), \
-                mock.patch(NAMESPACE + '.logging.error', return_value=[]):
-            ProfilingScene().init("")
-            setattr(ProfilingScene(), "_scene", Constant.STEP_INFO)
-            check = MergeOpCounterCalculator(file_list, CONFIG)
-            check._create_task()
+            with mock.patch(NAMESPACE + '.AscendTaskModel.get_all_data',
+                            return_value=[[1, 1, 1, 1, 1, 1, 1000, 1000, 'AI_CORE', 'AI_CORE']]):
+                check._create_task()
 
     def test_create_report(self):
         sql = "select op_type, task_type, count(op_type), sum(duration) as total_time," \

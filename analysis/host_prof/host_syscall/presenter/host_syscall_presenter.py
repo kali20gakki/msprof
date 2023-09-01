@@ -199,6 +199,22 @@ class HostSyscallPresenter(HostProfPresenterBase):
         return duration_sec
 
     @staticmethod
+    def summary_reformat(summary_data: list) -> list:
+        """
+        timestamp: us
+        """
+        return [
+            (
+                data[0], data[1], data[2], data[3],
+                InfoConfReader().get_host_duration(data[4], NumberConstant.MICRO_SECOND),
+                data[5],
+                InfoConfReader().get_host_duration(data[6], NumberConstant.MICRO_SECOND),
+                InfoConfReader().get_host_duration(data[7], NumberConstant.MICRO_SECOND),
+                InfoConfReader().get_host_duration(data[8], NumberConstant.MICRO_SECOND)
+            ) for data in summary_data
+        ]
+
+    @staticmethod
     def get_summary_api_info(result_dir: str) -> list:
         """
         get summary host os runtime api data
@@ -211,6 +227,7 @@ class HostSyscallPresenter(HostProfPresenterBase):
             cur_model.finalize()
             return []
         res = cur_model.get_summary_runtime_api_data()
+        res = HostSyscallPresenter.summary_reformat(res)
         cur_model.finalize()
         return res
 
@@ -294,8 +311,10 @@ class HostSyscallPresenter(HostProfPresenterBase):
         for data_item in runtime_api_data:
             # 'name', 'tid', 'ts', 'dur'
             temp_data = [
-                data_item[3], int(data_item[1]), int(data_item[2]), float(data_item[7]),
-                (float(data_item[8]) - float(data_item[7]))
+                data_item[3], int(data_item[1]), int(data_item[2]),
+                InfoConfReader().time_from_host_syscnt(data_item[7], NumberConstant.MICRO_SECOND),
+                InfoConfReader().get_host_duration(float(data_item[8]) - float(data_item[7]),
+                                                   NumberConstant.MICRO_SECOND)
             ]
             result.append(temp_data)
         return result
@@ -350,8 +369,9 @@ class HostSyscallPresenter(HostProfPresenterBase):
                 continue
             end_time = start_time + float(duration_sec) * NumberConstant.SEC_TO_US
             write_list = [
-                "", self.pid, command_tid, api_name, "", float(duration_sec) * NumberConstant.SEC_TO_US,
-                "", start_time, end_time
+                "", self.pid, command_tid, api_name, "",
+                float(duration_sec) * NumberConstant.NS_TIME_RATE,
+                "", start_time * NumberConstant.USTONS, end_time * NumberConstant.USTONS
             ]
             self.cur_model.insert_single_data(write_list)
 
@@ -378,12 +398,15 @@ class HostSyscallPresenter(HostProfPresenterBase):
                 time_info.start_time_ms) * NumberConstant.CONVERSION_TIME - PerfGapTime().get_gap_time()
             tran_duration_us = float(time_info.duration_ms) * NumberConstant.CONVERSION_TIME
             real_end_us = real_start_us + tran_duration_us
-            end_time_ms = str(
-                float(time_info.start_time_ms) + float(time_info.duration_ms))
+            end_time_ms = float(time_info.start_time_ms) + float(time_info.duration_ms)
             if float(end_time_ms) / NumberConstant.CONVERSION_TIME > start_handle_sec:
                 continue
             call_api_info = [
-                command_name, self.pid, command_tid, api_name, time_info.start_time_ms,
-                tran_duration_us, end_time_ms, real_start_us, real_end_us
+                command_name, self.pid, command_tid, api_name,
+                float(time_info.start_time_ms) * NumberConstant.MS_TO_NS,
+                tran_duration_us * NumberConstant.USTONS,
+                end_time_ms * NumberConstant.MS_TO_NS,
+                real_start_us * NumberConstant.USTONS,
+                real_end_us * NumberConstant.USTONS
             ]
             self.cur_model.insert_single_data(call_api_info)

@@ -29,13 +29,14 @@ struct DeviceInfo {
     int64_t ts_cpu_core_num;
     int64_t ai_cpu_core_num;
     int64_t ai_core_num;
+    int64_t ai_vector_num;
     int64_t ai_cpu_core_id;
     int64_t ai_core_id;
     int64_t aicpu_occupy_bitmap;
     DeviceInfo()
         : env_type(0), ctrl_cpu_id(0), ctrl_cpu_core_num(0), ctrl_cpu_endian_little(0),
-          ts_cpu_core_num(0), ai_cpu_core_num(0), ai_core_num(0), ai_cpu_core_id(0), ai_core_id(0),
-          aicpu_occupy_bitmap(0)
+          ts_cpu_core_num(0), ai_cpu_core_num(0), ai_core_num(0), ai_vector_num(0),
+          ai_cpu_core_id(0), ai_core_id(0), aicpu_occupy_bitmap(0)
     {
     }
 };

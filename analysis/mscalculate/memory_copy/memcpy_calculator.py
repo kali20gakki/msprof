@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
 
-from analyzer.scene_base.profiling_scene import ProfilingScene
+from common_func.profiling_scene import ProfilingScene
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.memcpy_constant import MemoryCopyConstant

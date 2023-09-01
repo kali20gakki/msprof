@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-# Copyright (c) Huawei Technologies Co., Ltd. 2020-2022. All rights reserved.
+# Copyright (c) Huawei Technologies Co., Ltd. 2023-2023. All rights reserved.
 import logging
 import os
 import unittest
@@ -8,7 +8,7 @@ from unittest import mock
 
 from constant.constant import CONFIG
 from msconfig.config_manager import ConfigManager
-from analyzer.scene_base.profiling_scene import ProfilingScene
+from common_func.profiling_scene import ProfilingScene
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
@@ -27,9 +27,9 @@ NAMESPACE = 'mscalculate.npu_mem.npu_op_mem_calculator'
 
 class TestNpuOpMemCalculator(unittest.TestCase):
 
-    def test_calculator_connect_db(self):
+    def test_connect_db(self):
         check = NpuOpMemCalculator({}, CONFIG)
-        check.calculator_connect_db()
+        check._connect_db()
 
     def test_calculate(self):
         with mock.patch(NAMESPACE + '.NpuOpMemCalculator._calc_memory_record'), \
@@ -54,7 +54,7 @@ class TestNpuOpMemCalculator(unittest.TestCase):
             result = check.save()
 
     def test_ms_run(self):
-        with mock.patch(NAMESPACE + '.NpuOpMemCalculator.calculator_connect_db'), \
+        with mock.patch(NAMESPACE + '.NpuOpMemCalculator._connect_db'), \
                 mock.patch(NAMESPACE + '.NpuOpMemCalculator.calculate'), \
                 mock.patch(NAMESPACE + '.NpuOpMemCalculator.save'):
             check = NpuOpMemCalculator({}, CONFIG)
@@ -90,7 +90,7 @@ class TestNpuOpMemCalculator(unittest.TestCase):
         setattr(check, "_op_data", [npu_op_mem_dto_1, npu_op_mem_dto_2])
         setattr(check, "_opeartor_memory", [])
         check._calc_operator_memory()
-        self.assertEqual(check._opeartor_memory, [['1', 1, 111, 112, 1, 1, 1, 0, 1, "NPU:0", '']])
+        self.assertEqual(check._opeartor_memory, [['1', 1, 111, 112, 1, 0, 1, 0, 1, "NPU:0", '']])
 
     def test_calc_memory_record(self):
         check = NpuOpMemCalculator({}, CONFIG)

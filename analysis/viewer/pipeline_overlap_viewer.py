@@ -27,6 +27,12 @@ class OverlapType(Enum):
 
 
 class PipelineOverlapViewer:
+    OVERLAP_TYPE_NAME = {
+        "COMPUTE_TIME": "Computing",
+        "COMMUNICATION_TIME": "Communication",
+        "COMMUNICATION_NOT_OVERLAPPED": "Communication(Not Overlapped)",
+        "FREE_TIME": "Free"
+    }
 
     def __init__(self, configs: dict, params: dict):
         self._configs = configs
@@ -45,19 +51,17 @@ class PipelineOverlapViewer:
             'model_id': Constant.DEFAULT_INVALID_VALUE
         }
         with OpSummaryModel(sample_config) as _model:
-            ai_core_data = _model.get_operator_data_by_task_type(Constant.TASK_TYPE_AI_CORE)
-            ai_cpu_data = _model.get_operator_data_by_task_type(Constant.TASK_TYPE_AI_CPU)
-        compute_data = SectionCalculator.merge_continuous_intervals(ai_core_data + ai_cpu_data)
+            compute_data = SectionCalculator.merge_continuous_intervals(_model.get_operator_data_by_task_type())
         result.extend(self._format_timeline_data(OverlapType.COMPUTE_TIME, data) for data in compute_data)
 
-        if not os.path.exists(PathManager.get_db_path(self._project_path, DBNameConstant.DB_HCCL)):
-            logging.warning("HCCL data not found, no need to calculate the overlap.")
+        if not os.path.exists(PathManager.get_db_path(self._project_path, DBNameConstant.DB_HCCL_SINGLE_DEVICE)):
+            logging.warning("HCCLSingledevice data not found, no need to calculate the overlap.")
             return ""
-        with HcclViewModel(self._project_path, DBNameConstant.DB_HCCL,
-                           [DBNameConstant.TABLE_HCCL_ALL_REDUCE]) as _model:
+        with HcclViewModel(self._project_path, DBNameConstant.DB_HCCL_SINGLE_DEVICE,
+                           [DBNameConstant.TABLE_HCCL_SINGLE_DEVICE]) as _model:
             if not _model.check_table():
-                logging.warning("HCCL table %s not found, no need to calculate the overlap.",
-                                DBNameConstant.TABLE_HCCL_ALL_REDUCE)
+                logging.warning("HCCLSingledevice table %s not found, no need to calculate the overlap.",
+                                DBNameConstant.TABLE_HCCL_SINGLE_DEVICE)
                 return ""
             communication_data = SectionCalculator.merge_continuous_intervals(_model.get_hccl_op_time_section())
             result.extend(
@@ -77,12 +81,12 @@ class PipelineOverlapViewer:
                                                         TraceViewHeaderConstant.PROCESS_OVERLAP_ANALYSE]]))
         _trace.extend(
             TraceViewManager.metadata_event(
-                [["thread_name", self._pid, overlap_type.value, overlap_type.name.lower()]
+                [["thread_name", self._pid, overlap_type.value, self.OVERLAP_TYPE_NAME.get(overlap_type.name)]
                  for overlap_type in OverlapType]
             )
         )
         return json.dumps(_trace)
 
     def _format_timeline_data(self, overlap_type, data):
-        return [overlap_type.name.lower(), self._pid, overlap_type.value, data.start_time / NumberConstant.NS_TO_US,
-                (data.end_time - data.start_time) / NumberConstant.NS_TO_US]
+        return [self.OVERLAP_TYPE_NAME.get(overlap_type.name), self._pid, overlap_type.value, data.start_time /
+                NumberConstant.NS_TO_US, (data.end_time - data.start_time) / NumberConstant.NS_TO_US]

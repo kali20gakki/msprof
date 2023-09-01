@@ -679,6 +679,11 @@ int32_t MmGetPid()
     return static_cast<int32_t>(getpid());
 }
 
+int32_t MmGetUid()
+{
+    return static_cast<int32_t>(getuid());
+}
+
 int32_t MmGetTid()
 {
     int32_t ret = static_cast<int32_t>(syscall(SYS_gettid));
@@ -817,6 +822,9 @@ int32_t MmGetOsName(char *name, int32_t nameSize)
 
 static int32_t LocalLookup(char *buf, uint32_t bufLen, const char *pattern, char *value, uint32_t valueLen)
 {
+    if (buf == nullptr) {
+        return PROFILING_FAILED;
+    }
     const char *pValue = nullptr;
     char *pBuf = nullptr;
     uint32_t len = strlen(pattern);

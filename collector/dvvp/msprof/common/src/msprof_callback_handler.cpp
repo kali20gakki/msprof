@@ -20,7 +20,7 @@ using namespace analysis::dvvp::common::error;
 using namespace analysis::dvvp::common::queue;
 using namespace analysis::dvvp::transport;
 // init map
-std::unordered_map<uint32_t, MsprofCallbackHandler> MsprofCallbackHandler::reporters_;
+std::map<uint32_t, MsprofCallbackHandler> MsprofCallbackHandler::reporters_;
 
 MsprofCallbackHandler::MsprofCallbackHandler() {}
 
@@ -123,7 +123,6 @@ int MsprofCallbackHandler::ReportData(const T &data) const
 }
  
 template int MsprofCallbackHandler::ReportData(const MsprofApi &data) const;
-template int MsprofCallbackHandler::ReportData(const MsprofEvent &data) const;
 template int MsprofCallbackHandler::ReportData(const MsprofCompactInfo &data) const;
 template int MsprofCallbackHandler::ReportData(const MsprofAdditionalInfo &data) const;
 

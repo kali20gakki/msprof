@@ -4,7 +4,7 @@
 
 import logging
 
-from analyzer.scene_base.profiling_scene import ProfilingScene
+from common_func.profiling_scene import ProfilingScene
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
@@ -81,8 +81,6 @@ class TaskSchedulerCalculator(MsMultiProcess):
             self.generate_report_data()
         except (OSError, SystemError, ValueError, TypeError, RuntimeError) as err:
             logging.error(str(err))
-        finally:
-            pass
 
     def create_task_time(self: any, runtime_conn: any, device: int, iter_time_range: list) -> None:
         """

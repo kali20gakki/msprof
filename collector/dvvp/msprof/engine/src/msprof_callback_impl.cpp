@@ -189,7 +189,11 @@ int32_t MsprofSetDeviceCallbackForDynProf(VOID_PTR data, uint32_t len)
 
 inline int32_t InternalErrorCodeToExternal(int32_t internalErrorCode)
 {
-    return (internalErrorCode == PROFILING_SUCCESS ? MSPROF_ERROR_NONE : MSPROF_ERROR);
+    if (internalErrorCode == PROFILING_NOTSUPPORT) {
+        return MSPROF_ERROR_UNINITIALIZE;
+    } else {
+        return (internalErrorCode == PROFILING_SUCCESS ? MSPROF_ERROR_NONE : MSPROF_ERROR);
+    }
 }
 
 // reporter callback
@@ -217,6 +221,7 @@ int32_t RegisterReporterCallback()
         MSPROF_LOGI("MsprofCallbackHandler InitReporters");
         Msprof::Engine::MsprofCallbackHandler::InitReporters();
     }
+    
     MSPROF_LOGI("Call profRegReporterCallback");
     aclError ret = ProfApiPlugin::instance()->MsprofProfRegReporterCallback(MsprofReporterCallbackImpl);
     if (ret != ACL_SUCCESS) {
@@ -235,8 +240,7 @@ int32_t RegisterNewReporterCallback()
         {PROFILE_REPORT_EVENT_CALLBACK, reinterpret_cast<VOID_PTR>(MsprofEventReporterCallbackImpl)},
         {PROFILE_REPORT_COMPACT_INFO_CALLBACK, reinterpret_cast<VOID_PTR>(MsprofCompactInfoReporterCallbackImpl)},
         {PROFILE_REPORT_ADDITIONAL_INFO_CALLBACK, reinterpret_cast<VOID_PTR>(MsprofAddiInfoReporterCallbackImpl)},
-        {PROFILE_REPORT_REG_TYPE_INFO_CALLBACK, reinterpret_cast<VOID_PTR>(MsprofRegReportTypeInfoImpl)},
-        {PROFILE_REPORT_GET_HASH_ID_CALLBACK, reinterpret_cast<VOID_PTR>(MsprofGetHashIdImpl)}
+        {PROFILE_REPORT_REG_TYPE_INFO_CALLBACK, reinterpret_cast<VOID_PTR>(MsprofRegReportTypeInfoImpl)}
     };
     for (auto iter : CALLBACK_FUNC_LIST) {
         aclError ret = ProfApiPlugin::instance()->MsprofProfRegProfilerCallback(iter.first, iter.second,
@@ -310,6 +314,12 @@ int32_t MsprofilerInit()
     aclError ret = ProfApiPlugin::instance()->MsprofProfRegCtrlCallback(MsprofCtrlCallbackImpl);
     if (ret != ACL_SUCCESS) {
         MSPROF_LOGE("Failed to register ctrl callback");
+        return PROFILING_FAILED;
+    }
+    ret = ProfApiPlugin::instance()->MsprofProfRegProfilerCallback(PROFILE_REPORT_GET_HASH_ID_CALLBACK,
+        reinterpret_cast<VOID_PTR>(MsprofGetHashIdImpl), sizeof(VOID_PTR));
+    if (ret != ACL_SUCCESS) {
+        MSPROF_LOGE("Failed to register get hash id callback");
         return PROFILING_FAILED;
     }
     return PROFILING_SUCCESS;

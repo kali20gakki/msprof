@@ -55,7 +55,7 @@ class MsprofTimeline:
         for data_dict in json_list:
             pid = data_dict.get(StrConstant.TRACE_HEADER_PID, TraceViewHeaderConstant.DEFAULT_PID_VALUE)
             if data_dict.get(StrConstant.TRACE_HEADER_NAME) == "process_name":
-                pid_process_name[pid] = data_dict.get(StrConstant.TRACE_HEADER_ARGS, {})\
+                pid_process_name[pid] = data_dict.get(StrConstant.TRACE_HEADER_ARGS, {}) \
                     .get(StrConstant.TRACE_HEADER_NAME, "")
             if pid_process_name.get(pid) not in TraceViewHeaderConstant.MSPROF_TIMELINE_FILTER_LIST:
                 pid_json_data.setdefault(pid, []).append(data_dict)
@@ -72,7 +72,7 @@ class MsprofTimeline:
         """
         value[StrConstant.TRACE_HEADER_PID] = format_pid
         if value.get(StrConstant.TRACE_HEADER_NAME) == "process_name":
-            value.setdefault(StrConstant.TRACE_HEADER_ARGS, {})[StrConstant.TRACE_HEADER_NAME] =\
+            value.setdefault(StrConstant.TRACE_HEADER_ARGS, {})[StrConstant.TRACE_HEADER_NAME] = \
                 layer_info.component_layer
 
         if value.get(StrConstant.TRACE_HEADER_NAME) == "thread_name" and \
@@ -81,7 +81,13 @@ class MsprofTimeline:
                 f'{process_name}({value.get(StrConstant.TRACE_HEADER_ARGS, {}).get(StrConstant.TRACE_HEADER_NAME, "")})'
 
         if cls.is_cann_ai_stack_data(layer_info, value):
-            value[StrConstant.TRACE_HEADER_NAME] = f'{process_name}@{value.get(StrConstant.TRACE_HEADER_NAME, "")}'
+            level = value.get(StrConstant.TRACE_HEADER_ARGS, {}).get(StrConstant.API_EVENT_HEADER_LEVEL)
+            if not level:
+                prefix = process_name
+            else:
+                prefix = StrConstant.LEVEL_MAP.get(level, level.capitalize())
+            value[StrConstant.TRACE_HEADER_NAME] = \
+                f'{prefix}@{value.get(StrConstant.TRACE_HEADER_NAME, "")}'
 
     @classmethod
     def get_layer_label_and_sort(cls: any, pid: int, layer_info: TraceViewHeaderConstant.LayerInfo) -> list:
@@ -100,36 +106,32 @@ class MsprofTimeline:
         return whether the data is cann ai stack data
         """
         return value.get("ph") == "X" and \
-               layer_info.component_layer == TraceViewHeaderConstant.COMPONENT_LAYER_CANN
+            layer_info.component_layer == TraceViewHeaderConstant.COMPONENT_LAYER_CANN
 
     def init_export_data(self: any) -> None:
         self._export_data_list = []
 
-    def add_export_data(self: any, data: str, data_type: str) -> None:
+    def add_export_data(self: any, export_data: json, data_type: str) -> None:
         """
         index events in bulk json
         :param data_type: data type
-        :param data: data
+        :param export_data: data to export
         :param data_type: data_type
         :return: None
         """
-        if not data:
+        if not export_data:
             return
+
         try:
-            json_list = json.loads(data)
+            if isinstance(export_data, list):
+                self.add_sort_index(export_data)
+                self.add_connect_json_line(export_data, data_type)
+                export_data = filter(
+                    lambda value: value["ph"] == "M" or self.is_in_iteration(value),
+                    export_data)
+                self._export_data_list.extend(export_data)
         except (TypeError, ValueError) as err:
             error(self.FILE_NAME, err)
-        else:
-            try:
-                if isinstance(json_list, list) and json_list:
-                    self.add_sort_index(json_list)
-                    self.add_connect_json_line(json_list, data_type)
-                    json_list = filter(
-                        lambda value: value["ph"] == "M" or self.is_in_iteration(value),
-                        json_list)
-                    self._export_data_list.extend(json_list)
-            except (TypeError, ValueError) as err:
-                error(self.FILE_NAME, err)
 
     def add_connect_json_line(self: any, json_list: list, data_type: str) -> None:
         """
@@ -151,9 +153,13 @@ class MsprofTimeline:
             for filtered_data in filtered_data_list:
                 process_name = filtered_data[1]
                 json_data = filtered_data[2]
+                if process_name in (TraceViewHeaderConstant.PROCESS_TASK, TraceViewHeaderConstant.PROCESS_STEP_TRACE):
+                    pid = TraceViewHeaderConstant.DEFAULT_PID_VALUE
+                else:
+                    pid = filtered_data[0]
                 # get the msprof timeline layer info
                 layer_info = self.get_layer_info(process_name)
-                format_pid = layer_info.sort_index
+                format_pid = TraceViewManager.get_format_pid(pid, layer_info.sort_index)
                 for value in json_data:
                     self.modify_timeline_info(process_name, layer_info, format_pid, value)
                 json_list.extend(json_data)
@@ -208,4 +214,3 @@ class MsprofTimeline:
             self._default_sort_index += 1
             return TraceViewHeaderConstant.LayerInfo(process_name, TraceViewHeaderConstant.GENERAL_LAYER_NPU,
                                                      self._default_sort_index)
-

@@ -42,21 +42,26 @@ def init_params(line: str) -> tuple:
     :return:
     """
     fields = line.split()
-    intf = fields[0][0:-1]
-    rxbytes = int(fields[1])
-    rxpackets = int(fields[2])
-    rxerrs = int(fields[3])
-    txbytes = int(fields[9])
-    txpackets = int(fields[10])
-    txerrs = int(fields[11])
-    stat_info = (intf, rxbytes, rxpackets, rxerrs, txbytes, txpackets, txerrs)
-    return stat_info
+    if len(fields) >= 12:
+        intf = fields[0][0:-1]
+        rxbytes = int(fields[1])
+        rxpackets = int(fields[2])
+        rxerrs = int(fields[3])
+        txbytes = int(fields[9])
+        txpackets = int(fields[10])
+        txerrs = int(fields[11])
+        stat_info = (intf, rxbytes, rxpackets, rxerrs, txbytes, txpackets, txerrs)
+        return stat_info
+    else:
+        return MsvpConstant.EMPTY_TUPLE
 
 
 class HostNetworkUsagePresenter(HostProfPresenterBase):
     """
     class for parsing host mem usage data
     """
+
+    NS_TO_S = 10 ** 9
 
     def __init__(self: any, result_dir: str, file_name: str = "") -> None:
         super().__init__(result_dir, file_name)
@@ -144,7 +149,8 @@ class HostNetworkUsagePresenter(HostProfPresenterBase):
         usage = (speed * NumberConstant.PERCENTAGE / self.speeds.get(intf)).quantize(NumberConstant.USAGE_PLACES)
         transit_speed = float(speed) * intf_num / NumberConstant.KILOBYTE
         self.cur_model.insert_single_data(
-            [last_timestamp, curr_timestamp, str(usage), transit_speed])
+            [last_timestamp * HostNetworkUsagePresenter.NS_TO_S,
+             curr_timestamp * HostNetworkUsagePresenter.NS_TO_S, str(usage), transit_speed])
 
     def write_usage_items(self: any, file: any) -> None:
         """
@@ -169,7 +175,7 @@ class HostNetworkUsagePresenter(HostProfPresenterBase):
                 # timestamp ns to sec
                 tmp_time = line.split()
                 if len(tmp_time) > 1 and is_number(tmp_time[1]):
-                    curr_timestamp = float(tmp_time[1]) / (10 ** 9)
+                    curr_timestamp = float(tmp_time[1]) / HostNetworkUsagePresenter.NS_TO_S
             else:
                 self._update_cur_data(line, curr_data)
 
@@ -197,7 +203,7 @@ class HostNetworkUsagePresenter(HostProfPresenterBase):
             return result
 
         for data in mem_usage_data.get("data"):
-            temp_data = ["Network Usage", float(data["start"]) * (10 ** 6), {"Usage(%)": data["usage"]}]
+            temp_data = ["Network Usage", float(data["start"]), {"Usage(%)": data["usage"]}]
             result.append(temp_data)
         return result
 

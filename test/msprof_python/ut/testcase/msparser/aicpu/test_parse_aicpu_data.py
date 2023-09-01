@@ -2,12 +2,23 @@ import sqlite3
 import unittest
 from unittest import mock
 from common_func.info_conf_reader import InfoConfReader
+from common_func.file_manager import FileOpen
 from constant.constant import CONFIG
 from msparser.aicpu.parse_aicpu_data import ParseAiCpuData
 from profiling_bean.prof_enum.data_tag import DataTag
 from sqlite.db_manager import DBManager
+from profiling_bean.db_dto.step_trace_dto import StepTraceDto
+from common_func.profiling_scene import ProfilingScene
 
 NAMESPACE = 'msparser.aicpu.parse_aicpu_data'
+
+
+def get_step_trace_data():
+    step_trace_dto = StepTraceDto()
+    step_trace_dto.step_start = 1
+    step_trace_dto.step_end = 28017250105
+    step_trace_dto.iter_id = 1
+    return step_trace_dto
 
 
 class TestParseAiCpuData(unittest.TestCase):
@@ -31,18 +42,26 @@ class TestParseAiCpuData(unittest.TestCase):
                b'scheduleTick=18017297109, tickBeforeRun=18017307033,tickAfterRun=18017484178, ' \
                b'dispatchTime=107 us, totalTime=1879 us.\x00[180175138] '
         with mock.patch('builtins.open', mock.mock_open(read_data=data)), \
-             mock.patch(NAMESPACE + '.ParseAiCpuData._ParseAiCpuData__analysis_ai_cpu'), \
-             mock.patch(NAMESPACE + '.logging.error'), \
-             mock.patch('common_func.msprof_iteration.MsprofIteration.get_iteration_end_dict', return_value={1: 10}):
+                mock.patch('common_func.file_manager.check_path_valid'), \
+                mock.patch(NAMESPACE + '.ParseAiCpuData._ParseAiCpuData__analysis_ai_cpu'), \
+                mock.patch(NAMESPACE + '.logging.error'), \
+                mock.patch('msmodel.step_trace.ts_track_model.TsTrackModel.get_step_trace_data',
+                           return_value=[get_step_trace_data()]), \
+                mock.patch('common_func.utils.Utils.is_step_scene', return_value=True):
             check = ParseAiCpuData(self.file_list, CONFIG)
             InfoConfReader()._info_json = {'devices': 0}
+            InfoConfReader()._sample_json = CONFIG
             result = check._ParseAiCpuData__read_and_analysis_ai_cpu('test')
         self.assertEqual(result, None)
         with mock.patch('builtins.open', mock.mock_open(read_data=data)), \
-             mock.patch(NAMESPACE + '.ParseAiCpuData._ParseAiCpuData__analysis_ai_cpu'), \
-             mock.patch('common_func.msprof_iteration.MsprofIteration.get_iteration_end_dict', return_value={1: 10}):
+                mock.patch('common_func.file_manager.check_path_valid'), \
+                mock.patch(NAMESPACE + '.ParseAiCpuData._ParseAiCpuData__analysis_ai_cpu'), \
+                mock.patch('msmodel.step_trace.ts_track_model.TsTrackModel.get_step_trace_data',
+                           return_value=[get_step_trace_data()]), \
+                mock.patch('common_func.utils.Utils.is_step_scene', return_value=True):
             check = ParseAiCpuData(self.file_list, CONFIG)
             InfoConfReader()._info_json = {'devices': 1}
+            InfoConfReader()._sample_json = CONFIG
             result = check._ParseAiCpuData__read_and_analysis_ai_cpu('test')
         self.assertEqual(result, None)
 
@@ -50,7 +69,7 @@ class TestParseAiCpuData(unittest.TestCase):
         with mock.patch(NAMESPACE + '.DBManager.destroy_db_connect'), \
              mock.patch(NAMESPACE + '.PathManager.get_db_path', return_value='test\\db'), \
              mock.patch(NAMESPACE + '.DBManager.create_connect_db', return_value=(True, True)), \
-             mock.patch('common_func.iter_recorder.MsprofIteration.get_iteration_end_dict', return_value=(True, True)), \
+             mock.patch('common_func.msprof_iteration.MsprofIteration.get_iteration_end_dict', return_value=(True, True)), \
              mock.patch(NAMESPACE + '.BatchCounter.init'), \
              mock.patch(NAMESPACE + '.IterRecorder'), \
              mock.patch(NAMESPACE + '.DBManager.sql_create_general_table', return_value=""), \
@@ -111,8 +130,10 @@ class TestParseAiCpuData(unittest.TestCase):
         )
 
         with mock.patch('common_func.msprof_iteration.Utils.is_step_scene', return_value=True), \
-             mock.patch('common_func.msprof_iteration.MsprofIteration.get_iteration_end_dict',
-                        return_value={1: 28017250105}):
+                mock.patch('common_func.utils.Utils.get_scene', return_value=''), \
+                mock.patch('msmodel.step_trace.ts_track_model.TsTrackModel.get_step_trace_data',
+                           return_value=[get_step_trace_data()]), \
+                mock.patch('common_func.utils.Utils.is_step_scene', return_value=True):
             check = ParseAiCpuData(self.file_list, CONFIG)
 
         InfoConfReader()._info_json = {"DeviceInfo": [
@@ -122,14 +143,17 @@ class TestParseAiCpuData(unittest.TestCase):
              "ai_cpu": "4,5,6,7", "aiv_num": 0, "hwts_frequency": "19.2", "aic_frequency": "680",
              "aiv_frequency": "1000"}]}
 
-        with mock.patch('common_func.msprof_iteration.Utils.is_step_scene', return_value=True):
+        with mock.patch('common_func.msprof_iteration.Utils.is_step_scene', return_value=True), \
+                mock.patch('common_func.utils.Utils.get_scene', return_value=''):
             check._ParseAiCpuData__analysis_ai_cpu(ai_cpu_datas)
             self.assertEqual(len(check.ai_cpu_datas), 1)
 
         with mock.patch(NAMESPACE + '.logging.warning'), \
              mock.patch('common_func.msprof_iteration.Utils.is_step_scene', return_value=True), \
-             mock.patch('common_func.msprof_iteration.MsprofIteration.get_iteration_end_dict',
-                        return_value={1: 28017250105}):
+                mock.patch('common_func.utils.Utils.get_scene', return_value=''), \
+                mock.patch('msmodel.step_trace.ts_track_model.TsTrackModel.get_step_trace_data',
+                           return_value=[get_step_trace_data()]), \
+                mock.patch('common_func.utils.Utils.is_step_scene', return_value=True):
             check = ParseAiCpuData(self.file_list, CONFIG)
             check._ParseAiCpuData__analysis_ai_cpu(wrong_ai_cpu_datas)
             self.assertEqual(check.ai_cpu_datas, [])

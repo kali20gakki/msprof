@@ -11,12 +11,13 @@ from common_func.file_name_manager import get_acl_hash_compiles
 from common_func.file_name_manager import get_ai_core_compiles
 from common_func.file_name_manager import get_ai_cpu_compiles
 from common_func.file_name_manager import get_aiv_compiles
+from common_func.file_name_manager import get_api_event_compiles
 from common_func.file_name_manager import get_biu_compiles
 from common_func.file_name_manager import get_ctrl_cpu_compiles
+from common_func.file_name_manager import get_dbg_file_compiles
 from common_func.file_name_manager import get_data_preprocess_compiles
 from common_func.file_name_manager import get_ddr_compiles
 from common_func.file_name_manager import get_dvpp_compiles
-from common_func.file_name_manager import get_api_event_compiles
 from common_func.file_name_manager import get_ffts_pmu_compiles
 from common_func.file_name_manager import get_file_name_pattern_match
 from common_func.file_name_manager import get_freq_compiles
@@ -53,6 +54,8 @@ from common_func.file_name_manager import get_msproftx_compiles
 from common_func.file_name_manager import get_msproftx_pipeline_compiles
 from common_func.file_name_manager import get_msproftx_torch_compiles
 from common_func.file_name_manager import get_multi_thread_compiles
+from common_func.file_name_manager import get_nano_model_exeom_compiles
+from common_func.file_name_manager import get_nano_stars_profile_compiles
 from common_func.file_name_manager import get_nic_compiles
 from common_func.file_name_manager import get_npu_mem_compiles
 from common_func.file_name_manager import get_npu_op_mem_compiles
@@ -149,6 +152,9 @@ class FileDispatch:
         DataTag.FUSION_ADD_INFO: get_ge_fusion_add_info_compiles(),
         DataTag.MEMORY_APPLICATION: get_ge_memory_application_info_compiles(),
         DataTag.CTX_ID: get_ge_ctx_id_info_compiles(),
+        DataTag.NANO_MODEL_EXEOM: get_nano_model_exeom_compiles(),
+        DataTag.NANO_STARS_PROFILE: get_nano_stars_profile_compiles(),
+        DataTag.DBG_FILE: get_dbg_file_compiles(),
     }
 
     def __init__(self: any, sample_config: dict) -> None:

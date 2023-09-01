@@ -67,7 +67,7 @@ class DBNameConstant(metaclass=ABCMeta):
     DB_NPU_MEM = "npu_mem.db"
     DB_SYNC_ACL_NPU = "sync_acl_npu.db"
     DB_FREQ = "freq.db"
-    DB_API_EVENT_DATA = "api_event.db"
+    DB_API_EVENT = "api_event.db"
     DB_HCCL_INFO = "hccl_info.db"
     DB_MULTI_THREAD = "multi_thread.db"
     DB_TENSOR_ADD_INFO = "tensor_info.db"
@@ -77,11 +77,11 @@ class DBNameConstant(metaclass=ABCMeta):
     DB_CTX_ID = "ctx_id.db"
     DB_MEMORY_APPLICATION = "memory_application.db"
     DB_MEMORY_OP = "task_memory.db"
+    DB_ASCEND_TASK = "ascend_task.db"
 
     # DB tables
     TABLE_ACL_DATA = "AclData"
-    TABLE_AI_CORE_METRIC_SUMMARY = "MetricSummary"
-    TABLE_AIV_METRIC_SUMMARY = "AivMetricSummary"
+
     TABLE_AI_CORE_REC = "AiCoreRec"
     TABLE_AI_CPU = "AiCpuData"
     TABLE_AI_CPU_FROM_TS = "AiCpuFromTs"
@@ -106,7 +106,16 @@ class DBNameConstant(metaclass=ABCMeta):
     TABLE_HWTS_TASK_TIME = "HwtsTaskTime"
     TABLE_LLC_METRIC_DATA = "LLCMetricData"
     TABLE_LLC_DSID = "LLCDsidData"
-    TABLE_METRICS_SUMMARY = "MetricSummary"
+
+    # MetricSummary
+    DB_METRICS_SUMMARY = "metric_summary.db"
+    TABLE_METRIC_SUMMARY = "MetricSummary"
+    TABLE_AIV_METRIC_SUMMARY = "AivMetricSummary"
+
+    DB_HCCL_SINGLE_DEVICE = "hccl_single_device.db"
+    TABLE_HCCL_SINGLE_DEVICE = "HCCLSingleDevice"
+    TABLE_HCCL_OP_REPORT = "HcclOpReport"
+
     TABLE_OP_COUNTER_GE_MERGE = "ge_task_merge"
     TABLE_OP_COUNTER_OP_REPORT = "op_report"
     TABLE_OP_COUNTER_RTS_TASK = "rts_task"
@@ -197,7 +206,6 @@ class DBNameConstant(metaclass=ABCMeta):
     # tscpu
     TABLE_TS_CPU_EVENT = "EventCount"
     TABLE_TS_CPU_HOT_INS = "HotIns"
-    TABLE_HCCL_ALL_REDUCE = "HCCLAllReduce"
 
     # msproftx
     TABLE_MSPROFTX = "MsprofTx"
@@ -217,7 +225,6 @@ class DBNameConstant(metaclass=ABCMeta):
 
     # ge
     TABLE_GE_TASK = "TaskInfo"
-    TABLE_GE_TENSOR = "TensorInfo"
     TABLE_GE_STEP = "StepInfo"
     TABLE_GE_SESSION = "SessionInfo"
     TABLE_GE_HASH = "GeHashInfo"
@@ -278,6 +285,12 @@ class DBNameConstant(metaclass=ABCMeta):
     TABLE_MEMORY_APPLICATION = "MemoryApplication"
     TABLE_HCCL_OP = "HCCLOP"
     TABLE_HCCL_TASK = "HCCLTask"
+    TABLE_HOST_TASK = "HostTask"
+    TABLE_ASCEND_TASK = "AscendTask"
+    TABLE_HCCL_OP_REPORT = "HcclOpReport"
+
+    # nano
+    TABLE_NANO_TASK = "NanoTask"
 
     @abstractmethod
     def get_db_name(self: any) -> str:

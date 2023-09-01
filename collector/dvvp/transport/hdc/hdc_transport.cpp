@@ -62,6 +62,12 @@ int HDCTransport::RecvPacket(TLV_REQ_2PTR packet)
 
     *packet = (TLV_REQ_PTR)buffer;
 
+    // check if packet data valid
+    if (bufLen != static_cast<int>(sizeof(struct tlv_req) + (*packet)->len)) {
+        MSPROF_LOGW("hdc read invalid data len=%d; bufLen=%d", (*packet)->len, bufLen);
+        return PROFILING_FAILED;
+    }
+
     if ((*packet)->len == static_cast<int>(CONTAINER_NO_SUPPORT_MESSAGE.size())) {
         std::string rcvBuffer((*packet)->value, CONTAINER_NO_SUPPORT_MESSAGE.size());
         if (rcvBuffer.compare(CONTAINER_NO_SUPPORT_MESSAGE) == 0) {

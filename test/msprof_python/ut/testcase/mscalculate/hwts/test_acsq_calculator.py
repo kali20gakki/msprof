@@ -1,7 +1,7 @@
 import unittest
 from unittest import mock
 
-from analyzer.scene_base.profiling_scene import ProfilingScene
+from common_func.profiling_scene import ProfilingScene
 from common_func.batch_counter import BatchCounter
 from mock_tools import ClassMock
 from mscalculate.hwts.acsq_calculator import AcsqCalculator
@@ -60,22 +60,9 @@ class TestAcsqCalculator(unittest.TestCase):
             check.ms_run()
 
     def test_get_data_from_task_table(self):
-        with mock.patch(NAMESPACE + '.DBManager.check_tables_in_db', return_value=False), \
-                mock.patch(NAMESPACE + '.PathManager.get_db_path', retunr_value='test'), \
-                mock.patch('mscalculate.ts_task.ai_cpu.aicpu_from_ts_collector.BatchCounter.init'), \
-                mock.patch('mscalculate.ts_task.ai_cpu.aicpu_from_ts_collector.AICpuFromTsCollector'), \
-                mock.patch('common_func.msprof_iteration.MsprofIteration.get_iteration_end_dict',
-                           return_value={}), \
-                mock.patch(NAMESPACE + '.logging.warning'):
-            AcsqCalculator(self.file_list, self.sample_config)._get_data_from_task_table()
-        with mock.patch(NAMESPACE + '.DBManager.check_tables_in_db', return_value=True), \
-                mock.patch(NAMESPACE + '.PathManager.get_db_path', retunr_value='test'), \
-                mock.patch('mscalculate.ts_task.ai_cpu.aicpu_from_ts_collector.BatchCounter.init'), \
-                mock.patch('mscalculate.ts_task.ai_cpu.aicpu_from_ts_collector.AICpuFromTsCollector'), \
-                mock.patch('common_func.msprof_iteration.MsprofIteration.get_iteration_end_dict',
-                           return_value={}), \
-                mock.patch('msmodel.stars.acsq_task_model.AcsqTaskModel.init', retunr_value='test'), \
-                mock.patch(NAMESPACE + '.DBManager.fetch_all_data', return_value=[]):
+        AcsqCalculator(self.file_list, self.sample_config)._get_data_from_task_table()
+
+        with mock.patch(NAMESPACE + '.DBManager.check_tables_in_db', return_value=True):
             AcsqCalculator(self.file_list, self.sample_config)._get_data_from_task_table()
 
     def test_filter_aicpu(self):

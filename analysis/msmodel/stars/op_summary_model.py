@@ -6,9 +6,11 @@ import logging
 import sqlite3
 
 from common_func.common import CommonConstant
+from common_func.constant import Constant
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
 from common_func.path_manager import PathManager
+from common_func.info_conf_reader import InfoConfReader
 from msmodel.interface.ianalysis_model import IAnalysisModel
 from msmodel.interface.view_model import ViewModel
 from msmodel.stars.acsq_task_model import AcsqTaskModel
@@ -20,6 +22,12 @@ class OpSummaryModel(ViewModel, IAnalysisModel):
     """
     class used to operate summary db
     """
+
+    COMPUTED_TASK_TYPE = (
+        Constant.TASK_TYPE_AI_CORE, Constant.TASK_TYPE_AI_CPU,
+        Constant.TASK_TYPE_AIV, Constant.TASK_TYPE_MIX_AIV,
+        Constant.TASK_TYPE_MIX_AIC
+    )
 
     def __init__(self: any, sample_config: dict) -> None:
         super().__init__(sample_config.get("result_dir"), DBNameConstant.DB_AICORE_OP_SUMMARY, [])
@@ -35,7 +43,6 @@ class OpSummaryModel(ViewModel, IAnalysisModel):
         :return:
         """
         self.create_ge_summary_table()
-        self.create_ge_tensor_table()
         self.create_ai_core_metrics_table()
         self.create_task_time_table()
         self.sql_commit()
@@ -51,29 +58,18 @@ class OpSummaryModel(ViewModel, IAnalysisModel):
         create_ge_summary_sql = "create table if not exists ge_summary as {}".format(ge_merge_sql)
         DBManager.execute_sql(self.conn, create_ge_summary_sql, sql_param)
 
-    def create_ge_tensor_table(self: any) -> None:
-        """
-        create ge tensor table
-        :return: None
-        """
-        ge_tensor_sql = "select * from {0} where (index_id={1} or index_id=0)" \
-            .format(DBNameConstant.TABLE_GE_TENSOR, self.iter_id)
-        create_ge_tensor_sql = "create table if not exists {0} as {1}" \
-            .format(DBNameConstant.TABLE_SUMMARY_TENSOR, ge_tensor_sql)
-        DBManager.execute_sql(self.conn, create_ge_tensor_sql)
-
     def create_ai_core_metrics_table(self: any) -> None:
         """
         create ai core metrics table
         :return: None
         """
-        if not self.attach_to_db(DBNameConstant.DB_RUNTIME):
+        if not self.attach_to_db(DBNameConstant.DB_METRICS_SUMMARY):
             logging.warning("unable to create ai core metrics table, because attach db of runtime failed.")
             return
-        if DBManager.check_tables_in_db(self.get_db_path(DBNameConstant.DB_RUNTIME),
-                                        CommonConstant.METRICS_SUMMARY_TABLE):
+        if DBManager.check_tables_in_db(self.get_db_path(DBNameConstant.DB_METRICS_SUMMARY),
+                                        DBNameConstant.TABLE_METRIC_SUMMARY):
             sql = "create table if not exists ai_core_metrics " \
-                  "as select * from {0}".format(CommonConstant.METRICS_SUMMARY_TABLE)
+                  "as select * from {0}".format(DBNameConstant.TABLE_METRIC_SUMMARY)
         else:
             logging.warning("unable to create ai core metrics table, because table is not found.")
             return
@@ -125,7 +121,7 @@ class OpSummaryModel(ViewModel, IAnalysisModel):
     def get_timeline_data(self: any) -> str:
         return self.__module__
 
-    def get_operator_data_by_task_type(self: any, task_type: str) -> list:
+    def get_operator_data_by_task_type(self: any, task_type: tuple = COMPUTED_TASK_TYPE) -> list:
         db_path = PathManager.get_db_path(self.result_dir, DBNameConstant.DB_AICORE_OP_SUMMARY)
         if not DBManager.check_tables_in_db(db_path, DBNameConstant.TABLE_SUMMARY_TASK_TIME,
                                             DBNameConstant.TABLE_SUMMARY_GE):
@@ -139,19 +135,25 @@ class OpSummaryModel(ViewModel, IAnalysisModel):
             inner_join_condition += " and (a.index_id=b.index_id or b.index_id=0)"
         sql = "SELECT a.stream_id, op_name, b.task_type, start_time, duration_time, " \
               "start_time+duration_time as end_time FROM {0} a INNER JOIN {1} b " \
-              "on a.stream_id=b.stream_id and a.task_id=b.task_id and a.batch_id=b.batch_id {2} " \
-              "and b.task_type=?".format(DBNameConstant.TABLE_SUMMARY_TASK_TIME, DBNameConstant.TABLE_SUMMARY_GE,
-                                         inner_join_condition)
-        return DBManager.fetch_all_data(self.cur, sql, (task_type,), dto_class=TimeSectionDto)
+              "on a.stream_id=b.stream_id and a.task_id=b.task_id and a.batch_id=b.batch_id " \
+              "and a.subtask_id=b.context_id {2} " \
+              "and a.task_type<>'{unknown}'".format(
+                DBNameConstant.TABLE_SUMMARY_TASK_TIME,
+                DBNameConstant.TABLE_SUMMARY_GE,
+                inner_join_condition,
+                unknown=Constant.TASK_TYPE_UNKNOWN)
+        return DBManager.fetch_all_data(self.cur, sql, dto_class=TimeSectionDto)
 
     def _get_ge_sql(self: any) -> tuple:
+        device_id = InfoConfReader().get_device_id()
         ge_sql = "SELECT model_id, task_id, stream_id, " \
                  "op_name, op_type, block_dim, task_type, timestamp " \
                  "from {0} " \
                  "where (index_id=? or index_id=0) " \
-                 "and model_id=?" \
+                 "and model_id=? " \
+                 "and device_id=?" \
             .format(DBNameConstant.TABLE_GE_TASK)
-        return ge_sql, (self.iter_id, self.model_id)
+        return ge_sql, (self.iter_id, self.model_id, device_id)
 
     def _get_acsq_task_data(self: any) -> list:
         try:

@@ -20,7 +20,7 @@ class ApiDataDto:
 
     @property
     def struct_type(self: any) -> str:
-        return str(self._struct_type)
+        return self._struct_type
 
     @property
     def id(self: any) -> str:
@@ -58,6 +58,7 @@ class ApiDataDto:
         dto.struct_type = struct_type
         dto.start = start
         dto.end = end
+        dto.item_id = ""
         return dto
 
     @struct_type.setter

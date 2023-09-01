@@ -12,7 +12,6 @@
 #include "cmd_log.h"
 #include "msprof_dlog.h"
 #include "ai_drv_dev_api.h"
-#include "prof_params_adapter.h"
 #include "config/config_manager.h"
 #include "application.h"
 #include "transport/file_transport.h"
@@ -296,6 +295,53 @@ ParseDataType RunningMode::GetParseDataType(const std::string &parseDataPath) co
     return ParseDataType::DATA_PATH_INVALID;
 }
 
+int RunningMode::StartAnalyzeTask()
+{
+    if (isQuit_) {
+        MSPROF_LOGE("Start analyze task error, msprofbin has quited");
+        return PROFILING_FAILED;
+    }
+    if (taskPid_ != MSVP_MMPROCESS) {
+        MSPROF_LOGE("Start analyze task error, process %d is running,"
+            "only one child process can run at the same time.", reinterpret_cast<int>(taskPid_));
+        return PROFILING_FAILED;
+    }
+    if (jobResultDir_.empty() || analysisPath_.empty()) {
+        MSPROF_LOGE("Start analyze task error, get output dir and msprof.py script failed.");
+        return PROFILING_FAILED;
+    }
+    CmdLog::instance()->CmdInfoLog("Start analyze data in %s.", Utils::BaseName(jobResultDir_).c_str());
+    taskName_="Analyze";
+
+    std::string cmd = params_->pythonPath;
+    ExecCmdParams execCmdParams(cmd, true, "");
+    std::vector<std::string> envsV;
+    int exitCode = INVALID_EXIT_CODE;
+    SetEnvList(envsV);
+
+    std::vector<std::string> argsV = {
+        analysisPath_,
+        "analyze",
+        "-dir=" + jobResultDir_,
+        "-r=" +  params_->analyzeRuleSwitch
+        
+    };
+    int ret = analysis::dvvp::common::utils::Utils::ExecCmd(execCmdParams, argsV, envsV, exitCode, taskPid_);
+    if (ret == PROFILING_FAILED) {
+        MSPROF_LOGE("Failed to launch analyze task, data path: %s", Utils::BaseName(jobResultDir_).c_str());
+        return PROFILING_FAILED;
+    }
+    ret = WaitRunningProcess(taskName_);
+    if (ret != PROFILING_SUCCESS) {
+        MSPROF_LOGE("Failed to wait analyze process %d to exit, ret=%d", reinterpret_cast<int>(taskPid_), ret);
+        return PROFILING_FAILED;
+    }
+    taskPid_ = MSVP_MMPROCESS;
+    exitCode = INVALID_EXIT_CODE;
+    CmdLog::instance()->CmdInfoLog("Analyze all data in %s done.", Utils::BaseName(jobResultDir_).c_str());
+    return PROFILING_SUCCESS;
+}
+
 int RunningMode::StartParseTask()
 {
     if (isQuit_) {
@@ -558,7 +604,7 @@ AppMode::AppMode(std::string preCheckParams, SHARED_PTR_ALIA<ProfileParams> para
         ARGS_INSTR_PROFILING, ARGS_HCCL, ARGS_SYS_SAMPLING_FREQ, ARGS_PID_SAMPLING_FREQ,
         ARGS_HARDWARE_MEM_SAMPLING_FREQ, ARGS_IO_SAMPLING_FREQ, ARGS_DVPP_FREQ,  ARGS_CPU_SAMPLING_FREQ,
         ARGS_INTERCONNECTION_FREQ, ARGS_HOST_SYS, ARGS_HOST_SYS_USAGE, ARGS_HOST_SYS_USAGE_FREQ,
-        ARGS_PYTHON_PATH, ARGS_MSPROFTX,
+        ARGS_PYTHON_PATH, ARGS_MSPROFTX
     };
 }
 
@@ -1197,7 +1243,7 @@ ParseMode::ParseMode(std::string preCheckParams, SHARED_PTR_ALIA<ProfileParams> 
 {
     whiteSet_ = {ARGS_OUTPUT, ARGS_PARSE, ARGS_PYTHON_PATH};
     neccessarySet_ = {ARGS_OUTPUT, ARGS_PARSE};
-    blackSet_ = {ARGS_QUERY, ARGS_EXPORT};
+    blackSet_ = {ARGS_QUERY, ARGS_EXPORT, ARGS_ANALYZE, ARGS_RULE};
 }
 
 ParseMode::~ParseMode() {}
@@ -1247,12 +1293,64 @@ int ParseMode::RunModeTasks()
     return PROFILING_SUCCESS;
 }
 
+AnalyzeMode::AnalyzeMode(std::string preCheckParams, SHARED_PTR_ALIA<ProfileParams> params)
+    : RunningMode(preCheckParams, "analyze", params)
+{
+    whiteSet_ = {ARGS_OUTPUT, ARGS_ANALYZE, ARGS_PYTHON_PATH, ARGS_RULE};
+    neccessarySet_ = {ARGS_OUTPUT, ARGS_ANALYZE};
+    blackSet_ = {ARGS_QUERY, ARGS_EXPORT, ARGS_PARSE};
+}
+
+AnalyzeMode::~AnalyzeMode() {}
+
+int AnalyzeMode::ModeParamsCheck()
+{
+    if (params_ == nullptr) {
+        MSPROF_LOGE("[Analyze Mode] Invalid params!");
+        return PROFILING_FAILED;
+    }
+    if (CheckForbiddenParams() != PROFILING_SUCCESS ||
+        CheckNeccessaryParams() != PROFILING_SUCCESS) {
+        return PROFILING_FAILED;
+    }
+    OutputUselessParams();
+
+    return PROFILING_SUCCESS;
+}
+
+void AnalyzeMode::UpdateOutputDirInfo()
+{
+    int ret = GetOutputDirInfoFromParams();
+    if (ret != PROFILING_SUCCESS) {
+        MSPROF_LOGW("Get output info failed.");
+    }
+}
+
+int AnalyzeMode::RunModeTasks()
+{
+    if (params_ == nullptr) {
+        MSPROF_LOGE("[Analyze Mode] Invalid params!");
+        return PROFILING_FAILED;
+    }
+    if (CheckAnalysisEnv() != PROFILING_SUCCESS) {
+        MSPROF_LOGW("[Analyze Mode] Analysis environment is not OK, parse will not start.");
+        return PROFILING_FAILED;
+    }
+    UpdateOutputDirInfo();
+    if (StartAnalyzeTask() != PROFILING_SUCCESS) {
+        MSPROF_LOGE("[Analyze Mode] Run analyze task failed.");
+        return PROFILING_FAILED;
+    }
+    
+    return PROFILING_SUCCESS;
+}
+
 QueryMode::QueryMode(std::string preCheckParams, SHARED_PTR_ALIA<ProfileParams> params)
     : RunningMode(preCheckParams, "query", params)
 {
     whiteSet_ = {ARGS_OUTPUT, ARGS_QUERY, ARGS_PYTHON_PATH};
     neccessarySet_ = {ARGS_OUTPUT, ARGS_QUERY};
-    blackSet_ = {ARGS_PARSE, ARGS_EXPORT};
+    blackSet_ = {ARGS_PARSE, ARGS_EXPORT, ARGS_ANALYZE, ARGS_RULE};
 }
 
 QueryMode::~QueryMode() {}
@@ -1306,7 +1404,7 @@ ExportMode::ExportMode(std::string preCheckParams, SHARED_PTR_ALIA<ProfileParams
         ARGS_EXPORT_MODEL_ID, ARGS_SUMMARY_FORMAT, ARGS_PYTHON_PATH
     };
     neccessarySet_ = {ARGS_OUTPUT, ARGS_EXPORT};
-    blackSet_ = {ARGS_QUERY, ARGS_PARSE};
+    blackSet_ = {ARGS_QUERY, ARGS_PARSE, ARGS_ANALYZE, ARGS_RULE};
 }
 
 ExportMode::~ExportMode() {}

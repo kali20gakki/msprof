@@ -9,9 +9,9 @@ import sqlite3
 from collections import defaultdict
 from common_func.ms_multi_process import MsMultiProcess
 from common_func.ms_constant.str_constant import StrConstant
+from mscalculate.ascend_task.ascend_task import TopDownTask
 from msconfig.config_manager import ConfigManager
-from analyzer.get_op_table_task_time import GetOpTableTsTime
-from analyzer.scene_base.profiling_scene import ProfilingScene
+from common_func.profiling_scene import ProfilingScene
 from common_func.common import CommonConstant
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
@@ -21,6 +21,8 @@ from common_func.msprof_exception import ProfException
 from common_func.msprof_iteration import MsprofIteration
 from common_func.path_manager import PathManager
 from common_func.platform.chip_manager import ChipManager
+from common_func.info_conf_reader import InfoConfReader
+from msmodel.task_time.ascend_task_model import AscendTaskModel
 from viewer.ge_info_report import get_ge_model_name_dict
 from profiling_bean.db_dto.ge_task_dto import GeTaskDto
 
@@ -53,11 +55,11 @@ class MergeOpCounterCalculator(MsMultiProcess):
               "max(duration) as max, {0}.model_id from {0}, {1} " \
               "where {0}.task_id={1}.task_id and {0}.stream_id={1}.stream_id " \
               "and {0}.batch_id={1}.batch_id " \
-              "and ({0}.context_id={1}.subtask_id or ({0}.context_id={context_id} and subtask_id={subtask_id})) " \
+              "and {0}.context_id={1}.subtask_id " \
+              "and {1}.start_time != {2} " \
               "group by op_type,{0}.task_type" \
             .format(CommonConstant.GE_TASK_MEGED_TABLE, CommonConstant.RTS_TASK_TABLE,
-                    context_id=NumberConstant.DEFAULT_GE_CONTEXT_ID,
-                    subtask_id=NumberConstant.DEFAULT_FFTS_SUBTASK_ID)
+                    NumberConstant.INVALID_TASK_TIME)
         return sql
 
     @staticmethod
@@ -155,10 +157,11 @@ class MergeOpCounterCalculator(MsMultiProcess):
                                             DBNameConstant.TABLE_HWTS_TASK_TIME)
 
     def _get_ge_data(self: any, ge_curs: any) -> list:
+        device_id = InfoConfReader().get_device_id()
         ge_data = []
         iter_list = MsprofIteration(self.project_path).get_index_id_list_with_index_and_model(self.iter_range)
         ge_sql = f'select model_id, op_name, op_type, task_type, task_id, stream_id, batch_id, context_id ' \
-                 f'from {DBNameConstant.TABLE_GE_TASK} where index_id=? and model_id=?'
+                 f'from {DBNameConstant.TABLE_GE_TASK} where index_id=? and model_id=? and device_id={device_id}'
         for index_and_model in iter_list:
             ge_data.extend(DBManager.fetch_all_data(ge_curs, ge_sql, index_and_model))
 
@@ -191,14 +194,24 @@ class MergeOpCounterCalculator(MsMultiProcess):
         insert data to task time table
         :return:
         """
-        ge_data = self._get_ge_data_from_merge_task()
-        rts_data = GetOpTableTsTime(self.sample_config).get_task_time_data(ge_data)
-        try:
-            DBManager.insert_data_into_table(self.conn, CommonConstant.RTS_TASK_TABLE, rts_data)
-        except sqlite3.Error as err:
-            logging.error(err, exc_info=Constant.TRACE_BACK_SWITCH)
-        finally:
-            pass
+        project_path = self.sample_config.get("result_dir")
+        ascend_task_db_path = PathManager.get_db_path(project_path, DBNameConstant.DB_ASCEND_TASK)
+
+        if not DBManager.check_tables_in_db(ascend_task_db_path, DBNameConstant.TABLE_ASCEND_TASK):
+            logging.warning("No table %s found in %s", DBNameConstant.TABLE_ASCEND_TASK, DBNameConstant.DB_ASCEND_TASK)
+            return
+        with AscendTaskModel(project_path, DBNameConstant.TABLE_ASCEND_TASK) as model:
+            tasks = model.get_all_data(DBNameConstant.TABLE_ASCEND_TASK)
+            if not tasks:
+                logging.error("Get tasks from %s error", DBNameConstant.TABLE_ASCEND_TASK)
+                return
+            ascend_tasks = [TopDownTask(*task) for task in tasks]
+            rts_data = [[task.task_id, task.stream_id, task.start_time, task.duration, task.device_task_type,
+                         task.index_id, task.model_id, task.batch_id, task.context_id] for task in ascend_tasks]
+            try:
+                DBManager.insert_data_into_table(self.conn, CommonConstant.RTS_TASK_TABLE, rts_data)
+            except sqlite3.Error as err:
+                logging.error(err, exc_info=Constant.TRACE_BACK_SWITCH)
 
     def _get_sql_dir(self: any) -> str:
         return PathManager.get_sql_dir(self.project_path)

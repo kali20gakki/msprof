@@ -41,8 +41,11 @@ class TaskQueueViewer:
             else:
                 result.append({
                     "name": current_task_queue.message, "pid": current_task_queue.pid, "tid": current_task_queue.tid,
-                    "ts": current_task_queue.start_time / NumberConstant.CONVERSION_TIME, "ph": "X", "args": {},
-                    "dur": (data.start_time - current_task_queue.start_time) / NumberConstant.CONVERSION_TIME
+                    "ts": InfoConfReader().time_from_host_syscnt(current_task_queue.start_time,
+                                                                 NumberConstant.MICRO_SECOND),
+                    "ph": "X", "args": {},
+                    "dur": InfoConfReader().get_host_duration((data.start_time - current_task_queue.start_time),
+                                                              NumberConstant.MICRO_SECOND)
                 })
                 current_task_queue = None
         return result

@@ -6,6 +6,7 @@
  */
 #ifndef COLLECTOR_DYNAMIC_PROFILING_COMMON_H
 #define COLLECTOR_DYNAMIC_PROFILING_COMMON_H
+#include <string>
 
 namespace Collector {
 namespace Dvvp {

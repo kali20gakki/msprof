@@ -472,6 +472,20 @@ def _get_ge_sql() -> str:
     return sql
 
 
+def _reformat(ge_datas: list) -> list:
+    return [
+        (
+            InfoConfReader().time_from_host_syscnt(data[0]),
+            InfoConfReader().get_host_duration(data[1]),
+            InfoConfReader().time_from_host_syscnt(data[2]),
+            InfoConfReader().get_host_duration(data[3]),
+            InfoConfReader().time_from_host_syscnt(data[4]),
+            InfoConfReader().get_host_duration(data[5]),
+            data[6], data[7], data[8]
+        ) for data in ge_datas
+    ]
+
+
 def get_ge_timeline_data(project_path: str) -> str:
     """
     get ge trace view data
@@ -484,6 +498,7 @@ def get_ge_timeline_data(project_path: str) -> str:
                 return json.dumps({"status": NumberConstant.ERROR,
                                    "info": "table {0} does not exist.".format(DBNameConstant.TABLE_GE_MODEL_TIME)})
             ge_datas = DBManager.fetch_all_data(cur, _get_ge_sql())
+            ge_datas = _reformat(ge_datas)
             if ge_datas:
                 pid = InfoConfReader().get_json_pid_data()
                 tid = InfoConfReader().get_json_tid_data()

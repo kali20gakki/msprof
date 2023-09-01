@@ -61,7 +61,7 @@ class TestMemoryApplicationParser(unittest.TestCase):
         data = MemoryApplicationBean.decode(struct_data)
         check = MemoryApplicationParser(self.file_list, CONFIG)
         result = check._get_memory_application_data(data)
-        self.assertEqual(result, ['node', '0', 0, '0', '0', '0', '0', '0', '0', "b'a'", b'0'])
+        self.assertEqual(result, ['node', '0', 0, 0, '0', '0', '0', '0', '0', "b'a'", b'0'])
 
 
 if __name__ == '__main__':

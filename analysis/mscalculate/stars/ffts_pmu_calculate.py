@@ -8,7 +8,7 @@ import os
 import sqlite3
 import struct
 
-from analyzer.scene_base.profiling_scene import ProfilingScene
+from common_func.profiling_scene import ProfilingScene
 from common_func.common import generate_config
 from common_func.config_mgr import ConfigMgr
 from common_func.constant import Constant
@@ -55,7 +55,7 @@ class FftsPmuCalculate(PmuCalculator, MsMultiProcess):
         self._result_dir = self.sample_config.get(StrConstant.SAMPLE_CONFIG_PROJECT_PATH)
         self._iter_model = HwtsIterModel(self._result_dir)
         self._iter_range = self.sample_config.get(StrConstant.PARAM_ITER_ID)
-        self._model = FftsPmuModel(self._result_dir, DBNameConstant.DB_RUNTIME, [])
+        self._model = FftsPmuModel(self._result_dir, DBNameConstant.DB_METRICS_SUMMARY, [])
         self._data_list = {}
         self._sample_json = ConfigMgr.read_sample_config(self._result_dir)
         self._file_list = file_list.get(DataTag.FFTS_PMU, [])
@@ -297,10 +297,10 @@ class FftsPmuCalculate(PmuCalculator, MsMultiProcess):
             logging.error(str(err), exc_info=Constant.TRACE_BACK_SWITCH)
 
     def _parse_by_iter(self) -> None:
-        runtime_db_path = PathManager.get_db_path(self._result_dir, DBNameConstant.DB_RUNTIME)
+        runtime_db_path = PathManager.get_db_path(self._result_dir, DBNameConstant.DB_METRICS_SUMMARY)
         if os.path.exists(runtime_db_path):
             with self._model as model:
-                model.drop_table(DBNameConstant.TABLE_METRICS_SUMMARY)
+                model.drop_table(DBNameConstant.TABLE_METRIC_SUMMARY)
         with self._iter_model as iter_model:
             if not iter_model.check_db() or not iter_model.check_table():
                 return
@@ -363,10 +363,10 @@ class FftsPmuCalculate(PmuCalculator, MsMultiProcess):
             logging.debug('Func type error, data may have been lost. Func type: %s', func_type)
 
     def _need_to_analyse(self: any) -> bool:
-        db_path = PathManager.get_db_path(self._result_dir, DBNameConstant.DB_RUNTIME)
+        db_path = PathManager.get_db_path(self._result_dir, DBNameConstant.DB_METRICS_SUMMARY)
         if not os.path.exists(db_path):
             return True
-        if DBManager.check_tables_in_db(db_path, DBNameConstant.TABLE_METRICS_SUMMARY):
+        if DBManager.check_tables_in_db(db_path, DBNameConstant.TABLE_METRIC_SUMMARY):
             return False
         return True
 

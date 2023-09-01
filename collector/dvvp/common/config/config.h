@@ -178,8 +178,11 @@ const std::string HDC_PERFCOUNT_MODULE_NAME = std::string("HdcTransport");
 const std::string FILE_PERFCOUNT_MODULE_NAME = std::string("FileTransport");
 const uint64_t TRANSPORT_PRI_FREQ = 128;
 
-const char * const MSVP_PROF_ON = "on";
-const std::string MSPROF_SWITCH_ON = "on";
+// prof switch
+const std::string MSVP_PROF_ON = "on";
+const std::string MSVP_PROF_OFF = "off";
+const std::string MSVP_PROF_L0 = "l0";
+const std::string MSVP_PROF_L1 = "l1";
 
 // ai core metrics type
 const std::string ARITHMETIC_UTILIZATION = "ArithmeticUtilization";

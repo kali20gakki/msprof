@@ -7,6 +7,7 @@
 #include "msprof_manager.h"
 #include "dyn_prof_client.h"
 #include "cmd_log.h"
+#include "input_parser.h"
 #include "errno/error_code.h"
 #include "message/prof_params.h"
 #include "platform/platform.h"
@@ -87,6 +88,18 @@ int MsprofManager::GenerateRunningMode()
         MSPROF_LOGE("[MsprocessCmd] Invalid params!");
         return PROFILING_FAILED;
     }
+    if (GenerateCollectRunningMode() == PROFILING_SUCCESS ||
+        GenerateAnalyzeRunningMode() == PROFILING_SUCCESS) {
+        return PROFILING_SUCCESS;
+    }
+    CmdLog::instance()->CmdErrorLog("No valid argument, one of [--dynamic --application "
+        "--sys-devices --host-sys --host-sys-usage --parse --query --export --analyze] should be set.");
+    ArgsManager::instance()->PrintHelp();
+    return PROFILING_FAILED;
+}
+
+int MsprofManager::GenerateCollectRunningMode()
+{
     if (!params_->app.empty() || DynProfMngCli::instance()->IsEnableMode()) {
         MSVP_MAKE_SHARED2_RET(rMode_, AppMode, "application", params_, PROFILING_FAILED);
         return PROFILING_SUCCESS;
@@ -115,6 +128,11 @@ int MsprofManager::GenerateRunningMode()
         MSVP_MAKE_SHARED2_RET(rMode_, SystemMode, "host-sys-usage", params_, PROFILING_FAILED);
         return PROFILING_SUCCESS;
     }
+    return PROFILING_FAILED;
+}
+
+int MsprofManager::GenerateAnalyzeRunningMode()
+{
     if (params_->parseSwitch == MSVP_PROF_ON) {
         MSVP_MAKE_SHARED2_RET(rMode_, ParseMode, "parse", params_, PROFILING_FAILED);
         return PROFILING_SUCCESS;
@@ -127,8 +145,10 @@ int MsprofManager::GenerateRunningMode()
         MSVP_MAKE_SHARED2_RET(rMode_, ExportMode, "export", params_, PROFILING_FAILED);
         return PROFILING_SUCCESS;
     }
-    CmdLog::instance()->CmdErrorLog("No valid argument found in --dynamic --application "
-    "--sys-devices --host-sys --host-sys-usage --parse --query --export");
+    if (params_->analyzeSwitch == MSVP_PROF_ON) {
+        MSVP_MAKE_SHARED2_RET(rMode_, AnalyzeMode, "analyze", params_, PROFILING_FAILED);
+        return PROFILING_SUCCESS;
+    }
     return PROFILING_FAILED;
 }
 

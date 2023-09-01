@@ -52,4 +52,4 @@ class AddInfoBean(StructDecoder):
         """
         timestamp
         """
-        return str(self._timestamp)
+        return self._timestamp

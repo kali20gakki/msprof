@@ -11,10 +11,30 @@ from common_func.ms_constant.str_constant import StrConstant
 from constant.constant import clear_dt_project
 from msparser.cluster.communication_parser import CommunicationParser
 from msparser.cluster.communication_matrix_parser import CommunicationMatrixParser
+from msparser.cluster.critical_path_parser import CriticalPathParser
 import pytest
 
 
 NAMESPACE = 'tuning.cluster.cluster_tuning_facade'
+
+
+class HcclOp:
+    op_name = 'all_reduce'
+    iteration = 0
+    plane_id = 0
+    stream_id = 1
+    first_timestamp = 1
+    timestamp = 1
+    duration = 2
+
+
+class GeOp:
+    op_name = 'MatMul'
+    task_type = 'AI_CORE'
+    stream_id = 0
+    start_time = 0
+    end_time = 1
+    duration_time = 1
 
 
 class TestClusterTuningFacade(unittest.TestCase):
@@ -39,6 +59,25 @@ class TestClusterTuningFacade(unittest.TestCase):
                 mock.patch(NAMESPACE + '.ClusterTuningFacade._check_collection_dir_valid'), \
                 mock.patch(NAMESPACE + '.ClusterTuningFacade.run'):
             ClusterTuningFacade(self.params).process()
+
+    def test_run_should_return_success_when_all_data_type(self):
+        with mock.patch(NAMESPACE + '.ClusterTuningFacade.cluster_communication'), \
+                mock.patch(NAMESPACE + '.ClusterTuningFacade.communication_matrix'):
+            tuning_facade = ClusterTuningFacade(self.params)
+            tuning_facade.data_type = -1
+            tuning_facade.run()
+
+    def test_run_should_return_success_when_data_type_9(self):
+        with mock.patch(NAMESPACE + '.ClusterTuningFacade.cluster_communication'):
+            tuning_facade = ClusterTuningFacade(self.params)
+            tuning_facade.data_type = 9
+            tuning_facade.run()
+
+    def test_run_should_return_success_when_data_type_10(self):
+        with mock.patch(NAMESPACE + '.ClusterTuningFacade.communication_matrix'):
+            tuning_facade = ClusterTuningFacade(self.params)
+            tuning_facade.data_type = 10
+            tuning_facade.run()
 
     def test_run_invalid_collection_prof1(self):
         with mock.patch(NAMESPACE + '.ClusterTuningFacade._check_data_type_valid'), \
@@ -145,3 +184,22 @@ class TestClusterTuningFacade(unittest.TestCase):
                 mock.patch(outspace2 + '.CommunicationMatrixCalculator.run'), \
                 mock.patch(outspace2 + '.CommunicationMatrixCalculator.add_suggestions'):
             ClusterTuningFacade(self.params).communication_matrix()
+
+    def test_critical_path_analysis_should_return_success_when_enable_critical_path(self):
+        hccl_op_events = {'all_Reduce': [HcclOp()]}
+        compute_op_events = [GeOp()]
+        with mock.patch(NAMESPACE + '.CriticalPathAnalysisParserFactory.generate_parser',
+                        return_value=CriticalPathParser(compute_op_events, hccl_op_events)):
+            test_tuning_facede = ClusterTuningFacade(self.params)
+            top_hccl_ops = test_tuning_facede.critical_path_analysis()
+            self.assertEqual(top_hccl_ops, ('all_Reduce',))
+
+    def test__check_params_valid_should_success_when_not_enable_critical_path(self):
+        with pytest.raises(ProfException) as err:
+            test_tuning_facade = ClusterTuningFacade(self.params)
+            test_tuning_facade.data_type = 6
+            test_tuning_facade._model_id = 1
+            test_tuning_facade._iteration_id = 1
+            test_tuning_facade._npu_id = 1
+            test_tuning_facade._check_params_valid()
+        self.assertEqual(ProfException.PROF_CLUSTER_DIR_ERROR, err.value.code)

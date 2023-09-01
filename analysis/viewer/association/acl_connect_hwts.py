@@ -14,7 +14,7 @@ from msmodel.interface.view_model import ViewModel
 
 
 class AclToHwts:
-    MODULE_ACL = 'acl'
+    API_TYPE = 'api'
     MODULE_TASK_TIME = 'task_time'
     ACL_OP_NAME = (
         f'{TraceViewHeaderConstant.PROCESS_ACL}@aclopExecute',
@@ -22,7 +22,7 @@ class AclToHwts:
         f'{TraceViewHeaderConstant.PROCESS_ACL}@aclopCompileAndExecute',
         f'{TraceViewHeaderConstant.PROCESS_ACL}@aclopCompileAndExecuteV2',
     )
-    ACL_OP_TYPE = 'ACL_OP'
+    ACL_OP_TYPE = ('ACL_OP', 'ACL_NN')
 
     def __init__(self: any, result_dir: str) -> None:
         self._result_dir = result_dir
@@ -36,7 +36,7 @@ class AclToHwts:
         acl_args = data_dict.get('args', '')
         if data_dict.get('name', '') not in AclToHwts.ACL_OP_NAME or not acl_args:
             return False
-        if acl_args.get('Mode', '') != AclToHwts.ACL_OP_TYPE:
+        if acl_args.get('Mode', '') not in AclToHwts.ACL_OP_TYPE:
             return False
         return True
 
@@ -56,7 +56,7 @@ class AclToHwts:
         """
         if AiStackDataCheckManager.contain_acl_data(
                 self._result_dir) and AiStackDataCheckManager.contain_core_cpu_reduce_data(self._result_dir):
-            if data_type == self.MODULE_ACL:
+            if data_type == self.API_TYPE:
                 self.add_acl_connect_start(json_list)
             if data_type == self.MODULE_TASK_TIME:
                 self.add_hwts_connect_end(json_list)

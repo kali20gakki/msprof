@@ -6,6 +6,7 @@
  */
 #include "chunk_pool.h"
 #include "securec.h"
+#include "msprof_dlog.h"
 
 namespace analysis {
 namespace dvvp {
@@ -50,7 +51,10 @@ void Chunk::Uninit()
 void Chunk::Clear()
 {
     if (buffer_ != nullptr) {
-        (void)memset_s(buffer_, bufferSize_ * sizeof(unsigned char), 0, bufferSize_ * sizeof(unsigned char));
+        auto ret = memset_s(buffer_, bufferSize_ * sizeof(unsigned char), 0, bufferSize_ * sizeof(unsigned char));
+        if (ret != EOK) {
+            MSPROF_LOGE("memory chunk clear failed ret:%d", ret);
+        }
     }
     usedSize_ = 0;
 }

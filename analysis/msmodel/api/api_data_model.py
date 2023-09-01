@@ -17,7 +17,7 @@ class ApiDataModel(ParserModel):
     """
 
     def __init__(self: any, result_dir: str) -> None:
-        super().__init__(result_dir, DBNameConstant.DB_API_EVENT_DATA, [DBNameConstant.TABLE_API_DATA])
+        super().__init__(result_dir, DBNameConstant.DB_API_EVENT, [DBNameConstant.TABLE_API_DATA])
 
     @staticmethod
     def update_type_hash_value(data: ApiDataBean, hash_dict: dict) -> tuple:

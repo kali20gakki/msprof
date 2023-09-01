@@ -23,12 +23,13 @@ class TestDataManager(unittest.TestCase):
             'project': '',
             'device_id': '0',
         }
-        key = DataManager(para)
-        key.data = {'type1': [1, 2]}
-        result1 = key.get_data('type1')
-        self.assertEqual(result1, [1, 2])
-        result2 = key.get_data('type2')
-        self.assertEqual(result2, [])
+        with mock.patch(NAMESPACE + '.AiStackDataCheckManager.contain_op_summary_data', return_value=False):
+            key = DataManager(para)
+            key.data = {'type1': [1, 2]}
+            result1 = key.get_data('type1')
+            self.assertEqual(result1, [1, 2])
+            result2 = key.get_data('type2')
+            self.assertEqual(result2, [])
 
 
 class TestDataLoader(unittest.TestCase):

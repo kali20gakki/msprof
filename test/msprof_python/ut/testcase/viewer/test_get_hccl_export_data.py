@@ -3,6 +3,7 @@
 import json
 import sqlite3
 import unittest
+from collections import OrderedDict
 from collections import namedtuple
 from unittest import mock
 
@@ -19,11 +20,15 @@ PARAMS = {'data_type': 'hccl', 'project': '',
 
 
 class TestHCCLExport(unittest.TestCase):
+    def setUp(self) -> None:
+        InfoConfReader()._info_json = {"pid": 1}
+
+    def tearDown(self) -> None:
+        InfoConfReader()._info_json = {}
 
     def test_get_hccl_timeline_data(self):
-        InfoConfReader()._info_json = {"pid": 1}
         db_manager = DBManager()
-        table_name = 'HCCLAllReduce'
+        table_name = 'HCCLSingleDevice'
         create_sql = "CREATE TABLE IF NOT EXISTS {0} (model_id int, index_id int, _iteration int)".format(table_name)
 
         data = ((1, 1, 1),)
@@ -32,14 +37,14 @@ class TestHCCLExport(unittest.TestCase):
         with mock.patch('msmodel.hccl.hccl_model.HcclViewModel.get_hccl_op_data', return_value=[]):
             res = HCCLExport(PARAMS).get_hccl_timeline_data()
         self.assertEqual(json.loads(res).get('status'), 1)
-        with mock.patch('msmodel.hccl.hccl_model.HcclViewModel.get_all_data', return_value=[]),\
-                mock.patch('msmodel.interface.view_model.DBManager.create_connect_db', return_value=(conn, curs)),\
+        with mock.patch('msmodel.hccl.hccl_model.HcclViewModel.get_all_data', return_value=[]), \
+                mock.patch('msmodel.interface.view_model.DBManager.create_connect_db', return_value=(conn, curs)), \
                 mock.patch('msmodel.hccl.hccl_model.HcclViewModel.check_table', return_value=True):
             res = HCCLExport(PARAMS).get_hccl_timeline_data()
         self.assertEqual(json.loads(res).get('status'), 2)
         conn, curs = db_manager.create_table('hccl.db')
-        with mock.patch(NAMESPACE + '.HCCLExport._format_hccl_data'),\
-                mock.patch('msmodel.interface.view_model.DBManager.create_connect_db', return_value=(conn, curs)),\
+        with mock.patch(NAMESPACE + '.HCCLExport._format_hccl_data'), \
+                mock.patch('msmodel.interface.view_model.DBManager.create_connect_db', return_value=(conn, curs)), \
                 mock.patch('msmodel.hccl.hccl_model.HcclViewModel.check_table', return_value=True):
             res = HCCLExport(PARAMS).get_hccl_timeline_data()
         self.assertEqual(json.loads(res), [])
@@ -48,16 +53,107 @@ class TestHCCLExport(unittest.TestCase):
 
     def test_format_hccl_data(self):
         hccl_data = namedtuple('hccl', ['plane_id', 'task_id', 'stream_id', 'hccl_name', 'step', 'stage', 'duration',
-                                        'timestamp', 'args'])
-        hccl_data = [hccl_data(1, 2, 3, 0, 0, 0, 0, 0, {}), hccl_data(2, 3, 4, 0, 0, 0, 0, 0, {})]
+                                        'timestamp', 'args', "group_name"])
+        hccl_data = [hccl_data(1, 2, 3, 0, 0, 0, 0, 0, {}, "1"), hccl_data(2, 3, 4, 0, 0, 0, 0, 0, {}, "1")]
 
-        model_data = namedtuple('model', ['op_name', 'timestamp', 'args', 'duration'])
-        model_data = [model_data('test_1', 0, [1, 2, 3], 0)]
+        op_data = namedtuple('model', ['op_name', 'timestamp', 'args', 'duration', "group_name"])
+        op_data = [op_data('test_1', 0, [1, 2, 3], 0, "1")]
         InfoConfReader()._info_json = {"pid": 1}
-        with mock.patch('msmodel.hccl.hccl_model.HcclViewModel.get_hccl_op_data', return_value=model_data):
+        with mock.patch('msmodel.hccl.hccl_model.HcclViewModel.get_hccl_op_data_by_group', return_value=op_data):
             hccl = HCCLExport(PARAMS)
             hccl._format_hccl_data(hccl_data)
+            # 1 + 3 * 2 + 3
             self.assertEqual(len(hccl.result), 10)
+
+    def test__add_hccl_bar_should_return_correct_hccl_bar(self):
+        hccl = HCCLExport(PARAMS)
+        hccl._add_hccl_bar()
+        expect_res = [
+            OrderedDict(
+                [
+                    ('name', 'process_name'),
+                    ('pid', 1),
+                    ('tid', 0),
+                    ('args', OrderedDict([('name', 'HCCL')])),
+                    ('ph', 'M')
+                ]
+            )
+        ]
+        self.assertEqual(hccl.result, expect_res)
+
+    def test__init_hccl_group_should_return_3_group_when_5_hccl_op_in_three_comm_domain(self):
+        hccl_data = [HcclDto(), HcclDto(), HcclDto(), HcclDto(), HcclDto()]
+        hccl_data[0].group_name = '1'
+        hccl_data[1].group_name = '1'
+        hccl_data[2].group_name = '2'
+        hccl_data[3].group_name = '3'
+        hccl_data[4].group_name = '2'
+        hccl_data[0].plane_id = 0
+        hccl_data[1].plane_id = 1
+        hccl_data[2].plane_id = 1
+        hccl_data[3].plane_id = 0
+        hccl_data[4].plane_id = 0
+
+        hccl = HCCLExport(PARAMS)
+        groups = hccl._init_hccl_group(hccl_data)
+        self.assertEqual(groups['1'].group_name, "1")
+        self.assertEqual(groups['1'].planes, {0, 1})
+        self.assertEqual(groups['1'].id, 0)
+        self.assertEqual(groups['2'].group_name, "2")
+        self.assertEqual(groups['2'].planes, {0, 1})
+        self.assertEqual(groups['2'].id, 1)
+        self.assertEqual(groups['3'].group_name, "3")
+        self.assertEqual(groups['3'].planes, {0})
+        self.assertEqual(groups['3'].id, 2)
+
+    def test__add_group_threads_should_return_comm_op_group_and_index_3_when_comm_op_in_2_plane(self):
+        hccl = HCCLExport(PARAMS)
+        group = hccl.HcclGroup("1", {0, 1}, 0, -1)
+        index = hccl._add_group_threads(group, 0, True)
+        self.assertEqual(index, 3)
+        self.assertEqual(len(hccl.result), 6)
+        self.assertEqual(hccl.result[0].get('args').get('name'), 'Group 0 Communication')
+
+    def test__add_group_threads_should_return_comm_and_index_3_when_comm_op_in_2_plane_invalid_group(self):
+        hccl = HCCLExport(PARAMS)
+        group = hccl.HcclGroup("1", {0, 1}, 0, -1)
+        index = hccl._add_group_threads(group, 0, False)
+        self.assertEqual(index, 3)
+        self.assertEqual(len(hccl.result), 6)
+        self.assertEqual(hccl.result[0].get('args').get('name'), 'Communication')
+
+    def test__get_meta_data_should_return_1_hccl_bar_3_group_threads_and_5_plane_threads_when_8_comm_op_in_2_g(self):
+        hccl_data = [
+            HcclDto(), HcclDto(), HcclDto(), HcclDto(),
+            HcclDto(), HcclDto(), HcclDto(), HcclDto()
+        ]
+        hccl_data[0].group_name = '1'
+        hccl_data[1].group_name = '1'
+        hccl_data[2].group_name = '2'
+        hccl_data[3].group_name = '3'
+        hccl_data[4].group_name = '2'
+        hccl_data[5].group_name = '1'
+        hccl_data[6].group_name = '2'
+        hccl_data[7].group_name = '3'
+        hccl_data[0].plane_id = 0
+        hccl_data[1].plane_id = 1
+        hccl_data[2].plane_id = 1
+        hccl_data[3].plane_id = 0
+        hccl_data[4].plane_id = 0
+        hccl_data[5].plane_id = 1
+        hccl_data[6].plane_id = 1
+        hccl_data[7].plane_id = 0
+
+        hccl = HCCLExport(PARAMS)
+        hccl._get_meta_data(hccl_data)
+        # 1 + (3+5)*2=17
+        self.assertEqual(len(hccl.result), 17)
+
+    def test_format_hccl_communication_data(self):
+        hccl_data = []
+        hccl = HCCLExport(PARAMS)
+        result = hccl._format_hccl_communication_data(hccl_data)
+        self.assertEqual(len(result), 0)
 
 
 if __name__ == '__main__':

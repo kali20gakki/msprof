@@ -151,7 +151,7 @@ class ImportCommand:
         cluster_basic_info = ClusterBasicInfo(prof_sub_path)
         cluster_basic_info.init()
         if not cluster_basic_info.is_host_profiling:
-            _have_rank_id = cluster_basic_info.rank_id != Constant.NA
+            _have_rank_id = cluster_basic_info.rank_id != Constant.DEFAULT_INVALID_VALUE
             if self.have_rank_id.setdefault("have_rank_id", _have_rank_id) != _have_rank_id:
                 message = f"The dir({self.collection_path}) contains both cluster and " \
                           f"non-cluster data! please check whether all devices have rank ids."

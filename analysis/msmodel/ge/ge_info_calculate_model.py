@@ -11,6 +11,7 @@ from common_func.db_name_constant import DBNameConstant
 from common_func.ms_constant.number_constant import NumberConstant
 from common_func.path_manager import PathManager
 from common_func.utils import Utils
+from common_func.info_conf_reader import InfoConfReader
 from msmodel.interface.base_model import BaseModel
 from msmodel.step_trace.ts_track_model import TsTrackModel
 
@@ -24,7 +25,7 @@ class GeInfoModel(BaseModel):
     STREAM_TASK_BATCH_KEY_FMT = "{0}-{1}-{2}"
 
     def __init__(self: any, result_dir: str) -> None:
-        super(GeInfoModel, self).__init__(result_dir, DBNameConstant.DB_GE_INFO, DBNameConstant.TABLE_GE_TASK)
+        super(GeInfoModel, self).__init__(result_dir, DBNameConstant.DB_GE_INFO, [DBNameConstant.TABLE_GE_TASK])
 
     def check_table(self: any, table_name=DBNameConstant.TABLE_GE_TASK) -> bool:
         """
@@ -154,9 +155,11 @@ class GeInfoModel(BaseModel):
 
     def get_repeat_times_for_target_aic_in_target_index(self: any, model_id: int,
                                                         max_index: int, aic_with_stream_task: list):
+        device_id = InfoConfReader().get_device_id()
         stream_id = aic_with_stream_task[0]
         task_id = aic_with_stream_task[1]
         sql = f"select * from {DBNameConstant.TABLE_GE_TASK} " \
-              f"where task_type = 'AI_CORE' and model_id = ? and stream_id = ? and task_id = ? and index_id = ? "
-        ge_data = DBManager.fetch_all_data(self.cur, sql, (model_id, stream_id, task_id, max_index))
+              f"where task_type = 'AI_CORE' and model_id = ? and stream_id = ? and " \
+              "task_id = ? and index_id = ? and device_id = ?"
+        ge_data = DBManager.fetch_all_data(self.cur, sql, (model_id, stream_id, task_id, max_index, device_id))
         return ge_data

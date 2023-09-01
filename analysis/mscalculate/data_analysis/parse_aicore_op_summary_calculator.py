@@ -6,10 +6,7 @@ import logging
 import os
 import sqlite3
 
-from analyzer.get_op_table_task_time import GetOpTableTsTime
-from analyzer.op_common_function import OpCommonFunc
-from analyzer.scene_base.profiling_scene import ProfilingScene
-from common_func.ai_stack_data_check_manager import AiStackDataCheckManager
+from common_func.profiling_scene import ProfilingScene
 from common_func.common import CommonConstant
 from common_func.constant import Constant
 from common_func.db_manager import DBManager
@@ -20,8 +17,10 @@ from common_func.ms_multi_process import MsMultiProcess
 from common_func.msprof_exception import ProfException
 from common_func.msprof_iteration import MsprofIteration
 from common_func.path_manager import PathManager
-from common_func.platform.chip_manager import ChipManager
+from common_func.info_conf_reader import InfoConfReader
+from mscalculate.ascend_task.ascend_task import TopDownTask
 from msconfig.config_manager import ConfigManager
+from msmodel.task_time.ascend_task_model import AscendTaskModel
 from profiling_bean.db_dto.ge_task_dto import GeTaskDto
 
 
@@ -56,6 +55,10 @@ class ParseAiCoreOpSummaryCalculator(MsMultiProcess):
         entry for analysis op summary data
         :return: None
         """
+        if not os.path.exists(PathManager.get_db_path(self.project_path, DBNameConstant.DB_ASCEND_TASK)):
+            logging.warning("No %s found, no need to create %s",
+                            DBNameConstant.DB_ASCEND_TASK, DBNameConstant.DB_AICORE_OP_SUMMARY)
+            return
         try:
             self.init_params()
         except (OSError, SystemError, ValueError, TypeError, RuntimeError, ProfException) as err:
@@ -90,8 +93,8 @@ class ParseAiCoreOpSummaryCalculator(MsMultiProcess):
                                             DBNameConstant.TABLE_GE_TASK):
             logging.warning("maybe the data of framework is not collected."
                             "try to export data with no framework data.")
-            if not DBManager.check_tables_in_db(self.get_db_path(DBNameConstant.DB_RUNTIME),
-                                                DBNameConstant.TABLE_METRICS_SUMMARY):
+            if not DBManager.check_tables_in_db(self.get_db_path(DBNameConstant.DB_METRICS_SUMMARY),
+                                                DBNameConstant.TABLE_METRIC_SUMMARY):
                 logging.warning("No need to create db for op summary, "
                                 "maybe the data of aicore is not collected.")
                 return
@@ -99,7 +102,6 @@ class ParseAiCoreOpSummaryCalculator(MsMultiProcess):
         if not (self.conn and self.curs):
             return
         self.create_ge_summary_table()
-        self.create_ge_tensor_table()
         self.create_ai_core_metrics_table()
         self.create_task_time_table()
         DBManager.destroy_db_connect(self.conn, self.curs)
@@ -131,44 +133,25 @@ class ParseAiCoreOpSummaryCalculator(MsMultiProcess):
         ge_data = self._get_ge_data()
         DBManager.insert_data_into_table(self.conn, DBNameConstant.TABLE_SUMMARY_GE, ge_data)
 
-    def create_ge_tensor_table(self: any) -> None:
-        """
-        create ge tensor table
-        """
-        if not DBManager.check_tables_in_db(self.get_db_path(DBNameConstant.DB_GE_INFO),
-                                            DBNameConstant.TABLE_GE_TENSOR):
-            logging.warning("unable to create ge tensor table, because table %s is not found.",
-                            DBNameConstant.TABLE_GE_TENSOR)
-            return
-        ge_tensor_create_sql = DBManager.sql_create_general_table("GeTensorMap",
-                                                                  DBNameConstant.TABLE_SUMMARY_TENSOR, self.TABLES_PATH)
-        DBManager.execute_sql(self.conn, ge_tensor_create_sql)
-        ge_data = []
-        iter_list = MsprofIteration(self.project_path).get_index_id_list_with_index_and_model(self.iter_range)
-        ge_tensor_sql = f"select * from {DBNameConstant.TABLE_GE_TENSOR} where index_id=? and model_id=?"
-        for index_and_model in iter_list:
-            ge_data.extend(DBManager.fetch_all_data(self.curs, ge_tensor_sql, index_and_model))
-        DBManager.insert_data_into_table(self.conn, DBNameConstant.TABLE_SUMMARY_TENSOR, ge_data)
-
     def create_ai_core_metrics_table(self: any) -> None:
         """
         create ai core metrics table
         :return: None
         """
-        db_name = os.path.splitext(DBNameConstant.DB_RUNTIME)[0]
-        if not DBManager.attach_to_db(self.conn, self.project_path, DBNameConstant.DB_RUNTIME, db_name):
+        db_name = os.path.splitext(DBNameConstant.DB_METRICS_SUMMARY)[0]
+        if not DBManager.attach_to_db(self.conn, self.project_path, DBNameConstant.DB_METRICS_SUMMARY, db_name):
             logging.warning("unable to create ai core metrics table, because attach db of runtime failed.")
             return
-        if DBManager.check_tables_in_db(self.get_db_path(DBNameConstant.DB_RUNTIME),
-                                        CommonConstant.METRICS_SUMMARY_TABLE):
+        if DBManager.check_tables_in_db(self.get_db_path(DBNameConstant.DB_METRICS_SUMMARY),
+                                        DBNameConstant.TABLE_METRIC_SUMMARY):
             sql = "create table if not exists ai_core_metrics " \
                   "as select * from {0}.{1}".format(db_name,
-                                                    CommonConstant.METRICS_SUMMARY_TABLE)
-        elif DBManager.check_tables_in_db(self.get_db_path(DBNameConstant.DB_RUNTIME),
-                                          CommonConstant.AIV_METRICS_SUMMARY_TABLE):
+                                                    DBNameConstant.TABLE_METRIC_SUMMARY)
+        elif DBManager.check_tables_in_db(self.get_db_path(DBNameConstant.DB_METRICS_SUMMARY),
+                                          DBNameConstant.TABLE_AIV_METRIC_SUMMARY):
             sql = "create table if not exists ai_core_metrics " \
                   "as select * from {0}.{1}".format(db_name,
-                                                    CommonConstant.AIV_METRICS_SUMMARY_TABLE)
+                                                    DBNameConstant.TABLE_AIV_METRIC_SUMMARY)
         else:
             logging.warning("unable to create ai core metrics table, because table is not found.")
             return
@@ -179,6 +162,12 @@ class ParseAiCoreOpSummaryCalculator(MsMultiProcess):
         create task time table
         :return: true or false
         """
+        ascend_task_db_path = PathManager.get_db_path(self.project_path, DBNameConstant.DB_ASCEND_TASK)
+
+        if not os.path.exists(ascend_task_db_path):
+            logging.warning("no task db %s found, task_time table will not be created",
+                            DBNameConstant.TABLE_ASCEND_TASK)
+            return
         create_table_sql = DBManager.sql_create_general_table("ModifiedTaskTimeMap", "task_time",
                                                               self.TABLE_PATH)
         if not create_table_sql:
@@ -199,13 +188,14 @@ class ParseAiCoreOpSummaryCalculator(MsMultiProcess):
         get task time data
         :return: task data list
         """
-        ge_data = self._get_ge_data_from_summary()
-        project_path = self.sample_config.get("result_dir")
-        if AiStackDataCheckManager.contain_task_time_data(project_path):
-            fetch_data = GetOpTableTsTime(self.sample_config).get_task_time_data(ge_data)
-            task_data = OpCommonFunc.calculate_task_time(fetch_data)
-            return task_data
-        return []
+        with AscendTaskModel(self.project_path, DBNameConstant.TABLE_ASCEND_TASK) as model:
+            tasks = model.get_all_data(DBNameConstant.TABLE_ASCEND_TASK)
+            if not tasks:
+                logging.error("Get tasks from %s error", DBNameConstant.TABLE_ASCEND_TASK)
+                return []
+            ascend_tasks = [TopDownTask(*task) for task in tasks]
+            return [[task.task_id, task.stream_id, task.start_time, task.duration, 0, task.device_task_type,
+                     task.index_id, task.model_id, task.batch_id, task.context_id] for task in ascend_tasks]
 
     def get_db_path(self: any, db_name: str) -> str:
         """
@@ -225,9 +215,15 @@ class ParseAiCoreOpSummaryCalculator(MsMultiProcess):
     def _get_ge_data(self: any) -> list:
         ge_data = []
         iter_list = MsprofIteration(self.project_path).get_index_id_list_with_index_and_model(self.iter_range)
+        device_id = InfoConfReader().get_device_id()
         ge_sql = f"SELECT model_id, batch_id, task_id, stream_id, " \
-                 f"op_name, op_type, block_dim, mix_block_dim, task_type, timestamp, index_id, context_id " \
-                 f"from {DBNameConstant.TABLE_GE_TASK} where index_id=? and model_id=?"
+                 f"op_name, op_type, block_dim, mix_block_dim, task_type, tensor_num, input_formats," \
+                 f" input_data_types, input_shapes, output_formats, output_data_types," \
+                 f" output_shapes, timestamp, index_id, context_id " \
+                 f"from {DBNameConstant.TABLE_GE_TASK} where index_id=? and model_id=? and device_id=?"
         for index_and_model in iter_list:
+            index_and_model_list = list(index_and_model)
+            index_and_model_list.append(device_id)
+            index_and_model = tuple(index_and_model_list)
             ge_data.extend(DBManager.fetch_all_data(self.curs, ge_sql, index_and_model))
         return ge_data

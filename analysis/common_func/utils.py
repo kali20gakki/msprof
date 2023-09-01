@@ -32,10 +32,18 @@ class Utils:
         :param result_dir: project path
         :return: True or False
         """
-        db_path = PathManager.get_db_path(result_dir, DBNameConstant.DB_STEP_TRACE)
-        return DBManager.check_tables_in_db(db_path, DBNameConstant.TABLE_STEP_TRACE_DATA) and \
-               DBManager.check_no_empty_tables_in_db(db_path, DBNameConstant.TABLE_STEP_TRACE_DATA) and \
-               not DBManager.check_item_in_table(db_path, DBNameConstant.TABLE_STEP_TRACE_DATA, 'model_id', 4294967295)
+        _model = BaseModel(result_dir, DBNameConstant.DB_STEP_TRACE, [DBNameConstant.TABLE_STEP_TRACE_DATA])
+        if not _model.check_table():
+            return False
+
+        sql = "select {col} from {table_name} where {col} != '{item}'".format(
+            table_name=DBNameConstant.TABLE_STEP_TRACE_DATA,
+            col='model_id',
+            item=Constant.GE_OP_MODEL_ID,
+        )
+        data = DBManager.fetch_one_data(_model.cur, sql)
+        _model.finalize()
+        return len(data) != 0
 
     @staticmethod
     def is_single_op_scene(result_dir: str) -> bool:
@@ -140,9 +148,9 @@ class Utils:
         if not info_json_path or not os.path.exists(info_json_path) or not os.path.isfile(
                 info_json_path):
             return []
-        check_path_valid(info_json_path, is_file=True)
         if os.path.getsize(info_json_path) > 1024 * 1024 * 1024:
             return []
+        check_path_valid(info_json_path, is_file=True, max_size=1024 * 1024 * 1024)
         with open(info_json_path, "r") as json_reader:
             json_data = json_reader.read()
             json_data = json.loads(json_data)

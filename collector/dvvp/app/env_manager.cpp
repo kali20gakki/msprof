@@ -20,6 +20,9 @@ std::vector<std::string> EnvManager::GetGlobalEnv()
 
 bool EnvManager::SetEnvList(analysis::dvvp::common::utils::CONST_CHAR_PTR_PTR envp, std::vector<std::string> &envpList)
 {
+    if (envp == nullptr) {
+        return false;
+    }
     bool isParaNumExceed = false;
     uint32_t envpLen = 0;
     constexpr uint32_t maxEnvpLen = 4096;

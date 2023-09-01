@@ -89,24 +89,9 @@ TEST_F(MSPROF_CALLBACK_HANDLER_UTEST, ReportDataTest) {
 TEST_F(MSPROF_CALLBACK_HANDLER_UTEST, ReportApiDataTest)
 {
     GlobalMockObject::verify();
-    MsprofCallbackHandler handler("unaging.api");
+    MsprofCallbackHandler handler("unaging.api_event");
  
     MsprofApi data;
-    EXPECT_EQ(PROFILING_FAILED, handler.ReportData(data));
-    MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::IsInited)
-        .stubs()
-        .will(returnValue(true));
-    handler.StartReporter();
-    EXPECT_EQ(PROFILING_SUCCESS, handler.ReportData(data));
-    handler.StopReporter();
-}
- 
-TEST_F(MSPROF_CALLBACK_HANDLER_UTEST, ReportEventDataTest)
-{
-    GlobalMockObject::verify();
-    MsprofCallbackHandler handler("unaging.event");
- 
-    MsprofEvent data;
     EXPECT_EQ(PROFILING_FAILED, handler.ReportData(data));
     MOCKER_CPP(&Msprofiler::Api::ProfAclMgr::IsInited)
         .stubs()

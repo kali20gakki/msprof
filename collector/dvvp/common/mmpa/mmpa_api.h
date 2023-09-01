@@ -275,6 +275,7 @@ int32_t MmGetEnv(const std::string &name, char *value, uint32_t len);
 int32_t MmGetCwd(char *buffer, int32_t maxLen);
 int32_t MmGetLocalTime(MmSystemTimeT *sysTimePtr);
 int32_t MmGetPid();
+int32_t MmGetUid();
 int32_t MmGetTid();
 int32_t MmStatGet(const std::string &path, MmStatT *buffer);
 int32_t MmClose(int32_t fd);

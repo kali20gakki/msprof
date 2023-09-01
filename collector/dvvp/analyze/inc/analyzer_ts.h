@@ -8,6 +8,7 @@
 #define ANALYSIS_DVVP_ANALYZE_ANALYZER_TS_H
 
 #include <map>
+#include <unordered_map>
 #include "analyzer_base.h"
 #include "utils/utils.h"
 #include "data_struct.h"
@@ -32,13 +33,14 @@ private:
     void ParseTsKeypointData(CONST_CHAR_PTR data, uint32_t len);
     uint8_t GetRptType(CONST_CHAR_PTR data, uint32_t len);
     void PrintStats() const;
+    void CreateTsKeyPointStartData(const TsProfileKeypoint *tsData, std::string opInfoKey);
 
 private:
     uint64_t opTimeCount_;
     uint32_t  totalTsMerges_;
     std::map<std::string, OpTime> opTimeDrafts_;      // stores incomplete data
     std::multimap<std::string, OpTime> opTimes_;      // key is taskId-streamId-contextId
-    std::vector<KeypointOp> keypointOpInfo_;
+    std::unordered_map<std::string, KeypointOp> keypointOpInfo_;
 };
 }  // namespace Analyze
 }  // namespace Dvvp

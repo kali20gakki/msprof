@@ -161,7 +161,9 @@ class TestParsingMemoryData(unittest.TestCase):
                          "txpackets REAL,txbytes REAL,txerrors REAL,txdropped REAL,funcid INTEGER)"
         insert_sql = "insert into NicOriginalData values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
         data = ((5, 0, 1, 1, 3, 4, 5, 10, 7, 8, 9, 4, 5, 6, 1, 3, 0),
-                (5, 0, 19, 1, 3, 4, 5, 10, 7, 8, 9, 4, 5, 6, 1, 3, 0))
+                (5, 0, 19, 1, 3, 4, 5, 10, 7, 8, 9, 4, 5, 6, 1, 3, 0),
+                (6, 0, 1, 1, 0, 4, 5, 10, 7, 8, 0, 4, 5, 6, 1, 3, 0),
+                (6, 0, 19, 1, 0, 4, 5, 10, 7, 8, 0, 4, 5, 6, 1, 3, 0))
         db_manager = DBManager()
         res = db_manager.create_table('nic.db', create_nic_sql, insert_sql, data)
         res[1].execute("create table if not exists NicReportData(device_id INTEGER,duration TEXT,"
@@ -171,6 +173,7 @@ class TestParsingMemoryData(unittest.TestCase):
         check = NicModel('test', 'nic.db', ['NicOriginalData'])
         check.conn, check.cur = res[0], res[1]
         check.calculate_nic_report_data((5,), 0)
+        check.calculate_nic_report_data((6,), 0)
         res[1].execute('drop table NicOriginalData')
         res[1].execute('drop table NicReportData')
         db_manager.destroy(res)

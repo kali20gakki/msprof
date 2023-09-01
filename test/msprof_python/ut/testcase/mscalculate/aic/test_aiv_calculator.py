@@ -8,7 +8,7 @@ import struct
 import unittest
 from unittest import mock
 
-from analyzer.scene_base.profiling_scene import ProfilingScene
+from common_func.profiling_scene import ProfilingScene
 from common_func.info_conf_reader import InfoConfReader
 from constant.constant import CONFIG
 from mscalculate.aic.aiv_calculator import AivCalculator
