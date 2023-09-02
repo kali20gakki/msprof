@@ -71,6 +71,7 @@ add_executable(msprofbin
     ../common/logger/cmd_log.cpp
     ../depend/src/slog_plugin.cpp
     ../depend/src/driver_plugin.cpp
+    ../depend/src/runtime_plugin.cpp
     ../common/platform/platform.cpp    
     ../common/memory/chunk_pool.cpp
     ../common/thread/thread.cpp
@@ -118,6 +119,7 @@ add_executable(msprofbin
     ../transport/hdc/platform/rpc/dev_mgr_api.cpp
     ../depend/src/plugin_handle.cpp
     ../depend/src/driver_plugin.cpp
+    ../depend/src/runtime_plugin.cpp
     ../depend/src/slog_plugin.cpp
     ${hdcCpp}
     ${CppPath}
