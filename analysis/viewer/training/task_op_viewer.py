@@ -27,7 +27,7 @@ class TaskOpViewer:
         """
         headers = [
             "kernel_name", "kernel_type", "stream_id", "task_id",
-            "task_time(us)", "task_start(ns)", "task_stop(ns)"
+            "task_time(us)", "task_start(us)", "task_stop(us)"
         ]
         if not message:
             logging.error("get_task_op_summary message empty")
@@ -97,8 +97,10 @@ class TaskOpViewer:
             op_name: str = op_name_dict.get((stream_id, task_id, batch_id), "N/A")
             task_type: str = host_task_type if host_task_type != f'{Constant.TASK_TYPE_UNKNOWN}' else 'Other'
             task_time: float = duration / DBManager.NSTOUS
+            task_start = f'"{start_time / DBManager.NSTOUS}"'
+            task_stop = f'"{(start_time + duration) / DBManager.NSTOUS}"'
             task_info.append((
                 op_name, task_type, stream_id, task_id,
-                task_time, f'"{start_time}"', f'"{start_time + duration}"',
+                task_time, task_start, task_stop,
             ))
         return task_info

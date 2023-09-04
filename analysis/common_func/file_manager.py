@@ -109,6 +109,7 @@ class FileManager:
                 return
             os.chmod(query_path, NumberConstant.DIR_AUTHORITY)
         output_file_path = PathManager.get_query_result_path(collection_path, file_name)
+        check_path_valid(output_file_path, True)
         try:
             with os.fdopen(os.open(output_file_path, Constant.WRITE_FLAGS,
                                    Constant.WRITE_MODES), 'w') as file:

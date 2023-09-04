@@ -278,8 +278,8 @@ class AICoreConfig(MetaConfig):
              '1.0*r38*256.0*32.0/((task_cyc*1000/(freq*1000.0))/'
              'block_num*((block_num+core_num-1)/core_num))/(8589934592.0)'),
             ('ub_read_bw_mte(GB/s)',
-             '((r3d-r10*4.0-r13*4.0)*128.0 +(r10*4.0+r13*4.0)*64.0)/'
-             '((task_cyc*1000/(freq*1000.0))/block_num*((block_num+core_num-1)/core_num))/(8589934592.0)'),
+             '(r3d*128.0*8.0)/((task_cyc*1000/(freq*1000.0))/'
+             'block_num*((block_num+core_num-1)/core_num))/(8589934592.0)'),
             ('ub_write_bw_mte(GB/s)',
              '(r3e*128.0*8.0)/((task_cyc*1000/(freq*1000.0))/'
              'block_num*((block_num+core_num-1)/core_num))/(8589934592.0)'),
@@ -356,10 +356,10 @@ class AICoreConfig(MetaConfig):
              '1.0*SUM(r10)*256.0*8.0/((task_cyc*1000/(freq*1000.0))/'
              'block_num*((block_num+core_num-1)/core_num))/(8589934592.0)'),
             ('main_mem_read_bw(GB/s)',
-             '1.0*SUM(r12)*256.0*8.0/((task_cyc*1000/(freq*1000.0))/'
+             '1.0*SUM(r12)*8.0*8.0/((task_cyc*1000/(freq*1000.0))/'
              'block_num*((block_num+core_num-1)/core_num))/(8589934592.0)'),
             ('main_mem_write_bw(GB/s)',
-             '1.0*SUM(r13)*256.0*8.0/((task_cyc*1000/(freq*1000.0))/'
+             '1.0*SUM(r13)*8.0*8.0/((task_cyc*1000/(freq*1000.0))/'
              'block_num*((block_num+core_num-1)/core_num))/(8589934592.0)'),
             ('l0a_read_bw(GB/s)',
              '1.0*SUM(r1b)*256.0*16.0/((task_cyc*1000/(freq*1000.0))/'
@@ -386,22 +386,22 @@ class AICoreConfig(MetaConfig):
              '1.0*SUM(r2a)*256.0*32.0/((task_cyc*1000/(freq*1000.0))/'
              'block_num*((block_num+core_num-1)/core_num))/(8589934592.0)'),
             ('ub_read_bw_vector(GB/s)',
-             '1.0*SUM(r43)*256.0*16.0/((task_cyc*1000/(freq*1000.0))/'
+             '1.0*SUM(r43)*128.0*2.0/((task_cyc*1000/(freq*1000.0))/'
              'block_num*((block_num+core_num-1)/core_num))/(8589934592.0)'),
             ('ub_write_bw_vector(GB/s)',
-             '1.0*SUM(r44)*256.0*8.0/((task_cyc*1000/(freq*1000.0))/'
+             '1.0*SUM(r44)*128.0*1.0/((task_cyc*1000/(freq*1000.0))/'
              'block_num*((block_num+core_num-1)/core_num))/(8589934592.0)'),
             ('ub_read_bw_scalar(GB/s)',
-             '1.0*SUM(r37)*256.0*32.0/((task_cyc*1000/(freq*1000.0))/'
+             '1.0*SUM(r37)*128.0*1.0/((task_cyc*1000/(freq*1000.0))/'
              'block_num*((block_num+core_num-1)/core_num))/(8589934592.0)'),
             ('ub_write_bw_scalar(GB/s)',
-             '1.0*SUM(r38)*256.0*32.0/((task_cyc*1000/(freq*1000.0))/'
+             '1.0*SUM(r38)*128.0*1.0/((task_cyc*1000/(freq*1000.0))/'
              'block_num*((block_num+core_num-1)/core_num))/(8589934592.0)'),
             ('ub_read_bw_mte(GB/s)',
-             '1.0*((SUM(r3d)-SUM(r10)*4.0-SUM(r13)*4.0)*128.0 +(SUM(r10)*4.0+SUM(r13)*4.0)*64.0)/'
-             '((task_cyc*1000/(freq*1000.0))/block_num*((block_num+core_num-1)/core_num))/(8589934592.0)'),
+             '1.0*SUM(r3d)*128.0*1.0/((task_cyc*1000/(freq*1000.0))/'
+             'block_num*((block_num+core_num-1)/core_num))/(8589934592.0)'),
             ('ub_write_bw_mte(GB/s)',
-             '1.0*SUM(r3e)*128.0*8.0/((task_cyc*1000/(freq*1000.0))/'
+             '1.0*SUM(r3e)*128.0*1.0/((task_cyc*1000/(freq*1000.0))/'
              'block_num*((block_num+core_num-1)/core_num))/(8589934592.0)'),
             ('write_cache_hit', '1.0 * SUM(r500)'),
             ('write_cache_miss_allocate', '1.0 * SUM(r502)'),

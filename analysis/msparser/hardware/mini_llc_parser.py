@@ -163,6 +163,8 @@ class MiniLLCParser(MsMultiProcess):
                     continue
                 line = line.strip().replace("<not counted>", "0").split(" ")
                 line = Utils.generator_to_list(i for i in line if i != '' and not i.startswith("("))
+                if not line:
+                    continue
                 line = line[:-1] + line[-1].split(self.SPLIT_FMT)[:-1]
                 # time, counts, events_sp0, events_sp1
                 if len(line) != 4:

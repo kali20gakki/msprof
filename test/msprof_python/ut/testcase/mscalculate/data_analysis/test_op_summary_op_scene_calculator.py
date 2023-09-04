@@ -32,10 +32,11 @@ class TestOpSummaryOpSceneCalculator(unittest.TestCase):
 
     def test_get_ge_sql(self):
         check = OpSummaryOpSceneCalculator(file_list, CONFIG)
+        InfoConfReader()._info_json = {'devices': '0'}
         result = check._get_ge_sql()
         sql = "SELECT model_id, task_id, stream_id, op_name, op_type, block_dim, mix_block_dim, task_type, " \
               "tensor_num, input_formats, input_data_types, input_shapes, output_formats, output_data_types," \
-              "output_shapes, index_id, timestamp, batch_id, context_id from TaskInfo"
+              "output_shapes, index_id, timestamp, batch_id, context_id from TaskInfo where device_id = 0"
         self.assertEqual(sql, result)
 
     def test_get_ge_merge_data(self):

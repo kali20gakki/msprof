@@ -30,7 +30,7 @@ class TestAivPmuModel(unittest.TestCase):
         with mock.patch(NAMESPACE + '.AivPmuModel.clear'), \
                 mock.patch(NAMESPACE + '.get_metrics_from_sample_config',
                            return_value={'ai_core_profiling_events': '0x64,0x65,0x66'}), \
-                mock.patch(NAMESPACE + '.insert_metric_value'):
+                mock.patch(NAMESPACE + '.create_metric_table'):
             check = AivPmuModel('test')
             check.create_table()
 

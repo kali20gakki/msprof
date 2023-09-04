@@ -62,6 +62,8 @@ class StructDecoder:
         "CtxIdBean": StructFmt.CTX_ID_FMT,
         "MemoryApplicationBean": StructFmt.MEMORY_APPLICATION_FMT,
         "MemoryOpBean": StructFmt.MEMORY_OP_FMT,
+        "NanoExeomBean": StructFmt.NANO_MODEL_EXEOM_FMT,
+        "NanoStarsBean": StructFmt.NANO_STARS_PROFILE_FMT
     }
 
     @classmethod

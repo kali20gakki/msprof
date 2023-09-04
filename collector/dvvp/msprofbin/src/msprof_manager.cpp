@@ -7,6 +7,7 @@
 #include "msprof_manager.h"
 #include "dyn_prof_client.h"
 #include "cmd_log.h"
+#include "input_parser.h"
 #include "errno/error_code.h"
 #include "message/prof_params.h"
 #include "platform/platform.h"
@@ -91,8 +92,9 @@ int MsprofManager::GenerateRunningMode()
         GenerateAnalyzeRunningMode() == PROFILING_SUCCESS) {
         return PROFILING_SUCCESS;
     }
-    CmdLog::instance()->CmdErrorLog("No valid argument found in --dynamic --application "
-    "--sys-devices --host-sys --host-sys-usage --parse --query --export");
+    CmdLog::instance()->CmdErrorLog("No valid argument, one of [--dynamic --application "
+        "--sys-devices --host-sys --host-sys-usage --parse --query --export --analyze] should be set.");
+    ArgsManager::instance()->PrintHelp();
     return PROFILING_FAILED;
 }
 

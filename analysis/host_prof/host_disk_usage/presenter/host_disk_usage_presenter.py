@@ -145,6 +145,9 @@ class HostDiskUsagePresenter(HostProfPresenterBase):
                 start_time = float(fields[1])
                 continue
 
+            if len(fields) < 8:  # skip this line if #fields less than 8 to avoid index out of range
+                continue
+
             pid = int(fields[1])
             try:
                 disk_read = float(fields[4]) * self._convert_to_k(fields[5])

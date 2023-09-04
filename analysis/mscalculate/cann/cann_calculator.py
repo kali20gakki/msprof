@@ -26,8 +26,7 @@ class CANNCalculator(ICalculator, MsMultiProcess):
     def __init__(self: any, file_list: dict, sample_config: dict) -> None:
         super().__init__(sample_config)
         self._project_path = sample_config.get(StrConstant.SAMPLE_CONFIG_PROJECT_PATH)
-        self.thread_set = set()
-        self.event_generator = CANNEventGenerator(self._project_path, self.thread_set)
+        self.event_generator = CANNEventGenerator(self._project_path)
         self.analysis_chains: List[CANNAnalysisChain] = []
         self.gears = dict()
 
@@ -44,9 +43,11 @@ class CANNCalculator(ICalculator, MsMultiProcess):
             Constant.TASK_LEVEL: TaskGear(self._project_path),
             Constant.HCCL_LEVEL: HCCLGear(self._project_path),
         }
-        event_q = self.event_generator.run()
-        for thread in self.thread_set:
-            chain = CANNAnalysisChain(thread, event_q, self.gears)
+        thread_dbs = self.event_generator.run()
+        for db in thread_dbs:
+            for gear in self.gears.values():
+                gear.set_db(db)
+            chain = CANNAnalysisChain(db.thread_id, db, self.gears)
             self.analysis_chains.append(chain)
             chain.start()
 

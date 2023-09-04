@@ -104,10 +104,10 @@ def _get_task_based_core_data(params: dict, curs: any, result_dir: str) -> tuple
     data = []
     table_name = ""
     if params.get(StrConstant.DATA_TYPE) == StrConstant.AI_CORE_PMU_EVENTS:
-        table_name = DBNameConstant.TABLE_AI_CORE_METRIC_SUMMARY
+        table_name = DBNameConstant.TABLE_METRIC_SUMMARY
         data = _get_output_event_counter(curs,
                                          result_dir,
-                                         DBNameConstant.TABLE_AI_CORE_METRIC_SUMMARY
+                                         DBNameConstant.TABLE_METRIC_SUMMARY
                                          )
     elif params.get(StrConstant.DATA_TYPE) == StrConstant.AI_VECTOR_CORE_PMU_EVENTS:
         table_name = DBNameConstant.TABLE_AIV_METRIC_SUMMARY
@@ -166,7 +166,7 @@ def get_output_event_counter(cursor: any, result_dir: str) -> list:
     """
     get ai core event count data
     """
-    return _get_output_event_counter(cursor, result_dir, DBNameConstant.TABLE_AI_CORE_METRIC_SUMMARY)
+    return _get_output_event_counter(cursor, result_dir, DBNameConstant.TABLE_METRIC_SUMMARY)
 
 
 def _get_event_counter_metric_res(cursor: any, result_dir: str, table_name: str) -> list:

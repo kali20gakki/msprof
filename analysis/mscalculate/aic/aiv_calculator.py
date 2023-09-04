@@ -37,10 +37,8 @@ class AivCalculator(AicCalculator, MsMultiProcess):
         :return:
         """
         if self._aiv_data_list:
-            aiv_pmu_model = AivPmuModel(self._project_path)
-            aiv_pmu_model.init()
-            aiv_pmu_model.flush(self._aiv_data_list)
-            aiv_pmu_model.finalize()
+            with AivPmuModel(self._project_path) as aiv_pmu_model:
+                aiv_pmu_model.flush(self._aiv_data_list)
 
     def ms_run(self: any) -> None:
         """

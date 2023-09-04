@@ -5,11 +5,11 @@ import logging
 
 from common_func.db_manager import DBManager
 from common_func.db_name_constant import DBNameConstant
-from msmodel.interface.base_model import BaseModel
+from msmodel.interface.parser_model import ParserModel
 from msmodel.interface.sql_helper import SqlWhereCondition
 
 
-class RuntimeHostTaskModel(BaseModel):
+class RuntimeHostTaskModel(ParserModel):
     """
     class used to operate all runtime host task
     """

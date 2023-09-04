@@ -128,7 +128,8 @@ class AiStackDataCheckManager(DataCheckManager):
                 cls._contain_hwts_data(result_dir, device_id=device_id) or \
                 cls.contain_stars_soc_data(result_dir, device_id=device_id) or \
                 (cls._contain_hwts_aiv_data(result_dir, device_id=device_id) or
-                 cls._contain_ts_track_aiv_data(result_dir, device_id=device_id)))
+                 cls._contain_ts_track_aiv_data(result_dir, device_id=device_id)) or
+                cls._contain_nano_data(result_dir, device_id=device_id))
 
     @classmethod
     def contain_task_time_task(cls: any, result_dir: str, device_id: any = None) -> bool:
@@ -204,7 +205,8 @@ class AiStackDataCheckManager(DataCheckManager):
         """
         return device_id != NumberConstant.HOST_ID and \
                DBManager.check_tables_in_db(
-                   PathManager.get_db_path(result_dir, DBNameConstant.DB_HCCL), DBNameConstant.TABLE_HCCL_ALL_REDUCE)
+                   PathManager.get_db_path(result_dir, DBNameConstant.DB_HCCL_SINGLE_DEVICE),
+                   DBNameConstant.TABLE_HCCL_SINGLE_DEVICE)
 
     @classmethod
     def contain_training_trace_data_or_step(cls: any, result_dir: str, device_id: int = None) -> bool:
@@ -392,4 +394,13 @@ class AiStackDataCheckManager(DataCheckManager):
         The data path contain hccl statistic data or not
         """
         return device_id != NumberConstant.HOST_ID and DBManager.check_tables_in_db(
-            PathManager.get_db_path(result_dir, DBNameConstant.DB_HCCL), DBNameConstant.TABLE_HCCL_OP_REPORT)
+            PathManager.get_db_path(result_dir, DBNameConstant.DB_HCCL_SINGLE_DEVICE),
+            DBNameConstant.TABLE_HCCL_OP_REPORT)
+
+    @classmethod
+    def _contain_nano_data(cls: any, result_dir: str, device_id: any = None) -> bool:
+        """
+        The data path contain nano_device data or not
+        """
+        return cls.check_data_exist(result_dir, file_name_manager.get_nano_stars_profile_compiles(),
+                                    device_id=device_id)
