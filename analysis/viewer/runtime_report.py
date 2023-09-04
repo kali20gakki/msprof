@@ -249,6 +249,29 @@ def add_op_total(result: list, result_dir: str) -> list:
     return res
 
 
+def add_cube_usage(value: list, time_index: int, ratio_index: int, ratio_index_int8: int, ratio_index_fp16,
+                   cycles_index: int, freq: float, core_num: int) -> list:
+    """
+    add cube usage column
+    """
+    if ratio_index_fp16 != -1 and ratio_index_int8 != -1:
+        if value[ratio_index_fp16]:
+            ratio_index = ratio_index_fp16
+        else:
+            ratio_index = ratio_index_int8
+    if value[ratio_index] == Constant.NA:
+        value.append(Constant.NA)
+    elif not NumberConstant.is_zero(min(value[ratio_index], value[cycles_index], value[time_index])):
+        if time_index == 9 or time_index == 20:
+            usage = value[cycles_index] / (freq * core_num * value[time_index])
+        else:
+            usage = value[ratio_index] * value[cycles_index] / (freq * core_num * value[time_index])
+        value.append(usage)
+    else:
+        value.append(0)
+    return value
+
+
 def add_mem_bound(value: list, vec_index: int, mac_index: int, mte2_index: int) -> list:
     """
     add memory bound column
