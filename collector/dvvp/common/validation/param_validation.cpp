@@ -691,10 +691,10 @@ bool ParamValidation::IsValidAnalyzeRuleSwitch(const std::string &switchName, co
         analysis::dvvp::common::utils::Utils::Split(switchVal, false, "", ",");
     
     for (size_t i = 0; i < ruleVal.size(); ++i) {
-        if (ruleVal[i].compare("communication") != 0 && ruleVal[i].compare("max_step_time") != 0) {
-            MSPROF_LOGE("The switch %s should be set to communication or max_step_time.", switchName.c_str());
+        if (ruleVal[i].compare("communication") != 0 && ruleVal[i].compare("communication_matrix") != 0) {
+            MSPROF_LOGE("The switch %s should be set to communication or communication_matrix.", switchName.c_str());
             CMD_LOGE("Argument --%s=%s is invalid."
-                "Should be set to communication or max_step_time.", switchName.c_str(), switchVal.c_str());
+                "Should be set to communication or communication_matrix.", switchName.c_str(), switchVal.c_str());
             return false;
         }
     }
