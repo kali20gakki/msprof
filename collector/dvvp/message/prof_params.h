@@ -197,7 +197,7 @@ struct ProfileParams : BaseInfo {
           pythonPath(""), parseSwitch("off"), querySwitch("off"), exportSwitch("off"),
           exportSummaryFormat(PROFILING_SUMMARY_FORMAT), exportIterationId(DEFAULT_INTERATION_ID),
           exportModelId(DEFAULT_MODEL_ID), usedParams(), dataTypeConfig(0), npuAppMemProfiling("on"),
-          analyzeSwitch("off"), analyzeRuleSwitch("communication")
+          analyzeSwitch("off"), analyzeRuleSwitch("communication,communication_matrix")
     {
     }
 
