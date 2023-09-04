@@ -1,6 +1,8 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (c) Huawei Technologies Co., Ltd. 2021-2022. All rights reserved.
+import logging
+
 from common_func.utils import Utils
 from profiling_bean.struct_info.struct_decoder import StructDecoder
 from common_func.ms_constant.number_constant import NumberConstant
@@ -15,12 +17,14 @@ class FftsPmuBean(StructDecoder):
         filed = args[0]
         self._stream_id = Utils.get_stream_id(filed[2])
         self._task_id = filed[3]
+        self._ov_flag = filed[5] & 0x400
         self._subtask_id = filed[6]
         self._ffts_type = filed[7] >> 13
         self._subtask_type = filed[5] & int(b'11111111')
         self._total_cycle = filed[10]
         self._pmu_list = filed[12:20]
         self._time_list = filed[20:]
+
 
     @property
     def stream_id(self: any) -> int:
@@ -70,6 +74,10 @@ class FftsPmuBean(StructDecoder):
         get total_cycle
         :return: total_cycle
         """
+        if self._ov_flag:
+            logging.warning("An overflow in the operator (stream id = %d, task id = %d) count has been detected and "
+                            "the total_cycle value is not credible!", self._stream_id, self._task_id)
+            return self._total_cycle + 4294967296 # 2**32 == 4294967296
         return self._total_cycle
 
     @property

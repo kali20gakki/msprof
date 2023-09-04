@@ -935,10 +935,10 @@ TEST_F(COMMON_VALIDATION_PARAM_VALIDATION_TEST, IsValidAnalyzeRuleSwitch)
     ret = ParamValidation::instance()->IsValidAnalyzeRuleSwitch("rule", "communication");
     EXPECT_EQ(true, ret);
 
-    ret = ParamValidation::instance()->IsValidAnalyzeRuleSwitch("rule", "max_step_time");
+    ret = ParamValidation::instance()->IsValidAnalyzeRuleSwitch("rule", "communication_matrix");
     EXPECT_EQ(true, ret);
 
-    ret = ParamValidation::instance()->IsValidAnalyzeRuleSwitch("rule", "communication,max_step_time");
+    ret = ParamValidation::instance()->IsValidAnalyzeRuleSwitch("rule", "communication,communication_matrix");
     EXPECT_EQ(true, ret);
 
     ret = ParamValidation::instance()->IsValidAnalyzeRuleSwitch("rule", "xxxx");

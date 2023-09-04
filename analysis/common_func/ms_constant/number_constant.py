@@ -67,6 +67,9 @@ class NumberConstant:
     DEFAULT_TASK_ID = 65535
     PROF_PATH_MAX_LEN = 300
 
+    # memory units transfer
+    BYTES_TO_KB = 1024.0
+
     # time conversion ns to us / ms to s
     CONVERSION_TIME = 1000.0
 

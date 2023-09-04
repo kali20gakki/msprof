@@ -313,12 +313,12 @@ bool DrvGetDeviceFreq(uint32_t deviceId, std::string &freq)
     auto ret = DriverPlugin::instance()->MsprofHalGetDeviceInfo(devId, static_cast<int32_t>(MODULE_TYPE_SYSTEM),
         static_cast<int32_t>(type), &deviceFreq);
     if (ret == DRV_ERROR_NONE && deviceFreq > 0) {
-        MSPROF_LOGI("Succeeded to DrvGetDeviceFreq frequency=%lld", deviceFreq);
+        MSPROF_LOGI("Succeeded to get device %d frequency=%lld", deviceId, deviceFreq);
         freq = std::to_string(static_cast<float>(deviceFreq) / FREQUENCY_KHZ_TO_MHZ);
         return true;
     } else {
-        MSPROF_LOGW("Driver doesn't support DrvGetDeviceFreq by halGetDeviceInfo interface, ret=%d",
-            static_cast<int32_t>(ret));
+        MSPROF_LOGW("Driver doesn't support get device %d frequency by halGetDeviceInfo interface, ret=%d",
+            deviceId, static_cast<int32_t>(ret));
         freq = NOT_SUPPORT_FREQUENCY;
     }
 

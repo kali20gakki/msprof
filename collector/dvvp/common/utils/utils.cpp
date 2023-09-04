@@ -87,11 +87,7 @@ unsigned long long Utils::GetCPUCycleCounter()
 unsigned long long Utils::GetClockRealtimeOrCPUCycleCounter()
 {
     static const bool IS_SUPPORTED_SYS_COUNTER = Platform::instance()->PlatformHostFreqIsEnable();
-    if (IS_SUPPORTED_SYS_COUNTER) {
-        return GetCPUCycleCounter();
-    } else {
-        return GetClockMonotonicRaw();
-    }
+    return IS_SUPPORTED_SYS_COUNTER ? GetCPUCycleCounter() : GetClockMonotonicRaw();
 }
 
 double Utils::StatCpuRealFreq()
@@ -109,6 +105,9 @@ double Utils::StatCpuRealFreq()
 
     double freqSum = 0;
     for (int i = 0; i < sampleTimes; i++) {
+        if (monotonicRaws[i + 1] == monotonicRaws[i]) {
+            continue;
+        }
         freqSum += static_cast<double>(cycleCnts[i + 1] - cycleCnts[i]) / (monotonicRaws[i + 1] - monotonicRaws[i]);
     }
     return freqSum / sampleTimes;
@@ -906,6 +905,10 @@ void Utils::GetChildDirs(const std::string &dir, bool isRecur, std::vector<std::
             if ((fileName.compare(".") == 0) || (fileName.compare("..") == 0)) {
                 continue;
             }
+            if (childDirs.size() >= MAX_FILES_NUM) {
+                MSPROF_LOGW("Get dirs num exceeds maximum value: %d, stop get dirs", MAX_FILES_NUM);
+                break;
+            }
             childDirs.push_back(childPath);
             if (!isRecur) {
                 continue;
@@ -937,6 +940,10 @@ void Utils::GetChildFilenames(const std::string &dir, std::vector<std::string> &
         std::string fileName = dirNameList[j]->d_name;
         if ((fileName.compare(".") == 0) || (fileName.compare("..") == 0)) {
             continue;
+        }
+        if (files.size() >= MAX_FILES_NUM) {
+            MSPROF_LOGW("Get files num exceeds maximum value: %d, stop get files", MAX_FILES_NUM);
+            break;
         }
         files.push_back(fileName);
     }

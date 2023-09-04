@@ -238,7 +238,6 @@ int32_t RegisterNewReporterCallback()
         {PROFILE_REPORT_COMPACT_INFO_CALLBACK, reinterpret_cast<VOID_PTR>(MsprofCompactInfoReporterCallbackImpl)},
         {PROFILE_REPORT_ADDITIONAL_INFO_CALLBACK, reinterpret_cast<VOID_PTR>(MsprofAddiInfoReporterCallbackImpl)},
         {PROFILE_REPORT_REG_TYPE_INFO_CALLBACK, reinterpret_cast<VOID_PTR>(MsprofRegReportTypeInfoImpl)},
-        {PROFILE_REPORT_GET_HASH_ID_CALLBACK, reinterpret_cast<VOID_PTR>(MsprofGetHashIdImpl)},
         {PROFILE_HOST_FREQ_IS_ENABLE_CALLBACK, reinterpret_cast<VOID_PTR>(MsprofHostFreqIsEnableImpl)}
     };
     for (auto iter : CALLBACK_FUNC_LIST) {
@@ -318,6 +317,13 @@ int32_t MsprofilerInit()
     aclError ret = ProfApiPlugin::instance()->MsprofProfRegCtrlCallback(MsprofCtrlCallbackImpl);
     if (ret != ACL_SUCCESS) {
         MSPROF_LOGE("Failed to register ctrl callback");
+        return PROFILING_FAILED;
+    }
+    MSPROF_EVENT("Started to register profiling hash id callback.");
+    ret = ProfApiPlugin::instance()->MsprofProfRegProfilerCallback(PROFILE_REPORT_GET_HASH_ID_CALLBACK,
+        reinterpret_cast<VOID_PTR>(MsprofGetHashIdImpl), sizeof(VOID_PTR));
+    if (ret != ACL_SUCCESS) {
+        MSPROF_LOGE("Failed to register get hash id callback");
         return PROFILING_FAILED;
     }
     return PROFILING_SUCCESS;

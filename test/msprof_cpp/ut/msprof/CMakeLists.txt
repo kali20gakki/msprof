@@ -117,6 +117,7 @@ set(profilerSrcFile
     ../stub/profile_drv_user_stub.cpp
     ../stub/hdc-api-stub.cpp
     ../../stub/driver_plugin_stub.cpp
+	../../stub/runtime_plugin_stub.cpp
     ${profilerSrcList}
 )
 
